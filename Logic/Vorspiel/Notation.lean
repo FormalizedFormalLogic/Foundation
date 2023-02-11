@@ -58,6 +58,24 @@ infix:55 " ⊧ " => HasDoubleTurnstile.doubleTurnstile
 end logicNotation
 
 namespace HasLogicSymbols
+
+@[reducible]
+instance Prop_HasLogicSymbols : HasLogicSymbols Prop where
+  top := True
+  bot := False
+  neg := Not
+  arrow := fun P Q => (P → Q)
+  and := And
+  or := Or
+
+@[simp] lemma Prop_neg_eq (p : Prop) : ¬' p = ¬p := rfl   
+
+@[simp] lemma Prop_arrow_eq (p q : Prop) : (p ⟶ q) = (p → q) := rfl
+
+@[simp] lemma Prop_and_eq (p q : Prop) : (p ⋏ q) = (p ∧ q) := rfl
+
+@[simp] lemma Prop_or_eq (p q : Prop) : (p ⋎ q) = (p ∨ q) := rfl
+
 variable (α β γ : Type _) [HasLogicSymbols α] [HasLogicSymbols β] [HasLogicSymbols γ]
 
 structure Hom where

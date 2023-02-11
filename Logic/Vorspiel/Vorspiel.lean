@@ -4,6 +4,23 @@ import Mathlib.Data.Fin.Basic
 import Mathlib.Data.Fintype.Basic
 import Mathlib.Data.Finset.Lattice
 
+namespace Nat
+variable {α : ℕ → Sort u}
+
+def cases (hzero : α 0) (hsucc : ∀ n, α (n + 1)) : ∀ n, α n
+  | 0     => hzero
+  | n + 1 => hsucc n  
+
+infixr:70 " :>ₙ " => cases
+
+@[simp] lemma cases_zero (hzero : α 0) (hsucc : ∀ n, α (n + 1)) :
+    (hzero :>ₙ hsucc) 0 = hzero := rfl
+
+@[simp] lemma cases_succ (hzero : α 0) (hsucc : ∀ n, α (n + 1)) (n : ℕ) :
+    (hzero :>ₙ hsucc) (n + 1) = hsucc n := rfl
+
+end Nat
+
 namespace Fin
 variable {n : ℕ} {C : Sort u} {a b : C} {s : Fin n → C}
 
