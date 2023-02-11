@@ -52,11 +52,32 @@ infixl:70 " <: " => rightConcat
 @[simp] lemma rightConcat_zero {s : Fin (n + 1) → C} {a : C} :
     (s <: a) 0 = s 0 := rightConcat_castSucc s a 0 
 
+@[simp] lemma zero_succ_eq_id {n} : (0 : Fin (n + 1)) :> succ = id :=
+  funext $ Fin.cases (by simp) (by simp)
+
 def nil : Fin 0 → C := finZeroElim
 
 def singleton (a : C) : Fin 1 → C := a :> nil
 
 def mk2 (a b : C) : Fin 2 → C := a :> b :> nil
+
+lemma to_leftConcat (s : Fin (n + 1) → C) : s = s 0 :> s ∘ Fin.succ :=
+   funext $ Fin.cases (by simp) (by simp)
+
+@[simp] lemma leftConcat_ext (a₁ a₂ : C) (s₁ s₂ : Fin n → C) :
+    a₁ :> s₁ = a₂ :> s₂ ↔ a₁ = a₂ ∧ s₁ = s₂ :=
+  ⟨by intros h
+      constructor
+      · exact congrFun h 0
+      · exact funext (fun i => by simpa using congrFun h (Fin.castSucc i + 1)),
+   by intros h; simp[h]⟩
+
+def decFinfun {α : Type _} : {n : ℕ} → (v w : Fin n → α) → (∀ i, Decidable (v i = w i)) → Decidable (v = w)
+  | 0,     _, _, _ => by simp; exact isTrue trivial
+  | n + 1, v, w, d => by
+      rw[Fin.to_leftConcat v, Fin.to_leftConcat w, Fin.leftConcat_ext]
+      haveI : Decidable (v ∘ Fin.succ = w ∘ Fin.succ) := decFinfun _ _ (by intros i; simp; exact d _)
+      refine instDecidableAnd
 
 end Fin
 

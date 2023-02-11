@@ -73,6 +73,12 @@ lemma neg_eq (p : SubFormula L μ n) : ¬'p = neg p := rfl
 
 lemma imp_eq (p q : SubFormula L μ n) : p ⟶ q = ¬'p ⋎ q := rfl
 
+@[simp] lemma and_inj (p₁ q₁ p₂ q₂ : SubFormula L μ n) : p₁ ⋏ p₂ = q₁ ⋏ q₂ ↔ p₁ = q₁ ∧ p₂ = q₂ :=
+by simp[HasAnd.and]
+
+@[simp] lemma or_inj (p₁ q₁ p₂ q₂ : SubFormula L μ n) : p₁ ⋎ p₂ = q₁ ⋎ q₂ ↔ p₁ = q₁ ∧ p₂ = q₂ :=
+by simp[HasOr.or]
+
 @[simp] lemma all_inj (p q : SubFormula L μ (n + 1)) : ∀' p = ∀' q ↔ p = q :=
   by simp[HasUniv.univ]
 
@@ -249,6 +255,9 @@ lemma map_map
     map fixed₂ free₂ (map fixed₁ free₁ p) = map (fixed₂ ∘ fixed₁) (free₂ ∘ free₁) p :=
   bind_bind _ _ _ _ _
 
+@[simp] lemma map_id (p) : @map L μ μ n n id id p = p :=
+  by induction p using rec' <;> simp[*]
+
 section Syntactic
 
 def shift : SyntacticSubFormula L n →L SyntacticSubFormula L n :=
@@ -267,10 +276,21 @@ def pull : SyntacticSubFormula L n →L SyntacticSubFormula L (n + 1) :=
     shift (nrel r v) = nrel r (fun i => SubTerm.shift $ v i) := rfl
 
 @[simp] lemma shift_all (p : SyntacticSubFormula L (n + 1)) :
-    shift (∀' p) = ∀' shift p  := by simp[shift]; congr; exact funext (Fin.cases (by simp) (by simp))
+    shift (∀' p) = ∀' shift p  := by simp[shift]
 
 @[simp] lemma shift_ex (p : SyntacticSubFormula L (n + 1)) :
-    shift (∃' p) = ∃' shift p  := by simp[shift]; congr; exact funext (Fin.cases (by simp) (by simp))
+    shift (∃' p) = ∃' shift p  := by simp[shift]
+
+lemma shift_Injective : Function.Injective (@shift L n) :=
+  Function.LeftInverse.injective (g := map id Nat.pred)
+    (by intros p; simp[shift, map_map, Function.comp]; exact map_id _)
+
+def shiftEmb : SyntacticSubFormula L n ↪ SyntacticSubFormula L n where
+  toFun := shift
+  inj' := shift_Injective
+
+lemma shiftEmb_eq_shift (p : SyntacticSubFormula L n) :
+  shiftEmb p = shift p := rfl
 
 @[simp] lemma push_rel {k} (r : L.rel k) (v : Fin k → SyntacticSubTerm L (n + 1)) :
     push (rel r v) = rel r (fun i => SubTerm.push $ v i) := rfl

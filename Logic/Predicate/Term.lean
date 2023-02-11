@@ -58,7 +58,7 @@ variable (fixed : Fin n₁ → SubTerm L μ₂ n₂) (free : μ₁ → SubTerm L
 
 @[simp] lemma bind_fixedVar (n : Fin n₁) : (#n : SubTerm L μ₁ n₁).bind fixed free = fixed n := rfl
 
-@[simp] lemma bind_function {k} (f : L.func k) (v : Fin k → SubTerm L μ₁ n₁) :
+@[simp] lemma bind_func {k} (f : L.func k) (v : Fin k → SubTerm L μ₁ n₁) :
     (func f v).bind fixed free = func f (fun i => (v i).bind fixed free) := rfl
 
 end bind
@@ -76,8 +76,10 @@ variable (fixed : Fin n₁ → Fin n₂) (free : μ₁ → μ₂)
 
 @[simp] lemma map_fixedVar (n : Fin n₁) : (#n : SubTerm L μ₁ n₁).map fixed free = #(fixed n) := rfl
 
-@[simp] lemma map_function {k} (f : L.func k) (v : Fin k → SubTerm L μ₁ n₁) :
+@[simp] lemma map_func {k} (f : L.func k) (v : Fin k → SubTerm L μ₁ n₁) :
     (func f v).map fixed free = func f (fun i => (v i).map fixed free) := rfl
+
+end map
 
 lemma map_map
   (fixed₁ : Fin n₁ → Fin n₂) (free₁ : μ₁ → μ₂)
@@ -85,7 +87,8 @@ lemma map_map
     (t.map fixed₁ free₁).map fixed₂ free₂ = t.map (fixed₂ ∘ fixed₁) (free₂ ∘ free₁) :=
   bind_bind _ _ _ _ _
 
-end map
+@[simp] lemma map_id (t) : @map L μ μ n n id id t = t :=
+  by induction t <;> simp[*]
 
 @[simp] lemma fixedSucc_fixedVar (x : Fin n) : fixedSucc (#x : SubTerm L μ n) = #(Fin.succ x) := rfl
 
@@ -117,13 +120,24 @@ def push : SyntacticSubTerm L (n + 1) → SyntacticSubTerm L n :=
 def pull : SyntacticSubTerm L n → SyntacticSubTerm L (n + 1) :=
   bind (fun x => #(Fin.castSucc x)) (#(Fin.last n) :>ₙ freeVar)
 
+@[simp] lemma shift_fixedVar (x : Fin n) : shift (#x : SyntacticSubTerm L n) = #x := rfl
+
+@[simp] lemma shift_freeVar (x : ℕ) : shift (&x : SyntacticSubTerm L n) = &(x + 1) := rfl
+
+@[simp] lemma shift_func {k} (f : L.func k) (v : Fin k → SyntacticSubTerm L n) :
+    shift (func f v) = func f (fun i => shift (v i)) := rfl
+
+lemma shift_Injective : Function.Injective (@shift L n) :=
+  Function.LeftInverse.injective (g := map id Nat.pred)
+    (by intros p; simp[shift, map_map, Function.comp]; exact map_id _)
+
 @[simp] lemma push_fixedVar_castSucc (x : Fin n) : push (#(Fin.castSucc x) : SyntacticSubTerm L (n + 1)) = #x := by simp[push]
 
 @[simp] lemma push_fixedVar_last : push (#(Fin.last n) : SyntacticSubTerm L (n + 1)) = &0 := by simp[push]
 
 @[simp] lemma push_freeVar (x : ℕ) : push (&x : SyntacticSubTerm L (n + 1)) = &(x + 1) := by simp[push]
 
-@[simp] lemma push_function {k} (f : L.func k) (v : Fin k → SyntacticSubTerm L (n + 1)) :
+@[simp] lemma push_func {k} (f : L.func k) (v : Fin k → SyntacticSubTerm L (n + 1)) :
     push (func f v) = func f (fun i => push $ v i) := by simp[push]
 
 @[simp] lemma pull_fixedVar (x : Fin n) : pull (#x : SyntacticSubTerm L n) = #(Fin.castSucc x) := by simp[pull]
@@ -132,7 +146,7 @@ def pull : SyntacticSubTerm L n → SyntacticSubTerm L (n + 1) :=
 
 @[simp] lemma pull_freeVar_succ (x : ℕ) : pull (&(x + 1) : SyntacticSubTerm L n) = &x := by simp[pull]
 
-@[simp] lemma pull_function {k} (f : L.func k) (v : Fin k → SyntacticSubTerm L n) :
+@[simp] lemma pull_func {k} (f : L.func k) (v : Fin k → SyntacticSubTerm L n) :
     pull (func f v) = func f (fun i => pull $ v i) := by simp[pull]
 
 end Syntactic
@@ -143,6 +157,27 @@ def langf : SubTerm L μ n → Finset (Σ k, L.func k)
   | #_       => ∅
   | &_       => ∅
   | func f v => insert ⟨_, f⟩ $ Finset.bunionᵢ Finset.univ (fun i => langf (v i))
+
+variable [DecidableEq μ]
+
+def hasDecEq : (t u : SubTerm L μ n) → Decidable (Eq t u)
+  | #x,                   #y                   => by simp; exact decEq x y
+  | #_,                   &_                   => isFalse SubTerm.noConfusion
+  | #_,                   func _ _             => isFalse SubTerm.noConfusion
+  | &_,                   #_                   => isFalse SubTerm.noConfusion
+  | &x,                   &y                   => by simp; exact decEq x y
+  | &_,                   func _ _             => isFalse SubTerm.noConfusion
+  | func _ _,             #_                   => isFalse SubTerm.noConfusion
+  | func _ _,             &_                   => isFalse SubTerm.noConfusion
+  | @func L μ _ k₁ r₁ v₁, @func L μ _ k₂ r₂ v₂ => by
+      by_cases e : k₁ = k₂
+      · rcases e with rfl
+        exact match decEq r₁ r₂ with
+        | isTrue h => by simp[h]; exact Fin.decFinfun _ _ (fun i => hasDecEq (v₁ i) (v₂ i))
+        | isFalse h => isFalse (by simp[h])
+      · exact isFalse (by simp[e])
+
+instance : DecidableEq (SubTerm L μ n) := hasDecEq
 
 end SubTerm
 
