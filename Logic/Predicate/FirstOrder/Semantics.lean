@@ -1,4 +1,4 @@
-import Logic.Predicate.FirstOrder.Language
+import Logic.Predicate.FirstOrder.Calculus
 import Logic.Predicate.Semantics
 
 variable {L : Language} {μ μ₁ μ₂ μ₃ : Type _}

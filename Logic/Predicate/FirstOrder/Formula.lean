@@ -89,6 +89,8 @@ variable (L)
 
 @[reducible] def rel! (k) (r : L.rel k) (v : Fin k → SubTerm L μ n) := rel r v
 
+@[reducible] def nrel! (k) (r : L.rel k) (v : Fin k → SubTerm L μ n) := nrel r v
+
 variable {L}
 
 @[elab_as_elim]
@@ -137,11 +139,13 @@ def toStr : ∀ {n}, SubFormula L μ n → String
   | _, ⊤            => "\\top"
   | _, ⊥            => "\\bot"
   | _, rel r v      => "{" ++ toString r ++ "} \\left(" ++ String.funFin_toStr (fun i => toString (v i)) ++ "\\right)"
-  | _, nrel r v     => "\\cancel{" ++ toString r ++ "} \\left(" ++ String.funFin_toStr (fun i => toString (v i)) ++ "\\right)"
+  | _, nrel r v     => "\\lnot {" ++ toString r ++ "} \\left(" ++ String.funFin_toStr (fun i => toString (v i)) ++ "\\right)"
   | _, p ⋏ q        => toStr p ++ " \\land " ++ toStr q
   | _, p ⋎ q        => toStr p ++ " \\lor " ++ toStr q
   | _, @all _ _ n p => "\\forall x_{" ++ toString n ++ "} \\left[" ++ toStr p ++ "\\right]"
   | _, @ex _ _ n p  => "\\exists x_{" ++ toString n ++ "} \\left[" ++ toStr p ++ "\\right]"
+
+instance : Repr (SubFormula L μ n) := ⟨fun t _ => toStr t⟩
 
 instance : ToString (SubFormula L μ n) := ⟨toStr⟩
 

@@ -40,13 +40,13 @@ prefix:64 "∃' " => HasEx.ex
 
 attribute [match_pattern] HasAnd.and HasOr.or HasUniv.univ HasEx.ex
 
-@[notation_class] class HasTurnstile (α : Sort _) where
-  turnstile : Set α → α → Prop
+@[notation_class] class HasTurnstile (α : Sort _) (β : Sort _) where
+  turnstile : Set α → α → β
 
 infix:45 " ⊢ " => HasTurnstile.turnstile
 
-@[notation_class] class HasVdash (α : Sort _) where
-  vdash : α → Prop
+@[notation_class] class HasVdash (α : Sort _) (β : outParam (Sort _)) where
+  vdash : α → β
 
 prefix:45 "⊩ " => HasVdash.vdash
 

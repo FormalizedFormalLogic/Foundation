@@ -32,6 +32,8 @@ def toStr : SubTerm L μ n → String
   | &x       => "z_{" ++ toString x ++ "}"
   | func f v => "{" ++ toString f ++ "} \\left(" ++ String.funFin_toStr (fun i => toStr (v i)) ++ "\\right)"
 
+instance : Repr (SubTerm L μ n) := ⟨fun t _ => toStr t⟩
+
 instance : ToString (SubTerm L μ n) := ⟨toStr⟩
 
 variable {n n₁ n₂ n₃ m m₁ m₂ m₃ : ℕ}

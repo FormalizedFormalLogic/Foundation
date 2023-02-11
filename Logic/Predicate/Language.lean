@@ -42,7 +42,12 @@ def equal : Language where
   rel := EqRel
 
 instance (k) : ToString (equal.func k) := ⟨fun _ => ""⟩
-instance (k) : ToString (equal.rel k) := ⟨fun _ => "\\mathrm{Equal}"⟩
+
+instance (k) : ToString (equal.rel k) := ⟨fun _ => "\\mathrm{Eq}"⟩
+
+instance (k) : DecidableEq (equal.func k) := fun a b => by rcases a
+
+instance (k) : DecidableEq (equal.rel k) := fun a b => by rcases a; rcases b; exact isTrue (by simp)
 
 structure Hom (L₁ L₂ : Language) where
   onFunc : {k : ℕ} → L₁.func k → L₂.func k

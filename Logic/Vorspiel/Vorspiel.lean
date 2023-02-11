@@ -99,14 +99,10 @@ end Fintype
 
 namespace String
 
-
-
 def funFin_toStr : ∀ {n}, (Fin n → String) → String
   | 0,     _ => ""
   | n + 1, s => if n = 0 then s 0 else s 0 ++ ", " ++ @funFin_toStr n (fun i => s (Fin.succ i))
 
 def test : Fin 4 → String := "a" :> "b" :> "c" :> "d" :> Fin.nil
-
-#eval funFin_toStr test
 
 end String
