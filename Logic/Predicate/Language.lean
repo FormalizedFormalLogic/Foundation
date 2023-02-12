@@ -53,23 +53,42 @@ structure Hom (L₁ L₂ : Language) where
   onFunc : {k : ℕ} → L₁.func k → L₂.func k
   onRel : {k : ℕ} → L₁.rel k → L₂.rel k
 
+infix:25 " →ᵥ " => Hom
+
 namespace Hom
 variable (L L₁ L₂ L₃ : Language) (Φ : Hom L₁ L₂)
 
-protected def id : Hom L L where
+protected def id : L →ᵥ L where
   onFunc := id
   onRel := id
 
 variable {L L₁ L₂ L₃}
 
-def comp (Ψ : Hom L₂ L₃) (Φ : Hom L₁ L₂) : Hom L₁ L₃ where
+def comp (Ψ : L₂ →ᵥ L₃) (Φ : L₁ →ᵥ L₂) : L₁ →ᵥ L₃ where
   onFunc := Ψ.onFunc ∘ Φ.onFunc 
   onRel  := Ψ.onRel ∘ Φ.onRel 
 
 end Hom
 
-def subLanguage (L : Language) (pfunc : ∀ k, Language.func L k → Prop) (prel : ∀ k, L.rel k → Prop) : Language where
+def subLanguage (L : Language) (pfunc : ∀ k, Language.func L k → Prop) (prel : ∀ k, L.rel k → Prop) :
+    Language where
   func := fun k => Subtype (pfunc k)
   rel  := fun k => Subtype (prel k)
+
+section subLanguage
+
+variable (L) {pfunc : ∀ k, Language.func L k → Prop} {prel : ∀ k, L.rel k → Prop}
+
+def ofSub : subLanguage L pfunc prel →ᵥ L where
+  onFunc := Subtype.val
+  onRel  := Subtype.val
+
+@[simp] lemma ofSub_onFunc {k : ℕ} :
+    (ofSub L : subLanguage L pfunc prel →ᵥ L).onFunc p = p.val := rfl
+
+@[simp] lemma ofSub_onRel {k : ℕ} :
+    (ofSub L : subLanguage L pfunc prel →ᵥ L).onRel p = p.val := rfl
+
+end subLanguage
 
 end Language

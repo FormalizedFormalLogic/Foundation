@@ -92,9 +92,7 @@ infix:25 " →L " => Hom
 namespace Hom
 variable {α β γ}
 
-instance coeToFun :
-    CoeFun (α →L β) (fun _ => α → β) :=
-  ⟨fun f => f.toFun⟩
+instance coeToFun : CoeFun (α →L β) (fun _ => α → β) := ⟨fun f => f.toFun⟩
 
 variable (f : α →L β) (a b : α)
 

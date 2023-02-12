@@ -71,6 +71,9 @@ lemma bind_bind
     (t.bind fixed₁ free₁).bind fixed₂ free₂ = t.bind (fun n => (fixed₁ n).bind fixed₂ free₂) (fun m => (free₁ m).bind fixed₂ free₂) :=
   by induction t <;> simp[*]
 
+@[simp] lemma bind_id (t) : @bind L μ μ n n fixedVar freeVar t = t :=
+  by induction t <;> simp[*]
+
 section map
 variable (fixed : Fin n₁ → Fin n₂) (free : μ₁ → μ₂)
 
@@ -95,6 +98,14 @@ lemma map_map
 @[simp] lemma fixedSucc_fixedVar (x : Fin n) : fixedSucc (#x : SubTerm L μ n) = #(Fin.succ x) := rfl
 
 @[simp] lemma fixedSucc_freeVar (x : μ) : fixedSucc (&x : SubTerm L μ n) = &x := rfl
+
+@[simp] lemma leftConcat_fixedSucc_comp_fixedVar :
+    (#0 :> fixedSucc ∘ fixedVar : Fin (n + 1) → SubTerm L μ (n + 1)) = fixedVar :=
+  funext (Fin.cases (by simp) (by simp))
+
+@[simp] lemma fixedSucc_comp_freeVar :
+    (fixedSucc ∘ freeVar : μ → SubTerm L μ (n + 1)) = freeVar :=
+  funext (by simp)
 
 section Syntactic
 
@@ -151,6 +162,12 @@ lemma shift_Injective : Function.Injective (@shift L n) :=
 @[simp] lemma pull_func {k} (f : L.func k) (v : Fin k → SyntacticSubTerm L n) :
     pull (func f v) = func f (fun i => pull $ v i) := by simp[pull]
 
+@[simp] lemma push_pull (t : SyntacticSubTerm L n) : push (pull t) = t :=
+  by induction t <;> simp[*]; case freeVar x => cases x <;> simp
+
+@[simp] lemma pull_push (t : SyntacticSubTerm L (n + 1)) : pull (push t) = t :=
+  by induction t <;> simp[*]; case fixedVar x => exact Fin.lastCases (by simp) (by simp) x
+
 end Syntactic
 
 variable {L : Language} [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq (L.rel k)]
@@ -159,6 +176,17 @@ def langf : SubTerm L μ n → Finset (Σ k, L.func k)
   | #_       => ∅
   | &_       => ∅
   | func f v => insert ⟨_, f⟩ $ Finset.bunionᵢ Finset.univ (fun i => langf (v i))
+
+def pfunc (t : SubTerm L μ n) (k) (f : L.func k) : Prop :=
+  ⟨k, f⟩ ∈ t.langf
+
+@[simp] lemma pfunc_func {k} (f : L.func k) (v : Fin k → SubTerm L μ n) :
+    pfunc (func f v) k f := by simp[pfunc, langf]
+
+lemma pfunc_func' {k} {f : L.func k} {v : Fin k → SubTerm L μ n}
+  {k'} {f' : L.func k'} {i} :
+    pfunc (v i) k' f' → pfunc (func f v) k' f' :=
+  by simp[pfunc, langf]; intros h; exact Or.inr ⟨i, h⟩
 
 variable [DecidableEq μ]
 
@@ -188,20 +216,38 @@ namespace Language
 namespace Hom
 variable {L L₁ L₂ L₃} {μ} (Φ : Hom L₁ L₂)
 
-def onTerm (Φ : Hom L₁ L₂) : SubTerm L₁ μ n → SubTerm L₂ μ n
+def onSubTerm (Φ : Hom L₁ L₂) : SubTerm L₁ μ n → SubTerm L₂ μ n
   | #x               => #x
   | &x               => &x
-  | SubTerm.func f v => SubTerm.func (Φ.onFunc f) (fun i => onTerm Φ (v i))
+  | SubTerm.func f v => SubTerm.func (Φ.onFunc f) (fun i => onSubTerm Φ (v i))
 
-@[simp] lemma onTerm_fixedVar (x : Fin n) : Φ.onTerm (#x : SubTerm L₁ μ n) = #x := rfl
+@[simp] lemma onSubTerm_fixedVar (x : Fin n) : Φ.onSubTerm (#x : SubTerm L₁ μ n) = #x := rfl
 
-@[simp] lemma onTerm_freeVar (x : μ) : Φ.onTerm (&x : SubTerm L₁ μ n) = &x := rfl
+@[simp] lemma onSubTerm_freeVar (x : μ) : Φ.onSubTerm (&x : SubTerm L₁ μ n) = &x := rfl
 
-@[simp] lemma onTerm_func {k} (f : L₁.func k) (v : Fin k → SubTerm L₁ μ n) :
-    Φ.onTerm (SubTerm.func f v) = SubTerm.func (Φ.onFunc f) (fun i => onTerm Φ (v i)) := rfl
+@[simp] lemma onSubTerm_func {k} (f : L₁.func k) (v : Fin k → SubTerm L₁ μ n) :
+    Φ.onSubTerm (SubTerm.func f v) = SubTerm.func (Φ.onFunc f) (fun i => onSubTerm Φ (v i)) := rfl
 
 end Hom
 
 end Language
+
+namespace SubTerm
+open Language
+variable {L : Language} [∀ k, DecidableEq (L.func k)] {μ n}
+
+def toSubᵢ (pf : ∀ k, L.func k → Prop) (pr : ∀ k, L.rel k → Prop) : ∀ t : SubTerm L μ n,
+    (∀ k f, t.pfunc k f → pf k f) → SubTerm (subLanguage L pf pr) μ n
+  | #x,                _ => #x
+  | &x,                _ => &x
+  | func (k := k) f v, h => func ⟨f, h k f (by simp)⟩ (fun i => toSubᵢ pf pr (v i) (fun k' f' h' => h k' f' (pfunc_func' h')))
+
+@[simp] lemma htoSub' (pf : ∀ k, L.func k → Prop) (pr : ∀ k, L.rel k → Prop) (t : SubTerm L μ n) (h : ∀ k f, t.pfunc k f → pf k f) :
+    (ofSub L).onSubTerm (t.toSubᵢ pf pr h) = t :=
+  by induction t <;> simp[*, toSubᵢ]
+
+end SubTerm
+
+
 
 

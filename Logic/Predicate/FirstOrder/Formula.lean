@@ -93,6 +93,36 @@ variable (L)
 
 variable {L}
 
+def complexity : {n : ℕ} → SubFormula L μ n → ℕ
+| _, ⊤        => 0
+| _, ⊥        => 0
+| _, rel _ _  => 0
+| _, nrel _ _ => 0
+| _, p ⋏ q    => max p.complexity q.complexity + 1
+| _, p ⋎ q    => max p.complexity q.complexity + 1
+| _, ∀' p     => p.complexity + 1
+| _, ∃' p     => p.complexity + 1
+
+@[simp] lemma complexity_top : complexity (⊤ : SubFormula L μ n) = 0 := rfl
+
+@[simp] lemma complexity_bot : complexity (⊥ : SubFormula L μ n) = 0 := rfl
+
+@[simp] lemma complexity_rel {k} (r : L.rel k) (v : Fin k → SubTerm L μ n) : complexity (rel r v) = 0 := rfl
+
+@[simp] lemma complexity_nrel {k} (r : L.rel k) (v : Fin k → SubTerm L μ n) : complexity (nrel r v) = 0 := rfl
+
+@[simp] lemma complexity_and (p q : SubFormula L μ n) : complexity (p ⋏ q) = max p.complexity q.complexity + 1 := rfl
+@[simp] lemma complexity_and' (p q : SubFormula L μ n) : complexity (and p q) = max p.complexity q.complexity + 1 := rfl
+
+@[simp] lemma complexity_or (p q : SubFormula L μ n) : complexity (p ⋎ q) = max p.complexity q.complexity + 1 := rfl
+@[simp] lemma complexity_or' (p q : SubFormula L μ n) : complexity (or p q) = max p.complexity q.complexity + 1 := rfl
+
+@[simp] lemma complexity_all (p : SubFormula L μ (n + 1)) : complexity (∀' p) = p.complexity + 1 := rfl
+@[simp] lemma complexity_all' (p : SubFormula L μ (n + 1)) : complexity (all p) = p.complexity + 1 := rfl
+
+@[simp] lemma complexity_ex (p : SubFormula L μ (n + 1)) : complexity (∃' p) = p.complexity + 1 := rfl
+@[simp] lemma complexity_ex' (p : SubFormula L μ (n + 1)) : complexity (ex p) = p.complexity + 1 := rfl
+
 @[elab_as_elim]
 def cases' {C : ∀ n, SubFormula L μ n → Sort _}
   (hverum  : ∀ {n : ℕ}, C n ⊤)
@@ -217,6 +247,20 @@ variable (fixed : Fin n₁ → SubTerm L μ₂ n₂) (free : μ₁ → SubTerm L
 @[simp] lemma bind_ex (p : SubFormula L μ₁ (n₁ + 1)) :
     bind fixed free (∃' p) = ∃' bind (#0 :> SubTerm.fixedSucc ∘ fixed) (SubTerm.fixedSucc ∘ free) p := rfl
 
+@[simp] lemma complexity_bind (p : SubFormula L μ₁ n₁) : complexity (bind fixed free p) = complexity p :=
+  by induction p using rec' generalizing μ₂ n₂ <;> simp[*]
+
+@[simp] lemma bind_id (p) : @bind L μ μ n n SubTerm.fixedVar SubTerm.freeVar p = p :=
+  by induction p using rec' <;> simp[*]
+
+@[simp] lemma eq_bind_of (fixed : Fin n → SubTerm L μ n) (free : μ → SubTerm L μ n)
+    (hfixed : ∀ x, fixed x = #x) (hfree : ∀ x, free x = &x) (p : SubFormula L μ n) :
+    bind fixed free p = p :=
+  by
+  have : fixed = SubTerm.fixedVar := funext hfixed
+  have : free = SubTerm.freeVar := funext hfree
+  simp[*]
+
 end bind
 
 lemma bind_bind
@@ -234,6 +278,8 @@ lemma bind_comp_bind
     (bind fixed₂ free₂).comp (bind fixed₁ free₁) = bind (fun n => (fixed₁ n).bind fixed₂ free₂) (fun m => (free₁ m).bind fixed₂ free₂) :=
   by ext p; simp[bind_bind]
 
+
+
 section map
 variable (fixed : Fin n₁ → Fin n₂) (free : μ₁ → μ₂)
 
@@ -250,6 +296,9 @@ variable (fixed : Fin n₁ → Fin n₂) (free : μ₁ → μ₂)
 @[simp] lemma map_ex (p : SubFormula L μ₁ (n₁ + 1)) :
     map fixed free (∃' p) = ∃' map (0 :> Fin.succ ∘ fixed) free p :=
   by simp[map]; congr; exact funext (Fin.cases (by simp) (by simp))
+
+@[simp] lemma complexity_map (p : SubFormula L μ₁ n₁) : complexity (map fixed free p) = complexity p :=
+  complexity_bind _ _ _
 
 end map
 
@@ -271,7 +320,7 @@ def push : SyntacticSubFormula L (n + 1) →L SyntacticSubFormula L n :=
   bind (SubTerm.fixedVar <: &0) (fun m => &(Nat.succ m))
 
 def pull : SyntacticSubFormula L n →L SyntacticSubFormula L (n + 1) :=
-  bind (fun x => #(Fin.castSucc x)) (fun x => match x with | 0 => #(Fin.last n) | x + 1 => &x)
+  bind (fun x => #(Fin.castSucc x)) (#(Fin.last n) :>ₙ SubTerm.freeVar)
 
 @[simp] lemma shift_rel {k} (r : L.rel k) (v : Fin k → SyntacticSubTerm L n) :
     shift (rel r v) = rel r (fun i => SubTerm.shift $ v i) := rfl
@@ -327,6 +376,39 @@ lemma shiftEmb_eq_shift (p : SyntacticSubFormula L n) :
   simp[pull]; congr
   · exact funext (Fin.cases (by simp) (by simp[Fin.succ_castSucc])) 
   · exact funext (Nat.rec (by simp) (by simp))
+
+@[simp] lemma push_pull (p : SyntacticSubFormula L n) : push (pull p) = p :=
+  by simp[pull, push, bind_bind]; apply eq_bind_of <;> simp; intros x; cases x <;> simp
+
+@[simp] lemma pull_push (p : SyntacticSubFormula L (n + 1)) : pull (push p) = p :=
+  by
+  simp[pull, push, bind_bind]; apply eq_bind_of <;> simp
+  intros x; exact Fin.lastCases (by simp) (by simp) x
+
+@[simp] lemma complexity_push (p : SyntacticSubFormula L (n + 1)) :
+    complexity (push p) = complexity p :=
+  by simp[push]
+
+@[elab_as_elim]
+def formulaRec {C : SyntacticFormula L → Sort _}
+  (hverum  : C ⊤)
+  (hfalsum : C ⊥)
+  (hrel    : ∀ {l : ℕ} (r : L.rel l) (v : Fin l → SyntacticTerm L), C (rel r v))
+  (hnrel   : ∀ {l : ℕ} (r : L.rel l) (v : Fin l → SyntacticTerm L), C (nrel r v))
+  (hand    : ∀ (p q : SyntacticFormula L), C p → C q → C (p ⋏ q))
+  (hor     : ∀ (p q : SyntacticFormula L), C p → C q → C (p ⋎ q))
+  (hall    : ∀ (p : SyntacticSubFormula L 1), C (push p) → C (∀' p))
+  (hex     : ∀ (p : SyntacticSubFormula L 1), C (push p) → C (∃' p)) :
+    ∀ (p : SyntacticFormula L), C p
+  | ⊤        => hverum
+  | ⊥        => hfalsum
+  | rel r v  => hrel r v
+  | nrel r v => hnrel r v
+  | p ⋏ q    => hand p q (formulaRec hverum hfalsum hrel hnrel hand hor hall hex p) (formulaRec hverum hfalsum hrel hnrel hand hor hall hex q)
+  | p ⋎ q    => hor p q (formulaRec hverum hfalsum hrel hnrel hand hor hall hex p) (formulaRec hverum hfalsum hrel hnrel hand hor hall hex q)
+  | ∀' p     => hall p (formulaRec hverum hfalsum hrel hnrel hand hor hall hex (push p))
+  | ∃' p     => hex p (formulaRec hverum hfalsum hrel hnrel hand hor hall hex (push p))
+  termination_by formulaRec _ _ _ _ _ _ _ _ p => p.complexity
 
 end Syntactic
 
