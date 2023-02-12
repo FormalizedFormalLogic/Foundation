@@ -9,40 +9,40 @@ variable (Φ : Hom L₁ L₂) {n : ℕ}
 
 open FirstOrder
 
-def onFOFormula' (Φ : Hom L₁ L₂) : ∀ {n}, SubFormula L₁ μ n → SubFormula L₂ μ n
+def onSubFormula₁' (Φ : Hom L₁ L₂) : ∀ {n}, SubFormula L₁ μ n → SubFormula L₂ μ n
   | _, ⊤                   => ⊤ 
   | _, ⊥                   => ⊥ 
-  | _, SubFormula.rel r v  => SubFormula.rel (Φ.onRel r) (fun i => Φ.onTerm (v i))
-  | _, SubFormula.nrel r v => SubFormula.nrel (Φ.onRel r) (fun i => Φ.onTerm (v i))
-  | _, p ⋏ q               => Φ.onFOFormula' p ⋏ Φ.onFOFormula' q
-  | _, p ⋎ q               => Φ.onFOFormula' p ⋎ Φ.onFOFormula' q
-  | _, ∀' p                => ∀' Φ.onFOFormula' p
-  | _, ∃' p                => ∃' Φ.onFOFormula' p
+  | _, SubFormula.rel r v  => SubFormula.rel (Φ.onRel r) (fun i => Φ.onSubTerm (v i))
+  | _, SubFormula.nrel r v => SubFormula.nrel (Φ.onRel r) (fun i => Φ.onSubTerm (v i))
+  | _, p ⋏ q               => Φ.onSubFormula₁' p ⋏ Φ.onSubFormula₁' q
+  | _, p ⋎ q               => Φ.onSubFormula₁' p ⋎ Φ.onSubFormula₁' q
+  | _, ∀' p                => ∀' Φ.onSubFormula₁' p
+  | _, ∃' p                => ∃' Φ.onSubFormula₁' p
 
-lemma onFOFormula'_neg {n} (p : SubFormula L₁ μ n) :
-    Φ.onFOFormula' (¬'p) = ¬' Φ.onFOFormula' p :=
-  by induction p using SubFormula.rec' <;> simp[*, onFOFormula', ←SubFormula.neg_eq]
+lemma onSubFormula₁'_neg {n} (p : SubFormula L₁ μ n) :
+    Φ.onSubFormula₁' (¬'p) = ¬' Φ.onSubFormula₁' p :=
+  by induction p using SubFormula.rec' <;> simp[*, onSubFormula₁', ←SubFormula.neg_eq]
 
-def onFOFormula (Φ : Hom L₁ L₂) {n} : SubFormula L₁ μ n →L SubFormula L₂ μ n where
-  toFun := Φ.onFOFormula'
-  map_top' := by simp[onFOFormula']
-  map_bot' := by simp[onFOFormula']
-  map_and' := by simp[onFOFormula']
-  map_or'  := by simp[onFOFormula']
-  map_neg' := by simp[onFOFormula'_neg]
-  map_imp' := by simp[SubFormula.imp_eq, onFOFormula'_neg, ←SubFormula.neg_eq, onFOFormula']
+def onSubFormula₁ (Φ : Hom L₁ L₂) {n} : SubFormula L₁ μ n →L SubFormula L₂ μ n where
+  toFun := Φ.onSubFormula₁'
+  map_top' := by simp[onSubFormula₁']
+  map_bot' := by simp[onSubFormula₁']
+  map_and' := by simp[onSubFormula₁']
+  map_or'  := by simp[onSubFormula₁']
+  map_neg' := by simp[onSubFormula₁'_neg]
+  map_imp' := by simp[SubFormula.imp_eq, onSubFormula₁'_neg, ←SubFormula.neg_eq, onSubFormula₁']
 
-@[simp] lemma onFOFormula_rel {k} (r : L₁.rel k) (v : Fin k → SubTerm L₁ μ n) :
-    Φ.onFOFormula (SubFormula.rel r v) = SubFormula.rel (Φ.onRel r) (fun i => Φ.onTerm (v i)) := rfl
+@[simp] lemma onSubFormula₁_rel {k} (r : L₁.rel k) (v : Fin k → SubTerm L₁ μ n) :
+    Φ.onSubFormula₁ (SubFormula.rel r v) = SubFormula.rel (Φ.onRel r) (fun i => Φ.onSubTerm (v i)) := rfl
 
-lemma onFOFormula_nrel {k} (r : L₁.rel k) (v : Fin k → SubTerm L₁ μ n) :
-    Φ.onFOFormula (SubFormula.nrel r v) = SubFormula.nrel (Φ.onRel r) (fun i => Φ.onTerm (v i)) := rfl
+@[simp] lemma onSubFormula₁_nrel {k} (r : L₁.rel k) (v : Fin k → SubTerm L₁ μ n) :
+    Φ.onSubFormula₁ (SubFormula.nrel r v) = SubFormula.nrel (Φ.onRel r) (fun i => Φ.onSubTerm (v i)) := rfl
 
-lemma onFOFormula_all (p : SubFormula L₁ μ (n + 1)) :
-    Φ.onFOFormula (∀' p) = ∀' Φ.onFOFormula p := rfl
+@[simp] lemma onSubFormula₁_all (p : SubFormula L₁ μ (n + 1)) :
+    Φ.onSubFormula₁ (∀' p) = ∀' Φ.onSubFormula₁ p := rfl
 
-lemma onFOFormula_ex (p : SubFormula L₁ μ (n + 1)) :
-    Φ.onFOFormula (∃' p) = ∃' Φ.onFOFormula p := rfl
+@[simp] lemma onSubFormula₁_ex (p : SubFormula L₁ μ (n + 1)) :
+    Φ.onSubFormula₁ (∃' p) = ∃' Φ.onSubFormula₁ p := rfl
 
 end Hom
 

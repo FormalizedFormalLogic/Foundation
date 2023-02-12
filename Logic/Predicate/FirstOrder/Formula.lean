@@ -316,10 +316,10 @@ section Syntactic
 def shift : SyntacticSubFormula L n →L SyntacticSubFormula L n :=
   map id Nat.succ
 
-def push : SyntacticSubFormula L (n + 1) →L SyntacticSubFormula L n :=
+def free : SyntacticSubFormula L (n + 1) →L SyntacticSubFormula L n :=
   bind (SubTerm.fixedVar <: &0) (fun m => &(Nat.succ m))
 
-def pull : SyntacticSubFormula L n →L SyntacticSubFormula L (n + 1) :=
+def fix : SyntacticSubFormula L n →L SyntacticSubFormula L (n + 1) :=
   bind (fun x => #(Fin.castSucc x)) (#(Fin.last n) :>ₙ SubTerm.freeVar)
 
 @[simp] lemma shift_rel {k} (r : L.rel k) (v : Fin k → SyntacticSubTerm L n) :
@@ -345,49 +345,49 @@ def shiftEmb : SyntacticSubFormula L n ↪ SyntacticSubFormula L n where
 lemma shiftEmb_eq_shift (p : SyntacticSubFormula L n) :
   shiftEmb p = shift p := rfl
 
-@[simp] lemma push_rel {k} (r : L.rel k) (v : Fin k → SyntacticSubTerm L (n + 1)) :
-    push (rel r v) = rel r (fun i => SubTerm.push $ v i) := rfl
+@[simp] lemma free_rel {k} (r : L.rel k) (v : Fin k → SyntacticSubTerm L (n + 1)) :
+    free (rel r v) = rel r (fun i => SubTerm.free $ v i) := rfl
 
-@[simp] lemma push_nrel {k} (r : L.rel k) (v : Fin k → SyntacticSubTerm L (n + 1)) :
-    push (nrel r v) = nrel r (fun i => SubTerm.push $ v i) := rfl
+@[simp] lemma free_nrel {k} (r : L.rel k) (v : Fin k → SyntacticSubTerm L (n + 1)) :
+    free (nrel r v) = nrel r (fun i => SubTerm.free $ v i) := rfl
 
-@[simp] lemma push_all (p : SyntacticSubFormula L (n + 1 + 1)) :
-    push (∀' p) = ∀' push p  := by
-  simp[push]; congr; exact funext (Fin.cases (by simp) (Fin.lastCases (by simp) (by simp; simp[Fin.succ_castSucc])))
+@[simp] lemma free_all (p : SyntacticSubFormula L (n + 1 + 1)) :
+    free (∀' p) = ∀' free p  := by
+  simp[free]; congr; exact funext (Fin.cases (by simp) (Fin.lastCases (by simp) (by simp; simp[Fin.succ_castSucc])))
 
-@[simp] lemma push_ex (p : SyntacticSubFormula L (n + 1 + 1)) :
-    push (∃' p) = ∃' push p  := by
-  simp[push]; congr; exact funext (Fin.cases (by simp) (Fin.lastCases (by simp) (by simp; simp[Fin.succ_castSucc])))
+@[simp] lemma free_ex (p : SyntacticSubFormula L (n + 1 + 1)) :
+    free (∃' p) = ∃' free p  := by
+  simp[free]; congr; exact funext (Fin.cases (by simp) (Fin.lastCases (by simp) (by simp; simp[Fin.succ_castSucc])))
 
-@[simp] lemma pull_rel {k} (r : L.rel k) (v : Fin k → SyntacticSubTerm L n) :
-    pull (rel r v) = rel r (fun i => SubTerm.pull $ v i) := rfl
+@[simp] lemma fix_rel {k} (r : L.rel k) (v : Fin k → SyntacticSubTerm L n) :
+    fix (rel r v) = rel r (fun i => SubTerm.fix $ v i) := rfl
 
-@[simp] lemma pull_nrel {k} (r : L.rel k) (v : Fin k → SyntacticSubTerm L n) :
-    pull (nrel r v) = nrel r (fun i => SubTerm.pull $ v i) := rfl
+@[simp] lemma fix_nrel {k} (r : L.rel k) (v : Fin k → SyntacticSubTerm L n) :
+    fix (nrel r v) = nrel r (fun i => SubTerm.fix $ v i) := rfl
 
-@[simp] lemma pull_all (p : SyntacticSubFormula L (n + 1)) :
-    pull (∀' p) = ∀' pull p := by
-  simp[pull]; congr
+@[simp] lemma fix_all (p : SyntacticSubFormula L (n + 1)) :
+    fix (∀' p) = ∀' fix p := by
+  simp[fix]; congr
   · exact funext (Fin.cases (by simp) (by simp[Fin.succ_castSucc])) 
   · exact funext (Nat.rec (by simp) (by simp))
 
-@[simp] lemma pull_ex (p : SyntacticSubFormula L (n + 1)) :
-    pull (∃' p) = ∃' pull p := by
-  simp[pull]; congr
+@[simp] lemma fix_ex (p : SyntacticSubFormula L (n + 1)) :
+    fix (∃' p) = ∃' fix p := by
+  simp[fix]; congr
   · exact funext (Fin.cases (by simp) (by simp[Fin.succ_castSucc])) 
   · exact funext (Nat.rec (by simp) (by simp))
 
-@[simp] lemma push_pull (p : SyntacticSubFormula L n) : push (pull p) = p :=
-  by simp[pull, push, bind_bind]; apply eq_bind_of <;> simp; intros x; cases x <;> simp
+@[simp] lemma free_fix (p : SyntacticSubFormula L n) : free (fix p) = p :=
+  by simp[fix, free, bind_bind]; apply eq_bind_of <;> simp; intros x; cases x <;> simp
 
-@[simp] lemma pull_push (p : SyntacticSubFormula L (n + 1)) : pull (push p) = p :=
+@[simp] lemma fix_free (p : SyntacticSubFormula L (n + 1)) : fix (free p) = p :=
   by
-  simp[pull, push, bind_bind]; apply eq_bind_of <;> simp
+  simp[fix, free, bind_bind]; apply eq_bind_of <;> simp
   intros x; exact Fin.lastCases (by simp) (by simp) x
 
-@[simp] lemma complexity_push (p : SyntacticSubFormula L (n + 1)) :
-    complexity (push p) = complexity p :=
-  by simp[push]
+@[simp] lemma complexity_free (p : SyntacticSubFormula L (n + 1)) :
+    complexity (free p) = complexity p :=
+  by simp[free]
 
 @[elab_as_elim]
 def formulaRec {C : SyntacticFormula L → Sort _}
@@ -397,8 +397,8 @@ def formulaRec {C : SyntacticFormula L → Sort _}
   (hnrel   : ∀ {l : ℕ} (r : L.rel l) (v : Fin l → SyntacticTerm L), C (nrel r v))
   (hand    : ∀ (p q : SyntacticFormula L), C p → C q → C (p ⋏ q))
   (hor     : ∀ (p q : SyntacticFormula L), C p → C q → C (p ⋎ q))
-  (hall    : ∀ (p : SyntacticSubFormula L 1), C (push p) → C (∀' p))
-  (hex     : ∀ (p : SyntacticSubFormula L 1), C (push p) → C (∃' p)) :
+  (hall    : ∀ (p : SyntacticSubFormula L 1), C (free p) → C (∀' p))
+  (hex     : ∀ (p : SyntacticSubFormula L 1), C (free p) → C (∃' p)) :
     ∀ (p : SyntacticFormula L), C p
   | ⊤        => hverum
   | ⊥        => hfalsum
@@ -406,8 +406,8 @@ def formulaRec {C : SyntacticFormula L → Sort _}
   | nrel r v => hnrel r v
   | p ⋏ q    => hand p q (formulaRec hverum hfalsum hrel hnrel hand hor hall hex p) (formulaRec hverum hfalsum hrel hnrel hand hor hall hex q)
   | p ⋎ q    => hor p q (formulaRec hverum hfalsum hrel hnrel hand hor hall hex p) (formulaRec hverum hfalsum hrel hnrel hand hor hall hex q)
-  | ∀' p     => hall p (formulaRec hverum hfalsum hrel hnrel hand hor hall hex (push p))
-  | ∃' p     => hex p (formulaRec hverum hfalsum hrel hnrel hand hor hall hex (push p))
+  | ∀' p     => hall p (formulaRec hverum hfalsum hrel hnrel hand hor hall hex (free p))
+  | ∃' p     => hex p (formulaRec hverum hfalsum hrel hnrel hand hor hall hex (free p))
   termination_by formulaRec _ _ _ _ _ _ _ _ p => p.complexity
 
 end Syntactic

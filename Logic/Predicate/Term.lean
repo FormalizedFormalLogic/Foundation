@@ -123,14 +123,14 @@ def shift_le (s : ℕ) : SyntacticSubTerm L n → SyntacticSubTerm L n :=
 
 /- 
   #0 #1 ... #(n - 1) #n &0 &1 ...
-   ↓push           ↑pull
+   ↓free           ↑fix
   #0 #1 ... #(n - 1) &0 &1 &2 ...
  -/
 
-def push : SyntacticSubTerm L (n + 1) → SyntacticSubTerm L n :=
+def free : SyntacticSubTerm L (n + 1) → SyntacticSubTerm L n :=
   bind (fixedVar <: &0) (fun m => &(Nat.succ m))
 
-def pull : SyntacticSubTerm L n → SyntacticSubTerm L (n + 1) :=
+def fix : SyntacticSubTerm L n → SyntacticSubTerm L (n + 1) :=
   bind (fun x => #(Fin.castSucc x)) (#(Fin.last n) :>ₙ freeVar)
 
 @[simp] lemma shift_fixedVar (x : Fin n) : shift (#x : SyntacticSubTerm L n) = #x := rfl
@@ -144,28 +144,28 @@ lemma shift_Injective : Function.Injective (@shift L n) :=
   Function.LeftInverse.injective (g := map id Nat.pred)
     (by intros p; simp[shift, map_map, Function.comp]; exact map_id _)
 
-@[simp] lemma push_fixedVar_castSucc (x : Fin n) : push (#(Fin.castSucc x) : SyntacticSubTerm L (n + 1)) = #x := by simp[push]
+@[simp] lemma free_fixedVar_castSucc (x : Fin n) : free (#(Fin.castSucc x) : SyntacticSubTerm L (n + 1)) = #x := by simp[free]
 
-@[simp] lemma push_fixedVar_last : push (#(Fin.last n) : SyntacticSubTerm L (n + 1)) = &0 := by simp[push]
+@[simp] lemma free_fixedVar_last : free (#(Fin.last n) : SyntacticSubTerm L (n + 1)) = &0 := by simp[free]
 
-@[simp] lemma push_freeVar (x : ℕ) : push (&x : SyntacticSubTerm L (n + 1)) = &(x + 1) := by simp[push]
+@[simp] lemma free_freeVar (x : ℕ) : free (&x : SyntacticSubTerm L (n + 1)) = &(x + 1) := by simp[free]
 
-@[simp] lemma push_func {k} (f : L.func k) (v : Fin k → SyntacticSubTerm L (n + 1)) :
-    push (func f v) = func f (fun i => push $ v i) := by simp[push]
+@[simp] lemma free_func {k} (f : L.func k) (v : Fin k → SyntacticSubTerm L (n + 1)) :
+    free (func f v) = func f (fun i => free $ v i) := by simp[free]
 
-@[simp] lemma pull_fixedVar (x : Fin n) : pull (#x : SyntacticSubTerm L n) = #(Fin.castSucc x) := by simp[pull]
+@[simp] lemma fix_fixedVar (x : Fin n) : fix (#x : SyntacticSubTerm L n) = #(Fin.castSucc x) := by simp[fix]
 
-@[simp] lemma pull_freeVar_zero : pull (&0 : SyntacticSubTerm L n) = #(Fin.last n) := by simp[pull]
+@[simp] lemma fix_freeVar_zero : fix (&0 : SyntacticSubTerm L n) = #(Fin.last n) := by simp[fix]
 
-@[simp] lemma pull_freeVar_succ (x : ℕ) : pull (&(x + 1) : SyntacticSubTerm L n) = &x := by simp[pull]
+@[simp] lemma fix_freeVar_succ (x : ℕ) : fix (&(x + 1) : SyntacticSubTerm L n) = &x := by simp[fix]
 
-@[simp] lemma pull_func {k} (f : L.func k) (v : Fin k → SyntacticSubTerm L n) :
-    pull (func f v) = func f (fun i => pull $ v i) := by simp[pull]
+@[simp] lemma fix_func {k} (f : L.func k) (v : Fin k → SyntacticSubTerm L n) :
+    fix (func f v) = func f (fun i => fix $ v i) := by simp[fix]
 
-@[simp] lemma push_pull (t : SyntacticSubTerm L n) : push (pull t) = t :=
+@[simp] lemma free_fix (t : SyntacticSubTerm L n) : free (fix t) = t :=
   by induction t <;> simp[*]; case freeVar x => cases x <;> simp
 
-@[simp] lemma pull_push (t : SyntacticSubTerm L (n + 1)) : pull (push t) = t :=
+@[simp] lemma fix_free (t : SyntacticSubTerm L (n + 1)) : fix (free t) = t :=
   by induction t <;> simp[*]; case fixedVar x => exact Fin.lastCases (by simp) (by simp) x
 
 end Syntactic

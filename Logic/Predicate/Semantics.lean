@@ -40,13 +40,13 @@ variable (Ψ : ℕ → S)
 lemma val_shift (t : SyntacticSubTerm L n) :
     t.shift.val S e Ψ = t.val S e (fun x => Ψ $ x + 1) := by simp[shift, val_map]
 
-lemma val_push (a : S) (t : SyntacticSubTerm L (n + 1)) :
-    t.push.val S e (a :>ₙ Ψ) = t.val S (e <: a) Ψ :=
-  by simp[push, val_bind]; congr; exact funext $ Fin.lastCases (by simp) (by simp)
+lemma val_free (a : S) (t : SyntacticSubTerm L (n + 1)) :
+    t.free.val S e (a :>ₙ Ψ) = t.val S (e <: a) Ψ :=
+  by simp[free, val_bind]; congr; exact funext $ Fin.lastCases (by simp) (by simp)
 
-lemma val_pull (a : S) (t : SyntacticSubTerm L n) :
-    t.pull.val S (e <: a) Ψ = t.val S e (a :>ₙ Ψ) :=
-  by simp[pull, val_bind]; congr; exact funext (Nat.cases (by simp) (by simp))
+lemma val_fix (a : S) (t : SyntacticSubTerm L n) :
+    t.fix.val S (e <: a) Ψ = t.val S e (a :>ₙ Ψ) :=
+  by simp[fix, val_bind]; congr; exact funext (Nat.cases (by simp) (by simp))
 
 end Syntactic
 
