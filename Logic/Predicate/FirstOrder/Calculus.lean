@@ -17,7 +17,7 @@ def shifts (Δ : Finset (SyntacticSubFormula L n)) :
 @[simp] lemma shifts_ss (Δ Γ : Finset (SyntacticSubFormula L n)) :
     shifts Δ ⊆ shifts Γ ↔ Δ ⊆ Γ := Finset.map_subset_map
 
-inductive Derivation : Finset (SyntacticFormula L) → Type u
+inductive Derivation : Finset (SyntacticFormula L) → Type _
 | AxL     : ∀ (Δ : Finset (SyntacticFormula L)) {k} (r : L.rel k) (v : Fin k → SyntacticTerm L),
     rel r v ∈ Δ → nrel r v ∈ Δ → Derivation Δ
 | verum   : ∀ (Δ : Finset (SyntacticFormula L)), ⊤ ∈ Δ → Derivation Δ
@@ -28,7 +28,7 @@ inductive Derivation : Finset (SyntacticFormula L) → Type u
 | and     : ∀ (Δ : Finset (SyntacticFormula L)) (p q : SyntacticFormula L),
     Derivation (insert p Δ) → Derivation (insert q Δ) → Derivation (insert (p ⋏ q) Δ)
 | all     : ∀ (Δ : Finset (SyntacticFormula L)) (p : SyntacticSubFormula L 1),
-    Derivation (insert (push p) (shifts Δ)) → Derivation (insert (∀' p) Δ)
+    Derivation (insert (free p) (shifts Δ)) → Derivation (insert (∀' p) Δ)
 | ex      : ∀ (Δ : Finset (SyntacticFormula L)) (t : SyntacticTerm L) (p : SyntacticSubFormula L 1),
     Derivation (insert (subst t p) Δ) → Derivation (insert (∃' p) Δ)
 
@@ -107,13 +107,52 @@ def weakening : ∀ {Δ}, ⊩ Δ → ∀ {Γ : Finset (SyntacticFormula L)}, Δ 
       have : ⊩ insert (p ⋏ q) Γ := and Γ p q dp dq
       Derivation.cast this (by simp; exact (Finset.insert_subset.mp h).1)    
   | _, all Δ p d,            Γ, h =>
-      have : ⊩ insert (push p) (shifts Γ) := weakening d (Finset.insert_subset_insert _ $ by simpa using (Finset.insert_subset.mp h).2)
+      have : ⊩ insert (free p) (shifts Γ) := weakening d (Finset.insert_subset_insert _ $ by simpa using (Finset.insert_subset.mp h).2)
       have : ⊩ insert (∀' p) Γ := all Γ p this
       Derivation.cast this (by simp; exact (Finset.insert_subset.mp h).1)      
   | _, ex Δ t p d,           Γ, h =>
       have : ⊩ insert (subst t p) Γ := weakening d (Finset.insert_subset_insert _ $ by simpa using (Finset.insert_subset.mp h).2)
       have : ⊩ insert (∃' p) Γ := ex Γ t p this
       Derivation.cast this (by simp; exact (Finset.insert_subset.mp h).1)     
+
+section Hom
+variable
+  {L₁ : Language} [∀ k, DecidableEq (L₁.func k)] [∀ k, DecidableEq (L₁.rel k)]
+  {L₂ : Language} [∀ k, DecidableEq (L₂.func k)] [∀ k, DecidableEq (L₂.rel k)]
+  {Δ₁ Γ₁ : Finset (SyntacticFormula L₁)}
+
+lemma shifts_image (Φ : L₁ →ᵥ L₂) {Δ : Finset (SyntacticFormula L₁)} :
+     shifts (Finset.image Φ.onSubFormula₁ Δ) = (Finset.image Φ.onSubFormula₁ (shifts Δ)) :=
+  by simp[shifts, shiftEmb, Finset.map_eq_image, Finset.image_image, Function.comp, SubFormula.onSubFormula₁_shift]
+
+def onDerivation (Φ : L₁ →ᵥ L₂) : ∀ {Δ : Finset (SyntacticFormula L₁)}, ⊩ Δ → ⊩ Finset.image Φ.onSubFormula₁ Δ
+  | _, AxL Δ r v hrel hnrel =>
+      AxL _ (Φ.onRel r) (fun i => Φ.onSubTerm (v i))
+        (Finset.mem_image_of_mem _ hrel) (Finset.mem_image_of_mem _ hnrel)
+  | _, verum Δ h            => verum _ (by simpa using Finset.mem_image_of_mem Φ.onSubFormula₁ h)
+  | _, orLeft Δ p q d       =>
+      have : ⊩ insert (Φ.onSubFormula₁ p ⋎ Φ.onSubFormula₁ q) (Finset.image Φ.onSubFormula₁ Δ) :=
+        orLeft _ _ _ (Derivation.cast (onDerivation Φ d) (by simp))
+      Derivation.cast this (by simp)
+  | _, orRight Δ p q d      =>
+      have : ⊩ insert (Φ.onSubFormula₁ p ⋎ Φ.onSubFormula₁ q) (Finset.image Φ.onSubFormula₁ Δ) :=
+        orRight _ _ _ (Derivation.cast (onDerivation Φ d) (by simp))
+      Derivation.cast this (by simp) 
+  | _, and Δ p q dp dq      =>
+      have : ⊩ insert (Φ.onSubFormula₁ p ⋏ Φ.onSubFormula₁ q) (Finset.image Φ.onSubFormula₁ Δ) :=
+        and _ _ _ (Derivation.cast (onDerivation Φ dp) (by simp)) (Derivation.cast (onDerivation Φ dq) (by simp))
+      Derivation.cast this (by simp)
+
+  | _, all Δ p d            =>
+      have : ⊩ insert (∀' Φ.onSubFormula₁ p) (Finset.image Φ.onSubFormula₁ Δ) :=
+        all _ _ (by simpa[←SubFormula.onSubFormula₁_free, shifts_image] using onDerivation Φ d)
+      Derivation.cast this (by simp)
+  | _, ex Δ t p d           =>
+      have : ⊩ insert (∃' Φ.onSubFormula₁ p) (Finset.image Φ.onSubFormula₁ Δ) :=
+        ex _ (Φ.onSubTerm t) _ (by simpa[←SubFormula.onSubFormula₁_subst] using onDerivation Φ d)
+      Derivation.cast this (by simp)
+
+end Hom
 
 end Derivation
 

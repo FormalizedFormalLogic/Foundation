@@ -48,9 +48,38 @@ end Hom
 
 end Language
 
-variable {L : Language} [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq (L.rel k)]
-
 namespace FirstOrder
+
+namespace SubFormula
+variable {L₁ L₂ : Language} (Φ : L₁ →ᵥ L₂) {μ₁ μ₂ : Type _} {n₁ n₂ : ℕ}
+
+lemma onSubFormula₁_bind (fixed : Fin n₁ → SubTerm L₁ μ₂ n₂) (free : μ₁ → SubTerm L₁ μ₂ n₂) (p) :
+    Φ.onSubFormula₁ (bind fixed free p) =
+    bind (fun x => Φ.onSubTerm (fixed x)) (fun x => Φ.onSubTerm (free x)) (Φ.onSubFormula₁ p) :=
+  by
+  induction p using rec' generalizing μ₂ n₂ <;>
+  simp[*, SubTerm.onSubTerm_bind, Fin.comp_left_concat, Function.comp, SubTerm.onSubTerm_fixedSucc]
+
+lemma onSubFormula₁_map (fixed : Fin n₁ → Fin n₂) (free : μ₁ → μ₂) (p) :
+    Φ.onSubFormula₁ (map fixed free p) = map fixed free (Φ.onSubFormula₁ p) :=
+  by simp[map, onSubFormula₁_bind]
+
+lemma onSubFormula₁_subst (u) (p : SubFormula L₁ μ (n + 1)) :
+    Φ.onSubFormula₁ (subst u p) = subst (Φ.onSubTerm u) (Φ.onSubFormula₁ p) :=
+  by simp[subst, onSubFormula₁_bind, Fin.comp_right_concat, Function.comp]
+
+lemma onSubFormula₁_shift (p : SyntacticSubFormula L₁ n) : Φ.onSubFormula₁ (shift p) = shift (Φ.onSubFormula₁ p) :=
+  by simp[shift, onSubFormula₁_map]
+
+lemma onSubFormula₁_free (p : SyntacticSubFormula L₁ (n + 1)) : Φ.onSubFormula₁ (free p) = free (Φ.onSubFormula₁ p) :=
+  by simp[free, onSubFormula₁_bind]; congr; exact funext $ Fin.lastCases (by simp) (by simp)
+
+lemma onSubFormula₁_fix (p : SyntacticSubFormula L₁ n) : Φ.onSubFormula₁ (fix p) = fix (Φ.onSubFormula₁ p) :=
+  by simp[fix, onSubFormula₁_bind]; congr; funext x; cases x <;> simp
+
+end SubFormula
+
+variable {L : Language} [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq (L.rel k)]
 
 namespace SubFormula
 

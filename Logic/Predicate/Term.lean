@@ -233,6 +233,35 @@ end Hom
 end Language
 
 namespace SubTerm
+variable {L₁ L₂ : Language} (Φ : L₁ →ᵥ L₂) {μ₁ μ₂ : Type _} {n₁ n₂ : ℕ}
+
+lemma onSubTerm_bind (fixed : Fin n₁ → SubTerm L₁ μ₂ n₂) (free : μ₁ → SubTerm L₁ μ₂ n₂) (t) :
+    Φ.onSubTerm (bind fixed free t) = bind (fun x => Φ.onSubTerm (fixed x)) (fun x => Φ.onSubTerm (free x)) (Φ.onSubTerm t) :=
+  by induction t <;> simp[*]
+
+lemma onSubTerm_map (fixed : Fin n₁ → Fin n₂) (free : μ₁ → μ₂) (t) :
+    Φ.onSubTerm (map fixed free t) = map fixed free (Φ.onSubTerm t) :=
+  by simp[map, onSubTerm_bind]
+
+lemma onSubTerm_subst (u) (t : SubTerm L₁ μ (n + 1)) :
+    Φ.onSubTerm (subst u t) = subst (Φ.onSubTerm u) (Φ.onSubTerm t) :=
+  by simp[subst, onSubTerm_bind, Fin.comp_right_concat, Function.comp]
+
+lemma onSubTerm_fixedSucc (t : SubTerm L₁ μ₁ n) : Φ.onSubTerm (fixedSucc t) = fixedSucc (Φ.onSubTerm t) :=
+  by simp[fixedSucc, onSubTerm_map]
+
+lemma onSubTerm_shift (t : SyntacticSubTerm L₁ n) : Φ.onSubTerm (shift t) = shift (Φ.onSubTerm t) :=
+  by simp[shift, onSubTerm_map]
+
+lemma onSubTerm_free (t : SyntacticSubTerm L₁ (n + 1)) : Φ.onSubTerm (free t) = free (Φ.onSubTerm t) :=
+  by simp[free, onSubTerm_bind]; congr; exact funext $ Fin.lastCases (by simp) (by simp)
+
+lemma onSubTerm_fix (t : SyntacticSubTerm L₁ n) : Φ.onSubTerm (fix t) = fix (Φ.onSubTerm t) :=
+  by simp[fix, onSubTerm_bind]; congr; funext x; cases x <;> simp
+
+end SubTerm
+
+namespace SubTerm
 open Language
 variable {L : Language} [∀ k, DecidableEq (L.func k)] {μ n}
 

@@ -79,6 +79,12 @@ def decFinfun {α : Type _} : {n : ℕ} → (v w : Fin n → α) → (∀ i, Dec
       haveI : Decidable (v ∘ Fin.succ = w ∘ Fin.succ) := decFinfun _ _ (by intros i; simp; exact d _)
       refine instDecidableAnd
 
+lemma comp_left_concat (f : C → α) (a : C) (s : Fin n → C) : (fun x => f $ (a :> s) x) = f a :> f ∘ s :=
+funext (fun i => cases (by simp) (by simp) i)
+
+lemma comp_right_concat (f : C → α) (a : C) (s : Fin n → C) : (fun x => f $ (s <: a) x) = f ∘ s <: f a :=
+funext (fun i => lastCases (by simp) (by simp) i)
+
 end Fin
 
 namespace Fintype
