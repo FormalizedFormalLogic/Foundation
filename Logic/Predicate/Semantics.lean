@@ -13,33 +13,6 @@ variable
 namespace Language
 namespace Hom
 
-/-
-set_option linter.unusedVariables false in
-def onModel₁ (Φ : L₁ →ᵥ L₂) (M₂ : Type w₂) [Structure₁ L₂ M₂] := M₂
-
-def cast (Φ : L₁ →ᵥ L₂) {M₂ : Type w₂} [Structure₁ L₂ M₂] (a : M₂) : Φ.onModel₁ M₂ := a
-
-def uncast (Φ : L₁ →ᵥ L₂) {M₂ : Type w₂} [Structure₁ L₂ M₂] (a : Φ.onModel₁ M₂) : M₂ := a
-
-variable {Φ : L₁ →ᵥ L₂} {M₂ : Type w₂} [Structure₁ L₂ M₂]
-
-instance [Inhabited M₂] : Inhabited (Φ.onModel₁ M₂) := ⟨Φ.cast default⟩
-
-@[simp] lemma uncast_cast (a : M₂) : Φ.uncast (Φ.cast a) = a := rfl
-
-@[simp] lemma cast_uncast (a : Φ.onModel₁ M₂) : Φ.cast (Φ.uncast a) = a := rfl
-
-lemma cast_injective : Function.Injective (Φ.cast : M₂ → Φ.onModel₁ M₂) := fun _ _ => id
-
-lemma uncast_injective : Function.Injective (Φ.uncast : Φ.onModel₁ M₂ → M₂) := fun _ _ => id
-
-@[simp] lemma cast_inj_iff (a b : M₂) : Φ.cast a = Φ.cast b ↔ a = b := cast_injective.eq_iff
-
-@[simp] lemma uncast_inj_iff (a b : Φ.onModel₁ M₂) : Φ.uncast a = Φ.uncast b ↔ a = b := uncast_injective.eq_iff
-
-attribute [irreducible] onModel₁
--/
-
 def onStructure₁ (Φ : L₁ →ᵥ L₂) {M : Type w} (S : Structure₁ L₂ M) : Structure₁ L₁ M where
   func := fun f => S.func (Φ.onFunc f)
   rel := fun r => S.rel (Φ.onRel r)
@@ -57,18 +30,6 @@ instance [Inhabited M] : Inhabited (Structure₁ L M) :=
 ⟨{ func := fun _ _ => default, rel := fun _ _ => True }⟩
 
 variable (Φ : L₁ →ᵥ L₂) {M : Type w} (S : Structure₁ L₂ M)
-
-/-
-instance [Structure₁ L₂ M₂] : Structure₁ L₁ (Φ.onModel₁ M₂) where
-  func := fun f v => Φ.cast $ Structure₁.func (Φ.onFunc f) (Φ.uncast ∘ v)
-  rel := fun r v => Structure₁.rel (Φ.onRel r) (Φ.uncast ∘ v)
-
-@[simp] lemma onModel₁_func {k} {f : L₁.func k} {v : Fin k → Φ.onModel₁ M₂} :
-    func f v = (Φ.cast $ func (Φ.onFunc f) (Φ.uncast ∘ v)) := rfl
-
-@[simp] lemma onModel₁_rel {k} {r : L₁.rel k} {v : Fin k → Φ.onModel₁ M₂} :
-    rel r v ↔ rel (Φ.onRel r) (Φ.uncast ∘ v) := of_eq rfl
--/
 
 @[simp] lemma onStructure₁_func {k} {f : L₁.func k} {v : Fin k → M} :
     (Φ.onStructure₁ S).func f v = S.func (Φ.onFunc f) v := rfl
@@ -140,5 +101,3 @@ lemma val_fix (a : M) (t : SyntacticSubTerm L n) :
 end Syntactic
 
 end SubTerm
-
-

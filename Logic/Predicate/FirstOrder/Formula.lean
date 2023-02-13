@@ -184,28 +184,10 @@ end SubFormula
 namespace SubFormula
 variable {n n₁ n₂ n₃ m m₁ m₂ m₃ : ℕ}
 
-/-
-section hom
-variable {A : ℕ → Type _} [∀ n, HasLogicSymbols (A n)] [HasUniv A] [HasEx A] 
-
-def hom' (param : ℕ → Sort _)
-  (homRel  : ∀ {n}, ∀ {k}, L.rel k → (Fin k → SubTerm L μ n) → A n)
-  (homNrel : ∀ {n}, ∀ {k},L.rel k → (Fin k → SubTerm L μ n) → A n) :
-    ∀ {n}, SubFormula L μ n → A n
-  | _, _, ⊤ => ⊤
-  | _, _, ⊥ => ⊥
-  | _, w, rel r v => homRel w r v
-  | _, w, nrel r v => homNrel w r v
-  | _, w, p ⋏ q => hom' param @homRel @homNrel w p ⋏ hom' param @homRel @homNrel w q
-  | _, w, p ⋎ q => hom' param @homRel @homNrel w p ⋎ hom' param @homRel @homNrel w q
-  | _, w, ∀' p  => ∀' hom' param @homRel @homNrel w p
-end hom
--/
-
 def bind' : ∀ {n₁ n₂}, (fixed : Fin n₁ → SubTerm L μ₂ n₂) → (free : μ₁ → SubTerm L μ₂ n₂) →
     SubFormula L μ₁ n₁ → SubFormula L μ₂ n₂
-  | _, _, _,    _,     ⊤          => ⊤
-  | _, _, _,    _,     ⊥          => ⊥
+  | _, _, _,     _,    ⊤          => ⊤
+  | _, _, _,     _,    ⊥          => ⊥
   | _, _, fixed, free, (rel r v)  => rel r (SubTerm.bind fixed free ∘ v)
   | _, _, fixed, free, (nrel r v) => nrel r (SubTerm.bind fixed free ∘ v)
   | _, _, fixed, free, (p ⋏ q)    => bind' fixed free p ⋏ bind' fixed free q
@@ -222,7 +204,7 @@ def bind (fixed : Fin n₁ → SubTerm L μ₂ n₂) (free : μ₁ → SubTerm L
   map_top' := by simp[bind']
   map_bot' := by simp[bind']
   map_and' := by simp[bind']
-  map_or' := by simp[bind']
+  map_or'  := by simp[bind']
   map_neg' := by simp[bind'_neg]
   map_imp' := by simp[imp_eq, bind'_neg, ←neg_eq, bind']
 
@@ -277,8 +259,6 @@ lemma bind_comp_bind
   (fixed₂ : Fin n₂ → SubTerm L μ₃ n₃) (free₂ : μ₂ → SubTerm L μ₃ n₃) :
     (bind fixed₂ free₂).comp (bind fixed₁ free₁) = bind (fun n => (fixed₁ n).bind fixed₂ free₂) (fun m => (free₁ m).bind fixed₂ free₂) :=
   by ext p; simp[bind_bind]
-
-
 
 section map
 variable (fixed : Fin n₁ → Fin n₂) (free : μ₁ → μ₂)
@@ -417,5 +397,61 @@ end SubFormula
 @[reducible] def Theory (L : Language) (μ) := Set (Formula L μ)
 
 @[reducible] def CTheory (L : Language) := Set (Sentence L)
+
+namespace SubFormula
+
+variable {L : Language} [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq (L.rel k)] [DecidableEq μ]
+
+def hasDecEq : (p q : SubFormula L μ n) → Decidable (p = q)
+  | ⊤,        q => by cases q using cases' <;>
+      { simp; try { exact isFalse not_false }; try { exact isTrue trivial } }
+  | ⊥,        q => by cases q using cases' <;>
+      { simp; try { exact isFalse not_false }; try { exact isTrue trivial } }
+  | rel r v,  q => by
+      cases q using cases' <;> try { simp; exact isFalse not_false }
+      case hrel k₁ k₂ r₂ v₂ =>
+        by_cases e : k₁ = k₂
+        · rcases e with rfl
+          exact match decEq r r₂ with
+          | isTrue h  => by simp[h]; exact Fin.decFinfun _ _ (fun i => decEq (v i) (v₂ i))
+          | isFalse h => isFalse (by simp[h])
+        · exact isFalse (by simp[e])
+  | nrel r v, q => by
+      cases q using cases' <;> try { simp; exact isFalse not_false }
+      case hnrel k₁ k₂ r₂ v₂ =>
+        by_cases e : k₁ = k₂
+        · rcases e with rfl
+          exact match decEq r r₂ with
+          | isTrue h  => by simp[h]; exact Fin.decFinfun _ _ (fun i => decEq (v i) (v₂ i))
+          | isFalse h => isFalse (by simp[h])
+        · exact isFalse (by simp[e])
+  | p ⋏ q,    r => by
+      cases r using cases' <;> try { simp; exact isFalse not_false }
+      case hand p' q' =>
+        exact match hasDecEq p p' with
+        | isTrue hp =>
+          match hasDecEq q q' with
+          | isTrue hq  => isTrue (hp ▸ hq ▸ rfl)
+          | isFalse hq => isFalse (by simp[hp, hq])
+        | isFalse hp => isFalse (by simp[hp])
+  | p ⋎ q,    r => by
+      cases r using cases' <;> try { simp; exact isFalse not_false }
+      case hor p' q' =>
+        exact match hasDecEq p p' with
+        | isTrue hp =>
+          match hasDecEq q q' with
+          | isTrue hq  => isTrue (hp ▸ hq ▸ rfl)
+          | isFalse hq => isFalse (by simp[hp, hq])
+        | isFalse hp => isFalse (by simp[hp])
+  | ∀' p,     q => by
+      cases q using cases' <;> try { simp; exact isFalse not_false }
+      case hall p' => simp; exact hasDecEq p p'
+  | ∃' p,     q => by
+      cases q using cases' <;> try { simp; exact isFalse not_false }
+      case hex p' => simp; exact hasDecEq p p'
+
+instance : DecidableEq (SubFormula L μ n) := hasDecEq
+
+end SubFormula
 
 end FirstOrder

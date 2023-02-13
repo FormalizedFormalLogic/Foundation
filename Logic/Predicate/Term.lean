@@ -271,7 +271,8 @@ def toSubᵢ (pf : ∀ k, L.func k → Prop) (pr : ∀ k, L.rel k → Prop) : �
   | &x,                _ => &x
   | func (k := k) f v, h => func ⟨f, h k f (by simp)⟩ (fun i => toSubᵢ pf pr (v i) (fun k' f' h' => h k' f' (pfunc_func' h')))
 
-@[simp] lemma htoSub' (pf : ∀ k, L.func k → Prop) (pr : ∀ k, L.rel k → Prop) (t : SubTerm L μ n) (h : ∀ k f, t.pfunc k f → pf k f) :
+@[simp] lemma onSubTerm_toSubᵢ (pf : ∀ k, L.func k → Prop) (pr : ∀ k, L.rel k → Prop)
+  (t : SubTerm L μ n) (h : ∀ k f, t.pfunc k f → pf k f) :
     (ofSub L).onSubTerm (t.toSubᵢ pf pr h) = t :=
   by induction t <;> simp[*, toSubᵢ]
 
