@@ -17,9 +17,13 @@ def onStructure₁ (Φ : L₁ →ᵥ L₂) {M : Type w} (S : Structure₁ L₂ M
   func := fun f => S.func (Φ.onFunc f)
   rel := fun r => S.rel (Φ.onRel r)
 
-instance subLanguageStructure₁ {pfunc : ∀ k, Language.func L k → Prop} {prel : ∀ k, L.rel k → Prop}
-  {M : Type w} [s : Structure₁ L M] : Structure₁ (subLanguage L pfunc prel) M :=
-  onStructure₁ (ofSub L) s
+instance subLanguageStructure₁ {pf : ∀ k, Language.func L k → Prop} {pr : ∀ k, L.rel k → Prop}
+  {M : Type w} [s : Structure₁ L M] : Structure₁ (subLanguage L pf pr) M :=
+  onStructure₁ (ofSubLanguage L) s
+
+noncomputable def extendStructure₁ (Φ : L₁ →ᵥ L₂) {M : Type w} [Inhabited M] (s : Structure₁ L₁ M) : Structure₁ L₂ M where
+  func := fun {k} f₂ v => Classical.epsilon (fun y => ∃ f₁ : L₁.func k, Φ.onFunc f₁ = f₂ ∧ y = s.func f₁ v)
+  rel  := fun {k} r₂ v => ∃ r₁ : L₁.rel k, Φ.onRel r₁ = r₂ ∧ s.rel r₁ v
 
 end Hom
 end Language
@@ -29,13 +33,29 @@ namespace Structure₁
 instance [Inhabited M] : Inhabited (Structure₁ L M) :=
 ⟨{ func := fun _ _ => default, rel := fun _ _ => True }⟩
 
-variable (Φ : L₁ →ᵥ L₂) {M : Type w} (S : Structure₁ L₂ M)
+variable (Φ : L₁ →ᵥ L₂) {M : Type w} (s₂ : Structure₁ L₂ M)
 
 @[simp] lemma onStructure₁_func {k} {f : L₁.func k} {v : Fin k → M} :
-    (Φ.onStructure₁ S).func f v = S.func (Φ.onFunc f) v := rfl
+    (Φ.onStructure₁ s₂).func f v = s₂.func (Φ.onFunc f) v := rfl
 
 @[simp] lemma onStructure₁_rel {k} {r : L₁.rel k} {v : Fin k → M} :
-    (Φ.onStructure₁ S).rel r v ↔ S.rel (Φ.onRel r) v := of_eq rfl
+    (Φ.onStructure₁ s₂).rel r v ↔ s₂.rel (Φ.onRel r) v := of_eq rfl
+
+variable [Inhabited M] (s₁ : Structure₁ L₁ M)
+
+lemma extendStructure₁_func
+  {k} (injf : Function.Injective (Φ.onFunc : L₁.func k → L₂.func k)) (f₁ : L₁.func k) (v : Fin k → M) :
+    (Φ.extendStructure₁ s₁).func (Φ.onFunc f₁) v = s₁.func f₁ v := by
+  simp[Language.Hom.extendStructure₁]
+  have : ∃ y, ∃ f₁' : L₁.func k, Φ.onFunc f₁' = Φ.onFunc f₁ ∧ y = s₁.func f₁' v := ⟨s₁.func f₁ v, f₁, rfl, rfl⟩
+  rcases Classical.epsilon_spec this with ⟨f', f'eq, h⟩
+  rcases injf f'eq with rfl; exact h
+
+lemma extendStructure₁_rel
+  {k} (injr : Function.Injective (Φ.onRel : L₁.rel k → L₂.rel k)) (r₁ : L₁.rel k) (v : Fin k → M) :
+    (Φ.extendStructure₁ s₁).rel (Φ.onRel r₁) v ↔ s₁.rel r₁ v := by
+  simp[Language.Hom.extendStructure₁]
+  refine ⟨by intros h; rcases h with ⟨r₁', e, h⟩; rcases injr e; exact h, by intros h; refine ⟨r₁, rfl, h⟩⟩
 
 end Structure₁
 
@@ -75,14 +95,24 @@ lemma val_subst (u : SubTerm L μ n) (t : SubTerm L μ (n + 1)) :
 @[simp] lemma val_fixedSucc (a : M) (t : SubTerm L μ n) :
     t.fixedSucc.val s (a :> e) ε = t.val s e ε := by simp[fixedSucc, val_map, Function.comp]
 
-section onStructure₁
-variable (Φ : L₁ →ᵥ L₂) (s : Structure₁ L₂ M) (e : Fin n → M) (ε : μ → M)
+section Language
+variable (Φ : L₁ →ᵥ L₂) (e : Fin n → M) (ε : μ → M)
 
-lemma val_onSubTerm {t : SubTerm L₁ μ n} :
-    val s e ε (Φ.onSubTerm t) = val (Φ.onStructure₁ s) e ε t :=
+lemma val_onSubTerm (s₂ : Structure₁ L₂ M) {t : SubTerm L₁ μ n} :
+    val s₂ e ε (Φ.onSubTerm t) = val (Φ.onStructure₁ s₂) e ε t :=
   by induction t <;> simp[*, val!, Function.comp]
 
-end onStructure₁
+variable [Inhabited M]
+
+lemma val_extendStructure₁_onSubTerm
+    (injf : ∀ k, Function.Injective (Φ.onFunc : L₁.func k → L₂.func k))
+    (s₁ : Structure₁ L₁ M) (t : SubTerm L₁ μ n) :
+    val (Φ.extendStructure₁ s₁) e ε (Φ.onSubTerm t) = val s₁ e ε t := by
+  induction t <;> simp[*]
+  case func k f v ih => 
+    exact Structure₁.extendStructure₁_func Φ s₁ (injf k) f (fun i => val s₁ e ε (v i))
+
+end Language
 
 section Syntactic
 variable (ε : ℕ → M)

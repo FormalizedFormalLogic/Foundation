@@ -172,21 +172,17 @@ end Syntactic
 
 variable {L : Language} [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq (L.rel k)]
 
-def langf : SubTerm L μ n → Finset (Σ k, L.func k)
+def languageFunc : SubTerm L μ n → Finset (Σ k, L.func k)
   | #_       => ∅
   | &_       => ∅
-  | func f v => insert ⟨_, f⟩ $ Finset.bunionᵢ Finset.univ (fun i => langf (v i))
+  | func f v => insert ⟨_, f⟩ $ Finset.bunionᵢ Finset.univ (fun i => languageFunc (v i))
 
-def pfunc (t : SubTerm L μ n) (k) (f : L.func k) : Prop :=
-  ⟨k, f⟩ ∈ t.langf
+@[simp] lemma languageFunc_func {k} (f : L.func k) (v : Fin k → SubTerm L μ n) :
+    ⟨k, f⟩ ∈ (func f v).languageFunc := by simp[languageFunc]
 
-@[simp] lemma pfunc_func {k} (f : L.func k) (v : Fin k → SubTerm L μ n) :
-    pfunc (func f v) k f := by simp[pfunc, langf]
-
-lemma pfunc_func' {k} {f : L.func k} {v : Fin k → SubTerm L μ n}
-  {k'} {f' : L.func k'} {i} :
-    pfunc (v i) k' f' → pfunc (func f v) k' f' :=
-  by simp[pfunc, langf]; intros h; exact Or.inr ⟨i, h⟩
+lemma languageFunc_func_ss {k} (f : L.func k) (v : Fin k → SubTerm L μ n) (i) :
+    (v i).languageFunc ⊆ (func f v).languageFunc :=
+  by intros x; simp[languageFunc]; intros h; exact Or.inr ⟨i, h⟩
 
 variable [DecidableEq μ]
 
@@ -265,16 +261,17 @@ namespace SubTerm
 open Language
 variable {L : Language} [∀ k, DecidableEq (L.func k)] {μ n}
 
-def toSubᵢ (pf : ∀ k, L.func k → Prop) (pr : ∀ k, L.rel k → Prop) : ∀ t : SubTerm L μ n,
-    (∀ k f, t.pfunc k f → pf k f) → SubTerm (subLanguage L pf pr) μ n
+def toSubLanguage' (pf : ∀ k, L.func k → Prop) (pr : ∀ k, L.rel k → Prop) : ∀ t : SubTerm L μ n,
+    (∀ k f, ⟨k, f⟩ ∈ t.languageFunc → pf k f) → SubTerm (subLanguage L pf pr) μ n
   | #x,                _ => #x
   | &x,                _ => &x
-  | func (k := k) f v, h => func ⟨f, h k f (by simp)⟩ (fun i => toSubᵢ pf pr (v i) (fun k' f' h' => h k' f' (pfunc_func' h')))
+  | func (k := k) f v, h => func ⟨f, h k f (by simp)⟩
+      (fun i => toSubLanguage' pf pr (v i) (fun k' f' h' => h k' f' (languageFunc_func_ss f v i h')))
 
-@[simp] lemma onSubTerm_toSubᵢ (pf : ∀ k, L.func k → Prop) (pr : ∀ k, L.rel k → Prop)
-  (t : SubTerm L μ n) (h : ∀ k f, t.pfunc k f → pf k f) :
-    (ofSub L).onSubTerm (t.toSubᵢ pf pr h) = t :=
-  by induction t <;> simp[*, toSubᵢ]
+@[simp] lemma onSubTerm_toSubLanguage' (pf : ∀ k, L.func k → Prop) (pr : ∀ k, L.rel k → Prop)
+  (t : SubTerm L μ n) (h : ∀ k f, ⟨k, f⟩ ∈ t.languageFunc → pf k f) :
+    L.ofSubLanguage.onSubTerm (t.toSubLanguage' pf pr h) = t :=
+  by induction t <;> simp[*, toSubLanguage']
 
 end SubTerm
 

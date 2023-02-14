@@ -3,9 +3,7 @@ import Logic.Predicate.Semantics
 
 universe u u₁ u₂ v v₁ v₂ w w₁ w₂
 
-variable
-  {L : Language.{u}} {L₁ : Language.{u₁}} {L₂ : Language.{u₂}}
-  {μ : Type v} {μ₁ : Type v₁} {μ₂ : Type v₂}
+variable {L : Language.{u}} {μ : Type v}
 
 namespace FirstOrder
 
@@ -91,49 +89,78 @@ infix:50 " ⊧₁ " => models!
 lemma models_def {s : Structure₁ L M} {p : Formula L μ} : s ⊧ p ↔ (∀ e, SubFormula.val s e p) :=
   by simp[HasDoubleTurnstile.doubleTurnstile, models]
 
-def valid (p : Formula L μ) : Prop := ∀ {M : Type u} (s : Structure₁ L M), s ⊧ p
+def valid (p : Formula L μ) : Prop := ∀ {M : Type u} [Inhabited M] (s : Structure₁ L M), s ⊧ p
 
 instance : HasDoubleTurnstile (Theory L μ) (Formula L μ) :=
-  ⟨fun T p => ∀ {M : Type u} (s : Structure₁ L M), (∀ q ∈ T, s ⊧ q) → s ⊧ p⟩
+  ⟨fun T p => ∀ {M : Type u} [Inhabited M] (s : Structure₁ L M), (∀ q ∈ T, s ⊧ q) → s ⊧ p⟩
 
 lemma semanticConsequence_def {T : Theory L μ} {p : Formula L μ} :
-    T ⊧ p ↔ (∀ {M : Type u} (s : Structure₁ L M), (∀ q ∈ T, s ⊧ q) → s ⊧ p) :=
+    T ⊧ p ↔ (∀ {M : Type u} [Inhabited M] (s : Structure₁ L M), (∀ q ∈ T, s ⊧ q) → s ⊧ p) :=
   by simp[HasDoubleTurnstile.doubleTurnstile, models]
 
 lemma semanticConsequence_def! {T : Theory L μ} {p : Formula L μ} :
-    T ⊧ p ↔ (∀ (M : Type u) [Structure₁ L M], (∀ q ∈ T, M ⊧₁ q) → M ⊧₁ p) :=
+    T ⊧ p ↔ (∀ (M : Type u) [Inhabited M] [Structure₁ L M], (∀ q ∈ T, M ⊧₁ q) → M ⊧₁ p) :=
   by simp[semanticConsequence_def]
 
 lemma valid_def! {p : Formula L μ} :
-    valid p ↔ ∀ (M : Type u) [Structure₁ L M], M ⊧₁ p := of_eq rfl
+    valid p ↔ ∀ (M : Type u) [Inhabited M] [Structure₁ L M], M ⊧₁ p := of_eq rfl
 
 @[simp] lemma valid_top : valid (⊤ : Formula L μ) := by simp[valid, models_def]; simp[Top.top]
 
 @[simp] lemma nvalid_bot : ¬valid (⊥ : Formula L μ) := by
   simp[valid]
-  exact ⟨PUnit, default, by simp[models_def]; simp[Bot.bot]⟩
+  exact ⟨PUnit, instInhabitedPUnit, default, by simp[models_def]; simp[Bot.bot]⟩
 
 namespace SubFormula
-variable {L₁ L₂ : Language.{u}}
-  {Φ : L₁ →ᵥ L₂} {M₂ : Type w₂} {s₂ : Structure₁ L₂ M₂} (e : Fin n → M₂) (ε : μ → M₂)
+variable {L₁ L₂ : Language.{u}} {Φ : L₁ →ᵥ L₂} 
+
+section 
+variable {M : Type w} {s₂ : Structure₁ L₂ M} {n} {e : Fin n → M} {ε : μ → M}
 
 lemma subval_onSubFormula₁ {p : SubFormula L₁ μ n} :
     subval s₂ e ε (Φ.onSubFormula₁ p) ↔ subval (Φ.onStructure₁ s₂) e ε p :=
   by induction p using rec' <;> simp[*, SubTerm.val_onSubTerm]
 
-lemma val_onSubFormula₁ {p : Formula L₁ μ} :
-    val s₂ ε (Φ.onSubFormula₁ p) ↔ val (Φ.onStructure₁ s₂) ε p :=
-  by simp[val, subval_onSubFormula₁]
-
 lemma models_onSubFormula₁ {p : Formula L₁ μ} :
     s₂ ⊧ Φ.onSubFormula₁ p ↔ Φ.onStructure₁ s₂ ⊧ p :=
-  by simp[models_def, val_onSubFormula₁]
+  by simp[models_def, val, subval_onSubFormula₁]
 
-lemma onSubFormula₁_valid_iff {T : Theory L₁ μ} {p : Formula L₁ μ} (h : T ⊧ p) :
+lemma onSubFormula₁_models_onSubFormula₁ {T : Theory L₁ μ} {p : Formula L₁ μ} (h : T ⊧ p) :
     Φ.onSubFormula₁ '' T ⊧ Φ.onSubFormula₁ p := by
-  intros M s hM
+  intros M _ s hM
   have : Φ.onStructure₁ s ⊧ p := h (Φ.onStructure₁ s) (fun q hq => models_onSubFormula₁.mp $ hM _ (Set.mem_image_of_mem _ hq))
   exact models_onSubFormula₁.mpr this
+
+end 
+
+section
+variable
+  (injf : ∀ k, Function.Injective (Φ.onFunc : L₁.func k → L₂.func k))
+  (injr : ∀ k, Function.Injective (Φ.onRel : L₁.rel k → L₂.rel k))
+  {M : Type w} [Inhabited M] (s₁ : Structure₁ L₁ M)
+  {n} (e : Fin n → M) (ε : μ → M)
+
+lemma subval_extendStructure₁_onSubFormula₁ {p : SubFormula L₁ μ n} :
+    subval (Φ.extendStructure₁ s₁) e ε (Φ.onSubFormula₁ p) ↔ subval s₁ e ε p := by
+  induction p using rec' <;> simp[*, SubTerm.val_extendStructure₁_onSubTerm Φ e ε injf s₁]
+  · case hrel k r v =>
+    exact Structure₁.extendStructure₁_rel Φ s₁ (injr k) r (fun i => SubTerm.val s₁ e ε (v i))
+  · case hnrel k r v =>
+    simpa[not_iff_not] using
+      Structure₁.extendStructure₁_rel Φ s₁ (injr k) r (fun i => SubTerm.val s₁ e ε (v i))
+
+lemma models_extendStructure₁_onSubFormula₁ {p : Formula L₁ μ} :
+    Φ.extendStructure₁ s₁ ⊧ Φ.onSubFormula₁ p ↔ s₁ ⊧ p := by
+  simp[models_def, val, subval_extendStructure₁_onSubFormula₁ injf injr]
+
+lemma onSubFormula₁_models_onSubFormula₁_iff {T : Theory L₁ μ} {p : Formula L₁ μ} :
+    Φ.onSubFormula₁ '' T ⊧ Φ.onSubFormula₁ p ↔ T ⊧ p :=
+  ⟨by intros h M _ s₁ hs₁
+      exact (models_extendStructure₁_onSubFormula₁ injf injr s₁).mp $
+        h (Φ.extendStructure₁ s₁) (by simpa[models_extendStructure₁_onSubFormula₁ injf injr] using hs₁),
+   onSubFormula₁_models_onSubFormula₁⟩
+
+end
 
 end SubFormula
 

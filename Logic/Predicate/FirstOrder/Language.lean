@@ -83,28 +83,71 @@ variable {L : Language} [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq (L.r
 
 namespace SubFormula
 
-noncomputable def langf : ∀ {n}, SubFormula L μ n → Finset (Σ k, L.func k)
+noncomputable def languageFunc : ∀ {n}, SubFormula L μ n → Finset (Σ k, L.func k)
   | _, ⊤        => ∅
   | _, ⊥        => ∅
-  | _, rel  _ v => Finset.bunionᵢ Finset.univ (fun i => SubTerm.langf (v i))
-  | _, nrel _ v => Finset.bunionᵢ Finset.univ (fun i => SubTerm.langf (v i))
-  | _, p ⋏ q    => langf p ∪ langf q 
-  | _, p ⋎ q    => langf p ∪ langf q 
-  | _, ∀' p     => langf p 
-  | _, ∃' p     => langf p 
+  | _, rel  _ v => Finset.bunionᵢ Finset.univ (fun i => SubTerm.languageFunc (v i))
+  | _, nrel _ v => Finset.bunionᵢ Finset.univ (fun i => SubTerm.languageFunc (v i))
+  | _, p ⋏ q    => languageFunc p ∪ languageFunc q 
+  | _, p ⋎ q    => languageFunc p ∪ languageFunc q 
+  | _, ∀' p     => languageFunc p 
+  | _, ∃' p     => languageFunc p 
 
-noncomputable def langr : ∀ {n}, SubFormula L μ n → Finset (Σ k, L.rel k)
+noncomputable def languageRel : ∀ {n}, SubFormula L μ n → Finset (Σ k, L.rel k)
   | _, ⊤        => ∅
   | _, ⊥        => ∅
   | _, rel  r _ => {⟨_, r⟩}
   | _, nrel r _ => {⟨_, r⟩}
-  | _, p ⋏ q    => langr p ∪ langr q 
-  | _, p ⋎ q    => langr p ∪ langr q 
-  | _, ∀' p     => langr p 
-  | _, ∃' p     => langr p 
+  | _, p ⋏ q    => languageRel p ∪ languageRel q 
+  | _, p ⋎ q    => languageRel p ∪ languageRel q 
+  | _, ∀' p     => languageRel p 
+  | _, ∃' p     => languageRel p
 
-def lang (p : SubFormula L μ n) : Language :=
-  Language.subLanguage L (fun k f => ⟨k, f⟩ ∈ langf p) (fun k r => ⟨k, r⟩ ∈ langr p) 
+lemma languageFunc_rel_ss {k} (r : L.rel k) (v : Fin k → SubTerm L μ n) (i) :
+    (v i).languageFunc ⊆ (rel r v).languageFunc :=
+  by intros x; simp[languageFunc]; intros h; exact ⟨i, h⟩
+
+def toSubLanguage' (pf : ∀ k, L.func k → Prop) (pr : ∀ k, L.rel k → Prop) : ∀ {n} (p : SubFormula L μ n),
+    (∀ k f, ⟨k, f⟩ ∈ p.languageFunc → pf k f) →
+    (∀ k r, ⟨k, r⟩ ∈ p.languageRel → pr k r) →
+    SubFormula (L.subLanguage pf pr) μ n
+  | _, ⊤,        _,  _  => ⊤
+  | _, ⊥,        _,  _  => ⊥
+  | _, rel r v,  hf, hr =>
+      rel ⟨r, hr _ r (by simp[languageRel])⟩
+        (fun i => (v i).toSubLanguage' pf pr (fun k f h => hf k f (languageFunc_rel_ss r v i h)))
+  | _, nrel r v, hf, hr =>
+      nrel ⟨r, hr _ r (by simp[languageRel])⟩
+        (fun i => (v i).toSubLanguage' pf pr (fun k f h => hf k f (languageFunc_rel_ss r v i h)))
+  | _, p ⋏ q,    hf, hr =>
+      toSubLanguage' pf pr p (fun k f h => hf k f (Finset.mem_union_left _ h)) (fun k r h => hr k r (Finset.mem_union_left _ h)) ⋏ 
+      toSubLanguage' pf pr q (fun k f h => hf k f (Finset.mem_union_right _ h)) (fun k r h => hr k r (Finset.mem_union_right _ h))
+  | _, p ⋎ q,    hf, hr =>
+      toSubLanguage' pf pr p (fun k f h => hf k f (Finset.mem_union_left _ h)) (fun k r h => hr k r (Finset.mem_union_left _ h)) ⋎
+      toSubLanguage' pf pr q (fun k f h => hf k f (Finset.mem_union_right _ h)) (fun k r h => hr k r (Finset.mem_union_right _ h))
+  | _, ∀' p,     hf, hr => ∀' toSubLanguage' pf pr p (fun k f h => hf k f h) (fun k r h => hr k r h)
+  | _, ∃' p,     hf, hr => ∃' toSubLanguage' pf pr p (fun k f h => hf k f h) (fun k r h => hr k r h)
+
+@[simp] lemma onSubFormula_toSubLanguage'
+  (pf : ∀ k, L.func k → Prop) (pr : ∀ k, L.rel k → Prop) {n} (p : SubFormula L μ n)
+  (hf : ∀ k f, ⟨k, f⟩ ∈ p.languageFunc → pf k f) (hr : ∀ k r, ⟨k, r⟩ ∈ p.languageRel → pr k r) :
+    L.ofSubLanguage.onSubFormula₁ (p.toSubLanguage' pf pr hf hr) = p :=
+  by induction p using rec' <;> simp[*, toSubLanguage']
+
+noncomputable def languageFuncIndexed (p : SubFormula L μ n) (k) : Finset (L.func k) :=
+  Finset.preimage (languageFunc p) (Sigma.mk k) (Set.injOn_of_injective sigma_mk_injective _)
+
+noncomputable def languageRelIndexed (p : SubFormula L μ n) (k) : Finset (L.rel k) :=
+  Finset.preimage (languageRel p) (Sigma.mk k) (Set.injOn_of_injective sigma_mk_injective _)
+
+def language (p : SubFormula L μ n) : Language :=
+  Language.subLanguage L (fun k f => ⟨k, f⟩ ∈ languageFunc p) (fun k r => ⟨k, r⟩ ∈ languageRel p) 
+
+noncomputable instance (p : SubFormula L μ n) (k) : Fintype (p.language.func k) :=
+  Fintype.subtype (languageFuncIndexed p k) (by simp[languageFuncIndexed])
+
+noncomputable instance (p : SubFormula L μ n) (k) : Fintype (p.language.rel k) :=
+  Fintype.subtype (languageRelIndexed p k) (by simp[languageRelIndexed])
 
 end SubFormula
 

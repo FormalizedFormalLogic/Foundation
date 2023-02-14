@@ -77,17 +77,17 @@ def subLanguage (L : Language) (pfunc : ∀ k, Language.func L k → Prop) (prel
 
 section subLanguage
 
-variable (L) {pfunc : ∀ k, Language.func L k → Prop} {prel : ∀ k, L.rel k → Prop}
+variable (L) {pf : ∀ k, Language.func L k → Prop} {pr : ∀ k, L.rel k → Prop}
 
-def ofSub : subLanguage L pfunc prel →ᵥ L where
+def ofSubLanguage : subLanguage L pf pr →ᵥ L where
   onFunc := Subtype.val
   onRel  := Subtype.val
 
-@[simp] lemma ofSub_onFunc {k : ℕ} :
-    (ofSub L : subLanguage L pfunc prel →ᵥ L).onFunc p = p.val := rfl
+@[simp] lemma ofSubLanguage_onFunc {k : ℕ} :
+    (ofSubLanguage L).onFunc p = p.val := rfl
 
-@[simp] lemma ofSub_onRel {k : ℕ} :
-    (ofSub L : subLanguage L pfunc prel →ᵥ L).onRel p = p.val := rfl
+@[simp] lemma ofSubLanguage_onRel {k : ℕ} :
+    (ofSubLanguage L).onRel p = p.val := rfl
 
 end subLanguage
 
