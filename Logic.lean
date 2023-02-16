@@ -1,4 +1,7 @@
-import Logic.FirstOrder.Language
+import Logic.Predicate.FirstOrder.Language
+import Logic.Vorspiel.Zermelo
+
+open FirstOrder
 
 def φ : SyntacticFormula Language.equal :=
   ∀' ∀' ∀' (
