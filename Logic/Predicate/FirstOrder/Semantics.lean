@@ -131,7 +131,37 @@ lemma onSubFormula₁_models_onSubFormula₁ {T : Theory L₁ μ} {p : Formula L
   have : Φ.onStructure₁ s ⊧ p := h (Φ.onStructure₁ s) (fun q hq => models_onSubFormula₁.mp $ hM _ (Set.mem_image_of_mem _ hq))
   exact models_onSubFormula₁.mpr this
 
-end 
+end
+
+
+section
+variable
+  (injf : ∀ k, Function.Injective (Φ.onFunc : L₁.func k → L₂.func k))
+  (injr : ∀ k, Function.Injective (Φ.onRel : L₁.rel k → L₂.rel k))
+  {M : Type w} [Inhabited M] (s₁ : Structure₁ L₁ M)
+  {n} (e : Fin n → M) (ε : μ → M)
+
+lemma subval_extendStructure₁_onSubFormula₁ {p : SubFormula L₁ μ n} :
+    subval (Φ.extendStructure₁ s₁) e ε (Φ.onSubFormula₁ p) ↔ subval s₁ e ε p := by
+  induction p using rec' <;> simp[*, SubTerm.val_extendStructure₁_onSubTerm Φ e ε injf s₁]
+  · case hrel k r v =>
+    exact Structure₁.extendStructure₁_rel Φ s₁ (injr k) r (fun i => SubTerm.val s₁ e ε (v i))
+  · case hnrel k r v =>
+    simpa[not_iff_not] using
+      Structure₁.extendStructure₁_rel Φ s₁ (injr k) r (fun i => SubTerm.val s₁ e ε (v i))
+
+lemma models_extendStructure₁_onSubFormula₁ {p : Formula L₁ μ} :
+    Φ.extendStructure₁ s₁ ⊧ Φ.onSubFormula₁ p ↔ s₁ ⊧ p := by
+  simp[models_def, val, subval_extendStructure₁_onSubFormula₁ injf injr]
+
+lemma onSubFormula₁_models_onSubFormula₁_iff {T : Theory L₁ μ} {p : Formula L₁ μ} :
+    Φ.onSubFormula₁ '' T ⊧ Φ.onSubFormula₁ p ↔ T ⊧ p :=
+  ⟨by intros h M _ s₁ hs₁
+      exact (models_extendStructure₁_onSubFormula₁ injf injr s₁).mp $
+        h (Φ.extendStructure₁ s₁) (by simpa[models_extendStructure₁_onSubFormula₁ injf injr] using hs₁),
+   onSubFormula₁_models_onSubFormula₁⟩
+
+end
 
 end SubFormula
 
