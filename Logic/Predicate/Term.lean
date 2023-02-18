@@ -5,7 +5,7 @@ variable (L : Language.{u}) (L₁ L₂ L₃ : Language)
 inductive SubTerm (μ : Type v) (n : ℕ)
   | fixedVar : Fin n → SubTerm μ n
   | freeVar  : μ → SubTerm μ n
-  | func : ∀ {k}, L.func k → (Fin k → SubTerm μ n) → SubTerm μ n
+  | func     : ∀ {arity}, L.func arity → (Fin arity → SubTerm μ n) → SubTerm μ n
 
 prefix:max "&" => SubTerm.freeVar
 prefix:max "#" => SubTerm.fixedVar
@@ -20,6 +20,8 @@ variable (μ : Type v) (μ₁ : Type v₁) (μ₂ : Type v₂) (μ₃ : Type v�
 
 namespace SubTerm
 variable {μ μ₁ μ₂ μ₃}
+
+instance [Inhabited μ] : Inhabited (SubTerm L μ n) := ⟨&default⟩
 
 @[reducible] def func! (k) (f : L.func k) (v : Fin k → SubTerm L μ n) := func f v
 
@@ -254,5 +256,23 @@ lemma onSubTerm_free (t : SyntacticSubTerm L₁ (n + 1)) : Φ.onSubTerm (free t)
 
 lemma onSubTerm_fix (t : SyntacticSubTerm L₁ n) : Φ.onSubTerm (fix t) = fix (Φ.onSubTerm t) :=
   by simp[fix, onSubTerm_bind]; congr; funext x; cases x <;> simp
+
+end SubTerm
+
+namespace SubTerm
+open Language
+variable {L : Language} [∀ k, DecidableEq (L.func k)] {μ n}
+
+def toSubLanguage' (pf : ∀ k, L.func k → Prop) (pr : ∀ k, L.rel k → Prop) : ∀ t : SubTerm L μ n,
+    (∀ k f, ⟨k, f⟩ ∈ t.languageFunc → pf k f) → SubTerm (subLanguage L pf pr) μ n
+  | #x,                _ => #x
+  | &x,                _ => &x
+  | func (arity := k) f v, h => func ⟨f, h k f (by simp)⟩
+      (fun i => toSubLanguage' pf pr (v i) (fun k' f' h' => h k' f' (languageFunc_func_ss f v i h')))
+
+@[simp] lemma onSubTerm_toSubLanguage' (pf : ∀ k, L.func k → Prop) (pr : ∀ k, L.rel k → Prop)
+  (t : SubTerm L μ n) (h : ∀ k f, ⟨k, f⟩ ∈ t.languageFunc → pf k f) :
+    L.ofSubLanguage.onSubTerm (t.toSubLanguage' pf pr h) = t :=
+  by induction t <;> simp[*, toSubLanguage']
 
 end SubTerm

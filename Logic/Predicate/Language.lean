@@ -37,6 +37,7 @@ def binary : Language where
 inductive EqRel : ℕ → Type
   | equal : EqRel 2
 
+@[reducible]
 def equal : Language where
   func := fun _ => Empty
   rel := EqRel
@@ -48,6 +49,16 @@ instance (k) : ToString (equal.rel k) := ⟨fun _ => "\\mathrm{Eq}"⟩
 instance (k) : DecidableEq (equal.func k) := fun a b => by rcases a
 
 instance (k) : DecidableEq (equal.rel k) := fun a b => by rcases a; rcases b; exact isTrue (by simp)
+
+instance (k) : Encodable (equal.func k) := Encodable.IsEmpty.toEncodable
+
+instance (k) : Encodable (equal.rel k) where
+  encode := fun _ => 0
+  decode := fun _ => 
+    match k with
+    | 2 => some EqRel.equal
+    | _ => none
+  encodek := fun x => by rcases x; simp
 
 structure Hom (L₁ L₂ : Language) where
   onFunc : {k : ℕ} → L₁.func k → L₂.func k

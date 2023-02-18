@@ -4,6 +4,7 @@ import Mathlib.Data.Fin.Basic
 import Mathlib.Data.Fintype.Basic
 import Mathlib.Data.Finset.Lattice
 import Mathlib.Data.Finset.Preimage
+import Mathlib.Data.W.Basic
 
 namespace Nat
 variable {α : ℕ → Sort u}
@@ -23,6 +24,7 @@ infixr:70 " :>ₙ " => cases
 end Nat
 
 namespace Fin
+section
 variable {n : ℕ} {C : Sort u} {a b : C} {s : Fin n → C}
 
 def leftConcat {C : Sort u} (hzero : C) (hsucc : Fin n → C) : Fin (n + 1) → C :=
@@ -86,7 +88,64 @@ funext (fun i => cases (by simp) (by simp) i)
 lemma comp_right_concat (f : C → α) (a : C) (s : Fin n → C) : (fun x => f $ (s <: a) x) = f ∘ s <: f a :=
 funext (fun i => lastCases (by simp) (by simp) i)
 
+end
+
+variable {α : Type _}
+
+def toList : {n : ℕ} → (Fin n → α) → List α
+  | 0,     _ => []
+  | _ + 1, v => v 0 :: toList (v ∘ Fin.succ)
+
+@[simp] lemma toList_zero (v : Fin 0 → α) : toList v = [] := rfl
+
+@[simp] lemma toList_succ (v : Fin (n + 1) → α) : toList v = v 0 :: toList (v ∘ Fin.succ) := rfl
+
+@[simp] lemma toList_length (v : Fin n → α) : (toList v).length = n :=
+  by induction n <;> simp[*]
+
+@[simp] lemma toList_nth (v : Fin n → α) (i) (hi) : (toList v).nthLe i hi = v ⟨i, by simpa using hi⟩ := by
+  induction n generalizing i <;> simp[*, List.nthLe_cons]
+  case zero => simp at hi
+  case succ => rcases i <;> simp
+
+def toOptionFinTo : {n : ℕ} → (Fin n → Option α) → Option (Fin n → α)
+  | 0,     _ => some nil
+  | _ + 1, v => (toOptionFinTo (v ∘ Fin.succ)).bind (fun vs => (v 0).map (fun z => z :> vs))
+
+@[simp] lemma toOptionFinTo_some (v : Fin n → α) :
+    toOptionFinTo (fun i => some (v i)) = some v :=
+  by induction n <;> simp[*, toOptionFinTo, Function.comp]; exact funext (Fin.cases (by simp) (by simp))
+
+def finitaryToNat : {n : ℕ} → (Fin n → ℕ) → ℕ
+  | 0,     _ => 0
+  | _ + 1, v => Nat.mkpair (v 0) (finitaryToNat $ v ∘ Fin.succ)
+
 end Fin
+
+def Nat.unvector : {n : ℕ} → ℕ → Fin n → ℕ
+  | 0,     _ => Fin.nil
+  | _ + 1, e => e.unpair.1 :> Nat.unvector e.unpair.2
+
+namespace Nat
+variable {n}
+
+@[simp] lemma unvector_le (e : ℕ) (i : Fin n) : unvector e i ≤ e := by
+  induction' n with n ih generalizing e <;> simp[*, unvector]
+  · have := i.isLt; simp at this
+  · exact Fin.cases (by simpa using Nat.unpair_left_le _) (fun i => le_trans (ih e.unpair.2 i) (Nat.unpair_right_le _)) i
+
+@[simp] lemma unvector_finitaryToNat (v : Fin n → ℕ) : unvector (Fin.finitaryToNat v) = v := by
+  induction n <;> simp[*, Nat.unvector, Fin.finitaryToNat]; exact funext (fun i => i.cases (by simp) (by simp))
+
+-- @[simp] lemma toNat_unvector (ln : 0 < n) (e : ℕ) : Fin.finitaryToNat (unvector e : Fin n → ℕ) = e := by
+--   induction n generalizing e <;> simp[unvector, Fin.finitaryToNat, Function.comp]
+--   · simp at ln
+--   · {simp[Function.comp]; sorry}
+
+lemma one_le_of_bodd {n : ℕ} (h : n.bodd = true) : 1 ≤ n :=
+by induction n <;> simp[←Nat.add_one] at h ⊢
+
+end Nat
 
 namespace Fintype
 variable {ι : Type _} [Fintype ι] {α : Type _} [SemilatticeSup α] [OrderBot α]
