@@ -60,6 +60,69 @@ instance (k) : Encodable (equal.rel k) where
     | _ => none
   encodek := fun x => by rcases x; simp
 
+inductive RingFunc : ℕ → Type
+  | zero : RingFunc 0
+  | one : RingFunc 0
+  | add : RingFunc 2
+  | mul : RingFunc 2
+
+inductive RingRel : ℕ → Type
+  | equal : RingRel 2
+  | le : RingRel 2
+
+@[reducible]
+def ring : Language where
+  func := RingFunc
+  rel := RingRel
+
+instance (k) : ToString (ring.func k) :=
+⟨ fun s =>
+  match s with
+  | RingFunc.zero => "0"
+  | RingFunc.one  => "1"
+  | RingFunc.add  => "(+)"
+  | RingFunc.mul  => "(\\cdot)"⟩
+
+instance (k) : ToString (ring.rel k) :=
+⟨ fun s =>
+  match s with
+  | RingRel.equal => "\\mathrm{Eq}"
+  | RingRel.le    => "\\mathrm{Le}"⟩
+
+instance (k) : DecidableEq (ring.func k) := fun a b =>
+  by rcases a <;> rcases b <;> simp <;> try {exact instDecidableTrue} <;> try {exact instDecidableFalse}
+
+instance (k) : DecidableEq (ring.rel k) := fun a b =>
+  by rcases a <;> rcases b <;> simp <;> try {exact instDecidableTrue} <;> try {exact instDecidableFalse}
+
+instance (k) : Encodable (ring.func k) where
+  encode := fun x =>
+    match x with
+    | RingFunc.zero => 0
+    | RingFunc.one  => 1
+    | RingFunc.add  => 0
+    | RingFunc.mul  => 1
+  decode := fun e =>
+    match k, e with
+    | 0, 0 => some RingFunc.zero
+    | 0, 1 => some RingFunc.one
+    | 2, 0 => some RingFunc.add
+    | 2, 1 => some RingFunc.mul
+    | _, _ => none
+  encodek := fun x => by rcases x <;> simp
+
+instance (k) : Encodable (ring.rel k) where
+  encode := fun x =>
+    match x with
+    | RingRel.equal => 0
+    | RingRel.le    => 1
+  decode := fun e =>
+    match k, e with
+    | 2, 0 => some RingRel.equal
+    | 2, 1 => some RingRel.le
+    | _, _ => none
+  encodek := fun x => by rcases x <;> simp
+
 structure Hom (L₁ L₂ : Language) where
   onFunc : {k : ℕ} → L₁.func k → L₂.func k
   onRel : {k : ℕ} → L₁.rel k → L₂.rel k
