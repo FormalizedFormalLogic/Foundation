@@ -1,5 +1,5 @@
 import Logic.Predicate.FirstOrder.Language
-import Mathlib.Data.Finset.Sort
+import Logic.Predicate.Coding
 
 universe u v
 
@@ -142,7 +142,6 @@ def onDerivation (Φ : L₁ →ᵥ L₂) : ∀ {Δ : Finset (SyntacticFormula L�
       have : ⊩ insert (Φ.onSubFormula₁ p ⋏ Φ.onSubFormula₁ q) (Finset.image Φ.onSubFormula₁ Δ) :=
         and _ _ _ (Derivation.cast (onDerivation Φ dp) (by simp)) (Derivation.cast (onDerivation Φ dq) (by simp))
       Derivation.cast this (by simp)
-
   | _, all Δ p d            =>
       have : ⊩ insert (∀' Φ.onSubFormula₁ p) (Finset.image Φ.onSubFormula₁ Δ) :=
         all _ _ (by simpa[←SubFormula.onSubFormula₁_free, shifts_image] using onDerivation Φ d)
@@ -153,6 +152,26 @@ def onDerivation (Φ : L₁ →ᵥ L₂) : ∀ {Δ : Finset (SyntacticFormula L�
       Derivation.cast this (by simp)
 
 end Hom
+
+variable [∀ k, Encodable (L.func k)] {μ : Type _} [Encodable μ]
+
+def decomp : Finset (SyntacticTerm L) → SyntacticFormula L → Finset (SyntacticFormula L) → Option (Set $ Finset $ SyntacticFormula L)
+| _, rel _ _,  _ => none
+| _, nrel _ _, _ => none
+| _, ⊤,        _ => some ∅
+| _, ⊥,        _ => none
+| _, p ⋏ q,    Γ => some { insert p Γ, insert q Γ }
+| _, p ⋎ q,    Γ => some { insert q (insert p Γ) }
+| _, ∀' p,     Γ => some { insert (SubFormula.free p) (shifts Γ) }
+| s, ∃' p,     Γ => some { s.image (subst · p) ∪ Γ }
+
+#check SubFormula.rel! Language.equal 2 Language.EqRel.equal (#0 :> #0 :> Fin.nil)
+
+#eval SubTerm.toNat (SubTerm.func! (μ := ℕ) (n := 0) Language.ring 2 Language.RingFunc.add (&0 :> &1 :> Fin.nil))
+
+
+#eval @instanceEnum Language.ring _ _ _
+  (SubFormula.rel! Language.ring 2 Language.RingRel.le (#0 :> #0 :> Fin.nil)) 2
 
 end Derivation
 

@@ -30,9 +30,10 @@ variable {L}
 variable [∀ k, ToString (L.func k)] [∀ k, ToString (L.rel k)] [ToString μ]
 
 def toStr : SubTerm L μ n → String
-  | #x       => "x_{" ++ toString (n - 1 - (x : ℕ)) ++ "}"
-  | &x       => "z_{" ++ toString x ++ "}"
-  | func f v => "{" ++ toString f ++ "} \\left(" ++ String.funFin_toStr (fun i => toStr (v i)) ++ "\\right)"
+  | #x                        => "x_{" ++ toString (n - 1 - (x : ℕ)) ++ "}"
+  | &x                        => "z_{" ++ toString x ++ "}"
+  | func (arity := 0) c _     => toString c
+  | func (arity := _ + 1) f v => "{" ++ toString f ++ "} \\left(" ++ String.funFin_toStr (fun i => toStr (v i)) ++ "\\right)"
 
 instance : Repr (SubTerm L μ n) := ⟨fun t _ => toStr t⟩
 

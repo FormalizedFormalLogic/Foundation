@@ -1,5 +1,4 @@
 import Logic.Predicate.Term
-import Mathlib.Data.Finset.Basic
 
 namespace FirstOrder
 
