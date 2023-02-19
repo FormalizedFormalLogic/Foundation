@@ -1,7 +1,9 @@
 import Logic.Predicate.Term
 import Mathlib.Data.W.Basic
 
-variable {L : Language} [∀ k, Encodable (L.func k)] {μ : Type _} [Inhabited μ] [Encodable μ]
+universe u v
+
+variable {L : Language.{u}} [∀ k, Encodable (L.func k)] {μ : Type v} [Encodable μ]
 
 namespace SubTerm
 open Encodable
@@ -13,8 +15,6 @@ def toNat : SubTerm L μ n → ℕ
   | &x                    => (Nat.bit false $ Nat.bit true (encode x)) + 1
   | func (arity := k) f v => (Nat.bit true  $ Nat.mkpair k $
       Nat.mkpair (encode f) (Fin.finitaryToNat $ fun i => (v i).toNat)) + 1
-
-#eval toNat (&9 : SyntacticSubTerm Language.equal 0)
 
 def ofNat : ℕ → Option (SubTerm L μ n)
 | 0  => none
@@ -32,9 +32,9 @@ def ofNat : ℕ → Option (SubTerm L μ n)
       have : ∀ i, w i < e + 1 := fun i =>
         Nat.lt_succ_of_le (le_trans (Nat.unvector_le x.unpair.2.unpair.2 i)
           (le_trans (Nat.unpair_right_le _) $
-            le_trans (Nat.unpair_right_le _) $ by simpa[Nat.div2_val] using Nat.div_le_self e 2))
+            le_trans (Nat.unpair_right_le _) $ by simp[Nat.div2_val]; exact Nat.div_le_self e 2))
       let v' : Option (Fin k → SubTerm L μ n) := Fin.toOptionFinTo (fun i => ofNat (w i))
-      func <$> f' <*> v'
+      f'.bind fun f => v'.map fun v => func f v
   decreasing_by exact this i
 
 @[simp] lemma ofNat_toNat : ∀ t : SubTerm L μ n, ofNat (toNat t) = some t
@@ -49,6 +49,20 @@ instance : Encodable (SubTerm L μ n) where
   decode := ofNat
   encodek := ofNat_toNat
 
+variable [∀ k, DecidableEq (L.func k)]
+
+def enumLt : ℕ → Finset (SyntacticTerm L)
+| 0     => ∅
+| s + 1 => enumLt s ∪ (Encodable.decode₂ (SyntacticTerm L) s).toFinset
+
+@[simp] lemma enumLt_zero : (enumLt 0 : Finset (SyntacticTerm L)) = ∅ := rfl 
+
+lemma mem_enumLt_of_lt {i} {t : SyntacticTerm L} (h : encode t < i) : t ∈ enumLt i := by
+  induction' i with i ih <;> simp[enumLt]
+  · contradiction
+  · have : encode t < i ∨ encode t = i := lt_or_eq_of_le (Nat.lt_succ.mp h)
+    rcases this with (h | rfl) <;> simp[*]
+
+#eval enumLt (L := Language.ring) 100
+
 end SubTerm
-
-

@@ -1,9 +1,12 @@
 import Logic.Predicate.FirstOrder.Language
 import Logic.Predicate.Coding
 
+universe u v
 
 namespace FirstOrder
-variable {L : Language} [∀ k, Encodable (L.func k)] [∀ k, Encodable (L.rel k)] {μ : Type _} [Encodable μ]
+
+variable {L : Language.{u}} [∀ k : ℕ, Encodable (L.func k)]
+  [∀ k, Encodable (L.rel k)] {μ : Type v} [Encodable μ]
 
 namespace SubFormula
 open Encodable
@@ -21,16 +24,16 @@ def toNat : {n : ℕ} → SubFormula L μ n → ℕ
 def ofNat : (n : ℕ) → ℕ → Option (SubFormula L μ n)
   | n, 0     => some ⊤
   | n, 1     => some ⊥
-  | n, e + 2 =>
+  | n, (e + 2) =>
     match e.bodd with
     | false =>
       let x := e.div2.div2
       let k := x.unpair.1
-      let r := decode₂ (L.rel k) x.unpair.2.unpair.1
-      let v := decode₂ (Fin k → SubTerm L μ n) x.unpair.2.unpair.2
+      let r' := decode₂ (L.rel k) x.unpair.2.unpair.1
+      let v' := decode₂ (Fin k → SubTerm L μ n) x.unpair.2.unpair.2
       match e.div2.bodd with
-      | false => rel <$> r <*> v
-      | true  => nrel <$> r <*> v
+      | false => r'.bind fun r => v'.map fun v => rel r v
+      | true  => r'.bind fun r => v'.map fun v => nrel r v
     | true  =>
       let x := e.div2.div2.div2
       have div8 : x ≤ e := by
@@ -41,16 +44,16 @@ def ofNat : (n : ℕ) → ℕ → Option (SubFormula L μ n)
       have : x.unpair.2 < e + 2 := lt_of_le_of_lt (Nat.unpair_right_le _) h
       match e.div2.bodd with
       | false =>  
-        let p := ofNat n x.unpair.1
-        let q := ofNat n x.unpair.2
+        let p' := ofNat n x.unpair.1
+        let q' := ofNat n x.unpair.2
         match e.div2.div2.bodd with
-        | false => HasAnd.and <$> p <*> q
-        | true  => HasOr.or <$> p <*> q
+        | false => p'.bind fun p => q'.map fun q => p ⋏ q
+        | true  => p'.bind fun p => q'.map fun q => p ⋎ q
       | true  =>
-        let p := ofNat (n + 1) x
+        let p' := ofNat (n + 1) x
         match e.div2.div2.bodd with
-        | false => HasUniv.univ <$> p
-        | true  => HasEx.ex <$> p
+        | false => p'.bind fun p => ∀' p
+        | true  => p'.bind fun p => ∃' p
   termination_by ofNat n e => e
 
 lemma ofNat_toNat : ∀ {n} (p : SubFormula L μ n), ofNat n p.toNat = some p

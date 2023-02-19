@@ -2,8 +2,10 @@ import Logic.Vorspiel.Notation
 import Mathlib.Tactic.LibrarySearch
 import Mathlib.Data.Fin.Basic
 import Mathlib.Data.Fintype.Basic
+import Mathlib.Data.Finset.Basic
 import Mathlib.Data.Finset.Lattice
 import Mathlib.Data.Finset.Preimage
+import Mathlib.Data.Finset.Sort
 import Mathlib.Data.W.Basic
 
 namespace Nat
@@ -105,7 +107,7 @@ def toList : {n : ℕ} → (Fin n → α) → List α
 
 @[simp] lemma toList_nth (v : Fin n → α) (i) (hi) : (toList v).nthLe i hi = v ⟨i, by simpa using hi⟩ := by
   induction n generalizing i <;> simp[*, List.nthLe_cons]
-  case zero => simp at hi
+  case zero => contradiction
   case succ => rcases i <;> simp
 
 def toOptionFinTo : {n : ℕ} → (Fin n → Option α) → Option (Fin n → α)
@@ -131,7 +133,7 @@ variable {n}
 
 @[simp] lemma unvector_le (e : ℕ) (i : Fin n) : unvector e i ≤ e := by
   induction' n with n ih generalizing e <;> simp[*, unvector]
-  · have := i.isLt; simp at this
+  · have := i.isLt; contradiction
   · exact Fin.cases (by simpa using Nat.unpair_left_le _) (fun i => le_trans (ih e.unpair.2 i) (Nat.unpair_right_le _)) i
 
 @[simp] lemma unvector_finitaryToNat (v : Fin n → ℕ) : unvector (Fin.finitaryToNat v) = v := by
