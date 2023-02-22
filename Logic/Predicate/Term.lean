@@ -33,7 +33,7 @@ def toStr : SubTerm L μ n → String
   | #x                        => "x_{" ++ toString (n - 1 - (x : ℕ)) ++ "}"
   | &x                        => "z_{" ++ toString x ++ "}"
   | func (arity := 0) c _     => toString c
-  | func (arity := _ + 1) f v => "{" ++ toString f ++ "} \\left(" ++ String.funFin_toStr (fun i => toStr (v i)) ++ "\\right)"
+  | func (arity := _ + 1) f v => "{" ++ toString f ++ "} \\left(" ++ String.vecToStr (fun i => toStr (v i)) ++ "\\right)"
 
 instance : Repr (SubTerm L μ n) := ⟨fun t _ => toStr t⟩
 
@@ -202,7 +202,7 @@ def hasDecEq : (t u : SubTerm L μ n) → Decidable (Eq t u)
       by_cases e : k₁ = k₂
       · rcases e with rfl
         exact match decEq r₁ r₂ with
-        | isTrue h => by simp[h]; exact Fin.decFinfun _ _ (fun i => hasDecEq (v₁ i) (v₂ i))
+        | isTrue h => by simp[h]; exact Matrix.decVec _ _ (fun i => hasDecEq (v₁ i) (v₂ i))
         | isFalse h => isFalse (by simp[h])
       · exact isFalse (by simp[e])
 
@@ -244,7 +244,7 @@ lemma onSubTerm_map (fixed : Fin n₁ → Fin n₂) (free : μ₁ → μ₂) (t)
 
 lemma onSubTerm_subst (u) (t : SubTerm L₁ μ (n + 1)) :
     Φ.onSubTerm (subst u t) = subst (Φ.onSubTerm u) (Φ.onSubTerm t) :=
-  by simp[subst, onSubTerm_bind, Fin.comp_right_concat, Function.comp]
+  by simp[subst, onSubTerm_bind, Matrix.comp_vecConsLast, Function.comp]
 
 lemma onSubTerm_fixedSucc (t : SubTerm L₁ μ₁ n) : Φ.onSubTerm (fixedSucc t) = fixedSucc (Φ.onSubTerm t) :=
   by simp[fixedSucc, onSubTerm_map]

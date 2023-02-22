@@ -52,25 +52,25 @@ instance : HasLogicSymbols (SubFormula L μ n) where
 instance : HasUniv (SubFormula L μ) := ⟨all⟩
 instance : HasEx (SubFormula L μ) := ⟨ex⟩
 
-@[simp] lemma neg_top : ¬'(⊤ : SubFormula L μ n) = ⊥ := rfl
+@[simp] lemma neg_top : ~(⊤ : SubFormula L μ n) = ⊥ := rfl
 
-@[simp] lemma neg_bot : ¬'(⊥ : SubFormula L μ n) = ⊤ := rfl
+@[simp] lemma neg_bot : ~(⊥ : SubFormula L μ n) = ⊤ := rfl
 
-@[simp] lemma neg_rel {k} (r : L.rel k) (v : Fin k → SubTerm L μ n) : ¬'(rel r v) = nrel r v := rfl
+@[simp] lemma neg_rel {k} (r : L.rel k) (v : Fin k → SubTerm L μ n) : ~(rel r v) = nrel r v := rfl
 
-@[simp] lemma neg_nrel {k} (r : L.rel k) (v : Fin k → SubTerm L μ n) : ¬'(nrel r v) = rel r v := rfl
+@[simp] lemma neg_nrel {k} (r : L.rel k) (v : Fin k → SubTerm L μ n) : ~(nrel r v) = rel r v := rfl
 
-@[simp] lemma neg_and (p q : SubFormula L μ n) : ¬'(p ⋏ q) = ¬'p ⋎ ¬'q := rfl
+@[simp] lemma neg_and (p q : SubFormula L μ n) : ~(p ⋏ q) = ~p ⋎ ~q := rfl
 
-@[simp] lemma neg_or (p q : SubFormula L μ n) : ¬'(p ⋎ q) = ¬'p ⋏ ¬'q := rfl
+@[simp] lemma neg_or (p q : SubFormula L μ n) : ~(p ⋎ q) = ~p ⋏ ~q := rfl
 
-@[simp] lemma neg_all (p : SubFormula L μ (n + 1)) : ¬'(∀' p) = ∃' ¬'p := rfl
+@[simp] lemma neg_all (p : SubFormula L μ (n + 1)) : ~(∀' p) = ∃' ~p := rfl
 
-@[simp] lemma neg_ex (p : SubFormula L μ (n + 1)) : ¬'(∃' p) = ∀' ¬'p := rfl
+@[simp] lemma neg_ex (p : SubFormula L μ (n + 1)) : ~(∃' p) = ∀' ~p := rfl
 
-lemma neg_eq (p : SubFormula L μ n) : ¬'p = neg p := rfl
+lemma neg_eq (p : SubFormula L μ n) : ~p = neg p := rfl
 
-lemma imp_eq (p q : SubFormula L μ n) : p ⟶ q = ¬'p ⋎ q := rfl
+lemma imp_eq (p q : SubFormula L μ n) : p ⟶ q = ~p ⋎ q := rfl
 
 @[simp] lemma and_inj (p₁ q₁ p₂ q₂ : SubFormula L μ n) : p₁ ⋏ p₂ = q₁ ⋏ q₂ ↔ p₁ = q₁ ∧ p₂ = q₂ :=
 by simp[HasAnd.and]
@@ -167,8 +167,8 @@ variable [∀ k, ToString (L.func k)] [∀ k, ToString (L.rel k)] [ToString μ]
 def toStr : ∀ {n}, SubFormula L μ n → String
   | _, ⊤            => "\\top"
   | _, ⊥            => "\\bot"
-  | _, rel r v      => "{" ++ toString r ++ "} \\left(" ++ String.funFin_toStr (fun i => toString (v i)) ++ "\\right)"
-  | _, nrel r v     => "\\lnot {" ++ toString r ++ "} \\left(" ++ String.funFin_toStr (fun i => toString (v i)) ++ "\\right)"
+  | _, rel r v      => "{" ++ toString r ++ "} \\left(" ++ String.vecToStr (fun i => toString (v i)) ++ "\\right)"
+  | _, nrel r v     => "\\lnot {" ++ toString r ++ "} \\left(" ++ String.vecToStr (fun i => toString (v i)) ++ "\\right)"
   | _, p ⋏ q        => toStr p ++ " \\land " ++ toStr q
   | _, p ⋎ q        => toStr p ++ " \\lor " ++ toStr q
   | _, @all _ _ n p => "\\forall x_{" ++ toString n ++ "} \\left[" ++ toStr p ++ "\\right]"
@@ -195,7 +195,7 @@ def bind' : ∀ {n₁ n₂}, (fixed : Fin n₁ → SubTerm L μ₂ n₂) → (fr
   | _, _, fixed, free, (∃' p)     => ∃' bind' (Fin.cases #0 $ SubTerm.fixedSucc ∘ fixed) (SubTerm.fixedSucc ∘ free) p
 
 lemma bind'_neg {n₁ n₂} (fixed : Fin n₁ → SubTerm L μ₂ n₂) (free : μ₁ → SubTerm L μ₂ n₂) (p) :
-    bind' fixed free (¬'p) = ¬'bind' fixed free p :=
+    bind' fixed free (~p) = ~bind' fixed free p :=
   by induction p using rec' generalizing n₂ <;> simp[*, bind', ←neg_eq]
 
 def bind (fixed : Fin n₁ → SubTerm L μ₂ n₂) (free : μ₁ → SubTerm L μ₂ n₂) : SubFormula L μ₁ n₁ →L SubFormula L μ₂ n₂ where
@@ -210,7 +210,7 @@ def bind (fixed : Fin n₁ → SubTerm L μ₂ n₂) (free : μ₁ → SubTerm L
 def map (fixed : Fin n₁ → Fin n₂) (free : μ₁ → μ₂) : SubFormula L μ₁ n₁ →L SubFormula L μ₂ n₂ :=
   bind (fun n => #(fixed n)) (fun m => &(free m))
 
-def subst (t : SubTerm L μ n) : SubFormula L μ (n + 1) →  SubFormula L μ n :=
+def subst (t : SubTerm L μ n) : SubFormula L μ (n + 1) →L SubFormula L μ n :=
   bind (SubTerm.fixedVar <: t) SubTerm.freeVar
 
 section bind
@@ -364,6 +364,9 @@ lemma shiftEmb_eq_shift (p : SyntacticSubFormula L n) :
   simp[fix, free, bind_bind]; apply eq_bind_of <;> simp
   intros x; exact Fin.lastCases (by simp) (by simp) x
 
+@[simp] lemma subst_shift_eq_free (p : SyntacticSubFormula L 1) : subst &0 (shift p) = free p :=
+  by simp[subst, shift, free, map, bind_bind]
+
 @[simp] lemma complexity_free (p : SyntacticSubFormula L (n + 1)) :
     complexity (free p) = complexity p :=
   by simp[free]
@@ -412,7 +415,7 @@ def hasDecEq : (p q : SubFormula L μ n) → Decidable (p = q)
         by_cases e : k₁ = k₂
         · rcases e with rfl
           exact match decEq r r₂ with
-          | isTrue h  => by simp[h]; exact Fin.decFinfun _ _ (fun i => decEq (v i) (v₂ i))
+          | isTrue h  => by simp[h]; exact Matrix.decVec _ _ (fun i => decEq (v i) (v₂ i))
           | isFalse h => isFalse (by simp[h])
         · exact isFalse (by simp[e])
   | nrel r v, q => by
@@ -421,7 +424,7 @@ def hasDecEq : (p q : SubFormula L μ n) → Decidable (p = q)
         by_cases e : k₁ = k₂
         · rcases e with rfl
           exact match decEq r r₂ with
-          | isTrue h  => by simp[h]; exact Fin.decFinfun _ _ (fun i => decEq (v i) (v₂ i))
+          | isTrue h  => by simp[h]; exact Matrix.decVec _ _ (fun i => decEq (v i) (v₂ i))
           | isFalse h => isFalse (by simp[h])
         · exact isFalse (by simp[e])
   | p ⋏ q,    r => by

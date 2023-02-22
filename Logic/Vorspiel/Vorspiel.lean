@@ -1,6 +1,7 @@
 import Logic.Vorspiel.Notation
 import Mathlib.Tactic.LibrarySearch
 import Mathlib.Data.Fin.Basic
+import Mathlib.Data.Fin.VecNotation
 import Mathlib.Data.Fintype.Basic
 import Mathlib.Data.Finset.Basic
 import Mathlib.Data.Finset.Lattice
@@ -25,51 +26,43 @@ infixr:70 " :>ₙ " => cases
 
 end Nat
 
-namespace Fin
+namespace Matrix
+open Fin
 section
-variable {n : ℕ} {C : Sort u} {a b : C} {s : Fin n → C}
+variable {n : ℕ} {α : Type u} (a b : α) (s : Fin n → α)
 
-def leftConcat {C : Sort u} (hzero : C) (hsucc : Fin n → C) : Fin (n + 1) → C :=
-  @cases n (fun _ => C) hzero hsucc
+infixr:70 " :> " => vecCons
 
-infixr:70 " :> " => leftConcat
+@[simp] lemma vecCons_zero :
+    (a :> s) 0 = a := by simp
 
-@[simp] lemma leftConcat_zero (a : C) (s : Fin n → C) :
-    (a :> s) 0 = a := by simp[leftConcat]
+@[simp] lemma vecCons_succ (i : Fin n) :
+    (a :> s) (Fin.succ i) = s i := by simp
 
-@[simp] lemma leftConcat_succ (a : C) (s : Fin n → C) (i : Fin n) :
-    (a :> s) (Fin.succ i) = s i := by simp[leftConcat]
+@[simp] lemma vecCons_last (a : C) (s : Fin (n + 1) → C) :
+    (a :> s) (Fin.last (n + 1)) = s (Fin.last n) := vecCons_succ a s (Fin.last n)
 
-@[simp] lemma leftConcat_last (a : C) (s : Fin (n + 1) → C) :
-    (a :> s) (Fin.last (n + 1)) = s (Fin.last n) := leftConcat_succ a s (Fin.last n)
+def vecConsLast {n : ℕ} (t : Fin n → α) (h : α) : Fin n.succ → α :=
+  Fin.lastCases h t
 
-def rightConcat {n} {C : Sort u} (hcast : Fin n → C) (hlast : C) : Fin (n + 1) → C :=
-  @lastCases n (fun _ => C) hlast hcast
+infixl:70 " <: " => vecConsLast
 
-infixl:70 " <: " => rightConcat
+@[simp] lemma rightConcat_last :
+    (s <: a) (last n) = a := by simp[vecConsLast]
 
-@[simp] lemma rightConcat_last (s : Fin n → C) (a : C) :
-    (s <: a) (last n) = a := by simp[rightConcat]
+@[simp] lemma rightConcat_castSucc (i : Fin n) :
+    (s <: a) (Fin.castSucc i) = s i := by simp[vecConsLast]
 
-@[simp] lemma rightConcat_castSucc (s : Fin n → C) (a : C) (i : Fin n) :
-    (s <: a) (Fin.castSucc i) = s i := by simp[rightConcat]
-
-@[simp] lemma rightConcat_zero {s : Fin (n + 1) → C} {a : C} :
-    (s <: a) 0 = s 0 := rightConcat_castSucc s a 0 
+@[simp] lemma rightConcat_zero (a : α) (s : Fin n.succ → α) :
+    (s <: a) 0 = s 0 := rightConcat_castSucc a s 0
 
 @[simp] lemma zero_succ_eq_id {n} : (0 : Fin (n + 1)) :> succ = id :=
   funext $ Fin.cases (by simp) (by simp)
 
-def nil : Fin 0 → C := finZeroElim
-
-def singleton (a : C) : Fin 1 → C := a :> nil
-
-def mk2 (a b : C) : Fin 2 → C := a :> b :> nil
-
-lemma to_leftConcat (s : Fin (n + 1) → C) : s = s 0 :> s ∘ Fin.succ :=
+lemma to_vecCons (s : Fin (n + 1) → C) : s = s 0 :> s ∘ Fin.succ :=
    funext $ Fin.cases (by simp) (by simp)
 
-@[simp] lemma leftConcat_ext (a₁ a₂ : C) (s₁ s₂ : Fin n → C) :
+@[simp] lemma vecCons_ext (a₁ a₂ : α) (s₁ s₂ : Fin n → α) :
     a₁ :> s₁ = a₂ :> s₂ ↔ a₁ = a₂ ∧ s₁ = s₂ :=
   ⟨by intros h
       constructor
@@ -77,17 +70,17 @@ lemma to_leftConcat (s : Fin (n + 1) → C) : s = s 0 :> s ∘ Fin.succ :=
       · exact funext (fun i => by simpa using congrFun h (Fin.castSucc i + 1)),
    by intros h; simp[h]⟩
 
-def decFinfun {α : Type _} : {n : ℕ} → (v w : Fin n → α) → (∀ i, Decidable (v i = w i)) → Decidable (v = w)
+def decVec {α : Type _} : {n : ℕ} → (v w : Fin n → α) → (∀ i, Decidable (v i = w i)) → Decidable (v = w)
   | 0,     _, _, _ => by simp; exact isTrue trivial
   | n + 1, v, w, d => by
-      rw[Fin.to_leftConcat v, Fin.to_leftConcat w, Fin.leftConcat_ext]
-      haveI : Decidable (v ∘ Fin.succ = w ∘ Fin.succ) := decFinfun _ _ (by intros i; simp; exact d _)
+      rw[to_vecCons v, to_vecCons w, vecCons_ext]
+      haveI : Decidable (v ∘ Fin.succ = w ∘ Fin.succ) := decVec _ _ (by intros i; simp; exact d _)
       refine instDecidableAnd
 
-lemma comp_left_concat (f : C → α) (a : C) (s : Fin n → C) : (fun x => f $ (a :> s) x) = f a :> f ∘ s :=
+lemma comp_vecCons (f : α → β) (a : α) (s : Fin n → α) : (fun x => f $ (a :> s) x) = f a :> f ∘ s :=
 funext (fun i => cases (by simp) (by simp) i)
 
-lemma comp_right_concat (f : C → α) (a : C) (s : Fin n → C) : (fun x => f $ (s <: a) x) = f ∘ s <: f a :=
+lemma comp_vecConsLast (f : α → β) (a : α) (s : Fin n → α) : (fun x => f $ (s <: a) x) = f ∘ s <: f a :=
 funext (fun i => lastCases (by simp) (by simp) i)
 
 end
@@ -110,25 +103,26 @@ def toList : {n : ℕ} → (Fin n → α) → List α
   case zero => contradiction
   case succ => rcases i <;> simp
 
-def toOptionFinTo : {n : ℕ} → (Fin n → Option α) → Option (Fin n → α)
-  | 0,     _ => some nil
-  | _ + 1, v => (toOptionFinTo (v ∘ Fin.succ)).bind (fun vs => (v 0).map (fun z => z :> vs))
+def toOptionVec : {n : ℕ} → (Fin n → Option α) → Option (Fin n → α)
+  | 0,     _ => some vecEmpty
+  | _ + 1, v => (toOptionVec (v ∘ Fin.succ)).bind (fun vs => (v 0).map (fun z => z :> vs))
 
-@[simp] lemma toOptionFinTo_some (v : Fin n → α) :
-    toOptionFinTo (fun i => some (v i)) = some v :=
-  by induction n <;> simp[*, toOptionFinTo, Function.comp]; exact funext (Fin.cases (by simp) (by simp))
+@[simp] lemma toOptionVec_some (v : Fin n → α) :
+    toOptionVec (fun i => some (v i)) = some v :=
+  by induction n <;> simp[*, toOptionVec, Function.comp]; exact funext (Fin.cases (by simp) (by simp))
 
-def finitaryToNat : {n : ℕ} → (Fin n → ℕ) → ℕ
+def vecToNat : {n : ℕ} → (Fin n → ℕ) → ℕ
   | 0,     _ => 0
-  | _ + 1, v => Nat.mkpair (v 0) (finitaryToNat $ v ∘ Fin.succ)
+  | _ + 1, v => Nat.mkpair (v 0) (vecToNat $ v ∘ Fin.succ)
 
-end Fin
+end Matrix
 
 def Nat.unvector : {n : ℕ} → ℕ → Fin n → ℕ
-  | 0,     _ => Fin.nil
+  | 0,     _ => Matrix.vecEmpty
   | _ + 1, e => e.unpair.1 :> Nat.unvector e.unpair.2
 
 namespace Nat
+open Matrix
 variable {n}
 
 @[simp] lemma unvector_le (e : ℕ) (i : Fin n) : unvector e i ≤ e := by
@@ -136,11 +130,11 @@ variable {n}
   · have := i.isLt; contradiction
   · exact Fin.cases (by simpa using Nat.unpair_left_le _) (fun i => le_trans (ih e.unpair.2 i) (Nat.unpair_right_le _)) i
 
-@[simp] lemma unvector_finitaryToNat (v : Fin n → ℕ) : unvector (Fin.finitaryToNat v) = v := by
-  induction n <;> simp[*, Nat.unvector, Fin.finitaryToNat]; exact funext (fun i => i.cases (by simp) (by simp))
+@[simp] lemma unvector_vecToNat (v : Fin n → ℕ) : unvector (vecToNat v) = v := by
+  induction n <;> simp[*, Nat.unvector, vecToNat]; exact funext (fun i => i.cases (by simp) (by simp))
 
--- @[simp] lemma toNat_unvector (ln : 0 < n) (e : ℕ) : Fin.finitaryToNat (unvector e : Fin n → ℕ) = e := by
---   induction n generalizing e <;> simp[unvector, Fin.finitaryToNat, Function.comp]
+-- @[simp] lemma toNat_unvector (ln : 0 < n) (e : ℕ) : Fin.vecToNat (unvector e : Fin n → ℕ) = e := by
+--   induction n generalizing e <;> simp[unvector, Fin.vecToNat, Function.comp]
 --   · simp at ln
 --   · {simp[Function.comp]; sorry}
 
@@ -167,11 +161,11 @@ end Fintype
 
 namespace String
 
-def funFin_toStr : ∀ {n}, (Fin n → String) → String
+def vecToStr : ∀ {n}, (Fin n → String) → String
   | 0,     _ => ""
-  | n + 1, s => if n = 0 then s 0 else s 0 ++ ", " ++ @funFin_toStr n (fun i => s (Fin.succ i))
+  | n + 1, s => if n = 0 then s 0 else s 0 ++ ", " ++ @vecToStr n (fun i => s (Fin.succ i))
 
-def test : Fin 4 → String := "a" :> "b" :> "c" :> "d" :> Fin.nil
+#eval vecToStr !["a", "b", "c", "d"]
 
 end String
 

@@ -8,7 +8,7 @@ section logicNotation
 @[notation_class] class HasNeg (α : Sort _) where
   neg : α → α
 
-prefix:75 "¬'" => HasNeg.neg
+prefix:75 "~" => HasNeg.neg
 
 @[notation_class] class HasArrow (α : Sort _) where
   arrow : α → α → α
@@ -68,7 +68,7 @@ instance Prop_HasLogicSymbols : HasLogicSymbols Prop where
   and := And
   or := Or
 
-@[simp] lemma Prop_neg_eq (p : Prop) : ¬' p = ¬p := rfl   
+@[simp] lemma Prop_neg_eq (p : Prop) : ~ p = ¬p := rfl   
 
 @[simp] lemma Prop_arrow_eq (p q : Prop) : (p ⟶ q) = (p → q) := rfl
 
@@ -82,7 +82,7 @@ structure Hom where
   toFun : α → β
   map_top' : toFun ⊤ = ⊤
   map_bot' : toFun ⊥ = ⊥
-  map_neg' : ∀ p, toFun (¬' p) = ¬'toFun p
+  map_neg' : ∀ p, toFun (~ p) = ~toFun p
   map_imp' : ∀ p q, toFun (p ⟶ q) = toFun p ⟶ toFun q
   map_and' : ∀ p q, toFun (p ⋏ q) = toFun p ⋏ toFun q
   map_or'  : ∀ p q, toFun (p ⋎ q) = toFun p ⋎ toFun q
@@ -100,7 +100,7 @@ variable (f : α →L β) (a b : α)
 
 @[simp] lemma map_bot : f ⊥ = ⊥ := map_bot' f
 
-@[simp] lemma map_neg : f (¬'a) = ¬'f a := Hom.map_neg' f a
+@[simp] lemma map_neg : f (~a) = ~f a := Hom.map_neg' f a
 
 @[simp] lemma map_imply : f (a ⟶ b) = f a ⟶ f b := map_imp' f a b
 

@@ -20,7 +20,7 @@ def onSubFormula₁' (Φ : Hom L₁ L₂) : ∀ {n}, SubFormula L₁ μ n → Su
   | _, ∃' p                => ∃' Φ.onSubFormula₁' p
 
 lemma onSubFormula₁'_neg {n} (p : SubFormula L₁ μ n) :
-    Φ.onSubFormula₁' (¬'p) = ¬' Φ.onSubFormula₁' p :=
+    Φ.onSubFormula₁' (~p) = ~Φ.onSubFormula₁' p :=
   by induction p using SubFormula.rec' <;> simp[*, onSubFormula₁', ←SubFormula.neg_eq]
 
 def onSubFormula₁ (Φ : Hom L₁ L₂) {n} : SubFormula L₁ μ n →L SubFormula L₂ μ n where
@@ -58,7 +58,7 @@ lemma onSubFormula₁_bind (fixed : Fin n₁ → SubTerm L₁ μ₂ n₂) (free 
     bind (fun x => Φ.onSubTerm (fixed x)) (fun x => Φ.onSubTerm (free x)) (Φ.onSubFormula₁ p) :=
   by
   induction p using rec' generalizing μ₂ n₂ <;>
-  simp[*, SubTerm.onSubTerm_bind, Fin.comp_left_concat, Function.comp, SubTerm.onSubTerm_fixedSucc]
+  simp[*, SubTerm.onSubTerm_bind, Matrix.comp_vecCons, Function.comp, SubTerm.onSubTerm_fixedSucc]
 
 lemma onSubFormula₁_map (fixed : Fin n₁ → Fin n₂) (free : μ₁ → μ₂) (p) :
     Φ.onSubFormula₁ (map fixed free p) = map fixed free (Φ.onSubFormula₁ p) :=
@@ -66,7 +66,7 @@ lemma onSubFormula₁_map (fixed : Fin n₁ → Fin n₂) (free : μ₁ → μ�
 
 lemma onSubFormula₁_subst (u) (p : SubFormula L₁ μ (n + 1)) :
     Φ.onSubFormula₁ (subst u p) = subst (Φ.onSubTerm u) (Φ.onSubFormula₁ p) :=
-  by simp[subst, onSubFormula₁_bind, Fin.comp_right_concat, Function.comp]
+  by simp[subst, onSubFormula₁_bind, Matrix.comp_vecConsLast, Function.comp]
 
 lemma onSubFormula₁_shift (p : SyntacticSubFormula L₁ n) : Φ.onSubFormula₁ (shift p) = shift (Φ.onSubFormula₁ p) :=
   by simp[shift, onSubFormula₁_map]

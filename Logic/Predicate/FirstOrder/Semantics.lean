@@ -22,7 +22,7 @@ def subval' (ε : μ → M) : ∀ {n}, (Fin n → M) → SubFormula L μ n → P
   | _, e, ∃' p     => ∃ x : M, (p.subval' ε (x :> e))
 
 @[simp] lemma subval'_neg (p : SubFormula L μ n) :
-    subval' s ε e (¬'p) = ¬subval' s ε e p :=
+    subval' s ε e (~p) = ¬subval' s ε e p :=
   by induction p using rec' <;> simp[*, subval', ←neg_eq, or_iff_not_imp_left]
 
 def subval : SubFormula L μ n →L Prop where

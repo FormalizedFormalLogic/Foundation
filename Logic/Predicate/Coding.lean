@@ -14,7 +14,7 @@ def toNat : SubTerm L μ n → ℕ
   | #x                    => (Nat.bit false $ Nat.bit false (encode x)) + 1
   | &x                    => (Nat.bit false $ Nat.bit true (encode x)) + 1
   | func (arity := k) f v => (Nat.bit true  $ Nat.mkpair k $
-      Nat.mkpair (encode f) (Fin.finitaryToNat $ fun i => (v i).toNat)) + 1
+      Nat.mkpair (encode f) (Matrix.vecToNat $ fun i => (v i).toNat)) + 1
 
 def ofNat : ℕ → Option (SubTerm L μ n)
 | 0  => none
@@ -33,7 +33,7 @@ def ofNat : ℕ → Option (SubTerm L μ n)
         Nat.lt_succ_of_le (le_trans (Nat.unvector_le x.unpair.2.unpair.2 i)
           (le_trans (Nat.unpair_right_le _) $
             le_trans (Nat.unpair_right_le _) $ by simp[Nat.div2_val]; exact Nat.div_le_self e 2))
-      let v' : Option (Fin k → SubTerm L μ n) := Fin.toOptionFinTo (fun i => ofNat (w i))
+      let v' : Option (Fin k → SubTerm L μ n) := Matrix.toOptionVec (fun i => ofNat (w i))
       f'.bind fun f => v'.map fun v => func f v
   decreasing_by exact this i
 
