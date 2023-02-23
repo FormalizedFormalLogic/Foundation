@@ -123,6 +123,28 @@ instance (k) : Encodable (ring.rel k) where
     | _, _ => none
   encodek := fun x => by rcases x <;> simp
 
+@[reducible]
+def relational (α : ℕ → Type u) : Language where
+  func := fun _ => PEmpty
+  rel := α
+
+section relational
+variable {α : ℕ → Type u} [e : ∀ n, Encodable (α n)] [d : ∀ n, DecidableEq (α n)] [s : ∀ n, ToString (α n)]
+
+instance (k) : Encodable ((relational α).func k) := Encodable.IsEmpty.toEncodable
+
+instance (k) : Encodable ((relational α).rel k) := e k
+
+instance (k) : DecidableEq ((relational α).func k) := fun a => by cases a
+
+instance (k) : DecidableEq ((relational α).rel k) := d k
+
+instance : ToString ((relational α).rel k) := ⟨fun a => "P^{" ++ toString k ++ "}_{" ++ toString a ++ "}"⟩
+
+instance : ToString ((relational α).func k) := ⟨fun a => by cases a⟩
+
+end relational
+
 structure Hom (L₁ L₂ : Language) where
   onFunc : {k : ℕ} → L₁.func k → L₂.func k
   onRel : {k : ℕ} → L₁.rel k → L₂.rel k

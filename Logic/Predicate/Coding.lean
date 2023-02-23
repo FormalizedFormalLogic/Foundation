@@ -51,17 +51,22 @@ instance : Encodable (SubTerm L μ n) where
 
 variable [∀ k, DecidableEq (L.func k)]
 
-def enumLt : ℕ → Finset (SyntacticTerm L)
-| 0     => ∅
-| s + 1 => enumLt s ∪ (Encodable.decode₂ (SyntacticTerm L) s).toFinset
+def enumLtList : ℕ → List (SyntacticTerm L)
+| 0     => []
+| s + 1 => (Encodable.decode₂ (SyntacticTerm L) s).toList ++ enumLtList s
 
-@[simp] lemma enumLt_zero : (enumLt 0 : Finset (SyntacticTerm L)) = ∅ := rfl 
-
-lemma mem_enumLt_of_lt {i} {t : SyntacticTerm L} (h : encode t < i) : t ∈ enumLt i := by
-  induction' i with i ih <;> simp[enumLt]
+lemma mem_enumLtList_of_lt {i} {t : SyntacticTerm L} (h : encode t < i) : t ∈ enumLtList i := by
+  induction' i with i ih <;> simp[enumLtList]
   · contradiction
   · have : encode t < i ∨ encode t = i := lt_or_eq_of_le (Nat.lt_succ.mp h)
     rcases this with (h | rfl) <;> simp[*]
+
+def enumLt (s : ℕ) : Finset (SyntacticTerm L) := (enumLtList s).toFinset
+
+@[simp] lemma enumLt_zero : (enumLt 0 : Finset (SyntacticTerm L)) = ∅ := rfl 
+
+lemma mem_enumLt_of_lt {i} {t : SyntacticTerm L} (h : encode t < i) : t ∈ enumLt i :=
+  by simp[enumLt]; exact mem_enumLtList_of_lt h
 
 #eval enumLt (L := Language.ring) 100
 

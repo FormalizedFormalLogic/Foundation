@@ -1,12 +1,9 @@
-import Logic.Predicate.FirstOrder.Language
-import Logic.Vorspiel.Zermelo
+import Logic.Predicate.FirstOrder.Calculus
 
-open FirstOrder
+open FirstOrder Derivation
 
-def φ : SyntacticFormula Language.equal :=
-  ∀' ∀' ∀' (
-    SubFormula.rel! Language.equal 2 Language.EqRel.equal (#0 :> #1 :> Fin.nil) ⟶
-    SubFormula.rel! Language.equal 2 Language.EqRel.equal (#1 :> #2 :> Fin.nil) ⟶
-    SubFormula.rel! Language.equal 2 Language.EqRel.equal (#0 :> #2 :> Fin.nil))
-
-#eval toString φ
+def d := derive? 4 32 (L := Language.relational (fun _ => ℕ)) 
+  (∀' ( SubFormula.rel! (Language.relational (fun _ => ℕ)) 1 0 ![#0] ⋎
+        SubFormula.rel! (Language.relational (fun _ => ℕ)) 1 1 ![#0]) ⟶
+   ∀' ( SubFormula.rel! (Language.relational (fun _ => ℕ)) 1 1 ![#0] ⋎
+        SubFormula.rel! (Language.relational (fun _ => ℕ)) 1 0 ![#0]))

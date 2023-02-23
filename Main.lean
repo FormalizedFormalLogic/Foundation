@@ -1,4 +1,4 @@
 import «Logic»
 
-def main : IO Unit :=
-  IO.println s!"\\varphi = {toString φ}"
+unsafe def main : IO Unit :=
+  IO.println s!"\\varphi = {reprStr d}"

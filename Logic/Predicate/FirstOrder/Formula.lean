@@ -165,14 +165,16 @@ def rec' {C : ∀ n, SubFormula L μ n → Sort _}
 variable [∀ k, ToString (L.func k)] [∀ k, ToString (L.rel k)] [ToString μ]
 
 def toStr : ∀ {n}, SubFormula L μ n → String
-  | _, ⊤            => "\\top"
-  | _, ⊥            => "\\bot"
-  | _, rel r v      => "{" ++ toString r ++ "} \\left(" ++ String.vecToStr (fun i => toString (v i)) ++ "\\right)"
-  | _, nrel r v     => "\\lnot {" ++ toString r ++ "} \\left(" ++ String.vecToStr (fun i => toString (v i)) ++ "\\right)"
-  | _, p ⋏ q        => toStr p ++ " \\land " ++ toStr q
-  | _, p ⋎ q        => toStr p ++ " \\lor " ++ toStr q
-  | _, @all _ _ n p => "\\forall x_{" ++ toString n ++ "} \\left[" ++ toStr p ++ "\\right]"
-  | _, @ex _ _ n p  => "\\exists x_{" ++ toString n ++ "} \\left[" ++ toStr p ++ "\\right]"
+  | _, ⊤                     => "\\top"
+  | _, ⊥                     => "\\bot"
+  | _, rel (k := 0) r _      => "{" ++ toString r ++ "}"
+  | _, rel (k := _ + 1) r v  => "{" ++ toString r ++ "} \\left(" ++ String.vecToStr (fun i => toString (v i)) ++ "\\right)"
+  | _, nrel (k := 0) r _     => "\\lnot {" ++ toString r ++ "}"
+  | _, nrel (k := _ + 1) r v => "\\lnot {" ++ toString r ++ "} \\left(" ++ String.vecToStr (fun i => toString (v i)) ++ "\\right)"
+  | _, p ⋏ q                 => "\\left(" ++ toStr p ++ " \\land " ++ toStr q ++ "\\right)"
+  | _, p ⋎ q                 => "\\left(" ++ toStr p ++ " \\lor "  ++ toStr q ++ "\\right)"
+  | _, @all _ _ n p          => "(\\forall x_{" ++ toString n ++ "}) " ++ toStr p
+  | _, @ex _ _ n p           => "(\\exists x_{" ++ toString n ++ "}) " ++ toStr p
 
 instance : Repr (SubFormula L μ n) := ⟨fun t _ => toStr t⟩
 
