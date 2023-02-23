@@ -67,7 +67,7 @@ inductive RingFunc : ℕ → Type
   | mul : RingFunc 2
 
 inductive RingRel : ℕ → Type
-  | equal : RingRel 2
+  | eq : RingRel 2
   | le : RingRel 2
 
 @[reducible]
@@ -86,7 +86,7 @@ instance (k) : ToString (ring.func k) :=
 instance (k) : ToString (ring.rel k) :=
 ⟨ fun s =>
   match s with
-  | RingRel.equal => "\\mathrm{Eq}"
+  | RingRel.eq => "\\mathrm{Eq}"
   | RingRel.le    => "\\mathrm{Le}"⟩
 
 instance (k) : DecidableEq (ring.func k) := fun a b =>
@@ -114,16 +114,15 @@ instance (k) : Encodable (ring.func k) where
 instance (k) : Encodable (ring.rel k) where
   encode := fun x =>
     match x with
-    | RingRel.equal => 0
+    | RingRel.eq => 0
     | RingRel.le    => 1
   decode := fun e =>
     match k, e with
-    | 2, 0 => some RingRel.equal
+    | 2, 0 => some RingRel.eq
     | 2, 1 => some RingRel.le
     | _, _ => none
   encodek := fun x => by rcases x <;> simp
 
-@[reducible]
 def relational (α : ℕ → Type u) : Language where
   func := fun _ => PEmpty
   rel := α
@@ -131,7 +130,7 @@ def relational (α : ℕ → Type u) : Language where
 section relational
 variable {α : ℕ → Type u} [e : ∀ n, Encodable (α n)] [d : ∀ n, DecidableEq (α n)] [s : ∀ n, ToString (α n)]
 
-instance (k) : Encodable ((relational α).func k) := Encodable.IsEmpty.toEncodable
+instance (k) : Encodable ((relational α).func k) := Encodable.IsEmpty.toEncodable (α := PEmpty)
 
 instance (k) : Encodable ((relational α).rel k) := e k
 
@@ -139,11 +138,19 @@ instance (k) : DecidableEq ((relational α).func k) := fun a => by cases a
 
 instance (k) : DecidableEq ((relational α).rel k) := d k
 
-instance : ToString ((relational α).rel k) := ⟨fun a => "P^{" ++ toString k ++ "}_{" ++ toString a ++ "}"⟩
+instance : ToString ((relational α).rel k) :=
+  ⟨fun a => "R^{" ++ toString k ++ "}_{" ++ toString (α := α k) a ++ "}"⟩
+
+def toRelational (a : α k) : (relational α).rel k := a
 
 instance : ToString ((relational α).func k) := ⟨fun a => by cases a⟩
 
 end relational
+
+class HasEq (L : Language.{u}) where
+  eq : L.rel 2
+
+instance : HasEq ring := ⟨RingRel.eq⟩
 
 structure Hom (L₁ L₂ : Language) where
   onFunc : {k : ℕ} → L₁.func k → L₂.func k

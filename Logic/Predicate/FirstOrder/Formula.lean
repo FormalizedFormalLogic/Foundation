@@ -185,6 +185,9 @@ end SubFormula
 namespace SubFormula
 variable {n n₁ n₂ n₃ m m₁ m₂ m₃ : ℕ}
 
+@[simp] lemma complexity_neg (p : SubFormula L μ n) : complexity (~p) = complexity p :=
+by induction p using rec' <;> simp[*]
+
 def bind' : ∀ {n₁ n₂}, (fixed : Fin n₁ → SubTerm L μ₂ n₂) → (free : μ₁ → SubTerm L μ₂ n₂) →
     SubFormula L μ₁ n₁ → SubFormula L μ₂ n₂
   | _, _, _,     _,    ⊤          => ⊤
@@ -395,6 +398,9 @@ def formulaRec {C : SyntacticFormula L → Sort _}
   termination_by formulaRec _ _ _ _ _ _ _ _ p => p.complexity
 
 end Syntactic
+
+lemma ne_of_ne_complexity {p q : SubFormula L μ n} (h : p.complexity ≠ q.complexity) : p ≠ q :=
+  by rintro rfl; contradiction
 
 end SubFormula
 

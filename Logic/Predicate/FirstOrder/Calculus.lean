@@ -22,16 +22,18 @@ lemma shifts_insert (p : SyntacticSubFormula L n) (Δ : Finset (SyntacticSubForm
   by simp[shifts, shiftEmb_eq_shift]
 
 inductive Derivation : Finset (SyntacticFormula L) → Type _
-| AxL   : ∀ (Δ : Finset (SyntacticFormula L)) {k} (r : L.rel k) (v : Fin k → SyntacticTerm L),
+| AxL     : ∀ (Δ : Finset (SyntacticFormula L)) {k} (r : L.rel k) (v : Fin k → SyntacticTerm L),
     rel r v ∈ Δ → nrel r v ∈ Δ → Derivation Δ
-| verum : ∀ (Δ : Finset (SyntacticFormula L)), ⊤ ∈ Δ → Derivation Δ
-| or  : ∀ (Δ : Finset (SyntacticFormula L)) (p q : SyntacticFormula L),
-    Derivation (insert q $ insert p Δ) → Derivation (insert (p ⋎ q) Δ)
-| and   : ∀ (Δ : Finset (SyntacticFormula L)) (p q : SyntacticFormula L),
+| verum   : ∀ (Δ : Finset (SyntacticFormula L)), ⊤ ∈ Δ → Derivation Δ
+| orLeft  : ∀ (Δ : Finset (SyntacticFormula L)) (p q : SyntacticFormula L),
+    Derivation (insert p Δ) → Derivation (insert (p ⋎ q) Δ)
+| orRight : ∀ (Δ : Finset (SyntacticFormula L)) (p q : SyntacticFormula L),
+    Derivation (insert q Δ) → Derivation (insert (p ⋎ q) Δ)
+| and     : ∀ (Δ : Finset (SyntacticFormula L)) (p q : SyntacticFormula L),
     Derivation (insert p Δ) → Derivation (insert q Δ) → Derivation (insert (p ⋏ q) Δ)
-| all   : ∀ (Δ : Finset (SyntacticFormula L)) (p : SyntacticSubFormula L 1),
+| all     : ∀ (Δ : Finset (SyntacticFormula L)) (p : SyntacticSubFormula L 1),
     Derivation (insert (free p) (shifts Δ)) → Derivation (insert (∀' p) Δ)
-| ex    : ∀ (Δ : Finset (SyntacticFormula L)) (t : SyntacticTerm L) (p : SyntacticSubFormula L 1),
+| ex      : ∀ (Δ : Finset (SyntacticFormula L)) (t : SyntacticTerm L) (p : SyntacticSubFormula L 1),
     Derivation (insert (subst t p) Δ) → Derivation (insert (∃' p) Δ)
 
 instance : HasVdash (Finset (SyntacticFormula L)) (Type _) := ⟨Derivation⟩
@@ -48,28 +50,32 @@ section Repr
 variable [∀ k, ToString (L.func k)] [∀ k, ToString (L.rel k)]
 
 protected unsafe def repr : {Δ : Finset (SyntacticFormula L)} → Derivation Δ → String
-  | _, AxL Δ _ _ _ _ =>
+  | _, AxL Δ _ _ _ _   =>
       "\\AxiomC{}\n" ++
       "\\RightLabel{\\scriptsize(AxL)}\n" ++
       "\\UnaryInfC{$\\Vdash " ++ reprStr Δ ++ "$}\n\n"
-  | _, verum Δ _     =>
+  | _, verum Δ _       =>
       "\\AxiomC{}\n" ++
       "\\RightLabel{\\scriptsize($\\top$)}\n" ++
       "\\UnaryInfC{$\\Vdash " ++ reprStr Δ ++ "$}\n\n"
-  | _, or Δ p q d =>
+  | _, orLeft Δ p q d  =>
       d.repr ++
-      "\\RightLabel{\\scriptsize($\\lor$)}\n" ++
+      "\\RightLabel{\\scriptsize($\\lor$L)}\n" ++
+      "\\UnaryInfC{$\\Vdash " ++ reprStr (insert (p ⋎ q) Δ) ++ "$}\n\n"
+  | _, orRight Δ p q d =>
+      d.repr ++
+      "\\RightLabel{\\scriptsize($\\lor$R)}\n" ++
       "\\UnaryInfC{$\\Vdash " ++ reprStr (insert (p ⋎ q) Δ) ++ "$}\n\n"
   | _, and Δ p q dp dq =>
       dp.repr ++
       dq.repr ++
       "\\RightLabel{\\scriptsize($\\land$)}\n" ++
       "\\BinaryInfC{$\\Vdash " ++ reprStr (insert (p ⋏ q) Δ) ++ "$}\n\n"
-  | _, all Δ p d =>
+  | _, all Δ p d       =>
       d.repr ++
       "\\RightLabel{\\scriptsize($\\forall$)}\n" ++
       "\\UnaryInfC{$\\Vdash " ++ reprStr (insert (∀' p) Δ) ++ "$}\n\n"
-  | _, ex Δ _ p d =>
+  | _, ex Δ _ p d      =>
       d.repr ++
       "\\RightLabel{\\scriptsize($\\exists$)}\n" ++
       "\\UnaryInfC{$\\Vdash " ++ reprStr (insert (∃' p) Δ) ++ "$}\n\n"
@@ -84,11 +90,14 @@ protected def cast (d : Derivation Δ) (e : Δ = Γ) : ⊩ Γ := cast (by simp[H
 def weakening : ∀ {Δ}, ⊩ Δ → ∀ {Γ : Finset (SyntacticFormula L)}, Δ ⊆ Γ → ⊩ Γ
   | _, AxL Δ r v hrel hnrel, Γ, h => AxL Γ r v (h hrel) (h hnrel)
   | _, verum Δ htop,         Γ, h => verum Γ (h htop)
-  | _, or Δ p q d,       Γ, h =>
-      have : ⊩ insert q (insert p Γ) :=
-        weakening d (Finset.insert_subset_insert q $ Finset.insert_subset_insert p (Finset.insert_subset.mp h).2)
-      have : ⊩ insert (p ⋎ q) Γ := or Γ p q this
-      Derivation.cast this (by simp; exact (Finset.insert_subset.mp h).1)
+  | _, orLeft Δ p q d,       Γ, h =>
+      have : ⊩ insert p Γ := weakening d (Finset.insert_subset_insert p (Finset.insert_subset.mp h).2)
+      have : ⊩ insert (p ⋎ q) Γ := orLeft Γ p q this
+      this.cast (by simp; exact (Finset.insert_subset.mp h).1)
+  | _, orRight Δ p q d,      Γ, h =>
+      have : ⊩ insert q Γ := weakening d (Finset.insert_subset_insert q (Finset.insert_subset.mp h).2)
+      have : ⊩ insert (p ⋎ q) Γ := orRight Γ p q this
+      this.cast (by simp; exact (Finset.insert_subset.mp h).1)
   | _, and Δ p q dp dq,      Γ, h =>
       have dp : ⊩ insert p Γ := weakening dp (Finset.insert_subset_insert p (Finset.insert_subset.mp h).2) 
       have dq : ⊩ insert q Γ := weakening dq (Finset.insert_subset_insert q (Finset.insert_subset.mp h).2) 
@@ -103,18 +112,34 @@ def weakening : ∀ {Δ}, ⊩ Δ → ∀ {Γ : Finset (SyntacticFormula L)}, Δ 
       have : ⊩ insert (∃' p) Γ := ex Γ t p this
       Derivation.cast this (by simp; exact (Finset.insert_subset.mp h).1)     
 
-def or' {p q : SyntacticFormula L} (h : p ⋎ q ∈ Δ) (d : ⊩ insert q (insert p Δ)) : ⊩ Δ :=
-  weakening (or Δ p q d) (by simp[Finset.insert_subset, h])
+--def or' {p q : SyntacticFormula L} (h : p ⋎ q ∈ Δ) (d : ⊩ insert p Δ) : ⊩ Δ :=
+--  weakening (or Δ p q d) (by simp[Finset.insert_subset, h])
 
-def and' {p q : SyntacticFormula L} (h : p ⋏ q ∈ Δ) (dp : ⊩ insert p Δ) (dq : ⊩ insert q Δ) : ⊩ Δ :=
-  weakening (and Δ p q dp dq) (by simp[Finset.insert_subset, h])  
+def orLeft' {p q : SyntacticFormula L} (h : p ⋎ q ∈ Δ) (d : ⊩ insert p (Δ.erase (p ⋎ q))) : ⊩ Δ :=
+  (orLeft _ p q d).cast (by simp[Finset.insert_erase h])
 
-def all' {p : SyntacticSubFormula L 1} (h : ∀' p ∈ Δ) (d : ⊩ insert (free p) (shifts Δ)) : ⊩ Δ :=
-  weakening (all Δ p d) (by simp[Finset.insert_subset, h])
+def orRight' {p q : SyntacticFormula L} (h : p ⋎ q ∈ Δ) (d : ⊩ insert q (Δ.erase (p ⋎ q))) : ⊩ Δ :=
+  (orRight _ p q d).cast (by simp[Finset.insert_erase h])
+
+def or {p q : SyntacticFormula L} (d : ⊩ insert p (insert q Δ)) : ⊩ insert (p ⋎ q) Δ :=
+  have : ⊩ insert (p ⋎ q) (insert q Δ) := orLeft _ p q d
+  (orRight (insert (p ⋎ q) Δ) p q (this.cast (by ext; simp; tauto))).cast (by simp)
+
+def and' {p q : SyntacticFormula L} (h : p ⋏ q ∈ Δ) (dp : ⊩ insert p (Δ.erase (p ⋏ q))) (dq : ⊩ insert q (Δ.erase (p ⋏ q))) : ⊩ Δ :=
+  (and _ p q dp dq).cast (by simp[Finset.insert_erase h])
+
+def all' {p : SyntacticSubFormula L 1} (h : ∀' p ∈ Δ) (d : ⊩ insert (free p) (shifts $ Δ.erase (∀' p))) : ⊩ Δ :=
+  (all _ p d).cast (by simp[Finset.insert_erase h])
 
 def ex' {p : SyntacticSubFormula L 1} (t : SyntacticTerm L) (h : ∃' p ∈ Δ)
-  (d : ⊩ insert (subst t p) Δ) : ⊩ Δ :=
-  weakening (ex Δ t p d) (by simp[Finset.insert_subset, h])
+  (d : ⊩ insert (subst t p) (Δ.erase (∃' p))) : ⊩ Δ :=
+  (ex _ t p d).cast (by simp[Finset.insert_erase h])
+
+@[simp] lemma ne_step_max (n m : ℕ) : n ≠ max n m + 1 :=
+  ne_of_lt $ Nat.lt_succ_of_le $ by simp
+
+@[simp] lemma ne_step_max' (n m : ℕ) : n ≠ max m n + 1 :=
+  ne_of_lt $ Nat.lt_succ_of_le $ by simp
 
 def em {p : SyntacticFormula L} {Δ : Finset (SyntacticFormula L)} (hpos : p ∈ Δ) (hneg : ~p ∈ Δ) : ⊩ Δ := by
   induction p using SubFormula.formulaRec generalizing Δ
@@ -124,19 +149,23 @@ def em {p : SyntacticFormula L} {Δ : Finset (SyntacticFormula L)} (hpos : p ∈
   case hnrel r v => exact AxL Δ r v hneg hpos 
   case hall p ih =>
     exact all' hpos $ ex' (p := ~ shift p) &0
-      (by simp; exact Or.inr (by simpa[-Finset.mem_map, shiftEmb_eq_shift] using Finset.mem_map_of_mem shiftEmb hneg))
-      (by simpa using ih (by simp) (by simp))
+      (by simp; exact Or.inr (by simp[shifts, shiftEmb_eq_shift]; exact ⟨_, hneg, by simp⟩))
+      (ih (by simp; exact Or.inr $ ne_of_ne_complexity $ by simp[shift]) (by simp))
   case hex p ih =>
     simp at hneg
     exact all' hneg $ ex' (p := shift p) &0
-      (by simp; exact Or.inr (by simpa[-Finset.mem_map, shiftEmb_eq_shift] using Finset.mem_map_of_mem shiftEmb hpos))
-      (by simpa using ih (by simp) (by simp))
+      (by simp; exact Or.inr (by simp[shifts, shiftEmb_eq_shift]; exact ⟨_, hpos, by simp⟩))
+      (ih (by simp) (by simp; exact Or.inr $ ne_of_ne_complexity $ by simp[shift]))
   case hand p q ihp ihq =>
     simp at hneg
-    exact or' hneg $ and' (p := p) (q := q) (by simp[hpos]) (ihp (by simp) (by simp)) (ihq (by simp) (by simp))
+    exact and' hpos
+      (orLeft' (p := ~p) (q := ~q) (by simp[hneg]) $ ihp (by simp; exact Or.inr $ ne_of_ne_complexity (by simp)) (by simp))
+      (orRight' (p := ~p) (q := ~q) (by simp[hneg]) $ ihq (by simp; exact Or.inr $ ne_of_ne_complexity (by simp)) (by simp))
   case hor p q ihp ihq =>
     simp at hneg
-    exact or' hpos $ and' (p := ~p) (q := ~q) (by simp[hneg]) (ihp (by simp) (by simp)) (ihq (by simp) (by simp))
+    exact and' hneg
+      (orLeft' (p := p) (q := q) (by simp[hpos]) $ ihp (by simp) (by simp; exact Or.inr $ ne_of_ne_complexity (by simp)))
+      (orRight' (p := p) (q := q) (by simp[hpos]) $ ihq (by simp) (by simp; exact Or.inr $ ne_of_ne_complexity (by simp)))
 
 section Hom
 variable
@@ -153,22 +182,26 @@ def onDerivation (Φ : L₁ →ᵥ L₂) : ∀ {Δ : Finset (SyntacticFormula L�
       AxL _ (Φ.onRel r) (fun i => Φ.onSubTerm (v i))
         (Finset.mem_image_of_mem _ hrel) (Finset.mem_image_of_mem _ hnrel)
   | _, verum Δ h            => verum _ (by simpa using Finset.mem_image_of_mem Φ.onSubFormula₁ h)
-  | _, or Δ p q d           =>
-      have : ⊩ insert (Φ.onSubFormula₁ p ⋎ Φ.onSubFormula₁ q) (Finset.image Φ.onSubFormula₁ Δ) :=
-        or _ _ _ (Derivation.cast (onDerivation Φ d) (by simp))
-      Derivation.cast this (by simp)
+  | _, orLeft Δ p q d       =>
+      have : ⊩ insert (Φ.onSubFormula₁ p ⋎ Φ.onSubFormula₁ q) (Δ.image Φ.onSubFormula₁) :=
+        orLeft _ _ _ ((onDerivation Φ d).cast (by simp))
+      this.cast (by simp)
+  | _, orRight Δ p q d       =>
+      have : ⊩ insert (Φ.onSubFormula₁ p ⋎ Φ.onSubFormula₁ q) (Δ.image Φ.onSubFormula₁) :=
+        orRight _ _ _ ((onDerivation Φ d).cast (by simp))
+      this.cast (by simp)
   | _, and Δ p q dp dq      =>
       have : ⊩ insert (Φ.onSubFormula₁ p ⋏ Φ.onSubFormula₁ q) (Finset.image Φ.onSubFormula₁ Δ) :=
-        and _ _ _ (Derivation.cast (onDerivation Φ dp) (by simp)) (Derivation.cast (onDerivation Φ dq) (by simp))
-      Derivation.cast this (by simp)
+        and _ _ _ ((onDerivation Φ dp).cast (by simp)) ((onDerivation Φ dq).cast (by simp))
+      this.cast (by simp)
   | _, all Δ p d            =>
       have : ⊩ insert (∀' Φ.onSubFormula₁ p) (Finset.image Φ.onSubFormula₁ Δ) :=
         all _ _ (by simpa[←SubFormula.onSubFormula₁_free, shifts_image] using onDerivation Φ d)
-      Derivation.cast this (by simp)
+      this.cast (by simp)
   | _, ex Δ t p d           =>
       have : ⊩ insert (∃' Φ.onSubFormula₁ p) (Finset.image Φ.onSubFormula₁ Δ) :=
         ex _ (Φ.onSubTerm t) _ (by simpa[←SubFormula.onSubFormula₁_subst] using onDerivation Φ d)
-      Derivation.cast this (by simp)
+      this.cast (by simp)
 
 end Hom
 
@@ -202,7 +235,7 @@ def deriveList? (tmax : ℕ) : ℕ → (Γ : List (SyntacticFormula L)) → Opti
       | rel r v  => (deriveList? tmax s $ Γ ++ [rel r v]).map (fun d => d.cast $ by ext; simp; tauto)
       | nrel r v => (deriveList? tmax s $ Γ ++ [nrel r v]).map (fun d => d.cast $ by ext; simp; tauto)
       | p ⋎ q    => (deriveList? tmax s (Γ ++ [p, q])).map
-          fun d => (or Γ.toFinset p q (d.cast $ by ext; simp; tauto)).cast (by ext; simp)
+          fun d => (or (Δ := Γ.toFinset) (p := p) (q := q) (d.cast $ by ext; simp; tauto)).cast (by ext; simp)
       | p ⋏ q    => (deriveList? tmax s (Γ ++ [p])).bind fun dp => (deriveList? tmax s (Γ ++ [q])).map
           fun dq => (and Γ.toFinset p q (dp.cast $ by ext; simp[or_comm]) (dq.cast $ by ext; simp[or_comm])).cast 
             (by ext; simp[or_comm])
@@ -217,41 +250,54 @@ def derive? (tmax s : ℕ) (p : SyntacticFormula L) : Option (⊩ ({p} : Finset 
 
 
 variable (p q : SyntacticFormula Language.equal)
+open Language
 
 #eval derive? 8 32 (L := Language.equal) 
   (SubFormula.rel! Language.equal 2 Language.EqRel.equal ![&0, &1] ⟶
    (∃' ∃' SubFormula.rel! Language.equal 2 Language.EqRel.equal ![#0, #1]))
 
-#eval derive? 32 32 (L := Language.equal) 
+#eval derive? 8 32 (L := Language.equal) 
   (SubFormula.rel! Language.equal 2 Language.EqRel.equal ![&0, &1] ⟶
    (∃' ∃' SubFormula.rel! Language.equal 2 Language.EqRel.equal ![#0, #1]))
 
-#eval derive? 32 32 (L := Language.equal) 
-  ((∀' ∀' SubFormula.rel! Language.equal 2 Language.EqRel.equal ![#0, #1]) ⋎
-   (∃' ∃' ~ SubFormula.rel! Language.equal 2 Language.EqRel.equal ![#0, #1]))
+#eval derive? 4 32 (L := relational (fun _ => ℕ)) 
+  ((∀'(SubFormula.rel! (relational (fun _ => ℕ)) 1 (toRelational 0) ![#0] ⋏
+       SubFormula.rel! (relational (fun _ => ℕ)) 1 (toRelational 1) ![#0]) ⟶ ⊥) ⟶
+    (∃'(~SubFormula.rel! (relational (fun _ => ℕ)) 1 (toRelational 1) ![#0] ⋎
+        ~SubFormula.rel! (relational (fun _ => ℕ)) 1 (toRelational 0) ![#0])))
+
+#eval derive? 8 32 (L := relational (fun _ => ℕ)) 
+  ((SubFormula.rel! (relational (fun _ => ℕ)) 2 (toRelational 0) ![&0, &1]) ⟶
+   (∃' ∃' SubFormula.rel! (relational (fun _ => ℕ)) 2 (toRelational 0) ![#0, #1]))
 
 #eval derive? 32 32 (L := Language.relational (fun _ => ℕ)) 
-  ((( SubFormula.rel! (Language.relational (fun _ => ℕ)) 0 0 ![] ⟶ 
-      SubFormula.rel! (Language.relational (fun _ => ℕ)) 0 1 ![]) ⟶
-    SubFormula.rel! (Language.relational (fun _ => ℕ)) 0 0 ![]) ⟶
-  SubFormula.rel! (Language.relational (fun _ => ℕ)) 0 0 ![])
+  ((( SubFormula.rel! (Language.relational (fun _ => ℕ)) 0 (toRelational 0) ![] ⟶ 
+      SubFormula.rel! (Language.relational (fun _ => ℕ)) 0 (toRelational 1) ![]) ⟶
+    SubFormula.rel! (Language.relational (fun _ => ℕ)) 0 (toRelational 0) ![]) ⟶
+  SubFormula.rel! (Language.relational (fun _ => ℕ)) 0 (toRelational 0) ![])
 
 #eval derive? 32 32 (L := Language.relational (fun _ => ℕ)) 
-  ((( SubFormula.rel! (Language.relational (fun _ => ℕ)) 0 0 ![] ⋎
-      SubFormula.rel! (Language.relational (fun _ => ℕ)) 0 1 ![]) ⟶
-    ( SubFormula.rel! (Language.relational (fun _ => ℕ)) 0 1 ![] ⋎
-      SubFormula.rel! (Language.relational (fun _ => ℕ)) 0 0 ![])))
+  ((( SubFormula.rel! (Language.relational (fun _ => ℕ)) 0 (toRelational 0) ![] ⟶ 
+      SubFormula.rel! (Language.relational (fun _ => ℕ)) 0 (toRelational 1) ![]) ⟶
+    SubFormula.rel! (Language.relational (fun _ => ℕ)) 0 (toRelational 0) ![]) ⟶
+  SubFormula.rel! (Language.relational (fun _ => ℕ)) 0 (toRelational 0) ![])
+
+#eval derive? 32 32 (L := Language.relational (fun _ => ℕ)) 
+  ((( SubFormula.rel! (Language.relational (fun _ => ℕ)) 0 (toRelational 0) ![] ⋎
+      SubFormula.rel! (Language.relational (fun _ => ℕ)) 0 (toRelational 1) ![]) ⟶
+    ( SubFormula.rel! (Language.relational (fun _ => ℕ)) 0 (toRelational 1) ![] ⋎
+      SubFormula.rel! (Language.relational (fun _ => ℕ)) 0 (toRelational 0) ![])))
 
 #eval derive? 4 32 (L := Language.relational (fun _ => ℕ)) 
-  (∀' ( SubFormula.rel! (Language.relational (fun _ => ℕ)) 1 0 ![#0] ⋎
-        SubFormula.rel! (Language.relational (fun _ => ℕ)) 1 1 ![#0]) ⟶
-   ∀' ( SubFormula.rel! (Language.relational (fun _ => ℕ)) 1 1 ![#0] ⋎
-        SubFormula.rel! (Language.relational (fun _ => ℕ)) 1 0 ![#0]))
-
+  (∀' ( SubFormula.rel! (Language.relational (fun _ => ℕ)) 1 (toRelational 0) ![#0] ⋏
+        SubFormula.rel! (Language.relational (fun _ => ℕ)) 0 (toRelational 1) ![] ⋏ 
+        SubFormula.rel! (Language.relational (fun _ => ℕ)) 0 (toRelational 1) ![]) ⟶
+  (∀' ( SubFormula.rel! (Language.relational (fun _ => ℕ)) 0 (toRelational 1) ![] ⋎
+        SubFormula.rel! (Language.relational (fun _ => ℕ)) 1 (toRelational 0) ![#0])))
 
 #eval derive? 4 32 (L := Language.relational (fun _ => ℕ)) 
-  ( ∀'(SubFormula.rel! (Language.relational (fun _ => ℕ)) 1 0 ![#0] ⟶
-    ∃' SubFormula.rel! (Language.relational (fun _ => ℕ)) 1 0 ![#0]))
+  ( ∀'(SubFormula.rel! (Language.relational (fun _ => ℕ)) 1 (toRelational 0) ![#0] ⟶
+    ∃' SubFormula.rel! (Language.relational (fun _ => ℕ)) 1 (toRelational 0) ![#0]))
 
 end Derivation
 

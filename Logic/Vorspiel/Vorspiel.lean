@@ -168,11 +168,3 @@ def vecToStr : ∀ {n}, (Fin n → String) → String
 #eval vecToStr !["a", "b", "c", "d"]
 
 end String
-
-namespace Finset
-variable {I : Type u} {A : I → Type v}
-
---noncomputable def FinsetSigma (s : Finset (Σ i : I, A i)) (i : I) : Finset (A i) :=
---  Finset.preimage s (Sigma.mk i) (Set.injOn_of_injective sigma_mk_injective _)
-
-end Finset
