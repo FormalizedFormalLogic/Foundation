@@ -16,13 +16,13 @@ inductive SubFormula (μ : Type v) : ℕ → Type (max u v) where
 
 variable (μ : Type v) (μ₁ : Type v₁) (μ₂ : Type v₂) (μ₃ : Type v₃)
 
-@[reducible] def Formula := SubFormula L μ 0
+abbrev Formula := SubFormula L μ 0
 
-@[reducible] def Sentence := Formula L Empty
+abbrev Sentence := Formula L Empty
 
-@[reducible] def SyntacticSubFormula (n : ℕ) := SubFormula L ℕ n
+abbrev SyntacticSubFormula (n : ℕ) := SubFormula L ℕ n
 
-@[reducible] def SyntacticFormula := SyntacticSubFormula L 0
+abbrev SyntacticFormula := SyntacticSubFormula L 0
 
 variable {L μ μ₁ μ₂ μ₃}
 
@@ -39,11 +39,9 @@ def neg {n} : SubFormula L μ n → SubFormula L μ n
   | all p    => ex (neg p)
   | ex p     => all (neg p)
 
-def imp (p q : SubFormula L μ n) : SubFormula L μ n := or (neg p) q
-
 instance : HasLogicSymbols (SubFormula L μ n) where
   neg := neg
-  arrow := imp
+  arrow := fun p q => or (neg p) q
   and := and
   or := or
   top := verum
@@ -86,9 +84,9 @@ by simp[HasOr.or]
 
 variable (L)
 
-@[reducible] def rel! (k) (r : L.rel k) (v : Fin k → SubTerm L μ n) := rel r v
+abbrev rel! (k) (r : L.rel k) (v : Fin k → SubTerm L μ n) := rel r v
 
-@[reducible] def nrel! (k) (r : L.rel k) (v : Fin k → SubTerm L μ n) := nrel r v
+abbrev nrel! (k) (r : L.rel k) (v : Fin k → SubTerm L μ n) := nrel r v
 
 variable {L}
 
@@ -402,11 +400,56 @@ end Syntactic
 lemma ne_of_ne_complexity {p q : SubFormula L μ n} (h : p.complexity ≠ q.complexity) : p ≠ q :=
   by rintro rfl; contradiction
 
+declare_syntax_cat subformula
+syntax "⊤" : subformula
+syntax "⊥" : subformula
+syntax:45 subterm:45 "=" subterm:0 : subformula
+syntax:45 "prop" term:max : subformula
+syntax:45 "rel¹" term "/[" subterm:0 "]" : subformula
+syntax:45 "rel²" term "/[" subterm:0 "," subterm:0 "]" : subformula
+syntax:33 "¬" subformula : subformula
+syntax:32 subformula:32 "∧" subformula:33 : subformula
+syntax:30 subformula:30 "∨" subformula:31 : subformula
+syntax:20 "∀" subformula:20 : subformula
+syntax:20 "∃" subformula:20 : subformula
+syntax "(" subformula ")" : subformula
+syntax:max "!" term:max : subformula
+syntax "“" subformula "”" : term
+ 
+macro_rules
+  | `(“ ⊤ ”)                                          => `(⊤)
+  | `(“ ⊥ ”)                                          => `(⊥)
+  | `(“ ! $t:term ”)                                  => `($t)
+  | `(“ prop $s:term ”)                               => `(rel $s ![])
+  | `(“ rel¹ $s:term /[ $t:subterm ] ”)               => `(rel $s ![T“$t”])
+  | `(“ rel² $s:term /[ $t₁:subterm, $t₂:subterm ] ”) => `(rel $s ![T“$t₁”, T“$t₂”])
+  | `(“ ¬ $p:subformula ”)                            => `(~“$p”)
+  | `(“ $t:subterm = $u:subterm ”)                    => `(rel Language.HasEq.eq ![T“$t”, T“$u”])
+  | `(“ $p:subformula ∧ $q:subformula ”)              => `(“$p” ⋏ “$q”)
+  | `(“ $p:subformula ∨ $q:subformula ”)              => `(“$p” ⋎ “$q”)
+  | `(“ ∀ $p:subformula ”)                            => `(∀' “$p”)
+  | `(“ ∃ $p:subformula ”)                            => `(∃' “$p”)
+  | `(“ ( $x ) ”)                                     => `(“$x”)
+
+#reduce (“¬ prop (Language.toRelational 1)” : Formula (Language.relational (fun _ => ℕ)) ℕ)
+#reduce (“rel¹ Language.toRelational 1 /[&0]” : Formula (Language.relational (fun _ => ℕ)) ℕ)
+#reduce (“¬ rel² Language.toRelational 1 /[&0, &1]” : Formula (Language.relational (fun _ => ℕ)) ℕ)
+#reduce (“¬ (∀ ∀ (#0 + 1) * #1 = #0 + #1)” : Sentence Language.ring)
+
+syntax:10 subformula:10 "→" subformula:11 : subformula
+syntax:10 subformula:10 "↔" subformula:11 : subformula
+
+macro_rules
+  | `(“ $p:subformula → $q:subformula ”) => `(“$p” ⟶ “$q”)
+  | `(“ $p:subformula ↔ $q:subformula ”) => `(“$p” ⟷ “$q”)
+
+#reduce (“(∃ ⊤) ↔ !(∃' ⊤)” : Sentence Language.ring)
+
 end SubFormula
 
-@[reducible] def Theory (L : Language) (μ) := Set (Formula L μ)
+abbrev Theory (L : Language) (μ) := Set (Formula L μ)
 
-@[reducible] def CTheory (L : Language) := Set (Sentence L)
+abbrev CTheory (L : Language) := Set (Sentence L)
 
 namespace SubFormula
 

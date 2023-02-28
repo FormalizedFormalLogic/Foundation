@@ -12,18 +12,18 @@ prefix:max "#" => SubTerm.fixedVar
 
 variable (μ : Type v) (μ₁ : Type v₁) (μ₂ : Type v₂) (μ₃ : Type v₃)
 
-@[reducible] def Term := SubTerm L μ 0
+abbrev Term := SubTerm L μ 0
 
-@[reducible] def SyntacticSubTerm (n : ℕ) := SubTerm L ℕ n
+abbrev SyntacticSubTerm (n : ℕ) := SubTerm L ℕ n
 
-@[reducible] def SyntacticTerm := SyntacticSubTerm L 0
+abbrev SyntacticTerm := SyntacticSubTerm L 0
 
 namespace SubTerm
 variable {μ μ₁ μ₂ μ₃}
 
 instance [Inhabited μ] : Inhabited (SubTerm L μ n) := ⟨&default⟩
 
-@[reducible] def func! (k) (f : L.func k) (v : Fin k → SubTerm L μ n) := func f v
+abbrev func! (k) (f : L.func k) (v : Fin k → SubTerm L μ n) := func f v
 
 variable {L}
 
@@ -232,6 +232,7 @@ end Hom
 end Language
 
 namespace SubTerm
+section
 variable {L₁ L₂ : Language} (Φ : L₁ →ᵥ L₂) {μ₁ μ₂ : Type _} {n₁ n₂ : ℕ}
 
 lemma onSubTerm_bind (fixed : Fin n₁ → SubTerm L₁ μ₂ n₂) (free : μ₁ → SubTerm L₁ μ₂ n₂) (t) :
@@ -258,9 +259,9 @@ lemma onSubTerm_free (t : SyntacticSubTerm L₁ (n + 1)) : Φ.onSubTerm (free t)
 lemma onSubTerm_fix (t : SyntacticSubTerm L₁ n) : Φ.onSubTerm (fix t) = fix (Φ.onSubTerm t) :=
   by simp[fix, onSubTerm_bind]; congr; funext x; cases x <;> simp
 
-end SubTerm
+end
 
-namespace SubTerm
+section
 open Language
 variable {L : Language} [∀ k, DecidableEq (L.func k)] {μ n}
 
@@ -275,5 +276,51 @@ def toSubLanguage' (pf : ∀ k, L.func k → Prop) (pr : ∀ k, L.rel k → Prop
   (t : SubTerm L μ n) (h : ∀ k f, ⟨k, f⟩ ∈ t.languageFunc → pf k f) :
     L.ofSubLanguage.onSubTerm (t.toSubLanguage' pf pr h) = t :=
   by induction t <;> simp[*, toSubLanguage']
+
+end
+
+section
+open Language
+variable {L : Language} [L.HasZero] [L.HasOne] [L.HasAdd] {μ : Type v} {n : ℕ}
+
+def natLit : ℕ → SubTerm L μ n
+  | 0     => func Language.HasZero.zero ![]
+  | n + 1 => func Language.HasAdd.add ![natLit n, func Language.HasOne.one ![]]
+
+@[simp] lemma natLit_zero : (natLit 0 : SubTerm L μ n) = func Language.HasZero.zero ![] := by rfl
+
+@[simp] lemma natLit_succ (n : ℕ) :
+  (natLit (n + 1) : SubTerm L μ n) = func Language.HasAdd.add ![natLit n, func Language.HasOne.one ![]] := by rfl
+
+end
+
+declare_syntax_cat subterm
+syntax:max "#" num : subterm
+syntax:max "&" term:max : subterm
+syntax:max "$" term:max : subterm
+syntax num : subterm
+syntax:70 "const" term:max : subterm
+syntax:70 "func¹" term "/[" subterm:0 "]" : subterm
+syntax:70 "func²" term "/[" subterm:0 "," subterm:0 "]" : subterm
+syntax:50 subterm:50 "+" subterm:51 : subterm
+syntax:60 subterm:60 "*" subterm:61 : subterm
+syntax "(" subterm ")" : subterm
+
+syntax "T“" subterm "”" : term
+
+macro_rules
+  | `(T“ # $n:num ”)                                      => `(#$n)
+  | `(T“ & $n:term ”)                                     => `(&$n)
+  | `(T“ $ $t:term ”)                                     => `($t)
+  | `(T“ $n:num ”)                                        => `(natLit $n)
+  | `(T“ const $d:term ”)                                 => `(func $d ![])
+  | `(T“ func¹ $d:term /[ $t:subterm ] ”)                 => `(func $d ![T“$t”])
+  | `(T“ func² $d:term /[ $t₁:subterm , $t₂:subterm ] ”)  => `(func $d ![T“$t₁”, T“$t₂”])
+  | `(T“ $t:subterm + $u:subterm ”)                       => `(func Language.HasAdd.add ![T“$t”, T“$u”])
+  | `(T“ $t:subterm * $u:subterm ”)                       => `(func Language.HasMul.mul ![T“$t”, T“$u”])
+  | `(T“ ( $x ) ”)                                        => `(T“$x”)
+
+#reduce (T“ func² Language.RingFunc.mul /[&2 + &0, const Language.RingFunc.zero]” : SubTerm Language.ring ℕ 8)
+#reduce (T“(&2 + &0) * #2” : SubTerm Language.ring ℕ 8)
 
 end SubTerm

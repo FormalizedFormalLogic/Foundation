@@ -38,7 +38,7 @@ prefix:64 "∀' " => HasUniv.univ
 
 prefix:64 "∃' " => HasEx.ex
 
-attribute [match_pattern] HasAnd.and HasOr.or HasUniv.univ HasEx.ex
+attribute [match_pattern] HasNeg.neg HasArrow.arrow HasAnd.and HasOr.or HasUniv.univ HasEx.ex
 
 @[notation_class] class HasTurnstile (α : Sort _) (β : Sort _) where
   turnstile : Set α → α → β
@@ -58,6 +58,15 @@ infix:55 " ⊧ " => HasDoubleTurnstile.doubleTurnstile
 end logicNotation
 
 namespace HasLogicSymbols
+
+section
+variable {α : Sort _} [HasLogicSymbols α]
+
+@[match_pattern] def iff (a b : α) := (a ⟶ b) ⋏ (b ⟶ a)
+
+infix:61 " ⟷ " => HasLogicSymbols.iff
+
+end
 
 @[reducible]
 instance Prop_HasLogicSymbols : HasLogicSymbols Prop where

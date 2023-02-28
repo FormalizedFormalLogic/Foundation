@@ -150,7 +150,28 @@ end relational
 class HasEq (L : Language.{u}) where
   eq : L.rel 2
 
+class HasLe (L : Language.{u}) where
+  le : L.rel 2
+
+class HasZero (L : Language.{u}) where
+  zero : L.func 0
+
+class HasOne (L : Language.{u}) where
+  one : L.func 0
+
+class HasAdd (L : Language.{u}) where
+  add : L.func 2
+
+class HasMul (L : Language.{u}) where
+  mul : L.func 2
+
+attribute [match_pattern] HasEq.eq HasAdd.add HasMul.mul
+
 instance : HasEq ring := ⟨RingRel.eq⟩
+instance : HasAdd ring := ⟨RingFunc.add⟩
+instance : HasMul ring := ⟨RingFunc.mul⟩
+instance : HasZero ring := ⟨RingFunc.zero⟩
+instance : HasOne ring := ⟨RingFunc.one⟩
 
 structure Hom (L₁ L₂ : Language) where
   onFunc : {k : ℕ} → L₁.func k → L₂.func k
