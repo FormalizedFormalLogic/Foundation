@@ -407,6 +407,7 @@ syntax:45 subterm:45 "=" subterm:0 : subformula
 syntax:45 "prop" term:max : subformula
 syntax:45 "rel¹" term "/[" subterm:0 "]" : subformula
 syntax:45 "rel²" term "/[" subterm:0 "," subterm:0 "]" : subformula
+syntax:45 "rel³" term "/[" subterm:0 "," subterm:0 "," subterm:0 "]" : subformula
 syntax:33 "¬" subformula : subformula
 syntax:32 subformula:32 "∧" subformula:33 : subformula
 syntax:30 subformula:30 "∨" subformula:31 : subformula
@@ -423,6 +424,7 @@ macro_rules
   | `(“ prop $s:term ”)                               => `(rel $s ![])
   | `(“ rel¹ $s:term /[ $t:subterm ] ”)               => `(rel $s ![T“$t”])
   | `(“ rel² $s:term /[ $t₁:subterm, $t₂:subterm ] ”) => `(rel $s ![T“$t₁”, T“$t₂”])
+  | `(“ rel³ $s:term /[ $t₁:subterm, $t₂:subterm, $t₃:subterm ] ”) => `(rel $s ![T“$t₁”, T“$t₂”, T“$t₃”])
   | `(“ ¬ $p:subformula ”)                            => `(~“$p”)
   | `(“ $t:subterm = $u:subterm ”)                    => `(rel Language.HasEq.eq ![T“$t”, T“$u”])
   | `(“ $p:subformula ∧ $q:subformula ”)              => `(“$p” ⋏ “$q”)

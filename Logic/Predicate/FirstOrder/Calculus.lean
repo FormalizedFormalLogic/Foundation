@@ -53,32 +53,32 @@ protected unsafe def repr : {Δ : Finset (SyntacticFormula L)} → Derivation Δ
   | _, AxL Δ _ _ _ _   =>
       "\\AxiomC{}\n" ++
       "\\RightLabel{\\scriptsize(AxL)}\n" ++
-      "\\UnaryInfC{$\\Vdash " ++ reprStr Δ ++ "$}\n\n"
+      "\\UnaryInfC{$" ++ reprStr Δ ++ "$}\n\n"
   | _, verum Δ _       =>
       "\\AxiomC{}\n" ++
       "\\RightLabel{\\scriptsize($\\top$)}\n" ++
-      "\\UnaryInfC{$\\Vdash " ++ reprStr Δ ++ "$}\n\n"
+      "\\UnaryInfC{$" ++ reprStr Δ ++ "$}\n\n"
   | _, orLeft Δ p q d  =>
       d.repr ++
       "\\RightLabel{\\scriptsize($\\lor$L)}\n" ++
-      "\\UnaryInfC{$\\Vdash " ++ reprStr (insert (p ⋎ q) Δ) ++ "$}\n\n"
+      "\\UnaryInfC{$" ++ reprStr (insert (p ⋎ q) Δ) ++ "$}\n\n"
   | _, orRight Δ p q d =>
       d.repr ++
       "\\RightLabel{\\scriptsize($\\lor$R)}\n" ++
-      "\\UnaryInfC{$\\Vdash " ++ reprStr (insert (p ⋎ q) Δ) ++ "$}\n\n"
+      "\\UnaryInfC{$" ++ reprStr (insert (p ⋎ q) Δ) ++ "$}\n\n"
   | _, and Δ p q dp dq =>
       dp.repr ++
       dq.repr ++
       "\\RightLabel{\\scriptsize($\\land$)}\n" ++
-      "\\BinaryInfC{$\\Vdash " ++ reprStr (insert (p ⋏ q) Δ) ++ "$}\n\n"
+      "\\BinaryInfC{$" ++ reprStr (insert (p ⋏ q) Δ) ++ "$}\n\n"
   | _, all Δ p d       =>
       d.repr ++
       "\\RightLabel{\\scriptsize($\\forall$)}\n" ++
-      "\\UnaryInfC{$\\Vdash " ++ reprStr (insert (∀' p) Δ) ++ "$}\n\n"
+      "\\UnaryInfC{$" ++ reprStr (insert (∀' p) Δ) ++ "$}\n\n"
   | _, ex Δ _ p d      =>
       d.repr ++
       "\\RightLabel{\\scriptsize($\\exists$)}\n" ++
-      "\\UnaryInfC{$\\Vdash " ++ reprStr (insert (∃' p) Δ) ++ "$}\n\n"
+      "\\UnaryInfC{$" ++ reprStr (insert (∃' p) Δ) ++ "$}\n\n"
 
 unsafe instance : Repr (⊩ Δ) where
   reprPrec d _ := d.repr
@@ -224,80 +224,58 @@ def exOfInstances (v : List (SyntacticTerm L)) (p : SyntacticSubFormula L 1)
   · exact Derivation.cast (ih (Γ := insert (∃' p) Γ)
       (Derivation.cast (ex _ t p h) (by ext r; simp))) (by simp)
 
-
-def deriveList? (tmax : ℕ) : ℕ → (Γ : List (SyntacticFormula L)) → Option (⊩ Γ.toFinset)
+def deriveList? (ts : List (SyntacticTerm L)) : ℕ → (Γ : List (SyntacticFormula L)) → Option (⊩ Γ.toFinset)
   | 0,     _      => none
   | _ + 1, []     => none
-  | s + 1, p :: Γ => if h : ~p ∈ Γ then some (em (p := p) (by simp) (by simp[h]))
+  | s + 1, p :: Γ =>
+      if h : ~p ∈ Γ then some (em (p := p) (by simp) (by simp[h]))
+      else if h : ⊤ ∈ Γ then some $ verum _ (by simp[h])
       else match p with
       | ⊤        => some $ verum _ (by simp)
-      | ⊥        => (deriveList? tmax s Γ).map (fun d => weakening d (by simpa using Finset.subset_insert ⊥ Γ.toFinset))
-      | rel r v  => (deriveList? tmax s $ Γ ++ [rel r v]).map (fun d => d.cast $ by ext; simp; tauto)
-      | nrel r v => (deriveList? tmax s $ Γ ++ [nrel r v]).map (fun d => d.cast $ by ext; simp; tauto)
-      | p ⋎ q    => (deriveList? tmax s (Γ ++ [p, q])).map
+      | ⊥        => (deriveList? ts s Γ).map (fun d => weakening d (by simpa using Finset.subset_insert ⊥ Γ.toFinset))
+      | rel r v  => (deriveList? ts s $ Γ ++ [rel r v]).map (fun d => d.cast $ by ext; simp; tauto)
+      | nrel r v => (deriveList? ts s $ Γ ++ [nrel r v]).map (fun d => d.cast $ by ext; simp; tauto)
+      | p ⋎ q    => (deriveList? ts s (Γ ++ [p, q])).map
           fun d => (or (Δ := Γ.toFinset) (p := p) (q := q) (d.cast $ by ext; simp; tauto)).cast (by ext; simp)
-      | p ⋏ q    => (deriveList? tmax s (Γ ++ [p])).bind fun dp => (deriveList? tmax s (Γ ++ [q])).map
+      | p ⋏ q    => (deriveList? ts s (Γ ++ [p])).bind fun dp => (deriveList? ts s (Γ ++ [q])).map
           fun dq => (and Γ.toFinset p q (dp.cast $ by ext; simp[or_comm]) (dq.cast $ by ext; simp[or_comm])).cast 
             (by ext; simp[or_comm])
-      | ∀' p     => (deriveList? tmax s (Γ.map shift ++ [free p])).map
+      | ∀' p     => (deriveList? ts s (Γ.map shift ++ [free p])).map
           fun d => (all (Γ.toFinset) p (d.cast $ by ext; simp[shifts, shiftEmb, or_comm])).cast (by simp)
-      | ∃' p     => (deriveList? tmax s (Γ ++ [∃' p] ++ (SubTerm.enumLtList tmax).map (subst · p))).map
-          fun d => (exOfInstances (Γ := insert (∃' p) Γ.toFinset) (SubTerm.enumLtList tmax)
+      | ∃' p     => (deriveList? ts s (Γ ++ [∃' p] ++ ts.map (subst · p))).map
+          fun d => (exOfInstances (Γ := insert (∃' p) Γ.toFinset) ts
             p (d.cast $ by ext; simp[or_comm])).cast (by ext; simp)
 
-def derive? (tmax s : ℕ) (p : SyntacticFormula L) : Option (⊩ ({p} : Finset (SyntacticFormula L))) :=
-  deriveList? tmax s [p]
+def derive? (ts : List (SyntacticTerm L)) (s : ℕ) (p : SyntacticFormula L) : Option (⊩ ({p} : Finset (SyntacticFormula L))) :=
+  deriveList? ts s [p]
 
-
-variable (p q : SyntacticFormula Language.equal)
 open Language
 
-#eval derive? 8 32 (L := Language.equal) 
-  (SubFormula.rel! Language.equal 2 Language.EqRel.equal ![&0, &1] ⟶
-   (∃' ∃' SubFormula.rel! Language.equal 2 Language.EqRel.equal ![#0, #1]))
+#eval derive? [&0, &1] 10 (L := ring) “&0 = &1 → (∃ ∃ #0 = #1)” 
 
-#eval derive? 8 32 (L := Language.equal) 
-  (SubFormula.rel! Language.equal 2 Language.EqRel.equal ![&0, &1] ⟶
-   (∃' ∃' SubFormula.rel! Language.equal 2 Language.EqRel.equal ![#0, #1]))
+#eval derive? [&0, &1] 4 (L := ring) “(∀ #0 = #0) → &1 = &1”
 
-#eval derive? 4 32 (L := relational (fun _ => ℕ)) 
-  ((∀'(SubFormula.rel! (relational (fun _ => ℕ)) 1 (toRelational 0) ![#0] ⋏
-       SubFormula.rel! (relational (fun _ => ℕ)) 1 (toRelational 1) ![#0]) ⟶ ⊥) ⟶
-    (∃'(~SubFormula.rel! (relational (fun _ => ℕ)) 1 (toRelational 1) ![#0] ⋎
-        ~SubFormula.rel! (relational (fun _ => ℕ)) 1 (toRelational 0) ![#0])))
+#eval derive? [] 16 (L := relational (fun _ => ℕ))
+  “((prop (toRelational 0) → prop (toRelational 1)) → prop (toRelational 0)) → prop (toRelational 0)” 
 
-#eval derive? 8 32 (L := relational (fun _ => ℕ)) 
-  ((SubFormula.rel! (relational (fun _ => ℕ)) 2 (toRelational 0) ![&0, &1]) ⟶
-   (∃' ∃' SubFormula.rel! (relational (fun _ => ℕ)) 2 (toRelational 0) ![#0, #1]))
+#eval derive? [&0] 16 (L := relational (fun _ => ℕ))
+  “(∀ rel¹ (toRelational 0)/[#0] ∨ rel¹ (toRelational 1)/[#0]) → (∀ rel¹ (toRelational 1)/[#0] ∨ rel¹ (toRelational 0)/[#0])” 
 
-#eval derive? 32 32 (L := Language.relational (fun _ => ℕ)) 
-  ((( SubFormula.rel! (Language.relational (fun _ => ℕ)) 0 (toRelational 0) ![] ⟶ 
-      SubFormula.rel! (Language.relational (fun _ => ℕ)) 0 (toRelational 1) ![]) ⟶
-    SubFormula.rel! (Language.relational (fun _ => ℕ)) 0 (toRelational 0) ![]) ⟶
-  SubFormula.rel! (Language.relational (fun _ => ℕ)) 0 (toRelational 0) ![])
+#eval derive? [&0] 32 (L := relational (fun _ => ℕ))
+  “(∀ rel¹ (toRelational 0)/[#0] ∨ rel¹ (toRelational 1)/[#0] ∨ rel¹ (toRelational 2)/[#0]) →
+   (∀ rel¹ (toRelational 2)/[#0] ∨ rel¹ (toRelational 1)/[#0] ∨ rel¹ (toRelational 0)/[#0])” 
 
-#eval derive? 32 32 (L := Language.relational (fun _ => ℕ)) 
-  ((( SubFormula.rel! (Language.relational (fun _ => ℕ)) 0 (toRelational 0) ![] ⟶ 
-      SubFormula.rel! (Language.relational (fun _ => ℕ)) 0 (toRelational 1) ![]) ⟶
-    SubFormula.rel! (Language.relational (fun _ => ℕ)) 0 (toRelational 0) ![]) ⟶
-  SubFormula.rel! (Language.relational (fun _ => ℕ)) 0 (toRelational 0) ![])
+#eval derive? [&0] 64 (L := relational (fun _ => ℕ))
+  “((∀ prop (toRelational 0) ∨ rel¹ (toRelational 0) /[#0]) → ⊥) ↔ 
+   ¬(∀ rel¹ (toRelational 0) /[#0] ∨ prop (toRelational 0))”
 
-#eval derive? 32 32 (L := Language.relational (fun _ => ℕ)) 
-  ((( SubFormula.rel! (Language.relational (fun _ => ℕ)) 0 (toRelational 0) ![] ⋎
-      SubFormula.rel! (Language.relational (fun _ => ℕ)) 0 (toRelational 1) ![]) ⟶
-    ( SubFormula.rel! (Language.relational (fun _ => ℕ)) 0 (toRelational 1) ![] ⋎
-      SubFormula.rel! (Language.relational (fun _ => ℕ)) 0 (toRelational 0) ![])))
+#eval derive? [&0, &1] 64 (L := relational (fun _ => ℕ))
+  “((∀ ∀ rel² (toRelational 0) /[#0, #1]) → ⊥) ↔ 
+   ¬(∀ ∀ rel² (toRelational 0) /[#0, #1])”
 
-#eval derive? 4 32 (L := Language.relational (fun _ => ℕ)) 
-  (∀' ( SubFormula.rel! (Language.relational (fun _ => ℕ)) 1 (toRelational 0) ![#0] ⋏
-        SubFormula.rel! (Language.relational (fun _ => ℕ)) 0 (toRelational 1) ![] ⋏ 
-        SubFormula.rel! (Language.relational (fun _ => ℕ)) 0 (toRelational 1) ![]) ⟶
-  (∀' ( SubFormula.rel! (Language.relational (fun _ => ℕ)) 0 (toRelational 1) ![] ⋎
-        SubFormula.rel! (Language.relational (fun _ => ℕ)) 1 (toRelational 0) ![#0])))
-
-#eval derive? 4 32 (L := Language.relational (fun _ => ℕ)) 
-  ( ∀'(SubFormula.rel! (Language.relational (fun _ => ℕ)) 1 (toRelational 0) ![#0] ⟶
-    ∃' SubFormula.rel! (Language.relational (fun _ => ℕ)) 1 (toRelational 0) ![#0]))
+#eval derive? [&0, &1] 128 (L := relational (fun _ => ℕ))
+  “((∀ ∀ rel² (toRelational 0) /[#0, #1])) →
+    (∀ ∀ rel² (toRelational 0) /[#1, #0])”
 
 end Derivation
 
