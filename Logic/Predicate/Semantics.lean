@@ -94,7 +94,7 @@ lemma val_subst (u : SubTerm L μ n) (t : SubTerm L μ (n + 1)) :
   by simp[subst, val_bind]; congr; exact funext $ Fin.lastCases (by simp) (by simp)
 
 @[simp] lemma val_fixedSucc (a : M) (t : SubTerm L μ n) :
-    t.fixedSucc.val s (a :> e) ε = t.val s e ε := by simp[fixedSucc, val_map, Function.comp]
+    t.bShift.val s (a :> e) ε = t.val s e ε := by simp[bShift, val_map, Function.comp]
 
 section Language
 variable (Φ : L₁ →ᵥ L₂) (e : Fin n → M) (ε : μ → M)

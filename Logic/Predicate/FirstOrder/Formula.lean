@@ -200,8 +200,8 @@ def bind' : ∀ {n₁ n₂}, (fixed : Fin n₁ → SubTerm L μ₂ n₂) → (fr
   | _, _, fixed, free, (nrel r v) => nrel r (SubTerm.bind fixed free ∘ v)
   | _, _, fixed, free, (p ⋏ q)    => bind' fixed free p ⋏ bind' fixed free q
   | _, _, fixed, free, (p ⋎ q)    => bind' fixed free p ⋎ bind' fixed free q
-  | _, _, fixed, free, (∀' p)     => ∀' bind' (Fin.cases #0 $ SubTerm.fixedSucc ∘ fixed) (SubTerm.fixedSucc ∘ free) p
-  | _, _, fixed, free, (∃' p)     => ∃' bind' (Fin.cases #0 $ SubTerm.fixedSucc ∘ fixed) (SubTerm.fixedSucc ∘ free) p
+  | _, _, fixed, free, (∀' p)     => ∀' bind' (Fin.cases #0 $ SubTerm.bShift ∘ fixed) (SubTerm.bShift ∘ free) p
+  | _, _, fixed, free, (∃' p)     => ∃' bind' (Fin.cases #0 $ SubTerm.bShift ∘ fixed) (SubTerm.bShift ∘ free) p
 
 lemma bind'_neg {n₁ n₂} (fixed : Fin n₁ → SubTerm L μ₂ n₂) (free : μ₁ → SubTerm L μ₂ n₂) (p) :
     bind' fixed free (~p) = ~bind' fixed free p :=
@@ -232,10 +232,10 @@ variable (fixed : Fin n₁ → SubTerm L μ₂ n₂) (free : μ₁ → SubTerm L
     bind fixed free (nrel r v) = nrel r (fun i => (v i).bind fixed free) := rfl
 
 @[simp] lemma bind_all (p : SubFormula L μ₁ (n₁ + 1)) :
-    bind fixed free (∀' p) = ∀' bind (#0 :> SubTerm.fixedSucc ∘ fixed) (SubTerm.fixedSucc ∘ free) p := rfl
+    bind fixed free (∀' p) = ∀' bind (#0 :> SubTerm.bShift ∘ fixed) (SubTerm.bShift ∘ free) p := rfl
 
 @[simp] lemma bind_ex (p : SubFormula L μ₁ (n₁ + 1)) :
-    bind fixed free (∃' p) = ∃' bind (#0 :> SubTerm.fixedSucc ∘ fixed) (SubTerm.fixedSucc ∘ free) p := rfl
+    bind fixed free (∃' p) = ∃' bind (#0 :> SubTerm.bShift ∘ fixed) (SubTerm.bShift ∘ free) p := rfl
 
 @[simp] lemma complexity_bind (p : SubFormula L μ₁ n₁) : complexity (bind fixed free p) = complexity p :=
   by induction p using rec' generalizing μ₂ n₂ <;> simp[*]
@@ -259,8 +259,8 @@ lemma bind_bind
     bind fixed₂ free₂ (bind fixed₁ free₁ p) = bind (fun n => (fixed₁ n).bind fixed₂ free₂) (fun m => (free₁ m).bind fixed₂ free₂) p := by
   induction p using rec' generalizing n₂ n₃ <;> simp[*, SubTerm.bind_bind] <;>
   { congr
-    refine funext (Fin.cases (by simp) (by simp[SubTerm.fixedSucc, SubTerm.map, SubTerm.bind_bind]))
-    refine funext (by simp[SubTerm.fixedSucc, SubTerm.map, SubTerm.bind_bind]) }
+    refine funext (Fin.cases (by simp) (by simp[SubTerm.bShift, SubTerm.map, SubTerm.bind_bind]))
+    refine funext (by simp[SubTerm.bShift, SubTerm.map, SubTerm.bind_bind]) }
 
 lemma bind_comp_bind
   (fixed₁ : Fin n₁ → SubTerm L μ₂ n₂) (free₁ : μ₁ → SubTerm L μ₂ n₂)
@@ -298,6 +298,28 @@ lemma map_map
 
 @[simp] lemma map_id (p) : @map L μ μ n n id id p = p :=
   by induction p using rec' <;> simp[*]
+
+@[simp] lemma subst_rel {s : SubTerm L μ n} {k} (r : L.rel k) (v : Fin k → SubTerm L μ (n + 1)) :
+    subst s (rel r v) = rel r (fun i => SubTerm.subst s (v i)) :=
+  by simp[subst, SubTerm.subst]
+
+@[simp] lemma subst_nrel {s : SubTerm L μ n} {k} (r : L.rel k) (v : Fin k → SubTerm L μ (n + 1)) :
+    subst s (nrel r v) = nrel r (fun i => SubTerm.subst s (v i)) :=
+  by simp[subst, SubTerm.subst]
+
+@[simp] lemma subst_all {s : SubTerm L μ n} (p : SubFormula L μ (n + 1 + 1)) :
+    subst s (∀' p) = ∀' subst s.bShift p := by
+  simp[subst, SubTerm.subst]; congr
+  funext i
+  cases' i using Fin.cases with i <;> simp
+  cases' i using Fin.lastCases with i <;> simp[Fin.succ_castSucc]
+
+@[simp] lemma subst_ex {s : SubTerm L μ n} (p : SubFormula L μ (n + 1 + 1)) :
+    subst s (∃' p) = ∃' subst s.bShift p := by
+  simp[subst, SubTerm.subst]; congr
+  funext i
+  cases' i using Fin.cases with i <;> simp
+  cases' i using Fin.lastCases with i <;> simp[Fin.succ_castSucc]
 
 section Syntactic
 
