@@ -110,6 +110,19 @@ lemma map_map
     (fixedSucc ∘ freeVar : μ → SubTerm L μ (n + 1)) = freeVar :=
   funext (by simp)
 
+@[simp] lemma subst_fixedVar_last (s : SubTerm L μ n) : subst s #(Fin.last n) = s :=
+  by simp[subst]
+
+@[simp] lemma subst_fixedVar_castSucc (s : SubTerm L μ n) (x : Fin n) : subst s #(Fin.castSucc x) = #x :=
+  by simp[subst]
+
+@[simp] lemma subst_freeVar (s : SubTerm L μ n) (x : μ) : subst s &x = &x :=
+  by simp[subst]
+
+@[simp] lemma subst_func (s : SubTerm L μ n) {k} (f : L.func k) (v : Fin k → SubTerm L μ (n + 1)) :
+    subst s (func f v) = func f (fun i => subst s (v i)) :=
+  by simp[subst]
+
 section Syntactic
 
 /-
@@ -281,7 +294,7 @@ end
 
 section
 open Language
-variable {L : Language} [L.HasZero] [L.HasOne] [L.HasAdd] {μ : Type v} {n : ℕ}
+variable {L : Language} [hz : L.HasZero] [ho : L.HasOne] [ha : L.HasAdd] {μ : Type v} {μ₁ μ₂} {n : ℕ} {n₁ n₂}
 
 def natLit : ℕ → SubTerm L μ n
   | 0     => func Language.HasZero.zero ![]
@@ -289,15 +302,20 @@ def natLit : ℕ → SubTerm L μ n
 
 @[simp] lemma natLit_zero : (natLit 0 : SubTerm L μ n) = func Language.HasZero.zero ![] := by rfl
 
-@[simp] lemma natLit_succ (n : ℕ) :
-  (natLit (n + 1) : SubTerm L μ n) = func Language.HasAdd.add ![natLit n, func Language.HasOne.one ![]] := by rfl
+@[simp] lemma natLit_succ (z : ℕ) :
+  (natLit (z + 1) : SubTerm L μ n) = func Language.HasAdd.add ![natLit z, func Language.HasOne.one ![]] := by rfl
+
+@[simp] lemma bind_natLit (z : ℕ) (fixed : Fin n₁ → SubTerm L μ₂ n₂) (free : μ₁ → SubTerm L μ₂ n₂) :
+    bind fixed free (natLit z) = natLit z := by
+  induction' z with z ih <;> simp
+  funext i; cases i using Fin.cases <;> simp[ih]
 
 end
 
 declare_syntax_cat subterm
 syntax:max "#" num : subterm
 syntax:max "&" term:max : subterm
-syntax:max "$" term:max : subterm
+syntax:max "!" term:max : subterm
 syntax num : subterm
 syntax:70 "const" term:max : subterm
 syntax:70 "func¹" term "/[" subterm:0 "]" : subterm
@@ -309,18 +327,18 @@ syntax "(" subterm ")" : subterm
 syntax "T“" subterm "”" : term
 
 macro_rules
-  | `(T“ # $n:num ”)                                      => `(#$n)
-  | `(T“ & $n:term ”)                                     => `(&$n)
-  | `(T“ $ $t:term ”)                                     => `($t)
-  | `(T“ $n:num ”)                                        => `(natLit $n)
-  | `(T“ const $d:term ”)                                 => `(func $d ![])
-  | `(T“ func¹ $d:term /[ $t:subterm ] ”)                 => `(func $d ![T“$t”])
-  | `(T“ func² $d:term /[ $t₁:subterm , $t₂:subterm ] ”)  => `(func $d ![T“$t₁”, T“$t₂”])
-  | `(T“ $t:subterm + $u:subterm ”)                       => `(func Language.HasAdd.add ![T“$t”, T“$u”])
-  | `(T“ $t:subterm * $u:subterm ”)                       => `(func Language.HasMul.mul ![T“$t”, T“$u”])
-  | `(T“ ( $x ) ”)                                        => `(T“$x”)
+  | `(T“ # $n:num ”)                                     => `(#$n)
+  | `(T“ & $n:term ”)                                    => `(&$n)
+  | `(T“ ! $t:term ”)                                    => `($t)
+  | `(T“ $n:num ”)                                       => `(natLit $n)
+  | `(T“ const $d:term ”)                                => `(func $d ![])
+  | `(T“ func¹ $d:term /[ $t:subterm ] ”)                => `(func $d ![T“$t”])
+  | `(T“ func² $d:term /[ $t₁:subterm , $t₂:subterm ] ”) => `(func $d ![T“$t₁”, T“$t₂”])
+  | `(T“ $t:subterm + $u:subterm ”)                      => `(func Language.HasAdd.add ![T“$t”, T“$u”])
+  | `(T“ $t:subterm * $u:subterm ”)                      => `(func Language.HasMul.mul ![T“$t”, T“$u”])
+  | `(T“ ( $x ) ”)                                       => `(T“$x”)
 
-#reduce (T“ func² Language.RingFunc.mul /[&2 + &0, const Language.RingFunc.zero]” : SubTerm Language.ring ℕ 8)
-#reduce (T“(&2 + &0) * #2” : SubTerm Language.ring ℕ 8)
+#reduce (T“ func² Language.ORingFunc.mul /[&2 + &0, const Language.ORingFunc.zero]” : SubTerm Language.oring ℕ 8)
+#reduce (T“(&2 + &0) * #2” : SubTerm Language.oring ℕ 8)
 
 end SubTerm

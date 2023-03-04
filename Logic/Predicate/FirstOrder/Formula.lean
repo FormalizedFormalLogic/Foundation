@@ -39,6 +39,9 @@ def neg {n} : SubFormula L μ n → SubFormula L μ n
   | all p    => ex (neg p)
   | ex p     => all (neg p)
 
+lemma neg_neg (p : SubFormula L μ n) : neg (neg p) = p :=
+  by induction p <;> simp[*, neg]
+
 instance : HasLogicSymbols (SubFormula L μ n) where
   neg := neg
   arrow := fun p q => or (neg p) q
@@ -65,6 +68,8 @@ instance : HasEx (SubFormula L μ) := ⟨ex⟩
 @[simp] lemma neg_all (p : SubFormula L μ (n + 1)) : ~(∀' p) = ∃' ~p := rfl
 
 @[simp] lemma neg_ex (p : SubFormula L μ (n + 1)) : ~(∃' p) = ∀' ~p := rfl
+
+@[simp] lemma neg_neg' (p : SubFormula L μ n) : ~~p = p := neg_neg p
 
 lemma neg_eq (p : SubFormula L μ n) : ~p = neg p := rfl
 
@@ -186,6 +191,7 @@ variable {n n₁ n₂ n₃ m m₁ m₂ m₃ : ℕ}
 @[simp] lemma complexity_neg (p : SubFormula L μ n) : complexity (~p) = complexity p :=
 by induction p using rec' <;> simp[*]
 
+@[reducible]
 def bind' : ∀ {n₁ n₂}, (fixed : Fin n₁ → SubTerm L μ₂ n₂) → (free : μ₁ → SubTerm L μ₂ n₂) →
     SubFormula L μ₁ n₁ → SubFormula L μ₂ n₂
   | _, _, _,     _,    ⊤          => ⊤
@@ -404,6 +410,8 @@ declare_syntax_cat subformula
 syntax "⊤" : subformula
 syntax "⊥" : subformula
 syntax:45 subterm:45 "=" subterm:0 : subformula
+syntax:45 subterm:45 "<" subterm:0 : subformula
+syntax:45 subterm:45 "≤" subterm:0 : subformula
 syntax:45 "prop" term:max : subformula
 syntax:45 "rel¹" term "/[" subterm:0 "]" : subformula
 syntax:45 "rel²" term "/[" subterm:0 "," subterm:0 "]" : subformula
@@ -427,6 +435,9 @@ macro_rules
   | `(“ rel³ $s:term /[ $t₁:subterm, $t₂:subterm, $t₃:subterm ] ”) => `(rel $s ![T“$t₁”, T“$t₂”, T“$t₃”])
   | `(“ ¬ $p:subformula ”)                            => `(~“$p”)
   | `(“ $t:subterm = $u:subterm ”)                    => `(rel Language.HasEq.eq ![T“$t”, T“$u”])
+  | `(“ $t:subterm < $u:subterm ”)                    => `(rel Language.HasLt.lt ![T“$t”, T“$u”])
+  | `(“ $t:subterm ≤ $u:subterm ”)                    =>
+    `(rel Language.HasLt.lt ![T“$t”, T“$u”] ⋎ rel Language.HasEq.eq ![T“$t”, T“$u”])
   | `(“ $p:subformula ∧ $q:subformula ”)              => `(“$p” ⋏ “$q”)
   | `(“ $p:subformula ∨ $q:subformula ”)              => `(“$p” ⋎ “$q”)
   | `(“ ∀ $p:subformula ”)                            => `(∀' “$p”)
@@ -436,7 +447,7 @@ macro_rules
 #reduce (“¬ prop (Language.toRelational 1)” : Formula (Language.relational (fun _ => ℕ)) ℕ)
 #reduce (“rel¹ Language.toRelational 1 /[&0]” : Formula (Language.relational (fun _ => ℕ)) ℕ)
 #reduce (“¬ rel² Language.toRelational 1 /[&0, &1]” : Formula (Language.relational (fun _ => ℕ)) ℕ)
-#reduce (“¬ (∀ ∀ (#0 + 1) * #1 = #0 + #1)” : Sentence Language.ring)
+#reduce (“¬ (∀ ∀ (#0 + 1) * #1 < #0 + #1)” : Sentence Language.oring)
 
 syntax:10 subformula:10 "→" subformula:11 : subformula
 syntax:10 subformula:10 "↔" subformula:11 : subformula
@@ -445,7 +456,7 @@ macro_rules
   | `(“ $p:subformula → $q:subformula ”) => `(“$p” ⟶ “$q”)
   | `(“ $p:subformula ↔ $q:subformula ”) => `(“$p” ⟷ “$q”)
 
-#reduce (“(∃ ⊤) ↔ !(∃' ⊤)” : Sentence Language.ring)
+#reduce (“(∃ ⊤) ↔ !(∃' ⊤)” : Sentence Language.oring)
 
 end SubFormula
 

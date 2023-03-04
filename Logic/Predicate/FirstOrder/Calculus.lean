@@ -4,6 +4,7 @@ import Logic.Predicate.Coding
 universe u v
 
 namespace FirstOrder
+
 open SubFormula
 variable {L : Language.{u}} [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq (L.rel k)]
 
@@ -42,6 +43,10 @@ structure provable (T : Theory L ℕ) (p : SyntacticFormula L) where
   leftHand : Finset (SyntacticFormula L)
   hleftHand : ↑leftHand ⊆ SubFormula.neg '' T
   derivation : ⊩ insert p leftHand
+
+abbrev DerivationList (G : List (SyntacticFormula L)) := ⊩ G.toFinset
+
+abbrev Derivationₛ (p : SyntacticFormula L) := ⊩ ({p} : Finset _)
 
 namespace Derivation
 variable {Δ Γ : Finset (SyntacticFormula L)}
@@ -246,14 +251,14 @@ def deriveList? (ts : List (SyntacticTerm L)) : ℕ → (Γ : List (SyntacticFor
           fun d => (exOfInstances (Γ := insert (∃' p) Γ.toFinset) ts
             p (d.cast $ by ext; simp[or_comm])).cast (by ext; simp)
 
-def derive? (ts : List (SyntacticTerm L)) (s : ℕ) (p : SyntacticFormula L) : Option (⊩ ({p} : Finset (SyntacticFormula L))) :=
+def derive? (ts : List (SyntacticTerm L)) (s : ℕ) (p : SyntacticFormula L) : Option (Derivationₛ p) :=
   deriveList? ts s [p]
 
 open Language
 
-#eval derive? [&0, &1] 10 (L := ring) “&0 = &1 → (∃ ∃ #0 = #1)” 
+#eval derive? [&0, &1] 10 (L := oring) “&0 = &1 → (∃ ∃ #0 = #1)” 
 
-#eval derive? [&0, &1] 4 (L := ring) “(∀ #0 = #0) → &1 = &1”
+#eval derive? [&0, &1] 4 (L := oring) “(∀ #0 = #0) → &1 = &1”
 
 #eval derive? [] 16 (L := relational (fun _ => ℕ))
   “((prop (toRelational 0) → prop (toRelational 1)) → prop (toRelational 0)) → prop (toRelational 0)” 

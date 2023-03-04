@@ -60,66 +60,66 @@ instance (k) : Encodable (equal.rel k) where
     | _ => none
   encodek := fun x => by rcases x; simp
 
-inductive RingFunc : ℕ → Type
-  | zero : RingFunc 0
-  | one : RingFunc 0
-  | add : RingFunc 2
-  | mul : RingFunc 2
+inductive ORingFunc : ℕ → Type
+  | zero : ORingFunc 0
+  | one : ORingFunc 0
+  | add : ORingFunc 2
+  | mul : ORingFunc 2
 
-inductive RingRel : ℕ → Type
-  | eq : RingRel 2
-  | le : RingRel 2
+inductive ORingRel : ℕ → Type
+  | eq : ORingRel 2
+  | lt : ORingRel 2
 
 @[reducible]
-def ring : Language where
-  func := RingFunc
-  rel := RingRel
+def oring : Language where
+  func := ORingFunc
+  rel := ORingRel
 
-instance (k) : ToString (ring.func k) :=
+instance (k) : ToString (oring.func k) :=
 ⟨ fun s =>
   match s with
-  | RingFunc.zero => "0"
-  | RingFunc.one  => "1"
-  | RingFunc.add  => "(+)"
-  | RingFunc.mul  => "(\\cdot)"⟩
+  | ORingFunc.zero => "0"
+  | ORingFunc.one  => "1"
+  | ORingFunc.add  => "(+)"
+  | ORingFunc.mul  => "(\\cdot)"⟩
 
-instance (k) : ToString (ring.rel k) :=
+instance (k) : ToString (oring.rel k) :=
 ⟨ fun s =>
   match s with
-  | RingRel.eq => "\\mathrm{Eq}"
-  | RingRel.le    => "\\mathrm{Le}"⟩
+  | ORingRel.eq => "\\mathrm{Eq}"
+  | ORingRel.lt    => "\\mathrm{Lt}"⟩
 
-instance (k) : DecidableEq (ring.func k) := fun a b =>
+instance (k) : DecidableEq (oring.func k) := fun a b =>
   by rcases a <;> rcases b <;> simp <;> try {exact instDecidableTrue} <;> try {exact instDecidableFalse}
 
-instance (k) : DecidableEq (ring.rel k) := fun a b =>
+instance (k) : DecidableEq (oring.rel k) := fun a b =>
   by rcases a <;> rcases b <;> simp <;> try {exact instDecidableTrue} <;> try {exact instDecidableFalse}
 
-instance (k) : Encodable (ring.func k) where
+instance (k) : Encodable (oring.func k) where
   encode := fun x =>
     match x with
-    | RingFunc.zero => 0
-    | RingFunc.one  => 1
-    | RingFunc.add  => 0
-    | RingFunc.mul  => 1
+    | ORingFunc.zero => 0
+    | ORingFunc.one  => 1
+    | ORingFunc.add  => 0
+    | ORingFunc.mul  => 1
   decode := fun e =>
     match k, e with
-    | 0, 0 => some RingFunc.zero
-    | 0, 1 => some RingFunc.one
-    | 2, 0 => some RingFunc.add
-    | 2, 1 => some RingFunc.mul
+    | 0, 0 => some ORingFunc.zero
+    | 0, 1 => some ORingFunc.one
+    | 2, 0 => some ORingFunc.add
+    | 2, 1 => some ORingFunc.mul
     | _, _ => none
   encodek := fun x => by rcases x <;> simp
 
-instance (k) : Encodable (ring.rel k) where
+instance (k) : Encodable (oring.rel k) where
   encode := fun x =>
     match x with
-    | RingRel.eq => 0
-    | RingRel.le    => 1
+    | ORingRel.eq => 0
+    | ORingRel.lt    => 1
   decode := fun e =>
     match k, e with
-    | 2, 0 => some RingRel.eq
-    | 2, 1 => some RingRel.le
+    | 2, 0 => some ORingRel.eq
+    | 2, 1 => some ORingRel.lt
     | _, _ => none
   encodek := fun x => by rcases x <;> simp
 
@@ -150,8 +150,8 @@ end relational
 class HasEq (L : Language.{u}) where
   eq : L.rel 2
 
-class HasLe (L : Language.{u}) where
-  le : L.rel 2
+class HasLt (L : Language.{u}) where
+  lt : L.rel 2
 
 class HasZero (L : Language.{u}) where
   zero : L.func 0
@@ -167,11 +167,12 @@ class HasMul (L : Language.{u}) where
 
 attribute [match_pattern] HasEq.eq HasAdd.add HasMul.mul
 
-instance : HasEq ring := ⟨RingRel.eq⟩
-instance : HasAdd ring := ⟨RingFunc.add⟩
-instance : HasMul ring := ⟨RingFunc.mul⟩
-instance : HasZero ring := ⟨RingFunc.zero⟩
-instance : HasOne ring := ⟨RingFunc.one⟩
+instance : HasEq oring := ⟨ORingRel.eq⟩
+instance : HasLt oring := ⟨ORingRel.lt⟩
+instance : HasAdd oring := ⟨ORingFunc.add⟩
+instance : HasMul oring := ⟨ORingFunc.mul⟩
+instance : HasZero oring := ⟨ORingFunc.zero⟩
+instance : HasOne oring := ⟨ORingFunc.one⟩
 
 structure Hom (L₁ L₂ : Language) where
   onFunc : {k : ℕ} → L₁.func k → L₂.func k
