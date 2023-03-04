@@ -75,6 +75,8 @@ lemma neg_eq (p : SubFormula L μ n) : ~p = neg p := rfl
 
 lemma imp_eq (p q : SubFormula L μ n) : p ⟶ q = ~p ⋎ q := rfl
 
+lemma iff_eq (p q : SubFormula L μ n) : p ⟷ q = (~p ⋎ q) ⋏ (~q ⋎ p) := rfl
+
 @[simp] lemma and_inj (p₁ q₁ p₂ q₂ : SubFormula L μ n) : p₁ ⋏ p₂ = q₁ ⋏ q₂ ↔ p₁ = q₁ ∧ p₂ = q₂ :=
 by simp[HasAnd.and]
 
