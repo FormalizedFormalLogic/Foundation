@@ -16,20 +16,20 @@ lemma free_fixedVar_of_lt (x : Fin (n + 1)) (h : x.val < n) : free (#x : Syntact
   free_fixedVar_castSucc (L := L) ⟨x, h⟩
 
 lemma free_func0 (f : L.func 0) :
-    SubTerm.free (SubTerm.func (L := L) (n := n + 1) f ![]) = SubTerm.func f ![] := by simp
+    SubTerm.free (SubTerm.func (L := L) (n := n + 1) f ![]) = SubTerm.func f ![] := by simp[free_func]
 
 lemma free_func1 (f : L.func 1) {t : SyntacticSubTerm L (n + 1)} {t'} (h : free t = t'):
-    SubTerm.free (SubTerm.func f ![t]) = SubTerm.func f ![t'] := by simp[←h]; funext x; simp
+    SubTerm.free (SubTerm.func f ![t]) = SubTerm.func f ![t'] := by simp[←h, free_func]; funext x; simp
 
 lemma free_func2 (f : L.func 2) {t₁ t₂ : SyntacticSubTerm L (n + 1)} {t₁' t₂'}
   (h₁ : free t₁ = t₁') (h₂ : free t₂ = t₂') :
     SubTerm.free (SubTerm.func f ![t₁, t₂]) = SubTerm.func f ![t₁', t₂'] :=
-  by simp[←h₁, ←h₂]; funext x; cases x using Fin.cases <;> simp
+  by simp[←h₁, ←h₂, free_func]; funext x; cases x using Fin.cases <;> simp
 
 lemma free_func3 (f : L.func 3) {t₁ t₂ t₃ : SyntacticSubTerm L (n + 1)} {t₁' t₂' t₃'}
   (h₁ : free t₁ = t₁') (h₂ : free t₂ = t₂') (h₃ : free t₃ = t₃') :
     SubTerm.free (SubTerm.func f ![t₁, t₂, t₃]) = SubTerm.func f ![t₁', t₂', t₃'] := by
-  simp[←h₁, ←h₂, ←h₃]; funext x;
+  simp[←h₁, ←h₂, ←h₃, free_func]; funext x;
   cases' x using Fin.cases with x <;> simp;
   cases' x using Fin.cases with x <;> simp
 
@@ -42,20 +42,20 @@ lemma subst_fixedVar_of_lt {s : SubTerm L μ n} (x : Fin (n + 1)) (h : x.val < n
   subst_fixedVar_castSucc s ⟨x, h⟩
 
 lemma subst_func0 {s : SubTerm L μ n} (f : L.func 0) :
-    subst s (SubTerm.func (L := L) (n := n + 1) f ![]) = SubTerm.func f ![] := by simp
+    subst s (SubTerm.func (L := L) (n := n + 1) f ![]) = SubTerm.func f ![] := by simp[subst_func]
 
 lemma subst_func1 {s : SubTerm L μ n} (f : L.func 1) {t : SubTerm L μ (n + 1)} {t'} (h : subst s t = t'):
-    subst s (SubTerm.func f ![t]) = SubTerm.func f ![t'] := by simp[←h]; funext x; simp
+    subst s (SubTerm.func f ![t]) = SubTerm.func f ![t'] := by simp[←h, subst_func]; funext x; simp
 
 lemma subst_func2 {s : SubTerm L μ n} (f : L.func 2) {t₁ t₂ : SubTerm L μ (n + 1)} {t₁' t₂'}
   (h₁ : subst s t₁ = t₁') (h₂ : subst s t₂ = t₂') :
     subst s (SubTerm.func f ![t₁, t₂]) = SubTerm.func f ![t₁', t₂'] :=
-  by simp[←h₁, ←h₂]; funext x; cases x using Fin.cases <;> simp
+  by simp[←h₁, ←h₂, subst_func]; funext x; cases x using Fin.cases <;> simp
 
 lemma subst_func3 {s : SubTerm L μ n} (f : L.func 3) {t₁ t₂ t₃ : SubTerm L μ (n + 1)} {t₁' t₂' t₃'}
   (h₁ : subst s t₁ = t₁') (h₂ : subst s t₂ = t₂') (h₃ : subst s t₃ = t₃') :
     subst s (SubTerm.func f ![t₁, t₂, t₃]) = SubTerm.func f ![t₁', t₂', t₃'] := by
-  simp[←h₁, ←h₂, ←h₃]; funext x;
+  simp[←h₁, ←h₂, ←h₃, subst_func]; funext x;
   cases' x using Fin.cases with x <;> simp;
   cases' x using Fin.cases with x <;> simp
 
@@ -84,20 +84,20 @@ lemma shift_subst {t : SyntacticSubTerm L (n + 1)} {u t' u'}
   cases' x using Fin.lastCases with x <;> simp
 
 lemma bShift_func0 (f : L.func 0) :
-    bShift (SubTerm.func (L := L) (μ:= μ) (n := n) f ![]) = SubTerm.func f ![] := by simp
+    bShift (SubTerm.func (L := L) (μ:= μ) (n := n) f ![]) = SubTerm.func f ![] := by simp[bShift_func]
 
 lemma bShift_func1 (f : L.func 1) {t : SubTerm L μ n} {t'} (h : bShift t = t'):
-    bShift (SubTerm.func f ![t]) = SubTerm.func f ![t'] := by simp[←h]; funext x; simp
+    bShift (SubTerm.func f ![t]) = SubTerm.func f ![t'] := by simp[←h, bShift_func]; funext x; simp
 
 lemma bShift_func2 (f : L.func 2) {t₁ t₂ : SubTerm L μ n} {t₁' t₂'}
   (h₁ : bShift t₁ = t₁') (h₂ : bShift t₂ = t₂') :
     bShift (SubTerm.func f ![t₁, t₂]) = SubTerm.func f ![t₁', t₂'] :=
-  by simp[←h₁, ←h₂]; funext x; cases x using Fin.cases <;> simp
+  by simp[←h₁, ←h₂, bShift_func]; funext x; cases x using Fin.cases <;> simp
 
 lemma bShift_func3 (f : L.func 3) {t₁ t₂ t₃ : SyntacticSubTerm L n} {t₁' t₂' t₃'}
   (h₁ : bShift t₁ = t₁') (h₂ : bShift t₂ = t₂') (h₃ : bShift t₃ = t₃') :
     bShift (SubTerm.func f ![t₁, t₂, t₃]) = SubTerm.func f ![t₁', t₂', t₃'] := by
-  simp[←h₁, ←h₂, ←h₃]; funext x;
+  simp[←h₁, ←h₂, ←h₃, bShift_func]; funext x;
   cases' x using Fin.cases with x <;> simp;
   cases' x using Fin.cases with x <;> simp
 
@@ -256,9 +256,9 @@ partial def resultBShift {L : Q(Language.{u})} {n : Q(ℕ)} : (t : Q(SyntacticSu
     MetaM ((res : Q(SyntacticSubTerm $L ($n + 1))) × Q(bShift $t = $res))
   | ~q(#$x)                              => do
     let z ← natAppFunQ Nat.succ x
-    let e := q(SubTerm.fixedSucc_fixedVar (L := $L) (μ := ℕ) (n := $n) $x)
+    let e := q(SubTerm.bShift_fixedVar (L := $L) (μ := ℕ) (n := $n) $x)
     return ⟨q(&$z), e⟩
-  | ~q(&$x)                              => pure ⟨q(&$x), q(SubTerm.fixedSucc_freeVar $x)⟩
+  | ~q(&$x)                              => pure ⟨q(&$x), q(SubTerm.bShift_freeVar $x)⟩
   | ~q(SubTerm.func $f ![])              => pure ⟨q(SubTerm.func $f ![]), q(bShift_func0 $f)⟩
   | ~q(SubTerm.func $f ![$t])            => do
     let ⟨tn, e⟩ ← resultBShift (L := L) (n := n) t

@@ -225,10 +225,10 @@ def subst (t : SubTerm L μ n) : SubFormula L μ (n + 1) →L SubFormula L μ n 
 section bind
 variable (fixed : Fin n₁ → SubTerm L μ₂ n₂) (free : μ₁ → SubTerm L μ₂ n₂)
 
-@[simp] lemma bind_rel {k} (r : L.rel k) (v : Fin k → SubTerm L μ₁ n₁) :
+lemma bind_rel {k} (r : L.rel k) (v : Fin k → SubTerm L μ₁ n₁) :
     bind fixed free (rel r v) = rel r (fun i => (v i).bind fixed free) := rfl
 
-@[simp] lemma bind_nrel {k} (r : L.rel k) (v : Fin k → SubTerm L μ₁ n₁) :
+lemma bind_nrel {k} (r : L.rel k) (v : Fin k → SubTerm L μ₁ n₁) :
     bind fixed free (nrel r v) = nrel r (fun i => (v i).bind fixed free) := rfl
 
 @[simp] lemma bind_all (p : SubFormula L μ₁ (n₁ + 1)) :
@@ -238,10 +238,10 @@ variable (fixed : Fin n₁ → SubTerm L μ₂ n₂) (free : μ₁ → SubTerm L
     bind fixed free (∃' p) = ∃' bind (#0 :> SubTerm.bShift ∘ fixed) (SubTerm.bShift ∘ free) p := rfl
 
 @[simp] lemma complexity_bind (p : SubFormula L μ₁ n₁) : complexity (bind fixed free p) = complexity p :=
-  by induction p using rec' generalizing μ₂ n₂ <;> simp[*]
+  by induction p using rec' generalizing μ₂ n₂ <;> simp[*, bind_rel, bind_nrel]
 
 @[simp] lemma bind_id (p) : @bind L μ μ n n SubTerm.fixedVar SubTerm.freeVar p = p :=
-  by induction p using rec' <;> simp[*]
+  by induction p using rec' <;> simp[*, bind_rel, bind_nrel]
 
 @[simp] lemma eq_bind_of (fixed : Fin n → SubTerm L μ n) (free : μ → SubTerm L μ n)
     (hfixed : ∀ x, fixed x = #x) (hfree : ∀ x, free x = &x) (p : SubFormula L μ n) :
@@ -257,7 +257,7 @@ lemma bind_bind
   (fixed₁ : Fin n₁ → SubTerm L μ₂ n₂) (free₁ : μ₁ → SubTerm L μ₂ n₂)
   (fixed₂ : Fin n₂ → SubTerm L μ₃ n₃) (free₂ : μ₂ → SubTerm L μ₃ n₃) (p : SubFormula L μ₁ n₁) :
     bind fixed₂ free₂ (bind fixed₁ free₁ p) = bind (fun n => (fixed₁ n).bind fixed₂ free₂) (fun m => (free₁ m).bind fixed₂ free₂) p := by
-  induction p using rec' generalizing n₂ n₃ <;> simp[*, SubTerm.bind_bind] <;>
+  induction p using rec' generalizing n₂ n₃ <;> simp[*, SubTerm.bind_bind, bind_rel, bind_nrel] <;>
   { congr
     refine funext (Fin.cases (by simp) (by simp[SubTerm.bShift, SubTerm.map, SubTerm.bind_bind]))
     refine funext (by simp[SubTerm.bShift, SubTerm.map, SubTerm.bind_bind]) }
@@ -271,10 +271,10 @@ lemma bind_comp_bind
 section map
 variable (fixed : Fin n₁ → Fin n₂) (free : μ₁ → μ₂)
 
-@[simp] lemma map_rel {k} (r : L.rel k) (v : Fin k → SubTerm L μ₁ n₁) :
+lemma map_rel {k} (r : L.rel k) (v : Fin k → SubTerm L μ₁ n₁) :
     map fixed free (rel r v) = rel r (fun i => (v i).map fixed free) := rfl
 
-@[simp] lemma map_nrel {k} (r : L.rel k) (v : Fin k → SubTerm L μ₁ n₁) :
+lemma map_nrel {k} (r : L.rel k) (v : Fin k → SubTerm L μ₁ n₁) :
     map fixed free (nrel r v) = nrel r (fun i => (v i).map fixed free) := rfl
 
 @[simp] lemma map_all (p : SubFormula L μ₁ (n₁ + 1)) :
@@ -297,15 +297,15 @@ lemma map_map
   bind_bind _ _ _ _ _
 
 @[simp] lemma map_id (p) : @map L μ μ n n id id p = p :=
-  by induction p using rec' <;> simp[*]
+  bind_id _
 
-@[simp] lemma subst_rel {s : SubTerm L μ n} {k} (r : L.rel k) (v : Fin k → SubTerm L μ (n + 1)) :
+lemma subst_rel {s : SubTerm L μ n} {k} (r : L.rel k) (v : Fin k → SubTerm L μ (n + 1)) :
     subst s (rel r v) = rel r (fun i => SubTerm.subst s (v i)) :=
-  by simp[subst, SubTerm.subst]
+  by simp[subst, SubTerm.subst, bind_rel]
 
-@[simp] lemma subst_nrel {s : SubTerm L μ n} {k} (r : L.rel k) (v : Fin k → SubTerm L μ (n + 1)) :
+lemma subst_nrel {s : SubTerm L μ n} {k} (r : L.rel k) (v : Fin k → SubTerm L μ (n + 1)) :
     subst s (nrel r v) = nrel r (fun i => SubTerm.subst s (v i)) :=
-  by simp[subst, SubTerm.subst]
+  by simp[subst, SubTerm.subst, bind_nrel]
 
 @[simp] lemma subst_all {s : SubTerm L μ n} (p : SubFormula L μ (n + 1 + 1)) :
     subst s (∀' p) = ∀' subst s.bShift p := by
@@ -332,10 +332,10 @@ def free : SyntacticSubFormula L (n + 1) →L SyntacticSubFormula L n :=
 def fix : SyntacticSubFormula L n →L SyntacticSubFormula L (n + 1) :=
   bind (fun x => #(Fin.castSucc x)) (#(Fin.last n) :>ₙ SubTerm.freeVar)
 
-@[simp] lemma shift_rel {k} (r : L.rel k) (v : Fin k → SyntacticSubTerm L n) :
+lemma shift_rel {k} (r : L.rel k) (v : Fin k → SyntacticSubTerm L n) :
     shift (rel r v) = rel r (fun i => SubTerm.shift $ v i) := rfl
 
-@[simp] lemma shift_nrel {k} (r : L.rel k) (v : Fin k → SyntacticSubTerm L n) :
+lemma shift_nrel {k} (r : L.rel k) (v : Fin k → SyntacticSubTerm L n) :
     shift (nrel r v) = nrel r (fun i => SubTerm.shift $ v i) := rfl
 
 @[simp] lemma shift_all (p : SyntacticSubFormula L (n + 1)) :
@@ -355,10 +355,16 @@ def shiftEmb : SyntacticSubFormula L n ↪ SyntacticSubFormula L n where
 lemma shiftEmb_eq_shift (p : SyntacticSubFormula L n) :
   shiftEmb p = shift p := rfl
 
-@[simp] lemma free_rel {k} (r : L.rel k) (v : Fin k → SyntacticSubTerm L (n + 1)) :
+lemma shift_subst (s : SyntacticSubTerm L n) (p : SyntacticSubFormula L (n + 1)) :
+    shift (subst s p) = subst s.shift (shift p) :=
+  by
+  simp[shift, subst, map, bind_bind]; congr; funext x
+  cases' x using Fin.lastCases <;> simp; rfl
+
+lemma free_rel {k} (r : L.rel k) (v : Fin k → SyntacticSubTerm L (n + 1)) :
     free (rel r v) = rel r (fun i => SubTerm.free $ v i) := rfl
 
-@[simp] lemma free_nrel {k} (r : L.rel k) (v : Fin k → SyntacticSubTerm L (n + 1)) :
+lemma free_nrel {k} (r : L.rel k) (v : Fin k → SyntacticSubTerm L (n + 1)) :
     free (nrel r v) = nrel r (fun i => SubTerm.free $ v i) := rfl
 
 @[simp] lemma free_all (p : SyntacticSubFormula L (n + 1 + 1)) :
@@ -369,10 +375,10 @@ lemma shiftEmb_eq_shift (p : SyntacticSubFormula L n) :
     free (∃' p) = ∃' free p  := by
   simp[free]; congr; exact funext (Fin.cases (by simp) (Fin.lastCases (by simp) (by simp; simp[Fin.succ_castSucc])))
 
-@[simp] lemma fix_rel {k} (r : L.rel k) (v : Fin k → SyntacticSubTerm L n) :
+lemma fix_rel {k} (r : L.rel k) (v : Fin k → SyntacticSubTerm L n) :
     fix (rel r v) = rel r (fun i => SubTerm.fix $ v i) := rfl
 
-@[simp] lemma fix_nrel {k} (r : L.rel k) (v : Fin k → SyntacticSubTerm L n) :
+lemma fix_nrel {k} (r : L.rel k) (v : Fin k → SyntacticSubTerm L n) :
     fix (nrel r v) = nrel r (fun i => SubTerm.fix $ v i) := rfl
 
 @[simp] lemma fix_all (p : SyntacticSubFormula L (n + 1)) :

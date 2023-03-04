@@ -63,7 +63,7 @@ variable (fixed : Fin n₁ → SubTerm L μ₂ n₂) (free : μ₁ → SubTerm L
 
 @[simp] lemma bind_fixedVar (n : Fin n₁) : (#n : SubTerm L μ₁ n₁).bind fixed free = fixed n := rfl
 
-@[simp] lemma bind_func {k} (f : L.func k) (v : Fin k → SubTerm L μ₁ n₁) :
+lemma bind_func {k} (f : L.func k) (v : Fin k → SubTerm L μ₁ n₁) :
     (func f v).bind fixed free = func f (fun i => (v i).bind fixed free) := rfl
 
 end bind
@@ -72,10 +72,16 @@ lemma bind_bind
   (fixed₁ : Fin n₁ → SubTerm L μ₂ n₂) (free₁ : μ₁ → SubTerm L μ₂ n₂)
   (fixed₂ : Fin n₂ → SubTerm L μ₃ n₃) (free₂ : μ₂ → SubTerm L μ₃ n₃) (t : SubTerm L μ₁ n₁) :
     (t.bind fixed₁ free₁).bind fixed₂ free₂ = t.bind (fun n => (fixed₁ n).bind fixed₂ free₂) (fun m => (free₁ m).bind fixed₂ free₂) :=
-  by induction t <;> simp[*]
+  by induction t <;> simp[*, bind_func]
 
 @[simp] lemma bind_id (t) : @bind L μ μ n n fixedVar freeVar t = t :=
-  by induction t <;> simp[*]
+  by induction t <;> simp[*, bind_func]
+
+lemma bind_id_of_eq (hfixed : ∀ x, fixed x = #x) (hfree : ∀ x, free x = &x) (t) : @bind L μ μ n n fixed free t = t :=
+  by
+  have e₁ : fixedVar = fixed := by funext x; simp[hfixed]
+  have e₂ : freeVar = free := by funext x; simp[hfree]
+  exact e₁ ▸ e₂ ▸ bind_id t
 
 section map
 variable (fixed : Fin n₁ → Fin n₂) (free : μ₁ → μ₂)
@@ -84,7 +90,7 @@ variable (fixed : Fin n₁ → Fin n₂) (free : μ₁ → μ₂)
 
 @[simp] lemma map_fixedVar (n : Fin n₁) : (#n : SubTerm L μ₁ n₁).map fixed free = #(fixed n) := rfl
 
-@[simp] lemma map_func {k} (f : L.func k) (v : Fin k → SubTerm L μ₁ n₁) :
+lemma map_func {k} (f : L.func k) (v : Fin k → SubTerm L μ₁ n₁) :
     (func f v).map fixed free = func f (fun i => (v i).map fixed free) := rfl
 
 end map
@@ -96,20 +102,20 @@ lemma map_map
   bind_bind _ _ _ _ _
 
 @[simp] lemma map_id (t) : @map L μ μ n n id id t = t :=
-  by induction t <;> simp[*]
+  by induction t <;> simp[*, map_func]
 
-@[simp] lemma fixedSucc_fixedVar (x : Fin n) : bShift (#x : SubTerm L μ n) = #(Fin.succ x) := rfl
+@[simp] lemma bShift_fixedVar (x : Fin n) : bShift (#x : SubTerm L μ n) = #(Fin.succ x) := rfl
 
-@[simp] lemma fixedSucc_freeVar (x : μ) : bShift (&x : SubTerm L μ n) = &x := rfl
+@[simp] lemma bShift_freeVar (x : μ) : bShift (&x : SubTerm L μ n) = &x := rfl
 
-@[simp] lemma fixedSucc_func {k} (f : L.func k) (v : Fin k → SubTerm L μ n) :
+lemma bShift_func {k} (f : L.func k) (v : Fin k → SubTerm L μ n) :
   bShift (func f v) = func f (fun i => bShift (v i)) := rfl
 
-@[simp] lemma leftConcat_fixedSucc_comp_fixedVar :
+@[simp] lemma leftConcat_bShift_comp_fixedVar :
     (#0 :> bShift ∘ fixedVar : Fin (n + 1) → SubTerm L μ (n + 1)) = fixedVar :=
   funext (Fin.cases (by simp) (by simp))
 
-@[simp] lemma fixedSucc_comp_freeVar :
+@[simp] lemma bShift_comp_freeVar :
     (bShift ∘ freeVar : μ → SubTerm L μ (n + 1)) = freeVar :=
   funext (by simp)
 
@@ -122,9 +128,9 @@ lemma map_map
 @[simp] lemma subst_freeVar (s : SubTerm L μ n) (x : μ) : subst s &x = &x :=
   by simp[subst]
 
-@[simp] lemma subst_func (s : SubTerm L μ n) {k} (f : L.func k) (v : Fin k → SubTerm L μ (n + 1)) :
+lemma subst_func (s : SubTerm L μ n) {k} (f : L.func k) (v : Fin k → SubTerm L μ (n + 1)) :
     subst s (func f v) = func f (fun i => subst s (v i)) :=
-  by simp[subst]
+  by simp[subst, bind_func]
 
 section Syntactic
 
@@ -169,8 +175,8 @@ lemma shift_Injective : Function.Injective (@shift L n) :=
 
 @[simp] lemma free_freeVar (x : ℕ) : free (&x : SyntacticSubTerm L (n + 1)) = &(x + 1) := by simp[free]
 
-@[simp] lemma free_func {k} (f : L.func k) (v : Fin k → SyntacticSubTerm L (n + 1)) :
-    free (func f v) = func f (fun i => free $ v i) := by simp[free]
+lemma free_func {k} (f : L.func k) (v : Fin k → SyntacticSubTerm L (n + 1)) :
+    free (func f v) = func f (fun i => free $ v i) := by simp[free, bind_func]
 
 @[simp] lemma fix_fixedVar (x : Fin n) : fix (#x : SyntacticSubTerm L n) = #(Fin.castSucc x) := by simp[fix]
 
@@ -178,14 +184,14 @@ lemma shift_Injective : Function.Injective (@shift L n) :=
 
 @[simp] lemma fix_freeVar_succ (x : ℕ) : fix (&(x + 1) : SyntacticSubTerm L n) = &x := by simp[fix]
 
-@[simp] lemma fix_func {k} (f : L.func k) (v : Fin k → SyntacticSubTerm L n) :
-    fix (func f v) = func f (fun i => fix $ v i) := by simp[fix]
+lemma fix_func {k} (f : L.func k) (v : Fin k → SyntacticSubTerm L n) :
+    fix (func f v) = func f (fun i => fix $ v i) := by simp[fix, bind_func]
 
 @[simp] lemma free_fix (t : SyntacticSubTerm L n) : free (fix t) = t :=
-  by induction t <;> simp[*]; case freeVar x => cases x <;> simp
+  by simp[free, fix, bind_bind]; exact bind_id_of_eq (by simp) (by intro x; cases x <;> simp) t
 
 @[simp] lemma fix_free (t : SyntacticSubTerm L (n + 1)) : fix (free t) = t :=
-  by induction t <;> simp[*]; case fixedVar x => exact Fin.lastCases (by simp) (by simp) x
+  by simp[free, fix, bind_bind]; exact bind_id_of_eq (by intro x; cases x using Fin.lastCases <;> simp) (by simp) t
 
 end Syntactic
 
@@ -240,7 +246,7 @@ def onSubTerm (Φ : Hom L₁ L₂) : SubTerm L₁ μ n → SubTerm L₂ μ n
 
 @[simp] lemma onSubTerm_freeVar (x : μ) : Φ.onSubTerm (&x : SubTerm L₁ μ n) = &x := rfl
 
-@[simp] lemma onSubTerm_func {k} (f : L₁.func k) (v : Fin k → SubTerm L₁ μ n) :
+lemma onSubTerm_func {k} (f : L₁.func k) (v : Fin k → SubTerm L₁ μ n) :
     Φ.onSubTerm (SubTerm.func f v) = SubTerm.func (Φ.onFunc f) (fun i => onSubTerm Φ (v i)) := rfl
 
 end Hom
@@ -248,12 +254,13 @@ end Hom
 end Language
 
 namespace SubTerm
+open Language.Hom
 section
 variable {L₁ L₂ : Language} (Φ : L₁ →ᵥ L₂) {μ₁ μ₂ : Type _} {n₁ n₂ : ℕ}
 
 lemma onSubTerm_bind (fixed : Fin n₁ → SubTerm L₁ μ₂ n₂) (free : μ₁ → SubTerm L₁ μ₂ n₂) (t) :
     Φ.onSubTerm (bind fixed free t) = bind (fun x => Φ.onSubTerm (fixed x)) (fun x => Φ.onSubTerm (free x)) (Φ.onSubTerm t) :=
-  by induction t <;> simp[*]
+  by induction t <;> simp[*, onSubTerm_func, bind_func]
 
 lemma onSubTerm_map (fixed : Fin n₁ → Fin n₂) (free : μ₁ → μ₂) (t) :
     Φ.onSubTerm (map fixed free t) = map fixed free (Φ.onSubTerm t) :=
@@ -263,7 +270,7 @@ lemma onSubTerm_subst (u) (t : SubTerm L₁ μ (n + 1)) :
     Φ.onSubTerm (subst u t) = subst (Φ.onSubTerm u) (Φ.onSubTerm t) :=
   by simp[subst, onSubTerm_bind, Matrix.comp_vecConsLast, Function.comp]
 
-lemma onSubTerm_fixedSucc (t : SubTerm L₁ μ₁ n) : Φ.onSubTerm (bShift t) = bShift (Φ.onSubTerm t) :=
+lemma onSubTerm_bShift (t : SubTerm L₁ μ₁ n) : Φ.onSubTerm (bShift t) = bShift (Φ.onSubTerm t) :=
   by simp[bShift, onSubTerm_map]
 
 lemma onSubTerm_shift (t : SyntacticSubTerm L₁ n) : Φ.onSubTerm (shift t) = shift (Φ.onSubTerm t) :=
@@ -291,7 +298,7 @@ def toSubLanguage' (pf : ∀ k, L.func k → Prop) (pr : ∀ k, L.rel k → Prop
 @[simp] lemma onSubTerm_toSubLanguage' (pf : ∀ k, L.func k → Prop) (pr : ∀ k, L.rel k → Prop)
   (t : SubTerm L μ n) (h : ∀ k f, ⟨k, f⟩ ∈ t.languageFunc → pf k f) :
     L.ofSubLanguage.onSubTerm (t.toSubLanguage' pf pr h) = t :=
-  by induction t <;> simp[*, toSubLanguage']
+  by induction t <;> simp[*, toSubLanguage', onSubTerm_func]
 
 end
 
@@ -310,8 +317,8 @@ lemma natLit_succ (z : ℕ) :
 
 @[simp] lemma bind_natLit (z : ℕ) (fixed : Fin n₁ → SubTerm L μ₂ n₂) (free : μ₁ → SubTerm L μ₂ n₂) :
     bind fixed free (natLit z) = natLit z := by
-  induction' z with z ih <;> simp[natLit_zero, natLit_succ]
-  funext i; cases i using Fin.cases <;> simp[ih]
+  induction' z with z ih <;> simp[natLit_zero, natLit_succ, bind_func]
+  funext i; cases i using Fin.cases <;> simp[ih, bind_func]
 
 end
 

@@ -32,10 +32,10 @@ def onSubFormula₁ (Φ : Hom L₁ L₂) {n} : SubFormula L₁ μ n →L SubForm
   map_neg' := by simp[onSubFormula₁'_neg]
   map_imp' := by simp[SubFormula.imp_eq, onSubFormula₁'_neg, ←SubFormula.neg_eq, onSubFormula₁']
 
-@[simp] lemma onSubFormula₁_rel {k} (r : L₁.rel k) (v : Fin k → SubTerm L₁ μ n) :
+lemma onSubFormula₁_rel {k} (r : L₁.rel k) (v : Fin k → SubTerm L₁ μ n) :
     Φ.onSubFormula₁ (SubFormula.rel r v) = SubFormula.rel (Φ.onRel r) (fun i => Φ.onSubTerm (v i)) := rfl
 
-@[simp] lemma onSubFormula₁_nrel {k} (r : L₁.rel k) (v : Fin k → SubTerm L₁ μ n) :
+lemma onSubFormula₁_nrel {k} (r : L₁.rel k) (v : Fin k → SubTerm L₁ μ n) :
     Φ.onSubFormula₁ (SubFormula.nrel r v) = SubFormula.nrel (Φ.onRel r) (fun i => Φ.onSubTerm (v i)) := rfl
 
 @[simp] lemma onSubFormula₁_all (p : SubFormula L₁ μ (n + 1)) :
@@ -55,10 +55,10 @@ variable {L₁ L₂ : Language} (Φ : L₁ →ᵥ L₂) {μ₁ μ₂ : Type _} {
 
 lemma onSubFormula₁_bind (fixed : Fin n₁ → SubTerm L₁ μ₂ n₂) (free : μ₁ → SubTerm L₁ μ₂ n₂) (p) :
     Φ.onSubFormula₁ (bind fixed free p) =
-    bind (fun x => Φ.onSubTerm (fixed x)) (fun x => Φ.onSubTerm (free x)) (Φ.onSubFormula₁ p) :=
-  by
+    bind (fun x => Φ.onSubTerm (fixed x)) (fun x => Φ.onSubTerm (free x)) (Φ.onSubFormula₁ p) := by
   induction p using rec' generalizing μ₂ n₂ <;>
-  simp[*, SubTerm.onSubTerm_bind, Matrix.comp_vecCons, Function.comp, SubTerm.onSubTerm_fixedSucc]
+  simp[*, SubTerm.onSubTerm_bind, Matrix.comp_vecCons, Function.comp, SubTerm.onSubTerm_bShift,
+    Language.Hom.onSubFormula₁_rel, Language.Hom.onSubFormula₁_nrel, bind_rel, bind_nrel]
 
 lemma onSubFormula₁_map (fixed : Fin n₁ → Fin n₂) (free : μ₁ → μ₂) (p) :
     Φ.onSubFormula₁ (map fixed free p) = map fixed free (Φ.onSubFormula₁ p) :=
@@ -131,8 +131,9 @@ def toSubLanguage' (pf : ∀ k, L.func k → Prop) (pr : ∀ k, L.rel k → Prop
 @[simp] lemma onSubFormula_toSubLanguage'
   (pf : ∀ k, L.func k → Prop) (pr : ∀ k, L.rel k → Prop) {n} (p : SubFormula L μ n)
   (hf : ∀ k f, ⟨k, f⟩ ∈ p.languageFunc → pf k f) (hr : ∀ k r, ⟨k, r⟩ ∈ p.languageRel → pr k r) :
-    L.ofSubLanguage.onSubFormula₁ (p.toSubLanguage' pf pr hf hr) = p :=
-  by induction p using rec' <;> simp[*, toSubLanguage']
+    L.ofSubLanguage.onSubFormula₁ (p.toSubLanguage' pf pr hf hr) = p := by
+  induction p using rec' <;>
+  simp[*, toSubLanguage', Language.Hom.onSubFormula₁_rel, Language.Hom.onSubFormula₁_nrel]
 
 noncomputable def languageFuncIndexed (p : SubFormula L μ n) (k) : Finset (L.func k) :=
   Finset.preimage (languageFunc p) (Sigma.mk k) (Set.injOn_of_injective sigma_mk_injective _)

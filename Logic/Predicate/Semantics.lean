@@ -79,12 +79,12 @@ variable {M e e₂ ε ε₂}
 
 @[simp] lemma val_freeVar (x) : val s e ε (&x : SubTerm L μ n) = ε x := rfl
 
-@[simp] lemma val_func {k} (f : L.func k) (v) :
+lemma val_func {k} (f : L.func k) (v) :
     val s e ε (func f v) = s.func f (fun i => (v i).val s e ε) := rfl
   
 lemma val_bind (fixed : Fin n₁ → SubTerm L μ₂ n₂) (free : μ₁ → SubTerm L μ₂ n₂) (t : SubTerm L μ₁ n₁) :
     (bind fixed free t).val s e₂ ε₂ = t.val s (val s e₂ ε₂ ∘ fixed) (val s e₂ ε₂ ∘ free) :=
-  by induction t <;> simp[*]
+  by induction t <;> simp[*, bind_func, val_func]
 
 lemma val_map (fixed : Fin n₁ → Fin n₂) (free : μ₁ → μ₂) (t : SubTerm L μ₁ n₁) :
     (map fixed free t).val s e₂ ε₂ = t.val s (e₂ ∘ fixed) (ε₂ ∘ free) := val_bind _ _ _
@@ -101,7 +101,7 @@ variable (Φ : L₁ →ᵥ L₂) (e : Fin n → M) (ε : μ → M)
 
 lemma val_onSubTerm (s₂ : Structure₁ L₂ M) {t : SubTerm L₁ μ n} :
     val s₂ e ε (Φ.onSubTerm t) = val (Φ.onStructure₁ s₂) e ε t :=
-  by induction t <;> simp[*, val!, Function.comp]
+  by induction t <;> simp[*, val!, Function.comp, val_func, Language.Hom.onSubTerm_func]
 
 variable [Inhabited M]
 
@@ -109,7 +109,7 @@ lemma val_extendStructure₁_onSubTerm
     (injf : ∀ k, Function.Injective (Φ.onFunc : L₁.func k → L₂.func k))
     (s₁ : Structure₁ L₁ M) (t : SubTerm L₁ μ n) :
     val (Φ.extendStructure₁ s₁) e ε (Φ.onSubTerm t) = val s₁ e ε t := by
-  induction t <;> simp[*]
+  induction t <;> simp[*, Language.Hom.onSubTerm_func, val_func]
   case func k f v ih => 
     exact Structure₁.extendStructure₁_func Φ s₁ (injf k) f (fun i => val s₁ e ε (v i))
 

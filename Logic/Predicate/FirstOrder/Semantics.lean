@@ -37,15 +37,15 @@ def subval : SubFormula L μ n →L Prop where
 @[reducible] def subval! (M : Type w) [s : Structure₁ L M] {n} (e : Fin n → M) (ε : μ → M) :
     SubFormula L μ n →L Prop := subval s e ε
 
-def val (ε : μ → M) : Formula L μ →L Prop := subval s Fin.nil ε
+def val (ε : μ → M) : Formula L μ →L Prop := subval s ![] ε
 
 @[reducible] def val! (M : Type w) [s : Structure₁ L M] (ε : μ → M) :
     Formula L μ →L Prop := val s ε
 
-@[simp] lemma subval_rel {k} {r : L.rel k} {v} :
+lemma subval_rel {k} {r : L.rel k} {v} :
     subval s e ε (rel r v) ↔ s.rel r (fun i => SubTerm.val s e ε (v i)) := of_eq rfl
 
-@[simp] lemma subval_nrel {k} {r : L.rel k} {v} :
+lemma subval_nrel {k} {r : L.rel k} {v} :
     subval s e ε (nrel r v) ↔ ¬s.rel r (fun i => SubTerm.val s e ε (v i)) := of_eq rfl
 
 @[simp] lemma subval_all {p : SubFormula L μ (n + 1)} :
@@ -57,7 +57,8 @@ def val (ε : μ → M) : Formula L μ →L Prop := subval s Fin.nil ε
 lemma subval_bind (fixed : Fin n₁ → SubTerm L μ₂ n₂) (free : μ₁ → SubTerm L μ₂ n₂) (p : SubFormula L μ₁ n₁) :
     subval s e₂ ε₂ (bind fixed free p) =
     subval s (SubTerm.val s e₂ ε₂ ∘ fixed) (SubTerm.val s e₂ ε₂ ∘ free) p := by
-  induction p using rec' generalizing n₂ <;> simp[*, SubTerm.val_bind, Function.comp]
+  induction p using rec' generalizing n₂ <;> simp[*, SubTerm.val_bind, Function.comp,
+    bind_rel, bind_nrel, subval_rel, subval_nrel]
   · apply forall_congr'; intros a; apply of_eq; congr; exact funext $ Fin.cases (by simp) (by simp)
   · apply exists_congr; intros a; apply of_eq; congr; exact funext $ Fin.cases (by simp) (by simp)
 
@@ -119,7 +120,9 @@ variable {M : Type w} {s₂ : Structure₁ L₂ M} {n} {e : Fin n → M} {ε : �
 
 lemma subval_onSubFormula₁ {p : SubFormula L₁ μ n} :
     subval s₂ e ε (Φ.onSubFormula₁ p) ↔ subval (Φ.onStructure₁ s₂) e ε p :=
-  by induction p using rec' <;> simp[*, SubTerm.val_onSubTerm]
+  by induction p using rec' <;>
+    simp[*, SubTerm.val_onSubTerm, Language.Hom.onSubFormula₁_rel, Language.Hom.onSubFormula₁_nrel,
+      subval_rel, subval_nrel]
 
 lemma models_onSubFormula₁ {p : Formula L₁ μ} :
     s₂ ⊧ Φ.onSubFormula₁ p ↔ Φ.onStructure₁ s₂ ⊧ p :=
@@ -133,7 +136,6 @@ lemma onSubFormula₁_models_onSubFormula₁ {T : Theory L₁ μ} {p : Formula L
 
 end
 
-
 section
 variable
   (injf : ∀ k, Function.Injective (Φ.onFunc : L₁.func k → L₂.func k))
@@ -143,7 +145,8 @@ variable
 
 lemma subval_extendStructure₁_onSubFormula₁ {p : SubFormula L₁ μ n} :
     subval (Φ.extendStructure₁ s₁) e ε (Φ.onSubFormula₁ p) ↔ subval s₁ e ε p := by
-  induction p using rec' <;> simp[*, SubTerm.val_extendStructure₁_onSubTerm Φ e ε injf s₁]
+  induction p using rec' <;> simp[*, SubTerm.val_extendStructure₁_onSubTerm Φ e ε injf s₁,
+    Language.Hom.onSubFormula₁_rel, Language.Hom.onSubFormula₁_nrel, subval_rel, subval_nrel]
   · case hrel k r v =>
     exact Structure₁.extendStructure₁_rel Φ s₁ (injr k) r (fun i => SubTerm.val s₁ e ε (v i))
   · case hnrel k r v =>
