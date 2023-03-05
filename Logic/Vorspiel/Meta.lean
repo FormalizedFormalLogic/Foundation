@@ -100,6 +100,25 @@ def toQListOfElem {α : Q(Type u)} {a : Q($α)} : {l : List Q($α)} → l.elem a
 
 example : 2 ∈ [3,4,5,2,6] := of_decide_eq_true rfl
 
+lemma List.cons_congr {a b : α} {l k : List α} (ha : a = b) (hl : l = k) : a :: l = b :: k :=
+  congr_arg₂ _ ha hl
+
+def resultList {α : Q(Type u)} (res : (a : Q($α)) → MetaM ((res : Q($α)) × Q($a = $res))) :
+    (l : List Q($α)) → MetaM ((lres : List Q($α)) × Q($(toQList (u := u) l) = $(toQList (u := u) lres)))
+  | []     => pure ⟨[], q(rfl)⟩
+  | a :: l => do
+    let ⟨an, e⟩ ← res a
+    let ⟨ihl, ihe⟩ ← resultList res l
+    return ⟨an :: ihl, q(List.cons_congr $e $ihe)⟩
+
+def funResultList {α β : Q(Type u)} (f : Q($α → $β)) (res : (a : Q($α)) → MetaM ((res : Q($β)) × Q($f $a = $res))) :
+    (l : List Q($α)) → MetaM ((lres : List Q($β)) × Q(List.map $f $(toQList (u := u) l) = $(toQList (u := u) lres)))
+  | []     => pure ⟨[], q(rfl)⟩
+  | a :: l => do
+    let ⟨an, e⟩ ← res a
+    let ⟨ihl, ihe⟩ ← funResultList f res l
+    return ⟨an :: ihl, q(List.cons_congr $e $ihe)⟩
+
 end List
 
 end Qq

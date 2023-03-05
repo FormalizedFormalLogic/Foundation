@@ -398,13 +398,42 @@ partial def result {L : Q(Language.{u})} {n : Q(ℕ)} : (p : Q(SyntacticSubFormu
     let ⟨pnn, ee⟩ ← resultShift (L := L) (n := n) pn
     return ⟨q($pnn), q(shift_congr_eq $e $ee)⟩
   | ~q($p)                  => do
-    logInfo m!"match fail: {p}"
+    -- logInfo m!"match fail: {p}"
     return ⟨q($p), q(rfl)⟩
 
 partial def result' {L : Q(Language.{u})} {n : Q(ℕ)} (p : Q(SyntacticSubFormula $L $n)) :
     MetaM (Result (u := u) q(SyntacticSubFormula $L $n) p) := do
     let ⟨res, e⟩ ← result p
     return ⟨res, e⟩
+
+partial def result₀ {L : Q(Language.{u})} (p : Q(SyntacticFormula $L)) :
+    MetaM ((res : Q(SyntacticFormula $L)) × Q($p = $res)) :=
+  result (L := L) (n := q(0)) p
+
+partial def result₀_res {L : Q(Language.{u})} (p : Q(SyntacticFormula $L)) :
+    MetaM Q(SyntacticFormula $L) := do
+  let ⟨res, _⟩ ← result₀ (L := L) p
+  return res
+
+partial def result₀List {L : Q(Language.{u})} (l : List Q(SyntacticFormula $L)) :
+    MetaM $ (res : List Q(SyntacticFormula $L)) × Q($(toQList (u := u) l) = $(toQList (u := u) res)) :=
+  resultList result₀ l
+
+partial def resultShift₀ {L : Q(Language.{u})} (p : Q(SyntacticFormula $L)) :
+    MetaM $ (res : Q(SyntacticFormula $L)) × Q(shift $p = $res) :=
+  resultShift (L := L) (n := q(0)) p
+
+partial def resultShift₀List {L : Q(Language.{u})} (l : List Q(SyntacticFormula $L)) :
+    MetaM $ (res : List Q(SyntacticFormula $L)) × Q(List.map shift $(toQList (u := u) l) = $(toQList (u := u) res)) :=
+  funResultList (u := u) (α := q(SyntacticFormula $L)) q(shift) resultShift₀ l
+
+partial def resultSubst₀ {L : Q(Language.{u})} (p : Q(SyntacticSubFormula $L 1)) (s : Q(SyntacticTerm $L)) :
+    MetaM $ (res : Q(SyntacticFormula $L)) × Q(subst $s $p = $res) :=
+  resultSubst (L := L) (n := q(0)) s p
+
+partial def resultSubst₀List {L : Q(Language.{u})} (v : List Q(SyntacticTerm $L)) (p : Q(SyntacticSubFormula $L 1)) :
+    MetaM $ (res : List Q(SyntacticFormula $L)) × Q(List.map (SubFormula.subst · $p) $(toQList (u := u) v) = $(toQList (u := u) res)) :=
+  funResultList (u := u) (α := q(SyntacticTerm $L)) q((subst · $p)) (resultSubst₀ p) v
 
 private inductive ResultTest (α : Type u) : (a : α) → Type u
   | result : (a b : α) → a = b → ResultTest α a
@@ -429,5 +458,373 @@ example {t : SyntacticSubTerm Language.oring 14} : ResultTest (SyntacticSubFormu
 end Meta
 
 end SubFormula
+
+namespace DerivationList
+open Derivation
+variable {L : Language.{u}} [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq (L.rel k)] {G : List (SyntacticFormula L)}
+
+def congr {G G' : List (SyntacticFormula L)} (e : G = G')
+  (d : DerivationList G) : DerivationList G' := by rw [←e]; exact d
+
+def head {p} (d : DerivationList (G ++ [p])) : DerivationList (p :: G) := d.cast (by ext; simp[or_comm])
+
+def headVerum : DerivationList (⊤ :: G) := Derivation.verum _ (by simp)
+
+def verum (h : ⊤ ∈ G) : DerivationList G := Derivation.verum _ (by simp[h])
+
+def tailVerum (p) (h : ⊤ ∈ G) : DerivationList (p :: G) := Derivation.verum _ (by simp[h])
+
+def headEm {p} (h : ~p ∈ G) : DerivationList (p :: G) := Derivation.em (p := p) (by simp) (by simp[h])
+
+def headEm' {p np} (e : ~p = np) (h : np ∈ G) :
+  DerivationList (p :: G) := Derivation.em (p := p) (by simp) (by simp[h, e])
+
+def rotate {p} (d : DerivationList (G ++ [p])) : DerivationList (p :: G) :=
+  d.cast (by ext; simp[or_comm])
+
+def headWeakening {p} (d : DerivationList G) : DerivationList (p :: G) :=
+  Derivation.weakening d (by simp; exact Finset.subset_insert  _ _)
+
+def headWeakeningOfvalid {p p'} (h : p = p') (d : valid p) : DerivationList (p' :: G) :=
+  Derivation.weakening d (by simp[h])
+
+def headOr {p q} (d : DerivationList (G ++ [p, q])) : DerivationList (p ⋎ q :: G) :=
+  (Derivation.or (Δ := G.toFinset) (p := p) (q := q) (d.cast $ by ext; simp; tauto)).cast (by simp)
+
+def headAnd {p q} (dp : DerivationList (G ++ [p])) (dq : DerivationList (G ++ [q])) : DerivationList (p ⋏ q :: G) :=
+  (Derivation.and (Δ := G.toFinset) (p := p) (q := q)
+    (dp.cast $ by ext; simp[or_comm]) (dq.cast $ by ext; simp[or_comm])).cast (by simp)
+
+def headAll {p : SyntacticSubFormula L 1} (d : DerivationList (G.map SubFormula.shift ++ [SubFormula.free p])) :
+    DerivationList ((∀' p) :: G) :=
+  (Derivation.all G.toFinset p (d.cast $ by ext; simp[shifts, SubFormula.shiftEmb, or_comm])).cast (by simp)
+
+def headAllOfEq {G'} (eG : G.map SubFormula.shift = G') {p : SyntacticSubFormula L 1} {p} (ep : SubFormula.free p = p')
+  (d : DerivationList (G' ++ [p'])) :
+    DerivationList ((∀' p) :: G) :=
+  (Derivation.all G.toFinset p (d.cast $ by ext; simp[←eG, ←ep, shifts, SubFormula.shiftEmb, or_comm])).cast (by simp)
+
+def headEx {t} {p : SyntacticSubFormula L 1} (d : DerivationList (G ++ [SubFormula.subst t p])) :
+    DerivationList ((∃' p) :: G) :=
+  (Derivation.ex G.toFinset t p (d.cast $ by ext; simp[or_comm])).cast (by simp)
+
+def headExInstances {v : List (SyntacticTerm L)} {p : SyntacticSubFormula L 1} (d : DerivationList (G ++ v.map (SubFormula.subst · p))) :
+    DerivationList ((∃' p) :: G) :=
+  (Derivation.exOfInstances (Γ := G.toFinset) v p (d.cast $ by ext x; simp[or_comm])).cast (by simp)
+
+def headExInstancesOfEq {v : List (SyntacticTerm L)} {p : SyntacticSubFormula L 1} {pi : List (SyntacticFormula L)}
+  (ev : v.map (SubFormula.subst · p) = pi) (d : DerivationList (G ++ pi)) :
+    DerivationList ((∃' p) :: G) :=
+  (Derivation.exOfInstances (Γ := G.toFinset) v p (d.cast $ by ext x; simp[←ev, or_comm])).cast (by simp)
+
+end DerivationList
+
+namespace valid
+open Derivation
+variable {L : Language.{u}} [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq (L.rel k)]
+
+def congr {p p' : SyntacticFormula L} (e : p' = p) (d : valid p) : valid p' :=
+  e ▸ d
+
+end valid
+
+set_option linter.unusedVariables false in
+abbrev DerivationListQ (L : Q(Language.{u}))
+  (dfunc : Q(∀ k, DecidableEq (($L).func k))) (drel : Q(∀ k, DecidableEq (($L).rel k)))
+  (G : List Q(SyntacticFormula $L)) :=
+  Q(DerivationList $(toQList (u := u) G))
+
+namespace DerivationListQ
+open SubFormula
+variable (L : Q(Language.{u}))
+  (dfunc : Q(∀ k, DecidableEq (($L).func k))) (drel : Q(∀ k, DecidableEq (($L).rel k))) (G : List Q(SyntacticFormula $L))
+
+def tovalidQ (p : Q(SyntacticFormula $L)) (d : DerivationListQ L dfunc drel [p]) : Q(valid $p) :=
+  q($d)
+
+def congrQ {G G' : List Q(SyntacticFormula $L)} (e : Q($(toQList (u := u) G) = $(toQList (u := u) G')))
+  (d : DerivationListQ L dfunc drel G) : DerivationListQ L dfunc drel G' :=
+  q(DerivationList.congr $e $d)
+
+def verum (h : G.elem q(⊤)) : DerivationListQ L dfunc drel G :=
+  (q(DerivationList.verum $(Qq.toQListOfElem (u := u) h)) : Q(DerivationList $(toQList (u := u) G)))
+
+-- assume q(⊤) ∈ G
+def verumDec : MetaM (DerivationListQ L dfunc drel G) := do
+  let h ← decideTQ q(⊤ ∈ $(toQList (u := u) G))
+  return q(DerivationList.verum $h)
+
+def headVerum : DerivationListQ L dfunc drel (q(⊤) :: G) :=
+  q(DerivationList.headVerum)
+
+def tailVerum (p : Q(SyntacticFormula $L)) (h : G.elem q(⊤)) :
+  DerivationListQ L dfunc drel (p :: G) :=
+  (q(DerivationList.tailVerum $p $(Qq.toQListOfElem (u := u) h)) : Q(DerivationList $(toQList (u := u) (p :: G))))
+
+-- assume q(⊤) ∈ G
+def tailVerumDec (p : Q(SyntacticFormula $L)) :
+  MetaM $ DerivationListQ L dfunc drel (p :: G) := do
+  let h ← decideTQ q(⊤ ∈ $(toQList (u := u) G))
+  logInfo m!"h = {h}"
+  return q(DerivationList.tailVerum $p $h)
+
+def headWeakening {p} (d : DerivationListQ L dfunc drel G) : DerivationListQ L dfunc drel (p :: G) :=
+  q(DerivationList.headWeakening $d)
+
+def headWeakeningOfvalid (p p' : Q(SyntacticFormula $L)) (h : Q($p = $p')) (d : Q(valid $p)) : DerivationListQ L dfunc drel (p' :: G) :=
+  q(DerivationList.headWeakeningOfvalid $h $d)
+
+-- def headEm {p : Q(SyntacticFormula $L)} (h : G.elem q(~$p)) : DerivationListQ L dfunc drel (p :: G) :=
+--   q(DerivationList.headEm $(Qq.toQListOfElem (u := u) h))
+
+def headEm {p np : Q(SyntacticFormula $L)} (e : Q(~$p = $np)) (h : G.elem np) : DerivationListQ L dfunc drel (p :: G) :=
+  q(DerivationList.headEm' $e $(Qq.toQListOfElem (u := u) h))
+
+-- assume np ∈ G
+def headEmDec {p np : Q(SyntacticFormula $L)} (e : Q(~$p = $np)) : MetaM (DerivationListQ L dfunc drel (p :: G)) := do
+  let h ← decideTQ q($np ∈ $(toQList (u := u) G))
+  logInfo m!"h = {h}"
+  return q(DerivationList.headEm' $e $h)
+
+def rotate (p : Q(SyntacticFormula $L)) (d : DerivationListQ L dfunc drel (G ++ [p])) :
+  DerivationListQ L dfunc drel (p :: G) :=
+  let x : Q(DerivationList $ $(toQList (u := u) G) ++ [$p]) := d
+  (q(DerivationList.rotate $x) : Q(DerivationList $(toQList (u := u) (p :: G))))
+
+def headOr {p q : Q(SyntacticFormula $L)}
+  (d : DerivationListQ L dfunc drel (Append.append G [q($p), q($q)])) :
+    DerivationListQ L dfunc drel (q($p ⋎ $q) :: G) :=
+  let x : Q(DerivationList $ Append.append  $(toQList (u := u) G) [$p, $q]) := d
+  (q(DerivationList.headOr $x) : Q(DerivationList ($p ⋎ $q :: $(toQList (u := u) G))))
+
+def headAnd {p q : Q(SyntacticFormula $L)}
+  (dp : DerivationListQ L dfunc drel (G ++ [p]))
+  (dq : DerivationListQ L dfunc drel (G ++ [q])) :
+    DerivationListQ L dfunc drel (q($p ⋏ $q) :: G) :=
+  let xp : Q(DerivationList $ Append.append  $(toQList (u := u) G) [$p]) := dp
+  let xq : Q(DerivationList $ Append.append  $(toQList (u := u) G) [$q]) := dq
+  (q(DerivationList.headAnd $xp $xq) : Q(DerivationList ($p ⋏ $q :: $(toQList (u := u) G))))
+
+def headAll (sG : List Q(SyntacticFormula $L)) (eG : Q(List.map shift $(toQList (u := u) G) = $(toQList (u := u) sG)))
+  {p : Q(SyntacticSubFormula $L 1)} {fp : Q(SyntacticFormula $L)} (ep : Q(free $p = $fp))
+  (d : DerivationListQ L dfunc drel (Append.append sG [fp])) :
+    DerivationListQ L dfunc drel (q(∀' $p) :: G) :=
+  let x : Q(DerivationList $ $(toQList (u := u) (Append.append sG [fp]))) := d
+  let x : Q(DerivationList $ Append.append $(toQList (u := u) sG) [$fp]) := d
+  (q(DerivationList.headAllOfEq $eG (p := $p) $ep $x) : Q(DerivationList ((∀' $p) :: $(toQList (u := u) G))))
+
+/-
+def headAll (sG : List Q(SyntacticFormula $L)) (eG : Q(List.map shift $(toQList (u := u) G) = $(toQList (u := u) sG)))
+  {p : Q(SyntacticSubFormula $L 1)} {fp : Q(SyntacticFormula $L)} (ep : Q(free $p = $fp))
+  (d : DerivationListQ L dfunc drel (Append.append sG [fp])) :
+    DerivationListQ L dfunc drel (q(∀' $p) :: G) :=
+  let x : Q(DerivationList $ $(toQList (u := u) (Append.append sG [fp]))) := d
+  let x : Q(DerivationList $ Append.append $(toQList (u := u) sG) [$fp]) := d
+  let x : Q(DerivationList $ Append.append (List.map shift $(toQList (u := u) G)) [SubFormula.free $p]) :=
+  -- TODO
+    q(by rw[($eG), ($ep)]; exact $x)
+  (q(DerivationList.headAll $x) : Q(DerivationList ((∀' $p) :: $(toQList (u := u) G))))
+-/
+
+def headEx (v : List Q(SyntacticTerm $L)) (p : Q(SyntacticSubFormula $L 1)) (pi : List Q(SyntacticFormula $L))
+  (ev : Q(List.map (SubFormula.subst · $p) $(toQList (u := u) v) = $(toQList (u := u) pi)))
+  (d : DerivationListQ L dfunc drel (G ++ pi)) :
+    DerivationListQ L dfunc drel (q(∃' $p) :: G) :=
+  -- let x : Q(DerivationList $ $(toQList (u := u) (G ++ pi))) := d
+  let x : Q(DerivationList $ $(toQList (u := u) G) ++ $(toQList (u := u) pi)) := d
+  q(DerivationList.headExInstancesOfEq $ev $x)
+
+/-
+def headEx (v : List Q(SyntacticTerm $L)) (p : Q(SyntacticSubFormula $L 1)) (pi : List Q(SyntacticFormula $L))
+  (ev : Q(List.map (SubFormula.subst · $p) $(toQList (u := u) v) = $(toQList (u := u) pi)))
+  (d : DerivationListQ L dfunc drel (G ++ pi)) :
+    DerivationListQ L dfunc drel (q(∃' $p) :: G) :=
+  -- let x : Q(DerivationList $ $(toQList (u := u) (G ++ pi))) := d
+  let x : Q(DerivationList $ $(toQList (u := u) G) ++ $(toQList (u := u) pi)) := d
+  let x : Q(DerivationList $ $(toQList (u := u) G) ++ List.map (SubFormula.subst · $p) $(toQList (u := u) v)) :=
+  -- TODO
+    q(by { rw[($ev)]; exact $x })
+  q(DerivationList.headExInstances $x)
+-/
+
+def getFormula (e : Q(Type u)) : MetaM $ Option Q(SyntacticFormula $L) := do
+  if let ~q(@valid $L' $dfunc' $drel' $p) := e then
+    if (← isDefEq (← whnf L) (← whnf L')) then
+      return some p
+    else return none
+  else return none
+
+section tauto
+
+def tryProveByHyp (L : Q(Language.{u})) (dfunc : Q(∀ k, DecidableEq (($L).func k))) (drel : Q(∀ k, DecidableEq (($L).rel k)))
+  (p : Q(SyntacticFormula $L)) (G : List Q(SyntacticFormula $L)) : MetaM $ Option (DerivationListQ (u := u) L dfunc drel (p :: G)) := do
+  let ctx ← Lean.MonadLCtx.getLCtx
+    let hyp ← ctx.findDeclM? fun decl: Lean.LocalDecl => do
+      if !decl.isImplementationDetail then
+        let declExpr := decl.toExpr
+        let declType ← Lean.Meta.inferType declExpr
+        let some p' ← getFormula L declType | return none
+        let ⟨pn', e'⟩ ← Meta.result₀ p'
+        if ← isDefEq p pn' then
+          let some d ← checkTypeQ (u := .succ u) declExpr q(@valid $L $dfunc $drel $p') | return none
+            return some (p', e', d)
+        else return none
+      else return none
+    if let some (p', e', d') := hyp then
+      return some $ headWeakeningOfvalid L dfunc drel G p p' e' d'
+    else return none
+
+partial def prvListTauto (hypSearch : Bool)
+  (L : Q(Language.{u})) (dfunc : Q(∀ k, DecidableEq (($L).func k))) (drel : Q(∀ k, DecidableEq (($L).rel k))) :
+    ℕ → (G : List Q(SyntacticFormula $L)) → MetaM (DerivationListQ (u := u) L dfunc drel G)
+  | 0,     _      => throwError "failed!"
+  | _,     []     => throwError "empty goal"
+  | s + 1, p :: G => do
+    -- hypothesis search
+    if let some d ← tryProveByHyp L dfunc drel p G then
+      return d
+    else 
+    -- proof search
+    let ⟨npn, npe⟩ ← SubFormula.Meta.resultNeg (L := L) (n := q(0)) p
+    if h : G.elem npn then
+      return DerivationListQ.headEm L dfunc drel G npe h
+    else
+    (match p with
+    | ~q(⊤)       => pure $ headVerum L dfunc drel G
+    | ~q(⊥)       => do
+      let d ← prvListTauto hypSearch L dfunc drel s G
+      return headWeakening L dfunc drel G d
+    | ~q($p ⋎ $q) => do
+      let d ← prvListTauto hypSearch L dfunc drel s (G ++ [p, q])
+      return (headOr L dfunc drel G d)
+    | ~q($p ⋏ $q) => do
+      let dp ← prvListTauto hypSearch L dfunc drel s (G ++ [p])
+      let dq ← prvListTauto hypSearch L dfunc drel s (G ++ [q])
+      return (headAnd L dfunc drel G dp dq)
+    | ~q($p)      => do
+      let d ← prvListTauto hypSearch L dfunc drel s (G ++ [p])
+      return rotate L dfunc drel G p d
+      : MetaM Q(DerivationList $ $p :: $(toQList (u := u) G)))
+
+def prvDrivationₛTauto (L : Q(Language.{u})) (dfunc : Q(∀ k, DecidableEq (($L).func k))) (drel : Q(∀ k, DecidableEq (($L).rel k)))
+  (s : ℕ) (p : Q(SyntacticFormula $L)) : MetaM Q(valid $p) := do
+  let ⟨pn, e⟩ ← SubFormula.Meta.result₀ (L := L) p
+  let d ← prvListTauto true L dfunc drel s [pn]
+  let h := tovalidQ L dfunc drel _ d
+  return q(valid.congr $e $h)
+
+elab "proveTauto" n:(num)? : tactic => do
+  let goalType ← Elab.Tactic.getMainTarget
+  let some ⟨.succ _, ty⟩ ← checkSortQ' goalType | throwError "not a type"
+  let ~q(@valid $L $dfunc $drel $p) := ty | throwError "not a type: valid p"
+  let s : ℕ :=
+    match n with
+    | some n => n.getNat
+    | none   => 16
+  let b ← prvDrivationₛTauto L dfunc drel s p
+  Lean.Elab.Tactic.closeMainGoal b
+
+section
+variable {L : Language.{u}} [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq (L.rel k)] (p q r s : SyntacticFormula L)
+
+example : valid ((p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r) := by proveTauto
+
+example : valid “((!p → !q) → !p) → !p” := by proveTauto
+
+example : valid “!p ∧ !q ∧ !r ↔ !r ∧ !p ∧ !q”  := by proveTauto
+
+example (d : valid p) : valid “!p ∨ !q”  := by proveTauto
+
+example (_ : valid “¬(!p ∧ !q)”) (_ : valid s) : valid “!s → !p ∧ !q → !r”  := by proveTauto
+
+example (_ : valid “¬(!p ∧ !q)”) : valid “¬!p ∨ ¬!q”  := by proveTauto
+
+end
+
+end tauto
+
+def prvList (L : Q(Language.{u})) (dfunc : Q(∀ k, DecidableEq (($L).func k))) (drel : Q(∀ k, DecidableEq (($L).rel k)))
+  (ts : List Q(SyntacticTerm $L)) :
+    ℕ → (G : List Q(SyntacticFormula $L)) → MetaM (DerivationListQ (u := u) L dfunc drel G)
+  | 0,     _      => throwError "failed!"
+  | _,     []     => throwError "empty goal"
+  | s + 1, p :: G => do
+   -- hypothesis search
+    if let some d ← tryProveByHyp L dfunc drel p G then
+      return d
+    else 
+    -- proof search
+    let ⟨npn, npe⟩ ← SubFormula.Meta.resultNeg (L := L) (n := q(0)) p
+    if h : G.elem npn then
+      return DerivationListQ.headEm L dfunc drel G npe h
+    else
+    (match p with
+    | ~q(⊤) => pure $ headVerum L dfunc drel G
+    | ~q(⊥) => do
+      let d ← prvList L dfunc drel ts s G
+      return headWeakening L dfunc drel G d
+    | ~q($p ⋎ $q) => do
+      let d ← prvList L dfunc drel ts s (G ++ [p, q])
+      return (headOr L dfunc drel G d)
+     | ~q($p ⋏ $q) => do
+      let dp ← prvList L dfunc drel ts s (G ++ [p])
+      let dq ← prvList L dfunc drel ts s (G ++ [q])
+      return (headAnd L dfunc drel G dp dq)   
+    | ~q(∀' $p)  => do
+      let ⟨fp, fpe⟩ ← Meta.resultFree p
+      let ⟨sG, sGe⟩ ← Meta.resultShift₀List G
+      let d ← prvList L dfunc drel ts s (Append.append sG [fp])
+      return headAll L dfunc drel G sG sGe fpe d
+    | ~q(∃' $p)   => do
+      let ⟨pi, pie⟩ ← Meta.resultSubst₀List ts p
+      let d ← prvList L dfunc drel ts s (G ++ pi)
+      return headEx L dfunc drel G ts p pi pie d
+    | ~q($p) => do
+      let d ← prvList L dfunc drel ts s (G ++ [p])
+      return rotate L dfunc drel G p d
+         : MetaM Q(DerivationList $ $p :: $(toQList (u := u) G)))
+
+def prvDrivationₛ (L : Q(Language.{u})) (dfunc : Q(∀ k, DecidableEq (($L).func k))) (drel : Q(∀ k, DecidableEq (($L).rel k)))
+  (ts : List Q(SyntacticTerm $L)) (s : ℕ) (p : Q(SyntacticFormula $L)) : MetaM Q(valid $p) := do
+  let ⟨pn, e⟩ ← SubFormula.Meta.result₀ (L := L) p
+  let d ← prvList L dfunc drel ts s [pn]
+  let h := tovalidQ L dfunc drel _ d
+  return q(valid.congr $e $h)
+
+syntax termSeq := " [" (term,*) "]"
+
+elab "prove" n:(num)? seq:(termSeq)? : tactic => do
+  let goalType ← Elab.Tactic.getMainTarget
+  let some ⟨.succ _, ty⟩ ← checkSortQ' goalType | throwError "error: not a type"
+  let ~q(@valid $L $dfunc $drel $p) := ty | throwError "error: not a type 2"
+  let s : ℕ :=
+    match n with
+    | some n => n.getNat
+    | none   => 16
+  let ts : Array Q(SyntacticTerm $L) ←
+    match seq with
+    | some seq =>
+      match seq with
+      | `(termSeq| [ $ss,* ] ) => do ss.getElems.mapM (Term.elabTerm · (some q(SyntacticTerm $L)))
+      | _                      => pure #[]
+    | _        => pure #[q(&0 : SyntacticTerm $L), q(&1 : SyntacticTerm $L)]
+  let b ← prvDrivationₛ L dfunc drel ts.toList s p
+  Lean.Elab.Tactic.closeMainGoal b
+
+section
+variable {L : Language.{u}} [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq (L.rel k)] (p q r s : SyntacticFormula L)
+open Language
+
+example (_ : valid “¬(!p ∧ !q)”) : valid “¬!p ∨ ¬!q”  := by proveTauto
+
+example : valid (L := oring) “&0 < 3 → ∃ &0 < #0” := by prove [T“3”]
+
+example : valid (L := oring) “&0 < &1 → ∃ ∃ #0 < #1” := by prove
+
+example (_ : valid (L := oring) “0 < 4 + 9”) : valid (L := oring) “⊤ ∧ (∃ 0 < 4 + #0)”  := by prove [T“9”]
+
+end
+
+end DerivationListQ
 
 end FirstOrder

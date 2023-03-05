@@ -187,7 +187,6 @@ partial def resultFree {L : Q(Language.{u})} {n : Q(ℕ)} : (t : Q(SyntacticSubT
     return ⟨q(SubTerm.func $f ![$tn₁, $tn₂, $tn₃]), q(free_func3 $f $e₁ $e₂ $e₃)⟩
   | ~q(natLit (hz := $hz) (ho := $ho) (ha := $ha) $z) => pure ⟨q(natLit $z), q(free_natLit $z)⟩
   | ~q($t)                               => do
-    logInfo m!"match fail: {t}"
     return ⟨q(SubTerm.free $t), q(rfl)⟩
 
 partial def resultSubst {L : Q(Language.{u})} {n : Q(ℕ)} (s : Q(SyntacticSubTerm $L $n)) :
@@ -220,7 +219,6 @@ partial def resultSubst {L : Q(Language.{u})} {n : Q(ℕ)} (s : Q(SyntacticSubTe
     return ⟨q(SubTerm.func $f ![$tn₁, $tn₂, $tn₃]), q(subst_func3 $f $e₁ $e₂ $e₃)⟩
   | ~q(natLit (hz := $hz) (ho := $ho) (ha := $ha) $z) => pure ⟨q(natLit $z), q(subst_natLit $z)⟩
   | ~q($t)                               => do
-    logInfo m!"match fail: {t}"
     return ⟨q(SubTerm.subst $s $t), q(rfl)⟩
 
 partial def resultShift {L : Q(Language.{u})} {n : Q(ℕ)} : (t : Q(SyntacticSubTerm $L $n)) →
@@ -249,7 +247,6 @@ partial def resultShift {L : Q(Language.{u})} {n : Q(ℕ)} : (t : Q(SyntacticSub
     return ⟨q(SubTerm.subst $tn₁ $tn₂), q(shift_subst $e₂ $e₁)⟩
   | ~q(natLit (hz := $hz) (ho := $ho) (ha := $ha) $z) => pure ⟨q(natLit $z), q(shift_natLit $z)⟩
   | ~q($t)                               => do
-    logInfo m!"match fail: {t}"
     return ⟨q(shift $t), q(rfl)⟩
 
 partial def resultBShift {L : Q(Language.{u})} {n : Q(ℕ)} : (t : Q(SyntacticSubTerm $L $n)) →
@@ -278,7 +275,6 @@ partial def resultBShift {L : Q(Language.{u})} {n : Q(ℕ)} : (t : Q(SyntacticSu
     return ⟨q(SubTerm.subst $tn₁ $tn₂), q(bShift_subst $e₂ $e₁)⟩
   | ~q(natLit (hz := $hz) (ho := $ho) (ha := $ha) $z) => pure ⟨q(natLit $z), q(bShift_natLit $z)⟩
   | ~q($t)                               => do
-    logInfo m!"match fail: {t}"
     return ⟨q(bShift $t), q(rfl)⟩
 
 partial def result {L : Q(Language.{u})} {n : Q(ℕ)} : (t : Q(SyntacticSubTerm $L $n)) →
@@ -313,7 +309,6 @@ partial def result {L : Q(Language.{u})} {n : Q(ℕ)} : (t : Q(SyntacticSubTerm 
     return ⟨q($tnn), q(shift_congr_eq $e $ee)⟩
   | ~q(natLit (hz := $hz) (ho := $ho) (ha := $ha) $z) => pure ⟨q(natLit $z), q(rfl)⟩
   | ~q($t)                               => do
-    logInfo m!"match fail: {t}"
     return ⟨q($t), q(rfl)⟩
 
 partial def result' {L : Q(Language.{u})} {n : Q(ℕ)} (t : Q(SyntacticSubTerm $L $n)) :

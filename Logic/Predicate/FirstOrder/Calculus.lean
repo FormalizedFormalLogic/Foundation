@@ -46,7 +46,7 @@ structure provable (T : Theory L ℕ) (p : SyntacticFormula L) where
 
 abbrev DerivationList (G : List (SyntacticFormula L)) := ⊩ G.toFinset
 
-abbrev Derivationₛ (p : SyntacticFormula L) := ⊩ ({p} : Finset _)
+abbrev valid (p : SyntacticFormula L) := ⊩ ({p} : Finset _)
 
 namespace Derivation
 variable {Δ Γ : Finset (SyntacticFormula L)}
@@ -251,7 +251,7 @@ def deriveList? (ts : List (SyntacticTerm L)) : ℕ → (Γ : List (SyntacticFor
           fun d => (exOfInstances (Γ := insert (∃' p) Γ.toFinset) ts
             p (d.cast $ by ext; simp[or_comm])).cast (by ext; simp)
 
-def derive? (ts : List (SyntacticTerm L)) (s : ℕ) (p : SyntacticFormula L) : Option (Derivationₛ p) :=
+def derive? (ts : List (SyntacticTerm L)) (s : ℕ) (p : SyntacticFormula L) : Option (valid p) :=
   deriveList? ts s [p]
 
 open Language

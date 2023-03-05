@@ -446,11 +446,11 @@ syntax:45 "prop" term:max : subformula
 syntax:45 "rel¹" term "/[" subterm:0 "]" : subformula
 syntax:45 "rel²" term "/[" subterm:0 "," subterm:0 "]" : subformula
 syntax:45 "rel³" term "/[" subterm:0 "," subterm:0 "," subterm:0 "]" : subformula
-syntax:33 "¬" subformula : subformula
+syntax:max "¬" subformula:35 : subformula
 syntax:32 subformula:32 "∧" subformula:33 : subformula
 syntax:30 subformula:30 "∨" subformula:31 : subformula
-syntax:20 "∀" subformula:20 : subformula
-syntax:20 "∃" subformula:20 : subformula
+syntax:25 "∀" subformula:24 : subformula
+syntax:25 "∃" subformula:24 : subformula
 syntax "(" subformula ")" : subformula
 syntax:max "!" term:max : subformula
 syntax "“" subformula "”" : term
@@ -474,19 +474,21 @@ macro_rules
   | `(“ ∃ $p:subformula ”)                            => `(∃' “$p”)
   | `(“ ( $x ) ”)                                     => `(“$x”)
 
-#reduce (“¬ prop (Language.toRelational 1)” : Formula (Language.relational (fun _ => ℕ)) ℕ)
-#reduce (“rel¹ Language.toRelational 1 /[&0]” : Formula (Language.relational (fun _ => ℕ)) ℕ)
-#reduce (“¬ rel² Language.toRelational 1 /[&0, &1]” : Formula (Language.relational (fun _ => ℕ)) ℕ)
-#reduce (“¬ (∀ ∀ (#0 + 1) * #1 < #0 + #1)” : Sentence Language.oring)
+#check (“¬ prop (Language.toRelational 1)” : Formula (Language.relational (fun _ => ℕ)) ℕ)
+#check (“rel¹ Language.toRelational 1 /[&0]” : Formula (Language.relational (fun _ => ℕ)) ℕ)
+#check (“¬ rel² Language.toRelational 1 /[&0, &1]” : Formula (Language.relational (fun _ => ℕ)) ℕ)
+#check (“¬(∀ ∀ (#0 + 1) * #1 < #0 + #1 ∨ 0 < 5)” : Sentence Language.oring)
+#check (“¬⊤ ∨ ¬0 < 5” : Sentence Language.oring)
 
-syntax:10 subformula:10 "→" subformula:11 : subformula
-syntax:10 subformula:10 "↔" subformula:11 : subformula
+syntax:10 subformula:9 "→" subformula:10 : subformula
+syntax:10 subformula:10 "↔" subformula:10 : subformula
 
 macro_rules
   | `(“ $p:subformula → $q:subformula ”) => `(“$p” ⟶ “$q”)
   | `(“ $p:subformula ↔ $q:subformula ”) => `(“$p” ⟷ “$q”)
 
 #reduce (“(∃ ⊤) ↔ !(∃' ⊤)” : Sentence Language.oring)
+#check (“0 < 0 → 0 < 1 → 0 < 2” : Sentence Language.oring)
 
 end SubFormula
 
