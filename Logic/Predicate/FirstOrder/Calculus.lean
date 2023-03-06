@@ -46,7 +46,7 @@ structure provable (T : Theory L ℕ) (p : SyntacticFormula L) where
 
 abbrev DerivationList (G : List (SyntacticFormula L)) := ⊩ G.toFinset
 
-abbrev valid (p : SyntacticFormula L) := ⊩ ({p} : Finset _)
+abbrev Derivation.Valid (p : SyntacticFormula L) := ⊩ ({p} : Finset _)
 
 namespace Derivation
 variable {Δ Γ : Finset (SyntacticFormula L)}
@@ -229,58 +229,7 @@ def exOfInstances (v : List (SyntacticTerm L)) (p : SyntacticSubFormula L 1)
   · exact Derivation.cast (ih (Γ := insert (∃' p) Γ)
       (Derivation.cast (ex _ t p h) (by ext r; simp))) (by simp)
 
-def deriveList? (ts : List (SyntacticTerm L)) : ℕ → (Γ : List (SyntacticFormula L)) → Option (⊩ Γ.toFinset)
-  | 0,     _      => none
-  | _ + 1, []     => none
-  | s + 1, p :: Γ =>
-      if h : ~p ∈ Γ then some (em (p := p) (by simp) (by simp[h]))
-      else if h : ⊤ ∈ Γ then some $ verum _ (by simp[h])
-      else match p with
-      | ⊤        => some $ verum _ (by simp)
-      | ⊥        => (deriveList? ts s Γ).map (fun d => weakening d (by simpa using Finset.subset_insert ⊥ Γ.toFinset))
-      | rel r v  => (deriveList? ts s $ Γ ++ [rel r v]).map (fun d => d.cast $ by ext; simp; tauto)
-      | nrel r v => (deriveList? ts s $ Γ ++ [nrel r v]).map (fun d => d.cast $ by ext; simp; tauto)
-      | p ⋎ q    => (deriveList? ts s (Γ ++ [p, q])).map
-          fun d => (or (Δ := Γ.toFinset) (p := p) (q := q) (d.cast $ by ext; simp; tauto)).cast (by ext; simp)
-      | p ⋏ q    => (deriveList? ts s (Γ ++ [p])).bind fun dp => (deriveList? ts s (Γ ++ [q])).map
-          fun dq => (and Γ.toFinset p q (dp.cast $ by ext; simp[or_comm]) (dq.cast $ by ext; simp[or_comm])).cast 
-            (by ext; simp[or_comm])
-      | ∀' p     => (deriveList? ts s (Γ.map shift ++ [free p])).map
-          fun d => (all (Γ.toFinset) p (d.cast $ by ext; simp[shifts, shiftEmb, or_comm])).cast (by simp)
-      | ∃' p     => (deriveList? ts s (Γ ++ [∃' p] ++ ts.map (subst · p))).map
-          fun d => (exOfInstances (Γ := insert (∃' p) Γ.toFinset) ts
-            p (d.cast $ by ext; simp[or_comm])).cast (by ext; simp)
-
-def derive? (ts : List (SyntacticTerm L)) (s : ℕ) (p : SyntacticFormula L) : Option (valid p) :=
-  deriveList? ts s [p]
-
 open Language
-
-#eval derive? [&0, &1] 10 (L := oring) “&0 = &1 → (∃ ∃ #0 = #1)” 
-
-#eval derive? [&0, &1] 4 (L := oring) “(∀ #0 = #0) → &1 = &1”
-
-#eval derive? [] 16 (L := relational (fun _ => ℕ))
-  “((prop (toRelational 0) → prop (toRelational 1)) → prop (toRelational 0)) → prop (toRelational 0)” 
-
-#eval derive? [&0] 16 (L := relational (fun _ => ℕ))
-  “(∀ rel¹ (toRelational 0)/[#0] ∨ rel¹ (toRelational 1)/[#0]) → (∀ rel¹ (toRelational 1)/[#0] ∨ rel¹ (toRelational 0)/[#0])” 
-
-#eval derive? [&0] 32 (L := relational (fun _ => ℕ))
-  “(∀ rel¹ (toRelational 0)/[#0] ∨ rel¹ (toRelational 1)/[#0] ∨ rel¹ (toRelational 2)/[#0]) →
-   (∀ rel¹ (toRelational 2)/[#0] ∨ rel¹ (toRelational 1)/[#0] ∨ rel¹ (toRelational 0)/[#0])” 
-
-#eval derive? [&0] 64 (L := relational (fun _ => ℕ))
-  “((∀ prop (toRelational 0) ∨ rel¹ (toRelational 0) /[#0]) → ⊥) ↔ 
-   ¬(∀ rel¹ (toRelational 0) /[#0] ∨ prop (toRelational 0))”
-
-#eval derive? [&0, &1] 64 (L := relational (fun _ => ℕ))
-  “((∀ ∀ rel² (toRelational 0) /[#0, #1]) → ⊥) ↔ 
-   ¬(∀ ∀ rel² (toRelational 0) /[#0, #1])”
-
-#eval derive? [&0, &1] 128 (L := relational (fun _ => ℕ))
-  “((∀ ∀ rel² (toRelational 0) /[#0, #1])) →
-    (∀ ∀ rel² (toRelational 0) /[#1, #0])”
 
 end Derivation
 

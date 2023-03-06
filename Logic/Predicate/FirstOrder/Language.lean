@@ -53,15 +53,15 @@ namespace FirstOrder
 namespace SubFormula
 variable {L₁ L₂ : Language} (Φ : L₁ →ᵥ L₂) {μ₁ μ₂ : Type _} {n₁ n₂ : ℕ}
 
-lemma onSubFormula₁_bind (fixed : Fin n₁ → SubTerm L₁ μ₂ n₂) (free : μ₁ → SubTerm L₁ μ₂ n₂) (p) :
-    Φ.onSubFormula₁ (bind fixed free p) =
-    bind (fun x => Φ.onSubTerm (fixed x)) (fun x => Φ.onSubTerm (free x)) (Φ.onSubFormula₁ p) := by
+lemma onSubFormula₁_bind (bound : Fin n₁ → SubTerm L₁ μ₂ n₂) (free : μ₁ → SubTerm L₁ μ₂ n₂) (p) :
+    Φ.onSubFormula₁ (bind bound free p) =
+    bind (fun x => Φ.onSubTerm (bound x)) (fun x => Φ.onSubTerm (free x)) (Φ.onSubFormula₁ p) := by
   induction p using rec' generalizing μ₂ n₂ <;>
   simp[*, SubTerm.onSubTerm_bind, Matrix.comp_vecCons, Function.comp, SubTerm.onSubTerm_bShift,
     Language.Hom.onSubFormula₁_rel, Language.Hom.onSubFormula₁_nrel, bind_rel, bind_nrel]
 
-lemma onSubFormula₁_map (fixed : Fin n₁ → Fin n₂) (free : μ₁ → μ₂) (p) :
-    Φ.onSubFormula₁ (map fixed free p) = map fixed free (Φ.onSubFormula₁ p) :=
+lemma onSubFormula₁_map (bound : Fin n₁ → Fin n₂) (free : μ₁ → μ₂) (p) :
+    Φ.onSubFormula₁ (map bound free p) = map bound free (Φ.onSubFormula₁ p) :=
   by simp[map, onSubFormula₁_bind]
 
 lemma onSubFormula₁_subst (u) (p : SubFormula L₁ μ (n + 1)) :

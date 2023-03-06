@@ -22,8 +22,8 @@ def ofNat : ℕ → Option (SubTerm L μ n)
   match e.bodd with
   | false => 
     match e.div2.bodd with
-    | false => (decode₂ (Fin n) e.div2.div2).map fixedVar
-    | true  => (decode₂ μ e.div2.div2).map freeVar
+    | false => (decode₂ (Fin n) e.div2.div2).map bvar
+    | true  => (decode₂ μ e.div2.div2).map fvar
   | true  =>
       let x := e.div2
       let k := x.unpair.1

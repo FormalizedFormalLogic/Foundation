@@ -9,11 +9,11 @@ namespace Meta
 section lemmata
 variable {L : Language.{u}} {μ : Type v} {n}
 
-lemma free_fixedVar_last (n : ℕ) : free (#⟨n, Nat.lt.base n⟩ : SyntacticSubTerm L (n + 1)) = &0 :=
-  SubTerm.free_fixedVar_last
+lemma free_bvar_last (n : ℕ) : free (#⟨n, Nat.lt.base n⟩ : SyntacticSubTerm L (n + 1)) = &0 :=
+  SubTerm.free_bvar_last
 
-lemma free_fixedVar_of_lt (x : Fin (n + 1)) (h : x.val < n) : free (#x : SyntacticSubTerm L (n + 1)) = #⟨x, h⟩ :=
-  free_fixedVar_castSucc (L := L) ⟨x, h⟩
+lemma free_bvar_of_lt (x : Fin (n + 1)) (h : x.val < n) : free (#x : SyntacticSubTerm L (n + 1)) = #⟨x, h⟩ :=
+  free_bvar_castSucc (L := L) ⟨x, h⟩
 
 lemma free_func0 (f : L.func 0) :
     SubTerm.free (SubTerm.func (L := L) (n := n + 1) f ![]) = SubTerm.func f ![] := by simp[free_func]
@@ -33,13 +33,13 @@ lemma free_func3 (f : L.func 3) {t₁ t₂ t₃ : SyntacticSubTerm L (n + 1)} {t
   cases' x using Fin.cases with x <;> simp;
   cases' x using Fin.cases with x <;> simp
 
-lemma subst_fixedVar_last (n : ℕ) (s : SubTerm L μ n) :
+lemma subst_bvar_last (n : ℕ) (s : SubTerm L μ n) :
     subst s (#⟨n, Nat.lt.base n⟩ : SubTerm L μ (n + 1)) = s :=
-  SubTerm.subst_fixedVar_last _
+  SubTerm.subst_bvar_last _
 
-lemma subst_fixedVar_of_lt {s : SubTerm L μ n} (x : Fin (n + 1)) (h : x.val < n) : 
+lemma subst_bvar_of_lt {s : SubTerm L μ n} (x : Fin (n + 1)) (h : x.val < n) : 
     subst s (#x : SubTerm L μ (n + 1)) = #⟨x, h⟩ :=
-  subst_fixedVar_castSucc s ⟨x, h⟩
+  subst_bvar_castSucc s ⟨x, h⟩
 
 lemma subst_func0 {s : SubTerm L μ n} (f : L.func 0) :
     subst s (SubTerm.func (L := L) (n := n + 1) f ![]) = SubTerm.func f ![] := by simp[subst_func]
@@ -161,16 +161,16 @@ partial def resultFree {L : Q(Language.{u})} {n : Q(ℕ)} : (t : Q(SyntacticSubT
     let some nnat := n.natLit? | throwError f!"Fail: natLit: {n}"
     let some xval := (← finQVal (n := q(.succ $n)) x) | throwError f!"Fail: FinQVal {x}"
     if xval = nnat then
-      let e := q(free_fixedVar_last (L := $L) $n)
+      let e := q(free_bvar_last (L := $L) $n)
       return ⟨q(&0), e⟩
     else
       let lt ← decideTQ q(($x).val < $n)
-      let e := q(free_fixedVar_of_lt (L := $L) $x $lt)
+      let e := q(free_bvar_of_lt (L := $L) $x $lt)
       let z : Q(Fin $n) ← Lean.Expr.ofNat q(Fin $n) xval
       return ⟨q(#$z), e⟩
   | ~q(&$x)                              => do
     let z ← natAppFunQ Nat.succ x
-    let e : Expr := q(SubTerm.free_freeVar (L := $L) (n := $n) $x)
+    let e : Expr := q(SubTerm.free_fvar (L := $L) (n := $n) $x)
     return ⟨q(&$z), e⟩
   | ~q(SubTerm.func $f ![])              => pure ⟨q(SubTerm.func $f ![]), q(free_func0 $f)⟩
   | ~q(SubTerm.func $f ![$t])            => do
@@ -197,13 +197,13 @@ partial def resultSubst {L : Q(Language.{u})} {n : Q(ℕ)} (s : Q(SyntacticSubTe
     let some nnat := n.natLit? | throwError f!"Fail: natLit: {n}"
     let some xval := (← finQVal (n := q(.succ $n)) x) | throwError f!"Fail: FinQVal {x}"
     if xval = nnat then
-      return ⟨q($s), (q(subst_fixedVar_last $n $s) : Expr)⟩
+      return ⟨q($s), (q(subst_bvar_last $n $s) : Expr)⟩
     else
       let lt ← decideTQ q(($x).val < $n)
-      let e := q(free_fixedVar_of_lt (L := $L) $x $lt)
+      let e := q(free_bvar_of_lt (L := $L) $x $lt)
       let z : Q(Fin $n) ← Lean.Expr.ofNat q(Fin $n) xval
       return ⟨q(#$z), e⟩
-  | ~q(&$x)                              => pure ⟨q(&$x), q(SubTerm.subst_freeVar _ _)⟩
+  | ~q(&$x)                              => pure ⟨q(&$x), q(SubTerm.subst_fvar _ _)⟩
   | ~q(SubTerm.func $f ![])              => pure ⟨q(SubTerm.func $f ![]), q(subst_func0 $f)⟩
   | ~q(SubTerm.func $f ![$t])            => do
     let ⟨tn, e⟩ ← resultSubst (L := L) (n := n) s t
@@ -223,10 +223,10 @@ partial def resultSubst {L : Q(Language.{u})} {n : Q(ℕ)} (s : Q(SyntacticSubTe
 
 partial def resultShift {L : Q(Language.{u})} {n : Q(ℕ)} : (t : Q(SyntacticSubTerm $L $n)) →
     MetaM ((res : Q(SyntacticSubTerm $L $n)) × Q(SubTerm.shift $t = $res))
-  | ~q(#$x)                              => pure ⟨q(#$x), q(SubTerm.shift_fixedVar $x)⟩
+  | ~q(#$x)                              => pure ⟨q(#$x), q(SubTerm.shift_bvar $x)⟩
   | ~q(&$x)                              =>  do
     let z ← natAppFunQ Nat.succ x
-    let e := q(SubTerm.shift_freeVar (L := $L) (n := $n) $x)
+    let e := q(SubTerm.shift_fvar (L := $L) (n := $n) $x)
     return ⟨q(&$z), e⟩
   | ~q(SubTerm.func $f ![])              => pure ⟨q(SubTerm.func $f ![]), q(shift_func0 $f)⟩
   | ~q(SubTerm.func $f ![$t])            => do
@@ -253,9 +253,9 @@ partial def resultBShift {L : Q(Language.{u})} {n : Q(ℕ)} : (t : Q(SyntacticSu
     MetaM ((res : Q(SyntacticSubTerm $L ($n + 1))) × Q(bShift $t = $res))
   | ~q(#$x)                              => do
     let z ← natAppFunQ Nat.succ x
-    let e := q(SubTerm.bShift_fixedVar (L := $L) (μ := ℕ) (n := $n) $x)
+    let e := q(SubTerm.bShift_bvar (L := $L) (μ := ℕ) (n := $n) $x)
     return ⟨q(&$z), e⟩
-  | ~q(&$x)                              => pure ⟨q(&$x), q(SubTerm.bShift_freeVar $x)⟩
+  | ~q(&$x)                              => pure ⟨q(&$x), q(SubTerm.bShift_fvar $x)⟩
   | ~q(SubTerm.func $f ![])              => pure ⟨q(SubTerm.func $f ![]), q(bShift_func0 $f)⟩
   | ~q(SubTerm.func $f ![$t])            => do
     let ⟨tn, e⟩ ← resultBShift (L := L) (n := n) t

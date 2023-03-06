@@ -54,16 +54,16 @@ lemma subval_nrel {k} {r : L.rel k} {v} :
 @[simp] lemma subval_ex {p : SubFormula L μ (n + 1)} :
     subval s e ε (∃' p) ↔ ∃ x : M, subval s (x :> e) ε p := of_eq rfl
 
-lemma subval_bind (fixed : Fin n₁ → SubTerm L μ₂ n₂) (free : μ₁ → SubTerm L μ₂ n₂) (p : SubFormula L μ₁ n₁) :
-    subval s e₂ ε₂ (bind fixed free p) =
-    subval s (SubTerm.val s e₂ ε₂ ∘ fixed) (SubTerm.val s e₂ ε₂ ∘ free) p := by
+lemma subval_bind (bound : Fin n₁ → SubTerm L μ₂ n₂) (free : μ₁ → SubTerm L μ₂ n₂) (p : SubFormula L μ₁ n₁) :
+    subval s e₂ ε₂ (bind bound free p) =
+    subval s (SubTerm.val s e₂ ε₂ ∘ bound) (SubTerm.val s e₂ ε₂ ∘ free) p := by
   induction p using rec' generalizing n₂ <;> simp[*, SubTerm.val_bind, Function.comp,
     bind_rel, bind_nrel, subval_rel, subval_nrel]
   · apply forall_congr'; intros a; apply of_eq; congr; exact funext $ Fin.cases (by simp) (by simp)
   · apply exists_congr; intros a; apply of_eq; congr; exact funext $ Fin.cases (by simp) (by simp)
 
-lemma subval_map (fixed : Fin n₁ → Fin n₂) (free : μ₁ → μ₂) (e : Fin n₂ → M) (ε : μ₂ → M) (p : SubFormula L μ₁ n₁) :
-    subval s e ε (map fixed free p) = subval s (e ∘ fixed) (ε ∘ free) p :=
+lemma subval_map (bound : Fin n₁ → Fin n₂) (free : μ₁ → μ₂) (e : Fin n₂ → M) (ε : μ₂ → M) (p : SubFormula L μ₁ n₁) :
+    subval s e ε (map bound free p) = subval s (e ∘ bound) (ε ∘ free) p :=
   by simp[map, subval_bind, Function.comp]
 
 lemma subval_subst (u : SubTerm L μ n) (p : SubFormula L μ (n + 1)) :

@@ -485,7 +485,7 @@ def rotate {p} (d : DerivationList (G ++ [p])) : DerivationList (p :: G) :=
 def headWeakening {p} (d : DerivationList G) : DerivationList (p :: G) :=
   Derivation.weakening d (by simp; exact Finset.subset_insert  _ _)
 
-def headWeakeningOfvalid {p p'} (h : p = p') (d : valid p) : DerivationList (p' :: G) :=
+def headWeakeningOfValid {p p'} (h : p = p') (d : Valid p) : DerivationList (p' :: G) :=
   Derivation.weakening d (by simp[h])
 
 def headOr {p q} (d : DerivationList (G ++ [p, q])) : DerivationList (p ⋎ q :: G) :=
@@ -519,14 +519,14 @@ def headExInstancesOfEq {v : List (SyntacticTerm L)} {p : SyntacticSubFormula L 
 
 end DerivationList
 
-namespace valid
+namespace Valid
 open Derivation
 variable {L : Language.{u}} [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq (L.rel k)]
 
-def congr {p p' : SyntacticFormula L} (e : p' = p) (d : valid p) : valid p' :=
+def congr {p p' : SyntacticFormula L} (e : p' = p) (d : Valid p) : Valid p' :=
   e ▸ d
 
-end valid
+end Valid
 
 set_option linter.unusedVariables false in
 abbrev DerivationListQ (L : Q(Language.{u}))
@@ -535,11 +535,11 @@ abbrev DerivationListQ (L : Q(Language.{u}))
   Q(DerivationList $(toQList (u := u) G))
 
 namespace DerivationListQ
-open SubFormula
+open SubFormula Derivation
 variable (L : Q(Language.{u}))
   (dfunc : Q(∀ k, DecidableEq (($L).func k))) (drel : Q(∀ k, DecidableEq (($L).rel k))) (G : List Q(SyntacticFormula $L))
 
-def tovalidQ (p : Q(SyntacticFormula $L)) (d : DerivationListQ L dfunc drel [p]) : Q(valid $p) :=
+def toValidQ (p : Q(SyntacticFormula $L)) (d : DerivationListQ L dfunc drel [p]) : Q(Valid $p) :=
   q($d)
 
 def congrQ {G G' : List Q(SyntacticFormula $L)} (e : Q($(toQList (u := u) G) = $(toQList (u := u) G')))
@@ -571,8 +571,8 @@ def tailVerumDec (p : Q(SyntacticFormula $L)) :
 def headWeakening {p} (d : DerivationListQ L dfunc drel G) : DerivationListQ L dfunc drel (p :: G) :=
   q(DerivationList.headWeakening $d)
 
-def headWeakeningOfvalid (p p' : Q(SyntacticFormula $L)) (h : Q($p = $p')) (d : Q(valid $p)) : DerivationListQ L dfunc drel (p' :: G) :=
-  q(DerivationList.headWeakeningOfvalid $h $d)
+def headWeakeningOfValid (p p' : Q(SyntacticFormula $L)) (h : Q($p = $p')) (d : Q(Valid $p)) : DerivationListQ L dfunc drel (p' :: G) :=
+  q(DerivationList.headWeakeningOfValid $h $d)
 
 -- def headEm {p : Q(SyntacticFormula $L)} (h : G.elem q(~$p)) : DerivationListQ L dfunc drel (p :: G) :=
 --   q(DerivationList.headEm $(Qq.toQListOfElem (u := u) h))
@@ -648,7 +648,7 @@ def headEx (v : List Q(SyntacticTerm $L)) (p : Q(SyntacticSubFormula $L 1)) (pi 
 -/
 
 def getFormula (e : Q(Type u)) : MetaM $ Option Q(SyntacticFormula $L) := do
-  if let ~q(@valid $L' $dfunc' $drel' $p) := e then
+  if let ~q(@Valid $L' $dfunc' $drel' $p) := e then
     if (← isDefEq (← whnf L) (← whnf L')) then
       return some p
     else return none
@@ -666,15 +666,15 @@ def tryProveByHyp (L : Q(Language.{u})) (dfunc : Q(∀ k, DecidableEq (($L).func
         let some p' ← getFormula L declType | return none
         let ⟨pn', e'⟩ ← Meta.result₀ p'
         if ← isDefEq p pn' then
-          let some d ← checkTypeQ (u := .succ u) declExpr q(@valid $L $dfunc $drel $p') | return none
+          let some d ← checkTypeQ (u := .succ u) declExpr q(@Valid $L $dfunc $drel $p') | return none
             return some (p', e', d)
         else return none
       else return none
     if let some (p', e', d') := hyp then
-      return some $ headWeakeningOfvalid L dfunc drel G p p' e' d'
+      return some $ headWeakeningOfValid L dfunc drel G p p' e' d'
     else return none
 
-partial def prvListTauto (hypSearch : Bool)
+def proveDerivationListQTauto (hypSearch : Bool)
   (L : Q(Language.{u})) (dfunc : Q(∀ k, DecidableEq (($L).func k))) (drel : Q(∀ k, DecidableEq (($L).rel k))) :
     ℕ → (G : List Q(SyntacticFormula $L)) → MetaM (DerivationListQ (u := u) L dfunc drel G)
   | 0,     _      => throwError "failed!"
@@ -692,58 +692,58 @@ partial def prvListTauto (hypSearch : Bool)
     (match p with
     | ~q(⊤)       => pure $ headVerum L dfunc drel G
     | ~q(⊥)       => do
-      let d ← prvListTauto hypSearch L dfunc drel s G
+      let d ← proveDerivationListQTauto hypSearch L dfunc drel s G
       return headWeakening L dfunc drel G d
     | ~q($p ⋎ $q) => do
-      let d ← prvListTauto hypSearch L dfunc drel s (G ++ [p, q])
+      let d ← proveDerivationListQTauto hypSearch L dfunc drel s (G ++ [p, q])
       return (headOr L dfunc drel G d)
     | ~q($p ⋏ $q) => do
-      let dp ← prvListTauto hypSearch L dfunc drel s (G ++ [p])
-      let dq ← prvListTauto hypSearch L dfunc drel s (G ++ [q])
+      let dp ← proveDerivationListQTauto hypSearch L dfunc drel s (G ++ [p])
+      let dq ← proveDerivationListQTauto hypSearch L dfunc drel s (G ++ [q])
       return (headAnd L dfunc drel G dp dq)
     | ~q($p)      => do
-      let d ← prvListTauto hypSearch L dfunc drel s (G ++ [p])
+      let d ← proveDerivationListQTauto hypSearch L dfunc drel s (G ++ [p])
       return rotate L dfunc drel G p d
       : MetaM Q(DerivationList $ $p :: $(toQList (u := u) G)))
 
-def prvDrivationₛTauto (L : Q(Language.{u})) (dfunc : Q(∀ k, DecidableEq (($L).func k))) (drel : Q(∀ k, DecidableEq (($L).rel k)))
-  (s : ℕ) (p : Q(SyntacticFormula $L)) : MetaM Q(valid $p) := do
+def proveValidTauto (L : Q(Language.{u})) (dfunc : Q(∀ k, DecidableEq (($L).func k))) (drel : Q(∀ k, DecidableEq (($L).rel k)))
+  (s : ℕ) (p : Q(SyntacticFormula $L)) : MetaM Q(Valid $p) := do
   let ⟨pn, e⟩ ← SubFormula.Meta.result₀ (L := L) p
-  let d ← prvListTauto true L dfunc drel s [pn]
-  let h := tovalidQ L dfunc drel _ d
-  return q(valid.congr $e $h)
+  let d ← proveDerivationListQTauto true L dfunc drel s [pn]
+  let h := toValidQ L dfunc drel _ d
+  return q(Valid.congr $e $h)
 
 elab "proveTauto" n:(num)? : tactic => do
   let goalType ← Elab.Tactic.getMainTarget
   let some ⟨.succ _, ty⟩ ← checkSortQ' goalType | throwError "not a type"
-  let ~q(@valid $L $dfunc $drel $p) := ty | throwError "not a type: valid p"
+  let ~q(@Valid $L $dfunc $drel $p) := ty | throwError "not a type: Valid p"
   let s : ℕ :=
     match n with
     | some n => n.getNat
     | none   => 16
-  let b ← prvDrivationₛTauto L dfunc drel s p
+  let b ← proveValidTauto L dfunc drel s p
   Lean.Elab.Tactic.closeMainGoal b
 
 section
 variable {L : Language.{u}} [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq (L.rel k)] (p q r s : SyntacticFormula L)
 
-example : valid ((p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r) := by proveTauto
+example : Valid ((p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r) := by proveTauto
 
-example : valid “((!p → !q) → !p) → !p” := by proveTauto
+example : Valid “((!p → !q) → !p) → !p” := by proveTauto
 
-example : valid “!p ∧ !q ∧ !r ↔ !r ∧ !p ∧ !q”  := by proveTauto
+example : Valid “!p ∧ !q ∧ !r ↔ !r ∧ !p ∧ !q”  := by proveTauto
 
-example (d : valid p) : valid “!p ∨ !q”  := by proveTauto
+example (d : Valid p) : Valid “!p ∨ !q”  := by proveTauto
 
-example (_ : valid “¬(!p ∧ !q)”) (_ : valid s) : valid “!s → !p ∧ !q → !r”  := by proveTauto
+example (_ : Valid “¬(!p ∧ !q)”) (_ : Valid s) : Valid “!s → !p ∧ !q → !r”  := by proveTauto
 
-example (_ : valid “¬(!p ∧ !q)”) : valid “¬!p ∨ ¬!q”  := by proveTauto
+example (_ : Valid “¬(!p ∧ !q)”) : Valid “¬!p ∨ ¬!q”  := by proveTauto
 
 end
 
 end tauto
 
-def prvList (L : Q(Language.{u})) (dfunc : Q(∀ k, DecidableEq (($L).func k))) (drel : Q(∀ k, DecidableEq (($L).rel k)))
+def proveDerivationListQ (L : Q(Language.{u})) (dfunc : Q(∀ k, DecidableEq (($L).func k))) (drel : Q(∀ k, DecidableEq (($L).rel k)))
   (ts : List Q(SyntacticTerm $L)) :
     ℕ → (G : List Q(SyntacticFormula $L)) → MetaM (DerivationListQ (u := u) L dfunc drel G)
   | 0,     _      => throwError "failed!"
@@ -761,42 +761,42 @@ def prvList (L : Q(Language.{u})) (dfunc : Q(∀ k, DecidableEq (($L).func k))) 
     (match p with
     | ~q(⊤) => pure $ headVerum L dfunc drel G
     | ~q(⊥) => do
-      let d ← prvList L dfunc drel ts s G
+      let d ← proveDerivationListQ L dfunc drel ts s G
       return headWeakening L dfunc drel G d
     | ~q($p ⋎ $q) => do
-      let d ← prvList L dfunc drel ts s (G ++ [p, q])
+      let d ← proveDerivationListQ L dfunc drel ts s (G ++ [p, q])
       return (headOr L dfunc drel G d)
      | ~q($p ⋏ $q) => do
-      let dp ← prvList L dfunc drel ts s (G ++ [p])
-      let dq ← prvList L dfunc drel ts s (G ++ [q])
+      let dp ← proveDerivationListQ L dfunc drel ts s (G ++ [p])
+      let dq ← proveDerivationListQ L dfunc drel ts s (G ++ [q])
       return (headAnd L dfunc drel G dp dq)   
     | ~q(∀' $p)  => do
       let ⟨fp, fpe⟩ ← Meta.resultFree p
       let ⟨sG, sGe⟩ ← Meta.resultShift₀List G
-      let d ← prvList L dfunc drel ts s (Append.append sG [fp])
+      let d ← proveDerivationListQ L dfunc drel ts s (Append.append sG [fp])
       return headAll L dfunc drel G sG sGe fpe d
     | ~q(∃' $p)   => do
       let ⟨pi, pie⟩ ← Meta.resultSubst₀List ts p
-      let d ← prvList L dfunc drel ts s (G ++ pi)
+      let d ← proveDerivationListQ L dfunc drel ts s (G ++ pi)
       return headEx L dfunc drel G ts p pi pie d
     | ~q($p) => do
-      let d ← prvList L dfunc drel ts s (G ++ [p])
+      let d ← proveDerivationListQ L dfunc drel ts s (G ++ [p])
       return rotate L dfunc drel G p d
          : MetaM Q(DerivationList $ $p :: $(toQList (u := u) G)))
 
-def prvDrivationₛ (L : Q(Language.{u})) (dfunc : Q(∀ k, DecidableEq (($L).func k))) (drel : Q(∀ k, DecidableEq (($L).rel k)))
-  (ts : List Q(SyntacticTerm $L)) (s : ℕ) (p : Q(SyntacticFormula $L)) : MetaM Q(valid $p) := do
+def proveValid (L : Q(Language.{u})) (dfunc : Q(∀ k, DecidableEq (($L).func k))) (drel : Q(∀ k, DecidableEq (($L).rel k)))
+  (ts : List Q(SyntacticTerm $L)) (s : ℕ) (p : Q(SyntacticFormula $L)) : MetaM Q(Valid $p) := do
   let ⟨pn, e⟩ ← SubFormula.Meta.result₀ (L := L) p
-  let d ← prvList L dfunc drel ts s [pn]
-  let h := tovalidQ L dfunc drel _ d
-  return q(valid.congr $e $h)
+  let d ← proveDerivationListQ L dfunc drel ts s [pn]
+  let h := toValidQ L dfunc drel _ d
+  return q(Valid.congr $e $h)
 
 syntax termSeq := " [" (term,*) "]"
 
 elab "prove" n:(num)? seq:(termSeq)? : tactic => do
   let goalType ← Elab.Tactic.getMainTarget
   let some ⟨.succ _, ty⟩ ← checkSortQ' goalType | throwError "error: not a type"
-  let ~q(@valid $L $dfunc $drel $p) := ty | throwError "error: not a type 2"
+  let ~q(@Valid $L $dfunc $drel $p) := ty | throwError "error: not a type 2"
   let s : ℕ :=
     match n with
     | some n => n.getNat
@@ -808,20 +808,20 @@ elab "prove" n:(num)? seq:(termSeq)? : tactic => do
       | `(termSeq| [ $ss,* ] ) => do ss.getElems.mapM (Term.elabTerm · (some q(SyntacticTerm $L)))
       | _                      => pure #[]
     | _        => pure #[q(&0 : SyntacticTerm $L), q(&1 : SyntacticTerm $L)]
-  let b ← prvDrivationₛ L dfunc drel ts.toList s p
+  let b ← proveValid L dfunc drel ts.toList s p
   Lean.Elab.Tactic.closeMainGoal b
 
 section
 variable {L : Language.{u}} [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq (L.rel k)] (p q r s : SyntacticFormula L)
 open Language
 
-example (_ : valid “¬(!p ∧ !q)”) : valid “¬!p ∨ ¬!q”  := by proveTauto
+example (_ : Valid “¬(!p ∧ !q)”) : Valid “¬!p ∨ ¬!q”  := by proveTauto
 
-example : valid (L := oring) “&0 < 3 → ∃ &0 < #0” := by prove [T“3”]
+example : Valid (L := oring) “&0 < 3 → ∃ &0 < #0” := by prove [T“3”]
 
-example : valid (L := oring) “&0 < &1 → ∃ ∃ #0 < #1” := by prove
+example : Valid (L := oring) “&0 < &1 → ∃ ∃ #0 < #1” := by prove
 
-example (_ : valid (L := oring) “0 < 4 + 9”) : valid (L := oring) “⊤ ∧ (∃ 0 < 4 + #0)”  := by prove [T“9”]
+example (_ : Valid (L := oring) “0 < 4 + 9”) : Valid (L := oring) “⊤ ∧ (∃ 0 < 4 + #0)”  := by prove [T“9”]
 
 end
 

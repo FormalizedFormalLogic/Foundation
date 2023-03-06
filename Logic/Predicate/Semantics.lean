@@ -75,25 +75,25 @@ variable (M) {s}
 
 variable {M e e₂ ε ε₂}
 
-@[simp] lemma val_fixedVar (x) : val s e ε (#x : SubTerm L μ n) = e x := rfl
+@[simp] lemma val_bvar (x) : val s e ε (#x : SubTerm L μ n) = e x := rfl
 
-@[simp] lemma val_freeVar (x) : val s e ε (&x : SubTerm L μ n) = ε x := rfl
+@[simp] lemma val_fvar (x) : val s e ε (&x : SubTerm L μ n) = ε x := rfl
 
 lemma val_func {k} (f : L.func k) (v) :
     val s e ε (func f v) = s.func f (fun i => (v i).val s e ε) := rfl
   
-lemma val_bind (fixed : Fin n₁ → SubTerm L μ₂ n₂) (free : μ₁ → SubTerm L μ₂ n₂) (t : SubTerm L μ₁ n₁) :
-    (bind fixed free t).val s e₂ ε₂ = t.val s (val s e₂ ε₂ ∘ fixed) (val s e₂ ε₂ ∘ free) :=
+lemma val_bind (bound : Fin n₁ → SubTerm L μ₂ n₂) (free : μ₁ → SubTerm L μ₂ n₂) (t : SubTerm L μ₁ n₁) :
+    (bind bound free t).val s e₂ ε₂ = t.val s (val s e₂ ε₂ ∘ bound) (val s e₂ ε₂ ∘ free) :=
   by induction t <;> simp[*, bind_func, val_func]
 
-lemma val_map (fixed : Fin n₁ → Fin n₂) (free : μ₁ → μ₂) (t : SubTerm L μ₁ n₁) :
-    (map fixed free t).val s e₂ ε₂ = t.val s (e₂ ∘ fixed) (ε₂ ∘ free) := val_bind _ _ _
+lemma val_map (bound : Fin n₁ → Fin n₂) (free : μ₁ → μ₂) (t : SubTerm L μ₁ n₁) :
+    (map bound free t).val s e₂ ε₂ = t.val s (e₂ ∘ bound) (ε₂ ∘ free) := val_bind _ _ _
 
 lemma val_subst (u : SubTerm L μ n) (t : SubTerm L μ (n + 1)) :
     (subst u t).val s e ε = t.val s (e <: u.val s e ε) ε :=
   by simp[subst, val_bind]; congr; exact funext $ Fin.lastCases (by simp) (by simp)
 
-@[simp] lemma val_fixedSucc (a : M) (t : SubTerm L μ n) :
+@[simp] lemma val_bShift (a : M) (t : SubTerm L μ n) :
     t.bShift.val s (a :> e) ε = t.val s e ε := by simp[bShift, val_map, Function.comp]
 
 section Language

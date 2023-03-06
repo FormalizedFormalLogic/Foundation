@@ -194,23 +194,23 @@ variable {n n₁ n₂ n₃ m m₁ m₂ m₃ : ℕ}
 by induction p using rec' <;> simp[*]
 
 @[reducible]
-def bind' : ∀ {n₁ n₂}, (fixed : Fin n₁ → SubTerm L μ₂ n₂) → (free : μ₁ → SubTerm L μ₂ n₂) →
+def bind' : ∀ {n₁ n₂}, (bound : Fin n₁ → SubTerm L μ₂ n₂) → (free : μ₁ → SubTerm L μ₂ n₂) →
     SubFormula L μ₁ n₁ → SubFormula L μ₂ n₂
   | _, _, _,     _,    ⊤          => ⊤
   | _, _, _,     _,    ⊥          => ⊥
-  | _, _, fixed, free, (rel r v)  => rel r (SubTerm.bind fixed free ∘ v)
-  | _, _, fixed, free, (nrel r v) => nrel r (SubTerm.bind fixed free ∘ v)
-  | _, _, fixed, free, (p ⋏ q)    => bind' fixed free p ⋏ bind' fixed free q
-  | _, _, fixed, free, (p ⋎ q)    => bind' fixed free p ⋎ bind' fixed free q
-  | _, _, fixed, free, (∀' p)     => ∀' bind' (Fin.cases #0 $ SubTerm.bShift ∘ fixed) (SubTerm.bShift ∘ free) p
-  | _, _, fixed, free, (∃' p)     => ∃' bind' (Fin.cases #0 $ SubTerm.bShift ∘ fixed) (SubTerm.bShift ∘ free) p
+  | _, _, bound, free, (rel r v)  => rel r (SubTerm.bind bound free ∘ v)
+  | _, _, bound, free, (nrel r v) => nrel r (SubTerm.bind bound free ∘ v)
+  | _, _, bound, free, (p ⋏ q)    => bind' bound free p ⋏ bind' bound free q
+  | _, _, bound, free, (p ⋎ q)    => bind' bound free p ⋎ bind' bound free q
+  | _, _, bound, free, (∀' p)     => ∀' bind' (Fin.cases #0 $ SubTerm.bShift ∘ bound) (SubTerm.bShift ∘ free) p
+  | _, _, bound, free, (∃' p)     => ∃' bind' (Fin.cases #0 $ SubTerm.bShift ∘ bound) (SubTerm.bShift ∘ free) p
 
-lemma bind'_neg {n₁ n₂} (fixed : Fin n₁ → SubTerm L μ₂ n₂) (free : μ₁ → SubTerm L μ₂ n₂) (p) :
-    bind' fixed free (~p) = ~bind' fixed free p :=
+lemma bind'_neg {n₁ n₂} (bound : Fin n₁ → SubTerm L μ₂ n₂) (free : μ₁ → SubTerm L μ₂ n₂) (p) :
+    bind' bound free (~p) = ~bind' bound free p :=
   by induction p using rec' generalizing n₂ <;> simp[*, bind', ←neg_eq]
 
-def bind (fixed : Fin n₁ → SubTerm L μ₂ n₂) (free : μ₁ → SubTerm L μ₂ n₂) : SubFormula L μ₁ n₁ →L SubFormula L μ₂ n₂ where
-  toFun := bind' fixed free
+def bind (bound : Fin n₁ → SubTerm L μ₂ n₂) (free : μ₁ → SubTerm L μ₂ n₂) : SubFormula L μ₁ n₁ →L SubFormula L μ₂ n₂ where
+  toFun := bind' bound free
   map_top' := by simp[bind']
   map_bot' := by simp[bind']
   map_and' := by simp[bind']
@@ -218,84 +218,84 @@ def bind (fixed : Fin n₁ → SubTerm L μ₂ n₂) (free : μ₁ → SubTerm L
   map_neg' := by simp[bind'_neg]
   map_imp' := by simp[imp_eq, bind'_neg, ←neg_eq, bind']
 
-def map (fixed : Fin n₁ → Fin n₂) (free : μ₁ → μ₂) : SubFormula L μ₁ n₁ →L SubFormula L μ₂ n₂ :=
-  bind (fun n => #(fixed n)) (fun m => &(free m))
+def map (bound : Fin n₁ → Fin n₂) (free : μ₁ → μ₂) : SubFormula L μ₁ n₁ →L SubFormula L μ₂ n₂ :=
+  bind (fun n => #(bound n)) (fun m => &(free m))
 
 def subst (t : SubTerm L μ n) : SubFormula L μ (n + 1) →L SubFormula L μ n :=
-  bind (SubTerm.fixedVar <: t) SubTerm.freeVar
+  bind (SubTerm.bvar <: t) SubTerm.fvar
 
 section bind
-variable (fixed : Fin n₁ → SubTerm L μ₂ n₂) (free : μ₁ → SubTerm L μ₂ n₂)
+variable (bound : Fin n₁ → SubTerm L μ₂ n₂) (free : μ₁ → SubTerm L μ₂ n₂)
 
 lemma bind_rel {k} (r : L.rel k) (v : Fin k → SubTerm L μ₁ n₁) :
-    bind fixed free (rel r v) = rel r (fun i => (v i).bind fixed free) := rfl
+    bind bound free (rel r v) = rel r (fun i => (v i).bind bound free) := rfl
 
 lemma bind_nrel {k} (r : L.rel k) (v : Fin k → SubTerm L μ₁ n₁) :
-    bind fixed free (nrel r v) = nrel r (fun i => (v i).bind fixed free) := rfl
+    bind bound free (nrel r v) = nrel r (fun i => (v i).bind bound free) := rfl
 
 @[simp] lemma bind_all (p : SubFormula L μ₁ (n₁ + 1)) :
-    bind fixed free (∀' p) = ∀' bind (#0 :> SubTerm.bShift ∘ fixed) (SubTerm.bShift ∘ free) p := rfl
+    bind bound free (∀' p) = ∀' bind (#0 :> SubTerm.bShift ∘ bound) (SubTerm.bShift ∘ free) p := rfl
 
 @[simp] lemma bind_ex (p : SubFormula L μ₁ (n₁ + 1)) :
-    bind fixed free (∃' p) = ∃' bind (#0 :> SubTerm.bShift ∘ fixed) (SubTerm.bShift ∘ free) p := rfl
+    bind bound free (∃' p) = ∃' bind (#0 :> SubTerm.bShift ∘ bound) (SubTerm.bShift ∘ free) p := rfl
 
-@[simp] lemma complexity_bind (p : SubFormula L μ₁ n₁) : complexity (bind fixed free p) = complexity p :=
+@[simp] lemma complexity_bind (p : SubFormula L μ₁ n₁) : complexity (bind bound free p) = complexity p :=
   by induction p using rec' generalizing μ₂ n₂ <;> simp[*, bind_rel, bind_nrel]
 
-@[simp] lemma bind_id (p) : @bind L μ μ n n SubTerm.fixedVar SubTerm.freeVar p = p :=
+@[simp] lemma bind_id (p) : @bind L μ μ n n SubTerm.bvar SubTerm.fvar p = p :=
   by induction p using rec' <;> simp[*, bind_rel, bind_nrel]
 
-@[simp] lemma eq_bind_of (fixed : Fin n → SubTerm L μ n) (free : μ → SubTerm L μ n)
-    (hfixed : ∀ x, fixed x = #x) (hfree : ∀ x, free x = &x) (p : SubFormula L μ n) :
-    bind fixed free p = p :=
+@[simp] lemma eq_bind_of (bound : Fin n → SubTerm L μ n) (free : μ → SubTerm L μ n)
+    (hbound : ∀ x, bound x = #x) (hfree : ∀ x, free x = &x) (p : SubFormula L μ n) :
+    bind bound free p = p :=
   by
-  have : fixed = SubTerm.fixedVar := funext hfixed
-  have : free = SubTerm.freeVar := funext hfree
+  have : bound = SubTerm.bvar := funext hbound
+  have : free = SubTerm.fvar := funext hfree
   simp[*]
 
 end bind
 
 lemma bind_bind
-  (fixed₁ : Fin n₁ → SubTerm L μ₂ n₂) (free₁ : μ₁ → SubTerm L μ₂ n₂)
-  (fixed₂ : Fin n₂ → SubTerm L μ₃ n₃) (free₂ : μ₂ → SubTerm L μ₃ n₃) (p : SubFormula L μ₁ n₁) :
-    bind fixed₂ free₂ (bind fixed₁ free₁ p) = bind (fun n => (fixed₁ n).bind fixed₂ free₂) (fun m => (free₁ m).bind fixed₂ free₂) p := by
+  (bound₁ : Fin n₁ → SubTerm L μ₂ n₂) (free₁ : μ₁ → SubTerm L μ₂ n₂)
+  (bound₂ : Fin n₂ → SubTerm L μ₃ n₃) (free₂ : μ₂ → SubTerm L μ₃ n₃) (p : SubFormula L μ₁ n₁) :
+    bind bound₂ free₂ (bind bound₁ free₁ p) = bind (fun n => (bound₁ n).bind bound₂ free₂) (fun m => (free₁ m).bind bound₂ free₂) p := by
   induction p using rec' generalizing n₂ n₃ <;> simp[*, SubTerm.bind_bind, bind_rel, bind_nrel] <;>
   { congr
     refine funext (Fin.cases (by simp) (by simp[SubTerm.bShift, SubTerm.map, SubTerm.bind_bind]))
     refine funext (by simp[SubTerm.bShift, SubTerm.map, SubTerm.bind_bind]) }
 
 lemma bind_comp_bind
-  (fixed₁ : Fin n₁ → SubTerm L μ₂ n₂) (free₁ : μ₁ → SubTerm L μ₂ n₂)
-  (fixed₂ : Fin n₂ → SubTerm L μ₃ n₃) (free₂ : μ₂ → SubTerm L μ₃ n₃) :
-    (bind fixed₂ free₂).comp (bind fixed₁ free₁) = bind (fun n => (fixed₁ n).bind fixed₂ free₂) (fun m => (free₁ m).bind fixed₂ free₂) :=
+  (bound₁ : Fin n₁ → SubTerm L μ₂ n₂) (free₁ : μ₁ → SubTerm L μ₂ n₂)
+  (bound₂ : Fin n₂ → SubTerm L μ₃ n₃) (free₂ : μ₂ → SubTerm L μ₃ n₃) :
+    (bind bound₂ free₂).comp (bind bound₁ free₁) = bind (fun n => (bound₁ n).bind bound₂ free₂) (fun m => (free₁ m).bind bound₂ free₂) :=
   by ext p; simp[bind_bind]
 
 section map
-variable (fixed : Fin n₁ → Fin n₂) (free : μ₁ → μ₂)
+variable (bound : Fin n₁ → Fin n₂) (free : μ₁ → μ₂)
 
 lemma map_rel {k} (r : L.rel k) (v : Fin k → SubTerm L μ₁ n₁) :
-    map fixed free (rel r v) = rel r (fun i => (v i).map fixed free) := rfl
+    map bound free (rel r v) = rel r (fun i => (v i).map bound free) := rfl
 
 lemma map_nrel {k} (r : L.rel k) (v : Fin k → SubTerm L μ₁ n₁) :
-    map fixed free (nrel r v) = nrel r (fun i => (v i).map fixed free) := rfl
+    map bound free (nrel r v) = nrel r (fun i => (v i).map bound free) := rfl
 
 @[simp] lemma map_all (p : SubFormula L μ₁ (n₁ + 1)) :
-    map fixed free (∀' p) = ∀' map (0 :> Fin.succ ∘ fixed) free p :=
+    map bound free (∀' p) = ∀' map (0 :> Fin.succ ∘ bound) free p :=
   by simp[map]; congr; exact funext (Fin.cases (by simp) (by simp))
 
 @[simp] lemma map_ex (p : SubFormula L μ₁ (n₁ + 1)) :
-    map fixed free (∃' p) = ∃' map (0 :> Fin.succ ∘ fixed) free p :=
+    map bound free (∃' p) = ∃' map (0 :> Fin.succ ∘ bound) free p :=
   by simp[map]; congr; exact funext (Fin.cases (by simp) (by simp))
 
-@[simp] lemma complexity_map (p : SubFormula L μ₁ n₁) : complexity (map fixed free p) = complexity p :=
+@[simp] lemma complexity_map (p : SubFormula L μ₁ n₁) : complexity (map bound free p) = complexity p :=
   complexity_bind _ _ _
 
 end map
 
 lemma map_map
-  (fixed₁ : Fin n₁ → Fin n₂) (free₁ : μ₁ → μ₂)
-  (fixed₂ : Fin n₂ → Fin n₃) (free₂ : μ₂ → μ₃) (p : SubFormula L μ₁ n₁) :
-    map fixed₂ free₂ (map fixed₁ free₁ p) = map (fixed₂ ∘ fixed₁) (free₂ ∘ free₁) p :=
+  (bound₁ : Fin n₁ → Fin n₂) (free₁ : μ₁ → μ₂)
+  (bound₂ : Fin n₂ → Fin n₃) (free₂ : μ₂ → μ₃) (p : SubFormula L μ₁ n₁) :
+    map bound₂ free₂ (map bound₁ free₁ p) = map (bound₂ ∘ bound₁) (free₂ ∘ free₁) p :=
   bind_bind _ _ _ _ _
 
 @[simp] lemma map_id (p) : @map L μ μ n n id id p = p :=
@@ -329,10 +329,10 @@ def shift : SyntacticSubFormula L n →L SyntacticSubFormula L n :=
   map id Nat.succ
 
 def free : SyntacticSubFormula L (n + 1) →L SyntacticSubFormula L n :=
-  bind (SubTerm.fixedVar <: &0) (fun m => &(Nat.succ m))
+  bind (SubTerm.bvar <: &0) (fun m => &(Nat.succ m))
 
 def fix : SyntacticSubFormula L n →L SyntacticSubFormula L (n + 1) :=
-  bind (fun x => #(Fin.castSucc x)) (#(Fin.last n) :>ₙ SubTerm.freeVar)
+  bind (fun x => #(Fin.castSucc x)) (#(Fin.last n) :>ₙ SubTerm.fvar)
 
 lemma shift_rel {k} (r : L.rel k) (v : Fin k → SyntacticSubTerm L n) :
     shift (rel r v) = rel r (fun i => SubTerm.shift $ v i) := rfl
