@@ -1,9 +1,6 @@
 import Logic.Predicate.FirstOrder.Calculus
+import Logic.Predicate.FirstOrder.Meta
 
-open FirstOrder Derivation
+open Language FirstOrder Derivation
 
-def d := derive? 4 32 (L := Language.relational (fun _ => ℕ)) 
-  (∀' ( SubFormula.rel! (Language.relational (fun _ => ℕ)) 1 (Language.toRelational 0) ![#0] ⋎
-        SubFormula.rel! (Language.relational (fun _ => ℕ)) 1 (Language.toRelational 1) ![#0]) ⟶
-   ∀' ( SubFormula.rel! (Language.relational (fun _ => ℕ)) 1 (Language.toRelational 1) ![#0] ⋎
-        SubFormula.rel! (Language.relational (fun _ => ℕ)) 1 (Language.toRelational 0) ![#0]))
+def d : Derivation.Valid (L := oring) “(∀ ∀ (¬#0 < #1 → #1 ≤ #0)) → (&0 < &1 ∨ &1 ≤ &0)” := by prove 64
