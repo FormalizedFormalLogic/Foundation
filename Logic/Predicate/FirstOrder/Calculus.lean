@@ -88,6 +88,71 @@ protected unsafe def repr : {Δ : Finset (SyntacticFormula L)} → Derivation Δ
 unsafe instance : Repr (⊩ Δ) where
   reprPrec d _ := d.repr
 
+protected def toStr : {Δ : Finset (SyntacticFormula L)} → Derivation Δ → String
+  | _, AxL _ r v _ _   =>
+      "\\AxiomC{}\n" ++
+      "\\RightLabel{\\scriptsize(AxL)}\n" ++
+      "\\UnaryInfC{$" ++ toString (rel r v) ++ "," ++ toString (nrel r v) ++ ", ... $}\n\n"
+  | _, verum _ _       =>
+      "\\AxiomC{}\n" ++
+      "\\RightLabel{\\scriptsize($\\top$)}\n" ++
+      "\\UnaryInfC{$ ⊤, ... $}\n\n"
+  | _, orLeft _ p q d  =>
+      d.toStr ++
+      "\\RightLabel{\\scriptsize($\\lor$L)}\n" ++
+      "\\UnaryInfC{$" ++ toString (p ⋎ q) ++ ", ... $}\n\n"
+  | _, orRight _ p q d =>
+      d.toStr ++
+      "\\RightLabel{\\scriptsize($\\lor$R)}\n" ++
+      "\\UnaryInfC{$" ++ toString (p ⋎ q) ++ ", ... $}\n\n"
+  | _, and _ p q dp dq =>
+      dp.toStr ++
+      dq.toStr ++
+      "\\RightLabel{\\scriptsize($\\land$)}\n" ++
+      "\\BinaryInfC{$" ++ toString (p ⋏ q) ++ ", ... $}\n\n"
+  | _, all _ p d       =>
+      d.toStr ++
+      "\\RightLabel{\\scriptsize($\\forall$)}\n" ++
+      "\\UnaryInfC{$" ++ toString (∀' p) ++ ", ... $}\n\n"
+  | _, ex _ _ p d      =>
+      d.toStr ++
+      "\\RightLabel{\\scriptsize($\\exists$)}\n" ++
+      "\\UnaryInfC{$" ++ toString (∃' p) ++ ", ... $}\n\n"
+
+
+protected def toStrCompact : {Δ : Finset (SyntacticFormula L)} → Derivation Δ → String
+  | _, AxL _ _ _ _ _   =>
+      "\\AxiomC{}\n" ++
+      "\\RightLabel{\\scriptsize(AxL)}\n" ++
+      "\\UnaryInfC{}\n\n"
+  | _, verum _ _       =>
+      "\\AxiomC{}\n" ++
+      "\\RightLabel{\\scriptsize($\\top$)}\n" ++
+      "\\UnaryInfC{}\n\n"
+  | _, orLeft _ _ _ d  =>
+      d.toStrCompact ++
+      "\\RightLabel{\\scriptsize($\\lor$L)}\n" ++
+      "\\UnaryInfC{}\n\n"
+  | _, orRight _ _ _ d =>
+      d.toStrCompact ++
+      "\\RightLabel{\\scriptsize($\\lor$R)}\n" ++
+      "\\UnaryInfC{}\n\n"
+  | _, and _ _ _ dp dq =>
+      dp.toStrCompact ++
+      dq.toStrCompact ++
+      "\\RightLabel{\\scriptsize($\\land$)}\n" ++
+      "\\BinaryInfC{}\n\n"
+  | _, all _ _ d       =>
+      d.toStrCompact ++
+      "\\RightLabel{\\scriptsize($\\forall$)}\n" ++
+      "\\UnaryInfC{}\n\n"
+  | _, ex _ _ _ d      =>
+      d.toStrCompact ++
+      "\\RightLabel{\\scriptsize($\\exists$)}\n" ++
+      "\\UnaryInfC{}\n\n"
+
+instance : ToString (⊩ Δ) := ⟨Derivation.toStr⟩
+
 end Repr
 
 protected def cast (d : Derivation Δ) (e : Δ = Γ) : ⊩ Γ := cast (by simp[HasVdash.vdash, e]) d
@@ -211,16 +276,6 @@ def onDerivation (Φ : L₁ →ᵥ L₂) : ∀ {Δ : Finset (SyntacticFormula L�
 end Hom
 
 variable [∀ k, Encodable (L.func k)] {μ : Type _} [Encodable μ]
-
-def decomp : Finset (SyntacticTerm L) → SyntacticFormula L → Finset (SyntacticFormula L) → Option (Set $ Finset $ SyntacticFormula L)
-| _, rel _ _,  _ => none
-| _, nrel _ _, _ => none
-| _, ⊤,        _ => some ∅
-| _, ⊥,        _ => none
-| _, p ⋏ q,    Γ => some { insert p Γ, insert q Γ }
-| _, p ⋎ q,    Γ => some { insert q (insert p Γ) }
-| _, ∀' p,     Γ => some { insert (SubFormula.free p) (shifts Γ) }
-| s, ∃' p,     Γ => some { s.image (subst · p) ∪ Γ }
 
 def exOfInstances (v : List (SyntacticTerm L)) (p : SyntacticSubFormula L 1)
   (h : ⊩ (v.map (subst · p)).toFinset ∪ Γ) : ⊩ insert (∃' p) Γ := by
