@@ -6,9 +6,9 @@ variable
   {L : Language.{u}} {L₁ : Language.{u₁}} {L₂ : Language.{u₂}}
   {μ : Type v} {μ₁ : Type v₁} {μ₂ : Type v₂}
 
-@[ext] class Structure₁ (L : Language.{u}) (M : Type w) :=
-  (func : {k : ℕ} → L.func k → (Fin k → M) → M)
-  (rel : {k : ℕ} → L.rel  k → (Fin k → M) → Prop)
+@[ext] class Structure₁ (L : Language.{u}) (M : Type w) where
+  func : {k : ℕ} → L.func k → (Fin k → M) → M
+  rel  : {k : ℕ} → L.rel k → (Fin k → M) → Prop
 
 namespace Language
 namespace Hom
@@ -29,6 +29,11 @@ end Hom
 end Language
 
 namespace Structure₁
+
+class Eq (L : Language.{u}) [L.HasEq] (M : Type w) [s : Structure₁ L M] where
+  eq : ∀ a b, s.rel Language.HasEq.eq ![a, b] ↔ a = b
+
+attribute [simp] Eq.eq
 
 instance [Inhabited M] : Inhabited (Structure₁ L M) :=
 ⟨{ func := fun _ _ => default, rel := fun _ _ => True }⟩

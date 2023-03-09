@@ -83,6 +83,12 @@ funext (fun i => cases (by simp) (by simp) i)
 lemma comp_vecConsLast (f : α → β) (a : α) (s : Fin n → α) : (fun x => f $ (s <: a) x) = f ∘ s <: f a :=
 funext (fun i => lastCases (by simp) (by simp) i)
 
+@[simp] lemma vecHead_comp (f : α → β) (v : Fin (n + 1) → α) : vecHead (f ∘ v) = f (vecHead v) :=
+  by simp[vecHead]
+
+@[simp] lemma vecTail_comp (f : α → β) (v : Fin (n + 1) → α) : vecTail (f ∘ v) = f ∘ (vecTail v) :=
+  by simp[vecTail, Function.comp.assoc]
+
 end
 
 variable {α : Type _}
@@ -168,3 +174,57 @@ def vecToStr : ∀ {n}, (Fin n → String) → String
 #eval vecToStr !["a", "b", "c", "d"]
 
 end String
+
+namespace Empty
+
+lemma eq_elim {α : Sort u} (f : Empty → α) : f = elim := funext (by rintro ⟨⟩)
+
+end Empty
+
+namespace Set
+variable  {α : Type u} {β : Type v}
+
+lemma subset_image_iff (f : α → β) {s : Set α} {t : Set β} :
+    t ⊆ f '' s ↔ ∃ u, u ⊆ s ∧ f '' u = t :=
+  ⟨by intro h
+      use {a : α | a ∈ s ∧ f a ∈ t}
+      constructor
+      { intros a ha; exact ha.1 }
+      { ext b; constructor <;> simp; { rintro a _ hfa rfl; exact hfa };
+        { intros hb; rcases h hb with ⟨a, ha, rfl⟩; exact ⟨a, ⟨ha, hb⟩, rfl⟩ } },
+   by { rintro ⟨u, hu, rfl⟩; intros b; simp; rintro a ha rfl; exact ⟨a, hu ha, rfl⟩ }⟩
+
+
+end Set
+
+namespace Quotient
+open Matrix
+variable {α : Type u} [s : Setoid α] {β : Type v}
+
+def liftVec : ∀ {n} (f : (Fin n → α) → β),
+  (∀ v₁ v₂ : Fin n → α, (∀ n, v₁ n ≈ v₂ n) → f v₁ = f v₂) → (Fin n → Quotient s) → β 
+| 0,     f, _, _ => f ![]
+| n + 1, f, h, v =>
+  let ih : α → (Fin n → Quotient s) → β :=
+    fun a v => liftVec (n := n) (fun v => f (a :> v))
+      (fun v₁ v₂ hv => h (a :> v₁) (a :> v₂) (Fin.cases (by simp; exact refl a) hv)) v
+  Quot.liftOn (vecHead v) (ih · (vecTail v)) 
+  (fun a b hab => by
+    have : ∀ v, f (a :> v) = f (b :> v) := fun v => h _ _ (Fin.cases hab (by simp; intro; exact refl _))
+    simp[this])
+
+@[simp] lemma liftVec_zero (f : (Fin 0 → α) → β) (h) (v : Fin 0 → Quotient s) : liftVec f h v = f ![] := rfl
+
+lemma liftVec_mk {n} (f : (Fin n → α) → β) (h) (v : Fin n → α) :
+    liftVec f h (Quotient.mk s ∘ v) = f v := by
+  induction' n with n ih <;> simp[liftVec, empty_eq, Quotient.liftOn_mk]
+  simpa using ih (fun v' => f (vecHead v :> v'))
+    (fun v₁ v₂ hv => h (vecHead v :> v₁) (vecHead v :> v₂) (Fin.cases (refl _) hv)) (vecTail v)
+
+@[simp] lemma liftVec_mk₁ (f : (Fin 1 → α) → β) (h) (a : α) :
+    liftVec f h ![Quotient.mk s a] = f ![a] := liftVec_mk f h ![a]
+
+@[simp] lemma liftVec_mk₂ (f : (Fin 2 → α) → β) (h) (a₁ a₂ : α) :
+    liftVec f h ![Quotient.mk s a₁, Quotient.mk s a₂] = f ![a₁, a₂] := liftVec_mk f h ![a₁, a₂]
+
+end Quotient
