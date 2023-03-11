@@ -8,6 +8,7 @@ import Mathlib.Data.Finset.Lattice
 import Mathlib.Data.Finset.Preimage
 import Mathlib.Data.Finset.Sort
 import Mathlib.Data.W.Basic
+import Mathlib.Order.Filter.Ultrafilter
 
 namespace Nat
 variable {α : ℕ → Sort u}
