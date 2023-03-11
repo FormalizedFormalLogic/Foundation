@@ -50,11 +50,6 @@ infix:45 " ⊢ " => HasTurnstile.turnstile
 
 prefix:45 "⊩ " => HasVdash.vdash
 
-@[notation_class] class HasDoubleTurnstile (α : Sort _) (β : Sort _) where
-  doubleTurnstile : α → β → Prop
-
-infix:55 " ⊧ " => HasDoubleTurnstile.doubleTurnstile
-
 end logicNotation
 
 namespace HasLogicSymbols
