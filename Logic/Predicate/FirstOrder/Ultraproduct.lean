@@ -5,17 +5,18 @@ universe u v
 section
 
 variable {L : Language.{u}} {μ : Type v}
- {I : Type u} (A : I → Type u) [(ι : I) → Inhabited (A ι)] [s : (ι : I) → Structure₁ L (A ι)] (𝓤 : Ultrafilter I)
+ {I : Type u} (A : I → Type u) [(ι : I) → Inhabited (A ι)] [s : (ι : I) → FirstOrder.Structure L (A ι)] (𝓤 : Ultrafilter I)
 
-namespace Structure₁
+namespace FirstOrder
+
+namespace Structure
 
 structure Uprod (𝓤 : Ultrafilter I) where
   val : (i : I) → A i
 
-instance UprodStruc : Structure₁.{u,u} L (Uprod A 𝓤) where
+instance UprodStruc : Structure.{u,u} L (Uprod A 𝓤) where
   func := fun f v => ⟨fun ι => (s ι).func f (fun i => (v i).val ι)⟩
   rel  := fun r v => {ι | (s ι).rel r (fun i => (v i).val ι)} ∈ 𝓤
-
 
 instance [Inhabited I] [(ι : I) → Inhabited (A ι)] : Inhabited (Uprod A 𝓤) := ⟨⟨default⟩⟩
 
@@ -25,10 +26,14 @@ instance [Inhabited I] [(ι : I) → Inhabited (A ι)] : Inhabited (Uprod A 𝓤
 @[simp] lemma rel_Uprod {k} (r : L.rel k) (v : Fin k → Uprod A 𝓤) :
     rel r v ↔ {ι | (s ι).rel r (fun i => (v i).val ι)} ∈ 𝓤 := of_eq rfl
 
-end Structure₁
+end Structure
+
+end FirstOrder
 
 namespace SubTerm
-open Structure₁
+
+open FirstOrder Structure
+
 variable (e : Fin n → Uprod A 𝓤) (ε : μ → Uprod A 𝓤)
 
 lemma val_Uprod (t : SubTerm L μ n) :
@@ -38,7 +43,9 @@ lemma val_Uprod (t : SubTerm L μ n) :
 end SubTerm
 
 namespace FirstOrder
-open Structure₁
+
+open Structure
+
 variable {A} {𝓤}
 
 namespace SubFormula
@@ -114,7 +121,7 @@ variable {L : Language.{u}} {T : CTheory L}
 
 abbrev FinSubTheory (T : CTheory L) := {t : Finset (Sentence L) // ↑t ⊆ T}
 
-variable (A : FinSubTheory T → Type u) [s : (ι : FinSubTheory T) → Structure₁ L (A ι)]
+variable (A : FinSubTheory T → Type u) [s : (ι : FinSubTheory T) → Structure L (A ι)]
 
 instance : Inhabited (FinSubTheory T) := ⟨∅, by simp⟩
 
@@ -133,13 +140,13 @@ theorem compactness :
   constructor
   · rintro h ⟨t, ht⟩; exact Semantics.satisfiableₛ_of_subset h ht
   · intro h
-    have : ∀ ι : FinSubTheory T, ∃ (M : Type u) (_ : Inhabited M) (_ : Structure₁ L M), M ⊧₁* (ι.val : CTheory L) := 
+    have : ∀ ι : FinSubTheory T, ∃ (M : Type u) (_ : Inhabited M) (_ : Structure L M), M ⊧₁* (ι.val : CTheory L) := 
       by intro ι; exact satisfiableₛ_iff.mp (h ι)
     choose A si s hA using this
     have : ∃ 𝓤 : Ultrafilter (FinSubTheory T), Set.image (SubFormula.domain A) T ⊆ 𝓤.sets := ultrafilter_exists A hA
     rcases this with ⟨𝓤, h𝓤⟩
-    have : Structure₁.Uprod A 𝓤 ⊧₁* T := by intro σ hσ; exact realize_Uprod.mpr (h𝓤 $ Set.mem_image_of_mem (SubFormula.domain A) hσ)
-    exact satisfiableₛ_intro (Structure₁.Uprod A 𝓤) this
+    have : Structure.Uprod A 𝓤 ⊧₁* T := by intro σ hσ; exact realize_Uprod.mpr (h𝓤 $ Set.mem_image_of_mem (SubFormula.domain A) hσ)
+    exact satisfiableₛ_intro (Structure.Uprod A 𝓤) this
 
 end FirstOrder
 
