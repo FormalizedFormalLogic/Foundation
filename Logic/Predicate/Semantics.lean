@@ -6,7 +6,7 @@ variable
   {L : Language.{u}} {L₁ : Language.{u₁}} {L₂ : Language.{u₂}}
   {μ : Type v} {μ₁ : Type v₁} {μ₂ : Type v₂}
 
-@[ext] class Structure₁ (L : Language.{u}) (M : Type w) where
+@[ext] structure Structure₁ (L : Language.{u}) (M : Type w) where
   func : {k : ℕ} → L.func k → (Fin k → M) → M
   rel  : {k : ℕ} → L.rel k → (Fin k → M) → Prop
 
@@ -18,7 +18,7 @@ def onStructure₁ (Φ : L₁ →ᵥ L₂) {M : Type w} (S : Structure₁ L₂ M
   rel := fun r => S.rel (Φ.onRel r)
 
 instance subLanguageStructure₁ {pf : ∀ k, Language.func L k → Prop} {pr : ∀ k, L.rel k → Prop}
-  {M : Type w} [s : Structure₁ L M] : Structure₁ (subLanguage L pf pr) M :=
+  {M : Type w} (s : Structure₁ L M) : Structure₁ (subLanguage L pf pr) M :=
   onStructure₁ (ofSubLanguage L) s
 
 noncomputable def extendStructure₁ (Φ : L₁ →ᵥ L₂) {M : Type w} [Inhabited M] (s : Structure₁ L₁ M) : Structure₁ L₂ M where
@@ -29,11 +29,6 @@ end Hom
 end Language
 
 namespace Structure₁
-
-class Eq (L : Language.{u}) [L.HasEq] (M : Type w) [s : Structure₁ L M] where
-  eq : ∀ a b, s.rel Language.HasEq.eq ![a, b] ↔ a = b
-
-attribute [simp] Eq.eq
 
 instance [Inhabited M] : Inhabited (Structure₁ L M) :=
 ⟨{ func := fun _ _ => default, rel := fun _ _ => True }⟩
@@ -76,7 +71,7 @@ def val : SubTerm L μ n → M
 
 variable (M) {s}
 
-@[reducible] def val! [s : Structure₁ L M] {n} (e : Fin n → M) (ε : μ → M) : SubTerm L μ n → M := val s e ε
+@[reducible] def val! (s : Structure₁ L M) {n} (e : Fin n → M) (ε : μ → M) : SubTerm L μ n → M := val s e ε
 
 variable {M e e₂ ε ε₂}
 

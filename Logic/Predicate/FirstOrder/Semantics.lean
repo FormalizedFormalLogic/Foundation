@@ -15,8 +15,8 @@ variable {n : ℕ} {M : Type w} (s : Structure₁ L M)
 def Eval' (ε : μ → M) : ∀ {n}, (Fin n → M) → SubFormula L μ n → Prop
   | _, _, ⊤        => True
   | _, _, ⊥        => False
-  | _, e, rel p v  => Structure₁.rel p (fun i => SubTerm.val s e ε (v i))
-  | _, e, nrel p v => ¬Structure₁.rel p (fun i => SubTerm.val s e ε (v i))
+  | _, e, rel p v  => s.rel p (fun i => SubTerm.val s e ε (v i))
+  | _, e, nrel p v => ¬s.rel p (fun i => SubTerm.val s e ε (v i))
   | _, e, p ⋏ q    => p.Eval' ε e ∧ q.Eval' ε e
   | _, e, p ⋎ q    => p.Eval' ε e ∨ q.Eval' ε e
   | _, e, ∀' p     => ∀ x : M, (p.Eval' ε (x :> e))
@@ -35,13 +35,13 @@ def Eval : SubFormula L μ n →L Prop where
   map_neg' := by simp[Eval'_neg]
   map_imp' := by simp[imp_eq, Eval'_neg, ←neg_eq, Eval', imp_iff_not_or]
 
-abbrev Eval! (M : Type w) [s : Structure₁ L M] {n} (e : Fin n → M) (ε : μ → M) :
+abbrev Eval! (M : Type w) (s : Structure₁ L M) {n} (e : Fin n → M) (ε : μ → M) :
     SubFormula L μ n →L Prop := Eval s e ε
 
-abbrev Realize (ε : μ → M) : Formula L μ →L Prop := Eval s ![] ε
+abbrev Val (ε : μ → M) : Formula L μ →L Prop := Eval s ![] ε
 
-abbrev Realize! (M : Type w) [s : Structure₁ L M] (ε : μ → M) :
-    Formula L μ →L Prop := Realize s ε
+abbrev Val! (M : Type w) (s : Structure₁ L M) (ε : μ → M) :
+    Formula L μ →L Prop := Val s ε
 
 lemma eval_rel {k} {r : L.rel k} {v} :
     Eval s e ε (rel r v) ↔ s.rel r (fun i => SubTerm.val s e ε (v i)) := of_eq rfl
@@ -104,39 +104,40 @@ end Syntactic
 
 end SubFormula
 
-def Models {M : Type w} (s : Structure₁ L M)  : Sentence L →L Prop := SubFormula.Realize s Empty.elim
-
-instance : Semantics.{u, u, u} (Sentence L) where
+instance semantics : Semantics.{u, u, u} (Sentence L) where
   struc := Structure₁ L
-  models := Models
+  realize := (SubFormula.Val · Empty.elim)
 
-@[reducible] instance toCStruc [s : Structure₁ L M] : Semantics.CStruc (Sentence L) M := ⟨s⟩
+abbrev CStruc (L : Language.{u}) (M : Type u) := Semantics.CStruc (Sentence L) M
 
-abbrev toStruc (s : Structure₁ L M) : Semantics.struc (Sentence L) M := s
+abbrev toCStruc (s : Structure₁ L M) : Semantics.CStruc (Sentence L) M := ⟨s⟩
+
+abbrev strucVal (L : Language.{u}) (M : Type u) [CStruc L M] : Structure₁ L M :=
+  Semantics.CStruc.out (F := Sentence L) (M := M)
 
 section
-variable {M : Type u} {s : Structure₁ L M}
+variable {M : Type u} [s : CStruc L M]
 
-lemma models_def : M ⊧ = SubFormula.Realize s Empty.elim := rfl
+lemma models_def : M ⊧ = SubFormula.Val (strucVal L M) Empty.elim := rfl
 
-lemma modelsₛ_def : (toStruc s) ⊧ₛ = SubFormula.Realize s Empty.elim := rfl
+lemma models_iff {σ : Sentence L} : M ⊧ σ ↔ SubFormula.Val (strucVal L M) Empty.elim σ := by simp[models_def]
 
-lemma models_iff {σ : Sentence L} : M ⊧ σ ↔ SubFormula.Realize s Empty.elim σ := by simp[models_def]
+lemma realize_def {s : Structure₁ L M} : Semantics.realize (self := semantics) s = SubFormula.Val s Empty.elim := rfl
 
-lemma models_iff_modelsₛ {σ : Sentence L} : M ⊧ σ ↔ (toStruc s) ⊧ₛ σ := by simp[models_def, modelsₛ_def]
+lemma modelsₛ_iff {s : Structure₁ L M} {σ : Sentence L} :
+  Semantics.realize (self := semantics) s σ ↔ SubFormula.Val s Empty.elim σ := of_eq rfl
 
-lemma modelsTheory_def {T : CTheory L} : M ⊧* T ↔ (∀ ⦃σ⦄, σ ∈ T → M ⊧ σ) :=
-  by simp[Semantics.cmodelsTheory]
+lemma models_iff_modelsₛ {σ : Sentence L} :
+    M ⊧ σ ↔ Semantics.realize (self := semantics) (strucVal L M) σ := by simp[models_def, realize_def]
 
-lemma modelsₛ_iff {σ : Sentence L} :
-  (toStruc s) ⊧ₛ σ ↔ SubFormula.Realize s Empty.elim σ := of_eq rfl
+lemma modelsTheory_def {T : CTheory L} : M ⊧* T ↔ (∀ ⦃σ⦄, σ ∈ T → M ⊧ σ) := by simp[Semantics.modelsTheory]
 
 lemma consequence_iff {T : CTheory L} {σ : Sentence L} :
-    T ⊨ σ ↔ (∀ (M : Type u) [Inhabited M] (_ : Structure₁ L M), M ⊧* T → M ⊧ σ) :=
+    T ⊨ σ ↔ (∀ (M : Type u) [Inhabited M] (s : Structure₁ L M), Semantics.realizeTheory (s := semantics) s T → Semantics.realize (self := semantics) s σ) :=
   Semantics.consequence_iff
 
 lemma satisfiableₛ_iff {T : CTheory L} :
-    Semantics.Satisfiableₛ T ↔ ∃ (M : Type u) (_ : Inhabited M) (_ : Structure₁ L M), M ⊧* T :=
+    Semantics.Satisfiableₛ T ↔ ∃ (M : Type u) (_ : Inhabited M) (s : Structure₁ L M), Semantics.realizeTheory (s := semantics) s T :=
   Semantics.satisfiableₛ_iff
 
 end
@@ -154,14 +155,14 @@ lemma eval_onSubFormula₁ {p : SubFormula L₁ μ n} :
       eval_rel, eval_nrel]
 
 lemma models_onSubFormula₁ {σ : Sentence L₁} :
-    (toStruc s₂) ⊧ₛ (Φ.onSubFormula₁ σ) ↔ (toStruc $ Φ.onStructure₁ s₂) ⊧ₛ σ :=
-  by simp[modelsₛ_iff, Realize, eval_onSubFormula₁]
+    Semantics.realize (self := semantics) s₂ (Φ.onSubFormula₁ σ) ↔ Semantics.realize (self := semantics) (Φ.onStructure₁ s₂) σ :=
+  by simp[modelsₛ_iff, Val, eval_onSubFormula₁]
 
 lemma onSubFormula₁_models_onSubFormula₁ {T : CTheory L₁} {σ : Sentence L₁} (h : T ⊨ σ) :
     Φ.onSubFormula₁ '' T ⊨ Φ.onSubFormula₁ σ := by
   simp[consequence_iff]
   intro M _ s hM
-  have : (toStruc $ Φ.onStructure₁ s) ⊧ₛ σ :=
+  have : Semantics.realize (self := semantics) (Φ.onStructure₁ s) σ :=
     consequence_iff.mp h M (Φ.onStructure₁ s) (fun q hq => models_onSubFormula₁.mp $ hM (Set.mem_image_of_mem _ hq))
   exact models_onSubFormula₁.mpr this
 
@@ -185,31 +186,44 @@ lemma eval_extendStructure₁_onSubFormula₁ {p : SubFormula L₁ μ n} :
       Structure₁.extendStructure₁_rel Φ s₁ (injr k) r (fun i => SubTerm.val s₁ e ε (v i))
 
 lemma models_extendStructure₁_onSubFormula₁ (σ : Sentence L₁) :
-    (toStruc $ Φ.extendStructure₁ s₁) ⊧ₛ (Φ.onSubFormula₁ σ) ↔ (toStruc s₁) ⊧ₛ σ := by
-  simp[modelsₛ_def, Realize, eval_extendStructure₁_onSubFormula₁ injf injr]
+    Semantics.realize (self := semantics) (Φ.extendStructure₁ s₁) (Φ.onSubFormula₁ σ) ↔ Semantics.realize (self := semantics) s₁ σ := by
+  simp[realize_def, Val, eval_extendStructure₁_onSubFormula₁ injf injr]
 
 lemma onSubFormula₁_models_onSubFormula₁_iff {T : CTheory L₁} {σ : Sentence L₁} :
     Φ.onSubFormula₁ '' T ⊨ Φ.onSubFormula₁ σ ↔ T ⊨ σ := by
   constructor
-  · simp[consequence_iff, modelsTheory_def, models_iff_modelsₛ]; intro h M _ s₁ hs₁
+  · simp[consequence_iff, Semantics.realizeTheory, models_iff_modelsₛ]; intro h M _ s₁ hs₁
     exact (models_extendStructure₁_onSubFormula₁ injf injr s₁ σ).mp $
-      h M (Φ.extendStructure₁ s₁)
-        (fun σ hσ => (models_extendStructure₁_onSubFormula₁ injf injr s₁ σ).mpr (hs₁ hσ))
+      h M (Φ.extendStructure₁ s₁) (fun σ hσ => (models_extendStructure₁_onSubFormula₁ injf injr s₁ σ).mpr (hs₁ hσ))
   · exact onSubFormula₁_models_onSubFormula₁
 
 end
 
-section Eq
-open Language
+end SubFormula
 
-variable {L : Language.{u}} [L.HasEq] {μ : Type v} (M : Type w) (s : Structure₁ L M) [Structure₁.Eq L M]
+end FirstOrder
+
+namespace Structure₁
+
+class Eq {L : Language.{u}} [L.HasEq] {M : Type w} (s : Structure₁ L M) where
+  eq : ∀ a b, s.rel Language.HasEq.eq ![a, b] ↔ a = b
+
+attribute [simp] Eq.eq
+
+end Structure₁
+
+namespace FirstOrder
+
+abbrev EqStruc (L : Language.{u}) [L.HasEq] (M : Type u) [CStruc L M] := Structure₁.Eq (strucVal L M)
+
+namespace SubFormula
+
+variable {L : Language.{u}} [L.HasEq] {μ : Type v} (M : Type w) (s : Structure₁ L M) [s.Eq]
   {n} (e : Fin n → M) (ε : μ → M)
 
 @[simp] lemma eval_eq (t u : SubTerm L μ n) :
     Eval s e ε (rel Language.HasEq.eq ![t, u]) ↔ t.val s e ε = u.val s e ε :=
   by simp
-
-end Eq
 
 end SubFormula
 

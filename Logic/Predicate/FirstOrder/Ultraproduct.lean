@@ -5,24 +5,24 @@ universe u v
 section
 
 variable {L : Language.{u}} {μ : Type v} {n : ℕ} {I : Type u}
-  (A : I → Type u) [(ι : I) → Inhabited (A ι)] [s : (ι : I) → Structure₁ L (A ι)] (𝓤 : Ultrafilter I)
+  (A : I → Type u) [(ι : I) → Inhabited (A ι)] (s : (ι : I) → Structure₁ L (A ι)) (𝓤 : Ultrafilter I)
 
 namespace Structure₁
 
 structure Uprod (𝓤 : Ultrafilter I) where
   val : (i : I) → A i
 
-instance : Structure₁ L (Uprod A 𝓤) where
-  func := fun f v => ⟨fun ι => func f (fun i => (v i).val ι)⟩
-  rel  := fun r v => {ι | rel r (fun i => (v i).val ι)} ∈ 𝓤
+def UprodStruc : Structure₁ L (Uprod A 𝓤) where
+  func := fun f v => ⟨fun ι => (s ι).func f (fun i => (v i).val ι)⟩
+  rel  := fun r v => {ι | (s ι).rel r (fun i => (v i).val ι)} ∈ 𝓤
 
 instance [Inhabited I] [(ι : I) → Inhabited (A ι)] : Inhabited (Uprod A 𝓤) := ⟨⟨default⟩⟩
 
 @[simp] lemma func_Uprod {k} (f : L.func k) (v : Fin k → Uprod A 𝓤) :
-    func f v = ⟨fun ι => func f (fun i => (v i).val ι)⟩ := rfl
+    (UprodStruc A s 𝓤).func f v = ⟨fun ι => (s ι).func f (fun i => (v i).val ι)⟩ := rfl
 
 @[simp] lemma rel_Uprod {k} (r : L.rel k) (v : Fin k → Uprod A 𝓤) :
-    rel r v ↔ {ι | rel r (fun i => (v i).val ι)} ∈ 𝓤 := of_eq rfl
+    (UprodStruc A s 𝓤).rel r v ↔ {ι | (s ι).rel r (fun i => (v i).val ι)} ∈ 𝓤 := of_eq rfl
 
 end Structure₁
 
@@ -31,7 +31,7 @@ open Structure₁
 variable (e : Fin n → Uprod A 𝓤) (ε : μ → Uprod A 𝓤)
 
 lemma val_Uprod (t : SubTerm L μ n) :
-    t.val! (Uprod A 𝓤) e ε = ⟨fun ι => t.val! (A ι) (fun i => (e i).val ι) (fun i => (ε i).val ι)⟩ :=
+    t.val (UprodStruc A s 𝓤) e ε = ⟨fun ι => t.val (s ι) (fun i => (e i).val ι) (fun i => (ε i).val ι)⟩ :=
   by induction t <;> simp[*, val_func]
 
 end SubTerm
@@ -48,7 +48,7 @@ lemma val_vecCons_val_eq {z : Uprod A 𝓤} {ι : I} :
   by simp[Matrix.comp_vecCons (Uprod.val · ι), Function.comp]
 
 lemma eval_Uprod {p : SubFormula L μ n} :
-    Eval! (Uprod A 𝓤) e ε p ↔ {ι | Eval! (A ι) (fun i => (e i).val ι) (fun i => (ε i).val ι) p} ∈ 𝓤 := by
+    Eval (UprodStruc A s 𝓤) e ε p ↔ {ι | Eval (s ι) (fun i => (e i).val ι) (fun i => (ε i).val ι) p} ∈ 𝓤 := by
   induction p using rec' <;>
   simp[*, Prop.top_eq_true, Prop.bot_eq_false, eval_rel, eval_nrel, SubTerm.val_Uprod]
   case hverum => exact Filter.univ_mem
@@ -62,14 +62,14 @@ lemma eval_Uprod {p : SubFormula L μ n} :
     constructor
     · intro h
       let z : Uprod A 𝓤 := ⟨fun ι =>
-        Classical.epsilon (fun z => ¬Eval! (A ι) (z :> fun i => (e i).val ι) (fun i => (ε i).val ι) p)⟩
+        Classical.epsilon (fun z => ¬Eval (s ι) (z :> fun i => (e i).val ι) (fun i => (ε i).val ι) p)⟩
       exact Filter.mem_of_superset (h z) (by 
         intro ι hι a
-        have : Eval! (A ι) (z.val ι :> fun i => (e i).val ι) (fun i => (ε i).val ι) p :=
+        have : Eval (s ι) (z.val ι :> fun i => (e i).val ι) (fun i => (ε i).val ι) p :=
           by rw [val_vecCons_val_eq]; exact hι
         by_contra hc
-        have : ¬Eval! (A ι) (z.val ι :> fun i => (e i).val ι) (fun i => (ε i).val ι) p :=
-          Classical.epsilon_spec (p := fun z => ¬(Eval! (A ι) (z :> fun i => (e i).val ι) _ p)) ⟨a, hc⟩
+        have : ¬Eval (s ι) (z.val ι :> fun i => (e i).val ι) (fun i => (ε i).val ι) p :=
+          Classical.epsilon_spec (p := fun z => ¬(Eval (s ι) (z :> fun i => (e i).val ι) _ p)) ⟨a, hc⟩
         contradiction)
     · intro h x
       exact Filter.mem_of_superset h (by intro ι h; simpa [val_vecCons_val_eq] using h (x.val ι))
@@ -79,23 +79,28 @@ lemma eval_Uprod {p : SubFormula L μ n} :
       exact Filter.mem_of_superset hx (by intro ι h; use x.val ι; simpa[val_vecCons_val_eq] using h)
     · intro h
       let z : Uprod A 𝓤 := ⟨fun ι =>
-        Classical.epsilon (fun z => Eval! (A ι) (z :> fun i => (e i).val ι) (fun i => (ε i).val ι) p)⟩
+        Classical.epsilon (fun z => Eval (s ι) (z :> fun i => (e i).val ι) (fun i => (ε i).val ι) p)⟩
       use z
       exact Filter.mem_of_superset h (by
         intro ι; rintro ⟨x, hx⟩
-        have : Eval! (A ι) (z.val ι :> fun i => (e i).val ι) (fun i => (ε i).val ι) p :=
-          Classical.epsilon_spec (p := fun z => Eval! (A ι) (z :> fun i => (e i).val ι) _ p) ⟨x, hx⟩
+        have : Eval (s ι) (z.val ι :> fun i => (e i).val ι) (fun i => (ε i).val ι) p :=
+          Classical.epsilon_spec (p := fun z => Eval (s ι) (z :> fun i => (e i).val ι) _ p) ⟨x, hx⟩
         rw[val_vecCons_val_eq] at this; exact this)
 
-lemma realize_Uprod {p : Formula L μ} :
-    Realize! (Uprod A 𝓤) ε p ↔ {ι | Realize! (A ι) (fun i => (ε i).val ι) p} ∈ 𝓤 :=
-  by simp[Realize!, Realize, eval_Uprod, Matrix.empty_eq]
+lemma val_Uprod {p : Formula L μ} :
+    Val (UprodStruc A s 𝓤) ε p ↔ {ι | Val (s ι) (fun i => (ε i).val ι) p} ∈ 𝓤 :=
+  by simp[Val, eval_Uprod, Matrix.empty_eq]
 
 end SubFormula
 
-lemma model_Uprod {σ : Sentence L} :
-    (Uprod A 𝓤) ⊧ σ ↔ {ι | (A ι) ⊧ σ} ∈ 𝓤 :=
-  by simp[models_def, SubFormula.realize_Uprod, Empty.eq_elim]
+instance zzz [(ι : I) → CStruc L (A ι)] : CStruc L (Uprod A 𝓤) :=
+  ⟨UprodStruc A (fun _ => strucVal _ _) 𝓤⟩
+
+variable [(ι : I) → CStruc L (A ι)]
+
+lemma realize_Uprod {σ : Sentence L} :
+    Semantics.realize (self := semantics) (UprodStruc A s 𝓤) σ ↔ {ι | Semantics.realize (self := semantics) (s ι) σ} ∈ 𝓤 :=
+  by simp[realize_def, SubFormula.val_Uprod, Empty.eq_elim]
 
 variable (A)
 
@@ -113,7 +118,7 @@ variable {L : Language.{u}} {T : CTheory L}
 
 abbrev FinSubTheory (T : CTheory L) := {t : Finset (Sentence L) // ↑t ⊆ T}
 
-variable (A : FinSubTheory T → Type u) [s : (ι : FinSubTheory T) → Structure₁ L (A ι)]
+variable (A : FinSubTheory T → Type u) (s : (ι : FinSubTheory T) → Structure₁ L (A ι))
 
 instance : Inhabited (FinSubTheory T) := ⟨∅, by simp⟩
 

@@ -229,3 +229,15 @@ lemma liftVec_mk {n} (f : (Fin n → α) → β) (h) (v : Fin n → α) :
     liftVec f h ![Quotient.mk s a₁, Quotient.mk s a₂] = f ![a₁, a₂] := liftVec_mk f h ![a₁, a₂]
 
 end Quotient
+
+class Class (F : Type u → Type v) (α : Type u) where
+  out : F α
+
+namespace Class
+variable {F : Type u → Type v} {α : Type u}
+
+@[simp] lemma out_mk (x : F α) : out (self := Class.mk x) = x := rfl
+
+@[simp] lemma mk_out [x : Class F α] : Class.mk out = x := rfl
+
+end Class
