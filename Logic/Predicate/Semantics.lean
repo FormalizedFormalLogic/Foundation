@@ -6,7 +6,7 @@ variable
   {L : Language.{u}} {L₁ : Language.{u₁}} {L₂ : Language.{u₂}}
   {μ : Type v} {μ₁ : Type v₁} {μ₂ : Type v₂}
 
-@[ext] structure Structure₁ (L : Language.{u}) (M : Type w) where
+@[ext] class Structure₁ (L : Language.{u}) (M : Type w) where
   func : {k : ℕ} → L.func k → (Fin k → M) → M
   rel  : {k : ℕ} → L.rel k → (Fin k → M) → Prop
 
@@ -71,7 +71,7 @@ def val : SubTerm L μ n → M
 
 variable (M) {s}
 
-@[reducible] def val! (s : Structure₁ L M) {n} (e : Fin n → M) (ε : μ → M) : SubTerm L μ n → M := val s e ε
+@[reducible] def val! (M : Type w) [s : Structure₁ L M] {n} (e : Fin n → M) (ε : μ → M) : SubTerm L μ n → M := val s e ε
 
 variable {M e e₂ ε ε₂}
 
