@@ -224,6 +224,8 @@ def map (bound : Fin n₁ → Fin n₂) (free : μ₁ → μ₂) : SubFormula L 
 def subst (t : SubTerm L μ n) : SubFormula L μ (n + 1) →L SubFormula L μ n :=
   bind (SubTerm.bvar <: t) SubTerm.fvar
 
+def emb : SubFormula L Empty n →L SubFormula L μ n := map id Empty.elim
+
 section bind
 variable (bound : Fin n₁ → SubTerm L μ₂ n₂) (free : μ₁ → SubTerm L μ₂ n₂)
 
@@ -322,6 +324,22 @@ lemma subst_nrel {s : SubTerm L μ n} {k} (r : L.rel k) (v : Fin k → SubTerm L
   funext i
   cases' i using Fin.cases with i <;> simp
   cases' i using Fin.lastCases with i <;> simp[Fin.succ_castSucc]
+
+lemma emb_rel {k} (r : L.rel k) (v : Fin k → SubTerm L Empty n) :
+    emb (μ := μ) (rel r v) = rel r (fun i => SubTerm.map id Empty.elim (v i)) :=
+  by simp[emb, map_rel]
+
+lemma emb_nrel {k} (r : L.rel k) (v : Fin k → SubTerm L Empty n) :
+    emb (μ := μ) (nrel r v) = nrel r (fun i => SubTerm.map id Empty.elim (v i)) :=
+  by simp[emb, map_nrel]
+
+@[simp] lemma emb_all (p : SubFormula L Empty (n + 1)) :
+    emb (μ := μ) (∀' p) = ∀' emb p :=
+  by simp[emb]
+
+@[simp] lemma emb_ex (p : SubFormula L Empty (n + 1)) :
+    emb (μ := μ) (∃' p) = ∃' emb p :=
+  by simp[emb]
 
 section Syntactic
 

@@ -4,7 +4,7 @@ import Logic.Vorspiel.Logic
 
 universe u u₁ u₂ v v₁ v₂ w w₁ w₂
 
-variable {L : Language.{u}} {μ : Type v}
+variable {L : Language.{u}} {μ : Type v} {μ₁ : Type v₁} {μ₂ : Type v₂}
 
 namespace FirstOrder
 
@@ -82,23 +82,34 @@ lemma eval_nrel {k} {r : L.rel k} {v} :
     Eval s e ε (∃' p) ↔ ∃ x : M, Eval s (x :> e) ε p := of_eq rfl
 
 lemma eval_bind (bound : Fin n₁ → SubTerm L μ₂ n₂) (free : μ₁ → SubTerm L μ₂ n₂) (p : SubFormula L μ₁ n₁) :
-    Eval s e₂ ε₂ (bind bound free p) =
+    Eval s e₂ ε₂ (bind bound free p) ↔
     Eval s (SubTerm.val s e₂ ε₂ ∘ bound) (SubTerm.val s e₂ ε₂ ∘ free) p := by
-  induction p using rec' generalizing n₂ <;> simp[*, SubTerm.val_bind, Function.comp,
-    bind_rel, bind_nrel, eval_rel, eval_nrel]
+  induction p using rec' generalizing n₂ <;> simp[*, SubTerm.val_bind, Function.comp, bind_rel, bind_nrel, eval_rel, eval_nrel]
   · apply forall_congr'; intros a; apply of_eq; congr; exact funext $ Fin.cases (by simp) (by simp)
   · apply exists_congr; intros a; apply of_eq; congr; exact funext $ Fin.cases (by simp) (by simp)
 
 lemma eval_map (bound : Fin n₁ → Fin n₂) (free : μ₁ → μ₂) (e : Fin n₂ → M) (ε : μ₂ → M) (p : SubFormula L μ₁ n₁) :
-    Eval s e ε (map bound free p) = Eval s (e ∘ bound) (ε ∘ free) p :=
+    Eval s e ε (map bound free p) ↔ Eval s (e ∘ bound) (ε ∘ free) p :=
   by simp[map, eval_bind, Function.comp]
 
-lemma eval_subst (u : SubTerm L μ n) (p : SubFormula L μ (n + 1)) :
-    Eval s e ε (subst u p) = Eval s (e <: u.val s e ε) ε p :=
+@[simp] lemma eval_subst (u : SubTerm L μ n) (p : SubFormula L μ (n + 1)) :
+    Eval s e ε (subst u p) ↔ Eval s (e <: u.val s e ε) ε p :=
   by simp[subst, eval_bind]; apply of_eq; congr ; exact funext $ Fin.lastCases (by simp) (by simp)
 
+@[simp] lemma eval_emb (p : SubFormula L Empty n) :
+    Eval s e ε (emb p) ↔ Eval s e Empty.elim p := by simp[emb, eval_map, Empty.eq_elim]
+
 section Syntactic
-variable (Ψ : ℕ → M)
+
+variable (ε : ℕ → M)
+
+@[simp] lemma eval_free (p : SyntacticSubFormula L (n + 1)) :
+    Eval s e (a :>ₙ ε) (free p) ↔ Eval s (e <: a) ε p :=
+  by simp[free, eval_bind]; apply of_eq; congr; funext x; cases x using Fin.lastCases <;> simp
+
+@[simp] lemma eval_shift (p : SyntacticSubFormula L n) :
+    Eval s e (a :>ₙ ε) (shift p) ↔ Eval s e ε p :=
+  by simp[shift, eval_map]; apply of_eq; congr 
 
 end Syntactic
 
@@ -148,6 +159,9 @@ lemma validₛ_iff {T : CTheory L} :
 end
 
 namespace SubFormula
+
+section onSubFormula₁
+
 variable {L₁ L₂ : Language.{u}} {Φ : L₁ →ᵥ L₂} 
 
 section 
@@ -173,6 +187,7 @@ lemma onSubFormula₁_models_onSubFormula₁ {T : CTheory L₁} {σ : Sentence L
 end
 
 section
+
 variable
   (injf : ∀ k, Function.Injective (Φ.onFunc : L₁.func k → L₂.func k))
   (injr : ∀ k, Function.Injective (Φ.onRel : L₁.rel k → L₂.rel k))
@@ -204,6 +219,8 @@ lemma onSubFormula₁_models_onSubFormula₁_iff {T : CTheory L₁} {σ : Senten
 
 end
 
+end onSubFormula₁
+
 end SubFormula
 
 namespace Structure
@@ -226,9 +243,59 @@ variable {L : Language.{u}} [L.HasEq] {μ : Type v} (M : Type w) (s : Structure 
 
 end SubFormula
 
-namespace Theory
+section soundness
 
-end Theory
+variable {L : Language.{u}} [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq (L.rel k)]
+
+lemma Derivation.sound : ∀ {Γ : Finset (SyntacticFormula L)},
+    ⊩ Γ → ∀ (M : Type u) [s : Structure L M] (ε : ℕ → M), ∃ p ∈ Γ, SubFormula.Val! M ε p
+  | _, AxL Δ r v hrel hnrel, M, s, ε => by
+    by_cases h : s.rel r (SubTerm.val! M ![] ε ∘ v)
+    · exact ⟨SubFormula.rel r v, hrel, h⟩
+    · exact ⟨SubFormula.nrel r v, hnrel, h⟩
+  | _, verum Δ h,            M, s, ε => ⟨⊤, h, by simp⟩
+  | _, orLeft Δ p q d,       M, s, ε => by
+    have : SubFormula.Val! M ε p ∨ ∃ q ∈ Δ, SubFormula.Val! M ε q := by simpa using Derivation.sound d M ε
+    rcases this with (hp | ⟨r, hr, hhr⟩)
+    · exact ⟨p ⋎ q, by simp, by simp[hp]⟩
+    · exact ⟨r, by simp[hr], hhr⟩
+  | _, orRight Δ p q d,       M, s, ε => by
+    have : SubFormula.Val! M ε q ∨ ∃ q ∈ Δ, SubFormula.Val! M ε q := by simpa using Derivation.sound d M ε
+    rcases this with (hq | ⟨r, hr, hhr⟩)
+    · exact ⟨p ⋎ q, by simp, by simp[hq]⟩
+    · exact ⟨r, by simp[hr], hhr⟩
+  | _, and Δ p q dp dq,       M, s, ε => by
+    have : SubFormula.Val! M ε p ∨ ∃ r ∈ Δ, SubFormula.Val! M ε r := by simpa using Derivation.sound dp M ε
+    rcases this with (hp | ⟨r, hr, hhr⟩)
+    · have : SubFormula.Val! M ε q ∨ ∃ r ∈ Δ, SubFormula.Val! M ε r := by simpa using Derivation.sound dq M ε
+      rcases this with (hq | ⟨r, hr, hhr⟩)
+      · exact ⟨p ⋏ q, by simp, by simp[hp, hq]⟩
+      · exact ⟨r, by simp[hr], hhr⟩
+    · exact ⟨r, by simp[hr], hhr⟩
+  | _, all Δ p d,             M, s, ε => by
+    have : (∀ a : M, SubFormula.Eval! M ![a] ε p) ∨ ∃ q ∈ Δ, SubFormula.Val! M ε q := by
+      simpa[shifts, SubFormula.shiftEmb, Matrix.vecConsLast_vecEmpty, forall_or_right]
+        using fun a : M => Derivation.sound d M (a :>ₙ ε)
+    rcases this with (hp | ⟨q, hq, hhq⟩)
+    · exact ⟨∀' p, by simp, hp⟩
+    · exact ⟨q, by simp[hq], hhq⟩
+  | _, ex Δ t p d,            M, s, ε => by
+    have : SubFormula.Eval! M ![t.val! M ![] ε] ε p ∨ ∃ p ∈ Δ, SubFormula.Val! M ε p := by
+      simpa[Matrix.vecConsLast_vecEmpty] using Derivation.sound d M ε
+    rcases this with (hp | ⟨q, hq, hhq⟩)
+    · exact ⟨∃' p, by simp, t.val! M ![] ε, hp⟩
+    · exact ⟨q, by simp[hq], hhq⟩
+
+lemma Proof.sound {T : CTheory L} {σ : Sentence L} : T ⊢ σ → T ⊨ σ := by
+  simp[consequence_iff]; rintro ⟨Γ, hΓ, d⟩ M _ _ hT
+  have : M ⊧₁ σ ∨ ∃ τ ∈ Γ, M ⊧₁ τ := by simpa using Derivation.sound d M default
+  rcases this with (hσ | ⟨τ, hτ, hhτ⟩)
+  · assumption
+  · have : ~τ ∈ T := by rcases hΓ hτ with ⟨τ', hτ', rfl⟩; simpa[←SubFormula.neg_eq] using hτ'
+    have : ¬ M ⊧₁ τ := by simpa using hT this
+    contradiction
+
+end soundness
 
 end FirstOrder
 

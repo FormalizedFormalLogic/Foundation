@@ -1,6 +1,5 @@
 import Logic.Vorspiel.Vorspiel
 
-@[reducible]
 class Semantics (F : Type u) [HasLogicSymbols F] where
   struc : Type w → Type v
   realize : {M : Type w} → struc M → F →L Prop

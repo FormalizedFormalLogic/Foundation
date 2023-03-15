@@ -130,6 +130,7 @@ lemma val_extendStructure_onSubTerm
 end Language
 
 section Syntactic
+
 variable (ε : ℕ → M)
 
 lemma val_shift (t : SyntacticSubTerm L n) :

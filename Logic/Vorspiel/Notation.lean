@@ -72,7 +72,11 @@ instance Prop_HasLogicSymbols : HasLogicSymbols Prop where
   and := And
   or := Or
 
-@[simp] lemma Prop_neg_eq (p : Prop) : ~ p = ¬p := rfl   
+@[simp] lemma Prop_top_eq : ⊤ = True := rfl
+
+@[simp] lemma Prop_bot_eq : ⊥ = False := rfl
+
+@[simp] lemma Prop_neg_eq (p : Prop) : ~ p = ¬p := rfl
 
 @[simp] lemma Prop_arrow_eq (p q : Prop) : (p ⟶ q) = (p → q) := rfl
 

@@ -37,16 +37,18 @@ inductive Derivation : Finset (SyntacticFormula L) → Type _
 | ex      : ∀ (Δ : Finset (SyntacticFormula L)) (t : SyntacticTerm L) (p : SyntacticSubFormula L 1),
     Derivation (insert (subst t p) Δ) → Derivation (insert (∃' p) Δ)
 
-instance : HasVdash (Finset (SyntacticFormula L)) (Type _) := ⟨Derivation⟩
-
-structure provable (T : Theory L ℕ) (p : SyntacticFormula L) where
-  leftHand : Finset (SyntacticFormula L)
-  hleftHand : ↑leftHand ⊆ SubFormula.neg '' T
-  derivation : ⊩ insert p leftHand
+instance : HasVdash (Finset (SyntacticFormula L)) (Type u) := ⟨Derivation⟩
 
 abbrev DerivationList (G : List (SyntacticFormula L)) := ⊩ G.toFinset
 
 abbrev Derivation.Valid (p : SyntacticFormula L) := ⊩ ({p} : Finset _)
+
+structure Proof (T : CTheory L) (σ : Sentence L) where
+  leftHand : Finset (Sentence L)
+  hleftHand : ↑leftHand ⊆ SubFormula.neg '' T
+  derivation : ⊩ ((insert σ leftHand).image emb : Finset (SyntacticFormula L))
+
+instance : HasTurnstile (Sentence L) (Type u) := ⟨Proof⟩
 
 namespace Derivation
 variable {Δ Γ : Finset (SyntacticFormula L)}
@@ -118,7 +120,6 @@ protected def toStr : {Δ : Finset (SyntacticFormula L)} → Derivation Δ → S
       d.toStr ++
       "\\RightLabel{\\scriptsize($\\exists$)}\n" ++
       "\\UnaryInfC{$" ++ toString (∃' p) ++ ", ... $}\n\n"
-
 
 protected def toStrCompact : {Δ : Finset (SyntacticFormula L)} → Derivation Δ → String
   | _, AxL _ _ _ _ _   =>
@@ -284,9 +285,13 @@ def exOfInstances (v : List (SyntacticTerm L)) (p : SyntacticSubFormula L 1)
   · exact Derivation.cast (ih (Γ := insert (∃' p) Γ)
       (Derivation.cast (ex _ t p h) (by ext r; simp))) (by simp)
 
-open Language
-
 end Derivation
+
+namespace Proof
+
+
+
+end Proof
 
 end FirstOrder
 

@@ -27,6 +27,64 @@ infixr:70 " :>ₙ " => cases
 
 end Nat
 
+namespace List
+
+variable {α : Type u}
+
+section And
+
+variable [HasAnd α] [Top α]
+
+def conj : List α → α
+  | []      => ⊤
+  | a :: as => a ⋏ as.conj
+
+@[simp] lemma conj_nil : conj ([] : List α) = ⊤ := rfl
+
+@[simp] lemma conj_cons {a : α} {as : List α} : conj (a :: as) = a ⋏ as.conj := rfl
+
+lemma conj_prop (ps : List Prop) : ps.conj ↔ (∀ p ∈ ps, p) := by
+  induction' ps with p ps ih <;> simp[*]
+  constructor
+  · rintro ⟨hp, h⟩ q (hq | hq); { exact hq.mpr hp }; { exact h q hq }
+  · intro h; exact ⟨h p (Or.inl $ of_eq rfl), fun q hq => h q (Or.inr hq)⟩
+
+variable {α β : Type u} [HasLogicSymbols α] [HasLogicSymbols β] {f : α →L β}
+
+lemma lhom_conj (as : List α) : f as.conj = (as.map f).conj := by induction as <;> simp[*] 
+
+@[simp] lemma lhom_conj_prop {f : α →L Prop} (as : List α) : f as.conj = ∀ a ∈ as, f a := by induction as <;> simp[*] 
+
+end And
+
+section Or
+
+variable [HasOr α] [Bot α]
+
+def disj : List α → α
+  | []      => ⊥
+  | a :: as => a ⋎ as.disj
+
+@[simp] lemma disj_nil : disj ([] : List α) = ⊥ := rfl
+
+@[simp] lemma disj_cons {a : α} {as : List α} : disj (a :: as) = a ⋎ as.disj := rfl
+
+lemma disj_prop (ps : List Prop) : ps.disj ↔ (∃ p ∈ ps, p) := by
+  induction' ps with p ps ih <;> simp[*]
+  constructor
+  · rintro (hp | ⟨q, hq, hhq⟩); { exact ⟨p, Or.inl $ of_eq rfl, hp⟩ }; { exact ⟨q, Or.inr hq, hhq⟩ }
+  · rintro ⟨q, (hq | hq), hhq⟩; { exact Or.inl $ hq.mp hhq }; { exact Or.inr ⟨q, hq, hhq⟩ } 
+
+variable {α β : Type _} [HasLogicSymbols α] [HasLogicSymbols β] {f : α →L β}
+
+lemma lhom_disj (as : List α) : f as.disj = (as.map f).disj := by induction as <;> simp[*] 
+
+@[simp] lemma lhom_disj_prop {f : α →L Prop} (as : List α) : f as.disj = ∃ a ∈ as, f a := by induction as <;> simp[*] 
+
+end Or
+
+end List
+
 namespace Matrix
 open Fin
 section
@@ -89,6 +147,12 @@ funext (fun i => lastCases (by simp) (by simp) i)
 
 @[simp] lemma vecTail_comp (f : α → β) (v : Fin (n + 1) → α) : vecTail (f ∘ v) = f ∘ (vecTail v) :=
   by simp[vecTail, Function.comp.assoc]
+
+lemma vecConsLast_vecEmpty (a : α) : vecEmpty <: a = ![a] :=
+  funext (fun x => by
+    have : 0 = Fin.last 0 := by rfl
+    cases' x using Fin.cases with i <;> simp[this]
+    have := i.isLt; contradiction )
 
 end
 
