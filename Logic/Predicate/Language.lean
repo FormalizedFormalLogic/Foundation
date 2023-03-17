@@ -167,12 +167,15 @@ class HasMul (L : Language.{u}) where
 
 attribute [match_pattern] HasEq.eq HasAdd.add HasMul.mul
 
-instance : HasEq oring := ⟨ORingRel.eq⟩
-instance : HasLt oring := ⟨ORingRel.lt⟩
-instance : HasAdd oring := ⟨ORingFunc.add⟩
-instance : HasMul oring := ⟨ORingFunc.mul⟩
-instance : HasZero oring := ⟨ORingFunc.zero⟩
-instance : HasOne oring := ⟨ORingFunc.one⟩
+class HasORing (L : Language) extends L.HasEq, L.HasLt, L.HasZero, L.HasOne, L.HasAdd, L.HasMul
+
+instance : HasORing oring where
+  eq := ORingRel.eq
+  lt := ORingRel.lt
+  zero := ORingFunc.zero
+  one := ORingFunc.one
+  add := ORingFunc.add
+  mul := ORingFunc.mul
 
 structure Hom (L₁ L₂ : Language) where
   onFunc : {k : ℕ} → L₁.func k → L₂.func k

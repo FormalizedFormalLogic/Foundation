@@ -6,7 +6,9 @@ universe u v
 namespace FirstOrder
 
 namespace Derivation
+
 open SubFormula
+
 variable {L : Language.{u}}
   [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq (L.rel k)]
   [∀ k, Encodable (L.func k)] [∀ k, Encodable (L.rel k)]
@@ -25,10 +27,9 @@ def decomp (s : Finset (SyntacticTerm L)) :
 def IsTerminal (Δ : Finset (SyntacticFormula L)) : Prop :=
   ∃ (k : ℕ) (r : L.rel k) (v : Fin k → SyntacticTerm L), rel r v ∈ Δ ∧ nrel r v ∈ Δ
 
-inductive SearchTreeAux (i : ℕ) :
-  ∀ {m₁ m₂}, finset (bounded_subformula L m₁ 0) → finset (bounded_subformula L m₂ 0) → Prop
-| decomp : ∀ {m₁ m₂} (Γ₁ : finset (bounded_formula L m₁)) (Γ₂ : finset (bounded_formula L m₂))
-    (p : bounded_formula L m₁) (hp : p ∈ Γ₁) (hi : p.index = i.unpair.fst),
+inductive SearchTreeAux (i : ℕ) : Finset (SyntacticFormula L) → Finset (SyntacticFormula L) → Prop
+| decomp : ∀ (Γ₁ : Finset (SyntacticFormula L)) (Γ₂ : Finset (SyntacticFormula L))
+    (p : SyntacticFormula L) (hp : p ∈ Γ₁) (hi : p.index = i.unpair.fst),
     sigma.mk m₂ Γ₂ ∈ decomp i.unpair.snd p Γ₁ → search_tree_decomp Γ₂ Γ₁
 | none : ∀ {m} (Γ : finset (bounded_formula L m)) 
     (hi : ∀ p ∈ Γ, subformula.index p ≠ i.unpair.fst),

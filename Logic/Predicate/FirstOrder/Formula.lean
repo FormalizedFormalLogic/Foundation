@@ -458,8 +458,8 @@ declare_syntax_cat subformula
 syntax "⊤" : subformula
 syntax "⊥" : subformula
 syntax:45 subterm:45 "=" subterm:0 : subformula
+syntax:45 subterm:45 "≠" subterm:0 : subformula
 syntax:45 subterm:45 "<" subterm:0 : subformula
-syntax:45 subterm:45 "≤" subterm:0 : subformula
 syntax:45 "prop" term:max : subformula
 syntax:45 "rel¹" term "/[" subterm:0 "]" : subformula
 syntax:45 "rel²" term "/[" subterm:0 "," subterm:0 "]" : subformula
@@ -484,9 +484,8 @@ macro_rules
   | `(“ rel³ $s:term /[ $t₁:subterm, $t₂:subterm, $t₃:subterm ] ”) => `(rel $s ![T“$t₁”, T“$t₂”, T“$t₃”])
   | `(“ ¬ $p:subformula ”)                            => `(~“$p”)
   | `(“ $t:subterm = $u:subterm ”)                    => `(rel Language.HasEq.eq ![T“$t”, T“$u”])
+  | `(“ $t:subterm ≠ $u:subterm ”)                    => `(nrel Language.HasEq.eq ![T“$t”, T“$u”])
   | `(“ $t:subterm < $u:subterm ”)                    => `(rel Language.HasLt.lt ![T“$t”, T“$u”])
-  | `(“ $t:subterm ≤ $u:subterm ”)                    =>
-    `(rel Language.HasLt.lt ![T“$t”, T“$u”] ⋎ rel Language.HasEq.eq ![T“$t”, T“$u”])
   | `(“ $p:subformula ∧ $q:subformula ”)              => `(“$p” ⋏ “$q”)
   | `(“ $p:subformula ∨ $q:subformula ”)              => `(“$p” ⋎ “$q”)
   | `(“ ∀ $p:subformula ”)                            => `(∀' “$p”)

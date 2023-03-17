@@ -231,7 +231,7 @@ partial def resultSubst {L : Q(Language.{u})} {n : Q(ℕ)} (s : Q(SyntacticSubTe
     let ⟨pn, pe⟩ ← resultSubst s p
     let ⟨qn, qe⟩ ← resultSubst s q
     return ⟨q($pn ⋎ $qn), q(hom_or_eq_of_eq $pe $qe)⟩
-  | ~q(~$p)             => do
+  | ~q(~$p)                 => do
     let ⟨pn, pe⟩ ← resultSubst s p
     return ⟨q(~$pn), q(hom_neg_eq_of_eq $pe)⟩
   | ~q(∀' $p)               => do
@@ -272,7 +272,7 @@ partial def resultShift {L : Q(Language.{u})} {n : Q(ℕ)} : (p : Q(SyntacticSub
     let ⟨pn, pe⟩ ← resultShift p
     let ⟨qn, qe⟩ ← resultShift q
     return ⟨q($pn ⋎ $qn), q(hom_or_eq_of_eq $pe $qe)⟩
-  | ~q(~$p)             => do
+  | ~q(~$p)                 => do
     let ⟨pn, pe⟩ ← resultShift p
     return ⟨q(~$pn), q(hom_neg_eq_of_eq $pe)⟩
   | ~q(∀' $p)               => do
@@ -315,7 +315,7 @@ partial def resultNeg {L : Q(Language.{u})} {n : Q(ℕ)} : (p : Q(SyntacticSubFo
     let ⟨pn, pe⟩ ← resultNeg p
     let ⟨qn, qe⟩ ← resultNeg q
     return ⟨q($pn ⋏ $qn), q(neg_or_eq_of_eq $pe $qe)⟩
-  | ~q(~$p)             => do
+  | ~q(~$p)                 => do
     return ⟨q($p), q(neg_neg' $p)⟩
   | ~q(∀' $p)               => do
     let ⟨pn, e⟩ ← resultNeg p
@@ -724,6 +724,7 @@ elab "proveTauto" n:(num)? : tactic => do
   let b ← proveValidTauto L dfunc drel s p
   Lean.Elab.Tactic.closeMainGoal b
 
+/-
 section
 variable {L : Language.{u}} [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq (L.rel k)] (p q r s : SyntacticFormula L)
 
@@ -740,7 +741,7 @@ example (_ : Valid “¬(!p ∧ !q)”) (_ : Valid s) : Valid “!s → !p ∧ !
 example (_ : Valid “¬(!p ∧ !q)”) : Valid “¬!p ∨ ¬!q”  := by proveTauto
 
 end
-
+-/
 end tauto
 
 def proveDerivationListQ (L : Q(Language.{u})) (dfunc : Q(∀ k, DecidableEq (($L).func k))) (drel : Q(∀ k, DecidableEq (($L).rel k)))
@@ -811,6 +812,7 @@ elab "prove" n:(num)? seq:(termSeq)? : tactic => do
   let b ← proveValid L dfunc drel ts.toList s p
   Lean.Elab.Tactic.closeMainGoal b
 
+/-
 section
 variable {L : Language.{u}} [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq (L.rel k)] (p q r s : SyntacticFormula L)
 open Language
@@ -824,7 +826,7 @@ example : Valid (L := oring) “&0 < &1 → ∃ ∃ #0 < #1” := by prove
 example (_ : Valid (L := oring) “0 < 4 + 9”) : Valid (L := oring) “⊤ ∧ (∃ 0 < 4 + #0)”  := by prove [T“9”]
 
 end
-
+-/
 end DerivationListQ
 
 end FirstOrder

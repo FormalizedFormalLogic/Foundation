@@ -50,11 +50,14 @@ def bind (bound : Fin n₁ → SubTerm L μ₂ n₂) (free : μ₁ → SubTerm L
 def map (bound : Fin n₁ → Fin n₂) (free : μ₁ → μ₂) : SubTerm L μ₁ n₁ → SubTerm L μ₂ n₂ :=
   bind (fun n => #(bound n)) (fun m => &(free m))
 
-def subst (t : SubTerm L μ n) : SubTerm L μ (n + 1) →  SubTerm L μ n :=
+def subst (t : SubTerm L μ n) : SubTerm L μ (n + 1) → SubTerm L μ n :=
   bind (bvar <: t) fvar
 
 def bShift : SubTerm L μ n → SubTerm L μ (n + 1) :=
   map Fin.succ id
+
+def castLe {n n' : ℕ} (h : n ≤ n') : SubTerm L μ n → SubTerm L μ n' :=
+  map (Fin.castLe h) id
 
 section bind
 variable (bound : Fin n₁ → SubTerm L μ₂ n₂) (free : μ₁ → SubTerm L μ₂ n₂)
@@ -131,6 +134,13 @@ lemma bShift_func {k} (f : L.func k) (v : Fin k → SubTerm L μ n) :
 lemma subst_func (s : SubTerm L μ n) {k} (f : L.func k) (v : Fin k → SubTerm L μ (n + 1)) :
     subst s (func f v) = func f (fun i => subst s (v i)) :=
   by simp[subst, bind_func]
+
+@[simp] lemma castLe_bvar {n'} (h : n ≤ n') (x : Fin n) : castLe h (#x : SubTerm L μ n) = #(Fin.castLe h x) := rfl
+
+@[simp] lemma castLe_fvar {n'} (h : n ≤ n') (x : μ) : castLe h (&x : SubTerm L μ n) = &x := rfl
+
+lemma castLe_func {n'} (h : n ≤ n') {k} (f : L.func k) (v : Fin k → SubTerm L μ n) :
+    castLe h (func f v) = func f (fun i => castLe h (v i)) := rfl
 
 section Syntactic
 
