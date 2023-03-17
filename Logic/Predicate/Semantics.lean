@@ -66,6 +66,10 @@ lemma extendStructure_rel
   simp[Language.Hom.extendStructure]
   refine ⟨by intros h; rcases h with ⟨r₁', e, h⟩; rcases injr e; exact h, by intros h; refine ⟨r₁, rfl, h⟩⟩
 
+class Eq (L : Language.{u}) [L.HasEq] (M : Type w) [s : Structure L M] where
+  eq : ∀ a b, s.rel Language.HasEq.eq ![a, b] ↔ a = b
+
+attribute [simp] Eq.eq
 
 end Structure
 

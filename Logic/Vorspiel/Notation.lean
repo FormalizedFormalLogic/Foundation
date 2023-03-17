@@ -33,6 +33,20 @@ class HasLogicSymbols (α : Sort _)
 
 prefix:64 "∀' " => HasUniv.univ
 
+section HasUniv
+
+variable {α : ℕ → Sort u} [HasUniv α]
+
+def univClosure : {n : ℕ} → α n → α 0
+  | 0,     a => a
+  | _ + 1, a => univClosure (∀' a)
+
+@[simp] lemma univ_closure_zero (a : α 0) : univClosure a = a := rfl
+
+@[simp] lemma univ_closure_succ {n} (a : α (n + 1)) : univClosure a = univClosure (∀' a) := rfl
+
+end HasUniv
+
 @[notation_class] class HasEx (α : ℕ → Sort _) where
   ex : ∀ {n}, α (n + 1) → α n
 
@@ -84,6 +98,8 @@ instance Prop_HasLogicSymbols : HasLogicSymbols Prop where
 
 @[simp] lemma Prop_or_eq (p q : Prop) : (p ⋎ q) = (p ∨ q) := rfl
 
+@[simp] lemma Prop_iff_eq (p q : Prop) : (p ⟷ q) = (p ↔ q) := by simp[HasLogicSymbols.iff, iff_iff_implies_and_implies]
+
 variable (α β γ : Type _) [HasLogicSymbols α] [HasLogicSymbols β] [HasLogicSymbols γ]
 
 structure Hom where
@@ -115,6 +131,8 @@ variable (f : α →L β) (a b : α)
 @[simp] lemma map_and : f (a ⋏ b) = f a ⋏ f b := map_and' f a b
 
 @[simp] lemma map_or : f (a ⋎ b) = f a ⋎ f b := map_or' f a b
+
+@[simp] lemma map_iff : f (a ⟷ b) = f a ⟷ f b := by simp[HasLogicSymbols.iff]
 
 protected def id : α →L α where
   toFun := id

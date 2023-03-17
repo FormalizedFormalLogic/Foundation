@@ -9,8 +9,7 @@ variable {L : Language.{u}} {μ : Type v} {μ₁ : Type v₁} {μ₂ : Type v₂
 namespace FirstOrder
 
 namespace SubFormula
-variable {n : ℕ} {M : Type w} (s : Structure L M)
-  (e : Fin n → M) (e₂ : Fin n₂ → M) (ε : μ → M) (ε₂ : μ₂ → M)
+variable {M : Type w} (s : Structure L M)
 
 def Eval' (ε : μ → M) : ∀ {n}, (Fin n → M) → SubFormula L μ n → Prop
   | _, _, ⊤        => True
@@ -25,6 +24,10 @@ def Eval' (ε : μ → M) : ∀ {n}, (Fin n → M) → SubFormula L μ n → Pro
 @[simp] lemma Eval'_neg (p : SubFormula L μ n) :
     Eval' s ε e (~p) = ¬Eval' s ε e p :=
   by induction p using rec' <;> simp[*, Eval', ←neg_eq, or_iff_not_imp_left]
+
+section
+
+variable {n : ℕ} (e : Fin n → M) (e₂ : Fin n₂ → M) (ε : μ → M) (ε₂ : μ₂ → M)
 
 def Eval : SubFormula L μ n →L Prop where
   toFun := Eval' s ε e
@@ -42,6 +45,8 @@ abbrev Val (ε : μ → M) : Formula L μ →L Prop := Eval s ![] ε
 
 abbrev Val! (M : Type w) [s : Structure L M] (ε : μ → M) :
     Formula L μ →L Prop := Val s ε
+
+end
 
 lemma eval_rel {k} {r : L.rel k} {v} :
     Eval s e ε (rel r v) ↔ s.rel r (fun i => SubTerm.val s e ε (v i)) := of_eq rfl
@@ -77,6 +82,13 @@ lemma eval_nrel {k} {r : L.rel k} {v} :
 
 @[simp] lemma eval_all {p : SubFormula L μ (n + 1)} :
     Eval s e ε (∀' p) ↔ ∀ x : M, Eval s (x :> e) ε p := of_eq rfl
+
+@[simp] lemma eval_univClosure {e'} {p : SubFormula L μ n} :
+    Eval s e' ε (univClosure p) ↔ ∀ e, Eval s e ε p := by
+  induction' n with n ih generalizing e' <;> simp[*, eq_finZeroElim]
+  constructor
+  · intro h e; simpa using h (Matrix.vecTail e) (Matrix.vecHead e)
+  · intro h e x; exact h (x :> e)
 
 @[simp] lemma eval_ex {p : SubFormula L μ (n + 1)} :
     Eval s e ε (∃' p) ↔ ∃ x : M, Eval s (x :> e) ε p := of_eq rfl
@@ -127,6 +139,15 @@ abbrev ModelsTheory (M : Type u) [s : Structure L M] (T : CTheory L) : Prop := S
 
 infix:55 " ⊧₁* " => ModelsTheory
 
+variable (L)
+
+def ElementaryEquiv (M₁ M₂ : Type u) [Structure L M₁] [Structure L M₂] : Prop :=
+  ∀ σ : Sentence L, M₁ ⊧₁ σ ↔ M₂ ⊧₁ σ
+
+notation:50 M₁ " ≃ₑ[" L "] " M₂ => ElementaryEquiv L M₁ M₂
+
+variable {L}
+
 section
 variable {M : Type u} [s : Structure L M]
 
@@ -155,6 +176,24 @@ lemma satisfiableₛ_intro {T : CTheory L} (M : Type u) [i : Inhabited M] [s : S
 lemma validₛ_iff {T : CTheory L} :
     Semantics.Validₛ T ↔ ∀ ⦃M : Type u⦄ [Inhabited M] [Structure L M], M ⊧₁* T :=
   of_eq rfl
+
+@[refl]
+lemma ElementaryEquiv.refl (M) [Structure L M] : M ≃ₑ[L] M := fun σ => by rfl
+
+@[symm]
+lemma ElementaryEquiv.symm {M₁ M₂} [Structure L M₁] [Structure L M₂] : (M₁ ≃ₑ[L] M₂) → (M₂ ≃ₑ[L] M₁) :=
+  fun h σ => (h σ).symm
+
+@[trans]
+lemma ElementaryEquiv.trans {M₁ M₂ M₃ : Type u} [Structure L M₁] [Structure L M₂] [Structure L M₃] :
+    (M₁ ≃ₑ[L] M₂) → (M₂ ≃ₑ[L] M₃) → (M₁ ≃ₑ[L] M₃) :=
+  fun h₁ h₂ σ => Iff.trans (h₁ σ) (h₂ σ)
+
+lemma ElementaryEquiv.models {M₁ M₂} [Structure L M₁] [Structure L M₂] (h : M₁ ≃ₑ[L] M₂) :
+    ∀ {σ : Sentence L}, M₁ ⊧₁ σ ↔ M₂ ⊧₁ σ := @h
+
+lemma ElementaryEquiv.modelsₛ {M₁ M₂} [Structure L M₁] [Structure L M₂] (h : M₁ ≃ₑ[L] M₂) :
+    ∀ {T : CTheory L}, M₁ ⊧₁* T ↔ M₂ ⊧₁* T := by simp[modelsₛ_iff, h.models]
 
 end
 
@@ -222,15 +261,6 @@ end
 end onSubFormula₁
 
 end SubFormula
-
-namespace Structure
-
-class Eq {L : Language.{u}} [L.HasEq] (M : Type w) [s : Structure L M] where
-  eq : ∀ a b, s.rel Language.HasEq.eq ![a, b] ↔ a = b
-
-attribute [simp] Eq.eq
-
-end Structure
 
 namespace SubFormula
 

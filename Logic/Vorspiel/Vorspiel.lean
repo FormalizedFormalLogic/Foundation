@@ -27,68 +27,12 @@ infixr:70 " :>ₙ " => cases
 
 end Nat
 
-namespace List
-
-variable {α : Type u}
-
-section And
-
-variable [HasAnd α] [Top α]
-
-def conj : List α → α
-  | []      => ⊤
-  | a :: as => a ⋏ as.conj
-
-@[simp] lemma conj_nil : conj ([] : List α) = ⊤ := rfl
-
-@[simp] lemma conj_cons {a : α} {as : List α} : conj (a :: as) = a ⋏ as.conj := rfl
-
-lemma conj_prop (ps : List Prop) : ps.conj ↔ (∀ p ∈ ps, p) := by
-  induction' ps with p ps ih <;> simp[*]
-  constructor
-  · rintro ⟨hp, h⟩ q (hq | hq); { exact hq.mpr hp }; { exact h q hq }
-  · intro h; exact ⟨h p (Or.inl $ of_eq rfl), fun q hq => h q (Or.inr hq)⟩
-
-variable {α β : Type u} [HasLogicSymbols α] [HasLogicSymbols β] {f : α →L β}
-
-lemma lhom_conj (as : List α) : f as.conj = (as.map f).conj := by induction as <;> simp[*] 
-
-@[simp] lemma lhom_conj_prop {f : α →L Prop} (as : List α) : f as.conj = ∀ a ∈ as, f a := by induction as <;> simp[*] 
-
-end And
-
-section Or
-
-variable [HasOr α] [Bot α]
-
-def disj : List α → α
-  | []      => ⊥
-  | a :: as => a ⋎ as.disj
-
-@[simp] lemma disj_nil : disj ([] : List α) = ⊥ := rfl
-
-@[simp] lemma disj_cons {a : α} {as : List α} : disj (a :: as) = a ⋎ as.disj := rfl
-
-lemma disj_prop (ps : List Prop) : ps.disj ↔ (∃ p ∈ ps, p) := by
-  induction' ps with p ps ih <;> simp[*]
-  constructor
-  · rintro (hp | ⟨q, hq, hhq⟩); { exact ⟨p, Or.inl $ of_eq rfl, hp⟩ }; { exact ⟨q, Or.inr hq, hhq⟩ }
-  · rintro ⟨q, (hq | hq), hhq⟩; { exact Or.inl $ hq.mp hhq }; { exact Or.inr ⟨q, hq, hhq⟩ } 
-
-variable {α β : Type _} [HasLogicSymbols α] [HasLogicSymbols β] {f : α →L β}
-
-lemma lhom_disj (as : List α) : f as.disj = (as.map f).disj := by induction as <;> simp[*] 
-
-@[simp] lemma lhom_disj_prop {f : α →L Prop} (as : List α) : f as.disj = ∃ a ∈ as, f a := by induction as <;> simp[*] 
-
-end Or
-
-end List
+lemma eq_finZeroElim {α : Sort u} (x : Fin 0 → α) : x = finZeroElim := funext (by rintro ⟨_, _⟩; contradiction)
 
 namespace Matrix
 open Fin
 section
-variable {n : ℕ} {α : Type u} (a b : α) (s : Fin n → α)
+variable {n : ℕ} {α : Type u} 
 
 infixr:70 " :> " => vecCons
 
@@ -99,7 +43,7 @@ infixr:70 " :> " => vecCons
     (a :> s) (Fin.succ i) = s i := by simp
 
 @[simp] lemma vecCons_last (a : C) (s : Fin (n + 1) → C) :
-    (a :> s) (Fin.last (n + 1)) = s (Fin.last n) := vecCons_succ a s (Fin.last n)
+    (a :> s) (Fin.last (n + 1)) = s (Fin.last n) := vecCons_succ (Fin.last n)
 
 def vecConsLast {n : ℕ} (t : Fin n → α) (h : α) : Fin n.succ → α :=
   Fin.lastCases h t
@@ -113,7 +57,7 @@ infixl:70 " <: " => vecConsLast
     (s <: a) (Fin.castSucc i) = s i := by simp[vecConsLast]
 
 @[simp] lemma rightConcat_zero (a : α) (s : Fin n.succ → α) :
-    (s <: a) 0 = s 0 := rightConcat_castSucc a s 0
+    (s <: a) 0 = s 0 := rightConcat_castSucc 0
 
 @[simp] lemma zero_succ_eq_id {n} : (0 : Fin (n + 1)) :> succ = id :=
   funext $ Fin.cases (by simp) (by simp)
@@ -139,6 +83,9 @@ def decVec {α : Type _} : {n : ℕ} → (v w : Fin n → α) → (∀ i, Decida
 lemma comp_vecCons (f : α → β) (a : α) (s : Fin n → α) : (fun x => f $ (a :> s) x) = f a :> f ∘ s :=
 funext (fun i => cases (by simp) (by simp) i)
 
+lemma comp_vecCons' (f : α → β) (a : α) (s : Fin n → α) : (fun x => f $ (a :> s) x) = f a :> fun i => f (s i) :=
+  comp_vecCons f a s
+
 lemma comp_vecConsLast (f : α → β) (a : α) (s : Fin n → α) : (fun x => f $ (s <: a) x) = f ∘ s <: f a :=
 funext (fun i => lastCases (by simp) (by simp) i)
 
@@ -153,6 +100,27 @@ lemma vecConsLast_vecEmpty (a : α) : vecEmpty <: a = ![a] :=
     have : 0 = Fin.last 0 := by rfl
     cases' x using Fin.cases with i <;> simp[this]
     have := i.isLt; contradiction )
+
+section And
+
+variable [HasLogicSymbols α]
+
+def conj : {n : ℕ} → (Fin n → α) → α
+  | 0,     _ => ⊤
+  | _ + 1, v => v 0 ⋏ conj (vecTail v)
+
+@[simp] lemma conj_nil (v : Fin 0 → α) : conj v = ⊤ := rfl
+
+@[simp] lemma conj_cons {a : α} {v : Fin n → α} : conj (a :> v) = a ⋏ conj v := rfl
+
+@[simp] lemma conj_hom (f : α →L Prop) (v : Fin n → α) : f (conj v) = ∀ i, f (v i) := by
+  induction' n with n ih <;> simp[conj]
+  · intro ⟨_, _⟩; contradiction
+  · simp[ih]; constructor
+    · intro ⟨hz, hs⟩ i; cases i using Fin.cases; { exact hz }; { exact hs _ }
+    · intro h; exact ⟨h 0, fun i => h _⟩
+
+end And
 
 end
 
@@ -264,7 +232,12 @@ end Set
 
 namespace Quotient
 open Matrix
-variable {α : Type u} [s : Setoid α] {β : Type v}
+variable {α : Type u} [s : Setoid α] {β : Sort v}
+
+@[elab_as_elim]
+lemma inductionOnVec {p : (Fin n → Quotient s) → Prop} (v : Fin n → Quotient s)
+  (h : ∀ v : Fin n → α, p (fun i => Quotient.mk s (v i))) : p v :=
+  Quotient.induction_on_pi v h
 
 def liftVec : ∀ {n} (f : (Fin n → α) → β),
   (∀ v₁ v₂ : Fin n → α, (∀ n, v₁ n ≈ v₂ n) → f v₁ = f v₂) → (Fin n → Quotient s) → β 
