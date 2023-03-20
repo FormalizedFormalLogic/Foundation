@@ -107,6 +107,16 @@ lemma map_map
 @[simp] lemma map_id (t) : @map L μ μ n n id id t = t :=
   by induction t <;> simp[*, map_func]
 
+lemma map_inj {bound : Fin n₁ → Fin n₂} {free : μ₁ → μ₂} (hb : Function.Injective bound) (hf : Function.Injective free) :
+    Function.Injective $ map (L := L) bound free
+  | #x,                    t => by cases t <;> simp[map_func]; intro h; exact hb h
+  | &x,                    t => by cases t <;> simp[map_func]; intro h; exact hf h
+  | func (arity := k) f v, t => by
+    cases t <;> simp[*, map_func]
+    case func =>
+      rintro rfl; simp; rintro rfl h; simp
+      funext i; exact map_inj hb hf (congr_fun h i)
+
 @[simp] lemma bShift_bvar (x : Fin n) : bShift (#x : SubTerm L μ n) = #(Fin.succ x) := rfl
 
 @[simp] lemma bShift_fvar (x : μ) : bShift (&x : SubTerm L μ n) = &x := rfl

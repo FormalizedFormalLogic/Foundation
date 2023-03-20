@@ -303,6 +303,35 @@ lemma map_map
 @[simp] lemma map_id (p) : @map L μ μ n n id id p = p :=
   bind_id _
 
+lemma map_inj : ∀ {n₁ n₂ μ₁ μ₂} {bound : Fin n₁ → Fin n₂} {free : μ₁ → μ₂},
+    (hb : Function.Injective bound) → (hf : Function.Injective free) → Function.Injective $ map (L := L) bound free
+  | _, _, _, _, _,     _,    _,  _,  ⊤,        p => by cases p using cases' <;> simp[map_rel, map_nrel]
+  | _, _, _, _, _,     _,    _,  _,  ⊥,        p => by cases p using cases' <;> simp[map_rel, map_nrel]
+  | _, _, _, _, _,     _,    hb, hf, rel r v,  p => by
+    cases p using cases' <;> simp[map_rel, map_nrel]
+    case hrel =>
+      rintro rfl; simp; rintro rfl h; simp
+      funext i; exact SubTerm.map_inj hb hf (congr_fun h i)
+  | _, _, _, _, _,     _,    hb, hf, nrel r v, p => by
+    cases p using cases' <;> simp[map_rel, map_nrel]
+    case hnrel =>
+      rintro rfl; simp; rintro rfl h; simp
+      funext i; exact SubTerm.map_inj hb hf (congr_fun h i)
+  | _, _, _, _, _,     _,    hb, hf, p ⋏ q,    r => by
+    cases r using cases' <;> simp[map_rel, map_nrel]
+    intro hp hq; exact ⟨map_inj hb hf hp, map_inj hb hf hq⟩
+  | _, _, _, _, _,     _,    hb, hf, p ⋎ q,    r => by
+    cases r using cases' <;> simp[map_rel, map_nrel]
+    intro hp hq; exact ⟨map_inj hb hf hp, map_inj hb hf hq⟩
+  | _, _, _, _, bound, free, hb, hf, ∀' p,     q => by
+    cases q using cases' <;> simp[map_rel, map_nrel]
+    intro h; exact map_inj (bound := 0 :> Fin.succ ∘ bound)
+      (Matrix.injective_vecCons ((Fin.succ_injective _).comp hb) (fun _ => (Fin.succ_ne_zero _).symm)) hf h
+  | _, _, _, _, bound, free, hb, hf, ∃' p,     q => by
+    cases q using cases' <;> simp[map_rel, map_nrel]
+    intro h; exact map_inj (bound := 0 :> Fin.succ ∘ bound)
+      (Matrix.injective_vecCons ((Fin.succ_injective _).comp hb) (fun _ => (Fin.succ_ne_zero _).symm)) hf h
+
 lemma subst_rel {s : SubTerm L μ n} {k} (r : L.rel k) (v : Fin k → SubTerm L μ (n + 1)) :
     subst s (rel r v) = rel r (fun i => SubTerm.subst s (v i)) :=
   by simp[subst, SubTerm.subst, bind_rel]

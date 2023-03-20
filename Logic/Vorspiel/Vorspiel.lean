@@ -101,6 +101,11 @@ lemma vecConsLast_vecEmpty (a : α) : vecEmpty <: a = ![a] :=
     cases' x using Fin.cases with i <;> simp[this]
     have := i.isLt; contradiction )
 
+lemma injective_vecCons {f : Fin n → α} (h : Function.Injective f) {a} (ha : ∀ i, a ≠ f i) : Function.Injective (a :> f) := by
+  have : ∀ i, f i ≠ a := fun i => (ha i).symm
+  intro i j; cases i using Fin.cases <;> cases j using Fin.cases <;> simp[*]
+  intro hf; exact h hf
+
 section And
 
 variable [HasLogicSymbols α]
