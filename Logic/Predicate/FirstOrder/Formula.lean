@@ -218,8 +218,12 @@ def bind (bound : Fin n₁ → SubTerm L μ₂ n₂) (free : μ₁ → SubTerm L
   map_neg' := by simp[bind'_neg]
   map_imp' := by simp[imp_eq, bind'_neg, ←neg_eq, bind']
 
+abbrev bind₀ (f : μ₁ → SubTerm L μ₂ n) : SubFormula L μ₁ n →L SubFormula L μ₂ n := bind SubTerm.bvar f
+
 def map (bound : Fin n₁ → Fin n₂) (free : μ₁ → μ₂) : SubFormula L μ₁ n₁ →L SubFormula L μ₂ n₂ :=
   bind (fun n => #(bound n)) (fun m => &(free m))
+
+abbrev map₀ (free : μ₁ → μ₂) : SubFormula L μ₁ n →L SubFormula L μ₂ n := map id free
 
 def subst (t : SubTerm L μ n) : SubFormula L μ (n + 1) →L SubFormula L μ n :=
   bind (SubTerm.bvar <: t) SubTerm.fvar
@@ -477,6 +481,18 @@ def formulaRec {C : SyntacticFormula L → Sort _}
   | ∀' p     => hall p (formulaRec hverum hfalsum hrel hnrel hand hor hall hex (free p))
   | ∃' p     => hex p (formulaRec hverum hfalsum hrel hnrel hand hor hall hex (free p))
   termination_by formulaRec _ _ _ _ _ _ _ _ p => p.complexity
+
+def fvarList : {n : ℕ} → SubFormula L μ n → List μ
+  | _, ⊤        => []
+  | _, ⊥        => []
+  | _, rel _ v  => List.join $ Matrix.toList (fun i => (v i).fvarList)
+  | _, nrel _ v => List.join $ Matrix.toList (fun i => (v i).fvarList)
+  | _, p ⋏ q    => p.fvarList ++ q.fvarList
+  | _, p ⋎ q    => p.fvarList ++ q.fvarList
+  | _, ∀' p     => p.fvarList
+  | _, ∃' p     => p.fvarList
+
+abbrev fvar? (p : SubFormula L μ n) (x : μ) : Prop := x ∈ p.fvarList
 
 end Syntactic
 

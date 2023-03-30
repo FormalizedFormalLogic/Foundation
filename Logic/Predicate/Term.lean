@@ -80,6 +80,9 @@ lemma bind_bind
 @[simp] lemma bind_id (t) : @bind L μ μ n n bvar fvar t = t :=
   by induction t <;> simp[*, bind_func]
 
+@[simp] lemma bind_id₀ (t) : @bind L μ μ 0 0 finZeroElim fvar t = t :=
+  by simpa[eq_finZeroElim] using bind_id t
+
 lemma bind_id_of_eq (hbound : ∀ x, bound x = #x) (hfree : ∀ x, free x = &x) (t) : @bind L μ μ n n bound free t = t :=
   by
   have e₁ : bvar = bound := by funext x; simp[hbound]
@@ -213,9 +216,26 @@ lemma fix_func {k} (f : L.func k) (v : Fin k → SyntacticSubTerm L n) :
 @[simp] lemma fix_free (t : SyntacticSubTerm L (n + 1)) : fix (free t) = t :=
   by simp[free, fix, bind_bind]; exact bind_id_of_eq (by intro x; cases x using Fin.lastCases <;> simp) (by simp) t
 
+lemma bShift_free_eq_shift (t : SyntacticTerm L) : free (bShift t) = shift t :=
+  by simp[free, bShift, shift, map, bind_bind, eq_finZeroElim]
+
 end Syntactic
 
-variable {L : Language} [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq (L.rel k)]
+def fvarList : SubTerm L μ n → List μ
+  | #_       => []
+  | &x       => [x]
+  | func _ v => List.join $ Matrix.toList (fun i => fvarList (v i))
+
+abbrev fvar? (t : SubTerm L μ n) (x : μ) : Prop := x ∈ t.fvarList
+
+@[simp] lemma fvarList_bvar : fvarList (#x : SubTerm L μ n) = [] := rfl
+
+@[simp] lemma fvarList_fvar : fvarList (&x : SubTerm L μ n) = [x] := rfl
+
+@[simp] lemma mem_fvarList_func {k} {f : L.func k} {v : Fin k → SubTerm L μ n} : x ∈ (func f v).fvarList ↔ ∃ i, x ∈ (v i).fvarList :=
+  by simp[fvarList]
+
+variable [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq (L.rel k)]
 
 def languageFunc : SubTerm L μ n → Finset (Σ k, L.func k)
   | #_       => ∅

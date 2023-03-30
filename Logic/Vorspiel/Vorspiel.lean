@@ -95,7 +95,7 @@ funext (fun i => lastCases (by simp) (by simp) i)
 @[simp] lemma vecTail_comp (f : α → β) (v : Fin (n + 1) → α) : vecTail (f ∘ v) = f ∘ (vecTail v) :=
   by simp[vecTail, Function.comp.assoc]
 
-lemma vecConsLast_vecEmpty (a : α) : vecEmpty <: a = ![a] :=
+lemma vecConsLast_vecEmpty {s : Fin 0 → α} (a : α) : s <: a = ![a] :=
   funext (fun x => by
     have : 0 = Fin.last 0 := by rfl
     cases' x using Fin.cases with i <;> simp[this]
@@ -146,6 +146,9 @@ def toList : {n : ℕ} → (Fin n → α) → List α
   induction n generalizing i <;> simp[*, List.nthLe_cons]
   case zero => contradiction
   case succ => rcases i <;> simp
+
+@[simp] lemma mem_toList_iff {v : Fin n → α} {a} : a ∈ toList v ↔ ∃ i, v i = a :=
+  by induction n <;> simp[*]; constructor; { rintro (rfl | ⟨i, rfl⟩) <;> simp }; { rintro ⟨i, rfl⟩; cases i using Fin.cases <;> simp }
 
 def toOptionVec : {n : ℕ} → (Fin n → Option α) → Option (Fin n → α)
   | 0,     _ => some vecEmpty
