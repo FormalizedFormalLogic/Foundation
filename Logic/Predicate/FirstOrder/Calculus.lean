@@ -11,6 +11,8 @@ variable {L : Language.{u}} [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq 
 def shifts (Δ : Finset (SyntacticSubFormula L n)) :
   Finset (SyntacticSubFormula L n) := Δ.map shiftEmb
 
+lemma shifts_eq_image (Δ : Finset (SyntacticSubFormula L n)) : shifts Δ = Δ.image shift := Finset.map_eq_image _ _
+
 @[simp] lemma mem_shifts_iff (p : SyntacticSubFormula L n) (Δ : Finset (SyntacticSubFormula L n)) :
     shift p ∈ shifts Δ ↔ p ∈ Δ :=
   Finset.mem_map' _
@@ -275,6 +277,47 @@ def onDerivation (Φ : L₁ →ᵥ L₂) : ∀ {Δ : Finset (SyntacticFormula L�
       this.cast (by simp)
 
 end Hom
+
+private lemma free_bind₀_eq (f : ℕ → SyntacticTerm L) (p : SyntacticSubFormula L 1) :
+    free (bind₀ (fun x => SubTerm.bShift (f x)) p) = bind₀ (&0 :>ₙ fun x => SubTerm.shift (f x)) (free p) := by
+  simp[free, bind_bind, Matrix.vecConsLast_vecEmpty]; congr; funext x
+  simp[SubTerm.free, SubTerm.bShift, SubTerm.shift, SubTerm.map, SubTerm.bind_bind, eq_finZeroElim]
+
+private lemma shift_bind₀_eq (f : ℕ → SyntacticTerm L) (p : SyntacticFormula L) :
+    shift (bind₀ f p) = bind₀ (&0 :>ₙ fun x => SubTerm.shift (f x)) (shift p) := by
+  simp[shift, map, bind₀, bind_bind]; congr
+
+private lemma bind₀_subst_eq (f : ℕ → SyntacticTerm L) (t) (p : SyntacticSubFormula L 1) :
+    bind₀ f (subst t p) = subst (t.bind SubTerm.bvar f) (bind₀ (SubTerm.bShift ∘ f) p) := by
+  simp[subst, bind_bind, Fin.eq_zero, SubTerm.bShift, SubTerm.map, SubTerm.bind_bind, eq_finZeroElim]; congr
+
+def onBind : ∀ {Δ : Finset (SyntacticFormula L)}, ⊩ Δ → ∀ (f : ℕ → SyntacticTerm L), ⊩ Δ.image (bind₀ f)
+  | _, AxL Δ r v hrel hnrel, f => AxL _ r (fun i => (v i).bind SubTerm.bvar f) (Finset.mem_image_of_mem _ hrel) (Finset.mem_image_of_mem _ hnrel)
+  | _, verum Δ h,            _ => verum _ (Finset.mem_image_of_mem _ h)
+  | _, orLeft Δ p q d,       f =>
+    have : ⊩ insert (bind₀ f p ⋎ bind₀ f q) (Δ.image (bind₀ f)) := orLeft _ _ _ ((onBind d f).cast (by simp))
+    this.cast (by simp)
+  | _, orRight Δ p q d,      f =>
+    have : ⊩ insert (bind₀ f p ⋎ bind₀ f q) (Δ.image (bind₀ f)) := orRight _ _ _ ((onBind d f).cast (by simp))
+    this.cast (by simp)
+  | _, and Δ p q dp dq,      f =>
+    have : ⊩ insert (bind₀ f p ⋏ bind₀ f q) (Δ.image (bind₀ f)) := and _ _ _ ((onBind dp f).cast (by simp)) ((onBind dq f).cast (by simp))
+    this.cast (by simp)
+  | _, all Δ p d,            f =>
+    have : ⊩ (insert (free p) (shifts Δ)).image (bind₀ (&0 :>ₙ fun x => SubTerm.shift (f x))).toFun := onBind d (&0 :>ₙ fun x => (f x).shift)
+    have : ⊩ insert (∀' (bind₀ (SubTerm.bShift ∘ f)) p) (Δ.image (bind₀ f).toFun) :=
+      all _ _ (by simpa[free_bind₀_eq, shift_bind₀_eq, shifts_eq_image, Finset.image_image, Function.comp] using this)
+    this.cast (by simp)
+  | _, ex Δ t p d,           f =>
+    have : ⊩ (insert (subst t p) Δ).image (bind₀ f) := onBind d f 
+    have : ⊩ insert (∃' bind₀ (SubTerm.bShift ∘ f) p) (Δ.image (bind₀ f)) := 
+      ex _ (SubTerm.bind SubTerm.bvar f t) _ (by simpa[bind₀_subst_eq] using this) 
+    this.cast (by simp)
+
+lemma efue (p : SyntacticSubFormula L 1) : map₀ (fun x => if x = m then 0 else x + 1) (subst &m p) = free p := by
+  simp[free, subst, map₀, map, bind_bind]
+
+/--/
 
 variable [∀ k, Encodable (L.func k)] {μ : Type _} [Encodable μ]
 
