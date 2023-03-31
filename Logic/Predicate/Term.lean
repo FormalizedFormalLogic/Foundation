@@ -232,8 +232,18 @@ abbrev fvar? (t : SubTerm L μ n) (x : μ) : Prop := x ∈ t.fvarList
 
 @[simp] lemma fvarList_fvar : fvarList (&x : SubTerm L μ n) = [x] := rfl
 
-@[simp] lemma mem_fvarList_func {k} {f : L.func k} {v : Fin k → SubTerm L μ n} : x ∈ (func f v).fvarList ↔ ∃ i, x ∈ (v i).fvarList :=
+@[simp] lemma mem_fvarList_func {k} {f : L.func k} {v : Fin k → SubTerm L μ n} :
+    x ∈ (func f v).fvarList ↔ ∃ i, x ∈ (v i).fvarList :=
   by simp[fvarList]
+
+lemma bind_eq_of_funEqOn (bound : Fin n₁ → SubTerm L μ₂ n₂) (free₁ free₂ : μ₁ → SubTerm L μ₂ n₂) (t : SubTerm L μ₁ n₁)
+  (h : Function.funEqOn t.fvar? free₁ free₂) :
+    t.bind bound free₁ = t.bind bound free₂ := by
+  induction t <;> simp[bind_func]
+  case fvar => simpa[fvar?, Function.funEqOn] using h
+  case func k f v ih =>
+    funext i
+    exact ih i (h.of_subset $ by simp[fvar?]; intro x hx; exact ⟨i, hx⟩)
 
 variable [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq (L.rel k)]
 

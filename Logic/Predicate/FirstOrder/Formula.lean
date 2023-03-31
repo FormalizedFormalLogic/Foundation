@@ -482,6 +482,8 @@ def formulaRec {C : SyntacticFormula L → Sort _}
   | ∃' p     => hex p (formulaRec hverum hfalsum hrel hnrel hand hor hall hex (free p))
   termination_by formulaRec _ _ _ _ _ _ _ _ p => p.complexity
 
+end Syntactic
+
 def fvarList : {n : ℕ} → SubFormula L μ n → List μ
   | _, ⊤        => []
   | _, ⊥        => []
@@ -494,7 +496,30 @@ def fvarList : {n : ℕ} → SubFormula L μ n → List μ
 
 abbrev fvar? (p : SubFormula L μ n) (x : μ) : Prop := x ∈ p.fvarList
 
-end Syntactic
+lemma bind_eq_of_funEqOn (bound : Fin n₁ → SubTerm L μ₂ n₂) (free₁ free₂ : μ₁ → SubTerm L μ₂ n₂) (p : SubFormula L μ₁ n₁)
+  (h : Function.funEqOn (fvar? p) free₁ free₂) :
+    bind bound free₁ p = bind bound free₂ p := by
+  induction p using rec' generalizing n₂ <;> simp[*, bind_rel, bind_nrel] <;> simp[fvar?, fvarList] at h
+  case hrel =>
+    funext i
+    exact SubTerm.bind_eq_of_funEqOn _ _ _ _ (h.of_subset (by simp[fvarList]; intro x hx; exact ⟨i, hx⟩))
+  case hnrel =>
+    funext i
+    exact SubTerm.bind_eq_of_funEqOn _ _ _ _ (h.of_subset (by simp[fvarList]; intro x hx; exact ⟨i, hx⟩))
+  case hand ihp ihq =>
+    exact ⟨ihp _ _ _ (h.of_subset (fun x hx => Or.inl hx)), ihq _ _ _ (h.of_subset (fun x hx => Or.inr hx))⟩
+  case hor ihp ihq =>
+    exact ⟨ihp _ _ _ (h.of_subset (fun x hx => Or.inl hx)), ihq _ _ _ (h.of_subset (fun x hx => Or.inr hx))⟩
+  case hall ih =>
+    exact ih _ _ _ (by intro x hx; simp[h x hx])
+  case hex ih =>
+    exact ih _ _ _ (by intro x hx; simp[h x hx])
+
+lemma bind_eq_of_funEqOn' {bound₁ bound₂ : Fin n → SubTerm L μ n} {free₁ free₂ : μ → SubTerm L μ n} (p : SubFormula L μ n)
+  (hbound : bound₁ = bound₂)
+  (hfree : Function.funEqOn (fvar? p) free₁ free₂) :
+    bind bound₁ free₁ p = bind bound₂ free₂ p := by
+  rw[hbound]; exact bind_eq_of_funEqOn _ _ _ _ hfree
 
 lemma ne_of_ne_complexity {p q : SubFormula L μ n} (h : p.complexity ≠ q.complexity) : p ≠ q :=
   by rintro rfl; contradiction
@@ -535,7 +560,7 @@ macro_rules
   | `(“ $p:subformula ∨ $q:subformula ”)              => `(“$p” ⋎ “$q”)
   | `(“ ∀ $p:subformula ”)                            => `(∀' “$p”)
   | `(“ ∃ $p:subformula ”)                            => `(∃' “$p”)
-  | `(“ ∀* $p:subformula ”)                            => `(univClosure “$p”)
+  | `(“ ∀* $p:subformula ”)                           => `(univClosure “$p”)
   | `(“ ( $x ) ”)                                     => `(“$x”)
 
 #check (“¬ prop (Language.toRelational 1)” : Formula (Language.relational (fun _ => ℕ)) ℕ)

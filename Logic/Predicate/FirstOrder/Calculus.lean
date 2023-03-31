@@ -25,7 +25,7 @@ lemma shifts_insert (p : SyntacticSubFormula L n) (Δ : Finset (SyntacticSubForm
   by simp[shifts, shiftEmb_eq_shift]
 
 inductive Derivation : Finset (SyntacticFormula L) → Type _
-| AxL     : ∀ (Δ : Finset (SyntacticFormula L)) {k} (r : L.rel k) (v : Fin k → SyntacticTerm L),
+| axL     : ∀ (Δ : Finset (SyntacticFormula L)) {k} (r : L.rel k) (v : Fin k → SyntacticTerm L),
     rel r v ∈ Δ → nrel r v ∈ Δ → Derivation Δ
 | verum   : ∀ (Δ : Finset (SyntacticFormula L)), ⊤ ∈ Δ → Derivation Δ
 | orLeft  : ∀ (Δ : Finset (SyntacticFormula L)) (p q : SyntacticFormula L),
@@ -59,9 +59,9 @@ section Repr
 variable [∀ k, ToString (L.func k)] [∀ k, ToString (L.rel k)]
 
 protected unsafe def repr : {Δ : Finset (SyntacticFormula L)} → Derivation Δ → String
-  | _, AxL Δ _ _ _ _   =>
+  | _, axL Δ _ _ _ _   =>
       "\\AxiomC{}\n" ++
-      "\\RightLabel{\\scriptsize(AxL)}\n" ++
+      "\\RightLabel{\\scriptsize(axL)}\n" ++
       "\\UnaryInfC{$" ++ reprStr Δ ++ "$}\n\n"
   | _, verum Δ _       =>
       "\\AxiomC{}\n" ++
@@ -93,9 +93,9 @@ unsafe instance : Repr (⊩ Δ) where
   reprPrec d _ := d.repr
 
 protected def toStr : {Δ : Finset (SyntacticFormula L)} → Derivation Δ → String
-  | _, AxL _ r v _ _   =>
+  | _, axL _ r v _ _   =>
       "\\AxiomC{}\n" ++
-      "\\RightLabel{\\scriptsize(AxL)}\n" ++
+      "\\RightLabel{\\scriptsize(axL)}\n" ++
       "\\UnaryInfC{$" ++ toString (rel r v) ++ "," ++ toString (nrel r v) ++ ", ... $}\n\n"
   | _, verum _ _       =>
       "\\AxiomC{}\n" ++
@@ -124,9 +124,9 @@ protected def toStr : {Δ : Finset (SyntacticFormula L)} → Derivation Δ → S
       "\\UnaryInfC{$" ++ toString (∃' p) ++ ", ... $}\n\n"
 
 protected def toStrCompact : {Δ : Finset (SyntacticFormula L)} → Derivation Δ → String
-  | _, AxL _ _ _ _ _   =>
+  | _, axL _ _ _ _ _   =>
       "\\AxiomC{}\n" ++
-      "\\RightLabel{\\scriptsize(AxL)}\n" ++
+      "\\RightLabel{\\scriptsize(axL)}\n" ++
       "\\UnaryInfC{}\n\n"
   | _, verum _ _       =>
       "\\AxiomC{}\n" ++
@@ -161,7 +161,7 @@ end Repr
 protected def cast (d : Derivation Δ) (e : Δ = Γ) : ⊩ Γ := cast (by simp[HasVdash.vdash, e]) d
 
 def weakening : ∀ {Δ}, ⊩ Δ → ∀ {Γ : Finset (SyntacticFormula L)}, Δ ⊆ Γ → ⊩ Γ
-  | _, AxL Δ r v hrel hnrel, Γ, h => AxL Γ r v (h hrel) (h hnrel)
+  | _, axL Δ r v hrel hnrel, Γ, h => axL Γ r v (h hrel) (h hnrel)
   | _, verum Δ htop,         Γ, h => verum Γ (h htop)
   | _, orLeft Δ p q d,       Γ, h =>
       have : ⊩ insert p Γ := weakening d (Finset.insert_subset_insert p (Finset.insert_subset.mp h).2)
@@ -218,8 +218,8 @@ def em {p : SyntacticFormula L} {Δ : Finset (SyntacticFormula L)} (hpos : p ∈
   induction p using SubFormula.formulaRec generalizing Δ
   case hverum    => exact verum Δ hpos
   case hfalsum   => exact verum Δ hneg
-  case hrel r v  => exact AxL Δ r v hpos hneg 
-  case hnrel r v => exact AxL Δ r v hneg hpos 
+  case hrel r v  => exact axL Δ r v hpos hneg 
+  case hnrel r v => exact axL Δ r v hneg hpos 
   case hall p ih =>
     exact all' hpos $ ex' (p := ~ shift p) &0
       (by simp; exact Or.inr (by simp[shifts, shiftEmb_eq_shift]; exact ⟨_, hneg, by simp⟩))
@@ -251,8 +251,8 @@ lemma shifts_image (Φ : L₁ →ᵥ L₂) {Δ : Finset (SyntacticFormula L₁)}
   by simp[shifts, shiftEmb, Finset.map_eq_image, Finset.image_image, Function.comp, SubFormula.onSubFormula₁_shift]
 
 def onDerivation (Φ : L₁ →ᵥ L₂) : ∀ {Δ : Finset (SyntacticFormula L₁)}, ⊩ Δ → ⊩ Finset.image Φ.onSubFormula₁ Δ
-  | _, AxL Δ r v hrel hnrel =>
-      AxL _ (Φ.onRel r) (fun i => Φ.onSubTerm (v i))
+  | _, axL Δ r v hrel hnrel =>
+      axL _ (Φ.onRel r) (fun i => Φ.onSubTerm (v i))
         (Finset.mem_image_of_mem _ hrel) (Finset.mem_image_of_mem _ hnrel)
   | _, verum Δ h            => verum _ (by simpa using Finset.mem_image_of_mem Φ.onSubFormula₁ h)
   | _, orLeft Δ p q d       =>
@@ -292,7 +292,7 @@ private lemma bind₀_subst_eq (f : ℕ → SyntacticTerm L) (t) (p : SyntacticS
   simp[subst, bind_bind, Fin.eq_zero, SubTerm.bShift, SubTerm.map, SubTerm.bind_bind, eq_finZeroElim]; congr
 
 def onBind : ∀ {Δ : Finset (SyntacticFormula L)}, ⊩ Δ → ∀ (f : ℕ → SyntacticTerm L), ⊩ Δ.image (bind₀ f)
-  | _, AxL Δ r v hrel hnrel, f => AxL _ r (fun i => (v i).bind SubTerm.bvar f) (Finset.mem_image_of_mem _ hrel) (Finset.mem_image_of_mem _ hnrel)
+  | _, axL Δ r v hrel hnrel, f => axL _ r (fun i => (v i).bind SubTerm.bvar f) (Finset.mem_image_of_mem _ hrel) (Finset.mem_image_of_mem _ hnrel)
   | _, verum Δ h,            _ => verum _ (Finset.mem_image_of_mem _ h)
   | _, orLeft Δ p q d,       f =>
     have : ⊩ insert (bind₀ f p ⋎ bind₀ f q) (Δ.image (bind₀ f)) := orLeft _ _ _ ((onBind d f).cast (by simp))
@@ -314,10 +314,25 @@ def onBind : ∀ {Δ : Finset (SyntacticFormula L)}, ⊩ Δ → ∀ (f : ℕ →
       ex _ (SubTerm.bind SubTerm.bvar f t) _ (by simpa[bind₀_subst_eq] using this) 
     this.cast (by simp)
 
-lemma efue (p : SyntacticSubFormula L 1) : map₀ (fun x => if x = m then 0 else x + 1) (subst &m p) = free p := by
-  simp[free, subst, map₀, map, bind_bind]
+def onMap {Δ : Finset (SyntacticFormula L)} (d : ⊩ Δ) (f : ℕ → ℕ) : ⊩ Δ.image (map₀ f) := onBind d _
 
-/--/
+private lemma map_subst_eq_free (p : SyntacticSubFormula L 1) (h : ¬p.fvar? m) :
+    map₀ (fun x => if x = m then 0 else x + 1) (subst &m p) = free p := by
+  simp[free, subst, map₀, map, bind_bind, Fin.eq_zero, Matrix.vecConsLast_vecEmpty, Matrix.constant_eq_singleton]
+  exact bind_eq_of_funEqOn _ _ _ _ (by intro x hx; simp; rintro rfl; contradiction)
+
+private lemma image_map₀_eq_shifts (Δ : Finset $ SyntacticFormula L) (h : ∀ p ∈ Δ, ¬p.fvar? m) :
+    Δ.image (map₀ (fun x => if x = m then 0 else x + 1)) = shifts Δ := by 
+  simp[shifts_eq_image]; apply Finset.image_congr
+  simp[Set.EqOn]; intro p hp;
+  simp[shift, map₀, map]
+  exact bind_eq_of_funEqOn _ _ _ _ (by intro x hx; simp; rintro rfl; have := h p hp; contradiction)
+
+def genelalizeByNewver {p : SyntacticSubFormula L 1} (hp : ¬p.fvar? m) (hΔ : ∀ q ∈ Δ, ¬q.fvar? m)
+  (d : ⊩ insert (subst &m p) Δ) : ⊩ insert (∀' p) Δ := by
+  have : ⊩ insert (free p) (shifts Δ) := by
+    simpa[map_subst_eq_free p hp, image_map₀_eq_shifts Δ hΔ] using onMap d (fun x => if x = m then 0 else x + 1)
+  exact all Δ p this
 
 variable [∀ k, Encodable (L.func k)] {μ : Type _} [Encodable μ]
 

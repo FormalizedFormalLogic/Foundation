@@ -101,6 +101,8 @@ lemma vecConsLast_vecEmpty {s : Fin 0 → α} (a : α) : s <: a = ![a] :=
     cases' x using Fin.cases with i <;> simp[this]
     have := i.isLt; contradiction )
 
+lemma constant_eq_singleton {a : α} : (fun _ => a) = ![a] := by funext x; simp
+
 lemma injective_vecCons {f : Fin n → α} (h : Function.Injective f) {a} (ha : ∀ i, a ≠ f i) : Function.Injective (a :> f) := by
   have : ∀ i, f i ≠ a := fun i => (ha i).symm
   intro i j; cases i using Fin.cases <;> cases j using Fin.cases <;> simp[*]
@@ -235,8 +237,18 @@ lemma subset_image_iff (f : α → β) {s : Set α} {t : Set β} :
         { intros hb; rcases h hb with ⟨a, ha, rfl⟩; exact ⟨a, ⟨ha, hb⟩, rfl⟩ } },
    by { rintro ⟨u, hu, rfl⟩; intros b; simp; rintro a ha rfl; exact ⟨a, hu ha, rfl⟩ }⟩
 
-
 end Set
+
+namespace Function
+
+variable  {α : Type u} {β : Type v}
+
+def funEqOn (p : α → Prop) (f g : α → β) : Prop := ∀ a, p a → f a = g a
+
+lemma funEqOn.of_subset {p q : α → Prop} {f g : α → β} (e : funEqOn p f g) (h : ∀ a, q a → p a) : funEqOn q f g :=
+  by intro a ha; exact e a (h a ha)
+
+end Function
 
 namespace Quotient
 open Matrix

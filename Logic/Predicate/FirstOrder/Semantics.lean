@@ -279,7 +279,7 @@ variable {L : Language.{u}} [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq 
 
 lemma Derivation.sound : ∀ {Γ : Finset (SyntacticFormula L)},
     ⊩ Γ → ∀ (M : Type u) [s : Structure L M] (ε : ℕ → M), ∃ p ∈ Γ, SubFormula.Val! M ε p
-  | _, AxL Δ r v hrel hnrel, M, s, ε => by
+  | _, axL Δ r v hrel hnrel, M, s, ε => by
     by_cases h : s.rel r (SubTerm.val! M ![] ε ∘ v)
     · exact ⟨SubFormula.rel r v, hrel, h⟩
     · exact ⟨SubFormula.nrel r v, hnrel, h⟩
