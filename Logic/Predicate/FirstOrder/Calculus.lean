@@ -5,6 +5,8 @@ universe u v
 
 namespace FirstOrder
 
+abbrev Sequent (L : Language.{u}) := Finset (SyntacticFormula L)
+
 open SubFormula
 variable {L : Language.{u}} [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq (L.rel k)]
 
@@ -24,22 +26,22 @@ lemma shifts_insert (p : SyntacticSubFormula L n) (Δ : Finset (SyntacticSubForm
     shifts (insert p Δ) = insert (shift p) (shifts Δ) :=
   by simp[shifts, shiftEmb_eq_shift]
 
-inductive Derivation : Finset (SyntacticFormula L) → Type _
-| axL     : ∀ (Δ : Finset (SyntacticFormula L)) {k} (r : L.rel k) (v : Fin k → SyntacticTerm L),
+inductive Derivation : Sequent L → Type _
+| axL     : ∀ (Δ : Sequent L) {k} (r : L.rel k) (v : Fin k → SyntacticTerm L),
     rel r v ∈ Δ → nrel r v ∈ Δ → Derivation Δ
-| verum   : ∀ (Δ : Finset (SyntacticFormula L)), ⊤ ∈ Δ → Derivation Δ
-| orLeft  : ∀ (Δ : Finset (SyntacticFormula L)) (p q : SyntacticFormula L),
+| verum   : ∀ (Δ : Sequent L), ⊤ ∈ Δ → Derivation Δ
+| orLeft  : ∀ (Δ : Sequent L) (p q : SyntacticFormula L),
     Derivation (insert p Δ) → Derivation (insert (p ⋎ q) Δ)
-| orRight : ∀ (Δ : Finset (SyntacticFormula L)) (p q : SyntacticFormula L),
+| orRight : ∀ (Δ : Sequent L) (p q : SyntacticFormula L),
     Derivation (insert q Δ) → Derivation (insert (p ⋎ q) Δ)
-| and     : ∀ (Δ : Finset (SyntacticFormula L)) (p q : SyntacticFormula L),
+| and     : ∀ (Δ : Sequent L) (p q : SyntacticFormula L),
     Derivation (insert p Δ) → Derivation (insert q Δ) → Derivation (insert (p ⋏ q) Δ)
-| all     : ∀ (Δ : Finset (SyntacticFormula L)) (p : SyntacticSubFormula L 1),
+| all     : ∀ (Δ : Sequent L) (p : SyntacticSubFormula L 1),
     Derivation (insert (free p) (shifts Δ)) → Derivation (insert (∀' p) Δ)
-| ex      : ∀ (Δ : Finset (SyntacticFormula L)) (t : SyntacticTerm L) (p : SyntacticSubFormula L 1),
+| ex      : ∀ (Δ : Sequent L) (t : SyntacticTerm L) (p : SyntacticSubFormula L 1),
     Derivation (insert (subst t p) Δ) → Derivation (insert (∃' p) Δ)
 
-instance : HasVdash (Finset (SyntacticFormula L)) (Type u) := ⟨Derivation⟩
+instance : HasVdash (Sequent L) (Type u) := ⟨Derivation⟩
 
 abbrev DerivationList (G : List (SyntacticFormula L)) := ⊩ G.toFinset
 
@@ -48,17 +50,17 @@ abbrev Derivation.Valid (p : SyntacticFormula L) := ⊩ ({p} : Finset _)
 structure Proof (T : CTheory L) (σ : Sentence L) where
   leftHand : Finset (Sentence L)
   hleftHand : ↑leftHand ⊆ SubFormula.neg '' T
-  derivation : ⊩ ((insert σ leftHand).image emb : Finset (SyntacticFormula L))
+  derivation : ⊩ ((insert σ leftHand).image emb : Sequent L)
 
 instance : HasTurnstile (Sentence L) (Type u) := ⟨Proof⟩
 
 namespace Derivation
-variable {Δ Γ : Finset (SyntacticFormula L)}
+variable {Δ Γ : Sequent L}
 
 section Repr
 variable [∀ k, ToString (L.func k)] [∀ k, ToString (L.rel k)]
 
-protected unsafe def repr : {Δ : Finset (SyntacticFormula L)} → Derivation Δ → String
+protected unsafe def repr : {Δ : Sequent L} → Derivation Δ → String
   | _, axL Δ _ _ _ _   =>
       "\\AxiomC{}\n" ++
       "\\RightLabel{\\scriptsize(axL)}\n" ++
@@ -92,7 +94,7 @@ protected unsafe def repr : {Δ : Finset (SyntacticFormula L)} → Derivation Δ
 unsafe instance : Repr (⊩ Δ) where
   reprPrec d _ := d.repr
 
-protected def toStr : {Δ : Finset (SyntacticFormula L)} → Derivation Δ → String
+protected def toStr : {Δ : Sequent L} → Derivation Δ → String
   | _, axL _ r v _ _   =>
       "\\AxiomC{}\n" ++
       "\\RightLabel{\\scriptsize(axL)}\n" ++
@@ -123,7 +125,7 @@ protected def toStr : {Δ : Finset (SyntacticFormula L)} → Derivation Δ → S
       "\\RightLabel{\\scriptsize($\\exists$)}\n" ++
       "\\UnaryInfC{$" ++ toString (∃' p) ++ ", ... $}\n\n"
 
-protected def toStrCompact : {Δ : Finset (SyntacticFormula L)} → Derivation Δ → String
+protected def toStrCompact : {Δ : Sequent L} → Derivation Δ → String
   | _, axL _ _ _ _ _   =>
       "\\AxiomC{}\n" ++
       "\\RightLabel{\\scriptsize(axL)}\n" ++
@@ -160,7 +162,7 @@ end Repr
 
 protected def cast (d : Derivation Δ) (e : Δ = Γ) : ⊩ Γ := cast (by simp[HasVdash.vdash, e]) d
 
-def weakening : ∀ {Δ}, ⊩ Δ → ∀ {Γ : Finset (SyntacticFormula L)}, Δ ⊆ Γ → ⊩ Γ
+def weakening : ∀ {Δ}, ⊩ Δ → ∀ {Γ : Sequent L}, Δ ⊆ Γ → ⊩ Γ
   | _, axL Δ r v hrel hnrel, Γ, h => axL Γ r v (h hrel) (h hnrel)
   | _, verum Δ htop,         Γ, h => verum Γ (h htop)
   | _, orLeft Δ p q d,       Γ, h =>
@@ -214,7 +216,7 @@ def ex' {p : SyntacticSubFormula L 1} (t : SyntacticTerm L) (h : ∃' p ∈ Δ)
 @[simp] lemma ne_step_max' (n m : ℕ) : n ≠ max m n + 1 :=
   ne_of_lt $ Nat.lt_succ_of_le $ by simp
 
-def em {p : SyntacticFormula L} {Δ : Finset (SyntacticFormula L)} (hpos : p ∈ Δ) (hneg : ~p ∈ Δ) : ⊩ Δ := by
+def em {p : SyntacticFormula L} {Δ : Sequent L} (hpos : p ∈ Δ) (hneg : ~p ∈ Δ) : ⊩ Δ := by
   induction p using SubFormula.formulaRec generalizing Δ
   case hverum    => exact verum Δ hpos
   case hfalsum   => exact verum Δ hneg
@@ -291,7 +293,7 @@ private lemma bind₀_subst_eq (f : ℕ → SyntacticTerm L) (t) (p : SyntacticS
     bind₀ f (subst t p) = subst (t.bind SubTerm.bvar f) (bind₀ (SubTerm.bShift ∘ f) p) := by
   simp[subst, bind_bind, Fin.eq_zero, SubTerm.bShift, SubTerm.map, SubTerm.bind_bind, eq_finZeroElim]; congr
 
-def onBind : ∀ {Δ : Finset (SyntacticFormula L)}, ⊩ Δ → ∀ (f : ℕ → SyntacticTerm L), ⊩ Δ.image (bind₀ f)
+def onBind : ∀ {Δ : Sequent L}, ⊩ Δ → ∀ (f : ℕ → SyntacticTerm L), ⊩ Δ.image (bind₀ f)
   | _, axL Δ r v hrel hnrel, f => axL _ r (fun i => (v i).bind SubTerm.bvar f) (Finset.mem_image_of_mem _ hrel) (Finset.mem_image_of_mem _ hnrel)
   | _, verum Δ h,            _ => verum _ (Finset.mem_image_of_mem _ h)
   | _, orLeft Δ p q d,       f =>
@@ -314,7 +316,7 @@ def onBind : ∀ {Δ : Finset (SyntacticFormula L)}, ⊩ Δ → ∀ (f : ℕ →
       ex _ (SubTerm.bind SubTerm.bvar f t) _ (by simpa[bind₀_subst_eq] using this) 
     this.cast (by simp)
 
-def onMap {Δ : Finset (SyntacticFormula L)} (d : ⊩ Δ) (f : ℕ → ℕ) : ⊩ Δ.image (map₀ f) := onBind d _
+def onMap {Δ : Sequent L} (d : ⊩ Δ) (f : ℕ → ℕ) : ⊩ Δ.image (map₀ f) := onBind d _
 
 private lemma map_subst_eq_free (p : SyntacticSubFormula L 1) (h : ¬p.fvar? m) :
     map₀ (fun x => if x = m then 0 else x + 1) (subst &m p) = free p := by

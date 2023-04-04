@@ -287,6 +287,29 @@ lemma liftVec_mk {n} (f : (Fin n → α) → β) (h) (v : Fin n → α) :
 
 end Quotient
 
+namespace List
+
+def upper : List ℕ → ℕ
+  | []      => 0
+  | n :: ns => max (n + 1) ns.upper
+
+@[simp] lemma upper_nil : upper [] = 0 := rfl
+
+@[simp] lemma upper_cons (n : ℕ) (ns : List ℕ) : upper (n :: ns) = max (n + 1) ns.upper := rfl
+
+lemma lt_upper (l : List ℕ) {n} (h : n ∈ l) : n < l.upper := by
+  induction' l with n ns ih <;> simp at h ⊢
+  case cons =>
+    rcases h with (rfl | h) <;> simp
+    exact Or.inr (ih h)
+
+variable {α : Type u} [DecidableEq α] {β: Type v} [DecidableEq β]
+
+lemma toFinset_map {f : α → β} (l : List α) : (l.map f).toFinset = Finset.image f l.toFinset := by
+  induction l <;> simp[*]
+
+end List
+
 class Class (F : Type u → Type v) (α : Type u) where
   out : F α
 

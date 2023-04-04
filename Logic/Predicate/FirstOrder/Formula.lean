@@ -515,6 +515,20 @@ lemma bind_eq_of_funEqOn (bound : Fin n₁ → SubTerm L μ₂ n₂) (free₁ fr
   case hex ih =>
     exact ih _ _ _ (by intro x hx; simp[h x hx])
 
+def upper (p : SyntacticSubFormula L n) : ℕ := Finset.sup p.fvarList.toFinset id + 1
+
+example (n : ℕ) : ¬n < n := irrefl_of _ _
+
+lemma not_fvar?_of_lt_upper (p : SyntacticSubFormula L n) (h : p.upper ≤ m) : ¬fvar? p m := by
+  simp[upper, Nat.add_one_le_iff, fvar?] at h ⊢
+  intro hm
+  have : m ≤ Finset.sup p.fvarList.toFinset id :=
+    Finset.le_sup (s := p.fvarList.toFinset) (b := m) (f := id) (by simpa using hm)
+  exact irrefl_of _ _ $ lt_of_lt_of_le h this
+
+@[simp] lemma not_fvar?_upper (p : SyntacticSubFormula L n) : ¬fvar? p p.upper :=
+  not_fvar?_of_lt_upper p (by simp)
+
 lemma bind_eq_of_funEqOn' {bound₁ bound₂ : Fin n → SubTerm L μ n} {free₁ free₂ : μ → SubTerm L μ n} (p : SubFormula L μ n)
   (hbound : bound₁ = bound₂)
   (hfree : Function.funEqOn (fvar? p) free₁ free₂) :
