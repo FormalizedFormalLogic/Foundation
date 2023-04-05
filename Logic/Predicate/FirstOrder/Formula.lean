@@ -358,6 +358,10 @@ lemma subst_nrel {s : SubTerm L μ n} {k} (r : L.rel k) (v : Fin k → SubTerm L
   cases' i using Fin.cases with i <;> simp
   cases' i using Fin.lastCases with i <;> simp[Fin.succ_castSucc]
 
+@[simp] lemma complexity_subst (t) (p : SyntacticSubFormula L (n + 1)) :
+    complexity (subst t p) = complexity p :=
+  by simp[subst]
+
 lemma emb_rel {k} (r : L.rel k) (v : Fin k → SubTerm L Empty n) :
     emb (μ := μ) (rel r v) = rel r (fun i => SubTerm.map id Empty.elim (v i)) :=
   by simp[emb, map_rel]

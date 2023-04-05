@@ -25,10 +25,3 @@ lemma isInfiniteDescendingChain_of_non_acc (z : α) (hz : ¬Acc r z) :
       exact Classical.epsilon_spec this
   intro i; simpa using (this (i + 1)).1
 
-theorem has_infiniteDescendingChain_of_not_wellFounded (h : ¬WellFounded r) : ∃ c, IsInfiniteDescendingChain r c := by
-  have : ∃ z, ¬Acc r z := by
-    suffices : ¬∀ z, Acc r z; exact not_forall.mp this
-    intros h; have : WellFounded r := ⟨h⟩; contradiction
-  rcases this with ⟨z, hz⟩
-  exact ⟨descendingChain r z, isInfiniteDescendingChain_of_non_acc r z hz⟩
-

@@ -77,10 +77,10 @@ lemma bind_bind
     (t.bind bound₁ free₁).bind bound₂ free₂ = t.bind (fun n => (bound₁ n).bind bound₂ free₂) (fun m => (free₁ m).bind bound₂ free₂) :=
   by induction t <;> simp[*, bind_func]
 
-@[simp] lemma bind_id (t) : @bind L μ μ n n bvar fvar t = t :=
+@[simp] lemma bind_id (t) : bind (L := L) (μ₁ := μ) (n₁ := n) bvar fvar t = t :=
   by induction t <;> simp[*, bind_func]
 
-@[simp] lemma bind_id₀ (t) : @bind L μ μ 0 0 finZeroElim fvar t = t :=
+@[simp] lemma bind_id_zero (f : Fin 0 → SubTerm L μ 0) (t) : bind (L := L) (μ₁ := μ) (n₁ := 0) f fvar t = t :=
   by simpa[eq_finZeroElim] using bind_id t
 
 lemma bind_id_of_eq (hbound : ∀ x, bound x = #x) (hfree : ∀ x, free x = &x) (t) : @bind L μ μ n n bound free t = t :=

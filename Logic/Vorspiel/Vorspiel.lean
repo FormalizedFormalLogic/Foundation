@@ -309,15 +309,3 @@ lemma toFinset_map {f : α → β} (l : List α) : (l.map f).toFinset = Finset.i
   induction l <;> simp[*]
 
 end List
-
-class Class (F : Type u → Type v) (α : Type u) where
-  out : F α
-
-namespace Class
-variable {F : Type u → Type v} {α : Type u}
-
-@[simp] lemma out_mk (x : F α) : out (self := Class.mk x) = x := rfl
-
-@[simp] lemma mk_out [x : Class F α] : Class.mk out = x := rfl
-
-end Class
