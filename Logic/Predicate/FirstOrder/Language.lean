@@ -77,6 +77,10 @@ lemma onSubFormula₁_free (p : SyntacticSubFormula L₁ (n + 1)) : Φ.onSubForm
 lemma onSubFormula₁_fix (p : SyntacticSubFormula L₁ n) : Φ.onSubFormula₁ (fix p) = fix (Φ.onSubFormula₁ p) :=
   by simp[fix, onSubFormula₁_bind]; congr; funext x; cases x <;> simp
 
+lemma onSubFormula₁_emb (p : SubFormula L₁ Empty n) :
+    (Φ.onSubFormula₁ (emb p) : SubFormula L₂ μ n) = emb (Φ.onSubFormula₁ p) :=
+  by simp[emb, onSubFormula₁_map]
+
 end SubFormula
 
 variable {L : Language} [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq (L.rel k)]
@@ -128,7 +132,7 @@ def toSubLanguage' (pf : ∀ k, L.func k → Prop) (pr : ∀ k, L.rel k → Prop
   | _, ∀' p,     hf, hr => ∀' toSubLanguage' pf pr p (fun k f h => hf k f h) (fun k r h => hr k r h)
   | _, ∃' p,     hf, hr => ∃' toSubLanguage' pf pr p (fun k f h => hf k f h) (fun k r h => hr k r h)
 
-@[simp] lemma onSubFormula_toSubLanguage'
+lemma ofSubFormula_toSubLanguage'
   (pf : ∀ k, L.func k → Prop) (pr : ∀ k, L.rel k → Prop) {n} (p : SubFormula L μ n)
   (hf : ∀ k f, ⟨k, f⟩ ∈ p.languageFunc → pf k f) (hr : ∀ k r, ⟨k, r⟩ ∈ p.languageRel → pr k r) :
     L.ofSubLanguage.onSubFormula₁ (p.toSubLanguage' pf pr hf hr) = p := by
@@ -141,11 +145,23 @@ noncomputable def languageFuncIndexed (p : SubFormula L μ n) (k) : Finset (L.fu
 noncomputable def languageRelIndexed (p : SubFormula L μ n) (k) : Finset (L.rel k) :=
   Finset.preimage (languageRel p) (Sigma.mk k) (Set.injOn_of_injective sigma_mk_injective _)
 
-def language (p : SubFormula L μ n) : Language :=
+abbrev language (p : SubFormula L μ n) : Language :=
   Language.subLanguage L (fun k f => ⟨k, f⟩ ∈ languageFunc p) (fun k r => ⟨k, r⟩ ∈ languageRel p) 
 
+-- delete
 noncomputable instance (p : SubFormula L μ n) (k) : Fintype (p.language.func k) :=
   Fintype.subtype (languageFuncIndexed p k) (by simp[languageFuncIndexed])
 
+-- delete
 noncomputable instance (p : SubFormula L μ n) (k) : Fintype (p.language.rel k) :=
   Fintype.subtype (languageRelIndexed p k) (by simp[languageRelIndexed])
+
+def toSubLanguageSelf (p : SubFormula L μ n) : SubFormula p.language μ n :=
+  p.toSubLanguage' (fun k f => ⟨k, f⟩ ∈ languageFunc p) (fun k r => ⟨k, r⟩ ∈ languageRel p)
+    (by simp) (by simp)
+
+lemma ofSubFormula_toSubLanguageSelf (p : SubFormula L μ n) :
+    L.ofSubLanguage.onSubFormula₁ p.toSubLanguageSelf = p :=
+  ofSubFormula_toSubLanguage' _ _ _ _ _
+  
+end SubFormula

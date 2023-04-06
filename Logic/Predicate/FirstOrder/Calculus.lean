@@ -45,7 +45,9 @@ instance : HasVdash (Sequent L) (Type u) := ⟨Derivation⟩
 
 abbrev DerivationList (G : List (SyntacticFormula L)) := ⊩ G.toFinset
 
-abbrev Derivation.Valid (p : SyntacticFormula L) := ⊩ ({p} : Finset _)
+abbrev Derivation₁ (p : SyntacticFormula L) := ⊩ ({p} : Sequent L)
+
+abbrev Derivation.Valid (σ : Sentence L) := ⊩ ({emb σ} : Sequent L)
 
 structure Proof (T : CTheory L) (σ : Sentence L) where
   leftHand : Finset (Sentence L)
@@ -277,6 +279,9 @@ def onDerivation (Φ : L₁ →ᵥ L₂) : ∀ {Δ : Finset (SyntacticFormula L�
       have : ⊩ insert (∃' Φ.onSubFormula₁ p) (Finset.image Φ.onSubFormula₁ Δ) :=
         ex _ (Φ.onSubTerm t) _ (by simpa[←SubFormula.onSubFormula₁_subst] using onDerivation Φ d)
       this.cast (by simp)
+
+def onValid (Φ : L₁ →ᵥ L₂) {σ : Sentence L₁} (h : Valid σ) : Valid (Φ.onSubFormula₁ σ) :=
+  (onDerivation Φ h).cast (by simp[onSubFormula₁_emb Φ σ])
 
 end Hom
 

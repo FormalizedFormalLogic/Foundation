@@ -173,6 +173,10 @@ lemma satisfiableₛ_iff {T : CTheory L} :
 lemma satisfiableₛ_intro {T : CTheory L} (M : Type u) [i : Inhabited M] [s : Structure L M] (h : M ⊧₁* T) : Semantics.Satisfiableₛ T :=
 ⟨M, i, s, h⟩
 
+lemma valid_iff {σ : Sentence L} :
+    Semantics.Valid σ ↔ ∀ ⦃M : Type u⦄ [Inhabited M] [Structure L M], M ⊧₁ σ :=
+  of_eq rfl
+
 lemma validₛ_iff {T : CTheory L} :
     Semantics.Validₛ T ↔ ∀ ⦃M : Type u⦄ [Inhabited M] [Structure L M], M ⊧₁* T :=
   of_eq rfl
@@ -246,6 +250,10 @@ lemma eval_extendStructure_onSubFormula₁ {p : SubFormula L₁ μ n} :
 lemma models_extendStructure_onSubFormula₁ (σ : Sentence L₁) :
     Semantics.realize (self := semantics) (Φ.extendStructure s₁) (Φ.onSubFormula₁ σ) ↔ Semantics.realize (self := semantics) s₁ σ := by
   simp[Semantics.realize, Val, eval_extendStructure_onSubFormula₁ injf injr]
+
+lemma valid_extendStructure_onSubFormula₁ {σ : Sentence L₁} :
+    Semantics.Valid (Φ.onSubFormula₁ σ) → Semantics.Valid σ :=
+  fun h _ _ s => (models_extendStructure_onSubFormula₁ injf injr s σ).mp (h _)
 
 lemma onSubFormula₁_models_onSubFormula₁_iff {T : CTheory L₁} {σ : Sentence L₁} :
     Φ.onSubFormula₁ '' T ⊨ Φ.onSubFormula₁ σ ↔ T ⊨ σ := by

@@ -212,10 +212,10 @@ def ofSubLanguage : subLanguage L pf pr →ᵥ L where
   onRel  := Subtype.val
 
 @[simp] lemma ofSubLanguage_onFunc {k : ℕ} :
-    (ofSubLanguage L).onFunc p = p.val := rfl
+    L.ofSubLanguage.onFunc p = p.val := rfl
 
 @[simp] lemma ofSubLanguage_onRel {k : ℕ} :
-    (ofSubLanguage L).onRel p = p.val := rfl
+    L.ofSubLanguage.onRel p = p.val := rfl
 
 end subLanguage
 
