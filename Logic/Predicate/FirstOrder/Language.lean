@@ -145,25 +145,6 @@ noncomputable def languageFuncIndexed (p : SubFormula L μ n) (k) : Finset (L.fu
 noncomputable def languageRelIndexed (p : SubFormula L μ n) (k) : Finset (L.rel k) :=
   Finset.preimage (languageRel p) (Sigma.mk k) (Set.injOn_of_injective sigma_mk_injective _)
 
-abbrev language (p : SubFormula L μ n) : Language :=
-  Language.subLanguage L (fun k f => ⟨k, f⟩ ∈ languageFunc p) (fun k r => ⟨k, r⟩ ∈ languageRel p) 
-
--- delete
-noncomputable instance (p : SubFormula L μ n) (k) : Fintype (p.language.func k) :=
-  Fintype.subtype (languageFuncIndexed p k) (by simp[languageFuncIndexed])
-
--- delete
-noncomputable instance (p : SubFormula L μ n) (k) : Fintype (p.language.rel k) :=
-  Fintype.subtype (languageRelIndexed p k) (by simp[languageRelIndexed])
-
-def toSubLanguageSelf (p : SubFormula L μ n) : SubFormula p.language μ n :=
-  p.toSubLanguage' (fun k f => ⟨k, f⟩ ∈ languageFunc p) (fun k r => ⟨k, r⟩ ∈ languageRel p)
-    (by simp) (by simp)
-
-lemma ofSubFormula_toSubLanguageSelf (p : SubFormula L μ n) :
-    L.ofSubLanguage.onSubFormula₁ p.toSubLanguageSelf = p :=
-  ofSubFormula_toSubLanguage' _ _ _ _ _
-
 abbrev languageFinset (Γ : Finset (SubFormula L μ n)) : Language :=
   Language.subLanguage L (fun k f => ∃ p ∈ Γ, ⟨k, f⟩ ∈ languageFunc p) (fun k r => ∃ p ∈ Γ, ⟨k, r⟩ ∈ languageRel p) 
 

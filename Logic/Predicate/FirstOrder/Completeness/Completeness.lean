@@ -10,29 +10,6 @@ variable {L : Language.{u}}
 attribute [local instance] Classical.decEq
 
 noncomputable def completenessₙ_of_encodable [∀ k, Encodable (L.func k)] [∀ k, Encodable (L.rel k)]
-  {σ : Sentence L} (h : Semantics.Valid σ) :
-    Derivation.Valid σ := by
-  have : WellFounded (SearchTree {emb σ}) := by
-    by_contra wf
-    have : ¬(SearchTree.model {emb σ}) ⊧₁ σ := by
-      simpa using SearchTree.semanticMainLemma_top wf (p := emb σ) (by simp)
-    have : (SearchTree.model {emb σ}) ⊧₁ σ := h _
-    contradiction
-  exact SearchTree.syntacticMainLemma_top this
-
-noncomputable def completenessₙ {σ : Sentence L} (h : Semantics.Valid σ) :
-    Derivation.Valid σ := by
-  haveI : ∀ k, Encodable (σ.language.func k) := fun _ => Fintype.toEncodable _
-  haveI : ∀ k, Encodable (σ.language.rel k) := fun _ => Fintype.toEncodable _
-  have e : L.ofSubLanguage.onSubFormula₁ σ.toSubLanguageSelf = σ := ofSubFormula_toSubLanguageSelf σ 
-  have : Semantics.Valid σ.toSubLanguageSelf :=
-    SubFormula.valid_extendStructure_onSubFormula₁ (Φ := L.ofSubLanguage)
-      (by simp[Function.Injective, Subtype.val_inj]) (by simp[Function.Injective, Subtype.val_inj])
-      (by rw[←e] at h; exact h)
-  have : Derivation.Valid σ.toSubLanguageSelf := completenessₙ_of_encodable this
-  simpa[e] using Derivation.onValid L.ofSubLanguage this
-
-noncomputable def finsetCompletenessₙ_of_encodable [∀ k, Encodable (L.func k)] [∀ k, Encodable (L.rel k)]
   {Γ : Finset (Sentence L)} (h : ∀ M [Inhabited M] [Structure L M], ∃ σ ∈ Γ, M ⊧₁ σ) :
     ⊩ (Γ.image emb : Sequent L) := by
   have : WellFounded (SearchTree (Γ.image emb : Sequent L)) := by
@@ -44,7 +21,7 @@ noncomputable def finsetCompletenessₙ_of_encodable [∀ k, Encodable (L.func k
     contradiction
   exact SearchTree.syntacticMainLemma_top this
 
-noncomputable def finsetCompletenessₙ {Γ : Finset (Sentence L)}
+noncomputable def completenessₙ {Γ : Finset (Sentence L)}
   (h : ∀ (M : Type u) (hM : Inhabited M) (s : Structure L M), ∃ σ ∈ Γ, M ⊧₁ σ) :
     ⊩ (Γ.image emb : Sequent L) := by
   haveI : ∀ k, Encodable ((languageFinset Γ).func k) := fun _ => Fintype.toEncodable _
@@ -61,7 +38,7 @@ noncomputable def finsetCompletenessₙ {Γ : Finset (Sentence L)}
         (by simp[Function.Injective, Subtype.val_inj]) (by simp[Function.Injective, Subtype.val_inj])
         s (toSubLanguageFinsetSelf hσΓ)).mp
       (by simpa[e] using hσ)⟩
-  have : ⊩ Γ'.image emb := finsetCompletenessₙ_of_encodable this
+  have : ⊩ Γ'.image emb := completenessₙ_of_encodable this
   exact (Derivation.onDerivation L.ofSubLanguage this).cast (by
     ext p; simp[Finset.mem_imageOfFinset_iff, onSubFormula₁_emb]; constructor
     · rintro ⟨_, ⟨τ, hτΓ, rfl⟩, rfl⟩; exact ⟨τ, hτΓ, by simp⟩
@@ -79,7 +56,7 @@ noncomputable def completeness {T} {σ : Sentence L} (h : T ⊨ σ) :
       contradiction⟩
   choose s hs using this
   have : ⊩ (insert σ (s.image HasNeg.neg)).image emb :=
-    finsetCompletenessₙ (Γ := insert σ (s.image HasNeg.neg))
+    completenessₙ (Γ := insert σ (s.image HasNeg.neg))
       (fun M hM struc => by
         have := hs.2; simp[Semantics.Satisfiableₛ] at this
         have : Semantics.realize (self := semantics) struc σ ∨
