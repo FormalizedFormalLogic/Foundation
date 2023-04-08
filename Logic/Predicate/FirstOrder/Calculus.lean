@@ -245,6 +245,7 @@ def em {p : SyntacticFormula L} {Δ : Sequent L} (hpos : p ∈ Δ) (hneg : ~p �
       (orRight' (p := p) (q := q) (by simp[hpos]) $ ihq (by simp) (by simp; exact Or.inr $ ne_of_ne_complexity (by simp)))
 
 section Hom
+
 variable
   {L₁ : Language} [∀ k, DecidableEq (L₁.func k)] [∀ k, DecidableEq (L₁.rel k)]
   {L₂ : Language} [∀ k, DecidableEq (L₂.func k)] [∀ k, DecidableEq (L₂.rel k)]

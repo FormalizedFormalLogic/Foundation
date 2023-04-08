@@ -163,5 +163,21 @@ def toSubLanguageSelf (p : SubFormula L μ n) : SubFormula p.language μ n :=
 lemma ofSubFormula_toSubLanguageSelf (p : SubFormula L μ n) :
     L.ofSubLanguage.onSubFormula₁ p.toSubLanguageSelf = p :=
   ofSubFormula_toSubLanguage' _ _ _ _ _
-  
+
+abbrev languageFinset (Γ : Finset (SubFormula L μ n)) : Language :=
+  Language.subLanguage L (fun k f => ∃ p ∈ Γ, ⟨k, f⟩ ∈ languageFunc p) (fun k r => ∃ p ∈ Γ, ⟨k, r⟩ ∈ languageRel p) 
+
+noncomputable instance (Γ : Finset (SubFormula L μ n)) (k) : Fintype ((languageFinset Γ).func k) :=
+  Fintype.subtype (Γ.bunionᵢ (languageFuncIndexed · k)) (by simp[languageFuncIndexed])
+
+noncomputable instance (Γ : Finset (SubFormula L μ n)) (k) : Fintype ((languageFinset Γ).rel k) :=
+  Fintype.subtype (Γ.bunionᵢ (languageRelIndexed · k)) (by simp[languageRelIndexed])
+
+def toSubLanguageFinsetSelf {Γ : Finset (SubFormula L μ n)} {p} (h : p ∈ Γ) : SubFormula (languageFinset Γ) μ n :=
+  p.toSubLanguage' _ _ (fun _ _ hf => ⟨p, h, hf⟩) (fun _ _ hr => ⟨p, h, hr⟩)
+
+@[simp] lemma ofSubFormula_toSubLanguageFinsetSelf {Γ : Finset (SubFormula L μ n)} {p} (h : p ∈ Γ) :
+    L.ofSubLanguage.onSubFormula₁ (toSubLanguageFinsetSelf h) = p :=
+  ofSubFormula_toSubLanguage' _ _ _ _ _
+
 end SubFormula

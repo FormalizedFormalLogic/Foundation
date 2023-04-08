@@ -200,7 +200,12 @@ def chainSet : Set (SyntacticFormula L) := ⋃ s, chain Γ s
 
 local notation "⛓️" => chainSet Γ
 
-def model : Structure L (SyntacticTerm L) where
+set_option linter.unusedVariables false in
+def model (Γ : Sequent L) := SyntacticTerm L
+
+instance : Inhabited (model Γ) := ⟨(default : SyntacticTerm L)⟩
+
+instance model.structure : Structure L (model Γ) where
   func := SubTerm.func
   rel  := fun r v => nrel r v ∈ ⛓️
 
@@ -273,13 +278,13 @@ lemma ex_mem_chain {p : SyntacticSubFormula L 1} (h : ∃' p ∈ ⛓️) : ∀ u
   exact mem_chain_iff.mpr ⟨codeIndex (∃' p) u i + 1, by simp[h]⟩
 
 @[simp] lemma val_model {e : Fin n → SyntacticTerm L} {ε} (t : SyntacticSubTerm L n) :
-    SubTerm.val (model Γ) e ε t = SubTerm.bind e ε t := by
+    SubTerm.val (model.structure Γ) e ε t = SubTerm.bind e ε t := by
   induction t <;> simp[*, SubTerm.val_func, SubTerm.bind_func]; rfl
 
 @[simp] lemma model_rel {k} (r : L.rel k) (v : Fin k → SyntacticTerm L) :
-    (model Γ).rel r v ↔ nrel r v ∈ ⛓️ := of_eq rfl
+    (model.structure Γ).rel r v ↔ nrel r v ∈ ⛓️ := of_eq rfl
 
-lemma semanticMainLemma : (p : SyntacticFormula L) → p ∈ ⛓️ → ¬Val (model Γ) SubTerm.fvar p
+lemma semanticMainLemma : (p : SyntacticFormula L) → p ∈ ⛓️ → ¬Val (model.structure Γ) SubTerm.fvar p
   | ⊤,        h => by by_contra; exact verum_nonmem_chain nwf h
   | ⊥,        _ => by simp
   | rel r v,  h => by simpa[eval_rel] using rel_nonmem_chain nwf h
@@ -288,9 +293,9 @@ lemma semanticMainLemma : (p : SyntacticFormula L) → p ∈ ⛓️ → ¬Val (m
       simp; intro _ _
       have : p ∈ ⛓️ ∨ q ∈ ⛓️ := and_mem_chain nwf h
       rcases this with (h | h)
-      · have : ¬Val (model Γ) SubTerm.fvar p := semanticMainLemma p h
+      · have : ¬Val (model.structure Γ) SubTerm.fvar p := semanticMainLemma p h
         contradiction
-      · have : ¬Val (model Γ) SubTerm.fvar q := semanticMainLemma q h
+      · have : ¬Val (model.structure Γ) SubTerm.fvar q := semanticMainLemma q h
         contradiction
   | p ⋎ q,    h => by
       have hpq : p ∈ ⛓️ ∧ q ∈ ⛓️ := or_mem_chain nwf h
@@ -300,22 +305,22 @@ lemma semanticMainLemma : (p : SyntacticFormula L) → p ∈ ⛓️ → ¬Val (m
   | ∀' p,     h => by
       have : ∃ u, subst u p ∈ ⛓️ := forall_mem_chain nwf h
       rcases this with ⟨u, hu⟩
-      have : ¬Eval (model Γ) ![u] SubTerm.fvar p := by
+      have : ¬Eval (model.structure Γ) ![u] SubTerm.fvar p := by
         simpa[Matrix.vecConsLast_vecEmpty] using semanticMainLemma _ hu
       simp; exact ⟨u, this⟩
   | ∃' p,     h => by
       simp; intro u
       have : subst u p ∈ ⛓️ := ex_mem_chain nwf h u
-      have : ¬Eval (model Γ) ![u] SubTerm.fvar p := by
+      have : ¬Eval (model.structure Γ) ![u] SubTerm.fvar p := by
         simpa[Matrix.vecConsLast_vecEmpty] using semanticMainLemma _ this
       assumption
   termination_by semanticMainLemma p _ => p.complexity
 
-lemma semanticMainLemma_top {p : SyntacticFormula L} (h : p ∈ Γ) : ¬Val (model Γ) SubTerm.fvar p :=
+lemma semanticMainLemma_top {p : SyntacticFormula L} (h : p ∈ Γ) : ¬Val (model.structure Γ) SubTerm.fvar p :=
   semanticMainLemma nwf p (mem_chain_iff.mpr ⟨0, by simpa[chain, chainU] using h⟩)
 
 end NotWellFounded
-
+  
 end SearchTree
 
 end FirstOrder

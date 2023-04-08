@@ -135,7 +135,8 @@ abbrev Models (M : Type u) [s : Structure L M] : Sentence L →L Prop := Semanti
 
 postfix:max " ⊧₁ " => Models
 
-abbrev ModelsTheory (M : Type u) [s : Structure L M] (T : CTheory L) : Prop := Semantics.realizeTheory (s := semantics) s T
+abbrev ModelsTheory (M : Type u) [s : Structure L M] (T : CTheory L) : Prop :=
+  Semantics.realizeTheory (semantics := semantics) s T
 
 infix:55 " ⊧₁* " => ModelsTheory
 

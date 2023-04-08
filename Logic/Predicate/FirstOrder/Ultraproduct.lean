@@ -135,7 +135,7 @@ lemma ultrafilter_exists (H : ∀ (ι : FinSubTheory T), (A ι) ⊧₁* (ι.val 
     intro σ hσ
     exact H ⟨t, ht⟩ hσ)
 
-theorem compactness :
+lemma compactnessAux :
     Semantics.Satisfiableₛ T ↔ ∀ ι : FinSubTheory T, Semantics.Satisfiableₛ (ι.val : CTheory L) := by
   constructor
   · rintro h ⟨t, ht⟩; exact Semantics.satisfiableₛ_of_subset h ht
@@ -147,6 +147,10 @@ theorem compactness :
     rcases this with ⟨𝓤, h𝓤⟩
     have : Structure.Uprod A 𝓤 ⊧₁* T := by intro σ hσ; exact realize_Uprod.mpr (h𝓤 $ Set.mem_image_of_mem (SubFormula.domain A) hσ)
     exact satisfiableₛ_intro (Structure.Uprod A 𝓤) this
+
+theorem compactness :
+    Semantics.Satisfiableₛ T ↔ ∀ T' : Finset (Sentence L), ↑T' ⊆ T → Semantics.Satisfiableₛ (T' : CTheory L) := by
+  rw[compactnessAux]; simp
 
 end FirstOrder
 

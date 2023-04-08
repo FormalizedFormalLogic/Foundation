@@ -308,4 +308,75 @@ variable {α : Type u} [DecidableEq α] {β: Type v} [DecidableEq β]
 lemma toFinset_map {f : α → β} (l : List α) : (l.map f).toFinset = Finset.image f l.toFinset := by
   induction l <;> simp[*]
 
+section
+
+variable {α : Type u} [HasLogicSymbols α]
+
+def conj : List α → α
+  | []      => ⊤
+  | a :: as => a ⋏ as.conj
+
+@[simp] lemma conj_nil : conj (α := α) [] = ⊤ := rfl
+
+@[simp] lemma conj_cons {a : α} {as : List α} : conj (a :: as) = a ⋏ as.conj := rfl
+
+lemma map_conj (f : α →L Prop) (l : List α) : f l.conj ↔ ∀ a ∈ l, f a := by
+  induction l <;> simp[*]
+
+def disj : List α → α
+  | []      => ⊥
+  | a :: as => a ⋎ as.disj
+
+@[simp] lemma disj_nil : disj (α := α) [] = ⊥ := rfl
+
+@[simp] lemma disj_cons {a : α} {as : List α} : disj (a :: as) = a ⋎ as.disj := rfl
+
+lemma map_disj (f : α →L Prop) (l : List α) : f l.disj ↔ ∃ a ∈ l, f a := by
+  induction l <;> simp[*]
+
+end
+
 end List
+
+namespace Finset
+
+variable {α : Type u} {β : Type v} {γ : Type w}
+
+noncomputable def rangeOfFinite {ι : Sort v} [Finite ι] (f : ι → α) : Finset α :=
+  Set.Finite.toFinset (s := Set.range f) (Set.toFinite (Set.range f))
+
+lemma mem_rangeOfFinite_iff  {ι : Sort v} [Finite ι] {f : ι → α} {a : α} :
+    a ∈ rangeOfFinite f ↔ ∃ i : ι, f i = a := by simp[rangeOfFinite]
+
+noncomputable def imageOfFinset [DecidableEq β] (s : Finset α) (f : (a : α) → a ∈ s → β) : Finset β :=
+  Finset.bunionᵢ s (rangeOfFinite $ f ·)
+
+lemma mem_imageOfFinset_iff [DecidableEq β] {s : Finset α} {f : (a : α) → a ∈ s → β} {b : β} :
+    b ∈ imageOfFinset s f ↔ ∃ (a : α) (ha : a ∈ s), f a ha = b := by
+  simp[imageOfFinset, mem_rangeOfFinite_iff]
+  constructor
+  · rintro ⟨a, _, ha, rfl⟩; exact ⟨a, ha, rfl⟩
+  · rintro ⟨a, ha, rfl⟩; exact ⟨a, ha, ha, rfl⟩
+
+@[simp] lemma mem_imageOfFinset  [DecidableEq β] {s : Finset α} (f : (a : α) → a ∈ s → β) (a : α) (ha : a ∈ s) :
+    f a ha ∈ imageOfFinset s f := by simp[mem_imageOfFinset_iff]; exact ⟨a, ha, rfl⟩
+
+-- lemma ext_image {f : β → α} {g : γ → α} {s : Finset β} {t : Finset γ} : f s = g t ↔ ∀ 
+
+section
+
+variable [HasLogicSymbols α]
+
+noncomputable def conj (s : Finset α) : α := s.toList.conj
+
+lemma map_conj (f : α →L Prop) (s : Finset α) : f s.conj ↔ ∀ a ∈ s, f a := by
+  simpa using List.map_conj f s.toList
+  
+noncomputable def disj (s : Finset α) : α := s.toList.disj
+
+lemma map_disj (f : α →L Prop) (s : Finset α) : f s.disj ↔ ∃ a ∈ s, f a := by
+  simpa using List.map_disj f s.toList
+
+end
+
+end Finset
