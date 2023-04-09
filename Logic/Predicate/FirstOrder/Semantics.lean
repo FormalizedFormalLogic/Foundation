@@ -325,7 +325,7 @@ lemma Derivation.sound : ∀ {Γ : Finset (SyntacticFormula L)},
     · exact ⟨∃' p, by simp, t.val! M ![] ε, hp⟩
     · exact ⟨q, by simp[hq], hhq⟩
 
-lemma Proof.sound {T : CTheory L} {σ : Sentence L} : T ⊢ σ → T ⊨ σ := by
+theorem soundness {T} {σ : Sentence L} : T ⊢ σ → T ⊨ σ := by
   simp[consequence_iff]; rintro ⟨Γ, hΓ, d⟩ M _ _ hT
   have : M ⊧₁ σ ∨ ∃ τ ∈ Γ, M ⊧₁ τ := by simpa using Derivation.sound d M default
   rcases this with (hσ | ⟨τ, hτ, hhτ⟩)

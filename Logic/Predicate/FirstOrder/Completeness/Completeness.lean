@@ -44,8 +44,8 @@ noncomputable def completenessₙ {Γ : Finset (Sentence L)}
     · rintro ⟨_, ⟨τ, hτΓ, rfl⟩, rfl⟩; exact ⟨τ, hτΓ, by simp⟩
     · rintro ⟨σ, hσΓ, rfl⟩; exact ⟨toSubLanguageFinsetSelf hσΓ, ⟨σ, hσΓ, rfl⟩, by simp⟩)
 
-noncomputable def completeness {T} {σ : Sentence L} (h : T ⊨ σ) :
-    T ⊢ σ := by
+noncomputable def completeness {T} {σ : Sentence L} : T ⊨ σ → T ⊢ σ := by
+  intro h
   have : ¬Semantics.Satisfiableₛ (insert (~σ) T) := Semantics.consequence_iff.mp h
   have : ∃ T' : Finset (Sentence L), ↑T' ⊆ T ∧ ¬Semantics.Satisfiableₛ (insert (~σ) T' : CTheory L) := by
     rw[compactness] at this; simp at this
