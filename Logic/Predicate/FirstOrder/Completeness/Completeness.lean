@@ -11,7 +11,7 @@ attribute [local instance] Classical.decEq
 
 noncomputable def completenessₙ_of_encodable [∀ k, Encodable (L.func k)] [∀ k, Encodable (L.rel k)]
   {Γ : Finset (Sentence L)} (h : ∀ M [Inhabited M] [Structure L M], ∃ σ ∈ Γ, M ⊧₁ σ) :
-    ⊩ (Γ.image emb : Sequent L) := by
+    ⊢ᵀ (Γ.image emb : Sequent L) := by
   have : WellFounded (SearchTree (Γ.image emb : Sequent L)) := by
     by_contra wf
     have : ∃ σ ∈ Γ, (SearchTree.model (Γ.image emb : Sequent L)) ⊧₁ σ := h _
@@ -23,7 +23,7 @@ noncomputable def completenessₙ_of_encodable [∀ k, Encodable (L.func k)] [�
 
 noncomputable def completenessₙ {Γ : Finset (Sentence L)}
   (h : ∀ (M : Type u) (hM : Inhabited M) (s : Structure L M), ∃ σ ∈ Γ, M ⊧₁ σ) :
-    ⊩ (Γ.image emb : Sequent L) := by
+    ⊢ᵀ (Γ.image emb : Sequent L) := by
   haveI : ∀ k, Encodable ((languageFinset Γ).func k) := fun _ => Fintype.toEncodable _
   haveI : ∀ k, Encodable ((languageFinset Γ).rel k) := fun _ => Fintype.toEncodable _
   have e : ∀ σ (hσ : σ ∈ Γ), L.ofSubLanguage.onSubFormula₁ (toSubLanguageFinsetSelf hσ) = σ := fun σ hσ =>
@@ -38,7 +38,7 @@ noncomputable def completenessₙ {Γ : Finset (Sentence L)}
         (by simp[Function.Injective, Subtype.val_inj]) (by simp[Function.Injective, Subtype.val_inj])
         s (toSubLanguageFinsetSelf hσΓ)).mp
       (by simpa[e] using hσ)⟩
-  have : ⊩ Γ'.image emb := completenessₙ_of_encodable this
+  have : ⊢ᵀ Γ'.image emb := completenessₙ_of_encodable this
   exact (Derivation.onDerivation L.ofSubLanguage this).cast (by
     ext p; simp[Finset.mem_imageOfFinset_iff, onSubFormula₁_emb]; constructor
     · rintro ⟨_, ⟨τ, hτΓ, rfl⟩, rfl⟩; exact ⟨τ, hτΓ, by simp⟩
@@ -55,7 +55,7 @@ noncomputable def completeness {T} {σ : Sentence L} : T ⊨ σ → T ⊢ σ := 
       have : Semantics.Satisfiableₛ (T' : CTheory L) := Semantics.satisfiableₛ_of_subset h (by simp)
       contradiction⟩
   choose s hs using this
-  have : ⊩ (insert σ (s.image HasNeg.neg)).image emb :=
+  have : ⊢ᵀ (insert σ (s.image HasNeg.neg)).image emb :=
     completenessₙ (Γ := insert σ (s.image HasNeg.neg))
       (fun M hM struc => by
         have := hs.2; simp[Semantics.Satisfiableₛ] at this

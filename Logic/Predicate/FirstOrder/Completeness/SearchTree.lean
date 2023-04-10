@@ -22,17 +22,17 @@ def sequentUpper (Γ : Sequent L) : ℕ := Γ.sup SubFormula.upper
 lemma not_fvar?_sequentUpper {p : SyntacticFormula L} {Γ : Sequent L} (h : p ∈ Γ) : ¬fvar? p (sequentUpper Γ) :=
   not_fvar?_of_lt_upper p (by simpa[sequentUpper] using Finset.le_sup h)
 
-inductive SearchTreeAux (t : SyntacticTerm L) (Γ : Sequent L) : SyntacticFormula L → Sequent L → Prop
+inductive Decomp (t : SyntacticTerm L) (Γ : Sequent L) : SyntacticFormula L → Sequent L → Prop
   | rel {k} (r : L.rel k) (v) :
-      nrel r v ∉ Γ → SearchTreeAux t Γ (rel r v) ∅ 
+      nrel r v ∉ Γ → Decomp t Γ (rel r v) ∅ 
   | nrel {k} (r : L.rel k) (v) :
-      rel r v ∉ Γ → SearchTreeAux t Γ (nrel r v) ∅
-  | falsum : SearchTreeAux t Γ ⊥ ∅
-  | andLeft (p q : SyntacticFormula L) : SearchTreeAux t Γ (p ⋏ q) {p}
-  | andRight (p q : SyntacticFormula L) : SearchTreeAux t Γ (p ⋏ q) {q}
-  | or (p q : SyntacticFormula L) : SearchTreeAux t Γ (p ⋎ q) {p, q}
-  | all (p : SyntacticSubFormula L 1) : SearchTreeAux t Γ (∀' p) {subst &(sequentUpper Γ) p}
-  | ex (p : SyntacticSubFormula L 1) : SearchTreeAux t Γ (∃' p) {subst t p}
+      rel r v ∉ Γ → Decomp t Γ (nrel r v) ∅
+  | falsum : Decomp t Γ ⊥ ∅
+  | andLeft (p q : SyntacticFormula L) : Decomp t Γ (p ⋏ q) {p}
+  | andRight (p q : SyntacticFormula L) : Decomp t Γ (p ⋏ q) {q}
+  | or (p q : SyntacticFormula L) : Decomp t Γ (p ⋎ q) {p, q}
+  | all (p : SyntacticSubFormula L 1) : Decomp t Γ (∀' p) {subst &(sequentUpper Γ) p}
+  | ex (p : SyntacticSubFormula L 1) : Decomp t Γ (∃' p) {subst t p}
 
 abbrev codeFormula (s : ℕ) : ℕ := s.unpair.1.unpair.1
 
@@ -46,13 +46,13 @@ lemma codeIndex_inj {p q : SyntacticFormula L} {t u} {i j} (h : codeIndex p t i 
 inductive SearchTreeAt (s : ℕ) : Sequent L → Sequent L → Prop
   | decomp (p : SyntacticFormula L) (Γ Δ : Sequent L) (i : ℕ) :
       p ∈ Γ → s = codeIndex p t i →
-      SearchTreeAux t Γ p Δ → SearchTreeAt s (Δ ∪ Γ) Γ
+      Decomp t Γ p Δ → SearchTreeAt s (Δ ∪ Γ) Γ
   | refl (Γ : Sequent L) : (∀ p ∈ Γ, ∀ t, ∀ i, s ≠ codeIndex p t i) → SearchTreeAt s Γ Γ
 
 local notation:25 Γ₁" ≺[" s:25 "] " Γ₂:80 => SearchTreeAt s Γ₁ Γ₂
 
 lemma searchtreeAt_iff_decomp_of_index {Γ' Γ : Sequent L} {p} {t} {i} (hΓ : p ∈ Γ) (hs : s = codeIndex p t i) :
-  Γ' ≺[s] Γ ↔ ∃ Δ, SearchTreeAux t Γ p Δ ∧ Γ' = Δ ∪ Γ :=
+  Γ' ≺[s] Γ ↔ ∃ Δ, Decomp t Γ p Δ ∧ Γ' = Δ ∪ Γ :=
   ⟨by rintro (_ | _)
       case decomp u q Δ j hj _ h =>
         rcases codeIndex_inj (hs.symm.trans hj) with ⟨rfl, rfl, rfl⟩
@@ -62,7 +62,7 @@ lemma searchtreeAt_iff_decomp_of_index {Γ' Γ : Sequent L} {p} {t} {i} (hΓ : p
    by rintro ⟨Δ, h, rfl⟩; exact SearchTreeAt.decomp p Γ Δ i hΓ hs h⟩
 
 lemma searchtreeAt_iff_decomp_of_index' {Γ' Γ : Sequent L} {p} {t} {i} (hΓ : p ∈ Γ) :
-  Γ' ≺[codeIndex p t i] Γ ↔ ∃ Δ, SearchTreeAux t Γ p Δ ∧ Γ' = Δ ∪ Γ := searchtreeAt_iff_decomp_of_index hΓ rfl
+  Γ' ≺[codeIndex p t i] Γ ↔ ∃ Δ, Decomp t Γ p Δ ∧ Γ' = Δ ∪ Γ := searchtreeAt_iff_decomp_of_index hΓ rfl
 
 lemma subset_of_searchtreeAt {Γ' Γ : Sequent L} (h : Γ' ≺[s] Γ) : Γ ⊆ Γ' := by
   rcases h with (_ | _) <;> simp[Finset.subset_union_right]
@@ -95,12 +95,12 @@ variable {Γ : Sequent L} (wf : WellFounded (SearchTree Γ))
 
 noncomputable def SearchTree.recursion {C : SearchTreeUnder Γ → Sort _} 
   (τ) (h : ∀ τ₁, (∀ τ₂, SearchTree Γ τ₂ τ₁ → C τ₂) → C τ₁) : C τ :=
-  WellFounded.recursion wf τ h
+  WellFounded.fix wf h τ
 
-noncomputable def syntacticMainLemma (τ : SearchTreeUnder Γ) : ⊩ τ.val.2 := by
+noncomputable def syntacticMainLemma (τ : SearchTreeUnder Γ) : ⊢ᵀ τ.val.2 := by
   apply SearchTree.recursion wf τ
   intro ⟨⟨s, Δ⟩, hΔ⟩ ih; simp
-  have ih : ∀ Δ₂ : Sequent L, Δ₂ ≺[s] Δ → ⊩ Δ₂ :=
+  have ih : ∀ Δ₂ : Sequent L, Δ₂ ≺[s] Δ → ⊢ᵀ Δ₂ :=
     fun Δ₂ h => ih ⟨(s + 1, Δ₂), SearchTree.IsUnder.lt h hΔ⟩ (SearchTree.intro _ _ h)
   by_cases hs : ∀ p ∈ Δ, ∀ t, ∀ i, s ≠ codeIndex p t i
   case pos =>
@@ -112,40 +112,40 @@ noncomputable def syntacticMainLemma (τ : SearchTreeUnder Γ) : ⊩ τ.val.2 :=
     case hverum =>
       exact Derivation.verum Δ hp
     case hfalsum =>
-      have : Δ ≺[s] Δ := (searchtreeAt_iff_decomp_of_index hp hi).mpr ⟨∅, SearchTreeAux.falsum, by simp⟩
+      have : Δ ≺[s] Δ := (searchtreeAt_iff_decomp_of_index hp hi).mpr ⟨∅, Decomp.falsum, by simp⟩
       exact ih Δ this
     case hrel k r v =>
       by_cases hrv : nrel r v ∈ Δ
       · exact Derivation.axL Δ r v hp hrv
-      · have : Δ ≺[s] Δ := (searchtreeAt_iff_decomp_of_index hp hi).mpr ⟨∅, SearchTreeAux.rel r v hrv, by simp⟩
+      · have : Δ ≺[s] Δ := (searchtreeAt_iff_decomp_of_index hp hi).mpr ⟨∅, Decomp.rel r v hrv, by simp⟩
         exact ih Δ this
     case hnrel k r v =>
       by_cases hrv : rel r v ∈ Δ
       · exact Derivation.axL Δ r v hrv hp
-      · have : Δ ≺[s] Δ := (searchtreeAt_iff_decomp_of_index hp hi).mpr ⟨∅, SearchTreeAux.nrel r v hrv, by simp⟩
+      · have : Δ ≺[s] Δ := (searchtreeAt_iff_decomp_of_index hp hi).mpr ⟨∅, Decomp.nrel r v hrv, by simp⟩
         exact ih Δ this
     case hand p q =>
-      have dp : insert p Δ ≺[s] Δ := (searchtreeAt_iff_decomp_of_index hp hi).mpr ⟨_, SearchTreeAux.andLeft p q, rfl⟩
-      have dq : insert q Δ ≺[s] Δ := (searchtreeAt_iff_decomp_of_index hp hi).mpr ⟨_, SearchTreeAux.andRight p q, rfl⟩
-      have : ⊩ insert (p ⋏ q) Δ := Derivation.and Δ p q (ih _ dp) (ih _ dq)
+      have dp : insert p Δ ≺[s] Δ := (searchtreeAt_iff_decomp_of_index hp hi).mpr ⟨_, Decomp.andLeft p q, rfl⟩
+      have dq : insert q Δ ≺[s] Δ := (searchtreeAt_iff_decomp_of_index hp hi).mpr ⟨_, Decomp.andRight p q, rfl⟩
+      have : ⊢ᵀ insert (p ⋏ q) Δ := Derivation.and Δ p q (ih _ dp) (ih _ dq)
       exact this.cast (by simp[hp])
     case hor p q =>
-      have : {p, q} ∪ Δ ≺[s] Δ := (searchtreeAt_iff_decomp_of_index hp hi).mpr ⟨_, SearchTreeAux.or p q, rfl⟩
-      have : ⊩ insert (p ⋎ q) Δ := Derivation.or ((ih _ this).cast (by simp[Finset.insert_eq]))
+      have : {p, q} ∪ Δ ≺[s] Δ := (searchtreeAt_iff_decomp_of_index hp hi).mpr ⟨_, Decomp.or p q, rfl⟩
+      have : ⊢ᵀ insert (p ⋎ q) Δ := Derivation.or ((ih _ this).cast (by simp[Finset.insert_eq]))
       exact this.cast (by simp[hp])
     case hall p =>
-      have : {subst &(sequentUpper Δ) p} ∪ Δ ≺[s] Δ := (searchtreeAt_iff_decomp_of_index hp hi).mpr ⟨_, SearchTreeAux.all p, rfl⟩
-      have : ⊩ insert (subst &(sequentUpper Δ) p) Δ := ih _ this
-      have : ⊩ insert (∀' p) Δ := Derivation.genelalizeByNewver (not_fvar?_sequentUpper hp) (fun _ hq => not_fvar?_sequentUpper hq) this
+      have : {subst &(sequentUpper Δ) p} ∪ Δ ≺[s] Δ := (searchtreeAt_iff_decomp_of_index hp hi).mpr ⟨_, Decomp.all p, rfl⟩
+      have : ⊢ᵀ insert (subst &(sequentUpper Δ) p) Δ := ih _ this
+      have : ⊢ᵀ insert (∀' p) Δ := Derivation.genelalizeByNewver (not_fvar?_sequentUpper hp) (fun _ hq => not_fvar?_sequentUpper hq) this
       exact this.cast (by simp[hp])
     case hex p =>
       have : {subst t p} ∪ Δ ≺[s] Δ :=
-        (searchtreeAt_iff_decomp_of_index hp hi).mpr ⟨_, SearchTreeAux.ex p, rfl⟩
-      have : ⊩ insert (subst t p) Δ := ih _ this
-      have : ⊩ insert (∃' p) Δ := Derivation.ex Δ t p this
+        (searchtreeAt_iff_decomp_of_index hp hi).mpr ⟨_, Decomp.ex p, rfl⟩
+      have : ⊢ᵀ insert (subst t p) Δ := ih _ this
+      have : ⊢ᵀ insert (∃' p) Δ := Derivation.ex Δ t p this
       exact this.cast (by simp[hp])  
 
-noncomputable def syntacticMainLemma_top : ⊩ Γ := syntacticMainLemma wf ⟨(0, Γ), SearchTree.IsUnder.top (Γ := Γ)⟩
+noncomputable def syntacticMainLemma_top : ⊢ᵀ Γ := syntacticMainLemma wf ⟨(0, Γ), SearchTree.IsUnder.top (Γ := Γ)⟩
 
 end WellFounded
 
@@ -223,7 +223,7 @@ lemma mem_chain_of_mem_chainSet {p} (hp : p ∈ ⛓️) (t) (s : ℕ) :
 
 lemma chain_succ_of_mem {p : SyntacticFormula L} (h : p ∈ ⛓️) (t) (s) : ∃ i Δ,
     s ≤ codeIndex p t i ∧
-    SearchTreeAux t (chain Γ (codeIndex p t i)) p Δ ∧
+    Decomp t (chain Γ (codeIndex p t i)) p Δ ∧
       chain Γ (codeIndex p t i + 1) = Δ ∪ chain Γ (codeIndex p t i) := by
   rcases mem_chain_of_mem_chainSet nwf h t s with ⟨i, hi, hp⟩
   have : chain Γ (codeIndex p t i + 1) ≺[codeIndex p t i] chain Γ (codeIndex p t i) := chain_spec nwf (codeIndex p t i)
@@ -238,7 +238,7 @@ lemma rel_nonmem_chain {k} {r : L.rel k} {v} : rel r v ∈ ⛓️ → nrel r v �
   have : ∃ sₚ, rel r v ∈ chain Γ sₚ := mem_chain_iff.mp hpos
   rcases this with ⟨sₚ, hsₚ⟩
   have : ∃ i Δ, sₚ ≤ codeIndex (nrel r v) default i ∧
-      SearchTreeAux default (chain Γ (codeIndex (nrel r v) default i)) (nrel r v) Δ ∧
+      Decomp default (chain Γ (codeIndex (nrel r v) default i)) (nrel r v) Δ ∧
       chain Γ (codeIndex (nrel r v) default i + 1) = Δ ∪ chain Γ (codeIndex (nrel r v) default i) :=
     chain_succ_of_mem nwf hneg default sₚ
   rcases this with ⟨i, Δ, hi, ⟨⟩, hΔ⟩
@@ -246,7 +246,7 @@ lemma rel_nonmem_chain {k} {r : L.rel k} {v} : rel r v ∈ ⛓️ → nrel r v �
   contradiction
 
 lemma and_mem_chain {p q : SyntacticFormula L} (h : p ⋏ q ∈ ⛓️) : p ∈ ⛓️ ∨ q ∈ ⛓️ := by
-  have : ∃ i Δ, SearchTreeAux default (chain Γ (codeIndex (p ⋏ q) default i)) (p ⋏ q) Δ ∧
+  have : ∃ i Δ, Decomp default (chain Γ (codeIndex (p ⋏ q) default i)) (p ⋏ q) Δ ∧
       chain Γ (codeIndex (p ⋏ q) default i + 1) = Δ ∪ chain Γ (codeIndex (p ⋏ q) default i) := by
     simpa using chain_succ_of_mem nwf h default 0
   rcases this with ⟨i, Δ, ⟨⟩, h⟩
@@ -254,7 +254,7 @@ lemma and_mem_chain {p q : SyntacticFormula L} (h : p ⋏ q ∈ ⛓️) : p ∈ 
   case andRight => exact Or.inr $ mem_chain_iff.mpr ⟨codeIndex (p ⋏ q) default i + 1, by simp[h]⟩
 
 lemma or_mem_chain {p q : SyntacticFormula L} (h : p ⋎ q ∈ ⛓️) : p ∈ ⛓️ ∧ q ∈ ⛓️ := by
-  have : ∃ i Δ, SearchTreeAux default (chain Γ (codeIndex (p ⋎ q) default i)) (p ⋎ q) Δ ∧
+  have : ∃ i Δ, Decomp default (chain Γ (codeIndex (p ⋎ q) default i)) (p ⋎ q) Δ ∧
       chain Γ (codeIndex (p ⋎ q) default i + 1) = Δ ∪ chain Γ (codeIndex (p ⋎ q) default i) := by
     simpa using chain_succ_of_mem nwf h default 0
   rcases this with ⟨i, Δ, ⟨⟩, h⟩
@@ -262,7 +262,7 @@ lemma or_mem_chain {p q : SyntacticFormula L} (h : p ⋎ q ∈ ⛓️) : p ∈ �
          mem_chain_iff.mpr ⟨codeIndex (p ⋎ q) default i + 1, by simp[h]⟩⟩
 
 lemma forall_mem_chain {p : SyntacticSubFormula L 1} (h : ∀' p ∈ ⛓️) : ∃ u, subst u p ∈ ⛓️ := by
-  have : ∃ i Δ, SearchTreeAux default (chain Γ (codeIndex (∀' p) default i)) (∀' p) Δ ∧
+  have : ∃ i Δ, Decomp default (chain Γ (codeIndex (∀' p) default i)) (∀' p) Δ ∧
       chain Γ (codeIndex (∀' p) default i + 1) = Δ ∪ chain Γ (codeIndex (∀' p) default i) := by
     simpa using chain_succ_of_mem nwf h default 0
   rcases this with ⟨i, Δ, ⟨⟩, h⟩
@@ -271,7 +271,7 @@ lemma forall_mem_chain {p : SyntacticSubFormula L 1} (h : ∀' p ∈ ⛓️) : �
 
 lemma ex_mem_chain {p : SyntacticSubFormula L 1} (h : ∃' p ∈ ⛓️) : ∀ u, subst u p ∈ ⛓️ := by
   intro u
-  have : ∃ i Δ, SearchTreeAux u (chain Γ (codeIndex (∃' p) u i)) (∃' p) Δ ∧
+  have : ∃ i Δ, Decomp u (chain Γ (codeIndex (∃' p) u i)) (∃' p) Δ ∧
       chain Γ (codeIndex (∃' p) u i + 1) = Δ ∪ chain Γ (codeIndex (∃' p) u i) := by
     simpa using chain_succ_of_mem nwf h u 0
   rcases this with ⟨i, Δ, ⟨⟩, h⟩

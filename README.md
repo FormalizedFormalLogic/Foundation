@@ -14,7 +14,7 @@ Formalizing Logic in Lean4
 
 |                            |                                     | Definition                   | Notation |
 | :----:                     | ----                                | ----                         | ----     |
-| $\vdash_\mathrm{T} \Gamma$ | Derivation in Tait-Calculus         |  `FirstOrder.Derivation`     | `⊩ Γ`    |
+| $\vdash_\mathrm{T} \Gamma$ | Derivation in Tait-Calculus         |  `FirstOrder.Derivation`     | `⊢ᵀ Γ`    |
 | $T \vdash \sigma$          | Provability, Proof                  |  `FirstOrder.Proof`          | `T ⊢ σ`  |
 | $M \models \sigma$         | Tarski's truth definition condition |  `FirstOrder.SubFormula.Val` | `M ⊧₁ σ` |
 
