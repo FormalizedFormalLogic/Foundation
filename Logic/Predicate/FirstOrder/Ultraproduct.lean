@@ -117,16 +117,16 @@ section
 
 namespace FirstOrder
 
-variable {L : Language.{u}} {T : CTheory L}
+variable {L : Language.{u}} {T : Theory L}
 
-abbrev FinSubTheory (T : CTheory L) := {t : Finset (Sentence L) // ↑t ⊆ T}
+abbrev FinSubTheory (T : Theory L) := {t : Finset (Sentence L) // ↑t ⊆ T}
 
 variable (A : FinSubTheory T → Type u) [s : (ι : FinSubTheory T) → Structure L (A ι)]
 
 instance : Inhabited (FinSubTheory T) := ⟨∅, by simp⟩
 
 attribute [instance] Classical.propDecidable in
-lemma ultrafilter_exists (H : ∀ (ι : FinSubTheory T), (A ι) ⊧₁* (ι.val : CTheory L)) :
+lemma ultrafilter_exists (H : ∀ (ι : FinSubTheory T), (A ι) ⊧₁* (ι.val : Theory L)) :
     ∃ 𝓤 : Ultrafilter (FinSubTheory T), Set.image (SubFormula.domain A) T ⊆ 𝓤.sets :=
   Ultrafilter.exists_ultrafilter_of_finite_inter_nonempty _ (by
     simp[Finset.subset_image_iff, SubFormula.domain]
@@ -136,11 +136,11 @@ lemma ultrafilter_exists (H : ∀ (ι : FinSubTheory T), (A ι) ⊧₁* (ι.val 
     exact H ⟨t, ht⟩ hσ)
 
 lemma compactnessAux :
-    Semantics.Satisfiableₛ T ↔ ∀ ι : FinSubTheory T, Semantics.Satisfiableₛ (ι.val : CTheory L) := by
+    Semantics.Satisfiableₛ T ↔ ∀ ι : FinSubTheory T, Semantics.Satisfiableₛ (ι.val : Theory L) := by
   constructor
   · rintro h ⟨t, ht⟩; exact Semantics.satisfiableₛ_of_subset h ht
   · intro h
-    have : ∀ ι : FinSubTheory T, ∃ (M : Type u) (_ : Inhabited M) (_ : Structure L M), M ⊧₁* (ι.val : CTheory L) := 
+    have : ∀ ι : FinSubTheory T, ∃ (M : Type u) (_ : Inhabited M) (_ : Structure L M), M ⊧₁* (ι.val : Theory L) := 
       by intro ι; exact satisfiableₛ_iff.mp (h ι)
     choose A si s hA using this
     have : ∃ 𝓤 : Ultrafilter (FinSubTheory T), Set.image (SubFormula.domain A) T ⊆ 𝓤.sets := ultrafilter_exists A hA
@@ -149,7 +149,7 @@ lemma compactnessAux :
     exact satisfiableₛ_intro (Structure.Uprod A 𝓤) this
 
 theorem compactness :
-    Semantics.Satisfiableₛ T ↔ ∀ T' : Finset (Sentence L), ↑T' ⊆ T → Semantics.Satisfiableₛ (T' : CTheory L) := by
+    Semantics.Satisfiableₛ T ↔ ∀ T' : Finset (Sentence L), ↑T' ⊆ T → Semantics.Satisfiableₛ (T' : Theory L) := by
   rw[compactnessAux]; simp
 
 end FirstOrder

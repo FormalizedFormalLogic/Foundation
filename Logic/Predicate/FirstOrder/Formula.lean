@@ -599,16 +599,14 @@ macro_rules
 
 end SubFormula
 
-abbrev Theory (L : Language) (μ) := Set (Formula L μ)
+abbrev Theory (L : Language) := Set (Sentence L)
 
-abbrev CTheory (L : Language) := Set (Sentence L)
-
-class SubTheory (T U : CTheory L) where
+class SubTheory (T U : Theory L) where
   sub : T ⊆ U
 
 namespace SubTheory
 
-variable {T U T₁ T₂ T₃ : CTheory L}
+variable {T U T₁ T₂ T₃ : Theory L}
 
 instance : SubTheory T T := ⟨by rfl⟩
 

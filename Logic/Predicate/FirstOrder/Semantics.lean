@@ -135,7 +135,7 @@ abbrev Models (M : Type u) [s : Structure L M] : Sentence L →L Prop := Semanti
 
 postfix:max " ⊧₁ " => Models
 
-abbrev ModelsTheory (M : Type u) [s : Structure L M] (T : CTheory L) : Prop :=
+abbrev ModelsTheory (M : Type u) [s : Structure L M] (T : Theory L) : Prop :=
   Semantics.realizeTheory (semantics := semantics) s T
 
 infix:55 " ⊧₁* " => ModelsTheory
@@ -158,27 +158,27 @@ lemma models_iff {σ : Sentence L} : M ⊧₁ σ ↔ SubFormula.Val s Empty.elim
 
 lemma realize_def : Semantics.realize (self := semantics) s = SubFormula.Val s Empty.elim := rfl
 
-lemma modelsₛ_iff {T : CTheory L} : M ⊧₁* T ↔ (∀ ⦃p⦄, p ∈ T → M ⊧₁ p) := of_eq rfl
+lemma modelsₛ_iff {T : Theory L} : M ⊧₁* T ↔ (∀ ⦃p⦄, p ∈ T → M ⊧₁ p) := of_eq rfl
 
 lemma models_iff_realize {σ : Sentence L} :
     M ⊧₁ σ ↔ Semantics.realize (self := semantics) s σ := of_eq rfl
 
-lemma consequence_iff {T : CTheory L} {σ : Sentence L} :
+lemma consequence_iff {T : Theory L} {σ : Sentence L} :
     T ⊨ σ ↔ (∀ (M : Type u) [Inhabited M] [Structure L M], M ⊧₁* T → M ⊧₁ σ) :=
   of_eq rfl
 
-lemma satisfiableₛ_iff {T : CTheory L} :
+lemma satisfiableₛ_iff {T : Theory L} :
     Semantics.Satisfiableₛ T ↔ ∃ (M : Type u) (_ : Inhabited M) (_ : Structure L M), M ⊧₁* T :=
   of_eq rfl
 
-lemma satisfiableₛ_intro {T : CTheory L} (M : Type u) [i : Inhabited M] [s : Structure L M] (h : M ⊧₁* T) : Semantics.Satisfiableₛ T :=
+lemma satisfiableₛ_intro {T : Theory L} (M : Type u) [i : Inhabited M] [s : Structure L M] (h : M ⊧₁* T) : Semantics.Satisfiableₛ T :=
 ⟨M, i, s, h⟩
 
 lemma valid_iff {σ : Sentence L} :
     Semantics.Valid σ ↔ ∀ ⦃M : Type u⦄ [Inhabited M] [Structure L M], M ⊧₁ σ :=
   of_eq rfl
 
-lemma validₛ_iff {T : CTheory L} :
+lemma validₛ_iff {T : Theory L} :
     Semantics.Validₛ T ↔ ∀ ⦃M : Type u⦄ [Inhabited M] [Structure L M], M ⊧₁* T :=
   of_eq rfl
 
@@ -198,7 +198,7 @@ lemma ElementaryEquiv.models {M₁ M₂} [Structure L M₁] [Structure L M₂] (
     ∀ {σ : Sentence L}, M₁ ⊧₁ σ ↔ M₂ ⊧₁ σ := @h
 
 lemma ElementaryEquiv.modelsₛ {M₁ M₂} [Structure L M₁] [Structure L M₂] (h : M₁ ≃ₑ[L] M₂) :
-    ∀ {T : CTheory L}, M₁ ⊧₁* T ↔ M₂ ⊧₁* T := by simp[modelsₛ_iff, h.models]
+    ∀ {T : Theory L}, M₁ ⊧₁* T ↔ M₂ ⊧₁* T := by simp[modelsₛ_iff, h.models]
 
 end
 
@@ -221,7 +221,7 @@ lemma models_onSubFormula₁ {σ : Sentence L₁} :
     Semantics.realize (self := semantics) s₂ (Φ.onSubFormula₁ σ) ↔ Semantics.realize (self := semantics) (Φ.onStructure s₂) σ :=
   by simp[Semantics.realize, Val, eval_onSubFormula₁]
 
-lemma onSubFormula₁_models_onSubFormula₁ {T : CTheory L₁} {σ : Sentence L₁} (h : T ⊨ σ) :
+lemma onSubFormula₁_models_onSubFormula₁ {T : Theory L₁} {σ : Sentence L₁} (h : T ⊨ σ) :
     Φ.onSubFormula₁ '' T ⊨ Φ.onSubFormula₁ σ := by
   intro M _ s hM
   have : Semantics.realize (self := semantics) (Φ.onStructure s) σ :=
@@ -256,7 +256,7 @@ lemma valid_extendStructure_onSubFormula₁ {σ : Sentence L₁} :
     Semantics.Valid (Φ.onSubFormula₁ σ) → Semantics.Valid σ :=
   fun h _ _ s => (models_extendStructure_onSubFormula₁ injf injr s σ).mp (h _)
 
-lemma onSubFormula₁_models_onSubFormula₁_iff {T : CTheory L₁} {σ : Sentence L₁} :
+lemma onSubFormula₁_models_onSubFormula₁_iff {T : Theory L₁} {σ : Sentence L₁} :
     Φ.onSubFormula₁ '' T ⊨ Φ.onSubFormula₁ σ ↔ T ⊨ σ := by
   constructor
   · simp; intro h M _ s₁ hs₁
@@ -293,14 +293,10 @@ lemma Derivation.sound : ∀ {Γ : Finset (SyntacticFormula L)},
     · exact ⟨SubFormula.rel r v, hrel, h⟩
     · exact ⟨SubFormula.nrel r v, hnrel, h⟩
   | _, verum Δ h,            M, s, ε => ⟨⊤, h, by simp⟩
-  | _, orLeft Δ p q d,       M, s, ε => by
-    have : SubFormula.Val! M ε p ∨ ∃ q ∈ Δ, SubFormula.Val! M ε q := by simpa using Derivation.sound d M ε
-    rcases this with (hp | ⟨r, hr, hhr⟩)
+  | _, or Δ p q d,       M, s, ε => by
+    have : SubFormula.Val! M ε p ∨ SubFormula.Val! M ε q ∨ ∃ q ∈ Δ, SubFormula.Val! M ε q := by simpa using Derivation.sound d M ε
+    rcases this with (hp | hq | ⟨r, hr, hhr⟩)
     · exact ⟨p ⋎ q, by simp, by simp[hp]⟩
-    · exact ⟨r, by simp[hr], hhr⟩
-  | _, orRight Δ p q d,       M, s, ε => by
-    have : SubFormula.Val! M ε q ∨ ∃ q ∈ Δ, SubFormula.Val! M ε q := by simpa using Derivation.sound d M ε
-    rcases this with (hq | ⟨r, hr, hhr⟩)
     · exact ⟨p ⋎ q, by simp, by simp[hq]⟩
     · exact ⟨r, by simp[hr], hhr⟩
   | _, and Δ p q dp dq,       M, s, ε => by

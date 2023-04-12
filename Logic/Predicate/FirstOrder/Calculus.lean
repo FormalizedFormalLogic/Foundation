@@ -27,18 +27,16 @@ lemma shifts_insert (p : SyntacticSubFormula L n) (Δ : Finset (SyntacticSubForm
   by simp[shifts, shiftEmb_eq_shift]
 
 inductive Derivation : Sequent L → Type _
-| axL     : ∀ (Δ : Sequent L) {k} (r : L.rel k) (v : Fin k → SyntacticTerm L),
+| axL   : ∀ (Δ : Sequent L) {k} (r : L.rel k) (v : Fin k → SyntacticTerm L),
     rel r v ∈ Δ → nrel r v ∈ Δ → Derivation Δ
-| verum   : ∀ (Δ : Sequent L), ⊤ ∈ Δ → Derivation Δ
-| orLeft  : ∀ (Δ : Sequent L) (p q : SyntacticFormula L),
-    Derivation (insert p Δ) → Derivation (insert (p ⋎ q) Δ)
-| orRight : ∀ (Δ : Sequent L) (p q : SyntacticFormula L),
-    Derivation (insert q Δ) → Derivation (insert (p ⋎ q) Δ)
-| and     : ∀ (Δ : Sequent L) (p q : SyntacticFormula L),
+| verum : ∀ (Δ : Sequent L), ⊤ ∈ Δ → Derivation Δ
+| or    : ∀ (Δ : Sequent L) (p q : SyntacticFormula L),
+    Derivation (insert p $ insert q Δ) → Derivation (insert (p ⋎ q) Δ)
+| and   : ∀ (Δ : Sequent L) (p q : SyntacticFormula L),
     Derivation (insert p Δ) → Derivation (insert q Δ) → Derivation (insert (p ⋏ q) Δ)
-| all     : ∀ (Δ : Sequent L) (p : SyntacticSubFormula L 1),
+| all   : ∀ (Δ : Sequent L) (p : SyntacticSubFormula L 1),
     Derivation (insert (free p) (shifts Δ)) → Derivation (insert (∀' p) Δ)
-| ex      : ∀ (Δ : Sequent L) (t : SyntacticTerm L) (p : SyntacticSubFormula L 1),
+| ex    : ∀ (Δ : Sequent L) (t : SyntacticTerm L) (p : SyntacticSubFormula L 1),
     Derivation (insert (subst t p) Δ) → Derivation (insert (∃' p) Δ)
 
 prefix:45 "⊢ᵀ " => Derivation
@@ -49,7 +47,7 @@ abbrev Derivation₁ (p : SyntacticFormula L) := ⊢ᵀ ({p} : Sequent L)
 
 abbrev Derivation.Valid (σ : Sentence L) := ⊢ᵀ ({emb σ} : Sequent L)
 
-structure Proof (T : CTheory L) (σ : Sentence L) where
+structure Proof (T : Theory L) (σ : Sentence L) where
   leftHand : Finset (Sentence L)
   hleftHand : ↑leftHand ⊆ SubFormula.neg '' T
   derivation : ⊢ᵀ ((insert σ leftHand).image emb : Sequent L)
@@ -71,14 +69,10 @@ protected unsafe def repr : {Δ : Sequent L} → Derivation Δ → String
       "\\AxiomC{}\n" ++
       "\\RightLabel{\\scriptsize($\\top$)}\n" ++
       "\\UnaryInfC{$" ++ reprStr Δ ++ "$}\n\n"
-  | _, orLeft Δ p q d  =>
+  | _, or Δ p q d      =>
       d.repr ++
       "\\RightLabel{\\scriptsize($\\lor$L)}\n" ++
-      "\\UnaryInfC{$" ++ reprStr (insert (p ⋎ q) Δ) ++ "$}\n\n"
-  | _, orRight Δ p q d =>
-      d.repr ++
-      "\\RightLabel{\\scriptsize($\\lor$R)}\n" ++
-      "\\UnaryInfC{$" ++ reprStr (insert (p ⋎ q) Δ) ++ "$}\n\n"
+      "\\UnaryInfC{$" ++ reprStr (insert p $ insert q Δ) ++ "$}\n\n"
   | _, and Δ p q dp dq =>
       dp.repr ++
       dq.repr ++
@@ -96,70 +90,6 @@ protected unsafe def repr : {Δ : Sequent L} → Derivation Δ → String
 unsafe instance : Repr (⊢ᵀ Δ) where
   reprPrec d _ := d.repr
 
-protected def toStr : {Δ : Sequent L} → Derivation Δ → String
-  | _, axL _ r v _ _   =>
-      "\\AxiomC{}\n" ++
-      "\\RightLabel{\\scriptsize(axL)}\n" ++
-      "\\UnaryInfC{$" ++ toString (rel r v) ++ "," ++ toString (nrel r v) ++ ", ... $}\n\n"
-  | _, verum _ _       =>
-      "\\AxiomC{}\n" ++
-      "\\RightLabel{\\scriptsize($\\top$)}\n" ++
-      "\\UnaryInfC{$ ⊤, ... $}\n\n"
-  | _, orLeft _ p q d  =>
-      d.toStr ++
-      "\\RightLabel{\\scriptsize($\\lor$L)}\n" ++
-      "\\UnaryInfC{$" ++ toString (p ⋎ q) ++ ", ... $}\n\n"
-  | _, orRight _ p q d =>
-      d.toStr ++
-      "\\RightLabel{\\scriptsize($\\lor$R)}\n" ++
-      "\\UnaryInfC{$" ++ toString (p ⋎ q) ++ ", ... $}\n\n"
-  | _, and _ p q dp dq =>
-      dp.toStr ++
-      dq.toStr ++
-      "\\RightLabel{\\scriptsize($\\land$)}\n" ++
-      "\\BinaryInfC{$" ++ toString (p ⋏ q) ++ ", ... $}\n\n"
-  | _, all _ p d       =>
-      d.toStr ++
-      "\\RightLabel{\\scriptsize($\\forall$)}\n" ++
-      "\\UnaryInfC{$" ++ toString (∀' p) ++ ", ... $}\n\n"
-  | _, ex _ _ p d      =>
-      d.toStr ++
-      "\\RightLabel{\\scriptsize($\\exists$)}\n" ++
-      "\\UnaryInfC{$" ++ toString (∃' p) ++ ", ... $}\n\n"
-
-protected def toStrCompact : {Δ : Sequent L} → Derivation Δ → String
-  | _, axL _ _ _ _ _   =>
-      "\\AxiomC{}\n" ++
-      "\\RightLabel{\\scriptsize(axL)}\n" ++
-      "\\UnaryInfC{}\n\n"
-  | _, verum _ _       =>
-      "\\AxiomC{}\n" ++
-      "\\RightLabel{\\scriptsize($\\top$)}\n" ++
-      "\\UnaryInfC{}\n\n"
-  | _, orLeft _ _ _ d  =>
-      d.toStrCompact ++
-      "\\RightLabel{\\scriptsize($\\lor$L)}\n" ++
-      "\\UnaryInfC{}\n\n"
-  | _, orRight _ _ _ d =>
-      d.toStrCompact ++
-      "\\RightLabel{\\scriptsize($\\lor$R)}\n" ++
-      "\\UnaryInfC{}\n\n"
-  | _, and _ _ _ dp dq =>
-      dp.toStrCompact ++
-      dq.toStrCompact ++
-      "\\RightLabel{\\scriptsize($\\land$)}\n" ++
-      "\\BinaryInfC{}\n\n"
-  | _, all _ _ d       =>
-      d.toStrCompact ++
-      "\\RightLabel{\\scriptsize($\\forall$)}\n" ++
-      "\\UnaryInfC{}\n\n"
-  | _, ex _ _ _ d      =>
-      d.toStrCompact ++
-      "\\RightLabel{\\scriptsize($\\exists$)}\n" ++
-      "\\UnaryInfC{}\n\n"
-
-instance : ToString (⊢ᵀ Δ) := ⟨Derivation.toStr⟩
-
 end Repr
 
 protected def cast (d : Derivation Δ) (e : Δ = Γ) : ⊢ᵀ Γ := cast (by simp[HasVdash.vdash, e]) d
@@ -167,13 +97,10 @@ protected def cast (d : Derivation Δ) (e : Δ = Γ) : ⊢ᵀ Γ := cast (by sim
 def weakening : ∀ {Δ}, ⊢ᵀ Δ → ∀ {Γ : Sequent L}, Δ ⊆ Γ → ⊢ᵀ Γ
   | _, axL Δ r v hrel hnrel, Γ, h => axL Γ r v (h hrel) (h hnrel)
   | _, verum Δ htop,         Γ, h => verum Γ (h htop)
-  | _, orLeft Δ p q d,       Γ, h =>
-      have : ⊢ᵀ insert p Γ := weakening d (Finset.insert_subset_insert p (Finset.insert_subset.mp h).2)
-      have : ⊢ᵀ insert (p ⋎ q) Γ := orLeft Γ p q this
-      this.cast (by simp; exact (Finset.insert_subset.mp h).1)
-  | _, orRight Δ p q d,      Γ, h =>
-      have : ⊢ᵀ insert q Γ := weakening d (Finset.insert_subset_insert q (Finset.insert_subset.mp h).2)
-      have : ⊢ᵀ insert (p ⋎ q) Γ := orRight Γ p q this
+  | _, or Δ p q d,           Γ, h =>
+      have : ⊢ᵀ (insert p $ insert q Γ) :=
+        weakening d (Finset.insert_subset_insert p $ Finset.insert_subset_insert q (Finset.insert_subset.mp h).2)
+      have : ⊢ᵀ insert (p ⋎ q) Γ := or Γ p q this
       this.cast (by simp; exact (Finset.insert_subset.mp h).1)
   | _, and Δ p q dp dq,      Γ, h =>
       have dp : ⊢ᵀ insert p Γ := weakening dp (Finset.insert_subset_insert p (Finset.insert_subset.mp h).2) 
@@ -192,15 +119,8 @@ def weakening : ∀ {Δ}, ⊢ᵀ Δ → ∀ {Γ : Sequent L}, Δ ⊆ Γ → ⊢�
 --def or' {p q : SyntacticFormula L} (h : p ⋎ q ∈ Δ) (d : ⊢ᵀ insert p Δ) : ⊢ᵀ Δ :=
 --  weakening (or Δ p q d) (by simp[Finset.insert_subset, h])
 
-def orLeft' {p q : SyntacticFormula L} (h : p ⋎ q ∈ Δ) (d : ⊢ᵀ insert p (Δ.erase (p ⋎ q))) : ⊢ᵀ Δ :=
-  (orLeft _ p q d).cast (by simp[Finset.insert_erase h])
-
-def orRight' {p q : SyntacticFormula L} (h : p ⋎ q ∈ Δ) (d : ⊢ᵀ insert q (Δ.erase (p ⋎ q))) : ⊢ᵀ Δ :=
-  (orRight _ p q d).cast (by simp[Finset.insert_erase h])
-
-def or {p q : SyntacticFormula L} (d : ⊢ᵀ insert p (insert q Δ)) : ⊢ᵀ insert (p ⋎ q) Δ :=
-  have : ⊢ᵀ insert (p ⋎ q) (insert q Δ) := orLeft _ p q d
-  (orRight (insert (p ⋎ q) Δ) p q (this.cast (by ext; simp; tauto))).cast (by simp)
+def or' {p q : SyntacticFormula L} (h : p ⋎ q ∈ Δ) (d : ⊢ᵀ (insert p $ insert q $ Δ.erase (p ⋎ q))) : ⊢ᵀ Δ :=
+  (or _ p q d).cast (by simp[Finset.insert_erase h])
 
 def and' {p q : SyntacticFormula L} (h : p ⋏ q ∈ Δ) (dp : ⊢ᵀ insert p (Δ.erase (p ⋏ q))) (dq : ⊢ᵀ insert q (Δ.erase (p ⋏ q))) : ⊢ᵀ Δ :=
   (and _ p q dp dq).cast (by simp[Finset.insert_erase h])
@@ -218,31 +138,34 @@ def ex' {p : SyntacticSubFormula L 1} (t : SyntacticTerm L) (h : ∃' p ∈ Δ)
 @[simp] lemma ne_step_max' (n m : ℕ) : n ≠ max m n + 1 :=
   ne_of_lt $ Nat.lt_succ_of_le $ by simp
 
+private lemma neg_ne_and {p q : SyntacticFormula L} : ¬~p = p ⋏ q :=
+ne_of_ne_complexity (by simp)
+
 def em {p : SyntacticFormula L} {Δ : Sequent L} (hpos : p ∈ Δ) (hneg : ~p ∈ Δ) : ⊢ᵀ Δ := by
   induction p using SubFormula.formulaRec generalizing Δ
-  case hverum    => exact verum Δ hpos
-  case hfalsum   => exact verum Δ hneg
-  case hrel r v  => exact axL Δ r v hpos hneg 
-  case hnrel r v => exact axL Δ r v hneg hpos 
-  case hall p ih =>
+  case hverum           => exact verum Δ hpos
+  case hfalsum          => exact verum Δ hneg
+  case hrel r v         => exact axL Δ r v hpos hneg 
+  case hnrel r v        => exact axL Δ r v hneg hpos 
+  case hall p ih        =>
     exact all' hpos $ ex' (p := ~ shift p) &0
       (by simp; exact Or.inr (by simp[shifts, shiftEmb_eq_shift]; exact ⟨_, hneg, by simp⟩))
       (ih (by simp; exact Or.inr $ ne_of_ne_complexity $ by simp[shift]) (by simp))
-  case hex p ih =>
+  case hex p ih         =>
     simp at hneg
     exact all' hneg $ ex' (p := shift p) &0
       (by simp; exact Or.inr (by simp[shifts, shiftEmb_eq_shift]; exact ⟨_, hpos, by simp⟩))
       (ih (by simp) (by simp; exact Or.inr $ ne_of_ne_complexity $ by simp[shift]))
   case hand p q ihp ihq =>
     simp at hneg
-    exact and' hpos
-      (orLeft' (p := ~p) (q := ~q) (by simp[hneg]) $ ihp (by simp; exact Or.inr $ ne_of_ne_complexity (by simp)) (by simp))
-      (orRight' (p := ~p) (q := ~q) (by simp[hneg]) $ ihq (by simp; exact Or.inr $ ne_of_ne_complexity (by simp)) (by simp))
-  case hor p q ihp ihq =>
+    exact or' hneg (and' (p := p) (q := q) (by simp[hpos])
+      (ihp (by simp) (by simp; exact Or.inr $ ne_of_ne_complexity (by simp)))
+      (ihq (by simp) (by simp; exact Or.inr $ ne_of_ne_complexity (by simp))))
+  case hor p q ihp ihq  =>
     simp at hneg
-    exact and' hneg
-      (orLeft' (p := p) (q := q) (by simp[hpos]) $ ihp (by simp) (by simp; exact Or.inr $ ne_of_ne_complexity (by simp)))
-      (orRight' (p := p) (q := q) (by simp[hpos]) $ ihq (by simp) (by simp; exact Or.inr $ ne_of_ne_complexity (by simp)))
+    exact or' hpos (and' (p := ~p) (q := ~q) (by simp[hneg])
+      (ihp (by simp; exact Or.inr $ ne_of_ne_complexity (by simp)) (by simp))
+      (ihq (by simp; exact Or.inr $ ne_of_ne_complexity (by simp)) (by simp)))   
 
 section Hom
 
@@ -260,13 +183,9 @@ def onDerivation (Φ : L₁ →ᵥ L₂) : ∀ {Δ : Finset (SyntacticFormula L�
       axL _ (Φ.onRel r) (fun i => Φ.onSubTerm (v i))
         (Finset.mem_image_of_mem _ hrel) (Finset.mem_image_of_mem _ hnrel)
   | _, verum Δ h            => verum _ (by simpa using Finset.mem_image_of_mem Φ.onSubFormula₁ h)
-  | _, orLeft Δ p q d       =>
+  | _, or Δ p q d           =>
       have : ⊢ᵀ insert (Φ.onSubFormula₁ p ⋎ Φ.onSubFormula₁ q) (Δ.image Φ.onSubFormula₁) :=
-        orLeft _ _ _ ((onDerivation Φ d).cast (by simp))
-      this.cast (by simp)
-  | _, orRight Δ p q d       =>
-      have : ⊢ᵀ insert (Φ.onSubFormula₁ p ⋎ Φ.onSubFormula₁ q) (Δ.image Φ.onSubFormula₁) :=
-        orRight _ _ _ ((onDerivation Φ d).cast (by simp))
+        or _ _ _ ((onDerivation Φ d).cast (by simp))
       this.cast (by simp)
   | _, and Δ p q dp dq      =>
       have : ⊢ᵀ insert (Φ.onSubFormula₁ p ⋏ Φ.onSubFormula₁ q) (Finset.image Φ.onSubFormula₁ Δ) :=
@@ -299,11 +218,8 @@ private lemma bind₀_subst_eq (f : ℕ → SyntacticTerm L) (t) (p : SyntacticS
 def onBind : ∀ {Δ : Sequent L}, ⊢ᵀ Δ → ∀ (f : ℕ → SyntacticTerm L), ⊢ᵀ Δ.image (bind₀ f)
   | _, axL Δ r v hrel hnrel, f => axL _ r (fun i => (v i).bind SubTerm.bvar f) (Finset.mem_image_of_mem _ hrel) (Finset.mem_image_of_mem _ hnrel)
   | _, verum Δ h,            _ => verum _ (Finset.mem_image_of_mem _ h)
-  | _, orLeft Δ p q d,       f =>
-    have : ⊢ᵀ insert (bind₀ f p ⋎ bind₀ f q) (Δ.image (bind₀ f)) := orLeft _ _ _ ((onBind d f).cast (by simp))
-    this.cast (by simp)
-  | _, orRight Δ p q d,      f =>
-    have : ⊢ᵀ insert (bind₀ f p ⋎ bind₀ f q) (Δ.image (bind₀ f)) := orRight _ _ _ ((onBind d f).cast (by simp))
+  | _, or Δ p q d,           f =>
+    have : ⊢ᵀ insert (bind₀ f p ⋎ bind₀ f q) (Δ.image (bind₀ f)) := or _ _ _ ((onBind d f).cast (by simp))
     this.cast (by simp)
   | _, and Δ p q dp dq,      f =>
     have : ⊢ᵀ insert (bind₀ f p ⋏ bind₀ f q) (Δ.image (bind₀ f)) := and _ _ _ ((onBind dp f).cast (by simp)) ((onBind dq f).cast (by simp))
@@ -350,11 +266,4 @@ def exOfInstances (v : List (SyntacticTerm L)) (p : SyntacticSubFormula L 1)
 
 end Derivation
 
-namespace Proof
-
-
-
-end Proof
-
 end FirstOrder
-

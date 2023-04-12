@@ -47,12 +47,12 @@ noncomputable def completenessₙ {Γ : Finset (Sentence L)}
 noncomputable def completeness {T} {σ : Sentence L} : T ⊨ σ → T ⊢ σ := by
   intro h
   have : ¬Semantics.Satisfiableₛ (insert (~σ) T) := Semantics.consequence_iff.mp h
-  have : ∃ T' : Finset (Sentence L), ↑T' ⊆ T ∧ ¬Semantics.Satisfiableₛ (insert (~σ) T' : CTheory L) := by
+  have : ∃ T' : Finset (Sentence L), ↑T' ⊆ T ∧ ¬Semantics.Satisfiableₛ (insert (~σ) T' : Theory L) := by
     rw[compactness] at this; simp at this
     rcases this with ⟨T', hT', h⟩
     exact ⟨T' \ {~σ}, by simp[Set.subset_def]; intro τ hτ eτ; simpa[eτ] using hT' hτ, by
       simp; intro h
-      have : Semantics.Satisfiableₛ (T' : CTheory L) := Semantics.satisfiableₛ_of_subset h (by simp)
+      have : Semantics.Satisfiableₛ (T' : Theory L) := Semantics.satisfiableₛ_of_subset h (by simp)
       contradiction⟩
   choose s hs using this
   have : ⊢ᵀ (insert σ (s.image HasNeg.neg)).image emb :=
