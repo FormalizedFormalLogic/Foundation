@@ -56,7 +56,7 @@ prefix:45 "⊢ᶜ " => DerivationCut
 
 abbrev DerivationClx (c : ℕ) : Sequent L → Type u := DerivationCutRestricted (·.complexity < c)
 
-notation :45 "⊢ᶜ[<" c "] " Γ:45 => DerivationClx c Γ
+notation :45 "⊢ᶜ[< " c "] " Γ:45 => DerivationClx c Γ
 
 abbrev DerivationList (G : List (SyntacticFormula L)) := ⊢ᶜ G.toFinset
 
@@ -159,6 +159,8 @@ def cutWeakening {P Q : SyntacticFormula L → Prop} (h : ∀ p, P p → Q p) : 
 
 @[simp] lemma lengtgh_cutWeakening {P Q : SyntacticFormula L → Prop} (h : ∀ p, P p → Q p) {Δ} (d : ⊢ᶜ[P] Δ) :
     (d.cutWeakening h).length = d.length := by induction d <;> simp[*, cutWeakening]
+
+def ofLe {i j : ℕ} (h : i ≤ j) : ⊢ᶜ[< i] Δ → ⊢ᶜ[< j] Δ := cutWeakening (fun _ hp => lt_of_lt_of_le hp h)
 
 def cutWeakeningCut (d : ⊢ᶜ[P] Δ) : ⊢ᶜ Δ := d.cutWeakening (by simp)
 
@@ -326,6 +328,8 @@ def onBind (h : ∀ f p, P p → P (bind₀ f p)) : ∀ {Δ : Sequent L}, ⊢ᶜ
 
 def onBind₀ {Δ : Sequent L} (d : ⊢ᵀ Δ) (f : ℕ → SyntacticTerm L) : ⊢ᵀ Δ.image (bind₀ f) := d.onBind (by simp) f
 
+def onBindClx {i} {Δ : Sequent L} (d : ⊢ᶜ[< i] Δ) (f : ℕ → SyntacticTerm L) : ⊢ᶜ[< i] Δ.image (bind₀ f) := d.onBind (by simp) f
+
 def onBindCut {Δ : Sequent L} (d : ⊢ᶜ Δ) (f : ℕ → SyntacticTerm L) : ⊢ᶜ Δ.image (bind₀ f) := d.onBind (by simp) f
 
 @[simp] lemma length_onBind (h) (d : ⊢ᶜ[P] Δ) (f : ℕ → SyntacticTerm L) : (d.onBind h f).length = d.length :=
@@ -335,6 +339,9 @@ def onBindCut {Δ : Sequent L} (d : ⊢ᶜ Δ) (f : ℕ → SyntacticTerm L) : �
   d.length_onBind _ f
 
 def onMap (h : ∀ f p, P p → P (bind₀ f p)) {Δ : Sequent L} (d : ⊢ᶜ[P] Δ) (f : ℕ → ℕ) : ⊢ᶜ[P] Δ.image (map₀ f) := d.onBind h _
+
+def onShift (h : ∀ f p, P p → P (bind₀ f p)) {Δ : Sequent L} (d : ⊢ᶜ[P] Δ) : ⊢ᶜ[P] (shifts Δ) :=
+  (d.onMap h Nat.succ).cast (by simp[shifts_eq_image, shift])
 
 private lemma map_subst_eq_free (p : SyntacticSubFormula L 1) (h : ¬p.fvar? m) :
     map₀ (fun x => if x = m then 0 else x + 1) (subst &m p) = free p := by

@@ -550,6 +550,12 @@ lemma bind_eq_of_funEqOn' {bound₁ bound₂ : Fin n → SubTerm L μ n} {free�
 lemma ne_of_ne_complexity {p q : SubFormula L μ n} (h : p.complexity ≠ q.complexity) : p ≠ q :=
   by rintro rfl; contradiction
 
+@[simp] lemma ex_ne_subst (p : SubFormula L μ (n + 1)) (t) : subst t p ≠ ∃' p := ne_of_ne_complexity (by simp[subst])
+
+@[simp] lemma ne_or_left (p q : SubFormula L μ n) : p ≠ p ⋎ q := ne_of_ne_complexity (by simp)
+
+@[simp] lemma ne_or_right (p q : SubFormula L μ n) : q ≠ p ⋎ q := ne_of_ne_complexity (by simp)
+
 inductive Open : {n : ℕ} → SubFormula L μ n → Prop
   | verum                      : Open ⊤
   | falsum                     : Open ⊥

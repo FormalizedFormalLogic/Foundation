@@ -25,6 +25,12 @@ infixr:70 " :>ₙ " => cases
 @[simp] lemma cases_succ (hzero : α 0) (hsucc : ∀ n, α (n + 1)) (n : ℕ) :
     (hzero :>ₙ hsucc) (n + 1) = hsucc n := rfl
 
+@[simp] lemma ne_step_max (n m : ℕ) : n ≠ max n m + 1 :=
+  ne_of_lt $ Nat.lt_succ_of_le $ by simp
+
+@[simp] lemma ne_step_max' (n m : ℕ) : n ≠ max m n + 1 :=
+  ne_of_lt $ Nat.lt_succ_of_le $ by simp
+
 end Nat
 
 lemma eq_finZeroElim {α : Sort u} (x : Fin 0 → α) : x = finZeroElim := funext (by rintro ⟨_, _⟩; contradiction)
@@ -378,5 +384,8 @@ lemma map_disj (f : α →L Prop) (s : Finset α) : f s.disj ↔ ∃ a ∈ s, f 
   simpa using List.map_disj f s.toList
 
 end
+
+lemma erase_union [DecidableEq α] {a : α} {s t : Finset α} :
+  (s ∪ t).erase a = (s.erase a) ∪ (t.erase a) := by ext; simp[and_or_left]
 
 end Finset
