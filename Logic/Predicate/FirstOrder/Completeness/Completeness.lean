@@ -39,7 +39,7 @@ noncomputable def completenessₙ {Γ : Finset (Sentence L)}
         s (toSubLanguageFinsetSelf hσΓ)).mp
       (by simpa[e] using hσ)⟩
   have : ⊢ᵀ Γ'.image emb := completenessₙ_of_encodable this
-  exact (Derivation.onDerivation L.ofSubLanguage this).cast (by
+  exact (this.lHom₀ L.ofSubLanguage).cast (by
     ext p; simp[Finset.mem_imageOfFinset_iff, onSubFormula₁_emb]; constructor
     · rintro ⟨_, ⟨τ, hτΓ, rfl⟩, rfl⟩; exact ⟨τ, hτΓ, by simp⟩
     · rintro ⟨σ, hσΓ, rfl⟩; exact ⟨toSubLanguageFinsetSelf hσΓ, ⟨σ, hσΓ, rfl⟩, by simp⟩)
@@ -69,7 +69,7 @@ noncomputable def completeness {T} {σ : Sentence L} : T ⊨ σ → T ⊢ σ := 
         simpa using this)
   exact { leftHand := s.image HasNeg.neg,
           hleftHand := by rw[Finset.coe_image]; exact Set.image_subset _ hs.1,
-          derivation := this}
+          derivation := this.cutWeakeningCut }
 
 end FirstOrder
 

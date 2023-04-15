@@ -23,10 +23,8 @@ lemma not_fvar?_sequentUpper {p : SyntacticFormula L} {Γ : Sequent L} (h : p �
   not_fvar?_of_lt_upper p (by simpa[sequentUpper] using Finset.le_sup h)
 
 inductive Decomp (t : SyntacticTerm L) (Γ : Sequent L) : SyntacticFormula L → Sequent L → Prop
-  | rel {k} (r : L.rel k) (v) :
-      nrel r v ∉ Γ → Decomp t Γ (rel r v) ∅ 
-  | nrel {k} (r : L.rel k) (v) :
-      rel r v ∉ Γ → Decomp t Γ (nrel r v) ∅
+  | rel {k} (r : L.rel k) (v) : nrel r v ∉ Γ → Decomp t Γ (rel r v) ∅ 
+  | nrel {k} (r : L.rel k) (v) : rel r v ∉ Γ → Decomp t Γ (nrel r v) ∅
   | falsum : Decomp t Γ ⊥ ∅
   | andLeft (p q : SyntacticFormula L) : Decomp t Γ (p ⋏ q) {p}
   | andRight (p q : SyntacticFormula L) : Decomp t Γ (p ⋏ q) {q}
@@ -110,39 +108,39 @@ noncomputable def syntacticMainLemma (τ : SearchTreeUnder Γ) : ⊢ᵀ τ.val.2
     choose p hp t i hi using this
     cases p using cases'
     case hverum =>
-      exact Derivation.verum Δ hp
+      exact DerivationCutRestricted.verum Δ hp
     case hfalsum =>
       have : Δ ≺[s] Δ := (searchtreeAt_iff_decomp_of_index hp hi).mpr ⟨∅, Decomp.falsum, by simp⟩
       exact ih Δ this
     case hrel k r v =>
       by_cases hrv : nrel r v ∈ Δ
-      · exact Derivation.axL Δ r v hp hrv
+      · exact DerivationCutRestricted.axL Δ r v hp hrv
       · have : Δ ≺[s] Δ := (searchtreeAt_iff_decomp_of_index hp hi).mpr ⟨∅, Decomp.rel r v hrv, by simp⟩
         exact ih Δ this
     case hnrel k r v =>
       by_cases hrv : rel r v ∈ Δ
-      · exact Derivation.axL Δ r v hrv hp
+      · exact DerivationCutRestricted.axL Δ r v hrv hp
       · have : Δ ≺[s] Δ := (searchtreeAt_iff_decomp_of_index hp hi).mpr ⟨∅, Decomp.nrel r v hrv, by simp⟩
         exact ih Δ this
     case hand p q =>
       have dp : insert p Δ ≺[s] Δ := (searchtreeAt_iff_decomp_of_index hp hi).mpr ⟨_, Decomp.andLeft p q, rfl⟩
       have dq : insert q Δ ≺[s] Δ := (searchtreeAt_iff_decomp_of_index hp hi).mpr ⟨_, Decomp.andRight p q, rfl⟩
-      have : ⊢ᵀ insert (p ⋏ q) Δ := Derivation.and Δ p q (ih _ dp) (ih _ dq)
+      have : ⊢ᵀ insert (p ⋏ q) Δ := DerivationCutRestricted.and Δ p q (ih _ dp) (ih _ dq)
       exact this.cast (by simp[hp])
     case hor p q =>
       have : {p, q} ∪ Δ ≺[s] Δ := (searchtreeAt_iff_decomp_of_index hp hi).mpr ⟨_, Decomp.or p q, rfl⟩
-      have : ⊢ᵀ insert (p ⋎ q) Δ := Derivation.or ((ih _ this).cast (by simp[Finset.insert_eq]))
+      have : ⊢ᵀ insert (p ⋎ q) Δ := DerivationCutRestricted.or _ _ _ ((ih _ this).cast (by simp[Finset.insert_eq]))
       exact this.cast (by simp[hp])
     case hall p =>
       have : {subst &(sequentUpper Δ) p} ∪ Δ ≺[s] Δ := (searchtreeAt_iff_decomp_of_index hp hi).mpr ⟨_, Decomp.all p, rfl⟩
       have : ⊢ᵀ insert (subst &(sequentUpper Δ) p) Δ := ih _ this
-      have : ⊢ᵀ insert (∀' p) Δ := Derivation.genelalizeByNewver (not_fvar?_sequentUpper hp) (fun _ hq => not_fvar?_sequentUpper hq) this
+      have : ⊢ᵀ insert (∀' p) Δ := DerivationCutRestricted.genelalizeByNewver₀ (not_fvar?_sequentUpper hp) (fun _ hq => not_fvar?_sequentUpper hq) this
       exact this.cast (by simp[hp])
     case hex p =>
       have : {subst t p} ∪ Δ ≺[s] Δ :=
         (searchtreeAt_iff_decomp_of_index hp hi).mpr ⟨_, Decomp.ex p, rfl⟩
       have : ⊢ᵀ insert (subst t p) Δ := ih _ this
-      have : ⊢ᵀ insert (∃' p) Δ := Derivation.ex Δ t p this
+      have : ⊢ᵀ insert (∃' p) Δ := DerivationCutRestricted.ex Δ t p this
       exact this.cast (by simp[hp])  
 
 noncomputable def syntacticMainLemma_top : ⊢ᵀ Γ := syntacticMainLemma wf ⟨(0, Γ), SearchTree.IsUnder.top (Γ := Γ)⟩
