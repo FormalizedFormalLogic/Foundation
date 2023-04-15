@@ -458,6 +458,14 @@ lemma fix_nrel {k} (r : L.rel k) (v : Fin k → SyntacticSubTerm L n) :
   simp[fix, free, bind_bind]; apply eq_bind_of <;> simp
   intros x; exact Fin.lastCases (by simp) (by simp) x
 
+lemma bind₀_free_eq_subst (p : SyntacticSubFormula L 1) (t : SyntacticTerm L) :
+    bind₀ (t :>ₙ SubTerm.fvar) (free p) = subst t p :=
+  by simp[subst, free, bind_bind, Matrix.vecConsLast_vecEmpty, Matrix.constant_eq_singleton] 
+
+lemma bind₀_shift_eq_self (p : SyntacticFormula L) (t : SyntacticTerm L) :
+    bind₀ (t :>ₙ SubTerm.fvar) (shift p) = p :=
+  by simp[shift, map, bind_bind]
+
 @[simp] lemma subst_shift_eq_free (p : SyntacticSubFormula L 1) : subst &0 (shift p) = free p :=
   by simp[subst, shift, free, map, bind_bind]
 
@@ -541,6 +549,16 @@ lemma bind_eq_of_funEqOn' {bound₁ bound₂ : Fin n → SubTerm L μ n} {free�
 
 lemma ne_of_ne_complexity {p q : SubFormula L μ n} (h : p.complexity ≠ q.complexity) : p ≠ q :=
   by rintro rfl; contradiction
+
+inductive Open : {n : ℕ} → SubFormula L μ n → Prop
+  | verum                      : Open ⊤
+  | falsum                     : Open ⊥
+  | rel {k} (r : L.rel k) (v)  : Open (rel r v)
+  | nrel {k} (r : L.rel k) (v) : Open (nrel r v)
+  | and {p q : SubFormula L μ n}   : Open p → Open q → Open (p ⋏ q)
+  | or {p q : SubFormula L μ n}    : Open p → Open q → Open (p ⋎ q)
+
+attribute [simp] Open.verum Open.falsum Open.rel Open.nrel
 
 declare_syntax_cat subformula
 syntax "⊤" : subformula

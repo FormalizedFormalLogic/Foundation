@@ -15,7 +15,7 @@ def shifts (Δ : Finset (SyntacticSubFormula L n)) :
 
 lemma shifts_eq_image (Δ : Finset (SyntacticSubFormula L n)) : shifts Δ = Δ.image shift := Finset.map_eq_image _ _
 
-@[simp] lemma mem_shifts_iff (p : SyntacticSubFormula L n) (Δ : Finset (SyntacticSubFormula L n)) :
+@[simp] lemma mem_shifts_iff {p : SyntacticSubFormula L n} {Δ : Finset (SyntacticSubFormula L n)} :
     shift p ∈ shifts Δ ↔ p ∈ Δ :=
   Finset.mem_map' _
 
@@ -24,6 +24,10 @@ lemma shifts_eq_image (Δ : Finset (SyntacticSubFormula L n)) : shifts Δ = Δ.i
 
 lemma shifts_insert (p : SyntacticSubFormula L n) (Δ : Finset (SyntacticSubFormula L n)) :
     shifts (insert p Δ) = insert (shift p) (shifts Δ) :=
+  by simp[shifts, shiftEmb_eq_shift]
+
+lemma shifts_erase (p : SyntacticSubFormula L n) (Δ : Finset (SyntacticSubFormula L n)) :
+    shifts (Δ.erase p) = (shifts Δ).erase (shift p) :=
   by simp[shifts, shiftEmb_eq_shift]
 
 inductive Derivation : Sequent L → Type _
@@ -55,7 +59,31 @@ structure Proof (T : Theory L) (σ : Sentence L) where
 instance : HasTurnstile (Sentence L) (Type u) := ⟨Proof⟩
 
 namespace Derivation
-variable {Δ Γ : Sequent L}
+variable {Δ Δ₁ Δ₂ Γ : Sequent L}
+
+def length : {Δ : Sequent L} → Derivation Δ → ℕ 
+  | _, axL Δ _ _ _ _   => 0
+  | _, verum Δ _       => 0
+  | _, or _ _ _ d      => d.length.succ
+  | _, and _ _ _ dp dq => (max dp.length dq.length).succ
+  | _, all _ _ d       => d.length.succ
+  | _, ex _ _ _ d      => d.length.succ
+
+section
+
+@[simp] lemma length_axL {k} {r : L.rel k} {v} (hpos : rel r v ∈ Δ) (hneg : nrel r v ∈ Δ) : (axL Δ r v hpos hneg).length = 0 := rfl
+
+@[simp] lemma length_verum (h : ⊤ ∈ Δ) : (verum Δ h).length = 0 := rfl
+
+@[simp] lemma length_and {p q} (dp : ⊢ᵀ insert p Δ) (dq : ⊢ᵀ insert q Δ) : (and Δ p q dp dq).length = (max dp.length dq.length).succ := rfl
+
+@[simp] lemma length_or {p q} (d : ⊢ᵀ (insert p $ insert q Δ)) : (or Δ p q d).length = d.length.succ := rfl
+
+@[simp] lemma length_all {p} (d) : (all Δ p d).length = d.length.succ := rfl
+
+@[simp] lemma length_ex {t} {p} (d) : (ex Δ t p d).length = d.length.succ := rfl
+
+end
 
 section Repr
 variable [∀ k, ToString (L.func k)] [∀ k, ToString (L.rel k)]
@@ -94,6 +122,8 @@ end Repr
 
 protected def cast (d : Derivation Δ) (e : Δ = Γ) : ⊢ᵀ Γ := cast (by simp[HasVdash.vdash, e]) d
 
+@[simp] lemma length_cast (d : Derivation Δ) (e : Δ = Γ) : (d.cast e).length = d.length := by rcases e with rfl; simp[Derivation.cast]
+
 def weakening : ∀ {Δ}, ⊢ᵀ Δ → ∀ {Γ : Sequent L}, Δ ⊆ Γ → ⊢ᵀ Γ
   | _, axL Δ r v hrel hnrel, Γ, h => axL Γ r v (h hrel) (h hnrel)
   | _, verum Δ htop,         Γ, h => verum Γ (h htop)
@@ -116,8 +146,8 @@ def weakening : ∀ {Δ}, ⊢ᵀ Δ → ∀ {Γ : Sequent L}, Δ ⊆ Γ → ⊢�
       have : ⊢ᵀ insert (∃' p) Γ := ex Γ t p this
       Derivation.cast this (by simp; exact (Finset.insert_subset.mp h).1)     
 
---def or' {p q : SyntacticFormula L} (h : p ⋎ q ∈ Δ) (d : ⊢ᵀ insert p Δ) : ⊢ᵀ Δ :=
---  weakening (or Δ p q d) (by simp[Finset.insert_subset, h])
+@[simp] lemma length_weakening {Δ} (d : ⊢ᵀ Δ) {Γ : Sequent L} (h : Δ ⊆ Γ) : (d.weakening h).length = d.length :=
+  by induction d generalizing Γ <;> simp[*, weakening]
 
 def or' {p q : SyntacticFormula L} (h : p ⋎ q ∈ Δ) (d : ⊢ᵀ (insert p $ insert q $ Δ.erase (p ⋎ q))) : ⊢ᵀ Δ :=
   (or _ p q d).cast (by simp[Finset.insert_erase h])
@@ -131,6 +161,19 @@ def all' {p : SyntacticSubFormula L 1} (h : ∀' p ∈ Δ) (d : ⊢ᵀ insert (f
 def ex' {p : SyntacticSubFormula L 1} (t : SyntacticTerm L) (h : ∃' p ∈ Δ)
   (d : ⊢ᵀ insert (subst t p) (Δ.erase (∃' p))) : ⊢ᵀ Δ :=
   (ex _ t p d).cast (by simp[Finset.insert_erase h])
+
+def or'' {p q : SyntacticFormula L} (h : p ⋎ q ∈ Δ) (d : ⊢ᵀ (insert p $ insert q $ Δ)) : ⊢ᵀ Δ :=
+  (or _ p q d).cast (by simp[h])
+
+def and'' {p q : SyntacticFormula L} (h : p ⋏ q ∈ Δ) (dp : ⊢ᵀ insert p Δ) (dq : ⊢ᵀ insert q Δ) : ⊢ᵀ Δ :=
+  (and _ p q dp dq).cast (by simp[h])
+
+def all'' {p : SyntacticSubFormula L 1} (h : ∀' p ∈ Δ) (d : ⊢ᵀ insert (free p) (shifts Δ)) : ⊢ᵀ Δ :=
+  (all _ p d).cast (by simp[h])
+
+def ex'' {p : SyntacticSubFormula L 1} (t : SyntacticTerm L) (h : ∃' p ∈ Δ)
+  (d : ⊢ᵀ insert (subst t p) Δ) : ⊢ᵀ Δ :=
+  (ex _ t p d).cast (by simp[h])
 
 @[simp] lemma ne_step_max (n m : ℕ) : n ≠ max n m + 1 :=
   ne_of_lt $ Nat.lt_succ_of_le $ by simp
@@ -227,13 +270,16 @@ def onBind : ∀ {Δ : Sequent L}, ⊢ᵀ Δ → ∀ (f : ℕ → SyntacticTerm 
   | _, all Δ p d,            f =>
     have : ⊢ᵀ (insert (free p) (shifts Δ)).image (bind₀ (&0 :>ₙ fun x => SubTerm.shift (f x))).toFun := onBind d (&0 :>ₙ fun x => (f x).shift)
     have : ⊢ᵀ insert (∀' (bind₀ (SubTerm.bShift ∘ f)) p) (Δ.image (bind₀ f).toFun) :=
-      all _ _ (by simpa[free_bind₀_eq, shift_bind₀_eq, shifts_eq_image, Finset.image_image, Function.comp] using this)
+      all _ _ (this.cast (by simp[free_bind₀_eq, shift_bind₀_eq, shifts_eq_image, Finset.image_image, Function.comp]))
     this.cast (by simp)
   | _, ex Δ t p d,           f =>
     have : ⊢ᵀ (insert (subst t p) Δ).image (bind₀ f) := onBind d f 
     have : ⊢ᵀ insert (∃' bind₀ (SubTerm.bShift ∘ f) p) (Δ.image (bind₀ f)) := 
-      ex _ (SubTerm.bind SubTerm.bvar f t) _ (by simpa[bind₀_subst_eq] using this) 
+      ex _ (SubTerm.bind SubTerm.bvar f t) _ (this.cast (by simp[bind₀_subst_eq])) 
     this.cast (by simp)
+
+@[simp] lemma length_onBind (d : ⊢ᵀ Δ) (f : ℕ → SyntacticTerm L) : (d.onBind f).length = d.length :=
+  by induction d generalizing f <;> simp[*, onBind]
 
 def onMap {Δ : Sequent L} (d : ⊢ᵀ Δ) (f : ℕ → ℕ) : ⊢ᵀ Δ.image (map₀ f) := onBind d _
 
