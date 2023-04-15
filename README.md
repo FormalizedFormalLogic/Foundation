@@ -12,11 +12,12 @@ Formalizing Logic in Lean4
 ## Definition
 ### First-Order logic
 
-|                            |                                     | Definition                   | Notation |
-| :----:                     | ----                                | ----                         | ----     |
-| $\vdash_\mathrm{T} \Gamma$ | Derivation in Tait-Calculus         |  `FirstOrder.Derivation`     | `⊢ᵀ Γ`    |
-| $T \vdash \sigma$          | Provability, Proof                  |  `FirstOrder.Proof`          | `T ⊢ σ`  |
-| $M \models \sigma$         | Tarski's truth definition condition |  `FirstOrder.SubFormula.Val` | `M ⊧₁ σ` |
+|                                     |                                     | Definition                   | Notation |
+| :----:                              | ----                                | ----                         | ----     |
+| $\vdash_\mathrm{T} \Gamma$          | Derivation in Tait-Calculus         |  `FirstOrder.Derivation`     | `⊢ᵀ Γ`    |
+| $(\rm Cut)\vdash_\mathrm{T} \Gamma$ | Derivation in Tait-Calculus + Cut   |  `FirstOrder.DerivationCut`     | `⊢ᶜ Γ`    |
+| $T \vdash \sigma$                   | Provability, Proof                  |  `FirstOrder.Proof`          | `T ⊢ σ`  |
+| $M \models \sigma$                  | Tarski's truth definition condition |  `FirstOrder.SubFormula.Val` | `M ⊧₁ σ` |
 
 ## Theorem
 ### First-Order logic
@@ -25,5 +26,5 @@ Formalizing Logic in Lean4
 | ----                           |  ----                     | ----             |
 | Soundness theorem              | `FirstOrder.soundness`    | `T ⊢ σ → T ⊨ σ` |
 | Completeness theorem           | `FirstOrder.completeness` | `T ⊨ σ → T ⊢ σ` |
-| Cut-elimination                | TODO                      |                  |
+| Cut-elimination                | `FirstOrder.hauptsatz`    | `⊢ᶜ Δ → ⊢ᵀ Δ`   |
 | Gödel's incompleteness theorem | TODO                      |                  |

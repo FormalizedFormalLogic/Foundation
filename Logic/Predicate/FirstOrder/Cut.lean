@@ -256,18 +256,18 @@ def reduction {i} {p} (hp : p.complexity ≤ i) : ⊢ᶜ[< i] insert p Δ → �
       (by simp[Finset.union_comm]; exact Finset.union_subset_union (by rfl) (by simp; exact Finset.erase_subset _ _))
   · exact (reductionAux dΔ tp hp dΓ).weakening (Finset.union_subset_union (by simp; exact Finset.erase_subset _ _) (by rfl))
 
-def cutElimination {i} : {Δ : Sequent L} → ⊢ᶜ[< i + 1] Δ → ⊢ᶜ[< i] Δ
+def elimination {i} : {Δ : Sequent L} → ⊢ᶜ[< i + 1] Δ → ⊢ᶜ[< i] Δ
   | _, axL Δ r v hpos hneg => axL Δ r v hpos hneg
   | _, verum Δ h           => verum Δ h
-  | _, and Δ p q dp dq     => and Δ p q dp.cutElimination dq.cutElimination
-  | _, or Δ p q d          => or Δ p q d.cutElimination
-  | _, all Δ p d           => all Δ p d.cutElimination
-  | _, ex Δ t p d          => ex Δ t p d.cutElimination
-  | _, cut _ _ _ hp dΔ dΓ  =>  reduction (Nat.lt_add_one_iff.mp hp) dΔ.cutElimination dΓ.cutElimination
+  | _, and Δ p q dp dq     => and Δ p q dp.elimination dq.elimination
+  | _, or Δ p q d          => or Δ p q d.elimination
+  | _, all Δ p d           => all Δ p d.elimination
+  | _, ex Δ t p d          => ex Δ t p d.elimination
+  | _, cut _ _ _ hp dΔ dΓ  => reduction (Nat.lt_add_one_iff.mp hp) dΔ.elimination dΓ.elimination
 
 def hauptsatzClx : {i : ℕ} → ⊢ᶜ[< i] Δ → ⊢ᵀ Δ
   | 0,     d => d.cutWeakening (by simp)
-  | i + 1, d => d.cutElimination.hauptsatzClx
+  | i + 1, d => d.elimination.hauptsatzClx
 
 def toClx : {Δ : Sequent L} → ⊢ᶜ Δ → (i : ℕ) × ⊢ᶜ[< i] Δ
   | _, axL Δ r v hpos hneg => ⟨0, axL Δ r v hpos hneg⟩
