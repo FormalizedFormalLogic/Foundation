@@ -68,7 +68,6 @@ def andInversion₁Aux : {Δ : Sequent L} → (d : ⊢ᶜ[P] Δ) → (p q : Synt
       (andInversion₁Aux dΓ p q).weakening (by simp[Finset.subset_iff]; rintro x hx (rfl | hhx) <;> simp[*])
     (cut _ _ r hr dΔ dΓ).cast (by simp[Finset.erase_union])
 
-
 def andInversion₁ {p q} (d : ⊢ᶜ[P] insert (p ⋏ q) Δ) : ⊢ᶜ[P] insert p Δ := 
   (andInversion₁Aux d p q).weakening (by simp; exact Finset.insert_subset_insert _ (Finset.erase_subset _ _))
 

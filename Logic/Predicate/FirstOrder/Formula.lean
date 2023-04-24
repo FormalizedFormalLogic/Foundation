@@ -418,6 +418,8 @@ lemma shift_subst (s : SyntacticSubTerm L n) (p : SyntacticSubFormula L (n + 1))
   simp[shift, subst, map, bind_bind]; congr; funext x
   cases' x using Fin.lastCases <;> simp; rfl
 
+@[simp] lemma shift_emb (p : SubFormula L Empty n) : shift (emb p) = emb p := by simp[shift, emb, map_map, Empty.eq_elim]
+
 lemma free_rel {k} (r : L.rel k) (v : Fin k → SyntacticSubTerm L (n + 1)) :
     free (rel r v) = rel r (fun i => SubTerm.free $ v i) := rfl
 

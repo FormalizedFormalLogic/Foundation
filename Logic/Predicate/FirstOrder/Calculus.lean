@@ -367,6 +367,13 @@ def genelalizeByNewver₀ {p : SyntacticSubFormula L 1} (hp : ¬p.fvar? m) (hΔ 
 def genelalizeByNewverCut {p : SyntacticSubFormula L 1} (hp : ¬p.fvar? m) (hΔ : ∀ q ∈ Δ, ¬q.fvar? m)
   (d : ⊢ᶜ insert (subst &m p) Δ) : ⊢ᶜ insert (∀' p) Δ := d.genelalizeByNewver (by simp) hp hΔ
 
+def exOfInstances (v : List (SyntacticTerm L)) (p : SyntacticSubFormula L 1)
+  (h : ⊢ᶜ[P] (v.map (subst · p)).toFinset ∪ Γ) : ⊢ᶜ[P] insert (∃' p) Γ := by
+  induction' v with t v ih generalizing Γ <;> simp at h
+  · exact weakening h (Finset.subset_insert _ Γ)
+  · exact (ih (Γ := insert (∃' p) Γ)
+      ((ex _ t p h).cast (by ext r; simp))).cast (by simp)
+
 end DerivationCutRestricted
 
 end FirstOrder

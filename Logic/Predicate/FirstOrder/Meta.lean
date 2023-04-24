@@ -460,7 +460,7 @@ end Meta
 end SubFormula
 
 namespace DerivationList
-open Derivation
+open DerivationCutRestricted
 variable {L : Language.{u}} [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq (L.rel k)] {G : List (SyntacticFormula L)}
 
 def congr {G G' : List (SyntacticFormula L)} (e : G = G')
@@ -468,59 +468,59 @@ def congr {G G' : List (SyntacticFormula L)} (e : G = G')
 
 def head {p} (d : DerivationList (G ++ [p])) : DerivationList (p :: G) := d.cast (by ext; simp[or_comm])
 
-def headVerum : DerivationList (⊤ :: G) := Derivation.verum _ (by simp)
+def headVerum : DerivationList (⊤ :: G) := DerivationCutRestricted.verum _ (by simp)
 
-def verum (h : ⊤ ∈ G) : DerivationList G := Derivation.verum _ (by simp[h])
+def verum (h : ⊤ ∈ G) : DerivationList G := DerivationCutRestricted.verum _ (by simp[h])
 
-def tailVerum (p) (h : ⊤ ∈ G) : DerivationList (p :: G) := Derivation.verum _ (by simp[h])
+def tailVerum (p) (h : ⊤ ∈ G) : DerivationList (p :: G) := DerivationCutRestricted.verum _ (by simp[h])
 
-def headEm {p} (h : ~p ∈ G) : DerivationList (p :: G) := Derivation.em (p := p) (by simp) (by simp[h])
+def headEm {p} (h : ~p ∈ G) : DerivationList (p :: G) := DerivationCutRestricted.em (p := p) (by simp) (by simp[h])
 
 def headEm' {p np} (e : ~p = np) (h : np ∈ G) :
-  DerivationList (p :: G) := Derivation.em (p := p) (by simp) (by simp[h, e])
+  DerivationList (p :: G) := DerivationCutRestricted.em (p := p) (by simp) (by simp[h, e])
 
 def rotate {p} (d : DerivationList (G ++ [p])) : DerivationList (p :: G) :=
   d.cast (by ext; simp[or_comm])
 
 def headWeakening {p} (d : DerivationList G) : DerivationList (p :: G) :=
-  Derivation.weakening d (by simp; exact Finset.subset_insert  _ _)
+  DerivationCutRestricted.weakening d (by simp; exact Finset.subset_insert  _ _)
 
 def headWeakeningOfDerivation₁ {p p'} (h : p = p') (d : Derivation₁ p) : DerivationList (p' :: G) :=
-  Derivation.weakening d (by simp[h])
+  DerivationCutRestricted.weakening d (by simp[h])
 
 def headOr {p q} (d : DerivationList (G ++ [p, q])) : DerivationList (p ⋎ q :: G) :=
-  (Derivation.or (Δ := G.toFinset) (p := p) (q := q) (d.cast $ by ext; simp; tauto)).cast (by simp)
+  (DerivationCutRestricted.or (Δ := G.toFinset) (p := p) (q := q) (d.cast $ by ext; simp; tauto)).cast (by simp)
 
 def headAnd {p q} (dp : DerivationList (G ++ [p])) (dq : DerivationList (G ++ [q])) : DerivationList (p ⋏ q :: G) :=
-  (Derivation.and (Δ := G.toFinset) (p := p) (q := q)
+  (DerivationCutRestricted.and (Δ := G.toFinset) (p := p) (q := q)
     (dp.cast $ by ext; simp[or_comm]) (dq.cast $ by ext; simp[or_comm])).cast (by simp)
 
 def headAll {p : SyntacticSubFormula L 1} (d : DerivationList (G.map SubFormula.shift ++ [SubFormula.free p])) :
     DerivationList ((∀' p) :: G) :=
-  (Derivation.all G.toFinset p (d.cast $ by ext; simp[shifts, SubFormula.shiftEmb, or_comm])).cast (by simp)
+  (DerivationCutRestricted.all G.toFinset p (d.cast $ by ext; simp[shifts, SubFormula.shiftEmb, or_comm])).cast (by simp)
 
 def headAllOfEq {G'} (eG : G.map SubFormula.shift = G') {p : SyntacticSubFormula L 1} {p} (ep : SubFormula.free p = p')
   (d : DerivationList (G' ++ [p'])) :
     DerivationList ((∀' p) :: G) :=
-  (Derivation.all G.toFinset p (d.cast $ by ext; simp[←eG, ←ep, shifts, SubFormula.shiftEmb, or_comm])).cast (by simp)
+  (DerivationCutRestricted.all G.toFinset p (d.cast $ by ext; simp[←eG, ←ep, shifts, SubFormula.shiftEmb, or_comm])).cast (by simp)
 
 def headEx {t} {p : SyntacticSubFormula L 1} (d : DerivationList (G ++ [SubFormula.subst t p])) :
     DerivationList ((∃' p) :: G) :=
-  (Derivation.ex G.toFinset t p (d.cast $ by ext; simp[or_comm])).cast (by simp)
+  (DerivationCutRestricted.ex G.toFinset t p (d.cast $ by ext; simp[or_comm])).cast (by simp)
 
 def headExInstances {v : List (SyntacticTerm L)} {p : SyntacticSubFormula L 1} (d : DerivationList (G ++ v.map (SubFormula.subst · p))) :
     DerivationList ((∃' p) :: G) :=
-  (Derivation.exOfInstances (Γ := G.toFinset) v p (d.cast $ by ext x; simp[or_comm])).cast (by simp)
+  (DerivationCutRestricted.exOfInstances (Γ := G.toFinset) v p (d.cast $ by ext x; simp[or_comm])).cast (by simp)
 
 def headExInstancesOfEq {v : List (SyntacticTerm L)} {p : SyntacticSubFormula L 1} {pi : List (SyntacticFormula L)}
   (ev : v.map (SubFormula.subst · p) = pi) (d : DerivationList (G ++ pi)) :
     DerivationList ((∃' p) :: G) :=
-  (Derivation.exOfInstances (Γ := G.toFinset) v p (d.cast $ by ext x; simp[←ev, or_comm])).cast (by simp)
+  (DerivationCutRestricted.exOfInstances (Γ := G.toFinset) v p (d.cast $ by ext x; simp[←ev, or_comm])).cast (by simp)
 
 end DerivationList
 
 namespace Derivation₁
-open Derivation
+open DerivationCutRestricted
 variable {L : Language.{u}} [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq (L.rel k)]
 
 def congr {p p' : SyntacticFormula L} (e : p' = p) (d : Derivation₁ p) : Derivation₁ p' :=
@@ -535,7 +535,7 @@ abbrev DerivationListQ (L : Q(Language.{u}))
   Q(DerivationList $(toQList (u := u) G))
 
 namespace DerivationListQ
-open SubFormula Derivation
+open SubFormula DerivationCutRestricted
 variable (L : Q(Language.{u}))
   (dfunc : Q(∀ k, DecidableEq (($L).func k))) (drel : Q(∀ k, DecidableEq (($L).rel k))) (G : List Q(SyntacticFormula $L))
 

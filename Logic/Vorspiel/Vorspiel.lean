@@ -342,6 +342,19 @@ lemma map_disj (f : α →L Prop) (l : List α) : f l.disj ↔ ∃ a ∈ l, f a 
 
 end
 
+variable {α : Type u} [inst : SemilatticeSup α] [inst : OrderBot α]
+
+def sup : List α → α
+  | [] => ⊥
+  | a :: as => a ⊔ as.sup
+
+@[simp] lemma sup_nil : ([] : List α).sup = ⊥ := rfl
+
+@[simp] lemma sup_cons (a : α) (as : List α) : (a :: as).sup = a ⊔ as.sup := rfl
+
+lemma le_sup {a} {l : List α} : a ∈ l → a ≤ l.sup :=
+  by induction' l with a l ih <;> simp[*]; rintro (rfl | h) <;> simp[*]; exact le_sup_of_le_right $ ih h
+
 end List
 
 namespace Finset

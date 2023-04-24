@@ -26,5 +26,5 @@ Formalizing Logic in Lean4
 | ----                           |  ----                     | ----             |
 | Soundness theorem              | `FirstOrder.soundness`    | `T ⊢ σ → T ⊨ σ` |
 | Completeness theorem           | `FirstOrder.completeness` | `T ⊨ σ → T ⊢ σ` |
-| Cut-elimination                | `FirstOrder.hauptsatz`    | `⊢ᶜ Δ → ⊢ᵀ Δ`   |
+| Cut-elimination                | `FirstOrder.DerivationCutRestricted.hauptsatz`    | `⊢ᶜ Δ → ⊢ᵀ Δ`   |
 | Gödel's incompleteness theorem | TODO                      |                  |
