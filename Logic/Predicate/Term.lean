@@ -53,6 +53,8 @@ def map (bound : Fin n₁ → Fin n₂) (free : μ₁ → μ₂) : SubTerm L μ�
 def subst (t : SubTerm L μ n) : SubTerm L μ (n + 1) → SubTerm L μ n :=
   bind (bvar <: t) fvar
 
+def emb : SubTerm L PEmpty n → SubTerm L μ n := map id PEmpty.elim
+
 def bShift : SubTerm L μ n → SubTerm L μ (n + 1) :=
   map Fin.succ id
 
@@ -352,25 +354,112 @@ def toSubLanguage' (pf : ∀ k, L.func k → Prop) (pr : ∀ k, L.rel k → Prop
 
 end
 
-section
+structure Abbrev (ι : Type w) where
+  func : {μ : Type v} → {n : ℕ} → (ι → SubTerm L μ n) → SubTerm L μ n
+  bind_func : ∀ {μ₁ μ₂ n₁ n₂} (bound : Fin n₁ → SubTerm L μ₂ n₂) (free : μ₁ → SubTerm L μ₂ n₂) (v : ι → SubTerm L μ₁ n₁),
+    bind bound free (func v) = func (fun i => bind bound free (v i))
+
+abbrev Const := Abbrev.{u,v,0} L Empty
+
+abbrev Monadic := Abbrev L Unit
+
+abbrev Finitary (n : ℕ) := Abbrev L (Fin n)
+
+namespace Abbrev
+variable {ι : Type w} {L : Language.{u}} {μ : Type v} {n : ℕ}
+
+def const (c : Const L) : SubTerm L μ n := c.func Empty.elim
+
+instance : Coe (Const L) (SubTerm L μ n) := ⟨const⟩
+
+@[simp] lemma bind_const (c : Const L) {μ₁ μ₂ n₁ n₂} (bound : Fin n₁ → SubTerm L μ₂ n₂) (free : μ₁ → SubTerm L μ₂ n₂) :
+    bind bound free c = c :=
+  by simpa[const, Empty.eq_elim] using c.bind_func bound free Empty.elim
+
+@[simp] lemma map_const (c : Const L) {μ₁ μ₂ : Type v} {n₁ n₂} (bound : Fin n₁ → Fin n₂) (free : μ₁ → μ₂) :
+    map bound free (c : SubTerm L μ₁ n₁) = c := by simp[map]
+
+@[simp] lemma subst_const (t : SubTerm L μ n) (c : Const L) :
+    subst t c = c := by simp[subst]
+
+@[simp] lemma emb_const (c : Const L) :
+    emb (L := L) (μ := μ) (n := n) (c : SubTerm L PEmpty n) = c := by simp[emb]
+
+@[simp] lemma shift_const (c : Const L) :
+    shift (c : SyntacticSubTerm L n) = c := by simp[shift]
+
+@[simp] lemma bShift_const (c : Const L) :
+    bShift (c : SubTerm L μ (n + 1)) = c := by simp[bShift]
+
+@[simp] lemma free_const (c : Const L) :
+    free (L := L) (n := n) c = c := by simp[free]
+
+lemma map_func (f : Abbrev L ι) {μ₁ μ₂ : Type v} {n₁ n₂} (bound : Fin n₁ → Fin n₂) (free : μ₁ → μ₂)
+  (v : ι → SubTerm L μ₁ n₁) :
+    map bound free (f.func v) = f.func (fun i => map bound free (v i)) := f.bind_func _ _ _
+
+lemma subst_func (t : SubTerm L μ n) (f : Abbrev L ι) (v : ι → SubTerm L μ (n + 1)) :
+    subst t (f.func v) = f.func (fun i => subst t (v i)) := f.bind_func _ _ _
+
+lemma emb_func (f : Abbrev L ι) (v : ι → SubTerm L PEmpty n) :
+    emb (μ := μ) (f.func v) = f.func (fun i => emb (v i)) := f.bind_func _ _ _
+
+lemma shift_func (f : Abbrev L ι) (v : ι → SyntacticSubTerm L n) :
+    shift (f.func v) = f.func (fun i => shift (v i)) := f.bind_func _ _ _
+
+lemma bShift_func (f : Abbrev L ι) (v : ι → SyntacticSubTerm L (n + 1)) :
+    bShift (f.func v) = f.func (fun i => bShift (v i)) := f.bind_func _ _ _
+
+lemma free_func (f : Abbrev L ι) (v : ι → SyntacticSubTerm L (n + 1)) :
+    free (f.func v) = f.func (fun i => free (v i)) := f.bind_func _ _ _
+
+end Abbrev
+
+section natLit
+
 open Language
-variable {L : Language} [hz : L.HasZero] [ho : L.HasOne] [ha : L.HasAdd] {μ : Type v} {μ₁ μ₂} {n : ℕ} {n₁ n₂}
+variable {L}
+variable [hz : L.Zero] [ho : L.One] [ha : L.Add] {μ : Type v} {μ₁ μ₂} {n : ℕ} {n₁ n₂}
 
-def natLit : ℕ → SubTerm L μ n
-  | 0     => func Language.HasZero.zero ![]
-  | n + 1 => func Language.HasAdd.add ![natLit n, func Language.HasOne.one ![]]
+def addOnes (t : SubTerm L μ n) : ℕ → SubTerm L μ n
+  | 0     => t
+  | z + 1 => func Language.Add.add ![addOnes t z, func Language.One.one ![]]
 
-lemma natLit_zero : (natLit 0 : SubTerm L μ n) = func Language.HasZero.zero ![] := by rfl
+@[simp] lemma addOnes_zero (t : SubTerm L μ n) : addOnes t 0 = t := rfl
 
-lemma natLit_succ (z : ℕ) :
-  (natLit (z + 1) : SubTerm L μ n) = func Language.HasAdd.add ![natLit z, func Language.HasOne.one ![]] := by rfl
+@[simp] lemma addOnes_succ (t : SubTerm L μ n) (z : ℕ) :
+  addOnes t (z + 1) = func Language.Add.add ![addOnes t z, func Language.One.one ![]] := rfl
 
-@[simp] lemma bind_natLit (z : ℕ) (bound : Fin n₁ → SubTerm L μ₂ n₂) (free : μ₁ → SubTerm L μ₂ n₂) :
-    bind bound free (natLit z) = natLit z := by
-  induction' z with z ih <;> simp[natLit_zero, natLit_succ, bind_func]
-  funext i; cases i using Fin.cases <;> simp[ih, bind_func]
+lemma bind_addOnes (t : SubTerm L μ₁ n₁) (z : ℕ) (bound : Fin n₁ → SubTerm L μ₂ n₂) (free : μ₁ → SubTerm L μ₂ n₂) :
+    bind bound free (t.addOnes z) = (t.bind bound free).addOnes z := by
+  induction z <;> simp[*, bind_func, Matrix.comp_vecCons', Matrix.constant_eq_singleton]
 
-end
+-- (((((1 + 1) + 1) + 1) + 1) ...) 
+def natLit' : ℕ → SubTerm L μ n
+  | 0                 => func Language.Zero.zero ![]
+  | z + 1             => addOnes (func Language.One.one ![]) z
+
+variable (L)
+
+def natLit (z : ℕ) : Const L where
+  func := fun _ => natLit' z
+  bind_func := by intros; cases z <;> simp[natLit', bind_func, bind_addOnes, Matrix.empty_eq]
+
+variable {L}
+
+abbrev sNatLit (z : ℕ) : SyntacticSubTerm L n := natLit L z
+
+lemma natLit_zero : (natLit L 0 : SubTerm L μ n) = func Language.Zero.zero ![] := by rfl
+
+lemma natLit_one : (natLit L 1 : SubTerm L μ n) = func Language.One.one ![] := by rfl
+
+lemma natLit_succ (z : ℕ) (neZero : z ≠ 0) :
+    (natLit L (.succ z) : SubTerm L μ n) = func Language.Add.add ![natLit L z, natLit L 1] := by
+  cases z
+  · contradiction
+  · simp[natLit, natLit', Abbrev.const]
+
+end natLit
 
 declare_syntax_cat subterm
 syntax:max "#" num : subterm
@@ -382,6 +471,7 @@ syntax:70 "func¹" term "/[" subterm:0 "]" : subterm
 syntax:70 "func²" term "/[" subterm:0 "," subterm:0 "]" : subterm
 syntax:50 subterm:50 "+" subterm:51 : subterm
 syntax:60 subterm:60 "*" subterm:61 : subterm
+syntax:65 subterm:65 "^" subterm:66 : subterm
 syntax "(" subterm ")" : subterm
 
 syntax "T“" subterm "”" : term
@@ -390,15 +480,16 @@ macro_rules
   | `(T“ # $n:num ”)                                     => `(#$n)
   | `(T“ & $n:term ”)                                    => `(&$n)
   | `(T“ ! $t:term ”)                                    => `($t)
-  | `(T“ $n:num ”)                                       => `(natLit $n)
+  | `(T“ $n:num ”)                                       => `((natLit _ $n).const)
   | `(T“ const $d:term ”)                                => `(func $d ![])
   | `(T“ func¹ $d:term /[ $t:subterm ] ”)                => `(func $d ![T“$t”])
   | `(T“ func² $d:term /[ $t₁:subterm , $t₂:subterm ] ”) => `(func $d ![T“$t₁”, T“$t₂”])
-  | `(T“ $t:subterm + $u:subterm ”)                      => `(func Language.HasAdd.add ![T“$t”, T“$u”])
-  | `(T“ $t:subterm * $u:subterm ”)                      => `(func Language.HasMul.mul ![T“$t”, T“$u”])
+  | `(T“ $t:subterm + $u:subterm ”)                      => `(func Language.Add.add ![T“$t”, T“$u”])
+  | `(T“ $t:subterm * $u:subterm ”)                      => `(func Language.Mul.mul ![T“$t”, T“$u”])
+  | `(T“ $t:subterm ^ $u:subterm ”)                      => `(func Language.Pow.pow ![T“$t”, T“$u”])
   | `(T“ ( $x ) ”)                                       => `(T“$x”)
 
 #reduce (T“ func² Language.ORingFunc.mul /[&2 + &0, const Language.ORingFunc.zero]” : SubTerm Language.oring ℕ 8)
-#reduce (T“(&2 + &0) * #2” : SubTerm Language.oring ℕ 8)
+#reduce (T“(&2 + 0) * 2” : SubTerm Language.oring ℕ 8)
 
 end SubTerm

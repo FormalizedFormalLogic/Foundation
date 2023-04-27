@@ -4,7 +4,177 @@ open Qq Lean Elab Meta Tactic
 
 -- SubTerm normalization
 namespace SubTerm
+
 namespace Meta
+
+#check Const
+
+inductive SubTermCode.Nullary
+  | numeral : Q(ℕ) → SubTermCode.Nullary
+  | expr : Expr → SubTermCode.Nullary
+
+inductive SubTermCode : Type
+  | bvar : ℕ → SubTermCode
+  | fvar : ℕ → SubTermCode
+  | add : Expr → SubTermCode → SubTermCode → SubTermCode
+  | mul : Expr → SubTermCode → SubTermCode → SubTermCode
+  | num : Expr → Expr → Expr → Expr → SubTermCode  
+  | func₀ : Expr → SubTermCode
+  | func₁ : Expr → SubTermCode → SubTermCode
+  | func₂ : Expr → SubTermCode → SubTermCode → SubTermCode
+  | metavar : Expr → SubTermCode
+
+namespace SubTermCode
+
+def toStr : SubTermCode → String
+  | bvar x   => "#" ++ toString x
+  | fvar x   => "&" ++ toString x
+  | func₀ _  => "const"
+  | func₁ _ c => "f¹ (" ++ c.toStr
+  | func₂ _ c₁ c₂ => "f² (" ++ c₁.toStr ++ ", " ++ c₂.toStr ++ ")"
+  | add _ c₁ c₂   => "(" ++ c₁.toStr ++ " + " ++ c₂.toStr ++ ")"
+  | mul _ c₁ c₂   => "(" ++ c₁.toStr ++ " * " ++ c₂.toStr ++ ")"
+  | num _ _ _ _   => "N"
+  | metavar _     => "m"
+
+instance : Repr SubTermCode := ⟨fun b _ => b.toStr⟩
+
+instance : ToString SubTermCode := ⟨toStr⟩
+
+def toExpr (L : Q(Language.{u})) (n : Q(ℕ)) : SubTermCode → MetaM Q(SyntacticSubTerm $L $n)
+  | bvar x         => do
+    let some nval := (←whnf n).natLit? | throwError f!"Fail: natLit?: {n}"
+    if x < nval then
+      let lt ← decideTQ q($x < $n)
+      return q(#(⟨$x, $lt⟩))
+    else throwError f!"Invalid SubTermCode"
+  | fvar x         => return q(&$x)
+  | add e c₁ c₂    => do
+    let _ : Q(Language.Add $L) := e
+    let et₁ ← toExpr L n c₁
+    let et₂ ← toExpr L n c₂
+    return q(func Language.Add.add ![$et₁, $et₂])
+  | mul e c₁ c₂    => do
+    let _ : Q(Language.Mul $L) := e
+    let et₁ ← toExpr L n c₁
+    let et₂ ← toExpr L n c₂
+    return q(func Language.Mul.mul ![$et₁, $et₂])
+  | num ez eo ea e => do
+    let _ : Q(Language.Zero $L) := ez
+    let _ : Q(Language.One $L) := eo
+    let _ : Q(Language.Add $L) := ea
+    let z : Q(ℕ) := e
+    return q(SubTerm.Abbrev.const (natLit $L $z))
+  | func₀ e        => do
+    let e : Q(($L).func 0) := e
+    return q(func $e ![])
+  | func₁ e c      => do
+    let ef : Q(($L).func 1) := e
+    let et ← toExpr L n c
+    return q(func $ef ![$et])
+  | func₂ e c₁ c₂  => do
+    let ef : Q(($L).func 2) := e
+    let et₁ ← toExpr L n c₁
+    let et₂ ← toExpr L n c₂
+    return q(func $ef ![$et₁, $et₂])
+  | metavar e      => return e    
+
+end SubTermCode
+
+namespace Syntax
+
+open Qq
+
+partial def toSubTermCode (L : Q(Language.{u})) (n : Q(ℕ)) : Syntax → TermElabM SubTermCode
+  | `(subterm| #$x)                 => do 
+    let some nval := (←whnf n).natLit? | throwError f!"Fail: natLit?: {n}"
+    let xval ← Lean.Syntax.isNatLit? x
+    if xval < nval then
+      return SubTermCode.bvar xval
+    else throwError "invalid variable: {xval} ≥ {n}"
+  | `(subterm| &$n)                 => do
+    let nval ← Lean.Syntax.isNatLit? n
+    return SubTermCode.fvar nval
+  | `(subterm| const $c)            => do
+    let (e : Q(($L).func 0)) ← Term.elabTerm c (return q(($L).func 0))
+    return SubTermCode.func₀ e
+  | `(subterm| func¹ $f/[$t])       => do
+    let (e : Q(($L).func 1)) ← Term.elabTerm f (return q(($L).func 1))
+    let c ← toSubTermCode L n t
+    return SubTermCode.func₁ e c
+  | `(subterm| func² $f/[$t₁, $t₂]) => do
+    let (e : Q(($L).func 1)) ← Term.elabTerm f (return q(($L).func 1))
+    let c₁ ← toSubTermCode L n t₁
+    let c₂ ← toSubTermCode L n t₂
+    return SubTermCode.func₂ e c₁ c₂
+  | `(subterm| $t₁ + $t₂)           => do
+    let c₁ ← toSubTermCode L n t₁
+    let c₂ ← toSubTermCode L n t₂
+    let ha : Q(Language.Add $L) ← synthInstanceQ q(Language.Add $L)
+    return SubTermCode.add ha c₁ c₂
+  | `(subterm| $t₁ * $t₂)           => do
+    let c₁ ← toSubTermCode L n t₁
+    let c₂ ← toSubTermCode L n t₂
+    let hm : Q(Language.Mul $L) ← synthInstanceQ q(Language.Mul $L)
+    return SubTermCode.mul hm c₁ c₂
+  | `(subterm| $n:num)              => do
+    let (e : Q(ℕ)) ← Term.elabTerm n (return .const `Nat [])
+    let hz : Q(Language.Zero $L) ← synthInstanceQ q(Language.Zero $L)
+    let ho : Q(Language.One $L) ← synthInstanceQ q(Language.One $L)
+    let ha : Q(Language.Add $L) ← synthInstanceQ q(Language.Add $L)
+    return SubTermCode.num hz ho ha e
+  | `(subterm| ($t))                => toSubTermCode L n t
+  | `(subterm| !$t)                 => do
+    let (e : Q(SyntacticSubTerm $L $n)) ← Term.elabTerm t (return q(SyntacticSubTerm $L $n))
+    return SubTermCode.metavar e
+  | _                               => throwUnsupportedSyntax
+
+elab "??dbg_Syntax.toSubTermCode" s:subterm  : term => do
+  let el : Q(Language.{0}) := q(Language.oring)
+  let en : Q(ℕ) := q(9)
+  let c ← toSubTermCode el en s
+  logInfo f! "{c}"
+  c.toExpr el en
+
+#eval ??dbg_Syntax.toSubTermCode (0 + #2 + 2) * &99
+
+end Syntax
+
+partial def toSubTermCode (L : Q(Language.{u})) : (n : Q(ℕ)) → Q(SyntacticSubTerm $L $n) → TermElabM SubTermCode
+  | ~q($n), ~q(#$x) => do
+    let some xval := (← finQVal (n := n) x) | throwError f!"Fail: FinQVal {x}"
+    return SubTermCode.bvar xval
+  | ~q($n), ~q(&$x) => do
+    let some xval := (←whnf x).natLit? | throwError f!"Fail: natLit?: {x}"
+    return SubTermCode.fvar xval
+  | ~q($n), ~q(SubTerm.Abbrev.const (natLit (hz := $hz) (ho := $ho) (ha := $ha) $z)) => do
+    return SubTermCode.num hz ho ha z
+  | ~q($n), ~q(SubTerm.func (Language.Add.add (self := $ha)) ![$t, $u]) => do
+    let c₁ ← toSubTermCode L n t
+    let c₂ ← toSubTermCode L n u
+    return SubTermCode.add ha c₁ c₂
+  | ~q($n), ~q(SubTerm.func (Language.Mul.mul (self := $hm)) ![$t, $u]) => do
+    let c₁ : SubTermCode ← toSubTermCode L n t
+    let c₂ ← toSubTermCode L n u
+    return SubTermCode.mul hm c₁ c₂
+  | ~q($n), ~q(SubTerm.func $c ![])       => do
+    return SubTermCode.func₀ c
+  | ~q($n), ~q(SubTerm.func $f ![$t])     => do
+    let c ← toSubTermCode L n t
+    return SubTermCode.func₁ f c
+  | ~q($n), ~q(SubTerm.func $f ![$t, $u]) => do
+    let c₁ ← toSubTermCode L n t
+    let c₂ ← toSubTermCode L n u
+    return SubTermCode.func₂ f c₁ c₂
+
+elab "??dbg_toSubTermCode" : term => do
+  let el : Q(Language.{0}) := q(Language.oring)
+  let en : Q(ℕ) := q(9)
+  let c ← toSubTermCode el en q(T“(0 + #2) * 2”)
+  logInfo f! "{c}"
+  c.toExpr el en
+
+#eval ??dbg_toSubTermCode
 
 section lemmata
 variable {L : Language.{u}} {μ : Type v} {n}
@@ -133,23 +303,23 @@ lemma bShift_congr_eq {t t' : SubTerm L μ n} {u} (e : t = t') (h : bShift t' = 
   bShift t = u := Eq.trans (congr_arg _ e) h
 
 section
-variable [hz : L.HasZero] [ho : L.HasOne] [ha : L.HasAdd]
+variable [hz : L.Zero] [ho : L.One] [ha : L.Add]
 
 @[simp] lemma free_natLit (z : ℕ) :
-    free (natLit z : SyntacticSubTerm L (n + 1)) = natLit z :=
-  SubTerm.bind_natLit _ _ _
+    free (natLit L z : SyntacticSubTerm L (n + 1)) = natLit L z :=
+  by simp
 
 @[simp] lemma subst_natLit {s} (z : ℕ) :
-    subst s (natLit z : SubTerm L μ (n + 1)) = natLit z :=
-  SubTerm.bind_natLit _ _ _
+    subst s (natLit L z : SubTerm L μ (n + 1)) = natLit L z :=
+  by simp
 
 @[simp] lemma shift_natLit (z : ℕ) :
-    shift (natLit z : SyntacticSubTerm L n) = natLit z :=
-  SubTerm.bind_natLit _ _ _
+    shift (natLit L z : SyntacticSubTerm L n) = natLit L z :=
+  by simp
 
 @[simp] lemma bShift_natLit (z : ℕ) :
-    bShift (natLit z : SubTerm L μ n) = natLit z :=
-  SubTerm.bind_natLit _ _ _
+    bShift (natLit L z : SubTerm L μ n) = natLit L z :=
+  by simp[bShift]
 
 end
 end lemmata
@@ -158,9 +328,9 @@ partial def resultFree {L : Q(Language.{u})} {n : Q(ℕ)} : (t : Q(SyntacticSubT
     MetaM ((res : Q(SyntacticSubTerm $L $n)) × Q(SubTerm.free $t = $res))
   | ~q(#$x)                              => do
     let n ←whnf n 
-    let some nnat := n.natLit? | throwError f!"Fail: natLit: {n}"
+    let some nval := n.natLit? | throwError f!"Fail: natLit: {n}"
     let some xval := (← finQVal (n := q(.succ $n)) x) | throwError f!"Fail: FinQVal {x}"
-    if xval = nnat then
+    if xval = nval then
       let e := q(free_bvar_last (L := $L) $n)
       return ⟨q(&0), e⟩
     else
@@ -185,18 +355,18 @@ partial def resultFree {L : Q(Language.{u})} {n : Q(ℕ)} : (t : Q(SyntacticSubT
     let ⟨tn₂, e₂⟩ ← resultFree (L := L) (n := n) t₂
     let ⟨tn₃, e₃⟩ ← resultFree (L := L) (n := n) t₃
     return ⟨q(SubTerm.func $f ![$tn₁, $tn₂, $tn₃]), q(free_func3 $f $e₁ $e₂ $e₃)⟩
-  | ~q(natLit (hz := $hz) (ho := $ho) (ha := $ha) $z) => pure ⟨q(natLit $z), q(free_natLit $z)⟩
+  | ~q(SubTerm.Abbrev.const $ natLit (hz := $hz) (ho := $ho) (ha := $ha) $z) => pure ⟨q(natLit $L $z), q(free_natLit $z)⟩
   | ~q($t)                               => do
     return ⟨q(SubTerm.free $t), q(rfl)⟩
 
 partial def resultSubst {L : Q(Language.{u})} {n : Q(ℕ)} (s : Q(SyntacticSubTerm $L $n)) :
-   (t : Q(SyntacticSubTerm $L ($n + 1))) →
+    (t : Q(SyntacticSubTerm $L ($n + 1))) →
     MetaM ((res : Q(SyntacticSubTerm $L $n)) × Q(SubTerm.subst $s $t = $res))
   | ~q(#$x)                              => do
     let n ←whnf n 
-    let some nnat := n.natLit? | throwError f!"Fail: natLit: {n}"
+    let some nval := n.natLit? | throwError f!"Fail: natLit: {n}"
     let some xval := (← finQVal (n := q(.succ $n)) x) | throwError f!"Fail: FinQVal {x}"
-    if xval = nnat then
+    if xval = nval then
       return ⟨q($s), (q(subst_bvar_last $n $s) : Expr)⟩
     else
       let lt ← decideTQ q(($x).val < $n)
@@ -217,7 +387,7 @@ partial def resultSubst {L : Q(Language.{u})} {n : Q(ℕ)} (s : Q(SyntacticSubTe
     let ⟨tn₂, e₂⟩ ← resultSubst (L := L) (n := n) s t₂
     let ⟨tn₃, e₃⟩ ← resultSubst (L := L) (n := n) s t₃
     return ⟨q(SubTerm.func $f ![$tn₁, $tn₂, $tn₃]), q(subst_func3 $f $e₁ $e₂ $e₃)⟩
-  | ~q(natLit (hz := $hz) (ho := $ho) (ha := $ha) $z) => pure ⟨q(natLit $z), q(subst_natLit $z)⟩
+  | ~q(SubTerm.Abbrev.const $ natLit (hz := $hz) (ho := $ho) (ha := $ha) $z) => pure ⟨q(natLit $L $z), q(subst_natLit $z)⟩
   | ~q($t)                               => do
     return ⟨q(SubTerm.subst $s $t), q(rfl)⟩
 
@@ -245,7 +415,7 @@ partial def resultShift {L : Q(Language.{u})} {n : Q(ℕ)} : (t : Q(SyntacticSub
     let ⟨tn₁, e₁⟩ ← resultShift (L := L) (n := n) t₁
     let ⟨tn₂, e₂⟩ ← resultShift (L := L) (n := q(.succ $n)) t₂
     return ⟨q(SubTerm.subst $tn₁ $tn₂), q(shift_subst $e₂ $e₁)⟩
-  | ~q(natLit (hz := $hz) (ho := $ho) (ha := $ha) $z) => pure ⟨q(natLit $z), q(shift_natLit $z)⟩
+  | ~q(SubTerm.Abbrev.const $ natLit (hz := $hz) (ho := $ho) (ha := $ha) $z) => pure ⟨q(natLit $L $z), q(shift_natLit $z)⟩
   | ~q($t)                               => do
     return ⟨q(shift $t), q(rfl)⟩
 
@@ -273,47 +443,74 @@ partial def resultBShift {L : Q(Language.{u})} {n : Q(ℕ)} : (t : Q(SyntacticSu
     let ⟨tn₁, e₁⟩ ← resultBShift (L := L) (n := n) t₁
     let ⟨tn₂, e₂⟩ ← resultBShift (L := L) (n := q(.succ $n)) t₂
     return ⟨q(SubTerm.subst $tn₁ $tn₂), q(bShift_subst $e₂ $e₁)⟩
-  | ~q(natLit (hz := $hz) (ho := $ho) (ha := $ha) $z) => pure ⟨q(natLit $z), q(bShift_natLit $z)⟩
+  | ~q(SubTerm.Abbrev.const $ natLit (hz := $hz) (ho := $ho) (ha := $ha) $z) => pure ⟨q(natLit $L $z), q(bShift_natLit $z)⟩
   | ~q($t)                               => do
     return ⟨q(bShift $t), q(rfl)⟩
 
-partial def result {L : Q(Language.{u})} {n : Q(ℕ)} : (t : Q(SyntacticSubTerm $L $n)) →
+inductive TransparencyMode
+  | constants
+  | unfold  
+  | all
+
+partial def natLitResult {L : Q(Language.{u})}
+  (iz : Q(Language.Zero $L)) (io : Q(Language.One $L)) (ia : Q(Language.Add $L)) (n : Q(ℕ)) :
+    TransparencyMode → (z : Q(ℕ)) → MetaM $ (res : Q(SyntacticSubTerm $L $n)) × Q(natLit $L $z = $res)
+  | TransparencyMode.constants =>
+    fun z => do
+    return ⟨q(natLit $L $z), q(rfl)⟩
+  | TransparencyMode.unfold    =>
+    fun z =>
+      match z with
+      | ~q(0)      => return ⟨q(natLit $L 0), q(rfl)⟩
+      | ~q($z + 1) => do
+        return ⟨q(func Language.Add.add ![natLit $L $z, func Language.One.one ![]]), q(rfl)⟩
+      | ~q($z)      => return ⟨q(natLit $L $z), q(rfl)⟩
+  | TransparencyMode.all       =>
+    fun z =>
+      match z with
+      | ~q(0)      => return ⟨q(natLit $L 0), q(rfl)⟩
+      | ~q($z + 1) => do
+        let ⟨e, he⟩ ← natLitResult iz io ia n TransparencyMode.all z
+        return ⟨q(func Language.Add.add ![$e, func Language.One.one ![]]), q(natLit_succ_of_eq $he)⟩
+      | ~q($z)      => return ⟨q(natLit $L $z), q(rfl)⟩
+
+partial def result (tp : TransparencyMode) {L : Q(Language.{u})} {n : Q(ℕ)} : (t : Q(SyntacticSubTerm $L $n)) →
     MetaM ((res : Q(SyntacticSubTerm $L $n)) × Q($t = $res))
-  | ~q(#$x)                              => pure ⟨q(#$x), q(rfl)⟩
-  | ~q(&$x)                              => pure ⟨q(&$x), q(rfl)⟩
-  | ~q(SubTerm.func $f ![])              => pure ⟨q(SubTerm.func $f ![]), q(rfl)⟩
-  | ~q(SubTerm.func $f ![$t])            => do
-    let ⟨tn, e⟩ ← result (L := L) (n := n) t
+  | ~q(#$x)                                           => pure ⟨q(#$x), q(rfl)⟩
+  | ~q(&$x)                                           => pure ⟨q(&$x), q(rfl)⟩
+  | ~q(SubTerm.func $f ![])                           => pure ⟨q(SubTerm.func $f ![]), q(rfl)⟩
+  | ~q(SubTerm.func $f ![$t])                         => do
+    let ⟨tn, e⟩ ← result tp (L := L) (n := n) t
     return ⟨q(SubTerm.func $f ![$tn]), q(func1_congr $f $e)⟩
-  | ~q(SubTerm.func $f ![$t₁, $t₂])      => do
-    let ⟨tn₁, e₁⟩ ← result (L := L) (n := n) t₁
-    let ⟨tn₂, e₂⟩ ← result (L := L) (n := n) t₂
+  | ~q(SubTerm.func $f ![$t₁, $t₂])                   => do
+    let ⟨tn₁, e₁⟩ ← result tp (L := L) (n := n) t₁
+    let ⟨tn₂, e₂⟩ ← result tp (L := L) (n := n) t₂
     return ⟨q(SubTerm.func $f ![$tn₁, $tn₂]), q(func2_congr $f $e₁ $e₂)⟩
-  | ~q(SubTerm.func $f ![$t₁, $t₂, $t₃]) => do
-    let ⟨tn₁, e₁⟩ ← result (L := L) (n := n) t₁
-    let ⟨tn₂, e₂⟩ ← result (L := L) (n := n) t₂
-    let ⟨tn₃, e₃⟩ ← result (L := L) (n := n) t₃
+  | ~q(SubTerm.func $f ![$t₁, $t₂, $t₃])              => do
+    let ⟨tn₁, e₁⟩ ← result tp (L := L) (n := n) t₁
+    let ⟨tn₂, e₂⟩ ← result tp (L := L) (n := n) t₂
+    let ⟨tn₃, e₃⟩ ← result tp (L := L) (n := n) t₃
     return ⟨q(SubTerm.func $f ![$tn₁, $tn₂, $tn₃]), q(func3_congr $f $e₁ $e₂ $e₃)⟩
-  | ~q(free $t)                          => do
-    let ⟨tn, e⟩ ← result (L := L) (n := q(.succ $n)) t
+  | ~q(free $t)                                       => do
+    let ⟨tn, e⟩ ← result tp (L := L) (n := q(.succ $n)) t
     let ⟨tnn, ee⟩ ← resultFree (L := L) (n := n) tn
     return ⟨q($tnn), q(free_congr_eq $e $ee)⟩
-  | ~q(subst $s $t)                      => do
-    let ⟨tn, te⟩ ← result (L := L) (n := q(.succ $n)) t
-    let ⟨sn, se⟩ ← result (L := L) (n := q($n)) s
+  | ~q(subst $s $t)                                   => do
+    let ⟨tn, te⟩ ← result tp (L := L) (n := q(.succ $n)) t
+    let ⟨sn, se⟩ ← result tp (L := L) (n := q($n)) s
     let ⟨tnn, ee⟩ ← resultSubst (L := L) (n := n) sn tn
     return ⟨q($tnn), q(subst_congr_eq $se $te $ee)⟩
-  | ~q(shift $t)                         => do
-    let ⟨tn, e⟩ ← result (L := L) (n := q($n)) t
+  | ~q(shift $t)                                      => do
+    let ⟨tn, e⟩ ← result tp (L := L) (n := q($n)) t
     let ⟨tnn, ee⟩ ← resultShift (L := L) (n := n) tn
     return ⟨q($tnn), q(shift_congr_eq $e $ee)⟩
-  | ~q(natLit (hz := $hz) (ho := $ho) (ha := $ha) $z) => pure ⟨q(natLit $z), q(rfl)⟩
-  | ~q($t)                               => do
-    return ⟨q($t), q(rfl)⟩
+  | ~q(SubTerm.Abbrev.const $ natLit (hz := $hz) (ho := $ho) (ha := $ha) $z) => natLitResult hz ho ha n tp z
+  | ~q($t)                                            => pure ⟨q($t), q(rfl)⟩
 
-partial def result' {L : Q(Language.{u})} {n : Q(ℕ)} (t : Q(SyntacticSubTerm $L $n)) :
-    MetaM (Result (u := u) q(SyntacticSubTerm $L $n) t) := do
-    let ⟨res, e⟩ ← result t 
+partial def result' {L : Q(Language.{u})} {n : Q(ℕ)} (t : Q(SyntacticSubTerm $L $n))
+  (tp : TransparencyMode := TransparencyMode.constants) :
+    MetaM (Result (u := u) t) := do
+    let ⟨res, e⟩ ← result tp t
     return ⟨res, e⟩
 
 private inductive ResultTest (α : Type u) : (a : α) → Type u
@@ -323,10 +520,10 @@ elab "dbg" : tactic => do
   let goalType ← Elab.Tactic.getMainTarget
   let some ⟨.succ u, ty⟩ ← checkSortQ' goalType | throwError "error: not a type"
   let ~q(ResultTest (SyntacticSubTerm $L $n) $t) := ty | throwError "error: not a type"
-  logInfo m!"t = {t} : SyntacticSubTerm {L} {n}"
+  logInfo m!"t = {t}"
   let t : Q(SyntacticSubTerm $L $n) ← withReducible <| whnf t
 
-  let ⟨tn, e⟩ ← result (L := L) (n := n) t
+  let ⟨tn, e⟩ ← result TransparencyMode.unfold (L := L) (n := n) t
   logInfo m!"tn = {tn}"
   logInfo m!"e = {e}"
   let c : Q(ResultTest (SyntacticSubTerm $L $n) $t) := (q(ResultTest.result ($t) $tn $e) : Expr)
@@ -334,6 +531,10 @@ elab "dbg" : tactic => do
 
 example {t : SyntacticSubTerm Language.oring 13} : ResultTest (SyntacticSubTerm Language.oring 12)
     (shift $ subst &99 T“(!t) + (#6 * !(bShift T“#2 + 9”)) + &7”) :=
+  by dbg
+
+example {t : SyntacticSubTerm Language.oring 13} (z : ℕ) : ResultTest (SyntacticSubTerm Language.oring 12)
+    (shift $ subst &99 T“!(shift $ natLit 8)”) :=
   by dbg
 
 example : 1 ≠ 2 := of_decide_eq_true rfl

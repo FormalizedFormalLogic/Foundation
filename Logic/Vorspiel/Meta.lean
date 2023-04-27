@@ -4,6 +4,7 @@ import Mathlib.Tactic.NormNum
 import Mathlib.Tactic.Clear!
 import Mathlib.Util.AtomM
 import Logic.Vorspiel.Vorspiel
+import Mathlib.Data.Fin.Fin2
 
 open Qq Lean Elab Meta Tactic
 
@@ -60,16 +61,29 @@ def MditeQ {α : Q(Sort u)} (c : Q(Prop)) (dec : Q(Decidable $c)) (t : MetaM Q($
 class NormalizeQ (α : Q(Type u)) where
   normalize : (e : Q($α)) → MetaM ((res : Q($α)) × Q($res = $e))
 
-structure Result (α : Q(Type u)) (e : Q($α)) where
+structure Result {α : Q(Type u)} (e : Q($α)) where
   expr : Q($α)
   proof : Q($e = $expr)
 
 namespace Result
-variable  {α : Q(Type u)}
+variable {α : Q(Type u)}
 
-@[reducible] def refl (e : Q($α)) : Result α e := ⟨e, q(rfl)⟩
+@[reducible] def refl (e : Q($α)) : Result e := ⟨e, q(rfl)⟩
+
+def mk' (e e' : Q($α)) (eq : Q($e = $e'))  : Result e := ⟨e', eq⟩
 
 end Result
+
+structure ResultFun {α : Q(Type u)} {β : Q(Type v)} (f : Q($α → $β)) (e : Q($α)) where
+  expr : Q($β)
+  proof : Q($f $e = $expr)
+
+namespace ResultFun
+variable {α : Q(Type u)} {β : Q(Type v)} (f : Q($α → $β))
+
+@[reducible] def refl (e : Q($α)) : ResultFun f e := ⟨q($f $e), q(rfl)⟩
+
+end ResultFun
 
 set_option linter.unusedVariables false in
 def BEqQ {α : Q(Sort u)} {a b : Q($α)} (h : a == b) : Q($a = $b) := (q(@rfl $α $a) : Expr)

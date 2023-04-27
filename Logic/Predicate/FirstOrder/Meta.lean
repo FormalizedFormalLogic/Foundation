@@ -180,6 +180,15 @@ lemma shift_congr_eq {p p' : SyntacticSubFormula L n} {q} (e : p = p') (h : shif
 
 end lemmata
 
+#check Result.mk'
+
+inductive TransparencyMode
+  | constants
+  | unfoldNeg
+  | unfoldImply
+  | unfoldIff
+  | all
+
 partial def resultFree {L : Q(Language.{u})} {n : Q(ℕ)} : (p : Q(SyntacticSubFormula $L ($n + 1))) →
     MetaM ((res : Q(SyntacticSubFormula $L $n)) × Q(free $p = $res))
   | ~q(⊤)                   => pure ⟨q(⊤), q(rfl)⟩
@@ -218,7 +227,7 @@ partial def resultFree {L : Q(Language.{u})} {n : Q(ℕ)} : (p : Q(SyntacticSubF
     let ⟨tn₂, e₂⟩ ← SubTerm.Meta.resultFree (L := L) (n := n) t₂
     return ⟨q(nrel $r ![$tn₁, $tn₂]), q(free_nrel₂ $r $e₁ $e₂)⟩
   | ~q($p)                  => pure ⟨q(free $p), q(rfl)⟩
-
+/--/
 partial def resultSubst {L : Q(Language.{u})} {n : Q(ℕ)} (s : Q(SyntacticSubTerm $L $n)) :
     (p : Q(SyntacticSubFormula $L ($n + 1))) → MetaM ((res : Q(SyntacticSubFormula $L $n)) × Q(subst $s $p = $res))
   | ~q(⊤)                   => pure ⟨q(⊤), q(rfl)⟩
