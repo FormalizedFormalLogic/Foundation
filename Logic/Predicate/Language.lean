@@ -147,27 +147,30 @@ instance : ToString ((relational α).func k) := ⟨fun a => by cases a⟩
 
 end relational
 
-class HasEq (L : Language.{u}) where
+class Eq (L : Language.{u}) where
   eq : L.rel 2
 
-class HasLt (L : Language.{u}) where
+class Lt (L : Language.{u}) where
   lt : L.rel 2
 
-class HasZero (L : Language.{u}) where
+class Zero (L : Language.{u}) where
   zero : L.func 0
 
-class HasOne (L : Language.{u}) where
+class One (L : Language.{u}) where
   one : L.func 0
 
-class HasAdd (L : Language.{u}) where
+class Add (L : Language.{u}) where
   add : L.func 2
 
-class HasMul (L : Language.{u}) where
+class Mul (L : Language.{u}) where
   mul : L.func 2
 
-attribute [match_pattern] HasEq.eq HasAdd.add HasMul.mul
+class Pow (L : Language.{u}) where
+  pow : L.func 2
 
-class HasORing (L : Language) extends L.HasEq, L.HasLt, L.HasZero, L.HasOne, L.HasAdd, L.HasMul
+attribute [match_pattern] Eq.eq Add.add Mul.mul
+
+class HasORing (L : Language) extends L.Eq, L.Lt, L.Zero, L.One, L.Add, L.Mul
 
 instance : HasORing oring where
   eq := ORingRel.eq

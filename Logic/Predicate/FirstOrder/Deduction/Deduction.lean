@@ -261,20 +261,20 @@ notation Δ " ⟹[" T "] " p => Deduction T Δ p
 open Qq
 
 inductive DeductionCode (L : Q(Language.{u})) : Type
-  | have    : Q(SyntacticFormula $L) → DeductionCode L → DeductionCode L → DeductionCode L
-  | assumption : DeductionCode L
+  | have          : Q(SyntacticFormula $L) → DeductionCode L → DeductionCode L → DeductionCode L
+  | assumption    : DeductionCode L
   | contradiction : Q(SyntacticFormula $L) → DeductionCode L → DeductionCode L → DeductionCode L
-  | trivial : DeductionCode L
-  | explode : DeductionCode L → DeductionCode L
-  | intro : DeductionCode L → DeductionCode L
-  | mdp   : Q(SyntacticFormula $L) → DeductionCode L → DeductionCode L → DeductionCode L  
-  | split : DeductionCode L → DeductionCode L → DeductionCode L
+  | trivial       : DeductionCode L
+  | explode       : DeductionCode L → DeductionCode L
+  | intro         : DeductionCode L → DeductionCode L
+  | mdp           : Q(SyntacticFormula $L) → DeductionCode L → DeductionCode L → DeductionCode L  
+  | split         : DeductionCode L → DeductionCode L → DeductionCode L
   -- TODO
-  | cases : (e₁ e₂ : Q(SyntacticFormula $L)) → DeductionCode L → DeductionCode L → DeductionCode L → DeductionCode L
-  | generalize : DeductionCode L → DeductionCode L
+  | cases         : (e₁ e₂ : Q(SyntacticFormula $L)) → DeductionCode L → DeductionCode L → DeductionCode L → DeductionCode L
+  | generalize    : DeductionCode L → DeductionCode L
   -- TODO
-  | exCases :  Q(SyntacticFormula $L) → DeductionCode L → DeductionCode L
-  | since : Syntax → DeductionCode L
-  | missing : DeductionCode L
+  | exCases       :  Q(SyntacticFormula $L) → DeductionCode L → DeductionCode L
+  | since         : Syntax → DeductionCode L
+  | missing       : DeductionCode L
 
 end FirstOrder
