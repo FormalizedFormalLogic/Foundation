@@ -247,6 +247,13 @@ lemma eq_elim {α : Sort u} (f : Empty → α) : f = elim := funext (by rintro �
 
 end Empty
 
+namespace IsEmpty
+variable {o : Sort u} (h : IsEmpty o)
+
+lemma eq_elim {α : Sort u} (f : o → α) : f = h.elim' := funext h.elim
+
+end IsEmpty
+
 namespace Set
 variable  {α : Type u} {β : Type v}
 

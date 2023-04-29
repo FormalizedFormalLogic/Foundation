@@ -77,7 +77,7 @@ lemma onSubFormula₁_free (p : SyntacticSubFormula L₁ (n + 1)) : Φ.onSubForm
 lemma onSubFormula₁_fix (p : SyntacticSubFormula L₁ n) : Φ.onSubFormula₁ (fix p) = fix (Φ.onSubFormula₁ p) :=
   by simp[fix, onSubFormula₁_bind]; congr; funext x; cases x <;> simp
 
-lemma onSubFormula₁_emb (p : SubFormula L₁ Empty n) :
+lemma onSubFormula₁_emb {o : Type w} [IsEmpty o] (p : SubFormula L₁ o n) :
     (Φ.onSubFormula₁ (emb p) : SubFormula L₂ μ n) = emb (Φ.onSubFormula₁ p) :=
   by simp[emb, onSubFormula₁_map]
 

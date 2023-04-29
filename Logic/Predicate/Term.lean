@@ -53,7 +53,7 @@ def map (bound : Fin n₁ → Fin n₂) (free : μ₁ → μ₂) : SubTerm L μ�
 def subst (t : SubTerm L μ n) : SubTerm L μ (n + 1) → SubTerm L μ n :=
   bind (bvar <: t) fvar
 
-def emb : SubTerm L PEmpty n → SubTerm L μ n := map id PEmpty.elim
+def emb {o : Type w} [h : IsEmpty o] : SubTerm L o n → SubTerm L μ n := map id h.elim'
 
 def bShift : SubTerm L μ n → SubTerm L μ (n + 1) :=
   map Fin.succ id
@@ -382,8 +382,8 @@ instance : Coe (Const L) (SubTerm L μ n) := ⟨const⟩
 @[simp] lemma subst_const (t : SubTerm L μ n) (c : Const L) :
     subst t c = c := by simp[subst]
 
-@[simp] lemma emb_const (c : Const L) :
-    emb (L := L) (μ := μ) (n := n) (c : SubTerm L PEmpty n) = c := by simp[emb]
+@[simp] lemma emb_const {o : Type v} [IsEmpty o] (c : Const L) :
+    emb (L := L) (μ := μ) (n := n) (Operator.const (μ := o) (n := n) c) = Operator.const (μ := μ) (n := n) c := by simp[emb]
 
 @[simp] lemma shift_const (c : Const L) :
     shift (c : SyntacticSubTerm L n) = c := by simp[shift]

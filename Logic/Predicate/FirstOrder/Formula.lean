@@ -228,7 +228,7 @@ abbrev map₀ (free : μ₁ → μ₂) : SubFormula L μ₁ n →L SubFormula L 
 def subst (t : SubTerm L μ n) : SubFormula L μ (n + 1) →L SubFormula L μ n :=
   bind (SubTerm.bvar <: t) SubTerm.fvar
 
-def emb : SubFormula L Empty n →L SubFormula L μ n := map id Empty.elim
+def emb {o : Type w} [h : IsEmpty o] : SubFormula L o n →L SubFormula L μ n := map id h.elim'
 
 section bind
 variable (bound : Fin n₁ → SubTerm L μ₂ n₂) (free : μ₁ → SubTerm L μ₂ n₂)
@@ -336,6 +336,8 @@ lemma map_inj : ∀ {n₁ n₂ μ₁ μ₂} {bound : Fin n₁ → Fin n₂} {fre
     intro h; exact map_inj (bound := 0 :> Fin.succ ∘ bound)
       (Matrix.injective_vecCons ((Fin.succ_injective _).comp hb) (fun _ => (Fin.succ_ne_zero _).symm)) hf h
 
+section subst
+
 lemma subst_rel {s : SubTerm L μ n} {k} (r : L.rel k) (v : Fin k → SubTerm L μ (n + 1)) :
     subst s (rel r v) = rel r (fun i => SubTerm.subst s (v i)) :=
   by simp[subst, SubTerm.subst, bind_rel]
@@ -362,21 +364,52 @@ lemma subst_nrel {s : SubTerm L μ n} {k} (r : L.rel k) (v : Fin k → SubTerm L
     complexity (subst t p) = complexity p :=
   by simp[subst]
 
-lemma emb_rel {k} (r : L.rel k) (v : Fin k → SubTerm L Empty n) :
-    emb (μ := μ) (rel r v) = rel r (fun i => SubTerm.map id Empty.elim (v i)) :=
-  by simp[emb, map_rel]
+end subst
 
-lemma emb_nrel {k} (r : L.rel k) (v : Fin k → SubTerm L Empty n) :
-    emb (μ := μ) (nrel r v) = nrel r (fun i => SubTerm.map id Empty.elim (v i)) :=
-  by simp[emb, map_nrel]
+section emb
+variable (o : Type v) [empty : IsEmpty o]
 
-@[simp] lemma emb_all (p : SubFormula L Empty (n + 1)) :
+lemma emb_rel {k} (r : L.rel k) (v : Fin k → SubTerm L o n) :
+    emb (μ := μ) (rel r v) = rel r (fun i => (v i).emb) :=
+  by simp[emb, map_rel, SubTerm.emb]
+
+@[simp] lemma emb_rel₀ (r : L.rel 0) :
+    emb (μ := μ) (n := n) (rel (μ := o) r ![]) = rel r ![] :=
+  by simp[emb_rel]
+
+@[simp] lemma emb_rel₁ (r : L.rel 1) (t : SubTerm L o n) :
+    emb (μ := μ) (n := n) (rel r ![t]) = rel r ![t.emb] :=
+  by simp[Matrix.constant_eq_singleton, emb_rel]
+
+@[simp] lemma emb_rel₂ (r : L.rel 2) (t₁ t₂ : SubTerm L o n) :
+    emb (μ := μ) (n := n) (rel r ![t₁, t₂]) = rel r ![t₁.emb, t₂.emb] :=
+  by simp[emb_rel]; funext i; induction i using Fin.induction <;> simp
+
+lemma emb_nrel {k} (r : L.rel k) (v : Fin k → SubTerm L o n) :
+    emb (μ := μ) (nrel r v) = nrel r (fun i => (v i).emb) :=
+  by simp[emb, map_nrel, SubTerm.emb]
+
+@[simp] lemma emb_nrel₀ (r : L.rel 0) :
+    emb (μ := μ) (n := n) (nrel (μ := o) r ![]) = nrel r ![] :=
+  by simp[emb_nrel]
+
+@[simp] lemma emb_nrel₁ (r : L.rel 1) (t : SubTerm L o n) :
+    emb (μ := μ) (n := n) (nrel r ![t]) = nrel r ![t.emb] :=
+  by simp[Matrix.constant_eq_singleton, emb_nrel]
+
+@[simp] lemma emb_nrel₂ (r : L.rel 2) (t₁ t₂ : SubTerm L o n) :
+    emb (μ := μ) (n := n) (nrel r ![t₁, t₂]) = nrel r ![t₁.emb, t₂.emb] :=
+  by simp[emb_nrel]; funext i; induction i using Fin.induction <;> simp
+
+@[simp] lemma emb_all (p : SubFormula L o (n + 1)) :
     emb (μ := μ) (∀' p) = ∀' emb p :=
   by simp[emb]
 
-@[simp] lemma emb_ex (p : SubFormula L Empty (n + 1)) :
+@[simp] lemma emb_ex (p : SubFormula L o (n + 1)) :
     emb (μ := μ) (∃' p) = ∃' emb p :=
   by simp[emb]
+
+end emb
 
 section Syntactic
 
@@ -418,7 +451,9 @@ lemma shift_subst (s : SyntacticSubTerm L n) (p : SyntacticSubFormula L (n + 1))
   simp[shift, subst, map, bind_bind]; congr; funext x
   cases' x using Fin.lastCases <;> simp; rfl
 
-@[simp] lemma shift_emb (p : SubFormula L Empty n) : shift (emb p) = emb p := by simp[shift, emb, map_map, Empty.eq_elim]
+@[simp] lemma shift_emb {o : Type v} [h : IsEmpty o] (p : SubFormula L o n) :
+    shift (emb p : SyntacticSubFormula L n) = emb p := by
+  simp[shift, emb, map_map]; congr; funext x; exact h.elim x
 
 lemma free_rel {k} (r : L.rel k) (v : Fin k → SyntacticSubTerm L (n + 1)) :
     free (rel r v) = rel r (fun i => SubTerm.free $ v i) := rfl
