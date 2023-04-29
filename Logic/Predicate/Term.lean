@@ -354,27 +354,27 @@ def toSubLanguage' (pf : ∀ k, L.func k → Prop) (pr : ∀ k, L.rel k → Prop
 
 end
 
-structure Abbrev (ι : Type w) where
-  func : {μ : Type v} → {n : ℕ} → (ι → SubTerm L μ n) → SubTerm L μ n
-  bind_func : ∀ {μ₁ μ₂ n₁ n₂} (bound : Fin n₁ → SubTerm L μ₂ n₂) (free : μ₁ → SubTerm L μ₂ n₂) (v : ι → SubTerm L μ₁ n₁),
-    bind bound free (func v) = func (fun i => bind bound free (v i))
+structure Operator (ι : Type w) where
+  operator : {μ : Type v} → {n : ℕ} → (ι → SubTerm L μ n) → SubTerm L μ n
+  bind_operator : ∀ {μ₁ μ₂ n₁ n₂} (bound : Fin n₁ → SubTerm L μ₂ n₂) (free : μ₁ → SubTerm L μ₂ n₂) (v : ι → SubTerm L μ₁ n₁),
+    bind bound free (operator v) = operator (fun i => bind bound free (v i))
 
-abbrev Const := Abbrev.{u,v,0} L Empty
+abbrev Const := Operator.{u,v,0} L Empty
 
-abbrev Monadic := Abbrev L Unit
+abbrev Monadic := Operator L Unit
 
-abbrev Finitary (n : ℕ) := Abbrev L (Fin n)
+abbrev Finitary (n : ℕ) := Operator L (Fin n)
 
-namespace Abbrev
+namespace Operator
 variable {ι : Type w} {L : Language.{u}} {μ : Type v} {n : ℕ}
 
-def const (c : Const L) : SubTerm L μ n := c.func Empty.elim
+def const (c : Const L) : SubTerm L μ n := c.operator Empty.elim
 
 instance : Coe (Const L) (SubTerm L μ n) := ⟨const⟩
 
 @[simp] lemma bind_const (c : Const L) {μ₁ μ₂ n₁ n₂} (bound : Fin n₁ → SubTerm L μ₂ n₂) (free : μ₁ → SubTerm L μ₂ n₂) :
     bind bound free c = c :=
-  by simpa[const, Empty.eq_elim] using c.bind_func bound free Empty.elim
+  by simpa[const, Empty.eq_elim] using c.bind_operator bound free Empty.elim
 
 @[simp] lemma map_const (c : Const L) {μ₁ μ₂ : Type v} {n₁ n₂} (bound : Fin n₁ → Fin n₂) (free : μ₁ → μ₂) :
     map bound free (c : SubTerm L μ₁ n₁) = c := by simp[map]
@@ -394,26 +394,26 @@ instance : Coe (Const L) (SubTerm L μ n) := ⟨const⟩
 @[simp] lemma free_const (c : Const L) :
     free (L := L) (n := n) c = c := by simp[free]
 
-lemma map_func (f : Abbrev L ι) {μ₁ μ₂ : Type v} {n₁ n₂} (bound : Fin n₁ → Fin n₂) (free : μ₁ → μ₂)
+lemma map_func (o : Operator L ι) {μ₁ μ₂ : Type v} {n₁ n₂} (bound : Fin n₁ → Fin n₂) (free : μ₁ → μ₂)
   (v : ι → SubTerm L μ₁ n₁) :
-    map bound free (f.func v) = f.func (fun i => map bound free (v i)) := f.bind_func _ _ _
+    map bound free (o.operator v) = o.operator (fun i => map bound free (v i)) := o.bind_operator _ _ _
 
-lemma subst_func (t : SubTerm L μ n) (f : Abbrev L ι) (v : ι → SubTerm L μ (n + 1)) :
-    subst t (f.func v) = f.func (fun i => subst t (v i)) := f.bind_func _ _ _
+lemma subst_func (t : SubTerm L μ n) (o : Operator L ι) (v : ι → SubTerm L μ (n + 1)) :
+    subst t (o.operator v) = o.operator (fun i => subst t (v i)) := o.bind_operator _ _ _
 
-lemma emb_func (f : Abbrev L ι) (v : ι → SubTerm L PEmpty n) :
-    emb (μ := μ) (f.func v) = f.func (fun i => emb (v i)) := f.bind_func _ _ _
+lemma emb_func (o : Operator L ι) (v : ι → SubTerm L PEmpty n) :
+    emb (μ := μ) (o.operator v) = o.operator (fun i => emb (v i)) := o.bind_operator _ _ _
 
-lemma shift_func (f : Abbrev L ι) (v : ι → SyntacticSubTerm L n) :
-    shift (f.func v) = f.func (fun i => shift (v i)) := f.bind_func _ _ _
+lemma shift_func (o : Operator L ι) (v : ι → SyntacticSubTerm L n) :
+    shift (o.operator v) = o.operator (fun i => shift (v i)) := o.bind_operator _ _ _
 
-lemma bShift_func (f : Abbrev L ι) (v : ι → SyntacticSubTerm L (n + 1)) :
-    bShift (f.func v) = f.func (fun i => bShift (v i)) := f.bind_func _ _ _
+lemma bShift_func (o : Operator L ι) (v : ι → SyntacticSubTerm L (n + 1)) :
+    bShift (o.operator v) = o.operator (fun i => bShift (v i)) := o.bind_operator _ _ _
 
-lemma free_func (f : Abbrev L ι) (v : ι → SyntacticSubTerm L (n + 1)) :
-    free (f.func v) = f.func (fun i => free (v i)) := f.bind_func _ _ _
+lemma free_func (o : Operator L ι) (v : ι → SyntacticSubTerm L (n + 1)) :
+    free (o.operator v) = o.operator (fun i => free (v i)) := o.bind_operator _ _ _
 
-end Abbrev
+end Operator
 
 section natLit
 
@@ -442,8 +442,8 @@ def natLit' : ℕ → SubTerm L μ n
 variable (L)
 
 def natLit (z : ℕ) : Const L where
-  func := fun _ => natLit' z
-  bind_func := by intros; cases z <;> simp[natLit', bind_func, bind_addOnes, Matrix.empty_eq]
+  operator := fun _ => natLit' z
+  bind_operator := by intros; cases z <;> simp[natLit', bind_func, bind_addOnes, Matrix.empty_eq]
 
 variable {L}
 
@@ -457,7 +457,7 @@ lemma natLit_succ (z : ℕ) (neZero : z ≠ 0) :
     (natLit L (.succ z) : SubTerm L μ n) = func Language.Add.add ![natLit L z, natLit L 1] := by
   cases z
   · contradiction
-  · simp[natLit, natLit', Abbrev.const]
+  · simp[natLit, natLit', Operator.const]
 
 end natLit
 
@@ -466,30 +466,133 @@ syntax:max "#" num : subterm
 syntax:max "&" term:max : subterm
 syntax:max "!" term:max : subterm
 syntax num : subterm
-syntax:70 "const" term:max : subterm
-syntax:70 "func¹" term "/[" subterm:0 "]" : subterm
-syntax:70 "func²" term "/[" subterm:0 "," subterm:0 "]" : subterm
-syntax:50 subterm:50 "+" subterm:51 : subterm
-syntax:60 subterm:60 "*" subterm:61 : subterm
-syntax:65 subterm:65 "^" subterm:66 : subterm
+syntax:70 "[" term "]" : subterm
+syntax:70 "[" term "](" subterm:0 ")" : subterm
+syntax:70 "[" term "](" subterm:0 ", " subterm:0 ")" : subterm
+syntax:50 subterm:50 " + " subterm:51 : subterm
+syntax:60 subterm:60 " * " subterm:61 : subterm
+syntax:65 subterm:65 " ^ " subterm:66 : subterm
 syntax "(" subterm ")" : subterm
 
-syntax "T“" subterm "”" : term
+syntax "T“ " subterm:0 " ”" : term
 
 macro_rules
-  | `(T“ # $n:num ”)                                     => `(#$n)
-  | `(T“ & $n:term ”)                                    => `(&$n)
-  | `(T“ ! $t:term ”)                                    => `($t)
-  | `(T“ $n:num ”)                                       => `((natLit _ $n).const)
-  | `(T“ const $d:term ”)                                => `(func $d ![])
-  | `(T“ func¹ $d:term /[ $t:subterm ] ”)                => `(func $d ![T“$t”])
-  | `(T“ func² $d:term /[ $t₁:subterm , $t₂:subterm ] ”) => `(func $d ![T“$t₁”, T“$t₂”])
-  | `(T“ $t:subterm + $u:subterm ”)                      => `(func Language.Add.add ![T“$t”, T“$u”])
-  | `(T“ $t:subterm * $u:subterm ”)                      => `(func Language.Mul.mul ![T“$t”, T“$u”])
-  | `(T“ $t:subterm ^ $u:subterm ”)                      => `(func Language.Pow.pow ![T“$t”, T“$u”])
-  | `(T“ ( $x ) ”)                                       => `(T“$x”)
+  | `(T“ # $n:num ”)                                 => `(#$n)
+  | `(T“ & $n:term ”)                                => `(&$n)
+  | `(T“ ! $t:term ”)                                => `($t)
+  | `(T“ $n:num ”)                                   => `((natLit _ $n).const)
+  | `(T“ [ $d:term ] ”)                              => `(func $d ![])
+  | `(T“ [ $d:term ]( $t:subterm ) ”)                => `(func $d ![T“$t”])
+  | `(T“ [ $d:term ]( $t₁:subterm , $t₂:subterm ) ”) => `(func $d ![T“$t₁”, T“$t₂”])
+  | `(T“ $t:subterm + $u:subterm ”)                  => `(func Language.Add.add ![T“$t”, T“$u”])
+  | `(T“ $t:subterm * $u:subterm ”)                  => `(func Language.Mul.mul ![T“$t”, T“$u”])
+  | `(T“ $t:subterm ^ $u:subterm ”)                  => `(func Language.Pow.pow ![T“$t”, T“$u”])
+  | `(T“ ( $x ) ”)                                   => `(T“$x”)
 
-#reduce (T“ func² Language.ORingFunc.mul /[&2 + &0, const Language.ORingFunc.zero]” : SubTerm Language.oring ℕ 8)
-#reduce (T“(&2 + 0) * 2” : SubTerm Language.oring ℕ 8)
+#check (T“ [Language.ORingFunc.mul](&2 + &0, [Language.ORingFunc.zero])” : SubTerm Language.oring ℕ 8)
+#check (T“3 * 2” : SubTerm Language.oring ℕ 8)
+#check SubTerm.func Language.Mul.mul (T“1” :> T“3” :> Matrix.vecEmpty)
+
+section delab
+open Lean PrettyPrinter Delaborator SubExpr
+
+instance : Coe NumLit (TSyntax `subterm) where
+  coe s := ⟨s.raw⟩
+
+@[app_unexpander natLit]
+def unexpsnderNatLit : Unexpander
+  | `($_ $_ $z:num) => `($z)
+  | _ => throw ()
+
+@[app_unexpander Operator.const]
+def unexpsnderOperatorConst : Unexpander
+  | `($_ $z:num) => `(T“$z”)
+  | _ => throw ()
+
+notation "lang(+)" => Language.Add.add
+notation "lang(*)" => Language.Mul.mul
+notation "lang(^)" => Language.Pow.pow
+
+@[app_unexpander Language.Add.add]
+def unexpsnderAdd : Unexpander
+  | `($_) => `(lang(+))
+
+@[app_unexpander Language.Mul.mul]
+def unexpsnderMul : Unexpander
+  | `($_) => `(lang(*))
+
+@[app_unexpander Language.Pow.pow]
+def unexpsnderPow : Unexpander
+  | `($_) => `(lang(^))
+
+@[app_unexpander SubTerm.func]
+def unexpandFunc : Unexpander
+  | `($_ $c ![])                 => `(T“ [$c] ”)
+  | `($_ $f ![T“ $t ”])          => `(T“ [$f]($t) ”)
+  | `($_ $f ![T“ $t ”, T“ $u ”]) => `(T“ [$f]($t, $u) ”)
+  | _                            => throw ()
+
+@[app_unexpander SubTerm.func]
+def unexpandFuncArith : Unexpander
+  | `($_ lang(+) ![T“$t:subterm”, T“$u:subterm”]) => `(T“ ($t + $u) ”)
+  | `($_ lang(+) ![T“$t:subterm”, #$x:num      ]) => `(T“ ($t + #$x) ”)
+  | `($_ lang(+) ![T“$t:subterm”, &$x:num      ]) => `(T“ ($t + &$x) ”)
+  | `($_ lang(+) ![T“$t:subterm”, $u           ]) => `(T“ ($t + !$u) ”)
+  | `($_ lang(+) ![#$x:num,       T“$u:subterm”]) => `(T“ (#$x + $u) ”)
+  | `($_ lang(+) ![#$x:num,       #$y:num      ]) => `(T“ (#$x + #$y) ”)
+  | `($_ lang(+) ![#$x:num,       &$y:num      ]) => `(T“ (#$x + &$y) ”)
+  | `($_ lang(+) ![#$x:num,       $u           ]) => `(T“ (#$x + !$u) ”)
+  | `($_ lang(+) ![&$x:num,       T“$u:subterm”]) => `(T“ (&$x + $u) ”)
+  | `($_ lang(+) ![&$x:num,       #$y:num      ]) => `(T“ (&$x + #$y) ”)
+  | `($_ lang(+) ![&$x:num,       &$y:num      ]) => `(T“ (&$x + &$y) ”)
+  | `($_ lang(+) ![&$x:num,       $u           ]) => `(T“ (&$x + !$u) ”)
+  | `($_ lang(+) ![$t,            T“$u:subterm”]) => `(T“ (!$t + $u) ”)
+  | `($_ lang(+) ![$t,            #$y:num      ]) => `(T“ (!$t + #$y) ”)
+  | `($_ lang(+) ![$t,            &$y:num      ]) => `(T“ (!$t + &$y) ”)
+  | `($_ lang(+) ![$t,            $u           ]) => `(T“ (!$t + !$u) ”)
+
+  | `($_ lang(*) ![T“$t:subterm”, T“$u:subterm”]) => `(T“ ($t * $u) ”)
+  | `($_ lang(*) ![T“$t:subterm”, #$x:num      ]) => `(T“ ($t * #$x) ”)
+  | `($_ lang(*) ![T“$t:subterm”, &$x:num      ]) => `(T“ ($t * &$x) ”)
+  | `($_ lang(*) ![T“$t:subterm”, $u           ]) => `(T“ ($t * !$u) ”)
+  | `($_ lang(*) ![#$x:num,       T“$u:subterm”]) => `(T“ (#$x * $u) ”)
+  | `($_ lang(*) ![#$x:num,       #$y:num      ]) => `(T“ (#$x * #$y) ”)
+  | `($_ lang(*) ![#$x:num,       &$y:num      ]) => `(T“ (#$x * &$y) ”)
+  | `($_ lang(*) ![#$x:num,       $u           ]) => `(T“ (#$x * !$u) ”)
+  | `($_ lang(*) ![&$x:num,       T“$u:subterm”]) => `(T“ (&$x * $u) ”)
+  | `($_ lang(*) ![&$x:num,       #$y:num      ]) => `(T“ (&$x * #$y) ”)
+  | `($_ lang(*) ![&$x:num,       &$y:num      ]) => `(T“ (&$x * &$y) ”)
+  | `($_ lang(*) ![&$x:num,       $u           ]) => `(T“ (&$x * !$u) ”)
+  | `($_ lang(*) ![$t,            T“$u:subterm”]) => `(T“ (!$t * $u) ”)
+  | `($_ lang(*) ![$t,            #$y:num      ]) => `(T“ (!$t * #$y) ”)
+  | `($_ lang(*) ![$t,            &$y:num      ]) => `(T“ (!$t * &$y) ”)
+  | `($_ lang(*) ![$t,            $u           ]) => `(T“ (!$t * !$u) ”)
+
+  | `($_ lang(^) ![T“$t:subterm”, T“$u:subterm”]) => `(T“ ($t ^ $u) ”)
+  | `($_ lang(^) ![T“$t:subterm”, #$x:num      ]) => `(T“ ($t ^ #$x) ”)
+  | `($_ lang(^) ![T“$t:subterm”, &$x:num      ]) => `(T“ ($t ^ &$x) ”)
+  | `($_ lang(^) ![T“$t:subterm”, $u           ]) => `(T“ ($t ^ !$u) ”)
+  | `($_ lang(^) ![#$x:num,       T“$u:subterm”]) => `(T“ (#$x ^ $u) ”)
+  | `($_ lang(^) ![#$x:num,       #$y:num      ]) => `(T“ (#$x ^ #$y) ”)
+  | `($_ lang(^) ![#$x:num,       &$y:num      ]) => `(T“ (#$x ^ &$y) ”)
+  | `($_ lang(^) ![#$x:num,       $u           ]) => `(T“ (#$x ^ !$u) ”)
+  | `($_ lang(^) ![&$x:num,       T“$u:subterm”]) => `(T“ (&$x ^ $u) ”)
+  | `($_ lang(^) ![&$x:num,       #$y:num      ]) => `(T“ (&$x ^ #$y) ”)
+  | `($_ lang(^) ![&$x:num,       &$y:num      ]) => `(T“ (&$x ^ &$y) ”)
+  | `($_ lang(^) ![&$x:num,       $u           ]) => `(T“ (&$x ^ !$u) ”)
+  | `($_ lang(^) ![$t,            T“$u:subterm”]) => `(T“ (!$t ^ $u) ”)
+  | `($_ lang(^) ![$t,            #$y:num      ]) => `(T“ (!$t ^ #$y) ”)
+  | `($_ lang(^) ![$t,            &$y:num      ]) => `(T“ (!$t ^ &$y) ”)
+  | `($_ lang(^) ![$t,            $u           ]) => `(T“ (!$t ^ !$u) ”)
+  | _                                             => throw ()
+
+#check natLit Language.oring 99
+#check (T“1” : SubTerm Language.oring ℕ 8)
+#check (SubTerm.func Language.Mul.mul (T“1” :> T“3” :> Matrix.vecEmpty) : SubTerm Language.oring ℕ 8)
+#check T“3 + 8 * &6+2 *#0”
+
+example (t : SubTerm L μ n) [L.ORing] : T“0 + 2 + !t”  = t := by { sorry }
+
+end delab
 
 end SubTerm

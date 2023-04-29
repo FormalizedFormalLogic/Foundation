@@ -170,9 +170,9 @@ class Pow (L : Language.{u}) where
 
 attribute [match_pattern] Eq.eq Add.add Mul.mul
 
-class HasORing (L : Language) extends L.Eq, L.Lt, L.Zero, L.One, L.Add, L.Mul
+class ORing (L : Language) extends L.Eq, L.Lt, L.Zero, L.One, L.Add, L.Mul
 
-instance : HasORing oring where
+instance : ORing oring where
   eq := ORingRel.eq
   lt := ORingRel.lt
   zero := ORingFunc.zero

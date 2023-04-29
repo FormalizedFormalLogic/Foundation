@@ -54,6 +54,23 @@ infixr:70 " :> " => vecCons
 def vecConsLast {n : ℕ} (t : Fin n → α) (h : α) : Fin n.succ → α :=
   Fin.lastCases h t
 
+section delab
+open Lean PrettyPrinter Delaborator SubExpr
+
+@[app_unexpander Matrix.vecEmpty]
+def unexpandVecEmpty : Unexpander
+  | `($(_)) => `(![])
+
+@[app_unexpander Matrix.vecCons]
+def unexpandVecCons : Unexpander
+  | `($(_) $a ![])      => `(![$a])
+  | `($(_) $a ![$as,*]) => `(![$a, $as,*])
+  | _                   => throw ()
+
+#check ![0, 1, 2]
+
+end delab
+
 infixl:70 " <: " => vecConsLast
 
 @[simp] lemma rightConcat_last :
