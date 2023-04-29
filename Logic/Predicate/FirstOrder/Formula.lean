@@ -646,6 +646,7 @@ syntax "⊥" : subformula
 syntax:45 subterm:45 " = " subterm:0 : subformula
 syntax:45 subterm:45 " ≠ " subterm:0 : subformula
 syntax:45 subterm:45 " < " subterm:0 : subformula
+syntax:45 subterm:45 " ≮ " subterm:0 : subformula
 syntax:45 "[" term:0 "]" : subformula
 syntax:45 "[" term "](" subterm:0 ")" : subformula
 syntax:45 "[" term "](" subterm:0 ", " subterm:0 ")" : subformula
@@ -655,9 +656,13 @@ syntax:30 subformula:30 " ∨ " subformula:31 : subformula
 syntax:max "∀ " subformula:35 : subformula
 syntax:max "∃ " subformula:35 : subformula
 syntax:25 "∀* " subformula:24 : subformula
+
+syntax subformula "⟦" subterm:0 "⟧" : subformula
+syntax:max "⇑" subformula:10 : subformula
+
 syntax "(" subformula ")" : subformula
 syntax:max "!" term:max : subformula
-syntax "“ " subformula " ”" : term
+syntax "“" subformula "”" : term
  
 macro_rules
   | `(“ ⊤ ”)                                       => `(⊤)
@@ -670,18 +675,22 @@ macro_rules
   | `(“ $t:subterm = $u:subterm ”)                 => `(rel Language.Eq.eq ![T“$t”, T“$u”])
   | `(“ $t:subterm ≠ $u:subterm ”)                 => `(nrel Language.Eq.eq ![T“$t”, T“$u”])
   | `(“ $t:subterm < $u:subterm ”)                 => `(rel Language.Lt.lt ![T“$t”, T“$u”])
+  | `(“ $t:subterm ≮ $u:subterm ”)                 => `(nrel Language.Lt.lt ![T“$t”, T“$u”])
   | `(“ $p:subformula ∧ $q:subformula ”)           => `(“$p” ⋏ “$q”)
   | `(“ $p:subformula ∨ $q:subformula ”)           => `(“$p” ⋎ “$q”)
   | `(“ ∀ $p:subformula ”)                         => `(∀' “$p”)
   | `(“ ∃ $p:subformula ”)                         => `(∃' “$p”)
   | `(“ ∀* $p:subformula ”)                        => `(univClosure “$p”)
+  | `(“ $p:subformula ⟦ $t:subterm ⟧ ”)            => `(subst T“$t” “$p”)
+  | `(“ ⇑$p:subformula ”)                         => `(shift “$p”)
+
   | `(“ ( $x ) ”)                                  => `(“$x”)
 
 #check (“ ¬ [Language.toRelational 0] ” : Formula (Language.relational (fun _ => ℕ)) ℕ)
 #check (“ [Language.toRelational 1](&0) ” : Formula (Language.relational (fun _ => ℕ)) ℕ)
 #check (“ ¬ [Language.toRelational 1](&0, &1) ” : Formula (Language.relational (fun _ => ℕ)) ℕ)
 #check (“ ¬(∀ ∀ (#0 + 1) * #1 < #0 + #1 ∨ 0 < 5) ” : Sentence Language.oring)
-#check (“ ∀* ¬⊤ ∨ ¬0 < 5 ” : Sentence Language.oring)
+#check (“ ∀* ¬⊤ ∨ (¬#0 < 5)⟦#3⟧ ” : Sentence Language.oring)
 
 syntax:10 subformula:9 " → " subformula:10 : subformula
 syntax:10 subformula:10 " ↔ " subformula:10 : subformula
@@ -691,7 +700,6 @@ macro_rules
   | `(“ $p:subformula ↔ $q:subformula ”) => `(“$p” ⟷ “$q”)
 
 #reduce (“(∃ ⊤) ↔ !(∃' ⊤)” : Sentence Language.oring)
-#check (“0 < 0 → 0 < 1 → 0 < 2” : Sentence Language.oring)
 
 section delab
 open Lean PrettyPrinter Delaborator SubExpr
@@ -757,6 +765,19 @@ def unexpandIff : Unexpander
   | `($_ $t:term         “$q:subformula”) => `(“ (!$t ↔ $q) ”)
   | _                                     => throw ()
 
+@[app_unexpander SubFormula.subst]
+def unexpandSubst : Unexpander
+  | `($_ “$p:subformula” T“$t:subterm” ) => `(“ $p ⟦$t⟧ ”)
+  | `($_ “$p:subformula” #$x:num )       => `(“ $p ⟦#$x⟧ ”)
+  | `($_ “$p:subformula” &$x:num )       => `(“ $p ⟦&$x⟧ ”)
+  | `($_ “$p:subformula” $t )            => `(“ $p ⟦!$t⟧ ”)
+  | _                                    => throw ()
+
+@[app_unexpander SubFormula.shift]
+def unexpandShift : Unexpander
+  | `($_ “$p:subformula”) => `(“ ⇑ $p ”)
+  | _                     => throw ()
+
 @[app_unexpander SubFormula.rel]
 def unexpandRelArith : Unexpander
   | `($_ lang(=) ![T“$t:subterm”, T“$u:subterm”]) => `(“ $t:subterm = $u  ”)
@@ -795,7 +816,46 @@ def unexpandRelArith : Unexpander
 
   | _                                             => throw ()
 
+@[app_unexpander SubFormula.nrel]
+def unexpandNRelArith : Unexpander
+  | `($_ lang(=) ![T“$t:subterm”, T“$u:subterm”]) => `(“ $t:subterm ≠ $u  ”)
+  | `($_ lang(=) ![T“$t:subterm”, #$y:num      ]) => `(“ $t:subterm ≠ #$y ”)
+  | `($_ lang(=) ![T“$t:subterm”, &$y:num      ]) => `(“ $t:subterm ≠ &$y ”)
+  | `($_ lang(=) ![T“$t:subterm”, $u           ]) => `(“ $t:subterm ≠ !$u ”)
+  | `($_ lang(=) ![#$x:num,       T“$u:subterm”]) => `(“ #$x        ≠ $u  ”)
+  | `($_ lang(=) ![#$x:num,       #$y:num      ]) => `(“ #$x        ≠ #$y ”)
+  | `($_ lang(=) ![#$x:num,       &$y:num      ]) => `(“ #$x        ≠ &$y ”)
+  | `($_ lang(=) ![#$x:num,       $u           ]) => `(“ #$x        ≠ !$u ”)
+  | `($_ lang(=) ![&$x:num,       T“$u:subterm”]) => `(“ &$x        ≠ $u  ”)
+  | `($_ lang(=) ![&$x:num,       #$y:num      ]) => `(“ &$x        ≠ #$y ”)
+  | `($_ lang(=) ![&$x:num,       &$y:num      ]) => `(“ &$x        ≠ &$y ”)
+  | `($_ lang(=) ![&$x:num,       $u           ]) => `(“ &$x        ≠ !$u ”)
+  | `($_ lang(=) ![$t:term,       T“$u:subterm”]) => `(“ !$t        ≠ $u  ”)
+  | `($_ lang(=) ![$t:term,       #$y:num      ]) => `(“ !$t        ≠ #$y ”)
+  | `($_ lang(=) ![$t:term,       &$y:num      ]) => `(“ !$t        ≠ &$y ”)
+  | `($_ lang(=) ![$t:term,       $u           ]) => `(“ !$t        ≠ !$u ”)
+
+  | `($_ lang(<) ![T“$t:subterm”, T“$u:subterm”]) => `(“ $t:subterm ≮ $u  ”)
+  | `($_ lang(<) ![T“$t:subterm”, #$y:num      ]) => `(“ $t:subterm ≮ #$y ”)
+  | `($_ lang(<) ![T“$t:subterm”, &$y:num      ]) => `(“ $t:subterm ≮ &$y ”)
+  | `($_ lang(<) ![T“$t:subterm”, $u           ]) => `(“ $t:subterm ≮ !$u ”)
+  | `($_ lang(<) ![#$x:num,       T“$u:subterm”]) => `(“ #$x        ≮ $u  ”)
+  | `($_ lang(<) ![#$x:num,       #$y:num      ]) => `(“ #$x        ≮ #$y ”)
+  | `($_ lang(<) ![#$x:num,       &$y:num      ]) => `(“ #$x        ≮ &$y ”)
+  | `($_ lang(<) ![#$x:num,       $u           ]) => `(“ #$x        ≮ !$u ”)
+  | `($_ lang(<) ![&$x:num,       T“$u:subterm”]) => `(“ &$x        ≮ $u  ”)
+  | `($_ lang(<) ![&$x:num,       #$y:num      ]) => `(“ &$x        ≮ #$y ”)
+  | `($_ lang(<) ![&$x:num,       &$y:num      ]) => `(“ &$x        ≮ &$y ”)
+  | `($_ lang(<) ![&$x:num,       $u           ]) => `(“ &$x        ≮ !$u ”)
+  | `($_ lang(<) ![$t:term,       T“$u:subterm”]) => `(“ !$t        ≮ $u  ”)
+  | `($_ lang(<) ![$t:term,       #$y:num      ]) => `(“ !$t        ≮ #$y ”)
+  | `($_ lang(<) ![$t:term,       &$y:num      ]) => `(“ !$t        ≮ &$y ”)
+  | `($_ lang(<) ![$t:term,       $u           ]) => `(“ !$t        ≮ !$u ”)
+
+  | _                                             => throw ()
+
 #check “ ¬∃ ∀ ((#0 + 1) * #1 < #0 + #1 ↔ 0 < &5) ”
+#check (“0 < 0 → 0 < 1 → 0 ≮ 2” : Sentence Language.oring)
 
 end delab
 

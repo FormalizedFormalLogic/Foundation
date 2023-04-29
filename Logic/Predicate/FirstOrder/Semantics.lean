@@ -273,11 +273,11 @@ end SubFormula
 
 namespace SubFormula
 
-variable {L : Language.{u}} [L.HasEq] {μ : Type v} (M : Type w) (s : Structure L M) [s.Eq]
+variable {L : Language.{u}} [L.Eq] {μ : Type v} (M : Type w) (s : Structure L M) [s.Eq]
   {n} (e : Fin n → M) (ε : μ → M)
 
 @[simp] lemma eval_eq (t u : SubTerm L μ n) :
-    Eval s e ε (rel Language.HasEq.eq ![t, u]) ↔ t.val s e ε = u.val s e ε :=
+    Eval s e ε (rel Language.Eq.eq ![t, u]) ↔ t.val s e ε = u.val s e ε :=
   by simp
 
 end SubFormula

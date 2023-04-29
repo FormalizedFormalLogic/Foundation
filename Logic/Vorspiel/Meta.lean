@@ -58,33 +58,6 @@ def MditeQ {α : Q(Sort u)} (c : Q(Prop)) (dec : Q(Decidable $c)) (t : MetaM Q($
   let e ← e
   return q(dite $c (fun h => $t h) (fun h => $e h))
 
-class NormalizeQ (α : Q(Type u)) where
-  normalize : (e : Q($α)) → MetaM ((res : Q($α)) × Q($res = $e))
-
-structure Result {α : Q(Type u)} (e : Q($α)) where
-  expr : Q($α)
-  proof : Q($e = $expr)
-
-namespace Result
-variable {α : Q(Type u)}
-
-@[reducible] def refl (e : Q($α)) : Result e := ⟨e, q(rfl)⟩
-
-def mk' (e e' : Q($α)) (eq : Q($e = $e'))  : Result e := ⟨e', eq⟩
-
-end Result
-
-structure ResultFun {α : Q(Type u)} {β : Q(Type v)} (f : Q($α → $β)) (e : Q($α)) where
-  expr : Q($β)
-  proof : Q($f $e = $expr)
-
-namespace ResultFun
-variable {α : Q(Type u)} {β : Q(Type v)} (f : Q($α → $β))
-
-@[reducible] def refl (e : Q($α)) : ResultFun f e := ⟨q($f $e), q(rfl)⟩
-
-end ResultFun
-
 set_option linter.unusedVariables false in
 def BEqQ {α : Q(Sort u)} {a b : Q($α)} (h : a == b) : Q($a = $b) := (q(@rfl $α $a) : Expr)
 
@@ -93,6 +66,11 @@ def eqQUnsafe {α : Q(Sort u)} (a b : Q($α)) : Q($a = $b) := (q(@rfl $α $a) : 
 def toQList {α : Q(Type u)} : List Q($α) → Q(List $α)
   | []     => q([])
   | a :: v => q($a :: $(toQList v))
+
+partial def ofQList {α : Q(Type u)} (l : Q(List $α)) : MetaM $ List Q($α) := do
+  match l with
+  | ~q([])       => return []
+  | ~q($a :: $l) => return a :: (← ofQList l)
 
 section List
 variable {α : Type u}
@@ -134,5 +112,25 @@ def funResultList {α β : Q(Type u)} (f : Q($α → $β)) (res : (a : Q($α)) �
     return ⟨an :: ihl, q(List.cons_congr $e $ihe)⟩
 
 end List
+
+structure Result (α : Q(Type u)) where
+  intro : (e : Q($α)) → MetaM $ (res : Q($α)) × Q($e = $res)
+
+structure FunResult {α : Q(Type u)} {β : Q(Type v)} (f : Q($α → $β)) where
+  intro : (e : Q($α)) → MetaM $ (res : Q($β)) × Q($f $e = $res)
+
+namespace Result
+variable {α : Q(Type u)}
+
+def refl : Result α := ⟨fun e => pure ⟨e, q(rfl)⟩⟩
+
+end Result
+
+namespace ResultFun
+variable {α : Q(Type u)} {β : Q(Type v)} (f : Q($α → $β))
+
+def refl (e : Q($α)) : FunResult f := ⟨fun e => pure ⟨q($f $e), q(rfl)⟩⟩
+
+end ResultFun
 
 end Qq

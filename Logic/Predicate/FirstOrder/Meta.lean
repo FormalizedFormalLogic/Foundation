@@ -180,8 +180,6 @@ lemma shift_congr_eq {p p' : SyntacticSubFormula L n} {q} (e : p = p') (h : shif
 
 end lemmata
 
-#check Result.mk'
-
 inductive TransparencyMode
   | constants
   | unfoldNeg
@@ -227,7 +225,7 @@ partial def resultFree {L : Q(Language.{u})} {n : Q(ℕ)} : (p : Q(SyntacticSubF
     let ⟨tn₂, e₂⟩ ← SubTerm.Meta.resultFree (L := L) (n := n) t₂
     return ⟨q(nrel $r ![$tn₁, $tn₂]), q(free_nrel₂ $r $e₁ $e₂)⟩
   | ~q($p)                  => pure ⟨q(free $p), q(rfl)⟩
-/--/
+
 partial def resultSubst {L : Q(Language.{u})} {n : Q(ℕ)} (s : Q(SyntacticSubTerm $L $n)) :
     (p : Q(SyntacticSubFormula $L ($n + 1))) → MetaM ((res : Q(SyntacticSubFormula $L $n)) × Q(subst $s $p = $res))
   | ~q(⊤)                   => pure ⟨q(⊤), q(rfl)⟩
@@ -344,6 +342,8 @@ partial def resultNeg {L : Q(Language.{u})} {n : Q(ℕ)} : (p : Q(SyntacticSubFo
     return ⟨q(rel $r ![$t₁, $t₂]), q(neg_nrel $r _)⟩
   | ~q($p)                  => pure ⟨q(~$p), q(rfl)⟩
 
+variable (tp : SubTerm.Meta.TransparencyMode)
+
 partial def result {L : Q(Language.{u})} {n : Q(ℕ)} : (p : Q(SyntacticSubFormula $L $n)) →
     MetaM ((res : Q(SyntacticSubFormula $L $n)) × Q($p = $res))
   | ~q(⊤)                   => pure ⟨q(⊤), q(rfl)⟩
@@ -379,26 +379,26 @@ partial def result {L : Q(Language.{u})} {n : Q(ℕ)} : (p : Q(SyntacticSubFormu
     return ⟨q(∃' $pn), q(ex_congr $pe)⟩
   | ~q(rel $r ![])          => pure ⟨q(rel $r ![]), q(rfl)⟩
   | ~q(rel $r ![$t])        => do
-    let ⟨tn, e⟩ ← SubTerm.Meta.result (L := L) (n := n) t
+    let ⟨tn, e⟩ ← SubTerm.Meta.result tp (L := L) (n := n) t
     return ⟨q(rel $r ![$tn]), q(rel₁_congr $e)⟩
   | ~q(rel $r ![$t₁, $t₂])  => do
-    let ⟨tn₁, e₁⟩ ← SubTerm.Meta.result (L := L) (n := n) t₁
-    let ⟨tn₂, e₂⟩ ← SubTerm.Meta.result (L := L) (n := n) t₂
+    let ⟨tn₁, e₁⟩ ← SubTerm.Meta.result tp (L := L) (n := n) t₁
+    let ⟨tn₂, e₂⟩ ← SubTerm.Meta.result tp (L := L) (n := n) t₂
     return ⟨q(rel $r ![$tn₁, $tn₂]), q(rel₂_congr $e₁ $e₂)⟩
   | ~q(nrel $r ![])         => pure ⟨q(nrel $r ![]), q(rfl)⟩
   | ~q(nrel $r ![$t])       => do
-    let ⟨tn, e⟩ ← SubTerm.Meta.result (L := L) (n := n) t
+    let ⟨tn, e⟩ ← SubTerm.Meta.result tp (L := L) (n := n) t
     return ⟨q(nrel $r ![$tn]), q(nrel₁_congr $e)⟩
   | ~q(nrel $r ![$t₁, $t₂]) => do
-    let ⟨tn₁, e₁⟩ ← SubTerm.Meta.result (L := L) (n := n) t₁
-    let ⟨tn₂, e₂⟩ ← SubTerm.Meta.result (L := L) (n := n) t₂
+    let ⟨tn₁, e₁⟩ ← SubTerm.Meta.result tp (L := L) (n := n) t₁
+    let ⟨tn₂, e₂⟩ ← SubTerm.Meta.result tp (L := L) (n := n) t₂
     return ⟨q(nrel $r ![$tn₁, $tn₂]), q(nrel₂_congr $e₁ $e₂)⟩
   | ~q(free $p)             => do
     let ⟨pn, e⟩ ← result (L := L) (n := q($n + 1)) p
     let ⟨pnn, ee⟩ ← resultFree (L := L) (n := n) pn
     return ⟨q($pnn), q(free_congr_eq $e $ee)⟩
   | ~q(subst $s $p)         => do
-    let ⟨sn, se⟩ ← SubTerm.Meta.result (L := L) (n := q($n)) s
+    let ⟨sn, se⟩ ← SubTerm.Meta.result tp (L := L) (n := q($n)) s
     let ⟨pn, pe⟩ ← result (L := L) (n := q($n + 1)) p
     let ⟨n, e⟩ ← resultSubst (L := L) (n := n) sn pn
     return ⟨q($n), q(subst_congr_eq $se $pe $e)⟩
@@ -410,23 +410,18 @@ partial def result {L : Q(Language.{u})} {n : Q(ℕ)} : (p : Q(SyntacticSubFormu
     -- logInfo m!"match fail: {p}"
     return ⟨q($p), q(rfl)⟩
 
-partial def result' {L : Q(Language.{u})} {n : Q(ℕ)} (p : Q(SyntacticSubFormula $L $n)) :
-    MetaM (Result (u := u) q(SyntacticSubFormula $L $n) p) := do
-    let ⟨res, e⟩ ← result p
-    return ⟨res, e⟩
-
-partial def result₀ {L : Q(Language.{u})} (p : Q(SyntacticFormula $L)) :
+partial def result₀ (tp : SubTerm.Meta.TransparencyMode) {L : Q(Language.{u})} (p : Q(SyntacticFormula $L)) :
     MetaM ((res : Q(SyntacticFormula $L)) × Q($p = $res)) :=
-  result (L := L) (n := q(0)) p
+  result tp (L := L) (n := q(0)) p
 
 partial def result₀_res {L : Q(Language.{u})} (p : Q(SyntacticFormula $L)) :
     MetaM Q(SyntacticFormula $L) := do
-  let ⟨res, _⟩ ← result₀ (L := L) p
+  let ⟨res, _⟩ ← result₀ tp (L := L) p
   return res
 
 partial def result₀List {L : Q(Language.{u})} (l : List Q(SyntacticFormula $L)) :
     MetaM $ (res : List Q(SyntacticFormula $L)) × Q($(toQList (u := u) l) = $(toQList (u := u) res)) :=
-  resultList result₀ l
+  resultList (result₀ tp) l
 
 partial def resultShift₀ {L : Q(Language.{u})} (p : Q(SyntacticFormula $L)) :
     MetaM $ (res : Q(SyntacticFormula $L)) × Q(shift $p = $res) :=
@@ -454,9 +449,9 @@ elab "dbg" : tactic => do
   logInfo m!"p = {p} : SyntacticSubFormula {L} {n}"
   let p : Q(SyntacticSubFormula $L $n) ← withReducible <| whnf p
 
-  let ⟨pn, e⟩ ← result (L := L) (n := n) p
+  let ⟨pn, e⟩ ← result SubTerm.Meta.TransparencyMode.constants (L := L) (n := n) p
   logInfo m!"pn = {pn}"
-  logInfo m!"e = {e}"
+  -- logInfo m!"e = {e}"
   let c : Q(ResultTest (SyntacticSubFormula $L $n) $p) := (q(ResultTest.result ($p) $pn $e) : Expr)
   Lean.Elab.Tactic.closeMainGoal c
 
@@ -472,8 +467,8 @@ namespace DerivationList
 open DerivationCutRestricted
 variable {L : Language.{u}} [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq (L.rel k)] {G : List (SyntacticFormula L)}
 
-def congr {G G' : List (SyntacticFormula L)} (e : G = G')
-  (d : DerivationList G) : DerivationList G' := by rw [←e]; exact d
+def congr {G G' : List (SyntacticFormula L)} (e : G' = G)
+  (d : DerivationList G) : DerivationList G' := by rw [e]; exact d
 
 def head {p} (d : DerivationList (G ++ [p])) : DerivationList (p :: G) := d.cast (by ext; simp[or_comm])
 
@@ -551,7 +546,7 @@ variable (L : Q(Language.{u}))
 def toDerivation₁Q (p : Q(SyntacticFormula $L)) (d : DerivationListQ L dfunc drel [p]) : Q(Derivation₁ $p) :=
   q($d)
 
-def congrQ {G G' : List Q(SyntacticFormula $L)} (e : Q($(toQList (u := u) G) = $(toQList (u := u) G')))
+def congrQ {G G' : List Q(SyntacticFormula $L)} (e : Q($(toQList (u := u) G') = $(toQList (u := u) G)))
   (d : DerivationListQ L dfunc drel G) : DerivationListQ L dfunc drel G' :=
   q(DerivationList.congr $e $d)
 
@@ -673,7 +668,7 @@ def tryProveByHyp (L : Q(Language.{u})) (dfunc : Q(∀ k, DecidableEq (($L).func
         let declExpr := decl.toExpr
         let declType ← Lean.Meta.inferType declExpr
         let some p' ← getFormula L declType | return none
-        let ⟨pn', e'⟩ ← Meta.result₀ p'
+        let ⟨pn', e'⟩ ← Meta.result₀ SubTerm.Meta.TransparencyMode.constants p'
         if ← isDefEq p pn' then
           let some d ← checkTypeQ (u := .succ u) declExpr q(@Derivation₁ $L $dfunc $drel $p') | return none
             return some (p', e', d)
@@ -717,7 +712,7 @@ def proveDerivationListQTauto (hypSearch : Bool)
 
 def proveDerivation₁Tauto (L : Q(Language.{u})) (dfunc : Q(∀ k, DecidableEq (($L).func k))) (drel : Q(∀ k, DecidableEq (($L).rel k)))
   (s : ℕ) (p : Q(SyntacticFormula $L)) : MetaM Q(Derivation₁ $p) := do
-  let ⟨pn, e⟩ ← SubFormula.Meta.result₀ (L := L) p
+  let ⟨pn, e⟩ ← SubFormula.Meta.result₀ SubTerm.Meta.TransparencyMode.constants (L := L) p
   let d ← proveDerivationListQTauto true L dfunc drel s [pn]
   let h := toDerivation₁Q L dfunc drel _ d
   return q(Derivation₁.congr $e $h)
@@ -769,18 +764,18 @@ def proveDerivationListQ (L : Q(Language.{u})) (dfunc : Q(∀ k, DecidableEq (($
       return DerivationListQ.headEm L dfunc drel G npe h
     else
     (match p with
-    | ~q(⊤) => pure $ headVerum L dfunc drel G
-    | ~q(⊥) => do
+    | ~q(⊤)       => pure $ headVerum L dfunc drel G
+    | ~q(⊥)       => do
       let d ← proveDerivationListQ L dfunc drel ts s G
       return headWeakening L dfunc drel G d
     | ~q($p ⋎ $q) => do
       let d ← proveDerivationListQ L dfunc drel ts s (G ++ [p, q])
       return (headOr L dfunc drel G d)
-     | ~q($p ⋏ $q) => do
+    | ~q($p ⋏ $q) => do
       let dp ← proveDerivationListQ L dfunc drel ts s (G ++ [p])
       let dq ← proveDerivationListQ L dfunc drel ts s (G ++ [q])
       return (headAnd L dfunc drel G dp dq)   
-    | ~q(∀' $p)  => do
+    | ~q(∀' $p)   => do
       let ⟨fp, fpe⟩ ← Meta.resultFree p
       let ⟨sG, sGe⟩ ← Meta.resultShift₀List G
       let d ← proveDerivationListQ L dfunc drel ts s (Append.append sG [fp])
@@ -789,21 +784,47 @@ def proveDerivationListQ (L : Q(Language.{u})) (dfunc : Q(∀ k, DecidableEq (($
       let ⟨pi, pie⟩ ← Meta.resultSubst₀List ts p
       let d ← proveDerivationListQ L dfunc drel ts s (G ++ pi)
       return headEx L dfunc drel G ts p pi pie d
-    | ~q($p) => do
+    | ~q($p)      => do
       let d ← proveDerivationListQ L dfunc drel ts s (G ++ [p])
       return rotate L dfunc drel G p d
          : MetaM Q(DerivationList $ $p :: $(toQList (u := u) G)))
 
+def proveDerivationList (L : Q(Language.{u})) (dfunc : Q(∀ k, DecidableEq (($L).func k))) (drel : Q(∀ k, DecidableEq (($L).rel k)))
+  (ts : List Q(SyntacticTerm $L)) (s : ℕ) (Γ : Q(List (SyntacticFormula $L))) : MetaM Q(DerivationList $Γ) := do
+  let G ← Qq.ofQList Γ
+  let ⟨G', e⟩ ← SubFormula.Meta.result₀List SubTerm.Meta.TransparencyMode.constants (L := L) G
+  have e' : Q($Γ = $(Qq.toQList (u := u) G')) := e
+  let d : Q(DerivationList $(toQList (u := u) G')) ← proveDerivationListQ L dfunc drel ts s G'
+  return q(($d).congr $e')
+
 def proveDerivation₁ (L : Q(Language.{u})) (dfunc : Q(∀ k, DecidableEq (($L).func k))) (drel : Q(∀ k, DecidableEq (($L).rel k)))
   (ts : List Q(SyntacticTerm $L)) (s : ℕ) (p : Q(SyntacticFormula $L)) : MetaM Q(Derivation₁ $p) := do
-  let ⟨pn, e⟩ ← SubFormula.Meta.result₀ (L := L) p
+  let ⟨pn, e⟩ ← SubFormula.Meta.result₀ SubTerm.Meta.TransparencyMode.constants (L := L) p
   let d ← proveDerivationListQ L dfunc drel ts s [pn]
   let h := toDerivation₁Q L dfunc drel _ d
   return q(Derivation₁.congr $e $h)
 
 syntax termSeq := " [" (term,*) "]"
 
-elab "prove" n:(num)? seq:(termSeq)? : tactic => do
+elab "proveDerivationList" n:(num)? seq:(termSeq)? : tactic => do
+  let goalType ← Elab.Tactic.getMainTarget
+  let some ⟨.succ _, ty⟩ ← checkSortQ' goalType | throwError "error: not a type"
+  let ~q(@DerivationList $L $dfunc $drel $Γ) := ty | throwError "error: not a type 2"
+  let s : ℕ :=
+    match n with
+    | some n => n.getNat
+    | none   => 16
+  let ts : Array Q(SyntacticTerm $L) ←
+    match seq with
+    | some seq =>
+      match seq with
+      | `(termSeq| [ $ss,* ] ) => do ss.getElems.mapM (Term.elabTerm · (some q(SyntacticTerm $L)))
+      | _                      => pure #[]
+    | _        => pure #[q(&0 : SyntacticTerm $L), q(&1 : SyntacticTerm $L)]
+  let b ← proveDerivationList L dfunc drel ts.toList s Γ
+  Lean.Elab.Tactic.closeMainGoal b
+
+elab "proveDerivation₁" n:(num)? seq:(termSeq)? : tactic => do
   let goalType ← Elab.Tactic.getMainTarget
   let some ⟨.succ _, ty⟩ ← checkSortQ' goalType | throwError "error: not a type"
   let ~q(@Derivation₁ $L $dfunc $drel $p) := ty | throwError "error: not a type 2"
@@ -828,11 +849,15 @@ open Language
 
 example (_ : Derivation₁ “¬(!p ∧ !q)”) : Derivation₁ “¬!p ∨ ¬!q”  := by proveTauto
 
-example : Derivation₁ (L := oring) “&0 < 3 → ∃ &0 < #0” := by prove [T“3”]
+example : Derivation₁ (L := oring) “&0 < 3 → ∃ &0 < #0” := by proveDerivation₁ [T“3”]
 
-example : Derivation₁ (L := oring) “&0 < &1 → ∃ ∃ #0 < #1” := by prove
+example : Derivation₁ (L := oring) “&0 < &1 → ∃ ∃ #0 < #1” := by proveDerivation₁
 
-example (_ : Derivation₁ (L := oring) “0 < 4 + 9”) : Derivation₁ (L := oring) “⊤ ∧ (∃ 0 < 4 + #0)”  := by prove [T“9”]
+example (_ : Derivation₁ (L := oring) “0 < 4 + 9”) : Derivation₁ (L := oring) “⊤ ∧ (∃ 0 < 4 + #0)”  := by proveDerivation₁ [T“9”]
+
+example : Derivation₁ (L := oring) “0 < 4 + 9 → (∃ 0 < 4 + #0)”  := by proveDerivation₁ [T“9”]
+
+example : DerivationList (L := oring) [“¬(0 < 4 + 9)”, ⊥, “∃ 0 < 4 + #0”] := by simp; proveDerivationList [T“9”]
 
 end
 -/

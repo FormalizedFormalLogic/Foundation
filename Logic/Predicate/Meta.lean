@@ -9,33 +9,87 @@ namespace Meta
 
 #check Const
 
-inductive SubTermCode.Nullary
-  | numeral : Q(ℕ) → SubTermCode.Nullary
-  | expr : Expr → SubTermCode.Nullary
+inductive Nullary
+  | numeral : Expr → Nullary
+  | operator : Expr → Nullary
+  | lang : Expr → Nullary
+
+def Nullary.toExpr (L : Q(Language.{u})) (n : Q(ℕ)) : Nullary → MetaM Q(SyntacticSubTerm $L $n)
+  | numeral e => do
+    let _ ← synthInstanceQ q(Language.Zero $L)
+    let _ ← synthInstanceQ q(Language.One $L)
+    let _ ← synthInstanceQ q(Language.Add $L)
+    let z : Q(ℕ) := e
+    return q(SubTerm.Operator.const (natLit $L $z))
+  | operator e => do
+    let e : Q(Const.{u, 0} $L) := e
+    return q(SubTerm.Operator.const $e)
+  | lang e    => do
+    let e : Q(($L).func 0) := e
+    return q(func $e ![])
+
+  inductive Unary
+  | operator : Expr → Unary
+  | lang : Expr → Unary
+
+def Unary.toExpr (L : Q(Language.{u})) (n : Q(ℕ)) :
+    Unary → Q(SyntacticSubTerm $L $n) → MetaM Q(SyntacticSubTerm $L $n)
+  | operator e, t => do
+    let e : Q(Finitary.{u, 0} $L 1) := e
+    return q(SubTerm.Operator.operator $e ![$t])
+  | lang e,     t => do
+    let e : Q(($L).func 1) := e
+    return q(func $e ![$t])
+
+  inductive Binary
+  | add : Binary
+  | mul : Binary
+  | pow : Binary
+  | operator : Expr → Binary
+  | lang : Expr → Binary
+
+def Binary.toExpr (L : Q(Language.{u})) (n : Q(ℕ)) :
+    Binary → Q(SyntacticSubTerm $L $n) → Q(SyntacticSubTerm $L $n) → MetaM Q(SyntacticSubTerm $L $n)
+  | add, t₁, t₂    => do
+    let __ : Q(Language.Add $L) ← synthInstanceQ q(Language.Add $L)
+    return q(func Language.Add.add ![$t₁, $t₂])
+  | mul, t₁, t₂    => do
+    let __ : Q(Language.Mul $L) ← synthInstanceQ q(Language.Mul $L)
+    return q(func Language.Mul.mul ![$t₁, $t₂])
+  | pow, t₁, t₂    => do
+    let __ : Q(Language.Pow $L) ← synthInstanceQ q(Language.Pow $L)
+    return q(func Language.Pow.pow ![$t₁, $t₂])
+  | operator e, t₁, t₂ => do
+    let e : Q(Finitary.{u, 0} $L 2) := e
+    return q(SubTerm.Operator.operator $e ![$t₁, $t₂])
+  | lang e, t₁, t₂ => do
+    let e : Q(($L).func 2) := e
+    return q(func $e ![$t₁, $t₂])
 
 inductive SubTermCode : Type
   | bvar : ℕ → SubTermCode
   | fvar : ℕ → SubTermCode
-  | add : Expr → SubTermCode → SubTermCode → SubTermCode
-  | mul : Expr → SubTermCode → SubTermCode → SubTermCode
-  | num : Expr → Expr → Expr → Expr → SubTermCode  
-  | func₀ : Expr → SubTermCode
-  | func₁ : Expr → SubTermCode → SubTermCode
-  | func₂ : Expr → SubTermCode → SubTermCode → SubTermCode
-  | metavar : Expr → SubTermCode
+  | nullary : Nullary → SubTermCode
+  | unary : Unary → SubTermCode → SubTermCode
+  | binary : Binary → SubTermCode → SubTermCode → SubTermCode
+  | lang : Expr → SubTermCode
 
 namespace SubTermCode
 
 def toStr : SubTermCode → String
-  | bvar x   => "#" ++ toString x
-  | fvar x   => "&" ++ toString x
-  | func₀ _  => "const"
-  | func₁ _ c => "f¹ (" ++ c.toStr
-  | func₂ _ c₁ c₂ => "f² (" ++ c₁.toStr ++ ", " ++ c₂.toStr ++ ")"
-  | add _ c₁ c₂   => "(" ++ c₁.toStr ++ " + " ++ c₂.toStr ++ ")"
-  | mul _ c₁ c₂   => "(" ++ c₁.toStr ++ " * " ++ c₂.toStr ++ ")"
-  | num _ _ _ _   => "N"
-  | metavar _     => "m"
+  | bvar x                            => "#" ++ toString x
+  | fvar x                            => "&" ++ toString x
+  | nullary (Nullary.numeral _)       => "nimeral"
+  | nullary (Nullary.operator _)      => "operator⁰"
+  | nullary (Nullary.lang _)          => "c"
+  | unary (Unary.operator _) c        => "operator¹ (" ++ c.toStr ++ ")"
+  | unary (Unary.lang _) c                         => "f¹ (" ++ c.toStr ++ ")"
+  | binary Binary.add c₁ c₂           => "(" ++ c₁.toStr ++ " + " ++ c₂.toStr ++ ")"
+  | binary Binary.mul c₁ c₂           => "(" ++ c₁.toStr ++ " + " ++ c₂.toStr ++ ")"
+  | binary Binary.pow c₁ c₂           => "(" ++ c₁.toStr ++ " ^ " ++ c₂.toStr ++ ")"
+  | binary (Binary.operator _) c₁ c₂  => "operator² (" ++ c₁.toStr ++ ", " ++ c₂.toStr ++ ")"
+  | binary (Binary.lang _) c₁ c₂      => "f² (" ++ c₁.toStr ++ ", " ++ c₂.toStr ++ ")"
+  | lang _                            => "m"
 
 instance : Repr SubTermCode := ⟨fun b _ => b.toStr⟩
 
@@ -49,35 +103,10 @@ def toExpr (L : Q(Language.{u})) (n : Q(ℕ)) : SubTermCode → MetaM Q(Syntacti
       return q(#(⟨$x, $lt⟩))
     else throwError f!"Invalid SubTermCode"
   | fvar x         => return q(&$x)
-  | add e c₁ c₂    => do
-    let _ : Q(Language.Add $L) := e
-    let et₁ ← toExpr L n c₁
-    let et₂ ← toExpr L n c₂
-    return q(func Language.Add.add ![$et₁, $et₂])
-  | mul e c₁ c₂    => do
-    let _ : Q(Language.Mul $L) := e
-    let et₁ ← toExpr L n c₁
-    let et₂ ← toExpr L n c₂
-    return q(func Language.Mul.mul ![$et₁, $et₂])
-  | num ez eo ea e => do
-    let _ : Q(Language.Zero $L) := ez
-    let _ : Q(Language.One $L) := eo
-    let _ : Q(Language.Add $L) := ea
-    let z : Q(ℕ) := e
-    return q(SubTerm.Abbrev.const (natLit $L $z))
-  | func₀ e        => do
-    let e : Q(($L).func 0) := e
-    return q(func $e ![])
-  | func₁ e c      => do
-    let ef : Q(($L).func 1) := e
-    let et ← toExpr L n c
-    return q(func $ef ![$et])
-  | func₂ e c₁ c₂  => do
-    let ef : Q(($L).func 2) := e
-    let et₁ ← toExpr L n c₁
-    let et₂ ← toExpr L n c₂
-    return q(func $ef ![$et₁, $et₂])
-  | metavar e      => return e    
+  | nullary e      => e.toExpr L n
+  | unary e c      => do e.toExpr L n (← c.toExpr L n)
+  | binary e c₁ c₂ => do e.toExpr L n (← c₁.toExpr L n) (← c₂.toExpr L n)
+  | lang e         => return e
 
 end SubTermCode
 
@@ -95,38 +124,33 @@ partial def toSubTermCode (L : Q(Language.{u})) (n : Q(ℕ)) : Syntax → TermEl
   | `(subterm| &$n)                 => do
     let nval ← Lean.Syntax.isNatLit? n
     return SubTermCode.fvar nval
-  | `(subterm| const $c)            => do
+  | `(subterm| [$c])            => do
     let (e : Q(($L).func 0)) ← Term.elabTerm c (return q(($L).func 0))
-    return SubTermCode.func₀ e
-  | `(subterm| func¹ $f/[$t])       => do
+    return SubTermCode.nullary (Nullary.lang e)
+  | `(subterm| [$f]($t))       => do
     let (e : Q(($L).func 1)) ← Term.elabTerm f (return q(($L).func 1))
     let c ← toSubTermCode L n t
-    return SubTermCode.func₁ e c
-  | `(subterm| func² $f/[$t₁, $t₂]) => do
+    return SubTermCode.unary (Unary.lang e) c
+  | `(subterm| [$f]($t₁, $t₂)) => do
     let (e : Q(($L).func 1)) ← Term.elabTerm f (return q(($L).func 1))
     let c₁ ← toSubTermCode L n t₁
     let c₂ ← toSubTermCode L n t₂
-    return SubTermCode.func₂ e c₁ c₂
+    return SubTermCode.binary (Binary.lang e) c₁ c₂
   | `(subterm| $t₁ + $t₂)           => do
     let c₁ ← toSubTermCode L n t₁
     let c₂ ← toSubTermCode L n t₂
-    let ha : Q(Language.Add $L) ← synthInstanceQ q(Language.Add $L)
-    return SubTermCode.add ha c₁ c₂
+    return SubTermCode.binary Binary.add c₁ c₂
   | `(subterm| $t₁ * $t₂)           => do
     let c₁ ← toSubTermCode L n t₁
     let c₂ ← toSubTermCode L n t₂
-    let hm : Q(Language.Mul $L) ← synthInstanceQ q(Language.Mul $L)
-    return SubTermCode.mul hm c₁ c₂
+    return SubTermCode.binary Binary.mul c₁ c₂
   | `(subterm| $n:num)              => do
     let (e : Q(ℕ)) ← Term.elabTerm n (return .const `Nat [])
-    let hz : Q(Language.Zero $L) ← synthInstanceQ q(Language.Zero $L)
-    let ho : Q(Language.One $L) ← synthInstanceQ q(Language.One $L)
-    let ha : Q(Language.Add $L) ← synthInstanceQ q(Language.Add $L)
-    return SubTermCode.num hz ho ha e
+    return SubTermCode.nullary (Nullary.numeral e)
   | `(subterm| ($t))                => toSubTermCode L n t
   | `(subterm| !$t)                 => do
     let (e : Q(SyntacticSubTerm $L $n)) ← Term.elabTerm t (return q(SyntacticSubTerm $L $n))
-    return SubTermCode.metavar e
+    return SubTermCode.lang e
   | _                               => throwUnsupportedSyntax
 
 elab "??dbg_Syntax.toSubTermCode" s:subterm  : term => do
@@ -140,14 +164,15 @@ elab "??dbg_Syntax.toSubTermCode" s:subterm  : term => do
 
 end Syntax
 
-partial def toSubTermCode (L : Q(Language.{u})) : (n : Q(ℕ)) → Q(SyntacticSubTerm $L $n) → TermElabM SubTermCode
+/-
+partial def toSubTermCode (L : Q(Language.{u})) : (n : Q(ℕ)) → Q(SyntacticSubTerm $L $n) → MetaM SubTermCode
   | ~q($n), ~q(#$x) => do
     let some xval := (← finQVal (n := n) x) | throwError f!"Fail: FinQVal {x}"
     return SubTermCode.bvar xval
   | ~q($n), ~q(&$x) => do
     let some xval := (←whnf x).natLit? | throwError f!"Fail: natLit?: {x}"
     return SubTermCode.fvar xval
-  | ~q($n), ~q(SubTerm.Abbrev.const (natLit (hz := $hz) (ho := $ho) (ha := $ha) $z)) => do
+  | ~q($n), ~q(SubTerm.Operation.const.{u, 0} (natLit (hz := $hz) (ho := $ho) (ha := $ha) $z)) => do
     return SubTermCode.num hz ho ha z
   | ~q($n), ~q(SubTerm.func (Language.Add.add (self := $ha)) ![$t, $u]) => do
     let c₁ ← toSubTermCode L n t
@@ -175,6 +200,7 @@ elab "??dbg_toSubTermCode" : term => do
   c.toExpr el en
 
 #eval ??dbg_toSubTermCode
+-/
 
 section lemmata
 variable {L : Language.{u}} {μ : Type v} {n}
@@ -230,20 +256,20 @@ lemma subst_func3 {s : SubTerm L μ n} (f : L.func 3) {t₁ t₂ t₃ : SubTerm 
   cases' x using Fin.cases with x <;> simp
 
 lemma shift_func0 (f : L.func 0) :
-    shift (SubTerm.func (L := L) (n := n) f ![]) = SubTerm.func f ![] := by simp
+    shift (SubTerm.func (L := L) (n := n) f ![]) = SubTerm.func f ![] := by simp[shift_func]
 
 lemma shift_func1 (f : L.func 1) {t t' : SyntacticSubTerm L n} (h : shift t = t'):
-    shift (SubTerm.func f ![t]) = SubTerm.func f ![t'] := by simp[←h]; funext x; simp
+    shift (SubTerm.func f ![t]) = SubTerm.func f ![t'] := by simp[shift_func, ←h]; funext x; simp
 
 lemma shift_func2 (f : L.func 2) {t₁ t₂ t₁' t₂' : SyntacticSubTerm L n}
   (h₁ : shift t₁ = t₁') (h₂ : shift t₂ = t₂') :
     shift (SubTerm.func f ![t₁, t₂]) = SubTerm.func f ![t₁', t₂'] :=
-  by simp[←h₁, ←h₂]; funext x; cases x using Fin.cases <;> simp
+  by simp[shift_func, ←h₁, ←h₂]; funext x; cases x using Fin.cases <;> simp
 
 lemma shift_func3 (f : L.func 3) {t₁ t₂ t₃ t₁' t₂' t₃' : SyntacticSubTerm L n}
   (h₁ : shift t₁ = t₁') (h₂ : shift t₂ = t₂') (h₃ : shift t₃ = t₃') :
     shift (SubTerm.func f ![t₁, t₂, t₃]) = SubTerm.func f ![t₁', t₂', t₃'] := by
-  simp[←h₁, ←h₂, ←h₃]; funext x;
+  simp[shift_func, ←h₁, ←h₂, ←h₃]; funext x;
   cases' x using Fin.cases with x <;> simp;
   cases' x using Fin.cases with x <;> simp
 
@@ -321,6 +347,9 @@ variable [hz : L.Zero] [ho : L.One] [ha : L.Add]
     bShift (natLit L z : SubTerm L μ n) = natLit L z :=
   by simp[bShift]
 
+lemma natLit_succ_of_eq {z : ℕ} (t : SubTerm L μ n) (h : natLit L z.succ = t) :
+  natLit L z.succ.succ = func Language.Add.add ![t, func Language.One.one ![]] := by rw[←h]; rfl
+
 end
 end lemmata
 
@@ -355,7 +384,7 @@ partial def resultFree {L : Q(Language.{u})} {n : Q(ℕ)} : (t : Q(SyntacticSubT
     let ⟨tn₂, e₂⟩ ← resultFree (L := L) (n := n) t₂
     let ⟨tn₃, e₃⟩ ← resultFree (L := L) (n := n) t₃
     return ⟨q(SubTerm.func $f ![$tn₁, $tn₂, $tn₃]), q(free_func3 $f $e₁ $e₂ $e₃)⟩
-  | ~q(SubTerm.Abbrev.const $ natLit (hz := $hz) (ho := $ho) (ha := $ha) $z) => pure ⟨q(natLit $L $z), q(free_natLit $z)⟩
+  | ~q(SubTerm.Operator.const $ natLit (hz := $hz) (ho := $ho) (ha := $ha) $z) => pure ⟨q(natLit $L $z), q(free_natLit $z)⟩
   | ~q($t)                               => do
     return ⟨q(SubTerm.free $t), q(rfl)⟩
 
@@ -387,7 +416,7 @@ partial def resultSubst {L : Q(Language.{u})} {n : Q(ℕ)} (s : Q(SyntacticSubTe
     let ⟨tn₂, e₂⟩ ← resultSubst (L := L) (n := n) s t₂
     let ⟨tn₃, e₃⟩ ← resultSubst (L := L) (n := n) s t₃
     return ⟨q(SubTerm.func $f ![$tn₁, $tn₂, $tn₃]), q(subst_func3 $f $e₁ $e₂ $e₃)⟩
-  | ~q(SubTerm.Abbrev.const $ natLit (hz := $hz) (ho := $ho) (ha := $ha) $z) => pure ⟨q(natLit $L $z), q(subst_natLit $z)⟩
+  | ~q(SubTerm.Operator.const $ natLit (hz := $hz) (ho := $ho) (ha := $ha) $z) => pure ⟨q(natLit $L $z), q(subst_natLit $z)⟩
   | ~q($t)                               => do
     return ⟨q(SubTerm.subst $s $t), q(rfl)⟩
 
@@ -415,7 +444,7 @@ partial def resultShift {L : Q(Language.{u})} {n : Q(ℕ)} : (t : Q(SyntacticSub
     let ⟨tn₁, e₁⟩ ← resultShift (L := L) (n := n) t₁
     let ⟨tn₂, e₂⟩ ← resultShift (L := L) (n := q(.succ $n)) t₂
     return ⟨q(SubTerm.subst $tn₁ $tn₂), q(shift_subst $e₂ $e₁)⟩
-  | ~q(SubTerm.Abbrev.const $ natLit (hz := $hz) (ho := $ho) (ha := $ha) $z) => pure ⟨q(natLit $L $z), q(shift_natLit $z)⟩
+  | ~q(SubTerm.Operator.const $ natLit (hz := $hz) (ho := $ho) (ha := $ha) $z) => pure ⟨q(natLit $L $z), q(shift_natLit $z)⟩
   | ~q($t)                               => do
     return ⟨q(shift $t), q(rfl)⟩
 
@@ -443,7 +472,7 @@ partial def resultBShift {L : Q(Language.{u})} {n : Q(ℕ)} : (t : Q(SyntacticSu
     let ⟨tn₁, e₁⟩ ← resultBShift (L := L) (n := n) t₁
     let ⟨tn₂, e₂⟩ ← resultBShift (L := L) (n := q(.succ $n)) t₂
     return ⟨q(SubTerm.subst $tn₁ $tn₂), q(bShift_subst $e₂ $e₁)⟩
-  | ~q(SubTerm.Abbrev.const $ natLit (hz := $hz) (ho := $ho) (ha := $ha) $z) => pure ⟨q(natLit $L $z), q(bShift_natLit $z)⟩
+  | ~q(SubTerm.Operator.const $ natLit (hz := $hz) (ho := $ho) (ha := $ha) $z) => pure ⟨q(natLit $L $z), q(bShift_natLit $z)⟩
   | ~q($t)                               => do
     return ⟨q(bShift $t), q(rfl)⟩
 
@@ -462,16 +491,18 @@ partial def natLitResult {L : Q(Language.{u})}
     fun z =>
       match z with
       | ~q(0)      => return ⟨q(natLit $L 0), q(rfl)⟩
-      | ~q($z + 1) => do
-        return ⟨q(func Language.Add.add ![natLit $L $z, func Language.One.one ![]]), q(rfl)⟩
+      | ~q(1)      => return ⟨q(natLit $L 1), q(rfl)⟩
+      | ~q(.succ $ .succ $z) => do
+        return ⟨q(func Language.Add.add ![natLit $L (.succ $z), natLit $L 1]), q(rfl)⟩
       | ~q($z)      => return ⟨q(natLit $L $z), q(rfl)⟩
   | TransparencyMode.all       =>
     fun z =>
       match z with
       | ~q(0)      => return ⟨q(natLit $L 0), q(rfl)⟩
-      | ~q($z + 1) => do
-        let ⟨e, he⟩ ← natLitResult iz io ia n TransparencyMode.all z
-        return ⟨q(func Language.Add.add ![$e, func Language.One.one ![]]), q(natLit_succ_of_eq $he)⟩
+      | ~q(1)      => return ⟨q(natLit $L 1), q(rfl)⟩
+      | ~q(.succ $ .succ $z) => do
+        let ⟨e, he⟩ ← natLitResult iz io ia n TransparencyMode.all q(.succ $z)
+        return ⟨q(func Language.Add.add ![$e, natLit $L 1]), q(natLit_succ_of_eq $e $he)⟩
       | ~q($z)      => return ⟨q(natLit $L $z), q(rfl)⟩
 
 partial def result (tp : TransparencyMode) {L : Q(Language.{u})} {n : Q(ℕ)} : (t : Q(SyntacticSubTerm $L $n)) →
@@ -504,14 +535,8 @@ partial def result (tp : TransparencyMode) {L : Q(Language.{u})} {n : Q(ℕ)} : 
     let ⟨tn, e⟩ ← result tp (L := L) (n := q($n)) t
     let ⟨tnn, ee⟩ ← resultShift (L := L) (n := n) tn
     return ⟨q($tnn), q(shift_congr_eq $e $ee)⟩
-  | ~q(SubTerm.Abbrev.const $ natLit (hz := $hz) (ho := $ho) (ha := $ha) $z) => natLitResult hz ho ha n tp z
+  | ~q(SubTerm.Operator.const $ natLit (hz := $hz) (ho := $ho) (ha := $ha) $z) => natLitResult hz ho ha n tp z
   | ~q($t)                                            => pure ⟨q($t), q(rfl)⟩
-
-partial def result' {L : Q(Language.{u})} {n : Q(ℕ)} (t : Q(SyntacticSubTerm $L $n))
-  (tp : TransparencyMode := TransparencyMode.constants) :
-    MetaM (Result (u := u) t) := do
-    let ⟨res, e⟩ ← result tp t
-    return ⟨res, e⟩
 
 private inductive ResultTest (α : Type u) : (a : α) → Type u
   | result : (a b : α) → a = b → ResultTest α a
@@ -522,19 +547,18 @@ elab "dbg" : tactic => do
   let ~q(ResultTest (SyntacticSubTerm $L $n) $t) := ty | throwError "error: not a type"
   logInfo m!"t = {t}"
   let t : Q(SyntacticSubTerm $L $n) ← withReducible <| whnf t
-
-  let ⟨tn, e⟩ ← result TransparencyMode.unfold (L := L) (n := n) t
+  let ⟨tn, e⟩ ← result TransparencyMode.constants (L := L) (n := n) t
   logInfo m!"tn = {tn}"
   logInfo m!"e = {e}"
   let c : Q(ResultTest (SyntacticSubTerm $L $n) $t) := (q(ResultTest.result ($t) $tn $e) : Expr)
   Lean.Elab.Tactic.closeMainGoal c
 
 example {t : SyntacticSubTerm Language.oring 13} : ResultTest (SyntacticSubTerm Language.oring 12)
-    (shift $ subst &99 T“(!t) + (#6 * !(bShift T“#2 + 9”)) + &7”) :=
+    (shift $ subst &99 T“(!t) + (#6 * !(shift T“#2 + 9”)) + &7”) :=
   by dbg
 
 example {t : SyntacticSubTerm Language.oring 13} (z : ℕ) : ResultTest (SyntacticSubTerm Language.oring 12)
-    (shift $ subst &99 T“!(shift $ natLit 8)”) :=
+    T“9” :=
   by dbg
 
 example : 1 ≠ 2 := of_decide_eq_true rfl

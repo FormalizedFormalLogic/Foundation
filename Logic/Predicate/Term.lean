@@ -187,7 +187,7 @@ def fix : SyntacticSubTerm L n → SyntacticSubTerm L (n + 1) :=
 
 @[simp] lemma shift_fvar (x : ℕ) : shift (&x : SyntacticSubTerm L n) = &(x + 1) := rfl
 
-@[simp] lemma shift_func {k} (f : L.func k) (v : Fin k → SyntacticSubTerm L n) :
+lemma shift_func {k} (f : L.func k) (v : Fin k → SyntacticSubTerm L n) :
     shift (func f v) = func f (fun i => shift (v i)) := rfl
 
 lemma shift_Injective : Function.Injective (@shift L n) :=
@@ -474,23 +474,34 @@ syntax:60 subterm:60 " * " subterm:61 : subterm
 syntax:65 subterm:65 " ^ " subterm:66 : subterm
 syntax "(" subterm ")" : subterm
 
-syntax "T“ " subterm:0 " ”" : term
+syntax:80 "⇑" subterm:80 : subterm
+syntax subterm "⟦" subterm "⟧" : subterm
+syntax:80 "⟨free⟩ " subterm:80 : subterm
+syntax:80 "⟨fix⟩ " subterm:80 : subterm
+
+syntax "T“" subterm:0 "”" : term
+
+#check SubTerm.fix
 
 macro_rules
   | `(T“ # $n:num ”)                                 => `(#$n)
   | `(T“ & $n:term ”)                                => `(&$n)
   | `(T“ ! $t:term ”)                                => `($t)
-  | `(T“ $n:num ”)                                   => `((natLit _ $n).const)
+  | `(T“ $n:num ”)                                   => `(SubTerm.Operator.const (natLit _ $n))
   | `(T“ [ $d:term ] ”)                              => `(func $d ![])
   | `(T“ [ $d:term ]( $t:subterm ) ”)                => `(func $d ![T“$t”])
   | `(T“ [ $d:term ]( $t₁:subterm , $t₂:subterm ) ”) => `(func $d ![T“$t₁”, T“$t₂”])
   | `(T“ $t:subterm + $u:subterm ”)                  => `(func Language.Add.add ![T“$t”, T“$u”])
   | `(T“ $t:subterm * $u:subterm ”)                  => `(func Language.Mul.mul ![T“$t”, T“$u”])
   | `(T“ $t:subterm ^ $u:subterm ”)                  => `(func Language.Pow.pow ![T“$t”, T“$u”])
+  | `(T“ ⇑$t:subterm ”)                             => `(shift T“$t”)
+  | `(T“ $t:subterm ⟦$u:subterm⟧ ”)                  => `(subst T“$t” T“$u”)
+  | `(T“ ⟨free⟩ $t:subterm ”)                        => `(SubTerm.free T“$t”)
+  | `(T“ ⟨fix⟩ $t:subterm ”)                         => `(SubTerm.fix T“$t”)
   | `(T“ ( $x ) ”)                                   => `(T“$x”)
 
 #check (T“ [Language.ORingFunc.mul](&2 + &0, [Language.ORingFunc.zero])” : SubTerm Language.oring ℕ 8)
-#check (T“3 * 2” : SubTerm Language.oring ℕ 8)
+#check T“⇑(3 * #3 + 9)”
 #check SubTerm.func Language.Mul.mul (T“1” :> T“3” :> Matrix.vecEmpty)
 
 section delab
@@ -531,6 +542,37 @@ def unexpandFunc : Unexpander
   | `($_ $f ![T“ $t ”])          => `(T“ [$f]($t) ”)
   | `($_ $f ![T“ $t ”, T“ $u ”]) => `(T“ [$f]($t, $u) ”)
   | _                            => throw ()
+
+@[app_unexpander SubTerm.shift]
+def unexpandShift : Unexpander
+  | `($_ T“$t”) => `(T“ ⇑$t ”)
+  | _           => throw ()
+
+@[app_unexpander SubTerm.subst]
+def unexpandSubst : Unexpander
+  | `($_ T“$t”   T“$u”  ) => `(T“ $t ⟦$u ⟧ ”)
+  | `($_ T“$t”   #$y:num) => `(T“ $t ⟦#$y⟧ ”)
+  | `($_ T“$t”   &$y:num) => `(T“ $t ⟦&$y⟧ ”)
+  | `($_ T“$t”   $u:term) => `(T“ $t ⟦!$u⟧ ”)
+  | `($_ #$x:num T“$u”  ) => `(T“ #$x ⟦$u ⟧ ”)
+  -- | `($_ #$x:num #$y:num) => `(T“ #$x ⟦#$y⟧ ”)
+  -- | `($_ #$x:num &$y:num) => `(T“ #$x ⟦&$y⟧ ”)
+  -- | `($_ #$x:num $u:term) => `(T“ #$x ⟦!$u⟧ ”)
+  | `($_ &$x:num T“$u”  ) => `(T“ &$x ⟦$u ⟧ ”)
+  -- | `($_ &$x:num #$y:num) => `(T“ &$x ⟦#$y⟧ ”)
+  -- | `($_ &$x:num &$y:num) => `(T“ &$x ⟦&$y⟧ ”)
+  -- | `($_ &$x:num $u:term) => `(T“ &$x ⟦!$u⟧ ”)
+  | _                 => throw ()
+
+@[app_unexpander SubTerm.free]
+def unexpandFree : Unexpander
+  | `($_ T“$t”) => `(T“ ⟨free⟩ $t ”)
+  | _           => throw ()
+
+@[app_unexpander SubTerm.fix]
+def unexpandFix : Unexpander
+  | `($_ T“$t”) => `(T“ ⟨fix⟩ $t ”)
+  | _           => throw ()
 
 @[app_unexpander SubTerm.func]
 def unexpandFuncArith : Unexpander
@@ -591,7 +633,8 @@ def unexpandFuncArith : Unexpander
 #check (SubTerm.func Language.Mul.mul (T“1” :> T“3” :> Matrix.vecEmpty) : SubTerm Language.oring ℕ 8)
 #check T“3 + 8 * &6+2 *#0”
 
-example (t : SubTerm L μ n) [L.ORing] : T“0 + 2 + !t”  = t := by { sorry }
+example (t : SyntacticSubTerm L (n + 1)) [L.ORing] :
+    T“0 + 2 + ⟨free⟩ ⇑(&6 + (!t + #0)⟦#3⟧)”  = T“0” := by { simp; sorry }
 
 end delab
 

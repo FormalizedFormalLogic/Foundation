@@ -2,7 +2,7 @@ import Logic.Predicate.FirstOrder.Semantics
 
 namespace FirstOrder
 
-variable {L : Language.{u}} [L.HasEq]
+variable {L : Language.{u}} [L.Eq]
 
 def fvarSeq {k n : ℕ} (f : Fin k → Fin n) : Fin k → SubTerm L μ n := fun i => #(f i)
 
@@ -14,7 +14,7 @@ end SubFormula
 
 namespace Theory
 
-class Sub (T U : CTheory L) where
+class Sub (T U : Theory L) where
   sub : T ⊆ U
 
 section Eq
@@ -25,7 +25,7 @@ abbrev Eq.varSeq₁ {k} : Fin k → SubTerm L μ (k + k) := fun i => #(Fin.natAd
 
 variable (L)
 
-inductive Eq : CTheory L
+inductive Eq : Theory L
   | refl : Eq “∀ #0 = #0”
   | symm : Eq “∀ ∀ (#1 = #0 → #0 = #1)”
   | trans : Eq “∀ ∀ ∀ (#2 = #1 → #1 = #0 → #2 = #0)”  
@@ -38,11 +38,11 @@ end Eq
 
 end Theory
 
-abbrev EqTheory (T : CTheory L) := SubTheory (Theory.Eq L) T
+abbrev EqTheory (T : Theory L) := SubTheory (Theory.Eq L) T
 
 namespace EqTheory
 
-variable (T : CTheory L) [EqTheory T]
+variable (T : Theory L) [EqTheory T]
 
 lemma subset : Theory.Eq L ⊆ T := SubTheory.sub 
 
@@ -56,7 +56,7 @@ variable (L)
 
 variable {M : Type u} [Structure L M]
 
-def eqv (a b : M) : Prop := rel (L := L) Language.HasEq.eq ![a, b]
+def eqv (a b : M) : Prop := rel (L := L) Language.Eq.eq ![a, b]
 
 variable {L}
 
@@ -155,7 +155,7 @@ lemma elementaryEquiv : QuotEq H ≃ₑ[L] M := fun _ => models_iff
 
 variable {H}
 
-lemma rel_eq (a b : QuotEq H) : Structure.rel (L := L) (M := QuotEq H) Language.HasEq.eq ![a, b] ↔ (a = b) := by
+lemma rel_eq (a b : QuotEq H) : Structure.rel (L := L) (M := QuotEq H) Language.Eq.eq ![a, b] ↔ (a = b) := by
   induction' a using Quotient.ind with a
   induction' b using Quotient.ind with b
   simp[rel_mk]; rw[of_eq_of]; rfl
@@ -168,20 +168,20 @@ end Eq
 
 end Structure
 
-lemma consequence_iff_eq {T : CTheory L} [EqTheory T] {σ : Sentence L} :
+lemma consequence_iff_eq {T : Theory L} [EqTheory T] {σ : Sentence L} :
     T ⊨ σ ↔ (∀ (M : Type u) [Inhabited M] [Structure L M] [Structure.Eq L M], M ⊧₁* T → M ⊧₁ σ) := by
   simp[consequence_iff]; constructor
   · intro h M i s _ hM; exact h M hM
   · intro h M i s hM
-    have H : M ⊧₁* Theory.Eq L := Semantics.modelsTheoryₛ_of_subset hM (EqTheory.subset T)
+    have H : M ⊧₁* Theory.Eq L := Semantics.realizeTheory_of_subset hM (EqTheory.subset T)
     have e : Structure.Eq.QuotEq H ≃ₑ[L] M := Structure.Eq.QuotEq.elementaryEquiv H
     exact e.models.mp $ h (Structure.Eq.QuotEq H) (e.modelsₛ.mpr hM)
 
-lemma satisfiableₛ_iff_eq {T : CTheory L} [EqTheory T] :
+lemma satisfiableₛ_iff_eq {T : Theory L} [EqTheory T] :
     Semantics.Satisfiableₛ T ↔ (∃ (M : Type u) (_ : Inhabited M) (_ : Structure L M) (_ : Structure.Eq L M), M ⊧₁* T) := by
   simp[satisfiableₛ_iff]; constructor
   · intro ⟨M, i, s, hM⟩;
-    have H : M ⊧₁* Theory.Eq L := Semantics.modelsTheoryₛ_of_subset hM (EqTheory.subset T)
+    have H : M ⊧₁* Theory.Eq L := Semantics.realizeTheory_of_subset hM (EqTheory.subset T)
     have e : Structure.Eq.QuotEq H ≃ₑ[L] M := Structure.Eq.QuotEq.elementaryEquiv H
     exact ⟨Structure.Eq.QuotEq H, inferInstance, inferInstance, inferInstance, e.modelsₛ.mpr hM⟩
   · intro ⟨M, i, s, _, hM⟩; exact ⟨M, i, s, hM⟩
