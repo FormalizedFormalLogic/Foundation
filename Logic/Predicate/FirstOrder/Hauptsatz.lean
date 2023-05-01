@@ -33,7 +33,7 @@ end SubFormula
 
 namespace DerivationCutRestricted
 
-variable {P : SyntacticFormula L → Prop} (hP : ∀ f p, P p → P (bind₀ f p)) {Δ Δ₁ Δ₂ Γ : Sequent L}
+variable {P : SyntacticFormula L → Prop} (hP : ∀ f p, P p → P (rewrite f p)) {Δ Δ₁ Δ₂ Γ : Sequent L}
 
 def andInversion₁Aux : {Δ : Sequent L} → (d : ⊢ᶜ[P] Δ) → (p q : SyntacticFormula L) → ⊢ᶜ[P] insert p (Δ.erase (p ⋏ q))
   | _, axL Δ r v hpos hneg, p, q => axL _ r v (by simp[hpos]) (by simp[hneg])
@@ -125,7 +125,7 @@ def allInversionAux : {Δ : Sequent L} → ⊢ᶜ[P] Δ →
       by_cases e : p' = p
       · simp[e]
         let d' : ⊢ᶜ[P] insert (subst t p) Δ :=
-          (d.onBind hP (t :>ₙ SubTerm.fvar)).cast (by simp[bind₀_free_eq_subst, bind₀_shift_eq_self, shifts_eq_image, Finset.image_image, Function.comp, e])
+          (d.rewrite hP (t :>ₙ SubTerm.fvar)).cast (by simp[rewrite_free_eq_subst, rewrite_shift_eq_self, shifts_eq_image, Finset.image_image, Function.comp, e])
         have : d'.length = d.length := by simp
         exact (allInversionAux d' p t).weakening (by simp[Finset.subset_iff]; rintro x hx (rfl | hhx) <;> simp[*])
       · have ne : ∀' p' ≠ ∀' p := by simpa using e
@@ -201,7 +201,7 @@ def reductionAux {i} : {Δ : Sequent L} →
     exact (and _ _ _ dr ds).cast (by simp[Finset.erase_insert_of_ne (Ne.symm e)])
   | _, all Δ q d,            p, tp, hp, Γ, dΓ => by
     have e : p ≠ ∀' q := ne_all_of_isVType tp
-    have : ⊢ᶜ[< i] (insert (~shift p) (shifts Γ)) := (dΓ.onShift (by simp)).cast (by simp[shifts_insert])
+    have : ⊢ᶜ[< i] (insert (~shift p) (shifts Γ)) := (dΓ.shift (by simp)).cast (by simp[shifts_insert])
     have : ⊢ᶜ[< i] insert (free q) (shifts $ Δ.erase p ∪ Γ) :=
       (reductionAux d (by simp[tp]) (by simp[shift, hp]) this).weakening
         (by simp[Finset.subset_iff]; rintro x (⟨hx, (rfl | hhx)⟩ | hhx) <;> simp[*] 

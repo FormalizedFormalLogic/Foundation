@@ -218,7 +218,7 @@ def bind (bound : Fin n₁ → SubTerm L μ₂ n₂) (free : μ₁ → SubTerm L
   map_neg' := by simp[bind'_neg]
   map_imp' := by simp[imp_eq, bind'_neg, ←neg_eq, bind']
 
-abbrev bind₀ (f : μ₁ → SubTerm L μ₂ n) : SubFormula L μ₁ n →L SubFormula L μ₂ n := bind SubTerm.bvar f
+abbrev rewrite (f : μ₁ → SubTerm L μ₂ n) : SubFormula L μ₁ n →L SubFormula L μ₂ n := bind SubTerm.bvar f
 
 def map (bound : Fin n₁ → Fin n₂) (free : μ₁ → μ₂) : SubFormula L μ₁ n₁ →L SubFormula L μ₂ n₂ :=
   bind (fun n => #(bound n)) (fun m => &(free m))
@@ -228,12 +228,12 @@ abbrev map₀ (free : μ₁ → μ₂) : SubFormula L μ₁ n →L SubFormula L 
 def subst (t : SubTerm L μ n) : SubFormula L μ (n + 1) →L SubFormula L μ n :=
   bind (SubTerm.bvar <: t) SubTerm.fvar
 
-notation "⟦↦ " t " ⟧" => subst t
+notation "⟦↦ " t "⟧" => subst t
 
 def substs {n'} (v : Fin n → SubTerm L μ n') : SubFormula L μ n →L SubFormula L μ n' :=
   bind v SubTerm.fvar
 
-notation "⟦→ " v " ⟧" => substs v
+notation "⟦→ " v "⟧" => substs v
 
 def emb {o : Type w} [h : IsEmpty o] : SubFormula L o n →L SubFormula L μ n := map id h.elim'
 
@@ -569,6 +569,10 @@ lemma shift_subst (s : SyntacticSubTerm L n) (p : SyntacticSubFormula L (n + 1))
     shift (emb p : SyntacticSubFormula L n) = emb p := by
   simp[shift, emb, map_map]; congr; funext x; exact h.elim x
 
+@[simp] lemma complexity_shift (p : SyntacticSubFormula L n) :
+    complexity (shift p) = complexity p :=
+  by simp[shift]
+
 end shift
 
 section free
@@ -621,16 +625,20 @@ lemma fix_nrel {k} (r : L.rel k) (v : Fin k → SyntacticSubTerm L n) :
   simp[fix, free, bind_bind]; apply eq_bind_of <;> simp
   intros x; exact Fin.lastCases (by simp) (by simp) x
 
-lemma bind₀_free_eq_subst (p : SyntacticSubFormula L 1) (t : SyntacticTerm L) :
-    bind₀ (t :>ₙ SubTerm.fvar) (free p) = subst t p :=
+lemma rewrite_free_eq_subst (p : SyntacticSubFormula L 1) (t : SyntacticTerm L) :
+    rewrite (t :>ₙ SubTerm.fvar) (free p) = subst t p :=
   by simp[subst, free, bind_bind, Matrix.vecConsLast_vecEmpty, Matrix.constant_eq_singleton] 
 
-lemma bind₀_shift_eq_self (p : SyntacticFormula L) (t : SyntacticTerm L) :
-    bind₀ (t :>ₙ SubTerm.fvar) (shift p) = p :=
+lemma rewrite_shift_eq_self (p : SyntacticFormula L) (t : SyntacticTerm L) :
+    rewrite (t :>ₙ SubTerm.fvar) (shift p) = p :=
   by simp[shift, map, bind_bind]
 
 @[simp] lemma subst_shift_eq_free (p : SyntacticSubFormula L 1) : subst &0 (shift p) = free p :=
   by simp[subst, shift, free, map, bind_bind]
+
+lemma free_substs_eq_substs_shift {n'} (w : Fin n' → SyntacticSubTerm L (n + 1)) (p : SyntacticSubFormula L n') :
+    free (substs w p) = substs (fun i => (w i).free) (shift p) :=
+  by simp[free, substs, shift, map, bind_bind, SubTerm.shift, SubTerm.map, SubTerm.free, SubTerm.bind_bind]
 
 lemma substs_eq_subst' {n'} (w : Fin (n + 1) → SyntacticSubTerm L n') (p : SyntacticSubFormula L (n + 1)) :
     substs w p = subst (w $ Fin.last n) (fix $ substs (SubTerm.shift ∘ w ∘ Fin.castSucc) $ free p) := by

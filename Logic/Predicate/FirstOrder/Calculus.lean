@@ -289,59 +289,59 @@ def lHom₀ (Φ : L₁ →ᵥ L₂) {Δ : Finset (SyntacticFormula L₁)}  (d : 
 
 end Hom
 
-private lemma free_bind₀_eq (f : ℕ → SyntacticTerm L) (p : SyntacticSubFormula L 1) :
-    free (bind₀ (fun x => SubTerm.bShift (f x)) p) = bind₀ (&0 :>ₙ fun x => SubTerm.shift (f x)) (free p) := by
+private lemma free_rewrite_eq (f : ℕ → SyntacticTerm L) (p : SyntacticSubFormula L 1) :
+    free (rewrite (fun x => SubTerm.bShift (f x)) p) = rewrite (&0 :>ₙ fun x => SubTerm.shift (f x)) (free p) := by
   simp[free, bind_bind, Matrix.vecConsLast_vecEmpty]; congr; funext x
   simp[SubTerm.free, SubTerm.bShift, SubTerm.shift, SubTerm.map, SubTerm.bind_bind, eq_finZeroElim]
 
-private lemma shift_bind₀_eq (f : ℕ → SyntacticTerm L) (p : SyntacticFormula L) :
-    shift (bind₀ f p) = bind₀ (&0 :>ₙ fun x => SubTerm.shift (f x)) (shift p) := by
-  simp[shift, map, bind₀, bind_bind]; congr
+private lemma shift_rewrite_eq (f : ℕ → SyntacticTerm L) (p : SyntacticFormula L) :
+    shift (rewrite f p) = rewrite (&0 :>ₙ fun x => SubTerm.shift (f x)) (shift p) := by
+  simp[shift, map, rewrite, bind_bind]; congr
 
-private lemma bind₀_subst_eq (f : ℕ → SyntacticTerm L) (t) (p : SyntacticSubFormula L 1) :
-    bind₀ f (subst t p) = subst (t.bind SubTerm.bvar f) (bind₀ (SubTerm.bShift ∘ f) p) := by
+private lemma rewrite_subst_eq (f : ℕ → SyntacticTerm L) (t) (p : SyntacticSubFormula L 1) :
+    rewrite f (subst t p) = subst (t.bind SubTerm.bvar f) (rewrite (SubTerm.bShift ∘ f) p) := by
   simp[subst, bind_bind, Fin.eq_zero, SubTerm.bShift, SubTerm.map, SubTerm.bind_bind, eq_finZeroElim]; congr
 
-def onBind (h : ∀ f p, P p → P (bind₀ f p)) : ∀ {Δ : Sequent L}, ⊢ᶜ[P] Δ → ∀ (f : ℕ → SyntacticTerm L), ⊢ᶜ[P] Δ.image (bind₀ f)
+protected def rewrite (h : ∀ f p, P p → P (rewrite f p)) : ∀ {Δ : Sequent L}, ⊢ᶜ[P] Δ → ∀ (f : ℕ → SyntacticTerm L), ⊢ᶜ[P] Δ.image (rewrite f)
   | _, axL Δ r v hrel hnrel, f => axL _ r (fun i => (v i).bind SubTerm.bvar f) (Finset.mem_image_of_mem _ hrel) (Finset.mem_image_of_mem _ hnrel)
   | _, verum Δ h,            _ => verum _ (Finset.mem_image_of_mem _ h)
   | _, or Δ p q d,           f =>
-    have : ⊢ᶜ[P] insert (bind₀ f p ⋎ bind₀ f q) (Δ.image (bind₀ f)) := or _ _ _ ((onBind h d f).cast (by simp))
+    have : ⊢ᶜ[P] insert (rewrite f p ⋎ rewrite f q) (Δ.image (rewrite f)) := or _ _ _ ((d.rewrite h f).cast (by simp))
     this.cast (by simp)
   | _, and Δ p q dp dq,      f =>
-    have : ⊢ᶜ[P] insert (bind₀ f p ⋏ bind₀ f q) (Δ.image (bind₀ f)) := and _ _ _ ((onBind h dp f).cast (by simp)) ((onBind h dq f).cast (by simp))
+    have : ⊢ᶜ[P] insert (rewrite f p ⋏ rewrite f q) (Δ.image (rewrite f)) := and _ _ _ ((dp.rewrite h f).cast (by simp)) ((dq.rewrite h f).cast (by simp))
     this.cast (by simp)
   | _, all Δ p d,            f =>
-    have : ⊢ᶜ[P] (insert (free p) (shifts Δ)).image (bind₀ (&0 :>ₙ fun x => SubTerm.shift (f x))).toFun := onBind h d (&0 :>ₙ fun x => (f x).shift)
-    have : ⊢ᶜ[P] insert (∀' (bind₀ (SubTerm.bShift ∘ f)) p) (Δ.image (bind₀ f).toFun) :=
-      all _ _ (this.cast (by simp[free_bind₀_eq, shift_bind₀_eq, shifts_eq_image, Finset.image_image, Function.comp]))
+    have : ⊢ᶜ[P] (insert (free p) (shifts Δ)).image (rewrite (&0 :>ₙ fun x => SubTerm.shift (f x))).toFun := d.rewrite h (&0 :>ₙ fun x => (f x).shift)
+    have : ⊢ᶜ[P] insert (∀' (rewrite (SubTerm.bShift ∘ f)) p) (Δ.image (rewrite f).toFun) :=
+      all _ _ (this.cast (by simp[free_rewrite_eq, shift_rewrite_eq, shifts_eq_image, Finset.image_image, Function.comp]))
     this.cast (by simp)
   | _, ex Δ t p d,           f =>
-    have : ⊢ᶜ[P] (insert (subst t p) Δ).image (bind₀ f) := onBind h d f 
-    have : ⊢ᶜ[P] insert (∃' bind₀ (SubTerm.bShift ∘ f) p) (Δ.image (bind₀ f)) := 
-      ex _ (SubTerm.bind SubTerm.bvar f t) _ (this.cast (by simp[bind₀_subst_eq])) 
+    have : ⊢ᶜ[P] (insert (subst t p) Δ).image (rewrite f) := d.rewrite h f 
+    have : ⊢ᶜ[P] insert (∃' rewrite (SubTerm.bShift ∘ f) p) (Δ.image (rewrite f)) := 
+      ex _ (SubTerm.bind SubTerm.bvar f t) _ (this.cast (by simp[rewrite_subst_eq])) 
     this.cast (by simp)
   | _, cut Δ Γ p hp dΔ dΓ,   f =>
-    have dΔ : ⊢ᶜ[P] insert (bind₀ f p) (Δ.image $ bind₀ f) := (dΔ.onBind h f).cast (by simp)
-    have dΓ : ⊢ᶜ[P] insert (~bind₀ f p) (Γ.image $ bind₀ f) := (dΓ.onBind h f).cast (by simp)
-    (cut _ _ (bind₀ f p) (h f p hp) dΔ dΓ).cast (by simp[Finset.image_union])
+    have dΔ : ⊢ᶜ[P] insert (rewrite f p) (Δ.image $ rewrite f) := (dΔ.rewrite h f).cast (by simp)
+    have dΓ : ⊢ᶜ[P] insert (~rewrite f p) (Γ.image $ rewrite f) := (dΓ.rewrite h f).cast (by simp)
+    (cut _ _ (rewrite f p) (h f p hp) dΔ dΓ).cast (by simp[Finset.image_union])
 
-def onBind₀ {Δ : Sequent L} (d : ⊢ᵀ Δ) (f : ℕ → SyntacticTerm L) : ⊢ᵀ Δ.image (bind₀ f) := d.onBind (by simp) f
+def rewrite₀ {Δ : Sequent L} (d : ⊢ᵀ Δ) (f : ℕ → SyntacticTerm L) : ⊢ᵀ Δ.image (rewrite f) := d.rewrite (by simp) f
 
-def onBindClx {i} {Δ : Sequent L} (d : ⊢ᶜ[< i] Δ) (f : ℕ → SyntacticTerm L) : ⊢ᶜ[< i] Δ.image (bind₀ f) := d.onBind (by simp) f
+def rewriteClx {i} {Δ : Sequent L} (d : ⊢ᶜ[< i] Δ) (f : ℕ → SyntacticTerm L) : ⊢ᶜ[< i] Δ.image (rewrite f) := d.rewrite (by simp) f
 
-def onBindCut {Δ : Sequent L} (d : ⊢ᶜ Δ) (f : ℕ → SyntacticTerm L) : ⊢ᶜ Δ.image (bind₀ f) := d.onBind (by simp) f
+def rewriteCut {Δ : Sequent L} (d : ⊢ᶜ Δ) (f : ℕ → SyntacticTerm L) : ⊢ᶜ Δ.image (rewrite f) := d.rewrite (by simp) f
 
-@[simp] lemma length_onBind (h) (d : ⊢ᶜ[P] Δ) (f : ℕ → SyntacticTerm L) : (d.onBind h f).length = d.length :=
-  by induction d generalizing f <;> simp[*, onBind]
+@[simp] lemma length_rewrite (h) (d : ⊢ᶜ[P] Δ) (f : ℕ → SyntacticTerm L) : (d.rewrite h f).length = d.length :=
+  by induction d generalizing f <;> simp[*, DerivationCutRestricted.rewrite]
 
-@[simp] lemma length_onBind₀ (d : ⊢ᵀ Δ) (f : ℕ → SyntacticTerm L) : (d.onBind₀ f).length = d.length :=
-  d.length_onBind _ f
+@[simp] lemma length_rewrite₀ (d : ⊢ᵀ Δ) (f : ℕ → SyntacticTerm L) : (d.rewrite₀ f).length = d.length :=
+  d.length_rewrite _ f
 
-def onMap (h : ∀ f p, P p → P (bind₀ f p)) {Δ : Sequent L} (d : ⊢ᶜ[P] Δ) (f : ℕ → ℕ) : ⊢ᶜ[P] Δ.image (map₀ f) := d.onBind h _
+protected def map (h : ∀ f p, P p → P (rewrite f p)) {Δ : Sequent L} (d : ⊢ᶜ[P] Δ) (f : ℕ → ℕ) : ⊢ᶜ[P] Δ.image (map₀ f) := d.rewrite h _
 
-def onShift (h : ∀ f p, P p → P (bind₀ f p)) {Δ : Sequent L} (d : ⊢ᶜ[P] Δ) : ⊢ᶜ[P] (shifts Δ) :=
-  (d.onMap h Nat.succ).cast (by simp[shifts_eq_image, shift])
+protected def shift (h : ∀ f p, P p → P (rewrite f p)) {Δ : Sequent L} (d : ⊢ᶜ[P] Δ) : ⊢ᶜ[P] (shifts Δ) :=
+  (d.map h Nat.succ).cast (by simp[shifts_eq_image, shift])
 
 private lemma map_subst_eq_free (p : SyntacticSubFormula L 1) (h : ¬p.fvar? m) :
     map₀ (fun x => if x = m then 0 else x + 1) (subst &m p) = free p := by
@@ -355,10 +355,10 @@ private lemma image_map₀_eq_shifts (Δ : Finset $ SyntacticFormula L) (h : ∀
   simp[shift, map₀, map]
   exact bind_eq_of_funEqOn _ _ _ _ (by intro x hx; simp; rintro rfl; have := h p hp; contradiction)
 
-def genelalizeByNewver (h : ∀ f p, P p → P (bind₀ f p)) {p : SyntacticSubFormula L 1} (hp : ¬p.fvar? m) (hΔ : ∀ q ∈ Δ, ¬q.fvar? m)
+def genelalizeByNewver (h : ∀ f p, P p → P (rewrite f p)) {p : SyntacticSubFormula L 1} (hp : ¬p.fvar? m) (hΔ : ∀ q ∈ Δ, ¬q.fvar? m)
   (d : ⊢ᶜ[P] insert (subst &m p) Δ) : ⊢ᶜ[P] insert (∀' p) Δ := by
   have : ⊢ᶜ[P] insert (free p) (shifts Δ) :=
-    (d.onMap h (fun x => if x = m then 0 else x + 1)).cast (by simp[map_subst_eq_free p hp, image_map₀_eq_shifts Δ hΔ])
+    (d.map h (fun x => if x = m then 0 else x + 1)).cast (by simp[map_subst_eq_free p hp, image_map₀_eq_shifts Δ hΔ])
   exact all Δ p this
 
 def genelalizeByNewver₀ {p : SyntacticSubFormula L 1} (hp : ¬p.fvar? m) (hΔ : ∀ q ∈ Δ, ¬q.fvar? m)
