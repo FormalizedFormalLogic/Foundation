@@ -113,6 +113,13 @@ structure Hom where
 
 infix:25 " →L " => Hom
 
+-- Hom.toFun を表示しない
+open Lean PrettyPrinter Delaborator SubExpr in
+@[app_unexpander Hom.toFun]
+def unexpsnderToFun : Unexpander
+  | `($_ $h $x) => `($h $x)
+  | _           => throw ()
+
 namespace Hom
 variable {α β γ}
 
