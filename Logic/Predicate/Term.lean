@@ -328,7 +328,7 @@ lemma fix_func {k} (f : L.func k) (v : Fin k → SyntacticSubTerm L n) :
 @[simp] lemma fix_free (t : SyntacticSubTerm L (n + 1)) : fix (free t) = t :=
   by simp[free, fix, bind_bind]; exact bind_id_of_eq (by intro x; cases x using Fin.lastCases <;> simp) (by simp) t
 
-lemma bShift_free_eq_shift (t : SyntacticTerm L) : free (bShift t) = shift t :=
+@[simp] lemma bShift_free_eq_shift (t : SyntacticTerm L) : free (bShift t) = shift t :=
   by simp[free, bShift, shift, map, bind_bind, eq_finZeroElim]
 
 lemma substs_eq_subst (w : Fin (n + 1) → SyntacticTerm L) (t : SyntacticSubTerm L (n + 1)) :

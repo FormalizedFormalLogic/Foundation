@@ -1,10 +1,23 @@
 import Logic.Predicate.FirstOrder.Semantics
 
+
+
+variable {L : Language.{u}} {μ : Type v} [L.Eq]
+namespace SubTerm
+
+def varSumInL {k} : Fin k → SubTerm L μ (k + k) := fun i => #(Fin.castLe (by simp) i)
+
+def varSumInR {k} : Fin k → SubTerm L μ (k + k) := fun i => #(Fin.natAdd k i)
+
+@[simp] lemma substs_varSumInL (w₁ w₂ : Fin k → SubTerm L μ n) (i) :
+  substs (Matrix.vecAppend rfl w₁ w₂) (varSumInL i) = w₁ i := by simp[varSumInL, Matrix.vecAppend_eq_ite]
+
+@[simp] lemma substs_varSumInR (w₁ w₂ : Fin k → SubTerm L μ n) (i) :
+  substs (Matrix.vecAppend rfl w₁ w₂) (varSumInR i) = w₂ i := by simp[varSumInR, Matrix.vecAppend_eq_ite]
+
+end SubTerm
+
 namespace FirstOrder
-
-variable {L : Language.{u}} [L.Eq]
-
-def fvarSeq {k n : ℕ} (f : Fin k → Fin n) : Fin k → SubTerm L μ n := fun i => #(f i)
 
 namespace SubFormula
 
@@ -13,15 +26,12 @@ def vecEq {k} (v w : Fin k → SubTerm L μ n) : SubFormula L μ n := Matrix.con
 end SubFormula
 
 namespace Theory
+open SubTerm
 
 class Sub (T U : Theory L) where
   sub : T ⊆ U
 
 section Eq
-
-abbrev Eq.varSeq₀ {k} : Fin k → SubTerm L μ (k + k) := fun i => #(Fin.castLe (by simp) i)
-
-abbrev Eq.varSeq₁ {k} : Fin k → SubTerm L μ (k + k) := fun i => #(Fin.natAdd k i)
 
 variable (L)
 
@@ -30,9 +40,9 @@ inductive Eq : Theory L
   | symm : Eq “∀ ∀ (#1 = #0 → #0 = #1)”
   | trans : Eq “∀ ∀ ∀ (#2 = #1 → #1 = #0 → #2 = #0)”  
   | funcExt {k} (f : L.func k) :
-    Eq “∀* (!(SubFormula.vecEq Eq.varSeq₀ Eq.varSeq₁) → !(SubTerm.func f Eq.varSeq₀) = !(SubTerm.func f Eq.varSeq₁))”
+    Eq “∀* (!(SubFormula.vecEq varSumInL varSumInR) → !(SubTerm.func f varSumInL) = !(SubTerm.func f varSumInR))”
   | relExt {k} (r : L.rel k) :
-    Eq “∀* (!(SubFormula.vecEq Eq.varSeq₀ Eq.varSeq₁) → (!(SubFormula.rel r Eq.varSeq₀) ↔ !(SubFormula.rel r Eq.varSeq₁)))”
+    Eq “∀* (!(SubFormula.vecEq varSumInL varSumInR) → !(SubFormula.rel r varSumInL) → !(SubFormula.rel r varSumInR))”
 
 end Eq
 
@@ -62,7 +72,7 @@ variable {L}
 
 variable (H : M ⊧₁* Theory.Eq L)
 
-open Theory SubFormula
+open SubTerm Theory SubFormula
 
 lemma eqv_refl (a : M) : eqv L a a := by
   have : M ⊧₁ “∀ #0 = #0” := H (Theory.Eq.refl (L := L))
@@ -81,17 +91,23 @@ lemma eqv_trans {a b c : M} : eqv L a b → eqv L b c → eqv L a c := by
 
 lemma eqv_funcExt {k} (f : L.func k) {v w : Fin k → M} (h : ∀ i, eqv L (v i) (w i)) :
     eqv L (func f v) (func f w) := by
-  have : M ⊧₁ “∀* (!(vecEq Eq.varSeq₀ Eq.varSeq₁) → !(SubTerm.func f Eq.varSeq₀) = !(SubTerm.func f Eq.varSeq₁))” :=
+  have : M ⊧₁ “∀* (!(vecEq varSumInL varSumInR) → !(SubTerm.func f varSumInL) = !(SubTerm.func f varSumInR))” :=
     H (Eq.funcExt f (L := L))
-  simp[models_def, vecEq, SubTerm.val_func] at this
+  simp[varSumInL, varSumInR, models_def, vecEq, SubTerm.val_func] at this
   simpa[Matrix.vecAppend_eq_ite] using this (Matrix.vecAppend rfl v w) (fun i => by simpa[Matrix.vecAppend_eq_ite] using h i)
+
+lemma eqv_relExt_aux {k} (r : L.rel k) {v w : Fin k → M} (h : ∀ i, eqv L (v i) (w i)) :
+    rel r v → rel r w := by
+  have : M ⊧₁ “∀* (!(vecEq varSumInL varSumInR) → !(SubFormula.rel r varSumInL) → !(SubFormula.rel r varSumInR))” :=
+    H (Eq.relExt r (L := L))
+  simp[varSumInL, varSumInR, models_def, vecEq, SubTerm.val_func, eval_rel (r := r)] at this
+  simpa[eval_rel, Matrix.vecAppend_eq_ite] using this (Matrix.vecAppend rfl v w) (fun i => by simpa[Matrix.vecAppend_eq_ite] using h i)
 
 lemma eqv_relExt {k} (r : L.rel k) {v w : Fin k → M} (h : ∀ i, eqv L (v i) (w i)) :
     rel r v = rel r w := by
-  have : M ⊧₁ “∀* (!(vecEq Eq.varSeq₀ Eq.varSeq₁) → (!(SubFormula.rel r Eq.varSeq₀) ↔ !(SubFormula.rel r Eq.varSeq₁)))” :=
-    H (Eq.relExt r (L := L))
-  simp[models_def, vecEq, SubTerm.val_func, eval_rel (r := r)] at this
-  simpa[eval_rel, Matrix.vecAppend_eq_ite] using this (Matrix.vecAppend rfl v w) (fun i => by simpa[Matrix.vecAppend_eq_ite] using h i)
+  simp; constructor
+  · exact eqv_relExt_aux H r h
+  · exact eqv_relExt_aux H r (fun i => eqv_symm H (h i))
 
 lemma eqv_equivalence : Equivalence (eqv L (M := M)) where
   refl := eqv_refl H

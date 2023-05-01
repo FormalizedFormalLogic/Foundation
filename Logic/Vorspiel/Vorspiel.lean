@@ -54,6 +54,12 @@ infixr:70 " :> " => vecCons
 def vecConsLast {n : ℕ} (t : Fin n → α) (h : α) : Fin n.succ → α :=
   Fin.lastCases h t
 
+@[simp] lemma cons_app_one {n : ℕ} (a : α) (s : Fin n.succ → α) : (a :> s) 1 = s 0 := rfl
+
+@[simp] lemma cons_app_two {n : ℕ} (a : α) (s : Fin n.succ.succ → α) : (a :> s) 2 = s 1 := rfl
+
+@[simp] lemma cons_app_three {n : ℕ} (a : α) (s : Fin n.succ.succ.succ → α) : (a :> s) 3 = s 2 := rfl
+
 section delab
 open Lean PrettyPrinter Delaborator SubExpr
 
@@ -67,7 +73,7 @@ def unexpandVecCons : Unexpander
   | `($(_) $a ![$as,*]) => `(![$a, $as,*])
   | _                   => throw ()
 
-#check ![0, 1, 2]
+#check 0 :> ![1, 2]
 
 end delab
 
@@ -133,7 +139,7 @@ lemma injective_vecCons {f : Fin n → α} (h : Function.Injective f) {a} (ha : 
 
 section And
 
-variable [HasLogicSymbols α]
+variable [HasLogicSymbols α] [HasLogicSymbols β]
 
 def conj : {n : ℕ} → (Fin n → α) → α
   | 0,     _ => ⊤
@@ -143,12 +149,17 @@ def conj : {n : ℕ} → (Fin n → α) → α
 
 @[simp] lemma conj_cons {a : α} {v : Fin n → α} : conj (a :> v) = a ⋏ conj v := rfl
 
-@[simp] lemma conj_hom (f : α →L Prop) (v : Fin n → α) : f (conj v) = ∀ i, f (v i) := by
+@[simp] lemma conj_hom_prop (f : α →L Prop) (v : Fin n → α) : f (conj v) = ∀ i, f (v i) := by
   induction' n with n ih <;> simp[conj]
   · intro ⟨_, _⟩; contradiction
   · simp[ih]; constructor
     · intro ⟨hz, hs⟩ i; cases i using Fin.cases; { exact hz }; { exact hs _ }
     · intro h; exact ⟨h 0, fun i => h _⟩
+
+lemma hom_conj (f : α →L β) (v : Fin n → α) : f (conj v) = conj (f ∘ v) := by
+  induction' n with n ih <;> simp[*, conj]
+
+lemma hom_conj' (f : α →L β) (v : Fin n → α) : f (conj v) = conj fun i => f (v i) := hom_conj f v
 
 end And
 
