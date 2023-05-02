@@ -72,6 +72,21 @@ partial def ofQList {α : Q(Type u)} (l : Q(List $α)) : MetaM $ List Q($α) := 
   | ~q([])       => return []
   | ~q($a :: $l) => return a :: (← ofQList l)
 
+def isStrongEq (t s : Expr) : MetaM Bool := do isDefEq (← whnf t) (← whnf s)
+
+elab "test₁" : term => do
+  let e₁ : Q(Fin 3) := q(2)
+  let e₂ : Q(Fin (.succ (.succ 1))) := q(Fin.succ 1)
+  let b₁ := e₁ == e₂
+  let b₂ ← isDefEq e₁ e₂
+  let b₃ ← isStrongEq e₁ e₂
+  logInfo m!"e₁ == e₂: {b₁}"
+  logInfo m!"isDefEq e₁ e₂: {b₂}"
+  logInfo m!"isStrongEq e₁ e₂: {b₃}"
+  return q(0)
+
+#eval test₁
+
 section List
 variable {α : Type u}
 
@@ -79,16 +94,15 @@ lemma List.mem_of_eq {a b : α} {l} (h : a = b) : a ∈ b :: l := by simp[h]
 
 lemma List.mem_of_mem {a b : α} {l : List α} (h : a ∈ l) : a ∈ b :: l := by simp[h]
 
-def toQListOfElem {α : Q(Type u)} {a : Q($α)} : {l : List Q($α)} → l.elem a → Q($a ∈ $(toQList (u := u) l))
-  | [],     h => by contradiction
-  | b :: l, h =>
-      match be : a == b with
-      | true =>
+def memQList? {α : Q(Type u)} (a : Q($α)) : (l : List Q($α)) → MetaM $  Option Q($a ∈ $(toQList (u := u) l))
+  | []     => return none
+  | b :: l => do
+      if (← isDefEq (← whnf a) (← whnf b)) then
         let e : Q($a = $b) := rflQ a
-        q(List.mem_of_eq $e)
-      | false => 
-        let ih : Q($a ∈ $(toQList (u := u) l)) := toQListOfElem (by simpa[be] using h)
-        q(List.mem_of_mem $ih)
+        return some q(List.mem_of_eq $e)
+      else
+        let some h ← memQList? a l | return none
+        return by simp at h ⊢; exact some q(List.mem_of_mem $h)
 
 example : 2 ∈ [3,4,5,2,6] := of_decide_eq_true rfl
 
@@ -134,3 +148,16 @@ def refl (e : Q($α)) : FunResult f := ⟨fun e => pure ⟨q($f $e), q(rfl)⟩�
 end ResultFun
 
 end Qq
+
+namespace List
+variable {m : Type → Type v} [inst : Monad m] {α : Type u}
+
+def elemM (r : α → α → m Bool) (a : α) : List α → m Bool
+  | [] => return false
+  | b :: bs => do
+    if (← r a b) then
+      return true
+    else
+      bs.elemM r a
+
+end List
