@@ -104,9 +104,9 @@ lemma eval_map (bound : Fin n₁ → Fin n₂) (free : μ₁ → μ₂) (e : Fin
     Eval s e ε (map bound free p) ↔ Eval s (e ∘ bound) (ε ∘ free) p :=
   by simp[map, eval_bind, Function.comp]
 
-@[simp] lemma eval_subst (u : SubTerm L μ n) (p : SubFormula L μ (n + 1)) :
-    Eval s e ε (subst u p) ↔ Eval s (e <: u.val s e ε) ε p :=
-  by simp[subst, eval_bind]; apply of_eq; congr ; exact funext $ Fin.lastCases (by simp) (by simp)
+@[simp] lemma eval_substs {k} (w : Fin k → SubTerm L μ n) (p : SubFormula L μ k) :
+    Eval s e ε (substs w p) ↔ Eval s (fun i => (w i).val s e ε) ε p :=
+  by simp[substs, eval_bind]; apply of_eq; congr
 
 @[simp] lemma eval_emb (p : SubFormula L Empty n) :
     Eval s e ε (emb p) ↔ Eval s e Empty.elim p := by simp[emb, eval_map, Empty.eq_elim]
@@ -319,7 +319,7 @@ lemma sound : ∀ {Γ : Sequent L}, ⊢ᶜ[P] Γ → ∀ (M : Type u) [s : Struc
     · exact ⟨q, by simp[hq], hhq⟩
   | _, ex Δ t p d,            M, s, ε => by
     have : SubFormula.Eval! M ![t.val! M ![] ε] ε p ∨ ∃ p ∈ Δ, SubFormula.Val! M ε p := by
-      simpa[Matrix.vecConsLast_vecEmpty] using sound d M ε
+      simpa[Matrix.constant_eq_singleton] using sound d M ε
     rcases this with (hp | ⟨q, hq, hhq⟩)
     · exact ⟨∃' p, by simp, t.val! M ![] ε, hp⟩
     · exact ⟨q, by simp[hq], hhq⟩

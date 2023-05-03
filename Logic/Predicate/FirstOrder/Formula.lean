@@ -7,8 +7,8 @@ variable (L : Language.{u})
 inductive SubFormula (μ : Type v) : ℕ → Type (max u v) where
   | verum  {n} : SubFormula μ n
   | falsum {n} : SubFormula μ n
-  | rel    {n} : ∀ {k}, L.rel k → (Fin k → SubTerm L μ n) → SubFormula μ n
-  | nrel   {n} : ∀ {k}, L.rel k → (Fin k → SubTerm L μ n) → SubFormula μ n
+  | rel    {n} : ∀ {arity}, L.rel arity → (Fin arity → SubTerm L μ n) → SubFormula μ n
+  | nrel   {n} : ∀ {arity}, L.rel arity → (Fin arity → SubTerm L μ n) → SubFormula μ n
   | and    {n} : SubFormula μ n → SubFormula μ n → SubFormula μ n
   | or     {n} : SubFormula μ n → SubFormula μ n → SubFormula μ n
   | all    {n} : SubFormula μ (n + 1) → SubFormula μ n
@@ -170,16 +170,16 @@ def rec' {C : ∀ n, SubFormula L μ n → Sort _}
 variable [∀ k, ToString (L.func k)] [∀ k, ToString (L.rel k)] [ToString μ]
 
 def toStr : ∀ {n}, SubFormula L μ n → String
-  | _, ⊤                     => "\\top"
-  | _, ⊥                     => "\\bot"
-  | _, rel (k := 0) r _      => "{" ++ toString r ++ "}"
-  | _, rel (k := _ + 1) r v  => "{" ++ toString r ++ "} \\left(" ++ String.vecToStr (fun i => toString (v i)) ++ "\\right)"
-  | _, nrel (k := 0) r _     => "\\lnot {" ++ toString r ++ "}"
-  | _, nrel (k := _ + 1) r v => "\\lnot {" ++ toString r ++ "} \\left(" ++ String.vecToStr (fun i => toString (v i)) ++ "\\right)"
-  | _, p ⋏ q                 => "\\left(" ++ toStr p ++ " \\land " ++ toStr q ++ "\\right)"
-  | _, p ⋎ q                 => "\\left(" ++ toStr p ++ " \\lor "  ++ toStr q ++ "\\right)"
-  | _, @all _ _ n p          => "(\\forall x_{" ++ toString n ++ "}) " ++ toStr p
-  | _, @ex _ _ n p           => "(\\exists x_{" ++ toString n ++ "}) " ++ toStr p
+  | _, ⊤                         => "\\top"
+  | _, ⊥                         => "\\bot"
+  | _, rel (arity := 0) r _      => "{" ++ toString r ++ "}"
+  | _, rel (arity := _ + 1) r v  => "{" ++ toString r ++ "} \\left(" ++ String.vecToStr (fun i => toString (v i)) ++ "\\right)"
+  | _, nrel (arity := 0) r _     => "\\lnot {" ++ toString r ++ "}"
+  | _, nrel (arity := _ + 1) r v => "\\lnot {" ++ toString r ++ "} \\left(" ++ String.vecToStr (fun i => toString (v i)) ++ "\\right)"
+  | _, p ⋏ q                     => "\\left(" ++ toStr p ++ " \\land " ++ toStr q ++ "\\right)"
+  | _, p ⋎ q                     => "\\left(" ++ toStr p ++ " \\lor "  ++ toStr q ++ "\\right)"
+  | _, @all _ _ n p              => "(\\forall x_{" ++ toString n ++ "}) " ++ toStr p
+  | _, @ex _ _ n p               => "(\\exists x_{" ++ toString n ++ "}) " ++ toStr p
 
 instance : Repr (SubFormula L μ n) := ⟨fun t _ => toStr t⟩
 
@@ -225,15 +225,11 @@ def map (bound : Fin n₁ → Fin n₂) (free : μ₁ → μ₂) : SubFormula L 
 
 abbrev map₀ (free : μ₁ → μ₂) : SubFormula L μ₁ n →L SubFormula L μ₂ n := map id free
 
-def subst (t : SubTerm L μ n) : SubFormula L μ (n + 1) →L SubFormula L μ n :=
-  bind (SubTerm.bvar <: t) SubTerm.fvar
-
-notation "⟦↦ " t "⟧" => subst t
-
 def substs {n'} (v : Fin n → SubTerm L μ n') : SubFormula L μ n →L SubFormula L μ n' :=
   bind v SubTerm.fvar
 
 notation "⟦→ " v "⟧" => substs v
+notation "⟦↦ " t "⟧" => substs ![t]
 
 def emb {o : Type w} [h : IsEmpty o] : SubFormula L o n →L SubFormula L μ n := map id h.elim'
 
@@ -346,61 +342,6 @@ lemma map_inj : ∀ {n₁ n₂ μ₁ μ₂} {bound : Fin n₁ → Fin n₂} {fre
     intro h; exact map_inj (bound := 0 :> Fin.succ ∘ bound)
       (Matrix.injective_vecCons ((Fin.succ_injective _).comp hb) (fun _ => (Fin.succ_ne_zero _).symm)) hf h
 
-section subst
-variable (s : SubTerm L μ n)
-
-lemma subst_rel {k} (r : L.rel k) (v : Fin k → SubTerm L μ (n + 1)) :
-    ⟦↦ s⟧ (rel r v) = rel r (fun i => SubTerm.subst s (v i)) :=
-  by simp[subst, SubTerm.subst, bind_rel]
-
-@[simp] lemma subst_rel₀ (r : L.rel 0) :
-    subst s (rel r ![]) = rel r ![] :=
-  by simp[subst_rel]
-
-@[simp] lemma subst_rel₁ (r : L.rel 1) (t : SubTerm L μ (n + 1)) :
-    subst s (rel r ![t]) = rel r ![SubTerm.subst s t] :=
-  by simp[Matrix.constant_eq_singleton, subst_rel]
-
-@[simp] lemma subst_rel₂ (r : L.rel 2) (t₁ t₂ : SubTerm L μ (n + 1)) :
-    subst s (rel r ![t₁, t₂]) = rel r ![SubTerm.subst s t₁, SubTerm.subst s t₂] :=
-  by simp[subst_rel]; funext i; induction i using Fin.induction <;> simp
-
-lemma subst_nrel {k} (r : L.rel k) (v : Fin k → SubTerm L μ (n + 1)) :
-    subst s (nrel r v) = nrel r (fun i => SubTerm.subst s (v i)) :=
-  by simp[subst, SubTerm.subst, bind_nrel]
-
-@[simp] lemma subst_nrel₀ (r : L.rel 0) :
-    subst s (nrel r ![]) = nrel r ![] :=
-  by simp[subst_nrel]
-
-@[simp] lemma subst_nrel₁ (r : L.rel 1) (t : SubTerm L μ (n + 1)) :
-    subst s (nrel r ![t]) = nrel r ![SubTerm.subst s t] :=
-  by simp[Matrix.constant_eq_singleton, subst_nrel]
-
-@[simp] lemma subst_nrel₂ (r : L.rel 2) (t₁ t₂ : SubTerm L μ (n + 1)) :
-    subst s (nrel r ![t₁, t₂]) = nrel r ![SubTerm.subst s t₁, SubTerm.subst s t₂] :=
-  by simp[subst_nrel]; funext i; induction i using Fin.induction <;> simp
-
-@[simp] lemma subst_all (p : SubFormula L μ (n + 1 + 1)) :
-    subst s (∀' p) = ∀' subst s.bShift p := by
-  simp[subst, SubTerm.subst]; congr
-  funext i
-  cases' i using Fin.cases with i <;> simp
-  cases' i using Fin.lastCases with i <;> simp[Fin.succ_castSucc]
-
-@[simp] lemma subst_ex (p : SubFormula L μ (n + 1 + 1)) :
-    subst s (∃' p) = ∃' subst s.bShift p := by
-  simp[subst, SubTerm.subst]; congr
-  funext i
-  cases' i using Fin.cases with i <;> simp
-  cases' i using Fin.lastCases with i <;> simp[Fin.succ_castSucc]
-
-@[simp] lemma complexity_subst (t) (p : SyntacticSubFormula L (n + 1)) :
-    complexity (subst t p) = complexity p :=
-  by simp[subst]
-
-end subst
-
 section substs
 variable {n' : ℕ} (w : Fin n → SubTerm L μ n')
 
@@ -439,9 +380,6 @@ lemma substs_nrel {k} (r : L.rel k) (v : Fin k → SubTerm L μ n) :
     substs w (nrel r ![t₁, t₂]) = nrel r ![SubTerm.substs w t₁, SubTerm.substs w t₂] :=
   by simp[substs_nrel]; funext i; induction i using Fin.induction <;> simp
 
-lemma substs_eq_subst_zero (t : SubTerm L μ 0) (p : SubFormula L μ 1) :
-    substs ![t] p = subst t p := by simp[Matrix.vecConsLast_vecEmpty, substs, subst]
-
 lemma substs_all {n'} (w : Fin n → SyntacticSubTerm L n') (p : SyntacticSubFormula L (n + 1)) :
     substs w (∀' p) = ∀' (substs (#0 :> SubTerm.bShift ∘ w) p) := by
   simp[substs, bind_bind]
@@ -449,6 +387,12 @@ lemma substs_all {n'} (w : Fin n → SyntacticSubTerm L n') (p : SyntacticSubFor
 lemma substs_ex {n'} (w : Fin n → SyntacticSubTerm L n') (p : SyntacticSubFormula L (n + 1)) :
     substs w (∃' p) = ∃' (substs (#0 :> SubTerm.bShift ∘ w) p) := by
   simp[substs, bind_bind]
+
+lemma substs_substs {n₁ n₂ n₃} (w : Fin n₂ → SubTerm L μ n₃) (v : Fin n₁ → SubTerm L μ n₂) (p : SubFormula L μ n₁) :
+    ⟦→ w⟧ (⟦→ v⟧ p) = ⟦→ SubTerm.substs w ∘ v⟧ p := by simp[substs, bind_bind]; congr
+
+@[simp] lemma complexity_substs {k} (w : Fin k → SyntacticSubTerm L n) (p : SyntacticSubFormula L k) :
+  (⟦→ w⟧ p).complexity = p.complexity := by simp[substs]
 
 end substs
 
@@ -559,11 +503,13 @@ def shiftEmb : SyntacticSubFormula L n ↪ SyntacticSubFormula L n where
 lemma shiftEmb_eq_shift (p : SyntacticSubFormula L n) :
   shiftEmb p = shift p := rfl
 
-lemma shift_subst (s : SyntacticSubTerm L n) (p : SyntacticSubFormula L (n + 1)) :
-    shift (subst s p) = subst s.shift (shift p) :=
-  by
-  simp[shift, subst, map, bind_bind]; congr; funext x
-  cases' x using Fin.lastCases <;> simp; rfl
+lemma shift_substs (w : Fin k → SyntacticSubTerm L n) (p : SyntacticSubFormula L k) :
+    shift (substs w p) = substs (SubTerm.shift ∘ w) (shift p) :=
+  by simp[shift, substs, map, bind_bind]; congr
+
+lemma shift_substs1 (t : SyntacticSubTerm L n) (p : SyntacticSubFormula L 1) :
+    shift (substs ![t] p) = substs ![t.shift] (shift p) :=
+  by simp[shift_substs, Function.comp, Matrix.constant_eq_singleton]
 
 @[simp] lemma shift_emb {o : Type v} [h : IsEmpty o] (p : SubFormula L o n) :
     shift (emb p : SyntacticSubFormula L n) = emb p := by
@@ -627,37 +573,29 @@ end fix
   simp[fix, free, bind_bind]; apply eq_bind_of <;> simp
   intros x; exact Fin.lastCases (by simp) (by simp) x
 
-lemma rewrite_free_eq_subst (p : SyntacticSubFormula L 1) (t : SyntacticTerm L) :
-    rewrite (t :>ₙ SubTerm.fvar) (free p) = subst t p :=
-  by simp[subst, free, bind_bind, Matrix.vecConsLast_vecEmpty, Matrix.constant_eq_singleton] 
+lemma rewrite_free_eq_substs (p : SyntacticSubFormula L 1) (t : SyntacticTerm L) :
+    rewrite (t :>ₙ SubTerm.fvar) (free p) = ⟦↦ t⟧ p :=
+  by simp[substs, free, bind_bind, Matrix.vecConsLast_vecEmpty, Matrix.constant_eq_singleton] 
 
 lemma rewrite_shift_eq_self (p : SyntacticFormula L) (t : SyntacticTerm L) :
     rewrite (t :>ₙ SubTerm.fvar) (shift p) = p :=
   by simp[shift, map, bind_bind]
 
-@[simp] lemma subst_shift_eq_free (p : SyntacticSubFormula L 1) : subst &0 (shift p) = free p :=
-  by simp[subst, shift, free, map, bind_bind]
+@[simp] lemma substs_shift_eq_free (p : SyntacticSubFormula L 1) : ⟦↦ &0⟧ (shift p) = free p :=
+  by simp[substs, shift, free, map, bind_bind, Matrix.constant_eq_singleton, Matrix.vecConsLast_vecEmpty]
 
 lemma free_substs_eq_substs_shift {n'} (w : Fin n' → SyntacticSubTerm L (n + 1)) (p : SyntacticSubFormula L n') :
     free (substs w p) = substs (fun i => (w i).free) (shift p) :=
   by simp[free, substs, shift, map, bind_bind, SubTerm.shift, SubTerm.map, SubTerm.free, SubTerm.bind_bind]
 
-lemma substs_eq_subst' {n'} (w : Fin (n + 1) → SyntacticSubTerm L n') (p : SyntacticSubFormula L (n + 1)) :
-    substs w p = subst (w $ Fin.last n) (fix $ substs (SubTerm.shift ∘ w ∘ Fin.castSucc) $ free p) := by
-  simp[substs, subst, free, fix, bind_bind]; congr
+lemma substs_eq_subst1 (w : Fin (n + 1) → SyntacticTerm L) (p : SyntacticSubFormula L (n + 1)) :
+    substs w p = ⟦↦ w (Fin.last n)⟧ (fix $ substs (SubTerm.shift ∘ w ∘ Fin.castSucc) $ free p) := by
+  simp[substs, substs, free, fix, bind_bind]; congr
   funext x; cases x using Fin.lastCases <;> simp[shift, map, bind_bind, SubTerm.shift, SubTerm.map, SubTerm.bind_bind]
-
-lemma subst_substs {n'} (t : SyntacticSubTerm L n') (w : Fin n → SyntacticSubTerm L (n' + 1)) (p : SyntacticSubFormula L n) :
-    subst t (substs w p) = substs (fun i => SubTerm.subst t (w i)) p := by
-  simp[substs, subst, bind_bind]; congr
 
 lemma free_substs {n'} (w : Fin n → SyntacticSubTerm L (n' + 1)) (p : SyntacticSubFormula L n) :
     free (substs w p) = substs (SubTerm.free ∘ w) (shift p) := by
   simp[free, substs, shift, map, bind_bind]; congr
-
-lemma shift_substs {n'} (w : Fin n → SyntacticSubTerm L n') (p : SyntacticSubFormula L n) :
-    shift (substs w p) = substs (SubTerm.shift ∘ w) (shift p) := by
-  simp[substs, shift, map, bind_bind]; congr
 
 variable (L)
 
@@ -683,9 +621,6 @@ lemma map_operator {μ₁ μ₂ : Type v} {n₁ n₂} (bound : Fin n₁ → Fin 
   (v : ι → SubTerm L μ₁ n₁) :
     map bound free (o.operator v) = o.operator (fun i => SubTerm.map bound free (v i)) := o.bind_operator _ _ _
 
-lemma subst_operator (s : SubTerm L μ n) (v : ι → SubTerm L μ (n + 1)) :
-    subst s (o.operator v) = o.operator (fun i => SubTerm.subst s (v i)) := o.bind_operator _ _ _
-
 lemma substs_operator (w : Fin n → SubTerm L μ n) (v : ι → SubTerm L μ n) :
     substs w (o.operator v) = o.operator (fun i => SubTerm.substs w (v i)) := o.bind_operator _ _ _
 
@@ -702,10 +637,6 @@ end
 
 section
 variable (o : OperatorFin L 1)
-
-@[simp] lemma subst_operator₁ (s : SubTerm L μ n) (t : SubTerm L μ (n + 1)) :
-    subst s (o.operator ![t]) = o.operator ![SubTerm.subst s t] :=
-  by simp[Matrix.constant_eq_singleton, subst_operator]
 
 @[simp] lemma substs_operator₁ (w : Fin n → SubTerm L μ n) (t : SubTerm L μ n) :
     substs w (o.operator ![t]) = o.operator ![SubTerm.substs w t] :=
@@ -727,10 +658,6 @@ end
 
 section
 variable (o : OperatorFin L 2)
-
-@[simp] lemma subst_operator₂ (s : SubTerm L μ n) (t₁ t₂ : SubTerm L μ (n + 1)) :
-    subst s (o.operator ![t₁, t₂]) = o.operator ![SubTerm.subst s t₁, SubTerm.subst s t₂] :=
-  by simp[subst_operator]; congr; funext i; induction i using Fin.induction <;> simp
 
 @[simp] lemma substs_operator₂ (w : Fin n → SubTerm L μ n) (t₁ t₂ : SubTerm L μ n) :
     substs w (o.operator ![t₁, t₂]) = o.operator ![SubTerm.substs w t₁, SubTerm.substs w t₂] :=
@@ -779,10 +706,6 @@ section
 lemma map_operatorMatrix {μ₁ μ₂ : Type v} {n₁ n₂} (bound : Fin n₁ → Fin n₂) (free : μ₁ → μ₂)
   (v : (i : ι) → I i → SubTerm L μ₁ n₁) :
     map bound free (o.operatorMatrix v) = o.operatorMatrix (fun i j => SubTerm.map bound free (v i j)) :=
-  o.bind_operatorMatrix _ _ _
-
-lemma subst_operatorMatrix (s : SubTerm L μ n) (v : (i : ι) → I i → SubTerm L μ (n + 1)) :
-    subst s (o.operatorMatrix v) = o.operatorMatrix (fun i j => SubTerm.subst s (v i j)) :=
   o.bind_operatorMatrix _ _ _
 
 lemma substs_operatorMatrix (w : Fin n → SubTerm L μ n) (v : (i : ι) → I i → SubTerm L μ n) :
@@ -884,7 +807,7 @@ lemma bind_eq_of_funEqOn' {bound₁ bound₂ : Fin n → SubTerm L μ n} {free�
 lemma ne_of_ne_complexity {p q : SubFormula L μ n} (h : p.complexity ≠ q.complexity) : p ≠ q :=
   by rintro rfl; contradiction
 
-@[simp] lemma ex_ne_subst (p : SubFormula L μ (n + 1)) (t) : subst t p ≠ ∃' p := ne_of_ne_complexity (by simp[subst])
+@[simp] lemma ex_ne_subst (p : SubFormula L μ 1) (t) : ⟦↦ t⟧ p ≠ ∃' p := ne_of_ne_complexity (by simp[substs])
 
 @[simp] lemma ne_or_left (p q : SubFormula L μ n) : p ≠ p ⋎ q := ne_of_ne_complexity (by simp)
 
@@ -988,7 +911,7 @@ syntax:max "∀ " subformula:35 : subformula
 syntax:max "∃ " subformula:35 : subformula
 syntax:25 "∀* " subformula:24 : subformula
 
-syntax subformula "⟦→ " subterm,* "⟧" : subformula
+syntax subformula "⟦" subterm,* "⟧" : subformula
 syntax:max "⇑" subformula:10 : subformula
 
 syntax "(" subformula ")" : subformula
@@ -1013,7 +936,7 @@ macro_rules
   | `(“ ∀ $p:subformula ”)                         => `(∀' “$p”)
   | `(“ ∃ $p:subformula ”)                         => `(∃' “$p”)
   | `(“ ∀* $p:subformula ”)                        => `(univClosure “$p”)
-  | `(“ $p:subformula ⟦→ $t:subterm,* ⟧ ”)            => do
+  | `(“ $p:subformula ⟦ $t:subterm,* ⟧ ”)            => do
     let v ← t.getElems.foldlM (β := Lean.TSyntax _) (init := ← `(![])) (fun s a => `(T“$a” :> $s))
     `(substs $v “$p”)
   | `(“ ⇑$p:subformula ”)                         => `(shift “$p”)
@@ -1101,10 +1024,26 @@ def unexpandIff : Unexpander
 
 @[app_unexpander HasLogicSymbols.Hom.toFun]
 def unexpandHomToFum : Unexpander
-  | `($_ ⟦→ ![T“$t:subterm”]⟧ “$p:subformula”) => `(“ ($p:subformula)⟦→ $t⟧ ”)
-  | `($_ ⟦→ ![#$x]⟧           “$p:subformula”) => `(“ ($p:subformula)⟦→ #$x⟧ ”)
-  | `($_ ⟦→ ![&$x]⟧           “$p:subformula”) => `(“ ($p:subformula)⟦→ &$x⟧ ”)
-  | `($_ ⟦→ ![$t] ⟧           “$p:subformula”) => `(“ ($p:subformula)⟦→ !$t⟧ ”)
+  | `($_ ⟦↦ T“$t:subterm”⟧                   “$p:subformula”) => `(“ ($p:subformula)⟦$t ⟧ ”)
+  | `($_ ⟦↦ #$x⟧                             “$p:subformula”) => `(“ ($p:subformula)⟦#$x⟧ ”)
+  | `($_ ⟦↦ &$x⟧                             “$p:subformula”) => `(“ ($p:subformula)⟦&$x⟧ ”)
+  | `($_ ⟦↦ $t ⟧                             “$p:subformula”) => `(“ ($p:subformula)⟦!$t⟧ ”)
+  | `($_ ⟦→ ![T“$t:subterm”, T“$u:subterm”]⟧ “$p:subformula”) => `(“ ($p:subformula)⟦$t,  $u ⟧ ”)
+  | `($_ ⟦→ ![T“$t:subterm”, #$y          ]⟧ “$p:subformula”) => `(“ ($p:subformula)⟦$t,  #$y⟧ ”)
+  | `($_ ⟦→ ![T“$t:subterm”, &$y          ]⟧ “$p:subformula”) => `(“ ($p:subformula)⟦$t,  &$y⟧ ”)
+  | `($_ ⟦→ ![T“$t:subterm”, $u           ]⟧ “$p:subformula”) => `(“ ($p:subformula)⟦$t,  !$u⟧ ”)
+  | `($_ ⟦→ ![#$x,           T“$u:subterm”]⟧ “$p:subformula”) => `(“ ($p:subformula)⟦#$x, $u ⟧ ”)
+  | `($_ ⟦→ ![#$x,           #$y          ]⟧ “$p:subformula”) => `(“ ($p:subformula)⟦#$x, #$y⟧ ”)
+  | `($_ ⟦→ ![#$x,           &$y          ]⟧ “$p:subformula”) => `(“ ($p:subformula)⟦#$x, &$y⟧ ”)
+  | `($_ ⟦→ ![#$x,           $u           ]⟧ “$p:subformula”) => `(“ ($p:subformula)⟦#$x, !$u⟧ ”)
+  | `($_ ⟦→ ![&$x,           T“$u:subterm”]⟧ “$p:subformula”) => `(“ ($p:subformula)⟦&$x, $u ⟧ ”)
+  | `($_ ⟦→ ![&$x,           #$y          ]⟧ “$p:subformula”) => `(“ ($p:subformula)⟦&$x, #$y⟧ ”)
+  | `($_ ⟦→ ![&$x,           &$y          ]⟧ “$p:subformula”) => `(“ ($p:subformula)⟦&$x, &$y⟧ ”)
+  | `($_ ⟦→ ![&$x,           $u           ]⟧ “$p:subformula”) => `(“ ($p:subformula)⟦&$x, !$u⟧ ”)
+  | `($_ ⟦→ ![$t,            T“$u:subterm”]⟧ “$p:subformula”) => `(“ ($p:subformula)⟦!$t, $u ⟧ ”)
+  | `($_ ⟦→ ![$t,            #$y          ]⟧ “$p:subformula”) => `(“ ($p:subformula)⟦!$t, #$y⟧ ”)
+  | `($_ ⟦→ ![$t,            &$y          ]⟧ “$p:subformula”) => `(“ ($p:subformula)⟦!$t, &$y⟧ ”)
+  | `($_ ⟦→ ![$t,            $u           ]⟧ “$p:subformula”) => `(“ ($p:subformula)⟦!$t, !$u⟧ ”)
   | _                                           => throw ()
 
 
@@ -1196,7 +1135,7 @@ def unexpandNRelArith : Unexpander
 
 #check “ ¬∃ ∀ ((#0 + 1) * #1 < #0 + #1 ↔ 0 < &5) ”
 #check (“0 < 0 → ∀ 0 < #0 → 0 ≮ 2” : Sentence Language.oring)
-#check “ ¬⊤ ∨ (¬#0 < 5)⟦→ #3⟧ ”
+#check “ ¬⊤ ∨ (¬#0 < 5)⟦#3⟧ ”
 #check “⋀ i, #i < #i + 9”
 
 end delab

@@ -64,9 +64,9 @@ lemma onSubFormula₁_map (bound : Fin n₁ → Fin n₂) (free : μ₁ → μ�
     Φ.onSubFormula₁ (map bound free p) = map bound free (Φ.onSubFormula₁ p) :=
   by simp[map, onSubFormula₁_bind]
 
-lemma onSubFormula₁_subst (u) (p : SubFormula L₁ μ (n + 1)) :
-    Φ.onSubFormula₁ (subst u p) = subst (Φ.onSubTerm u) (Φ.onSubFormula₁ p) :=
-  by simp[subst, onSubFormula₁_bind, Matrix.comp_vecConsLast, Function.comp]
+lemma onSubFormula₁_substs (w : Fin k → SubTerm L₁ μ n) (p : SubFormula L₁ μ k) :
+    Φ.onSubFormula₁ (substs w p) = substs (fun i => Φ.onSubTerm (w i)) (Φ.onSubFormula₁ p) :=
+  by simp[substs, onSubFormula₁_bind, Matrix.comp_vecConsLast, Function.comp]
 
 lemma onSubFormula₁_shift (p : SyntacticSubFormula L₁ n) : Φ.onSubFormula₁ (shift p) = shift (Φ.onSubFormula₁ p) :=
   by simp[shift, onSubFormula₁_map]

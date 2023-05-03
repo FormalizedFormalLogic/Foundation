@@ -106,9 +106,15 @@ lemma val_bind (bound : Fin n₁ → SubTerm L μ₂ n₂) (free : μ₁ → Sub
 lemma val_map (bound : Fin n₁ → Fin n₂) (free : μ₁ → μ₂) (t : SubTerm L μ₁ n₁) :
     (map bound free t).val s e₂ ε₂ = t.val s (e₂ ∘ bound) (ε₂ ∘ free) := val_bind _ _ _
 
+/-
 lemma val_subst (u : SubTerm L μ n) (t : SubTerm L μ (n + 1)) :
     (subst u t).val s e ε = t.val s (e <: u.val s e ε) ε :=
   by simp[subst, val_bind]; congr; exact funext $ Fin.lastCases (by simp) (by simp)
+-/
+
+lemma val_substs {n'} (w : Fin n' → SubTerm L μ n) (t : SubTerm L μ n') :
+    (substs w t).val s e ε = t.val s (fun x => (w x).val s e ε) ε :=
+  by simp[substs, val_bind]; congr
 
 @[simp] lemma val_bShift (a : M) (t : SubTerm L μ n) :
     t.bShift.val s (a :> e) ε = t.val s e ε := by simp[bShift, val_map, Function.comp]

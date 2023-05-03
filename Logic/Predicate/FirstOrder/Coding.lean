@@ -14,8 +14,8 @@ open Encodable
 def toNat : {n : ℕ} → SubFormula L μ n → ℕ
   | _, ⊤                 => 0
   | _, ⊥                 => 1
-  | _, rel (k := k) r v  => (Nat.bit false $ Nat.bit false $ Nat.mkpair k  $ Nat.mkpair (encode r) (encode v)) + 2
-  | _, nrel (k := k) r v => (Nat.bit false $ Nat.bit true  $ Nat.mkpair k  $ Nat.mkpair (encode r) (encode v)) + 2
+  | _, rel (arity := k) r v  => (Nat.bit false $ Nat.bit false $ Nat.mkpair k  $ Nat.mkpair (encode r) (encode v)) + 2
+  | _, nrel (arity := k) r v => (Nat.bit false $ Nat.bit true  $ Nat.mkpair k  $ Nat.mkpair (encode r) (encode v)) + 2
   | _, p ⋏ q             => (Nat.bit true  $ Nat.bit false $ Nat.bit false $ Nat.mkpair p.toNat q.toNat) + 2
   | _, p ⋎ q             => (Nat.bit true  $ Nat.bit false $ Nat.bit true  $ Nat.mkpair p.toNat q.toNat) + 2
   | _, ∀' p              => (Nat.bit true  $ Nat.bit true  $ Nat.bit false p.toNat) + 2

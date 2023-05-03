@@ -50,9 +50,6 @@ def bind (bound : Fin n₁ → SubTerm L μ₂ n₂) (free : μ₁ → SubTerm L
 def map (bound : Fin n₁ → Fin n₂) (free : μ₁ → μ₂) : SubTerm L μ₁ n₁ → SubTerm L μ₂ n₂ :=
   bind (fun n => #(bound n)) (fun m => &(free m))
 
-def subst (t : SubTerm L μ n) : SubTerm L μ (n + 1) → SubTerm L μ n :=
-  bind (bvar <: t) fvar
-
 def substs {n'} (v : Fin n → SubTerm L μ n') : SubTerm L μ n → SubTerm L μ n' :=
   bind v fvar
 
@@ -165,71 +162,6 @@ lemma bShift_func {k} (f : L.func k) (v : Fin k → SubTerm L μ n) :
 
 end bShift
 
-section subst
-
-@[simp] lemma subst_bvar_last (s : SubTerm L μ n) : subst s #(Fin.last n) = s :=
-  by simp[subst]
-
-@[simp] lemma subst_bvar_castSucc (s : SubTerm L μ n) (x : Fin n) : subst s #(Fin.castSucc x) = #x :=
-  by simp[subst]
-
-@[simp] lemma subst_bvar_last_one (s : SubTerm L μ 0) (i : Fin 1) : subst s #i = s :=
-  by rw[Fin.fin_one_eq_zero i]; exact subst_bvar_last s
-
-@[simp] lemma subst_bvar_last_zero_of_two (s : SubTerm L μ 1) : subst s #0 = #0 :=
-  subst_bvar_castSucc s 0
-
-@[simp] lemma subst_bvar_last_one_of_two (s : SubTerm L μ 1) : subst s #1 = s :=
-  subst_bvar_last s
-
-@[simp] lemma subst_bvar_last_zero_of_three (s : SubTerm L μ 2) : subst s #0 = #0 :=
-  subst_bvar_castSucc s 0
-
-@[simp] lemma subst_bvar_last_one_of_three (s : SubTerm L μ 2) : subst s #1 = #1 :=
-  subst_bvar_castSucc s 1
-
-@[simp] lemma subst_bvar_last_two_of_three (s : SubTerm L μ 2) : subst s #2 = s :=
-  subst_bvar_last s
-
-@[simp] lemma subst_bvar_last_zero_of_four (s : SubTerm L μ 3) : subst s #0 = #0 :=
-  subst_bvar_castSucc s 0
-
-@[simp] lemma subst_bvar_last_one_of_four (s : SubTerm L μ 3) : subst s #1 = #1 :=
-  subst_bvar_castSucc s 1
-
-@[simp] lemma subst_bvar_last_two_of_four (s : SubTerm L μ 3) : subst s #2 = #2 :=
-  subst_bvar_castSucc s 2
-
-@[simp] lemma subst_bvar_last_three_of_four (s : SubTerm L μ 3) : subst s #3 = s :=
-  subst_bvar_last s
-
-@[simp] lemma subst_fvar (s : SubTerm L μ n) (x : μ) : subst s &x = &x :=
-  by simp[subst]
-
-lemma subst_func (s : SubTerm L μ n) {k} (f : L.func k) (v : Fin k → SubTerm L μ (n + 1)) :
-    subst s (func f v) = func f (fun i => subst s (v i)) :=
-  by simp[subst, bind_func]
-
-@[simp] lemma subst_func₀ (s : SubTerm L μ n) (f : L.func 0) {v : Fin 0 → SubTerm L μ (n + 1)} :
-    subst s (func f v) = func f ![] := by simp[subst_func]
-
-@[simp] lemma subst_func₁ (s : SubTerm L μ n) (f : L.func 1) {t : SubTerm L μ (n + 1)} :
-    subst s (func f ![t]) = func f ![subst s t] := by
-  simp[Matrix.constant_eq_singleton, subst_func]
-
-@[simp] lemma subst_func₂ (s : SubTerm L μ n) (f : L.func 2) {t₁ t₂ : SubTerm L μ (n + 1)} :
-    subst s (func f ![t₁, t₂]) = func f ![subst s t₁, subst s t₂] := by
-  simp[subst_func]; funext i; induction i using Fin.induction <;> simp
-
-@[simp] lemma subst_bShift_zero (s t : SubTerm L μ 0) : subst s (bShift t) = t :=
-  by simp[subst, bShift, map, bind_bind]
-
-lemma subst_bShift (s) (t : SubTerm L μ (n + 1)) : subst (bShift s) (bShift t) = bShift (subst s t) :=
-  by simp[subst, bShift, map, bind_bind]; congr; funext x
-     cases x using Fin.lastCases <;> simp[Fin.succ_castSucc]
-
-end subst
-
 section substs
 variable {n'} (w : Fin n → SubTerm L μ n')
 
@@ -257,6 +189,10 @@ lemma substs_func {k} (f : L.func k) (v : Fin k → SubTerm L μ n) :
 @[simp] lemma substs_func₂ (f : L.func 2) (t₁ t₂ : SubTerm L μ n) :
     substs w (func f ![t₁, t₂]) = func f ![substs w t₁, substs w t₂] :=
   by simp[substs_func]; funext i; induction i using Fin.induction <;> simp
+
+lemma substs_substs {l k} (v : Fin l → SubTerm L μ k) (w : Fin k → SubTerm L μ n) (t) :
+    substs w (substs v t) = substs (substs w ∘ v) t :=
+  by simp[substs, bind_bind, Function.comp]
 
 end substs
 
@@ -331,10 +267,9 @@ lemma fix_func {k} (f : L.func k) (v : Fin k → SyntacticSubTerm L n) :
 @[simp] lemma bShift_free_eq_shift (t : SyntacticTerm L) : free (bShift t) = shift t :=
   by simp[free, bShift, shift, map, bind_bind, eq_finZeroElim]
 
-lemma substs_eq_subst (w : Fin (n + 1) → SyntacticTerm L) (t : SyntacticSubTerm L (n + 1)) :
-    substs w t = subst (w $ Fin.last n) (substs (shift ∘ w ∘ Fin.castSucc) t.free).fix :=
-  by simp[substs, subst, free, fix, bind_bind]; congr
-     funext x; cases x using Fin.lastCases <;> simp[shift, map, bind_bind]
+lemma substs_eq_substs1 (w : Fin (n + 1) → SyntacticTerm L) (t : SyntacticSubTerm L (n + 1)) :
+    substs w t = substs ![w $ Fin.last n] (substs (shift ∘ w ∘ Fin.castSucc) t.free).fix :=
+  by simp[substs, free, fix, bind_bind]; congr; funext x; cases x using Fin.lastCases <;> simp[shift, map, bind_bind]
 
 end Syntactic
 
@@ -433,10 +368,6 @@ lemma onSubTerm_map (bound : Fin n₁ → Fin n₂) (free : μ₁ → μ₂) (t)
     Φ.onSubTerm (map bound free t) = map bound free (Φ.onSubTerm t) :=
   by simp[map, onSubTerm_bind]
 
-lemma onSubTerm_subst (u) (t : SubTerm L₁ μ (n + 1)) :
-    Φ.onSubTerm (subst u t) = subst (Φ.onSubTerm u) (Φ.onSubTerm t) :=
-  by simp[subst, onSubTerm_bind, Matrix.comp_vecConsLast, Function.comp]
-
 lemma onSubTerm_bShift (t : SubTerm L₁ μ₁ n) : Φ.onSubTerm (bShift t) = bShift (Φ.onSubTerm t) :=
   by simp[bShift, onSubTerm_map]
 
@@ -494,9 +425,6 @@ instance : Coe (Const L) (SubTerm L μ n) := ⟨const⟩
 @[simp] lemma map_const (c : Const L) {μ₁ μ₂ : Type v} {n₁ n₂} (bound : Fin n₁ → Fin n₂) (free : μ₁ → μ₂) :
     map bound free (c : SubTerm L μ₁ n₁) = c := by simp[map]
 
-@[simp] lemma subst_const (t : SubTerm L μ n) (c : Const L) :
-    subst t c = c := by simp[subst]
-
 @[simp] lemma substs_const {n'} (w : Fin n → SubTerm L μ n') (c : Const L) :
     substs w c = c := by simp[substs]
 
@@ -516,19 +444,19 @@ lemma map_func (o : Operator L ι) {μ₁ μ₂ : Type v} {n₁ n₂} (bound : F
   (v : ι → SubTerm L μ₁ n₁) :
     map bound free (o.operator v) = o.operator (fun i => map bound free (v i)) := o.bind_operator _ _ _
 
-lemma subst_func (t : SubTerm L μ n) (o : Operator L ι) (v : ι → SubTerm L μ (n + 1)) :
-    subst t (o.operator v) = o.operator (fun i => subst t (v i)) := o.bind_operator _ _ _
+lemma substs_operator {n'} (w : Fin n → SubTerm L μ n') (o : Operator L ι) (v : ι → SubTerm L μ n) :
+    substs w (o.operator v) = o.operator (fun i => substs w (v i)) := o.bind_operator _ _ _
 
-lemma emb_func (o : Operator L ι) (v : ι → SubTerm L PEmpty n) :
+lemma emb_operator (o : Operator L ι) (v : ι → SubTerm L PEmpty n) :
     emb (μ := μ) (o.operator v) = o.operator (fun i => emb (v i)) := o.bind_operator _ _ _
 
-lemma shift_func (o : Operator L ι) (v : ι → SyntacticSubTerm L n) :
+lemma shift_operator (o : Operator L ι) (v : ι → SyntacticSubTerm L n) :
     shift (o.operator v) = o.operator (fun i => shift (v i)) := o.bind_operator _ _ _
 
-lemma bShift_func (o : Operator L ι) (v : ι → SyntacticSubTerm L (n + 1)) :
+lemma bShift_operator (o : Operator L ι) (v : ι → SyntacticSubTerm L (n + 1)) :
     bShift (o.operator v) = o.operator (fun i => bShift (v i)) := o.bind_operator _ _ _
 
-lemma free_func (o : Operator L ι) (v : ι → SyntacticSubTerm L (n + 1)) :
+lemma free_operator (o : Operator L ι) (v : ι → SyntacticSubTerm L (n + 1)) :
     free (o.operator v) = o.operator (fun i => free (v i)) := o.bind_operator _ _ _
 
 end Operator

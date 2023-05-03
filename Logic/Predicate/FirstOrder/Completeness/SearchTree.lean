@@ -29,8 +29,8 @@ inductive Decomp (t : SyntacticTerm L) (Γ : Sequent L) : SyntacticFormula L →
   | andLeft (p q : SyntacticFormula L) : Decomp t Γ (p ⋏ q) {p}
   | andRight (p q : SyntacticFormula L) : Decomp t Γ (p ⋏ q) {q}
   | or (p q : SyntacticFormula L) : Decomp t Γ (p ⋎ q) {p, q}
-  | all (p : SyntacticSubFormula L 1) : Decomp t Γ (∀' p) {subst &(sequentUpper Γ) p}
-  | ex (p : SyntacticSubFormula L 1) : Decomp t Γ (∃' p) {subst t p}
+  | all (p : SyntacticSubFormula L 1) : Decomp t Γ (∀' p) {⟦↦ &(sequentUpper Γ)⟧ p}
+  | ex (p : SyntacticSubFormula L 1) : Decomp t Γ (∃' p) {⟦↦ t⟧ p}
 
 abbrev codeFormula (s : ℕ) : ℕ := s.unpair.1.unpair.1
 
@@ -132,14 +132,14 @@ noncomputable def syntacticMainLemma (τ : SearchTreeUnder Γ) : ⊢ᵀ τ.val.2
       have : ⊢ᵀ insert (p ⋎ q) Δ := DerivationCutRestricted.or _ _ _ ((ih _ this).cast (by simp[Finset.insert_eq]))
       exact this.cast (by simp[hp])
     case hall p =>
-      have : {subst &(sequentUpper Δ) p} ∪ Δ ≺[s] Δ := (searchtreeAt_iff_decomp_of_index hp hi).mpr ⟨_, Decomp.all p, rfl⟩
-      have : ⊢ᵀ insert (subst &(sequentUpper Δ) p) Δ := ih _ this
+      have : {⟦↦ &(sequentUpper Δ)⟧ p} ∪ Δ ≺[s] Δ := (searchtreeAt_iff_decomp_of_index hp hi).mpr ⟨_, Decomp.all p, rfl⟩
+      have : ⊢ᵀ insert (⟦↦ &(sequentUpper Δ)⟧ p) Δ := ih _ this
       have : ⊢ᵀ insert (∀' p) Δ := DerivationCutRestricted.genelalizeByNewver₀ (not_fvar?_sequentUpper hp) (fun _ hq => not_fvar?_sequentUpper hq) this
       exact this.cast (by simp[hp])
     case hex p =>
-      have : {subst t p} ∪ Δ ≺[s] Δ :=
+      have : {⟦↦ t⟧ p} ∪ Δ ≺[s] Δ :=
         (searchtreeAt_iff_decomp_of_index hp hi).mpr ⟨_, Decomp.ex p, rfl⟩
-      have : ⊢ᵀ insert (subst t p) Δ := ih _ this
+      have : ⊢ᵀ insert (⟦↦ t⟧ p) Δ := ih _ this
       have : ⊢ᵀ insert (∃' p) Δ := DerivationCutRestricted.ex Δ t p this
       exact this.cast (by simp[hp])  
 
@@ -259,7 +259,7 @@ lemma or_mem_chain {p q : SyntacticFormula L} (h : p ⋎ q ∈ ⛓️) : p ∈ �
   exact ⟨mem_chain_iff.mpr ⟨codeIndex (p ⋎ q) default i + 1, by simp[h]⟩,
          mem_chain_iff.mpr ⟨codeIndex (p ⋎ q) default i + 1, by simp[h]⟩⟩
 
-lemma forall_mem_chain {p : SyntacticSubFormula L 1} (h : ∀' p ∈ ⛓️) : ∃ u, subst u p ∈ ⛓️ := by
+lemma forall_mem_chain {p : SyntacticSubFormula L 1} (h : ∀' p ∈ ⛓️) : ∃ u, ⟦↦ u⟧ p ∈ ⛓️ := by
   have : ∃ i Δ, Decomp default (chain Γ (codeIndex (∀' p) default i)) (∀' p) Δ ∧
       chain Γ (codeIndex (∀' p) default i + 1) = Δ ∪ chain Γ (codeIndex (∀' p) default i) := by
     simpa using chain_succ_of_mem nwf h default 0
@@ -267,7 +267,7 @@ lemma forall_mem_chain {p : SyntacticSubFormula L 1} (h : ∀' p ∈ ⛓️) : �
   exact ⟨&(sequentUpper (chain Γ (codeIndex (∀' p) default i))),
     mem_chain_iff.mpr ⟨codeIndex (∀' p) default i + 1, by simp[h]⟩⟩
 
-lemma ex_mem_chain {p : SyntacticSubFormula L 1} (h : ∃' p ∈ ⛓️) : ∀ u, subst u p ∈ ⛓️ := by
+lemma ex_mem_chain {p : SyntacticSubFormula L 1} (h : ∃' p ∈ ⛓️) : ∀ u, ⟦↦ u⟧ p ∈ ⛓️ := by
   intro u
   have : ∃ i Δ, Decomp u (chain Γ (codeIndex (∃' p) u i)) (∃' p) Δ ∧
       chain Γ (codeIndex (∃' p) u i + 1) = Δ ∪ chain Γ (codeIndex (∃' p) u i) := by
@@ -301,16 +301,16 @@ lemma semanticMainLemma : (p : SyntacticFormula L) → p ∈ ⛓️ → ¬Val (m
       · exact semanticMainLemma p hpq.1 h
       · exact semanticMainLemma q hpq.2 h
   | ∀' p,     h => by
-      have : ∃ u, subst u p ∈ ⛓️ := forall_mem_chain nwf h
+      have : ∃ u, ⟦↦ u⟧ p ∈ ⛓️ := forall_mem_chain nwf h
       rcases this with ⟨u, hu⟩
       have : ¬Eval (model.structure Γ) ![u] SubTerm.fvar p := by
-        simpa[Matrix.vecConsLast_vecEmpty] using semanticMainLemma _ hu
+        simpa[Matrix.constant_eq_singleton] using semanticMainLemma (⟦↦ u⟧ p) hu
       simp; exact ⟨u, this⟩
   | ∃' p,     h => by
       simp; intro u
-      have : subst u p ∈ ⛓️ := ex_mem_chain nwf h u
+      have : ⟦↦ u⟧ p ∈ ⛓️ := ex_mem_chain nwf h u
       have : ¬Eval (model.structure Γ) ![u] SubTerm.fvar p := by
-        simpa[Matrix.vecConsLast_vecEmpty] using semanticMainLemma _ this
+        simpa[Matrix.constant_eq_singleton] using semanticMainLemma (⟦↦ u⟧ p) this
       assumption
   termination_by semanticMainLemma p _ => p.complexity
 

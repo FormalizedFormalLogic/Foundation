@@ -452,9 +452,6 @@ example : [“0 = &1”] ⟹[T] “∀ ∀ ∀ ((#0 = 0 ∨ #1 ≠ 0 ∨ #2 = 0)
   □
 end
 
-example (p : SyntacticSubFormula L 1) : [“0 = &1”] ⟹[T] “∀ ∀ ∀ ((#0 = 0 ∨ #1 ≠ 0 ∨ #2 = 0) → ⊤)” :=
-
-
 end Meta
 
 end FirstOrder

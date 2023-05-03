@@ -10,6 +10,13 @@ open Qq Lean Elab Meta Tactic
 
 universe u v
 
+inductive DbgResult (α : Type u) : α → Type u
+  | intro : (a b : α) → a = b → DbgResult α a
+
+instance {α} (a : α) : ToString (DbgResult α a) := ⟨fun r =>
+  match r with
+  | DbgResult.intro _ _ _ => "🎉 Proof Success! 🎉"⟩
+
 namespace Qq
 
 def rflQ {α : Q(Sort u)} (a : Q($α)) : Q($a = $a) := q(rfl)
@@ -74,7 +81,7 @@ partial def ofQList {α : Q(Type u)} (l : Q(List $α)) : MetaM $ List Q($α) := 
 
 def isStrongEq (t s : Expr) : MetaM Bool := do isDefEq (← whnf t) (← whnf s)
 
-elab "test₁" : term => do
+elab "equalTest" : term => do
   let e₁ : Q(Fin 3) := q(2)
   let e₂ : Q(Fin (.succ (.succ 1))) := q(Fin.succ 1)
   let b₁ := e₁ == e₂
@@ -85,7 +92,7 @@ elab "test₁" : term => do
   logInfo m!"isStrongEq e₁ e₂: {b₃}"
   return q(0)
 
-#eval test₁
+#eval equalTest
 
 section List
 variable {α : Type u}
@@ -127,25 +134,129 @@ def funResultList {α β : Q(Type u)} (f : Q($α → $β)) (res : (a : Q($α)) �
 
 end List
 
-structure Result (α : Q(Type u)) where
-  intro : (e : Q($α)) → MetaM $ (res : Q($α)) × Q($e = $res)
+structure Result {α : Q(Type u)} (e : Q($α)) where
+  res : Q($α)
+  eq : Q($e = $res)
 
-structure FunResult {α : Q(Type u)} {β : Q(Type v)} (f : Q($α → $β)) where
-  intro : (e : Q($α)) → MetaM $ (res : Q($β)) × Q($f $e = $res)
+structure ResultFun {α : Q(Type u)} {β : Q(Type v)} (f : Q($α → $β)) (e : Q($α)) where
+  res : Q($β)
+  eq : Q($f $e = $res)
 
 namespace Result
 variable {α : Q(Type u)}
 
-def refl : Result α := ⟨fun e => pure ⟨e, q(rfl)⟩⟩
+def refl (e : Q($α)) : Result e := ⟨e, q(rfl)⟩
 
 end Result
 
 namespace ResultFun
 variable {α : Q(Type u)} {β : Q(Type v)} (f : Q($α → $β))
 
-def refl (e : Q($α)) : FunResult f := ⟨fun e => pure ⟨q($f $e), q(rfl)⟩⟩
+def refl (e : Q($α)) : ResultFun f e := ⟨q($f $e), q(rfl)⟩
 
 end ResultFun
+
+lemma compVecEmpty {α : Type u} {β : Type v} (f : α → β) : f ∘ ![] = ![] := by simp
+
+lemma compVecCons {α : Type u} {β : Type v} (f : α → β) {n}
+  {a : α} {as : Fin n → α} {b : β} {bs : Fin n → β} (hb : f a = b) (hbs : f ∘ as = bs) :
+    f ∘ (a :> as) = b :> bs := by simp[Function.comp, Matrix.comp_vecCons, hb, ←hbs]
+
+lemma vecConsExt {α : Type u} {n}
+  {a : α} {as : Fin n → α} {b : α} {bs : Fin n → α} (hb : a = b) (hbs : as = bs) :
+    a :> as = b :> bs := hb ▸ hbs ▸ rfl
+
+partial def resultVectorOfResult {α : Q(Type u)}
+  (r : (e : Q($α)) → MetaM ((r : Q($α)) × Q($e = $r)))
+  (n : Q(ℕ)) (l : Q(Fin $n → $α)) : MetaM ((l' : Q(Fin $n → $α)) × Q($l = $l')) := do
+  match n with
+  | ~q(0) =>
+    match l with
+    | ~q(![]) =>
+      return ⟨q(![]), q(rfl)⟩
+  | ~q($n + 1) =>
+    let l : Q(Fin ($n + 1) → $α) := l
+    match l with
+    | ~q($a :> $as) =>
+      let ⟨b, be⟩ ← r a
+      let ⟨bs, bse⟩ ← resultVectorOfResult r n as
+      return ⟨q($b :> $bs), q(vecConsExt $be $bse)⟩
+
+partial def resultVectorOfResultFun {α : Q(Type u)} {β : Q(Type v)}
+  (f : Q($α → $β)) (r : (e : Q($α)) → MetaM ((r : Q($β)) × Q($f $e = $r)))
+  (n : Q(ℕ)) (l : Q(Fin $n → $α)) : MetaM ((l' : Q(Fin $n → $β)) × Q($f ∘ $l = $l')) := do
+  match n with
+  | ~q(0) =>
+    match l with
+    | ~q(![]) =>
+      return ⟨q(![]), q(compVecEmpty $f)⟩
+  | ~q($n + 1) =>
+    let l : Q(Fin ($n + 1) → $α) := l
+    match l with
+    | ~q($a :> $as) =>
+      let ⟨b, be⟩ ← r a
+      let ⟨bs, bse⟩ ← resultVectorOfResultFun f r n as
+      return ⟨q($b :> $bs), q(compVecCons $f $be $bse)⟩
+
+-- def Result.toVector (n : Q(ℕ)) {α: Q(Type u)}
+--   (r : (e : Q($α)) → MetaM (Result e)) : (v : Q(Fin $n → $α)) → MetaM (Result (u := u) v) :=
+--   resultVectorOfResult (fun e => do by {  })
+
+
+
+partial def mapVectorQ {α : Q(Type u)} {β : Q(Type v)} (f : Q($α) → MetaM Q($β))
+    (n : Q(ℕ)) (l : Q(Fin $n → $α)) : MetaM Q(Fin $n → $β) := do
+  match n with
+  | ~q(0) =>
+    match l with
+    | ~q(![]) =>
+      return q(![])
+  | ~q($n + 1) =>
+    let l : Q(Fin ($n + 1) → $α) := l
+    match l with
+    | ~q($a :> $as) =>
+      let b : Q($β) ← f a
+      let bs : Q(Fin $n → $β) ← mapVectorQ f n as
+      return q($b :> $bs)
+
+elab "dbgmapVectorQ" : term => do
+  let f : Q(ℕ) → MetaM Q(ℕ) := fun x => whnf q($x * 3)
+  let v : Q(Fin 5 → ℕ) := q(![0,1,2,3,4])
+  let e ← mapVectorQ (u := levelZero) (α := q(ℕ)) (β := q(ℕ)) f q(5) v
+  logInfo m! "{e}"
+  return e
+
+#eval dbgmapVectorQ
+
+partial def vectorQNthAux {α : Q(Type u)}
+    (n : Q(ℕ)) (l : Q(Fin $n → $α)) (i : ℕ) : MetaM Q($α) := do
+  match n with
+  | ~q(0) => throwError m!"out of bound"
+  | ~q($n + 1) =>
+    let l : Q(Fin ($n + 1) → $α) := l
+    match l with
+    | ~q($a :> $l') =>
+      match i with
+      | 0        => return a
+      | .succ i' => vectorQNthAux n l' i'
+
+partial def vectorQNth {α : Q(Type u)}
+    (n : Q(ℕ)) (l : Q(Fin $n → $α)) (i : Q(Fin $n)) : MetaM ((a : Q($α)) × Q($l $i = $a)) := do
+    let some ival ← finQVal i | throwError m!"{i} should be numeral"
+    let r ← vectorQNthAux (u := u) n l ival
+    --let eq ← decideTQ q($l $i = $r)
+    let eq : Expr := q(@rfl $α $r)
+    return ⟨r, eq⟩
+
+elab "dbgvectorQNth" : term => do
+  let v : Q(Fin 5 → ℕ) := q(![0,1 + 8,2 + 8,3,4])
+  let ⟨e, eq⟩ ← vectorQNth (α := q(ℕ)) q(5) v q(2)
+  let dbgr := q(DbgResult.intro _ $e $eq)
+  logInfo m! "{e}"
+  logInfo m! "{eq}"
+  return dbgr
+
+#eval dbgvectorQNth
 
 end Qq
 

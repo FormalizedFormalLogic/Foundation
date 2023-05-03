@@ -28,29 +28,42 @@ lemma hom_imply_eq_of_eq {p q : SubFormula L μ n} {p' q'} (hp : f p = p') (hq :
 lemma hom_iff_eq_of_eq {p q : SubFormula L μ n} {p' q'} (hp : f p = p') (hq : f q = q') :
     f (p ⟷ q) = p' ⟷ q' := by simp[←hp, ←hq]
 
-lemma free_rel₀ (r : L.rel 0) :
-    free (rel r ![] : SyntacticSubFormula L (n + 1)) = rel r ![] := by simp[free_rel]
 
-lemma free_rel₁ (r : L.rel 1) {t : SyntacticSubTerm L (n + 1)} {t'} (h : t.free = t') :
-    free (rel r ![t]) = rel r ![t'] := by
-  simp[←h, free_rel]; funext i; cases' i using Fin.cases with i <;> simp
+section substs
+variable {k} {w : Fin k → SyntacticSubTerm L n}
 
-lemma free_rel₂ (r : L.rel 2) {t₁ t₂ : SyntacticSubTerm L (n + 1)} {t₁' t₂'}
-  (h₁ : t₁.free = t₁') (h₂ : t₂.free = t₂') :
-    free (rel r ![t₁, t₂]) = rel r ![t₁', t₂'] := by
-  simp[←h₁, ←h₂, free_rel]; funext i; cases' i using Fin.cases with i <;> simp
+lemma substs_rel_of_eq {l} (r : L.rel l) {v : Fin l → SyntacticSubTerm L k} {v'} (h : SubTerm.substs w ∘ v = v') :
+    substs w (rel r v) = rel r v' := by
+  simp[←h]; rfl
 
-lemma free_nrel₀ (r : L.rel 0) :
-    free (nrel r ![] : SyntacticSubFormula L (n + 1)) = nrel r ![] := by simp[free_nrel]
+lemma substs_nrel_of_eq {l} (r : L.rel l) {v : Fin l → SyntacticSubTerm L k} {v'} (h : SubTerm.substs w ∘ v = v') :
+    substs w (nrel r v) = nrel r v' := by
+  simp[←h]; rfl
 
-lemma free_nrel₁ (r : L.rel 1) {t : SyntacticSubTerm L (n + 1)} {t'} (h : t.free = t') :
-    free (nrel r ![t]) = nrel r ![t'] := by
-  simp[←h, free_nrel]; funext i; cases' i using Fin.cases with i <;> simp
+lemma substs_all_eq_of_eq {p : SyntacticSubFormula L (k + 1)} {w' p'}
+  (hw : SubTerm.bShift ∘ w = w') (hp : substs (#0 :> w') p = p') :
+    substs w (∀' p) = ∀' p' := by simp[←hw, ←hp, substs_all]
 
-lemma free_nrel₂ (r : L.rel 2) {t₁ t₂ : SyntacticSubTerm L (n + 1)} {t₁' t₂'}
-  (h₁ : t₁.free = t₁') (h₂ : t₂.free = t₂') :
-    free (nrel r ![t₁, t₂]) = nrel r ![t₁', t₂'] := by
-  simp[←h₁, ←h₂, free_nrel]; funext i; cases' i using Fin.cases with i <;> simp
+lemma substs_ex_eq_of_eq {p : SyntacticSubFormula L (k + 1)} {w' p'}
+  (hw : SubTerm.bShift ∘ w = w') (hp : substs (#0 :> w') p = p') :
+    substs w (∃' p) = ∃' p' := by simp[←hw, ←hp, substs_ex]
+
+lemma substs_substs_of_eq {l} {v : Fin n → SyntacticSubTerm L l} {p : SyntacticSubFormula L k} {w' p'}
+  (hw : SubTerm.substs v ∘ w = w') (hp : substs w' p = p') :
+    substs v (substs w p) = p' := by
+  simp[←hw, ←hp, substs_substs]
+
+end substs
+
+section free
+
+lemma free_rel_of_eq {k} (r : L.rel k) {v : Fin k → SyntacticSubTerm L (n + 1)} {v'} (h : SubTerm.free ∘ v = v') :
+    free (rel r v) = rel r v' := by
+  simp[←h]; rfl
+
+lemma free_nrel_of_eq {k} (r : L.rel k) {v : Fin k → SyntacticSubTerm L (n + 1)} {v'} (h : SubTerm.free ∘ v = v') :
+    free (nrel r v) = nrel r v' := by
+  simp[←h]; rfl
 
 lemma free_all_eq_of_eq {p : SyntacticSubFormula L (n + 1 + 1)} {p'} (h : free p = p') :
     free (∀' p) = ∀' p' := by simp[←h]
@@ -58,78 +71,22 @@ lemma free_all_eq_of_eq {p : SyntacticSubFormula L (n + 1 + 1)} {p'} (h : free p
 lemma free_ex_eq_of_eq {p : SyntacticSubFormula L (n + 1 + 1)} {p'} (h : free p = p') :
     free (∃' p) = ∃' p' := by simp[←h]
 
-lemma free_substs₀ {n'} {v : Fin 0 → SyntacticSubTerm L (n' + 1)} {p : SyntacticFormula L} :
-    free (substs v p) = substs ![] (shift p) := by
-  simp[free_substs, Matrix.empty_eq]
+lemma free_substs_of_eq {k} {w : Fin k → SyntacticSubTerm L (n + 1)} {p : SyntacticSubFormula L k} {w' p' p''}
+  (hw : SubTerm.free ∘ w = w') (hp : shift p = p') (hp' : substs w' p' = p''):
+    free (substs w p) = p'' := by
+  simp[←hw, ←hp, ←hp', free_substs, Function.comp]
 
-lemma free_substs₁ {n'} {t : SyntacticSubTerm L (n' + 1)} {p : SyntacticSubFormula L 1} :
-    free (substs ![t] p) = substs ![t.free] (shift p) := by
-  simp[free_substs, Function.comp, Matrix.constant_eq_singleton]
+end free
 
-lemma free_substs₂ {n'} {t₁ t₂ : SyntacticSubTerm L (n' + 1)} {p : SyntacticSubFormula L 2} :
-    free (substs ![t₁, t₂] p) = substs ![t₁.free, t₂.free] (shift p) := by
-  simp[free_substs, Function.comp]; congr; funext i; cases' i using Fin.cases with i <;> simp
+section shift
 
-lemma free_substs₃ {n'} {t₁ t₂ t₃ : SyntacticSubTerm L (n' + 1)} {p : SyntacticSubFormula L 3} :
-    free (substs ![t₁, t₂, t₃] p) = substs ![t₁.free, t₂.free, t₃.free] (shift p) := by
-  simp[free_substs, Function.comp]; congr; funext i
-  repeat (cases' i using Fin.cases with i <;> simp)
+lemma shift_rel_of_eq {k} (r : L.rel k) {v : Fin k → SyntacticSubTerm L n} {v'} (h : SubTerm.shift ∘ v = v') :
+    shift (rel r v) = rel r v' := by
+  simp[←h]; rfl
 
-lemma subst_rel₀ {s : SubTerm L μ n} (r : L.rel 0) :
-    subst s (rel r ![] : SubFormula L μ (n + 1)) = rel r ![] := by simp[subst_rel]
-
-lemma subst_rel₁ {s : SubTerm L μ n} (r : L.rel 1) {t : SubTerm L μ (n + 1)} {t'} (h : SubTerm.subst s t = t') :
-    subst s (rel r ![t]) = rel r ![t'] := by
-  simp[←h, subst_rel]; funext i; cases' i using Fin.cases with i <;> simp
-
-lemma subst_rel₂ {s : SubTerm L μ n} (r : L.rel 2) {t₁ t₂ : SubTerm L μ (n + 1)} {t₁' t₂'}
-  (h₁ : SubTerm.subst s t₁ = t₁') (h₂ : SubTerm.subst s t₂ = t₂') :
-    subst s (rel r ![t₁, t₂]) = rel r ![t₁', t₂'] := by
-  simp[←h₁, ←h₂, subst_rel]; funext i; cases' i using Fin.cases with i <;> simp
-
-lemma subst_nrel₀ {s : SubTerm L μ n} (r : L.rel 0) :
-    subst s (nrel r ![] : SubFormula L μ (n + 1)) = nrel r ![] := by simp[subst_nrel]
-
-lemma subst_nrel₁ {s : SubTerm L μ n} (r : L.rel 1) {t : SubTerm L μ (n + 1)} {t'} (h : SubTerm.subst s t = t') :
-    subst s (nrel r ![t]) = nrel r ![t'] := by
-  simp[←h, subst_nrel]; funext i; cases' i using Fin.cases with i <;> simp
-
-lemma subst_nrel₂ {s : SubTerm L μ n} (r : L.rel 2) {t₁ t₂ : SubTerm L μ (n + 1)} {t₁' t₂'}
-  (h₁ : SubTerm.subst s t₁ = t₁') (h₂ : SubTerm.subst s t₂ = t₂') :
-    subst s (nrel r ![t₁, t₂]) = nrel r ![t₁', t₂'] := by
-  simp[←h₁, ←h₂, subst_nrel]; funext i; cases' i using Fin.cases with i <;> simp
-
-lemma subst_all_eq_of_eq {s : SubTerm L μ n} {s'} {p : SubFormula L μ (n + 1 + 1)} {p'}
-  (hs : SubTerm.bShift s = s') (hp : subst s' p = p') :
-    subst s (∀' p) = ∀' p' := by simp[←hs, ←hp]
-
-lemma subst_ex_eq_of_eq {s : SubTerm L μ n} {s'} {p : SubFormula L μ (n + 1 + 1)} {p'}
-  (hs : SubTerm.bShift s = s') (hp : subst s' p = p') :
-    subst s (∃' p) = ∃' p' := by simp[←hs, ←hp]
-
-lemma shift_rel₀ (r : L.rel 0) :
-    shift (rel r ![] : SyntacticSubFormula L n) = rel r ![] := by simp[shift_rel]
-
-lemma shift_rel₁ (r : L.rel 1) {t : SyntacticSubTerm L n} {t'} (h : t.shift = t') :
-    shift (rel r ![t]) = rel r ![t'] := by
-  simp[←h, shift_rel]; funext i; cases' i using Fin.cases with i <;> simp
-
-lemma shift_rel₂ (r : L.rel 2) {t₁ t₂ : SyntacticSubTerm L n} {t₁' t₂'}
-  (h₁ : t₁.shift = t₁') (h₂ : t₂.shift = t₂') :
-    shift (rel r ![t₁, t₂]) = rel r ![t₁', t₂'] := by
-  simp[←h₁, ←h₂, shift_rel]; funext i; cases' i using Fin.cases with i <;> simp
-
-lemma shift_nrel₀ (r : L.rel 0) :
-    shift (nrel r ![] : SyntacticSubFormula L n) = nrel r ![] := by simp[shift_nrel]
-
-lemma shift_nrel₁ (r : L.rel 1) {t : SyntacticSubTerm L n} {t'} (h : t.shift = t') :
-    shift (nrel r ![t]) = nrel r ![t'] := by
-  simp[←h, shift_nrel]; funext i; cases' i using Fin.cases with i <;> simp
-
-lemma shift_nrel₂ (r : L.rel 2) {t₁ t₂ : SyntacticSubTerm L n} {t₁' t₂'}
-  (h₁ : t₁.shift = t₁') (h₂ : t₂.shift = t₂') :
-    shift (nrel r ![t₁, t₂]) = nrel r ![t₁', t₂'] := by
-  simp[←h₁, ←h₂, shift_nrel]; funext i; cases' i using Fin.cases with i <;> simp
+lemma shift_nrel_of_eq {k} (r : L.rel k) {v : Fin k → SyntacticSubTerm L n} {v'} (h : SubTerm.shift ∘ v = v') :
+    shift (nrel r v) = nrel r v' := by
+  simp[←h]; rfl
 
 lemma shift_all_eq_of_eq {p : SyntacticSubFormula L (n + 1)} {p'} (h : shift p = p') :
     shift (∀' p) = ∀' p' := by simp[←h]
@@ -137,9 +94,14 @@ lemma shift_all_eq_of_eq {p : SyntacticSubFormula L (n + 1)} {p'} (h : shift p =
 lemma shift_ex_eq_of_eq {p : SyntacticSubFormula L (n + 1)} {p'} (h : shift p = p') :
     shift (∃' p) = ∃' p' := by simp[←h]
 
-lemma shift_subst_eq_of_eq {s : SyntacticSubTerm L n} {p : SyntacticSubFormula L (n + 1)} {s' p'}
-  (hs : s.shift = s') (hp : shift p = p') :
-    shift (subst s p) = subst s' p' := by simp[←hs, ←hp, shift_subst]
+lemma shift_substs_of_eq {k} {w : Fin k → SyntacticSubTerm L n} {p : SyntacticSubFormula L k} {w' p' p''}
+  (hw : SubTerm.shift ∘ w = w') (hp : shift p = p') (hp' : substs w' p' = p'') :
+    shift (substs w p) = p'' := by
+  simp[←hw, ←hp, ←hp', shift_substs, Function.comp]
+
+end shift
+
+section neg
 
 lemma neg_and_eq_of_eq {p q : SubFormula L μ n} {p' q'} (hp : ~p = p') (hq : ~q = q') :
     ~(p ⋏ q) = p' ⋎ q' := by simp[←hp, ←hq]
@@ -165,17 +127,18 @@ lemma neg_imp_eq_of_eq {p q qn : SubFormula L μ n} (hq : ~q = qn) :
 lemma neg_iff_eq_of_eq {p q pn qn : SubFormula L μ n} (hp : ~p = pn) (hq : ~q = qn) :
     ~(p ⟷ q) = (p ⋏ qn) ⋎ (q ⋏ pn) := by simp[←hp, ←hq, iff_eq]
 
-lemma rel₁_congr {r : L.rel 1} {t t' : SubTerm L μ n} (h : t = t') :
-    rel r ![t] = rel r ![t'] := congr_arg _ (by simp[h])
+lemma neg_substs_of_eq {k} {w : Fin k → SyntacticSubTerm L n} {p : SyntacticSubFormula L k} {p' p''}
+  (hp : ~p = p') (hp' : substs w p' = p'') :
+    ~(substs w p) = p'' := by
+  simp[←hp, ←hp', shift_substs, Function.comp]
 
-lemma rel₂_congr {r : L.rel 2} {t₁ t₂ t₁' t₂' : SubTerm L μ n} (h₁ : t₁ = t₁') (h₂ : t₂ = t₂') :
-    rel r ![t₁, t₂] = rel r ![t₁', t₂'] := congr_arg _ (by simp[h₁, h₂])
+end neg
 
-lemma nrel₁_congr {r : L.rel 1} {t t' : SubTerm L μ n} (h : t = t') :
-    nrel r ![t] = nrel r ![t'] := congr_arg _ (by simp[h])
+lemma rel_congr {k} (r : L.rel k) {v v' : Fin k → SubTerm L μ n} (h : v = v') :
+    rel r v = rel r v' := congr_arg _ (by simp[h])
 
-lemma nrel₂_congr {r : L.rel 2} {t₁ t₂ t₁' t₂' : SubTerm L μ n} (h₁ : t₁ = t₁') (h₂ : t₂ = t₂') :
-    nrel r ![t₁, t₂] = nrel r ![t₁', t₂'] := congr_arg _ (by simp[h₁, h₂])
+lemma nrel_congr {k} (r : L.rel k) {v v' : Fin k → SubTerm L μ n} (h : v = v') :
+    nrel r v = nrel r v' := congr_arg _ (by simp[h])
 
 lemma and_congr {p q p' q': SyntacticSubFormula L n} (hp : p = p') (hq : q = q') :
     p ⋏ q = p' ⋏ q' := congr_arg₂ _ hp hq
@@ -201,11 +164,12 @@ lemma iff_eq_of_eq {p q p' q' p'' q'' : SubFormula L μ n} (hp : p = p') (hq : q
 lemma free_congr_eq {p p' : SyntacticSubFormula L (n + 1)} {q} (e : p = p') (h : free p' = q) :
   free p = q := Eq.trans (congr_arg _ e) h
 
-lemma subst_congr_eq {s s' : SubTerm L μ n} {p p' q} (es : s = s') (ep : p = p') (h : subst s' p' = q) :
-  subst s p = q := Eq.trans (congr_arg₂ _ (by simp[es]) ep) h
-
 lemma shift_congr_eq {p p' : SyntacticSubFormula L n} {q} (e : p = p') (h : shift p' = q) :
   shift p = q := Eq.trans (congr_arg _ e) h
+
+lemma substs_congr_eq {k} {w w' : Fin k → SyntacticSubTerm L n} {p p' : SyntacticSubFormula L k} {p''}
+  (hw : w = w') (hp : p = p') (h : substs w' p' = p'') :
+  substs w p = p'' := hw ▸ hp ▸ h
 
 lemma neg_congr {p p' : SubFormula L μ n} (e : p = p') :
   ~p = ~p' := congr_arg _ e
@@ -218,197 +182,196 @@ lemma iff_congr {p q p' q' : SubFormula L μ n} (ep : p = p') (eq : q = q') :
 
 end lemmata
 
-mutual
-
-partial def resultFree {L : Q(Language.{u})} {n : Q(ℕ)} : (p : Q(SyntacticSubFormula $L ($n + 1))) →
-    MetaM ((res : Q(SyntacticSubFormula $L $n)) × Q(free $p = $res))
-  | ~q(⊤)                   => pure ⟨q(⊤), q(rfl)⟩
-  | ~q(⊥)                   => pure ⟨q(⊥), q(rfl)⟩
-  | ~q($p ⋏ $q)             => do
-    let ⟨pn, pe⟩ ← resultFree p
-    let ⟨qn, qe⟩ ← resultFree q
+partial def resultSubsts {L : Q(Language.{u})} {k n : Q(ℕ)} (w : Q(Fin $k → SyntacticSubTerm $L $n)) :
+    (p : Q(SyntacticSubFormula $L $k)) → MetaM ((res : Q(SyntacticSubFormula $L $n)) × Q(substs $w $p = $res))
+  | ~q(⊤)                            => pure ⟨q(⊤), q(rfl)⟩
+  | ~q(⊥)                            => pure ⟨q(⊥), q(rfl)⟩
+  | ~q(rel (arity := $arity) $r $v)  => do
+    let ⟨v', ve⟩ ← resultVectorOfResultFun (u := u) (v := u)
+      (α := q(SyntacticSubTerm $L $k)) (β := q(SyntacticSubTerm $L $n))
+      q(@SubTerm.substs $L ℕ $k $n $w) (SubTerm.Meta.resultSubsts w) arity v
+    return ⟨q(rel $r $v'), q(substs_rel_of_eq $r $ve)⟩
+  | ~q(nrel (arity := $arity) $r $v) => do
+    let ⟨v', ve⟩ ← resultVectorOfResultFun (u := u) (v := u) (α := q(SyntacticSubTerm $L $k)) (β := q(SyntacticSubTerm $L $n))
+      q(@SubTerm.substs $L ℕ $k $n $w) (SubTerm.Meta.resultSubsts w) arity v
+    return ⟨q(nrel $r $v'), q(substs_nrel_of_eq $r $ve)⟩
+  | ~q($p ⋏ $q)                      => do
+    let ⟨pn, pe⟩ ← resultSubsts w p
+    let ⟨qn, qe⟩ ← resultSubsts w q
     return ⟨q($pn ⋏ $qn), q(hom_and_eq_of_eq $pe $qe)⟩
-  | ~q($p ⋎ $q)             => do
-    let ⟨pn, pe⟩ ← resultFree p
-    let ⟨qn, qe⟩ ← resultFree q
+  | ~q($p ⋎ $q)                      => do
+    let ⟨pn, pe⟩ ← resultSubsts w p
+    let ⟨qn, qe⟩ ← resultSubsts w q
     return ⟨q($pn ⋎ $qn), q(hom_or_eq_of_eq $pe $qe)⟩
-  | ~q(∀' $p)               => do
-    let ⟨pn, e⟩ ← resultFree (n := q($n + 1)) p
-    return ⟨q(∀' $pn), q(free_all_eq_of_eq $e)⟩
-  | ~q(∃' $p)               => do
-    let ⟨pn, e⟩ ← resultFree p
-    return ⟨q(∃' $pn), q(free_ex_eq_of_eq $e)⟩
-  | ~q(rel $r ![])          => pure ⟨q(rel $r ![]), q(free_rel₀ $r)⟩
-  | ~q(rel $r ![$t])        => do
-    let ⟨tn, e⟩ ← SubTerm.Meta.resultFree (L := L) (n := n) t
-    return ⟨q(rel $r ![$tn]), q(free_rel₁ $r $e)⟩
-  | ~q(rel $r ![$t₁, $t₂])  => do
-    let ⟨tn₁, e₁⟩ ← SubTerm.Meta.resultFree (L := L) (n := n) t₁
-    let ⟨tn₂, e₂⟩ ← SubTerm.Meta.resultFree (L := L) (n := n) t₂
-    return ⟨q(rel $r ![$tn₁, $tn₂]), q(free_rel₂ $r $e₁ $e₂)⟩
-  | ~q(nrel $r ![])         => pure ⟨q(nrel $r ![]), q(free_nrel₀ $r)⟩
-  | ~q(nrel $r ![$t])       => do
-    let ⟨tn, e⟩ ← SubTerm.Meta.resultFree (L := L) (n := n) t
-    return ⟨q(nrel $r ![$tn]), q(free_nrel₁ $r $e)⟩
-  | ~q(nrel $r ![$t₁, $t₂]) => do
-    let ⟨tn₁, e₁⟩ ← SubTerm.Meta.resultFree (L := L) (n := n) t₁
-    let ⟨tn₂, e₂⟩ ← SubTerm.Meta.resultFree (L := L) (n := n) t₂
-    return ⟨q(nrel $r ![$tn₁, $tn₂]), q(free_nrel₂ $r $e₁ $e₂)⟩
-  | ~q(~$p)             => do
-    let ⟨pn, pe⟩ ← resultFree p
+  | ~q(∀' $p)                        => do
+    let ⟨w', we⟩ ← resultVectorOfResultFun (u := u) (v := u) (α := q(SyntacticSubTerm $L $n)) (β := q(SyntacticSubTerm $L ($n + 1)))
+      q(@SubTerm.bShift $L ℕ $n) SubTerm.Meta.resultBShift k w
+    let ⟨p', pe⟩ ← resultSubsts (n := q($n + 1)) q(#0 :> $w') p
+    return ⟨q(∀' $p'), q(substs_all_eq_of_eq $we $pe)⟩
+  | ~q(∃' $p)                        => do
+    let ⟨w', we⟩ ← resultVectorOfResultFun (u := u) (v := u) (α := q(SyntacticSubTerm $L $n)) (β := q(SyntacticSubTerm $L ($n + 1)))
+      q(@SubTerm.bShift $L ℕ $n) SubTerm.Meta.resultBShift k w
+    let ⟨p', pe⟩ ← resultSubsts (n := q($n + 1)) q(#0 :> $w') p
+    return ⟨q(∃' $p'), q(substs_ex_eq_of_eq $we $pe)⟩
+  | ~q(~$p)                          => do
+    let ⟨pn, pe⟩ ← resultSubsts w p
     return ⟨q(~$pn), q(hom_neg_eq_of_eq $pe)⟩
-  | ~q($p ⟶ $q)        => do
-    let ⟨pn, pe⟩ ← resultFree p
-    let ⟨qn, qe⟩ ← resultFree q
+  | ~q($p ⟶ $q)                      => do
+    let ⟨pn, pe⟩ ← resultSubsts w p
+    let ⟨qn, qe⟩ ← resultSubsts w q
     return ⟨q($pn ⟶ $qn), q(hom_imply_eq_of_eq $pe $qe)⟩
-  | ~q($p ⟷ $q)        => do
-    let ⟨pn, pe⟩ ← resultFree p
-    let ⟨qn, qe⟩ ← resultFree q
+  | ~q($p ⟷ $q)                      => do
+    let ⟨pn, pe⟩ ← resultSubsts w p
+    let ⟨qn, qe⟩ ← resultSubsts w q
     return ⟨q($pn ⟷ $qn), q(hom_iff_eq_of_eq $pe $qe)⟩
-  | ~q(substs (n := 0) $v $p)        => do
-    return ⟨q(⟦→ ![]⟧ (shift $p)), q(free_substs₀)⟩
-  | ~q($p)                  => pure ⟨q(free $p), q(rfl)⟩
+  | ~q(substs (n := $l) $v $p)       => do
+    let ⟨v', ve⟩ ← resultVectorOfResultFun (u := u) (v := u) (α := q(SyntacticSubTerm $L $k)) (β := q(SyntacticSubTerm $L $n))
+      q(@SubTerm.substs $L ℕ $k $n $w) (SubTerm.Meta.resultSubsts w) l v
+    let ⟨p', pe⟩ ← resultSubsts v' p
+    return ⟨p', q(substs_substs_of_eq $ve $pe)⟩
+  | ~q($p)                           => pure ⟨q(substs $w $p), q(rfl)⟩
 
-partial def resultSubst {L : Q(Language.{u})} {n : Q(ℕ)} (s : Q(SyntacticSubTerm $L $n)) :
-    (p : Q(SyntacticSubFormula $L ($n + 1))) → MetaM ((res : Q(SyntacticSubFormula $L $n)) × Q(subst $s $p = $res))
-  | ~q(⊤)                   => pure ⟨q(⊤), q(rfl)⟩
-  | ~q(⊥)                   => pure ⟨q(⊥), q(rfl)⟩
-  | ~q($p ⋏ $q)             => do
-    let ⟨pn, pe⟩ ← resultSubst s p
-    let ⟨qn, qe⟩ ← resultSubst s q
-    return ⟨q($pn ⋏ $qn), q(hom_and_eq_of_eq $pe $qe)⟩
-  | ~q($p ⋎ $q)             => do
-    let ⟨pn, pe⟩ ← resultSubst s p
-    let ⟨qn, qe⟩ ← resultSubst s q
-    return ⟨q($pn ⋎ $qn), q(hom_or_eq_of_eq $pe $qe)⟩
-  | ~q(∀' $p)               => do
-    let ⟨sn, se⟩ ← SubTerm.Meta.resultBShift s
-    let ⟨pn, pe⟩ ← resultSubst sn p
-    return ⟨q(∀' $pn), q(subst_all_eq_of_eq $se $pe)⟩
-  | ~q(∃' $p)               => do
-    let ⟨sn, se⟩ ← SubTerm.Meta.resultBShift s
-    let ⟨pn, pe⟩ ← resultSubst sn p
-    return ⟨q(∃' $pn), q(subst_ex_eq_of_eq $se $pe)⟩
-  | ~q(rel $r ![])          => pure ⟨q(rel $r ![]), q(subst_rel₀ $r)⟩
-  | ~q(rel $r ![$t])        => do
-    let ⟨tn, e⟩ ← SubTerm.Meta.resultSubst (L := L) (n := n) s t
-    return ⟨q(rel $r ![$tn]), q(subst_rel₁ $r $e)⟩
-  | ~q(rel $r ![$t₁, $t₂])  => do
-    let ⟨tn₁, e₁⟩ ← SubTerm.Meta.resultSubst (L := L) (n := n) s t₁
-    let ⟨tn₂, e₂⟩ ← SubTerm.Meta.resultSubst (L := L) (n := n) s t₂
-    return ⟨q(rel $r ![$tn₁, $tn₂]), q(subst_rel₂ $r $e₁ $e₂)⟩
-  | ~q(nrel $r ![])         => pure ⟨q(nrel $r ![]), q(subst_nrel₀ $r)⟩
-  | ~q(nrel $r ![$t])       => do
-    let ⟨tn, e⟩ ← SubTerm.Meta.resultSubst (L := L) (n := n) s t
-    return ⟨q(nrel $r ![$tn]), q(subst_nrel₁ $r $e)⟩
-  | ~q(nrel $r ![$t₁, $t₂]) => do
-    let ⟨tn₁, e₁⟩ ← SubTerm.Meta.resultSubst (L := L) (n := n) s t₁
-    let ⟨tn₂, e₂⟩ ← SubTerm.Meta.resultSubst (L := L) (n := n) s t₂
-    return ⟨q(nrel $r ![$tn₁, $tn₂]), q(subst_nrel₂ $r $e₁ $e₂)⟩
-  | ~q(~$p)                 => do
-    let ⟨pn, pe⟩ ← resultSubst s p
-    return ⟨q(~$pn), q(hom_neg_eq_of_eq $pe)⟩
-  | ~q($p ⟶ $q)        => do
-    let ⟨pn, pe⟩ ← resultSubst s p
-    let ⟨qn, qe⟩ ← resultSubst s q
-    return ⟨q($pn ⟶ $qn), q(hom_imply_eq_of_eq $pe $qe)⟩
-  | ~q($p ⟷ $q)        => do
-    let ⟨pn, pe⟩ ← resultSubst s p
-    let ⟨qn, qe⟩ ← resultSubst s q
-    return ⟨q($pn ⟷ $qn), q(hom_iff_eq_of_eq $pe $qe)⟩
-  | ~q($p)                  => pure ⟨q(subst $s $p), q(rfl)⟩
+elab "dbgresultSubsts" : term => do
+  let L : Q(Language.{0}) := q(Language.oring)
+  let k : Q(ℕ) := q(2)
+  let n : Q(ℕ) := q(3)
+  let p : Q(SyntacticSubFormula $L $k) := q(“#0 < #1 + 9 * &6 → (∀ #1 < #0 + 7)⟦&4, &3 + #0⟧ ”)
+  let w : Q(Fin $k → SyntacticSubTerm $L $n) := q(![T“2”, T“&6”])
+  let ⟨e, eq⟩ ← resultSubsts (u := levelZero) w p
+  let dbgr := q(DbgResult.intro _ $e $eq)
+  logInfo m! "⟦→ {w}⟧ {p} \n⟹ \n{e}"
+  return dbgr
+
+#eval dbgresultSubsts
 
 partial def resultShift {L : Q(Language.{u})} {n : Q(ℕ)} : (p : Q(SyntacticSubFormula $L $n)) →
     MetaM ((res : Q(SyntacticSubFormula $L $n)) × Q(shift $p = $res))
-  | ~q(⊤)                   => pure ⟨q(⊤), q(rfl)⟩
-  | ~q(⊥)                   => pure ⟨q(⊥), q(rfl)⟩
-  | ~q($p ⋏ $q)             => do
+  | ~q(⊤)                            => pure ⟨q(⊤), q(rfl)⟩
+  | ~q(⊥)                            => pure ⟨q(⊥), q(rfl)⟩
+  | ~q(rel (arity := $arity) $r $v)  => do
+    let ⟨v', ve⟩ ← resultVectorOfResultFun (u := u) (v := u) (α := q(SyntacticSubTerm $L $n)) (β := q(SyntacticSubTerm $L $n))
+      q(@SubTerm.shift $L $n) SubTerm.Meta.resultShift arity v
+    return ⟨q(rel $r $v'), q(shift_rel_of_eq $r $ve)⟩
+  | ~q(nrel (arity := $arity) $r $v) => do
+    let ⟨v', ve⟩ ← resultVectorOfResultFun (u := u) (v := u) (α := q(SyntacticSubTerm $L $n)) (β := q(SyntacticSubTerm $L $n))
+      q(@SubTerm.shift $L $n) SubTerm.Meta.resultShift arity v
+    return ⟨q(nrel $r $v'), q(shift_nrel_of_eq $r $ve)⟩
+  | ~q($p ⋏ $q)                      => do
     let ⟨pn, pe⟩ ← resultShift p
     let ⟨qn, qe⟩ ← resultShift q
     return ⟨q($pn ⋏ $qn), q(hom_and_eq_of_eq $pe $qe)⟩
-  | ~q($p ⋎ $q)             => do
+  | ~q($p ⋎ $q)                      => do
     let ⟨pn, pe⟩ ← resultShift p
     let ⟨qn, qe⟩ ← resultShift q
     return ⟨q($pn ⋎ $qn), q(hom_or_eq_of_eq $pe $qe)⟩
-  | ~q(∀' $p)               => do
+  | ~q(∀' $p)                        => do
     let ⟨pn, e⟩ ← resultShift p
     return ⟨q(∀' $pn), q(shift_all_eq_of_eq $e)⟩
-  | ~q(∃' $p)               => do
+  | ~q(∃' $p)                        => do
     let ⟨pn, e⟩ ← resultShift p
     return ⟨q(∃' $pn), q(shift_ex_eq_of_eq $e)⟩
-  | ~q(rel $r ![])          => pure ⟨q(rel $r ![]), q(shift_rel₀ $r)⟩
-  | ~q(rel $r ![$t])        => do
-    let ⟨tn, e⟩ ← SubTerm.Meta.resultShift (L := L) (n := n) t
-    return ⟨q(rel $r ![$tn]), q(shift_rel₁ $r $e)⟩
-  | ~q(rel $r ![$t₁, $t₂])  => do
-    let ⟨tn₁, e₁⟩ ← SubTerm.Meta.resultShift (L := L) (n := n) t₁
-    let ⟨tn₂, e₂⟩ ← SubTerm.Meta.resultShift (L := L) (n := n) t₂
-    return ⟨q(rel $r ![$tn₁, $tn₂]), q(shift_rel₂ $r $e₁ $e₂)⟩
-  | ~q(nrel $r ![])         => pure ⟨q(nrel $r ![]), q(shift_nrel₀ $r)⟩
-  | ~q(nrel $r ![$t])       => do
-    let ⟨tn, e⟩ ← SubTerm.Meta.resultShift (L := L) (n := n) t
-    return ⟨q(nrel $r ![$tn]), q(shift_nrel₁ $r $e)⟩
-  | ~q(nrel $r ![$t₁, $t₂]) => do
-    let ⟨tn₁, e₁⟩ ← SubTerm.Meta.resultShift (L := L) (n := n) t₁
-    let ⟨tn₂, e₂⟩ ← SubTerm.Meta.resultShift (L := L) (n := n) t₂
-    return ⟨q(nrel $r ![$tn₁, $tn₂]), q(shift_nrel₂ $r $e₁ $e₂)⟩
-  | ~q(subst $s $p)         => do
-    let ⟨sn, se⟩ ← SubTerm.Meta.resultShift (L := L) (n := n) s
-    let ⟨pn, pe⟩ ← resultShift (L := L) (n := q($n + 1)) p
-    return ⟨q(subst $sn $pn), q(shift_subst_eq_of_eq $se $pe)⟩
-  | ~q(~$p)                 => do
+  | ~q(~$p)                          => do
     let ⟨pn, pe⟩ ← resultShift p
     return ⟨q(~$pn), q(hom_neg_eq_of_eq $pe)⟩
-  | ~q($p ⟶ $q)        => do
+  | ~q($p ⟶ $q)                      => do
     let ⟨pn, pe⟩ ← resultShift p
     let ⟨qn, qe⟩ ← resultShift q
     return ⟨q($pn ⟶ $qn), q(hom_imply_eq_of_eq $pe $qe)⟩
-  | ~q($p ⟷ $q)        => do
+  | ~q($p ⟷ $q)                      => do
     let ⟨pn, pe⟩ ← resultShift p
     let ⟨qn, qe⟩ ← resultShift q
     return ⟨q($pn ⟷ $qn), q(hom_iff_eq_of_eq $pe $qe)⟩
-  | ~q($p)                  => pure ⟨q(shift $p), q(rfl)⟩
+  | ~q(substs (n := $k) $w $p)       => do
+    let ⟨w', we⟩ ← resultVectorOfResultFun (u := u) (v := u) (α := q(SyntacticSubTerm $L $n)) (β := q(SyntacticSubTerm $L $n))
+      q(@SubTerm.shift $L $n) SubTerm.Meta.resultShift k w
+    let ⟨p', pe⟩ ← resultShift (n := k) p
+    let ⟨p'', p'e⟩ ← resultSubsts w' p'
+    return ⟨p'', q(shift_substs_of_eq $we $pe $p'e)⟩
+  | ~q($p)                           => pure ⟨q(shift $p), q(rfl)⟩
+
+partial def resultFree {L : Q(Language.{u})} {n : Q(ℕ)} : (p : Q(SyntacticSubFormula $L ($n + 1))) →
+    MetaM ((res : Q(SyntacticSubFormula $L $n)) × Q(free $p = $res))
+  | ~q(⊤)                            => pure ⟨q(⊤), q(rfl)⟩
+  | ~q(⊥)                            => pure ⟨q(⊥), q(rfl)⟩
+  | ~q(rel (arity := $arity) $r $v)  => do
+    let ⟨v', ve⟩ ← resultVectorOfResultFun (u := u) (v := u) (α := q(SyntacticSubTerm $L ($n + 1))) (β := q(SyntacticSubTerm $L $n))
+      q(@SubTerm.free $L $n) SubTerm.Meta.resultShift arity v
+    let e : Q(SyntacticSubFormula $L $n) := q(rel $r $v')
+    return ⟨e, q(free_rel_of_eq $r $ve)⟩
+  | ~q(nrel (arity := $arity) $r $v) => do
+    let ⟨v', ve⟩ ← resultVectorOfResultFun (u := u) (v := u) (α := q(SyntacticSubTerm $L ($n + 1))) (β := q(SyntacticSubTerm $L $n))
+      q(@SubTerm.free $L $n) SubTerm.Meta.resultShift arity v
+    let e : Q(SyntacticSubFormula $L $n) := q(nrel $r $v')
+    return ⟨e, q(free_nrel_of_eq $r $ve)⟩
+  | ~q($p ⋏ $q)                      => do
+    let ⟨pn, pe⟩ ← resultFree p
+    let ⟨qn, qe⟩ ← resultFree q
+    return ⟨q($pn ⋏ $qn), q(hom_and_eq_of_eq $pe $qe)⟩
+  | ~q($p ⋎ $q)                      => do
+    let ⟨pn, pe⟩ ← resultFree p
+    let ⟨qn, qe⟩ ← resultFree q
+    return ⟨q($pn ⋎ $qn), q(hom_or_eq_of_eq $pe $qe)⟩
+  | ~q(∀' $p)                        => do
+    let ⟨pn, e⟩ ← resultFree (n := q($n + 1)) p
+    return ⟨q(∀' $pn), q(free_all_eq_of_eq $e)⟩
+  | ~q(∃' $p)                        => do
+    let ⟨pn, e⟩ ← resultFree p
+    return ⟨q(∃' $pn), q(free_ex_eq_of_eq $e)⟩
+  | ~q(~$p)                          => do
+    let ⟨pn, pe⟩ ← resultFree p
+    return ⟨q(~$pn), q(hom_neg_eq_of_eq $pe)⟩
+  | ~q($p ⟶ $q)                      => do
+    let ⟨pn, pe⟩ ← resultFree p
+    let ⟨qn, qe⟩ ← resultFree q
+    return ⟨q($pn ⟶ $qn), q(hom_imply_eq_of_eq $pe $qe)⟩
+  | ~q($p ⟷ $q)                      => do
+    let ⟨pn, pe⟩ ← resultFree p
+    let ⟨qn, qe⟩ ← resultFree q
+    return ⟨q($pn ⟷ $qn), q(hom_iff_eq_of_eq $pe $qe)⟩
+  | ~q(substs (n := $k) $w $p)       => do
+    let ⟨p', pe⟩ ← resultShift (L := L) (n := k) p
+    let ⟨w', we⟩ ← resultVectorOfResultFun (u := u) (v := u) (α := q(SyntacticSubTerm $L ($n + 1))) (β := q(SyntacticSubTerm $L $n))
+      q(@SubTerm.free $L $n) SubTerm.Meta.resultShift k w
+    let ⟨p'', p'e⟩ ← resultSubsts w' p'
+    return ⟨p'', q(free_substs_of_eq $we $pe $p'e)⟩
+  | ~q($p)                           => pure ⟨q(free $p), q(rfl)⟩
+
 
 partial def resultNeg {L : Q(Language.{u})} {n : Q(ℕ)} : (p : Q(SyntacticSubFormula $L $n)) →
     MetaM ((res : Q(SyntacticSubFormula $L $n)) × Q(~$p = $res))
-  | ~q(⊤)                   => pure ⟨q(⊥), q(rfl)⟩
-  | ~q(⊥)                   => pure ⟨q(⊤), q(rfl)⟩
-  | ~q($p ⋏ $q)             => do
+  | ~q(⊤)                      => pure ⟨q(⊥), q(rfl)⟩
+  | ~q(⊥)                      => pure ⟨q(⊤), q(rfl)⟩
+  | ~q(rel $r $v)              => pure ⟨q(nrel $r $v), q(neg_rel $r _)⟩
+  | ~q(nrel $r $v)             => pure ⟨q(rel $r $v), q(neg_nrel $r _)⟩  
+  | ~q($p ⋏ $q)                => do
     let ⟨pn, pe⟩ ← resultNeg p
     let ⟨qn, qe⟩ ← resultNeg q
     return ⟨q($pn ⋎ $qn), q(neg_and_eq_of_eq $pe $qe)⟩
-  | ~q($p ⋎ $q)             => do
+  | ~q($p ⋎ $q)                => do
     let ⟨pn, pe⟩ ← resultNeg p
     let ⟨qn, qe⟩ ← resultNeg q
     return ⟨q($pn ⋏ $qn), q(neg_or_eq_of_eq $pe $qe)⟩
-  | ~q(∀' $p)               => do
+  | ~q(∀' $p)                  => do
     let ⟨pn, e⟩ ← resultNeg p
     return ⟨q(∃' $pn), q(neg_all_eq_of_eq $e)⟩
-  | ~q(∃' $p)               => do
+  | ~q(∃' $p)                  => do
     let ⟨pn, e⟩ ← resultNeg p
     return ⟨q(∀' $pn), q(neg_ex_eq_of_eq $e)⟩
-  | ~q(rel $r ![])          => pure ⟨q(nrel $r ![]), q(neg_rel $r _)⟩
-  | ~q(rel $r ![$t])        => do
-    return ⟨q(nrel $r ![$t]), q(neg_rel $r _)⟩
-  | ~q(rel $r ![$t₁, $t₂])  => do
-    return ⟨q(nrel $r ![$t₁, $t₂]), q(neg_rel $r _)⟩
-  | ~q(nrel $r ![])         => pure ⟨q(rel $r ![]), q(neg_nrel $r _)⟩
-  | ~q(nrel $r ![$t])       => do
-    return ⟨q(rel $r ![$t]), q(neg_nrel $r _)⟩
-  | ~q(nrel $r ![$t₁, $t₂]) => do
-    return ⟨q(rel $r ![$t₁, $t₂]), q(neg_nrel $r _)⟩
-  | ~q(~$p)                 => do
+  | ~q(~$p)                    => do
     return ⟨q($p), q(neg_neg' $p)⟩
-  | ~q($p ⟶ $q)             => do
+  | ~q($p ⟶ $q)                => do
     let ⟨qn, e⟩ ← resultNeg q
     return ⟨q($p ⋏ $qn), q(neg_imp_eq_of_eq $e)⟩
-  | ~q($p ⟷ $q)             => do
+  | ~q($p ⟷ $q)                => do
     let ⟨pn, pe⟩ ← resultNeg p
     let ⟨qn, qe⟩ ← resultNeg q
     return ⟨q(($p ⋏ $qn) ⋎ ($q ⋏ $pn)), q(neg_iff_eq_of_eq $pe $qe)⟩
-  | ~q($p)                  => pure ⟨q(~$p), q(rfl)⟩
+  | ~q(substs (n := $k) $w $p) => do
+    let ⟨p', pe⟩ ← resultNeg (n := k) p
+    let ⟨p'', p'e⟩ ← resultSubsts w p'
+    return ⟨p'', q(neg_substs_of_eq $pe $p'e)⟩
+  | ~q($p)                     => pure ⟨q(~$p), q(rfl)⟩
 
-end
 
 inductive UnfoldOption
   | neg
@@ -428,59 +391,51 @@ variable (tp : SubTerm.Meta.NumeralUnfoldOption) (unfoldOpt : UnfoldOption → B
 
 partial def result {L : Q(Language.{u})} {n : Q(ℕ)} : (p : Q(SyntacticSubFormula $L $n)) →
     MetaM ((res : Q(SyntacticSubFormula $L $n)) × Q($p = $res))
-  | ~q(⊤)                   => pure ⟨q(⊤), q(rfl)⟩
-  | ~q(⊥)                   => pure ⟨q(⊥), q(rfl)⟩
-  | ~q($p ⋏ $q)             => do
+  | ~q(⊤)                            => pure ⟨q(⊤), q(rfl)⟩
+  | ~q(⊥)                            => pure ⟨q(⊥), q(rfl)⟩
+  | ~q(rel (arity := $arity) $r $v)  => do
+    let ⟨v', ve⟩ ← resultVectorOfResult (u := u) (α := q(SyntacticSubTerm $L $n))
+      (SubTerm.Meta.result tp) arity v
+    return ⟨q(rel $r $v'), q(rel_congr $r $ve)⟩
+  | ~q(nrel (arity := $arity) $r $v) => do
+    let ⟨v', ve⟩ ← resultVectorOfResult (u := u) (α := q(SyntacticSubTerm $L $n))
+      (SubTerm.Meta.result tp) arity v
+    return ⟨q(nrel $r $v'), q(nrel_congr $r $ve)⟩
+  | ~q($p ⋏ $q)                      => do
     let ⟨pn, pe⟩ ← result p
     let ⟨qn, qe⟩ ← result q
     return ⟨q($pn ⋏ $qn), q(and_congr $pe $qe)⟩
-  | ~q($p ⋎ $q)             => do
+  | ~q($p ⋎ $q)                      => do
     let ⟨pn, pe⟩ ← result p
     let ⟨qn, qe⟩ ← result q
     return ⟨q($pn ⋎ $qn), q(or_congr $pe $qe)⟩
-  | ~q(∀' $p)               => do
+  | ~q(∀' $p)                        => do
     let ⟨pn, pe⟩ ← result p
     return ⟨q(∀' $pn), q(all_congr $pe)⟩
-  | ~q(∃' $p)               => do
+  | ~q(∃' $p)                        => do
     let ⟨pn, pe⟩ ← result p
     return ⟨q(∃' $pn), q(ex_congr $pe)⟩
-  | ~q(rel $r ![])          => pure ⟨q(rel $r ![]), q(rfl)⟩
-  | ~q(rel $r ![$t])        => do
-    let ⟨tn, e⟩ ← SubTerm.Meta.result tp (L := L) (n := n) t
-    return ⟨q(rel $r ![$tn]), q(rel₁_congr $e)⟩
-  | ~q(rel $r ![$t₁, $t₂])  => do
-    let ⟨tn₁, e₁⟩ ← SubTerm.Meta.result tp (L := L) (n := n) t₁
-    let ⟨tn₂, e₂⟩ ← SubTerm.Meta.result tp (L := L) (n := n) t₂
-    return ⟨q(rel $r ![$tn₁, $tn₂]), q(rel₂_congr $e₁ $e₂)⟩
-  | ~q(nrel $r ![])         => pure ⟨q(nrel $r ![]), q(rfl)⟩
-  | ~q(nrel $r ![$t])       => do
-    let ⟨tn, e⟩ ← SubTerm.Meta.result tp (L := L) (n := n) t
-    return ⟨q(nrel $r ![$tn]), q(nrel₁_congr $e)⟩
-  | ~q(nrel $r ![$t₁, $t₂]) => do
-    let ⟨tn₁, e₁⟩ ← SubTerm.Meta.result tp (L := L) (n := n) t₁
-    let ⟨tn₂, e₂⟩ ← SubTerm.Meta.result tp (L := L) (n := n) t₂
-
-    return ⟨q(nrel $r ![$tn₁, $tn₂]), q(nrel₂_congr $e₁ $e₂)⟩
-  | ~q(free $p)             => do
+  | ~q(free $p)                      => do
     let ⟨pn, e⟩ ← result (L := L) (n := q($n + 1)) p
     let ⟨pnn, ee⟩ ← resultFree (L := L) (n := n) pn
     return ⟨q($pnn), q(free_congr_eq $e $ee)⟩
-  | ~q(subst $s $p)         => do
-    let ⟨sn, se⟩ ← SubTerm.Meta.result tp (L := L) (n := q($n)) s
-    let ⟨pn, pe⟩ ← result (L := L) (n := q($n + 1)) p
-    let ⟨n, e⟩ ← resultSubst (L := L) (n := n) sn pn
-    return ⟨q($n), q(subst_congr_eq $se $pe $e)⟩
-  | ~q(shift $p)            => do
+  | ~q(substs (n := $k) $w $p)       => do
+    let ⟨p', pe⟩ ← result (L := L) (n := k) p
+    let ⟨w', we⟩ ← resultVectorOfResult (u := u) (α := q(SyntacticSubTerm $L $n))
+      (SubTerm.Meta.result tp) k w
+    let ⟨n, e⟩ ← resultSubsts (L := L) (n := n) w' p'
+    return ⟨q($n), q(substs_congr_eq $we $pe $e)⟩
+  | ~q(shift $p)                     => do
     let ⟨pn, e⟩ ← result (L := L) (n := n) p
     let ⟨pnn, ee⟩ ← resultShift (L := L) (n := n) pn
     return ⟨q($pnn), q(shift_congr_eq $e $ee)⟩
-  | ~q(~$p)                 => do
+  | ~q(~$p)                          => do
     let ⟨pn, e⟩ ← result p
     if unfoldOpt UnfoldOption.neg then
       let ⟨pnn, ee⟩ ← resultNeg pn
       return ⟨q($pnn), q(neg_congr_eq $e $ee)⟩
     else return ⟨q(~$pn), q(neg_congr $e)⟩
-  | ~q($p ⟶ $q)            => do
+  | ~q($p ⟶ $q)                     => do
     let ⟨pn, pe⟩ ← result (L := L) (n := n) p
     let ⟨qn, qe⟩ ← result (L := L) (n := n) q    
     if unfoldOpt UnfoldOption.imply then
@@ -489,7 +444,7 @@ partial def result {L : Q(Language.{u})} {n : Q(ℕ)} : (p : Q(SyntacticSubFormu
         return ⟨q($pnn ⋎ $qn), q(imp_eq_of_eq $pe $qe $pee)⟩
       return ⟨q(~$pn ⋎ $qn), q(imply_congr $pe $qe)⟩
     else return ⟨q($pn ⟶ $qn), q(imply_congr $pe $qe)⟩
-  | ~q($p ⟷ $q)            => do
+  | ~q($p ⟷ $q)                     => do
     let ⟨pn, pe⟩ ← result (L := L) (n := n) p
     let ⟨qn, qe⟩ ← result (L := L) (n := n) q
     if unfoldOpt UnfoldOption.iff then
@@ -502,7 +457,7 @@ partial def result {L : Q(Language.{u})} {n : Q(ℕ)} : (p : Q(SyntacticSubFormu
       else
         return ⟨q(($pn ⟶ $qn) ⋏ ($qn ⟶ $pn)), q(iff_congr $pe $qe)⟩
     else return ⟨q($pn ⟷ $qn), q(iff_congr $pe $qe)⟩
-  | ~q($p)                  => do
+  | ~q($p)                           => do
     -- logInfo m!"match fail: {p}"
     return ⟨q($p), q(rfl)⟩
 
@@ -528,36 +483,33 @@ partial def resultShift₀List {L : Q(Language.{u})} (l : List Q(SyntacticFormul
   funResultList (u := u) (α := q(SyntacticFormula $L)) q(shift) resultShift₀ l
 
 partial def resultSubst₀ {L : Q(Language.{u})} (p : Q(SyntacticSubFormula $L 1)) (s : Q(SyntacticTerm $L)) :
-    MetaM $ (res : Q(SyntacticFormula $L)) × Q(subst $s $p = $res) :=
-  resultSubst (L := L) (n := q(0)) s p
+    MetaM $ (res : Q(SyntacticFormula $L)) × Q(substs ![$s] $p = $res) :=
+  resultSubsts (L := L) (n := q(0)) q(![$s]) p
 
 partial def resultSubst₀List {L : Q(Language.{u})} (v : List Q(SyntacticTerm $L)) (p : Q(SyntacticSubFormula $L 1)) :
-    MetaM $ (res : List Q(SyntacticFormula $L)) × Q(List.map (SubFormula.subst · $p) $(toQList (u := u) v) = $(toQList (u := u) res)) :=
-  funResultList (u := u) (α := q(SyntacticTerm $L)) q((subst · $p)) (resultSubst₀ p) v
+    MetaM $ (res : List Q(SyntacticFormula $L)) × Q(List.map (SubFormula.substs ![·] $p) $(toQList (u := u) v) = $(toQList (u := u) res)) :=
+  funResultList (u := u) (α := q(SyntacticTerm $L)) q((substs ![·] $p)) (resultSubst₀ p) v
 
-private inductive ResultTest (α : Type u) : (a : α) → Type u
-  | result : (a b : α) → a = b → ResultTest α a
 
-elab "dbg" : tactic => do
+elab "dbgResult" : tactic => do
   let goalType ← Elab.Tactic.getMainTarget
   let some ⟨.succ u, ty⟩ ← checkSortQ' goalType | throwError "error: not a type"
-  let ~q(ResultTest (SyntacticSubFormula $L $n) $p) := ty | throwError "error: not a type"
-  logInfo m!"p = {p} : SyntacticSubFormula {L} {n}"
+  let ~q(DbgResult (SyntacticSubFormula $L $n) $p) := ty | throwError "error: not a type"
   let p : Q(SyntacticSubFormula $L $n) ← withReducible <| whnf p
 
-  let ⟨pn, e⟩ ← result SubTerm.Meta.NumeralUnfoldOption.unfoldSucc (unfoldOfList [UnfoldOption.iff]) (L := L) (n := n) p
-  logInfo m!"pn = {pn}"
+  let ⟨pn, e⟩ ← result SubTerm.Meta.NumeralUnfoldOption.none (unfoldOfList []) (L := L) (n := n) p
+  logInfo m!"{p}\n ⟹\n {pn}"
   -- logInfo m!"e = {e}"
-  let c : Q(ResultTest (SyntacticSubFormula $L $n) $p) := (q(ResultTest.result ($p) $pn $e) : Expr)
+  let c : Q(DbgResult (SyntacticSubFormula $L $n) $p) := (q(DbgResult.intro ($p) $pn $e) : Expr)
   Lean.Elab.Tactic.closeMainGoal c
 
-example {t : SyntacticSubTerm Language.oring 14} : ResultTest (SyntacticSubFormula Language.oring 12)
-    $ shift “3 < #4 ↔ ∀ !(shift $ subst &99 “(!t) + (#6 * 8) < &7”)” :=
-  by dbg
+example {t : SyntacticSubTerm Language.oring 2} : DbgResult (SyntacticSubFormula Language.oring 12)
+    $ shift “3 < #4 ↔ ∀ !(shift $ substs ![&99, &6] “∀ (!t) + (#0 * 8) < &7 + #1 + (#3 + 6)⟦5,4⟧ ”)” :=
+  by dbgResult
 
-example {t : SyntacticSubTerm Language.oring 14} : ResultTest (SyntacticSubFormula Language.oring 12)
-    $ “0 < 2” :=
-  by dbg
+example {p : SyntacticSubFormula Language.oring 2} : DbgResult (SyntacticSubFormula Language.oring 12)
+    $ “!p ⟦3 + #0 + #1, 2⟧ ⟦0, #2⟧ ” :=
+  by dbgResult
 
 end Meta
 
@@ -606,16 +558,16 @@ def headAllOfEq {G'} (eG : G.map SubFormula.shift = G') {p : SyntacticSubFormula
     DerivationList ((∀' p) :: G) :=
   (DerivationCutRestricted.all G.toFinset p (d.cast $ by ext; simp[←eG, ←ep, shifts, SubFormula.shiftEmb, or_comm])).cast (by simp)
 
-def headEx {t} {p : SyntacticSubFormula L 1} (d : DerivationList (G ++ [SubFormula.subst t p])) :
+def headEx {t} {p : SyntacticSubFormula L 1} (d : DerivationList (G ++ [⟦↦ t⟧ p])) :
     DerivationList ((∃' p) :: G) :=
   (DerivationCutRestricted.ex G.toFinset t p (d.cast $ by ext; simp[or_comm])).cast (by simp)
 
-def headExInstances {v : List (SyntacticTerm L)} {p : SyntacticSubFormula L 1} (d : DerivationList (G ++ v.map (SubFormula.subst · p))) :
+def headExInstances {v : List (SyntacticTerm L)} {p : SyntacticSubFormula L 1} (d : DerivationList (G ++ v.map (⟦↦ ·⟧ p))) :
     DerivationList ((∃' p) :: G) :=
   (DerivationCutRestricted.exOfInstances (Γ := G.toFinset) v p (d.cast $ by ext x; simp[or_comm])).cast (by simp)
 
 def headExInstancesOfEq' {v : List (SyntacticTerm L)} {p : SyntacticSubFormula L 1} {pi : List (SyntacticFormula L)}
-  (ev : v.map (SubFormula.subst · p) = pi) (d : DerivationList (G ++ pi ++ [∃' p])) :
+  (ev : v.map (⟦↦ ·⟧ p) = pi) (d : DerivationList (G ++ pi ++ [∃' p])) :
     DerivationList ((∃' p) :: G) :=
   (DerivationCutRestricted.exOfInstances' (Γ := G.toFinset) v p
     (d.cast $ by
@@ -623,7 +575,7 @@ def headExInstancesOfEq' {v : List (SyntacticTerm L)} {p : SyntacticSubFormula L
       rw[Finset.union_comm {∃' p}, ←Finset.union_assoc, Finset.union_comm pi.toFinset])).cast (by simp)
 
 def headExInstancesOfEq {v : List (SyntacticTerm L)} {p : SyntacticSubFormula L 1} {pi : List (SyntacticFormula L)}
-  (ev : v.map (SubFormula.subst · p) = pi) (d : DerivationList (G ++ pi)) :
+  (ev : v.map (⟦↦ ·⟧ p) = pi) (d : DerivationList (G ++ pi)) :
     DerivationList ((∃' p) :: G) :=
   (DerivationCutRestricted.exOfInstances (Γ := G.toFinset) v p (d.cast $ by ext x; simp[←ev, or_comm])).cast (by simp)
 
@@ -713,7 +665,7 @@ def headAll (sG : List Q(SyntacticFormula $L)) (eG : Q(List.map shift $(toQList 
 -/
 
 def headEx' (v : List Q(SyntacticTerm $L)) (p : Q(SyntacticSubFormula $L 1)) (pi : List Q(SyntacticFormula $L))
-  (ev : Q(List.map (SubFormula.subst · $p) $(toQList (u := u) v) = $(toQList (u := u) pi)))
+  (ev : Q(List.map (⟦↦ ·⟧ $p) $(toQList (u := u) v) = $(toQList (u := u) pi)))
   (d : DerivationListQ L dfunc drel (G ++ pi ++ [(q(∃' $p) : Q(SyntacticFormula $L))])) :
     DerivationListQ L dfunc drel (q(∃' $p) :: G) :=
   -- let x : Q(DerivationList $ $(toQList (u := u) (G ++ pi))) := d
@@ -721,7 +673,7 @@ def headEx' (v : List Q(SyntacticTerm $L)) (p : Q(SyntacticSubFormula $L 1)) (pi
   q(DerivationList.headExInstancesOfEq' $ev $x)
 
 def headEx (v : List Q(SyntacticTerm $L)) (p : Q(SyntacticSubFormula $L 1)) (pi : List Q(SyntacticFormula $L))
-  (ev : Q(List.map (SubFormula.subst · $p) $(toQList (u := u) v) = $(toQList (u := u) pi)))
+  (ev : Q(List.map (⟦↦ ·⟧ $p) $(toQList (u := u) v) = $(toQList (u := u) pi)))
   (d : DerivationListQ L dfunc drel (G ++ pi)) :
     DerivationListQ L dfunc drel (q(∃' $p) :: G) :=
   -- let x : Q(DerivationList $ $(toQList (u := u) (G ++ pi))) := d
@@ -730,12 +682,12 @@ def headEx (v : List Q(SyntacticTerm $L)) (p : Q(SyntacticSubFormula $L 1)) (pi 
 
 /-
 def headEx (v : List Q(SyntacticTerm $L)) (p : Q(SyntacticSubFormula $L 1)) (pi : List Q(SyntacticFormula $L))
-  (ev : Q(List.map (SubFormula.subst · $p) $(toQList (u := u) v) = $(toQList (u := u) pi)))
+  (ev : Q(List.map (⟦↦ ·⟧ $p) $(toQList (u := u) v) = $(toQList (u := u) pi)))
   (d : DerivationListQ L dfunc drel (G ++ pi)) :
     DerivationListQ L dfunc drel (q(∃' $p) :: G) :=
   -- let x : Q(DerivationList $ $(toQList (u := u) (G ++ pi))) := d
   let x : Q(DerivationList $ $(toQList (u := u) G) ++ $(toQList (u := u) pi)) := d
-  let x : Q(DerivationList $ $(toQList (u := u) G) ++ List.map (SubFormula.subst · $p) $(toQList (u := u) v)) :=
+  let x : Q(DerivationList $ $(toQList (u := u) G) ++ List.map (⟦↦ ·⟧ $p) $(toQList (u := u) v)) :=
   -- TODO
     q(by { rw[($ev)]; exact $x })
   q(DerivationList.headExInstances $x)

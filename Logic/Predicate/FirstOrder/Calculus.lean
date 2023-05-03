@@ -41,7 +41,7 @@ inductive DerivationCutRestricted (P : SyntacticFormula L → Prop) : Sequent L 
 | all   : ∀ (Δ : Sequent L) (p : SyntacticSubFormula L 1),
     DerivationCutRestricted P (insert (free p) (shifts Δ)) → DerivationCutRestricted P (insert (∀' p) Δ)
 | ex    : ∀ (Δ : Sequent L) (t : SyntacticTerm L) (p : SyntacticSubFormula L 1),
-    DerivationCutRestricted P (insert (subst t p) Δ) → DerivationCutRestricted P (insert (∃' p) Δ)
+    DerivationCutRestricted P (insert (⟦↦ t⟧ p) Δ) → DerivationCutRestricted P (insert (∃' p) Δ)
 | cut   : ∀ (Δ Γ : Sequent L) (p : SyntacticFormula L), P p →
     DerivationCutRestricted P (insert p Δ) → DerivationCutRestricted P (insert (~p) Γ) → DerivationCutRestricted P (Δ ∪ Γ)
 
@@ -96,7 +96,7 @@ section
 
 @[simp] lemma length_all {p} (d : ⊢ᶜ[P] insert (free p) (shifts Δ)) : (all Δ p d).length = d.length.succ := rfl
 
-@[simp] lemma length_ex {t} {p} (d : ⊢ᶜ[P] insert (subst t p) Δ) : (ex Δ t p d).length = d.length.succ := rfl
+@[simp] lemma length_ex {t} {p} (d : ⊢ᶜ[P] insert (substs ![t] p) Δ) : (ex Δ t p d).length = d.length.succ := rfl
 
 @[simp] lemma length_cut {p} (hp : P p) (dp : ⊢ᶜ[P] insert p Δ) (dn : ⊢ᶜ[P] insert (~p) Γ) :
   (cut _ _ p hp dp dn).length = (max dp.length dn.length).succ := rfl
@@ -182,7 +182,7 @@ def weakening : ∀ {Δ}, ⊢ᶜ[P] Δ → ∀ {Γ : Sequent L}, Δ ⊆ Γ → �
       have : ⊢ᶜ[P] insert (∀' p) Γ := all Γ p this
       this.cast (by simp; exact (Finset.insert_subset.mp h).1)      
   | _, ex Δ t p d,           Γ, h =>
-      have : ⊢ᶜ[P] insert (subst t p) Γ := d.weakening (Finset.insert_subset_insert _ $ by simpa using (Finset.insert_subset.mp h).2)
+      have : ⊢ᶜ[P] insert (⟦↦ t⟧ p) Γ := d.weakening (Finset.insert_subset_insert _ $ by simpa using (Finset.insert_subset.mp h).2)
       have : ⊢ᶜ[P] insert (∃' p) Γ := ex Γ t p this
       this.cast (by simp; exact (Finset.insert_subset.mp h).1)     
   | _, cut Δ₁ Δ₂ p hp d₁ d₂, Γ, h =>
@@ -203,7 +203,7 @@ def all' {p : SyntacticSubFormula L 1} (h : ∀' p ∈ Δ) (d : ⊢ᶜ[P] insert
   (all _ p d).cast (by simp[Finset.insert_erase h])
 
 def ex' {p : SyntacticSubFormula L 1} (t : SyntacticTerm L) (h : ∃' p ∈ Δ)
-  (d : ⊢ᶜ[P] insert (subst t p) (Δ.erase (∃' p))) : ⊢ᶜ[P] Δ :=
+  (d : ⊢ᶜ[P] insert (⟦↦ t⟧ p) (Δ.erase (∃' p))) : ⊢ᶜ[P] Δ :=
   (ex _ t p d).cast (by simp[Finset.insert_erase h])
 
 def cutCut {p} (d₁ : ⊢ᶜ insert p Δ) (d₂ : ⊢ᶜ insert (~p) Γ) : ⊢ᶜ Δ ∪ Γ := cut Δ Γ p trivial d₁ d₂
@@ -277,7 +277,7 @@ def lHom (Φ : L₁ →ᵥ L₂) {P₁ : SyntacticFormula L₁ → Prop} {P₂ :
       this.cast (by simp)
   | _, ex Δ t p d           =>
       have : ⊢ᶜ[P₂] insert (∃' Φ.onSubFormula₁ p) (Δ.image Φ.onSubFormula₁) :=
-        ex _ (Φ.onSubTerm t) _ ((d.lHom Φ h).cast (by simp[←SubFormula.onSubFormula₁_subst]))
+        ex _ (Φ.onSubTerm t) _ ((d.lHom Φ h).cast (by simp[SubFormula.onSubFormula₁_substs, Matrix.constant_eq_singleton]))
       this.cast (by simp)
   | _, cut Δ Γ p hp dΔ dΓ   =>
       have : ⊢ᶜ[P₂] (Δ.image Φ.onSubFormula₁) ∪ (Γ.image Φ.onSubFormula₁) :=
@@ -299,8 +299,8 @@ private lemma shift_rewrite_eq (f : ℕ → SyntacticTerm L) (p : SyntacticFormu
   simp[shift, map, rewrite, bind_bind]; congr
 
 private lemma rewrite_subst_eq (f : ℕ → SyntacticTerm L) (t) (p : SyntacticSubFormula L 1) :
-    rewrite f (subst t p) = subst (t.bind SubTerm.bvar f) (rewrite (SubTerm.bShift ∘ f) p) := by
-  simp[subst, bind_bind, Fin.eq_zero, SubTerm.bShift, SubTerm.map, SubTerm.bind_bind, eq_finZeroElim]; congr
+    rewrite f (⟦↦ t⟧ p) = ⟦↦ t.bind SubTerm.bvar f⟧ (rewrite (SubTerm.bShift ∘ f) p) := by
+  simp[substs, bind_bind, Fin.eq_zero, SubTerm.bShift, SubTerm.map, SubTerm.bind_bind, eq_finZeroElim]
 
 protected def rewrite (h : ∀ f p, P p → P (rewrite f p)) : ∀ {Δ : Sequent L}, ⊢ᶜ[P] Δ → ∀ (f : ℕ → SyntacticTerm L), ⊢ᶜ[P] Δ.image (rewrite f)
   | _, axL Δ r v hrel hnrel, f => axL _ r (fun i => (v i).bind SubTerm.bvar f) (Finset.mem_image_of_mem _ hrel) (Finset.mem_image_of_mem _ hnrel)
@@ -317,7 +317,7 @@ protected def rewrite (h : ∀ f p, P p → P (rewrite f p)) : ∀ {Δ : Sequent
       all _ _ (this.cast (by simp[free_rewrite_eq, shift_rewrite_eq, shifts_eq_image, Finset.image_image, Function.comp]))
     this.cast (by simp)
   | _, ex Δ t p d,           f =>
-    have : ⊢ᶜ[P] (insert (subst t p) Δ).image (rewrite f) := d.rewrite h f 
+    have : ⊢ᶜ[P] (insert (⟦↦ t⟧ p) Δ).image (rewrite f) := d.rewrite h f 
     have : ⊢ᶜ[P] insert (∃' rewrite (SubTerm.bShift ∘ f) p) (Δ.image (rewrite f)) := 
       ex _ (SubTerm.bind SubTerm.bvar f t) _ (this.cast (by simp[rewrite_subst_eq])) 
     this.cast (by simp)
@@ -344,8 +344,8 @@ protected def shift (h : ∀ f p, P p → P (rewrite f p)) {Δ : Sequent L} (d :
   (d.map h Nat.succ).cast (by simp[shifts_eq_image, shift])
 
 private lemma map_subst_eq_free (p : SyntacticSubFormula L 1) (h : ¬p.fvar? m) :
-    map₀ (fun x => if x = m then 0 else x + 1) (subst &m p) = free p := by
-  simp[free, subst, map₀, map, bind_bind, Fin.eq_zero, Matrix.vecConsLast_vecEmpty, Matrix.constant_eq_singleton]
+    map₀ (fun x => if x = m then 0 else x + 1) (⟦↦ &m⟧ p) = free p := by
+  simp[free, substs, map₀, map, bind_bind, Fin.eq_zero, Matrix.vecConsLast_vecEmpty, Matrix.constant_eq_singleton]
   exact bind_eq_of_funEqOn _ _ _ _ (by intro x hx; simp; rintro rfl; contradiction)
 
 private lemma image_map₀_eq_shifts (Δ : Finset $ SyntacticFormula L) (h : ∀ p ∈ Δ, ¬p.fvar? m) :
@@ -356,26 +356,26 @@ private lemma image_map₀_eq_shifts (Δ : Finset $ SyntacticFormula L) (h : ∀
   exact bind_eq_of_funEqOn _ _ _ _ (by intro x hx; simp; rintro rfl; have := h p hp; contradiction)
 
 def genelalizeByNewver (h : ∀ f p, P p → P (rewrite f p)) {p : SyntacticSubFormula L 1} (hp : ¬p.fvar? m) (hΔ : ∀ q ∈ Δ, ¬q.fvar? m)
-  (d : ⊢ᶜ[P] insert (subst &m p) Δ) : ⊢ᶜ[P] insert (∀' p) Δ := by
+  (d : ⊢ᶜ[P] insert (⟦↦ &m⟧ p) Δ) : ⊢ᶜ[P] insert (∀' p) Δ := by
   have : ⊢ᶜ[P] insert (free p) (shifts Δ) :=
     (d.map h (fun x => if x = m then 0 else x + 1)).cast (by simp[map_subst_eq_free p hp, image_map₀_eq_shifts Δ hΔ])
   exact all Δ p this
 
 def genelalizeByNewver₀ {p : SyntacticSubFormula L 1} (hp : ¬p.fvar? m) (hΔ : ∀ q ∈ Δ, ¬q.fvar? m)
-  (d : ⊢ᵀ insert (subst &m p) Δ) : ⊢ᵀ insert (∀' p) Δ := d.genelalizeByNewver (by simp) hp hΔ
+  (d : ⊢ᵀ insert (⟦↦ &m⟧ p) Δ) : ⊢ᵀ insert (∀' p) Δ := d.genelalizeByNewver (by simp) hp hΔ
 
 def genelalizeByNewverCut {p : SyntacticSubFormula L 1} (hp : ¬p.fvar? m) (hΔ : ∀ q ∈ Δ, ¬q.fvar? m)
-  (d : ⊢ᶜ insert (subst &m p) Δ) : ⊢ᶜ insert (∀' p) Δ := d.genelalizeByNewver (by simp) hp hΔ
+  (d : ⊢ᶜ insert (⟦↦ &m⟧ p) Δ) : ⊢ᶜ insert (∀' p) Δ := d.genelalizeByNewver (by simp) hp hΔ
 
 def exOfInstances (v : List (SyntacticTerm L)) (p : SyntacticSubFormula L 1)
-  (h : ⊢ᶜ[P] (v.map (subst · p)).toFinset ∪ Γ) : ⊢ᶜ[P] insert (∃' p) Γ := by
+  (h : ⊢ᶜ[P] (v.map (substs ![·] p)).toFinset ∪ Γ) : ⊢ᶜ[P] insert (∃' p) Γ := by
   induction' v with t v ih generalizing Γ <;> simp at h
   · exact weakening h (Finset.subset_insert _ Γ)
   · exact (ih (Γ := insert (∃' p) Γ)
       ((ex _ t p h).cast (by ext r; simp))).cast (by simp)
 
 def exOfInstances' (v : List (SyntacticTerm L)) (p : SyntacticSubFormula L 1)
-  (h : ⊢ᶜ[P] (insert (∃' p) $ (v.map (subst · p)).toFinset ∪ Γ)) : ⊢ᶜ[P] insert (∃' p) Γ :=
+  (h : ⊢ᶜ[P] (insert (∃' p) $ (v.map (substs ![·] p)).toFinset ∪ Γ)) : ⊢ᶜ[P] insert (∃' p) Γ :=
   (exOfInstances (Γ := insert (∃' p) Γ) v p (h.cast $ by simp)).cast (by simp)
 
 end DerivationCutRestricted
