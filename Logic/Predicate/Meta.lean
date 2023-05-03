@@ -134,28 +134,35 @@ lemma bShift_congr_eq {t t' : SubTerm L μ n} {u} (e : t = t') (h : bShift t' = 
   bShift t = u := Eq.trans (congr_arg _ e) h
 
 section
-variable [hz : L.Zero] [ho : L.One] [ha : L.Add]
+variable (c : Const L)
 
-@[simp] lemma free_natLit (z : ℕ) :
-    free (natLit L z : SyntacticSubTerm L (n + 1)) = natLit L z :=
+@[simp] lemma free_const :
+    free (c : SyntacticSubTerm L (n + 1)) = c :=
   by simp
 
-@[simp] lemma subst_natLit {s} (z : ℕ) :
-    subst s (natLit L z : SubTerm L μ (n + 1)) = natLit L z :=
+@[simp] lemma subst_const {s} :
+    subst s (c : SubTerm L μ (n + 1)) = c :=
   by simp
 
-@[simp] lemma shift_natLit (z : ℕ) :
-    shift (natLit L z : SyntacticSubTerm L n) = natLit L z :=
+@[simp] lemma substs_const {n'} {w : Fin n → SubTerm L μ n'} :
+    substs w (c : SubTerm L μ n) = c :=
   by simp
 
-@[simp] lemma bShift_natLit (z : ℕ) :
-    bShift (natLit L z : SubTerm L μ n) = natLit L z :=
+@[simp] lemma shift_const :
+    shift (c : SyntacticSubTerm L n) = c :=
+  by simp
+
+@[simp] lemma bShift_const :
+    bShift (c : SubTerm L μ n) = c :=
   by simp[bShift]
+
+variable [L.Zero] [L.One] [L.Add]
 
 lemma natLit_succ_of_eq {z : ℕ} (t : SubTerm L μ n) (h : natLit L z.succ = t) :
   natLit L z.succ.succ = func Language.Add.add ![t, func Language.One.one ![]] := by rw[←h]; rfl
 
 end
+
 end lemmata
 
 partial def resultFree {L : Q(Language.{u})} {n : Q(ℕ)} : (t : Q(SyntacticSubTerm $L ($n + 1))) →
@@ -189,10 +196,11 @@ partial def resultFree {L : Q(Language.{u})} {n : Q(ℕ)} : (t : Q(SyntacticSubT
     let ⟨tn₂, e₂⟩ ← resultFree (L := L) (n := n) t₂
     let ⟨tn₃, e₃⟩ ← resultFree (L := L) (n := n) t₃
     return ⟨q(SubTerm.func $f ![$tn₁, $tn₂, $tn₃]), q(free_func3 $f $e₁ $e₂ $e₃)⟩
-  | ~q(SubTerm.Operator.const $ natLit (hz := $hz) (ho := $ho) (ha := $ha) $z) => pure ⟨q(natLit $L $z), q(free_natLit $z)⟩
+  | ~q(SubTerm.Operator.const $c) => pure ⟨q(SubTerm.Operator.const $c), q(free_const _)⟩
   | ~q($t)                               => do
     return ⟨q(SubTerm.free $t), q(rfl)⟩
 
+-- TODO: replace with `substs`
 partial def resultSubst {L : Q(Language.{u})} {n : Q(ℕ)} (s : Q(SyntacticSubTerm $L $n)) :
     (t : Q(SyntacticSubTerm $L ($n + 1))) →
     MetaM ((res : Q(SyntacticSubTerm $L $n)) × Q(SubTerm.subst $s $t = $res))
@@ -221,7 +229,7 @@ partial def resultSubst {L : Q(Language.{u})} {n : Q(ℕ)} (s : Q(SyntacticSubTe
     let ⟨tn₂, e₂⟩ ← resultSubst (L := L) (n := n) s t₂
     let ⟨tn₃, e₃⟩ ← resultSubst (L := L) (n := n) s t₃
     return ⟨q(SubTerm.func $f ![$tn₁, $tn₂, $tn₃]), q(subst_func3 $f $e₁ $e₂ $e₃)⟩
-  | ~q(SubTerm.Operator.const $ natLit (hz := $hz) (ho := $ho) (ha := $ha) $z) => pure ⟨q(natLit $L $z), q(subst_natLit $z)⟩
+  | ~q(SubTerm.Operator.const $c) => pure ⟨q(SubTerm.Operator.const $c), q(subst_const $c)⟩
   | ~q($t)                               => do
     return ⟨q(SubTerm.subst $s $t), q(rfl)⟩
 
@@ -249,7 +257,7 @@ partial def resultShift {L : Q(Language.{u})} {n : Q(ℕ)} : (t : Q(SyntacticSub
     let ⟨tn₁, e₁⟩ ← resultShift (L := L) (n := n) t₁
     let ⟨tn₂, e₂⟩ ← resultShift (L := L) (n := q(.succ $n)) t₂
     return ⟨q(SubTerm.subst $tn₁ $tn₂), q(shift_subst $e₂ $e₁)⟩
-  | ~q(SubTerm.Operator.const $ natLit (hz := $hz) (ho := $ho) (ha := $ha) $z) => pure ⟨q(natLit $L $z), q(shift_natLit $z)⟩
+  | ~q(SubTerm.Operator.const $c) => pure ⟨q(SubTerm.Operator.const $c), q(shift_const $c)⟩
   | ~q($t)                               => do
     return ⟨q(shift $t), q(rfl)⟩
 
@@ -277,7 +285,7 @@ partial def resultBShift {L : Q(Language.{u})} {n : Q(ℕ)} : (t : Q(SyntacticSu
     let ⟨tn₁, e₁⟩ ← resultBShift (L := L) (n := n) t₁
     let ⟨tn₂, e₂⟩ ← resultBShift (L := L) (n := q(.succ $n)) t₂
     return ⟨q(SubTerm.subst $tn₁ $tn₂), q(bShift_subst $e₂ $e₁)⟩
-  | ~q(SubTerm.Operator.const $ natLit (hz := $hz) (ho := $ho) (ha := $ha) $z) => pure ⟨q(natLit $L $z), q(bShift_natLit $z)⟩
+  | ~q(SubTerm.Operator.const $c) => pure ⟨q(SubTerm.Operator.const $c), q(bShift_const $c)⟩
   | ~q($t)                               => do
     return ⟨q(bShift $t), q(rfl)⟩
 

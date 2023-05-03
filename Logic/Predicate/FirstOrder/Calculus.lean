@@ -374,6 +374,10 @@ def exOfInstances (v : List (SyntacticTerm L)) (p : SyntacticSubFormula L 1)
   · exact (ih (Γ := insert (∃' p) Γ)
       ((ex _ t p h).cast (by ext r; simp))).cast (by simp)
 
+def exOfInstances' (v : List (SyntacticTerm L)) (p : SyntacticSubFormula L 1)
+  (h : ⊢ᶜ[P] (insert (∃' p) $ (v.map (subst · p)).toFinset ∪ Γ)) : ⊢ᶜ[P] insert (∃' p) Γ :=
+  (exOfInstances (Γ := insert (∃' p) Γ) v p (h.cast $ by simp)).cast (by simp)
+
 end DerivationCutRestricted
 
 end FirstOrder

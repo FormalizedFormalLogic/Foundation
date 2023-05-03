@@ -497,6 +497,9 @@ instance : Coe (Const L) (SubTerm L μ n) := ⟨const⟩
 @[simp] lemma subst_const (t : SubTerm L μ n) (c : Const L) :
     subst t c = c := by simp[subst]
 
+@[simp] lemma substs_const {n'} (w : Fin n → SubTerm L μ n') (c : Const L) :
+    substs w c = c := by simp[substs]
+
 @[simp] lemma emb_const {o : Type v} [IsEmpty o] (c : Const L) :
     emb (L := L) (μ := μ) (n := n) (Operator.const (μ := o) (n := n) c) = Operator.const (μ := μ) (n := n) c := by simp[emb]
 

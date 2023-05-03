@@ -617,6 +617,8 @@ lemma fix_nrel {k} (r : L.rel k) (v : Fin k → SyntacticSubTerm L n) :
   · exact funext (Fin.cases (by simp) (by simp[Fin.succ_castSucc])) 
   · exact funext (Nat.rec (by simp) (by simp))
 
+end fix
+
 @[simp] lemma free_fix (p : SyntacticSubFormula L n) : free (fix p) = p :=
   by simp[fix, free, bind_bind]; apply eq_bind_of <;> simp; intros x; cases x <;> simp
 
@@ -649,7 +651,13 @@ lemma subst_substs {n'} (t : SyntacticSubTerm L n') (w : Fin n → SyntacticSubT
     subst t (substs w p) = substs (fun i => SubTerm.subst t (w i)) p := by
   simp[substs, subst, bind_bind]; congr
 
-end fix
+lemma free_substs {n'} (w : Fin n → SyntacticSubTerm L (n' + 1)) (p : SyntacticSubFormula L n) :
+    free (substs w p) = substs (SubTerm.free ∘ w) (shift p) := by
+  simp[free, substs, shift, map, bind_bind]; congr
+
+lemma shift_substs {n'} (w : Fin n → SyntacticSubTerm L n') (p : SyntacticSubFormula L n) :
+    shift (substs w p) = substs (SubTerm.shift ∘ w) (shift p) := by
+  simp[substs, shift, map, bind_bind]; congr
 
 variable (L)
 

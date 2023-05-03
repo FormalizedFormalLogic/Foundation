@@ -23,11 +23,26 @@ structure ProofArrow (T : Theory L) (Δ : List (SyntacticFormula L)) (p : Syntac
 
 variable {T}
 
+noncomputable def Proof.toProofArrow {σ : Sentence L} (b : T ⊢ σ) : ProofArrow T [] (emb σ) where
+  leftHand := b.leftHand.toList.map (~·)
+  hleftHand := by
+    simp; intro σ hσ 
+    have : ∃ τ ∈ T, ~τ = σ := by simpa using b.hleftHand hσ
+    rcases this with ⟨τ, hτ, rfl⟩; simp[hτ]
+  derivationList := b.derivation.cast (by simp[DerivationList, Function.comp, List.toFinset_map])
+
 namespace ProofArrow
 open DerivationCutRestricted
 variable {Δ Γ : List (SyntacticFormula L)}
 
 def derivation (b : ProofArrow T Δ p) : ⊢ᶜ (p :: ((b.leftHand.map emb ++ Δ).map (~·))).toFinset := b.derivationList
+
+def toProof {σ : Sentence L} (b : ProofArrow T [] (emb σ)) : T ⊢ σ where
+  leftHand := b.leftHand.toFinset.image (~·)
+  hleftHand := by simp[Set.subset_def]; intro σ hσ; exact ⟨σ, b.hleftHand σ hσ, rfl⟩
+  derivation := b.derivation.cast (by simp[List.toFinset_map, Finset.image_image, Function.comp])
+
+
 
 def cast {p p'} (b : ProofArrow T Δ p) (h : p = p') : ProofArrow T Δ p' :=
   h ▸ b
@@ -280,7 +295,7 @@ def eqTrans {t₁ t₂ t₃ : SyntacticTerm L} (b₁ : ProofArrow T Δ “!t₁ 
   (this.modusPonens b₁).modusPonens b₂
 
 def termExt : (t : SyntacticSubTerm L n) → (v₁ v₂ : Fin n → SyntacticTerm L) →
-    ((i : Fin n) → ProofArrow T Δ (“!(v₁ i) = !(v₂ i)”)) → ProofArrow T Δ “!(t.substs v₁) = !(t.substs v₂)”
+    ((i : Fin n) → ProofArrow T Δ “!(v₁ i) = !(v₂ i)”) → ProofArrow T Δ “!(t.substs v₁) = !(t.substs v₂)”
   | #x,       _,  _,  b => b x
   | &x,       _,  _,  _ => eqRefl &x
   | func f v, v₁, v₂, b =>
@@ -299,7 +314,7 @@ private def negImply {p q : SyntacticFormula L} (b : ProofArrow T Δ (p ⟶ q)) 
     contradiction q (assumption $ by simp) (assumption $ by simp))
 
 private def relExtAux {n} {k} (r : L.rel k) (v : Fin k → SyntacticSubTerm L n) (v₁ v₂ : Fin n → SyntacticTerm L)
-  (b : (i : Fin n) → ProofArrow T Δ (“!(v₁ i) = !(v₂ i)”)) : ProofArrow T Δ (⟦→ v₁ ⟧ (rel r v) ⟶ ⟦→ v₂ ⟧ (rel r v)) :=
+  (b : (i : Fin n) → ProofArrow T Δ “!(v₁ i) = !(v₂ i)”) : ProofArrow T Δ (⟦→ v₁ ⟧ (rel r v) ⟶ ⟦→ v₂ ⟧ (rel r v)) :=
   have : ProofArrow T Δ
     “∀* ((⋀ i, !(varSumInL i) = !(varSumInR i)) → (!(rel r varSumInL) → !(rel r varSumInR)))” :=
   (byAxiom (EqTheory.subset T (Theory.Eq.relExt r))).cast (by simp[vecEq, Matrix.hom_conj']; rfl)    
@@ -309,8 +324,9 @@ private def relExtAux {n} {k} (r : L.rel k) (v : Fin k → SyntacticSubTerm L n)
     this.specializes (Matrix.vecAppend rfl (fun i => (v i).substs v₁) (fun i => (v i).substs v₂))
   this.modusPonens (splits fun i => termExt (v i) v₁ v₂ b)
 
-def formulaExtAux : {Δ : List (SyntacticFormula L)} → {n : ℕ} → (p : SyntacticSubFormula L n) → (v₁ v₂ : Fin n → SyntacticTerm L) →
-    ((i : Fin n) → ProofArrow T Δ (“!(v₁ i) = !(v₂ i)”)) → ProofArrow T Δ (⟦→ v₁⟧ p ⟶ ⟦→ v₂⟧ p)
+-- 不要だが計算を軽くするために`noncomputable`をつけている
+noncomputable def formulaExtAux : {Δ : List (SyntacticFormula L)} → {n : ℕ} → (p : SyntacticSubFormula L n) → (v₁ v₂ : Fin n → SyntacticTerm L) →
+    ((i : Fin n) → ProofArrow T Δ “!(v₁ i) = !(v₂ i)”) → ProofArrow T Δ (⟦→ v₁⟧ p ⟶ ⟦→ v₂⟧ p)
   | Δ, _, ⊤,        v₁, v₂, _ => (intro $ assumption $ by simp)
   | Δ, _, ⊥,        v₁, v₂, _ => (intro $ assumption $ by simp)
   | Δ, _, rel r v,  v₁, v₂, b => relExtAux r v v₁ v₂ b
@@ -353,24 +369,31 @@ def formulaExtAux : {Δ : List (SyntacticFormula L)} → {n : ℕ} → (p : Synt
     this.cast (by simp[substs_ex])
   termination_by formulaExtAux p _ _ _ => p.complexity
 
-def formulaExt (p : SyntacticSubFormula L n) (v₁ v₂ : Fin n → SyntacticTerm L) 
-  (b : (i : Fin n) → ProofArrow T Δ (“!(v₁ i) = !(v₂ i)”)) (d : ProofArrow T Δ (⟦→ v₂⟧ p)) :
+noncomputable def formulaExt (p : SyntacticSubFormula L n) (v₁ v₂ : Fin n → SyntacticTerm L) 
+  (b : (i : Fin n) → ProofArrow T Δ “!(v₁ i) = !(v₂ i)”) (d : ProofArrow T Δ (⟦→ v₂⟧ p)) :
     ProofArrow T Δ (⟦→ v₁⟧ p) :=
   (formulaExtAux p v₂ v₁ (fun i => (b i).eqSymm)).modusPonens d
+
+noncomputable def rewriteEq {p : SyntacticSubFormula L 1} {t₁ t₂ : SyntacticTerm L}
+  (b : ProofArrow T Δ “!t₁ = !t₂”) (d : ProofArrow T Δ (⟦↦ t₂⟧ p)) :
+    ProofArrow T Δ (⟦↦ t₁⟧ p) :=
+  ((formulaExtAux p ![t₂] ![t₁] (fun i => b.eqSymm.cast $ by simp)).modusPonens
+    (d.cast $ by simp[substs_eq_subst_zero])).cast (by simp[substs_eq_subst_zero])
 
 end Eq
 
 end ProofArrow
 
-variable (T : Theory L) [L.Eq] [EqTheory T]
+variable (T)
+variable [L.Eq] [EqTheory T]
 
 inductive Deduction : List (SyntacticFormula L) → SyntacticFormula L → Type u
   | tauto {Δ p} : ProofArrow T Δ p → Deduction Δ p
   | axm {Δ σ} :
     σ ∈ T → Deduction Δ (emb σ)
-  | wekening {Δ Γ p} :
+  | weakening {Δ Γ p} :
     Δ ⊆ Γ → Deduction Δ p → Deduction Γ p    
-  | have {Δ p q} :
+  | trans {Δ p q} :
     Deduction Δ p → Deduction (p :: Δ) q → Deduction Δ q
   | assumption {Δ p} :
     p ∈ Δ → Deduction Δ p
@@ -383,7 +406,7 @@ inductive Deduction : List (SyntacticFormula L) → SyntacticFormula L → Type 
   -- → right
   | intro {Δ p q} : Deduction (p :: Δ) q → Deduction Δ (p ⟶ q) 
   -- → left
-  | mdp {Δ p q} :
+  | modusPonens {Δ p q} :
     Deduction Δ (p ⟶ q) → Deduction Δ p → Deduction Δ q
   -- ∧ right
   | split {Δ p q} :
@@ -408,42 +431,96 @@ inductive Deduction : List (SyntacticFormula L) → SyntacticFormula L → Type 
   | specialize (t) {Δ p} :
     Deduction Δ (∀' p) → Deduction Δ (subst t p)
   -- ∃ right
-  | use (t) {Δ p} :
+  | useInstance (t) {Δ p} :
     Deduction Δ (subst t p) → Deduction Δ (∃' p)
   -- ∃ left
   | exCases {Δ p q} :
     Deduction Δ (∃' p) → Deduction (free p :: Δ.map shift) (shift q) → Deduction Δ q
   -- =
-  | eqRefl {Δ t} :
+  | eqRefl {Δ} (t) :
     Deduction Δ “!t = !t”
   | eqSymm {Δ t₁ t₂} :
     Deduction Δ “!t₁ = !t₂” → Deduction Δ “!t₂ = !t₁”
   | eqTrans {Δ t₁ t₂ t₃} :
     Deduction Δ “!t₁ = !t₂” → Deduction Δ “!t₂ = !t₃” → Deduction Δ “!t₁ = !t₃”
-  | termExtOfEq {Δ n} (t : SyntacticSubTerm L n) (v₁ v₂ : Fin n → SyntacticTerm L) :
-    ((i : Fin n) → Deduction Δ “!(v₁ i) = !(v₂ i)”) → Deduction Δ “!(t.substs v₁) = !(t.substs v₂)”
-  | formulaExtOfEq {Δ n} (p : SyntacticSubFormula L n) (v₁ v₂ : Fin n → SyntacticTerm L) :
-    ((i : Fin n) → Deduction Δ “!(v₁ i) = !(v₂ i)”) → Deduction Δ (substs v₂ p) → Deduction Δ (substs v₁ p)
+  | rewriteEq {Δ} {p : SyntacticSubFormula L 1} {t₁ t₂ : SyntacticTerm L} :
+    Deduction Δ “!t₁ = !t₂” → Deduction Δ (⟦↦ t₂⟧ p) → Deduction Δ (⟦↦ t₁⟧ p)
 
-notation Δ " ⟹[" T "] " p => Deduction T Δ p
+notation Δ:0 " ⟹[" T "] " p => Deduction T Δ p
 
-open Qq
+variable {T}
 
-inductive DeductionCode (L : Q(Language.{u})) : Type
-  | have          : Q(SyntacticFormula $L) → DeductionCode L → DeductionCode L → DeductionCode L
-  | assumption    : DeductionCode L
-  | contradiction : Q(SyntacticFormula $L) → DeductionCode L → DeductionCode L → DeductionCode L
-  | trivial       : DeductionCode L
-  | explode       : DeductionCode L → DeductionCode L
-  | intro         : DeductionCode L → DeductionCode L
-  | mdp           : Q(SyntacticFormula $L) → DeductionCode L → DeductionCode L → DeductionCode L  
-  | split         : DeductionCode L → DeductionCode L → DeductionCode L
-  -- TODO
-  | cases         : (e₁ e₂ : Q(SyntacticFormula $L)) → DeductionCode L → DeductionCode L → DeductionCode L → DeductionCode L
-  | generalize    : DeductionCode L → DeductionCode L
-  -- TODO
-  | exCases       :  Q(SyntacticFormula $L) → DeductionCode L → DeductionCode L
-  | since         : Syntax → DeductionCode L
-  | missing       : DeductionCode L
+namespace Deduction
+open ProofArrow
+
+def toStr : {Δ : List (SyntacticFormula L)} → {p : SyntacticFormula L} → (Δ ⟹[T] p) → String
+  | _, _, tauto _               => "tauto"
+  | _, _, axm _                 => "axiom"
+  | _, _, weakening _ d         => "weakening\n" ++ d.toStr
+  | _, _, trans c₁ c₂           => "have: {\n" ++ c₁.toStr ++ "\n}\n" ++ c₂.toStr
+  | _, _, assumption _          => "assumption"
+  | _, _, contradiction _ c₁ c₂ => "contradiction: {\n" ++ c₁.toStr ++ "\n}\nand: {\n" ++ c₂.toStr ++ "\n}"
+  | _, _, trivial               => "trivial"
+  | _, _, explode c             => "explode" ++ c.toStr
+  | _, _, intro c               => "intro\n" ++ c.toStr
+  | _, _, modusPonens c₁ c₂     => "have: {\n" ++ c₁.toStr ++ "\n}\nand: {\n" ++ c₂.toStr ++ "\n}"
+  | _, _, split c₁ c₂           => "∧ split: {\n" ++ c₁.toStr ++ "\n}\nand: {\n" ++ c₂.toStr ++ "\n}"
+  | _, _, andLeft c             => "∧ left\n" ++ c.toStr
+  | _, _, andRight c            => "∧ right\n" ++ c.toStr
+  | _, _, orLeft c              => "∨ left\n" ++ c.toStr
+  | _, _, orRight c             => "∨ right\n" ++ c.toStr
+  | _, _, cases c₀ c₁ c₂        => "∨ split: {\n" ++ c₀.toStr ++ "\n}\nor left: {\n" ++ c₁.toStr ++ "\n}\nor right: {\n" ++ c₂.toStr ++ "\n}"
+  | _, _, generalize c          => "generalize\n" ++ c.toStr
+  | _, _, specialize _ c        => "specialize\n" ++ c.toStr
+  | _, _, useInstance _ c       => "use\n" ++ c.toStr
+  | _, _, exCases c₀ c₁         => "∃ cases: {\n" ++ c₀.toStr ++ "\n}\n" ++ c₁.toStr
+  | _, _, eqRefl _              => "refl"
+  | _, _, eqSymm c              => "symmetry" ++ c.toStr
+  | _, _, eqTrans c₁ c₂         => "trans: {\n" ++ c₁.toStr ++ "\n}\n and: {\n" ++ c₂.toStr ++ "\n}"
+  | _, _, rewriteEq c₁ c₂       => "rewrite: {\n" ++ c₁.toStr ++ "\n}\n" ++ c₂.toStr
+
+instance : Repr (Δ ⟹[T] p) := ⟨fun b _ => b.toStr⟩
+
+instance : ToString (Δ ⟹[T] p) := ⟨toStr⟩
+
+noncomputable def toProofArrow : {Δ : List (SyntacticFormula L)} → {p : SyntacticFormula L} →
+    (Δ ⟹[T] p) → ProofArrow T Δ p
+  | _, _, tauto d               => d
+  | _, _, axm h                 => ProofArrow.byAxiom h
+  | _, _, weakening h d         => d.toProofArrow.weakening h
+  | _, _, trans d₁ d₂           => d₁.toProofArrow.trans (d₂.toProofArrow)
+  | _, _, assumption h          => ProofArrow.assumption h
+  | _, _, contradiction p d₁ d₂ => d₁.toProofArrow.contradiction p d₂.toProofArrow
+  | _, _, trivial               => ProofArrow.trivial
+  | _, _, explode d             => d.toProofArrow.explode
+  | _, _, intro d               => d.toProofArrow.intro
+  | _, _, modusPonens d₁ d₂     => d₁.toProofArrow.modusPonens d₂.toProofArrow
+  | _, _, split d₁ d₂           => d₁.toProofArrow.split d₂.toProofArrow
+  | _, _, andLeft d             => d.toProofArrow.andLeft
+  | _, _, andRight d            => d.toProofArrow.andRight
+  | _, _, orLeft d              => d.toProofArrow.orLeft
+  | _, _, orRight d             => d.toProofArrow.orRight
+  | _, _, cases d₀ d₁ d₂        => d₀.toProofArrow.cases d₁.toProofArrow d₂.toProofArrow
+  | _, _, generalize d          => d.toProofArrow.generalize
+  | _, _, specialize t d        => d.toProofArrow.specialize t
+  | _, _, useInstance t d       => d.toProofArrow.useInstance t
+  | _, _, exCases d₀ d₁         => d₀.toProofArrow.exCases d₁.toProofArrow
+  | _, _, eqRefl t              => ProofArrow.eqRefl t
+  | _, _, eqSymm d              => d.toProofArrow.eqSymm
+  | _, _, eqTrans d₁ d₂         => d₁.toProofArrow.eqTrans d₂.toProofArrow
+  | _, _, rewriteEq d₀ d₁       => d₀.toProofArrow.rewriteEq d₁.toProofArrow
+
+noncomputable def toProof {σ : Sentence L} :
+    ([] ⟹[T] emb σ) → T ⊢ σ := fun b => b.toProofArrow.toProof
+
+def cast {Δ p p'} (h : p = p') (b : Δ ⟹[T] p) : Δ ⟹[T] p' := h ▸ b 
+
+def cast' {Δ Δ' p p'} (hΔ : Δ = Δ') (hp : p = p') (b : Δ ⟹[T] p) : Δ' ⟹[T] p' :=
+  hΔ ▸ hp ▸ b
+
+end Deduction
+
+noncomputable def Proof.toDeduction {σ : Sentence L} :
+    T ⊢ σ → ([] ⟹[T] emb σ) := fun b => Deduction.tauto (Proof.toProofArrow b)
 
 end FirstOrder
