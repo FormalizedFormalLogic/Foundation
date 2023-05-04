@@ -234,13 +234,13 @@ def generalize {p} (b : ProofArrow T (Δ.map shift) (free p)) : ProofArrow T Δ 
     (DerivationCutRestricted.all Γ p
       (b.derivationList.cast $ by simp[shifts_eq_image, Finset.image_union, ←List.toFinset_map, Function.comp])).cast (by simp)
 
-def specialize (t) {p} (b : ProofArrow T Δ (∀' p)) : ProofArrow T Δ (subst t p) where
+def specialize (t) {p} (b : ProofArrow T Δ (∀' p)) : ProofArrow T Δ (⟦↦ t⟧ p) where
   leftHand := b.leftHand
   hleftHand := b.hleftHand
   derivationList :=
     let Γ := ((b.leftHand.map emb ++ Δ).map (~·)).toFinset
-    have : ⊢ᶜ (insert (∃' ~p) $ insert (subst t p) Γ) := ex _ t (~p) (em (p := subst t p) (by simp) (by simp))
-    (cutCut (Δ := Γ) (Γ := insert (subst t p) Γ) (p := ∀' p) (b.derivationList.cast $ by simp) this).cast (by simp)
+    have : ⊢ᶜ (insert (∃' ~p) $ insert (⟦↦ t⟧ p) Γ) := ex _ t (~p) (em (p := ⟦↦ t⟧ p) (by simp) (by simp))
+    (cutCut (Δ := Γ) (Γ := insert (⟦↦ t⟧ p) Γ) (p := ∀' p) (b.derivationList.cast $ by simp) this).cast (by simp)
 
 def specializes : {n : ℕ} → (v : Fin n → SyntacticTerm L) → {p : SyntacticSubFormula L n} →
     ProofArrow T Δ (univClosure p) → ProofArrow T Δ (substs v p)
@@ -249,9 +249,10 @@ def specializes : {n : ℕ} → (v : Fin n → SyntacticTerm L) → {p : Syntact
     have : ProofArrow T Δ (∀' substs (#(Fin.last 0) :> SubTerm.bShift ∘ v ∘ Fin.succ) p) :=
       specializes (v ∘ Fin.succ) b
     (specialize (v 0) this).cast
-      (by simp[SubFormula.subst_substs]; congr; funext x; cases x using Fin.cases <;> simp)
+      (by simp[SubFormula.substs, SubFormula.bind_bind]; congr
+          funext i; cases i using Fin.cases <;> simp[SubTerm.bShift, SubTerm.map, SubTerm.bind_bind])
 
-def useInstance (t) {p} (b : ProofArrow T Δ (subst t p)) : ProofArrow T Δ (∃' p) where
+def useInstance (t) {p} (b : ProofArrow T Δ (⟦↦ t⟧ p)) : ProofArrow T Δ (∃' p) where
   leftHand := b.leftHand
   hleftHand := b.hleftHand
   derivationList :=
@@ -277,34 +278,34 @@ section Eq
 variable [L.Eq] [EqTheory T]
 open SubTerm SubFormula Theory Eq
 
-def eqRefl (t : SyntacticTerm L) : ProofArrow T Δ (“!t = !t”) :=
+def eqRefl (t : SyntacticTerm L) : ProofArrow T Δ (“ᵀ!t = ᵀ!t”) :=
   have b : ProofArrow T Δ (“∀ #0 = #0”) := (byAxiom (EqTheory.subset T Theory.Eq.refl)).cast (by simp)
   (specialize t b).cast (by simp)
 
-def eqSymm {t₁ t₂ : SyntacticTerm L} (b : ProofArrow T Δ “!t₁ = !t₂”) : ProofArrow T Δ “!t₂ = !t₁” :=
+def eqSymm {t₁ t₂ : SyntacticTerm L} (b : ProofArrow T Δ “ᵀ!t₁ = ᵀ!t₂”) : ProofArrow T Δ “ᵀ!t₂ = ᵀ!t₁” :=
   have : ProofArrow T Δ “∀ ∀ (#1 = #0 → #0 = #1)” :=
     (byAxiom (EqTheory.subset T Theory.Eq.symm)).cast (by simp)
-  have : ProofArrow T Δ “!t₁ = !t₂ → !t₂ = !t₁” := (this.specializes ![t₂, t₁]).cast (by simp)
+  have : ProofArrow T Δ “ᵀ!t₁ = ᵀ!t₂ → ᵀ!t₂ = ᵀ!t₁” := (this.specializes ![t₂, t₁]).cast (by simp)
   this.modusPonens  b
 
-def eqTrans {t₁ t₂ t₃ : SyntacticTerm L} (b₁ : ProofArrow T Δ “!t₁ = !t₂”) (b₂ : ProofArrow T Δ “!t₂ = !t₃”) :
-    ProofArrow T Δ “!t₁ = !t₃” :=
+def eqTrans {t₁ t₂ t₃ : SyntacticTerm L} (b₁ : ProofArrow T Δ “ᵀ!t₁ = ᵀ!t₂”) (b₂ : ProofArrow T Δ “ᵀ!t₂ = ᵀ!t₃”) :
+    ProofArrow T Δ “ᵀ!t₁ = ᵀ!t₃” :=
   have : ProofArrow T Δ “∀ ∀ ∀ (#2 = #1 → #1 = #0 → #2 = #0)” :=
     (byAxiom (EqTheory.subset T Theory.Eq.trans)).cast (by simp)
-  have : ProofArrow T Δ “!t₁ = !t₂ → !t₂ = !t₃ → !t₁ = !t₃” := (this.specializes ![t₃, t₂, t₁]).cast (by simp)
+  have : ProofArrow T Δ “ᵀ!t₁ = ᵀ!t₂ → ᵀ!t₂ = ᵀ!t₃ → ᵀ!t₁ = ᵀ!t₃” := (this.specializes ![t₃, t₂, t₁]).cast (by simp)
   (this.modusPonens b₁).modusPonens b₂
 
 def termExt : (t : SyntacticSubTerm L n) → (v₁ v₂ : Fin n → SyntacticTerm L) →
-    ((i : Fin n) → ProofArrow T Δ “!(v₁ i) = !(v₂ i)”) → ProofArrow T Δ “!(t.substs v₁) = !(t.substs v₂)”
+    ((i : Fin n) → ProofArrow T Δ “ᵀ!(v₁ i) = ᵀ!(v₂ i)”) → ProofArrow T Δ “ᵀ!(t.substs v₁) = ᵀ!(t.substs v₂)”
   | #x,       _,  _,  b => b x
   | &x,       _,  _,  _ => eqRefl &x
   | func f v, v₁, v₂, b =>
     have : ProofArrow T Δ
-      “∀* ((⋀ i, !(varSumInL i) = !(varSumInR i)) →
-      !(func f varSumInL) = !(func f varSumInR))” :=
+      “∀* ((⋀ i, ᵀ!(varSumInL i) = ᵀ!(varSumInR i)) →
+      ᵀ!(func f varSumInL) = ᵀ!(func f varSumInR))” :=
     (byAxiom (EqTheory.subset T (Theory.Eq.funcExt f))).cast (by simp[vecEq, Matrix.hom_conj']; rfl)    
     have : ProofArrow T Δ
-      “(⋀ i, !((v i).substs v₁) = !((v i).substs v₂)) → !(func f fun i => (v i).substs v₁) = !(func f fun i => (v i).substs v₂)” :=
+      “(⋀ i, ᵀ!((v i).substs v₁) = ᵀ!((v i).substs v₂)) → ᵀ!(func f fun i => (v i).substs v₁) = ᵀ!(func f fun i => (v i).substs v₂)” :=
       by simpa [Matrix.hom_conj', substs_func] using
         this.specializes (Matrix.vecAppend rfl (fun i => (v i).substs v₁) (fun i => (v i).substs v₂))
     this.modusPonens (splits fun i => termExt (v i) v₁ v₂ b)
@@ -314,11 +315,11 @@ private def negImply {p q : SyntacticFormula L} (b : ProofArrow T Δ (p ⟶ q)) 
     contradiction q (assumption $ by simp) (assumption $ by simp))
 
 private def relExtAux {n} {k} (r : L.rel k) (v : Fin k → SyntacticSubTerm L n) (v₁ v₂ : Fin n → SyntacticTerm L)
-  (b : (i : Fin n) → ProofArrow T Δ “!(v₁ i) = !(v₂ i)”) : ProofArrow T Δ (⟦→ v₁ ⟧ (rel r v) ⟶ ⟦→ v₂ ⟧ (rel r v)) :=
+  (b : (i : Fin n) → ProofArrow T Δ “ᵀ!(v₁ i) = ᵀ!(v₂ i)”) : ProofArrow T Δ (⟦→ v₁ ⟧ (rel r v) ⟶ ⟦→ v₂ ⟧ (rel r v)) :=
   have : ProofArrow T Δ
-    “∀* ((⋀ i, !(varSumInL i) = !(varSumInR i)) → (!(rel r varSumInL) → !(rel r varSumInR)))” :=
+    “∀* ((⋀ i, ᵀ!(varSumInL i) = ᵀ!(varSumInR i)) → (!(rel r varSumInL) → !(rel r varSumInR)))” :=
   (byAxiom (EqTheory.subset T (Theory.Eq.relExt r))).cast (by simp[vecEq, Matrix.hom_conj']; rfl)    
-  have : ProofArrow T Δ “(⋀ i, !((v i).substs v₁) = !((v i).substs v₂)) →
+  have : ProofArrow T Δ “(⋀ i, ᵀ!((v i).substs v₁) = ᵀ!((v i).substs v₂)) →
     !(rel r fun i => (v i).substs v₁) → !(rel r fun i => (v i).substs v₂)” :=
   by simpa [Matrix.hom_conj', substs_func, substs_rel _ r] using
     this.specializes (Matrix.vecAppend rfl (fun i => (v i).substs v₁) (fun i => (v i).substs v₂))
@@ -326,7 +327,7 @@ private def relExtAux {n} {k} (r : L.rel k) (v : Fin k → SyntacticSubTerm L n)
 
 -- 不要だが計算を軽くするために`noncomputable`をつけている
 noncomputable def formulaExtAux : {Δ : List (SyntacticFormula L)} → {n : ℕ} → (p : SyntacticSubFormula L n) → (v₁ v₂ : Fin n → SyntacticTerm L) →
-    ((i : Fin n) → ProofArrow T Δ “!(v₁ i) = !(v₂ i)”) → ProofArrow T Δ (⟦→ v₁⟧ p ⟶ ⟦→ v₂⟧ p)
+    ((i : Fin n) → ProofArrow T Δ “ᵀ!(v₁ i) = ᵀ!(v₂ i)”) → ProofArrow T Δ (⟦→ v₁⟧ p ⟶ ⟦→ v₂⟧ p)
   | Δ, _, ⊤,        v₁, v₂, _ => (intro $ assumption $ by simp)
   | Δ, _, ⊥,        v₁, v₂, _ => (intro $ assumption $ by simp)
   | Δ, _, rel r v,  v₁, v₂, b => relExtAux r v v₁ v₂ b
@@ -347,7 +348,7 @@ noncomputable def formulaExtAux : {Δ : List (SyntacticFormula L)} → {n : ℕ}
     let Δ' := (∀' shift (⟦→ #0 :> bShift ∘ v₁⟧ p)) :: Δ.map shift.toFun
     let v₁' := fun i => (#0 :> bShift ∘ v₁ $ i).free
     let v₂' := fun i => (#0 :> bShift ∘ v₂ $ i).free
-    have b' : (i : Fin _) → ProofArrow T Δ' (“!(v₁' i) = !(v₂' i)”) :=
+    have b' : (i : Fin _) → ProofArrow T Δ' (“ᵀ!(v₁' i) = ᵀ!(v₂' i)”) :=
       Fin.cases (eqRefl _) (fun i => ((b i).shift.weakening (by simp)).cast (by simp))
     have bp : ProofArrow T Δ' (⟦→ v₁'⟧ $ shift p) :=
       (specialize &0 (p := shift (⟦→ #0 :> bShift ∘ v₁⟧ p)) $ assumption $ by simp).cast (by simp[←free_substs_eq_substs_shift])
@@ -359,7 +360,7 @@ noncomputable def formulaExtAux : {Δ : List (SyntacticFormula L)} → {n : ℕ}
     let Δ' := ⟦→ fun i => ((#0 :> bShift ∘ v₁) i).free⟧ (shift p) :: (∃' shift (⟦→ #0 :> bShift ∘ v₁⟧ p)) :: Δ.map shift.toFun
     let v₁' := fun i => (#0 :> bShift ∘ v₁ $ i).free
     let v₂' := fun i => (#0 :> bShift ∘ v₂ $ i).free
-    have b' : (i : Fin _) → ProofArrow T Δ' (“!(v₁' i) = !(v₂' i)”) :=
+    have b' : (i : Fin _) → ProofArrow T Δ' (“ᵀ!(v₁' i) = ᵀ!(v₂' i)”) :=
       Fin.cases (eqRefl _) (fun i => ((b i).shift.weakening $ List.subset_cons_of_subset _ $ by simp).cast (by simp))
     have ih : ProofArrow T Δ' (⟦→ v₁'⟧ (shift p) ⟶ ⟦→ v₂'⟧ (shift p)) := formulaExtAux (Δ := Δ') (shift p) v₁' v₂' b'
     have : ProofArrow T Δ' (∃' SubFormula.shift (⟦→ #0 :> bShift ∘ v₂⟧ p)) :=
@@ -370,15 +371,15 @@ noncomputable def formulaExtAux : {Δ : List (SyntacticFormula L)} → {n : ℕ}
   termination_by formulaExtAux p _ _ _ => p.complexity
 
 noncomputable def formulaExt (p : SyntacticSubFormula L n) (v₁ v₂ : Fin n → SyntacticTerm L) 
-  (b : (i : Fin n) → ProofArrow T Δ “!(v₁ i) = !(v₂ i)”) (d : ProofArrow T Δ (⟦→ v₂⟧ p)) :
+  (b : (i : Fin n) → ProofArrow T Δ “ᵀ!(v₁ i) = ᵀ!(v₂ i)”) (d : ProofArrow T Δ (⟦→ v₂⟧ p)) :
     ProofArrow T Δ (⟦→ v₁⟧ p) :=
   (formulaExtAux p v₂ v₁ (fun i => (b i).eqSymm)).modusPonens d
 
 noncomputable def rewriteEq {p : SyntacticSubFormula L 1} {t₁ t₂ : SyntacticTerm L}
-  (b : ProofArrow T Δ “!t₁ = !t₂”) (d : ProofArrow T Δ (⟦↦ t₂⟧ p)) :
+  (b : ProofArrow T Δ “ᵀ!t₁ = ᵀ!t₂”) (d : ProofArrow T Δ (⟦↦ t₂⟧ p)) :
     ProofArrow T Δ (⟦↦ t₁⟧ p) :=
   ((formulaExtAux p ![t₂] ![t₁] (fun i => b.eqSymm.cast $ by simp)).modusPonens
-    (d.cast $ by simp[substs_eq_subst_zero])).cast (by simp[substs_eq_subst_zero])
+    (d.cast $ by simp)).cast (by simp)
 
 end Eq
 
@@ -429,22 +430,22 @@ inductive Deduction : List (SyntacticFormula L) → SyntacticFormula L → Type 
     Deduction (Δ.map shift) (free p) → Deduction Δ (∀' p)
   -- ∀ left
   | specialize (t) {Δ p} :
-    Deduction Δ (∀' p) → Deduction Δ (subst t p)
+    Deduction Δ (∀' p) → Deduction Δ (⟦↦ t⟧ p)
   -- ∃ right
   | useInstance (t) {Δ p} :
-    Deduction Δ (subst t p) → Deduction Δ (∃' p)
+    Deduction Δ (⟦↦ t⟧ p) → Deduction Δ (∃' p)
   -- ∃ left
   | exCases {Δ p q} :
     Deduction Δ (∃' p) → Deduction (free p :: Δ.map shift) (shift q) → Deduction Δ q
   -- =
   | eqRefl {Δ} (t) :
-    Deduction Δ “!t = !t”
+    Deduction Δ “ᵀ!t = ᵀ!t”
   | eqSymm {Δ t₁ t₂} :
-    Deduction Δ “!t₁ = !t₂” → Deduction Δ “!t₂ = !t₁”
+    Deduction Δ “ᵀ!t₁ = ᵀ!t₂” → Deduction Δ “ᵀ!t₂ = ᵀ!t₁”
   | eqTrans {Δ t₁ t₂ t₃} :
-    Deduction Δ “!t₁ = !t₂” → Deduction Δ “!t₂ = !t₃” → Deduction Δ “!t₁ = !t₃”
+    Deduction Δ “ᵀ!t₁ = ᵀ!t₂” → Deduction Δ “ᵀ!t₂ = ᵀ!t₃” → Deduction Δ “ᵀ!t₁ = ᵀ!t₃”
   | rewriteEq {Δ} {p : SyntacticSubFormula L 1} {t₁ t₂ : SyntacticTerm L} :
-    Deduction Δ “!t₁ = !t₂” → Deduction Δ (⟦↦ t₂⟧ p) → Deduction Δ (⟦↦ t₁⟧ p)
+    Deduction Δ “ᵀ!t₁ = ᵀ!t₂” → Deduction Δ (⟦↦ t₂⟧ p) → Deduction Δ (⟦↦ t₁⟧ p)
 
 notation Δ:0 " ⟹[" T "] " p => Deduction T Δ p
 

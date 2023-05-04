@@ -21,7 +21,7 @@ namespace FirstOrder
 
 namespace SubFormula
 
-def vecEq {k} (v w : Fin k → SubTerm L μ n) : SubFormula L μ n := Matrix.conj (fun i => “!(v i) = !(w i)”)
+def vecEq {k} (v w : Fin k → SubTerm L μ n) : SubFormula L μ n := Matrix.conj (fun i => “ᵀ!(v i) = ᵀ!(w i)”)
 
 end SubFormula
 
@@ -40,7 +40,7 @@ inductive Eq : Theory L
   | symm : Eq “∀ ∀ (#1 = #0 → #0 = #1)”
   | trans : Eq “∀ ∀ ∀ (#2 = #1 → #1 = #0 → #2 = #0)”  
   | funcExt {k} (f : L.func k) :
-    Eq “∀* (!(SubFormula.vecEq varSumInL varSumInR) → !(SubTerm.func f varSumInL) = !(SubTerm.func f varSumInR))”
+    Eq “∀* (!(SubFormula.vecEq varSumInL varSumInR) → ᵀ!(SubTerm.func f varSumInL) = ᵀ!(SubTerm.func f varSumInR))”
   | relExt {k} (r : L.rel k) :
     Eq “∀* (!(SubFormula.vecEq varSumInL varSumInR) → !(SubFormula.rel r varSumInL) → !(SubFormula.rel r varSumInR))”
 
@@ -91,7 +91,7 @@ lemma eqv_trans {a b c : M} : eqv L a b → eqv L b c → eqv L a c := by
 
 lemma eqv_funcExt {k} (f : L.func k) {v w : Fin k → M} (h : ∀ i, eqv L (v i) (w i)) :
     eqv L (func f v) (func f w) := by
-  have : M ⊧₁ “∀* (!(vecEq varSumInL varSumInR) → !(SubTerm.func f varSumInL) = !(SubTerm.func f varSumInR))” :=
+  have : M ⊧₁ “∀* (!(vecEq varSumInL varSumInR) → ᵀ!(SubTerm.func f varSumInL) = ᵀ!(SubTerm.func f varSumInR))” :=
     H (Eq.funcExt f (L := L))
   simp[varSumInL, varSumInR, models_def, vecEq, SubTerm.val_func] at this
   simpa[Matrix.vecAppend_eq_ite] using this (Matrix.vecAppend rfl v w) (fun i => by simpa[Matrix.vecAppend_eq_ite] using h i)

@@ -287,11 +287,11 @@ elab "dbg" : tactic => do
   Lean.Elab.Tactic.closeMainGoal c
 
 example {t : SyntacticSubTerm Language.oring 2} : DbgResult (SyntacticSubTerm Language.oring 12)
-    (shift $ substs ![substs ![T“6”, T“&7”] t, T“3 + &6”] T“(!t) + (#0 * !(shift T“#1 + 9 * #1”)) + &7”) :=
+    (shift $ substs ![substs ![ᵀ“6”, ᵀ“&7”] t, ᵀ“3 + &6”] ᵀ“(ᵀ!t) + (#0 * ᵀ!(shift ᵀ“#1 + 9 * #1”)) + &7”) :=
   by dbg
 
 example (t : SyntacticSubTerm Language.oring 3) : DbgResult (SyntacticSubTerm Language.oring 12)
-    T“((#0 + #1 + #2 + 8 * !t) ⟦#2, 7, 4⟧ ⟦4, 4, 5⟧) * 8” :=
+    $ free $ ᵀ“((#0 + #1 + #2 + 8 * ᵀ!t) ᵀ⟦#2, 7, 4⟧ ᵀ⟦4, 4, 5⟧) * 8” :=
   by dbg
 
 example : 1 ≠ 2 := of_decide_eq_true rfl

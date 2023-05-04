@@ -181,6 +181,8 @@ partial def resultVectorOfResult {α : Q(Type u)}
       let ⟨b, be⟩ ← r a
       let ⟨bs, bse⟩ ← resultVectorOfResult r n as
       return ⟨q($b :> $bs), q(vecConsExt $be $bse)⟩
+    | _ => throwError m!"error in resultVectorOfResult(2). nonexhaustive match: {l}"
+  | _ => throwError m!"error in resultVectorOfResult(1). nonexhaustive match: {n}"
 
 partial def resultVectorOfResultFun {α : Q(Type u)} {β : Q(Type v)}
   (f : Q($α → $β)) (r : (e : Q($α)) → MetaM ((r : Q($β)) × Q($f $e = $r)))
@@ -197,12 +199,12 @@ partial def resultVectorOfResultFun {α : Q(Type u)} {β : Q(Type v)}
       let ⟨b, be⟩ ← r a
       let ⟨bs, bse⟩ ← resultVectorOfResultFun f r n as
       return ⟨q($b :> $bs), q(compVecCons $f $be $bse)⟩
+    | _ => throwError m!"error in resultVectorOfResultFun(2). nonexhaustive match: {n}, {l}"
+  | _ => throwError m!"error in resultVectorOfResultFun(1). nonexhaustive match: {n}"
 
 -- def Result.toVector (n : Q(ℕ)) {α: Q(Type u)}
 --   (r : (e : Q($α)) → MetaM (Result e)) : (v : Q(Fin $n → $α)) → MetaM (Result (u := u) v) :=
 --   resultVectorOfResult (fun e => do by {  })
-
-
 
 partial def mapVectorQ {α : Q(Type u)} {β : Q(Type v)} (f : Q($α) → MetaM Q($β))
     (n : Q(ℕ)) (l : Q(Fin $n → $α)) : MetaM Q(Fin $n → $β) := do
@@ -218,6 +220,8 @@ partial def mapVectorQ {α : Q(Type u)} {β : Q(Type v)} (f : Q($α) → MetaM Q
       let b : Q($β) ← f a
       let bs : Q(Fin $n → $β) ← mapVectorQ f n as
       return q($b :> $bs)
+    | _ => throwError m!"error in mapVectorQ(2). nonexhaustive match: {l}"
+  | _ => throwError m!"error in mapVectorQ(1). nonexhaustive match: {n}"
 
 elab "dbgmapVectorQ" : term => do
   let f : Q(ℕ) → MetaM Q(ℕ) := fun x => whnf q($x * 3)
@@ -239,6 +243,9 @@ partial def vectorQNthAux {α : Q(Type u)}
       match i with
       | 0        => return a
       | .succ i' => vectorQNthAux n l' i'
+    | _ => throwError m!"error in vectorQNthAux(2). nonexhaustive match: {l}"
+  | _ => throwError m!"error in vectorQNthAux(1). nonexhaustive match: {n}"
+  
 
 partial def vectorQNth {α : Q(Type u)}
     (n : Q(ℕ)) (l : Q(Fin $n → $α)) (i : Q(Fin $n)) : MetaM ((a : Q($α)) × Q($l $i = $a)) := do

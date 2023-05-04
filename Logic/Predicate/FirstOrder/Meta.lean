@@ -236,7 +236,7 @@ elab "dbgresultSubsts" : term => do
   let k : Q(ℕ) := q(2)
   let n : Q(ℕ) := q(3)
   let p : Q(SyntacticSubFormula $L $k) := q(“#0 < #1 + 9 * &6 → (∀ #1 < #0 + 7)⟦&4, &3 + #0⟧ ”)
-  let w : Q(Fin $k → SyntacticSubTerm $L $n) := q(![T“2”, T“&6”])
+  let w : Q(Fin $k → SyntacticSubTerm $L $n) := q(![ᵀ“2”, ᵀ“&6”])
   let ⟨e, eq⟩ ← resultSubsts (u := levelZero) w p
   let dbgr := q(DbgResult.intro _ $e $eq)
   logInfo m! "⟦→ {w}⟧ {p} \n⟹ \n{e}"
@@ -294,13 +294,14 @@ partial def resultFree {L : Q(Language.{u})} {n : Q(ℕ)} : (p : Q(SyntacticSubF
   | ~q(⊤)                            => pure ⟨q(⊤), q(rfl)⟩
   | ~q(⊥)                            => pure ⟨q(⊥), q(rfl)⟩
   | ~q(rel (arity := $arity) $r $v)  => do
-    let ⟨v', ve⟩ ← resultVectorOfResultFun (u := u) (v := u) (α := q(SyntacticSubTerm $L ($n + 1))) (β := q(SyntacticSubTerm $L $n))
-      q(@SubTerm.free $L $n) SubTerm.Meta.resultShift arity v
-    let e : Q(SyntacticSubFormula $L $n) := q(rel $r $v')
-    return ⟨e, q(free_rel_of_eq $r $ve)⟩
+    let ⟨v', ve⟩ ← resultVectorOfResultFun (u := u) (v := u)
+      (α := q(SyntacticSubTerm $L ($n + 1))) (β := q(SyntacticSubTerm $L $n))
+      q(@SubTerm.free $L $n) SubTerm.Meta.resultFree arity v
+    return ⟨q(rel $r $v'), q(free_rel_of_eq $r $ve)⟩
   | ~q(nrel (arity := $arity) $r $v) => do
-    let ⟨v', ve⟩ ← resultVectorOfResultFun (u := u) (v := u) (α := q(SyntacticSubTerm $L ($n + 1))) (β := q(SyntacticSubTerm $L $n))
-      q(@SubTerm.free $L $n) SubTerm.Meta.resultShift arity v
+    let ⟨v', ve⟩ ← resultVectorOfResultFun (u := u) (v := u)
+      (α := q(SyntacticSubTerm $L ($n + 1))) (β := q(SyntacticSubTerm $L $n))
+      q(@SubTerm.free $L $n) SubTerm.Meta.resultFree arity v
     let e : Q(SyntacticSubFormula $L $n) := q(nrel $r $v')
     return ⟨e, q(free_nrel_of_eq $r $ve)⟩
   | ~q($p ⋏ $q)                      => do
@@ -334,8 +335,21 @@ partial def resultFree {L : Q(Language.{u})} {n : Q(ℕ)} : (p : Q(SyntacticSubF
       q(@SubTerm.free $L $n) SubTerm.Meta.resultShift k w
     let ⟨p'', p'e⟩ ← resultSubsts w' p'
     return ⟨p'', q(free_substs_of_eq $we $pe $p'e)⟩
-  | ~q($p)                           => pure ⟨q(free $p), q(rfl)⟩
+  | ~q($p)                           => do
+    return ⟨q(free $p), q(rfl)⟩
+  | e => throwError m! "fail! {e} "
 
+elab "dbgresultFree" : term => do
+  let L : Q(Language.{0}) := q(Language.oring)
+  let k : Q(ℕ) := q(2)
+  let n : Q(ℕ) := q(3)
+  let p : Q(SyntacticSubFormula $L ($k + 1)) := q(“#0 + #1 + #2 + #3 < &0 + &1 + &2 + &3”)
+  let ⟨e, eq⟩ ← resultFree (L := L) (n := k) p
+  let dbgr := q(DbgResult.intro _ $e $eq)
+  logInfo m! "free {p} \n⟹ \n{e}"
+  return dbgr
+
+#eval dbgresultFree
 
 partial def resultNeg {L : Q(Language.{u})} {n : Q(ℕ)} : (p : Q(SyntacticSubFormula $L $n)) →
     MetaM ((res : Q(SyntacticSubFormula $L $n)) × Q(~$p = $res))
@@ -503,12 +517,12 @@ elab "dbgResult" : tactic => do
   let c : Q(DbgResult (SyntacticSubFormula $L $n) $p) := (q(DbgResult.intro ($p) $pn $e) : Expr)
   Lean.Elab.Tactic.closeMainGoal c
 
-example {t : SyntacticSubTerm Language.oring 2} : DbgResult (SyntacticSubFormula Language.oring 12)
-    $ shift “3 < #4 ↔ ∀ !(shift $ substs ![&99, &6] “∀ (!t) + (#0 * 8) < &7 + #1 + (#3 + 6)⟦5,4⟧ ”)” :=
+example {t : SyntacticSubTerm Language.oring 3} : DbgResult (SyntacticSubFormula Language.oring 12)
+    $ shift “3 < #4 ↔ ∀ !(shift $ substs ![&99, &6] “∀ (ᵀ!t) + (#0 * 8) < &7 + #1 + (#3 + 6)”)” :=
   by dbgResult
 
-example {p : SyntacticSubFormula Language.oring 2} : DbgResult (SyntacticSubFormula Language.oring 12)
-    $ “!p ⟦3 + #0 + #1, 2⟧ ⟦0, #2⟧ ” :=
+example : DbgResult (SyntacticSubFormula Language.oring 3)
+    $ free “3 * 4 = &6” :=
   by dbgResult
 
 end Meta
@@ -897,15 +911,15 @@ open Language
 
 example (_ : Derivation₁ “¬(!p ∧ !q)”) : Derivation₁ “¬!p ∨ ¬!q”  := by proveTauto
 
-example : Derivation₁ (L := oring) “&0 < 3 → ∃ &0 < #0” := by proveDerivation₁ [T“3”]
+example : Derivation₁ (L := oring) “&0 < 3 → ∃ &0 < #0” := by proveDerivation₁ [ᵀ“3”]
 
-example : Derivation₁ (L := oring) “&0 < 4 + &1 → ∃ ∃ ∃ #0 < #1 + #2” := by proveDerivation₁ 32 [&1, T“4”, &0]
+example : Derivation₁ (L := oring) “&0 < 4 + &1 → ∃ ∃ ∃ #0 < #1 + #2” := by proveDerivation₁ 32 [&1, ᵀ“4”, &0]
 
-example (_ : Derivation₁ (L := oring) “0 < 4 + 9”) : Derivation₁ (L := oring) “⊤ ∧ (∃ 0 < 4 + #0)”  := by proveDerivation₁ [T“9”]
+example (_ : Derivation₁ (L := oring) “0 < 4 + 9”) : Derivation₁ (L := oring) “⊤ ∧ (∃ 0 < 4 + #0)”  := by proveDerivation₁ [ᵀ“9”]
 
-example : Derivation₁ (L := oring) “0 < 4 + 9 → (∃ 0 < 4 + #0)”  := by proveDerivation₁ [T“9”]
+example : Derivation₁ (L := oring) “0 < 4 + 9 → (∃ 0 < 4 + #0)”  := by proveDerivation₁ [ᵀ“9”]
 
-example : DerivationList (L := oring) [“¬(0 + &9 < 2)”, “∃ #0 < 2”] := by simp; proveDerivationList [T“0 + &9”]
+example : DerivationList (L := oring) [“¬(0 + &9 < 2)”, “∃ #0 < 2”] := by simp; proveDerivationList [ᵀ“0 + &9”]
 
 end
 -/
