@@ -1,6 +1,18 @@
+import Logic.Vorspiel.Vorspiel
+import Logic.Vorspiel.Meta
+import Logic.Vorspiel.Logic
+import Logic.Predicate.Language
+import Logic.Predicate.Term
+import Logic.Predicate.Semantics
+import Logic.Predicate.Coding
+import Logic.Predicate.Meta
+import Logic.Predicate.FirstOrder.Formula
+import Logic.Predicate.FirstOrder.Language
 import Logic.Predicate.FirstOrder.Calculus
+import Logic.Predicate.FirstOrder.Coding
+import Logic.Predicate.FirstOrder.Semantics
+import Logic.Predicate.FirstOrder.Ultraproduct
+import Logic.Predicate.FirstOrder.Eq
 import Logic.Predicate.FirstOrder.Meta
-
-open Language FirstOrder Derivation
-
-def d : Derivation.Valid (L := oring) “(∀ ∀ (¬#0 < #1 → #1 ≤ #0)) → (&0 < &1 ∨ &1 ≤ &0)” := by prove 64
+import Logic.Predicate.FirstOrder.Completeness.Completeness
+import Logic.Predicate.FirstOrder.Hauptsatz
