@@ -117,8 +117,8 @@ protected unsafe def repr : {Δ : Sequent L} → ⊢ᶜ[P] Δ → String
       "\\UnaryInfC{$" ++ reprStr Δ ++ "$}\n\n"
   | _, or Δ p q d      =>
       d.repr ++
-      "\\RightLabel{\\scriptsize($\\lor$L)}\n" ++
-      "\\UnaryInfC{$" ++ reprStr (insert p $ insert q Δ) ++ "$}\n\n"
+      "\\RightLabel{\\scriptsize($\\lor$)}\n" ++
+      "\\UnaryInfC{$" ++ reprStr (insert (p ⋎ q) Δ) ++ "$}\n\n"
   | _, and Δ p q dp dq =>
       dp.repr ++
       dq.repr ++
