@@ -71,6 +71,11 @@ instance : HasEx (SubFormula L μ) := ⟨ex⟩
 
 @[simp] lemma neg_neg' (p : SubFormula L μ n) : ~~p = p := neg_neg p
 
+@[simp] lemma neg_inj (p q : SubFormula L μ n) : ~p = ~q ↔ p = q := by
+  constructor
+  · intro h; simpa using congr_arg (~·) h
+  · exact congr_arg _
+
 lemma neg_eq (p : SubFormula L μ n) : ~p = neg p := rfl
 
 lemma imp_eq (p q : SubFormula L μ n) : p ⟶ q = ~p ⋎ q := rfl

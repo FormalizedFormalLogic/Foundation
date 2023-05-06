@@ -1,6 +1,6 @@
 import Logic.Predicate.FirstOrder.Formula
 
-variable {L L₁ L₂ L₃ : Language} {μ : Type _}
+variable {L L₁ L₂ L₃ : Language} {μ : Type v}
 
 namespace Language
 
@@ -162,3 +162,120 @@ def toSubLanguageFinsetSelf {Γ : Finset (SubFormula L μ n)} {p} (h : p ∈ Γ)
   ofSubFormula_toSubLanguage' _ _ _ _ _
 
 end SubFormula
+
+end FirstOrder
+
+namespace Language
+
+variable (L)
+
+def WithPropVar : Language where
+  func := L.func
+  rel  := fun k =>
+    match k with
+    | 0     => Option (L.rel 0)
+    | k + 1 => L.rel (k + 1)
+
+variable {L}
+
+def toWithPropVar : L →ᵥ L.WithPropVar where
+  onFunc := fun f => f
+  onRel  := fun {k} r =>
+    match k with
+    | 0     => some r
+    | _ + 1 => r
+
+@[simp] lemma toWithPropVar_func {k} {f : L.func k} : toWithPropVar.onFunc f = f := rfl
+
+@[simp] lemma toWithPropVar_rel_zero {r : L.rel 0} : toWithPropVar.onRel r = some r := rfl
+
+@[simp] lemma toWithPropVar_rel_succ {k} {r : L.rel (k + 1)} : toWithPropVar.onRel r = r := rfl
+
+end Language
+
+namespace SubTerm
+
+def ofWithPropVar {n : ℕ} : SubTerm L.WithPropVar μ n → SubTerm L μ n
+  | #x       => #x
+  | &x       => &x
+  | func f v => func f (fun i => (v i).ofWithPropVar)
+
+end SubTerm
+
+namespace FirstOrder
+
+namespace SubFormula
+variable {p₀ : SyntacticFormula L}
+
+def ofWithPropVarAux (p₀ : SyntacticFormula L) : {n : ℕ} → SyntacticSubFormula L.WithPropVar n → SyntacticSubFormula L n
+  | _, ⊤                            => ⊤
+  | _, ⊥                            => ⊥
+  | n, rel (arity := 0) none _      => map ![] (· + n) p₀
+  | _, rel (arity := 0) (some r) v  => rel r (fun i => (v i).ofWithPropVar)
+  | _, rel (arity := _ + 1) r v     => rel r (fun i => (v i).ofWithPropVar)
+  | n, nrel (arity := 0) none _     => ~map ![] (· + n) p₀
+  | _, nrel (arity := 0) (some r) v => nrel r (fun i => (v i).ofWithPropVar)
+  | _, nrel (arity := _ + 1) r v    => nrel r (fun i => (v i).ofWithPropVar)
+  | _, p ⋏ q                        => ofWithPropVarAux p₀ p ⋏ ofWithPropVarAux p₀ q
+  | _, p ⋎ q                        => ofWithPropVarAux p₀ p ⋎ ofWithPropVarAux p₀ q
+  | _, ∀' p                         => ∀' ofWithPropVarAux p₀ p
+  | _, ∃' p                         => ∃' ofWithPropVarAux p₀ p
+
+lemma ofWithPropVarAux_neg (p : SyntacticSubFormula L.WithPropVar n) :
+    ~ofWithPropVarAux p₀ p = ofWithPropVarAux p₀ (~p) := by
+  induction p using rec' <;> simp[*, ofWithPropVarAux, ←neg_eq]
+  case hrel k r v =>
+    cases k
+    case zero =>
+      cases r <;> simp[ofWithPropVarAux]
+    case succ =>
+      simp[ofWithPropVarAux]
+  case hnrel k r v =>
+    cases k
+    case zero =>
+      cases r <;> simp[ofWithPropVarAux]
+    case succ =>
+      simp[ofWithPropVarAux]
+
+def ofWithPropVar (p₀ : SyntacticFormula L) {n : ℕ} : SyntacticSubFormula L.WithPropVar n →L SyntacticSubFormula L n where
+  toFun := ofWithPropVarAux p₀
+  map_top' := rfl
+  map_bot' := rfl
+  map_and' := fun _ _ => rfl
+  map_or'  := fun _ _ => rfl
+  map_neg' := fun p => (ofWithPropVarAux_neg p).symm
+  map_imp' := fun p q => by simp[imp_eq, ofWithPropVarAux]; exact (ofWithPropVarAux_neg p).symm
+
+@[simp] lemma ofWithPropVar_rel_zero_none :
+    ofWithPropVar p₀ (rel (n := n) (arity := 0) none ![]) = map ![] (· + n) p₀ := by simp[ofWithPropVar, ofWithPropVarAux]
+
+@[simp] lemma ofWithPropVar_rel_zero_some (r : L.rel 0) :
+    ofWithPropVar p₀ (rel (n := n) (arity := 0) (some r) ![]) = rel r ![] := by simp[ofWithPropVar, ofWithPropVarAux]
+
+@[simp] lemma ofWithPropVar_nrel_zero_none :
+    ofWithPropVar p₀ (nrel (n := n) (arity := 0) none ![]) = ~map ![] (· + n) p₀ := by simp[ofWithPropVar, ofWithPropVarAux]
+
+@[simp] lemma ofWithPropVar_nrel_zero_some (r : L.rel 0) :
+    ofWithPropVar p₀ (nrel (n := n) (arity := 0) (some r) ![]) = nrel r ![] := by simp[ofWithPropVar, ofWithPropVarAux]
+
+@[simp] lemma ofWithPropVar_rel_succ (r : L.rel (k + 1)) (v : Fin (k + 1) → SyntacticSubTerm L.WithPropVar n) :
+    ofWithPropVar p₀ (rel (arity := k + 1) r v) = rel r (fun i => (v i).ofWithPropVar) :=
+  by simp[ofWithPropVar, ofWithPropVarAux]
+
+@[simp] lemma ofWithPropVar_nrel_succ (r : L.rel (k + 1)) (v : Fin (k + 1) → SyntacticSubTerm L.WithPropVar n) :
+    ofWithPropVar p₀ (nrel (arity := k + 1) r v) = nrel r (fun i => (v i).ofWithPropVar) :=
+  by simp[ofWithPropVar, ofWithPropVarAux]
+
+@[simp] lemma ofWithPropVar_all (p : SyntacticSubFormula L.WithPropVar (n + 1)) :
+    ofWithPropVar p₀ (∀' p) = ∀' ofWithPropVar p₀ p :=
+  by simp[ofWithPropVar, ofWithPropVarAux]
+
+@[simp] lemma ofWithPropVar_ex (p : SyntacticSubFormula L.WithPropVar (n + 1)) :
+    ofWithPropVar p₀ (∃' p) = ∃' ofWithPropVar p₀ p :=
+  by simp[ofWithPropVar, ofWithPropVarAux]
+
+end SubFormula
+
+end FirstOrder
+
+

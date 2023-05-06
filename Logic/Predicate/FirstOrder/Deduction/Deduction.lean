@@ -42,8 +42,6 @@ def toProof {σ : Sentence L} (b : ProofArrow T [] (emb σ)) : T ⊢ σ where
   hleftHand := by simp[Set.subset_def]; intro σ hσ; exact ⟨σ, b.hleftHand σ hσ, rfl⟩
   derivation := b.derivation.cast (by simp[List.toFinset_map, Finset.image_image, Function.comp])
 
-
-
 def cast {p p'} (b : ProofArrow T Δ p) (h : p = p') : ProofArrow T Δ p' :=
   h ▸ b
 
@@ -80,16 +78,25 @@ def trans {p q} (b₁ : ProofArrow T Δ p) (b₂ : ProofArrow T (p :: Δ) q) : P
 def assumption {p} (h : p ∈ Δ) : ProofArrow T Δ p where
   leftHand := []
   hleftHand := by simp
-  derivationList := em (p := p) (by simp) (by simp[h]; exact Or.inr ⟨p, h, rfl⟩)
+  derivationList := em (p := p) (by simp) (by simp[h])
 
-def weakening (h : Δ ⊆ Γ) {p} (b : ProofArrow T Δ p) : ProofArrow T Γ p where
+def weakening' {p q} (h : ~p :: Δ ⊆ ~q :: Γ) (b : ProofArrow T Δ p) : ProofArrow T Γ q where
   leftHand := b.leftHand
   hleftHand := b.hleftHand
   derivationList := b.derivationList.weakening
-    (by simp; exact Finset.insert_subset_insert _ $
-      Finset.union_subset_union (by rfl) (by simp[Finset.subset_iff]; intro q hq; exact ⟨q, h hq, rfl⟩))
+    (by intro x; simp[Function.comp, List.toFinset_map]
+        rintro (rfl | h | ⟨y, hy, rfl⟩)
+        · have : x = q ∨ ~x ∈ Γ := by simpa using @h (~x) (by simp);
+          rcases this with (rfl | h) <;> simp
+          exact Or.inr (Or.inr ⟨~x, h, by simp⟩)
+        · exact Or.inr (Or.inl h)
+        · have : y = ~q ∨ y ∈ Γ := by simpa using @h y (by simp[hy])
+          rcases this with (rfl | h) <;> simp[*])
 
-def contradiction (p) {q} (b₁ : ProofArrow T Δ p) (b₂ : ProofArrow T Δ (~p)) : ProofArrow T Δ q where
+def weakening {p} (h : Δ ⊆ Γ) (b : ProofArrow T Δ p) : ProofArrow T Γ p := 
+  b.weakening' (List.cons_subset_cons _ h)
+
+def contradiction {p} (q) (b₁ : ProofArrow T Δ p) (b₂ : ProofArrow T Δ (~p)) : ProofArrow T Δ q where
   leftHand := b₁.leftHand ++ b₂.leftHand
   hleftHand := by simp; rintro σ (hσ | hσ); exact b₁.hleftHand _ hσ; exact b₂.hleftHand _ hσ
   derivationList :=
@@ -111,6 +118,14 @@ def explode {p} (b : ProofArrow T Δ ⊥) : ProofArrow T Δ p where
     have b₂ : ⊢ᶜ (insert ⊤ $ insert p Γ) := verum _ (by simp)
     (cutCut b₁ b₂).cast (by simp)
 
+def intro {p q} (b : ProofArrow T (p :: Δ) q) : ProofArrow T Δ (p ⟶ q) where
+  leftHand := b.leftHand
+  hleftHand := b.hleftHand
+  derivationList :=
+    have : ⊢ᶜ (insert (~p) $ insert q ((b.leftHand.map emb ++ Δ).map (~·)).toFinset) :=
+      b.derivationList.cast (by simp[Finset.Insert.comm])
+    (or _ _ _ this).cast (by simp[SubFormula.imp_eq])
+
 def absurd {p} (b : ProofArrow T (p :: Δ) ⊥) : ProofArrow T Δ (~p) where
   leftHand := b.leftHand
   hleftHand := b.hleftHand
@@ -119,14 +134,6 @@ def absurd {p} (b : ProofArrow T (p :: Δ) ⊥) : ProofArrow T Δ (~p) where
     have b₁ : ⊢ᶜ (insert ⊥ $ insert (~p) Γ) := b.derivationList.cast (by simp)
     have b₂ : ⊢ᶜ (insert ⊤ $ insert (~p) Γ) := verum _ (by simp)
     (cutCut b₁ b₂).cast (by simp)
-
-def intro {p q} (b : ProofArrow T (p :: Δ) q) : ProofArrow T Δ (p ⟶ q) where
-  leftHand := b.leftHand
-  hleftHand := b.hleftHand
-  derivationList :=
-    have : ⊢ᶜ (insert (~p) $ insert q ((b.leftHand.map emb ++ Δ).map (~·)).toFinset) :=
-      b.derivationList.cast (by simp[Finset.Insert.comm])
-    (or _ _ _ this).cast (by simp[SubFormula.imp_eq])
 
 def modusPonens {p q} (b₁ : ProofArrow T Δ (p ⟶ q)) (b₂ : ProofArrow T Δ p) : ProofArrow T Δ q where
   leftHand := b₁.leftHand ++ b₂.leftHand
@@ -312,7 +319,7 @@ def termExt : (t : SyntacticSubTerm L n) → (v₁ v₂ : Fin n → SyntacticTer
 
 private def negImply {p q : SyntacticFormula L} (b : ProofArrow T Δ (p ⟶ q)) : ProofArrow T Δ (~q ⟶ ~p) :=
   (b.trans $ intro $ absurd $ trans (p := q) (modusPonens (p := p) (assumption $ by simp) (assumption $ by simp)) $
-    contradiction q (assumption $ by simp) (assumption $ by simp))
+    contradiction (p := q) ⊥ (assumption $ by simp) (assumption $ by simp))
 
 private def relExtAux {n} {k} (r : L.rel k) (v : Fin k → SyntacticSubTerm L n) (v₁ v₂ : Fin n → SyntacticTerm L)
   (b : (i : Fin n) → ProofArrow T Δ “ᵀ!(v₁ i) = ᵀ!(v₂ i)”) : ProofArrow T Δ (⟦→ v₁ ⟧ (rel r v) ⟶ ⟦→ v₂ ⟧ (rel r v)) :=
@@ -392,20 +399,22 @@ inductive Deduction : List (SyntacticFormula L) → SyntacticFormula L → Type 
   | tauto {Δ p} : ProofArrow T Δ p → Deduction Δ p
   | axm {Δ σ} :
     σ ∈ T → Deduction Δ (emb σ)
-  | weakening {Δ Γ p} :
-    Δ ⊆ Γ → Deduction Δ p → Deduction Γ p    
+  | weakening' {Δ Γ p q} :
+    ~p :: Δ ⊆ ~q :: Γ → Deduction Δ p → Deduction Γ q
+  | rewrite (f : ℕ → SyntacticTerm L) {p} :
+    Deduction Δ p → Deduction (Δ.map $ rewrite f) (rewrite f p)    
   | trans {Δ p q} :
     Deduction Δ p → Deduction (p :: Δ) q → Deduction Δ q
   | assumption {Δ p} :
     p ∈ Δ → Deduction Δ p
-  | contradiction {Δ} (p) {q} :
+  | contradiction {Δ p} (q) :
     Deduction Δ p → Deduction Δ (~p) → Deduction Δ q
   -- ⊤ - right
   | trivial {Δ} : Deduction Δ ⊤
   -- ⊥ - left
   | explode {Δ p} : Deduction Δ ⊥ → Deduction Δ p
   -- → right
-  | intro {Δ p q} : Deduction (p :: Δ) q → Deduction Δ (p ⟶ q) 
+  | intro {Δ p q} : Deduction (p :: Δ) q → Deduction Δ (p ⟶ q)
   -- → left
   | modusPonens {Δ p q} :
     Deduction Δ (p ⟶ q) → Deduction Δ p → Deduction Δ q
@@ -457,7 +466,8 @@ open ProofArrow
 def toStr : {Δ : List (SyntacticFormula L)} → {p : SyntacticFormula L} → (Δ ⟹[T] p) → String
   | _, _, tauto _               => "tauto"
   | _, _, axm _                 => "axiom"
-  | _, _, weakening _ d         => "weakening\n" ++ d.toStr
+  | _, _, weakening' _ d        => "weakening\n" ++ d.toStr
+  | _, _, rewrite _ d           => "rewrite\n" ++ d.toStr
   | _, _, trans c₁ c₂           => "have: {\n" ++ c₁.toStr ++ "\n}\n" ++ c₂.toStr
   | _, _, assumption _          => "assumption"
   | _, _, contradiction _ c₁ c₂ => "contradiction: {\n" ++ c₁.toStr ++ "\n}\nand: {\n" ++ c₂.toStr ++ "\n}"
@@ -488,10 +498,11 @@ noncomputable def toProofArrow : {Δ : List (SyntacticFormula L)} → {p : Synta
     (Δ ⟹[T] p) → ProofArrow T Δ p
   | _, _, tauto d               => d
   | _, _, axm h                 => ProofArrow.byAxiom h
-  | _, _, weakening h d         => d.toProofArrow.weakening h
+  | _, _, weakening' h d        => d.toProofArrow.weakening' h
+  | _, _, rewrite f d           => d.toProofArrow.rewrite f
   | _, _, trans d₁ d₂           => d₁.toProofArrow.trans (d₂.toProofArrow)
   | _, _, assumption h          => ProofArrow.assumption h
-  | _, _, contradiction p d₁ d₂ => d₁.toProofArrow.contradiction p d₂.toProofArrow
+  | _, _, contradiction _ d₁ d₂ => d₁.toProofArrow.contradiction _ d₂.toProofArrow
   | _, _, trivial               => ProofArrow.trivial
   | _, _, explode d             => d.toProofArrow.explode
   | _, _, intro d               => d.toProofArrow.intro
