@@ -928,7 +928,7 @@ macro_rules
   | `(“ ⊥ ”)                                       => `(⊥)
   | `(“ ! $t:term ”)                               => `($t)
   | `(“ [ $d:term ]( $t:subterm,* ) ”)             => do
-    let v ← t.getElems.foldlM (β := Lean.TSyntax _) (init := ← `(![])) (fun s a => `(ᵀ“$a” :> $s))
+    let v ← t.getElems.foldrM (β := Lean.TSyntax _) (init := ← `(![])) (fun a s => `(ᵀ“$a” :> $s))
     `(rel $d $v)
   | `(“ ¬ $p:subformula ”)                         => `(~“$p”)
   | `(“ $t:subterm = $u:subterm ”)                 => `(rel Language.Eq.eq ![ᵀ“$t”, ᵀ“$u”])
@@ -942,7 +942,7 @@ macro_rules
   | `(“ ∃ $p:subformula ”)                         => `(∃' “$p”)
   | `(“ ∀* $p:subformula ”)                        => `(univClosure “$p”)
   | `(“ $p:subformula ⟦ $t:subterm,* ⟧ ”)            => do
-    let v ← t.getElems.foldlM (β := Lean.TSyntax _) (init := ← `(![])) (fun s a => `(ᵀ“$a” :> $s))
+    let v ← t.getElems.foldrM (β := Lean.TSyntax _) (init := ← `(![])) (fun a s => `(ᵀ“$a” :> $s))
     `(substs $v “$p”)
   | `(“ ⇑$p:subformula ”)                         => `(shift “$p”)
 

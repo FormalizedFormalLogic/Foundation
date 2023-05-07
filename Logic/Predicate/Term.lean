@@ -534,14 +534,14 @@ macro_rules
   | `(ᵀ“ ᵀ! $t:term ”)                                => `($t)
   | `(ᵀ“ $n:num ”)                                   => `(SubTerm.Operator.const (natLit _ $n))
   | `(ᵀ“ [ $d:term ]( $t:subterm,* ) ”)              => do
-    let v ← t.getElems.foldlM (β := Lean.TSyntax _) (init := ← `(![])) (fun s a => `(ᵀ“$a” :> $s))
+    let v ← t.getElems.foldrM (β := Lean.TSyntax _) (init := ← `(![])) (fun a s => `(ᵀ“$a” :> $s))
     `(func $d $v)
   | `(ᵀ“ $t:subterm + $u:subterm ”)                  => `(func Language.Add.add ![ᵀ“$t”, ᵀ“$u”])
   | `(ᵀ“ $t:subterm * $u:subterm ”)                  => `(func Language.Mul.mul ![ᵀ“$t”, ᵀ“$u”])
   | `(ᵀ“ $t:subterm ^ $u:subterm ”)                  => `(func Language.Pow.pow ![ᵀ“$t”, ᵀ“$u”])
   | `(ᵀ“ ⇑$t:subterm ”)                             => `(shift ᵀ“$t”)
   | `(ᵀ“ $t:subterm ᵀ⟦$u:subterm,*⟧ ”)                => do
-    let v ← u.getElems.foldlM (β := Lean.TSyntax _) (init := ← `(![])) (fun s a => `(ᵀ“$a” :> $s))
+    let v ← u.getElems.foldrM (β := Lean.TSyntax _) (init := ← `(![])) (fun a s => `(ᵀ“$a” :> $s))
     `(substs $v ᵀ“$t”)
   | `(ᵀ“ ⤒$t:subterm ”)                             => `(SubTerm.bShift ᵀ“$t”)
   | `(ᵀ“ ⟨free⟩ $t:subterm ”)                        => `(SubTerm.free ᵀ“$t”)
