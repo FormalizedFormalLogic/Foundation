@@ -112,6 +112,19 @@ lemma natLit_succ_of_eq {z : ℕ} (t : SubTerm L μ n) (h : natLit L z.succ = t)
 
 end
 
+lemma substs_zero_of_eq {s t : Term L μ} (h : s = t) : s = substs ![t] #0 := by simp[h]
+
+lemma substs_consts_of_eq (c : Const L) {s : Term L μ} : c.const = substs ![s] c.const := by simp
+
+lemma substs_func_of_eq' {k} {s : Term L μ} (f : L.func k) {v : Fin k → Term L μ} {v' : Fin k → SubTerm L μ 1}
+  (h : ∀ i, v i = substs ![s] (v' i)) : func f v = substs ![s] (func f v') := by simp[substs_func, ←h]
+
+lemma eq_substs_substs_of_eq {k} {s : Term L μ} (t : SubTerm L μ k) {v : Fin k → Term L μ} {v' : Fin k → SubTerm L μ 1}
+  (h : ∀ i, v i = substs ![s] (v' i)) : substs v t = substs ![s] (substs v' t) := by simp[substs_substs, Function.comp, ←h]
+
+lemma eq_substs_substs_nil (v) (s : Term L μ) {t : Term L μ} {t'} (ht : substs v t = t') :
+  t = substs ![s] t' := by simp[←ht, substs_substs]
+
 end lemmata
 
 partial def resultSubsts {L : Q(Language.{u})} {k n : Q(ℕ)} (w : Q(Fin $k → SyntacticSubTerm $L $n)) :
@@ -133,6 +146,42 @@ partial def resultSubsts {L : Q(Language.{u})} {k n : Q(ℕ)} (w : Q(Fin $k → 
     let ⟨p', pe⟩ ← resultSubsts v' t
     return ⟨p', q(substs_substs_of_eq $ve $pe)⟩
   | ~q($t)                           => pure ⟨q(substs $w $t), q(rfl)⟩
+
+partial def findSubsts {L : Q(Language.{u})} (s : Q(SyntacticTerm $L))
+    (t : Q(SyntacticTerm $L)) : MetaM ((res : Q(SyntacticSubTerm $L 1)) × Q($t = substs ![$s] $res)) := do
+  if (← isDefEq s t) then
+    let eqn : Q($t = $s) := (q(@rfl (SyntacticTerm $L) $t) : Expr)
+    return ⟨q(#0), q(substs_zero_of_eq $eqn)⟩
+  else
+    match t with
+    | ~q(&$x)                          => return ⟨q(&($x)), q(rfl)⟩
+    | ~q(Operator.const $c)            => pure ⟨q(Operator.const $c), q(substs_consts_of_eq $c)⟩
+    | ~q(func (arity := $arity) $f $v) =>
+      let ⟨v', vh⟩ ← Qq.mapVectorInfo (u := u) (v := u) (H := q(fun t res => t = substs ![$s] res)) (findSubsts s) arity v
+      return ⟨q(func $f $v'), q(substs_func_of_eq' $f $vh)⟩
+    | ~q(substs (n := $k) $v $t)       =>
+      let ⟨v', vh⟩ ← Qq.mapVectorInfo (u := u) (v := u) (H := q(fun t res => t = substs ![$s] res)) (findSubsts s) k v
+      return ⟨q(substs $v' $t), q(eq_substs_substs_of_eq $t $vh)⟩
+    | ~q($t)                           => do
+      have v : Q(Fin 0 → SyntacticSubTerm $L 1) := q(![])
+      let ⟨t', th⟩ ← resultSubsts (k := q(0)) (n := q(1)) v t
+      return ⟨t', q(eq_substs_substs_nil $v $s $th)⟩
+
+elab "dbgFindSubsts" : term => do
+  let L : Q(Language.{0}) := q(Language.oring)
+  let t : Q(SyntacticTerm $L) := q(ᵀ“((&2 + 1) + 9) * (#0 + 1)ᵀ⟦&2 + 1, 6⟧ ”)
+  logInfo m! "{t}"
+  let s : Q(SyntacticTerm $L) := q(ᵀ“&2 + 1”)
+  let v : Q(Fin 1 → SyntacticTerm $L) := q(![$s])
+  let ⟨e, eq⟩ ← findSubsts s t
+  let dbgr := q(DbgResult.intro _ _ $eq)
+  logInfo m! "{t} \n⟹ \n{e}"
+  let ⟨e', eq'⟩ ← resultSubsts (u := levelZero) (L := L) (n := q(0)) v e
+  logInfo m! "{e} \n⟹ \n{e'}"
+  let dbgr' := q(DbgResult.intro _ _ $eq')
+  return dbgr
+
+#eval dbgFindSubsts
 
 partial def resultShift {L : Q(Language.{u})} {n : Q(ℕ)} : (t : Q(SyntacticSubTerm $L $n)) →
     MetaM ((res : Q(SyntacticSubTerm $L $n)) × Q(SubTerm.shift $t = $res))

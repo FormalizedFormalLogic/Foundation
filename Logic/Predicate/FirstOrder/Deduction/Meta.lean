@@ -130,26 +130,31 @@ open SubFormula
 variable (L : Q(Language.{u}))
 variable (dfunc : Q(∀ k, DecidableEq (($L).func k))) (drel : Q(∀ k, DecidableEq (($L).rel k))) (lEq : Q(Language.Eq $L)) 
 variable (T : Q(Theory $L)) (eqTh : Q(EqTheory $T))
+variable (Δ : Q(List (SyntacticFormula $L))) (Δ' : Q(List (SyntacticFormula $L)))
 
 def assumptionQ (Γ : Q(List (SyntacticFormula $L))) (p : Q(SyntacticFormula $L)) (h : Q($p ∈ $Γ)) :
     Q($Γ ⟹[$T] $p) :=
   q(Deduction.assumption $h)
 
-def generalizeOfEqQ (Δ Δ' : Q(List (SyntacticFormula $L))) (p : Q(SyntacticSubFormula $L 1)) (p' : Q(SyntacticFormula $L))
+def generalizeOfEqQ (p : Q(SyntacticSubFormula $L 1)) (p' : Q(SyntacticFormula $L))
   (hΔ : Q(($Δ).map shift = $Δ')) (hp : Q(free $p = $p')) (b : Q($Δ' ⟹[$T] $p')) : Q($Δ ⟹[$T] ∀' $p) :=
   q(Deduction.generalizeOfEq $hΔ $hp $b)
 
-def exCasesOfEqQ (Δ Δ' : Q(List (SyntacticFormula $L)))
+def useInstanceOfEqQ (t : Q(SyntacticTerm $L)) (p : Q(SyntacticSubFormula $L 1)) (p' : Q(SyntacticFormula $L))
+  (h : Q(⟦↦ $t⟧ $p = $p')) (b : Q($Δ ⟹[$T] $p')) : Q($Δ ⟹[$T] ∃' $p) :=
+  q(Deduction.useInstanceOfEq $t $h $b)
+
+def exCasesOfEqQ
   (p : Q(SyntacticSubFormula $L 1)) (p' : Q(SyntacticFormula $L))
   (q q' : Q(SyntacticFormula $L))
   (hΔ : Q(($Δ).map shift = $Δ')) (hp : Q(free $p = $p')) (hq : Q(shift $q = $q'))
   (b₀ : Q($Δ ⟹[$T] ∃' $p)) (b₁ : Q(($p' :: $Δ') ⟹[$T] $q')) : Q($Δ ⟹[$T] $q) :=
   q(Deduction.exCasesOfEq $hΔ $hp $hq $b₀ $b₁)
 
-def eqReflOfEqQ (Δ : Q(List (SyntacticFormula $L))) (t₁ t₂ : Q(SyntacticTerm $L)) (h : Q($t₁ = $t₂)) :
+def eqReflOfEqQ (t₁ t₂ : Q(SyntacticTerm $L)) (h : Q($t₁ = $t₂)) :
     Q($Δ ⟹[$T] SubFormula.rel Language.Eq.eq ![$t₁, $t₂]) := q(Deduction.eqReflOfEq $h)
 
-def iffReflOfEqQ (Δ : Q(List (SyntacticFormula $L))) (p₁ p₂ : Q(SyntacticFormula $L)) (h : Q($p₁ = $p₂)) :
+def iffReflOfEqQ (p₁ p₂ : Q(SyntacticFormula $L)) (h : Q($p₁ = $p₂)) :
     Q($Δ ⟹[$T] $p₁ ⟷ $p₂) := q(Deduction.iffReflOfEq $h)
 
 end DeductionQ
@@ -290,6 +295,9 @@ partial def subFormulaSyntaxToExpr (n : Q(ℕ)) : Syntax → TermElabM Q(Syntact
     return q(SubFormula.substs $ev $ep)
   | _                   => throwUnsupportedSyntax
 
+partial def termSyntaxToExpr (s : Syntax) : TermElabM Q(SyntacticTerm $L) :=
+  subTermSyntaxToExpr L q(0) s
+
 partial def formulaSyntaxToExpr (s : Syntax) : TermElabM Q(SyntacticFormula $L) :=
   subFormulaSyntaxToExpr L q(0) s
 
@@ -318,6 +326,7 @@ inductive DeductionCode (L : Q(Language.{u})) : Type
   | eqTrans       : Q(SyntacticFormula $L) → DeductionCode L → DeductionCode L → DeductionCode L
   | rewriteEq     : (e₁ e₂ : Q(SyntacticTerm $L)) → DeductionCode L → DeductionCode L → DeductionCode L
   | since         : Syntax → DeductionCode L
+  | rwEq          : Q(SyntacticTerm $L) → Syntax → DeductionCode L → DeductionCode L
   | showState     : DeductionCode L → DeductionCode L
   | missing       : DeductionCode L
   -- TODO
@@ -348,16 +357,16 @@ def toStr : DeductionCode L → String
   | eqTrans _ c₁ c₂       => "trans: {\n" ++ c₁.toStr ++ "\n}\n and: {\n" ++ c₂.toStr ++ "\n}"
   | rewriteEq _ _ c₁ c₂   => "rewrite: {\n" ++ c₁.toStr ++ "\n}\n" ++ c₂.toStr
   | since _               => "since"
+  | rwEq _ _ c            => c.toStr   
   | showState c           => c.toStr
   | missing               => "?"
-
+/--/
 instance : Repr (DeductionCode L) := ⟨fun b _ => b.toStr L⟩
 
 instance : ToString (DeductionCode L) := ⟨toStr L⟩
 
 variable (dfunc : Q(∀ k, DecidableEq (($L).func k))) (drel : Q(∀ k, DecidableEq (($L).rel k))) (lEq : Q(Language.Eq $L)) 
 variable (T : Q(Theory $L)) (eqTh : Q(EqTheory $T))
-
 
 def display (E : List Q(SyntacticFormula $L)) (e : Q(SyntacticFormula $L)) : MetaM Unit := do
   -- logInfo m!"Language: {L}\nTheory: {T}"
@@ -439,6 +448,14 @@ def run : (c : DeductionCode L) → (G : List Q(SyntacticFormula $L)) → (e : Q
       return DeductionQ.generalizeOfEqQ L dfunc drel lEq T
         (Qq.toQList (u := u) E) (Qq.toQList (u := u) sE) e fe sEe fee b
     | _ => throwError "incorrect structure: {e} should be ∀ _"
+  | useInstance t c, E, i => do
+    match i with
+    | ~q(∃' $p) =>
+      let ⟨p', pe⟩ ← SubFormula.Meta.resultSubsts (L := L) (k := q(1)) (n := q(0)) q(![$t]) p
+      let b ← c.run E p'
+      return DeductionQ.useInstanceOfEqQ L dfunc drel lEq T
+        (Qq.toQList (u := u) E) t p p' pe b
+    | _ => throwError "incorrect structure: {i} should be ∃ _" 
   | exCases e c₀ c₁,          E, i => do
     let ⟨fe, fee⟩ ← SubFormula.Meta.resultFree (L := L) (n := q(0)) e
     let ⟨si, sie⟩ ← SubFormula.Meta.resultShift (L := L) (n := q(0)) i
@@ -466,6 +483,15 @@ def run : (c : DeductionCode L) → (G : List Q(SyntacticFormula $L)) → (e : Q
         return DeductionQ.iffReflOfEqQ L dfunc drel lEq T (Qq.toQList (u := u) E) p₁ p₂ eqn
       else throwError "term should be equal: {p₁}, {p₂}"
     | _ => throwError "incorrect structure: {i} should be _ = _ or _ ↔ _"
+  | eqSymm c, E, i => do
+    match i with
+    | ~q(SubFormula.rel Language.Eq.eq ![$i₁, $i₂]) =>
+      let b ← c.run E q(“ᵀ!$i₂ = ᵀ!$i₁”)
+      return q(Deduction.eqSymm $b)
+    | ~q($p ⟷ $q) =>
+      let b ← c.run E q($q ⟷ $p)
+      return q(Deduction.iffSymm $b)
+    | _ => throwError "incorrect structure: {i} should be _ = _ or _ ↔ _"
   | since s, E, e               => do
     Term.elabTerm s (return q($(Qq.toQList (u := u) E) ⟹[$T] $e))
   | showState c,          E, e  => do
@@ -491,7 +517,10 @@ def seqIndent    := leading_parser many1Indent seqItem
 
 def seq := seqIndent
 
+syntax metaBlock := "by " term
+
 syntax proofBlock := "· " seq
+
 syntax optProofBlock := ("@ " seq)?
 
 syntax (name := notationAssumption) "assumption" : proofElem
@@ -520,9 +549,13 @@ syntax (name := notationCases) "cases " subformula " or " subformula optProofBlo
 
 syntax (name := notationGeneralize) "generalize" : proofElem
 
-syntax (name := notationExCases) "invoke " subformula optProofBlock : proofElem
+syntax (name := notationUse) "use " subterm : proofElem
+
+syntax (name := notationExCases) "choose " subformula optProofBlock : proofElem
 
 syntax (name := notationEqRefl) "rfl" : proofElem
+
+syntax (name := notationEqSymm) "symm" : proofElem
 
 syntax (name := notationSince) "since" term : proofElem
 
@@ -602,9 +635,9 @@ partial def seqToCode (L : Q(Language.{u})) : List Syntax → TermElabM (Deducti
       let c := if s.isMissing then DeductionCode.assumption else ← seqToCode L (getSeqElems <| s)
       return DeductionCode.orRight c
     else if k == ``notationCases then
-      let s₀ := getSeqOfOptProofBlock seqElem[4] 
-      let s₁ := getSeqOfOptProofBlock seqElem[5]
-      let s₂ := getSeqOfOptProofBlock seqElem[6]
+      let s₀ := getSeqOfOptProofBlock seqElem[4]
+      let s₁ := getSeqOfProofBlock seqElem[5]
+      let s₂ := getSeqOfProofBlock seqElem[6]
       let e₁ ← formulaSyntaxToExpr L seqElem[1]
       let e₂ ← formulaSyntaxToExpr L seqElem[3]
       let c₀ := if s₀.isMissing then DeductionCode.assumption else ← seqToCode L (getSeqElems <| s₀)
@@ -613,7 +646,11 @@ partial def seqToCode (L : Q(Language.{u})) : List Syntax → TermElabM (Deducti
       return DeductionCode.cases e₁ e₂ c₀ c₁ c₂
     else if k == ``notationGeneralize then
       let c ← seqToCode L seqElems
-      return DeductionCode.generalize c      
+      return DeductionCode.generalize c
+    else if k == ``notationUse then
+      let t ← termSyntaxToExpr L seqElem[1]
+      let c ← seqToCode L seqElems
+      return DeductionCode.useInstance t c
     else if k == ``notationExCases then
       let e ← subFormulaSyntaxToExpr L q(1) seqElem[1]
       let s := getSeqOfOptProofBlock seqElem[2] 
@@ -622,8 +659,9 @@ partial def seqToCode (L : Q(Language.{u})) : List Syntax → TermElabM (Deducti
       return DeductionCode.exCases e c₀ c₁
     else if k == ``notationEqRefl then
       return DeductionCode.eqRefl
-    -- TODO: else if k == ``notationEqRefl then
-    -- TODO: else if k == ``notationEqSymm then
+    else if k == ``notationEqSymm then
+      let c ← seqToCode L seqElems
+      return DeductionCode.eqSymm c
     -- TODO: else if k == ``notationEqTrans then
     -- TODO: else if k == ``notationRewriteEq then
     else if k == ``notationSince then
@@ -693,7 +731,7 @@ example : [“0 = &1”, “3 < &6 + &7”] ⟹[T] “∀ ∀ ∀ ((#0 = 0 ∨ #
     trivial
   □
 
-example (t : SyntacticSubTerm L 1) :
+example :
     [“&0 < 1 → &0 = 0”, “&0 < 1”] ⟹[T] “&0 = 0” :=
   proof.
     suffices &0 < 1
@@ -712,19 +750,41 @@ example (t : SyntacticSubTerm L 1) :
 example :
     [“∃ #0 < &1”] ⟹[T] “⊤” :=
   proof.
-    invoke #0 < &1
+    choose #0 < &1
     trivial
   □
 
+
+-- rfl
 example :
     [] ⟹[T] “2 = 1 + 1” :=
   proof.
-    rfl
+    ! symm
+    ! rfl
   □
 
 example :
     [] ⟹[T] “2 = 1 + 1 ↔ 1 + 1 = 2” :=
   proof.
+    ! symm
+    ! rfl
+  □
+
+example :
+    [“&0 = 0 ∨ ∃ &0 = #0 + 1”] ⟹[T] “⊤” :=
+  proof.
+    cases &0 = 0 or ∃ &0 = #0 + 1
+    · trivial
+    · choose &0 = #0 + 1
+      trivial
+  □
+
+example :
+    [] ⟹[T] “∃ ∃ ∃ #0 = #1 + #2” :=
+  proof.
+    use 1
+    use 2
+    use 3
     rfl
   □
 
