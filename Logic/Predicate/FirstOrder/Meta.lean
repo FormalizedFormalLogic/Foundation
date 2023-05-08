@@ -78,6 +78,36 @@ lemma free_substs_of_eq {k} {w : Fin k → SyntacticSubTerm L (n + 1)} {p : Synt
 
 end free
 
+section fix
+
+lemma fix_rel_of_eq {k} (r : L.rel k) {v : Fin k → SyntacticSubTerm L n} {v'} (h : SubTerm.fix ∘ v = v') :
+    fix (rel r v) = rel r v' := by
+  simp[←h]; rfl
+
+lemma fix_nrel_of_eq {k} (r : L.rel k) {v : Fin k → SyntacticSubTerm L n} {v'} (h : SubTerm.fix ∘ v = v') :
+    fix (nrel r v) = nrel r v' := by
+  simp[←h]; rfl
+
+lemma fix_all_eq_of_eq {p : SyntacticSubFormula L (n + 1)} {p'} (h : fix p = p') :
+    fix (∀' p) = ∀' p' := by simp[←h]
+
+lemma fix_ex_eq_of_eq {p : SyntacticSubFormula L (n + 1)} {p'} (h : fix p = p') :
+    fix (∃' p) = ∃' p' := by simp[←h]
+
+lemma fix_imply_eq_of_eq {p q : SyntacticSubFormula L n} {p' q'} (hp : fix p = p') (hq : fix q = q') :
+    fix (p ⟶ q) = p' ⟶ q' := by simp[←hp, ←hq]
+
+lemma fix_iff_eq_of_eq {p q : SyntacticSubFormula L n} {p' q'} (hp : fix p = p') (hq : fix q = q') :
+    fix (p ⟷ q) = p' ⟷ q' := by simp[←hp, ←hq]
+
+lemma fix_substs_of_eq {k} {p : SyntacticSubFormula L k} {w : Fin k → SyntacticSubTerm L n} {p' p'' w' w'' i}
+  (ht : fix p = p') (hw : SubTerm.fix ∘ w = w') (hi : Fin.last n = i) (hw' : w' <: #i = w'') (hp' : substs w'' p' = p''):
+    fix (substs w p) = p'' := by
+  simp[←ht, ←hw, ←hi, ←hw', ←hp', shift, map, fix, substs, bind_bind, Function.comp]; congr
+  · funext x; cases x <;> simp
+
+end fix
+
 section shift
 
 lemma shift_rel_of_eq {k} (r : L.rel k) {v : Fin k → SyntacticSubTerm L n} {v'} (h : SubTerm.shift ∘ v = v') :
@@ -179,6 +209,52 @@ lemma imply_congr {p q p' q' : SubFormula L μ n} (ep : p = p') (eq : q = q') :
 
 lemma iff_congr {p q p' q' : SubFormula L μ n} (ep : p = p') (eq : q = q') :
   (p ⟷ q) = (p' ⟷ q') := congr (congr_arg (fun p q => p ⟷ q) ep) eq
+
+lemma rel_eq_substs_rel_of_eq {k} {s : Term L μ} (r : L.rel k) {v : Fin k → Term L μ} {v' : Fin k → SubTerm L μ 1}
+  (h : ∀ i, v i = SubTerm.substs ![s] (v' i)) : rel r v = ⟦↦ s⟧ (rel r v') := by simp[substs_rel, ←h]
+
+lemma nrel_eq_substs_nrel_of_eq {k} {s : Term L μ} (r : L.rel k) {v : Fin k → Term L μ} {v' : Fin k → SubTerm L μ 1}
+  (h : ∀ i, v i = SubTerm.substs ![s] (v' i)) : nrel r v = ⟦↦ s⟧ (nrel r v') := by simp[substs_nrel, ←h]
+
+lemma eq_substs_and_of_eq {s : Term L μ} {p q : Formula L μ} {p' q' : SubFormula L μ 1}
+  (hp : p = ⟦↦ s⟧ p') (hq : q = ⟦↦ s⟧ q') : p ⋏ q = ⟦↦ s⟧ (p' ⋏ q') := by simp[←hp, ←hq]
+
+lemma eq_substs_or_of_eq {s : Term L μ} {p q : Formula L μ} {p' q' : SubFormula L μ 1}
+  (hp : p = ⟦↦ s⟧ p') (hq : q = ⟦↦ s⟧ q') : p ⋎ q = ⟦↦ s⟧ (p' ⋎ q') := by simp[←hp, ←hq]
+
+lemma all_eq_substs_all_of_eq {s : SyntacticTerm L} {s' p p' q q' q''}
+  (hp : free p = p') (hs : s.shift = s') (findq : p' = ⟦↦ s'⟧ q)
+  (hq : fix q = q') (hq' : ⟦→ ![#1, #0]⟧ q' = q'') : ∀' p = ⟦↦ s⟧ (∀' q'') := by
+  have hp : p = fix p' := by simpa using congr_arg fix hp
+  simp[hp, ←hs, findq, ←hq, ←hq', substs, fix, bind_bind, Fin.eq_zero]; congr
+  · funext; simp[SubTerm.shift, SubTerm.bShift, SubTerm.map, SubTerm.bind_bind, Matrix.empty_eq]
+  · funext x; cases x <;> simp
+
+lemma ex_eq_substs_ex_of_eq {s : SyntacticTerm L} {s' p p' q q' q''}
+  (hp : free p = p') (hs : s.shift = s') (findq : p' = ⟦↦ s'⟧ q)
+  (hq : fix q = q') (hq' : ⟦→ ![#1, #0]⟧ q' = q'') : ∃' p = ⟦↦ s⟧ (∃' q'') := by
+  have hp : p = fix p' := by simpa using congr_arg fix hp
+  simp[hp, ←hs, findq, ←hq, ←hq', substs, fix, bind_bind, Fin.eq_zero]; congr
+  · funext; simp[SubTerm.shift, SubTerm.bShift, SubTerm.map, SubTerm.bind_bind, Matrix.empty_eq]
+  · funext x; cases x <;> simp
+
+lemma eq_substs_neg_of_eq {s : Term L μ} {p : Formula L μ} {p' : SubFormula L μ 1}
+  (hp : p = ⟦↦ s⟧ p') : ~p = ⟦↦ s⟧ (~p') := by simp[←hp]
+
+lemma eq_substs_imply_of_eq {s : Term L μ} {p q : Formula L μ} {p' q' : SubFormula L μ 1}
+  (hp : p = ⟦↦ s⟧ p') (hq : q = ⟦↦ s⟧ q') :
+    p ⟶ q = ⟦↦ s⟧ (p' ⟶ q') := by simp[←hp, ←hq]
+
+lemma eq_substs_iff_of_eq {s : Term L μ} {p q : Formula L μ} {p' q' : SubFormula L μ 1}
+  (hp : p = ⟦↦ s⟧ p') (hq : q = ⟦↦ s⟧ q') :
+    p ⟷ q = ⟦↦ s⟧ (p' ⟷ q') := by simp[←hp, ←hq]
+
+lemma eq_substs_substs_of_eq {k} {s : Term L μ} (p : SubFormula L μ k) {v : Fin k → Term L μ} {v' : Fin k → SubTerm L μ 1}
+  (h : ∀ i, v i = SubTerm.substs ![s] (v' i)) :
+    substs v p = ⟦↦ s⟧ (substs v' p) := by simp[substs_substs, Function.comp, ←h]
+
+lemma eq_substs_substs_nil (v) (s : Term L μ) {p : Formula L μ} {p'} (ht : substs v p = p') :
+  p = substs ![s] p' := by simp[←ht, substs_substs]
 
 end lemmata
 
@@ -351,6 +427,74 @@ elab "dbgresultFree" : term => do
 
 #eval dbgresultFree
 
+#check fix_substs_of_eq
+
+partial def resultFix {L : Q(Language.{u})} {n : Q(ℕ)} : (p : Q(SyntacticSubFormula $L $n)) →
+    MetaM ((res : Q(SyntacticSubFormula $L ($n + 1))) × Q(fix $p = $res))
+  | ~q(⊤)                            => pure ⟨q(⊤), q(rfl)⟩
+  | ~q(⊥)                            => pure ⟨q(⊥), q(rfl)⟩
+  | ~q(rel (arity := $arity) $r $v)  => do
+    let ⟨v', ve⟩ ← resultVectorOfResultFun (u := u) (v := u)
+      (α := q(SyntacticSubTerm $L $n)) (β := q(SyntacticSubTerm $L ($n + 1)))
+      q(@SubTerm.fix $L $n) SubTerm.Meta.resultFix arity v
+    return ⟨q(rel $r $v'), q(fix_rel_of_eq $r $ve)⟩
+  | ~q(nrel (arity := $arity) $r $v) => do
+    let ⟨v', ve⟩ ← resultVectorOfResultFun (u := u) (v := u)
+      (α := q(SyntacticSubTerm $L $n)) (β := q(SyntacticSubTerm $L ($n + 1)))
+      q(@SubTerm.fix $L $n) SubTerm.Meta.resultFix arity v
+    return ⟨q(nrel $r $v'), q(fix_nrel_of_eq $r $ve)⟩
+  | ~q($p ⋏ $q)                      => do
+    let ⟨pn, pe⟩ ← resultFix p
+    let ⟨qn, qe⟩ ← resultFix q
+    return ⟨q($pn ⋏ $qn), q(hom_and_eq_of_eq $pe $qe)⟩
+  | ~q($p ⋎ $q)                      => do
+    let ⟨pn, pe⟩ ← resultFix p
+    let ⟨qn, qe⟩ ← resultFix q
+    return ⟨q($pn ⋎ $qn), q(hom_or_eq_of_eq $pe $qe)⟩
+  | ~q(∀' $p)                        => do
+    let ⟨pn, e⟩ ← resultFix (n := q($n + 1)) p
+    return ⟨q(∀' $pn), q(fix_all_eq_of_eq $e)⟩
+  | ~q(∃' $p)                        => do
+    let ⟨pn, e⟩ ← resultFix (n := q($n + 1)) p
+    return ⟨q(∃' $pn), q(fix_ex_eq_of_eq $e)⟩
+  | ~q(~$p)                          => do
+    let ⟨pn, pe⟩ ← resultFix p
+    return ⟨q(~$pn), q(hom_neg_eq_of_eq $pe)⟩
+  | ~q($p ⟶ $q)                      => do
+    let ⟨pn, pe⟩ ← resultFix p
+    let ⟨qn, qe⟩ ← resultFix q
+    return ⟨q($pn ⟶ $qn), q(hom_imply_eq_of_eq $pe $qe)⟩
+  | ~q($p ⟷ $q)                      => do
+    let ⟨pn, pe⟩ ← resultFix p
+    let ⟨qn, qe⟩ ← resultFix q
+    return ⟨q($pn ⟷ $qn), q(hom_iff_eq_of_eq $pe $qe)⟩
+  | ~q(substs (n := $k) $w $p)       => do
+    let ⟨p', hp⟩ ← resultFix (L := L) (n := k) p
+    let ⟨w', hw⟩ ← resultVectorOfResultFun (u := u) (v := u)
+      (α := q(SyntacticSubTerm $L $n)) (β := q(SyntacticSubTerm $L ($n + 1)))
+      q(@SubTerm.fix $L $n) SubTerm.Meta.resultFix k w
+    let some nval := (←whnf n).natLit? | throwError f!"Fail: natLit: {n}"
+    let z : Q(Fin ($n + 1)) ← Lean.Expr.ofNat q(Fin ($n + 1)) nval
+    let hz : Q(Fin.last $n = $z) := (q(@rfl (Fin ($n + 1)) $z) : Expr)
+    let ⟨w'', hw'⟩ ← vectorAppend k w' q(#$z)
+    let ⟨p'', hp'⟩ ← resultSubsts w'' p'
+    return ⟨p'', q(fix_substs_of_eq $hp $hw $hz $hw' $hp')⟩
+  | ~q($p)                           => do
+    return ⟨q(fix $p), q(rfl)⟩
+  | e => throwError m! "fail! {e} "
+
+elab "dbgResultFix'" : term => do
+  let L : Q(Language.{0}) := q(Language.oring)
+  let n : Q(ℕ) := q(5)
+  let p : Q(SyntacticSubFormula $L $n) := q(“#0 + #1 + #2 + #3 < &0 + &1 + &2 + &3 → (#0 = #1)⟦0, &5⟧ ”)
+  logInfo m! "{p}"
+  let ⟨e, eq⟩ ← resultFix (L := L) (n := n) p
+  let dbgr := q(DbgResult.intro _ $e $eq)
+  logInfo m! "free {p} \n⟹ \n{e}"
+  return dbgr
+
+#eval dbgResultFix'
+
 partial def resultNeg {L : Q(Language.{u})} {n : Q(ℕ)} : (p : Q(SyntacticSubFormula $L $n)) →
     MetaM ((res : Q(SyntacticSubFormula $L $n)) × Q(~$p = $res))
   | ~q(⊤)                      => pure ⟨q(⊥), q(rfl)⟩
@@ -504,7 +648,6 @@ partial def resultSubst₀List {L : Q(Language.{u})} (v : List Q(SyntacticTerm $
     MetaM $ (res : List Q(SyntacticFormula $L)) × Q(List.map (SubFormula.substs ![·] $p) $(toQList (u := u) v) = $(toQList (u := u) res)) :=
   funResultList (u := u) (α := q(SyntacticTerm $L)) q((substs ![·] $p)) (resultSubst₀ p) v
 
-
 elab "dbgResult" : tactic => do
   let goalType ← Elab.Tactic.getMainTarget
   let some ⟨.succ u, ty⟩ ← checkSortQ' goalType | throwError "error: not a type"
@@ -524,6 +667,72 @@ example {t : SyntacticSubTerm Language.oring 3} : DbgResult (SyntacticSubFormula
 example : DbgResult (SyntacticSubFormula Language.oring 3)
     $ free “3 * 4 = &6” :=
   by dbgResult
+
+#check all_eq_substs_all_of_eq
+
+partial def findFormula {L : Q(Language.{u})} (s : Q(SyntacticTerm $L)) :
+    (p : Q(SyntacticFormula $L)) → MetaM ((res : Q(SyntacticSubFormula $L 1)) × Q($p = substs ![$s] $res))
+  | ~q(⊤)        => return ⟨q(⊤), q(rfl)⟩
+  | ~q(⊥)        => return ⟨q(⊥), q(rfl)⟩
+  | ~q(rel (arity := $arity) $r $v)  => do
+    let ⟨v', vh⟩ ← Qq.mapVectorInfo (u := u) (v := u) (H := q(fun t res => t = SubTerm.substs ![$s] res)) (SubTerm.Meta.findTerm s) arity v
+    return ⟨q(rel $r $v'), q(rel_eq_substs_rel_of_eq $r $vh)⟩
+  | ~q(nrel (arity := $arity) $r $v)  => do
+    let ⟨v', vh⟩ ← Qq.mapVectorInfo (u := u) (v := u) (H := q(fun t res => t = SubTerm.substs ![$s] res)) (SubTerm.Meta.findTerm s) arity v
+    return ⟨q(nrel $r $v'), q(nrel_eq_substs_nrel_of_eq $r $vh)⟩
+  | ~q($p ⋏ $q)  => do
+    let ⟨p', ph⟩ ← findFormula s p
+    let ⟨q', qh⟩ ← findFormula s q
+    return ⟨q($p' ⋏ $q'), q(eq_substs_and_of_eq $ph $qh)⟩
+  | ~q($p ⋎ $q)  => do
+    let ⟨p', ph⟩ ← findFormula s p
+    let ⟨q', qh⟩ ← findFormula s q
+    return ⟨q($p' ⋎ $q'), q(eq_substs_or_of_eq $ph $qh)⟩
+  | ~q(∀' $p) => do
+    let ⟨p', hp⟩ ← resultFree p
+    let ⟨s', hs⟩ ← SubTerm.Meta.resultShift (u := u) (L := L) (n := q(0)) s
+    let ⟨q, hq⟩ ← findFormula (L := L) s' p'
+    let ⟨q', hq'⟩ ← resultFix (u := u) (L := L) q
+    let ⟨q'', hq''⟩ ← resultSubsts (L := L) (n := q(2)) (k := q(2)) q(![#1, #0]) q'
+    return ⟨q(∀' $q''), q(all_eq_substs_all_of_eq $hp $hs $hq $hq' $hq'')⟩
+  | ~q(∃' $p) => do
+    let ⟨p', hp⟩ ← resultFree p
+    let ⟨s', hs⟩ ← SubTerm.Meta.resultShift (u := u) (L := L) (n := q(0)) s
+    let ⟨q, hq⟩ ← findFormula (L := L) s' p'
+    let ⟨q', hq'⟩ ← resultFix (u := u) (L := L) q
+    let ⟨q'', hq''⟩ ← resultSubsts (L := L) (n := q(2)) (k := q(2)) q(![#1, #0]) q'
+    return ⟨q(∃' $q''), q(ex_eq_substs_ex_of_eq $hp $hs $hq $hq' $hq'')⟩
+  | ~q(~$p)  => do
+    let ⟨p', ph⟩ ← findFormula s p
+    return ⟨q(~$p'), q(eq_substs_neg_of_eq $ph)⟩
+  | ~q($p ⟶ $q)  => do
+    let ⟨p', ph⟩ ← findFormula s p
+    let ⟨q', qh⟩ ← findFormula s q
+    return ⟨q($p' ⟶ $q'), q(eq_substs_imply_of_eq $ph $qh)⟩
+  | ~q($p ⟷ $q)  => do
+    let ⟨p', ph⟩ ← findFormula s p
+    let ⟨q', qh⟩ ← findFormula s q
+    return ⟨q($p' ⟷ $q'), q(eq_substs_iff_of_eq $ph $qh)⟩
+  | ~q(substs (n := $k) $v $p)       => do
+    let ⟨v', vh⟩ ← Qq.mapVectorInfo (u := u) (v := u) (H := q(fun t res => t = SubTerm.substs ![$s] res)) (SubTerm.Meta.findTerm s) k v
+    return ⟨q(substs $v' $p), q(eq_substs_substs_of_eq $p $vh)⟩
+  | ~q($p)                           => do
+    have v : Q(Fin 0 → SyntacticSubTerm $L 1) := q(![])
+    let ⟨p', ph⟩ ← resultSubsts (k := q(0)) (n := q(1)) v p
+    return ⟨p', q(eq_substs_substs_nil $v $s $ph)⟩
+  
+
+elab "dbgFindFormula" : term => do
+  let L : Q(Language.{0}) := q(Language.oring)
+  let p : Q(SyntacticFormula $L) := q(“∀ (&2 + 1) + 9 * (#0 + 1)ᵀ⟦&2 + 1, 6⟧ < 0”)
+  let s : Q(SyntacticTerm $L) := q(ᵀ“&2 + 1”)
+  let v : Q(Fin 1 → SyntacticTerm $L) := q(![$s])
+  let ⟨e, eq⟩ ← findFormula s p
+  let dbgr := q(DbgResult.intro _ _ $eq)
+  logInfo m! "{p} \n⟹ \n{e}"
+  return dbgr
+
+#eval dbgFindFormula
 
 end Meta
 

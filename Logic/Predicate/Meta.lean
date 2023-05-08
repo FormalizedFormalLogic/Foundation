@@ -74,6 +74,29 @@ lemma free_substs_of_eq {t : SyntacticSubTerm L k} {w : Fin k → SyntacticSubTe
 
 end free
 
+section fix
+
+lemma fix_fvar (x) : fix (#x : SyntacticSubTerm L n) = #(.castSucc x) :=
+  SubTerm.fix_bvar x
+
+lemma fix_bvar_zero (n : ℕ) : fix &0 = (#⟨n, Nat.lt.base n⟩ : SyntacticSubTerm L (n + 1)) :=
+  SubTerm.fix_fvar_zero
+
+lemma fix_bvar_succ (x) (n : ℕ) : fix (&(x + 1) : SyntacticSubTerm L (n + 1)) = &x :=
+  SubTerm.fix_fvar_succ x
+
+lemma fix_func_of_eq {n} (f : L.func k) {v : Fin k → SyntacticSubTerm L n} {v'} (h : fix ∘ v = v') :
+    fix (func f v) = func f v' :=
+  by simp[fix_func, Function.comp, ←h]
+
+lemma fix_substs_of_eq {k} {t : SyntacticSubTerm L k} {w : Fin k → SyntacticSubTerm L n} {t' t'' w' w'' i}
+  (ht : fix t = t') (hw : fix ∘ w = w') (hi : Fin.last n = i) (hw' : w' <: #i = w'') (ht' : substs w'' t' = t''):
+    fix (substs w t) = t'' := by
+  simp[←ht, ←hw, ←hi, ←hw', ←ht', shift, map, fix, substs, bind_bind, Function.comp]; congr
+  · funext x; cases x <;> simp
+
+end fix
+
 lemma func_congr  {k} (f : L.func k) {v₁ v₂ : Fin k → SyntacticSubTerm L n} (h : v₁ = v₂):
     func f v₁ = func f v₂ := by simp[←h]
 
@@ -91,6 +114,10 @@ variable (c : Const L)
 
 @[simp] lemma free_const :
     free (c : SyntacticSubTerm L (n + 1)) = c :=
+  by simp
+
+@[simp] lemma fix_const :
+    fix (c : SyntacticSubTerm L n) = c :=
   by simp
 
 @[simp] lemma substs_const {n'} {w : Fin n → SubTerm L μ n'} :
@@ -112,11 +139,11 @@ lemma natLit_succ_of_eq {z : ℕ} (t : SubTerm L μ n) (h : natLit L z.succ = t)
 
 end
 
-lemma substs_zero_of_eq {s t : Term L μ} (h : s = t) : s = substs ![t] #0 := by simp[h]
+lemma eq_substs_zero_of_eq {s t : Term L μ} (h : s = t) : s = substs ![t] #0 := by simp[h]
 
-lemma substs_consts_of_eq (c : Const L) {s : Term L μ} : c.const = substs ![s] c.const := by simp
+lemma const_eq_substs_sonst_of_eq (c : Const L) {s : Term L μ} : c.const = substs ![s] c.const := by simp
 
-lemma substs_func_of_eq' {k} {s : Term L μ} (f : L.func k) {v : Fin k → Term L μ} {v' : Fin k → SubTerm L μ 1}
+lemma eq_substs_func_of_eq {k} {s : Term L μ} (f : L.func k) {v : Fin k → Term L μ} {v' : Fin k → SubTerm L μ 1}
   (h : ∀ i, v i = substs ![s] (v' i)) : func f v = substs ![s] (func f v') := by simp[substs_func, ←h]
 
 lemma eq_substs_substs_of_eq {k} {s : Term L μ} (t : SubTerm L μ k) {v : Fin k → Term L μ} {v' : Fin k → SubTerm L μ 1}
@@ -146,42 +173,6 @@ partial def resultSubsts {L : Q(Language.{u})} {k n : Q(ℕ)} (w : Q(Fin $k → 
     let ⟨p', pe⟩ ← resultSubsts v' t
     return ⟨p', q(substs_substs_of_eq $ve $pe)⟩
   | ~q($t)                           => pure ⟨q(substs $w $t), q(rfl)⟩
-
-partial def findSubsts {L : Q(Language.{u})} (s : Q(SyntacticTerm $L))
-    (t : Q(SyntacticTerm $L)) : MetaM ((res : Q(SyntacticSubTerm $L 1)) × Q($t = substs ![$s] $res)) := do
-  if (← isDefEq s t) then
-    let eqn : Q($t = $s) := (q(@rfl (SyntacticTerm $L) $t) : Expr)
-    return ⟨q(#0), q(substs_zero_of_eq $eqn)⟩
-  else
-    match t with
-    | ~q(&$x)                          => return ⟨q(&($x)), q(rfl)⟩
-    | ~q(Operator.const $c)            => pure ⟨q(Operator.const $c), q(substs_consts_of_eq $c)⟩
-    | ~q(func (arity := $arity) $f $v) =>
-      let ⟨v', vh⟩ ← Qq.mapVectorInfo (u := u) (v := u) (H := q(fun t res => t = substs ![$s] res)) (findSubsts s) arity v
-      return ⟨q(func $f $v'), q(substs_func_of_eq' $f $vh)⟩
-    | ~q(substs (n := $k) $v $t)       =>
-      let ⟨v', vh⟩ ← Qq.mapVectorInfo (u := u) (v := u) (H := q(fun t res => t = substs ![$s] res)) (findSubsts s) k v
-      return ⟨q(substs $v' $t), q(eq_substs_substs_of_eq $t $vh)⟩
-    | ~q($t)                           => do
-      have v : Q(Fin 0 → SyntacticSubTerm $L 1) := q(![])
-      let ⟨t', th⟩ ← resultSubsts (k := q(0)) (n := q(1)) v t
-      return ⟨t', q(eq_substs_substs_nil $v $s $th)⟩
-
-elab "dbgFindSubsts" : term => do
-  let L : Q(Language.{0}) := q(Language.oring)
-  let t : Q(SyntacticTerm $L) := q(ᵀ“((&2 + 1) + 9) * (#0 + 1)ᵀ⟦&2 + 1, 6⟧ ”)
-  logInfo m! "{t}"
-  let s : Q(SyntacticTerm $L) := q(ᵀ“&2 + 1”)
-  let v : Q(Fin 1 → SyntacticTerm $L) := q(![$s])
-  let ⟨e, eq⟩ ← findSubsts s t
-  let dbgr := q(DbgResult.intro _ _ $eq)
-  logInfo m! "{t} \n⟹ \n{e}"
-  let ⟨e', eq'⟩ ← resultSubsts (u := levelZero) (L := L) (n := q(0)) v e
-  logInfo m! "{e} \n⟹ \n{e'}"
-  let dbgr' := q(DbgResult.intro _ _ $eq')
-  return dbgr
-
-#eval dbgFindSubsts
 
 partial def resultShift {L : Q(Language.{u})} {n : Q(ℕ)} : (t : Q(SyntacticSubTerm $L $n)) →
     MetaM ((res : Q(SyntacticSubTerm $L $n)) × Q(SubTerm.shift $t = $res))
@@ -241,6 +232,54 @@ partial def resultFree {L : Q(Language.{u})} {n : Q(ℕ)} : (t : Q(SyntacticSubT
   | ~q(SubTerm.Operator.const $c)    => pure ⟨q(SubTerm.Operator.const $c), q(free_const _)⟩
   | ~q($t)                           => do
     return ⟨q(SubTerm.free $t), q(rfl)⟩
+
+#check fix_substs_of_eq
+
+partial def resultFix {L : Q(Language.{u})} {n : Q(ℕ)} : (t : Q(SyntacticSubTerm $L $n)) →
+    MetaM ((res : Q(SyntacticSubTerm $L ($n + 1))) × Q(SubTerm.fix $t = $res))
+  | ~q(#$x)                          => do
+    let some xval := (← finQVal (n := q(.succ $n)) x) | throwError f!"Fail: FinQVal {x}"
+    let e : Expr := q(SubTerm.fix_bvar (L := $L) (n := $n) $x)
+    let z : Q(Fin ($n + 1)) ← Lean.Expr.ofNat q(Fin ($n + 1)) xval
+    return ⟨q(#$z), e⟩
+  | ~q(&0)                          => do
+    let n' ←whnf n 
+    let some nval := n'.natLit? | throwError f!"Fail: natLit: {n}"
+    let z : Q(Fin ($n + 1)) ← Lean.Expr.ofNat q(Fin ($n + 1)) nval
+    let hh := q(@fix_bvar_zero $L $n)
+    return ⟨q(#$z), hh⟩
+  | ~q(&($x + 1))                          => do
+    return ⟨q(&$x), q(SubTerm.fix_fvar_succ (L := $L) (n := $n) $x)⟩
+  | ~q(func (arity := $arity) $f $v) => do
+    let ⟨v', ve'⟩ ← resultVectorOfResultFun (u := u) (v := u)
+      (α := q(SyntacticSubTerm $L $n)) (β := q(SyntacticSubTerm $L ($n + 1)))
+      q(@fix $L $n) resultFix arity v
+    let e : Q(SyntacticSubTerm $L ($n + 1)) := q(func $f $v')
+    return ⟨e, q(fix_func_of_eq $f $ve')⟩
+  | ~q(substs (n := $k) $w $t)       => do
+    let ⟨t', ht⟩ ← resultFix (L := L) (n := k) t
+    let ⟨w', hw⟩ ← resultVectorOfResultFun (u := u) (v := u)
+      (α := q(SyntacticSubTerm $L $n)) (β := q(SyntacticSubTerm $L ($n + 1)))
+      q(@fix $L $n) resultFix k w
+    let some nval := (←whnf n).natLit? | throwError f!"Fail: natLit: {n}"
+    let z : Q(Fin ($n + 1)) ← Lean.Expr.ofNat q(Fin ($n + 1)) nval
+    let hz : Q(Fin.last $n = $z) := (q(@rfl (Fin ($n + 1)) $z) : Expr)
+    let ⟨w'', hw'⟩ ← vectorAppend k w' q(#$z)
+    let ⟨t'', ht'⟩ ← resultSubsts w'' t'
+    return ⟨t'', q(fix_substs_of_eq $ht $hw $hz $hw' $ht')⟩
+  | ~q(SubTerm.Operator.const $c)    => pure ⟨q(SubTerm.Operator.const $c), q(fix_const _)⟩
+  | ~q($t)                           => do
+    return ⟨q(SubTerm.fix $t), q(rfl)⟩
+
+elab "dbgResultFix" : term => do
+  let L : Q(Language.{0}) := q(Language.oring)
+  let t : Q(SyntacticTerm $L) := q(ᵀ“((&2 + 1) + 9) * (#0 + 1)ᵀ⟦&2 + 1, 6⟧ ”)
+  let ⟨e, eq⟩ ← resultFix (L := L) (n := q(0)) t
+  logInfo m! "{t}\n ⟹\n {e}"
+  let dbgr := q(DbgResult.intro _ _ $eq)
+  return dbgr
+
+#eval dbgResultFix
 
 partial def resultBShift {L : Q(Language.{u})} {n : Q(ℕ)} : (t : Q(SyntacticSubTerm $L $n)) →
     MetaM ((res : Q(SyntacticSubTerm $L ($n + 1))) × Q(bShift $t = $res))
@@ -344,6 +383,42 @@ example (t : SyntacticSubTerm Language.oring 3) : DbgResult (SyntacticSubTerm La
   by dbg
 
 example : 1 ≠ 2 := of_decide_eq_true rfl
+
+partial def findTerm {L : Q(Language.{u})} (s : Q(SyntacticTerm $L))
+    (t : Q(SyntacticTerm $L)) : MetaM ((res : Q(SyntacticSubTerm $L 1)) × Q($t = substs ![$s] $res)) := do
+  if (← isDefEq s t) then
+    let eqn : Q($t = $s) := (q(@rfl (SyntacticTerm $L) $t) : Expr)
+    return ⟨q(#0), q(eq_substs_zero_of_eq $eqn)⟩
+  else
+    match t with
+    | ~q(&$x)                          => return ⟨q(&($x)), q(rfl)⟩
+    | ~q(Operator.const $c)            => pure ⟨q(Operator.const $c), q(const_eq_substs_sonst_of_eq $c)⟩
+    | ~q(func (arity := $arity) $f $v) =>
+      let ⟨v', vh⟩ ← Qq.mapVectorInfo (u := u) (v := u) (H := q(fun t res => t = substs ![$s] res)) (findTerm s) arity v
+      return ⟨q(func $f $v'), q(eq_substs_func_of_eq $f $vh)⟩
+    | ~q(substs (n := $k) $v $t)       =>
+      let ⟨v', vh⟩ ← Qq.mapVectorInfo (u := u) (v := u) (H := q(fun t res => t = substs ![$s] res)) (findTerm s) k v
+      return ⟨q(substs $v' $t), q(eq_substs_substs_of_eq $t $vh)⟩
+    | ~q($t)                           => do
+      have v : Q(Fin 0 → SyntacticSubTerm $L 1) := q(![])
+      let ⟨t', th⟩ ← resultSubsts (k := q(0)) (n := q(1)) v t
+      return ⟨t', q(eq_substs_substs_nil $v $s $th)⟩
+
+elab "dbgfindTerm" : term => do
+  let L : Q(Language.{0}) := q(Language.oring)
+  let t : Q(SyntacticTerm $L) := q(ᵀ“((&2 + 1) + 9) * (#0 + 1)ᵀ⟦&2 + 1, 6⟧ ”)
+  logInfo m! "{t}"
+  let s : Q(SyntacticTerm $L) := q(ᵀ“&2 + 1”)
+  let v : Q(Fin 1 → SyntacticTerm $L) := q(![$s])
+  let ⟨e, eq⟩ ← findTerm s t
+  let dbgr := q(DbgResult.intro _ _ $eq)
+  logInfo m! "{t} \n⟹ \n{e}"
+  let ⟨e', eq'⟩ ← resultSubsts (u := levelZero) (L := L) (n := q(0)) v e
+  logInfo m! "{e} \n⟹ \n{e'}"
+  let dbgr' := q(DbgResult.intro _ _ $eq')
+  return dbgr
+
+#eval dbgfindTerm
 
 end Meta
 

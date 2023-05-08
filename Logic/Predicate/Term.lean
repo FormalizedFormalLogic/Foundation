@@ -47,6 +47,10 @@ def bind (bound : Fin n₁ → SubTerm L μ₂ n₂) (free : μ₁ → SubTerm L
   | (&x)       => free x
   | (func f v) => func f (fun i => (v i).bind bound free)
 
+abbrev rewrite (f : μ₁ → SubTerm L μ₂ n) : SubTerm L μ₁ n → SubTerm L μ₂ n := bind SubTerm.bvar f
+
+abbrev rewrite1 (t : SyntacticSubTerm L n) : SyntacticSubTerm L n → SyntacticSubTerm L n := bind SubTerm.bvar (t :>ₙ fvar)
+
 def map (bound : Fin n₁ → Fin n₂) (free : μ₁ → μ₂) : SubTerm L μ₁ n₁ → SubTerm L μ₂ n₂ :=
   bind (fun n => #(bound n)) (fun m => &(free m))
 
@@ -244,6 +248,8 @@ lemma shift_Injective : Function.Injective (@shift L n) :=
 
 @[simp] lemma free_bvar_last : free (#(Fin.last n) : SyntacticSubTerm L (n + 1)) = &0 := by simp[free]
 
+@[simp] lemma free_bvar_last_zero : free (#0 : SyntacticSubTerm L 1) = &0 := free_bvar_last
+
 @[simp] lemma free_fvar (x : ℕ) : free (&x : SyntacticSubTerm L (n + 1)) = &(x + 1) := by simp[free]
 
 lemma free_func {k} (f : L.func k) (v : Fin k → SyntacticSubTerm L (n + 1)) :
@@ -439,6 +445,9 @@ instance : Coe (Const L) (SubTerm L μ n) := ⟨const⟩
 
 @[simp] lemma free_const (c : Const L) :
     free (L := L) (n := n) c = c := by simp[free]
+
+@[simp] lemma fix_const (c : Const L) :
+    fix (L := L) (n := n) c = c := by simp[fix]
 
 lemma map_func (o : Operator L ι) {μ₁ μ₂ : Type v} {n₁ n₂} (bound : Fin n₁ → Fin n₂) (free : μ₁ → μ₂)
   (v : ι → SubTerm L μ₁ n₁) :

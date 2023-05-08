@@ -102,6 +102,10 @@ lemma to_vecCons (s : Fin (n + 1) → C) : s = s 0 :> s ∘ Fin.succ :=
       · exact funext (fun i => by simpa using congrFun h (Fin.castSucc i + 1)),
    by intros h; simp[h]⟩
 
+lemma vecCons_assoc (a b : α) (s : Fin n → α) :
+    a :> (s <: b) = (a :> s) <: b := by
+  funext x; cases' x using Fin.cases with x <;> simp; cases x using Fin.lastCases <;> simp[Fin.succ_castSucc]
+
 def decVec {α : Type _} : {n : ℕ} → (v w : Fin n → α) → (∀ i, Decidable (v i = w i)) → Decidable (v = w)
   | 0,     _, _, _ => by simp; exact isTrue trivial
   | n + 1, v, w, d => by

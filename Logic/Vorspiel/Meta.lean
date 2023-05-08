@@ -290,6 +290,32 @@ elab "dbgvectorQNth" : term => do
 
 #eval dbgvectorQNth
 
+private lemma vecCons_assoc_eq {a b : α} {s : Fin n → α} (h : s <: b = t) :
+    (a :> s) <: b = a :> t := by simp[←h, Matrix.vecCons_assoc]
+
+partial def vectorAppend {α : Q(Type u)}
+    (n : Q(ℕ)) (v : Q(Fin $n → $α)) (a : Q($α)) : MetaM ((w : Q(Fin ($n + 1) → $α)) × Q($v <: $a = $w)) := do
+  match n with
+  | ~q(0) => return ⟨q(![$a]), q(Matrix.vecConsLast_vecEmpty $a)⟩
+  | ~q($n + 1) =>
+    let v : Q(Fin ($n + 1) → $α) := v
+    match v with
+    | ~q($b :> $v') =>
+      let ⟨ih, ihh⟩ ← vectorAppend n v' a
+      return ⟨q($b :> $ih), q(vecCons_assoc_eq $ihh)⟩
+    | _ => throwError m!"error in vectorQNthAux(2). nonexhaustive match: {v}"
+
+elab "dbgVectorAppend" : term => do
+  let v : Q(Fin 5 → ℕ) := q(![0,1 + 8,2 + 8,3,4])
+  let a : Q(ℕ) := q(8)
+  let ⟨w, eq⟩ ← vectorAppend (u := levelZero) q(5) v a
+  let dbgr := q(DbgResult.intro _ _ $eq)
+  logInfo m! "{w}"
+  logInfo m! "{eq}"
+  return dbgr
+
+#eval dbgVectorAppend
+
 end Qq
 
 namespace List
