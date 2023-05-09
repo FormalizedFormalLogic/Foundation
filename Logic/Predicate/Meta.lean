@@ -384,42 +384,6 @@ example (t : SyntacticSubTerm Language.oring 3) : DbgResult (SyntacticSubTerm La
 
 example : 1 ≠ 2 := of_decide_eq_true rfl
 
-partial def findTerm {L : Q(Language.{u})} (s : Q(SyntacticTerm $L))
-    (t : Q(SyntacticTerm $L)) : MetaM ((res : Q(SyntacticSubTerm $L 1)) × Q($t = substs ![$s] $res)) := do
-  if (← isDefEq s t) then
-    let eqn : Q($t = $s) := (q(@rfl (SyntacticTerm $L) $t) : Expr)
-    return ⟨q(#0), q(eq_substs_zero_of_eq $eqn)⟩
-  else
-    match t with
-    | ~q(&$x)                          => return ⟨q(&($x)), q(rfl)⟩
-    | ~q(Operator.const $c)            => pure ⟨q(Operator.const $c), q(const_eq_substs_sonst_of_eq $c)⟩
-    | ~q(func (arity := $arity) $f $v) =>
-      let ⟨v', vh⟩ ← Qq.mapVectorInfo (u := u) (v := u) (H := q(fun t res => t = substs ![$s] res)) (findTerm s) arity v
-      return ⟨q(func $f $v'), q(eq_substs_func_of_eq $f $vh)⟩
-    | ~q(substs (n := $k) $v $t)       =>
-      let ⟨v', vh⟩ ← Qq.mapVectorInfo (u := u) (v := u) (H := q(fun t res => t = substs ![$s] res)) (findTerm s) k v
-      return ⟨q(substs $v' $t), q(eq_substs_substs_of_eq $t $vh)⟩
-    | ~q($t)                           => do
-      have v : Q(Fin 0 → SyntacticSubTerm $L 1) := q(![])
-      let ⟨t', th⟩ ← resultSubsts (k := q(0)) (n := q(1)) v t
-      return ⟨t', q(eq_substs_substs_nil $v $s $th)⟩
-
-elab "dbgfindTerm" : term => do
-  let L : Q(Language.{0}) := q(Language.oring)
-  let t : Q(SyntacticTerm $L) := q(ᵀ“((&2 + 1) + 9) * (#0 + 1)ᵀ⟦&2 + 1, 6⟧ ”)
-  logInfo m! "{t}"
-  let s : Q(SyntacticTerm $L) := q(ᵀ“&2 + 1”)
-  let v : Q(Fin 1 → SyntacticTerm $L) := q(![$s])
-  let ⟨e, eq⟩ ← findTerm s t
-  let dbgr := q(DbgResult.intro _ _ $eq)
-  logInfo m! "{t} \n⟹ \n{e}"
-  let ⟨e', eq'⟩ ← resultSubsts (u := levelZero) (L := L) (n := q(0)) v e
-  logInfo m! "{e} \n⟹ \n{e'}"
-  let dbgr' := q(DbgResult.intro _ _ $eq')
-  return dbgr
-
-#eval dbgfindTerm
-
 end Meta
 
 end SubTerm

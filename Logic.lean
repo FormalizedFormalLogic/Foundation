@@ -14,5 +14,6 @@ import Logic.Predicate.FirstOrder.Semantics
 import Logic.Predicate.FirstOrder.Ultraproduct
 import Logic.Predicate.FirstOrder.Eq
 import Logic.Predicate.FirstOrder.Meta
+import Logic.Predicate.FirstOrder.ProofAutomation
 import Logic.Predicate.FirstOrder.Completeness.Completeness
 import Logic.Predicate.FirstOrder.Hauptsatz
