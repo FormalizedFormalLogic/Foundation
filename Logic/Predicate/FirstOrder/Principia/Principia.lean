@@ -395,72 +395,72 @@ end ProofArrow
 variable (T)
 variable [L.Eq] [EqTheory T]
 
-inductive Deduction : List (SyntacticFormula L) → SyntacticFormula L → Type u
-  | tauto {Δ p} : ProofArrow T Δ p → Deduction Δ p
+inductive Principia : List (SyntacticFormula L) → SyntacticFormula L → Type u
+  | tauto {Δ p} : ProofArrow T Δ p → Principia Δ p
   | axm {Δ σ} :
-    σ ∈ T → Deduction Δ (emb σ)
+    σ ∈ T → Principia Δ (emb σ)
   | weakening' {Δ Γ p q} :
-    ~p :: Δ ⊆ ~q :: Γ → Deduction Δ p → Deduction Γ q
+    ~p :: Δ ⊆ ~q :: Γ → Principia Δ p → Principia Γ q
   | rewrite (f : ℕ → SyntacticTerm L) {p} :
-    Deduction Δ p → Deduction (Δ.map $ rewrite f) (rewrite f p)    
+    Principia Δ p → Principia (Δ.map $ rewrite f) (rewrite f p)    
   | trans {Δ p q} :
-    Deduction Δ p → Deduction (p :: Δ) q → Deduction Δ q
+    Principia Δ p → Principia (p :: Δ) q → Principia Δ q
   | assumption {Δ p} :
-    p ∈ Δ → Deduction Δ p
+    p ∈ Δ → Principia Δ p
   | contradiction {Δ p} (q) :
-    Deduction Δ p → Deduction Δ (~p) → Deduction Δ q
+    Principia Δ p → Principia Δ (~p) → Principia Δ q
   -- ⊤ - right
-  | trivial {Δ} : Deduction Δ ⊤
+  | trivial {Δ} : Principia Δ ⊤
   -- ⊥ - left
-  | explode {Δ p} : Deduction Δ ⊥ → Deduction Δ p
+  | explode {Δ p} : Principia Δ ⊥ → Principia Δ p
   -- → right
-  | intro {Δ p q} : Deduction (p :: Δ) q → Deduction Δ (p ⟶ q)
+  | intro {Δ p q} : Principia (p :: Δ) q → Principia Δ (p ⟶ q)
   -- → left
   | modusPonens {Δ p q} :
-    Deduction Δ (p ⟶ q) → Deduction Δ p → Deduction Δ q
+    Principia Δ (p ⟶ q) → Principia Δ p → Principia Δ q
   -- ∧ right
   | split {Δ p q} :
-    Deduction Δ p → Deduction Δ q →Deduction Δ (p ⋏ q)
+    Principia Δ p → Principia Δ q →Principia Δ (p ⋏ q)
   -- ∧ left
   | andLeft {Δ p q} :
-    Deduction Δ (p ⋏ q) → Deduction Δ p
+    Principia Δ (p ⋏ q) → Principia Δ p
   | andRight {Δ p q} :
-    Deduction Δ (p ⋏ q) → Deduction Δ q
+    Principia Δ (p ⋏ q) → Principia Δ q
   -- ∨ right
   | orLeft {Δ p q} :
-    Deduction Δ p → Deduction Δ (p ⋎ q)
+    Principia Δ p → Principia Δ (p ⋎ q)
   | orRight {Δ p q} :
-    Deduction Δ q → Deduction Δ (p ⋎ q)
+    Principia Δ q → Principia Δ (p ⋎ q)
   -- ∨ left
   | cases {Δ p q r} :
-    Deduction Δ (p ⋎ q) → Deduction (p :: Δ) r → Deduction (q :: Δ) r → Deduction Δ r
+    Principia Δ (p ⋎ q) → Principia (p :: Δ) r → Principia (q :: Δ) r → Principia Δ r
   -- ∀ right
   | generalize {Δ} {p} :
-    Deduction (Δ.map shift) (free p) → Deduction Δ (∀' p)
+    Principia (Δ.map shift) (free p) → Principia Δ (∀' p)
   -- ∀ left
   | specialize (t) {Δ p} :
-    Deduction Δ (∀' p) → Deduction Δ (⟦↦ t⟧ p)
+    Principia Δ (∀' p) → Principia Δ (⟦↦ t⟧ p)
   -- ∃ right
   | useInstance (t) {Δ p} :
-    Deduction Δ (⟦↦ t⟧ p) → Deduction Δ (∃' p)
+    Principia Δ (⟦↦ t⟧ p) → Principia Δ (∃' p)
   -- ∃ left
   | exCases {Δ p q} :
-    Deduction Δ (∃' p) → Deduction (free p :: Δ.map shift) (shift q) → Deduction Δ q
+    Principia Δ (∃' p) → Principia (free p :: Δ.map shift) (shift q) → Principia Δ q
   -- =
   | eqRefl {Δ} (t) :
-    Deduction Δ “ᵀ!t = ᵀ!t”
+    Principia Δ “ᵀ!t = ᵀ!t”
   | eqSymm {Δ t₁ t₂} :
-    Deduction Δ “ᵀ!t₁ = ᵀ!t₂” → Deduction Δ “ᵀ!t₂ = ᵀ!t₁”
+    Principia Δ “ᵀ!t₁ = ᵀ!t₂” → Principia Δ “ᵀ!t₂ = ᵀ!t₁”
   | eqTrans {Δ t₁ t₂ t₃} :
-    Deduction Δ “ᵀ!t₁ = ᵀ!t₂” → Deduction Δ “ᵀ!t₂ = ᵀ!t₃” → Deduction Δ “ᵀ!t₁ = ᵀ!t₃”
+    Principia Δ “ᵀ!t₁ = ᵀ!t₂” → Principia Δ “ᵀ!t₂ = ᵀ!t₃” → Principia Δ “ᵀ!t₁ = ᵀ!t₃”
   | rewriteEq {Δ} {p : SyntacticSubFormula L 1} {t₁ t₂ : SyntacticTerm L} :
-    Deduction Δ “ᵀ!t₁ = ᵀ!t₂” → Deduction Δ (⟦↦ t₂⟧ p) → Deduction Δ (⟦↦ t₁⟧ p)
+    Principia Δ “ᵀ!t₁ = ᵀ!t₂” → Principia Δ (⟦↦ t₂⟧ p) → Principia Δ (⟦↦ t₁⟧ p)
 
-notation Δ:0 " ⟹[" T "] " p => Deduction T Δ p
+notation Δ:0 " ⟹[" T "] " p => Principia T Δ p
 
 variable {T}
 
-namespace Deduction
+namespace Principia
 open ProofArrow
 
 def toStr : {Δ : List (SyntacticFormula L)} → {p : SyntacticFormula L} → (Δ ⟹[T] p) → String
@@ -530,9 +530,9 @@ def cast {Δ p p'} (h : p = p') (b : Δ ⟹[T] p) : Δ ⟹[T] p' := h ▸ b
 def cast' {Δ Δ' p p'} (hΔ : Δ = Δ') (hp : p = p') (b : Δ ⟹[T] p) : Δ' ⟹[T] p' :=
   hΔ ▸ hp ▸ b
 
-end Deduction
+end Principia
 
-noncomputable def Proof.toDeduction {σ : Sentence L} :
-    T ⊢ σ → ([] ⟹[T] emb σ) := fun b => Deduction.tauto (Proof.toProofArrow b)
+noncomputable def Proof.toPrincipia {σ : Sentence L} :
+    T ⊢ σ → ([] ⟹[T] emb σ) := fun b => Principia.tauto (Proof.toProofArrow b)
 
 end FirstOrder
