@@ -462,11 +462,14 @@ lemma emb_operator (o : Operator L ι) (v : ι → SubTerm L PEmpty n) :
 lemma shift_operator (o : Operator L ι) (v : ι → SyntacticSubTerm L n) :
     shift (o.operator v) = o.operator (fun i => shift (v i)) := o.bind_operator _ _ _
 
-lemma bShift_operator (o : Operator L ι) (v : ι → SyntacticSubTerm L (n + 1)) :
+lemma bShift_operator (o : Operator L ι) (v : ι → SubTerm L μ n) :
     bShift (o.operator v) = o.operator (fun i => bShift (v i)) := o.bind_operator _ _ _
 
 lemma free_operator (o : Operator L ι) (v : ι → SyntacticSubTerm L (n + 1)) :
     free (o.operator v) = o.operator (fun i => free (v i)) := o.bind_operator _ _ _
+
+lemma fix_operator (o : Operator L ι) (v : ι → SyntacticSubTerm L n) :
+    fix (o.operator v) = o.operator (fun i => fix (v i)) := o.bind_operator _ _ _
 
 end Operator
 

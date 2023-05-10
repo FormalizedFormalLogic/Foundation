@@ -609,7 +609,7 @@ structure Operator (ι : Type w) where
   bind_operator : ∀ {μ₁ μ₂ n₁ n₂} (bound : Fin n₁ → SubTerm L μ₂ n₂) (free : μ₁ → SubTerm L μ₂ n₂) (v : ι → SubTerm L μ₁ n₁),
     bind bound free (operator v) = operator (fun i => SubTerm.bind bound free (v i))
 
-abbrev OperatorFin (n : ℕ) := Operator L (Fin n)
+abbrev Finitary (n : ℕ) := Operator L (Fin n)
 
 abbrev OperatorMatrix (ι : Type w) (I : ι → Type w') := Operator L ((i : ι ) × I i)
 
@@ -638,10 +638,13 @@ lemma shift_operator (v : ι → SyntacticSubTerm L n) :
 lemma free_operator (v : ι → SyntacticSubTerm L (n + 1)) :
     free (o.operator v) = o.operator (fun i => SubTerm.free (v i)) := o.bind_operator _ _ _
 
+lemma fix_operator (v : ι → SyntacticSubTerm L n) :
+    fix (o.operator v) = o.operator (fun i => SubTerm.fix (v i)) := o.bind_operator _ _ _
+
 end
 
 section
-variable (o : OperatorFin L 1)
+variable (o : Finitary L 1)
 
 @[simp] lemma substs_operator₁ (w : Fin n → SubTerm L μ n) (t : SubTerm L μ n) :
     substs w (o.operator ![t]) = o.operator ![SubTerm.substs w t] :=
@@ -662,7 +665,7 @@ variable (o : OperatorFin L 1)
 end
 
 section
-variable (o : OperatorFin L 2)
+variable (o : Finitary L 2)
 
 @[simp] lemma substs_operator₂ (w : Fin n → SubTerm L μ n) (t₁ t₂ : SubTerm L μ n) :
     substs w (o.operator ![t₁, t₂]) = o.operator ![SubTerm.substs w t₁, SubTerm.substs w t₂] :=

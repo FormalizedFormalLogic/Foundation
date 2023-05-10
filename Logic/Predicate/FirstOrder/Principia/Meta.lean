@@ -123,22 +123,18 @@ def iffEx {p q} (b : Δ.map shift ⟹[T] free p ⟷ free q) : Δ ⟹[T] ∃' p �
     (intro $ exCases (p := q) (assumption $ by simp) $ (useInstance &0 (p := shift p) $
       ((b.andRight.weakening (List.subset_cons_of_subset _ $ by simp)).modusPonens $ assumption $ by simp).cast (by simp)).cast (by simp))
 
-inductive IffFormula : (p₀ q₀ : SyntacticFormula L) → SyntacticFormula L → SyntacticFormula L → Type u
-  | intro {p₀ q₀} : IffFormula p₀ q₀ p₀ q₀
-  | reflexivity {p₀ q₀} : (p : SyntacticFormula L) → IffFormula p₀ q₀ p p
-  | and {p₀ q₀ p₁ p₂ q₁ q₂} : IffFormula p₀ q₀ p₁ q₁ → IffFormula p₀ q₀ p₂ q₂ → IffFormula p₀ q₀ (p₁ ⋏ p₂) (q₁ ⋏ q₂)
-  | or {p₀ q₀ p₁ p₂ q₁ q₂} : IffFormula p₀ q₀ p₁ q₁ → IffFormula p₀ q₀ p₂ q₂ → IffFormula p₀ q₀ (p₁ ⋎ p₂) (q₁ ⋎ q₂)
-  | all {p₀ q₀} {p q : SyntacticSubFormula L 1} : IffFormula (shift p₀) (shift q₀) (free p) (free q) → IffFormula p₀ q₀ (∀' p) (∀' q)
-  | ex {p₀ q₀} {p q : SyntacticSubFormula L 1} : IffFormula (shift p₀) (shift q₀) (free p) (free q) → IffFormula p₀ q₀ (∃' p) (∃' q)
-
 def iffOfIffFormula {p₀ q₀} :
     {p q : SyntacticFormula L} → IffFormula p₀ q₀ p q → {Δ : List (SyntacticFormula L)} → (Δ ⟹[T] p₀ ⟷ q₀) → (Δ ⟹[T] p ⟷ q)
-  | _, _, IffFormula.intro,     _, b => b
-  | _, _, IffFormula.reflexivity p,    Δ, _ => iffRefl _
-  | _, _, IffFormula.and h₁ h₂, Δ, b => iffAnd (iffOfIffFormula h₁ b) (iffOfIffFormula h₂ b)
-  | _, _, IffFormula.or h₁ h₂,  Δ, b => iffOr (iffOfIffFormula h₁ b) (iffOfIffFormula h₂ b)
-  | _, _, IffFormula.all h,     Δ, b => (iffOfIffFormula h (b.shift.cast $ by simp)).iffAll
-  | _, _, IffFormula.ex h,      Δ, b => (iffOfIffFormula h (b.shift.cast $ by simp)).iffEx
+  | _, _, IffFormula.intro,         _, b => b
+  | _, _, IffFormula.reflexivity p, Δ, _ => iffRefl _
+  | _, _, IffFormula.and h₁ h₂,     Δ, b => iffAnd (iffOfIffFormula h₁ b) (iffOfIffFormula h₂ b)
+  | _, _, IffFormula.or h₁ h₂,      Δ, b => iffOr (iffOfIffFormula h₁ b) (iffOfIffFormula h₂ b)
+  | _, _, IffFormula.all h,         Δ, b => (iffOfIffFormula h (b.shift.cast $ by simp)).iffAll
+  | _, _, IffFormula.ex h,          Δ, b => (iffOfIffFormula h (b.shift.cast $ by simp)).iffEx
+  | _, _, IffFormula.neg h,         Δ, b => (iffOfIffFormula h b).iffNeg
+
+def rephraseOfIffFormula {p₀ q₀ p q} (h : IffFormula p₀ q₀ p q) (b₀ : Δ ⟹[T] p₀ ⟷ q₀) (b₁ : Δ ⟹[T] q) : Δ ⟹[T] p :=
+  (iffOfIffFormula h b₀).andRight.modusPonens b₁
 
 def reflexivityOfEq {t₁ t₂ : SyntacticTerm L} (h : t₁ = t₂) :
     Δ ⟹[T] “ᵀ!t₁ = ᵀ!t₂” := by rw[h]; exact eqRefl _
@@ -217,6 +213,10 @@ def transListQ {q : Q(SyntacticFormula $L)} : (Γ : List Q(SyntacticFormula $L))
     have ih : Q($Δ ⟹[$T] $p ⟶ $q) := transListQ Γ (fun r hr => b₀ r (by simp[hr])) this
     have e : Q($Δ ⟹[$T] $p) := b₀ p (by simp)
     q(Principia.modusPonens $ih $e)
+
+def rephraseOfIffFormulaQ (p₀ q₀ p q : Q(SyntacticFormula $L)) (h : Q(Principia.IffFormula $p₀ $q₀ $p $q))
+  (b : Q($Δ ⟹[$T] $p₀ ⟷ $q₀)) (d : Q($Δ ⟹[$T] $q)) : Q($Δ ⟹[$T] $p) :=
+  q(Principia.rephraseOfIffFormula $h $b $d)
 
 end PrincipiaQ
 
@@ -389,6 +389,7 @@ inductive PrincipiaCode (L : Q(Language.{u})) : Type
   | symmetry        : PrincipiaCode L → PrincipiaCode L
   | eqTrans       : Q(SyntacticFormula $L) → PrincipiaCode L → PrincipiaCode L → PrincipiaCode L
   | rewriteEq     : (e₁ e₂ : Q(SyntacticTerm $L)) → PrincipiaCode L → PrincipiaCode L → PrincipiaCode L
+  | rephrase      : (e₁ e₂ : Q(SyntacticFormula $L)) → PrincipiaCode L → PrincipiaCode L → PrincipiaCode L
   | fromM         : Syntax → PrincipiaCode L
   | rwEq          : Q(SyntacticTerm $L) → Syntax → PrincipiaCode L → PrincipiaCode L
   | showState     : PrincipiaCode L → PrincipiaCode L
@@ -420,6 +421,7 @@ def toStr : PrincipiaCode L → String
   | symmetry c            => "symmetryetry" ++ c.toStr
   | eqTrans _ c₁ c₂       => "trans: {\n" ++ c₁.toStr ++ "\n}\n and: {\n" ++ c₂.toStr ++ "\n}"
   | rewriteEq _ _ c₁ c₂   => "rewrite: {\n" ++ c₁.toStr ++ "\n}\n" ++ c₂.toStr
+  | rephrase _ _ c₁ c₂    => "rephrase: {\n" ++ c₁.toStr ++ "\n}\n" ++ c₂.toStr
   | fromM _               => "from"
   | rwEq _ _ c            => c.toStr   
   | showState c           => c.toStr
@@ -573,6 +575,12 @@ partial def run : (c : PrincipiaCode L) → (G : List Q(SyntacticFormula $L)) �
     let b₁ ← c₁.run E p''
     return PrincipiaQ.rewriteEqOfEqQ L dfunc drel lEq T
       (Qq.toQList (u := u) E) t₁ t₂ p' p p'' hp hp' b₀ b₁
+  | rephrase p₀ q₀ c₀ c₁, E, p => do
+    let ⟨q, h⟩ ← SubFormula.Meta.rephraseFormula p₀ q₀ p
+    let b₀ ← c₀.run E q(“!$p₀ ↔ !$q₀”)
+    let b₁ ← c₁.run E q
+    return PrincipiaQ.rephraseOfIffFormulaQ L dfunc drel lEq T
+      (Qq.toQList (u := u) E) p₀ q₀ p q h b₀ b₁
   | fromM s, E, e               => do
     Term.elabTerm s (return q($(Qq.toQList (u := u) E) ⟹[$T] $e))
   | showState c,          E, e  => do
@@ -647,7 +655,9 @@ syntax (name := notationReflexivity) "rfl" : proofElem
 
 syntax (name := notationSymmetry) "symmetry" : proofElem
 
-syntax (name := notationRewriteEq) "rewrite" subterm " → " subterm optProofBlock : proofElem
+syntax (name := notationRewriteEq) "rewrite" subterm " ↦ " subterm optProofBlock : proofElem
+
+syntax (name := notationRephrase) "rephrase" subformula " ↦ " subformula optProofBlock : proofElem
 
 syntax (name := notationFromM) "from " term : proofElem
 
@@ -789,13 +799,20 @@ partial def seqToCode (L : Q(Language.{u})) : List Syntax → TermElabM (Princip
     | `(notationSymmetry| symmetry) =>
       let c ← seqToCode L seqElems
       return PrincipiaCode.symmetry c
-    | `(notationRewriteEq| rewrite $t₁:subterm → $t₂:subterm $b:optProofBlock) =>
+    | `(notationRewriteEq| rewrite $t₁:subterm ↦ $t₂:subterm $b:optProofBlock) =>
       let texpr₁ ← termSyntaxToExpr L t₁
       let texpr₂ ← termSyntaxToExpr L t₂
       let bblock := getSeqOfOptProofBlock b
       let c₀ := if bblock.isMissing then PrincipiaCode.assumption else ← seqToCode L (getSeqElems bblock)
       let c₁ ← seqToCode L seqElems
       return PrincipiaCode.rewriteEq texpr₁ texpr₂ c₀ c₁
+    | `(notationRephrase| rephrase $p₀:subformula ↦ $q₀:subformula $b:optProofBlock) =>
+      let p₀expr ← formulaSyntaxToExpr L p₀
+      let q₀expr ← formulaSyntaxToExpr L q₀
+      let bblock := getSeqOfOptProofBlock b
+      let c₀ := if bblock.isMissing then PrincipiaCode.assumption else ← seqToCode L (getSeqElems bblock)
+      let c₁ ← seqToCode L seqElems
+      return PrincipiaCode.rephrase p₀expr q₀expr c₀ c₁
     | `(notationFromM| from $t:term) =>
       return PrincipiaCode.fromM t
     | `(notationShowState| !) =>
@@ -947,12 +964,22 @@ example :
     symmetry
   □
 
--- rewrite ... → ...
+-- rewrite ... ↦ ...
 example :
     [“&0 + 2 = 3”] ⟹[T] “∀ 3 * #0 = (&0 + 2) * #0” :=
   proof.
-    rewrite &0 + 2 → 3
+    rewrite &0 + 2 ↦ 3
     generalize rfl
+  □
+
+-- rephrase ... ↦ ...
+example :
+    [“∀ ∀ (#0 < #1 ↔ ∃ #0 + 1 + #1 = #2)”] ⟹[T] “1 < 3” :=
+  proof.
+    specialize 1, 3 of #0 < #1 ↔ ∃ #0 + 1 + #1 = #2
+    rephrase 1 < 3 ↦ ∃ #0 + 1 + 1 = 3
+    use 1
+    rfl
   □
 
 end
