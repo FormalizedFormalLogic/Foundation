@@ -256,6 +256,9 @@ lemma eq_substs_substs_of_eq {k} {s : Term L μ} (p : SubFormula L μ k) {v : Fi
 lemma eq_substs_substs_nil (v) (s : Term L μ) {p : Formula L μ} {p'} (ht : substs v p = p') :
   p = substs ![s] p' := by simp[←ht, substs_substs]
 
+lemma univClosure_eq_of_eq {n} {p : SubFormula L μ (n + 1)} {q} (h : univClosure (∀' p) = q) :
+  univClosure p = q := by simp[←h]
+
 end lemmata
 
 partial def resultSubsts {L : Q(Language.{u})} {k n : Q(ℕ)} (w : Q(Fin $k → SyntacticSubTerm $L $n)) :
@@ -530,6 +533,15 @@ partial def resultNeg {L : Q(Language.{u})} {n : Q(ℕ)} : (p : Q(SyntacticSubFo
     return ⟨p'', q(neg_substs_of_eq $pe $p'e)⟩
   | ~q($p)                     => pure ⟨q(~$p), q(rfl)⟩
 
+partial def resultUnivClosure {L : Q(Language.{u})} {n : Q(ℕ)} (p : Q(SyntacticSubFormula $L $n)) :
+    MetaM ((res : Q(SyntacticFormula $L)) × Q(univClosure $p = $res)) :=
+  match n with
+  | ~q(0)      => return ⟨p, q(rfl)⟩
+  | ~q($n + 1) => do
+    have p : Q(SyntacticSubFormula $L ($n + 1)) := p
+    let ⟨p', hp⟩ ← resultUnivClosure (u := u) (L := L) (n := n) q(∀' $p)
+    let h : Q(univClosure $p = $p') := q(univClosure_eq_of_eq (p := $p) (q := $p') $hp)
+    return ⟨p', h⟩
 
 inductive UnfoldOption
   | neg
