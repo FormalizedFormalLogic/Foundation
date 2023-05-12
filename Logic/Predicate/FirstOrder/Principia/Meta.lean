@@ -15,6 +15,10 @@ def generalizeOfEq {Δ Δ' p p'}
   (hΔ : Δ.map shift = Δ') (hp : free p = p') (b : Δ' ⟹[T] p') : Δ ⟹[T] ∀' p :=
   generalize (b.cast' hΔ.symm hp.symm)
 
+def generalizeBAllOfEq {Δ Δ' p p' q q'}
+  (hΔ : Δ.map shift = Δ') (hp : free p = p') (hq : free q = q') (b : Δ' ⟹[T] p' ⟶ q') : Δ ⟹[T] ∀[p] q :=
+  generalize (b.cast' hΔ.symm (by simp[←hp, ←hq]))
+
 def specializeOfEq {t p p' q}
   (hp : ⟦↦ t⟧ p = p') (b : Δ ⟹[T] ∀' p) (d : (p' :: Δ) ⟹[T] q) : Δ ⟹[T] q :=
   ((b.specialize t).cast hp).trans d
@@ -45,6 +49,10 @@ def rewriteEqOfEq {t₁ t₂ p p₁ p₂} (h₁ : p₁ = ⟦↦ t₁⟧ p) (h₂
 def useInstanceOfEq (t) {Δ p p'} (h : ⟦↦ t⟧ p = p')
   (b : Δ ⟹[T] p') : Δ ⟹[T] ∃' p :=
   useInstance t (b.cast h.symm)
+
+def useInstanceBExOfEq (t) {Δ p p' q q'} (hp : ⟦↦ t⟧ p = p') (hq : ⟦↦ t⟧ q = q')
+  (b : Δ ⟹[T] p' ⋏ q') : Δ ⟹[T] ∃[p] q :=
+  useInstance t (b.cast (by simp[←hp, ←hq]))
 
 def weakening {Δ Γ p} (h : Δ ⊆ Γ) (b : Δ ⟹[T] p) : Γ ⟹[T] p :=
   b.weakening' (List.cons_subset_cons _ h)
@@ -158,6 +166,10 @@ def generalizeOfEqQ (p : Q(SyntacticSubFormula $L 1)) (p' : Q(SyntacticFormula $
   (hΔ : Q(($Δ).map shift = $Δ')) (hp : Q(free $p = $p')) (b : Q($Δ' ⟹[$T] $p')) : Q($Δ ⟹[$T] ∀' $p) :=
   q(Principia.generalizeOfEq $hΔ $hp $b)
 
+def generalizeBAllOfEqQ (p q : Q(SyntacticSubFormula $L 1)) (p' q' : Q(SyntacticFormula $L))
+  (hΔ : Q(($Δ).map shift = $Δ')) (hp : Q(free $p = $p')) (hq : Q(free $q = $q')) (b : Q($Δ' ⟹[$T] $p' ⟶ $q')) : Q($Δ ⟹[$T] ∀[$p] $q) :=
+  q(Principia.generalizeBAllOfEq $hΔ $hp $hq $b)
+
 def specializeOfEqQ (t : Q(SyntacticTerm $L)) (p : Q(SyntacticSubFormula $L 1)) (p' q : Q(SyntacticFormula $L))
   (hp : Q(⟦↦ $t⟧ $p = $p')) (b : Q($Δ ⟹[$T] ∀' $p)) (d : Q(($p' :: $Δ) ⟹[$T] $q)) : Q($Δ ⟹[$T] $q) :=
   q(Principia.specializeOfEq $hp $b $d)
@@ -169,6 +181,10 @@ def specializesOfEqQ {k : Q(ℕ)} (v : Q(Fin $k → SyntacticTerm $L)) (p : Q(Sy
 def useInstanceOfEqQ (t : Q(SyntacticTerm $L)) (p : Q(SyntacticSubFormula $L 1)) (p' : Q(SyntacticFormula $L))
   (h : Q(⟦↦ $t⟧ $p = $p')) (b : Q($Δ ⟹[$T] $p')) : Q($Δ ⟹[$T] ∃' $p) :=
   q(Principia.useInstanceOfEq $t $h $b)
+
+def useInstanceBExOfEqQ (t : Q(SyntacticTerm $L)) (p q : Q(SyntacticSubFormula $L 1)) (p' q' : Q(SyntacticFormula $L))
+  (hp : Q(⟦↦ $t⟧ $p = $p')) (hq : Q(⟦↦ $t⟧ $q = $q')) (b : Q($Δ ⟹[$T] $p' ⋏ $q')) : Q($Δ ⟹[$T] ∃[$p] $q) :=
+  q(Principia.useInstanceBExOfEq $t $hp $hq $b)
 
 def rewriteEqOfEqQ (t₁ t₂ : Q(SyntacticTerm $L)) (p : Q(SyntacticSubFormula $L 1)) (p₁ p₂ : Q(SyntacticFormula $L))
   (h₁ : Q($p₁ = ⟦↦ $t₁⟧ $p)) (h₂ : Q(⟦↦ $t₂⟧ $p = $p₂))
@@ -224,137 +240,13 @@ section Syntax
 variable (L : Q(Language.{u})) (n : Q(ℕ))
 open SubTerm
 
--- TODO
-partial def subTermSyntaxToExpr (n : Q(ℕ)) : Syntax → TermElabM Q(SyntacticSubTerm $L $n)
-  | `(subterm| ($s)) => subTermSyntaxToExpr n s
-  | `(subterm| ᵀ!$t:term) =>
-    Term.elabTerm t (return q(SyntacticSubTerm $L $n))
-  | `(subterm| $n:num) => do
-    let en ← Term.elabTerm n (return q(ℕ))
-    let _ ← synthInstanceQ q(Language.Zero $L)
-    let _ ← synthInstanceQ q(Language.One $L)
-    let _ ← synthInstanceQ q(Language.Add $L)
-    let z : Q(ℕ) := en
-    return q(SubTerm.Operator.const (natLit $L $z))
-  | `(subterm| # $x:num) => do
-    let some nval := (←whnf n).natLit? | throwError f!"Fail: natLit?: {n}"
-    let xval ← Lean.Syntax.isNatLit? x
-    if xval < nval then
-      let ex : Q(Fin $n) ← Expr.ofNat q(Fin $n) xval
-      return q(#$ex)
-    else throwError "invalid variable: {xval} ≥ {n}"
-  | `(subterm| & $x:num) => do
-    let ex : Q(ℕ) ← Term.elabTerm x (return q(ℕ))
-    return q(&$ex)
-  | `(subterm| $t₁:subterm + $t₂:subterm) => do
-    let et₁ ← subTermSyntaxToExpr n t₁
-    let et₂ ← subTermSyntaxToExpr n t₂
-    let (_ : Q(Language.Add $L)) ← synthInstanceQ q(Language.Add $L)
-    return q(SubTerm.func Language.Add.add ![$et₁, $et₂])
-  | `(subterm| $t₁:subterm * $t₂:subterm) => do
-    let et₁ ← subTermSyntaxToExpr n t₁
-    let et₂ ← subTermSyntaxToExpr n t₂
-    let (_ : Q(Language.Mul $L)) ← synthInstanceQ q(Language.Mul $L)
-    return q(SubTerm.func Language.Mul.mul ![$et₁, $et₂])
-  | `(subterm| $t₁:subterm ^ $t₂:subterm) => do
-    let et₁ ← subTermSyntaxToExpr n t₁
-    let et₂ ← subTermSyntaxToExpr n t₂
-    let (_ : Q(Language.Pow $L)) ← synthInstanceQ q(Language.Pow $L)
-    return q(SubTerm.func Language.Pow.pow ![$et₁, $et₂])
-  | `(subterm| $t ᵀ⟦$v:subterm,*⟧) => do
-    let e0 : Q(Fin 0 → SyntacticSubTerm $L $n) := q(![])
-    let (k, ev) ← v.getElems.foldlM (β := ℕ × Expr)
-      (init := (0, (e0 : Expr)))
-      (fun (k, e) s => do
-        let ih : Q(Fin $k → SyntacticSubTerm $L $n) := e
-        let es : Q(SyntacticSubTerm $L $n) ← subTermSyntaxToExpr n s
-        let e : Q(Fin ($k + 1) → SyntacticSubTerm $L $n) := q($es :> $ih) 
-        return (k + 1, e))
-    let ev : Q(Fin $k → SyntacticSubTerm $L $n) := ev
-    let et ← subTermSyntaxToExpr q($k) t
-    return q(substs $ev $et)
-  | _                    => throwUnsupportedSyntax
-  
--- TODO
-partial def subFormulaSyntaxToExpr (n : Q(ℕ)) : Syntax → TermElabM Q(SyntacticSubFormula $L $n)
-  | `(subformula| ($p)) => subFormulaSyntaxToExpr n p
-  | `(subformula| !$t:term)  =>
-    Term.elabTerm t (return q(SyntacticSubFormula $L $n))
+def subTermSyntaxToExpr (n : Q(ℕ)) : Syntax → TermElabM Q(SyntacticSubTerm $L $n)
+  | `(subterm| $s:subterm) => do
+    Term.elabTerm (←`(ᵀ“$s”)) (return q(SyntacticSubTerm $L $n))
 
-  | `(subformula| $t₁:subterm = $t₂:subterm) => do
-    let et₁ ← subTermSyntaxToExpr L n t₁
-    let et₂ ← subTermSyntaxToExpr L n t₂
-    let (_ : Q(Language.Eq $L)) ← synthInstanceQ q(Language.Eq $L)
-    let e : Expr := q(SubFormula.rel Language.Eq.eq ![$et₁, $et₂])
-    return e
-  | `(subformula| $t₁:subterm ≠ $t₂:subterm) => do
-    let et₁ ← subTermSyntaxToExpr L n t₁
-    let et₂ ← subTermSyntaxToExpr L n t₂
-    let (_ : Q(Language.Eq $L)) ← synthInstanceQ q(Language.Eq $L)
-    let e : Expr := q(SubFormula.nrel Language.Eq.eq ![$et₁, $et₂])
-    return e
-
-  | `(subformula| $t₁:subterm < $t₂:subterm) => do
-    let et₁ ← subTermSyntaxToExpr L n t₁
-    let et₂ ← subTermSyntaxToExpr L n t₂
-    let (_ : Q(Language.Lt $L)) ← synthInstanceQ q(Language.Lt $L)
-    let e : Expr := q(SubFormula.rel Language.Lt.lt ![$et₁, $et₂])
-    return e
-  | `(subformula| $t₁:subterm ≮ $t₂:subterm) => do
-    let et₁ ← subTermSyntaxToExpr L n t₁
-    let et₂ ← subTermSyntaxToExpr L n t₂
-    let (_ : Q(Language.Lt $L)) ← synthInstanceQ q(Language.Lt $L)
-    let e : Expr := q(SubFormula.nrel Language.Lt.lt ![$et₁, $et₂])
-    return e
-
-  | `(subformula| ⊤)       => return q(⊤)
-  | `(subformula| ⊥)       => return q(⊥)
-  | `(subformula| $p ∧ $q) => do
-    let ep ← subFormulaSyntaxToExpr n p
-    let eq ← subFormulaSyntaxToExpr n q
-    let epandeq : Expr := q($ep ⋏ $eq)
-    return epandeq
-  | `(subformula| $p ∨ $q) => do
-    let ep ← subFormulaSyntaxToExpr n p
-    let eq ← subFormulaSyntaxToExpr n q
-    let eporeq : Expr := q($ep ⋏ $eq)
-    return eporeq
-  | `(subformula| ∀ $p)     => do
-    let ep ← subFormulaSyntaxToExpr q($n + 1) p
-    let allep : Expr := q(∀' $ep)
-    return allep
-  | `(subformula| ∃ $p)     => do
-    let ep ← subFormulaSyntaxToExpr q($n + 1) p
-    let exep : Expr := q(∃' $ep)
-    return exep
-
-  | `(subformula| ¬$p)     => do
-    let ep ← subFormulaSyntaxToExpr n p
-    have nep : Expr := q(~$ep)
-    return nep
-  | `(subformula| $p → $q) => do
-    let ep ← subFormulaSyntaxToExpr n p
-    let eq ← subFormulaSyntaxToExpr n q
-    let eptoeq : Expr := q($ep ⟶ $eq)
-    return eptoeq
-  | `(subformula| $p ↔ $q) => do
-    let ep ← subFormulaSyntaxToExpr n p
-    let eq ← subFormulaSyntaxToExpr n q
-    let epiffeq : Expr := q($ep ⟷ $eq)
-    return epiffeq
-  | `(subformula| $p ⟦$v:subterm,*⟧) => do
-    let e0 : Q(Fin 0 → SyntacticSubTerm $L $n) := q(![])
-    let (k, ev) ← v.getElems.foldlM (β := ℕ × Expr)
-      (init := (0, (e0 : Expr)))
-      (fun (k, e) s => do
-        let ih : Q(Fin $k → SyntacticSubTerm $L $n) := e
-        let es : Q(SyntacticSubTerm $L $n) ← subTermSyntaxToExpr L n s
-        let e : Q(Fin ($k + 1) → SyntacticSubTerm $L $n) := q($es :> $ih) 
-        return (k + 1, e))
-    let ev : Q(Fin $k → SyntacticSubTerm $L $n) := ev
-    let ep ← subFormulaSyntaxToExpr q($k) p
-    return q(SubFormula.substs $ev $ep)
-  | _                   => throwUnsupportedSyntax
+def subFormulaSyntaxToExpr (n : Q(ℕ)) : Syntax → TermElabM Q(SyntacticSubFormula $L $n)
+  | `(subformula| $s:subformula) => do
+    Term.elabTerm (←`(“$s”)) (return q(SyntacticSubFormula $L $n))
 
 partial def termSyntaxToExpr (s : Syntax) : TermElabM Q(SyntacticTerm $L) :=
   subTermSyntaxToExpr L q(0) s
@@ -391,7 +283,7 @@ inductive PrincipiaCode (L : Q(Language.{u})) : Type
   | rewriteEq     : (e₁ e₂ : Q(SyntacticTerm $L)) → PrincipiaCode L → PrincipiaCode L → PrincipiaCode L
   | rephrase      : (e₁ e₂ : Q(SyntacticFormula $L)) → PrincipiaCode L → PrincipiaCode L → PrincipiaCode L
   | fromM         : Syntax → PrincipiaCode L
-  | rwEq          : Q(SyntacticTerm $L) → Syntax → PrincipiaCode L → PrincipiaCode L
+  | simpGoal      : Option (Syntax × Syntax) → PrincipiaCode L → PrincipiaCode L
   | showState     : PrincipiaCode L → PrincipiaCode L
   | missing       : PrincipiaCode L
 
@@ -401,7 +293,7 @@ variable (L : Q(Language.{u}))
 def toStr : PrincipiaCode L → String
   | assumption            => "assumption"
   | trans _ c₁ c₂         => "have: {\n" ++ c₁.toStr ++ "\n}" ++ c₂.toStr
-  | transList _ _ c₁ c₂         => "have: {\n" ++ c₁.toStr ++ "\n}" ++ c₂.toStr
+  | transList _ _ c₁ c₂   => "have: {\n" ++ c₁.toStr ++ "\n}" ++ c₂.toStr
   | contradiction _ c₁ c₂ => "contradiction: {\n" ++ c₁.toStr ++ "\n}\nand: {\n" ++ c₂.toStr ++ "\n}"    
   | trivial               => "trivial"
   | explode c             => "explode" ++ c.toStr
@@ -423,7 +315,7 @@ def toStr : PrincipiaCode L → String
   | rewriteEq _ _ c₁ c₂   => "rewrite: {\n" ++ c₁.toStr ++ "\n}\n" ++ c₂.toStr
   | rephrase _ _ c₁ c₂    => "rephrase: {\n" ++ c₁.toStr ++ "\n}\n" ++ c₂.toStr
   | fromM _               => "from"
-  | rwEq _ _ c            => c.toStr   
+  | simpGoal _ c            => c.toStr   
   | showState c           => c.toStr
   | missing               => "?"
 
@@ -529,13 +421,20 @@ partial def run : (c : PrincipiaCode L) → (G : List Q(SyntacticFormula $L)) �
     return q(Principia.cases $b₀ $b₁ $b₂)
   | generalize c,          E, e  => do
     match e with
-    | ~q(∀' $e) =>
+    | ~q(∀' $e)    =>
       let ⟨fe, fee⟩ ← SubFormula.Meta.resultFree e
       let ⟨sE, sEe⟩ ← SubFormula.Meta.resultShift₀List E
       let b ← c.run sE fe
       return PrincipiaQ.generalizeOfEqQ L dfunc drel lEq T
         (Qq.toQList (u := u) E) (Qq.toQList (u := u) sE) e fe sEe fee b
-    | _ => throwError "incorrect structure: {e} should be ∀ _"
+    | ~q(∀[$p] $q) =>
+      let ⟨p', pe⟩ ← SubFormula.Meta.resultFree p
+      let ⟨q', qe⟩ ← SubFormula.Meta.resultFree q
+      let ⟨sE, sEe⟩ ← SubFormula.Meta.resultShift₀List E
+      let b ← c.run sE q($p' ⟶ $q')
+      return PrincipiaQ.generalizeBAllOfEqQ L dfunc drel lEq T
+        (Qq.toQList (u := u) E) (Qq.toQList (u := u) sE) p q p' q' sEe pe qe b
+    | _            => throwError "incorrect structure: {e} should be ∀ _"
   | specialize k v p c₀ c₁,          E, q => do
     let ⟨p', hp⟩ ← SubFormula.Meta.resultSubsts (n := q(0)) (k := k) v p
     let ⟨p'', hp'⟩ ← SubFormula.Meta.resultUnivClosure (n := k) p
@@ -547,8 +446,12 @@ partial def run : (c : PrincipiaCode L) → (G : List Q(SyntacticFormula $L)) �
     | ~q(∃' $p) =>
       let ⟨p', pe⟩ ← SubFormula.Meta.resultSubsts (L := L) (k := q(1)) (n := q(0)) q(![$t]) p
       let b ← c.run E p'
-      return PrincipiaQ.useInstanceOfEqQ L dfunc drel lEq T
-        (Qq.toQList (u := u) E) t p p' pe b
+      return PrincipiaQ.useInstanceOfEqQ L dfunc drel lEq T (Qq.toQList (u := u) E) t p p' pe b
+    | ~q(∃[$p] $q) =>
+      let ⟨p', pe⟩ ← SubFormula.Meta.resultSubsts (L := L) (k := q(1)) (n := q(0)) q(![$t]) p
+      let ⟨q', qe⟩ ← SubFormula.Meta.resultSubsts (L := L) (k := q(1)) (n := q(0)) q(![$t]) q
+      let b ← c.run E q($p' ⋏ $q')
+      return PrincipiaQ.useInstanceBExOfEqQ L dfunc drel lEq T (Qq.toQList (u := u) E) t p q p' p' pe qe b
     | _ => throwError "incorrect structure: {i} should be ∃ _" 
   | exCases e c₀ c₁,          E, i => do
     let ⟨fe, fee⟩ ← SubFormula.Meta.resultFree (L := L) (n := q(0)) e
@@ -660,6 +563,8 @@ syntax (name := notationRewriteEq) "rewrite" subterm " ↦ " subterm optProofBlo
 syntax (name := notationRephrase) "rephrase" subformula " ↦ " subformula optProofBlock : proofElem
 
 syntax (name := notationFromM) "from " term : proofElem
+
+syntax (name := notationSimpM) "simp goal" subformula : proofElem
 
 syntax (name := notationShowState) "!" : proofElem
 
@@ -877,16 +782,14 @@ example : [“0 = 1”, “0 ≠ 1”] ⟹[T] “⊥” :=
   □
 
 -- suffices
-example :
-    [“&0 < 1 → &0 = 0”, “&0 < 1”] ⟹[T] “&0 = 0” :=
+example : [“&0 < 1 → &0 = 0”, “&0 < 1”] ⟹[T] “&0 = 0” :=
   proof.
     suffices &0 < 1
     assumption
   □
 
 -- have
-example :
-    [“&0 < 1 → &0 = 0”, “&0 < 1”] ⟹[T] “&0 = 0 ∨ 0 < 2” :=
+example : [“&0 < 1 → &0 = 0”, “&0 < 1”] ⟹[T] “&0 = 0 ∨ 0 < 2” :=
   proof.
     have &0 = 0
     · suffices &0 < 1
@@ -895,8 +798,7 @@ example :
   □
 
 -- cases ... or ... 
-example :
-    [“&0 = 0 ∨ ∃ &0 = #0 + 1”] ⟹[T] “∀ (&0 ≠ #0 + 1) → &0 = 0” :=
+example : [“&0 = 0 ∨ ∃ &0 = #0 + 1”] ⟹[T] “∀ (&0 ≠ #0 + 1) → &0 = 0” :=
   proof.
     cases &0 = 0 or ∃ &0 = #0 + 1
     · intro
@@ -923,8 +825,7 @@ example : [“∀ ∀ #0 + #1 = #1 + #0”] ⟹[T] “1 + 2 = 2 + 1” :=
   □
 
 -- use ...
-example :
-    [] ⟹[T] “∃ ∃ ∃ #0 = #1 + #2” :=
+example : [] ⟹[T] “∃ ∃ ∃ #0 = #1 + #2” :=
   proof.
     use 1
     use 2
@@ -933,8 +834,7 @@ example :
   □
 
 -- choose ...
-example :
-    [“∃ #0 < &1”] ⟹[T] “⊤” :=
+example : [“∃ #0 < &1”] ⟹[T] “⊤” :=
   proof.
     choose #0 < &1
     trivial
@@ -952,34 +852,47 @@ example : [] ⟹[T] “∀ (#0 = 1 + 1 → 0 < #0) ↔ ∀ (#0 ≠ 2 ∨ 0 < #0)
   □
 
 -- symmetry
-example :
-    [“1 = &0”] ⟹[T] “&0 = 1” :=
+example : [“1 = &0”] ⟹[T] “&0 = 1” :=
   proof.
     symmetry
   □
 
-example :
-    [“&0 < 1 ↔ &0 = 0”] ⟹[T] “&0 = 0 ↔ &0 < 1” :=
+example : [“&0 < 1 ↔ &0 = 0”] ⟹[T] “&0 = 0 ↔ &0 < 1” :=
   proof.
     symmetry
   □
 
 -- rewrite ... ↦ ...
-example :
-    [“&0 + 2 = 3”] ⟹[T] “∀ 3 * #0 = (&0 + 2) * #0” :=
+example : [“&0 + 2 = 3”] ⟹[T] “∀ 3 * #0 = (&0 + 2) * #0” :=
   proof.
     rewrite &0 + 2 ↦ 3
     generalize rfl
   □
 
 -- rephrase ... ↦ ...
+
+
 example :
-    [“∀ ∀ (#0 < #1 ↔ ∃ #0 + 1 + #1 = #2)”] ⟹[T] “1 < 3” :=
+  [ “∀ ∀ (#0 < #1 ↔ (∃ #0 + #1 + 1 = #2))”,
+    “∀ #0 + 0 = #0”,
+    “∀ (#0 = 0 ∨ (∃ #1 = #0 + 1))”] ⟹[T]
+    “∀ (0 = #0 ∨ 0 < #0)” :=
   proof.
-    specialize 1, 3 of #0 < #1 ↔ ∃ #0 + 1 + #1 = #2
-    rephrase 1 < 3 ↦ ∃ #0 + 1 + 1 = 3
-    use 1
-    rfl
+    generalize
+    specialize &0 of (#0 = 0 ∨ (∃ #1 = #0 + 1))
+    cases &0 = 0 or ∃ &0 = #0 + 1
+    · left
+      @ symmetry
+    · have 0 < &0
+      · choose &0 = #0 + 1
+        rewrite &1 ↦ &0 + 1
+        rephrase 0 < &0 + 1 ↦ ∃ #0 + 0 + 1 = &0 + 1
+        @ specialize 0, &0 + 1 of #0 < #1 ↔ (∃ #0 + #1 + 1 = #2)
+        use &0
+        rewrite &0 + 0 ↦ &0
+        @ specialize &0 of #0 + 0 = #0
+        rfl
+      right
   □
 
 end

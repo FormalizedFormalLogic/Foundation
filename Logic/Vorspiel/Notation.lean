@@ -169,5 +169,18 @@ def comp (g : β →L γ) (f : α →L β) : α →L γ where
 
 end Hom
 
+section quantifier
+variable {α : ℕ → Type u} [∀ i, HasLogicSymbols (α i)] [HasUniv α] [HasEx α]
+
+def ball (p : α (n + 1)) (q : α (n + 1)) : α n := ∀' (p ⟶ q)
+
+def bex (p : α (n + 1)) (q : α (n + 1)) : α n := ∃' (p ⋏ q)
+
+notation:64 "∀[" p "] " q => ball p q
+
+notation:64 "∃[" p "] " q => bex p q
+
+end quantifier
+
 end HasLogicSymbols
 
