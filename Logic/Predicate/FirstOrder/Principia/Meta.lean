@@ -246,6 +246,16 @@ section Syntax
 variable (L : Q(Language.{u})) (n : Q(ℕ))
 open SubTerm
 
+syntax termSeq := (subterm),*
+
+syntax lineIndex := "::[" num "]"
+
+def linnIndexToNat : Syntax → TermElabM ℕ
+  | `(lineIndex| ::[ $n:num ]) => return n.getNat
+  | _                          => throwUnsupportedSyntax
+
+syntax indexFormula := (lineIndex <|> subformula)
+
 def subTermSyntaxToExpr (n : Q(ℕ)) : Syntax → TermElabM Q(SyntacticSubTerm $L $n)
   | `(subterm| $s:subterm) => do
     Term.elabTerm (←`(ᵀ“$s”)) (return q(SyntacticSubTerm $L $n))
@@ -254,40 +264,64 @@ def subFormulaSyntaxToExpr (n : Q(ℕ)) : Syntax → TermElabM Q(SyntacticSubFor
   | `(subformula| $s:subformula) => do
     Term.elabTerm (←`(“$s”)) (return q(SyntacticSubFormula $L $n))
 
-partial def termSyntaxToExpr (s : Syntax) : TermElabM Q(SyntacticTerm $L) :=
+def termSyntaxToExpr (s : Syntax) : TermElabM Q(SyntacticTerm $L) :=
   subTermSyntaxToExpr L q(0) s
 
-partial def formulaSyntaxToExpr (s : Syntax) : TermElabM Q(SyntacticFormula $L) :=
+def formulaSyntaxToExpr (s : Syntax) : TermElabM Q(SyntacticFormula $L) :=
   subFormulaSyntaxToExpr L q(0) s
+
+def indexFormulaToFormula (E : List Expr) : Syntax → TermElabM Q(SyntacticFormula $L)
+  | `(indexFormula| ::[ $n:num ])     => do
+    let some p := E.get? (n.getNat) | throwError m!"error in indexFormulaToFormula: out of bound {E}"
+    return p
+  | `(indexFormula| $p:subformula) =>
+    formulaSyntaxToExpr L p
+  | _                              => throwUnsupportedSyntax
+
+def dequantifier : (n : ℕ) → Q(SyntacticFormula $L) → TermElabM Q(SyntacticSubFormula $L $n)
+  | 0,     p => return p
+  | n + 1, p => do
+    let p' ← dequantifier n p
+    match p' with
+    | ~q(∀' $q) => return q
+    | ~q(∃' $q) => return q
+    | ~q($q)    => throwError "error[dequantifier]: invalid number of quantifier"
+
+def indexFormulaToSubFormula (E : List Q(SyntacticFormula $L)) (n : ℕ) : Syntax → TermElabM Q(SyntacticSubFormula $L $n)
+  | `(indexFormula| ::[ $i:num ])  => do
+    let some p := E.reverse.get? (i.getNat - 1) | throwError m!"error in indexFormulaToFormula: out of bound {E}"
+    dequantifier L n p
+  | `(indexFormula| $p:subformula) =>
+    subFormulaSyntaxToExpr L q($n) p
+  | _                              => throwUnsupportedSyntax
 
 end Syntax
 
 inductive PrincipiaCode (L : Q(Language.{u})) : Type
   | assumption    : PrincipiaCode L
-  | trans         : Q(SyntacticFormula $L) → PrincipiaCode L → PrincipiaCode L → PrincipiaCode L
-  | transList     : List (Q(SyntacticFormula $L) × PrincipiaCode L) →
-    Q(SyntacticFormula $L) → PrincipiaCode L → PrincipiaCode L → PrincipiaCode L
-  | contradiction : Q(SyntacticFormula $L) → PrincipiaCode L → PrincipiaCode L → PrincipiaCode L
+  | trans         : Syntax → PrincipiaCode L → PrincipiaCode L → PrincipiaCode L
+  | transList     : List (Syntax × PrincipiaCode L) →
+    Syntax → PrincipiaCode L → PrincipiaCode L → PrincipiaCode L
+  | contradiction : Syntax → PrincipiaCode L → PrincipiaCode L → PrincipiaCode L
   | trivial       : PrincipiaCode L
   | explode       : PrincipiaCode L → PrincipiaCode L
   | intro         : PrincipiaCode L → PrincipiaCode L
-  | modusPonens   : Q(SyntacticFormula $L) → PrincipiaCode L → PrincipiaCode L → PrincipiaCode L  
+  | modusPonens   : Syntax → PrincipiaCode L → PrincipiaCode L → PrincipiaCode L  
   | split         : PrincipiaCode L → PrincipiaCode L → PrincipiaCode L
-  | andLeft       : Q(SyntacticFormula $L) → PrincipiaCode L → PrincipiaCode L
-  | andRight      : Q(SyntacticFormula $L) → PrincipiaCode L → PrincipiaCode L
+  | andLeft       : Syntax → PrincipiaCode L → PrincipiaCode L
+  | andRight      : Syntax → PrincipiaCode L → PrincipiaCode L
   | orLeft        : PrincipiaCode L → PrincipiaCode L
   | orRight       : PrincipiaCode L → PrincipiaCode L
-  | cases         : (e₁ e₂ : Q(SyntacticFormula $L)) → PrincipiaCode L → PrincipiaCode L → PrincipiaCode L → PrincipiaCode L
+  | cases         : (e₁ e₂ : Syntax) → PrincipiaCode L → PrincipiaCode L → PrincipiaCode L → PrincipiaCode L
   | generalize    : PrincipiaCode L → PrincipiaCode L
-  | specialize    : (k : Q(ℕ)) → Q(Fin $k → SyntacticTerm $L) → Q(SyntacticSubFormula $L $k) →
-    PrincipiaCode L → PrincipiaCode L → PrincipiaCode L
-  | useInstance   : Q(SyntacticTerm $L) → PrincipiaCode L → PrincipiaCode L
-  | exCases       : Q(SyntacticSubFormula $L 1) → PrincipiaCode L → PrincipiaCode L → PrincipiaCode L
-  | reflexivity        : PrincipiaCode L
-  | symmetry        : PrincipiaCode L → PrincipiaCode L
-  | eqTrans       : Q(SyntacticFormula $L) → PrincipiaCode L → PrincipiaCode L → PrincipiaCode L
-  | rewriteEq     : (e₁ e₂ : Q(SyntacticTerm $L)) → PrincipiaCode L → PrincipiaCode L → PrincipiaCode L
-  | rephrase      : (e₁ e₂ : Q(SyntacticFormula $L)) → PrincipiaCode L → PrincipiaCode L → PrincipiaCode L
+  | specialize    : List Syntax → Syntax → PrincipiaCode L → PrincipiaCode L → PrincipiaCode L
+  | useInstance   : Syntax → PrincipiaCode L → PrincipiaCode L
+  | exCases       : Syntax → PrincipiaCode L → PrincipiaCode L → PrincipiaCode L
+  | reflexivity   : PrincipiaCode L
+  | symmetry      : PrincipiaCode L → PrincipiaCode L
+  | eqTrans       : Syntax → PrincipiaCode L → PrincipiaCode L → PrincipiaCode L
+  | rewriteEq     : (e₁ e₂ : Syntax) → PrincipiaCode L → PrincipiaCode L → PrincipiaCode L
+  | rephrase      : (e₁ e₂ : Syntax) → PrincipiaCode L → PrincipiaCode L → PrincipiaCode L
   | fromM         : Syntax → PrincipiaCode L
   | simpM         : SubTerm.Meta.NumeralUnfoldOption → List SubFormula.Meta.UnfoldOption → PrincipiaCode L → PrincipiaCode L
   | showState     : PrincipiaCode L → PrincipiaCode L
@@ -312,7 +346,7 @@ def toStr : PrincipiaCode L → String
   | orRight c             => "∨ right\n" ++ c.toStr
   | cases _ _ c₀ c₁ c₂    => "∨ split: {\n" ++ c₀.toStr ++ "\n}\nor left: {\n" ++ c₁.toStr ++ "\n}\nor right: {\n" ++ c₂.toStr ++ "\n}"
   | generalize c          => "generalize\n" ++ c.toStr
-  | specialize _ _ _ c₁ c₂  => "specialize\n" ++ c₁.toStr ++ "\n" ++ c₂.toStr
+  | specialize _ _ c₁ c₂  => "specialize\n" ++ c₁.toStr ++ "\n" ++ c₂.toStr
   | useInstance _ c       => "use\n" ++ c.toStr
   | exCases _ c₀ c₁       => "∃ cases: {\n" ++ c₀.toStr ++ "\n}\n" ++ c₁.toStr
   | reflexivity           => "reflexivity"
@@ -359,73 +393,83 @@ def runRefl (E : List Q(SyntacticFormula $L)) (i : Q(SyntacticFormula $L)) : Ter
 
 partial def run : (c : PrincipiaCode L) → (G : List Q(SyntacticFormula $L)) → (e : Q(SyntacticFormula $L)) →
     TermElabM Q($(Qq.toQList (u := u) G) ⟹[$T] $e)
-  | assumption,            E, e  => do
+  | assumption, E, e  => do
     let some eh ← Qq.memQList? (u := u) e E | do display L E e; throwError m!"failed to prove {e} ∈ {E}" --el eVerum
     return PrincipiaQ.assumptionQ L dfunc drel lEq T (Qq.toQList (u := u) E) e eh
-  | trans e₁ c₁ c₂,        E, e₂ => do
-    let b₁ ← c₁.run E e₁
-    let b₂ ← c₂.run (e₁ :: E) e₂
-    return q(Principia.trans $b₁ $b₂)
-  | transList H q c₁ c₂, E, r => do
+  | trans s c₁ c₂, E, p => do
+    let q ← indexFormulaToSubFormula L E 0 s
+    let b ← c₁.run E q
+    let d ← c₂.run (q :: E) p
+    return q(Principia.trans $b $d)
+  | transList S s c₁ c₂, E, r => do
+    let q ← indexFormulaToSubFormula L E 0 s
+    let H ← S.mapM (fun (t, c) => return (←indexFormulaToSubFormula L E 0 t, c))
+    let C := S.map Prod.snd
     let b₁ ← c₁.run (H.map Prod.fst) q
     let b₂ ← c₂.run (q :: E) r
     PrincipiaQ.transListMQ' L dfunc drel lEq T (Qq.toQList (u := u) E) H q r (fun (p, c) _ => c.run E p) b₁ b₂
-  | contradiction e₀ c₁ c₂, E, e₁  => do
-    let b₁ ← c₁.run E e₀
-    let b₂ ← c₂.run E q(~$e₀)
-    return q(Principia.contradiction $e₁ $b₁ $b₂)
-  | trivial,               _, e  => do
-    match e with
+  | contradiction s c₁ c₂, E, p => do
+    let q ← indexFormulaToSubFormula L E 0 s
+    let b₁ ← c₁.run E q
+    let b₂ ← c₂.run E q(~$q)
+    return q(Principia.contradiction $p $b₁ $b₂)
+  | trivial, _, p => do
+    match p with
     | ~q(⊤) => return q(Principia.trivial)
-    | _ => throwError "incorrect structure: {e} should be ⊤"
-  | explode c,             E, _  => do
+    | _ => throwError "incorrect structure: {p} should be ⊤"
+  | explode c, E, _ => do
     let b ← c.run E q(⊥)
     return q(Principia.explode $b)
-  | intro c,               E, e  => do
-    match e with
-    | ~q($e₁ ⟶ $e₂) =>
-      let b ← c.run (e₁ :: E) e₂
+  | intro c, E, p => do
+    match p with
+    | ~q($p₁ ⟶ $p₂) =>
+      let b ← c.run (p₁ :: E) p₂
       return q(Principia.intro $b)
-    | _ => throwError "incorrect structure: {e} should be _ → _"
-  | modusPonens e₁ c₁ c₂,  E, e₂ => do
-    let b₁ ← c₁.run E q($e₁ ⟶ $e₂)
-    let b₂ ← c₂.run E e₁
+    | _ => throwError "incorrect structure: {p} should be _ → _"
+  | modusPonens s c₁ c₂, E, p => do
+    let q ← indexFormulaToSubFormula L E 0 s
+    let b₁ ← c₁.run E q($q ⟶ $p)
+    let b₂ ← c₂.run E q
     return q(Principia.modusPonens $b₁ $b₂)
-  | split c₁ c₂,           E, e  => do
-    match e with
-    | ~q($e₁ ⋏ $e₂) =>
-      let b₁ ← c₁.run E e₁
-      let b₂ ← c₂.run E e₂
+  | split c₁ c₂, E, p => do
+    match p with
+    | ~q($p₁ ⋏ $p₂) =>
+      let b₁ ← c₁.run E p₁
+      let b₂ ← c₂.run E p₂
       return q(Principia.split $b₁ $b₂)
-    | ~q($e₁ ⟷ $e₂) =>
-      let b₁ ← c₁.run E q($e₁ ⟶ $e₂)
-      let b₂ ← c₂.run E q($e₂ ⟶ $e₁)
+    | ~q($p₁ ⟷ $p₂) =>
+      let b₁ ← c₁.run E q($p₁ ⟶ $p₂)
+      let b₂ ← c₂.run E q($p₂ ⟶ $p₁)
       return q(Principia.splitIff $b₁ $b₂)
-    | _ => throwError "incorrect structure: {e} should be _ ⋏ _ or _ ⟷ _"
-  | andLeft e₁ c,           E, e₂  => do
-      let b ← c.run E q($e₂ ⋏ $e₁)
-      return q(Principia.andLeft $b)
-  | andRight e₁ c,           E, e₂  => do
-      let b ← c.run E q($e₁ ⋏ $e₂)
-      return q(Principia.andRight $b)
-  | orLeft c,               E, e  => do
-    match e with
-    | ~q($e₁ ⋎ $e₂) =>
-      let b ← c.run E e₁
+    | _ => throwError "incorrect structure: {p} should be _ ⋏ _ or _ ⟷ _"
+  | andLeft s c, E, p => do
+    let q ← indexFormulaToSubFormula L E 0 s    
+    let b ← c.run E q($p ⋏ $q)
+    return q(Principia.andLeft $b)
+  | andRight s c, E, p => do
+    let q ← indexFormulaToSubFormula L E 0 s    
+    let b ← c.run E q($q ⋏ $p)
+    return q(Principia.andRight $b)
+  | orLeft c, E, p => do
+    match p with
+    | ~q($p₁ ⋎ $p₂) =>
+      let b ← c.run E p₁
       return q(Principia.orLeft $b)
-    | _ => throwError "incorrect structure: {e} should be _ ⋎ _"
-  | orRight c,               E, e  => do
-    match e with
-    | ~q($e₁ ⋎ $e₂) =>
-      let b ← c.run E e₂
+    | _             => throwError "incorrect structure: {p} should be _ ⋎ _"
+  | orRight c, E, p => do
+    match p with
+    | ~q($p₁ ⋎ $p₂) =>
+      let b ← c.run E p₂
       return q(Principia.orRight $b)
-    | _ => throwError "incorrect structure: {e} should be _ ⋎ _"
-  | cases e₁ e₂ c₀ c₁ c₂,  E, e  => do
-    let b₀ ← c₀.run E q($e₁ ⋎ $e₂)
-    let b₁ ← c₁.run (e₁ :: E) e
-    let b₂ ← c₂.run (e₂ :: E) e
+    | _ => throwError "incorrect structure: {p} should be _ ⋎ _"
+  | cases s₁ s₂ c₀ c₁ c₂, E, p => do
+    let q₁ ← indexFormulaToSubFormula L E 0 s₁
+    let q₂ ← indexFormulaToSubFormula L E 0 s₂
+    let b₀ ← c₀.run E q($q₁ ⋎ $q₂)
+    let b₁ ← c₁.run (q₁ :: E) p
+    let b₂ ← c₂.run (q₂ :: E) p
     return q(Principia.cases $b₀ $b₁ $b₂)
-  | generalize c,          E, e  => do
+  | generalize c, E, e => do
     match e with
     | ~q(∀' $e)    =>
       let ⟨fe, fee⟩ ← SubFormula.Meta.resultFree e
@@ -441,14 +485,24 @@ partial def run : (c : PrincipiaCode L) → (G : List Q(SyntacticFormula $L)) �
       return PrincipiaQ.generalizeBAllOfEqQ L dfunc drel lEq T
         (Qq.toQList (u := u) E) (Qq.toQList (u := u) sE) p q p' q' sEe pe qe b
     | _            => throwError "incorrect structure: {e} should be ∀ _"
-  | specialize k v p c₀ c₁,          E, q => do
-    let ⟨p', hp⟩ ← SubFormula.Meta.resultSubsts (n := q(0)) (k := k) v p
-    let ⟨p'', hp'⟩ ← SubFormula.Meta.resultUnivClosure (n := k) p
-    let b ← c₀.run E p''
-    let d ← c₁.run (p' :: E) q
-    return PrincipiaQ.specializesOfEqQ L dfunc drel lEq T (Qq.toQList (u := u) E) v p p' p'' q hp hp' b d
-  | useInstance t c, E, i => do
-    match i with
+  | specialize ts s c₀ c₁, E, p => do
+    let k : ℕ := ts.length
+    let kExpr : Q(ℕ) := q($k)
+    let q ← indexFormulaToSubFormula L E k s
+    let tsexpr ← ts.mapM (termSyntaxToExpr L)
+    let (v, _) : Expr × ℕ := tsexpr.foldr (α := Expr) (fun t (w, k) =>
+        let t : Q(SyntacticTerm $L) := t
+        let w : Q(Fin $k → SyntacticTerm $L) := w
+        (q(@Matrix.vecCons (SyntacticTerm $L) $k $t $w), k + 1))
+        (q(@Matrix.vecEmpty (SyntacticTerm $L)), 0)
+    let ⟨q', hp⟩ ← SubFormula.Meta.resultSubsts (n := q(0)) (k := q($k)) v q
+    let ⟨q'', hp'⟩ ← SubFormula.Meta.resultUnivClosure q
+    let b ← c₀.run E q''
+    let d ← c₁.run (q' :: E) p
+    return PrincipiaQ.specializesOfEqQ L dfunc drel lEq T (Qq.toQList (u := u) E) (k := kExpr) v q q' q'' p hp hp' b d
+  | useInstance s c, E, p => do
+    let t ← termSyntaxToExpr L s
+    match p with
     | ~q(∃' $p) =>
       let ⟨p', pe⟩ ← SubFormula.Meta.resultSubsts (L := L) (k := q(1)) (n := q(0)) q(![$t]) p
       let b ← c.run E p'
@@ -458,15 +512,16 @@ partial def run : (c : PrincipiaCode L) → (G : List Q(SyntacticFormula $L)) �
       let ⟨q', qe⟩ ← SubFormula.Meta.resultSubsts (L := L) (k := q(1)) (n := q(0)) q(![$t]) q
       let b ← c.run E q($p' ⋏ $q')
       return PrincipiaQ.useInstanceBExOfEqQ L dfunc drel lEq T (Qq.toQList (u := u) E) t p q p' p' pe qe b
-    | _ => throwError "incorrect structure: {i} should be ∃ _" 
-  | exCases e c₀ c₁,          E, i => do
-    let ⟨fe, fee⟩ ← SubFormula.Meta.resultFree (L := L) (n := q(0)) e
-    let ⟨si, sie⟩ ← SubFormula.Meta.resultShift (L := L) (n := q(0)) i
+    | _ => throwError "incorrect structure: {p} should be ∃ _"
+  | exCases s c₀ c₁, E, p => do
+    let q ← indexFormulaToSubFormula L E 1 s
+    let ⟨fe, fee⟩ ← SubFormula.Meta.resultFree (L := L) (n := q(0)) q
+    let ⟨si, sie⟩ ← SubFormula.Meta.resultShift (L := L) (n := q(0)) p
     let ⟨sE, sEe⟩ ← SubFormula.Meta.resultShift₀List E
-    let b₀ ← c₀.run E q(∃' $e)
+    let b₀ ← c₀.run E q(∃' $q)
     let b₁ ← c₁.run (fe :: sE) si
     return PrincipiaQ.exCasesOfEqQ L dfunc drel lEq T
-      (Qq.toQList (u := u) E) (Qq.toQList (u := u) sE) e fe i si sEe fee sie b₀ b₁
+      (Qq.toQList (u := u) E) (Qq.toQList (u := u) sE) q fe p si sEe fee sie b₀ b₁
   | reflexivity, E, i => runRefl L dfunc drel lEq T E i
   | symmetry c, E, i => do
     match i with
@@ -477,31 +532,35 @@ partial def run : (c : PrincipiaCode L) → (G : List Q(SyntacticFormula $L)) �
       let b ← c.run E q($q ⟷ $p)
       return q(Principia.iffSymm $b)
     | _ => throwError "incorrect structure: {i} should be _ = _ or _ ↔ _"
-  | rewriteEq t₁ t₂ c₀ c₁, E, p => do
+  | rewriteEq s₁ s₂ c₀ c₁, E, p => do
+    let t₁ ← termSyntaxToExpr L s₁
+    let t₂ ← termSyntaxToExpr L s₂
     let ⟨p', hp⟩ ← SubFormula.Meta.findFormula t₁ p
     let ⟨p'', hp'⟩ ← SubFormula.Meta.resultSubsts q(![$t₂]) p'
     let b₀ ← c₀.run E q(“ᵀ!$t₁ = ᵀ!$t₂”)
     let b₁ ← c₁.run E p''
     return PrincipiaQ.rewriteEqOfEqQ L dfunc drel lEq T
       (Qq.toQList (u := u) E) t₁ t₂ p' p p'' hp hp' b₀ b₁
-  | rephrase p₀ q₀ c₀ c₁, E, p => do
+  | rephrase s₀ t₀ c₀ c₁, E, p => do
+    let p₀ ← indexFormulaToSubFormula L E 0 s₀
+    let q₀ ← indexFormulaToSubFormula L E 0 t₀
     let ⟨q, h⟩ ← SubFormula.Meta.rephraseFormula p₀ q₀ p
     let b₀ ← c₀.run E q(“!$p₀ ↔ !$q₀”)
     let b₁ ← c₁.run E q
     return PrincipiaQ.rephraseOfIffFormulaQ L dfunc drel lEq T
       (Qq.toQList (u := u) E) p₀ q₀ p q h b₀ b₁
-  | fromM s, E, e               => do
+  | fromM s, E, e => do
     Term.elabTerm s (return q($(Qq.toQList (u := u) E) ⟹[$T] $e))
   | simpM np l c, E, p => do
     let ⟨p', hp⟩ ← SubFormula.Meta.result (u := u) (L := L) (n := q(0)) np (SubFormula.Meta.unfoldOfList l) p
     logInfo m! "p': {p'}"
     let b ← c.run E p'
     return PrincipiaQ.castOfEqQ L dfunc drel lEq T (Qq.toQList (u := u) E) p p' hp b
-  | showState c,          E, e  => do
+  | showState c, E, e  => do
     display L E e
     let b ← c.run E e
     return q($b)
-  | _, E, e               => do
+  | _, E, e => do
     display L E e
     throwError m!"proof is missing" 
 
@@ -514,9 +573,9 @@ declare_syntax_cat proofElem
 @[inline] def proofElemParser (rbp : Nat := 0) : Parser :=
   categoryParser `proofElem rbp
 
-def seqItem      := leading_parser ppLine >> proofElemParser >> Lean.Parser.optional "; "
+def seqItem := leading_parser ppLine >> proofElemParser >> Lean.Parser.optional "; "
 
-def seqIndent    := leading_parser many1Indent seqItem
+def seqIndent := leading_parser many1Indent seqItem
 
 def seq := seqIndent
 
@@ -526,52 +585,42 @@ syntax proofBlock := "· " seq
 
 syntax optProofBlock := ("@ " seq)?
 
-syntax termSeq := (subterm),*
-
-syntax lineIndex := "##" num
-
-def linnIndexToNat : Syntax → TermElabM ℕ
-  | `(lineIndex| ##$n:num) => return n.getNat
-  | _                      => throwUnsupportedSyntax
-
-syntax indexFormula := (lineIndex <|> subformula)
-
 syntax (name := notationAssumption) "assumption" : proofElem
 
-syntax (name := notationHave) "have " subformula proofBlock : proofElem
+syntax (name := notationHave) "have " indexFormula proofBlock : proofElem
 
-syntax notationAndSeqUnit := "and" subformula optProofBlock
+syntax notationAndSeqUnit := "and" indexFormula optProofBlock
 
 syntax (name := notationSinceThen)
-  ("since" subformula optProofBlock notationAndSeqUnit*)? "then" subformula proofBlock : proofElem
+  ("since" indexFormula optProofBlock notationAndSeqUnit*)? "then" indexFormula proofBlock : proofElem
 
-syntax (name := notationContradiction) "contradiction " subformula optProofBlock optProofBlock : proofElem
+syntax (name := notationContradiction) "contradiction " indexFormula optProofBlock optProofBlock : proofElem
 
 syntax (name := notationTrivial) "trivial" : proofElem
 
 syntax (name := notationIntro) "intro" : proofElem
 
-syntax (name := notationModusPonens) "suffices" subformula optProofBlock : proofElem
+syntax (name := notationModusPonens) "suffices" indexFormula optProofBlock : proofElem
 
 syntax (name := notationSplit)"split" optProofBlock optProofBlock : proofElem
 
-syntax (name := notationAndLeft) "andl" subformula optProofBlock : proofElem
+syntax (name := notationAndLeft) "andl" indexFormula optProofBlock : proofElem
 
-syntax (name := notationAndRight) "andr" subformula optProofBlock : proofElem
+syntax (name := notationAndRight) "andr" indexFormula optProofBlock : proofElem
 
 syntax (name := notationOrLeft) "left" optProofBlock : proofElem
 
 syntax (name := notationOrRight) "right" optProofBlock : proofElem
 
-syntax (name := notationCases) "cases " subformula " or " subformula optProofBlock proofBlock proofBlock : proofElem
+syntax (name := notationCases) "cases " indexFormula " or " indexFormula optProofBlock proofBlock proofBlock : proofElem
 
 syntax (name := notationGeneralize) "generalize" : proofElem
 
-syntax (name := notationSpecialize) "specialize" (subterm),* " of " subformula optProofBlock : proofElem
+syntax (name := notationSpecialize) "specialize" (subterm),* " of " indexFormula optProofBlock : proofElem
 
 syntax (name := notationUse) "use " subterm : proofElem
 
-syntax (name := notationExCases) "choose " subformula optProofBlock : proofElem
+syntax (name := notationExCases) "choose " indexFormula optProofBlock : proofElem
 
 syntax (name := notationReflexivity) "rfl" : proofElem
 
@@ -579,7 +628,7 @@ syntax (name := notationSymmetry) "symmetry" : proofElem
 
 syntax (name := notationRewriteEq) "rewrite" subterm " ↦ " subterm optProofBlock : proofElem
 
-syntax (name := notationRephrase) "rephrase" subformula " ↦ " subformula optProofBlock : proofElem
+syntax (name := notationRephrase) "rephrase" indexFormula " ↦ " indexFormula optProofBlock : proofElem
 
 syntax (name := notationFromM) "from " term : proofElem
 
@@ -639,70 +688,61 @@ partial def seqToCode (L : Q(Language.{u})) : List Syntax → TermElabM (Princip
   | seqElem::seqElems => do
     match seqElem with
     | `(notationAssumption| assumption) => return PrincipiaCode.assumption
-    | `(notationHave| have $p:subformula $s:proofBlock) =>
-      let p ← formulaSyntaxToExpr L p
+    | `(notationHave| have $p:indexFormula $s:proofBlock) =>
       let c₁ ← seqToCode L (getSeqElems <| getSeqOfProofBlock s)
       let c₂ ← seqToCode L seqElems
       return PrincipiaCode.trans p c₁ c₂
     | `(notationSinceThen| then $q $s:proofBlock) =>
-      let qexpr ← formulaSyntaxToExpr L q
       let sblock := getSeqOfProofBlock s
       let c ← seqToCode L (getSeqElems sblock)
       let cs ← seqToCode L seqElems
-      return PrincipiaCode.transList [] qexpr c cs
+      return PrincipiaCode.transList [] q c cs
     | `(notationSinceThen| since $p $b:optProofBlock $andblock:notationAndSeqUnit* then $q $d:proofBlock) =>
-      let qexpr ← formulaSyntaxToExpr L q
       let dblock := getSeqOfProofBlock d
       let cthen ← seqToCode L (getSeqElems dblock)
       let cs ← seqToCode L seqElems
-      let pexpr ← formulaSyntaxToExpr L p
       let bblock := getSeqOfOptProofBlock b
       let csince := if bblock.isMissing then PrincipiaCode.assumption else ← seqToCode L (getSeqElems bblock)
       let args ← andblock.mapM (fun s => do
         match s with
-        | `(notationAndSeqUnit| and $r:subformula $z:optProofBlock) =>
-          let rexpr ← formulaSyntaxToExpr L r
+        | `(notationAndSeqUnit| and $r:indexFormula $z:optProofBlock) =>
           let zblock := getSeqOfOptProofBlock z
           let q := if zblock.isMissing then PrincipiaCode.assumption else ← seqToCode L (getSeqElems zblock)
-          return (rexpr, q)
+          return (r.raw, q)
         | _                                                         =>
           throwError f!"no match: {s}")
-      let argList := (pexpr, csince) :: args.toList
-      return PrincipiaCode.transList argList qexpr cthen cs
-    | `(notationContradiction| contradiction $p:subformula $b₁:optProofBlock $b₂:optProofBlock)
+      let argList := (p.raw, csince) :: args.toList
+      return PrincipiaCode.transList argList q cthen cs
+    | `(notationContradiction| contradiction $p:indexFormula $b₁:optProofBlock $b₂:optProofBlock)
                                                         =>
-      let pexpr ← formulaSyntaxToExpr L p
       let bblock₁ := getSeqOfOptProofBlock b₁
       let bblock₂ := getSeqOfOptProofBlock b₂
       let c₁ := if bblock₁.isMissing then PrincipiaCode.assumption else ← seqToCode L (getSeqElems bblock₁)
       let c₂ := if bblock₂.isMissing then PrincipiaCode.assumption else ← seqToCode L (getSeqElems bblock₂)
-      return PrincipiaCode.contradiction pexpr c₁ c₂
+      return PrincipiaCode.contradiction p c₁ c₂
     | `(notationTrivial| trivial)                       => return PrincipiaCode.trivial
     | `(notationIntro| intro)                           =>
       let c ← seqToCode L seqElems
       return PrincipiaCode.intro c
-    | `(notationModusPonens| suffices $p:subformula $b:optProofBlock) =>
-      let pexpr ← formulaSyntaxToExpr L p
+    | `(notationModusPonens| suffices $p:indexFormula $b:optProofBlock) =>
       let bblock := getSeqOfOptProofBlock b
       let c₀ := if bblock.isMissing then PrincipiaCode.assumption else ← seqToCode L (getSeqElems bblock)
       let c₁ ← seqToCode L seqElems
-      return PrincipiaCode.modusPonens pexpr c₀ c₁
+      return PrincipiaCode.modusPonens p c₀ c₁
     | `(notationSplit| split $b₁:optProofBlock $b₂:optProofBlock) =>
       let bblock₁ := getSeqOfOptProofBlock b₁
       let bblock₂ := getSeqOfOptProofBlock b₂
       let c₁ := if bblock₁.isMissing then PrincipiaCode.assumption else ← seqToCode L (getSeqElems bblock₁)
       let c₂ := if bblock₂.isMissing then PrincipiaCode.assumption else ← seqToCode L (getSeqElems bblock₂)
       return PrincipiaCode.split c₁ c₂
-    | `(notationAndLeft| andl $p:subformula $b:optProofBlock) =>
-      let pexpr ← formulaSyntaxToExpr L p
+    | `(notationAndLeft| andl $p:indexFormula $b:optProofBlock) =>
       let bblock := getSeqOfOptProofBlock b
       let c := if bblock.isMissing then PrincipiaCode.assumption else ← seqToCode L (getSeqElems bblock)
-      return PrincipiaCode.andLeft pexpr c
-    | `(notationAndRight| andr $p:subformula $b:optProofBlock) =>
-      let pexpr ← formulaSyntaxToExpr L p
+      return PrincipiaCode.andLeft p c
+    | `(notationAndRight| andr $p:indexFormula $b:optProofBlock) =>
       let bblock := getSeqOfOptProofBlock b
       let c := if bblock.isMissing then PrincipiaCode.assumption else ← seqToCode L (getSeqElems bblock)
-      return PrincipiaCode.andRight pexpr c
+      return PrincipiaCode.andRight p c
     | `(notationOrLeft| left $b:optProofBlock) =>
       let bblock := getSeqOfOptProofBlock b
       let c := if bblock.isMissing then PrincipiaCode.assumption else ← seqToCode L (getSeqElems bblock)
@@ -711,62 +751,45 @@ partial def seqToCode (L : Q(Language.{u})) : List Syntax → TermElabM (Princip
       let bblock := getSeqOfOptProofBlock b 
       let c := if bblock.isMissing then PrincipiaCode.assumption else ← seqToCode L (getSeqElems bblock)
       return PrincipiaCode.orRight c
-    | `(notationCases| cases $p:subformula or $q:subformula $b₀:optProofBlock $b₁:proofBlock $b₂:proofBlock) =>
-      let pexpr ← formulaSyntaxToExpr L p
-      let qexpr ← formulaSyntaxToExpr L q    
+    | `(notationCases| cases $p:indexFormula or $q:indexFormula $b₀:optProofBlock $b₁:proofBlock $b₂:proofBlock) =>
       let bblock₀ := getSeqOfOptProofBlock b₀
       let bblock₁ := getSeqOfProofBlock b₁
       let bblock₂ := getSeqOfProofBlock b₂
       let c₀ := if bblock₀.isMissing then PrincipiaCode.assumption else ← seqToCode L (getSeqElems bblock₀)
       let c₁ ← seqToCode L (getSeqElems bblock₁)
       let c₂ ← seqToCode L (getSeqElems bblock₂)
-      return PrincipiaCode.cases pexpr qexpr c₀ c₁ c₂
+      return PrincipiaCode.cases p q c₀ c₁ c₂
     | `(notationGeneralize| generalize) =>
       let c ← seqToCode L seqElems
       return PrincipiaCode.generalize c
-    | `(notationSpecialize| specialize $ts,* of $p:subformula $b:optProofBlock) =>
-      let tsexpr ← ts.getElems.mapM (termSyntaxToExpr L)
-      let n := tsexpr.size
-      let nexpr : Q(ℕ) ← Lean.Expr.ofNat q(ℕ) n
-      let pexpr ← subFormulaSyntaxToExpr L nexpr p
-      let (v, _) : Expr × ℕ := tsexpr.foldr (α := Expr) (fun t (w, k) =>
-        let t : Q(SyntacticTerm $L) := t
-        let w : Q(Fin $k → SyntacticTerm $L) := w
-        (q(@Matrix.vecCons (SyntacticTerm $L) $k $t $w), k + 1))
-        (q(@Matrix.vecEmpty (SyntacticTerm $L)), 0)
+    | `(notationSpecialize| specialize $ts,* of $p:indexFormula $b:optProofBlock) =>
       let bblock := getSeqOfOptProofBlock b
       let c₀ := if bblock.isMissing then PrincipiaCode.assumption else ← seqToCode L (getSeqElems bblock)
       let c ← seqToCode L seqElems
-      return PrincipiaCode.specialize nexpr v pexpr c₀ c
+      return PrincipiaCode.specialize ts.getElems.toList p c₀ c
     | `(notationUse| use $t) =>
-      let texpr ← termSyntaxToExpr L t
       let c ← seqToCode L seqElems
-      return PrincipiaCode.useInstance texpr c
-    | `(notationExCases| choose $p:subformula $b:optProofBlock) =>
-      let pexpr ← subFormulaSyntaxToExpr L q(1) p
+      return PrincipiaCode.useInstance t c
+    | `(notationExCases| choose $p:indexFormula $b:optProofBlock) =>
       let bblock := getSeqOfOptProofBlock b
       let c₀ := if bblock.isMissing then PrincipiaCode.assumption else ← seqToCode L (getSeqElems bblock)
       let c₁ ← seqToCode L seqElems
-      return PrincipiaCode.exCases pexpr c₀ c₁
+      return PrincipiaCode.exCases p c₀ c₁
     | `(notationReflexivity| rfl) =>
       return PrincipiaCode.reflexivity
     | `(notationSymmetry| symmetry) =>
       let c ← seqToCode L seqElems
       return PrincipiaCode.symmetry c
     | `(notationRewriteEq| rewrite $t₁:subterm ↦ $t₂:subterm $b:optProofBlock) =>
-      let texpr₁ ← termSyntaxToExpr L t₁
-      let texpr₂ ← termSyntaxToExpr L t₂
       let bblock := getSeqOfOptProofBlock b
       let c₀ := if bblock.isMissing then PrincipiaCode.assumption else ← seqToCode L (getSeqElems bblock)
       let c₁ ← seqToCode L seqElems
-      return PrincipiaCode.rewriteEq texpr₁ texpr₂ c₀ c₁
-    | `(notationRephrase| rephrase $p₀:subformula ↦ $q₀:subformula $b:optProofBlock) =>
-      let p₀expr ← formulaSyntaxToExpr L p₀
-      let q₀expr ← formulaSyntaxToExpr L q₀
+      return PrincipiaCode.rewriteEq t₁ t₂ c₀ c₁
+    | `(notationRephrase| rephrase $p₀:indexFormula ↦ $q₀:indexFormula $b:optProofBlock) =>
       let bblock := getSeqOfOptProofBlock b
       let c₀ := if bblock.isMissing then PrincipiaCode.assumption else ← seqToCode L (getSeqElems bblock)
       let c₁ ← seqToCode L seqElems
-      return PrincipiaCode.rephrase p₀expr q₀expr c₀ c₁
+      return PrincipiaCode.rephrase p₀ q₀ c₀ c₁
     | `(notationFromM| from $t:term) =>
       return PrincipiaCode.fromM t
     | `(notationSimpM| simp) =>
@@ -877,7 +900,9 @@ example : [“0 = &1”, “3 < &6 + &7”] ⟹[T] “∀ ∀ ∀ ((#0 = 0 ∨ #
 -- specialize ..., ..., ... ... of ...
 example : [“∀ ∀ #0 + #1 = #1 + #0”] ⟹[T] “1 + 2 = 2 + 1” :=
   proof.
+    !
     specialize 1, 2 of #0 + #1 = #1 + #0
+    !
   □
 
 -- use ...
@@ -932,18 +957,18 @@ example :
     “∀ (0 = #0 ∨ 0 < #0)” :=
   proof.
     generalize
-    specialize &0 of (#0 = 0 ∨ (∃ #1 = #0 + 1))
+    specialize &0 of ::[1]
     cases &0 = 0 or ∃ &0 = #0 + 1
     · left
       @ symmetry
     · have 0 < &0
-      · choose &0 = #0 + 1
+      · choose ::[5]
         rewrite &1 ↦ &0 + 1
         rephrase 0 < &0 + 1 ↦ ∃ #0 + 0 + 1 = &0 + 1
-        @ specialize 0, &0 + 1 of #0 < #1 ↔ (∃ #0 + #1 + 1 = #2)
+        @ specialize 0, &0 + 1 of ::[3]
         use &0
         rewrite &0 + 0 ↦ &0
-        @ specialize &0 of #0 + 0 = #0
+        @ specialize &0 of ::[2]
         rfl
       right
   □
