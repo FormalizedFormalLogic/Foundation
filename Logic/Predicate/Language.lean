@@ -123,6 +123,76 @@ instance (k) : Encodable (oring.rel k) where
     | _, _ => none
   encodek := fun x => by rcases x <;> simp
 
+inductive ORingWithPowPairingFunc : ℕ → Type
+  | zero : ORingWithPowPairingFunc 0
+  | one : ORingWithPowPairingFunc 0
+  | exp : ORingWithPowPairingFunc 1
+  | add : ORingWithPowPairingFunc 2
+  | mul : ORingWithPowPairingFunc 2
+  | pow : ORingWithPowPairingFunc 2
+  | pair : ORingWithPowPairingFunc 2
+
+@[reducible] def oringWithExpPowPairing : Language where
+  func := ORingWithPowPairingFunc
+  rel := ORingRel
+
+instance (k) : ToString (oringWithExpPowPairing.func k) :=
+⟨ fun s =>
+  match s with
+  | .zero => "0"
+  | .one  => "1"
+  | .exp  => "exp"
+  | .add  => "(+)"
+  | .mul  => "(\\cdot)"
+  | .pow  => "(\\cdot)"
+  | .pair  => "(\\mathrm{pair})"⟩
+
+instance (k) : ToString (oringWithExpPowPairing.rel k) :=
+⟨ fun s =>
+  match s with
+  | ORingRel.eq => "\\mathrm{Eq}"
+  | ORingRel.lt    => "\\mathrm{Lt}"⟩
+
+instance (k) : DecidableEq (oringWithExpPowPairing.func k) := fun a b =>
+  by rcases a <;> rcases b <;> simp <;> try {exact instDecidableTrue} <;> try {exact instDecidableFalse}
+
+instance (k) : DecidableEq (oringWithExpPowPairing.rel k) := fun a b =>
+  by rcases a <;> rcases b <;> simp <;> try {exact instDecidableTrue} <;> try {exact instDecidableFalse}
+
+instance (k) : Encodable (oringWithExpPowPairing.func k) where
+  encode := fun x =>
+    match x with
+    | .zero => 0
+    | .one  => 1
+    | .exp  => 0
+    | .add  => 0
+    | .mul  => 1
+    | .pow  => 2
+    | .pair  => 3
+  decode := fun e =>
+    match k, e with
+    | 0, 0 => some .zero
+    | 0, 1 => some .one
+    | 1, 0 => some .exp
+    | 2, 0 => some .add
+    | 2, 1 => some .mul
+    | 2, 2 => some .pow
+    | 2, 3 => some .pair
+    | _, _ => none
+  encodek := fun x => by rcases x <;> simp
+
+instance (k) : Encodable (oringWithExpPowPairing.rel k) where
+  encode := fun x =>
+    match x with
+    | ORingRel.eq => 0
+    | ORingRel.lt    => 1
+  decode := fun e =>
+    match k, e with
+    | 2, 0 => some ORingRel.eq
+    | 2, 1 => some ORingRel.lt
+    | _, _ => none
+  encodek := fun x => by rcases x <;> simp
+
 def relational (α : ℕ → Type u) : Language where
   func := fun _ => PEmpty
   rel := α
@@ -168,17 +238,40 @@ class Mul (L : Language.{u}) where
 class Pow (L : Language.{u}) where
   pow : L.func 2
 
+class Exp (L : Language.{u}) where
+  exp : L.func 1
+
+class Pairing (L : Language.{u}) where
+  pair : L.func 2
+
 attribute [match_pattern] Eq.eq Add.add Mul.mul
 
 class ORing (L : Language) extends L.Eq, L.Lt, L.Zero, L.One, L.Add, L.Mul
 
 instance : ORing oring where
-  eq := ORingRel.eq
-  lt := ORingRel.lt
-  zero := ORingFunc.zero
-  one := ORingFunc.one
-  add := ORingFunc.add
-  mul := ORingFunc.mul
+  eq := .eq
+  lt := .lt
+  zero := .zero
+  one := .one
+  add := .add
+  mul := .mul
+
+instance : ORing oringWithExpPowPairing where
+  eq := .eq
+  lt := .lt
+  zero := .zero
+  one := .one
+  add := .add
+  mul := .mul
+
+instance : Exp oringWithExpPowPairing where
+  exp := .exp
+
+instance : Pow oringWithExpPowPairing where
+  pow := .pow
+
+instance : Pairing oringWithExpPowPairing where
+  pair := .pair
 
 structure Hom (L₁ L₂ : Language) where
   onFunc : {k : ℕ} → L₁.func k → L₂.func k

@@ -528,13 +528,16 @@ syntax:70 "[" term "](" subterm,* ")" : subterm
 syntax:50 subterm:50 " + " subterm:51 : subterm
 syntax:60 subterm:60 " * " subterm:61 : subterm
 syntax:65 subterm:65 " ^ " subterm:66 : subterm
+syntax:67 "exp " subterm:68 : subterm
+syntax:75 "⟨" subterm ", " subterm "⟩" : subterm
+
 syntax "(" subterm ")" : subterm
 
 syntax subterm "ᵀ⟦" subterm,* "⟧" : subterm
 syntax:80 "⤒" subterm:80 : subterm
-syntax:80 "⇑" subterm:80 : subterm
-syntax:80 "⟨free⟩ " subterm:80 : subterm
-syntax:80 "⟨fix⟩ " subterm:80 : subterm
+syntax:80 "ᵀ⇑" subterm:80 : subterm
+syntax:80 "ᵀᶠ" subterm:80 : subterm
+syntax:80 "ᵀᵇ" subterm:80 : subterm
 
 syntax "ᵀ“" subterm:0 "”" : term
 
@@ -543,7 +546,7 @@ syntax "ᵀ“" subterm:0 "”" : term
 macro_rules
   | `(ᵀ“ # $n:term”)                                 => `(#$n)
   | `(ᵀ“ & $n:term ”)                                => `(&$n)
-  | `(ᵀ“ ᵀ! $t:term ”)                                => `($t)
+  | `(ᵀ“ ᵀ! $t:term ”)                               => `($t)
   | `(ᵀ“ $n:num ”)                                   => `(SubTerm.Operator.const (natLit _ $n))
   | `(ᵀ“ [ $d:term ]( $t:subterm,* ) ”)              => do
     let v ← t.getElems.foldrM (β := Lean.TSyntax _) (init := ← `(![])) (fun a s => `(ᵀ“$a” :> $s))
@@ -551,17 +554,19 @@ macro_rules
   | `(ᵀ“ $t:subterm + $u:subterm ”)                  => `(func Language.Add.add ![ᵀ“$t”, ᵀ“$u”])
   | `(ᵀ“ $t:subterm * $u:subterm ”)                  => `(func Language.Mul.mul ![ᵀ“$t”, ᵀ“$u”])
   | `(ᵀ“ $t:subterm ^ $u:subterm ”)                  => `(func Language.Pow.pow ![ᵀ“$t”, ᵀ“$u”])
-  | `(ᵀ“ ⇑$t:subterm ”)                             => `(shift ᵀ“$t”)
-  | `(ᵀ“ $t:subterm ᵀ⟦$u:subterm,*⟧ ”)                => do
+  | `(ᵀ“ exp $t:subterm ”)                           => `(func Language.Exp.exp ![ᵀ“$t”])
+  | `(ᵀ“ ⟨ $t:subterm, $u:subterm ⟩ ”)               => `(func Language.Pairing.pair ![ᵀ“$t”, ᵀ“$u”])
+  | `(ᵀ“ ᵀ⇑$t:subterm ”)                            => `(shift ᵀ“$t”)
+  | `(ᵀ“ $t:subterm ᵀ⟦$u:subterm,*⟧ ”)               => do
     let v ← u.getElems.foldrM (β := Lean.TSyntax _) (init := ← `(![])) (fun a s => `(ᵀ“$a” :> $s))
     `(substs $v ᵀ“$t”)
   | `(ᵀ“ ⤒$t:subterm ”)                             => `(SubTerm.bShift ᵀ“$t”)
-  | `(ᵀ“ ⟨free⟩ $t:subterm ”)                        => `(SubTerm.free ᵀ“$t”)
-  | `(ᵀ“ ⟨fix⟩ $t:subterm ”)                         => `(SubTerm.fix ᵀ“$t”)
+  | `(ᵀ“ ᵀᶠ $t:subterm ”)                            => `(SubTerm.free ᵀ“$t”)
+  | `(ᵀ“ ᵀᵇ $t:subterm ”)                            => `(SubTerm.fix ᵀ“$t”)
   | `(ᵀ“ ( $x ) ”)                                   => `(ᵀ“$x”)
 
 #check (ᵀ“ [Language.ORingFunc.mul](&2 + &0, [Language.ORingFunc.zero]())” : SubTerm Language.oring ℕ 8)
-#check ᵀ“⇑(3 * #3 + 9)”
+#check ᵀ“ᵀ⇑(3 * #3 + 9)”
 #check SubTerm.func Language.Mul.mul (ᵀ“1” :> ᵀ“3” :> Matrix.vecEmpty)
 
 section delab
@@ -583,6 +588,8 @@ def unexpsnderOperatorConst : Unexpander
 notation "lang(+)" => Language.Add.add
 notation "lang(*)" => Language.Mul.mul
 notation "lang(^)" => Language.Pow.pow
+notation "lang(exp)" => Language.Exp.exp
+notation "lang(⟨⟩)" => Language.Pairing.pair
 
 @[app_unexpander Language.Add.add]
 def unexpsnderAdd : Unexpander
@@ -605,7 +612,7 @@ def unexpandFunc : Unexpander
 
 @[app_unexpander SubTerm.shift]
 def unexpandShift : Unexpander
-  | `($_ ᵀ“$t”) => `(ᵀ“ ⇑$t ”)
+  | `($_ ᵀ“$t”) => `(ᵀ“ ᵀ⇑$t ”)
   | _           => throw ()
 
 @[app_unexpander SubTerm.bShift]
@@ -622,16 +629,21 @@ def unexpandSubsts : Unexpander
 
 @[app_unexpander SubTerm.free]
 def unexpandFree : Unexpander
-  | `($_ ᵀ“$t”) => `(ᵀ“ ⟨free⟩ $t ”)
+  | `($_ ᵀ“$t”) => `(ᵀ“ ᵀᶠ $t ”)
   | _           => throw ()
 
 @[app_unexpander SubTerm.fix]
 def unexpandFix : Unexpander
-  | `($_ ᵀ“$t”) => `(ᵀ“ ⟨fix⟩ $t ”)
+  | `($_ ᵀ“$t”) => `(ᵀ“ ᵀᵇ $t ”)
   | _           => throw ()
 
 @[app_unexpander SubTerm.func]
 def unexpandFuncArith : Unexpander
+  | `($_ lang(exp) ![ᵀ“$t:subterm”]) => `(ᵀ“ exp ($t) ”)
+  | `($_ lang(exp) ![#$x:term])      => `(ᵀ“ exp (#$x) ”)
+  | `($_ lang(exp) ![&$x:term])      => `(ᵀ“ exp (&$x) ”)
+  | `($_ lang(exp) ![$t])            => `(ᵀ“ exp (ᵀ!$t) ”)
+
   | `($_ lang(+) ![ᵀ“$t:subterm”, ᵀ“$u:subterm”]) => `(ᵀ“ ($t + $u) ”)
   | `($_ lang(+) ![ᵀ“$t:subterm”, #$x:term     ]) => `(ᵀ“ ($t + #$x) ”)
   | `($_ lang(+) ![ᵀ“$t:subterm”, &$x:term     ]) => `(ᵀ“ ($t + &$x) ”)
@@ -682,12 +694,29 @@ def unexpandFuncArith : Unexpander
   | `($_ lang(^) ![$t,            #$y:term     ]) => `(ᵀ“ (ᵀ!$t ^ #$y) ”)
   | `($_ lang(^) ![$t,            &$y:term     ]) => `(ᵀ“ (ᵀ!$t ^ &$y) ”)
   | `($_ lang(^) ![$t,            $u           ]) => `(ᵀ“ (ᵀ!$t ^ ᵀ!$u) ”)
+
+  | `($_ lang(⟨⟩) ![ᵀ“$t:subterm”, ᵀ“$u:subterm”]) => `(ᵀ“ ⟨$t, $u  ⟩ ”)
+  | `($_ lang(⟨⟩) ![ᵀ“$t:subterm”, #$x:term     ]) => `(ᵀ“ ⟨$t, #$x ⟩ ”)
+  | `($_ lang(⟨⟩) ![ᵀ“$t:subterm”, &$x:term     ]) => `(ᵀ“ ⟨$t, &$x ⟩ ”)
+  | `($_ lang(⟨⟩) ![ᵀ“$t:subterm”, $u           ]) => `(ᵀ“ ⟨$t, ᵀ!$u⟩ ”)
+  | `($_ lang(⟨⟩) ![#$x:term,      ᵀ“$u:subterm”]) => `(ᵀ“ ⟨#$x, $u  ⟩ ”)
+  | `($_ lang(⟨⟩) ![#$x:term,      #$y:term     ]) => `(ᵀ“ ⟨#$x, #$y ⟩ ”)
+  | `($_ lang(⟨⟩) ![#$x:term,      &$y:term     ]) => `(ᵀ“ ⟨#$x, &$y ⟩ ”)
+  | `($_ lang(⟨⟩) ![#$x:term,      $u           ]) => `(ᵀ“ ⟨#$x, ᵀ!$u⟩ ”)
+  | `($_ lang(⟨⟩) ![&$x:term,      ᵀ“$u:subterm”]) => `(ᵀ“ ⟨&$x, $u  ⟩ ”)
+  | `($_ lang(⟨⟩) ![&$x:term,      #$y:term     ]) => `(ᵀ“ ⟨&$x, #$y ⟩ ”)
+  | `($_ lang(⟨⟩) ![&$x:term,      &$y:term     ]) => `(ᵀ“ ⟨&$x, &$y ⟩ ”)
+  | `($_ lang(⟨⟩) ![&$x:term,      $u           ]) => `(ᵀ“ ⟨&$x, ᵀ!$u⟩ ”)
+  | `($_ lang(⟨⟩) ![$t,            ᵀ“$u:subterm”]) => `(ᵀ“ ⟨ᵀ!$t, $u  ⟩ ”)
+  | `($_ lang(⟨⟩) ![$t,            #$y:term     ]) => `(ᵀ“ ⟨ᵀ!$t, #$y ⟩ ”)
+  | `($_ lang(⟨⟩) ![$t,            &$y:term     ]) => `(ᵀ“ ⟨ᵀ!$t, &$y ⟩ ”)
+  | `($_ lang(⟨⟩) ![$t,            $u           ]) => `(ᵀ“ ⟨ᵀ!$t, ᵀ!$u⟩ ”)
   | _                                             => throw ()
 
 #check natLit Language.oring 99
 #check (ᵀ“1” : SubTerm Language.oring ℕ 8)
 #check (SubTerm.func Language.Mul.mul (ᵀ“1” :> ᵀ“3” :> Matrix.vecEmpty) : SubTerm Language.oring ℕ 8)
-#check ᵀ“3 + 8 * &6+2 *#0”
+#check ᵀ“3 + 8 * exp &6 + 2 *#0”
 
 example (t : SyntacticSubTerm L 2) [L.ORing] :
     (ᵀ“(&6 + (ᵀ!t + 2) ᵀ⟦&0 + 9, &2 + 0⟧)” : SyntacticTerm L)  = ᵀ“&0” := by { simp; sorry }
