@@ -286,19 +286,19 @@ variable [L.Eq] [EqTheory T]
 open SubTerm SubFormula Theory Eq
 
 def eqRefl (t : SyntacticTerm L) : ProofArrow T Δ (“ᵀ!t = ᵀ!t”) :=
-  have b : ProofArrow T Δ (“∀ #0 = #0”) := (byAxiom (EqTheory.subset T Theory.Eq.refl)).cast (by simp)
+  have b : ProofArrow T Δ (“∀ #0 = #0”) := (byAxiom (EqTheory.eq Theory.Eq.refl)).cast (by simp)
   (specialize t b).cast (by simp)
 
 def eqSymm {t₁ t₂ : SyntacticTerm L} (b : ProofArrow T Δ “ᵀ!t₁ = ᵀ!t₂”) : ProofArrow T Δ “ᵀ!t₂ = ᵀ!t₁” :=
   have : ProofArrow T Δ “∀ ∀ (#1 = #0 → #0 = #1)” :=
-    (byAxiom (EqTheory.subset T Theory.Eq.symm)).cast (by simp)
+    (byAxiom (EqTheory.eq Theory.Eq.symm)).cast (by simp)
   have : ProofArrow T Δ “ᵀ!t₁ = ᵀ!t₂ → ᵀ!t₂ = ᵀ!t₁” := (this.specializes ![t₂, t₁]).cast (by simp)
   this.modusPonens  b
 
 def eqTrans {t₁ t₂ t₃ : SyntacticTerm L} (b₁ : ProofArrow T Δ “ᵀ!t₁ = ᵀ!t₂”) (b₂ : ProofArrow T Δ “ᵀ!t₂ = ᵀ!t₃”) :
     ProofArrow T Δ “ᵀ!t₁ = ᵀ!t₃” :=
   have : ProofArrow T Δ “∀ ∀ ∀ (#2 = #1 → #1 = #0 → #2 = #0)” :=
-    (byAxiom (EqTheory.subset T Theory.Eq.trans)).cast (by simp)
+    (byAxiom (EqTheory.eq Theory.Eq.trans)).cast (by simp)
   have : ProofArrow T Δ “ᵀ!t₁ = ᵀ!t₂ → ᵀ!t₂ = ᵀ!t₃ → ᵀ!t₁ = ᵀ!t₃” := (this.specializes ![t₃, t₂, t₁]).cast (by simp)
   (this.modusPonens b₁).modusPonens b₂
 
@@ -310,7 +310,7 @@ def termExt : (t : SyntacticSubTerm L n) → (v₁ v₂ : Fin n → SyntacticTer
     have : ProofArrow T Δ
       “∀* ((⋀ i, ᵀ!(varSumInL i) = ᵀ!(varSumInR i)) →
       ᵀ!(func f varSumInL) = ᵀ!(func f varSumInR))” :=
-    (byAxiom (EqTheory.subset T (Theory.Eq.funcExt f))).cast (by simp[vecEq, Matrix.hom_conj']; rfl)    
+    (byAxiom (EqTheory.eq (Theory.Eq.funcExt f))).cast (by simp[vecEq, Matrix.hom_conj']; rfl)    
     have : ProofArrow T Δ
       “(⋀ i, ᵀ!((v i).substs v₁) = ᵀ!((v i).substs v₂)) → ᵀ!(func f fun i => (v i).substs v₁) = ᵀ!(func f fun i => (v i).substs v₂)” :=
       by simpa [Matrix.hom_conj', substs_func] using
@@ -325,7 +325,7 @@ private def relExtAux {n} {k} (r : L.rel k) (v : Fin k → SyntacticSubTerm L n)
   (b : (i : Fin n) → ProofArrow T Δ “ᵀ!(v₁ i) = ᵀ!(v₂ i)”) : ProofArrow T Δ (⟦→ v₁ ⟧ (rel r v) ⟶ ⟦→ v₂ ⟧ (rel r v)) :=
   have : ProofArrow T Δ
     “∀* ((⋀ i, ᵀ!(varSumInL i) = ᵀ!(varSumInR i)) → (!(rel r varSumInL) → !(rel r varSumInR)))” :=
-  (byAxiom (EqTheory.subset T (Theory.Eq.relExt r))).cast (by simp[vecEq, Matrix.hom_conj']; rfl)    
+  (byAxiom (EqTheory.eq (Theory.Eq.relExt r))).cast (by simp[vecEq, Matrix.hom_conj']; rfl)    
   have : ProofArrow T Δ “(⋀ i, ᵀ!((v i).substs v₁) = ᵀ!((v i).substs v₂)) →
     !(rel r fun i => (v i).substs v₁) → !(rel r fun i => (v i).substs v₂)” :=
   by simpa [Matrix.hom_conj', substs_func, substs_rel _ r] using
@@ -529,6 +529,8 @@ def cast {Δ p p'} (h : p = p') (b : Δ ⟹[T] p) : Δ ⟹[T] p' := h ▸ b
 
 def cast' {Δ Δ' p p'} (hΔ : Δ = Δ') (hp : p = p') (b : Δ ⟹[T] p) : Δ' ⟹[T] p' :=
   hΔ ▸ hp ▸ b
+
+def axmOfEq (σ : Sentence L) (hp : emb σ = p) (hσ : σ ∈ T) : Δ ⟹[T] p := by rw[←hp]; exact axm hσ
 
 end Principia
 

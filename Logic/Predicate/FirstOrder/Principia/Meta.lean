@@ -11,6 +11,9 @@ variable {L : Language.{u}} [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq 
 variable {T : Theory L} [EqTheory T]
 variable {Δ : List (SyntacticFormula L)}
 
+def castOfEq {Δ p p'} (hp : p = p') (b : Δ ⟹[T] p') : Δ ⟹[T] p :=
+  b.cast hp.symm
+
 def generalizeOfEq {Δ Δ' p p'}
   (hΔ : Δ.map shift = Δ') (hp : free p = p') (b : Δ' ⟹[T] p') : Δ ⟹[T] ∀' p :=
   generalize (b.cast' hΔ.symm hp.symm)
@@ -158,6 +161,9 @@ variable (dfunc : Q(∀ k, DecidableEq (($L).func k))) (drel : Q(∀ k, Decidabl
 variable (T : Q(Theory $L)) (eqTh : Q(EqTheory $T))
 variable (Δ Δ' Γ : Q(List (SyntacticFormula $L)))
 
+def castOfEqQ (p p' : Q(SyntacticFormula $L)) (hp : Q($p = $p')) (b : Q($Δ ⟹[$T] $p')) : Q($Δ ⟹[$T] $p) :=
+  q(Principia.castOfEq $hp $b)
+
 def assumptionQ (Γ : Q(List (SyntacticFormula $L))) (p : Q(SyntacticFormula $L)) (h : Q($p ∈ $Γ)) :
     Q($Γ ⟹[$T] $p) :=
   q(Principia.assumption $h)
@@ -283,7 +289,7 @@ inductive PrincipiaCode (L : Q(Language.{u})) : Type
   | rewriteEq     : (e₁ e₂ : Q(SyntacticTerm $L)) → PrincipiaCode L → PrincipiaCode L → PrincipiaCode L
   | rephrase      : (e₁ e₂ : Q(SyntacticFormula $L)) → PrincipiaCode L → PrincipiaCode L → PrincipiaCode L
   | fromM         : Syntax → PrincipiaCode L
-  | simpGoal      : Option (Syntax × Syntax) → PrincipiaCode L → PrincipiaCode L
+  | simpM         : SubTerm.Meta.NumeralUnfoldOption → List SubFormula.Meta.UnfoldOption → PrincipiaCode L → PrincipiaCode L
   | showState     : PrincipiaCode L → PrincipiaCode L
   | missing       : PrincipiaCode L
 
@@ -315,7 +321,7 @@ def toStr : PrincipiaCode L → String
   | rewriteEq _ _ c₁ c₂   => "rewrite: {\n" ++ c₁.toStr ++ "\n}\n" ++ c₂.toStr
   | rephrase _ _ c₁ c₂    => "rephrase: {\n" ++ c₁.toStr ++ "\n}\n" ++ c₂.toStr
   | fromM _               => "from"
-  | simpGoal _ c            => c.toStr   
+  | simpM _ _ c           => c.toStr   
   | showState c           => c.toStr
   | missing               => "?"
 
@@ -486,6 +492,11 @@ partial def run : (c : PrincipiaCode L) → (G : List Q(SyntacticFormula $L)) �
       (Qq.toQList (u := u) E) p₀ q₀ p q h b₀ b₁
   | fromM s, E, e               => do
     Term.elabTerm s (return q($(Qq.toQList (u := u) E) ⟹[$T] $e))
+  | simpM np l c, E, p => do
+    let ⟨p', hp⟩ ← SubFormula.Meta.result (u := u) (L := L) (n := q(0)) np (SubFormula.Meta.unfoldOfList l) p
+    logInfo m! "p': {p'}"
+    let b ← c.run E p'
+    return PrincipiaQ.castOfEqQ L dfunc drel lEq T (Qq.toQList (u := u) E) p p' hp b
   | showState c,          E, e  => do
     display L E e
     let b ← c.run E e
@@ -516,6 +527,14 @@ syntax proofBlock := "· " seq
 syntax optProofBlock := ("@ " seq)?
 
 syntax termSeq := (subterm),*
+
+syntax lineIndex := "##" num
+
+def linnIndexToNat : Syntax → TermElabM ℕ
+  | `(lineIndex| ##$n:num) => return n.getNat
+  | _                      => throwUnsupportedSyntax
+
+syntax indexFormula := (lineIndex <|> subformula)
 
 syntax (name := notationAssumption) "assumption" : proofElem
 
@@ -564,11 +583,41 @@ syntax (name := notationRephrase) "rephrase" subformula " ↦ " subformula optPr
 
 syntax (name := notationFromM) "from " term : proofElem
 
-syntax (name := notationSimpM) "simp goal" subformula : proofElem
 
 syntax (name := notationShowState) "!" : proofElem
 
 syntax (name := notationMissing) "?" : proofElem
+
+declare_syntax_cat unfoldOpt
+
+syntax "¬" : unfoldOpt
+syntax "→" : unfoldOpt
+syntax "↔" : unfoldOpt
+syntax "∀b" : unfoldOpt
+syntax "∃b" : unfoldOpt
+syntax "+1" : unfoldOpt
+syntax "+" : unfoldOpt
+
+syntax unfoldOptSeq := "[" unfoldOpt,* "]"
+
+syntax (name := notationSimpM) "simp" (unfoldOptSeq)? : proofElem
+
+def unfoldOptToUnfoldOption : Syntax → TermElabM (SubTerm.Meta.NumeralUnfoldOption ⊕ SubFormula.Meta.UnfoldOption)
+  | `(unfoldOpt| ¬)  => return Sum.inr SubFormula.Meta.UnfoldOption.neg
+  | `(unfoldOpt| →) => return Sum.inr SubFormula.Meta.UnfoldOption.imply
+  | `(unfoldOpt| ↔) => return Sum.inr SubFormula.Meta.UnfoldOption.iff
+  | `(unfoldOpt| ∀b) => return Sum.inr SubFormula.Meta.UnfoldOption.ball
+  | `(unfoldOpt| ∃b) => return Sum.inr SubFormula.Meta.UnfoldOption.bex
+  | `(unfoldOpt| +1) => return Sum.inl SubTerm.Meta.NumeralUnfoldOption.unfoldSucc
+  | `(unfoldOpt| +)  => return Sum.inl SubTerm.Meta.NumeralUnfoldOption.all
+  | _                => throwUnsupportedSyntax
+
+def unfoldOptSeqToListUnfoldOption : Syntax → TermElabM (SubTerm.Meta.NumeralUnfoldOption × List SubFormula.Meta.UnfoldOption)
+  | `(unfoldOptSeq| [$ts,*]) => do
+    let ts ← ts.getElems.mapM unfoldOptToUnfoldOption
+    return ts.foldl (β := SubTerm.Meta.NumeralUnfoldOption × List SubFormula.Meta.UnfoldOption)
+      (fun (np, l) => Sum.elim (fun np' => (np', l)) (fun up => (np, up :: l)) ) (SubTerm.Meta.NumeralUnfoldOption.none, [])
+  | _                        => throwUnsupportedSyntax
 
 private def getSeq (doStx : Syntax) : Syntax :=
   doStx[1]
@@ -685,7 +734,7 @@ partial def seqToCode (L : Q(Language.{u})) : List Syntax → TermElabM (Princip
         let w : Q(Fin $k → SyntacticTerm $L) := w
         (q(@Matrix.vecCons (SyntacticTerm $L) $k $t $w), k + 1))
         (q(@Matrix.vecEmpty (SyntacticTerm $L)), 0)
-      let bblock := getSeqOfProofBlock b
+      let bblock := getSeqOfOptProofBlock b
       let c₀ := if bblock.isMissing then PrincipiaCode.assumption else ← seqToCode L (getSeqElems bblock)
       let c ← seqToCode L seqElems
       return PrincipiaCode.specialize nexpr v pexpr c₀ c
@@ -720,6 +769,13 @@ partial def seqToCode (L : Q(Language.{u})) : List Syntax → TermElabM (Princip
       return PrincipiaCode.rephrase p₀expr q₀expr c₀ c₁
     | `(notationFromM| from $t:term) =>
       return PrincipiaCode.fromM t
+    | `(notationSimpM| simp) =>
+      let c ← seqToCode L seqElems
+      return PrincipiaCode.simpM SubTerm.Meta.NumeralUnfoldOption.none [] c
+    | `(notationSimpM| simp $ts:unfoldOptSeq) =>
+      let c ← seqToCode L seqElems
+      let (np, l) ← unfoldOptSeqToListUnfoldOption ts
+      return PrincipiaCode.simpM np l c
     | `(notationShowState| !) =>
       let c ← seqToCode L seqElems
       return PrincipiaCode.showState c
@@ -868,9 +924,6 @@ example : [“&0 + 2 = 3”] ⟹[T] “∀ 3 * #0 = (&0 + 2) * #0” :=
     rewrite &0 + 2 ↦ 3
     generalize rfl
   □
-
--- rephrase ... ↦ ...
-
 
 example :
   [ “∀ ∀ (#0 < #1 ↔ (∃ #0 + #1 + 1 = #2))”,
