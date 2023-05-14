@@ -1,7 +1,5 @@
 import Logic.Predicate.FirstOrder.Semantics
 
-
-
 variable {L : Language.{u}} {μ : Type v} [L.Eq]
 namespace SubTerm
 
@@ -48,15 +46,8 @@ end Eq
 
 end Theory
 
-abbrev EqTheory (T : Theory L) := SubTheory (Theory.Eq L) T
-
-namespace EqTheory
-
-variable (T : Theory L) [EqTheory T]
-
-lemma subset : Theory.Eq L ⊆ T := SubTheory.sub 
-
-end EqTheory
+class EqTheory (T : Theory L) where
+  eq : Theory.Eq L ⊆ T
 
 namespace Structure
 
@@ -189,7 +180,7 @@ lemma consequence_iff_eq {T : Theory L} [EqTheory T] {σ : Sentence L} :
   simp[consequence_iff]; constructor
   · intro h M i s _ hM; exact h M hM
   · intro h M i s hM
-    have H : M ⊧₁* Theory.Eq L := Semantics.realizeTheory_of_subset hM (EqTheory.subset T)
+    have H : M ⊧₁* Theory.Eq L := Semantics.realizeTheory_of_subset hM EqTheory.eq
     have e : Structure.Eq.QuotEq H ≃ₑ[L] M := Structure.Eq.QuotEq.elementaryEquiv H
     exact e.models.mp $ h (Structure.Eq.QuotEq H) (e.modelsₛ.mpr hM)
 
@@ -197,9 +188,46 @@ lemma satisfiableₛ_iff_eq {T : Theory L} [EqTheory T] :
     Semantics.Satisfiableₛ T ↔ (∃ (M : Type u) (_ : Inhabited M) (_ : Structure L M) (_ : Structure.Eq L M), M ⊧₁* T) := by
   simp[satisfiableₛ_iff]; constructor
   · intro ⟨M, i, s, hM⟩;
-    have H : M ⊧₁* Theory.Eq L := Semantics.realizeTheory_of_subset hM (EqTheory.subset T)
+    have H : M ⊧₁* Theory.Eq L := Semantics.realizeTheory_of_subset hM EqTheory.eq
     have e : Structure.Eq.QuotEq H ≃ₑ[L] M := Structure.Eq.QuotEq.elementaryEquiv H
     exact ⟨Structure.Eq.QuotEq H, inferInstance, inferInstance, inferInstance, e.modelsₛ.mpr hM⟩
   · intro ⟨M, i, s, _, hM⟩; exact ⟨M, i, s, hM⟩
+
+namespace SubFormula
+
+namespace Abbrev
+
+def le [L.Lt] : Abbrev L 2 := ⟨“#0 = #1 ∨ #0 < #1”⟩
+
+def divides [L.Mul] : Abbrev L 2 := ⟨“∃ #0 * #1 = #2”⟩
+
+end Abbrev
+
+section
+variable [L.Lt]
+
+def le : Finitary.{u, v} L 2 := Abbrev.le.toOperator
+notation "Op[≤]" => le
+
+lemma le_eq (t₁ t₂ : SubTerm L μ n) : le.operator ![t₁, t₂] = “ᵀ!t₁ = ᵀ!t₂ ∨ ᵀ!t₁ < ᵀ!t₂” :=
+  by simp[le, Abbrev.le, Abbrev.toOperator]
+notation "Op[|]" => le
+
+end
+
+section 
+variable [L.Mul]
+
+def divides : Finitary.{u, v} L 2 := Abbrev.divides.toOperator
+
+lemma divides_eq (t₁ t₂ : SubTerm L μ n) :
+  divides.operator ![t₁, t₂] = “∃ #0 * ᵀ!(.bShift t₁) = ᵀ!(.bShift t₂)” := by
+  simp[divides, Abbrev.divides, Abbrev.toOperator, substs_ex]
+
+end
+
+
+
+end SubFormula
 
 end FirstOrder

@@ -417,32 +417,32 @@ lemma substs_nrel {k} (r : L.rel k) (v : Fin k → SubTerm L μ n) :
     substs w (nrel r ![t₁, t₂]) = nrel r ![SubTerm.substs w t₁, SubTerm.substs w t₂] :=
   by simp[substs_nrel]; funext i; induction i using Fin.induction <;> simp
 
-lemma substs_all {n'} (w : Fin n → SyntacticSubTerm L n') (p : SyntacticSubFormula L (n + 1)) :
+lemma substs_all {n'} (w : Fin n → SubTerm L μ n') (p : SubFormula L μ (n + 1)) :
     substs w (∀' p) = ∀' (substs (#0 :> SubTerm.bShift ∘ w) p) := by
   simp[substs, bind_bind]
 
-lemma substs_ex {n'} (w : Fin n → SyntacticSubTerm L n') (p : SyntacticSubFormula L (n + 1)) :
+lemma substs_ex {n'} (w : Fin n → SubTerm L μ n') (p : SubFormula L μ (n + 1)) :
     substs w (∃' p) = ∃' (substs (#0 :> SubTerm.bShift ∘ w) p) := by
   simp[substs, bind_bind]
 
-lemma substs_ball {n'} (w : Fin n → SyntacticSubTerm L n') (p q : SyntacticSubFormula L (n + 1)) :
+lemma substs_ball {n'} (w : Fin n → SubTerm L μ n') (p q : SubFormula L μ (n + 1)) :
     substs w (∀[p] q) = ∀[substs (#0 :> SubTerm.bShift ∘ w) p] (substs (#0 :> SubTerm.bShift ∘ w) q) := by
   simp[substs, bind_bind]
 
-lemma substs_bex {n'} (w : Fin n → SyntacticSubTerm L n') (p q : SyntacticSubFormula L (n + 1)) :
+lemma substs_bex {n'} (w : Fin n → SubTerm L μ n') (p q : SubFormula L μ (n + 1)) :
     substs w (∃[p] q) = ∃[substs (#0 :> SubTerm.bShift ∘ w) p] (substs (#0 :> SubTerm.bShift ∘ w) q) := by
   simp[substs, bind_bind]
 
 lemma substs_substs {n₁ n₂ n₃} (w : Fin n₂ → SubTerm L μ n₃) (v : Fin n₁ → SubTerm L μ n₂) (p : SubFormula L μ n₁) :
     ⟦→ w⟧ (⟦→ v⟧ p) = ⟦→ SubTerm.substs w ∘ v⟧ p := by simp[substs, bind_bind]; congr
 
-@[simp] lemma complexity_substs {k} (w : Fin k → SyntacticSubTerm L n) (p : SyntacticSubFormula L k) :
+@[simp] lemma complexity_substs {k} (w : Fin k → SubTerm L μ n) (p : SubFormula L μ k) :
   (⟦→ w⟧ p).complexity = p.complexity := by simp[substs]
 
 end substs
 
 section emb
-variable (o : Type v) [empty : IsEmpty o]
+variable {o : Type w} [empty : IsEmpty o]
 
 lemma emb_rel {k} (r : L.rel k) (v : Fin k → SubTerm L o n) :
     emb (μ := μ) (rel r v) = rel r (fun i => (v i).emb) :=
@@ -669,6 +669,68 @@ lemma substs_eq_subst1 (w : Fin (n + 1) → SyntacticTerm L) (p : SyntacticSubFo
 lemma free_substs {n'} (w : Fin n → SyntacticSubTerm L (n' + 1)) (p : SyntacticSubFormula L n) :
     free (substs w p) = substs (SubTerm.free ∘ w) (shift p) := by
   simp[free, substs, shift, map, bind_bind]; congr
+
+def qr : ∀ {n}, SubFormula L μ n → ℕ
+  | _, ⊤        => 0
+  | _, ⊥        => 0
+  | _, rel _ _  => 0
+  | _, nrel _ _ => 0
+  | _, p ⋏ q    => max p.qr q.qr
+  | _, p ⋎ q    => max p.qr q.qr
+  | _, ∀' p     => p.qr + 1
+  | _, ∃' p     => p.qr + 1
+
+@[simp] lemma qr_top : (⊤ : SubFormula L μ n).qr = 0 := rfl
+
+@[simp] lemma qr_bot : (⊥ : SubFormula L μ n).qr = 0 := rfl
+
+@[simp] lemma qr_rel {k} (r : L.rel k) (v : Fin k → SubTerm L μ n) : (rel r v).qr = 0 := rfl
+
+@[simp] lemma qr_nrel {k} (r : L.rel k) (v : Fin k → SubTerm L μ n) : (nrel r v).qr = 0 := rfl
+
+@[simp] lemma qr_and (p q : SubFormula L μ n) : (p ⋏ q).qr = max p.qr q.qr := rfl
+
+@[simp] lemma qr_or (p q : SubFormula L μ n) : (p ⋎ q).qr = max p.qr q.qr := rfl
+
+@[simp] lemma qr_all (p : SubFormula L μ (n + 1)) : (∀' p).qr = p.qr + 1 := rfl
+
+@[simp] lemma qr_ex (p : SubFormula L μ (n + 1)) : (∃' p).qr = p.qr + 1 := rfl
+
+@[simp] lemma qr_neg (p : SubFormula L μ n) : (~p).qr = p.qr := by
+  induction' p using rec' <;> simp[*]
+
+@[simp] lemma qr_imply (p q : SubFormula L μ n) : (p ⟶ q).qr = max p.qr q.qr :=
+  by simp[imp_eq]
+
+@[simp] lemma qr_iff (p q : SubFormula L μ n) : (p ⟷ q).qr = max p.qr q.qr :=
+  by simp[iff_eq, total_of]
+
+def qfree (p : SubFormula L μ n) : Prop := p.qr = 0
+
+@[simp] lemma qfree_top : (⊤ : SubFormula L μ n).qfree := rfl
+
+@[simp] lemma qfree_bot : (⊥ : SubFormula L μ n).qfree := rfl
+
+@[simp] lemma qfree_rel {k} (r : L.rel k) (v : Fin k → SubTerm L μ n) : (rel r v).qfree := rfl
+
+@[simp] lemma qfree_nrel {k} (r : L.rel k) (v : Fin k → SubTerm L μ n) : (nrel r v).qfree := rfl
+
+@[simp] lemma qfree_and {p q : SubFormula L μ n} : (p ⋏ q).qfree ↔ p.qfree ∧ q.qfree := by simp[qfree]
+
+@[simp] lemma qfree_or {p q : SubFormula L μ n} : (p ⋎ q).qfree ↔ p.qfree ∧ q.qfree := by simp[qfree]
+
+@[simp] lemma not_qfree_all {p : SubFormula L μ (n + 1)} : ¬(∀' p).qfree := by simp[qfree]
+
+@[simp] lemma not_qfree_ex {p : SubFormula L μ (n + 1)} : ¬(∃' p).qfree := by simp[qfree]
+
+@[simp] lemma qfree_neg {p : SubFormula L μ n} : (~p).qfree ↔ p.qfree := by
+  simp[qfree]
+
+@[simp] lemma qfree_imply {p q : SubFormula L μ n} : (p ⟶ q).qfree ↔ p.qfree ∧ q.qfree :=
+  by simp[qfree]
+
+@[simp] lemma qfree_iff {p q : SubFormula L μ n} : (p ⟷ q).qfree ↔ p.qfree ∧ q.qfree :=
+  by simp[qfree]
 
 variable (L)
 
