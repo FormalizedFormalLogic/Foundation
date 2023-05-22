@@ -67,6 +67,9 @@ def transList {q} : (Γ : List (SyntacticFormula L)) → (∀ p ∈ Γ, Δ ⟹[T
 protected def shift {p} (b : Δ ⟹[T] p) : (Δ.map shift) ⟹[T] shift p :=
   b.rewrite _
 
+def apply  (b₁ : Δ ⟹[T] (q₁ ⟶ q₂)) (b₂ : Δ ⟹[T] q₁) (b₃ : (q₂ :: Δ) ⟹[T] p) : Δ ⟹[T] p :=
+  (b₁.modusPonens b₂).trans b₃
+
 def absurd {p} (b : (p :: Δ) ⟹[T] ⊥) : Δ ⟹[T] ~p :=
   (contradiction (~p) trivial b).weakening' (by simp)
 
@@ -167,6 +170,14 @@ def castOfEqQ (p p' : Q(SyntacticFormula $L)) (hp : Q($p = $p')) (b : Q($Δ ⟹[
 def assumptionQ (Γ : Q(List (SyntacticFormula $L))) (p : Q(SyntacticFormula $L)) (h : Q($p ∈ $Γ)) :
     Q($Γ ⟹[$T] $p) :=
   q(Principia.assumption $h)
+
+def assumptionSymmQ (Γ : Q(List (SyntacticFormula $L))) (t₁ t₂ : Q(SyntacticTerm $L)) (h : Q(“ᵀ!$t₁ = ᵀ!$t₂” ∈ $Γ)) :
+    Q($Γ ⟹[$T] “ᵀ!$t₂ = ᵀ!$t₁”) :=
+  q(Principia.eqSymm $ Principia.assumption (p := “ᵀ!$t₁ = ᵀ!$t₂”) $h)
+
+def assumptionIffSymmQ (Γ : Q(List (SyntacticFormula $L))) (p₁ p₂ : Q(SyntacticFormula $L)) (h : Q(($p₁ ⟷ $p₂) ∈ $Γ)) :
+    Q($Γ ⟹[$T] $p₂ ⟷ $p₁) :=
+  q(Principia.iffSymm $ Principia.assumption $h)
 
 def generalizeOfEqQ (p : Q(SyntacticSubFormula $L 1)) (p' : Q(SyntacticFormula $L))
   (hΔ : Q(($Δ).map shift = $Δ')) (hp : Q(free $p = $p')) (b : Q($Δ' ⟹[$T] $p')) : Q($Δ ⟹[$T] ∀' $p) :=
@@ -307,12 +318,13 @@ inductive PrincipiaCode (L : Q(Language.{u})) : Type
   | explode       : PrincipiaCode L → PrincipiaCode L
   | intro         : PrincipiaCode L → PrincipiaCode L
   | modusPonens   : Syntax → PrincipiaCode L → PrincipiaCode L → PrincipiaCode L  
+  | apply         : Syntax → Syntax → PrincipiaCode L → PrincipiaCode L → PrincipiaCode L → PrincipiaCode L  
   | split         : PrincipiaCode L → PrincipiaCode L → PrincipiaCode L
   | andLeft       : Syntax → PrincipiaCode L → PrincipiaCode L
   | andRight      : Syntax → PrincipiaCode L → PrincipiaCode L
   | orLeft        : PrincipiaCode L → PrincipiaCode L
   | orRight       : PrincipiaCode L → PrincipiaCode L
-  | cases         : (e₁ e₂ : Syntax) → PrincipiaCode L → PrincipiaCode L → PrincipiaCode L → PrincipiaCode L
+  | cases         : Syntax → Syntax → PrincipiaCode L → PrincipiaCode L → PrincipiaCode L → PrincipiaCode L
   | generalize    : PrincipiaCode L → PrincipiaCode L
   | specialize    : List Syntax → Syntax → PrincipiaCode L → PrincipiaCode L → PrincipiaCode L
   | useInstance   : Syntax → PrincipiaCode L → PrincipiaCode L
@@ -320,11 +332,12 @@ inductive PrincipiaCode (L : Q(Language.{u})) : Type
   | reflexivity   : PrincipiaCode L
   | symmetry      : PrincipiaCode L → PrincipiaCode L
   | eqTrans       : Syntax → PrincipiaCode L → PrincipiaCode L → PrincipiaCode L
-  | rewriteEq     : (e₁ e₂ : Syntax) → PrincipiaCode L → PrincipiaCode L → PrincipiaCode L
-  | rephrase      : (e₁ e₂ : Syntax) → PrincipiaCode L → PrincipiaCode L → PrincipiaCode L
+  | rewriteEq     : Syntax → Syntax → PrincipiaCode L → PrincipiaCode L → PrincipiaCode L
+  | rephrase      : Syntax → Syntax → PrincipiaCode L → PrincipiaCode L → PrincipiaCode L
   | fromM         : Syntax → PrincipiaCode L
   | simpM         : SubTerm.Meta.NumeralUnfoldOption → List SubFormula.Meta.UnfoldOption → PrincipiaCode L → PrincipiaCode L
   | showState     : PrincipiaCode L → PrincipiaCode L
+  | tryProve      : PrincipiaCode L
   | missing       : PrincipiaCode L
 
 namespace PrincipiaCode
@@ -339,6 +352,7 @@ def toStr : PrincipiaCode L → String
   | explode c             => "explode" ++ c.toStr
   | intro c               => "intro\n" ++ c.toStr
   | modusPonens _ c₁ c₂   => "have: {\n" ++ c₁.toStr ++ "\n}\nand: {\n" ++ c₂.toStr ++ "\n}"
+  | apply _ _ c₁ c₂ c₃    => "apply: {\n" ++ c₁.toStr ++ "\n}\nand: {\n" ++ c₂.toStr ++ "\n}\n" ++ c₃.toStr
   | split c₁ c₂           => "∧ split: {\n" ++ c₁.toStr ++ "\n}\nand: {\n" ++ c₂.toStr ++ "\n}"
   | andLeft _ c           => "∧ left\n" ++ c.toStr
   | andRight _ c          => "∧ right\n" ++ c.toStr
@@ -357,6 +371,7 @@ def toStr : PrincipiaCode L → String
   | fromM _               => "from"
   | simpM _ _ c           => c.toStr   
   | showState c           => c.toStr
+  | tryProve              => "try"
   | missing               => "?"
 
 instance : Repr (PrincipiaCode L) := ⟨fun b _ => b.toStr L⟩
@@ -404,7 +419,6 @@ partial def run : (c : PrincipiaCode L) → (G : List Q(SyntacticFormula $L)) �
   | transList S s c₁ c₂, E, r => do
     let q ← indexFormulaToSubFormula L E 0 s
     let H ← S.mapM (fun (t, c) => return (←indexFormulaToSubFormula L E 0 t, c))
-    let C := S.map Prod.snd
     let b₁ ← c₁.run (H.map Prod.fst) q
     let b₂ ← c₂.run (q :: E) r
     PrincipiaQ.transListMQ' L dfunc drel lEq T (Qq.toQList (u := u) E) H q r (fun (p, c) _ => c.run E p) b₁ b₂
@@ -431,6 +445,13 @@ partial def run : (c : PrincipiaCode L) → (G : List Q(SyntacticFormula $L)) �
     let b₁ ← c₁.run E q($q ⟶ $p)
     let b₂ ← c₂.run E q
     return q(Principia.modusPonens $b₁ $b₂)
+  | apply s₁ s₂ c₁ c₂ c₃, E, p => do
+    let q₁ ← indexFormulaToSubFormula L E 0 s₁
+    let q₂ ← indexFormulaToSubFormula L E 0 s₂
+    let b₁ ← c₁.run E q($q₁ ⟶ $q₂)
+    let b₂ ← c₂.run E q₁
+    let b₃ ← c₃.run (q₂ :: E) p
+    return q(Principia.apply $b₁ $b₂ $b₃)
   | split c₁ c₂, E, p => do
     match p with
     | ~q($p₁ ⋏ $p₂) =>
@@ -560,6 +581,31 @@ partial def run : (c : PrincipiaCode L) → (G : List Q(SyntacticFormula $L)) �
     display L E e
     let b ← c.run E e
     return q($b)
+  | tryProve, E, e  => do
+    let oh ← Qq.memQList? (u := u) e E
+    match oh with
+    | some eh => return PrincipiaQ.assumptionQ L dfunc drel lEq T (Qq.toQList (u := u) E) e eh
+    | none    =>
+      match e with
+      | ~q(“ᵀ!$t₁ = ᵀ!$t₂”) =>
+        let e' := q(“ᵀ!$t₂ = ᵀ!$t₁”)
+        let oh' ← Qq.memQList? (u := u) e' E
+        match oh' with
+        | some eh' => return PrincipiaQ.assumptionSymmQ L dfunc drel lEq T (Qq.toQList (u := u) E) t₂ t₁ eh'
+        | none     =>
+          display L E e
+          throwError m! "tryProve {e} failed"
+      | ~q($p₁ ⟷ $p₂) =>
+        let e' := q($p₂ ⟷ $p₁)
+        let oh' ← Qq.memQList? (u := u) e' E
+        match oh' with
+        | some eh' => return PrincipiaQ.assumptionIffSymmQ L dfunc drel lEq T (Qq.toQList (u := u) E) p₂ p₁ eh'
+        | none     =>
+          display L E e
+          throwError m! "tryProve {e} failed"
+      | _     =>
+        display L E e
+        throwError m! "tryProve {e} failed"
   | _, E, e => do
     display L E e
     throwError m!"proof is missing" 
@@ -684,7 +730,7 @@ def getSeqOfProofBlock (proofBlock : Syntax) : Syntax :=
   proofBlock[1]
 
 partial def seqToCode (L : Q(Language.{u})) : List Syntax → TermElabM (PrincipiaCode L)
-  | []                => return PrincipiaCode.assumption
+  | []                => return PrincipiaCode.tryProve
   | seqElem::seqElems => do
     match seqElem with
     | `(notationAssumption| assumption) => return PrincipiaCode.assumption
@@ -702,12 +748,12 @@ partial def seqToCode (L : Q(Language.{u})) : List Syntax → TermElabM (Princip
       let cthen ← seqToCode L (getSeqElems dblock)
       let cs ← seqToCode L seqElems
       let bblock := getSeqOfOptProofBlock b
-      let csince := if bblock.isMissing then PrincipiaCode.assumption else ← seqToCode L (getSeqElems bblock)
+      let csince := if bblock.isMissing then PrincipiaCode.tryProve else ← seqToCode L (getSeqElems bblock)
       let args ← andblock.mapM (fun s => do
         match s with
         | `(notationAndSeqUnit| and $r:indexFormula $z:optProofBlock) =>
           let zblock := getSeqOfOptProofBlock z
-          let q := if zblock.isMissing then PrincipiaCode.assumption else ← seqToCode L (getSeqElems zblock)
+          let q := if zblock.isMissing then PrincipiaCode.tryProve else ← seqToCode L (getSeqElems zblock)
           return (r.raw, q)
         | _                                                         =>
           throwError f!"no match: {s}")
@@ -717,8 +763,8 @@ partial def seqToCode (L : Q(Language.{u})) : List Syntax → TermElabM (Princip
                                                         =>
       let bblock₁ := getSeqOfOptProofBlock b₁
       let bblock₂ := getSeqOfOptProofBlock b₂
-      let c₁ := if bblock₁.isMissing then PrincipiaCode.assumption else ← seqToCode L (getSeqElems bblock₁)
-      let c₂ := if bblock₂.isMissing then PrincipiaCode.assumption else ← seqToCode L (getSeqElems bblock₂)
+      let c₁ := if bblock₁.isMissing then PrincipiaCode.tryProve else ← seqToCode L (getSeqElems bblock₁)
+      let c₂ := if bblock₂.isMissing then PrincipiaCode.tryProve else ← seqToCode L (getSeqElems bblock₂)
       return PrincipiaCode.contradiction p c₁ c₂
     | `(notationTrivial| trivial)                       => return PrincipiaCode.trivial
     | `(notationIntro| intro)                           =>
@@ -726,36 +772,36 @@ partial def seqToCode (L : Q(Language.{u})) : List Syntax → TermElabM (Princip
       return PrincipiaCode.intro c
     | `(notationModusPonens| suffices $p:indexFormula $b:optProofBlock) =>
       let bblock := getSeqOfOptProofBlock b
-      let c₀ := if bblock.isMissing then PrincipiaCode.assumption else ← seqToCode L (getSeqElems bblock)
+      let c₀ := if bblock.isMissing then PrincipiaCode.tryProve else ← seqToCode L (getSeqElems bblock)
       let c₁ ← seqToCode L seqElems
       return PrincipiaCode.modusPonens p c₀ c₁
     | `(notationSplit| split $b₁:optProofBlock $b₂:optProofBlock) =>
       let bblock₁ := getSeqOfOptProofBlock b₁
       let bblock₂ := getSeqOfOptProofBlock b₂
-      let c₁ := if bblock₁.isMissing then PrincipiaCode.assumption else ← seqToCode L (getSeqElems bblock₁)
-      let c₂ := if bblock₂.isMissing then PrincipiaCode.assumption else ← seqToCode L (getSeqElems bblock₂)
+      let c₁ := if bblock₁.isMissing then PrincipiaCode.tryProve else ← seqToCode L (getSeqElems bblock₁)
+      let c₂ := if bblock₂.isMissing then PrincipiaCode.tryProve else ← seqToCode L (getSeqElems bblock₂)
       return PrincipiaCode.split c₁ c₂
     | `(notationAndLeft| andl $p:indexFormula $b:optProofBlock) =>
       let bblock := getSeqOfOptProofBlock b
-      let c := if bblock.isMissing then PrincipiaCode.assumption else ← seqToCode L (getSeqElems bblock)
+      let c := if bblock.isMissing then PrincipiaCode.tryProve else ← seqToCode L (getSeqElems bblock)
       return PrincipiaCode.andLeft p c
     | `(notationAndRight| andr $p:indexFormula $b:optProofBlock) =>
       let bblock := getSeqOfOptProofBlock b
-      let c := if bblock.isMissing then PrincipiaCode.assumption else ← seqToCode L (getSeqElems bblock)
+      let c := if bblock.isMissing then PrincipiaCode.tryProve else ← seqToCode L (getSeqElems bblock)
       return PrincipiaCode.andRight p c
     | `(notationOrLeft| left $b:optProofBlock) =>
       let bblock := getSeqOfOptProofBlock b
-      let c := if bblock.isMissing then PrincipiaCode.assumption else ← seqToCode L (getSeqElems bblock)
+      let c := if bblock.isMissing then PrincipiaCode.tryProve else ← seqToCode L (getSeqElems bblock)
       return PrincipiaCode.orLeft c
     | `(notationOrRight| right $b:optProofBlock) =>
       let bblock := getSeqOfOptProofBlock b 
-      let c := if bblock.isMissing then PrincipiaCode.assumption else ← seqToCode L (getSeqElems bblock)
+      let c := if bblock.isMissing then PrincipiaCode.tryProve else ← seqToCode L (getSeqElems bblock)
       return PrincipiaCode.orRight c
     | `(notationCases| cases $p:indexFormula or $q:indexFormula $b₀:optProofBlock $b₁:proofBlock $b₂:proofBlock) =>
       let bblock₀ := getSeqOfOptProofBlock b₀
       let bblock₁ := getSeqOfProofBlock b₁
       let bblock₂ := getSeqOfProofBlock b₂
-      let c₀ := if bblock₀.isMissing then PrincipiaCode.assumption else ← seqToCode L (getSeqElems bblock₀)
+      let c₀ := if bblock₀.isMissing then PrincipiaCode.tryProve else ← seqToCode L (getSeqElems bblock₀)
       let c₁ ← seqToCode L (getSeqElems bblock₁)
       let c₂ ← seqToCode L (getSeqElems bblock₂)
       return PrincipiaCode.cases p q c₀ c₁ c₂
@@ -764,7 +810,7 @@ partial def seqToCode (L : Q(Language.{u})) : List Syntax → TermElabM (Princip
       return PrincipiaCode.generalize c
     | `(notationSpecialize| specialize $ts,* of $p:indexFormula $b:optProofBlock) =>
       let bblock := getSeqOfOptProofBlock b
-      let c₀ := if bblock.isMissing then PrincipiaCode.assumption else ← seqToCode L (getSeqElems bblock)
+      let c₀ := if bblock.isMissing then PrincipiaCode.tryProve else ← seqToCode L (getSeqElems bblock)
       let c ← seqToCode L seqElems
       return PrincipiaCode.specialize ts.getElems.toList p c₀ c
     | `(notationUse| use $t) =>
@@ -772,7 +818,7 @@ partial def seqToCode (L : Q(Language.{u})) : List Syntax → TermElabM (Princip
       return PrincipiaCode.useInstance t c
     | `(notationExCases| choose $p:indexFormula $b:optProofBlock) =>
       let bblock := getSeqOfOptProofBlock b
-      let c₀ := if bblock.isMissing then PrincipiaCode.assumption else ← seqToCode L (getSeqElems bblock)
+      let c₀ := if bblock.isMissing then PrincipiaCode.tryProve else ← seqToCode L (getSeqElems bblock)
       let c₁ ← seqToCode L seqElems
       return PrincipiaCode.exCases p c₀ c₁
     | `(notationReflexivity| rfl) =>
@@ -782,12 +828,12 @@ partial def seqToCode (L : Q(Language.{u})) : List Syntax → TermElabM (Princip
       return PrincipiaCode.symmetry c
     | `(notationRewriteEq| rewrite $t₁:subterm ↦ $t₂:subterm $b:optProofBlock) =>
       let bblock := getSeqOfOptProofBlock b
-      let c₀ := if bblock.isMissing then PrincipiaCode.assumption else ← seqToCode L (getSeqElems bblock)
+      let c₀ := if bblock.isMissing then PrincipiaCode.tryProve else ← seqToCode L (getSeqElems bblock)
       let c₁ ← seqToCode L seqElems
       return PrincipiaCode.rewriteEq t₁ t₂ c₀ c₁
     | `(notationRephrase| rephrase $p₀:indexFormula ↦ $q₀:indexFormula $b:optProofBlock) =>
       let bblock := getSeqOfOptProofBlock b
-      let c₀ := if bblock.isMissing then PrincipiaCode.assumption else ← seqToCode L (getSeqElems bblock)
+      let c₀ := if bblock.isMissing then PrincipiaCode.tryProve else ← seqToCode L (getSeqElems bblock)
       let c₁ ← seqToCode L seqElems
       return PrincipiaCode.rephrase p₀ q₀ c₀ c₁
     | `(notationFromM| from $t:term) =>
@@ -833,6 +879,12 @@ example (h : [“0 < &0”, “&0 < 3”, “&0 ≠ 1”] ⟹[T] “&0 = 2”) :
   proof.
     since 0 < &0 and &0 < 3 and &0 ≠ 1 then &0 = 2
       · from h
+  □
+
+-- split
+example : [“0 = &1”] ⟹[T] “&1 = 0” :=
+  proof.
+    !
   □
 
 -- split

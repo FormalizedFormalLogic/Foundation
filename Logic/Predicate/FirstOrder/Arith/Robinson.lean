@@ -9,8 +9,6 @@ namespace Arith
 
 namespace Robinson
 
-#check Principia.axm
-
 def succNeZero : [] ⟹[T] “∀ #0 + 1 ≠ 0” :=
   Principia.axmOfEq “∀ #0 + 1 ≠ 0” (by simp) (Theory.RobinsonTheory.robinson $ Theory.Arith.Robinson.q₁)
 
@@ -41,8 +39,7 @@ def eqZeroOfAddEqZero : [] ⟹[T] “∀ ∀ (#0 + #1 = 0 → #0 = 0 ∧ #1 = 0)
     then ∀ (#0 = 0 ∨ ∃ #1 = #0 + 1) · from zeroOrSucc
     then ∀ #0 + 0 = #0 · from addZero
     then ∀ ∀ (#0 + (#1 + 1) = (#0 + #1) + 1) · from addSucc  
-    generalize; generalize
-    intro
+    generalize; generalize; intro
     cases &1 = 0 or ∃ &1 = #0 + 1 @ specialize &1 of #0 = 0 ∨ ∃ #1 = #0 + 1
     · cases &0 = 0 or ∃ &0 = #0 + 1
       @ specialize &0 of #0 = 0 ∨ ∃ #1 = #0 + 1
@@ -50,10 +47,9 @@ def eqZeroOfAddEqZero : [] ⟹[T] “∀ ∀ (#0 + #1 = 0 → #0 = 0 ∧ #1 = 0)
       · choose &0 = #0 + 1
         have &0 + 1 = 0
         · have &0 + 1 + 0 = 0
-          · rewrite &0 + 1 ↦ &1 @ symmetry
-            rewrite 0 ↦ &2 @ symmetry
+          · rewrite &0 + 1 ↦ &1
+            rewrite 0 ↦ &2
             rewrite &1 + &2 ↦ 0
-            symmetry
           rewrite &0 + 1 ↦ &0 + 1 + 0
           @ symmetry; specialize &0 + 1 of #0 + 0 = #0
         have &0 + 1 ≠ 0
@@ -64,11 +60,11 @@ def eqZeroOfAddEqZero : [] ⟹[T] “∀ ∀ (#0 + #1 = 0 → #0 = 0 ∧ #1 = 0)
       · rewrite (&1 + &0) + 1 ↦ &1 + (&0 + 1)
         @ symmetry; specialize &1, &0 of #0 + (#1 + 1) = (#0 + #1) + 1
         rewrite &0 + 1 ↦ &2
-        @ symmetry
       have (&1 + &0) + 1 ≠ 0 
       · specialize &1 + &0 of #0 + 1 ≠ 0
       contradiction (&1 + &0) + 1 = 0
   □
+
 
 def eqZeroOfMulEqZero : [] ⟹[T] “∀ ∀ (#0 * #1 = 0 → #0 = 0 ∧ #1 = 0)” :=
   by sorry
