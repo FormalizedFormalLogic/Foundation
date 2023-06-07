@@ -43,8 +43,13 @@ abbrev Eval! (M : Type w) [s : Structure L M] {n} (e : Fin n → M) (ε : μ →
 
 abbrev Val (ε : μ → M) : Formula L μ →L Prop := Eval s ![] ε
 
+abbrev BVal (e : Fin n → M) : SubFormula L Empty n →L Prop := Eval s e Empty.elim
+
 abbrev Val! (M : Type w) [s : Structure L M] (ε : μ → M) :
     Formula L μ →L Prop := Val s ε
+
+abbrev BVal! (M : Type w) [s : Structure L M] (e : Fin n → M) :
+    SubFormula L Empty n →L Prop := BVal s e
 
 end
 
@@ -125,6 +130,25 @@ variable (ε : ℕ → M)
 
 end Syntactic
 
+section Hom
+variable {M₁ : Type w₁} {M₂ : Type w₂} [s₁ : Structure L M₁] [s₂ : Structure L M₂] (φ : M₁ →ₛ[L] M₂)
+variable {e₁ : Fin n → M₁} {ε₁ : μ → M₁}
+
+lemma eval_hom_iff_of_qfree : ∀ {n} {e₁ : Fin n → M₁} {ε₁ : μ → M₁} {p : SubFormula L μ n}, p.qfree →
+    (Eval s₁ e₁ ε₁ p ↔ Eval s₂ (φ ∘ e₁) (φ ∘ ε₁) p)
+  | _, e₁, ε₁, ⊤,        _ => by simp
+  | _, e₁, ε₁, ⊥,        _ => by simp
+  | _, e₁, ε₁, rel r v,  _ => by simp[Function.comp, eval_rel, φ.hom_rel r, φ.hom_val]
+  | _, e₁, ε₁, nrel r v, _ => by simp[Function.comp, eval_nrel, φ.hom_rel r, φ.hom_val]
+  | _, e₁, ε₁, p ⋏ q,    h => by simp at h ⊢; simp[eval_hom_iff_of_qfree h.1, eval_hom_iff_of_qfree h.2]
+  | _, e₁, ε₁, p ⋎ q,    h => by simp at h ⊢; simp[eval_hom_iff_of_qfree h.1, eval_hom_iff_of_qfree h.2]
+
+lemma eval_hom_univClosure {n} {ε₁ : μ → M₁} {p : SubFormula L μ n} (hp : p.qfree) :
+    Val s₂ (φ ∘ ε₁) (univClosure p) → Val s₁ ε₁ (univClosure p) := by
+  simp; intro h e₁; exact (eval_hom_iff_of_qfree φ hp).mpr (h (φ ∘ e₁))
+
+end Hom
+
 end SubFormula
 
 instance semantics : Semantics (Sentence L) where
@@ -199,6 +223,24 @@ lemma ElementaryEquiv.models {M₁ M₂} [Structure L M₁] [Structure L M₂] (
 
 lemma ElementaryEquiv.modelsₛ {M₁ M₂} [Structure L M₁] [Structure L M₂] (h : M₁ ≃ₑ[L] M₂) :
     ∀ {T : Theory L}, M₁ ⊧₁* T ↔ M₂ ⊧₁* T := by simp[modelsₛ_iff, h.models]
+
+section Hom
+variable {M₁ : Type u} {M₂ : Type u} [s₁ : Structure L M₁] [s₂ : Structure L M₂] (φ : M₁ →ₛ[L] M₂)
+variable {e₁ : Fin n → M₁} {ε₁ : μ → M₁}
+
+lemma models_hom_iff_of_qfree {σ : Sentence L} (hσ : σ.qfree) : M₁ ⊧₁ σ ↔ M₂ ⊧₁ σ := by
+  simpa[Matrix.empty_eq, Empty.eq_elim] using
+    SubFormula.eval_hom_iff_of_qfree (e₁ := finZeroElim) (ε₁ := Empty.elim) φ hσ
+
+lemma models_hom_univClosure {n} {σ : SubSentence L n} (hσ : σ.qfree) :
+    M₂ ⊧₁ (univClosure σ) → M₁ ⊧₁ (univClosure σ) := by
+  simpa[Matrix.empty_eq, Empty.eq_elim, models_iff] using
+    SubFormula.eval_hom_univClosure (ε₁ := Empty.elim) φ hσ
+
+lemma models_hom_univClosure_of_submodels [H : M₁ ⊆ₛ[L] M₂] {n} {σ : SubSentence L n} (hσ : σ.qfree) :
+    M₂ ⊧₁ (univClosure σ) → M₁ ⊧₁ (univClosure σ) := models_hom_univClosure H.inclusion hσ
+
+end Hom
 
 end
 

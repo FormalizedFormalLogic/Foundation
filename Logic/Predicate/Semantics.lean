@@ -7,10 +7,33 @@ variable
   {μ : Type v} {μ₁ : Type v₁} {μ₂ : Type v₂}
 
 namespace FirstOrder
+variable (L)
 
-@[ext] class Structure (L : Language.{u}) (M : Type w) where
+@[ext] class Structure (M : Type w) where
   func : {k : ℕ} → L.func k → (Fin k → M) → M
   rel  : {k : ℕ} → L.rel k → (Fin k → M) → Prop
+
+@[ext] structure Structure.Hom (M₁ : Type w₁) (M₂ : Type w₂) [s₁ : Structure L M₁] [s₂ : Structure L M₂] where
+  toFun : M₁ → M₂
+  toFun_func' : ∀ {k} (f : L.func k) (v : Fin k → M₁), toFun (s₁.func f v) = s₂.func f (fun i => toFun (v i))
+  toFun_rel' : ∀ {k} (r : L.rel k) (v : Fin k → M₁), s₁.rel r v ↔ s₂.rel r (fun i => toFun (v i))
+
+notation:25 M " →ₛ[" L "] " M' => Structure.Hom L M M'
+
+instance (M : Type w) (M' : Type w') [Structure L M] [Structure L M'] :
+  CoeFun (M →ₛ[L] M') (fun _ => M → M') := ⟨fun f => f.toFun⟩
+
+class SubStructure (M₁ : Type w₁) (M₂ : Type w₂) [Structure L M₁] [Structure L M₂] where
+  inclusion : M₁ →ₛ[L] M₂
+  inclusion_inj : Function.Injective inclusion.toFun
+
+notation:25 M₁ " ⊆ₛ[" L "] " M₂ => SubStructure L M₁ M₂
+
+@[ext] structure Structure.ClosedSubset (M : Type w) [s : Structure L M] where
+  domain : Set M
+  domain_closed : ∀ {k} (f : L.func k) {v : Fin k → M}, (∀ i, v i ∈ domain) → s.func f v ∈ domain
+
+instance (M : Type w) [Structure L M] : SetLike (Structure.ClosedSubset L M) M := ⟨Structure.ClosedSubset.domain, Structure.ClosedSubset.ext⟩
 
 end FirstOrder
 
@@ -79,16 +102,20 @@ namespace SubTerm
 
 open FirstOrder
 
-variable {M} (s : Structure L M) {n n₁ n₂ : ℕ} (e : Fin n → M) (e₂ : Fin n₂ → M) (ε : μ → M) (ε₂ : μ₂ → M)
+variable {M : Type w} (s : Structure L M) {n n₁ n₂ : ℕ} (e : Fin n → M) (e₂ : Fin n₂ → M) (ε : μ → M) (ε₂ : μ₂ → M)
 
 def val : SubTerm L μ n → M
   | #x       => e x
   | &x       => ε x
   | func f v => s.func f (fun i => (v i).val)
 
+abbrev bVal (t : SubTerm L Empty n) : M := t.val s e Empty.elim
+
 variable (M) {s}
 
-@[reducible] def val! (M : Type w) [s : Structure L M] {n} (e : Fin n → M) (ε : μ → M) : SubTerm L μ n → M := val s e ε
+abbrev val! [s : Structure L M] {n} (e : Fin n → M) (ε : μ → M) : SubTerm L μ n → M := val s e ε
+
+abbrev bVal! [s : Structure L M] {n} (e : Fin n → M) : SubTerm L Empty n → M := bVal s e
 
 variable {M e e₂ ε ε₂}
 
@@ -157,3 +184,70 @@ lemma val_fix (a : M) (t : SyntacticSubTerm L n) :
 end Syntactic
 
 end SubTerm
+
+namespace FirstOrder
+
+namespace Structure
+
+namespace ClosedSubset
+variable {M : Type w} [s : Structure L M] (u : ClosedSubset L M)
+
+lemma closed {k} (f : L.func k) {v : Fin k → M} (hv : ∀ i, v i ∈ u) : s.func f v ∈ u := u.domain_closed f hv
+
+instance toStructure [s : Structure L M] (u : ClosedSubset L M) : Structure L u where
+  func := fun f v => ⟨s.func f (fun i => ↑(v i)), u.closed f (by simp)⟩
+  rel := fun r v => s.rel r (fun i => ↑(v i))
+
+lemma coe_func {k} (f : L.func k) (v : Fin k → u) : (u.toStructure.func f v : M) = s.func f (fun i => ↑(v i)) := rfl
+
+lemma coe_rel {k} (r : L.rel k) (v : Fin k → u) : u.toStructure.rel r v ↔ s.rel r (fun i => ↑(v i)) := of_eq rfl
+
+end ClosedSubset
+
+namespace Hom
+variable {M₁ : Type w₁} {M₂ : Type w₂} [s₁ : Structure L M₁] [s₂ : Structure L M₂] (φ : M₁ →ₛ[L] M₂)
+
+lemma hom_func {k} (f : L.func k) (v : Fin k → M₁) :
+  φ (s₁.func f v) = s₂.func f (φ ∘ v) := φ.toFun_func' f v
+
+lemma hom_rel {k} (r : L.rel k) (v : Fin k → M₁) :
+  s₁.rel r v ↔ s₂.rel r (φ ∘ v) := φ.toFun_rel' r v
+
+lemma hom_val (e : Fin n → M₁) (ε : μ → M₁) (t : SubTerm L μ n) :
+    φ (t.val s₁ e ε) = t.val s₂ (φ ∘ e) (φ ∘ ε) := by
+  induction t <;> simp[*, SubTerm.val_func, hom_func, Function.comp]
+
+def eq_of_inj [L.Eq] [s₂.Eq] (h : Function.Injective φ) : s₁.Eq where
+  eq := fun a b => by simp[φ.hom_rel, Matrix.comp_vecCons', Matrix.constant_eq_singleton, h.eq_iff, Function.comp]
+
+def inclusion [s : Structure L M] (u : ClosedSubset L M) : u →ₛ[L] M where
+  toFun := Subtype.val
+  toFun_func' := by simp[ClosedSubset.coe_func]
+  toFun_rel' := by simp[ClosedSubset.coe_rel]
+
+end Hom
+
+end Structure
+
+namespace SubStructure
+open Structure
+
+variable {M : Type w} {M₁ : Type w₁} {M₂ : Type w₂}
+  [s : Structure L M] [s₁ : Structure L M₁] [s₂ : Structure L M₂] [H : M₁ ⊆ₛ[L] M₂]
+
+def eq_of_eq [L.Eq] [s₂.Eq] : s₁.Eq := H.inclusion.eq_of_inj H.inclusion_inj
+
+instance closedSubset (u : ClosedSubset L M) : u ⊆ₛ[L] M where
+  inclusion := Structure.Hom.inclusion u
+  inclusion_inj := by simp[Structure.Hom.inclusion]; exact Subtype.val_injective
+
+lemma inclusion_func {k} (f : L.func k) (v : Fin k → M₁) :
+  H.inclusion (s₁.func f v) = s₂.func f (H.inclusion ∘ v) := H.inclusion.hom_func f v
+
+lemma inclusion_val (e : Fin n → M₁) (ε : μ → M₁) (t : SubTerm L μ n) :
+    H.inclusion (t.val s₁ e ε) = t.val s₂ (H.inclusion ∘ e) (H.inclusion ∘ ε) := 
+  H.inclusion.hom_val e ε t
+  
+end SubStructure
+
+end FirstOrder
