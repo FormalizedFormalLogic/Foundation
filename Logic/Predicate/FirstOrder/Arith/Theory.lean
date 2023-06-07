@@ -31,6 +31,22 @@ inductive Robinson : Theory L
   | q₇ : Robinson “∀ ∀ (#0 * (#1 + 1) = #0 * #1 + #0)”
   | q₈ : Robinson “∀ ∀ (#0 < #1 ↔ (∃ #0 + #1 + 1 = #2))”
 
+inductive PAminus : Theory L
+  | addZero       : PAminus “∀ #0 + 0 = #0”
+  | addAssoc      : PAminus “∀ ∀ ∀ (#0 + #1) + #2 = #0 + (#1 + #2)”
+  | addComm       : PAminus “∀ ∀ #0 + #1 = #1 + #0”
+  | ltDef         : PAminus “∀ ∀ (#0 < #1 ↔ (∃ #0 + #1 + 1 = #2))”
+  | zeroBot       : PAminus “∀ 0 ≤ #0”
+  | zeroLeOne     : PAminus “0 < 1”
+  | oneLeOfZeroLt : PAminus “∀ (0 < #0 → 1 ≤ #0)”
+  | addLtAdd      : PAminus “∀ ∀ ∀ (#0 < #1 → #0 + #2 < #1 + #2)”
+  | mulZero       : PAminus “∀ #0 * 0 = 0”
+  | mulOne        : PAminus “∀ #0 * 1 = #0”
+  | mulAssoc      : PAminus “∀ ∀ ∀ (#0 * #1) * #2 = #0 * (#1 + #2)”
+  | mulComm       : PAminus “∀ ∀ #0 * #1 = #1 * #0”
+  | mulLtMul      : PAminus “∀ ∀ ∀ (#0 < #1 → #2 ≠ 0 → #0 * #2 < #1 * #2)”
+  | distr         : PAminus “∀ ∀ ∀ #0 * (#1 + #2) = #0 * #1 + #0 * #2”
+
 inductive Ind (U : Set (SubSentence L 1)) : Theory L
   | intro {σ} : σ ∈ U → Ind U (Arith.succInd σ) 
 
