@@ -182,7 +182,7 @@ lemma consequence_iff_eq {T : Theory L} [EqTheory T] {σ : Sentence L} :
   · intro h M i s hM
     have H : M ⊧₁* Theory.Eq L := Semantics.realizeTheory_of_subset hM EqTheory.eq
     have e : Structure.Eq.QuotEq H ≃ₑ[L] M := Structure.Eq.QuotEq.elementaryEquiv H
-    exact e.models.mp $ h (Structure.Eq.QuotEq H) (e.modelsₛ.mpr hM)
+    exact e.models.mp $ h (Structure.Eq.QuotEq H) (e.modelsTheory.mpr hM)
 
 lemma satisfiableₛ_iff_eq {T : Theory L} [EqTheory T] :
     Semantics.Satisfiableₛ T ↔ (∃ (M : Type u) (_ : Inhabited M) (_ : Structure L M) (_ : Structure.Eq L M), M ⊧₁* T) := by
@@ -190,7 +190,7 @@ lemma satisfiableₛ_iff_eq {T : Theory L} [EqTheory T] :
   · intro ⟨M, i, s, hM⟩;
     have H : M ⊧₁* Theory.Eq L := Semantics.realizeTheory_of_subset hM EqTheory.eq
     have e : Structure.Eq.QuotEq H ≃ₑ[L] M := Structure.Eq.QuotEq.elementaryEquiv H
-    exact ⟨Structure.Eq.QuotEq H, inferInstance, inferInstance, inferInstance, e.modelsₛ.mpr hM⟩
+    exact ⟨Structure.Eq.QuotEq H, inferInstance, inferInstance, inferInstance, e.modelsTheory.mpr hM⟩
   · intro ⟨M, i, s, _, hM⟩; exact ⟨M, i, s, hM⟩
 
 namespace SubFormula

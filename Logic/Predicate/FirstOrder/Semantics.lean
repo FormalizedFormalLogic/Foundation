@@ -164,6 +164,15 @@ abbrev ModelsTheory (M : Type u) [s : Structure L M] (T : Theory L) : Prop :=
 
 infix:55 " ⊧₁* " => ModelsTheory
 
+structure Theory.semanticGe (T₁ : Theory L₁) (T₂ : Theory L₂) :=
+  carrier : Type u → Type u
+  struc : (M₁ : Type u) → [Structure L₁ M₁] → Structure L₂ (carrier M₁)
+  modelsTheory : ∀ {M₁ : Type u} [Structure L₁ M₁], M₁ ⊧₁* T₁ → ModelsTheory (s := struc M₁) T₂
+
+structure Theory.semanticEquiv (T₁ : Theory L₁) (T₂ : Theory L₂) :=
+  toLeft : T₁.semanticGe T₂
+  toRight : T₂.semanticGe T₁
+
 variable (L)
 
 def ElementaryEquiv (M₁ M₂ : Type u) [Structure L M₁] [Structure L M₂] : Prop :=
@@ -182,7 +191,7 @@ lemma models_iff {σ : Sentence L} : M ⊧₁ σ ↔ SubFormula.Val s Empty.elim
 
 lemma realize_def : Semantics.realize (self := semantics) s = SubFormula.Val s Empty.elim := rfl
 
-lemma modelsₛ_iff {T : Theory L} : M ⊧₁* T ↔ (∀ ⦃p⦄, p ∈ T → M ⊧₁ p) := of_eq rfl
+lemma modelsTheory_iff {T : Theory L} : M ⊧₁* T ↔ (∀ ⦃p⦄, p ∈ T → M ⊧₁ p) := of_eq rfl
 
 lemma models_iff_realize {σ : Sentence L} :
     M ⊧₁ σ ↔ Semantics.realize (self := semantics) s σ := of_eq rfl
@@ -221,8 +230,8 @@ lemma ElementaryEquiv.trans {M₁ M₂ M₃ : Type u} [Structure L M₁] [Struct
 lemma ElementaryEquiv.models {M₁ M₂} [Structure L M₁] [Structure L M₂] (h : M₁ ≃ₑ[L] M₂) :
     ∀ {σ : Sentence L}, M₁ ⊧₁ σ ↔ M₂ ⊧₁ σ := @h
 
-lemma ElementaryEquiv.modelsₛ {M₁ M₂} [Structure L M₁] [Structure L M₂] (h : M₁ ≃ₑ[L] M₂) :
-    ∀ {T : Theory L}, M₁ ⊧₁* T ↔ M₂ ⊧₁* T := by simp[modelsₛ_iff, h.models]
+lemma ElementaryEquiv.modelsTheory {M₁ M₂} [Structure L M₁] [Structure L M₂] (h : M₁ ≃ₑ[L] M₂) :
+    ∀ {T : Theory L}, M₁ ⊧₁* T ↔ M₂ ⊧₁* T := by simp[modelsTheory_iff, h.models]
 
 section Hom
 variable {M₁ : Type u} {M₂ : Type u} [s₁ : Structure L M₁] [s₂ : Structure L M₂] (φ : M₁ →ₛ[L] M₂)
@@ -263,8 +272,8 @@ lemma models_onSubFormula₁ {σ : Sentence L₁} :
     Semantics.realize (self := semantics) s₂ (Φ.onSubFormula₁ σ) ↔ Semantics.realize (self := semantics) (Φ.onStructure s₂) σ :=
   by simp[Semantics.realize, Val, eval_onSubFormula₁]
 
-lemma onSubFormula₁_models_onSubFormula₁ {T : Theory L₁} {σ : Sentence L₁} (h : T ⊨ σ) :
-    Φ.onSubFormula₁ '' T ⊨ Φ.onSubFormula₁ σ := by
+lemma onTheory₁_models_onSubFormula₁ {T : Theory L₁} {σ : Sentence L₁} (h : T ⊨ σ) :
+    Φ.onTheory₁ T ⊨ Φ.onSubFormula₁ σ := by
   intro M _ s hM
   have : Semantics.realize (self := semantics) (Φ.onStructure s) σ :=
     h M (Φ.onStructure s) (fun q hq => models_onSubFormula₁.mp $ hM (Set.mem_image_of_mem _ hq))
@@ -298,20 +307,60 @@ lemma valid_extendStructure_onSubFormula₁ {σ : Sentence L₁} :
     Semantics.Valid (Φ.onSubFormula₁ σ) → Semantics.Valid σ :=
   fun h _ _ s => (models_extendStructure_onSubFormula₁ injf injr s σ).mp (h _)
 
-lemma onSubFormula₁_models_onSubFormula₁_iff {T : Theory L₁} {σ : Sentence L₁} :
-    Φ.onSubFormula₁ '' T ⊨ Φ.onSubFormula₁ σ ↔ T ⊨ σ := by
+lemma onTheory₁_models_onSubFormula₁_iff {T : Theory L₁} {σ : Sentence L₁} :
+    Φ.onTheory₁ T ⊨ Φ.onSubFormula₁ σ ↔ T ⊨ σ := by
   constructor
   · simp; intro h M _ s₁ hs₁
     exact (models_extendStructure_onSubFormula₁ injf injr s₁ σ).mp $
       h M (Φ.extendStructure s₁)
-      (by simp[Semantics.realizeTheory]; intro σ hσ; exact (models_extendStructure_onSubFormula₁ injf injr s₁ σ).mpr (hs₁ hσ))
-  · exact onSubFormula₁_models_onSubFormula₁
+      (by simp[Semantics.realizeTheory, Language.Hom.onTheory₁];
+          intro σ hσ; exact (models_extendStructure_onSubFormula₁ (Φ := Φ) injf injr s₁ σ).mpr (hs₁ hσ))
+  · exact onTheory₁_models_onSubFormula₁
 
 end
 
 end onSubFormula₁
 
 end SubFormula
+
+@[simp] lemma ModelsTheory.empty [Structure L M] : M ⊧₁* (∅ : Theory L)  := by intro _; simp
+
+lemma ModelsTheory.of_ss [Structure L M] {T U : Theory L} (h : M ⊧₁* U) (ss : T ⊆ U) : M ⊧₁* T :=
+  fun _ hσ => h (ss hσ)
+
+namespace Theory
+
+variable {L₁ L₂ : Language.{u}}
+variable {M : Type u} [s₂ : Structure L₂ M]
+variable {Φ : L₁ →ᵥ L₂}
+
+lemma modelsTheory_onTheory₁ {T₁ : Theory L₁} :
+    ModelsTheory (s := s₂) (Φ.onTheory₁ T₁) ↔ ModelsTheory (s := Φ.onStructure s₂) T₁ :=
+  by simp[SubFormula.models_onSubFormula₁, Language.Hom.onTheory₁, modelsTheory_iff, modelsTheory_iff (T := T₁)]
+
+namespace semanticGe
+
+def of_ss {T₁ : Theory L₁} {T₂ : Theory L₂} (ss : Φ.onTheory₁ T₁ ⊆ T₂) : T₂.semanticGe T₁ where
+  carrier := id
+  struc := fun _ s => Φ.onStructure s
+  modelsTheory := fun {M _} h => (modelsTheory_onTheory₁ (M := M)).mp (h.of_ss ss)
+
+protected def refl {T : Theory L} : T.semanticGe T where
+  carrier := id
+  struc := fun _ s => s
+  modelsTheory := fun h => h
+
+protected def trans {T₁ : Theory L₁} {T₂ : Theory L₂} {T₃ : Theory L₃}
+  (g₃ : T₃.semanticGe T₂) (g₂ : T₂.semanticGe T₁) : T₃.semanticGe T₁ where
+  carrier := g₂.carrier ∘ g₃.carrier
+  struc := fun M₃ _ => let _ := g₃.struc M₃; g₂.struc (g₃.carrier M₃)
+  modelsTheory := fun {M₃ _} h =>
+    let _ := g₃.struc M₃
+    g₂.modelsTheory (g₃.modelsTheory h)
+
+end semanticGe
+
+end Theory
 
 namespace SubFormula
 

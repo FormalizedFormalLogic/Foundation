@@ -9,28 +9,28 @@ variable (Φ : Hom L₁ L₂) {n : ℕ}
 
 open FirstOrder
 
-def onSubFormula₁' (Φ : Hom L₁ L₂) : ∀ {n}, SubFormula L₁ μ n → SubFormula L₂ μ n
+def onSubFormula₁Aux (Φ : Hom L₁ L₂) : ∀ {n}, SubFormula L₁ μ n → SubFormula L₂ μ n
   | _, ⊤                   => ⊤ 
   | _, ⊥                   => ⊥ 
   | _, SubFormula.rel r v  => SubFormula.rel (Φ.onRel r) (fun i => Φ.onSubTerm (v i))
   | _, SubFormula.nrel r v => SubFormula.nrel (Φ.onRel r) (fun i => Φ.onSubTerm (v i))
-  | _, p ⋏ q               => Φ.onSubFormula₁' p ⋏ Φ.onSubFormula₁' q
-  | _, p ⋎ q               => Φ.onSubFormula₁' p ⋎ Φ.onSubFormula₁' q
-  | _, ∀' p                => ∀' Φ.onSubFormula₁' p
-  | _, ∃' p                => ∃' Φ.onSubFormula₁' p
+  | _, p ⋏ q               => Φ.onSubFormula₁Aux p ⋏ Φ.onSubFormula₁Aux q
+  | _, p ⋎ q               => Φ.onSubFormula₁Aux p ⋎ Φ.onSubFormula₁Aux q
+  | _, ∀' p                => ∀' Φ.onSubFormula₁Aux p
+  | _, ∃' p                => ∃' Φ.onSubFormula₁Aux p
 
-lemma onSubFormula₁'_neg {n} (p : SubFormula L₁ μ n) :
-    Φ.onSubFormula₁' (~p) = ~Φ.onSubFormula₁' p :=
-  by induction p using SubFormula.rec' <;> simp[*, onSubFormula₁', ←SubFormula.neg_eq]
+lemma onSubFormula₁Aux_neg {n} (p : SubFormula L₁ μ n) :
+    Φ.onSubFormula₁Aux (~p) = ~Φ.onSubFormula₁Aux p :=
+  by induction p using SubFormula.rec' <;> simp[*, onSubFormula₁Aux, ←SubFormula.neg_eq]
 
 def onSubFormula₁ (Φ : Hom L₁ L₂) {n} : SubFormula L₁ μ n →L SubFormula L₂ μ n where
-  toFun := Φ.onSubFormula₁'
-  map_top' := by simp[onSubFormula₁']
-  map_bot' := by simp[onSubFormula₁']
-  map_and' := by simp[onSubFormula₁']
-  map_or'  := by simp[onSubFormula₁']
-  map_neg' := by simp[onSubFormula₁'_neg]
-  map_imp' := by simp[SubFormula.imp_eq, onSubFormula₁'_neg, ←SubFormula.neg_eq, onSubFormula₁']
+  toFun := Φ.onSubFormula₁Aux
+  map_top' := by simp[onSubFormula₁Aux]
+  map_bot' := by simp[onSubFormula₁Aux]
+  map_and' := by simp[onSubFormula₁Aux]
+  map_or'  := by simp[onSubFormula₁Aux]
+  map_neg' := by simp[onSubFormula₁Aux_neg]
+  map_imp' := by simp[SubFormula.imp_eq, onSubFormula₁Aux_neg, ←SubFormula.neg_eq, onSubFormula₁Aux]
 
 lemma onSubFormula₁_rel {k} (r : L₁.rel k) (v : Fin k → SubTerm L₁ μ n) :
     Φ.onSubFormula₁ (SubFormula.rel r v) = SubFormula.rel (Φ.onRel r) (fun i => Φ.onSubTerm (v i)) := rfl
@@ -43,6 +43,8 @@ lemma onSubFormula₁_nrel {k} (r : L₁.rel k) (v : Fin k → SubTerm L₁ μ n
 
 @[simp] lemma onSubFormula₁_ex (p : SubFormula L₁ μ (n + 1)) :
     Φ.onSubFormula₁ (∃' p) = ∃' Φ.onSubFormula₁ p := rfl
+
+def onTheory₁ (Φ : Hom L₁ L₂) (T : Theory L₁) : Theory L₂ := Φ.onSubFormula₁ '' T
 
 end Hom
 
