@@ -15,15 +15,16 @@ partial def findTerm {L : Q(Language.{u})} (s : Q(SyntacticTerm $L))
     | ~q(&$x)                          => return ⟨q(&($x)), q(rfl)⟩
     | ~q(Operator.const $c)            => pure ⟨q(Operator.const $c), q(const_eq_substs_sonst_of_eq $c)⟩
     | ~q(func (arity := $arity) $f $v) =>
-      let ⟨v', vh⟩ ← Qq.mapVectorInfo (u := u) (v := u) (H := q(fun t res => t = substs ![$s] res)) (findTerm s) arity v
+      let ⟨v', vh⟩ ← Qq.vectorCollection (u := u) (v := u) (H := q(fun t res => t = substs ![$s] res)) (findTerm s) arity v
       return ⟨q(func $f $v'), q(eq_substs_func_of_eq $f $vh)⟩
     | ~q(substs (n := $k) $v $t)       =>
-      let ⟨v', vh⟩ ← Qq.mapVectorInfo (u := u) (v := u) (H := q(fun t res => t = substs ![$s] res)) (findTerm s) k v
+      let ⟨v', vh⟩ ← Qq.vectorCollection (u := u) (v := u) (H := q(fun t res => t = substs ![$s] res)) (findTerm s) k v
       return ⟨q(substs $v' $t), q(eq_substs_substs_of_eq $t $vh)⟩
     | ~q($t)                           => do
       have v : Q(Fin 0 → SyntacticSubTerm $L 1) := q(![])
       let ⟨t', th⟩ ← resultSubsts (k := q(0)) (n := q(1)) v t
       return ⟨t', q(eq_substs_substs_nil $v $s $th)⟩
+
 
 elab "dbgfindTerm" : term => do
   let L : Q(Language.{0}) := q(Language.oring)
@@ -41,6 +42,98 @@ elab "dbgfindTerm" : term => do
 
 #eval dbgfindTerm
 
+
+namespace lemmata
+section 
+
+variable {α : Type u}
+
+lemma vec_concat_nth_tail {k} (x : α) (v : Fin k → α) (i : Fin k) (a : α) (h : v i = a) : (x :> v) (i.succ) = a := by
+  simp[h]
+
+lemma vec_concat_nth_head {k} (x : α) (v : Fin k → α) (a : α) (h : x = a) : (x :> v) 0 = a := by
+  simp[h]
+
+end
+
+section Term
+open SubTerm
+variable {L : Language}
+
+lemma subst_bvar (s : Fin k → SyntacticTerm L) (i : Fin k) (t : SyntacticTerm L) (h : s i = t) :
+    t = SubTerm.substs s #i := by simp[h]
+
+lemma substs_const (s : Fin k → SyntacticTerm L) (c : Const L) : c.const = substs s c.const := by simp
+
+lemma substs_func (s : Fin k → SyntacticTerm L) (f : L.func l) (v : Fin l → SyntacticTerm L) (v' : Fin l → SyntacticSubTerm L k)
+  (h : ∀ i, v i = substs s (v' i)) : func f v = substs s (func f v') := by simp[SubTerm.substs_func, ←h] 
+
+lemma substs_substs (s : Fin k → SyntacticTerm L) (t : SyntacticSubTerm L arity)
+  (v : Fin arity → SyntacticTerm L) (v' : Fin arity → SyntacticSubTerm L k)
+  (h : ∀ i, v i = substs s (v' i)) : substs v t = substs s (substs v' t) := by simp[SubTerm.substs_substs, Function.comp, ←h]
+
+lemma substs_substs_nil  (s : Fin k → SyntacticTerm L) (v) (t : SyntacticTerm L) (t') (ht : substs v t = t') :
+  t = substs s t' := by simp[←ht, SubTerm.substs_substs]
+
+end Term
+
+end lemmata
+
+#check Qq.vectorCollection
+-- if s i = t then return some i else none
+partial def findVecIndex {L : Q(Language.{u})} (k : Q(ℕ)) (s : Q(Fin $k → SyntacticTerm $L)) (t : Q(SyntacticTerm $L)) :
+    MetaM $ Option $ (i : Q(Fin $k)) × Q($s $i = $t) := do
+  match k with
+  | ~q(0) => return none
+  | ~q($k' + 1) =>
+    let s : Q(Fin ($k' + 1) → SyntacticTerm $L) := s
+    match s with
+    | ~q($sh :> $st) =>
+      match (←findVecIndex k' st t) with
+      | some ⟨i, b⟩  =>
+        let some ival := (← finQVal (n := q(.succ $k')) i) | throwError f!"Fail: FinQVal {i}"
+        let z : Q(Fin ($k' + 1)) ← Lean.Expr.ofNat q(Fin ($k' + 1)) (ival + 1)
+        return some ⟨z, (q(lemmata.vec_concat_nth_tail $sh $st $i $t $b) : Expr)⟩
+      | none =>
+        if (←isDefEq sh t) then
+          let eqn : Q($sh = $t) := (q(@rfl (SyntacticTerm $L) $t) : Expr)
+          return some ⟨q(0), (q(lemmata.vec_concat_nth_head $sh $st $t $eqn) : Expr)⟩
+        else return none
+
+partial def findTerms {L : Q(Language.{u})} (k : Q(ℕ)) (s : Q(Fin $k → SyntacticTerm $L))
+    (t : Q(SyntacticTerm $L)) : MetaM ((res : Q(SyntacticSubTerm $L $k)) × Q($t = substs $s $res)) := do
+  match (←findVecIndex k s t) with
+  | some ⟨i, h⟩ =>
+    return ⟨q(#$i), q(lemmata.subst_bvar $s $i $t $h)⟩
+  | none =>
+    match t with
+    | ~q(&$x)                          => return ⟨q(&($x)), q(rfl)⟩
+    | ~q(Operator.const $c)            => pure ⟨q(Operator.const $c), q(lemmata.substs_const $s $c)⟩
+    | ~q(func (arity := $arity) $f $v) =>
+      let ⟨v', vh⟩ ← Qq.vectorCollection (u := u) (v := u) (H := q(fun t res => t = substs $s res)) (findTerms k s) arity v
+      return ⟨q(func $f $v'), q(lemmata.substs_func $s $f $v $v' $vh)⟩
+    | ~q(substs (n := $arity) $v $t)       =>
+      let ⟨v', vh⟩ ← Qq.vectorCollection (u := u) (v := u) (H := q(fun t res => t = substs $s res)) (findTerms k s) arity v
+      return ⟨q(substs $v' $t), q(lemmata.substs_substs $s $t $v $v' $vh)⟩
+    | ~q($t)                           => do
+      have v : Q(Fin 0 → SyntacticSubTerm $L $k) := q(![])
+      let ⟨t', th⟩ ← resultSubsts (k := q(0)) (n := k) v t
+      return ⟨t', q(lemmata.substs_substs_nil $s $v $t $t' $th)⟩
+
+elab "dbgfindTerms" : term => do
+  let L : Q(Language.{0}) := q(Language.oring)
+  let t : Q(SyntacticTerm $L) := q(ᵀ“((&2 + 1) + 9*&3) * (#0 + 1)ᵀ⟦&2 + 1, 6⟧ ”)
+  logInfo m! "{t}"
+  let s : Q(Fin 2 → SyntacticTerm $L) := q(![ᵀ“&2 + 1”, ᵀ“&3”])
+  let ⟨e, eq⟩ ← findTerms q(2) s t
+  let dbgr := q(DbgResult.intro _ _ $eq)
+  logInfo m! "{t} \n⟹ \n{e}"
+  let ⟨e', _⟩ ← resultSubsts (u := levelZero) (L := L) (n := q(0)) s e
+  logInfo m! "{e} \n⟹ \n{e'}"
+  return dbgr
+
+#eval dbgfindTerms
+
 end Meta
 
 end SubTerm
@@ -56,10 +149,10 @@ partial def findFormula {L : Q(Language.{u})} (s : Q(SyntacticTerm $L)) :
   | ~q(⊤)        => return ⟨q(⊤), q(rfl)⟩
   | ~q(⊥)        => return ⟨q(⊥), q(rfl)⟩
   | ~q(rel (arity := $arity) $r $v)  => do
-    let ⟨v', vh⟩ ← Qq.mapVectorInfo (u := u) (v := u) (H := q(fun t res => t = SubTerm.substs ![$s] res)) (SubTerm.Meta.findTerm s) arity v
+    let ⟨v', vh⟩ ← Qq.vectorCollection (u := u) (v := u) (H := q(fun t res => t = SubTerm.substs ![$s] res)) (SubTerm.Meta.findTerm s) arity v
     return ⟨q(rel $r $v'), q(rel_eq_substs_rel_of_eq $r $vh)⟩
   | ~q(nrel (arity := $arity) $r $v)  => do
-    let ⟨v', vh⟩ ← Qq.mapVectorInfo (u := u) (v := u) (H := q(fun t res => t = SubTerm.substs ![$s] res)) (SubTerm.Meta.findTerm s) arity v
+    let ⟨v', vh⟩ ← Qq.vectorCollection (u := u) (v := u) (H := q(fun t res => t = SubTerm.substs ![$s] res)) (SubTerm.Meta.findTerm s) arity v
     return ⟨q(nrel $r $v'), q(nrel_eq_substs_nrel_of_eq $r $vh)⟩
   | ~q($p ⋏ $q)  => do
     let ⟨p', ph⟩ ← findFormula s p
@@ -95,7 +188,7 @@ partial def findFormula {L : Q(Language.{u})} (s : Q(SyntacticTerm $L)) :
     let ⟨q', qh⟩ ← findFormula s q
     return ⟨q($p' ⟷ $q'), q(eq_substs_iff_of_eq $ph $qh)⟩
   | ~q(substs (n := $k) $v $p)       => do
-    let ⟨v', vh⟩ ← Qq.mapVectorInfo (u := u) (v := u) (H := q(fun t res => t = SubTerm.substs ![$s] res)) (SubTerm.Meta.findTerm s) k v
+    let ⟨v', vh⟩ ← Qq.vectorCollection (u := u) (v := u) (H := q(fun t res => t = SubTerm.substs ![$s] res)) (SubTerm.Meta.findTerm s) k v
     return ⟨q(substs $v' $p), q(eq_substs_substs_of_eq $p $vh)⟩
   | ~q($p)                           => do
     have v : Q(Fin 0 → SyntacticSubTerm $L 1) := q(![])

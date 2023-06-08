@@ -202,7 +202,7 @@ partial def resultVectorOfResultFun {α : Q(Type u)} {β : Q(Type v)}
     | _ => throwError m!"error in resultVectorOfResultFun(2). nonexhaustive match: {n}, {l}"
   | _ => throwError m!"error in resultVectorOfResultFun(1). nonexhaustive match: {n}"
 
-partial def mapVectorInfo {α : Q(Type u)} {β : Q(Type v)} {H : Q($α → $β → Sort w)}
+partial def vectorCollection {α : Q(Type u)} {β : Q(Type v)} {H : Q($α → $β → Sort w)}
   (r : (a : Q($α)) → MetaM ((b : Q($β)) × Q($H $a $b)))
   (n : Q(ℕ)) (l : Q(Fin $n → $α)) : MetaM ((b : Q(Fin $n → $β)) × Q((i : Fin $n) → $H ($l i) ($b i))) := do
   match n with
@@ -215,7 +215,7 @@ partial def mapVectorInfo {α : Q(Type u)} {β : Q(Type v)} {H : Q($α → $β �
     match l with
     | ~q($a :> $as) =>
       let p ← r a
-      let ps ← mapVectorInfo r n as
+      let ps ← vectorCollection r n as
       let vectorConsQ
         {as : Q(Fin $n → $α)}
         {bs : Q(Fin $n → $β)}
@@ -224,8 +224,8 @@ partial def mapVectorInfo {α : Q(Type u)} {β : Q(Type v)} {H : Q($α → $β �
         q(Fin.cases $h $ih)
       have h : Q((i : Fin ($n + 1)) → $H (($a :> $as) i) (($(p.1) :> $(ps.1)) i)) := vectorConsQ ps.2 p.2
       return ⟨q($(p.1) :> $(ps.1)), h⟩
-    | _ => throwError m!"error in mapVectorInfo(2). nonexhaustive match: {n}, {l}"
-  | _ => throwError m!"error in mapVectorInfo(1). nonexhaustive match: {n}"
+    | _ => throwError m!"error in vectorCollection(2). nonexhaustive match: {n}, {l}"
+  | _ => throwError m!"error in vectorCollection(1). nonexhaustive match: {n}"
 
 -- def Result.toVector (n : Q(ℕ)) {α: Q(Type u)}
 --   (r : (e : Q($α)) → MetaM (Result e)) : (v : Q(Fin $n → $α)) → MetaM (Result (u := u) v) :=
