@@ -19,7 +19,6 @@ Formalizing Logic in Lean4
 | $(\rm Cut)\vdash_\mathrm{T} \Gamma$ | Derivation in Tait-Calculus + Cut   |  `FirstOrder.DerivationCut`     | `⊢ᶜ Γ`    |
 | $M \models \sigma$                  | Tarski's truth definition condition |  `FirstOrder.SubFormula.Val` | `M ⊧₁ σ` |
 | $T \vdash \sigma$                   | Provability, Proof                  |  `FirstOrder.Proof`          | `T ⊢ σ`  |
-|  | Redundant but practical proof system (`[]⟹[T] emb σ` is equivalent to `T ⊢ σ`) | `FirstOrder.Principia` | `[p₁ p₂ p₃, ...]⟹[T] q` |
 
 ## Theorem
 ### First-Order logic
@@ -30,3 +29,41 @@ Formalizing Logic in Lean4
 | Completeness theorem           | `FirstOrder.completeness` | `T ⊨ σ → T ⊢ σ` |
 | Cut-elimination                | `FirstOrder.DerivationCutRestricted.hauptsatz`    | `⊢ᶜ Δ → ⊢ᵀ Δ`   |
 | Gödel's incompleteness theorem | TODO                      |                  |
+
+## Principia
+- Redundant but practical [formal [formal proof system]]
+- `[emb σ₁, emb σ₂, ...]⟹[T] emb σ` is equivalent to `T ⊢ σ₁ ∧ σ₂ ∧ ... → σ`
+
+```code:eqZeroOfAddEqZero.lean
+def eqZeroOfAddEqZero : [] ⟹[T] “∀ ∀ (#0 + #1 = 0 → #0 = 0 ∧ #1 = 0)” :=
+  proof.
+    then ∀ #0 + 1 ≠ 0 as "ne zero" · from succNeZero
+    then ∀ (#0 = 0 ∨ ∃ #1 = #0 + 1) as "zero or succ" · from zeroOrSucc
+    then ∀ #0 + 0 = #0 as "add zero" · from addZero
+    then ∀ ∀ (#0 + (#1 + 1) = (#0 + #1) + 1) as "add succ" · from addSucc  
+    generalize; generalize; intro
+    cases &1 = 0 as "h₁" or ∃ &1 = #0 + 1 as "h₁" @ specialize &1 of "zero or succ"
+    · cases &0 = 0 as "h₂" or ∃ &0 = #0 + 1 as "h₂"
+      @ specialize &0 of "zero or succ"
+      · split
+      · choose "h₂" as "h₃"
+        have &0 + 1 = 0 as "contra"
+        · have &0 + 1 + 0 = 0
+          · rewrite &0 + 1 ↦ &1
+            rewrite 0 ↦ &2
+            rewrite &1 + &2 ↦ 0
+          rewrite &0 + 1 ↦ &0 + 1 + 0
+          @ symmetry; specialize &0 + 1 of "add zero"
+        have &0 + 1 ≠ 0
+        · specialize &0 of "ne zero"
+        contradiction "contra"
+    · choose "h₁" as "h₂"
+      have (&1 + &0) + 1 = 0 as "contra"
+      · rewrite (&1 + &0) + 1 ↦ &1 + (&0 + 1)
+        @ symmetry; specialize &1, &0 of "add succ"
+        rewrite &0 + 1 ↦ &2
+      have (&1 + &0) + 1 ≠ 0 
+      · specialize &1 + &0 of "ne zero"
+      contradiction "contra"
+  qed.
+```
