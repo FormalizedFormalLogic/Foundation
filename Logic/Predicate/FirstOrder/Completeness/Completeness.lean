@@ -3,7 +3,7 @@ import Logic.Predicate.FirstOrder.Ultraproduct
 
 namespace FirstOrder
 
-open SubFormula SearchTree
+open Logic SubFormula SearchTree
 
 variable {L : Language.{u}}
 
@@ -70,6 +70,8 @@ noncomputable def completeness {T} {σ : Sentence L} : T ⊨ σ → T ⊢ σ := 
   exact { leftHand := s.image HasNeg.neg,
           hleftHand := by rw[Finset.coe_image]; exact Set.image_subset _ hs.1,
           derivation := this.cutWeakeningCut }
+
+noncomputable instance : Logic.Complete (Sentence L) := ⟨completeness⟩
 
 end FirstOrder
 

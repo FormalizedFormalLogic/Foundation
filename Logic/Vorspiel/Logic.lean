@@ -1,11 +1,25 @@
 import Logic.Vorspiel.Vorspiel
 
+namespace Logic
+
+class Proof (F : Type u) [HasLogicSymbols F] where
+  Bew : Set F → F → Type u
+
+namespace Proof
+variable {F : Type u} [HasLogicSymbols F] [𝓑 : Proof F]
+
+instance : HasTurnstile F (Type u) := ⟨𝓑.Bew⟩
+
+def IsConsistent (T : Set F) : Prop := IsEmpty (T ⊢ ⊥)
+
+end Proof
+
 class Semantics (F : Type u) [HasLogicSymbols F] where
   struc : Type w → Type v
   realize : {M : Type w} → struc M → F →L Prop
 
 namespace Semantics
-variable {F : Type u} [HasLogicSymbols F] [semantics : Semantics.{u, v, w} F]
+variable {F : Type u} [HasLogicSymbols F] [𝓢 : Semantics.{u, v, w} F]
 
 def realizeTheory {M : Type w} (s : struc F M) (T : Set F) : Prop :=
     ∀ ⦃f⦄, f ∈ T → realize s f
@@ -52,3 +66,28 @@ lemma consequence_iff {T : Set F} {f : F} : T ⊨ f ↔ ¬Satisfiableₛ (insert
   · intro h M hM s; contrapose; exact h M hM s
 
 end Semantics
+
+variable (F : Type u) [HasLogicSymbols F] [𝓑 : Proof F] [𝓢 : Semantics.{u, v, w} F]
+
+class Sound where
+  sound : ∀ {T : Set F} {p : F}, T ⊢ p → T ⊨ p
+
+class Complete extends Sound F where
+  complete : ∀ {T : Set F} {p : F}, T ⊨ p → T ⊢ p
+
+variable {F}
+
+namespace Sound
+variable [Sound F]
+
+lemma not_provable_of_countermodel {M : Type w} [Inhabited M] {s : Semantics.struc F M} {T : Set F} {p : F}
+  (hT : s ⊧ₛ* T) (hp : ¬s ⊧ₛ p) : IsEmpty (T ⊢ p) :=
+  ⟨fun b => by have : s ⊧ₛ p := Sound.sound b M s hT; contradiction⟩
+
+lemma consistent_of_model {M : Type w} [Inhabited M] {s : Semantics.struc F M} {T : Set F}
+  (hT : s ⊧ₛ* T) : Proof.IsConsistent T :=
+  not_provable_of_countermodel (p := ⊥) hT (by simp)
+
+end Sound
+
+end Logic

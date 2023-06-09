@@ -1,5 +1,6 @@
 import Logic.Predicate.FirstOrder.Language
 import Logic.Predicate.Coding
+import Logic.Vorspiel.Logic
 
 universe u v
 
@@ -69,7 +70,7 @@ structure Proof (T : Theory L) (σ : Sentence L) where
   hleftHand : ↑leftHand ⊆ SubFormula.neg '' T
   derivation : ⊢ᶜ ((insert σ leftHand).image emb : Sequent L)
 
-instance : HasTurnstile (Sentence L) (Type u) := ⟨Proof⟩
+instance : Logic.Proof (Sentence L) := ⟨Proof⟩
 
 namespace DerivationCutRestricted
 variable {P : SyntacticFormula L → Prop} {Δ Δ₁ Δ₂ Γ : Sequent L}

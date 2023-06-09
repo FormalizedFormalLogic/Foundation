@@ -151,6 +151,8 @@ end Hom
 
 end SubFormula
 
+open Logic
+
 instance semantics : Semantics (Sentence L) where
   struc := Structure.{u, u} L
   realize := (SubFormula.Val · Empty.elim)
@@ -160,7 +162,7 @@ abbrev Models (M : Type u) [s : Structure L M] : Sentence L →L Prop := Semanti
 postfix:max " ⊧₁ " => Models
 
 abbrev ModelsTheory (M : Type u) [s : Structure L M] (T : Theory L) : Prop :=
-  Semantics.realizeTheory (semantics := semantics) s T
+  Semantics.realizeTheory (𝓢 := semantics) s T
 
 infix:55 " ⊧₁* " => ModelsTheory
 
@@ -433,6 +435,8 @@ theorem soundness {T} {σ : Sentence L} : T ⊢ σ → T ⊨ σ := by
   · have : ~τ ∈ T := by rcases hΓ hτ with ⟨τ', hτ', rfl⟩; simpa[←SubFormula.neg_eq] using hτ'
     have : ¬ M ⊧₁ τ := by simpa using hT this
     contradiction
+
+instance : Logic.Sound (Sentence L) := ⟨soundness⟩
 
 end soundness
 

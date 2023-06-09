@@ -180,15 +180,15 @@ lemma consequence_iff_eq {T : Theory L} [EqTheory T] {σ : Sentence L} :
   simp[consequence_iff]; constructor
   · intro h M i s _ hM; exact h M hM
   · intro h M i s hM
-    have H : M ⊧₁* Theory.Eq L := Semantics.realizeTheory_of_subset hM EqTheory.eq
+    have H : M ⊧₁* Theory.Eq L := Logic.Semantics.realizeTheory_of_subset hM EqTheory.eq
     have e : Structure.Eq.QuotEq H ≃ₑ[L] M := Structure.Eq.QuotEq.elementaryEquiv H
     exact e.models.mp $ h (Structure.Eq.QuotEq H) (e.modelsTheory.mpr hM)
 
 lemma satisfiableₛ_iff_eq {T : Theory L} [EqTheory T] :
-    Semantics.Satisfiableₛ T ↔ (∃ (M : Type u) (_ : Inhabited M) (_ : Structure L M) (_ : Structure.Eq L M), M ⊧₁* T) := by
+    Logic.Semantics.Satisfiableₛ T ↔ (∃ (M : Type u) (_ : Inhabited M) (_ : Structure L M) (_ : Structure.Eq L M), M ⊧₁* T) := by
   simp[satisfiableₛ_iff]; constructor
   · intro ⟨M, i, s, hM⟩;
-    have H : M ⊧₁* Theory.Eq L := Semantics.realizeTheory_of_subset hM EqTheory.eq
+    have H : M ⊧₁* Theory.Eq L := Logic.Semantics.realizeTheory_of_subset hM EqTheory.eq
     have e : Structure.Eq.QuotEq H ≃ₑ[L] M := Structure.Eq.QuotEq.elementaryEquiv H
     exact ⟨Structure.Eq.QuotEq H, inferInstance, inferInstance, inferInstance, e.modelsTheory.mpr hM⟩
   · intro ⟨M, i, s, _, hM⟩; exact ⟨M, i, s, hM⟩
@@ -254,8 +254,6 @@ lemma divides_eq (t₁ t₂ : SubTerm L μ n) :
   simp[divides, Abbrev.divides, Abbrev.toOperator, substs_ex]
 
 end
-
-
 
 end SubFormula
 

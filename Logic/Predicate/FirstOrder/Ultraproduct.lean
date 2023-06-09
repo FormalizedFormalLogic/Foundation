@@ -102,7 +102,7 @@ lemma val_Uprod {p : Formula L μ} :
 end SubFormula
 
 lemma realize_Uprod {σ : Sentence L} :
-    (Uprod A 𝓤) ⊧₁ σ ↔ {ι | Semantics.realize (self := semantics) (s ι) σ} ∈ 𝓤 :=
+    (Uprod A 𝓤) ⊧₁ σ ↔ {ι | Logic.Semantics.realize (self := semantics) (s ι) σ} ∈ 𝓤 :=
   by simp[realize_def, SubFormula.val_Uprod, Empty.eq_elim]
 
 variable (A)
@@ -116,7 +116,7 @@ end
 section
 
 namespace FirstOrder
-
+open Logic
 variable {L : Language.{u}} {T : Theory L}
 
 abbrev FinSubTheory (T : Theory L) := {t : Finset (Sentence L) // ↑t ⊆ T}
