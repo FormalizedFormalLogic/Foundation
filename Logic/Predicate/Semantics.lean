@@ -125,7 +125,18 @@ variable {M e e₂ ε ε₂}
 
 lemma val_func {k} (f : L.func k) (v) :
     val s e ε (func f v) = s.func f (fun i => (v i).val s e ε) := rfl
-  
+
+@[simp] lemma val_func₀ (f : L.func 0) (v) :
+    val s e ε (func f v) = s.func f ![] := by simp[val_func, Matrix.empty_eq]
+
+@[simp] lemma val_func₁ (f : L.func 1) (t) :
+    val s e ε (func f ![t]) = s.func f ![t.val s e ε] :=
+  by simp[val_func]; apply of_eq; congr; funext i; cases' i using Fin.cases with i <;> simp
+
+@[simp] lemma val_func₂ (f : L.func 2) (t u) :
+    val s e ε (func f ![t, u]) = s.func f ![t.val s e ε, u.val s e ε] :=
+  by simp[val_func]; apply of_eq; congr; funext i; cases' i using Fin.cases with i <;> simp
+
 lemma val_bind (bound : Fin n₁ → SubTerm L μ₂ n₂) (free : μ₁ → SubTerm L μ₂ n₂) (t : SubTerm L μ₁ n₁) :
     (bind bound free t).val s e₂ ε₂ = t.val s (val s e₂ ε₂ ∘ bound) (val s e₂ ε₂ ∘ free) :=
   by induction t <;> simp[*, bind_func, val_func]

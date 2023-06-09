@@ -35,32 +35,17 @@ Formalizing Logic in Lean4
 - `[emb σ₁, emb σ₂, ...]⟹[T] emb σ` is equivalent to `T ⊢ σ₁ ∧ σ₂ ∧ ... → σ`
 
 ```code:eqZeroOfAddEqZero.lean
-def eqZeroOfAddEqZero : [] ⟹[T] “∀ ∀ (#0 + #1 = 0 → #0 = 0 ∧ #1 = 0)” :=
+def zeroBot : [] ⟹[T] “∀ 0 ≤ #1” :=
   proof.
-    then ∀ #0 + 1 ≠ 0 as "ne zero" · from succNeZero
     then ∀ (#0 = 0 ∨ ∃ #1 = #0 + 1) as "zero or succ" · from zeroOrSucc
-    then ∀ #0 + 0 = #0 as "add zero" · from addZero
-    then ∀ ∀ (#0 + (#1 + 1) = (#0 + #1) + 1) as "add succ" · from addSucc  
-    generalize; generalize; intro as "h₀"
-    cases &1 = 0 as "h₁" or ∃ &1 = #0 + 1 as "h₁" @ specialize "zero or succ" with &1
-    · cases &0 = 0 as "h₂" or ∃ &0 = #0 + 1 as "h₂"
-      @ specialize "zero or succ" with &0
-      · split
-      · choose "h₂" as "h₃"
-        have &0 + 1 = 0 as "contra"
-        · have &0 + 1 + 0 = 0 · rew ←"h₃", ←"h₁", "h₀"
-          rewrite &0 + 1 = &0 + 1 + 0
-          @ symmetry; specialize "add zero" with &0 + 1
-        have &0 + 1 ≠ 0
-        · specialize "ne zero" with &0
-        contradiction "contra"
-    · choose "h₁" as "h₂"
-      have (&1 + &0) + 1 = 0 as "contra"
-      · rewrite (&1 + &0) + 1 = &1 + (&0 + 1)
-        @ symmetry; specialize "add succ" with &1, &0
-        rewrite ←"h₂"
-      have (&1 + &0) + 1 ≠ 0 
-      · specialize "ne zero" with &1 + &0
-      contradiction "contra"
+    then ∀ ∀ (#0 ≤ #1 ↔ #0 = #1 ∨ #0 < #1) as "le def" · from leIffEqOrLt
+    then ∀ (0 < #0 + 1) as "zero lt succ" · from zeroLtSucc
+    generalize
+    rewrite 0 ≤ &0 ↔ 0 = &0 ∨ 0 < &0
+    @ specialize "le def" with 0, &0
+    cases &0 = 0 or ∃ &0 = #0 + 1
+    @ specialize "zero or succ" with &0
+    · left 
+    · right; choose this; rew this; specialize "zero lt succ" with &0
   qed.
 ```

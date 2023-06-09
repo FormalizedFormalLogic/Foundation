@@ -13,12 +13,6 @@ def leastNumber (p : SubFormula L μ 1) : Formula L μ := “∃ !p → ∃ (!p 
 
 def orderInd (p : SubFormula L μ 1) : Formula L μ := “∀ (∀[#0 < #1] !p⟦#0⟧ → !p⟦#0⟧) → ∀ !p”
 
-end Arith
-
-namespace Theory
-
-namespace Arith
-
 variable (L)
 
 inductive Robinson : Theory L
@@ -67,7 +61,7 @@ inductive Exp : Theory L
 
 end Exp
 
-end Arith
+variable {L}
 
 class RobinsonTheory (T : Theory L) extends EqTheory T where
   robinson : Arith.Robinson L ⊆ T
@@ -85,6 +79,6 @@ abbrev Peano (T : Theory L) := IndTheory Set.univ T
 
 abbrev PairingTheory [L.Pairing] (T : Theory L) := SubTheory (Arith.Pairing L) T
 
-end Theory
+end Arith
 
 end FirstOrder
