@@ -41,29 +41,26 @@ def eqZeroOfAddEqZero : [] ⟹[T] “∀ ∀ (#0 + #1 = 0 → #0 = 0 ∧ #1 = 0)
     then ∀ (#0 = 0 ∨ ∃ #1 = #0 + 1) as "zero or succ" · from zeroOrSucc
     then ∀ #0 + 0 = #0 as "add zero" · from addZero
     then ∀ ∀ (#0 + (#1 + 1) = (#0 + #1) + 1) as "add succ" · from addSucc  
-    generalize; generalize; intro
-    cases &1 = 0 as "h₁" or ∃ &1 = #0 + 1 as "h₁" @ specialize &1 of "zero or succ"
+    generalize; generalize; intro as "h₀"
+    cases &1 = 0 as "h₁" or ∃ &1 = #0 + 1 as "h₁" @ specialize "zero or succ" with &1
     · cases &0 = 0 as "h₂" or ∃ &0 = #0 + 1 as "h₂"
-      @ specialize &0 of "zero or succ"
+      @ specialize "zero or succ" with &0
       · split
       · choose "h₂" as "h₃"
         have &0 + 1 = 0 as "contra"
-        · have &0 + 1 + 0 = 0
-          · rewrite &0 + 1 ↦ &1
-            rewrite 0 ↦ &2
-            rewrite &1 + &2 ↦ 0
-          rewrite &0 + 1 ↦ &0 + 1 + 0
-          @ symmetry; specialize &0 + 1 of "add zero"
+        · have &0 + 1 + 0 = 0 · rew ←"h₃", ←"h₁", "h₀"
+          rewrite &0 + 1 = &0 + 1 + 0
+          @ symmetry; specialize "add zero" with &0 + 1
         have &0 + 1 ≠ 0
-        · specialize &0 of "ne zero"
+        · specialize "ne zero" with &0
         contradiction "contra"
     · choose "h₁" as "h₂"
       have (&1 + &0) + 1 = 0 as "contra"
-      · rewrite (&1 + &0) + 1 ↦ &1 + (&0 + 1)
-        @ symmetry; specialize &1, &0 of "add succ"
-        rewrite &0 + 1 ↦ &2
+      · rewrite (&1 + &0) + 1 = &1 + (&0 + 1)
+        @ symmetry; specialize "add succ" with &1, &0
+        rewrite ←"h₂"
       have (&1 + &0) + 1 ≠ 0 
-      · specialize &1 + &0 of "ne zero"
+      · specialize "ne zero" with &1 + &0
       contradiction "contra"
   qed.
 ```
