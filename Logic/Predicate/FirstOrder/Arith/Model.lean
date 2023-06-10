@@ -8,7 +8,7 @@ open Language
 
 namespace Semantics
 
-instance StandardModel : Structure oring ℕ where
+instance standardModel : Structure oRing ℕ where
   func := fun f =>
     match f with
     | ORingFunc.zero => fun _ => 0
@@ -20,32 +20,36 @@ instance StandardModel : Structure oring ℕ where
     | ORingRel.eq => fun v => v 0 = v 1
     | ORingRel.lt => fun v => v 0 < v 1
 
-instance : Structure.Eq oring ℕ := ⟨by simp[StandardModel]⟩
+instance : Structure.Eq oRing ℕ := ⟨by simp[standardModel]⟩
 
-namespace StandardModel
+namespace standardModel
 variable {μ : Type v} (e : Fin n → ℕ) (ε : μ → ℕ)
 
 @[simp] lemma zero_eq_zero :
-    StandardModel.func Language.Zero.zero = 0 :=
+    standardModel.func Language.Zero.zero = 0 :=
   rfl
 
 @[simp] lemma one_eq_one :
-    StandardModel.func Language.One.one = 1 :=
+    standardModel.func Language.One.one = 1 :=
   rfl
 
-@[simp] lemma add_eq_add : StandardModel.func lang(+) ![x, y] = x + y := rfl
+@[simp] lemma add_eq_add : standardModel.func lang(+) ![x, y] = x + y := rfl
 
-@[simp] lemma mul_eq_mul : StandardModel.func lang(*) ![x, y] = x * y := rfl
+@[simp] lemma mul_eq_mul : standardModel.func lang(*) ![x, y] = x * y := rfl
 
 @[simp] lemma numeral_eq_numeral (n : ℕ) :
-    SubTerm.val StandardModel e ε (SubTerm.natLit oring n) = n := by 
+    SubTerm.val standardModel e ε (SubTerm.natLit oRing n) = n := by 
   induction' n with n ih <;> simp[SubTerm.natLit_zero]
   cases' n with n <;> simp[SubTerm.natLit_one, ←Nat.one_eq_succ_zero, SubTerm.natLit_succ, Nat.succ_eq_add_one] at ih ⊢
   simp[ih]
 
-@[simp] lemma lt_eq_lt : StandardModel.rel lang(<) ![x, y] ↔ x < y := of_eq rfl
+@[simp] lemma lt_eq_lt : standardModel.rel lang(<) ![x, y] ↔ x < y := of_eq rfl
 
-theorem ModelsRobinson : ℕ ⊧₁* Robinson oring := by
+@[simp] lemma le_eq_le (t u : SubTerm oRing μ n) :
+    SubFormula.Eval standardModel e ε “ᵀ!t ≤ ᵀ!u”  ↔ t.val standardModel e ε ≤ u.val standardModel e ε :=
+  by simp[SubFormula.le_eq, le_iff_eq_or_lt]
+
+theorem modelsTheoryRobinson : ℕ ⊧₁* Theory.Robinson oRing := by
   intro σ h
   rcases h <;> simp[realize_def]
   case q₃ => intro x; cases x <;> simp
@@ -53,14 +57,25 @@ theorem ModelsRobinson : ℕ ⊧₁* Robinson oring := by
   case q₇ => simp[mul_add]
   case q₈ =>
     intro x y
-    simp[Nat.lt_iff_add_one_le, le_iff_exists_add]
-    exact ⟨by rintro ⟨x, rfl⟩; exact ⟨x, by rw[add_comm (y + 1), add_assoc]⟩,
-      by rintro ⟨x, rfl⟩; exact ⟨x, by rw[add_comm (y + 1), add_assoc]⟩⟩
+    simp[SubFormula.le_eq, Nat.lt_iff_add_one_le, le_iff_exists_add];
+    exact ⟨by rintro ⟨z, rfl⟩; exact ⟨z, by simp[add_comm]⟩, by rintro ⟨z, rfl⟩; exact ⟨z, by simp[add_comm]⟩⟩
 
-end StandardModel
+@[simp] theorem modelsRobinson : ℕ ⊧₁* Axiom.Robinson oRing := by
+  simp[Axiom.Robinson, modelsTheoryRobinson]
 
-theorem Robinson.IsConsistent : Logic.Proof.IsConsistent (Robinson oring) :=
-  Logic.Sound.consistent_of_model StandardModel.ModelsRobinson
+lemma modelsSuccInd (σ : SubSentence oRing 1) : ℕ ⊧₁ (Arith.succInd σ) := by
+  simp[succInd, models_iff, Matrix.constant_eq_singleton]
+  intro hzero hsucc x; induction' x with x ih
+  · exact hzero
+  · exact hsucc x ih
+
+lemma modelsPeano : ℕ ⊧₁* Axiom.Peano oRing :=
+  by simp[Axiom.Peano, Axiom.Ind, Theory.IndScheme, modelsSuccInd]
+
+end standardModel
+
+theorem Peano.IsConsistent : Logic.Proof.IsConsistent (Axiom.Peano oRing) :=
+  Logic.Sound.consistent_of_model standardModel.modelsPeano
 
 variable (L : Language.{u}) [L.ORing]
 
@@ -73,8 +88,6 @@ structure ClosedCut (M : Type w) [s : Structure L M] extends Structure.ClosedSub
   closedLt : ∀ x y : M, SubFormula.BVal s ![x, y] “#0 < #1” → y ∈ domain → x ∈ domain
 
 end Semantics
-
-
 
 end Arith
 

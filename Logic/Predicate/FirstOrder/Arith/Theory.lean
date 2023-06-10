@@ -15,6 +15,8 @@ def orderInd (p : SubFormula L μ 1) : Formula L μ := “∀ (∀[#0 < #1] !p�
 
 variable (L)
 
+namespace Theory
+
 inductive Robinson : Theory L
   | q₁ : Robinson “∀ #0 + 1 ≠ 0”
   | q₂ : Robinson “∀ ∀ (#0 + 1 = #1 + 1 → #0 = #1)”
@@ -23,7 +25,7 @@ inductive Robinson : Theory L
   | q₅ : Robinson “∀ ∀ (#0 + (#1 + 1) = (#0 + #1) + 1)”
   | q₆ : Robinson “∀ #0 * 0 = 0”
   | q₇ : Robinson “∀ ∀ (#0 * (#1 + 1) = #0 * #1 + #0)”
-  | q₈ : Robinson “∀ ∀ (#0 < #1 ↔ (∃ #0 + #1 + 1 = #2))”
+  | q₈ : Robinson “∀ ∀ (#0 ≤ #1 ↔ (∃ #0 + #1 = #2))”
 
 inductive PAminus : Theory L
   | addZero       : PAminus “∀ #0 + 0 = #0”
@@ -41,8 +43,11 @@ inductive PAminus : Theory L
   | mulLtMul      : PAminus “∀ ∀ ∀ (#0 < #1 → #2 ≠ 0 → #0 * #2 < #1 * #2)”
   | distr         : PAminus “∀ ∀ ∀ #0 * (#1 + #2) = #0 * #1 + #0 * #2”
 
-inductive Ind (U : Set (SubSentence L 1)) : Theory L
-  | intro {σ} : σ ∈ U → Ind U (Arith.succInd σ) 
+variable {L}
+
+def IndScheme (u : Set (SubSentence L 1)) : Theory L := succInd '' u
+
+variable (L)
 
 section Paring
 variable [L.Pairing]
@@ -61,23 +66,66 @@ inductive Exp : Theory L
 
 end Exp
 
+end Theory
+
 variable {L}
 
-class RobinsonTheory (T : Theory L) extends EqTheory T where
-  robinson : Arith.Robinson L ⊆ T
+class Robinson (T : Theory L) where
+  robinson : Theory.Robinson L ⊆ T
 
-class IndTheory (U) (T : Theory L) extends RobinsonTheory T where
-  ind : Arith.Ind L U ⊆ T
+attribute [simp] Robinson.robinson
 
-abbrev IOpen (T : Theory L) := IndTheory SubFormula.qfree T
+class Ind (U) (T : Theory L) where
+  ind : Theory.IndScheme U ⊆ T
 
-abbrev ISigma (k : ℕ) (T : Theory L) := IndTheory (Arith.Hierarchy.Sigma k) T
+attribute [simp] Ind.ind
 
-abbrev IPi (k : ℕ) (T : Theory L) := IndTheory (Arith.Hierarchy.Pi k) T
+abbrev IOpen (T : Theory L) := Ind SubFormula.qfree T
 
-abbrev Peano (T : Theory L) := IndTheory Set.univ T
+abbrev ISigma (k : ℕ) (T : Theory L) := Ind (Arith.Hierarchy.Sigma k) T
 
-abbrev PairingTheory [L.Pairing] (T : Theory L) := SubTheory (Arith.Pairing L) T
+abbrev IPi (k : ℕ) (T : Theory L) := Ind (Arith.Hierarchy.Pi k) T
+
+abbrev Peano (T : Theory L) := Ind Set.univ T
+
+abbrev PairingTheory [L.Pairing] (T : Theory L) := SubTheory (Theory.Pairing L) T
+
+namespace Axiom
+
+variable (L)
+
+def Robinson : Theory L := Theory.Robinson L ∪ Theory.Eq L
+
+variable {L}
+
+def Ind (U : Set (SubSentence L 1)) : Theory L := Axiom.Robinson L ∪ Theory.IndScheme U
+
+variable (L)
+
+abbrev IOpen : Theory L := Ind SubFormula.qfree
+
+abbrev ISigma (k : ℕ) : Theory L := Ind (Arith.Hierarchy.Sigma k)
+
+abbrev IPi (k : ℕ) : Theory L := Ind (Arith.Hierarchy.Pi k)
+
+abbrev Peano : Theory L := Ind Set.univ
+
+instance : EqTheory (Robinson L) where
+  eq := by simp[Robinson]
+
+instance : Arith.Robinson (Robinson L) where
+  robinson := by simp[Robinson]
+
+instance (u : Set (SubSentence L 1)) : EqTheory (Ind u) where
+  eq := by simp[Ind]; exact Set.subset_union_of_subset_left (by simp) _
+
+instance (u : Set (SubSentence L 1)) : Arith.Robinson (Ind u) where
+  robinson := by simp[Ind]; exact Set.subset_union_of_subset_left (by simp) _
+
+instance (u : Set (SubSentence L 1)) : Arith.Ind u (Ind u) where
+  ind := by simp[Ind]
+
+end Axiom
 
 end Arith
 

@@ -27,7 +27,7 @@ partial def findTerm {L : Q(Language.{u})} (s : Q(SyntacticTerm $L))
 
 
 elab "dbgfindTerm" : term => do
-  let L : Q(Language.{0}) := q(Language.oring)
+  let L : Q(Language.{0}) := q(Language.oRing)
   let t : Q(SyntacticTerm $L) := q(ᵀ“((&2 + 1) + 9) * (#0 + 1)ᵀ⟦&2 + 1, 6⟧ ”)
   logInfo m! "{t}"
   let s : Q(SyntacticTerm $L) := q(ᵀ“&2 + 1”)
@@ -121,7 +121,7 @@ partial def findTerms {L : Q(Language.{u})} (k : Q(ℕ)) (s : Q(Fin $k → Synta
       return ⟨t', q(lemmata.substs_substs_nil $s $v $t $t' $th)⟩
 
 elab "dbgfindTerms" : term => do
-  let L : Q(Language.{0}) := q(Language.oring)
+  let L : Q(Language.{0}) := q(Language.oRing)
   let t : Q(SyntacticTerm $L) := q(ᵀ“((&2 + 1) + 9*&3) * (#0 + 1)ᵀ⟦&2 + 1, 6⟧ ”)
   logInfo m! "{t}"
   let s : Q(Fin 2 → SyntacticTerm $L) := q(![ᵀ“&2 + 1”, ᵀ“&3”])
@@ -197,7 +197,7 @@ partial def findFormula {L : Q(Language.{u})} (s : Q(SyntacticTerm $L)) :
   
 
 elab "dbgFindFormula" : term => do
-  let L : Q(Language.{0}) := q(Language.oring)
+  let L : Q(Language.{0}) := q(Language.oRing)
   let p : Q(SyntacticFormula $L) := q(“∀ (&2 + 1) + 9 * (#0 + 1)ᵀ⟦&2 + 1, 6⟧ < 0”)
   let s : Q(SyntacticTerm $L) := q(ᵀ“&2 + 1”)
   let v : Q(Fin 1 → SyntacticTerm $L) := q(![$s])
@@ -304,7 +304,7 @@ partial def rephraseFormula {L : Q(Language.{u})} (p₀ q₀ : Q(SyntacticFormul
     | ~q($p) => return ⟨p, q(IffFormula.reflexivity _)⟩
 
 elab "rephraseFormula" : term => do
-  let L : Q(Language.{0}) := q(Language.oring)
+  let L : Q(Language.{0}) := q(Language.oRing)
   let p₀ : Q(SyntacticFormula $L) := q(“&2 < 3”)
   let q₀ : Q(SyntacticFormula $L) := q(“&2 = 3”)
   let p : Q(SyntacticFormula $L) := q(“&2 < 3 → ∀ (&2 + 1) + 9 * (#0 + 1)ᵀ⟦&2 + 1, 6⟧ < 0”)

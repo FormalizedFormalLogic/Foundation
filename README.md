@@ -34,18 +34,34 @@ Formalizing Logic in Lean4
 - Redundant but practical [formal [formal proof system]]
 - `[emb σ₁, emb σ₂, ...]⟹[T] emb σ` is equivalent to `T ⊢ σ₁ ∧ σ₂ ∧ ... → σ`
 
-```code:eqZeroOfAddEqZero.lean
-def zeroBot : [] ⟹[T] “∀ 0 ≤ #1” :=
+```code:eqZeroOfMulEqZero.lean
+def eqZeroOfMulEqZero : [] ⟹[T] “∀ ∀ (#0 * #1 = 0 → #0 = 0 ∨ #1 = 0)” :=
   proof.
-    then ∀ (#0 = 0 ∨ ∃ #1 = #0 + 1) as "zero or succ" · from zeroOrSucc
-    then ∀ ∀ (#0 ≤ #1 ↔ #0 = #1 ∨ #0 < #1) as "le def" · from leIffEqOrLt
-    then ∀ (0 < #0 + 1) as "zero lt succ" · from zeroLtSucc
-    generalize
-    rewrite 0 ≤ &0 ↔ 0 = &0 ∨ 0 < &0
-    @ specialize "le def" with 0, &0
-    cases &0 = 0 or ∃ &0 = #0 + 1
-    @ specialize "zero or succ" with &0
-    · left 
-    · right; choose this; rew this; specialize "zero lt succ" with &0
+    then ∀ #0 + 1 ≠ 0 as "succ ne zero" · from succNeZero
+    then ∀ (#0 ≠ 0 → ∃ #1 = #0 + 1) as "eq succ of pos" · from zeroOrSucc
+    then ∀ ∀ (#0 + (#1 + 1) = (#0 + #1) + 1) as "add succ" · from addSucc 
+    then ∀ ∀ (#0 * (#1 + 1) = (#0 * #1) + #0) as "mul succ" · from mulSucc
+    generalize; generalize; intro as "h₀"
+    absurd as "ne zero"
+    have ∃ &0 = #0 + 1
+    · specialize "eq succ of pos" with &0 as "h"
+      apply "h"
+      · andl "ne zero"
+    choose this as "e₁"
+    have ∃ &2 = #0 + 1
+    · specialize "eq succ of pos" with &2 as "h"
+      apply "h"
+      · andr "ne zero"
+    choose this as "e₂"
+    have &2 * &3 = (&1 + 1)*&0 + &1 + 1 as "h₁"
+    · specialize "mul succ" with &1 + 1, &0 as "ms"
+      specialize "add succ" with (&1 + 1)*&0, &1 as "as"
+      rew "e₁", "e₂", "ms", "as"
+      rfl
+    have (&1 + 1)*&0 + &1 + 1 = 0
+    · rew ←"h₁"
+    have (&1 + 1)*&0 + &1 + 1 ≠ 0
+    · specialize "succ ne zero" with (&1 + 1)*&0 + &1
+    contradiction this
   qed.
 ```

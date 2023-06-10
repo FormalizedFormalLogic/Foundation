@@ -57,6 +57,19 @@ lemma realizeTheory_of_subset {T U : Set F} {s : struc F M} (h : s ⊧ₛ* U) (s
     s ⊧ₛ* insert f T ↔ s ⊧ₛ f ∧ s ⊧ₛ* T := by
   simp[realizeTheory]
 
+@[simp] lemma realizeTheory_union {T U : Set F} {s : struc F M} :
+    s ⊧ₛ* T ∪ U ↔ s ⊧ₛ* T ∧ s ⊧ₛ* U := by
+  simp[realizeTheory]
+  exact
+  ⟨fun h => ⟨fun f hf => h (Or.inl hf), fun f hf => h (Or.inr hf)⟩,
+   by rintro ⟨h₁, h₂⟩ f (h | h); exact h₁ h; exact h₂ h⟩
+
+@[simp] lemma realizeTheory_image {f : α → F} {A : Set α} {s : struc F M} :
+    s ⊧ₛ* f '' A ↔ ∀ i ∈ A, s ⊧ₛ (f i) := by simp[realizeTheory]
+
+@[simp] lemma realizeTheory_range {f : α → F} {s : struc F M} :
+    s ⊧ₛ* Set.range f ↔ ∀ i, s ⊧ₛ (f i) := by simp[realizeTheory]
+
 lemma satisfiableₛ_of_subset {T U : Set F} (h : Satisfiableₛ U) (ss : T ⊆ U) : Satisfiableₛ T :=
   by rcases h with ⟨M, i, s, h⟩; exact ⟨M, i, s, realizeTheory_of_subset h ss⟩
 

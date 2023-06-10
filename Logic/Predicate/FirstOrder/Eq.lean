@@ -49,9 +49,18 @@ end Theory
 class EqTheory (T : Theory L) where
   eq : Theory.Eq L ⊆ T
 
+attribute [simp] EqTheory.eq
+
 namespace Structure
 
 namespace Eq
+
+@[simp] lemma modelsEqTheory {M : Type u} [Structure L M] [Structure.Eq L M] : M ⊧₁* Theory.Eq L := by
+  intro σ h
+  cases h <;> simp[realize_def, SubFormula.vecEq, SubTerm.val_func]
+  · intro e h; congr; funext i; exact h i
+  case relExt r =>
+    simp[SubFormula.eval_rel]; intro e h; simp[congr_arg (rel r) (funext h)]
 
 variable (L)
 
