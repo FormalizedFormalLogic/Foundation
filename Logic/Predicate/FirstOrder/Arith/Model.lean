@@ -63,9 +63,9 @@ theorem modelsTheoryRobinson : ℕ ⊧₁* Theory.Robinson oRing := by
 @[simp] theorem modelsRobinson : ℕ ⊧₁* Axiom.Robinson oRing := by
   simp[Axiom.Robinson, modelsTheoryRobinson]
 
-lemma modelsSuccInd (σ : SubSentence oRing 1) : ℕ ⊧₁ (Arith.succInd σ) := by
-  simp[succInd, models_iff, Matrix.constant_eq_singleton]
-  intro hzero hsucc x; induction' x with x ih
+lemma modelsSuccInd (σ : SubSentence oRing (k + 1)) : ℕ ⊧₁ (Arith.succInd σ) := by
+  simp[succInd, models_iff, Matrix.constant_eq_singleton, Matrix.comp_vecCons']
+  intro e hzero hsucc x; induction' x with x ih
   · exact hzero
   · exact hsucc x ih
 

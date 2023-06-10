@@ -735,7 +735,7 @@ syntax (name := notationUse) "use " subterm : proofElem
 
 syntax (name := notationExCases) "choose " indexFormula (nameAs) optProofBlock : proofElem
 
-syntax (name := notationReflexivity) "rfl" : proofElem
+syntax (name := notationReflexivity) "refl" : proofElem
 
 syntax (name := notationSymmetry) "symmetry" : proofElem
 
@@ -917,7 +917,7 @@ partial def seqToCode (L : Q(Language.{u})) : List Syntax → TermElabM (Princip
       let c₁ ← seqToCode L seqElems
       let n : Option String := nameAsToString nameas
       return PrincipiaCode.exCases n p c₀ c₁
-    | `(notationReflexivity| rfl) =>
+    | `(notationReflexivity| refl) =>
       return PrincipiaCode.reflexivity
     | `(notationSymmetry| symmetry) =>
       let c ← seqToCode L seqElems
@@ -1078,7 +1078,7 @@ example : [] ⟹[T] “∃ ∃ ∃ #0 = #1 + #2” :=
     use 1
     use 2
     use 3
-    rfl
+    refl
   qed.
 
 -- choose ...
@@ -1089,15 +1089,15 @@ example : [“∃ #0 < &1”] ⟹[T] “⊤” :=
     trivial
   qed.
 
--- rfl
+-- refl
 example : [] ⟹[T] “0 = 1 + 1 ↔ 0 = 2” :=
   proof.
-    rfl
+    refl
   qed.
 
 example : [] ⟹[T] “∀ (#0 = 1 + 1 → 0 < #0) ↔ ∀ (#0 ≠ 2 ∨ 0 < #0)” :=
   proof.
-    rfl
+    refl
   qed.
 
 -- symmetry
@@ -1116,7 +1116,7 @@ example : [“&0 + 2 = 3”] ⟹[T] “∀ 3 * #0 = (&0 + 2) * #0” :=
   proof.
     have &0 + 2 = 3 as "h" · assumption
     rewrite "h"
-    !generalize rfl
+    !generalize refl
   qed.
 
 example :
@@ -1138,7 +1138,7 @@ example :
         use &0
         !rewrite &0 + 0 = &0
         @ specialize ::1 with &0
-        rfl
+        refl
       right
   qed.
 

@@ -3,38 +3,38 @@ import Logic.Predicate.FirstOrder.Principia.Meta
 
 namespace FirstOrder
 variable {L : Language.{u}} [L.ORing] [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq (L.rel k)]
-variable {T : Theory L} [Arith.RobinsonTheory T]
+variable {T : Theory L} [Arith.Robinson T]
 
 namespace Arith
 
 namespace Robinson
 
 def succNeZero : [] ⟹[T] “∀ #0 + 1 ≠ 0” :=
-  Principia.axmOfEq “∀ #0 + 1 ≠ 0” (by simp) (RobinsonTheory.robinson $ Arith.Robinson.q₁)
+  Principia.axmOfEq “∀ #0 + 1 ≠ 0” (by simp) (Arith.Robinson.robinson $ Theory.Robinson.q₁)
 
 def succInj : [] ⟹[T] “∀ ∀ (#0 + 1 = #1 + 1 → #0 = #1)” :=
-  Principia.axmOfEq “∀ ∀ (#0 + 1 = #1 + 1 → #0 = #1)” (by simp) (RobinsonTheory.robinson $ Arith.Robinson.q₂)
+  Principia.axmOfEq “∀ ∀ (#0 + 1 = #1 + 1 → #0 = #1)” (by simp) (Arith.Robinson.robinson $ Theory.Robinson.q₂)
 
 def zeroOrSucc : [] ⟹[T] “∀ (#0 = 0 ∨ (∃ #1 = #0 + 1))” :=
-  Principia.axmOfEq “∀ (#0 = 0 ∨ (∃ #1 = #0 + 1))” (by simp) (RobinsonTheory.robinson $ Arith.Robinson.q₃)
+  Principia.axmOfEq “∀ (#0 = 0 ∨ (∃ #1 = #0 + 1))” (by simp) (Arith.Robinson.robinson $ Theory.Robinson.q₃)
 
 def addZero : [] ⟹[T] “∀ #0 + 0 = #0” :=
-  Principia.axmOfEq “∀ #0 + 0 = #0” (by simp) (RobinsonTheory.robinson $ Arith.Robinson.q₄)
+  Principia.axmOfEq “∀ #0 + 0 = #0” (by simp) (Arith.Robinson.robinson $ Theory.Robinson.q₄)
 
 def addSucc : [] ⟹[T] “∀ ∀ (#0 + (#1 + 1) = (#0 + #1) + 1)” :=
-  Principia.axmOfEq “∀ ∀ (#0 + (#1 + 1) = (#0 + #1) + 1)” (by simp) (RobinsonTheory.robinson $ Arith.Robinson.q₅)
+  Principia.axmOfEq “∀ ∀ (#0 + (#1 + 1) = (#0 + #1) + 1)” (by simp) (Arith.Robinson.robinson $ Theory.Robinson.q₅)
 
 def mulZero : [] ⟹[T] “∀ #0 * 0 = 0” :=
-  Principia.axmOfEq “∀ #0 * 0 = 0” (by simp) (RobinsonTheory.robinson $ Arith.Robinson.q₆)
+  Principia.axmOfEq “∀ #0 * 0 = 0” (by simp) (Arith.Robinson.robinson $ Theory.Robinson.q₆)
 
 def mulSucc : [] ⟹[T] “∀ ∀ #0 * (#1 + 1) = (#0 * #1) + #0” :=
-  Principia.axmOfEq “∀ ∀ #0 * (#1 + 1) = (#0 * #1) + #0” (by simp) (RobinsonTheory.robinson $ Arith.Robinson.q₇)
-
-def ltIff : [] ⟹[T] “∀ ∀ (#0 < #1 ↔ (∃ #0 + #1 + 1 = #2))” :=
-  Principia.axmOfEq “∀ ∀ (#0 < #1 ↔ (∃ #0 + #1 + 1 = #2))” (by simp) (RobinsonTheory.robinson $ Arith.Robinson.q₈)
+  Principia.axmOfEq “∀ ∀ #0 * (#1 + 1) = (#0 * #1) + #0” (by simp) (Arith.Robinson.robinson $ Theory.Robinson.q₇)
 
 def leIffEqOrLt : [] ⟹[T] “∀ ∀ (#0 ≤ #1 ↔ #0 = #1 ∨ #0 < #1)” :=
-  by simp[SubFormula.le_eq]; exact proofBy { generalize; generalize; rfl }
+  by simp[SubFormula.le_eq]; exact proofBy { generalize; generalize; refl }
+
+def leIffAdd : [] ⟹[T] “∀ ∀ (#0 ≤ #1 ↔ ∃ #0 + #1 = #2)” :=
+  Principia.axmOfEq “∀ ∀ (#0 ≤ #1 ↔ ∃ #0 + #1 = #2)” (by simp) (Arith.Robinson.robinson $ Theory.Robinson.q₈)
 
 def eqZeroOfAddEqZero : [] ⟹[T] “∀ ∀ (#0 + #1 = 0 → #0 = 0 ∧ #1 = 0)” :=
   proof.
@@ -98,7 +98,7 @@ def eqZeroOfMulEqZero : [] ⟹[T] “∀ ∀ (#0 * #1 = 0 → #0 = 0 ∨ #1 = 0)
     · specialize "mul succ" with &1 + 1, &0 as "ms"
       specialize "add succ" with (&1 + 1)*&0, &1 as "as"
       rew "e₁", "e₂", "ms", "as"
-      rfl
+      refl
     have (&1 + 1)*&0 + &1 + 1 = 0
     · rew ←"h₁"
     have (&1 + 1)*&0 + &1 + 1 ≠ 0
@@ -106,31 +106,15 @@ def eqZeroOfMulEqZero : [] ⟹[T] “∀ ∀ (#0 * #1 = 0 → #0 = 0 ∨ #1 = 0)
     contradiction this
   qed.
 
-def zeroLtSucc : [] ⟹[T] “∀ 0 < #1 + 1” :=
+def zeroBot : [] ⟹[T] “∀ 0 ≤ #0” :=
   proof.
-    then ∀ #0 + 0 = #0 as "add zero" · from addZero
-    then ∀ ∀ (#0 < #1 ↔ ∃ #0 + #1 + 1 = #2) as "lt def" · from ltIff
+    then ∀ (#0 + 0 = #0) as "add zero" · from addZero
+    then ∀ ∀ (#0 ≤ #1 ↔ ∃ #0 + #1 = #2) as "le def" · from leIffAdd
     generalize
-    rewrite 0 < &0 + 1 ↔ ∃ #0 + 0 + 1 = &0 + 1
-    @ specialize "lt def" with 0, &0 + 1
-    use &0
-    rewrite &0 + 0 = &0
-    @ specialize "add zero" with &0
-    rfl
-  qed.
-
-def zeroBot : [] ⟹[T] “∀ 0 ≤ #1” :=
-  proof.
-    then ∀ (#0 = 0 ∨ ∃ #1 = #0 + 1) as "zero or succ" · from zeroOrSucc
-    then ∀ ∀ (#0 ≤ #1 ↔ #0 = #1 ∨ #0 < #1) as "le def" · from leIffEqOrLt
-    then ∀ (0 < #0 + 1) as "zero lt succ" · from zeroLtSucc
-    generalize
-    rewrite 0 ≤ &0 ↔ 0 = &0 ∨ 0 < &0
+    rewrite 0 ≤ &0 ↔ ∃ #0 + 0 = &0
     @ specialize "le def" with 0, &0
-    cases &0 = 0 or ∃ &0 = #0 + 1
-    @ specialize "zero or succ" with &0
-    · left 
-    · right; choose this; rew this; specialize "zero lt succ" with &0
+    use &0
+    specialize "add zero" with &0
   qed.
 
 end Robinson

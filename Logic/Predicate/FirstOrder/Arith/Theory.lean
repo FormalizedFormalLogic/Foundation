@@ -1,4 +1,4 @@
-import Logic.Predicate.FirstOrder.Eq
+import Logic.Predicate.FirstOrder.Order.Le
 import Logic.Predicate.FirstOrder.Arith.Hierarchy
 
 namespace FirstOrder
@@ -7,11 +7,14 @@ variable {L : Language.{u}} [L.ORing]
 
 namespace Arith
 
-def succInd (p : SubFormula L μ 1) : Formula L μ := “!p⟦0⟧ → ∀ (!p⟦#0⟧ → !p⟦#0 + 1⟧) → ∀ !p”
+def succInd (p : SubFormula L μ (k + 1)) : Formula L μ :=
+  “∀* (!(⟦→ ᵀ“0” :> (#·)⟧ p) → ∀ (!(⟦→ ᵀ“#0” :> (#·.succ)⟧ p) → !(⟦→ ᵀ“#0 + 1” :> (#·.succ)⟧ p)) → ∀ !p)”
 
-def leastNumber (p : SubFormula L μ 1) : Formula L μ := “∃ !p → ∃ (!p ∧ ∀[#0 < #1] ¬!p⟦#0⟧)”
+def leastNumber (p : SubFormula L μ (k + 1)) : Formula L μ :=
+  “∀* (∃ !p → ∃ (!p ∧ ∀[#0 < #1] ¬!(⟦→ #0 :> (#·.succ.succ)⟧ p)))”
 
-def orderInd (p : SubFormula L μ 1) : Formula L μ := “∀ (∀[#0 < #1] !p⟦#0⟧ → !p⟦#0⟧) → ∀ !p”
+def orderInd (p : SubFormula L μ (k + 1)) : Formula L μ :=
+  “∀* (∀ (∀[#0 < #1] !(⟦→ #0 :> (#·.succ.succ)⟧ p) → !p) → ∀ !p)”
 
 variable (L)
 
