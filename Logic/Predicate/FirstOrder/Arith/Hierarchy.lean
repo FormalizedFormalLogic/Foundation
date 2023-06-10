@@ -1,4 +1,4 @@
-import Logic.Predicate.FirstOrder.Eq
+import Logic.Predicate.FirstOrder.Order.Le
 
 variable {L : Language.{u}} [L.ORing] {μ : Type v}
 
