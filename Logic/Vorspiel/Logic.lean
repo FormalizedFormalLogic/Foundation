@@ -4,11 +4,22 @@ namespace Logic
 
 class Proof (F : Type u) [HasLogicSymbols F] where
   Bew : Set F → F → Type u
+  axm : ∀ {T f}, f ∈ T → Bew T f
 
 namespace Proof
 variable {F : Type u} [HasLogicSymbols F] [𝓑 : Proof F]
 
 instance : HasTurnstile F (Type u) := ⟨𝓑.Bew⟩
+
+def BewTheory (T U : Set F) : Type u := {f : F} → f ∈ U → T ⊢ f
+
+infix:45 " ⊢* " => Proof.BewTheory
+
+def BewTheoryEmpty (T : Set F) : T ⊢* ∅ := fun h => by contradiction
+
+def BewTheory.ofSubset {T U : Set F} (h : U ⊆ T) : T ⊢* U := fun hf => axm (h hf)
+
+def BewTheory.refl (T : Set F) : T ⊢* T := axm
 
 def IsConsistent (T : Set F) : Prop := IsEmpty (T ⊢ ⊥)
 
@@ -92,14 +103,21 @@ variable {F}
 
 namespace Sound
 variable [Sound F]
+variable {M : Type w} [Inhabited M] {s : Semantics.struc F M}
 
-lemma not_provable_of_countermodel {M : Type w} [Inhabited M] {s : Semantics.struc F M} {T : Set F} {p : F}
+lemma not_provable_of_countermodel {T : Set F} {p : F}
   (hT : s ⊧ₛ* T) (hp : ¬s ⊧ₛ p) : IsEmpty (T ⊢ p) :=
   ⟨fun b => by have : s ⊧ₛ p := Sound.sound b M s hT; contradiction⟩
 
-lemma consistent_of_model {M : Type w} [Inhabited M] {s : Semantics.struc F M} {T : Set F}
+lemma consistent_of_model {T : Set F}
   (hT : s ⊧ₛ* T) : Proof.IsConsistent T :=
   not_provable_of_countermodel (p := ⊥) hT (by simp)
+
+lemma realize_of_proof {T : Set F} {f} (h : s ⊧ₛ* T) (b : T ⊢ f) : s ⊧ₛ f :=
+  Sound.sound b M s h
+
+lemma realizeTheory_of_proofTheory {T U : Set F} (h : s ⊧ₛ* T) (b : T ⊢* U) : s ⊧ₛ* U :=
+  fun _ hf => realize_of_proof h (b hf)
 
 end Sound
 

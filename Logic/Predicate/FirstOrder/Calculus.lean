@@ -65,13 +65,6 @@ abbrev Derivation₁ (p : SyntacticFormula L) := ⊢ᶜ ({p} : Sequent L)
 
 abbrev Derivation.Valid (σ : Sentence L) := ⊢ᵀ ({emb σ} : Sequent L)
 
-structure Proof (T : Theory L) (σ : Sentence L) where
-  leftHand : Finset (Sentence L)
-  hleftHand : ↑leftHand ⊆ SubFormula.neg '' T
-  derivation : ⊢ᶜ ((insert σ leftHand).image emb : Sequent L)
-
-instance : Logic.Proof (Sentence L) := ⟨Proof⟩
-
 namespace DerivationCutRestricted
 variable {P : SyntacticFormula L → Prop} {Δ Δ₁ Δ₂ Γ : Sequent L}
 
@@ -380,5 +373,19 @@ def exOfInstances' (v : List (SyntacticTerm L)) (p : SyntacticSubFormula L 1)
   (exOfInstances (Γ := insert (∃' p) Γ) v p (h.cast $ by simp)).cast (by simp)
 
 end DerivationCutRestricted
+
+structure Proof (T : Theory L) (σ : Sentence L) where
+  leftHand : Finset (Sentence L)
+  hleftHand : ↑leftHand ⊆ SubFormula.neg '' T
+  derivation : ⊢ᶜ ((insert σ leftHand).image emb : Sequent L)
+
+instance : Logic.Proof (Sentence L) where
+  Bew := Proof
+  axm := by
+    intro f σ hσ
+    exact
+    { leftHand := {~σ}
+      hleftHand := by simp[hσ]; exact ⟨σ, hσ, rfl⟩
+      derivation := DerivationCutRestricted.em (p := emb σ) (by simp) (by simp) } 
 
 end FirstOrder
