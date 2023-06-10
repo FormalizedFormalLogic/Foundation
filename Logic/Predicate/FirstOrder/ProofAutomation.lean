@@ -384,15 +384,15 @@ open Language
 
 example (_ : Derivation₁ “¬(!p ∧ !q)”) : Derivation₁ “¬!p ∨ ¬!q”  := by proveTauto
 
-example : Derivation₁ (L := oring) “&0 < 3 → ∃ &0 < #0” := by proveDerivation₁ [ᵀ“3”]
+example : Derivation₁ (L := oRing) “&0 < 3 → ∃ &0 < #0” := by proveDerivation₁ [ᵀ“3”]
 
-example : Derivation₁ (L := oring) “&0 < 4 + &1 → ∃ ∃ ∃ #0 < #1 + #2” := by proveDerivation₁ 32 [&1, ᵀ“4”, &0]
+example : Derivation₁ (L := oRing) “&0 < 4 + &1 → ∃ ∃ ∃ #0 < #1 + #2” := by proveDerivation₁ 32 [&1, ᵀ“4”, &0]
 
-example (_ : Derivation₁ (L := oring) “0 < 4 + 9”) : Derivation₁ (L := oring) “⊤ ∧ (∃ 0 < 4 + #0)”  := by proveDerivation₁ [ᵀ“9”]
+example (_ : Derivation₁ (L := oRing) “0 < 4 + 9”) : Derivation₁ (L := oRing) “⊤ ∧ (∃ 0 < 4 + #0)”  := by proveDerivation₁ [ᵀ“9”]
 
-example : Derivation₁ (L := oring) “0 < 4 + 9 → (∃ 0 < 4 + #0)”  := by proveDerivation₁ [ᵀ“9”]
+example : Derivation₁ (L := oRing) “0 < 4 + 9 → (∃ 0 < 4 + #0)”  := by proveDerivation₁ [ᵀ“9”]
 
-example : DerivationList (L := oring) [“¬(0 + &9 < 2)”, “∃ #0 < 2”] := by simp; proveDerivationList [ᵀ“0 + &9”]
+example : DerivationList (L := oRing) [“¬(0 + &9 < 2)”, “∃ #0 < 2”] := by simp; proveDerivationList [ᵀ“0 + &9”]
 
 end
 -/

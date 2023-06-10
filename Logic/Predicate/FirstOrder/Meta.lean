@@ -389,7 +389,7 @@ partial def resultSubsts {L : Q(Language.{u})} {k n : Q(ℕ)} (w : Q(Fin $k → 
   | ~q($p)                           => pure ⟨q(substs $w $p), q(rfl)⟩
 
 elab "dbgresultSubsts" : term => do
-  let L : Q(Language.{0}) := q(Language.oring)
+  let L : Q(Language.{0}) := q(Language.oRing)
   let k : Q(ℕ) := q(2)
   let n : Q(ℕ) := q(3)
   let p : Q(SyntacticSubFormula $L $k) := q(“#0 < #1 + 9 * &6 → (∀ #1 < #0 + 7)⟦&4, &3 + #0⟧ ”)
@@ -520,7 +520,7 @@ partial def resultFree {L : Q(Language.{u})} {n : Q(ℕ)} : (p : Q(SyntacticSubF
     return ⟨q(free $p), q(rfl)⟩
 
 elab "dbgresultFree" : term => do
-  let L : Q(Language.{0}) := q(Language.oring)
+  let L : Q(Language.{0}) := q(Language.oRing)
   let k : Q(ℕ) := q(2)
   let p : Q(SyntacticSubFormula $L ($k + 1)) := q(“#0 + #1 + #2 + #3 < &0 + &1 + &2 + &3”)
   let ⟨e, eq⟩ ← resultFree (L := L) (n := k) p
@@ -600,7 +600,7 @@ partial def resultFix {L : Q(Language.{u})} {n : Q(ℕ)} : (p : Q(SyntacticSubFo
   | e => throwError m! "fail! {e} "
 
 elab "dbgResultFix'" : term => do
-  let L : Q(Language.{0}) := q(Language.oring)
+  let L : Q(Language.{0}) := q(Language.oRing)
   let n : Q(ℕ) := q(5)
   let p : Q(SyntacticSubFormula $L $n) := q(“#0 + #1 + #2 + #3 < &0 + &1 + &2 + &3 → (#0 = #1)⟦0, &5⟧ ”)
   logInfo m! "{p}"
@@ -807,11 +807,11 @@ elab "dbgResult" : tactic => do
   let c : Q(DbgResult (SyntacticSubFormula $L $n) $p) := (q(DbgResult.intro ($p) $pn $e) : Expr)
   Lean.Elab.Tactic.closeMainGoal c
 
-example {t : SyntacticSubTerm Language.oring 3} : DbgResult (SyntacticSubFormula Language.oring 12)
+example {t : SyntacticSubTerm Language.oRing 3} : DbgResult (SyntacticSubFormula Language.oRing 12)
     $ shift “3 < #4 ↔ ∀ !(shift $ substs ![&99, &6] “∀ (ᵀ!t) + (#0 * 8) < &7 + #1 + (#3 + 6)”)” :=
   by dbgResult
 
-example : DbgResult (SyntacticSubFormula Language.oring 3)
+example : DbgResult (SyntacticSubFormula Language.oRing 3)
     $ free “3 * 4 = &6” :=
   by dbgResult
 

@@ -68,6 +68,6 @@ def enumLt (s : ℕ) : Finset (SyntacticTerm L) := (enumLtList s).toFinset
 lemma mem_enumLt_of_lt {i} {t : SyntacticTerm L} (h : encode t < i) : t ∈ enumLt i :=
   by simp[enumLt]; exact mem_enumLtList_of_lt h
 
-#eval enumLt (L := Language.oring) 100
+#eval enumLt (L := Language.oRing) 100
 
 end SubTerm

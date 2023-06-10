@@ -1112,7 +1112,7 @@ macro_rules
   | `(“ $p:subformula → $q:subformula ”) => `(“$p” ⟶ “$q”)
   | `(“ $p:subformula ↔ $q:subformula ”) => `(“$p” ⟷ “$q”)
 
-#reduce (“(∃ ⊤) ↔ !(∃' ⊤)” : Sentence Language.oring)
+#reduce (“(∃ ⊤) ↔ !(∃' ⊤)” : Sentence Language.oRing)
 
 section delab
 open Lean PrettyPrinter Delaborator SubExpr
@@ -1304,7 +1304,7 @@ def unexpandNRelArith : Unexpander
   | _                                             => throw ()
 
 #check “ ¬∃ ∀ ((#0 + 1) * #1 < #0 + #1 ↔ 0 < &5) ”
-#check (“0 < 0 → ∀ 0 < #0 → 0 ≮ 2” : Sentence Language.oring)
+#check (“0 < 0 → ∀ 0 < #0 → 0 ≮ 2” : Sentence Language.oRing)
 #check “¬⊤ ∨ (¬#0 < 5)⟦#3, 7⟧⟦2, #3⟧”
 #check “⋀ i, #i < #i + 9”
 #check “∀[#0 < 1] #0 = 0” 

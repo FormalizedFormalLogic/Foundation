@@ -565,7 +565,7 @@ macro_rules
   | `(ᵀ“ ᵀᵇ $t:subterm ”)                            => `(SubTerm.fix ᵀ“$t”)
   | `(ᵀ“ ( $x ) ”)                                   => `(ᵀ“$x”)
 
-#check (ᵀ“ [Language.ORingFunc.mul](&2 + &0, [Language.ORingFunc.zero]())” : SubTerm Language.oring ℕ 8)
+#check (ᵀ“ [Language.ORingFunc.mul](&2 + &0, [Language.ORingFunc.zero]())” : SubTerm Language.oRing ℕ 8)
 #check ᵀ“ᵀ⇑(3 * #3 + 9)”
 #check SubTerm.func Language.Mul.mul (ᵀ“1” :> ᵀ“3” :> Matrix.vecEmpty)
 
@@ -713,9 +713,9 @@ def unexpandFuncArith : Unexpander
   | `($_ lang(⟨⟩) ![$t,            $u           ]) => `(ᵀ“ ⟨ᵀ!$t, ᵀ!$u⟩ ”)
   | _                                             => throw ()
 
-#check natLit Language.oring 99
-#check (ᵀ“1” : SubTerm Language.oring ℕ 8)
-#check (SubTerm.func Language.Mul.mul (ᵀ“1” :> ᵀ“3” :> Matrix.vecEmpty) : SubTerm Language.oring ℕ 8)
+#check natLit Language.oRing 99
+#check (ᵀ“1” : SubTerm Language.oRing ℕ 8)
+#check (SubTerm.func Language.Mul.mul (ᵀ“1” :> ᵀ“3” :> Matrix.vecEmpty) : SubTerm Language.oRing ℕ 8)
 #check ᵀ“3 + 8 * exp &6 + 2 *#0”
 
 example (t : SyntacticSubTerm L 2) [L.ORing] :

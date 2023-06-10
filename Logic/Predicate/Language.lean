@@ -71,11 +71,11 @@ inductive ORingRel : ℕ → Type
   | lt : ORingRel 2
 
 @[reducible]
-def oring : Language where
+def oRing : Language where
   func := ORingFunc
   rel := ORingRel
 
-instance (k) : ToString (oring.func k) :=
+instance (k) : ToString (oRing.func k) :=
 ⟨ fun s =>
   match s with
   | ORingFunc.zero => "0"
@@ -83,19 +83,19 @@ instance (k) : ToString (oring.func k) :=
   | ORingFunc.add  => "(+)"
   | ORingFunc.mul  => "(\\cdot)"⟩
 
-instance (k) : ToString (oring.rel k) :=
+instance (k) : ToString (oRing.rel k) :=
 ⟨ fun s =>
   match s with
   | ORingRel.eq => "\\mathrm{Eq}"
   | ORingRel.lt    => "\\mathrm{Lt}"⟩
 
-instance (k) : DecidableEq (oring.func k) := fun a b =>
+instance (k) : DecidableEq (oRing.func k) := fun a b =>
   by rcases a <;> rcases b <;> simp <;> try {exact instDecidableTrue} <;> try {exact instDecidableFalse}
 
-instance (k) : DecidableEq (oring.rel k) := fun a b =>
+instance (k) : DecidableEq (oRing.rel k) := fun a b =>
   by rcases a <;> rcases b <;> simp <;> try {exact instDecidableTrue} <;> try {exact instDecidableFalse}
 
-instance (k) : Encodable (oring.func k) where
+instance (k) : Encodable (oRing.func k) where
   encode := fun x =>
     match x with
     | ORingFunc.zero => 0
@@ -111,7 +111,7 @@ instance (k) : Encodable (oring.func k) where
     | _, _ => none
   encodek := fun x => by rcases x <;> simp
 
-instance (k) : Encodable (oring.rel k) where
+instance (k) : Encodable (oRing.rel k) where
   encode := fun x =>
     match x with
     | ORingRel.eq => 0
@@ -132,11 +132,11 @@ inductive ORingWithPowPairingFunc : ℕ → Type
   | pow : ORingWithPowPairingFunc 2
   | pair : ORingWithPowPairingFunc 2
 
-@[reducible] def oringWithExpPowPairing : Language where
+@[reducible] def oRingWithExpPowPairing : Language where
   func := ORingWithPowPairingFunc
   rel := ORingRel
 
-instance (k) : ToString (oringWithExpPowPairing.func k) :=
+instance (k) : ToString (oRingWithExpPowPairing.func k) :=
 ⟨ fun s =>
   match s with
   | .zero => "0"
@@ -147,19 +147,19 @@ instance (k) : ToString (oringWithExpPowPairing.func k) :=
   | .pow  => "(\\cdot)"
   | .pair  => "(\\mathrm{pair})"⟩
 
-instance (k) : ToString (oringWithExpPowPairing.rel k) :=
+instance (k) : ToString (oRingWithExpPowPairing.rel k) :=
 ⟨ fun s =>
   match s with
   | ORingRel.eq => "\\mathrm{Eq}"
   | ORingRel.lt    => "\\mathrm{Lt}"⟩
 
-instance (k) : DecidableEq (oringWithExpPowPairing.func k) := fun a b =>
+instance (k) : DecidableEq (oRingWithExpPowPairing.func k) := fun a b =>
   by rcases a <;> rcases b <;> simp <;> try {exact instDecidableTrue} <;> try {exact instDecidableFalse}
 
-instance (k) : DecidableEq (oringWithExpPowPairing.rel k) := fun a b =>
+instance (k) : DecidableEq (oRingWithExpPowPairing.rel k) := fun a b =>
   by rcases a <;> rcases b <;> simp <;> try {exact instDecidableTrue} <;> try {exact instDecidableFalse}
 
-instance (k) : Encodable (oringWithExpPowPairing.func k) where
+instance (k) : Encodable (oRingWithExpPowPairing.func k) where
   encode := fun x =>
     match x with
     | .zero => 0
@@ -181,7 +181,7 @@ instance (k) : Encodable (oringWithExpPowPairing.func k) where
     | _, _ => none
   encodek := fun x => by rcases x <;> simp
 
-instance (k) : Encodable (oringWithExpPowPairing.rel k) where
+instance (k) : Encodable (oRingWithExpPowPairing.rel k) where
   encode := fun x =>
     match x with
     | ORingRel.eq => 0
@@ -248,7 +248,7 @@ attribute [match_pattern] Eq.eq Add.add Mul.mul
 
 class ORing (L : Language) extends L.Eq, L.Lt, L.Zero, L.One, L.Add, L.Mul
 
-instance : ORing oring where
+instance : ORing oRing where
   eq := .eq
   lt := .lt
   zero := .zero
@@ -256,7 +256,7 @@ instance : ORing oring where
   add := .add
   mul := .mul
 
-instance : ORing oringWithExpPowPairing where
+instance : ORing oRingWithExpPowPairing where
   eq := .eq
   lt := .lt
   zero := .zero
@@ -264,13 +264,13 @@ instance : ORing oringWithExpPowPairing where
   add := .add
   mul := .mul
 
-instance : Exp oringWithExpPowPairing where
+instance : Exp oRingWithExpPowPairing where
   exp := .exp
 
-instance : Pow oringWithExpPowPairing where
+instance : Pow oRingWithExpPowPairing where
   pow := .pow
 
-instance : Pairing oringWithExpPowPairing where
+instance : Pairing oRingWithExpPowPairing where
   pair := .pair
 
 structure Hom (L₁ L₂ : Language) where

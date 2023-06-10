@@ -311,7 +311,7 @@ partial def resultFix {L : Q(Language.{u})} {n : Q(ℕ)} : (t : Q(SyntacticSubTe
     return ⟨q(SubTerm.fix $t), q(rfl)⟩
 
 elab "dbgResultFix" : term => do
-  let L : Q(Language.{0}) := q(Language.oring)
+  let L : Q(Language.{0}) := q(Language.oRing)
   let t : Q(SyntacticTerm $L) := q(ᵀ“((&2 + 1) + 9) * (#0 + 1)ᵀ⟦&2 + 1, 6⟧ ”)
   let ⟨e, eq⟩ ← resultFix (L := L) (n := q(0)) t
   logInfo m! "{t}\n ⟹\n {e}"
@@ -419,11 +419,11 @@ elab "dbg" : tactic => do
   let c : Q(DbgResult (SyntacticSubTerm $L $n) $t) := (q(DbgResult.intro ($t) $tn $e) : Expr)
   Lean.Elab.Tactic.closeMainGoal c
 
-example {t : SyntacticSubTerm Language.oring 2} : DbgResult (SyntacticSubTerm Language.oring 12)
+example {t : SyntacticSubTerm Language.oRing 2} : DbgResult (SyntacticSubTerm Language.oRing 12)
     (shift $ substs ![substs ![ᵀ“6”, ᵀ“&7”] t, ᵀ“3 + &6”] ᵀ“(ᵀ!t) + (#0 * ᵀ!(shift ᵀ“#1 + 9 * #1”)) + &7”) :=
   by dbg
 
-example (t : SyntacticSubTerm Language.oring 3) : DbgResult (SyntacticSubTerm Language.oring 12)
+example (t : SyntacticSubTerm Language.oRing 3) : DbgResult (SyntacticSubTerm Language.oRing 12)
     $ free $ ᵀ“((#0 + #1 + #2 + 8 * ᵀ!t) ᵀ⟦#2, 7, 4⟧ ᵀ⟦4, 4, 5⟧) * 8” :=
   by dbg
 
