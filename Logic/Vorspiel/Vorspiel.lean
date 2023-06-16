@@ -119,6 +119,17 @@ funext (fun i => cases (by simp) (by simp) i)
 lemma comp_vecCons' (f : α → β) (a : α) (s : Fin n → α) : (fun x => f $ (a :> s) x) = f a :> fun i => f (s i) :=
   comp_vecCons f a s
 
+lemma comp_vecCons'' (f : α → β) (a : α) (s : Fin n → α) : f ∘ (a :> s) = f a :> f ∘ s :=
+  comp_vecCons f a s
+
+@[simp] lemma comp₀ : f ∘ (![] : Fin 0 → α) = ![] := by simp
+
+@[simp] lemma comp₁ (a : α) : f ∘ ![a] = ![f a] := by simp[comp_vecCons'']
+
+@[simp] lemma comp₂ (a₁ a₂ : α) : f ∘ ![a₁, a₂] = ![f a₁, f a₂] := by simp[comp_vecCons'']
+
+@[simp] lemma comp₃ (a₁ a₂ a₃ : α) : f ∘ ![a₁, a₂, a₃] = ![f a₁, f a₂, f a₃] := by simp[comp_vecCons'']
+
 lemma comp_vecConsLast (f : α → β) (a : α) (s : Fin n → α) : (fun x => f $ (s <: a) x) = f ∘ s <: f a :=
 funext (fun i => lastCases (by simp) (by simp) i)
 

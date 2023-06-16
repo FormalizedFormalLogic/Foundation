@@ -570,6 +570,14 @@ lemma shift_substs1 (t : SyntacticSubTerm L n) (p : SyntacticSubFormula L 1) :
     shift (substs ![t] p) = substs ![t.shift] (shift p) :=
   by simp[shift_substs, Function.comp, Matrix.constant_eq_singleton]
 
+lemma emb_substs {o : Type v} [h : IsEmpty o] (w : Fin k → SubTerm L o n) (p : SubFormula L o k) :
+    emb (μ:= μ) (substs w p) = substs (SubTerm.emb ∘ w) (emb p) :=
+  by simp[emb, substs, map, bind_bind]; congr
+
+lemma emb_substs1 {o : Type v} [h : IsEmpty o] (t : SubTerm L o n) (p : SubFormula L o 1) :
+    emb (μ:= μ) (substs ![t] p) = substs ![SubTerm.emb t] (emb p) :=
+  by simp[emb_substs, Function.comp, Matrix.constant_eq_singleton]
+
 @[simp] lemma shift_emb {o : Type v} [h : IsEmpty o] (p : SubFormula L o n) :
     shift (emb p : SyntacticSubFormula L n) = emb p := by
   simp[shift, emb, map_map]; congr; funext x; exact h.elim x
