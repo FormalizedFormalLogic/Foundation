@@ -496,6 +496,9 @@ lemma emb_nrel {k} (r : L.rel k) (v : Fin k → SubTerm L o n) :
     emb (μ := μ) (univClosure p) = univClosure (emb p) := by
   simp[emb]
 
+lemma emb_Injective : Function.Injective (emb : SubFormula L o n → SubFormula L μ n) :=
+  map_inj (fun _ _ h => h) (fun x => IsEmpty.elim' empty x)
+
 end emb
 
 section Syntactic
@@ -577,6 +580,11 @@ lemma emb_substs {o : Type v} [h : IsEmpty o] (w : Fin k → SubTerm L o n) (p :
 lemma emb_substs1 {o : Type v} [h : IsEmpty o] (t : SubTerm L o n) (p : SubFormula L o 1) :
     emb (μ:= μ) (substs ![t] p) = substs ![SubTerm.emb t] (emb p) :=
   by simp[emb_substs, Function.comp, Matrix.constant_eq_singleton]
+
+@[simp] lemma rewrite_emb (f : μ → SubTerm L μ n)
+  {o : Type v} [h : IsEmpty o] (p : SubFormula L o n) :
+    rewrite f (emb p : SubFormula L μ n) = emb p := by
+  simp[rewrite, emb, map, bind_bind]; congr; funext x; exact h.elim x
 
 @[simp] lemma shift_emb {o : Type v} [h : IsEmpty o] (p : SubFormula L o n) :
     shift (emb p : SyntacticSubFormula L n) = emb p := by
@@ -986,6 +994,8 @@ attribute [simp] Open.verum Open.falsum Open.rel Open.nrel
 end SubFormula
 
 abbrev Theory (L : Language) := Set (Sentence L)
+
+abbrev SyntacticTheory (L : Language) := Set (SyntacticFormula L)
 
 class SubTheory (T U : Theory L) where
   sub : T ⊆ U

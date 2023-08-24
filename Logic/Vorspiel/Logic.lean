@@ -2,18 +2,24 @@ import Logic.Vorspiel.Vorspiel
 
 namespace Logic
 
-class Proof (F : Type u) [HasLogicSymbols F] where
+variable (F : Type u) [HasLogicSymbols F]
+
+/- Deduction System of F -/
+
+class Calculus (F : Type u) [HasLogicSymbols F] where
   Bew : Set F → F → Type u
   axm : ∀ {T f}, f ∈ T → Bew T f
 
-namespace Proof
-variable {F : Type u} [HasLogicSymbols F] [𝓑 : Proof F]
+variable {F}
+
+namespace Calculus
+variable [𝓑 : Calculus F]
 
 instance : HasTurnstile F (Type u) := ⟨𝓑.Bew⟩
 
 def BewTheory (T U : Set F) : Type u := {f : F} → f ∈ U → T ⊢ f
 
-infix:45 " ⊢* " => Proof.BewTheory
+infix:45 " ⊢* " => Calculus.BewTheory
 
 def BewTheoryEmpty (T : Set F) : T ⊢* ∅ := fun h => by contradiction
 
@@ -23,14 +29,20 @@ def BewTheory.refl (T : Set F) : T ⊢* T := axm
 
 def IsConsistent (T : Set F) : Prop := IsEmpty (T ⊢ ⊥)
 
-end Proof
+end Calculus
+
+def Calculus.hom [Calculus F] {G : Type u} [HasLogicSymbols G] (F : G →L F) : Calculus G where
+  Bew := fun T g => F '' T ⊢ F g
+  axm := fun h => Calculus.axm (Set.mem_image_of_mem F h)
+
+/- Semantics of F -/
 
 class Semantics (F : Type u) [HasLogicSymbols F] where
   struc : Type w → Type v
   realize : {M : Type w} → struc M → F →L Prop
 
 namespace Semantics
-variable {F : Type u} [HasLogicSymbols F] [𝓢 : Semantics.{u, v, w} F]
+variable [𝓢 : Semantics.{u, v, w} F]
 
 def realizeTheory {M : Type w} (s : struc F M) (T : Set F) : Prop :=
     ∀ ⦃f⦄, f ∈ T → realize s f
@@ -91,7 +103,8 @@ lemma consequence_iff {T : Set F} {f : F} : T ⊨ f ↔ ¬Satisfiableₛ (insert
 
 end Semantics
 
-variable (F : Type u) [HasLogicSymbols F] [𝓑 : Proof F] [𝓢 : Semantics.{u, v, w} F]
+variable (F)
+variable [HasLogicSymbols F] [𝓑 : Calculus F] [𝓢 : Semantics.{u, v, w} F]
 
 class Sound where
   sound : ∀ {T : Set F} {p : F}, T ⊢ p → T ⊨ p
@@ -110,7 +123,7 @@ lemma not_provable_of_countermodel {T : Set F} {p : F}
   ⟨fun b => by have : s ⊧ₛ p := Sound.sound b M s hT; contradiction⟩
 
 lemma consistent_of_model {T : Set F}
-  (hT : s ⊧ₛ* T) : Proof.IsConsistent T :=
+  (hT : s ⊧ₛ* T) : Calculus.IsConsistent T :=
   not_provable_of_countermodel (p := ⊥) hT (by simp)
 
 lemma realize_of_proof {T : Set F} {f} (h : s ⊧ₛ* T) (b : T ⊢ f) : s ⊧ₛ f :=

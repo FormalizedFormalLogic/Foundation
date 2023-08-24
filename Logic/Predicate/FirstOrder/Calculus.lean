@@ -374,18 +374,75 @@ def exOfInstances' (v : List (SyntacticTerm L)) (p : SyntacticSubFormula L 1)
 
 end DerivationCutRestricted
 
-structure Proof (T : Theory L) (σ : Sentence L) where
+/-
+structure Calculus (T : Theory L) (σ : Sentence L) where
   leftHand : Finset (Sentence L)
   hleftHand : ↑leftHand ⊆ SubFormula.neg '' T
   derivation : ⊢ᶜ ((insert σ leftHand).image emb : Sequent L)
 
-instance : Logic.Proof (Sentence L) where
-  Bew := Proof
+instance : Logic.Calculus (Sentence L) where
+  Bew := Calculus
   axm := by
     intro f σ hσ
     exact
     { leftHand := {~σ}
       hleftHand := by simp[hσ]; exact ⟨σ, hσ, rfl⟩
       derivation := DerivationCutRestricted.em (p := emb σ) (by simp) (by simp) } 
+-/
+
+structure SyntacticCalculus (T : Set (SyntacticFormula L)) (p : SyntacticFormula L) where
+  leftHand : Finset (SyntacticFormula L)
+  hleftHand : ↑leftHand ⊆ (~·) '' T
+  derivation : ⊢ᶜ insert p leftHand
+
+instance : Logic.Calculus (SyntacticFormula L) where
+  Bew := SyntacticCalculus
+  axm := by
+    intro f p hp
+    exact
+    { leftHand := {~p}
+      hleftHand := by simp[hp]
+      derivation := DerivationCutRestricted.em (p := p) (by simp) (by simp) } 
+
+instance : Logic.Calculus (Sentence L) := Logic.Calculus.hom (emb (μ := ℕ))
+
+protected def SentenceCalculus.emb {T : Theory L} {σ : Sentence L} (b : T ⊢ σ) :
+  emb (μ := ℕ) '' T ⊢ emb σ := b
+
+def SentenceCalculusOfEmb {T : Theory L} {σ : Sentence L} {s : Finset (Sentence L)}
+  (hs : ↑s ⊆ (~·) '' T) (b : ⊢ᶜ ((insert σ s).image emb : Sequent L)) : T ⊢ σ where
+  leftHand := s.image emb
+  hleftHand := by
+    simp; intro σ hσ; simp
+    have : ∃ τ ∈ T, ~τ = σ := by simpa using hs hσ
+    rcases this with ⟨τ, hτ, rfl⟩
+    exact ⟨τ, hτ, by simp⟩
+  derivation := b.cast (by simp)
+
+noncomputable def SentenceCalculus.leftHand {T : Theory L} {σ : Sentence L} (b : T ⊢ σ) : Finset (Sentence L) :=
+  Finset.preimage b.leftHand SubFormula.emb (Function.Injective.injOn emb_Injective _)
+
+lemma SentenceCalculus.leftHandEq {T : Theory L} {σ : Sentence L} (b : T ⊢ σ) : (leftHand b).image emb = b.leftHand :=
+  by { ext p; simp[SentenceCalculus.leftHand]; exact ⟨by rintro ⟨σ, hσ, rfl⟩; exact hσ,
+       by { rintro hp; 
+            have : ∃ τ ∈ T, ~emb τ = p := by simpa using b.hleftHand hp
+            rcases this with ⟨τ, _, rfl⟩; exact ⟨~τ, by simpa using hp, by simp⟩ }⟩ }
+
+lemma SentenceCalculus.hleftHand {T : Theory L} {σ : Sentence L} (b : T ⊢ σ) :
+    ↑(leftHand b) ⊆ (~·) '' T := by
+  simp[leftHand, Set.preimage_subset_iff]
+  intro σ hσ
+  have : ∃ τ ∈ T, ~SubFormula.emb τ = SubFormula.emb σ := by simpa using b.hleftHand hσ
+  rcases this with ⟨τ, hτ, eq⟩
+  exact ⟨τ, hτ, emb_Injective (by simpa using eq)⟩
+  
+def SentenceCalculus.derivation {T : Theory L} {σ : Sentence L} (b : T ⊢ σ) :
+    ⊢ᶜ ((insert σ (leftHand b)).image SubFormula.emb : Sequent L) :=
+  b.derivation.cast (by
+    simp[leftHand]; apply congr_arg; ext p; simp
+    exact ⟨by
+      rintro h; have : ∃ a, a ∈ T ∧ ~SubFormula.emb a = p := by simpa using b.hleftHand h
+      rcases this with ⟨τ, _, rfl⟩; exact ⟨~τ, by simpa using h, by simp⟩,
+      by { rintro ⟨τ, h, rfl⟩; exact h }⟩)
 
 end FirstOrder
