@@ -3,7 +3,9 @@ import Mathlib.Data.W.Basic
 
 universe u v
 
-variable {L : Language.{u}} [∀ k, Encodable (L.func k)] {μ : Type v} [Encodable μ]
+namespace FirstOrder
+
+variable {L : ℕ → Type  u} [∀ k, Encodable (L k)] {μ : Type v} [Encodable μ]
 
 namespace SubTerm
 open Encodable
@@ -17,7 +19,7 @@ def toNat : SubTerm L μ n → ℕ
       Nat.mkpair (encode f) (Matrix.vecToNat $ fun i => (v i).toNat)) + 1
 
 def ofNat : ℕ → Option (SubTerm L μ n)
-| 0  => none
+| 0     => none
 | e + 1 =>
   match e.bodd with
   | false => 
@@ -27,7 +29,7 @@ def ofNat : ℕ → Option (SubTerm L μ n)
   | true  =>
       let x := e.div2
       let k := x.unpair.1
-      let f' : Option (L.func k) := decode₂ (L.func k) x.unpair.2.unpair.1
+      let f' : Option (L k) := decode₂ (L k) x.unpair.2.unpair.1
       let w : Fin k → ℕ := Nat.unvector x.unpair.2.unpair.2
       have : ∀ i, w i < e + 1 := fun i =>
         Nat.lt_succ_of_le (le_trans (Nat.unvector_le x.unpair.2.unpair.2 i)
@@ -49,7 +51,7 @@ instance : Encodable (SubTerm L μ n) where
   decode := ofNat
   encodek := ofNat_toNat
 
-variable [∀ k, DecidableEq (L.func k)]
+variable [∀ k, DecidableEq (L k)]
 
 def enumLtList : ℕ → List (SyntacticTerm L)
 | 0     => []
@@ -68,6 +70,8 @@ def enumLt (s : ℕ) : Finset (SyntacticTerm L) := (enumLtList s).toFinset
 lemma mem_enumLt_of_lt {i} {t : SyntacticTerm L} (h : encode t < i) : t ∈ enumLt i :=
   by simp[enumLt]; exact mem_enumLtList_of_lt h
 
-#eval enumLt (L := Language.oRing) 100
+#eval enumLt (L := Language.ORingRel) 100
 
 end SubTerm
+
+end FirstOrder

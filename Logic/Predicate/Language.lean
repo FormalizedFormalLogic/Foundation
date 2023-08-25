@@ -1,17 +1,7 @@
 import Logic.Vorspiel.Vorspiel
 import Mathlib.Data.Finset.Basic
 
-structure Language where
-  func : Nat → Type u
-  rel  : Nat → Type u
-
 namespace Language
-
-protected def empty : Language.{u} where
-  func := fun _ => PEmpty
-  rel  := fun _ => PEmpty
-
-instance : Inhabited Language := ⟨Language.empty⟩
 
 inductive GraphFunc : ℕ → Type
   | start : GraphFunc 0
@@ -21,38 +11,17 @@ inductive GraphRel : ℕ → Type
   | equal : GraphRel 2
   | le : GraphRel 2
 
-def graph : Language where
-  func := GraphFunc
-  rel := GraphRel
-
 inductive BinaryRel : ℕ → Type
   | isone : BinaryRel 1
   | equal : BinaryRel 2
   | le : BinaryRel 2
 
-def binary : Language where
-  func := fun _ => Empty
-  rel := BinaryRel
-
 inductive EqRel : ℕ → Type
   | equal : EqRel 2
 
-@[reducible]
-def equal : Language where
-  func := fun _ => Empty
-  rel := EqRel
+instance (k) : ToString (EqRel k) := ⟨fun _ => "\\mathrm{Eq}"⟩
 
-instance (k) : ToString (equal.func k) := ⟨fun _ => ""⟩
-
-instance (k) : ToString (equal.rel k) := ⟨fun _ => "\\mathrm{Eq}"⟩
-
-instance (k) : DecidableEq (equal.func k) := fun a b => by rcases a
-
-instance (k) : DecidableEq (equal.rel k) := fun a b => by rcases a; rcases b; exact isTrue (by simp)
-
-instance (k) : Encodable (equal.func k) := Encodable.IsEmpty.toEncodable
-
-instance (k) : Encodable (equal.rel k) where
+instance (k) : Encodable (EqRel k) where
   encode := fun _ => 0
   decode := fun _ => 
     match k with
@@ -70,12 +39,7 @@ inductive ORingRel : ℕ → Type
   | eq : ORingRel 2
   | lt : ORingRel 2
 
-@[reducible]
-def oRing : Language where
-  func := ORingFunc
-  rel := ORingRel
-
-instance (k) : ToString (oRing.func k) :=
+instance (k) : ToString (ORingFunc k) :=
 ⟨ fun s =>
   match s with
   | ORingFunc.zero => "0"
@@ -83,19 +47,19 @@ instance (k) : ToString (oRing.func k) :=
   | ORingFunc.add  => "(+)"
   | ORingFunc.mul  => "(\\cdot)"⟩
 
-instance (k) : ToString (oRing.rel k) :=
+instance (k) : ToString (ORingRel k) :=
 ⟨ fun s =>
   match s with
   | ORingRel.eq => "\\mathrm{Eq}"
   | ORingRel.lt    => "\\mathrm{Lt}"⟩
 
-instance (k) : DecidableEq (oRing.func k) := fun a b =>
+instance (k) : DecidableEq (ORingFunc k) := fun a b =>
   by rcases a <;> rcases b <;> simp <;> try {exact instDecidableTrue} <;> try {exact instDecidableFalse}
 
-instance (k) : DecidableEq (oRing.rel k) := fun a b =>
+instance (k) : DecidableEq (ORingRel k) := fun a b =>
   by rcases a <;> rcases b <;> simp <;> try {exact instDecidableTrue} <;> try {exact instDecidableFalse}
 
-instance (k) : Encodable (oRing.func k) where
+instance (k) : Encodable (ORingFunc k) where
   encode := fun x =>
     match x with
     | ORingFunc.zero => 0
@@ -111,7 +75,7 @@ instance (k) : Encodable (oRing.func k) where
     | _, _ => none
   encodek := fun x => by rcases x <;> simp
 
-instance (k) : Encodable (oRing.rel k) where
+instance (k) : Encodable (ORingRel k) where
   encode := fun x =>
     match x with
     | ORingRel.eq => 0
@@ -132,11 +96,7 @@ inductive ORingWithPowPairingFunc : ℕ → Type
   | pow : ORingWithPowPairingFunc 2
   | pair : ORingWithPowPairingFunc 2
 
-@[reducible] def oRingWithExpPowPairing : Language where
-  func := ORingWithPowPairingFunc
-  rel := ORingRel
-
-instance (k) : ToString (oRingWithExpPowPairing.func k) :=
+instance (k) : ToString (ORingWithPowPairingFunc k) :=
 ⟨ fun s =>
   match s with
   | .zero => "0"
@@ -147,19 +107,10 @@ instance (k) : ToString (oRingWithExpPowPairing.func k) :=
   | .pow  => "(\\cdot)"
   | .pair  => "(\\mathrm{pair})"⟩
 
-instance (k) : ToString (oRingWithExpPowPairing.rel k) :=
-⟨ fun s =>
-  match s with
-  | ORingRel.eq => "\\mathrm{Eq}"
-  | ORingRel.lt    => "\\mathrm{Lt}"⟩
-
-instance (k) : DecidableEq (oRingWithExpPowPairing.func k) := fun a b =>
+instance (k) : DecidableEq (ORingWithPowPairingFunc k) := fun a b =>
   by rcases a <;> rcases b <;> simp <;> try {exact instDecidableTrue} <;> try {exact instDecidableFalse}
 
-instance (k) : DecidableEq (oRingWithExpPowPairing.rel k) := fun a b =>
-  by rcases a <;> rcases b <;> simp <;> try {exact instDecidableTrue} <;> try {exact instDecidableFalse}
-
-instance (k) : Encodable (oRingWithExpPowPairing.func k) where
+instance (k) : Encodable (ORingWithPowPairingFunc k) where
   encode := fun x =>
     match x with
     | .zero => 0
@@ -181,74 +132,38 @@ instance (k) : Encodable (oRingWithExpPowPairing.func k) where
     | _, _ => none
   encodek := fun x => by rcases x <;> simp
 
-instance (k) : Encodable (oRingWithExpPowPairing.rel k) where
-  encode := fun x =>
-    match x with
-    | ORingRel.eq => 0
-    | ORingRel.lt    => 1
-  decode := fun e =>
-    match k, e with
-    | 2, 0 => some ORingRel.eq
-    | 2, 1 => some ORingRel.lt
-    | _, _ => none
-  encodek := fun x => by rcases x <;> simp
+class Eq (Lr : ℕ → Type u) where
+  eq : Lr 2
 
-def relational (α : ℕ → Type u) : Language where
-  func := fun _ => PEmpty
-  rel := α
+class Lt (Lr : ℕ → Type u) where
+  lt : Lr 2
 
-section relational
-variable {α : ℕ → Type u} [e : ∀ n, Encodable (α n)] [d : ∀ n, DecidableEq (α n)] [s : ∀ n, ToString (α n)]
+class Zero (Lf : ℕ → Type u) where
+  zero : Lf 0
 
-instance (k) : Encodable ((relational α).func k) := Encodable.IsEmpty.toEncodable (α := PEmpty)
+class One (Lf : ℕ → Type u) where
+  one : Lf 0
 
-instance (k) : Encodable ((relational α).rel k) := e k
+class Add (Lf : ℕ → Type u) where
+  add : Lf 2
 
-instance (k) : DecidableEq ((relational α).func k) := fun a => by cases a
+class Mul (Lf : ℕ → Type u) where
+  mul : Lf 2
 
-instance (k) : DecidableEq ((relational α).rel k) := d k
+class Pow (Lf : ℕ → Type u) where
+  pow : Lf 2
 
-instance : ToString ((relational α).rel k) :=
-  ⟨fun a => "R^{" ++ toString k ++ "}_{" ++ toString (α := α k) a ++ "}"⟩
+class Exp (Lf : ℕ → Type u) where
+  exp : Lf 1
 
-def toRelational (a : α k) : (relational α).rel k := a
-
-instance : ToString ((relational α).func k) := ⟨fun a => by cases a⟩
-
-end relational
-
-class Eq (L : Language.{u}) where
-  eq : L.rel 2
-
-class Lt (L : Language.{u}) where
-  lt : L.rel 2
-
-class Zero (L : Language.{u}) where
-  zero : L.func 0
-
-class One (L : Language.{u}) where
-  one : L.func 0
-
-class Add (L : Language.{u}) where
-  add : L.func 2
-
-class Mul (L : Language.{u}) where
-  mul : L.func 2
-
-class Pow (L : Language.{u}) where
-  pow : L.func 2
-
-class Exp (L : Language.{u}) where
-  exp : L.func 1
-
-class Pairing (L : Language.{u}) where
-  pair : L.func 2
+class Pairing (Lf : ℕ → Type u) where
+  pair : Lf 2
 
 attribute [match_pattern] Eq.eq Add.add Mul.mul
 
-class ORing (L : Language) extends L.Eq, L.Lt, L.Zero, L.One, L.Add, L.Mul
+class ORing (Lf Lr : ℕ → Type u) extends Eq Lr, Lt Lr, Zero Lf, One Lf, Add Lf, Mul Lf
 
-instance : ORing oRing where
+instance : ORing ORingFunc ORingRel where
   eq := .eq
   lt := .lt
   zero := .zero
@@ -256,7 +171,7 @@ instance : ORing oRing where
   add := .add
   mul := .mul
 
-instance : ORing oRingWithExpPowPairing where
+instance : ORing ORingWithPowPairingFunc ORingRel where
   eq := .eq
   lt := .lt
   zero := .zero
@@ -264,55 +179,33 @@ instance : ORing oRingWithExpPowPairing where
   add := .add
   mul := .mul
 
-instance : Exp oRingWithExpPowPairing where
+instance : Exp ORingWithPowPairingFunc where
   exp := .exp
 
-instance : Pow oRingWithExpPowPairing where
+instance : Pow ORingWithPowPairingFunc where
   pow := .pow
 
-instance : Pairing oRingWithExpPowPairing where
+instance : Pairing ORingWithPowPairingFunc where
   pair := .pair
 
-structure Hom (L₁ L₂ : Language) where
-  onFunc : {k : ℕ} → L₁.func k → L₂.func k
-  onRel : {k : ℕ} → L₁.rel k → L₂.rel k
+/-
+structure Hom (L₁ L₂ : ℕ → Type u) where
+  toFun : {k : ℕ} → L₁ k → L₂ k
 
 infix:25 " →ᵥ " => Hom
 
 namespace Hom
-variable (L L₁ L₂ L₃ : Language) (Φ : Hom L₁ L₂)
+variable (L L₁ L₂ L₃ : ℕ → Type u) (Φ : Hom L₁ L₂)
 
 protected def id : L →ᵥ L where
-  onFunc := id
-  onRel := id
+  toFun := id
 
 variable {L L₁ L₂ L₃}
 
 def comp (Ψ : L₂ →ᵥ L₃) (Φ : L₁ →ᵥ L₂) : L₁ →ᵥ L₃ where
-  onFunc := Ψ.onFunc ∘ Φ.onFunc 
-  onRel  := Ψ.onRel ∘ Φ.onRel 
+  toFun := Ψ.toFun ∘ Φ.toFun
 
 end Hom
-
-def subLanguage (L : Language) (pfunc : ∀ k, Language.func L k → Prop) (prel : ∀ k, L.rel k → Prop) :
-    Language where
-  func := fun k => Subtype (pfunc k)
-  rel  := fun k => Subtype (prel k)
-
-section subLanguage
-
-variable (L) {pf : ∀ k, Language.func L k → Prop} {pr : ∀ k, L.rel k → Prop}
-
-def ofSubLanguage : subLanguage L pf pr →ᵥ L where
-  onFunc := Subtype.val
-  onRel  := Subtype.val
-
-@[simp] lemma ofSubLanguage_onFunc {k : ℕ} :
-    L.ofSubLanguage.onFunc p = p.val := rfl
-
-@[simp] lemma ofSubLanguage_onRel {k : ℕ} :
-    L.ofSubLanguage.onRel p = p.val := rfl
-
-end subLanguage
+-/
 
 end Language

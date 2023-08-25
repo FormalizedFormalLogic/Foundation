@@ -102,6 +102,7 @@ instance Prop_HasLogicSymbols : HasLogicSymbols Prop where
 
 variable (α β γ : Type _) [HasLogicSymbols α] [HasLogicSymbols β] [HasLogicSymbols γ]
 
+@[ext]
 structure Hom where
   toFun : α → β
   map_top' : toFun ⊤ = ⊤
@@ -113,7 +114,7 @@ structure Hom where
 
 infix:25 " →L " => Hom
 
--- Hom.toFun を表示しない
+-- hide Hom.toFun
 open Lean PrettyPrinter Delaborator SubExpr in
 @[app_unexpander Hom.toFun]
 def unexpsnderToFun : Unexpander
@@ -122,6 +123,10 @@ def unexpsnderToFun : Unexpander
 
 namespace Hom
 variable {α β γ}
+
+instance : FunLike (α →L β) α (fun _ => β) where
+  coe := toFun
+  coe_injective' := by intro f g h; ext x; exact congr_fun h x
 
 instance coeToFun : CoeFun (α →L β) (fun _ => α → β) := ⟨fun f => f.toFun⟩
 
@@ -163,9 +168,6 @@ def comp (g : β →L γ) (f : α →L β) : α →L γ where
 
 @[simp] lemma app_comp (g : β →L γ) (f : α →L β) (a : α) :
      g.comp f a = g (f a) := rfl
-
-@[ext] lemma ext (f g : α →L β) (h : ∀ x, f x = g x) : f = g :=
-  by rcases f; rcases g; simp; funext x; exact h x
 
 end Hom
 
