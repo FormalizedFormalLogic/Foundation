@@ -100,23 +100,44 @@ instance Prop_HasLogicSymbols : HasLogicSymbols Prop where
 
 @[simp] lemma Prop_iff_eq (p q : Prop) : (p ⟷ q) = (p ↔ q) := by simp[HasLogicSymbols.iff, iff_iff_implies_and_implies]
 
+class HomClass (F : Type _) (α β : outParam (Type _)) [HasLogicSymbols α] [HasLogicSymbols β] extends FunLike F α (fun _ => β) where
+  map_top : ∀ (f : F), f ⊤ = ⊤
+  map_bot : ∀ (f : F), f ⊥ = ⊥
+  map_neg : ∀ (f : F) (p : α), f (~ p) = ~f p
+  map_imply : ∀ (f : F) (p q : α), f (p ⟶ q) = f p ⟶ f q
+  map_and : ∀ (f : F) (p q : α), f (p ⋏ q) = f p ⋏ f q
+  map_or  : ∀ (f : F) (p q : α), f (p ⋎ q) = f p ⋎ f q
+
+attribute [simp] HomClass.map_top HomClass.map_bot HomClass.map_neg HomClass.map_imply HomClass.map_and HomClass.map_or
+
+namespace HomClass
+
+variable (F : Type _) (α β : outParam (Type _)) [HasLogicSymbols α] [HasLogicSymbols β]
+variable [HomClass F α β]
+variable (f : F) (a b : α)
+
+instance : CoeFun F (fun _ => α → β) := ⟨FunLike.coe⟩
+
+@[simp] lemma map_iff : f (a ⟷ b) = f a ⟷ f b := by simp[HasLogicSymbols.iff]
+
+end HomClass
+
 variable (α β γ : Type _) [HasLogicSymbols α] [HasLogicSymbols β] [HasLogicSymbols γ]
 
-@[ext]
 structure Hom where
-  toFun : α → β
-  map_top' : toFun ⊤ = ⊤
-  map_bot' : toFun ⊥ = ⊥
-  map_neg' : ∀ p, toFun (~ p) = ~toFun p
-  map_imp' : ∀ p q, toFun (p ⟶ q) = toFun p ⟶ toFun q
-  map_and' : ∀ p q, toFun (p ⋏ q) = toFun p ⋏ toFun q
-  map_or'  : ∀ p q, toFun (p ⋎ q) = toFun p ⋎ toFun q
+  toTr : α → β
+  map_top' : toTr ⊤ = ⊤
+  map_bot' : toTr ⊥ = ⊥
+  map_neg' : ∀ p, toTr (~ p) = ~toTr p
+  map_imply' : ∀ p q, toTr (p ⟶ q) = toTr p ⟶ toTr q
+  map_and' : ∀ p q, toTr (p ⋏ q) = toTr p ⋏ toTr q
+  map_or'  : ∀ p q, toTr (p ⋎ q) = toTr p ⋎ toTr q
 
 infix:25 " →L " => Hom
 
--- hide Hom.toFun
+-- hide Hom.toTr
 open Lean PrettyPrinter Delaborator SubExpr in
-@[app_unexpander Hom.toFun]
+@[app_unexpander Hom.toTr]
 def unexpsnderToFun : Unexpander
   | `($_ $h $x) => `($h $x)
   | _           => throw ()
@@ -125,44 +146,40 @@ namespace Hom
 variable {α β γ}
 
 instance : FunLike (α →L β) α (fun _ => β) where
-  coe := toFun
-  coe_injective' := by intro f g h; ext x; exact congr_fun h x
+  coe := toTr
+  coe_injective' := by intro f g h; rcases f; rcases g; simp; exact h
 
-instance coeToFun : CoeFun (α →L β) (fun _ => α → β) := ⟨fun f => f.toFun⟩
+instance : CoeFun (α →L β) (fun _ => α → β) := FunLike.hasCoeToFun
+
+@[ext] lemma ext (f g : α →L β) (h : ∀ x, f x = g x) : f = g := FunLike.ext f g h
+
+instance : HomClass (α →L β) α β where
+  map_top := map_top'
+  map_bot := map_bot'
+  map_neg := map_neg'
+  map_imply := map_imply'
+  map_and := map_and'
+  map_or := map_or'
 
 variable (f : α →L β) (a b : α)
 
-@[simp] lemma map_top : f ⊤ = ⊤ := map_top' f
-
-@[simp] lemma map_bot : f ⊥ = ⊥ := map_bot' f
-
-@[simp] lemma map_neg : f (~a) = ~f a := Hom.map_neg' f a
-
-@[simp] lemma map_imply : f (a ⟶ b) = f a ⟶ f b := map_imp' f a b
-
-@[simp] lemma map_and : f (a ⋏ b) = f a ⋏ f b := map_and' f a b
-
-@[simp] lemma map_or : f (a ⋎ b) = f a ⋎ f b := map_or' f a b
-
-@[simp] lemma map_iff : f (a ⟷ b) = f a ⟷ f b := by simp[HasLogicSymbols.iff]
-
 protected def id : α →L α where
-  toFun := id
+  toTr := id
   map_top' := by simp
   map_bot' := by simp
   map_neg' := by simp
-  map_imp' := by simp
+  map_imply' := by simp
   map_and' := by simp
   map_or' := by simp
 
 @[simp] lemma app_id (a : α) : HasLogicSymbols.Hom.id a = a := rfl
 
 def comp (g : β →L γ) (f : α →L β) : α →L γ where
-  toFun := g.toFun ∘ f.toFun
+  toTr := g ∘ f
   map_top' := by simp
   map_bot' := by simp
   map_neg' := by simp
-  map_imp' := by simp
+  map_imply' := by simp
   map_and' := by simp
   map_or' := by simp  
 

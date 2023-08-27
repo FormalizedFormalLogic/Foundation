@@ -1,4 +1,4 @@
-import Logic.Predicate.Term
+import Logic.Predicate.FirstOrder.Basic.Term.Term
 import Mathlib.Data.W.Basic
 
 universe u v

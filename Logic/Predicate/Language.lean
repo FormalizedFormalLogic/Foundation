@@ -188,6 +188,18 @@ instance : Pow ORingWithPowPairingFunc where
 instance : Pairing ORingWithPowPairingFunc where
   pair := .pair
 
+class InhabitedRelLanguage (L : ℕ → Type u) where
+  rank : ℕ
+  nonempty : Inhabited (L $ rank + 1)
+
+namespace InhabitedRelLanguage
+
+instance (Lr : ℕ → Type u) [InhabitedRelLanguage Lr] : Inhabited (Lr (InhabitedRelLanguage.rank Lr + 1)) := InhabitedRelLanguage.nonempty
+
+instance (Lr : ℕ → Type u) [Eq Lr] : InhabitedRelLanguage Lr := ⟨1, ⟨Eq.eq⟩⟩
+
+end InhabitedRelLanguage
+
 /-
 structure Hom (L₁ L₂ : ℕ → Type u) where
   toFun : {k : ℕ} → L₁ k → L₂ k

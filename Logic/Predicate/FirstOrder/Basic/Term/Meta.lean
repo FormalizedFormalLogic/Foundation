@@ -1,5 +1,5 @@
-import Logic.Predicate.Coding
-import Logic.Predicate.Elab
+import Logic.Predicate.FirstOrder.Basic.Term.Coding
+import Logic.Predicate.FirstOrder.Basic.Term.Elab
 import Logic.Vorspiel.Meta
 open Qq Lean Elab Meta Tactic
 
@@ -11,22 +11,24 @@ namespace SubTerm
 
 namespace Meta
 
+open FirstOrder.Rew
+
 section lemmata
 variable {L : ℕ → Type u} {μ : Type v} {n}
 
-section Hom
+section Rew
 
-variable (ω : Hom L μ₁ n₁ μ₂ n₂)
+variable (ω : Rew L μ₁ n₁ μ₂ n₂)
 
-lemma hom_func_eq_of_eq {k} (f : L k) {v : Fin k → SubTerm L μ₁ n₁} {v'} (h : ω ∘ v = v') :
+lemma Rew_func_eq_of_eq {k} (f : L k) {v : Fin k → SubTerm L μ₁ n₁} {v'} (h : ω ∘ v = v') :
     ω (func f v) = func f v' :=
-  by simp[Hom.func, Function.comp, ←h]
+  by simp[Rew.func, Function.comp, ←h]
 
-lemma hom_finitary_eq_of_eq {k} (f : Finitary L k) {v : Fin k → SubTerm L μ₁ n₁} {v'} (h : ω ∘ v = v') :
+lemma Rew_finitary_eq_of_eq {k} (f : Finitary L k) {v : Fin k → SubTerm L μ₁ n₁} {v'} (h : ω ∘ v = v') :
     ω (f.operator v) = f.operator v' :=
-  by simp[Hom.operator, Function.comp, ←h]
+  by simp[Rew.operator, Function.comp, ←h]
 
-end Hom
+end Rew
 
 section substs
 
@@ -36,7 +38,7 @@ lemma substs_bvar_eq_of_eq {n n'} {w : Fin n → SubTerm L μ n'} {x : Fin n} {t
 
 lemma substs_substs_eq_of_eq {l k n} {v : Fin l → SubTerm L μ k} {w : Fin k → SubTerm L μ n} {t : SubTerm L μ l} {v'} {t'}
   (hv : substs w ∘ v = v') (ht : substs v' t = t') :
-    substs w (substs v t) = t' := by simp[substs_substs, ←hv, ←ht]
+    substs w (substs v t) = t' := by simp[←comp_app, substs_comp_substs, ←hv, ←ht]
 
 lemma substs_eq_eq_of_eq {k n} {w w' : Fin k → SubTerm L μ n} {t t' : SubTerm L μ k} {u}
   (hw : w = w') (ht : t = t') (h : substs w' t' = u) : substs w t = u := hw ▸ ht ▸ h
@@ -48,7 +50,7 @@ section shift
 lemma shift_substs_eq_of_eq {t : SyntacticSubTerm L k} {w : Fin k → SyntacticSubTerm L n} {t' t'' w'}
   (ht : shift t = t') (hw : shift ∘ w = w') (ht' : substs w' t' = t'') :
     shift (substs w t) = t'' := by
-  simp[←ht, ←hw, ←ht', shift, substs, map, bind_bind]
+  simp[←ht, ←hw, ←ht', ←comp_app, shift_comp_substs]
 
 end shift
 
@@ -57,14 +59,13 @@ section bShift
 lemma bShift_substs_eq_of_eq {w : Fin k → SubTerm L μ n} {t : SubTerm L μ k} {w' t'}
   (hw : bShift ∘ w = w') (ht : substs w' t = t') :
     bShift (substs w t) = t' := by
-  simp[←hw, ←ht, bShift, substs, map, bind_bind]; congr
+  simp[←hw, ←ht, ←comp_app, bShift_comp_substs]
 
 end bShift
 
 section free
 
-lemma free_bvar_last (n : ℕ) : free (#⟨n, Nat.lt.base n⟩ : SyntacticSubTerm L (n + 1)) = &0 :=
-  SubTerm.free_bvar_last
+lemma free_bvar_last (n : ℕ) : free (#⟨n, Nat.lt.base n⟩ : SyntacticSubTerm L (n + 1)) = &0 := Rew.free_bvar_last
 
 lemma free_bvar_of_lt (x : Fin (n + 1)) (h : x.val < n) : free (#x : SyntacticSubTerm L (n + 1)) = #⟨x, h⟩ :=
   free_bvar_castSucc (L := L) ⟨x, h⟩
@@ -72,26 +73,22 @@ lemma free_bvar_of_lt (x : Fin (n + 1)) (h : x.val < n) : free (#x : SyntacticSu
 lemma free_substs_eq_of_eq {t : SyntacticSubTerm L k} {w : Fin k → SyntacticSubTerm L (n + 1)} {t' w' t''}
   (ht : shift t = t') (hw : free ∘ w = w') (ht' : substs w' t' = t'') :
     free (substs w t) = t'' := by
-  simp[←ht, ←hw, ←ht', shift, map, free, substs, bind_bind]
+  simp[←ht, ←hw, ←ht', ←comp_app]; exact ext' (by ext x <;> simp[comp_app]) _
 
 end free
 
 section fix
 
-lemma fix_fvar (x) : fix (#x : SyntacticSubTerm L n) = #(.castSucc x) :=
-  SubTerm.fix_bvar x
+lemma fix_bvar (x) : fix (#x : SyntacticSubTerm L n) = #(.castSucc x) := Rew.fix_bvar x
 
-lemma fix_bvar_zero (n : ℕ) : fix &0 = (#⟨n, Nat.lt.base n⟩ : SyntacticSubTerm L (n + 1)) :=
-  SubTerm.fix_fvar_zero
+lemma fix_fvar_zero (n : ℕ) : fix &0 = (#⟨n, Nat.lt.base n⟩ : SyntacticSubTerm L (n + 1)) := Rew.fix_fvar_zero
 
-lemma fix_bvar_succ (x) (n : ℕ) : fix (&(x + 1) : SyntacticSubTerm L (n + 1)) = &x :=
-  SubTerm.fix_fvar_succ x
+lemma fix_fvar_succ (x) (n : ℕ) : fix (&(x + 1) : SyntacticSubTerm L n) = &x := Rew.fix_fvar_succ x
 
 lemma fix_substs_eq_of_eq {k} {t : SyntacticSubTerm L k} {w : Fin k → SyntacticSubTerm L n} {t' t'' w' w'' i}
   (ht : fix t = t') (hw : fix ∘ w = w') (hi : Fin.last n = i) (hw' : w' <: #i = w'') (ht' : substs w'' t' = t''):
     fix (substs w t) = t'' := by
-  simp[←ht, ←hw, ←hi, ←hw', ←ht', shift, map, fix, substs, bind_bind, Function.comp]; congr
-  · funext x; cases x <;> simp
+  simp[←ht, ←hw, ←hi, ←hw', ←ht', ←comp_app]; exact ext' (by ext x <;> simp[comp_app]; { cases x <;> simp }) _
 
 end fix
 
@@ -152,51 +149,51 @@ partial def resultSubsts {L : Q(ℕ → Type u)} {k n : Q(ℕ)} (w : Q(Fin $k �
     let ⟨v', ve⟩ ← resultVectorOfResultFun (u := u) (v := u)
       (α := q(SyntacticSubTerm $L $k)) (β := q(SyntacticSubTerm $L $n))
       q(substs $w) (resultSubsts w) arity v
-    return ⟨q(func $f $v'), q(hom_func_eq_of_eq _ $f $ve)⟩
+    return ⟨q(func $f $v'), q(Rew_func_eq_of_eq _ $f $ve)⟩
   | ~q(Operator.const $c)            => pure ⟨q(Operator.const $c), q(substs_const $c)⟩
   | ~q(Operator.operator (ι := Fin $arity) $f $v) => do
     let ⟨v', ve⟩ ← resultVectorOfResultFun (u := u) (v := u)
       (α := q(SyntacticSubTerm $L $k)) (β := q(SyntacticSubTerm $L $n))
       q(substs $w) (resultSubsts w) arity v
-    return ⟨q(Operator.operator $f $v'), q(hom_finitary_eq_of_eq _ $f $ve)⟩
+    return ⟨q(Operator.operator $f $v'), q(Rew_finitary_eq_of_eq _ $f $ve)⟩
   | ~q(substs (n := $l) $v $t)       => do
     let ⟨v', ve⟩ ← resultVectorOfResultFun (u := u) (v := u)
       (α := q(SyntacticSubTerm $L $k)) (β := q(SyntacticSubTerm $L $n))
-      q(@SubTerm.substs $L ℕ $k $n $w) (resultSubsts w) l v
+      q(@Rew.substs $L ℕ $k $n $w) (resultSubsts w) l v
     let ⟨p', pe⟩ ← resultSubsts v' t
     return ⟨p', q(substs_substs_eq_of_eq $ve $pe)⟩
   | ~q($t)                           => pure ⟨q(substs $w $t), q(rfl)⟩
 
 partial def resultShift {L : Q(ℕ → Type u)} {n : Q(ℕ)} : (t : Q(SyntacticSubTerm $L $n)) →
-    MetaM ((res : Q(SyntacticSubTerm $L $n)) × Q(SubTerm.shift $t = $res))
-  | ~q(#$x)                          => pure ⟨q(#$x), q(SubTerm.shift_bvar $x)⟩
+    MetaM ((res : Q(SyntacticSubTerm $L $n)) × Q(shift $t = $res))
+  | ~q(#$x)                          => pure ⟨q(#$x), q(shift_bvar $x)⟩
   | ~q(&$x)                          =>  do
     let z ← natAppFunQ Nat.succ x
-    let e := q(SubTerm.shift_fvar (L := $L) (n := $n) $x)
+    let e := q(shift_fvar (L := $L) (n := $n) $x)
     return ⟨q(&$z), e⟩
   | ~q(func (arity := $arity) $f $v) => do
     let ⟨v', ve'⟩ ← resultVectorOfResultFun (u := u) (v := u)
       (α := q(SyntacticSubTerm $L $n)) (β := q(SyntacticSubTerm $L $n))
       q(@shift $L $n) resultShift arity v
-    return ⟨q(func $f $v'), q(hom_func_eq_of_eq _ $f $ve')⟩
+    return ⟨q(func $f $v'), q(Rew_func_eq_of_eq _ $f $ve')⟩
   | ~q(substs (n := $k) $w $t)       => do
     let ⟨t', te⟩ ← resultShift (L := L) (n := k) t
     let ⟨w', we⟩ ← resultVectorOfResultFun (u := u) (v := u)
       (α := q(SyntacticSubTerm $L $n)) (β := q(SyntacticSubTerm $L $n))
-      q(@SubTerm.shift $L $n) resultShift k w
+      q(@shift $L $n) resultShift k w
     let ⟨t'', t'e⟩ ← resultSubsts w' t'
     return ⟨t'', q(shift_substs_eq_of_eq $te $we $t'e)⟩
-  | ~q(SubTerm.Operator.const $c)    => pure ⟨q(SubTerm.Operator.const $c), q(shift_const $c)⟩
+  | ~q(Operator.const $c)    => pure ⟨q(Operator.const $c), q(shift_const $c)⟩
   | ~q(Operator.operator (ι := Fin $arity) $f $v) => do
     let ⟨v', ve'⟩ ← resultVectorOfResultFun (u := u) (v := u)
       (α := q(SyntacticSubTerm $L $n)) (β := q(SyntacticSubTerm $L $n))
       q(@shift $L $n) resultShift arity v
-    return ⟨q(Operator.operator $f $v'), q(hom_finitary_eq_of_eq _ $f $ve')⟩
+    return ⟨q(Operator.operator $f $v'), q(Rew_finitary_eq_of_eq _ $f $ve')⟩
   | ~q($t)                           => do
     return ⟨q(shift $t), q(rfl)⟩
 
 partial def resultFree {L : Q(ℕ → Type u)} {n : Q(ℕ)} : (t : Q(SyntacticSubTerm $L ($n + 1))) →
-    MetaM ((res : Q(SyntacticSubTerm $L $n)) × Q(SubTerm.free $t = $res))
+    MetaM ((res : Q(SyntacticSubTerm $L $n)) × Q(free $t = $res))
   | ~q(#$x)                                       => do
     let n ←whnf n 
     let some nval := n.natLit? | throwError f!"Fail: natLit: {n}"
@@ -211,49 +208,49 @@ partial def resultFree {L : Q(ℕ → Type u)} {n : Q(ℕ)} : (t : Q(SyntacticSu
       return ⟨q(#$z), e⟩
   | ~q(&$x)                                       => do
     let z ← natAppFunQ Nat.succ x
-    let e : Expr := q(SubTerm.free_fvar (L := $L) (n := $n) $x)
+    let e : Expr := q(free_fvar (L := $L) (n := $n) $x)
     return ⟨q(&$z), e⟩
   | ~q(func (arity := $arity) $f $v)              => do
     let ⟨v', ve'⟩ ← resultVectorOfResultFun (u := u) (v := u)
       (α := q(SyntacticSubTerm $L ($n + 1))) (β := q(SyntacticSubTerm $L $n))
       q(@free $L $n) resultFree arity v
-    return ⟨q(func $f $v'), q(hom_func_eq_of_eq _ $f $ve')⟩
+    return ⟨q(func $f $v'), q(Rew_func_eq_of_eq _ $f $ve')⟩
   | ~q(substs (n := $k) $w $t)                    => do
     let ⟨t', te⟩ ← resultShift (L := L) (n := k) t
     let ⟨w', we⟩ ← resultVectorOfResultFun (u := u) (v := u)
       (α := q(SyntacticSubTerm $L ($n + 1))) (β := q(SyntacticSubTerm $L $n))
-      q(@SubTerm.free $L $n) resultFree k w
+      q(@free $L $n) resultFree k w
     let ⟨t'', t'e⟩ ← resultSubsts w' t'
     return ⟨t'', q(free_substs_eq_of_eq $te $we $t'e)⟩
-  | ~q(SubTerm.Operator.const $c)                 => return ⟨q(SubTerm.Operator.const $c), q(free_const _)⟩
+  | ~q(Operator.const $c)                 => return ⟨q(Operator.const $c), q(free_const _)⟩
   | ~q(Operator.operator (ι := Fin $arity) $f $v) => do
     let ⟨v', ve'⟩ ← resultVectorOfResultFun (u := u) (v := u)
       (α := q(SyntacticSubTerm $L ($n + 1))) (β := q(SyntacticSubTerm $L $n))
       q(@free $L $n) resultFree arity v
-    return ⟨q(Operator.operator $f $v'), q(hom_finitary_eq_of_eq _ $f $ve')⟩
+    return ⟨q(Operator.operator $f $v'), q(Rew_finitary_eq_of_eq _ $f $ve')⟩
   | ~q($t)                                        => do
-    return ⟨q(SubTerm.free $t), q(rfl)⟩
+    return ⟨q(free $t), q(rfl)⟩
 
 partial def resultFix {L : Q(ℕ → Type u)} {n : Q(ℕ)} : (t : Q(SyntacticSubTerm $L $n)) →
-    MetaM ((res : Q(SyntacticSubTerm $L ($n + 1))) × Q(SubTerm.fix $t = $res))
+    MetaM ((res : Q(SyntacticSubTerm $L ($n + 1))) × Q(fix $t = $res))
   | ~q(#$x)                                       => do
     let some xval := (← finQVal (n := q(.succ $n)) x) | throwError f!"Fail: FinQVal {x}"
-    let e : Expr := q(SubTerm.fix_bvar (L := $L) (n := $n) $x)
+    let e : Expr := q(fix_bvar (L := $L) (n := $n) $x)
     let z : Q(Fin ($n + 1)) ← Lean.Expr.ofNat q(Fin ($n + 1)) xval
     return ⟨q(#$z), e⟩
   | ~q(&0)                                        => do
     let n' ←whnf n 
     let some nval := n'.natLit? | throwError f!"Fail: natLit: {n}"
     let z : Q(Fin ($n + 1)) ← Lean.Expr.ofNat q(Fin ($n + 1)) nval
-    let hh := q(@fix_bvar_zero $L $n)
+    let hh := q(@fix_fvar_zero $L $n)
     return ⟨q(#$z), hh⟩
   | ~q(&($x + 1))                                 => do
-    return ⟨q(&$x), q(SubTerm.fix_fvar_succ (L := $L) (n := $n) $x)⟩
+    return ⟨q(&$x), q(fix_fvar_succ (L := $L) (n := $n) $x)⟩
   | ~q(func (arity := $arity) $f $v)              => do
     let ⟨v', ve'⟩ ← resultVectorOfResultFun (u := u) (v := u)
       (α := q(SyntacticSubTerm $L $n)) (β := q(SyntacticSubTerm $L ($n + 1)))
       q(@fix $L $n) resultFix arity v
-    return ⟨q(func $f $v'), q(hom_func_eq_of_eq _ $f $ve')⟩
+    return ⟨q(func $f $v'), q(Rew_func_eq_of_eq _ $f $ve')⟩
   | ~q(substs (n := $k) $w $t)                    => do
     let ⟨t', ht⟩ ← resultFix (L := L) (n := k) t
     let ⟨w', hw⟩ ← resultVectorOfResultFun (u := u) (v := u)
@@ -265,18 +262,18 @@ partial def resultFix {L : Q(ℕ → Type u)} {n : Q(ℕ)} : (t : Q(SyntacticSub
     let ⟨w'', hw'⟩ ← vectorAppend k w' q(#$z)
     let ⟨t'', ht'⟩ ← resultSubsts w'' t'
     return ⟨t'', q(fix_substs_eq_of_eq $ht $hw $hz $hw' $ht')⟩
-  | ~q(SubTerm.Operator.const $c)                 => return ⟨q(SubTerm.Operator.const $c), q(fix_const _)⟩
+  | ~q(Operator.const $c)                 => return ⟨q(Operator.const $c), q(fix_const _)⟩
   | ~q(Operator.operator (ι := Fin $arity) $f $v) => do
     let ⟨v', ve'⟩ ← resultVectorOfResultFun (u := u) (v := u)
       (α := q(SyntacticSubTerm $L $n)) (β := q(SyntacticSubTerm $L ($n + 1)))
       q(@fix $L $n) resultFix arity v
-    return ⟨q(Operator.operator $f $v'), q(hom_finitary_eq_of_eq _ $f $ve')⟩
+    return ⟨q(Operator.operator $f $v'), q(Rew_finitary_eq_of_eq _ $f $ve')⟩
   | ~q($t)                                        => do
-    return ⟨q(SubTerm.fix $t), q(rfl)⟩
+    return ⟨q(fix $t), q(rfl)⟩
 
 elab "dbgResultFix" : term => do
   let L : Q(ℕ → Type) := q(Language.ORingFunc)
-  let t : Q(SyntacticTerm $L) := q(ᵀ“((&2 + 1) + 9) * (#0 + 1)ᵀ⟦&2 + 1, 6⟧ ”)
+  let t : Q(SyntacticTerm $L) := q(ᵀ“((&2 + 1) + 9) * (#0 + 1) ᵀ[&2 + 1, 6] ”)
   let ⟨e, eq⟩ ← resultFix (L := L) (n := q(0)) t
   logInfo m! "{t}\n ⟹\n {e}"
   let dbgr := q(DbgResult.intro _ _ $eq)
@@ -289,26 +286,26 @@ partial def resultBShift {L : Q(ℕ → Type u)} {n : Q(ℕ)} : (t : Q(Syntactic
   | ~q(#$x)                                       => do
     let some xval := (← finQVal (n := q(.succ $n)) x) | throwError f!"Fail: FinQVal {x}"
     let z : Q(Fin ($n + 1)) ← Lean.Expr.ofNat q(Fin ($n + 1)) (xval + 1)
-    let e := q(SubTerm.bShift_bvar (L := $L) (μ := ℕ) (n := $n) $x)
+    let e := q(bShift_bvar (L := $L) (μ := ℕ) (n := $n) $x)
     return ⟨q(#$z), e⟩
-  | ~q(&$x)                                       => return ⟨q(&$x), q(SubTerm.bShift_fvar $x)⟩
+  | ~q(&$x)                                       => return ⟨q(&$x), q(bShift_fvar $x)⟩
   | ~q(func (arity := $arity) $f $v)              => do
     let ⟨v', ve'⟩ ← resultVectorOfResultFun (u := u) (v := u)
       (α := q(SyntacticSubTerm $L $n)) (β := q(SyntacticSubTerm $L ($n + 1)))
       q(@bShift $L ℕ $n) resultBShift arity v
-    return ⟨q(func $f $v'), q(hom_func_eq_of_eq _ $f $ve')⟩
+    return ⟨q(func $f $v'), q(Rew_func_eq_of_eq _ $f $ve')⟩
   | ~q(substs (n := $k) $w $t)                    => do
     let ⟨w', we⟩ ← resultVectorOfResultFun (u := u) (v := u)
       (α := q(SyntacticSubTerm $L $n)) (β := q(SyntacticSubTerm $L ($n + 1)))
-      q(@SubTerm.bShift $L ℕ $n) resultBShift k w
+      q(@bShift $L ℕ $n) resultBShift k w
     let ⟨t', te⟩ ← resultSubsts w' t
     return ⟨t', q(bShift_substs_eq_of_eq $we $te)⟩
-  | ~q(SubTerm.Operator.const $c)                 => return ⟨q(SubTerm.Operator.const $c), q(bShift_const $c)⟩
+  | ~q(Operator.const $c)                 => return ⟨q(Operator.const $c), q(bShift_const $c)⟩
   | ~q(Operator.operator (ι := Fin $arity) $f $v) => do
     let ⟨v', ve'⟩ ← resultVectorOfResultFun (u := u) (v := u)
       (α := q(SyntacticSubTerm $L $n)) (β := q(SyntacticSubTerm $L ($n + 1)))
       q(@bShift $L ℕ $n) resultBShift arity v
-    return ⟨q(Operator.operator $f $v'), q(hom_finitary_eq_of_eq _ $f $ve')⟩
+    return ⟨q(Operator.operator $f $v'), q(Rew_finitary_eq_of_eq _ $f $ve')⟩
   | ~q($t)                                        => do
     return ⟨q(bShift $t), q(rfl)⟩
 
@@ -363,7 +360,7 @@ partial def result (tp : NumeralUnfoldOption) {L : Q(ℕ → Type u)} {n : Q(ℕ
     let ⟨t', te⟩ ← result tp (L := L) (n := q($n)) t
     let ⟨t'', tee⟩ ← resultShift (L := L) (n := n) t'
     return ⟨q($t''), q(shift_congr_eq $te $tee)⟩
-  | ~q(SubTerm.Operator.const $ natLit (hz := $hz) (ho := $ho) (ha := $ha) $z) => natLitResult hz ho ha n tp z
+  | ~q(Operator.const $ natLit (hz := $hz) (ho := $ho) (ha := $ha) $z) => natLitResult hz ho ha n tp z
   | ~q(Operator.operator (ι := Fin $arity) $f $v) => do
     let ⟨vn, ve⟩ ← resultVectorOfResult (α := q(SyntacticSubTerm $L $n)) (u := u) (result tp) arity v
     return ⟨q(Operator.operator $f $vn), q(finitary_congr $f $ve)⟩
@@ -388,7 +385,7 @@ example {t : SyntacticSubTerm Language.ORingFunc 2} : DbgResult (SyntacticSubTer
   by dbg
 
 example (t : SyntacticSubTerm Language.ORingFunc 3) : DbgResult (SyntacticSubTerm Language.ORingFunc 12)
-    $ free $ ᵀ“((#0 + #1 + #2 + 8 * ᵀ!t) ᵀ⟦#2, 7, 4⟧ ᵀ⟦4, 4, 5⟧) * 8” :=
+    $ free $ ᵀ“((#0 + #1 + #2 + 8 * ᵀ!t) ᵀ[#2, 7, 4] ᵀ[4, 4, 5]) * 8” :=
   by dbg
 
 example : 1 ≠ 2 := of_decide_eq_true rfl
