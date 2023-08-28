@@ -1,25 +1,24 @@
-import Logic.Predicate.FirstOrder.Language
-import Logic.Predicate.Coding
+import Logic.Predicate.FirstOrder.Basic.Formula.Formula
+import Logic.Predicate.FirstOrder.Basic.Term.Coding
 
 universe u v
 
 namespace FirstOrder
 
-variable {L : Language.{u}} [∀ k : ℕ, Encodable (L.func k)]
-  [∀ k, Encodable (L.rel k)] {μ : Type v} [Encodable μ]
+variable {L : Language.{u}} [∀ k : ℕ, Encodable (L.func k)] [∀ k, Encodable (L.rel k)] {μ : Type v} [Encodable μ]
 
 namespace SubFormula
 open Encodable
 
 def toNat : {n : ℕ} → SubFormula L μ n → ℕ
-  | _, ⊤                 => 0
-  | _, ⊥                 => 1
+  | _, ⊤                     => 0
+  | _, ⊥                     => 1
   | _, rel (arity := k) r v  => (Nat.bit false $ Nat.bit false $ Nat.mkpair k  $ Nat.mkpair (encode r) (encode v)) + 2
   | _, nrel (arity := k) r v => (Nat.bit false $ Nat.bit true  $ Nat.mkpair k  $ Nat.mkpair (encode r) (encode v)) + 2
-  | _, p ⋏ q             => (Nat.bit true  $ Nat.bit false $ Nat.bit false $ Nat.mkpair p.toNat q.toNat) + 2
-  | _, p ⋎ q             => (Nat.bit true  $ Nat.bit false $ Nat.bit true  $ Nat.mkpair p.toNat q.toNat) + 2
-  | _, ∀' p              => (Nat.bit true  $ Nat.bit true  $ Nat.bit false p.toNat) + 2
-  | _, ∃' p              => (Nat.bit true  $ Nat.bit true  $ Nat.bit true  p.toNat) + 2
+  | _, p ⋏ q                 => (Nat.bit true  $ Nat.bit false $ Nat.bit false $ Nat.mkpair p.toNat q.toNat) + 2
+  | _, p ⋎ q                 => (Nat.bit true  $ Nat.bit false $ Nat.bit true  $ Nat.mkpair p.toNat q.toNat) + 2
+  | _, ∀' p                  => (Nat.bit true  $ Nat.bit true  $ Nat.bit false p.toNat) + 2
+  | _, ∃' p                  => (Nat.bit true  $ Nat.bit true  $ Nat.bit true  p.toNat) + 2
 
 def ofNat : (n : ℕ) → ℕ → Option (SubFormula L μ n)
   | n, 0     => some ⊤
@@ -94,6 +93,5 @@ instance (n) : Encodable (SubFormula L μ n) where
   encodek := ofNat_toNat
 
 end SubFormula
-
 
 end FirstOrder
