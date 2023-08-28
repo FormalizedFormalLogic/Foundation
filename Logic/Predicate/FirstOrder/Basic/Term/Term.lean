@@ -1,25 +1,25 @@
-import Logic.Predicate.Language
+import Logic.Predicate.FirstOrder.Basic.Language
 
 namespace FirstOrder
 
-inductive SubTerm (L : ℕ → Type u) (μ : Type v) (n : ℕ)
+inductive SubTerm (L : Language.{u}) (μ : Type v) (n : ℕ)
   | bvar : Fin n → SubTerm L μ n
   | fvar : μ → SubTerm L μ n
-  | func : ∀ {arity}, L arity → (Fin arity → SubTerm L μ n) → SubTerm L μ n
+  | func : ∀ {arity}, L.func arity → (Fin arity → SubTerm L μ n) → SubTerm L μ n
 
 scoped prefix:max "&" => SubTerm.fvar
 scoped prefix:max "#" => SubTerm.bvar
 
-abbrev Term (L : ℕ → Type u) (μ : Type v) := SubTerm L μ 0
+abbrev Term (L : Language.{u}) (μ : Type v) := SubTerm L μ 0
 
-abbrev SyntacticSubTerm (L : ℕ → Type u) (n : ℕ) := SubTerm L ℕ n
+abbrev SyntacticSubTerm (L : Language.{u}) (n : ℕ) := SubTerm L ℕ n
 
-abbrev SyntacticTerm (L : ℕ → Type u) := SyntacticSubTerm L 0
+abbrev SyntacticTerm (L : Language.{u}) := SyntacticSubTerm L 0
 
 namespace SubTerm
 
 variable
-  {L L' : ℕ → Type u} {L₁ : ℕ → Type u₁} {L₂ : ℕ → Type u₂}
+  {L L' : Language.{u}} {L₁ : Language.{u₁}} {L₂ : Language.{u₂}} {L₃ : Language.{u₃}}
   {μ μ' : Type v} {μ₁ : Type v₁} {μ₂ : Type v₂} {μ₃ : Type v₃}
   {n n₁ n₂ n₃ : ℕ}
 
@@ -27,7 +27,7 @@ instance [Inhabited μ] : Inhabited (SubTerm L μ n) := ⟨&default⟩
 
 section ToString
 
-variable [∀ k, ToString (L k)] [ToString μ]
+variable [∀ k, ToString (L.func k)] [ToString μ]
 
 def toStr : SubTerm L μ n → String
   | #x                        => "x_{" ++ toString (n - 1 - (x : ℕ)) ++ "}"
@@ -43,7 +43,7 @@ end ToString
 
 section Decidable
 
-variable [∀ k, DecidableEq (L k)] [DecidableEq μ]
+variable [∀ k, DecidableEq (L.func k)] [DecidableEq μ]
 
 def hasDecEq : (t u : SubTerm L μ n) → Decidable (Eq t u)
   | #x,                   #y                   => by simp; exact decEq x y
@@ -66,21 +66,21 @@ instance : DecidableEq (SubTerm L μ n) := hasDecEq
 
 end Decidable
 
-abbrev func! (k) (f : L k) (v : Fin k → SubTerm L μ n) := func f v
+abbrev func! (k) (f : L.func k) (v : Fin k → SubTerm L μ n) := func f v
 
 end SubTerm
 
-structure Rew (L : ℕ → Type u) (μ₁ : Type ν₁) (n₁ : ℕ) (μ₂ : Type ν₂) (n₂ : ℕ) where
+structure Rew (L : Language.{u}) (μ₁ : Type ν₁) (n₁ : ℕ) (μ₂ : Type ν₂) (n₂ : ℕ) where
   toFun : SubTerm L μ₁ n₁ → SubTerm L μ₂ n₂
-  func' : ∀ {k} (f : L k) (v : Fin k → SubTerm L μ₁ n₁), toFun (SubTerm.func f v) = SubTerm.func f (fun i => toFun (v i))
+  func' : ∀ {k} (f : L.func k) (v : Fin k → SubTerm L μ₁ n₁), toFun (SubTerm.func f v) = SubTerm.func f (fun i => toFun (v i))
 
-abbrev SyntacticRew (L : ℕ → Type u) (n₁ n₂ : ℕ) := Rew L ℕ n₁ ℕ n₂
+abbrev SyntacticRew (L : Language.{u}) (n₁ n₂ : ℕ) := Rew L ℕ n₁ ℕ n₂
 
 namespace Rew
 
 open SubTerm
 variable
-  {L L' : ℕ → Type u} {L₁ : ℕ → Type u₁} {L₂ : ℕ → Type u₂} {L₃ : ℕ → Type u₃}
+  {L L' : Language.{u}} {L₁ : Language.{u₁}} {L₂ : Language.{u₂}} {L₃ : Language.{u₃}}
   {μ μ' : Type v} {μ₁ : Type v₁} {μ₂ : Type v₂} {μ₃ : Type v₃}
   {n n₁ n₂ n₃ : ℕ}
 variable (ω : Rew L μ₁ n₁ μ₂ n₂)
@@ -91,22 +91,22 @@ instance : FunLike (Rew L μ₁ n₁ μ₂ n₂) (SubTerm L μ₁ n₁) (fun _ =
 
 instance : CoeFun (Rew L μ₁ n₁ μ₂ n₂) (fun _ => SubTerm L μ₁ n₁ → SubTerm L μ₂ n₂) := FunLike.hasCoeToFun
 
-protected lemma func {k} (f : L k) (v : Fin k → SubTerm L μ₁ n₁) :
+protected lemma func {k} (f : L.func k) (v : Fin k → SubTerm L μ₁ n₁) :
     ω (func f v) = func f (fun i => ω (v i)) := ω.func' f v
 
-lemma func'' {k} (f : L k) (v : Fin k → SubTerm L μ₁ n₁) :
+lemma func'' {k} (f : L.func k) (v : Fin k → SubTerm L μ₁ n₁) :
     ω (func f v) = func f (ω ∘ v) := ω.func' f v
 
-@[simp] lemma func0 (f : L 0) (v : Fin 0 → SubTerm L μ₁ n₁) :
+@[simp] lemma func0 (f : L.func 0) (v : Fin 0 → SubTerm L μ₁ n₁) :
     ω (func f v) = func f ![] := by simp[Rew.func]
 
-@[simp] lemma func1 (f : L 1) (t : SubTerm L μ₁ n₁) :
+@[simp] lemma func1 (f : L.func 1) (t : SubTerm L μ₁ n₁) :
     ω (func f ![t]) = func f ![ω t] := by simp[Matrix.constant_eq_singleton, Rew.func]
 
-@[simp] lemma func2 (f : L 2) (t₁ t₂ : SubTerm L μ₁ n₁) :
+@[simp] lemma func2 (f : L.func 2) (t₁ t₂ : SubTerm L μ₁ n₁) :
     ω (func f ![t₁, t₂]) = func f ![ω t₁, ω t₂] := by simp[Rew.func]; funext i; induction i using Fin.induction <;> simp
 
-@[simp] lemma func3 (f : L 3) (t₁ t₂ t₃ : SubTerm L μ₁ n₁) :
+@[simp] lemma func3 (f : L.func 3) (t₁ t₂ t₃ : SubTerm L μ₁ n₁) :
     ω (func f ![t₁, t₂, t₃]) = func f ![ω t₁, ω t₂, ω t₃] := by
   simp[Rew.func]; funext i; induction' i using Fin.induction with i <;> simp; induction' i using Fin.induction with i <;> simp
 
@@ -233,7 +233,7 @@ variable {n'} (w : Fin n → SubTerm L μ n')
 @[simp] lemma substs_zero (w : Fin 0 → Term L μ) : substs w = Rew.id :=
   by ext x <;> simp; { exact Fin.elim0 x }
 
-lemma substs_comp_substs {l k} (v : Fin l → SubTerm L μ k) (w : Fin k → SubTerm L μ n) :
+lemma substs_comp_substs (v : Fin l → SubTerm L μ k) (w : Fin k → SubTerm L μ n) :
     (substs w).comp (substs v) = substs (substs w ∘ v) :=
   by ext <;> simp[comp_app]
 
@@ -310,7 +310,7 @@ section shift
 
 @[simp] lemma shift_fvar (x : ℕ) : shift (&x : SyntacticSubTerm L n) = &(x + 1) := rfl
 
-lemma shift_func {k} (f : L k) (v : Fin k → SyntacticSubTerm L n) :
+lemma shift_func {k} (f : L.func k) (v : Fin k → SyntacticSubTerm L n) :
     shift (func f v) = func f (fun i => shift (v i)) := rfl
 
 lemma shift_Injective : Function.Injective (@shift L n) :=
@@ -415,7 +415,7 @@ namespace SubTerm
 open Rew
 
 variable
-  {L L' : ℕ → Type u} {L₁ : ℕ → Type u₁} {L₂ : ℕ → Type u₂}
+  {L L' : Language.{u}} {L₁ : Language.{u₁}} {L₂ : Language.{u₂}} {L₃ : Language.{u₃}}
   {μ μ' : Type v} {μ₁ : Type v₁} {μ₂ : Type v₂} {μ₃ : Type v₃}
   {n n₁ n₂ n₃ : ℕ}
 
@@ -430,7 +430,7 @@ abbrev fvar? (t : SubTerm L μ n) (x : μ) : Prop := x ∈ t.fvarList
 
 @[simp] lemma fvarList_fvar : fvarList (&x : SubTerm L μ n) = [x] := rfl
 
-@[simp] lemma mem_fvarList_func {k} {f : L k} {v : Fin k → SubTerm L μ n} :
+@[simp] lemma mem_fvarList_func {k} {f : L.func k} {v : Fin k → SubTerm L μ n} :
     x ∈ (func f v).fvarList ↔ ∃ i, x ∈ (v i).fvarList :=
   by simp[fvarList]
 
@@ -445,17 +445,17 @@ lemma bind_eq_of_funEqOn (b : Fin n₁ → SubTerm L μ₂ n₂) (e₁ e₂ : μ
 
 section lang
 
-variable [∀ k, DecidableEq (L k)]
+variable [∀ k, DecidableEq (L.func k)]
 
-def lang : SubTerm L μ n → Finset (Σ k, L k)
+def lang : SubTerm L μ n → Finset (Σ k, L.func k)
   | #_       => ∅
   | &_       => ∅
   | func f v => insert ⟨_, f⟩ $ Finset.bunionᵢ Finset.univ (fun i => lang (v i))
 
-@[simp] lemma lang_func {k} (f : L k) (v : Fin k → SubTerm L μ n) :
+@[simp] lemma lang_func {k} (f : L.func k) (v : Fin k → SubTerm L μ n) :
     ⟨k, f⟩ ∈ (func f v).lang := by simp[lang]
 
-lemma lang_func_ss {k} (f : L k) (v : Fin k → SubTerm L μ n) (i) :
+lemma lang_func_ss {k} (f : L.func k) (v : Fin k → SubTerm L μ n) (i) :
     (v i).lang ⊆ (func f v).lang :=
   by intros x; simp[lang]; intros h; exact Or.inr ⟨i, h⟩
 
@@ -463,27 +463,27 @@ end lang
 
 section lMap
 
-variable (Φ : ⦃k : ℕ⦄ → L₁ k → L₂ k)
+variable (Φ : L₁ →ᵥ L₂)
 
-def lMap (Φ : ⦃k : ℕ⦄ → L₁ k → L₂ k) : SubTerm L₁ μ n → SubTerm L₂ μ n
+def lMap (Φ : L₁ →ᵥ L₂) : SubTerm L₁ μ n → SubTerm L₂ μ n
   | #x       => #x
   | &x       => &x
-  | func f v => func (Φ f) (fun i => lMap Φ (v i))
+  | func f v => func (Φ.func f) (fun i => lMap Φ (v i))
 
 @[simp] lemma lMap_bvar (x : Fin n) : (#x : SubTerm L₁ μ n).lMap Φ = #x := rfl
 
 @[simp] lemma lMap_fvar (x : μ) : (&x : SubTerm L₁ μ n).lMap Φ = &x := rfl
 
-lemma lMap_func {k} (f : L₁ k) (v : Fin k → SubTerm L₁ μ n) :
-    (func f v).lMap Φ = func (Φ f) (fun i => lMap Φ (v i)) := rfl
+lemma lMap_func {k} (f : L₁.func k) (v : Fin k → SubTerm L₁ μ n) :
+    (func f v).lMap Φ = func (Φ.func f) (fun i => lMap Φ (v i)) := rfl
 
 lemma lMap_bind (b : Fin n₁ → SubTerm L₁ μ₂ n₂) (e : μ₁ → SubTerm L₁ μ₂ n₂) (t) :
-    (bind b e t).lMap Φ = bind (fun x => (b x).lMap Φ) (fun x => (e x).lMap Φ) (t.lMap Φ) :=
+    lMap Φ (bind b e t) = bind (lMap Φ ∘ b) (lMap Φ ∘ e) (t.lMap Φ) :=
   by induction t <;> simp[*, lMap_func, Rew.func]
 
 lemma lMap_map (b : Fin n₁ → Fin n₂) (e : μ₁ → μ₂) (t) :
     (map b e t).lMap Φ = map b e (t.lMap Φ) :=
-  by simp[map, lMap_bind]
+  by simp[map, lMap_bind, Function.comp]
 
 lemma lMap_bShift (t : SubTerm L₁ μ₁ n) : (bShift t).lMap Φ = bShift (t.lMap Φ) :=
   by simp[bShift, lMap_map]
@@ -499,16 +499,16 @@ lemma lMap_fix (t : SyntacticSubTerm L₁ n) : (fix t).lMap Φ = fix (t.lMap Φ)
 
 end lMap
 
-structure Operator (L : ℕ → Type u) (ι : Type w) where
+structure Operator (L : Language.{u}) (ι : Type w) where
   operator : {μ : Type v} → {n : ℕ} → (ι → SubTerm L μ n) → SubTerm L μ n
   rew_operator : ∀ {μ μ' n₁ n₂} (ω : Rew L μ n₁ μ' n₂) (v : ι → SubTerm L μ n₁),
     ω (operator v) = operator (fun i => ω (v i))
 
-abbrev Const (L : ℕ → Type u) := Operator.{u,v,0} L Empty
+abbrev Const (L : Language.{u}) := Operator.{u,v,0} L Empty
 
-abbrev Monadic (L : ℕ → Type u) := Operator L Unit
+abbrev Monadic (L : Language.{u}) := Operator L Unit
 
-abbrev Finitary (L : ℕ → Type u) (n : ℕ) := Operator L (Fin n)
+abbrev Finitary (L : Language.{u}) (n : ℕ) := Operator L (Fin n)
 
 def Operator.const (c : Const L) : SubTerm L μ n := c.operator Empty.elim
 
@@ -567,7 +567,7 @@ namespace Rew
 open SubTerm
 
 variable
-  {L L' : ℕ → Type u} {L₁ : ℕ → Type u₁} {L₂ : ℕ → Type u₂}
+  {L L' : Language.{u}} {L₁ : Language.{u₁}} {L₂ : Language.{u₂}} {L₃ : Language.{u₃}}
   {μ μ' : Type v} {μ₁ : Type v₁} {μ₂ : Type v₂} {μ₃ : Type v₃}
   {n n₁ n₂ n₃ : ℕ}
 variable (ω : Rew L μ n₁ μ' n₂)

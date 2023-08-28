@@ -11,16 +11,18 @@ namespace SubTerm
 
 namespace Meta
 
+-- transform a Term to its normalform
+
 open FirstOrder.Rew
 
 section lemmata
-variable {L : ℕ → Type u} {μ : Type v} {n}
+variable {L : Language.{u}} {μ : Type v} {n}
 
 section Rew
 
 variable (ω : Rew L μ₁ n₁ μ₂ n₂)
 
-lemma Rew_func_eq_of_eq {k} (f : L k) {v : Fin k → SubTerm L μ₁ n₁} {v'} (h : ω ∘ v = v') :
+lemma Rew_func_eq_of_eq {k} (f : L.func k) {v : Fin k → SubTerm L μ₁ n₁} {v'} (h : ω ∘ v = v') :
     ω (func f v) = func f v' :=
   by simp[Rew.func, Function.comp, ←h]
 
@@ -92,7 +94,7 @@ lemma fix_substs_eq_of_eq {k} {t : SyntacticSubTerm L k} {w : Fin k → Syntacti
 
 end fix
 
-lemma func_congr  {k} (f : L k) {v₁ v₂ : Fin k → SyntacticSubTerm L n} (h : v₁ = v₂):
+lemma func_congr  {k} (f : L.func k) {v₁ v₂ : Fin k → SyntacticSubTerm L n} (h : v₁ = v₂):
     func f v₁ = func f v₂ := by simp[←h]
 
 lemma finitary_congr  {k} (f : Finitary L k) {v₁ v₂ : Fin k → SyntacticSubTerm L n} (h : v₁ = v₂):
@@ -139,7 +141,7 @@ end Const
 
 end lemmata
 
-partial def resultSubsts {L : Q(ℕ → Type u)} {k n : Q(ℕ)} (w : Q(Fin $k → SyntacticSubTerm $L $n)) :
+partial def resultSubsts {L : Q(Language.{u})} {k n : Q(ℕ)} (w : Q(Fin $k → SyntacticSubTerm $L $n)) :
     (t : Q(SyntacticSubTerm $L $k)) → MetaM ((res : Q(SyntacticSubTerm $L $n)) × Q(substs $w $t = $res))
   | ~q(#$x)                          => do
     let ⟨t, ht⟩ ← vectorQNth (u := u) k w x
@@ -164,7 +166,7 @@ partial def resultSubsts {L : Q(ℕ → Type u)} {k n : Q(ℕ)} (w : Q(Fin $k �
     return ⟨p', q(substs_substs_eq_of_eq $ve $pe)⟩
   | ~q($t)                           => pure ⟨q(substs $w $t), q(rfl)⟩
 
-partial def resultShift {L : Q(ℕ → Type u)} {n : Q(ℕ)} : (t : Q(SyntacticSubTerm $L $n)) →
+partial def resultShift {L : Q(Language.{u})} {n : Q(ℕ)} : (t : Q(SyntacticSubTerm $L $n)) →
     MetaM ((res : Q(SyntacticSubTerm $L $n)) × Q(shift $t = $res))
   | ~q(#$x)                          => pure ⟨q(#$x), q(shift_bvar $x)⟩
   | ~q(&$x)                          =>  do
@@ -192,7 +194,7 @@ partial def resultShift {L : Q(ℕ → Type u)} {n : Q(ℕ)} : (t : Q(SyntacticS
   | ~q($t)                           => do
     return ⟨q(shift $t), q(rfl)⟩
 
-partial def resultFree {L : Q(ℕ → Type u)} {n : Q(ℕ)} : (t : Q(SyntacticSubTerm $L ($n + 1))) →
+partial def resultFree {L : Q(Language.{u})} {n : Q(ℕ)} : (t : Q(SyntacticSubTerm $L ($n + 1))) →
     MetaM ((res : Q(SyntacticSubTerm $L $n)) × Q(free $t = $res))
   | ~q(#$x)                                       => do
     let n ←whnf n 
@@ -231,7 +233,7 @@ partial def resultFree {L : Q(ℕ → Type u)} {n : Q(ℕ)} : (t : Q(SyntacticSu
   | ~q($t)                                        => do
     return ⟨q(free $t), q(rfl)⟩
 
-partial def resultFix {L : Q(ℕ → Type u)} {n : Q(ℕ)} : (t : Q(SyntacticSubTerm $L $n)) →
+partial def resultFix {L : Q(Language.{u})} {n : Q(ℕ)} : (t : Q(SyntacticSubTerm $L $n)) →
     MetaM ((res : Q(SyntacticSubTerm $L ($n + 1))) × Q(fix $t = $res))
   | ~q(#$x)                                       => do
     let some xval := (← finQVal (n := q(.succ $n)) x) | throwError f!"Fail: FinQVal {x}"
@@ -272,7 +274,7 @@ partial def resultFix {L : Q(ℕ → Type u)} {n : Q(ℕ)} : (t : Q(SyntacticSub
     return ⟨q(fix $t), q(rfl)⟩
 
 elab "dbgResultFix" : term => do
-  let L : Q(ℕ → Type) := q(Language.ORingFunc)
+  let L : Q(Language.{0}) := q(Language.oRing)
   let t : Q(SyntacticTerm $L) := q(ᵀ“((&2 + 1) + 9) * (#0 + 1) ᵀ[&2 + 1, 6] ”)
   let ⟨e, eq⟩ ← resultFix (L := L) (n := q(0)) t
   logInfo m! "{t}\n ⟹\n {e}"
@@ -281,7 +283,7 @@ elab "dbgResultFix" : term => do
 
 #eval dbgResultFix
 
-partial def resultBShift {L : Q(ℕ → Type u)} {n : Q(ℕ)} : (t : Q(SyntacticSubTerm $L $n)) →
+partial def resultBShift {L : Q(Language.{u})} {n : Q(ℕ)} : (t : Q(SyntacticSubTerm $L $n)) →
     MetaM ((res : Q(SyntacticSubTerm $L ($n + 1))) × Q(bShift $t = $res))
   | ~q(#$x)                                       => do
     let some xval := (← finQVal (n := q(.succ $n)) x) | throwError f!"Fail: FinQVal {x}"
@@ -314,7 +316,7 @@ inductive NumeralUnfoldOption
   | unfoldSucc
   | all
 
-partial def natLitResult {L : Q(ℕ → Type u)}
+partial def natLitResult {L : Q(Language.{u})}
   (iz : Q(Language.Zero $L)) (io : Q(Language.One $L)) (ia : Q(Language.Add $L)) (n : Q(ℕ)) :
     NumeralUnfoldOption → (z : Q(ℕ)) → MetaM $ (res : Q(SyntacticSubTerm $L $n)) × Q(natLit $L $z = $res)
   | NumeralUnfoldOption.none       =>
@@ -340,7 +342,7 @@ partial def natLitResult {L : Q(ℕ → Type u)}
         return ⟨q(func Language.Add.add ![$e, natLit $L 1]), q(natLit_succ_eq_of_eq $e $he)⟩
       | ~q($z)      => return ⟨q(natLit $L $z), q(rfl)⟩
 
-partial def result (tp : NumeralUnfoldOption) {L : Q(ℕ → Type u)} {n : Q(ℕ)} : (t : Q(SyntacticSubTerm $L $n)) →
+partial def result (tp : NumeralUnfoldOption) {L : Q(Language.{u})} {n : Q(ℕ)} : (t : Q(SyntacticSubTerm $L $n)) →
     MetaM ((res : Q(SyntacticSubTerm $L $n)) × Q($t = $res))
   | ~q(#$x)                                       => pure ⟨q(#$x), q(rfl)⟩
   | ~q(&$x)                                       => pure ⟨q(&$x), q(rfl)⟩
@@ -380,11 +382,11 @@ elab "dbg" : tactic => do
   let c : Q(DbgResult (SyntacticSubTerm $L $n) $t) := (q(DbgResult.intro ($t) $tn $e) : Expr)
   Lean.Elab.Tactic.closeMainGoal c
 
-example {t : SyntacticSubTerm Language.ORingFunc 2} : DbgResult (SyntacticSubTerm Language.ORingFunc 12)
+example {t : SyntacticSubTerm Language.oRing 2} : DbgResult (SyntacticSubTerm Language.oRing 12)
     (shift $ substs ![substs ![ᵀ“6”, ᵀ“&7”] t, ᵀ“3 + &6”] ᵀ“(ᵀ!t) + (#0 * ᵀ!(shift ᵀ“#1 + 9 * #1”)) + &7”) :=
   by dbg
 
-example (t : SyntacticSubTerm Language.ORingFunc 3) : DbgResult (SyntacticSubTerm Language.ORingFunc 12)
+example (t : SyntacticSubTerm Language.oRing 3) : DbgResult (SyntacticSubTerm Language.oRing 12)
     $ free $ ᵀ“((#0 + #1 + #2 + 8 * ᵀ!t) ᵀ[#2, 7, 4] ᵀ[4, 4, 5]) * 8” :=
   by dbg
 
