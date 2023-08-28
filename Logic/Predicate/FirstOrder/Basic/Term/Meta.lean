@@ -5,6 +5,8 @@ open Qq Lean Elab Meta Tactic
 
 -- SubTerm normalization
 
+namespace LO
+
 namespace FirstOrder
 
 namespace SubTerm
@@ -397,3 +399,5 @@ end Meta
 end SubTerm
 
 end FirstOrder
+
+end LO

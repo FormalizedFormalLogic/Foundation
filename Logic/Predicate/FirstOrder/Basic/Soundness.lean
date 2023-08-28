@@ -1,6 +1,8 @@
 import Logic.Predicate.FirstOrder.Basic.Semantics
 import Logic.Predicate.FirstOrder.Basic.Calculus
 
+namespace LO
+
 namespace FirstOrder
 
 section soundness
@@ -69,3 +71,5 @@ instance : Logic.Sound (Sentence L) := ⟨soundness⟩
 end soundness
 
 end FirstOrder
+
+end LO

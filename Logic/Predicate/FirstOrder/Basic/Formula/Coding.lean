@@ -1,7 +1,7 @@
 import Logic.Predicate.FirstOrder.Basic.Formula.Formula
 import Logic.Predicate.FirstOrder.Basic.Term.Coding
 
-universe u v
+namespace LO
 
 namespace FirstOrder
 
@@ -95,3 +95,5 @@ instance (n) : Encodable (SubFormula L μ n) where
 end SubFormula
 
 end FirstOrder
+
+end LO

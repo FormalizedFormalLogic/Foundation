@@ -3,7 +3,7 @@ import Logic.Predicate.FirstOrder.Basic.Formula.Elab
 import Logic.Predicate.FirstOrder.Basic.Term.Meta
 open Qq Lean Elab Meta Tactic
 
-universe u v
+namespace LO
 
 namespace FirstOrder
 
@@ -736,3 +736,5 @@ end Meta
 end SubFormula
 
 end FirstOrder
+
+end LO

@@ -1,5 +1,7 @@
 import Logic.Vorspiel.Vorspiel
 
+namespace LO
+
 namespace Logic
 
 variable (F : Type u) [HasLogicSymbols F]
@@ -135,3 +137,5 @@ lemma realizeTheory_of_proofTheory {T U : Set F} (h : s ⊧ₛ* T) (b : T ⊢* U
 end Sound
 
 end Logic
+
+end LO

@@ -1,6 +1,8 @@
 import Logic.Vorspiel.Vorspiel
 import Mathlib.Data.Finset.Basic
 
+namespace LO
+    
 namespace FirstOrder
 
 structure Language where
@@ -279,7 +281,7 @@ structure Hom (L₁ L₂ : Language) where
   func : {k : ℕ} → L₁.func k → L₂.func k
   rel : {k : ℕ} → L₁.rel k → L₂.rel k
 
-scoped[FirstOrder] infix:25 " →ᵥ " => Language.Hom
+scoped[LO.FirstOrder] infix:25 " →ᵥ " => LO.FirstOrder.Language.Hom
  
 namespace Hom
 variable (L L₁ L₂ L₃ : Language) (Φ : Hom L₁ L₂)
@@ -320,3 +322,5 @@ end subLanguage
 end Language
 
 end FirstOrder
+
+end LO

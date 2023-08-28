@@ -1,6 +1,8 @@
 import Logic.Predicate.FirstOrder.Basic.Term.Elab
 import Logic.Predicate.FirstOrder.Basic.Formula.Formula
 
+namespace LO
+
 namespace FirstOrder
 
 namespace SubFormula
@@ -266,3 +268,7 @@ def unexpandNRelArith : Unexpander
 end delab
 
 end SubFormula
+
+end FirstOrder
+
+end LO

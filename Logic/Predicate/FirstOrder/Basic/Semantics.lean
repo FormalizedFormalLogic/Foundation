@@ -1,6 +1,8 @@
 import Logic.Predicate.FirstOrder.Basic.Formula.Formula
 import Logic.Vorspiel.Logic
 
+namespace LO
+
 namespace FirstOrder
 
 variable {L : Language.{u}} {μ : Type v} {μ₁ : Type v₁} {μ₂ : Type v₂}
@@ -525,3 +527,4 @@ end SubFormula
 
 end FirstOrder
 
+end LO

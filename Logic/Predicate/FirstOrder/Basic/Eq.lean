@@ -1,6 +1,8 @@
 import Logic.Predicate.FirstOrder.Basic.Formula.Elab
 import Logic.Predicate.FirstOrder.Basic.Semantics
 
+namespace LO
+
 namespace FirstOrder
 
 variable {L : Language.{u}} {μ : Type v} [L.Eq]
@@ -204,3 +206,5 @@ lemma satisfiableₛ_iff_eq {T : Theory L} [EqTheory T] :
   · intro ⟨M, i, s, _, hM⟩; exact ⟨M, i, s, hM⟩
 
 end FirstOrder
+
+end LO

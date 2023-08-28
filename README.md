@@ -4,8 +4,10 @@ Formalizing Logic in Lean4
 ## Structure
 - **Logic**
   - **Vorspiel**: Supplementary definitions and theorems for Mathlib
+  - **Propositional**: Propositional logic
   - **Predicate**: Predicate logic
     - **FirstOrder**: First-Order logic
+      - **Basic**: Basic Definitions & Theorems
       - **Completeness**: Completeness theorem
       - **Principia**: Proof system
       - **Arith**: Arithmetic
@@ -15,19 +17,19 @@ Formalizing Logic in Lean4
 
 |                                     |                                     | Definition                   | Notation |
 | :----:                              | ----                                | ----                         | :----:   |
-| $\vdash_\mathrm{T} \Gamma$          | Derivation in Tait-Calculus         |  `FirstOrder.Derivation`     | `⊢ᵀ Γ`    |
-| $(\rm Cut)\vdash_\mathrm{T} \Gamma$ | Derivation in Tait-Calculus + Cut   |  `FirstOrder.DerivationCut`     | `⊢ᶜ Γ`    |
-| $M \models \sigma$                  | Tarski's truth definition condition |  `FirstOrder.SubFormula.Val` | `M ⊧₁ σ` |
-| $T \vdash \sigma$                   | Provability, Proof                  |  `FirstOrder.Proof`          | `T ⊢ σ`  |
+| $\vdash_\mathrm{T} \Gamma$          | Derivation in Tait-Calculus         |  `LO.FirstOrder.Derivation`     | `⊢ᵀ Γ`    |
+| $(\rm Cut)\vdash_\mathrm{T} \Gamma$ | Derivation in Tait-Calculus + Cut   |  `LO.FirstOrder.DerivationCut`     | `⊢ᶜ Γ`    |
+| $M \models \sigma$                  | Tarski's truth definition condition |  `LO.FirstOrder.SubFormula.Val` | `M ⊧₁ σ` |
+| $T \vdash \sigma$                   | Provability, Proof                  |  `LO.FirstOrder.Proof`          | `T ⊢ σ`  |
 
 ## Theorem
 ### First-Order logic
 
 |                                | Proof                     | Proposition      | 
 | ----                           |  ----                     | :----:           |
-| Soundness theorem              | `FirstOrder.soundness`    | `T ⊢ σ → T ⊨ σ` |
-| Completeness theorem           | `FirstOrder.completeness` | `T ⊨ σ → T ⊢ σ` |
-| Cut-elimination                | `FirstOrder.DerivationCutRestricted.hauptsatz`    | `⊢ᶜ Δ → ⊢ᵀ Δ`   |
+| Soundness theorem              | `LO.FirstOrder.soundness`    | `T ⊢ σ → T ⊨ σ` |
+| Completeness theorem           | `LO.FirstOrder.completeness` | `T ⊨ σ → T ⊢ σ` |
+| Cut-elimination                | `LO.FirstOrder.DerivationCutRestricted.hauptsatz`    | `⊢ᶜ Δ → ⊢ᵀ Δ`   |
 | Gödel's incompleteness theorem | TODO                      |                  |
 
 ## Principia

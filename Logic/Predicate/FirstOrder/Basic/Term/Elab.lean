@@ -1,5 +1,7 @@
 import Logic.Predicate.FirstOrder.Basic.Term.Term
 
+namespace LO
+
 namespace FirstOrder
 
 namespace SubTerm
@@ -177,7 +179,7 @@ def unexpandFuncArith : Unexpander
 #check natLit Language.oRing 99
 #check (ᵀ“1 + 8” : SubTerm Language.oRing ℕ 8)
 #check (SubTerm.func Language.Mul.mul (ᵀ“1” :> ᵀ“3” :> Matrix.vecEmpty) : SubTerm Language.oRing ℕ 8)
-#check ᵀ“3 + 8 * exp &6 + 2 *#0”
+#check ᵀ“3 + 8 * exp &6 + 2 * ᵀ!(#3)”
 #check [→ &0, &5] ᵀ“3 * #3 + 9”
 #check Rew.shift ᵀ“(3 * #3 + 9)”
 
@@ -186,3 +188,5 @@ end delab
 end SubTerm
 
 end FirstOrder
+
+end LO

@@ -1,5 +1,7 @@
 import Logic.Predicate.FirstOrder.Basic.Language
 
+namespace LO
+
 namespace FirstOrder
 
 inductive SubTerm (L : Language.{u}) (μ : Type v) (n : ℕ)
@@ -649,3 +651,5 @@ protected lemma operator' (o : Operator L ι) (v : ι → SubTerm L μ n₁) :
 end Rew
 
 end FirstOrder
+
+end LO

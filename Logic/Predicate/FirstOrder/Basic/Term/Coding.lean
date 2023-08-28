@@ -1,7 +1,7 @@
 import Logic.Predicate.FirstOrder.Basic.Term.Term
 import Mathlib.Data.W.Basic
 
-universe u v
+namespace LO
 
 namespace FirstOrder
 
@@ -75,3 +75,5 @@ lemma mem_enumLt_of_lt {i} {t : SyntacticTerm L} (h : encode t < i) : t ∈ enum
 end SubTerm
 
 end FirstOrder
+
+end LO

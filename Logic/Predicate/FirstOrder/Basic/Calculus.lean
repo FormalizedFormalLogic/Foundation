@@ -1,7 +1,7 @@
 import Logic.Predicate.FirstOrder.Basic.Formula.Formula
 import Logic.Vorspiel.Logic
 
-universe u v
+namespace LO
 
 namespace FirstOrder
 
@@ -445,3 +445,5 @@ def SentenceCalculus.derivation {T : Theory L} {σ : Sentence L} (b : T ⊢ σ) 
       by { rintro ⟨τ, h, rfl⟩; exact h }⟩)
 
 end FirstOrder
+
+end LO

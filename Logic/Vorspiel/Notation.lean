@@ -3,6 +3,8 @@ import Mathlib.Order.BoundedOrder
 
 universe u v
 
+namespace LO
+
 section logicNotation
 
 @[notation_class] class HasNeg (α : Sort _) where
@@ -203,3 +205,4 @@ end quantifier
 
 end HasLogicSymbols
 
+end LO

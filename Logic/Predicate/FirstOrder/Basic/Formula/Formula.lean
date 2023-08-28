@@ -1,5 +1,7 @@
 import Logic.Predicate.FirstOrder.Basic.Term.Term
 
+namespace LO
+
 namespace FirstOrder
 
 inductive SubFormula (L : Language.{u}) (μ : Type v) : ℕ → Type (max u v) where
@@ -755,3 +757,5 @@ end SubTheory
 def Theory.lMap (Φ : L₁ →ᵥ L₂) (T : Theory L₁) : Theory L₂ := SubFormula.lMap Φ '' T
 
 end FirstOrder
+
+end LO
