@@ -393,6 +393,8 @@ abbrev bindl (b : Fin n₁ → SubTerm L μ₂ n₂) (e : μ₁ → SubTerm L μ
 
 abbrev rewritel (f : μ₁ → SubTerm L μ₂ n) : SubFormula L μ₁ n →L SubFormula L μ₂ n := (rewrite f).hom
 
+abbrev rewriteMapl (e : μ₁ → μ₂) : SubFormula L μ₁ n →L SubFormula L μ₂ n := (rewriteMap e).hom
+
 abbrev mapl (b : Fin n₁ → Fin n₂) (e : μ₁ → μ₂) : SubFormula L μ₁ n₁ →L SubFormula L μ₂ n₂ := (map b e).hom
 
 abbrev map₀l (e : μ₁ → μ₂) : SubFormula L μ₁ n →L SubFormula L μ₂ n := mapl id e
@@ -451,6 +453,15 @@ lemma embl_Injective {o} [e : IsEmpty o] : Function.Injective (embl : SubFormula
 
 lemma shiftl_Injective : Function.Injective (shiftl : SyntacticSubFormula L n → SyntacticSubFormula L n) :=
   by simp[shiftl, shift]; exact mapl_inj Function.injective_id Nat.succ_injective
+
+@[simp] lemma hom_fix_free (p : SyntacticSubFormula L (n + 1)) :
+    fixl (freel p) = p := by simp[←hom_comp_app]
+
+@[simp] lemma hom_free_fix (p : SyntacticSubFormula L n) :
+    freel (fixl p) = p := by simp[←hom_comp_app]
+
+@[simp] lemma hom_substs_mbar_zero_comp_shift_eq_free (p : SyntacticSubFormula L 1) :
+    substsl ![&0] (Rew.shiftl p) = freel p := by simp[←hom_comp_app, substs_mbar_zero_comp_shift_eq_free]
 
 end Rew
 
@@ -580,24 +591,27 @@ def fvarList : {n : ℕ} → SubFormula L μ n → List μ
 
 abbrev fvar? (p : SubFormula L μ n) (x : μ) : Prop := x ∈ p.fvarList
 
-lemma bind_eq_of_funEqOn (b : Fin n₁ → SubTerm L μ₂ n₂) (e₁ e₂ : μ₁ → SubTerm L μ₂ n₂) (p : SubFormula L μ₁ n₁)
-  (h : Function.funEqOn (fvar? p) e₁ e₂) :
-    Rew.bindl b e₁ p = Rew.bindl b e₂ p := by
-  induction p using rec' generalizing n₂ <;> simp[*, Rew.rel, Rew.nrel] <;> simp[fvar?, fvarList] at h
+lemma rew_eq_of_funEqOn {ω₁ ω₂ : Rew L μ₁ n₁ μ₂ n₂} {p}
+  (hb : ∀ x, ω₁ #x = ω₂ #x) (hf : Function.funEqOn (fvar? p) (ω₁ ∘ SubTerm.fvar) (ω₂ ∘ SubTerm.fvar)) :
+    ω₁.hom p = ω₂.hom p := by
+  induction p using rec' generalizing n₂ <;> simp[*, Rew.rel, Rew.nrel] <;> simp[fvar?, fvarList] at hf
   case hrel =>
     funext i
-    exact SubTerm.bind_eq_of_funEqOn _ _ _ _ (h.of_subset (by simp[fvarList]; intro x hx; exact ⟨i, hx⟩))
+    exact SubTerm.rew_eq_of_funEqOn _ _ _ hb (hf.of_subset (by simp[fvarList]; intro x hx; exact ⟨i, hx⟩))
   case hnrel =>
     funext i
-    exact SubTerm.bind_eq_of_funEqOn _ _ _ _ (h.of_subset (by simp[fvarList]; intro x hx; exact ⟨i, hx⟩))
+    exact SubTerm.rew_eq_of_funEqOn _ _ _ hb (hf.of_subset (by simp[fvarList]; intro x hx; exact ⟨i, hx⟩))
   case hand ihp ihq =>
-    exact ⟨ihp _ _ _ (h.of_subset (fun x hx => Or.inl hx)), ihq _ _ _ (h.of_subset (fun x hx => Or.inr hx))⟩
+    exact ⟨ihp hb (hf.of_subset (fun x hx => Or.inl hx)), ihq hb (hf.of_subset (fun x hx => Or.inr hx))⟩
   case hor ihp ihq =>
-    exact ⟨ihp _ _ _ (h.of_subset (fun x hx => Or.inl hx)), ihq _ _ _ (h.of_subset (fun x hx => Or.inr hx))⟩
+    exact ⟨ihp hb (hf.of_subset (fun x hx => Or.inl hx)), ihq hb (hf.of_subset (fun x hx => Or.inr hx))⟩
   case hall ih =>
-    exact ih _ _ _ (by intro x hx; simp[h x hx])
+    exact ih (fun x => by cases x using Fin.cases <;> simp[hb]) (fun x hx => by simp; exact congr_arg _ (hf x hx))
   case hex ih =>
-    exact ih _ _ _ (by intro x hx; simp[h x hx])
+    exact ih (fun x => by cases x using Fin.cases <;> simp[hb]) (fun x hx => by simp; exact congr_arg _ (hf x hx))
+
+lemma rew_eq_of_funEqOn₀ {ω₁ ω₂ : Rew L μ₁ 0 μ₂ n₂} {p} (hf : Function.funEqOn (fvar? p) (ω₁ ∘ SubTerm.fvar) (ω₂ ∘ SubTerm.fvar)) : ω₁.hom p = ω₂.hom p :=
+  rew_eq_of_funEqOn (fun x => Fin.elim0 x) hf
 
 def upper (p : SyntacticSubFormula L n) : ℕ := Finset.sup p.fvarList.toFinset id + 1
 
@@ -610,11 +624,6 @@ lemma not_fvar?_of_lt_upper (p : SyntacticSubFormula L n) (h : p.upper ≤ m) : 
 
 @[simp] lemma not_fvar?_upper (p : SyntacticSubFormula L n) : ¬fvar? p p.upper :=
   not_fvar?_of_lt_upper p (by simp)
-
-lemma bind_eq_of_funEqOn' {b₁ b₂ : Fin n → SubTerm L μ n} {e₁ e₂ : μ → SubTerm L μ n} (p : SubFormula L μ n)
-  (hb : b₁ = b₂)
-  (he : Function.funEqOn (fvar? p) e₁ e₂) : Rew.bindl b₁ e₁ p = Rew.bindl b₂ e₂ p := by
-  rw[hb]; exact bind_eq_of_funEqOn _ _ _ _ he
 
 lemma ne_of_ne_complexity {p q : SubFormula L μ n} (h : p.complexity ≠ q.complexity) : p ≠ q :=
   by rintro rfl; contradiction
@@ -676,27 +685,27 @@ lemma lMap_nrel {k} (r : L₁.rel k) (v : Fin k → SubTerm L₁ μ n) :
 @[simp] lemma lMap_ex (p : SubFormula L₁ μ (n + 1)) :
     lMap Φ (∃' p) = ∃' lMap Φ p := rfl
 
-lemma lMap_bindl (b : Fin n₁ → SubTerm L₁ μ₂ n₂) (e : μ₁ → SubTerm L₁ μ₂ n₂) (p) :
+lemma lMap_bind (b : Fin n₁ → SubTerm L₁ μ₂ n₂) (e : μ₁ → SubTerm L₁ μ₂ n₂) (p) :
     lMap Φ (Rew.bindl b e p) = Rew.bindl (SubTerm.lMap Φ ∘ b) (SubTerm.lMap Φ ∘ e) (lMap Φ p) := by
   induction p using rec' generalizing μ₂ n₂ <;>
   simp[*, Rew.rel, Rew.nrel, lMap_rel, lMap_nrel, SubTerm.lMap_bind, Rew.q_bind, Matrix.comp_vecCons', SubTerm.lMap_bShift, Function.comp]
 
-lemma lMap_mapl (b : Fin n₁ → Fin n₂) (e : μ₁ → μ₂) (p) :
-    lMap Φ (Rew.mapl b e p) = Rew.mapl b e (lMap Φ p) := lMap_bindl _ _ _
+lemma lMap_map (b : Fin n₁ → Fin n₂) (e : μ₁ → μ₂) (p) :
+    lMap Φ (Rew.mapl b e p) = Rew.mapl b e (lMap Φ p) := lMap_bind _ _ _
 
-lemma lMap_substsl (w : Fin k → SubTerm L₁ μ n) (p : SubFormula L₁ μ k) :
-    lMap Φ (Rew.substsl w p) = Rew.substsl (SubTerm.lMap Φ ∘ w) (lMap Φ p) := lMap_bindl _ _ _
+lemma lMap_substs (w : Fin k → SubTerm L₁ μ n) (p : SubFormula L₁ μ k) :
+    lMap Φ (Rew.substsl w p) = Rew.substsl (SubTerm.lMap Φ ∘ w) (lMap Φ p) := lMap_bind _ _ _
 
-lemma lMap_shift (p : SyntacticSubFormula L₁ n) : lMap Φ (Rew.shiftl p) = Rew.shiftl (lMap Φ p) := lMap_bindl _ _ _
+lemma lMap_shift (p : SyntacticSubFormula L₁ n) : lMap Φ (Rew.shiftl p) = Rew.shiftl (lMap Φ p) := lMap_bind _ _ _
 
 lemma lMap_free (p : SyntacticSubFormula L₁ (n + 1)) : lMap Φ (Rew.freel p) = Rew.freel (lMap Φ p) := by
-  simp[Rew.freel, Rew.free, lMap_bindl, Function.comp, Matrix.comp_vecConsLast]
+  simp[Rew.freel, Rew.free, lMap_bind, Function.comp, Matrix.comp_vecConsLast]
   
 lemma lMap_fix (p : SyntacticSubFormula L₁ n) : lMap Φ (Rew.fixl p) = Rew.fixl (lMap Φ p) :=
-  by simp[Rew.fixl, Rew.fix, lMap_bindl, Function.comp, Rew.bindl]; congr; { funext x; cases x <;> simp }
+  by simp[Rew.fixl, Rew.fix, lMap_bind, Function.comp, Rew.bindl]; congr; { funext x; cases x <;> simp }
 
 lemma lMap_emb {o : Type w} [IsEmpty o] (p : SubFormula L₁ o n) :
-    (lMap Φ (Rew.embl p) : SubFormula L₂ μ n) = Rew.embl (lMap Φ p) := lMap_bindl _ _ _
+    (lMap Φ (Rew.embl p) : SubFormula L₂ μ n) = Rew.embl (lMap Φ p) := lMap_bind _ _ _
 
 variable [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq (L.rel k)]
 

@@ -138,7 +138,9 @@ def bind (b : Fin n₁ → SubTerm L μ₂ n₂) (e : μ₁ → SubTerm L μ₂ 
   toFun := bindAux b e
   func' := fun _ _ => rfl
 
-abbrev rewrite (f : μ₁ → SubTerm L μ₂ n) : Rew L μ₁ n μ₂ n := bind SubTerm.bvar f
+def rewrite (f : μ₁ → SubTerm L μ₂ n) : Rew L μ₁ n μ₂ n := bind SubTerm.bvar f
+
+def rewriteMap (e : μ₁ → μ₂) : Rew L μ₁ n μ₂ n := bind SubTerm.bvar (fun m => &(e m))
 
 def map (b : Fin n₁ → Fin n₂) (e : μ₁ → μ₂) : Rew L μ₁ n₁ μ₂ n₂ :=
   bind (fun n => #(b n)) (fun m => &(e m))
@@ -195,6 +197,28 @@ lemma map_inj {b : Fin n₁ → Fin n₂} {e : μ₁ → μ₂} (hb : Function.I
       funext i; exact map_inj hb he (congr_fun h i)
 
 end map
+
+section rewrite
+
+variable (f : μ₁ → SubTerm L μ₂ n)
+
+@[simp] lemma rewrite_fvar (x : μ₁) : rewrite f &x = f x := rfl
+
+@[simp] lemma rewrite_bvar (x : Fin n) : rewrite e (#x : SubTerm L μ₁ n) = #x := rfl
+
+end rewrite
+
+section rewriteMap
+
+variable (e : μ₁ → μ₂)
+
+@[simp] lemma rewriteMap_fvar (x : μ₁) : rewriteMap e (&x : SubTerm L μ₁ n) = &(e x) := rfl
+
+@[simp] lemma rewriteMap_bvar (x : Fin n) : rewriteMap e (#x : SubTerm L μ₁ n) = #x := rfl
+
+@[simp] lemma rewriteMap_id : rewriteMap (L := L) (n := n) (id : μ → μ) = Rew.id := by ext <;> simp
+
+end rewriteMap
 
 section emb
 
@@ -273,6 +297,12 @@ lemma q_bind (b : Fin n₁ → SubTerm L μ₂ n₂) (e : μ₁ → SubTerm L μ
 
 lemma q_map (b : Fin n₁ → Fin n₂) (e : μ₁ → μ₂) :
     (map (L := L) b e).q = map (0 :> Fin.succ ∘ b) e := by ext x; { cases x using Fin.cases <;> simp }; { simp }
+
+lemma q_rewrite (f : μ₁ → SubTerm L μ₂ n) :
+    (rewrite f).q = rewrite (bShift ∘ f) := by ext x; { cases x using Fin.cases <;> simp[rewriteMap] }; { simp }
+
+@[simp] lemma q_rewriteMap (e : μ₁ → μ₂) :
+    (rewriteMap (L := L) (n := n) e).q = rewriteMap e := by ext x; { cases x using Fin.cases <;> simp[rewriteMap] }; { simp }
 
 @[simp] lemma q_emb {o : Type v₁} [e : IsEmpty o] {n} :
     (emb (L := L) (o := o) (μ := μ₂) (n := n)).q = emb := by ext x; { cases x using Fin.cases <;> simp }; { exact e.elim x }
@@ -376,9 +406,20 @@ lemma rewrite_comp_shift_eq_substs (t : SyntacticTerm L) :
 lemma substs_mbar_zero_comp_shift_eq_free :
     (substs (L := L) ![&0]).comp shift = free := by ext x <;> simp[comp_app, Fin.eq_zero]
 
+@[simp] lemma substs_comp_bShift_eq_id (v : Fin 1 → SubTerm L μ 0) :
+    (substs (L := L) v).comp bShift = Rew.id := by ext x <;> simp[comp_app]; exact Fin.elim0 x
+
 lemma free_comp_substs_eq_substs_comp_shift {n'} (w : Fin n' → SyntacticSubTerm Lf (n + 1)) :
     free.comp (substs w) = (substs (free ∘ w)).comp shift :=
   by ext x <;> simp[comp_app]
+
+@[simp] lemma fix_free_app (t : SyntacticSubTerm L (n + 1)) : fix (free t) = t := by simp[←comp_app]
+
+@[simp] lemma free_fix_app (t : SyntacticSubTerm L n) : free (fix t) = t := by simp[←comp_app]
+
+@[simp] lemma free_bShift_app (t : SyntacticSubTerm L 0) : free (bShift t) = shift t := by simp[←comp_app]
+
+@[simp] lemma substs_bShift_app (v : Fin 1 → SubTerm L μ 0) : substs v (bShift t) = t := by simp[←comp_app]
 
 section q
 
@@ -434,6 +475,17 @@ abbrev fvar? (t : SubTerm L μ n) (x : μ) : Prop := x ∈ t.fvarList
     x ∈ (func f v).fvarList ↔ ∃ i, x ∈ (v i).fvarList :=
   by simp[fvarList]
 
+lemma rew_eq_of_funEqOn (ω₁ ω₂ : Rew L μ₁ n₁ μ₂ n₂) (t : SubTerm L μ₁ n₁)
+  (hb : ∀ x, ω₁ #x = ω₂ #x)
+  (he : Function.funEqOn t.fvar? (ω₁ ∘ SubTerm.fvar) (ω₂ ∘ SubTerm.fvar)) :
+    ω₁ t = ω₂ t := by
+  induction t <;> simp[Rew.func, hb]
+  case fvar => simpa[fvar?, Function.funEqOn] using he
+  case func k f v ih =>
+    funext i
+    exact ih i (he.of_subset $ by simp[fvar?]; intro x hx; exact ⟨i, hx⟩)
+
+/-
 lemma bind_eq_of_funEqOn (b : Fin n₁ → SubTerm L μ₂ n₂) (e₁ e₂ : μ₁ → SubTerm L μ₂ n₂) (t : SubTerm L μ₁ n₁)
   (h : Function.funEqOn t.fvar? e₁ e₂) :
     bind b e₁ t = bind b e₂ t := by
@@ -442,6 +494,7 @@ lemma bind_eq_of_funEqOn (b : Fin n₁ → SubTerm L μ₂ n₂) (e₁ e₂ : μ
   case func k f v ih =>
     funext i
     exact ih i (h.of_subset $ by simp[fvar?]; intro x hx; exact ⟨i, hx⟩)
+-/
 
 section lang
 
