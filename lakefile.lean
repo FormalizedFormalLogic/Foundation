@@ -10,7 +10,7 @@ lean_lib «Logic» {
 }
 
 require mathlib from git
-  "https://github.com/leanprover-community/mathlib4.git" @ "4ed6589"
+  "https://github.com/leanprover-community/mathlib4.git"
 
 
 @[default_target]
