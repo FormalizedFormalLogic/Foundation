@@ -1,13 +1,13 @@
-import Logic.Predicate.FirstOrder.Semantics
+import Logic.Predicate.FirstOrder.Basic.Semantics
 
-universe u v
+namespace LO
+
+namespace FirstOrder
 
 section
 
 variable {L : Language.{u}} {μ : Type v}
  {I : Type u} (A : I → Type u) [(ι : I) → Inhabited (A ι)] [s : (ι : I) → FirstOrder.Structure L (A ι)] (𝓤 : Ultrafilter I)
-
-namespace FirstOrder
 
 namespace Structure
 
@@ -15,24 +15,22 @@ structure Uprod (𝓤 : Ultrafilter I) where
   val : (i : I) → A i
 
 instance UprodStruc : Structure.{u,u} L (Uprod A 𝓤) where
-  func := fun f v => ⟨fun ι => (s ι).func f (fun i => (v i).val ι)⟩
-  rel  := fun r v => {ι | (s ι).rel r (fun i => (v i).val ι)} ∈ 𝓤
+  func := fun _ f v => ⟨fun ι => (s ι).func f (fun i => (v i).val ι)⟩
+  rel  := fun _ r v => {ι | (s ι).rel r (fun i => (v i).val ι)} ∈ 𝓤
 
 instance [Inhabited I] [(ι : I) → Inhabited (A ι)] : Inhabited (Uprod A 𝓤) := ⟨⟨default⟩⟩
 
 @[simp] lemma func_Uprod {k} (f : L.func k) (v : Fin k → Uprod A 𝓤) :
-    func f v = ⟨fun ι => (s ι).func f (fun i => (v i).val ι)⟩ := rfl
+    Structure.func f v = ⟨fun ι => (s ι).func f (fun i => (v i).val ι)⟩ := rfl
 
 @[simp] lemma rel_Uprod {k} (r : L.rel k) (v : Fin k → Uprod A 𝓤) :
-    rel r v ↔ {ι | (s ι).rel r (fun i => (v i).val ι)} ∈ 𝓤 := of_eq rfl
+    Structure.rel r v ↔ {ι | (s ι).rel r (fun i => (v i).val ι)} ∈ 𝓤 := of_eq rfl
 
 end Structure
 
-end FirstOrder
-
 namespace SubTerm
 
-open FirstOrder Structure
+open Structure
 
 variable (e : Fin n → Uprod A 𝓤) (ε : μ → Uprod A 𝓤)
 
@@ -42,13 +40,12 @@ lemma val_Uprod (t : SubTerm L μ n) :
 
 end SubTerm
 
-namespace FirstOrder
-
 open Structure
 
 variable {A} {𝓤}
 
 namespace SubFormula
+
 variable {e : Fin n → Uprod A 𝓤} {ε : μ → Uprod A 𝓤}
 
 lemma val_vecCons_val_eq {z : Uprod A 𝓤} {ι : I} :
@@ -102,21 +99,19 @@ lemma val_Uprod {p : Formula L μ} :
 end SubFormula
 
 lemma realize_Uprod {σ : Sentence L} :
-    (Uprod A 𝓤) ⊧₁ σ ↔ {ι | Logic.Semantics.realize (self := semantics) (s ι) σ} ∈ 𝓤 :=
+    (Uprod A 𝓤) ⊧ σ ↔ {ι | Logic.Semantics.realize (self := semantics) (s ι) σ} ∈ 𝓤 :=
   by simp[realize_def, SubFormula.val_Uprod, Empty.eq_elim]
 
 variable (A)
 
-def SubFormula.domain (σ : Sentence L) := {ι | (A ι) ⊧₁ σ}
-
-end FirstOrder
+def SubFormula.domain (σ : Sentence L) := {ι | (A ι) ⊧ σ}
 
 end
 
 section
 
-namespace FirstOrder
 open Logic
+
 variable {L : Language.{u}} {T : Theory L}
 
 abbrev FinSubTheory (T : Theory L) := {t : Finset (Sentence L) // ↑t ⊆ T}
@@ -126,7 +121,7 @@ variable (A : FinSubTheory T → Type u) [s : (ι : FinSubTheory T) → Structur
 instance : Inhabited (FinSubTheory T) := ⟨∅, by simp⟩
 
 attribute [instance] Classical.propDecidable in
-lemma ultrafilter_exists (H : ∀ (ι : FinSubTheory T), (A ι) ⊧₁* (ι.val : Theory L)) :
+lemma ultrafilter_exists (H : ∀ (ι : FinSubTheory T), (A ι) ⊧* (ι.val : Theory L)) :
     ∃ 𝓤 : Ultrafilter (FinSubTheory T), Set.image (SubFormula.domain A) T ⊆ 𝓤.sets :=
   Ultrafilter.exists_ultrafilter_of_finite_inter_nonempty _ (by
     simp[Finset.subset_image_iff, SubFormula.domain]
@@ -140,19 +135,20 @@ lemma compactnessAux :
   constructor
   · rintro h ⟨t, ht⟩; exact Semantics.satisfiableₛ_of_subset h ht
   · intro h
-    have : ∀ ι : FinSubTheory T, ∃ (M : Type u) (_ : Inhabited M) (_ : Structure L M), M ⊧₁* (ι.val : Theory L) := 
+    have : ∀ ι : FinSubTheory T, ∃ (M : Type u) (_ : Inhabited M) (_ : Structure L M), M ⊧* (ι.val : Theory L) := 
       by intro ι; exact satisfiableₛ_iff.mp (h ι)
     choose A si s hA using this
     have : ∃ 𝓤 : Ultrafilter (FinSubTheory T), Set.image (SubFormula.domain A) T ⊆ 𝓤.sets := ultrafilter_exists A hA
     rcases this with ⟨𝓤, h𝓤⟩
-    have : Structure.Uprod A 𝓤 ⊧₁* T := by intro σ hσ; exact realize_Uprod.mpr (h𝓤 $ Set.mem_image_of_mem (SubFormula.domain A) hσ)
+    have : Structure.Uprod A 𝓤 ⊧* T := by intro σ hσ; exact realize_Uprod.mpr (h𝓤 $ Set.mem_image_of_mem (SubFormula.domain A) hσ)
     exact satisfiableₛ_intro (Structure.Uprod A 𝓤) this
 
 theorem compactness :
     Semantics.Satisfiableₛ T ↔ ∀ T' : Finset (Sentence L), ↑T' ⊆ T → Semantics.Satisfiableₛ (T' : Theory L) := by
   rw[compactnessAux]; simp
 
-end FirstOrder
-
 end
 
+end FirstOrder
+
+end LO

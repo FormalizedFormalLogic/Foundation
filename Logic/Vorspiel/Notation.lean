@@ -7,37 +7,37 @@ namespace LO
 
 section logicNotation
 
-@[notation_class] class HasNeg (α : Sort _) where
-  neg : α → α
+@[notation_class] class Tilde (α : Sort _) where
+  tilde : α → α
 
-prefix:75 "~" => HasNeg.neg
+prefix:75 "~" => Tilde.tilde
 
-@[notation_class] class HasArrow (α : Sort _) where
+@[notation_class] class Arrow (α : Sort _) where
   arrow : α → α → α
 
-infixr:60 " ⟶ " => HasArrow.arrow
+infixr:60 " ⟶ " => Arrow.arrow
 
-@[notation_class] class HasAnd (α : Sort _) where
-  and : α → α → α
+@[notation_class] class Wedge (α : Sort _) where
+  wedge : α → α → α
 
-infixl:69 " ⋏ " => HasAnd.and
+infixl:69 " ⋏ " => Wedge.wedge
 
-@[match_pattern, notation_class] class HasOr (α : Sort _) where
-  or : α → α → α
+@[match_pattern, notation_class] class Vee (α : Sort _) where
+  vee : α → α → α
 
-infixl:68 " ⋎ " => HasOr.or
+infixl:68 " ⋎ " => Vee.vee
 
-class HasLogicSymbols (α : Sort _)
-  extends Top α, Bot α, HasNeg α, HasArrow α, HasAnd α, HasOr α
+class LogicSymbol (α : Sort _)
+  extends Top α, Bot α, Tilde α, Arrow α, Wedge α, Vee α
 
-@[notation_class] class HasUniv (α : ℕ → Sort _) where
+@[notation_class] class UnivQuantifier (α : ℕ → Sort _) where
   univ : ∀ {n}, α (n + 1) → α n
 
-prefix:64 "∀' " => HasUniv.univ
+prefix:64 "∀' " => UnivQuantifier.univ
 
-section HasUniv
+section UnivQuantifier
 
-variable {α : ℕ → Sort u} [HasUniv α]
+variable {α : ℕ → Sort u} [UnivQuantifier α]
 
 def univClosure : {n : ℕ} → α n → α 0
   | 0,     a => a
@@ -47,14 +47,14 @@ def univClosure : {n : ℕ} → α n → α 0
 
 @[simp] lemma univ_closure_succ {n} (a : α (n + 1)) : univClosure a = univClosure (∀' a) := rfl
 
-end HasUniv
+end UnivQuantifier
 
-@[notation_class] class HasEx (α : ℕ → Sort _) where
+@[notation_class] class ExQuantifier (α : ℕ → Sort _) where
   ex : ∀ {n}, α (n + 1) → α n
 
-prefix:64 "∃' " => HasEx.ex
+prefix:64 "∃' " => ExQuantifier.ex
 
-attribute [match_pattern] HasNeg.neg HasArrow.arrow HasAnd.and HasOr.or HasUniv.univ HasEx.ex
+attribute [match_pattern] Tilde.tilde Arrow.arrow Wedge.wedge Vee.vee UnivQuantifier.univ ExQuantifier.ex
 
 @[notation_class] class HasTurnstile (α : Sort _) (β : Sort _) where
   turnstile : Set α → α → β
@@ -68,25 +68,25 @@ prefix:45 "⊩ " => HasVdash.vdash
 
 end logicNotation
 
-namespace HasLogicSymbols
+namespace LogicSymbol
 
 section
-variable {α : Sort _} [HasLogicSymbols α]
+variable {α : Sort _} [LogicSymbol α]
 
 @[match_pattern] def iff (a b : α) := (a ⟶ b) ⋏ (b ⟶ a)
 
-infix:61 " ⟷ " => HasLogicSymbols.iff
+infix:61 " ⟷ " => LogicSymbol.iff
 
 end
 
 @[reducible]
-instance Prop_HasLogicSymbols : HasLogicSymbols Prop where
+instance Prop_HasLogicSymbols : LogicSymbol Prop where
   top := True
   bot := False
-  neg := Not
+  tilde := Not
   arrow := fun P Q => (P → Q)
-  and := And
-  or := Or
+  wedge := And
+  vee := Or
 
 @[simp] lemma Prop_top_eq : ⊤ = True := rfl
 
@@ -100,9 +100,9 @@ instance Prop_HasLogicSymbols : HasLogicSymbols Prop where
 
 @[simp] lemma Prop_or_eq (p q : Prop) : (p ⋎ q) = (p ∨ q) := rfl
 
-@[simp] lemma Prop_iff_eq (p q : Prop) : (p ⟷ q) = (p ↔ q) := by simp[HasLogicSymbols.iff, iff_iff_implies_and_implies]
+@[simp] lemma Prop_iff_eq (p q : Prop) : (p ⟷ q) = (p ↔ q) := by simp[LogicSymbol.iff, iff_iff_implies_and_implies]
 
-class HomClass (F : Type _) (α β : outParam (Type _)) [HasLogicSymbols α] [HasLogicSymbols β] extends FunLike F α (fun _ => β) where
+class HomClass (F : Type _) (α β : outParam (Type _)) [LogicSymbol α] [LogicSymbol β] extends FunLike F α (fun _ => β) where
   map_top : ∀ (f : F), f ⊤ = ⊤
   map_bot : ∀ (f : F), f ⊥ = ⊥
   map_neg : ∀ (f : F) (p : α), f (~ p) = ~f p
@@ -114,17 +114,17 @@ attribute [simp] HomClass.map_top HomClass.map_bot HomClass.map_neg HomClass.map
 
 namespace HomClass
 
-variable (F : Type _) (α β : outParam (Type _)) [HasLogicSymbols α] [HasLogicSymbols β]
+variable (F : Type _) (α β : outParam (Type _)) [LogicSymbol α] [LogicSymbol β]
 variable [HomClass F α β]
 variable (f : F) (a b : α)
 
 instance : CoeFun F (fun _ => α → β) := ⟨FunLike.coe⟩
 
-@[simp] lemma map_iff : f (a ⟷ b) = f a ⟷ f b := by simp[HasLogicSymbols.iff]
+@[simp] lemma map_iff : f (a ⟷ b) = f a ⟷ f b := by simp[LogicSymbol.iff]
 
 end HomClass
 
-variable (α β γ : Type _) [HasLogicSymbols α] [HasLogicSymbols β] [HasLogicSymbols γ]
+variable (α β γ : Type _) [LogicSymbol α] [LogicSymbol β] [LogicSymbol γ]
 
 structure Hom where
   toTr : α → β
@@ -174,7 +174,7 @@ protected def id : α →L α where
   map_and' := by simp
   map_or' := by simp
 
-@[simp] lemma app_id (a : α) : HasLogicSymbols.Hom.id a = a := rfl
+@[simp] lemma app_id (a : α) : LogicSymbol.Hom.id a = a := rfl
 
 def comp (g : β →L γ) (f : α →L β) : α →L γ where
   toTr := g ∘ f
@@ -191,7 +191,7 @@ def comp (g : β →L γ) (f : α →L β) : α →L γ where
 end Hom
 
 section quantifier
-variable {α : ℕ → Type u} [∀ i, HasLogicSymbols (α i)] [HasUniv α] [HasEx α]
+variable {α : ℕ → Type u} [∀ i, LogicSymbol (α i)] [UnivQuantifier α] [ExQuantifier α]
 
 def ball (p : α (n + 1)) (q : α (n + 1)) : α n := ∀' (p ⟶ q)
 
@@ -203,6 +203,6 @@ notation:64 "∃[" p "] " q => bex p q
 
 end quantifier
 
-end HasLogicSymbols
+end LogicSymbol
 
 end LO

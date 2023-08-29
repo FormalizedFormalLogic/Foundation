@@ -59,10 +59,10 @@ end DerivationCutRestricted
 
 theorem soundness {T} {σ : Sentence L} : T ⊢ σ → T ⊨ σ := by
   simp[consequence_iff]; rintro b M _ _ hT
-  have : M ⊧ σ ∨ ∃ τ ∈ SentenceCalculus.leftHand b, M ⊧ τ := by simpa using (SentenceCalculus.derivation b).sound M default
+  have : M ⊧ σ ∨ ∃ τ ∈ Proof₀.leftHand b, M ⊧ τ := by simpa using (Proof₀.derivation b).sound M default
   rcases this with (hσ | ⟨τ, hτ, hhτ⟩)
   · assumption
-  · have : ~τ ∈ T := by rcases (SentenceCalculus.hleftHand b) hτ with ⟨τ', hτ', rfl⟩; simpa[←SubFormula.neg_eq] using hτ'
+  · have : ~τ ∈ T := by rcases (Proof₀.hleftHand b) hτ with ⟨τ', hτ', rfl⟩; simpa[←SubFormula.neg_eq] using hτ'
     have : ¬ M ⊧ τ := by simpa using hT this
     contradiction
 

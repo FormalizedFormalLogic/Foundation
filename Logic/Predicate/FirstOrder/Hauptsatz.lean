@@ -208,7 +208,8 @@ def reductionAux {i} : {Δ : Sequent L} →
     have : ⊢ᶜ[< i] (insert (~Rew.shiftl p) (shifts Γ)) := (dΓ.shift (by simp)).cast (by simp[shifts_insert])
     have : ⊢ᶜ[< i] insert (Rew.freel q) (shifts $ Δ.erase p ∪ Γ) :=
       (reductionAux d (by simp[tp]) (by simp[hp]) this).weakening
-        (by simp[Finset.subset_iff]; rintro x (⟨hx, (rfl | hhx)⟩ | hhx) <;> simp[*] 
+        (by simp[Finset.subset_iff]; rintro x (⟨hx, (rfl | hhx)⟩ | hhx);
+            · simp[*]
             · simp[shifts_eq_image] at hhx ⊢; rcases hhx with ⟨y, hy, rfl⟩; exact Or.inr ⟨y, Or.inl ⟨by rintro rfl; contradiction, hy⟩, rfl⟩
             · simp[shifts_eq_image] at hhx ⊢; rcases hhx with ⟨y, hy, rfl⟩; exact Or.inr ⟨y, Or.inr hy, rfl⟩)
     have : ⊢ᶜ[< i] insert (∀' q) (Δ.erase p ∪ Γ) := all _ _ this
@@ -256,7 +257,7 @@ def reduction {i} {p} (hp : p.complexity ≤ i) : ⊢ᶜ[< i] insert p Δ → �
   cases tp : p.isVType
   · have : (~p).isVType = true := isVType_neg_true_of_eq_false tp
     exact (reductionAux dΓ this (by simp[hp]) (Γ := Δ) (dΔ.cast (by simp))).weakening
-      (by simp[Finset.union_comm]; exact Finset.union_subset_union (by rfl) (by simp; exact Finset.erase_subset _ _))
+      (by simp[Finset.union_comm]; exact Finset.union_subset_union (by rfl) (Finset.erase_subset _ _))
   · exact (reductionAux dΔ tp hp dΓ).weakening (Finset.union_subset_union (by simp; exact Finset.erase_subset _ _) (by rfl))
 
 def elimination {i} : {Δ : Sequent L} → ⊢ᶜ[< i + 1] Δ → ⊢ᶜ[< i] Δ
@@ -287,3 +288,5 @@ def hauptsatz : ⊢ᶜ Δ → ⊢ᵀ Δ := fun d => hauptsatzClx d.toClx.2
 end DerivationCutRestricted
 
 end FirstOrder
+
+end LO

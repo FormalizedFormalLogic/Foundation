@@ -4,24 +4,25 @@ namespace LO
 
 namespace Logic
 
-variable (F : Type u) [HasLogicSymbols F]
+variable (F : Type u) [LogicSymbol F]
 
 /- Deduction System of F -/
 
-class Calculus (F : Type u) [HasLogicSymbols F] where
+class Proof (F : Type u) [LogicSymbol F] where
   Bew : Set F → F → Type u
   axm : ∀ {T f}, f ∈ T → Bew T f
+  weakening' : ∀ {T U f}, T ⊆ U → Bew T f → Bew U f
 
 variable {F}
 
-namespace Calculus
-variable [𝓑 : Calculus F]
+namespace Proof
+variable [𝓑 : Proof F]
 
 instance : HasTurnstile F (Type u) := ⟨𝓑.Bew⟩
 
 def BewTheory (T U : Set F) : Type u := {f : F} → f ∈ U → T ⊢ f
 
-infix:45 " ⊢* " => Calculus.BewTheory
+infix:45 " ⊢* " => Proof.BewTheory
 
 def BewTheoryEmpty (T : Set F) : T ⊢* ∅ := fun h => by contradiction
 
@@ -29,17 +30,22 @@ def BewTheory.ofSubset {T U : Set F} (h : U ⊆ T) : T ⊢* U := fun hf => axm (
 
 def BewTheory.refl (T : Set F) : T ⊢* T := axm
 
-def IsConsistent (T : Set F) : Prop := IsEmpty (T ⊢ ⊥)
+def Consistent (T : Set F) : Prop := IsEmpty (T ⊢ ⊥)
 
-end Calculus
+lemma weakening {T U : Set F} {f : F} (b : T ⊢ f) (ss : T ⊆ U) : U ⊢ f := weakening' ss b
 
-def Calculus.hom [Calculus F] {G : Type u} [HasLogicSymbols G] (F : G →L F) : Calculus G where
+lemma Consistent.of_subset {T U : Set F} (h : Consistent U) (ss : T ⊆ U) : Consistent T := ⟨fun b => h.false (weakening b ss)⟩
+
+end Proof
+
+def Proof.hom [Proof F] {G : Type u} [LogicSymbol G] (F : G →L F) : Proof G where
   Bew := fun T g => F '' T ⊢ F g
-  axm := fun h => Calculus.axm (Set.mem_image_of_mem F h)
+  axm := fun h => Proof.axm (Set.mem_image_of_mem F h)
+  weakening' := fun h => by simp; exact Proof.weakening' (Set.image_subset F h)
 
 /- Semantics of F -/
 
-class Semantics (F : Type u) [HasLogicSymbols F] where
+class Semantics (F : Type u) [LogicSymbol F] where
   struc : Type w → Type v
   realize : {M : Type w} → struc M → F →L Prop
 
@@ -70,7 +76,7 @@ def Satisfiableₛ (T : Set F) : Prop := ∃ (M : Type w) (_ : Inhabited M) (s :
 lemma valid_neg_iff (f : F) : Valid (~f) ↔ ¬Satisfiable f := by simp[Valid, Satisfiable]
 
 lemma not_satisfiable_finset [DecidableEq F] (t : Finset F) :
-    ¬Satisfiableₛ (t : Set F) ↔ Valid (t.image HasNeg.neg).disj :=
+    ¬Satisfiableₛ (t : Set F) ↔ Valid (t.image (~·)).disj :=
   by simp[Satisfiableₛ, realizeTheory, Valid, Finset.map_disj]
 
 lemma realizeTheory_of_subset {T U : Set F} {s : struc F M} (h : s ⊧ₛ* U) (ss : T ⊆ U) : s ⊧ₛ* T :=
@@ -106,7 +112,7 @@ lemma consequence_iff {T : Set F} {f : F} : T ⊨ f ↔ ¬Satisfiableₛ (insert
 end Semantics
 
 variable (F)
-variable [HasLogicSymbols F] [𝓑 : Calculus F] [𝓢 : Semantics.{u, v, w} F]
+variable [LogicSymbol F] [𝓑 : Proof F] [𝓢 : Semantics.{u, v, w} F]
 
 class Sound where
   sound : ∀ {T : Set F} {p : F}, T ⊢ p → T ⊨ p
@@ -117,6 +123,7 @@ class Complete extends Sound F where
 variable {F}
 
 namespace Sound
+
 variable [Sound F]
 variable {M : Type w} [Inhabited M] {s : Semantics.struc F M}
 
@@ -125,8 +132,11 @@ lemma not_provable_of_countermodel {T : Set F} {p : F}
   ⟨fun b => by have : s ⊧ₛ p := Sound.sound b M s hT; contradiction⟩
 
 lemma consistent_of_model {T : Set F}
-  (hT : s ⊧ₛ* T) : Calculus.IsConsistent T :=
+  (hT : s ⊧ₛ* T) : Proof.Consistent T :=
   not_provable_of_countermodel (p := ⊥) hT (by simp)
+
+lemma consistent_of_satisfiable {T : Set F} : Semantics.Satisfiableₛ T → Proof.Consistent T := by
+  rintro ⟨M, _, s, h⟩; exact consistent_of_model h
 
 lemma realize_of_proof {T : Set F} {f} (h : s ⊧ₛ* T) (b : T ⊢ f) : s ⊧ₛ f :=
   Sound.sound b M s h

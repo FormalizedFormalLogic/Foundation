@@ -175,7 +175,6 @@ partial def resultVectorOfResult {α : Q(Type u)}
     | ~q(![]) =>
       return ⟨q(![]), q(rfl)⟩
   | ~q($n + 1) =>
-    let l : Q(Fin ($n + 1) → $α) := l
     match l with
     | ~q($a :> $as) =>
       let ⟨b, be⟩ ← r a
@@ -193,7 +192,6 @@ partial def resultVectorOfResultFun {α : Q(Type u)} {β : Q(Type v)}
     | ~q(![]) =>
       return ⟨q(![]), q(compVecEmpty $f)⟩
   | ~q($n + 1) =>
-    let l : Q(Fin ($n + 1) → $α) := l
     match l with
     | ~q($a :> $as) =>
       let ⟨b, be⟩ ← r a
@@ -210,19 +208,18 @@ partial def vectorCollection {α : Q(Type u)} {β : Q(Type v)} {H : Q($α → $�
     match l with
     | ~q(![])  =>
       return ⟨q(![]), q(finZeroElim)⟩
-  | ~q($n + 1) =>
-    let l : Q(Fin ($n + 1) → $α) := l
+  | ~q($n' + 1) =>
     match l with
     | ~q($a :> $as) =>
       let p ← r a
-      let ps ← vectorCollection r n as
+      let ps ← vectorCollection r n' as
       let vectorConsQ
-        {as : Q(Fin $n → $α)}
-        {bs : Q(Fin $n → $β)}
-        (ih : Q((i : Fin $n) → $H ($as i) ($bs i)))
-        {a : Q($α)} {b : Q($β)} (h : Q($H $a $b)) : Q((i : Fin ($n + 1)) → $H (($a :> $as) i) (($b :> $bs) i)) :=
+        {as : Q(Fin $n' → $α)}
+        {bs : Q(Fin $n' → $β)}
+        (ih : Q((i : Fin $n') → $H ($as i) ($bs i)))
+        {a : Q($α)} {b : Q($β)} (h : Q($H $a $b)) : Q((i : Fin ($n' + 1)) → $H (($a :> $as) i) (($b :> $bs) i)) :=
         q(Fin.cases $h $ih)
-      have h : Q((i : Fin ($n + 1)) → $H (($a :> $as) i) (($(p.1) :> $(ps.1)) i)) := vectorConsQ ps.2 p.2
+      have h : Q((i : Fin ($n' + 1)) → $H (($a :> $as) i) (($(p.1) :> $(ps.1)) i)) := vectorConsQ ps.2 p.2
       return ⟨q($(p.1) :> $(ps.1)), h⟩
     | _ => throwError m!"error in vectorCollection(2). nonexhaustive match: {n}, {l}"
   | _ => throwError m!"error in vectorCollection(1). nonexhaustive match: {n}"
@@ -238,12 +235,11 @@ partial def mapVectorQ {α : Q(Type u)} {β : Q(Type v)} (f : Q($α) → MetaM Q
     match l with
     | ~q(![]) =>
       return q(![])
-  | ~q($n + 1) =>
-    let l : Q(Fin ($n + 1) → $α) := l
+  | ~q($n' + 1) =>
     match l with
     | ~q($a :> $as) =>
       let b : Q($β) ← f a
-      let bs : Q(Fin $n → $β) ← mapVectorQ f n as
+      let bs : Q(Fin $n' → $β) ← mapVectorQ f n' as
       return q($b :> $bs)
     | _ => throwError m!"error in mapVectorQ(2). nonexhaustive match: {l}"
   | _ => throwError m!"error in mapVectorQ(1). nonexhaustive match: {n}"
@@ -259,18 +255,21 @@ elab "dbgmapVectorQ" : term => do
 
 partial def vectorQNthAux {α : Q(Type u)}
     (n : Q(ℕ)) (l : Q(Fin $n → $α)) (i : ℕ) : MetaM Q($α) := do
-  match n with
-  | ~q(0) => throwError m!"out of bound"
-  | ~q($n + 1) =>
-    let l : Q(Fin ($n + 1) → $α) := l
-    match l with
-    | ~q($a :> $l') =>
-      match i with
-      | 0        => return a
-      | .succ i' => vectorQNthAux n l' i'
-    | _ => throwError m!"error in vectorQNthAux(2). nonexhaustive match: {l}"
-  | _ => throwError m!"error in vectorQNthAux(1). nonexhaustive match: {n}"
-  
+  match i with
+  | 0 =>
+    match n with
+    | ~q(0) => throwError m!"out of bound"
+    | ~q($n + 1) =>
+      match l with
+      | ~q($a :> _) => return a
+      | _ => throwError m!"error in vectorQNthAux(2). nonexhaustive match: {l}"
+  | .succ i' =>
+    match n with
+    | ~q(0) => throwError m!"out of bound"
+    | ~q($n + 1) =>
+      match l with
+      | ~q(_ :> $l') => vectorQNthAux n l' i'
+      | _ => throwError m!"error in vectorQNthAux(2). nonexhaustive match: {l}"
 
 partial def vectorQNth {α : Q(Type u)}
     (n : Q(ℕ)) (l : Q(Fin $n → $α)) (i : Q(Fin $n)) : MetaM ((a : Q($α)) × Q($l $i = $a)) := do
@@ -282,7 +281,7 @@ partial def vectorQNth {α : Q(Type u)}
 
 elab "dbgvectorQNth" : term => do
   let v : Q(Fin 5 → ℕ) := q(![0,1 + 8,2 + 8,3,4])
-  let ⟨e, eq⟩ ← vectorQNth (α := q(ℕ)) q(5) v q(2)
+  let ⟨e, eq⟩ ← vectorQNth (α := q(ℕ)) q(5) v q(2+1)
   let dbgr := q(DbgResult.intro _ $e $eq)
   logInfo m! "{e}"
   logInfo m! "{eq}"
@@ -297,11 +296,10 @@ partial def vectorAppend {α : Q(Type u)}
     (n : Q(ℕ)) (v : Q(Fin $n → $α)) (a : Q($α)) : MetaM ((w : Q(Fin ($n + 1) → $α)) × Q($v <: $a = $w)) := do
   match n with
   | ~q(0) => return ⟨q(![$a]), q(Matrix.vecConsLast_vecEmpty $a)⟩
-  | ~q($n + 1) =>
-    let v : Q(Fin ($n + 1) → $α) := v
+  | ~q($n' + 1) =>
     match v with
     | ~q($b :> $v') =>
-      let ⟨ih, ihh⟩ ← vectorAppend n v' a
+      let ⟨ih, ihh⟩ ← vectorAppend n' v' a
       return ⟨q($b :> $ih), q(vecCons_assoc_eq $ihh)⟩
     | _ => throwError m!"error in vectorQNthAux(2). nonexhaustive match: {v}"
 

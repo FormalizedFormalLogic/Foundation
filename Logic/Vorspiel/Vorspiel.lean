@@ -9,6 +9,7 @@ import Mathlib.Data.Finset.Preimage
 import Mathlib.Data.Finset.Sort
 import Mathlib.Data.W.Basic
 import Mathlib.Order.Filter.Ultrafilter
+import Mathlib.Logic.Encodable.Basic
 
 open LO
 
@@ -157,7 +158,7 @@ lemma injective_vecCons {f : Fin n → α} (h : Function.Injective f) {a} (ha : 
 section And
 
 variable {F : Type _}
-variable [HasLogicSymbols α] [HasLogicSymbols β]
+variable [LogicSymbol α] [LogicSymbol β]
 
 def conj : {n : ℕ} → (Fin n → α) → α
   | 0,     _ => ⊤
@@ -167,18 +168,17 @@ def conj : {n : ℕ} → (Fin n → α) → α
 
 @[simp] lemma conj_cons {a : α} {v : Fin n → α} : conj (a :> v) = a ⋏ conj v := rfl
 
-@[simp] lemma conj_hom_prop [HasLogicSymbols.HomClass F α Prop]
+@[simp] lemma conj_hom_prop [LogicSymbol.HomClass F α Prop]
   (f : F) (v : Fin n → α) : f (conj v) = ∀ i, f (v i) := by
   induction' n with n ih <;> simp[conj]
-  · intro ⟨_, _⟩; contradiction
   · simp[ih]; constructor
     · intro ⟨hz, hs⟩ i; cases i using Fin.cases; { exact hz }; { exact hs _ }
     · intro h; exact ⟨h 0, fun i => h _⟩
 
-lemma hom_conj [HasLogicSymbols.HomClass F α β] (f : F) (v : Fin n → α) : f (conj v) = conj (f ∘ v) := by
+lemma hom_conj [LogicSymbol.HomClass F α β] (f : F) (v : Fin n → α) : f (conj v) = conj (f ∘ v) := by
   induction' n with n ih <;> simp[*, conj]
 
-lemma hom_conj' [HasLogicSymbols.HomClass F α β] (f : F) (v : Fin n → α) : f (conj v) = conj fun i => f (v i) := hom_conj f v
+lemma hom_conj' [LogicSymbol.HomClass F α β] (f : F) (v : Fin n → α) : f (conj v) = conj fun i => f (v i) := hom_conj f v
 
 end And
 
@@ -215,7 +215,7 @@ def toOptionVec : {n : ℕ} → (Fin n → Option α) → Option (Fin n → α)
 
 def vecToNat : {n : ℕ} → (Fin n → ℕ) → ℕ
   | 0,     _ => 0
-  | _ + 1, v => Nat.mkpair (v 0) (vecToNat $ v ∘ Fin.succ)
+  | _ + 1, v => Nat.pair (v 0) (vecToNat $ v ∘ Fin.succ)
 
 end Matrix
 
@@ -360,7 +360,7 @@ def upper : List ℕ → ℕ
 lemma lt_upper (l : List ℕ) {n} (h : n ∈ l) : n < l.upper := by
   induction' l with n ns ih <;> simp at h ⊢
   case cons =>
-    rcases h with (rfl | h) <;> simp
+    rcases h with (rfl | h); { exact Or.inl (Nat.lt_succ_self _) }
     exact Or.inr (ih h)
 
 variable {α : Type u} [DecidableEq α] {β: Type v} [DecidableEq β]
@@ -370,7 +370,7 @@ lemma toFinset_map {f : α → β} (l : List α) : (l.map f).toFinset = Finset.i
 
 section
 
-variable {α : Type u} [HasLogicSymbols α]
+variable {α : Type u} [LogicSymbol α]
 
 def conj : List α → α
   | []      => ⊤
@@ -380,7 +380,7 @@ def conj : List α → α
 
 @[simp] lemma conj_cons {a : α} {as : List α} : conj (a :: as) = a ⋏ as.conj := rfl
 
-lemma map_conj [HasLogicSymbols.HomClass F α Prop] (f : F) (l : List α) : f l.conj ↔ ∀ a ∈ l, f a := by
+lemma map_conj [LogicSymbol.HomClass F α Prop] (f : F) (l : List α) : f l.conj ↔ ∀ a ∈ l, f a := by
   induction l <;> simp[*]
 
 def disj : List α → α
@@ -391,7 +391,7 @@ def disj : List α → α
 
 @[simp] lemma disj_cons {a : α} {as : List α} : disj (a :: as) = a ⋎ as.disj := rfl
 
-lemma map_disj [HasLogicSymbols.HomClass F α Prop] (f : F) (l : List α) : f l.disj ↔ ∃ a ∈ l, f a := by
+lemma map_disj [LogicSymbol.HomClass F α Prop] (f : F) (l : List α) : f l.disj ↔ ∃ a ∈ l, f a := by
   induction l <;> simp[*]
 
 end
@@ -407,7 +407,7 @@ def sup : List α → α
 @[simp] lemma sup_cons (a : α) (as : List α) : (a :: as).sup = a ⊔ as.sup := rfl
 
 lemma le_sup {a} {l : List α} : a ∈ l → a ≤ l.sup :=
-  by induction' l with a l ih <;> simp[*]; rintro (rfl | h) <;> simp[*]; exact le_sup_of_le_right $ ih h
+  by induction' l with a l ih <;> simp[*]; rintro (rfl | h); { simp }; { exact le_sup_of_le_right $ ih h }
 
 end List
 
@@ -422,7 +422,7 @@ lemma mem_rangeOfFinite_iff  {ι : Sort v} [Finite ι] {f : ι → α} {a : α} 
     a ∈ rangeOfFinite f ↔ ∃ i : ι, f i = a := by simp[rangeOfFinite]
 
 noncomputable def imageOfFinset [DecidableEq β] (s : Finset α) (f : (a : α) → a ∈ s → β) : Finset β :=
-  Finset.bunionᵢ s (rangeOfFinite $ f ·)
+  Finset.biUnion s (rangeOfFinite $ f ·)
 
 lemma mem_imageOfFinset_iff [DecidableEq β] {s : Finset α} {f : (a : α) → a ∈ s → β} {b : β} :
     b ∈ imageOfFinset s f ↔ ∃ (a : α) (ha : a ∈ s), f a ha = b := by
@@ -438,16 +438,16 @@ lemma mem_imageOfFinset_iff [DecidableEq β] {s : Finset α} {f : (a : α) → a
 
 section
 
-variable [HasLogicSymbols α]
+variable [LogicSymbol α]
 
 noncomputable def conj (s : Finset α) : α := s.toList.conj
 
-lemma map_conj [HasLogicSymbols.HomClass F α Prop] (f : F) (s : Finset α) : f s.conj ↔ ∀ a ∈ s, f a := by
+lemma map_conj [LogicSymbol.HomClass F α Prop] (f : F) (s : Finset α) : f s.conj ↔ ∀ a ∈ s, f a := by
   simpa using List.map_conj f s.toList
   
 noncomputable def disj (s : Finset α) : α := s.toList.disj
 
-lemma map_disj [HasLogicSymbols.HomClass F α Prop] (f : F) (s : Finset α) : f s.disj ↔ ∃ a ∈ s, f a := by
+lemma map_disj [LogicSymbol.HomClass F α Prop] (f : F) (s : Finset α) : f s.disj ↔ ∃ a ∈ s, f a := by
   simpa using List.map_disj f s.toList
 
 end

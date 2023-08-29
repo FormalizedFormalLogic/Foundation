@@ -54,7 +54,7 @@ instance (k) : DecidableEq (equal.func k) := fun a b => by rcases a
 
 instance (k) : DecidableEq (equal.rel k) := fun a b => by rcases a; rcases b; exact isTrue (by simp)
 
-instance (k) : Encodable (equal.func k) := Encodable.IsEmpty.toEncodable
+instance (k) : Encodable (equal.func k) := IsEmpty.toEncodable
 
 instance (k) : Encodable (equal.rel k) where
   encode := fun _ => 0
@@ -204,7 +204,7 @@ def relational (α : ℕ → Type u) : Language where
 section relational
 variable {α : ℕ → Type u} [e : ∀ n, Encodable (α n)] [d : ∀ n, DecidableEq (α n)] [s : ∀ n, ToString (α n)]
 
-instance (k) : Encodable ((relational α).func k) := Encodable.IsEmpty.toEncodable (α := PEmpty)
+instance (k) : Encodable ((relational α).func k) := IsEmpty.toEncodable (α := PEmpty)
 
 instance (k) : Encodable ((relational α).rel k) := e k
 

@@ -15,8 +15,8 @@ variable {n : ℕ}
 def toNat : SubTerm L μ n → ℕ 
   | #x                    => (Nat.bit false $ Nat.bit false (encode x)) + 1
   | &x                    => (Nat.bit false $ Nat.bit true (encode x)) + 1
-  | func (arity := k) f v => (Nat.bit true  $ Nat.mkpair k $
-      Nat.mkpair (encode f) (Matrix.vecToNat $ fun i => (v i).toNat)) + 1
+  | func (arity := k) f v => (Nat.bit true  $ Nat.pair k $
+      Nat.pair (encode f) (Matrix.vecToNat $ fun i => (v i).toNat)) + 1
 
 def ofNat : ℕ → Option (SubTerm L μ n)
 | 0     => none
@@ -44,7 +44,7 @@ def ofNat : ℕ → Option (SubTerm L μ n)
   | &x => by simp[ofNat, toNat]; rw[Nat.bodd_bit, Nat.div2_bit]; simp; rw[Nat.bodd_bit, Nat.div2_bit]; simp
   | func f v => by
       simp[ofNat, toNat]
-      rw[Nat.bodd_bit, Nat.div2_bit, Nat.unpair_mkpair]; simp[fun i => ofNat_toNat (v i)];
+      rw[Nat.bodd_bit, Nat.div2_bit, Nat.unpair_pair]; simp[fun i => ofNat_toNat (v i)];
 
 instance : Encodable (SubTerm L μ n) where
   encode := toNat

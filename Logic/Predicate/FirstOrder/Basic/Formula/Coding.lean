@@ -13,10 +13,10 @@ open Encodable
 def toNat : {n : ℕ} → SubFormula L μ n → ℕ
   | _, ⊤                     => 0
   | _, ⊥                     => 1
-  | _, rel (arity := k) r v  => (Nat.bit false $ Nat.bit false $ Nat.mkpair k  $ Nat.mkpair (encode r) (encode v)) + 2
-  | _, nrel (arity := k) r v => (Nat.bit false $ Nat.bit true  $ Nat.mkpair k  $ Nat.mkpair (encode r) (encode v)) + 2
-  | _, p ⋏ q                 => (Nat.bit true  $ Nat.bit false $ Nat.bit false $ Nat.mkpair p.toNat q.toNat) + 2
-  | _, p ⋎ q                 => (Nat.bit true  $ Nat.bit false $ Nat.bit true  $ Nat.mkpair p.toNat q.toNat) + 2
+  | _, rel (arity := k) r v  => (Nat.bit false $ Nat.bit false $ Nat.pair k  $ Nat.pair (encode r) (encode v)) + 2
+  | _, nrel (arity := k) r v => (Nat.bit false $ Nat.bit true  $ Nat.pair k  $ Nat.pair (encode r) (encode v)) + 2
+  | _, p ⋏ q                 => (Nat.bit true  $ Nat.bit false $ Nat.bit false $ Nat.pair p.toNat q.toNat) + 2
+  | _, p ⋎ q                 => (Nat.bit true  $ Nat.bit false $ Nat.bit true  $ Nat.pair p.toNat q.toNat) + 2
   | _, ∀' p                  => (Nat.bit true  $ Nat.bit true  $ Nat.bit false p.toNat) + 2
   | _, ∃' p                  => (Nat.bit true  $ Nat.bit true  $ Nat.bit true  p.toNat) + 2
 
@@ -61,11 +61,11 @@ lemma ofNat_toNat : ∀ {n} (p : SubFormula L μ n), ofNat n p.toNat = some p
   | n, rel r v => by
       simp[toNat, ofNat]
       rw[Nat.bodd_bit, Nat.div2_bit]; simp
-      rw[Nat.bodd_bit, Nat.div2_bit, Nat.unpair_mkpair]; simp
+      rw[Nat.bodd_bit, Nat.div2_bit, Nat.unpair_pair]; simp
   | n, nrel r v => by
       simp[toNat, ofNat]
       rw[Nat.bodd_bit, Nat.div2_bit]; simp
-      rw[Nat.bodd_bit, Nat.div2_bit, Nat.unpair_mkpair]; simp     
+      rw[Nat.bodd_bit, Nat.div2_bit, Nat.unpair_pair]; simp     
   | n, p ⋏ q => by
       simp[toNat, ofNat]
       rw[Nat.bodd_bit, Nat.div2_bit]; simp

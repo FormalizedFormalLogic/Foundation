@@ -44,17 +44,17 @@ def neg {n} : SubFormula L μ n → SubFormula L μ n
 lemma neg_neg (p : SubFormula L μ n) : neg (neg p) = p :=
   by induction p <;> simp[*, neg]
 
-instance : HasLogicSymbols (SubFormula L μ n) where
-  neg := neg
+instance : LogicSymbol (SubFormula L μ n) where
+  tilde := neg
   arrow := fun p q => or (neg p) q
-  and := and
-  or := or
+  wedge := and
+  vee := or
   top := verum
   bot := falsum
 
-instance : HasUniv (SubFormula L μ) := ⟨all⟩
+instance : UnivQuantifier (SubFormula L μ) := ⟨all⟩
 
-instance : HasEx (SubFormula L μ) := ⟨ex⟩
+instance : ExQuantifier (SubFormula L μ) := ⟨ex⟩
 
 section ToString
 
@@ -112,22 +112,22 @@ lemma ball_eq (p q : SubFormula L μ (n + 1)) : (∀[p] q) = ∀' (p ⟶ q) := r
 lemma bex_eq (p q : SubFormula L μ (n + 1)) : (∃[p] q) = ∃' (p ⋏ q) := rfl
 
 @[simp] lemma neg_ball (p q : SubFormula L μ (n + 1)) : ~(∀[p] q) = ∃[p] ~q := by
-  simp[HasLogicSymbols.ball, HasLogicSymbols.bex, imp_eq]
+  simp[LogicSymbol.ball, LogicSymbol.bex, imp_eq]
 
 @[simp] lemma neg_bex (p q : SubFormula L μ (n + 1)) : ~(∃[p] q) = ∀[p] ~q := by
-  simp[HasLogicSymbols.ball, HasLogicSymbols.bex, imp_eq]
+  simp[LogicSymbol.ball, LogicSymbol.bex, imp_eq]
 
 @[simp] lemma and_inj (p₁ q₁ p₂ q₂ : SubFormula L μ n) : p₁ ⋏ p₂ = q₁ ⋏ q₂ ↔ p₁ = q₁ ∧ p₂ = q₂ :=
-by simp[HasAnd.and]
+by simp[Wedge.wedge]
 
 @[simp] lemma or_inj (p₁ q₁ p₂ q₂ : SubFormula L μ n) : p₁ ⋎ p₂ = q₁ ⋎ q₂ ↔ p₁ = q₁ ∧ p₂ = q₂ :=
-by simp[HasOr.or]
+by simp[Vee.vee]
 
 @[simp] lemma all_inj (p q : SubFormula L μ (n + 1)) : ∀' p = ∀' q ↔ p = q :=
-  by simp[HasUniv.univ]
+  by simp[UnivQuantifier.univ]
 
 @[simp] lemma ex_inj (p q : SubFormula L μ (n + 1)) : ∃' p = ∃' q ↔ p = q :=
-  by simp[HasEx.ex]
+  by simp[ExQuantifier.ex]
 
 abbrev rel! (L : Language.{u}) (k) (r : L.rel k) (v : Fin k → SubTerm L μ n) := rel r v
 
@@ -320,7 +320,7 @@ lemma neg' (p : SubFormula L μ₁ n₁) : ω (~p) = ~ω p := loMap_neg ω p
 
 lemma or' (p q : SubFormula L μ₁ n₁) : ω (p ⋎ q) = ω p ⋎ ω q := by rfl
 
-instance : HasLogicSymbols.homClass (Rew L μ₁ n₁ μ₂ n₂) (SubFormula L μ₁ n₁) (SubFormula L μ₂ n₂) where
+instance : LogicSymbol.homClass (Rew L μ₁ n₁ μ₂ n₂) (SubFormula L μ₁ n₁) (SubFormula L μ₂ n₂) where
   map_top := fun ω => by rfl
   map_bot := fun ω => by rfl
   map_neg := loMap_neg
@@ -387,7 +387,7 @@ lemma hom_ext' {ω₁ ω₂ : Rew L μ₁ n₁ μ₂ n₂} (h : ω₁ = ω₂) {
 
 end
 
-@[simp] lemma hom_id_eq : (Rew.id.hom : SubFormula L μ n →L SubFormula L μ n) = HasLogicSymbols.Hom.id := by
+@[simp] lemma hom_id_eq : (Rew.id.hom : SubFormula L μ n →L SubFormula L μ n) = LogicSymbol.Hom.id := by
   ext p; induction p using SubFormula.rec' <;> simp[Rew.rel, Rew.nrel, *]
 
 abbrev bindl (b : Fin n₁ → SubTerm L μ₂ n₂) (e : μ₁ → SubTerm L μ₂ n₂) :
@@ -599,10 +599,10 @@ lemma rew_eq_of_funEqOn {ω₁ ω₂ : Rew L μ₁ n₁ μ₂ n₂} {p}
   induction p using rec' generalizing n₂ <;> simp[*, Rew.rel, Rew.nrel] <;> simp[fvar?, fvarList] at hf
   case hrel =>
     funext i
-    exact SubTerm.rew_eq_of_funEqOn _ _ _ hb (hf.of_subset (by simp[fvarList]; intro x hx; exact ⟨i, hx⟩))
+    exact SubTerm.rew_eq_of_funEqOn _ _ _ hb (hf.of_subset (by intro x hx; exact ⟨i, hx⟩))
   case hnrel =>
     funext i
-    exact SubTerm.rew_eq_of_funEqOn _ _ _ hb (hf.of_subset (by simp[fvarList]; intro x hx; exact ⟨i, hx⟩))
+    exact SubTerm.rew_eq_of_funEqOn _ _ _ hb (hf.of_subset (by intro x hx; exact ⟨i, hx⟩))
   case hand ihp ihq =>
     exact ⟨ihp hb (hf.of_subset (fun x hx => Or.inl hx)), ihq hb (hf.of_subset (fun x hx => Or.inr hx))⟩
   case hor ihp ihq =>
@@ -714,8 +714,8 @@ variable [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq (L.rel k)]
 noncomputable def langFun : ∀ {n}, SubFormula L μ n → Finset (Σ k, L.func k)
   | _, ⊤        => ∅
   | _, ⊥        => ∅
-  | _, rel  _ v => Finset.bunionᵢ Finset.univ (fun i => (v i).lang)
-  | _, nrel _ v => Finset.bunionᵢ Finset.univ (fun i => (v i).lang)
+  | _, rel  _ v => Finset.biUnion Finset.univ (fun i => (v i).lang)
+  | _, nrel _ v => Finset.biUnion Finset.univ (fun i => (v i).lang)
   | _, p ⋏ q    => langFun p ∪ langFun q 
   | _, p ⋎ q    => langFun p ∪ langFun q 
   | _, ∀' p     => langFun p 

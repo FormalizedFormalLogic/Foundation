@@ -54,8 +54,8 @@ macro_rules
   | `(“ ∀* $p:subformula ”)                        => `(univClosure “$p”)
   | `(“ $p:subformula [ $t:subterm,* ] ”)            => do
     let v ← t.getElems.foldrM (β := Lean.TSyntax _) (init := ← `(![])) (fun a s => `(ᵀ“$a” :> $s))
-    `(Rew.substsl $v “$p”)
-  | `(“ ⇑$p:subformula ”)                         => `(Rew.shiftl “$p”)
+    `((Rew.substs $v).hom “$p”)
+  | `(“ ⇑$p:subformula ”)                         => `(Rew.shift.hom “$p”)
   | `(“ ( $x ) ”)                                  => `(“$x”)
 
 #check “ ¬(∀ ∀ (#0 + 1) * #1 < #0 + #1 ∨ 0 < 5) ”
@@ -91,57 +91,57 @@ def unexpandFunc : Unexpander
   | `($_ $f ![ᵀ“ $t ”, ᵀ“ $u ”]) => `(“ ⟨$f⟩($t, $u) ”)
   | _                            => throw ()
 
-@[app_unexpander HasAnd.and]
+@[app_unexpander Wedge.wedge]
 def unexpandAnd : Unexpander
   | `($_ “$p:subformula” “$q:subformula”) => `(“ ($p ∧ $q) ”)
   | `($_ “$p:subformula” $u:term)         => `(“ ($p ∧ !$u) ”)
   | `($_ $t:term         “$q:subformula”) => `(“ (!$t ∧ $q) ”)
   | _                                     => throw ()
 
-@[app_unexpander HasOr.or]
+@[app_unexpander Vee.vee]
 def unexpandOr : Unexpander
   | `($_ “$p:subformula” “$q:subformula”) => `(“ ($p ∨ $q) ”)
   | `($_ “$p:subformula” $u:term)         => `(“ ($p ∨ !$u) ”)
   | `($_ $t:term         “$q:subformula”) => `(“ (!$t ∨ $q) ”)
   | _                                     => throw ()
 
-@[app_unexpander HasNeg.neg]
+@[app_unexpander Tilde.tilde]
 def unexpandNeg : Unexpander
   | `($_ “$p:subformula”) => `(“ ¬$p ”)
   | _                     => throw ()
 
-@[app_unexpander HasUniv.univ]
+@[app_unexpander UnivQuantifier.univ]
 def unexpandUniv : Unexpander
   | `($_ “$p:subformula”) => `(“ ∀ $p ”)
   | _                     => throw ()
 
-@[app_unexpander HasEx.ex]
+@[app_unexpander ExQuantifier.ex]
 def unexpandEx : Unexpander
   | `($_ “$p:subformula”) => `(“ ∃ $p ”)
   | _                     => throw ()
 
-@[app_unexpander HasArrow.arrow]
+@[app_unexpander Arrow.arrow]
 def unexpandArrow : Unexpander
   | `($_ “$p:subformula” “$q:subformula”) => `(“ ($p → $q) ”)
   | `($_ “$p:subformula” $u:term)         => `(“ ($p → !$u) ”)
   | `($_ $t:term         “$q:subformula”) => `(“ (!$t → $q) ”)
   | _                                     => throw ()
 
-@[app_unexpander HasLogicSymbols.iff]
+@[app_unexpander LogicSymbol.iff]
 def unexpandIff : Unexpander
   | `($_ “$p:subformula” “$q:subformula”) => `(“ ($p ↔ $q) ”)
   | `($_ “$p:subformula” $u:term)         => `(“ ($p ↔ !$u) ”)
   | `($_ $t:term         “$q:subformula”) => `(“ (!$t ↔ $q) ”)
   | _                                     => throw ()
 
-@[app_unexpander HasLogicSymbols.ball]
+@[app_unexpander LogicSymbol.ball]
 def unexpandBall : Unexpander
   | `($_ “$p:subformula” “$q:subformula”) => `(“ (∀[$p] $q) ”)
   | `($_ “$p:subformula” $u:term)         => `(“ (∀[$p] !$u) ”)
   | `($_ $t:term         “$q:subformula”) => `(“ (∀[!$t] $q) ”)
   | _                                     => throw ()
 
-@[app_unexpander HasLogicSymbols.bex]
+@[app_unexpander LogicSymbol.bex]
 def unexpandBEx : Unexpander
   | `($_ “$p:subformula” “$q:subformula”) => `(“ (∃[$p] $q) ”)
   | `($_ “$p:subformula” $u:term)         => `(“ (∃[$p] !$u) ”)

@@ -8,7 +8,7 @@ namespace FirstOrder
 variable {L : Language.{u}} {μ : Type v} [L.Eq]
 namespace SubTerm
 
-def varSumInL {k} : Fin k → SubTerm L μ (k + k) := fun i => #(Fin.castLe (by simp) i)
+def varSumInL {k} : Fin k → SubTerm L μ (k + k) := fun i => #(Fin.castLE (by simp) i)
 
 def varSumInR {k} : Fin k → SubTerm L μ (k + k) := fun i => #(Fin.natAdd k i)
 
@@ -117,7 +117,7 @@ lemma eqv_equivalence : Equivalence (eqv L (M := M)) where
   symm := eqv_symm H
   trans := eqv_trans H
 
-instance eqvSetoid : Setoid M := Setoid.mk (eqv L) (eqv_equivalence H)
+def eqvSetoid (H : M ⊧* Theory.Eq L) : Setoid M := Setoid.mk (eqv L) (eqv_equivalence H)
 
 def QuotEq := Quotient (eqvSetoid H)
 
@@ -177,7 +177,7 @@ variable {H}
 lemma rel_eq (a b : QuotEq H) : Structure.rel (L := L) (M := QuotEq H) Language.Eq.eq ![a, b] ↔ (a = b) := by
   induction' a using Quotient.ind with a
   induction' b using Quotient.ind with b
-  simp[rel_mk]; rw[of_eq_of]; rfl
+  rw[of_eq_of]; rfl
 
 instance : Structure.Eq L (QuotEq H) := ⟨rel_eq⟩
 

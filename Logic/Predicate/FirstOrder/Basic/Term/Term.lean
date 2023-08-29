@@ -155,8 +155,8 @@ def emb {o : Type v₁} [h : IsEmpty o] {μ : Type v₂} {n} : Rew L o n μ n :=
 def bShift : Rew L μ n μ (n + 1) :=
   map Fin.succ id
 
-def castLe {n n' : ℕ} (h : n ≤ n') : Rew L μ n μ n' :=
-  map (Fin.castLe h) id
+def castLE {n n' : ℕ} (h : n ≤ n') : Rew L μ n μ n' :=
+  map (Fin.castLE h) id
 
 def q (ω : Rew L μ₁ n₁ μ₂ n₂) : Rew L μ₁ (n₁ + 1) μ₂ (n₂ + 1) := 
   bind (#0 :> bShift ∘ ω ∘ bvar) (bShift ∘ ω ∘ fvar)
@@ -265,13 +265,13 @@ lemma substs_comp_substs (v : Fin l → SubTerm L μ k) (w : Fin k → SubTerm L
 
 end substs
 
-section castLe
+section castLE
 
-@[simp] lemma castLe_bvar {n'} (h : n ≤ n') (x : Fin n) : castLe h (#x : SubTerm L μ n) = #(Fin.castLe h x) := rfl
+@[simp] lemma castLe_bvar {n'} (h : n ≤ n') (x : Fin n) : castLE h (#x : SubTerm L μ n) = #(Fin.castLE h x) := rfl
 
-@[simp] lemma castLe_fvar {n'} (h : n ≤ n') (x : μ) : castLe h (&x : SubTerm L μ n) = &x := rfl
+@[simp] lemma castLe_fvar {n'} (h : n ≤ n') (x : μ) : castLE h (&x : SubTerm L μ n) = &x := rfl
 
-end castLe
+end castLE
 
 section q
 
@@ -402,7 +402,7 @@ lemma shift_comp_substs1 (t : SyntacticSubTerm L n₂) :
 lemma rewrite_comp_free_eq_substs (t : SyntacticTerm L) :
     (rewrite (t :>ₙ SubTerm.fvar)).comp free = substs ![t] := by ext x <;> simp[comp_app, Fin.eq_zero]
 
-lemma rewrite_comp_shift_eq_substs (t : SyntacticTerm L) :
+lemma rewrite_comp_shift_eq_id (t : SyntacticTerm L) :
     (rewrite (t :>ₙ SubTerm.fvar)).comp shift = Rew.id := by ext x <;> simp[comp_app]
 
 lemma substs_mbar_zero_comp_shift_eq_free :
@@ -505,7 +505,7 @@ variable [∀ k, DecidableEq (L.func k)]
 def lang : SubTerm L μ n → Finset (Σ k, L.func k)
   | #_       => ∅
   | &_       => ∅
-  | func f v => insert ⟨_, f⟩ $ Finset.bunionᵢ Finset.univ (fun i => lang (v i))
+  | func f v => insert ⟨_, f⟩ $ Finset.biUnion Finset.univ (fun i => lang (v i))
 
 @[simp] lemma lang_func {k} (f : L.func k) (v : Fin k → SubTerm L μ n) :
     ⟨k, f⟩ ∈ (func f v).lang := by simp[lang]
