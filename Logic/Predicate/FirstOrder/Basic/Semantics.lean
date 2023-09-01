@@ -346,11 +346,10 @@ end SubFormula
 
 open Logic
 
-instance semantics : Semantics (Sentence L) where
-  struc := Structure.{u, u} L
+instance semantics : Semantics (Sentence L) (Structure.{u, u} L) where
   realize := (SubFormula.Val · Empty.elim)
 
-abbrev Models (M : Type u) [s : Structure L M] : Sentence L →L Prop := Semantics.realize (self := semantics) s
+abbrev Models (M : Type u) [s : Structure L M] : Sentence L →L Prop := Semantics.realize s
 
 scoped postfix:max " ⊧ " => Models
 
@@ -384,16 +383,15 @@ lemma models_def : M ⊧ = SubFormula.Val s Empty.elim := rfl
 
 lemma models_iff {σ : Sentence L} : M ⊧ σ ↔ SubFormula.Val s Empty.elim σ := by simp[models_def]
 
-lemma realize_def : Semantics.realize (self := semantics) s = SubFormula.Val s Empty.elim := rfl
+lemma realize_def : Semantics.realize s = SubFormula.Val s Empty.elim := rfl
 
 lemma modelsTheory_iff {T : Theory L} : M ⊧* T ↔ (∀ ⦃p⦄, p ∈ T → M ⊧ p) := of_eq rfl
 
 lemma models_iff_realize {σ : Sentence L} :
-    M ⊧ σ ↔ Semantics.realize (self := semantics) s σ := of_eq rfl
+    M ⊧ σ ↔ Semantics.realize s σ := of_eq rfl
 
 lemma consequence_iff {T : Theory L} {σ : Sentence L} :
-    T ⊨ σ ↔ (∀ (M : Type u) [Inhabited M] [Structure L M], M ⊧* T → M ⊧ σ) :=
-  of_eq rfl
+    T ⊨ σ ↔ (∀ (M : Type u) [Inhabited M] [Structure L M], M ⊧* T → M ⊧ σ) := of_eq rfl
 
 lemma satisfiableₛ_iff {T : Theory L} :
     Semantics.Satisfiableₛ T ↔ ∃ (M : Type u) (_ : Inhabited M) (_ : Structure L M), M ⊧* T :=
@@ -452,7 +450,7 @@ namespace SubFormula
 
 variable {L₁ L₂ : Language.{u}} {Φ : L₁ →ᵥ L₂} 
 
-section 
+section lMap
 variable {M : Type u} {s₂ : Structure L₂ M} {n} {e : Fin n → M} {ε : μ → M}
 
 lemma eval_lMap {p : SubFormula L₁ μ n} :
@@ -461,19 +459,19 @@ lemma eval_lMap {p : SubFormula L₁ μ n} :
     simp[*, SubTerm.val_lMap, lMap_rel, lMap_nrel, eval_rel, eval_nrel]
 
 lemma models_lMap {σ : Sentence L₁} :
-    Semantics.realize (self := semantics) s₂ (lMap Φ σ) ↔ Semantics.realize (self := semantics) (s₂.lMap Φ) σ :=
+    Semantics.realize s₂ (lMap Φ σ) ↔ Semantics.realize (s₂.lMap Φ) σ :=
   by simp[Semantics.realize, Val, eval_lMap]
 
-lemma onTheory₁_models_lMap {T : Theory L₁} {σ : Sentence L₁} (h : T ⊨ σ) :
-    T.lMap Φ ⊨ lMap Φ σ := by
-  intro M _ s hM
-  have : Semantics.realize (self := semantics) (s.lMap Φ) σ :=
-    h M (s.lMap Φ) (fun q hq => models_lMap.mp $ hM (Set.mem_image_of_mem _ hq))
-  exact models_lMap.mpr this
-
-end
+end lMap
 
 end SubFormula
+
+lemma lMap_models_lMap {L₁ L₂ : Language.{u}} {Φ : L₁ →ᵥ L₂}  {T : Theory L₁} {σ : Sentence L₁} (h : T ⊨ σ) :
+    T.lMap Φ ⊨ SubFormula.lMap Φ σ := by
+  intro M _ s hM
+  have : Semantics.realize (s.lMap Φ) σ :=
+    h M (s.lMap Φ) (fun q hq => SubFormula.models_lMap.mp $ hM (Set.mem_image_of_mem _ hq))
+  exact SubFormula.models_lMap.mpr this
 
 @[simp] lemma ModelsTheory.empty [Structure L M] : M ⊧* (∅ : Theory L)  := by intro _; simp
 

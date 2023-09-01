@@ -298,27 +298,6 @@ def comp (Ψ : L₂ →ᵥ L₃) (Φ : L₁ →ᵥ L₂) : L₁ →ᵥ L₃ wher
 
 end Hom
 
-def subLanguage (L : Language) (pfunc : ∀ k, Language.func L k → Prop) (prel : ∀ k, L.rel k → Prop) :
-    Language where
-  func := fun k => Subtype (pfunc k)
-  rel  := fun k => Subtype (prel k)
-
-section subLanguage
-
-variable (L) {pf : ∀ k, Language.func L k → Prop} {pr : ∀ k, L.rel k → Prop}
-
-def ofSubLanguage : subLanguage L pf pr →ᵥ L where
-  func := Subtype.val
-  rel  := Subtype.val
-
-@[simp] lemma ofSubLanguage_onFunc {k : ℕ} :
-    L.ofSubLanguage.func p = p.val := rfl
-
-@[simp] lemma ofSubLanguage_onRel {k : ℕ} :
-    L.ofSubLanguage.rel p = p.val := rfl
-
-end subLanguage
-
 end Language
 
 end FirstOrder

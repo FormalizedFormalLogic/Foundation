@@ -99,7 +99,7 @@ lemma val_Uprod {p : Formula L μ} :
 end SubFormula
 
 lemma realize_Uprod {σ : Sentence L} :
-    (Uprod A 𝓤) ⊧ σ ↔ {ι | Logic.Semantics.realize (self := semantics) (s ι) σ} ∈ 𝓤 :=
+    (Uprod A 𝓤) ⊧ σ ↔ {ι | Logic.Semantics.realize (s ι) σ} ∈ 𝓤 :=
   by simp[realize_def, SubFormula.val_Uprod, Empty.eq_elim]
 
 variable (A)
@@ -146,6 +146,8 @@ lemma compactnessAux :
 theorem compactness :
     Semantics.Satisfiableₛ T ↔ ∀ T' : Finset (Sentence L), ↑T' ⊆ T → Semantics.Satisfiableₛ (T' : Theory L) := by
   rw[compactnessAux]; simp
+
+instance : Logic.Compact (Sentence L) := ⟨compactness⟩
 
 end
 

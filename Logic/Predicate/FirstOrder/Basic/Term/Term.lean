@@ -176,6 +176,8 @@ variable (b : Fin n₁ → SubTerm L μ₂ n₂) (e : μ₁ → SubTerm L μ₂ 
 lemma eq_bind (ω : Rew L μ₁ n₁ μ₂ n₂) : ω = bind (ω ∘ bvar) (ω ∘ fvar) := by
   ext t; induction t ; simp[Rew.func'']; funext; simp[*]
 
+@[simp] lemma bind_eq_id_of_zero (f : Fin 0 → SubTerm L μ₂ 0) : bind f fvar = Rew.id := by { ext x <;> simp; exact Fin.elim0 x }
+
 end bind
 
 section map
@@ -477,6 +479,14 @@ abbrev fvar? (t : SubTerm L μ n) (x : μ) : Prop := x ∈ t.fvarList
     x ∈ (func f v).fvarList ↔ ∃ i, x ∈ (v i).fvarList :=
   by simp[fvarList]
 
+@[simp] lemma fvarList_empty {o : Type w} [IsEmpty o] {t : SubTerm L o n} : fvarList t = [] := by
+  induction t <;> simp
+
+@[simp] lemma fvarList_emb {o : Type w} [e : IsEmpty o] {t : SubTerm L o n} : fvarList (Rew.emb t : SubTerm L μ n) = [] := by
+  induction t <;> simp[*, Rew.func]
+  case fvar x => { exact IsEmpty.elim' e x }
+  case func => simp[*, fvarList]
+
 lemma rew_eq_of_funEqOn (ω₁ ω₂ : Rew L μ₁ n₁ μ₂ n₂) (t : SubTerm L μ₁ n₁)
   (hb : ∀ x, ω₁ #x = ω₂ #x)
   (he : Function.funEqOn t.fvar? (ω₁ ∘ SubTerm.fvar) (ω₂ ∘ SubTerm.fvar)) :
@@ -497,24 +507,6 @@ lemma bind_eq_of_funEqOn (b : Fin n₁ → SubTerm L μ₂ n₂) (e₁ e₂ : μ
     funext i
     exact ih i (h.of_subset $ by simp[fvar?]; intro x hx; exact ⟨i, hx⟩)
 -/
-
-section lang
-
-variable [∀ k, DecidableEq (L.func k)]
-
-def lang : SubTerm L μ n → Finset (Σ k, L.func k)
-  | #_       => ∅
-  | &_       => ∅
-  | func f v => insert ⟨_, f⟩ $ Finset.biUnion Finset.univ (fun i => lang (v i))
-
-@[simp] lemma lang_func {k} (f : L.func k) (v : Fin k → SubTerm L μ n) :
-    ⟨k, f⟩ ∈ (func f v).lang := by simp[lang]
-
-lemma lang_func_ss {k} (f : L.func k) (v : Fin k → SubTerm L μ n) (i) :
-    (v i).lang ⊆ (func f v).lang :=
-  by intros x; simp[lang]; intros h; exact Or.inr ⟨i, h⟩
-
-end lang
 
 section lMap
 
