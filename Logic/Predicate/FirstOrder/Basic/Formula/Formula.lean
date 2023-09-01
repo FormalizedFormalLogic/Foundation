@@ -330,8 +330,10 @@ instance : LogicSymbol.homClass (Rew L μ₁ n₁ μ₂ n₂) (SubFormula L μ�
 
 -/
 
+lemma hom_eq_loMap : ω.hom = ω.loMap := rfl
+
 protected lemma rel {k} {r : L.rel k} {v : Fin k → SubTerm L μ₁ n₁} :
-    ω.hom (rel r v) = rel r (fun i => ω (v i)) := by rfl
+    ω.hom (rel r v) = rel r (fun i => ω (v i)) := rfl
 
 protected lemma nrel {k} {r : L.rel k} {v : Fin k → SubTerm L μ₁ n₁} :
     ω.hom (nrel r v) = nrel r (fun i => ω (v i)) := by rfl
@@ -380,8 +382,10 @@ lemma nrel' {k} {r : L.rel k} {v : Fin k → SubTerm L μ₁ n₁} :
 @[simp] protected lemma bex {p q : SubFormula L μ₁ (n₁ + 1)} :
     ω.hom (∃[p] q) = ∃[ω.q.hom p] ω.q.hom q := by simp[bex_eq]
 
+attribute [irreducible] hom
+
 @[simp] lemma complexity (p : SubFormula L μ₁ n₁) : (ω.hom p).complexity = p.complexity := by
-  induction p using SubFormula.rec' generalizing n₂ <;> simp[Rew.rel, Rew.nrel, *]
+  induction p using SubFormula.rec' generalizing n₂ <;> simp[*, Rew.rel, Rew.nrel]
 
 lemma hom_ext' {ω₁ ω₂ : Rew L μ₁ n₁ μ₂ n₂} (h : ω₁ = ω₂) {p} : ω₁.hom p = ω₂.hom p := by simp[h]
 
@@ -556,7 +560,7 @@ namespace Abbrev
 def toOperator (a : Abbrev L n) : Finitary L n where
   operator := fun v => Rew.substsl v (Rew.embl a.sentence)
   rew_operator := fun ω v => by
-    simp[Empty.eq_elim, ←Rew.hom_comp_app]; exact Rew.ext_loMap' (by ext x <;> simp[Rew.comp_app]; { contradiction }) _
+    simp[Empty.eq_elim, ←Rew.hom_comp_app]; exact Rew.hom_ext' (by ext x <;> simp[Rew.comp_app]; { contradiction })
 
 end Abbrev
 
@@ -592,6 +596,23 @@ def fvarList : {n : ℕ} → SubFormula L μ n → List μ
   | _, ∃' p     => p.fvarList
 
 abbrev fvar? (p : SubFormula L μ n) (x : μ) : Prop := x ∈ p.fvarList
+
+@[simp] lemma fvarList_top : fvarList (⊤ : SubFormula L μ n) = [] := rfl
+
+@[simp] lemma fvarList_bot : fvarList (⊥ : SubFormula L μ n) = [] := rfl
+
+@[simp] lemma fvarList_all (p : SubFormula L μ (n + 1)) : fvarList (∀' p) = fvarList p := rfl
+
+@[simp] lemma fvarList_ex (p : SubFormula L μ (n + 1)) : fvarList (∃' p) = fvarList p := rfl
+
+@[simp] lemma fvarList_neg (p : SubFormula L μ n) : fvarList (~p) = fvarList p := by
+  induction p using rec' <;> simp[*, fvarList, ←neg_eq]
+
+@[simp] lemma fvarList_sentence {o : Type w} [IsEmpty o] (p : SubFormula L o n) : fvarList p = [] := by
+  induction p using rec' <;> simp[*, fvarList, ←neg_eq]
+
+@[simp] lemma fvarList_emb {o : Type w} [IsEmpty o] (p : SubFormula L o n) : fvarList (Rew.embl p : SubFormula L μ n) = [] := by
+  induction p using rec' <;> simp[*, Rew.rel, Rew.nrel, fvarList, ←neg_eq]
 
 lemma rew_eq_of_funEqOn {ω₁ ω₂ : Rew L μ₁ n₁ μ₂ n₂} {p}
   (hb : ∀ x, ω₁ #x = ω₂ #x) (hf : Function.funEqOn (fvar? p) (ω₁ ∘ SubTerm.fvar) (ω₂ ∘ SubTerm.fvar)) :
@@ -708,32 +729,6 @@ lemma lMap_fix (p : SyntacticSubFormula L₁ n) : lMap Φ (Rew.fixl p) = Rew.fix
 
 lemma lMap_emb {o : Type w} [IsEmpty o] (p : SubFormula L₁ o n) :
     (lMap Φ (Rew.embl p) : SubFormula L₂ μ n) = Rew.embl (lMap Φ p) := lMap_bind _ _ _
-
-variable [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq (L.rel k)]
-
-noncomputable def langFun : ∀ {n}, SubFormula L μ n → Finset (Σ k, L.func k)
-  | _, ⊤        => ∅
-  | _, ⊥        => ∅
-  | _, rel  _ v => Finset.biUnion Finset.univ (fun i => (v i).lang)
-  | _, nrel _ v => Finset.biUnion Finset.univ (fun i => (v i).lang)
-  | _, p ⋏ q    => langFun p ∪ langFun q 
-  | _, p ⋎ q    => langFun p ∪ langFun q 
-  | _, ∀' p     => langFun p 
-  | _, ∃' p     => langFun p 
-
-noncomputable def langRel : ∀ {n}, SubFormula L μ n → Finset (Σ k, L.rel k)
-  | _, ⊤        => ∅
-  | _, ⊥        => ∅
-  | _, rel  r _ => {⟨_, r⟩}
-  | _, nrel r _ => {⟨_, r⟩}
-  | _, p ⋏ q    => langRel p ∪ langRel q 
-  | _, p ⋎ q    => langRel p ∪ langRel q 
-  | _, ∀' p     => langRel p 
-  | _, ∃' p     => langRel p
-
-lemma langFun_rel_ss {k} (r : L.rel k) (v : Fin k → SubTerm L μ n) (i) :
-    (v i).lang ⊆ (rel r v).langFun :=
-  by intros x; simp[langFun]; intros h; exact ⟨i, h⟩
 
 end SubFormula
 

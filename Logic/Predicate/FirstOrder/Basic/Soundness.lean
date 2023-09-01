@@ -57,14 +57,17 @@ lemma sound : ∀ {Γ : Sequent L}, ⊢ᶜ[P] Γ → ∀ (M : Type u) [s : Struc
 
 end DerivationCutRestricted
 
-theorem soundness {T} {σ : Sentence L} : T ⊢ σ → T ⊨ σ := by
-  simp[consequence_iff]; rintro b M _ _ hT
-  have : M ⊧ σ ∨ ∃ τ ∈ Proof₀.leftHand b, M ⊧ τ := by simpa using (Proof₀.derivation b).sound M default
-  rcases this with (hσ | ⟨τ, hτ, hhτ⟩)
-  · assumption
-  · have : ~τ ∈ T := by rcases (Proof₀.hleftHand b) hτ with ⟨τ', hτ', rfl⟩; simpa[←SubFormula.neg_eq] using hτ'
-    have : ¬ M ⊧ τ := by simpa using hT this
-    contradiction
+lemma DerivationCutRestrictedWithAxiom.soundness (b : T ⊢ᶜ[P] Γ) {M : Type u} [s : Structure L M] (h : M ⊧* T) (ε : ℕ → M) :
+    ∃ p ∈ Γ, SubFormula.Val! M ε p := by
+  have : ∃ p, (p ∈ Γ ∨ ∃ σ ∈ b.leftHand, Rew.embl σ = p) ∧ SubFormula.Val! M ε p := by simpa using b.derivation.sound M ε
+  rcases this with ⟨p, (hp | ⟨σ, hσ, rfl⟩), vp⟩
+  { exact ⟨p, hp, vp⟩ }
+  { have : M ⊧ σ := by simpa using vp
+    have : ¬M ⊧ σ := by simpa using h (DerivationCutRestrictedWithAxiom.neg_mem hσ)
+    contradiction }
+
+theorem soundness {T} {σ : Sentence L} : T ⊢ σ → T ⊨ σ := fun d M hM s hT => by
+  simpa using d.soundness hT
 
 instance : Logic.Sound (Sentence L) := ⟨soundness⟩
 

@@ -169,7 +169,8 @@ def falsumElimAux : {Δ : Sequent L} → ⊢ᶜ[P] Δ → ⊢ᶜ[P] Δ.erase ⊥
   | _, all Δ p d           =>
     have : ⊢ᶜ[P] (insert (Rew.freel p) (shifts $ Δ.erase ⊥)) :=
       d.falsumElimAux.weakening
-        (by {simp[Finset.subset_iff, shifts_eq_image]; rintro x hx (rfl | ⟨y, hy, rfl⟩); { exact Or.inl rfl }; { exact Or.inr ⟨y, ⟨by rintro rfl; contradiction, hy⟩, rfl⟩ } } )
+        (by {simp[Finset.subset_iff, shifts_eq_image]; rintro x hx (rfl | ⟨y, hy, rfl⟩); { exact Or.inl rfl };
+             { exact Or.inr ⟨y, ⟨by rintro rfl; simp at hx, hy⟩, rfl⟩ } } )
     (all _ _ this).cast (by simp[Finset.erase_insert_of_ne])
   | _, ex Δ t p d          =>
     have : ⊢ᶜ[P] (insert ([→ t].hom p) $ Δ.erase ⊥) := d.falsumElimAux.weakening (by simp[Finset.subset_iff]; rintro x hx (rfl | hhx) <;> simp[*])

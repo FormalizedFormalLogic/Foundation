@@ -34,10 +34,10 @@ lemma rew_iff_eq_of_eq {p q : SubFormula L μ₁ n₁} {p' q'} (hp : ω.hom p = 
     ω.hom (p ⟷ q) = p' ⟷ q' := by simp[←hp, ←hq]
 
 lemma rew_rel_eq_of_eq {k} (r : L.rel k) {v : Fin k → SubTerm L μ₁ n₁} {v'} (h : ω ∘ v = v') :
-    ω.hom (rel r v) = rel r v' := by simp[←h]; rfl
+    ω.hom (rel r v) = rel r v' := by simp[←h, ω.rel]; rfl
 
 lemma rew_nrel_eq_of_eq {k} (r : L.rel k) {v : Fin k → SubTerm L μ₁ n₁} {v'} (h : ω ∘ v = v') :
-    ω.hom (nrel r v) = nrel r v' := by simp[←h]; rfl
+    ω.hom (nrel r v) = nrel r v' := by simp[←h, ω.nrel]; rfl
 
 lemma rew_finitary_eq_of_eq {k} (o : Finitary L k) {v : Fin k → SubTerm L μ₁ n₁} {v' : Fin k → SubTerm L μ₂ n₂} (h : ω ∘ v = v') :
     ω.hom (o.operator v) = o.operator v' := by simp[←h, o.rew_operator, Function.comp]
@@ -238,10 +238,12 @@ lemma univClosure_eq_of_eq {n} {p : SubFormula L μ (n + 1)} {q} (h : univClosur
 
 end lemmata
 
+#check LogicSymbol.HomClass.map_top
+
 partial def resultSubsts (L : Q(Language.{u})) (k n : Q(ℕ)) (w : Q(Fin $k → SyntacticSubTerm $L $n)) :
     (p : Q(SyntacticSubFormula $L $k)) → MetaM ((res : Q(SyntacticSubFormula $L $n)) × Q(Rew.substsl $w $p = $res))
-  | ~q(⊤)                            => pure ⟨q(⊤), q(rfl)⟩
-  | ~q(⊥)                            => pure ⟨q(⊥), q(rfl)⟩
+  | ~q(⊤)                            => pure ⟨q(⊤), q(LogicSymbol.HomClass.map_top _)⟩
+  | ~q(⊥)                            => pure ⟨q(⊥), q(LogicSymbol.HomClass.map_bot _)⟩
   | ~q(rel (arity := $arity) $r $v)  => do
     let ⟨v', ve⟩ ← resultVectorOfResultFun (u := u) (v := u)
       (α := q(SyntacticSubTerm $L $k)) (β := q(SyntacticSubTerm $L $n))
@@ -319,8 +321,8 @@ elab "dbgresultSubsts" : term => do
 
 partial def resultShift (L : Q(Language.{u})) (n : Q(ℕ)) : (p : Q(SyntacticSubFormula $L $n)) →
     MetaM ((res : Q(SyntacticSubFormula $L $n)) × Q(Rew.shiftl $p = $res))
-  | ~q(⊤)                            => pure ⟨q(⊤), q(rfl)⟩
-  | ~q(⊥)                            => pure ⟨q(⊥), q(rfl)⟩
+  | ~q(⊤)                            => pure ⟨q(⊤), q(LogicSymbol.HomClass.map_top _)⟩
+  | ~q(⊥)                            => pure ⟨q(⊥), q(LogicSymbol.HomClass.map_bot _)⟩
   | ~q(rel (arity := $arity) $r $v)  => do
     let ⟨v', ve⟩ ← resultVectorOfResultFun (u := u) (v := u) (α := q(SyntacticSubTerm $L $n)) (β := q(SyntacticSubTerm $L $n))
       q(Rew.shift) (SubTerm.Meta.resultShift L n) arity v
@@ -376,8 +378,8 @@ partial def resultShift (L : Q(Language.{u})) (n : Q(ℕ)) : (p : Q(SyntacticSub
 
 partial def resultFree (L : Q(Language.{u})) (n : Q(ℕ)) : (p : Q(SyntacticSubFormula $L ($n + 1))) →
     MetaM ((res : Q(SyntacticSubFormula $L $n)) × Q(Rew.freel $p = $res))
-  | ~q(⊤)                            => pure ⟨q(⊤), q(rfl)⟩
-  | ~q(⊥)                            => pure ⟨q(⊥), q(rfl)⟩
+  | ~q(⊤)                            => pure ⟨q(⊤), q(LogicSymbol.HomClass.map_top _)⟩
+  | ~q(⊥)                            => pure ⟨q(⊥), q(LogicSymbol.HomClass.map_bot _)⟩
   | ~q(rel (arity := $arity) $r $v)  => do
     let ⟨v', ve⟩ ← resultVectorOfResultFun (u := u) (v := u)
       (α := q(SyntacticSubTerm $L ($n + 1))) (β := q(SyntacticSubTerm $L $n))
@@ -450,8 +452,8 @@ elab "dbgresultFree" : term => do
 
 partial def resultFix (L : Q(Language.{u})) (n : Q(ℕ)) : (p : Q(SyntacticSubFormula $L $n)) →
     MetaM ((res : Q(SyntacticSubFormula $L ($n + 1))) × Q(Rew.fixl $p = $res))
-  | ~q(⊤)                            => pure ⟨q(⊤), q(rfl)⟩
-  | ~q(⊥)                            => pure ⟨q(⊥), q(rfl)⟩
+  | ~q(⊤)                            => pure ⟨q(⊤), q(LogicSymbol.HomClass.map_top _)⟩
+  | ~q(⊥)                            => pure ⟨q(⊥), q(LogicSymbol.HomClass.map_bot _)⟩
   | ~q(rel (arity := $arity) $r $v)  => do
     let ⟨v', ve⟩ ← resultVectorOfResultFun (u := u) (v := u)
       (α := q(SyntacticSubTerm $L $n)) (β := q(SyntacticSubTerm $L ($n + 1)))
