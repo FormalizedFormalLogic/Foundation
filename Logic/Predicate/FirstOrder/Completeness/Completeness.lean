@@ -16,7 +16,7 @@ section Encodable
 
 variable [∀ k, Encodable (L.func k)] [∀ k, Encodable (L.rel k)]
 
-noncomputable def DerivationWithAxiom.completeness_of_encodable
+noncomputable def DerivationWA.completeness_of_encodable
   {Γ : Finset (Sentence L)} (h : ∀ M [Inhabited M] [Structure L M], M ⊧* T → ∃ σ ∈ Γ, M ⊧ σ) :
     T ⊢ᵀ (Γ.image Rew.embl : Sequent L) := by
   have : WellFounded (SearchTree.Lt T (Γ.image Rew.embl : Sequent L)) := by
@@ -30,7 +30,7 @@ noncomputable def DerivationWithAxiom.completeness_of_encodable
 
 noncomputable def completeness_of_encodable {σ : Sentence L} :
     T ⊨ σ → T ⊢ σ := fun h => by
-  have : T ⊢ᵀ {Rew.embl σ} := DerivationWithAxiom.completeness_of_encodable (T := T) (Γ := {σ}) (fun M i s hM => ⟨σ, by simp, h M s hM⟩)
+  have : T ⊢ᵀ {Rew.embl σ} := DerivationWA.completeness_of_encodable (T := T) (Γ := {σ}) (fun M i s hM => ⟨σ, by simp, h M s hM⟩)
   exact this.toProof
   
 noncomputable instance : Logic.Complete (Sentence L) := ⟨completeness_of_encodable⟩

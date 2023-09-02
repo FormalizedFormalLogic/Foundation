@@ -32,7 +32,7 @@ lemma isVType_neg_true_of_eq_false {p : SyntacticSubFormula L n} : isVType p = f
 
 end SubFormula
 
-namespace DerivationCutRestricted
+namespace DerivationCR
 
 variable {P : SyntacticFormula L → Prop} (hP : ∀ f p, P p → P (Rew.rewritel f p)) {Δ Δ₁ Δ₂ Γ : Sequent L}
 
@@ -286,7 +286,7 @@ def toClx : {Δ : Sequent L} → ⊢ᶜ Δ → (i : ℕ) × ⊢ᶜ[< i] Δ
 
 def hauptsatz : ⊢ᶜ Δ → ⊢ᵀ Δ := fun d => hauptsatzClx d.toClx.2
 
-end DerivationCutRestricted
+end DerivationCR
 
 end FirstOrder
 

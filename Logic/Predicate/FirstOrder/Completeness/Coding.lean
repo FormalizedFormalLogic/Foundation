@@ -16,7 +16,7 @@ def newVar (Γ : Sequent L) : ℕ := Γ.sup SubFormula.upper
 lemma not_fvar?_newVar {p : SyntacticFormula L} {Γ : Sequent L} (h : p ∈ Γ) : ¬fvar? p (newVar Γ) :=
   not_fvar?_of_lt_upper p (by simpa[newVar] using Finset.le_sup h)
 
-namespace DerivationWithAxiom
+namespace DerivationWA
 
 open SubFormula
 variable {P : SyntacticFormula L → Prop} {T : Theory L} {Δ : Sequent L}
@@ -32,9 +32,9 @@ protected def all_nvar {p} (h : ∀' p ∈ Δ)
         (by simp; rintro q (hq | ⟨σ, _, rfl⟩); { exact not_fvar?_newVar hq }; { simp[fvar?] })
     d₂.cast (Finset.insert_eq_of_mem $ by simp[h])
 
-end DerivationWithAxiom
+end DerivationWA
 
-namespace DerivationWithAxiom
+namespace DerivationWA
 
 inductive Code (L : Language.{u})
   | axL : {k : ℕ} → (r : L.rel k) → (v : Fin k → SyntacticTerm L) → Code L
@@ -78,7 +78,7 @@ def Code.equiv (L : Language.{u}) :
 
 instance : Encodable (Code L) := Encodable.ofEquiv _ (Code.equiv L)
 
-end DerivationWithAxiom
+end DerivationWA
 
 end FirstOrder
 

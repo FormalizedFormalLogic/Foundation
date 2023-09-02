@@ -8,7 +8,7 @@ namespace FirstOrder
 
 namespace Completeness
 
-open SubFormula DerivationWithAxiom Encodable
+open SubFormula DerivationWA Encodable
 variable {L : Language.{u}}
   [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq (L.rel k)]
   [∀ k, Encodable (L.func k)] [∀ k, Encodable (L.rel k)]
@@ -80,7 +80,7 @@ end SearchTree
 
 section WellFounded
 
-open DerivationCutRestrictedWithAxiom
+open DerivationCRWA
 variable (wf : WellFounded (SearchTree.Lt T Γ))
 
 noncomputable def SearchTree.recursion {C : SearchTree T Γ → Sort v}
@@ -109,31 +109,31 @@ noncomputable def syntacticMainLemma (σ : SearchTree T Γ) : T ⊢ᵀ σ.seq :=
         have rq : insert q Δ₁ ≺[Code.and p q] Δ₁ := Redux.and₂ h
         have dp : T ⊢ᵀ insert p Δ₁ := ih' (ReduxNat.redux hs rp)
         have dq : T ⊢ᵀ insert q Δ₁ := ih' (ReduxNat.redux hs rq)
-        exact DerivationCutRestrictedWithAxiom.and h dp dq }
+        exact DerivationCRWA.and h dp dq }
       { exact ih' (ReduxNat.redux hs $ Redux.andRefl h) } }
     case or p q =>
     { by_cases h : p ⋎ q ∈ Δ₁
       { have : insert p (insert q Δ₁) ≺[Code.or p q] Δ₁ := Redux.or h
         have : T ⊢ᵀ (insert p $ insert q Δ₁) := ih' (ReduxNat.redux hs this)
-        exact DerivationCutRestrictedWithAxiom.or h this }
+        exact DerivationCRWA.or h this }
       { exact ih' (ReduxNat.redux hs $ Redux.orRefl h) } }
     case all p =>
     { by_cases h : ∀' p ∈ Δ₁
       { have : insert ([→ &(newVar Δ₁)].hom p) Δ₁ ≺[Code.all p] Δ₁ := Redux.all h
         have : T ⊢ᵀ insert ([→ &(newVar Δ₁)].hom p) Δ₁ := ih' (ReduxNat.redux hs this)
-        exact DerivationWithAxiom.all_nvar h this }
+        exact DerivationWA.all_nvar h this }
       { exact ih' (ReduxNat.redux hs $ Redux.allRefl h) } }
     case ex p t =>
     { by_cases h : ∃' p ∈ Δ₁
       { have : insert ([→ t].hom p) Δ₁ ≺[Code.ex p t] Δ₁ := Redux.ex h
         have : T ⊢ᵀ insert ([→ t].hom p) Δ₁ := ih' (ReduxNat.redux hs this)
-        exact DerivationCutRestrictedWithAxiom.ex h this }
+        exact DerivationCRWA.ex h this }
       { exact ih' (ReduxNat.redux hs $ Redux.exRefl h) } }
     case id σ =>
     { by_cases h : σ ∈ T
       { have : insert (~Rew.embl σ) Δ₁ ≺[Code.id σ] Δ₁ := Redux.id h
         have : T ⊢ᵀ insert (~Rew.embl σ) Δ₁ := ih' (ReduxNat.redux hs this)
-        exact DerivationCutRestrictedWithAxiom.id h this }
+        exact DerivationCRWA.id h this }
       { exact ih' (ReduxNat.redux hs $ Redux.idRefl h) } } }
 
 noncomputable def syntacticMainLemmaTop : T ⊢ᵀ Γ := syntacticMainLemma wf ⊤

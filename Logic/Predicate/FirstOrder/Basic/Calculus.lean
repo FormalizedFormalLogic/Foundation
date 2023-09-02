@@ -38,32 +38,32 @@ lemma shifts_erase (p : SyntacticSubFormula L n) (Δ : Finset (SyntacticSubFormu
     shifts (Δ.erase p) = (shifts Δ).erase (Rew.shiftl p) :=
   by simp[shifts, shiftEmb_eq_shift]
 
-inductive DerivationCutRestricted (P : SyntacticFormula L → Prop) : Sequent L → Type u
+inductive DerivationCR (P : SyntacticFormula L → Prop) : Sequent L → Type u
 | axL   : ∀ (Δ : Sequent L) {k} (r : L.rel k) (v : Fin k → SyntacticTerm L),
-    rel r v ∈ Δ → nrel r v ∈ Δ → DerivationCutRestricted P Δ
-| verum : ∀ (Δ : Sequent L), ⊤ ∈ Δ → DerivationCutRestricted P Δ
+    rel r v ∈ Δ → nrel r v ∈ Δ → DerivationCR P Δ
+| verum : ∀ (Δ : Sequent L), ⊤ ∈ Δ → DerivationCR P Δ
 | or    : ∀ (Δ : Sequent L) (p q : SyntacticFormula L),
-    DerivationCutRestricted P (insert p $ insert q Δ) → DerivationCutRestricted P (insert (p ⋎ q) Δ)
+    DerivationCR P (insert p $ insert q Δ) → DerivationCR P (insert (p ⋎ q) Δ)
 | and   : ∀ (Δ : Sequent L) (p q : SyntacticFormula L),
-    DerivationCutRestricted P (insert p Δ) → DerivationCutRestricted P (insert q Δ) → DerivationCutRestricted P (insert (p ⋏ q) Δ)
+    DerivationCR P (insert p Δ) → DerivationCR P (insert q Δ) → DerivationCR P (insert (p ⋏ q) Δ)
 | all   : ∀ (Δ : Sequent L) (p : SyntacticSubFormula L 1),
-    DerivationCutRestricted P (insert (Rew.free.hom p) (shifts Δ)) → DerivationCutRestricted P (insert (∀' p) Δ)
+    DerivationCR P (insert (Rew.free.hom p) (shifts Δ)) → DerivationCR P (insert (∀' p) Δ)
 | ex    : ∀ (Δ : Sequent L) (t : SyntacticTerm L) (p : SyntacticSubFormula L 1),
-    DerivationCutRestricted P (insert ([→ t].hom p) Δ) → DerivationCutRestricted P (insert (∃' p) Δ)
+    DerivationCR P (insert ([→ t].hom p) Δ) → DerivationCR P (insert (∃' p) Δ)
 | cut   : ∀ (Δ Γ : Sequent L) (p : SyntacticFormula L), P p →
-    DerivationCutRestricted P (insert p Δ) → DerivationCutRestricted P (insert (~p) Γ) → DerivationCutRestricted P (Δ ∪ Γ)
+    DerivationCR P (insert p Δ) → DerivationCR P (insert (~p) Γ) → DerivationCR P (Δ ∪ Γ)
 
-scoped notation :45 "⊢ᶜ[" P "] " Γ:45 => DerivationCutRestricted P Γ
+scoped notation :45 "⊢ᶜ[" P "] " Γ:45 => DerivationCR P Γ
 
-abbrev Derivation : Sequent L → Type u := DerivationCutRestricted (fun _ => False)
+abbrev Derivation : Sequent L → Type u := DerivationCR (fun _ => False)
 
 scoped prefix:45 "⊢ᵀ " => Derivation
 
-abbrev DerivationCut : Sequent L → Type u := DerivationCutRestricted (fun _ => True)
+abbrev DerivationC : Sequent L → Type u := DerivationCR (fun _ => True)
 
-scoped prefix:45 "⊢ᶜ " => DerivationCut
+scoped prefix:45 "⊢ᶜ " => DerivationC
 
-abbrev DerivationClx (c : ℕ) : Sequent L → Type u := DerivationCutRestricted (·.complexity < c)
+abbrev DerivationClx (c : ℕ) : Sequent L → Type u := DerivationCR (·.complexity < c)
 
 scoped notation :45 "⊢ᶜ[< " c "] " Γ:45 => DerivationClx c Γ
 
@@ -73,10 +73,10 @@ abbrev Derivation₁ (p : SyntacticFormula L) := ⊢ᶜ ({p} : Sequent L)
 
 abbrev Derivation.Valid (σ : Sentence L) := ⊢ᵀ ({Rew.embl σ} : Sequent L)
 
-namespace DerivationCutRestricted
+namespace DerivationCR
 variable {P : SyntacticFormula L → Prop} {Δ Δ₁ Δ₂ Γ : Sequent L}
 
-def length : {Δ : Sequent L} → DerivationCutRestricted P Δ → ℕ 
+def length : {Δ : Sequent L} → DerivationCR P Δ → ℕ 
   | _, axL Δ _ _ _ _     => 0
   | _, verum Δ _         => 0
   | _, or _ _ _ d        => d.length.succ
@@ -148,7 +148,7 @@ protected def cast (d : ⊢ᶜ[P] Δ) (e : Δ = Γ) : ⊢ᶜ[P] Γ := cast (by s
 
 def cast₀ (d : ⊢ᵀ Δ) (e : Δ = Γ) : ⊢ᵀ Γ := d.cast e
 
-@[simp] lemma length_cast (d : ⊢ᶜ[P] Δ) (e : Δ = Γ) : (d.cast e).length = d.length := by rcases e with rfl; simp[DerivationCutRestricted.cast]
+@[simp] lemma length_cast (d : ⊢ᶜ[P] Δ) (e : Δ = Γ) : (d.cast e).length = d.length := by rcases e with rfl; simp[DerivationCR.cast]
 
 def cutWeakening {P Q : SyntacticFormula L → Prop} (h : ∀ p, P p → Q p) : ∀ {Δ}, ⊢ᶜ[P] Δ → ⊢ᶜ[Q] Δ
   | _, axL Δ r v hpos hneg  => axL Δ r v hpos hneg
@@ -208,7 +208,7 @@ def ex' {p : SyntacticSubFormula L 1} (t : SyntacticTerm L) (h : ∃' p ∈ Δ)
   (d : ⊢ᶜ[P] insert ([→ t].hom p) (Δ.erase (∃' p))) : ⊢ᶜ[P] Δ :=
   (ex _ t p d).cast (by simp[Finset.insert_erase h])
 
-def cutCut {p} (d₁ : ⊢ᶜ insert p Δ) (d₂ : ⊢ᶜ insert (~p) Γ) : ⊢ᶜ Δ ∪ Γ := cut Δ Γ p trivial d₁ d₂
+def cCut {p} (d₁ : ⊢ᶜ insert p Δ) (d₂ : ⊢ᶜ insert (~p) Γ) : ⊢ᶜ Δ ∪ Γ := cut Δ Γ p trivial d₁ d₂
 
 def cutClx {i} {p} (d₁ : ⊢ᶜ[< i] insert p Δ) (d₂ : ⊢ᶜ[< i] insert (~p) Γ) (hp : p.complexity < i) :
     ⊢ᶜ[< i] Δ ∪ Γ := cut Δ Γ p hp d₁ d₂
@@ -366,7 +366,7 @@ def rewriteClx {i} {Δ : Sequent L} (d : ⊢ᶜ[< i] Δ) (f : ℕ → SyntacticT
 def rewriteCut {Δ : Sequent L} (d : ⊢ᶜ Δ) (f : ℕ → SyntacticTerm L) : ⊢ᶜ Δ.image (Rew.rewritel f) := d.rewrite (by simp) f
 
 @[simp] lemma length_rewrite (h) (d : ⊢ᶜ[P] Δ) (f : ℕ → SyntacticTerm L) : (d.rewrite h f).length = d.length :=
-  by induction d generalizing f <;> simp[*, DerivationCutRestricted.rewrite]
+  by induction d generalizing f <;> simp[*, DerivationCR.rewrite]
 
 @[simp] lemma length_rewrite₀ (d : ⊢ᵀ Δ) (f : ℕ → SyntacticTerm L) : (d.rewrite₀ f).length = d.length :=
   d.length_rewrite _ f
@@ -410,59 +410,59 @@ def exOfInstances' (v : List (SyntacticTerm L)) (p : SyntacticSubFormula L 1)
   (h : ⊢ᶜ[P] (insert (∃' p) $ (v.map (Rew.substsl ![·] p)).toFinset ∪ Γ)) : ⊢ᶜ[P] insert (∃' p) Γ :=
   (exOfInstances (Γ := insert (∃' p) Γ) v p (h.cast $ by simp)).cast (by simp)
 
-end DerivationCutRestricted
+end DerivationCR
 
-structure DerivationCutRestrictedWithAxiom (P : SyntacticFormula L → Prop) (T : Theory L) (Δ : Sequent L) where
+structure DerivationCRWA (P : SyntacticFormula L → Prop) (T : Theory L) (Δ : Sequent L) where
   leftHand : Finset (Sentence L)
   hleftHand : ↑leftHand ⊆ (~·) '' T
   derivation : ⊢ᶜ[P] Δ ∪ (leftHand.image Rew.embl)
 
-scoped notation :45 T " ⊢ᶜ[" P "] " Γ:45 => DerivationCutRestrictedWithAxiom P T Γ
+scoped notation :45 T " ⊢ᶜ[" P "] " Γ:45 => DerivationCRWA P T Γ
 
-abbrev DerivationWithAxiom (T : Theory L) (Δ : Sequent L) := DerivationCutRestrictedWithAxiom (fun _ => False) T Δ
+abbrev DerivationWithAxiom (T : Theory L) (Δ : Sequent L) := DerivationCRWA (fun _ => False) T Δ
 
 scoped infix:45 " ⊢ᵀ " => DerivationWithAxiom
 
-abbrev DerivationCutWithAxiom (T : Theory L) (Δ : Sequent L) := DerivationCutRestrictedWithAxiom (fun _ => True) T Δ
+abbrev DerivationCWA (T : Theory L) (Δ : Sequent L) := DerivationCRWA (fun _ => True) T Δ
 
-scoped infix:45 " ⊢' " => DerivationCutWithAxiom
+scoped infix:45 " ⊢' " => DerivationCWA
 
-abbrev ProofAux (T : Theory L) (p : SyntacticFormula L) := DerivationCutWithAxiom T {p}
+abbrev ProofAux (T : Theory L) (p : SyntacticFormula L) := DerivationCWA T {p}
 
 instance Proof : Logic.Proof (Sentence L) where
   Bew := fun T σ => ProofAux T (Rew.embl σ)
   axm := fun {f σ} hσ =>
     { leftHand := {~σ}
       hleftHand := by simp[hσ]
-      derivation := DerivationCutRestricted.em (p := Rew.embl σ) (by simp) (by simp) }
+      derivation := DerivationCR.em (p := Rew.embl σ) (by simp) (by simp) }
   weakening' := fun {T U} f h b =>
     { leftHand := b.leftHand,
       hleftHand := Set.Subset.trans b.hleftHand (Set.image_subset _ h),
       derivation := b.derivation }
 
-def DerivationCutRestrictedWithAxiom.toDerivationCutWithAxiom {T : Theory L} {Δ} (b : T ⊢ᶜ[P] Δ) : T ⊢' Δ where
+def DerivationCRWA.toDerivationCWA {T : Theory L} {Δ} (b : T ⊢ᶜ[P] Δ) : T ⊢' Δ where
   leftHand := b.leftHand
   hleftHand := b.hleftHand
   derivation := b.derivation.cutWeakening (by simp)
 
-def DerivationCutRestrictedWithAxiom.toDerivationCutWithAxiom' {T : Theory L} {σ : Sentence L} (b : T ⊢ σ) : T ⊢' {Rew.embl σ} := b
+def DerivationCRWA.toDerivationCWA' {T : Theory L} {σ : Sentence L} (b : T ⊢ σ) : T ⊢' {Rew.embl σ} := b
 
-def DerivationCutRestrictedWithAxiom.toProof {T : Theory L} {σ : Sentence L} (b : T ⊢ᶜ[P] {Rew.embl σ}) : T ⊢ σ :=
-  b.toDerivationCutWithAxiom
+def DerivationCRWA.toProof {T : Theory L} {σ : Sentence L} (b : T ⊢ᶜ[P] {Rew.embl σ}) : T ⊢ σ :=
+  b.toDerivationCWA
 
 def Proof.toDerivationWithAxiom {T : Theory L} {σ : Sentence L} (b : T ⊢ σ) : T ⊢' {Rew.embl σ} := b
 
-def DerivationCutRestricted.toProof
+def DerivationCR.toDerivationCRWA
   {P : SyntacticFormula L → Prop} {T : Theory L} {Δ : Sequent L} (b : ⊢ᶜ[P] Δ) : T ⊢ᶜ[P] Δ where
   leftHand := ∅
   hleftHand := by simp
   derivation := b.cast (by simp)
 
-namespace DerivationCutRestrictedWithAxiom
+namespace DerivationCRWA
 
 variable {P : SyntacticFormula L → Prop} {T : Theory L} {Δ : Sequent L}
 
-def kernel (b : DerivationCutRestrictedWithAxiom P T Δ) := b.leftHand.image (~·)
+def kernel (b : DerivationCRWA P T Δ) := b.leftHand.image (~·)
 
 lemma neg_mem {b : T ⊢ᶜ[P] Δ} (hσ : σ ∈ b.leftHand) : ~σ ∈ T := by
   have : ∃ q ∈ T, ~q = σ := b.hleftHand hσ; rcases this with ⟨q, hq, rfl⟩; simp[hq]
@@ -475,10 +475,10 @@ lemma compact {p} (b : T ⊢ᶜ[P] p) : b.kernel ⊢ᶜ[P] p where
   hleftHand := by simp[kernel, ←Set.image_comp]
   derivation := b.derivation
 
-def verum (h : ⊤ ∈ Δ) : T ⊢ᶜ[P] Δ := (DerivationCutRestricted.verum _ (by simp[h])).toProof
+def verum (h : ⊤ ∈ Δ) : T ⊢ᶜ[P] Δ := (DerivationCR.verum _ (by simp[h])).toDerivationCRWA
 
 def axL {k} (r : L.rel k) (v : Fin k → SyntacticTerm L) (h : rel r v ∈ Δ) (nh : nrel r v ∈ Δ) : T ⊢ᶜ[P] Δ :=
-  (DerivationCutRestricted.axL Δ r v h nh).toProof
+  (DerivationCR.axL Δ r v h nh).toDerivationCRWA
 
 protected def and {p₁ p₂} (h : p₁ ⋏ p₂ ∈ Δ) (b₁ : T ⊢ᶜ[P] insert p₁ Δ) (b₂ : T ⊢ᶜ[P] insert p₂ Δ) :
     T ⊢ᶜ[P] Δ where
@@ -486,7 +486,7 @@ protected def and {p₁ p₂} (h : p₁ ⋏ p₂ ∈ Δ) (b₁ : T ⊢ᶜ[P] ins
   hleftHand := by simp[b₁.hleftHand, b₂.hleftHand]
   derivation :=
     let d : ⊢ᶜ[P] insert (p₁ ⋏ p₂) (Δ ∪ (b₁.leftHand ∪ b₂.leftHand).image Rew.embl) :=
-      DerivationCutRestricted.and (Δ ∪ (b₁.leftHand ∪ b₂.leftHand).image Rew.embl) p₁ p₂
+      DerivationCR.and (Δ ∪ (b₁.leftHand ∪ b₂.leftHand).image Rew.embl) p₁ p₂
         (b₁.derivation.weakening (by intro x; simp; rintro (rfl | hx | ⟨σ, hσ, rfl⟩); { simp }; { simp[hx] }; { exact Or.inr $ Or.inr ⟨σ, Or.inl hσ, rfl⟩ } ))
         (b₂.derivation.weakening (by intro x; simp; rintro (rfl | hx | ⟨σ, hσ, rfl⟩); { simp }; { simp[hx] }; { exact Or.inr $ Or.inr ⟨σ, Or.inr hσ, rfl⟩ } ))
     d.cast (Finset.insert_eq_of_mem (by simp[h]))
@@ -496,7 +496,7 @@ protected def or {p₁ p₂} (h : p₁ ⋎ p₂ ∈ Δ) (b : T ⊢ᶜ[P] insert 
   hleftHand := b.hleftHand
   derivation :=
     let d : ⊢ᶜ[P] insert (p₁ ⋎ p₂) (Δ ∪ b.leftHand.image Rew.embl) :=
-      DerivationCutRestricted.or (Δ ∪ b.leftHand.image Rew.embl) p₁ p₂ (b.derivation.cast (by simp[Finset.insert_union]))
+      DerivationCR.or (Δ ∪ b.leftHand.image Rew.embl) p₁ p₂ (b.derivation.cast (by simp[Finset.insert_union]))
     d.cast (Finset.insert_eq_of_mem (by simp[h]))
 
 protected def all {p} (h : ∀' p ∈ Δ)
@@ -514,8 +514,13 @@ protected def ex {p} {t} (h : ∃' p ∈ Δ)
   hleftHand := b.hleftHand
   derivation :=
     let d₁ : ⊢ᶜ[P] insert ([→ t].hom p) (Δ ∪ b.leftHand.image Rew.embl) := by simpa using b.derivation
-    let d₂ : ⊢ᶜ[P] insert (∃' p) (Δ ∪ b.leftHand.image Rew.embl) := DerivationCutRestricted.ex _ t p d₁
+    let d₂ : ⊢ᶜ[P] insert (∃' p) (Δ ∪ b.leftHand.image Rew.embl) := DerivationCR.ex _ t p d₁
     d₂.cast (Finset.insert_eq_of_mem $ by simp[h])
+
+protected def id {σ} (hσ : σ ∈ T) (b : T ⊢ᶜ[P] insert (~Rew.embl σ) Δ) : T ⊢ᶜ[P] Δ where
+  leftHand := insert (~σ) b.leftHand
+  hleftHand := by simp[Set.insert_subset_iff, b.hleftHand, hσ]
+  derivation := b.derivation.cast (by ext ; simp)
 
 def cast {Δ₁ Δ₂ : Sequent L} (h : Δ₁ = Δ₂) (b : T ⊢ᶜ[P] Δ₁) : T ⊢ᶜ[P] Δ₂ := by rw[h] at b; exact b
 
@@ -548,10 +553,29 @@ def elimFalsum (b : T ⊢ᶜ[P] Δ) : T ⊢ᶜ[P] Δ.erase ⊥ where
   derivation :=
     b.derivation.elimFalsum.weakening (by simp[Finset.erase_union_distrib]; exact Finset.union_subset_union_right (Finset.erase_subset _ _))
 
-protected def id {σ} (hσ : σ ∈ T) (b : T ⊢ᶜ[P] insert (~Rew.embl σ) Δ) : T ⊢ᶜ[P] Δ where
-  leftHand := insert (~σ) b.leftHand
-  hleftHand := by simp[Set.insert_subset_iff, b.hleftHand, hσ]
-  derivation := b.derivation.cast (by ext ; simp)
+def byAxiom {σ} (hσ : σ ∈ T) (h : Rew.embl σ ∈ Δ) : T ⊢ᶜ[P] Δ where
+  leftHand := {~σ}
+  hleftHand := by simp[hσ]
+  derivation := DerivationCR.em (p := Rew.embl σ) (by simp[h]) (by simp)
+
+protected def em {p} (hp : p ∈ Δ) (hn : ~p ∈ Δ) : T ⊢ᶜ[P] Δ := (DerivationCR.em hp hn).toDerivationCRWA
+
+def cCut {p} (b₁ : T ⊢' insert p Δ) (b₂ : T ⊢' insert (~p) Γ) : T ⊢' Δ ∪ Γ where
+  leftHand := b₁.leftHand ∪ b₂.leftHand
+  hleftHand := by simp[b₁.hleftHand, b₂.hleftHand]
+  derivation := by
+    have b₁' : ⊢ᶜ insert p (Δ ∪ b₁.leftHand.image Rew.embl) := by simpa using b₁.derivation
+    have b₂' : ⊢ᶜ insert (~p) (Γ ∪ b₂.leftHand.image Rew.embl) := by simpa using b₂.derivation
+    exact (b₁'.cCut b₂').cast (by simp only [←Finset.union_assoc, Finset.union_comm _ Γ, Finset.image_union])
+
+def cCut' {p} (b₁ : T ⊢' insert p Δ) (b₂ : T ⊢' insert (~p) Δ) : T ⊢' Δ := (b₁.cCut b₂).cast (by simp)
+
+protected def rewrite (f : ℕ → SyntacticTerm L) {T : Theory L} {Δ : Sequent L} (b : T ⊢' Δ) :
+    T ⊢' Δ.image (Rew.rewritel f) where
+  leftHand := b.leftHand
+  hleftHand := b.hleftHand
+  derivation := (b.derivation.rewriteCut f).cast
+    (by simp[Finset.image_union, Finset.image_image, Rew.hom_comp_eq]; congr; ext q; simp[←Rew.hom_comp_app])
 
 variable
   {L₁ : Language} [∀ k, DecidableEq (L₁.func k)] [∀ k, DecidableEq (L₁.rel k)]
@@ -569,7 +593,7 @@ protected def lMap (Φ : L₁ →ᵥ L₂) {T : Theory L₁} {Δ : Sequent L₁}
     (b.derivation.lMapCut Φ).cast
     (by simp[Finset.image_union, Finset.image_image]; congr; ext x; simp[SubFormula.lMap_emb])
 
-end DerivationCutRestrictedWithAxiom
+end DerivationCRWA
 
 theorem Proof.compact (T : Theory L) :
     Logic.Proof.Consistent T ↔ ∀ T' : Finset (Sentence L), (T' : Theory L) ⊆ T → Logic.Proof.Consistent (T' : Theory L) :=

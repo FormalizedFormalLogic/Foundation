@@ -11,7 +11,7 @@ variable {L : Language.{u}} [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq 
 
 variable {P : SyntacticFormula L → Prop}
 
-namespace DerivationCutRestricted
+namespace DerivationCR
 
 lemma sound : ∀ {Γ : Sequent L}, ⊢ᶜ[P] Γ → ∀ (M : Type u) [s : Structure L M] (ε : ℕ → M), ∃ p ∈ Γ, SubFormula.Val! M ε p
   | _, axL Δ r v hrel hnrel, M, s, ε => by
@@ -55,15 +55,15 @@ lemma sound : ∀ {Γ : Sequent L}, ⊢ᶜ[P] Γ → ∀ (M : Type u) [s : Struc
       · exact ⟨q, by simp[hΓ], hq⟩
     · exact ⟨q, by simp[hΔ], hq⟩
 
-end DerivationCutRestricted
+end DerivationCR
 
-lemma DerivationCutRestrictedWithAxiom.soundness (b : T ⊢ᶜ[P] Γ) {M : Type u} [s : Structure L M] (h : M ⊧* T) (ε : ℕ → M) :
+lemma DerivationCRWA.soundness (b : T ⊢ᶜ[P] Γ) {M : Type u} [s : Structure L M] (h : M ⊧* T) (ε : ℕ → M) :
     ∃ p ∈ Γ, SubFormula.Val! M ε p := by
   have : ∃ p, (p ∈ Γ ∨ ∃ σ ∈ b.leftHand, Rew.embl σ = p) ∧ SubFormula.Val! M ε p := by simpa using b.derivation.sound M ε
   rcases this with ⟨p, (hp | ⟨σ, hσ, rfl⟩), vp⟩
   { exact ⟨p, hp, vp⟩ }
   { have : M ⊧ σ := by simpa using vp
-    have : ¬M ⊧ σ := by simpa using h (DerivationCutRestrictedWithAxiom.neg_mem hσ)
+    have : ¬M ⊧ σ := by simpa using h (DerivationCRWA.neg_mem hσ)
     contradiction }
 
 theorem soundness {T} {σ : Sentence L} : T ⊢ σ → T ⊨ σ := fun d M hM s hT => by
