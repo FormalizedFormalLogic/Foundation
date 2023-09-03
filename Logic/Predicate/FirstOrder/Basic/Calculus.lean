@@ -419,18 +419,16 @@ structure DerivationCRWA (P : SyntacticFormula L → Prop) (T : Theory L) (Δ : 
 
 scoped notation :45 T " ⊢ᶜ[" P "] " Γ:45 => DerivationCRWA P T Γ
 
-abbrev DerivationWithAxiom (T : Theory L) (Δ : Sequent L) := DerivationCRWA (fun _ => False) T Δ
+abbrev DerivationWA (T : Theory L) (Δ : Sequent L) := DerivationCRWA (fun _ => False) T Δ
 
-scoped infix:45 " ⊢ᵀ " => DerivationWithAxiom
+scoped infix:45 " ⊢ᵀ " => DerivationWA
 
 abbrev DerivationCWA (T : Theory L) (Δ : Sequent L) := DerivationCRWA (fun _ => True) T Δ
 
 scoped infix:45 " ⊢' " => DerivationCWA
 
-abbrev ProofAux (T : Theory L) (p : SyntacticFormula L) := DerivationCWA T {p}
-
 instance Proof : Logic.Proof (Sentence L) where
-  Bew := fun T σ => ProofAux T (Rew.embl σ)
+  Bew := fun T σ => T ⊢' {Rew.embl σ}
   axm := fun {f σ} hσ =>
     { leftHand := {~σ}
       hleftHand := by simp[hσ]
@@ -445,12 +443,12 @@ def DerivationCRWA.toDerivationCWA {T : Theory L} {Δ} (b : T ⊢ᶜ[P] Δ) : T 
   hleftHand := b.hleftHand
   derivation := b.derivation.cutWeakening (by simp)
 
-def DerivationCRWA.toDerivationCWA' {T : Theory L} {σ : Sentence L} (b : T ⊢ σ) : T ⊢' {Rew.embl σ} := b
+def DerivationCWA.toDerivationCWA {T : Theory L} {σ : Sentence L} (b : T ⊢ σ) : T ⊢' {Rew.embl σ} := b
 
 def DerivationCRWA.toProof {T : Theory L} {σ : Sentence L} (b : T ⊢ᶜ[P] {Rew.embl σ}) : T ⊢ σ :=
   b.toDerivationCWA
 
-def Proof.toDerivationWithAxiom {T : Theory L} {σ : Sentence L} (b : T ⊢ σ) : T ⊢' {Rew.embl σ} := b
+def DerivationCWA.toDerivationWA {T : Theory L} {σ : Sentence L} (b : T ⊢ σ) : T ⊢' {Rew.embl σ} := b
 
 def DerivationCR.toDerivationCRWA
   {P : SyntacticFormula L → Prop} {T : Theory L} {Δ : Sequent L} (b : ⊢ᶜ[P] Δ) : T ⊢ᶜ[P] Δ where
@@ -559,6 +557,25 @@ def byAxiom {σ} (hσ : σ ∈ T) (h : Rew.embl σ ∈ Δ) : T ⊢ᶜ[P] Δ wher
   derivation := DerivationCR.em (p := Rew.embl σ) (by simp[h]) (by simp)
 
 protected def em {p} (hp : p ∈ Δ) (hn : ~p ∈ Δ) : T ⊢ᶜ[P] Δ := (DerivationCR.em hp hn).toDerivationCRWA
+
+def and' {p₁ p₂} (b₁ : T ⊢ᶜ[P] insert p₁ Δ) (b₂ : T ⊢ᶜ[P] insert p₂ Δ) : T ⊢ᶜ[P] insert (p₁ ⋏ p₂) Δ :=
+  let b₁' : T ⊢ᶜ[P] insert p₁ (insert (p₁ ⋏ p₂) Δ) := b₁.weakeningRight (by simp[Finset.Insert.comm p₁, Finset.subset_insert])
+  let b₂' : T ⊢ᶜ[P] insert p₂ (insert (p₁ ⋏ p₂) Δ) := b₂.weakeningRight (by simp[Finset.Insert.comm p₂, Finset.subset_insert])
+  b₁'.and (by simp) b₂'
+
+def or' {p q} (b : T ⊢ᶜ[P] insert p (insert q Δ)) : T ⊢ᶜ[P] insert (p ⋎ q) Δ :=
+  let b' : T ⊢ᶜ[P] (insert p $ insert q $ insert (p ⋎ q) Δ) := b.weakeningRight (by simp[Finset.Insert.comm _ (p ⋎ q), Finset.subset_insert])
+  b'.or (by simp)
+
+def all' {p} (b : T ⊢ᶜ[P] insert (Rew.freel p) (shifts Δ)) : T ⊢ᶜ[P] insert (∀' p) Δ :=
+  let b' : T ⊢ᶜ[P] (insert (Rew.freel p) $ shifts $ insert (∀' p) Δ) :=
+    b.weakeningRight (by simp[Finset.Insert.comm (Rew.freel p), shifts_insert, Finset.subset_insert])
+  b'.all (by simp)
+
+def ex' {p} {t : SyntacticTerm L} (b : T ⊢ᶜ[P] insert ([→ t].hom p) Δ) : T ⊢ᶜ[P] insert (∃' p) Δ :=
+  let b' : T ⊢ᶜ[P] insert ([→ t].hom p) (insert (∃' p) Δ) :=
+    b.weakeningRight (by simp[Finset.Insert.comm ([→ t].hom p), shifts_insert, Finset.subset_insert])
+  b'.ex (by simp)
 
 def cCut {p} (b₁ : T ⊢' insert p Δ) (b₂ : T ⊢' insert (~p) Γ) : T ⊢' Δ ∪ Γ where
   leftHand := b₁.leftHand ∪ b₂.leftHand

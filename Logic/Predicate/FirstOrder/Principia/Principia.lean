@@ -1,46 +1,34 @@
-import Logic.Predicate.FirstOrder.Calculus
-import Logic.Predicate.FirstOrder.Eq
+import Logic.Predicate.FirstOrder.Basic.Calculus
+import Logic.Predicate.FirstOrder.Basic.Eq
 
-universe u v
+namespace LO
 
 namespace FirstOrder
 
 variable {L : Language.{u}} [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq (L.rel k)]
 
-variable (T : Theory L) {μ : Type v}
+variable {T : Theory L} {μ : Type v}
 
-open SubFormula
+open SubFormula DerivationCR DerivationCRWA
 
+/-
 def SequentList.fvarList (l : List $ SubFormula L μ n) : List μ :=
   l.bind SubFormula.fvarList
 
 def fleshVar (C : List $ SyntacticFormula L) : ℕ := (SequentList.fvarList C).sup
+-/
 
-structure ProofArrow (T : Theory L) (Δ : List (SyntacticFormula L)) (p : SyntacticFormula L) where
-  leftHand : List (Sentence L)
-  hleftHand : ∀ σ ∈ leftHand, σ ∈ T
-  derivationList : DerivationList (p :: ((leftHand.map emb ++ Δ).map (~·)))
+def ProofArrow (T : Theory L) (Δ : List (SyntacticFormula L)) (p : SyntacticFormula L) := T ⊢' insert p (Δ.map (~·)).toFinset
 
-variable {T}
-
-noncomputable def Proof.toProofArrow {σ : Sentence L} (b : T ⊢ σ) : ProofArrow T [] (emb σ) where
-  leftHand := b.leftHand.toList.map (~·)
-  hleftHand := by
-    simp; intro σ hσ 
-    have : ∃ τ ∈ T, ~τ = σ := by simpa using b.hleftHand hσ
-    rcases this with ⟨τ, hτ, rfl⟩; simp[hτ]
-  derivationList := b.derivation.cast (by simp[DerivationList, Function.comp, List.toFinset_map])
+noncomputable def Proof.toProofArrow {σ : Sentence L} (b : T ⊢ σ) : ProofArrow T [] (Rew.embl σ) := b.cast (by simp)
 
 namespace ProofArrow
-open DerivationCutRestricted
+
 variable {Δ Γ : List (SyntacticFormula L)}
 
-def derivation (b : ProofArrow T Δ p) : ⊢ᶜ (p :: ((b.leftHand.map emb ++ Δ).map (~·))).toFinset := b.derivationList
+def toDerivationCWA (b : ProofArrow T Δ p) : T ⊢' insert p (Δ.map (~·)).toFinset := b
 
-def toProof {σ : Sentence L} (b : ProofArrow T [] (emb σ)) : T ⊢ σ where
-  leftHand := b.leftHand.toFinset.image (~·)
-  hleftHand := by simp[Set.subset_def]; intro σ hσ; exact ⟨σ, b.hleftHand σ hσ, rfl⟩
-  derivation := b.derivation.cast (by simp[List.toFinset_map, Finset.image_image, Function.comp])
+def toProof {σ : Sentence L} (b : ProofArrow T [] (Rew.embl σ)) : T ⊢ σ := b.cast (by simp)
 
 def cast {p p'} (b : ProofArrow T Δ p) (h : p = p') : ProofArrow T Δ p' :=
   h ▸ b
@@ -49,88 +37,44 @@ def cast' {Δ Δ' p p'} (b : ProofArrow T Δ p) (hΔ : Δ = Δ') (hp : p = p') :
   hΔ ▸ hp ▸ b
 
 protected def rewrite (f : ℕ → SyntacticTerm L) {p} (b : ProofArrow T Δ p) :
-    ProofArrow T (Δ.map $ rewrite f) (rewrite f p) where
-  leftHand := b.leftHand
-  hleftHand := b.hleftHand
-  derivationList := (b.derivation.rewriteCut f).cast (by
-    simp[shifts_eq_image, Finset.image_union, List.toFinset_map, Finset.image_image]; congr
-    · funext p; simp[SubFormula.rewrite, SubFormula.emb, SubFormula.map, SubFormula.bind_bind]; congr; funext; contradiction
-    · funext p; simp)
+    ProofArrow T (Δ.map $ Rew.rewritel f) (Rew.rewritel f p) :=
+  (b.toDerivationCWA.rewrite f).cast (by simp[Function.comp, List.toFinset_map, Finset.image_image])
 
-protected def shift {p} (b : ProofArrow T Δ p) : ProofArrow T (Δ.map shift) (shift p) := b.rewrite _
+protected def shift {p} (b : ProofArrow T Δ p) : ProofArrow T (Δ.map Rew.shiftl) (Rew.shiftl p) := b.rewrite _
 
-def byAxiom {σ} (h : σ ∈ T) : ProofArrow T Δ (emb σ) where
-  leftHand := [σ]
-  hleftHand := by simp[h]
-  derivationList := em (p := emb σ) (by simp) (by simp)
+def byAxiom {σ} (h : σ ∈ T) : ProofArrow T Δ (Rew.embl σ) :=
+  DerivationCRWA.byAxiom (σ := σ) h (by simp)
 
-def trans {p q} (b₁ : ProofArrow T Δ p) (b₂ : ProofArrow T (p :: Δ) q) : ProofArrow T Δ q where
-  leftHand := b₁.leftHand ++ b₂.leftHand
-  hleftHand := by simp; rintro σ (hσ | hσ); exact b₁.hleftHand _ hσ; exact b₂.hleftHand _ hσ
-  derivationList :=
-    (cutCut (p := p)
-      (Δ := ((b₁.leftHand.map emb ++ Δ).map (~·)).toFinset)
-      (Γ := insert q ((b₂.leftHand.map emb ++ Δ).map (~·)).toFinset)
-      (b₁.derivationList.cast (by simp))
-      (b₂.derivationList.cast (by simp[Finset.Insert.comm]))).cast
-        (by simp[Finset.union_self, Finset.union_comm (Δ.map (~·)).toFinset])
+def trans {p q} (b₁ : ProofArrow T Δ p) (b₂ : ProofArrow T (p :: Δ) q) : ProofArrow T Δ q :=
+  let b₁' : T ⊢' insert p (Δ.map (~·)).toFinset := b₁
+  let b₂' : T ⊢' insert (~p) (insert q (Δ.map (~·)).toFinset) := b₂.toDerivationCWA.cast (by simp[Finset.Insert.comm])
+  (b₁'.cCut b₂').cast (by simp)
 
-def assumption {p} (h : p ∈ Δ) : ProofArrow T Δ p where
-  leftHand := []
-  hleftHand := by simp
-  derivationList := em (p := p) (by simp) (by simp[h])
+def assumption {p} (h : p ∈ Δ) : ProofArrow T Δ p := DerivationCRWA.em (p := p) (by simp) (by simp[h])
 
-def weakening' {p q} (h : ~p :: Δ ⊆ ~q :: Γ) (b : ProofArrow T Δ p) : ProofArrow T Γ q where
-  leftHand := b.leftHand
-  hleftHand := b.hleftHand
-  derivationList := b.derivationList.weakening
-    (by intro x; simp[Function.comp, List.toFinset_map]
-        rintro (rfl | h | ⟨y, hy, rfl⟩)
-        · have : x = q ∨ ~x ∈ Γ := by simpa using @h (~x) (by simp);
-          rcases this with (rfl | h) <;> simp
-          exact Or.inr (Or.inr ⟨~x, h, by simp⟩)
-        · exact Or.inr (Or.inl h)
-        · have : y = ~q ∨ y ∈ Γ := by simpa using @h y (by simp[hy])
-          rcases this with (rfl | h) <;> simp[*])
+def weakening' {p q} (h : ~p :: Δ ⊆ ~q :: Γ) (b : ProofArrow T Δ p) : ProofArrow T Γ q :=
+  b.toDerivationCWA.weakeningRight (by simpa using List.toFinset_mono (List.map_subset (~·) h))
 
 def weakening {p} (h : Δ ⊆ Γ) (b : ProofArrow T Δ p) : ProofArrow T Γ p := 
   b.weakening' (List.cons_subset_cons _ h)
 
-def contradiction {p} (q) (b₁ : ProofArrow T Δ p) (b₂ : ProofArrow T Δ (~p)) : ProofArrow T Δ q where
-  leftHand := b₁.leftHand ++ b₂.leftHand
-  hleftHand := by simp; rintro σ (hσ | hσ); exact b₁.hleftHand _ hσ; exact b₂.hleftHand _ hσ
-  derivationList :=
-    let Γ := (((b₁.leftHand ++ b₂.leftHand).map emb ++ Δ).map (~·)).toFinset
-    have b₁₁ : ⊢ᶜ insert p Γ := b₁.derivationList.weakening
-      (by simp; exact Finset.insert_subset_insert _ (Finset.union_subset_union (by rfl) (Finset.subset_union_right _ _)))
-    have b₂₁ : ⊢ᶜ insert (~p) Γ := b₂.derivationList.weakening
-      (by simp; exact Finset.insert_subset_insert _ (Finset.subset_union_right _ _))
-    (cutCut b₁₁ b₂₁).weakening (by simp[Finset.subset_insert])
+def contradiction {p} (q) (b₁ : ProofArrow T Δ p) (b₂ : ProofArrow T Δ (~p)) : ProofArrow T Δ q :=
+  (b₁.toDerivationCWA.cCut' b₂.toDerivationCWA).weakeningRight (Finset.subset_insert _ _)
 
-def trivial : ProofArrow T Δ ⊤ := ⟨[], by simp, verum _ (by simp)⟩
+def trivial : ProofArrow T Δ ⊤ := DerivationCRWA.verum (by simp)
 
-def explode {p} (b : ProofArrow T Δ ⊥) : ProofArrow T Δ p where
-  leftHand := b.leftHand
-  hleftHand := b.hleftHand
-  derivationList :=
-    let Γ := ((b.leftHand.map emb ++ Δ).map (~·)).toFinset
-    have b₁ : ⊢ᶜ (insert ⊥ $ insert p Γ) := b.derivationList.weakening (by simp; exact Finset.insert_subset_insert _ (Finset.subset_insert _ _))
-    have b₂ : ⊢ᶜ (insert ⊤ $ insert p Γ) := verum _ (by simp)
-    (cutCut b₁ b₂).cast (by simp)
+def explode {p} (b : ProofArrow T Δ ⊥) : ProofArrow T Δ p := b.contradiction p (by simpa using trivial)
 
-def intro {p q} (b : ProofArrow T (p :: Δ) q) : ProofArrow T Δ (p ⟶ q) where
-  leftHand := b.leftHand
-  hleftHand := b.hleftHand
-  derivationList :=
-    have : ⊢ᶜ (insert (~p) $ insert q ((b.leftHand.map emb ++ Δ).map (~·)).toFinset) :=
-      b.derivationList.cast (by simp[Finset.Insert.comm])
-    (or _ _ _ this).cast (by simp[SubFormula.imp_eq])
+/--/
+def intro {p q} (b : ProofArrow T (p :: Δ) q) : ProofArrow T Δ (p ⟶ q) := by
+  have : T ⊢' (insert (~p) $ insert q (Δ.map (~·)).toFinset) := b.toDerivationCWA.cast (by simp[Finset.Insert.comm])
+
 
 def absurd {p} (b : ProofArrow T (p :: Δ) ⊥) : ProofArrow T Δ (~p) where
   leftHand := b.leftHand
   hleftHand := b.hleftHand
   derivationList :=
-    let Γ := ((b.leftHand.map emb ++ Δ).map (~·)).toFinset
+    let Γ := ((b.leftHand ++ Δ).map (~·)).toFinset
     have b₁ : ⊢ᶜ (insert ⊥ $ insert (~p) Γ) := b.derivationList.cast (by simp)
     have b₂ : ⊢ᶜ (insert ⊤ $ insert (~p) Γ) := verum _ (by simp)
     (cutCut b₁ b₂).cast (by simp)
@@ -139,7 +83,7 @@ def modusPonens {p q} (b₁ : ProofArrow T Δ (p ⟶ q)) (b₂ : ProofArrow T Δ
   leftHand := b₁.leftHand ++ b₂.leftHand
   hleftHand := by simp; rintro σ (hσ | hσ); exact b₁.hleftHand _ hσ; exact b₂.hleftHand _ hσ
   derivationList :=
-    let Γ := (((b₁.leftHand ++ b₂.leftHand).map emb ++ Δ).map (~·)).toFinset
+    let Γ := (((b₁.leftHand ++ b₂.leftHand) ++ Δ).map (~·)).toFinset
     have b₁₁ : ⊢ᶜ insert (~p ⋎ q) Γ := b₁.derivationList.weakening
       (by simp[SubFormula.imp_eq]; exact Finset.insert_subset_insert _ (Finset.union_subset_union (by rfl) (Finset.subset_union_right _ _)))
     have b₂₁ : ⊢ᶜ insert p Γ := b₂.derivationList.weakening
@@ -154,7 +98,7 @@ def split {p q} (b₁ : ProofArrow T Δ p) (b₂ : ProofArrow T Δ q) : ProofArr
   leftHand := b₁.leftHand ++ b₂.leftHand
   hleftHand := by simp; rintro σ (hσ | hσ); exact b₁.hleftHand _ hσ; exact b₂.hleftHand _ hσ
   derivationList :=
-    let Γ := (((b₁.leftHand ++ b₂.leftHand).map emb ++ Δ).map (~·)).toFinset
+    let Γ := (((b₁.leftHand ++ b₂.leftHand) ++ Δ).map (~·)).toFinset
     have b₁₁ : ⊢ᶜ insert p Γ := b₁.derivationList.weakening
       (by simp[SubFormula.imp_eq]; exact Finset.insert_subset_insert _ (Finset.union_subset_union (by rfl) (Finset.subset_union_right _ _)))
     have b₂₁ : ⊢ᶜ insert q Γ := b₂.derivationList.weakening
@@ -171,7 +115,7 @@ def andLeft {p q} (b : ProofArrow T Δ (p ⋏ q)) : ProofArrow T Δ p where
   leftHand := b.leftHand
   hleftHand := b.hleftHand
   derivationList :=
-    let Γ := ((b.leftHand.map emb ++ Δ).map (~·)).toFinset
+    let Γ := ((b.leftHand ++ Δ).map (~·)).toFinset
     have b₁ : ⊢ᶜ insert (p ⋏ q) Γ := b.derivationList.cast (by simp)
     have b₂ : ⊢ᶜ (insert (~p ⋎ ~q) $ insert p Γ) := or _ _ _ (em (p := p) (by simp) (by simp))
     (cutCut (Δ := Γ) (Γ := insert p Γ) b₁ (b₂.cast (by simp))).cast (by simp)
@@ -180,7 +124,7 @@ def andRight {p q} (b : ProofArrow T Δ (p ⋏ q)) : ProofArrow T Δ q where
   leftHand := b.leftHand
   hleftHand := b.hleftHand
   derivationList :=
-    let Γ := ((b.leftHand.map emb ++ Δ).map (~·)).toFinset
+    let Γ := ((b.leftHand ++ Δ).map (~·)).toFinset
     have b₁ : ⊢ᶜ insert (p ⋏ q) Γ := b.derivationList.cast (by simp)
     have b₂ : ⊢ᶜ (insert (~p ⋎ ~q) $ insert q Γ) := or _ _ _ (em (p := q) (by simp) (by simp))
     (cutCut (Δ := Γ) (Γ := insert q Γ) b₁ (b₂.cast (by simp))).cast (by simp)
@@ -190,7 +134,7 @@ def destruct {p q r} (b₀ : ProofArrow T Δ (p ⋏ q)) (b : ProofArrow T (p :: 
   have b' : ProofArrow T (q :: Δ) r := (this.weakening (by simp)).trans b
   have : ProofArrow T Δ q := b₀.trans (andRight (p := p) $ assumption $ by simp)
   this.trans b'
-
+/--/
 def byConj : {n : ℕ} → (p : Fin n → SyntacticFormula L) →
     (b : ProofArrow T Δ (Matrix.conj p)) → (i : Fin n) → ProofArrow T Δ (p i)
   | 0,     p, _ => fun i => by have : False := finZeroElim (α := fun _ => False) i; contradiction
@@ -200,7 +144,7 @@ def orLeft {p q} (b : ProofArrow T Δ p) : ProofArrow T Δ (p ⋎ q) where
   leftHand := b.leftHand
   hleftHand := b.hleftHand
   derivationList :=
-    let Γ := ((b.leftHand.map emb ++ Δ).map (~·)).toFinset
+    let Γ := ((b.leftHand ++ Δ).map (~·)).toFinset
     have : ⊢ᶜ (insert p $ insert q Γ) := b.derivationList.weakening (by simp[Finset.Insert.comm p, Finset.subset_insert])
     (or _ _ _ this).cast (by simp)
 
@@ -208,7 +152,7 @@ def orRight {p q} (b : ProofArrow T Δ q) : ProofArrow T Δ (p ⋎ q) where
   leftHand := b.leftHand
   hleftHand := b.hleftHand
   derivationList :=
-    let Γ := ((b.leftHand.map emb ++ Δ).map (~·)).toFinset
+    let Γ := ((b.leftHand ++ Δ).map (~·)).toFinset
     have : ⊢ᶜ (insert p $ insert q Γ) := b.derivationList.weakening (by simp[Finset.subset_insert])
     (or _ _ _ this).cast (by simp)
 
@@ -216,7 +160,7 @@ def cases {p q r} (b₀ : ProofArrow T Δ (p ⋎ q)) (b₁ : ProofArrow T (p :: 
   leftHand := b₀.leftHand ++ b₁.leftHand ++ b₂.leftHand
   hleftHand := by simp; rintro σ (hσ | hσ | hσ); exact b₀.hleftHand _ hσ; exact b₁.hleftHand _ hσ; exact b₂.hleftHand _ hσ
   derivationList :=
-    let Γ := (((b₀.leftHand ++ b₁.leftHand ++ b₂.leftHand).map emb ++ Δ).map (~·)).toFinset
+    let Γ := (((b₀.leftHand ++ b₁.leftHand ++ b₂.leftHand) ++ Δ).map (~·)).toFinset
     have b₀₁ : ⊢ᶜ insert (p ⋎ q) Γ := b₀.derivationList.weakening (by
       simp[SubFormula.imp_eq]; exact Finset.insert_subset_insert _
         (Finset.union_subset_union (by rfl) (by rw[←Finset.union_assoc]; exact Finset.subset_union_right _ _)))
@@ -237,15 +181,18 @@ def generalize {p} (b : ProofArrow T (Δ.map shift) (free p)) : ProofArrow T Δ 
   leftHand := b.leftHand
   hleftHand := b.hleftHand
   derivationList :=
-    let Γ := ((b.leftHand.map emb ++ Δ).map (~·)).toFinset
-    (DerivationCutRestricted.all Γ p
-      (b.derivationList.cast $ by simp[shifts_eq_image, Finset.image_union, ←List.toFinset_map, Function.comp])).cast (by simp)
-
+    let Γ := ((b.leftHand ++ Δ).map (~·)).toFinset
+    (DerivationCR.all Γ p
+      (b.derivationList.cast $ by
+        simp[shifts_eq_image, Finset.image_union, ←List.toFinset_map, Function.comp];
+        have : b.leftHand.map (~ shift ·) = b.leftHand.map (~·) := by {  }
+          )).cast (by simp)
+/--/
 def specialize (t) {p} (b : ProofArrow T Δ (∀' p)) : ProofArrow T Δ (⟦↦ t⟧ p) where
   leftHand := b.leftHand
   hleftHand := b.hleftHand
   derivationList :=
-    let Γ := ((b.leftHand.map emb ++ Δ).map (~·)).toFinset
+    let Γ := ((b.leftHand ++ Δ).map (~·)).toFinset
     have : ⊢ᶜ (insert (∃' ~p) $ insert (⟦↦ t⟧ p) Γ) := ex _ t (~p) (em (p := ⟦↦ t⟧ p) (by simp) (by simp))
     (cutCut (Δ := Γ) (Γ := insert (⟦↦ t⟧ p) Γ) (p := ∀' p) (b.derivationList.cast $ by simp) this).cast (by simp)
 
@@ -263,14 +210,14 @@ def useInstance (t) {p} (b : ProofArrow T Δ (⟦↦ t⟧ p)) : ProofArrow T Δ 
   leftHand := b.leftHand
   hleftHand := b.hleftHand
   derivationList :=
-    let Γ := ((b.leftHand.map emb ++ Δ).map (~·)).toFinset
+    let Γ := ((b.leftHand ++ Δ).map (~·)).toFinset
     (ex Γ t p $ b.derivationList.cast $ by simp).cast (by simp)
 
 def exCases {p q} (b₀ : ProofArrow T Δ (∃' p)) (b₁ : ProofArrow T (free p :: Δ.map shift) (shift q)) : ProofArrow T Δ q where
   leftHand := b₀.leftHand ++ b₁.leftHand
   hleftHand := by simp; rintro σ (hσ | hσ); exact b₀.hleftHand _ hσ; exact b₁.hleftHand _ hσ
   derivationList :=
-    let Γ := (((b₀.leftHand ++ b₁.leftHand).map emb ++ Δ).map (~·)).toFinset
+    let Γ := (((b₀.leftHand ++ b₁.leftHand) ++ Δ).map (~·)).toFinset
     have b₀₁ : ⊢ᶜ insert (∃' p) Γ := b₀.derivationList.weakening
       (by simp[SubFormula.imp_eq]; exact Finset.insert_subset_insert _ (Finset.union_subset_union (by rfl) (Finset.subset_union_right _ _)))
     have b₁₁ : ⊢ᶜ (insert (free $ ~p) $ shifts $ insert q Γ) := b₁.derivationList.weakening
@@ -278,7 +225,7 @@ def exCases {p q} (b₀ : ProofArrow T Δ (∃' p)) (b₁ : ProofArrow T (free p
         (Finset.insert_subset_insert _ $ Finset.insert_subset_insert _ $ by
           simp[shifts_eq_image, Finset.image_union, ←List.toFinset_map, Function.comp, Finset.subset_union_right]))
     have b₁₂ : ⊢ᶜ (insert (~(∃' p)) $ insert q Γ) :=
-      DerivationCutRestricted.all (insert q Γ) (~p) (b₁₁.cast (by simp))
+      DerivationCR.all (insert q Γ) (~p) (b₁₁.cast (by simp))
     (cutCut b₀₁ b₁₂).cast (by simp)
 
 section Eq
@@ -390,8 +337,15 @@ noncomputable def rewriteEq {p : SyntacticSubFormula L 1} {t₁ t₂ : Syntactic
 
 end Eq
 
+def toProof' {Δ : List (Sentence L)} {σ : Sentence L} (b : ProofArrow T Δ (emb σ)) : T ⊢ Δ.conj ⟶ σ where
+  leftHand := b.leftHand.toFinset.image (~·)
+  hleftHand := by simp[Set.subset_def]; intro σ hσ; exact ⟨σ, b.hleftHand σ hσ, rfl⟩
+  derivation := b.derivation.cast (by simp[List.toFinset_map, Finset.image_image, Function.comp])
+
 end ProofArrow
 
+
+/--/
 variable (T)
 variable [L.Eq] [EqTheory T]
 

@@ -368,6 +368,9 @@ variable {α : Type u} [DecidableEq α] {β: Type v} [DecidableEq β]
 lemma toFinset_map {f : α → β} (l : List α) : (l.map f).toFinset = Finset.image f l.toFinset := by
   induction l <;> simp[*]
 
+lemma toFinset_mono {l l' : List α} (h : l ⊆ l') : l.toFinset ⊆ l'.toFinset := by
+  intro a; simp; intro ha; exact h ha
+
 section
 
 variable {α : Type u} [LogicSymbol α]

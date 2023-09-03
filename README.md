@@ -7,7 +7,7 @@ Formalizing Logic in Lean4
   - **Propositional**: Propositional logic
   - **Predicate**: Predicate logic
     - **FirstOrder**: First-Order logic
-      - **Basic**: Basic Definitions & Theorems
+      - **Basic**: Basic definitions & theorems
       - **Completeness**: Completeness theorem
       - **Principia**: Proof system
       - **Arith**: Arithmetic
@@ -18,7 +18,7 @@ Formalizing Logic in Lean4
 |                                     |                                     | Definition                   | Notation |
 | :----:                              | ----                                | ----                         | :----:   |
 | $\vdash_\mathrm{T} \Gamma$          | Derivation in Tait-Calculus         |  `LO.FirstOrder.Derivation`     | `⊢ᵀ Γ`    |
-| $(\rm Cut)\vdash_\mathrm{T} \Gamma$ | Derivation in Tait-Calculus + Cut   |  `LO.FirstOrder.DerivationCut`     | `⊢ᶜ Γ`    |
+| $(\rm Cut)\vdash_\mathrm{T} \Gamma$ | Derivation in Tait-Calculus + Cut   |  `LO.FirstOrder.DerivationC`     | `⊢ᶜ Γ`    |
 | $M \models \sigma$                  | Tarski's truth definition condition |  `LO.FirstOrder.SubFormula.Val` | `M ⊧₁ σ` |
 | $T \vdash \sigma$                   | Provability, Proof                  |  `LO.FirstOrder.Proof`          | `T ⊢ σ`  |
 
@@ -29,7 +29,7 @@ Formalizing Logic in Lean4
 | ----                           |  ----                     | :----:           |
 | Soundness theorem              | `LO.FirstOrder.soundness`    | `T ⊢ σ → T ⊨ σ` |
 | Completeness theorem           | `LO.FirstOrder.completeness` | `T ⊨ σ → T ⊢ σ` |
-| Cut-elimination                | `LO.FirstOrder.DerivationCutRestricted.hauptsatz`    | `⊢ᶜ Δ → ⊢ᵀ Δ`   |
+| Cut-elimination                | `LO.FirstOrder.DerivationCR.hauptsatz`    | `⊢ᶜ Δ → ⊢ᵀ Δ`   |
 | Gödel's incompleteness theorem | TODO                      |                  |
 
 ## Principia
