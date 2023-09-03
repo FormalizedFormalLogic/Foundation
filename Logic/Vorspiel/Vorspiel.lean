@@ -1,5 +1,5 @@
-import Logic.Vorspiel.Notation
 import Mathlib.Tactic.LibrarySearch
+import Mathlib.Order.BoundedOrder
 import Mathlib.Data.Fin.Basic
 import Mathlib.Data.Fin.VecNotation
 import Mathlib.Data.Fintype.Basic
@@ -10,8 +10,6 @@ import Mathlib.Data.Finset.Sort
 import Mathlib.Data.W.Basic
 import Mathlib.Order.Filter.Ultrafilter
 import Mathlib.Logic.Encodable.Basic
-
-open LO
 
 namespace Nat
 variable {α : ℕ → Sort u}
@@ -154,33 +152,6 @@ lemma injective_vecCons {f : Fin n → α} (h : Function.Injective f) {a} (ha : 
   have : ∀ i, f i ≠ a := fun i => (ha i).symm
   intro i j; cases i using Fin.cases <;> cases j using Fin.cases <;> simp[*]
   intro hf; exact h hf
-
-section And
-
-variable {F : Type _}
-variable [LogicSymbol α] [LogicSymbol β]
-
-def conj : {n : ℕ} → (Fin n → α) → α
-  | 0,     _ => ⊤
-  | _ + 1, v => v 0 ⋏ conj (vecTail v)
-
-@[simp] lemma conj_nil (v : Fin 0 → α) : conj v = ⊤ := rfl
-
-@[simp] lemma conj_cons {a : α} {v : Fin n → α} : conj (a :> v) = a ⋏ conj v := rfl
-
-@[simp] lemma conj_hom_prop [LogicSymbol.HomClass F α Prop]
-  (f : F) (v : Fin n → α) : f (conj v) = ∀ i, f (v i) := by
-  induction' n with n ih <;> simp[conj]
-  · simp[ih]; constructor
-    · intro ⟨hz, hs⟩ i; cases i using Fin.cases; { exact hz }; { exact hs _ }
-    · intro h; exact ⟨h 0, fun i => h _⟩
-
-lemma hom_conj [LogicSymbol.HomClass F α β] (f : F) (v : Fin n → α) : f (conj v) = conj (f ∘ v) := by
-  induction' n with n ih <;> simp[*, conj]
-
-lemma hom_conj' [LogicSymbol.HomClass F α β] (f : F) (v : Fin n → α) : f (conj v) = conj fun i => f (v i) := hom_conj f v
-
-end And
 
 end
 
@@ -371,34 +342,6 @@ lemma toFinset_map {f : α → β} (l : List α) : (l.map f).toFinset = Finset.i
 lemma toFinset_mono {l l' : List α} (h : l ⊆ l') : l.toFinset ⊆ l'.toFinset := by
   intro a; simp; intro ha; exact h ha
 
-section
-
-variable {α : Type u} [LogicSymbol α]
-
-def conj : List α → α
-  | []      => ⊤
-  | a :: as => a ⋏ as.conj
-
-@[simp] lemma conj_nil : conj (α := α) [] = ⊤ := rfl
-
-@[simp] lemma conj_cons {a : α} {as : List α} : conj (a :: as) = a ⋏ as.conj := rfl
-
-lemma map_conj [LogicSymbol.HomClass F α Prop] (f : F) (l : List α) : f l.conj ↔ ∀ a ∈ l, f a := by
-  induction l <;> simp[*]
-
-def disj : List α → α
-  | []      => ⊥
-  | a :: as => a ⋎ as.disj
-
-@[simp] lemma disj_nil : disj (α := α) [] = ⊥ := rfl
-
-@[simp] lemma disj_cons {a : α} {as : List α} : disj (a :: as) = a ⋎ as.disj := rfl
-
-lemma map_disj [LogicSymbol.HomClass F α Prop] (f : F) (l : List α) : f l.disj ↔ ∃ a ∈ l, f a := by
-  induction l <;> simp[*]
-
-end
-
 variable {α : Type u} [inst : SemilatticeSup α] [inst : OrderBot α]
 
 def sup : List α → α
@@ -436,24 +379,6 @@ lemma mem_imageOfFinset_iff [DecidableEq β] {s : Finset α} {f : (a : α) → a
 
 @[simp] lemma mem_imageOfFinset  [DecidableEq β] {s : Finset α} (f : (a : α) → a ∈ s → β) (a : α) (ha : a ∈ s) :
     f a ha ∈ imageOfFinset s f := by simp[mem_imageOfFinset_iff]; exact ⟨a, ha, rfl⟩
-
--- lemma ext_image {f : β → α} {g : γ → α} {s : Finset β} {t : Finset γ} : f s = g t ↔ ∀ 
-
-section
-
-variable [LogicSymbol α]
-
-noncomputable def conj (s : Finset α) : α := s.toList.conj
-
-lemma map_conj [LogicSymbol.HomClass F α Prop] (f : F) (s : Finset α) : f s.conj ↔ ∀ a ∈ s, f a := by
-  simpa using List.map_conj f s.toList
-  
-noncomputable def disj (s : Finset α) : α := s.toList.disj
-
-lemma map_disj [LogicSymbol.HomClass F α Prop] (f : F) (s : Finset α) : f s.disj ↔ ∃ a ∈ s, f a := by
-  simpa using List.map_disj f s.toList
-
-end
 
 lemma erase_union [DecidableEq α] {a : α} {s t : Finset α} :
   (s ∪ t).erase a = (s.erase a) ∪ (t.erase a) := by ext; simp[and_or_left]

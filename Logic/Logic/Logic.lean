@@ -1,4 +1,4 @@
-import Logic.Vorspiel.Vorspiel
+import Logic.Logic.LogicSymbol
 
 namespace LO
 

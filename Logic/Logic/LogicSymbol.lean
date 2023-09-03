@@ -1,5 +1,4 @@
-import Lean
-import Mathlib.Order.BoundedOrder
+import Logic.Vorspiel.Vorspiel
 
 universe u v
 
@@ -206,3 +205,88 @@ end quantifier
 end LogicSymbol
 
 end LO
+
+open LO
+
+namespace Matrix
+
+section And
+
+variable {α : Type _}
+variable [LogicSymbol α] [LogicSymbol β]
+
+def conj : {n : ℕ} → (Fin n → α) → α
+  | 0,     _ => ⊤
+  | _ + 1, v => v 0 ⋏ conj (vecTail v)
+
+@[simp] lemma conj_nil (v : Fin 0 → α) : conj v = ⊤ := rfl
+
+@[simp] lemma conj_cons {a : α} {v : Fin n → α} : conj (a :> v) = a ⋏ conj v := rfl
+
+@[simp] lemma conj_hom_prop [LogicSymbol.HomClass F α Prop]
+  (f : F) (v : Fin n → α) : f (conj v) = ∀ i, f (v i) := by
+  induction' n with n ih <;> simp[conj]
+  · simp[ih]; constructor
+    · intro ⟨hz, hs⟩ i; cases i using Fin.cases; { exact hz }; { exact hs _ }
+    · intro h; exact ⟨h 0, fun i => h _⟩
+
+lemma hom_conj [LogicSymbol.HomClass F α β] (f : F) (v : Fin n → α) : f (conj v) = conj (f ∘ v) := by
+  induction' n with n ih <;> simp[*, conj]
+
+lemma hom_conj' [LogicSymbol.HomClass F α β] (f : F) (v : Fin n → α) : f (conj v) = conj fun i => f (v i) := hom_conj f v
+
+end And
+
+end Matrix
+
+namespace List
+
+section
+
+variable {α : Type u} [LogicSymbol α]
+
+def conj : List α → α
+  | []      => ⊤
+  | a :: as => a ⋏ as.conj
+
+@[simp] lemma conj_nil : conj (α := α) [] = ⊤ := rfl
+
+@[simp] lemma conj_cons {a : α} {as : List α} : conj (a :: as) = a ⋏ as.conj := rfl
+
+lemma map_conj [LogicSymbol.HomClass F α Prop] (f : F) (l : List α) : f l.conj ↔ ∀ a ∈ l, f a := by
+  induction l <;> simp[*]
+
+def disj : List α → α
+  | []      => ⊥
+  | a :: as => a ⋎ as.disj
+
+@[simp] lemma disj_nil : disj (α := α) [] = ⊥ := rfl
+
+@[simp] lemma disj_cons {a : α} {as : List α} : disj (a :: as) = a ⋎ as.disj := rfl
+
+lemma map_disj [LogicSymbol.HomClass F α Prop] (f : F) (l : List α) : f l.disj ↔ ∃ a ∈ l, f a := by
+  induction l <;> simp[*]
+
+end
+
+end List
+
+namespace Finset
+
+section
+
+variable [LogicSymbol α]
+
+noncomputable def conj (s : Finset α) : α := s.toList.conj
+
+lemma map_conj [LogicSymbol.HomClass F α Prop] (f : F) (s : Finset α) : f s.conj ↔ ∀ a ∈ s, f a := by
+  simpa using List.map_conj f s.toList
+  
+noncomputable def disj (s : Finset α) : α := s.toList.disj
+
+lemma map_disj [LogicSymbol.HomClass F α Prop] (f : F) (s : Finset α) : f s.disj ↔ ∃ a ∈ s, f a := by
+  simpa using List.map_disj f s.toList
+
+end
+
+end Finset

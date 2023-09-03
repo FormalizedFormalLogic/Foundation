@@ -1,5 +1,4 @@
 import Logic.Predicate.FirstOrder.Basic.Formula.Formula
-import Logic.Vorspiel.Logic
 
 namespace LO
 

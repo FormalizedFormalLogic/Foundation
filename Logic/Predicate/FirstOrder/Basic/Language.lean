@@ -1,5 +1,4 @@
-import Logic.Vorspiel.Vorspiel
-import Mathlib.Data.Finset.Basic
+import Logic.Logic.Logic
 
 namespace LO
     
