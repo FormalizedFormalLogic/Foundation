@@ -4,6 +4,7 @@ Formalizing Logic in Lean4
 ## Structure
 - **Logic**
   - **Vorspiel**: Supplementary definitions and theorems for Mathlib
+  - **Logic**
   - **Propositional**: Propositional logic
   - **Predicate**: Predicate logic
     - **FirstOrder**: First-Order logic
