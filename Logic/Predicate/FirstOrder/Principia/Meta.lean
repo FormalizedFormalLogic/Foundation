@@ -3,10 +3,13 @@ import Logic.Predicate.FirstOrder.Principia.RewriteFormula
 
 open Qq Lean Elab Meta Tactic Term
 
+namespace LO
+
 namespace FirstOrder
 
 namespace Principia
-open SubFormula
+
+open SubFormula Rew
 variable {L : Language.{u}} [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq (L.rel k)] [L.Eq]
 variable {T : Theory L} [EqTheory T]
 variable {Δ : List (SyntacticFormula L)}
@@ -15,45 +18,45 @@ def castOfEq {Δ p p'} (hp : p = p') (b : Δ ⟹[T] p') : Δ ⟹[T] p :=
   b.cast hp.symm
 
 def generalizeOfEq {Δ Δ' p p'}
-  (hΔ : Δ.map shift = Δ') (hp : free p = p') (b : Δ' ⟹[T] p') : Δ ⟹[T] ∀' p :=
+  (hΔ : Δ.map shiftl = Δ') (hp : freel p = p') (b : Δ' ⟹[T] p') : Δ ⟹[T] ∀' p :=
   generalize (b.cast' hΔ.symm hp.symm)
 
 def generalizeBAllOfEq {Δ Δ' p p' q q'}
-  (hΔ : Δ.map shift = Δ') (hp : free p = p') (hq : free q = q') (b : Δ' ⟹[T] p' ⟶ q') : Δ ⟹[T] ∀[p] q :=
+  (hΔ : Δ.map shiftl = Δ') (hp : freel p = p') (hq : freel q = q') (b : Δ' ⟹[T] p' ⟶ q') : Δ ⟹[T] ∀[p] q :=
   generalize (b.cast' hΔ.symm (by simp[←hp, ←hq]))
 
 def specializeOfEq {t p p' q}
-  (hp : ⟦↦ t⟧ p = p') (b : Δ ⟹[T] ∀' p) (d : (p' :: Δ) ⟹[T] q) : Δ ⟹[T] q :=
+  (hp : [→ t].hom p = p') (b : Δ ⟹[T] ∀' p) (d : (p' :: Δ) ⟹[T] q) : Δ ⟹[T] q :=
   ((b.specialize t).cast hp).trans d
 
 def specializes : {k : ℕ} → (v : Fin k → SyntacticTerm L) → {p : SyntacticSubFormula L k} →
-    (Δ ⟹[T] univClosure p) → (Δ ⟹[T] ⟦→ v⟧ p)
-  | 0,     _, p, d => d.cast (by simp)
+    (Δ ⟹[T] univClosure p) → (Δ ⟹[T] substsl v p)
+  | 0,     _, p, d => d.cast (by simp[substsl])
   | k + 1, v, p, d =>
-    have : Δ ⟹[T] ∀' ⟦→ #0 :> SubTerm.bShift ∘ Matrix.vecTail v⟧ p := specializes (Matrix.vecTail v) d
+    have : Δ ⟹[T] ∀' substsl (#0 :> bShift ∘ Matrix.vecTail v) p := (specializes (Matrix.vecTail v) d).cast (by simp; rfl)
     (specialize (Matrix.vecHead v) this).cast (by
-      simp[substs_substs, Function.comp, Matrix.comp_vecCons']; congr;
-      funext x; cases x using Fin.cases<;> simp[Matrix.vecTail, Matrix.vecHead]
-      simp[SubTerm.substs, SubTerm.bShift, SubTerm.map, SubTerm.bind_bind])
+      simp[←hom_comp_app]; apply Rew.hom_ext'
+      ext x <;> simp[comp_app]
+      { cases x using Fin.cases <;> simp <;> rfl })
 
 def specializesOfEq {k v} {p : SyntacticSubFormula L k} {p' p'' q}
-  (hp : ⟦→ v⟧ p = p') (hp' : univClosure p = p'') (b : Δ ⟹[T] p'') (d : (p' :: Δ) ⟹[T] q) : Δ ⟹[T] q :=
+  (hp : substsl v p = p') (hp' : univClosure p = p'') (b : Δ ⟹[T] p'') (d : (p' :: Δ) ⟹[T] q) : Δ ⟹[T] q :=
   (((b.cast hp'.symm).specializes v).cast hp).trans d
 
 def exCasesOfEq {Δ Δ' p p' q q'}
-  (hΔ : Δ.map shift = Δ') (hp : free p = p') (hq : shift q = q')
+  (hΔ : Δ.map shiftl = Δ') (hp : freel p = p') (hq : shiftl q = q')
   (b₀ : Δ ⟹[T] ∃' p) (b₁ : (p' :: Δ') ⟹[T] q') : Δ ⟹[T] q :=
   b₀.exCases (b₁.cast' (by rw[hΔ, hp]) hq.symm)
 
-def rewriteEqOfEq {t₁ t₂ p p₁ p₂} (h₁ : p₁ = ⟦↦ t₁⟧ p) (h₂ : ⟦↦ t₂⟧ p = p₂)
+def rewriteEqOfEq {t₁ t₂ p p₁ p₂} (h₁ : p₁ = [→ t₁].hom p) (h₂ : [→ t₂].hom p = p₂)
   (b : Δ ⟹[T] “ᵀ!t₁ = ᵀ!t₂”) (b' : Δ ⟹[T] p₂) : Δ ⟹[T] p₁ :=
   by simpa[h₁] using rewriteEq b (by simpa[←h₂] using b')
 
-def useInstanceOfEq (t) {Δ p p'} (h : ⟦↦ t⟧ p = p')
+def useInstanceOfEq (t) {Δ p p'} (h : [→ t].hom p = p')
   (b : Δ ⟹[T] p') : Δ ⟹[T] ∃' p :=
   useInstance t (b.cast h.symm)
 
-def useInstanceBExOfEq (t) {Δ p p' q q'} (hp : ⟦↦ t⟧ p = p') (hq : ⟦↦ t⟧ q = q')
+def useInstanceBExOfEq (t) {Δ p p' q q'} (hp : [→ t].hom p = p') (hq : [→ t].hom q = q')
   (b : Δ ⟹[T] p' ⋏ q') : Δ ⟹[T] ∃[p] q :=
   useInstance t (b.cast (by simp[←hp, ←hq]))
 
@@ -64,7 +67,7 @@ def transList {q} : (Γ : List (SyntacticFormula L)) → (∀ p ∈ Γ, Δ ⟹[T
   | [],     _,  b₁ => b₁.weakening (by simp)
   | p :: Γ, b₀, b₁ => (transList Γ (fun r hr => b₀ r (by simp[hr])) b₁.intro).modusPonens (b₀ p (by simp))
 
-protected def shift {p} (b : Δ ⟹[T] p) : (Δ.map shift) ⟹[T] shift p :=
+protected def shift {p} (b : Δ ⟹[T] p) : (Δ.map shiftl) ⟹[T] shiftl p :=
   b.rewrite _
 
 def apply  (b₁ : Δ ⟹[T] (q₁ ⟶ q₂)) (b₂ : Δ ⟹[T] q₁) (b₃ : (q₂ :: Δ) ⟹[T] p) : Δ ⟹[T] p :=
@@ -129,19 +132,19 @@ def iffNeg {p q} (b : Δ ⟹[T] p ⟷ q) : Δ ⟹[T] ~p ⟷ ~q :=
       ((b.andLeft.weakening (List.subset_cons_of_subset _ $ by simp)).modusPonens $ assumption $ by simp)
       (assumption $ by simp))
 
-def iffAll {p q} (b : Δ.map shift ⟹[T] free p ⟷ free q) : Δ ⟹[T] ∀' p ⟷ ∀' q :=
+def iffAll {p q} (b : Δ.map shiftl ⟹[T] freel p ⟷ freel q) : Δ ⟹[T] ∀' p ⟷ ∀' q :=
   splitIff
     (intro $ generalize $ (b.andLeft.weakening $ by simp).modusPonens $
-      (specialize &0 (p := shift p) $ assumption $ by simp).cast (by simp))
+      (specialize &0 (p := shiftl p) $ assumption $ by simp).cast (by simp[←hom_comp_app]))
     (intro $ generalize $ (b.andRight.weakening $ by simp).modusPonens $
-      (specialize &0 (p := shift q) $ assumption $ by simp).cast (by simp))
+      (specialize &0 (p := shiftl q) $ assumption $ by simp).cast (by simp[←hom_comp_app]))
 
-def iffEx {p q} (b : Δ.map shift ⟹[T] free p ⟷ free q) : Δ ⟹[T] ∃' p ⟷ ∃' q :=
+def iffEx {p q} (b : Δ.map shiftl ⟹[T] freel p ⟷ freel q) : Δ ⟹[T] ∃' p ⟷ ∃' q :=
   splitIff
-    (intro $ exCases (p := p) (assumption $ by simp) $ (useInstance &0 (p := shift q) $
-      ((b.andLeft.weakening (List.subset_cons_of_subset _ $ by simp)).modusPonens $ assumption $ by simp).cast (by simp)).cast (by simp))
-    (intro $ exCases (p := q) (assumption $ by simp) $ (useInstance &0 (p := shift p) $
-      ((b.andRight.weakening (List.subset_cons_of_subset _ $ by simp)).modusPonens $ assumption $ by simp).cast (by simp)).cast (by simp))
+    (intro $ exCases (p := p) (assumption $ by simp) $ (useInstance &0 (p := shiftl q) $
+      ((b.andLeft.weakening (List.subset_cons_of_subset _ $ by simp)).modusPonens $ assumption $ by simp).cast (by simp[←hom_comp_app])).cast (by simp))
+    (intro $ exCases (p := q) (assumption $ by simp) $ (useInstance &0 (p := shiftl p) $
+      ((b.andRight.weakening (List.subset_cons_of_subset _ $ by simp)).modusPonens $ assumption $ by simp).cast (by simp[←hom_comp_app])).cast (by simp))
 
 def iffOfIffFormula {p₀ q₀} :
     {p q : SyntacticFormula L} → IffFormula p₀ q₀ p q → {Δ : List (SyntacticFormula L)} → (Δ ⟹[T] p₀ ⟷ q₀) → (Δ ⟹[T] p ⟷ q)
@@ -184,38 +187,38 @@ def assumptionIffSymmQ (Γ : Q(List (SyntacticFormula $L))) (p₁ p₂ : Q(Synta
   q(Principia.iffSymm $ Principia.assumption $h)
 
 def generalizeOfEqQ (p : Q(SyntacticSubFormula $L 1)) (p' : Q(SyntacticFormula $L))
-  (hΔ : Q(($Δ).map shift = $Δ')) (hp : Q(free $p = $p')) (b : Q($Δ' ⟹[$T] $p')) : Q($Δ ⟹[$T] ∀' $p) :=
+  (hΔ : Q(($Δ).map shiftl = $Δ')) (hp : Q(freel $p = $p')) (b : Q($Δ' ⟹[$T] $p')) : Q($Δ ⟹[$T] ∀' $p) :=
   q(Principia.generalizeOfEq $hΔ $hp $b)
 
 def generalizeBAllOfEqQ (p q : Q(SyntacticSubFormula $L 1)) (p' q' : Q(SyntacticFormula $L))
-  (hΔ : Q(($Δ).map shift = $Δ')) (hp : Q(free $p = $p')) (hq : Q(free $q = $q')) (b : Q($Δ' ⟹[$T] $p' ⟶ $q')) : Q($Δ ⟹[$T] ∀[$p] $q) :=
+  (hΔ : Q(($Δ).map shiftl = $Δ')) (hp : Q(freel $p = $p')) (hq : Q(freel $q = $q')) (b : Q($Δ' ⟹[$T] $p' ⟶ $q')) : Q($Δ ⟹[$T] ∀[$p] $q) :=
   q(Principia.generalizeBAllOfEq $hΔ $hp $hq $b)
 
 def specializeOfEqQ (t : Q(SyntacticTerm $L)) (p : Q(SyntacticSubFormula $L 1)) (p' q : Q(SyntacticFormula $L))
-  (hp : Q(⟦↦ $t⟧ $p = $p')) (b : Q($Δ ⟹[$T] ∀' $p)) (d : Q(($p' :: $Δ) ⟹[$T] $q)) : Q($Δ ⟹[$T] $q) :=
+  (hp : Q([→ $t].hom $p = $p')) (b : Q($Δ ⟹[$T] ∀' $p)) (d : Q(($p' :: $Δ) ⟹[$T] $q)) : Q($Δ ⟹[$T] $q) :=
   q(Principia.specializeOfEq $hp $b $d)
 
 def specializesOfEqQ {k : Q(ℕ)} (v : Q(Fin $k → SyntacticTerm $L)) (p : Q(SyntacticSubFormula $L $k)) (p' p'' q : Q(SyntacticFormula $L))
-  (hp : Q(⟦→ $v⟧ $p = $p')) (hp' : Q(univClosure $p = $p'')) (b : Q($Δ ⟹[$T] $p'')) (d : Q(($p' :: $Δ) ⟹[$T] $q)) : Q($Δ ⟹[$T] $q) :=
+  (hp : Q(substsl $v $p = $p')) (hp' : Q(univClosure $p = $p'')) (b : Q($Δ ⟹[$T] $p'')) (d : Q(($p' :: $Δ) ⟹[$T] $q)) : Q($Δ ⟹[$T] $q) :=
   q(Principia.specializesOfEq $hp $hp' $b $d)
 
 def useInstanceOfEqQ (t : Q(SyntacticTerm $L)) (p : Q(SyntacticSubFormula $L 1)) (p' : Q(SyntacticFormula $L))
-  (h : Q(⟦↦ $t⟧ $p = $p')) (b : Q($Δ ⟹[$T] $p')) : Q($Δ ⟹[$T] ∃' $p) :=
+  (h : Q([→ $t].hom $p = $p')) (b : Q($Δ ⟹[$T] $p')) : Q($Δ ⟹[$T] ∃' $p) :=
   q(Principia.useInstanceOfEq $t $h $b)
 
 def useInstanceBExOfEqQ (t : Q(SyntacticTerm $L)) (p q : Q(SyntacticSubFormula $L 1)) (p' q' : Q(SyntacticFormula $L))
-  (hp : Q(⟦↦ $t⟧ $p = $p')) (hq : Q(⟦↦ $t⟧ $q = $q')) (b : Q($Δ ⟹[$T] $p' ⋏ $q')) : Q($Δ ⟹[$T] ∃[$p] $q) :=
+  (hp : Q([→ $t].hom $p = $p')) (hq : Q([→ $t].hom $q = $q')) (b : Q($Δ ⟹[$T] $p' ⋏ $q')) : Q($Δ ⟹[$T] ∃[$p] $q) :=
   q(Principia.useInstanceBExOfEq $t $hp $hq $b)
 
 def rewriteEqOfEqQ (t₁ t₂ : Q(SyntacticTerm $L)) (p : Q(SyntacticSubFormula $L 1)) (p₁ p₂ : Q(SyntacticFormula $L))
-  (h₁ : Q($p₁ = ⟦↦ $t₁⟧ $p)) (h₂ : Q(⟦↦ $t₂⟧ $p = $p₂))
+  (h₁ : Q($p₁ = [→ $t₁].hom $p)) (h₂ : Q([→ $t₂].hom $p = $p₂))
   (b : Q($Δ ⟹[$T] “ᵀ!$t₁ = ᵀ!$t₂”)) (b' : Q($Δ ⟹[$T] $p₂)) : Q($Δ ⟹[$T] $p₁) :=
   q(Principia.rewriteEqOfEq $h₁ $h₂ $b $b')
 
 def exCasesOfEqQ
   (p : Q(SyntacticSubFormula $L 1)) (p' : Q(SyntacticFormula $L))
   (q q' : Q(SyntacticFormula $L))
-  (hΔ : Q(($Δ).map shift = $Δ')) (hp : Q(free $p = $p')) (hq : Q(shift $q = $q'))
+  (hΔ : Q(($Δ).map shiftl = $Δ')) (hp : Q(freel $p = $p')) (hq : Q(shiftl $q = $q'))
   (b₀ : Q($Δ ⟹[$T] ∃' $p)) (b₁ : Q(($p' :: $Δ') ⟹[$T] $q')) : Q($Δ ⟹[$T] $q) :=
   q(Principia.exCasesOfEq $hΔ $hp $hq $b₀ $b₁)
 
@@ -570,14 +573,14 @@ partial def run : State → (c : PrincipiaCode L) → (G : List Q(SyntacticFormu
   | state, generalize c, E, e => do
     match e with
     | ~q(∀' $e)    =>
-      let ⟨fe, fee⟩ ← SubFormula.Meta.resultFree e
+      let ⟨fe, fee⟩ ← SubFormula.Meta.resultFree L q(0) e
       let ⟨sE, sEe⟩ ← SubFormula.Meta.resultShift₀List E
       let b ← c.run state sE fe
       return PrincipiaQ.generalizeOfEqQ L dfunc drel lEq T
         (Qq.toQList (u := u) E) (Qq.toQList (u := u) sE) e fe sEe fee b
     | ~q(∀[$p] $q) =>
-      let ⟨p', pe⟩ ← SubFormula.Meta.resultFree p
-      let ⟨q', qe⟩ ← SubFormula.Meta.resultFree q
+      let ⟨p', pe⟩ ← SubFormula.Meta.resultFree L q(0) p
+      let ⟨q', qe⟩ ← SubFormula.Meta.resultFree L q(0) q
       let ⟨sE, sEe⟩ ← SubFormula.Meta.resultShift₀List E
       let b ← c.run state sE q($p' ⟶ $q')
       return PrincipiaQ.generalizeBAllOfEqQ L dfunc drel lEq T
@@ -593,7 +596,7 @@ partial def run : State → (c : PrincipiaCode L) → (G : List Q(SyntacticFormu
         let w : Q(Fin $k → SyntacticTerm $L) := w
         (q(@Matrix.vecCons (SyntacticTerm $L) $k $t $w), k + 1))
         (q(@Matrix.vecEmpty (SyntacticTerm $L)), 0)
-    let ⟨q', hp⟩ ← SubFormula.Meta.resultSubsts (n := q(0)) (k := q($k)) v q
+    let ⟨q', hp⟩ ← SubFormula.Meta.resultSubsts L q($k) q(0) v q
     let ⟨q'', hp'⟩ ← SubFormula.Meta.resultUnivClosure q
     let b ← c₀.run state E q''
     let newState := name.elim state (state.addLemmaName · E.length)
@@ -603,19 +606,19 @@ partial def run : State → (c : PrincipiaCode L) → (G : List Q(SyntacticFormu
     let t ← termSyntaxToExpr L s
     match p with
     | ~q(∃' $p) =>
-      let ⟨p', pe⟩ ← SubFormula.Meta.resultSubsts (L := L) (k := q(1)) (n := q(0)) q(![$t]) p
+      let ⟨p', pe⟩ ← SubFormula.Meta.resultSubsts L q(1) q(0) q(![$t]) p
       let b ← c.run state E p'
       return PrincipiaQ.useInstanceOfEqQ L dfunc drel lEq T (Qq.toQList (u := u) E) t p p' pe b
     | ~q(∃[$p] $q) =>
-      let ⟨p', pe⟩ ← SubFormula.Meta.resultSubsts (L := L) (k := q(1)) (n := q(0)) q(![$t]) p
-      let ⟨q', qe⟩ ← SubFormula.Meta.resultSubsts (L := L) (k := q(1)) (n := q(0)) q(![$t]) q
+      let ⟨p', pe⟩ ← SubFormula.Meta.resultSubsts L q(1) q(0) q(![$t]) p
+      let ⟨q', qe⟩ ← SubFormula.Meta.resultSubsts L q(1) q(0) q(![$t]) q
       let b ← c.run state E q($p' ⋏ $q')
       return PrincipiaQ.useInstanceBExOfEqQ L dfunc drel lEq T (Qq.toQList (u := u) E) t p q p' p' pe qe b
     | _ => throwError "incorrect structure: {p} should be ∃ _"
   | state, exCases name s c₀ c₁, E, p => do
     let q ← indexFormulaToSubFormula L state E 1 s
-    let ⟨fe, fee⟩ ← SubFormula.Meta.resultFree (L := L) (n := q(0)) q
-    let ⟨si, sie⟩ ← SubFormula.Meta.resultShift (L := L) (n := q(0)) p
+    let ⟨fe, fee⟩ ← SubFormula.Meta.resultFree L q(0) q
+    let ⟨si, sie⟩ ← SubFormula.Meta.resultShift L q(0) p
     let ⟨sE, sEe⟩ ← SubFormula.Meta.resultShift₀List E
     let b₀ ← c₀.run state E q(∃' $q)
     let newState := name.elim state (state.addLemmaName · E.length)
@@ -639,7 +642,7 @@ partial def run : State → (c : PrincipiaCode L) → (G : List Q(SyntacticFormu
       let t₁ := if b then t'₁ else t'₂
       let t₂ := if b then t'₂ else t'₁
       let ⟨p', hp⟩ ← SubFormula.Meta.findFormula t₁ p
-      let ⟨p'', hp'⟩ ← SubFormula.Meta.resultSubsts (k := q(1)) (n := q(0)) q(![$t₂]) p'
+      let ⟨p'', hp'⟩ ← SubFormula.Meta.resultSubsts L q(1) q(0) q(![$t₂]) p'
       let b₀ ← c₀.run state E q(“ᵀ!$t₁ = ᵀ!$t₂”)
       let b₁ ← c₁.run state E p''
       return PrincipiaQ.rewriteEqOfEqQ L dfunc drel lEq T
