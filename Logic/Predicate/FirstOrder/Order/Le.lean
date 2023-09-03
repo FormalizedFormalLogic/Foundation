@@ -1,5 +1,7 @@
-import Logic.Predicate.FirstOrder.Eq
+import Logic.Predicate.FirstOrder.Basic.Eq
 import Logic.Predicate.FirstOrder.Principia.Meta
+
+namespace LO
 
 namespace FirstOrder
 variable {L : Language.{u}} [L.ORing] [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq (L.rel k)]
@@ -79,3 +81,5 @@ def leIffEqOrLt : [] ⟹[T] “∀ ∀ (#0 ≤ #1 ↔ #0 = #1 ∨ #0 < #1)” :=
 end Order
 
 end FirstOrder
+
+end LO

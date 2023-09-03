@@ -1,6 +1,8 @@
 import Logic.Predicate.FirstOrder.Arith.Theory
 import Logic.Predicate.FirstOrder.Principia.Meta
 
+namespace LO
+
 namespace FirstOrder
 variable {L : Language.{u}} [L.ORing] [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq (L.rel k)]
 variable {T : Theory L} [Arith.Robinson T]

@@ -1,6 +1,8 @@
 import Logic.Predicate.FirstOrder.Order.Le
 import Logic.Predicate.FirstOrder.Arith.Hierarchy
 
+namespace LO
+
 namespace FirstOrder
 
 variable {L : Language.{u}} [L.ORing]
@@ -8,13 +10,13 @@ variable {L : Language.{u}} [L.ORing]
 namespace Arith
 
 def succInd (p : SubFormula L μ (k + 1)) : Formula L μ :=
-  “∀* (!(⟦→ ᵀ“0” :> (#·)⟧ p) → ∀ (!(⟦→ ᵀ“#0” :> (#·.succ)⟧ p) → !(⟦→ ᵀ“#0 + 1” :> (#·.succ)⟧ p)) → ∀ !p)”
+  “∀* (!(Rew.substsl (ᵀ“0” :> (#·)) p) → ∀ (!(Rew.substsl  (ᵀ“#0” :> (#·.succ)) p) → !(Rew.substsl (ᵀ“#0 + 1” :> (#·.succ)) p)) → ∀ !p)”
 
 def leastNumber (p : SubFormula L μ (k + 1)) : Formula L μ :=
-  “∀* (∃ !p → ∃ (!p ∧ ∀[#0 < #1] ¬!(⟦→ #0 :> (#·.succ.succ)⟧ p)))”
+  “∀* (∃ !p → ∃ (!p ∧ ∀[#0 < #1] ¬!(Rew.substsl (#0 :> (#·.succ.succ)) p)))”
 
 def orderInd (p : SubFormula L μ (k + 1)) : Formula L μ :=
-  “∀* (∀ (∀[#0 < #1] !(⟦→ #0 :> (#·.succ.succ)⟧ p) → !p) → ∀ !p)”
+  “∀* (∀ (∀[#0 < #1] !(Rew.substsl (#0 :> (#·.succ.succ)) p) → !p) → ∀ !p)”
 
 variable (L)
 

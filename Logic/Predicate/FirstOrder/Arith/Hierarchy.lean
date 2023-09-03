@@ -1,5 +1,9 @@
 import Logic.Predicate.FirstOrder.Order.Le
 
+namespace LO
+
+namespace FirstOrder
+
 variable {L : Language.{u}} [L.ORing] {μ : Type v}
 
 namespace SubTerm
@@ -10,7 +14,7 @@ def bZeroFree : SubTerm L μ (n + 1) → Bool
   | &_       => true
   | func _ v => ∀ i, (v i).bZeroFree 
 
-lemma bShift_of_bZeroFree : ∀ {t : SubTerm L μ (n + 1)}, t.bZeroFree → ∃ u : SubTerm L μ n , t = u.bShift
+lemma bShift_of_bZeroFree : ∀ {t : SubTerm L μ (n + 1)}, t.bZeroFree → ∃ u : SubTerm L μ n , t = Rew.bShift u
   | #x,       h => by
     cases' x using Fin.cases with x
     · simp at h
@@ -19,11 +23,9 @@ lemma bShift_of_bZeroFree : ∀ {t : SubTerm L μ (n + 1)}, t.bZeroFree → ∃ 
   | func f v, h => by
     simp[bZeroFree] at h
     choose w hw using fun i => bShift_of_bZeroFree (h i)
-    exact ⟨func f w, by simp[bShift_func]; funext; simp[hw]⟩
+    exact ⟨func f w, by simp[Rew.func]; funext; simp[hw]⟩
 
 end SubTerm
-
-namespace FirstOrder
 
 namespace Arith
 
@@ -53,3 +55,5 @@ end Hierarchy
 end Arith
 
 end FirstOrder
+
+end LO
