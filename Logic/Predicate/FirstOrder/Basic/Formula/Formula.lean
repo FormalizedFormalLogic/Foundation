@@ -469,6 +469,9 @@ lemma shiftl_Injective : Function.Injective (shiftl : SyntacticSubFormula L n �
 @[simp] lemma hom_substs_mbar_zero_comp_shift_eq_free (p : SyntacticSubFormula L 1) :
     substsl ![&0] (Rew.shiftl p) = freel p := by simp[←hom_comp_app, substs_mbar_zero_comp_shift_eq_free]
 
+@[simp] protected lemma emb_univClosure {o} [e : IsEmpty o] {σ : SubFormula L o n} :
+    (embl (univClosure σ) : SubFormula L μ 0) = univClosure (embl σ) := by induction n <;> simp[*]
+
 end Rew
 
 namespace SubFormula
@@ -731,6 +734,36 @@ lemma lMap_emb {o : Type w} [IsEmpty o] (p : SubFormula L₁ o n) :
     (lMap Φ (Rew.embl p) : SubFormula L₂ μ n) = Rew.embl (lMap Φ p) := lMap_bind _ _ _
 
 end SubFormula
+
+namespace Rew
+
+open SubFormula
+
+variable
+  {L L' : Language.{u}} {L₁ : Language.{u₁}} {L₂ : Language.{u₂}} {L₃ : Language.{u₃}}
+  {μ μ' : Type v} {μ₁ : Type v₁} {μ₂ : Type v₂} {μ₃ : Type v₃}
+  {n n₁ n₂ n₃ : ℕ}
+variable (ω : Rew L μ n₁ μ' n₂)
+
+lemma hom_operator (o : Operator L ι) (v : ι → SubTerm L μ n₁) :
+    ω.hom (o.operator v) = o.operator (fun i => ω (v i)) := by rw[ω.eq_bind]; exact o.rew_operator _ _
+
+lemma hom_operator' (o : Operator L ι) (v : ι → SubTerm L μ n₁) :
+    ω.hom (o.operator v) = o.operator (ω ∘ v) := ω.hom_operator o v
+
+@[simp] lemma hom_finitary0 (o : Finitary L 0) (v : Fin 0 → SubTerm L μ n₁) :
+    ω.hom (o.operator v) = o.operator ![] := by simp[ω.hom_operator', Matrix.empty_eq]
+
+@[simp] lemma hom_finitary1 (o : Finitary L 1) (t : SubTerm L μ n₁) :
+    ω.hom (o.operator ![t]) = o.operator ![ω t] := by simp[ω.hom_operator']
+
+@[simp] lemma hom_finitary2 (o : Finitary L 2) (t₁ t₂ : SubTerm L μ n₁) :
+    ω.hom (o.operator ![t₁, t₂]) = o.operator ![ω t₁, ω t₂] := by simp[ω.hom_operator']
+
+@[simp] lemma hom_finitary3 (o : Finitary L 3) (t₁ t₂ t₃ : SubTerm L μ n₁) :
+    ω.hom (o.operator ![t₁, t₂, t₃]) = o.operator ![ω t₁, ω t₂, ω t₃] := by simp[ω.hom_operator']
+
+end Rew
 
 abbrev Theory (L : Language.{u}) := Set (Sentence L)
 

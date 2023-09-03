@@ -158,12 +158,20 @@ def bShift : Rew L μ n μ (n + 1) :=
 def castLE {n n' : ℕ} (h : n ≤ n') : Rew L μ n μ n' :=
   map (Fin.castLE h) id
 
-def q (ω : Rew L μ₁ n₁ μ₂ n₂) : Rew L μ₁ (n₁ + 1) μ₂ (n₂ + 1) := 
+protected def q (ω : Rew L μ₁ n₁ μ₂ n₂) : Rew L μ₁ (n₁ + 1) μ₂ (n₂ + 1) := 
   bind (#0 :> bShift ∘ ω ∘ bvar) (bShift ∘ ω ∘ fvar)
 
 lemma eq_id_of_eq {ω : Rew L μ n μ n} (hb : ∀ x, ω #x = #x) (he : ∀ x, ω &x = &x) (t) : ω t = t := by
   have : ω = Rew.id := by ext <;> simp[*]
   simp[this]
+
+def qpow (ω : Rew L μ₁ n₁ μ₂ n₂) : (k : ℕ) → Rew L μ₁ (n₁ + k) μ₂ (n₂ + k)
+  | 0     => ω
+  | k + 1 => (ω.qpow k).q
+
+@[simp] lemma qpow_zero (ω : Rew L μ₁ n₁ μ₂ n₂) : qpow ω 0 = ω := rfl
+
+@[simp] lemma qpow_succ (ω : Rew L μ₁ n₁ μ₂ n₂) (k : ℕ) : qpow ω (k + 1) = (ω.qpow k).q := rfl
 
 section bind
 
@@ -293,8 +301,13 @@ variable (ω : Rew L μ₁ n₁ μ₂ n₂)
 
 @[simp] lemma q_id : (Rew.id : Rew L μ n μ n).q = Rew.id := by ext x; { cases x using Fin.cases <;> simp }; { simp }
 
+@[simp] lemma qpow_id {k} : (Rew.id : Rew L μ n μ n).qpow k = Rew.id := by induction k <;> simp[*]
+
 lemma q_comp (ω₂ : Rew L μ₂ n₂ μ₃ n₃) (ω₁ : Rew L μ₁ n₁ μ₂ n₂) :
     (Rew.comp ω₂ ω₁).q = ω₂.q.comp ω₁.q := by ext x; { cases x using Fin.cases <;> simp[comp_app] }; { simp[comp_app] }
+
+lemma qpow_comp (k) (ω₂ : Rew L μ₂ n₂ μ₃ n₃) (ω₁ : Rew L μ₁ n₁ μ₂ n₂) :
+    (Rew.comp ω₂ ω₁).qpow k = (ω₂.qpow k).comp (ω₁.qpow k) := by induction k <;> simp[*, q_comp]
 
 lemma q_bind (b : Fin n₁ → SubTerm L μ₂ n₂) (e : μ₁ → SubTerm L μ₂ n₂) :
     (bind b e).q = bind (#0 :> bShift ∘ b) (bShift ∘ e) := by ext x; { cases x using Fin.cases <;> simp }; { simp }
@@ -310,6 +323,9 @@ lemma q_rewrite (f : μ₁ → SubTerm L μ₂ n) :
 
 @[simp] lemma q_emb {o : Type v₁} [e : IsEmpty o] {n} :
     (emb (L := L) (o := o) (μ := μ₂) (n := n)).q = emb := by ext x; { cases x using Fin.cases <;> simp }; { exact e.elim x }
+
+@[simp] lemma qpow_emb {o : Type v₁} [e : IsEmpty o] {n k} :
+    (emb (L := L) (o := o) (μ := μ₂) (n := n)).qpow k = emb := by induction k <;> simp[*]
 
 lemma q_substs (w : Fin n → SubTerm L μ n') :
     (substs w).q = substs (#0 :> bShift ∘ w) := by ext x; { cases x using Fin.cases <;> simp }; { simp }
@@ -407,7 +423,7 @@ lemma rewrite_comp_free_eq_substs (t : SyntacticTerm L) :
 lemma rewrite_comp_shift_eq_id (t : SyntacticTerm L) :
     (rewrite (t :>ₙ SubTerm.fvar)).comp shift = Rew.id := by ext x <;> simp[comp_app]
 
-lemma substs_mbar_zero_comp_shift_eq_free :
+@[simp] lemma substs_mbar_zero_comp_shift_eq_free :
     (substs (L := L) ![&0]).comp shift = free := by ext x <;> simp[comp_app, Fin.eq_zero]
 
 @[simp] lemma substs_comp_bShift_eq_id (v : Fin 1 → SubTerm L μ 0) :

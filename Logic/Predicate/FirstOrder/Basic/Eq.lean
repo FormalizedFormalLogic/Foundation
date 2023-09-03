@@ -18,6 +18,12 @@ def varSumInR {k} : Fin k → SubTerm L μ (k + k) := fun i => #(Fin.natAdd k i)
 @[simp] lemma substs_varSumInR (w₁ w₂ : Fin k → SubTerm L μ n) (i) :
   Rew.substs (Matrix.vecAppend rfl w₁ w₂) (varSumInR i) = w₂ i := by simp[varSumInR, Matrix.vecAppend_eq_ite]
 
+@[simp] lemma emb_varSumInL {o} [IsEmpty o] (i : Fin k) :
+  (Rew.emb (varSumInL (μ := o) i) : SubTerm L μ (k + k)) = varSumInL i := by simp[varSumInL]
+
+@[simp] lemma emb_varSumInR {o} [IsEmpty o] (i : Fin k) :
+  (Rew.emb (varSumInR (μ := o) i) : SubTerm L μ (k + k)) = varSumInR i := by simp[varSumInR]
+
 end SubTerm
 
 namespace SubFormula
