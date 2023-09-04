@@ -426,7 +426,7 @@ abbrev DerivationCWA (T : Theory L) (Δ : Sequent L) := DerivationCRWA (fun _ =>
 
 scoped infix:45 " ⊢' " => DerivationCWA
 
-instance Proof : Logic.Proof (Sentence L) where
+instance Proof : Logic.System (Sentence L) where
   Bew := fun T σ => T ⊢' {Rew.embl σ}
   axm := fun {f σ} hσ =>
     { leftHand := {~σ}
@@ -611,17 +611,17 @@ protected def lMap (Φ : L₁ →ᵥ L₂) {T : Theory L₁} {Δ : Sequent L₁}
 
 end DerivationCRWA
 
-theorem Proof.compact (T : Theory L) :
-    Logic.Proof.Consistent T ↔ ∀ T' : Finset (Sentence L), (T' : Theory L) ⊆ T → Logic.Proof.Consistent (T' : Theory L) :=
+theorem System.compact (T : Theory L) :
+    Logic.System.Consistent T ↔ ∀ T' : Finset (Sentence L), (T' : Theory L) ⊆ T → Logic.System.Consistent (T' : Theory L) :=
   ⟨fun c u hu => c.of_subset hu, fun h => ⟨fun b => (h b.kernel (by simp)).false b.compact⟩⟩
 
 lemma consistent_iff_empty_sequent {T : Theory L} :
-    Logic.Proof.Consistent T ↔ IsEmpty (T ⊢' ∅) :=
-  ⟨by contrapose; simp[Logic.Proof.Consistent]; intro b; exact ⟨b.weakeningRight (by simp)⟩,
-   by contrapose; simp[Logic.Proof.Consistent]; intro b; exact ⟨b.elimFalsum.cast (by simp)⟩⟩
+    Logic.System.Consistent T ↔ IsEmpty (T ⊢' ∅) :=
+  ⟨by contrapose; simp[Logic.System.Consistent]; intro b; exact ⟨b.weakeningRight (by simp)⟩,
+   by contrapose; simp[Logic.System.Consistent]; intro b; exact ⟨b.elimFalsum.cast (by simp)⟩⟩
 
 lemma provable_iff_inConsistent {T : Theory L} :
-    Nonempty (T ⊢ σ) ↔ ¬Logic.Proof.Consistent (insert (~σ) T) :=
+    Nonempty (T ⊢ σ) ↔ ¬Logic.System.Consistent (insert (~σ) T) :=
   ⟨by rintro ⟨b⟩; simp[consistent_iff_empty_sequent]
       have : T ⊢' insert (Rew.embl σ) ∅ := b
       exact ⟨this.resolution⟩,
@@ -632,12 +632,12 @@ variable
   {L₁ : Language} [∀ k, DecidableEq (L₁.func k)] [∀ k, DecidableEq (L₁.rel k)]
   {L₂ : Language} [∀ k, DecidableEq (L₂.func k)] [∀ k, DecidableEq (L₂.rel k)]
 
-def Proof.lMap (Φ : L₁ →ᵥ L₂) {T : Theory L₁} {σ : Sentence L₁} (b : T ⊢ σ) :
+def System.lMap (Φ : L₁ →ᵥ L₂) {T : Theory L₁} {σ : Sentence L₁} (b : T ⊢ σ) :
     Theory.lMap Φ T ⊢ SubFormula.lMap Φ σ := by simpa[SubFormula.lMap_emb] using b.lMap Φ
 
 lemma inConsistent_lMap (Φ : L₁ →ᵥ L₂) {T : Theory L₁} :
-    ¬Logic.Proof.Consistent T → ¬Logic.Proof.Consistent (Theory.lMap Φ T) := by
-  simp[Logic.Proof.Consistent]; intro b; exact ⟨by simpa using Proof.lMap Φ b⟩
+    ¬Logic.System.Consistent T → ¬Logic.System.Consistent (Theory.lMap Φ T) := by
+  simp[Logic.System.Consistent]; intro b; exact ⟨by simpa using System.lMap Φ b⟩
 
 end FirstOrder
 

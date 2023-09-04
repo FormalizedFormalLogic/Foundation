@@ -286,20 +286,20 @@ section Syntax
 variable (L : Q(Language.{u})) (n : Q(ℕ))
 open SubTerm
 
-syntax termSeq := (subterm),*
+syntax termSeq := (foterm),*
 
 syntax lineIndex := "::" num
 
 syntax prevIndex := "this"
 
-syntax indexFormula := (prevIndex <|> lineIndex <|> subformula <|> str)
+syntax indexFormula := (prevIndex <|> lineIndex <|> foformula <|> str)
 
 def subTermSyntaxToExpr (n : Q(ℕ)) : Syntax → TermElabM Q(SyntacticSubTerm $L $n)
-  | `(subterm| $s:subterm) => do
+  | `(foterm| $s:foterm) => do
     Term.elabTerm (←`(ᵀ“$s”)) (return q(SyntacticSubTerm $L $n))
 
 def subFormulaSyntaxToExpr (n : Q(ℕ)) : Syntax → TermElabM Q(SyntacticSubFormula $L $n)
-  | `(subformula| $s:subformula) => do
+  | `(foformula| $s:foformula) => do
     Term.elabTerm (←`(“$s”)) (return q(SyntacticSubFormula $L $n))
 
 def termSyntaxToExpr (s : Syntax) : TermElabM Q(SyntacticTerm $L) :=
@@ -328,7 +328,7 @@ def indexFormulaToSubFormula (state : State) (E : List Q(SyntacticFormula $L)) (
     let some i := (state.findIndex s.getString) | throwError m!"error in indexFormulaToSubFormula: no lemma named {s}"
     let some p := E.reverse.get? i | throwError m!"error in indexFormulaToSubFormula: out of bound {E}"
     dequantifier L n p
-  | `(indexFormula| $p:subformula) =>
+  | `(indexFormula| $p:foformula) =>
     subFormulaSyntaxToExpr L q($n) p
   | _                              => throwUnsupportedSyntax
 
@@ -732,9 +732,9 @@ syntax (name := notationCases) "cases " indexFormula nameAs " or " indexFormula 
 
 syntax (name := notationGeneralize) "generalize" : proofElem
 
-syntax (name := notationSpecialize) "specialize" indexFormula " with " (subterm),* nameAs optProofBlock : proofElem
+syntax (name := notationSpecialize) "specialize" indexFormula " with " (foterm),* nameAs optProofBlock : proofElem
 
-syntax (name := notationUse) "use " subterm : proofElem
+syntax (name := notationUse) "use " foterm : proofElem
 
 syntax (name := notationExCases) "choose " indexFormula (nameAs) optProofBlock : proofElem
 

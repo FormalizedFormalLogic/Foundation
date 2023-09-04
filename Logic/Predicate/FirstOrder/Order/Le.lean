@@ -25,29 +25,29 @@ notation "Op(≤)" => le
 lemma le_eq (t₁ t₂ : SubTerm L μ n) : le.operator ![t₁, t₂] = “ᵀ!t₁ = ᵀ!t₂ ∨ ᵀ!t₁ < ᵀ!t₂” :=
   by simp[le, Abbrev.le, Abbrev.toOperator]
 
-syntax:45 subterm:45 " ≤ " subterm:0 : subformula
+syntax:45 foterm:45 " ≤ " foterm:0 : foformula
 
 macro_rules
-  | `(“ $t₁:subterm ≤ $t₂:subterm ”) => `(Op(≤).operator ![ᵀ“$t₁”, ᵀ“$t₂”])
+  | `(“ $t₁:foterm ≤ $t₂:foterm ”) => `(Op(≤).operator ![ᵀ“$t₁”, ᵀ“$t₂”])
 
 section delab
 open Lean PrettyPrinter Delaborator SubExpr
 
 @[app_unexpander Operator.operator]
 def unexpandOpLe : Unexpander
-  | `($_ Op(≤) ![ᵀ“$t:subterm”, ᵀ“$u:subterm”]) => `(“ $t:subterm ≤ $u  ”)
-  | `($_ Op(≤) ![ᵀ“$t:subterm”, #$y:term     ]) => `(“ $t:subterm ≤ #$y ”)
-  | `($_ Op(≤) ![ᵀ“$t:subterm”, &$y:term     ]) => `(“ $t:subterm ≤ &$y ”)
-  | `($_ Op(≤) ![ᵀ“$t:subterm”, $u           ]) => `(“ $t:subterm ≤ ᵀ!$u ”)
-  | `($_ Op(≤) ![#$x:term,      ᵀ“$u:subterm”]) => `(“ #$x        ≤ $u  ”)
+  | `($_ Op(≤) ![ᵀ“$t:foterm”, ᵀ“$u:foterm”]) => `(“ $t:foterm ≤ $u  ”)
+  | `($_ Op(≤) ![ᵀ“$t:foterm”, #$y:term     ]) => `(“ $t:foterm ≤ #$y ”)
+  | `($_ Op(≤) ![ᵀ“$t:foterm”, &$y:term     ]) => `(“ $t:foterm ≤ &$y ”)
+  | `($_ Op(≤) ![ᵀ“$t:foterm”, $u           ]) => `(“ $t:foterm ≤ ᵀ!$u ”)
+  | `($_ Op(≤) ![#$x:term,      ᵀ“$u:foterm”]) => `(“ #$x        ≤ $u  ”)
   | `($_ Op(≤) ![#$x:term,      #$y:term     ]) => `(“ #$x        ≤ #$y ”)
   | `($_ Op(≤) ![#$x:term,      &$y:term     ]) => `(“ #$x        ≤ &$y ”)
   | `($_ Op(≤) ![#$x:term,      $u           ]) => `(“ #$x        ≤ ᵀ!$u ”)
-  | `($_ Op(≤) ![&$x:term,      ᵀ“$u:subterm”]) => `(“ &$x        ≤ $u  ”)
+  | `($_ Op(≤) ![&$x:term,      ᵀ“$u:foterm”]) => `(“ &$x        ≤ $u  ”)
   | `($_ Op(≤) ![&$x:term,      #$y:term     ]) => `(“ &$x        ≤ #$y ”)
   | `($_ Op(≤) ![&$x:term,      &$y:term     ]) => `(“ &$x        ≤ &$y ”)
   | `($_ Op(≤) ![&$x:term,      $u           ]) => `(“ &$x        ≤ ᵀ!$u ”)
-  | `($_ Op(≤) ![$t:term,       ᵀ“$u:subterm”]) => `(“ ᵀ!$t       ≤ $u  ”)
+  | `($_ Op(≤) ![$t:term,       ᵀ“$u:foterm”]) => `(“ ᵀ!$t       ≤ $u  ”)
   | `($_ Op(≤) ![$t:term,       #$y:term     ]) => `(“ ᵀ!$t       ≤ #$y ”)
   | `($_ Op(≤) ![$t:term,       &$y:term     ]) => `(“ ᵀ!$t       ≤ &$y ”)
   | `($_ Op(≤) ![$t:term,       $u           ]) => `(“ ᵀ!$t       ≤ ᵀ!$u ”)

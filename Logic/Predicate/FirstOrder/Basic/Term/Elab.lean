@@ -6,48 +6,50 @@ namespace FirstOrder
 
 namespace SubTerm
 
-declare_syntax_cat subterm
-syntax:max "#" term:max : subterm
-syntax:max "&" term:max : subterm
-syntax:max "ᵀ!" term:max : subterm
-syntax num : subterm
-syntax:70 "ᵀ⟨" term "⟩(" subterm,* ")" : subterm
-syntax:50 subterm:50 " + " subterm:51 : subterm
-syntax:60 subterm:60 " * " subterm:61 : subterm
-syntax:65 subterm:65 " ^ " subterm:66 : subterm
-syntax:67 "exp " subterm:68 : subterm
-syntax:75 "⟨" subterm ", " subterm "⟩" : subterm
+declare_syntax_cat foterm
+syntax:max "#" term:max : foterm
+syntax:max "&" term:max : foterm
+syntax:max "." str : foterm
+syntax:max "ᵀ!" term:max : foterm
+syntax num : foterm
+syntax:70 "ᵀ⟨" term "⟩(" foterm,* ")" : foterm
+syntax:50 foterm:50 " + " foterm:51 : foterm
+syntax:60 foterm:60 " * " foterm:61 : foterm
+syntax:65 foterm:65 " ^ " foterm:66 : foterm
+syntax:67 "exp " foterm:68 : foterm
+syntax:75 "⟨" foterm ", " foterm "⟩" : foterm
 
-syntax "(" subterm ")" : subterm
+syntax "(" foterm ")" : foterm
 
-syntax subterm "ᵀ[" subterm,* "]" : subterm
-syntax:80 "⤒" subterm:80 : subterm
-syntax:80 "ᵀ⇑" subterm:80 : subterm
-syntax:80 "ᵀᶠ" subterm:80 : subterm
-syntax:80 "ᵀᵇ" subterm:80 : subterm
+syntax foterm "ᵀ[" foterm,* "]" : foterm
+syntax:80 "⤒" foterm:80 : foterm
+syntax:80 "ᵀ⇑" foterm:80 : foterm
+syntax:80 "ᵀᶠ" foterm:80 : foterm
+syntax:80 "ᵀᵇ" foterm:80 : foterm
 
-syntax "ᵀ“" subterm:0 "”" : term
+syntax "ᵀ“" foterm:0 "”" : term
  
 macro_rules
   | `(ᵀ“ # $n:term”)                                 => `(#$n)
   | `(ᵀ“ & $n:term ”)                                => `(&$n)
+  | `(ᵀ“ . $s:str ”)                                 => `(&$s)
   | `(ᵀ“ ᵀ! $t:term ”)                               => `($t)
   | `(ᵀ“ $n:num ”)                                   => `(SubTerm.Operator.const (natLit _ $n))
-  | `(ᵀ“ ᵀ⟨ $d:term ⟩( $t:subterm,* ) ”)              => do
+  | `(ᵀ“ ᵀ⟨ $d:term ⟩( $t:foterm,* ) ”)              => do
     let v ← t.getElems.foldrM (β := Lean.TSyntax _) (init := ← `(![])) (fun a s => `(ᵀ“$a” :> $s))
     `(func $d $v)
-  | `(ᵀ“ $t:subterm + $u:subterm ”)                  => `(func Language.Add.add ![ᵀ“$t”, ᵀ“$u”])
-  | `(ᵀ“ $t:subterm * $u:subterm ”)                  => `(func Language.Mul.mul ![ᵀ“$t”, ᵀ“$u”])
-  | `(ᵀ“ $t:subterm ^ $u:subterm ”)                  => `(func Language.Pow.pow ![ᵀ“$t”, ᵀ“$u”])
-  | `(ᵀ“ exp $t:subterm ”)                           => `(func Language.Exp.exp ![ᵀ“$t”])
-  | `(ᵀ“ ⟨ $t:subterm, $u:subterm ⟩ ”)               => `(func Language.Pairing.pair ![ᵀ“$t”, ᵀ“$u”])
-  | `(ᵀ“ ᵀ⇑$t:subterm ”)                            => `(Rew.shift ᵀ“$t”)
-  | `(ᵀ“ $t:subterm ᵀ[$u:subterm,*] ”)               => do
+  | `(ᵀ“ $t:foterm + $u:foterm ”)                  => `(func Language.Add.add ![ᵀ“$t”, ᵀ“$u”])
+  | `(ᵀ“ $t:foterm * $u:foterm ”)                  => `(func Language.Mul.mul ![ᵀ“$t”, ᵀ“$u”])
+  | `(ᵀ“ $t:foterm ^ $u:foterm ”)                  => `(func Language.Pow.pow ![ᵀ“$t”, ᵀ“$u”])
+  | `(ᵀ“ exp $t:foterm ”)                           => `(func Language.Exp.exp ![ᵀ“$t”])
+  | `(ᵀ“ ⟨ $t:foterm, $u:foterm ⟩ ”)               => `(func Language.Pairing.pair ![ᵀ“$t”, ᵀ“$u”])
+  | `(ᵀ“ ᵀ⇑$t:foterm ”)                            => `(Rew.shift ᵀ“$t”)
+  | `(ᵀ“ $t:foterm ᵀ[$u:foterm,*] ”)               => do
     let v ← u.getElems.foldrM (β := Lean.TSyntax _) (init := ← `(![])) (fun a s => `(ᵀ“$a” :> $s))
     `(Rew.substs $v ᵀ“$t”)
-  | `(ᵀ“ ⤒$t:subterm ”)                             => `(Rew.bShift ᵀ“$t”)
-  | `(ᵀ“ ᵀᶠ $t:subterm ”)                            => `(Rew.free ᵀ“$t”)
-  | `(ᵀ“ ᵀᵇ $t:subterm ”)                            => `(Rew.fix ᵀ“$t”)
+  | `(ᵀ“ ⤒$t:foterm ”)                             => `(Rew.bShift ᵀ“$t”)
+  | `(ᵀ“ ᵀᶠ $t:foterm ”)                            => `(Rew.free ᵀ“$t”)
+  | `(ᵀ“ ᵀᵇ $t:foterm ”)                            => `(Rew.fix ᵀ“$t”)
   | `(ᵀ“ ( $x ) ”)                                   => `(ᵀ“$x”)
 
 #check Language.Add.add
@@ -60,7 +62,7 @@ macro_rules
 section delab
 open Lean PrettyPrinter Delaborator SubExpr
 
-instance : Coe NumLit (TSyntax `subterm) where
+instance : Coe NumLit (TSyntax `foterm) where
   coe s := ⟨s.raw⟩
 
 @[app_unexpander natLit]
@@ -102,75 +104,75 @@ def unexpandShift : Unexpander
 
 @[app_unexpander SubTerm.func]
 def unexpandFuncArith : Unexpander
-  | `($_ lang(exp) ![ᵀ“$t:subterm”]) => `(ᵀ“ exp $t ”)
+  | `($_ lang(exp) ![ᵀ“$t:foterm”]) => `(ᵀ“ exp $t ”)
   | `($_ lang(exp) ![#$x:term])      => `(ᵀ“ exp #$x ”)
   | `($_ lang(exp) ![&$x:term])      => `(ᵀ“ exp &$x ”)
   | `($_ lang(exp) ![$t])            => `(ᵀ“ exp ᵀ!$t ”)
 
-  | `($_ lang(+) ![ᵀ“$t:subterm”, ᵀ“$u:subterm”]) => `(ᵀ“ ($t + $u) ”)
-  | `($_ lang(+) ![ᵀ“$t:subterm”, #$x:term     ]) => `(ᵀ“ ($t + #$x) ”)
-  | `($_ lang(+) ![ᵀ“$t:subterm”, &$x:term     ]) => `(ᵀ“ ($t + &$x) ”)
-  | `($_ lang(+) ![ᵀ“$t:subterm”, $u           ]) => `(ᵀ“ ($t + ᵀ!$u) ”)
-  | `($_ lang(+) ![#$x:term,      ᵀ“$u:subterm”]) => `(ᵀ“ (#$x + $u) ”)
+  | `($_ lang(+) ![ᵀ“$t:foterm”, ᵀ“$u:foterm”]) => `(ᵀ“ ($t + $u) ”)
+  | `($_ lang(+) ![ᵀ“$t:foterm”, #$x:term     ]) => `(ᵀ“ ($t + #$x) ”)
+  | `($_ lang(+) ![ᵀ“$t:foterm”, &$x:term     ]) => `(ᵀ“ ($t + &$x) ”)
+  | `($_ lang(+) ![ᵀ“$t:foterm”, $u           ]) => `(ᵀ“ ($t + ᵀ!$u) ”)
+  | `($_ lang(+) ![#$x:term,      ᵀ“$u:foterm”]) => `(ᵀ“ (#$x + $u) ”)
   | `($_ lang(+) ![#$x:term,      #$y:term     ]) => `(ᵀ“ (#$x + #$y) ”)
   | `($_ lang(+) ![#$x:term,      &$y:term     ]) => `(ᵀ“ (#$x + &$y) ”)
   | `($_ lang(+) ![#$x:term,      $u           ]) => `(ᵀ“ (#$x + ᵀ!$u) ”)
-  | `($_ lang(+) ![&$x:term,      ᵀ“$u:subterm”]) => `(ᵀ“ (&$x + $u) ”)
+  | `($_ lang(+) ![&$x:term,      ᵀ“$u:foterm”]) => `(ᵀ“ (&$x + $u) ”)
   | `($_ lang(+) ![&$x:term,      #$y:term     ]) => `(ᵀ“ (&$x + #$y) ”)
   | `($_ lang(+) ![&$x:term,      &$y:term     ]) => `(ᵀ“ (&$x + &$y) ”)
   | `($_ lang(+) ![&$x:term,      $u           ]) => `(ᵀ“ (&$x + ᵀ!$u) ”)
-  | `($_ lang(+) ![$t,            ᵀ“$u:subterm”]) => `(ᵀ“ (ᵀ!$t + $u) ”)
+  | `($_ lang(+) ![$t,            ᵀ“$u:foterm”]) => `(ᵀ“ (ᵀ!$t + $u) ”)
   | `($_ lang(+) ![$t,            #$y:term     ]) => `(ᵀ“ (ᵀ!$t + #$y) ”)
   | `($_ lang(+) ![$t,            &$y:term     ]) => `(ᵀ“ (ᵀ!$t + &$y) ”)
   | `($_ lang(+) ![$t,            $u           ]) => `(ᵀ“ (ᵀ!$t + ᵀ!$u) ”)
 
-  | `($_ lang(*) ![ᵀ“$t:subterm”, ᵀ“$u:subterm”]) => `(ᵀ“ ($t * $u) ”)
-  | `($_ lang(*) ![ᵀ“$t:subterm”, #$x:term     ]) => `(ᵀ“ ($t * #$x) ”)
-  | `($_ lang(*) ![ᵀ“$t:subterm”, &$x:term     ]) => `(ᵀ“ ($t * &$x) ”)
-  | `($_ lang(*) ![ᵀ“$t:subterm”, $u           ]) => `(ᵀ“ ($t * ᵀ!$u) ”)
-  | `($_ lang(*) ![#$x:term,      ᵀ“$u:subterm”]) => `(ᵀ“ (#$x * $u) ”)
+  | `($_ lang(*) ![ᵀ“$t:foterm”, ᵀ“$u:foterm”]) => `(ᵀ“ ($t * $u) ”)
+  | `($_ lang(*) ![ᵀ“$t:foterm”, #$x:term     ]) => `(ᵀ“ ($t * #$x) ”)
+  | `($_ lang(*) ![ᵀ“$t:foterm”, &$x:term     ]) => `(ᵀ“ ($t * &$x) ”)
+  | `($_ lang(*) ![ᵀ“$t:foterm”, $u           ]) => `(ᵀ“ ($t * ᵀ!$u) ”)
+  | `($_ lang(*) ![#$x:term,      ᵀ“$u:foterm”]) => `(ᵀ“ (#$x * $u) ”)
   | `($_ lang(*) ![#$x:term,      #$y:term     ]) => `(ᵀ“ (#$x * #$y) ”)
   | `($_ lang(*) ![#$x:term,      &$y:term     ]) => `(ᵀ“ (#$x * &$y) ”)
   | `($_ lang(*) ![#$x:term,      $u           ]) => `(ᵀ“ (#$x * ᵀ!$u) ”)
-  | `($_ lang(*) ![&$x:term,      ᵀ“$u:subterm”]) => `(ᵀ“ (&$x * $u) ”)
+  | `($_ lang(*) ![&$x:term,      ᵀ“$u:foterm”]) => `(ᵀ“ (&$x * $u) ”)
   | `($_ lang(*) ![&$x:term,      #$y:term     ]) => `(ᵀ“ (&$x * #$y) ”)
   | `($_ lang(*) ![&$x:term,      &$y:term     ]) => `(ᵀ“ (&$x * &$y) ”)
   | `($_ lang(*) ![&$x:term,      $u           ]) => `(ᵀ“ (&$x * ᵀ!$u) ”)
-  | `($_ lang(*) ![$t,            ᵀ“$u:subterm”]) => `(ᵀ“ (ᵀ!$t * $u) ”)
+  | `($_ lang(*) ![$t,            ᵀ“$u:foterm”]) => `(ᵀ“ (ᵀ!$t * $u) ”)
   | `($_ lang(*) ![$t,            #$y:term     ]) => `(ᵀ“ (ᵀ!$t * #$y) ”)
   | `($_ lang(*) ![$t,            &$y:term     ]) => `(ᵀ“ (ᵀ!$t * &$y) ”)
   | `($_ lang(*) ![$t,            $u           ]) => `(ᵀ“ (ᵀ!$t * ᵀ!$u) ”)
 
-  | `($_ lang(^) ![ᵀ“$t:subterm”, ᵀ“$u:subterm”]) => `(ᵀ“ ($t ^ $u) ”)
-  | `($_ lang(^) ![ᵀ“$t:subterm”, #$x:term     ]) => `(ᵀ“ ($t ^ #$x) ”)
-  | `($_ lang(^) ![ᵀ“$t:subterm”, &$x:term     ]) => `(ᵀ“ ($t ^ &$x) ”)
-  | `($_ lang(^) ![ᵀ“$t:subterm”, $u           ]) => `(ᵀ“ ($t ^ ᵀ!$u) ”)
-  | `($_ lang(^) ![#$x:term,      ᵀ“$u:subterm”]) => `(ᵀ“ (#$x ^ $u) ”)
+  | `($_ lang(^) ![ᵀ“$t:foterm”, ᵀ“$u:foterm”]) => `(ᵀ“ ($t ^ $u) ”)
+  | `($_ lang(^) ![ᵀ“$t:foterm”, #$x:term     ]) => `(ᵀ“ ($t ^ #$x) ”)
+  | `($_ lang(^) ![ᵀ“$t:foterm”, &$x:term     ]) => `(ᵀ“ ($t ^ &$x) ”)
+  | `($_ lang(^) ![ᵀ“$t:foterm”, $u           ]) => `(ᵀ“ ($t ^ ᵀ!$u) ”)
+  | `($_ lang(^) ![#$x:term,      ᵀ“$u:foterm”]) => `(ᵀ“ (#$x ^ $u) ”)
   | `($_ lang(^) ![#$x:term,      #$y:term     ]) => `(ᵀ“ (#$x ^ #$y) ”)
   | `($_ lang(^) ![#$x:term,      &$y:term     ]) => `(ᵀ“ (#$x ^ &$y) ”)
   | `($_ lang(^) ![#$x:term,      $u           ]) => `(ᵀ“ (#$x ^ ᵀ!$u) ”)
-  | `($_ lang(^) ![&$x:term,      ᵀ“$u:subterm”]) => `(ᵀ“ (&$x ^ $u) ”)
+  | `($_ lang(^) ![&$x:term,      ᵀ“$u:foterm”]) => `(ᵀ“ (&$x ^ $u) ”)
   | `($_ lang(^) ![&$x:term,      #$y:term     ]) => `(ᵀ“ (&$x ^ #$y) ”)
   | `($_ lang(^) ![&$x:term,      &$y:term     ]) => `(ᵀ“ (&$x ^ &$y) ”)
   | `($_ lang(^) ![&$x:term,      $u           ]) => `(ᵀ“ (&$x ^ ᵀ!$u) ”)
-  | `($_ lang(^) ![$t,            ᵀ“$u:subterm”]) => `(ᵀ“ (ᵀ!$t ^ $u) ”)
+  | `($_ lang(^) ![$t,            ᵀ“$u:foterm”]) => `(ᵀ“ (ᵀ!$t ^ $u) ”)
   | `($_ lang(^) ![$t,            #$y:term     ]) => `(ᵀ“ (ᵀ!$t ^ #$y) ”)
   | `($_ lang(^) ![$t,            &$y:term     ]) => `(ᵀ“ (ᵀ!$t ^ &$y) ”)
   | `($_ lang(^) ![$t,            $u           ]) => `(ᵀ“ (ᵀ!$t ^ ᵀ!$u) ”)
 
-  | `($_ lang(⟨⟩) ![ᵀ“$t:subterm”, ᵀ“$u:subterm”]) => `(ᵀ“ ⟨$t, $u  ⟩ ”)
-  | `($_ lang(⟨⟩) ![ᵀ“$t:subterm”, #$x:term     ]) => `(ᵀ“ ⟨$t, #$x ⟩ ”)
-  | `($_ lang(⟨⟩) ![ᵀ“$t:subterm”, &$x:term     ]) => `(ᵀ“ ⟨$t, &$x ⟩ ”)
-  | `($_ lang(⟨⟩) ![ᵀ“$t:subterm”, $u           ]) => `(ᵀ“ ⟨$t, ᵀ!$u⟩ ”)
-  | `($_ lang(⟨⟩) ![#$x:term,      ᵀ“$u:subterm”]) => `(ᵀ“ ⟨#$x, $u  ⟩ ”)
+  | `($_ lang(⟨⟩) ![ᵀ“$t:foterm”, ᵀ“$u:foterm”]) => `(ᵀ“ ⟨$t, $u  ⟩ ”)
+  | `($_ lang(⟨⟩) ![ᵀ“$t:foterm”, #$x:term     ]) => `(ᵀ“ ⟨$t, #$x ⟩ ”)
+  | `($_ lang(⟨⟩) ![ᵀ“$t:foterm”, &$x:term     ]) => `(ᵀ“ ⟨$t, &$x ⟩ ”)
+  | `($_ lang(⟨⟩) ![ᵀ“$t:foterm”, $u           ]) => `(ᵀ“ ⟨$t, ᵀ!$u⟩ ”)
+  | `($_ lang(⟨⟩) ![#$x:term,      ᵀ“$u:foterm”]) => `(ᵀ“ ⟨#$x, $u  ⟩ ”)
   | `($_ lang(⟨⟩) ![#$x:term,      #$y:term     ]) => `(ᵀ“ ⟨#$x, #$y ⟩ ”)
   | `($_ lang(⟨⟩) ![#$x:term,      &$y:term     ]) => `(ᵀ“ ⟨#$x, &$y ⟩ ”)
   | `($_ lang(⟨⟩) ![#$x:term,      $u           ]) => `(ᵀ“ ⟨#$x, ᵀ!$u⟩ ”)
-  | `($_ lang(⟨⟩) ![&$x:term,      ᵀ“$u:subterm”]) => `(ᵀ“ ⟨&$x, $u  ⟩ ”)
+  | `($_ lang(⟨⟩) ![&$x:term,      ᵀ“$u:foterm”]) => `(ᵀ“ ⟨&$x, $u  ⟩ ”)
   | `($_ lang(⟨⟩) ![&$x:term,      #$y:term     ]) => `(ᵀ“ ⟨&$x, #$y ⟩ ”)
   | `($_ lang(⟨⟩) ![&$x:term,      &$y:term     ]) => `(ᵀ“ ⟨&$x, &$y ⟩ ”)
   | `($_ lang(⟨⟩) ![&$x:term,      $u           ]) => `(ᵀ“ ⟨&$x, ᵀ!$u⟩ ”)
-  | `($_ lang(⟨⟩) ![$t,            ᵀ“$u:subterm”]) => `(ᵀ“ ⟨ᵀ!$t, $u  ⟩ ”)
+  | `($_ lang(⟨⟩) ![$t,            ᵀ“$u:foterm”]) => `(ᵀ“ ⟨ᵀ!$t, $u  ⟩ ”)
   | `($_ lang(⟨⟩) ![$t,            #$y:term     ]) => `(ᵀ“ ⟨ᵀ!$t, #$y ⟩ ”)
   | `($_ lang(⟨⟩) ![$t,            &$y:term     ]) => `(ᵀ“ ⟨ᵀ!$t, &$y ⟩ ”)
   | `($_ lang(⟨⟩) ![$t,            $u           ]) => `(ᵀ“ ⟨ᵀ!$t, ᵀ!$u⟩ ”)

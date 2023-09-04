@@ -4,7 +4,7 @@ namespace LO
 
 namespace Logic
 
-class Principia (F : Type u) [LogicSymbol F] extends Proof F where
+class Principia (F : Type u) [LogicSymbol F] extends System F where
   Pr : Set F → List F → F → Type u
   toBew : {T : Set F} → {Δ : List F} → {f : F} → Pr T Δ f → T ⊢ Δ.conj ⟶ f
   PrWeakening' : {Δ Γ : List F} → {f : F} → Δ ⊆ Γ → Pr T Δ f → Pr T Γ f

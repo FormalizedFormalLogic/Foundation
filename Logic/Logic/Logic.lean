@@ -8,19 +8,19 @@ variable {F : Type u} [LogicSymbol F]
 
 /- Deduction System of F -/
 
-class Proof (F : Type u) [LogicSymbol F] where
+class System (F : Type u) [LogicSymbol F] where
   Bew : Set F → F → Type u
   axm : ∀ {f}, f ∈ T → Bew T f 
   weakening' : ∀ {T U f}, T ⊆ U → Bew T f → Bew U f
 
-namespace Proof
-variable [𝓑 : Proof F]
+namespace System
+variable [𝓑 : System F]
 
 instance : HasTurnstile F (Type u) := ⟨𝓑.Bew⟩
 
 def BewTheory (T U : Set F) : Type u := {f : F} → f ∈ U → T ⊢ f
 
-infix:45 " ⊢* " => Proof.BewTheory
+infix:45 " ⊢* " => System.BewTheory
 
 def BewTheoryEmpty (T : Set F) : T ⊢* ∅ := fun h => by contradiction
 
@@ -36,12 +36,12 @@ lemma Consistent.of_subset {T U : Set F} (h : Consistent U) (ss : T ⊆ U) : Con
 
 lemma inConsistent_of_proof {T : Set F} (b : T ⊢ ⊥) : ¬Consistent T := by simp[Consistent]; exact ⟨b⟩
 
-end Proof
+end System
 
-def Proof.hom [Proof F] {G : Type u} [LogicSymbol G] (F : G →L F) : Proof G where
+def System.hom [System F] {G : Type u} [LogicSymbol G] (F : G →L F) : System G where
   Bew := fun T g => F '' T ⊢ F g
-  axm := fun h => Proof.axm (Set.mem_image_of_mem F h)
-  weakening' := fun h => by simp; exact Proof.weakening' (Set.image_subset F h)
+  axm := fun h => System.axm (Set.mem_image_of_mem F h)
+  weakening' := fun h => by simp; exact System.weakening' (Set.image_subset F h)
 
 /- Semantics of F -/
 
@@ -111,7 +111,7 @@ lemma consequence_iff {T : Set F} {f : F} : T ⊨ f ↔ ¬Satisfiableₛ (insert
 end Semantics
 
 variable (F)
-variable [LogicSymbol F] [𝓑 : Proof F] {Struc : Type w → Type v} [𝓢 : Semantics F Struc]
+variable [LogicSymbol F] [𝓑 : System F] {Struc : Type w → Type v} [𝓢 : Semantics F Struc]
 
 class Sound where
   sound : ∀ {T : Set F} {p : F}, T ⊢ p → T ⊨ p
@@ -134,10 +134,10 @@ lemma not_provable_of_countermodel {T : Set F} {p : F}
   ⟨fun b => by have : s ⊧ₛ p := Sound.sound b M s hT; contradiction⟩
 
 lemma consistent_of_model {T : Set F}
-  (hT : s ⊧ₛ* T) : Proof.Consistent T :=
+  (hT : s ⊧ₛ* T) : System.Consistent T :=
   not_provable_of_countermodel (p := ⊥) hT (by simp)
 
-lemma consistent_of_satisfiable {T : Set F} : Semantics.Satisfiableₛ T → Proof.Consistent T := by
+lemma consistent_of_satisfiable {T : Set F} : Semantics.Satisfiableₛ T → System.Consistent T := by
   rintro ⟨M, _, s, h⟩; exact consistent_of_model h
 
 lemma realize_of_proof {T : Set F} {f} (h : s ⊧ₛ* T) (b : T ⊢ f) : s ⊧ₛ f :=
@@ -166,16 +166,19 @@ namespace Complete
 
 variable [Complete F]
 
-lemma satisfiableₛ_iff_consistent {T : Set F} : Semantics.Satisfiableₛ T ↔ Proof.Consistent T :=
+lemma satisfiableₛ_iff_consistent {T : Set F} : Semantics.Satisfiableₛ T ↔ System.Consistent T :=
   ⟨Sound.consistent_of_satisfiable,
    by contrapose; intro h
       have : T ⊨ ⊥
       { intro M i s hM; have : Semantics.Satisfiableₛ T := ⟨M, i, s, hM⟩; contradiction }
       have : T ⊢ ⊥ := complete this
-      exact Proof.inConsistent_of_proof this⟩
+      exact System.inConsistent_of_proof this⟩
 
 lemma not_satisfiable_iff_inconsistent {T : Set F} : ¬Semantics.Satisfiableₛ T ↔ Nonempty (T ⊢ ⊥) := by
-  simp[satisfiableₛ_iff_consistent, Proof.Consistent]
+  simp[satisfiableₛ_iff_consistent, System.Consistent]
+
+lemma consequence_iff_provable {T : Set F} {f : F} : T ⊨ f ↔ Nonempty (T ⊢ f) :=
+⟨fun h => ⟨complete h⟩, by rintro ⟨b⟩; exact Sound.sound b⟩
 
 end Complete
 

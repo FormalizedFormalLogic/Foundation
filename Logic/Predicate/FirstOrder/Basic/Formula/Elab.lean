@@ -7,66 +7,66 @@ namespace FirstOrder
 
 namespace SubFormula
 
-declare_syntax_cat subformula
-syntax "⊤" : subformula
-syntax "⊥" : subformula
-syntax:45 subterm:45 " = " subterm:0 : subformula
-syntax:45 subterm:45 " ≠ " subterm:0 : subformula
-syntax:45 subterm:45 " < " subterm:0 : subformula
-syntax:45 subterm:45 " ≮ " subterm:0 : subformula
-syntax:45 "⟨" term "⟩(" subterm,* ")" : subformula
-syntax:max "¬" subformula:35 : subformula
-syntax:32 subformula:32 " ∧ " subformula:33 : subformula
-syntax:32 "⋀ " ident ", " subformula : subformula
-syntax:30 subformula:30 " ∨ " subformula:31 : subformula
-syntax:max "∀ " subformula:35 : subformula
-syntax:max "∃ " subformula:35 : subformula
-syntax:max "∀[" subformula "] " subformula:35 : subformula
-syntax:25 "∀* " subformula:24 : subformula
-syntax:max "∃[" subformula "] " subformula:35 : subformula
+declare_syntax_cat foformula
+syntax "⊤" : foformula
+syntax "⊥" : foformula
+syntax:45 foterm:45 " = " foterm:0 : foformula
+syntax:45 foterm:45 " ≠ " foterm:0 : foformula
+syntax:45 foterm:45 " < " foterm:0 : foformula
+syntax:45 foterm:45 " ≮ " foterm:0 : foformula
+syntax:45 "⟨" term "⟩(" foterm,* ")" : foformula
+syntax:max "¬" foformula:35 : foformula
+syntax:32 foformula:32 " ∧ " foformula:33 : foformula
+syntax:32 "⋀ " ident ", " foformula : foformula
+syntax:30 foformula:30 " ∨ " foformula:31 : foformula
+syntax:max "∀ " foformula:35 : foformula
+syntax:max "∃ " foformula:35 : foformula
+syntax:max "∀[" foformula "] " foformula:35 : foformula
+syntax:25 "∀* " foformula:24 : foformula
+syntax:max "∃[" foformula "] " foformula:35 : foformula
 
-syntax subformula "[" subterm,* "]" : subformula
-syntax:max "⇑" subformula:10 : subformula
+syntax foformula "[" foterm,* "]" : foformula
+syntax:max "⇑" foformula:10 : foformula
 
-syntax "(" subformula ")" : subformula
-syntax:max "!" term:max : subformula
-syntax "“" subformula "”" : term
+syntax "(" foformula ")" : foformula
+syntax:max "!" term:max : foformula
+syntax "“" foformula "”" : term
  
 macro_rules
   | `(“ ⊤ ”)                                       => `(⊤)
   | `(“ ⊥ ”)                                       => `(⊥)
   | `(“ ! $t:term ”)                               => `($t)
-  | `(“ ⟨ $d:term ⟩( $t:subterm,* ) ”)             => do
+  | `(“ ⟨ $d:term ⟩( $t:foterm,* ) ”)             => do
     let v ← t.getElems.foldrM (β := Lean.TSyntax _) (init := ← `(![])) (fun a s => `(ᵀ“$a” :> $s))
     `(rel $d $v)
-  | `(“ ¬ $p:subformula ”)                         => `(~“$p”)
-  | `(“ $t:subterm = $u:subterm ”)                 => `(rel Language.Eq.eq ![ᵀ“$t”, ᵀ“$u”])
-  | `(“ $t:subterm ≠ $u:subterm ”)                 => `(nrel Language.Eq.eq ![ᵀ“$t”, ᵀ“$u”])
-  | `(“ $t:subterm < $u:subterm ”)                 => `(rel Language.Lt.lt ![ᵀ“$t”, ᵀ“$u”])
-  | `(“ $t:subterm ≮ $u:subterm ”)                 => `(nrel Language.Lt.lt ![ᵀ“$t”, ᵀ“$u”])
-  | `(“ $p:subformula ∧ $q:subformula ”)           => `(“$p” ⋏ “$q”)
-  | `(“ ⋀ $i, $p:subformula ”)                    => `(Matrix.conj fun $i => “$p”)
-  | `(“ $p:subformula ∨ $q:subformula ”)           => `(“$p” ⋎ “$q”)
-  | `(“ ∀ $p:subformula ”)                         => `(∀' “$p”)
-  | `(“ ∃ $p:subformula ”)                         => `(∃' “$p”)
-  | `(“ ∀[$p:subformula] $q:subformula ”)          => `(∀[“$p”] “$q”)
-  | `(“ ∃[$p:subformula] $q:subformula ”)          => `(∃[“$p”] “$q”)
-  | `(“ ∀* $p:subformula ”)                        => `(univClosure “$p”)
-  | `(“ $p:subformula [ $t:subterm,* ] ”)            => do
+  | `(“ ¬ $p:foformula ”)                         => `(~“$p”)
+  | `(“ $t:foterm = $u:foterm ”)                 => `(rel Language.Eq.eq ![ᵀ“$t”, ᵀ“$u”])
+  | `(“ $t:foterm ≠ $u:foterm ”)                 => `(nrel Language.Eq.eq ![ᵀ“$t”, ᵀ“$u”])
+  | `(“ $t:foterm < $u:foterm ”)                 => `(rel Language.Lt.lt ![ᵀ“$t”, ᵀ“$u”])
+  | `(“ $t:foterm ≮ $u:foterm ”)                 => `(nrel Language.Lt.lt ![ᵀ“$t”, ᵀ“$u”])
+  | `(“ $p:foformula ∧ $q:foformula ”)           => `(“$p” ⋏ “$q”)
+  | `(“ ⋀ $i, $p:foformula ”)                    => `(Matrix.conj fun $i => “$p”)
+  | `(“ $p:foformula ∨ $q:foformula ”)           => `(“$p” ⋎ “$q”)
+  | `(“ ∀ $p:foformula ”)                         => `(∀' “$p”)
+  | `(“ ∃ $p:foformula ”)                         => `(∃' “$p”)
+  | `(“ ∀[$p:foformula] $q:foformula ”)          => `(∀[“$p”] “$q”)
+  | `(“ ∃[$p:foformula] $q:foformula ”)          => `(∃[“$p”] “$q”)
+  | `(“ ∀* $p:foformula ”)                        => `(univClosure “$p”)
+  | `(“ $p:foformula [ $t:foterm,* ] ”)            => do
     let v ← t.getElems.foldrM (β := Lean.TSyntax _) (init := ← `(![])) (fun a s => `(ᵀ“$a” :> $s))
     `((Rew.substs $v).hom “$p”)
-  | `(“ ⇑$p:subformula ”)                         => `(Rew.shift.hom “$p”)
+  | `(“ ⇑$p:foformula ”)                         => `(Rew.shift.hom “$p”)
   | `(“ ( $x ) ”)                                  => `(“$x”)
 
 #check “ ¬(∀ ∀ (#0 + 1) * #1 < #0 + #1 ∨ 0 < 5) ”
 #check “⋀ i, #i < #i + 9”
 
-syntax:10 subformula:9 " → " subformula:10 : subformula
-syntax:10 subformula:10 " ↔ " subformula:10 : subformula
+syntax:10 foformula:9 " → " foformula:10 : foformula
+syntax:10 foformula:10 " ↔ " foformula:10 : foformula
 
 macro_rules
-  | `(“ $p:subformula → $q:subformula ”) => `(“$p” ⟶ “$q”)
-  | `(“ $p:subformula ↔ $q:subformula ”) => `(“$p” ⟷ “$q”)
+  | `(“ $p:foformula → $q:foformula ”) => `(“$p” ⟶ “$q”)
+  | `(“ $p:foformula ↔ $q:foformula ”) => `(“$p” ⟷ “$q”)
 
 #reduce (“(∃ ⊤) ↔ !(∃' ⊤)” : Sentence Language.oRing)
 
@@ -93,128 +93,128 @@ def unexpandFunc : Unexpander
 
 @[app_unexpander Wedge.wedge]
 def unexpandAnd : Unexpander
-  | `($_ “$p:subformula” “$q:subformula”) => `(“ ($p ∧ $q) ”)
-  | `($_ “$p:subformula” $u:term)         => `(“ ($p ∧ !$u) ”)
-  | `($_ $t:term         “$q:subformula”) => `(“ (!$t ∧ $q) ”)
+  | `($_ “$p:foformula” “$q:foformula”) => `(“ ($p ∧ $q) ”)
+  | `($_ “$p:foformula” $u:term)         => `(“ ($p ∧ !$u) ”)
+  | `($_ $t:term         “$q:foformula”) => `(“ (!$t ∧ $q) ”)
   | _                                     => throw ()
 
 @[app_unexpander Vee.vee]
 def unexpandOr : Unexpander
-  | `($_ “$p:subformula” “$q:subformula”) => `(“ ($p ∨ $q) ”)
-  | `($_ “$p:subformula” $u:term)         => `(“ ($p ∨ !$u) ”)
-  | `($_ $t:term         “$q:subformula”) => `(“ (!$t ∨ $q) ”)
+  | `($_ “$p:foformula” “$q:foformula”) => `(“ ($p ∨ $q) ”)
+  | `($_ “$p:foformula” $u:term)         => `(“ ($p ∨ !$u) ”)
+  | `($_ $t:term         “$q:foformula”) => `(“ (!$t ∨ $q) ”)
   | _                                     => throw ()
 
 @[app_unexpander Tilde.tilde]
 def unexpandNeg : Unexpander
-  | `($_ “$p:subformula”) => `(“ ¬$p ”)
+  | `($_ “$p:foformula”) => `(“ ¬$p ”)
   | _                     => throw ()
 
 @[app_unexpander UnivQuantifier.univ]
 def unexpandUniv : Unexpander
-  | `($_ “$p:subformula”) => `(“ ∀ $p ”)
+  | `($_ “$p:foformula”) => `(“ ∀ $p ”)
   | _                     => throw ()
 
 @[app_unexpander ExQuantifier.ex]
 def unexpandEx : Unexpander
-  | `($_ “$p:subformula”) => `(“ ∃ $p ”)
+  | `($_ “$p:foformula”) => `(“ ∃ $p ”)
   | _                     => throw ()
 
 @[app_unexpander Arrow.arrow]
 def unexpandArrow : Unexpander
-  | `($_ “$p:subformula” “$q:subformula”) => `(“ ($p → $q) ”)
-  | `($_ “$p:subformula” $u:term)         => `(“ ($p → !$u) ”)
-  | `($_ $t:term         “$q:subformula”) => `(“ (!$t → $q) ”)
+  | `($_ “$p:foformula” “$q:foformula”) => `(“ ($p → $q) ”)
+  | `($_ “$p:foformula” $u:term)         => `(“ ($p → !$u) ”)
+  | `($_ $t:term         “$q:foformula”) => `(“ (!$t → $q) ”)
   | _                                     => throw ()
 
 @[app_unexpander LogicSymbol.iff]
 def unexpandIff : Unexpander
-  | `($_ “$p:subformula” “$q:subformula”) => `(“ ($p ↔ $q) ”)
-  | `($_ “$p:subformula” $u:term)         => `(“ ($p ↔ !$u) ”)
-  | `($_ $t:term         “$q:subformula”) => `(“ (!$t ↔ $q) ”)
+  | `($_ “$p:foformula” “$q:foformula”) => `(“ ($p ↔ $q) ”)
+  | `($_ “$p:foformula” $u:term)         => `(“ ($p ↔ !$u) ”)
+  | `($_ $t:term         “$q:foformula”) => `(“ (!$t ↔ $q) ”)
   | _                                     => throw ()
 
 @[app_unexpander LogicSymbol.ball]
 def unexpandBall : Unexpander
-  | `($_ “$p:subformula” “$q:subformula”) => `(“ (∀[$p] $q) ”)
-  | `($_ “$p:subformula” $u:term)         => `(“ (∀[$p] !$u) ”)
-  | `($_ $t:term         “$q:subformula”) => `(“ (∀[!$t] $q) ”)
+  | `($_ “$p:foformula” “$q:foformula”) => `(“ (∀[$p] $q) ”)
+  | `($_ “$p:foformula” $u:term)         => `(“ (∀[$p] !$u) ”)
+  | `($_ $t:term         “$q:foformula”) => `(“ (∀[!$t] $q) ”)
   | _                                     => throw ()
 
 @[app_unexpander LogicSymbol.bex]
 def unexpandBEx : Unexpander
-  | `($_ “$p:subformula” “$q:subformula”) => `(“ (∃[$p] $q) ”)
-  | `($_ “$p:subformula” $u:term)         => `(“ (∃[$p] !$u) ”)
-  | `($_ $t:term         “$q:subformula”) => `(“ (∃[!$t] $q) ”)
+  | `($_ “$p:foformula” “$q:foformula”) => `(“ (∃[$p] $q) ”)
+  | `($_ “$p:foformula” $u:term)         => `(“ (∃[$p] !$u) ”)
+  | `($_ $t:term         “$q:foformula”) => `(“ (∃[!$t] $q) ”)
   | _                                     => throw ()
 
 @[app_unexpander FunLike.coe]
 def unexpandRewToFum : Unexpander
-  | `($_ [→ ᵀ“$t:subterm”]                “$p:subformula”) => `(“ ($p:subformula)[$t ] ”)
-  | `($_ [→ #$x]                          “$p:subformula”) => `(“ ($p:subformula)[#$x] ”)
-  | `($_ [→ &$x]                          “$p:subformula”) => `(“ ($p:subformula)[&$x] ”)
-  | `($_ [→ $t ]                          “$p:subformula”) => `(“ ($p:subformula)[ᵀ!$t] ”)
-  | `($_ [→ ᵀ“$t:subterm”, ᵀ“$u:subterm”] “$p:subformula”) => `(“ ($p:subformula)[$t,  $u ] ”)
-  | `($_ [→ ᵀ“$t:subterm”, #$y          ] “$p:subformula”) => `(“ ($p:subformula)[$t,  #$y] ”)
-  | `($_ [→ ᵀ“$t:subterm”, &$y          ] “$p:subformula”) => `(“ ($p:subformula)[$t,  &$y] ”)
-  | `($_ [→ ᵀ“$t:subterm”, $u           ] “$p:subformula”) => `(“ ($p:subformula)[$t,  ᵀ!$u] ”)
-  | `($_ [→ #$x,           ᵀ“$u:subterm”] “$p:subformula”) => `(“ ($p:subformula)[#$x, $u ] ”)
-  | `($_ [→ #$x,           #$y          ] “$p:subformula”) => `(“ ($p:subformula)[#$x, #$y] ”)
-  | `($_ [→ #$x,           &$y          ] “$p:subformula”) => `(“ ($p:subformula)[#$x, &$y] ”)
-  | `($_ [→ #$x,           $u           ] “$p:subformula”) => `(“ ($p:subformula)[#$x, ᵀ!$u] ”)
-  | `($_ [→ &$x,           ᵀ“$u:subterm”] “$p:subformula”) => `(“ ($p:subformula)[&$x, $u ] ”)
-  | `($_ [→ &$x,           #$y          ] “$p:subformula”) => `(“ ($p:subformula)[&$x, #$y] ”)
-  | `($_ [→ &$x,           &$y          ] “$p:subformula”) => `(“ ($p:subformula)[&$x, &$y] ”)
-  | `($_ [→ &$x,           $u           ] “$p:subformula”) => `(“ ($p:subformula)[&$x, ᵀ!$u] ”)
-  | `($_ [→ $t,            ᵀ“$u:subterm”] “$p:subformula”) => `(“ ($p:subformula)[ᵀ!$t, $u ] ”)
-  | `($_ [→ $t,            #$y          ] “$p:subformula”) => `(“ ($p:subformula)[ᵀ!$t, #$y] ”)
-  | `($_ [→ $t,            &$y          ] “$p:subformula”) => `(“ ($p:subformula)[ᵀ!$t, &$y] ”)
-  | `($_ [→ $t,            $u           ] “$p:subformula”) => `(“ ($p:subformula)[ᵀ!$t, ᵀ!$u] ”)
+  | `($_ [→ ᵀ“$t:foterm”]                “$p:foformula”) => `(“ ($p:foformula)[$t ] ”)
+  | `($_ [→ #$x]                          “$p:foformula”) => `(“ ($p:foformula)[#$x] ”)
+  | `($_ [→ &$x]                          “$p:foformula”) => `(“ ($p:foformula)[&$x] ”)
+  | `($_ [→ $t ]                          “$p:foformula”) => `(“ ($p:foformula)[ᵀ!$t] ”)
+  | `($_ [→ ᵀ“$t:foterm”, ᵀ“$u:foterm”] “$p:foformula”) => `(“ ($p:foformula)[$t,  $u ] ”)
+  | `($_ [→ ᵀ“$t:foterm”, #$y          ] “$p:foformula”) => `(“ ($p:foformula)[$t,  #$y] ”)
+  | `($_ [→ ᵀ“$t:foterm”, &$y          ] “$p:foformula”) => `(“ ($p:foformula)[$t,  &$y] ”)
+  | `($_ [→ ᵀ“$t:foterm”, $u           ] “$p:foformula”) => `(“ ($p:foformula)[$t,  ᵀ!$u] ”)
+  | `($_ [→ #$x,           ᵀ“$u:foterm”] “$p:foformula”) => `(“ ($p:foformula)[#$x, $u ] ”)
+  | `($_ [→ #$x,           #$y          ] “$p:foformula”) => `(“ ($p:foformula)[#$x, #$y] ”)
+  | `($_ [→ #$x,           &$y          ] “$p:foformula”) => `(“ ($p:foformula)[#$x, &$y] ”)
+  | `($_ [→ #$x,           $u           ] “$p:foformula”) => `(“ ($p:foformula)[#$x, ᵀ!$u] ”)
+  | `($_ [→ &$x,           ᵀ“$u:foterm”] “$p:foformula”) => `(“ ($p:foformula)[&$x, $u ] ”)
+  | `($_ [→ &$x,           #$y          ] “$p:foformula”) => `(“ ($p:foformula)[&$x, #$y] ”)
+  | `($_ [→ &$x,           &$y          ] “$p:foformula”) => `(“ ($p:foformula)[&$x, &$y] ”)
+  | `($_ [→ &$x,           $u           ] “$p:foformula”) => `(“ ($p:foformula)[&$x, ᵀ!$u] ”)
+  | `($_ [→ $t,            ᵀ“$u:foterm”] “$p:foformula”) => `(“ ($p:foformula)[ᵀ!$t, $u ] ”)
+  | `($_ [→ $t,            #$y          ] “$p:foformula”) => `(“ ($p:foformula)[ᵀ!$t, #$y] ”)
+  | `($_ [→ $t,            &$y          ] “$p:foformula”) => `(“ ($p:foformula)[ᵀ!$t, &$y] ”)
+  | `($_ [→ $t,            $u           ] “$p:foformula”) => `(“ ($p:foformula)[ᵀ!$t, ᵀ!$u] ”)
   | _                                           => throw ()
 
 
 @[app_unexpander Matrix.conj]
 def unexpandMatrixConj : Unexpander
-  | `($_ fun $i:ident => “$p:subformula”) => `(“ (⋀ $i, $p) ”)
+  | `($_ fun $i:ident => “$p:foformula”) => `(“ (⋀ $i, $p) ”)
   | _                                     => throw ()
 
 @[app_unexpander FunLike.coe]
 def unexpandShift : Unexpander
-  | `($_ “$p:subformula”) => `(“ ⇑ $p ”)
+  | `($_ “$p:foformula”) => `(“ ⇑ $p ”)
   | _                     => throw ()
 
 @[app_unexpander SubFormula.rel]
 def unexpandRelArith : Unexpander
-  | `($_ lang(=) ![ᵀ“$t:subterm”, ᵀ“$u:subterm”]) => `(“ $t:subterm = $u  ”)
-  | `($_ lang(=) ![ᵀ“$t:subterm”, #$y:term     ]) => `(“ $t:subterm = #$y ”)
-  | `($_ lang(=) ![ᵀ“$t:subterm”, &$y:term     ]) => `(“ $t:subterm = &$y ”)
-  | `($_ lang(=) ![ᵀ“$t:subterm”, $u           ]) => `(“ $t:subterm = ᵀ!$u ”)
-  | `($_ lang(=) ![#$x:term,      ᵀ“$u:subterm”]) => `(“ #$x        = $u  ”)
+  | `($_ lang(=) ![ᵀ“$t:foterm”, ᵀ“$u:foterm”]) => `(“ $t:foterm = $u  ”)
+  | `($_ lang(=) ![ᵀ“$t:foterm”, #$y:term     ]) => `(“ $t:foterm = #$y ”)
+  | `($_ lang(=) ![ᵀ“$t:foterm”, &$y:term     ]) => `(“ $t:foterm = &$y ”)
+  | `($_ lang(=) ![ᵀ“$t:foterm”, $u           ]) => `(“ $t:foterm = ᵀ!$u ”)
+  | `($_ lang(=) ![#$x:term,      ᵀ“$u:foterm”]) => `(“ #$x        = $u  ”)
   | `($_ lang(=) ![#$x:term,      #$y:term     ]) => `(“ #$x        = #$y ”)
   | `($_ lang(=) ![#$x:term,      &$y:term     ]) => `(“ #$x        = &$y ”)
   | `($_ lang(=) ![#$x:term,      $u           ]) => `(“ #$x        = ᵀ!$u ”)
-  | `($_ lang(=) ![&$x:term,      ᵀ“$u:subterm”]) => `(“ &$x        = $u  ”)
+  | `($_ lang(=) ![&$x:term,      ᵀ“$u:foterm”]) => `(“ &$x        = $u  ”)
   | `($_ lang(=) ![&$x:term,      #$y:term     ]) => `(“ &$x        = #$y ”)
   | `($_ lang(=) ![&$x:term,      &$y:term     ]) => `(“ &$x        = &$y ”)
   | `($_ lang(=) ![&$x:term,      $u           ]) => `(“ &$x        = ᵀ!$u ”)
-  | `($_ lang(=) ![$t:term,       ᵀ“$u:subterm”]) => `(“ ᵀ!$t       = $u  ”)
+  | `($_ lang(=) ![$t:term,       ᵀ“$u:foterm”]) => `(“ ᵀ!$t       = $u  ”)
   | `($_ lang(=) ![$t:term,       #$y:term     ]) => `(“ ᵀ!$t       = #$y ”)
   | `($_ lang(=) ![$t:term,       &$y:term     ]) => `(“ ᵀ!$t       = &$y ”)
   | `($_ lang(=) ![$t:term,       $u           ]) => `(“ ᵀ!$t       = ᵀ!$u ”)
 
-  | `($_ lang(<) ![ᵀ“$t:subterm”, ᵀ“$u:subterm”]) => `(“ $t:subterm < $u  ”)
-  | `($_ lang(<) ![ᵀ“$t:subterm”, #$y:term     ]) => `(“ $t:subterm < #$y ”)
-  | `($_ lang(<) ![ᵀ“$t:subterm”, &$y:term     ]) => `(“ $t:subterm < &$y ”)
-  | `($_ lang(<) ![ᵀ“$t:subterm”, $u           ]) => `(“ $t:subterm < ᵀ!$u ”)
-  | `($_ lang(<) ![#$x:term,      ᵀ“$u:subterm”]) => `(“ #$x        < $u  ”)
+  | `($_ lang(<) ![ᵀ“$t:foterm”, ᵀ“$u:foterm”]) => `(“ $t:foterm < $u  ”)
+  | `($_ lang(<) ![ᵀ“$t:foterm”, #$y:term     ]) => `(“ $t:foterm < #$y ”)
+  | `($_ lang(<) ![ᵀ“$t:foterm”, &$y:term     ]) => `(“ $t:foterm < &$y ”)
+  | `($_ lang(<) ![ᵀ“$t:foterm”, $u           ]) => `(“ $t:foterm < ᵀ!$u ”)
+  | `($_ lang(<) ![#$x:term,      ᵀ“$u:foterm”]) => `(“ #$x        < $u  ”)
   | `($_ lang(<) ![#$x:term,      #$y:term     ]) => `(“ #$x        < #$y ”)
   | `($_ lang(<) ![#$x:term,      &$y:term     ]) => `(“ #$x        < &$y ”)
   | `($_ lang(<) ![#$x:term,      $u           ]) => `(“ #$x        < ᵀ!$u ”)
-  | `($_ lang(<) ![&$x:term,      ᵀ“$u:subterm”]) => `(“ &$x        < $u  ”)
+  | `($_ lang(<) ![&$x:term,      ᵀ“$u:foterm”]) => `(“ &$x        < $u  ”)
   | `($_ lang(<) ![&$x:term,      #$y:term     ]) => `(“ &$x        < #$y ”)
   | `($_ lang(<) ![&$x:term,      &$y:term     ]) => `(“ &$x        < &$y ”)
   | `($_ lang(<) ![&$x:term,      $u           ]) => `(“ &$x        < ᵀ!$u ”)
-  | `($_ lang(<) ![$t:term,       ᵀ“$u:subterm”]) => `(“ ᵀ!$t       < $u  ”)
+  | `($_ lang(<) ![$t:term,       ᵀ“$u:foterm”]) => `(“ ᵀ!$t       < $u  ”)
   | `($_ lang(<) ![$t:term,       #$y:term     ]) => `(“ ᵀ!$t       < #$y ”)
   | `($_ lang(<) ![$t:term,       &$y:term     ]) => `(“ ᵀ!$t       < &$y ”)
   | `($_ lang(<) ![$t:term,       $u           ]) => `(“ ᵀ!$t       < ᵀ!$u ”)
@@ -223,36 +223,36 @@ def unexpandRelArith : Unexpander
 
 @[app_unexpander SubFormula.nrel]
 def unexpandNRelArith : Unexpander
-  | `($_ lang(=) ![ᵀ“$t:subterm”, ᵀ“$u:subterm”]) => `(“ $t:subterm ≠ $u  ”)
-  | `($_ lang(=) ![ᵀ“$t:subterm”, #$y:term     ]) => `(“ $t:subterm ≠ #$y ”)
-  | `($_ lang(=) ![ᵀ“$t:subterm”, &$y:term     ]) => `(“ $t:subterm ≠ &$y ”)
-  | `($_ lang(=) ![ᵀ“$t:subterm”, $u           ]) => `(“ $t:subterm ≠ ᵀ!$u ”)
-  | `($_ lang(=) ![#$x:term,      ᵀ“$u:subterm”]) => `(“ #$x        ≠ $u  ”)
+  | `($_ lang(=) ![ᵀ“$t:foterm”, ᵀ“$u:foterm”]) => `(“ $t:foterm ≠ $u  ”)
+  | `($_ lang(=) ![ᵀ“$t:foterm”, #$y:term     ]) => `(“ $t:foterm ≠ #$y ”)
+  | `($_ lang(=) ![ᵀ“$t:foterm”, &$y:term     ]) => `(“ $t:foterm ≠ &$y ”)
+  | `($_ lang(=) ![ᵀ“$t:foterm”, $u           ]) => `(“ $t:foterm ≠ ᵀ!$u ”)
+  | `($_ lang(=) ![#$x:term,      ᵀ“$u:foterm”]) => `(“ #$x        ≠ $u  ”)
   | `($_ lang(=) ![#$x:term,      #$y:term     ]) => `(“ #$x        ≠ #$y ”)
   | `($_ lang(=) ![#$x:term,      &$y:term     ]) => `(“ #$x        ≠ &$y ”)
   | `($_ lang(=) ![#$x:term,      $u           ]) => `(“ #$x        ≠ ᵀ!$u ”)
-  | `($_ lang(=) ![&$x:term,      ᵀ“$u:subterm”]) => `(“ &$x        ≠ $u  ”)
+  | `($_ lang(=) ![&$x:term,      ᵀ“$u:foterm”]) => `(“ &$x        ≠ $u  ”)
   | `($_ lang(=) ![&$x:term,      #$y:term     ]) => `(“ &$x        ≠ #$y ”)
   | `($_ lang(=) ![&$x:term,      &$y:term     ]) => `(“ &$x        ≠ &$y ”)
   | `($_ lang(=) ![&$x:term,      $u           ]) => `(“ &$x        ≠ ᵀ!$u ”)
-  | `($_ lang(=) ![$t:term,       ᵀ“$u:subterm”]) => `(“ ᵀ!$t       ≠ $u  ”)
+  | `($_ lang(=) ![$t:term,       ᵀ“$u:foterm”]) => `(“ ᵀ!$t       ≠ $u  ”)
   | `($_ lang(=) ![$t:term,       #$y:term     ]) => `(“ ᵀ!$t       ≠ #$y ”)
   | `($_ lang(=) ![$t:term,       &$y:term     ]) => `(“ ᵀ!$t       ≠ &$y ”)
   | `($_ lang(=) ![$t:term,       $u           ]) => `(“ ᵀ!$t       ≠ ᵀ!$u ”)
 
-  | `($_ lang(<) ![ᵀ“$t:subterm”, ᵀ“$u:subterm”]) => `(“ $t:subterm ≮ $u  ”)
-  | `($_ lang(<) ![ᵀ“$t:subterm”, #$y:term     ]) => `(“ $t:subterm ≮ #$y ”)
-  | `($_ lang(<) ![ᵀ“$t:subterm”, &$y:term     ]) => `(“ $t:subterm ≮ &$y ”)
-  | `($_ lang(<) ![ᵀ“$t:subterm”, $u           ]) => `(“ $t:subterm ≮ ᵀ!$u ”)
-  | `($_ lang(<) ![#$x:term,      ᵀ“$u:subterm”]) => `(“ #$x        ≮ $u  ”)
+  | `($_ lang(<) ![ᵀ“$t:foterm”, ᵀ“$u:foterm”]) => `(“ $t:foterm ≮ $u  ”)
+  | `($_ lang(<) ![ᵀ“$t:foterm”, #$y:term     ]) => `(“ $t:foterm ≮ #$y ”)
+  | `($_ lang(<) ![ᵀ“$t:foterm”, &$y:term     ]) => `(“ $t:foterm ≮ &$y ”)
+  | `($_ lang(<) ![ᵀ“$t:foterm”, $u           ]) => `(“ $t:foterm ≮ ᵀ!$u ”)
+  | `($_ lang(<) ![#$x:term,      ᵀ“$u:foterm”]) => `(“ #$x        ≮ $u  ”)
   | `($_ lang(<) ![#$x:term,      #$y:term     ]) => `(“ #$x        ≮ #$y ”)
   | `($_ lang(<) ![#$x:term,      &$y:term     ]) => `(“ #$x        ≮ &$y ”)
   | `($_ lang(<) ![#$x:term,      $u           ]) => `(“ #$x        ≮ ᵀ!$u ”)
-  | `($_ lang(<) ![&$x:term,      ᵀ“$u:subterm”]) => `(“ &$x        ≮ $u  ”)
+  | `($_ lang(<) ![&$x:term,      ᵀ“$u:foterm”]) => `(“ &$x        ≮ $u  ”)
   | `($_ lang(<) ![&$x:term,      #$y:term     ]) => `(“ &$x        ≮ #$y ”)
   | `($_ lang(<) ![&$x:term,      &$y:term     ]) => `(“ &$x        ≮ &$y ”)
   | `($_ lang(<) ![&$x:term,      $u           ]) => `(“ &$x        ≮ ᵀ!$u ”)
-  | `($_ lang(<) ![$t:term,       ᵀ“$u:subterm”]) => `(“ ᵀ!$t       ≮ $u  ”)
+  | `($_ lang(<) ![$t:term,       ᵀ“$u:foterm”]) => `(“ ᵀ!$t       ≮ $u  ”)
   | `($_ lang(<) ![$t:term,       #$y:term     ]) => `(“ ᵀ!$t       ≮ #$y ”)
   | `($_ lang(<) ![$t:term,       &$y:term     ]) => `(“ ᵀ!$t       ≮ &$y ”)
   | `($_ lang(<) ![$t:term,       $u           ]) => `(“ ᵀ!$t       ≮ ᵀ!$u ”)
