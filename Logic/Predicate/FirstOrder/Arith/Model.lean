@@ -77,7 +77,7 @@ lemma modelsPeano : ℕ ⊧* Axiom.Peano oRing :=
 
 end standardModel
 
-theorem Peano.IsConsistent : Logic.Proof.Consistent (Axiom.Peano oRing) :=
+theorem Peano.IsConsistent : Logic.System.Consistent (Axiom.Peano oRing) :=
   Logic.Sound.consistent_of_model standardModel.modelsPeano
 
 variable (L : Language.{u}) [L.ORing]
