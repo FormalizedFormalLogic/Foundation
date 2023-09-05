@@ -10,6 +10,7 @@ import Mathlib.Data.Finset.Sort
 import Mathlib.Data.W.Basic
 import Mathlib.Order.Filter.Ultrafilter
 import Mathlib.Logic.Encodable.Basic
+import Mathlib.Computability.Primrec
 
 namespace Nat
 variable {α : ℕ → Sort u}
