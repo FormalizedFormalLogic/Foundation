@@ -191,6 +191,12 @@ def vecToNat : {n : ℕ} → (Fin n → ℕ) → ℕ
 
 end Matrix
 
+namespace Option
+
+lemma pure_eq_some (a : α) : pure a = some a := rfl
+
+end Option
+
 def Nat.unvector : {n : ℕ} → ℕ → Fin n → ℕ
   | 0,     _ => Matrix.vecEmpty
   | _ + 1, e => e.unpair.1 :> Nat.unvector e.unpair.2
@@ -214,6 +220,13 @@ variable {n}
 
 lemma one_le_of_bodd {n : ℕ} (h : n.bodd = true) : 1 ≤ n :=
 by induction n <;> simp[←Nat.add_one] at h ⊢
+
+lemma pair_le_pair_of_le {a₁ a₂ b₁ b₂ : ℕ} (ha : a₁ ≤ a₂) (hb : b₁ ≤ b₂) : a₁.pair b₁ ≤ a₂.pair b₂ := by
+  rcases lt_or_eq_of_le ha with (ha | rfl) <;> rcases lt_or_eq_of_le hb with (hb | rfl)
+  { exact le_of_lt (lt_trans (Nat.pair_lt_pair_left b₁ ha) (Nat.pair_lt_pair_right a₂ hb)) }
+  { exact le_of_lt (Nat.pair_lt_pair_left b₁ ha) }
+  { exact le_of_lt (Nat.pair_lt_pair_right a₁ hb) }
+  { rfl }
 
 end Nat
 
@@ -356,6 +369,45 @@ def sup : List α → α
 lemma le_sup {a} {l : List α} : a ∈ l → a ≤ l.sup :=
   by induction' l with a l ih <;> simp[*]; rintro (rfl | h); { simp }; { exact le_sup_of_le_right $ ih h }
 
+lemma getI_map_range [Inhabited α] (f : ℕ → α) (h : i < n) : ((List.range n).map f).getI i = f i := by
+  simpa using List.getI_eq_get ((List.range n).map f) (n := i) (by simpa using h)
+
+variable {m : Type _ → Type _} {α : Type _} {β : Type _} [Monad m]
+
+lemma mapM'_eq_none_iff {f : α → Option β} {l : List α} : l.mapM' f = none ↔ ∃ a ∈ l, f a = none := by
+  induction' l with a l ih <;> simp[Option.bind_eq_bind]
+  { constructor
+    { intros H
+      rcases hb : f a with (_ | b); { simp }
+      rcases hbs : mapM' f l with (_ | bs)
+      { exact Or.inr (ih.mp hbs) }
+      { have : False := by simpa[Option.pure_eq_some] using (H (b :: bs) b hb) bs hbs
+        contradiction } }
+    { rintro (h | h)
+      { simp[h] }
+      { have := ih.mpr h; simp[this] } } }
+
+lemma length_mapM' {f : α → Option β} {as : List α} : as.mapM' f = some bs → bs.length = as.length := by
+  induction' as with a as ih generalizing bs <;> simp[Option.pure_eq_some, Option.bind_eq_bind]
+  { rintro rfl; simp }
+  { rintro b _ bs hbs rfl; simpa using ih hbs }
+
+lemma mapM'_mem_inversion {f : α → Option β} {as : List α} (h : as.mapM' f = some bs) (hb : b ∈ bs) :
+    ∃ a, f a = some b := by
+  induction' as with a as ih generalizing bs <;> simp[Option.pure_eq_some, Option.bind_eq_bind] at h
+  { rcases h with rfl; simp at hb }
+  { rcases h with ⟨b', hb', bs', hbs', rfl⟩
+    have : b = b' ∨ b ∈ bs' := by simpa using hb
+    rcases this with (rfl | hb)
+    { exact ⟨a, hb'⟩ }
+    { exact ih hbs' hb } }
+
+lemma mapM'_eq_mapM'_of_eq {f g : α → m β} (l : List α) (hf : ∀ a ∈ l, f a = g a) : l.mapM' f = l.mapM' g := by
+  induction' l with a as ih <;> simp
+  { have : as.mapM' f = as.mapM' g := ih (fun a ha => hf a (by simp[ha]))
+    have : f a = g a := hf a (by simp)
+    simp[*] }
+
 end List
 
 namespace Finset
@@ -385,3 +437,18 @@ lemma erase_union [DecidableEq α] {a : α} {s t : Finset α} :
   (s ∪ t).erase a = (s.erase a) ∪ (t.erase a) := by ext; simp[and_or_left]
 
 end Finset
+
+namespace Denumerable
+
+lemma lt_of_mem_list : ∀ n i, i ∈ ofNat (List ℕ) n → i < n
+  | 0     => by simp
+  | n + 1 =>
+    have : n.unpair.2 < n + 1 := Nat.lt_succ_of_le (Nat.unpair_right_le n)
+    by simp
+       exact ⟨Nat.lt_succ_of_le (Nat.unpair_left_le n),
+         by { intro i hi
+              have : i < n.unpair.2 := lt_of_mem_list n.unpair.2 i hi
+              exact lt_trans this (Nat.lt_succ_of_le $ Nat.unpair_right_le n) }⟩
+    
+
+end Denumerable
