@@ -42,6 +42,9 @@ open Fin
 section
 variable {n : ℕ} {α : Type u} 
 
+lemma ext' {v w : Fin n → α} : (∀ i, v i = w i) ↔ v = w :=
+  ⟨by { intro h; ext i; exact h i }, by { rintro rfl; simp }⟩
+
 infixr:70 " :> " => vecCons
 
 @[simp] lemma vecCons_zero :
@@ -184,6 +187,40 @@ def toOptionVec : {n : ℕ} → (Fin n → Option α) → Option (Fin n → α)
 @[simp] lemma toOptionVec_some (v : Fin n → α) :
     toOptionVec (fun i => some (v i)) = some v :=
   by induction n <;> simp[*, toOptionVec, Function.comp]; exact funext (Fin.cases (by simp) (by simp))
+
+@[simp] lemma toOptionVec_zero (v : Fin 0 → Option α) : toOptionVec v = some ![] := rfl
+
+@[simp] lemma toOptionVec_eq_none_iff {v : Fin n → Option α} :
+    toOptionVec v = none ↔ ∃ i, v i = none := by
+  induction' n with n ih
+  · simp
+  · simp[toOptionVec]
+    rcases hz : v 0 with (_ | a) <;> simp
+    { exact ⟨0, hz⟩ }
+    { rcases hs : toOptionVec (v ∘ Fin.succ) with (_ | w) <;> simp
+      { rcases ih.mp hs with ⟨i, hi⟩
+        exact ⟨i.succ, hi⟩ }
+      { intro x; cases x using Fin.cases
+        · simp[hz]
+        · have : toOptionVec (v ∘ Fin.succ) ≠ none ↔ ∀ i : Fin n, v i.succ ≠ none :=
+            by simpa using not_iff_not.mpr (@ih (v ∘ Fin.succ))
+          exact this.mp (by simp[hs]) _ } }
+
+@[simp] lemma toOptionVec_eq_some_iff {v : Fin n → Option α} :
+    toOptionVec v = some w ↔ ∀ i, v i = some (w i) := by
+  induction' n with n ih
+  · simp
+  · simp[toOptionVec]
+    rcases hz : v 0 with (_ | a) <;> simp
+    { exact ⟨0, by simp[hz]⟩ }
+    { rcases hs : toOptionVec (v ∘ Fin.succ) with (_ | z) <;> simp
+      { have : ∃ i : Fin n, v i.succ = none := by simpa using hs
+        rcases this with ⟨i, hi⟩
+        exact ⟨i.succ, by simp[hi]⟩ }
+      { have : ∀ i, v i.succ = some (z i) := ih.mp hs
+        have : v = some a :> (fun i => some (z i)) :=
+          by funext i; cases i using Fin.cases <;> simp[hz, this]
+        simp[this, ←comp_vecCons', Matrix.ext'] } }
 
 def vecToNat : {n : ℕ} → (Fin n → ℕ) → ℕ
   | 0,     _ => 0
@@ -356,7 +393,7 @@ lemma toFinset_map {f : α → β} (l : List α) : (l.map f).toFinset = Finset.i
 lemma toFinset_mono {l l' : List α} (h : l ⊆ l') : l.toFinset ⊆ l'.toFinset := by
   intro a; simp; intro ha; exact h ha
 
-variable {α : Type u} [inst : SemilatticeSup α] [inst : OrderBot α]
+variable {α : Type u} [SemilatticeSup α] [OrderBot α]
 
 def sup : List α → α
   | [] => ⊥
@@ -371,6 +408,22 @@ lemma le_sup {a} {l : List α} : a ∈ l → a ≤ l.sup :=
 
 lemma getI_map_range [Inhabited α] (f : ℕ → α) (h : i < n) : ((List.range n).map f).getI i = f i := by
   simpa using List.getI_eq_get ((List.range n).map f) (n := i) (by simpa using h)
+
+lemma sup_ofFn (f : Fin n → α) : (ofFn f).sup = Finset.sup Finset.univ f := by
+  induction' n with n ih <;> simp
+  { simp[ih]
+    have : (Finset.univ : Finset (Fin (n + 1))) = insert 0 ((Finset.univ : Finset (Fin n)).image Fin.succ)
+    { ext i; simp }
+    rw[this, Finset.sup_insert]; simp
+    have : Finset.sup Finset.univ (fun i => f (Fin.succ i)) = Finset.sup {0}ᶜ f
+    { simpa[Function.comp] using Eq.symm <| Finset.sup_image (Finset.univ : Finset (Fin n)) Fin.succ f }
+    rw[this] }
+
+lemma ofFn_get_eq_map {n} (g : α → β) (as : List α) {h} : ofFn (fun i => g (as.get (i.cast h)) : Fin n → β) = as.map g := by
+  ext i b; simp
+  by_cases hi : i < n
+  { simp[hi, List.ofFnNthVal, List.get?_eq_get (h ▸ hi)] }
+  { simp[hi, List.ofFnNthVal, List.get?_len_le (le_of_not_lt $ h ▸ hi)] }
 
 variable {m : Type _ → Type _} {α : Type _} {β : Type _} [Monad m]
 
@@ -408,7 +461,22 @@ lemma mapM'_eq_mapM'_of_eq {f g : α → m β} (l : List α) (hf : ∀ a ∈ l, 
     have : f a = g a := hf a (by simp)
     simp[*] }
 
+lemma mapM'_option_map {f : α → Option β} {g : β → γ} (as : List α) :
+    as.mapM' (fun a => (f a).map g) = (as.mapM' f).map (fun bs => bs.map g) := by
+  induction' as with a as ih generalizing f g <;> simp[Option.pure_eq_some, Option.bind_eq_bind, Function.comp]
+  { simp[ih]
+    rcases ha : f a with (_ | b) <;> simp
+    rcases has : mapM' f as with (_ | bs) <;> simp }
+
 end List
+
+namespace Vector
+
+variable {α : Type _}
+
+lemma get_mk_eq_get {n} (l : List α) (h : l.length = n) (i : Fin n) : get (⟨l, h⟩ : Vector α n) i = l.get (i.cast h.symm) := rfl
+
+end Vector
 
 namespace Finset
 
@@ -435,6 +503,12 @@ lemma mem_imageOfFinset_iff [DecidableEq β] {s : Finset α} {f : (a : α) → a
 
 lemma erase_union [DecidableEq α] {a : α} {s t : Finset α} :
   (s ∪ t).erase a = (s.erase a) ∪ (t.erase a) := by ext; simp[and_or_left]
+
+@[simp] lemma equiv_univ {α α'} [Fintype α] [Fintype α'] [DecidableEq α'] (e : α ≃ α') :
+    (univ : Finset α).image e = univ := by ext x; simp; exact ⟨e.symm x, by simp⟩
+
+@[simp] lemma sup_univ_equiv {α α'} [DecidableEq α] [Fintype α] [Fintype α'] [SemilatticeSup β] [OrderBot β] (f : α → β) (e : α' ≃ α) :
+    sup univ (fun i => f (e i)) = sup univ f := by simpa[Function.comp] using Eq.symm <| Finset.sup_image univ e f 
 
 end Finset
 
