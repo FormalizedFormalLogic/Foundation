@@ -1,5 +1,7 @@
 import Logic.Vorspiel.Vorspiel
 
+attribute [-instance] WType.instEncodableWType
+
 namespace Nat
 
 def predO : ℕ → Option ℕ
@@ -351,19 +353,21 @@ end Encodable
 
 namespace WType
 
-attribute [-instance] WType.instEncodableWType
-
 open Encodable Primrec Primcodable UniformlyPrimcodable
 variable {α : Type _} {β : α → Type _}
-  [(a : α) → Fintype (β a)] [(a : α) → DecidableEq (β a)] [(a : α) → Primcodable (β a)] [Primcodable α] [PrimrecCard β]
+  [Primcodable α] [(a : α) → Fintype (β a)] [(a : α) → DecidableEq (β a)] [(a : α) → Primcodable (β a)] [PrimrecCard β]
 
 def elimOpt (γ : Type _) (fγ : (Σ a : α, β a → γ) → Option γ) : WType β → Option γ
   | ⟨a, f⟩ => (toFinArrowOpt (fun b => elimOpt γ fγ (f b))).bind fun g => fγ ⟨a, g⟩
 
-@[reducible] def SubWType {α : Type _} (β : α → Type _)
+def SubWType {α : Type _} (β : α → Type _)
   [(a : α) → Fintype (β a)] [(a : α) → Primcodable (β a)] (n : ℕ) := { t : WType β // t.depth ≤ n }
 
 namespace SubWType
+
+def mk (a : α) (f : β a → SubWType β s) : SubWType β (s + 1) := ⟨⟨a, fun i => (f i).val⟩, by simp[depth]; intro b; exact (f b).property ⟩
+
+def ofWType (w : WType β) {n} (h : w.depth ≤ n) : SubWType β n := ⟨w, h⟩
 
 @[simp] lemma depth_le (t : SubWType β n) : t.val.depth ≤ n := t.property
 
@@ -423,11 +427,17 @@ def elimDecode (f : α → List γ → γ) : ℕ → ℕ → Option γ :=
 
 variable {β}
 
+abbrev decode' (s e : ℕ) : Option (SubWType β s) := decode e
+
 lemma elim'_eq_elimDecode [Inhabited γ] (f : (a : α) × (β a → γ) → γ) :
     (decode e).map (elim' γ f s) = elimDecode β (fun a l => f ⟨a, fintypeArrowEquivFinArrow.symm (fun i => l.getI i)⟩) s e := by
   simp[elimDecode]
   rcases (decode e) with (_ | w) <;> simp
   { congr; funext ⟨a, j⟩; simp; congr; funext b; simp }
+
+lemma elim'_eq_elimDecode' [Inhabited γ] (f : (a : α) × (β a → γ) → γ) :
+    (decode' s e).map (elim' γ f s) = elimDecode β (fun a l => f ⟨a, fintypeArrowEquivFinArrow.symm (fun i => l.getI i)⟩) s e :=
+  elim'_eq_elimDecode f
 
 variable (β)
 
@@ -448,8 +458,7 @@ lemma elimDecode_eq_induction (f : α → List γ → γ) (s e) :
       { simp[Vector.get_mk_eq_get, List.ofFn_get_eq_map]; congr
         rw[Encodable.fintypeArrowEquivFinArrow_fintypeEquivFin (fun i =>
           WType.elim γ (fun x => f x.fst (List.ofFn (fintypeArrowEquivFinArrow x.snd))) (w.get (i.cast hlw.symm)).val)];
-        rw[List.ofFn_get_eq_map (fun z => WType.elim γ (fun x => f x.fst (List.ofFn (fintypeArrowEquivFinArrow x.snd))) z.val) w] } }
-
+        rw[List.ofFn_get_eq_map (fun z => WType.elim γ (fun x => f x.fst (List.ofFn (fintypeArrowEquivFinArrow x.snd))) z.val) w];rfl } }
 
 @[reducible]
 private def elimDecodeG (f : α → List γ → γ) : ℕ × ℕ → List (Option γ) → Option γ := fun (s, e) ih =>
@@ -503,10 +512,14 @@ end elimDecode
 
 lemma encode_eq_elim' : ∀ w : SubWType β s, encode w = elim' ℕ encode s w := by
   { induction' s with s ih
-    · simp; intro w h; simpa using lt_of_lt_of_le (depth_pos w) h
+    · simp; intro ⟨w, h⟩; simpa using lt_of_lt_of_le (depth_pos w) h
     · rintro ⟨⟨a, f⟩, hw⟩; simp[elim', elim, Primcodable.SubWType, primcodable_succ, Primcodable.ofEquiv_toEncodable]
       rw[Encodable.encode_ofEquiv equiv_succ]
       simp[equiv_succ, Encodable.encode_sigma_val]
+      suffices :
+        encode (⟨a, fun b => ofWType (f b) (by simp[depth, Nat.succ_eq_add_one] at hw; exact hw b)⟩ : (a : α) × (β a → SubWType β s)) =
+        encode (⟨a, fun b => elim ℕ encode (f b)⟩ : (a : α) × (β a → ℕ))
+      { exact this }
       rw[Encodable.encode_sigma_val, Encodable.encode_sigma_val, encode_fintypeArrow, encode_finArrow, encode_list]
       simp[Function.comp]; rw[←encode_finArrow, encode_fintypeArrow (β a)]; simp
       congr; funext i; simp; rw[ih]; rfl }
@@ -526,7 +539,7 @@ lemma depth_eq_elimDecode (s e : ℕ) :
     (decode e : Option (SubWType β s)).map (fun w => w.val.depth) = elimDecode β (fun a l => l.sup + 1) s e := by
   have : ∀ w : SubWType β s, depth w.val = elim' ℕ (fun p => Finset.sup Finset.univ p.snd + 1) s w
   { induction' s with s ih
-    · simp; intro w h; simpa using lt_of_lt_of_le (depth_pos w) h
+    · simp; intro ⟨w, h⟩; simpa using lt_of_lt_of_le (depth_pos w) h
     · rintro ⟨⟨a, f⟩, hw⟩;
       simp[depth, ih, elim', elim]
       have : ∀ (b : β a), depth (f b) = elim ℕ (fun p => Finset.sup Finset.univ p.snd + 1) (f b) :=
@@ -543,7 +556,7 @@ lemma depth_decode_primrec : Primrec₂ (fun s e => (decode e : Option (SubWType
 
 def ofW : WType β → (s : ℕ) × SubWType β s := fun w => ⟨w.depth, ⟨w, by rfl⟩⟩
 
-def toW : (s : ℕ) × SubWType β s → WType β := fun ⟨_, w⟩ => w
+def toW : (s : ℕ) × SubWType β s → WType β := fun ⟨_, w⟩ => w.val
 
 end SubWType
 
@@ -575,4 +588,43 @@ instance _root_.Primcodable.wtype : Primcodable (WType β) :=
   { encodable with
     prim := Primrec.nat_iff.mp <| primrec_encode_decode.of_eq (fun e => (encode_decode_eq e).symm) }
 
+lemma encode_eq (w : WType β) : encode w = encode (SubWType.ofW w) := rfl
+
+lemma decode_eq (e : ℕ) : decode e = (decode e : Option ((s : ℕ) × SubWType β s)).map SubWType.toW := rfl
+
+def elimL (f : α → List γ → γ) : WType β → γ :=
+ fun w => elim γ (fun ⟨a, v⟩ => f a (List.ofFn $ fintypeArrowEquivFinArrow v)) w
+
+lemma elim_eq_elimL [Inhabited γ] (f : (a : α) × (β a → γ) → γ) :
+    elim γ f w = elimL (fun a l => f ⟨a, fintypeArrowEquivFinArrow.symm (fun i => l.getI i)⟩) w := by
+  simp[elimL]; congr; funext ⟨a, j⟩; simp; congr; funext b; simp
+
+lemma decode_elimL_eq (f : α → List γ → γ) :
+    (decode e : Option (WType β)).map (elimL f) = (SubWType.elimDecode β f e.unpair.1 e.unpair.2) := by
+  simp[elimL, decode_eq, Function.comp, SubWType.elimDecode, SubWType.elim']
+  rcases (decode e.unpair.2) with (_ | ⟨_, _⟩) <;> simp[SubWType.toW]
+
 end WType
+
+namespace Primrec
+
+lemma decode_iff {α : Type _} {σ : Type _} [Primcodable α] [Primcodable σ] {f : α → σ} :
+    Primrec (fun n => (Encodable.decode n).map f) ↔ Primrec f :=
+  ⟨fun h => by simp[Primrec]; exact Primrec.nat_iff.mp (Primrec.encode.comp h),
+   fun h => option_map Primrec.decode (h.comp₂ Primrec₂.right)⟩
+
+open Encodable WType
+variable {α : Type _} {β : α → Type _} {γ : Type _}
+  [Primcodable α] [(a : α) → Fintype (β a)] [(a : α) → DecidableEq (β a)] [(a : α) → Primcodable (β a)] [PrimrecCard β] [Primcodable γ]
+
+lemma w_depth : Primrec (fun w => w.depth : WType β → ℕ) := by
+  have : Primrec (fun n => (encodeDecode (WType β) n).map $ fun e => e.unpair.1) :=
+    option_map Primrec.encodeDecode (fst.comp₂ $ Primrec.unpair.comp₂ Primrec₂.right)
+  exact decode_iff.mp (this.of_eq $ fun n => by
+    simp[encodeDecode_eq_encode_map_decode]
+    rcases decode n <;> simp[WType.encode_eq, WType.SubWType.ofW])
+
+lemma w_elimL {f : α → List γ → γ} (hf : Primrec₂ f) : Primrec (elimL f : WType β → γ) :=
+  decode_iff.mp (by simp[decode_elimL_eq]; apply SubWType.primrec_elimDecode β hf)
+
+end Primrec
