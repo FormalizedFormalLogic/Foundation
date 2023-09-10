@@ -419,7 +419,7 @@ lemma decode_succ :
 
 section elimDecode
 
-variable {γ : Type _}
+variable {σ : Type _} {γ : Type _}
 variable (β)
 
 def elimDecode (f : α → List γ → γ) : ℕ → ℕ → Option γ :=
@@ -461,22 +461,22 @@ lemma elimDecode_eq_induction (f : α → List γ → γ) (s e) :
         rw[List.ofFn_get_eq_map (fun z => WType.elim γ (fun x => f x.fst (List.ofFn (fintypeArrowEquivFinArrow x.snd))) z.val) w];rfl } }
 
 @[reducible]
-private def elimDecodeG (f : α → List γ → γ) : ℕ × ℕ → List (Option γ) → Option γ := fun (s, e) ih =>
+private def elimDecodeG (f : σ → α → List γ → γ) : σ → ℕ × ℕ → List (Option γ) → Option γ := fun x (s, e) ih =>
   Nat.casesOn s none
     (fun s => (decode e.unpair.1 : Option α).bind
       $ fun a => (((Denumerable.ofNat (List ℕ) e.unpair.2).mapM' (fun c => ih.getI (s.pair c))).bind
         $ fun l => if l.length = Fintype.card (β a) then some l else none).map
-          $ fun v => f a v)
+          $ fun v => f x a v)
 
-private lemma elimDecodeG_eq_elimDecode (f : α → List γ → γ) (s e) :
-    elimDecodeG β f (s, e) ((List.range (s.pair e)).map (fun i => elimDecode β f i.unpair.1 i.unpair.2)) = elimDecode β f s e := by
-  simp[elimDecode_eq_induction β f s e, elimDecodeG]
+private lemma elimDecodeG_eq_elimDecode (f : σ → α → List γ → γ) (x s e) :
+    elimDecodeG β f x (s, e) ((List.range (s.pair e)).map (fun i => elimDecode β (f x) i.unpair.1 i.unpair.2)) = elimDecode β (f x) s e := by
+  simp[elimDecode_eq_induction β (f x) s e, elimDecodeG]
   rcases s with (_ | s) <;> simp; congr
   funext a
   have : 
-    mapM' (fun c => ((List.range ((s + 1).pair e)).map $ fun i => elimDecode β f i.unpair.fst i.unpair.snd).getI (s.pair c))
+    mapM' (fun c => ((List.range ((s + 1).pair e)).map $ fun i => elimDecode β (f x) i.unpair.fst i.unpair.snd).getI (s.pair c))
       (Denumerable.ofNat (List ℕ) e.unpair.2) =
-    mapM' (elimDecode β f s) (Denumerable.ofNat (List ℕ) e.unpair.2) :=
+    mapM' (elimDecode β (f x) s) (Denumerable.ofNat (List ℕ) e.unpair.2) :=
   List.mapM'_eq_mapM'_of_eq _ (by
   { intro c hc
     have : s.pair c < (s + 1).pair e := by
@@ -485,28 +485,38 @@ private lemma elimDecodeG_eq_elimDecode (f : α → List γ → γ) (s e) :
     simp[List.getI_map_range _ this] })
   rw[this]
 
-variable [Primcodable γ]
+variable [Primcodable σ] [Primcodable γ]
 
-private lemma elimDecodeG_primrec {f : α → List γ → γ} (hf : Primrec₂ f) : Primrec₂ (elimDecodeG β f) :=
-  by apply Primrec.nat_casesOn (fst.comp fst) (const none)
-      (by apply option_bind (Primrec.decode.comp $ fst.comp $ Primrec.unpair.comp $ snd.comp $ fst.comp fst)
+private lemma elimDecodeG_primrec {f : σ → α × List γ → γ} (hf : Primrec₂ f) :
+    Primrec₂ (fun p ih => elimDecodeG β (fun x a ih => f x (a, ih)) p.1 p.2 ih : σ × (ℕ × ℕ) → List (Option γ) → Option γ) :=
+  by apply Primrec.nat_casesOn (fst.comp $ snd.comp fst) (const none)
+      (by apply option_bind (Primrec.decode.comp $ fst.comp $ Primrec.unpair.comp $ snd.comp $ snd.comp $ fst.comp fst)
             (by apply option_map
                   (option_bind
                     (by apply option_list_mapM'
-                          (by apply (Primrec.ofNat _).comp $
-                                snd.comp $ Primrec.unpair.comp $ snd.comp $ fst.comp $ fst.comp $ fst)
-                          (by apply Primrec.list_getI.comp
-                                (snd.comp $ fst.comp $ fst.comp $ fst)
+                          (by apply (Primrec.ofNat _).comp $ snd.comp $ Primrec.unpair.comp $ snd.comp $ snd.comp $ fst.comp $ fst.comp $ fst)
+                          (by apply Primrec.list_getI.comp (snd.comp $ fst.comp $ fst.comp fst)
                                 (Primrec₂.natPair.comp (snd.comp $ fst.comp fst) snd)))
                     (by apply Primrec.ite
                           (Primrec.eq.comp (list_length.comp snd) (PrimrecCard.card_prim.comp $ snd.comp fst))
                           (option_some.comp snd)
                           (const none)))
-                  (hf.comp₂ (snd.comp₂ Primrec₂.left) Primrec₂.right)))
+                  (by apply hf.comp (fst.comp $ fst.comp $ fst.comp $ fst.comp fst) (Primrec.pair (snd.comp fst) snd))))
 
-lemma primrec_elimDecode {f : α → List γ → γ} (hf : Primrec₂ f) : Primrec₂ (elimDecode β f) := by
-  have : Primrec₂ (fun p t => some (elimDecodeG β f p t)) := option_some.comp (elimDecodeG_primrec β hf)
-  exact nat_strong_rec'2' _ this (by simp[elimDecodeG_eq_elimDecode β f])
+lemma primrec_elimDecode_param {f : σ → α × List γ → γ} (hf : Primrec₂ f) :
+    Primrec₂ (fun x p => elimDecode β (fun a ih => f x (a, ih)) p.1 p.2 : σ → ℕ × ℕ → Option γ) := by
+  have : Primrec₂ (fun p ih => some $ elimDecodeG β (fun x a ih => f x (a, ih)) p.1 p.2 ih : σ × (ℕ × ℕ) → List (Option γ) → Option (Option γ)) :=
+    option_some.comp (elimDecodeG_primrec β hf)
+  exact nat_strong_rec'2 _ this (by simp[elimDecodeG_eq_elimDecode β])
+
+lemma primrec_elimDecode {f : α → List γ → γ} (hf : Primrec₂ f) :
+    Primrec₂ (fun s e => elimDecode β f s e : ℕ → ℕ → Option γ) :=
+  have : Primrec₂ (fun _ p => f p.1 p.2 : Unit → α × List γ → γ) := hf.comp (fst.comp snd) (snd.comp snd)
+  (primrec_elimDecode_param β this).comp₂ (const ()).to₂ (fst.pair snd)
+
+lemma primrec_elimDecode_param_comp {f : σ → α × List γ → γ} {g : σ → ℕ} {h : σ → ℕ} (hf : Primrec₂ f) (hg : Primrec g) (hh : Primrec h) :
+    Primrec (fun x => elimDecode β (fun a l => f x (a, l)) (g x) (h x) : σ → Option γ) :=
+  (primrec_elimDecode_param β hf).comp Primrec.id (hg.pair hh)
 
 end elimDecode
 
@@ -613,9 +623,16 @@ lemma decode_iff {α : Type _} {σ : Type _} [Primcodable α] [Primcodable σ] {
   ⟨fun h => by simp[Primrec]; exact Primrec.nat_iff.mp (Primrec.encode.comp h),
    fun h => option_map Primrec.decode (h.comp₂ Primrec₂.right)⟩
 
+lemma decode2_iff {α : Type _} {β : Type _} {σ : Type _} [Primcodable α] [Primcodable β] [Primcodable σ] {f : α → β → σ} :
+    Primrec₂ (fun a n => (Encodable.decode n).map (f a)) ↔ Primrec₂ f :=
+  ⟨fun h => by simp[Primrec₂, Primrec, Option.map_bind', Function.comp]
+               exact Primrec.nat_iff.mp (Primrec.encode.comp $ option_bind (Primrec.decode.comp $ fst.comp Primrec.unpair)
+                 (h.comp₂ Primrec₂.right (snd.comp $ Primrec.unpair.comp fst))),
+   fun h => option_map (Primrec.decode.comp snd) (h.comp₂ (fst.comp fst) Primrec₂.right)⟩
+
 open Encodable WType
-variable {α : Type _} {β : α → Type _} {γ : Type _}
-  [Primcodable α] [(a : α) → Fintype (β a)] [(a : α) → DecidableEq (β a)] [(a : α) → Primcodable (β a)] [PrimrecCard β] [Primcodable γ]
+variable {σ : Type _} {α : Type _} {β : α → Type _} {γ : Type _}
+  [Primcodable σ] [Primcodable α] [(a : α) → Fintype (β a)] [(a : α) → DecidableEq (β a)] [(a : α) → Primcodable (β a)] [PrimrecCard β] [Primcodable γ]
 
 lemma w_depth : Primrec (fun w => w.depth : WType β → ℕ) := by
   have : Primrec (fun n => (encodeDecode (WType β) n).map $ fun e => e.unpair.1) :=
@@ -626,5 +643,11 @@ lemma w_depth : Primrec (fun w => w.depth : WType β → ℕ) := by
 
 lemma w_elimL {f : α → List γ → γ} (hf : Primrec₂ f) : Primrec (elimL f : WType β → γ) :=
   decode_iff.mp (by simp[decode_elimL_eq]; apply SubWType.primrec_elimDecode β hf)
+
+lemma w_elimL_param {f : σ → α × List γ → γ} (hf : Primrec₂ f) : Primrec₂ (fun x w => elimL (fun p l => f x (p, l)) w : σ → WType β → γ) :=
+  decode2_iff.mp
+    (by simp[decode_elimL_eq]
+        exact (SubWType.primrec_elimDecode_param β hf).comp₂ Primrec₂.left
+          (Primrec.pair (fst.comp $ Primrec.unpair.comp snd) (snd.comp $ Primrec.unpair.comp snd)).to₂)
 
 end Primrec
