@@ -510,6 +510,15 @@ lemma erase_union [DecidableEq α] {a : α} {s t : Finset α} :
 @[simp] lemma sup_univ_equiv {α α'} [DecidableEq α] [Fintype α] [Fintype α'] [SemilatticeSup β] [OrderBot β] (f : α → β) (e : α' ≃ α) :
     sup univ (fun i => f (e i)) = sup univ f := by simpa[Function.comp] using Eq.symm <| Finset.sup_image univ e f 
 
+lemma sup_univ_list_eq_sup_map {σ : Type _} {α : Type _} [SemilatticeSup α] [OrderBot α]
+  (l : List σ) (f : σ → α) : Finset.sup Finset.univ (fun (i : Fin l.length) => f $ l.get i) = (l.map f).sup := by
+  induction' l with s l ih <;> simp
+  { have : (Finset.univ : Finset (Fin $ l.length + 1)) = insert 0 ((Finset.univ : Finset (Fin l.length)).image Fin.succ) := by ext; simp
+    rw[this, Finset.sup_insert, Finset.sup_image]; simp[Function.comp, ih] }
+
+lemma sup_univ_cast {α : Type _} [SemilatticeSup α] [OrderBot α] {n} (f : Fin n → α) (n') {h : n' = n} :
+    Finset.sup Finset.univ (fun (i : Fin n') => f (i.cast h)) = Finset.sup Finset.univ f := by rcases h with rfl; simp
+
 end Finset
 
 namespace Denumerable
