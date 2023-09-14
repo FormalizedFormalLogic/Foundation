@@ -35,6 +35,16 @@ infixr:70 " :>ₙ " => cases
 
 end Nat
 
+namespace Fin
+
+lemma sort_univ {n} : Finset.univ.sort (fun x y : Fin n => x ≤ y) = List.finRange n :=
+  List.eq_of_perm_of_sorted
+    (List.perm_of_nodup_nodup_toFinset_eq (Finset.sort_nodup _ Finset.univ) (List.nodup_finRange n) (by ext i; simp))
+    (Finset.sort_sorted LE.le Finset.univ)
+    (List.Pairwise.pmap (List.pairwise_le_range n) (by simp) (by simp))
+
+end Fin
+
 lemma eq_finZeroElim {α : Sort u} (x : Fin 0 → α) : x = finZeroElim := funext (by rintro ⟨_, _⟩; contradiction)
 
 namespace Matrix
@@ -425,6 +435,12 @@ lemma ofFn_get_eq_map {n} (g : α → β) (as : List α) {h} : ofFn (fun i => g 
   { simp[hi, List.ofFnNthVal, List.get?_eq_get (h ▸ hi)] }
   { simp[hi, List.ofFnNthVal, List.get?_len_le (le_of_not_lt $ h ▸ hi)] }
 
+lemma indexOf_finRange (i : Fin k) : (List.finRange k).indexOf i = i := by
+  have : (List.finRange k).indexOf i < (List.finRange k).length := List.indexOf_lt_length.mpr (by simp)
+  have h₁ : (List.finRange k).get ⟨(List.finRange k).indexOf i, this⟩ = i := List.indexOf_get this
+  have h₂ : (List.finRange k).get ⟨i, by simp⟩ = i := List.get_finRange _
+  simpa using (List.Nodup.get_inj_iff (List.nodup_finRange k)).mp (Eq.trans h₁ h₂.symm)
+
 variable {m : Type _ → Type _} {α : Type _} {β : Type _} [Monad m]
 
 lemma mapM'_eq_none_iff {f : α → Option β} {l : List α} : l.mapM' f = none ↔ ∃ a ∈ l, f a = none := by
@@ -532,6 +548,5 @@ lemma lt_of_mem_list : ∀ n i, i ∈ ofNat (List ℕ) n → i < n
          by { intro i hi
               have : i < n.unpair.2 := lt_of_mem_list n.unpair.2 i hi
               exact lt_trans this (Nat.lt_succ_of_le $ Nat.unpair_right_le n) }⟩
-    
 
 end Denumerable

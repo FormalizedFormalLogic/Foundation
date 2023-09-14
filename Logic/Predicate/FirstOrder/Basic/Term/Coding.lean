@@ -1,5 +1,4 @@
 import Logic.Predicate.FirstOrder.Basic.Term.Term
-import Mathlib.Data.W.Basic
 
 namespace LO
 

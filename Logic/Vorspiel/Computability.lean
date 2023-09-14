@@ -50,52 +50,24 @@ lemma fintypeArrowEquivFinArrow_eq (f : ι → α) : fintypeArrowEquivFinArrow f
 @[simp] lemma fintypeArrowEquivFinArrow'_symm_app {k} (hk : Fintype.card ι = k) (v : Fin k → α) :
     (fintypeArrowEquivFinArrow' hk).symm v i = v ((fintypeEquivFin i).cast hk) := by rcases hk with rfl; rfl
 
-/-
-lemma encode'_fin : encode' (Fin n) (i : Fin n) = i := rfl
+@[simp] lemma cast_fintypeEquivFin_fin {k : ℕ} (i : Fin k) : (fintypeEquivFin i).cast (Fintype.card_fin _) = i := by
+  ext
+  simp [Encodable.fintypeEquivFin, Fin.cast_eq_cast',
+    ←Fin.castIso_eq_cast, Fin.encodable, List.Nodup.getEquivOfForallMemList,
+    Encodable.sortedUniv, Encodable.encode']
+  convert List.indexOf_finRange i
+  exact Fin.sort_univ
 
--- TODO: move to Vorspiel
-@[simp] lemma orderEmb_on_fin_id {k} (e : Fin k ↪o Fin k) (i : Fin k) : e i = i := by
-  induction' k with k ih
-  { exact Fin.elim0 i }
-  { have hzero : e 0 = 0
-    { by_contra A
-      have : ∃ j : Fin k, e 0 = j.succ := by exact Fin.eq_succ_of_ne_zero A
-      rcases this with ⟨j, hj⟩
-      have : Function.Surjective e := Finite.surjective_of_injective e.injective
-      rcases this 0 with ⟨l, hl⟩
-      exact Fin.succ_ne_zero j (by simpa[hj, hl] using OrderHomClass.monotone e (Fin.zero_le l)) }
-    have ne_zero : ∀ i : Fin k, e i.succ ≠ 0
-    { intro i hi
-      have : e i.succ = e 0 := by rw[hzero, hi]
-      exact Fin.succ_ne_zero i (e.injective this) }
-    cases' i using Fin.cases with i
-    { exact hzero }
-    { have : ∃ j : Fin k, e i.succ = j.succ := Fin.eq_succ_of_ne_zero (ne_zero i)
-      rcases this with ⟨j, hj⟩
-      let e' : Fin k ↪o Fin k :=
-        { toFun := fun i => (e i.succ).pred (ne_zero i),
-          inj'  := by intro i j; simp,
-          map_rel_iff' := by simp }
-      have : j = i := by simpa[hj] using ih e' i
-      simp[this, hj] } }
+@[simp] lemma val_fintypeEquivFin_fin {k : ℕ} (i : Fin k) : (fintypeEquivFin i).val = i.val :=
+  congr_arg Fin.val (cast_fintypeEquivFin_fin i)
 
--- TODO: move to Vorspiel
-@[simp] lemma orderIso_on_fin_id {k} (e : Fin k ≃o Fin k) (i : Fin k) : e i = i :=
-  orderEmb_on_fin_id e.toRelEmbedding i
+@[simp] lemma fintypeEquivFin_symm_cast_fin {k : ℕ} (i : Fin k) :
+    fintypeEquivFin.symm (i.cast (Fintype.card_fin _).symm) = i := by
+  have := congr_arg (fun j => fintypeEquivFin.symm (j.cast (Fintype.card_fin _).symm)) (cast_fintypeEquivFin_fin i)
+  simpa[-cast_fintypeEquivFin_fin] using this.symm
 
-lemma indexOfSortedUnivFin (i : Fin k) : List.indexOf i (sortedUniv (Fin k)) = i := by
-  simp[sortedUniv, encode'_fin]
-  have := Finset.orderIsoOfFin_symm_apply (Finset.univ : Finset (Fin k)) (Finset.card_fin k) ⟨i, Finset.mem_univ i⟩
-  simp at this
-  rw[←this]
-
-@[simp] lemma cast_fintypeEquivFin_fin (i : Fin k) {hk} : (fintypeEquivFin i).cast hk = i := by
-  simp[fintypeEquivFin, List.Nodup.getEquivOfForallMemList]; 
-
-@[simp] lemma fintypeArrowEquivFinArrow'_symm_app_finArrow {k} (hk) (v : Fin k → α) :
-    (fintypeArrowEquivFinArrow' hk).symm v = v := by { funext i; simp[hk];  }
-
--/
+@[simp] lemma fintypeArrowEquivFinArrow'_symm_app_fin_arrow {k} (hk) (v : Fin k → α) :
+    (fintypeArrowEquivFinArrow' hk).symm v = v := by funext i; simp[hk]
 
 @[simp] lemma fintypeArrowEquivVector_app (f : ι → α) : (fintypeArrowEquivVector f).get i = f (fintypeEquivFin.symm i) := by
   simp[fintypeArrowEquivVector, Equiv.vectorEquivFin]
@@ -710,6 +682,9 @@ lemma decode_eq (e : ℕ) : decode e = (decode e : Option ((s : ℕ) × SubWType
 
 def elimL (f : α → List γ → γ) : WType β → γ :=
  fun w => elim γ (fun ⟨a, v⟩ => f a (List.ofFn $ fintypeArrowEquivFinArrow v)) w
+
+lemma elimL_mk (f : α → List γ → γ) (a : α) (v : β a → WType β) :
+    elimL f ⟨a, v⟩ = f a (List.ofFn $ fintypeArrowEquivFinArrow $ fun b => elimL f (v b)) := by simp[elimL, elim]
 
 lemma elim_eq_elimL [Inhabited γ] (f : (a : α) × (β a → γ) → γ) :
     elim γ f w = elimL (fun a l => f ⟨a, fintypeArrowEquivFinArrow.symm (fun i => l.getI i)⟩) w := by
