@@ -759,14 +759,18 @@ lemma _root_.Primrec₂.of_equiv_iff'2 {β} (e : β ≃ α₂) {f : α₁ → β
 
 end Equiv
 
-lemma finArrow_list_ofFn {α} [Primcodable α] : Primrec (fun v => List.ofFn v : (Fin k → α) → List α) :=
-  have : Primrec (fun e => Encodable.encode $ Encodable.decode (α := Fin k → α) e) := Primrec.encode.comp Primrec.decode
-  (decode_iff.mp $ encode_iff.mp $ this.of_eq $ fun e => by rcases (Encodable.decode e) <;> simp[Encodable.encode_finArrow])
-
 open Encodable WType
 variable {σ : Type _} {α : Type _} {β : α → Type _} {γ : Type _}
   [Primcodable σ] [Primcodable α] [(a : α) → Fintype (β a)]
   [(a : α) → DecidableEq (β a)] [(a : α) → Primcodable (β a)] [PrimrecCard β] [Primcodable γ]
+
+lemma finArrow_list_ofFn {α} [Primcodable α] : Primrec (fun v => List.ofFn v : (Fin k → α) → List α) :=
+  have : Primrec (fun e => Encodable.encode $ Encodable.decode (α := Fin k → α) e) := Primrec.encode.comp Primrec.decode
+  (decode_iff.mp $ encode_iff.mp $ this.of_eq $ fun e => by rcases (Encodable.decode e) <;> simp[Encodable.encode_finArrow])
+
+lemma sigma_finArrow_list_ofFn {α} [Primcodable α] : Primrec (fun v => List.ofFn v.2 : (Σ k, Fin k → α) → List α) :=
+  have : Primrec (fun p => (encode p).unpair.2 : (Σ k, Fin k → α) → ℕ) := (snd.comp $ unpair.comp Primrec.encode)
+  encode_iff.mp (this.of_eq $ fun ⟨k, v⟩ => by simp[encode_finArrow])
 
 lemma sigma_fst [UniformlyPrimcodable β] : Primrec (Sigma.fst : ((a : α) × β a) → α) :=
   have : Primrec (fun e => (decode (α := α) e.unpair.1).bind $ fun a => (encodeDecode (β a) e.unpair.2).map (fun _ => a) : ℕ → Option α) :=
@@ -775,6 +779,20 @@ lemma sigma_fst [UniformlyPrimcodable β] : Primrec (Sigma.fst : ((a : α) × β
   decode_iff.mp (this.of_eq $
     by intro n; simp; rcases (decode n.unpair.1) with (_ | a) <;> simp
        { simp[encodeDecode_eq_encode_map_decode, Function.comp] })
+
+lemma sigma_prod_left {α} {β γ : α → Type _} [Primcodable α]
+  [(a : α) → Primcodable (β a)] [(a : α) → Primcodable (γ a)] [UniformlyPrimcodable β] [UniformlyPrimcodable γ] :
+    Primrec (fun p => ⟨p.1, p.2.1⟩ : (Σ a, β a × γ a) → (Σ a, β a)) :=
+  have : Primrec (fun p => Nat.pair (encode p).unpair.1 (encode p).unpair.2.unpair.1 : (Σ a, β a × γ a) → ℕ) :=
+    Primrec₂.natPair.comp (fst.comp $ unpair.comp Primrec.encode) (fst.comp $ unpair.comp $ snd.comp $ unpair.comp Primrec.encode)
+  encode_iff.mp (this.of_eq $ fun ⟨k, b, v⟩ => by simp[encode_finArrow])
+
+lemma sigma_prod_right {α} {β γ : α → Type _} [Primcodable α]
+  [(a : α) → Primcodable (β a)] [(a : α) → Primcodable (γ a)] [UniformlyPrimcodable β] [UniformlyPrimcodable γ] :
+    Primrec (fun p => ⟨p.1, p.2.2⟩ : (Σ a, β a × γ a) → (Σ a, γ a)) :=
+  have : Primrec (fun p => Nat.pair (encode p).unpair.1 (encode p).unpair.2.unpair.2 : (Σ a, β a × γ a) → ℕ) :=
+    Primrec₂.natPair.comp (fst.comp $ unpair.comp Primrec.encode) (snd.comp $ unpair.comp $ snd.comp $ unpair.comp Primrec.encode)
+  encode_iff.mp (this.of_eq $ fun ⟨k, b, v⟩ => by simp[encode_finArrow])
 
 lemma sigma_pair [UniformlyPrimcodable β] (a : α) : Primrec (Sigma.mk a : β a → (a : α) × β a) :=
   encode_iff.mp (by simp; exact Primrec₂.natPair.comp (const _) Primrec.encode)

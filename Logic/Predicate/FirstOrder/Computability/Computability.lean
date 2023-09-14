@@ -390,6 +390,26 @@ def equivW (L) (μ) : UFormula L μ ≃ WType (Edge L μ) where
   left_inv := fun p => by induction p <;> simp[toW, ofW, *]
   right_inv := toW_ofW
 
+@[simp] lemma equivW_verum : (equivW L μ) verum = ⟨(true, Sum.inr $ Sum.inl ()), Empty.elim⟩ := rfl
+
+@[simp] lemma equivW_falsum : (equivW L μ) falsum = ⟨(false, Sum.inr $ Sum.inl ()), Empty.elim⟩ := rfl
+
+@[simp] lemma equivW_rel {k} (r : L.rel k) (v) : (equivW L μ) (rel r v) = ⟨(true, Sum.inl ⟨_, r, v⟩), Empty.elim⟩ := rfl
+
+@[simp] lemma equivW_nrel {k} (r : L.rel k) (v) : (equivW L μ) (nrel r v) = ⟨(false, Sum.inl ⟨_, r, v⟩), Empty.elim⟩ := rfl
+
+@[simp] lemma equivW_and (p q : UFormula L μ) :
+    (equivW L μ) (and p q) = ⟨(true, Sum.inr $ Sum.inr $ Sum.inl ()), Bool.rec ((equivW L μ) p) ((equivW L μ) q)⟩ := rfl
+
+@[simp] lemma equivW_or (p q : UFormula L μ) :
+    (equivW L μ) (or p q) = ⟨(false, Sum.inr $ Sum.inr $ Sum.inl ()), Bool.rec ((equivW L μ) p) ((equivW L μ) q)⟩ := rfl
+
+@[simp] lemma equivW_all (p : UFormula L μ) :
+    (equivW L μ) (all p) = ⟨(true, Sum.inr $ Sum.inr $ Sum.inr ()), fun _ => (equivW L μ) p⟩ := rfl
+
+@[simp] lemma equivW_ex (p : UFormula L μ) :
+    (equivW L μ) (ex p) = ⟨(false, Sum.inr $ Sum.inr $ Sum.inr ()), fun _ => (equivW L μ) p⟩ := rfl
+
 @[simp] lemma equivW_symm_true_inr_inr_inl (v : Bool → WType (Edge L μ)) :
     (equivW L μ).symm ⟨(true, Sum.inr $ Sum.inr $ Sum.inl ()), v⟩ = and ((equivW L μ).symm $ v false) ((equivW L μ).symm $ v true) := rfl
 
@@ -477,7 +497,121 @@ lemma ex_primrec : Primrec (ex : UFormula L μ → UFormula L μ) := by
     ((this.comp (Primrec.const ()) Primrec.id).comp (Primrec.of_equiv (e := equivW L μ)))
   exact this.of_eq (fun p => by simp)
 
+private def F [Inhabited γ]
+  (γVerum : σ → γ)
+  (γFalsum : σ → γ)
+  (γRel : σ → (k : ℕ) × L.rel k × (Fin k → UTerm L μ) → γ)
+  (γNrel : σ → (k : ℕ) × L.rel k × (Fin k → UTerm L μ) → γ)
+  (γAnd : σ → γ × γ → γ)
+  (γOr : σ → γ × γ → γ)
+  (γAll : σ → γ → γ)
+  (γEx : σ → γ → γ) : σ → Node L μ × List γ → γ := fun z p =>
+    (Sum.casesOn p.1.2 (fun f => bif p.1.1 then γRel z f else γNrel z f)
+    $ fun c => Sum.casesOn c (fun _ => bif p.1.1 then γVerum z else γFalsum z)
+    $ fun c => Sum.casesOn c (fun _ => bif p.1.1 then γAnd z (p.2.getI 0, p.2.getI 1) else γOr z (p.2.getI 0, p.2.getI 1))
+    $ fun _ => bif p.1.1 then γAll z (p.2.getI 0) else γEx z (p.2.getI 0))
+
+private lemma elim_eq
+  [Inhabited γ]
+  (γVerum : σ → γ)
+  (γFalsum : σ → γ)
+  (γRel : σ → (k : ℕ) × L.rel k × (Fin k → UTerm L μ) → γ)
+  (γNrel : σ → (k : ℕ) × L.rel k × (Fin k → UTerm L μ) → γ)  
+  (γAnd : σ → γ × γ → γ)
+  (γOr : σ → γ × γ → γ)
+  (γAll : σ → γ → γ)
+  (γEx : σ → γ → γ) (p : UFormula L μ) :
+    elim (γVerum x) (γFalsum x)
+      (fun {k} f v => γRel x ⟨k, f, v⟩)
+      (fun {k} f v => γNrel x ⟨k, f, v⟩)
+      (fun y₁ y₂ => γAnd x (y₁, y₂))
+      (fun y₁ y₂ => γOr x (y₁, y₂))
+      (γAll x)
+      (γEx x) p =
+    WType.elimL (fun p l => F γVerum γFalsum γRel γNrel γAnd γOr γAll γEx x (p, l)) (equivW L μ p) := by
+  induction p <;> simp[elim, WType.elimL_mk, F, *] <;> congr
+
+lemma elim_primrec_param {σ γ} [Primcodable σ] [Primcodable γ] [Inhabited γ]
+  {γVerum γFalsum : σ → γ}
+  {γRel γNrel : σ → (k : ℕ) × L.rel k × (Fin k → UTerm L μ) → γ}
+  {γAnd γOr : σ → γ × γ → γ}
+  {γAll γEx : σ → γ → γ}
+  (hVerum : Primrec γVerum)
+  (hFalsum : Primrec γFalsum)
+  (hRel : Primrec₂ γRel)
+  (hNrel : Primrec₂ γNrel)
+  (hAnd : Primrec₂ γAnd)
+  (hOr : Primrec₂ γOr)
+  (hAll : Primrec₂ γAll)
+  (hEx : Primrec₂ γEx) :
+    Primrec₂ (fun x => elim (γVerum x) (γFalsum x)
+      (fun {k} f v => γRel x ⟨k, f, v⟩)
+      (fun {k} f v => γNrel x ⟨k, f, v⟩)
+      (fun y₁ y₂ => γAnd x (y₁, y₂))
+      (fun y₁ y₂ => γOr x (y₁, y₂))
+      (γAll x)
+      (γEx x)) := by {
+  have hF : Primrec₂ (F γVerum γFalsum γRel γNrel γAnd γOr γAll γEx) :=
+    sum_casesOn (snd.comp $ fst.comp snd)
+      (Primrec.cond (fst.comp $ fst.comp $ snd.comp fst) (hRel.comp (fst.comp fst) snd) (hNrel.comp (fst.comp fst) snd))
+      (sum_casesOn snd
+        (by apply Primrec.cond (fst.comp $ fst.comp $ snd.comp $ fst.comp fst)
+              (hVerum.comp $ fst.comp $ fst.comp fst)
+              (hFalsum.comp $ fst.comp $ fst.comp fst))
+        (by apply sum_casesOn snd
+              (by apply Primrec.cond (fst.comp $ fst.comp $ snd.comp $ fst.comp $ fst.comp fst)
+                    (hAnd.comp (fst.comp $ fst.comp $ fst.comp fst)
+                      (Primrec.pair (list_getI.comp (snd.comp $ snd.comp $ fst.comp $ fst.comp fst) (Primrec.const 0))
+                        (list_getI.comp (snd.comp $ snd.comp $ fst.comp $ fst.comp fst) (Primrec.const 1))))
+                    (hOr.comp (fst.comp $ fst.comp $ fst.comp fst)
+                      (Primrec.pair (list_getI.comp (snd.comp $ snd.comp $ fst.comp $ fst.comp fst) (Primrec.const 0))
+                        (list_getI.comp (snd.comp $ snd.comp $ fst.comp $ fst.comp fst) (Primrec.const 1)))))
+              (by apply Primrec.cond (fst.comp $ fst.comp $ snd.comp $ fst.comp $ fst.comp fst)
+                    (hAll.comp (fst.comp $ fst.comp $ fst.comp fst)
+                      (list_getI.comp (snd.comp $ snd.comp $ fst.comp $ fst.comp fst) (Primrec.const 0)))
+                    (hEx.comp (fst.comp $ fst.comp $ fst.comp fst)
+                      (list_getI.comp (snd.comp $ snd.comp $ fst.comp $ fst.comp fst) (Primrec.const 0))))))
+  have : Primrec₂ (fun x p => WType.elimL (fun p l => F γVerum γFalsum γRel γNrel γAnd γOr γAll γEx x (p, l)) (equivW L μ p)) :=
+    (w_elimL_param hF).comp₂ Primrec₂.left (Primrec.of_equiv.comp snd)
+  exact this.of_eq (fun x t => by simp[elim_eq]) }
+
+lemma elim_primrec {γ} [Primcodable γ] [Inhabited γ]
+  (γVerum γFalsum : γ)
+  {γRel γNrel : (k : ℕ) × L.rel k × (Fin k → UTerm L μ) → γ}
+  {γAnd γOr : γ → γ → γ}
+  {γAll γEx : γ → γ}
+  (hRel : Primrec γRel)
+  (hNrel : Primrec γNrel)
+  (hAnd : Primrec₂ γAnd)
+  (hOr : Primrec₂ γOr)
+  (hAll : Primrec γAll)
+  (hEx : Primrec γEx) :
+    Primrec (elim γVerum γFalsum (fun {k} f v => γRel ⟨k, f, v⟩) (fun {k} f v => γNrel ⟨k, f, v⟩) γAnd γOr γAll γEx) := by
+  have := elim_primrec_param (σ := Unit)
+    (Primrec.const γVerum) (Primrec.const γFalsum)
+    (hRel.comp₂ Primrec₂.right) (hNrel.comp₂ Primrec₂.right)
+    (hAnd.comp₂ (fst.comp₂ Primrec₂.right) (snd.comp₂ Primrec₂.right)) (hOr.comp₂ (fst.comp₂ Primrec₂.right) (snd.comp₂ Primrec₂.right))
+    (hAll.comp₂ Primrec₂.right) (hEx.comp₂ Primrec₂.right)
+  exact this.comp (Primrec.const ()) Primrec.id
+
+lemma rank_primrec : Primrec (rank : UFormula L μ → ℕ) := by
+  have hr : Primrec (fun p => ((List.ofFn p.2.2).map UTerm.rank).sup : (k : ℕ) × L.rel k × (Fin k → UTerm L μ) → ℕ) :=
+    (list_sup nat_max).comp
+      (list_map (by apply sigma_finArrow_list_ofFn.comp (sigma_prod_right (β := L.rel))) (UTerm.rank_primrec.comp₂ Primrec₂.right))
+  have hb : Primrec₂ (fun m n => max m n : ℕ → ℕ → ℕ) := Primrec.nat_max
+  have hq : Primrec (fun n => n.pred : ℕ → ℕ) := Primrec.pred
+  have := elim_primrec 0 0 hr hr hb hb hq hq
+  exact this.of_eq (fun p => by
+    simp[Function.comp]
+    induction p <;> simp[elim, *]
+    { simp[List.sup_ofFn] }
+    { simp[List.sup_ofFn] })
+
 end W
+
+instance : Primcodable (SubFormula L μ n) :=
+  letI : Primcodable { p : UFormula L μ // p.rank ≤ n } := Primcodable.subtype (nat_le.comp rank_primrec (Primrec.const n))
+  Primcodable.ofEquiv { p : UFormula L μ // p.rank ≤ n } subformulaEquivSubtype
 
 end UFormula
 
