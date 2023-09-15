@@ -184,7 +184,44 @@ end Primcodable
 
 namespace Primrec
 
+open Encodable
 variable {α : Type _} {β : Type _} {γ : Type _} {σ : Type _} [Primcodable α] [Primcodable β] [Primcodable γ] [Primcodable σ]
+
+lemma decode_iff {α : Type _} {σ : Type _} [Primcodable α] [Primcodable σ] {f : α → σ} :
+    Primrec (fun n => (Encodable.decode n).map f) ↔ Primrec f :=
+  ⟨fun h => by simp[Primrec]; exact Primrec.nat_iff.mp (Primrec.encode.comp h),
+   fun h => option_map Primrec.decode (h.comp₂ Primrec₂.right)⟩
+
+lemma decode₂2_iff {α : Type _} {β : Type _} {σ : Type _} [Primcodable α] [Primcodable β] [Primcodable σ] {f : α → β → σ} :
+    Primrec₂ (fun a n => (Encodable.decode n).map (f a)) ↔ Primrec₂ f :=
+  ⟨fun h => by simp[Primrec₂, Primrec, Option.map_bind', Function.comp]
+               exact Primrec.nat_iff.mp (Primrec.encode.comp $ option_bind (Primrec.decode.comp $ fst.comp Primrec.unpair)
+                 (h.comp₂ Primrec₂.right (snd.comp $ Primrec.unpair.comp fst))),
+   fun h => option_map (Primrec.decode.comp snd) (h.comp₂ (fst.comp fst) Primrec₂.right)⟩
+
+section Equiv
+
+variable {α α₁ α₂ σ τ : Type _} [Primcodable α] [Primcodable α₁] [Primcodable α₂] [Primcodable σ] [Primcodable τ] 
+
+lemma _root_.Primrec₂.of_equiv_iff {β} (e : β ≃ α) {f : σ → τ → β} :
+  haveI := Primcodable.ofEquiv α e
+  (Primrec₂ fun a b => e (f a b)) ↔ Primrec₂ f := by simp[Primrec₂, Primrec.of_equiv_iff]
+
+lemma of_equiv_iff' {β} (e : β ≃ α) {f : β → σ} :
+    haveI := Primcodable.ofEquiv α e
+    (Primrec fun b => (f (e.symm b))) ↔ Primrec f :=
+  letI := Primcodable.ofEquiv α e
+  ⟨fun h => (h.comp (of_equiv (e := e))).of_eq (by simp),
+   fun h => h.comp Primrec.of_equiv_symm⟩
+
+lemma _root_.Primrec₂.of_equiv_iff'2 {β} (e : β ≃ α₂) {f : α₁ → β → σ} :
+    haveI := Primcodable.ofEquiv α₂ e
+    Primrec₂ (fun a b => (f a (e.symm b))) ↔ Primrec₂ f :=
+  letI := Primcodable.ofEquiv α₂ e
+  ⟨fun h => (h.comp fst ((of_equiv (e := e)).comp snd)).of_eq (by simp),
+   fun h => h.comp fst (of_equiv_symm.comp snd)⟩
+
+end Equiv
 
 lemma nat_strong_rec' (f : α → ℕ → σ) {g : α × ℕ → List σ → Option σ} (hg : Primrec₂ g)
   (H : ∀ a n, g (a, n) ((List.range n).map (f a)) = some (f a n)) : Primrec₂ f := by
@@ -220,6 +257,75 @@ lemma option_list_mapM'
     induction bs <;> simp[Option.pure_eq_some, Option.bind_eq_bind, *]
     { simp[Option.map_eq_bind, Function.comp] }
   exact this.of_eq (by simp[e])
+
+lemma to₂' {f : α → β → σ} (hf : Primrec (fun p => f p.1 p.2 : α × β → σ)) : Primrec₂ f := hf
+
+lemma of_list_decode_eq_some_cons {a : α} {as : List α} {e : ℕ} : decode e = some (a :: as) →
+    decode e.pred.unpair.1 = some a ∧ decode e.pred.unpair.2 = some as := by
+  rcases e with (_ | e) <;> simp
+  rcases (decode e.unpair.1) with (_ | a) <;> simp[seq_eq_bind_map, Option.bind_eq_bind]
+  rcases (decode e.unpair.2) with (_ | as) <;> simp[seq_eq_bind_map, Option.bind_eq_bind]
+  rintro rfl rfl; simp
+
+section zipWith
+
+@[reducible] private def decodeZipWithRec (f : σ → α × β → γ) : σ × ℕ → List (Option $ List γ) → Option (List γ) := fun p IH =>
+  (decode p.2 : Option (List α × List β)).bind
+    $ fun l => l.1.casesOn (some [])
+      $ fun a _ => l.2.casesOn (some [])
+        $ fun b _ => (IH.get? (encode (p.2.unpair.1.pred.unpair.2, p.2.unpair.2.pred.unpair.2))).map
+          $ fun cs => f p.1 (a, b) :: cs.iget
+
+private lemma casesOn_eq_uncurry (l : σ → List α) (f : σ → β) (g : σ → α → List α → β) :
+    (fun x => @List.casesOn α (fun _ => β) (l x) (f x) (g x)) =
+    (fun x => List.casesOn (l x) (f x) (fun a as => (Function.uncurry $ g x) (a, as))) := by rfl
+
+private lemma decodeZipWithRec_primrec {f : σ → α × β → γ} (hf : Primrec₂ f) : Primrec₂ (decodeZipWithRec f) := by
+  exact option_bind (Primrec.decode.comp $ snd.comp fst)
+    (by apply to₂'; rw[casesOn_eq_uncurry]
+        apply list_casesOn (fst.comp snd) (Primrec.const _)
+          (by apply to₂'; simp[Function.uncurry]; rw[casesOn_eq_uncurry]
+              apply list_casesOn (snd.comp $ snd.comp fst) (const _)
+                (by simp[Function.uncurry]
+                    apply option_map (list_get?.comp (snd.comp $ fst.comp $ fst.comp fst)
+                      (Primrec₂.natPair.comp
+                        (snd.comp $ unpair.comp $ pred.comp $ fst.comp $ unpair.comp $ snd.comp $ fst.comp $ fst.comp $ fst.comp fst)
+                        (snd.comp $ unpair.comp $ pred.comp $ snd.comp $ unpair.comp $ snd.comp $ fst.comp $ fst.comp $ fst.comp fst)))
+                      (list_cons.comp₂
+                        (hf.comp₂
+                          (fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ Primrec₂.left)
+                          (Primrec₂.pair.comp₂
+                            (fst.comp₂ $ snd.comp₂ $ fst.comp₂ Primrec₂.left)
+                            (fst.comp₂ $ snd.comp₂ Primrec₂.left)))
+                        (option_iget.comp₂ Primrec₂.right)))))
+
+lemma list_zipWith_param {f : σ → α × β → γ} (hf : Primrec₂ f) :
+    Primrec₂ (fun x p => List.zipWith (fun a b => f x (a, b)) p.1 p.2 : σ → List α × List β → List γ) := by
+  have h : Primrec₂ (fun x p => some (decodeZipWithRec f x p)) := option_some.comp (decodeZipWithRec_primrec hf)
+  let F : σ → ℕ → Option (List γ) :=
+    fun x n => (decode n : Option (List α × List β)).bind
+      $ fun p => List.zipWith (fun a b => f x (a, b)) p.1 p.2
+  have : Primrec₂ F := nat_strong_rec' F h (fun x e => by
+    simp[decodeZipWithRec]
+    rcases has : (decode (e.unpair.1)) with (_ | as) <;> simp
+    rcases hbs : (decode (e.unpair.2)) with (_ | bs) <;> simp
+    rcases as with (_ | ⟨a, as⟩) <;> simp
+    rcases bs with (_ | ⟨b, bs⟩) <;> simp
+    have : e.unpair.1.pred.unpair.2.pair e.unpair.2.pred.unpair.2 < e
+    { have lt₁ : e.unpair.1.pred.unpair.2 < e.unpair.1 :=
+        lt_of_le_of_lt (Nat.unpair_right_le _) (Nat.pred_lt (fun eq => by simp[eq] at has))
+      have lt₂ : e.unpair.2.pred.unpair.2 < e.unpair.2 :=
+        lt_of_le_of_lt (Nat.unpair_right_le _) (Nat.pred_lt (fun eq => by simp[eq] at hbs))
+      simpa using lt_trans (Nat.pair_lt_pair_left e.unpair.2.pred.unpair.2 lt₁) (Nat.pair_lt_pair_right e.unpair.1 lt₂) }
+    rw[List.get?_range this]; simp[of_list_decode_eq_some_cons has, of_list_decode_eq_some_cons hbs])
+  exact decode₂2_iff.mp (this.of_eq $ fun x e => by simp only [Option.map_eq_bind]; rfl)
+
+lemma list_zipWith {f : α → β → γ} (hf : Primrec₂ f) : Primrec₂ (List.zipWith f) :=
+  (list_zipWith_param (hf.comp₂ (fst.comp₂ Primrec₂.right) (snd.comp₂ Primrec₂.right))).comp₂
+    (Primrec₂.const ())
+    Primrec.id.to₂
+
+end zipWith
 
 open Encodable
 variable {α : Type _} [Primcodable α]
@@ -722,42 +828,6 @@ lemma mk₀_eq (a : α) [h : IsEmpty (β a)] : mk₀ a = some (⟨a, h.elim'⟩ 
 end WType
 
 namespace Primrec
-
-lemma decode_iff {α : Type _} {σ : Type _} [Primcodable α] [Primcodable σ] {f : α → σ} :
-    Primrec (fun n => (Encodable.decode n).map f) ↔ Primrec f :=
-  ⟨fun h => by simp[Primrec]; exact Primrec.nat_iff.mp (Primrec.encode.comp h),
-   fun h => option_map Primrec.decode (h.comp₂ Primrec₂.right)⟩
-
-lemma decode₂2_iff {α : Type _} {β : Type _} {σ : Type _} [Primcodable α] [Primcodable β] [Primcodable σ] {f : α → β → σ} :
-    Primrec₂ (fun a n => (Encodable.decode n).map (f a)) ↔ Primrec₂ f :=
-  ⟨fun h => by simp[Primrec₂, Primrec, Option.map_bind', Function.comp]
-               exact Primrec.nat_iff.mp (Primrec.encode.comp $ option_bind (Primrec.decode.comp $ fst.comp Primrec.unpair)
-                 (h.comp₂ Primrec₂.right (snd.comp $ Primrec.unpair.comp fst))),
-   fun h => option_map (Primrec.decode.comp snd) (h.comp₂ (fst.comp fst) Primrec₂.right)⟩
-
-section Equiv
-
-variable {α α₁ α₂ σ τ : Type _} [Primcodable α] [Primcodable α₁] [Primcodable α₂] [Primcodable σ] [Primcodable τ] 
-
-lemma _root_.Primrec₂.of_equiv_iff {β} (e : β ≃ α) {f : σ → τ → β} :
-  haveI := Primcodable.ofEquiv α e
-  (Primrec₂ fun a b => e (f a b)) ↔ Primrec₂ f := by simp[Primrec₂, Primrec.of_equiv_iff]
-
-lemma of_equiv_iff' {β} (e : β ≃ α) {f : β → σ} :
-    haveI := Primcodable.ofEquiv α e
-    (Primrec fun b => (f (e.symm b))) ↔ Primrec f :=
-  letI := Primcodable.ofEquiv α e
-  ⟨fun h => (h.comp (of_equiv (e := e))).of_eq (by simp),
-   fun h => h.comp Primrec.of_equiv_symm⟩
-
-lemma _root_.Primrec₂.of_equiv_iff'2 {β} (e : β ≃ α₂) {f : α₁ → β → σ} :
-    haveI := Primcodable.ofEquiv α₂ e
-    Primrec₂ (fun a b => (f a (e.symm b))) ↔ Primrec₂ f :=
-  letI := Primcodable.ofEquiv α₂ e
-  ⟨fun h => (h.comp fst ((of_equiv (e := e)).comp snd)).of_eq (by simp),
-   fun h => h.comp fst (of_equiv_symm.comp snd)⟩
-
-end Equiv
 
 open Encodable WType
 variable {σ : Type _} {α : Type _} {β : α → Type _} {γ : Type _}
