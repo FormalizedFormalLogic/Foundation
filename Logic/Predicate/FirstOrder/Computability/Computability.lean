@@ -36,43 +36,90 @@ def bind (b : ℕ → UTerm L μ₂) (e : μ₁ → UTerm L μ₂) : UTerm L μ�
   | fvar x   => e x
   | func f v => func f (fun i => (v i).bind b e)
 
-def rank : UTerm L μ → ℕ
+def rewrite (e : μ₁ → UTerm L μ₂) : UTerm L μ₁ → UTerm L μ₂ := bind bvar e
+
+def substAt (z : ℕ) (t : UTerm L μ) : UTerm L μ → UTerm L μ :=
+  bind (fun x => if x < z then bvar x else if x = z then t else bvar x.pred) fvar
+
+def bv : UTerm L μ → ℕ
   | bvar x   => x + 1
   | fvar _   => 0
-  | func _ v => Finset.sup Finset.univ (fun i => (v i).rank)
+  | func _ v => Finset.sup Finset.univ (fun i => (v i).bv)
 
-@[simp] lemma rank_bvar : rank (bvar x : UTerm L μ) = x + 1 := rfl
+def substLast (u : UTerm L μ) : UTerm L μ → UTerm L μ := fun t => substAt t.bv.pred u t
 
-@[simp] lemma rank_fvar : rank (fvar x : UTerm L μ) = 0 := rfl
+@[simp] lemma bv_bvar : bv (bvar x : UTerm L μ) = x + 1 := rfl
 
-@[simp] lemma subtype_val_le (t : { t : UTerm L μ // t.rank ≤ n }) : t.val.rank ≤ n := t.property
+@[simp] lemma bv_fvar : bv (fvar x : UTerm L μ) = 0 := rfl
 
-def toSubTerm : (t : UTerm L μ) → t.rank ≤ n → SubTerm L μ n
+@[simp] lemma substAt_bvar (z) (u : UTerm L μ) : substAt z u (bvar z) = u := by simp[substLast, substAt, bind]
+
+@[simp] lemma substAt_bvar_fin (z) (u : UTerm L μ) (x : Fin z) :
+    substAt z u (bvar x) = bvar x := by simp[substLast, substAt, bind]
+
+@[simp] lemma substAt_fvar (z) (u : UTerm L μ) : substAt z u (fvar x) = fvar x := by simp[substLast, substAt, bind]
+
+@[simp] lemma substAt_func {k} (f : L.func k) (v : Fin k → UTerm L μ) :
+    substAt z u (func f v) = func f (fun i => substAt z u (v i)) := by simp[substLast, substAt, bind]
+
+@[simp] lemma subtype_val_bv_le (t : { t : UTerm L μ // t.bv ≤ n }) : t.val.bv ≤ n := t.property
+
+lemma bv_bind {b : ℕ → UTerm L μ₂} {e : μ₁ → UTerm L μ₂} (t : UTerm L μ₁)
+  (hb : ∀ x < t.bv, (b x).bv ≤ m) (he : ∀ x, (e x).bv ≤ m) : (bind b e t).bv ≤ m := by
+  induction t
+  case bvar => simp[bind, bv] at hb ⊢; exact hb _ (Nat.lt_succ_self _)
+  case fvar => simp[bind, bv] at he ⊢; exact he _
+  case func k f v ih =>
+    simp[bind, bv]; intro i; exact ih i (fun x hx => hb x (by simp[bv]; exact ⟨i, hx⟩))
+
+lemma bv_rewrite {e : μ₁ → UTerm L μ₂} {t : UTerm L μ₁} (ht : t.bv ≤ m) (he : ∀ x, (e x).bv ≤ m) : (rewrite e t).bv ≤ m :=
+  bv_bind t (fun x hx => by simp; exact lt_of_lt_of_le hx ht) he
+
+lemma bv_substLast {t u : UTerm L μ} (ht : t.bv ≤ n + 1) (hu : u.bv ≤ n) : (substLast u t).bv ≤ n :=
+  bv_bind _ (fun x hx => by
+    have : x < (bv t).pred ∨ x = (bv t).pred ∨ x > (bv t).pred := Nat.lt_trichotomy _ _
+    rcases this with (lt | rfl | lt)
+    · simp[lt]
+      have : x < n := by simpa using lt_of_lt_of_le lt (Nat.pred_le_pred ht)
+      exact this
+    · simp[hu]
+    · simp[Nat.lt_asymm lt, Nat.ne_of_gt lt]
+      have : x ≤ t.bv.pred := Nat.le_pred_of_lt hx
+      exact False.elim (Nat.lt_le_antisymm lt this)) (by simp[bv])
+
+def toSubTerm : (t : UTerm L μ) → t.bv ≤ n → SubTerm L μ n
   | bvar x,   h => #⟨x, by simp at h; exact Nat.lt_of_succ_le h⟩
   | fvar x,   _ => &x
-  | func f v, h => SubTerm.func f (fun i => toSubTerm (v i) (by simp[rank] at h; exact h i))
+  | func f v, h => SubTerm.func f (fun i => toSubTerm (v i) (by simp[bv] at h; exact h i))
 
-def ofSubTerm : SubTerm L μ n → { t : UTerm L μ // t.rank ≤ n }
+def ofSubTerm : SubTerm L μ n → { t : UTerm L μ // t.bv ≤ n }
   | #x               => ⟨bvar x, Nat.succ_le_of_lt x.isLt⟩
   | &x               => ⟨fvar x, by simp⟩
-  | SubTerm.func f v => ⟨func f (fun i => ofSubTerm (v i)), by simp[rank]⟩
+  | SubTerm.func f v => ⟨func f (fun i => ofSubTerm (v i)), by simp[bv]⟩
 
 lemma toSubTerm_ofSubterm {n} (t : SubTerm L μ n) : toSubTerm (ofSubTerm t).1 (ofSubTerm t).2 = t := by
   induction t <;> simp[ofSubTerm, toSubTerm]
   case func f v ih => { funext i; exact ih i }
 
-lemma ofSubTerm_toSubterm {n} (t : UTerm L μ) (h : t.rank ≤ n) : ofSubTerm (toSubTerm t h) = t := by
+lemma ofSubTerm_toSubterm {n} (t : UTerm L μ) (h : t.bv ≤ n) : ofSubTerm (toSubTerm t h) = t := by
   induction t <;> simp[ofSubTerm, toSubTerm]
   case func f v ih =>
     funext i
-    have h : ∀ i, (v i).rank ≤ n := by simpa[rank] using h
+    have h : ∀ i, (v i).bv ≤ n := by simpa[bv] using h
     exact ih i (h i)
 
-def subtermEquivSubtype : SubTerm L μ n ≃ { t : UTerm L μ // t.rank ≤ n } where
+def subtEquiv : SubTerm L μ n ≃ { t : UTerm L μ // t.bv ≤ n } where
   toFun := ofSubTerm
   invFun := fun t => toSubTerm t.1 t.2
   left_inv := toSubTerm_ofSubterm
   right_inv := by intro ⟨t, h⟩; ext; simpa using ofSubTerm_toSubterm t h
+
+@[simp] lemma subtEquiv_bvar (x : Fin n) : subtEquiv (#x : SubTerm L μ n) = ⟨bvar x, x.isLt⟩ := rfl
+
+@[simp] lemma subtEquiv_fvar (x : μ) : subtEquiv (&x : SubTerm L μ n) = ⟨fvar x, by simp⟩ := rfl
+
+@[simp] lemma subtEquiv_func {k} (f : L.func k) (v : Fin k → SubTerm L μ n) :
+    subtEquiv (SubTerm.func f v) = ⟨func f (fun i => subtEquiv (v i)), by simp[bv]⟩ := rfl
 
 open Encodable Primrec Primrec₂
 variable [Primcodable μ] [(k : ℕ) → Primcodable (L.func k)] [UniformlyPrimcodable L.func]
@@ -145,11 +192,13 @@ lemma bvar_primrec : Primrec (bvar : ℕ → UTerm L μ) :=
 lemma fvar_primrec : Primrec (fvar : μ → UTerm L μ) :=
   (Primrec.of_equiv_iff (equivW L μ)).mp (w_mk₀ (Sum.inr $ Sum.inl ·) (fun _ => instIsEmptyEmpty) (sum_inr.comp sum_inl))
 
+def funcL (f : (k : ℕ) × L.func k) (l : List (UTerm L μ)) : Option (UTerm L μ) :=
+  if h : l.length = f.1
+    then some (func f.2 (fun i => l.get (i.cast h.symm)))
+    else none
+
 lemma funcL_primrec :
-  Primrec₂ (fun (f : (k : ℕ) × L.func k) (l : List (UTerm L μ)) =>
-    if h : l.length = f.1
-      then some (func f.2 (fun i => l.get (i.cast h.symm)))
-      else none) :=
+  Primrec₂ (funcL : (k : ℕ) × L.func k → List (UTerm L μ) → Option (UTerm L μ)) :=
   have : Primrec₂ (fun (a : Node L μ) (l : List (UTerm L μ)) => (WType.mkL a (l.map (equivW L μ))).map (equivW L μ).symm) :=
     option_map
       (w_mkL.comp₂ Primrec₂.left ((list_map Primrec.id (Primrec.of_equiv.comp₂ Primrec₂.right)).comp₂ Primrec₂.right))
@@ -158,7 +207,7 @@ lemma funcL_primrec :
     this.comp₂ (sum_inr.comp₂ $ sum_inr.comp₂ Primrec₂.left) Primrec₂.right
   this.of_eq (fun ⟨k, f⟩ l => by
       simp[WType.mkL, Edge]
-      by_cases hl : l.length = k <;> simp[hl]
+      by_cases hl : l.length = k <;> simp[hl, funcL]
       { funext i; rw[Encodable.fintypeArrowEquivFinArrow_symm_app]; simp; congr })
 
 lemma func_primrec (k) : Primrec₂ (func : L.func k → (Fin k → UTerm L μ) → UTerm L μ) :=
@@ -214,19 +263,81 @@ lemma elim_primrec_opt {γ} [Inhabited γ] [Primcodable γ] {b : ℕ → γ} {e 
     Primrec (elim b e u) :=
   (elim_primrec hb he (option_iget.comp₂ hu)).of_eq (fun t => by simp[H])
 
-lemma rank_primrec : Primrec (rank : UTerm L μ → ℕ) := by
+lemma bv_primrec : Primrec (bv : UTerm L μ → ℕ) := by
   have : Primrec (elim (L := L) (μ := μ) Nat.succ (fun _ => 0) fun {k} _ v => (List.ofFn v).sup) :=
     elim_primrec Primrec.succ (Primrec.const 0) ((list_sup nat_max).comp₂ Primrec₂.right)
   exact this.of_eq (fun t => by
-    induction t <;> simp[elim, rank, *]
+    induction t <;> simp[elim, bv, *]
     { simp[List.sup_ofFn] })
+
+variable {μ₁ : Type*} {μ₂ : Type*} [Primcodable μ₁] [Primcodable μ₂]
+
+lemma bind_param_primrec [Primcodable σ] {b : σ → ℕ → UTerm L μ₂} {e : σ → μ₁ → UTerm L μ₂} (hb : Primrec₂ b) (he : Primrec₂ e) :
+    Primrec₂ (fun x => bind (b x) (e x)) := by
+  have : Primrec₂ (fun _ p => funcL p.1 p.2 : σ → ((k : ℕ) × L.func k) × List (UTerm L μ₂) → Option (UTerm L μ₂)) :=
+    funcL_primrec.comp₂ (fst.comp₂ Primrec₂.right) (snd.comp₂ Primrec₂.right)
+  have := elim_primrec_param_opt hb he (fun _ _ f v => func f v) this
+    (by intro x k f v; simp[funcL]; congr)
+  exact this.of_eq (fun x t => by induction t <;> simp[elim, bind, *])
+
+lemma bind_primrec {b : ℕ → UTerm L μ₂} {e : μ₁ → UTerm L μ₂} (hb : Primrec b) (he : Primrec e) :
+    Primrec (bind b e) :=
+  (bind_param_primrec (hb.comp₂ Primrec₂.right) (he.comp₂ Primrec₂.right)).comp (Primrec.const ()) Primrec.id
+
+lemma substAt_primrec : Primrec₂ (fun p t => substAt p.1 p.2 t : ℕ × UTerm L μ → UTerm L μ → UTerm L μ) :=
+  bind_param_primrec
+    (by apply Primrec.ite (nat_lt.comp snd (fst.comp fst)) (bvar_primrec.comp snd)
+          (Primrec.ite (Primrec.eq.comp snd (fst.comp fst)) (snd.comp fst) (bvar_primrec.comp $ pred.comp snd)))
+    (fvar_primrec.comp₂ Primrec₂.right)
 
 end W
 
-instance : Primcodable (SubTerm L μ n) :=
-  letI : Primcodable { t : UTerm L μ // t.rank ≤ n } := Primcodable.subtype (nat_le.comp rank_primrec (Primrec.const n))
-  Primcodable.ofEquiv { t : UTerm L μ // t.rank ≤ n } subtermEquivSubtype
 end UTerm
+
+namespace SubTerm
+
+open UTerm Encodable Primrec Primrec₂
+variable [Primcodable μ] [(k : ℕ) → Primcodable (L.func k)] [UniformlyPrimcodable L.func]
+
+instance : Primcodable (SubTerm L μ n) :=
+  letI : Primcodable { t : UTerm L μ // t.bv ≤ n } := Primcodable.subtype (nat_le.comp UTerm.bv_primrec (Primrec.const n))
+  Primcodable.ofEquiv { t : UTerm L μ // t.bv ≤ n } subtEquiv
+
+def bv : SubTerm L μ n → ℕ
+  | #x   => x + 1
+  | &_   => 0
+  | func _ v => Finset.sup Finset.univ (fun i => (v i).bv)
+
+@[simp] lemma bv_le (t : SubTerm L μ n) : t.bv ≤ n := by induction t <;> simp[bv, Nat.add_one_le_iff, *]
+
+def bPrincipal (t : SubTerm L μ (n + 1)) : Prop := t.bv = n + 1
+
+instance : Decidable (bPrincipal t) := instDecidableEq _ _
+
+lemma bPrincipal_iff_not_lt {t : SubTerm L μ (n + 1)} : bPrincipal t ↔ n < t.bv := by
+  simp[bPrincipal]
+  exact ⟨by intro e; simp[e], by intro h; exact Nat.le_antisymm (bv_le t) h⟩
+
+@[simp] lemma bPrincipal_bvar {x} : bPrincipal (#x : SubTerm L μ (n + 1)) ↔ x = Fin.last n :=
+  by simp[bPrincipal, bv]; exact eq_iff_eq_of_cmp_eq_cmp rfl
+
+@[simp] lemma bPrincipal_fvar {x} : ¬bPrincipal (&x : SubTerm L μ (n + 1)) :=
+  by simp[bPrincipal, bv]; exact Nat.ne_of_beq_eq_false rfl
+
+@[simp] lemma bPrincipal_func {k} {f : L.func k} {v : Fin k → SubTerm L μ (n + 1)} :
+    bPrincipal (func f v) ↔ ∃ i, bPrincipal (v i) := by
+  simp[bPrincipal_iff_not_lt, bv]
+
+def substsLast (u : SubTerm L μ n) (t : SubTerm L μ (n + 1)) := Rew.substs ((fun x => #x) <: u) t
+
+lemma substsLast_eq (u : SubTerm L μ n) (t : SubTerm L μ (n + 1)) :
+    (subtEquiv (substsLast u t)).val = UTerm.substAt n (subtEquiv u).val (subtEquiv t).val := by
+  simp[UTerm.substLast]
+  induction t <;> simp[substsLast]
+  case bvar x => cases' x using Fin.lastCases with x <;> simp
+  case func k f v ih => simp[Rew.func]; funext i; exact ih i
+
+end SubTerm
 
 namespace UFormula
 
@@ -250,35 +361,55 @@ def elim {γ : Type _}
   | all p    => γAll (p.elim γVerum γFalsum γRel γNrel γAnd γOr γAll γEx)
   | ex p     => γEx (p.elim γVerum γFalsum γRel γNrel γAnd γOr γAll γEx)
 
-def rank : UFormula L μ → ℕ
+def neg : UFormula L μ → UFormula L μ
+  | verum    => falsum
+  | falsum   => verum
+  | rel r v  => nrel r v
+  | nrel r v => rel r v
+  | and p q  => or p.neg q.neg
+  | or p q   => and p.neg q.neg
+  | all p    => ex p.neg
+  | ex p     => all p.neg
+
+def bv : UFormula L μ → ℕ
   | verum    => 0
   | falsum   => 0
-  | rel _ v  => Finset.sup Finset.univ (fun i => (v i).rank)
-  | nrel _ v => Finset.sup Finset.univ (fun i => (v i).rank)
-  | and p q  => max p.rank q.rank
-  | or p q   => max p.rank q.rank
-  | all p    => p.rank.pred
-  | ex p     => p.rank.pred
+  | rel _ v  => Finset.sup Finset.univ (fun i => (v i).bv)
+  | nrel _ v => Finset.sup Finset.univ (fun i => (v i).bv)
+  | and p q  => max p.bv q.bv
+  | or p q   => max p.bv q.bv
+  | all p    => p.bv.pred
+  | ex p     => p.bv.pred
 
-@[simp] lemma rank_verum : rank (verum : UFormula L μ) = 0 := rfl
+def rewrite (e : μ₁ → UTerm L μ₂) : UFormula L μ₁ → UFormula L μ₂
+  | verum    => verum
+  | falsum   => falsum
+  | rel r v  => rel r (fun i => (v i).rewrite e)
+  | nrel r v => nrel r (fun i => (v i).rewrite e)
+  | and p q  => and (p.rewrite e) (q.rewrite e)
+  | or p q   => or (p.rewrite e) (q.rewrite e)
+  | all p    => all (p.rewrite e)
+  | ex p     => ex (p.rewrite e)
 
-@[simp] lemma rank_falsum : rank (falsum : UFormula L μ) = 0 := rfl
+@[simp] lemma bv_verum : bv (verum : UFormula L μ) = 0 := rfl
 
-@[simp] lemma rank_rel {k} (r : L.rel k) (v : Fin k → UTerm L μ) : rank (rel r v) = Finset.sup Finset.univ (fun i => (v i).rank) := rfl
+@[simp] lemma bv_falsum : bv (falsum : UFormula L μ) = 0 := rfl
 
-@[simp] lemma rank_nrel {k} (r : L.rel k) (v : Fin k → UTerm L μ) : rank (nrel r v) = Finset.sup Finset.univ (fun i => (v i).rank) := rfl
+@[simp] lemma bv_rel {k} (r : L.rel k) (v : Fin k → UTerm L μ) : bv (rel r v) = Finset.sup Finset.univ (fun i => (v i).bv) := rfl
 
-@[simp] lemma rank_and (p q : UFormula L μ) : (and p q).rank = max p.rank q.rank := rfl
+@[simp] lemma bv_nrel {k} (r : L.rel k) (v : Fin k → UTerm L μ) : bv (nrel r v) = Finset.sup Finset.univ (fun i => (v i).bv) := rfl
 
-@[simp] lemma rank_or (p q : UFormula L μ) : (or p q).rank = max p.rank q.rank := rfl
+@[simp] lemma bv_and (p q : UFormula L μ) : (and p q).bv = max p.bv q.bv := rfl
 
-@[simp] lemma rank_all (p : UFormula L μ) : (all p).rank = p.rank.pred := rfl
+@[simp] lemma bv_or (p q : UFormula L μ) : (or p q).bv = max p.bv q.bv := rfl
 
-@[simp] lemma rank_ex (p : UFormula L μ) : (ex p).rank = p.rank.pred := rfl
+@[simp] lemma bv_all (p : UFormula L μ) : (all p).bv = p.bv.pred := rfl
 
-@[simp] lemma subtype_val_le (p : { p : UFormula L μ // p.rank ≤ n }) : p.val.rank ≤ n := p.property
+@[simp] lemma bv_ex (p : UFormula L μ) : (ex p).bv = p.bv.pred := rfl
 
-def toSubFormula : {n : ℕ} → (p : UFormula L μ) → p.rank ≤ n → SubFormula L μ n
+@[simp] lemma subtype_val_le (p : { p : UFormula L μ // p.bv ≤ n }) : p.val.bv ≤ n := p.property
+
+def toSubFormula : {n : ℕ} → (p : UFormula L μ) → p.bv ≤ n → SubFormula L μ n
   | _, verum,    _ => ⊤
   | _, falsum,   _ => ⊥
   | _, rel r v,  h => SubFormula.rel r (fun i => (v i).toSubTerm (by simp at h; exact h i))
@@ -288,7 +419,7 @@ def toSubFormula : {n : ℕ} → (p : UFormula L μ) → p.rank ≤ n → SubFor
   | _, all p,    h => ∀' p.toSubFormula (Nat.le_add_of_sub_le h)
   | _, ex p,     h => ∃' p.toSubFormula (Nat.le_add_of_sub_le h)
 
-def ofSubFormula : {n : ℕ} → SubFormula L μ n → { p : UFormula L μ // p.rank ≤ n }
+def ofSubFormula : {n : ℕ} → SubFormula L μ n → { p : UFormula L μ // p.bv ≤ n }
   | _, ⊤                   => ⟨verum, by simp⟩
   | _, ⊥                   => ⟨falsum, by simp⟩
   | _, SubFormula.rel r v  => ⟨rel r (fun i => (UTerm.ofSubTerm $ v i)), by simp⟩
@@ -308,7 +439,7 @@ lemma toSubFormula_ofSubFormula : ∀ {n : ℕ} (p : SubFormula L μ n), toSubFo
   | _, ∀' p                => by simp[ofSubFormula, toSubFormula]; exact toSubFormula_ofSubFormula p
   | _, ∃' p                => by simp[ofSubFormula, toSubFormula]; exact toSubFormula_ofSubFormula p
 
-lemma ofSubFormula_toSubFormula : ∀ {n : ℕ} (p : UFormula L μ) (h : p.rank ≤ n), ofSubFormula (toSubFormula p h) = p
+lemma ofSubFormula_toSubFormula : ∀ {n : ℕ} (p : UFormula L μ) (h : p.bv ≤ n), ofSubFormula (toSubFormula p h) = p
   | _, verum,    h => rfl
   | _, falsum,   h => rfl
   | _, rel r v,  h => by simp[ofSubFormula, toSubFormula, UTerm.ofSubTerm_toSubterm]
@@ -326,7 +457,7 @@ lemma ofSubFormula_toSubFormula : ∀ {n : ℕ} (p : UFormula L μ) (h : p.rank 
     simp[ofSubFormula, toSubFormula]
     exact ofSubFormula_toSubFormula p (by {simp at h; exact Nat.le_add_of_sub_le h })
 
-def subformulaEquivSubtype : SubFormula L μ n ≃ { p : UFormula L μ // p.rank ≤ n } where
+def subformulaEquivSubtype : SubFormula L μ n ≃ { p : UFormula L μ // p.bv ≤ n } where
   toFun := ofSubFormula
   invFun := fun p => p.1.toSubFormula p.2
   left_inv := toSubFormula_ofSubFormula
@@ -410,6 +541,10 @@ def equivW (L) (μ) : UFormula L μ ≃ WType (Edge L μ) where
 @[simp] lemma equivW_ex (p : UFormula L μ) :
     (equivW L μ) (ex p) = ⟨(false, Sum.inr $ Sum.inr $ Sum.inr ()), fun _ => (equivW L μ) p⟩ := rfl
 
+@[simp] lemma equivW_symm_true_inl : (equivW L μ).symm ⟨(true, Sum.inl ⟨k, r, v⟩), Empty.elim⟩ = rel r v := rfl
+
+@[simp] lemma equivW_symm_false_inl : (equivW L μ).symm ⟨(false, Sum.inl ⟨k, r, v⟩), Empty.elim⟩ = nrel r v := rfl
+
 @[simp] lemma equivW_symm_true_inr_inr_inl (v : Bool → WType (Edge L μ)) :
     (equivW L μ).symm ⟨(true, Sum.inr $ Sum.inr $ Sum.inl ()), v⟩ = and ((equivW L μ).symm $ v false) ((equivW L μ).symm $ v true) := rfl
 
@@ -457,17 +592,23 @@ instance : PrimrecCard (Edge L μ) where
 
 instance primcodable : Primcodable (UFormula L μ) := Primcodable.ofEquiv (WType (Edge L μ)) (equivW L μ)
 
-/-
-lemma relL_primrec :
-  Primrec₂ (fun (f : (k : ℕ) × L.rel k) (l : List (UTerm L μ)) =>
-    if h : l.length = f.1
-      then some (rel f.2 (fun i => l.get (i.cast h.symm)))
-      else none) := by
-  let i : (k : ℕ) × L.rel k × (Fin k → UTerm L μ) → Node L μ := fun t => (true, Sum.inl ⟨t.1, t.2.1, t.2.2⟩)
-  have : Primrec i := sorry
+lemma rel_primrec :
+    Primrec (fun p => rel p.2.1 p.2.2 : (k : ℕ) × L.rel k × (Fin k → UTerm L μ) → UFormula L μ) := by
+  let i : (k : ℕ) × L.rel k × (Fin k → UTerm L μ) → Node L μ := fun t => (true, Sum.inl t)
+  have : Primrec i := Primrec.pair (Primrec.const true) (sum_inl.comp Primrec.id)
   have : Primrec (fun t => WType.mk (i t) Empty.elim) :=
     w_mk₀ (β := Edge L μ) i (by intros; exact instIsEmptyEmpty) this
--/
+  have := (of_equiv_symm (e := equivW L μ)).comp this
+  simpa using this
+
+lemma nrel_primrec :
+    Primrec (fun p => nrel p.2.1 p.2.2 : (k : ℕ) × L.rel k × (Fin k → UTerm L μ) → UFormula L μ) := by
+  let i : (k : ℕ) × L.rel k × (Fin k → UTerm L μ) → Node L μ := fun t => (false, Sum.inl t)
+  have : Primrec i := Primrec.pair (Primrec.const false) (sum_inl.comp Primrec.id)
+  have : Primrec (fun t => WType.mk (i t) Empty.elim) :=
+    w_mk₀ (β := Edge L μ) i (by intros; exact instIsEmptyEmpty) this
+  have := (of_equiv_symm (e := equivW L μ)).comp this
+  simpa using this
 
 lemma and_primrec : Primrec₂ (and : UFormula L μ → UFormula L μ → UFormula L μ) := by
   have := w_mk₂ (β := Edge L μ) (fun (_ : Unit) => (true, Sum.inr $ Sum.inr $ Sum.inl ())) (by rintro ⟨⟩; simp[Edge]) (const _)
@@ -594,10 +735,10 @@ lemma elim_primrec {γ} [Primcodable γ] [Inhabited γ]
     (hAll.comp₂ Primrec₂.right) (hEx.comp₂ Primrec₂.right)
   exact this.comp (Primrec.const ()) Primrec.id
 
-lemma rank_primrec : Primrec (rank : UFormula L μ → ℕ) := by
-  have hr : Primrec (fun p => ((List.ofFn p.2.2).map UTerm.rank).sup : (k : ℕ) × L.rel k × (Fin k → UTerm L μ) → ℕ) :=
+lemma bv_primrec : Primrec (bv : UFormula L μ → ℕ) := by
+  have hr : Primrec (fun p => ((List.ofFn p.2.2).map UTerm.bv).sup : (k : ℕ) × L.rel k × (Fin k → UTerm L μ) → ℕ) :=
     (list_sup nat_max).comp
-      (list_map (by apply sigma_finArrow_list_ofFn.comp (sigma_prod_right (β := L.rel))) (UTerm.rank_primrec.comp₂ Primrec₂.right))
+      (list_map (by apply sigma_finArrow_list_ofFn.comp (sigma_prod_right (β := L.rel))) (UTerm.bv_primrec.comp₂ Primrec₂.right))
   have hb : Primrec₂ (fun m n => max m n : ℕ → ℕ → ℕ) := Primrec.nat_max
   have hq : Primrec (fun n => n.pred : ℕ → ℕ) := Primrec.pred
   have := elim_primrec 0 0 hr hr hb hb hq hq
@@ -610,8 +751,18 @@ lemma rank_primrec : Primrec (rank : UFormula L μ → ℕ) := by
 end W
 
 instance : Primcodable (SubFormula L μ n) :=
-  letI : Primcodable { p : UFormula L μ // p.rank ≤ n } := Primcodable.subtype (nat_le.comp rank_primrec (Primrec.const n))
-  Primcodable.ofEquiv { p : UFormula L μ // p.rank ≤ n } subformulaEquivSubtype
+  letI : Primcodable { p : UFormula L μ // p.bv ≤ n } := Primcodable.subtype (nat_le.comp bv_primrec (Primrec.const n))
+  Primcodable.ofEquiv { p : UFormula L μ // p.bv ≤ n } subformulaEquivSubtype
+
+lemma neg_primrec : Primrec (neg : UFormula L μ → UFormula L μ) := by
+  have hRel : Primrec (fun T => nrel T.2.1 T.2.2 : (k : ℕ) × L.rel k × (Fin k → UTerm L μ) → UFormula L μ) := nrel_primrec
+  have hNrel : Primrec (fun T => rel T.2.1 T.2.2 : (k : ℕ) × L.rel k × (Fin k → UTerm L μ) → UFormula L μ) := rel_primrec
+  have hAnd : Primrec₂ (or : UFormula L μ → UFormula L μ → UFormula L μ) := or_primrec
+  have hOr : Primrec₂ (and : UFormula L μ → UFormula L μ → UFormula L μ) := and_primrec
+  have hAll : Primrec (ex : UFormula L μ → UFormula L μ) := ex_primrec
+  have hEx : Primrec (all : UFormula L μ → UFormula L μ) := all_primrec
+  have := elim_primrec falsum verum hRel hNrel hAnd hOr hAll hEx
+  exact this.of_eq (fun p => by simp; induction p <;> simp[elim, neg, *])
 
 end UFormula
 
