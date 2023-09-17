@@ -11,6 +11,7 @@ import Mathlib.Data.W.Basic
 import Mathlib.Order.Filter.Ultrafilter
 import Mathlib.Logic.Encodable.Basic
 import Mathlib.Computability.Primrec
+import Mathlib.Computability.Partrec
 
 namespace Nat
 variable {α : ℕ → Sort u}
@@ -32,6 +33,9 @@ infixr:70 " :>ₙ " => cases
 
 @[simp] lemma ne_step_max' (n m : ℕ) : n ≠ max m n + 1 :=
   ne_of_lt $ Nat.lt_succ_of_le $ by simp
+
+lemma sub_pred {m n : ℕ} (hm : n ≤ m) (hn : n ≠ 0) : m - n.pred = (m - n).succ := by
+  rw [←Nat.sub_one, tsub_tsub_assoc hm (Nat.one_le_iff_ne_zero.mpr hn)]
 
 end Nat
 
@@ -242,6 +246,9 @@ namespace Option
 
 lemma pure_eq_some (a : α) : pure a = some a := rfl
 
+@[simp] lemma toList_eq_iff {o : Option α} {a} :
+    o.toList = [a] ↔ o = some a := by rcases o <;> simp
+
 end Option
 
 def Nat.unvector : {n : ℕ} → ℕ → Fin n → ℕ
@@ -435,6 +442,23 @@ lemma ofFn_get_eq_map {n} (g : α → β) (as : List α) {h} : ofFn (fun i => g 
   { simp[hi, List.ofFnNthVal, List.get?_eq_get (h ▸ hi)] }
   { simp[hi, List.ofFnNthVal, List.get?_len_le (le_of_not_lt $ h ▸ hi)] }
 
+lemma take_map_range (f : ℕ → α) : ((range n).map f).take m = (range (min n m)).map f := by
+  induction' m with m ih
+  · simp
+  · simp[take_succ, ih]
+    rcases hm : ((range n).get? m) with (_ | i) <;> simp
+    · have : n ≤ m := by simpa using get?_eq_none.mp hm
+      simp[Nat.min_eq_left this, Nat.min_eq_left (Nat.le_step this)]
+    · have : m < n ∧ m = i := by simpa using get?_eq_some.mp hm
+      rcases this with ⟨lt, rfl⟩
+      simp[Nat.min_eq_right lt, Nat.min_eq_right (le_of_lt lt), range_succ]
+
+lemma bind_toList_some {f : ℕ → Option α} {g : ℕ → α} (h : ∀ x < n, f x = some (g x)) :
+  (List.range n).bind (fun i => (f i).toList) = (List.range n).map g := by
+  have : (List.range n).bind (fun i => (f i).toList) = (List.range n).bind (List.ret ∘ g) :=
+    List.bind_congr (by simp; intro m hm; simp[h _ hm]; rfl)
+  rw[this, List.bind_ret_eq_map]
+
 lemma indexOf_finRange (i : Fin k) : (List.finRange k).indexOf i = i := by
   have : (List.finRange k).indexOf i < (List.finRange k).length := List.indexOf_lt_length.mpr (by simp)
   have h₁ : (List.finRange k).get ⟨(List.finRange k).indexOf i, this⟩ = i := List.indexOf_get this
@@ -483,6 +507,20 @@ lemma mapM'_option_map {f : α → Option β} {g : β → γ} (as : List α) :
   { simp[ih]
     rcases ha : f a with (_ | b) <;> simp
     rcases has : mapM' f as with (_ | bs) <;> simp }
+
+def allSome' : List (Option α) → Option (List α) := mapM' id
+
+@[simp] lemma mapM_eq_map (l : List α) (f : α → β) :
+    l.mapM' (fun x => some (f x)) = some (l.map f) := by
+  induction l <;> simp[Option.pure_eq_some, Option.bind_eq_bind, Function.comp, *]
+
+lemma mapM_map (as : List α) (f : α → Option β) (g : Option β → Option γ) :
+    mapM' g (as.map f) = as.mapM' (g ∘ f) := by
+  induction' as with a as ih <;> simp[Option.bind_eq_bind, Function.comp, *]
+
+@[simp] lemma allSome_map_some (l : List α) (f : α → β) :
+    allSome' (l.map (fun x => some (f x))) = some (l.map f) := by
+  simp[allSome', mapM_map]
 
 end List
 
@@ -550,3 +588,4 @@ lemma lt_of_mem_list : ∀ n i, i ∈ ofNat (List ℕ) n → i < n
               exact lt_trans this (Nat.lt_succ_of_le $ Nat.unpair_right_le n) }⟩
 
 end Denumerable
+
