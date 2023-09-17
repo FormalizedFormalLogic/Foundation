@@ -527,5 +527,13 @@ lemma encode_fintypeArrow_card_two
     encode f = encode [f (fintypeEquivFin.symm ((0 : Fin 2).cast hι.symm)), f (fintypeEquivFin.symm ((1 : Fin 2).cast hι.symm))] := by
   simp[encode_fintypeArrow, encode_finArrow, hι]; exact ⟨by congr, by congr⟩
 
+lemma encode_list_lt {b : β} {bs : List β} (h : b ∈ bs) : encode b < encode bs := by
+  induction' bs with b' bs ih
+  · simp at h
+  · have : b = b' ∨ b ∈ bs := by simpa using h
+    rcases this with (rfl | lt) <;> simp
+    · exact Nat.lt_succ.mpr (Nat.left_le_pair (encode b) (encode bs))
+    · exact Nat.lt.step <| lt_of_lt_of_le (ih lt) (Nat.right_le_pair (encode b') (encode bs))
+
 end Encodable
 

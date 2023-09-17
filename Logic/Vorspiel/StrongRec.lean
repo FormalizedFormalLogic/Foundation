@@ -82,7 +82,7 @@ private lemma F_eq_iterateL {f : α → ℕ → σ} {g : α × ℕ → List σ �
       · simpa[hk] using H (h^[m] a) 0
       · simpa only [heq hk] using H (h^[m - k] a) k
 
-lemma nat_one_side_strong_rec {f : α → ℕ → σ} {g : α × ℕ → List σ → Option σ} {h : α → α}
+lemma nat_one_side_strong_rec (f : α → ℕ → σ) {g : α × ℕ → List σ → Option σ} {h : α → α}
   (hg : Primrec₂ g) (hh : Primrec h)
   (H : ∀ a k, g (a, k) ((List.range k).map (f (h a))) = some (f a k)) : Primrec₂ f := 
   have : Primrec₂ (fun a m => (F g h a m (m + 1)).get? m) :=
