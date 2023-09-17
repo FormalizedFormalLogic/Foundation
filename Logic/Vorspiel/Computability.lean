@@ -537,3 +537,57 @@ lemma encode_list_lt {b : β} {bs : List β} (h : b ∈ bs) : encode b < encode 
 
 end Encodable
 
+namespace Primrec
+
+open Encodable WType
+variable {σ : Type*} {α : Type*} {β : α → Type*} {γ : Type*}
+  [Primcodable σ] [Primcodable α] [(a : α) → Fintype (β a)]
+  [(a : α) → DecidableEq (β a)] [(a : α) → Primcodable (β a)] [PrimrecCard β] [Primcodable γ]
+
+lemma finArrow_list_ofFn {α} [Primcodable α] : Primrec (fun v => List.ofFn v : (Fin k → α) → List α) :=
+  have : Primrec (fun e => Encodable.encode $ Encodable.decode (α := Fin k → α) e) := Primrec.encode.comp Primrec.decode
+  (decode_iff.mp $ encode_iff.mp $ this.of_eq $ fun e => by rcases (Encodable.decode e) <;> simp[Encodable.encode_finArrow])
+
+lemma sigma_finArrow_list_ofFn {α} [Primcodable α] : Primrec (fun v => List.ofFn v.2 : (Σ k, Fin k → α) → List α) :=
+  have : Primrec (fun p => (encode p).unpair.2 : (Σ k, Fin k → α) → ℕ) := (snd.comp $ unpair.comp Primrec.encode)
+  encode_iff.mp (this.of_eq $ fun ⟨k, v⟩ => by simp[encode_finArrow])
+
+lemma sigma_fst [UniformlyPrimcodable β] : Primrec (Sigma.fst : ((a : α) × β a) → α) :=
+  have : Primrec (fun e => (decode (α := α) e.unpair.1).bind $ fun a => (encodeDecode (β a) e.unpair.2).map (fun _ => a) : ℕ → Option α) :=
+    option_bind (Primrec.decode.comp $ fst.comp unpair)
+      (option_map (Primrec₂.encodeDecode_u.comp snd (snd.comp $ unpair.comp fst)) (snd.comp fst).to₂)
+  decode_iff.mp (this.of_eq $
+    by intro n; simp; rcases (decode n.unpair.1) with (_ | a) <;> simp
+       { simp[encodeDecode_eq_encode_map_decode, Function.comp] })
+
+lemma sigma_prod_left {α} {β γ : α → Type*} [Primcodable α]
+  [(a : α) → Primcodable (β a)] [(a : α) → Primcodable (γ a)] [UniformlyPrimcodable β] [UniformlyPrimcodable γ] :
+    Primrec (fun p => ⟨p.1, p.2.1⟩ : (Σ a, β a × γ a) → (Σ a, β a)) :=
+  have : Primrec (fun p => Nat.pair (encode p).unpair.1 (encode p).unpair.2.unpair.1 : (Σ a, β a × γ a) → ℕ) :=
+    Primrec₂.natPair.comp (fst.comp $ unpair.comp Primrec.encode) (fst.comp $ unpair.comp $ snd.comp $ unpair.comp Primrec.encode)
+  encode_iff.mp (this.of_eq $ fun ⟨k, b, v⟩ => by simp[encode_finArrow])
+
+lemma sigma_prod_right {α} {β γ : α → Type*} [Primcodable α]
+  [(a : α) → Primcodable (β a)] [(a : α) → Primcodable (γ a)] [UniformlyPrimcodable β] [UniformlyPrimcodable γ] :
+    Primrec (fun p => ⟨p.1, p.2.2⟩ : (Σ a, β a × γ a) → (Σ a, γ a)) :=
+  have : Primrec (fun p => Nat.pair (encode p).unpair.1 (encode p).unpair.2.unpair.2 : (Σ a, β a × γ a) → ℕ) :=
+    Primrec₂.natPair.comp (fst.comp $ unpair.comp Primrec.encode) (snd.comp $ unpair.comp $ snd.comp $ unpair.comp Primrec.encode)
+  encode_iff.mp (this.of_eq $ fun ⟨k, b, v⟩ => by simp[encode_finArrow])
+
+lemma sigma_pair [UniformlyPrimcodable β] (a : α) : Primrec (Sigma.mk a : β a → (a : α) × β a) :=
+  encode_iff.mp (by simp; exact Primrec₂.natPair.comp (const _) Primrec.encode)
+
+lemma finArrow_map {f} (hf : Primrec f) (k) : Primrec (fun v i => f (v i) : (Fin k → α) → (Fin k → σ)) := by
+  have : Primrec (fun e => encode $ ((encodeDecode (Fin k → α) e).bind
+    $ fun c => (decode c : Option (List α)).map (fun l => l.map f)) : ℕ → ℕ) :=
+    (Primrec.encode.comp $ option_bind Primrec.encodeDecode
+      (option_map (Primrec.decode.comp snd) (by apply list_map snd (hf.comp₂ Primrec₂.right))))
+  exact decode_iff.mp (encode_iff.mp $ this.of_eq $ fun e => by
+    simp[encodeDecode_eq_encode_map_decode, decode_finArrow]
+    rcases has : (decode e) with (_ | as) <;> simp[Function.comp]
+    { rfl }
+    { rcases hv : (as.toVector k) with (_ | v) <;> simp
+      { rfl }
+      { rw[Encodable.encode_some]; simp[encode_finArrow, Function.comp] } })
+
+end Primrec
