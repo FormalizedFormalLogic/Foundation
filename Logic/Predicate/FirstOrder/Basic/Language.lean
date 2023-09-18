@@ -1,7 +1,9 @@
 import Logic.Logic.Logic
+import Logic.Vorspiel.Computability
 
 namespace LO
-    
+
+open Primrec
 namespace FirstOrder
 
 structure Language where
@@ -114,17 +116,81 @@ instance (k) : Encodable (oRing.func k) where
     | _, _ => none
   encodek := fun x => by rcases x <;> simp
 
+instance oRIngFunc1IsEmpty : IsEmpty (oRing.func 1) := ⟨by rintro ⟨⟩⟩
+
+instance oRIngFuncGe3IsEmpty : ∀ k ≥ 3, IsEmpty (oRing.func k)
+  | 0       => by simp
+  | 1       => by simp
+  | 2       => by simp
+  | (n + 3) => fun _ => ⟨by rintro ⟨⟩⟩
+
+private lemma oRingFunc_encodeDecode_primrec : Primrec₂ (fun k e =>
+  if k = 0 ∧ e = 0 then some 0
+  else if k = 0 ∧ e = 1 then some 1
+  else if k = 2 ∧ e = 0 then some 0
+  else if k = 2 ∧ e = 1 then some 1
+  else none) :=
+  to₂ <| Primrec.ite (PrimrecPred.and (Primrec.eq.comp fst (const _)) (Primrec.eq.comp snd (const _))) (const _)
+      <| Primrec.ite (PrimrecPred.and (Primrec.eq.comp fst (const _)) (Primrec.eq.comp snd (const _))) (const _)
+      <| Primrec.ite (PrimrecPred.and (Primrec.eq.comp fst (const _)) (Primrec.eq.comp snd (const _))) (const _)
+      <| Primrec.ite (PrimrecPred.and (Primrec.eq.comp fst (const _)) (Primrec.eq.comp snd (const _))) (const _)
+      <| const _
+
+instance (k) : Primcodable (oRing.func k) where
+  prim := nat_iff.mp <| (Primrec.encode.comp (oRingFunc_encodeDecode_primrec.comp (Primrec.const k) Primrec.id)).of_eq (fun e => by
+    simp[Encodable.decode]
+    rcases k with (_ | k)
+    · rcases e with (_ | e) <;> simp; rcases e with (_ | e) <;> simp
+    · rcases k with (_ | k) <;> simp
+      · rcases k with (_ | k) <;> simp
+        · rcases e with (_ | e) <;> simp; rcases e with (_ | e) <;> simp)
+
+instance : UniformlyPrimcodable oRing.func := UniformlyPrimcodable.ofEncodeDecode
+  (oRingFunc_encodeDecode_primrec.of_eq $ fun k e => by
+    simp[Encodable.encodeDecode, Encodable.decode]
+    rcases k with (_ | k)
+    · rcases e with (_ | e) <;> simp; rcases e with (_ | e) <;> simp
+    · rcases k with (_ | k) <;> simp
+      · rcases k with (_ | k) <;> simp
+        · rcases e with (_ | e) <;> simp; rcases e with (_ | e) <;> simp)
+
 instance (k) : Encodable (oRing.rel k) where
   encode := fun x =>
     match x with
     | ORingRel.eq => 0
-    | ORingRel.lt    => 1
+    | ORingRel.lt => 1
   decode := fun e =>
     match k, e with
     | 2, 0 => some ORingRel.eq
     | 2, 1 => some ORingRel.lt
     | _, _ => none
   encodek := fun x => by rcases x <;> simp
+
+private lemma oRingRel_encodeDecode_primrec : Primrec₂ (fun k e =>
+  if k = 2 ∧ e = 0 then some 0
+  else if k = 2 ∧ e = 1 then some 1
+  else none) :=
+  to₂ <| Primrec.ite (PrimrecPred.and (Primrec.eq.comp fst (const _)) (Primrec.eq.comp snd (const _))) (const _)
+      <| Primrec.ite (PrimrecPred.and (Primrec.eq.comp fst (const _)) (Primrec.eq.comp snd (const _))) (const _)
+      <| const _
+
+instance (k) : Primcodable (oRing.rel k) where
+  prim := nat_iff.mp <| (Primrec.encode.comp (oRingRel_encodeDecode_primrec.comp (Primrec.const k) Primrec.id)).of_eq (fun e => by
+    simp[Encodable.decode]
+    rcases k with (_ | k) <;> simp
+    rcases k with (_ | k) <;> simp
+    rcases k with (_ | k) <;> simp
+    rcases e with (_ | e) <;> simp
+    rcases e with (_ | e) <;> simp)
+
+instance : UniformlyPrimcodable oRing.rel := UniformlyPrimcodable.ofEncodeDecode
+  (oRingRel_encodeDecode_primrec.of_eq $ fun k e => by
+    simp[Encodable.encodeDecode, Encodable.decode]
+    rcases k with (_ | k) <;> simp
+    rcases k with (_ | k) <;> simp
+    rcases k with (_ | k) <;> simp
+    rcases e with (_ | e) <;> simp
+    rcases e with (_ | e) <;> simp)
 
 inductive ORingWithPowPairingFunc : ℕ → Type
   | zero : ORingWithPowPairingFunc 0

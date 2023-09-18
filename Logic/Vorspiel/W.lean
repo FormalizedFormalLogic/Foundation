@@ -15,6 +15,10 @@ def elimv (fs : σ → σ) (fγ : σ → (Σ a : α, β a → γ) → γ) : σ �
 lemma elimv_eq_elim {fγ : σ → (Σ a : α, β a → γ) → γ} : elimv id fγ a = elim γ (fγ a) := by
   funext w; induction' w with a f ih; simp[elim, elimv, ih]
 
+lemma elimv_eq_elimv (fs : τ → σ → σ) (fγ : τ → σ → (Σ a : α, β a → γ) → γ) (x z) :
+    elimv (fs x) (fγ x) z = elimv (fun (p : τ × σ) => (p.1, fs p.1 p.2)) (fun (p : τ × σ) => fγ p.1 p.2) (x, z) := by
+  funext w; induction w generalizing x z; simp[elimv, *]
+
 end elimv
 
 open Encodable Primrec Primcodable UniformlyPrimcodable
@@ -338,8 +342,8 @@ end WType
 namespace Primrec
 
 open Encodable WType
-variable {σ : Type*} {α : Type*} {β : α → Type*} {γ : Type*}
-  [Primcodable σ] [Primcodable α] [(a : α) → Fintype (β a)]
+variable {τ σ α γ : Type*} {β : α → Type*}
+  [Primcodable τ] [Primcodable σ] [Primcodable α] [(a : α) → Fintype (β a)]
   [(a : α) → DecidableEq (β a)] [(a : α) → Primcodable (β a)] [PrimrecCard β] [Primcodable γ]
 
 lemma w_depth : Primrec (fun w => w.depth : WType β → ℕ) := by
@@ -360,6 +364,27 @@ lemma w_elimvL {fs : σ → σ} {f : σ → α × List γ → γ}
       (Primrec₂.pair.comp₂
         (fst.comp₂ $ unpair.comp₂ Primrec₂.right)
         (snd.comp₂ $ unpair.comp₂ Primrec₂.right)))
+
+lemma w_elimvL_param {fs : τ → σ → σ} {f : τ → σ × (α × List γ) → γ} {s : τ → σ} {g : τ → WType β}
+  (hfs : Primrec₂ fs) (hf : Primrec₂ f) (hs : Primrec s) (hg : Primrec g) :
+    Primrec (fun x => elimvL (fs x) (fun z a l => f x (z, a, l)) (s x) (g x)) := by
+  have := (w_elimvL (β := β)
+      (Primrec₂.pair.comp fst (hfs.comp fst snd))
+      (hf.comp₂ (fst.comp₂ Primrec₂.left) (Primrec₂.pair.comp₂ (snd.comp₂ Primrec₂.left) Primrec₂.right))).comp
+    (Primrec₂.pair.comp Primrec.id hs) hg
+  apply this.of_eq <| by
+    intro x; simp[elimvL]; apply congr_fun; exact Eq.symm <|
+      elimv_eq_elimv fs (fun x z (p : Σ a, β a → γ) => f x (z, p.1, List.ofFn $ fintypeArrowEquivFinArrow p.2)) x (s x)
+
+-- TODO: delete
+lemma w_elimvL_param' {fs : τ → σ → σ} {f : τ → σ → α → List γ → γ} {s : τ → σ} {g : τ → WType β}
+  (hfs : Primrec₂ fs) (hf : Primrec₂ (fun (p : τ × σ) (q : α × List γ) => f p.1 p.2 q.1 q.2)) (hs : Primrec s) (hg : Primrec g) :
+    Primrec (fun x => elimvL (fs x) (f x) (s x) (g x)) := by
+  have := ((w_elimvL (β := β) (Primrec₂.pair.comp fst (hfs.comp fst snd)) hf)).comp
+    (Primrec₂.pair.comp Primrec.id hs) hg
+  exact this.of_eq <| by
+    intro x; simp[elimvL]; exact Eq.symm <|
+      congr_fun (elimv_eq_elimv fs (fun x z (p : Σ a, β a → γ) => f x z p.1 (List.ofFn $ fintypeArrowEquivFinArrow p.2)) x (s x)) _
 
 lemma w_elim [Inhabited γ] {f : (a : α) × (β a → γ) → γ}
   (hf : Primrec₂ (fun a l => f ⟨a, fintypeArrowEquivFinArrow.symm (fun i => l.getI i)⟩ : α → List γ → γ)) :
