@@ -5,6 +5,14 @@ attribute [-instance] WType.instEncodableWType Encodable.finPi Encodable.fintype
 open Encodable
 variable {α β γ σ : Type*} [Primcodable α] [Primcodable β] [Primcodable γ] [Primcodable σ]
 
+namespace Nat
+
+def funRec2 (t : α → ℕ → α) (z : α → β) (s : α × ℕ → β × β → β) : α → ℕ → β
+  | a, 0     => z a
+  | a, n + 1 => s (a, n) (funRec2 t z s a n, funRec2 t z s (t a n) n)
+
+end Nat
+
 namespace Primrec
 
 lemma nat_rec'' {f : α → ℕ} {g : α → β} {h : α → ℕ → β → β}
@@ -31,6 +39,9 @@ lemma list_take : Primrec₂ (List.take : ℕ → List α → List α) := by
       (list_append.comp₂ (snd.comp₂ Primrec₂.right)
         (option_toList.comp₂ $ list_get?.comp₂ (snd.comp₂ Primrec₂.left) (fst.comp₂ Primrec₂.right))))
   exact this.of_eq (fun n as => by induction' n with n ih <;> simp[List.take_succ, *])
+
+lemma nat_pow : Primrec₂ ((· ^ ·) : ℕ → ℕ → ℕ) :=
+  Primrec₂.unpaired'.1 Nat.Primrec.pow
 
 private def iterateL (f : α → ℕ → β) (h : α → α) (a : α) (m k : ℕ) : List β :=
   (List.range k).map (f (h^[m - k.pred] a))
@@ -91,5 +102,33 @@ lemma nat_one_side_strong_rec (f : α → ℕ → σ) {g : α × ℕ → List σ
       Primrec₂.right
   Primrec₂.option_some_iff.1 <| this.of_eq <| fun a m => by
     simp[F_eq_iterateL H a (le_refl $ m + 1), iterateL, List.get?_range (Nat.lt.base m)]
+
+private def iterater (t : α → ℕ → α) (a : α) (m : ℕ) : List Bool → α
+  | []         => a
+  | true :: l  => iterater t a m l
+  | false :: l => t (iterater t a m l) (m - l.length)
+
+private def L (t : α → ℕ → α) (z : α → β) (s : α × ℕ → β × β → β) (a : α) (m : ℕ) : ℕ → List Bool → β
+  | 0,     l => z (iterater t a m l)
+  | n + 1, l => s (a, n) (L t z s a m n (true :: l), L t z s a m n (false :: l))
+
+
+lemma nat_funRec2 {t : α → ℕ → α} {z : α → β} {s : α × ℕ → β × β → β}
+  (ht : Primrec₂ t) (hz : Primrec z) (hs : Primrec₂ s) :
+    Primrec₂ (Nat.funRec2 t z s) := sorry
+
+lemma strong_nat_funRec {t : α → ℕ → α} (f : α → ℕ → σ) {g : α × ℕ → List σ → Option σ}
+  (ht : Primrec₂ t) (hg : Primrec₂ g)
+  (H : ∀ a k, g (a, k) ((List.range k).map (f (t a k))) = some (f a k)) : Primrec₂ f := by
+  have hz : Primrec (fun _ => [] : α → List σ) := const []
+  have hs : Primrec₂ (fun p l => l.1 ++ (g p l.2).toList : α × ℕ → List σ × List σ → List σ) :=
+    list_append.comp₂ (fst.comp₂ Primrec₂.right) (option_toList.comp₂ $ hg.comp₂ Primrec₂.left (snd.comp₂ Primrec₂.right))
+  have := nat_funRec2 ht hz hs
+  have := list_get?.comp₂ (this.comp₂ Primrec₂.left (Primrec.succ.comp₂ Primrec₂.right)) Primrec₂.right
+  have frEq : ∀ a m, Nat.funRec2 t (fun _ => []) (fun p l => l.fst ++ (g p l.snd).toList) a m = (List.range m).map (f a)
+  { intro a m
+    induction' m with m ih generalizing a <;> simp[Nat.funRec2, List.range_succ, *] }
+  exact Primrec₂.option_some_iff.1 <| this.of_eq <| fun a m => by simp[frEq, List.get?_range]
+
 
 end Primrec
