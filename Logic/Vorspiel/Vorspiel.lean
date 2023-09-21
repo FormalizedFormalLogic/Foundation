@@ -453,9 +453,9 @@ lemma take_map_range (f : ℕ → α) : ((range n).map f).take m = (range (min n
       rcases this with ⟨lt, rfl⟩
       simp[Nat.min_eq_right lt, Nat.min_eq_right (le_of_lt lt), range_succ]
 
-lemma bind_toList_some {f : ℕ → Option α} {g : ℕ → α} (h : ∀ x < n, f x = some (g x)) :
-  (List.range n).bind (fun i => (f i).toList) = (List.range n).map g := by
-  have : (List.range n).bind (fun i => (f i).toList) = (List.range n).bind (List.ret ∘ g) :=
+lemma bind_toList_some {f : β → Option α} {g : β → α} {bs : List β} (h : ∀ x ∈ bs, f x = some (g x)) :
+  bs.bind (fun i => (f i).toList) = bs.map g := by
+  have : bs.bind (fun i => (f i).toList) = bs.bind (List.ret ∘ g) :=
     List.bind_congr (by simp; intro m hm; simp[h _ hm]; rfl)
   rw[this, List.bind_ret_eq_map]
 
