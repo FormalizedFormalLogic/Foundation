@@ -1,4 +1,5 @@
 import Logic.Predicate.FirstOrder.Basic.Term.Term
+open Lean PrettyPrinter Delaborator SubExpr
 
 namespace LO
 
@@ -9,7 +10,7 @@ namespace SubTerm
 declare_syntax_cat foterm
 syntax:max "#" term:max : foterm
 syntax:max "&" term:max : foterm
-syntax:max "." str : foterm
+syntax ident : foterm
 syntax:max "ᵀ!" term:max : foterm
 syntax num : foterm
 syntax:70 "ᵀ⟨" term "⟩(" foterm,* ")" : foterm
@@ -28,11 +29,11 @@ syntax:80 "ᵀᶠ" foterm:80 : foterm
 syntax:80 "ᵀᵇ" foterm:80 : foterm
 
 syntax "ᵀ“" foterm:0 "”" : term
- 
+
 macro_rules
   | `(ᵀ“ # $n:term”)                                 => `(#$n)
   | `(ᵀ“ & $n:term ”)                                => `(&$n)
-  | `(ᵀ“ . $s:str ”)                                 => `(&$s)
+  | `(ᵀ“ $name:ident ”)                            => `(& $(quote name.getId.getString!))
   | `(ᵀ“ ᵀ! $t:term ”)                               => `($t)
   | `(ᵀ“ $n:num ”)                                   => `(SubTerm.Operator.const (natLit _ $n))
   | `(ᵀ“ ᵀ⟨ $d:term ⟩( $t:foterm,* ) ”)              => do
@@ -60,10 +61,16 @@ macro_rules
 #check SubTerm.func Language.Mul.mul (ᵀ“1” :> ᵀ“3” :> Matrix.vecEmpty)
 
 section delab
-open Lean PrettyPrinter Delaborator SubExpr
 
 instance : Coe NumLit (TSyntax `foterm) where
   coe s := ⟨s.raw⟩
+
+/-
+@[app_unexpander SubTerm.fvar]
+def unexpsnderFver : Unexpander
+  | `($_ $name:str) => `($name)
+  | _ => throw ()
+-/
 
 @[app_unexpander natLit]
 def unexpsnderNatLit : Unexpander
@@ -184,6 +191,7 @@ def unexpandFuncArith : Unexpander
 #check ᵀ“3 + 8 * exp &6 + 2 * ᵀ!(#3)”
 #check [→ &0, &5] ᵀ“3 * #3 + 9”
 #check Rew.shift ᵀ“(3 * #3 + 9)”
+#check ᵀ“(3 * #3 * x + y + z)”
 
 end delab
 

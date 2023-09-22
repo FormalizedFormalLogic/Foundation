@@ -264,6 +264,7 @@ def unexpandNRelArith : Unexpander
 #check “¬⊤ ∨ ((#0 < 5)) [#3, 7][2, #3]”
 #check “⋀ i, #i < #i + 9”
 #check “∀[#0 < 1] #0 = 0” 
+#check “x < y → y < z → x < z”
 
 end delab
 

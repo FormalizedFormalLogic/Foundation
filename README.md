@@ -20,7 +20,7 @@ Formalizing Logic in Lean4
 | :----:                              | ----                                | ----                         | :----:   |
 | $\vdash_\mathrm{T} \Gamma$          | Derivation in Tait-Calculus         |  `LO.FirstOrder.Derivation`     | `⊢ᵀ Γ`    |
 | $(\rm Cut)\vdash_\mathrm{T} \Gamma$ | Derivation in Tait-Calculus + Cut   |  `LO.FirstOrder.DerivationC`     | `⊢ᶜ Γ`    |
-| $M \models \sigma$                  | Tarski's truth definition condition |  `LO.FirstOrder.SubFormula.Val` | `M ⊧₁ σ` |
+| $M \models \sigma$                  | Tarski's truth definition condition |  `LO.FirstOrder.SubFormula.Val` | `M ⊧ σ` |
 | $T \vdash \sigma$                   | Provability, Proof                  |  `LO.FirstOrder.Proof`          | `T ⊢ σ`  |
 
 ## Theorem
@@ -40,31 +40,31 @@ Formalizing Logic in Lean4
 ```code:eqZeroOfMulEqZero.lean
 def eqZeroOfMulEqZero : [] ⟹[T] “∀ ∀ (#0 * #1 = 0 → #0 = 0 ∨ #1 = 0)” :=
   proof.
-    then ∀ #0 + 1 ≠ 0 as "succ ne zero" · from succNeZero
-    then ∀ (#0 ≠ 0 → ∃ #1 = #0 + 1) as "eq succ of pos" · from zeroOrSucc
-    then ∀ ∀ (#0 + (#1 + 1) = (#0 + #1) + 1) as "add succ" · from addSucc 
-    then ∀ ∀ (#0 * (#1 + 1) = (#0 * #1) + #0) as "mul succ" · from mulSucc
-    generalize; generalize; intro as "h₀"
-    absurd as "ne zero"
-    have ∃ &0 = #0 + 1
-    · specialize "eq succ of pos" with &0 as "h"
-      apply "h"
-      · andl "ne zero"
-    choose this as "e₁"
-    have ∃ &2 = #0 + 1
-    · specialize "eq succ of pos" with &2 as "h"
-      apply "h"
-      · andr "ne zero"
-    choose this as "e₂"
-    have &2 * &3 = (&1 + 1)*&0 + &1 + 1 as "h₁"
-    · specialize "mul succ" with &1 + 1, &0 as "ms"
-      specialize "add succ" with (&1 + 1)*&0, &1 as "as"
-      rew "e₁", "e₂", "ms", "as"
-      rfl
-    have (&1 + 1)*&0 + &1 + 1 = 0
-    · rew ←"h₁"
-    have (&1 + 1)*&0 + &1 + 1 ≠ 0
-    · specialize "succ ne zero" with (&1 + 1)*&0 + &1
+    then ∀ #0 + 1 ≠ 0 as .succ_ne_zero · from succNeZero
+    then ∀ (#0 ≠ 0 → ∃ #1 = #0 + 1) as .eq_succ_of_pos · from zeroOrSucc
+    then ∀ ∀ (#0 + (#1 + 1) = (#0 + #1) + 1) as .add_succ · from addSucc 
+    then ∀ ∀ (#0 * (#1 + 1) = (#0 * #1) + #0) as .mul_succ · from mulSucc
+    generalize m; generalize n; intro as .h₀
+    absurd as .ne_zero
+    have ∃ n = #0 + 1
+    · specialize .eq_succ_of_pos with n as .h
+      apply .h
+      · andl .ne_zero
+    choose n' st this as .hn'
+    have ∃ m = #0 + 1
+    · specialize .eq_succ_of_pos with m as .h
+      apply .h
+      · andr .ne_zero
+    choose m' st this as .hm'
+    have n * m = (n' + 1)*m' + n' + 1 as .h₁
+    · specialize .mul_succ with n' + 1, m' as .hms
+      specialize .add_succ with (n' + 1)*m', n' as .has
+      rw[.hn', .hm', .hms, .has]
+      refl
+    have (n' + 1)*m' + n' + 1 = 0
+    · rw[←.h₁]
+    have (n' + 1)*m' + n' + 1 ≠ 0
+    · specialize .succ_ne_zero with (n' + 1)*m' + n'
     contradiction this
   qed.
 ```

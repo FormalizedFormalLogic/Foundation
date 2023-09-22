@@ -166,6 +166,23 @@ lemma vecConsExt {α : Type u} {n}
   {a : α} {as : Fin n → α} {b : α} {bs : Fin n → α} (hb : a = b) (hbs : as = bs) :
     a :> as = b :> bs := hb ▸ hbs ▸ rfl
 
+partial def mapVector {α : Q(Type u)} {β : Q(Type v)}
+  (r : Q($α) → MetaM Q($β))
+  (n : Q(ℕ)) (l : Q(Fin $n → $α)) : MetaM Q(Fin $n → $β) := do
+  match n with
+  | ~q(0) =>
+    match l with
+    | ~q(![]) =>
+      return q(![])
+  | ~q($n + 1) =>
+    match l with
+    | ~q($a :> $as) =>
+      let b ← r a
+      let bs ← mapVector r n as
+      return q($b :> $bs)
+    | _ => throwError m!"error in mapVector(2). nonexhaustive match: {n}, {l}"
+  | _ => throwError m!"error in mapVector(1). nonexhaustive match: {n}"
+
 partial def resultVectorOfResult {α : Q(Type u)}
   (r : (e : Q($α)) → MetaM ((r : Q($α)) × Q($e = $r)))
   (n : Q(ℕ)) (l : Q(Fin $n → $α)) : MetaM ((l' : Q(Fin $n → $α)) × Q($l = $l')) := do
@@ -315,6 +332,18 @@ elab "dbgVectorAppend" : term => do
 #eval dbgVectorAppend
 
 end Qq
+
+namespace Lean
+
+namespace Expr
+
+def stringLit? : Expr → Option String
+  | lit (Literal.strVal s) => some s
+  | _                      => none
+
+end Expr
+
+end Lean
 
 namespace List
 variable {m : Type → Type v} [inst : Monad m] {α : Type u}

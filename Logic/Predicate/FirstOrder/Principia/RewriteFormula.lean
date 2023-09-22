@@ -394,4 +394,209 @@ end Meta
 
 end SubFormula
 
+namespace SubTerm
+
+namespace Meta
+
+def fvarStr (s : String) : Option ℕ :=
+  if s = "var₀" then some 0
+  else if s = "var₁" then some 1
+  else if s = "var₂" then some 2
+  else if s = "var₃" then some 3
+  else if s = "var₄" then some 4
+  else none
+
+partial def strToSyntactic (s : List String) (L : Q(Language.{u})) (n : Q(ℕ)) : Q(SubTerm $L String $n) → MetaM (Q(SyntacticSubTerm $L $n))
+  | ~q(#$x)                          => pure q(#$x)
+  | ~q(&$x)                          => do 
+    let some x := Lean.Expr.stringLit? (←whnf x) | throwError "not String"
+    let (z : Q(ℕ)) ← match fvarStr x with
+      | some i => Expr.ofNat q(ℕ) i
+      | none =>
+        let i := s.indexOf x
+        if i = s.length then
+          throwError m!"variable {x} was not declared"
+        else
+          Expr.ofNat q(ℕ) i
+      return q(&$z)
+  | ~q(func (arity := $arity) $f $v) => do
+  let v' ← mapVector (u := u) (v := u) (strToSyntactic s L n) arity v
+  return q(func $f $v')
+  | ~q(substs (n := $k) $w $t)       => do
+    let t' ← strToSyntactic s L k t
+    let w' ← mapVector (u := u) (v := u) (strToSyntactic s L n) k w
+    return q(substs $w' $t')
+  | ~q(Operator.const $c)            => pure q(Operator.const $c)
+  | ~q(Operator.operator (ι := Fin $arity) $f $v) => do
+    let v' ← mapVector (u := u) (v := u) (strToSyntactic s L n) arity v
+    return q(Operator.operator $f $v')
+  | ~q($t)                           => throwError m!"non-exhaustive match: {t}"
+
+elab "dbgstrToSyntactic" : term => do
+  let s : List String := ["x₁", "x₂", "a₁"]
+  let L : Q(Language.{0}) := q(Language.oRing)
+  let t : Q(SubTerm $L String 2) := q(ᵀ“4 + x₂ * var₂”)
+  let t' ← strToSyntactic s L q(2) t
+  logInfo m! "{t} \n⟹ \n{t'}"
+  return t
+
+#eval dbgstrToSyntactic
+
+partial def syntacticToStr (s : List String) (L : Q(Language.{u})) (n : Q(ℕ)) : Q(SyntacticSubTerm $L $n) → MetaM (Q(SubTerm $L String $n))
+  | ~q(#$x)                          => pure q(#$x)
+  | ~q(&$x)                          => do 
+    let some x := Lean.Expr.natLit? (←whnf x) | throwError "not ℕ"
+    let (z : String) := match s.get? x with
+      | some s => s
+      | none => "var_not_found"
+    return q(&$z)
+  | ~q(func (arity := $arity) $f $v) => do
+  let v' ← mapVector (u := u) (v := u) (syntacticToStr s L n) arity v
+  return q(func $f $v')
+  | ~q(substs (n := $k) $w $t)       => do
+    let t' ← syntacticToStr s L k t
+    let w' ← mapVector (u := u) (v := u) (syntacticToStr s L n) k w
+    return q(substs $w' $t')
+  | ~q(Operator.const $c)            => pure q(Operator.const $c)
+  | ~q(Operator.operator (ι := Fin $arity) $f $v) => do
+    let v' ← mapVector (u := u) (v := u) (syntacticToStr s L n) arity v
+    return q(Operator.operator $f $v')
+  | ~q($t)                           => throwError m!"non-exhaustive match: {t}"
+
+elab "dbgsyntacticToStr" : term => do
+  let s : List String := ["x₁", "x₂", "a₁"]
+  let L : Q(Language.{0}) := q(Language.oRing)
+  let t : Q(SyntacticSubTerm $L 2) := q(ᵀ“4 + &1”)
+  let t' ← syntacticToStr s L q(2) t
+  logInfo m! "{t} \n⟹ \n{t'}"
+  return t
+
+#eval dbgsyntacticToStr
+
+end Meta
+
+end SubTerm
+
+namespace SubFormula
+
+namespace Meta
+
+partial def strToSyntactic (s : List String) (L : Q(Language.{u})) (n : Q(ℕ)) : (p : Q(SubFormula $L String $n)) →
+    MetaM Q(SyntacticSubFormula $L $n)
+  | ~q(⊤)                            => pure q(⊤)
+  | ~q(⊥)                            => pure q(⊥)
+  | ~q(rel (arity := $arity) $r $v)  => do
+    let v' ← mapVector (u := u) (v := u) (SubTerm.Meta.strToSyntactic s L n) arity v
+    return q(rel $r $v')
+  | ~q(nrel (arity := $arity) $r $v) => do
+    let v' ← mapVector (u := u) (v := u) (SubTerm.Meta.strToSyntactic s L n) arity v
+    return q(nrel $r $v')
+  | ~q($p ⋏ $q)                      => do
+    let pn ← strToSyntactic s L n p
+    let qn ← strToSyntactic s L n q
+    return q($pn ⋏ $qn)
+  | ~q($p ⋎ $q)                      => do
+    let pn ← strToSyntactic s L n p
+    let qn ← strToSyntactic s L n q
+    return q($pn ⋎ $qn)
+  | ~q(∀' $p)                        => do
+    let pn ← strToSyntactic s L q($n + 1) p
+    return q(∀' $pn)
+  | ~q(∃' $p)                        => do
+    let pn ← strToSyntactic s L q($n + 1) p
+    return q(∃' $pn)
+  | ~q(~$p)                          => do
+    let pn ← strToSyntactic s L n p
+    return q(~$pn)
+  | ~q($p ⟶ $q)                      => do
+    let pn ← strToSyntactic s L n p
+    let qn ← strToSyntactic s L n q
+    return q($pn ⟶ $qn)
+  | ~q($p ⟷ $q)                      => do
+    let pn ← strToSyntactic s L n p
+    let qn ← strToSyntactic s L n q
+    return q($pn ⟷ $qn)
+  | ~q(∀[$p] $q)                     => do
+    let p' ← strToSyntactic s L q($n + 1) p
+    let q' ← strToSyntactic s L q($n + 1) q
+    return q(∀[$p'] $q')
+  | ~q(∃[$p] $q)                     => do
+    let p' ← strToSyntactic s L q($n + 1) p
+    let q' ← strToSyntactic s L q($n + 1) q
+    return q(∃[$p'] $q')
+  | ~q(Rew.substsl (n := $k) $w $p)       => do
+    let w' ← mapVector (u := u) (v := u) (SubTerm.Meta.strToSyntactic s L n) k w
+    let p' ← strToSyntactic s L k p
+    return q(Rew.substsl $w' $p')
+  | ~q(Operator.operator (ι := Fin $arity) $o $v) => do
+    let v' ← mapVector (u := u) (v := u) (SubTerm.Meta.strToSyntactic s L n) arity v
+    return q(Operator.operator $o $v')
+  | ~q($p)                           => throwError m!"non-exhaustive match: {p}"
+
+elab "dbgstrToSyntactic'" : term => do
+  let s : List String := ["x", "y", "z", "x₁", "x₂", "a₁"]
+  let L : Q(Language.{0}) := q(Language.oRing)
+  let p : Q(SubFormula $L String 2) := q(“x + 4 < x₁ + x₂ → ∀ (#0 + y = 5)”)
+  let p' ← strToSyntactic s L q(2) p
+  logInfo m! "{p} \n⟹ \n{p'}"
+  return p
+
+#eval dbgstrToSyntactic'
+
+partial def syntacticToStr (s : List String) (L : Q(Language.{u})) (n : Q(ℕ)) : (p : Q(SyntacticSubFormula $L $n)) →
+    MetaM Q(SubFormula $L String $n)
+  | ~q(⊤)                            => pure q(⊤)
+  | ~q(⊥)                            => pure q(⊥)
+  | ~q(rel (arity := $arity) $r $v)  => do
+    let v' ← mapVector (u := u) (v := u) (SubTerm.Meta.syntacticToStr s L n) arity v
+    return q(rel $r $v')
+  | ~q(nrel (arity := $arity) $r $v) => do
+    let v' ← mapVector (u := u) (v := u) (SubTerm.Meta.syntacticToStr s L n) arity v
+    return q(nrel $r $v')
+  | ~q($p ⋏ $q)                      => do
+    let pn ← syntacticToStr s L n p
+    let qn ← syntacticToStr s L n q
+    return q($pn ⋏ $qn)
+  | ~q($p ⋎ $q)                      => do
+    let pn ← syntacticToStr s L n p
+    let qn ← syntacticToStr s L n q
+    return q($pn ⋎ $qn)
+  | ~q(∀' $p)                        => do
+    let pn ← syntacticToStr s L q($n + 1) p
+    return q(∀' $pn)
+  | ~q(∃' $p)                        => do
+    let pn ← syntacticToStr s L q($n + 1) p
+    return q(∃' $pn)
+  | ~q(~$p)                          => do
+    let pn ← syntacticToStr s L n p
+    return q(~$pn)
+  | ~q($p ⟶ $q)                      => do
+    let pn ← syntacticToStr s L n p
+    let qn ← syntacticToStr s L n q
+    return q($pn ⟶ $qn)
+  | ~q($p ⟷ $q)                      => do
+    let pn ← syntacticToStr s L n p
+    let qn ← syntacticToStr s L n q
+    return q($pn ⟷ $qn)
+  | ~q(∀[$p] $q)                     => do
+    let p' ← syntacticToStr s L q($n + 1) p
+    let q' ← syntacticToStr s L q($n + 1) q
+    return q(∀[$p'] $q')
+  | ~q(∃[$p] $q)                     => do
+    let p' ← syntacticToStr s L q($n + 1) p
+    let q' ← syntacticToStr s L q($n + 1) q
+    return q(∃[$p'] $q')
+  | ~q(Rew.substsl (n := $k) $w $p)       => do
+    let w' ← mapVector (u := u) (v := u) (SubTerm.Meta.syntacticToStr s L n) k w
+    let p' ← syntacticToStr s L k p
+    return q(Rew.substsl $w' $p')
+  | ~q(Operator.operator (ι := Fin $arity) $o $v) => do
+    let v' ← mapVector (u := u) (v := u) (SubTerm.Meta.syntacticToStr s L n) arity v
+    return q(Operator.operator $o $v')
+  | ~q($p)                           => throwError m!"non-exhaustive match: {p}"
+
+end Meta
+
+end SubFormula
+
 end FirstOrder

@@ -76,7 +76,7 @@ namespace Order
 variable {T : Theory L} [EqTheory T]
 
 def leIffEqOrLt : [] ⟹[T] “∀ ∀ (#0 ≤ #1 ↔ #0 = #1 ∨ #0 < #1)” :=
-  by simp[SubFormula.le_eq]; exact proofBy { generalize; generalize; refl }
+  by simp[SubFormula.le_eq]; exact proofBy { generalize x; generalize x; refl }
 
 end Order
 
