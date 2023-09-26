@@ -52,6 +52,20 @@ variable {μ : Type v} (e : Fin n → ℕ) (ε : μ → ℕ)
     SubFormula.Eval standardModel e ε “ᵀ!t ≤ ᵀ!u”  ↔ t.val standardModel e ε ≤ u.val standardModel e ε :=
   by simp[SubFormula.le_eq, le_iff_eq_or_lt]
 
+theorem modelsTheoryPAminus : ℕ ⊧* Theory.PAminus oRing := by
+  intro σ h
+  rcases h <;> simp[realize_def]
+  case addAssoc => intro l m n; exact add_assoc n m l
+  case addComm  => intro m n; exact add_comm n m
+  case mulAssoc => intro l m n; exact mul_assoc n m l
+  case mulComm  => intro m n; exact mul_comm n m
+  case addEqOfLt => intro m n h; exact ⟨m - n, Nat.add_sub_of_le (le_of_lt h)⟩
+  case oneLeOfZeroLt => intro n hn; exact hn
+  case mulLtMul => rintro l m n h hl; exact (mul_lt_mul_right hl).mpr h
+  case distr => intro l m n; exact Nat.mul_add n m l
+  case ltTrans => intro l m n; exact Nat.lt_trans
+  case ltTri => intro n m; simp[or_assoc]; exact Nat.lt_trichotomy m n
+
 theorem modelsTheoryRobinson : ℕ ⊧* Theory.Robinson oRing := by
   intro σ h
   rcases h <;> simp[realize_def]
@@ -77,7 +91,7 @@ lemma modelsPeano : ℕ ⊧* Axiom.Peano oRing :=
 
 end standardModel
 
-theorem Peano.IsConsistent : Logic.System.Consistent (Axiom.Peano oRing) :=
+theorem Peano.Consistent : Logic.System.Consistent (Axiom.Peano oRing) :=
   Logic.Sound.consistent_of_model standardModel.modelsPeano
 
 variable (L : Language.{u}) [L.ORing]

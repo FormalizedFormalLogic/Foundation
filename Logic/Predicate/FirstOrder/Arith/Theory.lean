@@ -36,17 +36,20 @@ inductive PAminus : Theory L
   | addZero       : PAminus “∀ #0 + 0 = #0”
   | addAssoc      : PAminus “∀ ∀ ∀ (#0 + #1) + #2 = #0 + (#1 + #2)”
   | addComm       : PAminus “∀ ∀ #0 + #1 = #1 + #0”
-  | ltDef         : PAminus “∀ ∀ (#0 < #1 ↔ (∃ #0 + #1 + 1 = #2))”
-  | zeroBot       : PAminus “∀ 0 ≤ #0”
-  | zeroLeOne     : PAminus “0 < 1”
+  | addEqOfLt     : PAminus “∀ ∀ (#0 < #1 → ∃ #1 + #0 = #2)”
+  | zeroLe        : PAminus “∀ (0 ≤ #0)”
+  | zeroLtOne     : PAminus “0 < 1”
   | oneLeOfZeroLt : PAminus “∀ (0 < #0 → 1 ≤ #0)”
   | addLtAdd      : PAminus “∀ ∀ ∀ (#0 < #1 → #0 + #2 < #1 + #2)”
   | mulZero       : PAminus “∀ #0 * 0 = 0”
   | mulOne        : PAminus “∀ #0 * 1 = #0”
-  | mulAssoc      : PAminus “∀ ∀ ∀ (#0 * #1) * #2 = #0 * (#1 + #2)”
+  | mulAssoc      : PAminus “∀ ∀ ∀ (#0 * #1) * #2 = #0 * (#1 * #2)”
   | mulComm       : PAminus “∀ ∀ #0 * #1 = #1 * #0”
-  | mulLtMul      : PAminus “∀ ∀ ∀ (#0 < #1 → #2 ≠ 0 → #0 * #2 < #1 * #2)”
+  | mulLtMul      : PAminus “∀ ∀ ∀ (#0 < #1 ∧ 0 < #2 → #0 * #2 < #1 * #2)”
   | distr         : PAminus “∀ ∀ ∀ #0 * (#1 + #2) = #0 * #1 + #0 * #2”
+  | ltIrrefl      : PAminus “∀ ¬#0 < #0”
+  | ltTrans       : PAminus “∀ ∀ ∀ (#0 < #1 ∧ #1 < #2 → #0 < #2)”
+  | ltTri         : PAminus “∀ ∀ (#0 < #1 ∨ #0 = #1 ∨ #1 < #0)”
 
 variable {L}
 
@@ -79,6 +82,11 @@ class Robinson (T : Theory L) where
   robinson : Theory.Robinson L ⊆ T
 
 attribute [simp] Robinson.robinson
+
+class PAminus (T : Theory L) where
+  paminus : Theory.PAminus L ⊆ T
+
+attribute [simp] PAminus.paminus
 
 class Ind (U) (T : Theory L) where
   ind : Theory.IndScheme U ⊆ T
