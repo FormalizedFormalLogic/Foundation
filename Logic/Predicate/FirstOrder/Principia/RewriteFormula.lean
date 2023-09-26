@@ -198,6 +198,9 @@ lemma ex_eq_substs_ex_of_eq {s : SyntacticTerm L} {s' p p' q q' q''}
     simp[←Rew.comp_app]; congr; ext x <;> simp[comp_app]; { exact Fin.elim0 x } }
   { cases x <;> simp }
 
+lemma operator_eq_substs_rel_of_eq {k} {s : Term L μ} (o : Operator L (Fin k)) {v : Fin k → Term L μ} {v' : Fin k → SubTerm L μ 1}
+  (h : ∀ i, v i = [→ s] (v' i)) : o.operator v = [→ s].hom (o.operator v') := by simp[Operator.rew_operator, ←h]
+
 lemma eq_substs_neg_of_eq {s : Term L μ} {p : Formula L μ} {p' : SubFormula L μ 1}
   (hp : p = [→ s].hom p') : ~p = [→ s].hom (~p') := by simp[←hp]
 
@@ -268,11 +271,14 @@ partial def findFormula {L : Q(Language.{u})} (s : Q(SyntacticTerm $L)) :
   | ~q(substsl (n := $k) $v $p)       => do
     let ⟨v', vh⟩ ← Qq.vectorCollection (u := u) (v := u) (H := q(fun t res => t = substs ![$s] res)) (SubTerm.Meta.findTerm s) k v
     return ⟨q(substsl $v' $p), q(eq_substs_substs_of_eq $p $vh)⟩
+  | ~q(Operator.operator (ι := Fin $arity) $o $v) => do
+    let ⟨v', vh⟩ ← Qq.vectorCollection (u := u) (v := u) (H := q(fun t res => t = substs ![$s] res)) (SubTerm.Meta.findTerm s) arity v
+    return ⟨q(Operator.operator $o $v'), q(operator_eq_substs_rel_of_eq $o $vh)⟩
   | ~q($p)                           => do
     have v : Q(Fin 0 → SyntacticSubTerm $L 1) := q(![])
     let ⟨p', ph⟩ ← resultSubsts L (k := q(0)) (n := q(1)) v p
     return ⟨p', q(eq_substs_substs_nil $v $s $ph)⟩
-  
+
 elab "dbgFindFormula" : term => do
   let L : Q(Language.{0}) := q(Language.oRing)
   let p : Q(SyntacticFormula $L) := q(“∀ (&2 + 1) + 9 * (#0 + 1)ᵀ[&2 + 1, 6] < 0”)

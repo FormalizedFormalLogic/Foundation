@@ -378,6 +378,7 @@ inductive PrincipiaCode (L : Q(Language.{u})) : Type
   | eqTrans       : Syntax → PrincipiaCode L → PrincipiaCode L → PrincipiaCode L
   | rew           : Syntax → Bool → PrincipiaCode L → PrincipiaCode L → PrincipiaCode L
   | fromM         : Syntax → PrincipiaCode L
+  | eFromM         : Syntax → PrincipiaCode L
   | simpM         : SubTerm.Meta.NumeralUnfoldOption → List SubFormula.Meta.UnfoldOption → PrincipiaCode L → PrincipiaCode L
   | showState     : PrincipiaCode L → PrincipiaCode L
   | tryProve      : PrincipiaCode L
@@ -412,6 +413,7 @@ def toStr : PrincipiaCode L → String
   | eqTrans _ c₁ c₂       => "trans: {\n" ++ c₁.toStr ++ "\n}\n and: {\n" ++ c₂.toStr ++ "\n}"
   | rew _ _ _ c₂              => "rew:" ++ c₂.toStr
   | fromM _               => "from"
+  | eFromM _               => "eFromM"
   | simpM _ _ c           => c.toStr   
   | showState c           => c.toStr
   | tryProve              => "try"
@@ -678,6 +680,8 @@ partial def run : State → (c : PrincipiaCode L) → (G : List Q(SyntacticFormu
     | _ => throwError "incorrect equation or formula: {eq} should be _ = _ or _ ↔ _"
   | _, fromM s, E, e => do
     Term.elabTerm s (return q($(Qq.toQList (u := u) E) ⟹[$T] $e))
+  | _, eFromM s, _, e => do
+    Term.elabTerm s (return q([] ⟹[$T] $e))
   | state, simpM np l c, E, p => do
     let ⟨p', hp⟩ ← SubFormula.Meta.result (u := u) (L := L) (n := q(0)) np (SubFormula.Meta.unfoldOfList l) p
     logInfo m! "p': {p'}"
@@ -769,6 +773,8 @@ syntax (name := notationRew) "rewrite" arrowIndexFormula optProofBlock : proofEl
 syntax (name := notationRews) "rw" "["(arrowIndexFormula),*"]" : proofElem
 
 syntax (name := notationFromM) "from " term : proofElem
+
+syntax (name := notationEFromM) "efrom " term : proofElem
 
 syntax (name := notationShowState) "!" : proofElem
 
@@ -960,6 +966,8 @@ partial def seqToCode (L : Q(Language.{u})) : List Syntax → TermElabM (Princip
       return c
     | `(notationFromM| from $t:term) =>
       return PrincipiaCode.fromM t
+    | `(notationEFromM| efrom $t:term) =>
+      return PrincipiaCode.eFromM t
     | `(notationSimpM| simp) =>
       let c ← seqToCode L seqElems
       return PrincipiaCode.simpM SubTerm.Meta.NumeralUnfoldOption.none [] c
@@ -1171,6 +1179,14 @@ example :
         @ specialize ::1 with y
         refl
       right
+  qed.
+
+example : [] ⟹[T] “∀ ∀ (#0 = #1 → #1 = 0 → #0 = 0)” :=
+  proof.
+    generalize n; generalize m
+    intro as .h₁; intro as .h₂
+    rw[.h₁]
+    !
   qed.
 
 end
