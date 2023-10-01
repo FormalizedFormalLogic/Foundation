@@ -129,6 +129,7 @@ lemma strong_rec {m : α → ℕ} (f : α → σ) {l : α → List α} {g : α �
   (hm : Primrec m) (hl : Primrec l) (hg : Primrec₂ g)
   (Ord : ∀ a, ∀ a' ∈ l a, m a' < m a)
   (H : ∀ a, g a ((l a).map f) = some (f a)) : Primrec f := by
+  haveI : DecidableEq α := Encodable.decidableEqOfEncodable α
   have : Primrec (fun a => ((graph m l g a (m a + 1)).get? 0).map Prod.snd) :=
     option_map (list_get?.comp ((graph_primrec hm hl hg).comp Primrec.id (succ.comp hm)) (const 0)) (snd.comp₂ Primrec₂.right)
   exact option_some_iff.mp <| this.of_eq <| fun a => by simp[graph_eq m f l g a Ord H (m a + 1) (by rfl)]

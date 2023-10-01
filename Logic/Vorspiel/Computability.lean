@@ -12,6 +12,8 @@ def predO : ℕ → Option ℕ
 
 @[simp] lemma predO_succ {n} : predO (n + 1) = some n := rfl
 
+def toFin (n : ℕ) : ℕ → Option (Fin n) := fun x => if hx : x < n then some ⟨x, hx⟩ else none
+
 end Nat
 
 namespace List
@@ -64,6 +66,10 @@ lemma fintypeArrowEquivFinArrow_eq (f : ι → α) : fintypeArrowEquivFinArrow f
 @[simp] lemma fintypeEquivFin_false : fintypeEquivFin false = 0 := rfl
 
 @[simp] lemma fintypeEquivFin_true : fintypeEquivFin true = 1 := rfl
+
+@[simp] lemma fintypeEquivFin_symm_zero : fintypeEquivFin.symm 0 = false := rfl
+
+@[simp] lemma fintypeEquivFin_symm_one : fintypeEquivFin.symm 1 = true := rfl
 
 @[simp] lemma fintypeEquivFin_symm_cast_fin {k : ℕ} (i : Fin k) :
     fintypeEquivFin.symm (i.cast (Fintype.card_fin _).symm) = i := by
@@ -347,6 +353,9 @@ lemma list_sup [SemilatticeSup α] [OrderBot α] (hsup : Primrec₂ (Sup.sup : �
     list_foldr Primrec.id (const _) (hsup.comp₂ (fst.comp₂ Primrec₂.right) (snd.comp₂ Primrec₂.right))
   exact this.of_eq (by simp[e])
 
+lemma option_get! [Inhabited α] : Primrec (Option.get! : Option α → α) :=
+  (option_casesOn Primrec.id (const default) Primrec₂.right).of_eq <| by rintro (_ | a) <;> simp
+
 end Primrec
 
 class UniformlyPrimcodable {α : Type u} (β : α → Type v) [Primcodable α] [(a : α) → Primcodable (β a)] : Prop where
@@ -544,7 +553,7 @@ variable {σ : Type*} {α : Type*} {β : α → Type*} {γ : Type*}
   [Primcodable σ] [Primcodable α] [(a : α) → Fintype (β a)]
   [(a : α) → DecidableEq (β a)] [(a : α) → Primcodable (β a)] [PrimrecCard β] [Primcodable γ]
 
-lemma finArrow_list_ofFn {α} [Primcodable α] : Primrec (fun v => List.ofFn v : (Fin k → α) → List α) :=
+lemma finArrow_list_ofFn {α} [Primcodable α] : Primrec (List.ofFn : (Fin k → α) → List α) :=
   have : Primrec (fun e => Encodable.encode $ Encodable.decode (α := Fin k → α) e) := Primrec.encode.comp Primrec.decode
   (decode_iff.mp $ encode_iff.mp $ this.of_eq $ fun e => by rcases (Encodable.decode e) <;> simp[Encodable.encode_finArrow])
 
@@ -577,6 +586,14 @@ lemma sigma_prod_right {α} {β γ : α → Type*} [Primcodable α]
 lemma sigma_pair [UniformlyPrimcodable β] (a : α) : Primrec (Sigma.mk a : β a → (a : α) × β a) :=
   encode_iff.mp (by simp; exact Primrec₂.natPair.comp (const _) Primrec.encode)
 
+lemma encode_of_uniform {σ} [Primcodable σ] [UniformlyPrimcodable β] {b : σ → Σ a, β a} (hb : Primrec b) :
+    Primrec (fun x => encode (b x).2) := by
+  have : Primrec (fun x => (Nat.unpair (encode (b x))).2) := snd.comp (unpair.comp $ Primrec.encode.comp hb)
+  exact this.of_eq <| by
+    intro x
+    rcases b x with ⟨a, b⟩
+    simp[encode_sigma_val]
+
 lemma finArrow_map {f} (hf : Primrec f) (k) : Primrec (fun v i => f (v i) : (Fin k → α) → (Fin k → σ)) := by
   have : Primrec (fun e => encode $ ((encodeDecode (Fin k → α) e).bind
     $ fun c => (decode c : Option (List α)).map (fun l => l.map f)) : ℕ → ℕ) :=
@@ -589,5 +606,46 @@ lemma finArrow_map {f} (hf : Primrec f) (k) : Primrec (fun v i => f (v i) : (Fin
     { rcases hv : (as.toVector k) with (_ | v) <;> simp
       { rfl }
       { rw[Encodable.encode_some]; simp[encode_finArrow, Function.comp] } })
+
+lemma finArrow_app {v : σ → Fin n → α} {f} (hv : Primrec v) (hf : Primrec f) : Primrec (fun x => (v x) (f x) : σ → α) :=
+  have : Primrec (fun x => (List.ofFn (v x)).get? (f x)) := list_get?.comp (finArrow_list_ofFn.comp hv) (fin_val.comp hf)
+  option_some_iff.mp <| this.of_eq <| fun x => by simp[List.ofFnNthVal]
+
+lemma finite_change {f} (hf : Primrec f) (g : ℕ → α) (h : ∃ m, ∀ x ≥ m, g x = f x) : Primrec g := by
+  rcases h with ⟨m, h⟩
+  induction' m with m ih generalizing g
+  · exact hf.of_eq <| by intro n; exact Eq.symm <| h n (Nat.zero_le n)
+  · let g' : ℕ → α := fun x => if x < m then g x else f x
+    have : Primrec g' :=
+      ih g' (by simp; intro x hx lt; exact (False.elim $ Nat.lt_le_antisymm lt hx))
+    have : Primrec (fun x => if x = m then g m else g' x) :=
+      Primrec.ite (Primrec.eq.comp Primrec.id (const m)) (const (g m)) this
+    exact this.of_eq <| by
+      intro x; simp
+      by_cases hx : x = m <;> simp[hx]
+      intro hhx
+      have : m < x := Ne.lt_of_le' hx hhx
+      exact Eq.symm <| h x this
+
+lemma of_subtype_iff {β} [Primcodable β] {p : α → Prop} [DecidablePred p] {hp : PrimrecPred p} {f : β → {a : α // p a}} :
+    haveI := Primcodable.subtype hp
+    Primrec (Subtype.val $ f ·) ↔ Primrec f :=
+  letI := Primcodable.subtype hp
+  ⟨fun hf => encode_iff.mp <| (Primrec.encode.comp hf).of_eq <| by intro b; simp[Encodable.Subtype.encode_eq],
+   fun hf => subtype_val.comp hf⟩
+
+lemma _root_.Primrec₂.of_subtype_iff {β γ} [Primcodable β] [Primcodable γ]
+  {p : α → Prop} [DecidablePred p] {hp : PrimrecPred p} {f : β → γ → {a : α // p a}} :
+    haveI := Primcodable.subtype hp
+    Primrec₂ (Subtype.val $ f · ·) ↔ Primrec₂ f := Primrec.of_subtype_iff
+
+lemma nat_toFin {n : ℕ} : Primrec (Nat.toFin n) :=
+  have : Primrec (fun x => if x < n then x + 1 else 0) :=
+    Primrec.ite (nat_lt.comp Primrec.id (const n)) succ (const 0)
+  encode_iff.mp <| (Primrec.ite (nat_lt.comp Primrec.id (const n)) succ (const 0)).of_eq <| by
+    intro x; simp[Nat.toFin]
+    by_cases hx : x < n <;> simp[hx]
+    · rfl
+    · rfl
 
 end Primrec

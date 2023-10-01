@@ -249,6 +249,10 @@ lemma pure_eq_some (a : α) : pure a = some a := rfl
 @[simp] lemma toList_eq_iff {o : Option α} {a} :
     o.toList = [a] ↔ o = some a := by rcases o <;> simp
 
+@[simp] lemma get!_none [Inhabited α] : (none : Option α).get! = default := rfl
+
+@[simp] lemma get!_some [Inhabited α] {a : α} : (some a).get! = a := rfl
+
 end Option
 
 def Nat.unvector : {n : ℕ} → ℕ → Fin n → ℕ

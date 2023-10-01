@@ -155,6 +155,9 @@ def emb {o : Type v₁} [h : IsEmpty o] {μ : Type v₂} {n} : Rew L o n μ n :=
 def bShift : Rew L μ n μ (n + 1) :=
   map Fin.succ id
 
+def bShiftAdd (m : ℕ) : Rew L μ n μ (n + m) :=
+  map (Fin.addNat · m) id
+
 def castLE {n n' : ℕ} (h : n ≤ n') : Rew L μ n μ n' :=
   map (Fin.castLE h) id
 
@@ -255,6 +258,14 @@ section bShift
   funext (by simp)
 
 end bShift
+
+section bShiftAdd
+
+@[simp] lemma bShiftAdd_bvar (m) (x : Fin n) : bShiftAdd m (#x : SubTerm L μ n) = #(Fin.addNat x m) := rfl
+
+@[simp] lemma bShiftAdd_fvar (m) (x : μ) : bShiftAdd m (&x : SubTerm L μ n) = &x := rfl
+
+end bShiftAdd
 
 section substs
 
