@@ -363,9 +363,9 @@ lemma func₂_primrec : Primrec₂ (fun f t => func f ![t.1, t.2] : L.func 2 →
       simp[funcL]
       funext i; cases i using Fin.cases <;> simp
 
-lemma subtEquiv_bind_eq_bind (b : Fin k → SubTerm L μ n) (e : μ → SubTerm L μ n) (t : SubTerm L μ k) :
+lemma subtEquiv_bind_eq_bind (b : Fin n₁ → SubTerm L μ₂ n₂) (e : μ₁ → SubTerm L μ₂ n₂) (t : SubTerm L μ₁ n₁) :
     (subtEquiv (Rew.bind b e t)).val =
-    UTerm.bind (fun x => if hx : x < k then subtEquiv (b ⟨x, hx⟩) else default) (fun x => subtEquiv $ e x) (subtEquiv t) := by
+    UTerm.bind (fun x => if hx : x < n₁ then subtEquiv (b ⟨x, hx⟩) else default) (fun x => subtEquiv $ e x) (subtEquiv t) := by
   induction t <;> simp[UTerm.bind]
   case func k f v ih =>
     simp[Rew.func]
@@ -383,21 +383,27 @@ lemma subtEquiv_bShift_eq_bShift (t : SubTerm L μ k) :
   · intro x hx; simp[lt_of_lt_of_le hx (bv_subtEquiv t)]
   · simp
 
-lemma bind_primrec {b : α → Fin k → SubTerm L μ n} {e : α → μ → SubTerm L μ n} {t : α → SubTerm L μ k}
+variable {σ : Type*} {μ₁ : Type*} {μ₂ : Type*} [Primcodable μ₁] [Primcodable μ₂] [Primcodable σ]
+
+lemma brew_primrec {b : α → Fin n₁ → SubTerm L μ₂ n₂} (hb : Primrec b) :
+    Primrec₂ (fun z x => if hx : x < n₁ then (subtEquiv (b z ⟨x, hx⟩)).val else default) := by
+  letI : ∀ n, Primcodable { t : UTerm L μ₂ // t.bv ≤ n } := fun n => Primcodable.subtype (nat_le.comp UTerm.bv_primrec (Primrec.const n))
+  have : Primrec₂ (fun z x => (Nat.toFin n₁ x).casesOn default (fun i => (subtEquiv (b z i)).val) : α → ℕ → UTerm L μ₂) :=
+    to₂' <| option_casesOn (α := α × ℕ) (nat_toFin.comp snd) (Primrec.const default) <| subtype_val.comp₂ <| of_equiv.comp₂ <|
+    to₂' <| finArrow_app (v := fun (p : (α × ℕ) × Fin n₁) => b p.1.1) (hb.comp (fst.comp fst)) snd
+  exact this.of_eq <| by
+    intro a x; simp[Nat.toFin]
+    by_cases hx : x < n₁ <;> simp[hx]
+
+lemma bind_primrec {b : α → Fin n₁ → SubTerm L μ₂ n₂} {e : α → μ₁ → SubTerm L μ₂ n₂} {t : α → SubTerm L μ₁ n₁}
   (hb : Primrec b) (he : Primrec₂ e) (ht : Primrec t) :
-    Primrec (fun x => Rew.bind (b x) (e x) (t x) : α → SubTerm L μ n) := by
-  letI : ∀ n, Primcodable { t : UTerm L μ // t.bv ≤ n } := fun n => Primcodable.subtype (nat_le.comp UTerm.bv_primrec (Primrec.const n))
-  have : Primrec₂ (fun z x => if hx : x < k then (subtEquiv (b z ⟨x, hx⟩)).val else default) := by
-      have : Primrec₂ (fun z x => (Nat.toFin k x).casesOn default (fun i => (subtEquiv (b z i)).val) : α → ℕ → UTerm L μ) :=
-        to₂' <| option_casesOn (α := α × ℕ) (nat_toFin.comp snd) (Primrec.const default) <| subtype_val.comp₂ <| of_equiv.comp₂ <|
-        to₂' <| finArrow_app (v := fun (p : (α × ℕ) × Fin k) => b p.1.1) (hb.comp (fst.comp fst)) snd
-      exact this.of_eq <| by
-        intro a x; simp[Nat.toFin]
-        by_cases hx : x < k <;> simp[hx]
+    Primrec (fun x => Rew.bind (b x) (e x) (t x)) := by
+  letI : ∀ n, Primcodable { t : UTerm L μ₁ // t.bv ≤ n } := fun n => Primcodable.subtype (nat_le.comp UTerm.bv_primrec (Primrec.const n))
+  letI : ∀ n, Primcodable { t : UTerm L μ₂ // t.bv ≤ n } := fun n => Primcodable.subtype (nat_le.comp UTerm.bv_primrec (Primrec.const n))
   have : Primrec (fun z =>
-      UTerm.bind (fun x => if hx : x < k then subtEquiv (b z ⟨x, hx⟩) else default) (fun x => subtEquiv $ e z x) (subtEquiv $ t z)
-      : α → UTerm L μ) :=
-    UTerm.bind_primrec_param this
+      UTerm.bind (fun x => if hx : x < n₁ then subtEquiv (b z ⟨x, hx⟩) else default) (fun x => subtEquiv $ e z x) (subtEquiv $ t z)
+      : α → UTerm L μ₂) :=
+    UTerm.bind_primrec_param (brew_primrec hb)
       (subtype_val.comp₂ $ of_equiv.comp₂ $ he.comp₂ Primrec₂.left Primrec₂.right)
       (subtype_val.comp $ of_equiv.comp ht)
   exact encode_iff.mp <| (Primrec.encode.comp this).of_eq <| by
