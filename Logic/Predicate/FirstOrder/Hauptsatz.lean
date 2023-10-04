@@ -36,7 +36,7 @@ namespace DerivationCR
 
 variable {P : SyntacticFormula L → Prop} (hP : ∀ f p, P p → P (Rew.rewritel f p)) {Δ Δ₁ Δ₂ Γ : Sequent L}
 
-def andInversion₁Aux : {Δ : Sequent L} → (d : ⊢ᶜ[P] Δ) → (p q : SyntacticFormula L) → ⊢ᶜ[P] insert p (Δ.erase (p ⋏ q))
+noncomputable def andInversion₁Aux : {Δ : Sequent L} → (d : ⊢ᶜ[P] Δ) → (p q : SyntacticFormula L) → ⊢ᶜ[P] insert p (Δ.erase (p ⋏ q))
   | _, axL Δ r v hpos hneg, p, q => axL _ r v (by simp[hpos]) (by simp[hneg])
   | _, verum Δ h,           p, q => verum _ (by simp[h])
   | _, and Δ p' q' dp dq,   p, q => by
@@ -69,10 +69,10 @@ def andInversion₁Aux : {Δ : Sequent L} → (d : ⊢ᶜ[P] Δ) → (p q : Synt
       (andInversion₁Aux dΓ p q).weakening (by simp[Finset.subset_iff]; rintro x hx (rfl | hhx) <;> simp[*])
     (cut _ _ r hr dΔ dΓ).cast (by simp[Finset.erase_union])
 
-def andInversion₁ {p q} (d : ⊢ᶜ[P] insert (p ⋏ q) Δ) : ⊢ᶜ[P] insert p Δ := 
+noncomputable def andInversion₁ {p q} (d : ⊢ᶜ[P] insert (p ⋏ q) Δ) : ⊢ᶜ[P] insert p Δ := 
   (andInversion₁Aux d p q).weakening (by simp; exact Finset.insert_subset_insert _ (Finset.erase_subset _ _))
 
-def andInversion₂Aux : {Δ : Sequent L} → ⊢ᶜ[P] Δ → (p q : SyntacticFormula L) → ⊢ᶜ[P] insert q (Δ.erase (p ⋏ q))
+noncomputable def andInversion₂Aux : {Δ : Sequent L} → ⊢ᶜ[P] Δ → (p q : SyntacticFormula L) → ⊢ᶜ[P] insert q (Δ.erase (p ⋏ q))
   | _, axL Δ r v hpos hneg, p, q => axL _ r v (by simp[hpos]) (by simp[hneg])
   | _, verum Δ h,           p, q => verum _ (by simp[h])
   | _, and Δ p' q' dp dq,   p, q => by
@@ -105,10 +105,11 @@ def andInversion₂Aux : {Δ : Sequent L} → ⊢ᶜ[P] Δ → (p q : SyntacticF
       (andInversion₂Aux dΓ p q).weakening (by simp[Finset.subset_iff]; rintro x hx (rfl | hhx) <;> simp[*])
     (cut _ _ r hr dΔ dΓ).cast (by simp[Finset.erase_union])
 
-def andInversion₂ {p q} (d : ⊢ᶜ[P] insert (p ⋏ q) Δ) : ⊢ᶜ[P] insert q Δ := 
+noncomputable def andInversion₂ {p q} (d : ⊢ᶜ[P] insert (p ⋏ q) Δ) : ⊢ᶜ[P] insert q Δ := 
   (andInversion₂Aux d p q).weakening (by simp; exact Finset.insert_subset_insert _ (Finset.erase_subset _ _))
 
-def allInversionAux : {Δ : Sequent L} → ⊢ᶜ[P] Δ →
+
+noncomputable def allInversionAux : {Δ : Sequent L} → ⊢ᶜ[P] Δ →
     (p : SyntacticSubFormula L 1) → (t : SyntacticTerm L) → ⊢ᶜ[P] insert ([→ t].hom p) (Δ.erase (∀' p))
   | _, axL Δ r v hpos hneg, p, t => axL _ r v (by simp[hpos]) (by simp[hneg])
   | _, verum Δ h,           p, t => verum _ (by simp[h])
@@ -149,13 +150,13 @@ def allInversionAux : {Δ : Sequent L} → ⊢ᶜ[P] Δ →
     (cut _ _ r hr dΔ dΓ).cast (by simp[Finset.erase_union])
   termination_by allInversionAux _ d _ _ => d.length
 
-def allInversion (d : ⊢ᶜ[P] insert (∀' p) Δ) (t) : ⊢ᶜ[P] insert ([→ t].hom p) Δ :=
+noncomputable def allInversion (d : ⊢ᶜ[P] insert (∀' p) Δ) (t) : ⊢ᶜ[P] insert ([→ t].hom p) Δ :=
   (allInversionAux hP d p t).weakening (by simp; exact Finset.insert_subset_insert _ (Finset.erase_subset _ _))
 
-def allInversionClx {i} (d : ⊢ᶜ[< i] insert (∀' p) Δ) (t) : ⊢ᶜ[< i] insert ([→ t].hom p) Δ :=
+noncomputable def allInversionClx {i} (d : ⊢ᶜ[< i] insert (∀' p) Δ) (t) : ⊢ᶜ[< i] insert ([→ t].hom p) Δ :=
   allInversion (by simp) d t
 
-def falsumElimAux : {Δ : Sequent L} → ⊢ᶜ[P] Δ → ⊢ᶜ[P] Δ.erase ⊥
+noncomputable def falsumElimAux : {Δ : Sequent L} → ⊢ᶜ[P] Δ → ⊢ᶜ[P] Δ.erase ⊥
   | _, axL Δ r v hpos hneg => axL _ r v (by simp[hpos]) (by simp[hneg])
   | _, verum Δ h           => verum _ (by simp[h])
   | _, and Δ p q dp dq     =>
@@ -180,9 +181,9 @@ def falsumElimAux : {Δ : Sequent L} → ⊢ᶜ[P] Δ → ⊢ᶜ[P] Δ.erase ⊥
     have dΓ : ⊢ᶜ[P] (insert (~p) $ Γ.erase ⊥) := dΓ.falsumElimAux.weakening (by simp[Finset.subset_iff]; rintro x hx (rfl | hhx) <;> simp[*])
     (cut _ _ p hp dΔ dΓ).cast (by simp[Finset.erase_union])
 
-def falsumElim (d : ⊢ᶜ[P] insert ⊥ Δ) : ⊢ᶜ[P] Δ := d.falsumElimAux.weakening (by simp; exact Finset.erase_subset _ _)
+noncomputable def falsumElim (d : ⊢ᶜ[P] insert ⊥ Δ) : ⊢ᶜ[P] Δ := d.falsumElimAux.weakening (by simp; exact Finset.erase_subset _ _)
 
-def reductionAux {i} : {Δ : Sequent L} →
+noncomputable def reductionAux {i} : {Δ : Sequent L} →
     ⊢ᶜ[< i] Δ → {p : SyntacticFormula L} → p.isVType = true → p.complexity ≤ i →
     {Γ : Sequent L} → ⊢ᶜ[< i] insert (~p) Γ → ⊢ᶜ[< i] Δ.erase p ∪ Γ
   | _, axL Δ r v hpos hneg,  p, _,  _,  Γ, dΓ => by
@@ -254,14 +255,14 @@ def reductionAux {i} : {Δ : Sequent L} →
       (cut (Δ₁.erase p ∪ Γ) (Δ₂.erase p ∪ Γ) r hr d₁₁ d₂₁).cast (by rw[←Finset.union_union_distrib_right, Finset.erase_union])
     this
 
-def reduction {i} {p} (hp : p.complexity ≤ i) : ⊢ᶜ[< i] insert p Δ → ⊢ᶜ[< i] insert (~p) Γ → ⊢ᶜ[< i] Δ ∪ Γ := fun dΔ dΓ => by
+noncomputable def reduction {i} {p} (hp : p.complexity ≤ i) : ⊢ᶜ[< i] insert p Δ → ⊢ᶜ[< i] insert (~p) Γ → ⊢ᶜ[< i] Δ ∪ Γ := fun dΔ dΓ => by
   cases tp : p.isVType
   · have : (~p).isVType = true := isVType_neg_true_of_eq_false tp
     exact (reductionAux dΓ this (by simp[hp]) (Γ := Δ) (dΔ.cast (by simp))).weakening
       (by simp[Finset.union_comm]; exact Finset.union_subset_union (by rfl) (Finset.erase_subset _ _))
   · exact (reductionAux dΔ tp hp dΓ).weakening (Finset.union_subset_union (by simp; exact Finset.erase_subset _ _) (by rfl))
 
-def elimination {i} : {Δ : Sequent L} → ⊢ᶜ[< i + 1] Δ → ⊢ᶜ[< i] Δ
+noncomputable def elimination {i} : {Δ : Sequent L} → ⊢ᶜ[< i + 1] Δ → ⊢ᶜ[< i] Δ
   | _, axL Δ r v hpos hneg => axL Δ r v hpos hneg
   | _, verum Δ h           => verum Δ h
   | _, and Δ p q dp dq     => and Δ p q dp.elimination dq.elimination
@@ -270,11 +271,11 @@ def elimination {i} : {Δ : Sequent L} → ⊢ᶜ[< i + 1] Δ → ⊢ᶜ[< i] Δ
   | _, ex Δ t p d          => ex Δ t p d.elimination
   | _, cut _ _ _ hp dΔ dΓ  => reduction (Nat.lt_add_one_iff.mp hp) dΔ.elimination dΓ.elimination
 
-def hauptsatzClx : {i : ℕ} → ⊢ᶜ[< i] Δ → ⊢ᵀ Δ
+noncomputable def hauptsatzClx : {i : ℕ} → ⊢ᶜ[< i] Δ → ⊢ᵀ Δ
   | 0,     d => d.cutWeakening (by simp)
   | i + 1, d => d.elimination.hauptsatzClx
 
-def toClx : {Δ : Sequent L} → ⊢ᶜ Δ → (i : ℕ) × ⊢ᶜ[< i] Δ
+noncomputable def toClx : {Δ : Sequent L} → ⊢ᶜ Δ → (i : ℕ) × ⊢ᶜ[< i] Δ
   | _, axL Δ r v hpos hneg => ⟨0, axL Δ r v hpos hneg⟩
   | _, verum Δ h           => ⟨0, verum Δ h⟩
   | _, and Δ p q dp dq     => ⟨max dp.toClx.1 dq.toClx.1, and Δ p q (dp.toClx.2.ofLe (by simp)) (dq.toClx.2.ofLe (by simp))⟩
@@ -284,7 +285,10 @@ def toClx : {Δ : Sequent L} → ⊢ᶜ Δ → (i : ℕ) × ⊢ᶜ[< i] Δ
   | _, cut Δ Γ p _ dΔ dΓ   =>
     ⟨max (max dΔ.toClx.1 dΓ.toClx.1) p.complexity.succ, cut Δ Γ  p (by simp) (dΔ.toClx.2.ofLe (by simp)) (dΓ.toClx.2.ofLe (by simp))⟩
 
-def hauptsatz : ⊢ᶜ Δ → ⊢ᵀ Δ := fun d => hauptsatzClx d.toClx.2
+noncomputable def hauptsatz : ⊢ᶜ Δ → ⊢ᵀ Δ := fun d => hauptsatzClx d.toClx.2
+
+lemma iff_cut : Nonempty (⊢ᵀ Δ) ↔ Nonempty (⊢ᶜ Δ) :=
+  ⟨by { rintro ⟨d⟩; exact ⟨cutWeakeningCut d⟩ }, by rintro ⟨d⟩; exact ⟨d.hauptsatz⟩⟩
 
 end DerivationCR
 
