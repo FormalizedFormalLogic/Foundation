@@ -392,6 +392,10 @@ end Quotient
 
 namespace List
 
+def subsetSet (l : List α) (s : Set α) : Prop := ∀ ⦃a : α⦄, a ∈ l → a ∈ s
+
+lemma subsetSet_def {l : List α} {s : Set α} : l.subsetSet s ↔ (∀ a ∈ l, a ∈ s) := by simp[subsetSet]
+
 def upper : List ℕ → ℕ
   | []      => 0
   | n :: ns => max (n + 1) ns.upper
