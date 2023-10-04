@@ -511,6 +511,11 @@ lemma encode_vector {n} (v : Vector β n) :
 lemma encode_finArrow {n} (f : Fin n → β) :
     encode f = encode (List.ofFn f) := by simp[finArrow]; rw[Encodable.encode_ofEquiv, encode_vector]; simp
 
+lemma encode_finArrow' [Primcodable β] (f : Fin k → β) :
+    encode f = encode (fun i => encode (f i)) := by
+  simp[encode_finArrow, encode_list (List.ofFn f)]
+  funext i; simp
+
 lemma encode_fintypeArrow (ι : Type*) [Fintype ι] [Primcodable ι] [DecidableEq ι] (β : Type*) [Primcodable β] (f : ι → β) :
     encode f = encode (fintypeArrowEquivFinArrow f) := by simp[Primcodable.ofEquiv_toEncodable]; rw[Encodable.encode_ofEquiv]
 
@@ -647,5 +652,25 @@ lemma nat_toFin {n : ℕ} : Primrec (Nat.toFin n) :=
     by_cases hx : x < n <;> simp[hx]
     · rfl
     · rfl
+
+lemma list_mem [DecidableEq α] : PrimrecRel (· ∈ · : α → List α → Prop) := by
+  have : Primrec₂ (fun a l => l.foldr (fun a' ih => a = a' || ih) false : α → List α → Bool) :=
+    to₂' <| list_foldr snd (const false)
+      <| (dom_bool₂ _).comp₂
+        (Primrec.eq.comp₂ (fst.comp₂ Primrec₂.left) (fst.comp₂ Primrec₂.right))
+        (snd.comp₂ Primrec₂.right)
+  exact this.of_eq <| by intro a as; induction as <;> simp[*]
+
+lemma list_subset [DecidableEq α] : PrimrecRel (· ⊆ · : List α → List α → Prop) := by
+  have : Primrec₂ (fun l₁ l₂ => l₁.foldr (fun a' ih => a' ∈ l₂ && ih) true : List α → List α → Bool) :=
+    to₂' <| list_foldr fst (const true)
+      <| (dom_bool₂ _).comp₂
+        (list_mem.comp₂ (fst.comp₂ Primrec₂.right) (snd.comp₂ Primrec₂.left))
+        (snd.comp₂ Primrec₂.right)
+  exact this.of_eq <| by intro l₁ l₂; induction l₁ <;> simp[*]
+
+lemma list_all {α : Type*} {β : Type*} [Primcodable α] [Primcodable β]
+  {p : α → β → Bool} {l : α → List β} (hp : Primrec₂ p) (hl : Primrec l) : Primrec (fun a => (l a).all (p a)) :=
+  list_foldr hl (const true) ((dom_bool₂ _).comp₂ (hp.comp₂ Primrec₂.left (fst.comp₂ Primrec₂.right)) (snd.comp₂ Primrec₂.right))
 
 end Primrec

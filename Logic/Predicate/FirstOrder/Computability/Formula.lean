@@ -841,6 +841,34 @@ instance : Primcodable (SubFormula L μ n) :=
 -- 31775805419608027972015818561000739343253563007945350184910033971876879754597654645132096911041199614874696969038805225053580411
 -- 215684158738776904337761136760151729990515106646661045385956293637
 
+lemma rel_primrec :
+    Primrec (fun p => rel p.2.1 p.2.2 : (k : ℕ) × L.rel k × (Fin k → SubTerm L μ n) → SubFormula L μ n) := by
+  letI : ∀ n, Primcodable { t : UTerm L μ // t.bv ≤ n } := fun n => Primcodable.subtype (nat_le.comp UTerm.bv_primrec (Primrec.const n))
+  have h : Primrec (fun f => ⟨f.1, f.2.1, (fun i => UTerm.subtEquiv (f.2.2 i))⟩
+    : (k : ℕ) × L.rel k × (Fin k → SubTerm L μ n) → (k : ℕ) × L.rel k × (Fin k → UTerm L μ)) :=
+    encode_iff.mp (Primrec.encode.of_eq <| by
+      rintro ⟨k, r, v⟩; simp[Encodable.encode_prod_val r, encode_finArrow']
+      funext i; exact encode_ofEquiv subtEquiv _)
+  have : Primrec (fun f => UFormula.rel f.2.1 (fun i => UTerm.subtEquiv (f.2.2 i))
+      : (k : ℕ) × L.rel k × (Fin k → SubTerm L μ n) → UFormula L μ) :=
+    UFormula.rel_primrec.comp h
+  exact encode_iff.mp <| (Primrec.encode.comp this).of_eq <| by
+    rintro ⟨k, r, v⟩; simp[Encodable.encode_ofEquiv subfEquiv, Encodable.Subtype.encode_eq]
+
+lemma nrel_primrec :
+    Primrec (fun p => nrel p.2.1 p.2.2 : (k : ℕ) × L.rel k × (Fin k → SubTerm L μ n) → SubFormula L μ n) := by
+  letI : ∀ n, Primcodable { t : UTerm L μ // t.bv ≤ n } := fun n => Primcodable.subtype (nat_le.comp UTerm.bv_primrec (Primrec.const n))
+  have h : Primrec (fun f => ⟨f.1, f.2.1, (fun i => UTerm.subtEquiv (f.2.2 i))⟩
+    : (k : ℕ) × L.rel k × (Fin k → SubTerm L μ n) → (k : ℕ) × L.rel k × (Fin k → UTerm L μ)) :=
+    encode_iff.mp (Primrec.encode.of_eq <| by
+      rintro ⟨k, r, v⟩; simp[Encodable.encode_prod_val r, encode_finArrow']
+      funext i; exact encode_ofEquiv subtEquiv _)
+  have : Primrec (fun f => UFormula.nrel f.2.1 (fun i => UTerm.subtEquiv (f.2.2 i))
+      : (k : ℕ) × L.rel k × (Fin k → SubTerm L μ n) → UFormula L μ) :=
+    UFormula.nrel_primrec.comp h
+  exact encode_iff.mp <| (Primrec.encode.comp this).of_eq <| by
+    rintro ⟨k, r, v⟩; simp[Encodable.encode_ofEquiv subfEquiv, Encodable.Subtype.encode_eq]
+
 def relL (r : (k : ℕ) × L.rel k) (l : List (SubTerm L μ n)) : Option (SubFormula L μ n) :=
   if h : l.length = r.1
     then some (rel r.2 (fun i => l.get (i.cast h.symm)))
@@ -980,6 +1008,11 @@ lemma shift_primrec : Primrec (Rew.shiftl : SyntacticSubFormula L n → Syntacti
 lemma free_primrec : Primrec (Rew.freel : SyntacticSubFormula L (n + 1) → SyntacticSubFormula L n) := by
   unfold Rew.freel; rw[Rew.eq_bind Rew.free]
   exact bind_primrec (const _) (SubTerm.fvar_primrec.comp $ succ.comp snd) Primrec.id
+
+lemma emb_primrec : Primrec (Rew.embl : Sentence L → Formula L μ) := by
+  unfold Rew.embl; rw[Rew.eq_bind Rew.emb]; simp[Function.comp]
+  exact bind_primrec (const _)
+    (Primrec₂.option_some_iff.mp $ (Primrec₂.const none).of_eq <| by rintro _ ⟨⟩) Primrec.id
 
 end SubFormula
 

@@ -74,6 +74,98 @@ def isProper : ProofList L → Bool
   | (Code.ex p t,  Γ) :: l => isProper l && ∃' p ∈ Γ && Rew.substsl ![t] p :: Γ ∈ sequents l
   | (Code.wk Δ,    Γ) :: l => isProper l && Δ ⊆ Γ && Δ ∈ sequents l
 
+private def F (Γ : List (SyntacticFormula L)) (seq : List (List (SyntacticFormula L))) : Code L → Bool := fun c =>
+  Sum.recOn (Code.equiv L c)
+    (fun f => SubFormula.rel f.2.1 f.2.2 ∈ Γ && SubFormula.nrel f.2.1 f.2.2 ∈ Γ)
+  <| fun c => c.casesOn (fun _ => ⊤ ∈ Γ)
+  <| fun c => c.casesOn (fun p => p.1 ⋏ p.2 ∈ Γ && p.1 :: Γ ∈ seq && p.2 :: Γ ∈ seq)
+  <| fun c => c.casesOn (fun p => p.1 ⋎ p.2 ∈ Γ && p.1 :: p.2 :: Γ ∈ seq)
+  <| fun c => c.casesOn (fun p => ∀' p ∈ Γ && Rew.freel p :: Γ.map Rew.shiftl ∈ seq)
+  <| fun c => c.casesOn (fun p => ∃' p.1 ∈ Γ && Rew.substsl ![p.2] p.1 :: Γ ∈ seq)
+  <| fun Δ => Δ ⊆ Γ && Δ ∈ seq
+
+instance : Primcodable
+      ((((List (SyntacticFormula L) × List (List (SyntacticFormula L))) × Code L) ×
+          (Unit ⊕
+            SyntacticFormula L × SyntacticFormula L ⊕
+              SyntacticFormula L × SyntacticFormula L ⊕
+                SyntacticSubFormula L 1 ⊕ SyntacticSubFormula L 1 × SyntacticTerm L ⊕ List (SyntacticFormula L))) ×
+        (SyntacticFormula L × SyntacticFormula L ⊕
+          SyntacticFormula L × SyntacticFormula L ⊕
+            SyntacticSubFormula L 1 ⊕ SyntacticSubFormula L 1 × SyntacticTerm L ⊕ List (SyntacticFormula L))) := Primcodable.prod
+
+private lemma F_primrec : Primrec₂ (fun (p : List (SyntacticFormula L) × List (List (SyntacticFormula L))) => F p.1 p.2) :=
+  to₂' <| sum_casesOn (of_equiv.comp snd)
+    ((dom_bool₂ _).comp₂
+      (by apply list_mem.comp₂ (SubFormula.rel_primrec.comp₂ Primrec₂.right) (fst.comp₂ $ fst.comp₂ Primrec₂.left))
+      (by apply list_mem.comp₂ (SubFormula.nrel_primrec.comp₂ Primrec₂.right) (fst.comp₂ $ fst.comp₂ Primrec₂.left)))
+  <| to₂' <| sum_casesOn snd
+    (by apply list_mem.comp₂ (Primrec₂.const ⊤) (fst.comp₂ $ fst.comp₂ $ fst.comp₂ Primrec₂.left))
+  <| to₂' <| sum_casesOn snd
+    ((dom_bool₂ _).comp₂
+      ((dom_bool₂ _).comp₂
+        (by apply list_mem.comp₂
+              (SubFormula.and_primrec.comp₂ (fst.comp₂ Primrec₂.right) (snd.comp₂ Primrec₂.right))
+              (fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ Primrec₂.left))
+        (by apply list_mem.comp₂
+              (list_cons.comp₂ (fst.comp₂ Primrec₂.right) (fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ Primrec₂.left))
+              (snd.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ Primrec₂.left)))
+      (by apply list_mem.comp₂
+            (list_cons.comp₂ (snd.comp₂ Primrec₂.right) (fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ Primrec₂.left))
+            (snd.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ Primrec₂.left)))
+  <| to₂' <| sum_casesOn snd
+    ((dom_bool₂ _).comp₂
+      (by apply list_mem.comp₂
+            (SubFormula.or_primrec.comp₂ (fst.comp₂ Primrec₂.right) (snd.comp₂ Primrec₂.right))
+            (fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ Primrec₂.left))
+      (by apply list_mem.comp₂
+            (by apply list_cons.comp₂ (fst.comp₂ Primrec₂.right) $ list_cons.comp₂
+                  (snd.comp₂ Primrec₂.right)
+                  (fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ Primrec₂.left))
+            (snd.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ Primrec₂.left)))
+  <| to₂' <| sum_casesOn snd
+    ((dom_bool₂ _).comp₂
+      (by apply list_mem.comp₂
+            (SubFormula.all_primrec.comp₂ Primrec₂.right)
+            (fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ Primrec₂.left))
+      (by apply list_mem.comp₂
+            (list_cons.comp₂
+              (SubFormula.free_primrec.comp₂ Primrec₂.right)
+              (to₂' <| by apply list_map
+                            (fst.comp $ fst.comp $ fst.comp $ fst.comp $ fst.comp $ fst.comp $ fst)
+                            (SubFormula.shift_primrec.comp₂ Primrec₂.right)))
+            (snd.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ Primrec₂.left)))
+  <| to₂' <| sum_casesOn snd
+    ((dom_bool₂ _).comp₂
+      (by apply list_mem.comp₂
+            (SubFormula.ex_primrec.comp₂ $ fst.comp₂ Primrec₂.right)
+            (fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ Primrec₂.left))
+      (by apply list_mem.comp₂
+            (list_cons.comp₂
+              (by { sorry })
+              (fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ Primrec₂.left))
+            (snd.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ Primrec₂.left)))
+  <| (dom_bool₂ _).comp₂
+    (by apply list_subset.comp₂
+          Primrec₂.right
+          (fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ Primrec₂.left))
+    (by apply list_mem.comp₂
+          Primrec₂.right
+          (snd.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ Primrec₂.left))
+
+lemma isProper_primrec : Primrec (isProper : ProofList L → Bool) := by
+  have : Primrec₂ (fun _ p => p.2.2 && F p.1.2 (sequents p.2.1) p.1.1
+    : ProofList L → (Code L × List (SyntacticFormula L)) × (List (Code L × List (SyntacticFormula L))) × Bool → Bool) :=
+    (dom_bool₂ _).comp₂ (snd.comp₂ $ snd.comp₂ Primrec₂.right)
+    (F_primrec.comp₂
+        ((Primrec₂.pair.comp (snd.comp fst) (list_map (fst.comp snd) (snd.comp₂ Primrec₂.right))).comp₂ Primrec₂.right)
+        (fst.comp₂ $ fst.comp₂ Primrec₂.right))
+  have : Primrec (fun l => l.rec true (fun c l' ih => ih && F c.2 (sequents l') c.1) : ProofList L → Bool) :=
+    list_rec Primrec.id (const true) this
+  exact this.of_eq <| by
+    intro l; induction' l with c l ih <;> simp[isProper]
+    rw[ih]; rcases c with ⟨⟨⟩, Γ⟩ <;> simp[isProper, F, Code.equiv, Bool.and_assoc]
+
 @[simp] lemma sequents_append {l₁ l₂ : ProofList L} : sequents (l₁ ++ l₂) = sequents l₁ ++ sequents l₂ := by simp[sequents]
 
 lemma isProper_append {l₁ l₂ : ProofList L} (h₁ : isProper l₁) (h₂ : isProper l₂) : isProper (l₁ ++ l₂) := by
@@ -199,8 +291,8 @@ lemma derivable_iff_isProper {Γ : Sequent L} : Nonempty (⊢ᵀ Γ) ↔ ∃ l, 
   ⟨by rintro ⟨b⟩; exact ⟨ofDerivation b, isProper_ofDerivation b, mem_ofDerivation b⟩,
    by rintro ⟨l, hl⟩; rcases derivation_of_isProper l hl.1 _ hl.2 with ⟨d⟩; exact ⟨d.cast (by simp)⟩⟩
 
-lemma provable_iff {σ : Sentence L} :
-    Nonempty (T ⊢ σ) ↔ ∃ l, ∃ U : List (Sentence L), (U.map (~·)).subsetSet T ∧ (σ :: U).map Rew.embl ∈ sequents l ∧ isProper l := by
+lemma provable_iff {T : Theory L} {σ : Sentence L} [DecidablePred T] :
+    Nonempty (T ⊢ σ) ↔ ∃ l, ∃ U : List (Sentence L), (U.map (~·)).all (T ·) ∧ (σ :: U).map Rew.embl ∈ sequents l ∧ isProper l := by
   exact ⟨by
     rintro ⟨U, hU, d⟩
     rcases derivable_iff_isProper.mp (iff_cut.mpr ⟨d⟩) with ⟨l, hl, hmem⟩
@@ -209,12 +301,12 @@ lemma provable_iff {σ : Sentence L} :
     exact ⟨l', U.toList, by
       simp[List.subsetSet]; intro x hx
       have : ∃ y ∈ T, ~y = x := by simpa using hU hx
-      rcases this with ⟨y, hy, rfl⟩; simp[hy], by simp, hl'⟩,
+      rcases this with ⟨y, hy, rfl⟩; simpa[hy], by simp, hl'⟩,
   by rintro ⟨l, U, hU, hl, hproper⟩
      rcases derivation_of_isProper l hproper _ hl with ⟨d⟩
      exact ⟨{ 
        leftHand := U.toFinset
-       hleftHand := by intro x; simp; intro hx; exact ⟨~x, by simp[@hU (~x) (by simp[hx])]⟩
+       hleftHand := by intro x; simp; intro hx; exact ⟨~x, by { simp at hU; exact ⟨hU x hx, by simp⟩ }⟩
        derivation := cutWeakeningCut (d.cast (by simp[List.toFinset_map, Finset.insert_eq])) }⟩⟩
 
 end ProofList
