@@ -9,6 +9,7 @@ Formalizing Logic in Lean4
   - **Predicate**: Predicate logic
     - **FirstOrder**: First-Order logic
       - **Basic**: Basic definitions & theorems
+      - **Computability**: encodeing, computability
       - **Completeness**: Completeness theorem
       - **Principia**: Proof system
       - **Arith**: Arithmetic
@@ -56,15 +57,20 @@ def eqZeroOfMulEqZero : [] ⟹[T] “∀ ∀ (#0 * #1 = 0 → #0 = 0 ∨ #1 = 0)
       apply .h
       · andr .ne_zero
     choose m' st this as .hm'
-    have n * m = (n' + 1)*m' + n' + 1 as .h₁
+    have n * m = (n' + 1) * m' + n' + 1 as .h₁
     · specialize .mul_succ with n' + 1, m' as .hms
-      specialize .add_succ with (n' + 1)*m', n' as .has
+      specialize .add_succ with (n' + 1) * m', n' as .has
       rw[.hn', .hm', .hms, .has]
       refl
-    have (n' + 1)*m' + n' + 1 = 0
+    have (n' + 1) * m' + n' + 1 = 0
     · rw[←.h₁]
-    have (n' + 1)*m' + n' + 1 ≠ 0
-    · specialize .succ_ne_zero with (n' + 1)*m' + n'
+    have (n' + 1) * m' + n' + 1 ≠ 0
+    · specialize .succ_ne_zero with (n' + 1) * m' + n'
     contradiction this
   qed.
 ```
+
+## References
+- J. Han, F. van Doorn, A formalization of forcing and the unprovability of the continuum hypothesis
+- W. Pohlers, Proof Theory: The First Step into Impredicativity
+- P. Hájek, P. Pudlák, Metamathematics of First-Order Arithmetic
