@@ -1,4 +1,5 @@
 import Logic.Vorspiel.Vorspiel
+import Mathlib.Computability.Halting
 
 attribute [-instance] WType.instEncodableWType Encodable.finPi Encodable.fintypeArrowOfEncodable
 
@@ -674,3 +675,41 @@ lemma list_all {α : Type*} {β : Type*} [Primcodable α] [Primcodable β]
   list_foldr hl (const true) ((dom_bool₂ _).comp₂ (hp.comp₂ Primrec₂.left (fst.comp₂ Primrec₂.right)) (snd.comp₂ Primrec₂.right))
 
 end Primrec
+
+namespace Computable
+
+variable {α : Type*} {β : Type*} {σ : Type*} [Primcodable α] [Primcodable β] [Primcodable σ]
+
+lemma dom_bool {f : Bool → α} : Computable f := (Primrec.dom_bool f).to_comp
+
+lemma dom_bool₂ {f : Bool → Bool → α} : Computable₂ f := (Primrec.dom_bool₂ f).to_comp
+
+lemma _root_.Computable₂.left : Computable₂ fun (a : α) (_ : β) => a := .fst
+
+lemma _root_.Computable₂.right : Computable₂ fun (_ : α) (b : β) => b := .snd
+
+lemma to₂' {f : α → β → σ} (hf : Computable (fun p => f p.1 p.2 : α × β → σ)) : Computable₂ f := hf
+
+lemma list_all {α : Type*} {β : Type*} [Primcodable α] [Primcodable β]
+  {p : α → β → Bool} {l : α → List β} (hp : Computable₂ p) (hl : Computable l) : Computable (fun a => (l a).all (p a)) := by
+  let f : α → ℕ → Bool := fun a n => n.recOn true (fun m ih => ((l a).reverse.get? m).casesOn false (fun b => p a b && ih))
+  have : Computable₂ (fun q₁ q₂ => ((l q₁.1).reverse.get? q₂.1).casesOn false (fun b => p q₁.1 b && q₂.2)
+    : α × ℕ → ℕ × Bool → Bool) :=
+    to₂' <| option_casesOn
+      (list_get?.comp (list_reverse.comp $ hl.comp $ fst.comp fst) (fst.comp snd))
+      (const false) (by apply dom_bool₂.comp₂ (hp.comp₂ (fst.comp₂ $ fst.comp₂ .left) .right) (snd.comp₂ $ snd.comp₂ .left))
+  have hf : Computable₂ f := (nat_rec snd (const true) this).to₂
+  have := hf.comp Computable.id (list_length.comp hl)
+  exact this.of_eq <| by
+    intro a; simp
+    generalize l a = l
+    induction' l with b l ih <;> simp
+    { have : List.get? (List.reverse l ++ [b]) (List.length l) = some b := by
+        simpa using List.get?_concat_length l.reverse b      
+      simp[this]; rw[←ih]
+      exact congr_arg₂ (· && ·) rfl (Nat.rec_eq _ _ _ _ (by
+        intro m hm k
+        have : (l.reverse ++ [b]).get? m = l.reverse.get? m := List.get?_append (by simp[hm])
+        simp[this])) }
+
+end Computable 

@@ -7,7 +7,7 @@ namespace LO
 
 namespace FirstOrder
 
-open Encodable Primrec
+open Encodable
 variable {L : Language.{u}} [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq (L.rel k)]
 variable [(k : ℕ) → Primcodable (L.func k)] [(k : ℕ) → Primcodable (L.rel k)]
   [UniformlyPrimcodable L.func] [UniformlyPrimcodable L.rel] [Primcodable μ]
@@ -84,15 +84,19 @@ private def F (Γ : List (SyntacticFormula L)) (seq : List (List (SyntacticFormu
   <| fun c => c.casesOn (fun p => ∃' p.1 ∈ Γ && Rew.substsl ![p.2] p.1 :: Γ ∈ seq)
   <| fun Δ => Δ ⊆ Γ && Δ ∈ seq
 
+section
+
+open Primrec
+
 instance : Primcodable
-      ((((List (SyntacticFormula L) × List (List (SyntacticFormula L))) × Code L) ×
-          (Unit ⊕
-            SyntacticFormula L × SyntacticFormula L ⊕
-              SyntacticFormula L × SyntacticFormula L ⊕
-                SyntacticSubFormula L 1 ⊕ SyntacticSubFormula L 1 × SyntacticTerm L ⊕ List (SyntacticFormula L))) ×
-        (SyntacticFormula L × SyntacticFormula L ⊕
+  ((((List (SyntacticFormula L) × List (List (SyntacticFormula L))) × Code L) ×
+      (Unit ⊕
+        SyntacticFormula L × SyntacticFormula L ⊕
           SyntacticFormula L × SyntacticFormula L ⊕
-            SyntacticSubFormula L 1 ⊕ SyntacticSubFormula L 1 × SyntacticTerm L ⊕ List (SyntacticFormula L))) := Primcodable.prod
+            SyntacticSubFormula L 1 ⊕ SyntacticSubFormula L 1 × SyntacticTerm L ⊕ List (SyntacticFormula L))) ×
+    (SyntacticFormula L × SyntacticFormula L ⊕
+      SyntacticFormula L × SyntacticFormula L ⊕
+        SyntacticSubFormula L 1 ⊕ SyntacticSubFormula L 1 × SyntacticTerm L ⊕ List (SyntacticFormula L))) := Primcodable.prod
 
 private lemma F_primrec : Primrec₂ (fun (p : List (SyntacticFormula L) × List (List (SyntacticFormula L))) => F p.1 p.2) :=
   to₂' <| sum_casesOn (of_equiv.comp snd)
@@ -141,9 +145,9 @@ private lemma F_primrec : Primrec₂ (fun (p : List (SyntacticFormula L) × List
             (SubFormula.ex_primrec.comp₂ $ fst.comp₂ Primrec₂.right)
             (fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ Primrec₂.left))
       (by apply list_mem.comp₂
-            (list_cons.comp₂
-              (by { sorry })
-              (fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ Primrec₂.left))
+            (by apply list_cons.comp₂
+                  (by apply SubFormula.substs₁_primrec.comp₂ (snd.comp₂ Primrec₂.right) (fst.comp₂ Primrec₂.right))
+                  (by apply fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ Primrec₂.left))
             (snd.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ Primrec₂.left)))
   <| (dom_bool₂ _).comp₂
     (by apply list_subset.comp₂
@@ -151,7 +155,7 @@ private lemma F_primrec : Primrec₂ (fun (p : List (SyntacticFormula L) × List
           (fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ Primrec₂.left))
     (by apply list_mem.comp₂
           Primrec₂.right
-          (snd.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ Primrec₂.left))
+          (by apply snd.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ Primrec₂.left))
 
 lemma isProper_primrec : Primrec (isProper : ProofList L → Bool) := by
   have : Primrec₂ (fun _ p => p.2.2 && F p.1.2 (sequents p.2.1) p.1.1
@@ -165,6 +169,8 @@ lemma isProper_primrec : Primrec (isProper : ProofList L → Bool) := by
   exact this.of_eq <| by
     intro l; induction' l with c l ih <;> simp[isProper]
     rw[ih]; rcases c with ⟨⟨⟩, Γ⟩ <;> simp[isProper, F, Code.equiv, Bool.and_assoc]
+
+end
 
 @[simp] lemma sequents_append {l₁ l₂ : ProofList L} : sequents (l₁ ++ l₂) = sequents l₁ ++ sequents l₂ := by simp[sequents]
 
@@ -180,10 +186,6 @@ lemma isProper_append {l₁ l₂ : ProofList L} (h₁ : isProper l₁) (h₂ : i
     case all => { exact ⟨⟨ih h₁.1.1, h₁.1.2⟩, Or.inl h₁.2⟩ }
     case ex => { exact ⟨⟨ih h₁.1.1, h₁.1.2⟩, Or.inl h₁.2⟩ }
     case wk => { exact ⟨⟨ih h₁.1.1, h₁.1.2⟩, Or.inl h₁.2⟩ }
-
-def head : List (Code L × List (SyntacticFormula L)) → List (SyntacticFormula L)
-  | []          => [⊤]
-  | ⟨_, Γ⟩ :: _ => Γ
 
 lemma derivation_of_isProper : (l : ProofList L) → isProper l → ∀ Γ ∈ sequents l, Nonempty (⊢ᵀ Γ.toFinset)
   | [],                     _, Δ, hΔ => by simp[sequents] at hΔ
@@ -291,7 +293,7 @@ lemma derivable_iff_isProper {Γ : Sequent L} : Nonempty (⊢ᵀ Γ) ↔ ∃ l, 
   ⟨by rintro ⟨b⟩; exact ⟨ofDerivation b, isProper_ofDerivation b, mem_ofDerivation b⟩,
    by rintro ⟨l, hl⟩; rcases derivation_of_isProper l hl.1 _ hl.2 with ⟨d⟩; exact ⟨d.cast (by simp)⟩⟩
 
-lemma provable_iff {T : Theory L} {σ : Sentence L} [DecidablePred T] :
+lemma provable_iff {T : Theory L} [DecidablePred T] {σ : Sentence L} :
     Nonempty (T ⊢ σ) ↔ ∃ l, ∃ U : List (Sentence L), (U.map (~·)).all (T ·) ∧ (σ :: U).map Rew.embl ∈ sequents l ∧ isProper l := by
   exact ⟨by
     rintro ⟨U, hU, d⟩
@@ -313,6 +315,50 @@ end ProofList
 
 end Derivation
 
+open Derivation ProofList
+
+def provFn (T : Theory L) [DecidablePred T] : ℕ → ℕ → ℕ := fun x e =>
+  (decode x : Option (Sentence L)).casesOn 0
+  <| fun σ => (decode e : Option (ProofList L × List (Sentence L))).casesOn 0
+  <| fun A => bif (A.2.map (~·)).all (T ·) && (σ :: A.2).map Rew.embl ∈ sequents A.1 && isProper A.1 then 1 else 0
+
+lemma provable_iff_provFn {T : Theory L} [DecidablePred T] {σ : Sentence L} :
+    Nonempty (T ⊢ σ) ↔ ∃ e, provFn T (encode σ) e = 1 := by
+  simp[provable_iff, provFn]
+  constructor
+  · rintro ⟨l, U, hU, hl, hproper⟩
+    use encode (l, U)
+    have : (U.map (~·)).all (T ·) := by simp; intro x hx; exact hU x hx
+    simp[hU, hl, hproper, this]
+  · simp; intro e
+    rcases decode e.unpair.1 with (_ | ⟨l⟩) <;> simp
+    rcases decode e.unpair.2 with (_ | ⟨U⟩) <;> simp
+    simp only [Bool.cond_eq_ite, Bool.and_eq_true, ite_eq_iff]; simp
+    intro h₁ h₂ h₃
+    exact ⟨l, U, h₁, h₂, h₃⟩
+
+section
+
+open Computable
+
+lemma provFn_primrec {T : Theory L} [DecidablePred T] (hT : Computable (fun x => decide (T x))) :
+    Computable₂ (provFn T) :=
+  to₂' <| option_casesOn (Computable.decode.comp fst) (const 0)
+  <| option_casesOn (Computable.decode.comp $ snd.comp fst) (const 0)
+  <| to₂' <| Computable.cond
+    (dom_bool₂.comp
+      (dom_bool₂.comp
+        (list_all (hT.comp Computable₂.right)
+          (Primrec.to_comp $ Primrec.list_map (Primrec.snd.comp .snd) (SubFormula.neg_primrec.comp₂ .right)))
+        (Primrec.to_comp $ by
+          apply Primrec.list_mem.comp
+                  (Primrec.list_map (Primrec.list_cons.comp (Primrec.snd.comp .fst) (Primrec.snd.comp .snd))
+                    (SubFormula.emb_primrec.comp₂ .right))
+                  (Primrec.list_map (Primrec.fst.comp .snd) (Primrec.snd.comp₂ .right))))
+      (Primrec.to_comp $ isProper_primrec.comp $ Primrec.fst.comp .snd))
+    (const 1) (const 0)
+
+end
 
 end FirstOrder
 

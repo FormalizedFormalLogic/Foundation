@@ -1001,6 +1001,12 @@ lemma substs_primrec :
     to₂' <| bind_primrec fst (SubTerm.fvar_primrec.comp snd) snd
   exact this.of_eq <| by { intro v p; unfold Rew.substsl; rw[Rew.eq_bind (Rew.substs v)]; simp[Function.comp] }
 
+lemma substs₁_primrec :
+    Primrec₂ (fun t p => Rew.substsl ![t] p : SubTerm L μ n' → SubFormula L μ 1 → SubFormula L μ n') :=
+  substs_primrec.comp₂ (Primrec₂.encode_iff.mp $ 
+    (Primrec.encode.comp₂ (list_cons.comp₂ Primrec₂.left (Primrec₂.const []))).of_eq
+    <| by intro x _; simp[encode_finArrow]) Primrec₂.right
+
 lemma shift_primrec : Primrec (Rew.shiftl : SyntacticSubFormula L n → SyntacticSubFormula L n) := by
   unfold Rew.shiftl; rw[Rew.eq_bind Rew.shift]
   exact bind_primrec (const _) (SubTerm.fvar_primrec.comp $ succ.comp snd) Primrec.id
@@ -1013,6 +1019,8 @@ lemma emb_primrec : Primrec (Rew.embl : Sentence L → Formula L μ) := by
   unfold Rew.embl; rw[Rew.eq_bind Rew.emb]; simp[Function.comp]
   exact bind_primrec (const _)
     (Primrec₂.option_some_iff.mp $ (Primrec₂.const none).of_eq <| by rintro _ ⟨⟩) Primrec.id
+
+
 
 end SubFormula
 

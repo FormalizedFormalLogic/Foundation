@@ -37,6 +37,12 @@ infixr:70 " :>ₙ " => cases
 lemma sub_pred {m n : ℕ} (hm : n ≤ m) (hn : n ≠ 0) : m - n.pred = (m - n).succ := by
   rw [←Nat.sub_one, tsub_tsub_assoc hm (Nat.one_le_iff_ne_zero.mpr hn)]
 
+lemma rec_eq {α : Sort*} (a : α) (f₁ f₂ : ℕ → α → α) (n : ℕ) (H : ∀ m < n, ∀ a, f₁ m a = f₂ m a) :
+    (n.rec a f₁ : α) = n.rec a f₂ := by
+  induction' n with n ih <;> simp
+  · have : (n.rec a f₁ : α) = n.rec a f₂ := ih (fun m hm a =>  H m (Nat.lt.step hm) a)
+    simpa[this] using H n (Nat.lt.base n) (n.rec a f₂)
+
 end Nat
 
 namespace Fin
