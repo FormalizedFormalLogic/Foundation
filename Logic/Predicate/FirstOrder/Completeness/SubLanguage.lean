@@ -192,9 +192,9 @@ lemma eval_lMap {p : SubFormula L₁ μ n} :
     simpa[not_iff_not] using
       extendStructure.rel Φ s₁ (injr k) r (fun i => SubTerm.val s₁ e ε (v i))
 
-lemma realize_lMap (σ : Sentence L₁) :
-    Logic.Semantics.realize (s₁.extendStructure Φ) (SubFormula.lMap Φ σ) ↔ Logic.Semantics.realize s₁ σ := by
-  simp[Logic.Semantics.realize, Val, eval_lMap Φ injf injr]
+lemma models_lMap (σ : Sentence L₁) :
+    Logic.Semantics.models (s₁.extendStructure Φ) (SubFormula.lMap Φ σ) ↔ Logic.Semantics.models s₁ σ := by
+  simp[Logic.Semantics.models, Val, eval_lMap Φ injf injr]
 
 end extendStructure
 
@@ -211,10 +211,10 @@ lemma lMap_models_lMap_iff {T : Theory L₁} {σ : Sentence L₁} :
     Theory.lMap Φ T ⊨ SubFormula.lMap Φ σ ↔ T ⊨ σ := by
   constructor
   · simp; intro h M _ s₁ hs₁
-    exact (Structure.extendStructure.realize_lMap Φ injf injr s₁ σ).mp $
+    exact (Structure.extendStructure.models_lMap Φ injf injr s₁ σ).mp $
       h M (s₁.extendStructure Φ)
-      (by simp[Logic.Semantics.realizeTheory, Theory.lMap];
-          intro σ hσ; exact (Structure.extendStructure.realize_lMap (Φ := Φ) injf injr s₁ σ).mpr (hs₁ hσ))
+      (by simp[Logic.Semantics.modelsTheory, Theory.lMap];
+          intro σ hσ; exact (Structure.extendStructure.models_lMap (Φ := Φ) injf injr s₁ σ).mpr (hs₁ hσ))
   · exact lMap_models_lMap
 
 open Logic
@@ -222,7 +222,7 @@ open Logic
 lemma satisfiableₛ_lMap {T : Theory L₁} (s : Semantics.Satisfiableₛ T) :
     Semantics.Satisfiableₛ (SubFormula.lMap Φ '' T) := by
   rcases s with ⟨M, i, s, hM⟩
-  exact ⟨M, i, s.extendStructure Φ, by simp; intro σ hσ; exact (Structure.extendStructure.realize_lMap Φ injf injr s σ).mpr (hM hσ)⟩
+  exact ⟨M, i, s.extendStructure Φ, by simp; intro σ hσ; exact (Structure.extendStructure.models_lMap Φ injf injr s σ).mpr (hM hσ)⟩
 
 end lMap
 

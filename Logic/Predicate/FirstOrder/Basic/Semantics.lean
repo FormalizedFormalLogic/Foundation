@@ -100,6 +100,8 @@ abbrev val! (M : Type w) [s : Structure L M] {n} (e : Fin n → M) (ε : μ → 
 
 abbrev bVal! (M : Type w) [s : Structure L M] {n} (e : Fin n → M) : SubTerm L Empty n → M := bVal s e
 
+abbrev realize (s : Structure L M) (t : Term L M) : M := t.val s ![] id
+
 @[simp] lemma val_bvar (x) : val s e ε (#x : SubTerm L μ n) = e x := rfl
 
 @[simp] lemma val_fvar (x) : val s e ε (&x : SubTerm L μ n) = ε x := rfl
@@ -128,6 +130,7 @@ lemma val_substs {n'} (w : Fin n' → SubTerm L μ n) (t : SubTerm L μ n') :
 
 @[simp] lemma val_bShift (a : M) (t : SubTerm L μ n) :
     (Rew.bShift t).val s (a :> e) ε = t.val s e ε := by simp[val_rew, Function.comp]
+
 section Language
 
 variable (φ : L₁ →ᵥ L₂) (e : Fin n → M) (ε : μ → M)
@@ -135,18 +138,6 @@ variable (φ : L₁ →ᵥ L₂) (e : Fin n → M) (ε : μ → M)
 lemma val_lMap (φ : L₁ →ᵥ L₂) (s₂ : Structure L₂ M) (e : Fin n → M) (ε : μ → M) {t : SubTerm L₁ μ n} :
     (t.lMap φ).val s₂ e ε = t.val (s₂.lMap φ) e ε :=
   by induction t <;> simp[*, val!, Function.comp, val_func, SubTerm.lMap_func]
-
-/-
-variable [Inhabited M]
-
-lemma val_extendTStructure_lMap
-    (injf : ∀ k, Function.Injective (φ.onFunc : L₁.func k → L₂.func k))
-    (s₁ : TStructure L₁ M) (t : SubTerm L₁ μ n) :
-    val (φ.extendTStructure s₁) e ε (φ.lMap t) = val s₁ e ε t := by
-  induction t <;> simp[*, Language.Hom.lMap_func, val_func]
-  case func k f v ih => 
-    exact TStructure.extendTStructure_func φ s₁ (injf k) f (fun i => val s₁ e ε (v i))
--/
 
 end Language
 
@@ -245,6 +236,8 @@ abbrev Val! (M : Type w) [s : Structure L M] (ε : μ → M) :
 
 abbrev BVal! (M : Type w) [s : Structure L M] (e : Fin n → M) :
     SubFormula L Empty n →L Prop := BVal s e
+
+abbrev Realize (s : Structure L M) : Formula L M →L Prop := Eval s ![] id
 
 lemma eval_rel {k} {r : L.rel k} {v} :
     Eval s e ε (rel r v) ↔ s.rel r (fun i => SubTerm.val s e ε (v i)) := of_eq rfl
@@ -346,16 +339,20 @@ end SubFormula
 open Logic
 
 instance semantics : Semantics (Sentence L) (Structure.{u, u} L) where
-  realize := (SubFormula.Val · Empty.elim)
+  models := (SubFormula.Val · Empty.elim)
 
-abbrev Models (M : Type u) [s : Structure L M] : Sentence L →L Prop := Semantics.realize s
+abbrev Models (M : Type u) [s : Structure L M] : Sentence L →L Prop := Semantics.models s
 
 scoped postfix:max " ⊧ " => Models
 
 abbrev ModelsTheory (M : Type u) [s : Structure L M] (T : Theory L) : Prop :=
-  Semantics.realizeTheory (𝓢 := semantics) s T
+  Semantics.modelsTheory (𝓢 := semantics) s T
 
 scoped infix:55 " ⊧* " => ModelsTheory
+
+abbrev Realize (M : Type u) [s : Structure L M] : Formula L M →L Prop := SubFormula.Val s id
+
+scoped postfix:max " ⊧ᵣ " => Realize
 
 structure Theory.semanticGe (T₁ : Theory L₁) (T₂ : Theory L₂) :=
   carrier : Type u → Type u
@@ -382,12 +379,12 @@ lemma models_def : M ⊧ = SubFormula.Val s Empty.elim := rfl
 
 lemma models_iff {σ : Sentence L} : M ⊧ σ ↔ SubFormula.Val s Empty.elim σ := by simp[models_def]
 
-lemma realize_def : Semantics.realize s = SubFormula.Val s Empty.elim := rfl
+lemma models_def' : Semantics.models s = SubFormula.Val s Empty.elim := rfl
 
 lemma modelsTheory_iff {T : Theory L} : M ⊧* T ↔ (∀ ⦃p⦄, p ∈ T → M ⊧ p) := of_eq rfl
 
-lemma models_iff_realize {σ : Sentence L} :
-    M ⊧ σ ↔ Semantics.realize s σ := of_eq rfl
+lemma models_iff_models {σ : Sentence L} :
+    M ⊧ σ ↔ Semantics.models s σ := of_eq rfl
 
 lemma consequence_iff {T : Theory L} {σ : Sentence L} :
     T ⊨ σ ↔ (∀ (M : Type u) [Inhabited M] [Structure L M], M ⊧* T → M ⊧ σ) := of_eq rfl
@@ -396,8 +393,8 @@ lemma satisfiableₛ_iff {T : Theory L} :
     Semantics.Satisfiableₛ T ↔ ∃ (M : Type u) (_ : Inhabited M) (_ : Structure L M), M ⊧* T :=
   of_eq rfl
 
-lemma satisfiableₛ_intro {T : Theory L} (M : Type u) [i : Inhabited M] [s : Structure L M] (h : M ⊧* T) : Semantics.Satisfiableₛ T :=
-⟨M, i, s, h⟩
+lemma satisfiableₛ_intro {T : Theory L} (M : Type u) [i : Inhabited M] [s : Structure L M] (h : M ⊧* T) :
+    Semantics.Satisfiableₛ T := ⟨M, i, s, h⟩
 
 lemma valid_iff {σ : Sentence L} :
     Semantics.Valid σ ↔ ∀ ⦃M : Type u⦄ [Inhabited M] [Structure L M], M ⊧ σ :=
@@ -458,8 +455,8 @@ lemma eval_lMap {p : SubFormula L₁ μ n} :
     simp[*, SubTerm.val_lMap, lMap_rel, lMap_nrel, eval_rel, eval_nrel]
 
 lemma models_lMap {σ : Sentence L₁} :
-    Semantics.realize s₂ (lMap Φ σ) ↔ Semantics.realize (s₂.lMap Φ) σ :=
-  by simp[Semantics.realize, Val, eval_lMap]
+    Semantics.models s₂ (lMap Φ σ) ↔ Semantics.models (s₂.lMap Φ) σ :=
+  by simp[Semantics.models, Val, eval_lMap]
 
 end lMap
 
@@ -468,7 +465,7 @@ end SubFormula
 lemma lMap_models_lMap {L₁ L₂ : Language.{u}} {Φ : L₁ →ᵥ L₂}  {T : Theory L₁} {σ : Sentence L₁} (h : T ⊨ σ) :
     T.lMap Φ ⊨ SubFormula.lMap Φ σ := by
   intro M _ s hM
-  have : Semantics.realize (s.lMap Φ) σ :=
+  have : Semantics.models (s.lMap Φ) σ :=
     h M (s.lMap Φ) (fun q hq => SubFormula.models_lMap.mp $ hM (Set.mem_image_of_mem _ hq))
   exact SubFormula.models_lMap.mpr this
 

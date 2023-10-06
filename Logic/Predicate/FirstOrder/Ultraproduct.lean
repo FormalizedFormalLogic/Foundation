@@ -98,9 +98,9 @@ lemma val_Uprod {p : Formula L μ} :
 
 end SubFormula
 
-lemma realize_Uprod {σ : Sentence L} :
-    (Uprod A 𝓤) ⊧ σ ↔ {ι | Logic.Semantics.realize (s ι) σ} ∈ 𝓤 :=
-  by simp[realize_def, SubFormula.val_Uprod, Empty.eq_elim]
+lemma models_Uprod {σ : Sentence L} :
+    (Uprod A 𝓤) ⊧ σ ↔ {ι | Logic.Semantics.models (s ι) σ} ∈ 𝓤 :=
+  by simp[models_def, SubFormula.val_Uprod, Empty.eq_elim]
 
 variable (A)
 
@@ -140,7 +140,7 @@ lemma compactnessAux :
     choose A si s hA using this
     have : ∃ 𝓤 : Ultrafilter (FinSubTheory T), Set.image (SubFormula.domain A) T ⊆ 𝓤.sets := ultrafilter_exists A hA
     rcases this with ⟨𝓤, h𝓤⟩
-    have : Structure.Uprod A 𝓤 ⊧* T := by intro σ hσ; exact realize_Uprod.mpr (h𝓤 $ Set.mem_image_of_mem (SubFormula.domain A) hσ)
+    have : Structure.Uprod A 𝓤 ⊧* T := by intro σ hσ; exact models_Uprod.mpr (h𝓤 $ Set.mem_image_of_mem (SubFormula.domain A) hσ)
     exact satisfiableₛ_intro (Structure.Uprod A 𝓤) this
 
 theorem compactness :

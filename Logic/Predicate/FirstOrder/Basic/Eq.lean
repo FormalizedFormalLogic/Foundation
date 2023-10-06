@@ -66,7 +66,7 @@ namespace Eq
 
 @[simp] lemma modelsEqTheory {M : Type u} [Structure L M] [Structure.Eq L M] : M ⊧* Theory.Eq L := by
   intro σ h
-  cases h <;> simp[realize_def, SubFormula.vecEq, SubTerm.val_func]
+  cases h <;> simp[models_def, SubFormula.vecEq, SubTerm.val_func]
   · intro e h; congr; funext i; exact h i
   case relExt r =>
     simp[SubFormula.eval_rel]; intro e h; simp[congr_arg (rel r) (funext h)]
@@ -198,7 +198,7 @@ lemma consequence_iff_eq {T : Theory L} [EqTheory T] {σ : Sentence L} :
   simp[consequence_iff]; constructor
   · intro h M i s _ hM; exact h M hM
   · intro h M i s hM
-    have H : M ⊧* Theory.Eq L := Logic.Semantics.realizeTheory_of_subset hM EqTheory.eq
+    have H : M ⊧* Theory.Eq L := Logic.Semantics.modelsTheory_of_subset hM EqTheory.eq
     have e : Structure.Eq.QuotEq H ≃ₑ[L] M := Structure.Eq.QuotEq.elementaryEquiv H
     exact e.models.mp $ h (Structure.Eq.QuotEq H) (e.modelsTheory.mpr hM)
 
@@ -206,7 +206,7 @@ lemma satisfiableₛ_iff_eq {T : Theory L} [EqTheory T] :
     Logic.Semantics.Satisfiableₛ T ↔ (∃ (M : Type u) (_ : Inhabited M) (_ : Structure L M) (_ : Structure.Eq L M), M ⊧* T) := by
   simp[satisfiableₛ_iff]; constructor
   · intro ⟨M, i, s, hM⟩;
-    have H : M ⊧* Theory.Eq L := Logic.Semantics.realizeTheory_of_subset hM EqTheory.eq
+    have H : M ⊧* Theory.Eq L := Logic.Semantics.modelsTheory_of_subset hM EqTheory.eq
     have e : Structure.Eq.QuotEq H ≃ₑ[L] M := Structure.Eq.QuotEq.elementaryEquiv H
     exact ⟨Structure.Eq.QuotEq H, inferInstance, inferInstance, inferInstance, e.modelsTheory.mpr hM⟩
   · intro ⟨M, i, s, _, hM⟩; exact ⟨M, i, s, hM⟩
