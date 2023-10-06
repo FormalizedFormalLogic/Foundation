@@ -1,5 +1,4 @@
-import Logic.Predicate.FirstOrder.Basic.Formula.Formula
-import Logic.Predicate.FirstOrder.Basic.Formula.Elab
+import Logic.Predicate.FirstOrder.Basic
 import Logic.Vorspiel.W
 
 attribute [-instance] WType.instEncodableWType Encodable.finPi Encodable.fintypeArrowOfEncodable

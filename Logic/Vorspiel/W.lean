@@ -265,13 +265,13 @@ private lemma primrec_encode_decode :
       (option_map (SubWType.depth_decode_primrec.comp (fst.comp $ unpair.comp fst) snd)
         (Primrec₂.natPair.comp₂ Primrec₂.right (snd.comp fst))))
 
-private def encodable : Encodable (WType β) where
+def _root_.Encodable.wtype : Encodable (WType β) where
   encode := fun w => encode (SubWType.ofW w)
   decode := fun e => (decode e).map SubWType.toW
   encodek := by rintro ⟨a, f⟩; simp[SubWType.toW, SubWType.ofW]
 
 instance _root_.Primcodable.wtype : Primcodable (WType β) :=
-  { encodable with
+  { Encodable.wtype with
     prim := Primrec.nat_iff.mp <| primrec_encode_decode.of_eq (fun e => (encode_decode_eq e).symm) }
 
 lemma encode_eq (w : WType β) : encode w = encode (SubWType.ofW w) := rfl
@@ -468,5 +468,4 @@ lemma w_elimvL [Inhabited (WType β)] {fs : α → σ → σ} {fγ : σ → α �
     hfγ.comp₂ (fst.comp₂ Primrec₂.right) (snd.comp₂ Primrec₂.right)
   exact w_elimvL_param hfs hfγ fst snd }
   
-
 end Primrec

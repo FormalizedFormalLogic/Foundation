@@ -1,4 +1,4 @@
-import Logic.Predicate.FirstOrder.Basic.Soundness
+import Logic.Predicate.FirstOrder.Basic
 
 namespace LO
 

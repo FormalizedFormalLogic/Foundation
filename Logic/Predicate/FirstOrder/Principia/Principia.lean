@@ -1,5 +1,4 @@
-import Logic.Predicate.FirstOrder.Basic.Calculus
-import Logic.Predicate.FirstOrder.Basic.Eq
+import Logic.Predicate.FirstOrder.Basic
 
 namespace LO
 

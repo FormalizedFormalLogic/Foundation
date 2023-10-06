@@ -1,4 +1,4 @@
-import Logic.Predicate.FirstOrder.Basic.Eq
+import Logic.Predicate.FirstOrder.Basic
 import Logic.Predicate.FirstOrder.Principia.Meta
 
 namespace LO

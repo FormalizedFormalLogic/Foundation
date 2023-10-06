@@ -1,6 +1,5 @@
-import Logic.Predicate.FirstOrder.Basic.Soundness
-import Logic.Predicate.FirstOrder.Basic.Formula.Coding
-import Mathlib.Logic.Encodable.Basic
+import Logic.Predicate.FirstOrder.Basic
+import Logic.Predicate.FirstOrder.Computability.Coding
 
 namespace LO
 
@@ -76,6 +75,7 @@ def Code.equiv (L : Language.{u}) :
   right_inv := fun x => by
     rcases x with (⟨_, _, _⟩ | ⟨⟩ | ⟨_, _⟩ | ⟨_, _⟩ | _ | ⟨_, _⟩ | _) <;> simp
 
+attribute [local instance] SubTerm.encodable SubFormula.encodable in
 instance : Encodable (Code L) := Encodable.ofEquiv _ (Code.equiv L)
 
 end DerivationWA

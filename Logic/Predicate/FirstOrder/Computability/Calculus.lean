@@ -1,6 +1,5 @@
 import Logic.Predicate.FirstOrder.Computability.Term
 import Logic.Predicate.FirstOrder.Computability.Formula
-import Logic.Predicate.FirstOrder.Basic.Calculus
 import Logic.Predicate.FirstOrder.Hauptsatz
 
 namespace LO

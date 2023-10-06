@@ -1,4 +1,3 @@
-import Logic.Predicate.FirstOrder.Basic.Term.Coding
 import Logic.Predicate.FirstOrder.Basic.Term.Elab
 import Logic.Vorspiel.Meta
 open Qq Lean Elab Meta Tactic

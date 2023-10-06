@@ -383,7 +383,6 @@ end W
 instance primcodable : Primcodable (UFormula L μ) := Primcodable.ofEquiv (WType (Edge L μ)) (equivW L μ)
 
 lemma qeq {a b c d : α} (h₁ : a = b) (h₂ : b = c) (h₃ : c = d) : a = d := by { simp[*] }
-#check WType.instEncodableWType
 
 lemma encode_rel {k} (r : L.rel k) (v : Fin k → UTerm L μ) :
     encode (rel r v) = Nat.pair 1 ((Nat.pair 1 $ 2 * k.pair $ (encode r).pair (encode v)).pair 0) := by
@@ -890,6 +889,8 @@ lemma relL_primrec : Primrec₂ (relL : (Σ k, L.rel k) → List (SubTerm L μ n
     { simp[Encodable.encode_ofEquiv subfEquiv, Encodable.Subtype.encode_eq]
       funext i; congr }
 
+example (t : SubFormula L μ n) : encode (some t) = encode t + 1 := by { simp }
+
 lemma nrelL_primrec : Primrec₂ (nrelL : (Σ k, L.rel k) → List (SubTerm L μ n) → Option (SubFormula L μ n)) := by
   letI : ∀ n, Primcodable { t : UTerm L μ // t.bv ≤ n } := fun n => Primcodable.subtype (nat_le.comp UTerm.bv_primrec (Primrec.const n))
   have : Primrec₂ (fun f v => UFormula.nrelL f (v.map (UTerm.subtEquiv ·))
@@ -1019,8 +1020,6 @@ lemma emb_primrec : Primrec (Rew.embl : Sentence L → Formula L μ) := by
   unfold Rew.embl; rw[Rew.eq_bind Rew.emb]; simp[Function.comp]
   exact bind_primrec (const _)
     (Primrec₂.option_some_iff.mp $ (Primrec₂.const none).of_eq <| by rintro _ ⟨⟩) Primrec.id
-
-
 
 end SubFormula
 

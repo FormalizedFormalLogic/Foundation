@@ -1,4 +1,4 @@
-import Logic.Predicate.FirstOrder.Basic.Formula.Meta
+import Logic.Predicate.FirstOrder.Basic
 open Qq Lean Elab Meta Tactic Term
 
 namespace LO
