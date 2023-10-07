@@ -1,5 +1,6 @@
 import Logic.Predicate.FirstOrder.Principia.Principia
 import Logic.Predicate.FirstOrder.Principia.RewriteFormula
+import Logic.Vorspiel.String
 
 open Qq Lean Elab Meta Tactic Term
 
@@ -266,28 +267,45 @@ end PrincipiaQ
 structure State : Type :=
   lemmaName : List (String × ℕ)
   varName : List String
+  unnamedVar : ℕ
 
 namespace State
 
 def init : State where
   lemmaName := []
   varName := []
+  unnamedVar := 0
 
 def changeLemmaName (f : List (String × ℕ) → List (String × ℕ)) (s : State) : State where
   lemmaName := f s.lemmaName
   varName := s.varName
+  unnamedVar := s.unnamedVar
 
 def changeVarName (f : List String → List String) (s : State) : State where
   lemmaName := s.lemmaName
   varName := f s.varName
+  unnamedVar := s.unnamedVar
 
 def addLemmaName (s : State) (name : String) (e : ℕ) : State where
   lemmaName := (name, e) :: s.lemmaName
   varName := s.varName
+  unnamedVar := s.unnamedVar
 
-def addVarName (s : State) (name : String) : State where
+def addVarName (s : State) (name : Option String) : State :=
+  match name with
+  | some t =>
+    { lemmaName := s.lemmaName
+      varName := t :: s.varName
+      unnamedVar := s.unnamedVar }
+  | none   =>
+    { lemmaName := s.lemmaName
+      varName := ("𝑥" ++ (String.subscript s.unnamedVar)) :: s.varName
+      unnamedVar := s.unnamedVar + 1 }
+
+def succUnnamedVar (s : State) : State where
   lemmaName := s.lemmaName
-  varName := name :: s.varName
+  varName := s.varName
+  unnamedVar := s.unnamedVar + 1
 
 def findName (s : State) (i : ℕ) : Option String :=
   s.lemmaName.foldl (fun o => o.elim (fun (n, j) => if i = j then some n else none) (fun n _ => some n)) none
@@ -301,29 +319,28 @@ section Syntax
 variable (L : Q(Language.{u})) (n : Q(ℕ))
 open SubTerm
 
+syntax propStrForm := "“" foformula "”"
+
 syntax termSeq := (foterm),*
 
 syntax lineIndex := "::" num
 
 syntax prevIndex := "this"
 
-syntax lemmaName := "." ident
+syntax lemmaName := ident
 
-syntax indexFormula := (prevIndex <|> lineIndex <|> foformula <|> lemmaName)
+syntax indexFormula := (prevIndex <|> lineIndex <|> lemmaName <|> propStrForm)
 
 def subTermSyntaxToExpr (n : Q(ℕ)) : Syntax → TermElabM Q(SubTerm $L String $n)
   | `(foterm| $s:foterm) => do
     Term.elabTerm (←`(ᵀ“$s”)) (return q(SubTerm $L String $n))
 
-def subFormulaSyntaxToExpr (n : Q(ℕ)) : Syntax → TermElabM Q(SubFormula $L String $n)
+def strFormSyntaxToExpr (n : Q(ℕ)) : Syntax → TermElabM Q(SubFormula $L String $n)
   | `(foformula| $s:foformula) => do
     Term.elabTerm (←`(“$s”)) (return q(SubFormula $L String $n))
 
 def termSyntaxToExpr (s : Syntax) : TermElabM Q(Term $L String) :=
   subTermSyntaxToExpr L q(0) s
-
-def formulaSyntaxToExpr (s : Syntax) : TermElabM Q(SyntacticFormula $L) :=
-  subFormulaSyntaxToExpr L q(0) s
 
 def dequantifier : (n : ℕ) → Q(SyntacticFormula $L) → TermElabM Q(SyntacticSubFormula $L $n)
   | 0,     p => return p
@@ -334,20 +351,21 @@ def dequantifier : (n : ℕ) → Q(SyntacticFormula $L) → TermElabM Q(Syntacti
     | ~q(∃' $q) => return q
     | ~q($q)    => throwError m!"error[dequantifier]: invalid number of quantifier: {p'}"
 
-def indexFormulaToSubFormula (state : State) (E : List Q(SyntacticFormula $L)) (n : ℕ) : Syntax → TermElabM Q(SyntacticSubFormula $L $n)
-  | `(indexFormula| this)             => do
+def indexFormulaToSubFormula (state : State) (E : List Q(SyntacticFormula $L)) (n : ℕ) :
+    Syntax → TermElabM Q(SyntacticSubFormula $L $n)
+  | `(indexFormula| this)        => do
     let some p := E.get? 0 | throwError m!"error in indexFormulaToSubFormula: out of bound {E}"
     dequantifier L n p
   | `(indexFormula| :: $i:num )  => do
     let some p := E.reverse.get? i.getNat | throwError m!"error in indexFormulaToSubFormula: out of bound {E}"
     dequantifier L n p
-  | `(indexFormula| .$name:ident)        => do
+  | `(indexFormula| $name:ident) => do
     let some i := (state.findIndex name.getId.getString!) | throwError m!"error in indexFormulaToSubFormula: no lemma named {name}"
     let some p := E.reverse.get? i | throwError m!"error in indexFormulaToSubFormula: out of bound {E}"
     dequantifier L n p
-  | `(indexFormula| $p:foformula) => do
-    SubFormula.Meta.strToSyntactic state.varName L q($n) (←subFormulaSyntaxToExpr L q($n) p)
-  | _                              => throwUnsupportedSyntax
+  | `(indexFormula| “$p:foformula”) => do
+    SubFormula.Meta.strToSyntactic state.varName L q($n) (←strFormSyntaxToExpr L q($n) p)
+  | _                            => throwUnsupportedSyntax
 
 end Syntax
 
@@ -369,8 +387,9 @@ inductive PrincipiaCode (L : Q(Language.{u})) : Type
   | orLeft        : PrincipiaCode L → PrincipiaCode L
   | orRight       : PrincipiaCode L → PrincipiaCode L
   | cases         : Option String → Option String → Syntax → Syntax → PrincipiaCode L → PrincipiaCode L → PrincipiaCode L → PrincipiaCode L
-  | generalize    : String → PrincipiaCode L → PrincipiaCode L
+  | generalize    : Option String → PrincipiaCode L → PrincipiaCode L
   | specialize    : Option String → List Syntax → Syntax → PrincipiaCode L → PrincipiaCode L → PrincipiaCode L
+  --| unify         : Option String → Syntax → PrincipiaCode L → PrincipiaCode L → PrincipiaCode L
   | useInstance   : Syntax → PrincipiaCode L → PrincipiaCode L
   | exCases       : String → Option String → Syntax → PrincipiaCode L → PrincipiaCode L → PrincipiaCode L
   | reflexivity   : PrincipiaCode L
@@ -717,18 +736,20 @@ syntax proofBlock := "· " seq
 
 syntax optProofBlock := ("@ " seq)?
 
---syntax lemmaName := (str)?
+syntax termOrWC := ident <|> "_"
 
-syntax nameAs := ("as " lemmaName)?
+syntax nameAs := ("(" lemmaName ")")?
+
+syntax nameOrWC := lemmaName <|> "_"
 
 syntax (name := notationAssumption) "assumption" : proofElem
 
-syntax (name := notationHave) "have " indexFormula nameAs proofBlock : proofElem
+syntax (name := notationHave) "have " nameAs indexFormula proofBlock : proofElem
 
 syntax notationAndSeqUnit := "and" indexFormula optProofBlock
 
 syntax (name := notationSinceThen)
-  ("since" indexFormula optProofBlock notationAndSeqUnit*)? "then" indexFormula nameAs proofBlock : proofElem
+  ("since" indexFormula optProofBlock notationAndSeqUnit*)? "then" nameAs indexFormula proofBlock : proofElem
 
 syntax (name := notationContradiction) "contradiction " indexFormula optProofBlock optProofBlock : proofElem
 
@@ -736,13 +757,13 @@ syntax (name := notationAbsurd) "absurd " nameAs optProofBlock optProofBlock : p
 
 syntax (name := notationTrivial) "trivial" : proofElem
 
-syntax (name := notationIntro) "intro" nameAs : proofElem
+syntax (name := notationIntro) "intro" nameOrWC : proofElem
 
 syntax (name := notationModusPonens) "suffices" indexFormula optProofBlock : proofElem
 
-syntax (name := notationApply) "apply" indexFormula nameAs optProofBlock proofBlock : proofElem
+syntax (name := notationApply) "apply" nameAs indexFormula optProofBlock proofBlock : proofElem
 
-syntax (name := notationSplit)"split" optProofBlock optProofBlock : proofElem
+syntax (name := notationSplit) "split" optProofBlock optProofBlock : proofElem
 
 syntax (name := notationAndLeft) "andl" indexFormula optProofBlock : proofElem
 
@@ -752,15 +773,17 @@ syntax (name := notationOrLeft) "left" : proofElem
 
 syntax (name := notationOrRight) "right" : proofElem
 
-syntax (name := notationCases) "cases " indexFormula nameAs " or " indexFormula nameAs optProofBlock proofBlock proofBlock : proofElem
+syntax (name := notationCases) "cases " nameAs indexFormula " or " nameAs indexFormula optProofBlock proofBlock proofBlock : proofElem
 
-syntax (name := notationGeneralize) "generalize" ident : proofElem
+syntax (name := notationGeneralize) "gen" termOrWC : proofElem
 
-syntax (name := notationSpecialize) "specialize" indexFormula " with " (foterm),* nameAs optProofBlock : proofElem
+syntax (name := notationGens) "gens" (termOrWC)* : proofElem
+
+syntax (name := notationSpecialize) "specialize" nameAs indexFormula " with " (foterm),* optProofBlock : proofElem
 
 syntax (name := notationUse) "use " foterm : proofElem
 
-syntax (name := notationExCases) "choose " ident " st " indexFormula (nameAs) optProofBlock : proofElem
+syntax (name := notationExCases) "choose" nameAs ident " st " indexFormula optProofBlock : proofElem
 
 syntax (name := notationReflexivity) "refl" : proofElem
 
@@ -833,26 +856,38 @@ def getSeqOfProofBlock (proofBlock : Syntax) : Syntax :=
 
 def nameAsToString (s : Syntax) : Option String :=
   match s with
-  | `(nameAs| as .$name:ident) => name.getId.getString!
+  | `(nameAs| ($name:ident)) => name.getId.getString!
   | _                    => none
+
+def nameOrWCToString (s : Syntax) : Option String :=
+  match s with
+  | `(nameOrWC| $name:ident) => name.getId.getString!
+  | `(nameOrWC| _)           => none
+  | _                        => none
+
+def termOrWCToString (s : Syntax) : Option String :=
+  match s with
+  | `(termOrWC| $name:ident) => name.getId.getString!
+  | `(termOrWC| _)           => none
+  | _                        => none
 
 partial def seqToCode (L : Q(Language.{u})) : List Syntax → TermElabM (PrincipiaCode L)
   | []                => return PrincipiaCode.tryProve
   | seqElem::seqElems => do
     match seqElem with
     | `(notationAssumption| assumption) => return PrincipiaCode.assumption
-    | `(notationHave| have $p:indexFormula $name:nameAs $s:proofBlock) =>
+    | `(notationHave| have $name:nameAs $p:indexFormula $s:proofBlock) =>
       let c₁ ← seqToCode L (getSeqElems <| getSeqOfProofBlock s)
       let c₂ ← seqToCode L seqElems
       let n : Option String := nameAsToString name
       return PrincipiaCode.trans n p c₁ c₂
-    | `(notationSinceThen| then $q $name:nameAs $s:proofBlock) =>
+    | `(notationSinceThen| then $name:nameAs $q $s:proofBlock) =>
       let sblock := getSeqOfProofBlock s
       let c ← seqToCode L (getSeqElems sblock)
       let cs ← seqToCode L seqElems
       let n : Option String := nameAsToString name
       return PrincipiaCode.transList n [] q c cs
-    | `(notationSinceThen| since $p $b:optProofBlock $andblock:notationAndSeqUnit* then $q $name:nameAs $d:proofBlock) =>
+    | `(notationSinceThen| since $p $b:optProofBlock $andblock:notationAndSeqUnit* then $name:nameAs $q $d:proofBlock) =>
       let dblock := getSeqOfProofBlock d
       let cthen ← seqToCode L (getSeqElems dblock)
       let cs ← seqToCode L seqElems
@@ -881,16 +916,16 @@ partial def seqToCode (L : Q(Language.{u})) : List Syntax → TermElabM (Princip
       let cs ← seqToCode L seqElems
       let n : Option String := nameAsToString name
       return PrincipiaCode.absurd n cs
-    | `(notationIntro| intro $name:nameAs)                           =>
+    | `(notationIntro| intro $name:nameOrWC)                           =>
       let c ← seqToCode L seqElems
-      let n : Option String := nameAsToString name
+      let n : Option String := nameOrWCToString name
       return PrincipiaCode.intro n c
     | `(notationModusPonens| suffices $p:indexFormula $b:optProofBlock) =>
       let bblock := getSeqOfOptProofBlock b
       let c₀ := if bblock.isMissing then PrincipiaCode.tryProve else ← seqToCode L (getSeqElems bblock)
       let c₁ ← seqToCode L seqElems
       return PrincipiaCode.modusPonens p c₀ c₁
-    | `(notationApply| apply $p:indexFormula $name:nameAs $b₁:optProofBlock $b₂:proofBlock) =>
+    | `(notationApply| apply $name:nameAs $p:indexFormula $b₁:optProofBlock $b₂:proofBlock) =>
       let bblock₁ := getSeqOfOptProofBlock b₁
       let bblock₂ := getSeqOfProofBlock b₂
       let cs ← seqToCode L seqElems
@@ -918,7 +953,7 @@ partial def seqToCode (L : Q(Language.{u})) : List Syntax → TermElabM (Princip
     | `(notationOrRight| right) =>
       let c ← seqToCode L seqElems
       return PrincipiaCode.orRight c
-    | `(notationCases| cases $p:indexFormula $name₁:nameAs or $q:indexFormula $name₂:nameAs $b₀:optProofBlock $b₁:proofBlock $b₂:proofBlock) =>
+    | `(notationCases| cases $name₁:nameAs $p:indexFormula or $name₂:nameAs $q:indexFormula $b₀:optProofBlock $b₁:proofBlock $b₂:proofBlock) =>
       let bblock₀ := getSeqOfOptProofBlock b₀
       let bblock₁ := getSeqOfProofBlock b₁
       let bblock₂ := getSeqOfProofBlock b₂
@@ -928,10 +963,14 @@ partial def seqToCode (L : Q(Language.{u})) : List Syntax → TermElabM (Princip
       let n₁ : Option String := nameAsToString name₁
       let n₂ : Option String := nameAsToString name₂
       return PrincipiaCode.cases n₁ n₂ p q c₀ c₁ c₂
-    | `(notationGeneralize| generalize $varName:ident) =>
+    | `(notationGeneralize| gen $varName:termOrWC) =>
       let c ← seqToCode L seqElems
-      return PrincipiaCode.generalize varName.getId.getString! c
-    | `(notationSpecialize| specialize $p:indexFormula with $ts,* $name:nameAs $b:optProofBlock) =>
+      return PrincipiaCode.generalize (termOrWCToString varName) c
+    | `(notationGens| gens $varNames:termOrWC*) =>
+      let c ← seqToCode L seqElems
+      let names := varNames.toList.map termOrWCToString
+      return names.foldr (fun s ih => PrincipiaCode.generalize s ih) c
+    | `(notationSpecialize| specialize $name:nameAs $p:indexFormula with $ts,* $b:optProofBlock) =>
       let bblock := getSeqOfOptProofBlock b
       let c₀ := if bblock.isMissing then PrincipiaCode.tryProve else ← seqToCode L (getSeqElems bblock)
       let c ← seqToCode L seqElems
@@ -940,7 +979,7 @@ partial def seqToCode (L : Q(Language.{u})) : List Syntax → TermElabM (Princip
     | `(notationUse| use $t) =>
       let c ← seqToCode L seqElems
       return PrincipiaCode.useInstance t c
-    | `(notationExCases| choose $varName st $p:indexFormula $nameas:nameAs $b:optProofBlock) =>
+    | `(notationExCases| choose $nameas:nameAs $varName st $p:indexFormula $b:optProofBlock) =>
       let bblock := getSeqOfOptProofBlock b
       let c₀ := if bblock.isMissing then PrincipiaCode.tryProve else ← seqToCode L (getSeqElems bblock)
       let c₁ ← seqToCode L seqElems
@@ -1005,7 +1044,7 @@ variable {T : Theory L} [EqTheory T]
 -- have
 example : [“4 < 1”, “∃ #0 < &1”, “2 + &1 < 0”] ⟹[T] “⊤” :=
   proof.
-    have ∃ #0 < var₁ as .L1
+    have(L1) “∃ #0 < var₁”
     · assumption
     choose x st this
     !trivial
@@ -1015,7 +1054,7 @@ example : [“4 < 1”, “∃ #0 < &1”, “2 + &1 < 0”] ⟹[T] “⊤” :=
 example (h : [“0 < &0”, “&0 < 3”, “&0 ≠ 1”] ⟹[T] “&0 = 2”) :
     [“&0 ≠ 1”, “0 < &0 ∧ &9 = 1”, “&0 < 3”, “0 < &0”] ⟹[T] “&0 = 2” :=
   proof.
-    since 0 < var₀ and var₀ < 3 and var₀ ≠ 1 then var₀ = 2
+    since “0 < var₀” and “var₀ < 3” and “var₀ ≠ 1” then “var₀ = 2”
       · from h
   qed.
 
@@ -1024,54 +1063,54 @@ example : [“0 = &1”] ⟹[T] “⊤ ∧ (2 < 3 → 0 = &1)” :=
   proof.
     split
     @ trivial
-    @ intro
+    @ intro _
   qed.
 
 example : [] ⟹[T] “&0 = 1 ↔ &0 = 1 ∧ 1 = &0” :=
   proof.
     split
-    @ intro
+    @ intro _
       split
       @ assumption
       @ symmetry
-    @ intro as .h
-      andl .h
+    @ intro h
+      andl h
   qed.
 
 -- contradiction
 example : [“0 = 1”, “0 ≠ 1”] ⟹[T] “⊥” :=
   proof.
-    contradiction 0 = 1
+    contradiction “0 = 1”
   qed.
 
 -- contradiction
 example : [“0 = 1”] ⟹[T] “0 = 1 ∨ 0 = 2” :=
   proof.
-    absurd as .h₀
-    have 0 ≠ 1 as .h₁
-    · andl .h₀
-    contradiction .h₁
+    absurd (h₀)
+    have (h₁) “0 ≠ 1”
+    · andl h₀
+    contradiction h₁
   qed.
 
 -- suffices
 example : [“&0 < 1 → &0 = 0”, “&0 < 1”] ⟹[T] “&0 = 0” :=
   proof.
-    suffices var₀ < 1
+    suffices “var₀ < 1”
     assumption
   qed.
 
 -- apply
 example : [“&0 < 1 → &0 = 0”, “&0 < 1”] ⟹[T] “&0 = 0” :=
   proof.
-    apply var₀ < 1 → var₀ = 0
+    apply “var₀ < 1 → var₀ = 0”
     · assumption
   qed.
 
 -- have
 example : [“&0 < 1 → &0 = 0”, “&0 < 1”] ⟹[T] “&0 = 0 ∨ 0 < 2” :=
   proof.
-    have var₀ = 0
-    · suffices var₀ < 1
+    have “var₀ = 0”
+    · suffices “var₀ < 1”
         assumption
     left
   qed.
@@ -1079,28 +1118,26 @@ example : [“&0 < 1 → &0 = 0”, “&0 < 1”] ⟹[T] “&0 = 0 ∨ 0 < 2” 
 -- cases ... or ... 
 example : [“&0 = 0 ∨ ∃ &0 = #0 + 1”] ⟹[T] “∀ (&0 ≠ #0 + 1) → &0 = 0” :=
   proof.
-    cases var₀ = 0 as .hz or ∃ var₀ = #0 + 1 as .hs
-    · intro
-    · intro as .h
-      choose x st .hs as .hs'
-      specialize .h with x
-      contradiction .hs'
+    cases (hz) “var₀ = 0” or (hs) “∃ var₀ = #0 + 1”
+    · intro _
+    · intro h
+      choose (hs') x st hs
+      specialize h with x
+      contradiction hs'
   qed.
 
 -- generalize
 example : [“0 = &1”, “3 < &6 + &7”] ⟹[T] “∀ ∀ ∀ ((#0 = 0 ∨ #1 ≠ 0 ∨ #2 = 0) → ⊤)” :=
   proof.
-    generalize x₁
-    generalize x₂
-    generalize x₃
-    intro
+    gens _ _ x
+    intro _
     trivial
   qed.
 
 -- specialize ..., ..., ... ... with ...
 example : [“∀ ∀ #0 + #1 = #1 + #0”] ⟹[T] “1 + 2 = 2 + 1” :=
   proof.
-    specialize #0 + #1 = #1 + #0 with 1, 2 as .h
+    specialize (h) “#0 + #1 = #1 + #0” with 1, 2
   qed.
 
 -- use ...
@@ -1115,7 +1152,7 @@ example : [] ⟹[T] “∃ ∃ ∃ #0 = #1 + #2” :=
 -- choose ...
 example : [“∃ #0 < &1”] ⟹[T] “⊤” :=
   proof.
-    have ∃ #0 < var₁ · assumption
+    have “∃ #0 < var₁” · assumption
     choose x st this
     trivial
   qed.
@@ -1145,10 +1182,10 @@ example : [“&0 < 1 ↔ &0 = 0”] ⟹[T] “&0 = 0 ↔ &0 < 1” :=
 -- rewrite ...
 example : [“&0 + 2 = 3”] ⟹[T] “∀ 3 * #0 = (&0 + 2) * #0” :=
   proof.
-    have var₀ + 2 = 3 as .h
+    have (h) “var₀ + 2 = 3”
     · assumption
-    rewrite .h
-    generalize x
+    rewrite h
+    gen x
     refl
   qed.
 
@@ -1164,18 +1201,17 @@ example :
     “∀ (#0 = 0 ∨ (∃ #1 = #0 + 1))” ] ⟹[T]
     “∀ (0 = #0 ∨ 0 < #0)” :=
   proof.
-    generalize x
+    gen x
     specialize ::0 with x
-    cases x = 0 or ∃ x = #0 + 1
-    · left
-      symmetry
-    · have 0 < x
-      · choose y st ::4
-        have 0 < y + 1 ↔ ∃ #0 + 0 + 1 = y + 1 as .lt_iff
-          · specialize ::2 with 0, y + 1
-        rw[←y + 1 = x, .lt_iff]
+    cases “x = 0” or “∃ x = #0 + 1”
+    · left; symmetry
+    · have “0 < x”
+      · choose (hy) y st ::4
+        have (lt_iff) “0 < y + 1 ↔ ∃ #0 + 0 + 1 = y + 1”
+        · specialize ::2 with 0, y + 1
+        rw[hy, lt_iff]
         use y
-        rewrite y + 0 = y
+        rewrite “y + 0 = y”
         @ specialize ::1 with y
         refl
       right
@@ -1183,9 +1219,9 @@ example :
 
 example : [] ⟹[T] “∀ ∀ (#0 = #1 → #1 = 0 → #0 = 0)” :=
   proof.
-    generalize n; generalize m
-    intro as .h₁; intro as .h₂
-    rw[.h₁]
+    gens n m
+    intro h₁; intro h₂
+    rw[h₁]
     !
   qed.
 

@@ -62,7 +62,6 @@ elab "dbgfindTerm" : term => do
 
 #eval dbgfindTerm
 
-
 section lemmata
 section 
 
