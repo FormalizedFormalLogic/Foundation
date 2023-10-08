@@ -38,35 +38,24 @@ Formalizing Logic in Lean4
 - Redundant but practical [formal [formal proof system]]
 - `[emb σ₁, emb σ₂, ...]⟹[T] emb σ` is equivalent to `T ⊢ σ₁ ∧ σ₂ ∧ ... → σ`
 
-```code:eqZeroOfMulEqZero.lean
-def eqZeroOfMulEqZero : [] ⟹[T] “∀ ∀ (#0 * #1 = 0 → #0 = 0 ∨ #1 = 0)” :=
+```code:ltOfLeOfLt.lean
+def ltOfLeOfLt : [] ⟹[T] “∀ ∀ ∀ (#0 ≤ #1 ∧ #1 < #2 → #0 < #2)” :=
   proof.
-    then ∀ #0 + 1 ≠ 0 as .succ_ne_zero · from succNeZero
-    then ∀ (#0 ≠ 0 → ∃ #1 = #0 + 1) as .eq_succ_of_pos · from zeroOrSucc
-    then ∀ ∀ (#0 + (#1 + 1) = (#0 + #1) + 1) as .add_succ · from addSucc 
-    then ∀ ∀ (#0 * (#1 + 1) = (#0 * #1) + #0) as .mul_succ · from mulSucc
-    generalize m; generalize n; intro as .h₀
-    absurd as .ne_zero
-    have ∃ n = #0 + 1
-    · specialize .eq_succ_of_pos with n as .h
-      apply .h
-      · andl .ne_zero
-    choose n' st this as .hn'
-    have ∃ m = #0 + 1
-    · specialize .eq_succ_of_pos with m as .h
-      apply .h
-      · andr .ne_zero
-    choose m' st this as .hm'
-    have n * m = (n' + 1) * m' + n' + 1 as .h₁
-    · specialize .mul_succ with n' + 1, m' as .hms
-      specialize .add_succ with (n' + 1) * m', n' as .has
-      rw[.hn', .hm', .hms, .has]
-      refl
-    have (n' + 1) * m' + n' + 1 = 0
-    · rw[←.h₁]
-    have (n' + 1) * m' + n' + 1 ≠ 0
-    · specialize .succ_ne_zero with (n' + 1) * m' + n'
-    contradiction this
+    then (lt_iff) “∀ ∀ (#0 ≤ #1 ↔ #0 = #1 ∨ #0 < #1)” · from leIffEqOrLt
+    then (lt_trans) “∀ ∀ ∀ (#0 < #1 ∧ #1 < #2 → #0 < #2)” · from ltTrans
+    gens n m l; intro h
+    have “l = m ∨ l < m”
+    · specialize lt_iff with l, m
+      rw[←this]
+      andl h
+    cases (hl) “l = m” or (hl) “l < m”
+    · rw[this]
+      andr h
+    · specialize lt_trans with l, m, n
+      apply this
+      · split
+        @ assumption
+        @ andr h
   qed.
 ```
 
