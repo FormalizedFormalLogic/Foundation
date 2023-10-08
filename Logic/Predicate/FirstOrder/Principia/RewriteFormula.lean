@@ -453,7 +453,7 @@ partial def syntacticToStr (s : List String) (L : Q(Language.{u})) (n : Q(ℕ)) 
     let some x := Lean.Expr.natLit? (←whnf x) | throwError "not ℕ"
     let (z : String) := match s.get? x with
       | some s => s
-      | none => "var_not_found"
+      | none   => "?"
     return q(&$z)
   | ~q(func (arity := $arity) $f $v) => do
   let v' ← mapVector (u := u) (v := u) (syntacticToStr s L n) arity v
