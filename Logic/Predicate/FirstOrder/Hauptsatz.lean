@@ -4,13 +4,13 @@ namespace LO
 
 namespace FirstOrder
 
-open SubFormula
+open Subformula
 
 variable {L : Language.{u}} [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq (L.rel k)]
 
-namespace SubFormula
+namespace Subformula
 
-def isVType : {n : ℕ} → SubFormula L μ n → Bool
+def isVType : {n : ℕ} → Subformula L μ n → Bool
   | _, rel _ _  => true
   | _, nrel _ _ => true
   | _, ⊤        => true
@@ -20,17 +20,17 @@ def isVType : {n : ℕ} → SubFormula L μ n → Bool
   | _, ∀' _     => false
   | _, ∃' _     => true
 
-lemma ne_and_of_isVType {p q r : SubFormula L μ n} (h : isVType p) : p ≠ q ⋏ r := by rintro rfl; simp[isVType] at h
+lemma ne_and_of_isVType {p q r : Subformula L μ n} (h : isVType p) : p ≠ q ⋏ r := by rintro rfl; simp[isVType] at h
 
-lemma ne_all_of_isVType {p : SubFormula L μ n} {q} (h : isVType p) : p ≠ ∀' q := by rintro rfl; simp[isVType] at h
+lemma ne_all_of_isVType {p : Subformula L μ n} {q} (h : isVType p) : p ≠ ∀' q := by rintro rfl; simp[isVType] at h
 
-@[simp] lemma isVType_shift_iff {p : SyntacticSubFormula L n} : isVType (Rew.shiftl p) = isVType p := by
+@[simp] lemma isVType_shift_iff {p : SyntacticSubformula L n} : isVType (Rew.shiftl p) = isVType p := by
   induction p using rec' <;> simp[Rew.rel, Rew.nrel, isVType]
 
-lemma isVType_neg_true_of_eq_false {p : SyntacticSubFormula L n} : isVType p = false → isVType (~p) = true := by
+lemma isVType_neg_true_of_eq_false {p : SyntacticSubformula L n} : isVType p = false → isVType (~p) = true := by
   induction p using rec' <;> simp[Rew.rel, Rew.nrel, isVType]
 
-end SubFormula
+end Subformula
 
 namespace DerivationCR
 
@@ -110,7 +110,7 @@ noncomputable def andInversion₂ {p q} (d : ⊢ᶜ[P] insert (p ⋏ q) Δ) : �
 
 
 noncomputable def allInversionAux : {Δ : Sequent L} → ⊢ᶜ[P] Δ →
-    (p : SyntacticSubFormula L 1) → (t : SyntacticTerm L) → ⊢ᶜ[P] insert ([→ t].hom p) (Δ.erase (∀' p))
+    (p : SyntacticSubformula L 1) → (t : SyntacticTerm L) → ⊢ᶜ[P] insert ([→ t].hom p) (Δ.erase (∀' p))
   | _, axL Δ r v hpos hneg, p, t => axL _ r v (by simp[hpos]) (by simp[hneg])
   | _, verum Δ h,           p, t => verum _ (by simp[h])
   | _, and Δ r s dr ds,     p, t =>
@@ -127,7 +127,7 @@ noncomputable def allInversionAux : {Δ : Sequent L} → ⊢ᶜ[P] Δ →
       by_cases e : p' = p
       · simp[e]
         let d' : ⊢ᶜ[P] insert ([→ t].hom p) Δ :=
-          (d.rewrite hP (t :>ₙ SubTerm.fvar)).cast
+          (d.rewrite hP (t :>ₙ Subterm.fvar)).cast
             (by simp[shifts_eq_image, Finset.image_image, Function.comp, e,
                   ←Rew.hom_comp_app, Rew.rewrite_comp_free_eq_substs, Rew.rewrite_comp_shift_eq_id]; )
         have : d'.length = d.length := by simp

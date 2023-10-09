@@ -6,7 +6,7 @@ namespace LO
 namespace FirstOrder
 variable {L : Language.{u}} [L.ORing] [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq (L.rel k)]
 
-namespace SubFormula
+namespace Subformula
 
 namespace Abbrev
 
@@ -22,7 +22,7 @@ variable [L.Lt]
 def le : Finitary.{u, v} L 2 := Abbrev.le.toOperator
 notation "Op(≤)" => le
 
-lemma le_eq (t₁ t₂ : SubTerm L μ n) : le.operator ![t₁, t₂] = “ᵀ!t₁ = ᵀ!t₂ ∨ ᵀ!t₁ < ᵀ!t₂” :=
+lemma le_eq (t₁ t₂ : Subterm L μ n) : le.operator ![t₁, t₂] = “ᵀ!t₁ = ᵀ!t₂ ∨ ᵀ!t₁ < ᵀ!t₂” :=
   by simp[le, Abbrev.le, Abbrev.toOperator]
 
 syntax:45 foterm:45 " ≤ " foterm:0 : foformula
@@ -63,20 +63,20 @@ variable [L.Mul]
 
 def divides : Finitary.{u, v} L 2 := Abbrev.divides.toOperator
 
-lemma divides_eq (t₁ t₂ : SubTerm L μ n) :
+lemma divides_eq (t₁ t₂ : Subterm L μ n) :
   divides.operator ![t₁, t₂] = “∃ #0 * ᵀ!(.bShift t₁) = ᵀ!(.bShift t₂)” := by
   simp[divides, Abbrev.divides, Abbrev.toOperator, substs_ex]
 
 end
 -/
 
-end SubFormula
+end Subformula
 
 namespace Order
 variable {T : Theory L} [EqTheory T]
 
 def leIffEqOrLt : [] ⟹[T] “∀ ∀ (#0 ≤ #1 ↔ #0 = #1 ∨ #0 < #1)” :=
-  by simp[SubFormula.le_eq]; exact proofBy { gens _ _; refl }
+  by simp[Subformula.le_eq]; exact proofBy { gens _ _; refl }
 
 end Order
 

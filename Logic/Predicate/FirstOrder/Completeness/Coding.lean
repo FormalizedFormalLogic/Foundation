@@ -5,19 +5,19 @@ namespace LO
 
 namespace FirstOrder
 
-open SubFormula
+open Subformula
 variable {L : Language.{u}}
   [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq (L.rel k)]
   [∀ k, Encodable (L.func k)] [∀ k, Encodable (L.rel k)]
 
-def newVar (Γ : Sequent L) : ℕ := Γ.sup SubFormula.upper
+def newVar (Γ : Sequent L) : ℕ := Γ.sup Subformula.upper
 
 lemma not_fvar?_newVar {p : SyntacticFormula L} {Γ : Sequent L} (h : p ∈ Γ) : ¬fvar? p (newVar Γ) :=
   not_fvar?_of_lt_upper p (by simpa[newVar] using Finset.le_sup h)
 
 namespace DerivationWA
 
-open SubFormula
+open Subformula
 variable {P : SyntacticFormula L → Prop} {T : Theory L} {Δ : Sequent L}
 
 protected def all_nvar {p} (h : ∀' p ∈ Δ)
@@ -40,8 +40,8 @@ inductive Code (L : Language.{u})
   | verum : Code L
   | and : SyntacticFormula L → SyntacticFormula L → Code L
   | or : SyntacticFormula L → SyntacticFormula L → Code L
-  | all : SyntacticSubFormula L 1 → Code L
-  | ex : SyntacticSubFormula L 1 → SyntacticTerm L → Code L
+  | all : SyntacticSubformula L 1 → Code L
+  | ex : SyntacticSubformula L 1 → SyntacticTerm L → Code L
   | id : Sentence L → Code L
 
 def Code.equiv (L : Language.{u}) :
@@ -50,8 +50,8 @@ def Code.equiv (L : Language.{u}) :
     Unit ⊕
     (SyntacticFormula L × SyntacticFormula L) ⊕
     (SyntacticFormula L × SyntacticFormula L) ⊕
-    (SyntacticSubFormula L 1) ⊕
-    (SyntacticSubFormula L 1 × SyntacticTerm L) ⊕
+    (SyntacticSubformula L 1) ⊕
+    (SyntacticSubformula L 1 × SyntacticTerm L) ⊕
     (Sentence L) where
   toFun := fun c =>
     match c with
@@ -75,7 +75,7 @@ def Code.equiv (L : Language.{u}) :
   right_inv := fun x => by
     rcases x with (⟨_, _, _⟩ | ⟨⟩ | ⟨_, _⟩ | ⟨_, _⟩ | _ | ⟨_, _⟩ | _) <;> simp
 
-attribute [local instance] SubTerm.encodable SubFormula.encodable in
+attribute [local instance] Subterm.encodable Subformula.encodable in
 instance : Encodable (Code L) := Encodable.ofEquiv _ (Code.equiv L)
 
 end DerivationWA

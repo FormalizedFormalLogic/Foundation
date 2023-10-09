@@ -6,34 +6,34 @@ namespace FirstOrder
 
 abbrev Sequent (L : Language.{u}) := Finset (SyntacticFormula L)
 
-open SubFormula
+open Subformula
 variable {L : Language.{u}} [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq (L.rel k)]
 
-def shifts (Δ : Finset (SyntacticSubFormula L n)) :
-  Finset (SyntacticSubFormula L n) := Δ.map shiftEmb
+def shifts (Δ : Finset (SyntacticSubformula L n)) :
+  Finset (SyntacticSubformula L n) := Δ.map shiftEmb
 
-lemma shifts_eq_image (Δ : Finset (SyntacticSubFormula L n)) : shifts Δ = Δ.image Rew.shiftl := Finset.map_eq_image _ _
+lemma shifts_eq_image (Δ : Finset (SyntacticSubformula L n)) : shifts Δ = Δ.image Rew.shiftl := Finset.map_eq_image _ _
 
-@[simp] lemma mem_shifts_iff {p : SyntacticSubFormula L n} {Δ : Finset (SyntacticSubFormula L n)} :
+@[simp] lemma mem_shifts_iff {p : SyntacticSubformula L n} {Δ : Finset (SyntacticSubformula L n)} :
     Rew.shiftl p ∈ shifts Δ ↔ p ∈ Δ :=
   Finset.mem_map' _
 
-@[simp] lemma shifts_ss (Δ Γ : Finset (SyntacticSubFormula L n)) :
+@[simp] lemma shifts_ss (Δ Γ : Finset (SyntacticSubformula L n)) :
     shifts Δ ⊆ shifts Γ ↔ Δ ⊆ Γ := Finset.map_subset_map
 
-lemma shifts_insert (p : SyntacticSubFormula L n) (Δ : Finset (SyntacticSubFormula L n)) :
+lemma shifts_insert (p : SyntacticSubformula L n) (Δ : Finset (SyntacticSubformula L n)) :
     shifts (insert p Δ) = insert (Rew.shiftl p) (shifts Δ) :=
   by simp[shifts, shiftEmb_eq_shift]
 
-lemma shifts_union (Δ Γ : Finset (SyntacticSubFormula L n)) :
+lemma shifts_union (Δ Γ : Finset (SyntacticSubformula L n)) :
     shifts (Δ ∪ Γ) = (shifts Δ) ∪ (shifts Γ) :=
   by simp[shifts, shiftEmb_eq_shift, Finset.map_union]
 
-@[simp] lemma shifts_emb (s : Finset (SubSentence L n)) :
+@[simp] lemma shifts_emb (s : Finset (Subsentence L n)) :
     shifts (s.image Rew.embl) = s.image Rew.embl := by
   simp[shifts, shiftEmb, Finset.map_eq_image, Finset.image_image, Function.comp, ←Rew.hom_comp_app]
 
-lemma shifts_erase (p : SyntacticSubFormula L n) (Δ : Finset (SyntacticSubFormula L n)) :
+lemma shifts_erase (p : SyntacticSubformula L n) (Δ : Finset (SyntacticSubformula L n)) :
     shifts (Δ.erase p) = (shifts Δ).erase (Rew.shiftl p) :=
   by simp[shifts, shiftEmb_eq_shift]
 
@@ -45,9 +45,9 @@ inductive DerivationCR (P : SyntacticFormula L → Prop) : Sequent L → Type u
     DerivationCR P (insert p $ insert q Δ) → DerivationCR P (insert (p ⋎ q) Δ)
 | and   : ∀ (Δ : Sequent L) (p q : SyntacticFormula L),
     DerivationCR P (insert p Δ) → DerivationCR P (insert q Δ) → DerivationCR P (insert (p ⋏ q) Δ)
-| all   : ∀ (Δ : Sequent L) (p : SyntacticSubFormula L 1),
+| all   : ∀ (Δ : Sequent L) (p : SyntacticSubformula L 1),
     DerivationCR P (insert (Rew.free.hom p) (shifts Δ)) → DerivationCR P (insert (∀' p) Δ)
-| ex    : ∀ (Δ : Sequent L) (t : SyntacticTerm L) (p : SyntacticSubFormula L 1),
+| ex    : ∀ (Δ : Sequent L) (t : SyntacticTerm L) (p : SyntacticSubformula L 1),
     DerivationCR P (insert ([→ t].hom p) Δ) → DerivationCR P (insert (∃' p) Δ)
 | cut   : ∀ (Δ Γ : Sequent L) (p : SyntacticFormula L), P p →
     DerivationCR P (insert p Δ) → DerivationCR P (insert (~p) Γ) → DerivationCR P (Δ ∪ Γ)
@@ -200,10 +200,10 @@ def or' {p q : SyntacticFormula L} (h : p ⋎ q ∈ Δ) (d : ⊢ᶜ[P] (insert p
 def and' {p q : SyntacticFormula L} (h : p ⋏ q ∈ Δ) (dp : ⊢ᶜ[P] insert p (Δ.erase (p ⋏ q))) (dq : ⊢ᶜ[P] insert q (Δ.erase (p ⋏ q))) : ⊢ᶜ[P] Δ :=
   (and _ p q dp dq).cast (by simp[Finset.insert_erase h])
 
-def all' {p : SyntacticSubFormula L 1} (h : ∀' p ∈ Δ) (d : ⊢ᶜ[P] insert (Rew.freel p) (shifts $ Δ.erase (∀' p))) : ⊢ᶜ[P] Δ :=
+def all' {p : SyntacticSubformula L 1} (h : ∀' p ∈ Δ) (d : ⊢ᶜ[P] insert (Rew.freel p) (shifts $ Δ.erase (∀' p))) : ⊢ᶜ[P] Δ :=
   (all _ p d).cast (by simp[Finset.insert_erase h])
 
-def ex' {p : SyntacticSubFormula L 1} (t : SyntacticTerm L) (h : ∃' p ∈ Δ)
+def ex' {p : SyntacticSubformula L 1} (t : SyntacticTerm L) (h : ∃' p ∈ Δ)
   (d : ⊢ᶜ[P] insert ([→ t].hom p) (Δ.erase (∃' p))) : ⊢ᶜ[P] Δ :=
   (ex _ t p d).cast (by simp[Finset.insert_erase h])
 
@@ -222,7 +222,7 @@ private lemma neg_ne_and {p q : SyntacticFormula L} : ¬~p = p ⋏ q :=
 ne_of_ne_complexity (by simp)
 
 def em {p : SyntacticFormula L} {Δ : Sequent L} (hpos : p ∈ Δ) (hneg : ~p ∈ Δ) : ⊢ᶜ[P] Δ := by
-  induction p using SubFormula.formulaRec generalizing Δ
+  induction p using Subformula.formulaRec generalizing Δ
   case hverum           => exact verum Δ hpos
   case hfalsum          => exact verum Δ hneg
   case hrel r v         => exact axL Δ r v hpos hneg 
@@ -280,45 +280,45 @@ variable
   {Δ₁ Γ₁ : Finset (SyntacticFormula L₁)}
 
 lemma shifts_image (Φ : L₁ →ᵥ L₂) {Δ : Finset (SyntacticFormula L₁)} :
-     shifts (Δ.image $ SubFormula.lMap Φ) = (Finset.image (SubFormula.lMap Φ) (shifts Δ)) :=
-  by simp[shifts, shiftEmb, Finset.map_eq_image, Finset.image_image, Function.comp, SubFormula.lMap_shift]
+     shifts (Δ.image $ Subformula.lMap Φ) = (Finset.image (Subformula.lMap Φ) (shifts Δ)) :=
+  by simp[shifts, shiftEmb, Finset.map_eq_image, Finset.image_image, Function.comp, Subformula.lMap_shift]
 
-def lMap (Φ : L₁ →ᵥ L₂) {P₁ : SyntacticFormula L₁ → Prop} {P₂ : SyntacticFormula L₂ → Prop} (h : ∀ p, P₁ p → P₂ (SubFormula.lMap Φ p)):
-    ∀ {Δ : Finset (SyntacticFormula L₁)}, ⊢ᶜ[P₁] Δ → ⊢ᶜ[P₂] Δ.image (SubFormula.lMap Φ)
+def lMap (Φ : L₁ →ᵥ L₂) {P₁ : SyntacticFormula L₁ → Prop} {P₂ : SyntacticFormula L₂ → Prop} (h : ∀ p, P₁ p → P₂ (Subformula.lMap Φ p)):
+    ∀ {Δ : Finset (SyntacticFormula L₁)}, ⊢ᶜ[P₁] Δ → ⊢ᶜ[P₂] Δ.image (Subformula.lMap Φ)
   | _, axL Δ r v hrel hnrel =>
       axL _ (Φ.rel r) (fun i => (v i).lMap Φ)
         (Finset.mem_image_of_mem _ hrel) (Finset.mem_image_of_mem _ hnrel)
-  | _, verum Δ h            => verum _ (by simpa using Finset.mem_image_of_mem (SubFormula.lMap Φ) h)
+  | _, verum Δ h            => verum _ (by simpa using Finset.mem_image_of_mem (Subformula.lMap Φ) h)
   | _, or Δ p q d           =>
-      have : ⊢ᶜ[P₂] insert (SubFormula.lMap Φ p ⋎ SubFormula.lMap Φ q) (Δ.image (SubFormula.lMap Φ)) :=
+      have : ⊢ᶜ[P₂] insert (Subformula.lMap Φ p ⋎ Subformula.lMap Φ q) (Δ.image (Subformula.lMap Φ)) :=
         or _ _ _ ((d.lMap Φ h).cast (by simp))
       this.cast (by simp)
   | _, and Δ p q dp dq      =>
-      have : ⊢ᶜ[P₂] insert (SubFormula.lMap Φ p ⋏ SubFormula.lMap Φ q) (Δ.image (SubFormula.lMap Φ)) :=
+      have : ⊢ᶜ[P₂] insert (Subformula.lMap Φ p ⋏ Subformula.lMap Φ q) (Δ.image (Subformula.lMap Φ)) :=
         and _ _ _ ((dp.lMap Φ h).cast (by simp)) ((dq.lMap Φ h).cast (by simp))
       this.cast (by simp)
   | _, all Δ p d            =>
-      have : ⊢ᶜ[P₂] insert (∀' SubFormula.lMap Φ p) (Δ.image (SubFormula.lMap Φ)) :=
-        all _ _ ((d.lMap Φ h).cast (by simp[←SubFormula.lMap_free, shifts_image]))
+      have : ⊢ᶜ[P₂] insert (∀' Subformula.lMap Φ p) (Δ.image (Subformula.lMap Φ)) :=
+        all _ _ ((d.lMap Φ h).cast (by simp[←Subformula.lMap_free, shifts_image]))
       this.cast (by simp)
   | _, ex Δ t p d           =>
-      have : ⊢ᶜ[P₂] insert (∃' SubFormula.lMap Φ p) (Δ.image (SubFormula.lMap Φ)) :=
-        ex _ (SubTerm.lMap Φ t) _ ((d.lMap Φ h).cast (by simp[SubFormula.lMap_substs, Matrix.constant_eq_singleton]))
+      have : ⊢ᶜ[P₂] insert (∃' Subformula.lMap Φ p) (Δ.image (Subformula.lMap Φ)) :=
+        ex _ (Subterm.lMap Φ t) _ ((d.lMap Φ h).cast (by simp[Subformula.lMap_substs, Matrix.constant_eq_singleton]))
       this.cast (by simp)
   | _, cut Δ Γ p hp dΔ dΓ   =>
-      have : ⊢ᶜ[P₂] (Δ.image (SubFormula.lMap Φ)) ∪ (Γ.image (SubFormula.lMap Φ)) :=
-        cut _ _ (SubFormula.lMap Φ p) (h p hp) ((dΔ.lMap Φ h).cast (by simp)) ((dΓ.lMap Φ h).cast (by simp))
+      have : ⊢ᶜ[P₂] (Δ.image (Subformula.lMap Φ)) ∪ (Γ.image (Subformula.lMap Φ)) :=
+        cut _ _ (Subformula.lMap Φ p) (h p hp) ((dΔ.lMap Φ h).cast (by simp)) ((dΓ.lMap Φ h).cast (by simp))
       this.cast (by simp[Finset.image_union])
 
-def lMap₀ (Φ : L₁ →ᵥ L₂) {Δ : Finset (SyntacticFormula L₁)} (d : ⊢ᵀ Δ) : ⊢ᵀ Δ.image (SubFormula.lMap Φ) :=
+def lMap₀ (Φ : L₁ →ᵥ L₂) {Δ : Finset (SyntacticFormula L₁)} (d : ⊢ᵀ Δ) : ⊢ᵀ Δ.image (Subformula.lMap Φ) :=
   d.lMap Φ (fun _ x => x)
 
-def lMapCut (Φ : L₁ →ᵥ L₂) {Δ : Finset (SyntacticFormula L₁)} (d : ⊢ᶜ Δ) : ⊢ᶜ Δ.image (SubFormula.lMap Φ) :=
+def lMapCut (Φ : L₁ →ᵥ L₂) {Δ : Finset (SyntacticFormula L₁)} (d : ⊢ᶜ Δ) : ⊢ᶜ Δ.image (Subformula.lMap Φ) :=
   d.lMap Φ (fun _ x => x)
 
 end Hom
 
-private lemma free_rewrite_eq (f : ℕ → SyntacticTerm L) (p : SyntacticSubFormula L 1) :
+private lemma free_rewrite_eq (f : ℕ → SyntacticTerm L) (p : SyntacticSubformula L 1) :
     Rew.freel (Rew.rewritel (fun x => Rew.bShift (f x)) p) = Rew.rewritel (&0 :>ₙ fun x => Rew.shift (f x)) (Rew.freel p) := by
   simp[←Rew.hom_comp_app]; exact Rew.hom_ext' (by ext x <;> simp[Rew.comp_app, Fin.eq_zero])
 
@@ -326,7 +326,7 @@ private lemma shift_rewrite_eq (f : ℕ → SyntacticTerm L) (p : SyntacticFormu
     Rew.shiftl (Rew.rewritel f p) = Rew.rewritel (&0 :>ₙ fun x => Rew.shift (f x)) (Rew.shiftl p) := by
   simp[←Rew.hom_comp_app]; exact Rew.hom_ext' (by ext x <;> simp[Rew.comp_app])
 
-private lemma rewrite_subst_eq (f : ℕ → SyntacticTerm L) (t) (p : SyntacticSubFormula L 1) :
+private lemma rewrite_subst_eq (f : ℕ → SyntacticTerm L) (t) (p : SyntacticSubformula L 1) :
     Rew.rewritel f ([→ t].hom p) = [→ Rew.rewrite f t].hom (Rew.rewritel (Rew.bShift ∘ f) p) := by
   simp[←Rew.hom_comp_app]; exact Rew.hom_ext' (by ext x <;> simp[Rew.comp_app])
 
@@ -375,10 +375,10 @@ protected def map (h : ∀ f p, P p → P (Rew.rewritel f p)) {Δ : Sequent L} (
 protected def shift (h : ∀ f p, P p → P (Rew.rewritel f p)) {Δ : Sequent L} (d : ⊢ᶜ[P] Δ) : ⊢ᶜ[P] (shifts Δ) :=
   (d.map h Nat.succ).cast (by simp[shifts_eq_image]; congr)
 
-private lemma map_subst_eq_free (p : SyntacticSubFormula L 1) (h : ¬p.fvar? m) :
+private lemma map_subst_eq_free (p : SyntacticSubformula L 1) (h : ¬p.fvar? m) :
     Rew.rewriteMapl (fun x => if x = m then 0 else x + 1) ([→ &m].hom p) = Rew.freel p := by
   simp[←Rew.hom_comp_app];
-  exact SubFormula.rew_eq_of_funEqOn (by simp[Rew.comp_app, Fin.eq_zero])
+  exact Subformula.rew_eq_of_funEqOn (by simp[Rew.comp_app, Fin.eq_zero])
     (fun x hx => by simp[Rew.comp_app]; rintro rfl; contradiction)
 
 private lemma image_map₀_eq_shifts (Δ : Finset $ SyntacticFormula L) (h : ∀ p ∈ Δ, ¬p.fvar? m) :
@@ -386,26 +386,26 @@ private lemma image_map₀_eq_shifts (Δ : Finset $ SyntacticFormula L) (h : ∀
   simp[shifts_eq_image]; apply Finset.image_congr
   intro p hp; exact rew_eq_of_funEqOn₀ (by intro x hx; simp; rintro rfl; have := h p hp; contradiction)
 
-def genelalizeByNewver (h : ∀ f p, P p → P (Rew.rewritel f p)) {p : SyntacticSubFormula L 1} (hp : ¬p.fvar? m) (hΔ : ∀ q ∈ Δ, ¬q.fvar? m)
+def genelalizeByNewver (h : ∀ f p, P p → P (Rew.rewritel f p)) {p : SyntacticSubformula L 1} (hp : ¬p.fvar? m) (hΔ : ∀ q ∈ Δ, ¬q.fvar? m)
   (d : ⊢ᶜ[P] insert ([→ &m].hom p) Δ) : ⊢ᶜ[P] insert (∀' p) Δ := by
   have : ⊢ᶜ[P] insert (Rew.freel p) (shifts Δ) :=
     (d.map h (fun x => if x = m then 0 else x + 1)).cast (by simp[map_subst_eq_free p hp, image_map₀_eq_shifts Δ hΔ])
   exact all Δ p this
 
-def genelalizeByNewver₀ {p : SyntacticSubFormula L 1} (hp : ¬p.fvar? m) (hΔ : ∀ q ∈ Δ, ¬q.fvar? m)
+def genelalizeByNewver₀ {p : SyntacticSubformula L 1} (hp : ¬p.fvar? m) (hΔ : ∀ q ∈ Δ, ¬q.fvar? m)
   (d : ⊢ᵀ insert ([→ &m].hom p) Δ) : ⊢ᵀ insert (∀' p) Δ := d.genelalizeByNewver (by simp) hp hΔ
 
-def genelalizeByNewverCut {p : SyntacticSubFormula L 1} (hp : ¬p.fvar? m) (hΔ : ∀ q ∈ Δ, ¬q.fvar? m)
+def genelalizeByNewverCut {p : SyntacticSubformula L 1} (hp : ¬p.fvar? m) (hΔ : ∀ q ∈ Δ, ¬q.fvar? m)
   (d : ⊢ᶜ insert ([→ &m].hom p) Δ) : ⊢ᶜ insert (∀' p) Δ := d.genelalizeByNewver (by simp) hp hΔ
 
-def exOfInstances (v : List (SyntacticTerm L)) (p : SyntacticSubFormula L 1)
+def exOfInstances (v : List (SyntacticTerm L)) (p : SyntacticSubformula L 1)
   (h : ⊢ᶜ[P] (v.map (Rew.substsl ![·] p)).toFinset ∪ Γ) : ⊢ᶜ[P] insert (∃' p) Γ := by
   induction' v with t v ih generalizing Γ <;> simp at h
   · exact weakening h (Finset.subset_insert _ Γ)
   · exact (ih (Γ := insert (∃' p) Γ)
       ((ex _ t p h).cast (by ext r; simp))).cast (by simp)
 
-def exOfInstances' (v : List (SyntacticTerm L)) (p : SyntacticSubFormula L 1)
+def exOfInstances' (v : List (SyntacticTerm L)) (p : SyntacticSubformula L 1)
   (h : ⊢ᶜ[P] (insert (∃' p) $ (v.map (Rew.substsl ![·] p)).toFinset ∪ Γ)) : ⊢ᶜ[P] insert (∃' p) Γ :=
   (exOfInstances (Γ := insert (∃' p) Γ) v p (h.cast $ by simp)).cast (by simp)
 
@@ -598,8 +598,8 @@ variable
   {L₂ : Language} [∀ k, DecidableEq (L₂.func k)] [∀ k, DecidableEq (L₂.rel k)]
 
 protected def lMap (Φ : L₁ →ᵥ L₂) {T : Theory L₁} {Δ : Sequent L₁} (b : T ⊢' Δ) :
-    Theory.lMap Φ T ⊢' Δ.image (SubFormula.lMap Φ) where
-  leftHand := b.leftHand.image (SubFormula.lMap Φ)
+    Theory.lMap Φ T ⊢' Δ.image (Subformula.lMap Φ) where
+  leftHand := b.leftHand.image (Subformula.lMap Φ)
   hleftHand := by
     simp; intro σ hσ
     have : ∃ τ ∈ T, ~τ = σ := by simpa using b.hleftHand hσ;
@@ -607,7 +607,7 @@ protected def lMap (Φ : L₁ →ᵥ L₂) {T : Theory L₁} {Δ : Sequent L₁}
     simpa using Set.mem_image_of_mem _ hτ
   derivation :=
     (b.derivation.lMapCut Φ).cast
-    (by simp[Finset.image_union, Finset.image_image]; congr; ext x; simp[SubFormula.lMap_emb])
+    (by simp[Finset.image_union, Finset.image_image]; congr; ext x; simp[Subformula.lMap_emb])
 
 end DerivationCRWA
 
@@ -633,7 +633,7 @@ variable
   {L₂ : Language} [∀ k, DecidableEq (L₂.func k)] [∀ k, DecidableEq (L₂.rel k)]
 
 def System.lMap (Φ : L₁ →ᵥ L₂) {T : Theory L₁} {σ : Sentence L₁} (b : T ⊢ σ) :
-    Theory.lMap Φ T ⊢ SubFormula.lMap Φ σ := by simpa[SubFormula.lMap_emb] using b.lMap Φ
+    Theory.lMap Φ T ⊢ Subformula.lMap Φ σ := by simpa[Subformula.lMap_emb] using b.lMap Φ
 
 lemma inConsistent_lMap (Φ : L₁ →ᵥ L₂) {T : Theory L₁} :
     ¬Logic.System.Consistent T → ¬Logic.System.Consistent (Theory.lMap Φ T) := by

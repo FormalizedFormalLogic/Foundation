@@ -82,29 +82,29 @@ end Inclusion
 
 end Structure
 
-namespace SubTerm
+namespace Subterm
 
 variable
   {M : Type w} {s : Structure L M}
   {e : Fin n → M} {e₁ : Fin n₁ → M} {e₂ : Fin n₂ → M}
   {ε : μ → M} {ε₁ : μ₁ → M} {ε₂ : μ₂ → M}
 
-def val (s : Structure L M) (e : Fin n → M) (ε : μ → M) : SubTerm L μ n → M
+def val (s : Structure L M) (e : Fin n → M) (ε : μ → M) : Subterm L μ n → M
   | #x       => e x
   | &x       => ε x
   | func f v => s.func f (fun i => (v i).val s e ε)
 
-abbrev bVal (s : Structure L M) (e : Fin n → M) (t : SubTerm L Empty n) : M := t.val s e Empty.elim
+abbrev bVal (s : Structure L M) (e : Fin n → M) (t : Subterm L Empty n) : M := t.val s e Empty.elim
 
-abbrev val! (M : Type w) [s : Structure L M] {n} (e : Fin n → M) (ε : μ → M) : SubTerm L μ n → M := val s e ε
+abbrev val! (M : Type w) [s : Structure L M] {n} (e : Fin n → M) (ε : μ → M) : Subterm L μ n → M := val s e ε
 
-abbrev bVal! (M : Type w) [s : Structure L M] {n} (e : Fin n → M) : SubTerm L Empty n → M := bVal s e
+abbrev bVal! (M : Type w) [s : Structure L M] {n} (e : Fin n → M) : Subterm L Empty n → M := bVal s e
 
 abbrev realize (s : Structure L M) (t : Term L M) : M := t.val s ![] id
 
-@[simp] lemma val_bvar (x) : val s e ε (#x : SubTerm L μ n) = e x := rfl
+@[simp] lemma val_bvar (x) : val s e ε (#x : Subterm L μ n) = e x := rfl
 
-@[simp] lemma val_fvar (x) : val s e ε (&x : SubTerm L μ n) = ε x := rfl
+@[simp] lemma val_fvar (x) : val s e ε (&x : Subterm L μ n) = ε x := rfl
 
 lemma val_func {k} (f : L.func k) (v) :
     val s e ε (func f v) = s.func f (fun i => (v i).val s e ε) := rfl
@@ -120,24 +120,24 @@ lemma val_func {k} (f : L.func k) (v) :
     val s e ε (func f ![t, u]) = s.func f ![t.val s e ε, u.val s e ε] :=
   by simp[val_func]; apply of_eq; congr; funext i; cases' i using Fin.cases with i <;> simp
 
-lemma val_rew (ω : Rew L μ₁ n₁ μ₂ n₂) (t : SubTerm L μ₁ n₁) :
+lemma val_rew (ω : Rew L μ₁ n₁ μ₂ n₂) (t : Subterm L μ₁ n₁) :
     (ω t).val s e₂ ε₂ = t.val s (val s e₂ ε₂ ∘ ω ∘ bvar) (val s e₂ ε₂ ∘ ω ∘ fvar) :=
   by induction t <;> simp[*, Rew.func, val_func]
 
-lemma val_substs {n'} (w : Fin n' → SubTerm L μ n) (t : SubTerm L μ n') :
+lemma val_substs {n'} (w : Fin n' → Subterm L μ n) (t : Subterm L μ n') :
     (Rew.substs w t).val s e ε = t.val s (fun x => (w x).val s e ε) ε :=
   by simp[val_rew]; congr
 
-@[simp] lemma val_bShift (a : M) (t : SubTerm L μ n) :
+@[simp] lemma val_bShift (a : M) (t : Subterm L μ n) :
     (Rew.bShift t).val s (a :> e) ε = t.val s e ε := by simp[val_rew, Function.comp]
 
 section Language
 
 variable (φ : L₁ →ᵥ L₂) (e : Fin n → M) (ε : μ → M)
 
-lemma val_lMap (φ : L₁ →ᵥ L₂) (s₂ : Structure L₂ M) (e : Fin n → M) (ε : μ → M) {t : SubTerm L₁ μ n} :
+lemma val_lMap (φ : L₁ →ᵥ L₂) (s₂ : Structure L₂ M) (e : Fin n → M) (ε : μ → M) {t : Subterm L₁ μ n} :
     (t.lMap φ).val s₂ e ε = t.val (s₂.lMap φ) e ε :=
-  by induction t <;> simp[*, val!, Function.comp, val_func, SubTerm.lMap_func]
+  by induction t <;> simp[*, val!, Function.comp, val_func, Subterm.lMap_func]
 
 end Language
 
@@ -145,20 +145,20 @@ section Syntactic
 
 variable (ε : ℕ → M)
 
-lemma val_shift (t : SyntacticSubTerm L n) :
+lemma val_shift (t : SyntacticSubterm L n) :
     (Rew.shift t).val s e ε = t.val s e (ε ∘ Nat.succ) := by simp[val_rew]; congr
 
-lemma val_free (a : M) (t : SyntacticSubTerm L (n + 1)) :
+lemma val_free (a : M) (t : SyntacticSubterm L (n + 1)) :
     (Rew.free t).val s e (a :>ₙ ε) = t.val s (e <: a) ε :=
   by simp[val_rew]; congr; exact funext $ Fin.lastCases (by simp) (by simp)
 
-lemma val_fix (a : M) (t : SyntacticSubTerm L n) :
+lemma val_fix (a : M) (t : SyntacticSubterm L n) :
     (Rew.fix t).val s (e <: a) ε = t.val s e (a :>ₙ ε) :=
   by simp[val_rew]; congr <;> simp[Function.comp]; exact funext (Nat.cases (by simp) (by simp))
 
 end Syntactic
 
-end SubTerm
+end Subterm
 
 namespace Structure
 
@@ -182,9 +182,9 @@ namespace Hom
 
 variable {M₁ : Type w₁} {M₂ : Type w₂} [s₁ : Structure L M₁] [s₂ : Structure L M₂] (φ : M₁ →ₛ[L] M₂)
 
-lemma val (e : Fin n → M₁) (ε : μ → M₁) (t : SubTerm L μ n) :
+lemma val (e : Fin n → M₁) (ε : μ → M₁) (t : Subterm L μ n) :
     φ (t.val s₁ e ε) = t.val s₂ (φ ∘ e) (φ ∘ ε) := by
-  induction t <;> simp[*, SubTerm.val_func, Hom.func, Function.comp]
+  induction t <;> simp[*, Subterm.val_func, Hom.func, Function.comp]
 
 def inclusion [s : Structure L M] (u : ClosedSubset L M) : u ⊆ₛ[L] M where
   toFun := Subtype.val
@@ -196,26 +196,26 @@ end Hom
 
 end Structure
 
-namespace SubFormula
+namespace Subformula
 
 variable {M : Type w} {s : Structure L M}
 variable {n : ℕ} {e : Fin n → M} {e₂ : Fin n₂ → M} {ε : μ → M} {ε₂ : μ₂ → M}
 
-def Eval' (s : Structure L M) (ε : μ → M) : ∀ {n}, (Fin n → M) → SubFormula L μ n → Prop
+def Eval' (s : Structure L M) (ε : μ → M) : ∀ {n}, (Fin n → M) → Subformula L μ n → Prop
   | _, _, ⊤        => True
   | _, _, ⊥        => False
-  | _, e, rel p v  => s.rel p (fun i => SubTerm.val s e ε (v i))
-  | _, e, nrel p v => ¬s.rel p (fun i => SubTerm.val s e ε (v i))
+  | _, e, rel p v  => s.rel p (fun i => Subterm.val s e ε (v i))
+  | _, e, nrel p v => ¬s.rel p (fun i => Subterm.val s e ε (v i))
   | _, e, p ⋏ q    => p.Eval' s ε e ∧ q.Eval' s ε e
   | _, e, p ⋎ q    => p.Eval' s ε e ∨ q.Eval' s ε e
   | _, e, ∀' p     => ∀ x : M, (p.Eval' s ε (x :> e))
   | _, e, ∃' p     => ∃ x : M, (p.Eval' s ε (x :> e))
 
-@[simp] lemma Eval'_neg (p : SubFormula L μ n) :
+@[simp] lemma Eval'_neg (p : Subformula L μ n) :
     Eval' s ε e (~p) = ¬Eval' s ε e p :=
   by induction p using rec' <;> simp[*, Eval', ←neg_eq, or_iff_not_imp_left]
 
-def Eval (s : Structure L M) (e : Fin n → M) (ε : μ → M) : SubFormula L μ n →L Prop where
+def Eval (s : Structure L M) (e : Fin n → M) (ε : μ → M) : Subformula L μ n →L Prop where
   toTr := Eval' s ε e
   map_top' := rfl
   map_bot' := rfl
@@ -225,91 +225,91 @@ def Eval (s : Structure L M) (e : Fin n → M) (ε : μ → M) : SubFormula L μ
   map_imply' := by simp[imp_eq, Eval'_neg, ←neg_eq, Eval', imp_iff_not_or]
 
 abbrev Eval! (M : Type w) [s : Structure L M] {n} (e : Fin n → M) (ε : μ → M) :
-    SubFormula L μ n →L Prop := Eval s e ε
+    Subformula L μ n →L Prop := Eval s e ε
 
 abbrev Val (s : Structure L M) (ε : μ → M) : Formula L μ →L Prop := Eval s ![] ε
 
-abbrev BVal (s : Structure L M) (e : Fin n → M) : SubFormula L Empty n →L Prop := Eval s e Empty.elim
+abbrev BVal (s : Structure L M) (e : Fin n → M) : Subformula L Empty n →L Prop := Eval s e Empty.elim
 
 abbrev Val! (M : Type w) [s : Structure L M] (ε : μ → M) :
     Formula L μ →L Prop := Val s ε
 
 abbrev BVal! (M : Type w) [s : Structure L M] (e : Fin n → M) :
-    SubFormula L Empty n →L Prop := BVal s e
+    Subformula L Empty n →L Prop := BVal s e
 
 abbrev Realize (s : Structure L M) : Formula L M →L Prop := Eval s ![] id
 
 lemma eval_rel {k} {r : L.rel k} {v} :
-    Eval s e ε (rel r v) ↔ s.rel r (fun i => SubTerm.val s e ε (v i)) := of_eq rfl
+    Eval s e ε (rel r v) ↔ s.rel r (fun i => Subterm.val s e ε (v i)) := of_eq rfl
 
 @[simp] lemma eval_rel₀ {r : L.rel 0} :
     Eval s e ε (rel r ![]) ↔ s.rel r ![] := by simp[eval_rel, Matrix.empty_eq]
 
-@[simp] lemma eval_rel₁ {r : L.rel 1} (t : SubTerm L μ n) :
+@[simp] lemma eval_rel₁ {r : L.rel 1} (t : Subterm L μ n) :
     Eval s e ε (rel r ![t]) ↔ s.rel r ![t.val s e ε] := by
   simp[eval_rel]; apply of_eq; congr
   funext i; cases' i using Fin.cases with i <;> simp
 
-@[simp] lemma eval_rel₂ {r : L.rel 2} (t₁ t₂ : SubTerm L μ n) :
+@[simp] lemma eval_rel₂ {r : L.rel 2} (t₁ t₂ : Subterm L μ n) :
     Eval s e ε (rel r ![t₁, t₂]) ↔ s.rel r ![t₁.val s e ε, t₂.val s e ε] := by
   simp[eval_rel]; apply of_eq; congr
   funext i; cases' i using Fin.cases with i <;> simp
 
 lemma eval_nrel {k} {r : L.rel k} {v} :
-    Eval s e ε (nrel r v) ↔ ¬s.rel r (fun i => SubTerm.val s e ε (v i)) := of_eq rfl
+    Eval s e ε (nrel r v) ↔ ¬s.rel r (fun i => Subterm.val s e ε (v i)) := of_eq rfl
 
 @[simp] lemma eval_nrel₀ {r : L.rel 0} :
     Eval s e ε (nrel r ![]) ↔ ¬s.rel r ![] := by simp[eval_nrel, Matrix.empty_eq]
 
-@[simp] lemma eval_nrel₁ {r : L.rel 1} (t : SubTerm L μ n) :
+@[simp] lemma eval_nrel₁ {r : L.rel 1} (t : Subterm L μ n) :
     Eval s e ε (nrel r ![t]) ↔ ¬s.rel r ![t.val s e ε] := by
   simp[eval_rel]; apply of_eq; congr
   funext i; cases' i using Fin.cases with i <;> simp
 
-@[simp] lemma eval_nrel₂ {r : L.rel 2} (t₁ t₂ : SubTerm L μ n) :
+@[simp] lemma eval_nrel₂ {r : L.rel 2} (t₁ t₂ : Subterm L μ n) :
     Eval s e ε (nrel r ![t₁, t₂]) ↔ ¬s.rel r ![t₁.val s e ε, t₂.val s e ε] := by
   simp[eval_rel]; apply of_eq; congr
   funext i; cases' i using Fin.cases with i <;> simp
 
-@[simp] lemma eval_all {p : SubFormula L μ (n + 1)} :
+@[simp] lemma eval_all {p : Subformula L μ (n + 1)} :
     Eval s e ε (∀' p) ↔ ∀ x : M, Eval s (x :> e) ε p := of_eq rfl
 
-@[simp] lemma eval_univClosure {e'} {p : SubFormula L μ n'} :
+@[simp] lemma eval_univClosure {e'} {p : Subformula L μ n'} :
     Eval s e' ε (univClosure p) ↔ ∀ e, Eval s e ε p := by
   induction' n' with n' ih generalizing e' <;> simp[*, eq_finZeroElim]
   constructor
   · intro h e; simpa using h (Matrix.vecTail e) (Matrix.vecHead e)
   · intro h e x; exact h (x :> e)
 
-@[simp] lemma eval_ex {p : SubFormula L μ (n + 1)} :
+@[simp] lemma eval_ex {p : Subformula L μ (n + 1)} :
     Eval s e ε (∃' p) ↔ ∃ x : M, Eval s (x :> e) ε p := of_eq rfl
 
-lemma eval_rew (ω : Rew L μ₁ n₁ μ₂ n₂) (p : SubFormula L μ₁ n₁) :
-    Eval s e₂ ε₂ (ω.hom p) ↔ Eval s (SubTerm.val s e₂ ε₂ ∘ ω ∘ SubTerm.bvar) (SubTerm.val s e₂ ε₂ ∘ ω ∘ SubTerm.fvar) p := by
-  induction p using rec' generalizing n₂ <;> simp[*, SubTerm.val_rew, eval_rel, eval_nrel, Rew.rel, Rew.nrel]
+lemma eval_rew (ω : Rew L μ₁ n₁ μ₂ n₂) (p : Subformula L μ₁ n₁) :
+    Eval s e₂ ε₂ (ω.hom p) ↔ Eval s (Subterm.val s e₂ ε₂ ∘ ω ∘ Subterm.bvar) (Subterm.val s e₂ ε₂ ∘ ω ∘ Subterm.fvar) p := by
+  induction p using rec' generalizing n₂ <;> simp[*, Subterm.val_rew, eval_rel, eval_nrel, Rew.rel, Rew.nrel]
   case hall => simp[Function.comp]; exact iff_of_eq $ forall_congr (fun x => by congr; funext i; cases i using Fin.cases <;> simp)
   case hex => simp[Function.comp]; exact exists_congr (fun x => iff_of_eq $ by congr; funext i; cases i using Fin.cases <;> simp)
 
-lemma eval_map (b : Fin n₁ → Fin n₂) (f : μ₁ → μ₂) (e : Fin n₂ → M) (ε : μ₂ → M) (p : SubFormula L μ₁ n₁) :
+lemma eval_map (b : Fin n₁ → Fin n₂) (f : μ₁ → μ₂) (e : Fin n₂ → M) (ε : μ₂ → M) (p : Subformula L μ₁ n₁) :
     Eval s e ε (Rew.mapl b f p) ↔ Eval s (e ∘ b) (ε ∘ f) p :=
   by simp[eval_rew, Function.comp]
 
-lemma eval_substs {k} (w : Fin k → SubTerm L μ n) (p : SubFormula L μ k) :
+lemma eval_substs {k} (w : Fin k → Subterm L μ n) (p : Subformula L μ k) :
     Eval s e ε (Rew.substsl w p) ↔ Eval s (fun i => (w i).val s e ε) ε p :=
   by simp[eval_rew, Function.comp]
 
-@[simp] lemma eval_emb (p : SubFormula L Empty n) :
+@[simp] lemma eval_emb (p : Subformula L Empty n) :
     Eval s e ε (Rew.embl p) ↔ Eval s e Empty.elim p := by simp[eval_rew, Function.comp]; apply iff_of_eq; congr; funext x; contradiction
 
 section Syntactic
 
 variable (ε : ℕ → M)
 
-@[simp] lemma eval_free (p : SyntacticSubFormula L (n + 1)) :
+@[simp] lemma eval_free (p : SyntacticSubformula L (n + 1)) :
     Eval s e (a :>ₙ ε) (Rew.freel p) ↔ Eval s (e <: a) ε p :=
   by simp[eval_rew, Function.comp]; congr; apply iff_of_eq; congr; funext x; cases x using Fin.lastCases <;> simp
 
-@[simp] lemma eval_shift (p : SyntacticSubFormula L n) :
+@[simp] lemma eval_shift (p : SyntacticSubformula L n) :
     Eval s e (a :>ₙ ε) (Rew.shiftl p) ↔ Eval s e ε p :=
   by simp[eval_rew, Function.comp]
 
@@ -319,7 +319,7 @@ section Hom
 variable {M₁ : Type w₁} {M₂ : Type w₂} [s₁ : Structure L M₁] [s₂ : Structure L M₂] (φ : M₁ →ₛ[L] M₂)
 variable {e₁ : Fin n → M₁} {ε₁ : μ → M₁}
 
-lemma eval_hom_iff_of_qfree : ∀ {n} {e₁ : Fin n → M₁} {ε₁ : μ → M₁} {p : SubFormula L μ n}, p.qfree →
+lemma eval_hom_iff_of_qfree : ∀ {n} {e₁ : Fin n → M₁} {ε₁ : μ → M₁} {p : Subformula L μ n}, p.qfree →
     (Eval s₁ e₁ ε₁ p ↔ Eval s₂ (φ ∘ e₁) (φ ∘ ε₁) p)
   | _, e₁, ε₁, ⊤,        _ => by simp
   | _, e₁, ε₁, ⊥,        _ => by simp
@@ -328,18 +328,18 @@ lemma eval_hom_iff_of_qfree : ∀ {n} {e₁ : Fin n → M₁} {ε₁ : μ → M�
   | _, e₁, ε₁, p ⋏ q,    h => by simp at h ⊢; simp[eval_hom_iff_of_qfree h.1, eval_hom_iff_of_qfree h.2]
   | _, e₁, ε₁, p ⋎ q,    h => by simp at h ⊢; simp[eval_hom_iff_of_qfree h.1, eval_hom_iff_of_qfree h.2]
 
-lemma eval_hom_univClosure {n} {ε₁ : μ → M₁} {p : SubFormula L μ n} (hp : p.qfree) :
+lemma eval_hom_univClosure {n} {ε₁ : μ → M₁} {p : Subformula L μ n} (hp : p.qfree) :
     Val s₂ (φ ∘ ε₁) (univClosure p) → Val s₁ ε₁ (univClosure p) := by
   simp; intro h e₁; exact (eval_hom_iff_of_qfree φ hp).mpr (h (φ ∘ e₁))
 
 end Hom
 
-end SubFormula
+end Subformula
 
 open Logic
 
 instance semantics : Semantics (Sentence L) (Structure.{u, u} L) where
-  models := (SubFormula.Val · Empty.elim)
+  models := (Subformula.Val · Empty.elim)
 
 abbrev Models (M : Type u) [s : Structure L M] : Sentence L →L Prop := Semantics.models s
 
@@ -350,7 +350,7 @@ abbrev ModelsTheory (M : Type u) [s : Structure L M] (T : Theory L) : Prop :=
 
 scoped infix:55 " ⊧* " => ModelsTheory
 
-abbrev Realize (M : Type u) [s : Structure L M] : Formula L M →L Prop := SubFormula.Val s id
+abbrev Realize (M : Type u) [s : Structure L M] : Formula L M →L Prop := Subformula.Val s id
 
 scoped postfix:max " ⊧ᵣ " => Realize
 
@@ -375,11 +375,11 @@ variable {L}
 section
 variable {M : Type u} [s : Structure L M]
 
-lemma models_def : M ⊧ = SubFormula.Val s Empty.elim := rfl
+lemma models_def : M ⊧ = Subformula.Val s Empty.elim := rfl
 
-lemma models_iff {σ : Sentence L} : M ⊧ σ ↔ SubFormula.Val s Empty.elim σ := by simp[models_def]
+lemma models_iff {σ : Sentence L} : M ⊧ σ ↔ Subformula.Val s Empty.elim σ := by simp[models_def]
 
-lemma models_def' : Semantics.models s = SubFormula.Val s Empty.elim := rfl
+lemma models_def' : Semantics.models s = Subformula.Val s Empty.elim := rfl
 
 lemma modelsTheory_iff {T : Theory L} : M ⊧* T ↔ (∀ ⦃p⦄, p ∈ T → M ⊧ p) := of_eq rfl
 
@@ -428,31 +428,31 @@ variable {e₁ : Fin n → M₁} {ε₁ : μ → M₁}
 
 lemma models_hom_iff_of_qfree {σ : Sentence L} (hσ : σ.qfree) : M₁ ⊧ σ ↔ M₂ ⊧ σ := by
   simpa[Matrix.empty_eq, Empty.eq_elim] using
-    SubFormula.eval_hom_iff_of_qfree (e₁ := finZeroElim) (ε₁ := Empty.elim) φ hσ
+    Subformula.eval_hom_iff_of_qfree (e₁ := finZeroElim) (ε₁ := Empty.elim) φ hσ
 
-lemma models_hom_univClosure {n} {σ : SubSentence L n} (hσ : σ.qfree) :
+lemma models_hom_univClosure {n} {σ : Subsentence L n} (hσ : σ.qfree) :
     M₂ ⊧ (univClosure σ) → M₁ ⊧ (univClosure σ) := by
   simpa[Matrix.empty_eq, Empty.eq_elim, models_iff] using
-    SubFormula.eval_hom_univClosure (ε₁ := Empty.elim) φ hσ
+    Subformula.eval_hom_univClosure (ε₁ := Empty.elim) φ hσ
 
-lemma models_hom_univClosure_of_submodels [H : M₁ ⊆ₛ[L] M₂] {n} {σ : SubSentence L n} (hσ : σ.qfree) :
+lemma models_hom_univClosure_of_submodels [H : M₁ ⊆ₛ[L] M₂] {n} {σ : Subsentence L n} (hσ : σ.qfree) :
     M₂ ⊧ (univClosure σ) → M₁ ⊧ (univClosure σ) := models_hom_univClosure H.toHom hσ
 
 end Hom
 
 end
 
-namespace SubFormula
+namespace Subformula
 
 variable {L₁ L₂ : Language.{u}} {Φ : L₁ →ᵥ L₂} 
 
 section lMap
 variable {M : Type u} {s₂ : Structure L₂ M} {n} {e : Fin n → M} {ε : μ → M}
 
-lemma eval_lMap {p : SubFormula L₁ μ n} :
+lemma eval_lMap {p : Subformula L₁ μ n} :
     Eval s₂ e ε (lMap Φ p) ↔ Eval (s₂.lMap Φ) e ε p :=
   by induction p using rec' <;>
-    simp[*, SubTerm.val_lMap, lMap_rel, lMap_nrel, eval_rel, eval_nrel]
+    simp[*, Subterm.val_lMap, lMap_rel, lMap_nrel, eval_rel, eval_nrel]
 
 lemma models_lMap {σ : Sentence L₁} :
     Semantics.models s₂ (lMap Φ σ) ↔ Semantics.models (s₂.lMap Φ) σ :=
@@ -460,14 +460,14 @@ lemma models_lMap {σ : Sentence L₁} :
 
 end lMap
 
-end SubFormula
+end Subformula
 
 lemma lMap_models_lMap {L₁ L₂ : Language.{u}} {Φ : L₁ →ᵥ L₂}  {T : Theory L₁} {σ : Sentence L₁} (h : T ⊨ σ) :
-    T.lMap Φ ⊨ SubFormula.lMap Φ σ := by
+    T.lMap Φ ⊨ Subformula.lMap Φ σ := by
   intro M _ s hM
   have : Semantics.models (s.lMap Φ) σ :=
-    h M (s.lMap Φ) (fun q hq => SubFormula.models_lMap.mp $ hM (Set.mem_image_of_mem _ hq))
-  exact SubFormula.models_lMap.mpr this
+    h M (s.lMap Φ) (fun q hq => Subformula.models_lMap.mp $ hM (Set.mem_image_of_mem _ hq))
+  exact Subformula.models_lMap.mpr this
 
 @[simp] lemma ModelsTheory.empty [Structure L M] : M ⊧* (∅ : Theory L)  := by intro _; simp
 
@@ -482,7 +482,7 @@ variable {Φ : L₁ →ᵥ L₂}
 
 lemma modelsTheory_onTheory₁ {T₁ : Theory L₁} :
     ModelsTheory (s := s₂) (T₁.lMap Φ) ↔ ModelsTheory (s := s₂.lMap Φ) T₁ :=
-  by simp[SubFormula.models_lMap, Theory.lMap, modelsTheory_iff, modelsTheory_iff (T := T₁)]
+  by simp[Subformula.models_lMap, Theory.lMap, modelsTheory_iff, modelsTheory_iff (T := T₁)]
 
 namespace semanticGe
 
@@ -508,16 +508,16 @@ end semanticGe
 
 end Theory
 
-namespace SubFormula
+namespace Subformula
 
 variable {L : Language.{u}} [L.Eq] {μ : Type v} (M : Type w) (s : Structure L M) [s.Eq]
   {n} (e : Fin n → M) (ε : μ → M)
 
-@[simp] lemma eval_eq (t u : SubTerm L μ n) :
+@[simp] lemma eval_eq (t u : Subterm L μ n) :
     Eval s e ε (rel Language.Eq.eq ![t, u]) ↔ t.val s e ε = u.val s e ε :=
   by simp
 
-end SubFormula
+end Subformula
 
 end FirstOrder
 

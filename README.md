@@ -21,7 +21,7 @@ Formalizing Logic in Lean4
 | :----:                              | ----                                | ----                         | :----:   |
 | $\vdash_\mathrm{T} \Gamma$          | Derivation in Tait-Calculus         |  `LO.FirstOrder.Derivation`     | `⊢ᵀ Γ`    |
 | $(\rm Cut)\vdash_\mathrm{T} \Gamma$ | Derivation in Tait-Calculus + Cut   |  `LO.FirstOrder.DerivationC`     | `⊢ᶜ Γ`    |
-| $M \models \sigma$                  | Tarski's truth definition condition |  `LO.FirstOrder.SubFormula.Val` | `M ⊧ σ` |
+| $M \models \sigma$                  | Tarski's truth definition condition |  `LO.FirstOrder.Subformula.Val` | `M ⊧ σ` |
 | $T \vdash \sigma$                   | Provability, Proof                  |  `LO.FirstOrder.Proof`          | `T ⊢ σ`  |
 
 ## Theorem
@@ -35,7 +35,7 @@ Formalizing Logic in Lean4
 | Gödel's incompleteness theorem | TODO                      |                  |
 
 ## Principia
-- Redundant but practical [formal [formal proof system]]
+- DSL for proof system of first-order logic
 - `[emb σ₁, emb σ₂, ...]⟹[T] emb σ` is equivalent to `T ⊢ σ₁ ∧ σ₂ ∧ ... → σ`
 
 ```code:ltOfLeOfLt.lean

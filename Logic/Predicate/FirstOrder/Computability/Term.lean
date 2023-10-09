@@ -99,41 +99,41 @@ lemma bv_substLast {t u : UTerm L μ} (ht : t.bv ≤ n + 1) (hu : u.bv ≤ n) : 
       have : x ≤ t.bv.pred := Nat.le_pred_of_lt hx
       exact False.elim (Nat.lt_le_antisymm lt this)) (by simp[bv])
 
-def toSubTerm : (t : UTerm L μ) → t.bv ≤ n → SubTerm L μ n
+def toSubterm : (t : UTerm L μ) → t.bv ≤ n → Subterm L μ n
   | bvar x,   h => #⟨x, by simp at h; exact Nat.lt_of_succ_le h⟩
   | fvar x,   _ => &x
-  | func f v, h => SubTerm.func f (fun i => toSubTerm (v i) (by simp[bv] at h; exact h i))
+  | func f v, h => Subterm.func f (fun i => toSubterm (v i) (by simp[bv] at h; exact h i))
 
-def ofSubTerm : SubTerm L μ n → { t : UTerm L μ // t.bv ≤ n }
+def ofSubterm : Subterm L μ n → { t : UTerm L μ // t.bv ≤ n }
   | #x               => ⟨bvar x, Nat.succ_le_of_lt x.isLt⟩
   | &x               => ⟨fvar x, by simp⟩
-  | SubTerm.func f v => ⟨func f (fun i => ofSubTerm (v i)), by simp[bv]⟩
+  | Subterm.func f v => ⟨func f (fun i => ofSubterm (v i)), by simp[bv]⟩
 
-lemma toSubTerm_ofSubterm {n} (t : SubTerm L μ n) : toSubTerm (ofSubTerm t).1 (ofSubTerm t).2 = t := by
-  induction t <;> simp[ofSubTerm, toSubTerm]
+lemma toSubterm_ofSubterm {n} (t : Subterm L μ n) : toSubterm (ofSubterm t).1 (ofSubterm t).2 = t := by
+  induction t <;> simp[ofSubterm, toSubterm]
   case func f v ih => { funext i; exact ih i }
 
-lemma ofSubTerm_toSubterm {n} (t : UTerm L μ) (h : t.bv ≤ n) : ofSubTerm (toSubTerm t h) = t := by
-  induction t <;> simp[ofSubTerm, toSubTerm]
+lemma ofSubterm_toSubterm {n} (t : UTerm L μ) (h : t.bv ≤ n) : ofSubterm (toSubterm t h) = t := by
+  induction t <;> simp[ofSubterm, toSubterm]
   case func f v ih =>
     funext i
     have h : ∀ i, (v i).bv ≤ n := by simpa[bv] using h
     exact ih i (h i)
 
-def subtEquiv : SubTerm L μ n ≃ { t : UTerm L μ // t.bv ≤ n } where
-  toFun := ofSubTerm
-  invFun := fun t => toSubTerm t.1 t.2
-  left_inv := toSubTerm_ofSubterm
-  right_inv := by intro ⟨t, h⟩; ext; simpa using ofSubTerm_toSubterm t h
+def subtEquiv : Subterm L μ n ≃ { t : UTerm L μ // t.bv ≤ n } where
+  toFun := ofSubterm
+  invFun := fun t => toSubterm t.1 t.2
+  left_inv := toSubterm_ofSubterm
+  right_inv := by intro ⟨t, h⟩; ext; simpa using ofSubterm_toSubterm t h
 
-@[simp] lemma subtEquiv_bvar (x : Fin n) : subtEquiv (#x : SubTerm L μ n) = ⟨bvar x, x.isLt⟩ := rfl
+@[simp] lemma subtEquiv_bvar (x : Fin n) : subtEquiv (#x : Subterm L μ n) = ⟨bvar x, x.isLt⟩ := rfl
 
-@[simp] lemma subtEquiv_fvar (x : μ) : subtEquiv (&x : SubTerm L μ n) = ⟨fvar x, by simp⟩ := rfl
+@[simp] lemma subtEquiv_fvar (x : μ) : subtEquiv (&x : Subterm L μ n) = ⟨fvar x, by simp⟩ := rfl
 
-@[simp] lemma subtEquiv_func {k} (f : L.func k) (v : Fin k → SubTerm L μ n) :
-    subtEquiv (SubTerm.func f v) = ⟨func f (fun i => subtEquiv (v i)), by simp[bv]⟩ := rfl
+@[simp] lemma subtEquiv_func {k} (f : L.func k) (v : Fin k → Subterm L μ n) :
+    subtEquiv (Subterm.func f v) = ⟨func f (fun i => subtEquiv (v i)), by simp[bv]⟩ := rfl
 
-lemma ofSubTerm_eq_subtEquiv : @ofSubTerm L μ n = subtEquiv := rfl
+lemma ofSubterm_eq_subtEquiv : @ofSubterm L μ n = subtEquiv := rfl
 
 open Encodable Primrec Primrec₂
 variable [Primcodable μ] [(k : ℕ) → Primcodable (L.func k)] [UniformlyPrimcodable L.func]
@@ -311,30 +311,30 @@ end W
 end UTerm
 
 
-namespace SubTerm
+namespace Subterm
 
 open UTerm Encodable Primrec Primrec₂
 variable {α : Type*} [Primcodable α]
 variable [Primcodable μ] [(k : ℕ) → Primcodable (L.func k)] [UniformlyPrimcodable L.func]
 
-instance : Primcodable (SubTerm L μ n) :=
+instance : Primcodable (Subterm L μ n) :=
   letI : Primcodable { t : UTerm L μ // t.bv ≤ n } := Primcodable.subtype (nat_le.comp UTerm.bv_primrec (Primrec.const n))
   Primcodable.ofEquiv { t : UTerm L μ // t.bv ≤ n } subtEquiv
 
-lemma bvar_primrec : Primrec (bvar : Fin n → SubTerm L μ n) := dom_fintype _
+lemma bvar_primrec : Primrec (bvar : Fin n → Subterm L μ n) := dom_fintype _
 
-lemma fvar_primrec : Primrec (fvar : μ → SubTerm L μ n) :=
+lemma fvar_primrec : Primrec (fvar : μ → Subterm L μ n) :=
   letI : Primcodable { t : UTerm L μ // t.bv ≤ n } := Primcodable.subtype (nat_le.comp UTerm.bv_primrec (Primrec.const n))
   (Primrec.of_equiv_iff subtEquiv).mp <| of_subtype_iff.mp <| by simpa using UTerm.fvar_primrec
 
-def funcL {n} (f : (k : ℕ) × L.func k) (l : List (SubTerm L μ n)) : Option (SubTerm L μ n) :=
+def funcL {n} (f : (k : ℕ) × L.func k) (l : List (Subterm L μ n)) : Option (Subterm L μ n) :=
   if h : l.length = f.1
     then some (func f.2 (fun i => l.get (i.cast h.symm)))
     else none
 
-lemma funcL_primrec : Primrec₂ (funcL : (k : ℕ) × L.func k → List (SubTerm L μ n) → Option (SubTerm L μ n)) :=
+lemma funcL_primrec : Primrec₂ (funcL : (k : ℕ) × L.func k → List (Subterm L μ n) → Option (Subterm L μ n)) :=
   letI : Primcodable { t : UTerm L μ // t.bv ≤ n } := Primcodable.subtype (nat_le.comp UTerm.bv_primrec (Primrec.const n))
-  have : Primrec₂ (fun f l => UTerm.funcL f (l.map (subtEquiv ·)) : (k : ℕ) × L.func k → List (SubTerm L μ n) → Option (UTerm L μ)) :=
+  have : Primrec₂ (fun f l => UTerm.funcL f (l.map (subtEquiv ·)) : (k : ℕ) × L.func k → List (Subterm L μ n) → Option (UTerm L μ)) :=
     UTerm.funcL_primrec.comp₂ Primrec₂.left
       <| to₂' <| list_map snd <| to₂' <| by apply subtype_val.comp <| of_equiv.comp snd
   Primrec₂.encode_iff.mp <| (Primrec.encode.comp₂ this).of_eq <| by
@@ -344,25 +344,25 @@ lemma funcL_primrec : Primrec₂ (funcL : (k : ℕ) × L.func k → List (SubTer
     { simp[Encodable.encode_ofEquiv subtEquiv, Encodable.Subtype.encode_eq]
       funext i; congr }
 
-lemma funcL_primrec' (k) : Primrec₂ (funcL ⟨k, ·⟩ : L.func k → List (SubTerm L μ n) → Option (SubTerm L μ n)) :=
+lemma funcL_primrec' (k) : Primrec₂ (funcL ⟨k, ·⟩ : L.func k → List (Subterm L μ n) → Option (Subterm L μ n)) :=
   (funcL_primrec.comp₂ ((sigma_pair k).comp₂ Primrec₂.left) Primrec₂.right).of_eq <| by simp[funcL]
 
-lemma func₁_primrec : Primrec₂ (func · ![·] : L.func 1 → SubTerm L μ n → SubTerm L μ n) :=
+lemma func₁_primrec : Primrec₂ (func · ![·] : L.func 1 → Subterm L μ n → Subterm L μ n) :=
   Primrec₂.option_some_iff.mp <|
-    have : Primrec₂ (fun f t => funcL ⟨1, f⟩ [t] : L.func 1 → SubTerm L μ n → Option (SubTerm L μ n)) :=
+    have : Primrec₂ (fun f t => funcL ⟨1, f⟩ [t] : L.func 1 → Subterm L μ n → Option (Subterm L μ n)) :=
       (funcL_primrec' 1).comp₂ Primrec₂.left (list_cons.comp₂ Primrec₂.right (Primrec₂.const []))
     this.of_eq <| by intro f t; simp[funcL, Matrix.constant_eq_singleton]
 
-lemma func₂_primrec : Primrec₂ (fun f t => func f ![t.1, t.2] : L.func 2 → SubTerm L μ n × SubTerm L μ n → SubTerm L μ n) :=
+lemma func₂_primrec : Primrec₂ (fun f t => func f ![t.1, t.2] : L.func 2 → Subterm L μ n × Subterm L μ n → Subterm L μ n) :=
   Primrec₂.option_some_iff.mp <| by
-    have : Primrec₂ (fun f t => funcL ⟨2, f⟩ [t.1, t.2] : L.func 2 → SubTerm L μ n × SubTerm L μ n → Option (SubTerm L μ n)) :=
+    have : Primrec₂ (fun f t => funcL ⟨2, f⟩ [t.1, t.2] : L.func 2 → Subterm L μ n × Subterm L μ n → Option (Subterm L μ n)) :=
       (funcL_primrec' 2).comp₂ Primrec₂.left
         <| list_cons.comp₂ (fst.comp₂ Primrec₂.right) <| list_cons.comp₂ (snd.comp₂ Primrec₂.right) (Primrec₂.const [])
     exact this.of_eq <| fun f ⟨t₁, t₂⟩ => by
       simp[funcL]
       funext i; cases i using Fin.cases <;> simp
 
-lemma subtEquiv_bind_eq_bind (b : Fin n₁ → SubTerm L μ₂ n₂) (e : μ₁ → SubTerm L μ₂ n₂) (t : SubTerm L μ₁ n₁) :
+lemma subtEquiv_bind_eq_bind (b : Fin n₁ → Subterm L μ₂ n₂) (e : μ₁ → Subterm L μ₂ n₂) (t : Subterm L μ₁ n₁) :
     (subtEquiv (Rew.bind b e t)).val =
     UTerm.bind (fun x => if hx : x < n₁ then subtEquiv (b ⟨x, hx⟩) else default) (fun x => subtEquiv $ e x) (subtEquiv t) := by
   induction t <;> simp[UTerm.bind]
@@ -370,11 +370,11 @@ lemma subtEquiv_bind_eq_bind (b : Fin n₁ → SubTerm L μ₂ n₂) (e : μ₁ 
     simp[Rew.func]
     funext i; simp[ih]; rfl
 
-lemma bv_subtEquiv (t : SubTerm L μ n) : (subtEquiv t).val.bv ≤ n := by
+lemma bv_subtEquiv (t : Subterm L μ n) : (subtEquiv t).val.bv ≤ n := by
   induction t <;> simp[UTerm.bv]
   case bvar x => { exact x.prop }
 
-lemma subtEquiv_bShift_eq_bShift (t : SubTerm L μ k) :
+lemma subtEquiv_bShift_eq_bShift (t : Subterm L μ k) :
     (subtEquiv (Rew.bShift t)).val = UTerm.bShifts 1 (subtEquiv t) := by
   rw[Rew.eq_bind Rew.bShift, subtEquiv_bind_eq_bind]
   simp[bShifts]
@@ -384,7 +384,7 @@ lemma subtEquiv_bShift_eq_bShift (t : SubTerm L μ k) :
 
 variable {σ : Type*} {μ₁ : Type*} {μ₂ : Type*} [Primcodable μ₁] [Primcodable μ₂] [Primcodable σ]
 
-lemma brew_primrec {b : α → Fin n₁ → SubTerm L μ₂ n₂} (hb : Primrec b) :
+lemma brew_primrec {b : α → Fin n₁ → Subterm L μ₂ n₂} (hb : Primrec b) :
     Primrec₂ (fun z x => if hx : x < n₁ then (subtEquiv (b z ⟨x, hx⟩)).val else default) := by
   letI : ∀ n, Primcodable { t : UTerm L μ₂ // t.bv ≤ n } := fun n => Primcodable.subtype (nat_le.comp UTerm.bv_primrec (Primrec.const n))
   have : Primrec₂ (fun z x => (Nat.toFin n₁ x).casesOn default (fun i => (subtEquiv (b z i)).val) : α → ℕ → UTerm L μ₂) :=
@@ -394,7 +394,7 @@ lemma brew_primrec {b : α → Fin n₁ → SubTerm L μ₂ n₂} (hb : Primrec 
     intro a x; simp[Nat.toFin]
     by_cases hx : x < n₁ <;> simp[hx]
 
-lemma bind_primrec {b : α → Fin n₁ → SubTerm L μ₂ n₂} {e : α → μ₁ → SubTerm L μ₂ n₂} {t : α → SubTerm L μ₁ n₁}
+lemma bind_primrec {b : α → Fin n₁ → Subterm L μ₂ n₂} {e : α → μ₁ → Subterm L μ₂ n₂} {t : α → Subterm L μ₁ n₁}
   (hb : Primrec b) (he : Primrec₂ e) (ht : Primrec t) :
     Primrec (fun x => Rew.bind (b x) (e x) (t x)) := by
   letI : ∀ n, Primcodable { t : UTerm L μ₁ // t.bv ≤ n } := fun n => Primcodable.subtype (nat_le.comp UTerm.bv_primrec (Primrec.const n))
@@ -409,7 +409,7 @@ lemma bind_primrec {b : α → Fin n₁ → SubTerm L μ₂ n₂} {e : α → μ
     intro a
     simp[Encodable.encode_ofEquiv subtEquiv, Encodable.Subtype.encode_eq, subtEquiv_bind_eq_bind]
 
-end SubTerm
+end Subterm
 
 end FirstOrder
 

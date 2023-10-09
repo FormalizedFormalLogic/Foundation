@@ -20,8 +20,8 @@ inductive Code (L : Language.{u})
   | verum : Code L
   | and : SyntacticFormula L → SyntacticFormula L → Code L
   | or : SyntacticFormula L → SyntacticFormula L → Code L
-  | all : SyntacticSubFormula L 1 → Code L
-  | ex : SyntacticSubFormula L 1 → SyntacticTerm L → Code L
+  | all : SyntacticSubformula L 1 → Code L
+  | ex : SyntacticSubformula L 1 → SyntacticTerm L → Code L
   | wk : List (SyntacticFormula L) → Code L
 
 def Code.equiv (L : Language.{u}) :
@@ -30,8 +30,8 @@ def Code.equiv (L : Language.{u}) :
     Unit ⊕
     (SyntacticFormula L × SyntacticFormula L) ⊕
     (SyntacticFormula L × SyntacticFormula L) ⊕
-    (SyntacticSubFormula L 1) ⊕
-    (SyntacticSubFormula L 1 × SyntacticTerm L) ⊕
+    (SyntacticSubformula L 1) ⊕
+    (SyntacticSubformula L 1 × SyntacticTerm L) ⊕
     List (SyntacticFormula L) where
   toFun := fun c =>
     match c with
@@ -65,7 +65,7 @@ def sequents : ProofList L → List (List (SyntacticFormula L)) := List.map Prod
 
 def isProper : ProofList L → Bool
   | []                     => true
-  | (Code.axL r v, Γ) :: l => isProper l && SubFormula.rel r v ∈ Γ && SubFormula.nrel r v ∈ Γ
+  | (Code.axL r v, Γ) :: l => isProper l && Subformula.rel r v ∈ Γ && Subformula.nrel r v ∈ Γ
   | (Code.verum,   Γ) :: l => isProper l && ⊤ ∈ Γ
   | (Code.and p q, Γ) :: l => isProper l && p ⋏ q ∈ Γ && p :: Γ ∈ sequents l && q :: Γ ∈ sequents l
   | (Code.or p q,  Γ) :: l => isProper l && p ⋎ q ∈ Γ && p :: q :: Γ ∈ sequents l
@@ -75,7 +75,7 @@ def isProper : ProofList L → Bool
 
 private def F (Γ : List (SyntacticFormula L)) (seq : List (List (SyntacticFormula L))) : Code L → Bool := fun c =>
   Sum.recOn (Code.equiv L c)
-    (fun f => SubFormula.rel f.2.1 f.2.2 ∈ Γ && SubFormula.nrel f.2.1 f.2.2 ∈ Γ)
+    (fun f => Subformula.rel f.2.1 f.2.2 ∈ Γ && Subformula.nrel f.2.1 f.2.2 ∈ Γ)
   <| fun c => c.casesOn (fun _ => ⊤ ∈ Γ)
   <| fun c => c.casesOn (fun p => p.1 ⋏ p.2 ∈ Γ && p.1 :: Γ ∈ seq && p.2 :: Γ ∈ seq)
   <| fun c => c.casesOn (fun p => p.1 ⋎ p.2 ∈ Γ && p.1 :: p.2 :: Γ ∈ seq)
@@ -92,23 +92,23 @@ instance : Primcodable
       (Unit ⊕
         SyntacticFormula L × SyntacticFormula L ⊕
           SyntacticFormula L × SyntacticFormula L ⊕
-            SyntacticSubFormula L 1 ⊕ SyntacticSubFormula L 1 × SyntacticTerm L ⊕ List (SyntacticFormula L))) ×
+            SyntacticSubformula L 1 ⊕ SyntacticSubformula L 1 × SyntacticTerm L ⊕ List (SyntacticFormula L))) ×
     (SyntacticFormula L × SyntacticFormula L ⊕
       SyntacticFormula L × SyntacticFormula L ⊕
-        SyntacticSubFormula L 1 ⊕ SyntacticSubFormula L 1 × SyntacticTerm L ⊕ List (SyntacticFormula L))) := Primcodable.prod
+        SyntacticSubformula L 1 ⊕ SyntacticSubformula L 1 × SyntacticTerm L ⊕ List (SyntacticFormula L))) := Primcodable.prod
 
 private lemma F_primrec : Primrec₂ (fun (p : List (SyntacticFormula L) × List (List (SyntacticFormula L))) => F p.1 p.2) :=
   to₂' <| sum_casesOn (of_equiv.comp snd)
     ((dom_bool₂ _).comp₂
-      (by apply list_mem.comp₂ (SubFormula.rel_primrec.comp₂ Primrec₂.right) (fst.comp₂ $ fst.comp₂ Primrec₂.left))
-      (by apply list_mem.comp₂ (SubFormula.nrel_primrec.comp₂ Primrec₂.right) (fst.comp₂ $ fst.comp₂ Primrec₂.left)))
+      (by apply list_mem.comp₂ (Subformula.rel_primrec.comp₂ Primrec₂.right) (fst.comp₂ $ fst.comp₂ Primrec₂.left))
+      (by apply list_mem.comp₂ (Subformula.nrel_primrec.comp₂ Primrec₂.right) (fst.comp₂ $ fst.comp₂ Primrec₂.left)))
   <| to₂' <| sum_casesOn snd
     (by apply list_mem.comp₂ (Primrec₂.const ⊤) (fst.comp₂ $ fst.comp₂ $ fst.comp₂ Primrec₂.left))
   <| to₂' <| sum_casesOn snd
     ((dom_bool₂ _).comp₂
       ((dom_bool₂ _).comp₂
         (by apply list_mem.comp₂
-              (SubFormula.and_primrec.comp₂ (fst.comp₂ Primrec₂.right) (snd.comp₂ Primrec₂.right))
+              (Subformula.and_primrec.comp₂ (fst.comp₂ Primrec₂.right) (snd.comp₂ Primrec₂.right))
               (fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ Primrec₂.left))
         (by apply list_mem.comp₂
               (list_cons.comp₂ (fst.comp₂ Primrec₂.right) (fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ Primrec₂.left))
@@ -119,7 +119,7 @@ private lemma F_primrec : Primrec₂ (fun (p : List (SyntacticFormula L) × List
   <| to₂' <| sum_casesOn snd
     ((dom_bool₂ _).comp₂
       (by apply list_mem.comp₂
-            (SubFormula.or_primrec.comp₂ (fst.comp₂ Primrec₂.right) (snd.comp₂ Primrec₂.right))
+            (Subformula.or_primrec.comp₂ (fst.comp₂ Primrec₂.right) (snd.comp₂ Primrec₂.right))
             (fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ Primrec₂.left))
       (by apply list_mem.comp₂
             (by apply list_cons.comp₂ (fst.comp₂ Primrec₂.right) $ list_cons.comp₂
@@ -129,23 +129,23 @@ private lemma F_primrec : Primrec₂ (fun (p : List (SyntacticFormula L) × List
   <| to₂' <| sum_casesOn snd
     ((dom_bool₂ _).comp₂
       (by apply list_mem.comp₂
-            (SubFormula.all_primrec.comp₂ Primrec₂.right)
+            (Subformula.all_primrec.comp₂ Primrec₂.right)
             (fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ Primrec₂.left))
       (by apply list_mem.comp₂
             (list_cons.comp₂
-              (SubFormula.free_primrec.comp₂ Primrec₂.right)
+              (Subformula.free_primrec.comp₂ Primrec₂.right)
               (to₂' <| by apply list_map
                             (fst.comp $ fst.comp $ fst.comp $ fst.comp $ fst.comp $ fst.comp $ fst)
-                            (SubFormula.shift_primrec.comp₂ Primrec₂.right)))
+                            (Subformula.shift_primrec.comp₂ Primrec₂.right)))
             (snd.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ Primrec₂.left)))
   <| to₂' <| sum_casesOn snd
     ((dom_bool₂ _).comp₂
       (by apply list_mem.comp₂
-            (SubFormula.ex_primrec.comp₂ $ fst.comp₂ Primrec₂.right)
+            (Subformula.ex_primrec.comp₂ $ fst.comp₂ Primrec₂.right)
             (fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ Primrec₂.left))
       (by apply list_mem.comp₂
             (by apply list_cons.comp₂
-                  (by apply SubFormula.substs₁_primrec.comp₂ (snd.comp₂ Primrec₂.right) (fst.comp₂ Primrec₂.right))
+                  (by apply Subformula.substs₁_primrec.comp₂ (snd.comp₂ Primrec₂.right) (fst.comp₂ Primrec₂.right))
                   (by apply fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ Primrec₂.left))
             (snd.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ Primrec₂.left)))
   <| (dom_bool₂ _).comp₂
@@ -348,11 +348,11 @@ lemma provFn_primrec {T : Theory L} [DecidablePred T] (hT : Computable (fun x =>
     (dom_bool₂.comp
       (dom_bool₂.comp
         (list_all (hT.comp Computable₂.right)
-          (Primrec.to_comp $ Primrec.list_map (Primrec.snd.comp .snd) (SubFormula.neg_primrec.comp₂ .right)))
+          (Primrec.to_comp $ Primrec.list_map (Primrec.snd.comp .snd) (Subformula.neg_primrec.comp₂ .right)))
         (Primrec.to_comp $ by
           apply Primrec.list_mem.comp
                   (Primrec.list_map (Primrec.list_cons.comp (Primrec.snd.comp .fst) (Primrec.snd.comp .snd))
-                    (SubFormula.emb_primrec.comp₂ .right))
+                    (Subformula.emb_primrec.comp₂ .right))
                   (Primrec.list_map (Primrec.fst.comp .snd) (Primrec.snd.comp₂ .right))))
       (Primrec.to_comp $ isProper_primrec.comp $ Primrec.fst.comp .snd))
     (const 1) (const 0)

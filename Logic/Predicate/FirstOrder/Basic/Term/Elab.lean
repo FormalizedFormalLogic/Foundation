@@ -5,7 +5,7 @@ namespace LO
 
 namespace FirstOrder
 
-namespace SubTerm
+namespace Subterm
 
 declare_syntax_cat foterm
 syntax:max "#" term:max : foterm
@@ -35,7 +35,7 @@ macro_rules
   | `(ᵀ“ & $n:term ”)                                => `(&$n)
   | `(ᵀ“ $name:ident ”)                            => `(& $(quote name.getId.getString!))
   | `(ᵀ“ ᵀ! $t:term ”)                               => `($t)
-  | `(ᵀ“ $n:num ”)                                   => `(SubTerm.Operator.const (natLit _ $n))
+  | `(ᵀ“ $n:num ”)                                   => `(Subterm.Operator.const (natLit _ $n))
   | `(ᵀ“ ᵀ⟨ $d:term ⟩( $t:foterm,* ) ”)              => do
     let v ← t.getElems.foldrM (β := Lean.TSyntax _) (init := ← `(![])) (fun a s => `(ᵀ“$a” :> $s))
     `(func $d $v)
@@ -55,10 +55,10 @@ macro_rules
 
 #check Language.Add.add
 
-#check (ᵀ“ ᵀ⟨Language.ORingFunc.mul⟩(&2 + &0, ᵀ⟨Language.ORingFunc.zero⟩())” : SubTerm Language.oRing ℕ 8)
-#check (ᵀ“ ᵀ⟨Language.ORingFunc.mul⟩(&2 + &0, ᵀ⟨Language.ORingFunc.zero⟩())” : SubTerm Language.oRing ℕ 8)
+#check (ᵀ“ ᵀ⟨Language.ORingFunc.mul⟩(&2 + &0, ᵀ⟨Language.ORingFunc.zero⟩())” : Subterm Language.oRing ℕ 8)
+#check (ᵀ“ ᵀ⟨Language.ORingFunc.mul⟩(&2 + &0, ᵀ⟨Language.ORingFunc.zero⟩())” : Subterm Language.oRing ℕ 8)
 #check ᵀ“ᵀ⇑(3 * #3 + 9)”
-#check SubTerm.func Language.Mul.mul (ᵀ“1” :> ᵀ“3” :> Matrix.vecEmpty)
+#check Subterm.func Language.Mul.mul (ᵀ“1” :> ᵀ“3” :> Matrix.vecEmpty)
 
 section delab
 
@@ -66,7 +66,7 @@ instance : Coe NumLit (TSyntax `foterm) where
   coe s := ⟨s.raw⟩
 
 /-
-@[app_unexpander SubTerm.fvar]
+@[app_unexpander Subterm.fvar]
 def unexpsnderFver : Unexpander
   | `($_ $name:str) => `($name)
   | _ => throw ()
@@ -109,7 +109,7 @@ def unexpandShift : Unexpander
   | `($_ [→ ᵀ“$t₁”, ᵀ“$t₂”, ᵀ“$t₃”] ᵀ“$t”) => `(ᵀ“ $t ᵀ[$t₁, $t₂, $t₃] ”)
   | _           => throw ()
 
-@[app_unexpander SubTerm.func]
+@[app_unexpander Subterm.func]
 def unexpandFuncArith : Unexpander
   | `($_ lang(exp) ![ᵀ“$t:foterm”]) => `(ᵀ“ exp $t ”)
   | `($_ lang(exp) ![#$x:term])      => `(ᵀ“ exp #$x ”)
@@ -186,8 +186,8 @@ def unexpandFuncArith : Unexpander
   | _                                             => throw ()
 
 #check natLit Language.oRing 99
-#check (ᵀ“1 + 8” : SubTerm Language.oRing ℕ 8)
-#check (SubTerm.func Language.Mul.mul (ᵀ“1” :> ᵀ“3” :> Matrix.vecEmpty) : SubTerm Language.oRing ℕ 8)
+#check (ᵀ“1 + 8” : Subterm Language.oRing ℕ 8)
+#check (Subterm.func Language.Mul.mul (ᵀ“1” :> ᵀ“3” :> Matrix.vecEmpty) : Subterm Language.oRing ℕ 8)
 #check ᵀ“3 + 8 * exp &6 + 2 * ᵀ!(#3)”
 #check [→ &0, &5] ᵀ“3 * #3 + 9”
 #check Rew.shift ᵀ“(3 * #3 + 9)”
@@ -195,7 +195,7 @@ def unexpandFuncArith : Unexpander
 
 end delab
 
-end SubTerm
+end Subterm
 
 end FirstOrder
 

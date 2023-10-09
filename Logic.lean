@@ -23,6 +23,8 @@ import Logic.Predicate.FirstOrder.Basic.Calculus
 import Logic.Predicate.FirstOrder.Basic.Eq
 import Logic.Predicate.FirstOrder.Basic.Soundness
 
+import Logic.Predicate.FirstOrder.Basic
+
 import Logic.Predicate.FirstOrder.Hauptsatz
 import Logic.Predicate.FirstOrder.Ultraproduct
 

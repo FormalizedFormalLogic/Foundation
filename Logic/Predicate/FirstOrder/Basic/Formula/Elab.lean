@@ -5,7 +5,7 @@ namespace LO
 
 namespace FirstOrder
 
-namespace SubFormula
+namespace Subformula
 
 declare_syntax_cat foformula
 syntax "⊤" : foformula
@@ -84,7 +84,7 @@ def unexpsnderEq : Unexpander
 def unexpsnderLe : Unexpander
   | `($_) => `(lang(<))
 
-@[app_unexpander SubFormula.rel]
+@[app_unexpander Subformula.rel]
 def unexpandFunc : Unexpander
   | `($_ $c ![])                 => `(“ ⟨$c⟩() ”)
   | `($_ $f ![ᵀ“ $t ”])          => `(“ ⟨$f⟩($t) ”)
@@ -183,7 +183,7 @@ def unexpandShift : Unexpander
   | `($_ “$p:foformula”) => `(“ ⇑ $p ”)
   | _                     => throw ()
 
-@[app_unexpander SubFormula.rel]
+@[app_unexpander Subformula.rel]
 def unexpandRelArith : Unexpander
   | `($_ lang(=) ![ᵀ“$t:foterm”, ᵀ“$u:foterm”]) => `(“ $t:foterm = $u  ”)
   | `($_ lang(=) ![ᵀ“$t:foterm”, #$y:term     ]) => `(“ $t:foterm = #$y ”)
@@ -221,7 +221,7 @@ def unexpandRelArith : Unexpander
 
   | _                                             => throw ()
 
-@[app_unexpander SubFormula.nrel]
+@[app_unexpander Subformula.nrel]
 def unexpandNRelArith : Unexpander
   | `($_ lang(=) ![ᵀ“$t:foterm”, ᵀ“$u:foterm”]) => `(“ $t:foterm ≠ $u  ”)
   | `($_ lang(=) ![ᵀ“$t:foterm”, #$y:term     ]) => `(“ $t:foterm ≠ #$y ”)
@@ -268,7 +268,7 @@ def unexpandNRelArith : Unexpander
 
 end delab
 
-end SubFormula
+end Subformula
 
 end FirstOrder
 

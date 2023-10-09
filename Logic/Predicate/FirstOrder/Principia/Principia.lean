@@ -8,11 +8,11 @@ variable {L : Language.{u}} [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq 
 
 variable {T : Theory L} {μ : Type v}
 
-open Rew SubFormula DerivationCR DerivationCRWA
+open Rew Subformula DerivationCR DerivationCRWA
 
 /-
-def SequentList.fvarList (l : List $ SubFormula L μ n) : List μ :=
-  l.bind SubFormula.fvarList
+def SequentList.fvarList (l : List $ Subformula L μ n) : List μ :=
+  l.bind Subformula.fvarList
 
 def fleshVar (C : List $ SyntacticFormula L) : ℕ := (SequentList.fvarList C).sup
 -/
@@ -133,7 +133,7 @@ def specialize (t) {p} (b : ProofArrow T Δ (∀' p)) : ProofArrow T Δ ([→ t]
     DerivationCRWA.ex' (t := t) (DerivationCRWA.em (p := [→ t].hom p) (by simp) (by simp))
   (b.toDerivationCWA.cCut b').cast (by simp)
 
-def specializes : {n : ℕ} → (v : Fin n → SyntacticTerm L) → {p : SyntacticSubFormula L n} →
+def specializes : {n : ℕ} → (v : Fin n → SyntacticTerm L) → {p : SyntacticSubformula L n} →
     ProofArrow T Δ (univClosure p) → ProofArrow T Δ ((substs v).hom p)
   | 0,     v, p, b => b.cast (by simp)
   | n + 1, v, p, b =>
@@ -153,7 +153,7 @@ def exCases {p q} (b₀ : ProofArrow T Δ (∃' p))
 
 section Eq
 variable [L.Eq] [EqTheory T]
-open SubTerm SubFormula Theory Eq
+open Subterm Subformula Theory Eq
 
 def eqRefl (t : SyntacticTerm L) : ProofArrow T Δ (“ᵀ!t = ᵀ!t”) :=
   have b : ProofArrow T Δ (“∀ #0 = #0”) := (byAxiom (EqTheory.eq Theory.Eq.refl)).cast (by simp)
@@ -172,7 +172,7 @@ def eqTrans {t₁ t₂ t₃ : SyntacticTerm L} (b₁ : ProofArrow T Δ “ᵀ!t�
   have : ProofArrow T Δ “ᵀ!t₁ = ᵀ!t₂ → ᵀ!t₂ = ᵀ!t₃ → ᵀ!t₁ = ᵀ!t₃” := (this.specializes ![t₃, t₂, t₁]).cast (by simp)
   (this.modusPonens b₁).modusPonens b₂
 
-def termExt : (t : SyntacticSubTerm L n) → (v₁ v₂ : Fin n → SyntacticTerm L) →
+def termExt : (t : SyntacticSubterm L n) → (v₁ v₂ : Fin n → SyntacticTerm L) →
     ((i : Fin n) → ProofArrow T Δ “ᵀ!(v₁ i) = ᵀ!(v₂ i)”) → ProofArrow T Δ “ᵀ!(substs v₁ t) = ᵀ!(substs v₂ t)”
   | #x,       _,  _,  b => b x
   | &x,       _,  _,  _ => eqRefl &x
@@ -191,7 +191,7 @@ private def negImply {p q : SyntacticFormula L} (b : ProofArrow T Δ (p ⟶ q)) 
   (b.trans $ intro $ absurd $ trans (p := q) (modusPonens (p := p) (assumption $ by simp) (assumption $ by simp)) $
     contradiction (p := q) ⊥ (assumption $ by simp) (assumption $ by simp))
 
-private def relExtAux {n} {k} (r : L.rel k) (v : Fin k → SyntacticSubTerm L n) (v₁ v₂ : Fin n → SyntacticTerm L)
+private def relExtAux {n} {k} (r : L.rel k) (v : Fin k → SyntacticSubterm L n) (v₁ v₂ : Fin n → SyntacticTerm L)
   (b : (i : Fin n) → ProofArrow T Δ “ᵀ!(v₁ i) = ᵀ!(v₂ i)”) : ProofArrow T Δ (substsl v₁ (rel r v) ⟶ substsl v₂ (rel r v)) :=
   have : ProofArrow T Δ
     “∀* ((⋀ i, ᵀ!(varSumInL i) = ᵀ!(varSumInR i)) → (!(rel r varSumInL) → !(rel r varSumInR)))” :=
@@ -202,12 +202,12 @@ private def relExtAux {n} {k} (r : L.rel k) (v : Fin k → SyntacticSubTerm L n)
     simp[Matrix.hom_conj', Rew.func] at this; simpa[Rew.rel] using this }
   (this.modusPonens (splits fun i => termExt (v i) v₁ v₂ b)).cast (by simp[Rew.rel])
 
-private lemma free_substs_eq_substs_shift {n'} (w : Fin n' → SyntacticSubTerm L (n + 1)) (p : SyntacticSubFormula L n') :
+private lemma free_substs_eq_substs_shift {n'} (w : Fin n' → SyntacticSubterm L (n + 1)) (p : SyntacticSubformula L n') :
     freel (substsl w p) = substsl (fun i => Rew.free (w i)) (shiftl p) :=
   by simp[←Rew.hom_comp_app]; apply Rew.hom_ext'; ext x <;> simp[Rew.comp_app]
 
 -- 不要だが計算を軽くするために`noncomputable`をつけている
-noncomputable def formulaExtAux : {Δ : List (SyntacticFormula L)} → {n : ℕ} → (p : SyntacticSubFormula L n) → (v₁ v₂ : Fin n → SyntacticTerm L) →
+noncomputable def formulaExtAux : {Δ : List (SyntacticFormula L)} → {n : ℕ} → (p : SyntacticSubformula L n) → (v₁ v₂ : Fin n → SyntacticTerm L) →
     ((i : Fin n) → ProofArrow T Δ “ᵀ!(v₁ i) = ᵀ!(v₂ i)”) → ProofArrow T Δ (substsl v₁ p ⟶ substsl v₂ p)
   | Δ, _, ⊤,        v₁, v₂, _ => (intro $ assumption $ by simp)
   | Δ, _, ⊥,        v₁, v₂, _ => (intro $ assumption $ by simp)
@@ -255,12 +255,12 @@ noncomputable def formulaExtAux : {Δ : List (SyntacticFormula L)} → {n : ℕ}
     this.cast (by simp; rfl)
   termination_by formulaExtAux p _ _ _ => p.complexity
 
-noncomputable def formulaExt (p : SyntacticSubFormula L n) (v₁ v₂ : Fin n → SyntacticTerm L) 
+noncomputable def formulaExt (p : SyntacticSubformula L n) (v₁ v₂ : Fin n → SyntacticTerm L) 
   (b : (i : Fin n) → ProofArrow T Δ “ᵀ!(v₁ i) = ᵀ!(v₂ i)”) (d : ProofArrow T Δ (substsl v₂ p)) :
     ProofArrow T Δ (substsl v₁ p) :=
   (formulaExtAux p v₂ v₁ (fun i => (b i).eqSymm)).modusPonens d
 
-noncomputable def rewriteEq {p : SyntacticSubFormula L 1} {t₁ t₂ : SyntacticTerm L}
+noncomputable def rewriteEq {p : SyntacticSubformula L 1} {t₁ t₂ : SyntacticTerm L}
   (b : ProofArrow T Δ “ᵀ!t₁ = ᵀ!t₂”) (d : ProofArrow T Δ ([→ t₂].hom p)) :
     ProofArrow T Δ ([→ t₁].hom p) :=
   ((formulaExtAux p ![t₂] ![t₁] (fun i => b.eqSymm.cast $ by simp)).modusPonens
@@ -331,7 +331,7 @@ inductive Principia : List (SyntacticFormula L) → SyntacticFormula L → Type 
     Principia Δ “ᵀ!t₁ = ᵀ!t₂” → Principia Δ “ᵀ!t₂ = ᵀ!t₁”
   | eqTrans {Δ t₁ t₂ t₃} :
     Principia Δ “ᵀ!t₁ = ᵀ!t₂” → Principia Δ “ᵀ!t₂ = ᵀ!t₃” → Principia Δ “ᵀ!t₁ = ᵀ!t₃”
-  | rewriteEq {Δ} {p : SyntacticSubFormula L 1} {t₁ t₂ : SyntacticTerm L} :
+  | rewriteEq {Δ} {p : SyntacticSubformula L 1} {t₁ t₂ : SyntacticTerm L} :
     Principia Δ “ᵀ!t₁ = ᵀ!t₂” → Principia Δ ([→ t₂].hom p) → Principia Δ ([→ t₁].hom p)
 
 notation Δ:0 " ⟹[" T "] " p => Principia T Δ p

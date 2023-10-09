@@ -9,13 +9,13 @@ variable {L : Language.{u}} [L.ORing]
 
 namespace Arith
 
-def succInd (p : SubFormula L μ (k + 1)) : Formula L μ :=
+def succInd (p : Subformula L μ (k + 1)) : Formula L μ :=
   “∀* (!(Rew.substsl (ᵀ“0” :> (#·)) p) → ∀ (!(Rew.substsl  (ᵀ“#0” :> (#·.succ)) p) → !(Rew.substsl (ᵀ“#0 + 1” :> (#·.succ)) p)) → ∀ !p)”
 
-def leastNumber (p : SubFormula L μ (k + 1)) : Formula L μ :=
+def leastNumber (p : Subformula L μ (k + 1)) : Formula L μ :=
   “∀* (∃ !p → ∃ (!p ∧ ∀[#0 < #1] ¬!(Rew.substsl (#0 :> (#·.succ.succ)) p)))”
 
-def orderInd (p : SubFormula L μ (k + 1)) : Formula L μ :=
+def orderInd (p : Subformula L μ (k + 1)) : Formula L μ :=
   “∀* (∀ (∀[#0 < #1] !(Rew.substsl (#0 :> (#·.succ.succ)) p) → !p) → ∀ !p)”
 
 variable (L)
@@ -53,7 +53,7 @@ inductive PAminus : Theory L
 
 variable {L}
 
-def IndScheme (u : Set (SubSentence L 1)) : Theory L := succInd '' u
+def IndScheme (u : Set (Subsentence L 1)) : Theory L := succInd '' u
 
 variable (L)
 
@@ -93,7 +93,7 @@ class Ind (U) (T : Theory L) where
 
 attribute [simp] Ind.ind
 
-abbrev IOpen (T : Theory L) := Ind SubFormula.qfree T
+abbrev IOpen (T : Theory L) := Ind Subformula.qfree T
 
 abbrev ISigma (k : ℕ) (T : Theory L) := Ind (Arith.Hierarchy.Sigma k) T
 
@@ -111,11 +111,11 @@ def Robinson : Theory L := Theory.Robinson L ∪ Theory.Eq L
 
 variable {L}
 
-def Ind (U : Set (SubSentence L 1)) : Theory L := Axiom.Robinson L ∪ Theory.IndScheme U
+def Ind (U : Set (Subsentence L 1)) : Theory L := Axiom.Robinson L ∪ Theory.IndScheme U
 
 variable (L)
 
-abbrev IOpen : Theory L := Ind SubFormula.qfree
+abbrev IOpen : Theory L := Ind Subformula.qfree
 
 abbrev ISigma (k : ℕ) : Theory L := Ind (Arith.Hierarchy.Sigma k)
 
@@ -129,13 +129,13 @@ instance : EqTheory (Robinson L) where
 instance : Arith.Robinson (Robinson L) where
   robinson := by simp[Robinson]
 
-instance (u : Set (SubSentence L 1)) : EqTheory (Ind u) where
+instance (u : Set (Subsentence L 1)) : EqTheory (Ind u) where
   eq := by simp[Ind]; exact Set.subset_union_of_subset_left (by simp) _
 
-instance (u : Set (SubSentence L 1)) : Arith.Robinson (Ind u) where
+instance (u : Set (Subsentence L 1)) : Arith.Robinson (Ind u) where
   robinson := by simp[Ind]; exact Set.subset_union_of_subset_left (by simp) _
 
-instance (u : Set (SubSentence L 1)) : Arith.Ind u (Ind u) where
+instance (u : Set (Subsentence L 1)) : Arith.Ind u (Ind u) where
   ind := by simp[Ind]
 
 end Axiom
