@@ -1,11 +1,57 @@
 import Logic.Vorspiel.Vorspiel
 import Mathlib.Computability.Halting
+import Mathlib.Data.Nat.ModEq
 
 open Vector Part
 
 namespace Nat
 
-def beta (n m i : ℕ) := n % ((i + 1) * m + 1)
+lemma coprime_list_prod_iff_right {k} {l : List ℕ} :
+    coprime k l.prod ↔ ∀ n ∈ l, coprime k n := by
+  induction' l with m l ih <;> simp[Nat.coprime_mul_iff_right, *]
+
+inductive Coprimes : List ℕ → Prop
+  | nil : Coprimes []
+  | cons {n : ℕ} {l : List ℕ} : (∀ m ∈ l, coprime n m) → Coprimes l → Coprimes (n :: l)
+
+lemma coprimes_cons_iff_coprimes_coprime_prod {n} {l : List ℕ} :
+    Coprimes (n :: l) ↔ Coprimes l ∧ coprime n l.prod := by
+  simp[coprime_list_prod_iff_right]; constructor
+  · rintro ⟨⟩ ; simpa[*]
+  · rintro ⟨hl, hn⟩; exact Coprimes.cons hn hl
+
+lemma modEq_iff_modEq_list_prod {a b} {l : List ℕ} (co : Coprimes l) :
+    (∀ i, a ≡ b [MOD l.get i]) ↔ a ≡ b [MOD l.prod] := by
+  induction' l with m l ih <;> simp[Nat.modEq_one]
+  · intro i; exact Fin.elim0 i
+  · rcases co with (_ | ⟨hm, hl⟩)
+    have : a ≡ b [MOD m] ∧ a ≡ b [MOD l.prod] ↔ a ≡ b [MOD m * l.prod] :=
+      Nat.modEq_and_modEq_iff_modEq_mul (coprime_list_prod_iff_right.mpr hm)
+    simp[←this, ←ih hl]
+    constructor
+    · intro h; exact ⟨by simpa using h ⟨0, by simp⟩, fun i => by simpa using h i.succ⟩
+    · intro h i
+      cases i using Fin.cases
+      · simpa using h.1
+      · simpa using h.2 _
+
+def chineseRemainderList : (l : List (ℕ × ℕ)) → (H : Coprimes (l.map Prod.fst)) →
+    { k // ∀ i, k ≡ (l.get i).2 [MOD (l.get i).1] }
+  | [],          _ => ⟨0, by simp⟩
+  | (m, a) :: l, H => by
+    have hl : Coprimes (l.map Prod.fst) ∧ coprime m (l.map Prod.fst).prod :=
+      coprimes_cons_iff_coprimes_coprime_prod.mp H
+    let ih : { k // ∀ i, k ≡ (l.get i).2 [MOD (l.get i).1] } := chineseRemainderList l hl.1
+    let z := Nat.chineseRemainder hl.2 a ih
+    exact ⟨z, by
+      intro i; cases' i using Fin.cases with i <;> simp
+      · exact z.prop.1
+      · have : z ≡ ih [MOD (l.get i).1] := by
+          simpa using (modEq_iff_modEq_list_prod hl.1).mpr z.prop.2 (i.cast $ by simp)
+        have : z ≡ (l.get i).2 [MOD (l.get i).1] := Nat.ModEq.trans this (ih.prop i)
+        exact this⟩
+
+def beta (n i : ℕ) := n.unpair.1 % ((i + 1) * n.unpair.2 + 1)
 
 end Nat
 
@@ -17,11 +63,15 @@ def isLtNat (n m : ℕ) : ℕ := if n < m then 1 else 0
 
 def isLeNat (n m : ℕ) : ℕ := if n ≤ m then 1 else 0
 
+def isDvdNat (n m : ℕ) : ℕ := if n ∣ m then 1 else 0
+
 @[simp] lemma isEqNat_pos_iff : 0 < isEqNat n m ↔ n = m := by simp[isEqNat]; by_cases n = m <;> simp[*]
 
 @[simp] lemma isLtNat_pos_iff : 0 < isLtNat n m ↔ n < m := by simp[isLtNat]; by_cases n < m <;> simp[*]
 
 @[simp] lemma isLeNat_pos_iff : 0 < isLeNat n m ↔ n ≤ m := by simp[isLeNat]; by_cases n ≤ m <;> simp[*]
+
+@[simp] lemma isDvdNat_pos_iff : 0 < isDvdNat n m ↔ n ∣ m := by simp[isDvdNat]; by_cases n ∣ m <;> simp[*]
 
 def inv (n : ℕ) : ℕ := isEqNat n 0
 
@@ -114,6 +164,23 @@ lemma to_partrec' {n} {f : Vector ℕ n →. ℕ} (hf : ArithPart₁ f) : Partre
 
 lemma of_eq {n} {f g : Vector ℕ n →. ℕ} (hf : ArithPart₁ f) (H : ∀ i, f i = g i) : ArithPart₁ g :=
   (funext H : f = g) ▸ hf
+
+lemma bind (f : Vector ℕ n → ℕ →. ℕ) (hf : @ArithPart₁ (n + 1) fun v => f v.tail v.head) {g} (hg : @ArithPart₁ n g) :
+    @ArithPart₁ n fun v => (g v).bind (f v) :=
+  (hf.comp (g :> fun i v => v.get i) (fun i => by cases i using Fin.cases <;> simp[*]; exact proj _)).of_eq (by
+    intro v; simp
+    rcases Part.eq_none_or_eq_some (g v) with (hgv | ⟨x, hgv⟩)
+    · simp[hgv, mOfFn]
+    · simp[hgv, Matrix.comp_vecCons']
+      have : mOfFn (fun i => (g :> fun j v => Part.some $ v.get j) i v) = pure (Vector.ofFn (x :> fun j => v.get j)) := by
+        rw[←Vector.mOfFn_pure]; apply congr_arg
+        funext i; cases i using Fin.cases <;> simp[hgv]
+      simp[this])
+
+lemma map (f : Vector ℕ n → ℕ → ℕ) (hf : @Arith₁ (n + 1) fun v => f v.tail v.head) {g} (hg : @ArithPart₁ n g) :
+    @ArithPart₁ n fun v => (g v).map (f v) :=
+  (bind (Part.some $ f · ·) (hf.of_eq <| by simp) hg).of_eq <| by
+  intro v; rcases Part.eq_none_or_eq_some (g v) with (_ | ⟨x, _⟩) <;> simp[*]
 
 lemma comp₁ (f : ℕ →. ℕ) (hf : @ArithPart₁ 1 fun v => f (v.get 0)) {n g} (hg : @Arith₁ n g) :
     @ArithPart₁ n fun v => f (g v) :=
@@ -287,7 +354,7 @@ protected lemma pair {n} (i j : Fin n) : Arith₁ (fun v => (v.get i).pair (v.ge
   exact this.of_eq <| by
     intro v; simp[pair]
 
-lemma nat_unpair₁ {n} (i : Fin n) : Arith₁ (fun v => (v.get i).unpair.1) := by
+lemma unpair₁ {n} (i : Fin n) : Arith₁ (fun v => (v.get i).unpair.1) := by
   have hf : Arith₁ (fun v => isLtNat (v.get i - (v.get i).sqrt * (v.get i).sqrt) (v.get i).sqrt) :=
     (lt 0 1).comp₂ _
       ((Arith₁.sub 0 1).comp₂ _ (proj i) ((mul 0 1).comp₂ _ (Arith₁.sqrt i) (Arith₁.sqrt i)))
@@ -300,7 +367,7 @@ lemma nat_unpair₁ {n} (i : Fin n) : Arith₁ (fun v => (v.get i).unpair.1) := 
     intro v; simp[unpair]
     by_cases v.get i - (v.get i).sqrt * (v.get i).sqrt < sqrt (v.get i) <;> simp[*]
 
-lemma nat_unpair₂ {n} (i : Fin n) : Arith₁ (fun v => (v.get i).unpair.2) := by
+lemma unpair₂ {n} (i : Fin n) : Arith₁ (fun v => (v.get i).unpair.2) := by
   have hf : Arith₁ (fun v => isLtNat (v.get i - (v.get i).sqrt * (v.get i).sqrt) (v.get i).sqrt) :=
     (lt 0 1).comp₂ _
       ((Arith₁.sub 0 1).comp₂ _ (proj i) ((mul 0 1).comp₂ _ (Arith₁.sqrt i) (Arith₁.sqrt i)))
@@ -312,5 +379,57 @@ lemma nat_unpair₂ {n} (i : Fin n) : Arith₁ (fun v => (v.get i).unpair.2) := 
   exact this.of_eq <| by
     intro v; simp[unpair]
     by_cases v.get i - (v.get i).sqrt * (v.get i).sqrt < sqrt (v.get i) <;> simp[*]
+
+lemma dvd (i j : Fin n) : Arith₁ (fun v => isDvdNat (v.get i) (v.get j)) := by
+  have hr : @Arith₁ (n + 1) (fun v =>
+    (isEqNat (v.head * (v.get i.succ)) (v.get j.succ)).or (isLtNat (v.get j.succ) v.head)) :=
+    (or 0 1).comp₂ _
+      ((equal 0 1).comp₂ _ ((mul 0 1).comp₂ _ head (proj i.succ)) (proj j.succ))
+      ((lt 0 1).comp₂ _ (proj j.succ) head)
+  have : @Arith₁ (n + 1) (fun v => isLeNat v.head (v.tail.get j)) :=
+    (le 0 1).comp₂ _ head ((proj j.succ).of_eq <| by simp)
+  have := ArithPart₁.map (fun v x => isLeNat x (v.get j)) this (ArithPart₁.rfindPos hr)
+  exact this.of_eq <| by
+    intro v; simp[isDvdNat, Part.eq_some_iff]
+    by_cases hv : v.get i ∣ v.get j <;> simp[hv]
+    · rcases least_number _ hv with ⟨k, hk, hkm⟩
+      have hkvj : k ≤ v.get j := by
+        by_cases hkz : k = 0
+        · simp[hkz]
+        · rw[hk]; exact Nat.le_mul_of_pos_left (Nat.zero_lt_of_ne_zero $ fun hvi => by
+            simp[hvi] at hk
+            have : v.get j ≠ 0 := hkm 0 (Nat.pos_of_ne_zero hkz)
+            contradiction)
+      refine ⟨k,
+        ⟨by symm; simp; left; simp[hk, mul_comm],
+         by intro m hm; symm; simp[mul_comm m, Ne.symm (hkm m hm), le_of_lt (lt_of_lt_of_le hm hkvj)]⟩,
+        by simp[isLeNat]; exact not_lt.mpr hkvj⟩
+    · exact ⟨v.get j + 1, ⟨by symm; simp, by
+        intro m hm; symm; simp[lt_succ.mp hm]; intro A
+        have : v.get i ∣ v.get j := by rw[←A]; exact Nat.dvd_mul_left (Vector.get v i) m
+        contradiction⟩, by simp[isLeNat]⟩
+
+lemma rem (i j : Fin n) : Arith₁ (fun v => v.get i % v.get j) := by
+  let F : Vector ℕ (n + 1) → ℕ := fun v => isDvdNat (v.get j.succ) (v.get i.succ - v.head)
+  have : Arith₁ F :=
+    (dvd 0 1).comp₂ _ (proj j.succ) ((sub 0 1).comp₂ _ (proj i.succ) head)
+  exact (ArithPart₁.rfindPos this).of_eq <| by
+    intro v; simp[Part.eq_some_iff, Nat.dvd_sub_mod]
+    intro m hm A
+    have hmvi : m < v.get i := lt_of_lt_of_le hm <| Nat.mod_le (v.get i) (v.get j)
+    have hsub : v.get j ∣ v.get i % v.get j - m := by
+      have : v.get i - m - (v.get i - v.get i % v.get j) = v.get i % v.get j - m := by
+        rw[Nat.sub_eq_iff_eq_add (Nat.sub_le_sub_left _ (le_of_lt hm)), Nat.sub_eq_iff_eq_add (le_of_lt hmvi),
+          ←Nat.sub_add_comm (le_of_lt hm), Nat.add_sub_of_le (Nat.mod_le (v.get i) (v.get j)),
+          Nat.sub_add_cancel (le_of_lt hmvi)]
+      rw[←this]
+      exact Nat.dvd_sub (Nat.sub_le_sub_left _ (le_of_lt hm)) A (@Nat.dvd_sub_mod (v.get j) (v.get i))
+    have hpos : 0 < v.get i % v.get j - m := Nat.lt_sub_of_add_lt (by simpa using hm)
+    have : v.get i % v.get j - m < v.get j := by
+      have : v.get i % v.get j < v.get j :=
+        Nat.mod_lt _ (Nat.pos_of_ne_zero $ fun h => (Nat.not_lt.mpr (by simpa[h] using hsub)) hmvi)
+      exact lt_of_le_of_lt (sub_le _ _) this
+    have : ¬v.get j ∣ v.get i % v.get j - m := Nat.not_dvd_of_pos_of_lt hpos this
+    contradiction
 
 end Nat.Arith₁
