@@ -551,6 +551,9 @@ variable {α : Type _}
 
 lemma get_mk_eq_get {n} (l : List α) (h : l.length = n) (i : Fin n) : get (⟨l, h⟩ : Vector α n) i = l.get (i.cast h.symm) := rfl
 
+lemma get_one {α : Type*} {n} (v : Vector α (n + 2)) : v.get 1 = v.tail.head := by
+  rw[←Vector.get_zero, Vector.get_tail_succ]; rfl
+
 end Vector
 
 namespace Finset
