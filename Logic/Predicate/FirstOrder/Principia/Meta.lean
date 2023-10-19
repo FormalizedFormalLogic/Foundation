@@ -1,6 +1,5 @@
 import Logic.Predicate.FirstOrder.Principia.Principia
 import Logic.Predicate.FirstOrder.Principia.RewriteFormula
-import Logic.Vorspiel.String
 
 open Qq Lean Elab Meta Tactic Term
 

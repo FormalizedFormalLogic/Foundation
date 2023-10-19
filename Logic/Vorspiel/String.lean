@@ -2,6 +2,8 @@ import Logic.Vorspiel.Vorspiel
 
 namespace String
 
+instance (ι : Type*) [h : IsEmpty ι] : ToString ι  := ⟨h.elim⟩
+
 def subscript : ℕ → String
   | 0 => "₀"
   | 1 => "₁"
@@ -14,5 +16,10 @@ def subscript : ℕ → String
   | 8 => "₈"
   | 9 => "₉"
   | _ => ""
+
+def _root_.List.seqStr {α : Type*} (f : α → String) (s : String) : List α → String
+  | []      => ""
+  | [a]     => f a
+  | a :: as => f a ++ s ++ seqStr f s as
 
 end String

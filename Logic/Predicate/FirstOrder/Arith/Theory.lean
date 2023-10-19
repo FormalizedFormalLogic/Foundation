@@ -22,16 +22,6 @@ variable (L)
 
 namespace Theory
 
-inductive Robinson : Theory L
-  | q₁ : Robinson “∀ #0 + 1 ≠ 0”
-  | q₂ : Robinson “∀ ∀ (#0 + 1 = #1 + 1 → #0 = #1)”
-  | q₃ : Robinson “∀ (#0 = 0 ∨ (∃ #1 = #0 + 1))”
-  | q₄ : Robinson “∀ #0 + 0 = #0”
-  | q₅ : Robinson “∀ ∀ (#0 + (#1 + 1) = (#0 + #1) + 1)”
-  | q₆ : Robinson “∀ #0 * 0 = 0”
-  | q₇ : Robinson “∀ ∀ (#0 * (#1 + 1) = #0 * #1 + #0)”
-  | q₈ : Robinson “∀ ∀ (#0 ≤ #1 ↔ (∃ #0 + #1 = #2))”
-
 inductive PAminus : Theory L
   | addZero       : PAminus “∀ #0 + 0 = #0”
   | addAssoc      : PAminus “∀ ∀ ∀ (#0 + #1) + #2 = #0 + (#1 + #2)”
@@ -78,11 +68,6 @@ end Theory
 
 variable {L}
 
-class Robinson (T : Theory L) where
-  robinson : Theory.Robinson L ⊆ T
-
-attribute [simp] Robinson.robinson
-
 class PAminus (T : Theory L) where
   paminus : Theory.PAminus L ⊆ T
 
@@ -107,11 +92,11 @@ namespace Axiom
 
 variable (L)
 
-def Robinson : Theory L := Theory.Robinson L ∪ Theory.Eq L
+def PAminus : Theory L := Theory.PAminus L ∪ Theory.Eq L
 
 variable {L}
 
-def Ind (U : Set (Subsentence L 1)) : Theory L := Axiom.Robinson L ∪ Theory.IndScheme U
+def Ind (U : Set (Subsentence L 1)) : Theory L := Axiom.PAminus L ∪ Theory.IndScheme U
 
 variable (L)
 
@@ -123,17 +108,17 @@ abbrev IPi (k : ℕ) : Theory L := Ind (Arith.Hierarchy.Pi k)
 
 abbrev Peano : Theory L := Ind Set.univ
 
-instance : EqTheory (Robinson L) where
-  eq := by simp[Robinson]
+instance : EqTheory (PAminus L) where
+  eq := by simp[PAminus]
 
-instance : Arith.Robinson (Robinson L) where
-  robinson := by simp[Robinson]
+instance : Arith.PAminus (PAminus L) where
+  paminus := by simp[PAminus]
 
 instance (u : Set (Subsentence L 1)) : EqTheory (Ind u) where
   eq := by simp[Ind]; exact Set.subset_union_of_subset_left (by simp) _
 
-instance (u : Set (Subsentence L 1)) : Arith.Robinson (Ind u) where
-  robinson := by simp[Ind]; exact Set.subset_union_of_subset_left (by simp) _
+instance (u : Set (Subsentence L 1)) : Arith.PAminus (Ind u) where
+  paminus := by simp[Ind]; exact Set.subset_union_of_subset_left (by simp) _
 
 instance (u : Set (Subsentence L 1)) : Arith.Ind u (Ind u) where
   ind := by simp[Ind]

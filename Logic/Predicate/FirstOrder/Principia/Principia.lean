@@ -1,4 +1,5 @@
 import Logic.Predicate.FirstOrder.Basic
+import Logic.Vorspiel.String
 
 namespace LO
 
@@ -341,36 +342,90 @@ variable {T}
 namespace Principia
 open ProofArrow
 
+section Repr
+
+variable [∀ k, ToString (L.func k)] [∀ k, ToString (L.rel k)]
+
+def _root_.String.turnstile {α β} [ToString α] [ToString β] (Γ : List α) (b : β) : String :=
+  Γ.seqStr toString ", " ++ " \\vdash " ++ toString b
+
+def _root_.String.Bussproof.axiomc (Γ : String) : String :=
+  "\\AxiomC{" ++ Γ ++ "}\n"
+
+def _root_.String.Bussproof.unalyinfc (U s Δ : String) : String :=
+  U ++
+  "\\RightLabel{\\scriptsize $" ++ s ++ "$}\n" ++
+  "\\UnaryInfC{$" ++  Δ ++ "$}\n\n"
+
+def _root_.String.Bussproof.binaryinfc (U₁ U₂ s Δ : String) : String :=
+  U₁ ++ U₂ ++
+  "\\RightLabel{\\scriptsize $" ++ s ++ "$}\n" ++
+  "\\BinaryInfC{$" ++ Δ ++ "$}\n\n"
+
+def _root_.String.Bussproof.trinaryinfc (U₁ U₂ U₃ s Δ : String) : String :=
+  U₁ ++ U₂ ++ U₃ ++
+  "\\RightLabel{\\scriptsize $" ++ s ++ "$}\n" ++
+  "\\TrinaryInfC{$" ++ Δ ++ "$}\n\n"
+
+open String
+
 def toStr : {Δ : List (SyntacticFormula L)} → {p : SyntacticFormula L} → (Δ ⟹[T] p) → String
-  | _, _, tauto _               => "tauto"
-  | _, _, axm _                 => "axiom"
-  | _, _, weakening' _ d        => "weakening\n" ++ d.toStr
-  | _, _, rewrite _ d           => "rewrite\n" ++ d.toStr
-  | _, _, trans c₁ c₂           => "have: {\n" ++ c₁.toStr ++ "\n}\n" ++ c₂.toStr
-  | _, _, assumption _          => "assumption"
-  | _, _, contradiction _ c₁ c₂ => "contradiction: {\n" ++ c₁.toStr ++ "\n}\nand: {\n" ++ c₂.toStr ++ "\n}"
-  | _, _, trivial               => "trivial"
-  | _, _, explode c             => "explode" ++ c.toStr
-  | _, _, intro c               => "intro\n" ++ c.toStr
-  | _, _, modusPonens c₁ c₂     => "have: {\n" ++ c₁.toStr ++ "\n}\nand: {\n" ++ c₂.toStr ++ "\n}"
-  | _, _, split c₁ c₂           => "∧ split: {\n" ++ c₁.toStr ++ "\n}\nand: {\n" ++ c₂.toStr ++ "\n}"
-  | _, _, andLeft c             => "∧ left\n" ++ c.toStr
-  | _, _, andRight c            => "∧ right\n" ++ c.toStr
-  | _, _, orLeft c              => "∨ left\n" ++ c.toStr
-  | _, _, orRight c             => "∨ right\n" ++ c.toStr
-  | _, _, cases c₀ c₁ c₂        => "∨ split: {\n" ++ c₀.toStr ++ "\n}\nor left: {\n" ++ c₁.toStr ++ "\n}\nor right: {\n" ++ c₂.toStr ++ "\n}"
-  | _, _, generalize c          => "generalize\n" ++ c.toStr
-  | _, _, specialize _ c        => "specialize\n" ++ c.toStr
-  | _, _, useInstance _ c       => "use\n" ++ c.toStr
-  | _, _, exCases c₀ c₁         => "∃ cases: {\n" ++ c₀.toStr ++ "\n}\n" ++ c₁.toStr
-  | _, _, eqRefl _              => "refl"
-  | _, _, eqSymm c              => "symmetry" ++ c.toStr
-  | _, _, eqTrans c₁ c₂         => "trans: {\n" ++ c₁.toStr ++ "\n}\n and: {\n" ++ c₂.toStr ++ "\n}"
-  | _, _, rewriteEq c₁ c₂       => "rewrite: {\n" ++ c₁.toStr ++ "\n}\n" ++ c₂.toStr
+  | Δ, p, tauto _               =>
+    String.Bussproof.unalyinfc (Bussproof.axiomc "") "\\mathsf{OF PROOFARROW}" (String.turnstile Δ p)
+  | Δ, _, axm (σ := σ) _        =>
+    String.Bussproof.unalyinfc (Bussproof.axiomc "") "\\mathsf{AX}" (String.turnstile Δ σ)
+  | Δ, p, weakening' _ d        =>
+    String.Bussproof.unalyinfc d.toStr "\\mathsf{W}" (String.turnstile Δ p)
+  | _, _, rewrite (Δ := Δ) (p := p) f d           =>
+    String.Bussproof.unalyinfc d.toStr "\\mathsf{REW}" (String.turnstile (Δ.map $ rewritel f) (rewritel f p))
+  | Δ, q, trans c₁ c₂           =>
+    String.Bussproof.binaryinfc c₁.toStr c₂.toStr "\\mathsf{CUT}" (String.turnstile Δ q)
+  | Δ, p, assumption _          =>
+    String.Bussproof.unalyinfc (Bussproof.axiomc "") "\\mathsf{I}" (String.turnstile Δ p)
+  | Δ, q, contradiction _ c₁ c₂ =>
+    String.Bussproof.binaryinfc c₁.toStr c₂.toStr "\\mathsf{CONTRA}" (String.turnstile Δ q)
+  | Δ, _, trivial               =>
+    String.Bussproof.unalyinfc (Bussproof.axiomc "") "\\top_\\mathsf{INTRO}" (String.turnstile Δ (⊤ : SyntacticFormula L))
+  | Δ, p, explode d             =>
+    String.Bussproof.unalyinfc d.toStr "\\bot_\\mathsf{ELIM}" (String.turnstile Δ p)
+  | Δ, _, intro (p := p) (q := q) d               =>
+    String.Bussproof.unalyinfc d.toStr "\\to_\\mathsf{INTRO}" (String.turnstile Δ (p ⟶ q))
+  | Δ, q, modusPonens c₁ c₂     =>
+    String.Bussproof.binaryinfc c₁.toStr c₂.toStr "\\to_\\mathsf{ELIM}" (String.turnstile Δ q)
+  | Δ, _, split (p := p) (q := q) c₁ c₂           =>
+    String.Bussproof.binaryinfc c₁.toStr c₂.toStr "\\wedge_\\mathsf{INTRO}" (String.turnstile Δ (p ⋏ q))
+  | Δ, p, andLeft d             =>
+    String.Bussproof.unalyinfc d.toStr "\\wedge_\\mathsf{ELIM}" (String.turnstile Δ p)
+  | Δ, p, andRight d            =>
+    String.Bussproof.unalyinfc d.toStr "\\wedge_\\mathsf{ELIM}" (String.turnstile Δ p)
+  | Δ, _, orLeft (p := p) (q := q) d =>
+    String.Bussproof.unalyinfc d.toStr "\\vee_\\mathsf{INTRO}" (String.turnstile Δ (p ⋎ q))
+  | Δ, _, orRight (p := p) (q := q) d =>
+    String.Bussproof.unalyinfc d.toStr "\\vee_\\mathsf{INTRO}" (String.turnstile Δ (p ⋎ q))
+  | Δ, r, cases c₀ c₁ c₂        =>
+    String.Bussproof.trinaryinfc c₀.toStr c₁.toStr c₂.toStr "\\vee_\\mathsf{ELIM}" (String.turnstile Δ r)
+  | Δ, _, generalize (p := p) d =>
+    String.Bussproof.unalyinfc d.toStr "\\forall_\\mathsf{INTRO}" (String.turnstile Δ (∀' p))
+  | Δ, _, specialize (p := p) t d =>
+    String.Bussproof.unalyinfc d.toStr "\\forall_\\mathsf{ELIM}" (String.turnstile Δ ([→ t].hom p))
+  | Δ, _, useInstance (p := p) _ d =>
+    String.Bussproof.unalyinfc d.toStr "\\exists_\\mathsf{INTRO}" (String.turnstile Δ (∃' p))
+  | Δ, q, exCases c₀ c₁         =>
+    String.Bussproof.binaryinfc c₀.toStr c₁.toStr "\\exists_\\mathsf{ELIM}" (String.turnstile Δ q)
+  | Δ, _, eqRefl t              =>
+    String.Bussproof.unalyinfc (Bussproof.axiomc "") "=_\\mathsf{REFL}" (String.turnstile Δ “ᵀ!t = ᵀ!t”)
+  | Δ, _, eqSymm (t₁ := t₁) (t₂ := t₂) d            =>
+    String.Bussproof.unalyinfc d.toStr "=_\\mathsf{SYMM}" (String.turnstile Δ “ᵀ!t₂ = ᵀ!t₁”)
+  | Δ, _, eqTrans (t₁ := t₁) (t₃ := t₃) c₁ c₂       =>
+    String.Bussproof.binaryinfc c₁.toStr c₂.toStr "=_\\mathsf{TRANS}" (String.turnstile Δ “ᵀ!t₁ = ᵀ!t₃”)
+  | Δ, _, rewriteEq (t₁ := t₁) (p := p) c₁ c₂       =>
+    String.Bussproof.binaryinfc c₁.toStr c₂.toStr "=_\\mathsf{REW}" (String.turnstile Δ ([→ t₁].hom p))
 
 instance : Repr (Δ ⟹[T] p) := ⟨fun b _ => b.toStr⟩
 
 instance : ToString (Δ ⟹[T] p) := ⟨toStr⟩
+
+end Repr
 
 noncomputable def toProofArrow : {Δ : List (SyntacticFormula L)} → {p : SyntacticFormula L} →
     (Δ ⟹[T] p) → ProofArrow T Δ p
