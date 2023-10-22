@@ -285,6 +285,7 @@ def appShiftAux : ℕ → DTerm L n → DTerm L n
   | maxdepth + 1, func f v     => func f (fun i => appShiftAux maxdepth (v i))
   | maxdepth + 1, operator o v => operator o (fun i => appShiftAux maxdepth (v i))
   | _        + 1, const c      => const c
+
   | maxdepth + 1, substs v t   => substs (fun i => appShiftAux maxdepth (v i)) (appShiftAux maxdepth t)
   | maxdepth + 1, shift t      => appShiftAux maxdepth (appShiftAux maxdepth t)
   | _        + 1, bShift t     => shift (bShift t)
@@ -299,7 +300,7 @@ def appShiftAuxDeq : (maxdepth : ℕ) → (t : DTerm L n) → (shift t).DEq (app
   | maxdepth + 1, func f v     => DEq.shiftFunc f (fun i => appShiftAuxDeq maxdepth (v i))
   | maxdepth + 1, operator f v => DEq.shiftFinitary f (fun i => appShiftAuxDeq maxdepth (v i))
   | _        + 1, const c      => DEq.shiftConst c
-  | maxdepth + 1, substs t v   => DEq.shiftSubsts (appShiftAuxDeq maxdepth t) (fun i => appShiftAuxDeq maxdepth (v i))
+  | maxdepth + 1, substs v t   => DEq.shiftSubsts (appShiftAuxDeq maxdepth t) (fun i => appShiftAuxDeq maxdepth (v i))
   | maxdepth + 1, shift t      => DEq.trans (DEq.shiftExt (appShiftAuxDeq maxdepth t)) (appShiftAuxDeq maxdepth (appShiftAux maxdepth t))
   | maxdepth + 1, bShift t     => DEq.refl _
   | maxdepth + 1, free t       => DEq.refl _
