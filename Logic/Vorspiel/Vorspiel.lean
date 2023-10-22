@@ -254,6 +254,17 @@ def vecToNat : {n : ℕ} → (Fin n → ℕ) → ℕ
   | 0,     _ => 0
   | _ + 1, v => Nat.pair (v 0) (vecToNat $ v ∘ Fin.succ)
 
+variable {m : Type u → Type v} [Monad m] {α : Type w} {β : Type u}
+
+def getM : {n : ℕ} → (Fin n → m β) → m (Fin n → β)
+  | 0,     _ => pure ![]
+  | _ + 1, v => vecCons <$> vecHead v <*> getM (Matrix.vecTail v)
+
+lemma getM_pure [LawfulMonad m] {n} (v : Fin n → β) : getM (fun i => (pure (v i) : m β)) = pure v := by
+  induction' n with n ih <;> simp[empty_eq, getM]
+  · simp[vecHead, vecTail, Function.comp, seq_eq_bind, ih]
+    exact congr_arg _ (funext $ Fin.cases rfl (fun i => rfl))
+
 end Matrix
 
 namespace Option

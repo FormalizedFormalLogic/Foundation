@@ -166,6 +166,42 @@ lemma vecConsExt {α : Type u} {n}
   {a : α} {as : Fin n → α} {b : α} {bs : Fin n → α} (hb : a = b) (hbs : as = bs) :
     a :> as = b :> bs := hb ▸ hbs ▸ rfl
 
+def vecFold (α : Q(Type u)) :
+    {n : ℕ} → (Fin n → Q($α)) → Q(Fin $n → $α)
+  | 0,     _ => q(![])
+  | _ + 1, v =>
+    let ih := vecFold α (v ·.succ)
+    q($(v 0) :> $ih)
+
+def vecFoldDep : {n : ℕ} → (α : Q(Fin $n → Sort u)) → ((i : Fin n) → Q($α $i)) → Q((i : Fin $n) → $α i)
+  | 0,     _, _ => q(finZeroElim)
+  | _ + 1, _, v =>
+    let ih := vecFoldDep _ (v ·.succ)
+    q(Fin.cases $(v 0) $ih)
+
+def vecUnfold (α : Q(Type u)) :
+    (n : ℕ) → Q(Fin $n → $α) → MetaM (Fin n → Q($α))
+  | 0,     _ => pure finZeroElim
+  | n + 1, v =>
+    match v with
+    | ~q($a :> $w) => do
+      let ih ←vecUnfold α n w
+      return a :> ih
+
+lemma eq_cons_app_succ_of_eq {α : Type u} {a b : α} {as : Fin n → α} {i : Fin n}
+  (has : as i = b) : (a :> as) i.succ = b := by simp[has]
+
+partial def vectorGet {α : Q(Type u)} :
+    {n : ℕ} → (l : Q(Fin $n → $α)) → (i : Fin n) → MetaM ((a : Q($α)) × Q($l $i = $a))
+  | 0,     _, i => Fin.elim0 i
+  | n + 1, l, i =>
+    match l with
+    | ~q($a :> $as) =>
+      i.cases (pure ⟨q($a), q(rfl)⟩)
+        (fun i : Fin n => do
+          let ⟨b, hb⟩ ← vectorGet as i
+          return ⟨q($b), q(eq_cons_app_succ_of_eq $hb)⟩)
+
 partial def mapVector {α : Q(Type u)} {β : Q(Type v)}
   (r : Q($α) → MetaM Q($β))
   (n : Q(ℕ)) (l : Q(Fin $n → $α)) : MetaM Q(Fin $n → $β) := do
