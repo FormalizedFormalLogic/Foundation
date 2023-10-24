@@ -1,5 +1,6 @@
 import Logic.Logic.Logic
 import Logic.Vorspiel.Computability
+import Logic.Vorspiel.Meta
 
 namespace LO
 
@@ -65,34 +66,40 @@ instance (k) : Encodable (equal.rel k) where
     | _ => none
   encodek := fun x => by rcases x; simp
 
-inductive ORingFunc : ℕ → Type
-  | zero : ORingFunc 0
-  | one : ORingFunc 0
-  | add : ORingFunc 2
-  | mul : ORingFunc 2
+namespace ORing
 
-inductive ORingRel : ℕ → Type
-  | eq : ORingRel 2
-  | lt : ORingRel 2
+inductive Func : ℕ → Type
+  | zero : Func 0
+  | one : Func 0
+  | add : Func 2
+  | mul : Func 2
+
+inductive Rel : ℕ → Type
+  | eq : Rel 2
+  | lt : Rel 2
+
+end ORing
 
 @[reducible]
 def oRing : Language where
-  func := ORingFunc
-  rel := ORingRel
+  func := ORing.Func
+  rel := ORing.Rel
+
+namespace ORing
 
 instance (k) : ToString (oRing.func k) :=
 ⟨ fun s =>
   match s with
-  | ORingFunc.zero => "0"
-  | ORingFunc.one  => "1"
-  | ORingFunc.add  => "(+)"
-  | ORingFunc.mul  => "(\\cdot)"⟩
+  | Func.zero => "0"
+  | Func.one  => "1"
+  | Func.add  => "(+)"
+  | Func.mul  => "(\\cdot)"⟩
 
 instance (k) : ToString (oRing.rel k) :=
 ⟨ fun s =>
   match s with
-  | ORingRel.eq => "\\mathrm{Eq}"
-  | ORingRel.lt    => "\\mathrm{Lt}"⟩
+  | Rel.eq => "\\mathrm{Eq}"
+  | Rel.lt    => "\\mathrm{Lt}"⟩
 
 instance (k) : DecidableEq (oRing.func k) := fun a b =>
   by rcases a <;> rcases b <;> simp <;> try {exact instDecidableTrue} <;> try {exact instDecidableFalse}
@@ -103,28 +110,28 @@ instance (k) : DecidableEq (oRing.rel k) := fun a b =>
 instance (k) : Encodable (oRing.func k) where
   encode := fun x =>
     match x with
-    | ORingFunc.zero => 0
-    | ORingFunc.one  => 1
-    | ORingFunc.add  => 0
-    | ORingFunc.mul  => 1
+    | Func.zero => 0
+    | Func.one  => 1
+    | Func.add  => 0
+    | Func.mul  => 1
   decode := fun e =>
     match k, e with
-    | 0, 0 => some ORingFunc.zero
-    | 0, 1 => some ORingFunc.one
-    | 2, 0 => some ORingFunc.add
-    | 2, 1 => some ORingFunc.mul
+    | 0, 0 => some Func.zero
+    | 0, 1 => some Func.one
+    | 2, 0 => some Func.add
+    | 2, 1 => some Func.mul
     | _, _ => none
   encodek := fun x => by rcases x <;> simp
 
-instance oRIngFunc1IsEmpty : IsEmpty (oRing.func 1) := ⟨by rintro ⟨⟩⟩
+instance Func1IsEmpty : IsEmpty (oRing.func 1) := ⟨by rintro ⟨⟩⟩
 
-instance oRIngFuncGe3IsEmpty : ∀ k ≥ 3, IsEmpty (oRing.func k)
+instance FuncGe3IsEmpty : ∀ k ≥ 3, IsEmpty (oRing.func k)
   | 0       => by simp
   | 1       => by simp
   | 2       => by simp
   | (n + 3) => fun _ => ⟨by rintro ⟨⟩⟩
 
-private lemma oRingFunc_encodeDecode_primrec : Primrec₂ (fun k e =>
+private lemma Func_encodeDecode_primrec : Primrec₂ (fun k e =>
   if k = 0 ∧ e = 0 then some 0
   else if k = 0 ∧ e = 1 then some 1
   else if k = 2 ∧ e = 0 then some 0
@@ -137,7 +144,7 @@ private lemma oRingFunc_encodeDecode_primrec : Primrec₂ (fun k e =>
       <| const _
 
 instance (k) : Primcodable (oRing.func k) where
-  prim := nat_iff.mp <| (Primrec.encode.comp (oRingFunc_encodeDecode_primrec.comp (Primrec.const k) Primrec.id)).of_eq (fun e => by
+  prim := nat_iff.mp <| (Primrec.encode.comp (Func_encodeDecode_primrec.comp (Primrec.const k) Primrec.id)).of_eq (fun e => by
     simp[Encodable.decode]
     rcases k with (_ | k)
     · rcases e with (_ | e) <;> simp; rcases e with (_ | e) <;> simp
@@ -146,7 +153,7 @@ instance (k) : Primcodable (oRing.func k) where
         · rcases e with (_ | e) <;> simp; rcases e with (_ | e) <;> simp)
 
 instance : UniformlyPrimcodable oRing.func := UniformlyPrimcodable.ofEncodeDecode
-  (oRingFunc_encodeDecode_primrec.of_eq $ fun k e => by
+  (Func_encodeDecode_primrec.of_eq $ fun k e => by
     simp[Encodable.encodeDecode, Encodable.decode]
     rcases k with (_ | k)
     · rcases e with (_ | e) <;> simp; rcases e with (_ | e) <;> simp
@@ -157,16 +164,16 @@ instance : UniformlyPrimcodable oRing.func := UniformlyPrimcodable.ofEncodeDecod
 instance (k) : Encodable (oRing.rel k) where
   encode := fun x =>
     match x with
-    | ORingRel.eq => 0
-    | ORingRel.lt => 1
+    | Rel.eq => 0
+    | Rel.lt => 1
   decode := fun e =>
     match k, e with
-    | 2, 0 => some ORingRel.eq
-    | 2, 1 => some ORingRel.lt
+    | 2, 0 => some Rel.eq
+    | 2, 1 => some Rel.lt
     | _, _ => none
   encodek := fun x => by rcases x <;> simp
 
-private lemma oRingRel_encodeDecode_primrec : Primrec₂ (fun k e =>
+private lemma Rel_encodeDecode_primrec : Primrec₂ (fun k e =>
   if k = 2 ∧ e = 0 then some 0
   else if k = 2 ∧ e = 1 then some 1
   else none) :=
@@ -175,7 +182,7 @@ private lemma oRingRel_encodeDecode_primrec : Primrec₂ (fun k e =>
       <| const _
 
 instance (k) : Primcodable (oRing.rel k) where
-  prim := nat_iff.mp <| (Primrec.encode.comp (oRingRel_encodeDecode_primrec.comp (Primrec.const k) Primrec.id)).of_eq (fun e => by
+  prim := nat_iff.mp <| (Primrec.encode.comp (Rel_encodeDecode_primrec.comp (Primrec.const k) Primrec.id)).of_eq (fun e => by
     simp[Encodable.decode]
     rcases k with (_ | k) <;> simp
     rcases k with (_ | k) <;> simp
@@ -184,7 +191,7 @@ instance (k) : Primcodable (oRing.rel k) where
     rcases e with (_ | e) <;> simp)
 
 instance : UniformlyPrimcodable oRing.rel := UniformlyPrimcodable.ofEncodeDecode
-  (oRingRel_encodeDecode_primrec.of_eq $ fun k e => by
+  (Rel_encodeDecode_primrec.of_eq $ fun k e => by
     simp[Encodable.encodeDecode, Encodable.decode]
     rcases k with (_ | k) <;> simp
     rcases k with (_ | k) <;> simp
@@ -192,75 +199,7 @@ instance : UniformlyPrimcodable oRing.rel := UniformlyPrimcodable.ofEncodeDecode
     rcases e with (_ | e) <;> simp
     rcases e with (_ | e) <;> simp)
 
-inductive ORingWithPowPairingFunc : ℕ → Type
-  | zero : ORingWithPowPairingFunc 0
-  | one : ORingWithPowPairingFunc 0
-  | exp : ORingWithPowPairingFunc 1
-  | add : ORingWithPowPairingFunc 2
-  | mul : ORingWithPowPairingFunc 2
-  | pow : ORingWithPowPairingFunc 2
-  | pair : ORingWithPowPairingFunc 2
-
-@[reducible] def oRingWithExpPowPairing : Language where
-  func := ORingWithPowPairingFunc
-  rel := ORingRel
-
-instance (k) : ToString (oRingWithExpPowPairing.func k) :=
-⟨ fun s =>
-  match s with
-  | .zero => "0"
-  | .one  => "1"
-  | .exp  => "exp"
-  | .add  => "(+)"
-  | .mul  => "(\\cdot)"
-  | .pow  => "(\\cdot)"
-  | .pair  => "(\\mathrm{pair})"⟩
-
-instance (k) : ToString (oRingWithExpPowPairing.rel k) :=
-⟨ fun s =>
-  match s with
-  | ORingRel.eq => "\\mathrm{Eq}"
-  | ORingRel.lt    => "\\mathrm{Lt}"⟩
-
-instance (k) : DecidableEq (oRingWithExpPowPairing.func k) := fun a b =>
-  by rcases a <;> rcases b <;> simp <;> try {exact instDecidableTrue} <;> try {exact instDecidableFalse}
-
-instance (k) : DecidableEq (oRingWithExpPowPairing.rel k) := fun a b =>
-  by rcases a <;> rcases b <;> simp <;> try {exact instDecidableTrue} <;> try {exact instDecidableFalse}
-
-instance (k) : Encodable (oRingWithExpPowPairing.func k) where
-  encode := fun x =>
-    match x with
-    | .zero => 0
-    | .one  => 1
-    | .exp  => 0
-    | .add  => 0
-    | .mul  => 1
-    | .pow  => 2
-    | .pair  => 3
-  decode := fun e =>
-    match k, e with
-    | 0, 0 => some .zero
-    | 0, 1 => some .one
-    | 1, 0 => some .exp
-    | 2, 0 => some .add
-    | 2, 1 => some .mul
-    | 2, 2 => some .pow
-    | 2, 3 => some .pair
-    | _, _ => none
-  encodek := fun x => by rcases x <;> simp
-
-instance (k) : Encodable (oRingWithExpPowPairing.rel k) where
-  encode := fun x =>
-    match x with
-    | ORingRel.eq => 0
-    | ORingRel.lt    => 1
-  decode := fun e =>
-    match k, e with
-    | 2, 0 => some ORingRel.eq
-    | 2, 1 => some ORingRel.lt
-    | _, _ => none
-  encodek := fun x => by rcases x <;> simp
+end ORing
 
 def relational (α : ℕ → Type u) : Language where
   func := fun _ => PEmpty
@@ -325,22 +264,45 @@ instance : ORing oRing where
   add := .add
   mul := .mul
 
-instance : ORing oRingWithExpPowPairing where
-  eq := .eq
-  lt := .lt
-  zero := .zero
-  one := .one
-  add := .add
-  mul := .mul
+namespace ORing
 
-instance : Exp oRingWithExpPowPairing where
-  exp := .exp
+open Qq Lean Elab Meta Tactic
 
-instance : Pow oRingWithExpPowPairing where
-  pow := .pow
+def denoteFunc : (k : ℕ) → Q(oRing.func $k) → MetaM (oRing.func k)
+  | 0, e =>
+    match e with
+    | ~q(Zero.zero) => return Language.Zero.zero
+    | ~q(One.one)   => return Language.One.one
+  | 2, e =>
+    match e with
+    | ~q(Language.Add.add) => return Language.Add.add
+    | ~q(Language.Mul.mul) => return Language.Mul.mul
+  | _, e => throwError m!"error in DenotationORing : {e}"
+  
+def denoteRel : (k : ℕ) → Q(oRing.rel $k) → MetaM (oRing.rel k)
+  | 2, e =>
+    match e with
+    | ~q(Language.Eq.eq) => return Language.Eq.eq
+    | ~q(Language.Lt.lt) => return Language.Lt.lt
+  | _, e => throwError m!"error in DenotationORing : {e}"
 
-instance : Pairing oRingWithExpPowPairing where
-  pair := .pair
+instance : Denotation (oRing.func k) where
+   denote := denoteFunc k
+   toExpr := fun f =>
+     ( match f with
+       | Func.zero => q(Language.Zero.zero)
+       | Func.one  => q(Language.One.one)
+       | Func.add  => q(Language.Add.add)
+       | Func.mul  => q(Language.Mul.mul) : Q(oRing.func $k))
+
+instance : Denotation (oRing.rel k) where
+   denote := denoteRel k
+   toExpr := fun f =>
+     ( match f with
+       | Rel.eq => q(Language.Eq.eq)
+       | Rel.lt => q(Language.Lt.lt) : Q(oRing.rel $k))
+
+end ORing
 
 structure Hom (L₁ L₂ : Language) where
   func : {k : ℕ} → L₁.func k → L₂.func k

@@ -51,6 +51,8 @@ lemma least_number (P : ℕ → Prop) (hP : ∃ x, P x) : ∃ x, P x ∧ ∀ z <
     exact ih m hm hPm
   · exact ⟨n, hn, by simpa using H⟩
 
+def toFin (n : ℕ) : ℕ → Option (Fin n) := fun x => if hx : x < n then some ⟨x, hx⟩ else none
+
 end Nat
 
 namespace Fin
@@ -256,12 +258,14 @@ def vecToNat : {n : ℕ} → (Fin n → ℕ) → ℕ
 
 variable {m : Type u → Type v} [Monad m] {α : Type w} {β : Type u}
 
-def getM : {n : ℕ} → (Fin n → m β) → m (Fin n → β)
-  | 0,     _ => pure ![]
-  | _ + 1, v => vecCons <$> vecHead v <*> getM (Matrix.vecTail v)
+def getM : {n : ℕ} → {β : Fin n → Type u} → ((i : Fin n) → m (β i)) → m ((i : Fin n) → β i)
+  | 0,     _, _ => pure finZeroElim
+  | _ + 1, _, f => Fin.cases <$> f 0 <*> getM (f ·.succ)
 
-lemma getM_pure [LawfulMonad m] {n} (v : Fin n → β) : getM (fun i => (pure (v i) : m β)) = pure v := by
+lemma getM_pure [LawfulMonad m] {n} {β : Fin n → Type u} (v : (i : Fin n) → β i) :
+    getM (fun i => (pure (v i) : m (β i))) = pure v := by
   induction' n with n ih <;> simp[empty_eq, getM]
+  · congr; funext x; exact x.elim0
   · simp[vecHead, vecTail, Function.comp, seq_eq_bind, ih]
     exact congr_arg _ (funext $ Fin.cases rfl (fun i => rfl))
 

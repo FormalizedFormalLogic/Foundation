@@ -13,8 +13,6 @@ def predO : ℕ → Option ℕ
 
 @[simp] lemma predO_succ {n} : predO (n + 1) = some n := rfl
 
-def toFin (n : ℕ) : ℕ → Option (Fin n) := fun x => if hx : x < n then some ⟨x, hx⟩ else none
-
 end Nat
 
 namespace List

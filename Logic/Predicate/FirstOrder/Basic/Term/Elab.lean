@@ -55,8 +55,8 @@ macro_rules
 
 #check Language.Add.add
 
-#check (ᵀ“ ᵀ⟨Language.ORingFunc.mul⟩(&2 + &0, ᵀ⟨Language.ORingFunc.zero⟩())” : Subterm Language.oRing ℕ 8)
-#check (ᵀ“ ᵀ⟨Language.ORingFunc.mul⟩(&2 + &0, ᵀ⟨Language.ORingFunc.zero⟩())” : Subterm Language.oRing ℕ 8)
+#check (ᵀ“ ᵀ⟨Language.ORing.Func.mul⟩(&2 + &0, ᵀ⟨Language.ORing.Func.zero⟩())” : Subterm Language.oRing ℕ 8)
+#check (ᵀ“ ᵀ⟨Language.ORing.Func.mul⟩(&2 + &0, ᵀ⟨Language.ORing.Func.zero⟩())” : Subterm Language.oRing ℕ 8)
 #check ᵀ“ᵀ⇑(3 * #3 + 9)”
 #check Subterm.func Language.Mul.mul (ᵀ“1” :> ᵀ“3” :> Matrix.vecEmpty)
 
@@ -188,7 +188,6 @@ def unexpandFuncArith : Unexpander
 #check natLit Language.oRing 99
 #check (ᵀ“1 + 8” : Subterm Language.oRing ℕ 8)
 #check (Subterm.func Language.Mul.mul (ᵀ“1” :> ᵀ“3” :> Matrix.vecEmpty) : Subterm Language.oRing ℕ 8)
-#check ᵀ“3 + 8 * exp &6 + 2 * ᵀ!(#3)”
 #check [→ &0, &5] ᵀ“3 * #3 + 9”
 #check Rew.shift ᵀ“(3 * #3 + 9)”
 #check ᵀ“(3 * #3 * x + y + z)”

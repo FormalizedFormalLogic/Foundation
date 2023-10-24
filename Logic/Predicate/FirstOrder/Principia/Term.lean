@@ -1,5 +1,6 @@
-import Logic.Predicate.FirstOrder.Basic.Term.Elab
+import Logic.Predicate.FirstOrder.Basic
 import Logic.Vorspiel.Meta
+
 open Qq Lean Elab Meta Tactic
 
 -- Subterm normalization
@@ -14,7 +15,6 @@ namespace lemmataTerm
 
 variable {L : Language.{u}} {μ : Type v} {n}
 
-section term
 open Subterm
 
 lemma func_ext {k} (f : L.func k) (v w : Fin k → Subterm L μ₁ n₁) (H : ∀ i, v i = w i) :
@@ -54,7 +54,7 @@ lemma shift_substs_eq_of_eq {t : SyntacticSubterm L k} {w : Fin k → SyntacticS
   simp[←ht, ←hw, ←Rew.comp_app, Rew.shift_comp_substs]
   congr; funext i; simp[hw]
 
-end term
+lemma subst_bshift_0 (v : Fin 1 → Subterm L μ 0) (t : Subterm L μ 0) : Rew.substs v (Rew.bShift t) = t := by simp[Rew.comp]
 
 end lemmataTerm
 
@@ -67,6 +67,8 @@ inductive DTerm (L : Q(Language.{u})) : ℕ → Type
   | expr {n : ℕ} : Q(SyntacticSubterm $L $n) → DTerm L n
 
 namespace DTerm
+
+instance : Inhabited (DTerm L n) := ⟨fvar 0⟩
 
 def toStr {L : Q(Language.{u})} {n : ℕ} : DTerm L n → String
   | bvar x       => "#" ++ toString x
@@ -93,39 +95,39 @@ instance : ToString (DTerm L n) := ⟨DTerm.toStr⟩
   | const c      => q(Subterm.Operator.const $c)
   | expr e        => e
 
-partial def toDTerm (L : Q(Language.{u})) (n : ℕ) : (t : Q(SyntacticSubterm $L $n)) → MetaM (DTerm L n)
+protected def isDefEq {L : Q(Language.{u})} {n} (t₁ t₂ : DTerm L n) : MetaM Bool :=
+  Lean.Meta.isDefEq t₁.toExpr t₂.toExpr
+
+partial def denote (L : Q(Language.{u})) (n : ℕ) : (t : Q(SyntacticSubterm $L $n)) → MetaM (DTerm L n)
   | ~q(#$x) => do
-    let some x' := ←@Qq.finQVal q($n) (←whnf x) | throwError m! "error in toDTerm₁: {x}"
-    let some x'' := n.toFin x' | throwError m! "error in toDTerm₂: {x'}"
-    return DTerm.bvar x''
+    let x' : Fin n ← Denotation.denote x
+    return DTerm.bvar x'
   | ~q(&$x) => do
-    let some x' := Lean.Expr.natLit? (←whnf x) | throwError "error in toDTerm₂: {x}"
+    let x' : ℕ ← Denotation.denote x
     return DTerm.fvar x'
   | ~q(Subterm.func (arity := $arity) $f $v) => do
-    let some arity' := Lean.Expr.natLit? (←whnf arity) | throwError "error in toDTerm₃: {arity}"
+    let arity' : ℕ ← Denotation.denote arity
     let v' ← vecUnfold q(SyntacticSubterm $L $n) arity' v
-    let v'' ← Matrix.getM fun i => toDTerm L n (v' i)
+    let v'' ← Matrix.getM fun i => denote L n (v' i)
     return DTerm.func f v''
   | ~q(Subterm.Operator.operator (ι := Fin $arity) $o $v) => do
-    let some arity' := Lean.Expr.natLit? (←whnf arity) | throwError "error in toDTerm₃: {arity}"
+    let arity' : ℕ ← Denotation.denote arity
     let v' ← vecUnfold q(SyntacticSubterm $L $n) arity' v
-    let v'' ← Matrix.getM fun i => toDTerm L n (v' i)
+    let v'' ← Matrix.getM fun i => denote L n (v' i)
     return DTerm.finitary o v''
   | ~q(Subterm.Operator.const $c) => return DTerm.const c
   | ~q($t) => do
-    logInfo m! "nonexhaustive match in toDTerm: {t}"
+    logInfo m! "nonexhaustive match in denote: {t}"
     return DTerm.expr t
+
+instance (L : Q(Language.{u})) (n) : Denotation (DTerm L n) where
+  denote := denote L n
+  toExpr := toExpr
 
 structure DEq {L : Q(Language.{u})} {n : ℕ} (t₁ t₂ : DTerm L n) where
   expr : Q($(t₁.toExpr) = $(t₂.toExpr))
 
 local infix:20 " ≡ " => DTerm.DEq
-
-structure DEqFun {L : Q(Language.{u})} {n₁ n₂ : ℕ} (f : Q(SyntacticSubterm $L $n₁ → SyntacticSubterm $L $n₂))
-  (t₁ : DTerm L n₁) (t₂ : DTerm L n₂) where
-  expr : Q($f $(t₁.toExpr) = $(t₂.toExpr))
-
-local notation:25 t₁ " ≡[" f:25 "] " t₂:0 => DTerm.DEqFun f t₁ t₂
 
 namespace DEq
 
@@ -158,6 +160,8 @@ def operatorExt {arity : ℕ}
   let e : Q(($f).operator $v' = ($f).operator $w') := q(lemmataTerm.operator_ext $f _ _ $H)
   exact .mk e
 
+def ofIsDefEq (t₁ t₂ : DTerm L n) : t₁ ≡ t₂ := ⟨(q(@rfl (SyntacticSubterm $L $n) $t₁.toExpr) : Expr)⟩
+
 end DEq
 
 abbrev qrew (L : Q(Language.{u})) (n m: ℕ) (ω : Q(Rew $L ℕ $n ℕ $m)) : Q(SyntacticSubterm $L $n → SyntacticSubterm $L $m) := q($ω)
@@ -179,9 +183,19 @@ abbrev qfix {L : Q(Language.{u})} {n : ℕ} : Q(SyntacticSubterm $L $n → Synta
 abbrev qfree {L : Q(Language.{u})} {n : ℕ} : Q(SyntacticSubterm $L ($n + 1) → SyntacticSubterm $L $n) :=
   qrew L (n + 1) n q(Rew.free)
 
+structure DEqFun {L : Q(Language.{u})} {n₁ n₂ : ℕ} (f : Q(SyntacticSubterm $L $n₁ → SyntacticSubterm $L $n₂))
+  (t₁ : DTerm L n₁) (t₂ : DTerm L n₂) where
+  expr : Q($f $(t₁.toExpr) = $(t₂.toExpr))
+
+local notation:25 t₁ " ≡[" f:25 "] " t₂:0 => DTerm.DEqFun f t₁ t₂
+
 namespace DEqFun
 
 variable {L : Q(Language.{u})} {n : ℕ}
+
+def ofDEqFunOfDEq {n₁ n₂ : ℕ} {f : Q(SyntacticSubterm $L $n₁ → SyntacticSubterm $L $n₂)}
+  {t₁ : DTerm L n₁} {t₂ t₂' : DTerm L n₂} (df : t₁ ≡[f] t₂) (de : t₂ ≡ t₂') :
+    t₁ ≡[f] t₂' := ⟨q(Eq.trans $df.expr $de.expr)⟩
 
 def rewFunc {arity n m : ℕ} (ω : Q(Rew $L ℕ $n ℕ $m)) (f : Q(($L).func $arity))
   {v : Fin arity → DTerm L n} {w : Fin arity → DTerm L m}
@@ -329,10 +343,10 @@ local elab "dbgSubst" : term => do
   let t : Q(SyntacticSubterm $L $n) := q(ᵀ“9 + #0 * &6 + ᵀ!(Rew.fix #1)”)
   let v : Q(Fin $n → SyntacticSubterm $L $m) := q(![ᵀ“&2 + 2”, ᵀ“#1 * 8”])
   let v' ←vecUnfold q(SyntacticSubterm $L $m) n v
-  let v'' ←Matrix.getM fun i => toDTerm L m (v' i)
+  let v'' ←Matrix.getM fun i => denote L m (v' i)
   -- let s : Q(SyntacticSubterm $L $n) :=
   --   q(Rew.shift $ Rew.substs ![Rew.substs ![ᵀ“6”, ᵀ“&7”] $t, ᵀ“3 + &6”] ᵀ“(ᵀ!$t) + (#0 * ᵀ!(Rew.fix ᵀ“#1 + 9 * #1”)) + &7”)
-  let dt ← toDTerm L n t
+  let dt ← denote L n t
   let fdt := DEqFunMap.substs v'' dt
   let e := fdt.toExpr
   let eq := ((DEqFunMap.substs v'').deq dt).expr
@@ -348,7 +362,7 @@ local elab "dbgFree" : term => do
   let L : Q(Language.{0}) := q(.oRing)
   let n : ℕ := 2
   let t : Q(SyntacticSubterm $L $n) := q(ᵀ“9 * (#0 + #1) + &0 * &1 + &2”)
-  let dt ← toDTerm L n t
+  let dt ← denote L n t
   let fdt := DEqFunMap.free dt
 
   let e := fdt.toExpr
@@ -359,7 +373,40 @@ local elab "dbgFree" : term => do
   --logInfo m! "eq =def= {eq}"
   return dbgr
 
-#eval dbgFree
+def findTerm (s : DTerm L 0) (t : DTerm L 0) :
+  MetaM ((t' : DTerm L 1) × (t' ≡[qsubsts ![s]] t)) := do
+  if ←DTerm.isDefEq s t
+    then return ⟨bvar 0, DEqFun.ofDEqFunOfDEq (DEqFun.substsBvar ![s] 0) (DEq.ofIsDefEq s t)⟩
+    else match t with
+    | bvar x       => return Fin.elim0 x
+    | fvar x       => return ⟨fvar x, DEqFun.substsFvar _ _⟩
+    | func f v     =>
+      let w ← Matrix.getM fun i => findTerm s (v i)
+      return ⟨func f (fun i => (w i).1), DEqFun.rewFunc _ f (fun i => (w i).2)⟩
+    | finitary f v =>
+      let w ← Matrix.getM fun i => findTerm s (v i)
+      return ⟨finitary f (fun i => (w i).1), DEqFun.rewFinitary _ f (fun i => (w i).2)⟩
+    | const c      => return ⟨const c, DEqFun.rewConst _ c⟩
+    | expr e       => return ⟨expr q(Rew.bShift $e),
+      let h : Q(Rew.substs ![$s.toExpr] (Rew.bShift $e) = $e) := q(lemmataTerm.subst_bshift_0 _ $e)
+      .mk h⟩
+
+local elab "dbgfindTerm" : term => do
+  let L : Q(Language.{0}) := q(.oRing)
+  let s : Q(SyntacticSubterm $L 0) := q(ᵀ“&0 + 1”)
+  let t : Q(SyntacticSubterm $L 0) := q(ᵀ“9 + (&0 + 1) + 0 * (&6 + (&0 + 1) + &3 * (&0 + 1))”)
+  let ds ← denote L 0 s
+  let dt ← denote L 0 t
+  let ⟨fdt, eq⟩ ← findTerm ds dt
+  let efdt := fdt.toExpr
+  let eeq := eq.expr
+  logInfo m! "{toString dt} ⟹d {toString fdt}"
+  let dbgr := q(DbgResult.intro _ _ $eeq)
+  logInfo m! "substs ![{s}] {t} ⟹ {efdt}"
+  --logInfo m! "eq =def= {eeq}"
+  return dbgr
+
+#eval dbgfindTerm
 
 end DTerm
 

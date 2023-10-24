@@ -385,7 +385,7 @@ namespace List
 variable {m : Type → Type v} [inst : Monad m] {α : Type u}
 
 def elemM (r : α → α → m Bool) (a : α) : List α → m Bool
-  | [] => return false
+  | []      => return false
   | b :: bs => do
     if (← r a b) then
       return true
@@ -393,3 +393,30 @@ def elemM (r : α → α → m Bool) (a : α) : List α → m Bool
       bs.elemM r a
 
 end List
+
+class Denotation (α : Type) where
+  denote : Expr → MetaM α
+  toExpr : α → Expr
+
+namespace Denotation
+
+instance : Denotation ℕ where
+  denote := fun e => do
+    let some n := Lean.Expr.natLit? (←whnf e) | throwError "error in denotationNat: {e}"
+    return n
+  toExpr := fun n : ℕ => q($n)
+
+instance {n : ℕ} : Denotation (Fin n) where
+  denote := fun e => do
+    let some i' := ←@Qq.finQVal q($n) (←whnf e) | throwError m! "error in denotationFin₁: {e}"
+    let some i := n.toFin i' | throwError m! "error in denotationFin₂: {i'}"
+    return i
+  toExpr := fun i : Fin n => q($i)
+
+instance : Denotation String where
+  denote := fun e => do
+    let some s := Lean.Expr.stringLit? (←whnf e) | throwError m!"error in DenotationString : {e}"
+    return s
+  toExpr := fun s : String => q($s)
+
+end Denotation
