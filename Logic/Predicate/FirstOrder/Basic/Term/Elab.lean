@@ -35,7 +35,7 @@ macro_rules
   | `(ᵀ“ & $n:term ”)                                => `(&$n)
   | `(ᵀ“ $name:ident ”)                            => `(& $(quote name.getId.getString!))
   | `(ᵀ“ ᵀ! $t:term ”)                               => `($t)
-  | `(ᵀ“ $n:num ”)                                   => `(Subterm.Operator.const (natLit _ $n))
+  | `(ᵀ“ $n:num ”)                                   => `(Subterm.Operator.const (numeral _ $n))
   | `(ᵀ“ ᵀ⟨ $d:term ⟩( $t:foterm,* ) ”)              => do
     let v ← t.getElems.foldrM (β := Lean.TSyntax _) (init := ← `(![])) (fun a s => `(ᵀ“$a” :> $s))
     `(func $d $v)
@@ -72,7 +72,7 @@ def unexpsnderFver : Unexpander
   | _ => throw ()
 -/
 
-@[app_unexpander natLit]
+@[app_unexpander numeral]
 def unexpsnderNatLit : Unexpander
   | `($_ $_ $z:num) => `($z)
   | _ => throw ()
@@ -88,7 +88,7 @@ notation "lang(^)" => Language.Pow.pow
 notation "lang(exp)" => Language.Exp.exp
 notation "lang(⟨⟩)" => Language.Pairing.pair
 
-@[app_unexpander Language.Add.add] 
+@[app_unexpander Language.Add.add]
 def unexpsnderAdd : Unexpander
   | `($_) => `(lang(+))
 
@@ -185,7 +185,7 @@ def unexpandFuncArith : Unexpander
   | `($_ lang(⟨⟩) ![$t,            $u           ]) => `(ᵀ“ ⟨ᵀ!$t, ᵀ!$u⟩ ”)
   | _                                             => throw ()
 
-#check natLit Language.oRing 99
+#check numeral Language.oRing 99
 #check (ᵀ“1 + 8” : Subterm Language.oRing ℕ 8)
 #check (Subterm.func Language.Mul.mul (ᵀ“1” :> ᵀ“3” :> Matrix.vecEmpty) : Subterm Language.oRing ℕ 8)
 #check [→ &0, &5] ᵀ“3 * #3 + 9”

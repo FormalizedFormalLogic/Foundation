@@ -135,8 +135,8 @@ variable (c : Const L)
 
 variable [Language.Zero L] [Language.One L] [Language.Add L]
 
-lemma natLit_succ_eq_of_eq {z : ℕ} (t : Subterm L μ n) (h : natLit L z.succ = t) :
-  natLit L z.succ.succ = func Language.Add.add ![t, func Language.One.one ![]] := by rw[←h]; rfl
+lemma numeral_succ_eq_of_eq {z : ℕ} (t : Subterm L μ n) (h : numeral L z.succ = t) :
+  numeral L z.succ.succ = func Language.Add.add ![t, func Language.One.one ![]] := by rw[←h]; rfl
 
 end Const
 
@@ -198,7 +198,7 @@ partial def resultShift (L : Q(Language.{u})) (n : Q(ℕ)) : (t : Q(SyntacticSub
 partial def resultFree (L : Q(Language.{u})) (n : Q(ℕ)) : (t : Q(SyntacticSubterm $L ($n + 1))) →
     MetaM ((res : Q(SyntacticSubterm $L $n)) × Q(free $t = $res))
   | ~q(#$x)                                       => do
-    let n ←whnf n 
+    let n ←whnf n
     let some nval := n.natLit? | throwError f!"Fail: natLit: {n}"
     let some xval := (← finQVal (n := q(.succ $n)) x) | throwError f!"Fail: FinQVal {x}"
     if xval = nval then
@@ -242,7 +242,7 @@ partial def resultFix (L : Q(Language.{u})) (n : Q(ℕ)) : (t : Q(SyntacticSubte
     let z : Q(Fin ($n + 1)) ← Lean.Expr.ofNat q(Fin ($n + 1)) xval
     return ⟨q(#$z), e⟩
   | ~q(&0)                                        => do
-    let n' ←whnf n 
+    let n' ←whnf n
     let some nval := n'.natLit? | throwError f!"Fail: natLit: {n}"
     let z : Q(Fin ($n + 1)) ← Lean.Expr.ofNat q(Fin ($n + 1)) nval
     let hh := q(@fix_fvar_zero $L $n)
@@ -317,31 +317,31 @@ inductive NumeralUnfoldOption
   | unfoldSucc
   | all
 
-partial def natLitResult (L : Q(Language.{u}))
+partial def numeralResult (L : Q(Language.{u}))
   (iz : Q(Language.Zero $L)) (io : Q(Language.One $L)) (ia : Q(Language.Add $L)) (n : Q(ℕ)) :
-    NumeralUnfoldOption → (z : Q(ℕ)) → MetaM $ (res : Q(SyntacticSubterm $L $n)) × Q(natLit $L $z = $res)
+    NumeralUnfoldOption → (z : Q(ℕ)) → MetaM $ (res : Q(SyntacticSubterm $L $n)) × Q(numeral $L $z = $res)
   | NumeralUnfoldOption.none       =>
     fun z => do
-    return ⟨q(natLit $L $z), q(rfl)⟩
+    return ⟨q(numeral $L $z), q(rfl)⟩
   | NumeralUnfoldOption.unfoldSucc =>
     fun z =>
       match z with
-      | ~q(0)      => return ⟨q(natLit $L 0), q(rfl)⟩
-      | ~q(1)      => return ⟨q(natLit $L 1), q(rfl)⟩
+      | ~q(0)      => return ⟨q(numeral $L 0), q(rfl)⟩
+      | ~q(1)      => return ⟨q(numeral $L 1), q(rfl)⟩
       | ~q(.succ $ .succ $z)       => do
         let z' ← natAppFunQ Nat.succ z
-        let e := q(@rfl _ (@Operator.const $L ℕ $n (natLit $L (.succ (.succ $z)))))
-        return ⟨q(func Language.Add.add ![natLit $L $z', natLit $L 1]), e⟩
-      | ~q($z)      => return ⟨q(natLit $L $z), q(rfl)⟩
+        let e := q(@rfl _ (@Operator.const $L ℕ $n (numeral $L (.succ (.succ $z)))))
+        return ⟨q(func Language.Add.add ![numeral $L $z', numeral $L 1]), e⟩
+      | ~q($z)      => return ⟨q(numeral $L $z), q(rfl)⟩
   | NumeralUnfoldOption.all        =>
     fun z =>
       match z with
-      | ~q(0)      => return ⟨q(natLit $L 0), q(rfl)⟩
-      | ~q(1)      => return ⟨q(natLit $L 1), q(rfl)⟩
+      | ~q(0)      => return ⟨q(numeral $L 0), q(rfl)⟩
+      | ~q(1)      => return ⟨q(numeral $L 1), q(rfl)⟩
       | ~q(.succ $ .succ $z') => do
-        let ⟨e, he⟩ ← natLitResult L iz io ia n NumeralUnfoldOption.all q(.succ $z')
-        return ⟨q(func Language.Add.add ![$e, natLit $L 1]), q(natLit_succ_eq_of_eq $e $he)⟩
-      | ~q($z)      => return ⟨q(natLit $L $z), q(rfl)⟩
+        let ⟨e, he⟩ ← numeralResult L iz io ia n NumeralUnfoldOption.all q(.succ $z')
+        return ⟨q(func Language.Add.add ![$e, numeral $L 1]), q(numeral_succ_eq_of_eq $e $he)⟩
+      | ~q($z)      => return ⟨q(numeral $L $z), q(rfl)⟩
 
 partial def result (tp : NumeralUnfoldOption) (L : Q(Language.{u})) (n : Q(ℕ)) : (t : Q(SyntacticSubterm $L $n)) →
     MetaM ((res : Q(SyntacticSubterm $L $n)) × Q($t = $res))
@@ -363,7 +363,7 @@ partial def result (tp : NumeralUnfoldOption) (L : Q(Language.{u})) (n : Q(ℕ))
     let ⟨t', te⟩ ← result tp L n t
     let ⟨t'', tee⟩ ← resultShift L n t'
     return ⟨q($t''), q(shift_congr_eq $te $tee)⟩
-  | ~q(Operator.const $ natLit (hz := $hz) (ho := $ho) (ha := $ha) $z) => natLitResult L hz ho ha n tp z
+  | ~q(Operator.const $ numeral (hz := $hz) (ho := $ho) (ha := $ha) $z) => numeralResult L hz ho ha n tp z
   | ~q(Operator.operator (ι := Fin $arity) $f $v) => do
     let ⟨vn, ve⟩ ← resultVectorOfResult (α := q(SyntacticSubterm $L $n)) (u := u) (result tp L n) arity v
     return ⟨q(Operator.operator $f $vn), q(finitary_congr $f $ve)⟩
@@ -376,7 +376,7 @@ elab "dbg" : tactic => do
   logInfo m!"t = {t}"
   let t : Q(SyntacticSubterm $L $n) ← withReducible <| whnf t
   let ⟨tn, e⟩ ← result NumeralUnfoldOption.none L n t
-  let ⟨tnbs, ebs⟩ ← resultBShift L n tn
+  let ⟨tnbs, _⟩ ← resultBShift L n tn
   logInfo m!"tn = {tn}"
   logInfo m!"tnbs = {tnbs}"
   --logInfo m!"e = {e}"

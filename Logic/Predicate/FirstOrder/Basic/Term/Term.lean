@@ -132,7 +132,7 @@ lemma comp_app (ω₂ : Rew L μ₂ n₂ μ₃ n₃) (ω₁ : Rew L μ₁ n₁ �
     (ω₂.comp ω₁) t = ω₂ (ω₁ t) := rfl
 
 def bindAux (b : Fin n₁ → Subterm L μ₂ n₂) (e : μ₁ → Subterm L μ₂ n₂) : Subterm L μ₁ n₁ → Subterm L μ₂ n₂
-  | (#x)       => b x    
+  | (#x)       => b x
   | (&x)       => e x
   | (func f v) => func f (fun i => bindAux b e (v i))
 
@@ -161,7 +161,7 @@ def bShiftAdd (m : ℕ) : Rew L μ n μ (n + m) :=
 def castLE {n n' : ℕ} (h : n ≤ n') : Rew L μ n μ n' :=
   map (Fin.castLE h) id
 
-protected def q (ω : Rew L μ₁ n₁ μ₂ n₂) : Rew L μ₁ (n₁ + 1) μ₂ (n₂ + 1) := 
+protected def q (ω : Rew L μ₁ n₁ μ₂ n₂) : Rew L μ₁ (n₁ + 1) μ₂ (n₂ + 1) :=
   bind (#0 :> bShift ∘ ω ∘ bvar) (bShift ∘ ω ∘ fvar)
 
 lemma eq_id_of_eq {ω : Rew L μ n μ n} (hb : ∀ x, ω #x = #x) (he : ∀ x, ω &x = &x) (t) : ω t = t := by
@@ -353,7 +353,7 @@ section Syntactic
 
 def shift : SyntacticRew L n n := map id Nat.succ
 
-/- 
+/-
   #0 #1 ... #(n - 1) #n &0 &1 ...
    ↓free           ↑fix
   #0 #1 ... #(n - 1) &0 &1 &2 ...
@@ -588,7 +588,7 @@ def Operator.const (c : Const L) : Subterm L μ n := c.operator Empty.elim
 
 instance : Coe (Const L) (Subterm L μ n) := ⟨Operator.const⟩
 
-section natLit
+section numeral
 
 open Language
 
@@ -607,32 +607,32 @@ def addOnes (t : Subterm L μ n) : ℕ → Subterm L μ n
 lemma Rew.addOnes (ω : Rew L μ₁ n₁ μ₂ n₂) (t : Subterm L μ₁ n₁) (z : ℕ) :
     ω (t.addOnes z) = (ω t).addOnes z := by induction z <;> simp[*]
 
--- (((((1 + 1) + 1) + 1) + 1) ... ) 
-def natLit' : ℕ → Subterm L μ n
+-- (((((1 + 1) + 1) + 1) + 1) ... )
+def numeral' : ℕ → Subterm L μ n
   | 0     => func Language.Zero.zero ![]
   | z + 1 => addOnes (func Language.One.one ![]) z
 
 variable (L)
 
-def natLit (z : ℕ) : Const L where
-  operator := fun _ => natLit' z
-  rew_operator := by intros; cases z <;> simp[natLit', Rew.addOnes, Matrix.empty_eq]
+def numeral (z : ℕ) : Const L where
+  operator := fun _ => numeral' z
+  rew_operator := by intros; cases z <;> simp[numeral', Rew.addOnes, Matrix.empty_eq]
 
 variable {L}
 
-abbrev sNatLit (z : ℕ) : SyntacticSubterm L n := natLit L z
+abbrev snumeral (z : ℕ) : SyntacticSubterm L n := numeral L z
 
-lemma natLit_zero : (natLit L 0 : Subterm L μ n) = func Language.Zero.zero ![] := by rfl
+lemma numeral_zero : (numeral L 0 : Subterm L μ n) = func Language.Zero.zero ![] := by rfl
 
-lemma natLit_one : (natLit L 1 : Subterm L μ n) = func Language.One.one ![] := by rfl
+lemma numeral_one : (numeral L 1 : Subterm L μ n) = func Language.One.one ![] := by rfl
 
-lemma natLit_succ (z : ℕ) (neZero : z ≠ 0) :
-    (natLit L (.succ z) : Subterm L μ n) = func Language.Add.add ![natLit L z, natLit L 1] := by
+lemma numeral_succ (z : ℕ) (neZero : z ≠ 0) :
+    (numeral L (.succ z) : Subterm L μ n) = func Language.Add.add ![numeral L z, numeral L 1] := by
   cases z
   · contradiction
-  · simp[natLit, natLit', Operator.const]
+  · simp[numeral, numeral', Operator.const]
 
-end natLit
+end numeral
 
 end Subterm
 

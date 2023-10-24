@@ -112,85 +112,57 @@ proof.
   rw[this]
 qed.
 
-/-
-def leAdd : [] ⟹[T] “∀ ∀ #0 ≤ #0 + #1” :=
-  proof.
-    gen n; gen m
-    have 0 = n ∨ 0 < n
-    · specialize 0 ≤ #0 with n @ efrom zeroLe
-      specialize #0 ≤ #1 ↔ #0 = #1 ∨ #0 < #1 with 0, n @ efrom leIffEqOrLt
-      rw[←this]
-    cases 0 = n as .hn or 0 < n as .hn
-    · specialize #0 ≤ #0 with m @ efrom leRefl
-      specialize #0 + 0 = #0 with m @ efrom addZero
-      rw[←.hn, this]
-    · have m < m + n
-      · specialize 0 + #0 = #0 with m @ efrom zeroAdd
-        ?
-        then ∀ ∀ ∀ (#0 < #1 → #0 + #2 < #1 + #2) as .add_lt_add · from addLtAdd
-        specialize this with 0, n, m
-
-  qed.
-
-def numeralLtSucc {n m : ℕ} (h : n < m) : [] ⟹[T] “∀ ∀ #0 < #0 + 1 + #1” :=
-  proof.
-    gen n; gen m
-    
-    ?
-  qed.
--/
-
-def numeralAdd (n m : ℕ) : [] ⟹[T] “ᵀ!(Subterm.natLit L n) + ᵀ!(Subterm.natLit L m) = ᵀ!(Subterm.natLit L (n + m))” := by
+def numeralAdd (n m : ℕ) : [] ⟹[T] “ᵀ!(Subterm.numeral L n) + ᵀ!(Subterm.numeral L m) = ᵀ!(Subterm.numeral L (n + m))” := by
   induction' m with m ih
   · simp
     exact proofBy {
       then “∀ #0 + 0 = #0” · from addZero
-      specialize this with ᵀ!(Subterm.Operator.const $ Subterm.natLit L n) }
+      specialize this with ᵀ!(Subterm.Operator.const $ Subterm.numeral L n) }
   · by_cases hm : m = 0
     · simp[hm, Nat.add_succ] at ih ⊢
-      suffices : [] ⟹[T] “ᵀ!(Subterm.natLit L n) + 1 = ᵀ!(Subterm.natLit L (n + 1))”
+      suffices : [] ⟹[T] “ᵀ!(Subterm.numeral L n) + 1 = ᵀ!(Subterm.numeral L (n + 1))”
       { exact this.cast (by rfl) }
       by_cases hn : n = 0
       · simp[hn]
         exact proofBy {
           then “∀ 0 + #0 = #0” · from zeroAdd
           specialize this with 1 }
-      · simp[hn, Subterm.natLit_succ]; exact proofBy { refl }
-    · simp[hm, Nat.add_succ, Subterm.natLit_succ]
+      · simp[hn, Subterm.numeral_succ]; exact proofBy { refl }
+    · simp[hm, Nat.add_succ, Subterm.numeral_succ]
       exact proof.
-        then (ih) “ᵀ!(Subterm.natLit L n) + ᵀ!(Subterm.natLit L m) = ᵀ!(Subterm.natLit L (n + m))” · from ih
+        then (ih) “ᵀ!(Subterm.numeral L n) + ᵀ!(Subterm.numeral L m) = ᵀ!(Subterm.numeral L (n + m))” · from ih
         then (add_succ) “∀ ∀ ∀ (#0 + #1) + #2 = #0 + (#1 + #2)” · from addAssoc
-        specialize this with ᵀ!(Subterm.Operator.const $ Subterm.natLit L n), ᵀ!(Subterm.Operator.const $ Subterm.natLit L m), 1
+        specialize this with ᵀ!(Subterm.Operator.const $ Subterm.numeral L n), ᵀ!(Subterm.Operator.const $ Subterm.numeral L m), 1
         rw[←this, ih]
         refl
       qed.
-      
-def numeralMul (n m : ℕ) : [] ⟹[T] “ᵀ!(Subterm.natLit L n) * ᵀ!(Subterm.natLit L m) = ᵀ!(Subterm.natLit L (n * m))” := by
+
+def numeralMul (n m : ℕ) : [] ⟹[T] “ᵀ!(Subterm.numeral L n) * ᵀ!(Subterm.numeral L m) = ᵀ!(Subterm.numeral L (n * m))” := by
   induction' m with m ih
   · simp
     exact proofBy {
       then “∀ #0 * 0 = 0” · from mulZero
-      specialize this with ᵀ!(Subterm.Operator.const $ Subterm.natLit L n) }
+      specialize this with ᵀ!(Subterm.Operator.const $ Subterm.numeral L n) }
   · by_cases hm : m = 0
     · simp[hm, Nat.add_succ] at ih ⊢
-      suffices : [] ⟹[T] “ᵀ!(Subterm.natLit L n) * 1 = ᵀ!(Subterm.natLit L n)”
+      suffices : [] ⟹[T] “ᵀ!(Subterm.numeral L n) * 1 = ᵀ!(Subterm.numeral L n)”
       { exact this.cast (by rfl) }
       exact proofBy {
         then “∀ #0 * 1 = #0” · from mulOne
-        specialize this with ᵀ!(Subterm.Operator.const $ Subterm.natLit L n) }
-    · simp[hm, Nat.mul_succ, Subterm.natLit_succ]
+        specialize this with ᵀ!(Subterm.Operator.const $ Subterm.numeral L n) }
+    · simp[hm, Nat.mul_succ, Subterm.numeral_succ]
       exact proofBy {
-        then “ᵀ!(Subterm.natLit L (n * m)) + ᵀ!(Subterm.natLit L n) = ᵀ!(Subterm.natLit L (n * m + n))” · from numeralAdd _ _
-        then (ih) “ᵀ!(Subterm.natLit L n) * ᵀ!(Subterm.natLit L m) = ᵀ!(Subterm.natLit L (n * m))” · from ih
+        then “ᵀ!(Subterm.numeral L (n * m)) + ᵀ!(Subterm.numeral L n) = ᵀ!(Subterm.numeral L (n * m + n))” · from numeralAdd _ _
+        then (ih) “ᵀ!(Subterm.numeral L n) * ᵀ!(Subterm.numeral L m) = ᵀ!(Subterm.numeral L (n * m))” · from ih
         then “∀ #0 * 1 = #0” · from mulOne
-        specialize (h) this with ᵀ!(Subterm.Operator.const $ Subterm.natLit L n)
+        specialize (h) this with ᵀ!(Subterm.Operator.const $ Subterm.numeral L n)
         then “∀ ∀ ∀ #0 * (#1 + #2) = #0 * #1 + #0 * #2” · from distr
-        specialize this with ᵀ!(Subterm.Operator.const $ Subterm.natLit L n), ᵀ!(Subterm.Operator.const $ Subterm.natLit L m), 1
+        specialize this with ᵀ!(Subterm.Operator.const $ Subterm.numeral L n), ᵀ!(Subterm.Operator.const $ Subterm.numeral L m), 1
         rw[this, h, ih] }
 
-def numeralLt {n m : ℕ} (h : n < m) : [] ⟹[T] “ᵀ!(Subterm.natLit L n) < ᵀ!(Subterm.natLit L m)” := sorry
-  
-def numeralNEq {n m : ℕ} (h : n ≠ m) : [] ⟹[T] “ᵀ!(Subterm.natLit L n) ≠ ᵀ!(Subterm.natLit L m)” := sorry
+def numeralLt {n m : ℕ} (h : n < m) : [] ⟹[T] “ᵀ!(Subterm.numeral L n) < ᵀ!(Subterm.numeral L m)” := sorry
+
+def numeralNEq {n m : ℕ} (h : n ≠ m) : [] ⟹[T] “ᵀ!(Subterm.numeral L n) ≠ ᵀ!(Subterm.numeral L m)” := sorry
 
 end PAminus
 
