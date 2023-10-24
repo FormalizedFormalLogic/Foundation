@@ -20,7 +20,7 @@ open Subterm
 lemma func_ext {k} (f : L.func k) (v w : Fin k → Subterm L μ₁ n₁) (H : ∀ i, v i = w i) :
     func f v = func f w := congr_arg _ (funext H)
 
-lemma operator_ext {k} (f : Finitary L k) (v w : Fin k → Subterm L μ n) (H : ∀ i, v i = w i) :
+lemma finitary_ext {k} (f : Finitary L k) (v w : Fin k → Subterm L μ n) (H : ∀ i, v i = w i) :
     f.operator v = f.operator w := congr_arg _ (funext H)
 
 lemma substs_ext {k} {t u : Subterm L μ k} {v w : Fin k → Subterm L μ n} (ht : t = u) (H : ∀ i, v i = w i) :
@@ -74,7 +74,7 @@ def toStr {L : Q(Language.{u})} {n : ℕ} : DTerm L n → String
   | bvar x       => "#" ++ toString x
   | fvar x       => "&" ++ toString x
   | func _ v     => "func" ++ " " ++ "(" ++ (String.vecToStr fun i => (v i).toStr) ++ ")"
-  | finitary _ v => "op" ++ " " ++ "(" ++ (String.vecToStr fun i => (v i).toStr) ++ ")"
+  | finitary _ v => "f" ++ " " ++ "(" ++ (String.vecToStr fun i => (v i).toStr) ++ ")"
   | const _      => "const"
   | expr _       => "expr"
 
@@ -133,8 +133,6 @@ namespace DEq
 
 variable {L : Q(Language.{u})} {n : ℕ}
 
-instance (t₁ t₂ : DTerm L n) : Inhabited (t₁ ≡ t₂) := ⟨⟨default⟩⟩
-
 @[refl] protected def refl (t : DTerm L n) : t ≡ t := .mk q(rfl)
 
 @[symm] protected def symm {t₁ t₂ : DTerm L n} (h : t₁ ≡ t₂) : t₂ ≡ t₁ :=
@@ -142,6 +140,8 @@ instance (t₁ t₂ : DTerm L n) : Inhabited (t₁ ≡ t₂) := ⟨⟨default⟩
 
 @[trans] protected def trans {t₁ t₂ t₃ : DTerm L n} (h₁ : t₁ ≡ t₂) (h₂ : t₂ ≡ t₃) : t₁ ≡ t₃ :=
   .mk q(Eq.trans $h₁.expr $h₂.expr)
+
+def ofIsDefEq (t₁ t₂ : DTerm L n) : t₁ ≡ t₂ := ⟨(q(@rfl (SyntacticSubterm $L $n) $t₁.toExpr) : Expr)⟩
 
 def funcExt {arity : ℕ} (f : Q(($L).func $arity)) {v w : Fin arity → DTerm L n} (H : (i : Fin arity) → v i ≡ w i) :
     func f v ≡ func f w := by
@@ -151,16 +151,41 @@ def funcExt {arity : ℕ} (f : Q(($L).func $arity)) {v w : Fin arity → DTerm L
   let e : Q(Subterm.func $f $v' = Subterm.func $f $w') := q(lemmataTerm.func_ext $f _ _ $H)
   exact .mk e
 
-def operatorExt {arity : ℕ}
+def finitaryExt {arity : ℕ}
   (f : Q(Subterm.Finitary.{u, 0} $L $arity)) {v w : Fin arity → DTerm L n} (H : (i : Fin arity) → v i ≡ w i) :
     finitary f v ≡ finitary f w := by
   let v' := Qq.vecFold q(SyntacticSubterm $L $n) (fun i => (v i).toExpr)
   let w' := Qq.vecFold q(SyntacticSubterm $L $n) (fun i => (w i).toExpr)
   let H : Q(∀ i, $v' i = $w' i) := vecFoldDep q(fun i => $v' i = $w' i) (fun i => (H i).expr)
-  let e : Q(($f).operator $v' = ($f).operator $w') := q(lemmataTerm.operator_ext $f _ _ $H)
+  let e : Q(($f).operator $v' = ($f).operator $w') := q(lemmataTerm.finitary_ext $f _ _ $H)
   exact .mk e
 
-def ofIsDefEq (t₁ t₂ : DTerm L n) : t₁ ≡ t₂ := ⟨(q(@rfl (SyntacticSubterm $L $n) $t₁.toExpr) : Expr)⟩
+/-
+section Numeral
+
+variable (iz : Q(Language.Zero $L)) (io : Q(Language.One $L)) (ia : Q(Language.Add $L))
+
+def numeralEq : (z : ℕ) → (t : DTerm L n) × (const q(Subterm.numeral $L $z) ≡ t)
+  | 0 => ⟨const q(Subterm.numeral $L 0), DEq.refl _⟩
+  | 1 => ⟨const q(Subterm.numeral $L 1), DEq.refl _⟩
+  | z + 2 => ⟨  (numeralEq (z + 1)).1, by {  }⟩
+
+def unfoldNumeral : (t : DTerm L n) → MetaM ((t' : DTerm L n) × (t ≡ t'))
+  | bvar x       => pure ⟨bvar x, DEq.refl _⟩
+  | fvar x       => pure ⟨fvar x, DEq.refl _⟩
+  | func f v     => do
+    let w ← Matrix.getM fun i => unfoldNumeral (v i)
+    return ⟨func f (fun i => (w i).1), funcExt f fun i => (w i).2⟩
+  | finitary f v => do
+    let w ← Matrix.getM fun i => unfoldNumeral (v i)
+    return ⟨finitary f (fun i => (w i).1), finitaryExt f fun i => (w i).2⟩
+  | const c      =>
+    match c with
+    |
+  | DTerm.expr e => pure ⟨DTerm.expr e, DEq.refl _⟩
+
+end Numeral
+-/
 
 end DEq
 

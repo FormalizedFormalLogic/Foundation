@@ -554,9 +554,15 @@ structure Operator (L : Language.{u}) (ι : Type w) where
   operator : {μ : Type v} → {n : ℕ} → (ι → Subterm L μ n) → Subformula L μ n
   rew_operator : ∀ {μ₁ μ₂ n₁ n₂} (ω : Rew L μ₁ n₁ μ₂ n₂) (v : ι → Subterm L μ₁ n₁), ω.hom (operator v) = operator (fun i => ω (v i))
 
+abbrev Const (L : Language.{u}) := Operator.{u,v,0} L Empty
+
+abbrev Monadic (L : Language.{u}) := Operator L Unit
+
 abbrev Finitary (L : Language.{u}) (n : ℕ) := Operator L (Fin n)
 
 abbrev OperatorMatrix (ι : Type w) (I : ι → Type w') := Operator L ((i : ι ) × I i)
+
+def Operator.const (c : Const L) : Subformula L μ n := c.operator Empty.elim
 
 namespace Abbrev
 
@@ -677,8 +683,8 @@ namespace Subformula
 variable {L : Language.{u}} {L₁ : Language.{u₁}} {{L₂ : Language.{u₂}}} {L₃ : Language.{u₃}} {μ : Type v} {Φ : L₁ →ᵥ L₂}
 
 def lMapAux (Φ : L₁ →ᵥ L₂) : ∀ {n}, Subformula L₁ μ n → Subformula L₂ μ n
-  | _, ⊤        => ⊤ 
-  | _, ⊥        => ⊥ 
+  | _, ⊤        => ⊤
+  | _, ⊥        => ⊥
   | _, rel r v  => rel (Φ.rel r) (Subterm.lMap Φ ∘ v)
   | _, nrel r v => nrel (Φ.rel r) (Subterm.lMap Φ ∘ v)
   | _, p ⋏ q    => lMapAux Φ p ⋏ lMapAux Φ q
@@ -726,7 +732,7 @@ lemma lMap_shift (p : SyntacticSubformula L₁ n) : lMap Φ (Rew.shiftl p) = Rew
 
 lemma lMap_free (p : SyntacticSubformula L₁ (n + 1)) : lMap Φ (Rew.freel p) = Rew.freel (lMap Φ p) := by
   simp[Rew.freel, Rew.free, lMap_bind, Function.comp, Matrix.comp_vecConsLast]
-  
+
 lemma lMap_fix (p : SyntacticSubformula L₁ n) : lMap Φ (Rew.fixl p) = Rew.fixl (lMap Φ p) :=
   by simp[Rew.fixl, Rew.fix, lMap_bind, Function.comp, Rew.bindl]; congr; { funext x; cases x <;> simp }
 
@@ -762,6 +768,9 @@ lemma hom_operator' (o : Operator L ι) (v : ι → Subterm L μ n₁) :
 
 @[simp] lemma hom_finitary3 (o : Finitary L 3) (t₁ t₂ t₃ : Subterm L μ n₁) :
     ω.hom (o.operator ![t₁, t₂, t₃]) = o.operator ![ω t₁, ω t₂, ω t₃] := by simp[ω.hom_operator']
+
+@[simp] lemma hom_const (o : Const L) : ω.hom (Operator.const c) = Operator.const c := by
+  simp[Operator.const, ω.hom_operator']; congr; funext x; exact x.elim
 
 end Rew
 

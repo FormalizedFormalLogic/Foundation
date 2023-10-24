@@ -60,7 +60,7 @@ instance (k) : Encodable (equal.func k) := IsEmpty.toEncodable
 
 instance (k) : Encodable (equal.rel k) where
   encode := fun _ => 0
-  decode := fun _ => 
+  decode := fun _ =>
     match k with
     | 2 => some EqRel.equal
     | _ => none
@@ -264,6 +264,7 @@ instance : ORing oRing where
   add := .add
   mul := .mul
 
+/-
 namespace ORing
 
 open Qq Lean Elab Meta Tactic
@@ -278,7 +279,7 @@ def denoteFunc : (k : ℕ) → Q(oRing.func $k) → MetaM (oRing.func k)
     | ~q(Language.Add.add) => return Language.Add.add
     | ~q(Language.Mul.mul) => return Language.Mul.mul
   | _, e => throwError m!"error in DenotationORing : {e}"
-  
+
 def denoteRel : (k : ℕ) → Q(oRing.rel $k) → MetaM (oRing.rel k)
   | 2, e =>
     match e with
@@ -286,7 +287,7 @@ def denoteRel : (k : ℕ) → Q(oRing.rel $k) → MetaM (oRing.rel k)
     | ~q(Language.Lt.lt) => return Language.Lt.lt
   | _, e => throwError m!"error in DenotationORing : {e}"
 
-instance : Denotation (oRing.func k) where
+instance (k : ℕ) : Denotation q(oRing.func $k) (oRing.func k) where
    denote := denoteFunc k
    toExpr := fun f =>
      ( match f with
@@ -295,7 +296,7 @@ instance : Denotation (oRing.func k) where
        | Func.add  => q(Language.Add.add)
        | Func.mul  => q(Language.Mul.mul) : Q(oRing.func $k))
 
-instance : Denotation (oRing.rel k) where
+instance (k : ℕ) : Denotation q(oRing.rel $k) (oRing.rel k) where
    denote := denoteRel k
    toExpr := fun f =>
      ( match f with
@@ -303,13 +304,14 @@ instance : Denotation (oRing.rel k) where
        | Rel.lt => q(Language.Lt.lt) : Q(oRing.rel $k))
 
 end ORing
+-/
 
 structure Hom (L₁ L₂ : Language) where
   func : {k : ℕ} → L₁.func k → L₂.func k
   rel : {k : ℕ} → L₁.rel k → L₂.rel k
 
 scoped[LO.FirstOrder] infix:25 " →ᵥ " => LO.FirstOrder.Language.Hom
- 
+
 namespace Hom
 variable (L L₁ L₂ L₃ : Language) (Φ : Hom L₁ L₂)
 
@@ -320,8 +322,8 @@ protected def id : L →ᵥ L where
 variable {L L₁ L₂ L₃}
 
 def comp (Ψ : L₂ →ᵥ L₃) (Φ : L₁ →ᵥ L₂) : L₁ →ᵥ L₃ where
-  func := Ψ.func ∘ Φ.func 
-  rel  := Ψ.rel ∘ Φ.rel 
+  func := Ψ.func ∘ Φ.func
+  rel  := Ψ.rel ∘ Φ.rel
 
 end Hom
 

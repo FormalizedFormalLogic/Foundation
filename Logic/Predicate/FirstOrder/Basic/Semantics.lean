@@ -363,6 +363,9 @@ structure Theory.semanticEquiv (T₁ : Theory L₁) (T₂ : Theory L₂) :=
   toLeft : T₁.semanticGe T₂
   toRight : T₂.semanticGe T₁
 
+def modelsTheory_iff_modelsTheory_s {M : Type u} [s : Structure L M] {T : Theory L} :
+  M ⊧* T ↔ s ⊧ₛ* T := by rfl
+
 variable (L)
 
 def ElementaryEquiv (M₁ M₂ : Type u) [Structure L M₁] [Structure L M₂] : Prop :=
@@ -444,7 +447,7 @@ end
 
 namespace Subformula
 
-variable {L₁ L₂ : Language.{u}} {Φ : L₁ →ᵥ L₂} 
+variable {L₁ L₂ : Language.{u}} {Φ : L₁ →ᵥ L₂}
 
 section lMap
 variable {M : Type u} {s₂ : Structure L₂ M} {n} {e : Fin n → M} {ε : μ → M}
