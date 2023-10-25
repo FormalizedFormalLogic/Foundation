@@ -45,7 +45,33 @@ lemma rew_finitary_eq_of_eq {k} (f : Finitary L k) {v : Fin k → Subterm L μ�
     ω.hom (f.operator v) = f.operator v' :=
   by simp[Rew.hom_operator, Function.comp, h]
 
+lemma rew_and_eq_of_eq {p q p' q'} (hp : ω.hom p = p') (hq : ω.hom q = q') :
+    ω.hom (p ⋏ q) = p' ⋏ q' :=
+  by simp[hp, hq]
 
+lemma rew_or_eq_of_eq {p q p' q'} (hp : ω.hom p = p') (hq : ω.hom q = q') :
+    ω.hom (p ⋎ q) = p' ⋎ q' :=
+  by simp[hp, hq]
+
+lemma rew_neg_eq_of_eq {p p'} (hp : ω.hom p = p') :
+    ω.hom (~p) = ~p' :=
+  by simp[hp]
+
+lemma rew_imply_eq_of_eq {p q p' q'} (hp : ω.hom p = p') (hq : ω.hom q = q') :
+    ω.hom (p ⟶ q) = p' ⟶ q' :=
+  by simp[hp, hq]
+
+lemma rew_iff_eq_of_eq {p q p' q'} (hp : ω.hom p = p') (hq : ω.hom q = q') :
+    ω.hom (p ⟷ q) = p' ⟷ q' :=
+  by simp[hp, hq]
+
+lemma rew_all_eq_of_eq {p p'} (hp : ω.q.hom p = p') :
+    ω.hom (∀' p) = ∀' p' :=
+  by simp[hp]
+
+lemma rew_ex_eq_of_eq {p p'} (hp : ω.q.hom p = p') :
+    ω.hom (∃' p) = ∃' p' :=
+  by simp[hp]
 
 end Rew
 
@@ -269,8 +295,80 @@ def rewConst {n m : ℕ} (ω : Q(Rew $L ℕ $n ℕ $m))
   let e : Q(($ω).hom (Subformula.Operator.const $c) = Subformula.Operator.const $c) := q(lemmataFormula.rew_const_eq_of_eq _ $c)
   exact .mk e
 
+def rewVerum {n m : ℕ} (ω : Q(Rew $L ℕ $n ℕ $m)) : (verum : DFormula L n) ≡[qrew L n m ω] verum :=
+  let e : Q(($ω).hom ⊤ = ⊤) := q(LogicSymbol.HomClass.map_top _)
+  .mk e
+
+def rewFalsum {n m : ℕ} (ω : Q(Rew $L ℕ $n ℕ $m)) : (falsum : DFormula L n) ≡[qrew L n m ω] falsum :=
+  let e : Q(($ω).hom ⊥ = ⊥) := q(LogicSymbol.HomClass.map_bot _)
+  .mk e
+
+def rewAnd {n m : ℕ} (ω : Q(Rew $L ℕ $n ℕ $m)) {p q : DFormula L n} {p' q' : DFormula L m}
+  (hp : p ≡[qrew L n m ω] p') (hq : q ≡[qrew L n m ω] q') :
+    and p q ≡[qrew L n m ω] and p' q' :=
+  let hp : Q(($ω).hom $p.toExpr = $p'.toExpr) := hp.expr
+  let hq : Q(($ω).hom $q.toExpr = $q'.toExpr) := hq.expr
+  let e : Q(($ω).hom ($p.toExpr ⋏ $q.toExpr) = $p'.toExpr ⋏ $q'.toExpr) := q(lemmataFormula.rew_and_eq_of_eq _ $hp $hq)
+  .mk e
+
+def rewOr {n m : ℕ} (ω : Q(Rew $L ℕ $n ℕ $m)) {p q : DFormula L n} {p' q' : DFormula L m}
+  (hp : p ≡[qrew L n m ω] p') (hq : q ≡[qrew L n m ω] q') :
+    or p q ≡[qrew L n m ω] or p' q' :=
+  let hp : Q(($ω).hom $p.toExpr = $p'.toExpr) := hp.expr
+  let hq : Q(($ω).hom $q.toExpr = $q'.toExpr) := hq.expr
+  let e : Q(($ω).hom ($p.toExpr ⋎ $q.toExpr) = $p'.toExpr ⋎ $q'.toExpr) := q(lemmataFormula.rew_or_eq_of_eq _ $hp $hq)
+  .mk e
+
+def rewNeg {n m : ℕ} (ω : Q(Rew $L ℕ $n ℕ $m)) {p : DFormula L n} {p' : DFormula L m}
+  (hp : p ≡[qrew L n m ω] p') :
+    neg p ≡[qrew L n m ω] neg p' :=
+  let hp : Q(($ω).hom $p.toExpr = $p'.toExpr) := hp.expr
+  let e : Q(($ω).hom (~$p.toExpr) = ~$p'.toExpr) := q(lemmataFormula.rew_neg_eq_of_eq _ $hp)
+  .mk e
+
+def rewImply {n m : ℕ} (ω : Q(Rew $L ℕ $n ℕ $m)) {p q : DFormula L n} {p' q' : DFormula L m}
+  (hp : p ≡[qrew L n m ω] p') (hq : q ≡[qrew L n m ω] q') :
+    imply p q ≡[qrew L n m ω] imply p' q' :=
+  let hp : Q(($ω).hom $p.toExpr = $p'.toExpr) := hp.expr
+  let hq : Q(($ω).hom $q.toExpr = $q'.toExpr) := hq.expr
+  let e : Q(($ω).hom ($p.toExpr ⟶ $q.toExpr) = $p'.toExpr ⟶ $q'.toExpr) := q(lemmataFormula.rew_imply_eq_of_eq _ $hp $hq)
+  .mk e
+
+def rewIff {n m : ℕ} (ω : Q(Rew $L ℕ $n ℕ $m)) {p q : DFormula L n} {p' q' : DFormula L m}
+  (hp : p ≡[qrew L n m ω] p') (hq : q ≡[qrew L n m ω] q') :
+    iff p q ≡[qrew L n m ω] iff p' q' :=
+  let hp : Q(($ω).hom $p.toExpr = $p'.toExpr) := hp.expr
+  let hq : Q(($ω).hom $q.toExpr = $q'.toExpr) := hq.expr
+  let e : Q(($ω).hom ($p.toExpr ⟷ $q.toExpr) = $p'.toExpr ⟷ $q'.toExpr) := q(lemmataFormula.rew_iff_eq_of_eq _ $hp $hq)
+  .mk e
+
 end DEqFun
 
+/-
+structure DEqFunMap (L : Q(Language.{u})) (n₁ n₂ : ℕ) (f : Q(SyntacticSubformula $L $n₁ → SyntacticSubformula $L $n₂)) where
+  toFun : (p₁ : DFormula L n₁) → (p₂ : DFormula L n₂) × (p₁ ≡[f] p₂)
+
+namespace DEqFunMap
+
+variable {L : Q(Language.{u})}
+
+instance (n₁ n₂ : ℕ) (f : Q(SyntacticSubformula $L $n₁ → SyntacticSubformula $L $n₂)) :
+    CoeFun (DEqFunMap L n₁ n₂ f) (fun _ => DFormula L n₁ → DFormula L n₂) := ⟨fun d t => (d.toFun t).1⟩
+
+def deq {n₁ n₂ : ℕ} {f : Q(SyntacticSubformula $L $n₁ → SyntacticSubformula $L $n₂)} (d : DEqFunMap L n₁ n₂ f) (p : DFormula L n₁) :
+    p ≡[f] d p := (d.toFun p).2
+
+section rew
+
+variable {m n : ℕ} (ω : Q(Rew $L ℕ $n ℕ $m)) (F : DTerm.DEqFunMap L n m (DTerm.qrew L n m ω))
+
+def rewAux : (p : DFormula L n) → (p' : DFormula L m) × (p ≡[qrew L n m ω] p')
+  | verum => ⟨⟩
+
+def rew : DEqFunMap L n m (qrew L n m ω) := ⟨rewAux ω bt ft hbt hft⟩
+
+end rew
+-/
 
 end DFormula
 

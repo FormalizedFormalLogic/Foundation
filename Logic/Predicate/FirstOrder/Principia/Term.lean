@@ -301,45 +301,33 @@ def fixFvar (x : ℕ) : (fvar x : DTerm L n) ≡[@qfix _ L n] x.casesOn (bvar (F
 end DEqFun
 
 structure DEqFunMap (L : Q(Language.{u})) (n₁ n₂ : ℕ) (f : Q(SyntacticSubterm $L $n₁ → SyntacticSubterm $L $n₂)) where
-  toFun : DTerm L n₁ → DTerm L n₂
-  deq' : ∀ t : DTerm L n₁, t ≡[f] toFun t
+  toFun : (t₁ : DTerm L n₁) → (t₂ : DTerm L n₂) × (t₁ ≡[f] t₂)
 
 namespace DEqFunMap
 
 variable {L : Q(Language.{u})}
 
 instance (n₁ n₂ : ℕ) (f : Q(SyntacticSubterm $L $n₁ → SyntacticSubterm $L $n₂)) :
-    CoeFun (DEqFunMap L n₁ n₂ f) (fun _ => DTerm L n₁ → DTerm L n₂) := ⟨toFun⟩
+    CoeFun (DEqFunMap L n₁ n₂ f) (fun _ => DTerm L n₁ → DTerm L n₂) := ⟨fun d t => (d.toFun t).1⟩
 
 def deq {n₁ n₂ : ℕ} {f : Q(SyntacticSubterm $L $n₁ → SyntacticSubterm $L $n₂)} (d : DEqFunMap L n₁ n₂ f) (t : DTerm L n₁) :
-    t ≡[f] d t := d.deq' t
+    t ≡[f] d t := (d.toFun t).2
 
 section rew
 
 variable {m n : ℕ} (ω : Q(Rew $L ℕ $n ℕ $m))
   (bt : Fin n → DTerm L m) (ft : ℕ → DTerm L m)
+  (hbt : ∀ x, bvar x ≡[qrew L n m ω] bt x) (hft : ∀ x, fvar x ≡[qrew L n m ω] ft x)
 
-def rewAux : DTerm L n → DTerm L m
-  | bvar x       => bt x
-  | fvar x       => ft x
-  | func f v     => func f (fun i => rewAux (v i))
-  | finitary o v => finitary o (fun i => rewAux (v i))
-  | const c      => const c
-  | expr e       => expr q($ω $e)
+def rewAux : (t : DTerm L n) → (t' : DTerm L m) × (t ≡[qrew L n m ω] t')
+  | bvar x       => ⟨bt x, hbt x⟩
+  | fvar x       => ⟨ft x, hft x⟩
+  | func f v     => ⟨func f (fun i => (rewAux (v i)).1), DEqFun.rewFunc _ f (fun i => (rewAux (v i)).2)⟩
+  | finitary f v => ⟨finitary f (fun i => (rewAux (v i)).1), DEqFun.rewFinitary _ f (fun i => (rewAux (v i)).2)⟩
+  | const c      => ⟨const c, DEqFun.rewConst _ c⟩
+  | expr e       => ⟨expr q($ω $e), .mk (q(@rfl (SyntacticSubterm $L $m) ($ω $e)) : Expr)⟩
 
-variable (hbt : ∀ x, bvar x ≡[qrew L n m ω] bt x) (hft : ∀ x, fvar x ≡[qrew L n m ω] ft x)
-
-def rewDEqFun : (t : DTerm L n) → t ≡[qrew L n m ω] rewAux ω bt ft t
-  | bvar x       => hbt x
-  | fvar x       => hft x
-  | func f v     => DEqFun.rewFunc _ f (fun i => rewDEqFun (v i))
-  | finitary f v => DEqFun.rewFinitary _ f (fun i => rewDEqFun (v i))
-  | const c      => DEqFun.rewConst _ c
-  | expr e       => .mk (q(@rfl (SyntacticSubterm $L $m) ($ω $e)) : Expr)
-
-def rew : DEqFunMap L n m (qrew L n m ω) where
-  toFun := rewAux ω bt ft
-  deq'  := rewDEqFun ω bt ft hbt hft
+def rew : DEqFunMap L n m (qrew L n m ω) := ⟨rewAux ω bt ft hbt hft⟩
 
 end rew
 
