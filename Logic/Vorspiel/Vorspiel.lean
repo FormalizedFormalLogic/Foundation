@@ -18,7 +18,7 @@ variable {α : ℕ → Sort u}
 
 def cases (hzero : α 0) (hsucc : ∀ n, α (n + 1)) : ∀ n, α n
   | 0     => hzero
-  | n + 1 => hsucc n  
+  | n + 1 => hsucc n
 
 infixr:70 " :>ₙ " => cases
 
@@ -53,6 +53,20 @@ lemma least_number (P : ℕ → Prop) (hP : ∃ x, P x) : ∃ x, P x ∧ ∀ z <
 
 def toFin (n : ℕ) : ℕ → Option (Fin n) := fun x => if hx : x < n then some ⟨x, hx⟩ else none
 
+section
+
+variable {r : ℕ → ℕ → Sort u}
+  (refl : (n : ℕ) → r n n)
+  (trans : {l m n : ℕ} → r l m → r m n → r l n)
+  (succ : (n : ℕ) → r n (n + 1))
+
+def ofLeOfReflOfTrans {m n : ℕ} (h : m ≤ n) : r m n :=
+  add_sub_of_le h ▸
+    Nat.rec (motive := fun k => r m (m + k)) (refl m)
+      (fun k ih => @trans m (m + k) (m + k.succ) ih (by simpa[Nat.add_succ] using succ (m + k))) (n - m)
+
+end
+
 end Nat
 
 namespace Fin
@@ -70,7 +84,7 @@ lemma eq_finZeroElim {α : Sort u} (x : Fin 0 → α) : x = finZeroElim := funex
 namespace Matrix
 open Fin
 section
-variable {n : ℕ} {α : Type u} 
+variable {n : ℕ} {α : Type u}
 
 lemma ext' {v w : Fin n → α} : (∀ i, v i = w i) ↔ v = w :=
   ⟨by { intro h; ext i; exact h i }, by { rintro rfl; simp }⟩
@@ -392,13 +406,13 @@ lemma inductionOnVec {p : (Fin n → Quotient s) → Prop} (v : Fin n → Quotie
   Quotient.induction_on_pi v h
 
 def liftVec : ∀ {n} (f : (Fin n → α) → β),
-  (∀ v₁ v₂ : Fin n → α, (∀ n, v₁ n ≈ v₂ n) → f v₁ = f v₂) → (Fin n → Quotient s) → β 
+  (∀ v₁ v₂ : Fin n → α, (∀ n, v₁ n ≈ v₂ n) → f v₁ = f v₂) → (Fin n → Quotient s) → β
 | 0,     f, _, _ => f ![]
 | n + 1, f, h, v =>
   let ih : α → (Fin n → Quotient s) → β :=
     fun a v => liftVec (n := n) (fun v => f (a :> v))
       (fun v₁ v₂ hv => h (a :> v₁) (a :> v₂) (Fin.cases (by simp; exact refl a) hv)) v
-  Quot.liftOn (vecHead v) (ih · (vecTail v)) 
+  Quot.liftOn (vecHead v) (ih · (vecTail v))
   (fun a b hab => by
     have : ∀ v, f (a :> v) = f (b :> v) := fun v => h _ _ (Fin.cases hab (by simp; intro; exact refl _))
     simp[this])
@@ -601,7 +615,7 @@ lemma erase_union [DecidableEq α] {a : α} {s t : Finset α} :
     (univ : Finset α).image e = univ := by ext x; simp; exact ⟨e.symm x, by simp⟩
 
 @[simp] lemma sup_univ_equiv {α α'} [DecidableEq α] [Fintype α] [Fintype α'] [SemilatticeSup β] [OrderBot β] (f : α → β) (e : α' ≃ α) :
-    sup univ (fun i => f (e i)) = sup univ f := by simpa[Function.comp] using Eq.symm <| Finset.sup_image univ e f 
+    sup univ (fun i => f (e i)) = sup univ f := by simpa[Function.comp] using Eq.symm <| Finset.sup_image univ e f
 
 lemma sup_univ_list_eq_sup_map {σ : Type _} {α : Type _} [SemilatticeSup α] [OrderBot α]
   (l : List σ) (f : σ → α) : Finset.sup Finset.univ (fun (i : Fin l.length) => f $ l.get i) = (l.map f).sup := by
@@ -627,4 +641,3 @@ lemma lt_of_mem_list : ∀ n i, i ∈ ofNat (List ℕ) n → i < n
               exact lt_trans this (Nat.lt_succ_of_le $ Nat.unpair_right_le n) }⟩
 
 end Denumerable
-

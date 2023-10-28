@@ -306,7 +306,16 @@ instance (k : ℕ) : Denotation q(oRing.rel $k) (oRing.rel k) where
 end ORing
 -/
 
-structure Hom (L₁ L₂ : Language) where
+def ofFunc (F : ℕ → Type v) : Language := ⟨F, fun _ => PEmpty⟩
+
+def add (L₁ : Language.{u₁}) (L₂ : Language.{u₂}) : Language :=
+  ⟨fun k => L₁.func k ⊕ L₂.func k, fun k => L₁.rel k ⊕ L₂.rel k⟩
+
+instance : _root_.Add Language := ⟨add⟩
+
+def sigma (L : ι → Language) : Language := ⟨fun k => Σ i, (L i).func k, fun k => Σ i, (L i).rel k⟩
+
+@[ext] structure Hom (L₁ L₂ : Language) where
   func : {k : ℕ} → L₁.func k → L₂.func k
   rel : {k : ℕ} → L₁.rel k → L₂.rel k
 
@@ -324,6 +333,12 @@ variable {L L₁ L₂ L₃}
 def comp (Ψ : L₂ →ᵥ L₃) (Φ : L₁ →ᵥ L₂) : L₁ →ᵥ L₃ where
   func := Ψ.func ∘ Φ.func
   rel  := Ψ.rel ∘ Φ.rel
+
+def add₁ (L₁ : Language.{u₁}) (L₂ : Language.{u₂}) : L₁ →ᵥ L₁.add L₂ := ⟨Sum.inl, Sum.inl⟩
+
+def add₂ (L₁ : Language.{u₁}) (L₂ : Language.{u₂}) : L₂ →ᵥ L₁.add L₂ := ⟨Sum.inr, Sum.inr⟩
+
+def sigma (L : ι → Language) (i : ι) : L i →ᵥ Language.sigma L := ⟨fun f => ⟨i, f⟩, fun r => ⟨i, r⟩⟩
 
 end Hom
 
