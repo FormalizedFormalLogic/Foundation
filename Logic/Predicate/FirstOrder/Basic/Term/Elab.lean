@@ -31,29 +31,29 @@ syntax:80 "ᵀᵇ" foterm:80 : foterm
 syntax "ᵀ“" foterm:0 "”" : term
 
 macro_rules
-  | `(ᵀ“ # $n:term”)                                 => `(#$n)
-  | `(ᵀ“ & $n:term ”)                                => `(&$n)
+  | `(ᵀ“ # $n:term”)                               => `(#$n)
+  | `(ᵀ“ & $n:term ”)                              => `(&$n)
   | `(ᵀ“ $name:ident ”)                            => `(& $(quote name.getId.getString!))
-  | `(ᵀ“ ᵀ! $t:term ”)                               => `($t)
-  | `(ᵀ“ $n:num ”)                                   => `(Subterm.Operator.const (numeral _ $n))
-  | `(ᵀ“ ᵀ⟨ $d:term ⟩( $t:foterm,* ) ”)              => do
+  | `(ᵀ“ ᵀ! $t:term ”)                             => `($t)
+  | `(ᵀ“ $n:num ”)                                 => `(Subterm.Operator.const (numeral _ $n))
+  | `(ᵀ“ ᵀ⟨ $d:term ⟩( $t:foterm,* ) ”)            => do
     let v ← t.getElems.foldrM (β := Lean.TSyntax _) (init := ← `(![])) (fun a s => `(ᵀ“$a” :> $s))
     `(func $d $v)
-  | `(ᵀ“ $t:foterm + $u:foterm ”)                  => `(func Language.Add.add ![ᵀ“$t”, ᵀ“$u”])
-  | `(ᵀ“ $t:foterm * $u:foterm ”)                  => `(func Language.Mul.mul ![ᵀ“$t”, ᵀ“$u”])
-  | `(ᵀ“ $t:foterm ^ $u:foterm ”)                  => `(func Language.Pow.pow ![ᵀ“$t”, ᵀ“$u”])
-  | `(ᵀ“ exp $t:foterm ”)                           => `(func Language.Exp.exp ![ᵀ“$t”])
-  | `(ᵀ“ ⟨ $t:foterm, $u:foterm ⟩ ”)               => `(func Language.Pairing.pair ![ᵀ“$t”, ᵀ“$u”])
-  | `(ᵀ“ ᵀ⇑$t:foterm ”)                            => `(Rew.shift ᵀ“$t”)
+  | `(ᵀ“ $t:foterm + $u:foterm ”)                  => `(Operator.operator Subterm.Add.add ![ᵀ“$t”, ᵀ“$u”])
+  | `(ᵀ“ $t:foterm * $u:foterm ”)                  => `(Operator.operator Subterm.Mul.mul ![ᵀ“$t”, ᵀ“$u”])
+  | `(ᵀ“ $t:foterm ^ $u:foterm ”)                  => `(Operator.operator Subterm.Pow.pow ![ᵀ“$t”, ᵀ“$u”])
+  | `(ᵀ“ exp $t:foterm ”)                          => `(Operator.operator Subterm.Exp.exp ![ᵀ“$t”])
+  | `(ᵀ“ ⟨ $t:foterm, $u:foterm ⟩ ”)               => `(Operator.operator Subterm.Pairing.pair ![ᵀ“$t”, ᵀ“$u”])
+  | `(ᵀ“ ᵀ⇑$t:foterm ”)                           => `(Rew.shift ᵀ“$t”)
   | `(ᵀ“ $t:foterm ᵀ[$u:foterm,*] ”)               => do
     let v ← u.getElems.foldrM (β := Lean.TSyntax _) (init := ← `(![])) (fun a s => `(ᵀ“$a” :> $s))
     `(Rew.substs $v ᵀ“$t”)
-  | `(ᵀ“ ⤒$t:foterm ”)                             => `(Rew.bShift ᵀ“$t”)
-  | `(ᵀ“ ᵀᶠ $t:foterm ”)                            => `(Rew.free ᵀ“$t”)
-  | `(ᵀ“ ᵀᵇ $t:foterm ”)                            => `(Rew.fix ᵀ“$t”)
-  | `(ᵀ“ ( $x ) ”)                                   => `(ᵀ“$x”)
+  | `(ᵀ“ ⤒$t:foterm ”)                            => `(Rew.bShift ᵀ“$t”)
+  | `(ᵀ“ ᵀᶠ $t:foterm ”)                           => `(Rew.free ᵀ“$t”)
+  | `(ᵀ“ ᵀᵇ $t:foterm ”)                           => `(Rew.fix ᵀ“$t”)
+  | `(ᵀ“ ( $x ) ”)                                 => `(ᵀ“$x”)
 
-#check Language.Add.add
+#check Operator.operator Subterm.Add.add
 
 #check (ᵀ“ ᵀ⟨Language.ORing.Func.mul⟩(&2 + &0, ᵀ⟨Language.ORing.Func.zero⟩())” : Subterm Language.oRing ℕ 8)
 #check (ᵀ“ ᵀ⟨Language.ORing.Func.mul⟩(&2 + &0, ᵀ⟨Language.ORing.Func.zero⟩())” : Subterm Language.oRing ℕ 8)

@@ -573,64 +573,114 @@ lemma lMap_fix (t : SyntacticSubterm L₁ n) : (fix t).lMap Φ = fix (t.lMap Φ)
 
 end lMap
 
-structure Operator (L : Language.{u}) (ι : Type w) where
-  operator : {μ : Type v} → {n : ℕ} → (ι → Subterm L μ n) → Subterm L μ n
-  rew_operator : ∀ {μ μ' n₁ n₂} (ω : Rew L μ n₁ μ' n₂) (v : ι → Subterm L μ n₁),
-    ω (operator v) = operator (fun i => ω (v i))
+structure Operator (L : Language.{u}) (n : ℕ) where
+  term : Subterm L Empty n
 
-abbrev Const (L : Language.{u}) := Operator.{u,v,0} L Empty
+abbrev Const (L : Language.{u}) := Operator L 0
 
-abbrev Monadic (L : Language.{u}) := Operator L Unit
+def Subterm.fn {k} (f : L.func k) : Operator L k := ⟨Subterm.func f (#·)⟩
 
-abbrev Finitary (L : Language.{u}) (n : ℕ) := Operator L (Fin n)
+namespace Operator
 
-def Operator.const (c : Const L) : Subterm L μ n := c.operator Empty.elim
+def operator (o : Operator L k) (v : Fin k → Subterm L μ n) : Subterm L μ n :=
+  Rew.substs v (Rew.emb o.term)
+
+def const (c : Const L) : Subterm L μ n := c.operator ![]
 
 instance : Coe (Const L) (Subterm L μ n) := ⟨Operator.const⟩
 
+def comp (o : Operator L k) (w : Fin k → Operator L l) : Operator L l :=
+  ⟨o.operator (fun x => (w x).term)⟩
+
+lemma operator_comp (o : Operator L k) (w : Fin k → Operator L l) (v : Fin l → Subterm L μ n) :
+  (o.comp w).operator v = o.operator (fun x => (w x).operator v) := by
+    simp[operator, comp, ←Rew.comp_app]; congr 1
+    ext <;> simp[Rew.comp_app]; contradiction
+
+def bvar (x : Fin n) : Operator L n := ⟨#x⟩
+
+lemma operator_bvar (x : Fin k) (v : Fin k → Subterm L μ n) : (bvar x).operator v = v x := by
+  simp[operator, bvar]
+
+-- f.operator ![ ... f.operator ![f.operator ![z, t 0], t 1], ... ,t (n-1)]
+def foldl (f : Operator L 2) (z : Operator L k) : List (Operator L k) → Operator L k
+  | []      => z
+  | o :: os => f.comp ![foldl f z os, o]
+
+@[simp] lemma foldl_nil (f : Operator L 2) (z : Operator L k) : f.foldl z [] = z := rfl
+
+@[simp] lemma operator_foldl_cons (f : Operator L 2) (z : Operator L k) (o : Operator L k) (os : List (Operator L k))
+  (v : Fin k → Subterm L μ n) :
+    (f.foldl z (o :: os)).operator v = f.operator ![(f.foldl z os).operator v, o.operator v] := by
+  simp[foldl, operator_comp, Matrix.fun_eq_vec₂]
+
+def iterl (f : Operator L 2) (z : Const L) : (n : ℕ) → Operator L n
+  | 0     => z
+  | _ + 1 => f.foldl (bvar 0) (List.ofFn fun x => bvar x.succ)
+
+@[simp] lemma iterl_zero (f : Operator L 2) (z : Const L) : f.iterl z 0 = z := rfl
+
+end Operator
+
 section numeral
+
+class Zero (L : Language.{u}) where
+  zero : Const L
+
+class One (L : Language.{u}) where
+  one : Const L
+
+instance [Zero L] : _root_.Zero (Const L) := ⟨Zero.zero⟩
+
+instance [Zero L] : _root_.Zero (Subterm L μ n) := ⟨(0 : Const L)⟩
+
+instance [One L] : _root_.One (Const L) := ⟨One.one⟩
+
+instance [One L] : _root_.One (Subterm L μ n) := ⟨(1 : Const L)⟩
+
+instance [L.Zero] : Zero L := ⟨⟨func Language.Zero.zero ![]⟩⟩
+
+instance [L.One] : One L := ⟨⟨func Language.One.one ![]⟩⟩
+
+lemma Subterm.coe_zero [Zero L] : (↑(0 : Const L) : Subterm L μ n) = 0 := rfl
+
+lemma Subterm.coe_one [One L] : (↑(1 : Const L) : Subterm L μ n) = 1 := rfl
+
+class Add (L : Language.{u}) where
+  add : Operator L 2
+
+class Mul (L : Language.{u}) where
+  mul : Operator L 2
+
+class Sub (L : Language.{u}) where
+  sub : Operator L 2
+
+class Div (L : Language.{u}) where
+  div : Operator L 2
+
+class Ring (L : Language) extends Zero L, One L, Add L, Mul L
+
+instance [L.Add] : Add L := ⟨⟨func Language.Add.add ![#0, #1]⟩⟩
+
+instance [L.Mul] : Mul L := ⟨⟨func Language.Mul.mul ![#0, #1]⟩⟩
 
 open Language
 
+def numeral (L : Language) [Zero L] [One L] [Add L] : ℕ → Const L
+  | 0     => 0
+  | n + 1 => Add.add.foldl 1 (List.replicate n 1)
+
 variable [hz : Zero L] [ho : One L] [ha : Add L]
 
--- (((((t + 1) + 1) + 1) + 1) ... )
-def addOnes (t : Subterm L μ n) : ℕ → Subterm L μ n
-  | 0     => t
-  | z + 1 => func Language.Add.add ![addOnes t z, func Language.One.one ![]]
+lemma numeral_zero : numeral L 0 = 0 := by rfl
 
-@[simp] lemma addOnes_zero (t : Subterm L μ n) : addOnes t 0 = t := rfl
+lemma numeral_one : numeral L 1 = 1 := by rfl
 
-@[simp] lemma addOnes_succ (t : Subterm L μ n) (z : ℕ) :
-  addOnes t (z + 1) = func Language.Add.add ![addOnes t z, func Language.One.one ![]] := rfl
-
-lemma Rew.addOnes (ω : Rew L μ₁ n₁ μ₂ n₂) (t : Subterm L μ₁ n₁) (z : ℕ) :
-    ω (t.addOnes z) = (ω t).addOnes z := by induction z <;> simp[*]
-
--- (((((1 + 1) + 1) + 1) + 1) ... )
-def numeral' : ℕ → Subterm L μ n
-  | 0     => func Language.Zero.zero ![]
-  | z + 1 => addOnes (func Language.One.one ![]) z
-
-variable (L)
-
-def numeral (z : ℕ) : Const L where
-  operator := fun _ => numeral' z
-  rew_operator := by intros; cases z <;> simp[numeral', Rew.addOnes, Matrix.empty_eq]
-
-variable {L}
-
-abbrev snumeral (z : ℕ) : SyntacticSubterm L n := numeral L z
-
-lemma numeral_zero : (numeral L 0 : Subterm L μ n) = func Language.Zero.zero ![] := by rfl
-
-lemma numeral_one : (numeral L 1 : Subterm L μ n) = func Language.One.one ![] := by rfl
-
-lemma numeral_succ (z : ℕ) (neZero : z ≠ 0) :
-    (numeral L (.succ z) : Subterm L μ n) = func Language.Add.add ![numeral L z, numeral L 1] := by
-  cases z
-  · contradiction
-  · simp[numeral, numeral', Operator.const]
+lemma numeral_succ (hz : z ≠ 0) : numeral L (z + 1) = Add.add.comp ![numeral L z, 1] := by
+  simp[numeral]
+  cases' z with z
+  · simp at hz
+  · simp[Operator.foldl]
 
 end numeral
 
@@ -646,26 +696,28 @@ variable
   {n n₁ n₂ n₃ : ℕ}
 variable (ω : Rew L μ n₁ μ' n₂)
 
-protected lemma operator (o : Operator L ι) (v : ι → Subterm L μ n₁) :
-    ω (o.operator v) = o.operator (fun i => ω (v i)) := by rw[ω.eq_bind]; exact o.rew_operator _ _
+protected lemma operator (o : Operator L k) (v : Fin k → Subterm L μ n₁) :
+    ω (o.operator v) = o.operator (fun i => ω (v i)) := by
+  simp[Operator.operator, ←comp_app]; congr 1
+  ext <;> simp[comp_app]; try contradiction
 
-protected lemma operator' (o : Operator L ι) (v : ι → Subterm L μ n₁) :
+protected lemma operator' (o : Operator L k) (v : Fin k → Subterm L μ n₁) :
     ω (o.operator v) = o.operator (ω ∘ v) := ω.operator o v
 
-@[simp] lemma finitary0 (o : Finitary L 0) (v : Fin 0 → Subterm L μ n₁) :
+@[simp] lemma finitary0 (o : Operator L 0) (v : Fin 0 → Subterm L μ n₁) :
     ω (o.operator v) = o.operator ![] := by simp[ω.operator', Matrix.empty_eq]
 
-@[simp] lemma finitary1 (o : Finitary L 1) (t : Subterm L μ n₁) :
+@[simp] lemma finitary1 (o : Operator L 1) (t : Subterm L μ n₁) :
     ω (o.operator ![t]) = o.operator ![ω t] := by simp[ω.operator']
 
-@[simp] lemma finitary2 (o : Finitary L 2) (t₁ t₂ : Subterm L μ n₁) :
+@[simp] lemma finitary2 (o : Operator L 2) (t₁ t₂ : Subterm L μ n₁) :
     ω (o.operator ![t₁, t₂]) = o.operator ![ω t₁, ω t₂] := by simp[ω.operator']
 
-@[simp] lemma finitary3 (o : Finitary L 3) (t₁ t₂ t₃ : Subterm L μ n₁) :
+@[simp] lemma finitary3 (o : Operator L 3) (t₁ t₂ t₃ : Subterm L μ n₁) :
     ω (o.operator ![t₁, t₂, t₃]) = o.operator ![ω t₁, ω t₂, ω t₃] := by simp[ω.operator']
 
 @[simp] protected lemma const (c : Const L) : ω c = c :=
-  by simpa[Operator.const, Empty.eq_elim] using c.rew_operator ω Empty.elim
+  by simp[Operator.const, Empty.eq_elim]
 
 end Rew
 

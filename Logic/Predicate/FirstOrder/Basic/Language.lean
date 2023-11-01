@@ -99,7 +99,7 @@ instance (k) : ToString (oRing.rel k) :=
 ⟨ fun s =>
   match s with
   | Rel.eq => "\\mathrm{Eq}"
-  | Rel.lt    => "\\mathrm{Lt}"⟩
+  | Rel.lt    => "\\mathrm{LT}"⟩
 
 instance (k) : DecidableEq (oRing.func k) := fun a b =>
   by rcases a <;> rcases b <;> simp <;> try {exact instDecidableTrue} <;> try {exact instDecidableFalse}
@@ -228,7 +228,7 @@ end relational
 class Eq (L : Language.{u}) where
   eq : L.rel 2
 
-class Lt (L : Language.{u}) where
+class LT (L : Language.{u}) where
   lt : L.rel 2
 
 class Zero (L : Language.{u}) where
@@ -254,7 +254,7 @@ class Pairing (L : Language.{u}) where
 
 attribute [match_pattern] Eq.eq Add.add Mul.mul
 
-class ORing (L : Language) extends L.Eq, L.Lt, L.Zero, L.One, L.Add, L.Mul
+class ORing (L : Language) extends L.Eq, L.LT, L.Zero, L.One, L.Add, L.Mul
 
 instance : ORing oRing where
   eq := .eq
@@ -284,7 +284,7 @@ def denoteRel : (k : ℕ) → Q(oRing.rel $k) → MetaM (oRing.rel k)
   | 2, e =>
     match e with
     | ~q(Language.Eq.eq) => return Language.Eq.eq
-    | ~q(Language.Lt.lt) => return Language.Lt.lt
+    | ~q(Language.LT.lt) => return Language.LT.lt
   | _, e => throwError m!"error in DenotationORing : {e}"
 
 instance (k : ℕ) : Denotation q(oRing.func $k) (oRing.func k) where
@@ -301,7 +301,7 @@ instance (k : ℕ) : Denotation q(oRing.rel $k) (oRing.rel k) where
    toExpr := fun f =>
      ( match f with
        | Rel.eq => q(Language.Eq.eq)
-       | Rel.lt => q(Language.Lt.lt) : Q(oRing.rel $k))
+       | Rel.lt => q(Language.LT.lt) : Q(oRing.rel $k))
 
 end ORing
 -/

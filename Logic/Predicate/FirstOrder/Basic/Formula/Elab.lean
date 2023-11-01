@@ -31,7 +31,7 @@ syntax:max "⇑" foformula:10 : foformula
 syntax "(" foformula ")" : foformula
 syntax:max "!" term:max : foformula
 syntax "“" foformula "”" : term
- 
+
 macro_rules
   | `(“ ⊤ ”)                                       => `(⊤)
   | `(“ ⊥ ”)                                       => `(⊥)
@@ -40,10 +40,10 @@ macro_rules
     let v ← t.getElems.foldrM (β := Lean.TSyntax _) (init := ← `(![])) (fun a s => `(ᵀ“$a” :> $s))
     `(rel $d $v)
   | `(“ ¬ $p:foformula ”)                         => `(~“$p”)
-  | `(“ $t:foterm = $u:foterm ”)                 => `(rel Language.Eq.eq ![ᵀ“$t”, ᵀ“$u”])
-  | `(“ $t:foterm ≠ $u:foterm ”)                 => `(nrel Language.Eq.eq ![ᵀ“$t”, ᵀ“$u”])
-  | `(“ $t:foterm < $u:foterm ”)                 => `(rel Language.Lt.lt ![ᵀ“$t”, ᵀ“$u”])
-  | `(“ $t:foterm ≮ $u:foterm ”)                 => `(nrel Language.Lt.lt ![ᵀ“$t”, ᵀ“$u”])
+  | `(“ $t:foterm = $u:foterm ”)                 => `(Operator.operator Eq.eq ![ᵀ“$t”, ᵀ“$u”])
+  | `(“ $t:foterm ≠ $u:foterm ”)                 => `(~(Operator.operator Eq.eq ![ᵀ“$t”, ᵀ“$u”]))
+  | `(“ $t:foterm < $u:foterm ”)                 => `(Operator.operator LT.lt ![ᵀ“$t”, ᵀ“$u”])
+  | `(“ $t:foterm ≮ $u:foterm ”)                 => `(~(Operator.operator LT.lt ![ᵀ“$t”, ᵀ“$u”]))
   | `(“ $p:foformula ∧ $q:foformula ”)           => `(“$p” ⋏ “$q”)
   | `(“ ⋀ $i, $p:foformula ”)                    => `(Matrix.conj fun $i => “$p”)
   | `(“ $p:foformula ∨ $q:foformula ”)           => `(“$p” ⋎ “$q”)
@@ -74,13 +74,13 @@ section delab
 open Lean PrettyPrinter Delaborator SubExpr
 
 notation "lang(=)" => Language.Eq.eq
-notation "lang(<)" => Language.Lt.lt
+notation "lang(<)" => Language.LT.lt
 
 @[app_unexpander Language.Eq.eq]
 def unexpsnderEq : Unexpander
   | `($_) => `(lang(=))
 
-@[app_unexpander Language.Lt.lt]
+@[app_unexpander Language.LT.lt]
 def unexpsnderLe : Unexpander
   | `($_) => `(lang(<))
 
@@ -263,7 +263,7 @@ def unexpandNRelArith : Unexpander
 #check (“0 < 0 → ∀ 0 < #0 → 0 ≮ 2” : Sentence Language.oRing)
 #check “¬⊤ ∨ ((#0 < 5)) [#3, 7][2, #3]”
 #check “⋀ i, #i < #i + 9”
-#check “∀[#0 < 1] #0 = 0” 
+#check “∀[#0 < 1] #0 = 0”
 #check “x < y → y < z → x < z”
 
 end delab

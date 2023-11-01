@@ -394,31 +394,6 @@ end
 @[simp] lemma hom_id_eq : (Rew.id.hom : Subformula L μ n →L Subformula L μ n) = LogicSymbol.Hom.id := by
   ext p; induction p using Subformula.rec' <;> simp[Rew.rel, Rew.nrel, *]
 
-abbrev bindl (b : Fin n₁ → Subterm L μ₂ n₂) (e : μ₁ → Subterm L μ₂ n₂) :
-    Subformula L μ₁ n₁ →L Subformula L μ₂ n₂ := (bind b e).hom
-
-abbrev rewritel (f : μ₁ → Subterm L μ₂ n) : Subformula L μ₁ n →L Subformula L μ₂ n := (rewrite f).hom
-
-abbrev rewriteMapl (e : μ₁ → μ₂) : Subformula L μ₁ n →L Subformula L μ₂ n := (rewriteMap e).hom
-
-abbrev mapl (b : Fin n₁ → Fin n₂) (e : μ₁ → μ₂) : Subformula L μ₁ n₁ →L Subformula L μ₂ n₂ := (map b e).hom
-
-abbrev map₀l (e : μ₁ → μ₂) : Subformula L μ₁ n →L Subformula L μ₂ n := mapl id e
-
-abbrev substsl {n'} (v : Fin n → Subterm L μ n') : Subformula L μ n →L Subformula L μ n' := (substs v).hom
-
-abbrev embl {o : Type w} [IsEmpty o] : Subformula L o n →L Subformula L μ n := emb.hom
-
-section Syntactic
-
-abbrev shiftl : SyntacticSubformula L n →L SyntacticSubformula L n := shift.hom
-
-abbrev freel : SyntacticSubformula L (n + 1) →L SyntacticSubformula L n := free.hom
-
-abbrev fixl : SyntacticSubformula L n →L SyntacticSubformula L (n + 1) := fix.hom
-
-end Syntactic
-
 lemma hom_comp_eq (ω₂ : Rew L μ₂ n₂ μ₃ n₃) (ω₁ : Rew L μ₁ n₁ μ₂ n₂) : (ω₂.comp ω₁).hom = ω₂.hom.comp ω₁.hom := by
   ext p; simp; induction p using Subformula.rec' generalizing n₂ n₃ <;> simp[Rew.rel, Rew.nrel, comp_app, q_comp, *]
 
@@ -426,7 +401,7 @@ lemma hom_comp_app (ω₂ : Rew L μ₂ n₂ μ₃ n₃) (ω₁ : Rew L μ₁ n�
     (ω₂.comp ω₁).hom p = ω₂.hom (ω₁.hom p) := by simp[hom_comp_eq]
 
 lemma mapl_inj : ∀ {n₁ n₂ μ₁ μ₂} {b : Fin n₁ → Fin n₂} {e : μ₁ → μ₂},
-    (hb : Function.Injective b) → (hf : Function.Injective e) → Function.Injective $ mapl (L := L) b e
+    (hb : Function.Injective b) → (hf : Function.Injective e) → Function.Injective $ (map (L := L) b e).hom
   | _, _, _, _, _, _, _,  _,  ⊤,        p => by cases p using cases' <;> simp[Rew.rel, Rew.nrel]
   | _, _, _, _, _, _, _,  _,  ⊥,        p => by cases p using cases' <;> simp[Rew.rel, Rew.nrel]
   | _, _, _, _, _, _, hb, hf, rel r v,  p => by
@@ -454,23 +429,23 @@ lemma mapl_inj : ∀ {n₁ n₂ μ₁ μ₂} {b : Fin n₁ → Fin n₂} {e : μ
     intro h; exact mapl_inj (b := 0 :> Fin.succ ∘ b)
       (Matrix.injective_vecCons ((Fin.succ_injective _).comp hb) (fun _ => (Fin.succ_ne_zero _).symm)) hf h
 
-lemma embl_Injective {o} [e : IsEmpty o] : Function.Injective (embl : Subformula L o n → Subformula L μ n) :=
-  by simp[embl, emb]; exact mapl_inj Function.injective_id (fun x => IsEmpty.elim e x)
+lemma emb.hom_Injective {o} [e : IsEmpty o] : Function.Injective (emb.hom : Subformula L o n → Subformula L μ n) :=
+  by simp[emb]; exact mapl_inj Function.injective_id (fun x => IsEmpty.elim e x)
 
-lemma shiftl_Injective : Function.Injective (shiftl : SyntacticSubformula L n → SyntacticSubformula L n) :=
-  by simp[shiftl, shift]; exact mapl_inj Function.injective_id Nat.succ_injective
+lemma shift.hom_Injective : Function.Injective (shift.hom : SyntacticSubformula L n → SyntacticSubformula L n) :=
+  by simp[shift]; exact mapl_inj Function.injective_id Nat.succ_injective
 
 @[simp] lemma hom_fix_free (p : SyntacticSubformula L (n + 1)) :
-    fixl (freel p) = p := by simp[←hom_comp_app]
+    fix.hom (free.hom p) = p := by simp[←hom_comp_app]
 
 @[simp] lemma hom_free_fix (p : SyntacticSubformula L n) :
-    freel (fixl p) = p := by simp[←hom_comp_app]
+    free.hom (fix.hom p) = p := by simp[←hom_comp_app]
 
 @[simp] lemma hom_substs_mbar_zero_comp_shift_eq_free (p : SyntacticSubformula L 1) :
-    substsl ![&0] (Rew.shiftl p) = freel p := by simp[←hom_comp_app, substs_mbar_zero_comp_shift_eq_free]
+    (substs ![&0]).hom (Rew.shift.hom p) = free.hom p := by simp[←hom_comp_app, substs_mbar_zero_comp_shift_eq_free]
 
 @[simp] protected lemma emb_univClosure {o} [e : IsEmpty o] {σ : Subformula L o n} :
-    (embl (univClosure σ) : Subformula L μ 0) = univClosure (embl σ) := by induction n <;> simp[*]
+    (emb.hom (univClosure σ) : Subformula L μ 0) = univClosure (emb.hom σ) := by induction n <;> simp[*]
 
 end Rew
 
@@ -479,11 +454,11 @@ namespace Subformula
 variable {L : Language.{u}} {μ : Type v} {n n₁ n₂ n₂ m m₁ m₂ m₃ : ℕ}
 
 def shiftEmb : SyntacticSubformula L n ↪ SyntacticSubformula L n where
-  toFun := Rew.shiftl
-  inj' := Rew.shiftl_Injective
+  toFun := Rew.shift.hom
+  inj' := Rew.shift.hom_Injective
 
 lemma shiftEmb_eq_shift (p : SyntacticSubformula L n) :
-  shiftEmb p = Rew.shiftl p := rfl
+  shiftEmb p = Rew.shift.hom p := rfl
 
 def qr : ∀ {n}, Subformula L μ n → ℕ
   | _, ⊤        => 0
@@ -547,31 +522,53 @@ def qfree (p : Subformula L μ n) : Prop := p.qr = 0
 @[simp] lemma qfree_iff {p q : Subformula L μ n} : (p ⟷ q).qfree ↔ p.qfree ∧ q.qfree :=
   by simp[qfree]
 
-structure Abbrev (L : Language.{u}) (n : ℕ) where
+structure Operator (L : Language.{u}) (n : ℕ) where
   sentence : Subsentence L n
 
-structure Operator (L : Language.{u}) (ι : Type w) where
-  operator : {μ : Type v} → {n : ℕ} → (ι → Subterm L μ n) → Subformula L μ n
-  rew_operator : ∀ {μ₁ μ₂ n₁ n₂} (ω : Rew L μ₁ n₁ μ₂ n₂) (v : ι → Subterm L μ₁ n₁), ω.hom (operator v) = operator (fun i => ω (v i))
+abbrev Const (L : Language.{u}) := Operator L 0
 
-abbrev Const (L : Language.{u}) := Operator.{u,v,0} L Empty
+namespace Operator
 
-abbrev Monadic (L : Language.{u}) := Operator L Unit
+def operator (o : Operator L k) (v : Fin k → Subterm L μ n) : Subformula L μ n :=
+  (Rew.substs v).hom (Rew.emb.hom o.sentence)
 
-abbrev Finitary (L : Language.{u}) (n : ℕ) := Operator L (Fin n)
+def const (c : Const L) : Subformula L μ n := c.operator ![]
 
-abbrev OperatorMatrix (ι : Type w) (I : ι → Type w') := Operator L ((i : ι ) × I i)
+instance : Coe (Const L) (Subformula L μ n) := ⟨Operator.const⟩
 
-def Operator.const (c : Const L) : Subformula L μ n := c.operator Empty.elim
+def comp (o : Operator L k) (w : Fin k → Subterm.Operator L l) : Operator L l :=
+  ⟨o.operator (fun x => (w x).term)⟩
 
-namespace Abbrev
+lemma operator_comp (o : Operator L k) (w : Fin k → Subterm.Operator L l) (v : Fin l → Subterm L μ n) :
+  (o.comp w).operator v = o.operator (fun x => (w x).operator v) := by
+    simp[operator, comp, ←Rew.hom_comp_app]; congr 2
+    ext <;> simp[Rew.comp_app]
+    · congr
+    · contradiction
 
-def toOperator (a : Abbrev L n) : Finitary L n where
-  operator := fun v => Rew.substsl v (Rew.embl a.sentence)
-  rew_operator := fun ω v => by
-    simp[Empty.eq_elim, ←Rew.hom_comp_app]; exact Rew.hom_ext' (by ext x <;> simp[Rew.comp_app]; { contradiction })
+def and {k} (o₁ o₂ : Operator L k) : Operator L k := ⟨o₁.sentence ⋏ o₂.sentence⟩
 
-end Abbrev
+def or {k} (o₁ o₂ : Operator L k) : Operator L k := ⟨o₁.sentence ⋎ o₂.sentence⟩
+
+end Operator
+
+class Eq (L : Language) where
+  eq : Operator L 2
+
+class LT (L : Language) where
+  lt : Operator L 2
+
+class LE (L : Language) where
+  le : Operator L 2
+
+class Mem (L : Language) where
+  mem : Operator L 2
+
+instance [L.Eq] : Eq L := ⟨⟨rel Language.Eq.eq ![#0, #1]⟩⟩
+
+instance [L.LT] : LT L := ⟨⟨rel Language.LT.lt ![#0, #1]⟩⟩
+
+instance [Eq L] [LT L] : LE L := ⟨Eq.eq.and LT.lt⟩
 
 @[elab_as_elim]
 def formulaRec {C : SyntacticFormula L → Sort _}
@@ -581,8 +578,8 @@ def formulaRec {C : SyntacticFormula L → Sort _}
   (hnrel   : ∀ {l : ℕ} (r : L.rel l) (v : Fin l → SyntacticTerm L), C (nrel r v))
   (hand    : ∀ (p q : SyntacticFormula L), C p → C q → C (p ⋏ q))
   (hor     : ∀ (p q : SyntacticFormula L), C p → C q → C (p ⋎ q))
-  (hall    : ∀ (p : SyntacticSubformula L 1), C (Rew.freel p) → C (∀' p))
-  (hex     : ∀ (p : SyntacticSubformula L 1), C (Rew.freel p) → C (∃' p)) :
+  (hall    : ∀ (p : SyntacticSubformula L 1), C (Rew.free.hom p) → C (∀' p))
+  (hex     : ∀ (p : SyntacticSubformula L 1), C (Rew.free.hom p) → C (∃' p)) :
     ∀ (p : SyntacticFormula L), C p
   | ⊤        => hverum
   | ⊥        => hfalsum
@@ -590,8 +587,8 @@ def formulaRec {C : SyntacticFormula L → Sort _}
   | nrel r v => hnrel r v
   | p ⋏ q    => hand p q (formulaRec hverum hfalsum hrel hnrel hand hor hall hex p) (formulaRec hverum hfalsum hrel hnrel hand hor hall hex q)
   | p ⋎ q    => hor p q (formulaRec hverum hfalsum hrel hnrel hand hor hall hex p) (formulaRec hverum hfalsum hrel hnrel hand hor hall hex q)
-  | ∀' p     => hall p (formulaRec hverum hfalsum hrel hnrel hand hor hall hex (Rew.freel p))
-  | ∃' p     => hex p (formulaRec hverum hfalsum hrel hnrel hand hor hall hex (Rew.freel p))
+  | ∀' p     => hall p (formulaRec hverum hfalsum hrel hnrel hand hor hall hex (Rew.free.hom p))
+  | ∃' p     => hex p (formulaRec hverum hfalsum hrel hnrel hand hor hall hex (Rew.free.hom p))
   termination_by formulaRec _ _ _ _ _ _ _ _ p => p.complexity
 
 def fvarList : {n : ℕ} → Subformula L μ n → List μ
@@ -620,7 +617,7 @@ abbrev fvar? (p : Subformula L μ n) (x : μ) : Prop := x ∈ p.fvarList
 @[simp] lemma fvarList_sentence {o : Type w} [IsEmpty o] (p : Subformula L o n) : fvarList p = [] := by
   induction p using rec' <;> simp[*, fvarList, ←neg_eq]
 
-@[simp] lemma fvarList_emb {o : Type w} [IsEmpty o] (p : Subformula L o n) : fvarList (Rew.embl p : Subformula L μ n) = [] := by
+@[simp] lemma fvarList_emb {o : Type w} [IsEmpty o] (p : Subformula L o n) : fvarList (Rew.emb.hom p : Subformula L μ n) = [] := by
   induction p using rec' <;> simp[*, Rew.rel, Rew.nrel, fvarList, ←neg_eq]
 
 lemma rew_eq_of_funEqOn {ω₁ ω₂ : Rew L μ₁ n₁ μ₂ n₂} {p}
@@ -718,26 +715,26 @@ lemma lMap_nrel {k} (r : L₁.rel k) (v : Fin k → Subterm L₁ μ n) :
     lMap Φ (∃' p) = ∃' lMap Φ p := rfl
 
 lemma lMap_bind (b : Fin n₁ → Subterm L₁ μ₂ n₂) (e : μ₁ → Subterm L₁ μ₂ n₂) (p) :
-    lMap Φ (Rew.bindl b e p) = Rew.bindl (Subterm.lMap Φ ∘ b) (Subterm.lMap Φ ∘ e) (lMap Φ p) := by
+    lMap Φ ((Rew.bind b e).hom p) = (Rew.bind (Subterm.lMap Φ ∘ b) (Subterm.lMap Φ ∘ e)).hom (lMap Φ p) := by
   induction p using rec' generalizing μ₂ n₂ <;>
   simp[*, Rew.rel, Rew.nrel, lMap_rel, lMap_nrel, Subterm.lMap_bind, Rew.q_bind, Matrix.comp_vecCons', Subterm.lMap_bShift, Function.comp]
 
 lemma lMap_map (b : Fin n₁ → Fin n₂) (e : μ₁ → μ₂) (p) :
-    lMap Φ (Rew.mapl b e p) = Rew.mapl b e (lMap Φ p) := lMap_bind _ _ _
+    lMap Φ ((Rew.map b e).hom p) = (Rew.map b e).hom (lMap Φ p) := lMap_bind _ _ _
 
 lemma lMap_substs (w : Fin k → Subterm L₁ μ n) (p : Subformula L₁ μ k) :
-    lMap Φ (Rew.substsl w p) = Rew.substsl (Subterm.lMap Φ ∘ w) (lMap Φ p) := lMap_bind _ _ _
+    lMap Φ ((Rew.substs w).hom p) = (Rew.substs (Subterm.lMap Φ ∘ w)).hom (lMap Φ p) := lMap_bind _ _ _
 
-lemma lMap_shift (p : SyntacticSubformula L₁ n) : lMap Φ (Rew.shiftl p) = Rew.shiftl (lMap Φ p) := lMap_bind _ _ _
+lemma lMap_shift (p : SyntacticSubformula L₁ n) : lMap Φ (Rew.shift.hom p) = Rew.shift.hom (lMap Φ p) := lMap_bind _ _ _
 
-lemma lMap_free (p : SyntacticSubformula L₁ (n + 1)) : lMap Φ (Rew.freel p) = Rew.freel (lMap Φ p) := by
-  simp[Rew.freel, Rew.free, lMap_bind, Function.comp, Matrix.comp_vecConsLast]
+lemma lMap_free (p : SyntacticSubformula L₁ (n + 1)) : lMap Φ (Rew.free.hom p) = Rew.free.hom (lMap Φ p) := by
+  simp[Rew.free, lMap_bind, Function.comp, Matrix.comp_vecConsLast]
 
-lemma lMap_fix (p : SyntacticSubformula L₁ n) : lMap Φ (Rew.fixl p) = Rew.fixl (lMap Φ p) :=
-  by simp[Rew.fixl, Rew.fix, lMap_bind, Function.comp, Rew.bindl]; congr; { funext x; cases x <;> simp }
+lemma lMap_fix (p : SyntacticSubformula L₁ n) : lMap Φ (Rew.fix.hom p) = Rew.fix.hom (lMap Φ p) :=
+  by simp[Rew.fix, lMap_bind, Function.comp]; congr; { funext x; cases x <;> simp }
 
 lemma lMap_emb {o : Type w} [IsEmpty o] (p : Subformula L₁ o n) :
-    (lMap Φ (Rew.embl p) : Subformula L₂ μ n) = Rew.embl (lMap Φ p) := lMap_bind _ _ _
+    (lMap Φ (Rew.emb.hom p) : Subformula L₂ μ n) = Rew.emb.hom (lMap Φ p) := lMap_bind _ _ _
 
 end Subformula
 
@@ -751,26 +748,28 @@ variable
   {n n₁ n₂ n₃ : ℕ}
 variable (ω : Rew L μ n₁ μ' n₂)
 
-lemma hom_operator (o : Operator L ι) (v : ι → Subterm L μ n₁) :
-    ω.hom (o.operator v) = o.operator (fun i => ω (v i)) := by rw[ω.eq_bind]; exact o.rew_operator _ _
+lemma hom_operator (o : Operator L k) (v : Fin k → Subterm L μ n₁) :
+    ω.hom (o.operator v) = o.operator (fun i => ω (v i)) := by
+  simp[Operator.operator, ←Rew.hom_comp_app]; congr 2
+  ext <;> simp[Rew.comp_app]; contradiction
 
-lemma hom_operator' (o : Operator L ι) (v : ι → Subterm L μ n₁) :
+lemma hom_operator' (o : Operator L k) (v : Fin k → Subterm L μ n₁) :
     ω.hom (o.operator v) = o.operator (ω ∘ v) := ω.hom_operator o v
 
-@[simp] lemma hom_finitary0 (o : Finitary L 0) (v : Fin 0 → Subterm L μ n₁) :
+@[simp] lemma hom_finitary0 (o : Operator L 0) (v : Fin 0 → Subterm L μ n₁) :
     ω.hom (o.operator v) = o.operator ![] := by simp[ω.hom_operator', Matrix.empty_eq]
 
-@[simp] lemma hom_finitary1 (o : Finitary L 1) (t : Subterm L μ n₁) :
+@[simp] lemma hom_finitary1 (o : Operator L 1) (t : Subterm L μ n₁) :
     ω.hom (o.operator ![t]) = o.operator ![ω t] := by simp[ω.hom_operator']
 
-@[simp] lemma hom_finitary2 (o : Finitary L 2) (t₁ t₂ : Subterm L μ n₁) :
+@[simp] lemma hom_finitary2 (o : Operator L 2) (t₁ t₂ : Subterm L μ n₁) :
     ω.hom (o.operator ![t₁, t₂]) = o.operator ![ω t₁, ω t₂] := by simp[ω.hom_operator']
 
-@[simp] lemma hom_finitary3 (o : Finitary L 3) (t₁ t₂ t₃ : Subterm L μ n₁) :
+@[simp] lemma hom_finitary3 (o : Operator L 3) (t₁ t₂ t₃ : Subterm L μ n₁) :
     ω.hom (o.operator ![t₁, t₂, t₃]) = o.operator ![ω t₁, ω t₂, ω t₃] := by simp[ω.hom_operator']
 
 @[simp] lemma hom_const (o : Const L) : ω.hom (Operator.const c) = Operator.const c := by
-  simp[Operator.const, ω.hom_operator']; congr; funext x; exact x.elim
+  simp[Operator.const, ω.hom_operator']
 
 end Rew
 

@@ -196,6 +196,11 @@ lemma vecConsLast_vecEmpty {s : Fin 0 → α} (a : α) : s <: a = ![a] :=
 
 lemma constant_eq_singleton {a : α} : (fun _ => a) = ![a] := by funext x; simp
 
+lemma constant_eq_singleton' {v : Fin 1 → α} : v = ![v 0] := by funext x; simp[Fin.eq_zero]
+
+lemma fun_eq_vec₂ {v : Fin 2 → α} : v = ![v 0, v 1] := by
+  funext x; cases x using Fin.cases <;> simp[Fin.eq_zero]
+
 lemma injective_vecCons {f : Fin n → α} (h : Function.Injective f) {a} (ha : ∀ i, a ≠ f i) : Function.Injective (a :> f) := by
   have : ∀ i, f i ≠ a := fun i => (ha i).symm
   intro i j; cases i using Fin.cases <;> cases j using Fin.cases <;> simp[*]
