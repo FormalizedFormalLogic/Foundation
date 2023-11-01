@@ -622,49 +622,51 @@ def iterl (f : Operator L 2) (z : Const L) : (n : ℕ) → Operator L n
 
 end Operator
 
+end Subterm
+
 section numeral
 
 class Zero (L : Language.{u}) where
-  zero : Const L
+  zero : Subterm.Const L
 
 class One (L : Language.{u}) where
-  one : Const L
+  one : Subterm.Const L
 
-instance [Zero L] : _root_.Zero (Const L) := ⟨Zero.zero⟩
+instance [Zero L] : _root_.Zero (Subterm.Const L) := ⟨Zero.zero⟩
 
-instance [Zero L] : _root_.Zero (Subterm L μ n) := ⟨(0 : Const L)⟩
+instance [Zero L] : _root_.Zero (Subterm L μ n) := ⟨(0 : Subterm.Const L)⟩
 
-instance [One L] : _root_.One (Const L) := ⟨One.one⟩
+instance [One L] : _root_.One (Subterm.Const L) := ⟨One.one⟩
 
-instance [One L] : _root_.One (Subterm L μ n) := ⟨(1 : Const L)⟩
+instance [One L] : _root_.One (Subterm L μ n) := ⟨(1 : Subterm.Const L)⟩
 
-instance [L.Zero] : Zero L := ⟨⟨func Language.Zero.zero ![]⟩⟩
+instance [Language.Zero L] : Zero L := ⟨⟨Subterm.func Language.Zero.zero ![]⟩⟩
 
-instance [L.One] : One L := ⟨⟨func Language.One.one ![]⟩⟩
+instance [Language.One L] : One L := ⟨⟨Subterm.func Language.One.one ![]⟩⟩
 
-lemma Subterm.coe_zero [Zero L] : (↑(0 : Const L) : Subterm L μ n) = 0 := rfl
+lemma coe_zero [Zero L] : (↑(0 : Subterm.Const L) : Subterm L μ n) = 0 := rfl
 
-lemma Subterm.coe_one [One L] : (↑(1 : Const L) : Subterm L μ n) = 1 := rfl
+lemma coe_one [One L] : (↑(1 : Subterm.Const L) : Subterm L μ n) = 1 := rfl
 
 class Add (L : Language.{u}) where
-  add : Operator L 2
+  add : Subterm.Operator L 2
 
 class Mul (L : Language.{u}) where
-  mul : Operator L 2
+  mul : Subterm.Operator L 2
 
 class Sub (L : Language.{u}) where
-  sub : Operator L 2
+  sub : Subterm.Operator L 2
 
 class Div (L : Language.{u}) where
-  div : Operator L 2
+  div : Subterm.Operator L 2
 
 class Ring (L : Language) extends Zero L, One L, Add L, Mul L
 
-instance [L.Add] : Add L := ⟨⟨func Language.Add.add ![#0, #1]⟩⟩
+instance [Language.Add L] : Add L := ⟨⟨Subterm.func Language.Add.add ![#0, #1]⟩⟩
 
-instance [L.Mul] : Mul L := ⟨⟨func Language.Mul.mul ![#0, #1]⟩⟩
+instance [Language.Mul L] : Mul L := ⟨⟨Subterm.func Language.Mul.mul ![#0, #1]⟩⟩
 
-open Language
+open Language Subterm
 
 def numeral (L : Language) [Zero L] [One L] [Add L] : ℕ → Const L
   | 0     => 0
@@ -683,8 +685,6 @@ lemma numeral_succ (hz : z ≠ 0) : numeral L (z + 1) = Add.add.comp ![numeral L
   · simp[Operator.foldl]
 
 end numeral
-
-end Subterm
 
 namespace Rew
 

@@ -552,24 +552,6 @@ def or {k} (o₁ o₂ : Operator L k) : Operator L k := ⟨o₁.sentence ⋎ o�
 
 end Operator
 
-class Eq (L : Language) where
-  eq : Operator L 2
-
-class LT (L : Language) where
-  lt : Operator L 2
-
-class LE (L : Language) where
-  le : Operator L 2
-
-class Mem (L : Language) where
-  mem : Operator L 2
-
-instance [L.Eq] : Eq L := ⟨⟨rel Language.Eq.eq ![#0, #1]⟩⟩
-
-instance [L.LT] : LT L := ⟨⟨rel Language.LT.lt ![#0, #1]⟩⟩
-
-instance [Eq L] [LT L] : LE L := ⟨Eq.eq.and LT.lt⟩
-
 @[elab_as_elim]
 def formulaRec {C : SyntacticFormula L → Sort _}
   (hverum  : C ⊤)
@@ -674,6 +656,24 @@ inductive Open : {n : ℕ} → Subformula L μ n → Prop
 attribute [simp] Open.verum Open.falsum Open.rel Open.nrel
 
 end Subformula
+
+class Eq (L : Language) where
+  eq : Subformula.Operator L 2
+
+class LT (L : Language) where
+  lt : Subformula.Operator L 2
+
+class LE (L : Language) where
+  le : Subformula.Operator L 2
+
+class Mem (L : Language) where
+  mem : Subformula.Operator L 2
+
+instance [Language.Eq L] : Eq L := ⟨⟨Subformula.rel Language.Eq.eq ![#0, #1]⟩⟩
+
+instance [Language.LT L] : LT L := ⟨⟨Subformula.rel Language.LT.lt ![#0, #1]⟩⟩
+
+instance [Eq L] [LT L] : LE L := ⟨Eq.eq.and LT.lt⟩
 
 namespace Subformula
 

@@ -5,7 +5,7 @@ namespace LO
 
 namespace FirstOrder
 
-variable {L : Language.{u}} {μ : Type v} [L.Eq]
+variable {L : Language.{u}} {μ : Type v} [FirstOrder.Eq L]
 namespace Subterm
 
 def varSumInL {k} : Fin k → Subterm L μ (k + k) := fun i => #(Fin.castLE (by simp) i)
@@ -45,7 +45,7 @@ variable (L)
 inductive Eq : Theory L
   | refl : Eq “∀ #0 = #0”
   | symm : Eq “∀ ∀ (#1 = #0 → #0 = #1)”
-  | trans : Eq “∀ ∀ ∀ (#2 = #1 → #1 = #0 → #2 = #0)”  
+  | trans : Eq “∀ ∀ ∀ (#2 = #1 → #1 = #0 → #2 = #0)”
   | funcExt {k} (f : L.func k) :
     Eq “∀* (!(Subformula.vecEq varSumInL varSumInR) → ᵀ!(Subterm.func f varSumInL) = ᵀ!(Subterm.func f varSumInR))”
   | relExt {k} (r : L.rel k) :
@@ -75,7 +75,7 @@ variable (L)
 
 variable {M : Type u} [Structure L M]
 
-def eqv (a b : M) : Prop := rel (L := L) Language.Eq.eq ![a, b]
+def eqv (a b : M) : Prop := (@FirstOrder.Eq.eq L _).val ![a, b]
 
 variable {L}
 
@@ -180,10 +180,12 @@ lemma elementaryEquiv : QuotEq H ≃ₑ[L] M := fun _ => models_iff
 
 variable {H}
 
-lemma rel_eq (a b : QuotEq H) : Structure.rel (L := L) (M := QuotEq H) Language.Eq.eq ![a, b] ↔ (a = b) := by
+lemma rel_eq (a b : QuotEq H) : (@FirstOrder.Eq.eq L _).val (M := QuotEq H) ![a, b] ↔ a = b := by
   induction' a using Quotient.ind with a
   induction' b using Quotient.ind with b
-  rw[of_eq_of]; rfl
+  rw[of_eq_of]; simp[eqv, Subformula.Operator.val];
+  simpa[Eval!, Matrix.fun_eq_vec₂, Empty.eq_elim] using
+    eval_mk (H := H) (e := ![a, b]) (ε := Empty.elim) (p := FirstOrder.Eq.eq.sentence)
 
 instance : Structure.Eq L (QuotEq H) := ⟨rel_eq⟩
 
