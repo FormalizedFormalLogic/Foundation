@@ -59,7 +59,7 @@ end DerivationCR
 
 lemma DerivationCRWA.soundness (b : T ⊢ᶜ[P] Γ) {M : Type u} [s : Structure L M] (h : M ⊧* T) (ε : ℕ → M) :
     ∃ p ∈ Γ, Subformula.Val! M ε p := by
-  have : ∃ p, (p ∈ Γ ∨ ∃ σ ∈ b.leftHand, Rew.embl σ = p) ∧ Subformula.Val! M ε p := by simpa using b.derivation.sound M ε
+  have : ∃ p, (p ∈ Γ ∨ ∃ σ ∈ b.leftHand, Rew.emb.hom σ = p) ∧ Subformula.Val! M ε p := by simpa using b.derivation.sound M ε
   rcases this with ⟨p, (hp | ⟨σ, hσ, rfl⟩), vp⟩
   { exact ⟨p, hp, vp⟩ }
   { have : M ⊧ σ := by simpa using vp

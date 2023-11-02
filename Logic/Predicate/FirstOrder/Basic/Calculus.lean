@@ -12,17 +12,17 @@ variable {L : Language.{u}} [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq 
 def shifts (Δ : Finset (SyntacticSubformula L n)) :
   Finset (SyntacticSubformula L n) := Δ.map shiftEmb
 
-lemma shifts_eq_image (Δ : Finset (SyntacticSubformula L n)) : shifts Δ = Δ.image Rew.shiftl := Finset.map_eq_image _ _
+lemma shifts_eq_image (Δ : Finset (SyntacticSubformula L n)) : shifts Δ = Δ.image Rew.shift.hom := Finset.map_eq_image _ _
 
 @[simp] lemma mem_shifts_iff {p : SyntacticSubformula L n} {Δ : Finset (SyntacticSubformula L n)} :
-    Rew.shiftl p ∈ shifts Δ ↔ p ∈ Δ :=
+    Rew.shift.hom p ∈ shifts Δ ↔ p ∈ Δ :=
   Finset.mem_map' _
 
 @[simp] lemma shifts_ss (Δ Γ : Finset (SyntacticSubformula L n)) :
     shifts Δ ⊆ shifts Γ ↔ Δ ⊆ Γ := Finset.map_subset_map
 
 lemma shifts_insert (p : SyntacticSubformula L n) (Δ : Finset (SyntacticSubformula L n)) :
-    shifts (insert p Δ) = insert (Rew.shiftl p) (shifts Δ) :=
+    shifts (insert p Δ) = insert (Rew.shift.hom p) (shifts Δ) :=
   by simp[shifts, shiftEmb_eq_shift]
 
 lemma shifts_union (Δ Γ : Finset (SyntacticSubformula L n)) :
@@ -30,11 +30,11 @@ lemma shifts_union (Δ Γ : Finset (SyntacticSubformula L n)) :
   by simp[shifts, shiftEmb_eq_shift, Finset.map_union]
 
 @[simp] lemma shifts_emb (s : Finset (Subsentence L n)) :
-    shifts (s.image Rew.embl) = s.image Rew.embl := by
+    shifts (s.image Rew.emb.hom) = s.image Rew.emb.hom := by
   simp[shifts, shiftEmb, Finset.map_eq_image, Finset.image_image, Function.comp, ←Rew.hom_comp_app]
 
 lemma shifts_erase (p : SyntacticSubformula L n) (Δ : Finset (SyntacticSubformula L n)) :
-    shifts (Δ.erase p) = (shifts Δ).erase (Rew.shiftl p) :=
+    shifts (Δ.erase p) = (shifts Δ).erase (Rew.shift.hom p) :=
   by simp[shifts, shiftEmb_eq_shift]
 
 inductive DerivationCR (P : SyntacticFormula L → Prop) : Sequent L → Type u
@@ -70,12 +70,12 @@ abbrev DerivationList (G : List (SyntacticFormula L)) := ⊢ᶜ G.toFinset
 
 abbrev Derivation₁ (p : SyntacticFormula L) := ⊢ᶜ ({p} : Sequent L)
 
-abbrev Derivation.Valid (σ : Sentence L) := ⊢ᵀ ({Rew.embl σ} : Sequent L)
+abbrev Derivation.Valid (σ : Sentence L) := ⊢ᵀ ({Rew.emb.hom σ} : Sequent L)
 
 namespace DerivationCR
 variable {P : SyntacticFormula L → Prop} {Δ Δ₁ Δ₂ Γ : Sequent L}
 
-def length : {Δ : Sequent L} → DerivationCR P Δ → ℕ 
+def length : {Δ : Sequent L} → DerivationCR P Δ → ℕ
   | _, axL Δ _ _ _ _     => 0
   | _, verum Δ _         => 0
   | _, or _ _ _ d        => d.length.succ
@@ -95,7 +95,7 @@ section
 
 @[simp] lemma length_or {p q} (d : ⊢ᶜ[P] (insert p $ insert q Δ)) : (or Δ p q d).length = d.length.succ := rfl
 
-@[simp] lemma length_all {p} (d : ⊢ᶜ[P] insert (Rew.freel p) (shifts Δ)) : (all Δ p d).length = d.length.succ := rfl
+@[simp] lemma length_all {p} (d : ⊢ᶜ[P] insert (Rew.free.hom p) (shifts Δ)) : (all Δ p d).length = d.length.succ := rfl
 
 @[simp] lemma length_ex {t} {p} (d : ⊢ᶜ[P] insert ([→ t].hom p) Δ) : (ex Δ t p d).length = d.length.succ := rfl
 
@@ -137,7 +137,7 @@ protected unsafe def repr : {Δ : Sequent L} → ⊢ᶜ[P] Δ → String
       dp.repr ++
       dn.repr ++
       "\\RightLabel{\\scriptsize(Cut)}\n" ++
-      "\\BinaryInfC{$" ++ reprStr (Δ ∪ Γ) ++ "$}\n\n"     
+      "\\BinaryInfC{$" ++ reprStr (Δ ∪ Γ) ++ "$}\n\n"
 
 unsafe instance : Repr (⊢ᶜ[P] Δ) where reprPrec d _ := d.repr
 
@@ -156,7 +156,7 @@ def cutWeakening {P Q : SyntacticFormula L → Prop} (h : ∀ p, P p → Q p) : 
   | _, or Δ p q d           => or Δ p q (d.cutWeakening h)
   | _, all Δ p d            => all Δ p (d.cutWeakening h)
   | _, ex Δ t p d           => ex Δ t p (d.cutWeakening h)
-  | _, cut Δ₁ Δ₂ p hp d₁ d₂ => cut Δ₁ Δ₂ p (h p hp) (d₁.cutWeakening h) (d₂.cutWeakening h) 
+  | _, cut Δ₁ Δ₂ p hp d₁ d₂ => cut Δ₁ Δ₂ p (h p hp) (d₁.cutWeakening h) (d₂.cutWeakening h)
 
 @[simp] lemma lengtgh_cutWeakening {P Q : SyntacticFormula L → Prop} (h : ∀ p, P p → Q p) {Δ} (d : ⊢ᶜ[P] Δ) :
     (d.cutWeakening h).length = d.length := by induction d <;> simp[*, cutWeakening]
@@ -174,18 +174,18 @@ def weakening : ∀ {Δ}, ⊢ᶜ[P] Δ → ∀ {Γ : Sequent L}, Δ ⊆ Γ → �
       have : ⊢ᶜ[P] insert (p ⋎ q) Γ := or Γ p q this
       this.cast (by simp; exact (Finset.insert_subset_iff.mp h).1)
   | _, and Δ p q dp dq,      Γ, h =>
-      have dp : ⊢ᶜ[P] insert p Γ := dp.weakening (Finset.insert_subset_insert p (Finset.insert_subset_iff.mp h).2) 
-      have dq : ⊢ᶜ[P] insert q Γ := dq.weakening (Finset.insert_subset_insert q (Finset.insert_subset_iff.mp h).2) 
+      have dp : ⊢ᶜ[P] insert p Γ := dp.weakening (Finset.insert_subset_insert p (Finset.insert_subset_iff.mp h).2)
+      have dq : ⊢ᶜ[P] insert q Γ := dq.weakening (Finset.insert_subset_insert q (Finset.insert_subset_iff.mp h).2)
       have : ⊢ᶜ[P] insert (p ⋏ q) Γ := and Γ p q dp dq
-      this.cast (by simp; exact (Finset.insert_subset_iff.mp h).1)    
+      this.cast (by simp; exact (Finset.insert_subset_iff.mp h).1)
   | _, all Δ p d,            Γ, h =>
-      have : ⊢ᶜ[P] insert (Rew.freel p) (shifts Γ) := d.weakening (Finset.insert_subset_insert _ $ by simpa using (Finset.insert_subset_iff.mp h).2)
+      have : ⊢ᶜ[P] insert (Rew.free.hom p) (shifts Γ) := d.weakening (Finset.insert_subset_insert _ $ by simpa using (Finset.insert_subset_iff.mp h).2)
       have : ⊢ᶜ[P] insert (∀' p) Γ := all Γ p this
-      this.cast (by simp; exact (Finset.insert_subset_iff.mp h).1)      
+      this.cast (by simp; exact (Finset.insert_subset_iff.mp h).1)
   | _, ex Δ t p d,           Γ, h =>
       have : ⊢ᶜ[P] insert ([→ t].hom p) Γ := d.weakening (Finset.insert_subset_insert _ $ by simpa using (Finset.insert_subset_iff.mp h).2)
       have : ⊢ᶜ[P] insert (∃' p) Γ := ex Γ t p this
-      this.cast (by simp; exact (Finset.insert_subset_iff.mp h).1)     
+      this.cast (by simp; exact (Finset.insert_subset_iff.mp h).1)
   | _, cut Δ₁ Δ₂ p hp d₁ d₂, Γ, h =>
       have d₁ : ⊢ᶜ[P] insert p Γ := d₁.weakening (Finset.insert_subset_insert _ (Finset.union_subset_left h))
       have d₂ : ⊢ᶜ[P] insert (~p) Γ := d₂.weakening (Finset.insert_subset_insert _ (Finset.union_subset_right h))
@@ -200,7 +200,7 @@ def or' {p q : SyntacticFormula L} (h : p ⋎ q ∈ Δ) (d : ⊢ᶜ[P] (insert p
 def and' {p q : SyntacticFormula L} (h : p ⋏ q ∈ Δ) (dp : ⊢ᶜ[P] insert p (Δ.erase (p ⋏ q))) (dq : ⊢ᶜ[P] insert q (Δ.erase (p ⋏ q))) : ⊢ᶜ[P] Δ :=
   (and _ p q dp dq).cast (by simp[Finset.insert_erase h])
 
-def all' {p : SyntacticSubformula L 1} (h : ∀' p ∈ Δ) (d : ⊢ᶜ[P] insert (Rew.freel p) (shifts $ Δ.erase (∀' p))) : ⊢ᶜ[P] Δ :=
+def all' {p : SyntacticSubformula L 1} (h : ∀' p ∈ Δ) (d : ⊢ᶜ[P] insert (Rew.free.hom p) (shifts $ Δ.erase (∀' p))) : ⊢ᶜ[P] Δ :=
   (all _ p d).cast (by simp[Finset.insert_erase h])
 
 def ex' {p : SyntacticSubformula L 1} (t : SyntacticTerm L) (h : ∃' p ∈ Δ)
@@ -225,8 +225,8 @@ def em {p : SyntacticFormula L} {Δ : Sequent L} (hpos : p ∈ Δ) (hneg : ~p �
   induction p using Subformula.formulaRec generalizing Δ
   case hverum           => exact verum Δ hpos
   case hfalsum          => exact verum Δ hneg
-  case hrel r v         => exact axL Δ r v hpos hneg 
-  case hnrel r v        => exact axL Δ r v hneg hpos 
+  case hrel r v         => exact axL Δ r v hpos hneg
+  case hnrel r v        => exact axL Δ r v hneg hpos
   case hall p ih        =>
     exact all' hpos $ ex' (p := ~Rew.shift.hom p) &0
       (by simp; exact Or.inr (by simp[shifts, shiftEmb_eq_shift]; exact ⟨_, hneg, by simp⟩))
@@ -245,7 +245,7 @@ def em {p : SyntacticFormula L} {Δ : Sequent L} (hpos : p ∈ Δ) (hneg : ~p �
     simp at hneg
     exact or' hpos (and' (p := ~p) (q := ~q) (by simp[hneg])
       (ihp (by simp; exact Or.inr $ ne_of_ne_complexity (by simp)) (by simp))
-      (ihq (by simp; exact Or.inr $ ne_of_ne_complexity (by simp)) (by simp)))   
+      (ihq (by simp; exact Or.inr $ ne_of_ne_complexity (by simp)) (by simp)))
 
 def elimFalsum : {Δ : Sequent L} → ⊢ᶜ[P] Δ → ⊢ᶜ[P] Δ.erase ⊥
   | _, axL Δ r v hpos hneg => axL _ r v (by simp[hpos]) (by simp[hneg])
@@ -259,7 +259,7 @@ def elimFalsum : {Δ : Sequent L} → ⊢ᶜ[P] Δ → ⊢ᶜ[P] Δ.erase ⊥
       d.elimFalsum.weakening (by simp[Finset.subset_iff]; rintro x hx (rfl | hhx) <;> simp[*])
     (or _ _ _ this).cast (by simp[Finset.erase_insert_of_ne])
   | _, all Δ p d           =>
-    have : ⊢ᶜ[P] (insert (Rew.freel p) (shifts $ Δ.erase ⊥)) :=
+    have : ⊢ᶜ[P] (insert (Rew.free.hom p) (shifts $ Δ.erase ⊥)) :=
       d.elimFalsum.weakening
         (by {simp[Finset.subset_iff, shifts_eq_image]; rintro x hx (rfl | ⟨y, hy, rfl⟩); { exact Or.inl rfl };
              { exact Or.inr ⟨y, ⟨by rintro rfl; simp at hx, hy⟩, rfl⟩ } } )
@@ -319,50 +319,51 @@ def lMapCut (Φ : L₁ →ᵥ L₂) {Δ : Finset (SyntacticFormula L₁)} (d : �
 end Hom
 
 private lemma free_rewrite_eq (f : ℕ → SyntacticTerm L) (p : SyntacticSubformula L 1) :
-    Rew.freel (Rew.rewritel (fun x => Rew.bShift (f x)) p) = Rew.rewritel (&0 :>ₙ fun x => Rew.shift (f x)) (Rew.freel p) := by
+    Rew.free.hom ((Rew.rewrite (fun x => Rew.bShift (f x))).hom p) =
+    (Rew.rewrite (&0 :>ₙ fun x => Rew.shift (f x))).hom (Rew.free.hom p) := by
   simp[←Rew.hom_comp_app]; exact Rew.hom_ext' (by ext x <;> simp[Rew.comp_app, Fin.eq_zero])
 
 private lemma shift_rewrite_eq (f : ℕ → SyntacticTerm L) (p : SyntacticFormula L) :
-    Rew.shiftl (Rew.rewritel f p) = Rew.rewritel (&0 :>ₙ fun x => Rew.shift (f x)) (Rew.shiftl p) := by
+    Rew.shift.hom ((Rew.rewrite f).hom p) = (Rew.rewrite (&0 :>ₙ fun x => Rew.shift (f x))).hom (Rew.shift.hom p) := by
   simp[←Rew.hom_comp_app]; exact Rew.hom_ext' (by ext x <;> simp[Rew.comp_app])
 
 private lemma rewrite_subst_eq (f : ℕ → SyntacticTerm L) (t) (p : SyntacticSubformula L 1) :
-    Rew.rewritel f ([→ t].hom p) = [→ Rew.rewrite f t].hom (Rew.rewritel (Rew.bShift ∘ f) p) := by
+    (Rew.rewrite f).hom ([→ t].hom p) = [→ Rew.rewrite f t].hom ((Rew.rewrite (Rew.bShift ∘ f)).hom p) := by
   simp[←Rew.hom_comp_app]; exact Rew.hom_ext' (by ext x <;> simp[Rew.comp_app])
 
-protected def rewrite (h : ∀ f p, P p → P (Rew.rewritel f p)) :
-    ∀ {Δ : Sequent L}, ⊢ᶜ[P] Δ → ∀ (f : ℕ → SyntacticTerm L), ⊢ᶜ[P] Δ.image (Rew.rewritel f)
+protected def rewrite (h : ∀ f p, P p → P ((Rew.rewrite f).hom p)) :
+    ∀ {Δ : Sequent L}, ⊢ᶜ[P] Δ → ∀ (f : ℕ → SyntacticTerm L), ⊢ᶜ[P] Δ.image ((Rew.rewrite f).hom)
   | _, axL Δ r v hrel hnrel, f =>
     axL _ r (fun i => Rew.rewrite f (v i))
-      (by simpa[(Rew.rewrite f).rel] using Finset.mem_image_of_mem (Rew.rewritel f) hrel)
-      (by simpa[(Rew.rewrite f).nrel] using Finset.mem_image_of_mem (Rew.rewritel f) hnrel)
-  | _, verum Δ h,            f => verum _ (by simpa using Finset.mem_image_of_mem (Rew.rewritel f) h)
+      (by simpa[(Rew.rewrite f).rel] using Finset.mem_image_of_mem ((Rew.rewrite f).hom) hrel)
+      (by simpa[(Rew.rewrite f).nrel] using Finset.mem_image_of_mem ((Rew.rewrite f).hom) hnrel)
+  | _, verum Δ h,            f => verum _ (by simpa using Finset.mem_image_of_mem ((Rew.rewrite f).hom) h)
   | _, or Δ p q d,           f =>
-    have : ⊢ᶜ[P] insert (Rew.rewritel f p ⋎ Rew.rewritel f q) (Δ.image (Rew.rewritel f)) := or _ _ _ ((d.rewrite h f).cast (by simp))
+    have : ⊢ᶜ[P] insert ((Rew.rewrite f).hom p ⋎ (Rew.rewrite f).hom q) (Δ.image ((Rew.rewrite f).hom)) := or _ _ _ ((d.rewrite h f).cast (by simp))
     this.cast (by simp)
   | _, and Δ p q dp dq,      f =>
-    have : ⊢ᶜ[P] insert (Rew.rewritel f p ⋏ Rew.rewritel f q) (Δ.image (Rew.rewritel f)) := and _ _ _ ((dp.rewrite h f).cast (by simp)) ((dq.rewrite h f).cast (by simp))
+    have : ⊢ᶜ[P] insert ((Rew.rewrite f).hom p ⋏ (Rew.rewrite f).hom q) (Δ.image ((Rew.rewrite f).hom)) := and _ _ _ ((dp.rewrite h f).cast (by simp)) ((dq.rewrite h f).cast (by simp))
     this.cast (by simp)
   | _, all Δ p d,            f =>
-    have : ⊢ᶜ[P] (insert (Rew.freel p) (shifts Δ)).image (Rew.rewritel (&0 :>ₙ fun x => Rew.shift (f x))) := d.rewrite h (&0 :>ₙ fun x => Rew.shift (f x))
-    have : ⊢ᶜ[P] insert (∀' (Rew.rewritel (Rew.bShift ∘ f)) p) (Δ.image (Rew.rewritel f)) :=
+    have : ⊢ᶜ[P] (insert (Rew.free.hom p) (shifts Δ)).image (Rew.rewrite (&0 :>ₙ fun x => Rew.shift (f x))).hom := d.rewrite h (&0 :>ₙ fun x => Rew.shift (f x))
+    have : ⊢ᶜ[P] insert (∀' (Rew.rewrite (Rew.bShift ∘ f)).hom p) (Δ.image ((Rew.rewrite f).hom)) :=
       all _ _ (this.cast (by simp[free_rewrite_eq, shift_rewrite_eq, shifts_eq_image, Finset.image_image, Function.comp]))
     this.cast (by simp[Rew.q_rewrite])
   | _, ex Δ t p d,           f =>
-    have : ⊢ᶜ[P] (insert ([→ t].hom p) Δ).image (Rew.rewritel f) := d.rewrite h f 
-    have : ⊢ᶜ[P] insert (∃' Rew.rewritel (Rew.bShift ∘ f) p) (Δ.image (Rew.rewritel f)) := 
-      ex _ (Rew.rewrite f t) _ (this.cast (by simp[rewrite_subst_eq])) 
+    have : ⊢ᶜ[P] (insert ([→ t].hom p) Δ).image ((Rew.rewrite f).hom) := d.rewrite h f
+    have : ⊢ᶜ[P] insert (∃' (Rew.rewrite (Rew.bShift ∘ f)).hom p) (Δ.image ((Rew.rewrite f).hom)) :=
+      ex _ (Rew.rewrite f t) _ (this.cast (by simp[rewrite_subst_eq]))
     this.cast (by simp[Rew.q_rewrite])
   | _, cut Δ Γ p hp dΔ dΓ,   f =>
-    have dΔ : ⊢ᶜ[P] insert (Rew.rewritel f p) (Δ.image $ Rew.rewritel f) := (dΔ.rewrite h f).cast (by simp)
-    have dΓ : ⊢ᶜ[P] insert (~Rew.rewritel f p) (Γ.image $ Rew.rewritel f) := (dΓ.rewrite h f).cast (by simp)
-    (cut _ _ (Rew.rewritel f p) (h f p hp) dΔ dΓ).cast (by simp[Finset.image_union])
+    have dΔ : ⊢ᶜ[P] insert ((Rew.rewrite f).hom p) (Δ.image $ (Rew.rewrite f).hom) := (dΔ.rewrite h f).cast (by simp)
+    have dΓ : ⊢ᶜ[P] insert (~(Rew.rewrite f).hom p) (Γ.image $ (Rew.rewrite f).hom) := (dΓ.rewrite h f).cast (by simp)
+    (cut _ _ ((Rew.rewrite f).hom p) (h f p hp) dΔ dΓ).cast (by simp[Finset.image_union])
 
-def rewrite₀ {Δ : Sequent L} (d : ⊢ᵀ Δ) (f : ℕ → SyntacticTerm L) : ⊢ᵀ Δ.image (Rew.rewritel f) := d.rewrite (by simp) f
+def rewrite₀ {Δ : Sequent L} (d : ⊢ᵀ Δ) (f : ℕ → SyntacticTerm L) : ⊢ᵀ Δ.image ((Rew.rewrite f).hom) := d.rewrite (by simp) f
 
-def rewriteClx {i} {Δ : Sequent L} (d : ⊢ᶜ[< i] Δ) (f : ℕ → SyntacticTerm L) : ⊢ᶜ[< i] Δ.image (Rew.rewritel f) := d.rewrite (by simp) f
+def rewriteClx {i} {Δ : Sequent L} (d : ⊢ᶜ[< i] Δ) (f : ℕ → SyntacticTerm L) : ⊢ᶜ[< i] Δ.image ((Rew.rewrite f).hom) := d.rewrite (by simp) f
 
-def rewriteCut {Δ : Sequent L} (d : ⊢ᶜ Δ) (f : ℕ → SyntacticTerm L) : ⊢ᶜ Δ.image (Rew.rewritel f) := d.rewrite (by simp) f
+def rewriteCut {Δ : Sequent L} (d : ⊢ᶜ Δ) (f : ℕ → SyntacticTerm L) : ⊢ᶜ Δ.image ((Rew.rewrite f).hom) := d.rewrite (by simp) f
 
 @[simp] lemma length_rewrite (h) (d : ⊢ᶜ[P] Δ) (f : ℕ → SyntacticTerm L) : (d.rewrite h f).length = d.length :=
   by induction d generalizing f <;> simp[*, DerivationCR.rewrite]
@@ -370,25 +371,26 @@ def rewriteCut {Δ : Sequent L} (d : ⊢ᶜ Δ) (f : ℕ → SyntacticTerm L) : 
 @[simp] lemma length_rewrite₀ (d : ⊢ᵀ Δ) (f : ℕ → SyntacticTerm L) : (d.rewrite₀ f).length = d.length :=
   d.length_rewrite _ f
 
-protected def map (h : ∀ f p, P p → P (Rew.rewritel f p)) {Δ : Sequent L} (d : ⊢ᶜ[P] Δ) (f : ℕ → ℕ) : ⊢ᶜ[P] Δ.image (Rew.rewriteMapl f) := d.rewrite h _
+protected def map (h : ∀ f p, P p → P ((Rew.rewrite f).hom p)) {Δ : Sequent L} (d : ⊢ᶜ[P] Δ) (f : ℕ → ℕ) :
+    ⊢ᶜ[P] Δ.image (Rew.rewriteMap f).hom := d.rewrite h _
 
-protected def shift (h : ∀ f p, P p → P (Rew.rewritel f p)) {Δ : Sequent L} (d : ⊢ᶜ[P] Δ) : ⊢ᶜ[P] (shifts Δ) :=
+protected def shift (h : ∀ f p, P p → P ((Rew.rewrite f).hom p)) {Δ : Sequent L} (d : ⊢ᶜ[P] Δ) : ⊢ᶜ[P] (shifts Δ) :=
   (d.map h Nat.succ).cast (by simp[shifts_eq_image]; congr)
 
 private lemma map_subst_eq_free (p : SyntacticSubformula L 1) (h : ¬p.fvar? m) :
-    Rew.rewriteMapl (fun x => if x = m then 0 else x + 1) ([→ &m].hom p) = Rew.freel p := by
+    (Rew.rewriteMap (fun x => if x = m then 0 else x + 1)).hom ([→ &m].hom p) = Rew.free.hom p := by
   simp[←Rew.hom_comp_app];
   exact Subformula.rew_eq_of_funEqOn (by simp[Rew.comp_app, Fin.eq_zero])
     (fun x hx => by simp[Rew.comp_app]; rintro rfl; contradiction)
 
 private lemma image_map₀_eq_shifts (Δ : Finset $ SyntacticFormula L) (h : ∀ p ∈ Δ, ¬p.fvar? m) :
-    Δ.image (Rew.rewriteMapl (fun x => if x = m then 0 else x + 1)) = shifts Δ := by 
+    Δ.image (Rew.rewriteMap (fun x => if x = m then 0 else x + 1)).hom = shifts Δ := by
   simp[shifts_eq_image]; apply Finset.image_congr
   intro p hp; exact rew_eq_of_funEqOn₀ (by intro x hx; simp; rintro rfl; have := h p hp; contradiction)
 
-def genelalizeByNewver (h : ∀ f p, P p → P (Rew.rewritel f p)) {p : SyntacticSubformula L 1} (hp : ¬p.fvar? m) (hΔ : ∀ q ∈ Δ, ¬q.fvar? m)
+def genelalizeByNewver (h : ∀ f p, P p → P ((Rew.rewrite f).hom p)) {p : SyntacticSubformula L 1} (hp : ¬p.fvar? m) (hΔ : ∀ q ∈ Δ, ¬q.fvar? m)
   (d : ⊢ᶜ[P] insert ([→ &m].hom p) Δ) : ⊢ᶜ[P] insert (∀' p) Δ := by
-  have : ⊢ᶜ[P] insert (Rew.freel p) (shifts Δ) :=
+  have : ⊢ᶜ[P] insert (Rew.free.hom p) (shifts Δ) :=
     (d.map h (fun x => if x = m then 0 else x + 1)).cast (by simp[map_subst_eq_free p hp, image_map₀_eq_shifts Δ hΔ])
   exact all Δ p this
 
@@ -399,14 +401,14 @@ def genelalizeByNewverCut {p : SyntacticSubformula L 1} (hp : ¬p.fvar? m) (hΔ 
   (d : ⊢ᶜ insert ([→ &m].hom p) Δ) : ⊢ᶜ insert (∀' p) Δ := d.genelalizeByNewver (by simp) hp hΔ
 
 def exOfInstances (v : List (SyntacticTerm L)) (p : SyntacticSubformula L 1)
-  (h : ⊢ᶜ[P] (v.map (Rew.substsl ![·] p)).toFinset ∪ Γ) : ⊢ᶜ[P] insert (∃' p) Γ := by
+  (h : ⊢ᶜ[P] (v.map (fun t => (Rew.substs ![t]).hom p)).toFinset ∪ Γ) : ⊢ᶜ[P] insert (∃' p) Γ := by
   induction' v with t v ih generalizing Γ <;> simp at h
   · exact weakening h (Finset.subset_insert _ Γ)
   · exact (ih (Γ := insert (∃' p) Γ)
       ((ex _ t p h).cast (by ext r; simp))).cast (by simp)
 
 def exOfInstances' (v : List (SyntacticTerm L)) (p : SyntacticSubformula L 1)
-  (h : ⊢ᶜ[P] (insert (∃' p) $ (v.map (Rew.substsl ![·] p)).toFinset ∪ Γ)) : ⊢ᶜ[P] insert (∃' p) Γ :=
+  (h : ⊢ᶜ[P] (insert (∃' p) $ (v.map (fun t => (Rew.substs ![t]).hom p)).toFinset ∪ Γ)) : ⊢ᶜ[P] insert (∃' p) Γ :=
   (exOfInstances (Γ := insert (∃' p) Γ) v p (h.cast $ by simp)).cast (by simp)
 
 end DerivationCR
@@ -414,7 +416,7 @@ end DerivationCR
 structure DerivationCRWA (P : SyntacticFormula L → Prop) (T : Theory L) (Δ : Sequent L) where
   leftHand : Finset (Sentence L)
   hleftHand : ↑leftHand ⊆ (~·) '' T
-  derivation : ⊢ᶜ[P] Δ ∪ (leftHand.image Rew.embl)
+  derivation : ⊢ᶜ[P] Δ ∪ (leftHand.image Rew.emb.hom)
 
 scoped notation :45 T " ⊢ᶜ[" P "] " Γ:45 => DerivationCRWA P T Γ
 
@@ -427,11 +429,11 @@ abbrev DerivationCWA (T : Theory L) (Δ : Sequent L) := DerivationCRWA (fun _ =>
 scoped infix:45 " ⊢' " => DerivationCWA
 
 instance Proof : Logic.System (Sentence L) where
-  Bew := fun T σ => T ⊢' {Rew.embl σ}
+  Bew := fun T σ => T ⊢' {Rew.emb.hom σ}
   axm := fun {f σ} hσ =>
     { leftHand := {~σ}
       hleftHand := by simp[hσ]
-      derivation := DerivationCR.em (p := Rew.embl σ) (by simp) (by simp) }
+      derivation := DerivationCR.em (p := Rew.emb.hom σ) (by simp) (by simp) }
   weakening' := fun {T U} f h b =>
     { leftHand := b.leftHand,
       hleftHand := Set.Subset.trans b.hleftHand (Set.image_subset _ h),
@@ -442,12 +444,12 @@ def DerivationCRWA.toDerivationCWA {T : Theory L} {Δ} (b : T ⊢ᶜ[P] Δ) : T 
   hleftHand := b.hleftHand
   derivation := b.derivation.cutWeakening (by simp)
 
-def DerivationCWA.toDerivationCWA {T : Theory L} {σ : Sentence L} (b : T ⊢ σ) : T ⊢' {Rew.embl σ} := b
+def DerivationCWA.toDerivationCWA {T : Theory L} {σ : Sentence L} (b : T ⊢ σ) : T ⊢' {Rew.emb.hom σ} := b
 
-def DerivationCRWA.toProof {T : Theory L} {σ : Sentence L} (b : T ⊢ᶜ[P] {Rew.embl σ}) : T ⊢ σ :=
+def DerivationCRWA.toProof {T : Theory L} {σ : Sentence L} (b : T ⊢ᶜ[P] {Rew.emb.hom σ}) : T ⊢ σ :=
   b.toDerivationCWA
 
-def DerivationCWA.toDerivationWA {T : Theory L} {σ : Sentence L} (b : T ⊢ σ) : T ⊢' {Rew.embl σ} := b
+def DerivationCWA.toDerivationWA {T : Theory L} {σ : Sentence L} (b : T ⊢ σ) : T ⊢' {Rew.emb.hom σ} := b
 
 def DerivationCR.toDerivationCRWA
   {P : SyntacticFormula L → Prop} {T : Theory L} {Δ : Sequent L} (b : ⊢ᶜ[P] Δ) : T ⊢ᶜ[P] Δ where
@@ -482,8 +484,8 @@ protected def and {p₁ p₂} (h : p₁ ⋏ p₂ ∈ Δ) (b₁ : T ⊢ᶜ[P] ins
   leftHand := b₁.leftHand ∪ b₂.leftHand
   hleftHand := by simp[b₁.hleftHand, b₂.hleftHand]
   derivation :=
-    let d : ⊢ᶜ[P] insert (p₁ ⋏ p₂) (Δ ∪ (b₁.leftHand ∪ b₂.leftHand).image Rew.embl) :=
-      DerivationCR.and (Δ ∪ (b₁.leftHand ∪ b₂.leftHand).image Rew.embl) p₁ p₂
+    let d : ⊢ᶜ[P] insert (p₁ ⋏ p₂) (Δ ∪ (b₁.leftHand ∪ b₂.leftHand).image Rew.emb.hom) :=
+      DerivationCR.and (Δ ∪ (b₁.leftHand ∪ b₂.leftHand).image Rew.emb.hom) p₁ p₂
         (b₁.derivation.weakening (by intro x; simp; rintro (rfl | hx | ⟨σ, hσ, rfl⟩); { simp }; { simp[hx] }; { exact Or.inr $ Or.inr ⟨σ, Or.inl hσ, rfl⟩ } ))
         (b₂.derivation.weakening (by intro x; simp; rintro (rfl | hx | ⟨σ, hσ, rfl⟩); { simp }; { simp[hx] }; { exact Or.inr $ Or.inr ⟨σ, Or.inr hσ, rfl⟩ } ))
     d.cast (Finset.insert_eq_of_mem (by simp[h]))
@@ -492,17 +494,17 @@ protected def or {p₁ p₂} (h : p₁ ⋎ p₂ ∈ Δ) (b : T ⊢ᶜ[P] insert 
   leftHand := b.leftHand
   hleftHand := b.hleftHand
   derivation :=
-    let d : ⊢ᶜ[P] insert (p₁ ⋎ p₂) (Δ ∪ b.leftHand.image Rew.embl) :=
-      DerivationCR.or (Δ ∪ b.leftHand.image Rew.embl) p₁ p₂ (b.derivation.cast (by simp[Finset.insert_union]))
+    let d : ⊢ᶜ[P] insert (p₁ ⋎ p₂) (Δ ∪ b.leftHand.image Rew.emb.hom) :=
+      DerivationCR.or (Δ ∪ b.leftHand.image Rew.emb.hom) p₁ p₂ (b.derivation.cast (by simp[Finset.insert_union]))
     d.cast (Finset.insert_eq_of_mem (by simp[h]))
 
 protected def all {p} (h : ∀' p ∈ Δ)
-  (b : T ⊢ᶜ[P] (insert (Rew.freel p) (shifts Δ))) : T ⊢ᶜ[P] Δ where
+  (b : T ⊢ᶜ[P] (insert (Rew.free.hom p) (shifts Δ))) : T ⊢ᶜ[P] Δ where
   leftHand := b.leftHand
   hleftHand := b.hleftHand
   derivation :=
-    let d₁ : ⊢ᶜ[P] insert (Rew.freel p) (shifts $ Δ ∪ b.leftHand.image Rew.embl) := b.derivation.cast (by simp[shifts_union])
-    let d₂ : ⊢ᶜ[P] insert (∀' p) (Δ ∪ b.leftHand.image Rew.embl):= d₁.all
+    let d₁ : ⊢ᶜ[P] insert (Rew.free.hom p) (shifts $ Δ ∪ b.leftHand.image Rew.emb.hom) := b.derivation.cast (by simp[shifts_union])
+    let d₂ : ⊢ᶜ[P] insert (∀' p) (Δ ∪ b.leftHand.image Rew.emb.hom):= d₁.all
     d₂.cast (Finset.insert_eq_of_mem $ by simp[h])
 
 protected def ex {p} {t} (h : ∃' p ∈ Δ)
@@ -510,11 +512,11 @@ protected def ex {p} {t} (h : ∃' p ∈ Δ)
   leftHand := b.leftHand
   hleftHand := b.hleftHand
   derivation :=
-    let d₁ : ⊢ᶜ[P] insert ([→ t].hom p) (Δ ∪ b.leftHand.image Rew.embl) := by simpa using b.derivation
-    let d₂ : ⊢ᶜ[P] insert (∃' p) (Δ ∪ b.leftHand.image Rew.embl) := DerivationCR.ex _ t p d₁
+    let d₁ : ⊢ᶜ[P] insert ([→ t].hom p) (Δ ∪ b.leftHand.image Rew.emb.hom) := by simpa using b.derivation
+    let d₂ : ⊢ᶜ[P] insert (∃' p) (Δ ∪ b.leftHand.image Rew.emb.hom) := DerivationCR.ex _ t p d₁
     d₂.cast (Finset.insert_eq_of_mem $ by simp[h])
 
-protected def id {σ} (hσ : σ ∈ T) (b : T ⊢ᶜ[P] insert (~Rew.embl σ) Δ) : T ⊢ᶜ[P] Δ where
+protected def id {σ} (hσ : σ ∈ T) (b : T ⊢ᶜ[P] insert (~Rew.emb.hom σ) Δ) : T ⊢ᶜ[P] Δ where
   leftHand := insert (~σ) b.leftHand
   hleftHand := by simp[Set.insert_subset_iff, b.hleftHand, hσ]
   derivation := b.derivation.cast (by ext ; simp)
@@ -531,15 +533,15 @@ def weakeningLeft {T U : Theory L} (h : T ⊆ U) (b : T ⊢ᶜ[P] Δ) : U ⊢ᶜ
   hleftHand := Set.Subset.trans b.hleftHand (Set.image_subset _ h)
   derivation := b.derivation
 
-def deduction {σ} (b : insert σ T ⊢ᶜ[P] Δ) : T ⊢ᶜ[P] insert (~Rew.embl σ) Δ where
+def deduction {σ} (b : insert σ T ⊢ᶜ[P] Δ) : T ⊢ᶜ[P] insert (~Rew.emb.hom σ) Δ where
   leftHand := Finset.erase b.leftHand (~σ)
   hleftHand := by simp; exact subset_trans b.hleftHand (by simp; intro σ; simp)
   derivation := b.derivation.weakening
-    (by rw[Finset.insert_union, ←Finset.union_insert, Finset.image_erase (f := Rew.embl) Rew.embl_Injective]
+    (by rw[Finset.insert_union, ←Finset.union_insert, Finset.image_erase (f := Rew.emb.hom) Rew.emb.hom_Injective]
         simp[-Finset.insert_union, -Finset.union_insert]
-        exact Finset.union_subset_union_right (Finset.insert_erase_subset _ _)) 
-  
-def resolution {σ} (b : T ⊢ᶜ[P] insert (Rew.embl σ) Δ) : insert (~σ) T ⊢ᶜ[P] Δ where
+        exact Finset.union_subset_union_right (Finset.insert_erase_subset _ _))
+
+def resolution {σ} (b : T ⊢ᶜ[P] insert (Rew.emb.hom σ) Δ) : insert (~σ) T ⊢ᶜ[P] Δ where
   leftHand := insert σ b.leftHand
   hleftHand := by simp[Set.image_insert_eq]; exact Set.insert_subset_insert b.hleftHand
   derivation := b.derivation.cast (by rw[Finset.insert_union, ←Finset.union_insert, Finset.image_insert])
@@ -550,10 +552,10 @@ def elimFalsum (b : T ⊢ᶜ[P] Δ) : T ⊢ᶜ[P] Δ.erase ⊥ where
   derivation :=
     b.derivation.elimFalsum.weakening (by simp[Finset.erase_union_distrib]; exact Finset.union_subset_union_right (Finset.erase_subset _ _))
 
-def byAxiom {σ} (hσ : σ ∈ T) (h : Rew.embl σ ∈ Δ) : T ⊢ᶜ[P] Δ where
+def byAxiom {σ} (hσ : σ ∈ T) (h : Rew.emb.hom σ ∈ Δ) : T ⊢ᶜ[P] Δ where
   leftHand := {~σ}
   hleftHand := by simp[hσ]
-  derivation := DerivationCR.em (p := Rew.embl σ) (by simp[h]) (by simp)
+  derivation := DerivationCR.em (p := Rew.emb.hom σ) (by simp[h]) (by simp)
 
 protected def em {p} (hp : p ∈ Δ) (hn : ~p ∈ Δ) : T ⊢ᶜ[P] Δ := (DerivationCR.em hp hn).toDerivationCRWA
 
@@ -566,9 +568,9 @@ def or' {p q} (b : T ⊢ᶜ[P] insert p (insert q Δ)) : T ⊢ᶜ[P] insert (p �
   let b' : T ⊢ᶜ[P] (insert p $ insert q $ insert (p ⋎ q) Δ) := b.weakeningRight (by simp[Finset.Insert.comm _ (p ⋎ q), Finset.subset_insert])
   b'.or (by simp)
 
-def all' {p} (b : T ⊢ᶜ[P] insert (Rew.freel p) (shifts Δ)) : T ⊢ᶜ[P] insert (∀' p) Δ :=
-  let b' : T ⊢ᶜ[P] (insert (Rew.freel p) $ shifts $ insert (∀' p) Δ) :=
-    b.weakeningRight (by simp[Finset.Insert.comm (Rew.freel p), shifts_insert, Finset.subset_insert])
+def all' {p} (b : T ⊢ᶜ[P] insert (Rew.free.hom p) (shifts Δ)) : T ⊢ᶜ[P] insert (∀' p) Δ :=
+  let b' : T ⊢ᶜ[P] (insert (Rew.free.hom p) $ shifts $ insert (∀' p) Δ) :=
+    b.weakeningRight (by simp[Finset.Insert.comm (Rew.free.hom p), shifts_insert, Finset.subset_insert])
   b'.all (by simp)
 
 def ex' {p} {t : SyntacticTerm L} (b : T ⊢ᶜ[P] insert ([→ t].hom p) Δ) : T ⊢ᶜ[P] insert (∃' p) Δ :=
@@ -580,14 +582,14 @@ def cCut {p} (b₁ : T ⊢' insert p Δ) (b₂ : T ⊢' insert (~p) Γ) : T ⊢'
   leftHand := b₁.leftHand ∪ b₂.leftHand
   hleftHand := by simp[b₁.hleftHand, b₂.hleftHand]
   derivation := by
-    have b₁' : ⊢ᶜ insert p (Δ ∪ b₁.leftHand.image Rew.embl) := by simpa using b₁.derivation
-    have b₂' : ⊢ᶜ insert (~p) (Γ ∪ b₂.leftHand.image Rew.embl) := by simpa using b₂.derivation
+    have b₁' : ⊢ᶜ insert p (Δ ∪ b₁.leftHand.image Rew.emb.hom) := by simpa using b₁.derivation
+    have b₂' : ⊢ᶜ insert (~p) (Γ ∪ b₂.leftHand.image Rew.emb.hom) := by simpa using b₂.derivation
     exact (b₁'.cCut b₂').cast (by simp only [←Finset.union_assoc, Finset.union_comm _ Γ, Finset.image_union])
 
 def cCut' {p} (b₁ : T ⊢' insert p Δ) (b₂ : T ⊢' insert (~p) Δ) : T ⊢' Δ := (b₁.cCut b₂).cast (by simp)
 
 protected def rewrite (f : ℕ → SyntacticTerm L) {T : Theory L} {Δ : Sequent L} (b : T ⊢' Δ) :
-    T ⊢' Δ.image (Rew.rewritel f) where
+    T ⊢' Δ.image ((Rew.rewrite f).hom) where
   leftHand := b.leftHand
   hleftHand := b.hleftHand
   derivation := (b.derivation.rewriteCut f).cast
@@ -623,7 +625,7 @@ lemma consistent_iff_empty_sequent {T : Theory L} :
 lemma provable_iff_inConsistent {T : Theory L} :
     Nonempty (T ⊢ σ) ↔ ¬Logic.System.Consistent (insert (~σ) T) :=
   ⟨by rintro ⟨b⟩; simp[consistent_iff_empty_sequent]
-      have : T ⊢' insert (Rew.embl σ) ∅ := b
+      have : T ⊢' insert (Rew.emb.hom σ) ∅ := b
       exact ⟨this.resolution⟩,
    by simp[consistent_iff_empty_sequent]; intro b
       exact ⟨by simpa using b.deduction⟩⟩

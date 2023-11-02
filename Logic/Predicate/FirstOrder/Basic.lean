@@ -1,10 +1,8 @@
 import Logic.Predicate.FirstOrder.Basic.Language
 import Logic.Predicate.FirstOrder.Basic.Term.Term
 import Logic.Predicate.FirstOrder.Basic.Term.Elab
-import Logic.Predicate.FirstOrder.Basic.Term.Meta
 import Logic.Predicate.FirstOrder.Basic.Formula.Formula
 import Logic.Predicate.FirstOrder.Basic.Formula.Elab
-import Logic.Predicate.FirstOrder.Basic.Formula.Meta
 import Logic.Predicate.FirstOrder.Basic.Semantics
 import Logic.Predicate.FirstOrder.Basic.Calculus
 import Logic.Predicate.FirstOrder.Basic.Eq

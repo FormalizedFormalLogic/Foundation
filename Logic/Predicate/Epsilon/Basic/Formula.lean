@@ -100,6 +100,9 @@ end Subformula
 def Theory.epsilonAxiom {k : ℕ} (p : Subsentence L.Epsilon (k + 1)) : Sentence L.Epsilon :=
   “∀* (∃ !p → !(Rew.substsl (Subterm.func p.epsilon (#·) :> (#·)) p))”
 
+def Theory.epsilonSharp (T : Theory L) : Theory L.Epsilon :=
+   T.lMap (L.homEpsilon 0) ∪ ⋃ k, Set.range fun p : Subsentence L.Epsilon (k + 1) => Theory.epsilonAxiom p
+
 end FirstOrder
 
 end LO
