@@ -25,8 +25,8 @@ protected def all_nvar {p} (h : ∀' p ∈ Δ)
   leftHand := b.leftHand
   hleftHand := b.hleftHand
   derivation :=
-    let d₁ : ⊢ᵀ (insert ([→ &(newVar Δ)].hom p) (Δ ∪ b.leftHand.image Rew.embl)) := by simpa using b.derivation
-    let d₂ : ⊢ᵀ insert (∀' p) (Δ ∪ b.leftHand.image Rew.embl) :=
+    let d₁ : ⊢ᵀ (insert ([→ &(newVar Δ)].hom p) (Δ ∪ b.leftHand.image Rew.emb.hom)) := by simpa using b.derivation
+    let d₂ : ⊢ᵀ insert (∀' p) (Δ ∪ b.leftHand.image Rew.emb.hom) :=
       d₁.genelalizeByNewver₀ (by simpa[fvar?] using not_fvar?_newVar h)
         (by simp; rintro q (hq | ⟨σ, _, rfl⟩); { exact not_fvar?_newVar hq }; { simp[fvar?] })
     d₂.cast (Finset.insert_eq_of_mem $ by simp[h])

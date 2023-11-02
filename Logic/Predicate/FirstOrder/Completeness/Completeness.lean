@@ -18,21 +18,21 @@ variable [∀ k, Encodable (L.func k)] [∀ k, Encodable (L.rel k)]
 
 noncomputable def DerivationWA.completeness_of_encodable
   {Γ : Finset (Sentence L)} (h : ∀ M [Inhabited M] [Structure L M], M ⊧* T → ∃ σ ∈ Γ, M ⊧ σ) :
-    T ⊢ᵀ (Γ.image Rew.embl : Sequent L) := by
-  have : WellFounded (SearchTree.Lt T (Γ.image Rew.embl : Sequent L)) := by
+    T ⊢ᵀ (Γ.image Rew.emb.hom : Sequent L) := by
+  have : WellFounded (SearchTree.Lt T (Γ.image Rew.emb.hom : Sequent L)) := by
     by_contra nwf
-    have : ∃ σ ∈ Γ, (Model T (Γ.image Rew.embl : Sequent L)) ⊧ σ := h _ (Model.models nwf)
+    have : ∃ σ ∈ Γ, (Model T (Γ.image Rew.emb.hom : Sequent L)) ⊧ σ := h _ (Model.models nwf)
     rcases this with ⟨σ, hσ, h⟩
-    have : ¬(Model T (Γ.image Rew.embl : Sequent L)) ⊧ σ := by
-      simpa using semanticMainLemmaTop nwf (p := Rew.embl σ) (by simp; exact ⟨σ, hσ, rfl⟩)
+    have : ¬(Model T (Γ.image Rew.emb.hom : Sequent L)) ⊧ σ := by
+      simpa using semanticMainLemmaTop nwf (p := Rew.emb.hom σ) (by simp; exact ⟨σ, hσ, rfl⟩)
     contradiction
   exact syntacticMainLemmaTop this
 
 noncomputable def completeness_of_encodable {σ : Sentence L} :
     T ⊨ σ → T ⊢ σ := fun h => by
-  have : T ⊢ᵀ {Rew.embl σ} := DerivationWA.completeness_of_encodable (T := T) (Γ := {σ}) (fun M i s hM => ⟨σ, by simp, h M s hM⟩)
+  have : T ⊢ᵀ {Rew.emb.hom σ} := DerivationWA.completeness_of_encodable (T := T) (Γ := {σ}) (fun M i s hM => ⟨σ, by simp, h M s hM⟩)
   exact this.toProof
-  
+
 noncomputable instance : Logic.Complete (Sentence L) := ⟨completeness_of_encodable⟩
 
 end Encodable
@@ -64,4 +64,3 @@ noncomputable def completeness {σ : Sentence L} :
 noncomputable instance : Logic.Complete (Sentence L) := ⟨completeness⟩
 
 end FirstOrder
-

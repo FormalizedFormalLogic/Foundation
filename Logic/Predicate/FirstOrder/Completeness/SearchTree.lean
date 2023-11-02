@@ -29,7 +29,7 @@ inductive Redux (T : Theory L) : Code L → Sequent L → Sequent L → Prop
     ∃' p ∈ Γ → Redux T (Code.ex p t) (insert ([→ t].hom p) Γ) Γ
   | exRefl    {Γ : Sequent L} {p : SyntacticSubformula L 1} {t : SyntacticTerm L} :
     ∃' p ∉ Γ → Redux T (Code.ex p t) Γ Γ
-  | id        {Γ : Sequent L} {σ : Sentence L} (hσ : σ ∈ T) : Redux T (Code.id σ) (insert (~Rew.embl σ) Γ) Γ
+  | id        {Γ : Sequent L} {σ : Sentence L} (hσ : σ ∈ T) : Redux T (Code.id σ) (insert (~Rew.emb.hom σ) Γ) Γ
   | idRefl    {Γ : Sequent L} {σ : Sentence L} (hσ : σ ∉ T) : Redux T (Code.id σ) Γ Γ
 
 local notation:25 Δ₁" ≺[" c:25 "] " Δ₂:80 => Redux T c Δ₁ Δ₂
@@ -70,7 +70,7 @@ lemma rank_of_lt {τ₁ τ₂ : SearchTree T Γ} (h : Lt T Γ τ₂ τ₁) : τ�
 lemma seq_of_lt {τ₁ τ₂ : SearchTree T Γ} (h : Lt T Γ τ₂ τ₁) : τ₂.seq ≺⟨τ₁.rank⟩ τ₁.seq := by
   cases h; simp[rank, seq]; assumption
 
-instance : Top (SearchTree T Γ) := ⟨⟨0, Γ, SearchTreeAux.zero⟩⟩ 
+instance : Top (SearchTree T Γ) := ⟨⟨0, Γ, SearchTreeAux.zero⟩⟩
 
 @[simp] lemma rank_top : (⊤ : SearchTree T Γ).rank = 0 := rfl
 
@@ -131,8 +131,8 @@ noncomputable def syntacticMainLemma (σ : SearchTree T Γ) : T ⊢ᵀ σ.seq :=
       { exact ih' (ReduxNat.redux hs $ Redux.exRefl h) } }
     case id σ =>
     { by_cases h : σ ∈ T
-      { have : insert (~Rew.embl σ) Δ₁ ≺[Code.id σ] Δ₁ := Redux.id h
-        have : T ⊢ᵀ insert (~Rew.embl σ) Δ₁ := ih' (ReduxNat.redux hs this)
+      { have : insert (~Rew.emb.hom σ) Δ₁ ≺[Code.id σ] Δ₁ := Redux.id h
+        have : T ⊢ᵀ insert (~Rew.emb.hom σ) Δ₁ := ih' (ReduxNat.redux hs this)
         exact DerivationCRWA.id h this }
       { exact ih' (ReduxNat.redux hs $ Redux.idRefl h) } } }
 
@@ -170,7 +170,7 @@ lemma chainU_val_fst_eq (s : ℕ) : (chainU T Γ s).rank = s := by
   induction' s with s ih <;> simp[SearchTree.rank]
   · exact rfl
   · simpa[ih] using SearchTree.rank_of_lt (chainU_spec nwf s)
-    
+
 lemma chain_spec (s) : ⛓️[s + 1] ≺⟨s⟩ ⛓️[s] :=
   by simpa[chainU_val_fst_eq nwf s] using SearchTree.seq_of_lt (chainU_spec nwf s)
 
@@ -179,7 +179,7 @@ lemma chain_monotone {s u : ℕ} (h : s ≤ u) : ⛓️[s] ⊆ ⛓️[u] := by
   simpa[Nat.add_sub_of_le h] using this (u - s)
   intro d; induction' d with d ih
   · rfl
-  · simp[Nat.add_succ]; exact subset_trans ih $ ReduxNat.antimonotone (chain_spec nwf (s + d))  
+  · simp[Nat.add_succ]; exact subset_trans ih $ ReduxNat.antimonotone (chain_spec nwf (s + d))
 
 lemma chain_spec' (c : Code L) (i : ℕ) : ⛓️[(encode c).pair i + 1] ≺[c] ⛓️[(encode c).pair i] := (chain_spec nwf _).toRedux
 
@@ -191,7 +191,7 @@ lemma chainSet_verum : ⊤ ∉ ⛓️ := by
     generalize ⛓️[(encode (Code.verum : Code L)).pair s + 1] = Δ' at this
     rcases this; assumption
   contradiction
-  
+
 lemma chainSet_axL {k} (r : L.rel k) (v : Fin k → SyntacticTerm L) : rel r v ∉ ⛓️ ∨ nrel r v ∉ ⛓️ := by
   by_contra h
   have : (∃ s₁, rel r v ∈ ⛓️[s₁]) ∧ (∃ s₂, nrel r v ∈ ⛓️[s₂])
@@ -253,7 +253,7 @@ lemma chainSet_ex {p : SyntacticSubformula L 1} (h : ∃' p ∈ ⛓️) : ∀ t,
   { have : ∃' p ∈ ⛓️[(encode $ Code.ex p t).pair s] := chain_monotone nwf (Nat.right_le_pair _ _) hs
     contradiction }
 
-lemma chainSet_id {σ : Sentence L} (h : σ ∈ T) : ~Rew.embl σ ∈ ⛓️ := by
+lemma chainSet_id {σ : Sentence L} (h : σ ∈ T) : ~Rew.emb.hom σ ∈ ⛓️ := by
   have : ⛓️[(encode $ Code.id σ).pair 0 + 1] ≺[Code.id σ] ⛓️[(encode $ Code.id σ).pair 0] := chain_spec' nwf _ _
   generalize hΔ : ⛓️[(encode $ Code.id σ).pair 0 + 1] = Δ
   rw[hΔ] at this; rcases this
@@ -279,7 +279,7 @@ instance Model.structure (T : Theory L) (Γ : Sequent L) : Structure L (Model T 
 lemma semanticMainLemma_val : (p : SyntacticFormula L) → p ∈ ⛓️ → ¬Val (Model.structure T Γ) Subterm.fvar p
   | ⊤,        h => by by_contra; exact chainSet_verum nwf h
   | ⊥,        _ => by simp
-  | rel r v,  h => by { rcases chainSet_axL nwf r v with (hr | hr); { contradiction }; { simpa[eval_rel] using hr } } 
+  | rel r v,  h => by { rcases chainSet_axL nwf r v with (hr | hr); { contradiction }; { simpa[eval_rel] using hr } }
   | nrel r v, h => by simpa[eval_nrel] using h
   | p ⋏ q,    h => by
       simp; intro _ _

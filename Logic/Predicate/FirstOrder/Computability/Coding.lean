@@ -6,7 +6,7 @@ namespace FirstOrder
 
 variable {L : Language.{u}} {μ : Type v}
   [(k : ℕ) → Encodable (L.func k)] [(k : ℕ) → Encodable (L.rel k)] [Encodable μ]
-  
+
 def UTerm.encodable : Encodable (UTerm L μ) := Encodable.ofEquiv (WType (Edge L μ)) (equivW L μ)
 
 def Subterm.encodable : Encodable (Subterm L μ n) :=

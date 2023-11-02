@@ -142,12 +142,12 @@ lemma bind_eq_bind_of_eq (b₁ b₂ : ℕ → UTerm L μ₂) (e₁ e₂ : μ₁ 
     funext i
     apply UTerm.bind_eq_bind_of_eq
     · intro x hx; exact hb x (by simp; exact ⟨i, hx⟩)
-    · simp 
+    · simp
   case nrel k r v =>
     funext i
     apply UTerm.bind_eq_bind_of_eq
     · intro x hx; exact hb x (by simp; exact ⟨i, hx⟩)
-    · simp 
+    · simp
   case and p q ihp ihq =>
     exact ⟨ihp b₁ b₂ e₁ e₂ (fun x hx => hb x (by simp[hx])) he, ihq b₁ b₂ e₁ e₂ (fun x hx => hb x (by simp[hx])) he⟩
   case or p q ihp ihq =>
@@ -395,7 +395,7 @@ lemma encode_rel {k} (r : L.rel k) (v : Fin k → UTerm L μ) :
   { rw[←this]; apply congr_arg; simp }
   simp[WType.SubWType.encode_mk, Encodable.encode_fintypeArrow_isEmpty, Edge]
   rw[encode_prod_val]
-  
+
 lemma encode_nrel {k} (r : L.rel k) (v : Fin k → UTerm L μ) :
     encode (nrel r v) = Nat.pair 1 ((Nat.pair 0 $ 2 * k.pair $ (encode r).pair (encode v)).pair 0) := by
   simp[primcodable, Primcodable.ofEquiv_toEncodable,
@@ -521,7 +521,7 @@ private lemma elim_eq
   (γVerum : σ → γ)
   (γFalsum : σ → γ)
   (γRel : σ → (k : ℕ) × L.rel k × (Fin k → UTerm L μ) → γ)
-  (γNrel : σ → (k : ℕ) × L.rel k × (Fin k → UTerm L μ) → γ)  
+  (γNrel : σ → (k : ℕ) × L.rel k × (Fin k → UTerm L μ) → γ)
   (γAnd : σ → γ × γ → γ)
   (γOr : σ → γ × γ → γ)
   (γAll : σ → γ → γ)
@@ -956,13 +956,13 @@ lemma bv_subtEquiv (p : Subformula L μ n) : (subfEquiv p).val.bv ≤ n := by
   induction p <;> simp
 
 lemma subfEquiv_bind_eq_bind (b : Fin n₁ → Subterm L μ₂ n₂) (e : μ₁ → Subterm L μ₂ n₂) (p : Subformula L μ₁ n₁) :
-    (subfEquiv (Rew.bindl b e p)).val =
+    (subfEquiv ((Rew.bind b e).hom p)).val =
     UFormula.bind (fun x => if hx : x < n₁ then subtEquiv (b ⟨x, hx⟩) else default) (fun x => subtEquiv $ e x) (subfEquiv p) := by
   induction p using rec' generalizing n₂ μ₂ e <;>
     simp[Subterm.subtEquiv_bind_eq_bind, bindq, Rew.rel, Rew.nrel, UFormula.bind,
       ofSubterm_eq_subtEquiv, ofSubformula_eq_subfEquiv, *]
   case hall _ k p ih =>
-    simp[Rew.q_bind, Rew.bindl, ih, bindq_eq_bind]
+    simp[Rew.q_bind, ih, bindq_eq_bind]
     apply UFormula.bind_eq_bind_of_eq
     · intro x hx; simp[shiftb]
       cases' x with x <;> simp[Nat.succ_eq_add_one]
@@ -970,7 +970,7 @@ lemma subfEquiv_bind_eq_bind (b : Fin n₁ → Subterm L μ₂ n₂) (e : μ₁ 
       simp[this, Subterm.subtEquiv_bShift_eq_bShift]
     · intro x; exact Subterm.subtEquiv_bShift_eq_bShift (e x)
   case hex _ k p ih =>
-    simp[Rew.q_bind, Rew.bindl, ih, bindq_eq_bind]
+    simp[Rew.q_bind, ih, bindq_eq_bind]
     apply UFormula.bind_eq_bind_of_eq
     · intro x hx; simp[shiftb]
       cases' x with x <;> simp[Nat.succ_eq_add_one]
@@ -981,7 +981,7 @@ lemma subfEquiv_bind_eq_bind (b : Fin n₁ → Subterm L μ₂ n₂) (e : μ₁ 
 variable {σ : Type*} {μ₁ : Type*} {μ₂ : Type*} [Primcodable μ₁] [Primcodable μ₂] [Primcodable σ]
 
 lemma bind_primrec {b : σ → Fin n₁ → Subterm L μ₂ n₂} {e : σ → μ₁ → Subterm L μ₂ n₂} {p : σ → Subformula L μ₁ n₁}
-  (hb : Primrec b) (he : Primrec₂ e) (hp : Primrec p) : Primrec (fun x => Rew.bindl (b x) (e x) (p x)) := by
+  (hb : Primrec b) (he : Primrec₂ e) (hp : Primrec p) : Primrec (fun x => (Rew.bind (b x) (e x)).hom (p x)) := by
     letI : ∀ n, Primcodable { t : UTerm L μ₁ // t.bv ≤ n } := fun n => Primcodable.subtype (nat_le.comp UTerm.bv_primrec (Primrec.const n))
     letI : ∀ n, Primcodable { t : UTerm L μ₂ // t.bv ≤ n } := fun n => Primcodable.subtype (nat_le.comp UTerm.bv_primrec (Primrec.const n))
     letI : ∀ n , Primcodable { p : UFormula L μ₁ // p.bv ≤ n } := fun n => Primcodable.subtype (nat_le.comp bv_primrec (Primrec.const n))
@@ -997,27 +997,27 @@ lemma bind_primrec {b : σ → Fin n₁ → Subterm L μ₂ n₂} {e : σ → μ
       simp[Encodable.encode_ofEquiv subfEquiv, Encodable.Subtype.encode_eq, subfEquiv_bind_eq_bind]
 
 lemma substs_primrec :
-    Primrec₂ (fun v p => Rew.substsl v p : (Fin n → Subterm L μ n') → Subformula L μ n → Subformula L μ n') := by
-  have : Primrec₂ (fun v p => Rew.bindl v (&·) p : (Fin n → Subterm L μ n') → Subformula L μ n → Subformula L μ n') :=
+    Primrec₂ (fun v p => (Rew.substs v).hom p : (Fin n → Subterm L μ n') → Subformula L μ n → Subformula L μ n') := by
+  have : Primrec₂ (fun v p => (Rew.bind v (&·)).hom p : (Fin n → Subterm L μ n') → Subformula L μ n → Subformula L μ n') :=
     to₂' <| bind_primrec fst (Subterm.fvar_primrec.comp snd) snd
-  exact this.of_eq <| by { intro v p; unfold Rew.substsl; rw[Rew.eq_bind (Rew.substs v)]; simp[Function.comp] }
+  exact this.of_eq <| by { intro v p; rw[Rew.eq_bind (Rew.substs v)]; simp[Function.comp] }
 
 lemma substs₁_primrec :
-    Primrec₂ (fun t p => Rew.substsl ![t] p : Subterm L μ n' → Subformula L μ 1 → Subformula L μ n') :=
-  substs_primrec.comp₂ (Primrec₂.encode_iff.mp $ 
+    Primrec₂ (fun t p => (Rew.substs ![t]).hom p : Subterm L μ n' → Subformula L μ 1 → Subformula L μ n') :=
+  substs_primrec.comp₂ (Primrec₂.encode_iff.mp $
     (Primrec.encode.comp₂ (list_cons.comp₂ Primrec₂.left (Primrec₂.const []))).of_eq
     <| by intro x _; simp[encode_finArrow]) Primrec₂.right
 
-lemma shift_primrec : Primrec (Rew.shiftl : SyntacticSubformula L n → SyntacticSubformula L n) := by
-  unfold Rew.shiftl; rw[Rew.eq_bind Rew.shift]
+lemma shift_primrec : Primrec (Rew.shift.hom : SyntacticSubformula L n → SyntacticSubformula L n) := by
+  rw[Rew.eq_bind Rew.shift]
   exact bind_primrec (const _) (Subterm.fvar_primrec.comp $ succ.comp snd) Primrec.id
 
-lemma free_primrec : Primrec (Rew.freel : SyntacticSubformula L (n + 1) → SyntacticSubformula L n) := by
-  unfold Rew.freel; rw[Rew.eq_bind Rew.free]
+lemma free_primrec : Primrec (Rew.free.hom : SyntacticSubformula L (n + 1) → SyntacticSubformula L n) := by
+  rw[Rew.eq_bind Rew.free]
   exact bind_primrec (const _) (Subterm.fvar_primrec.comp $ succ.comp snd) Primrec.id
 
-lemma emb_primrec : Primrec (Rew.embl : Sentence L → Formula L μ) := by
-  unfold Rew.embl; rw[Rew.eq_bind Rew.emb]; simp[Function.comp]
+lemma emb_primrec : Primrec (Rew.emb.hom : Sentence L → Formula L μ) := by
+  rw[Rew.eq_bind Rew.emb]; simp[Function.comp]
   exact bind_primrec (const _)
     (Primrec₂.option_some_iff.mp $ (Primrec₂.const none).of_eq <| by rintro _ ⟨⟩) Primrec.id
 

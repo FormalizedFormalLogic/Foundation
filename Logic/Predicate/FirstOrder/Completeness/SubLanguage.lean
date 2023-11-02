@@ -71,19 +71,19 @@ noncomputable def langFunc : ∀ {n}, Subformula L μ n → Finset (Σ k, L.func
   | _, ⊥        => ∅
   | _, rel  _ v => Finset.biUnion Finset.univ (fun i => (v i).lang)
   | _, nrel _ v => Finset.biUnion Finset.univ (fun i => (v i).lang)
-  | _, p ⋏ q    => langFunc p ∪ langFunc q 
-  | _, p ⋎ q    => langFunc p ∪ langFunc q 
-  | _, ∀' p     => langFunc p 
-  | _, ∃' p     => langFunc p 
+  | _, p ⋏ q    => langFunc p ∪ langFunc q
+  | _, p ⋎ q    => langFunc p ∪ langFunc q
+  | _, ∀' p     => langFunc p
+  | _, ∃' p     => langFunc p
 
 noncomputable def langRel : ∀ {n}, Subformula L μ n → Finset (Σ k, L.rel k)
   | _, ⊤        => ∅
   | _, ⊥        => ∅
   | _, rel  r _ => {⟨_, r⟩}
   | _, nrel r _ => {⟨_, r⟩}
-  | _, p ⋏ q    => langRel p ∪ langRel q 
-  | _, p ⋎ q    => langRel p ∪ langRel q 
-  | _, ∀' p     => langRel p 
+  | _, p ⋏ q    => langRel p ∪ langRel q
+  | _, p ⋎ q    => langRel p ∪ langRel q
+  | _, ∀' p     => langRel p
   | _, ∃' p     => langRel p
 
 lemma langFunc_rel_ss {k} (r : L.rel k) (v : Fin k → Subterm L μ n) (i) :
@@ -103,7 +103,7 @@ def toSubLanguage' (pf : ∀ k, L.func k → Prop) (pr : ∀ k, L.rel k → Prop
       nrel ⟨r, hr _ r (by simp[langRel])⟩
         (fun i => (v i).toSubLanguage' pf pr (fun k f h => hf k f (langFunc_rel_ss r v i h)))
   | _, p ⋏ q,    hf, hr =>
-      toSubLanguage' pf pr p (fun k f h => hf k f (Finset.mem_union_left _ h)) (fun k r h => hr k r (Finset.mem_union_left _ h)) ⋏ 
+      toSubLanguage' pf pr p (fun k f h => hf k f (Finset.mem_union_left _ h)) (fun k r h => hr k r (Finset.mem_union_left _ h)) ⋏
       toSubLanguage' pf pr q (fun k f h => hf k f (Finset.mem_union_right _ h)) (fun k r h => hr k r (Finset.mem_union_right _ h))
   | _, p ⋎ q,    hf, hr =>
       toSubLanguage' pf pr p (fun k f h => hf k f (Finset.mem_union_left _ h)) (fun k r h => hr k r (Finset.mem_union_left _ h)) ⋎
@@ -124,7 +124,7 @@ noncomputable def languageRelIndexed (p : Subformula L μ n) (k) : Finset (L.rel
   Finset.preimage (langRel p) (Sigma.mk k) (Set.injOn_of_injective sigma_mk_injective _)
 
 abbrev languageFinset (Γ : Finset (Subformula L μ n)) : Language :=
-  Language.subLanguage L (fun k f => ∃ p ∈ Γ, ⟨k, f⟩ ∈ langFunc p) (fun k r => ∃ p ∈ Γ, ⟨k, r⟩ ∈ langRel p) 
+  Language.subLanguage L (fun k f => ∃ p ∈ Γ, ⟨k, f⟩ ∈ langFunc p) (fun k r => ∃ p ∈ Γ, ⟨k, r⟩ ∈ langRel p)
 
 noncomputable instance (Γ : Finset (Subformula L μ n)) (k) : Fintype ((languageFinset Γ).func k) :=
   Fintype.subtype (Γ.biUnion (languageFuncIndexed · k)) (by simp[languageFuncIndexed])
@@ -178,7 +178,7 @@ lemma val_lMap
     (s₁ : Structure L₁ M) (t : Subterm L₁ μ n) :
     Subterm.val (s₁.extendStructure Φ) e ε (t.lMap Φ) = Subterm.val s₁ e ε t := by
   induction t <;> simp[*, Subterm.lMap_func, Subterm.val_func]
-  case func k f v ih => 
+  case func k f v ih =>
     exact extendStructure.func Φ s₁ (injf k) f (fun i => Subterm.val s₁ e ε (v i))
 
 open Subformula

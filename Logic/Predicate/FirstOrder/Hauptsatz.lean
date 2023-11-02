@@ -24,7 +24,7 @@ lemma ne_and_of_isVType {p q r : Subformula L μ n} (h : isVType p) : p ≠ q �
 
 lemma ne_all_of_isVType {p : Subformula L μ n} {q} (h : isVType p) : p ≠ ∀' q := by rintro rfl; simp[isVType] at h
 
-@[simp] lemma isVType_shift_iff {p : SyntacticSubformula L n} : isVType (Rew.shiftl p) = isVType p := by
+@[simp] lemma isVType_shift_iff {p : SyntacticSubformula L n} : isVType (Rew.shift.hom p) = isVType p := by
   induction p using rec' <;> simp[Rew.rel, Rew.nrel, isVType]
 
 lemma isVType_neg_true_of_eq_false {p : SyntacticSubformula L n} : isVType p = false → isVType (~p) = true := by
@@ -34,7 +34,7 @@ end Subformula
 
 namespace DerivationCR
 
-variable {P : SyntacticFormula L → Prop} (hP : ∀ f p, P p → P (Rew.rewritel f p)) {Δ Δ₁ Δ₂ Γ : Sequent L}
+variable {P : SyntacticFormula L → Prop} (hP : ∀ f p, P p → P ((Rew.rewrite f).hom p)) {Δ Δ₁ Δ₂ Γ : Sequent L}
 
 noncomputable def andInversion₁Aux : {Δ : Sequent L} → (d : ⊢ᶜ[P] Δ) → (p q : SyntacticFormula L) → ⊢ᶜ[P] insert p (Δ.erase (p ⋏ q))
   | _, axL Δ r v hpos hneg, p, q => axL _ r v (by simp[hpos]) (by simp[hneg])
@@ -54,8 +54,8 @@ noncomputable def andInversion₁Aux : {Δ : Sequent L} → (d : ⊢ᶜ[P] Δ) �
       (andInversion₁Aux d p q).weakening (by simp[Finset.subset_iff]; rintro x hx (rfl | rfl | hhx) <;> simp[*])
     (or _ _ _ this).cast (by simp[Finset.erase_insert_of_ne, Finset.Insert.comm p])
   | _, all Δ r d,           p, q =>
-    have : ⊢ᶜ[P] insert (Rew.freel r) (shifts $ insert p $ Δ.erase (p ⋏ q)) :=
-      (andInversion₁Aux d (Rew.shiftl p) (Rew.shiftl q)).weakening
+    have : ⊢ᶜ[P] insert (Rew.free.hom r) (shifts $ insert p $ Δ.erase (p ⋏ q)) :=
+      (andInversion₁Aux d (Rew.shift.hom p) (Rew.shift.hom q)).weakening
         (by simp[shifts_insert, shifts_erase, Finset.subset_iff]; rintro x hx (rfl | hhx) <;> simp[*])
     (all _ _ this).cast (by simp[Finset.erase_insert_of_ne, Finset.Insert.comm p])
   | _, ex Δ t r d,          p, q =>
@@ -69,7 +69,7 @@ noncomputable def andInversion₁Aux : {Δ : Sequent L} → (d : ⊢ᶜ[P] Δ) �
       (andInversion₁Aux dΓ p q).weakening (by simp[Finset.subset_iff]; rintro x hx (rfl | hhx) <;> simp[*])
     (cut _ _ r hr dΔ dΓ).cast (by simp[Finset.erase_union])
 
-noncomputable def andInversion₁ {p q} (d : ⊢ᶜ[P] insert (p ⋏ q) Δ) : ⊢ᶜ[P] insert p Δ := 
+noncomputable def andInversion₁ {p q} (d : ⊢ᶜ[P] insert (p ⋏ q) Δ) : ⊢ᶜ[P] insert p Δ :=
   (andInversion₁Aux d p q).weakening (by simp; exact Finset.insert_subset_insert _ (Finset.erase_subset _ _))
 
 noncomputable def andInversion₂Aux : {Δ : Sequent L} → ⊢ᶜ[P] Δ → (p q : SyntacticFormula L) → ⊢ᶜ[P] insert q (Δ.erase (p ⋏ q))
@@ -90,8 +90,8 @@ noncomputable def andInversion₂Aux : {Δ : Sequent L} → ⊢ᶜ[P] Δ → (p 
       (andInversion₂Aux d p q).weakening (by simp[Finset.subset_iff]; rintro x hx (rfl | rfl | hhx) <;> simp[*])
     (or _ _ _ this).cast (by simp[Finset.erase_insert_of_ne, Finset.Insert.comm q])
   | _, all Δ r d,           p, q =>
-    have : ⊢ᶜ[P] insert (Rew.freel r) (shifts $ insert q $ Δ.erase (p ⋏ q)) :=
-      (andInversion₂Aux d (Rew.shiftl p) (Rew.shiftl q)).weakening
+    have : ⊢ᶜ[P] insert (Rew.free.hom r) (shifts $ insert q $ Δ.erase (p ⋏ q)) :=
+      (andInversion₂Aux d (Rew.shift.hom p) (Rew.shift.hom q)).weakening
         (by simp[shifts_insert, shifts_erase, Finset.subset_iff]; rintro x hx (rfl | hhx) <;> simp[*])
     (all _ _ this).cast (by simp[Finset.erase_insert_of_ne, Finset.Insert.comm q])
   | _, ex Δ t r d,          p, q =>
@@ -105,7 +105,7 @@ noncomputable def andInversion₂Aux : {Δ : Sequent L} → ⊢ᶜ[P] Δ → (p 
       (andInversion₂Aux dΓ p q).weakening (by simp[Finset.subset_iff]; rintro x hx (rfl | hhx) <;> simp[*])
     (cut _ _ r hr dΔ dΓ).cast (by simp[Finset.erase_union])
 
-noncomputable def andInversion₂ {p q} (d : ⊢ᶜ[P] insert (p ⋏ q) Δ) : ⊢ᶜ[P] insert q Δ := 
+noncomputable def andInversion₂ {p q} (d : ⊢ᶜ[P] insert (p ⋏ q) Δ) : ⊢ᶜ[P] insert q Δ :=
   (andInversion₂Aux d p q).weakening (by simp; exact Finset.insert_subset_insert _ (Finset.erase_subset _ _))
 
 
@@ -133,7 +133,7 @@ noncomputable def allInversionAux : {Δ : Sequent L} → ⊢ᶜ[P] Δ →
         have : d'.length = d.length := by simp
         exact (allInversionAux d' p t).weakening (by simp[Finset.subset_iff]; rintro x hx (rfl | hhx) <;> simp[*])
       · have ne : ∀' p' ≠ ∀' p := by simpa using e
-        have : ⊢ᶜ[P] (insert (Rew.freel p') $ shifts $ insert ([→ t].hom p) $ Δ.erase (∀' p)) :=
+        have : ⊢ᶜ[P] (insert (Rew.free.hom p') $ shifts $ insert ([→ t].hom p) $ Δ.erase (∀' p)) :=
           (allInversionAux d (Rew.shift.hom p) (Rew.shift t)).weakening (by
             simp[←Rew.hom_comp_app, Rew.shift_comp_substs1, shifts_insert, shifts_erase, Finset.subset_iff];
             rintro x hhx (rfl | hx) <;> simp[*]; exact Or.inr (Or.inr hhx))
@@ -168,7 +168,7 @@ noncomputable def falsumElimAux : {Δ : Sequent L} → ⊢ᶜ[P] Δ → ⊢ᶜ[P
       d.falsumElimAux.weakening (by simp[Finset.subset_iff]; rintro x hx (rfl | hhx) <;> simp[*])
     (or _ _ _ this).cast (by simp[Finset.erase_insert_of_ne])
   | _, all Δ p d           =>
-    have : ⊢ᶜ[P] (insert (Rew.freel p) (shifts $ Δ.erase ⊥)) :=
+    have : ⊢ᶜ[P] (insert (Rew.free.hom p) (shifts $ Δ.erase ⊥)) :=
       d.falsumElimAux.weakening
         (by {simp[Finset.subset_iff, shifts_eq_image]; rintro x hx (rfl | ⟨y, hy, rfl⟩); { exact Or.inl rfl };
              { exact Or.inr ⟨y, ⟨by rintro rfl; simp at hx, hy⟩, rfl⟩ } } )
@@ -188,7 +188,7 @@ noncomputable def reductionAux {i} : {Δ : Sequent L} →
     {Γ : Sequent L} → ⊢ᶜ[< i] insert (~p) Γ → ⊢ᶜ[< i] Δ.erase p ∪ Γ
   | _, axL Δ r v hpos hneg,  p, _,  _,  Γ, dΓ => by
     by_cases e₁ : p = rel r v
-    · exact dΓ.weakening (by simp[e₁, hpos, hneg, Finset.subset_iff]; intro x hx; exact Or.inr hx) 
+    · exact dΓ.weakening (by simp[e₁, hpos, hneg, Finset.subset_iff]; intro x hx; exact Or.inr hx)
     · by_cases e₂ : p = nrel r v
       · exact dΓ.weakening (by simp[e₂, hpos, hneg, Finset.subset_iff]; intro x hx; exact Or.inr hx)
       · exact axL _ r v (by simp[Ne.symm e₁, hpos]) (by simp[Ne.symm e₂, hneg])
@@ -207,8 +207,8 @@ noncomputable def reductionAux {i} : {Δ : Sequent L} →
     exact (and _ _ _ dr ds).cast (by simp[Finset.erase_insert_of_ne (Ne.symm e)])
   | _, all Δ q d,            p, tp, hp, Γ, dΓ => by
     have e : p ≠ ∀' q := ne_all_of_isVType tp
-    have : ⊢ᶜ[< i] (insert (~Rew.shiftl p) (shifts Γ)) := (dΓ.shift (by simp)).cast (by simp[shifts_insert])
-    have : ⊢ᶜ[< i] insert (Rew.freel q) (shifts $ Δ.erase p ∪ Γ) :=
+    have : ⊢ᶜ[< i] (insert (~Rew.shift.hom p) (shifts Γ)) := (dΓ.shift (by simp)).cast (by simp[shifts_insert])
+    have : ⊢ᶜ[< i] insert (Rew.free.hom q) (shifts $ Δ.erase p ∪ Γ) :=
       (reductionAux d (by simp[tp]) (by simp[hp]) this).weakening
         (by simp[Finset.subset_iff]; rintro x (⟨hx, (rfl | hhx)⟩ | hhx);
             · simp[*]
@@ -288,7 +288,7 @@ noncomputable def toClx : {Δ : Sequent L} → ⊢ᶜ Δ → (i : ℕ) × ⊢ᶜ
 noncomputable def hauptsatz : ⊢ᶜ Δ → ⊢ᵀ Δ := fun d => hauptsatzClx d.toClx.2
 
 lemma iff_cut : Nonempty (⊢ᵀ Δ) ↔ Nonempty (⊢ᶜ Δ) :=
-  ⟨by { rintro ⟨d⟩; exact ⟨cutWeakeningCut d⟩ }, by rintro ⟨d⟩; exact ⟨d.hauptsatz⟩⟩
+  ⟨by rintro ⟨d⟩; exact ⟨cutWeakeningCut d⟩, by rintro ⟨d⟩; exact ⟨d.hauptsatz⟩⟩
 
 end DerivationCR
 

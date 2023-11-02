@@ -69,8 +69,8 @@ def isProper : ProofList L → Bool
   | (Code.verum,   Γ) :: l => isProper l && ⊤ ∈ Γ
   | (Code.and p q, Γ) :: l => isProper l && p ⋏ q ∈ Γ && p :: Γ ∈ sequents l && q :: Γ ∈ sequents l
   | (Code.or p q,  Γ) :: l => isProper l && p ⋎ q ∈ Γ && p :: q :: Γ ∈ sequents l
-  | (Code.all p,   Γ) :: l => isProper l && ∀' p ∈ Γ && Rew.freel p :: Γ.map Rew.shiftl ∈ sequents l
-  | (Code.ex p t,  Γ) :: l => isProper l && ∃' p ∈ Γ && Rew.substsl ![t] p :: Γ ∈ sequents l
+  | (Code.all p,   Γ) :: l => isProper l && ∀' p ∈ Γ && Rew.free.hom p :: Γ.map Rew.shift.hom ∈ sequents l
+  | (Code.ex p t,  Γ) :: l => isProper l && ∃' p ∈ Γ && (Rew.substs ![t]).hom p :: Γ ∈ sequents l
   | (Code.wk Δ,    Γ) :: l => isProper l && Δ ⊆ Γ && Δ ∈ sequents l
 
 private def F (Γ : List (SyntacticFormula L)) (seq : List (List (SyntacticFormula L))) : Code L → Bool := fun c =>
@@ -79,8 +79,8 @@ private def F (Γ : List (SyntacticFormula L)) (seq : List (List (SyntacticFormu
   <| fun c => c.casesOn (fun _ => ⊤ ∈ Γ)
   <| fun c => c.casesOn (fun p => p.1 ⋏ p.2 ∈ Γ && p.1 :: Γ ∈ seq && p.2 :: Γ ∈ seq)
   <| fun c => c.casesOn (fun p => p.1 ⋎ p.2 ∈ Γ && p.1 :: p.2 :: Γ ∈ seq)
-  <| fun c => c.casesOn (fun p => ∀' p ∈ Γ && Rew.freel p :: Γ.map Rew.shiftl ∈ seq)
-  <| fun c => c.casesOn (fun p => ∃' p.1 ∈ Γ && Rew.substsl ![p.2] p.1 :: Γ ∈ seq)
+  <| fun c => c.casesOn (fun p => ∀' p ∈ Γ && Rew.free.hom p :: Γ.map Rew.shift.hom ∈ seq)
+  <| fun c => c.casesOn (fun p => ∃' p.1 ∈ Γ && (Rew.substs ![p.2]).hom p.1 :: Γ ∈ seq)
   <| fun Δ => Δ ⊆ Γ && Δ ∈ seq
 
 section
@@ -249,10 +249,10 @@ noncomputable def ofDerivation : {Γ : Sequent L} → ⊢ᵀ Γ → ProofList L
     (Code.wk (insert p $ insert q Γ).toList, p :: q :: (insert (p ⋎ q) Γ).toList) :: ofDerivation bpq
   | _, DerivationCR.all Γ p b       =>
     (Code.all p, (insert (∀' p) Γ).toList) ::
-    (Code.wk (insert (Rew.freel p) $ shifts Γ).toList, Rew.freel p :: (insert (∀' p) Γ).toList.map Rew.shiftl) :: ofDerivation b
+    (Code.wk (insert (Rew.free.hom p) $ shifts Γ).toList, Rew.free.hom p :: (insert (∀' p) Γ).toList.map Rew.shift.hom) :: ofDerivation b
   | _, DerivationCR.ex Γ t p b      =>
     (Code.ex p t, (insert (∃' p) Γ).toList) ::
-    (Code.wk (insert (Rew.substsl ![t] p) Γ).toList, Rew.substsl ![t] p :: (insert (∃' p) Γ).toList) :: ofDerivation b
+    (Code.wk (insert ((Rew.substs ![t]).hom p) Γ).toList, (Rew.substs ![t]).hom p :: (insert (∃' p) Γ).toList) :: ofDerivation b
 
 lemma mem_ofDerivation {Γ : Sequent L} (b : ⊢ᵀ Γ) : Γ.toList ∈ sequents (ofDerivation b) := by
   cases b <;> simp[ofDerivation, sequents]
@@ -287,17 +287,17 @@ lemma isProper_ofDerivation : ∀ {Γ : Sequent L} (b : ⊢ᵀ Γ), isProper (of
   | _, DerivationCR.ex Γ t p b      => by
     simp[isProper, sequents_cons, List.mem_cons_cons, mem_ofDerivation]
     exact ⟨isProper_ofDerivation b, by simp[List.subset_def]; intro x hx; simp[hx]⟩
-  
+
 lemma derivable_iff_isProper {Γ : Sequent L} : Nonempty (⊢ᵀ Γ) ↔ ∃ l, isProper l ∧ Γ.toList ∈ sequents l :=
   ⟨by rintro ⟨b⟩; exact ⟨ofDerivation b, isProper_ofDerivation b, mem_ofDerivation b⟩,
    by rintro ⟨l, hl⟩; rcases derivation_of_isProper l hl.1 _ hl.2 with ⟨d⟩; exact ⟨d.cast (by simp)⟩⟩
 
 lemma provable_iff {T : Theory L} [DecidablePred T] {σ : Sentence L} :
-    Nonempty (T ⊢ σ) ↔ ∃ l, ∃ U : List (Sentence L), (U.map (~·)).all (T ·) ∧ (σ :: U).map Rew.embl ∈ sequents l ∧ isProper l := by
+    Nonempty (T ⊢ σ) ↔ ∃ l, ∃ U : List (Sentence L), (U.map (~·)).all (T ·) ∧ (σ :: U).map Rew.emb.hom ∈ sequents l ∧ isProper l := by
   exact ⟨by
     rintro ⟨U, hU, d⟩
     rcases derivable_iff_isProper.mp (iff_cut.mpr ⟨d⟩) with ⟨l, hl, hmem⟩
-    let l' := (Code.wk ((insert σ U).image Rew.embl).toList, ((σ :: U.toList).map Rew.embl)) :: l
+    let l' := (Code.wk ((insert σ U).image Rew.emb.hom).toList, ((σ :: U.toList).map Rew.emb.hom)) :: l
     have hl' : isProper l' := by simp[isProper, hl]; exact ⟨by simp[List.subset_def], by simp[Finset.insert_eq, hmem]⟩
     exact ⟨l', U.toList, by
       simp[List.subsetSet]; intro x hx
@@ -305,7 +305,7 @@ lemma provable_iff {T : Theory L} [DecidablePred T] {σ : Sentence L} :
       rcases this with ⟨y, hy, rfl⟩; simpa[hy], by simp, hl'⟩,
   by rintro ⟨l, U, hU, hl, hproper⟩
      rcases derivation_of_isProper l hproper _ hl with ⟨d⟩
-     exact ⟨{ 
+     exact ⟨{
        leftHand := U.toFinset
        hleftHand := by intro x; simp; intro hx; exact ⟨~x, by { simp at hU; exact ⟨hU x hx, by simp⟩ }⟩
        derivation := cutWeakeningCut (d.cast (by simp[List.toFinset_map, Finset.insert_eq])) }⟩⟩
@@ -319,7 +319,7 @@ open Derivation ProofList
 def provFn (T : Theory L) [DecidablePred T] : ℕ → ℕ → ℕ := fun x e =>
   (decode x : Option (Sentence L)).casesOn 0
   <| fun σ => (decode e : Option (ProofList L × List (Sentence L))).casesOn 0
-  <| fun A => bif (A.2.map (~·)).all (T ·) && (σ :: A.2).map Rew.embl ∈ sequents A.1 && isProper A.1 then 1 else 0
+  <| fun A => bif (A.2.map (~·)).all (T ·) && (σ :: A.2).map Rew.emb.hom ∈ sequents A.1 && isProper A.1 then 1 else 0
 
 lemma provable_iff_provFn {T : Theory L} [DecidablePred T] {σ : Sentence L} :
     Nonempty (T ⊢ σ) ↔ ∃ e, provFn T (encode σ) e = 1 := by

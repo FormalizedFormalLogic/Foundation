@@ -249,7 +249,7 @@ private lemma elim_eq {b : σ → ℕ → γ} {e : σ → μ → γ} {u : σ →
   induction t <;> simp[elim, WType.elimL_mk, F, *]
   { simp[Edge]; congr; funext i; rw[fintypeArrowEquivFinArrow_app]; congr; ext; simp[Fin.castIso_eq_cast] }
 
-lemma elim_primrec_param {σ γ} [Primcodable σ] [Primcodable γ] 
+lemma elim_primrec_param {σ γ} [Primcodable σ] [Primcodable γ]
   {b : σ → ℕ → γ} {e : σ → μ → γ} {u : σ → ((k : ℕ) × L.func k) × List γ → γ} {t : σ → UTerm L μ}
   (hb : Primrec₂ b) (he : Primrec₂ e) (hu : Primrec₂ u) (ht : Primrec t) :
     Primrec (fun x => elim (b x) (e x) (fun {k} f v => u x (⟨k, f⟩, List.ofFn v)) (t x)) := by
@@ -261,14 +261,14 @@ lemma elim_primrec_param {σ γ} [Primcodable σ] [Primcodable γ]
 
 lemma elim_primrec_param_opt {σ γ} [Primcodable σ] [Inhabited γ] [Primcodable γ]
   {b : σ → ℕ → γ} {e : σ → μ → γ} {t : σ → UTerm L μ}
-  (hb : Primrec₂ b) (he : Primrec₂ e) 
+  (hb : Primrec₂ b) (he : Primrec₂ e)
   (u : σ → {k : ℕ} → L.func k → (Fin k → γ) → γ) {uOpt : σ → ((k : ℕ) × L.func k) × List γ → Option γ}
   (hu : Primrec₂ uOpt) (ht : Primrec t)
   (H : ∀ (x : σ) {k} (f : L.func k) (v : Fin k → γ), uOpt x (⟨k, f⟩, List.ofFn v) = some (u x f v)) :
     Primrec (fun x => elim (b x) (e x) (u x) (t x)) :=
   (elim_primrec_param hb he (option_iget.comp₂ hu) ht).of_eq (fun _ => by simp[H])
 
-lemma elim_primrec {γ} [Primcodable γ] 
+lemma elim_primrec {γ} [Primcodable γ]
   {b : ℕ → γ} {e : μ → γ} {u : ((k : ℕ) × L.func k) → List γ → γ} (hb : Primrec b) (he : Primrec e) (hu : Primrec₂ u) :
     Primrec (elim b e (fun {k} f v => u ⟨k, f⟩ (List.ofFn v))) :=
   elim_primrec_param (σ := UTerm L μ)
