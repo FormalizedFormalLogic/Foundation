@@ -338,7 +338,23 @@ def add₁ (L₁ : Language.{u₁}) (L₂ : Language.{u₂}) : L₁ →ᵥ L₁.
 
 def add₂ (L₁ : Language.{u₁}) (L₂ : Language.{u₂}) : L₂ →ᵥ L₁.add L₂ := ⟨Sum.inr, Sum.inr⟩
 
+@[simp] lemma func_add₁ (L₁ : Language.{u₁}) (L₂ : Language.{u₂}) (f : L₁.func k) :
+    (add₁ L₁ L₂).func f = Sum.inl f := rfl
+
+@[simp] lemma rel_add₁ (L₁ : Language.{u₁}) (L₂ : Language.{u₂}) (r : L₁.rel k) :
+    (add₁ L₁ L₂).rel r = Sum.inl r := rfl
+
+@[simp] lemma func_add₂ (L₁ : Language.{u₁}) (L₂ : Language.{u₂}) (f : L₂.func k) :
+    (add₂ L₁ L₂).func f = Sum.inr f := rfl
+
+@[simp] lemma rel_add₂ (L₁ : Language.{u₁}) (L₂ : Language.{u₂}) (r : L₂.rel k) :
+    (add₂ L₁ L₂).rel r = Sum.inr r := rfl
+
 def sigma (L : ι → Language) (i : ι) : L i →ᵥ Language.sigma L := ⟨fun f => ⟨i, f⟩, fun r => ⟨i, r⟩⟩
+
+@[simp] lemma func_sigma (L : ι → Language) (i : ι) (f : (L i).func k) : (sigma L i).func f = ⟨i, f⟩ := rfl
+
+@[simp] lemma rel_sigma (L : ι → Language) (i : ι) (r : (L i).rel k) : (sigma L i).rel r = ⟨i, r⟩ := rfl
 
 end Hom
 

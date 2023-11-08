@@ -551,6 +551,90 @@ end semanticGe
 
 end Theory
 
+namespace Structure
+
+section ofFunc
+
+variable (F : ℕ → Type*) {M : Type*} (fF : {k : ℕ} → (f : F k) → (Fin k → M) → M)
+
+def ofFunc : Structure (Language.ofFunc F) M where
+  func := fun _ f v => fF f v
+  rel  := fun _ r _ => r.elim
+
+lemma func_ofFunc {k} (f : F k) (v : Fin k → M) : (ofFunc F fF).func f v = fF f v := rfl
+
+end ofFunc
+
+section add
+
+variable (L₁ : Language.{u₁}) (L₂ : Language.{u₂}) (M : Type*) [str₁ : Structure L₁ M] [str₂ : Structure L₂ M]
+
+instance add : Structure (L₁.add L₂) M where
+  func := fun _ f v =>
+    match f with
+    | Sum.inl f => func f v
+    | Sum.inr f => func f v
+  rel := fun _ r v =>
+    match r with
+    | Sum.inl r => rel r v
+    | Sum.inr r => rel r v
+
+variable {L₁ L₂ M}
+
+@[simp] lemma func_sigma_inl {k} (f : L₁.func k) (v : Fin k → M) : (add L₁ L₂ M).func (Sum.inl f) v = func f v := rfl
+
+@[simp] lemma func_sigma_inr {k} (f : L₂.func k) (v : Fin k → M) : (add L₁ L₂ M).func (Sum.inr f) v = func f v := rfl
+
+@[simp] lemma rel_sigma_inl {k} (r : L₁.rel k) (v : Fin k → M) : (add L₁ L₂ M).rel (Sum.inl r) v ↔ rel r v := iff_of_eq rfl
+
+@[simp] lemma rel_sigma_inr {k} (r : L₂.rel k) (v : Fin k → M) : (add L₁ L₂ M).rel (Sum.inr r) v ↔ rel r v := iff_of_eq rfl
+
+@[simp] lemma val_lMap_add₁ {n} (t : Subterm L₁ μ n) (e : Fin n → M) (ε : μ → M) :
+    Subterm.val (add L₁ L₂ M) e ε (t.lMap (Language.Hom.add₁ L₁ L₂)) = t.val str₁ e ε := by
+  induction t <;> simp[Subterm.val, *]
+
+@[simp] lemma val_lMap_add₂ {n} (t : Subterm L₂ μ n) (e : Fin n → M) (ε : μ → M) :
+    Subterm.val (add L₁ L₂ M) e ε (t.lMap (Language.Hom.add₂ L₁ L₂)) = t.val str₂ e ε := by
+  induction t <;> simp[Subterm.val, *]
+
+@[simp] lemma eval_lMap_add₁ {n} (p : Subformula L₁ μ n) (e : Fin n → M) (ε : μ → M) :
+    Subformula.Eval (add L₁ L₂ M) e ε (Subformula.lMap (Language.Hom.add₁ L₁ L₂) p) ↔ Subformula.Eval str₁ e ε p := by
+  induction p using Subformula.rec' <;>
+    simp[*, Subformula.eval_rel, Subformula.lMap_rel, Subformula.eval_nrel, Subformula.lMap_nrel]
+
+@[simp] lemma eval_lMap_add₂ {n} (p : Subformula L₂ μ n) (e : Fin n → M) (ε : μ → M) :
+    Subformula.Eval (add L₁ L₂ M) e ε (Subformula.lMap (Language.Hom.add₂ L₁ L₂) p) ↔ Subformula.Eval str₂ e ε p := by
+  induction p using Subformula.rec' <;>
+    simp[*, Subformula.eval_rel, Subformula.lMap_rel, Subformula.eval_nrel, Subformula.lMap_nrel]
+
+end add
+
+section sigma
+
+variable (L : ι → Language) (M : Type*) [str : (i : ι) → Structure (L i) M]
+
+instance sigma : Structure (Language.sigma L) M where
+  func := fun _ ⟨_, f⟩ v => func f v
+  rel  := fun _ ⟨_, r⟩ v => rel r v
+
+@[simp] lemma func_sigma {k} (f : (L i).func k) (v : Fin k → M) : (sigma L M).func ⟨i, f⟩ v = func f v := rfl
+
+@[simp] lemma rel_sigma {k} (r : (L i).rel k) (v : Fin k → M) : (sigma L M).rel ⟨i, r⟩ v ↔ rel r v := iff_of_eq rfl
+
+@[simp] lemma val_lMap_sigma {n} (t : Subterm (L i) μ n) (e : Fin n → M) (ε : μ → M) :
+    Subterm.val (sigma L M) e ε (t.lMap (Language.Hom.sigma L i)) = t.val (str i) e ε := by
+  induction t <;> simp[Subterm.val, *]
+
+@[simp] lemma eval_lMap_sigma {n} (p : Subformula (L i) μ n) (e : Fin n → M) (ε : μ → M) :
+    Subformula.Eval (sigma L M) e ε (Subformula.lMap (Language.Hom.sigma L i) p) ↔ Subformula.Eval (str i) e ε p := by
+  induction p using Subformula.rec' <;>
+    simp[*, Subformula.eval_rel, Subformula.lMap_rel, Subformula.eval_nrel, Subformula.lMap_nrel]
+
+end sigma
+
+end Structure
+
+
 end FirstOrder
 
 end LO
