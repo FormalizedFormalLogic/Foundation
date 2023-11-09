@@ -1,4 +1,4 @@
-import Logic.Predicate.FirstOrder.Basic.Formula.Formula
+import Logic.Predicate.FirstOrder.Basic.Formula
 
 namespace LO
 
@@ -61,6 +61,10 @@ variable (φ : L₁ →ᵥ L₂) {M : Type w} (s₂ : Structure L₂ M)
 @[simp] lemma lMap_func {k} {f : L₁.func k} {v : Fin k → M} : (s₂.lMap φ).func f v = s₂.func (φ.func f) v := rfl
 
 @[simp] lemma lMap_rel {k} {r : L₁.rel k} {v : Fin k → M} : (s₂.lMap φ).rel r v ↔ s₂.rel (φ.rel r) v := of_eq rfl
+
+def ofEquiv {M : Type w} [Structure L M] {N : Type w'} (φ : M ≃ N) : Structure L N where
+  func := fun _ f v => φ (func f (φ.symm ∘ v))
+  rel  := fun _ r v => rel r (φ.symm ∘ v)
 
 end Structure
 
@@ -199,6 +203,35 @@ def inclusion [s : Structure L M] (u : ClosedSubset L M) : u ⊆ₛ[L] M where
 
 end Hom
 
+section
+
+variable [s : Structure L M] (φ : M ≃ N)
+
+lemma ofEquiv_func (f : L.func k) (v : Fin k → N) :
+    (ofEquiv φ).func f v = φ (func f (φ.symm ∘ v)) := rfl
+
+lemma ofEquiv_val (e : Fin n → N) (ε : μ → N) (t : Subterm L μ n) :
+    t.val (ofEquiv φ) e ε = φ (t.val s (φ.symm ∘ e) (φ.symm ∘ ε)) := by
+  induction t <;> simp[*, Subterm.val_func, ofEquiv_func φ, Function.comp]
+
+end
+
+open Subterm
+
+protected class Zero (L : Language.{u}) [Operator.Zero L] (M : Type w) [Zero M] [s : Structure L M] where
+  zero : (@Operator.Zero.zero L _).val ![] = (0 : M)
+
+protected class One (L : Language.{u}) [Operator.One L] (M : Type w) [One M] [s : Structure L M] where
+  one : (@Operator.One.one L _).val ![] = (1 : M)
+
+protected class Add (L : Language.{u}) [Operator.Add L] (M : Type w) [Add M] [s : Structure L M] where
+  add : ∀ a b : M, (@Operator.Add.add L _).val ![a, b] = a + b
+
+protected class Mul (L : Language.{u}) [Operator.Mul L] (M : Type w) [Mul M] [s : Structure L M] where
+  add : ∀ a b : M, (@Operator.Mul.mul L _).val ![a, b] = a * b
+
+attribute [simp] Zero.zero One.one Add.add Mul.mul
+
 end Structure
 
 namespace Subformula
@@ -323,6 +356,12 @@ end Syntactic
 def Operator.val {M : Type w} [s : Structure L M] {k} (o : Operator L k) (v : Fin k → M) : Prop :=
   Subformula.Eval s v Empty.elim o.sentence
 
+@[simp] lemma val_operator_and {k} {o₁ o₂ : Operator L k} {v : Fin k → M} :
+    (o₁.and o₂).val v ↔ o₁.val v ∧ o₂.val v := by simp[Operator.and, Operator.val]
+
+@[simp] lemma val_operator_or {k} {o₁ o₂ : Operator L k} {v : Fin k → M} :
+    (o₁.or o₂).val v ↔ o₁.val v ∨ o₂.val v := by simp[Operator.or, Operator.val]
+
 lemma eval_operator {k} {o : Operator L k} {v : Fin k → Subterm L μ n} :
     Eval s e ε (o.operator v) ↔ o.val (fun i => (v i).val s e ε) := by
   simp[Operator.operator, eval_substs, Operator.val]
@@ -362,10 +401,22 @@ end Subformula
 
 namespace Structure
 
-protected class Eq (L : Language.{u}) [Eq L] (M : Type w) [s : Structure L M] where
-  eq : ∀ a b : M, (@Eq.eq L _).val ![a, b] ↔ a = b
+section
 
-attribute [simp] Eq.eq
+open Subformula
+
+protected class Eq (L : Language.{u}) [Operator.Eq L] (M : Type w) [s : Structure L M] where
+  eq : ∀ a b : M, (@Operator.Eq.eq L _).val ![a, b] ↔ a = b
+
+protected class LT (L : Language.{u}) [Operator.LT L] (M : Type w) [LT M] [s : Structure L M] where
+  lt : ∀ a b : M, (@Operator.LT.lt L _).val ![a, b] ↔ a < b
+
+class Mem (L : Language.{u}) [Operator.Mem L] (M : Type w) [Membership M M] [s : Structure L M] where
+  mem : ∀ a b : M, (@Operator.Mem.mem L _).val ![a, b] ↔ a ∈ b
+
+attribute [simp] Eq.eq LT.lt Mem.mem
+
+end
 
 namespace Inclusion
 
@@ -373,6 +424,37 @@ variable {M₁ : Type w₁} [Structure L M₁] {M₂ : Type w₂} [Structure L M
 
 lemma inj : Function.Injective (↑φ.toHom : M₁ → M₂) := φ.inj'
 end Inclusion
+
+section
+
+open Subformula
+variable [s : Structure L M] (φ : M ≃ N)
+
+lemma ofEquiv_rel (r : L.rel k) (v : Fin k → N) :
+    (Structure.ofEquiv φ).rel r v ↔ Structure.rel r (φ.symm ∘ v) := iff_of_eq rfl
+
+lemma eval_ofEquiv_iff : ∀ {n} {e : Fin n → N} {ε : μ → N} {p : Subformula L μ n},
+    (Eval (ofEquiv φ) e ε p ↔ Eval s (φ.symm ∘ e) (φ.symm ∘ ε) p)
+  | _, e, ε, ⊤                   => by simp
+  | _, e, ε, ⊥                   => by simp
+  | _, e, ε, Subformula.rel r v  => by simp[Function.comp, eval_rel, ofEquiv_rel φ, Structure.ofEquiv_val φ]
+  | _, e, ε, Subformula.nrel r v => by simp[Function.comp, eval_nrel, ofEquiv_rel φ, Structure.ofEquiv_val φ]
+  | _, e, ε, p ⋏ q               => by simp[eval_ofEquiv_iff (p := p), eval_ofEquiv_iff (p := q)]
+  | _, e, ε, p ⋎ q               => by simp[eval_ofEquiv_iff (p := p), eval_ofEquiv_iff (p := q)]
+  | _, e, ε, ∀' p                => by
+    simp; exact
+    ⟨fun h x => by simpa[Matrix.comp_vecCons''] using eval_ofEquiv_iff.mp (h (φ x)),
+     fun h x => eval_ofEquiv_iff.mpr (by simpa[Matrix.comp_vecCons''] using h (φ.symm x))⟩
+  | _, e, ε, ∃' p                => by
+    simp; exact
+    ⟨by rintro ⟨x, h⟩; exists φ.symm x; simpa[Matrix.comp_vecCons''] using eval_ofEquiv_iff.mp h,
+     by rintro ⟨x, h⟩; exists φ x; apply eval_ofEquiv_iff.mpr; simpa[Matrix.comp_vecCons''] using h⟩
+
+lemma operator_val_ofEquiv_iff {k : ℕ} {o : Operator L k} {v : Fin k → N} :
+    letI : Structure L N := ofEquiv φ
+    o.val v ↔ o.val (φ.symm ∘ v) := by simp[Operator.val, eval_ofEquiv_iff, Empty.eq_elim]
+
+end
 
 end Structure
 
@@ -389,6 +471,9 @@ abbrev ModelsTheory (M : Type u) [s : Structure L M] (T : Theory L) : Prop :=
   Semantics.modelsTheory (𝓢 := semantics) s T
 
 scoped infix:55 " ⊧* " => ModelsTheory
+
+class Theory.Mod (M : Type u) [Structure L M] (T : Theory L) :=
+  modelsTheory : M ⊧* T
 
 abbrev Realize (M : Type u) [s : Structure L M] : Formula L M →L Prop := Subformula.Val s id
 
@@ -432,6 +517,11 @@ lemma models_iff_models {σ : Sentence L} :
 lemma consequence_iff {T : Theory L} {σ : Sentence L} :
     T ⊨ σ ↔ (∀ (M : Type u) [Inhabited M] [Structure L M], M ⊧* T → M ⊧ σ) := of_eq rfl
 
+lemma consequence_iff' {T : Theory L} {σ : Sentence L} :
+    T ⊨ σ ↔ (∀ (M : Type u) [Inhabited M] [Structure L M] [Theory.Mod M T], M ⊧ σ) :=
+  ⟨fun h M _ _ _ => consequence_iff.mp h M Theory.Mod.modelsTheory,
+   fun h M i s hs => @h M i s ⟨hs⟩⟩
+
 lemma satisfiableₛ_iff {T : Theory L} :
     Semantics.Satisfiableₛ T ↔ ∃ (M : Type u) (_ : Inhabited M) (_ : Structure L M), M ⊧* T :=
   of_eq rfl
@@ -447,23 +537,27 @@ lemma validₛ_iff {T : Theory L} :
     Semantics.Validₛ T ↔ ∀ ⦃M : Type u⦄ [Inhabited M] [Structure L M], M ⊧* T :=
   of_eq rfl
 
+namespace ElementaryEquiv
+
 @[refl]
-lemma ElementaryEquiv.refl (M) [Structure L M] : M ≃ₑ[L] M := fun σ => by rfl
+lemma refl (M) [Structure L M] : M ≃ₑ[L] M := fun σ => by rfl
 
 @[symm]
-lemma ElementaryEquiv.symm {M₁ M₂} [Structure L M₁] [Structure L M₂] : (M₁ ≃ₑ[L] M₂) → (M₂ ≃ₑ[L] M₁) :=
+lemma symm {M₁ M₂} [Structure L M₁] [Structure L M₂] : (M₁ ≃ₑ[L] M₂) → (M₂ ≃ₑ[L] M₁) :=
   fun h σ => (h σ).symm
 
 @[trans]
-lemma ElementaryEquiv.trans {M₁ M₂ M₃ : Type u} [Structure L M₁] [Structure L M₂] [Structure L M₃] :
+lemma trans {M₁ M₂ M₃ : Type u} [Structure L M₁] [Structure L M₂] [Structure L M₃] :
     (M₁ ≃ₑ[L] M₂) → (M₂ ≃ₑ[L] M₃) → (M₁ ≃ₑ[L] M₃) :=
   fun h₁ h₂ σ => Iff.trans (h₁ σ) (h₂ σ)
 
-lemma ElementaryEquiv.models {M₁ M₂} [Structure L M₁] [Structure L M₂] (h : M₁ ≃ₑ[L] M₂) :
+lemma models {M₁ M₂} [Structure L M₁] [Structure L M₂] (h : M₁ ≃ₑ[L] M₂) :
     ∀ {σ : Sentence L}, M₁ ⊧ σ ↔ M₂ ⊧ σ := @h
 
-lemma ElementaryEquiv.modelsTheory {M₁ M₂} [Structure L M₁] [Structure L M₂] (h : M₁ ≃ₑ[L] M₂) :
-    ∀ {T : Theory L}, M₁ ⊧* T ↔ M₂ ⊧* T := by simp[modelsTheory_iff, h.models]
+lemma modelsTheory {M₁ M₂} [Structure L M₁] [Structure L M₂] (h : M₁ ≃ₑ[L] M₂) {T : Theory L} :
+    M₁ ⊧* T ↔ M₂ ⊧* T := by simp[modelsTheory_iff, h.models]
+
+end ElementaryEquiv
 
 section Hom
 variable {M₁ : Type u} {M₂ : Type u} [s₁ : Structure L M₁] [s₂ : Structure L M₂] (φ : M₁ →ₛ[L] M₂)
@@ -480,6 +574,19 @@ lemma models_hom_univClosure {n} {σ : Subsentence L n} (hσ : σ.qfree) :
 
 lemma models_hom_univClosure_of_submodels [H : M₁ ⊆ₛ[L] M₂] {n} {σ : Subsentence L n} (hσ : σ.qfree) :
     M₂ ⊧ (univClosure σ) → M₁ ⊧ (univClosure σ) := models_hom_univClosure H.toHom hσ
+
+section
+
+open Subformula
+variable [s : Structure L M] (φ : M ≃ N)
+
+lemma ElementaryEquiv.ofEquiv :
+    letI : Structure L N := Structure.ofEquiv φ
+    M ≃ₑ[L] N := fun σ => by
+  letI : Structure L N := Structure.ofEquiv φ
+  simp[models_iff, Empty.eq_elim, Structure.eval_ofEquiv_iff]
+
+end
 
 end Hom
 
@@ -549,9 +656,68 @@ protected def trans {T₁ : Theory L₁} {T₂ : Theory L₂} {T₃ : Theory L�
 
 end semanticGe
 
+namespace Mod
+
+variable {M : Type u} [Structure L M] { T : Theory L} [Theory.Mod M T]
+
+lemma models {σ : Sentence L} (hσ : σ ∈ T) : M ⊧ σ :=
+  modelsTheory_iff.mp Theory.Mod.modelsTheory hσ
+
+end Mod
+
 end Theory
 
 namespace Structure
+
+structure Model (L : Language.{u}) (M : Type w) :=
+  intro : M
+
+namespace Model
+
+variable [Structure L M]
+
+def equiv (L : Language.{u}) (M : Type w) : M ≃ Model L M where
+  toFun := fun x => ⟨x⟩
+  invFun := Model.intro
+  left_inv := by intro x; simp
+  right_inv := by rintro ⟨x⟩; simp
+
+instance : Structure L (Model L M) := Structure.ofEquiv (equiv L M)
+
+instance [Inhabited M] : Inhabited (Model L M) := ⟨equiv L M default⟩
+
+lemma elementaryEquiv (L : Language.{u}) (M : Type u) [Structure L M] : M ≃ₑ[L] Model L M := ElementaryEquiv.ofEquiv _
+
+section
+
+open Subterm Subformula
+
+instance [Operator.Add L] : Add (Model L M) :=
+  ⟨fun x y => (@Operator.Add.add L _).val ![x, y]⟩
+
+instance [Operator.Add L] : Structure.Add L (Model L M) := ⟨fun _ _ => rfl⟩
+
+instance [Operator.Mul L] : Mul (Model L M) :=
+  ⟨fun x y => (@Operator.Mul.mul L _).val ![x, y]⟩
+
+instance [Operator.Mul L] : Structure.Mul L (Model L M) := ⟨fun _ _ => rfl⟩
+
+instance [Operator.Eq L] [Structure.Eq L M] : Structure.Eq L (Model L M) :=
+  ⟨fun x y => by simp[operator_val_ofEquiv_iff]⟩
+
+instance [Operator.LT L] : LT (Model L M) :=
+  ⟨fun x y => (@Operator.LT.lt L _).val ![x, y]⟩
+
+instance [Operator.LT L] : Structure.LT L (Model L M) := ⟨fun _ _ => iff_of_eq rfl⟩
+
+instance [Operator.Mem L] : Membership (Model L M) (Model L M) :=
+  ⟨fun x y => (@Operator.Mem.mem L _).val ![x, y]⟩
+
+instance [Operator.Mem L] : Structure.Mem L (Model L M) := ⟨fun _ _ => iff_of_eq rfl⟩
+
+end
+
+end Model
 
 section ofFunc
 

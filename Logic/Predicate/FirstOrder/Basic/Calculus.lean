@@ -1,4 +1,4 @@
-import Logic.Predicate.FirstOrder.Basic.Formula.Formula
+import Logic.Predicate.FirstOrder.Basic.Formula
 
 namespace LO
 

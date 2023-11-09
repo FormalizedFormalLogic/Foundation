@@ -1,11 +1,11 @@
-import Logic.Predicate.FirstOrder.Basic.Formula.Elab
+import Logic.Predicate.FirstOrder.Basic.Elab
 import Logic.Predicate.FirstOrder.Basic.Semantics
 
 namespace LO
 
 namespace FirstOrder
 
-variable {L : Language.{u}} {μ : Type v} [FirstOrder.Eq L]
+variable {L : Language.{u}} {μ : Type v} [Subformula.Operator.Eq L]
 namespace Subterm
 
 def varSumInL {k} : Fin k → Subterm L μ (k + k) := fun i => #(Fin.castLE (by simp) i)
@@ -75,7 +75,7 @@ variable (L)
 
 variable {M : Type u} [Structure L M]
 
-def eqv (a b : M) : Prop := (@FirstOrder.Eq.eq L _).val ![a, b]
+def eqv (a b : M) : Prop := (@Subformula.Operator.Eq.eq L _).val ![a, b]
 
 variable {L}
 
@@ -180,12 +180,12 @@ lemma elementaryEquiv : QuotEq H ≃ₑ[L] M := fun _ => models_iff
 
 variable {H}
 
-lemma rel_eq (a b : QuotEq H) : (@FirstOrder.Eq.eq L _).val (M := QuotEq H) ![a, b] ↔ a = b := by
+lemma rel_eq (a b : QuotEq H) : (@Subformula.Operator.Eq.eq L _).val (M := QuotEq H) ![a, b] ↔ a = b := by
   induction' a using Quotient.ind with a
   induction' b using Quotient.ind with b
   rw[of_eq_of]; simp[eqv, Subformula.Operator.val];
   simpa[Eval!, Matrix.fun_eq_vec₂, Empty.eq_elim] using
-    eval_mk (H := H) (e := ![a, b]) (ε := Empty.elim) (p := FirstOrder.Eq.eq.sentence)
+    eval_mk (H := H) (e := ![a, b]) (ε := Empty.elim) (p := Subformula.Operator.Eq.eq.sentence)
 
 instance : Structure.Eq L (QuotEq H) := ⟨rel_eq⟩
 
@@ -203,6 +203,11 @@ lemma consequence_iff_eq {T : Theory L} [EqTheory T] {σ : Sentence L} :
     have H : M ⊧* Theory.Eq L := Logic.Semantics.modelsTheory_of_subset hM EqTheory.eq
     have e : Structure.Eq.QuotEq H ≃ₑ[L] M := Structure.Eq.QuotEq.elementaryEquiv H
     exact e.models.mp $ h (Structure.Eq.QuotEq H) (e.modelsTheory.mpr hM)
+
+lemma consequence_iff_eq' {T : Theory L} [EqTheory T] {σ : Sentence L} :
+    T ⊨ σ ↔ (∀ (M : Type u) [Inhabited M] [Structure L M] [Structure.Eq L M] [Theory.Mod M T], M ⊧ σ) := by
+  rw[consequence_iff_eq]
+  exact ⟨fun h M _ _ _ hT => h M Theory.Mod.modelsTheory, fun h M i s e hT => @h M i s e ⟨hT⟩⟩
 
 lemma satisfiableₛ_iff_eq {T : Theory L} [EqTheory T] :
     Logic.Semantics.Satisfiableₛ T ↔ (∃ (M : Type u) (_ : Inhabited M) (_ : Structure L M) (_ : Structure.Eq L M), M ⊧* T) := by

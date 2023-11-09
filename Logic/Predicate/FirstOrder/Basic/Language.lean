@@ -225,28 +225,28 @@ instance : ToString ((relational α).func k) := ⟨fun a => by cases a⟩
 
 end relational
 
-class Eq (L : Language.{u}) where
+protected class Eq (L : Language.{u}) where
   eq : L.rel 2
 
-class LT (L : Language.{u}) where
+protected class LT (L : Language.{u}) where
   lt : L.rel 2
 
-class Zero (L : Language.{u}) where
+protected class Zero (L : Language.{u}) where
   zero : L.func 0
 
-class One (L : Language.{u}) where
+protected class One (L : Language.{u}) where
   one : L.func 0
 
-class Add (L : Language.{u}) where
+protected class Add (L : Language.{u}) where
   add : L.func 2
 
-class Mul (L : Language.{u}) where
+protected class Mul (L : Language.{u}) where
   mul : L.func 2
 
-class Pow (L : Language.{u}) where
+protected class Pow (L : Language.{u}) where
   pow : L.func 2
 
-class Exp (L : Language.{u}) where
+protected class Exp (L : Language.{u}) where
   exp : L.func 1
 
 class Pairing (L : Language.{u}) where

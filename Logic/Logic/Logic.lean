@@ -10,7 +10,7 @@ variable {F : Type u} [LogicSymbol F]
 
 class System (F : Type u) [LogicSymbol F] where
   Bew : Set F → F → Type u
-  axm : ∀ {f}, f ∈ T → Bew T f 
+  axm : ∀ {f}, f ∈ T → Bew T f
   weakening' : ∀ {T U f}, T ⊆ U → Bew T f → Bew U f
 
 namespace System

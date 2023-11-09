@@ -1,4 +1,4 @@
-import Logic.Predicate.FirstOrder.Basic.Term.Term
+import Logic.Predicate.FirstOrder.Basic.Term
 
 namespace LO
 
@@ -529,7 +529,7 @@ abbrev Const (L : Language.{u}) := Operator L 0
 
 namespace Operator
 
-def operator (o : Operator L k) (v : Fin k → Subterm L μ n) : Subformula L μ n :=
+def operator {arity : ℕ} (o : Operator L arity) (v : Fin arity → Subterm L μ n) : Subformula L μ n :=
   (Rew.substs v).hom (Rew.emb.hom o.sentence)
 
 def const (c : Const L) : Subformula L μ n := c.operator ![]
@@ -549,6 +549,30 @@ lemma operator_comp (o : Operator L k) (w : Fin k → Subterm.Operator L l) (v :
 def and {k} (o₁ o₂ : Operator L k) : Operator L k := ⟨o₁.sentence ⋏ o₂.sentence⟩
 
 def or {k} (o₁ o₂ : Operator L k) : Operator L k := ⟨o₁.sentence ⋎ o₂.sentence⟩
+
+@[simp] lemma operator_and (o₁ o₂ : Operator L k) (v : Fin k → Subterm L μ n) :
+  (o₁.and o₂).operator v = o₁.operator v ⋏ o₂.operator v := by simp[operator, and]
+
+@[simp] lemma operator_or (o₁ o₂ : Operator L k) (v : Fin k → Subterm L μ n) :
+  (o₁.or o₂).operator v = o₁.operator v ⋎ o₂.operator v := by simp[operator, or]
+
+protected class Eq (L : Language) where
+  eq : Subformula.Operator L 2
+
+protected class LT (L : Language) where
+  lt : Subformula.Operator L 2
+
+protected class LE (L : Language) where
+  le : Subformula.Operator L 2
+
+protected class Mem (L : Language) where
+  mem : Subformula.Operator L 2
+
+instance [Language.Eq L] : Operator.Eq L := ⟨⟨Subformula.rel Language.Eq.eq Subterm.bvar⟩⟩
+
+instance [Language.LT L] : Operator.LT L := ⟨⟨Subformula.rel Language.LT.lt Subterm.bvar⟩⟩
+
+instance [Operator.Eq L] [Operator.LT L] : Operator.LE L := ⟨Eq.eq.and LT.lt⟩
 
 end Operator
 
@@ -655,28 +679,6 @@ inductive Open : {n : ℕ} → Subformula L μ n → Prop
 
 attribute [simp] Open.verum Open.falsum Open.rel Open.nrel
 
-end Subformula
-
-class Eq (L : Language) where
-  eq : Subformula.Operator L 2
-
-class LT (L : Language) where
-  lt : Subformula.Operator L 2
-
-class LE (L : Language) where
-  le : Subformula.Operator L 2
-
-class Mem (L : Language) where
-  mem : Subformula.Operator L 2
-
-instance [Language.Eq L] : Eq L := ⟨⟨Subformula.rel Language.Eq.eq ![#0, #1]⟩⟩
-
-instance [Language.LT L] : LT L := ⟨⟨Subformula.rel Language.LT.lt ![#0, #1]⟩⟩
-
-instance [Eq L] [LT L] : LE L := ⟨Eq.eq.and LT.lt⟩
-
-namespace Subformula
-
 variable {L : Language.{u}} {L₁ : Language.{u₁}} {{L₂ : Language.{u₂}}} {L₃ : Language.{u₃}} {μ : Type v} {Φ : L₁ →ᵥ L₂}
 
 def lMapAux (Φ : L₁ →ᵥ L₂) : ∀ {n}, Subformula L₁ μ n → Subformula L₂ μ n
@@ -746,26 +748,26 @@ variable
   {L L' : Language.{u}} {L₁ : Language.{u₁}} {L₂ : Language.{u₂}} {L₃ : Language.{u₃}}
   {μ μ' : Type v} {μ₁ : Type v₁} {μ₂ : Type v₂} {μ₃ : Type v₃}
   {n n₁ n₂ n₃ : ℕ}
-variable (ω : Rew L μ n₁ μ' n₂)
+variable (ω : Rew L μ₁ n₁ μ₂ n₂)
 
-lemma hom_operator (o : Operator L k) (v : Fin k → Subterm L μ n₁) :
+lemma hom_operator (o : Operator L k) (v : Fin k → Subterm L μ₁ n₁) :
     ω.hom (o.operator v) = o.operator (fun i => ω (v i)) := by
   simp[Operator.operator, ←Rew.hom_comp_app]; congr 2
   ext <;> simp[Rew.comp_app]; contradiction
 
-lemma hom_operator' (o : Operator L k) (v : Fin k → Subterm L μ n₁) :
+lemma hom_operator' (o : Operator L k) (v : Fin k → Subterm L μ₁ n₁) :
     ω.hom (o.operator v) = o.operator (ω ∘ v) := ω.hom_operator o v
 
-@[simp] lemma hom_finitary0 (o : Operator L 0) (v : Fin 0 → Subterm L μ n₁) :
+@[simp] lemma hom_finitary0 (o : Operator L 0) (v : Fin 0 → Subterm L μ₁ n₁) :
     ω.hom (o.operator v) = o.operator ![] := by simp[ω.hom_operator', Matrix.empty_eq]
 
-@[simp] lemma hom_finitary1 (o : Operator L 1) (t : Subterm L μ n₁) :
+@[simp] lemma hom_finitary1 (o : Operator L 1) (t : Subterm L μ₁ n₁) :
     ω.hom (o.operator ![t]) = o.operator ![ω t] := by simp[ω.hom_operator']
 
-@[simp] lemma hom_finitary2 (o : Operator L 2) (t₁ t₂ : Subterm L μ n₁) :
+@[simp] lemma hom_finitary2 (o : Operator L 2) (t₁ t₂ : Subterm L μ₁ n₁) :
     ω.hom (o.operator ![t₁, t₂]) = o.operator ![ω t₁, ω t₂] := by simp[ω.hom_operator']
 
-@[simp] lemma hom_finitary3 (o : Operator L 3) (t₁ t₂ t₃ : Subterm L μ n₁) :
+@[simp] lemma hom_finitary3 (o : Operator L 3) (t₁ t₂ t₃ : Subterm L μ₁ n₁) :
     ω.hom (o.operator ![t₁, t₂, t₃]) = o.operator ![ω t₁, ω t₂, ω t₃] := by simp[ω.hom_operator']
 
 @[simp] lemma hom_const (o : Const L) : ω.hom (Operator.const c) = Operator.const c := by

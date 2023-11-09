@@ -8,9 +8,9 @@ namespace FirstOrder
 
 open Logic Subformula Completeness
 
-variable {L : Language.{u}} {T : Theory L}
+variable {L : Language.{u}} [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq (L.rel k)] {T : Theory L}
 
-attribute [local instance] Classical.decEq
+--attribute [local instance] Classical.decEq
 
 section Encodable
 
@@ -37,6 +37,8 @@ noncomputable instance : Logic.Complete (Sentence L) := ⟨completeness_of_encod
 
 end Encodable
 
+#check completeness_of_encodable
+
 noncomputable def completeness {σ : Sentence L} :
     T ⊨ σ → T ⊢ σ := fun h => by
   have : ∃ u : Finset (Sentence L), ↑u ⊆ insert (~σ) T ∧ ¬Semantics.Satisfiableₛ (u : Theory L) := by
@@ -61,6 +63,6 @@ noncomputable def completeness {σ : Sentence L} :
   choose b _ using exists_true_iff_nonempty.mpr this
   exact b
 
-noncomputable instance : Logic.Complete (Sentence L) := ⟨completeness⟩
+noncomputable instance completeness.sentence : Logic.Complete (Sentence L) := ⟨completeness⟩
 
 end FirstOrder

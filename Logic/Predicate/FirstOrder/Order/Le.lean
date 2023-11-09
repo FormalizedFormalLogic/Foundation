@@ -1,64 +1,56 @@
 import Logic.Predicate.FirstOrder.Basic
-import Logic.Predicate.FirstOrder.Principia.Meta
+import Logic.Predicate.FirstOrder.Completeness.Completeness
+--import Logic.Predicate.FirstOrder.Principia.Meta
 
 namespace LO
 
 namespace FirstOrder
-variable {L : Language.{u}} [L.ORing] [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq (L.rel k)]
+variable {L : Language.{u}} [Subformula.Operator.Eq L] [Subformula.Operator.LT L]
+  [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq (L.rel k)]
+
+open Subformula
+
+def LT.le : Operator L 2 := Subformula.Operator.Eq.eq.or Subformula.Operator.LT.lt
+
+lemma le_eq (t₁ t₂ : Subterm L μ n) : LT.le.operator ![t₁, t₂] = “ᵀ!t₁ = ᵀ!t₂ ∨ ᵀ!t₁ < ᵀ!t₂” := by
+  simp[Operator.operator, Operator.or, LT.le, ←Rew.hom_comp_app, ←Matrix.fun_eq_vec₂]
 
 namespace Subformula
 
-namespace Abbrev
-
-def le [L.Lt] : Abbrev L 2 := ⟨“#0 = #1 ∨ #0 < #1”⟩
-
--- def divides [L.Mul] : Abbrev L 2 := ⟨“∃ #0 * #1 = #2”⟩
-
-end Abbrev
-
-section
-variable [L.Lt]
-
-def le : Finitary.{u, v} L 2 := Abbrev.le.toOperator
-notation "Op(≤)" => le
-
-lemma le_eq (t₁ t₂ : Subterm L μ n) : le.operator ![t₁, t₂] = “ᵀ!t₁ = ᵀ!t₂ ∨ ᵀ!t₁ < ᵀ!t₂” :=
-  by simp[le, Abbrev.le, Abbrev.toOperator]
-
 syntax:45 foterm:45 " ≤ " foterm:0 : foformula
 
+notation "op(≤)" => LT.le
+
 macro_rules
-  | `(“ $t₁:foterm ≤ $t₂:foterm ”) => `(Op(≤).operator ![ᵀ“$t₁”, ᵀ“$t₂”])
+  | `(“ $t₁:foterm ≤ $t₂:foterm ”) => `(op(≤).operator ![ᵀ“$t₁”, ᵀ“$t₂”])
 
 section delab
 open Lean PrettyPrinter Delaborator SubExpr
 
 @[app_unexpander Operator.operator]
 def unexpandOpLe : Unexpander
-  | `($_ Op(≤) ![ᵀ“$t:foterm”, ᵀ“$u:foterm”]) => `(“ $t:foterm ≤ $u   ”)
-  | `($_ Op(≤) ![ᵀ“$t:foterm”, #$y:term    ]) => `(“ $t:foterm ≤ #$y  ”)
-  | `($_ Op(≤) ![ᵀ“$t:foterm”, &$y:term    ]) => `(“ $t:foterm ≤ &$y  ”)
-  | `($_ Op(≤) ![ᵀ“$t:foterm”, $u          ]) => `(“ $t:foterm ≤ ᵀ!$u ”)
-  | `($_ Op(≤) ![#$x:term,     ᵀ“$u:foterm”]) => `(“ #$x       ≤ $u   ”)
-  | `($_ Op(≤) ![#$x:term,     #$y:term    ]) => `(“ #$x       ≤ #$y  ”)
-  | `($_ Op(≤) ![#$x:term,     &$y:term    ]) => `(“ #$x       ≤ &$y  ”)
-  | `($_ Op(≤) ![#$x:term,     $u          ]) => `(“ #$x       ≤ ᵀ!$u ”)
-  | `($_ Op(≤) ![&$x:term,     ᵀ“$u:foterm”]) => `(“ &$x       ≤ $u   ”)
-  | `($_ Op(≤) ![&$x:term,     #$y:term    ]) => `(“ &$x       ≤ #$y  ”)
-  | `($_ Op(≤) ![&$x:term,     &$y:term    ]) => `(“ &$x       ≤ &$y  ”)
-  | `($_ Op(≤) ![&$x:term,     $u          ]) => `(“ &$x       ≤ ᵀ!$u ”)
-  | `($_ Op(≤) ![$t:term,      ᵀ“$u:foterm”]) => `(“ ᵀ!$t      ≤ $u   ”)
-  | `($_ Op(≤) ![$t:term,      #$y:term    ]) => `(“ ᵀ!$t      ≤ #$y  ”)
-  | `($_ Op(≤) ![$t:term,      &$y:term    ]) => `(“ ᵀ!$t      ≤ &$y  ”)
-  | `($_ Op(≤) ![$t:term,      $u          ]) => `(“ ᵀ!$t      ≤ ᵀ!$u ”)
+  | `($_ op(≤) ![ᵀ“$t:foterm”, ᵀ“$u:foterm”]) => `(“ $t:foterm ≤ $u   ”)
+  | `($_ op(≤) ![ᵀ“$t:foterm”, #$y:term    ]) => `(“ $t:foterm ≤ #$y  ”)
+  | `($_ op(≤) ![ᵀ“$t:foterm”, &$y:term    ]) => `(“ $t:foterm ≤ &$y  ”)
+  | `($_ op(≤) ![ᵀ“$t:foterm”, $u          ]) => `(“ $t:foterm ≤ ᵀ!$u ”)
+  | `($_ op(≤) ![#$x:term,     ᵀ“$u:foterm”]) => `(“ #$x       ≤ $u   ”)
+  | `($_ op(≤) ![#$x:term,     #$y:term    ]) => `(“ #$x       ≤ #$y  ”)
+  | `($_ op(≤) ![#$x:term,     &$y:term    ]) => `(“ #$x       ≤ &$y  ”)
+  | `($_ op(≤) ![#$x:term,     $u          ]) => `(“ #$x       ≤ ᵀ!$u ”)
+  | `($_ op(≤) ![&$x:term,     ᵀ“$u:foterm”]) => `(“ &$x       ≤ $u   ”)
+  | `($_ op(≤) ![&$x:term,     #$y:term    ]) => `(“ &$x       ≤ #$y  ”)
+  | `($_ op(≤) ![&$x:term,     &$y:term    ]) => `(“ &$x       ≤ &$y  ”)
+  | `($_ op(≤) ![&$x:term,     $u          ]) => `(“ &$x       ≤ ᵀ!$u ”)
+  | `($_ op(≤) ![$t:term,      ᵀ“$u:foterm”]) => `(“ ᵀ!$t      ≤ $u   ”)
+  | `($_ op(≤) ![$t:term,      #$y:term    ]) => `(“ ᵀ!$t      ≤ #$y  ”)
+  | `($_ op(≤) ![$t:term,      &$y:term    ]) => `(“ ᵀ!$t      ≤ &$y  ”)
+  | `($_ op(≤) ![$t:term,      $u          ]) => `(“ ᵀ!$t      ≤ ᵀ!$u ”)
   | _                                         => throw ()
 
 end delab
 
-end
-
 /-
-section 
+section
 variable [L.Mul]
 
 def divides : Finitary.{u, v} L 2 := Abbrev.divides.toOperator
@@ -72,11 +64,39 @@ end
 
 end Subformula
 
-namespace Order
-variable {T : Theory L} [EqTheory T]
+namespace Theory.Order
 
-def leIffEqOrLt : [] ⟹[T] “∀ ∀ (#0 ≤ #1 ↔ #0 = #1 ∨ #0 < #1)” :=
-  by simp[Subformula.le_eq]; exact proofBy { gens _ _; refl }
+inductive Total (L : Language) [Subformula.Operator.Eq L] [Subformula.Operator.LT L] : Sentence L → Prop
+  | ltTrans  : Total L “∀ ∀ ∀ (#0 < #1 → #1 < #2 → #0 < #2)”
+  | ltIrrefl : Total L “∀ (¬#0 < #0)”
+  | ltTri    : Total L “∀ ∀ (#0 < #1 ∨ #0 = #1 ∨#1 < #0)”
+
+end Theory.Order
+
+namespace Order
+variable {T : Theory L} [EqTheory T] [SubTheory (Theory.Order.Total L) T]
+
+noncomputable def leIffEqOrLt : T ⊢ “∀ ∀ (#0 ≤ #1 ↔ #0 = #1 ∨ #0 < #1)” :=
+  Logic.Complete.complete (consequence_iff.mpr $ fun _ _ _ _ => by simp[models_def, LT.le])
+
+class MTotal (M : Type*) [_root_.LT M] :=
+  ltTrans : ∀ x y z : M, x < y → y < z → x < z
+  ltIrrefl : ∀ x : M, ¬x < x
+  ltTri : ∀ x y : M, x < y ∨ x = y ∨ y < x
+
+lemma provOf (σ : Sentence L)
+  (H : ∀ (M : Type u)
+         [Inhabited M]
+         [_root_.LT M]
+         [Structure L M]
+         [Structure.Eq L M]
+         [Structure.LT L M]
+         [Theory.Mod M T],
+         M ⊧ σ) :
+    T ⊨ σ := consequence_iff_eq.mpr fun M _ _ _ hT =>
+  letI : Theory.Mod (Structure.Model L M) T := ⟨((ElementaryEquiv.modelsTheory (Structure.Model.elementaryEquiv L M)).mp hT)⟩
+  (ElementaryEquiv.models (Structure.Model.elementaryEquiv L M)).mpr
+    (H (Structure.Model L M))
 
 end Order
 
