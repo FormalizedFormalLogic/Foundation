@@ -81,17 +81,16 @@ def unexpsnderOperatorConst : Unexpander
   | `($_ $z:num) => `(ᵀ“$z”)
   | _ => throw ()
 
-notation "lang(+)" => Add.add
-notation "lang(*)" => Mul.mul
-notation "lang(^)" => Pow.pow
+notation "op(+)" => Operator.Add.add
+notation "op(*)" => Operator.Mul.mul
 
 @[app_unexpander Add.add]
 def unexpsnderAdd : Unexpander
-  | `($_) => `(lang(+))
+  | `($_) => `(op(+))
 
 @[app_unexpander Mul.mul]
 def unexpsnderMul : Unexpander
-  | `($_) => `(lang(*))
+  | `($_) => `(op(*))
 
 @[app_unexpander FunLike.coe]
 def unexpandShift : Unexpander
@@ -104,56 +103,40 @@ def unexpandShift : Unexpander
 
 @[app_unexpander Subterm.Operator.operator]
 def unexpandFuncArith : Unexpander
-  | `($_ lang(+) ![ᵀ“$t:foterm”, ᵀ“$u:foterm”]) => `(ᵀ“ ($t + $u) ”)
-  | `($_ lang(+) ![ᵀ“$t:foterm”, #$x:term     ]) => `(ᵀ“ ($t + #$x) ”)
-  | `($_ lang(+) ![ᵀ“$t:foterm”, &$x:term     ]) => `(ᵀ“ ($t + &$x) ”)
-  | `($_ lang(+) ![ᵀ“$t:foterm”, $u           ]) => `(ᵀ“ ($t + ᵀ!$u) ”)
-  | `($_ lang(+) ![#$x:term,      ᵀ“$u:foterm”]) => `(ᵀ“ (#$x + $u) ”)
-  | `($_ lang(+) ![#$x:term,      #$y:term     ]) => `(ᵀ“ (#$x + #$y) ”)
-  | `($_ lang(+) ![#$x:term,      &$y:term     ]) => `(ᵀ“ (#$x + &$y) ”)
-  | `($_ lang(+) ![#$x:term,      $u           ]) => `(ᵀ“ (#$x + ᵀ!$u) ”)
-  | `($_ lang(+) ![&$x:term,      ᵀ“$u:foterm”]) => `(ᵀ“ (&$x + $u) ”)
-  | `($_ lang(+) ![&$x:term,      #$y:term     ]) => `(ᵀ“ (&$x + #$y) ”)
-  | `($_ lang(+) ![&$x:term,      &$y:term     ]) => `(ᵀ“ (&$x + &$y) ”)
-  | `($_ lang(+) ![&$x:term,      $u           ]) => `(ᵀ“ (&$x + ᵀ!$u) ”)
-  | `($_ lang(+) ![$t,            ᵀ“$u:foterm”]) => `(ᵀ“ (ᵀ!$t + $u) ”)
-  | `($_ lang(+) ![$t,            #$y:term     ]) => `(ᵀ“ (ᵀ!$t + #$y) ”)
-  | `($_ lang(+) ![$t,            &$y:term     ]) => `(ᵀ“ (ᵀ!$t + &$y) ”)
-  | `($_ lang(+) ![$t,            $u           ]) => `(ᵀ“ (ᵀ!$t + ᵀ!$u) ”)
+  | `($_ op(+) ![ᵀ“$t:foterm”, ᵀ“$u:foterm”]) => `(ᵀ“ ($t + $u) ”)
+  | `($_ op(+) ![ᵀ“$t:foterm”, #$x:term     ]) => `(ᵀ“ ($t + #$x) ”)
+  | `($_ op(+) ![ᵀ“$t:foterm”, &$x:term     ]) => `(ᵀ“ ($t + &$x) ”)
+  | `($_ op(+) ![ᵀ“$t:foterm”, $u           ]) => `(ᵀ“ ($t + ᵀ!$u) ”)
+  | `($_ op(+) ![#$x:term,      ᵀ“$u:foterm”]) => `(ᵀ“ (#$x + $u) ”)
+  | `($_ op(+) ![#$x:term,      #$y:term     ]) => `(ᵀ“ (#$x + #$y) ”)
+  | `($_ op(+) ![#$x:term,      &$y:term     ]) => `(ᵀ“ (#$x + &$y) ”)
+  | `($_ op(+) ![#$x:term,      $u           ]) => `(ᵀ“ (#$x + ᵀ!$u) ”)
+  | `($_ op(+) ![&$x:term,      ᵀ“$u:foterm”]) => `(ᵀ“ (&$x + $u) ”)
+  | `($_ op(+) ![&$x:term,      #$y:term     ]) => `(ᵀ“ (&$x + #$y) ”)
+  | `($_ op(+) ![&$x:term,      &$y:term     ]) => `(ᵀ“ (&$x + &$y) ”)
+  | `($_ op(+) ![&$x:term,      $u           ]) => `(ᵀ“ (&$x + ᵀ!$u) ”)
+  | `($_ op(+) ![$t,            ᵀ“$u:foterm”]) => `(ᵀ“ (ᵀ!$t + $u) ”)
+  | `($_ op(+) ![$t,            #$y:term     ]) => `(ᵀ“ (ᵀ!$t + #$y) ”)
+  | `($_ op(+) ![$t,            &$y:term     ]) => `(ᵀ“ (ᵀ!$t + &$y) ”)
+  | `($_ op(+) ![$t,            $u           ]) => `(ᵀ“ (ᵀ!$t + ᵀ!$u) ”)
 
-  | `($_ lang(*) ![ᵀ“$t:foterm”, ᵀ“$u:foterm”]) => `(ᵀ“ ($t * $u) ”)
-  | `($_ lang(*) ![ᵀ“$t:foterm”, #$x:term     ]) => `(ᵀ“ ($t * #$x) ”)
-  | `($_ lang(*) ![ᵀ“$t:foterm”, &$x:term     ]) => `(ᵀ“ ($t * &$x) ”)
-  | `($_ lang(*) ![ᵀ“$t:foterm”, $u           ]) => `(ᵀ“ ($t * ᵀ!$u) ”)
-  | `($_ lang(*) ![#$x:term,      ᵀ“$u:foterm”]) => `(ᵀ“ (#$x * $u) ”)
-  | `($_ lang(*) ![#$x:term,      #$y:term     ]) => `(ᵀ“ (#$x * #$y) ”)
-  | `($_ lang(*) ![#$x:term,      &$y:term     ]) => `(ᵀ“ (#$x * &$y) ”)
-  | `($_ lang(*) ![#$x:term,      $u           ]) => `(ᵀ“ (#$x * ᵀ!$u) ”)
-  | `($_ lang(*) ![&$x:term,      ᵀ“$u:foterm”]) => `(ᵀ“ (&$x * $u) ”)
-  | `($_ lang(*) ![&$x:term,      #$y:term     ]) => `(ᵀ“ (&$x * #$y) ”)
-  | `($_ lang(*) ![&$x:term,      &$y:term     ]) => `(ᵀ“ (&$x * &$y) ”)
-  | `($_ lang(*) ![&$x:term,      $u           ]) => `(ᵀ“ (&$x * ᵀ!$u) ”)
-  | `($_ lang(*) ![$t,            ᵀ“$u:foterm”]) => `(ᵀ“ (ᵀ!$t * $u) ”)
-  | `($_ lang(*) ![$t,            #$y:term     ]) => `(ᵀ“ (ᵀ!$t * #$y) ”)
-  | `($_ lang(*) ![$t,            &$y:term     ]) => `(ᵀ“ (ᵀ!$t * &$y) ”)
-  | `($_ lang(*) ![$t,            $u           ]) => `(ᵀ“ (ᵀ!$t * ᵀ!$u) ”)
+  | `($_ op(*) ![ᵀ“$t:foterm”, ᵀ“$u:foterm”]) => `(ᵀ“ ($t * $u) ”)
+  | `($_ op(*) ![ᵀ“$t:foterm”, #$x:term     ]) => `(ᵀ“ ($t * #$x) ”)
+  | `($_ op(*) ![ᵀ“$t:foterm”, &$x:term     ]) => `(ᵀ“ ($t * &$x) ”)
+  | `($_ op(*) ![ᵀ“$t:foterm”, $u           ]) => `(ᵀ“ ($t * ᵀ!$u) ”)
+  | `($_ op(*) ![#$x:term,      ᵀ“$u:foterm”]) => `(ᵀ“ (#$x * $u) ”)
+  | `($_ op(*) ![#$x:term,      #$y:term     ]) => `(ᵀ“ (#$x * #$y) ”)
+  | `($_ op(*) ![#$x:term,      &$y:term     ]) => `(ᵀ“ (#$x * &$y) ”)
+  | `($_ op(*) ![#$x:term,      $u           ]) => `(ᵀ“ (#$x * ᵀ!$u) ”)
+  | `($_ op(*) ![&$x:term,      ᵀ“$u:foterm”]) => `(ᵀ“ (&$x * $u) ”)
+  | `($_ op(*) ![&$x:term,      #$y:term     ]) => `(ᵀ“ (&$x * #$y) ”)
+  | `($_ op(*) ![&$x:term,      &$y:term     ]) => `(ᵀ“ (&$x * &$y) ”)
+  | `($_ op(*) ![&$x:term,      $u           ]) => `(ᵀ“ (&$x * ᵀ!$u) ”)
+  | `($_ op(*) ![$t,            ᵀ“$u:foterm”]) => `(ᵀ“ (ᵀ!$t * $u) ”)
+  | `($_ op(*) ![$t,            #$y:term     ]) => `(ᵀ“ (ᵀ!$t * #$y) ”)
+  | `($_ op(*) ![$t,            &$y:term     ]) => `(ᵀ“ (ᵀ!$t * &$y) ”)
+  | `($_ op(*) ![$t,            $u           ]) => `(ᵀ“ (ᵀ!$t * ᵀ!$u) ”)
 
-  | `($_ lang(^) ![ᵀ“$t:foterm”, ᵀ“$u:foterm”]) => `(ᵀ“ ($t ^ $u) ”)
-  | `($_ lang(^) ![ᵀ“$t:foterm”, #$x:term     ]) => `(ᵀ“ ($t ^ #$x) ”)
-  | `($_ lang(^) ![ᵀ“$t:foterm”, &$x:term     ]) => `(ᵀ“ ($t ^ &$x) ”)
-  | `($_ lang(^) ![ᵀ“$t:foterm”, $u           ]) => `(ᵀ“ ($t ^ ᵀ!$u) ”)
-  | `($_ lang(^) ![#$x:term,      ᵀ“$u:foterm”]) => `(ᵀ“ (#$x ^ $u) ”)
-  | `($_ lang(^) ![#$x:term,      #$y:term     ]) => `(ᵀ“ (#$x ^ #$y) ”)
-  | `($_ lang(^) ![#$x:term,      &$y:term     ]) => `(ᵀ“ (#$x ^ &$y) ”)
-  | `($_ lang(^) ![#$x:term,      $u           ]) => `(ᵀ“ (#$x ^ ᵀ!$u) ”)
-  | `($_ lang(^) ![&$x:term,      ᵀ“$u:foterm”]) => `(ᵀ“ (&$x ^ $u) ”)
-  | `($_ lang(^) ![&$x:term,      #$y:term     ]) => `(ᵀ“ (&$x ^ #$y) ”)
-  | `($_ lang(^) ![&$x:term,      &$y:term     ]) => `(ᵀ“ (&$x ^ &$y) ”)
-  | `($_ lang(^) ![&$x:term,      $u           ]) => `(ᵀ“ (&$x ^ ᵀ!$u) ”)
-  | `($_ lang(^) ![$t,            ᵀ“$u:foterm”]) => `(ᵀ“ (ᵀ!$t ^ $u) ”)
-  | `($_ lang(^) ![$t,            #$y:term     ]) => `(ᵀ“ (ᵀ!$t ^ #$y) ”)
-  | `($_ lang(^) ![$t,            &$y:term     ]) => `(ᵀ“ (ᵀ!$t ^ &$y) ”)
-  | `($_ lang(^) ![$t,            $u           ]) => `(ᵀ“ (ᵀ!$t ^ ᵀ!$u) ”)
   | _                                             => throw ()
 
 #check Operator.numeral Language.oRing 99
@@ -236,8 +219,8 @@ macro_rules
 section delab
 open Lean PrettyPrinter Delaborator SubExpr
 
-notation "op(=)" => Eq.eq
-notation "op(<)" => LT.lt
+notation "op(=)" => Operator.Eq.eq
+notation "op(<)" => Operator.LT.lt
 
 @[app_unexpander Language.Eq.eq]
 def unexpsnderEq : Unexpander

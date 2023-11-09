@@ -637,21 +637,9 @@ protected class Zero (L : Language.{u}) where
 protected class One (L : Language.{u}) where
   one : Subterm.Const L
 
-instance [Operator.Zero L] : Zero (Subterm.Const L) := ⟨Operator.Zero.zero⟩
-
-instance [Operator.Zero L] : Zero (Subterm L μ n) := ⟨(0 : Subterm.Const L)⟩
-
-instance [Operator.One L] : One (Subterm.Const L) := ⟨Operator.One.one⟩
-
-instance [Operator.One L] : One (Subterm L μ n) := ⟨(1 : Subterm.Const L)⟩
-
 instance [Language.Zero L] : Operator.Zero L := ⟨⟨Subterm.func Language.Zero.zero ![]⟩⟩
 
 instance [Language.One L] : Operator.One L := ⟨⟨Subterm.func Language.One.one ![]⟩⟩
-
-lemma coe_zero [Operator.Zero L] : (↑(0 : Subterm.Const L) : Subterm L μ n) = 0 := rfl
-
-lemma coe_one [Operator.One L] : (↑(1 : Subterm.Const L) : Subterm L μ n) = 1 := rfl
 
 protected class Add (L : Language) where
   add : Subterm.Operator L 2
@@ -665,29 +653,38 @@ protected class Sub (L : Language) where
 protected class Div (L : Language) where
   div : Subterm.Operator L 2
 
-class Ring (L : Language) extends Operator.Zero L, Operator.One L, Operator.Add L, Operator.Mul L
+instance [Language.Add L] : Operator.Add L := ⟨⟨Subterm.func Language.Add.add Subterm.bvar⟩⟩
 
-instance [Language.Add L] : Operator.Add L := ⟨⟨Subterm.func Language.Add.add ![#0, #1]⟩⟩
+instance [Language.Mul L] : Operator.Mul L := ⟨⟨Subterm.func Language.Mul.mul Subterm.bvar⟩⟩
 
-instance [Language.Mul L] : Operator.Mul L := ⟨⟨Subterm.func Language.Mul.mul ![#0, #1]⟩⟩
+lemma Zero.term_eq [L.Zero] : (@Zero.zero L _).term = Subterm.func Language.Zero.zero ![] := rfl
+
+lemma One.term_eq [L.One] : (@One.one L _).term = Subterm.func Language.One.one ![] := rfl
+
+lemma Add.term_eq [L.Add] : (@Add.add L _).term = Subterm.func Language.Add.add Subterm.bvar := rfl
+
+lemma Mul.term_eq [L.Mul] : (@Mul.mul L _).term = Subterm.func Language.Mul.mul Subterm.bvar := rfl
 
 open Language Subterm
 
 def numeral (L : Language) [Operator.Zero L] [Operator.One L] [Operator.Add L] : ℕ → Const L
-  | 0     => 0
-  | n + 1 => Add.add.foldl 1 (List.replicate n 1)
+  | 0     => Zero.zero
+  | n + 1 => Add.add.foldl One.one (List.replicate n One.one)
 
 variable [hz : Operator.Zero L] [ho : Operator.One L] [ha : Operator.Add L]
 
-lemma numeral_zero : numeral L 0 = 0 := by rfl
+lemma numeral_zero : numeral L 0 = Zero.zero := by rfl
 
-lemma numeral_one : numeral L 1 = 1 := by rfl
+lemma numeral_one : numeral L 1 = One.one := by rfl
 
-lemma numeral_succ (hz : z ≠ 0) : numeral L (z + 1) = Operator.Add.add.comp ![numeral L z, 1] := by
+lemma numeral_succ (hz : z ≠ 0) : numeral L (z + 1) = Operator.Add.add.comp ![numeral L z, One.one] := by
   simp[numeral]
   cases' z with z
   · simp at hz
   · simp[Operator.foldl]
+
+lemma numeral_add_two : numeral L (z + 2) = Operator.Add.add.comp ![numeral L (z + 1), One.one] :=
+  numeral_succ (by simp)
 
 end numeral
 

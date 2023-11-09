@@ -1,10 +1,10 @@
-import Logic.Predicate.FirstOrder.Order.Le
+import Logic.Predicate.FirstOrder.Arith.Basic
 
 namespace LO
 
 namespace FirstOrder
 
-variable {L : Language.{u}} [L.ORing] {μ : Type v}
+variable {L : Language.{u}} [FirstOrder.ORing L] {μ : Type v}
 
 namespace Subterm
 
@@ -12,7 +12,7 @@ namespace Subterm
 def bZeroFree : Subterm L μ (n + 1) → Bool
   | #x       => x ≠ 0
   | &_       => true
-  | func _ v => ∀ i, (v i).bZeroFree 
+  | func _ v => ∀ i, (v i).bZeroFree
 
 lemma bShift_of_bZeroFree : ∀ {t : Subterm L μ (n + 1)}, t.bZeroFree → ∃ u : Subterm L μ n , t = Rew.bShift u
   | #x,       h => by

@@ -19,7 +19,7 @@ namespace Subformula
 
 syntax:45 foterm:45 " ≤ " foterm:0 : foformula
 
-notation "op(≤)" => LT.le
+notation "op(≤)" => Operator.LE.le
 
 macro_rules
   | `(“ $t₁:foterm ≤ $t₂:foterm ”) => `(op(≤).operator ![ᵀ“$t₁”, ᵀ“$t₂”])
@@ -77,7 +77,8 @@ namespace Order
 variable {T : Theory L} [EqTheory T] [SubTheory (Theory.Order.Total L) T]
 
 noncomputable def leIffEqOrLt : T ⊢ “∀ ∀ (#0 ≤ #1 ↔ #0 = #1 ∨ #0 < #1)” :=
-  Logic.Complete.complete (consequence_iff.mpr $ fun _ _ _ _ => by simp[models_def, LT.le])
+  Logic.Complete.complete
+    (consequence_iff.mpr $ fun _ _ _ _ => by simp[models_def, Subformula.Operator.LE.def_of_Eq_of_LT])
 
 class MTotal (M : Type*) [_root_.LT M] :=
   ltTrans : ∀ x y z : M, x < y → y < z → x < z

@@ -1,22 +1,24 @@
-import Logic.Predicate.FirstOrder.Order.Le
 import Logic.Predicate.FirstOrder.Arith.Hierarchy
 
 namespace LO
 
 namespace FirstOrder
 
-variable {L : Language.{u}} [L.ORing]
+variable {L : Language.{u}} [FirstOrder.ORing L]
+
+
 
 namespace Arith
 
 def succInd (p : Subformula L μ (k + 1)) : Formula L μ :=
-  “∀* (!(Rew.substsl (ᵀ“0” :> (#·)) p) → ∀ (!(Rew.substsl  (ᵀ“#0” :> (#·.succ)) p) → !(Rew.substsl (ᵀ“#0 + 1” :> (#·.succ)) p)) → ∀ !p)”
+  “∀* (!((Rew.substs (ᵀ“0” :> (#·))).hom p) → ∀ (!((Rew.substs  (ᵀ“#0” :> (#·.succ))).hom p) →
+   !((Rew.substs (ᵀ“#0 + 1” :> (#·.succ))).hom p)) → ∀ !p)”
 
 def leastNumber (p : Subformula L μ (k + 1)) : Formula L μ :=
-  “∀* (∃ !p → ∃ (!p ∧ ∀[#0 < #1] ¬!(Rew.substsl (#0 :> (#·.succ.succ)) p)))”
+  “∀* (∃ !p → ∃ (!p ∧ ∀[#0 < #1] ¬!((Rew.substs (#0 :> (#·.succ.succ))).hom p)))”
 
 def orderInd (p : Subformula L μ (k + 1)) : Formula L μ :=
-  “∀* (∀ (∀[#0 < #1] !(Rew.substsl (#0 :> (#·.succ.succ)) p) → !p) → ∀ !p)”
+  “∀* (∀ (∀[#0 < #1] !((Rew.substs (#0 :> (#·.succ.succ))).hom p) → !p) → ∀ !p)”
 
 variable (L)
 
@@ -47,23 +49,6 @@ def IndScheme (u : Set (Subsentence L 1)) : Theory L := succInd '' u
 
 variable (L)
 
-section Paring
-variable [L.Pairing]
-
-inductive Pairing : Sentence L → Prop
-  | pairing : Pairing “∀ ∀ ∀ (⟨#0, #1⟩ = #2 ↔ (#0 + #1 + 1) * (#0 + #1) + 2 * #0 = 2 * #2)”
-
-end Paring
-
-section Exp
-variable [L.Exp]
-
-inductive Exp : Theory L
-  | zero : Exp “exp 0 = 1”
-  | succ : Exp “∀ exp (#0 + 1) = exp #0 * 2”
-
-end Exp
-
 end Theory
 
 variable {L}
@@ -85,8 +70,6 @@ abbrev ISigma (k : ℕ) (T : Theory L) := Ind (Arith.Hierarchy.Sigma k) T
 abbrev IPi (k : ℕ) (T : Theory L) := Ind (Arith.Hierarchy.Pi k) T
 
 abbrev Peano (T : Theory L) := Ind Set.univ T
-
-abbrev PairingTheory [L.Pairing] (T : Theory L) := SubTheory (Theory.Pairing L) T
 
 namespace Axiom
 

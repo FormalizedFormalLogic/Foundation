@@ -128,6 +128,10 @@ lemma val_operator {k} (o : Operator L k) (v) :
     val s e ε (o.operator v) = o.val (fun x => (v x).val s e ε) := by
   simp[Operator.operator, val_substs]; congr; funext x; contradiction
 
+@[simp] lemma val_const (o : Const L) :
+    val s e ε o.const = o.val ![] := by
+  simp[Operator.const, val_operator, Matrix.empty_eq]
+
 @[simp] lemma val_operator₀ (o : Const L) :
     val s e ε (o.operator v) = o.val ![] := by
   simp[val_operator, Matrix.empty_eq]
@@ -139,6 +143,13 @@ lemma val_operator {k} (o : Operator L k) (v) :
 @[simp] lemma val_operator₂ (o : Operator L 2) (t u) :
     val s e ε (o.operator ![t, u]) = o.val ![t.val s e ε, u.val s e ε] :=
   by simp[val_operator]; congr; funext i; cases' i using Fin.cases with i <;> simp
+
+namespace Operator
+
+lemma val_comp (o₁ : Operator L k) (o₂ : Fin k → Operator L m) (v : Fin m → M) :
+  (o₁.comp o₂).val v = o₁.val (fun i => (o₂ i).val v) := by simp[comp, val, val_operator]
+
+end Operator
 
 section Language
 
@@ -228,7 +239,7 @@ protected class Add (L : Language.{u}) [Operator.Add L] (M : Type w) [Add M] [s 
   add : ∀ a b : M, (@Operator.Add.add L _).val ![a, b] = a + b
 
 protected class Mul (L : Language.{u}) [Operator.Mul L] (M : Type w) [Mul M] [s : Structure L M] where
-  add : ∀ a b : M, (@Operator.Mul.mul L _).val ![a, b] = a * b
+  mul : ∀ a b : M, (@Operator.Mul.mul L _).val ![a, b] = a * b
 
 attribute [simp] Zero.zero One.one Add.add Mul.mul
 
@@ -411,10 +422,18 @@ protected class Eq (L : Language.{u}) [Operator.Eq L] (M : Type w) [s : Structur
 protected class LT (L : Language.{u}) [Operator.LT L] (M : Type w) [LT M] [s : Structure L M] where
   lt : ∀ a b : M, (@Operator.LT.lt L _).val ![a, b] ↔ a < b
 
+protected class LE (L : Language.{u}) [Operator.LE L] (M : Type w) [LE M] [s : Structure L M] where
+  le : ∀ a b : M, (@Operator.LE.le L _).val ![a, b] ↔ a ≤ b
+
 class Mem (L : Language.{u}) [Operator.Mem L] (M : Type w) [Membership M M] [s : Structure L M] where
   mem : ∀ a b : M, (@Operator.Mem.mem L _).val ![a, b] ↔ a ∈ b
 
-attribute [simp] Eq.eq LT.lt Mem.mem
+attribute [simp] Structure.Eq.eq Structure.LT.lt Structure.LE.le Structure.Mem.mem
+
+@[simp] lemma le_iff_of_eq_of_lt [Operator.Eq L] [Operator.LT L] {M : Type w} [LT M]
+    [Structure L M] [Structure.Eq L M] [Structure.LT L M] {a b : M} :
+    (@Operator.LE.le L _).val ![a, b] ↔ a = b ∨ a < b := by
+  simp[Operator.LE.def_of_Eq_of_LT]
 
 end
 
@@ -691,6 +710,14 @@ lemma elementaryEquiv (L : Language.{u}) (M : Type u) [Structure L M] : M ≃ₑ
 section
 
 open Subterm Subformula
+
+instance [Operator.Zero L] : Zero (Model L M) := ⟨(@Operator.Zero.zero L _).val ![]⟩
+
+instance [Operator.Zero L] : Structure.Zero L (Model L M) := ⟨rfl⟩
+
+instance [Operator.One L] : One (Model L M) := ⟨(@Operator.One.one L _).val ![]⟩
+
+instance [Operator.One L] : Structure.One L (Model L M) := ⟨rfl⟩
 
 instance [Operator.Add L] : Add (Model L M) :=
   ⟨fun x y => (@Operator.Add.add L _).val ![x, y]⟩

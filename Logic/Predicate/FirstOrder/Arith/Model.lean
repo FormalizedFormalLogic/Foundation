@@ -22,39 +22,29 @@ instance standardModel : Structure oRing ℕ where
     | ORing.Rel.eq => fun v => v 0 = v 1
     | ORing.Rel.lt => fun v => v 0 < v 1
 
-instance : Structure.Eq oRing ℕ := ⟨by simp[standardModel]⟩
+instance : Structure.Eq oRing ℕ :=
+  ⟨by intro a b; simp[standardModel, Subformula.Operator.val, Subformula.Operator.Eq.sentence_eq, Subformula.eval_rel]⟩
 
 namespace standardModel
 variable {μ : Type v} (e : Fin n → ℕ) (ε : μ → ℕ)
 
-@[simp] lemma zero_eq_zero :
-    standardModel.func Language.Zero.zero = 0 :=
-  rfl
+instance : Structure.Zero oRing ℕ := ⟨rfl⟩
 
-@[simp] lemma one_eq_one :
-    standardModel.func Language.One.one = 1 :=
-  rfl
+instance : Structure.One oRing ℕ := ⟨rfl⟩
 
-@[simp] lemma add_eq_add : standardModel.func lang(+) ![x, y] = x + y := rfl
+instance : Structure.Add oRing ℕ := ⟨fun _ _ => rfl⟩
 
-@[simp] lemma mul_eq_mul : standardModel.func lang(*) ![x, y] = x * y := rfl
+instance : Structure.Mul oRing ℕ := ⟨fun _ _ => rfl⟩
 
-@[simp] lemma numeral_eq_numeral (n : ℕ) :
-    Subterm.val standardModel e ε (Subterm.numeral oRing n) = n := by
-  induction' n with n ih
-  { simp[Subterm.numeral_zero] }
-  { cases' n with n <;> simp[Subterm.numeral_one, ←Nat.one_eq_succ_zero, Subterm.numeral_succ, Nat.succ_eq_add_one] at ih ⊢
-    simp[ih] }
+instance : Structure.Eq oRing ℕ := ⟨fun _ _ => iff_of_eq rfl⟩
 
-@[simp] lemma lt_eq_lt : standardModel.rel lang(<) ![x, y] ↔ x < y := of_eq rfl
+instance : Structure.LT oRing ℕ := ⟨fun _ _ => iff_of_eq rfl⟩
 
-@[simp] lemma le_eq_le (t u : Subterm oRing μ n) :
-    Subformula.Eval standardModel e ε “ᵀ!t ≤ ᵀ!u”  ↔ t.val standardModel e ε ≤ u.val standardModel e ε :=
-  by simp[Subformula.le_eq, le_iff_eq_or_lt]
+instance : ORing oRing := ORing.mk
 
 lemma modelsTheoryPAminusAux : ℕ ⊧* Theory.PAminus oRing := by
   intro σ h
-  rcases h <;> simp[models_def]
+  rcases h <;> simp[models_def, ←le_iff_eq_or_lt]
   case addAssoc => intro l m n; exact add_assoc n m l
   case addComm  => intro m n; exact add_comm n m
   case mulAssoc => intro l m n; exact mul_assoc n m l
@@ -95,6 +85,52 @@ structure ClosedCut (M : Type w) [s : Structure L M] extends Structure.ClosedSub
 
 end Semantics
 
+class MPAminus (M : Type*) [Zero M] [One M] [Add M] [Mul M] [LT M] where
+  add_zero          : ∀ x : M, x + 0 = x
+  add_assoc         : ∀ x y z : M, (x + y) + z = x + (y + z)
+  add_comm          : ∀ x y : M, x + y = y + x
+  add_eq_of_lt      : ∀ x y : M, x < y → ∃ z, x + z = y
+  zero_le           : ∀ x, 0 = x ∨ 0 < x
+  zero_lt_one       : 0 < 1
+  one_le_of_zero_lt : ∀ x : M, 0 < x → 1 = x ∨ 1 < x
+  add_lt_add        : ∀ x y z : M, x < y → x + z < y + z
+  mul_zero          : ∀ x : M, x * 0 = 0
+  mul_one           : ∀ x : M, x * 1 = x
+  mul_assoc         : ∀ x y z : M, (x * y) * z = x * (y * z)
+  mul_comm          : ∀ x y : M, x * y = y * x
+  mul_lt_mul        : ∀ x y z : M, x < y → 0 < z → x * z < y * z
+  distr             : ∀ x y z : M, x * (y + z) = x * y + x * z
+  lt_irrefl         : ∀ x : M, ¬x < x
+  lt_trans          : ∀ x y z : M, x < y → y < z → x < z
+  lt_tri            : ∀ x y : M, x < y ∨ x = y ∨ y < x
+
+variable {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M] [MPAminus M]
+
+
+instance : AddCommMonoid M where
+  add_assoc := MPAminus.add_assoc
+  zero_add := fun x => MPAminus.add_comm x 0 ▸ MPAminus.add_zero x
+  add_zero := MPAminus.add_zero
+  add_comm := MPAminus.add_comm
+
+instance  : LinearOrder M where
+  le := fun x y => x = y ∨ x < y
+  le_refl := fun x => Or.inl (by simp)
+  le_trans := by
+    rintro x y z (rfl | hx) (rfl | hy) <;> simp[*]
+    · exact Or.inr (MPAminus.lt_trans _ _ _ hx hy)
+  le_antisymm := by
+    rintro x y (rfl | hx) <;> simp
+    rintro (rfl | hy) <;> try simp
+    exact False.elim $ MPAminus.lt_irrefl _ (MPAminus.lt_trans _ _ _ hx hy)
+  le_total := by
+    intro x y
+    rcases MPAminus.lt_tri x y with (h | rfl | h) <;> simp[*]
+  lt_iff_le_not_le := by { sorry }
+  decidableLE := by { sorry }
+
 end Arith
 
 end FirstOrder
+
+end LO

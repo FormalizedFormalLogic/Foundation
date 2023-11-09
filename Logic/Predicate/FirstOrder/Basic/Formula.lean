@@ -572,7 +572,14 @@ instance [Language.Eq L] : Operator.Eq L := ⟨⟨Subformula.rel Language.Eq.eq 
 
 instance [Language.LT L] : Operator.LT L := ⟨⟨Subformula.rel Language.LT.lt Subterm.bvar⟩⟩
 
-instance [Operator.Eq L] [Operator.LT L] : Operator.LE L := ⟨Eq.eq.and LT.lt⟩
+instance [Operator.Eq L] [Operator.LT L] : Operator.LE L := ⟨Eq.eq.or LT.lt⟩
+
+lemma Eq.sentence_eq [L.Eq] : (@Operator.Eq.eq L _).sentence = Subformula.rel Language.Eq.eq Subterm.bvar := rfl
+
+lemma LT.sentence_eq [L.LT] : (@Operator.LT.lt L _).sentence = Subformula.rel Language.LT.lt Subterm.bvar := rfl
+
+lemma LE.def_of_Eq_of_LT [Operator.Eq L] [Operator.LT L] :
+    (@Operator.LE.le L _) = Eq.eq.or LT.lt := rfl
 
 end Operator
 
