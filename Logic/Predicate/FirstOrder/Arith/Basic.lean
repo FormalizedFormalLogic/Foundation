@@ -16,9 +16,9 @@ def numeral : ℕ → α
   | 1     => 1
   | n + 2 => numeral (n + 1) + 1
 
- lemma zero_eq_zero : (Zero.zero : α) = 0 := rfl
+ @[simp] lemma zero_eq_zero : (numeral 0 : α) = 0 := rfl
 
- lemma one_eq_one : (One.one : α) = 1 := rfl
+ @[simp] lemma one_eq_one : (numeral 1 : α) = 1 := rfl
 
 end ORingSymbol
 
@@ -34,8 +34,7 @@ open Subterm Subformula
 class ORing (L : Language) extends
   Operator.Zero L, Operator.One L, Operator.Add L, Operator.Mul L, Operator.Eq L, Operator.LT L
 
-class Structure.ORing (L : Language) [ORing L]
-    (M : Type w) [Zero M] [One M] [Add M] [Mul M] [LT M] [Structure L M] extends
+class Structure.ORing (L : Language) [ORing L] (M : Type w) [ORingSymbol M] [Structure L M] extends
   Structure.Zero L M, Structure.One L M, Structure.Add L M, Structure.Mul L M, Structure.Eq L M, Structure.LT L M
 
 attribute [instance] Structure.ORing.mk
@@ -57,6 +56,7 @@ variable [ORing L] {T : Theory L} [EqTheory T] [SubTheory (Theory.Order.Total L)
 
 lemma consequence_of (σ : Sentence L)
   (H : ∀ (M : Type u)
+         [DecidableEq M]
          [Inhabited M]
          [ORingSymbol M]
          [Structure L M]

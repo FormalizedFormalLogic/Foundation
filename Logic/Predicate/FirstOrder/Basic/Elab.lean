@@ -162,9 +162,9 @@ syntax:45 foterm:45 " < " foterm:0 : foformula
 syntax:45 foterm:45 " ≮ " foterm:0 : foformula
 syntax:45 "⟨" term "⟩(" foterm,* ")" : foformula
 syntax:max "¬" foformula:35 : foformula
-syntax:32 foformula:32 " ∧ " foformula:33 : foformula
+syntax:32 foformula:33 " ∧ " foformula:32 : foformula
 syntax:32 "⋀ " ident ", " foformula : foformula
-syntax:30 foformula:30 " ∨ " foformula:31 : foformula
+syntax:30 foformula:31 " ∨ " foformula:30 : foformula
 syntax:max "∀ " foformula:35 : foformula
 syntax:max "∃ " foformula:35 : foformula
 syntax:max "∀[" foformula "] " foformula:35 : foformula
@@ -206,6 +206,7 @@ macro_rules
 
 #check “ ¬(∀ ∀ (#0 + 1) * #1 < #0 + #1 ∨ 0 < 5) ”
 #check “⋀ i, #i < #i + 9”
+#check “0 < 1 ∨ 0 = 1 ∨1 < 0”
 
 syntax:10 foformula:9 " → " foformula:10 : foformula
 syntax:10 foformula:10 " ↔ " foformula:10 : foformula

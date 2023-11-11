@@ -1,168 +1,156 @@
 import Logic.Predicate.FirstOrder.Arith.Theory
-import Logic.Predicate.FirstOrder.Principia.Meta
+import Logic.Predicate.FirstOrder.Arith.Model
+import Mathlib.Algebra.Order.Monoid.Canonical.Defs
+
+--import Logic.Predicate.FirstOrder.Principia.Meta
 
 namespace LO
 
 namespace FirstOrder
-variable {L : Language.{u}} [L.ORing] [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq (L.rel k)]
-variable {T : Theory L} [EqTheory T] [Arith.PAminus T]
+variable {L : Language.{u}} [ORing L] [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq (L.rel k)]
 
 namespace Arith
 
 namespace PAminus
 
-def addZero : [] ⟹[T] “∀ #0 + 0 = #0” :=
-  Principia.axmOfEq _ (by simp) (Arith.PAminus.paminus $ Theory.PAminus.addZero)
+noncomputable section
 
-def addAssoc : [] ⟹[T] “∀ ∀ ∀ (#0 + #1) + #2 = #0 + (#1 + #2)” :=
-  Principia.axmOfEq _ (by simp) (Arith.PAminus.paminus $ Theory.PAminus.addAssoc)
+namespace Model
+open Language
+variable
+  {M : Type} [DecidableEq M] [ORingSymbol M]
+  [Structure Language.oRing M] [Structure.ORing Language.oRing M]
+  [Theory.Mod M (Theory.PAminus Language.oRing)]
 
-def addComm : [] ⟹[T] “∀ ∀ #0 + #1 = #1 + #0” :=
-  Principia.axmOfEq _ (by simp) (Arith.PAminus.paminus $ Theory.PAminus.addComm)
+instance : LE M := ⟨fun x y => x = y ∨ x < y⟩
 
-def addEqOfLt : [] ⟹[T] “∀ ∀ (#0 < #1 → ∃ #1 + #0 = #2)” :=
-  Principia.axmOfEq _ (by simp) (Arith.PAminus.paminus $ Theory.PAminus.addEqOfLt)
+lemma le_def {x y : M} : x ≤ y ↔ x = y ∨ x < y := iff_of_eq rfl
 
-def zeroLe : [] ⟹[T] “∀ (0 ≤ #0)” :=
-  Principia.axmOfEq _ (by simp) (Arith.PAminus.paminus $ Theory.PAminus.zeroLe)
+lemma add_zero : ∀ x : M, x + 0 = x := by
+  simpa[models_iff] using Theory.Mod.models M (@Theory.PAminus.addZero oRing _)
 
-def zeroLtOne : [] ⟹[T] “0 < 1” :=
-  Principia.axmOfEq _ (by simp) (Arith.PAminus.paminus $ Theory.PAminus.zeroLtOne)
+lemma add_assoc : ∀ x y z : M, (x + y) + z = x + (y + z) := by
+  simpa[models_iff] using Theory.Mod.models M (@Theory.PAminus.addAssoc oRing _)
 
-def oneLeOfZeroLt : [] ⟹[T] “∀ (0 < #0 → 1 ≤ #0)” :=
-  Principia.axmOfEq _ (by simp) (Arith.PAminus.paminus $ Theory.PAminus.oneLeOfZeroLt)
+lemma add_comm : ∀ x y : M, x + y = y + x := by
+  simpa[models_iff] using Theory.Mod.models M (@Theory.PAminus.addComm oRing _)
 
-def addLtAdd : [] ⟹[T] “∀ ∀ ∀ (#0 < #1 → #0 + #2 < #1 + #2)” :=
-  Principia.axmOfEq _ (by simp) (Arith.PAminus.paminus $ Theory.PAminus.addLtAdd)
+lemma add_eq_of_lt : ∀ x y : M, x < y → ∃ z, x + z = y := by
+  simpa[models_iff] using Theory.Mod.models M (@Theory.PAminus.addEqOfLt oRing _)
 
-def mulZero : [] ⟹[T] “∀ #0 * 0 = 0” :=
-  Principia.axmOfEq _ (by simp) (Arith.PAminus.paminus $ Theory.PAminus.mulZero)
+lemma zero_le : ∀ x : M, 0 ≤ x := by
+  simpa[models_iff] using Theory.Mod.models M (@Theory.PAminus.zeroLe oRing _)
 
-def mulOne : [] ⟹[T] “∀ #0 * 1 = #0” :=
-  Principia.axmOfEq _ (by simp) (Arith.PAminus.paminus $ Theory.PAminus.mulOne)
+lemma zero_lt_one : (0 : M) < 1 := by
+  simpa[models_iff] using Theory.Mod.models M (@Theory.PAminus.zeroLtOne oRing _)
 
-def mulAssoc : [] ⟹[T] “∀ ∀ ∀ (#0 * #1) * #2 = #0 * (#1 * #2)” :=
-  Principia.axmOfEq _ (by simp) (Arith.PAminus.paminus $ Theory.PAminus.mulAssoc)
+lemma one_le_of_zero_lt : ∀ x : M, 0 < x → 1 ≤ x := by
+  simpa[models_iff] using Theory.Mod.models M (@Theory.PAminus.oneLeOfZeroLt oRing _)
 
-def mulComm : [] ⟹[T] “∀ ∀ #0 * #1 = #1 * #0” :=
-  Principia.axmOfEq _ (by simp) (Arith.PAminus.paminus $ Theory.PAminus.mulComm)
+lemma add_lt_add : ∀ x y z : M, x < y → x + z < y + z := by
+  simpa[models_iff] using Theory.Mod.models M (@Theory.PAminus.addLtAdd oRing _)
 
-def mulLtMul : [] ⟹[T] “∀ ∀ ∀ (#0 < #1 ∧ 0 < #2 → #0 * #2 < #1 * #2)” :=
-  Principia.axmOfEq _ (by simp) (Arith.PAminus.paminus $ Theory.PAminus.mulLtMul)
+lemma mul_zero : ∀ x : M, x * 0 = 0 := by
+  simpa[models_iff] using Theory.Mod.models M (@Theory.PAminus.mulZero oRing _)
 
-def distr : [] ⟹[T] “∀ ∀ ∀ #0 * (#1 + #2) = #0 * #1 + #0 * #2” :=
-  Principia.axmOfEq _ (by simp) (Arith.PAminus.paminus $ Theory.PAminus.distr)
+lemma mul_one : ∀ x : M, x * 1 = x := by
+  simpa[models_iff] using Theory.Mod.models M (@Theory.PAminus.mulOne oRing _)
 
-def leIffEqOrLt : [] ⟹[T] “∀ ∀ (#0 ≤ #1 ↔ #0 = #1 ∨ #0 < #1)” :=
-  by simp[Subformula.le_eq]; exact proofBy { gens _ _; refl }
+lemma mul_assoc : ∀ x y z : M, (x * y) * z = x * (y * z) := by
+  simpa[models_iff] using Theory.Mod.models M (@Theory.PAminus.mulAssoc oRing _)
 
-def ltIrrefl : [] ⟹[T] “∀ ¬#0 < #0” :=
-  Principia.axmOfEq _ (by simp) (Arith.PAminus.paminus $ Theory.PAminus.ltIrrefl)
+lemma mul_comm : ∀ x y : M, x * y = y * x := by
+  simpa[models_iff] using Theory.Mod.models M (@Theory.PAminus.mulComm oRing _)
 
-def ltTrans : [] ⟹[T] “∀ ∀ ∀ (#0 < #1 ∧ #1 < #2 → #0 < #2)” :=
-  Principia.axmOfEq _ (by simp) (Arith.PAminus.paminus $ Theory.PAminus.ltTrans)
+lemma mul_lt_mul : ∀ x y z : M, x < y → 0 < z → x * z < y * z := by
+  simpa[models_iff] using Theory.Mod.models M (@Theory.PAminus.mulLtMul oRing _)
 
-def ltTri : [] ⟹[T] “∀ ∀ (#0 < #1 ∨ #0 = #1 ∨ #1 < #0)” :=
-  Principia.axmOfEq _ (by simp) (Arith.PAminus.paminus $ Theory.PAminus.ltTri)
+lemma distr : ∀ x y z : M, x * (y + z) = x * y + x * z := by
+  simpa[models_iff] using Theory.Mod.models M (@Theory.PAminus.distr oRing _)
 
-def ltOfLeOfLt : [] ⟹[T] “∀ ∀ ∀ (#0 ≤ #1 ∧ #1 < #2 → #0 < #2)” :=
-  proof.
-    then (lt_iff) “∀ ∀ (#0 ≤ #1 ↔ #0 = #1 ∨ #0 < #1)” · from leIffEqOrLt
-    then (lt_trans) “∀ ∀ ∀ (#0 < #1 ∧ #1 < #2 → #0 < #2)” · from ltTrans
-    gens n m l; intro h
-    have “l = m ∨ l < m”
-    · specialize lt_iff with l, m
-      rw[←this]
-      andl h
-    cases (hl) “l = m” or (hl) “l < m”
-    · rw[this]
-      andr h
-    · specialize lt_trans with l, m, n
-      apply this
-      · split
-        @ assumption
-        @ andr h
-  qed.
+lemma lt_irrefl : ∀ x : M, ¬x < x := by
+  simpa[models_iff] using Theory.Mod.models M (@Theory.PAminus.ltIrrefl oRing _)
 
-def leOfLt : [] ⟹[T] “∀ ∀ (#0 < #1 → #0 ≤ #1)” :=
-  proof.
-    gens n m; intro h
-    then “∀ ∀ (#0 ≤ #1 ↔ #0 = #1 ∨ #0 < #1)” · from leIffEqOrLt
-    specialize this with m, n
-    rw[this]
-    right
-  qed.
+lemma lt_trans : ∀ x y z : M, x < y → y < z → x < z := by
+  simpa[models_iff] using Theory.Mod.models M (@Theory.PAminus.ltTrans oRing _)
 
-def leRefl : [] ⟹[T] “∀ #0 ≤ #0” :=
-  proof.
-    gen n
-    then “∀ ∀ (#0 ≤ #1 ↔ #0 = #1 ∨ #0 < #1)” · from leIffEqOrLt
-    specialize this with n, n
-    rw[this]
-    left; refl
-  qed.
+lemma lt_tri : ∀ x y : M, x < y ∨ x = y ∨ y < x := by
+  simpa[models_iff] using Theory.Mod.models M (@Theory.PAminus.ltTri oRing _)
 
-def zeroAdd : [] ⟹[T] “∀ 0 + #0 = #0” :=
-proof.
-  then (add_zero) “∀ #0 + 0 = #0” · from addZero
-  then (add_comm) “∀ ∀ #0 + #1 = #1 + #0” · from addComm
-  gen n
-  specialize add_zero with n
-  specialize add_comm with 0, n
-  rw[this]
-qed.
+instance : AddCommMonoid M where
+  add_assoc := Model.add_assoc
+  zero_add  := fun x => Model.add_comm x 0 ▸ Model.add_zero x
+  add_zero  := Model.add_zero
+  add_comm  := Model.add_comm
 
-def numeralAdd (n m : ℕ) : [] ⟹[T] “ᵀ!(Subterm.numeral L n) + ᵀ!(Subterm.numeral L m) = ᵀ!(Subterm.numeral L (n + m))” := by
-  induction' m with m ih
-  · simp
-    exact proofBy {
-      then “∀ #0 + 0 = #0” · from addZero
-      specialize this with ᵀ!(Subterm.Operator.const $ Subterm.numeral L n) }
-  · by_cases hm : m = 0
-    · simp[hm, Nat.add_succ] at ih ⊢
-      suffices : [] ⟹[T] “ᵀ!(Subterm.numeral L n) + 1 = ᵀ!(Subterm.numeral L (n + 1))”
-      { exact this.cast (by rfl) }
-      by_cases hn : n = 0
-      · simp[hn]
-        exact proofBy {
-          then “∀ 0 + #0 = #0” · from zeroAdd
-          specialize this with 1 }
-      · simp[hn, Subterm.numeral_succ]; exact proofBy { refl }
-    · simp[hm, Nat.add_succ, Subterm.numeral_succ]
-      exact proof.
-        then (ih) “ᵀ!(Subterm.numeral L n) + ᵀ!(Subterm.numeral L m) = ᵀ!(Subterm.numeral L (n + m))” · from ih
-        then (add_succ) “∀ ∀ ∀ (#0 + #1) + #2 = #0 + (#1 + #2)” · from addAssoc
-        specialize this with ᵀ!(Subterm.Operator.const $ Subterm.numeral L n), ᵀ!(Subterm.Operator.const $ Subterm.numeral L m), 1
-        rw[←this, ih]
-        refl
-      qed.
+instance : CommMonoid M where
+  mul_assoc := Model.mul_assoc
+  one_mul   := fun x => Model.mul_comm x 1 ▸ Model.mul_one x
+  mul_one   :=  Model.mul_one
+  mul_comm  := Model.mul_comm
 
-def numeralMul (n m : ℕ) : [] ⟹[T] “ᵀ!(Subterm.numeral L n) * ᵀ!(Subterm.numeral L m) = ᵀ!(Subterm.numeral L (n * m))” := by
-  induction' m with m ih
-  · simp
-    exact proofBy {
-      then “∀ #0 * 0 = 0” · from mulZero
-      specialize this with ᵀ!(Subterm.Operator.const $ Subterm.numeral L n) }
-  · by_cases hm : m = 0
-    · simp[hm, Nat.add_succ] at ih ⊢
-      suffices : [] ⟹[T] “ᵀ!(Subterm.numeral L n) * 1 = ᵀ!(Subterm.numeral L n)”
-      { exact this.cast (by rfl) }
-      exact proofBy {
-        then “∀ #0 * 1 = #0” · from mulOne
-        specialize this with ᵀ!(Subterm.Operator.const $ Subterm.numeral L n) }
-    · simp[hm, Nat.mul_succ, Subterm.numeral_succ]
-      exact proofBy {
-        then “ᵀ!(Subterm.numeral L (n * m)) + ᵀ!(Subterm.numeral L n) = ᵀ!(Subterm.numeral L (n * m + n))” · from numeralAdd _ _
-        then (ih) “ᵀ!(Subterm.numeral L n) * ᵀ!(Subterm.numeral L m) = ᵀ!(Subterm.numeral L (n * m))” · from ih
-        then “∀ #0 * 1 = #0” · from mulOne
-        specialize (h) this with ᵀ!(Subterm.Operator.const $ Subterm.numeral L n)
-        then “∀ ∀ ∀ #0 * (#1 + #2) = #0 * #1 + #0 * #2” · from distr
-        specialize this with ᵀ!(Subterm.Operator.const $ Subterm.numeral L n), ᵀ!(Subterm.Operator.const $ Subterm.numeral L m), 1
-        rw[this, h, ih] }
+instance : LinearOrder M where
+  le_refl := fun x => Or.inl (by simp)
+  le_trans := by
+    rintro x y z (rfl | hx) (rfl | hy) <;> simp[*, le_def]
+    · exact Or.inr (Model.lt_trans _ _ _ hx hy)
+  le_antisymm := by
+    rintro x y (rfl | hx) <;> simp
+    rintro (rfl | hy) <;> try simp
+    exact False.elim $ Model.lt_irrefl _ (Model.lt_trans _ _ _ hx hy)
+  le_total := by
+    intro x y
+    rcases Model.lt_tri x y with (h | rfl | h) <;> simp[*, le_def]
+  lt_iff_le_not_le := fun x y =>
+    ⟨fun h => ⟨Or.inr h, by
+      simp[le_def]; rintro (rfl | h'); { exact lt_irrefl y h }; { exact lt_irrefl _ (lt_trans _ _ _ h h') }⟩,
+     by simp[not_or, le_def]; rintro (rfl | h) <;> simp[*] ⟩
+  decidableLE := fun _ _ => Classical.dec _
 
-def numeralLt {n m : ℕ} (h : n < m) : [] ⟹[T] “ᵀ!(Subterm.numeral L n) < ᵀ!(Subterm.numeral L m)” := sorry
+lemma zero_mul : ∀ x : M, 0 * x = 0 := fun x => by simpa[mul_comm] using mul_zero x
 
-def numeralNEq {n m : ℕ} (h : n ≠ m) : [] ⟹[T] “ᵀ!(Subterm.numeral L n) ≠ ᵀ!(Subterm.numeral L m)” := sorry
+instance : LinearOrderedCommSemiring M where
+  left_distrib := distr
+  right_distrib := fun x y z => by simp[mul_comm _ z]; exact distr z x y
+  zero_mul := zero_mul
+  mul_zero := mul_zero
+  mul_assoc := Model.mul_assoc
+  mul_comm := mul_comm
+  one_mul   := fun x => Model.mul_comm x 1 ▸ Model.mul_one x
+  mul_one   :=  Model.mul_one
+  add_le_add_left := by rintro x y (rfl | h) z <;> simp[add_comm z]; exact Or.inr (add_lt_add x y z h)
+  zero_le_one := Or.inr zero_lt_one
+  le_of_add_le_add_left := by
+    rintro x y z h
+    have : y ≤ z ∨ z < y := le_or_lt y z
+    rcases this with (hyz | hyz)
+    · exact hyz
+    · have : x + z < x + y := by simpa[add_comm] using add_lt_add z y x hyz
+      exact False.elim ((lt_iff_not_ge _ _).mp this h)
+  exists_pair_ne := ⟨0, 1, ne_of_lt zero_lt_one⟩
+  mul_lt_mul_of_pos_left := by
+    rintro x y z h hz; simp[mul_zero]; { simpa[mul_comm z] using mul_lt_mul x y z h hz }
+  mul_lt_mul_of_pos_right := by
+    rintro x y z h hz; simp[mul_zero]; { simpa using mul_lt_mul x y z h hz }
+  le_total := le_total
+  decidableLE := fun _ _ => Classical.dec _
+
+@[simp] lemma numeral_eq_natCast : (n : ℕ) → (ORingSymbol.numeral n : M) = n
+  | 0     => rfl
+  | 1     => by simp
+  | n + 2 => by simp[ORingSymbol.numeral, numeral_eq_natCast (n + 1), add_assoc, one_add_one_eq_two]
+
+lemma natCast_add (n m : ℕ) : (↑n : M) + (↑m : M) = ↑(n + m) := by symm; exact Nat.cast_add n m
+
+lemma natCast_mul (n m : ℕ) : (↑n : M) * (↑m : M) = ↑(n * m) := by symm; exact Nat.cast_mul n m
+
+lemma natCast_lt {n m : ℕ} (h : n < m) : (↑n : M) < (↑m : M) := by exact Iff.mpr Nat.cast_lt h
+
+
+
+end Model
+
+end
 
 end PAminus
 

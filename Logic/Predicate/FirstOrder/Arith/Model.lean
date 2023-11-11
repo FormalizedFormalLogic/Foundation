@@ -45,16 +45,16 @@ instance : ORing oRing := ORing.mk
 lemma modelsTheoryPAminusAux : ℕ ⊧* Theory.PAminus oRing := by
   intro σ h
   rcases h <;> simp[models_def, ←le_iff_eq_or_lt]
-  case addAssoc => intro l m n; exact add_assoc n m l
-  case addComm  => intro m n; exact add_comm n m
-  case mulAssoc => intro l m n; exact mul_assoc n m l
-  case mulComm  => intro m n; exact mul_comm n m
-  case addEqOfLt => intro m n h; exact ⟨m - n, Nat.add_sub_of_le (le_of_lt h)⟩
+  case addAssoc => intro l m n; exact add_assoc l m n
+  case addComm  => intro m n; exact add_comm m n
+  case mulAssoc => intro l m n; exact mul_assoc l m n
+  case mulComm  => intro m n; exact mul_comm m n
+  case addEqOfLt => intro m n h; exact ⟨n - m, Nat.add_sub_of_le (le_of_lt h)⟩
   case oneLeOfZeroLt => intro n hn; exact hn
   case mulLtMul => rintro l m n h hl; exact (mul_lt_mul_right hl).mpr h
-  case distr => intro l m n; exact Nat.mul_add n m l
+  case distr => intro l m n; exact Nat.mul_add l m n
   case ltTrans => intro l m n; exact Nat.lt_trans
-  case ltTri => intro n m; simp[or_assoc]; exact Nat.lt_trichotomy m n
+  case ltTri => intro n m; exact Nat.lt_trichotomy n m
 
 theorem modelsTheoryPAminus : ℕ ⊧* Axiom.PAminus oRing := by
   simp[Axiom.PAminus, modelsTheoryPAminusAux]
@@ -84,50 +84,6 @@ structure ClosedCut (M : Type w) [s : Structure L M] extends Structure.ClosedSub
   closedLt : ∀ x y : M, Subformula.BVal s ![x, y] “#0 < #1” → y ∈ domain → x ∈ domain
 
 end Semantics
-
-class MPAminus (M : Type*) [Zero M] [One M] [Add M] [Mul M] [LT M] where
-  add_zero          : ∀ x : M, x + 0 = x
-  add_assoc         : ∀ x y z : M, (x + y) + z = x + (y + z)
-  add_comm          : ∀ x y : M, x + y = y + x
-  add_eq_of_lt      : ∀ x y : M, x < y → ∃ z, x + z = y
-  zero_le           : ∀ x, 0 = x ∨ 0 < x
-  zero_lt_one       : 0 < 1
-  one_le_of_zero_lt : ∀ x : M, 0 < x → 1 = x ∨ 1 < x
-  add_lt_add        : ∀ x y z : M, x < y → x + z < y + z
-  mul_zero          : ∀ x : M, x * 0 = 0
-  mul_one           : ∀ x : M, x * 1 = x
-  mul_assoc         : ∀ x y z : M, (x * y) * z = x * (y * z)
-  mul_comm          : ∀ x y : M, x * y = y * x
-  mul_lt_mul        : ∀ x y z : M, x < y → 0 < z → x * z < y * z
-  distr             : ∀ x y z : M, x * (y + z) = x * y + x * z
-  lt_irrefl         : ∀ x : M, ¬x < x
-  lt_trans          : ∀ x y z : M, x < y → y < z → x < z
-  lt_tri            : ∀ x y : M, x < y ∨ x = y ∨ y < x
-
-variable {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M] [MPAminus M]
-
-
-instance : AddCommMonoid M where
-  add_assoc := MPAminus.add_assoc
-  zero_add := fun x => MPAminus.add_comm x 0 ▸ MPAminus.add_zero x
-  add_zero := MPAminus.add_zero
-  add_comm := MPAminus.add_comm
-
-instance  : LinearOrder M where
-  le := fun x y => x = y ∨ x < y
-  le_refl := fun x => Or.inl (by simp)
-  le_trans := by
-    rintro x y z (rfl | hx) (rfl | hy) <;> simp[*]
-    · exact Or.inr (MPAminus.lt_trans _ _ _ hx hy)
-  le_antisymm := by
-    rintro x y (rfl | hx) <;> simp
-    rintro (rfl | hy) <;> try simp
-    exact False.elim $ MPAminus.lt_irrefl _ (MPAminus.lt_trans _ _ _ hx hy)
-  le_total := by
-    intro x y
-    rcases MPAminus.lt_tri x y with (h | rfl | h) <;> simp[*]
-  lt_iff_le_not_le := by { sorry }
-  decidableLE := by { sorry }
 
 end Arith
 

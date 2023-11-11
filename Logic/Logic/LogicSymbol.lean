@@ -19,12 +19,12 @@ infixr:60 " ⟶ " => Arrow.arrow
 @[notation_class] class Wedge (α : Sort _) where
   wedge : α → α → α
 
-infixl:69 " ⋏ " => Wedge.wedge
+infixr:69 " ⋏ " => Wedge.wedge
 
 @[match_pattern, notation_class] class Vee (α : Sort _) where
   vee : α → α → α
 
-infixl:68 " ⋎ " => Vee.vee
+infixr:68 " ⋎ " => Vee.vee
 
 class LogicSymbol (α : Sort _)
   extends Top α, Bot α, Tilde α, Arrow α, Wedge α, Vee α
@@ -182,7 +182,7 @@ def comp (g : β →L γ) (f : α →L β) : α →L γ where
   map_neg' := by simp
   map_imply' := by simp
   map_and' := by simp
-  map_or' := by simp  
+  map_or' := by simp
 
 @[simp] lemma app_comp (g : β →L γ) (f : α →L β) (a : α) :
      g.comp f a = g (f a) := rfl
@@ -281,7 +281,7 @@ noncomputable def conj (s : Finset α) : α := s.toList.conj
 
 lemma map_conj [LogicSymbol.HomClass F α Prop] (f : F) (s : Finset α) : f s.conj ↔ ∀ a ∈ s, f a := by
   simpa using List.map_conj f s.toList
-  
+
 noncomputable def disj (s : Finset α) : α := s.toList.disj
 
 lemma map_disj [LogicSymbol.HomClass F α Prop] (f : F) (s : Finset α) : f s.disj ↔ ∃ a ∈ s, f a := by

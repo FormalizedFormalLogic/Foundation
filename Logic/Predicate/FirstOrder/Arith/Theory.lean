@@ -26,22 +26,22 @@ namespace Theory
 
 inductive PAminus : Theory L
   | addZero       : PAminus “∀ #0 + 0 = #0”
-  | addAssoc      : PAminus “∀ ∀ ∀ (#0 + #1) + #2 = #0 + (#1 + #2)”
-  | addComm       : PAminus “∀ ∀ #0 + #1 = #1 + #0”
-  | addEqOfLt     : PAminus “∀ ∀ (#0 < #1 → ∃ #1 + #0 = #2)”
+  | addAssoc      : PAminus “∀ ∀ ∀ (#2 + #1) + #0 = #2 + (#1 + #0)”
+  | addComm       : PAminus “∀ ∀ #1 + #0 = #0 + #1”
+  | addEqOfLt     : PAminus “∀ ∀ (#1 < #0 → ∃ #2 + #0 = #1)”
   | zeroLe        : PAminus “∀ (0 ≤ #0)”
   | zeroLtOne     : PAminus “0 < 1”
   | oneLeOfZeroLt : PAminus “∀ (0 < #0 → 1 ≤ #0)”
-  | addLtAdd      : PAminus “∀ ∀ ∀ (#0 < #1 → #0 + #2 < #1 + #2)”
+  | addLtAdd      : PAminus “∀ ∀ ∀ (#2 < #1 → #2 + #0 < #1 + #0)”
   | mulZero       : PAminus “∀ #0 * 0 = 0”
   | mulOne        : PAminus “∀ #0 * 1 = #0”
-  | mulAssoc      : PAminus “∀ ∀ ∀ (#0 * #1) * #2 = #0 * (#1 * #2)”
-  | mulComm       : PAminus “∀ ∀ #0 * #1 = #1 * #0”
-  | mulLtMul      : PAminus “∀ ∀ ∀ (#0 < #1 ∧ 0 < #2 → #0 * #2 < #1 * #2)”
-  | distr         : PAminus “∀ ∀ ∀ #0 * (#1 + #2) = #0 * #1 + #0 * #2”
+  | mulAssoc      : PAminus “∀ ∀ ∀ (#2 * #1) * #0 = #2 * (#1 * #0)”
+  | mulComm       : PAminus “∀ ∀ #1 * #0 = #0 * #1”
+  | mulLtMul      : PAminus “∀ ∀ ∀ (#2 < #1 ∧ 0 < #0 → #2 * #0 < #1 * #0)”
+  | distr         : PAminus “∀ ∀ ∀ #2 * (#1 + #0) = #2 * #1 + #2 * #0”
   | ltIrrefl      : PAminus “∀ ¬#0 < #0”
-  | ltTrans       : PAminus “∀ ∀ ∀ (#0 < #1 ∧ #1 < #2 → #0 < #2)”
-  | ltTri         : PAminus “∀ ∀ (#0 < #1 ∨ #0 = #1 ∨ #1 < #0)”
+  | ltTrans       : PAminus “∀ ∀ ∀ (#2 < #1 ∧ #1 < #0 → #2 < #0)”
+  | ltTri         : PAminus “∀ ∀ (#1 < #0 ∨ #1 = #0 ∨ #0 < #1)”
 
 variable {L}
 

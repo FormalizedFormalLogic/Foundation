@@ -66,6 +66,11 @@ def ofEquiv {M : Type w} [Structure L M] {N : Type w'} (φ : M ≃ N) : Structur
   func := fun _ f v => φ (func f (φ.symm ∘ v))
   rel  := fun _ r v => rel r (φ.symm ∘ v)
 
+protected abbrev Decidable (L : Language.{u}) (M : Type w) [s : Structure L M] :=
+  {k : ℕ} → (r : L.rel k) → (v : Fin k → M) → Decidable (s.rel r v)
+
+noncomputable instance [Structure L M] : Structure.Decidable L M := fun r v => Classical.dec (rel r v)
+
 end Structure
 
 namespace Subterm
@@ -677,7 +682,7 @@ end semanticGe
 
 namespace Mod
 
-variable {M : Type u} [Structure L M] { T : Theory L} [Theory.Mod M T]
+variable (M : Type u) [Structure L M] { T : Theory L} [Theory.Mod M T]
 
 lemma models {σ : Sentence L} (hσ : σ ∈ T) : M ⊧ σ :=
   modelsTheory_iff.mp Theory.Mod.modelsTheory hσ
