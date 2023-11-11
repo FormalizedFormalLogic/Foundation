@@ -73,7 +73,7 @@ end standardModel
 theorem Peano.Consistent : Logic.System.Consistent (Axiom.Peano oRing) :=
   Logic.Sound.consistent_of_model standardModel.modelsPeano
 
-variable (L : Language.{u}) [L.ORing]
+variable (L : Language.{u}) [ORing L]
 
 structure Cut (M : Type w) [s : Structure L M] where
   domain : Set M

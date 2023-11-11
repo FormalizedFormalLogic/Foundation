@@ -35,9 +35,9 @@ inductive DeltaZeroForm : ∀ {n}, Subformula L μ n → Prop
   | qfree {n} : ∀ {p : Subformula L μ n}, p.qfree → DeltaZeroForm p
   | and {n} {p q : Subformula L μ n} (hp : DeltaZeroForm p) (hp : DeltaZeroForm q) : DeltaZeroForm (p ⋏ q)
   | ball {n} {p : Subformula L μ (n + 1)} (t : Subterm L μ n) :
-    DeltaZeroForm p → DeltaZeroForm “∀[#0 < ᵀ!(Rew.bShift t)] !p”
+    DeltaZeroForm p → DeltaZeroForm “∀[#0 < !!(Rew.bShift t)] !p”
   | bex {n} {p : Subformula L μ (n + 1)} (t : Subterm L μ n) :
-    DeltaZeroForm p → DeltaZeroForm “∃[#0 < ᵀ!(Rew.bShift t)] !p”
+    DeltaZeroForm p → DeltaZeroForm “∃[#0 < !!(Rew.bShift t)] !p”
 
 mutual
 

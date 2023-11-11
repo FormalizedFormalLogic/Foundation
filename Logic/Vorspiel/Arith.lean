@@ -182,16 +182,16 @@ lemma or_eq (n m : ℕ) : or n m = if 0 < n ∨ 0 < m then 1 else 0 := by simp[o
 
 def ball (n : ℕ) (p : ℕ → ℕ) : ℕ := n.rec 1 (fun n ih => (p n).pos.and ih)
 
-@[simp] lemma ball_pos_iff {p : ℕ → ℕ} {n : ℕ} : 0 < ball n p ↔ ∀ m < n, 0 < p m := by 
+@[simp] lemma ball_pos_iff {p : ℕ → ℕ} {n : ℕ} : 0 < ball n p ↔ ∀ m < n, 0 < p m := by
   induction' n with n ih <;> simp[ball, Nat.lt_succ_iff] at*
   · simp[ih]; exact ⟨
     by rintro ⟨hn, hp⟩ m hm; rcases lt_or_eq_of_le hm with (hm | rfl); { exact hp _ hm }; { exact hn },
     by intro h; exact ⟨h n (Nat.le_refl n), fun m hm => h m (le_of_lt hm)⟩⟩
 
-@[simp] lemma ball_eq_zero_iff {p : ℕ → ℕ} {n : ℕ} : ball n p = 0 ↔ ∃ m < n, p m = 0 := by 
+@[simp] lemma ball_eq_zero_iff {p : ℕ → ℕ} {n : ℕ} : ball n p = 0 ↔ ∃ m < n, p m = 0 := by
   simpa[-ball_pos_iff] using not_iff_not.mpr (ball_pos_iff (p := p) (n := n))
 
-lemma ball_pos_iff_eq_one {p : ℕ → ℕ} {n : ℕ} : ball n p = 1 ↔ 0 < ball n p := by 
+lemma ball_pos_iff_eq_one {p : ℕ → ℕ} {n : ℕ} : ball n p = 1 ↔ 0 < ball n p := by
   induction' n with n _ <;> simp[ball, Nat.lt_succ_iff] at*
   · constructor
     · intro h; simpa using pos_of_eq_one h
@@ -254,7 +254,7 @@ lemma to_partrec' {n} {f : Vector ℕ n →. ℕ} (hf : ArithPart₁ f) : Partre
   case comp m n f g _ _ hf hg =>
     exact Partrec'.comp g hf hg
   case rfind f _ hf =>
-    exact Partrec'.rfind hf    
+    exact Partrec'.rfind hf
 
 lemma of_eq {n} {f g : Vector ℕ n →. ℕ} (hf : ArithPart₁ f) (H : ∀ i, f i = g i) : ArithPart₁ g :=
   (funext H : f = g) ▸ hf
@@ -321,7 +321,7 @@ lemma lt {n} (i j : Fin n) : @Arith₁ n (fun v => isLtNat (v.get i) (v.get j)) 
 lemma comp {m n f} (g : Fin n → Vector ℕ m → ℕ) (hf : Arith₁ f) (hg : ∀ i, Arith₁ (g i)) :
     Arith₁ fun v => f (Vector.ofFn fun i => g i v) :=
   (Nat.ArithPart₁.comp (fun i => g i : Fin n → Vector ℕ m →. ℕ) hf hg).of_eq <| by simp
-  
+
 def Vec {n m} (f : Vector ℕ n → Vector ℕ m) : Prop := ∀ i, Arith₁ fun v => (f v).get i
 
 protected lemma nil {n} : @Vec n 0 (fun _ => nil) := fun i => i.elim0
@@ -552,7 +552,7 @@ lemma ball {p : Vector ℕ n → ℕ → ℕ} (hp : @Arith₁ (n + 1) (fun v => 
       exact ⟨x, ⟨by symm; simp[hpx], by intro m hm; symm; simp[hlx m hm, lt_trans hm hx]⟩, by
         have : isEqNat x (v.get i) = 0 := by simp[isEqNat, imp_false]; exact ne_of_lt hx
         simp[this]; symm; simp; exact ⟨x, hx, hpx⟩⟩
-      
+
 def recSequence (f : Vector ℕ n → ℕ) (g : Vector ℕ (n + 2) → ℕ) (z : ℕ) (v : Vector ℕ n) : List ℕ :=
   List.ofFn fun i : Fin (z + 1) => Nat.recOn i (f v) (fun y IH => g (y ::ᵥ IH ::ᵥ v))
 
@@ -625,3 +625,50 @@ lemma _root_.Nat.ArithPart₁.of_partrec {f : Vector ℕ n →. ℕ} (hf : Partr
   case rfind f _ hf       => exact ArithPart₁.rfind hf
 
 end Nat.Arith₁
+
+namespace Nat.ArithPart₁
+
+inductive Code : ℕ → Type
+  | zero (n) : Code n
+  | one (n) : Code n
+  | add {n} (i j : Fin n) : Code n
+  | mul {n} (i j : Fin n) : Code n
+  | proj {n} (i : Fin n) : Code n
+  | equal {n} (i j : Fin n) : Code n
+  | lt {n} (i j : Fin n) : Code n
+  | comp {m n} : Code n → (Fin n → Code m) → Code m
+  | rfind {n} : Code (n + 1) → Code n
+
+instance (k) : Inhabited (Code k) := ⟨Code.zero k⟩
+
+inductive Code.eval : {n : ℕ} → Code n → (Vector ℕ n →. ℕ) → Prop
+  | zero {n} : Code.eval (Code.zero n) (fun _ => 0)
+  | one  {n} : Code.eval (Code.one n)  (fun _ => 1)
+  | add  {n} (i j : Fin n) : Code.eval (Code.add i j) (fun v => ↑(v.get i + v.get j))
+  | mul  {n} (i j : Fin n) : Code.eval (Code.mul i j) (fun v => ↑(v.get i * v.get j))
+  | proj {n} (i : Fin n)   : Code.eval (Code.proj i) (fun v => v.get i)
+  | equal {n} (i j : Fin n)   : Code.eval (Code.equal i j) (fun v => isEqNat (v.get i) (v.get j))
+  | lt {n} (i j : Fin n) : Code.eval (Code.lt i j) (fun v => isLtNat (v.get i) (v.get j))
+  | comp {m n} (c : Code n) (d : Fin n → Code m) (f : Vector ℕ n →. ℕ) (g : Fin n → (Vector ℕ m →. ℕ)) :
+      Code.eval c f → (∀ i, Code.eval (d i) (g i)) →
+      Code.eval (c.comp d) (fun v => (mOfFn fun i => g i v) >>= f)
+  | rfind {n} (c : Code (n + 1)) (f : Vector ℕ (n + 1) → ℕ) :
+      Code.eval c f → Code.eval c.rfind (fun v => Nat.rfind fun n => Part.some (f (n ::ᵥ v) = 0))
+
+lemma exists_code : ∀ {n : ℕ} {f : Vector ℕ n →. ℕ}, ArithPart₁ f → ∃ c : Code n, c.eval f
+  | n, _, ArithPart₁.zero                => ⟨Code.zero n, Code.eval.zero⟩
+  | n, _, ArithPart₁.one                 => ⟨Code.one n, Code.eval.one⟩
+  | _, _, ArithPart₁.add i j             => ⟨Code.add i j, Code.eval.add i j⟩
+  | _, _, ArithPart₁.mul i j             => ⟨Code.mul i j, Code.eval.mul i j⟩
+  | _, _, ArithPart₁.proj i              => ⟨Code.proj i, Code.eval.proj i⟩
+  | _, _, ArithPart₁.equal i j           => ⟨Code.equal i j, Code.eval.equal i j⟩
+  | _, _, ArithPart₁.lt i j              => ⟨Code.lt i j, Code.eval.lt i j⟩
+  | _, _, @ArithPart₁.comp _ _ f g hf hg => by
+    rcases exists_code hf with ⟨cf, hcf⟩
+    choose cg hcg using fun i            => exists_code (hg i)
+    exact ⟨cf.comp cg, Code.eval.comp cf cg f g hcf hcg⟩
+  | _, _, @ArithPart₁.rfind _ f hf       => by
+    rcases exists_code hf with ⟨cf, hcf⟩
+    exact ⟨cf.rfind, Code.eval.rfind cf f hcf⟩
+
+end Nat.ArithPart₁

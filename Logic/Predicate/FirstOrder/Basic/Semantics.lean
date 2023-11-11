@@ -335,8 +335,23 @@ lemma eval_nrel {k} {r : L.rel k} {v} :
   · intro h e; simpa using h (Matrix.vecTail e) (Matrix.vecHead e)
   · intro h e x; exact h (x :> e)
 
+@[simp] lemma eval_ball {p q : Subformula L μ (n + 1)} :
+    Eval s e ε (∀[p] q) ↔ ∀ x : M, Eval s (x :> e) ε p → Eval s (x :> e) ε q := by
+  simp[LogicSymbol.ball]
+
 @[simp] lemma eval_ex {p : Subformula L μ (n + 1)} :
     Eval s e ε (∃' p) ↔ ∃ x : M, Eval s (x :> e) ε p := of_eq rfl
+
+@[simp] lemma eval_exClosure {e'} {p : Subformula L μ n'} :
+    Eval s e' ε (exClosure p) ↔ ∃ e, Eval s e ε p := by
+  induction' n' with n' ih generalizing e' <;> simp[*, eq_finZeroElim]
+  constructor
+  · rintro ⟨e, x, h⟩; exact ⟨x :> e, h⟩
+  · rintro ⟨e, h⟩; exact ⟨Matrix.vecTail e, Matrix.vecHead e, by simpa using h⟩
+
+@[simp] lemma eval_bex {p q : Subformula L μ (n + 1)} :
+    Eval s e ε (∃[p] q) ↔ ∃ x : M, Eval s (x :> e) ε p ⋏ Eval s (x :> e) ε q := by
+  simp[LogicSymbol.bex]
 
 lemma eval_rew (ω : Rew L μ₁ n₁ μ₂ n₂) (p : Subformula L μ₁ n₁) :
     Eval s e₂ ε₂ (ω.hom p) ↔ Eval s (Subterm.val s e₂ ε₂ ∘ ω ∘ Subterm.bvar) (Subterm.val s e₂ ε₂ ∘ ω ∘ Subterm.fvar) p := by

@@ -12,7 +12,7 @@ open Subformula
 
 def LT.le : Operator L 2 := Subformula.Operator.Eq.eq.or Subformula.Operator.LT.lt
 
-lemma le_eq (t₁ t₂ : Subterm L μ n) : LT.le.operator ![t₁, t₂] = “ᵀ!t₁ = ᵀ!t₂ ∨ ᵀ!t₁ < ᵀ!t₂” := by
+lemma le_eq (t₁ t₂ : Subterm L μ n) : LT.le.operator ![t₁, t₂] = “!!t₁ = !!t₂ ∨ !!t₁ < !!t₂” := by
   simp[Operator.operator, Operator.or, LT.le, ←Rew.hom_comp_app, ←Matrix.fun_eq_vec₂]
 
 namespace Subformula
@@ -32,19 +32,19 @@ def unexpandOpLe : Unexpander
   | `($_ op(≤) ![ᵀ“$t:foterm”, ᵀ“$u:foterm”]) => `(“ $t:foterm ≤ $u   ”)
   | `($_ op(≤) ![ᵀ“$t:foterm”, #$y:term    ]) => `(“ $t:foterm ≤ #$y  ”)
   | `($_ op(≤) ![ᵀ“$t:foterm”, &$y:term    ]) => `(“ $t:foterm ≤ &$y  ”)
-  | `($_ op(≤) ![ᵀ“$t:foterm”, $u          ]) => `(“ $t:foterm ≤ ᵀ!$u ”)
+  | `($_ op(≤) ![ᵀ“$t:foterm”, $u          ]) => `(“ $t:foterm ≤ !!$u ”)
   | `($_ op(≤) ![#$x:term,     ᵀ“$u:foterm”]) => `(“ #$x       ≤ $u   ”)
   | `($_ op(≤) ![#$x:term,     #$y:term    ]) => `(“ #$x       ≤ #$y  ”)
   | `($_ op(≤) ![#$x:term,     &$y:term    ]) => `(“ #$x       ≤ &$y  ”)
-  | `($_ op(≤) ![#$x:term,     $u          ]) => `(“ #$x       ≤ ᵀ!$u ”)
+  | `($_ op(≤) ![#$x:term,     $u          ]) => `(“ #$x       ≤ !!$u ”)
   | `($_ op(≤) ![&$x:term,     ᵀ“$u:foterm”]) => `(“ &$x       ≤ $u   ”)
   | `($_ op(≤) ![&$x:term,     #$y:term    ]) => `(“ &$x       ≤ #$y  ”)
   | `($_ op(≤) ![&$x:term,     &$y:term    ]) => `(“ &$x       ≤ &$y  ”)
-  | `($_ op(≤) ![&$x:term,     $u          ]) => `(“ &$x       ≤ ᵀ!$u ”)
-  | `($_ op(≤) ![$t:term,      ᵀ“$u:foterm”]) => `(“ ᵀ!$t      ≤ $u   ”)
-  | `($_ op(≤) ![$t:term,      #$y:term    ]) => `(“ ᵀ!$t      ≤ #$y  ”)
-  | `($_ op(≤) ![$t:term,      &$y:term    ]) => `(“ ᵀ!$t      ≤ &$y  ”)
-  | `($_ op(≤) ![$t:term,      $u          ]) => `(“ ᵀ!$t      ≤ ᵀ!$u ”)
+  | `($_ op(≤) ![&$x:term,     $u          ]) => `(“ &$x       ≤ !!$u ”)
+  | `($_ op(≤) ![$t:term,      ᵀ“$u:foterm”]) => `(“ !!$t      ≤ $u   ”)
+  | `($_ op(≤) ![$t:term,      #$y:term    ]) => `(“ !!$t      ≤ #$y  ”)
+  | `($_ op(≤) ![$t:term,      &$y:term    ]) => `(“ !!$t      ≤ &$y  ”)
+  | `($_ op(≤) ![$t:term,      $u          ]) => `(“ !!$t      ≤ !!$u ”)
   | _                                         => throw ()
 
 end delab
@@ -56,7 +56,7 @@ variable [L.Mul]
 def divides : Finitary.{u, v} L 2 := Abbrev.divides.toOperator
 
 lemma divides_eq (t₁ t₂ : Subterm L μ n) :
-  divides.operator ![t₁, t₂] = “∃ #0 * ᵀ!(.bShift t₁) = ᵀ!(.bShift t₂)” := by
+  divides.operator ![t₁, t₂] = “∃ #0 * !!(.bShift t₁) = !!(.bShift t₂)” := by
   simp[divides, Abbrev.divides, Abbrev.toOperator, substs_ex]
 
 end

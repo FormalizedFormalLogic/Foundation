@@ -340,7 +340,7 @@ section
 
 open Computable
 
-lemma provFn_primrec {T : Theory L} [DecidablePred T] (hT : Computable (fun x => decide (T x))) :
+lemma provFn_computable {T : Theory L} [DecidablePred T] (hT : Computable (fun x => decide (T x))) :
     Computable₂ (provFn T) :=
   to₂' <| option_casesOn (Computable.decode.comp fst) (const 0)
   <| option_casesOn (Computable.decode.comp $ snd.comp fst) (const 0)

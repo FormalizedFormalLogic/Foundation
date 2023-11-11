@@ -21,7 +21,7 @@ infixr:60 " ⟶ " => Arrow.arrow
 
 infixr:69 " ⋏ " => Wedge.wedge
 
-@[match_pattern, notation_class] class Vee (α : Sort _) where
+@[notation_class] class Vee (α : Sort _) where
   vee : α → α → α
 
 infixr:68 " ⋎ " => Vee.vee
@@ -52,6 +52,20 @@ end UnivQuantifier
   ex : ∀ {n}, α (n + 1) → α n
 
 prefix:64 "∃' " => ExQuantifier.ex
+
+section ExQuantifier
+
+variable {α : ℕ → Sort u} [ExQuantifier α]
+
+def exClosure : {n : ℕ} → α n → α 0
+  | 0,     a => a
+  | _ + 1, a => exClosure (∃' a)
+
+@[simp] lemma ex_closure_zero (a : α 0) : exClosure a = a := rfl
+
+@[simp] lemma ex_closure_succ {n} (a : α (n + 1)) : exClosure a = exClosure (∃' a) := rfl
+
+end ExQuantifier
 
 attribute [match_pattern] Tilde.tilde Arrow.arrow Wedge.wedge Vee.vee UnivQuantifier.univ ExQuantifier.ex
 
