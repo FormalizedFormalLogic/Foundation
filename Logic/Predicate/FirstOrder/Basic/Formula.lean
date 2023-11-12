@@ -447,6 +447,56 @@ lemma shift.hom_Injective : Function.Injective (shift.hom : SyntacticSubformula 
 @[simp] protected lemma emb_univClosure {o} [e : IsEmpty o] {σ : Subformula L o n} :
     (emb.hom (univClosure σ) : Subformula L μ 0) = univClosure (emb.hom σ) := by induction n <;> simp[*]
 
+variable (ω : Rew L μ₁ n₁ μ₂ n₂)
+
+@[simp] lemma eq_top_iff {p : Subformula L μ₁ n₁} : ω.hom p = ⊤ ↔ p = ⊤ := by
+  cases p using Subformula.rec' <;> simp[Rew.rel, Rew.nrel]
+
+@[simp] lemma eq_bot_iff {p : Subformula L μ₁ n₁} : ω.hom p = ⊥ ↔ p = ⊥ := by
+  cases p using Subformula.rec' <;> simp[Rew.rel, Rew.nrel]
+
+lemma eq_rel_iff {p : Subformula L μ₁ n₁} {k} {r : L.rel k} {v} :
+    ω.hom p = Subformula.rel r v ↔ ∃ v', ω ∘ v' = v ∧ p = Subformula.rel r v' := by
+  cases p using Subformula.rec' <;> simp[Rew.rel, Rew.nrel]
+  case hrel k' r' v =>
+    by_cases hk : k' = k <;> simp[hk]; rcases hk with rfl; simp
+    by_cases hr : r' = r <;> simp[hr, Function.funext_iff]
+
+lemma eq_nrel_iff {p : Subformula L μ₁ n₁} {k} {r : L.rel k} {v} :
+    ω.hom p = Subformula.nrel r v ↔ ∃ v', ω ∘ v' = v ∧ p = Subformula.nrel r v' := by
+  cases p using Subformula.rec' <;> simp[Rew.rel, Rew.nrel]
+  case hnrel k' r' v =>
+    by_cases hk : k' = k <;> simp[hk]; rcases hk with rfl; simp
+    by_cases hr : r' = r <;> simp[hr, Function.funext_iff]
+
+@[simp] lemma eq_and_iff {p : Subformula L μ₁ n₁} {q₁ q₂} :
+    ω.hom p = q₁ ⋏ q₂ ↔ ∃ p₁ p₂, ω.hom p₁ = q₁ ∧ ω.hom p₂ = q₂ ∧ p = p₁ ⋏ p₂ := by
+  cases p using Subformula.rec' <;> simp[Rew.rel, Rew.nrel]
+
+@[simp] lemma eq_or_iff {p : Subformula L μ₁ n₁} {q₁ q₂} :
+    ω.hom p = q₁ ⋎ q₂ ↔ ∃ p₁ p₂, ω.hom p₁ = q₁ ∧ ω.hom p₂ = q₂ ∧ p = p₁ ⋎ p₂ := by
+  cases p using Subformula.rec' <;> simp[Rew.rel, Rew.nrel]
+
+lemma eq_all_iff {p : Subformula L μ₁ n₁} {q} :
+    ω.hom p = ∀' q ↔ ∃ p', ω.q.hom p' = q ∧ p = ∀' p' := by
+  cases p using Subformula.rec' <;> simp[Rew.rel, Rew.nrel]
+
+lemma eq_ex_iff {p : Subformula L μ₁ n₁} {q} :
+    ω.hom p = ∃' q ↔ ∃ p', ω.q.hom p' = q ∧ p = ∃' p' := by
+  cases p using Subformula.rec' <;> simp[Rew.rel, Rew.nrel]
+
+@[simp] lemma eq_neg_iff {p : Subformula L μ₁ n₁} {q₁ q₂} :
+    ω.hom p = q₁ ⟶ q₂ ↔ ∃ p₁ p₂, ω.hom p₁ = q₁ ∧ ω.hom p₂ = q₂ ∧ p = p₁ ⟶ p₂ := by
+  simp[imp_eq]; constructor
+  · rintro ⟨p₁, hp₁, q₂, rfl, rfl⟩; exact ⟨~p₁, by simp[hp₁]⟩
+  · rintro ⟨p₁, rfl, p₂, rfl, rfl⟩; exact ⟨~p₁, by simp, p₂, by simp⟩
+
+lemma eq_ball_iff {p : Subformula L μ₁ n₁} {q₁ q₂} :
+    (ω.hom p = ∀[q₁] q₂) ↔ ∃ p₁ p₂, ω.q.hom p₁ = q₁ ∧ ω.q.hom p₂ = q₂ ∧ p = ∀[p₁] p₂ := by
+  simp[LogicSymbol.ball, eq_all_iff]; constructor
+  · rintro ⟨p', ⟨p₁, rfl, p₂, rfl, rfl⟩, rfl⟩; exact ⟨p₁, rfl, p₂, rfl, rfl⟩
+  · rintro ⟨p₁, rfl, p₂, rfl, rfl⟩; simp; exact ⟨p₁, rfl, p₂, rfl, rfl⟩
+
 end Rew
 
 namespace Subformula

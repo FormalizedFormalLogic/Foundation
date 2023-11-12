@@ -6,9 +6,15 @@ namespace LO
 
 namespace FirstOrder
 
-namespace Incompleteness
+namespace Arith
 
 local notation "OR" => Language.oRing
+
+lemma Hierarchy.equal {t u : Subterm Language.oRing μ n} : Hierarchy b s “!!t = !!u” := by
+  simp[Subformula.Operator.operator, Matrix.fun_eq_vec₂,
+    Subformula.Operator.Eq.sentence_eq, Subformula.Operator.LT.sentence_eq]
+
+namespace Incompleteness
 
 open Nat.ArithPart₁
 
@@ -25,21 +31,25 @@ def codeAux : {k : ℕ} → Nat.ArithPart₁.Code k → Formula OR (Fin (k + 1))
       Matrix.conj fun i => (Rew.bind ![] (#i :> (&·.succ))).hom (codeAux (d i)))
   | _, Code.rfind c   =>
     (Rew.bind ![] (Subterm.Operator.numeral OR 0 :> &0 :> (&·.succ))).hom (codeAux c) ⋏
-    (∀[“#0 < &0”] ~(Rew.bind ![] (Subterm.Operator.numeral OR 0 :> #0 :> (&·.succ))).hom (codeAux c))
+    (∀[“#0 < &0”] ∃' “#0 ≠ 0” ⋏ (Rew.bind ![] (#0 :> #1 :> (&·.succ))).hom (codeAux c))
 
 def code (c : Code k) : Subsentence OR (k + 1) := (Rew.bind ![] (#0 :> (#·.succ))).hom (codeAux c)
 
-@[simp] lemma Part.mem_mOfFn : ∀ {n : ℕ} {w : Vector α n} {v : Fin n →. α},
-    w ∈ Vector.mOfFn v ↔ ∀ i, w.get i ∈ v i
-  | 0,     _, _ => by simp[Vector.mOfFn]
-  | n + 1, w, v => by
-    simp[Vector.mOfFn, @Part.mem_mOfFn _ n]
-    exact ⟨by rintro ⟨a, ha, v, hv, rfl⟩ i; cases i using Fin.cases <;> simp[ha, hv],
-      by intro h; exact ⟨w.head, by simpa using h 0, w.tail, fun i => by simpa using h i.succ, by simp⟩⟩
+lemma codeAux_sigma_zero {k} (c : Nat.ArithPart₁.Code k) : Hierarchy.Sigma 1 (codeAux c) := by
+  induction c <;> simp[codeAux, Subformula.Operator.operator, Matrix.fun_eq_vec₂,
+    Subformula.Operator.Eq.sentence_eq, Subformula.Operator.LT.sentence_eq]
+  case comp c d ihc ihg =>
+    exact Hierarchy.exClosure (by simp; exact ⟨Hierarchy.rew _ ihc, fun i => Hierarchy.rew _ (ihg i)⟩)
+  case rfind k c ih =>
+    exact ⟨Hierarchy.rew _ ih, by
+      suffices : Hierarchy.Sigma 1 (n := 0) (∀[“#0 < &0”] ∃' “#0 ≠ 0” ⋏ (Rew.bind ![] (#0 :> #1 :> (&·.succ))).hom (codeAux c))
+      · simpa[Subformula.Operator.operator, Matrix.fun_eq_vec₂,
+          Subformula.Operator.Eq.sentence_eq, Subformula.Operator.LT.sentence_eq] using this
+      exact Hierarchy.ball' &0 (by simp) (Hierarchy.ex $ by
+        simp[Hierarchy.neg_iff, Hierarchy.equal]; exact Hierarchy.rew _ ih)⟩
 
-lemma Vector.ofFn_vecCons (a : α) (v : Fin n → α) :
-    Vector.ofFn (a :> v) = a ::ᵥ Vector.ofFn v := by
-  ext i; cases i using Fin.cases <;> simp
+lemma code_sigma_zero {k} (c : Nat.ArithPart₁.Code k) : Hierarchy.Sigma 1 (code c) :=
+  Hierarchy.rew _ (codeAux_sigma_zero c)
 
 lemma models_codeAux {c : Code k} {f : Vector ℕ k →. ℕ} (hc : c.eval f) (y : ℕ) (v : Fin k → ℕ) :
     Subformula.Eval! ℕ ![] (y :> v) (codeAux c) ↔ f (Vector.ofFn v) = Part.some y := by
@@ -128,8 +138,9 @@ lemma prv_iff_provable' (σ : Sentence OR) :
   simp[models_iff, Subformula.eval_rew, Matrix.empty_eq, Function.comp,
     Matrix.comp_vecCons', Matrix.constant_eq_singleton, prv_iff_provable hT]
 
-
 end Incompleteness
+
+end Arith
 
 end FirstOrder
 

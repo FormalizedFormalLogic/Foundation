@@ -588,6 +588,10 @@ lemma get_mk_eq_get {n} (l : List α) (h : l.length = n) (i : Fin n) : get (⟨l
 lemma get_one {α : Type*} {n} (v : Vector α (n + 2)) : v.get 1 = v.tail.head := by
   rw[←Vector.get_zero, Vector.get_tail_succ]; rfl
 
+lemma ofFn_vecCons (a : α) (v : Fin n → α) :
+    ofFn (a :> v) = a ::ᵥ ofFn v := by
+  ext i; cases i using Fin.cases <;> simp
+
 end Vector
 
 namespace Finset
@@ -646,3 +650,15 @@ lemma lt_of_mem_list : ∀ n i, i ∈ ofNat (List ℕ) n → i < n
               exact lt_trans this (Nat.lt_succ_of_le $ Nat.unpair_right_le n) }⟩
 
 end Denumerable
+
+namespace Part
+
+@[simp] lemma mem_vector_mOfFn : ∀ {n : ℕ} {w : Vector α n} {v : Fin n →. α},
+    w ∈ Vector.mOfFn v ↔ ∀ i, w.get i ∈ v i
+  | 0,     _, _ => by simp[Vector.mOfFn]
+  | n + 1, w, v => by
+    simp[Vector.mOfFn, @mem_vector_mOfFn _ n]
+    exact ⟨by rintro ⟨a, ha, v, hv, rfl⟩ i; cases i using Fin.cases <;> simp[ha, hv],
+      by intro h; exact ⟨w.head, by simpa using h 0, w.tail, fun i => by simpa using h i.succ, by simp⟩⟩
+
+end Part
