@@ -7,7 +7,6 @@ import Mathlib.Algebra.Order.Monoid.Canonical.Defs
 namespace LO
 
 namespace FirstOrder
-variable {L : Language.{u}} [ORing L] [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq (L.rel k)]
 
 namespace Arith
 
@@ -19,8 +18,8 @@ namespace Model
 open Language
 variable
   {M : Type} [DecidableEq M] [ORingSymbol M]
-  [Structure Language.oRing M] [Structure.ORing Language.oRing M]
-  [Theory.Mod M (Theory.PAminus Language.oRing)]
+  [Structure ℒₒᵣ M] [Structure.ORing ℒₒᵣ M]
+  [Theory.Mod M (Theory.PAminus ℒₒᵣ)]
 
 instance : LE M := ⟨fun x y => x = y ∨ x < y⟩
 
@@ -38,7 +37,7 @@ lemma add_comm : ∀ x y : M, x + y = y + x := by
 lemma add_eq_of_lt : ∀ x y : M, x < y → ∃ z, x + z = y := by
   simpa[models_iff] using Theory.Mod.models M (@Theory.PAminus.addEqOfLt oRing _)
 
-lemma zero_le : ∀ x : M, 0 ≤ x := by
+@[simp] lemma zero_le : ∀ x : M, 0 ≤ x := by
   simpa[models_iff] using Theory.Mod.models M (@Theory.PAminus.zeroLe oRing _)
 
 lemma zero_lt_one : (0 : M) < 1 := by
@@ -135,20 +134,91 @@ instance : LinearOrderedCommSemiring M where
   le_total := le_total
   decidableLE := fun _ _ => Classical.dec _
 
+instance : CanonicallyOrderedAddMonoid M where
+  bot := 0
+  bot_le := by simp
+  exists_add_of_le := by
+    rintro x y (rfl | h)
+    · exact ⟨0, by simp⟩
+    · simpa[eq_comm] using add_eq_of_lt x y h
+  le_self_add := by intro x y; simp
+
 @[simp] lemma numeral_eq_natCast : (n : ℕ) → (ORingSymbol.numeral n : M) = n
   | 0     => rfl
   | 1     => by simp
   | n + 2 => by simp[ORingSymbol.numeral, numeral_eq_natCast (n + 1), add_assoc, one_add_one_eq_two]
 
-lemma natCast_add (n m : ℕ) : (↑n : M) + (↑m : M) = ↑(n + m) := by symm; exact Nat.cast_add n m
+lemma not_neg (x : M) : ¬x < 0 := by simp
 
-lemma natCast_mul (n m : ℕ) : (↑n : M) * (↑m : M) = ↑(n * m) := by symm; exact Nat.cast_mul n m
+lemma eq_succ_of_pos {x : M} (h : 0 < x) : ∃ y, x = y + 1 := by
+  rcases le_iff_exists_add.mp (one_le_of_zero_lt x h) with ⟨y, rfl⟩
+  exact ⟨y, add_comm 1 y⟩
 
-lemma natCast_lt {n m : ℕ} (h : n < m) : (↑n : M) < (↑m : M) := by exact Iff.mpr Nat.cast_lt h
+lemma le_of_lt_succ {x y : M} : x < y + 1 ↔ x ≤ y :=
+  ⟨fun h => by
+    rcases lt_iff_exists_add.mp h with ⟨z, hz, h⟩
+    rcases eq_succ_of_pos hz with ⟨z', rfl⟩
+    have : y = x + z' := by simpa[←add_assoc] using h
+    simp[this],
+   by intro h; exact lt_of_le_of_lt h (lt_add_one y)⟩
 
+lemma eq_nat_of_lt_nat : ∀ {n : ℕ} {x : M}, x < n → ∃ m : ℕ, x = m
+  | 0,     x, hx => by simp[not_neg] at hx
+  | n + 1, x, hx => by
+    have : x ≤ n := by simpa[le_of_lt_succ] using hx
+    rcases this with (rfl | hx)
+    · exact ⟨n, rfl⟩
+    · exact eq_nat_of_lt_nat hx
 
+open Hierarchy
+
+lemma val_numeral {n} : ∀ (t : Subterm ℒₒᵣ Empty n),
+    ∀ v, Subterm.val! M (ORingSymbol.numeral ∘ v) Empty.elim t = ORingSymbol.numeral (Subterm.val! ℕ v Empty.elim t)
+  | #_,                                _ => by simp
+  | Subterm.func Language.Zero.zero _, e => by simp
+  | Subterm.func Language.One.one _,   e => by simp
+  | Subterm.func Language.Add.add v,   e => by simp[Subterm.val_func, val_numeral (v 0), val_numeral (v 1)]
+  | Subterm.func Language.Mul.mul v,   e => by simp[Subterm.val_func, val_numeral (v 0), val_numeral (v 1)]
+
+lemma sigma_one_completeness : ∀ {n} {σ : Subsentence ℒₒᵣ n},
+    Sigma 1 σ → ∀ {e}, Subformula.Eval! ℕ e Empty.elim σ → Subformula.Eval! M (ORingSymbol.numeral ∘ e) Empty.elim σ
+  | _, _, Hierarchy.verum _ _ _,               _ => by simp
+  | _, _, Hierarchy.falsum _ _ _,              _ => by simp
+  | _, _, Hierarchy.rel _ _ Language.Eq.eq v,  e => by simp[Subformula.eval_rel, Matrix.comp_vecCons', val_numeral]
+  | _, _, Hierarchy.nrel _ _ Language.Eq.eq v, e => by simp[Subformula.eval_nrel, Matrix.comp_vecCons', val_numeral]
+  | _, _, Hierarchy.rel _ _ Language.LT.lt v,  e => by simp[Subformula.eval_rel, Matrix.comp_vecCons', val_numeral]
+  | _, _, Hierarchy.nrel _ _ Language.LT.lt v, e => by simp[Subformula.eval_nrel, Matrix.comp_vecCons', val_numeral]
+  | _, _, Hierarchy.and hp hq,                 e => by
+    simp; intro ep eq; exact ⟨sigma_one_completeness hp ep, sigma_one_completeness hq eq⟩
+  | _, _, Hierarchy.or hp hq,                  e => by
+    simp; rintro (h | h)
+    · left; exact sigma_one_completeness hp h
+    · right; exact sigma_one_completeness hq h
+  | _, _, Hierarchy.ball t hp,                 e => by
+    simp[val_numeral]; intro h x hx
+    rcases eq_nat_of_lt_nat hx with ⟨x, rfl⟩
+    simpa[Matrix.comp_vecCons''] using sigma_one_completeness hp (h x (by simpa using hx))
+  | _, _, Hierarchy.bex t hp,                  e => by
+    simp[val_numeral]; intro x hx h
+    exact ⟨x, by simpa using hx, by simpa[Matrix.comp_vecCons''] using sigma_one_completeness hp h⟩
+  | _, _, Hierarchy.sigma (p := p) hp,         e => by
+    simp; intro x h
+    have : Hierarchy.Sigma 1 p := Hierarchy.mono_succ (pi_zero_iff_sigma_zero.mp hp)
+    exact ⟨x, by simpa[Matrix.comp_vecCons''] using sigma_one_completeness this h⟩
+  | _, _, Hierarchy.ex hp,                     e => by
+    simp; intro x hx; exact ⟨x, by simpa[Matrix.comp_vecCons''] using sigma_one_completeness hp hx⟩
 
 end Model
+
+variable {T : Theory ℒₒᵣ} [EqTheory T] [PAminus T]
+
+theorem sigma_one_completeness {σ : Sentence ℒₒᵣ} (hσ : Hierarchy.Sigma 1 σ) :
+    ℕ ⊧ σ → T ⊢ σ := fun H =>
+  Logic.Complete.complete (consequence_of _ _ (fun M _ _ _ _ _ _ => by
+    haveI : Theory.Mod M (Theory.PAminus ℒₒᵣ) := Theory.Mod.of_ss (T₁ := T) M PAminus.paminus
+    simp[models_iff] at H
+    simpa using @Model.sigma_one_completeness M _ _ _ _ _ _ hσ ![] H))
+
 
 end
 

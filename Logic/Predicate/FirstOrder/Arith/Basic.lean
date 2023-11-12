@@ -52,7 +52,7 @@ variable [FirstOrder.ORing L] {M : Type u} [ORingSymbol M] [Structure L M] [Stru
 end Structure
 
 namespace Arith
-variable [ORing L] {T : Theory L} [EqTheory T] [SubTheory (Theory.Order.Total L) T]
+variable [ORing L] (T : Theory L) [EqTheory T] [SubTheory (Theory.Order.Total L) T]
 
 lemma consequence_of (σ : Sentence L)
   (H : ∀ (M : Type u)
@@ -67,6 +67,8 @@ lemma consequence_of (σ : Sentence L)
   letI : Theory.Mod (Structure.Model L M) T := ⟨((ElementaryEquiv.modelsTheory (Structure.Model.elementaryEquiv L M)).mp hT)⟩
   (ElementaryEquiv.models (Structure.Model.elementaryEquiv L M)).mpr
     (H (Structure.Model L M))
+
+scoped notation "ℒₒᵣ" => Language.oRing
 
 end Arith
 

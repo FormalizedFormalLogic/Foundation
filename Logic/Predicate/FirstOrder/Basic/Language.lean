@@ -252,7 +252,7 @@ protected class Exp (L : Language.{u}) where
 class Pairing (L : Language.{u}) where
   pair : L.func 2
 
-attribute [match_pattern] Eq.eq Add.add Mul.mul
+attribute [match_pattern] Zero.zero One.one Add.add Mul.mul Eq.eq LT.lt
 
 class ORing (L : Language) extends L.Eq, L.LT, L.Zero, L.One, L.Add, L.Mul
 

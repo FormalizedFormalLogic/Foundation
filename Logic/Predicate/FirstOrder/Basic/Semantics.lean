@@ -248,6 +248,26 @@ protected class Mul (L : Language.{u}) [Operator.Mul L] (M : Type w) [Mul M] [s 
 
 attribute [simp] Zero.zero One.one Add.add Mul.mul
 
+@[simp] lemma zero_eq_of_lang [L.Zero] {M : Type w} [Zero M] [Structure L M] [Structure.Zero L M] :
+    Structure.func (L := L) Language.Zero.zero ![] = (0 : M) := by
+  simpa[Operator.val, Subterm.Operator.Zero.zero, val_func, ←Matrix.fun_eq_vec₂] using
+    Structure.Zero.zero (L := L) (M := M)
+
+@[simp] lemma one_eq_of_lang [L.One] {M : Type w} [One M] [Structure L M] [Structure.One L M] :
+    Structure.func (L := L) Language.One.one ![] = (1 : M) := by
+  simpa[Operator.val, Subterm.Operator.One.one, val_func, ←Matrix.fun_eq_vec₂] using
+    Structure.One.one (L := L) (M := M)
+
+@[simp] lemma add_eq_of_lang [L.Add] {M : Type w} [Add M] [Structure L M] [Structure.Add L M] {v : Fin 2 → M} :
+    Structure.func (L := L) Language.Add.add v = v 0 + v 1 := by
+  simpa[Operator.val, val_func, ←Matrix.fun_eq_vec₂] using
+    Structure.Add.add (L := L) (v 0) (v 1)
+
+@[simp] lemma mul_eq_of_lang [L.Mul] {M : Type w} [Mul M] [Structure L M] [Structure.Mul L M] {v : Fin 2 → M} :
+    Structure.func (L := L) Language.Mul.mul v = v 0 * v 1 := by
+  simpa[Operator.val, val_func, ←Matrix.fun_eq_vec₂] using
+    Structure.Mul.mul (L := L) (v 0) (v 1)
+
 end Structure
 
 namespace Subformula
@@ -454,6 +474,16 @@ attribute [simp] Structure.Eq.eq Structure.LT.lt Structure.LE.le Structure.Mem.m
     [Structure L M] [Structure.Eq L M] [Structure.LT L M] {a b : M} :
     (@Operator.LE.le L _).val ![a, b] ↔ a = b ∨ a < b := by
   simp[Operator.LE.def_of_Eq_of_LT]
+
+@[simp] lemma eq_lang [L.Eq] {M : Type w} [Structure L M] [Structure.Eq L M] {v : Fin 2 → M} :
+    Structure.rel (L := L) Language.Eq.eq v ↔ v 0 = v 1 := by
+  simpa[Operator.val, Subformula.Operator.Eq.sentence_eq, eval_rel, ←Matrix.fun_eq_vec₂] using
+    Structure.Eq.eq (L := L) (v 0) (v 1)
+
+@[simp] lemma lt_lang [L.LT] {M : Type w} [LT M] [Structure L M] [Structure.LT L M] {v : Fin 2 → M} :
+    Structure.rel (L := L) Language.LT.lt v ↔ v 0 < v 1 := by
+  simpa[Operator.val, Subformula.Operator.LT.sentence_eq, eval_rel, ←Matrix.fun_eq_vec₂] using
+    Structure.LT.lt (L := L) (v 0) (v 1)
 
 end
 
@@ -701,6 +731,9 @@ variable (M : Type u) [Structure L M] { T : Theory L} [Theory.Mod M T]
 
 lemma models {σ : Sentence L} (hσ : σ ∈ T) : M ⊧ σ :=
   modelsTheory_iff.mp Theory.Mod.modelsTheory hσ
+
+lemma of_ss {T₁ T₂ : Theory L} [Theory.Mod M T₁] (ss : T₂ ⊆ T₁) : Theory.Mod M T₂ :=
+  ⟨ModelsTheory.of_ss Mod.modelsTheory ss⟩
 
 end Mod
 

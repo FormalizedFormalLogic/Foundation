@@ -35,7 +35,7 @@ def codeAux : {k : ℕ} → Nat.ArithPart₁.Code k → Formula OR (Fin (k + 1))
 
 def code (c : Code k) : Subsentence OR (k + 1) := (Rew.bind ![] (#0 :> (#·.succ))).hom (codeAux c)
 
-lemma codeAux_sigma_zero {k} (c : Nat.ArithPart₁.Code k) : Hierarchy.Sigma 1 (codeAux c) := by
+lemma codeAux_sigma_one {k} (c : Nat.ArithPart₁.Code k) : Hierarchy.Sigma 1 (codeAux c) := by
   induction c <;> simp[codeAux, Subformula.Operator.operator, Matrix.fun_eq_vec₂,
     Subformula.Operator.Eq.sentence_eq, Subformula.Operator.LT.sentence_eq]
   case comp c d ihc ihg =>
@@ -48,8 +48,8 @@ lemma codeAux_sigma_zero {k} (c : Nat.ArithPart₁.Code k) : Hierarchy.Sigma 1 (
       exact Hierarchy.ball' &0 (by simp) (Hierarchy.ex $ by
         simp[Hierarchy.neg_iff, Hierarchy.equal]; exact Hierarchy.rew _ ih)⟩
 
-lemma code_sigma_zero {k} (c : Nat.ArithPart₁.Code k) : Hierarchy.Sigma 1 (code c) :=
-  Hierarchy.rew _ (codeAux_sigma_zero c)
+lemma code_sigma_one {k} (c : Nat.ArithPart₁.Code k) : Hierarchy.Sigma 1 (code c) :=
+  Hierarchy.rew _ (codeAux_sigma_one c)
 
 lemma models_codeAux {c : Code k} {f : Vector ℕ k →. ℕ} (hc : c.eval f) (y : ℕ) (v : Fin k → ℕ) :
     Subformula.Eval! ℕ ![] (y :> v) (codeAux c) ↔ f (Vector.ofFn v) = Part.some y := by
