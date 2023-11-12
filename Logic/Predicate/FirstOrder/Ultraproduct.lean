@@ -68,7 +68,7 @@ lemma eval_Uprod {p : Subformula L μ n} :
     · intro h
       let z : Uprod A 𝓤 := ⟨fun ι =>
         Classical.epsilon (fun z => ¬Eval (s ι) (z :> fun i => (e i).val ι) (fun i => (ε i).val ι) p)⟩
-      exact Filter.mem_of_superset (h z) (by 
+      exact Filter.mem_of_superset (h z) (by
         intro ι hι a
         have : Eval (s ι) (z.val ι :> fun i => (e i).val ι) (fun i => (ε i).val ι) p :=
           by rw [val_vecCons_val_eq]; exact hι
@@ -120,10 +120,11 @@ variable (A : FinSubTheory T → Type u) [s : (ι : FinSubTheory T) → Structur
 
 instance : Inhabited (FinSubTheory T) := ⟨∅, by simp⟩
 
-attribute [instance] Classical.propDecidable in
+
 lemma ultrafilter_exists (H : ∀ (ι : FinSubTheory T), (A ι) ⊧* (ι.val : Theory L)) :
     ∃ 𝓤 : Ultrafilter (FinSubTheory T), Set.image (Subformula.domain A) T ⊆ 𝓤.sets :=
   Ultrafilter.exists_ultrafilter_of_finite_inter_nonempty _ (by
+    haveI : DecidableEq (Set (FinSubTheory T)) := fun _ _ => Classical.propDecidable _
     simp[Finset.subset_image_iff, Subformula.domain]
     intro t ht
     use t; use ht
@@ -135,7 +136,7 @@ lemma compactnessAux :
   constructor
   · rintro h ⟨t, ht⟩; exact Semantics.satisfiableₛ_of_subset h ht
   · intro h
-    have : ∀ ι : FinSubTheory T, ∃ (M : Type u) (_ : Inhabited M) (_ : Structure L M), M ⊧* (ι.val : Theory L) := 
+    have : ∀ ι : FinSubTheory T, ∃ (M : Type u) (_ : Inhabited M) (_ : Structure L M), M ⊧* (ι.val : Theory L) :=
       by intro ι; exact satisfiableₛ_iff.mp (h ι)
     choose A si s hA using this
     have : ∃ 𝓤 : Ultrafilter (FinSubTheory T), Set.image (Subformula.domain A) T ⊆ 𝓤.sets := ultrafilter_exists A hA

@@ -10,8 +10,6 @@ open Logic Subformula Completeness
 
 variable {L : Language.{u}} [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq (L.rel k)] {T : Theory L}
 
---attribute [local instance] Classical.decEq
-
 section Encodable
 
 variable [∀ k, Encodable (L.func k)] [∀ k, Encodable (L.rel k)]
@@ -37,13 +35,13 @@ noncomputable instance : Logic.Complete (Sentence L) := ⟨completeness_of_encod
 
 end Encodable
 
-#check completeness_of_encodable
-
 noncomputable def completeness {σ : Sentence L} :
     T ⊨ σ → T ⊢ σ := fun h => by
   have : ∃ u : Finset (Sentence L), ↑u ⊆ insert (~σ) T ∧ ¬Semantics.Satisfiableₛ (u : Theory L) := by
     simpa[Compact.compact (T := insert (~σ) T)] using Semantics.consequence_iff.mp h
   choose u hu using this; rcases hu with ⟨ssu, hu⟩
+  haveI : (k : ℕ) → DecidableEq (Language.func (languageFinset u) k) := fun _ => Classical.typeDecidableEq _
+  haveI : (k : ℕ) → DecidableEq (Language.rel (languageFinset u) k) := fun _ => Classical.typeDecidableEq _
   haveI : ∀ k, Encodable ((languageFinset u).func k) := fun _ => Fintype.toEncodable _
   haveI : ∀ k, Encodable ((languageFinset u).rel k) := fun _ => Fintype.toEncodable _
   let u' : Finset (Sentence (languageFinset u)) := Finset.imageOfFinset u (fun _ hσ => toSubLanguageFinsetSelf hσ)
