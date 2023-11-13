@@ -12,12 +12,9 @@ import Logic.Propositional.Basic.Formula
 -- FirstOrder
 
 import Logic.Predicate.FirstOrder.Basic.Language
-import Logic.Predicate.FirstOrder.Basic.Term.Term
-import Logic.Predicate.FirstOrder.Basic.Term.Elab
-import Logic.Predicate.FirstOrder.Basic.Term.Meta
-import Logic.Predicate.FirstOrder.Basic.Formula.Formula
-import Logic.Predicate.FirstOrder.Basic.Formula.Elab
-import Logic.Predicate.FirstOrder.Basic.Formula.Meta
+import Logic.Predicate.FirstOrder.Basic.Term
+import Logic.Predicate.FirstOrder.Basic.Formula
+import Logic.Predicate.FirstOrder.Basic.Elab
 import Logic.Predicate.FirstOrder.Basic.Semantics
 import Logic.Predicate.FirstOrder.Basic.Calculus
 import Logic.Predicate.FirstOrder.Basic.Eq
@@ -30,17 +27,13 @@ import Logic.Predicate.FirstOrder.Ultraproduct
 
 import Logic.Predicate.FirstOrder.Computability.Term
 import Logic.Predicate.FirstOrder.Computability.Formula
-import Logic.Predicate.FirstOrder.Computability.Calculus
 import Logic.Predicate.FirstOrder.Computability.Coding
+import Logic.Predicate.FirstOrder.Computability.Calculus
 
 import Logic.Predicate.FirstOrder.Completeness.Coding
 import Logic.Predicate.FirstOrder.Completeness.SubLanguage
 import Logic.Predicate.FirstOrder.Completeness.SearchTree
 import Logic.Predicate.FirstOrder.Completeness.Completeness
-
-import Logic.Predicate.FirstOrder.Principia.Principia
-import Logic.Predicate.FirstOrder.Principia.RewriteFormula
-import Logic.Predicate.FirstOrder.Principia.Meta
 
 import Logic.Predicate.FirstOrder.Order.Le
 
@@ -48,3 +41,5 @@ import Logic.Predicate.FirstOrder.Arith.Hierarchy
 import Logic.Predicate.FirstOrder.Arith.Theory
 import Logic.Predicate.FirstOrder.Arith.Model
 import Logic.Predicate.FirstOrder.Arith.PAminus
+
+import Logic.Predicate.FirstOrder.Incompleteness.FirstIncompleteness
