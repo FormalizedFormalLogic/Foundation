@@ -36,6 +36,12 @@ lemma Consistent.of_subset {T U : Set F} (h : Consistent U) (ss : T ⊆ U) : Con
 
 lemma inConsistent_of_proof {T : Set F} (b : T ⊢ ⊥) : ¬Consistent T := by simp[Consistent]; exact ⟨b⟩
 
+abbrev Provable (T : Set F) (f : F) : Prop := Nonempty (T ⊢ f)
+
+infix:45 " ⊢! " => System.Provable
+
+def Maximal (T : Set F) : Prop := ∀ f, (T ⊢! f) ∨ (T ⊢! ~f)
+
 end System
 
 def System.hom [System F] {G : Type u} [LogicSymbol G] (F : G →L F) : System G where
@@ -116,6 +122,9 @@ variable [LogicSymbol F] [𝓑 : System F] {Struc : Type w → Type v} [𝓢 : S
 class Sound where
   sound : ∀ {T : Set F} {p : F}, T ⊢ p → T ⊨ p
 
+class SoundOn (M : Type w) (s : Struc M) (H : Set F) where
+  sound : ∀ {T : Set F} {p : F}, p ∈ H → T ⊢ p → s ⊧ₛ p
+
 class Compact where
   compact {T : Set F} : Semantics.Satisfiableₛ T ↔ (∀ u : Finset F, (u : Set F) ⊆ T → Semantics.Satisfiableₛ (u : Set F))
 
@@ -174,10 +183,10 @@ lemma satisfiableₛ_iff_consistent {T : Set F} : Semantics.Satisfiableₛ T ↔
       have : T ⊢ ⊥ := complete this
       exact System.inConsistent_of_proof this⟩
 
-lemma not_satisfiable_iff_inconsistent {T : Set F} : ¬Semantics.Satisfiableₛ T ↔ Nonempty (T ⊢ ⊥) := by
+lemma not_satisfiable_iff_inconsistent {T : Set F} : ¬Semantics.Satisfiableₛ T ↔ T ⊢! ⊥ := by
   simp[satisfiableₛ_iff_consistent, System.Consistent]
 
-lemma consequence_iff_provable {T : Set F} {f : F} : T ⊨ f ↔ Nonempty (T ⊢ f) :=
+lemma consequence_iff_provable {T : Set F} {f : F} : T ⊨ f ↔ T ⊢! f :=
 ⟨fun h => ⟨complete h⟩, by rintro ⟨b⟩; exact Sound.sound b⟩
 
 end Complete

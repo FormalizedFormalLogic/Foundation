@@ -5,6 +5,7 @@ import Logic.Predicate.FirstOrder.Completeness.Completeness
 namespace LO
 
 namespace FirstOrder
+
 variable {L : Language.{u}} [Subformula.Operator.Eq L] [Subformula.Operator.LT L]
   [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq (L.rel k)]
 

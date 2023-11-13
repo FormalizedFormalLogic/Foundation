@@ -8,17 +8,33 @@ namespace FirstOrder
 
 namespace Arith
 
-local notation "OR" => Language.oRing
+open Encodable
+
+section
+
+variable {L} [(k : ℕ) → DecidableEq (L.func k)] [(k : ℕ) → DecidableEq (L.rel k)]
+  [ORing L] [Structure L ℕ]
+
+abbrev SigmaOneSound (T : Theory L) := Sound T (Hierarchy.Sigma 1)
+
+lemma consistent_of_sigmaOneSound (T : Theory L) [SigmaOneSound T] :
+    Logic.System.Consistent T := consistent_of_sound T (Hierarchy.Sigma 1) (by simp)
+
+end
 
 lemma Hierarchy.equal {t u : Subterm Language.oRing μ n} : Hierarchy b s “!!t = !!u” := by
   simp[Subformula.Operator.operator, Matrix.fun_eq_vec₂,
     Subformula.Operator.Eq.sentence_eq, Subformula.Operator.LT.sentence_eq]
 
+abbrev godelNumber {α : Type*} [Primcodable α] (a : α) : Subterm.Const ℒₒᵣ := Subterm.Operator.numeral ℒₒᵣ (encode a)
+
+notation: max "⸢" a "⸣" => godelNumber a
+
 namespace Incompleteness
 
 open Nat.ArithPart₁
 
-def codeAux : {k : ℕ} → Nat.ArithPart₁.Code k → Formula OR (Fin (k + 1))
+def codeAux : {k : ℕ} → Nat.ArithPart₁.Code k → Formula ℒₒᵣ (Fin (k + 1))
   | _, Code.zero _    => “&0 = 0”
   | _, Code.one _     => “&0 = 1”
   | _, Code.add i j   => “&0 = !!&i.succ + !!&j.succ”
@@ -30,10 +46,10 @@ def codeAux : {k : ℕ} → Nat.ArithPart₁.Code k → Formula OR (Fin (k + 1))
     exClosure (((Rew.bind ![] (&0 :> (#·))).hom (codeAux c)) ⋏
       Matrix.conj fun i => (Rew.bind ![] (#i :> (&·.succ))).hom (codeAux (d i)))
   | _, Code.rfind c   =>
-    (Rew.bind ![] (Subterm.Operator.numeral OR 0 :> &0 :> (&·.succ))).hom (codeAux c) ⋏
+    (Rew.bind ![] (⸢0⸣ :> &0 :> (&·.succ))).hom (codeAux c) ⋏
     (∀[“#0 < &0”] ∃' “#0 ≠ 0” ⋏ (Rew.bind ![] (#0 :> #1 :> (&·.succ))).hom (codeAux c))
 
-def code (c : Code k) : Subsentence OR (k + 1) := (Rew.bind ![] (#0 :> (#·.succ))).hom (codeAux c)
+def code (c : Code k) : Subsentence ℒₒᵣ (k + 1) := (Rew.bind ![] (#0 :> (#·.succ))).hom (codeAux c)
 
 lemma codeAux_sigma_one {k} (c : Nat.ArithPart₁.Code k) : Hierarchy.Sigma 1 (codeAux c) := by
   induction c <;> simp[codeAux, Subformula.Operator.operator, Matrix.fun_eq_vec₂,
@@ -104,16 +120,98 @@ lemma codeOfPartrec_spec {k} {f : Vector ℕ k →. ℕ} (hf : Nat.Partrec' f) {
     exact ⟨c, models_code hc⟩
   exact Classical.epsilon_spec this y v
 
-noncomputable def isProof (T : Theory OR) : Subsentence OR 2 :=
-  (Rew.substs ![Subterm.Operator.numeral OR 1, #0, #1]).hom
+variable {T : Theory ℒₒᵣ} [EqTheory T] [PAminus T] [sT : SigmaOneSound T]
+
+lemma provable_iff_mem_partrec {k} {f : Vector ℕ k →. ℕ} (hf : Nat.Partrec' f) {y : ℕ} {v : Fin k → ℕ} :
+    (T ⊢! (Rew.substs $ ⸢y⸣ :> fun i => ⸢v i⸣).hom (code $ codeOfPartrec f)) ↔ y ∈ f (Vector.ofFn v) := by
+  let σ : Sentence ℒₒᵣ := (Rew.substs $ ⸢y⸣ :> fun i => ⸢v i⸣).hom (code $ codeOfPartrec f)
+  have sigma : Hierarchy.Sigma 1 σ :=
+    (Hierarchy.rew (Rew.substs $ ⸢y⸣ :> fun i => ⸢v i⸣) (code_sigma_one (codeOfPartrec f)))
+  constructor
+  · rintro ⟨b⟩
+    have : Subformula.Eval! ℕ (y :> v) Empty.elim (code $ codeOfPartrec f) := by
+      simpa[models_iff, Subformula.eval_rew, Matrix.empty_eq, Function.comp, Matrix.comp_vecCons'] using
+        sT.sound sigma ⟨b⟩
+    exact (codeOfPartrec_spec hf).mp this
+  · intro h
+    exact ⟨PAminus.sigma_one_completeness (T := T) sigma (by
+      simp[models_iff, Subformula.eval_rew, Matrix.empty_eq,
+        Function.comp, Matrix.comp_vecCons', codeOfPartrec_spec hf, h])⟩
+
+section
+
+variable {α : Type*} {σ : Type*} [Primcodable α] [Primcodable σ]
+
+noncomputable def graph (f : α →. σ) : Subsentence ℒₒᵣ 2 :=
+  code (codeOfPartrec fun x => Part.bind (decode (α := α) x.head) fun a => (f a).map encode)
+
+theorem representation {f : α →. σ} (hf : Partrec f) {x y} :
+    T ⊢! [→ ⸢y⸣, ⸢x⸣].hom (graph f) ↔ y ∈ f x := by
+  let f' : Vector ℕ 1 →. ℕ := fun x => Part.bind (decode (α := α) x.head) fun a => (f a).map encode
+  have : Nat.Partrec' f' :=
+    Nat.Partrec'.part_iff.mpr
+      (Partrec.bind (Computable.ofOption $ Primrec.to_comp $ Primrec.decode.comp Primrec.vector_head)
+      (Partrec.to₂ <| Partrec.map (hf.comp .snd) (Computable.encode.comp₂ .right)))
+  simpa[Matrix.constant_eq_singleton] using
+    provable_iff_mem_partrec this (y := encode y) (v := ![encode x])
+
+end
+
+noncomputable section
+
+attribute [instance] Classical.propDecidable
+
+variable (T)
+
+def d : Subsentence ℒₒᵣ 1 → Bool := fun σ => T ⊢! [→ ⸢σ⸣].hom σ
+
+variable {T}
+variable (hT : Computable (fun x => decide (T x))) (A : Logic.System.Maximal T)
+
+lemma d_computable : Computable (d T) := by
+  let pr : Sentence ℒₒᵣ →. Bool := fun σ => (provableFn T σ).map (fun _ => true)
+  let rf : Sentence ℒₒᵣ →. Bool := fun σ => (provableFn T (~σ)).map (fun _ => false)
+  let d' : Subsentence ℒₒᵣ 1 →. Bool := fun σ => PFun.merge pr rf ([→ ⸢σ⸣].hom σ)
+  have hpr : Partrec pr := Partrec.map (provableFn_partrec hT) (Computable.const true)
+  have hrf : Partrec rf := Partrec.map
+    ((provableFn_partrec hT).comp $ Primrec.to_comp Subformula.neg_primrec) (Computable.const false)
+  have H : ∀ σ b, b ∈ pr σ → ∀ b', b' ∈ rf σ → b = b' := by
+    simp; rintro σ ⟨⟩ hp ⟨⟩ hr
+    have bp : T ⊢ σ := Classical.choice <| (provable_iff_provableFn (L := ℒₒᵣ)).mpr hp
+    have br : T ⊢ ~σ := Classical.choice <| (provable_iff_provableFn (L := ℒₒᵣ)).mpr hr
+    exact inconsistent_of_provable_and_refutable bp br (consistent_of_sigmaOneSound T)
+  have : Partrec (PFun.merge pr rf) := Partrec.mergep hpr hrf H
+  have : Partrec d' :=
+    this.comp (Primrec.to_comp $
+      (Subformula.substs₁_primrec (L := ℒₒᵣ)).comp
+        ((Subterm.Operator.const_primrec (L := ℒₒᵣ)).comp $
+          (Subterm.Operator.numeral_primrec (L := ℒₒᵣ)).comp .encode) Primrec.id)
+  exact this.of_eq <| by
+    intro σ
+    simp[Part.eq_some_iff, Partrec.merge_iff hpr hrf H, ←provable_iff_provableFn, d]
+    rcases A ([→ ⸢σ⸣].hom σ) with (hσ | bσ)
+    · exact Or.inl hσ
+    · exact Or.inr ⟨bσ, ⟨fun b => by
+        rcases bσ with ⟨bσ⟩
+        exact inconsistent_of_provable_and_refutable b bσ (consistent_of_sigmaOneSound T)⟩⟩
+
+def
+
+attribute [-instance] Classical.propDecidable
+
+end
+
+/--/
+noncomputable def isProof (T : Theory ℒₒᵣ) [DecidablePred T] : Subsentence ℒₒᵣ 2 :=
+  (Rew.substs ![numeral 1, #0, #1]).hom
     (code (k := 2) (codeOfPartrec (fun v => Part.some $ provFn T (v.get 1) (v.get 0))))
 
-noncomputable def prv (T : Theory OR) : Subsentence OR 1 := ∃' isProof T
+noncomputable def prv (T : Theory ℒₒᵣ) [DecidablePred T] : Subsentence ℒₒᵣ 1 := ∃' isProof T
 
-variable {T : Theory OR} (hT : Computable (fun x => decide (T x)))
+variable {T : Theory ℒₒᵣ} [DecidablePred T] (hT : Computable (fun x => decide (T x)))
 
-lemma isProof_iff (σ : Sentence OR) :
-    Nonempty (T ⊢ σ) ↔ ∃ b, Subformula.Eval! ℕ ![b, Encodable.encode σ] Empty.elim (isProof T) := by
+lemma isProof_iff (σ : Sentence ℒₒᵣ) :
+    Nonempty (T ⊢ σ) ↔ ∃ b, Subformula.Eval! ℕ ![b, encode σ] Empty.elim (isProof T) := by
   have : Nat.Partrec' fun v : Vector ℕ 2 => Part.some $ provFn T (v.get 1) (v.get 0) :=
     Nat.Partrec'.part_iff.mpr
       (Computable.partrec $ (provFn_computable hT).comp
@@ -124,17 +222,17 @@ lemma isProof_iff (σ : Sentence OR) :
   constructor
   · rintro ⟨b, hb⟩
     exact ⟨b, by
-      simpa using (codeOfPartrec_spec this (y := 1) (v := ![b, Encodable.encode σ])).mpr (by simp[hb])⟩
+      simpa using (codeOfPartrec_spec this (y := 1) (v := ![b, encode σ])).mpr (by simp[hb])⟩
   · rintro ⟨b, hb⟩
     exact ⟨b, by
-      symm; simpa using (codeOfPartrec_spec this (y := 1) (v := ![b, Encodable.encode σ])).mp (by simp[hb])⟩
+      symm; simpa using (codeOfPartrec_spec this (y := 1) (v := ![b, encode σ])).mp (by simp[hb])⟩
 
-lemma prv_iff_provable (σ : Sentence OR) :
-    Nonempty (T ⊢ σ) ↔ Subformula.Eval! ℕ ![Encodable.encode σ] Empty.elim (prv T) := by
+lemma prv_iff_provable (σ : Sentence ℒₒᵣ) :
+    Nonempty (T ⊢ σ) ↔ Subformula.Eval! ℕ ![encode σ] Empty.elim (prv T) := by
   simp[prv, isProof_iff hT]
 
-lemma prv_iff_provable' (σ : Sentence OR) :
-    ℕ ⊧ ([→ Subterm.Operator.numeral OR (Encodable.encode σ)].hom $ prv T) ↔ Nonempty (T ⊢ σ) := by
+lemma prv_iff_provable' (σ : Sentence ℒₒᵣ) :
+    ℕ ⊧ ([→ numeral (encode σ)].hom $ prv T) ↔ Nonempty (T ⊢ σ) := by
   simp[models_iff, Subformula.eval_rew, Matrix.empty_eq, Function.comp,
     Matrix.comp_vecCons', Matrix.constant_eq_singleton, prv_iff_provable hT]
 

@@ -52,11 +52,25 @@ variable [FirstOrder.ORing L] {M : Type u} [ORingSymbol M] [Structure L M] [Stru
 end Structure
 
 namespace Arith
+
+class Sound {L : Language} [(k : ℕ) → DecidableEq (L.func k)] [(k : ℕ) → DecidableEq (L.rel k)] [Structure L ℕ]
+    (T : Theory L) (F : Sentence L → Prop) where
+  sound : ∀ {σ}, F σ → T ⊢! σ → ℕ ⊧ σ
+
+section
+
+variable {L : Language} [(k : ℕ) → DecidableEq (L.func k)] [(k : ℕ) → DecidableEq (L.rel k)] [Structure L ℕ]
+    (T : Theory L) (F : Set (Sentence L))
+
+lemma consistent_of_sound [Sound T F] (hF : F ⊥) : Logic.System.Consistent T :=
+  ⟨fun b => by simpa using Sound.sound hF ⟨b⟩⟩
+
+end
+
 variable [ORing L] (T : Theory L) [EqTheory T] [SubTheory (Theory.Order.Total L) T]
 
 lemma consequence_of (σ : Sentence L)
   (H : ∀ (M : Type u)
-         [DecidableEq M]
          [Inhabited M]
          [ORingSymbol M]
          [Structure L M]
@@ -67,6 +81,7 @@ lemma consequence_of (σ : Sentence L)
   letI : Theory.Mod (Structure.Model L M) T := ⟨((ElementaryEquiv.modelsTheory (Structure.Model.elementaryEquiv L M)).mp hT)⟩
   (ElementaryEquiv.models (Structure.Model.elementaryEquiv L M)).mpr
     (H (Structure.Model L M))
+
 
 scoped notation "ℒₒᵣ" => Language.oRing
 

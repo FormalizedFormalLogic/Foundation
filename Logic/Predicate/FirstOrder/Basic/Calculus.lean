@@ -630,6 +630,11 @@ lemma provable_iff_inConsistent {T : Theory L} :
    by simp[consistent_iff_empty_sequent]; intro b
       exact ⟨by simpa using b.deduction⟩⟩
 
+lemma inconsistent_of_provable_and_refutable {T : Theory L} {σ}
+  (bp : T ⊢ σ) (br : T ⊢ ~σ) : ¬Logic.System.Consistent T := fun A => by
+  have : T ⊢' ∅ := DerivationCRWA.cCut' bp (by simpa using DerivationCWA.toDerivationCWA br)
+  exact (consistent_iff_empty_sequent.mp A).false this
+
 variable
   {L₁ : Language} [∀ k, DecidableEq (L₁.func k)] [∀ k, DecidableEq (L₁.rel k)]
   {L₂ : Language} [∀ k, DecidableEq (L₂.func k)] [∀ k, DecidableEq (L₂.rel k)]
