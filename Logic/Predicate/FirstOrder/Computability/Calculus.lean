@@ -355,17 +355,21 @@ lemma provable_iff_provableFn {T : Theory L} [DecidablePred T] {σ : Sentence L}
     exact ⟨e, ⟨he, fun h => by simpa using hm _ h⟩, he⟩
   · rintro ⟨e, ⟨he, _⟩, _⟩; exact ⟨e, he⟩
 
+class Theory.Computable (T : Theory L) [DecidablePred T] where
+  comp : Computable (fun x => decide (T x))
+
 section
 
 open Computable
+variable {T : Theory L} [DecidablePred T] [Theory.Computable T]
 
-lemma isProofFn_computable {T : Theory L} [DecidablePred T] (hT : Computable (fun x => decide (T x))) :
+lemma isProofFn_computable :
     Computable₂ (isProofFn T) :=
   to₂' <| option_casesOn (Computable.decode.comp snd) (const false)
   <| to₂' <| Computable.cond
     (dom_bool₂.comp
       (dom_bool₂.comp
-        (list_all (hT.comp Computable₂.right)
+        (list_all (Theory.Computable.comp.comp Computable₂.right)
           (Primrec.to_comp $ Primrec.list_map (Primrec.snd.comp .snd) (Subformula.neg_primrec.comp₂ .right)))
         (Primrec.to_comp $ by
           apply Primrec.list_mem.comp
@@ -377,8 +381,8 @@ lemma isProofFn_computable {T : Theory L} [DecidablePred T] (hT : Computable (fu
     (const true)
     (const false)
 
-lemma provableFn_partrec {T : Theory L} [DecidablePred T] (hT : Computable (fun x => decide (T x))) :
-    Partrec (provableFn T) := Partrec.rfindOpt (dom_bool.comp $ isProofFn_computable hT)
+lemma provableFn_partrec :
+    Partrec (provableFn T) := Partrec.rfindOpt (dom_bool.comp $ isProofFn_computable)
 
 end
 

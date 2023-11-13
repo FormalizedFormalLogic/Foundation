@@ -40,7 +40,7 @@ abbrev Provable (T : Set F) (f : F) : Prop := Nonempty (T ⊢ f)
 
 infix:45 " ⊢! " => System.Provable
 
-def Maximal (T : Set F) : Prop := ∀ f, (T ⊢! f) ∨ (T ⊢! ~f)
+def Complete (T : Set F) : Prop := ∀ f, (T ⊢! f) ∨ (T ⊢! ~f)
 
 end System
 

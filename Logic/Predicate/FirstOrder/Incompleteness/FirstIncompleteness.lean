@@ -30,8 +30,6 @@ abbrev godelNumber {α : Type*} [Primcodable α] (a : α) : Subterm.Const ℒₒ
 
 notation: max "⸢" a "⸣" => godelNumber a
 
-namespace Incompleteness
-
 open Nat.ArithPart₁
 
 def codeAux : {k : ℕ} → Nat.ArithPart₁.Code k → Formula ℒₒᵣ (Fin (k + 1))
@@ -120,7 +118,11 @@ lemma codeOfPartrec_spec {k} {f : Vector ℕ k →. ℕ} (hf : Nat.Partrec' f) {
     exact ⟨c, models_code hc⟩
   exact Classical.epsilon_spec this y v
 
-variable {T : Theory ℒₒᵣ} [EqTheory T] [PAminus T] [sT : SigmaOneSound T]
+namespace FirstIncompleteness
+
+variable {T : Theory ℒₒᵣ} [EqTheory T] [PAminus T] [DecidablePred T] [SigmaOneSound T] [Theory.Computable T]
+
+section graph
 
 lemma provable_iff_mem_partrec {k} {f : Vector ℕ k →. ℕ} (hf : Nat.Partrec' f) {y : ℕ} {v : Fin k → ℕ} :
     (T ⊢! (Rew.substs $ ⸢y⸣ :> fun i => ⸢v i⸣).hom (code $ codeOfPartrec f)) ↔ y ∈ f (Vector.ofFn v) := by
@@ -131,7 +133,7 @@ lemma provable_iff_mem_partrec {k} {f : Vector ℕ k →. ℕ} (hf : Nat.Partrec
   · rintro ⟨b⟩
     have : Subformula.Eval! ℕ (y :> v) Empty.elim (code $ codeOfPartrec f) := by
       simpa[models_iff, Subformula.eval_rew, Matrix.empty_eq, Function.comp, Matrix.comp_vecCons'] using
-        sT.sound sigma ⟨b⟩
+        Arith.Sound.sound sigma ⟨b⟩
     exact (codeOfPartrec_spec hf).mp this
   · intro h
     exact ⟨PAminus.sigma_one_completeness (T := T) sigma (by
@@ -157,24 +159,31 @@ theorem representation {f : α →. σ} (hf : Partrec f) {x y} :
 
 end
 
-noncomputable section
+end graph
+
+variable (A : Logic.System.Complete T)
 
 attribute [instance] Classical.propDecidable
 
 variable (T)
 
-def d : Subsentence ℒₒᵣ 1 → Bool := fun σ => T ⊢! [→ ⸢σ⸣].hom σ
+noncomputable def diag : Subsentence ℒₒᵣ 1 → Bool := fun σ => T ⊢! [→ ⸢σ⸣].hom σ
+
+local notation "d" => diag T
+
+noncomputable def diagRefutation : Subsentence ℒₒᵣ 1 := [→ ⸢false⸣, #0].hom (graph (diag T : Subsentence ℒₒᵣ 1 →. Bool))
+
+local notation "ρ" => diagRefutation T
 
 variable {T}
-variable (hT : Computable (fun x => decide (T x))) (A : Logic.System.Maximal T)
 
-lemma d_computable : Computable (d T) := by
+lemma d_computable : Computable d := by
   let pr : Sentence ℒₒᵣ →. Bool := fun σ => (provableFn T σ).map (fun _ => true)
   let rf : Sentence ℒₒᵣ →. Bool := fun σ => (provableFn T (~σ)).map (fun _ => false)
   let d' : Subsentence ℒₒᵣ 1 →. Bool := fun σ => PFun.merge pr rf ([→ ⸢σ⸣].hom σ)
-  have hpr : Partrec pr := Partrec.map (provableFn_partrec hT) (Computable.const true)
+  have hpr : Partrec pr := Partrec.map provableFn_partrec (Computable.const true)
   have hrf : Partrec rf := Partrec.map
-    ((provableFn_partrec hT).comp $ Primrec.to_comp Subformula.neg_primrec) (Computable.const false)
+    ((provableFn_partrec (L := ℒₒᵣ)).comp $ Primrec.to_comp Subformula.neg_primrec) (Computable.const false)
   have H : ∀ σ b, b ∈ pr σ → ∀ b', b' ∈ rf σ → b = b' := by
     simp; rintro σ ⟨⟩ hp ⟨⟩ hr
     have bp : T ⊢ σ := Classical.choice <| (provable_iff_provableFn (L := ℒₒᵣ)).mpr hp
@@ -188,55 +197,37 @@ lemma d_computable : Computable (d T) := by
           (Subterm.Operator.numeral_primrec (L := ℒₒᵣ)).comp .encode) Primrec.id)
   exact this.of_eq <| by
     intro σ
-    simp[Part.eq_some_iff, Partrec.merge_iff hpr hrf H, ←provable_iff_provableFn, d]
+    simp[Part.eq_some_iff, Partrec.merge_iff hpr hrf H, ←provable_iff_provableFn, diag]
     rcases A ([→ ⸢σ⸣].hom σ) with (hσ | bσ)
     · exact Or.inl hσ
     · exact Or.inr ⟨bσ, ⟨fun b => by
         rcases bσ with ⟨bσ⟩
         exact inconsistent_of_provable_and_refutable b bσ (consistent_of_sigmaOneSound T)⟩⟩
 
-def
+lemma diagRefutation_spec (σ : Subsentence ℒₒᵣ 1) :
+  d σ = false ↔ T ⊢! [→ ⸢σ⸣].hom ρ := by
+  have : T ⊢! [→ ⸢false⸣, ⸢σ⸣].hom (graph (diag T : Subsentence ℒₒᵣ 1 →. Bool)) ↔ diag T σ = false := by
+    simpa[@eq_comm _ false] using representation (d_computable A) (x := σ) (y := false)
+  simp[diagRefutation, ←Rew.hom_comp_app, Rew.substs_comp_substs, this]
+
+theorem contrad : False := by
+  have hd : d ρ = true  ↔ T ⊢! [→ ⸢ρ⸣].hom ρ := by simp[diag]
+  have hρ : d ρ = false ↔ T ⊢! [→ ⸢ρ⸣].hom ρ := diagRefutation_spec A (diagRefutation T)
+  rw[←hd, Bool.eq_false_iff] at hρ
+  exact not_iff_self hρ
+
+end FirstIncompleteness
 
 attribute [-instance] Classical.propDecidable
 
-end
+variable {T : Theory ℒₒᵣ} [EqTheory T] [PAminus T] [DecidablePred T]
 
-/--/
-noncomputable def isProof (T : Theory ℒₒᵣ) [DecidablePred T] : Subsentence ℒₒᵣ 2 :=
-  (Rew.substs ![numeral 1, #0, #1]).hom
-    (code (k := 2) (codeOfPartrec (fun v => Part.some $ provFn T (v.get 1) (v.get 0))))
+theorem firstIncompleteness [SigmaOneSound T] [Theory.Computable T] [Theory.Computable T] : ¬Logic.System.Complete T :=
+  FirstIncompleteness.contrad
 
-noncomputable def prv (T : Theory ℒₒᵣ) [DecidablePred T] : Subsentence ℒₒᵣ 1 := ∃' isProof T
-
-variable {T : Theory ℒₒᵣ} [DecidablePred T] (hT : Computable (fun x => decide (T x)))
-
-lemma isProof_iff (σ : Sentence ℒₒᵣ) :
-    Nonempty (T ⊢ σ) ↔ ∃ b, Subformula.Eval! ℕ ![b, encode σ] Empty.elim (isProof T) := by
-  have : Nat.Partrec' fun v : Vector ℕ 2 => Part.some $ provFn T (v.get 1) (v.get 0) :=
-    Nat.Partrec'.part_iff.mpr
-      (Computable.partrec $ (provFn_computable hT).comp
-        (Computable.vector_get.comp Computable.id (Computable.const 1))
-        (Computable.vector_get.comp Computable.id (Computable.const 0)))
-  simp[isProof, Subformula.eval_rew, Matrix.empty_eq, Function.comp, Matrix.comp_vecCons',
-    Matrix.constant_eq_singleton, provable_iff_provFn]
-  constructor
-  · rintro ⟨b, hb⟩
-    exact ⟨b, by
-      simpa using (codeOfPartrec_spec this (y := 1) (v := ![b, encode σ])).mpr (by simp[hb])⟩
-  · rintro ⟨b, hb⟩
-    exact ⟨b, by
-      symm; simpa using (codeOfPartrec_spec this (y := 1) (v := ![b, encode σ])).mp (by simp[hb])⟩
-
-lemma prv_iff_provable (σ : Sentence ℒₒᵣ) :
-    Nonempty (T ⊢ σ) ↔ Subformula.Eval! ℕ ![encode σ] Empty.elim (prv T) := by
-  simp[prv, isProof_iff hT]
-
-lemma prv_iff_provable' (σ : Sentence ℒₒᵣ) :
-    ℕ ⊧ ([→ numeral (encode σ)].hom $ prv T) ↔ Nonempty (T ⊢ σ) := by
-  simp[models_iff, Subformula.eval_rew, Matrix.empty_eq, Function.comp,
-    Matrix.comp_vecCons', Matrix.constant_eq_singleton, prv_iff_provable hT]
-
-end Incompleteness
+lemma exists_undecidable_sentence [SigmaOneSound T] [Theory.Computable T] [Theory.Computable T] :
+    ∃ σ : Sentence ℒₒᵣ, ¬T ⊢! σ ∧ ¬T ⊢! ~σ := by
+  simpa[Logic.System.Complete, not_or] using firstIncompleteness (T := T)
 
 end Arith
 
