@@ -409,6 +409,74 @@ lemma bind_primrec {b : α → Fin n₁ → Subterm L μ₂ n₂} {e : α → μ
     intro a
     simp[Encodable.encode_ofEquiv subtEquiv, Encodable.Subtype.encode_eq, subtEquiv_bind_eq_bind]
 
+lemma substs_primrec :
+    Primrec₂ (fun v p => (Rew.substs v) p : (Fin n → Subterm L μ n') → Subterm L μ n → Subterm L μ n') := by
+  have : Primrec₂ (fun v t => (Rew.bind v (&·)) t : (Fin n → Subterm L μ n') → Subterm L μ n → Subterm L μ n') :=
+    to₂' <| bind_primrec fst (Subterm.fvar_primrec.comp snd) snd
+  exact this.of_eq <| by { intro v p; rw[Rew.eq_bind (Rew.substs v)]; simp[Function.comp] }
+
+lemma substs₀_primrec :
+    Primrec (fun u => Rew.substs ![] u : Subterm L μ 0 → Subterm L μ n') :=
+  substs_primrec.comp (.const ![]) Primrec.id
+
+lemma substs₁_primrec :
+    Primrec₂ (fun t u => Rew.substs ![t] u : Subterm L μ n' → Subterm L μ 1 → Subterm L μ n') :=
+  substs_primrec.comp₂ (Primrec₂.encode_iff.mp $
+    (Primrec.encode.comp₂ (list_cons.comp₂ Primrec₂.left (Primrec₂.const []))).of_eq
+    <| by intro x _; simp[encode_finArrow]) Primrec₂.right
+
+lemma substs₂_primrec :
+    Primrec₂ (fun v u => Rew.substs ![v.1, v.2] u : Subterm L μ n' × Subterm L μ n' → Subterm L μ 2 → Subterm L μ n') :=
+  substs_primrec.comp₂ (Primrec₂.encode_iff.mp $
+    (Primrec.encode.comp₂ (list_cons.comp₂ (Primrec.fst.comp₂ .left)
+          (list_cons.comp₂ (Primrec.snd.comp₂ .left) $ .const []))).of_eq <|
+    by intro x _; simp[encode_finArrow]) Primrec₂.right
+
+lemma emb_primrec : Primrec (Rew.emb : Subterm L Empty n → Subterm L μ n) := by
+  rw[Rew.eq_bind Rew.emb]; simp[Function.comp]
+  exact bind_primrec (const _)
+    (Primrec₂.option_some_iff.mp $ (Primrec₂.const none).of_eq <| by rintro _ ⟨⟩) Primrec.id
+
+namespace Operator
+
+instance (k) : Primcodable (Operator L k) := Primcodable.ofEquiv (Subterm L Empty k) equiv
+
+lemma term_primrec : Primrec (@Operator.term L k) := Primrec.of_equiv (e := @equiv L k)
+
+lemma mk_primrec : Primrec (@Operator.mk L k) := Primrec.of_equiv_symm (e := @equiv L k)
+
+lemma operator_primrec : Primrec₂ (operator : Operator L k → (Fin k → Subterm L μ n) → Subterm L μ n) :=
+  substs_primrec.comp₂ .right (emb_primrec.comp $ term_primrec.comp .fst)
+
+lemma comp_primrec₂ (o : Operator L 2) : Primrec₂ (fun o₁ o₂ => comp o ![o₁, o₂] : Operator L l → Operator L l → Operator L l) :=
+  mk_primrec.comp <| operator_primrec.comp (.const o) (Primrec.encode_iff.mp $ by
+    simp[Matrix.comp_vecCons', Matrix.constant_eq_singleton]
+    have : Primrec (fun p : Operator L l × Operator L l => encode [p.1.term, p.2.term]) :=
+      Primrec.encode.comp (list_cons.comp (term_primrec.comp fst) $
+        list_cons.comp (term_primrec.comp snd) (.const []))
+    exact this.of_eq <| by simp[encode_finArrow])
+
+lemma foldr_primrec (f : Operator L 2) (z : Operator L k) : Primrec (foldr f z) := by
+  have : Primrec₂ (fun _ p => f.comp ![p.2, p.1] : List (Operator L k) → Operator L k × Operator L k → Operator L k) :=
+    by apply (comp_primrec₂ f).comp₂ (Primrec.snd.comp₂ .right) (Primrec.fst.comp₂ .right)
+  have := Primrec.list_foldr Primrec.id (.const z) this
+  exact this.of_eq <| by
+    intro l; induction l <;> simp[foldr, *] at*; simp[*]
+
+variable [Operator.Zero L] [Operator.One L] [Operator.Add L]
+
+lemma numeral_primrec : Primrec (numeral L) := by
+  have : Primrec₂ (fun _ n => Add.add.foldr One.one (List.replicate n One.one) : ℕ → ℕ → Const L) :=
+    (foldr_primrec _ _).comp₂ (list_replicate.comp₂ .right (.const _))
+  have := Primrec.nat_casesOn Primrec.id (.const Zero.zero) this
+  exact this.of_eq <| by
+    intro n; induction n <;> simp[numeral, *]
+
+lemma const_primrec : Primrec (Operator.const : Const L → Subterm L μ n) :=
+  operator_primrec.comp .id (.const ![])
+
+end Operator
+
 end Subterm
 
 end FirstOrder

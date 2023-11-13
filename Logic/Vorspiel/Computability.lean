@@ -151,7 +151,7 @@ lemma encodeDecode_ofEquiv (α) [Encodable α] {β} (e : β ≃ α) :
   rcases h : (decode n : Option α) with (_ | ⟨a⟩) <;> simp
   { simp[@Encodable.encode_none _ (Encodable.ofEquiv α e)] }
   { have := @Encodable.encode_some _ (Encodable.ofEquiv α e) (e.symm a); rw[this];
-    simpa using Encodable.encode_ofEquiv e (e.symm a) } 
+    simpa using Encodable.encode_ofEquiv e (e.symm a) }
 
 lemma encodeDecode_ofEquiv_prim (α) {β} [Primcodable α] (e : β ≃ α) :
     haveI : Primcodable β := Primcodable.ofEquiv α e
@@ -402,7 +402,7 @@ instance finArrow (β : Type*) [Primcodable β] : UniformlyPrimcodable (Fin · �
     have : ∀ n e, encode (decode (α := Vector β n) e) = encode (decode (α := Fin n → β) e) := by
       intro n e; simp[Encodable.decode_ofEquiv]
       rcases h : decode (α := Vector β n) e with (_ | v) <;> simp
-      { have : ∀ b : Fin n → β, encode b = encode ((Equiv.vectorEquivFin β n).symm b) := 
+      { have : ∀ b : Fin n → β, encode b = encode ((Equiv.vectorEquivFin β n).symm b) :=
           fun b => encode_ofEquiv (Equiv.vectorEquivFin β n).symm b
         simpa using (this (Equiv.vectorEquivFin β n v)).symm }
     exact uniformly_prim.of_eq this
@@ -672,6 +672,12 @@ lemma list_all {α : Type*} {β : Type*} [Primcodable α] [Primcodable β]
   {p : α → β → Bool} {l : α → List β} (hp : Primrec₂ p) (hl : Primrec l) : Primrec (fun a => (l a).all (p a)) :=
   list_foldr hl (const true) ((dom_bool₂ _).comp₂ (hp.comp₂ Primrec₂.left (fst.comp₂ Primrec₂.right)) (snd.comp₂ Primrec₂.right))
 
+lemma list_replicate {α : Type*} [Primcodable α] : Primrec₂ (@List.replicate α) := by
+   have : Primrec₂ (fun p ih => p.2 :: ih.2 : ℕ × α → ℕ × List α → List α) :=
+     list_cons.comp₂ (snd.comp₂ .left) (snd.comp₂ .right)
+   exact (Primrec.nat_rec' Primrec.fst (.const []) this).of_eq <| by
+     rintro ⟨n, a⟩; simp; induction n <;> simp[*]
+
 end Primrec
 
 namespace Computable
@@ -703,11 +709,32 @@ lemma list_all {α : Type*} {β : Type*} [Primcodable α] [Primcodable β]
     generalize l a = l
     induction' l with b l ih <;> simp
     { have : List.get? (List.reverse l ++ [b]) (List.length l) = some b := by
-        simpa using List.get?_concat_length l.reverse b      
+        simpa using List.get?_concat_length l.reverse b
       simp[this]; rw[←ih]
       exact congr_arg₂ (· && ·) rfl (Nat.rec_eq _ _ _ _ (by
         intro m hm k
         have : (l.reverse ++ [b]).get? m = l.reverse.get? m := List.get?_append (by simp[hm])
         simp[this])) }
 
-end Computable 
+end Computable
+
+namespace Partrec
+
+variable {α : Type*} {β : Type*} {σ : Type*} [Primcodable α] [Primcodable β] [Primcodable σ]
+
+noncomputable def _root_.PFun.merge (f g : α →. σ) : α →. σ :=
+  Classical.epsilon (fun k => ∀ a x, x ∈ k a ↔ x ∈ f a ∨ x ∈ g a)
+
+lemma merge_iff {f g : α →. σ} (hf : Partrec f) (hg : Partrec g)
+  (H : ∀ (a), ∀ x ∈ f a, ∀ y ∈ g a, x = y) {a x} :
+    x ∈ PFun.merge f g a ↔ x ∈ f a ∨ x ∈ g a := by
+  rcases merge hf hg H with ⟨k, _, hk⟩
+  exact Classical.epsilon_spec (p := fun k => ∀ a x, x ∈ k a ↔ x ∈ f a ∨ x ∈ g a) ⟨k, hk⟩ a x
+
+lemma mergep {f g : α →. σ} (hf : Partrec f) (hg : Partrec g)
+  (H : ∀ (a), ∀ x ∈ f a, ∀ y ∈ g a, x = y) :
+    Partrec (PFun.merge f g) := by
+  rcases merge hf hg H with ⟨k, pk, hk⟩
+  exact pk.of_eq fun a => by ext a; simp[hk, merge_iff hf hg H]
+
+end Partrec

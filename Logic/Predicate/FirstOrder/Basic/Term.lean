@@ -590,6 +590,12 @@ def Subterm.fn {k} (f : L.func k) : Operator L k := ⟨Subterm.func f (#·)⟩
 
 namespace Operator
 
+def equiv : Operator L n ≃ Subterm L Empty n where
+  toFun := Operator.term
+  invFun := Operator.mk
+  left_inv := by intro _; simp
+  right_inv := by intro _; simp
+
 def operator {arity : ℕ} (o : Operator L arity) (v : Fin arity → Subterm L μ n) : Subterm L μ n :=
   Rew.substs v (Rew.emb o.term)
 
@@ -611,23 +617,22 @@ lemma operator_bvar (x : Fin k) (v : Fin k → Subterm L μ n) : (bvar x).operat
   simp[operator, bvar]
 
 -- f.operator ![ ... f.operator ![f.operator ![z, t 0], t 1], ... ,t (n-1)]
-def foldl (f : Operator L 2) (z : Operator L k) : List (Operator L k) → Operator L k
+def foldr (f : Operator L 2) (z : Operator L k) : List (Operator L k) → Operator L k
   | []      => z
-  | o :: os => f.comp ![foldl f z os, o]
+  | o :: os => f.comp ![foldr f z os, o]
 
-@[simp] lemma foldl_nil (f : Operator L 2) (z : Operator L k) : f.foldl z [] = z := rfl
+@[simp] lemma foldr_nil (f : Operator L 2) (z : Operator L k) : f.foldr z [] = z := rfl
 
-@[simp] lemma operator_foldl_cons (f : Operator L 2) (z : Operator L k) (o : Operator L k) (os : List (Operator L k))
+@[simp] lemma operator_foldr_cons (f : Operator L 2) (z : Operator L k) (o : Operator L k) (os : List (Operator L k))
   (v : Fin k → Subterm L μ n) :
-    (f.foldl z (o :: os)).operator v = f.operator ![(f.foldl z os).operator v, o.operator v] := by
-  simp[foldl, operator_comp, Matrix.fun_eq_vec₂]
+    (f.foldr z (o :: os)).operator v = f.operator ![(f.foldr z os).operator v, o.operator v] := by
+  simp[foldr, operator_comp, Matrix.fun_eq_vec₂]
 
-def iterl (f : Operator L 2) (z : Const L) : (n : ℕ) → Operator L n
+def iterr (f : Operator L 2) (z : Const L) : (n : ℕ) → Operator L n
   | 0     => z
-  | _ + 1 => f.foldl (bvar 0) (List.ofFn fun x => bvar x.succ)
+  | _ + 1 => f.foldr (bvar 0) (List.ofFn fun x => bvar x.succ)
 
-@[simp] lemma iterl_zero (f : Operator L 2) (z : Const L) : f.iterl z 0 = z := rfl
-
+@[simp] lemma iterr_zero (f : Operator L 2) (z : Const L) : f.iterr z 0 = z := rfl
 
 section numeral
 
@@ -669,7 +674,7 @@ open Language Subterm
 
 def numeral (L : Language) [Operator.Zero L] [Operator.One L] [Operator.Add L] : ℕ → Const L
   | 0     => Zero.zero
-  | n + 1 => Add.add.foldl One.one (List.replicate n One.one)
+  | n + 1 => Add.add.foldr One.one (List.replicate n One.one)
 
 variable [hz : Operator.Zero L] [ho : Operator.One L] [ha : Operator.Add L]
 
@@ -681,7 +686,7 @@ lemma numeral_succ (hz : z ≠ 0) : numeral L (z + 1) = Operator.Add.add.comp ![
   simp[numeral]
   cases' z with z
   · simp at hz
-  · simp[Operator.foldl]
+  · simp[Operator.foldr]
 
 lemma numeral_add_two : numeral L (z + 2) = Operator.Add.add.comp ![numeral L (z + 1), One.one] :=
   numeral_succ (by simp)

@@ -316,14 +316,23 @@ end Derivation
 
 open Derivation ProofList
 
-def provFn (T : Theory L) [DecidablePred T] : ℕ → ℕ → ℕ := fun x e =>
-  (decode x : Option (Sentence L)).casesOn 0
-  <| fun σ => (decode e : Option (ProofList L × List (Sentence L))).casesOn 0
-  <| fun A => bif (A.2.map (~·)).all (T ·) && (σ :: A.2).map Rew.emb.hom ∈ sequents A.1 && isProper A.1 then 1 else 0
+def isProofFn (T : Theory L) [DecidablePred T] : Sentence L → ℕ → Bool :=
+  fun σ e => (decode e : Option (ProofList L × List (Sentence L))).casesOn false
+  <| fun A => bif (A.2.map (~·)).all (T ·) && (σ :: A.2).map Rew.emb.hom ∈ sequents A.1 && isProper A.1 then true else false
 
-lemma provable_iff_provFn {T : Theory L} [DecidablePred T] {σ : Sentence L} :
-    Nonempty (T ⊢ σ) ↔ ∃ e, provFn T (encode σ) e = 1 := by
-  simp[provable_iff, provFn]
+-- TODO: move to Vorspiel
+def Bool.toOpt : Bool → Option Unit := fun b => bif b then some () else none
+
+@[simp] lemma isSome_bool_to_opt (b) : Option.isSome (Bool.toOpt b) = b := by cases b <;> simp
+
+@[simp] lemma to_opt_eq_some_iff (b) : Bool.toOpt b = some () ↔ b := by cases b <;> simp
+
+def provableFn (T : Theory L) [DecidablePred T] : Sentence L →. Unit := fun x =>
+  Nat.rfindOpt (fun e => Bool.toOpt (isProofFn T x e))
+
+lemma provable_iff_isProofFn {T : Theory L} [DecidablePred T] {σ : Sentence L} :
+    T ⊢! σ ↔ ∃ e, isProofFn T σ e := by
+  simp[provable_iff, isProofFn]
   constructor
   · rintro ⟨l, U, hU, hl, hproper⟩
     use encode (l, U)
@@ -336,14 +345,23 @@ lemma provable_iff_provFn {T : Theory L} [DecidablePred T] {σ : Sentence L} :
     intro h₁ h₂ h₃
     exact ⟨l, U, h₁, h₂, h₃⟩
 
+lemma provable_iff_provableFn {T : Theory L} [DecidablePred T] {σ : Sentence L} {u} :
+    T ⊢! σ ↔ u ∈ provableFn T σ := by
+  rcases u with ⟨⟩
+  simp[provableFn, provable_iff_isProofFn, Nat.rfindOpt, @eq_comm _ true, @eq_comm _ false]
+  constructor
+  · intro h
+    rcases Nat.least_number _ h with ⟨e, he, hm⟩
+    exact ⟨e, ⟨he, fun h => by simpa using hm _ h⟩, he⟩
+  · rintro ⟨e, ⟨he, _⟩, _⟩; exact ⟨e, he⟩
+
 section
 
 open Computable
 
-lemma provFn_computable {T : Theory L} [DecidablePred T] (hT : Computable (fun x => decide (T x))) :
-    Computable₂ (provFn T) :=
-  to₂' <| option_casesOn (Computable.decode.comp fst) (const 0)
-  <| option_casesOn (Computable.decode.comp $ snd.comp fst) (const 0)
+lemma isProofFn_computable {T : Theory L} [DecidablePred T] (hT : Computable (fun x => decide (T x))) :
+    Computable₂ (isProofFn T) :=
+  to₂' <| option_casesOn (Computable.decode.comp snd) (const false)
   <| to₂' <| Computable.cond
     (dom_bool₂.comp
       (dom_bool₂.comp
@@ -351,11 +369,16 @@ lemma provFn_computable {T : Theory L} [DecidablePred T] (hT : Computable (fun x
           (Primrec.to_comp $ Primrec.list_map (Primrec.snd.comp .snd) (Subformula.neg_primrec.comp₂ .right)))
         (Primrec.to_comp $ by
           apply Primrec.list_mem.comp
-                  (Primrec.list_map (Primrec.list_cons.comp (Primrec.snd.comp .fst) (Primrec.snd.comp .snd))
-                    (Subformula.emb_primrec.comp₂ .right))
-                  (Primrec.list_map (Primrec.fst.comp .snd) (Primrec.snd.comp₂ .right))))
+            (Primrec.list_map
+              (Primrec.list_cons.comp (Primrec.fst.comp .fst) (Primrec.snd.comp .snd))
+                <| Subformula.emb_primrec.comp₂ .right)
+            (Primrec.list_map (Primrec.fst.comp .snd) <| Primrec.snd.comp₂ .right)))
       (Primrec.to_comp $ isProper_primrec.comp $ Primrec.fst.comp .snd))
-    (const 1) (const 0)
+    (const true)
+    (const false)
+
+lemma provableFn_partrec {T : Theory L} [DecidablePred T] (hT : Computable (fun x => decide (T x))) :
+    Partrec (provableFn T) := Partrec.rfindOpt (dom_bool.comp $ isProofFn_computable hT)
 
 end
 
