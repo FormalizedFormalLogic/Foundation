@@ -11,8 +11,8 @@ Formalizing Logic in Lean4
       - **Basic**: Basic definitions & theorems
       - **Computability**: encodeing, computability
       - **Completeness**: Completeness theorem
-      - **Principia**: Proof system
       - **Arith**: Arithmetic
+      - **Incompleteness**: Incompleteness theorem
 
 ## Definition
 ### First-Order logic
@@ -32,34 +32,10 @@ Formalizing Logic in Lean4
 | Soundness theorem              | `LO.FirstOrder.soundness`    | `T ⊢ σ → T ⊨ σ` |
 | Completeness theorem           | `LO.FirstOrder.completeness` | `T ⊨ σ → T ⊢ σ` |
 | Cut-elimination                | `LO.FirstOrder.DerivationCR.hauptsatz`    | `⊢ᶜ Δ → ⊢ᵀ Δ`   |
-| Gödel's incompleteness theorem | TODO                      |                  |
-
-## Principia
-- DSL for proof system of first-order logic
-- `[emb σ₁, emb σ₂, ...]⟹[T] emb σ` is equivalent to `T ⊢ σ₁ ∧ σ₂ ∧ ... → σ`
-
-```code:ltOfLeOfLt.lean
-def ltOfLeOfLt : [] ⟹[T] “∀ ∀ ∀ (#0 ≤ #1 ∧ #1 < #2 → #0 < #2)” :=
-  proof.
-    then (lt_iff) “∀ ∀ (#0 ≤ #1 ↔ #0 = #1 ∨ #0 < #1)” · from leIffEqOrLt
-    then (lt_trans) “∀ ∀ ∀ (#0 < #1 ∧ #1 < #2 → #0 < #2)” · from ltTrans
-    gens n m l; intro h
-    have “l = m ∨ l < m”
-    · specialize lt_iff with l, m
-      rw[←this]
-      andl h
-    cases (hl) “l = m” or (hl) “l < m”
-    · rw[this]
-      andr h
-    · specialize lt_trans with l, m, n
-      apply this
-      · split
-        @ assumption
-        @ andr h
-  qed.
-```
+| Gödel's first incompleteness theorem | `LO.FIrstOrder.Arith.firstIncompleteness` | `SigmaOneSound T → Theory.Computable T → ¬Logic.System.Complete T` |
 
 ## References
 - J. Han, F. van Doorn, A formalization of forcing and the unprovability of the continuum hypothesis
 - W. Pohlers, Proof Theory: The First Step into Impredicativity
 - P. Hájek, P. Pudlák, Metamathematics of First-Order Arithmetic
+- 田中 一之, ゲーデルと20世紀の論理学
