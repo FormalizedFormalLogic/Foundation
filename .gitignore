@@ -1,3 +1,5 @@
 /build
 /lake-packages/*
 lakefile.olean
+
+.vscode/settings.json
