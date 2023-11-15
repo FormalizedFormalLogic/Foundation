@@ -2,19 +2,59 @@ import Logic.Predicate.FirstOrder.Incompleteness.FirstIncompleteness
 
 namespace LO.FirstOrder
 
-section Supplymental
-
-/- TODO: 拡大理論は拡大元の理論の全ての文を証明できるはず -/
-@[simp] lemma SubTheory.stronger {T U : Theory ℒₒᵣ} [SubTheory T U] {σ} : (T ⊢! σ) → (U ⊢! σ) := by sorry
-
-end Supplymental
-
 namespace Arith
 
 namespace Incompleteness.Provability
 
 local notation "Σ" => Bool.true
 local notation "Π" => Bool.false
+
+section TheoryCalculus
+
+variable {T U : Theory ℒₒᵣ} [SubTheory T U]
+
+lemma iff_intro : (T ⊢! σ ⟶ π) → (T ⊢! π ⟶ σ) → (T ⊢! σ ⟷ π) := by sorry
+
+lemma iff_comm : (T ⊢! σ ⟷ π) → (T ⊢! π ⟷ σ) := by sorry
+
+lemma iff_trans : (T ⊢! σ ⟷ π) → (T ⊢! π ⟷ ρ) → (T ⊢! σ ⟷ ρ) := by sorry
+
+lemma iff_contra : (T ⊢! σ ⟷ π) → (T ⊢! ~σ ⟷ ~π) := by sorry
+
+lemma iff_contra' : (T ⊢! σ ⟷ π) → (T ⊢! ~π ⟷ ~σ) := λ h => iff_comm $ iff_contra h
+
+lemma iff_mp : (T ⊢! σ ⟷ π) → (T ⊢! σ ⟶ π) := by sorry
+
+lemma iff_mpr : (T ⊢! σ ⟷ π) → (T ⊢! π ⟶ σ) := λ h => iff_mp $ iff_comm h
+
+lemma iff_unprov : (T ⊢! σ ⟷ π) → (T ⊬! σ) → (T ⊬! π) := by sorry
+
+lemma imply : (T ⊢! σ ⟶ π) → (T ⊢! σ) → (T ⊢! π) := by sorry
+
+lemma imply_trans : (T ⊢! σ ⟶ π) → (T ⊢! π ⟶ ρ) → (T ⊢! σ ⟶ ρ) := by sorry
+
+lemma imply_contra₀ : (T ⊢! σ ⟶ π) → (T ⊢! ~π ⟶ ~σ) := by sorry
+
+lemma imply_contra₃ : (T ⊢! ~σ ⟶ ~π) → (T ⊢! π ⟶ σ) := by sorry
+
+lemma nc : (T ⊢! σ) → (T ⊢! ~σ) → (T ⊢! ⊥) := by sorry
+
+lemma negneg : (T ⊢! σ) → (T ⊢! ~~σ) := by sorry
+
+lemma efq : (T ⊢! ⊥ ⟶ σ) := by sorry
+
+lemma elim_and_left_dilemma : (T ⊢! (σ ⋏ π) ⟶ ρ) → (T ⊢! σ ⟶ π) → (T ⊢! σ ⟶ ρ) := by sorry
+
+lemma elim_and_right_dilemma : (T ⊢! (σ ⋏ π) ⟶ ρ) → (T ⊢! π ⟶ σ) → (T ⊢! π ⟶ ρ) := by sorry
+
+lemma deduction {σ π} : (T ⊢! σ ⟶ π) ↔ (T ∪ {σ} ⊢! π) := by sorry
+
+lemma subtheorem [SubTheory T U] : (T ⊢! σ) → (U ⊢! σ) := by sorry
+
+lemma consistent_or : (¬Logic.System.Consistent (T ∪ {σ})) → (T ⊢! ~σ) := by sorry
+
+end TheoryCalculus
+
 
 section Conditions
 
@@ -29,43 +69,35 @@ class HasProvable where
 
 notation "Pr[" T "]" => HasProvable.Provable T
 
-def prsubst [HasProvable T] (σ : Sentence ℒₒᵣ) : Sentence ℒₒᵣ := [→ ⸢σ⸣].hom Pr[T]
+abbrev prsubst [HasProvable T] (σ : Sentence ℒₒᵣ) : Sentence ℒₒᵣ := [→ ⸢σ⸣].hom Pr[T]
 
-notation "Pr[" T "](⸢ " σ " ⸣)" => prsubst T (σ : Sentence ℒₒᵣ)
+notation "Pr[" T "](⸢" σ "⸣)" => prsubst T (σ : Sentence ℒₒᵣ)
 
 class ProvableLimit [HasProvable T] (b n) where
   hier : Hierarchy b n Pr[T]
 
-variable [HasProvable U]
+variable [SubTheory T U] [HasProvable U]
 
-class Derivability1 [SubTheory T U] where
+class Derivability1 where
   D1 : ∀ {σ : Sentence ℒₒᵣ}, (U ⊢! σ) → (T ⊢! Pr[U](⸢σ⸣))
 
-class Derivability2 [SubTheory T U] where
+class Derivability2 where
   D2 : ∀ (σ π : Sentence ℒₒᵣ), T ⊢! Pr[U](⸢σ ⟶ π⸣) ⟶ (Pr[U](⸢σ⸣) ⟶ Pr[U](⸢π⸣))
 
-class Derivability3 [SubTheory T U] where
+class Derivability3 where
   D3 : ∀ (σ : Sentence ℒₒᵣ), T ⊢! Pr[U](⸢σ⸣) ⟶ Pr[U](⸢Pr[U](⸢σ⸣)⸣)
 
-class FormalizedCompleteness [SubTheory T U] (b n) where
+class FormalizedCompleteness (b n) where
   FC : ∀ (σ : Sentence ℒₒᵣ), (Hierarchy b n σ) → (T ⊢! σ ⟶ Pr[U](⸢σ⸣))
 
--- abbrev FormalizedSigmaOneCompleteness := @FormalizedCompleteness T Σ 1
+variable [∀ (σ : Sentence ℒₒᵣ), HasProvable (U ∪ {σ})]
 
-/-
-instance [HasProvabilityPred T Σ 1] [FormalizedCompleteness T Σ 1] : (@Derivability3 T b n) :=
-  ⟨λ σ => @FormalizedCompleteness.FC T Σ 1 _ ([→ ⸢σ⸣].hom (HasProvabilityPred.Provable T b n)) (by sorry)⟩
--/
+class FormalizedDeductionTheorem where
+  FDT : ∀ (σ π : Sentence ℒₒᵣ), (T ⊢! Pr[U](⸢σ ⟶ π⸣) ⟷ Pr[U ∪ {σ}](⸢π⸣))
 
-/-
-class Expandable extends HasProvabilityPred T b n where
-  expand : ∀ U, HasProvabilityPred (T ∪ U) b n
-
-instance [HasProvabilityPred T b n] [@Expandable T b n] : HasProvabilityPred (T ∪ {σ}) b n := by exact Expandable.expand {σ}
-
-class FormalizedDeductionTheorem [HasProvabilityPred U b n] where
-  FDT : ∀ (σ π : Sentence ℒₒᵣ), (T ⊢! Pr[U](⸢σ ⟶ π⸣)  Pr[T ∪ {σ}](⸢π⸣))
--/
+lemma FormalizedDeductionTheorem.FDT_neg [FormalizedDeductionTheorem T U] : T ⊢! ~Pr[U](⸢σ ⟶ π⸣) ⟷ ~Pr[U ∪ {σ}](⸢π⸣) := by
+  suffices T ⊢! Pr[U](⸢σ ⟶ π⸣) ⟷ Pr[U ∪ {σ}](⸢π⸣) from iff_contra this
+  apply FormalizedDeductionTheorem.FDT
 
 class Diagonizable (b n) where
   diag (δ : Subsentence ℒₒᵣ 1) : (Hierarchy b n δ) → (∃ (σ : Sentence ℒₒᵣ), (Hierarchy b n σ) ∧ (T ⊢! σ ⟷ ([→ ⸢σ⸣].hom δ)))
@@ -95,7 +127,13 @@ lemma exists_HenkinSentence [Diagonizable T Σ k] [ProvableLimit U Σ k] : ∃ (
   have ⟨H, ⟨hH, hd⟩⟩ := @Diagonizable.diag T Σ k _ (Pr[U]) ProvableLimit.hier
   existsi H; simpa [IsHenkinSentence, hH] using hd;
 
-def IsKreiselSentence (H : Sentence ℒₒᵣ) (σ : Sentence ℒₒᵣ) := T ⊢! H ⟷ (Pr[U](⸢H⸣) ⟶ σ)
+def IsKreiselSentence (K : Sentence ℒₒᵣ) (σ : Sentence ℒₒᵣ) := T ⊢! K ⟷ (Pr[U](⸢K⸣) ⟶ σ)
+
+/-
+lemma exists_KreiselSentence [Diagonizable T Σ k] [ProvableLimit U Σ k] {σ} : ∃ (K : Sentence ℒₒᵣ), (IsKreiselSentence T U K σ) := by
+  have ⟨K, ⟨hH, hd⟩⟩ := @Diagonizable.diag T Σ k _ (Pr[U]) ProvableLimit.hier
+  existsi K; -- simpa [IsHenkinSentence, hH] using hd;
+-/
 
 -- def KreiselSentenceExistance (σ : Sentence α) := @Diagonizable.diag T Π 1 _ ([→ ⸢σ⸣].hom Pr[T]) (by exact @ProvabilityPredHierarchy.hie T Π 1 _ _)
 
@@ -107,40 +145,6 @@ section ProvabilityCalculus
 open Subformula
 
 variable {T U : Theory ℒₒᵣ} [SubTheory T U] [HasProvable U]
-
-lemma iff_intro : (T ⊢! σ ⟶ π) → (T ⊢! π ⟶ σ) → (T ⊢! σ ⟷ π) := by sorry
-
-lemma iff_trans : (T ⊢! σ ⟷ π) → (T ⊢! π ⟷ ρ) → (T ⊢! σ ⟷ ρ) := by sorry
-
-lemma iff_contra : (T ⊢! σ ⟷ π) → (T ⊢! ~σ ⟷ ~π) := by sorry
-
-lemma iff_contra' : (T ⊢! σ ⟷ π) → (T ⊢! ~π ⟷ ~σ) := by sorry
-
-lemma iff_mp : (T ⊢! σ ⟷ π) → (T ⊢! σ ⟶ π) := by sorry
-
-lemma iff_mpr : (T ⊢! σ ⟷ π) → (T ⊢! π ⟶ σ) := by sorry
-
-lemma iff_unprov : (T ⊢! σ ⟷ π) → (T ⊬! σ) → (T ⊬! π) := by sorry
-
-lemma imply : (T ⊢! σ ⟶ π) → (T ⊢! σ) → (T ⊢! π) := by sorry
-
-lemma imply_trans : (T ⊢! σ ⟶ π) → (T ⊢! π ⟶ ρ) → (T ⊢! σ ⟶ ρ) := by sorry
-
-lemma imply_contra₀ : (T ⊢! σ ⟶ π) → (T ⊢! ~π ⟶ ~σ) := by sorry
-
-lemma imply_contra₃ : (T ⊢! ~σ ⟶ ~π) → (T ⊢! π ⟶ σ) := by sorry
-
-lemma nc : (T ⊢! σ) → (T ⊢! ~σ) → (T ⊢! ⊥) := by sorry
-
-lemma negneg : (T ⊢! σ) → (T ⊢! ~~σ) := by sorry
-
-lemma efq : (T ⊢! ⊥ ⟶ σ) := by sorry
-
-lemma elim_and_left_dilemma : (T ⊢! (σ ⋏ π) ⟶ ρ) → (T ⊢! σ ⟶ π) → (T ⊢! σ ⟶ ρ) := by sorry
-
-lemma elim_and_right_dilemma : (T ⊢! (σ ⋏ π) ⟶ ρ) → (T ⊢! π ⟶ σ) → (T ⊢! π ⟶ ρ) := by sorry
-
-
 variable [Derivability1 T U] [Derivability2 T U] [Derivability3 T U]
 
 lemma provDilemma (σ) : (T ⊢! (Pr[U](⸢σ⸣) ⋏ Pr[U](⸢~σ⸣)) ⟶ (Pr[U](⸢⊥⸣))) := by
@@ -167,13 +171,13 @@ lemma GoedelSentence_Unprovablility : Logic.System.Consistent U → U ⊬! G := 
   by_contra hP;
   have h₁ : T ⊢! Pr[U](⸢G⸣) := D1 hP;
   have h₂ : T ⊢! Pr[U](⸢G⸣) ⟶ ~G := by simpa using iff_mpr $ iff_contra hG;
-  have hR : U ⊢! ~G := by have := imply h₂ h₁; sorry; -- exact SubTheory.stronger b;
+  have hR : U ⊢! ~G := subtheorem (imply h₂ h₁);
   exact hConsistency.false (nc hP hR).some
 
 lemma GoedelSentence_Unrefutability : SigmaOneSound U → U ⊬! ~G := by
   intro hSound;
   by_contra hR;
-  have a : U ⊢! ~G ⟶ ~~Pr[U](⸢G⸣) := by have := (iff_mp $ iff_contra hG); sorry;
+  have a : U ⊢! ~G ⟶ ~~Pr[U](⸢G⸣) := subtheorem (iff_mp $ iff_contra hG);
   have h₁ : U ⊢! Pr[U](⸢G⸣) := by have := imply a hR; simpa;
   have h₂ : ℕ ⊧ Pr[U](⸢G⸣) := hSound.sound (Hierarchy.rew _ ProvableLimit.hier) h₁;
   have hP : U ⊢! G := (HasProvable.spec G).mp h₂;
@@ -206,20 +210,20 @@ variable (U' : Theory ℒₒᵣ) [SubTheory T U'] [HasProvable U'] [Derivability
 lemma extend : (U' ⊢! Con[U] ⟶ ~Pr[U](⸢σ⸣)) ↔ (U' ⊢! Pr[U](⸢σ⸣) ⟶ Pr[U](⸢~σ⸣)) := by
   apply Iff.intro;
   . intro H;
-    exact imply_contra₃ $ imply_trans (by have := FormalizedConsistency T U (~σ); sorry) H;
+    exact imply_contra₃ $ imply_trans (subtheorem (FormalizedConsistency T U (~σ))) H;
   . intro H;
     have a : T ⊢! (Pr[U](⸢σ⸣) ⋏ Pr[U](⸢~σ⸣)) ⟶ (Pr[U](⸢⊥⸣)) := provDilemma σ;
-    have b : U' ⊢! (Pr[U](⸢σ⸣) ⋏ Pr[U](⸢~σ⸣)) ⟶ (Pr[U](⸢⊥⸣)) := by sorry;
+    have b : U' ⊢! (Pr[U](⸢σ⸣) ⋏ Pr[U](⸢~σ⸣)) ⟶ (Pr[U](⸢⊥⸣)) := subtheorem a;
     exact imply_contra₀ $ elim_and_left_dilemma b H;
 
 lemma equality_GoedelSentence_Consistency {G} (hG : IsGoedelSentence T U G) (hGS1 : Hierarchy Π 1 G) : U ⊢! G ⟷ Con[U] := by
   have hnGP1 : Hierarchy Σ 1 (~G) := Hierarchy.neg hGS1;
   have h₁ : T ⊢! ~G ⟶ Pr[U](⸢~G⸣) := FormalizedCompleteness.FC (~G) hnGP1;
   have h₂ : T ⊢! Pr[U](⸢G⸣) ⟶ ~G := by have := iff_mp (iff_contra' hG); simpa;
-  have h₃ : U ⊢! Pr[U](⸢G⸣) ⟶ Pr[U](⸢~G⸣) := have := imply_trans h₂ h₁; by sorry;
+  have h₃ : U ⊢! Pr[U](⸢G⸣) ⟶ Pr[U](⸢~G⸣) := subtheorem (imply_trans h₂ h₁);
   have h₄ : U ⊢! Con[U] ⟶ ~Pr[U](⸢G⸣) := (extend T _ _).mpr h₃;
-  have h₅ : U ⊢! ~Pr[U](⸢G⸣) ⟶ Con[U] := by have := FormalizedConsistency T U G; sorry;
-  exact iff_trans (by have := hG; sorry) $ iff_intro h₅ h₄;
+  have h₅ : U ⊢! ~Pr[U](⸢G⸣) ⟶ Con[U] := subtheorem (FormalizedConsistency T U G);
+  exact iff_trans (subtheorem hG) $ iff_intro h₅ h₄;
 
 lemma Consistency_Unprovablility : Logic.System.Consistent U → U ⊬! Con[U] := by
   intro hConsistency;
@@ -228,6 +232,8 @@ lemma Consistency_Unprovablility : Logic.System.Consistent U → U ⊬! Con[U] :
   have hEq := equality_GoedelSentence_Consistency T U hG hGS1;
   exact iff_unprov hEq hI₁;
 
+lemma Consistent_of_ProvabilityConsistency : (U ⊢! Con[U]) → ¬Logic.System.Consistent U := by simpa using not_imp_not.mpr (Consistency_Unprovablility T U);
+
 lemma Consistency_Unrefutability : SigmaOneSound U → U ⊬! ~Con[U] := by
   intro hSound;
   have ⟨G, ⟨hG, hGS1⟩⟩ := exists_GoedelSentence₁ T U;
@@ -235,6 +241,69 @@ lemma Consistency_Unrefutability : SigmaOneSound U → U ⊬! ~Con[U] := by
   have hEq := equality_GoedelSentence_Consistency T U hG hGS1;
   exact iff_unprov (iff_contra hEq) hI₁;
 
+-- lemma SigmaOneSound_of_UnrefutabilityConsistency : (U ⊢! ~Con[U]) → (SigmaOneSound U) := by simpa using not_imp_not.mpr (Consistency_Unrefutability T U);
+
 end SecondIncompleteness
+
+namespace Loeb_with_IT2
+
+variable (T U : Theory ℒₒᵣ) [SubTheory T U] [∀ σ, SubTheory T (U ∪ {~σ})] [∀ σ, SubTheory (T ∪ {σ}) (U ∪ {~σ})] [SigmaOneSound U]
+variable [Diagonizable T Π 1]
+variable
+        [HasProvable U]
+        [∀ σ, HasProvable (U ∪ {σ})]
+        [ProvableLimit U Σ 1]
+        [∀ σ, ProvableLimit (U ∪ {~σ}) Σ 1]
+        [∀ σ, Derivability1 T (U ∪ {σ})]
+        [∀ σ, Derivability2 T (U ∪ {σ})]
+        [∀ σ, FormalizedCompleteness T (U ∪ {σ}) Σ 1]
+        [FormalizedDeductionTheorem T U]
+
+open Derivability1 Derivability2 FormalizedCompleteness
+
+lemma Loeb_with_IT2 (σ) : (U ⊢! Pr[U](⸢σ⸣) ⟶ σ) → (U ⊢! σ) := by
+  intro H;
+  have h₁ : U ⊢! ~σ ⟶ ~Pr[U](⸢σ⸣) := imply_contra₀ H;
+  have h₂ : U ∪ {~σ} ⊢! ~Pr[U](⸢σ⸣) := deduction.mp h₁;
+  have h₃ : T ⊢! ~Pr[U](⸢~σ ⟶ ⊥⸣) ⟷ ~Pr[U ∪ {~σ}](⸢⊥⸣) := FormalizedDeductionTheorem.FDT_neg _ _;
+  have h₄ : T ∪ {~σ} ⊢! Pr[U](⸢~σ ⟶ ⊥⸣) ⟷ Pr[U ∪ {~σ}](⸢⊥⸣) := by sorry;
+  have h₅ : T ∪ {~σ} ⊢! Pr[U](⸢~σ ⟶ ⊥⸣) := by sorry;
+  have h₆ : U ∪ {~σ} ⊢! Con[U ∪ {~σ}] := by sorry; -- subtheorem (imply (iff_mp h₄) h₅);
+  have hc : ¬Logic.System.Consistent (U ∪ {~σ}) := SecondIncompleteness.Consistent_of_ProvabilityConsistency T _ h₆;
+  simpa using consistent_or hc;
+
+/-
+lemma CCC : U ⊬! Con[U] ⟶ ~Pr[U](⸢~Con[U]⸣) := by
+  by_contra ih;
+  have a : U ⊢! Pr[U](⸢~Con[U]⸣) ⟶ Pr[U](⸢⊥⸣) := imply_contra₃ ih;
+  have b : U ⊢! Pr[U](⸢~Con[U]⸣) ⟶ ~Con[U] → U ⊢! ~Con[U] := Loeb_with_IT2 T U (~Con[U]);
+  have c : U ⊢! ~Con[U] := imply (by sorry) (by sorry);
+-/
+
+end Loeb_with_IT2
+
+
+namespace Loeb_without_IT2
+
+
+variable (T U : Theory ℒₒᵣ) [SubTheory T U] [∀ σ, SubTheory T (U ∪ {~σ})] [∀ σ, SubTheory (T ∪ {σ}) (U ∪ {~σ})] [SigmaOneSound U]
+variable [Diagonizable T Π 1]
+variable
+        [HasProvable U]
+        [∀ σ, HasProvable (U ∪ {σ})]
+        [ProvableLimit U Σ 1]
+        [∀ σ, ProvableLimit (U ∪ {~σ}) Σ 1]
+        [∀ σ, Derivability1 T (U ∪ {σ})]
+        [∀ σ, Derivability2 T (U ∪ {σ})]
+        [∀ σ, FormalizedCompleteness T (U ∪ {σ}) Σ 1]
+        [FormalizedDeductionTheorem T U]
+
+/-
+lemma Loeb_without_IT2 (σ) : (U ⊢! Pr[U](⸢σ⸣) ⟶ σ) → (U ⊢! σ) := by
+  intro H;
+  have ⟨K, ⟨hH, hd⟩⟩ := @Diagonizable.diag T Π 1 _ ([→ ⸢σ⸣].hom (HasProvable.Provable U)) (by sorry);
+-/
+
+end Loeb_without_IT2
 
 end LO.FirstOrder.Arith.Incompleteness.Provability
