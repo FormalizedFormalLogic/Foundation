@@ -205,16 +205,14 @@ lemma d_computable : Computable d := by
         exact inconsistent_of_provable_and_refutable b bσ (consistent_of_sigmaOneSound T)⟩⟩
 
 lemma diagRefutation_spec (σ : Subsentence ℒₒᵣ 1) :
-  d σ = false ↔ T ⊢! [→ ⸢σ⸣].hom ρ := by
-  have : T ⊢! [→ ⸢false⸣, ⸢σ⸣].hom (graph (diag T : Subsentence ℒₒᵣ 1 →. Bool)) ↔ diag T σ = false := by
-    simpa[@eq_comm _ false] using representation (d_computable A) (x := σ) (y := false)
-  simp[diagRefutation, ←Rew.hom_comp_app, Rew.substs_comp_substs, this]
+  T ⊢! [→ ⸢σ⸣].hom ρ ↔ ¬T ⊢! [→ ⸢σ⸣].hom σ := by
+  have : T ⊢! [→ ⸢false⸣, ⸢σ⸣].hom (graph (d : Subsentence ℒₒᵣ 1 →. Bool)) ↔ ¬T ⊢! [→ ⸢σ⸣].hom σ := by
+    simpa[@eq_comm _ false, diag] using representation (d_computable A) (x := σ) (y := false)
+  simpa[diagRefutation, ←Rew.hom_comp_app, Rew.substs_comp_substs]
 
 theorem contrad : False := by
-  have hd : d ρ = true  ↔ T ⊢! [→ ⸢ρ⸣].hom ρ := by simp[diag]
-  have hρ : d ρ = false ↔ T ⊢! [→ ⸢ρ⸣].hom ρ := diagRefutation_spec A (diagRefutation T)
-  rw[←hd, Bool.eq_false_iff] at hρ
-  exact not_iff_self hρ
+  have : T ⊢! [→ ⸢ρ⸣].hom ρ ↔ ¬T ⊢! [→ ⸢ρ⸣].hom ρ := by simpa using diagRefutation_spec A ρ
+  exact iff_not_self this
 
 end FirstIncompleteness
 
@@ -227,7 +225,7 @@ theorem firstIncompleteness [SigmaOneSound T] [Theory.Computable T] : ¬Logic.Sy
 
 lemma exists_undecidable_sentence [SigmaOneSound T] [Theory.Computable T] :
     ∃ σ : Sentence ℒₒᵣ, ¬T ⊢! σ ∧ ¬T ⊢! ~σ := by
-  simpa[Logic.System.Complete, not_or] using firstIncompleteness (T := T)
+  simpa[Logic.System.Complete, not_or] using firstIncompleteness
 
 end Arith
 
