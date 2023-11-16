@@ -97,7 +97,7 @@ lemma bv_substLast {t u : UTerm L μ} (ht : t.bv ≤ n + 1) (hu : u.bv ≤ n) : 
     · simp[hu]
     · simp[Nat.lt_asymm lt, Nat.ne_of_gt lt]
       have : x ≤ t.bv.pred := Nat.le_pred_of_lt hx
-      exact False.elim (Nat.lt_le_antisymm lt this)) (by simp[bv])
+      exact False.elim (Nat.not_le_of_lt lt this)) (by simp[bv])
 
 def toSubterm : (t : UTerm L μ) → t.bv ≤ n → Subterm L μ n
   | bvar x,   h => #⟨x, by simp at h; exact Nat.lt_of_succ_le h⟩
@@ -163,7 +163,7 @@ def equivW (L) (μ) : UTerm L μ ≃ WType (Edge L μ) where
   left_inv := fun t => by induction t <;> simp[toW, ofW, *]
   right_inv := fun t => by
     induction' t with a v ih
-    rcases a with (x | x | _) <;> simp[toW, ofW, *]
+    rcases a with (x | x | _) <;> simp[toW, ofW, *, Empty.eq_elim]
 
 instance : Inhabited (WType (Edge L μ)) := ⟨WType.mk (Sum.inl 0) Empty.elim⟩
 
@@ -247,7 +247,7 @@ private lemma elim_eq {b : σ → ℕ → γ} {e : σ → μ → γ} {u : σ →
     elim (b x) (e x) (fun {k} f v => u x (⟨k, f⟩, List.ofFn v)) t =
     WType.elimL (fun p l => F b e u x (p, l)) (equivW L μ t) := by
   induction t <;> simp[elim, WType.elimL_mk, F, *]
-  { simp[Edge]; congr; funext i; rw[fintypeArrowEquivFinArrow_app]; congr; ext; simp[Fin.castIso_eq_cast] }
+  { simp[Edge]; congr; funext i; rw[fintypeArrowEquivFinArrow_app]; congr; ext; simp }
 
 lemma elim_primrec_param {σ γ} [Primcodable σ] [Primcodable γ]
   {b : σ → ℕ → γ} {e : σ → μ → γ} {u : σ → ((k : ℕ) × L.func k) × List γ → γ} {t : σ → UTerm L μ}
@@ -296,7 +296,7 @@ lemma bind_primrec_param [Primcodable σ] {b : σ → ℕ → UTerm L μ₂} {e 
   have : Primrec₂ (fun _ p => funcL p.1 p.2 : σ → ((k : ℕ) × L.func k) × List (UTerm L μ₂) → Option (UTerm L μ₂)) :=
     funcL_primrec.comp₂ (fst.comp₂ Primrec₂.right) (snd.comp₂ Primrec₂.right)
   have := elim_primrec_param_opt hb he (fun _ _ f v => func f v) this hg
-    (by intro x k f v; simp[funcL]; congr)
+    (by intro _ k f v; simp[funcL])
   exact this.of_eq <| by intro x; generalize g x = t; induction t <;> simp[elim, bind, *]
 
 lemma bind_primrec {b : ℕ → UTerm L μ₂} {e : μ₁ → UTerm L μ₂} (hb : Primrec b) (he : Primrec e) :

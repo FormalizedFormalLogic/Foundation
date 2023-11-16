@@ -288,10 +288,10 @@ def ofW : WType (Edge L μ) → UFormula L μ
   | ⟨(false, Sum.inr $ Sum.inr $ Sum.inr ()), p⟩ => ex (ofW $ p ())
 
 lemma toW_ofW : ∀ (w : WType (Edge L μ)), toW (ofW w) = w
-  | ⟨(true,  Sum.inl ⟨_, r, v⟩), _⟩              => by simp[ofW, toW]
-  | ⟨(false, Sum.inl ⟨_, r, v⟩), _⟩              => by simp[ofW, toW]
-  | ⟨(true,  Sum.inr $ Sum.inl ()), _⟩           => by simp[ofW, toW]
-  | ⟨(false, Sum.inr $ Sum.inl ()), _⟩           => by simp[ofW, toW]
+  | ⟨(true,  Sum.inl ⟨_, r, v⟩), _⟩              => by simp[ofW, toW, Empty.eq_elim]
+  | ⟨(false, Sum.inl ⟨_, r, v⟩), _⟩              => by simp[ofW, toW, Empty.eq_elim]
+  | ⟨(true,  Sum.inr $ Sum.inl ()), _⟩           => by simp[ofW, toW, Empty.eq_elim]
+  | ⟨(false, Sum.inr $ Sum.inl ()), _⟩           => by simp[ofW, toW, Empty.eq_elim]
   | ⟨(true,  Sum.inr $ Sum.inr $ Sum.inl ()), w⟩ => by
     simp[ofW, toW, toW_ofW (w false), toW_ofW (w true)]
     ext b; cases b <;> simp
@@ -653,8 +653,12 @@ lemma inversion_primrec : Primrec (inversion : UFormula L μ → Node L μ × Li
     cases p <;> simp[WType.inversion, inversion, toW_eq_equivW]
     case and => rw[fintypeEquivFin_symm_zero, fintypeEquivFin_symm_one]; simp
     case or => rw[fintypeEquivFin_symm_zero, fintypeEquivFin_symm_one]; simp
-    case all => rw[fintypeArrowEquivFinArrow_eq]; simp
-    case ex => rw[fintypeArrowEquivFinArrow_eq]; simp
+    case all p =>
+      rw[Equiv.symm_apply_eq]
+      exact fintypeArrowEquivFinArrow_app _ _
+    case ex =>
+      rw[Equiv.symm_apply_eq]
+      exact fintypeArrowEquivFinArrow_app _ _
 
 section bind_primrec
 

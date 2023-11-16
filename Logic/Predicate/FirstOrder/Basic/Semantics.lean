@@ -337,12 +337,12 @@ lemma eval_nrel {k} {r : L.rel k} {v} :
 
 @[simp] lemma eval_nrel₁ {r : L.rel 1} (t : Subterm L μ n) :
     Eval s e ε (nrel r ![t]) ↔ ¬s.rel r ![t.val s e ε] := by
-  simp[eval_rel]; apply of_eq; congr
+  simp[eval_nrel]; apply of_eq; congr
   funext i; cases' i using Fin.cases with i <;> simp
 
 @[simp] lemma eval_nrel₂ {r : L.rel 2} (t₁ t₂ : Subterm L μ n) :
     Eval s e ε (nrel r ![t₁, t₂]) ↔ ¬s.rel r ![t₁.val s e ε, t₂.val s e ε] := by
-  simp[eval_rel]; apply of_eq; congr
+  simp[eval_nrel]; apply of_eq; congr
   funext i; cases' i using Fin.cases with i <;> simp
 
 @[simp] lemma eval_all {p : Subformula L μ (n + 1)} :

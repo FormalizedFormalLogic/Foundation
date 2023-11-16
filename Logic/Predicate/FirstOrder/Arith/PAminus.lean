@@ -134,7 +134,7 @@ instance : LinearOrderedCommSemiring M where
   le_total := le_total
   decidableLE := fun _ _ => Classical.dec _
 
-instance : CanonicallyOrderedAddMonoid M where
+instance : CanonicallyOrderedAddCommMonoid M where
   bot := 0
   bot_le := by simp
   exists_add_of_le := by
@@ -217,7 +217,6 @@ theorem sigma_one_completeness {σ : Sentence ℒₒᵣ} (hσ : Hierarchy.Sigma 
   Logic.Complete.complete (consequence_of _ _ (fun M _ _ _ _ _ => by
     haveI : Theory.Mod M (Theory.PAminus ℒₒᵣ) := Theory.Mod.of_ss (T₁ := T) M PAminus.paminus
     simpa using @Model.sigma_one_completeness M _ _ _ _ _ _ hσ ![] (by simpa[models_iff] using H)))
-
 
 end
 

@@ -13,14 +13,14 @@ lemma mod_eq_of_modEq {a b n} (h : a ≡ b [MOD n]) (hb : b < n) : a % n = b := 
   simp[this]; exact mod_eq_of_lt hb
 
 lemma coprime_list_prod_iff_right {k} {l : List ℕ} :
-    coprime k l.prod ↔ ∀ n ∈ l, coprime k n := by
+    Coprime k l.prod ↔ ∀ n ∈ l, Coprime k n := by
   induction' l with m l ih <;> simp[Nat.coprime_mul_iff_right, *]
 
 inductive Coprimes : List ℕ → Prop
   | nil : Coprimes []
-  | cons {n : ℕ} {l : List ℕ} : (∀ m ∈ l, coprime n m) → Coprimes l → Coprimes (n :: l)
+  | cons {n : ℕ} {l : List ℕ} : (∀ m ∈ l, Coprime n m) → Coprimes l → Coprimes (n :: l)
 
-lemma coprimes_of_nodup {l : List ℕ} (hl : l.Nodup) (H : ∀ n ∈ l, ∀ m ∈ l, n ≠ m → coprime n m) :
+lemma coprimes_of_nodup {l : List ℕ} (hl : l.Nodup) (H : ∀ n ∈ l, ∀ m ∈ l, n ≠ m → Coprime n m) :
     Coprimes l := by
   induction' l with n l ih
   · exact Coprimes.nil
@@ -29,7 +29,7 @@ lemma coprimes_of_nodup {l : List ℕ} (hl : l.Nodup) (H : ∀ n ∈ l, ∀ m �
       (H m (by simp[hm]) n (by simp) (by rintro rfl; exact (List.nodup_cons.mp hl).1 hm))) this
 
 lemma coprimes_cons_iff_coprimes_coprime_prod {n} {l : List ℕ} :
-    Coprimes (n :: l) ↔ Coprimes l ∧ coprime n l.prod := by
+    Coprimes (n :: l) ↔ Coprimes l ∧ Coprime n l.prod := by
   simp[coprime_list_prod_iff_right]; constructor
   · rintro ⟨⟩ ; simpa[*]
   · rintro ⟨hl, hn⟩; exact Coprimes.cons hn hl
@@ -37,7 +37,6 @@ lemma coprimes_cons_iff_coprimes_coprime_prod {n} {l : List ℕ} :
 lemma modEq_iff_modEq_list_prod {a b} {l : List ℕ} (co : Coprimes l) :
     (∀ i, a ≡ b [MOD l.get i]) ↔ a ≡ b [MOD l.prod] := by
   induction' l with m l ih <;> simp[Nat.modEq_one]
-  · intro i; exact Fin.elim0 i
   · rcases co with (_ | ⟨hm, hl⟩)
     have : a ≡ b [MOD m] ∧ a ≡ b [MOD l.prod] ↔ a ≡ b [MOD m * l.prod] :=
       Nat.modEq_and_modEq_iff_modEq_mul (coprime_list_prod_iff_right.mpr hm)
@@ -53,7 +52,7 @@ def chineseRemainderList : (l : List (ℕ × ℕ)) → (H : Coprimes (l.map Prod
     { k // ∀ i, k ≡ (l.get i).1 [MOD (l.get i).2] }
   | [],          _ => ⟨0, by simp⟩
   | (a, m) :: l, H => by
-    have hl : Coprimes (l.map Prod.snd) ∧ coprime m (l.map Prod.snd).prod :=
+    have hl : Coprimes (l.map Prod.snd) ∧ Coprime m (l.map Prod.snd).prod :=
       coprimes_cons_iff_coprimes_coprime_prod.mp H
     let ih : { k // ∀ i, k ≡ (l.get i).1 [MOD (l.get i).2] } := chineseRemainderList l hl.1
     let z := Nat.chineseRemainder hl.2 a ih
@@ -81,7 +80,7 @@ private lemma coprimeList_lt (l : List ℕ) (i) : ((coprimeList l).get i).1 < ((
     _             ≤ (i + 1) * (Nat.listSup l)! + 1 := le_add_right _ _
   simpa only [coprimeList, List.get_ofFn] using lt_of_lt_of_le h₁ h₂
 
-lemma coprime_mul_succ {n m a} (h : n ≤ m) (ha : m - n ∣ a) : coprime (n * a + 1) (m * a + 1) :=
+lemma coprime_mul_succ {n m a} (h : n ≤ m) (ha : m - n ∣ a) : Coprime (n * a + 1) (m * a + 1) :=
   Nat.coprime_of_dvd (by
     intro p pp hn hm
     have : p ∣ (m - n) * a := by
@@ -104,7 +103,7 @@ lemma coprimes_coprimeList (l : List ℕ) : Coprimes ((coprimeList l).map Prod.s
        intro i j; simp[listSup, ←Fin.ext_iff, Nat.factorial_ne_zero])
     (by
       simp[←Fin.ext_iff, not_or]
-      suffices : ∀ i j : Fin l.length, i < j → coprime ((i + 1) * (listSup l)! + 1) ((j + 1) * (listSup l)! + 1)
+      suffices : ∀ i j : Fin l.length, i < j → Coprime ((i + 1) * (listSup l)! + 1) ((j + 1) * (listSup l)! + 1)
       · intro i j hij _
         have : i < j ∨ j < i := Ne.lt_or_lt hij; rcases this with (hij | hij)
         · exact this i j hij

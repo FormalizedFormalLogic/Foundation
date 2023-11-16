@@ -210,7 +210,7 @@ variable
 lemma lMap_models_lMap_iff {T : Theory L₁} {σ : Sentence L₁} :
     Theory.lMap Φ T ⊨ Subformula.lMap Φ σ ↔ T ⊨ σ := by
   constructor
-  · simp; intro h M _ s₁ hs₁
+  · intro h M _ s₁ hs₁
     exact (Structure.extendStructure.models_lMap Φ injf injr s₁ σ).mp $
       h M (s₁.extendStructure Φ)
       (by simp[Logic.Semantics.modelsTheory, Theory.lMap];

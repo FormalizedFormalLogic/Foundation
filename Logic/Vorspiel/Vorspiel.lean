@@ -12,6 +12,7 @@ import Mathlib.Order.Filter.Ultrafilter
 import Mathlib.Logic.Encodable.Basic
 import Mathlib.Computability.Primrec
 import Mathlib.Computability.Partrec
+import Mathlib.Data.Finset.Sort
 
 namespace Nat
 variable {α : ℕ → Sort u}
@@ -68,16 +69,6 @@ def ofLeOfReflOfTrans {m n : ℕ} (h : m ≤ n) : r m n :=
 end
 
 end Nat
-
-namespace Fin
-
-lemma sort_univ {n} : Finset.univ.sort (fun x y : Fin n => x ≤ y) = List.finRange n :=
-  List.eq_of_perm_of_sorted
-    (List.perm_of_nodup_nodup_toFinset_eq (Finset.sort_nodup _ Finset.univ) (List.nodup_finRange n) (by ext i; simp))
-    (Finset.sort_sorted LE.le Finset.univ)
-    (List.Pairwise.pmap (List.pairwise_le_range n) (by simp) (by simp))
-
-end Fin
 
 lemma eq_finZeroElim {α : Sort u} (x : Fin 0 → α) : x = finZeroElim := funext (by rintro ⟨_, _⟩; contradiction)
 
@@ -156,7 +147,7 @@ lemma vecCons_assoc (a b : α) (s : Fin n → α) :
   funext x; cases' x using Fin.cases with x <;> simp; cases x using Fin.lastCases <;> simp[Fin.succ_castSucc]
 
 def decVec {α : Type _} : {n : ℕ} → (v w : Fin n → α) → (∀ i, Decidable (v i = w i)) → Decidable (v = w)
-  | 0,     _, _, _ => by simp; exact isTrue trivial
+  | 0,     _, _, _ => by simp[Matrix.empty_eq]; exact isTrue trivial
   | n + 1, v, w, d => by
       rw[to_vecCons v, to_vecCons w, vecCons_ext]
       haveI : Decidable (v ∘ Fin.succ = w ∘ Fin.succ) := decVec _ _ (by intros i; simp; exact d _)
@@ -171,7 +162,7 @@ lemma comp_vecCons' (f : α → β) (a : α) (s : Fin n → α) : (fun x => f $ 
 lemma comp_vecCons'' (f : α → β) (a : α) (s : Fin n → α) : f ∘ (a :> s) = f a :> f ∘ s :=
   comp_vecCons f a s
 
-@[simp] lemma comp₀ : f ∘ (![] : Fin 0 → α) = ![] := by simp
+@[simp] lemma comp₀ : f ∘ (![] : Fin 0 → α) = ![] := by simp[Matrix.empty_eq]
 
 @[simp] lemma comp₁ (a : α) : f ∘ ![a] = ![f a] := by simp[comp_vecCons'']
 
@@ -235,7 +226,7 @@ def toOptionVec : {n : ℕ} → (Fin n → Option α) → Option (Fin n → α)
 
 @[simp] lemma toOptionVec_some (v : Fin n → α) :
     toOptionVec (fun i => some (v i)) = some v :=
-  by induction n <;> simp[*, toOptionVec, Function.comp]; exact funext (Fin.cases (by simp) (by simp))
+  by induction n <;> simp[*, Matrix.empty_eq, toOptionVec, Function.comp]; exact funext (Fin.cases (by simp) (by simp))
 
 @[simp] lemma toOptionVec_zero (v : Fin 0 → Option α) : toOptionVec v = some ![] := rfl
 
@@ -258,7 +249,7 @@ def toOptionVec : {n : ℕ} → (Fin n → Option α) → Option (Fin n → α)
 @[simp] lemma toOptionVec_eq_some_iff {v : Fin n → Option α} :
     toOptionVec v = some w ↔ ∀ i, v i = some (w i) := by
   induction' n with n ih
-  · simp
+  · simp[Matrix.empty_eq]
   · simp[toOptionVec]
     rcases hz : v 0 with (_ | a) <;> simp
     { exact ⟨0, by simp[hz]⟩ }
@@ -309,15 +300,18 @@ def Nat.unvector : {n : ℕ} → ℕ → Fin n → ℕ
 
 namespace Nat
 open Matrix
-variable {n}
+variable {n : ℕ}
 
 @[simp] lemma unvector_le (e : ℕ) (i : Fin n) : unvector e i ≤ e := by
   induction' n with n ih generalizing e <;> simp[*, unvector]
   · have := i.isLt; contradiction
   · exact Fin.cases (by simpa using Nat.unpair_left_le _) (fun i => le_trans (ih e.unpair.2 i) (Nat.unpair_right_le _)) i
 
+--@[simp] lemma unvector_vecToNat (v : Fin n → ℕ) : unvector (vecToNat v) = v := by { sorry }
+
 @[simp] lemma unvector_vecToNat (v : Fin n → ℕ) : unvector (vecToNat v) = v := by
-  induction n <;> simp[*, Nat.unvector, vecToNat]; exact funext (fun i => i.cases (by simp) (by simp))
+  induction n <;> simp[*, Nat.unvector, vecToNat, Matrix.empty_eq]
+  exact funext (fun i => i.cases (by simp[Matrix.empty_eq]) (by simp[Matrix.empty_eq]))
 
 -- @[simp] lemma toNat_unvector (ln : 0 < n) (e : ℕ) : Fin.vecToNat (unvector e : Fin n → ℕ) = e := by
 --   induction n generalizing e <;> simp[unvector, Fin.vecToNat, Function.comp]
@@ -465,6 +459,7 @@ lemma toFinset_map {f : α → β} (l : List α) : (l.map f).toFinset = Finset.i
 lemma toFinset_mono {l l' : List α} (h : l ⊆ l') : l.toFinset ⊆ l'.toFinset := by
   intro a; simp; intro ha; exact h ha
 
+section
 variable {α : Type u} [SemilatticeSup α] [OrderBot α]
 
 def sup : List α → α
@@ -491,6 +486,8 @@ lemma sup_ofFn (f : Fin n → α) : (ofFn f).sup = Finset.sup Finset.univ f := b
     { simpa[Function.comp] using Eq.symm <| Finset.sup_image (Finset.univ : Finset (Fin n)) Fin.succ f }
     rw[this] }
 
+end
+
 lemma ofFn_get_eq_map {n} (g : α → β) (as : List α) {h} : ofFn (fun i => g (as.get (i.cast h)) : Fin n → β) = as.map g := by
   ext i b; simp
   by_cases hi : i < n
@@ -513,12 +510,6 @@ lemma bind_toList_some {f : β → Option α} {g : β → α} {bs : List β} (h 
   have : bs.bind (fun i => (f i).toList) = bs.bind (List.ret ∘ g) :=
     List.bind_congr (by simp; intro m hm; simp[h _ hm]; rfl)
   rw[this, List.bind_ret_eq_map]
-
-lemma indexOf_finRange (i : Fin k) : (List.finRange k).indexOf i = i := by
-  have : (List.finRange k).indexOf i < (List.finRange k).length := List.indexOf_lt_length.mpr (by simp)
-  have h₁ : (List.finRange k).get ⟨(List.finRange k).indexOf i, this⟩ = i := List.indexOf_get this
-  have h₂ : (List.finRange k).get ⟨i, by simp⟩ = i := List.get_finRange _
-  simpa using (List.Nodup.get_inj_iff (List.nodup_finRange k)).mp (Eq.trans h₁ h₂.symm)
 
 variable {m : Type _ → Type _} {α : Type _} {β : Type _} [Monad m]
 
@@ -621,7 +612,7 @@ lemma erase_union [DecidableEq α] {a : α} {s t : Finset α} :
   (s ∪ t).erase a = (s.erase a) ∪ (t.erase a) := by ext; simp[and_or_left]
 
 @[simp] lemma equiv_univ {α α'} [Fintype α] [Fintype α'] [DecidableEq α'] (e : α ≃ α') :
-    (univ : Finset α).image e = univ := by ext x; simp; exact ⟨e.symm x, by simp⟩
+    (univ : Finset α).image e = univ := by ext x; simp
 
 @[simp] lemma sup_univ_equiv {α α'} [DecidableEq α] [Fintype α] [Fintype α'] [SemilatticeSup β] [OrderBot β] (f : α → β) (e : α' ≃ α) :
     sup univ (fun i => f (e i)) = sup univ f := by simpa[Function.comp] using Eq.symm <| Finset.sup_image univ e f
@@ -655,7 +646,7 @@ namespace Part
 
 @[simp] lemma mem_vector_mOfFn : ∀ {n : ℕ} {w : Vector α n} {v : Fin n →. α},
     w ∈ Vector.mOfFn v ↔ ∀ i, w.get i ∈ v i
-  | 0,     _, _ => by simp[Vector.mOfFn]
+  | 0,     _, _ => by simp[Vector.mOfFn, Vector.eq_nil]
   | n + 1, w, v => by
     simp[Vector.mOfFn, @mem_vector_mOfFn _ n]
     exact ⟨by rintro ⟨a, ha, v, hv, rfl⟩ i; cases i using Fin.cases <;> simp[ha, hv],

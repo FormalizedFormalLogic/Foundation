@@ -110,7 +110,7 @@ private lemma F_primrec : Primrec₂ (fun (p : List (SyntacticFormula L) × List
         (by apply list_mem.comp₂
               (Subformula.and_primrec.comp₂ (fst.comp₂ Primrec₂.right) (snd.comp₂ Primrec₂.right))
               (fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ Primrec₂.left))
-        (by apply list_mem.comp₂
+        (by apply (list_mem (α := List (SyntacticFormula L))).comp₂
               (list_cons.comp₂ (fst.comp₂ Primrec₂.right) (fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ Primrec₂.left))
               (snd.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ Primrec₂.left)))
       (by apply list_mem.comp₂

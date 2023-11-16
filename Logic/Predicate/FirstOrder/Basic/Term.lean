@@ -100,7 +100,7 @@ lemma func'' {k} (f : L.func k) (v : Fin k → Subterm L μ₁ n₁) :
     ω (func f v) = func f (ω ∘ v) := ω.func' f v
 
 @[simp] lemma func0 (f : L.func 0) (v : Fin 0 → Subterm L μ₁ n₁) :
-    ω (func f v) = func f ![] := by simp[Rew.func]
+    ω (func f v) = func f ![] := by simp[Rew.func, Matrix.empty_eq]
 
 @[simp] lemma func1 (f : L.func 1) (t : Subterm L μ₁ n₁) :
     ω (func f ![t]) = func f ![ω t] := by simp[Matrix.constant_eq_singleton, Rew.func]
@@ -514,19 +514,19 @@ abbrev fvar? (t : Subterm L μ n) (x : μ) : Prop := x ∈ t.fvarList
     x ∈ (func f v).fvarList ↔ ∃ i, x ∈ (v i).fvarList :=
   by simp[fvarList]
 
-@[simp] lemma fvarList_empty {o : Type w} [IsEmpty o] {t : Subterm L o n} : fvarList t = [] := by
-  induction t <;> simp
+@[simp] lemma fvarList_empty {o : Type w} [e : IsEmpty o] {t : Subterm L o n} : fvarList t = [] := by
+  induction t <;> simp[List.eq_nil_iff_forall_not_mem]
+  case fvar x => exact IsEmpty.elim e x
 
 @[simp] lemma fvarList_emb {o : Type w} [e : IsEmpty o] {t : Subterm L o n} : fvarList (Rew.emb t : Subterm L μ n) = [] := by
-  induction t <;> simp[*, Rew.func]
+  induction t <;> simp[*, List.eq_nil_iff_forall_not_mem, Rew.func]
   case fvar x => { exact IsEmpty.elim' e x }
-  case func => simp[*, fvarList]
 
 lemma rew_eq_of_funEqOn (ω₁ ω₂ : Rew L μ₁ n₁ μ₂ n₂) (t : Subterm L μ₁ n₁)
   (hb : ∀ x, ω₁ #x = ω₂ #x)
   (he : Function.funEqOn t.fvar? (ω₁ ∘ Subterm.fvar) (ω₂ ∘ Subterm.fvar)) :
     ω₁ t = ω₂ t := by
-  induction t <;> simp[Rew.func, hb]
+  induction t <;> try simp[Rew.func, hb]
   case fvar => simpa[fvar?, Function.funEqOn] using he
   case func k f v ih =>
     funext i

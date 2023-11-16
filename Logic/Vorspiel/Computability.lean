@@ -40,7 +40,8 @@ def fintypeArrowEquivVector : (ι → α) ≃ (Vector α (Fintype.card ι)) :=
 
 lemma fintypeArrowEquivFinArrow_eq (f : ι → α) : fintypeArrowEquivFinArrow f = fun i => f (fintypeEquivFin.symm i) := by rfl
 
-@[simp] lemma fintypeArrowEquivFinArrow_app (f : ι → α) (i) : fintypeArrowEquivFinArrow f i = f (fintypeEquivFin.symm i) := by rfl
+@[simp] lemma fintypeArrowEquivFinArrow_app (f : ι → α) (i) :
+    fintypeArrowEquivFinArrow f i = f (fintypeEquivFin.symm i) := by rfl
 
 @[simp] lemma fintypeArrowEquivFinArrow_symm_app (v : Fin (Fintype.card ι) → α) :
     fintypeArrowEquivFinArrow.symm v i = v (fintypeEquivFin i) := by rfl
@@ -54,10 +55,10 @@ lemma fintypeArrowEquivFinArrow_eq (f : ι → α) : fintypeArrowEquivFinArrow f
 @[simp] lemma cast_fintypeEquivFin_fin {k : ℕ} (i : Fin k) : (fintypeEquivFin i).cast (Fintype.card_fin _) = i := by
   ext
   simp [Encodable.fintypeEquivFin, Fin.cast_eq_cast',
-    ←Fin.castIso_eq_cast, Fin.encodable, List.Nodup.getEquivOfForallMemList,
+    Fin.encodable, List.Nodup.getEquivOfForallMemList,
     Encodable.sortedUniv, Encodable.encode']
   convert List.indexOf_finRange i
-  exact Fin.sort_univ
+  exact Fin.sort_univ _
 
 @[simp] lemma val_fintypeEquivFin_fin {k : ℕ} (i : Fin k) : (fintypeEquivFin i).val = i.val :=
   congr_arg Fin.val (cast_fintypeEquivFin_fin i)
@@ -538,7 +539,7 @@ lemma encode_fintypeArrow_card_one
 lemma encode_fintypeArrow_card_two
   {ι : Type*} [Fintype ι] [Primcodable ι] [DecidableEq ι] (hι : Fintype.card ι = 2) (β : Type*) [Primcodable β] (f : ι → β) :
     encode f = encode [f (fintypeEquivFin.symm ((0 : Fin 2).cast hι.symm)), f (fintypeEquivFin.symm ((1 : Fin 2).cast hι.symm))] := by
-  simp[encode_fintypeArrow, encode_finArrow, hι]; exact ⟨by congr, by congr⟩
+  simp[encode_fintypeArrow, encode_finArrow, hι]
 
 lemma encode_list_lt {b : β} {bs : List β} (h : b ∈ bs) : encode b < encode bs := by
   induction' bs with b' bs ih
@@ -621,7 +622,7 @@ lemma finite_change {f} (hf : Primrec f) (g : ℕ → α) (h : ∃ m, ∀ x ≥ 
   · exact hf.of_eq <| by intro n; exact Eq.symm <| h n (Nat.zero_le n)
   · let g' : ℕ → α := fun x => if x < m then g x else f x
     have : Primrec g' :=
-      ih g' (by simp; intro x hx lt; exact (False.elim $ Nat.lt_le_antisymm lt hx))
+      ih g' (by simp; intro x hx lt; exact (False.elim $ Nat.not_le.mpr lt hx))
     have : Primrec (fun x => if x = m then g m else g' x) :=
       Primrec.ite (Primrec.eq.comp Primrec.id (const m)) (const (g m)) this
     exact this.of_eq <| by
@@ -652,13 +653,20 @@ lemma nat_toFin {n : ℕ} : Primrec (Nat.toFin n) :=
     · rfl
     · rfl
 
-lemma list_mem [DecidableEq α] : PrimrecRel (· ∈ · : α → List α → Prop) := by
-  have : Primrec₂ (fun a l => l.foldr (fun a' ih => a = a' || ih) false : α → List α → Bool) :=
+lemma decide_eq_iff (p : Prop) [Decidable p] (b : Bool) : decide p = b ↔ (p ↔ b = true) := by cases b <;> simp
+
+lemma Primrec.lawfulbeq [BEq α] [LawfulBEq α] :
+    Primrec₂ (@BEq.beq α _) := by
+  haveI : DecidableEq α := Encodable.decidableEqOfEncodable α
+  exact Primrec₂.of_eq Primrec.eq (by intro a b; simp[decide_eq_iff])
+
+lemma list_mem [BEq α] [LawfulBEq α] : PrimrecRel (· ∈ · : α → List α → Prop) := by
+  have : Primrec₂ (fun a l => l.foldr (fun a' ih => (a == a') || ih) false : α → List α → Bool) :=
     to₂' <| list_foldr snd (const false)
-      <| (dom_bool₂ _).comp₂
-        (Primrec.eq.comp₂ (fst.comp₂ Primrec₂.left) (fst.comp₂ Primrec₂.right))
+      <| (dom_bool₂ Bool.or).comp₂
+        (Primrec.lawfulbeq.comp₂ (fst.comp₂ Primrec₂.left) (fst.comp₂ Primrec₂.right))
         (snd.comp₂ Primrec₂.right)
-  exact this.of_eq <| by intro a as; induction as <;> simp[*]
+  exact this.of_eq <| by intro a as; induction as <;> simp[*]; symm; simp[decide_eq_iff]
 
 lemma list_subset [DecidableEq α] : PrimrecRel (· ⊆ · : List α → List α → Prop) := by
   have : Primrec₂ (fun l₁ l₂ => l₁.foldr (fun a' ih => a' ∈ l₂ && ih) true : List α → List α → Bool) :=

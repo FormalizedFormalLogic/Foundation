@@ -46,7 +46,7 @@ abbrev ofWType (w : WType β) (n) (h : w.depth ≤ n) : SubWType β n := ⟨w, h
 
 def elim' (γ : Type*) (fγ : (Σ a : α, β a → γ) → γ) (s) : SubWType β s → γ := fun ⟨t, _⟩ => t.elim γ fγ
 
-lemma elim_const {w₁ : SubWType β s₁} {w₂ : SubWType β s₂} (h : w₁.val = w₂.val) (γ) (fγ : (Σ a : α, β a → γ) → γ) : 
+lemma elim_const {w₁ : SubWType β s₁} {w₂ : SubWType β s₂} (h : w₁.val = w₂.val) (γ) (fγ : (Σ a : α, β a → γ) → γ) :
     elim' γ fγ s₁ w₁ = elim' γ fγ s₂ w₂ := by
   rcases w₁ with ⟨w, hw₁⟩
   rcases w₂ with ⟨w, hw₂⟩
@@ -149,7 +149,7 @@ private lemma elimDecodeG_eq_elimDecode (f : σ → α → List γ → γ) (x s 
   simp[elimDecode_eq_induction β (f x) s e, elimDecodeG]
   rcases s with (_ | s) <;> simp; congr
   funext a
-  have : 
+  have :
     mapM' (fun c => ((List.range ((s + 1).pair e)).map $ fun i => elimDecode β (f x) i.unpair.fst i.unpair.snd).getI (s.pair c))
       (Denumerable.ofNat (List ℕ) e.unpair.2) =
     mapM' (elimDecode β (f x) s) (Denumerable.ofNat (List ℕ) e.unpair.2) :=
@@ -256,7 +256,7 @@ private lemma encode_decode_eq (e : ℕ) :
   { simp[SubWType.encode_eq_elim']; apply SubWType.elim_const; simp }
 
 private lemma primrec_encode_decode :
-    Primrec (fun e => 
+    Primrec (fun e =>
       encode (((encodeDecode (SubWType β e.unpair.1) e.unpair.2).bind
         $ fun c => ((decode c : Option (SubWType β e.unpair.1)).map (fun w => w.val.depth)).map
           $ fun d => d.pair c)) : ℕ → ℕ) :=
@@ -318,10 +318,11 @@ lemma encode_mk_eq (a : α) (f : β a → WType β) :
 
 lemma mk₀_eq (a : α) [h : IsEmpty (β a)] : mk₀ a = some (⟨a, h.elim'⟩ : WType β) := by
   simp[mk₀, mkL, Fintype.card_eq_zero_iff.mpr h]
+  funext x; exact IsEmpty.elim h x
 
 lemma mkL_inversion (w : WType β) : mkL (inversion w).1 (inversion w).2 = w := by
   rcases w with ⟨a, f⟩
-  simp[inversion, mkL, Fin.castIso_eq_cast]
+  simp[inversion, mkL]
   funext; simp
 
 end WType
@@ -398,7 +399,7 @@ lemma w_mk₁ (f : σ → α) (h : ∀ x, Fintype.card (β (f x)) = 1) (hf : Pri
     simp[encode_mk_eq, encode_fintypeArrow_card_one (h x) ℕ _ (fintypeEquivFin.symm ((0 : Fin 1).cast (h x).symm))]
     have : Finset.univ = {fintypeEquivFin.symm ((0 : Fin 1).cast (h x).symm)}
     { have : Subsingleton (β (f x)) := Fintype.card_le_one_iff_subsingleton.mp (by simp[h x])
-      ext; simp }
+      ext; simp; exact this.allEq _ _ }
     rw[this, Finset.sup_singleton])
 
 lemma w_mk₂ (f : σ → α) (h : ∀ x, Fintype.card (β (f x)) = 2) (hf : Primrec f) :
@@ -420,7 +421,7 @@ lemma w_mkFin (f : σ → α) {k} (h : ∀ x, Fintype.card (β (f x)) = k) (hf :
     simp[mkL, h]
     have := (fintypeArrowEquivFinArrow' (α := WType β) (h x)).injective
     apply this
-    funext i; simp; congr)
+    funext i; simp)
 
 lemma w_inversion [Inhabited (WType β)] : Primrec (WType.inversion : WType β → α × List (WType β)) := by
   have : Primrec₂ (fun a l => (a, l.map (fun p => (mkL p.1 p.2).get!)) : α → List (α × List (WType β)) → α × List (WType β)) :=
@@ -467,5 +468,5 @@ lemma w_elimvL [Inhabited (WType β)] {fs : α → σ → σ} {fγ : σ → α �
   have hfγ : Primrec₂ (fun _ p => fγ p.1 p.2 : σ × WType β → σ × α × List γ → γ) :=
     hfγ.comp₂ (fst.comp₂ Primrec₂.right) (snd.comp₂ Primrec₂.right)
   exact w_elimvL_param hfs hfγ fst snd }
-  
+
 end Primrec

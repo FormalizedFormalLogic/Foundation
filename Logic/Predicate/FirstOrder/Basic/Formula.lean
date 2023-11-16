@@ -345,7 +345,7 @@ lemma nrel' {k} {r : L.rel k} {v : Fin k → Subterm L μ₁ n₁} :
     ω.hom (nrel r v) = nrel r (ω ∘ v) := by rfl
 
 @[simp] lemma rel0 {r : L.rel 0} {v : Fin 0 → Subterm L μ₁ n₁} :
-    ω.hom (rel r v) = rel r ![] := by simp[ω.rel]
+    ω.hom (rel r v) = rel r ![] := by simp[ω.rel, Matrix.empty_eq]
 
 @[simp] lemma rel1 {r : L.rel 1} {t : Subterm L μ₁ n₁} :
     ω.hom (rel r ![t]) = rel r ![ω t] := by simp[ω.rel, Matrix.constant_eq_singleton]
@@ -358,7 +358,7 @@ lemma nrel' {k} {r : L.rel k} {v : Fin k → Subterm L μ₁ n₁} :
   simp[ω.rel]; funext i; induction' i using Fin.induction with i <;> simp; induction' i using Fin.induction with i <;> simp
 
 @[simp] lemma nrel0 {r : L.rel 0} {v : Fin 0 → Subterm L μ₁ n₁} :
-    ω.hom (nrel r v) = nrel r ![] := by simp[ω.nrel]
+    ω.hom (nrel r v) = nrel r ![] := by simp[ω.nrel, Matrix.empty_eq]
 
 @[simp] lemma nrel1 {r : L.rel 1} {t : Subterm L μ₁ n₁} :
     ω.hom (nrel r ![t]) = nrel r ![ω t] := by simp[ω.nrel, Matrix.constant_eq_singleton]

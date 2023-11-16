@@ -82,7 +82,7 @@ lemma zero_eq_alt {p : Subformula L μ n} : Hierarchy b 0 p → Hierarchy (!b) 0
   generalize hz : 0 = z
   rw[eq_comm] at hz
   intro h
-  induction h <;> simp at hz ⊢
+  induction h <;> try simp at hz ⊢
   case and _ _ ihp ihq =>
     exact ⟨ihp hz, ihq hz⟩
   case or _ _ ihp ihq => exact ⟨ihp hz, ihq hz⟩
