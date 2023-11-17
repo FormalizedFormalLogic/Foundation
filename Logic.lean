@@ -11,35 +11,35 @@ import Logic.Propositional.Basic.Formula
 
 -- FirstOrder
 
-import Logic.Predicate.FirstOrder.Basic.Language
-import Logic.Predicate.FirstOrder.Basic.Term
-import Logic.Predicate.FirstOrder.Basic.Formula
-import Logic.Predicate.FirstOrder.Basic.Elab
-import Logic.Predicate.FirstOrder.Basic.Semantics
-import Logic.Predicate.FirstOrder.Basic.Calculus
-import Logic.Predicate.FirstOrder.Basic.Eq
-import Logic.Predicate.FirstOrder.Basic.Soundness
+import Logic.FirstOrder.Basic.Language
+import Logic.FirstOrder.Basic.Term
+import Logic.FirstOrder.Basic.Formula
+import Logic.FirstOrder.Basic.Elab
+import Logic.FirstOrder.Basic.Semantics
+import Logic.FirstOrder.Basic.Calculus
+import Logic.FirstOrder.Basic.Eq
+import Logic.FirstOrder.Basic.Soundness
 
-import Logic.Predicate.FirstOrder.Basic
+import Logic.FirstOrder.Basic
 
-import Logic.Predicate.FirstOrder.Hauptsatz
-import Logic.Predicate.FirstOrder.Ultraproduct
+import Logic.FirstOrder.Hauptsatz
+import Logic.FirstOrder.Ultraproduct
 
-import Logic.Predicate.FirstOrder.Computability.Term
-import Logic.Predicate.FirstOrder.Computability.Formula
-import Logic.Predicate.FirstOrder.Computability.Coding
-import Logic.Predicate.FirstOrder.Computability.Calculus
+import Logic.FirstOrder.Computability.Term
+import Logic.FirstOrder.Computability.Formula
+import Logic.FirstOrder.Computability.Coding
+import Logic.FirstOrder.Computability.Calculus
 
-import Logic.Predicate.FirstOrder.Completeness.Coding
-import Logic.Predicate.FirstOrder.Completeness.SubLanguage
-import Logic.Predicate.FirstOrder.Completeness.SearchTree
-import Logic.Predicate.FirstOrder.Completeness.Completeness
+import Logic.FirstOrder.Completeness.Coding
+import Logic.FirstOrder.Completeness.SubLanguage
+import Logic.FirstOrder.Completeness.SearchTree
+import Logic.FirstOrder.Completeness.Completeness
 
-import Logic.Predicate.FirstOrder.Order.Le
+import Logic.FirstOrder.Order.Le
 
-import Logic.Predicate.FirstOrder.Arith.Hierarchy
-import Logic.Predicate.FirstOrder.Arith.Theory
-import Logic.Predicate.FirstOrder.Arith.Model
-import Logic.Predicate.FirstOrder.Arith.PAminus
+import Logic.FirstOrder.Arith.Hierarchy
+import Logic.FirstOrder.Arith.Theory
+import Logic.FirstOrder.Arith.Model
+import Logic.FirstOrder.Arith.PAminus
 
-import Logic.Predicate.FirstOrder.Incompleteness.FirstIncompleteness
+import Logic.FirstOrder.Incompleteness.FirstIncompleteness
