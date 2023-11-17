@@ -7,7 +7,8 @@ Formalizing Logic in Lean4
   - **Logic**
   - **Propositional**: Propositional logic
   - **Predicate**: Predicate logic
-    - **FirstOrder**: First-Order logic
+    - **ManySorted**: Many-sorted logic
+    - **FirstOrder**: First-order logic
       - **Basic**: Basic definitions & theorems
       - **Computability**: encodeing, computability
       - **Completeness**: Completeness theorem

@@ -113,7 +113,7 @@ def unexpandVecCons : Unexpander
   | `($(_) $a ![$as,*]) => `(![$a, $as,*])
   | _                   => throw ()
 
-#check 0 :> ![1, 2]
+#check ![1, 2]
 
 end delab
 
@@ -131,7 +131,7 @@ infixl:70 " <: " => vecConsLast
 @[simp] lemma zero_succ_eq_id {n} : (0 : Fin (n + 1)) :> succ = id :=
   funext $ Fin.cases (by simp) (by simp)
 
-lemma to_vecCons (s : Fin (n + 1) → C) : s = s 0 :> s ∘ Fin.succ :=
+lemma eq_vecCons (s : Fin (n + 1) → C) : s = s 0 :> s ∘ Fin.succ :=
    funext $ Fin.cases (by simp) (by simp)
 
 @[simp] lemma vecCons_ext (a₁ a₂ : α) (s₁ s₂ : Fin n → α) :
@@ -149,7 +149,7 @@ lemma vecCons_assoc (a b : α) (s : Fin n → α) :
 def decVec {α : Type _} : {n : ℕ} → (v w : Fin n → α) → (∀ i, Decidable (v i = w i)) → Decidable (v = w)
   | 0,     _, _, _ => by simp[Matrix.empty_eq]; exact isTrue trivial
   | n + 1, v, w, d => by
-      rw[to_vecCons v, to_vecCons w, vecCons_ext]
+      rw[eq_vecCons v, eq_vecCons w, vecCons_ext]
       haveI : Decidable (v ∘ Fin.succ = w ∘ Fin.succ) := decVec _ _ (by intros i; simp; exact d _)
       refine instDecidableAnd
 
@@ -280,6 +280,43 @@ lemma getM_pure [LawfulMonad m] {n} {β : Fin n → Type u} (v : (i : Fin n) →
     exact congr_arg _ (funext $ Fin.cases rfl (fun i => rfl))
 
 end Matrix
+
+namespace DMatrix
+
+def vecEmpty : Fin 0 → α :=
+  Fin.elim0'
+
+variable {n} {α : Fin (n + 1) → Type*}
+
+def vecCons (h : α 0) (t : (i : Fin n) → α i.succ) : (i : Fin n.succ) → α i :=
+  Fin.cons h t
+
+infixr:70 " ::> " => vecCons
+
+@[simp] lemma vecCons_zero (h : α 0) (t : (i : Fin n) → α i.succ) : (h ::> t) 0 = h := rfl
+
+@[simp] lemma vecCons_succ (h : α 0) (t : (i : Fin n) → α i.succ) (i : Fin n) : (h ::> t) i.succ = t i := rfl
+
+lemma eq_vecCons (s : (i : Fin (n + 1)) → α i) : s = s 0 ::> fun i => s i.succ :=
+   funext $ Fin.cases (by simp) (by simp)
+
+@[simp] lemma vecCons_ext (a₁ a₂ : α 0) (s₁ s₂ : (i : Fin n) → α i.succ) :
+    a₁ ::> s₁ = a₂ ::> s₂ ↔ a₁ = a₂ ∧ s₁ = s₂ :=
+  ⟨by intros h
+      constructor
+      · exact congrFun h 0
+      · exact funext (fun i => by simpa using congrFun h i.succ),
+   by intros h; simp[h]⟩
+
+def decVec {n : ℕ} {α : Fin n → Type _}
+  (v w : (i : Fin n) → α i) (h : ∀ i, Decidable (v i = w i)) : Decidable (v = w) := by
+    induction' n with n ih
+    · exact isTrue (by funext x; exact finZeroElim (α := fun x => v x = w x) x)
+    · rw[eq_vecCons v, eq_vecCons w, vecCons_ext]
+      haveI := ih (fun i => v i.succ) (fun i => w i.succ) (fun i => h i.succ)
+      refine instDecidableAnd
+
+end DMatrix
 
 namespace Option
 
