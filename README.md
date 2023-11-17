@@ -6,14 +6,15 @@ Formalizing Logic in Lean4
   - **Vorspiel**: Supplementary definitions and theorems for Mathlib
   - **Logic**
   - **Propositional**: Propositional logic
-  - **Predicate**: Predicate logic
-    - **ManySorted**: Many-sorted logic
-    - **FirstOrder**: First-order logic
-      - **Basic**: Basic definitions & theorems
-      - **Computability**: encodeing, computability
-      - **Completeness**: Completeness theorem
-      - **Arith**: Arithmetic
-      - **Incompleteness**: Incompleteness theorem
+    - **Basic**
+  - **ManySorted**: Many-sorted logic
+    - **Basic**
+  - **FirstOrder**: First-order logic
+    - **Basic**
+    - **Computability**: encodeing, computability
+    - **Completeness**: Completeness theorem
+    - **Arith**: Arithmetic
+    - **Incompleteness**: Incompleteness theorem
 
 ## Definition
 ### First-Order logic

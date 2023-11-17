@@ -218,14 +218,14 @@ end FirstIncompleteness
 
 attribute [-instance] Classical.propDecidable
 
-variable {T : Theory ℒₒᵣ} [EqTheory T] [PAminus T] [DecidablePred T]
+variable (T : Theory ℒₒᵣ) [EqTheory T] [PAminus T] [DecidablePred T]
 
 theorem firstIncompleteness [SigmaOneSound T] [Theory.Computable T] : ¬Logic.System.Complete T :=
   FirstIncompleteness.contrad
 
 lemma exists_undecidable_sentence [SigmaOneSound T] [Theory.Computable T] :
     ∃ σ : Sentence ℒₒᵣ, ¬T ⊢! σ ∧ ¬T ⊢! ~σ := by
-  simpa[Logic.System.Complete, not_or] using firstIncompleteness
+  simpa[Logic.System.Complete, not_or] using firstIncompleteness T
 
 end Arith
 
