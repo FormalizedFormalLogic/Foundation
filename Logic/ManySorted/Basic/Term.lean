@@ -3,12 +3,55 @@ import Logic.ManySorted.Basic.Language
 
 attribute [-instance] WType.instEncodableWType Encodable.finPi Encodable.fintypeArrowOfEncodable
 
+section
+variable {S : Type w} [DecidableEq S]
+
+def idxMap (s : S) {α : S → Type*} (f : α s → α s) : (s : S) → α s → α s := fun s' =>
+  if h : s = s' then h ▸ f else id
+
+namespace Nat
+
+section
+
+def indexedMod (s : S) (m : ℕ) (n : S → ℕ) : S → ℕ := fun s' => if s = s' then m else n s'
+
+def indexedSucc (s : S) (n : S → ℕ) : S → ℕ := fun s' => if s = s' then n s' + 1 else n s'
+
+@[simp] lemma indexedSucc_app_eq {s : S} {n : S → ℕ} : indexedSucc s n s = n s + 1 := by simp[indexedSucc]
+
+@[simp] lemma indexedSucc_app_ne {s s' : S} (h : s ≠ s') {n : S → ℕ} : indexedSucc s n s' = n s' := by simp[indexedSucc, h]
+
+end
+
+end Nat
+
+namespace Fin
+
+def indexedSucc (s : S) (n : S → ℕ) (s') : Fin (n s') → Fin (Nat.indexedSucc s n s') :=
+  fun i => if h : s = s' then i.succ.cast (by simp[h]) else i.cast (by simp[h])
+
+end Fin
+
+namespace Matrix
+
+def indexedVecCons {β : S → Type*} {n : S → ℕ} (s : S) (b : β s) (f : (s' : S) → Fin (n s') → β s') (s' : S) :
+    Fin (Nat.indexedSucc s n s') → β s' :=
+  if h : s = s' then fun i => h ▸ (b :> f s) (i.cast $ by simp[h]) else fun i => f s' (i.cast $ by simp[h])
+
+def indexedVecConsLast {β : S → Type*} {n : S → ℕ} (s : S) (b : β s) (f : (s' : S) → Fin (n s') → β s') (s' : S) :
+    Fin (Nat.indexedSucc s n s') → β s' :=
+  if h : s = s' then fun i => h ▸ (f s <: b) (i.cast $ by simp[h]) else fun i => f s' (i.cast $ by simp[h])
+
+end Matrix
+
+end
+
 namespace LO
 
 namespace ManySorted
 
-inductive Subterm {S : Type w} : (s : S) → (L : Language.{w, u} S) → (μ : S → Type v) → ℕ → Type _
-  | bvar {n} (sort : S) : Fin n → Subterm sort L μ n
+inductive Subterm {S : Type w} : (s : S) → (L : Language.{w, u} S) → (μ : S → Type v) → (S → ℕ) → Type _
+  | bvar {n} (sort : S) : Fin (n sort) → Subterm sort L μ n
   | fvar {n} (sort : S) : μ sort → Subterm sort L μ n
   | func {n} {sort : S} {arity} {aug : Fin arity → S} :
     L.Func sort aug → ((i : Fin arity) → Subterm (aug i) L μ n) → Subterm sort L μ n
@@ -27,6 +70,8 @@ abbrev SyntacticTerm {S : Type w} (s : S) (L : Language.{w, u} S) := Subterm s L
 namespace Subterm
 
 variable {S : Type w} {L : Language.{w, u} S} {μ : S → Type v}
+
+def cast {n n' : S → ℕ} (t : Subterm s L μ n) (h : n = n')  : Subterm s L μ n' := h ▸ t
 
 section Decidable
 
@@ -61,17 +106,19 @@ end Decidable
 
 end Subterm
 
-structure Rew {S : Type w} (L : Language.{w,u} S) (μ₁ : S → Type ν₁) (n₁ : ℕ) (μ₂ : S → Type ν₂) (n₂ : ℕ) where
+structure Rew {S : Type w} (L : Language.{w,u} S) (μ₁ : S → Type ν₁) (n₁ : S → ℕ) (μ₂ : S → Type ν₂) (n₂ : S → ℕ) where
   toFun : (s : S) → Subterm s L μ₁ n₁ → Subterm s L μ₂ n₂
   func' : ∀ {s : S} {k : ℕ} {a : Fin k → S} (f : L.Func s a) (v : (i : Fin k) → Subterm (a i) L μ₁ n₁),
     toFun s (Subterm.func f v) = Subterm.func f (fun i => toFun (a i) (v i))
 
-abbrev SyntacticRew (L : Language.{w, u} S) (n₁ n₂ : ℕ) := Rew L (fun _ => ℕ) n₁ (fun _ => ℕ) n₂
+abbrev SyntacticRew (L : Language.{w, u} S) (n₁ n₂ : S → ℕ) := Rew L (fun _ => ℕ) n₁ (fun _ => ℕ) n₂
 
 namespace Rew
 
 open Subterm
-variable {S : Type w} {L : Language.{w, u} S} {μ : S → Type v} {μ₁ : S → Type v₁} {μ₂ : S → Type v₂}
+variable {S : Type w} [DecidableEq S] {L : Language.{w, u} S}
+{μ : S → Type v} {μ₁ : S → Type v₁} {μ₂ : S → Type v₂}
+{n n₁ n₂ : S → ℕ}
 
 def trm (ω : Rew L μ₁ n₁ μ₂ n₂) {s : S} : Subterm s L μ₁ n₁ → Subterm s L μ₂ n₂ := ω.toFun s
 
@@ -116,31 +163,43 @@ lemma comp_assoc (ω₃ : Rew L μ₃ n₃ μ₄ n₄) (ω₂ : Rew L μ₂ n₂
 
 @[simp] lemma comp_id (ω : Rew L μ₁ n₁ μ₂ n₂) : ω ⊚ Rew.id = ω := by ext <;> simp[comp_app]
 
-def bindAux (b : (s : S) → Fin n₁ → Subterm s L μ₂ n₂) (e : (s : S) → μ₁ s → Subterm s L μ₂ n₂) :
+def bindAux (b : (s : S) → Fin (n₁ s) → Subterm s L μ₂ n₂) (e : (s : S) → μ₁ s → Subterm s L μ₂ n₂) :
     (s : S) → Subterm s L μ₁ n₁ → Subterm s L μ₂ n₂
   | _, #x∷s     => b s x
   | _, &x∷s     => e s x
   | _, func f v => func f (fun i => bindAux b e _ (v i))
 
 def bind
-    (b : (s : S) → Fin n₁ → Subterm s L μ₂ n₂)
+    (b : (s : S) → Fin (n₁ s) → Subterm s L μ₂ n₂)
     (e : (s : S) → μ₁ s → Subterm s L μ₂ n₂) : Rew L μ₁ n₁ μ₂ n₂ where
   toFun := bindAux b e
   func' := fun _ _ => rfl
 
-def map (b : S → Fin n₁ → Fin n₂) (e : (s : S) → μ₁ s → μ₂ s) : Rew L μ₁ n₁ μ₂ n₂ :=
+def map (b : (s : S) → Fin (n₁ s) → Fin (n₂ s)) (e : (s : S) → μ₁ s → μ₂ s) : Rew L μ₁ n₁ μ₂ n₂ :=
   bind (fun s x => #(b s x)) (fun s x => &(e s x))
 
-def bShift : Rew L μ n μ (n + 1) :=
-  map (fun _ => Fin.succ) (fun _ => id)
-
-protected def q (ω : Rew L μ₁ n₁ μ₂ n₂) : Rew L μ₁ (n₁ + 1) μ₂ (n₂ + 1) :=
-  bind (fun s => #0∷s ::> (bShift.trm ∘ ω.trm ∘ bvar s)) (fun s => bShift.trm ∘ ω.trm ∘ fvar s)
+def bShift (s : S) : Rew L μ n μ (Nat.indexedSucc s n) :=
+  map (Fin.indexedSucc s n) (fun _ => id)
 
 lemma eq_id_of_eq {ω : Rew L μ n μ n} (hb : ∀ s x, ω.trm #x∷s = #x∷s) (he : ∀ s x, ω.trm &x∷s = &x∷s)
     {s} (t : Subterm s L μ n) : ω.trm t = t := by
   have : ω = Rew.id := by ext <;> simp[*]
   simp[this]
+
+protected def q (s : S) (ω : Rew L μ₁ n₁ μ₂ n₂) : Rew L μ₁ (Nat.indexedSucc s n₁) μ₂ (Nat.indexedSucc s n₂) :=
+  bind
+    (Matrix.indexedVecCons s #((0 : Fin (n₂ s + 1)).cast $ by simp)∷s (fun s' => (bShift s).trm ∘ ω.trm ∘ bvar s'))
+    (fun s' => (bShift s).trm ∘ ω.trm ∘ fvar s')
+
+def shift (s : S) : SyntacticRew L n n := map (fun _ => id) (idxMap s Nat.succ)
+
+def free (s : S) : SyntacticRew L (Nat.indexedSucc s n) n :=
+  bind
+    (Matrix.indexedVecConsLast s &0∷s bvar)
+    (fun s' x => if s = s' then &(x + 1)∷s' else &x∷s')
+
+--def fix : SyntacticRew L n (n + 1) := bind (fun x => #(Fin.castSucc x)) (#(Fin.last n) :>ₙ fvar)
+
 
 end Rew
 
