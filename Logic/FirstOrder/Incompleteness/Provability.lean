@@ -327,21 +327,23 @@ variable [HasProvable U] [ProvableLimit U Σ 1] [Derivability1 U U] [Derivabilit
 
 open Derivability1 Derivability2 Derivability3
 
-lemma Loeb_without_IT2 (σ) : (U ⊢! σ) ↔ (U ⊢! Pr[U](⸢σ⸣) ⟶ σ) := by
+theorem Loeb_without_IT2 (σ) : (U ⊢! σ) ↔ (U ⊢! Pr[U](⸢σ⸣) ⟶ σ) := by
   apply Iff.intro;
-  . intro H; exact imply_intro H;
+  . intro H; simp;
   . intro H;
     have ⟨K, hK⟩ := exists_KreiselSentence T U 1 σ;
-    have hK : U ⊢! K ⟷ (Pr[U](⸢K⸣) ⟶ σ) := subtheorem hK;
-    have h₂ : U ⊢! Pr[U](⸢K ⟶ (Pr[U](⸢K⸣) ⟶ σ)⸣) := D1 (iff_mp hK);
-    have h₃ : U ⊢! Pr[U](⸢K⸣) ⟶ Pr[U](⸢Pr[U](⸢K⸣) ⟶ σ⸣) := imply (D2 _ _) h₂;
+    have h₂ : U ⊢! Pr[U](⸢K ⟶ (Pr[U](⸢K⸣) ⟶ σ)⸣) := D1 (iff_mp $ subtheorem hK);
+    have h₃ : U ⊢! Pr[U](⸢K⸣) ⟶ Pr[U](⸢Pr[U](⸢K⸣) ⟶ σ⸣) := mp (D2 _ _) h₂;
     have h₄ : U ⊢! Pr[U](⸢Pr[U](⸢K⸣) ⟶ σ⸣) ⟶ (Pr[U](⸢Pr[U](⸢K⸣)⸣) ⟶ Pr[U](⸢σ⸣)) := D2 Pr[U](⸢K⸣) σ;
     have h₅ : U ⊢! Pr[U](⸢K⸣) ⟶ (Pr[U](⸢Pr[U](⸢K⸣)⸣) ⟶ Pr[U](⸢σ⸣)) := imply_trans h₃ h₄;
     have h₆ : U ⊢! Pr[U](⸢K⸣) ⟶ Pr[U](⸢Pr[U](⸢K⸣)⸣) := D3 _;
     have h₇ : U ⊢! Pr[U](⸢K⸣) ⟶ Pr[U](⸢σ⸣) := imply_dilemma h₅ h₆;
     have h₈ : U ⊢! Pr[U](⸢K⸣) ⟶ σ := imply_trans h₇ H;
-    have h₉ : U ⊢! K := imply (iff_mpr hK) h₈;
-    exact imply h₈ (D1 h₉);
+    have h₉ : U ⊢! K := mp (iff_mpr $ subtheorem hK) h₈;
+    exact mp h₈ (D1 h₉);
+
+theorem HenkinSentence_Provablility (hH : IsHenkinSentence T U H) : U ⊢! H :=
+  (Loeb_without_IT2 T U H).mpr (iff_mpr (subtheorem hH))
 
 end Loeb_without_IT2
 
