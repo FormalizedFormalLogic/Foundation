@@ -271,13 +271,16 @@ lemma Consistency_Unrefutability : SigmaOneSound U → U ⊬! ~Con[U] := by
   have hEq := equality_GoedelSentence_Consistency T U hG hGS1;
   exact iff_unprov (iff_contra hEq) hI₁;
 
--- lemma SigmaOneSound_of_UnrefutabilityConsistency : (U ⊢! ~Con[U]) → (SigmaOneSound U) := by simpa using not_imp_not.mpr (Consistency_Unrefutability T U);
+lemma NotSigmaOneSound_of_UnrefutabilityConsistency : (U ⊢! ~Con[U]) → (IsEmpty (SigmaOneSound U)) := by
+  intro H;
+  by_contra C;
+  exact (Consistency_Unrefutability T U (by simp at C; exact C.some)) H;
 
 end SecondIncompleteness
 
 namespace Loeb_with_IT2
 
-variable (T U : Theory ℒₒᵣ) [SubTheory T U] [∀ σ, SubTheory T (U ∪ {~σ})] [∀ σ, SubTheory (T ∪ {σ}) (U ∪ {~σ})] [SigmaOneSound U]
+variable (T U : Theory ℒₒᵣ) [SubTheory T U] [∀ σ, SubTheory T (U ∪ {~σ})] [∀ σ, SubTheory (T ∪ {σ}) (U ∪ {~σ})] [ss : SigmaOneSound U]
 variable [Diagonizable T Π 1]
 variable
         [HasProvable U]
@@ -289,32 +292,46 @@ variable
         [∀ σ, FormalizedCompleteness T (U ∪ {σ}) Σ 1]
         [FormalizedDeductionTheorem T U]
 
-open Derivability1 Derivability2 FormalizedCompleteness
+open Derivability1 Derivability2 FormalizedCompleteness FormalizedDeductionTheorem SecondIncompleteness
 
-lemma Loeb_with_IT2 (σ) : (U ⊢! σ) ↔ (U ⊢! Pr[U](⸢σ⸣) ⟶ σ) := by
+theorem Loeb_with_IT2 (σ) : (U ⊢! σ) ↔ (U ⊢! Pr[U](⸢σ⸣) ⟶ σ) := by
   apply Iff.intro;
-  . intro H; exact imply_intro H;
+  . intro H; simp;
   . intro H;
     have h₁ : U ⊢! ~σ ⟶ ~Pr[U](⸢σ⸣) := imply_contra₀ H;
     have h₂ : U ∪ {~σ} ⊢! ~Pr[U](⸢σ⸣) := deduction.mp h₁;
     have h₃ : U ∪ {~σ} ⊢! ~Pr[U](⸢~σ ⟶ ⊥⸣) := by
-      have : U ∪ {~σ} ⊢! ~Pr[U](⸢σ⸣) ⟶ ~Pr[U](⸢~~σ⸣) := imply_contra₀ $ formalized_dne σ;
-      have : U ∪ {~σ} ⊢! ~Pr[U](⸢σ⸣) → U ∪ {~σ} ⊢! ~Pr[U](⸢~~σ⸣) := imply this;
-      exact imply (iff_mp (iff_contra (formalized_neg_def _))) (this h₂);
+      have : U ∪ {~σ} ⊢! ~Pr[U](⸢σ⸣) ⟶ ~Pr[U](⸢~~σ⸣) := imply_contra₀ $ formalized_DNE σ;
+      have : U ∪ {~σ} ⊢! ~Pr[U](⸢σ⸣) → U ∪ {~σ} ⊢! ~Pr[U](⸢~~σ⸣) := mp this;
+      exact mp (iff_mp (iff_contra (formalized_neg_def _))) (this h₂);
     have h₄ : U ∪ {~σ} ⊢! ~Pr[U](⸢~σ ⟶ ⊥⸣) ⟷ ~Pr[U ∪ {~σ}](⸢⊥⸣) := by
-      have : T ⊢! ~Pr[U](⸢~σ ⟶ ⊥⸣) ⟷ ~Pr[U ∪ {~σ}](⸢⊥⸣) := FormalizedDeductionTheorem.FDT_neg _ _;
+      have : T ⊢! ~Pr[U](⸢~σ ⟶ ⊥⸣) ⟷ ~Pr[U ∪ {~σ}](⸢⊥⸣) := FDT_neg _ _;
       exact subtheorem this;
-    have h₅ : U ∪ {~σ} ⊢! Con[U ∪ {~σ}] := imply (iff_mp h₄) h₃;
-    have hc : ¬Logic.System.Consistent (U ∪ {~σ}) := SecondIncompleteness.Consistent_of_ProvabilityConsistency T _ h₅;
+    have h₅ : U ∪ {~σ} ⊢! Con[U ∪ {~σ}] := mp (iff_mp h₄) h₃;
+    have hc : ¬Logic.System.Consistent (U ∪ {~σ}) := Consistent_of_ProvabilityConsistency T _ h₅;
     simpa using consistent_or hc;
 
-/-
-lemma CCC : U ⊬! Con[U] ⟶ ~Pr[U](⸢~Con[U]⸣) := by
-  by_contra ih;
-  have a : U ⊢! Pr[U](⸢~Con[U]⸣) ⟶ Pr[U](⸢⊥⸣) := imply_contra₃ ih;
-  have b : U ⊢! Pr[U](⸢~Con[U]⸣) ⟶ ~Con[U] → U ⊢! ~Con[U] := Loeb_with_IT2 T U (~Con[U]);
-  have c : U ⊢! ~Con[U] := imply (by sorry) (by sorry);
--/
+variable
+        [Derivability1 T U]
+        [Derivability1 U U]
+        [Derivability2 T U]
+        [FormalizedCompleteness T U Σ 1]
+
+/-- Formalized Gödel's 2nd Incompleteness Theorem -/
+theorem FormalizedUnprovabilityConsistency : U ⊬! Con[U] ⟶ ~Pr[U](⸢~Con[U]⸣) := by
+  by_contra H;
+  have h₁ : U ⊢! Pr[U](⸢~Con[U]⸣) ⟶ ~Con[U] := by have := imply_contra₃ H; nth_rw 2 [Consistency]; simpa [neg_neg];
+  have h₂ : U ⊢! ~Con[U] := (Loeb_with_IT2 T U _).mpr h₁;
+  exact (NotSigmaOneSound_of_UnrefutabilityConsistency T U h₂).false ss;
+
+/-- Formalized Gödel's 1st Incompleteness Theorem -/
+theorem FormalizedUnrefutabilityGoedelSentence (hG : IsGoedelSentence T U G) (hGS1 : Hierarchy Π 1 G) :
+  U ⊬! Con[U] ⟶ ~Pr[U](⸢~G⸣) := by
+  by_contra H;
+  have h₁ := iff_contra $ equality_GoedelSentence_Consistency T U hG hGS1;
+  have h₂ : U ⊢! ~Pr[U](⸢~Con[U]⸣) ⟷ ~Pr[U](⸢~G⸣) := iff_contra' $ MP (D2_iff U U (~G) (~Con[U])) (D1 h₁);
+  have h₃ : U ⊬! Con[U] ⟶ ~Pr[U](⸢~G⸣) := iff_unprov' (FormalizedUnprovabilityConsistency T U) h₂;
+  exact h₃ H;
 
 end Loeb_with_IT2
 
