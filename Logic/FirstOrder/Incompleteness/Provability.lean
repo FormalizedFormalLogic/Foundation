@@ -1,4 +1,4 @@
-import Logic.Predicate.FirstOrder.Incompleteness.FirstIncompleteness
+import Logic.FirstOrder.Incompleteness.FirstIncompleteness
 
 namespace LO.FirstOrder
 
