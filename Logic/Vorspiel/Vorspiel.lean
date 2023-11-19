@@ -368,7 +368,11 @@ lemma pair_le_pair_of_le {a₁ a₂ b₁ b₂ : ℕ} (ha : a₁ ≤ a₂) (hb : 
 end Nat
 
 namespace Fintype
-variable {ι : Type _} [Fintype ι] {α : Type _} [SemilatticeSup α] [OrderBot α]
+variable {ι : Type _} [Fintype ι]
+
+section
+
+variable {α : Type _} [SemilatticeSup α] [OrderBot α]
 
 def sup (f : ι → α) : α := (Finset.univ : Finset ι).sup f
 
@@ -380,6 +384,11 @@ lemma le_sup {a : α} {f : ι → α} (i : ι) (le : a ≤ f i) : a ≤ sup f :=
     sup f ≤ a ↔ (∀ i, f i ≤ a) := by simp[sup]
 
 @[simp] lemma finsup_eq_0_of_empty [IsEmpty ι] (f : ι → α) : sup f = ⊥ := by simp[sup]
+
+end
+
+def decideEqPi {β : ι → Type*} (a b : (i : ι) → β i) (_ : (i : ι) → Decidable (a i = b i)) : Decidable (a = b) :=
+  decidable_of_iff (∀ i, a i = b i) Function.funext_iff.symm
 
 end Fintype
 
