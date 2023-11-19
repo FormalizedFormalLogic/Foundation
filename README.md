@@ -15,6 +15,7 @@ Formalizing Logic in Lean4
     - **Completeness**: Completeness theorem
     - **Arith**: Arithmetic
     - **Incompleteness**: Incompleteness theorem
+  - **SecondOrder**: Monadic second-order logic
 
 ## Definition
 ### First-Order logic
