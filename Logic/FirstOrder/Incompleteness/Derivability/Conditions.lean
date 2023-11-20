@@ -32,13 +32,10 @@ abbrev Definable.Sigma (k) := Definable T (Hierarchy Σ k)
 abbrev Definable.Pi (k) := Definable T (Hierarchy Π k)
 
 class Derivability1 where
-  D1 : ∀ {σ : Sentence ℒₒᵣ}, T₀ ⊢! σ → T₀ ⊢! (Pr[T] ⸢σ⸣)
+  D1 : ∀ {σ : Sentence ℒₒᵣ}, T ⊢! σ → T₀ ⊢! (Pr[T] ⸢σ⸣)
 
 class Derivability2 where
   D2 : ∀ {σ π : Sentence ℒₒᵣ}, T₀ ⊢! (Pr[T] ⸢σ ⟶ π⸣) ⟶ ((Pr[T] ⸢σ⸣) ⟶ (Pr[T] ⸢π⸣))
-
-lemma Derivability2.D2_iff {σ π : Sentence ℒₒᵣ} : T₀ ⊢! (Pr[T] ⸢σ ⟷ π⸣) ⟶ ((Pr[T] ⸢σ⸣) ⟷ (Pr[T] ⸢π⸣)) := by
-  sorry;
 
 class Derivability3 where
   D3 : ∀ {σ : Sentence ℒₒᵣ}, T₀ ⊢! (Pr[T] ⸢σ⸣) ⟶ (Pr[T] ⸢Pr[T] ⸢σ⸣⸣)
@@ -57,7 +54,23 @@ section PrCalculus
 open Subformula FirstOrder.Theory Derivability1 Derivability2 Derivability3
 
 variable {T₀ T : Theory ℒₒᵣ} [SubTheory T₀ T] [HasProvablePred T]
-variable [Derivability1 T₀ T] [Derivability2 T₀ T] [Derivability3 T₀ T]
+variable [hD1 : Derivability1 T₀ T] [hD2 : Derivability2 T₀ T] [hD3 : Derivability3 T₀ T] [hFC : FormalizedCompleteness T₀ T b n]
+
+lemma Derivability1.D1' {σ : Sentence ℒₒᵣ} : T ⊢! σ → T ⊢! (Pr[T] ⸢σ⸣) := by intro h; exact weakening $ hD1.D1 h;
+
+lemma Derivability2.D2' {σ π : Sentence ℒₒᵣ} : T ⊢! (Pr[T] ⸢σ ⟶ π⸣) ⟶ ((Pr[T] ⸢σ⸣) ⟶ (Pr[T] ⸢π⸣)) := weakening hD2.D2
+
+lemma Derivability2.D2_iff [SubTheory T₀ T] [hd : Derivability2 T₀ T] {σ π : Sentence ℒₒᵣ} : T₀ ⊢! (Pr[T] ⸢σ ⟷ π⸣) ⟶ ((Pr[T] ⸢σ⸣) ⟷ (Pr[T] ⸢π⸣)) := by
+  sorry;
+  -- have a := @Derivability2.D2 T₀ T _ _ _ σ π;
+  -- have b := @Derivability2.D2 T₀ T _ _ _ π σ;
+  -- sorry;
+
+lemma Derivability3.D3' {σ : Sentence ℒₒᵣ} : T₀ ⊢! (Pr[T] ⸢σ⸣) ⟶ (Pr[T] ⸢Pr[T] ⸢σ⸣⸣) := weakening hD3.D3
+
+lemma FormalizedCompleteness.FC' {σ : Sentence ℒₒᵣ} : Hierarchy b n σ → T ⊢! σ ⟶ (Pr[T] ⸢σ⸣) := by
+  intro hH;
+  exact weakening $ hFC.FC hH;
 
 lemma formalized_NC (σ : Sentence ℒₒᵣ) : T₀ ⊢! ((Pr[T] ⸢σ⸣) ⟶ (Pr[T] ⸢~σ⸣)) ⟶ (Pr[T] ⸢(⊥ : Sentence ℒₒᵣ)⸣) := by
   /-
@@ -105,31 +118,30 @@ section FixedPoints
 
 open HasProvablePred
 
-variable (T : Theory ℒₒᵣ) [HasProvablePred T] {n}
+variable (T₀ T : Theory ℒₒᵣ) [HasProvablePred T] [SubTheory T₀ T] {n}
 
-def IsGoedelSentence (G : Sentence ℒₒᵣ) := T ⊢! G ⟷ ~(Pr[T] ⸢G⸣)
+def IsGoedelSentence [SubTheory T₀ T] (G : Sentence ℒₒᵣ) := T₀ ⊢! G ⟷ ~(Pr[T] ⸢G⸣)
 
 lemma existsGoedelSentence
-  [hdiag : Diagonizable T Π n] [hdef : Definable.Sigma T n]
-  : ∃ (G : Sentence ℒₒᵣ), (IsGoedelSentence T G ∧ Hierarchy Π n G) := by
+  [hdiag : Diagonizable T₀ Π n] [hdef : Definable.Sigma T n]
+  : ∃ (G : Sentence ℒₒᵣ), (IsGoedelSentence T₀ T G ∧ Hierarchy Π n G) := by
   have ⟨G, ⟨hH, hd⟩⟩ := hdiag.diag (~ProvablePred T) (Hierarchy.neg hdef.definable);
   existsi G; simpa [IsGoedelSentence, hH, Rew.neg'] using hd;
 
-def IsHenkinSentence (H : Sentence ℒₒᵣ) := T ⊢! H ⟷ (Pr[T] ⸢H⸣)
+def IsHenkinSentence [SubTheory T₀ T] (H : Sentence ℒₒᵣ) := T₀ ⊢! H ⟷ (Pr[T] ⸢H⸣)
 
 lemma existsHenkinSentence
-  [hdiag : Diagonizable T Σ n] [hdef : Definable.Sigma T n]
-  : ∃ (H : Sentence ℒₒᵣ), (IsHenkinSentence T H ∧ Hierarchy Σ n H) := by
+  [hdiag : Diagonizable T₀ Σ n] [hdef : Definable.Sigma T n]
+  : ∃ (H : Sentence ℒₒᵣ), (IsHenkinSentence T₀ T H ∧ Hierarchy Σ n H) := by
   have ⟨H, ⟨hH, hd⟩⟩ := hdiag.diag (ProvablePred T) hdef.definable;
   existsi H; simpa [IsHenkinSentence, hH] using hd;
 
-def IsKrieselSentence (K σ : Sentence ℒₒᵣ) := T ⊢! K ⟷ ((Pr[T] ⸢K⸣) ⟶ σ)
+def IsKrieselSentence [SubTheory T₀ T] (K σ : Sentence ℒₒᵣ) := T₀ ⊢! K ⟷ ((Pr[T] ⸢K⸣) ⟶ σ)
 
 lemma existsKreiselSentence [hdef : Definable.Sigma T n] (σ)
-  : ∃ (K : Sentence ℒₒᵣ), IsKrieselSentence T K σ := by sorry
+  : ∃ (K : Sentence ℒₒᵣ), IsKrieselSentence T₀ T K σ := by sorry
 
 end FixedPoints
-
 
 
 end LO.FirstOrder.Arith
