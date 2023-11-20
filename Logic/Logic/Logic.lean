@@ -2,8 +2,6 @@ import Logic.Logic.LogicSymbol
 
 namespace LO
 
-namespace Logic
-
 variable {F : Type u} [LogicSymbol F]
 
 /- Deduction System of F -/
@@ -190,7 +188,5 @@ lemma consequence_iff_provable {T : Set F} {f : F} : T ⊨ f ↔ T ⊢! f :=
 ⟨fun h => ⟨complete h⟩, by rintro ⟨b⟩; exact Sound.sound b⟩
 
 end Complete
-
-end Logic
 
 end LO

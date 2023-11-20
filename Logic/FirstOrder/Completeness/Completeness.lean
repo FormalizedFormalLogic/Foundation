@@ -6,7 +6,7 @@ namespace LO
 
 namespace FirstOrder
 
-open Logic Subformula Completeness
+open Subformula Completeness
 
 variable {L : Language.{u}} [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq (L.rel k)] {T : Theory L}
 
@@ -31,7 +31,7 @@ noncomputable def completeness_of_encodable {σ : Sentence L} :
   have : T ⊢ᵀ {Rew.emb.hom σ} := DerivationWA.completeness_of_encodable (T := T) (Γ := {σ}) (fun M i s hM => ⟨σ, by simp, h M s hM⟩)
   exact this.toProof
 
-noncomputable instance : Logic.Complete (Sentence L) := ⟨completeness_of_encodable⟩
+noncomputable instance : Complete (Sentence L) := ⟨completeness_of_encodable⟩
 
 end Encodable
 
@@ -54,13 +54,13 @@ noncomputable def completeness {σ : Sentence L} :
     have : Semantics.Satisfiableₛ (u : Theory L) := by
       rw[←image_u']; simpa using (satisfiableₛ_lMap L.ofSubLanguage (fun k => Subtype.val_injective) (fun _ => Subtype.val_injective) h)
     contradiction }
-  have : ¬Proof.Consistent (u' : Theory (languageFinset u)) := fun h => this (Logic.Complete.satisfiableₛ_iff_consistent.mpr h)
+  have : ¬Proof.Consistent (u' : Theory (languageFinset u)) := fun h => this (Complete.satisfiableₛ_iff_consistent.mpr h)
   have : ¬Proof.Consistent (u : Theory L) := by rw[←image_u']; simpa using inConsistent_lMap L.ofSubLanguage this
   have : ¬Proof.Consistent (insert (~σ) T) := fun h => this (h.of_subset ssu)
   have : Nonempty (T ⊢ σ) := provable_iff_inConsistent.mpr this
   choose b _ using exists_true_iff_nonempty.mpr this
   exact b
 
-noncomputable instance completeness.sentence : Logic.Complete (Sentence L) := ⟨completeness⟩
+noncomputable instance completeness.sentence : Complete (Sentence L) := ⟨completeness⟩
 
 end FirstOrder

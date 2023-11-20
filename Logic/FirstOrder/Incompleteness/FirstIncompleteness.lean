@@ -11,7 +11,7 @@ section
 variable {L : Language.{u}} [(k : ℕ) → DecidableEq (L.func k)] [(k : ℕ) → DecidableEq (L.rel k)]
 
 lemma provable_iff_of_consistent_of_complete {T : Theory L}
-  (consis : Logic.System.Consistent T) (comp : Logic.System.Complete T) :
+  (consis : System.Consistent T) (comp : System.Complete T) :
     T ⊢! σ ↔ ¬T ⊢! ~σ :=
   ⟨by rintro ⟨b₁⟩ ⟨b₂⟩; exact inconsistent_of_provable_and_refutable b₁ b₂ consis,
    by intro h; exact or_iff_not_imp_right.mp (comp σ) h⟩
@@ -30,7 +30,7 @@ variable {L} [(k : ℕ) → DecidableEq (L.func k)] [(k : ℕ) → DecidableEq (
 abbrev SigmaOneSound (T : Theory L) := Sound T (Hierarchy.Sigma 1)
 
 lemma consistent_of_sigmaOneSound (T : Theory L) [SigmaOneSound T] :
-    Logic.System.Consistent T := consistent_of_sound T (Hierarchy.Sigma 1) (by simp)
+    System.Consistent T := consistent_of_sound T (Hierarchy.Sigma 1) (by simp)
 
 end
 
@@ -212,7 +212,7 @@ lemma diagRefutation_spec (σ : Subsentence ℒₒᵣ 1) :
     T ⊢! [→ ⸢σ⸣].hom ρ ↔ T ⊢! ~[→ ⸢σ⸣].hom σ := by
   simpa[diagRefutation] using pred_representation (diagRefutation_re T) (x := σ)
 
-theorem main : ¬Logic.System.Complete T := fun A => by
+theorem main : ¬System.Complete T := fun A => by
   have h₁ : T ⊢! [→ ⸢ρ⸣].hom ρ ↔ T ⊢! ~[→ ⸢ρ⸣].hom ρ := by simpa using diagRefutation_spec (T := T) ρ
   have h₂ : T ⊢! ~[→ ⸢ρ⸣].hom ρ ↔ ¬T ⊢! [→ ⸢ρ⸣].hom ρ := by
     simpa using provable_iff_of_consistent_of_complete (consistent_of_sigmaOneSound T) A (σ := ~[→ ⸢ρ⸣].hom ρ)
@@ -224,12 +224,12 @@ attribute [-instance] Classical.propDecidable
 
 variable (T : Theory ℒₒᵣ) [EqTheory T] [PAminus T] [DecidablePred T]
 
-theorem firstIncompleteness [SigmaOneSound T] [Theory.Computable T] : ¬Logic.System.Complete T :=
+theorem firstIncompleteness [SigmaOneSound T] [Theory.Computable T] : ¬System.Complete T :=
   FirstIncompleteness.main
 
 lemma exists_undecidable_sentence [SigmaOneSound T] [Theory.Computable T] :
     ∃ σ : Sentence ℒₒᵣ, ¬T ⊢! σ ∧ ¬T ⊢! ~σ := by
-  simpa[Logic.System.Complete, not_or] using firstIncompleteness T
+  simpa[System.Complete, not_or] using firstIncompleteness T
 
 end Arith
 

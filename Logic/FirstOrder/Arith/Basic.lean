@@ -62,7 +62,7 @@ section
 variable {L : Language} [(k : ℕ) → DecidableEq (L.func k)] [(k : ℕ) → DecidableEq (L.rel k)] [Structure L ℕ]
     (T : Theory L) (F : Set (Sentence L))
 
-lemma consistent_of_sound [Sound T F] (hF : F ⊥) : Logic.System.Consistent T :=
+lemma consistent_of_sound [Sound T F] (hF : F ⊥) : System.Consistent T :=
   ⟨fun b => by simpa using Sound.sound hF ⟨b⟩⟩
 
 end

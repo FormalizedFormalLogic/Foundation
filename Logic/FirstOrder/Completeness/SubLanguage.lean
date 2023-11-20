@@ -193,8 +193,8 @@ lemma eval_lMap {p : Subformula L₁ μ n} :
       extendStructure.rel Φ s₁ (injr k) r (fun i => Subterm.val s₁ e ε (v i))
 
 lemma models_lMap (σ : Sentence L₁) :
-    Logic.Semantics.models (s₁.extendStructure Φ) (Subformula.lMap Φ σ) ↔ Logic.Semantics.models s₁ σ := by
-  simp[Logic.Semantics.models, Val, eval_lMap Φ injf injr]
+    Semantics.models (s₁.extendStructure Φ) (Subformula.lMap Φ σ) ↔ Semantics.models s₁ σ := by
+  simp[Semantics.models, Val, eval_lMap Φ injf injr]
 
 end extendStructure
 
@@ -213,11 +213,9 @@ lemma lMap_models_lMap_iff {T : Theory L₁} {σ : Sentence L₁} :
   · intro h M _ s₁ hs₁
     exact (Structure.extendStructure.models_lMap Φ injf injr s₁ σ).mp $
       h M (s₁.extendStructure Φ)
-      (by simp[Logic.Semantics.modelsTheory, Theory.lMap];
+      (by simp[Semantics.modelsTheory, Theory.lMap];
           intro σ hσ; exact (Structure.extendStructure.models_lMap (Φ := Φ) injf injr s₁ σ).mpr (hs₁ hσ))
   · exact lMap_models_lMap
-
-open Logic
 
 lemma satisfiableₛ_lMap {T : Theory L₁} (s : Semantics.Satisfiableₛ T) :
     Semantics.Satisfiableₛ (Subformula.lMap Φ '' T) := by

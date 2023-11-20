@@ -214,7 +214,7 @@ variable {T : Theory ℒₒᵣ} [EqTheory T] [PAminus T]
 
 theorem sigma_one_completeness {σ : Sentence ℒₒᵣ} (hσ : Hierarchy.Sigma 1 σ) :
     ℕ ⊧ σ → T ⊢ σ := fun H =>
-  Logic.Complete.complete (consequence_of _ _ (fun M _ _ _ _ _ => by
+  Complete.complete (consequence_of _ _ (fun M _ _ _ _ _ => by
     haveI : Theory.Mod M (Theory.PAminus ℒₒᵣ) := Theory.Mod.of_ss (T₁ := T) M PAminus.paminus
     simpa using @Model.sigma_one_completeness M _ _ _ _ _ _ hσ ![] (by simpa[models_iff] using H)))
 

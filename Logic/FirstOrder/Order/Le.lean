@@ -78,7 +78,7 @@ namespace Order
 variable {T : Theory L} [EqTheory T] [SubTheory (Theory.Order.Total L) T]
 
 noncomputable def leIffEqOrLt : T ⊢ “∀ ∀ (#0 ≤ #1 ↔ #0 = #1 ∨ #0 < #1)” :=
-  Logic.Complete.complete
+  Complete.complete
     (consequence_iff.mpr $ fun _ _ _ _ => by simp[models_def, Subformula.Operator.LE.def_of_Eq_of_LT])
 
 class MTotal (M : Type*) [_root_.LT M] :=

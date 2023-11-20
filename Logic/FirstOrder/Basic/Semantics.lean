@@ -527,8 +527,6 @@ end
 
 end Structure
 
-open Logic
-
 instance semantics : Semantics (Sentence L) (Structure.{u, u} L) where
   models := (Subformula.Val · Empty.elim)
 

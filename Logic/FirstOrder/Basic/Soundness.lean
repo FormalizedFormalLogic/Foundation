@@ -69,7 +69,7 @@ lemma DerivationCRWA.soundness (b : T ⊢ᶜ[P] Γ) {M : Type u} [s : Structure 
 theorem soundness {T} {σ : Sentence L} : T ⊢ σ → T ⊨ σ := fun d M hM s hT => by
   simpa using d.soundness hT
 
-instance : Logic.Sound (Sentence L) := ⟨soundness⟩
+instance : Sound (Sentence L) := ⟨soundness⟩
 
 end soundness
 

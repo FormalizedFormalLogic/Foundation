@@ -99,7 +99,7 @@ lemma val_Uprod {p : Formula L μ} :
 end Subformula
 
 lemma models_Uprod {σ : Sentence L} :
-    (Uprod A 𝓤) ⊧ σ ↔ {ι | Logic.Semantics.models (s ι) σ} ∈ 𝓤 :=
+    (Uprod A 𝓤) ⊧ σ ↔ {ι | Semantics.models (s ι) σ} ∈ 𝓤 :=
   by simp[models_def, Subformula.val_Uprod, Empty.eq_elim]
 
 variable (A)
@@ -109,8 +109,6 @@ def Subformula.domain (σ : Sentence L) := {ι | (A ι) ⊧ σ}
 end
 
 section
-
-open Logic
 
 variable {L : Language.{u}} {T : Theory L}
 
@@ -148,7 +146,7 @@ theorem compactness :
     Semantics.Satisfiableₛ T ↔ ∀ T' : Finset (Sentence L), ↑T' ⊆ T → Semantics.Satisfiableₛ (T' : Theory L) := by
   rw[compactnessAux]; simp
 
-instance : Logic.Compact (Sentence L) := ⟨compactness⟩
+instance : Compact (Sentence L) := ⟨compactness⟩
 
 end
 
