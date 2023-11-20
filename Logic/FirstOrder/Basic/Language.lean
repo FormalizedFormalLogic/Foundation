@@ -1,4 +1,4 @@
-import Logic.Logic.Logic
+import Logic.Logic.System
 import Logic.Vorspiel.Computability
 import Logic.Vorspiel.Meta
 

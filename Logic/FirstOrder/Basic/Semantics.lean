@@ -1,3 +1,4 @@
+import Logic.Logic.Semantics
 import Logic.FirstOrder.Basic.Formula
 
 namespace LO
