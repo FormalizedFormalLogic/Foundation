@@ -361,7 +361,7 @@ class Theory.Computable (T : Theory L) [DecidablePred T] where
 section
 
 open Computable
-variable {T : Theory L} [DecidablePred T] [Theory.Computable T]
+variable (T : Theory L) [DecidablePred T] [Theory.Computable T]
 
 lemma isProofFn_computable :
     Computable₂ (isProofFn T) :=
@@ -382,7 +382,10 @@ lemma isProofFn_computable :
     (const false)
 
 lemma provableFn_partrec :
-    Partrec (provableFn T) := Partrec.rfindOpt (dom_bool.comp $ isProofFn_computable)
+    Partrec (provableFn T) := Partrec.rfindOpt (dom_bool.comp $ isProofFn_computable T)
+
+lemma provable_RePred : RePred (T ⊢! ·) :=
+  (provableFn_partrec T).of_eq <| by intro σ; ext; simp[←provable_iff_provableFn]
 
 end
 
