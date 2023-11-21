@@ -66,11 +66,15 @@ lemma Derivability2.D2_iff [SubTheory T₀ T] [hd : Derivability2 T₀ T] {σ π
   -- have b := @Derivability2.D2 T₀ T _ _ _ π σ;
   -- sorry;
 
-lemma Derivability3.D3' {σ : Sentence ℒₒᵣ} : T₀ ⊢! (Pr[T] ⸢σ⸣) ⟶ (Pr[T] ⸢Pr[T] ⸢σ⸣⸣) := weakening hD3.D3
+lemma Derivability3.D3' {σ : Sentence ℒₒᵣ} : T ⊢! (Pr[T] ⸢σ⸣) ⟶ (Pr[T] ⸢Pr[T] ⸢σ⸣⸣) := weakening hD3.D3
 
 lemma FormalizedCompleteness.FC' {σ : Sentence ℒₒᵣ} : Hierarchy b n σ → T ⊢! σ ⟶ (Pr[T] ⸢σ⸣) := by
   intro hH;
   exact weakening $ hFC.FC hH;
+
+lemma formalized_imp_intro : (T ⊢! σ ⟶ π) → (T₀ ⊢! (Pr[T] ⸢σ⸣) ⟶ (Pr[T] ⸢π⸣)) := by
+  intro H;
+  exact MP D2 $ D1 H;
 
 lemma formalized_NC (σ : Sentence ℒₒᵣ) : T₀ ⊢! ((Pr[T] ⸢σ⸣) ⟶ (Pr[T] ⸢~σ⸣)) ⟶ (Pr[T] ⸢(⊥ : Sentence ℒₒᵣ)⸣) := by
   /-
