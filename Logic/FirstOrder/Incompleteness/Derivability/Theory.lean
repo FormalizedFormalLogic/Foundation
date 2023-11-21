@@ -3,7 +3,7 @@ import Logic.FirstOrder.Incompleteness.FirstIncompleteness
 
 namespace LO.FirstOrder.Theory
 
-open LO.Logic LO.FirstOrder.Subformula
+open Subformula
 
 variable {L : Language.{u}} [𝓑 : System (Sentence L)] (T : Theory L)
 
@@ -23,7 +23,7 @@ section PropositionalCalculus
 variable {T : Theory L} [hComplete : Complete T] [hConsistent : Consistent T]
 
 @[simp]
-lemma weakening [hs : SubTheory T₀ T] : (T₀ ⊢! σ) → (T ⊢! σ) := by simp; intro H; exact ⟨Logic.System.weakening H hs.sub⟩;
+lemma weakening [hs : SubTheory T₀ T] : (T₀ ⊢! σ) → (T ⊢! σ) := by simp; intro H; exact ⟨System.weakening H hs.sub⟩;
 
 lemma deduction {σ π} : (T ⊢! σ ⟶ π) ↔ (T ∪ {σ} ⊢! π) := by
   apply Iff.intro;
