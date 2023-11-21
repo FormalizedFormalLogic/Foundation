@@ -1,4 +1,4 @@
-import Logic.Logic.Logic
+import Logic.Logic.LogicSymbol
 
 namespace LO
 
