@@ -1,4 +1,4 @@
-import Logic.Logic.Logic
+import Logic.Logic.System
 
 namespace LO
 
@@ -28,4 +28,3 @@ end Principia
 end Logic
 
 end LO
-
