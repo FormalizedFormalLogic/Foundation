@@ -499,6 +499,16 @@ lemma eq_ball_iff {p : Subformula L μ₁ n₁} {q₁ q₂} :
 
 end Rew
 
+scoped syntax (name := substsHomNotation) term:max "#[" term,* "]" : term
+
+scoped macro_rules (kind := substsHomNotation)
+  | `($p:term #[$terms:term,*]) => `((Rew.substs ![$terms,*]).hom $p)
+
+scoped syntax (name := rewriteMapHomNotation) term:max "&[" term,* "]" : term
+
+scoped macro_rules (kind := rewriteMapHomNotation)
+  | `($p:term &[$terms:term,*]) => `((Rew.rewriteMap ![$terms,*]).hom $p)
+
 namespace Subformula
 
 variable {L : Language.{u}} {μ : Type v} {n n₁ n₂ n₂ m m₁ m₂ m₃ : ℕ}

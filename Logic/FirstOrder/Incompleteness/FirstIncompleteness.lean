@@ -154,7 +154,7 @@ noncomputable def graph (f : α →. σ) : Subsentence ℒₒᵣ 2 :=
   code (codeOfPartrec fun x => Part.bind (decode (α := α) x.head) fun a => (f a).map encode)
 
 theorem representation {f : α →. σ} (hf : Partrec f) {x y} :
-    T ⊢! [→ ⸢y⸣, ⸢x⸣].hom (graph f) ↔ y ∈ f x := by
+    T ⊢! (graph f)#[⸢y⸣, ⸢x⸣] ↔ y ∈ f x := by
   let f' : Vector ℕ 1 →. ℕ := fun x => Part.bind (decode (α := α) x.head) fun a => (f a).map encode
   have : Nat.Partrec' f' :=
     Nat.Partrec'.part_iff.mpr
@@ -167,7 +167,7 @@ noncomputable def pred (p : α → Prop) : Subsentence ℒₒᵣ 1 :=
   [→ ⸢()⸣, #0].hom <| graph (fun a => Part.assert (p a) fun _ => Part.some ())
 
 theorem pred_representation {p : α → Prop} (hp : RePred p) {x} :
-    T ⊢! [→ ⸢x⸣].hom (pred p) ↔ p x := by
+    T ⊢! (pred p)#[⸢x⸣] ↔ p x := by
   simpa[pred, ←Rew.hom_comp_app, Rew.substs_comp_substs] using
     representation hp (T := T) (x := x) (y := ())
 
@@ -178,7 +178,7 @@ variable {L : Language.{u}} [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq 
 noncomputable def provableSentence (U : Theory L) : Subsentence ℒₒᵣ 1 := pred (U ⊢! ·)
 
 theorem provableSentence_representation (U : Theory L) [DecidablePred U] [Theory.Computable U] {σ} :
-    T ⊢! [→ ⸢σ⸣].hom (provableSentence U) ↔ U ⊢! σ := by
+    T ⊢! (provableSentence U)#[⸢σ⸣] ↔ U ⊢! σ := by
   simpa using pred_representation (T := T) (provable_RePred U) (x := σ)
 
 end representation
@@ -189,8 +189,8 @@ attribute [instance] Classical.propDecidable
 
 variable (T)
 
-private lemma diagRefutation_re : RePred (fun σ => T ⊢! ~[→ ⸢σ⸣].hom σ) := by
-  have : Partrec fun σ : Subsentence ℒₒᵣ 1 => (provableFn T (~[→ ⸢σ⸣].hom σ)).map (fun _ => ()) :=
+private lemma diagRefutation_re : RePred (fun σ => T ⊢! ~σ#[⸢σ⸣]) := by
+  have : Partrec fun σ : Subsentence ℒₒᵣ 1 => (provableFn T (~σ#[⸢σ⸣])).map (fun _ => ()) :=
     Partrec.map
       ((provableFn_partrec T).comp <| Primrec.to_comp
         <| (Subformula.neg_primrec (L := ℒₒᵣ)).comp
@@ -200,20 +200,20 @@ private lemma diagRefutation_re : RePred (fun σ => T ⊢! ~[→ ⸢σ⸣].hom �
       (.const ())
   exact this.of_eq <| by intro σ; ext; simp[←provable_iff_provableFn]
 
-noncomputable def diagRefutation : Subsentence ℒₒᵣ 1 := pred (fun σ => T ⊢! ~[→ ⸢σ⸣].hom σ)
+noncomputable def diagRefutation : Subsentence ℒₒᵣ 1 := pred (fun σ => T ⊢! ~σ#[⸢σ⸣])
 
 local notation "ρ" => diagRefutation T
 
 variable {T}
 
 lemma diagRefutation_spec (σ : Subsentence ℒₒᵣ 1) :
-    T ⊢! [→ ⸢σ⸣].hom ρ ↔ T ⊢! ~[→ ⸢σ⸣].hom σ := by
+    T ⊢! ρ#[⸢σ⸣] ↔ T ⊢! ~σ#[⸢σ⸣] := by
   simpa[diagRefutation] using pred_representation (diagRefutation_re T) (x := σ)
 
 theorem main : ¬System.Complete T := fun A => by
-  have h₁ : T ⊢! [→ ⸢ρ⸣].hom ρ ↔ T ⊢! ~[→ ⸢ρ⸣].hom ρ := by simpa using diagRefutation_spec (T := T) ρ
-  have h₂ : T ⊢! ~[→ ⸢ρ⸣].hom ρ ↔ ¬T ⊢! [→ ⸢ρ⸣].hom ρ := by
-    simpa using provable_iff_of_consistent_of_complete (consistent_of_sigmaOneSound T) A (σ := ~[→ ⸢ρ⸣].hom ρ)
+  have h₁ : T ⊢! ρ#[⸢ρ⸣] ↔ T ⊢! ~ρ#[⸢ρ⸣] := by simpa using diagRefutation_spec (T := T) ρ
+  have h₂ : T ⊢! ~ρ#[⸢ρ⸣] ↔ ¬T ⊢! ρ#[⸢ρ⸣] := by
+    simpa using provable_iff_of_consistent_of_complete (consistent_of_sigmaOneSound T) A (σ := ~ρ#[⸢ρ⸣])
   exact iff_not_self (Iff.trans h₁ h₂)
 
 end FirstIncompleteness
