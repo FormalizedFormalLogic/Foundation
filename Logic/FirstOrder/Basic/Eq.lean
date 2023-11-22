@@ -184,8 +184,8 @@ lemma rel_eq (a b : QuotEq H) : (@Subformula.Operator.Eq.eq L _).val (M := QuotE
   induction' a using Quotient.ind with a
   induction' b using Quotient.ind with b
   rw[of_eq_of]; simp[eqv, Subformula.Operator.val];
-  simpa[Eval!, Matrix.fun_eq_vec₂, Empty.eq_elim] using
-    eval_mk (H := H) (e := ![a, b]) (ε := Empty.elim) (p := Subformula.Operator.Eq.eq.sentence)
+  simpa[Eval!, Matrix.fun_eq_vec₂, Matrix.empty_eq] using
+    eval_mk (H := H) (e := ![]) (ε := ![a, b]) (p := Subformula.Operator.Eq.eq.sentence)
 
 instance : Structure.Eq L (QuotEq H) := ⟨rel_eq⟩
 

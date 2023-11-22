@@ -409,6 +409,16 @@ lemma bind_primrec {b : α → Fin n₁ → Subterm L μ₂ n₂} {e : α → μ
     intro a
     simp[Encodable.encode_ofEquiv subtEquiv, Encodable.Subtype.encode_eq, subtEquiv_bind_eq_bind]
 
+lemma rewrite_primrec :
+    Primrec₂ (fun v p => (Rew.rewrite v) p : (Fin k → Subterm L μ n) → Subterm L (Fin k) n → Subterm L μ n) := by
+  have : Primrec₂ (fun v t => (Rew.bind (#·) v) t : (Fin k → Subterm L μ n) → Subterm L (Fin k) n → Subterm L μ n) :=
+    to₂' <| bind_primrec (.const _) (to₂' <| Primrec.finArrow_app (fst.comp fst) snd) snd
+  exact this.of_eq <| by intro v p; rfl
+
+lemma castLE_primrec (h : n₁ ≤ n₂) : Primrec (Rew.castLE h : Subterm L μ n₁ → Subterm L μ n₂) := by
+  rw[Rew.eq_bind (Rew.castLE h)]; simp[Function.comp]
+  exact bind_primrec (const _) (Subterm.fvar_primrec.comp snd) Primrec.id
+
 lemma substs_primrec :
     Primrec₂ (fun v p => (Rew.substs v) p : (Fin n → Subterm L μ n') → Subterm L μ n → Subterm L μ n') := by
   have : Primrec₂ (fun v t => (Rew.bind v (&·)) t : (Fin n → Subterm L μ n') → Subterm L μ n → Subterm L μ n') :=
@@ -439,14 +449,14 @@ lemma emb_primrec : Primrec (Rew.emb : Subterm L Empty n → Subterm L μ n) := 
 
 namespace Operator
 
-instance (k) : Primcodable (Operator L k) := Primcodable.ofEquiv (Subterm L Empty k) equiv
+instance (k) : Primcodable (Operator L k) := Primcodable.ofEquiv (TermFin L k) equiv
 
 lemma term_primrec : Primrec (@Operator.term L k) := Primrec.of_equiv (e := @equiv L k)
 
 lemma mk_primrec : Primrec (@Operator.mk L k) := Primrec.of_equiv_symm (e := @equiv L k)
 
 lemma operator_primrec : Primrec₂ (operator : Operator L k → (Fin k → Subterm L μ n) → Subterm L μ n) :=
-  substs_primrec.comp₂ .right (emb_primrec.comp $ term_primrec.comp .fst)
+  rewrite_primrec.comp₂ .right ((castLE_primrec _).comp $ term_primrec.comp .fst)
 
 lemma comp_primrec₂ (o : Operator L 2) : Primrec₂ (fun o₁ o₂ => comp o ![o₁, o₂] : Operator L l → Operator L l → Operator L l) :=
   mk_primrec.comp <| operator_primrec.comp (.const o) (Primrec.encode_iff.mp $ by

@@ -14,6 +14,8 @@ scoped prefix:max "#" => Subterm.bvar
 
 abbrev Term (L : Language.{u}) (μ : Type v) := Subterm L μ 0
 
+abbrev TermFin (L : Language.{u}) (n : ℕ) := Subterm L (Fin n) 0
+
 abbrev SyntacticSubterm (L : Language.{u}) (n : ℕ) := Subterm L ℕ n
 
 abbrev SyntacticTerm (L : Language.{u}) := SyntacticSubterm L 0
@@ -225,6 +227,12 @@ variable (f : μ₁ → Subterm L μ₂ n)
 
 @[simp] lemma rewrite_bvar (x : Fin n) : rewrite e (#x : Subterm L μ₁ n) = #x := rfl
 
+lemma rewrite_comp_rewrite (v : μ₂ → Subterm L μ₃ n) (w : μ₁ → Subterm L μ₂ n) :
+    (rewrite v).comp (rewrite w) = rewrite (rewrite v ∘ w) :=
+  by ext <;> simp[comp_app]
+
+@[simp] lemma rewrite_eq_id : (rewrite Subterm.fvar : Rew L μ n μ n) = Rew.id := by ext <;> simp
+
 end rewrite
 
 section rewriteMap
@@ -300,6 +308,8 @@ section castLE
 
 @[simp] lemma castLe_fvar {n'} (h : n ≤ n') (x : μ) : castLE h (&x : Subterm L μ n) = &x := rfl
 
+@[simp] lemma castLe_eq_id {h} : (castLE h : Rew L μ n μ n) = Rew.id := by ext <;> simp
+
 end castLE
 
 section q
@@ -345,6 +355,14 @@ lemma q_rewrite (f : μ₁ → Subterm L μ₂ n) :
 
 @[simp] lemma qpow_emb {o : Type v₁} [e : IsEmpty o] {n k} :
     (emb (L := L) (o := o) (μ := μ₂) (n := n)).qpow k = emb := by induction k <;> simp[*]
+
+@[simp] lemma q_castLE {n n'} (h : n ≤ n') :
+    (castLE h : Rew L μ n μ n').q = castLE (Nat.add_le_add_right h 1) := by
+  ext x <;> simp; cases x using Fin.cases <;> simp
+
+@[simp] lemma qpow_castLE {n n'} (h : n ≤ n') :
+    (castLE h : Rew L μ n μ n').qpow k = castLE (Nat.add_le_add_right h k) := by
+  induction k <;> simp[*]
 
 lemma q_substs (w : Fin n → Subterm L μ n') :
     (substs w).q = substs (#0 :> bShift ∘ w) := by ext x; { cases x using Fin.cases <;> simp }; { simp }
@@ -459,6 +477,10 @@ lemma free_comp_substs_eq_substs_comp_shift {n'} (w : Fin n' → SyntacticSubter
 @[simp] lemma free_bShift_app (t : SyntacticSubterm L 0) : free (bShift t) = shift t := by simp[←comp_app]
 
 @[simp] lemma substs_bShift_app (v : Fin 1 → Subterm L μ 0) : substs v (bShift t) = t := by simp[←comp_app]
+
+lemma rewrite_comp_fix_eq_substs (t) :
+    ((rewrite (t :>ₙ (&·))).comp free : SyntacticRew L 1 0) = substs ![t] := by
+  ext x <;> simp[comp_app, Fin.eq_zero]
 
 section q
 
@@ -582,22 +604,22 @@ lemma lMap_fix (t : SyntacticSubterm L₁ n) : (fix t).lMap Φ = fix (t.lMap Φ)
 end lMap
 
 structure Operator (L : Language.{u}) (n : ℕ) where
-  term : Subterm L Empty n
+  term : TermFin L n
 
 abbrev Const (L : Language.{u}) := Operator L 0
 
-def Subterm.fn {k} (f : L.func k) : Operator L k := ⟨Subterm.func f (#·)⟩
+def Subterm.fn {k} (f : L.func k) : Operator L k := ⟨Subterm.func f (&·)⟩
 
 namespace Operator
 
-def equiv : Operator L n ≃ Subterm L Empty n where
+def equiv : Operator L n ≃ TermFin L n where
   toFun := Operator.term
   invFun := Operator.mk
   left_inv := by intro _; simp
   right_inv := by intro _; simp
 
 def operator {arity : ℕ} (o : Operator L arity) (v : Fin arity → Subterm L μ n) : Subterm L μ n :=
-  Rew.substs v (Rew.emb o.term)
+  Rew.rewrite v (Rew.castLE n.zero_le o.term)
 
 def const (c : Const L) : Subterm L μ n := c.operator ![]
 
@@ -608,13 +630,12 @@ def comp (o : Operator L k) (w : Fin k → Operator L l) : Operator L l :=
 
 lemma operator_comp (o : Operator L k) (w : Fin k → Operator L l) (v : Fin l → Subterm L μ n) :
   (o.comp w).operator v = o.operator (fun x => (w x).operator v) := by
-    simp[operator, comp, ←Rew.comp_app]; congr 1
-    ext <;> simp[Rew.comp_app]; contradiction
+    simp[operator, comp, ←Rew.comp_app]; congr 1; ext <;> simp[Rew.comp_app]
 
-def bvar (x : Fin n) : Operator L n := ⟨#x⟩
+def fvar (x : Fin n) : Operator L n := ⟨&x⟩
 
-lemma operator_bvar (x : Fin k) (v : Fin k → Subterm L μ n) : (bvar x).operator v = v x := by
-  simp[operator, bvar]
+lemma operator_bvar (x : Fin k) (v : Fin k → Subterm L μ n) : (fvar x).operator v = v x := by
+  simp[operator, fvar]
 
 -- f.operator ![ ... f.operator ![f.operator ![z, t 0], t 1], ... ,t (n-1)]
 def foldr (f : Operator L 2) (z : Operator L k) : List (Operator L k) → Operator L k
@@ -630,7 +651,7 @@ def foldr (f : Operator L 2) (z : Operator L k) : List (Operator L k) → Operat
 
 def iterr (f : Operator L 2) (z : Const L) : (n : ℕ) → Operator L n
   | 0     => z
-  | _ + 1 => f.foldr (bvar 0) (List.ofFn fun x => bvar x.succ)
+  | _ + 1 => f.foldr (fvar 0) (List.ofFn fun x => fvar x.succ)
 
 @[simp] lemma iterr_zero (f : Operator L 2) (z : Const L) : f.iterr z 0 = z := rfl
 
@@ -658,17 +679,17 @@ protected class Sub (L : Language) where
 protected class Div (L : Language) where
   div : Subterm.Operator L 2
 
-instance [Language.Add L] : Operator.Add L := ⟨⟨Subterm.func Language.Add.add Subterm.bvar⟩⟩
+instance [Language.Add L] : Operator.Add L := ⟨⟨Subterm.func Language.Add.add Subterm.fvar⟩⟩
 
-instance [Language.Mul L] : Operator.Mul L := ⟨⟨Subterm.func Language.Mul.mul Subterm.bvar⟩⟩
+instance [Language.Mul L] : Operator.Mul L := ⟨⟨Subterm.func Language.Mul.mul Subterm.fvar⟩⟩
 
 lemma Zero.term_eq [L.Zero] : (@Zero.zero L _).term = Subterm.func Language.Zero.zero ![] := rfl
 
 lemma One.term_eq [L.One] : (@One.one L _).term = Subterm.func Language.One.one ![] := rfl
 
-lemma Add.term_eq [L.Add] : (@Add.add L _).term = Subterm.func Language.Add.add Subterm.bvar := rfl
+lemma Add.term_eq [L.Add] : (@Add.add L _).term = Subterm.func Language.Add.add Subterm.fvar := rfl
 
-lemma Mul.term_eq [L.Mul] : (@Mul.mul L _).term = Subterm.func Language.Mul.mul Subterm.bvar := rfl
+lemma Mul.term_eq [L.Mul] : (@Mul.mul L _).term = Subterm.func Language.Mul.mul Subterm.fvar := rfl
 
 open Language Subterm
 
@@ -714,7 +735,7 @@ variable (ω : Rew L μ₁ n₁ μ₂ n₂)
 protected lemma operator (o : Operator L k) (v : Fin k → Subterm L μ₁ n₁) :
     ω (o.operator v) = o.operator (fun i => ω (v i)) := by
   simp[Operator.operator, ←comp_app]; congr 1
-  ext <;> simp[comp_app]; try contradiction
+  ext x <;> simp[comp_app]; exact x.elim0'
 
 protected lemma operator' (o : Operator L k) (v : Fin k → Subterm L μ₁ n₁) :
     ω (o.operator v) = o.operator (ω ∘ v) := ω.operator o v

@@ -1000,6 +1000,18 @@ lemma bind_primrec {b : σ → Fin n₁ → Subterm L μ₂ n₂} {e : σ → μ
       intro x
       simp[Encodable.encode_ofEquiv subfEquiv, Encodable.Subtype.encode_eq, subfEquiv_bind_eq_bind]
 
+lemma rewrite_primrec :
+    Primrec₂ (fun v p => (Rew.rewrite v).hom p : (Fin k → Subterm L μ n) → Subformula L (Fin k) n → Subformula L μ n) := by
+  have : Primrec₂ (fun v p => (Rew.bind (#·) v).hom p : (Fin k → Subterm L μ n) → Subformula L (Fin k) n → Subformula L μ n) :=
+    to₂' <| bind_primrec (.const _) (to₂' <| Primrec.finArrow_app (fst.comp fst) snd) snd
+  exact this.of_eq <| by intro v p; rfl
+
+lemma rewrite₁_primrec :
+    Primrec₂ (fun t p => p&[t] : Subterm L μ n → Subformula L (Fin 1) n → Subformula L μ n) :=
+  rewrite_primrec.comp₂ (Primrec₂.encode_iff.mp $
+    (Primrec.encode.comp₂ (list_cons.comp₂ Primrec₂.left (Primrec₂.const []))).of_eq
+    <| by intro x _; simp[encode_finArrow]) Primrec₂.right
+
 lemma substs_primrec :
     Primrec₂ (fun v p => (Rew.substs v).hom p : (Fin n → Subterm L μ n') → Subformula L μ n → Subformula L μ n') := by
   have : Primrec₂ (fun v p => (Rew.bind v (&·)).hom p : (Fin n → Subterm L μ n') → Subformula L μ n → Subformula L μ n') :=

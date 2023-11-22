@@ -116,8 +116,12 @@ lemma val_rew (ω : Rew L μ₁ n₁ μ₂ n₂) (t : Subterm L μ₁ n₁) :
     (ω t).val s e₂ ε₂ = t.val s (val s e₂ ε₂ ∘ ω ∘ bvar) (val s e₂ ε₂ ∘ ω ∘ fvar) :=
   by induction t <;> simp[*, Rew.func, val_func]
 
-lemma val_substs {n'} (w : Fin n' → Subterm L μ n) (t : Subterm L μ n') :
-    (Rew.substs w t).val s e ε = t.val s (fun x => (w x).val s e ε) ε :=
+lemma val_rewrite (f : μ₁ → Subterm L μ₂ n) (t : Subterm L μ₁ n) :
+    (Rew.rewrite f t).val s e ε₂ = t.val s e (fun x => (f x).val s e ε₂) :=
+  by simp[val_rew]; congr
+
+lemma val_substs (w : Fin n₁ → Subterm L μ n₂) (t : Subterm L μ n₁) :
+    (Rew.substs w t).val s e₂ ε = t.val s (fun x => (w x).val s e₂ ε) ε :=
   by simp[val_rew]; congr
 
 @[simp] lemma val_bShift (a : M) (t : Subterm L μ n) :
@@ -127,12 +131,16 @@ lemma val_substs {n'} (w : Fin n' → Subterm L μ n) (t : Subterm L μ n') :
     (Rew.emb t : Subterm L μ n).val s e ε = t.val s e i.elim := by
   simp[val_rew]; congr; { funext x; exact i.elim' x }
 
+@[simp] lemma val_castLE (h : n₁ ≤ n₂) (t : Subterm L μ n₁) :
+    (Rew.castLE h t).val s e₂ ε = t.val s (fun x => e₂ (x.castLE h)) ε  := by
+  simp[val_rew]; congr
+
 def Operator.val {M : Type w} [s : Structure L M] (o : Operator L k) (v : Fin k → M) : M :=
-  Subterm.val s v Empty.elim o.term
+  Subterm.val s ![] v o.term
 
 lemma val_operator {k} (o : Operator L k) (v) :
     val s e ε (o.operator v) = o.val (fun x => (v x).val s e ε) := by
-  simp[Operator.operator, val_substs]; congr; funext x; contradiction
+  simp[Operator.operator, val_rewrite, Operator.val]; congr; funext x; exact x.elim0
 
 @[simp] lemma val_const (o : Const L) :
     val s e ε o.const = o.val ![] := by
@@ -384,12 +392,21 @@ lemma eval_map (b : Fin n₁ → Fin n₂) (f : μ₁ → μ₂) (e : Fin n₂ �
     Eval s e ε ((Rew.map b f).hom p) ↔ Eval s (e ∘ b) (ε ∘ f) p :=
   by simp[eval_rew, Function.comp]
 
+lemma eval_rewrite (f : μ₁ → Subterm L μ₂ n) (p : Subformula L μ₁ n) :
+    Eval s e ε₂ ((Rew.rewrite f).hom p) ↔ Eval s e (fun x => (f x).val s e ε₂) p :=
+  by simp[eval_rew, Function.comp]
+
+@[simp] lemma eval_castLE (h : n₁ ≤ n₂) (p : Subformula L μ n₁) :
+    Eval s e₂ ε ((Rew.castLE h).hom p) ↔ Eval s (fun x => e₂ (x.castLE h)) ε p := by
+  simp[eval_rew, Function.comp]
+
 lemma eval_substs {k} (w : Fin k → Subterm L μ n) (p : Subformula L μ k) :
     Eval s e ε ((Rew.substs w).hom p) ↔ Eval s (fun i => (w i).val s e ε) ε p :=
   by simp[eval_rew, Function.comp]
 
 @[simp] lemma eval_emb (p : Subformula L Empty n) :
-    Eval s e ε (Rew.emb.hom p) ↔ Eval s e Empty.elim p := by simp[eval_rew, Function.comp]; apply iff_of_eq; congr; funext x; contradiction
+    Eval s e ε (Rew.emb.hom p) ↔ Eval s e Empty.elim p := by
+  simp[eval_rew, Function.comp]; apply iff_of_eq; congr; funext x; contradiction
 
 section Syntactic
 
@@ -406,7 +423,7 @@ variable (ε : ℕ → M)
 end Syntactic
 
 def Operator.val {M : Type w} [s : Structure L M] {k} (o : Operator L k) (v : Fin k → M) : Prop :=
-  Subformula.Eval s v Empty.elim o.sentence
+  Subformula.Eval s ![] v o.sentence
 
 @[simp] lemma val_operator_and {k} {o₁ o₂ : Operator L k} {v : Fin k → M} :
     (o₁.and o₂).val v ↔ o₁.val v ∧ o₂.val v := by simp[Operator.and, Operator.val]
@@ -416,7 +433,7 @@ def Operator.val {M : Type w} [s : Structure L M] {k} (o : Operator L k) (v : Fi
 
 lemma eval_operator {k} {o : Operator L k} {v : Fin k → Subterm L μ n} :
     Eval s e ε (o.operator v) ↔ o.val (fun i => (v i).val s e ε) := by
-  simp[Operator.operator, eval_substs, Operator.val]
+  simp[Operator.operator, eval_rewrite, Operator.val, Matrix.empty_eq]
 
 @[simp] lemma eval_operator₀ {o : Const L} {v} :
     Eval s e ε (o.operator v) ↔ o.val (M := M) ![] := by
