@@ -77,7 +77,7 @@ lemma list_dlookup' [DecidableEq α] : Primrec₂ (List.dlookup' : α → List (
 lemma list_mapGraph [DecidableEq α] : Primrec₂ (List.mapGraph : List (α × β) → List α → List β) :=
   to₂ <| list_bind snd (option_toList.comp₂ $ list_dlookup'.comp₂ Primrec₂.right (fst.comp₂ Primrec₂.left))
 
-section strong_rec
+section nat_omega_rec
 
 variable [DecidableEq α]
 
@@ -125,7 +125,7 @@ private lemma graph_eq (m : α → ℕ) (f : α → σ) (l : α → List α) (g 
       · exact H a'
       · exact List.subset_bind_of_mem ha' l }
 
-lemma strong_rec {m : α → ℕ} (f : α → σ) {l : α → List α} {g : α → List σ → Option σ}
+lemma nat_omega_rec {m : α → ℕ} (f : α → σ) {l : α → List α} {g : α → List σ → Option σ}
   (hm : Primrec m) (hl : Primrec l) (hg : Primrec₂ g)
   (Ord : ∀ a, ∀ a' ∈ l a, m a' < m a)
   (H : ∀ a, g a ((l a).map f) = some (f a)) : Primrec f := by
@@ -135,15 +135,15 @@ lemma strong_rec {m : α → ℕ} (f : α → σ) {l : α → List α} {g : α �
   exact option_some_iff.mp <| this.of_eq <| fun a => by
     simp[graph_eq m f l g a Ord H (m a + 1) (by rfl), hist]
 
-end strong_rec
+end nat_omega_rec
 
-lemma strong_rec_prod [DecidableEq α] {t : α → ℕ → α} (f : α → ℕ → σ) {g : α × ℕ → List σ → Option σ}
+lemma nat_omega_rec_prod [DecidableEq α] {t : α → ℕ → α} (f : α → ℕ → σ) {g : α × ℕ → List σ → Option σ}
   (ht : Primrec₂ t) (hg : Primrec₂ g)
   (H : ∀ a k, g (a, k) ((List.range k).map (f (t a k))) = some (f a k)) : Primrec₂ f := by
   have hm : Primrec (fun p => p.2 : α × ℕ → ℕ) := snd
   have hl : Primrec (fun p => (List.range p.2).map fun x => (t p.1 p.2, x) : α × ℕ → List (α × ℕ)) :=
     list_map (list_range.comp snd) (Primrec₂.pair.comp₂ (ht.comp₂ (fst.comp₂ Primrec₂.left) (snd.comp₂ Primrec₂.left)) Primrec₂.right)
-  have := strong_rec (fun (p : α × ℕ) => f p.1 p.2) hm hl hg (by simp) (by rintro ⟨a, k⟩; simp[Function.comp, H])
+  have := nat_omega_rec (fun (p : α × ℕ) => f p.1 p.2) hm hl hg (by simp) (by rintro ⟨a, k⟩; simp[Function.comp, H])
   exact to₂ this
 
 end Primrec

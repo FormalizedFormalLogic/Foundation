@@ -1,5 +1,5 @@
 import Logic.Vorspiel.Computability
-import Logic.Vorspiel.StrongRec
+import Logic.Vorspiel.OmegaRec
 
 attribute [-instance] WType.instEncodableWType Encodable.finPi Encodable.fintypeArrowOfEncodable
 
@@ -453,7 +453,7 @@ lemma w_elimvL_param [Inhabited (WType β)] {fs : τ → α × σ → σ} {fγ :
         hfγ.comp₂ (fst.comp₂ Primrec₂.left)
           <| Primrec₂.pair.comp₂ (fst.comp₂ $ snd.comp₂ Primrec₂.left)
           <| Primrec₂.pair.comp₂ (fst.comp₂ $ w_inversion.comp₂ $ snd.comp₂ $ snd.comp₂ Primrec₂.left) Primrec₂.right
-      apply strong_rec _ hm hl (option_some.comp₂ hg)
+      apply nat_omega_rec _ hm hl (option_some.comp₂ hg)
         (by rintro ⟨z, x, ⟨a, f⟩⟩ ⟨z', x', w'⟩
             simp[inversion, Function.comp, List.mem_ofFn]
             rintro rfl rfl i rfl; exact depth_lt_depth_mk _ _ _)

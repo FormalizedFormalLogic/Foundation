@@ -808,7 +808,7 @@ lemma bindq_param_primrec {b : σ → ℕ → UTerm L μ₂} {e : σ → μ₁ �
     have hm : Primrec (fun (q : σ × ℕ × UFormula L μ₁) => q.2.2.depth) := depth_primrec.comp (snd.comp snd)
     have hl : Primrec (bindqL : σ × ℕ × UFormula L μ₁ → List (σ × ℕ × UFormula L μ₁)) := bindqL_primrec
     have hg : Primrec₂ (bindqG b e : σ × ℕ × UFormula L μ₁ → List (UFormula L μ₂) → Option (UFormula L μ₂)) := bindqG_primrec hb he
-    have := strong_rec (fun (q : σ × ℕ × UFormula L μ₁) => bindq (b q.1) (e q.1) q.2.1 q.2.2) hm hl hg
+    have := nat_omega_rec (fun (q : σ × ℕ × UFormula L μ₁) => bindq (b q.1) (e q.1) q.2.1 q.2.2) hm hl hg
       (by rintro ⟨x₁, m₁, p₁⟩ ⟨x₂, m₂, p₂⟩; simp[bindqL]
           cases p₁ <;> simp[inversion]
           case and => rintro (⟨rfl, rfl, rfl⟩ | ⟨rfl, rfl, rfl⟩) <;> simp[depth, Nat.lt_succ]
