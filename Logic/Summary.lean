@@ -15,14 +15,15 @@ theorem soundness_theorem {σ : Sentence L} : T ⊢ σ → T ⊨ σ := FirstOrde
 
 theorem completeness_theorem {σ : Sentence L} : T ⊨ σ → T ⊢ σ := FirstOrder.completeness
 
-open Arith
+open Arith FirstIncompleteness
 
 variable (T : Theory ℒₒᵣ) [EqTheory T] [PAminus T] [DecidablePred T] [SigmaOneSound T] [Theory.Computable T]
 
 theorem first_incompleteness_theorem : ¬System.Complete T :=
   FirstOrder.Arith.first_incompleteness T
 
-theorem undecidable_sentence : ∃ σ : Sentence ℒₒᵣ, ¬T ⊢! σ ∧ ¬T ⊢! ~σ :=
-  FirstOrder.Arith.exists_undecidable_sentence T
+theorem undecidable_sentence :
+    ¬T ⊢! undecidableSentence T ∧ ¬T ⊢! ~undecidableSentence T :=
+  FirstOrder.Arith.undecidable T
 
 end LO.Summary.FirstOrder

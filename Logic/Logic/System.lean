@@ -40,6 +40,11 @@ infix:45 " ⊢! " => System.Provable
 
 def Complete (T : Set F) : Prop := ∀ f, (T ⊢! f) ∨ (T ⊢! ~f)
 
+def Independent (T : Set F) (f : F) : Prop := ¬T ⊢! f ∧ ¬T ⊢! ~f
+
+lemma incomplete_iff_exists_independent {T : Set F} :
+    ¬Complete T ↔ ∃ f, Independent T f := by simp[Complete, not_or, Independent]
+
 end System
 
 def System.hom [System F] {G : Type u} [LogicSymbol G] (F : G →L F) : System G where
