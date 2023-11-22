@@ -222,12 +222,12 @@ attribute [-instance] Classical.propDecidable
 
 variable (T : Theory ℒₒᵣ) [EqTheory T] [PAminus T] [DecidablePred T]
 
-theorem firstIncompleteness [SigmaOneSound T] [Theory.Computable T] : ¬System.Complete T :=
+theorem first_incompleteness [SigmaOneSound T] [Theory.Computable T] : ¬System.Complete T :=
   FirstIncompleteness.main
 
 lemma exists_undecidable_sentence [SigmaOneSound T] [Theory.Computable T] :
     ∃ σ : Sentence ℒₒᵣ, ¬T ⊢! σ ∧ ¬T ⊢! ~σ := by
-  simpa[System.Complete, not_or] using firstIncompleteness T
+  simpa[System.Complete, not_or] using first_incompleteness T
 
 end Arith
 
