@@ -10,7 +10,7 @@ open Language
 
 namespace Semantics
 
-instance standardModel : Structure oRing ℕ where
+instance standardModel : Structure ℒₒᵣ ℕ where
   func := fun _ f =>
     match f with
     | ORing.Func.zero => fun _ => 0
@@ -22,27 +22,27 @@ instance standardModel : Structure oRing ℕ where
     | ORing.Rel.eq => fun v => v 0 = v 1
     | ORing.Rel.lt => fun v => v 0 < v 1
 
-instance : Structure.Eq oRing ℕ :=
+instance : Structure.Eq ℒₒᵣ ℕ :=
   ⟨by intro a b; simp[standardModel, Subformula.Operator.val, Subformula.Operator.Eq.sentence_eq, Subformula.eval_rel]⟩
 
 namespace standardModel
 variable {μ : Type v} (e : Fin n → ℕ) (ε : μ → ℕ)
 
-instance : Structure.Zero oRing ℕ := ⟨rfl⟩
+instance : Structure.Zero ℒₒᵣ ℕ := ⟨rfl⟩
 
-instance : Structure.One oRing ℕ := ⟨rfl⟩
+instance : Structure.One ℒₒᵣ ℕ := ⟨rfl⟩
 
-instance : Structure.Add oRing ℕ := ⟨fun _ _ => rfl⟩
+instance : Structure.Add ℒₒᵣ ℕ := ⟨fun _ _ => rfl⟩
 
-instance : Structure.Mul oRing ℕ := ⟨fun _ _ => rfl⟩
+instance : Structure.Mul ℒₒᵣ ℕ := ⟨fun _ _ => rfl⟩
 
-instance : Structure.Eq oRing ℕ := ⟨fun _ _ => iff_of_eq rfl⟩
+instance : Structure.Eq ℒₒᵣ ℕ := ⟨fun _ _ => iff_of_eq rfl⟩
 
-instance : Structure.LT oRing ℕ := ⟨fun _ _ => iff_of_eq rfl⟩
+instance : Structure.LT ℒₒᵣ ℕ := ⟨fun _ _ => iff_of_eq rfl⟩
 
-instance : ORing oRing := ORing.mk
+instance : ORing ℒₒᵣ := ORing.mk
 
-lemma modelsTheoryPAminusAux : ℕ ⊧* Theory.PAminus oRing := by
+lemma modelsTheoryPAminusAux : ℕ ⊧* Theory.PAminus ℒₒᵣ := by
   intro σ h
   rcases h <;> simp[models_def, ←le_iff_eq_or_lt]
   case addAssoc => intro l m n; exact add_assoc l m n
@@ -56,21 +56,21 @@ lemma modelsTheoryPAminusAux : ℕ ⊧* Theory.PAminus oRing := by
   case ltTrans => intro l m n; exact Nat.lt_trans
   case ltTri => intro n m; exact Nat.lt_trichotomy n m
 
-theorem modelsTheoryPAminus : ℕ ⊧* Axiom.PAminus oRing := by
+theorem modelsTheoryPAminus : ℕ ⊧* Axiom.PAminus ℒₒᵣ := by
   simp[Axiom.PAminus, modelsTheoryPAminusAux]
 
-lemma modelsSuccInd (σ : Subsentence oRing (k + 1)) : ℕ ⊧ (Arith.succInd σ) := by
+lemma modelsSuccInd (σ : Subsentence ℒₒᵣ (k + 1)) : ℕ ⊧ (Arith.succInd σ) := by
   simp[succInd, models_iff, Matrix.constant_eq_singleton, Matrix.comp_vecCons', Subformula.eval_substs]
   intro e hzero hsucc x; induction' x with x ih
   · exact hzero
   · exact hsucc x ih
 
-lemma modelsPeano : ℕ ⊧* Axiom.Peano oRing :=
+lemma modelsPeano : ℕ ⊧* Axiom.Peano ℒₒᵣ :=
   by simp[Axiom.Peano, Axiom.Ind, Theory.IndScheme, modelsSuccInd, modelsTheoryPAminus]
 
 end standardModel
 
-theorem Peano.Consistent : System.Consistent (Axiom.Peano oRing) :=
+theorem Peano.Consistent : System.Consistent (Axiom.Peano ℒₒᵣ) :=
   Sound.consistent_of_model standardModel.modelsPeano
 
 variable (L : Language.{u}) [ORing L]

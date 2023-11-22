@@ -691,6 +691,10 @@ lemma numeral_succ (hz : z ≠ 0) : numeral L (z + 1) = Operator.Add.add.comp ![
 lemma numeral_add_two : numeral L (z + 2) = Operator.Add.add.comp ![numeral L (z + 1), One.one] :=
   numeral_succ (by simp)
 
+abbrev godelNumber (L : Language) [Operator.Zero L] [Operator.One L] [Operator.Add L]
+    {α : Type*} [Primcodable α] (a : α) : Subterm.Const L :=
+  Subterm.Operator.numeral L (Encodable.encode a)
+
 end numeral
 
 end Operator

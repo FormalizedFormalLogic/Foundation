@@ -38,9 +38,7 @@ lemma Hierarchy.equal {t u : Subterm Language.oRing μ n} : Hierarchy b s “!!t
   simp[Subformula.Operator.operator, Matrix.fun_eq_vec₂,
     Subformula.Operator.Eq.sentence_eq, Subformula.Operator.LT.sentence_eq]
 
-abbrev godelNumber {α : Type*} [Primcodable α] (a : α) : Subterm.Const ℒₒᵣ := Subterm.Operator.numeral ℒₒᵣ (encode a)
-
-notation: max "⸢" a "⸣" => godelNumber a
+scoped notation: max "⸢" a "⸣" => Subterm.Operator.godelNumber ℒₒᵣ a
 
 open Nat.ArithPart₁
 
