@@ -1,4 +1,3 @@
-import Logic.FirstOrder.Arith.Theory
 import Logic.FirstOrder.Arith.Model
 import Mathlib.Algebra.Order.Monoid.Canonical.Defs
 
@@ -215,7 +214,7 @@ variable {T : Theory ℒₒᵣ} [EqTheory T] [PAminus T]
 theorem sigma_one_completeness {σ : Sentence ℒₒᵣ} (hσ : Hierarchy.Sigma 1 σ) :
     ℕ ⊧ σ → T ⊢ σ := fun H =>
   Complete.complete (consequence_of _ _ (fun M _ _ _ _ _ => by
-    haveI : Theory.Mod M (Theory.PAminus ℒₒᵣ) := Theory.Mod.of_ss (T₁ := T) M PAminus.paminus
+    haveI : Theory.Mod M (Theory.PAminus ℒₒᵣ) := Theory.Mod.of_subtheory (T₁ := T) M (Semantics.ofSystemSubtheory _ _)
     simpa using @Model.sigma_one_completeness M _ _ _ _ _ _ hσ ![] (by simpa[models_iff] using H)))
 
 end

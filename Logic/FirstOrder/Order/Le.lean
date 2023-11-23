@@ -75,7 +75,7 @@ inductive Total (L : Language) [Subformula.Operator.Eq L] [Subformula.Operator.L
 end Theory.Order
 
 namespace Order
-variable {T : Theory L} [EqTheory T] [SubTheory (Theory.Order.Total L) T]
+variable {T : Theory L} [EqTheory T]
 
 noncomputable def leIffEqOrLt : T ⊢ “∀ ∀ (#0 ≤ #1 ↔ #0 = #1 ∨ #0 < #1)” :=
   Complete.complete

@@ -28,7 +28,7 @@ def BewTheory.refl (T : Set F) : T ⊢* T := axm
 
 def Consistent (T : Set F) : Prop := IsEmpty (T ⊢ ⊥)
 
-lemma weakening {T U : Set F} {f : F} (b : T ⊢ f) (ss : T ⊆ U) : U ⊢ f := weakening' ss b
+def weakening {T U : Set F} {f : F} (b : T ⊢ f) (ss : T ⊆ U) : U ⊢ f := weakening' ss b
 
 lemma Consistent.of_subset {T U : Set F} (h : Consistent U) (ss : T ⊆ U) : Consistent T := ⟨fun b => h.false (weakening b ss)⟩
 
@@ -38,12 +38,45 @@ abbrev Provable (T : Set F) (f : F) : Prop := Nonempty (T ⊢ f)
 
 infix:45 " ⊢! " => System.Provable
 
-def Complete (T : Set F) : Prop := ∀ f, (T ⊢! f) ∨ (T ⊢! ~f)
+protected def Complete (T : Set F) : Prop := ∀ f, (T ⊢! f) ∨ (T ⊢! ~f)
 
 def Independent (T : Set F) (f : F) : Prop := ¬T ⊢! f ∧ ¬T ⊢! ~f
 
 lemma incomplete_iff_exists_independent {T : Set F} :
-    ¬Complete T ↔ ∃ f, Independent T f := by simp[Complete, not_or, Independent]
+    ¬System.Complete T ↔ ∃ f, Independent T f := by simp[System.Complete, not_or, Independent]
+
+class Subtheory (T U : Set F) where
+  sub : {f : F} → T ⊢ f → U ⊢ f
+
+class Equivalent (T U : Set F) where
+  ofLeft : {f : F} → T ⊢ f → U ⊢ f
+  ofRight : {f : F} → U ⊢ f → T ⊢ f
+
+namespace Subtheory
+
+variable (T U T₁ T₂ T₃ : Set F)
+
+@[refl] instance : Subtheory T T := ⟨id⟩
+
+@[trans] protected def trans [Subtheory T₁ T₂] [Subtheory T₂ T₃] : Subtheory T₁ T₃ :=
+  ⟨fun {f} b => sub (sub b : T₂ ⊢ f)⟩
+
+def ofSubset (h : T ⊆ U) : Subtheory T U := ⟨fun b => weakening b h⟩
+
+end Subtheory
+
+namespace Equivalent
+
+variable (T U T₁ T₂ T₃ : Set F)
+
+@[refl] instance : Equivalent T T := ⟨id, id⟩
+
+@[symm] instance [Equivalent T U] : Equivalent U T := ⟨ofRight, ofLeft⟩
+
+@[trans] protected def trans [Equivalent T₁ T₂] [Equivalent T₂ T₃] : Equivalent T₁ T₃ :=
+  ⟨fun {f} b => ofLeft (ofLeft b : T₂ ⊢ f), fun {f} b => ofRight (ofRight b : T₂ ⊢ f)⟩
+
+end Equivalent
 
 end System
 
@@ -109,5 +142,23 @@ lemma consequence_iff_provable {T : Set F} {f : F} : T ⊨ f ↔ T ⊢! f :=
 ⟨fun h => ⟨complete h⟩, by rintro ⟨b⟩; exact Sound.sound b⟩
 
 end Complete
+
+namespace System
+
+variable [LO.Complete F]
+
+def ofSemanticsSubtheory {T₁ T₂ : Set F} (h : Semantics.Subtheory T₁ T₂) : System.Subtheory T₁ T₂ :=
+  ⟨fun hf => Complete.complete (h (Sound.sound hf))⟩
+
+end System
+
+namespace Semantics
+
+variable [LO.Complete F]
+
+lemma ofSystemSubtheory (T₁ T₂ : Set F) [System.Subtheory T₁ T₂] : Semantics.Subtheory T₁ T₂ :=
+  fun hf => (Sound.sound $ System.Subtheory.sub $ Complete.complete hf)
+
+end Semantics
 
 end LO

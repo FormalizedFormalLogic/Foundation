@@ -207,7 +207,7 @@ lemma consequence_iff_eq {T : Theory L} [EqTheory T] {σ : Sentence L} :
 lemma consequence_iff_eq' {T : Theory L} [EqTheory T] {σ : Sentence L} :
     T ⊨ σ ↔ (∀ (M : Type u) [Inhabited M] [Structure L M] [Structure.Eq L M] [Theory.Mod M T], M ⊧ σ) := by
   rw[consequence_iff_eq]
-  exact ⟨fun h M _ _ _ hT => h M Theory.Mod.modelsTheory, fun h M i s e hT => @h M i s e ⟨hT⟩⟩
+  exact ⟨fun h M _ _ _ hT => h M Semantics.Mod.modelsTheory, fun h M i s e hT => @h M i s e ⟨hT⟩⟩
 
 lemma satisfiableₛ_iff_eq {T : Theory L} [EqTheory T] :
     Semantics.Satisfiableₛ T ↔ (∃ (M : Type u) (_ : Inhabited M) (_ : Structure L M) (_ : Structure.Eq L M), M ⊧* T) := by

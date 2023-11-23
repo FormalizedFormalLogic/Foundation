@@ -39,7 +39,7 @@ macro_rules
   | `(ᵀ“ $n:num ”)                                 => `(Subterm.Operator.const (Operator.numeral _ $n))
   | `(ᵀ“ ᵀ⟨ $d:term ⟩( $t:foterm,* ) ”)            => do
     let v ← t.getElems.foldrM (β := Lean.TSyntax _) (init := ← `(![])) (fun a s => `(ᵀ“$a” :> $s))
-    `(func $d $v)
+    `(Operator.operator $d $v)
   | `(ᵀ“ $t:foterm + $u:foterm ”)                  => `(Operator.Add.add.operator ![ᵀ“$t”, ᵀ“$u”])
   | `(ᵀ“ $t:foterm * $u:foterm ”)                  => `(Operator.Mul.mul.operator ![ᵀ“$t”, ᵀ“$u”])
   | `(ᵀ“ $t:foterm ^ $u:foterm ”)                  => `(Operator.Pow.pow.operator ![ᵀ“$t”, ᵀ“$u”])
@@ -54,8 +54,8 @@ macro_rules
   | `(ᵀ“ ᵀᵇ $t:foterm ”)                           => `(Rew.fix ᵀ“$t”)
   | `(ᵀ“ ( $x ) ”)                                 => `(ᵀ“$x”)
 
-#check (ᵀ“ ᵀ⟨Language.ORing.Func.mul⟩(&2 + &0, ᵀ⟨Language.ORing.Func.zero⟩())” : Subterm Language.oRing ℕ 8)
-#check (ᵀ“ ᵀ⟨Language.ORing.Func.mul⟩(&2 + &0, ᵀ⟨Language.ORing.Func.zero⟩())” : Subterm Language.oRing ℕ 8)
+#check (ᵀ“ ᵀ⟨Operator.Add.add⟩(&2 + &0, ᵀ⟨Operator.Zero.zero⟩())” : Subterm Language.oRing ℕ 8)
+#check (ᵀ“ ᵀ⟨Operator.Add.add⟩(&2 + &0, ᵀ⟨Operator.Zero.zero⟩())” : Subterm Language.oRing ℕ 8)
 #check ᵀ“ᵀ⇑(3 * #3 + 9)”
 #check Subterm.func Language.Mul.mul (ᵀ“1” :> ᵀ“3” :> Matrix.vecEmpty)
 
@@ -184,7 +184,7 @@ macro_rules
   | `(“ ! $t:term ”)                               => `($t)
   | `(“ ⟨ $d:term ⟩( $t:foterm,* ) ”)             => do
     let v ← t.getElems.foldrM (β := Lean.TSyntax _) (init := ← `(![])) (fun a s => `(ᵀ“$a” :> $s))
-    `(rel $d $v)
+    `(Operaator.operator $d $v)
   | `(“ ¬ $p:foformula ”)                         => `(~“$p”)
   | `(“ $t:foterm = $u:foterm ”)                 => `(Operator.operator Operator.Eq.eq ![ᵀ“$t”, ᵀ“$u”])
   | `(“ $t:foterm ≠ $u:foterm ”)                 => `(~(Operator.operator Operator.Eq.eq ![ᵀ“$t”, ᵀ“$u”]))

@@ -557,8 +557,7 @@ abbrev ModelsTheory (M : Type u) [s : Structure L M] (T : Theory L) : Prop :=
 
 scoped infix:55 " ⊧* " => ModelsTheory
 
-class Theory.Mod (M : Type u) [Structure L M] (T : Theory L) :=
-  modelsTheory : M ⊧* T
+abbrev Theory.Mod (M : Type u) [s : Structure L M] (T : Theory L) := Semantics.Mod s T
 
 abbrev Realize (M : Type u) [s : Structure L M] : Formula L M →L Prop := Subformula.Val s id
 
@@ -604,7 +603,7 @@ lemma consequence_iff {T : Theory L} {σ : Sentence L} :
 
 lemma consequence_iff' {T : Theory L} {σ : Sentence L} :
     T ⊨ σ ↔ (∀ (M : Type u) [Inhabited M] [Structure L M] [Theory.Mod M T], M ⊧ σ) :=
-  ⟨fun h M _ _ _ => consequence_iff.mp h M Theory.Mod.modelsTheory,
+  ⟨fun h M _ s _ => Semantics.consequence_iff'.mp h M s,
    fun h M i s hs => @h M i s ⟨hs⟩⟩
 
 lemma satisfiableₛ_iff {T : Theory L} :
@@ -743,13 +742,15 @@ end semanticGe
 
 namespace Mod
 
-variable (M : Type u) [Structure L M] { T : Theory L} [Theory.Mod M T]
+variable (M : Type u) [s : Structure L M] { T : Theory L} [Theory.Mod M T]
 
-lemma models {σ : Sentence L} (hσ : σ ∈ T) : M ⊧ σ :=
-  modelsTheory_iff.mp Theory.Mod.modelsTheory hσ
+lemma models {σ : Sentence L} (hσ : σ ∈ T) : M ⊧ σ := Semantics.Mod.models M s hσ
 
 lemma of_ss {T₁ T₂ : Theory L} [Theory.Mod M T₁] (ss : T₂ ⊆ T₁) : Theory.Mod M T₂ :=
-  ⟨ModelsTheory.of_ss Mod.modelsTheory ss⟩
+  Semantics.Mod.of_ss M s ss
+
+lemma of_subtheory [Inhabited M] {T₁ T₂ : Theory L} [Theory.Mod M T₁] (h : Semantics.Subtheory T₂ T₁) : Theory.Mod M T₂ :=
+  Semantics.Mod.of_subtheory M s h
 
 end Mod
 

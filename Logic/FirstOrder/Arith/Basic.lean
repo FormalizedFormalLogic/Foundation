@@ -67,7 +67,7 @@ lemma consistent_of_sound [Sound T F] (hF : F ⊥) : System.Consistent T :=
 
 end
 
-variable [ORing L] (T : Theory L) [EqTheory T] [SubTheory (Theory.Order.Total L) T]
+variable [ORing L] (T : Theory L) [EqTheory T]
 
 lemma consequence_of (σ : Sentence L)
   (H : ∀ (M : Type u)
@@ -81,7 +81,6 @@ lemma consequence_of (σ : Sentence L)
   letI : Theory.Mod (Structure.Model L M) T := ⟨((ElementaryEquiv.modelsTheory (Structure.Model.elementaryEquiv L M)).mp hT)⟩
   (ElementaryEquiv.models (Structure.Model.elementaryEquiv L M)).mpr
     (H (Structure.Model L M))
-
 
 scoped notation "ℒₒᵣ" => Language.oRing
 

@@ -112,17 +112,17 @@ section
 
 variable {L : Language.{u}} {T : Theory L}
 
-abbrev FinSubTheory (T : Theory L) := {t : Finset (Sentence L) // ↑t ⊆ T}
+abbrev FinSubtheory (T : Theory L) := {t : Finset (Sentence L) // ↑t ⊆ T}
 
-variable (A : FinSubTheory T → Type u) [s : (ι : FinSubTheory T) → Structure L (A ι)]
+variable (A : FinSubtheory T → Type u) [s : (ι : FinSubtheory T) → Structure L (A ι)]
 
-instance : Inhabited (FinSubTheory T) := ⟨∅, by simp⟩
+instance : Inhabited (FinSubtheory T) := ⟨∅, by simp⟩
 
 
-lemma ultrafilter_exists (H : ∀ (ι : FinSubTheory T), (A ι) ⊧* (ι.val : Theory L)) :
-    ∃ 𝓤 : Ultrafilter (FinSubTheory T), Set.image (Subformula.domain A) T ⊆ 𝓤.sets :=
+lemma ultrafilter_exists (H : ∀ (ι : FinSubtheory T), (A ι) ⊧* (ι.val : Theory L)) :
+    ∃ 𝓤 : Ultrafilter (FinSubtheory T), Set.image (Subformula.domain A) T ⊆ 𝓤.sets :=
   Ultrafilter.exists_ultrafilter_of_finite_inter_nonempty _ (by
-    haveI : DecidableEq (Set (FinSubTheory T)) := fun _ _ => Classical.propDecidable _
+    haveI : DecidableEq (Set (FinSubtheory T)) := fun _ _ => Classical.propDecidable _
     simp[Finset.subset_image_iff, Subformula.domain]
     intro t ht
     use t; use ht
@@ -130,14 +130,14 @@ lemma ultrafilter_exists (H : ∀ (ι : FinSubTheory T), (A ι) ⊧* (ι.val : T
     exact H ⟨t, ht⟩ hσ)
 
 lemma compactnessAux :
-    Semantics.Satisfiableₛ T ↔ ∀ ι : FinSubTheory T, Semantics.Satisfiableₛ (ι.val : Theory L) := by
+    Semantics.Satisfiableₛ T ↔ ∀ ι : FinSubtheory T, Semantics.Satisfiableₛ (ι.val : Theory L) := by
   constructor
   · rintro h ⟨t, ht⟩; exact Semantics.satisfiableₛ_of_subset h ht
   · intro h
-    have : ∀ ι : FinSubTheory T, ∃ (M : Type u) (_ : Inhabited M) (_ : Structure L M), M ⊧* (ι.val : Theory L) :=
+    have : ∀ ι : FinSubtheory T, ∃ (M : Type u) (_ : Inhabited M) (_ : Structure L M), M ⊧* (ι.val : Theory L) :=
       by intro ι; exact satisfiableₛ_iff.mp (h ι)
     choose A si s hA using this
-    have : ∃ 𝓤 : Ultrafilter (FinSubTheory T), Set.image (Subformula.domain A) T ⊆ 𝓤.sets := ultrafilter_exists A hA
+    have : ∃ 𝓤 : Ultrafilter (FinSubtheory T), Set.image (Subformula.domain A) T ⊆ 𝓤.sets := ultrafilter_exists A hA
     rcases this with ⟨𝓤, h𝓤⟩
     have : Structure.Uprod A 𝓤 ⊧* T := by intro σ hσ; exact models_Uprod.mpr (h𝓤 $ Set.mem_image_of_mem (Subformula.domain A) hσ)
     exact satisfiableₛ_intro (Structure.Uprod A 𝓤) this

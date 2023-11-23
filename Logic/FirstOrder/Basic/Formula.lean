@@ -851,19 +851,6 @@ abbrev Theory (L : Language.{u}) := Set (Sentence L)
 
 abbrev SyntacticTheory (L : Language.{u}) := Set (SyntacticFormula L)
 
-class SubTheory (T U : Theory L) where
-  sub : T ⊆ U
-
-namespace SubTheory
-
-variable {T U T₁ T₂ T₃ : Theory L}
-
-instance : SubTheory T T := ⟨by rfl⟩
-
-def trans [SubTheory T₁ T₂] [SubTheory T₂ T₃] : SubTheory T₁ T₃ := ⟨subset_trans (sub (T := T₁) (U := T₂)) sub⟩
-
-end SubTheory
-
 def Theory.lMap (Φ : L₁ →ᵥ L₂) (T : Theory L₁) : Theory L₂ := Subformula.lMap Φ '' T
 
 end FirstOrder

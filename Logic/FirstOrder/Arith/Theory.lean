@@ -5,7 +5,7 @@ namespace LO
 namespace FirstOrder
 
 variable {L : Language.{u}} [FirstOrder.ORing L]
-
+  [(k : ℕ) → DecidableEq (L.func k)] [(k : ℕ) → DecidableEq (L.rel k)]
 
 
 namespace Arith
@@ -13,6 +13,11 @@ namespace Arith
 def succInd (p : Subformula L μ (k + 1)) : Formula L μ :=
   “∀* (!((Rew.substs (ᵀ“0” :> (#·))).hom p) → ∀ (!((Rew.substs  (ᵀ“#0” :> (#·.succ))).hom p) →
    !((Rew.substs (ᵀ“#0 + 1” :> (#·.succ))).hom p)) → ∀ !p)”
+
+def succInd' (p : Subformula.Operator L (k + 1)) : Formula L μ :=
+  “∀* (!(p.operator (ᵀ“0” :> (#·))) →
+       ∀ (!(p.operator (#0 :> (#·.succ))) → !(p.operator (ᵀ“#0 + 1” :> (#·.succ)))) →
+       ∀ !(p.operator (#0 :> (#·.succ))))”
 
 def leastNumber (p : Subformula L μ (k + 1)) : Formula L μ :=
   “∀* (∃ !p → ∃ (!p ∧ ∀[#0 < #1] ¬!((Rew.substs (#0 :> (#·.succ.succ))).hom p)))”
@@ -53,15 +58,9 @@ end Theory
 
 variable {L}
 
-class PAminus (T : Theory L) where
-  paminus : Theory.PAminus L ⊆ T
+abbrev PAminus (T : Theory L) := System.Subtheory (Theory.PAminus L) T
 
-attribute [simp] PAminus.paminus
-
-class Ind (U) (T : Theory L) where
-  ind : Theory.IndScheme U ⊆ T
-
-attribute [simp] Ind.ind
+abbrev Ind (U) (T : Theory L) := System.Subtheory (Theory.IndScheme U) T
 
 abbrev IOpen (T : Theory L) := Ind Subformula.qfree T
 
@@ -94,17 +93,15 @@ abbrev Peano : Theory L := Ind Set.univ
 instance : EqTheory (PAminus L) where
   eq := by simp[PAminus]
 
-instance : Arith.PAminus (PAminus L) where
-  paminus := by simp[PAminus]
+instance : Arith.PAminus (PAminus L) := System.Subtheory.ofSubset _ _ (by simp[PAminus])
 
 instance (u : Set (Subsentence L 1)) : EqTheory (Ind u) where
   eq := by simp[Ind]; exact Set.subset_union_of_subset_left (by simp) _
 
-instance (u : Set (Subsentence L 1)) : Arith.PAminus (Ind u) where
-  paminus := by simp[Ind]; exact Set.subset_union_of_subset_left (by simp) _
+instance (u : Set (Subsentence L 1)) : Arith.PAminus (Ind u) :=
+  System.Subtheory.ofSubset _ _ (by simp[Ind, PAminus]; exact Set.subset_union_of_subset_left (by simp) _)
 
-instance (u : Set (Subsentence L 1)) : Arith.Ind u (Ind u) where
-  ind := by simp[Ind]
+instance (u : Set (Subsentence L 1)) : Arith.Ind u (Ind u) := System.Subtheory.ofSubset _ _ (by simp[Ind])
 
 end Axiom
 
