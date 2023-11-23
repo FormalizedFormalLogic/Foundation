@@ -1,5 +1,5 @@
+import Logic.Logic.HilbertStyle
 import Logic.FirstOrder.Incompleteness.FirstIncompleteness
-
 
 namespace LO.FirstOrder.Theory
 
@@ -20,7 +20,11 @@ abbrev Inconsistent := IsEmpty (Theory.Consistent T)
 
 section PropositionalCalculus
 
-variable {T : Theory L} [hComplete : Complete T] [hConsistent : Consistent T]
+open System.IntuitionisticNC
+
+variable {T : Theory L} [System.IntuitionisticNC (Sentence L)]
+
+infixl:50 "⊕" => modusPonens
 
 @[simp]
 lemma weakening [hs : SubTheory T₀ T] : (T₀ ⊢! σ) → (T ⊢! σ) := by simp; intro H; exact ⟨System.weakening H hs.sub⟩;
@@ -35,49 +39,41 @@ lemma consistent_or {T} {σ : Sentence L} : (Theory.Inconsistent (T ∪ {σ})) �
 @[simp]
 lemma axm : T ∪ {σ} ⊢! σ := by sorry
 
-lemma or_intro_left : T ⊢! σ → T ⊢! σ ⋎ π := by sorry
+lemma or_intro_left : T ⊢! σ → T ⊢! σ ⋎ π := by
+  intro H;
+  exact (disj₁ _ _ _) ⊕ H;
 
-lemma or_intro_right : T ⊢! π → T ⊢! σ ⋎ π := by sorry
+lemma or_intro_right : T ⊢! π → T ⊢! σ ⋎ π := by
+  intro H;
+  exact (disj₂ _ _ _) ⊕ H;
 
 lemma or_intro : (T ⊢! σ ∨ T ⊢! π) → T ⊢! σ ⋎ π
   | .inl h => or_intro_left h
   | .inr h => or_intro_right h
 
-lemma or_comm : T ⊢! σ ⋎ π → T ⊢! π ⋎ σ := by sorry;
+lemma or_comm : T ⊢! σ ⋎ π → T ⊢! π ⋎ σ := by
+  intro H;
+  have hl := disj₁ T π σ;
+  have hr := disj₂ T π σ;
+  exact (((disj₃ T _ _ _) ⊕ hr) ⊕ hl) ⊕ H;
 
-/-- TODO: おそらく`T`が`Complete`である必要がある -/
-lemma or_decomp : T ⊢! σ ⋎ π → (T ⊢! σ ∨ T ⊢! π) := by sorry;
-
-lemma or_elim_left : (T ⊢! σ ⋎ π) → (T ⊢! ~σ) → (T ⊢! π) := by
+lemma and_intro : (T ⊢! σ) → (T ⊢! π) → (T ⊢! σ ⋏ π) := by
   intro H₁ H₂;
-  by_contra C;
-  cases or_decomp H₁ with
-  | inl h => sorry; -- have a := hConsistent.consistent σ -- exact hCon.hbConsistent σ h H₂;
-  | inr h => simp at C;
-
-lemma or_elim_right : (T ⊢! σ ⋎ π) → (T ⊢! ~π) → (T ⊢! σ) := by
-  intro H₁ H₂;
-  exact or_elim_left (or_comm H₁) H₂;
-
-lemma and_intro : (T ⊢! σ) → (T ⊢! π) → (T ⊢! σ ⋏ π) := by sorry
+  exact ((conj₃ T σ π) ⊕ H₁) ⊕ H₂;
 
 lemma and_comm : (T ⊢! σ ⋏ π) → (T ⊢! π ⋏ σ) := by
-  simp;
   intro H;
-  sorry
+  have hl := (conj₁ T _ _) ⊕ H;
+  have hr := (conj₂ T _ _) ⊕ H;
+  exact ((conj₃ T π σ) ⊕ hr) ⊕ hl;
 
 lemma and_left : (T ⊢! σ ⋏ π) → (T ⊢! σ) := by
-  simp;
   intro H;
-  sorry
+  exact (conj₁ T σ π) ⊕ H;
 
 lemma and_right : (T ⊢! σ ⋏ π) → (T ⊢! π) := λ H => and_left $ and_comm H
 
-
-lemma imply_decomp : (T ⊢! σ ⟶ π) → (T ⊢! σ) → (T ⊢! π) := by
-  intro H₁ H₂;
-  simp only [imp_eq] at H₁;
-  exact or_elim_left H₁ (by simpa [neg_neg']);
+lemma imply_decomp : (T ⊢! σ ⟶ π) → (T ⊢! σ) → (T ⊢! π) := System.IntuitionisticNC.modusPonens
 
 alias MP := imply_decomp
 
@@ -138,13 +134,18 @@ lemma unprov_imp_right_iff : (T ⊬! σ ⟶ π) → (T ⊢! π ⟷ ρ) → (T �
   exact H₁ $ imply_trans HC $ iff_mpr H₂;
 
 lemma NC : (T ⊢! σ) → (T ⊢! ~σ) → (T ⊢! ⊥) := by
-  intro H₁ H₂; sorry;
+  intro H₁ H₂;
+  have h₁ := imply₁ T σ ⊤ ⊕ H₁;
+  have h₂ := imply₁ T (~σ) ⊤ ⊕ H₂;
+  exact (neg₁ T ⊤ σ ⊕ h₁) ⊕ h₂;
 
-lemma neg_imply_bot {σ} : (T ⊢! ~σ) → (T ⊢! σ ⟶ ⊥) := by sorry;
+lemma neg_imply_bot {σ} : (T ⊢! ~σ) → (T ⊢! σ ⟶ ⊥) := by
+  intro H;
+  simpa [neg_neg'] using (neg₂ T (~σ) ⊥ ⊕ H);
 
 lemma neg_neg : (T ⊢! σ) ↔ (T ⊢! ~~σ) := by simp;
 
-lemma EFQ : T ⊢! ⊥ ⟶ σ := by sorry
+lemma EFQ : T ⊢! ⊥ ⟶ σ := efq T σ
 
 lemma imply_dilemma : T ⊢! σ ⟶ (π ⟶ ρ) → T ⊢! (σ ⟶ π) → T ⊢! (σ ⟶ ρ) := by
   intro H₁ H₂;
