@@ -2,11 +2,13 @@ import Logic.FirstOrder.Incompleteness.Derivability.Theory
 import Logic.FirstOrder.Incompleteness.Derivability.Conditions
 import Logic.FirstOrder.Incompleteness.Derivability.FirstIncompleteness
 
+open LO.System
+
 namespace LO.FirstOrder.Arith.Incompleteness
 
 open FirstOrder.Theory HasProvablePred FirstIncompleteness
 
-variable (T₀ T : Theory ℒₒᵣ) [SubTheory T₀ T]
+variable (T₀ T : Theory ℒₒᵣ) [Subtheory T₀ T]
 variable [Diagonizable T₀ Π 1]
 variable
   [HasProvablePred T]
@@ -20,7 +22,7 @@ open Derivability1 Derivability2 Derivability3
 lemma FormalizedConsistency (σ : Sentence ℒₒᵣ) : T₀ ⊢! ~(Pr[T] ⸢σ⸣) ⟶ ConL[T] := by
   exact imply_contra₀ $ MP D2 $ D1 EFQ
 
-variable (U : Theory ℒₒᵣ) [SubTheory T₀ U] in
+variable (U : Theory ℒₒᵣ) [Subtheory T₀ U] in
 private lemma extend {σ : Sentence ℒₒᵣ}
   : (U ⊢! ConL[T] ⟶ ~Pr[T] ⸢σ⸣) ↔ (U ⊢! (Pr[T] ⸢σ⸣) ⟶ (Pr[T] ⸢~σ⸣)) := by
   apply Iff.intro;

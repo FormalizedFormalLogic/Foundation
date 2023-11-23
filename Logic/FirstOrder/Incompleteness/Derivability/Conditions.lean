@@ -3,6 +3,8 @@ import Logic.FirstOrder.Incompleteness.Derivability.Theory
 notation "Σ" => Bool.true
 notation "Π" => Bool.false
 
+open LO.System
+
 namespace LO.FirstOrder.Arith
 
 variable (T₀ T: Theory ℒₒᵣ)
@@ -53,14 +55,14 @@ section PrCalculus
 
 open Subformula FirstOrder.Theory Derivability1 Derivability2 Derivability3
 
-variable {T₀ T : Theory ℒₒᵣ} [SubTheory T₀ T] [HasProvablePred T]
+variable {T₀ T : Theory ℒₒᵣ} [Subtheory T₀ T] [HasProvablePred T]
 variable [hD1 : Derivability1 T₀ T] [hD2 : Derivability2 T₀ T] [hD3 : Derivability3 T₀ T] [hFC : FormalizedCompleteness T₀ T b n]
 
 lemma Derivability1.D1' {σ : Sentence ℒₒᵣ} : T ⊢! σ → T ⊢! (Pr[T] ⸢σ⸣) := by intro h; exact weakening $ hD1.D1 h;
 
 lemma Derivability2.D2' {σ π : Sentence ℒₒᵣ} : T ⊢! (Pr[T] ⸢σ ⟶ π⸣) ⟶ ((Pr[T] ⸢σ⸣) ⟶ (Pr[T] ⸢π⸣)) := weakening hD2.D2
 
-lemma Derivability2.D2_iff [SubTheory T₀ T] [hd : Derivability2 T₀ T] {σ π : Sentence ℒₒᵣ} : T₀ ⊢! (Pr[T] ⸢σ ⟷ π⸣) ⟶ ((Pr[T] ⸢σ⸣) ⟷ (Pr[T] ⸢π⸣)) := by
+lemma Derivability2.D2_iff [Subtheory T₀ T] [hd : Derivability2 T₀ T] {σ π : Sentence ℒₒᵣ} : T₀ ⊢! (Pr[T] ⸢σ ⟷ π⸣) ⟶ ((Pr[T] ⸢σ⸣) ⟷ (Pr[T] ⸢π⸣)) := by
   sorry;
   -- have a := @Derivability2.D2 T₀ T _ _ _ σ π;
   -- have b := @Derivability2.D2 T₀ T _ _ _ π σ;
@@ -122,9 +124,9 @@ section FixedPoints
 
 open HasProvablePred
 
-variable (T₀ T : Theory ℒₒᵣ) [HasProvablePred T] [SubTheory T₀ T] {n}
+variable (T₀ T : Theory ℒₒᵣ) [HasProvablePred T] [Subtheory T₀ T] {n}
 
-def IsGoedelSentence [SubTheory T₀ T] (G : Sentence ℒₒᵣ) := T₀ ⊢! G ⟷ ~(Pr[T] ⸢G⸣)
+def IsGoedelSentence [Subtheory T₀ T] (G : Sentence ℒₒᵣ) := T₀ ⊢! G ⟷ ~(Pr[T] ⸢G⸣)
 
 lemma existsGoedelSentence
   [hdiag : Diagonizable T₀ Π n] [hdef : Definable.Sigma T n]
@@ -132,7 +134,7 @@ lemma existsGoedelSentence
   have ⟨G, ⟨hH, hd⟩⟩ := hdiag.diag (~ProvablePred T) (Hierarchy.neg hdef.definable);
   existsi G; simpa [IsGoedelSentence, hH, Rew.neg'] using hd;
 
-def IsHenkinSentence [SubTheory T₀ T] (H : Sentence ℒₒᵣ) := T₀ ⊢! H ⟷ (Pr[T] ⸢H⸣)
+def IsHenkinSentence [Subtheory T₀ T] (H : Sentence ℒₒᵣ) := T₀ ⊢! H ⟷ (Pr[T] ⸢H⸣)
 
 lemma existsHenkinSentence
   [hdiag : Diagonizable T₀ Σ n] [hdef : Definable.Sigma T n]
@@ -140,7 +142,7 @@ lemma existsHenkinSentence
   have ⟨H, ⟨hH, hd⟩⟩ := hdiag.diag (ProvablePred T) hdef.definable;
   existsi H; simpa [IsHenkinSentence, hH] using hd;
 
-def IsKrieselSentence [SubTheory T₀ T] (K σ : Sentence ℒₒᵣ) := T₀ ⊢! K ⟷ ((Pr[T] ⸢K⸣) ⟶ σ)
+def IsKrieselSentence [Subtheory T₀ T] (K σ : Sentence ℒₒᵣ) := T₀ ⊢! K ⟷ ((Pr[T] ⸢K⸣) ⟶ σ)
 
 lemma existsKreiselSentence [hdef : Definable.Sigma T n] (σ)
   : ∃ (K : Sentence ℒₒᵣ), IsKrieselSentence T₀ T K σ := by sorry

@@ -3,11 +3,13 @@ import Logic.FirstOrder.Incompleteness.Derivability.Conditions
 import Logic.FirstOrder.Incompleteness.Derivability.FirstIncompleteness
 import Logic.FirstOrder.Incompleteness.Derivability.SecondIncompleteness
 
+open LO.System
+
 namespace LO.FirstOrder.Arith.Incompleteness
 
 open FirstOrder.Theory HasProvablePred
 
-variable (T₀ T : Theory ℒₒᵣ) [hSub : SubTheory T₀ T]
+variable (T₀ T : Theory ℒₒᵣ) [hSub : Subtheory T₀ T]
 variable [Diagonizable T₀ Σ 1] [Diagonizable T₀ Π 1]
 variable
   [HasProvablePred T]
@@ -25,7 +27,7 @@ variable (σ)
 
 /-- Löb's Theorem *with* 2nd Incompleteness Theorem -/
 theorem LoebTheorem : (T ⊢! σ) ↔ (T ⊢! ((Pr[T] ⸢σ⸣) ⟶ σ)) := by
-  have : SubTheory T₀ (T ∪ {~σ}) := SubTheory.instCoeSubTheoryForAllSentenceUnionTheoryInstUnionSetSingletonInstSingletonSet.coe hSub (~σ);
+  have : Subtheory T₀ (T ∪ {~σ}) := by sorry;
   have : Derivability1 T₀ (T ∪ {~σ}) := by sorry;
   have : Derivability2 T₀ (T ∪ {~σ}) := by sorry;
   have : Derivability3 T₀ (T ∪ {~σ}) := by sorry;

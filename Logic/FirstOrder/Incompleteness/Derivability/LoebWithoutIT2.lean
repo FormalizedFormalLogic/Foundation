@@ -2,12 +2,14 @@ import Logic.FirstOrder.Incompleteness.Derivability.Theory
 import Logic.FirstOrder.Incompleteness.Derivability.Conditions
 import Logic.FirstOrder.Incompleteness.Derivability.FirstIncompleteness
 
+open LO.System
+
 namespace LO.FirstOrder.Arith.Incompleteness
 
 open FirstOrder.Theory HasProvablePred FirstIncompleteness
 open Derivability1 Derivability2 Derivability3
 
-variable (T₀ T : Theory ℒₒᵣ) [SubTheory T₀ T]
+variable (T₀ T : Theory ℒₒᵣ) [Subtheory T₀ T]
 variable [Diagonizable T₀ Σ 1] [Diagonizable T₀ Π 1]
 variable
   [hConsis : Theory.Consistent T]

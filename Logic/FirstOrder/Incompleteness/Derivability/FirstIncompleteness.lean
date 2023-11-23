@@ -1,11 +1,13 @@
 import Logic.FirstOrder.Incompleteness.Derivability.Theory
 import Logic.FirstOrder.Incompleteness.Derivability.Conditions
 
+open LO.System
+
 namespace LO.FirstOrder.Arith.Incompleteness
 
 open FirstOrder.Theory HasProvablePred
 
-variable (T₀ T : Theory ℒₒᵣ) [SubTheory T₀ T]
+variable (T₀ T : Theory ℒₒᵣ) [Subtheory T₀ T]
 variable [Diagonizable T₀ Π 1]
 variable
   [hPred : HasProvablePred T]

@@ -1,5 +1,8 @@
+import Logic.Logic.System
 import Logic.Logic.HilbertStyle
 import Logic.FirstOrder.Incompleteness.FirstIncompleteness
+
+open LO.System
 
 namespace LO.FirstOrder.Theory
 
@@ -24,10 +27,18 @@ open System.IntuitionisticNC
 
 variable {T : Theory L} [System.IntuitionisticNC (Sentence L)]
 
+instance : Subtheory T (T ∪ {σ}) where
+  sub := by
+    intro σ' h;
+    exact weakening h (by simp)
+
 infixl:50 "⊕" => modusPonens
 
 @[simp]
-lemma weakening [hs : SubTheory T₀ T] : (T₀ ⊢! σ) → (T ⊢! σ) := by simp; intro H; exact ⟨System.weakening H hs.sub⟩;
+lemma weakening [hs : Subtheory T₀ T] : (T₀ ⊢! σ) → (T ⊢! σ) := by
+  simp;
+  intro H;
+  exact ⟨hs.sub H⟩;
 
 lemma deduction {σ π} : (T ⊢! σ ⟶ π) ↔ (T ∪ {σ} ⊢! π) := by
   apply Iff.intro;
