@@ -30,12 +30,12 @@ Formalizing Logic in Lean4
 ## Theorem
 ### First-Order logic
 
-|                                | Proof                                     | Proposition      | 
-| ----                           | ----                                      | :----:           |
-| Soundness theorem              | `LO.FirstOrder.soundness`                 | `T ⊢ σ → T ⊨ σ` |
-| Completeness theorem           | `LO.FirstOrder.completeness`              | `T ⊨ σ → T ⊢ σ` |
-| Cut-elimination                | `LO.FirstOrder.DerivationCR.hauptsatz`    | `⊢ᶜ Δ → ⊢ᵀ Δ`   |
-| First incompleteness theorem   | `LO.FirstOrder.Arith.firstIncompleteness` | `PAminus T → SigmaOneSound T → Theory.Computable T → ¬System.Complete T` |
+|                                | Proof                                    | 
+| ----                           | ----                                     |
+| Soundness theorem              | `@soundness : ∀ {L : Language} [inst : (k : ℕ) → DecidableEq (Language.func L k)] [inst_1 : (k : ℕ) → DecidableEq (Language.rel L k)] {T : Set (Sentence L)} {σ : Sentence L}, T ⊢ σ → T ⊨ σ` |
+| Completeness theorem           | `@completeness : {L : Language} → [inst : (k : ℕ) → DecidableEq (Language.func L k)] → [inst_1 : (k : ℕ) → DecidableEq (Language.rel L k)] → {T : Theory L} → {σ : Sentence L} → T ⊨ σ → T ⊢ σ` |
+| Cut-elimination                | `@DerivationCR.hauptsatz : {L : Language} → [inst : (k : ℕ) → DecidableEq (Language.func L k)] → [inst_1 : (k : ℕ) → DecidableEq (Language.rel L k)] → {Δ : Sequent L} → ⊢ᶜ Δ → ⊢ᵀ Δ` |
+| First incompleteness theorem   | `@Arith.first_incompleteness : ∀ (T : Theory Language.oRing) [inst : DecidablePred T] [inst_1 : EqTheory T] [inst_2 : Arith.PAminus T] [inst_3 : Arith.SigmaOneSound T] [inst : Theory.Computable T], ¬System.Complete T` |
 
 ## References
 - J. Han, F. van Doorn, A formalization of forcing and the unprovability of the continuum hypothesis
