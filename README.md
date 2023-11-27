@@ -29,6 +29,8 @@ Formalizing Logic in Lean4
 
 ## Theorem
 
+The key results are summarised in `Logic/Summary.lean`.
+
 ### First-Order logic
 
 - Cut-elimination
@@ -48,13 +50,13 @@ theorem completeness_theorem {σ : Sentence L} : T ⊨ σ → T ⊢ σ := FirstO
 
 - Gödel's first incompleteness theorem
 ```lean
-theorem first_incompleteness_theorem :
-    ¬System.Complete T := FirstOrder.Arith.first_incompleteness T
-```
+variable (T : Theory ℒₒᵣ) [DecidablePred T] [EqTheory T] [PAminus T] [SigmaOneSound T] [Theory.Computable T]
 
-```lean
-theorem undecidable_sentence :
-    T ⊬ undecidableSentence T ∧ T ⊬ ~undecidableSentence T := FirstOrder.Arith.undecidable T
+theorem first_incompleteness_theorem : ¬System.Complete T :=
+  FirstOrder.Arith.first_incompleteness T
+
+theorem undecidable_sentence : T ⊬ undecidableSentence T ∧ T ⊬ ~undecidableSentence T :=
+  FirstOrder.Arith.undecidable T
 ```
 
 ## References
