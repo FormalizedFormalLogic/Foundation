@@ -38,9 +38,15 @@ abbrev Provable (T : Set F) (f : F) : Prop := Nonempty (T ⊢ f)
 
 infix:45 " ⊢! " => System.Provable
 
+abbrev Unprovable (T : Set F) (f : F) : Prop := IsEmpty (T ⊢ f)
+
+infix:45 " ⊬ " => System.Unprovable
+
+lemma unprovable_iff_not_provable {T : Set F} {f : F} : T ⊬ f ↔ ¬T ⊢! f := by simp[System.Unprovable]
+
 protected def Complete (T : Set F) : Prop := ∀ f, (T ⊢! f) ∨ (T ⊢! ~f)
 
-def Independent (T : Set F) (f : F) : Prop := ¬T ⊢! f ∧ ¬T ⊢! ~f
+def Independent (T : Set F) (f : F) : Prop := T ⊬ f ∧ T ⊬ ~f
 
 lemma incomplete_iff_exists_independent {T : Set F} :
     ¬System.Complete T ↔ ∃ f, Independent T f := by simp[System.Complete, not_or, Independent]

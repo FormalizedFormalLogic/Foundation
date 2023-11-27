@@ -191,8 +191,6 @@ end representation
 
 namespace FirstIncompleteness
 
-attribute [instance] Classical.propDecidable
-
 variable (T)
 
 private lemma diagRefutation_re : RePred (fun σ => T ⊢! ~σ&[⸢σ⸣]) := by
@@ -220,24 +218,22 @@ lemma diagRefutation_spec (σ : FormulaFin ℒₒᵣ 1) :
 
 lemma independent : System.Independent T γ := by
   have h : T ⊢! γ ↔ T ⊢! ~γ := by simpa using diagRefutation_spec T ρ
-  constructor
-  · intro b
-    exact inconsistent_of_provable_and_refutable' b (h.mp b) (consistent_of_sigmaOneSound T)
-  · intro b
-    exact inconsistent_of_provable_and_refutable' (h.mpr b) b (consistent_of_sigmaOneSound T)
+  exact
+    ⟨System.unprovable_iff_not_provable.mpr
+       (fun b => inconsistent_of_provable_and_refutable' b (h.mp b) (consistent_of_sigmaOneSound T)),
+     System.unprovable_iff_not_provable.mpr
+       (fun b => inconsistent_of_provable_and_refutable' (h.mpr b) b (consistent_of_sigmaOneSound T))⟩
 
 theorem main : ¬System.Complete T := System.incomplete_iff_exists_independent.mpr ⟨γ, independent T⟩
 
 end FirstIncompleteness
-
-attribute [-instance] Classical.propDecidable
 
 variable (T : Theory ℒₒᵣ) [DecidablePred T] [EqTheory T] [PAminus T] [SigmaOneSound T] [Theory.Computable T]
 
 theorem first_incompleteness : ¬System.Complete T := FirstIncompleteness.main T
 
 lemma undecidable :
-    ¬T ⊢! FirstIncompleteness.undecidableSentence T ∧ ¬T ⊢! ~FirstIncompleteness.undecidableSentence T :=
+    T ⊬ FirstIncompleteness.undecidableSentence T ∧ T ⊬ ~FirstIncompleteness.undecidableSentence T :=
   FirstIncompleteness.independent T
 
 end Arith

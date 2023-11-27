@@ -9,22 +9,14 @@ section logicNotation
 @[notation_class] class Tilde (α : Sort _) where
   tilde : α → α
 
-prefix:75 "~" => Tilde.tilde
-
 @[notation_class] class Arrow (α : Sort _) where
   arrow : α → α → α
-
-infixr:60 " ⟶ " => Arrow.arrow
 
 @[notation_class] class Wedge (α : Sort _) where
   wedge : α → α → α
 
-infixr:69 " ⋏ " => Wedge.wedge
-
 @[notation_class] class Vee (α : Sort _) where
   vee : α → α → α
-
-infixr:68 " ⋎ " => Vee.vee
 
 class LogicSymbol (α : Sort _)
   extends Top α, Bot α, Tilde α, Arrow α, Wedge α, Vee α
@@ -32,7 +24,46 @@ class LogicSymbol (α : Sort _)
 @[notation_class] class UnivQuantifier (α : ℕ → Sort _) where
   univ : ∀ {n}, α (n + 1) → α n
 
+@[notation_class] class ExQuantifier (α : ℕ → Sort _) where
+  ex : ∀ {n}, α (n + 1) → α n
+
+@[notation_class] class UnivQuantifier₂ (α : ℕ → ℕ → Sort _) where
+  univ₂₁ : ∀ {m n}, α (m + 1) n → α m n
+  univ₂₂ : ∀ {m n}, α m (n + 1) → α m n
+
+@[notation_class] class ExQuantifier₂ (α : ℕ → ℕ → Sort _) where
+  ex₂₁ : ∀ {m n}, α (m + 1) n → α m n
+  ex₂₂ : ∀ {m n}, α m (n + 1) → α m n
+
+prefix:75 "~" => Tilde.tilde
+
+infixr:60 " ⟶ " => Arrow.arrow
+
+infixr:69 " ⋏ " => Wedge.wedge
+
+infixr:68 " ⋎ " => Vee.vee
+
 prefix:64 "∀' " => UnivQuantifier.univ
+
+prefix:64 "∃' " => ExQuantifier.ex
+
+prefix:64 "∀¹ " => UnivQuantifier₂.univ₂₁
+prefix:64 "∀² " => UnivQuantifier₂.univ₂₂
+
+prefix:64 "∃¹ " => ExQuantifier₂.ex₂₁
+prefix:64 "∃² " => ExQuantifier₂.ex₂₂
+
+attribute [match_pattern]
+  Tilde.tilde
+  Arrow.arrow
+  Wedge.wedge
+  Vee.vee
+  UnivQuantifier.univ
+  ExQuantifier.ex
+  UnivQuantifier₂.univ₂₁
+  UnivQuantifier₂.univ₂₂
+  ExQuantifier₂.ex₂₁
+  ExQuantifier₂.ex₂₂
 
 section UnivQuantifier
 
@@ -42,16 +73,11 @@ def univClosure : {n : ℕ} → α n → α 0
   | 0,     a => a
   | _ + 1, a => univClosure (∀' a)
 
-@[simp] lemma univ_closure_zero (a : α 0) : univClosure a = a := rfl
+@[simp] lemma univClosure_zero (a : α 0) : univClosure a = a := rfl
 
-@[simp] lemma univ_closure_succ {n} (a : α (n + 1)) : univClosure a = univClosure (∀' a) := rfl
+@[simp] lemma univClosure_succ {n} (a : α (n + 1)) : univClosure a = univClosure (∀' a) := rfl
 
 end UnivQuantifier
-
-@[notation_class] class ExQuantifier (α : ℕ → Sort _) where
-  ex : ∀ {n}, α (n + 1) → α n
-
-prefix:64 "∃' " => ExQuantifier.ex
 
 section ExQuantifier
 
@@ -61,13 +87,55 @@ def exClosure : {n : ℕ} → α n → α 0
   | 0,     a => a
   | _ + 1, a => exClosure (∃' a)
 
-@[simp] lemma ex_closure_zero (a : α 0) : exClosure a = a := rfl
+@[simp] lemma exClosure_zero (a : α 0) : exClosure a = a := rfl
 
-@[simp] lemma ex_closure_succ {n} (a : α (n + 1)) : exClosure a = exClosure (∃' a) := rfl
+@[simp] lemma exClosure_succ {n} (a : α (n + 1)) : exClosure a = exClosure (∃' a) := rfl
 
 end ExQuantifier
 
-attribute [match_pattern] Tilde.tilde Arrow.arrow Wedge.wedge Vee.vee UnivQuantifier.univ ExQuantifier.ex
+section UnivQuantifier₂
+
+variable {α : ℕ → ℕ → Sort u} [UnivQuantifier₂ α]
+
+def univClosure₂₁ : {m n : ℕ} → α m n → α 0 n
+  | 0,     _, a => a
+  | _ + 1, _, a => univClosure₂₁ (∀¹ a)
+
+def univClosure₂₂ : {m n : ℕ} → α m n → α m 0
+  | _, 0,     a => a
+  | _, _ + 1, a => univClosure₂₂ (∀² a)
+
+@[simp] lemma univClosure₂₁_zero {n} (a : α 0 n) : univClosure₂₁ a = a := rfl
+
+@[simp] lemma univClosure₂₁_succ {m n} (a : α (m + 1) n) : univClosure₂₁ a = univClosure₂₁ (∀¹ a) := rfl
+
+@[simp] lemma univClosure₂₂_zero {m} (a : α m 0) : univClosure₂₂ a = a := rfl
+
+@[simp] lemma univClosure₂₂_succ {m n} (a : α m (n + 1)) : univClosure₂₂ a = univClosure₂₂ (∀² a) := rfl
+
+end UnivQuantifier₂
+
+section ExQuantifier₂
+
+variable {α : ℕ → ℕ → Sort u} [ExQuantifier₂ α]
+
+def exClosure₂₁ : {m n : ℕ} → α m n → α 0 n
+  | 0,     _, a => a
+  | _ + 1, _, a => exClosure₂₁ (∃¹ a)
+
+def exClosure₂₂ : {m n : ℕ} → α m n → α m 0
+  | _, 0,     a => a
+  | _, _ + 1, a => exClosure₂₂ (∃² a)
+
+@[simp] lemma exClosure₂₁_zero {n} (a : α 0 n) : exClosure₂₁ a = a := rfl
+
+@[simp] lemma exClosure₂₁_succ {m n} (a : α (m + 1) n) : exClosure₂₁ a = exClosure₂₁ (∃¹ a) := rfl
+
+@[simp] lemma exClosure₂₂_zero {m} (a : α m 0) : exClosure₂₂ a = a := rfl
+
+@[simp] lemma exClosure₂₂_succ {m n} (a : α m (n + 1)) : exClosure₂₂ a = exClosure₂₂ (∃² a) := rfl
+
+end ExQuantifier₂
 
 @[notation_class] class HasTurnstile (α : Sort _) (β : Sort _) where
   turnstile : Set α → α → β
@@ -215,6 +283,16 @@ notation:64 "∀[" p "] " q => ball p q
 notation:64 "∃[" p "] " q => bex p q
 
 end quantifier
+
+class AndOrClosed {F} [LogicSymbol F] (C : F → Prop) where
+  verum  : C ⊤
+  falsum : C ⊥
+  and {f g : F} : C f → C g → C (f ⋏ g)
+  or  {f g : F} : C f → C g → C (f ⋎ g)
+
+class Closed {F} [LogicSymbol F] (C : F → Prop) extends AndOrClosed C where
+  not {f : F} : C f → C (~f)
+  imply {f g : F} : C f → C g → C (f ⟶ g)
 
 end LogicSymbol
 

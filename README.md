@@ -28,14 +28,34 @@ Formalizing Logic in Lean4
 | $T \vdash \sigma$                   | Proof, Provability                  |  `LO.FirstOrder.Proof`          | `T ⊢ σ`, `T ⊢! σ` |
 
 ## Theorem
+
 ### First-Order logic
 
-|                                | Proof                                    | 
-| ----                           | ----                                     |
-| Soundness theorem              | `@soundness : ∀ {L : Language} [inst : (k : ℕ) → DecidableEq (Language.func L k)] [inst_1 : (k : ℕ) → DecidableEq (Language.rel L k)] {T : Set (Sentence L)} {σ : Sentence L}, T ⊢ σ → T ⊨ σ` |
-| Completeness theorem           | `@completeness : {L : Language} → [inst : (k : ℕ) → DecidableEq (Language.func L k)] → [inst_1 : (k : ℕ) → DecidableEq (Language.rel L k)] → {T : Theory L} → {σ : Sentence L} → T ⊨ σ → T ⊢ σ` |
-| Cut-elimination                | `@DerivationCR.hauptsatz : {L : Language} → [inst : (k : ℕ) → DecidableEq (Language.func L k)] → [inst_1 : (k : ℕ) → DecidableEq (Language.rel L k)] → {Δ : Sequent L} → ⊢ᶜ Δ → ⊢ᵀ Δ` |
-| First incompleteness theorem   | `@Arith.first_incompleteness : ∀ (T : Theory Language.oRing) [inst : DecidablePred T] [inst_1 : EqTheory T] [inst_2 : Arith.PAminus T] [inst_3 : Arith.SigmaOneSound T] [inst : Theory.Computable T], ¬System.Complete T` |
+- Cut-elimination
+```lean
+theorem cut_elimination {Δ : Sequent L} : ⊢ᶜ Δ → ⊢ᵀ Δ := DerivationCR.hauptsatz
+```
+
+- Soundness theorem
+```lean
+theorem soundness_theorem {σ : Sentence L} : T ⊢ σ → T ⊨ σ := FirstOrder.soundness
+```
+
+- Completeness theorem
+```lean
+theorem completeness_theorem {σ : Sentence L} : T ⊨ σ → T ⊢ σ := FirstOrder.completeness
+```
+
+- Gödel's first incompleteness theorem
+```lean
+theorem first_incompleteness_theorem :
+    ¬System.Complete T := FirstOrder.Arith.first_incompleteness T
+```
+
+```lean
+theorem undecidable_sentence :
+    T ⊬ undecidableSentence T ∧ T ⊬ ~undecidableSentence T := FirstOrder.Arith.undecidable T
+```
 
 ## References
 - J. Han, F. van Doorn, A formalization of forcing and the unprovability of the continuum hypothesis
