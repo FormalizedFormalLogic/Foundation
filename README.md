@@ -35,34 +35,36 @@ The key results are summarised in `Logic/Summary.lean`.
 
 - Cut-elimination
 ```lean
-theorem cut_elimination {Δ : Sequent L} : ⊢ᶜ Δ → ⊢ᵀ Δ := DerivationCR.hauptsatz
+noncomputable example {Δ : Sequent L} : ⊢ᶜ Δ → ⊢ᵀ Δ := DerivationCR.hauptsatz
 ```
 
 - Compactness theorem
 ```lean
-theorem compactness_theorem (T : Theory L) :
-    Semantics.Satisfiableₛ T ↔ ∀ T' : Finset (Sentence L), ↑T' ⊆ T → Semantics.Satisfiableₛ (T' : Theory L) :=
+example (T : Theory L) :
+    Semantics.Satisfiableₛ T ↔
+    ∀ T' : Finset (Sentence L), ↑T' ⊆ T → Semantics.Satisfiableₛ (T' : Theory L) :=
   FirstOrder.compactness
 ```
 
 - Soundness theorem
 ```lean
-theorem soundness_theorem {σ : Sentence L} : T ⊢ σ → T ⊨ σ := FirstOrder.soundness
+example {σ : Sentence L} : T ⊢ σ → T ⊨ σ := FirstOrder.soundness
 ```
 
 - Completeness theorem
 ```lean
-theorem completeness_theorem {σ : Sentence L} : T ⊨ σ → T ⊢ σ := FirstOrder.completeness
+noncomputable example {σ : Sentence L} : T ⊨ σ → T ⊢ σ := FirstOrder.completeness
 ```
 
 - Gödel's first incompleteness theorem
 ```lean
-variable (T : Theory ℒₒᵣ) [DecidablePred T] [EqTheory T] [PAminus T] [SigmaOneSound T] [Theory.Computable T]
+variable (T : Theory ℒₒᵣ)
+  [DecidablePred T] [EqTheory T] [PAminus T] [SigmaOneSound T] [Theory.Computable T]
 
-theorem first_incompleteness_theorem : ¬System.Complete T :=
+example : ¬System.Complete T :=
   FirstOrder.Arith.first_incompleteness T
 
-theorem undecidable_sentence : T ⊬ undecidableSentence T ∧ T ⊬ ~undecidableSentence T :=
+example : T ⊬ undecidableSentence T ∧ T ⊬ ~undecidableSentence T :=
   FirstOrder.Arith.undecidable T
 ```
 
