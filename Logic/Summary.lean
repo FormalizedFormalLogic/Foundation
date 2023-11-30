@@ -12,6 +12,11 @@ variable {L : Language} [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq (L.r
 /- Cut elimination for Tait-calculus -/
 theorem cut_elimination {Δ : Sequent L} : ⊢ᶜ Δ → ⊢ᵀ Δ := DerivationCR.hauptsatz
 
+/- Compactness theorem -/
+theorem compactness_theorem (T : Theory L) :
+    Semantics.Satisfiableₛ T ↔ ∀ T' : Finset (Sentence L), ↑T' ⊆ T → Semantics.Satisfiableₛ (T' : Theory L) :=
+  FirstOrder.compactness
+
 /- Soundness theorem -/
 theorem soundness_theorem {σ : Sentence L} : T ⊢ σ → T ⊨ σ := FirstOrder.soundness
 

@@ -15,43 +15,7 @@ namespace Structure
 
 instance [Inhabited M] : Inhabited (Structure L M) := ⟨{ func := fun _ _ => default, rel := fun _ _ _ => True }⟩
 
-structure Hom (L : Language.{u}) (M₁ : Type w₁) (M₂ : Type w₂) [s₁ : Structure L M₁] [s₂ : Structure L M₂] where
-  toFun : M₁ → M₂
-  func' : ∀ {k} (f : L.func k) (v : Fin k → M₁), toFun (s₁.func f v) = s₂.func f (toFun ∘ v)
-  rel' : ∀ {k} (r : L.rel k) (v : Fin k → M₁), s₁.rel r v ↔ s₂.rel r (toFun ∘ v)
 
-notation:25 M " →ₛ[" L "] " M' => Hom L M M'
-
-namespace Hom
-
-variable {M₁ : Type w₁} {M₂ : Type w₂} [s₁ : Structure L M₁] [s₂ : Structure L M₂] (φ : M₁ →ₛ[L] M₂)
-
-instance : FunLike (M₁ →ₛ[L] M₂) M₁ (fun _ => M₂) where
-  coe := fun φ => φ.toFun
-  coe_injective' := fun φ ψ h => by rcases φ; rcases ψ; simp at h ⊢; ext; exact congr_fun h _
-
-instance : CoeFun (M₁ →ₛ[L] M₂) (fun _ => M₁ → M₂) := FunLike.hasCoeToFun
-
-@[ext] lemma ext (φ ψ : M₁ →ₛ[L] M₂) (h : ∀ x, φ x = ψ x) : φ = ψ := FunLike.ext φ ψ h
-
-protected lemma func {k} (f : L.func k) (v : Fin k → M₁) :
-    φ (s₁.func f v) = s₂.func f (φ ∘ v) := φ.func' f v
-
-protected lemma rel {k} (r : L.rel k) (v : Fin k → M₁) :
-    s₁.rel r v ↔ s₂.rel r (φ ∘ v) := φ.rel' r v
-
-end Hom
-
-class Inclusion (L : Language.{u}) (M₁ : Type w₁) (M₂ : Type w₂) [Structure L M₁] [Structure L M₂] extends M₁ →ₛ[L] M₂ where
-  inj' : Function.Injective toFun
-
-notation:25 M₁ " ⊆ₛ[" L "] " M₂ => Inclusion L M₁ M₂
-
-@[ext] structure ClosedSubset (L : Language.{u}) (M : Type w) [s : Structure L M] where
-  domain : Set M
-  domain_closed : ∀ {k} (f : L.func k) {v : Fin k → M}, (∀ i, v i ∈ domain) → s.func f v ∈ domain
-
-instance (M : Type w) [Structure L M] : SetLike (ClosedSubset L M) M := ⟨ClosedSubset.domain, ClosedSubset.ext⟩
 
 protected def lMap (φ : L₁ →ᵥ L₂) {M : Type w} (S : Structure L₂ M) : Structure L₁ M where
   func := fun _ f => S.func (φ.func f)
@@ -195,38 +159,6 @@ end Syntactic
 end Subterm
 
 namespace Structure
-
-namespace ClosedSubset
-
-variable {M : Type w} [s : Structure L M] (u : ClosedSubset L M)
-
-lemma closed {k} (f : L.func k) {v : Fin k → M} (hv : ∀ i, v i ∈ u) : s.func f v ∈ u := u.domain_closed f hv
-
-instance toStructure [s : Structure L M] (u : ClosedSubset L M) : Structure L u where
-  func := fun k f v => ⟨s.func f (fun i => ↑(v i)), u.closed f (by simp)⟩
-  rel := fun k r v => s.rel r (fun i => v i)
-
-protected lemma func {k} (f : L.func k) (v : Fin k → u) : u.toStructure.func f v = s.func f (fun i => v i) := rfl
-
-protected lemma rel {k} (r : L.rel k) (v : Fin k → u) : u.toStructure.rel r v ↔ s.rel r (fun i => v i) := of_eq rfl
-
-end ClosedSubset
-
-namespace Hom
-
-variable {M₁ : Type w₁} {M₂ : Type w₂} [s₁ : Structure L M₁] [s₂ : Structure L M₂] (φ : M₁ →ₛ[L] M₂)
-
-lemma val (e : Fin n → M₁) (ε : μ → M₁) (t : Subterm L μ n) :
-    φ (t.val s₁ e ε) = t.val s₂ (φ ∘ e) (φ ∘ ε) := by
-  induction t <;> simp[*, Subterm.val_func, Hom.func, Function.comp]
-
-def inclusion [s : Structure L M] (u : ClosedSubset L M) : u ⊆ₛ[L] M where
-  toFun := Subtype.val
-  func' := by simp[ClosedSubset.func, Function.comp]
-  rel' := by simp[ClosedSubset.rel, Function.comp]
-  inj' := Subtype.val_injective
-
-end Hom
 
 section
 
@@ -447,25 +379,6 @@ lemma eval_operator {k} {o : Operator L k} {v : Fin k → Subterm L μ n} :
     Eval s e ε (o.operator ![t₁, t₂]) ↔ o.val ![t₁.val s e ε, t₂.val s e ε] := by
   simp[eval_operator]; apply of_eq; congr; funext i; cases' i using Fin.cases with i <;> simp
 
-section Hom
-variable {M₁ : Type w₁} {M₂ : Type w₂} [s₁ : Structure L M₁] [s₂ : Structure L M₂] (φ : M₁ →ₛ[L] M₂)
-variable {e₁ : Fin n → M₁} {ε₁ : μ → M₁}
-
-lemma eval_hom_iff_of_qfree : ∀ {n} {e₁ : Fin n → M₁} {ε₁ : μ → M₁} {p : Subformula L μ n}, p.qfree →
-    (Eval s₁ e₁ ε₁ p ↔ Eval s₂ (φ ∘ e₁) (φ ∘ ε₁) p)
-  | _, e₁, ε₁, ⊤,        _ => by simp
-  | _, e₁, ε₁, ⊥,        _ => by simp
-  | _, e₁, ε₁, rel r v,  _ => by simp[Function.comp, eval_rel, φ.rel, φ.val]
-  | _, e₁, ε₁, nrel r v, _ => by simp[Function.comp, eval_nrel, φ.rel r, φ.val]
-  | _, e₁, ε₁, p ⋏ q,    h => by simp at h ⊢; simp[eval_hom_iff_of_qfree h.1, eval_hom_iff_of_qfree h.2]
-  | _, e₁, ε₁, p ⋎ q,    h => by simp at h ⊢; simp[eval_hom_iff_of_qfree h.1, eval_hom_iff_of_qfree h.2]
-
-lemma eval_hom_univClosure {n} {ε₁ : μ → M₁} {p : Subformula L μ n} (hp : p.qfree) :
-    Val s₂ (φ ∘ ε₁) (univClosure p) → Val s₁ ε₁ (univClosure p) := by
-  simp; intro h e₁; exact (eval_hom_iff_of_qfree φ hp).mpr (h (φ ∘ e₁))
-
-end Hom
-
 end Subformula
 
 namespace Structure
@@ -504,13 +417,6 @@ attribute [simp] Structure.Eq.eq Structure.LT.lt Structure.LE.le Structure.Mem.m
     Structure.LT.lt (L := L) (v 0) (v 1)
 
 end
-
-namespace Inclusion
-
-variable {M₁ : Type w₁} [Structure L M₁] {M₂ : Type w₂} [Structure L M₂] (φ : M₁ ⊆ₛ[L] M₂)
-
-lemma inj : Function.Injective (↑φ.toHom : M₁ → M₂) := φ.inj'
-end Inclusion
 
 section
 
@@ -575,15 +481,6 @@ structure Theory.semanticEquiv (T₁ : Theory L₁) (T₂ : Theory L₂) :=
 def modelsTheory_iff_modelsTheory_s {M : Type u} [s : Structure L M] {T : Theory L} :
   M ⊧* T ↔ s ⊧ₛ* T := by rfl
 
-variable (L)
-
-def ElementaryEquiv (M₁ M₂ : Type u) [Structure L M₁] [Structure L M₂] : Prop :=
-  ∀ σ : Sentence L, M₁ ⊧ σ ↔ M₂ ⊧ σ
-
-notation:50 M₁ " ≃ₑ[" L "] " M₂ => ElementaryEquiv L M₁ M₂
-
-variable {L}
-
 section
 variable {M : Type u} [s : Structure L M]
 
@@ -620,59 +517,6 @@ lemma valid_iff {σ : Sentence L} :
 lemma validₛ_iff {T : Theory L} :
     Semantics.Validₛ T ↔ ∀ ⦃M : Type u⦄ [Inhabited M] [Structure L M], M ⊧* T :=
   of_eq rfl
-
-namespace ElementaryEquiv
-
-@[refl]
-lemma refl (M) [Structure L M] : M ≃ₑ[L] M := fun σ => by rfl
-
-@[symm]
-lemma symm {M₁ M₂} [Structure L M₁] [Structure L M₂] : (M₁ ≃ₑ[L] M₂) → (M₂ ≃ₑ[L] M₁) :=
-  fun h σ => (h σ).symm
-
-@[trans]
-lemma trans {M₁ M₂ M₃ : Type u} [Structure L M₁] [Structure L M₂] [Structure L M₃] :
-    (M₁ ≃ₑ[L] M₂) → (M₂ ≃ₑ[L] M₃) → (M₁ ≃ₑ[L] M₃) :=
-  fun h₁ h₂ σ => Iff.trans (h₁ σ) (h₂ σ)
-
-lemma models {M₁ M₂} [Structure L M₁] [Structure L M₂] (h : M₁ ≃ₑ[L] M₂) :
-    ∀ {σ : Sentence L}, M₁ ⊧ σ ↔ M₂ ⊧ σ := @h
-
-lemma modelsTheory {M₁ M₂} [Structure L M₁] [Structure L M₂] (h : M₁ ≃ₑ[L] M₂) {T : Theory L} :
-    M₁ ⊧* T ↔ M₂ ⊧* T := by simp[modelsTheory_iff, h.models]
-
-end ElementaryEquiv
-
-section Hom
-variable {M₁ : Type u} {M₂ : Type u} [s₁ : Structure L M₁] [s₂ : Structure L M₂] (φ : M₁ →ₛ[L] M₂)
-variable {e₁ : Fin n → M₁} {ε₁ : μ → M₁}
-
-lemma models_hom_iff_of_qfree {σ : Sentence L} (hσ : σ.qfree) : M₁ ⊧ σ ↔ M₂ ⊧ σ := by
-  simpa[Matrix.empty_eq, Empty.eq_elim] using
-    Subformula.eval_hom_iff_of_qfree (e₁ := finZeroElim) (ε₁ := Empty.elim) φ hσ
-
-lemma models_hom_univClosure {n} {σ : Subsentence L n} (hσ : σ.qfree) :
-    M₂ ⊧ (univClosure σ) → M₁ ⊧ (univClosure σ) := by
-  simpa[Matrix.empty_eq, Empty.eq_elim, models_iff] using
-    Subformula.eval_hom_univClosure (ε₁ := Empty.elim) φ hσ
-
-lemma models_hom_univClosure_of_submodels [H : M₁ ⊆ₛ[L] M₂] {n} {σ : Subsentence L n} (hσ : σ.qfree) :
-    M₂ ⊧ (univClosure σ) → M₁ ⊧ (univClosure σ) := models_hom_univClosure H.toHom hσ
-
-section
-
-open Subformula
-variable [s : Structure L M] (φ : M ≃ N)
-
-lemma ElementaryEquiv.ofEquiv :
-    letI : Structure L N := Structure.ofEquiv φ
-    M ≃ₑ[L] N := fun σ => by
-  letI : Structure L N := Structure.ofEquiv φ
-  simp[models_iff, Empty.eq_elim, Structure.eval_ofEquiv_iff]
-
-end
-
-end Hom
 
 end
 
@@ -716,7 +560,7 @@ variable {Φ : L₁ →ᵥ L₂}
 
 lemma modelsTheory_onTheory₁ {T₁ : Theory L₁} :
     ModelsTheory (s := s₂) (T₁.lMap Φ) ↔ ModelsTheory (s := s₂.lMap Φ) T₁ :=
-  by simp[Subformula.models_lMap, Theory.lMap, modelsTheory_iff, modelsTheory_iff (T := T₁)]
+  by simp[Subformula.models_lMap, Theory.lMap, modelsTheory_iff, @modelsTheory_iff (T := T₁)]
 
 namespace semanticGe
 
@@ -755,148 +599,6 @@ lemma of_subtheory [Inhabited M] {T₁ T₂ : Theory L} [Theory.Mod M T₁] (h :
 end Mod
 
 end Theory
-
-namespace Structure
-
-structure Model (L : Language.{u}) (M : Type w) :=
-  intro : M
-
-namespace Model
-
-variable [Structure L M]
-
-def equiv (L : Language.{u}) (M : Type w) : M ≃ Model L M where
-  toFun := fun x => ⟨x⟩
-  invFun := Model.intro
-  left_inv := by intro x; simp
-  right_inv := by rintro ⟨x⟩; simp
-
-instance : Structure L (Model L M) := Structure.ofEquiv (equiv L M)
-
-instance [Inhabited M] : Inhabited (Model L M) := ⟨equiv L M default⟩
-
-lemma elementaryEquiv (L : Language.{u}) (M : Type u) [Structure L M] : M ≃ₑ[L] Model L M := ElementaryEquiv.ofEquiv _
-
-section
-
-open Subterm Subformula
-
-instance [Operator.Zero L] : Zero (Model L M) := ⟨(@Operator.Zero.zero L _).val ![]⟩
-
-instance [Operator.Zero L] : Structure.Zero L (Model L M) := ⟨rfl⟩
-
-instance [Operator.One L] : One (Model L M) := ⟨(@Operator.One.one L _).val ![]⟩
-
-instance [Operator.One L] : Structure.One L (Model L M) := ⟨rfl⟩
-
-instance [Operator.Add L] : Add (Model L M) :=
-  ⟨fun x y => (@Operator.Add.add L _).val ![x, y]⟩
-
-instance [Operator.Add L] : Structure.Add L (Model L M) := ⟨fun _ _ => rfl⟩
-
-instance [Operator.Mul L] : Mul (Model L M) :=
-  ⟨fun x y => (@Operator.Mul.mul L _).val ![x, y]⟩
-
-instance [Operator.Mul L] : Structure.Mul L (Model L M) := ⟨fun _ _ => rfl⟩
-
-instance [Operator.Eq L] [Structure.Eq L M] : Structure.Eq L (Model L M) :=
-  ⟨fun x y => by simp[operator_val_ofEquiv_iff]⟩
-
-instance [Operator.LT L] : LT (Model L M) :=
-  ⟨fun x y => (@Operator.LT.lt L _).val ![x, y]⟩
-
-instance [Operator.LT L] : Structure.LT L (Model L M) := ⟨fun _ _ => iff_of_eq rfl⟩
-
-instance [Operator.Mem L] : Membership (Model L M) (Model L M) :=
-  ⟨fun x y => (@Operator.Mem.mem L _).val ![x, y]⟩
-
-instance [Operator.Mem L] : Structure.Mem L (Model L M) := ⟨fun _ _ => iff_of_eq rfl⟩
-
-end
-
-end Model
-
-section ofFunc
-
-variable (F : ℕ → Type*) {M : Type*} (fF : {k : ℕ} → (f : F k) → (Fin k → M) → M)
-
-def ofFunc : Structure (Language.ofFunc F) M where
-  func := fun _ f v => fF f v
-  rel  := fun _ r _ => r.elim
-
-lemma func_ofFunc {k} (f : F k) (v : Fin k → M) : (ofFunc F fF).func f v = fF f v := rfl
-
-end ofFunc
-
-section add
-
-variable (L₁ : Language.{u₁}) (L₂ : Language.{u₂}) (M : Type*) [str₁ : Structure L₁ M] [str₂ : Structure L₂ M]
-
-instance add : Structure (L₁.add L₂) M where
-  func := fun _ f v =>
-    match f with
-    | Sum.inl f => func f v
-    | Sum.inr f => func f v
-  rel := fun _ r v =>
-    match r with
-    | Sum.inl r => rel r v
-    | Sum.inr r => rel r v
-
-variable {L₁ L₂ M}
-
-@[simp] lemma func_sigma_inl {k} (f : L₁.func k) (v : Fin k → M) : (add L₁ L₂ M).func (Sum.inl f) v = func f v := rfl
-
-@[simp] lemma func_sigma_inr {k} (f : L₂.func k) (v : Fin k → M) : (add L₁ L₂ M).func (Sum.inr f) v = func f v := rfl
-
-@[simp] lemma rel_sigma_inl {k} (r : L₁.rel k) (v : Fin k → M) : (add L₁ L₂ M).rel (Sum.inl r) v ↔ rel r v := iff_of_eq rfl
-
-@[simp] lemma rel_sigma_inr {k} (r : L₂.rel k) (v : Fin k → M) : (add L₁ L₂ M).rel (Sum.inr r) v ↔ rel r v := iff_of_eq rfl
-
-@[simp] lemma val_lMap_add₁ {n} (t : Subterm L₁ μ n) (e : Fin n → M) (ε : μ → M) :
-    Subterm.val (add L₁ L₂ M) e ε (t.lMap (Language.Hom.add₁ L₁ L₂)) = t.val str₁ e ε := by
-  induction t <;> simp[Subterm.val, *]
-
-@[simp] lemma val_lMap_add₂ {n} (t : Subterm L₂ μ n) (e : Fin n → M) (ε : μ → M) :
-    Subterm.val (add L₁ L₂ M) e ε (t.lMap (Language.Hom.add₂ L₁ L₂)) = t.val str₂ e ε := by
-  induction t <;> simp[Subterm.val, *]
-
-@[simp] lemma eval_lMap_add₁ {n} (p : Subformula L₁ μ n) (e : Fin n → M) (ε : μ → M) :
-    Subformula.Eval (add L₁ L₂ M) e ε (Subformula.lMap (Language.Hom.add₁ L₁ L₂) p) ↔ Subformula.Eval str₁ e ε p := by
-  induction p using Subformula.rec' <;>
-    simp[*, Subformula.eval_rel, Subformula.lMap_rel, Subformula.eval_nrel, Subformula.lMap_nrel]
-
-@[simp] lemma eval_lMap_add₂ {n} (p : Subformula L₂ μ n) (e : Fin n → M) (ε : μ → M) :
-    Subformula.Eval (add L₁ L₂ M) e ε (Subformula.lMap (Language.Hom.add₂ L₁ L₂) p) ↔ Subformula.Eval str₂ e ε p := by
-  induction p using Subformula.rec' <;>
-    simp[*, Subformula.eval_rel, Subformula.lMap_rel, Subformula.eval_nrel, Subformula.lMap_nrel]
-
-end add
-
-section sigma
-
-variable (L : ι → Language) (M : Type*) [str : (i : ι) → Structure (L i) M]
-
-instance sigma : Structure (Language.sigma L) M where
-  func := fun _ ⟨_, f⟩ v => func f v
-  rel  := fun _ ⟨_, r⟩ v => rel r v
-
-@[simp] lemma func_sigma {k} (f : (L i).func k) (v : Fin k → M) : (sigma L M).func ⟨i, f⟩ v = func f v := rfl
-
-@[simp] lemma rel_sigma {k} (r : (L i).rel k) (v : Fin k → M) : (sigma L M).rel ⟨i, r⟩ v ↔ rel r v := iff_of_eq rfl
-
-@[simp] lemma val_lMap_sigma {n} (t : Subterm (L i) μ n) (e : Fin n → M) (ε : μ → M) :
-    Subterm.val (sigma L M) e ε (t.lMap (Language.Hom.sigma L i)) = t.val (str i) e ε := by
-  induction t <;> simp[Subterm.val, *]
-
-@[simp] lemma eval_lMap_sigma {n} (p : Subformula (L i) μ n) (e : Fin n → M) (ε : μ → M) :
-    Subformula.Eval (sigma L M) e ε (Subformula.lMap (Language.Hom.sigma L i) p) ↔ Subformula.Eval (str i) e ε p := by
-  induction p using Subformula.rec' <;>
-    simp[*, Subformula.eval_rel, Subformula.lMap_rel, Subformula.eval_nrel, Subformula.lMap_nrel]
-
-end sigma
-
-end Structure
-
 
 end FirstOrder
 

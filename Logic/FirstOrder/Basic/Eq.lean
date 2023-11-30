@@ -1,5 +1,5 @@
 import Logic.FirstOrder.Basic.Elab
-import Logic.FirstOrder.Basic.Semantics
+import Logic.FirstOrder.Basic.Elementary
 
 namespace LO
 
@@ -176,7 +176,7 @@ lemma models_iff {σ : Sentence L} : (QuotEq H) ⊧ σ ↔ M ⊧ σ := by
 
 variable (H)
 
-lemma elementaryEquiv : QuotEq H ≃ₑ[L] M := fun _ => models_iff
+lemma elementaryEquiv : QuotEq H ≡ₑ[L] M := fun _ => models_iff
 
 variable {H}
 
@@ -201,7 +201,7 @@ lemma consequence_iff_eq {T : Theory L} [EqTheory T] {σ : Sentence L} :
   · intro h M i s _ hM; exact h M hM
   · intro h M i s hM
     have H : M ⊧* Theory.Eq L := Semantics.modelsTheory_of_subset hM EqTheory.eq
-    have e : Structure.Eq.QuotEq H ≃ₑ[L] M := Structure.Eq.QuotEq.elementaryEquiv H
+    have e : Structure.Eq.QuotEq H ≡ₑ[L] M := Structure.Eq.QuotEq.elementaryEquiv H
     exact e.models.mp $ h (Structure.Eq.QuotEq H) (e.modelsTheory.mpr hM)
 
 lemma consequence_iff_eq' {T : Theory L} [EqTheory T] {σ : Sentence L} :
@@ -214,7 +214,7 @@ lemma satisfiableₛ_iff_eq {T : Theory L} [EqTheory T] :
   simp[satisfiableₛ_iff]; constructor
   · intro ⟨M, i, s, hM⟩;
     have H : M ⊧* Theory.Eq L := Semantics.modelsTheory_of_subset hM EqTheory.eq
-    have e : Structure.Eq.QuotEq H ≃ₑ[L] M := Structure.Eq.QuotEq.elementaryEquiv H
+    have e : Structure.Eq.QuotEq H ≡ₑ[L] M := Structure.Eq.QuotEq.elementaryEquiv H
     exact ⟨Structure.Eq.QuotEq H, inferInstance, inferInstance, inferInstance, e.modelsTheory.mpr hM⟩
   · intro ⟨M, i, s, _, hM⟩; exact ⟨M, i, s, hM⟩
 
