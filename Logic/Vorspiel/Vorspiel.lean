@@ -35,9 +35,6 @@ infixr:70 " :>ₙ " => cases
 @[simp] lemma ne_step_max' (n m : ℕ) : n ≠ max m n + 1 :=
   ne_of_lt $ Nat.lt_succ_of_le $ by simp
 
-lemma sub_pred {m n : ℕ} (hm : n ≤ m) (hn : n ≠ 0) : m - n.pred = (m - n).succ := by
-  rw [←Nat.sub_one, tsub_tsub_assoc hm (Nat.one_le_iff_ne_zero.mpr hn)]
-
 lemma rec_eq {α : Sort*} (a : α) (f₁ f₂ : ℕ → α → α) (n : ℕ) (H : ∀ m < n, ∀ a, f₁ m a = f₂ m a) :
     (n.rec a f₁ : α) = n.rec a f₂ := by
   induction' n with n ih <;> simp
@@ -54,20 +51,6 @@ lemma least_number (P : ℕ → Prop) (hP : ∃ x, P x) : ∃ x, P x ∧ ∀ z <
 
 def toFin (n : ℕ) : ℕ → Option (Fin n) := fun x => if hx : x < n then some ⟨x, hx⟩ else none
 
-section
-
-variable {r : ℕ → ℕ → Sort u}
-  (refl : (n : ℕ) → r n n)
-  (trans : {l m n : ℕ} → r l m → r m n → r l n)
-  (succ : (n : ℕ) → r n (n + 1))
-
-def ofLeOfReflOfTrans {m n : ℕ} (h : m ≤ n) : r m n :=
-  add_sub_of_le h ▸
-    Nat.rec (motive := fun k => r m (m + k)) (refl m)
-      (fun k ih => @trans m (m + k) (m + k.succ) ih (by simpa[Nat.add_succ] using succ (m + k))) (n - m)
-
-end
-
 end Nat
 
 lemma eq_finZeroElim {α : Sort u} (x : Fin 0 → α) : x = finZeroElim := funext (by rintro ⟨_, _⟩; contradiction)
@@ -76,9 +59,6 @@ namespace Matrix
 open Fin
 section
 variable {n : ℕ} {α : Type u}
-
-lemma ext' {v w : Fin n → α} : (∀ i, v i = w i) ↔ v = w :=
-  ⟨by { intro h; ext i; exact h i }, by { rintro rfl; simp }⟩
 
 infixr:70 " :> " => vecCons
 
@@ -260,7 +240,7 @@ def toOptionVec : {n : ℕ} → (Fin n → Option α) → Option (Fin n → α)
       { have : ∀ i, v i.succ = some (z i) := ih.mp hs
         have : v = some a :> (fun i => some (z i)) :=
           by funext i; cases i using Fin.cases <;> simp[hz, this]
-        simp[this, ←comp_vecCons', Matrix.ext'] } }
+        simp[this, ←comp_vecCons', Iff.symm Function.funext_iff ] } }
 
 def vecToNat : {n : ℕ} → (Fin n → ℕ) → ℕ
   | 0,     _ => 0
