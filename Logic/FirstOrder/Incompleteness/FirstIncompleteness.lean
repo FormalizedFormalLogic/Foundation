@@ -208,9 +208,9 @@ noncomputable def diagRefutation : FormulaFin ℒₒᵣ 1 := pred (fun σ => T �
 
 local notation "ρ" => diagRefutation T
 
-noncomputable def undecidableSentence : Sentence ℒₒᵣ := ρ&[⸢ρ⸣]
+noncomputable def undecidable : Sentence ℒₒᵣ := ρ&[⸢ρ⸣]
 
-local notation "γ" => undecidableSentence T
+local notation "γ" => undecidable T
 
 lemma diagRefutation_spec (σ : FormulaFin ℒₒᵣ 1) :
     T ⊢! ρ&[⸢σ⸣] ↔ T ⊢! ~σ&[⸢σ⸣] := by
@@ -233,7 +233,7 @@ variable (T : Theory ℒₒᵣ) [DecidablePred T] [EqTheory T] [PAminus T] [Sigm
 theorem first_incompleteness : ¬System.Complete T := FirstIncompleteness.main T
 
 lemma undecidable :
-    T ⊬ FirstIncompleteness.undecidableSentence T ∧ T ⊬ ~FirstIncompleteness.undecidableSentence T :=
+    T ⊬ FirstIncompleteness.undecidable T ∧ T ⊬ ~FirstIncompleteness.undecidable T :=
   FirstIncompleteness.independent T
 
 end Arith
