@@ -1,4 +1,3 @@
-import Logic.FirstOrder.Basic
 import Logic.FirstOrder.Completeness.Coding
 import Logic.Vorspiel.Order
 
