@@ -1,4 +1,3 @@
-import Logic.Vorspiel.Computability
 import Logic.Vorspiel.OmegaRec
 
 attribute [-instance] WType.instEncodableWType Encodable.finPi Encodable.fintypeArrowOfEncodable
