@@ -2,7 +2,7 @@ import Logic.FirstOrder.Incompleteness.Derivability.Theory
 import Logic.FirstOrder.Incompleteness.Derivability.Conditions
 import Logic.FirstOrder.Incompleteness.Derivability.FirstIncompleteness
 
-open LO.System
+open LO.System LO.System.Intuitionistic
 
 namespace LO.FirstOrder.Arith.Incompleteness
 
@@ -27,7 +27,7 @@ private lemma extend {σ : Sentence ℒₒᵣ}
   : (U ⊢! ConL[T] ⟶ ~Pr[T] ⸢σ⸣) ↔ (U ⊢! (Pr[T] ⸢σ⸣) ⟶ (Pr[T] ⸢~σ⸣)) := by
   apply Iff.intro;
   . intro H;
-    exact imply_contra₃ $ imply_trans (weakening $ FormalizedConsistency T₀ T (~σ)) H;
+    exact imply_contra₃ $ imp_trans (weakening $ FormalizedConsistency T₀ T (~σ)) H;
   . intro H;
     exact imply_contra₀ $ elim_and_left_dilemma (by
       have : T₀ ⊢! (Pr[T] ⸢σ⸣ ⋏ Pr[T] ⸢~σ⸣) ⟶ (Pr[T] ⸢⊥⸣) := formalized_NC' σ;
@@ -40,7 +40,7 @@ lemma formalizedGoedelSentenceUnprovablility : T ⊢! ConL[T] ⟶ ~Pr[T] ⸢G⸣
   have h₁ : T ⊢! (Pr[T] ⸢G⸣) ⟶ (Pr[T] ⸢(Pr[T] ⸢G⸣)⸣) := hD3.D3';
   have h₂ : T ⊢! Pr[T] ⸢G⸣ ⟶ ~G := weakening $ imply_contra₁ $ iff_mp hG;
   have h₃ : T ⊢! Pr[T] ⸢Pr[T] ⸢G⸣⸣ ⟶ Pr[T] ⸢~G⸣ := weakening $ @formalized_imp_intro T₀ T _ _ _ _ _ h₂;
-  exact (extend T₀ T T).mpr $ imply_trans h₁ h₃;
+  exact (extend T₀ T T).mpr $ imp_trans h₁ h₃;
 
 lemma equality_GoedelSentence_Consistency : T ⊢! G ⟷ ConL[T] := by
   have h₄ : T ⊢! ConL[T] ⟶ ~Pr[T] ⸢G⸣ := formalizedGoedelSentenceUnprovablility T₀ T hG;
@@ -54,7 +54,8 @@ theorem LConsistencyUnprovablility [hConsis : Theory.Consistent T] : T ⊬! ConL
 lemma Inconsistent_of_LConsistencyProvability : T ⊢! ConL[T] → (Theory.Inconsistent T) := by
   intro hP;
   by_contra hConsis; simp at hConsis; have := hConsis.some;
-  exact (LConsistencyUnprovablility T₀ T) hP;
+  suffices : T ⊬! ConL[T]; aesop;
+  exact LConsistencyUnprovablility T₀ T;
 
 theorem LConsistencyUnrefutability [hSound : SigmaOneSound T] : T ⊬! ~ConL[T] := by
   have ⟨G, ⟨hG, _⟩⟩ := @existsGoedelSentence T₀ T _ _ 1 _ _;
@@ -63,6 +64,7 @@ theorem LConsistencyUnrefutability [hSound : SigmaOneSound T] : T ⊬! ~ConL[T] 
 lemma NotSigmaOneSoundness_of_LConsitencyRefutability : T ⊢! ~ConL[T] → IsEmpty (SigmaOneSound T) := by
   intro H;
   by_contra C; simp at C; have := C.some;
-  exact (LConsistencyUnrefutability T₀ T).elim H;
+  suffices : T ⊬! ~ConL[T]; aesop;
+  exact LConsistencyUnrefutability T₀ T;
 
 end LO.FirstOrder.Arith.Incompleteness

@@ -48,6 +48,19 @@ lemma inconsistent_of_proof {T : Set F} (b : T ⊢ ⊥) : ¬Consistent T := by s
 
 lemma consistemt_iff_unprovable {T : Set F} : Consistent T ↔ T ⊬ ⊥ := by rfl
 
+abbrev Provable (T : Set F) (f : F) : Prop := Nonempty (T ⊢ f)
+
+infix:45 " ⊢! " => System.Provable
+
+abbrev Unprovable (T : Set F) (f : F) : Prop := IsEmpty (T ⊢ f)
+
+infix:45 " ⊬ " => System.Unprovable
+
+-- TODO: 互換性のために残している
+infix:45 " ⊬! " => System.Unprovable
+
+lemma unprovable_iff_not_provable {T : Set F} {f : F} : T ⊬ f ↔ ¬T ⊢! f := by simp[System.Unprovable]
+
 protected def Complete (T : Set F) : Prop := ∀ f, (T ⊢! f) ∨ (T ⊢! ~f)
 
 def Independent (T : Set F) (f : F) : Prop := T ⊬ f ∧ T ⊬ ~f

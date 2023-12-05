@@ -2,7 +2,7 @@ import Logic.FirstOrder.Incompleteness.Derivability.Theory
 import Logic.FirstOrder.Incompleteness.Derivability.Conditions
 import Logic.FirstOrder.Incompleteness.Derivability.FirstIncompleteness
 
-open LO.System
+open LO.System LO.System.Intuitionistic
 
 namespace LO.FirstOrder.Arith.Incompleteness
 
@@ -28,17 +28,17 @@ theorem LoebTheorem (σ : Sentence ℒₒᵣ) : T ⊢! σ ↔ T ⊢! (Pr[T] ⸢�
     have h₂ : T ⊢! Pr[T] ⸢K ⟶ (Pr[T] ⸢K⸣ ⟶ σ)⸣ := hD1.D1' (iff_mp $ weakening hK);
     have h₃ : T ⊢! Pr[T] ⸢K⸣ ⟶ Pr[T] ⸢Pr[T] ⸢K⸣ ⟶ σ⸣ := MP hD2.D2' h₂;
     have h₄ : T ⊢! Pr[T] ⸢Pr[T] ⸢K⸣ ⟶ σ⸣ ⟶ (Pr[T] ⸢Pr[T] ⸢K⸣⸣ ⟶ Pr[T] ⸢σ⸣) := hD2.D2';
-    have h₅ : T ⊢! Pr[T] ⸢K⸣ ⟶ (Pr[T] ⸢Pr[T] ⸢K⸣⸣ ⟶ Pr[T] ⸢σ⸣) := imply_trans h₃ h₄;
+    have h₅ : T ⊢! Pr[T] ⸢K⸣ ⟶ (Pr[T] ⸢Pr[T] ⸢K⸣⸣ ⟶ Pr[T] ⸢σ⸣) := imp_trans h₃ h₄;
     have h₆ : T ⊢! Pr[T] ⸢K⸣ ⟶ Pr[T] ⸢Pr[T] ⸢K⸣⸣ := weakening $ hD3.D3';
     have h₇ : T ⊢! Pr[T] ⸢K⸣ ⟶ Pr[T] ⸢σ⸣ := imply_dilemma h₅ h₆;
-    have h₈ : T ⊢! Pr[T] ⸢K⸣ ⟶ σ := imply_trans h₇ H;
+    have h₈ : T ⊢! Pr[T] ⸢K⸣ ⟶ σ := imp_trans h₇ H;
     have h₉ : T ⊢! K := MP (iff_mpr $ weakening hK) h₈;
     exact MP h₈ (hD1.D1' h₉);
 
 /-- 2nd Incompleteness Theorem via Löb's Theorem -/
 theorem LConsistencyUnprovablility : T ⊬! (ConL[T]) := by
   by_contra hC;
-  exact hConsis.consistent.false ((LoebTheorem T₀ T (⊥ : Sentence ℒₒᵣ)).mpr $ neg_imply_bot hC).some;
+  exact hConsis.consistent.false ((LoebTheorem T₀ T (⊥ : Sentence ℒₒᵣ)).mpr $ neg_imply_bot (by simpa using hC)).some;
 
 theorem HenkinSentenceProvability (hH : IsHenkinSentence T₀ T H) : T ⊢! H := (LoebTheorem T₀ T H).mpr (iff_mpr $ weakening $ hH)
 

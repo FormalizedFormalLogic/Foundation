@@ -18,6 +18,8 @@ class Intuitionistic (F : Type u) [LogicSymbol F] [System F] where
   disj₃       (T : Set F) (p q r : F) : T ⊢! (p ⟶ r) ⟶ (q ⟶ r) ⟶ p ⋎ q ⟶ r
   neg₁        (T : Set F) (p q : F)   : T ⊢! (p ⟶ q) ⟶ (p ⟶ ~q) ⟶ ~p
   neg₂        (T : Set F) (p q : F)   : T ⊢! p ⟶ ~p ⟶ q
+  -- MEMO: `⊤ = ~⊥`であることを要請すれば`neg₂`から明らか
+  efq         (T : Set F) (p : F)     : T ⊢! ⊥ ⟶ p
 
 variable {Struc : Type w → Type v} [𝓢 : Semantics F Struc]
 
@@ -38,6 +40,7 @@ instance [LO.Complete F] : Intuitionistic F where
   disj₃  := fun T p q r => Complete.consequence_iff_provable.mp (fun _ _ _ _ => by simpa using Or.rec)
   neg₁   := fun T p q => Complete.consequence_iff_provable.mp (fun _ _ _ _ => by simp; exact fun a b c => (b c) (a c))
   neg₂   := fun T p q => Complete.consequence_iff_provable.mp (fun _ _ _ _ => by simp; exact fun a b => (b a).elim)
+  efq    := fun T p => Complete.consequence_iff_provable.mp (fun _ _ _ _ => by simp)
 
 namespace Intuitionistic
 
@@ -58,12 +61,39 @@ lemma and_left {p q : F} (h : T ⊢! p ⋏ q) : T ⊢! p := conj₁ T p q ⨀ h
 
 lemma and_right {p q : F} (h : T ⊢! p ⋏ q) : T ⊢! q := conj₂ T p q ⨀ h
 
+lemma and_symm {p q : F} (h : T ⊢! p ⋏ q) : T ⊢! q ⋏ p := and_split (and_right h) (and_left h)
+
+lemma or_left {p q : F} (h : T ⊢! p) : T ⊢! p ⋎ q := disj₁ T p q ⨀ h
+
+lemma or_right {p q : F} (h : T ⊢! q) : T ⊢! p ⋎ q := disj₂ T p q ⨀ h
+
+lemma or_symm {p q : F} (h : T ⊢! p ⋎ q) : T ⊢! q ⋎ p := (disj₃ T _ _ _) ⨀ (disj₂ _ _ _) ⨀ (disj₁ _ _ _) ⨀ h
+
 lemma iff_refl (p : F) : T ⊢! p ⟷ p := and_split (imp_id p) (imp_id p)
 
 lemma iff_symm {p q : F} (h : T ⊢! p ⟷ q) : T ⊢! q ⟷ p := and_split (and_right h) (and_left h)
 
 lemma iff_trans {p q r : F} (hp : T ⊢! p ⟷ q) (hq : T ⊢! q ⟷ r) : T ⊢! p ⟷ r :=
   and_split (imp_trans (and_left hp) (and_left hq)) (imp_trans (and_right hq) (and_right hp))
+
+lemma iff_mp {p q : F} (h : T ⊢! p ⟷ q) : T ⊢! p ⟶ q := and_left h
+
+lemma iff_mpr {p q : F} (h : T ⊢! p ⟷ q) : T ⊢! q ⟶ p := and_right h
+
+lemma iff_unprov {p q : F} (h₁ : T ⊢! p ⟷ q) (h₂ : T ⊬! p) : T ⊬! q := by
+  by_contra hC;
+  suffices : T ⊢! p; aesop;
+  exact (iff_mpr h₁) ⨀ (by simpa using hC);
+
+lemma unprov_imp_left_iff (h₁ : T ⊬! σ ⟶ π) (h₂ : T ⊢! σ ⟷ ρ): (T ⊬! ρ ⟶ π) := by
+  by_contra HC;
+  suffices : T ⊢! σ ⟶ π; simp_all only [not_isEmpty_of_nonempty];
+  exact imp_trans (iff_mp h₂) (by simpa using HC);
+
+lemma unprov_imp_right_iff (h₁ : T ⊬! σ ⟶ π) (h₂ : T ⊢! π ⟷ ρ): (T ⊬! σ ⟶ ρ) := by
+  by_contra HC;
+  suffices : T ⊢! σ ⟶ π; simp_all only [not_isEmpty_of_nonempty];
+  exact imp_trans (by simpa using HC) (iff_mpr h₂);
 
 end Intuitionistic
 

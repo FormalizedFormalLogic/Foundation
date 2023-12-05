@@ -3,7 +3,7 @@ import Logic.FirstOrder.Incompleteness.Derivability.Conditions
 import Logic.FirstOrder.Incompleteness.Derivability.FirstIncompleteness
 import Logic.FirstOrder.Incompleteness.Derivability.SecondIncompleteness
 
-open LO.System
+open LO.System LO.System.Intuitionistic
 
 namespace LO.FirstOrder.Arith.Incompleteness
 
@@ -49,17 +49,19 @@ variable [hSound : SigmaOneSound T] [HasProvablePred (T ∪ {~~ConL[T]})] [Defin
 
 theorem FormalizedUnprovabilityConsistency : T ⊬! (ConL[T]) ⟶ ~(Pr[T] ⸢(~ConL[T])⸣) := by
   by_contra H;
-  -- have : SubTheorem
-  have h₁ : T ⊢! Pr[T] ⸢~ConL[T]⸣ ⟶ ~ConL[T] := by have := imply_contra₃ H; nth_rw 2 [LConsistenncy]; simpa;
+  have h₁ : T ⊢! Pr[T] ⸢~ConL[T]⸣ ⟶ ~ConL[T] := by
+    have := imply_contra₃ (by simpa using H);
+    nth_rw 2 [LConsistenncy];
+    simpa;
   have h₂ : T ⊢! ~ConL[T] := (LoebTheorem T₀ T (~ConL[T])).mpr h₁;
   exact (NotSigmaOneSoundness_of_LConsitencyRefutability T₀ T h₂).false hSound;
 
 theorem FormalizedUnrefutabilityGoedelSentence (hG : IsGoedelSentence T₀ T G)
   : T ⊬! ConL[T] ⟶ ~Pr[T] ⸢~G⸣ := by
   by_contra H;
+  suffices : T ⊬! ConL[T] ⟶ ~Pr[T] ⸢~G⸣; aesop;
   have h₁ : T ⊢! ~G ⟷ ~ConL[T] := iff_contra $ equality_GoedelSentence_Consistency T₀ T hG;
   have h₂ : T ⊢! ~Pr[T] ⸢~ConL[T]⸣ ⟷ ~Pr[T] ⸢~G⸣ := iff_contra' $ MP (weakening $ @D2_iff T₀ T _ _ _ _ _) (hD1.D1' h₁);
-  have h₃ : T ⊬! ConL[T] ⟶ ~Pr[T] ⸢~G⸣ := unprov_imp_right_iff (FormalizedUnprovabilityConsistency T₀ T) h₂;
-  exact h₃ H;
+  exact unprov_imp_right_iff (FormalizedUnprovabilityConsistency T₀ T) h₂;
 
 end LO.FirstOrder.Arith.Incompleteness
