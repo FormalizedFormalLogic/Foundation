@@ -64,7 +64,7 @@ variable (T : Theory ℒₒᵣ)
 example : ¬System.Complete T :=
   FirstOrder.Arith.first_incompleteness T
 
-example : T ⊬ undecidableSentence T ∧ T ⊬ ~undecidableSentence T :=
+example : T ⊬ undecidable T ∧ T ⊬ ~undecidable T :=
   FirstOrder.Arith.undecidable T
 ```
 
@@ -72,4 +72,5 @@ example : T ⊬ undecidableSentence T ∧ T ⊬ ~undecidableSentence T :=
 - J. Han, F. van Doorn, A formalization of forcing and the unprovability of the continuum hypothesis
 - W. Pohlers, Proof Theory: The First Step into Impredicativity
 - P. Hájek, P. Pudlák, Metamathematics of First-Order Arithmetic
+- R. Kaye, Models of Peano arithmetic
 - 田中 一之, ゲーデルと20世紀の論理学

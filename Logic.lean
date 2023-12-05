@@ -3,6 +3,9 @@ import Logic.Vorspiel.Order
 import Logic.Vorspiel.Meta
 
 import Logic.Logic.LogicSymbol
+import Logic.Logic.Semantics
+import Logic.Logic.System
+import Logic.Logic.HilbertStyle
 
 -- Propositional
 
@@ -42,3 +45,4 @@ import Logic.FirstOrder.Arith.Model
 import Logic.FirstOrder.Arith.PAminus
 
 import Logic.FirstOrder.Incompleteness.FirstIncompleteness
+import Logic.FirstOrder.Incompleteness.SelfReference

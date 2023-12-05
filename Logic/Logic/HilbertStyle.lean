@@ -5,9 +5,9 @@ namespace LO
 namespace System
 variable {F : Type u} [LogicSymbol F] [𝓑 : System F]
 
-class IntuitionisticNC (F : Type u) [LogicSymbol F] [System F] where
-  verum       (T : Set F)             : T ⊢! ⊤
+class Intuitionistic (F : Type u) [LogicSymbol F] [System F] where
   modus_ponens {T : Set F} {p q : F}   : T ⊢! p ⟶ q → T ⊢! p → T ⊢! q
+  verum       (T : Set F)             : T ⊢! ⊤
   imply₁      (T : Set F) (p q : F)   : T ⊢! p ⟶ q ⟶ p
   imply₂      (T : Set F) (p q r : F) : T ⊢! (p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r
   conj₁       (T : Set F) (p q : F)   : T ⊢! p ⋏ q ⟶ p
@@ -21,14 +21,13 @@ class IntuitionisticNC (F : Type u) [LogicSymbol F] [System F] where
 
 variable {Struc : Type w → Type v} [𝓢 : Semantics F Struc]
 
-instance [LO.Complete F] : IntuitionisticNC F where
-  verum := fun T =>
-    Complete.consequence_iff_provable.mp (fun M _ _ _ => by simp)
+instance [LO.Complete F] : Intuitionistic F where
   modus_ponens := fun {T p q} b₁ b₂ =>
     Complete.consequence_iff_provable.mp (fun M _ s hM => by
       rcases b₁ with ⟨b₁⟩; rcases b₂ with ⟨b₂⟩
       have : s ⊧ₛ p → s ⊧ₛ q := by simpa using Sound.models_of_proof hM b₁
       exact this (Sound.models_of_proof hM b₂))
+  verum  := fun T => Complete.consequence_iff_provable.mp (fun M _ _ _ => by simp)
   imply₁ := fun T p q => Complete.consequence_iff_provable.mp (fun _ _ _ _ => by simp; exact fun a _ => a)
   imply₂ := fun T p q r => Complete.consequence_iff_provable.mp (fun _ _ _ _ => by simp; exact fun a b c => a c (b c))
   conj₁  := fun T p q => Complete.consequence_iff_provable.mp (fun _ _ _ _ => by simp; exact fun a _ => a)
@@ -40,9 +39,9 @@ instance [LO.Complete F] : IntuitionisticNC F where
   neg₁   := fun T p q => Complete.consequence_iff_provable.mp (fun _ _ _ _ => by simp; exact fun a b c => (b c) (a c))
   neg₂   := fun T p q => Complete.consequence_iff_provable.mp (fun _ _ _ _ => by simp; exact fun a b => (b a).elim)
 
-namespace IntuitionisticNC
+namespace Intuitionistic
 
-variable [IntuitionisticNC F] {T : Set F}
+variable [Intuitionistic F] {T : Set F}
 
 scoped infixl:90 " ⨀ " => modus_ponens
 
@@ -66,7 +65,7 @@ lemma iff_symm {p q : F} (h : T ⊢! p ⟷ q) : T ⊢! q ⟷ p := and_split (and
 lemma iff_trans {p q r : F} (hp : T ⊢! p ⟷ q) (hq : T ⊢! q ⟷ r) : T ⊢! p ⟷ r :=
   and_split (imp_trans (and_left hp) (and_left hq)) (imp_trans (and_right hq) (and_right hp))
 
-end IntuitionisticNC
+end Intuitionistic
 
 end System
 
