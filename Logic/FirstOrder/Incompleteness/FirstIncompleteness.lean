@@ -53,7 +53,7 @@ local notation "γ" => undecidable T
 
 lemma diagRefutation_spec (σ : Subsentence ℒₒᵣ 1) :
     T ⊢! ρ/[⸢σ⸣] ↔ T ⊢! ~σ/[⸢σ⸣] := by
-  simpa[diagRefutation] using pred_representation (diagRefutation_re T) (x := σ)
+  simpa[diagRefutation] using pred_representation T (diagRefutation_re T) (x := σ)
 
 lemma independent : System.Independent T γ := by
   have h : T ⊢! γ ↔ T ⊢! ~γ := by simpa using diagRefutation_spec T ρ
