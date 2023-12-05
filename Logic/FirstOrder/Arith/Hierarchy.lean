@@ -144,6 +144,14 @@ lemma exClosure : {n : ℕ} → {p : Subformula L μ n} → Sigma (s + 1) p → 
 
 end Hierarchy
 
+variable {L : Language} [(k : ℕ) → DecidableEq (L.func k)] [(k : ℕ) → DecidableEq (L.rel k)]
+  [ORing L] [Structure L ℕ]
+
+abbrev SigmaOneSound (T : Theory L) := Sound (L := L) T (Hierarchy.Sigma 1)
+
+lemma consistent_of_sigmaOneSound (T : Theory L) [SigmaOneSound T] :
+    System.Consistent T := consistent_of_sound T (Hierarchy.Sigma 1) (by simp)
+
 end Arith
 
 end FirstOrder
