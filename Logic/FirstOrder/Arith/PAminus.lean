@@ -172,7 +172,7 @@ lemma eq_nat_of_lt_nat : ∀ {n : ℕ} {x : M}, x < n → ∃ m : ℕ, x = m
 open Hierarchy
 
 lemma val_numeral {n} : ∀ (t : Subterm ℒₒᵣ Empty n),
-    ∀ v, Subterm.val! M (ORingSymbol.numeral ∘ v) Empty.elim t = ORingSymbol.numeral (Subterm.val! ℕ v Empty.elim t)
+    ∀ v, Subterm.val! M (v ·) Empty.elim t = (Subterm.val! ℕ v Empty.elim t)
   | #_,                                _ => by simp
   | Subterm.func Language.Zero.zero _, e => by simp
   | Subterm.func Language.One.one _,   e => by simp
@@ -180,7 +180,7 @@ lemma val_numeral {n} : ∀ (t : Subterm ℒₒᵣ Empty n),
   | Subterm.func Language.Mul.mul v,   e => by simp[Subterm.val_func, val_numeral (v 0), val_numeral (v 1)]
 
 lemma sigma_one_completeness : ∀ {n} {σ : Subsentence ℒₒᵣ n},
-    Sigma 1 σ → ∀ {e}, Subformula.Eval! ℕ e Empty.elim σ → Subformula.Eval! M (ORingSymbol.numeral ∘ e) Empty.elim σ
+    Sigma 1 σ → ∀ {e}, Subformula.PVal! ℕ e σ → Subformula.PVal! M (e ·) σ
   | _, _, Hierarchy.verum _ _ _,               _ => by simp
   | _, _, Hierarchy.falsum _ _ _,              _ => by simp
   | _, _, Hierarchy.rel _ _ Language.Eq.eq v,  e => by simp[Subformula.eval_rel, Matrix.comp_vecCons', val_numeral]
@@ -196,16 +196,16 @@ lemma sigma_one_completeness : ∀ {n} {σ : Subsentence ℒₒᵣ n},
   | _, _, Hierarchy.ball t hp,                 e => by
     simp[val_numeral]; intro h x hx
     rcases eq_nat_of_lt_nat hx with ⟨x, rfl⟩
-    simpa[Matrix.comp_vecCons''] using sigma_one_completeness hp (h x (by simpa using hx))
+    simpa[Matrix.comp_vecCons'] using sigma_one_completeness hp (h x (by simpa using hx))
   | _, _, Hierarchy.bex t hp,                  e => by
     simp[val_numeral]; intro x hx h
-    exact ⟨x, by simpa using hx, by simpa[Matrix.comp_vecCons''] using sigma_one_completeness hp h⟩
+    exact ⟨x, by simpa using hx, by simpa[Matrix.comp_vecCons'] using sigma_one_completeness hp h⟩
   | _, _, Hierarchy.sigma (p := p) hp,         e => by
     simp; intro x h
     have : Hierarchy.Sigma 1 p := Hierarchy.mono_succ (pi_zero_iff_sigma_zero.mp hp)
-    exact ⟨x, by simpa[Matrix.comp_vecCons''] using sigma_one_completeness this h⟩
+    exact ⟨x, by simpa[Matrix.comp_vecCons'] using sigma_one_completeness this h⟩
   | _, _, Hierarchy.ex hp,                     e => by
-    simp; intro x hx; exact ⟨x, by simpa[Matrix.comp_vecCons''] using sigma_one_completeness hp hx⟩
+    simp; intro x hx; exact ⟨x, by simpa[Matrix.comp_vecCons'] using sigma_one_completeness hp hx⟩
 
 end Model
 
@@ -215,7 +215,7 @@ theorem sigma_one_completeness {σ : Sentence ℒₒᵣ} (hσ : Hierarchy.Sigma 
     ℕ ⊧ σ → T ⊢ σ := fun H =>
   Complete.complete (consequence_of _ _ (fun M _ _ _ _ _ => by
     haveI : Theory.Mod M (Theory.PAminus ℒₒᵣ) := Theory.Mod.of_subtheory (T₁ := T) M (Semantics.ofSystemSubtheory _ _)
-    simpa using @Model.sigma_one_completeness M _ _ _ _ _ _ hσ ![] (by simpa[models_iff] using H)))
+    simpa[Matrix.empty_eq] using @Model.sigma_one_completeness M _ _ _ _ _ _ hσ ![] (by simpa[models_iff] using H)))
 
 end
 

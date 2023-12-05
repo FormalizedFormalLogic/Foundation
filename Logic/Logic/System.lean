@@ -110,6 +110,8 @@ namespace Sound
 variable [Sound F]
 variable {M : Type w} [Inhabited M] {s : Struc M}
 
+lemma sound' {T : Set F} {f : F} : T ⊢! f → T ⊨ f := by rintro ⟨b⟩; exact sound b
+
 lemma not_provable_of_countermodel {T : Set F} {p : F}
   (hT : s ⊧ₛ* T) (hp : ¬s ⊧ₛ p) : IsEmpty (T ⊢ p) :=
   ⟨fun b => by have : s ⊧ₛ p := Sound.sound b M s hT; contradiction⟩
