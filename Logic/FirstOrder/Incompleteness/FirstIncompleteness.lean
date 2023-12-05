@@ -63,7 +63,7 @@ def codeAux : {k : ℕ} → Nat.ArithPart₁.Code k → Formula ℒₒᵣ (Fin (
     (Rew.bind ![] (⸢0⸣ :> &0 :> (&·.succ))).hom (codeAux c) ⋏
     (∀[“#0 < &0”] ∃' “#0 ≠ 0” ⋏ (Rew.bind ![] (#0 :> #1 :> (&·.succ))).hom (codeAux c))
 
-def code (c : Code k) : FormulaFin ℒₒᵣ (k + 1) := (Rew.bind ![] (&0 :> (&·.succ))).hom (codeAux c)
+def code (c : Code k) : Subsentence ℒₒᵣ (k + 1) := (Rew.bind ![] (#0 :> (#·.succ))).hom (codeAux c)
 
 lemma codeAux_sigma_one {k} (c : Nat.ArithPart₁.Code k) : Hierarchy.Sigma 1 (codeAux c) := by
   induction c <;> simp[codeAux, Subformula.Operator.operator, Matrix.fun_eq_vec₂,
@@ -120,16 +120,16 @@ lemma models_codeAux {c : Code k} {f : Vector ℕ k →. ℕ} (hc : c.eval f) (y
     · intro h; simpa using Nat.mem_rfind.mp (Part.eq_some_iff.mp h)
 
 lemma models_code {c : Code k} {f : Vector ℕ k →. ℕ} (hc : c.eval f) (y : ℕ) (v : Fin k → ℕ) :
-    Subformula.Val! ℕ (y :> v) (code c) ↔ y ∈ f (Vector.ofFn v) := by
+    Subformula.PVal! ℕ (y :> v) (code c) ↔ y ∈ f (Vector.ofFn v) := by
   simpa[code, models_iff, Subformula.eval_rew, Matrix.empty_eq, Function.comp,
     Matrix.comp_vecCons', ←Part.eq_some_iff] using models_codeAux hc y v
 
 noncomputable def codeOfPartrec {k} (f : Vector ℕ k →. ℕ) : Code k :=
-  Classical.epsilon (fun c => ∀ y v, Subformula.Val! ℕ (y :> v) (code c) ↔ y ∈ f (Vector.ofFn v))
+  Classical.epsilon (fun c => ∀ y v, Subformula.PVal! ℕ (y :> v) (code c) ↔ y ∈ f (Vector.ofFn v))
 
 lemma codeOfPartrec_spec {k} {f : Vector ℕ k →. ℕ} (hf : Nat.Partrec' f) {y : ℕ} {v : Fin k → ℕ} :
-    Subformula.Val! ℕ (y :> v) (code $ codeOfPartrec f) ↔ y ∈ f (Vector.ofFn v) := by
-  have : ∃ c, ∀ y v, Subformula.Val! ℕ (y :> v) (code c) ↔ y ∈ f (Vector.ofFn v) := by
+    Subformula.PVal! ℕ (y :> v) (code $ codeOfPartrec f) ↔ y ∈ f (Vector.ofFn v) := by
+  have : ∃ c, ∀ y v, Subformula.PVal! ℕ (y :> v) (code c) ↔ y ∈ f (Vector.ofFn v) := by
     rcases Nat.ArithPart₁.exists_code (of_partrec hf) with ⟨c, hc⟩
     exact ⟨c, models_code hc⟩
   exact Classical.epsilon_spec this y v
@@ -139,13 +139,13 @@ variable {T : Theory ℒₒᵣ} [EqTheory T] [PAminus T] [DecidablePred T] [Sigm
 section representation
 
 lemma provable_iff_mem_partrec {k} {f : Vector ℕ k →. ℕ} (hf : Nat.Partrec' f) {y : ℕ} {v : Fin k → ℕ} :
-    (T ⊢! (Rew.rewrite $ ⸢y⸣ :> fun i => ⸢v i⸣).hom (code $ codeOfPartrec f)) ↔ y ∈ f (Vector.ofFn v) := by
-  let σ : Sentence ℒₒᵣ := (Rew.rewrite $ ⸢y⸣ :> fun i => ⸢v i⸣).hom (code $ codeOfPartrec f)
+    (T ⊢! (Rew.substs $ ⸢y⸣ :> fun i => ⸢v i⸣).hom (code $ codeOfPartrec f)) ↔ y ∈ f (Vector.ofFn v) := by
+  let σ : Sentence ℒₒᵣ := (Rew.substs $ ⸢y⸣ :> fun i => ⸢v i⸣).hom (code $ codeOfPartrec f)
   have sigma : Hierarchy.Sigma 1 σ :=
-    (Hierarchy.rew (Rew.rewrite $ ⸢y⸣ :> fun i => ⸢v i⸣) (code_sigma_one (codeOfPartrec f)))
+    (Hierarchy.rew (Rew.substs $ ⸢y⸣ :> fun i => ⸢v i⸣) (code_sigma_one (codeOfPartrec f)))
   constructor
   · rintro ⟨b⟩
-    have : Subformula.Eval! ℕ ![] (y :> v) (code $ codeOfPartrec f) := by
+    have : Subformula.PVal! ℕ (y :> v) (code $ codeOfPartrec f) := by
       simpa[models_iff, Subformula.eval_rew, Matrix.empty_eq, Function.comp, Matrix.comp_vecCons'] using
         Arith.Sound.sound sigma ⟨b⟩
     exact (codeOfPartrec_spec hf).mp this
@@ -156,11 +156,11 @@ lemma provable_iff_mem_partrec {k} {f : Vector ℕ k →. ℕ} (hf : Nat.Partrec
 
 variable {α : Type*} {σ : Type*} [Primcodable α] [Primcodable σ]
 
-noncomputable def graph (f : α →. σ) : FormulaFin ℒₒᵣ 2 :=
+noncomputable def graph (f : α →. σ) : Subsentence ℒₒᵣ 2 :=
   code (codeOfPartrec fun x => Part.bind (decode (α := α) x.head) fun a => (f a).map encode)
 
 theorem representation {f : α →. σ} (hf : Partrec f) {x y} :
-    T ⊢! (graph f)&[⸢y⸣, ⸢x⸣] ↔ y ∈ f x := by
+    T ⊢! (graph f)/[⸢y⸣, ⸢x⸣] ↔ y ∈ f x := by
   let f' : Vector ℕ 1 →. ℕ := fun x => Part.bind (decode (α := α) x.head) fun a => (f a).map encode
   have : Nat.Partrec' f' :=
     Nat.Partrec'.part_iff.mpr
@@ -169,22 +169,22 @@ theorem representation {f : α →. σ} (hf : Partrec f) {x y} :
   simpa[Matrix.constant_eq_singleton] using
     provable_iff_mem_partrec this (y := encode y) (v := ![encode x])
 
-noncomputable def pred (p : α → Prop) : FormulaFin ℒₒᵣ 1 :=
-  (graph (fun a => Part.assert (p a) fun _ => Part.some ()))&[⸢()⸣, &0]
+noncomputable def pred (p : α → Prop) : Subsentence ℒₒᵣ 1 :=
+  (graph (fun a => Part.assert (p a) fun _ => Part.some ()))/[⸢()⸣, #0]
 
 theorem pred_representation {p : α → Prop} (hp : RePred p) {x} :
-    T ⊢! (pred p)&[⸢x⸣] ↔ p x := by
-  simpa[pred, ←Rew.hom_comp_app, Rew.rewrite_comp_rewrite] using
+    T ⊢! (pred p)/[⸢x⸣] ↔ p x := by
+  simpa[pred, ←Rew.hom_comp_app, Rew.substs_comp_substs] using
     representation hp (T := T) (x := x) (y := ())
 
 variable {L : Language.{u}} [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq (L.rel k)]
   [(k : ℕ) → Primcodable (L.func k)] [(k : ℕ) → Primcodable (L.rel k)]
   [UniformlyPrimcodable L.func] [UniformlyPrimcodable L.rel]
 
-noncomputable def provableSentence (U : Theory L) : FormulaFin ℒₒᵣ 1 := pred (U ⊢! ·)
+noncomputable def provableSentence (U : Theory L) : Subsentence ℒₒᵣ 1 := pred (U ⊢! ·)
 
 theorem provableSentence_representation (U : Theory L) [DecidablePred U] [Theory.Computable U] {σ} :
-    T ⊢! (provableSentence U)&[⸢σ⸣] ↔ U ⊢! σ := by
+    T ⊢! (provableSentence U)/[⸢σ⸣] ↔ U ⊢! σ := by
   simpa using pred_representation (T := T) (provable_RePred U) (x := σ)
 
 end representation
@@ -193,27 +193,27 @@ namespace FirstIncompleteness
 
 variable (T)
 
-private lemma diagRefutation_re : RePred (fun σ => T ⊢! ~σ&[⸢σ⸣]) := by
-  have : Partrec fun σ : FormulaFin ℒₒᵣ 1 => (provableFn T (~σ&[⸢σ⸣])).map (fun _ => ()) :=
+private lemma diagRefutation_re : RePred (fun σ => T ⊢! ~σ/[⸢σ⸣]) := by
+  have : Partrec fun σ : Subsentence ℒₒᵣ 1 => (provableFn T (~σ/[⸢σ⸣])).map (fun _ => ()) :=
     Partrec.map
       ((provableFn_partrec T).comp <| Primrec.to_comp
         <| (Subformula.neg_primrec (L := ℒₒᵣ)).comp
-        <| (Subformula.rewrite₁_primrec (L := ℒₒᵣ)).comp
+        <| (Subformula.substs₁_primrec (L := ℒₒᵣ)).comp
           ((Subterm.Operator.const_primrec (L := ℒₒᵣ)).comp
             <| (Subterm.Operator.numeral_primrec (L := ℒₒᵣ)).comp .encode) .id)
       (.const ())
   exact this.of_eq <| by intro σ; ext; simp[←provable_iff_provableFn]
 
-noncomputable def diagRefutation : FormulaFin ℒₒᵣ 1 := pred (fun σ => T ⊢! ~σ&[⸢σ⸣])
+noncomputable def diagRefutation : Subsentence ℒₒᵣ 1 := pred (fun σ => T ⊢! ~σ/[⸢σ⸣])
 
 local notation "ρ" => diagRefutation T
 
-noncomputable def undecidable : Sentence ℒₒᵣ := ρ&[⸢ρ⸣]
+noncomputable def undecidable : Sentence ℒₒᵣ := ρ/[⸢ρ⸣]
 
 local notation "γ" => undecidable T
 
-lemma diagRefutation_spec (σ : FormulaFin ℒₒᵣ 1) :
-    T ⊢! ρ&[⸢σ⸣] ↔ T ⊢! ~σ&[⸢σ⸣] := by
+lemma diagRefutation_spec (σ : Subsentence ℒₒᵣ 1) :
+    T ⊢! ρ/[⸢σ⸣] ↔ T ⊢! ~σ/[⸢σ⸣] := by
   simpa[diagRefutation] using pred_representation (diagRefutation_re T) (x := σ)
 
 lemma independent : System.Independent T γ := by
@@ -229,11 +229,12 @@ theorem main : ¬System.Complete T := System.incomplete_iff_exists_independent.m
 end FirstIncompleteness
 
 variable (T : Theory ℒₒᵣ) [DecidablePred T] [EqTheory T] [PAminus T] [SigmaOneSound T] [Theory.Computable T]
+open FirstIncompleteness
 
+/- Gödel's First incompleteness theorem -/
 theorem first_incompleteness : ¬System.Complete T := FirstIncompleteness.main T
 
-lemma undecidable :
-    T ⊬ FirstIncompleteness.undecidable T ∧ T ⊬ ~FirstIncompleteness.undecidable T :=
+lemma undecidable : T ⊬ undecidable T ∧ T ⊬ ~undecidable T :=
   FirstIncompleteness.independent T
 
 end Arith

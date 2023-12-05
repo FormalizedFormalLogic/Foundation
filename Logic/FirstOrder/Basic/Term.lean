@@ -14,8 +14,6 @@ scoped prefix:max "#" => Subterm.bvar
 
 abbrev Term (L : Language.{u}) (μ : Type v) := Subterm L μ 0
 
-abbrev TermFin (L : Language.{u}) (n : ℕ) := Subterm L (Fin n) 0
-
 abbrev SyntacticSubterm (L : Language.{u}) (n : ℕ) := Subterm L ℕ n
 
 abbrev SyntacticTerm (L : Language.{u}) := SyntacticSubterm L 0
@@ -604,22 +602,22 @@ lemma lMap_fix (t : SyntacticSubterm L₁ n) : (fix t).lMap Φ = fix (t.lMap Φ)
 end lMap
 
 structure Operator (L : Language.{u}) (n : ℕ) where
-  term : TermFin L n
+  term : Subterm L Empty n
 
 abbrev Const (L : Language.{u}) := Operator L 0
 
-def Subterm.fn {k} (f : L.func k) : Operator L k := ⟨Subterm.func f (&·)⟩
+def Subterm.fn {k} (f : L.func k) : Operator L k := ⟨Subterm.func f (#·)⟩
 
 namespace Operator
 
-def equiv : Operator L n ≃ TermFin L n where
+def equiv : Operator L n ≃ Subterm L Empty n where
   toFun := Operator.term
   invFun := Operator.mk
   left_inv := by intro _; simp
   right_inv := by intro _; simp
 
 def operator {arity : ℕ} (o : Operator L arity) (v : Fin arity → Subterm L μ n) : Subterm L μ n :=
-  Rew.rewrite v (Rew.castLE n.zero_le o.term)
+  Rew.substs v (Rew.emb o.term)
 
 def const (c : Const L) : Subterm L μ n := c.operator ![]
 
@@ -630,12 +628,13 @@ def comp (o : Operator L k) (w : Fin k → Operator L l) : Operator L l :=
 
 lemma operator_comp (o : Operator L k) (w : Fin k → Operator L l) (v : Fin l → Subterm L μ n) :
   (o.comp w).operator v = o.operator (fun x => (w x).operator v) := by
-    simp[operator, comp, ←Rew.comp_app]; congr 1; ext <;> simp[Rew.comp_app]
+    simp[operator, comp, ←Rew.comp_app]; congr 1
+    ext <;> simp[Rew.comp_app]; contradiction
 
-def fvar (x : Fin n) : Operator L n := ⟨&x⟩
+def bvar (x : Fin n) : Operator L n := ⟨#x⟩
 
-lemma operator_bvar (x : Fin k) (v : Fin k → Subterm L μ n) : (fvar x).operator v = v x := by
-  simp[operator, fvar]
+lemma operator_bvar (x : Fin k) (v : Fin k → Subterm L μ n) : (bvar x).operator v = v x := by
+  simp[operator, bvar]
 
 -- f.operator ![ ... f.operator ![f.operator ![z, t 0], t 1], ... ,t (n-1)]
 def foldr (f : Operator L 2) (z : Operator L k) : List (Operator L k) → Operator L k
@@ -651,7 +650,7 @@ def foldr (f : Operator L 2) (z : Operator L k) : List (Operator L k) → Operat
 
 def iterr (f : Operator L 2) (z : Const L) : (n : ℕ) → Operator L n
   | 0     => z
-  | _ + 1 => f.foldr (fvar 0) (List.ofFn fun x => fvar x.succ)
+  | _ + 1 => f.foldr (bvar 0) (List.ofFn fun x => bvar x.succ)
 
 @[simp] lemma iterr_zero (f : Operator L 2) (z : Const L) : f.iterr z 0 = z := rfl
 
@@ -679,17 +678,17 @@ protected class Sub (L : Language) where
 protected class Div (L : Language) where
   div : Subterm.Operator L 2
 
-instance [Language.Add L] : Operator.Add L := ⟨⟨Subterm.func Language.Add.add Subterm.fvar⟩⟩
+instance [Language.Add L] : Operator.Add L := ⟨⟨Subterm.func Language.Add.add Subterm.bvar⟩⟩
 
-instance [Language.Mul L] : Operator.Mul L := ⟨⟨Subterm.func Language.Mul.mul Subterm.fvar⟩⟩
+instance [Language.Mul L] : Operator.Mul L := ⟨⟨Subterm.func Language.Mul.mul Subterm.bvar⟩⟩
 
 lemma Zero.term_eq [L.Zero] : (@Zero.zero L _).term = Subterm.func Language.Zero.zero ![] := rfl
 
 lemma One.term_eq [L.One] : (@One.one L _).term = Subterm.func Language.One.one ![] := rfl
 
-lemma Add.term_eq [L.Add] : (@Add.add L _).term = Subterm.func Language.Add.add Subterm.fvar := rfl
+lemma Add.term_eq [L.Add] : (@Add.add L _).term = Subterm.func Language.Add.add Subterm.bvar := rfl
 
-lemma Mul.term_eq [L.Mul] : (@Mul.mul L _).term = Subterm.func Language.Mul.mul Subterm.fvar := rfl
+lemma Mul.term_eq [L.Mul] : (@Mul.mul L _).term = Subterm.func Language.Mul.mul Subterm.bvar := rfl
 
 open Language Subterm
 
@@ -735,7 +734,7 @@ variable (ω : Rew L μ₁ n₁ μ₂ n₂)
 protected lemma operator (o : Operator L k) (v : Fin k → Subterm L μ₁ n₁) :
     ω (o.operator v) = o.operator (fun i => ω (v i)) := by
   simp[Operator.operator, ←comp_app]; congr 1
-  ext x <;> simp[comp_app]; exact x.elim0'
+  ext <;> simp[comp_app]; try contradiction
 
 protected lemma operator' (o : Operator L k) (v : Fin k → Subterm L μ₁ n₁) :
     ω (o.operator v) = o.operator (ω ∘ v) := ω.operator o v

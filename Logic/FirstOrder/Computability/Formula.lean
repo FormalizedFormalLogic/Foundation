@@ -1006,12 +1006,6 @@ lemma rewrite_primrec :
     to₂' <| bind_primrec (.const _) (to₂' <| Primrec.finArrow_app (fst.comp fst) snd) snd
   exact this.of_eq <| by intro v p; rfl
 
-lemma rewrite₁_primrec :
-    Primrec₂ (fun t p => p&[t] : Subterm L μ n → Subformula L (Fin 1) n → Subformula L μ n) :=
-  rewrite_primrec.comp₂ (Primrec₂.encode_iff.mp $
-    (Primrec.encode.comp₂ (list_cons.comp₂ Primrec₂.left (Primrec₂.const []))).of_eq
-    <| by intro x _; simp[encode_finArrow]) Primrec₂.right
-
 lemma substs_primrec :
     Primrec₂ (fun v p => (Rew.substs v).hom p : (Fin n → Subterm L μ n') → Subformula L μ n → Subformula L μ n') := by
   have : Primrec₂ (fun v p => (Rew.bind v (&·)).hom p : (Fin n → Subterm L μ n') → Subformula L μ n → Subformula L μ n') :=
@@ -1019,7 +1013,7 @@ lemma substs_primrec :
   exact this.of_eq <| by { intro v p; rw[Rew.eq_bind (Rew.substs v)]; simp[Function.comp] }
 
 lemma substs₁_primrec :
-    Primrec₂ (fun t p => (Rew.substs ![t]).hom p : Subterm L μ n' → Subformula L μ 1 → Subformula L μ n') :=
+    Primrec₂ (fun t p => p/[t] : Subterm L μ n' → Subformula L μ 1 → Subformula L μ n') :=
   substs_primrec.comp₂ (Primrec₂.encode_iff.mp $
     (Primrec.encode.comp₂ (list_cons.comp₂ Primrec₂.left (Primrec₂.const []))).of_eq
     <| by intro x _; simp[encode_finArrow]) Primrec₂.right

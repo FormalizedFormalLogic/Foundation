@@ -449,14 +449,14 @@ lemma emb_primrec : Primrec (Rew.emb : Subterm L Empty n → Subterm L μ n) := 
 
 namespace Operator
 
-instance (k) : Primcodable (Operator L k) := Primcodable.ofEquiv (TermFin L k) equiv
+instance (k) : Primcodable (Operator L k) := Primcodable.ofEquiv (Subterm L Empty k) equiv
 
 lemma term_primrec : Primrec (@Operator.term L k) := Primrec.of_equiv (e := @equiv L k)
 
 lemma mk_primrec : Primrec (@Operator.mk L k) := Primrec.of_equiv_symm (e := @equiv L k)
 
 lemma operator_primrec : Primrec₂ (operator : Operator L k → (Fin k → Subterm L μ n) → Subterm L μ n) :=
-  rewrite_primrec.comp₂ .right ((castLE_primrec _).comp $ term_primrec.comp .fst)
+  substs_primrec.comp₂ .right (emb_primrec.comp $ term_primrec.comp .fst)
 
 lemma comp_primrec₂ (o : Operator L 2) : Primrec₂ (fun o₁ o₂ => comp o ![o₁, o₂] : Operator L l → Operator L l → Operator L l) :=
   mk_primrec.comp <| operator_primrec.comp (.const o) (Primrec.encode_iff.mp $ by

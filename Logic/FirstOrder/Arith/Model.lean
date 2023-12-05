@@ -78,10 +78,10 @@ variable (L : Language.{u}) [ORing L]
 structure Cut (M : Type w) [s : Structure L M] where
   domain : Set M
   closedSucc : ∀ x ∈ domain, (ᵀ“#0 + 1”).bVal s ![x] ∈ domain
-  closedLt : ∀ x y : M, Subformula.BVal s ![x, y] “#0 < #1” → y ∈ domain → x ∈ domain
+  closedLt : ∀ x y : M, Subformula.PVal s ![x, y] “#0 < #1” → y ∈ domain → x ∈ domain
 
 structure ClosedCut (M : Type w) [s : Structure L M] extends Structure.ClosedSubset L M where
-  closedLt : ∀ x y : M, Subformula.BVal s ![x, y] “#0 < #1” → y ∈ domain → x ∈ domain
+  closedLt : ∀ x y : M, Subformula.PVal s ![x, y] “#0 < #1” → y ∈ domain → x ∈ domain
 
 end Semantics
 

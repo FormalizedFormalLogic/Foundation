@@ -396,8 +396,8 @@ section Definability
 
 variable {L : Language.{u}} {α : Type u} [Structure L α]
 
-def DefinableIn {k} (C : Set (FormulaFin L k)) (R : Set (Fin k → α)) : Prop :=
-  ∃ p ∈ C, ∀ v, v ∈ R ↔ Subformula.Val! α v p
+def DefinableIn {k} (C : Set (Subsentence L k)) (R : Set (Fin k → α)) : Prop :=
+  ∃ p ∈ C, ∀ v, v ∈ R ↔ Subformula.PVal! α v p
 
 end Definability
 

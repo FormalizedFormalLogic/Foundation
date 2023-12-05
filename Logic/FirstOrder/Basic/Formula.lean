@@ -16,8 +16,6 @@ inductive Subformula (L : Language.{u}) (μ : Type v) : ℕ → Type (max u v) w
 
 abbrev Formula (L : Language.{u}) (μ : Type v) := Subformula L μ 0
 
-abbrev FormulaFin (L : Language.{u}) (n : ℕ) := Subformula L (Fin n) 0
-
 abbrev Sentence (L : Language.{u}) := Formula L Empty
 
 abbrev Subsentence (L : Language.{u}) (n : ℕ) := Subformula L Empty n
@@ -501,15 +499,10 @@ lemma eq_ball_iff {p : Subformula L μ₁ n₁} {q₁ q₂} :
 
 end Rew
 
-scoped syntax (name := substsHomNotation) term:max "#[" term,* "]" : term
+scoped syntax (name := substsHomNotation) term:max "/[" term,* "]" : term
 
 scoped macro_rules (kind := substsHomNotation)
-  | `($p:term #[$terms:term,*]) => `((Rew.substs ![$terms,*]).hom $p)
-
-scoped syntax (name := rewriteHomNotation) term:max "&[" term,* "]" : term
-
-scoped macro_rules (kind := rewriteHomNotation)
-  | `($p:term &[$terms:term,*]) => `((Rew.rewrite ![$terms,*]).hom $p)
+  | `($p:term /[$terms:term,*]) => `((Rew.substs ![$terms,*]).hom $p)
 
 namespace Subformula
 
@@ -585,14 +578,14 @@ def qfree (p : Subformula L μ n) : Prop := p.qr = 0
   by simp[qfree]
 
 structure Operator (L : Language.{u}) (n : ℕ) where
-  sentence : FormulaFin L n
+  sentence : Subsentence L n
 
 abbrev Const (L : Language.{u}) := Operator L 0
 
 namespace Operator
 
 def operator {arity : ℕ} (o : Operator L arity) (v : Fin arity → Subterm L μ n) : Subformula L μ n :=
-  (Rew.rewrite v).hom ((Rew.castLE n.zero_le).hom o.sentence)
+  (Rew.substs v).hom (Rew.emb.hom o.sentence)
 
 def const (c : Const L) : Subformula L μ n := c.operator ![]
 
@@ -606,6 +599,7 @@ lemma operator_comp (o : Operator L k) (w : Fin k → Subterm.Operator L l) (v :
     simp[operator, comp, ←Rew.hom_comp_app]; congr 2
     ext <;> simp[Rew.comp_app]
     · congr
+    · contradiction
 
 def and {k} (o₁ o₂ : Operator L k) : Operator L k := ⟨o₁.sentence ⋏ o₂.sentence⟩
 
@@ -629,15 +623,15 @@ protected class LE (L : Language) where
 protected class Mem (L : Language) where
   mem : Subformula.Operator L 2
 
-instance [Language.Eq L] : Operator.Eq L := ⟨⟨Subformula.rel Language.Eq.eq Subterm.fvar⟩⟩
+instance [Language.Eq L] : Operator.Eq L := ⟨⟨Subformula.rel Language.Eq.eq Subterm.bvar⟩⟩
 
-instance [Language.LT L] : Operator.LT L := ⟨⟨Subformula.rel Language.LT.lt Subterm.fvar⟩⟩
+instance [Language.LT L] : Operator.LT L := ⟨⟨Subformula.rel Language.LT.lt Subterm.bvar⟩⟩
 
 instance [Operator.Eq L] [Operator.LT L] : Operator.LE L := ⟨Eq.eq.or LT.lt⟩
 
-lemma Eq.sentence_eq [L.Eq] : (@Operator.Eq.eq L _).sentence = Subformula.rel Language.Eq.eq Subterm.fvar := rfl
+lemma Eq.sentence_eq [L.Eq] : (@Operator.Eq.eq L _).sentence = Subformula.rel Language.Eq.eq Subterm.bvar := rfl
 
-lemma LT.sentence_eq [L.LT] : (@Operator.LT.lt L _).sentence = Subformula.rel Language.LT.lt Subterm.fvar := rfl
+lemma LT.sentence_eq [L.LT] : (@Operator.LT.lt L _).sentence = Subformula.rel Language.LT.lt Subterm.bvar := rfl
 
 lemma LE.def_of_Eq_of_LT [Operator.Eq L] [Operator.LT L] :
     (@Operator.LE.le L _) = Eq.eq.or LT.lt := rfl
@@ -825,7 +819,7 @@ variable (ω : Rew L μ₁ n₁ μ₂ n₂)
 lemma hom_operator (o : Operator L k) (v : Fin k → Subterm L μ₁ n₁) :
     ω.hom (o.operator v) = o.operator (fun i => ω (v i)) := by
   simp[Operator.operator, ←Rew.hom_comp_app]; congr 2
-  ext x <;> simp[Rew.comp_app]; exact x.elim0'
+  ext <;> simp[Rew.comp_app]; contradiction
 
 lemma hom_operator' (o : Operator L k) (v : Fin k → Subterm L μ₁ n₁) :
     ω.hom (o.operator v) = o.operator (ω ∘ v) := ω.hom_operator o v

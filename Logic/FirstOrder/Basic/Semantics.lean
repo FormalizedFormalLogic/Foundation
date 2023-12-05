@@ -100,11 +100,11 @@ lemma val_substs (w : Fin n₁ → Subterm L μ n₂) (t : Subterm L μ n₁) :
   simp[val_rew]; congr
 
 def Operator.val {M : Type w} [s : Structure L M] (o : Operator L k) (v : Fin k → M) : M :=
-  Subterm.val s ![] v o.term
+  Subterm.val s v Empty.elim o.term
 
 lemma val_operator {k} (o : Operator L k) (v) :
     val s e ε (o.operator v) = o.val (fun x => (v x).val s e ε) := by
-  simp[Operator.operator, val_rewrite, Operator.val]; congr; funext x; exact x.elim0
+  simp[Operator.operator, val_substs]; congr; funext x; contradiction
 
 @[simp] lemma val_const (o : Const L) :
     val s e ε o.const = o.val ![] := by
@@ -244,13 +244,13 @@ abbrev Eval! (M : Type w) [s : Structure L M] {n} (e : Fin n → M) (ε : μ →
 
 abbrev Val (s : Structure L M) (ε : μ → M) : Formula L μ →L Prop := Eval s ![] ε
 
-abbrev BVal (s : Structure L M) (e : Fin n → M) : Subformula L Empty n →L Prop := Eval s e Empty.elim
+abbrev PVal (s : Structure L M) (e : Fin n → M) : Subsentence L n →L Prop := Eval s e Empty.elim
 
 abbrev Val! (M : Type w) [s : Structure L M] (ε : μ → M) :
     Formula L μ →L Prop := Val s ε
 
-abbrev BVal! (M : Type w) [s : Structure L M] (e : Fin n → M) :
-    Subformula L Empty n →L Prop := BVal s e
+abbrev PVal! (M : Type w) [s : Structure L M] (e : Fin n → M) :
+    Subformula L Empty n →L Prop := PVal s e
 
 abbrev Realize (s : Structure L M) : Formula L M →L Prop := Eval s ![] id
 
@@ -355,7 +355,7 @@ variable (ε : ℕ → M)
 end Syntactic
 
 def Operator.val {M : Type w} [s : Structure L M] {k} (o : Operator L k) (v : Fin k → M) : Prop :=
-  Subformula.Eval s ![] v o.sentence
+  Subformula.Eval s v Empty.elim o.sentence
 
 @[simp] lemma val_operator_and {k} {o₁ o₂ : Operator L k} {v : Fin k → M} :
     (o₁.and o₂).val v ↔ o₁.val v ∧ o₂.val v := by simp[Operator.and, Operator.val]
@@ -365,7 +365,7 @@ def Operator.val {M : Type w} [s : Structure L M] {k} (o : Operator L k) (v : Fi
 
 lemma eval_operator {k} {o : Operator L k} {v : Fin k → Subterm L μ n} :
     Eval s e ε (o.operator v) ↔ o.val (fun i => (v i).val s e ε) := by
-  simp[Operator.operator, eval_rewrite, Operator.val, Matrix.empty_eq]
+  simp[Operator.operator, eval_substs, Operator.val]
 
 @[simp] lemma eval_operator₀ {o : Const L} {v} :
     Eval s e ε (o.operator v) ↔ o.val (M := M) ![] := by
