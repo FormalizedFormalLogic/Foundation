@@ -1,12 +1,14 @@
 /-
-Copyright (c) 2023 xxxx. All rights reserved.
+Copyright (c) 2023 Shogo Saito. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: xxxx
+Authors: Shogo Saito
 -/
-import Logic.Vorspiel.Vorspiel
+
 import Mathlib.Data.Nat.ModEq
-import Mathlib.Data.List.FinRange
 import Mathlib.Data.Nat.Prime
+import Mathlib.Data.Nat.Pairing
+import Mathlib.Data.List.FinRange
+import Mathlib.Data.List.MinMax
 
 /-!
 # Gödel's Beta Function Lemma
@@ -21,21 +23,19 @@ xxx
 
 ## References
 
-* [XXXX F. Q. Gouvêa, *p-adic numbers*][gouvea1997]
-* [XXXX R. Y. Lewis, *A formal proof of Hensel's lemma over the p-adic integers*][lewis2019]
+* [R. Kaye, *Models of Peano arithmetic*][kaye1991]
 * <https://en.wikipedia.org/wiki/G%C3%B6del%27s_%CE%B2_function>
 
 ## Tags
 
-Gödel
+Gödel, beta function
 -/
 
 namespace Nat
 
 /-- These lemmas set the stage for Gödel's Beta Function Lemma, -/
 lemma mod_eq_of_modEq {a b n} (h : a ≡ b [MOD n]) (hb : b < n) : a % n = b := by
-  have : a % n = b % n := h
-  simp[this]; exact mod_eq_of_lt hb
+  simpa[show a % n = b % n from h] using mod_eq_of_lt hb
 
 lemma coprime_list_prod_iff_right {k} {l : List ℕ} :
     Coprime k l.prod ↔ ∀ n ∈ l, Coprime k n := by
@@ -89,7 +89,7 @@ def chineseRemainderList : (l : List (ℕ × ℕ)) → (H : Coprimes (l.map Prod
         have : z ≡ (l.get i).1 [MOD (l.get i).2] := Nat.ModEq.trans this (ih.prop i)
         exact this⟩
 
-def listSup (l : List ℕ) := max l.length l.sup + 1
+def listSup (l : List ℕ) := max l.length (List.foldr max 0 l) + 1
 
 def coprimeList (l : List ℕ) : List (ℕ × ℕ) :=
   List.ofFn (fun i : Fin l.length => (l.get i, (i + 1) * (listSup l)! + 1))
@@ -98,11 +98,9 @@ def coprimeList (l : List ℕ) : List (ℕ × ℕ) :=
 
 lemma coprimeList_lt (l : List ℕ) (i) : ((coprimeList l).get i).1 < ((coprimeList l).get i).2 := by
   have h₁ : l.get (i.cast $ by simp[coprimeList]) < listSup l :=
-    Nat.lt_add_one_iff.mpr (by simp; right; exact List.le_sup (by apply List.get_mem))
-  have h₂ : Nat.listSup l ≤ (i + 1) * (Nat.listSup l)! + 1 := calc
-    Nat.listSup l ≤ (Nat.listSup l)!               := self_le_factorial _
-    _             ≤ (i + 1) * (Nat.listSup l)!     := Nat.le_mul_of_pos_left (succ_pos _)
-    _             ≤ (i + 1) * (Nat.listSup l)! + 1 := le_add_right _ _
+    Nat.lt_add_one_iff.mpr (by simpa using Or.inr $ List.le_max_of_le (List.get_mem _ _ _) (by rfl))
+  have h₂ : Nat.listSup l ≤ (i + 1) * (Nat.listSup l)! + 1 :=
+    le_trans (self_le_factorial _) (le_trans (Nat.le_mul_of_pos_left (succ_pos _)) (le_add_right _ _))
   simpa only [coprimeList, List.get_ofFn] using lt_of_lt_of_le h₁ h₂
 
 lemma coprime_mul_succ {n m a} (h : n ≤ m) (ha : m - n ∣ a) : Coprime (n * a + 1) (m * a + 1) :=
@@ -130,11 +128,11 @@ lemma coprimes_coprimeList (l : List ℕ) : Coprimes ((coprimeList l).map Prod.s
       simp[←Fin.ext_iff, not_or]
       suffices : ∀ i j : Fin l.length, i < j → Coprime ((i + 1) * (listSup l)! + 1) ((j + 1) * (listSup l)! + 1)
       · intro i j hij _
-        have : i < j ∨ j < i := Ne.lt_or_lt hij; rcases this with (hij | hij)
+        rcases Ne.lt_or_lt hij with (hij | hij)
         · exact this i j hij
         · exact coprime_comm.mp (this j i hij)
       intro i j hij
-      have hjl : j < listSup l := lt_of_lt_of_le j.prop (le_step (le_max_left l.length l.sup))
+      have hjl : j < listSup l := lt_of_lt_of_le j.prop (le_step (le_max_left l.length (List.foldr max 0 l)))
       apply coprime_mul_succ
         (Nat.succ_le_succ $ le_of_lt hij)
         (Nat.dvd_factorial (by simp[Nat.succ_sub_succ, hij]) (by
