@@ -15,12 +15,6 @@ lemma provable_iff_of_consistent_of_complete {T : Theory L}
   ⟨by rintro ⟨b₁⟩ ⟨b₂⟩; exact inconsistent_of_provable_and_refutable b₁ b₂ consis,
    by intro h; exact or_iff_not_imp_right.mp (comp σ) h⟩
 
--- TODO: move to Logic
-lemma inconsistent_of_provable_and_refutable' {T : Theory L} {σ}
-    (bp : T ⊢! σ) (br : T ⊢! ~σ) : ¬System.Consistent T := by
-  rcases bp with ⟨bp⟩; rcases br with ⟨br⟩
-  exact inconsistent_of_provable_and_refutable bp br
-
 end
 
 namespace Arith

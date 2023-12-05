@@ -258,16 +258,6 @@ theorem pred_representation {p : α → Prop} (hp : RePred p) {x} :
   simpa[pred, ←Rew.hom_comp_app, Rew.substs_comp_substs] using
     representation hp (T := T) (x := x) (y := ())
 
-variable {L : Language.{u}} [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq (L.rel k)]
-  [(k : ℕ) → Primcodable (L.func k)] [(k : ℕ) → Primcodable (L.rel k)]
-  [UniformlyPrimcodable L.func] [UniformlyPrimcodable L.rel]
-
-noncomputable def provableSentence (U : Theory L) : Subsentence ℒₒᵣ 1 := pred (U ⊢! ·)
-
-theorem provableSentence_representation (U : Theory L) [DecidablePred U] [Theory.Computable U] {σ} :
-    T ⊢! (provableSentence U)/[⸢σ⸣] ↔ U ⊢! σ := by
-  simpa using pred_representation (T := T) (provable_RePred U) (x := σ)
-
 end representation
 
 end Arith

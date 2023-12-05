@@ -635,6 +635,11 @@ lemma inconsistent_of_provable_and_refutable {T : Theory L} {σ}
   have : T ⊢' ∅ := DerivationCRWA.cCut' bp (by simpa using DerivationCWA.toDerivationCWA br)
   exact (consistent_iff_empty_sequent.mp A).false this
 
+lemma inconsistent_of_provable_and_refutable' {T : Theory L} {σ}
+    (bp : T ⊢! σ) (br : T ⊢! ~σ) : ¬System.Consistent T := by
+  rcases bp with ⟨bp⟩; rcases br with ⟨br⟩
+  exact inconsistent_of_provable_and_refutable bp br
+
 variable
   {L₁ : Language} [∀ k, DecidableEq (L₁.func k)] [∀ k, DecidableEq (L₁.rel k)]
   {L₂ : Language} [∀ k, DecidableEq (L₂.func k)] [∀ k, DecidableEq (L₂.rel k)]

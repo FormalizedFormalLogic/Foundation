@@ -44,7 +44,7 @@ namespace IntuitionisticNC
 
 variable [IntuitionisticNC F] {T : Set F}
 
-local infixl:90 " ⨀ " => modus_ponens
+scoped infixl:90 " ⨀ " => modus_ponens
 
 @[simp] lemma imp_id (p : F) : T ⊢! p ⟶ p := (imply₂ T p (p ⟶ p) p) ⨀ (imply₁ T p (p ⟶ p)) ⨀ (imply₁ T p p)
 

@@ -1,3 +1,4 @@
+import Logic.Logic.HilbertStyle
 import Logic.FirstOrder.Arith.Representation
 import Logic.FirstOrder.Computability.Calculus
 
@@ -9,7 +10,7 @@ namespace Arith
 
 namespace SelfReference
 
-variable {T : Theory ℒₒᵣ} [EqTheory T] [PAminus T] [DecidablePred T] [SigmaOneSound T] [Theory.Computable T]
+variable {T : Theory ℒₒᵣ} [EqTheory T] [PAminus T] [SigmaOneSound T]
 
 open Encodable Subformula
 
@@ -33,6 +34,8 @@ noncomputable def fixpoint (θ : Subsentence ℒₒᵣ 1) : Sentence ℒₒᵣ :
 lemma substs_diag (θ σ : Subsentence ℒₒᵣ 1) :
     (diag θ)/[(⸢σ⸣ : Subterm ℒₒᵣ Empty 0)] = ∀' (fsbs/[#0, ⸢σ⸣, ⸢σ⸣] ⟶ θ/[#0]) := by
   simp[diag, Rew.q_substs, ←Rew.hom_comp_app, Rew.substs_comp_substs]
+
+variable (T)
 
 theorem main (θ : Subsentence ℒₒᵣ 1) :
     T ⊢! fixpoint θ ⟷ θ/[⸢fixpoint θ⸣] :=
@@ -58,6 +61,59 @@ theorem main (θ : Subsentence ℒₒᵣ 1) :
 
 end SelfReference
 
+namespace FirstIncompletenessBySelfReference
+
+variable {T : Theory ℒₒᵣ} [EqTheory T] [PAminus T] [SigmaOneSound T]
+
+section ProvableSentence
+
+variable {L : Language.{u}} [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq (L.rel k)]
+  [(k : ℕ) → Primcodable (L.func k)] [(k : ℕ) → Primcodable (L.rel k)]
+  [UniformlyPrimcodable L.func] [UniformlyPrimcodable L.rel]
+
+noncomputable def provableSentence (U : Theory L) : Subsentence ℒₒᵣ 1 := pred (U ⊢! ·)
+
+theorem provableSentence_representation {U : Theory L} [DecidablePred U] [Theory.Computable U] {σ : Sentence L} :
+    T ⊢! (provableSentence U)/[⸢σ⸣] ↔ U ⊢! σ := by
+  simpa using pred_representation (T := T) (provable_RePred U) (x := σ)
+
+end ProvableSentence
+
+open SelfReference
+
+variable (T)
+
+noncomputable def goedel : Sentence ℒₒᵣ := fixpoint (~provableSentence T)
+
+local notation "G" => goedel T
+
+lemma goedel_spec : T ⊢! G ⟷ ~(provableSentence T)/[⸢G⸣] := by
+  simpa using SelfReference.main T (~provableSentence T)
+
+-- TODO: proof this via (T ⊢ p ⟷ q) → (T ⊢ ~p ⟷ ~q)
+lemma goedel_spec' : T ⊢! ~G ⟷ (provableSentence T)/[⸢G⸣] :=
+  Complete.consequence_iff_provable.mp (consequence_of _ _ (fun M _ _ _ _ _ => by
+    have : M ⊧ G ↔ ¬M ⊧ ((provableSentence T)/[⸢G⸣]) :=
+      by simpa using consequence_iff'.mp (Sound.sound' (goedel_spec T)) M
+    simp[this]))
+
+variable [DecidablePred T] [Theory.Computable T]
+open System.IntuitionisticNC
+
+theorem godel_independent : System.Independent T G := by
+  suffices : ¬(T ⊢! G ∨ T ⊢! ~G)
+  · simpa[System.Independent, not_or] using this
+  rintro (H | H)
+  · have h₁ : T ⊢! ~(provableSentence T)/[⸢G⸣] := by simpa using and_left (goedel_spec T) ⨀ H
+    have h₂ : T ⊢! (provableSentence T)/[⸢G⸣]  := by simpa using (provableSentence_representation (L := ℒₒᵣ)).mpr H
+    exact inconsistent_of_provable_and_refutable' h₂ h₁ (consistent_of_sigmaOneSound T)
+  · have : T ⊢! (provableSentence T)/[⸢G⸣] := by simpa using and_left (goedel_spec' T) ⨀ H
+    have : T ⊢! G := (provableSentence_representation (L := ℒₒᵣ)).mp this
+    exact inconsistent_of_provable_and_refutable' this H (consistent_of_sigmaOneSound T)
+
+theorem main : ¬System.Complete T := System.incomplete_iff_exists_independent.mpr ⟨G, godel_independent T⟩
+
+end FirstIncompletenessBySelfReference
 
 end Arith
 
