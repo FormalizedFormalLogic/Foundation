@@ -169,6 +169,9 @@ lemma constant_eq_singleton {a : α} : (fun _ => a) = ![a] := by funext x; simp
 
 lemma constant_eq_singleton' {v : Fin 1 → α} : v = ![v 0] := by funext x; simp[Fin.eq_zero]
 
+lemma constant_eq_vec₂ {a : α} : (fun _ => a) = ![a, a] := by
+  funext x; cases x using Fin.cases <;> simp[Fin.eq_zero]
+
 lemma fun_eq_vec₂ {v : Fin 2 → α} : v = ![v 0, v 1] := by
   funext x; cases x using Fin.cases <;> simp[Fin.eq_zero]
 
