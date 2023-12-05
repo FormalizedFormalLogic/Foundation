@@ -1,6 +1,4 @@
-import Logic.FirstOrder.Basic
 import Logic.FirstOrder.Completeness.Completeness
---import Logic.FirstOrder.Principia.Meta
 
 namespace LO
 

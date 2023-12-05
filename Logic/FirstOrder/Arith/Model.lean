@@ -1,4 +1,3 @@
-import Logic.FirstOrder.Completeness.Completeness
 import Logic.FirstOrder.Arith.Theory
 
 namespace LO
