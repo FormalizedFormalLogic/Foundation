@@ -1,4 +1,4 @@
-import Logic.FirstOrder.Basic
+import Logic.FirstOrder.Basic.Eq
 
 namespace LO
 
