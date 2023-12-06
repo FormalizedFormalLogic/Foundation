@@ -36,7 +36,7 @@ theorem LoebTheorem : (T ⊢! σ) ↔ (T ⊢! ((Pr[T] ⸢σ⸣) ⟶ σ)) := by
   . intro H; simp only [hyp_right];
   . intro H;
     have h₁ : T ⊢! ~σ ⟶ ~Pr[T] ⸢σ⸣ := imp_contra₀ H;
-    have h₂ : T ∪ {~σ} ⊢! ~Pr[T] ⸢σ⸣ := deduction.mp h₁;
+    have h₂ : T ∪ {~σ} ⊢! ~Pr[T] ⸢σ⸣ := System.Deduction.deduction.mp h₁;
     have h₃ : T ∪ {~σ} ⊢! ~Pr[T] ⸢~σ ⟶ ⊥⸣ := (iff_mp (iff_contra (weakening $ @formalized_neg_def T _ (~σ)))) ⨀ ((imp_contra₀ $ formalized_DNE σ) ⨀ h₂);
     have h₄ : T ∪ {~σ} ⊢! ~Pr[T] ⸢~σ ⟶ ⊥⸣ ⟷ ~Pr[T ∪ {~σ}] ⸢⊥⸣ := by
       have : T₀ ⊢! ~Pr[T] ⸢~σ ⟶ ⊥⸣ ⟷ ~Pr[T ∪ {~σ}] ⸢⊥⸣ := FDT_neg _ _;

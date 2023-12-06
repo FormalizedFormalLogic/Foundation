@@ -1,6 +1,18 @@
 import Logic.Logic.HilbertStyle
 import Logic.FirstOrder.Incompleteness.Derivability.Theory
 
+/-
+以下の定義はℒₒᵣに依存しないので一般のLについて示したほうがよいと思う
+（hereditarily finite setの上で第二不完全性定理を証明するさいなどに結果を応用できる）
+
+ゲーデル数については
+
+class GoedelNumber (L : Language) (α : Type*) where
+  encode : α → Subterm.Const L
+
+のような型クラスで扱えば良い
+-/
+
 notation "Σ" => Bool.true
 notation "Π" => Bool.false
 

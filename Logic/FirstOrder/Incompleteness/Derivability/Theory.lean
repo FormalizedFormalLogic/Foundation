@@ -19,6 +19,11 @@ abbrev Incomplete := IsEmpty (Theory.Complete T)
 class Consistent where
   consistent : System.Consistent T
 
+/-
+class Inconsistent where
+  inconsistent : ~System.Consistent T
+にしたほうがよい気がする
+ -/
 abbrev Inconsistent := IsEmpty (Theory.Consistent T)
 
 section PropositionalCalculus
