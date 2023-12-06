@@ -10,14 +10,15 @@ namespace LO.FirstOrder.Arith
 
 variable (T₀ T: Theory ℒₒᵣ)
 
-lemma Consistent_of_SigmaOneSound [hs : SigmaOneSound T] : Theory.Consistent T where
-  consistent := consistent_of_sound T (Hierarchy.Sigma 1) (by sorry); -- TODO: fix
+lemma Consistent_of_SigmaOneSound [SigmaOneSound T] : Theory.Consistent T where
+  consistent := consistent_of_sigmaOneSound T
 
 class HasProvablePred where
   ProvablePred : Subsentence ℒₒᵣ 1
-  spec : ∀ {σ}, ℕ ⊧ ([→ ⸢σ⸣].hom ProvablePred) ↔ T ⊢! σ
+  spec : ∀ {σ}, ℕ ⊧ (ProvablePred/[⸢σ⸣]) ↔ T ⊢! σ
 
-private def HasProvablePred.PrSubst (T : Theory ℒₒᵣ) [HasProvablePred T] (c : Subterm.Const ℒₒᵣ) : Sentence ℒₒᵣ := [→ c].hom $ ProvablePred T
+private def HasProvablePred.PrSubst (T : Theory ℒₒᵣ) [HasProvablePred T] (c : Subterm.Const ℒₒᵣ) :
+    Sentence ℒₒᵣ := (ProvablePred T)/[c]
 
 notation "Pr[" T "]" => HasProvablePred.PrSubst T
 
@@ -49,7 +50,8 @@ class FormalizedCompleteness (b n) where
 class FormalizedDeductionTheorem where
   FDT : ∀ {σ π : Sentence ℒₒᵣ} [HasProvablePred (T ∪ {σ})], T₀ ⊢! (Pr[T] ⸢σ ⟶ π⸣) ⟷ (Pr[T ∪ {σ}] ⸢π⸣)
 
-lemma FormalizedDeductionTheorem.FDT_neg [HasProvablePred (T ∪ {σ})] [FormalizedDeductionTheorem T₀ T] : T₀ ⊢! ~(Pr[T] ⸢σ ⟶ π⸣) ⟷ ~(Pr[T ∪ {σ}] ⸢π⸣) :=
+lemma FormalizedDeductionTheorem.FDT_neg [HasProvablePred (T ∪ {σ})] [FormalizedDeductionTheorem T₀ T] :
+    T₀ ⊢! ~(Pr[T] ⸢σ ⟶ π⸣) ⟷ ~(Pr[T ∪ {σ}] ⸢π⸣) :=
   iff_contra FormalizedDeductionTheorem.FDT
 
 section PrCalculus
@@ -63,7 +65,8 @@ lemma Derivability1.D1' {σ : Sentence ℒₒᵣ} : T ⊢! σ → T ⊢! (Pr[T] 
 
 lemma Derivability2.D2' {σ π : Sentence ℒₒᵣ} : T ⊢! (Pr[T] ⸢σ ⟶ π⸣) ⟶ ((Pr[T] ⸢σ⸣) ⟶ (Pr[T] ⸢π⸣)) := weakening hD2.D2
 
-lemma Derivability2.D2_iff [Subtheory T₀ T] [hd : Derivability2 T₀ T] {σ π : Sentence ℒₒᵣ} : T₀ ⊢! (Pr[T] ⸢σ ⟷ π⸣) ⟶ ((Pr[T] ⸢σ⸣) ⟷ (Pr[T] ⸢π⸣)) := by
+lemma Derivability2.D2_iff [Subtheory T₀ T] [hd : Derivability2 T₀ T] {σ π : Sentence ℒₒᵣ} :
+    T₀ ⊢! (Pr[T] ⸢σ ⟷ π⸣) ⟶ ((Pr[T] ⸢σ⸣) ⟷ (Pr[T] ⸢π⸣)) := by
   sorry;
   -- have a := @Derivability2.D2 T₀ T _ _ _ σ π;
   -- have b := @Derivability2.D2 T₀ T _ _ _ π σ;

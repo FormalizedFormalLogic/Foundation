@@ -8,7 +8,8 @@ namespace LO.FirstOrder.Theory
 
 open Subformula
 
-variable {L : Language.{u}} [𝓑 : System (Sentence L)] (T : Theory L)
+variable {L : Language.{u}} [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq (L.rel k)]
+  (T : Theory L)
 
 class Complete where
   complete : System.Complete T
@@ -20,12 +21,11 @@ class Consistent where
 
 abbrev Inconsistent := IsEmpty (Theory.Consistent T)
 
-
 section PropositionalCalculus
 
-open System.Intuitionistic
+open System.Intuitionistic System.Deduction
 
-variable {T : Theory L} [System.Intuitionistic (Sentence L)]
+variable {T : Theory L}
 
 instance : BotDef (Sentence L) where
   bot_def := by simp;
@@ -47,15 +47,18 @@ lemma weakening [hs : Subtheory T₀ T] : (T₀ ⊢! σ) → (T ⊢! σ) := by
   intro H;
   exact ⟨hs.sub H⟩;
 
-lemma deduction {σ π} : (T ⊢! σ ⟶ π) ↔ (T ∪ {σ} ⊢! π) := by
-  apply Iff.intro;
-  . sorry;
-  . sorry;
+lemma provable_falsum_of_inconsistent {T : Theory L} : Theory.Inconsistent T → T ⊢! ⊥ := by
+  intro h; by_contra A
+  have : Consistent T := ⟨⟨fun b => A ⟨b⟩⟩⟩
+  exact h.false this
 
-lemma consistent_or {T} {σ : Sentence L} : (Theory.Inconsistent (T ∪ {σ})) → (T ⊢! ~σ) := by sorry
+lemma consistent_or {T} {σ : Sentence L} : Theory.Inconsistent (T ∪ {σ}) → T ⊢! ~σ := by
+  intro h
+  have : T ⊢! σ ⟶ ⊥ := deduction.mpr (provable_falsum_of_inconsistent h)
+  exact neg₁ T σ ⊤ ⨀ (hyp_right (Intuitionistic.verum _) _) ⨀ this
 
 @[simp]
-lemma axm : T ∪ {σ} ⊢! σ := by sorry
+lemma axm : T ∪ {σ} ⊢! σ := deduction.mp (imp_id _)
 
 lemma imply_intro {σ π} : (T ⊢! σ) → ((T ⊢! σ) → (T ⊢! π)) → (T ⊢! σ ⟶ π) := λ H₁ H₂ => hyp_right (H₂ H₁) _
 
@@ -69,6 +72,5 @@ lemma elim_and_left_dilemma : (T ⊢! (σ ⋏ π) ⟶ ρ) → (T ⊢! σ ⟶ π)
   exact (weakening H₁) ⨀ (and_split axm $ deduction.mp H₂);
 
 end PropositionalCalculus
-
 
 end LO.FirstOrder.Theory

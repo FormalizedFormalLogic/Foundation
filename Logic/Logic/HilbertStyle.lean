@@ -3,11 +3,13 @@ import Logic.Logic.System
 namespace LO
 
 namespace System
-variable {F : Type u} [LogicSymbol F] [𝓑 : System F]
 
-class Intuitionistic (F : Type u) [LogicSymbol F] [System F] where
+variable (F : Type u) [LogicSymbol F] [System F]
+
+class Intuitionistic where
   modus_ponens {T : Set F} {p q : F}   : T ⊢! p ⟶ q → T ⊢! p → T ⊢! q
   verum       (T : Set F)             : T ⊢! ⊤
+  falsum      (T : Set F) (p : F)     : T ⊢! ⊥ ⟶ p
   imply₁      (T : Set F) (p q : F)   : T ⊢! p ⟶ q ⟶ p
   imply₂      (T : Set F) (p q r : F) : T ⊢! (p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r
   conj₁       (T : Set F) (p q : F)   : T ⊢! p ⋏ q ⟶ p
@@ -19,25 +21,11 @@ class Intuitionistic (F : Type u) [LogicSymbol F] [System F] where
   neg₁        (T : Set F) (p q : F)   : T ⊢! (p ⟶ q) ⟶ (p ⟶ ~q) ⟶ ~p
   neg₂        (T : Set F) (p q : F)   : T ⊢! p ⟶ ~p ⟶ q
 
-variable {Struc : Type w → Type v} [𝓢 : Semantics F Struc]
+class Deduction where
+  deduction {T : Set F} {p q : F} : T ⊢! p ⟶ q ↔ T ∪ {p} ⊢! q
 
-instance [LO.Complete F] : Intuitionistic F where
-  modus_ponens := fun {T p q} b₁ b₂ =>
-    Complete.consequence_iff_provable.mp (fun M _ s hM => by
-      rcases b₁ with ⟨b₁⟩; rcases b₂ with ⟨b₂⟩
-      have : s ⊧ₛ p → s ⊧ₛ q := by simpa using Sound.models_of_proof hM b₁
-      exact this (Sound.models_of_proof hM b₂))
-  verum  := fun T => Complete.consequence_iff_provable.mp (fun M _ _ _ => by simp)
-  imply₁ := fun T p q => Complete.consequence_iff_provable.mp (fun _ _ _ _ => by simp; exact fun a _ => a)
-  imply₂ := fun T p q r => Complete.consequence_iff_provable.mp (fun _ _ _ _ => by simp; exact fun a b c => a c (b c))
-  conj₁  := fun T p q => Complete.consequence_iff_provable.mp (fun _ _ _ _ => by simp; exact fun a _ => a)
-  conj₂  := fun T p q => Complete.consequence_iff_provable.mp (fun _ _ _ _ => by simp)
-  conj₃  := fun T p q => Complete.consequence_iff_provable.mp (fun _ _ _ _ => by simp; exact fun a b => ⟨a, b⟩)
-  disj₁  := fun T p q => Complete.consequence_iff_provable.mp (fun _ _ _ _ => by simpa using Or.inl)
-  disj₂  := fun T p q => Complete.consequence_iff_provable.mp (fun _ _ _ _ => by simpa using Or.inr)
-  disj₃  := fun T p q r => Complete.consequence_iff_provable.mp (fun _ _ _ _ => by simpa using Or.rec)
-  neg₁   := fun T p q => Complete.consequence_iff_provable.mp (fun _ _ _ _ => by simp; exact fun a b c => (b c) (a c))
-  neg₂   := fun T p q => Complete.consequence_iff_provable.mp (fun _ _ _ _ => by simp; exact fun a b => (b a).elim)
+variable {F}
+variable {Struc : Type w → Type v} [𝓢 : Semantics F Struc]
 
 namespace Intuitionistic
 
@@ -144,6 +132,43 @@ lemma iff_contra : (T ⊢! σ ⟷ π) → (T ⊢! ~σ ⟷ ~π) := λ H => iff_in
 lemma iff_contra' : (T ⊢! σ ⟷ π) → (T ⊢! ~π ⟷ ~σ) := λ H => iff_symm $ iff_contra H
 
 end Intuitionistic
+
+section complete
+
+variable [Complete F]
+
+instance : Intuitionistic F where
+  modus_ponens := fun {T p q} b₁ b₂ =>
+    Complete.consequence_iff_provable.mp (fun M _ s hM => by
+      rcases b₁ with ⟨b₁⟩; rcases b₂ with ⟨b₂⟩
+      have : s ⊧ₛ p → s ⊧ₛ q := by simpa using Sound.models_of_proof hM b₁
+      exact this (Sound.models_of_proof hM b₂))
+  verum  := fun T => Complete.consequence_iff_provable.mp (fun M _ _ _ => by simp)
+  falsum := fun T p => Complete.consequence_iff_provable.mp (fun M _ _ _ => by simp)
+  imply₁ := fun T p q => Complete.consequence_iff_provable.mp (fun _ _ _ _ => by simp; exact fun a _ => a)
+  imply₂ := fun T p q r => Complete.consequence_iff_provable.mp (fun _ _ _ _ => by simp; exact fun a b c => a c (b c))
+  conj₁  := fun T p q => Complete.consequence_iff_provable.mp (fun _ _ _ _ => by simp; exact fun a _ => a)
+  conj₂  := fun T p q => Complete.consequence_iff_provable.mp (fun _ _ _ _ => by simp)
+  conj₃  := fun T p q => Complete.consequence_iff_provable.mp (fun _ _ _ _ => by simp; exact fun a b => ⟨a, b⟩)
+  disj₁  := fun T p q => Complete.consequence_iff_provable.mp (fun _ _ _ _ => by simpa using Or.inl)
+  disj₂  := fun T p q => Complete.consequence_iff_provable.mp (fun _ _ _ _ => by simpa using Or.inr)
+  disj₃  := fun T p q r => Complete.consequence_iff_provable.mp (fun _ _ _ _ => by simpa using Or.rec)
+  neg₁   := fun T p q => Complete.consequence_iff_provable.mp (fun _ _ _ _ => by simp; exact fun a b c => (b c) (a c))
+  neg₂   := fun T p q => Complete.consequence_iff_provable.mp (fun _ _ _ _ => by simp; exact fun a b => (b a).elim)
+
+instance : Deduction F where
+  deduction := fun {T p q} =>
+    ⟨ fun b => Complete.consequence_iff_provable.mp (fun M _ s hM => by
+        rcases b with ⟨b⟩
+        have hM : s ⊧ₛ p ∧ s ⊧ₛ* T := by simpa using hM
+        have : s ⊧ₛ p → s ⊧ₛ q := by simpa using Sound.models_of_proof hM.2 b
+        exact this hM.1),
+      fun b =>
+      Complete.consequence_iff_provable.mp (fun M _ s hM => by
+        rcases b with ⟨b⟩
+        simp; intro hp; exact Sound.models_of_proof (s := s) (by simp[*]) b) ⟩
+
+end complete
 
 end System
 
