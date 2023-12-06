@@ -1,12 +1,12 @@
 /-
-Copyright (c) 2023 xxxx. All rights reserved.
+Copyright (c) 2023 Palalansoukî. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: xxxx
+Authors: Palalansoukî. Adapted for mathlib by Hunter Monroe
 -/
-import Logic.Vorspiel.Vorspiel
 import Mathlib.Data.Nat.ModEq
 import Mathlib.Data.List.FinRange
 import Mathlib.Data.Nat.Prime
+import Mathlib.Data.W.Basic
 
 /-!
 # Gödel's Beta Function Lemma
@@ -17,18 +17,38 @@ This file proves Gödel's Beta Function Lemma, used to prove the First Incomplet
 
 ## Implementation notes
 
-xxx
+This file is taken from https://github.com/iehality/lean4-logic, which includes proofs of Gödel's
+First Incompleteness Theorem and other key results in logic. The eventual goal is to import
+these into mathlib.
 
 ## References
 
-* [XXXX F. Q. Gouvêa, *p-adic numbers*][gouvea1997]
-* [XXXX R. Y. Lewis, *A formal proof of Hensel's lemma over the p-adic integers*][lewis2019]
+* [Richard Kaye, *Models of Peano Arithmetic*][kaye1991]
 * <https://en.wikipedia.org/wiki/G%C3%B6del%27s_%CE%B2_function>
 
 ## Tags
 
-Gödel
+Gödel, Logic
 -/
+
+namespace List
+
+section
+variable {α : Type u} [SemilatticeSup α] [OrderBot α]
+
+/-- These lemmas set the stage for Gödel's Beta Function Lemma, -/
+def sup : List α → α
+  | [] => ⊥
+  | a :: as => a ⊔ as.sup
+
+@[simp] lemma sup_cons (a : α) (as : List α) : (a :: as).sup = a ⊔ as.sup := rfl
+
+lemma le_sup {a} {l : List α} : a ∈ l → a ≤ l.sup :=
+  by induction' l with a l ih <;> simp[*]; rintro (rfl | h); { simp }; { exact le_sup_of_le_right $ ih h }
+
+end
+
+end List
 
 namespace Nat
 

@@ -13,6 +13,8 @@ import Mathlib.Logic.Encodable.Basic
 import Mathlib.Computability.Primrec
 import Mathlib.Computability.Partrec
 import Mathlib.Data.Finset.Sort
+import Logic.Vorspiel.Godel
+
 
 namespace Nat
 variable {α : ℕ → Sort u}
@@ -488,16 +490,7 @@ lemma toFinset_mono {l l' : List α} (h : l ⊆ l') : l.toFinset ⊆ l'.toFinset
 section
 variable {α : Type u} [SemilatticeSup α] [OrderBot α]
 
-def sup : List α → α
-  | [] => ⊥
-  | a :: as => a ⊔ as.sup
-
 @[simp] lemma sup_nil : ([] : List α).sup = ⊥ := rfl
-
-@[simp] lemma sup_cons (a : α) (as : List α) : (a :: as).sup = a ⊔ as.sup := rfl
-
-lemma le_sup {a} {l : List α} : a ∈ l → a ≤ l.sup :=
-  by induction' l with a l ih <;> simp[*]; rintro (rfl | h); { simp }; { exact le_sup_of_le_right $ ih h }
 
 lemma getI_map_range [Inhabited α] (f : ℕ → α) (h : i < n) : ((List.range n).map f).getI i = f i := by
   simpa using List.getI_eq_get ((List.range n).map f) (n := i) (by simpa using h)
