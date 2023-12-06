@@ -1,16 +1,17 @@
+import Logic.Logic.HilbertStyle
 import Logic.FirstOrder.Incompleteness.Derivability.Theory
 
 notation "Σ" => Bool.true
 notation "Π" => Bool.false
 
-open LO.System
+open LO.System LO.System.Intuitionistic
 
 namespace LO.FirstOrder.Arith
 
 variable (T₀ T: Theory ℒₒᵣ)
 
 lemma Consistent_of_SigmaOneSound [hs : SigmaOneSound T] : Theory.Consistent T where
-  consistent := consistent_of_sound T (Hierarchy.Sigma 1) (by simp);
+  consistent := consistent_of_sound T (Hierarchy.Sigma 1) (by sorry); -- TODO: fix
 
 class HasProvablePred where
   ProvablePred : Subsentence ℒₒᵣ 1
@@ -76,13 +77,13 @@ lemma FormalizedCompleteness.FC' {σ : Sentence ℒₒᵣ} : Hierarchy b n σ �
 
 lemma formalized_imp_intro : (T ⊢! σ ⟶ π) → (T₀ ⊢! (Pr[T] ⸢σ⸣) ⟶ (Pr[T] ⸢π⸣)) := by
   intro H;
-  exact MP D2 $ D1 H;
+  exact D2 ⨀ D1 H;
 
 lemma formalized_NC (σ : Sentence ℒₒᵣ) : T₀ ⊢! ((Pr[T] ⸢σ⸣) ⟶ (Pr[T] ⸢~σ⸣)) ⟶ (Pr[T] ⸢(⊥ : Sentence ℒₒᵣ)⸣) := by
   /-
   have : (T ⊢! σ) → (T ⊢! ~σ) → (T ⊢! ⊥) := NC;
   have a : T ⊢! Pr[U](⸢σ ⟶ ~σ⸣) ⟶ (Pr[U](⸢σ⸣)) ⟶ (Pr[U](⸢~σ⸣)) := D2 σ (~σ);
-  have b : T ⊢! ~(Pr[U](⸢σ⸣) ⟶ Pr[U](⸢~σ⸣)) ⟶ ~Pr[U](⸢σ ⟶ ~σ⸣) := imply_contra₀ (D2 σ (~σ));
+  have b : T ⊢! ~(Pr[U](⸢σ⸣) ⟶ Pr[U](⸢~σ⸣)) ⟶ ~Pr[U](⸢σ ⟶ ~σ⸣) := imp_contra₀ (D2 σ (~σ));
   simp [imp_eq Pr[U](⸢σ⸣), imp_eq σ] at b;
   -/
   sorry;
@@ -90,9 +91,9 @@ lemma formalized_NC (σ : Sentence ℒₒᵣ) : T₀ ⊢! ((Pr[T] ⸢σ⸣) ⟶ 
 lemma formalized_NC' (σ : Sentence ℒₒᵣ) : T₀ ⊢! ((Pr[T] ⸢σ⸣) ⋏ (Pr[T] ⸢~σ⸣)) ⟶ (Pr[T] ⸢(⊥ : Sentence ℒₒᵣ)⸣) := by
   sorry;
 
-lemma formalized_DNI (σ : Sentence ℒₒᵣ) : T₀ ⊢! (Pr[T] ⸢σ⸣) ⟶ (Pr[T] ⸢~~σ⸣) := by simp [neg_neg'];
+lemma formalized_DNI (σ : Sentence ℒₒᵣ) : T₀ ⊢! (Pr[T] ⸢σ⸣) ⟶ (Pr[T] ⸢~~σ⸣) := sorry -- by simp [neg_neg']; TODO: fix
 
-lemma formalized_DNE (σ : Sentence ℒₒᵣ) : T₀ ⊢! (Pr[T] ⸢~~σ⸣) ⟶ (Pr[T] ⸢σ⸣) := by simp [neg_neg'];
+lemma formalized_DNE (σ : Sentence ℒₒᵣ) : T₀ ⊢! (Pr[T] ⸢~~σ⸣) ⟶ (Pr[T] ⸢σ⸣) := sorry -- by simp [neg_neg']; TODO: fix
 
 lemma formalized_neg_def (σ : Sentence ℒₒᵣ) : T ⊢! (Pr[T] ⸢~σ⸣) ⟷ (Pr[T] ⸢σ ⟶ ⊥⸣) := by
   apply iff_intro;

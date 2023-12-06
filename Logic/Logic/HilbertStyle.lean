@@ -18,8 +18,6 @@ class Intuitionistic (F : Type u) [LogicSymbol F] [System F] where
   disj₃       (T : Set F) (p q r : F) : T ⊢! (p ⟶ r) ⟶ (q ⟶ r) ⟶ p ⋎ q ⟶ r
   neg₁        (T : Set F) (p q : F)   : T ⊢! (p ⟶ q) ⟶ (p ⟶ ~q) ⟶ ~p
   neg₂        (T : Set F) (p q : F)   : T ⊢! p ⟶ ~p ⟶ q
-  -- MEMO: `⊤ = ~⊥`であることを要請すれば`neg₂`から明らか
-  efq         (T : Set F) (p : F)     : T ⊢! ⊥ ⟶ p
 
 variable {Struc : Type w → Type v} [𝓢 : Semantics F Struc]
 
@@ -40,7 +38,6 @@ instance [LO.Complete F] : Intuitionistic F where
   disj₃  := fun T p q r => Complete.consequence_iff_provable.mp (fun _ _ _ _ => by simpa using Or.rec)
   neg₁   := fun T p q => Complete.consequence_iff_provable.mp (fun _ _ _ _ => by simp; exact fun a b c => (b c) (a c))
   neg₂   := fun T p q => Complete.consequence_iff_provable.mp (fun _ _ _ _ => by simp; exact fun a b => (b a).elim)
-  efq    := fun T p => Complete.consequence_iff_provable.mp (fun _ _ _ _ => by simp)
 
 namespace Intuitionistic
 
@@ -94,6 +91,57 @@ lemma unprov_imp_right_iff (h₁ : T ⊬! σ ⟶ π) (h₂ : T ⊢! π ⟷ ρ): 
   by_contra HC;
   suffices : T ⊢! σ ⟶ π; simp_all only [not_isEmpty_of_nonempty];
   exact imp_trans (by simpa using HC) (iff_mpr h₂);
+
+class BotDef (F : Type u) [LogicSymbol F] where
+  bot_def : (⊥ : F) = ~(⊤ : F)
+open BotDef
+
+variable [BotDef F]
+
+lemma no_contradiction {p : F} (h₁ : T ⊢! p) (h₂ : T ⊢! ~p) : T ⊢! ⊥ := by
+  have hl := imply₁ T p ⊤ ⨀ h₁;
+  have hr := imply₁ T (~p) ⊤ ⨀ h₂;
+  simpa [bot_def] using (neg₁ T ⊤ p) ⨀ hl ⨀ hr;
+
+lemma neg_imply_bot' {p : F} (h : T ⊢! ~p) : T ⊢! ~~p ⟶ ⊥ := by
+  exact neg₂ T (~p) ⊥ ⨀ h;
+
+lemma efq (p : F) : T ⊢! ⊥ ⟶ p := by
+  simpa [bot_def] using neg₂ T ⊤ p ⨀ verum T;
+
+class DoubleNeg (F : Type u) [LogicSymbol F] where
+  double_neg : ∀ (p : F), ~~p = p
+open DoubleNeg
+
+variable [DoubleNeg F]
+
+lemma neg_imply_bot (p : F) (h : T ⊢! ~p) : (T ⊢! p ⟶ ⊥) := by
+  simpa [double_neg] using (neg₂ T (~p) ⊥ ⨀ h);
+
+-- TODO: DoubleNegを仮定する必要は確か無い（直観主義論理で示せる）はず
+lemma negneg_intro (p : F) : T ⊢! p ⟶ ~~p := by simp [double_neg];
+
+lemma negneg_elim (p : F) : T ⊢! p ⟶ ~~p := by simp [double_neg];
+
+class ImpDef (F : Type u) [LogicSymbol F] where
+  imp_def {p q : F} : (p ⟶ q) = ~p ⋎ q
+
+variable [ImpDef F]
+
+lemma imp_contra₀ {p q} (h : T ⊢! p ⟶ q) : (T ⊢! ~q ⟶ ~p) := by
+  simp_all [ImpDef.imp_def, DoubleNeg.double_neg, or_symm];
+
+lemma imp_contra₁ {p q} (h : T ⊢! p ⟶ ~q) : (T ⊢! q ⟶ ~p) := by simpa [double_neg] using (imp_contra₀ h);
+
+lemma imp_contra₂ {p q} (h : T ⊢! ~p ⟶ q) : (T ⊢! ~q ⟶ p) := by simpa [double_neg] using (imp_contra₀ h);
+
+lemma imp_contra₃ {p q} (h : T ⊢! ~p ⟶ ~q) : (T ⊢! q ⟶ p) := by simpa [double_neg] using (imp_contra₀ h);
+
+lemma iff_intro : (T ⊢! σ ⟶ π) → (T ⊢! π ⟶ σ) → (T ⊢! σ ⟷ π) := λ H₁ H₂ => conj₃ _ _ _ ⨀ H₁ ⨀ H₂
+
+lemma iff_contra : (T ⊢! σ ⟷ π) → (T ⊢! ~σ ⟷ ~π) := λ H => iff_intro (imp_contra₀ $ iff_mpr H) (imp_contra₀ $ iff_mp H)
+
+lemma iff_contra' : (T ⊢! σ ⟷ π) → (T ⊢! ~π ⟷ ~σ) := λ H => iff_symm $ iff_contra H
 
 end Intuitionistic
 

@@ -20,16 +20,16 @@ variable
 open Derivability1 Derivability2 Derivability3
 
 lemma FormalizedConsistency (σ : Sentence ℒₒᵣ) : T₀ ⊢! ~(Pr[T] ⸢σ⸣) ⟶ ConL[T] := by
-  exact imply_contra₀ $ MP D2 $ D1 EFQ
+  exact imp_contra₀ $ D2 ⨀ D1 (efq _)
 
 variable (U : Theory ℒₒᵣ) [Subtheory T₀ U] in
 private lemma extend {σ : Sentence ℒₒᵣ}
   : (U ⊢! ConL[T] ⟶ ~Pr[T] ⸢σ⸣) ↔ (U ⊢! (Pr[T] ⸢σ⸣) ⟶ (Pr[T] ⸢~σ⸣)) := by
   apply Iff.intro;
   . intro H;
-    exact imply_contra₃ $ imp_trans (weakening $ FormalizedConsistency T₀ T (~σ)) H;
+    exact imp_contra₃ $ imp_trans (weakening $ FormalizedConsistency T₀ T (~σ)) H;
   . intro H;
-    exact imply_contra₀ $ elim_and_left_dilemma (by
+    exact imp_contra₀ $ elim_and_left_dilemma (by
       have : T₀ ⊢! (Pr[T] ⸢σ⸣ ⋏ Pr[T] ⸢~σ⸣) ⟶ (Pr[T] ⸢⊥⸣) := formalized_NC' σ;
       exact weakening this
     ) H;
@@ -38,7 +38,7 @@ variable (hG : IsGoedelSentence T₀ T G) (hGh : Hierarchy Π 1 G)
 
 lemma formalizedGoedelSentenceUnprovablility : T ⊢! ConL[T] ⟶ ~Pr[T] ⸢G⸣ := by
   have h₁ : T ⊢! (Pr[T] ⸢G⸣) ⟶ (Pr[T] ⸢(Pr[T] ⸢G⸣)⸣) := hD3.D3';
-  have h₂ : T ⊢! Pr[T] ⸢G⸣ ⟶ ~G := weakening $ imply_contra₁ $ iff_mp hG;
+  have h₂ : T ⊢! Pr[T] ⸢G⸣ ⟶ ~G := weakening $ imp_contra₁ $ iff_mp hG;
   have h₃ : T ⊢! Pr[T] ⸢Pr[T] ⸢G⸣⸣ ⟶ Pr[T] ⸢~G⸣ := weakening $ @formalized_imp_intro T₀ T _ _ _ _ _ h₂;
   exact (extend T₀ T T).mpr $ imp_trans h₁ h₃;
 

@@ -27,6 +27,15 @@ open System.Intuitionistic
 
 variable {T : Theory L} [System.Intuitionistic (Sentence L)]
 
+instance : BotDef (Sentence L) where
+  bot_def := by simp;
+
+instance : DoubleNeg (Sentence L) where
+  double_neg := by simp;
+
+instance : ImpDef (Sentence L) where
+  imp_def := by simp [imp_eq];
+
 instance : Subtheory T (T ∪ {σ}) where
   sub := by
     intro σ' h;
@@ -48,69 +57,16 @@ lemma consistent_or {T} {σ : Sentence L} : (Theory.Inconsistent (T ∪ {σ})) �
 @[simp]
 lemma axm : T ∪ {σ} ⊢! σ := by sorry
 
-lemma or_intro : (T ⊢! σ ∨ T ⊢! π) → T ⊢! σ ⋎ π
-  | .inl h => or_left h
-  | .inr h => or_right h
-
-lemma or_comm : T ⊢! σ ⋎ π → T ⊢! π ⋎ σ := or_symm
-
-lemma and_intro : (T ⊢! σ) → (T ⊢! π) → (T ⊢! σ ⋏ π) := by
-  intro H₁ H₂;
-  exact ((conj₃ T σ π) ⨀ H₁) ⨀ H₂;
-
-lemma imply_decomp : (T ⊢! σ ⟶ π) → (T ⊢! σ) → (T ⊢! π) := System.Intuitionistic.modus_ponens
-
-alias MP := imply_decomp
-
-lemma imply_intro_trivial {σ π} : (T ⊢! π) → (T ⊢! σ ⟶ π) := λ H => or_right H
-
-lemma imply_intro {σ π} : (T ⊢! σ) → ((T ⊢! σ) → (T ⊢! π)) → (T ⊢! σ ⟶ π) := λ H₁ H₂ => imply_intro_trivial (H₂ H₁)
-
-@[simp]
-lemma imply_axm : T ⊢! σ ⟶ σ := deduction.mpr axm
-
-lemma imply_contra₀ : (T ⊢! σ ⟶ π) → (T ⊢! ~π ⟶ ~σ) := by
-  simp only [imp_eq, neg_neg']; intro H; exact or_comm H;
-
-lemma imply_contra₁ : (T ⊢! σ ⟶ ~π) → (T ⊢! π ⟶ ~σ) := by
-  intro H; simpa using (imply_contra₀ H);
-
-lemma imply_contra₂ : (T ⊢! ~σ ⟶ π) → (T ⊢! ~π ⟶ σ) := by
-  intro H; simpa using (imply_contra₀ H);
-
-lemma imply_contra₃ : (T ⊢! ~σ ⟶ ~π) → (T ⊢! π ⟶ σ) := by
-  intro H; simpa using (imply_contra₀ H);
-
-lemma iff_comm : (T ⊢! σ ⟷ π) → (T ⊢! π ⟷ σ) := iff_symm
-
-lemma iff_intro : (T ⊢! σ ⟶ π) → (T ⊢! π ⟶ σ) → (T ⊢! σ ⟷ π) := λ H₁ H₂ => and_intro H₁ H₂
-
-lemma iff_contra : (T ⊢! σ ⟷ π) → (T ⊢! ~σ ⟷ ~π) := λ H => iff_intro (imply_contra₀ $ iff_mpr H) (imply_contra₀ $ iff_mp H)
-
-lemma iff_contra' : (T ⊢! σ ⟷ π) → (T ⊢! ~π ⟷ ~σ) := λ H => iff_comm $ iff_contra H
-
-lemma NC : (T ⊢! σ) → (T ⊢! ~σ) → (T ⊢! ⊥) := by
-  intro H₁ H₂;
-  have h₁ := imply₁ T σ ⊤ ⨀ H₁;
-  have h₂ := imply₁ T (~σ) ⊤ ⨀ H₂;
-  exact (neg₁ T ⊤ σ ⨀ h₁) ⨀ h₂;
-
-lemma neg_imply_bot {σ} : (T ⊢! ~σ) → (T ⊢! σ ⟶ ⊥) := by
-  intro H;
-  simpa [neg_neg'] using (neg₂ T (~σ) ⊥ ⨀ H);
-
-lemma neg_neg : (T ⊢! σ) ↔ (T ⊢! ~~σ) := by simp;
-
-lemma EFQ : T ⊢! ⊥ ⟶ σ := efq T σ
+lemma imply_intro {σ π} : (T ⊢! σ) → ((T ⊢! σ) → (T ⊢! π)) → (T ⊢! σ ⟶ π) := λ H₁ H₂ => hyp_right (H₂ H₁) _
 
 lemma imply_dilemma : T ⊢! σ ⟶ (π ⟶ ρ) → T ⊢! (σ ⟶ π) → T ⊢! (σ ⟶ ρ) := by
   intro H₁ H₂;
-  exact deduction.mpr $ MP (deduction.mp H₁) (deduction.mp H₂);
+  exact deduction.mpr $ (deduction.mp H₁) ⨀ (deduction.mp H₂);
 
 lemma elim_and_left_dilemma : (T ⊢! (σ ⋏ π) ⟶ ρ) → (T ⊢! σ ⟶ π) → (T ⊢! σ ⟶ ρ) := by
   intro H₁ H₂;
   apply deduction.mpr;
-  exact MP (weakening H₁) (and_intro axm $ deduction.mp H₂);
+  exact (weakening H₁) ⨀ (and_split axm $ deduction.mp H₂);
 
 end PropositionalCalculus
 

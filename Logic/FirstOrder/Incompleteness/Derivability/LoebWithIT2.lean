@@ -33,15 +33,15 @@ theorem LoebTheorem : (T ⊢! σ) ↔ (T ⊢! ((Pr[T] ⸢σ⸣) ⟶ σ)) := by
   have : Derivability3 T₀ (T ∪ {~σ}) := by sorry;
 
   apply Iff.intro;
-  . intro H; exact imply_intro_trivial H;
+  . intro H; simp only [hyp_right];
   . intro H;
-    have h₁ : T ⊢! ~σ ⟶ ~Pr[T] ⸢σ⸣ := imply_contra₀ H;
+    have h₁ : T ⊢! ~σ ⟶ ~Pr[T] ⸢σ⸣ := imp_contra₀ H;
     have h₂ : T ∪ {~σ} ⊢! ~Pr[T] ⸢σ⸣ := deduction.mp h₁;
-    have h₃ : T ∪ {~σ} ⊢! ~Pr[T] ⸢~σ ⟶ ⊥⸣ := MP (iff_mp (iff_contra (weakening $ @formalized_neg_def T _ (~σ)))) (MP (imply_contra₀ $ formalized_DNE σ) h₂);
+    have h₃ : T ∪ {~σ} ⊢! ~Pr[T] ⸢~σ ⟶ ⊥⸣ := (iff_mp (iff_contra (weakening $ @formalized_neg_def T _ (~σ)))) ⨀ ((imp_contra₀ $ formalized_DNE σ) ⨀ h₂);
     have h₄ : T ∪ {~σ} ⊢! ~Pr[T] ⸢~σ ⟶ ⊥⸣ ⟷ ~Pr[T ∪ {~σ}] ⸢⊥⸣ := by
       have : T₀ ⊢! ~Pr[T] ⸢~σ ⟶ ⊥⸣ ⟷ ~Pr[T ∪ {~σ}] ⸢⊥⸣ := FDT_neg _ _;
       exact weakening this;
-    have h₅ := MP (iff_mp h₄) h₃;
+    have h₅ := (iff_mp h₄) ⨀ h₃;
     have h₆ : Inconsistent (T ∪ {~σ}) := Inconsistent_of_LConsistencyProvability T₀ _ h₅;
     simpa using consistent_or h₆;
 
@@ -50,7 +50,7 @@ variable [hSound : SigmaOneSound T] [HasProvablePred (T ∪ {~~ConL[T]})] [Defin
 theorem FormalizedUnprovabilityConsistency : T ⊬! (ConL[T]) ⟶ ~(Pr[T] ⸢(~ConL[T])⸣) := by
   by_contra H;
   have h₁ : T ⊢! Pr[T] ⸢~ConL[T]⸣ ⟶ ~ConL[T] := by
-    have := imply_contra₃ (by simpa using H);
+    have := imp_contra₃ (by simpa using H);
     nth_rw 2 [LConsistenncy];
     simpa;
   have h₂ : T ⊢! ~ConL[T] := (LoebTheorem T₀ T (~ConL[T])).mpr h₁;
@@ -61,7 +61,7 @@ theorem FormalizedUnrefutabilityGoedelSentence (hG : IsGoedelSentence T₀ T G)
   by_contra H;
   suffices : T ⊬! ConL[T] ⟶ ~Pr[T] ⸢~G⸣; aesop;
   have h₁ : T ⊢! ~G ⟷ ~ConL[T] := iff_contra $ equality_GoedelSentence_Consistency T₀ T hG;
-  have h₂ : T ⊢! ~Pr[T] ⸢~ConL[T]⸣ ⟷ ~Pr[T] ⸢~G⸣ := iff_contra' $ MP (weakening $ @D2_iff T₀ T _ _ _ _ _) (hD1.D1' h₁);
+  have h₂ : T ⊢! ~Pr[T] ⸢~ConL[T]⸣ ⟷ ~Pr[T] ⸢~G⸣ := iff_contra' $ (weakening $ @D2_iff T₀ T _ _ _ _ _) ⨀ (hD1.D1' h₁);
   exact unprov_imp_right_iff (FormalizedUnprovabilityConsistency T₀ T) h₂;
 
 end LO.FirstOrder.Arith.Incompleteness
