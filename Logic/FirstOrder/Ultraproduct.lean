@@ -20,10 +20,10 @@ instance UprodStruc : Structure.{u,u} L (Uprod A 𝓤) where
 
 instance [Inhabited I] [(ι : I) → Inhabited (A ι)] : Inhabited (Uprod A 𝓤) := ⟨⟨default⟩⟩
 
-@[simp] lemma func_Uprod {k} (f : L.func k) (v : Fin k → Uprod A 𝓤) :
+@[simp] lemma func_Uprod {k} (f : L.Func k) (v : Fin k → Uprod A 𝓤) :
     Structure.func f v = ⟨fun ι => (s ι).func f (fun i => (v i).val ι)⟩ := rfl
 
-@[simp] lemma rel_Uprod {k} (r : L.rel k) (v : Fin k → Uprod A 𝓤) :
+@[simp] lemma rel_Uprod {k} (r : L.Rel k) (v : Fin k → Uprod A 𝓤) :
     Structure.rel r v ↔ {ι | (s ι).rel r (fun i => (v i).val ι)} ∈ 𝓤 := of_eq rfl
 
 end Structure

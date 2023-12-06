@@ -46,9 +46,9 @@ inductive Eq : Theory L
   | refl : Eq “∀ #0 = #0”
   | symm : Eq “∀ ∀ (#1 = #0 → #0 = #1)”
   | trans : Eq “∀ ∀ ∀ (#2 = #1 → #1 = #0 → #2 = #0)”
-  | funcExt {k} (f : L.func k) :
+  | funcExt {k} (f : L.Func k) :
     Eq “∀* (!(Subformula.vecEq varSumInL varSumInR) → !!(Subterm.func f varSumInL) = !!(Subterm.func f varSumInR))”
-  | relExt {k} (r : L.rel k) :
+  | relExt {k} (r : L.Rel k) :
     Eq “∀* (!(Subformula.vecEq varSumInL varSumInR) → !(Subformula.rel r varSumInL) → !(Subformula.rel r varSumInR))”
 
 end Eq
@@ -98,21 +98,21 @@ lemma eqv_trans {a b c : M} : eqv L a b → eqv L b c → eqv L a c := by
   simp[models_def] at this
   exact this a b c
 
-lemma eqv_funcExt {k} (f : L.func k) {v w : Fin k → M} (h : ∀ i, eqv L (v i) (w i)) :
+lemma eqv_funcExt {k} (f : L.Func k) {v w : Fin k → M} (h : ∀ i, eqv L (v i) (w i)) :
     eqv L (func f v) (func f w) := by
   have : M ⊧ “∀* (!(vecEq varSumInL varSumInR) → !!(Subterm.func f varSumInL) = !!(Subterm.func f varSumInR))” :=
     H (Eq.funcExt f (L := L))
   simp[varSumInL, varSumInR, models_def, vecEq, Subterm.val_func] at this
   simpa[Matrix.vecAppend_eq_ite] using this (Matrix.vecAppend rfl v w) (fun i => by simpa[Matrix.vecAppend_eq_ite] using h i)
 
-lemma eqv_relExt_aux {k} (r : L.rel k) {v w : Fin k → M} (h : ∀ i, eqv L (v i) (w i)) :
+lemma eqv_relExt_aux {k} (r : L.Rel k) {v w : Fin k → M} (h : ∀ i, eqv L (v i) (w i)) :
     rel r v → rel r w := by
   have : M ⊧ “∀* (!(vecEq varSumInL varSumInR) → !(Subformula.rel r varSumInL) → !(Subformula.rel r varSumInR))” :=
     H (Eq.relExt r (L := L))
   simp[varSumInL, varSumInR, models_def, vecEq, Subterm.val_func, eval_rel (r := r)] at this
   simpa[eval_rel, Matrix.vecAppend_eq_ite] using this (Matrix.vecAppend rfl v w) (fun i => by simpa[Matrix.vecAppend_eq_ite] using h i)
 
-lemma eqv_relExt {k} (r : L.rel k) {v w : Fin k → M} (h : ∀ i, eqv L (v i) (w i)) :
+lemma eqv_relExt {k} (r : L.Rel k) {v w : Fin k → M} (h : ∀ i, eqv L (v i) (w i)) :
     rel r v = rel r w := by
   simp; constructor
   · exact eqv_relExt_aux H r h
@@ -133,10 +133,10 @@ lemma of_eq_of {a b : M} : (⟦a⟧ : QuotEq H) = ⟦b⟧ ↔ eqv L a b := Quoti
 
 namespace QuotEq
 
-def func ⦃k⦄ (f : L.func k) (v : Fin k → QuotEq H) : QuotEq H :=
+def func ⦃k⦄ (f : L.Func k) (v : Fin k → QuotEq H) : QuotEq H :=
   Quotient.liftVec (s := eqvSetoid H) (⟦Structure.func f ·⟧) (fun _ _ hvw => (of_eq_of H).mpr (eqv_funcExt H f hvw)) v
 
-def rel ⦃k⦄ (r : L.rel k) (v : Fin k → QuotEq H) : Prop :=
+def rel ⦃k⦄ (r : L.Rel k) (v : Fin k → QuotEq H) : Prop :=
   Quotient.liftVec (s := eqvSetoid H) (Structure.rel r) (fun _ _ hvw => eqv_relExt H r hvw) v
 
 variable {H}
@@ -145,10 +145,10 @@ instance QuotEqStruc : Structure L (QuotEq H) where
   func := QuotEq.func H
   rel := QuotEq.rel H
 
-lemma funk_mk {k} (f : L.func k) (v : Fin k → M) : Structure.func (M := QuotEq H) f (fun i => ⟦v i⟧) = ⟦Structure.func f v⟧ :=
+lemma funk_mk {k} (f : L.Func k) (v : Fin k → M) : Structure.func (M := QuotEq H) f (fun i => ⟦v i⟧) = ⟦Structure.func f v⟧ :=
   Quotient.liftVec_mk (s := eqvSetoid H) _ _ _
 
-lemma rel_mk {k} (r : L.rel k) (v : Fin k → M) : Structure.rel (M := QuotEq H) r (fun i => ⟦v i⟧) ↔ Structure.rel r v :=
+lemma rel_mk {k} (r : L.Rel k) (v : Fin k → M) : Structure.rel (M := QuotEq H) r (fun i => ⟦v i⟧) ↔ Structure.rel r v :=
   of_eq $ Quotient.liftVec_mk (s := eqvSetoid H) _ _ _
 
 lemma val_mk {e} {ε} (t : Subterm L μ n) : Subterm.val! (QuotEq H) (fun i => ⟦e i⟧) (fun i => ⟦ε i⟧) t = ⟦Subterm.val! M e ε t⟧ :=

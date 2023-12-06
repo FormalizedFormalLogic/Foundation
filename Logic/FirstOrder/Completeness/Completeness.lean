@@ -8,11 +8,11 @@ namespace FirstOrder
 
 open Subformula Completeness
 
-variable {L : Language.{u}} [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq (L.rel k)] {T : Theory L}
+variable {L : Language.{u}} [∀ k, DecidableEq (L.Func k)] [∀ k, DecidableEq (L.Rel k)] {T : Theory L}
 
 section Encodable
 
-variable [∀ k, Encodable (L.func k)] [∀ k, Encodable (L.rel k)]
+variable [∀ k, Encodable (L.Func k)] [∀ k, Encodable (L.Rel k)]
 
 noncomputable def DerivationWA.completeness_of_encodable
   {Γ : Finset (Sentence L)} (h : ∀ M [Inhabited M] [Structure L M], M ⊧* T → ∃ σ ∈ Γ, M ⊧ σ) :
@@ -40,10 +40,10 @@ noncomputable def completeness {σ : Sentence L} :
   have : ∃ u : Finset (Sentence L), ↑u ⊆ insert (~σ) T ∧ ¬Semantics.Satisfiableₛ (u : Theory L) := by
     simpa[Compact.compact (T := insert (~σ) T)] using Semantics.consequence_iff.mp h
   choose u hu using this; rcases hu with ⟨ssu, hu⟩
-  haveI : (k : ℕ) → DecidableEq (Language.func (languageFinset u) k) := fun _ => Classical.typeDecidableEq _
-  haveI : (k : ℕ) → DecidableEq (Language.rel (languageFinset u) k) := fun _ => Classical.typeDecidableEq _
-  haveI : ∀ k, Encodable ((languageFinset u).func k) := fun _ => Fintype.toEncodable _
-  haveI : ∀ k, Encodable ((languageFinset u).rel k) := fun _ => Fintype.toEncodable _
+  haveI : (k : ℕ) → DecidableEq ((languageFinset u).Func k) := fun _ => Classical.typeDecidableEq _
+  haveI : (k : ℕ) → DecidableEq ((languageFinset u).Rel k) := fun _ => Classical.typeDecidableEq _
+  haveI : ∀ k, Encodable ((languageFinset u).Func k) := fun _ => Fintype.toEncodable _
+  haveI : ∀ k, Encodable ((languageFinset u).Rel k) := fun _ => Fintype.toEncodable _
   let u' : Finset (Sentence (languageFinset u)) := Finset.imageOfFinset u (fun _ hσ => toSubLanguageFinsetSelf hσ)
   have image_u' : u'.image (Subformula.lMap L.ofSubLanguage) = u := by
     { ext τ; simp[Finset.mem_imageOfFinset_iff]

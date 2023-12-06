@@ -17,7 +17,7 @@ variable {L : Language.{u}} {μ : Type v} {n}
 
 open Subterm
 
-lemma func_ext {k} (f : L.func k) (v w : Fin k → Subterm L μ₁ n₁) (H : ∀ i, v i = w i) :
+lemma func_ext {k} (f : L.Func k) (v w : Fin k → Subterm L μ₁ n₁) (H : ∀ i, v i = w i) :
     func f v = func f w := congr_arg _ (funext H)
 
 lemma Operator_ext {k} (f : Operator L k) (v w : Fin k → Subterm L μ n) (H : ∀ i, v i = w i) :
@@ -34,7 +34,7 @@ section Rew
 
 variable (ω : Rew L μ₁ n₁ μ₂ n₂)
 
-lemma rew_func_eq_of_eq {k} (f : L.func k) {v : Fin k → Subterm L μ₁ n₁} {v'} (h : ∀ i, ω (v i) = v' i) :
+lemma rew_func_eq_of_eq {k} (f : L.Func k) {v : Fin k → Subterm L μ₁ n₁} {v'} (h : ∀ i, ω (v i) = v' i) :
     ω (func f v) = func f v' :=
   by simp[Rew.func, Function.comp, h]
 

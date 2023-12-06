@@ -8,8 +8,8 @@ namespace FirstOrder
 variable {L : Language.{u}} {μ : Type v} {μ₁ : Type v₁} {μ₂ : Type v₂}
 
 @[ext] class Structure (L : Language.{u}) (M : Type w) where
-  func : ⦃k : ℕ⦄ → L.func k → (Fin k → M) → M
-  rel : ⦃k : ℕ⦄ → L.rel k → (Fin k → M) → Prop
+  func : ⦃k : ℕ⦄ → L.Func k → (Fin k → M) → M
+  rel : ⦃k : ℕ⦄ → L.Rel k → (Fin k → M) → Prop
 
 namespace Structure
 
@@ -23,16 +23,16 @@ protected def lMap (φ : L₁ →ᵥ L₂) {M : Type w} (S : Structure L₂ M) :
 
 variable (φ : L₁ →ᵥ L₂) {M : Type w} (s₂ : Structure L₂ M)
 
-@[simp] lemma lMap_func {k} {f : L₁.func k} {v : Fin k → M} : (s₂.lMap φ).func f v = s₂.func (φ.func f) v := rfl
+@[simp] lemma lMap_func {k} {f : L₁.Func k} {v : Fin k → M} : (s₂.lMap φ).func f v = s₂.func (φ.func f) v := rfl
 
-@[simp] lemma lMap_rel {k} {r : L₁.rel k} {v : Fin k → M} : (s₂.lMap φ).rel r v ↔ s₂.rel (φ.rel r) v := of_eq rfl
+@[simp] lemma lMap_rel {k} {r : L₁.Rel k} {v : Fin k → M} : (s₂.lMap φ).rel r v ↔ s₂.rel (φ.rel r) v := of_eq rfl
 
 def ofEquiv {M : Type w} [Structure L M] {N : Type w'} (φ : M ≃ N) : Structure L N where
   func := fun _ f v => φ (func f (φ.symm ∘ v))
   rel  := fun _ r v => rel r (φ.symm ∘ v)
 
 protected abbrev Decidable (L : Language.{u}) (M : Type w) [s : Structure L M] :=
-  {k : ℕ} → (r : L.rel k) → (v : Fin k → M) → Decidable (s.rel r v)
+  {k : ℕ} → (r : L.Rel k) → (v : Fin k → M) → Decidable (s.rel r v)
 
 noncomputable instance [Structure L M] : Structure.Decidable L M := fun r v => Classical.dec (rel r v)
 
@@ -62,17 +62,17 @@ abbrev realize (s : Structure L M) (t : Term L M) : M := t.val s ![] id
 
 @[simp] lemma val_fvar (x) : val s e ε (&x : Subterm L μ n) = ε x := rfl
 
-lemma val_func {k} (f : L.func k) (v) :
+lemma val_func {k} (f : L.Func k) (v) :
     val s e ε (func f v) = s.func f (fun i => (v i).val s e ε) := rfl
 
-@[simp] lemma val_func₀ (f : L.func 0) (v) :
+@[simp] lemma val_func₀ (f : L.Func 0) (v) :
     val s e ε (func f v) = s.func f ![] := by simp[val_func, Matrix.empty_eq]
 
-@[simp] lemma val_func₁ (f : L.func 1) (t) :
+@[simp] lemma val_func₁ (f : L.Func 1) (t) :
     val s e ε (func f ![t]) = s.func f ![t.val s e ε] :=
   by simp[val_func]; congr; funext i; cases' i using Fin.cases with i <;> simp
 
-@[simp] lemma val_func₂ (f : L.func 2) (t u) :
+@[simp] lemma val_func₂ (f : L.Func 2) (t u) :
     val s e ε (func f ![t, u]) = s.func f ![t.val s e ε, u.val s e ε] :=
   by simp[val_func]; congr; funext i; cases' i using Fin.cases with i <;> simp
 
@@ -164,7 +164,7 @@ section
 
 variable [s : Structure L M] (φ : M ≃ N)
 
-lemma ofEquiv_func (f : L.func k) (v : Fin k → N) :
+lemma ofEquiv_func (f : L.Func k) (v : Fin k → N) :
     (ofEquiv φ).func f v = φ (func f (φ.symm ∘ v)) := rfl
 
 lemma ofEquiv_val (e : Fin n → N) (ε : μ → N) (t : Subterm L μ n) :
@@ -254,34 +254,34 @@ abbrev PVal! (M : Type w) [s : Structure L M] (e : Fin n → M) :
 
 abbrev Realize (s : Structure L M) : Formula L M →L Prop := Eval s ![] id
 
-lemma eval_rel {k} {r : L.rel k} {v} :
+lemma eval_rel {k} {r : L.Rel k} {v} :
     Eval s e ε (rel r v) ↔ s.rel r (fun i => Subterm.val s e ε (v i)) := of_eq rfl
 
-@[simp] lemma eval_rel₀ {r : L.rel 0} :
+@[simp] lemma eval_rel₀ {r : L.Rel 0} :
     Eval s e ε (rel r ![]) ↔ s.rel r ![] := by simp[eval_rel, Matrix.empty_eq]
 
-@[simp] lemma eval_rel₁ {r : L.rel 1} (t : Subterm L μ n) :
+@[simp] lemma eval_rel₁ {r : L.Rel 1} (t : Subterm L μ n) :
     Eval s e ε (rel r ![t]) ↔ s.rel r ![t.val s e ε] := by
   simp[eval_rel]; apply of_eq; congr
   funext i; cases' i using Fin.cases with i <;> simp
 
-@[simp] lemma eval_rel₂ {r : L.rel 2} (t₁ t₂ : Subterm L μ n) :
+@[simp] lemma eval_rel₂ {r : L.Rel 2} (t₁ t₂ : Subterm L μ n) :
     Eval s e ε (rel r ![t₁, t₂]) ↔ s.rel r ![t₁.val s e ε, t₂.val s e ε] := by
   simp[eval_rel]; apply of_eq; congr
   funext i; cases' i using Fin.cases with i <;> simp
 
-lemma eval_nrel {k} {r : L.rel k} {v} :
+lemma eval_nrel {k} {r : L.Rel k} {v} :
     Eval s e ε (nrel r v) ↔ ¬s.rel r (fun i => Subterm.val s e ε (v i)) := of_eq rfl
 
-@[simp] lemma eval_nrel₀ {r : L.rel 0} :
+@[simp] lemma eval_nrel₀ {r : L.Rel 0} :
     Eval s e ε (nrel r ![]) ↔ ¬s.rel r ![] := by simp[eval_nrel, Matrix.empty_eq]
 
-@[simp] lemma eval_nrel₁ {r : L.rel 1} (t : Subterm L μ n) :
+@[simp] lemma eval_nrel₁ {r : L.Rel 1} (t : Subterm L μ n) :
     Eval s e ε (nrel r ![t]) ↔ ¬s.rel r ![t.val s e ε] := by
   simp[eval_nrel]; apply of_eq; congr
   funext i; cases' i using Fin.cases with i <;> simp
 
-@[simp] lemma eval_nrel₂ {r : L.rel 2} (t₁ t₂ : Subterm L μ n) :
+@[simp] lemma eval_nrel₂ {r : L.Rel 2} (t₁ t₂ : Subterm L μ n) :
     Eval s e ε (nrel r ![t₁, t₂]) ↔ ¬s.rel r ![t₁.val s e ε, t₂.val s e ε] := by
   simp[eval_nrel]; apply of_eq; congr
   funext i; cases' i using Fin.cases with i <;> simp
@@ -423,7 +423,7 @@ section
 open Subformula
 variable [s : Structure L M] (φ : M ≃ N)
 
-lemma ofEquiv_rel (r : L.rel k) (v : Fin k → N) :
+lemma ofEquiv_rel (r : L.Rel k) (v : Fin k → N) :
     (Structure.ofEquiv φ).rel r v ↔ Structure.rel r (φ.symm ∘ v) := iff_of_eq rfl
 
 lemma eval_ofEquiv_iff : ∀ {n} {e : Fin n → N} {ε : μ → N} {p : Subformula L μ n},

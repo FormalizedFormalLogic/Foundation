@@ -7,7 +7,7 @@ namespace FirstOrder
 inductive Subterm (L : Language.{u}) (μ : Type v) (n : ℕ)
   | bvar : Fin n → Subterm L μ n
   | fvar : μ → Subterm L μ n
-  | func : ∀ {arity}, L.func arity → (Fin arity → Subterm L μ n) → Subterm L μ n
+  | func : ∀ {arity}, L.Func arity → (Fin arity → Subterm L μ n) → Subterm L μ n
 
 scoped prefix:max "&" => Subterm.fvar
 scoped prefix:max "#" => Subterm.bvar
@@ -29,7 +29,7 @@ instance [Inhabited μ] : Inhabited (Subterm L μ n) := ⟨&default⟩
 
 section ToString
 
-variable [∀ k, ToString (L.func k)] [ToString μ]
+variable [∀ k, ToString (L.Func k)] [ToString μ]
 
 def toStr : Subterm L μ n → String
   | #x                        => "x_{" ++ toString (n - 1 - (x : ℕ)) ++ "}"
@@ -45,7 +45,7 @@ end ToString
 
 section Decidable
 
-variable [∀ k, DecidableEq (L.func k)] [DecidableEq μ]
+variable [∀ k, DecidableEq (L.Func k)] [DecidableEq μ]
 
 def hasDecEq : (t u : Subterm L μ n) → Decidable (Eq t u)
   | #x,                   #y                   => by simp; exact decEq x y
@@ -68,13 +68,13 @@ instance : DecidableEq (Subterm L μ n) := hasDecEq
 
 end Decidable
 
-abbrev func! (k) (f : L.func k) (v : Fin k → Subterm L μ n) := func f v
+abbrev func! (k) (f : L.Func k) (v : Fin k → Subterm L μ n) := func f v
 
 end Subterm
 
 structure Rew (L : Language.{u}) (μ₁ : Type ν₁) (n₁ : ℕ) (μ₂ : Type ν₂) (n₂ : ℕ) where
   toFun : Subterm L μ₁ n₁ → Subterm L μ₂ n₂
-  func' : ∀ {k} (f : L.func k) (v : Fin k → Subterm L μ₁ n₁), toFun (Subterm.func f v) = Subterm.func f (fun i => toFun (v i))
+  func' : ∀ {k} (f : L.Func k) (v : Fin k → Subterm L μ₁ n₁), toFun (Subterm.func f v) = Subterm.func f (fun i => toFun (v i))
 
 abbrev SyntacticRew (L : Language.{u}) (n₁ n₂ : ℕ) := Rew L ℕ n₁ ℕ n₂
 
@@ -93,22 +93,22 @@ instance : FunLike (Rew L μ₁ n₁ μ₂ n₂) (Subterm L μ₁ n₁) (fun _ =
 
 instance : CoeFun (Rew L μ₁ n₁ μ₂ n₂) (fun _ => Subterm L μ₁ n₁ → Subterm L μ₂ n₂) := FunLike.hasCoeToFun
 
-protected lemma func {k} (f : L.func k) (v : Fin k → Subterm L μ₁ n₁) :
+protected lemma func {k} (f : L.Func k) (v : Fin k → Subterm L μ₁ n₁) :
     ω (func f v) = func f (fun i => ω (v i)) := ω.func' f v
 
-lemma func'' {k} (f : L.func k) (v : Fin k → Subterm L μ₁ n₁) :
+lemma func'' {k} (f : L.Func k) (v : Fin k → Subterm L μ₁ n₁) :
     ω (func f v) = func f (ω ∘ v) := ω.func' f v
 
-@[simp] lemma func0 (f : L.func 0) (v : Fin 0 → Subterm L μ₁ n₁) :
+@[simp] lemma func0 (f : L.Func 0) (v : Fin 0 → Subterm L μ₁ n₁) :
     ω (func f v) = func f ![] := by simp[Rew.func, Matrix.empty_eq]
 
-@[simp] lemma func1 (f : L.func 1) (t : Subterm L μ₁ n₁) :
+@[simp] lemma func1 (f : L.Func 1) (t : Subterm L μ₁ n₁) :
     ω (func f ![t]) = func f ![ω t] := by simp[Matrix.constant_eq_singleton, Rew.func]
 
-@[simp] lemma func2 (f : L.func 2) (t₁ t₂ : Subterm L μ₁ n₁) :
+@[simp] lemma func2 (f : L.Func 2) (t₁ t₂ : Subterm L μ₁ n₁) :
     ω (func f ![t₁, t₂]) = func f ![ω t₁, ω t₂] := by simp[Rew.func]; funext i; induction i using Fin.induction <;> simp
 
-@[simp] lemma func3 (f : L.func 3) (t₁ t₂ t₃ : Subterm L μ₁ n₁) :
+@[simp] lemma func3 (f : L.Func 3) (t₁ t₂ t₃ : Subterm L μ₁ n₁) :
     ω (func f ![t₁, t₂, t₃]) = func f ![ω t₁, ω t₂, ω t₃] := by
   simp[Rew.func]; funext i; induction' i using Fin.induction with i <;> simp; induction' i using Fin.induction with i <;> simp
 
@@ -395,7 +395,7 @@ section shift
 
 @[simp] lemma shift_fvar (x : ℕ) : shift (&x : SyntacticSubterm L n) = &(x + 1) := rfl
 
-lemma shift_func {k} (f : L.func k) (v : Fin k → SyntacticSubterm L n) :
+lemma shift_func {k} (f : L.Func k) (v : Fin k → SyntacticSubterm L n) :
     shift (func f v) = func f (fun i => shift (v i)) := rfl
 
 lemma shift_Injective : Function.Injective (@shift L n) :=
@@ -530,7 +530,7 @@ abbrev fvar? (t : Subterm L μ n) (x : μ) : Prop := x ∈ t.fvarList
 
 @[simp] lemma fvarList_fvar : fvarList (&x : Subterm L μ n) = [x] := rfl
 
-@[simp] lemma mem_fvarList_func {k} {f : L.func k} {v : Fin k → Subterm L μ n} :
+@[simp] lemma mem_fvarList_func {k} {f : L.Func k} {v : Fin k → Subterm L μ n} :
     x ∈ (func f v).fvarList ↔ ∃ i, x ∈ (v i).fvarList :=
   by simp[fvarList]
 
@@ -576,7 +576,7 @@ def lMap (Φ : L₁ →ᵥ L₂) : Subterm L₁ μ n → Subterm L₂ μ n
 
 @[simp] lemma lMap_fvar (x : μ) : (&x : Subterm L₁ μ n).lMap Φ = &x := rfl
 
-lemma lMap_func {k} (f : L₁.func k) (v : Fin k → Subterm L₁ μ n) :
+lemma lMap_func {k} (f : L₁.Func k) (v : Fin k → Subterm L₁ μ n) :
     (func f v).lMap Φ = func (Φ.func f) (fun i => lMap Φ (v i)) := rfl
 
 lemma lMap_bind (b : Fin n₁ → Subterm L₁ μ₂ n₂) (e : μ₁ → Subterm L₁ μ₂ n₂) (t) :
@@ -606,7 +606,7 @@ structure Operator (L : Language.{u}) (n : ℕ) where
 
 abbrev Const (L : Language.{u}) := Operator L 0
 
-def Subterm.fn {k} (f : L.func k) : Operator L k := ⟨Subterm.func f (#·)⟩
+def Subterm.fn {k} (f : L.Func k) : Operator L k := ⟨Subterm.func f (#·)⟩
 
 namespace Operator
 

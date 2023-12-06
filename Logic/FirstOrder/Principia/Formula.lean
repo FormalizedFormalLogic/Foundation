@@ -16,10 +16,10 @@ variable {L : Language.{u}} {μ : Type v} {n}
 
 open Subformula
 
-lemma rel_ext {k} (r : L.rel k) (v w : Fin k → Subterm L μ₁ n₁) (H : ∀ i, v i = w i) :
+lemma rel_ext {k} (r : L.Rel k) (v w : Fin k → Subterm L μ₁ n₁) (H : ∀ i, v i = w i) :
     rel r v = rel r w := congr_arg _ (funext H)
 
-lemma nrel_ext {k} (r : L.rel k) (v w : Fin k → Subterm L μ₁ n₁) (H : ∀ i, v i = w i) :
+lemma nrel_ext {k} (r : L.Rel k) (v w : Fin k → Subterm L μ₁ n₁) (H : ∀ i, v i = w i) :
     nrel r v = nrel r w := congr_arg _ (funext H)
 
 lemma Operator_ext {k} (f : Operator L k) (v w : Fin k → Subterm L μ n) (H : ∀ i, v i = w i) :
@@ -29,11 +29,11 @@ section Rew
 
 variable (ω : Rew L μ₁ n₁ μ₂ n₂)
 
-lemma rew_rel_eq_of_eq {k} (r : L.rel k) {v : Fin k → Subterm L μ₁ n₁} {v'} (h : ∀ i, ω (v i) = v' i) :
+lemma rew_rel_eq_of_eq {k} (r : L.Rel k) {v : Fin k → Subterm L μ₁ n₁} {v'} (h : ∀ i, ω (v i) = v' i) :
     ω.hom (rel r v) = rel r v' :=
   by simp[Rew.rel, Function.comp, h]
 
-lemma rew_nrel_eq_of_eq {k} (r : L.rel k) {v : Fin k → Subterm L μ₁ n₁} {v'} (h : ∀ i, ω (v i) = v' i) :
+lemma rew_nrel_eq_of_eq {k} (r : L.Rel k) {v : Fin k → Subterm L μ₁ n₁} {v'} (h : ∀ i, ω (v i) = v' i) :
     ω.hom (nrel r v) = nrel r v' :=
   by simp[Rew.nrel, Function.comp, h]
 

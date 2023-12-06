@@ -7,7 +7,7 @@ namespace LO.Summary.FirstOrder
 
 open LO.FirstOrder
 
-variable {L : Language} [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq (L.rel k)] {T : Theory L}
+variable {L : Language} [∀ k, DecidableEq (L.Func k)] [∀ k, DecidableEq (L.Rel k)] {T : Theory L}
 
 /- Cut elimination for Tait-calculus -/
 noncomputable example {Δ : Sequent L} : ⊢ᶜ Δ → ⊢ᵀ Δ := DerivationCR.hauptsatz

@@ -10,12 +10,12 @@ namespace Completeness
 
 open Subformula DerivationWA Encodable
 variable {L : Language.{u}}
-  [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq (L.rel k)]
-  [∀ k, Encodable (L.func k)] [∀ k, Encodable (L.rel k)]
+  [∀ k, DecidableEq (L.Func k)] [∀ k, DecidableEq (L.Rel k)]
+  [∀ k, Encodable (L.Func k)] [∀ k, Encodable (L.Rel k)]
 variable {T : Theory L} {Γ : Sequent L}
 
 inductive Redux (T : Theory L) : Code L → Sequent L → Sequent L → Prop
-  | axLRefl   {Γ : Sequent L} {k} (r : L.rel k) (v) :
+  | axLRefl   {Γ : Sequent L} {k} (r : L.Rel k) (v) :
     Subformula.rel r v ∉ Γ ∨ Subformula.nrel r v ∉ Γ → Redux T (Code.axL r v) Γ Γ
   | verumRefl {Γ : Sequent L} : ⊤ ∉ Γ → Redux T Code.verum Γ Γ
   | and₁      {Γ : Sequent L} {p q : SyntacticFormula L} : p ⋏ q ∈ Γ → Redux T (Code.and p q) (insert p Γ) Γ
@@ -192,7 +192,7 @@ lemma chainSet_verum : ⊤ ∉ ⛓️ := by
     rcases this; assumption
   contradiction
 
-lemma chainSet_axL {k} (r : L.rel k) (v : Fin k → SyntacticTerm L) : rel r v ∉ ⛓️ ∨ nrel r v ∉ ⛓️ := by
+lemma chainSet_axL {k} (r : L.Rel k) (v : Fin k → SyntacticTerm L) : rel r v ∉ ⛓️ ∨ nrel r v ∉ ⛓️ := by
   by_contra h
   have : (∃ s₁, rel r v ∈ ⛓️[s₁]) ∧ (∃ s₂, nrel r v ∈ ⛓️[s₂])
   { have h : rel r v ∈ ⛓️ ∧ nrel r v ∈ ⛓️ := by simpa[not_or] using h
@@ -273,7 +273,7 @@ instance Model.structure (T : Theory L) (Γ : Sequent L) : Structure L (Model T 
     Subterm.val (Model.structure T Γ) e ε t = Rew.bind e ε t := by
   induction t <;> simp[*, Subterm.val_func, Rew.func]; rfl
 
-@[simp] lemma Model.rel {k} (r : L.rel k) (v : Fin k → SyntacticTerm L) :
+@[simp] lemma Model.rel {k} (r : L.Rel k) (v : Fin k → SyntacticTerm L) :
     (Model.structure T Γ).rel r v ↔ nrel r v ∈ ⛓️ := of_eq rfl
 
 lemma semanticMainLemma_val : (p : SyntacticFormula L) → p ∈ ⛓️ → ¬Val (Model.structure T Γ) Subterm.fvar p

@@ -5,7 +5,7 @@ namespace LO
 
 namespace FirstOrder
 
-variable {L : Language.{u}} [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq (L.rel k)]
+variable {L : Language.{u}} [∀ k, DecidableEq (L.Func k)] [∀ k, DecidableEq (L.Rel k)]
 
 variable {T : Theory L} {μ : Type v}
 
@@ -192,7 +192,7 @@ private def negImply {p q : SyntacticFormula L} (b : ProofArrow T Δ (p ⟶ q)) 
   (b.trans $ intro $ absurd $ trans (p := q) (modusPonens (p := p) (assumption $ by simp) (assumption $ by simp)) $
     contradiction (p := q) ⊥ (assumption $ by simp) (assumption $ by simp))
 
-private def relExtAux {n} {k} (r : L.rel k) (v : Fin k → SyntacticSubterm L n) (v₁ v₂ : Fin n → SyntacticTerm L)
+private def relExtAux {n} {k} (r : L.Rel k) (v : Fin k → SyntacticSubterm L n) (v₁ v₂ : Fin n → SyntacticTerm L)
   (b : (i : Fin n) → ProofArrow T Δ “!!(v₁ i) = !!(v₂ i)”) : ProofArrow T Δ ((substs v₁).hom (rel r v) ⟶ (substs v₂).hom (rel r v)) :=
   have : ProofArrow T Δ
     “∀* ((⋀ i, !!(varSumInL i) = !!(varSumInR i)) → (!(rel r varSumInL) → !(rel r varSumInR)))” :=
@@ -345,7 +345,7 @@ open ProofArrow
 
 section Repr
 
-variable [∀ k, ToString (L.func k)] [∀ k, ToString (L.rel k)]
+variable [∀ k, ToString (L.Func k)] [∀ k, ToString (L.Rel k)]
 
 def _root_.String.turnstile {α β} [ToString α] [ToString β] (Γ : List α) (b : β) : String :=
   Γ.seqStr toString ", " ++ " \\vdash " ++ toString b

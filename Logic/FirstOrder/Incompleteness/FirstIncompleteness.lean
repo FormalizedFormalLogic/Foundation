@@ -7,7 +7,7 @@ namespace FirstOrder
 
 section
 
-variable {L : Language.{u}} [(k : ℕ) → DecidableEq (L.func k)] [(k : ℕ) → DecidableEq (L.rel k)]
+variable {L : Language.{u}} [(k : ℕ) → DecidableEq (L.Func k)] [(k : ℕ) → DecidableEq (L.Rel k)]
 
 lemma provable_iff_of_consistent_of_complete {T : Theory L}
   (consis : System.Consistent T) (comp : System.Complete T) :

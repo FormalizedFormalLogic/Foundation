@@ -67,9 +67,9 @@ variable {T : Theory ℒₒᵣ} [EqTheory T] [PAminus T] [SigmaOneSound T]
 
 section ProvableSentence
 
-variable {L : Language.{u}} [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq (L.rel k)]
-  [(k : ℕ) → Primcodable (L.func k)] [(k : ℕ) → Primcodable (L.rel k)]
-  [UniformlyPrimcodable L.func] [UniformlyPrimcodable L.rel]
+variable {L : Language.{u}} [∀ k, DecidableEq (L.Func k)] [∀ k, DecidableEq (L.Rel k)]
+  [(k : ℕ) → Primcodable (L.Func k)] [(k : ℕ) → Primcodable (L.Rel k)]
+  [UniformlyPrimcodable L.Func] [UniformlyPrimcodable L.Rel]
 
 noncomputable def provableSentence (U : Theory L) : Subsentence ℒₒᵣ 1 := pred (U ⊢! ·)
 

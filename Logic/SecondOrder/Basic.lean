@@ -17,10 +17,10 @@ namespace FirstOrder.Language
 open MSO MSO.Srt
 
 inductive MSO.Func (L : FirstOrder.Language.{u}) : Srt → (Srt → ℕ) → Type u
-  | elem {k : ℕ} : L.func k → MSO.Func L elem (Srt.cases' k 0)
+  | elem {k : ℕ} : L.Func k → MSO.Func L elem (Srt.cases' k 0)
 
 inductive MSO.Rel (L : FirstOrder.Language.{u}) : (Srt → ℕ) → Type u
-  | elem {k : ℕ} : L.rel k → MSO.Rel L (Srt.cases' k 0)
+  | elem {k : ℕ} : L.Rel k → MSO.Rel L (Srt.cases' k 0)
   | mem          : MSO.Rel L (Srt.cases' 1 1)
 
 def mSO (L : FirstOrder.Language.{u}) : ManySorted.Language Srt where

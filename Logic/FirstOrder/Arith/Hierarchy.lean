@@ -14,8 +14,8 @@ local notation "Π" => Bool.false
 inductive Hierarchy : Bool → ℕ → {n : ℕ} → Subformula L μ n → Prop
   | verum (b s n)                             : Hierarchy b s (⊤ : Subformula L μ n)
   | falsum (b s n)                            : Hierarchy b s (⊥ : Subformula L μ n)
-  | rel (b s) {k} (r : L.rel k) (v : Fin k → Subterm L μ n) : Hierarchy b s (Subformula.rel r v)
-  | nrel (b s) {k} (r : L.rel k) (v)          : Hierarchy b s (Subformula.nrel r v)
+  | rel (b s) {k} (r : L.Rel k) (v : Fin k → Subterm L μ n) : Hierarchy b s (Subformula.rel r v)
+  | nrel (b s) {k} (r : L.Rel k) (v)          : Hierarchy b s (Subformula.nrel r v)
   | and {b s n} {p q : Subformula L μ n}      : Hierarchy b s p → Hierarchy b s q → Hierarchy b s (p ⋏ q)
   | or {b s n} {p q : Subformula L μ n}       : Hierarchy b s p → Hierarchy b s q → Hierarchy b s (p ⋎ q)
   | ball {b s n} {p : Subformula L μ (n + 1)} :
@@ -144,7 +144,7 @@ lemma exClosure : {n : ℕ} → {p : Subformula L μ n} → Sigma (s + 1) p → 
 
 end Hierarchy
 
-variable {L : Language} [(k : ℕ) → DecidableEq (L.func k)] [(k : ℕ) → DecidableEq (L.rel k)]
+variable {L : Language} [(k : ℕ) → DecidableEq (L.Func k)] [(k : ℕ) → DecidableEq (L.Rel k)]
   [ORing L] [Structure L ℕ]
 
 abbrev SigmaOneSound (T : Theory L) := Sound (L := L) T (Hierarchy.Sigma 1)

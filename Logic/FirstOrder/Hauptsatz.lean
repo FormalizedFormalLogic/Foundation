@@ -6,7 +6,7 @@ namespace FirstOrder
 
 open Subformula
 
-variable {L : Language.{u}} [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq (L.rel k)]
+variable {L : Language.{u}} [∀ k, DecidableEq (L.Func k)] [∀ k, DecidableEq (L.Rel k)]
 
 namespace Subformula
 

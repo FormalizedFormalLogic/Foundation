@@ -11,8 +11,8 @@ variable {L : Language.{u}} {μ : Type v}
 inductive UFormula (L : Language.{u}) (μ : Type v) : Type (max u v) where
   | verum  : UFormula L μ
   | falsum : UFormula L μ
-  | rel    : {arity : ℕ} → L.rel arity → (Fin arity → UTerm L μ) → UFormula L μ
-  | nrel   : {arity : ℕ} → L.rel arity → (Fin arity → UTerm L μ) → UFormula L μ
+  | rel    : {arity : ℕ} → L.Rel arity → (Fin arity → UTerm L μ) → UFormula L μ
+  | nrel   : {arity : ℕ} → L.Rel arity → (Fin arity → UTerm L μ) → UFormula L μ
   | and    : UFormula L μ → UFormula L μ → UFormula L μ
   | or     : UFormula L μ → UFormula L μ → UFormula L μ
   | all    : UFormula L μ → UFormula L μ
@@ -25,8 +25,8 @@ instance : Inhabited (UFormula L μ) := ⟨verum⟩
 def elim {γ : Type*}
   (γVerum : γ)
   (γFalsum : γ)
-  (γRel : {k : ℕ} → L.rel k → (Fin k → UTerm L μ) → γ)
-  (γNrel : {k : ℕ} → L.rel k → (Fin k → UTerm L μ) → γ)
+  (γRel : {k : ℕ} → L.Rel k → (Fin k → UTerm L μ) → γ)
+  (γNrel : {k : ℕ} → L.Rel k → (Fin k → UTerm L μ) → γ)
   (γAnd : γ → γ → γ)
   (γOr : γ → γ → γ)
   (γAll : γ → γ)
@@ -121,9 +121,9 @@ def rewrite (e : μ₁ → UTerm L μ₂) : UFormula L μ₁ → UFormula L μ�
 
 @[simp] lemma bv_falsum : bv (falsum : UFormula L μ) = 0 := rfl
 
-@[simp] lemma bv_rel {k} (r : L.rel k) (v : Fin k → UTerm L μ) : bv (rel r v) = Finset.sup Finset.univ (fun i => (v i).bv) := rfl
+@[simp] lemma bv_rel {k} (r : L.Rel k) (v : Fin k → UTerm L μ) : bv (rel r v) = Finset.sup Finset.univ (fun i => (v i).bv) := rfl
 
-@[simp] lemma bv_nrel {k} (r : L.rel k) (v : Fin k → UTerm L μ) : bv (nrel r v) = Finset.sup Finset.univ (fun i => (v i).bv) := rfl
+@[simp] lemma bv_nrel {k} (r : L.Rel k) (v : Fin k → UTerm L μ) : bv (nrel r v) = Finset.sup Finset.univ (fun i => (v i).bv) := rfl
 
 @[simp] lemma bv_and (p q : UFormula L μ) : (and p q).bv = max p.bv q.bv := rfl
 
@@ -229,10 +229,10 @@ lemma ofSubformula_eq_subfEquiv : @ofSubformula L μ n = subfEquiv := rfl
 
 @[simp] lemma subfEquiv_falsum : subfEquiv (⊥ : Subformula L μ n) = ⟨falsum, by simp⟩ := rfl
 
-@[simp] lemma subfEquiv_rel {k} (r : L.rel k) (v : Fin k → Subterm L μ n) :
+@[simp] lemma subfEquiv_rel {k} (r : L.Rel k) (v : Fin k → Subterm L μ n) :
     subfEquiv (Subformula.rel r v) = ⟨rel r (fun i => UTerm.subtEquiv (v i)), by simp⟩ := rfl
 
-@[simp] lemma subfEquiv_nrel {k} (r : L.rel k) (v : Fin k → Subterm L μ n) :
+@[simp] lemma subfEquiv_nrel {k} (r : L.Rel k) (v : Fin k → Subterm L μ n) :
     subfEquiv (Subformula.nrel r v) = ⟨nrel r (fun i => UTerm.subtEquiv (v i)), by simp⟩ := rfl
 
 @[simp] lemma subfEquiv_and (p q : Subformula L μ n) :
@@ -248,13 +248,13 @@ lemma ofSubformula_eq_subfEquiv : @ofSubformula L μ n = subfEquiv := rfl
     subfEquiv (∃' p) = ⟨ex (subfEquiv p), by simpa using Iff.mpr Nat.pred_le_iff (subfEquiv p).property⟩ := rfl
 
 open Encodable Primrec
-variable [(k : ℕ) → Primcodable (L.func k)] [(k : ℕ) → Primcodable (L.rel k)]
-  [UniformlyPrimcodable L.func] [UniformlyPrimcodable L.rel] [Primcodable μ]
+variable [(k : ℕ) → Primcodable (L.Func k)] [(k : ℕ) → Primcodable (L.Rel k)]
+  [UniformlyPrimcodable L.Func] [UniformlyPrimcodable L.Rel] [Primcodable μ]
 
 section W
 
 abbrev Node (L : Language.{u}) (μ : Type v) :=
-  Bool × (((k : ℕ) × L.rel k × (Fin k → UTerm L μ)) ⊕ Unit ⊕ Unit ⊕ Unit)
+  Bool × (((k : ℕ) × L.Rel k × (Fin k → UTerm L μ)) ⊕ Unit ⊕ Unit ⊕ Unit)
 -- sign × (atomic formula ⊕ ⊤/⊥ ⊕ ⋏/⋎ ⊕ ∀/∃)
 
 instance : Primcodable (Node L μ) := Primcodable.prod
@@ -313,9 +313,9 @@ lemma toW_eq_equivW : toW = equivW L μ := rfl
 
 @[simp] lemma equivW_falsum : (equivW L μ) falsum = ⟨(false, Sum.inr $ Sum.inl ()), Empty.elim⟩ := rfl
 
-@[simp] lemma equivW_rel {k} (r : L.rel k) (v) : (equivW L μ) (rel r v) = ⟨(true, Sum.inl ⟨_, r, v⟩), Empty.elim⟩ := rfl
+@[simp] lemma equivW_rel {k} (r : L.Rel k) (v) : (equivW L μ) (rel r v) = ⟨(true, Sum.inl ⟨_, r, v⟩), Empty.elim⟩ := rfl
 
-@[simp] lemma equivW_nrel {k} (r : L.rel k) (v) : (equivW L μ) (nrel r v) = ⟨(false, Sum.inl ⟨_, r, v⟩), Empty.elim⟩ := rfl
+@[simp] lemma equivW_nrel {k} (r : L.Rel k) (v) : (equivW L μ) (nrel r v) = ⟨(false, Sum.inl ⟨_, r, v⟩), Empty.elim⟩ := rfl
 
 @[simp] lemma equivW_and (p q : UFormula L μ) :
     (equivW L μ) (and p q) = ⟨(true, Sum.inr $ Sum.inr $ Sum.inl ()), Bool.rec ((equivW L μ) p) ((equivW L μ) q)⟩ := rfl
@@ -384,7 +384,7 @@ instance primcodable : Primcodable (UFormula L μ) := Primcodable.ofEquiv (WType
 
 lemma qeq {a b c d : α} (h₁ : a = b) (h₂ : b = c) (h₃ : c = d) : a = d := by { simp[*] }
 
-lemma encode_rel {k} (r : L.rel k) (v : Fin k → UTerm L μ) :
+lemma encode_rel {k} (r : L.Rel k) (v : Fin k → UTerm L μ) :
     encode (rel r v) = Nat.pair 1 ((Nat.pair 1 $ 2 * k.pair $ (encode r).pair (encode v)).pair 0) := by
   simp[primcodable, Primcodable.ofEquiv_toEncodable,
     Encodable.encode_ofEquiv (equivW L μ), WType.encode_eq, WType.SubWType.ofW, WType.depth]
@@ -396,7 +396,7 @@ lemma encode_rel {k} (r : L.rel k) (v : Fin k → UTerm L μ) :
   simp[WType.SubWType.encode_mk, Encodable.encode_fintypeArrow_isEmpty, Edge]
   rw[encode_prod_val]
 
-lemma encode_nrel {k} (r : L.rel k) (v : Fin k → UTerm L μ) :
+lemma encode_nrel {k} (r : L.Rel k) (v : Fin k → UTerm L μ) :
     encode (nrel r v) = Nat.pair 1 ((Nat.pair 0 $ 2 * k.pair $ (encode r).pair (encode v)).pair 0) := by
   simp[primcodable, Primcodable.ofEquiv_toEncodable,
     Encodable.encode_ofEquiv (equivW L μ), WType.encode_eq, WType.SubWType.ofW, WType.depth]
@@ -409,8 +409,8 @@ lemma encode_nrel {k} (r : L.rel k) (v : Fin k → UTerm L μ) :
   rw[encode_prod_val]
 
 lemma rel_primrec :
-    Primrec (fun p => rel p.2.1 p.2.2 : (k : ℕ) × L.rel k × (Fin k → UTerm L μ) → UFormula L μ) := by
-  let i : (k : ℕ) × L.rel k × (Fin k → UTerm L μ) → Node L μ := fun t => (true, Sum.inl t)
+    Primrec (fun p => rel p.2.1 p.2.2 : (k : ℕ) × L.Rel k × (Fin k → UTerm L μ) → UFormula L μ) := by
+  let i : (k : ℕ) × L.Rel k × (Fin k → UTerm L μ) → Node L μ := fun t => (true, Sum.inl t)
   have : Primrec i := Primrec.pair (Primrec.const true) (sum_inl.comp Primrec.id)
   have : Primrec (fun t => WType.mk (i t) Empty.elim) :=
     w_mk₀ (β := Edge L μ) i (by intros; exact instIsEmptyEmpty) this
@@ -418,28 +418,28 @@ lemma rel_primrec :
   simpa using this
 
 lemma nrel_primrec :
-    Primrec (fun p => nrel p.2.1 p.2.2 : (k : ℕ) × L.rel k × (Fin k → UTerm L μ) → UFormula L μ) := by
-  let i : (k : ℕ) × L.rel k × (Fin k → UTerm L μ) → Node L μ := fun t => (false, Sum.inl t)
+    Primrec (fun p => nrel p.2.1 p.2.2 : (k : ℕ) × L.Rel k × (Fin k → UTerm L μ) → UFormula L μ) := by
+  let i : (k : ℕ) × L.Rel k × (Fin k → UTerm L μ) → Node L μ := fun t => (false, Sum.inl t)
   have : Primrec i := Primrec.pair (Primrec.const false) (sum_inl.comp Primrec.id)
   have : Primrec (fun t => WType.mk (i t) Empty.elim) :=
     w_mk₀ (β := Edge L μ) i (by intros; exact instIsEmptyEmpty) this
   have := (of_equiv_symm (e := equivW L μ)).comp this
   simpa using this
 
-def relL (r : (k : ℕ) × L.rel k) (l : List (UTerm L μ)) : Option (UFormula L μ) :=
+def relL (r : (k : ℕ) × L.Rel k) (l : List (UTerm L μ)) : Option (UFormula L μ) :=
   if h : l.length = r.1
     then some (rel r.2 (fun i => l.get (i.cast h.symm)))
     else none
 
-def nrelL (r : (k : ℕ) × L.rel k) (l : List (UTerm L μ)) : Option (UFormula L μ) :=
+def nrelL (r : (k : ℕ) × L.Rel k) (l : List (UTerm L μ)) : Option (UFormula L μ) :=
   if h : l.length = r.1
     then some (nrel r.2 (fun i => l.get (i.cast h.symm)))
     else none
 
-lemma relL_primrec : Primrec₂ (relL : (k : ℕ) × L.rel k → List (UTerm L μ) → Option (UFormula L μ)) :=
+lemma relL_primrec : Primrec₂ (relL : (k : ℕ) × L.Rel k → List (UTerm L μ) → Option (UFormula L μ)) :=
   have : Primrec₂ (fun r l => if l.length = r.1
       then (Nat.pair 1 ((Nat.pair 1 $ 2 * r.1.pair $ (encode r.2).pair (encode l)).pair 0)) + 1 else 0
-      : (k : ℕ) × L.rel k → List (UTerm L μ) → ℕ) :=
+      : (k : ℕ) × L.Rel k → List (UTerm L μ) → ℕ) :=
     to₂' <| Primrec.ite
       (Primrec.eq.comp (list_length.comp snd) (sigma_fst.comp fst))
       (succ.comp $ Primrec₂.natPair.comp (const 1) $
@@ -454,10 +454,10 @@ lemma relL_primrec : Primrec₂ (relL : (k : ℕ) × L.rel k → List (UTerm L �
     { rcases hl with rfl
       simp[encode_rel, encode_finArrow, List.ofFn_get] }
 
-lemma nrelL_primrec : Primrec₂ (nrelL : (k : ℕ) × L.rel k → List (UTerm L μ) → Option (UFormula L μ)) :=
+lemma nrelL_primrec : Primrec₂ (nrelL : (k : ℕ) × L.Rel k → List (UTerm L μ) → Option (UFormula L μ)) :=
   have : Primrec₂ (fun r l => if l.length = r.1
       then (Nat.pair 1 ((Nat.pair 0 $ 2 * r.1.pair $ (encode r.2).pair (encode l)).pair 0)) + 1 else 0
-      : (k : ℕ) × L.rel k → List (UTerm L μ) → ℕ) :=
+      : (k : ℕ) × L.Rel k → List (UTerm L μ) → ℕ) :=
     to₂' <| Primrec.ite
       (Primrec.eq.comp (list_length.comp snd) (sigma_fst.comp fst))
       (succ.comp $ Primrec₂.natPair.comp (const 1) $
@@ -505,8 +505,8 @@ section elim_primrec
 private def F [Inhabited γ]
   (γVerum : σ → γ)
   (γFalsum : σ → γ)
-  (γRel : σ → (k : ℕ) × L.rel k × (Fin k → UTerm L μ) → γ)
-  (γNrel : σ → (k : ℕ) × L.rel k × (Fin k → UTerm L μ) → γ)
+  (γRel : σ → (k : ℕ) × L.Rel k × (Fin k → UTerm L μ) → γ)
+  (γNrel : σ → (k : ℕ) × L.Rel k × (Fin k → UTerm L μ) → γ)
   (γAnd : σ → γ × γ → γ)
   (γOr : σ → γ × γ → γ)
   (γAll : σ → γ → γ)
@@ -520,8 +520,8 @@ private lemma elim_eq
   [Inhabited γ]
   (γVerum : σ → γ)
   (γFalsum : σ → γ)
-  (γRel : σ → (k : ℕ) × L.rel k × (Fin k → UTerm L μ) → γ)
-  (γNrel : σ → (k : ℕ) × L.rel k × (Fin k → UTerm L μ) → γ)
+  (γRel : σ → (k : ℕ) × L.Rel k × (Fin k → UTerm L μ) → γ)
+  (γNrel : σ → (k : ℕ) × L.Rel k × (Fin k → UTerm L μ) → γ)
   (γAnd : σ → γ × γ → γ)
   (γOr : σ → γ × γ → γ)
   (γAll : σ → γ → γ)
@@ -538,7 +538,7 @@ private lemma elim_eq
 
 private lemma hF {σ γ} [Primcodable σ] [Primcodable γ] [Inhabited γ]
   {γVerum γFalsum : σ → γ}
-  {γRel γNrel : σ → (k : ℕ) × L.rel k × (Fin k → UTerm L μ) → γ}
+  {γRel γNrel : σ → (k : ℕ) × L.Rel k × (Fin k → UTerm L μ) → γ}
   {γAnd γOr : σ → γ × γ → γ}
   {γAll γEx : σ → γ → γ}
   (hVerum : Primrec γVerum)
@@ -571,7 +571,7 @@ private lemma hF {σ γ} [Primcodable σ] [Primcodable γ] [Inhabited γ]
 
 lemma elim_primrec_param {σ γ} [Primcodable σ] [Primcodable γ] [Inhabited γ]
   {γVerum γFalsum : σ → γ}
-  {γRel γNrel : σ → (k : ℕ) × L.rel k × (Fin k → UTerm L μ) → γ}
+  {γRel γNrel : σ → (k : ℕ) × L.Rel k × (Fin k → UTerm L μ) → γ}
   {γAnd γOr : σ → γ × γ → γ}
   {γAll γEx : σ → γ → γ}
   {f : σ → UFormula L μ}
@@ -596,7 +596,7 @@ lemma elim_primrec_param {σ γ} [Primcodable σ] [Primcodable γ] [Inhabited γ
 
 lemma elim_primrec {γ} [Primcodable γ] [Inhabited γ]
   (γVerum γFalsum : γ)
-  {γRel γNrel : (k : ℕ) × L.rel k × (Fin k → UTerm L μ) → γ}
+  {γRel γNrel : (k : ℕ) × L.Rel k × (Fin k → UTerm L μ) → γ}
   {γAnd γOr : γ → γ → γ}
   {γAll γEx : γ → γ}
   (hRel : Primrec γRel)
@@ -615,9 +615,9 @@ lemma elim_primrec {γ} [Primcodable γ] [Inhabited γ]
 end elim_primrec
 
 lemma bv_primrec : Primrec (bv : UFormula L μ → ℕ) := by
-  have hr : Primrec (fun p => ((List.ofFn p.2.2).map UTerm.bv).sup : (k : ℕ) × L.rel k × (Fin k → UTerm L μ) → ℕ) :=
+  have hr : Primrec (fun p => ((List.ofFn p.2.2).map UTerm.bv).sup : (k : ℕ) × L.Rel k × (Fin k → UTerm L μ) → ℕ) :=
     (list_sup nat_max).comp
-      (list_map (by apply sigma_finArrow_list_ofFn.comp (sigma_prod_right (β := L.rel))) (UTerm.bv_primrec.comp₂ Primrec₂.right))
+      (list_map (by apply sigma_finArrow_list_ofFn.comp (sigma_prod_right (β := L.Rel))) (UTerm.bv_primrec.comp₂ Primrec₂.right))
   have hb : Primrec₂ (fun m n => max m n : ℕ → ℕ → ℕ) := Primrec.nat_max
   have hq : Primrec (fun n => n.pred : ℕ → ℕ) := Primrec.pred
   have := elim_primrec 0 0 hr hr hb hb hq hq
@@ -705,9 +705,9 @@ private lemma bindqL_primrec : Primrec (bindqL : σ × ℕ × UFormula L μ₁ �
         Primrec₂.right))
 
 private lemma ofFn_dep_FinArrow_primrec :
-    Primrec (fun (a : ((σ × ℕ × UFormula L μ₁) × List (UFormula L μ₂)) × Σ k, L.rel k × (Fin k → UTerm L μ₁)) =>
+    Primrec (fun (a : ((σ × ℕ × UFormula L μ₁) × List (UFormula L μ₂)) × Σ k, L.Rel k × (Fin k → UTerm L μ₁)) =>
       List.ofFn a.2.2.2) :=
-  have : Primrec (fun (a : ((σ × ℕ × UFormula L μ₁) × List (UFormula L μ₂)) × Σ k, L.rel k × (Fin k → UTerm L μ₁)) =>
+  have : Primrec (fun (a : ((σ × ℕ × UFormula L μ₁) × List (UFormula L μ₂)) × Σ k, L.Rel k × (Fin k → UTerm L μ₁)) =>
       (encode a).unpair.2.unpair.2.unpair.2) :=
     (snd.comp $ unpair.comp $ snd.comp $ unpair.comp $ snd.comp $ unpair.comp Primrec.encode)
   (encode_iff.mp $ by
@@ -716,7 +716,7 @@ private lemma ofFn_dep_FinArrow_primrec :
 
 private lemma relL_finArrow_primrec {b : σ → ℕ → UTerm L μ₂} {e : σ → μ₁ → UTerm L μ₂}
   (hb : Primrec₂ b) (he : Primrec₂ e) :
-    Primrec (fun (a : ((σ × ℕ × UFormula L μ₁) × List (UFormula L μ₂)) × Σ k, L.rel k × (Fin k → UTerm L μ₁)) =>
+    Primrec (fun (a : ((σ × ℕ × UFormula L μ₁) × List (UFormula L μ₂)) × Σ k, L.Rel k × (Fin k → UTerm L μ₁)) =>
       relL ⟨a.2.1, a.2.2.1⟩
         ((List.ofFn a.2.2.2).map
           (fun t => t.bind (shiftb (b a.1.1.1) a.1.1.2.1)
@@ -742,7 +742,7 @@ private lemma relL_finArrow_primrec {b : σ → ℕ → UTerm L μ₂} {e : σ �
 
 private lemma nrelL_finArrow_primrec {b : σ → ℕ → UTerm L μ₂} {e : σ → μ₁ → UTerm L μ₂}
   (hb : Primrec₂ b) (he : Primrec₂ e) :
-    Primrec (fun (a : ((σ × ℕ × UFormula L μ₁) × List (UFormula L μ₂)) × Σ k, L.rel k × (Fin k → UTerm L μ₁)) =>
+    Primrec (fun (a : ((σ × ℕ × UFormula L μ₁) × List (UFormula L μ₂)) × Σ k, L.Rel k × (Fin k → UTerm L μ₁)) =>
       nrelL ⟨a.2.1, a.2.2.1⟩
         ((List.ofFn a.2.2.2).map
           (fun t => t.bind (shiftb (b a.1.1.1) a.1.1.2.1)
@@ -831,8 +831,8 @@ namespace Subformula
 
 open UTerm UFormula Encodable Primrec
 variable {α : Type*} [Primcodable α]
-variable [Primcodable μ] [(k : ℕ) → Primcodable (L.func k)] [UniformlyPrimcodable L.func]
-  [(k : ℕ) → Primcodable (L.rel k)] [UniformlyPrimcodable L.rel]
+variable [Primcodable μ] [(k : ℕ) → Primcodable (L.Func k)] [UniformlyPrimcodable L.Func]
+  [(k : ℕ) → Primcodable (L.Rel k)] [UniformlyPrimcodable L.Rel]
 
 instance : Primcodable (Subformula L μ n) :=
   letI : Primcodable { p : UFormula L μ // p.bv ≤ n } := Primcodable.subtype (nat_le.comp bv_primrec (Primrec.const n))
@@ -845,47 +845,47 @@ instance : Primcodable (Subformula L μ n) :=
 -- 215684158738776904337761136760151729990515106646661045385956293637
 
 lemma rel_primrec :
-    Primrec (fun p => rel p.2.1 p.2.2 : (k : ℕ) × L.rel k × (Fin k → Subterm L μ n) → Subformula L μ n) := by
+    Primrec (fun p => rel p.2.1 p.2.2 : (k : ℕ) × L.Rel k × (Fin k → Subterm L μ n) → Subformula L μ n) := by
   letI : ∀ n, Primcodable { t : UTerm L μ // t.bv ≤ n } := fun n => Primcodable.subtype (nat_le.comp UTerm.bv_primrec (Primrec.const n))
   have h : Primrec (fun f => ⟨f.1, f.2.1, (fun i => UTerm.subtEquiv (f.2.2 i))⟩
-    : (k : ℕ) × L.rel k × (Fin k → Subterm L μ n) → (k : ℕ) × L.rel k × (Fin k → UTerm L μ)) :=
+    : (k : ℕ) × L.Rel k × (Fin k → Subterm L μ n) → (k : ℕ) × L.Rel k × (Fin k → UTerm L μ)) :=
     encode_iff.mp (Primrec.encode.of_eq <| by
       rintro ⟨k, r, v⟩; simp[Encodable.encode_prod_val r, encode_finArrow']
       funext i; exact encode_ofEquiv subtEquiv _)
   have : Primrec (fun f => UFormula.rel f.2.1 (fun i => UTerm.subtEquiv (f.2.2 i))
-      : (k : ℕ) × L.rel k × (Fin k → Subterm L μ n) → UFormula L μ) :=
+      : (k : ℕ) × L.Rel k × (Fin k → Subterm L μ n) → UFormula L μ) :=
     UFormula.rel_primrec.comp h
   exact encode_iff.mp <| (Primrec.encode.comp this).of_eq <| by
     rintro ⟨k, r, v⟩; simp[Encodable.encode_ofEquiv subfEquiv, Encodable.Subtype.encode_eq]
 
 lemma nrel_primrec :
-    Primrec (fun p => nrel p.2.1 p.2.2 : (k : ℕ) × L.rel k × (Fin k → Subterm L μ n) → Subformula L μ n) := by
+    Primrec (fun p => nrel p.2.1 p.2.2 : (k : ℕ) × L.Rel k × (Fin k → Subterm L μ n) → Subformula L μ n) := by
   letI : ∀ n, Primcodable { t : UTerm L μ // t.bv ≤ n } := fun n => Primcodable.subtype (nat_le.comp UTerm.bv_primrec (Primrec.const n))
   have h : Primrec (fun f => ⟨f.1, f.2.1, (fun i => UTerm.subtEquiv (f.2.2 i))⟩
-    : (k : ℕ) × L.rel k × (Fin k → Subterm L μ n) → (k : ℕ) × L.rel k × (Fin k → UTerm L μ)) :=
+    : (k : ℕ) × L.Rel k × (Fin k → Subterm L μ n) → (k : ℕ) × L.Rel k × (Fin k → UTerm L μ)) :=
     encode_iff.mp (Primrec.encode.of_eq <| by
       rintro ⟨k, r, v⟩; simp[Encodable.encode_prod_val r, encode_finArrow']
       funext i; exact encode_ofEquiv subtEquiv _)
   have : Primrec (fun f => UFormula.nrel f.2.1 (fun i => UTerm.subtEquiv (f.2.2 i))
-      : (k : ℕ) × L.rel k × (Fin k → Subterm L μ n) → UFormula L μ) :=
+      : (k : ℕ) × L.Rel k × (Fin k → Subterm L μ n) → UFormula L μ) :=
     UFormula.nrel_primrec.comp h
   exact encode_iff.mp <| (Primrec.encode.comp this).of_eq <| by
     rintro ⟨k, r, v⟩; simp[Encodable.encode_ofEquiv subfEquiv, Encodable.Subtype.encode_eq]
 
-def relL (r : (k : ℕ) × L.rel k) (l : List (Subterm L μ n)) : Option (Subformula L μ n) :=
+def relL (r : (k : ℕ) × L.Rel k) (l : List (Subterm L μ n)) : Option (Subformula L μ n) :=
   if h : l.length = r.1
     then some (rel r.2 (fun i => l.get (i.cast h.symm)))
     else none
 
-def nrelL (r : (k : ℕ) × L.rel k) (l : List (Subterm L μ n)) : Option (Subformula L μ n) :=
+def nrelL (r : (k : ℕ) × L.Rel k) (l : List (Subterm L μ n)) : Option (Subformula L μ n) :=
   if h : l.length = r.1
     then some (nrel r.2 (fun i => l.get (i.cast h.symm)))
     else none
 
-lemma relL_primrec : Primrec₂ (relL : (Σ k, L.rel k) → List (Subterm L μ n) → Option (Subformula L μ n)) := by
+lemma relL_primrec : Primrec₂ (relL : (Σ k, L.Rel k) → List (Subterm L μ n) → Option (Subformula L μ n)) := by
   letI : ∀ n, Primcodable { t : UTerm L μ // t.bv ≤ n } := fun n => Primcodable.subtype (nat_le.comp UTerm.bv_primrec (Primrec.const n))
   have : Primrec₂ (fun f v => UFormula.relL f (v.map (UTerm.subtEquiv ·))
-      : (k : ℕ) × L.rel k → List (Subterm L μ n) → Option (UFormula L μ)) :=
+      : (k : ℕ) × L.Rel k → List (Subterm L μ n) → Option (UFormula L μ)) :=
     UFormula.relL_primrec.comp₂ Primrec₂.left (to₂' <| list_map snd (subtype_val.comp₂ $ of_equiv.comp₂ Primrec₂.right))
   exact encode_iff.mp <| (Primrec.encode.comp this).of_eq <| by
     rintro ⟨⟨k, f⟩, l⟩; simp[relL, UFormula.relL]
@@ -895,10 +895,10 @@ lemma relL_primrec : Primrec₂ (relL : (Σ k, L.rel k) → List (Subterm L μ n
 
 example (t : Subformula L μ n) : encode (some t) = encode t + 1 := by { simp }
 
-lemma nrelL_primrec : Primrec₂ (nrelL : (Σ k, L.rel k) → List (Subterm L μ n) → Option (Subformula L μ n)) := by
+lemma nrelL_primrec : Primrec₂ (nrelL : (Σ k, L.Rel k) → List (Subterm L μ n) → Option (Subformula L μ n)) := by
   letI : ∀ n, Primcodable { t : UTerm L μ // t.bv ≤ n } := fun n => Primcodable.subtype (nat_le.comp UTerm.bv_primrec (Primrec.const n))
   have : Primrec₂ (fun f v => UFormula.nrelL f (v.map (UTerm.subtEquiv ·))
-      : (k : ℕ) × L.rel k → List (Subterm L μ n) → Option (UFormula L μ)) :=
+      : (k : ℕ) × L.Rel k → List (Subterm L μ n) → Option (UFormula L μ)) :=
     UFormula.nrelL_primrec.comp₂ Primrec₂.left (to₂' <| list_map snd (subtype_val.comp₂ $ of_equiv.comp₂ Primrec₂.right))
   exact encode_iff.mp <| (Primrec.encode.comp this).of_eq <| by
     rintro ⟨⟨k, f⟩, l⟩; simp[nrelL, UFormula.nrelL]

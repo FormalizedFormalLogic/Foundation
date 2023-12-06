@@ -7,7 +7,7 @@ namespace FirstOrder
 abbrev Sequent (L : Language.{u}) := Finset (SyntacticFormula L)
 
 open Subformula
-variable {L : Language.{u}} [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq (L.rel k)]
+variable {L : Language.{u}} [∀ k, DecidableEq (L.Func k)] [∀ k, DecidableEq (L.Rel k)]
 
 def shifts (Δ : Finset (SyntacticSubformula L n)) :
   Finset (SyntacticSubformula L n) := Δ.map shiftEmb
@@ -38,7 +38,7 @@ lemma shifts_erase (p : SyntacticSubformula L n) (Δ : Finset (SyntacticSubformu
   by simp[shifts, shiftEmb_eq_shift]
 
 inductive DerivationCR (P : SyntacticFormula L → Prop) : Sequent L → Type u
-| axL   : ∀ (Δ : Sequent L) {k} (r : L.rel k) (v : Fin k → SyntacticTerm L),
+| axL   : ∀ (Δ : Sequent L) {k} (r : L.Rel k) (v : Fin k → SyntacticTerm L),
     rel r v ∈ Δ → nrel r v ∈ Δ → DerivationCR P Δ
 | verum : ∀ (Δ : Sequent L), ⊤ ∈ Δ → DerivationCR P Δ
 | or    : ∀ (Δ : Sequent L) (p q : SyntacticFormula L),
@@ -86,7 +86,7 @@ def length : {Δ : Sequent L} → DerivationCR P Δ → ℕ
 
 section
 
-@[simp] lemma length_axL {k} {r : L.rel k} {v} (hpos : rel r v ∈ Δ) (hneg : nrel r v ∈ Δ) :
+@[simp] lemma length_axL {k} {r : L.Rel k} {v} (hpos : rel r v ∈ Δ) (hneg : nrel r v ∈ Δ) :
   (axL (P := P) Δ r v hpos hneg).length = 0 := rfl
 
 @[simp] lemma length_verum (h : ⊤ ∈ Δ) : (verum (P := P) Δ h).length = 0 := rfl
@@ -105,7 +105,7 @@ section
 end
 
 section Repr
-variable [∀ k, ToString (L.func k)] [∀ k, ToString (L.rel k)]
+variable [∀ k, ToString (L.Func k)] [∀ k, ToString (L.Rel k)]
 
 protected unsafe def repr : {Δ : Sequent L} → ⊢ᶜ[P] Δ → String
   | _, axL Δ _ _ _ _   =>
@@ -275,8 +275,8 @@ def elimFalsum : {Δ : Sequent L} → ⊢ᶜ[P] Δ → ⊢ᶜ[P] Δ.erase ⊥
 section Hom
 
 variable
-  {L₁ : Language} [∀ k, DecidableEq (L₁.func k)] [∀ k, DecidableEq (L₁.rel k)]
-  {L₂ : Language} [∀ k, DecidableEq (L₂.func k)] [∀ k, DecidableEq (L₂.rel k)]
+  {L₁ : Language} [∀ k, DecidableEq (L₁.Func k)] [∀ k, DecidableEq (L₁.Rel k)]
+  {L₂ : Language} [∀ k, DecidableEq (L₂.Func k)] [∀ k, DecidableEq (L₂.Rel k)]
   {Δ₁ Γ₁ : Finset (SyntacticFormula L₁)}
 
 lemma shifts_image (Φ : L₁ →ᵥ L₂) {Δ : Finset (SyntacticFormula L₁)} :
@@ -476,7 +476,7 @@ lemma compact {p} (b : T ⊢ᶜ[P] p) : b.kernel ⊢ᶜ[P] p where
 
 def verum (h : ⊤ ∈ Δ) : T ⊢ᶜ[P] Δ := (DerivationCR.verum _ (by simp[h])).toDerivationCRWA
 
-def axL {k} (r : L.rel k) (v : Fin k → SyntacticTerm L) (h : rel r v ∈ Δ) (nh : nrel r v ∈ Δ) : T ⊢ᶜ[P] Δ :=
+def axL {k} (r : L.Rel k) (v : Fin k → SyntacticTerm L) (h : rel r v ∈ Δ) (nh : nrel r v ∈ Δ) : T ⊢ᶜ[P] Δ :=
   (DerivationCR.axL Δ r v h nh).toDerivationCRWA
 
 protected def and {p₁ p₂} (h : p₁ ⋏ p₂ ∈ Δ) (b₁ : T ⊢ᶜ[P] insert p₁ Δ) (b₂ : T ⊢ᶜ[P] insert p₂ Δ) :
@@ -596,8 +596,8 @@ protected def rewrite (f : ℕ → SyntacticTerm L) {T : Theory L} {Δ : Sequent
     (by simp[Finset.image_union, Finset.image_image, Rew.hom_comp_eq]; congr; ext q; simp[←Rew.hom_comp_app])
 
 variable
-  {L₁ : Language} [∀ k, DecidableEq (L₁.func k)] [∀ k, DecidableEq (L₁.rel k)]
-  {L₂ : Language} [∀ k, DecidableEq (L₂.func k)] [∀ k, DecidableEq (L₂.rel k)]
+  {L₁ : Language} [∀ k, DecidableEq (L₁.Func k)] [∀ k, DecidableEq (L₁.Rel k)]
+  {L₂ : Language} [∀ k, DecidableEq (L₂.Func k)] [∀ k, DecidableEq (L₂.Rel k)]
 
 protected def lMap (Φ : L₁ →ᵥ L₂) {T : Theory L₁} {Δ : Sequent L₁} (b : T ⊢' Δ) :
     Theory.lMap Φ T ⊢' Δ.image (Subformula.lMap Φ) where
@@ -641,8 +641,8 @@ lemma inconsistent_of_provable_and_refutable' {T : Theory L} {σ}
   exact inconsistent_of_provable_and_refutable bp br
 
 variable
-  {L₁ : Language} [∀ k, DecidableEq (L₁.func k)] [∀ k, DecidableEq (L₁.rel k)]
-  {L₂ : Language} [∀ k, DecidableEq (L₂.func k)] [∀ k, DecidableEq (L₂.rel k)]
+  {L₁ : Language} [∀ k, DecidableEq (L₁.Func k)] [∀ k, DecidableEq (L₁.Rel k)]
+  {L₂ : Language} [∀ k, DecidableEq (L₂.Func k)] [∀ k, DecidableEq (L₂.Rel k)]
 
 def System.lMap (Φ : L₁ →ᵥ L₂) {T : Theory L₁} {σ : Sentence L₁} (b : T ⊢ σ) :
     Theory.lMap Φ T ⊢ Subformula.lMap Φ σ := by simpa[Subformula.lMap_emb] using b.lMap Φ

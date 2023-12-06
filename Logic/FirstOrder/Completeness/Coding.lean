@@ -7,8 +7,8 @@ namespace FirstOrder
 
 open Subformula
 variable {L : Language.{u}}
-  [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq (L.rel k)]
-  [∀ k, Encodable (L.func k)] [∀ k, Encodable (L.rel k)]
+  [∀ k, DecidableEq (L.Func k)] [∀ k, DecidableEq (L.Rel k)]
+  [∀ k, Encodable (L.Func k)] [∀ k, Encodable (L.Rel k)]
 
 def newVar (Γ : Sequent L) : ℕ := Γ.sup Subformula.upper
 
@@ -36,7 +36,7 @@ end DerivationWA
 namespace DerivationWA
 
 inductive Code (L : Language.{u})
-  | axL : {k : ℕ} → (r : L.rel k) → (v : Fin k → SyntacticTerm L) → Code L
+  | axL : {k : ℕ} → (r : L.Rel k) → (v : Fin k → SyntacticTerm L) → Code L
   | verum : Code L
   | and : SyntacticFormula L → SyntacticFormula L → Code L
   | or : SyntacticFormula L → SyntacticFormula L → Code L
@@ -46,7 +46,7 @@ inductive Code (L : Language.{u})
 
 def Code.equiv (L : Language.{u}) :
     Code L ≃
-    ((k : ℕ) × (L.rel k) × (Fin k → SyntacticTerm L)) ⊕
+    ((k : ℕ) × (L.Rel k) × (Fin k → SyntacticTerm L)) ⊕
     Unit ⊕
     (SyntacticFormula L × SyntacticFormula L) ⊕
     (SyntacticFormula L × SyntacticFormula L) ⊕

@@ -16,14 +16,14 @@ variable (L M M₁ M₂ M₃)
 
 structure Hom where
   toFun : M₁ → M₂
-  func' : ∀ {k} (f : L.func k) (v : Fin k → M₁), toFun (s₁.func f v) = s₂.func f (toFun ∘ v)
-  rel' : ∀ {k} (r : L.rel k) (v : Fin k → M₁), s₁.rel r v → s₂.rel r (toFun ∘ v)
+  func' : ∀ {k} (f : L.Func k) (v : Fin k → M₁), toFun (s₁.func f v) = s₂.func f (toFun ∘ v)
+  rel' : ∀ {k} (r : L.Rel k) (v : Fin k → M₁), s₁.rel r v → s₂.rel r (toFun ∘ v)
 
 notation:25 M " →ₛ[" L "] " M' => Hom L M M'
 
 structure Embedding extends M₁ →ₛ[L] M₂ where
   toFun_inj : Function.Injective toFun
-  rel_inv' {k} (r : L.rel k) (v : Fin k → M₁) : s₂.rel r (toFun ∘ v) → s₁.rel r v
+  rel_inv' {k} (r : L.Rel k) (v : Fin k → M₁) : s₂.rel r (toFun ∘ v) → s₁.rel r v
 
 notation:25 M " ↪ₛ[" L "] " M' => Embedding L M M'
 
@@ -34,19 +34,19 @@ notation:25 M " ≃ₛ[" L "] " M' => Iso L M M'
 
 @[ext] structure ClosedSubset where
   domain : Set M
-  domain_closed : ∀ {k} (f : L.func k) {v : Fin k → M}, (∀ i, v i ∈ domain) → s.func f v ∈ domain
+  domain_closed : ∀ {k} (f : L.Func k) {v : Fin k → M}, (∀ i, v i ∈ domain) → s.func f v ∈ domain
 
 class HomClass (F : Type*) (L : outParam (Language.{u}))
     (M₁ : outParam (Type*)) (M₂ : outParam (Type*)) [s₁ : Structure L M₁] [s₂ : Structure L M₂]
     extends FunLike F M₁ (fun _ => M₂) where
-  map_func : ∀ (h : F) {k} (f : L.func k) (v : Fin k → M₁), h (func f v) = func f (h ∘ v)
-  map_rel : ∀ (h : F) {k} (r : L.rel k) (v : Fin k → M₁), s₁.rel r v → s₂.rel r (h ∘ v)
+  map_func : ∀ (h : F) {k} (f : L.Func k) (v : Fin k → M₁), h (func f v) = func f (h ∘ v)
+  map_rel : ∀ (h : F) {k} (r : L.Rel k) (v : Fin k → M₁), s₁.rel r v → s₂.rel r (h ∘ v)
 
 class EmbeddingClass (F : Type*) (L : outParam (Language.{u}))
     (M₁ : outParam (Type*)) (M₂ : outParam (Type*)) [s₁ : Structure L M₁] [s₂ : Structure L M₂]
     extends HomClass F L M₁ M₂ where
   map_inj (f : F) : Function.Injective f
-  map_rel_inv (f : F) {k} (r : L.rel k) (v : Fin k → M₁) : s₂.rel r (f ∘ v) → s₁.rel r v
+  map_rel_inv (f : F) {k} (r : L.Rel k) (v : Fin k → M₁) : s₂.rel r (f ∘ v) → s₁.rel r v
 
 class IsoClass (F : Type*) (L : outParam (Language.{u}))
     (M₁ : outParam (Type*)) (M₂ : outParam (Type*)) [s₁ : Structure L M₁] [s₂ : Structure L M₂]
@@ -69,10 +69,10 @@ variable {F : Type*} [HomClass F L M₁ M₂] (φ : F)
 
 @[ext] lemma ext (φ ψ : F) (h : ∀ x, φ x = ψ x) : φ = ψ := FunLike.ext φ ψ h
 
-protected lemma func {k} (f : L.func k) (v : Fin k → M₁) :
+protected lemma func {k} (f : L.Func k) (v : Fin k → M₁) :
     φ (s₁.func f v) = s₂.func f (φ ∘ v) := map_func φ f v
 
-protected lemma rel {k} (r : L.rel k) (v : Fin k → M₁) :
+protected lemma rel {k} (r : L.Rel k) (v : Fin k → M₁) :
     s₁.rel r v → s₂.rel r (φ ∘ v) := map_rel φ r v
 
 lemma val_term (e : Fin n → M₁) (ε : μ → M₁) (t : Subterm L μ n) :
@@ -99,10 +99,10 @@ def toEmbedding : M₁ ↪ M₂ where
   toFun := φ
   inj'  := map_inj φ
 
-protected lemma func {k} (f : L.func k) (v : Fin k → M₁) :
+protected lemma func {k} (f : L.Func k) (v : Fin k → M₁) :
     φ (s₁.func f v) = s₂.func f (φ ∘ v) := map_func φ f v
 
-protected lemma rel {k} (r : L.rel k) (v : Fin k → M₁) :
+protected lemma rel {k} (r : L.Rel k) (v : Fin k → M₁) :
     s₂.rel r (φ ∘ v) ↔ s₁.rel r v := ⟨map_rel_inv φ r v, HomClass.rel φ r v⟩
 
 end EmbeddingClass
@@ -128,15 +128,15 @@ variable (u : ClosedSubset L M)
 
 instance : SetLike (ClosedSubset L M) M := ⟨ClosedSubset.domain, ClosedSubset.ext⟩
 
-lemma closed {k} (f : L.func k) {v : Fin k → M} (hv : ∀ i, v i ∈ u) : s.func f v ∈ u := u.domain_closed f hv
+lemma closed {k} (f : L.Func k) {v : Fin k → M} (hv : ∀ i, v i ∈ u) : s.func f v ∈ u := u.domain_closed f hv
 
 instance toStructure [s : Structure L M] (u : ClosedSubset L M) : Structure L u where
   func := fun k f v => ⟨s.func f (fun i => ↑(v i)), u.closed f (by simp)⟩
   rel := fun k r v => s.rel r (fun i => v i)
 
-protected lemma func {k} (f : L.func k) (v : Fin k → u) : u.toStructure.func f v = s.func f (fun i => v i) := rfl
+protected lemma func {k} (f : L.Func k) (v : Fin k → u) : u.toStructure.func f v = s.func f (fun i => v i) := rfl
 
-protected lemma rel {k} (r : L.rel k) (v : Fin k → u) : u.toStructure.rel r v ↔ s.rel r (fun i => v i) := of_eq rfl
+protected lemma rel {k} (r : L.Rel k) (v : Fin k → u) : u.toStructure.rel r v ↔ s.rel r (fun i => v i) := of_eq rfl
 
 def inclusion : u ↪ₛ[L] M where
   toFun := Subtype.val
@@ -339,13 +339,13 @@ instance add : Structure (L₁.add L₂) M where
 
 variable {L₁ L₂ M}
 
-@[simp] lemma func_sigma_inl {k} (f : L₁.func k) (v : Fin k → M) : (add L₁ L₂ M).func (Sum.inl f) v = func f v := rfl
+@[simp] lemma func_sigma_inl {k} (f : L₁.Func k) (v : Fin k → M) : (add L₁ L₂ M).func (Sum.inl f) v = func f v := rfl
 
-@[simp] lemma func_sigma_inr {k} (f : L₂.func k) (v : Fin k → M) : (add L₁ L₂ M).func (Sum.inr f) v = func f v := rfl
+@[simp] lemma func_sigma_inr {k} (f : L₂.Func k) (v : Fin k → M) : (add L₁ L₂ M).func (Sum.inr f) v = func f v := rfl
 
-@[simp] lemma rel_sigma_inl {k} (r : L₁.rel k) (v : Fin k → M) : (add L₁ L₂ M).rel (Sum.inl r) v ↔ rel r v := iff_of_eq rfl
+@[simp] lemma rel_sigma_inl {k} (r : L₁.Rel k) (v : Fin k → M) : (add L₁ L₂ M).rel (Sum.inl r) v ↔ rel r v := iff_of_eq rfl
 
-@[simp] lemma rel_sigma_inr {k} (r : L₂.rel k) (v : Fin k → M) : (add L₁ L₂ M).rel (Sum.inr r) v ↔ rel r v := iff_of_eq rfl
+@[simp] lemma rel_sigma_inr {k} (r : L₂.Rel k) (v : Fin k → M) : (add L₁ L₂ M).rel (Sum.inr r) v ↔ rel r v := iff_of_eq rfl
 
 @[simp] lemma val_lMap_add₁ {n} (t : Subterm L₁ μ n) (e : Fin n → M) (ε : μ → M) :
     Subterm.val (add L₁ L₂ M) e ε (t.lMap (Language.Hom.add₁ L₁ L₂)) = t.val str₁ e ε := by
@@ -375,9 +375,9 @@ instance sigma : Structure (Language.sigma L) M where
   func := fun _ ⟨_, f⟩ v => func f v
   rel  := fun _ ⟨_, r⟩ v => rel r v
 
-@[simp] lemma func_sigma {k} (f : (L i).func k) (v : Fin k → M) : (sigma L M).func ⟨i, f⟩ v = func f v := rfl
+@[simp] lemma func_sigma {k} (f : (L i).Func k) (v : Fin k → M) : (sigma L M).func ⟨i, f⟩ v = func f v := rfl
 
-@[simp] lemma rel_sigma {k} (r : (L i).rel k) (v : Fin k → M) : (sigma L M).rel ⟨i, r⟩ v ↔ rel r v := iff_of_eq rfl
+@[simp] lemma rel_sigma {k} (r : (L i).Rel k) (v : Fin k → M) : (sigma L M).rel ⟨i, r⟩ v ↔ rel r v := iff_of_eq rfl
 
 @[simp] lemma val_lMap_sigma {n} (t : Subterm (L i) μ n) (e : Fin n → M) (ε : μ → M) :
     Subterm.val (sigma L M) e ε (t.lMap (Language.Hom.sigma L i)) = t.val (str i) e ε := by
