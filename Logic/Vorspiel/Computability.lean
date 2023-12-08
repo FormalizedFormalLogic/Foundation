@@ -488,7 +488,8 @@ lemma decode_list :
 
 lemma decode_vector (e : ℕ) :
     (decode (α := Vector β k) e) = (decode (α := List β) e).bind (List.toVector k) := by
-  simp[decode, decodeSubtype, List.toVector]
+    exact rfl
+--  simp[decode, decodeSubtype, List.toVector]
 
 lemma decode_finArrow (β : Type*) [Primcodable β] (e : ℕ) :
     (decode (α := Fin k → β) e) = (decode (α := List β) e).bind (fun l => (l.toVector k).map (Equiv.vectorEquivFin β k)) := by
