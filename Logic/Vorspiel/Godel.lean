@@ -41,25 +41,22 @@ lemma coprime_list_prod_iff_right {k} {l : List ℕ} :
     Coprime k l.prod ↔ ∀ n ∈ l, Coprime k n := by
   induction' l with m l ih <;> simp[Nat.coprime_mul_iff_right, *]
 
-inductive Coprimes : List ℕ → Prop
-  | nil : Coprimes []
-  | cons {n : ℕ} {l : List ℕ} : (∀ m ∈ l, Coprime n m) → Coprimes l → Coprimes (n :: l)
+--abbrev Coprimes (l : List ℕ) : Prop := l.Pairwise Coprime
 
 lemma coprimes_of_nodup {l : List ℕ} (hl : l.Nodup) (H : ∀ n ∈ l, ∀ m ∈ l, n ≠ m → Coprime n m) :
-    Coprimes l := by
+    l.Pairwise Coprime := by
   induction' l with n l ih
-  · exact Coprimes.nil
-  · have : Coprimes l := ih (List.Nodup.of_cons hl) (fun m hm k hk => H m (by simp[hm]) k (by simp[hk]))
-    exact Coprimes.cons (fun m hm => coprime_comm.mp
+  · exact List.Pairwise.nil
+  · have : l.Pairwise Coprime := ih (List.Nodup.of_cons hl) (fun m hm k hk => H m (by simp[hm]) k (by simp[hk]))
+    exact List.Pairwise.cons (fun m hm => coprime_comm.mp
       (H m (by simp[hm]) n (by simp) (by rintro rfl; exact (List.nodup_cons.mp hl).1 hm))) this
 
 lemma coprimes_cons_iff_coprimes_coprime_prod {n} {l : List ℕ} :
-    Coprimes (n :: l) ↔ Coprimes l ∧ Coprime n l.prod := by
-  simp[coprime_list_prod_iff_right]; constructor
-  · rintro ⟨⟩ ; simpa[*]
-  · rintro ⟨hl, hn⟩; exact Coprimes.cons hn hl
+    (n :: l).Pairwise Coprime ↔ l.Pairwise Coprime ∧ Coprime n l.prod :=
+  ⟨by rintro (⟨⟩ | ⟨hn, hp⟩); exact ⟨hp, coprime_list_prod_iff_right.mpr hn⟩,
+   by rintro ⟨hn, hp⟩; exact List.Pairwise.cons (coprime_list_prod_iff_right.mp hp) hn⟩
 
-lemma modEq_iff_modEq_list_prod {a b} {l : List ℕ} (co : Coprimes l) :
+lemma modEq_iff_modEq_list_prod {a b} {l : List ℕ} (co : l.Pairwise Coprime) :
     (∀ i, a ≡ b [MOD l.get i]) ↔ a ≡ b [MOD l.prod] := by
   induction' l with m l ih <;> simp[Nat.modEq_one]
   · rcases co with (_ | ⟨hm, hl⟩)
@@ -73,11 +70,11 @@ lemma modEq_iff_modEq_list_prod {a b} {l : List ℕ} (co : Coprimes l) :
       · simpa using h.1
       · simpa using h.2 _
 
-def chineseRemainderList : (l : List (ℕ × ℕ)) → (H : Coprimes (l.map Prod.snd)) →
+def chineseRemainderList : (l : List (ℕ × ℕ)) → (H : (l.map Prod.snd).Pairwise Coprime) →
     { k // ∀ i, k ≡ (l.get i).1 [MOD (l.get i).2] }
   | [],          _ => ⟨0, by simp⟩
   | (a, m) :: l, H => by
-    have hl : Coprimes (l.map Prod.snd) ∧ Coprime m (l.map Prod.snd).prod :=
+    have hl : (l.map Prod.snd).Pairwise Coprime ∧ Coprime m (l.map Prod.snd).prod :=
       coprimes_cons_iff_coprimes_coprime_prod.mp H
     let ih : { k // ∀ i, k ≡ (l.get i).1 [MOD (l.get i).2] } := chineseRemainderList l hl.1
     let z := Nat.chineseRemainder hl.2 a ih
@@ -117,7 +114,7 @@ lemma coprime_mul_succ {n m a} (h : n ≤ m) (ha : m - n ∣ a) : Coprime (n * a
       simpa[Nat.add_sub_cancel_left] using Nat.dvd_sub (le_add_right _ _) hn (Dvd.dvd.mul_left this n)
     simp[this] at pp)
 
-lemma coprimes_coprimeList (l : List ℕ) : Coprimes ((coprimeList l).map Prod.snd) := by
+lemma coprimes_coprimeList (l : List ℕ) : ((coprimeList l).map Prod.snd).Pairwise Coprime := by
   have : (coprimeList l).map Prod.snd = List.ofFn (fun i : Fin l.length => (i + 1) * (listSup l)! + 1) := by
     simp[coprimeList, Function.comp]
   rw[this]
