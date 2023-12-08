@@ -46,9 +46,7 @@ lemma coprime_list_prod_iff_right {k} {l : List ℕ} :
     Coprime k l.prod ↔ ∀ n ∈ l, Coprime k n := by
   induction' l with m l ih <;> simp[Nat.coprime_mul_iff_right, *]
 
---abbrev Coprimes (l : List ℕ) : Prop := l.Pairwise Coprime
-
-lemma coprimes_of_nodup {l : List ℕ} (hl : l.Nodup) (H : ∀ n ∈ l, ∀ m ∈ l, n ≠ m → Coprime n m) :
+lemma pairwise_coprime_of_nodup {l : List ℕ} (hl : l.Nodup) (H : ∀ n ∈ l, ∀ m ∈ l, n ≠ m → Coprime n m) :
     l.Pairwise Coprime := by
   induction' l with n l ih
   · exact List.Pairwise.nil
@@ -56,7 +54,7 @@ lemma coprimes_of_nodup {l : List ℕ} (hl : l.Nodup) (H : ∀ n ∈ l, ∀ m �
     exact List.Pairwise.cons (fun m hm => coprime_comm.mp
       (H m (by simp[hm]) n (by simp) (by rintro rfl; exact (List.nodup_cons.mp hl).1 hm))) this
 
-lemma coprimes_cons_iff_coprimes_coprime_prod {n} {l : List ℕ} :
+lemma pairwise_coprime_cons_iff_pairwise_coprime_coprime_prod {n} {l : List ℕ} :
     (n :: l).Pairwise Coprime ↔ l.Pairwise Coprime ∧ Coprime n l.prod :=
   ⟨by rintro (⟨⟩ | ⟨hn, hp⟩); exact ⟨hp, coprime_list_prod_iff_right.mpr hn⟩,
    by rintro ⟨hn, hp⟩; exact List.Pairwise.cons (coprime_list_prod_iff_right.mp hp) hn⟩
@@ -81,7 +79,7 @@ def chineseRemainderList : (l : List (ℕ × ℕ)) → (H : (l.map Prod.snd).Pai
   | [],          _ => ⟨0, by simp⟩
   | (a, m) :: l, H => by
     have hl : (l.map Prod.snd).Pairwise Coprime ∧ Coprime m (l.map Prod.snd).prod :=
-      coprimes_cons_iff_coprimes_coprime_prod.mp H
+      pairwise_coprime_cons_iff_pairwise_coprime_coprime_prod.mp H
     let ih : { k // ∀ i, k ≡ (l.get i).1 [MOD (l.get i).2] } := chineseRemainderList l hl.1
     let z := Nat.chineseRemainder hl.2 a ih
     exact ⟨z, by
@@ -128,11 +126,11 @@ lemma coprime_mul_succ {n m a} (h : n ≤ m) (ha : m - n ∣ a) : Coprime (n * a
 --    exact pp
     )
 
-lemma coprimes_coprimeList (l : List ℕ) : ((coprimeList l).map Prod.snd).Pairwise Coprime := by
+lemma pairwise_coprime_coprimeList (l : List ℕ) : ((coprimeList l).map Prod.snd).Pairwise Coprime := by
   have : (coprimeList l).map Prod.snd = List.ofFn (fun i : Fin l.length => (i + 1) * (listSup l)! + 1) := by
     simp[coprimeList, Function.comp]
   rw[this]
-  exact coprimes_of_nodup
+  exact pairwise_coprime_of_nodup
     (List.nodup_ofFn_ofInjective $ by
        intro i j; simp[listSup, ← Fin.ext_iff, Nat.factorial_ne_zero])
     (by
@@ -156,13 +154,13 @@ def beta (n i : ℕ) := n.unpair.1 % ((i + 1) * n.unpair.2 + 1)
 
 /-- Inverse of Gödel's Beta Function -/
 def unbeta (l : List ℕ) :=
-  (chineseRemainderList (coprimeList l) (coprimes_coprimeList l) : ℕ).pair (listSup l)!
+  (chineseRemainderList (coprimeList l) (pairwise_coprime_coprimeList l) : ℕ).pair (listSup l)!
 
 /-- **Gödel's Beta Function Lemma** -/
 lemma beta_function_lemma (l : List ℕ) (i : Fin l.length) :
     beta (unbeta l) i = l.get i := by
   simpa[beta, unbeta, coprimeList] using mod_eq_of_modEq
-    ((chineseRemainderList (coprimeList l) (coprimes_coprimeList l)).2 (i.cast $ by simp))
+    ((chineseRemainderList (coprimeList l) (pairwise_coprime_coprimeList l)).2 (i.cast $ by simp))
     (coprimeList_lt l _)
 
 end Nat
