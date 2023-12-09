@@ -24,6 +24,25 @@ instance : LogicSymbol (Litform α) where
   tilde := Litform.neg
   arrow := Litform.imply
 
+section ToString
+
+variable [ToString α]
+
+def toStr : Litform α → String
+  | ⊤      => "⊤"
+  | ⊥      => "⊥"
+  | atom a => toString a
+  | ~p     => "(¬" ++ toStr p ++ ")"
+  | p ⋏ q  => "(" ++ toStr p ++ " ∧ " ++ toStr q ++ ")"
+  | p ⋎ q  => "(" ++ toStr p ++ " ∨ "  ++ toStr q ++ ")"
+  | p ⟶ q => "(" ++ toStr p ++ " ⟶ "  ++ toStr q ++ ")"
+
+instance : Repr (Litform α) := ⟨fun t _ => toStr t⟩
+
+instance : ToString (Litform α) := ⟨toStr⟩
+
+end ToString
+
 namespace Meta
 
 variable (F : Q(Type*)) (ls : Q(LogicSymbol $F))

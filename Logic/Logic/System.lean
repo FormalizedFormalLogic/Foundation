@@ -191,4 +191,35 @@ def toProof {p : F} (b : ⊢ᴸ [p]) (T : Set F) : T ⊢ p :=
 
 end LawfulOneSided
 
+class TwoSided (F : Type*) where
+  Derivation : List F → List F → Type*
+
+infix: 45 " ⊢ᴳ " => TwoSided.Derivation
+
+class Gentzen (F : Type u) [LogicSymbol F] extends TwoSided F where
+  verum (Γ Δ : List F)                : Γ ⊢ᴳ ⊤ :: Δ
+  falsum (Γ Δ : List F)               : ⊥ :: Γ ⊢ᴳ Δ
+  negLeft {p : F} {Γ Δ : List F}      : Γ ⊢ᴳ p :: Δ → ~p :: Γ ⊢ᴳ Δ
+  negRight {p : F} {Γ Δ : List F}     : p :: Γ ⊢ᴳ Δ → Γ ⊢ᴳ ~p :: Δ
+  andLeft {p q : F} {Γ Δ : List F}    : p :: q :: Γ ⊢ᴳ Δ → p ⋏ q :: Γ ⊢ᴳ Δ
+  andRight {p q : F} {Γ Δ : List F}   : Γ ⊢ᴳ p :: Δ → Γ ⊢ᴳ q :: Δ → Γ ⊢ᴳ p ⋏ q :: Δ
+  orLeft {p q : F} {Γ Δ : List F}     : p :: Γ ⊢ᴳ Δ → q :: Γ ⊢ᴳ Δ → p ⋎ q :: Γ ⊢ᴳ Δ
+  orRight {p q : F} {Γ Δ : List F}    : Γ ⊢ᴳ p :: q :: Δ → Γ ⊢ᴳ p ⋎ q :: Δ
+  implyLeft {p q : F} {Γ Δ : List F}  : Γ ⊢ᴳ p :: Δ → q :: Γ ⊢ᴳ Δ → (p ⟶ q) :: Γ ⊢ᴳ Δ
+  implyRight {p q : F} {Γ Δ : List F} : p :: Γ ⊢ᴳ q :: Δ → Γ ⊢ᴳ (p ⟶ q) :: Δ
+  wk {Γ Γ' Δ Δ' : List F} : Γ ⊢ᴳ Δ → Γ ⊆ Γ' → Δ ⊆ Δ' → Γ' ⊢ᴳ Δ'
+  em {p} {Γ Δ : List F} (hΓ : p ∈ Γ) (hΔ : p ∈ Δ) : Γ ⊢ᴳ Δ
+
+class LawfulGentzen (F : Type u) [LogicSymbol F] [System F] extends Gentzen F where
+  toProofEmpty {p : F} : [] ⊢ᴳ [p] → ∅ ⊢ p
+
+namespace LawfulGentzen
+
+variable {F : Type*} [LogicSymbol F] [System F] [LawfulGentzen F]
+
+def toProof {p : F} (b : [] ⊢ᴳ [p]) (T : Set F) : T ⊢ p :=
+  System.weakening (toProofEmpty b) (Set.empty_subset T)
+
+end LawfulGentzen
+
 end LO

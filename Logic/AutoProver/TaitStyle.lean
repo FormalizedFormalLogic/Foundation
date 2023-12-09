@@ -313,9 +313,13 @@ example : T ⊢ p ⟶ p ⋎ q := by tryProve
 
 example : T ⊢ q ⋎ p ⟷ p ⋎ q := by tryProve 5
 
-example : T ⊢! q ⋎ p ⋎ r ⟷ r ⋎ p ⋎ q := by try_prove
+example : T ⊢! p ⋎ q ⋎ r ⋎ s ⟷ r ⋎ s ⋎ q ⋎ p := by try_prove
+
+example : T ⊢! p ⟷ p ⋎ p ⋎ p ⋎ p ⋎ p ⋎ p ⋎ p := by try_prove
 
 example : T ⊢! ((p ⟶ q) ⟶ p) ⟶ p := by try_prove
+
+example : T ⊢! (p ⟶ q) ⋎ (q ⟶ p) := by try_prove
 
 end test
 

@@ -170,6 +170,25 @@ instance : LawfulOneSided (Formula α) where
   toProofEmpty := fun b =>
     DerivationCRWA.toProof (DerivationCR.toDerivationCRWA b ∅)
 
+instance zz : LawfulGentzen (Formula α) where
+  Derivation := fun Γ Δ => ⊢ᴾᵀ ((Γ.map (~·)).toFinset ∪ Δ.toFinset)
+  verum := fun _ _ => DerivationCR.verum _ (by simp)
+  falsum := fun _ _ => DerivationCR.verum _ (by simp)
+  negLeft := fun b => b.cast (by simp)
+  negRight := fun b => b.cast (by simp)
+  andLeft := fun b => by simpa using DerivationCR.or _ _ _ (by simpa using b)
+  andRight := fun bp bq => by simpa using DerivationCR.and _ _ _ (by simpa using bp) (by simpa using bq)
+  orLeft := fun bp bq => by simpa using DerivationCR.and _ _ _ (by simpa using bp) (by simpa using bq)
+  orRight := fun b => by simpa using DerivationCR.or _ _ _ (by simpa using b)
+  implyLeft := fun bp bq => by simpa[Formula.imp_eq] using DerivationCR.and _ _ _ (by simpa using bp) (by simpa using bq)
+  implyRight := fun b => by simpa[Formula.imp_eq] using DerivationCR.or _ _ _ (b.cast $ by simp[Finset.Insert.comm])
+  wk := fun b hΓ hΔ => b.weakening
+    (Finset.union_subset_union
+      (by simpa[List.toFinset_map] using Finset.image_subset_image (List.toFinset_mono hΓ))
+      (List.toFinset_mono hΔ))
+  em := fun {p} _ _ hΓ hΔ => DerivationCR.em (p := p) (by simp[*]) (by simp[*])
+  toProofEmpty := fun d => DerivationCRWA.toProof (DerivationCR.toDerivationCRWA d ∅)
+#check zz
 end Propositional
 
 end LO
