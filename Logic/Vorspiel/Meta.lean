@@ -394,29 +394,97 @@ def elemM (r : α → α → m Bool) (a : α) : List α → m Bool
 
 end List
 
-class Denotation (α : Type) where
-  denote : Expr → MetaM α
-  toExpr : α → Expr
+class ExprNamed (α : Type) where
+  name : Q(Type)
+
+instance : ExprNamed ℕ := ⟨q(ℕ)⟩
+
+instance : ExprNamed ℕ := ⟨q(ℕ)⟩
+
+class Denotation (σ : outParam (Q(Type*))) (α : Type) where
+  denote' : Q($σ) → MetaM α
+  toExpr' : α → Q($σ)
 
 namespace Denotation
 
-instance : Denotation ℕ where
-  denote := fun e => do
+abbrev denote (σ : Q(Type*)) {α} [Denotation σ α] : Q($σ) → MetaM α := denote'
+
+abbrev toExpr (σ : Q(Type*)) {α} [Denotation σ α] : α → Q($σ) := toExpr'
+
+instance nat : Denotation q(ℕ) ℕ where
+  denote' := fun e => do
     let some n := Lean.Expr.natLit? (←whnf e) | throwError "error in denotationNat: {e}"
     return n
-  toExpr := fun n : ℕ => q($n)
+  toExpr' := fun n : ℕ => q($n)
 
-instance {n : ℕ} : Denotation (Fin n) where
-  denote := fun e => do
+instance {n : ℕ} : Denotation q(Fin $n) (Fin n) where
+  denote' := fun e => do
     let some i' := ←@Qq.finQVal q($n) (←whnf e) | throwError m! "error in denotationFin₁: {e}"
     let some i := n.toFin i' | throwError m! "error in denotationFin₂: {i'}"
     return i
-  toExpr := fun i : Fin n => q($i)
+  toExpr' := fun i : Fin n => q($i)
 
-instance : Denotation String where
-  denote := fun e => do
+instance : Denotation q(String) String where
+  denote' := fun e => do
     let some s := Lean.Expr.stringLit? (←whnf e) | throwError m!"error in DenotationString : {e}"
     return s
-  toExpr := fun s : String => q($s)
+  toExpr' := fun s : String => q($s)
+
+instance list {σ : Q(Type*)} {α : Type} [Denotation σ α] : Denotation q(List $σ) (List α) where
+  denote' := fun e => do (← ofQList e).mapM (denote σ)
+  toExpr' := fun l => toQList (l.map toExpr')
+
+abbrev denoteₗ {σ : Q(Type*)} {α} (d : Denotation σ α) : Q(List $σ) → MetaM (List α) := denote' (self := list)
+
+abbrev toExprₗ {σ : Q(Type*)} {α} (d : Denotation σ α) : List α → Q(List $σ) := toExpr' (self := list)
+
+def memList? {σ : Q(Type*)} (d : Denotation σ α) (a : α) (l : List α) :
+  MetaM $ Option Q($(toExpr σ a) ∈ $(toExprₗ d l)) := memQList? (toExpr σ a) (l.map toExpr')
+
+local elab "dbgDList" : term => do
+  let xExpr : Q(List ℕ) := q([0,1 + 8,2 + 8,3,4])
+  let x : List ℕ ← denote q(List ℕ) xExpr
+  logInfo m! "x: {x}"
+
+  let y : List ℕ := [99, 2, 3]
+  let yExpr := toExpr q(List ℕ) y
+  let y : List ℕ ← denote q(List ℕ) yExpr
+  let some mem ← memList? nat 2 y | throwError "xxx"
+  logInfo m! "y: {mem}"
+  return yExpr
+
+#eval dbgDList
+
+variable {σ τ : Q(Type*)} {α β : Type}
+  [Denotation σ α] [Denotation τ β]
+
+protected def isDefEq (a₁ a₂ : α) : MetaM Bool :=
+  Lean.Meta.isDefEq (toExpr σ a₁) (toExpr σ a₂)
+
+variable (σ)
+
+structure DEq (a₁ a₂ : α) where
+  expr : Q($(toExpr σ a₁) = $(toExpr σ a₂))
+
+local notation:25 a₁ " ≡[" σ:25 "] " a₂:0 => DEq σ a₁ a₂
+
+variable {σ}
+
+structure DEqFun (f : Q($σ → $τ)) (a : α) (b : β) where
+  expr : Q($f $(toExpr σ a) = $(toExpr τ b))
+
+local notation:25 f "⟨" p₁:25 "⟩ ≡ " p₂:0 => DEqFun f p₁ p₂
+
+namespace DEq
+
+@[refl] protected def refl (a : α) : a ≡[σ] a := .mk q(rfl)
+
+@[symm] protected def symm {a₁ a₂ : α} (h : a₁ ≡[σ] a₂) : a₂ ≡[σ] a₁ :=
+  .mk q(Eq.symm $h.expr)
+
+@[trans] protected def trans {a₁ a₂ a₃ : α} (h₁ : a₁ ≡[σ] a₂) (h₂ : a₂ ≡[σ] a₃) : a₁ ≡[σ] a₃ :=
+  .mk q(Eq.trans $h₁.expr $h₂.expr)
+
+end DEq
 
 end Denotation
