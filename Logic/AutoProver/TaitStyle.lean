@@ -164,10 +164,6 @@ open Denotation
 
 variable {F : Q(Type u)} {ls : Q(LogicSymbol $F)} {os : Q(OneSided.{u, v} $F)} (G : List (Lit F))
 
-abbrev DEqFun {F : Q(Type*)} (ls : outParam (Q(LogicSymbol $F))) (f : Q($F → $F)) (p q : Lit F) :=
-  letI := Lit.denotation F ls
-  Denotation.DEqFun f p q
-
 def DEq {F : Q(Type*)} : Lit F → Lit F → MetaM Bool
   | Formula.atom e,  Formula.atom e'  => Lean.Meta.isDefEq e e'
   | Formula.natom e, Formula.natom e' => Lean.Meta.isDefEq e e'
@@ -193,7 +189,7 @@ def verum : DerivationQ ls os (⊤ :: G) := q(OneSided.verum _)
 
 def emOfEq (dm : Q(DeMorgan $F)) {p : Lit F} (G) : MetaM (DerivationQ ls os (p :: G)) :=
   letI := Lit.denotation F ls
-  do let some h ← Denotation.memList? (Lit.denotation F ls) (~p) G | throwError m! "failed to prove {~p} ∈ {G}"
+  do let some h ← Denotation.memList? (Lit.denotation F ls) (~p) G | throwError m! "failed to derive {~p} ∈ {G}"
      let e : Q(~$(toExpr F p) = $(toExpr F $ ~p)) := q($(Lit.negToExprEqToExprNeg F ls dm p))
      return q(OneSided.emOfEq $e $h)
 
@@ -209,9 +205,9 @@ def rAnd {p q : Lit F} (dp : DerivationQ ls os (G ++ [p])) (dq : DerivationQ ls 
   let xq : Q(OneSided.Derivation ($(Denotation.toExprₗ (Lit.denotation F ls) G) ++ [$(toExpr F q)])) := dq
   q(OneSided.rAnd $xp $xq)
 
-def prove {F : Q(Type u)} (ls : Q(LogicSymbol $F)) (dm : Q(DeMorgan $F)) (os : Q(OneSided.{u, v} $F)) :
+def derive {F : Q(Type u)} (ls : Q(LogicSymbol $F)) (dm : Q(DeMorgan $F)) (os : Q(OneSided.{u, v} $F)) :
     ℕ → (G : List (Lit F)) → MetaM (DerivationQ ls os G)
-  | 0,     _      => throwError "failed!"
+  | 0,     G      => throwError f!"failed! {G}"
   | _,     []     => throwError "empty goal"
   | s + 1, p :: G => do
     -- proof search
@@ -221,23 +217,107 @@ def prove {F : Q(Type u)} (ls : Q(LogicSymbol $F)) (dm : Q(DeMorgan $F)) (os : Q
     match p with
     | ⊤               => pure $ verum G
     | ⊥               => do
-      let d ← prove ls dm os s G
+      let d ← derive ls dm os s G
       return tail G d
     | p ⋎ q           => do
-      let d ← prove ls dm os s (G ++ [p, q])
+      let d ← derive ls dm os s (G ++ [p, q])
       return rOr G d
     | p ⋏ q           => do
-      let dp ← prove ls dm os s (G ++ [p])
-      let dq ← prove ls dm os s (G ++ [q])
+      let dp ← derive ls dm os s (G ++ [p])
+      let dq ← derive ls dm os s (G ++ [q])
       return rAnd G dp dq
     | Formula.atom a  => do
-      let d ← prove ls dm os s (G ++ [Formula.atom a])
+      let d ← derive ls dm os s (G ++ [Formula.atom a])
       return rotate G d
     | Formula.natom a => do
-      let d ← prove ls dm os s (G ++ [Formula.natom a])
+      let d ← derive ls dm os s (G ++ [Formula.natom a])
       return rotate G d
 
 end DerivationQ
+
+open Lit
+
+def prove {F : Q(Type u)}
+    (ls : Q(LogicSymbol $F)) (dm : Q(DeMorgan $F))
+    (sys : Q(System $F)) (_ : Q(LawfulOneSided.{u, v} $F))
+    (s : ℕ) (T : Q(Set $F)) (p : Q($F)) : MetaM Q($T ⊢ $p) :=
+  letI := Litform.Meta.denotation F ls; do
+  let lf : Litform.Meta.Lit F ← Denotation.denote F p
+  let l := ofLitform F lf
+  let p' := Denotation.toExpr F (toLitform F l)
+  let eq : Q($p = $p') := (toLitformOfLitform F ls dm lf).expr
+  let d' : Q(⊢ᴸ [$p']) ← DerivationQ.derive ls dm q(LawfulOneSided.toOneSided) s [l]
+  let b : Q($T ⊢ $p) := q(LawfulOneSided.toProof (Eq.symm $eq ▸ $d') $T)
+  return b
+
+elab "tryProve" n:(num)? : tactic => do
+  let s : ℕ :=
+    match n with
+    | some n => n.getNat
+    | none   => 16
+  let goalType ← Elab.Tactic.getMainTarget
+  let some ⟨.succ u, ty⟩ ← checkSortQ' goalType | throwError "error: not a type"
+  let ~q(@HasTurnstile.turnstile.{u} $F _ $ss $T $p) := ty | throwError "error: not a type 2"
+  let .some instLS ← trySynthInstanceQ (q(LogicSymbol.{u} $F) : Q(Type u))
+    | throwError m! "error: failed to find instance LogicSymbol {F}"
+  let .some instDM ← trySynthInstanceQ q(DeMorgan $F)
+    | throwError m! "error: failed to find instance DeMorgan {F}"
+  let .some instSys ← trySynthInstanceQ q(System $F)
+    | throwError m! "error: failed to find instance System {F}"
+  let .some instLOS ← trySynthInstanceQ q(LawfulOneSided.{u, u} $F)
+    | throwError m! "error: failed to find instance LawfulOneSided {F}"
+  let b ← prove instLS instDM instSys instLOS s T p
+  Lean.Elab.Tactic.closeMainGoal b
+
+def prove! {F : Q(Type u)}
+    (ls : Q(LogicSymbol $F)) (dm : Q(DeMorgan $F))
+    (sys : Q(System $F)) (_ : Q(LawfulOneSided.{u, v} $F))
+    (s : ℕ) (T : Q(Set $F)) (p : Q($F)) : MetaM Q($T ⊢! $p) :=
+  letI := Litform.Meta.denotation F ls; do
+  let lf : Litform.Meta.Lit F ← Denotation.denote F p
+  let l := ofLitform F lf
+  let p' := Denotation.toExpr F (toLitform F l)
+  let eq : Q($p = $p') := (toLitformOfLitform F ls dm lf).expr
+  let d' : Q(⊢ᴸ [$p']) ← DerivationQ.derive ls dm q(LawfulOneSided.toOneSided) s [l]
+  let b : Q($T ⊢! $p) := q(⟨LawfulOneSided.toProof (Eq.symm $eq ▸ $d') $T⟩)
+  return b
+
+#check @System.Provable
+
+elab "try_prove" n:(num)? : tactic => do
+  let s : ℕ :=
+    match n with
+    | some n => n.getNat
+    | none   => 16
+  let goalType ← Elab.Tactic.getMainTarget
+  let ty ← inferPropQ goalType
+  let ~q(@System.Provable $F $j $jj $T $p) := ty | throwError "error: not a type 2"
+  let .some instLS ← trySynthInstanceQ (q(LogicSymbol $F) : Q(Type u_2))
+    | throwError m! "error: failed to find instance LogicSymbol {F}"
+  let .some instDM ← trySynthInstanceQ q(DeMorgan $F)
+    | throwError m! "error: failed to find instance DeMorgan {F}"
+  let .some instSys ← trySynthInstanceQ q(System $F)
+    | throwError m! "error: failed to find instance System {F}"
+  let .some instLOS ← trySynthInstanceQ q(LawfulOneSided.{u_2,u_2} $F)
+    | throwError m! "error: failed to find instance LawfulOneSided {F}"
+  let b ← prove! instLS instDM instSys instLOS s T p
+  Lean.Elab.Tactic.closeMainGoal b
+
+section test
+
+variable (T : Theory ℕ) (p : Formula ℕ)
+
+example : T ⊢ p ⟶ p := by tryProve
+
+example : T ⊢ p ⟶ p ⋎ q := by tryProve
+
+example : T ⊢ q ⋎ p ⟷ p ⋎ q := by tryProve 5
+
+example : T ⊢! q ⋎ p ⋎ r ⟷ r ⋎ p ⋎ q := by try_prove
+
+example : T ⊢! ((p ⟶ q) ⟶ p) ⟶ p := by try_prove
+
+end test
 
 end TaitStyle
 

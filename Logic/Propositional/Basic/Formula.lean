@@ -85,6 +85,14 @@ by simp[Wedge.wedge]
 @[simp] lemma or_inj (p₁ q₁ p₂ q₂ : Formula α) : p₁ ⋎ p₂ = q₁ ⋎ q₂ ↔ p₁ = q₁ ∧ p₂ = q₂ :=
 by simp[Vee.vee]
 
+instance : DeMorgan (Formula α) where
+  verum := rfl
+  falsum := rfl
+  and := by simp
+  or := by simp
+  imply := by simp[imp_eq]
+  neg := by simp
+
 def complexity : Formula α → ℕ
 | ⊤       => 0
 | ⊥       => 0

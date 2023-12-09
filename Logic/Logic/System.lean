@@ -186,7 +186,7 @@ namespace LawfulOneSided
 
 variable {F : Type*} [LogicSymbol F] [System F] [LawfulOneSided F]
 
-lemma toProof {p : F} (b : ⊢ᴸ [p]) (T : Set F) : T ⊢ p :=
+def toProof {p : F} (b : ⊢ᴸ [p]) (T : Set F) : T ⊢ p :=
   System.weakening (toProofEmpty b) (Set.empty_subset T)
 
 end LawfulOneSided

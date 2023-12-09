@@ -66,6 +66,13 @@ protected def cast (d : ⊢ᴾᶜ[P] Δ) (e : Δ = Γ) : ⊢ᴾᶜ[P] Γ := cast
 @[simp] lemma length_cast (d : ⊢ᴾᶜ[P] Δ) (e : Δ = Γ) : (d.cast e).length = d.length := by
   rcases e with rfl; simp[DerivationCR.cast]
 
+def cutWeakening {P Q : Formula α → Prop} (h : ∀ p, P p → Q p) : ∀ {Δ}, ⊢ᴾᶜ[P] Δ → ⊢ᴾᶜ[Q] Δ
+  | _, axL Δ a hpos hneg  => axL Δ a hpos hneg
+  | _, verum Δ h            => verum Δ h
+  | _, and Δ p q dp dq      => and Δ p q (dp.cutWeakening h) (dq.cutWeakening h)
+  | _, or Δ p q d           => or Δ p q (d.cutWeakening h)
+  | _, cut Δ₁ Δ₂ p hp d₁ d₂ => cut Δ₁ Δ₂ p (h p hp) (d₁.cutWeakening h) (d₂.cutWeakening h)
+
 def weakening : ∀ {Δ}, ⊢ᴾᶜ[P] Δ → ∀ {Γ : Sequent α}, Δ ⊆ Γ → ⊢ᴾᶜ[P] Γ
   | _, axL Δ a hrel hnrel, Γ,   h => axL Γ a (h hrel) (h hnrel)
   | _, verum Δ htop,         Γ, h => verum Γ (h htop)
@@ -134,6 +141,34 @@ instance Proof : System (Formula α) where
     { leftHand := b.leftHand,
       hleftHand := Set.Subset.trans b.hleftHand (Set.image_subset _ h),
       derivation := b.derivation }
+
+def DerivationCR.toDerivationCRWA
+  {P : Formula α → Prop} {Δ : Sequent α} (b : ⊢ᴾᶜ[P] Δ) (T : Theory α) : T ⊢ᴾᶜ[P] Δ where
+  leftHand := ∅
+  hleftHand := by simp
+  derivation := b.cast (by simp)
+
+def DerivationCRWA.toDerivationCWA {T : Theory α} {Δ} (b : T ⊢ᴾᶜ[P] Δ) : T ⊢' Δ where
+  leftHand := b.leftHand
+  hleftHand := b.hleftHand
+  derivation := b.derivation.cutWeakening (by simp)
+
+def DerivationCWA.toDerivationCWA {T : Theory α} {p : Formula α} (b : T ⊢ p) : T ⊢' {p} := b
+
+def DerivationCRWA.toProof {T : Theory α} {p : Formula α} (b : T ⊢ᴾᶜ[P] {p}) : T ⊢ p :=
+  b.toDerivationCWA
+
+instance : OneSided (Formula α) where
+  Derivation := fun Δ : List (Formula α) => ⊢ᴾᵀ (Δ.toFinset : Sequent α)
+  verum := fun Δ => DerivationCR.verum _ (by simp)
+  and := fun dp dq => by simpa using DerivationCR.and _ _ _ (by simpa using dp) (by simpa using dq)
+  or := fun d => by simpa using DerivationCR.or _ _ _ (by simpa using d)
+  wk := fun d ss => DerivationCR.weakening d (List.toFinset_mono ss)
+  em := fun {p} d hp => DerivationCR.em (p := p) (by simp) (by simp[hp])
+
+instance : LawfulOneSided (Formula α) where
+  toProofEmpty := fun b =>
+    DerivationCRWA.toProof (DerivationCR.toDerivationCRWA b ∅)
 
 end Propositional
 

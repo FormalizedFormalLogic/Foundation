@@ -44,6 +44,8 @@ def inferSortQ' (e : Expr) : MetaM ((u : Level) × (α : Q(Sort $u)) × Q($α)) 
     | throwError "not a type{indentExpr α}"
   pure ⟨u, α, e⟩
 
+
+
 -- given an Expr e representing type α : Sort u, returns u and q(α)
 def checkSortQ' (e : Expr) : MetaM (Option ((u : Level) × Q(Sort $u))) := do
   if let ⟨.succ u, α, e⟩ ← inferSortQ' e then
@@ -51,6 +53,10 @@ def checkSortQ' (e : Expr) : MetaM (Option ((u : Level) × Q(Sort $u))) := do
       return some ⟨u, e⟩
     else return none
   else return none
+
+-- TODO: fix
+def inferPropQ (e : Expr) : MetaM Q(Prop) := do
+  return e
 
 def inferSortQOfUniverse' (e : Expr) (ty : Q(Sort $u)) : MetaM (Option Q($ty)) := do
   if let ⟨.succ _, α, e⟩ ← inferSortQ' e then
