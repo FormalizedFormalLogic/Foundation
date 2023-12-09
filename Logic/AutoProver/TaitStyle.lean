@@ -1,90 +1,14 @@
 import Logic.Propositional.Basic.Calculus
+import Logic.AutoProver.Litform
 import Logic.Vorspiel.Meta
 
 open Qq Lean Elab Meta Tactic
 
 namespace LO
 
-inductive Litform (α : Type*) : Type _
-  | atom (a : α)  : Litform α
-  | verum         : Litform α
-  | falsum        : Litform α
-  | and           : Litform α → Litform α → Litform α
-  | or            : Litform α → Litform α → Litform α
-  | neg           : Litform α → Litform α
-  | imply         : Litform α → Litform α → Litform α
-
-namespace Litform
-
-instance : LogicSymbol (Litform α) where
-  top   := Litform.verum
-  bot   := Litform.falsum
-  wedge := Litform.and
-  vee   := Litform.or
-  tilde := Litform.neg
-  arrow := Litform.imply
-
-namespace Meta
-
-variable (F : Q(Type*)) (ls : Q(LogicSymbol $F))
-
-abbrev Lit (F : Q(Type*)) := Litform Q($F)
-
-abbrev toExpr : Lit F → Q($F)
-  | atom e  => q($e)
-  | ⊤       => q(⊤)
-  | ⊥       => q(⊥)
-  | p ⋏ q   => q($(toExpr p) ⋏ $(toExpr q))
-  | p ⋎ q   => q($(toExpr p) ⋎ $(toExpr q))
-  | ~p      => q(~$(toExpr p))
-  | p ⟶ q  => q($(toExpr p) ⟶ $(toExpr q))
-
-partial def denote : Q($F) → MetaM (Lit F)
-  | ~q(⊤)        => return ⊤
-  | ~q(⊥)        => return ⊥
-  | ~q($p ⋏ $q)  => return (←denote p) ⋏ (←denote q)
-  | ~q($p ⋎ $q)  => return (←denote p) ⋎ (←denote q)
-  | ~q($p ⟶ $q) => return (←denote p) ⟶ (←denote q)
-  | ~q($p ⟷ $q)  => return (←denote p) ⟷ (←denote q)
-  | ~q(~$p)      => return ~(←denote p)
-  | ~q($e)       => return atom e
-
-instance denotation : Denotation q($F) (Lit F) where
-  denote' := denote F ls
-  toExpr' := toExpr F ls
-
-abbrev DEq (p q : Lit F) :=
-  letI := denotation F ls
-  Denotation.DEq F p q
-
-end Meta
-
-end Litform
-
-class DeMorgan (F : Type*) [LogicSymbol F] where
-  verum           : ~(⊤ : F) = ⊥
-  falsum          : ~(⊥ : F) = ⊤
-  imply (p q : F) : (p ⟶ q) = ~p ⋎ q
-  and (p q : F)   : ~(p ⋏ q) = ~p ⋎ ~q
-  or (p q : F)    : ~(p ⋎ q) = ~p ⋏ ~q
-  neg (p : F)     : ~~p = p
-
-class OneSided (F : Type*) [LogicSymbol F] where
-  Derivation : List F → Type
-  verum (Δ : List F) : Derivation (⊤ :: Δ)
-  and {p q : F} {Δ : List F} : Derivation (p :: Δ) → Derivation (q :: Δ) → Derivation (p ⋏ q :: Δ)
-  or {p q : F} {Δ : List F} : Derivation (p :: q :: Δ) → Derivation (p ⋎ q :: Δ)
-  wk {Δ Γ : List F} : Derivation Δ → Δ ⊆ Γ → Derivation Γ
-  em {p} {Δ : List F} (hp : ~p ∈ Δ) : Derivation (p :: Δ)
-
-class RawfulOneSided (F : Type*) [LogicSymbol F] [System F] extends OneSided F where
-  toProof (T : Set F) (p : F) : Derivation [p] → T ⊢ p
-
 namespace OneSided
 
 variable {F : Type*} [LogicSymbol F] [OneSided F]
-
-scoped prefix:45 "⊢ᴸ " => Derivation
 
 variable {Δ : List F} {p q r : F}
 
@@ -232,13 +156,13 @@ def toLitformOfLitform : (p : Litform.Meta.Lit F) → p ≡ᴸ (toLitform F (ofL
 end Lit
 
 set_option linter.unusedVariables false in
-abbrev DerivationQ {F : Q(Type*)} (ls : Q(LogicSymbol $F)) (os : Q(OneSided $F)) (G : List (Lit F)) :=
+abbrev DerivationQ {F : Q(Type u)} (ls : Q(LogicSymbol $F)) (os : Q(OneSided.{u,v} $F)) (G : List (Lit F)) :=
   Q(OneSided.Derivation $(Denotation.toExprₗ (Lit.denotation F ls) G))
 
 namespace DerivationQ
 open Denotation
 
-variable {F : Q(Type*)} {ls : Q(LogicSymbol $F)} {os : Q(OneSided $F)} (G : List (Lit F))
+variable {F : Q(Type u)} {ls : Q(LogicSymbol $F)} {os : Q(OneSided.{u, v} $F)} (G : List (Lit F))
 
 abbrev DEqFun {F : Q(Type*)} (ls : outParam (Q(LogicSymbol $F))) (f : Q($F → $F)) (p q : Lit F) :=
   letI := Lit.denotation F ls
@@ -285,7 +209,7 @@ def rAnd {p q : Lit F} (dp : DerivationQ ls os (G ++ [p])) (dq : DerivationQ ls 
   let xq : Q(OneSided.Derivation ($(Denotation.toExprₗ (Lit.denotation F ls) G) ++ [$(toExpr F q)])) := dq
   q(OneSided.rAnd $xp $xq)
 
-def prove {F : Q(Type*)} (ls : Q(LogicSymbol $F)) (dm : Q(DeMorgan $F)) (os : Q(OneSided $F)) :
+def prove {F : Q(Type u)} (ls : Q(LogicSymbol $F)) (dm : Q(DeMorgan $F)) (os : Q(OneSided.{u, v} $F)) :
     ℕ → (G : List (Lit F)) → MetaM (DerivationQ ls os G)
   | 0,     _      => throwError "failed!"
   | _,     []     => throwError "empty goal"

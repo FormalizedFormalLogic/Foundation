@@ -169,4 +169,26 @@ lemma ofSystemSubtheory (T₁ T₂ : Set F) [System.Subtheory T₁ T₂] : Seman
 
 end Semantics
 
+class OneSided (F : Type*) [LogicSymbol F] where
+  Derivation : List F → Type*
+  verum (Δ : List F) : Derivation (⊤ :: Δ)
+  and {p q : F} {Δ : List F} : Derivation (p :: Δ) → Derivation (q :: Δ) → Derivation (p ⋏ q :: Δ)
+  or {p q : F} {Δ : List F} : Derivation (p :: q :: Δ) → Derivation (p ⋎ q :: Δ)
+  wk {Δ Γ : List F} : Derivation Δ → Δ ⊆ Γ → Derivation Γ
+  em {p} {Δ : List F} (hp : ~p ∈ Δ) : Derivation (p :: Δ)
+
+scoped prefix:45 "⊢ᴸ " => OneSided.Derivation
+
+class LawfulOneSided (F : Type*) [LogicSymbol F] [System F] extends OneSided F where
+  toProofEmpty {p : F} : ⊢ᴸ [p] → ∅ ⊢ p
+
+namespace LawfulOneSided
+
+variable {F : Type*} [LogicSymbol F] [System F] [LawfulOneSided F]
+
+lemma toProof {p : F} (b : ⊢ᴸ [p]) (T : Set F) : T ⊢ p :=
+  System.weakening (toProofEmpty b) (Set.empty_subset T)
+
+end LawfulOneSided
+
 end LO

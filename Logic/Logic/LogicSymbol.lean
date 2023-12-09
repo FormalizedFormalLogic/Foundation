@@ -149,6 +149,14 @@ prefix:45 "⊩ " => HasVdash.vdash
 
 end logicNotation
 
+class DeMorgan (F : Type*) [LogicSymbol F] where
+  verum           : ~(⊤ : F) = ⊥
+  falsum          : ~(⊥ : F) = ⊤
+  imply (p q : F) : (p ⟶ q) = ~p ⋎ q
+  and (p q : F)   : ~(p ⋏ q) = ~p ⋎ ~q
+  or (p q : F)    : ~(p ⋎ q) = ~p ⋏ ~q
+  neg (p : F)     : ~~p = p
+
 namespace LogicSymbol
 
 section
