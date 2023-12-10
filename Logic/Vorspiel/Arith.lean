@@ -1,5 +1,5 @@
 import Logic.Vorspiel.Vorspiel
-import Logic.Vorspiel.Godel
+import Logic.Vorspiel.GodelBetaFunction
 import Mathlib.Computability.Halting
 import Mathlib.Data.Nat.ModEq
 import Mathlib.Data.List.FinRange
@@ -421,7 +421,7 @@ lemma ball {p : Vector ℕ n → ℕ → ℕ} (hp : @Arith₁ (n + 1) (fun v => 
     by_cases H : ∀ m < v.get i, 0 < p v m
     · exact ⟨v.get i,
         ⟨by symm; simp, by intro m hm; symm; simp[hm]; exact Nat.not_eq_zero_of_lt (H m hm)⟩,
-        by { simp[isEqNat]; symm; exact ball_pos_iff_eq_one.mpr (by simpa) }⟩
+c:\Users\HP\mathlib4-1\Mathlib\Logic\Godel\GodelBetaFunction.leanc:\Users\HP\mathlib4-1\Mathlib\Logic\Godel\GodelBetaFunction.lean        by { simp[isEqNat]; symm; exact ball_pos_iff_eq_one.mpr (by simpa) }⟩
     · have : ∃ x < Vector.get v i, p v x = 0 ∧ ∀ y < x, p v y ≠ 0 := by
         simp at H; rcases least_number _ H with ⟨x, hx, hxl⟩
         exact ⟨x, hx.1, hx.2, by
