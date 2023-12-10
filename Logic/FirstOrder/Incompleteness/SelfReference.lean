@@ -1,7 +1,7 @@
 import Logic.Logic.HilbertStyle
 import Logic.FirstOrder.Arith.Representation
 import Logic.FirstOrder.Computability.Calculus
-import Logic.AutoProver.ProofSearch
+import Logic.AutoProver.Prover
 
 namespace LO
 
