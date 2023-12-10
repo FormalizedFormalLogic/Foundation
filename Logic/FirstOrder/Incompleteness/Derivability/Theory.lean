@@ -10,7 +10,7 @@ open Subformula
 
 variable
   {L : Language.{u}}
-  [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq (L.rel k)] [System (Sentence L)]
+  [∀ k, DecidableEq (L.Func k)] [∀ k, DecidableEq (L.Rel k)] [System (Sentence L)]
   (T : Theory L)
 
 class Complete where
