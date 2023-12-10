@@ -4,6 +4,8 @@ namespace LO
 
 namespace FirstOrder
 
+set_option linter.unusedVariables false
+
 variable {L : Language.{u}} {L₁ : Language.{u}} {L₂ : Language.{u}}
 
 namespace Language

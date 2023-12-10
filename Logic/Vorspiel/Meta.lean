@@ -6,6 +6,8 @@ import Mathlib.Util.AtomM
 import Logic.Vorspiel.Vorspiel
 import Mathlib.Data.Fin.Fin2
 
+set_option linter.unusedVariables false
+
 open Qq Lean Elab Meta Tactic
 
 universe u v
