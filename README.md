@@ -5,6 +5,7 @@ Formalizing Logic in Lean4
 - **Logic**
   - **Vorspiel**: Supplementary definitions and theorems for Mathlib
   - **Logic**
+  - **AutoProver**: Automated theorem proving based on proof search
   - **Propositional**: Propositional logic
     - **Basic**
   - **ManySorted**: Many-sorted logic
@@ -36,19 +37,6 @@ The key results are summarised in `Logic/Summary.lean`.
 - Cut-elimination
 ```lean
 noncomputable example {Δ : Sequent L} : ⊢ᶜ Δ → ⊢ᵀ Δ := DerivationCR.hauptsatz
-```
-
-- Compactness theorem
-```lean
-example (T : Theory L) :
-    Semantics.Satisfiableₛ T ↔
-    ∀ T' : Finset (Sentence L), ↑T' ⊆ T → Semantics.Satisfiableₛ (T' : Theory L) :=
-  FirstOrder.compactness
-```
-
-- Soundness theorem
-```lean
-example {σ : Sentence L} : T ⊢ σ → T ⊨ σ := FirstOrder.soundness
 ```
 
 - Completeness theorem

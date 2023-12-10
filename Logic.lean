@@ -7,6 +7,11 @@ import Logic.Logic.Semantics
 import Logic.Logic.System
 import Logic.Logic.HilbertStyle
 
+-- AutoProver
+
+import Logic.AutoProver.Litform
+import Logic.AutoProver.Prover
+
 -- Propositional
 
 import Logic.Propositional.Basic.Formula
