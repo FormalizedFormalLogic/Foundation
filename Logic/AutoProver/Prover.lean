@@ -1,4 +1,3 @@
-import Logic.Propositional.Basic.Calculus
 import Logic.AutoProver.Litform
 import Logic.Vorspiel.Meta
 
@@ -317,32 +316,6 @@ elab "prover" n:(num)? seq:(termSeq)? : tactic => do
   let ⟨L₀, H₀⟩ ← proverL₀ instLS instSys T seq
   let b ← proveL₀! instLS instSys instLGz s T p L₀ H₀
   Lean.Elab.Tactic.closeMainGoal b
-
-section test
-
-open Propositional Formula
-
-variable (T : Theory ℕ)
-
-example : T ⊢! p ⋎ q ⋎ r ⋎ s ⟷ r ⋎ p ⋎ s ⋎ q ⋎ p := by tautology
-
-example : T ⊢! p ⟷ p ⋎ p ⋎ p ⋎ p ⋎ p ⋎ p ⋎ p := by tautology
-
-example : T ⊢! ((p ⟶ q) ⟶ p) ⟶ p := by tautology
-
-example : T ⊢! (r ⟶ p) ⟶ ((p ⟶ q) ⟶ r) ⟶ p := by tautology
-
-example : T ⊢! (~p ⟶ p) ⟶ p := by tautology
-
-example : T ⊢! (p ⟶ q) ⋎ (q ⟶ p) := by tautology
-
-example : T ⊢! (p ⟷ q) ⟷ (~q ⟷ ~p) := by tautology
-
-example (h : T ⊢! p ⟷ q) : T ⊢! ~q ⟷ ~p := by prover [h]
-
-example (h : T ⊢! p ⟷ q) (hp : T ⊢! p) : T ⊢! q := by prover [h, hp]
-
-end test
 
 end AutoProver
 

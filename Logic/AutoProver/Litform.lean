@@ -1,4 +1,4 @@
-import Logic.Propositional.Basic.Calculus
+import Logic.Logic.System
 import Logic.Vorspiel.Meta
 
 open Qq Lean Elab Meta Tactic
