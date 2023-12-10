@@ -19,13 +19,15 @@ class Complete where
 class Incomplete where
   incomplete : ¬System.Complete T
 
+lemma false_of_complete_incomplete [c : Complete T] [i: Incomplete T] : False := by
+  exact i.incomplete c.complete
+
 class Consistent where
   consistent : System.Consistent T
 
 class Inconsistent where
   inconsistent : ¬System.Consistent T
 
-@[simp]
 lemma false_of_consistent_inconsistent [c : Consistent T] [i: Inconsistent T] : False := by
   exact i.inconsistent c.consistent
 

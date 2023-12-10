@@ -67,14 +67,14 @@ section PrCalculus
 
 open Subformula FirstOrder.Theory Derivability1 Derivability2 Derivability3
 
-variable {T₀ T : Theory L} [Subtheory T₀ T] [HasProvablePred T M]
+variable {T₀ T : Theory L} [Subtheory T₀ T] {M} [Structure L M] [HasProvablePred T M]
 variable [hD1 : Derivability1 T₀ T M] [hD2 : Derivability2 T₀ T M] [hD3 : Derivability3 T₀ T M]
 
 lemma Derivability1.D1' {σ : Sentence L} : T ⊢! σ → T ⊢! ((Pr T M)/[⸢σ⸣]) := by intro h; exact weakening $ hD1.D1 h;
 
 lemma Derivability2.D2' {σ π : Sentence L} : T ⊢! (Pr T M)/[⸢σ ⟶ π⸣] ⟶ ((Pr T M)/[⸢σ⸣] ⟶ (Pr T M)/[⸢π⸣]) := weakening hD2.D2
 
-lemma Derivability2.D2_iff [Subtheory T₀ T] {σ π : Sentence L}
+lemma Derivability2.D2_iff {σ π : Sentence L}
   : T₀ ⊢! ((Pr T M)/[⸢σ ⟷ π⸣]) ⟶ ((Pr T M)/[⸢σ⸣] ⟷ (Pr T M)/[⸢π⸣]) := by
   have a : T₀ ⊢! (Pr T M)/[⸢σ ⟶ π⸣] ⟶ (Pr T M)/[⸢σ⸣] ⟶ (Pr T M)/[⸢π⸣] := hD2.D2;
   have b : T₀ ⊢! (Pr T M)/[⸢π ⟶ σ⸣] ⟶ (Pr T M)/[⸢π⸣] ⟶ (Pr T M)/[⸢σ⸣] := hD2.D2;
@@ -119,22 +119,19 @@ end PrCalculus
 
 section ConsistencyFormalization
 
-variable (T : Theory L) [HasProvablePred T M]
-
 /-- Löb style consistency formalization -/
-@[simp]
-def LConsistenncy : Sentence L := ~(Pr T M)/[⸢⊥⸣]
+@[simp] def LConsistency : Sentence L := ~(Pr T M)/[⸢⊥⸣]
 
-notation "ConL[" T "]" => LConsistenncy T
+notation "Con[" T "," M "]" => LConsistency T M
 
 end ConsistencyFormalization
 
 end HasProvablePred
 
-variable (P : ∀ (n : Fin 2), (Subsentence L n) → Prop)
+variable (hDef : ∀ {n : ℕ}, (Subsentence L n) → Prop)
 
 class Diagonizable where
-  diag (δ : Subsentence L 1) : (P 1 δ) → ∃ (σ : Sentence L), (P 0 σ) ∧ (T ⊢! σ ⟷ ([→ ⸢σ⸣].hom δ))
+  diag (δ : Subsentence L 1) : (hDef δ) → ∃ (σ : Sentence L), (hDef σ) ∧ (T ⊢! σ ⟷ δ/[⸢σ⸣])
 
 section FixedPoints
 
@@ -144,24 +141,24 @@ variable [Subtheory T₀ T] [HasProvablePred T M]
 
 def IsGoedelSentence (G : Sentence L) := T₀ ⊢! G ⟷ ~(Pr T M)/[⸢G⸣]
 
-variable [hdiag : Diagonizable T₀ P]
+variable [hdiag : Diagonizable T₀ hDef]
 
-lemma existsGoedelSentence (h : P 1 (~Pr T M)) -- 可証性述語の否定がΠ₁であることの抽象化
-  : ∃ (G : Sentence L), ((IsGoedelSentence T₀ T M G) ∧ (P 0 G)) := by
+lemma existsGoedelSentence (h : hDef (~Pr T M)) -- 可証性述語の否定がΠ₁であることの抽象化
+  : ∃ (G : Sentence L), (IsGoedelSentence T₀ T M G) ∧ (hDef G) := by
   have ⟨G, ⟨hH, hd⟩⟩ := hdiag.diag (~(Pr T M)) h;
   existsi G; simpa [IsGoedelSentence, hH, Rew.neg'] using hd;
 
 def IsHenkinSentence [Subtheory T₀ T] (H : Sentence L) := T₀ ⊢! H ⟷ (Pr T M)/[⸢H⸣]
 
-lemma existsHenkinSentence (h : P 1 (Pr T M)) -- 可証性述語がΣ₁であることの抽象化
-  : ∃ (H : Sentence L), (IsHenkinSentence T₀ T M H) ∧ (P 0 H) := by
+lemma existsHenkinSentence (h : hDef (Pr T M)) -- 可証性述語がΣ₁であることの抽象化
+  : ∃ (H : Sentence L), (IsHenkinSentence T₀ T M H) ∧ (hDef H) := by
   have ⟨H, ⟨hH, hd⟩⟩ := hdiag.diag (Pr T M) h;
   existsi H; simpa [IsHenkinSentence, hH] using hd;
 
 def IsKrieselSentence [Subtheory T₀ T] (K σ : Sentence L) := T₀ ⊢! K ⟷ ((Pr T M)/[⸢K⸣] ⟶ σ)
 
 lemma existsKreiselSentence (σ : Sentence L)
-  : ∃ (K : Sentence L), IsKrieselSentence T₀ T M K σ := by
+  : ∃ (K : Sentence L), (IsKrieselSentence T₀ T M K σ) := by
   have ⟨K, ⟨hH, hd⟩⟩ := hdiag.diag ((Pr T M)/[⸢σ⸣]) (by sorry);
   existsi K; simp [IsKrieselSentence, hH]; sorry;
 
