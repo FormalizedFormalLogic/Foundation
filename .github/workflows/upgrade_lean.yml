@@ -1,8 +1,8 @@
 on:
     schedule:
-      - cron: '0 2 * * *' # once a day at 2am UTC
+      - cron: '0 2 * * *'
 
-  jobs:
+jobs:
     upgrade_lean:
       runs-on: ubuntu-latest
       name: Bump Lean and dependency versions
