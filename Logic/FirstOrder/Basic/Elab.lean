@@ -139,12 +139,12 @@ def unexpandFuncArith : Unexpander
 
   | _                                             => throw ()
 
-#check Operator.numeral Language.oRing 99
-#check (ᵀ“1 + 8” : Subterm Language.oRing ℕ 8)
-#check (Subterm.func Language.Mul.mul (ᵀ“1” :> ᵀ“3” :> Matrix.vecEmpty) : Subterm Language.oRing ℕ 8)
-#check [→ &0, &5] ᵀ“3 * #3 + 9”
-#check Rew.shift ᵀ“(3 * #3 + 9)”
-#check ᵀ“(3 * #3 * x + y + z)”
+--#check Operator.numeral Language.oRing 99
+--#check (ᵀ“1 + 8” : Subterm Language.oRing ℕ 8)
+--#check (Subterm.func Language.Mul.mul (ᵀ“1” :> ᵀ“3” :> Matrix.vecEmpty) : Subterm Language.oRing ℕ 8)
+--#check [→ &0, &5] ᵀ“3 * #3 + 9”
+--#check Rew.shift ᵀ“(3 * #3 + 9)”
+--#check ᵀ“(3 * #3 * x + y + z)”
 
 end delab
 

@@ -104,8 +104,6 @@ elab "equalTest" : term => do
   logInfo m!"isStrongEq e₁ e₂: {b₃}"
   return q(0)
 
-#eval equalTest
-
 section List
 variable {α : Type u}
 
@@ -358,8 +356,6 @@ elab "dbgvectorQNth" : term => do
   logInfo m! "{eq}"
   return dbgr
 
-#eval dbgvectorQNth
-
 private lemma vecCons_assoc_eq {a b : α} {s : Fin n → α} (h : s <: b = t) :
     (a :> s) <: b = a :> t := by simp[←h, Matrix.vecCons_assoc]
 
@@ -382,8 +378,6 @@ elab "dbgVectorAppend" : term => do
   logInfo m! "{w}"
   logInfo m! "{eq}"
   return dbgr
-
-#eval dbgVectorAppend
 
 end Qq
 

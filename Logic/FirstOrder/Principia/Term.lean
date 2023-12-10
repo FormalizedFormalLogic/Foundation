@@ -369,8 +369,6 @@ local elab "dbgSubst" : term => do
   --logInfo m! "eq =def= {eq}"
   return dbgr
 
-#eval dbgSubst
-
 local elab "dbgFree" : term => do
   let L : Q(Language.{0}) := q(.oRing)
   let n : ℕ := 2

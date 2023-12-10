@@ -93,8 +93,6 @@ def unexpandVecCons : Unexpander
   | `($(_) $a ![$as,*]) => `(![$a, $as,*])
   | _                   => throw ()
 
-#check ![1, 2]
-
 end delab
 
 infixl:70 " <: " => vecConsLast
@@ -380,8 +378,6 @@ namespace String
 def vecToStr : ∀ {n}, (Fin n → String) → String
   | 0,     _ => ""
   | n + 1, s => if n = 0 then s 0 else s 0 ++ ", " ++ @vecToStr n (fun i => s (Fin.succ i))
-
-#eval vecToStr !["a", "b", "c", "d"]
 
 end String
 
