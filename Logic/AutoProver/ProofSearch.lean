@@ -229,11 +229,6 @@ def turnstile? (ty : Q(Prop)) : MetaM ((u : Level) × (F : Q(Type u)) × Q(Set $
   let ~q(@System.Provable $F $instLS $instSys $T $p) := ty | throwError "error: not a prop _ ⊢! _"
   return ⟨_, F, T, p⟩
 
-
-
-
-
-
 section
 
 open Litform.Meta Denotation
@@ -336,6 +331,8 @@ example : T ⊢! p ⟷ p ⋎ p ⋎ p ⋎ p ⋎ p ⋎ p ⋎ p := by tautology
 example : T ⊢! ((p ⟶ q) ⟶ p) ⟶ p := by tautology
 
 example : T ⊢! (r ⟶ p) ⟶ ((p ⟶ q) ⟶ r) ⟶ p := by tautology
+
+example : T ⊢! (~p ⟶ p) ⟶ p := by tautology
 
 example : T ⊢! (p ⟶ q) ⋎ (q ⟶ p) := by tautology
 

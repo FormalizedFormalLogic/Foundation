@@ -452,7 +452,7 @@ def DerivationCRWA.toProof {T : Theory L} {σ : Sentence L} (b : T ⊢ᶜ[P] {Re
 def DerivationCWA.toDerivationWA {T : Theory L} {σ : Sentence L} (b : T ⊢ σ) : T ⊢' {Rew.emb.hom σ} := b
 
 def DerivationCR.toDerivationCRWA
-  {P : SyntacticFormula L → Prop} {T : Theory L} {Δ : Sequent L} (b : ⊢ᶜ[P] Δ) : T ⊢ᶜ[P] Δ where
+  {P : SyntacticFormula L → Prop} (T : Theory L) {Δ : Sequent L} (b : ⊢ᶜ[P] Δ) : T ⊢ᶜ[P] Δ where
   leftHand := ∅
   hleftHand := by simp
   derivation := b.cast (by simp)
@@ -474,10 +474,10 @@ lemma compact {p} (b : T ⊢ᶜ[P] p) : b.kernel ⊢ᶜ[P] p where
   hleftHand := by simp[kernel, ←Set.image_comp]
   derivation := b.derivation
 
-def verum (h : ⊤ ∈ Δ) : T ⊢ᶜ[P] Δ := (DerivationCR.verum _ (by simp[h])).toDerivationCRWA
+def verum (h : ⊤ ∈ Δ) : T ⊢ᶜ[P] Δ := (DerivationCR.verum _ (by simp[h])).toDerivationCRWA T
 
 def axL {k} (r : L.Rel k) (v : Fin k → SyntacticTerm L) (h : rel r v ∈ Δ) (nh : nrel r v ∈ Δ) : T ⊢ᶜ[P] Δ :=
-  (DerivationCR.axL Δ r v h nh).toDerivationCRWA
+  (DerivationCR.axL Δ r v h nh).toDerivationCRWA T
 
 protected def and {p₁ p₂} (h : p₁ ⋏ p₂ ∈ Δ) (b₁ : T ⊢ᶜ[P] insert p₁ Δ) (b₂ : T ⊢ᶜ[P] insert p₂ Δ) :
     T ⊢ᶜ[P] Δ where
@@ -557,7 +557,7 @@ def byAxiom {σ} (hσ : σ ∈ T) (h : Rew.emb.hom σ ∈ Δ) : T ⊢ᶜ[P] Δ w
   hleftHand := by simp[hσ]
   derivation := DerivationCR.em (p := Rew.emb.hom σ) (by simp[h]) (by simp)
 
-protected def em {p} (hp : p ∈ Δ) (hn : ~p ∈ Δ) : T ⊢ᶜ[P] Δ := (DerivationCR.em hp hn).toDerivationCRWA
+protected def em {p} (hp : p ∈ Δ) (hn : ~p ∈ Δ) : T ⊢ᶜ[P] Δ := (DerivationCR.em hp hn).toDerivationCRWA T
 
 def and' {p₁ p₂} (b₁ : T ⊢ᶜ[P] insert p₁ Δ) (b₂ : T ⊢ᶜ[P] insert p₂ Δ) : T ⊢ᶜ[P] insert (p₁ ⋏ p₂) Δ :=
   let b₁' : T ⊢ᶜ[P] insert p₁ (insert (p₁ ⋏ p₂) Δ) := b₁.weakeningRight (by simp[Finset.Insert.comm p₁, Finset.subset_insert])
@@ -650,6 +650,41 @@ def System.lMap (Φ : L₁ →ᵥ L₂) {T : Theory L₁} {σ : Sentence L₁} (
 lemma inConsistent_lMap (Φ : L₁ →ᵥ L₂) {T : Theory L₁} :
     ¬System.Consistent T → ¬System.Consistent (Theory.lMap Φ T) := by
   simp[System.Consistent]; intro b; exact ⟨by simpa using System.lMap Φ b⟩
+
+instance : Gentzen (Sentence L) where
+  Derivation := fun Γ Δ => ⊢ᶜ ((Γ.map (~Rew.emb.hom ·)).toFinset ∪ (Δ.map Rew.emb.hom).toFinset)
+  verum := fun _ _ => DerivationCR.verum _ (by simp)
+  falsum := fun _ _ => DerivationCR.verum _ (by simp)
+  negLeft := fun b => b.cast (by simp)
+  negRight := fun b => b.cast (by simp)
+  andLeft := fun b => by simpa using DerivationCR.or _ _ _ (by simpa using b)
+  andRight := fun bp bq => by simpa using DerivationCR.and _ _ _ (by simpa using bp) (by simpa using bq)
+  orLeft := fun bp bq => by simpa using DerivationCR.and _ _ _ (by simpa using bp) (by simpa using bq)
+  orRight := fun b => by simpa using DerivationCR.or _ _ _ (by simpa using b)
+  implyLeft := fun bp bq => by simpa[Subformula.imp_eq] using DerivationCR.and _ _ _ (by simpa using bp) (by simpa using bq)
+  implyRight := fun b => by simpa[Subformula.imp_eq] using DerivationCR.or _ _ _ (b.cast $ by simp[Finset.Insert.comm])
+  wk := fun b hΓ hΔ => b.weakening
+    (Finset.union_subset_union
+      (by simpa[List.toFinset_map] using Finset.image_subset_image (List.toFinset_mono hΓ))
+      (List.toFinset_mono $ List.map_subset _ hΔ))
+  em := fun {p} _ _ hΓ hΔ =>
+    DerivationCR.em (p := Rew.emb.hom p)
+      (by simp[*]; exact Or.inr ⟨p, hΔ, rfl⟩)
+      (by simp[*]; exact Or.inl ⟨p, hΓ, rfl⟩)
+
+
+variable {T : Theory L} {Γ Δ : List (Sentence L)}
+
+def gentzen_trans (hΓ : ∀ σ ∈ Γ, T ⊢ σ) (d : Γ ⊢ᴳ Δ) : T ⊢' (Δ.map Rew.emb.hom).toFinset := by
+  induction' Γ with σ Γ ih generalizing Δ
+  · exact (d.toDerivationCRWA T).cast (by simp)
+  · have d' : Γ ⊢ᴳ ~σ :: Δ := d.cast (by simp)
+    have b₁ : T ⊢' insert (Rew.emb.hom σ) ∅  := hΓ σ (by simp)
+    have b₂ : T ⊢' insert (~Rew.emb.hom σ) (Δ.map Rew.emb.hom).toFinset := by simpa using ih (fun p hp => hΓ p (by simp[hp])) d'
+    exact (b₁.cCut b₂).cast (by simp)
+
+instance : LawfulGentzen (Sentence L) where
+  toProof₁ := fun d h => DerivationCRWA.toProof (by simpa using gentzen_trans h d)
 
 end FirstOrder
 

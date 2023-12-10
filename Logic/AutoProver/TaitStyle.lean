@@ -2,6 +2,8 @@ import Logic.Propositional.Basic.Calculus
 import Logic.AutoProver.Litform
 import Logic.Vorspiel.Meta
 
+/- DEPRECATED -/
+
 open Qq Lean Elab Meta Tactic
 
 namespace LO
