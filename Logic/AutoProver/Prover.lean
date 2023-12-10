@@ -225,7 +225,7 @@ def derive {F : Q(Type u)} (instLS : Q(LogicSymbol $F)) (instGz : Q(Gentzen.{u, 
 
 end DerivationQ
 
-def turnstile? (ty : Q(Prop)) : MetaM ((u : Level) × (F : Q(Type u)) × Q(Set $F) × Q($F)) := do
+def isExprProvable? (ty : Q(Prop)) : MetaM ((u : Level) × (F : Q(Type u)) × Q(Set $F) × Q($F)) := do
   let ~q(@System.Provable $F $instLS $instSys $T $p) := ty | throwError "error: not a prop _ ⊢! _"
   return ⟨_, F, T, p⟩
 
@@ -245,11 +245,11 @@ def prove! (s : ℕ) (T : Q(Set $F)) (p : Q($F)) : MetaM Q($T ⊢! $p) :=
 
 syntax termSeq := "[" (term,*) "]"
 
-def proofOfTurnstile? (T : Q(Set $F)) (e : Expr) : MetaM ((p : Q($F)) × Q($T ⊢ $p)) := do
+def proofOfProvable? (T : Q(Set $F)) (e : Expr) : MetaM ((p : Q($F)) × Q($T ⊢! $p)) := do
   let ⟨ty, h⟩ ← inferPropQ' e
-  let ⟨_, _, T', p⟩ ← turnstile? ty
+  let ⟨_, _, T', p⟩ ← isExprProvable? ty
   if ← isDefEq T T' then return ⟨p, h⟩
-  else throwError m! "failed to find q such that {ty} == {T} ⊢ q"
+  else throwError m! "failed to find q such that {ty} == {T} ⊢! q"
 
 def proverL₀ (T : Q(Set $F)) (seq : Option (TSyntax `LO.AutoProver.termSeq)) :
     letI := denotation F instLS
@@ -260,10 +260,10 @@ def proverL₀ (T : Q(Set $F)) (seq : Option (TSyntax `LO.AutoProver.termSeq)) :
              match seq with
              | `(termSeq| [ $ss,* ] ) => do
                ss.getElems.mapM (fun s => do
-                 proofOfTurnstile? instLS instSys T (← Term.elabTerm s none))
+                 proofOfProvable? instLS instSys T (← Term.elabTerm s none))
              | _                      => return #[]
            | _        => return #[])
-  let E : List ((p : Lit F) × Q($T ⊢ $(toExpr F p))) := Array.toList <| ← E.mapM fun e => do
+  let E : List ((p : Lit F) × Q($T ⊢! $(toExpr F p))) := Array.toList <| ← E.mapM fun e => do
     let p : Lit F ← denote F e.1
     return ⟨p, e.2⟩
   let L₀ := E.map Sigma.fst
@@ -289,7 +289,7 @@ elab "tautology" n:(num)? : tactic => do
     | none   => 32
   let goalType ← Elab.Tactic.getMainTarget
   let ty ← inferPropQ goalType
-  let ⟨u, F, T, p⟩ ← turnstile? ty
+  let ⟨u, F, T, p⟩ ← isExprProvable? ty
   let .some instLS ← trySynthInstanceQ (q(LogicSymbol.{u} $F) : Q(Type u))
     | throwError m! "error: failed to find instance LogicSymbol {F}"
   let .some instSys ← trySynthInstanceQ q(System $F)
@@ -307,7 +307,7 @@ elab "prover" n:(num)? seq:(termSeq)? : tactic => do
     | none   => 32
   let goalType ← Elab.Tactic.getMainTarget
   let ty ← inferPropQ goalType
-  let ⟨u, F, T, p⟩ ← turnstile? ty
+  let ⟨u, F, T, p⟩ ← isExprProvable? ty
   let .some instLS ← trySynthInstanceQ (q(LogicSymbol.{u} $F) : Q(Type u))
     | throwError m! "error: failed to find instance LogicSymbol {F}"
   let .some instSys ← trySynthInstanceQ q(System $F)
