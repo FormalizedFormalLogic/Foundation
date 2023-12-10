@@ -1,116 +1,116 @@
 import Logic.Logic.HilbertStyle
 import Logic.FirstOrder.Incompleteness.Derivability.Theory
+import Logic.FirstOrder.Basic.Semantics
 
 /-
-以下の定義はℒₒᵣに依存しないので一般のLについて示したほうがよいと思う
+以下の定義はLに依存しないので一般のLについて示したほうがよいと思う
 （hereditarily finite setの上で第二不完全性定理を証明するさいなどに結果を応用できる）
 
 ゲーデル数については
 
-class GoedelNumber (L : Language) (α : Type*) where
-  encode : α → Subterm.Const L
 
 のような型クラスで扱えば良い
 -/
 
-notation "Σ" => Bool.true
-notation "Π" => Bool.false
-
 open LO.System LO.System.Intuitionistic
 
-namespace LO.FirstOrder.Arith
+namespace LO.FirstOrder.Incompleteness
 
-variable (T₀ T: Theory ℒₒᵣ)
+variable {L : Language} [System (Sentence L)]
 
-lemma Consistent_of_SigmaOneSound [SigmaOneSound T] : Theory.Consistent T where
-  consistent := consistent_of_sigmaOneSound T
+class GoedelNumber (L : Language) (α : Type*) where
+  encode : α → Subterm.Const L
+
+local notation:max "⸢" σ "⸣" => @GoedelNumber.encode L _ _ (σ : Sentence L)
+
+variable (T₀ T: Theory L) (M) [Structure L M]
+
+variable [GoedelNumber L (Sentence L)]
 
 class HasProvablePred where
-  ProvablePred : Subsentence ℒₒᵣ 1
-  spec : ∀ {σ}, ℕ ⊧ (ProvablePred/[⸢σ⸣]) ↔ T ⊢! σ
-
-private def HasProvablePred.PrSubst (T : Theory ℒₒᵣ) [HasProvablePred T] (c : Subterm.Const ℒₒᵣ) :
-    Sentence ℒₒᵣ := (ProvablePred T)/[c]
-
-notation "Pr[" T "]" => HasProvablePred.PrSubst T
+  Pr : Subsentence L 1
+  spec : ∀ {σ}, M ⊧ (Pr/[⸢σ⸣]) ↔ T ⊢! σ
 
 namespace HasProvablePred
 
 open Theory FirstOrder.Theory
 
-variable [HasProvablePred T]
+open HasProvablePred
 
-class Definable [hp : HasProvablePred T] (P : (Subsentence ℒₒᵣ 1) → Prop) where
-  definable : P (ProvablePred T)
+variable [HasProvablePred T M]
 
-abbrev Definable.Sigma (k) := Definable T (Hierarchy Σ k)
-
-abbrev Definable.Pi (k) := Definable T (Hierarchy Π k)
+class PrSoundness (P : Sentence L → Prop) where
+  sounds : ∀ {σ}, (P σ) → T ⊢! (Pr T M)/[⸢σ⸣] → M ⊧ ((Pr T M)/[⸢σ⸣])
 
 class Derivability1 where
-  D1 : ∀ {σ : Sentence ℒₒᵣ}, T ⊢! σ → T₀ ⊢! (Pr[T] ⸢σ⸣)
+  D1 : ∀ {σ : Sentence L}, T ⊢! σ → T₀ ⊢! (Pr T M)/[⸢σ⸣]
 
 class Derivability2 where
-  D2 : ∀ {σ π : Sentence ℒₒᵣ}, T₀ ⊢! (Pr[T] ⸢σ ⟶ π⸣) ⟶ ((Pr[T] ⸢σ⸣) ⟶ (Pr[T] ⸢π⸣))
+  D2 : ∀ {σ π : Sentence L}, T₀ ⊢! (Pr T M)/[⸢σ ⟶ π⸣] ⟶ (Pr T M)/[⸢σ⸣] ⟶ (Pr T M)/[⸢π⸣]
 
 class Derivability3 where
-  D3 : ∀ {σ : Sentence ℒₒᵣ}, T₀ ⊢! (Pr[T] ⸢σ⸣) ⟶ (Pr[T] ⸢Pr[T] ⸢σ⸣⸣)
+  D3 : ∀ {σ : Sentence L}, T₀ ⊢! (Pr T M)/[⸢σ⸣] ⟶ (Pr T M)/[⸢(Pr T M)/[⸢σ⸣]⸣]
 
-class FormalizedCompleteness (b n) where
-  FC : ∀ {σ : Sentence ℒₒᵣ}, Hierarchy b n σ → T₀ ⊢! σ ⟶ (Pr[T] ⸢σ⸣)
+class FormalizedCompleteness (P : Sentence L → Prop) where
+  FC : ∀ {σ : Sentence L}, P σ → T₀ ⊢! σ ⟶ (Pr T M)/[⸢σ⸣]
 
 class FormalizedDeductionTheorem where
-  FDT : ∀ {σ π : Sentence ℒₒᵣ} [HasProvablePred (T ∪ {σ})], T₀ ⊢! (Pr[T] ⸢σ ⟶ π⸣) ⟷ (Pr[T ∪ {σ}] ⸢π⸣)
+  FDT : ∀ {σ π : Sentence L} [HasProvablePred (T ∪ {σ}) M], T₀ ⊢! (Pr T M)/[⸢σ ⟶ π⸣] ⟷ (Pr (T ∪ {σ}) M)/[⸢π⸣]
 
-lemma FormalizedDeductionTheorem.FDT_neg [HasProvablePred (T ∪ {σ})] [FormalizedDeductionTheorem T₀ T] :
-    T₀ ⊢! ~(Pr[T] ⸢σ ⟶ π⸣) ⟷ ~(Pr[T ∪ {σ}] ⸢π⸣) :=
+variable [Intuitionistic (Sentence L)]
+
+lemma FormalizedDeductionTheorem.FDT_neg [HasProvablePred (T ∪ {σ}) M] [FormalizedDeductionTheorem T₀ T M]
+  : T₀ ⊢! ~((Pr T M)/[⸢σ ⟶ π⸣]) ⟷ ~((Pr (T ∪ {σ}) M)/[⸢π⸣]) :=
   iff_contra FormalizedDeductionTheorem.FDT
 
 section PrCalculus
 
 open Subformula FirstOrder.Theory Derivability1 Derivability2 Derivability3
 
-variable {T₀ T : Theory ℒₒᵣ} [Subtheory T₀ T] [HasProvablePred T]
-variable [hD1 : Derivability1 T₀ T] [hD2 : Derivability2 T₀ T] [hD3 : Derivability3 T₀ T] [hFC : FormalizedCompleteness T₀ T b n]
+variable {T₀ T : Theory L} [Subtheory T₀ T] [HasProvablePred T M]
+variable [hD1 : Derivability1 T₀ T M] [hD2 : Derivability2 T₀ T M] [hD3 : Derivability3 T₀ T M]
 
-lemma Derivability1.D1' {σ : Sentence ℒₒᵣ} : T ⊢! σ → T ⊢! (Pr[T] ⸢σ⸣) := by intro h; exact weakening $ hD1.D1 h;
+lemma Derivability1.D1' {σ : Sentence L} : T ⊢! σ → T ⊢! ((Pr T M)/[⸢σ⸣]) := by intro h; exact weakening $ hD1.D1 h;
 
-lemma Derivability2.D2' {σ π : Sentence ℒₒᵣ} : T ⊢! (Pr[T] ⸢σ ⟶ π⸣) ⟶ ((Pr[T] ⸢σ⸣) ⟶ (Pr[T] ⸢π⸣)) := weakening hD2.D2
+lemma Derivability2.D2' {σ π : Sentence L} : T ⊢! (Pr T M)/[⸢σ ⟶ π⸣] ⟶ ((Pr T M)/[⸢σ⸣] ⟶ (Pr T M)/[⸢π⸣]) := weakening hD2.D2
 
-lemma Derivability2.D2_iff [Subtheory T₀ T] [hd : Derivability2 T₀ T] {σ π : Sentence ℒₒᵣ} :
-    T₀ ⊢! (Pr[T] ⸢σ ⟷ π⸣) ⟶ ((Pr[T] ⸢σ⸣) ⟷ (Pr[T] ⸢π⸣)) := by
-  sorry;
-  -- have a := @Derivability2.D2 T₀ T _ _ _ σ π;
-  -- have b := @Derivability2.D2 T₀ T _ _ _ π σ;
-  -- sorry;
+lemma Derivability2.D2_iff [Subtheory T₀ T] {σ π : Sentence L}
+  : T₀ ⊢! ((Pr T M)/[⸢σ ⟷ π⸣]) ⟶ ((Pr T M)/[⸢σ⸣] ⟷ (Pr T M)/[⸢π⸣]) := by
+  have a : T₀ ⊢! (Pr T M)/[⸢σ ⟶ π⸣] ⟶ (Pr T M)/[⸢σ⸣] ⟶ (Pr T M)/[⸢π⸣] := hD2.D2;
+  have b : T₀ ⊢! (Pr T M)/[⸢π ⟶ σ⸣] ⟶ (Pr T M)/[⸢π⸣] ⟶ (Pr T M)/[⸢σ⸣] := hD2.D2;
+  sorry
 
-lemma Derivability3.D3' {σ : Sentence ℒₒᵣ} : T ⊢! (Pr[T] ⸢σ⸣) ⟶ (Pr[T] ⸢Pr[T] ⸢σ⸣⸣) := weakening hD3.D3
+lemma Derivability3.D3' {σ : Sentence L} : T ⊢! (Pr T M)/[⸢σ⸣] ⟶ ((Pr T M)/[⸢(Pr T M)/[⸢σ⸣]⸣]) := weakening hD3.D3
 
-lemma FormalizedCompleteness.FC' {σ : Sentence ℒₒᵣ} : Hierarchy b n σ → T ⊢! σ ⟶ (Pr[T] ⸢σ⸣) := by
+variable (P : Sentence L → Prop) [hFC : FormalizedCompleteness T₀ T M P]
+
+lemma FormalizedCompleteness.FC' {σ : Sentence L} : (P σ) → T ⊢! σ ⟶ ((Pr T M)/[⸢σ⸣]) := by
   intro hH;
   exact weakening $ hFC.FC hH;
 
-lemma formalized_imp_intro : (T ⊢! σ ⟶ π) → (T₀ ⊢! (Pr[T] ⸢σ⸣) ⟶ (Pr[T] ⸢π⸣)) := by
+lemma formalized_imp_intro : (T ⊢! σ ⟶ π) → (T₀ ⊢! (Pr T M)/[⸢σ⸣] ⟶ (Pr T M)/[⸢π⸣]) := by
   intro H;
   exact D2 ⨀ D1 H;
 
-lemma formalized_NC (σ : Sentence ℒₒᵣ) : T₀ ⊢! ((Pr[T] ⸢σ⸣) ⟶ (Pr[T] ⸢~σ⸣)) ⟶ (Pr[T] ⸢(⊥ : Sentence ℒₒᵣ)⸣) := by
+lemma formalized_NC (σ : Sentence L) : T₀ ⊢! ((Pr T M)/[⸢σ⸣] ⟶ (Pr T M)/[⸢~σ⸣]) ⟶ (Pr T M)/[⸢⊥⸣] := by
+  have : (T ⊢! σ) → (T ⊢! ~σ) → (T ⊢! ⊥) := no_contradiction;
+  have a : T₀ ⊢! (Pr T M)/[⸢σ ⟶ ~σ⸣] ⟶ (Pr T M)/[⸢σ⸣] ⟶ (Pr T M)/[⸢~σ⸣] := hD2.D2;
+  have b : T₀ ⊢! ~((Pr T M)/[⸢σ⸣] ⟶ (Pr T M)/[⸢~σ⸣]) ⟶ ~(Pr T M)/[⸢σ ⟶ ~σ⸣] := imp_contra₀ $ hD2.D2;
+  sorry;
   /-
-  have : (T ⊢! σ) → (T ⊢! ~σ) → (T ⊢! ⊥) := NC;
-  have a : T ⊢! Pr[U](⸢σ ⟶ ~σ⸣) ⟶ (Pr[U](⸢σ⸣)) ⟶ (Pr[U](⸢~σ⸣)) := D2 σ (~σ);
   have b : T ⊢! ~(Pr[U](⸢σ⸣) ⟶ Pr[U](⸢~σ⸣)) ⟶ ~Pr[U](⸢σ ⟶ ~σ⸣) := imp_contra₀ (D2 σ (~σ));
+
   simp [imp_eq Pr[U](⸢σ⸣), imp_eq σ] at b;
   -/
+
+lemma formalized_NC' (σ : Sentence L) : T₀ ⊢! (Pr T M)/[⸢σ⸣] ⋏ (Pr T M)/[⸢~σ⸣] ⟶ (Pr T M)/[⸢⊥⸣] := by
   sorry;
 
-lemma formalized_NC' (σ : Sentence ℒₒᵣ) : T₀ ⊢! ((Pr[T] ⸢σ⸣) ⋏ (Pr[T] ⸢~σ⸣)) ⟶ (Pr[T] ⸢(⊥ : Sentence ℒₒᵣ)⸣) := by
-  sorry;
+lemma formalized_DNI (σ : Sentence L) : T₀ ⊢! (Pr T M)/[⸢σ⸣] ⟶ (Pr T M)/[⸢~~σ⸣] := by simp [neg_neg'];
 
-lemma formalized_DNI (σ : Sentence ℒₒᵣ) : T₀ ⊢! (Pr[T] ⸢σ⸣) ⟶ (Pr[T] ⸢~~σ⸣) := sorry -- by simp [neg_neg']; TODO: fix
+lemma formalized_DNE (σ : Sentence L) : T₀ ⊢! (Pr T M)/[⸢~~σ⸣] ⟶ (Pr T M)/[⸢σ⸣] := by simp [neg_neg'];
 
-lemma formalized_DNE (σ : Sentence ℒₒᵣ) : T₀ ⊢! (Pr[T] ⸢~~σ⸣) ⟶ (Pr[T] ⸢σ⸣) := sorry -- by simp [neg_neg']; TODO: fix
-
-lemma formalized_neg_def (σ : Sentence ℒₒᵣ) : T ⊢! (Pr[T] ⸢~σ⸣) ⟷ (Pr[T] ⸢σ ⟶ ⊥⸣) := by
+lemma formalized_neg_def (σ : Sentence L) : T ⊢! (Pr T M)/[⸢~σ⸣] ⟷ (Pr T M)/[⸢σ ⟶ ⊥⸣] := by
   apply iff_intro;
   . sorry; -- apply imply_intro;
   . sorry; -- apply imply_intro;
@@ -119,11 +119,11 @@ end PrCalculus
 
 section ConsistencyFormalization
 
-variable (T : Theory ℒₒᵣ) [HasProvablePred T]
+variable (T : Theory L) [HasProvablePred T M]
 
 /-- Löb style consistency formalization -/
 @[simp]
-def LConsistenncy : Sentence ℒₒᵣ := ~(Pr[T] ⸢(⊥ : Sentence ℒₒᵣ)⸣)
+def LConsistenncy : Sentence L := ~(Pr T M)/[⸢⊥⸣]
 
 notation "ConL[" T "]" => LConsistenncy T
 
@@ -131,39 +131,40 @@ end ConsistencyFormalization
 
 end HasProvablePred
 
+variable (P : ∀ (n : Fin 2), (Subsentence L n) → Prop)
 
-class Diagonizable (b n) where
-  diag (δ : Subsentence ℒₒᵣ 1) : Hierarchy b n δ → ∃ (σ : Sentence ℒₒᵣ), (Hierarchy b n σ) ∧ (T ⊢! σ ⟷ ([→ ⸢σ⸣].hom δ))
-
+class Diagonizable where
+  diag (δ : Subsentence L 1) : (P 1 δ) → ∃ (σ : Sentence L), (P 0 σ) ∧ (T ⊢! σ ⟷ ([→ ⸢σ⸣].hom δ))
 
 section FixedPoints
 
 open HasProvablePred
 
-variable (T₀ T : Theory ℒₒᵣ) [HasProvablePred T] [Subtheory T₀ T] {n}
+variable [Subtheory T₀ T] [HasProvablePred T M]
 
-def IsGoedelSentence [Subtheory T₀ T] (G : Sentence ℒₒᵣ) := T₀ ⊢! G ⟷ ~(Pr[T] ⸢G⸣)
+def IsGoedelSentence (G : Sentence L) := T₀ ⊢! G ⟷ ~(Pr T M)/[⸢G⸣]
 
-lemma existsGoedelSentence
-  [hdiag : Diagonizable T₀ Π n] [hdef : Definable.Sigma T n]
-  : ∃ (G : Sentence ℒₒᵣ), (IsGoedelSentence T₀ T G ∧ Hierarchy Π n G) := by
-  have ⟨G, ⟨hH, hd⟩⟩ := hdiag.diag (~ProvablePred T) (Hierarchy.neg hdef.definable);
+variable [hdiag : Diagonizable T₀ P]
+
+lemma existsGoedelSentence (h : P 1 (~Pr T M)) -- 可証性述語の否定がΠ₁であることの抽象化
+  : ∃ (G : Sentence L), ((IsGoedelSentence T₀ T M G) ∧ (P 0 G)) := by
+  have ⟨G, ⟨hH, hd⟩⟩ := hdiag.diag (~(Pr T M)) h;
   existsi G; simpa [IsGoedelSentence, hH, Rew.neg'] using hd;
 
-def IsHenkinSentence [Subtheory T₀ T] (H : Sentence ℒₒᵣ) := T₀ ⊢! H ⟷ (Pr[T] ⸢H⸣)
+def IsHenkinSentence [Subtheory T₀ T] (H : Sentence L) := T₀ ⊢! H ⟷ (Pr T M)/[⸢H⸣]
 
-lemma existsHenkinSentence
-  [hdiag : Diagonizable T₀ Σ n] [hdef : Definable.Sigma T n]
-  : ∃ (H : Sentence ℒₒᵣ), (IsHenkinSentence T₀ T H ∧ Hierarchy Σ n H) := by
-  have ⟨H, ⟨hH, hd⟩⟩ := hdiag.diag (ProvablePred T) hdef.definable;
+lemma existsHenkinSentence (h : P 1 (Pr T M)) -- 可証性述語がΣ₁であることの抽象化
+  : ∃ (H : Sentence L), (IsHenkinSentence T₀ T M H) ∧ (P 0 H) := by
+  have ⟨H, ⟨hH, hd⟩⟩ := hdiag.diag (Pr T M) h;
   existsi H; simpa [IsHenkinSentence, hH] using hd;
 
-def IsKrieselSentence [Subtheory T₀ T] (K σ : Sentence ℒₒᵣ) := T₀ ⊢! K ⟷ ((Pr[T] ⸢K⸣) ⟶ σ)
+def IsKrieselSentence [Subtheory T₀ T] (K σ : Sentence L) := T₀ ⊢! K ⟷ ((Pr T M)/[⸢K⸣] ⟶ σ)
 
-lemma existsKreiselSentence [hdef : Definable.Sigma T n] (σ)
-  : ∃ (K : Sentence ℒₒᵣ), IsKrieselSentence T₀ T K σ := by sorry
+lemma existsKreiselSentence (σ : Sentence L)
+  : ∃ (K : Sentence L), IsKrieselSentence T₀ T M K σ := by
+  have ⟨K, ⟨hH, hd⟩⟩ := hdiag.diag ((Pr T M)/[⸢σ⸣]) (by sorry);
+  existsi K; simp [IsKrieselSentence, hH]; sorry;
 
 end FixedPoints
 
-
-end LO.FirstOrder.Arith
+end LO.FirstOrder.Incompleteness

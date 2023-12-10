@@ -1,6 +1,6 @@
 import Logic.Logic.System
 import Logic.Logic.HilbertStyle
-import Logic.FirstOrder.Incompleteness.FirstIncompleteness
+import Logic.FirstOrder.Basic.Formula
 
 open LO.System
 
@@ -8,29 +8,34 @@ namespace LO.FirstOrder.Theory
 
 open Subformula
 
-variable {L : Language.{u}} [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq (L.rel k)]
+variable
+  {L : Language.{u}}
+  [∀ k, DecidableEq (L.func k)] [∀ k, DecidableEq (L.rel k)] [System (Sentence L)]
   (T : Theory L)
 
 class Complete where
   complete : System.Complete T
 
-abbrev Incomplete := IsEmpty (Theory.Complete T)
+class Incomplete where
+  incomplete : ¬System.Complete T
 
 class Consistent where
   consistent : System.Consistent T
 
-/-
 class Inconsistent where
-  inconsistent : ~System.Consistent T
-にしたほうがよい気がする
- -/
-abbrev Inconsistent := IsEmpty (Theory.Consistent T)
+  inconsistent : ¬System.Consistent T
+
+@[simp]
+lemma false_of_consistent_inconsistent [c : Consistent T] [i: Inconsistent T] : False := by
+  exact i.inconsistent c.consistent
 
 section PropositionalCalculus
 
 open System.Intuitionistic System.Deduction
 
 variable {T : Theory L}
+variable [Intuitionistic (Sentence L)]
+variable [Deduction (Sentence L)]
 
 instance : BotDef (Sentence L) where
   bot_def := by simp;
@@ -54,8 +59,12 @@ lemma weakening [hs : Subtheory T₀ T] : (T₀ ⊢! σ) → (T ⊢! σ) := by
 
 lemma provable_falsum_of_inconsistent {T : Theory L} : Theory.Inconsistent T → T ⊢! ⊥ := by
   intro h; by_contra A
-  have : Consistent T := ⟨⟨fun b => A ⟨b⟩⟩⟩
-  exact h.false this
+  have : Consistent T := ⟨⟨fun b => A ⟨b⟩⟩⟩;
+  exact false_of_consistent_inconsistent T;
+
+@[simp]
+lemma broken_consistent [hc : Theory.Consistent T] (hp : T ⊢! σ) (hr : T ⊢! ~σ) : False := by
+  exact hc.consistent.false (no_contradiction hp hr).some;
 
 lemma consistent_or {T} {σ : Sentence L} : Theory.Inconsistent (T ∪ {σ}) → T ⊢! ~σ := by
   intro h

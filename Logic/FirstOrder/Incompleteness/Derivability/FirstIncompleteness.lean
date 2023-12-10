@@ -4,42 +4,43 @@ import Logic.FirstOrder.Incompleteness.Derivability.Conditions
 
 open LO.System LO.System.Intuitionistic
 
-namespace LO.FirstOrder.Arith.Incompleteness
+namespace LO.FirstOrder.Incompleteness
 
 open FirstOrder.Theory HasProvablePred
 
-variable (T₀ T : Theory ℒₒᵣ) [Subtheory T₀ T]
-variable [Diagonizable T₀ Π 1]
-variable
-  [hPred : HasProvablePred T]
-  [hPredDef : HasProvablePred.Definable.Sigma T 1]
-  [hD1 : Derivability1 T₀ T]
+variable {L : Language} [System (Sentence L)] [Intuitionistic (Sentence L)] [GoedelNumber L (Sentence L)]
+variable (T₀ T : Theory L) [Subtheory T₀ T]
+variable {P} [Diagonizable T₀ P]
+variable (M) [Structure L M]
+variable [hPred : HasProvablePred T M] [hD1 : Derivability1 T₀ T M]
 
-variable (hG : IsGoedelSentence T₀ T G)
+local notation:max "⸢" σ "⸣" => @GoedelNumber.encode L _ _ (σ : Sentence L)
 
-open HasProvablePred.Derivability1
+variable {G : Sentence L} (hG : IsGoedelSentence T₀ T M G)
 
-lemma GoedelSentenceUnprovablility [hConsis : Theory.Consistent T] : T ⊬! G := by
+variable [hConsis : Theory.Consistent T] [hSoundness : PrSoundness T M (λ _ => True)]
+
+lemma GoedelSentenceUnprovablility : T ⊬! G := by
   by_contra hP; simp at hP;
-  have h₁ : T ⊢! (Pr[T] ⸢G⸣) := hD1.D1' hP;
-  have h₂ : T ⊢! (Pr[T] ⸢G⸣) ⟶ ~G := by simpa using weakening $ iff_mpr $ iff_contra hG;
+  have h₁ : T ⊢! (Pr T M)/[⸢G⸣] := hD1.D1' hP;
+  have h₂ : T ⊢! (Pr T M)/[⸢G⸣] ⟶ ~G := by simpa using weakening $ iff_mpr $ iff_contra hG;
   have hR : T ⊢! ~G := weakening (h₂ ⨀ h₁);
-  exact hConsis.consistent.false (no_contradiction hP hR).some;
+  exact broken_consistent hP hR;
 
-lemma GoedelSentenceUnrefutability [hSound : SigmaOneSound T] : T ⊬! ~G := by
+lemma GoedelSentenceUnrefutability : T ⊬! ~G := by
   by_contra hR; simp at hR;
-  have h₁ : T ⊢! ~G ⟶ Pr[T] ⸢G⸣ := by simpa [Subformula.neg_neg'] using weakening $ iff_mp $ iff_contra hG;
-  have h₂ : T ⊢! Pr[T] ⸢G⸣ := h₁ ⨀ hR; simp at h₂;
-  have h₃ : ℕ ⊧ (Pr[T] ⸢G⸣) := hSound.sound (Hierarchy.rew _ hPredDef.definable) h₂;
+  have h₁ : T ⊢! ~G ⟶ (Pr T M)/[⸢G⸣] := by simpa [Subformula.neg_neg'] using weakening $ iff_mp $ iff_contra hG;
+  have h₂ : T ⊢! (Pr T M)/[⸢G⸣] := h₁ ⨀ hR; simp at h₂;
+  have h₃ : M ⊧ ((Pr T M)/[⸢G⸣]) := hSoundness.sounds (by simp) h₂;
   have hP : T ⊢! G := hPred.spec.mp h₃;
-  exact (Consistent_of_SigmaOneSound T).consistent.false (no_contradiction hP hR).some;
+  exact broken_consistent hP hR;
 
-theorem FirstIncompleteness [hSound : SigmaOneSound T] : Theory.Incomplete T := by
-  have ⟨G, ⟨hG, _⟩⟩ := @existsGoedelSentence T₀ T _ _ 1 _ _;
-  have := Consistent_of_SigmaOneSound T;
-  by_contra hCC; simp at hCC;
-  cases (hCC.some.complete G) with
-  | inl h => simpa using (GoedelSentenceUnprovablility T₀ T hG);
-  | inr h => simpa using (GoedelSentenceUnrefutability T₀ T hG);
+theorem FirstIncompleteness (a : P 1 (~Pr T M)) : Theory.Incomplete T := by
+  have γ := existsGoedelSentence T₀ T M P a;
+  suffices ¬System.Complete T by exact ⟨this⟩;
+  by_contra hC;
+  cases (hC γ.choose) with
+  | inl h => simpa using (GoedelSentenceUnprovablility T₀ T M γ.choose_spec.left);
+  | inr h => simpa using (GoedelSentenceUnrefutability T₀ T M γ.choose_spec.left);
 
-end LO.FirstOrder.Arith.Incompleteness
+end LO.FirstOrder.Incompleteness
