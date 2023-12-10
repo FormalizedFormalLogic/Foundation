@@ -54,6 +54,12 @@ def checkSortQ' (e : Expr) : MetaM (Option ((u : Level) × Q(Sort $u))) := do
     else return none
   else return none
 
+def inferPropQ' (e : Expr) : MetaM ((p : Q(Prop)) × Q($p)) := do
+  let ⟨u, α, e⟩ ← inferSortQ' e
+  if u == levelZero then
+    return ⟨α, e⟩
+  else throwError "not a prop {indentExpr α}"
+
 -- TODO: fix
 def inferPropQ (e : Expr) : MetaM Q(Prop) := do
   return e
@@ -106,6 +112,12 @@ variable {α : Type u}
 lemma List.mem_of_eq {a b : α} {l} (h : a = b) : a ∈ b :: l := by simp[h]
 
 lemma List.mem_of_mem {a b : α} {l : List α} (h : a ∈ l) : a ∈ b :: l := by simp[h]
+
+lemma List.cases_of_mem_cons {p : α → Prop} {a a' : α} {l : List α} (h : a' ∈ a :: l)
+    (hl : ∀ a' ∈ l, p a') (ha : p a) : p a' := by
+  rcases List.mem_cons.mp h with (h | h)
+  · simpa[h]
+  · exact hl _ h
 
 def memQList? {α : Q(Type u)} (a : Q($α)) : (l : List Q($α)) → MetaM $  Option Q($a ∈ $(toQList (u := u) l))
   | []     => return none
@@ -459,7 +471,12 @@ local elab "dbgDList" : term => do
   logInfo m! "y: {mem}"
   return yExpr
 
-#eval dbgDList
+def listSigmaImpliment {σ : Q(Type*)} (d : Denotation σ α) {p : Q($σ → Prop)} :
+    (l : List ((a : α) × Q($p $(toExpr σ a)))) → MetaM Q(∀ a' ∈ $(toExprₗ d (l.map Sigma.fst)), $p a')
+  | []     => return q(fun a h => False.elim (List.not_mem_nil a h))
+  | ⟨a, ha⟩ :: l => do
+    let ih ← listSigmaImpliment d l
+    return (by simp at ha ih ⊢; exact q(fun _ ha' => List.cases_of_mem_cons ha' $ih $ha))
 
 variable {σ τ : Q(Type*)} {α β : Type}
   [Denotation σ α] [Denotation τ β]

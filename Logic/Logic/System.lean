@@ -38,6 +38,8 @@ abbrev Provable (T : Set F) (f : F) : Prop := Nonempty (T ⊢ f)
 
 infix:45 " ⊢! " => System.Provable
 
+noncomputable def Provable.toProof {T : Set F} {f : F} (h : T ⊢! f) : T ⊢ f := Classical.choice h
+
 abbrev Unprovable (T : Set F) (f : F) : Prop := IsEmpty (T ⊢ f)
 
 infix:45 " ⊬ " => System.Unprovable
@@ -211,14 +213,17 @@ class Gentzen (F : Type u) [LogicSymbol F] extends TwoSided F where
   em {p} {Γ Δ : List F} (hΓ : p ∈ Γ) (hΔ : p ∈ Δ) : Γ ⊢ᴳ Δ
 
 class LawfulGentzen (F : Type u) [LogicSymbol F] [System F] extends Gentzen F where
-  toProofEmpty {p : F} : [] ⊢ᴳ [p] → ∅ ⊢ p
+  toProof₁ {Γ} {T : Set F} {p : F} : Γ ⊢ᴳ [p] → (∀ q ∈ Γ, T ⊢ q) → T ⊢ p
 
 namespace LawfulGentzen
 
 variable {F : Type*} [LogicSymbol F] [System F] [LawfulGentzen F]
 
-def toProof {p : F} (b : [] ⊢ᴳ [p]) (T : Set F) : T ⊢ p :=
-  System.weakening (toProofEmpty b) (Set.empty_subset T)
+def toProofOfNil {p : F} (b : [] ⊢ᴳ [p]) (T : Set F) : T ⊢ p :=
+  toProof₁ b (by intro q h; exact False.elim ((List.mem_nil_iff q).mp h))
+
+lemma toProof₁! {Γ} {T : Set F} {p : F} (b : Γ ⊢ᴳ [p]) (H : ∀ q ∈ Γ, T ⊢! q) : T ⊢! p :=
+  ⟨toProof₁ b (fun q hq => (H q hq).toProof)⟩
 
 end LawfulGentzen
 

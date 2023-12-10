@@ -101,6 +101,8 @@ def and' {p q : Formula α} (h : p ⋏ q ∈ Δ)
     (dp : ⊢ᴾᶜ[P] insert p (Δ.erase (p ⋏ q))) (dq : ⊢ᴾᶜ[P] insert q (Δ.erase (p ⋏ q))) : ⊢ᴾᶜ[P] Δ :=
   (and _ p q dp dq).cast (by simp[Finset.insert_erase h])
 
+def cCut {p} (d₁ : ⊢ᴾᶜ insert p Δ) (d₂ : ⊢ᴾᶜ insert (~p) Γ) : ⊢ᴾᶜ Δ ∪ Γ := cut Δ Γ p trivial d₁ d₂
+
 def em {p : Formula α} {Δ : Sequent α} (hpos : p ∈ Δ) (hneg : ~p ∈ Δ) : ⊢ᴾᶜ[P] Δ := by
   induction p using Formula.rec' generalizing Δ
   case hverum           => exact verum Δ hpos
@@ -131,6 +133,39 @@ abbrev DerivationCWA (T : Theory α) (Δ : Sequent α) := DerivationCRWA (fun _ 
 
 scoped infix:45 " ⊢' " => DerivationCWA
 
+def DerivationCR.toDerivationCRWA
+  {P : Formula α → Prop} {Δ : Sequent α} (b : ⊢ᴾᶜ[P] Δ) (T : Theory α) : T ⊢ᴾᶜ[P] Δ where
+  leftHand := ∅
+  hleftHand := by simp
+  derivation := b.cast (by simp)
+
+def DerivationCRWA.toDerivationCWA {T : Theory α} {Δ} (b : T ⊢ᴾᶜ[P] Δ) : T ⊢' Δ where
+  leftHand := b.leftHand
+  hleftHand := b.hleftHand
+  derivation := b.derivation.cutWeakening (by simp)
+
+namespace DerivationCRWA
+variable {P : Formula α → Prop} {T : Theory α} {Γ Δ E : Sequent α}
+
+def cast {Δ₁ Δ₂ : Sequent α} (h : Δ₁ = Δ₂) (b : T ⊢ᴾᶜ[P] Δ₁) : T ⊢ᴾᶜ[P] Δ₂ := by rw[h] at b; exact b
+
+protected def em {p} (hp : p ∈ Δ) (hn : ~p ∈ Δ) : T ⊢ᴾᶜ[P] Δ :=
+  (DerivationCR.em hp hn).toDerivationCRWA T
+
+def cCut {p} (b₁ : T ⊢' insert p Δ) (b₂ : T ⊢' insert (~p) Γ) : T ⊢' Δ ∪ Γ where
+  leftHand := b₁.leftHand ∪ b₂.leftHand
+  hleftHand := by simp[b₁.hleftHand, b₂.hleftHand]
+  derivation := by
+    have b₁' : ⊢ᴾᶜ insert p (Δ ∪ b₁.leftHand) := by simpa using b₁.derivation
+    have b₂' : ⊢ᴾᶜ insert (~p) (Γ ∪ b₂.leftHand) := by simpa using b₂.derivation
+    exact (b₁'.cCut b₂').cast (by simp only [←Finset.union_assoc, Finset.union_comm _ Γ, Finset.image_union])
+
+def cCut' {p} (b₁ : T ⊢' insert p Δ) (b₂ : T ⊢' insert (~p) Δ) : T ⊢' Δ := (cCut b₁ b₂).cast (by simp)
+
+end DerivationCRWA
+
+
+
 instance Proof : System (Formula α) where
   Bew := fun T σ => T ⊢' {σ}
   axm := fun {f σ} hσ =>
@@ -142,16 +177,7 @@ instance Proof : System (Formula α) where
       hleftHand := Set.Subset.trans b.hleftHand (Set.image_subset _ h),
       derivation := b.derivation }
 
-def DerivationCR.toDerivationCRWA
-  {P : Formula α → Prop} {Δ : Sequent α} (b : ⊢ᴾᶜ[P] Δ) (T : Theory α) : T ⊢ᴾᶜ[P] Δ where
-  leftHand := ∅
-  hleftHand := by simp
-  derivation := b.cast (by simp)
 
-def DerivationCRWA.toDerivationCWA {T : Theory α} {Δ} (b : T ⊢ᴾᶜ[P] Δ) : T ⊢' Δ where
-  leftHand := b.leftHand
-  hleftHand := b.hleftHand
-  derivation := b.derivation.cutWeakening (by simp)
 
 def DerivationCWA.toDerivationCWA {T : Theory α} {p : Formula α} (b : T ⊢ p) : T ⊢' {p} := b
 
@@ -170,8 +196,8 @@ instance : LawfulOneSided (Formula α) where
   toProofEmpty := fun b =>
     DerivationCRWA.toProof (DerivationCR.toDerivationCRWA b ∅)
 
-instance zz : LawfulGentzen (Formula α) where
-  Derivation := fun Γ Δ => ⊢ᴾᵀ ((Γ.map (~·)).toFinset ∪ Δ.toFinset)
+instance : Gentzen (Formula α) where
+  Derivation := fun Γ Δ => ⊢ᴾᶜ ((Γ.map (~·)).toFinset ∪ Δ.toFinset)
   verum := fun _ _ => DerivationCR.verum _ (by simp)
   falsum := fun _ _ => DerivationCR.verum _ (by simp)
   negLeft := fun b => b.cast (by simp)
@@ -187,8 +213,20 @@ instance zz : LawfulGentzen (Formula α) where
       (by simpa[List.toFinset_map] using Finset.image_subset_image (List.toFinset_mono hΓ))
       (List.toFinset_mono hΔ))
   em := fun {p} _ _ hΓ hΔ => DerivationCR.em (p := p) (by simp[*]) (by simp[*])
-  toProofEmpty := fun d => DerivationCRWA.toProof (DerivationCR.toDerivationCRWA d ∅)
-#check zz
+
+variable {T : Theory α} {p : Formula α} {Γ Δ : List (Formula α)}
+
+def gentzen_trans (hΓ : ∀ p ∈ Γ, T ⊢ p) (d : Γ ⊢ᴳ Δ) : T ⊢' Δ.toFinset := by
+  induction' Γ with p Γ ih generalizing Δ
+  · exact (d.toDerivationCRWA T).cast (by simp)
+  · have d' : Γ ⊢ᴳ ~p :: Δ := d.cast (by simp)
+    have b₁ : T ⊢' insert p ∅  := hΓ p (by simp)
+    have b₂ : T ⊢' insert (~p) Δ.toFinset := by simpa using ih (fun p hp => hΓ p (by simp[hp])) d'
+    exact (b₁.cCut b₂).cast (by simp)
+
+instance : LawfulGentzen (Formula α) where
+  toProof₁ := fun d h => DerivationCRWA.toProof (by simpa using gentzen_trans h d)
+
 end Propositional
 
 end LO
