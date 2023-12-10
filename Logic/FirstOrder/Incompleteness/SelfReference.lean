@@ -1,4 +1,4 @@
-import Logic.Logic.HilbertStyle
+--import Logic.Logic.HilbertStyle
 import Logic.FirstOrder.Arith.Representation
 import Logic.FirstOrder.Computability.Calculus
 import Logic.AutoProver.Prover
@@ -91,21 +91,17 @@ local notation "G" => goedel T
 lemma goedel_spec : T ⊢! G ⟷ ~(provableSentence T)/[⸢G⸣] := by
   simpa using SelfReference.main T (~provableSentence T)
 
-lemma goedel_spec' : T ⊢! ~G ⟷ (provableSentence T)/[⸢G⸣] :=
-  by prover [goedel_spec T]
-
 variable [DecidablePred T] [Theory.Computable T]
-open System.Intuitionistic
 
 theorem godel_independent : System.Independent T G := by
   suffices : ¬(T ⊢! G ∨ T ⊢! ~G)
   · simpa[System.Independent, not_or] using this
   rintro (H | H)
-  · have h₁ : T ⊢! ~(provableSentence T)/[⸢G⸣] := by simpa using and_left (goedel_spec T) ⨀ H
+  · have h₁ : T ⊢! ~(provableSentence T)/[⸢G⸣] := by prover [goedel_spec T, H]
     have h₂ : T ⊢! (provableSentence T)/[⸢G⸣]  := by simpa using (provableSentence_representation (L := ℒₒᵣ)).mpr H
     exact inconsistent_of_provable_and_refutable' h₂ h₁ (consistent_of_sigmaOneSound T)
   · have : T ⊢! ~G ⟷ (provableSentence T)/[⸢G⸣] := by prover [goedel_spec T]
-    have : T ⊢! (provableSentence T)/[⸢G⸣] := by simpa using and_left this ⨀ H
+    have : T ⊢! (provableSentence T)/[⸢G⸣] := by prover [this, H]
     have : T ⊢! G := (provableSentence_representation (L := ℒₒᵣ)).mp this
     exact inconsistent_of_provable_and_refutable' this H (consistent_of_sigmaOneSound T)
 
