@@ -1,7 +1,7 @@
 on:
     schedule:
       - cron: '0 2 * * *' # once a day at 2am UTC
-  
+
   jobs:
     upgrade_lean:
       runs-on: ubuntu-latest
