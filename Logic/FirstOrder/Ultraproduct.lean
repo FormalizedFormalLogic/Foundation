@@ -132,7 +132,7 @@ lemma ultrafilter_exists (H : ∀ (ι : FinSubtheory T), (A ι) ⊧* (ι.val : T
 lemma compactnessAux :
     Semantics.Satisfiableₛ T ↔ ∀ ι : FinSubtheory T, Semantics.Satisfiableₛ (ι.val : Theory L) := by
   constructor
-  · rintro h ⟨t, ht⟩; exact Semantics.satisfiableₛ_of_subset h ht
+  · rintro h ⟨t, ht⟩; exact Semantics.Satisfiableₛ.of_subset h ht
   · intro h
     have : ∀ ι : FinSubtheory T, ∃ (M : Type u) (_ : Inhabited M) (_ : Structure L M), M ⊧* (ι.val : Theory L) :=
       by intro ι; exact satisfiableₛ_iff.mp (h ι)
