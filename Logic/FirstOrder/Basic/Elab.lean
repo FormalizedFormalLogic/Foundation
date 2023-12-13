@@ -11,6 +11,7 @@ namespace Subterm
 declare_syntax_cat foterm
 syntax:max "#" term:max : foterm
 syntax:max "&" term:max : foterm
+syntax:max "⋆" : foterm
 syntax ident : foterm
 syntax:max "!!" term:max : foterm
 syntax num : foterm
@@ -34,6 +35,7 @@ syntax "ᵀ“" foterm:0 "”" : term
 macro_rules
   | `(ᵀ“ # $n:term”)                               => `(#$n)
   | `(ᵀ“ & $n:term ”)                              => `(&$n)
+  | `(ᵀ“ ⋆ ”)                                      => `(Operator.Star.star.const)
   | `(ᵀ“ $name:ident ”)                            => `(& $(quote name.getId.getString!))
   | `(ᵀ“ !! $t:term ”)                             => `($t)
   | `(ᵀ“ $n:num ”)                                 => `(Subterm.Operator.const (Operator.numeral _ $n))
@@ -56,7 +58,7 @@ macro_rules
 
 #check (ᵀ“ ᵀ⟨Operator.Add.add⟩(&2 + &0, ᵀ⟨Operator.Zero.zero⟩())” : Subterm Language.oRing ℕ 8)
 #check (ᵀ“ ᵀ⟨Operator.Add.add⟩(&2 + &0, ᵀ⟨Operator.Zero.zero⟩())” : Subterm Language.oRing ℕ 8)
-#check ᵀ“ᵀ⇑(3 * #3 + 9)”
+#check ᵀ“ᵀ⇑(⋆ * #3 + 9)”
 #check Subterm.func Language.Mul.mul (ᵀ“1” :> ᵀ“3” :> Matrix.vecEmpty)
 
 section delab

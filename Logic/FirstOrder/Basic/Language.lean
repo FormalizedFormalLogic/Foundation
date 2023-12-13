@@ -13,6 +13,12 @@ structure Language where
 
 namespace Language
 
+class IsRelational (L : Language) where
+  func_empty : ∀ k, IsEmpty (L.Func (k + 1))
+
+class IsConstant (L : Language) extends IsRelational L where
+  rel_empty  : ∀ k, IsEmpty (L.Rel k)
+
 protected def empty : Language.{u} where
   Func := fun _ => PEmpty
   Rel  := fun _ => PEmpty
@@ -84,6 +90,8 @@ end ORing
 def oRing : Language where
   Func := ORing.Func
   Rel := ORing.Rel
+
+notation "ℒₒᵣ" => oRing
 
 namespace ORing
 
@@ -201,6 +209,33 @@ instance : UniformlyPrimcodable oRing.Rel := UniformlyPrimcodable.ofEncodeDecode
 
 end ORing
 
+namespace Constant
+
+variable (C : Type*)
+
+inductive Func : ℕ → Type _
+  | const (c : C) : Func 0
+
+end Constant
+
+section Constant
+
+variable (C : Type*)
+
+def constant : Language := ⟨Constant.Func C, fun _ => PEmpty⟩
+
+--instance : Coe (Type*) Language := ⟨constant⟩
+
+instance : Coe C ((constant C).Func 0) := ⟨Constant.Func.const⟩
+
+instance : IsConstant (constant C) where
+  func_empty := fun k => ⟨by rintro ⟨⟩⟩
+  rel_empty  := fun k => ⟨by rintro ⟨⟩⟩
+
+abbrev unit : Language := constant PUnit
+
+end Constant
+
 def relational (α : ℕ → Type u) : Language where
   Func := fun _ => PEmpty
   Rel := α
@@ -224,6 +259,15 @@ def toRelational (a : α k) : (relational α).Rel k := a
 instance : ToString ((relational α).Func k) := ⟨fun a => by cases a⟩
 
 end relational
+
+def ofFunc (F : ℕ → Type v) : Language := ⟨F, fun _ => PEmpty⟩
+
+def add (L₁ : Language.{u₁}) (L₂ : Language.{u₂}) : Language :=
+  ⟨fun k => L₁.Func k ⊕ L₂.Func k, fun k => L₁.Rel k ⊕ L₂.Rel k⟩
+
+instance : _root_.Add Language := ⟨add⟩
+
+def sigma (L : ι → Language) : Language := ⟨fun k => Σ i, (L i).Func k, fun k => Σ i, (L i).Rel k⟩
 
 protected class Eq (L : Language.{u}) where
   eq : L.Rel 2
@@ -252,7 +296,10 @@ protected class Exp (L : Language.{u}) where
 class Pairing (L : Language.{u}) where
   pair : L.Func 2
 
-attribute [match_pattern] Zero.zero One.one Add.add Mul.mul Eq.eq LT.lt
+class Star (L : Language.{u}) where
+  star : L.Func 0
+
+attribute [match_pattern] Zero.zero One.one Add.add Mul.mul Eq.eq LT.lt Star.star
 
 class ORing (L : Language) extends L.Eq, L.LT, L.Zero, L.One, L.Add, L.Mul
 
@@ -263,6 +310,30 @@ instance : ORing oRing where
   one := .one
   add := .add
   mul := .mul
+
+instance : Star unit where
+  star := ()
+
+instance (L : Language) (S : Language) [Star S] : Star (L.add S) where
+  star := Sum.inr Star.star
+
+instance (L : Language) (S : Language) [L.Zero] : (L.add S).Zero where
+  zero := Sum.inl Zero.zero
+
+instance (L : Language) (S : Language) [L.One] : (L.add S).One where
+  one := Sum.inl One.one
+
+instance (L : Language) (S : Language) [L.Add] : (L.add S).Add where
+  add := Sum.inl Add.add
+
+instance (L : Language) (S : Language) [L.Mul] : (L.add S).Mul where
+  mul := Sum.inl Mul.mul
+
+instance (L : Language) (S : Language) [L.Eq] : (L.add S).Eq where
+  eq := Sum.inl Eq.eq
+
+instance (L : Language) (S : Language) [L.LT] : (L.add S).LT where
+  lt := Sum.inl LT.lt
 
 /-
 namespace ORing
@@ -306,15 +377,6 @@ instance (k : ℕ) : Denotation q(oRing.Rel $k) (oRing.Rel k) where
 end ORing
 -/
 
-def ofFunc (F : ℕ → Type v) : Language := ⟨F, fun _ => PEmpty⟩
-
-def add (L₁ : Language.{u₁}) (L₂ : Language.{u₂}) : Language :=
-  ⟨fun k => L₁.Func k ⊕ L₂.Func k, fun k => L₁.Rel k ⊕ L₂.Rel k⟩
-
-instance : _root_.Add Language := ⟨add⟩
-
-def sigma (L : ι → Language) : Language := ⟨fun k => Σ i, (L i).Func k, fun k => Σ i, (L i).Rel k⟩
-
 @[ext] structure Hom (L₁ L₂ : Language) where
   func : {k : ℕ} → L₁.Func k → L₂.Func k
   rel : {k : ℕ} → L₁.Rel k → L₂.Rel k
@@ -334,27 +396,48 @@ def comp (Ψ : L₂ →ᵥ L₃) (Φ : L₁ →ᵥ L₂) : L₁ →ᵥ L₃ wher
   func := Ψ.func ∘ Φ.func
   rel  := Ψ.rel ∘ Φ.rel
 
-def add₁ (L₁ : Language.{u₁}) (L₂ : Language.{u₂}) : L₁ →ᵥ L₁.add L₂ := ⟨Sum.inl, Sum.inl⟩
+def add₁ (L₁ : Language) (L₂ : Language) : L₁ →ᵥ L₁.add L₂ := ⟨Sum.inl, Sum.inl⟩
 
-def add₂ (L₁ : Language.{u₁}) (L₂ : Language.{u₂}) : L₂ →ᵥ L₁.add L₂ := ⟨Sum.inr, Sum.inr⟩
+def add₂ (L₁ : Language) (L₂ : Language) : L₂ →ᵥ L₁.add L₂ := ⟨Sum.inr, Sum.inr⟩
 
-@[simp] lemma func_add₁ (L₁ : Language.{u₁}) (L₂ : Language.{u₂}) (f : L₁.Func k) :
+lemma func_add₁ (L₁ : Language) (L₂ : Language) (f : L₁.Func k) :
     (add₁ L₁ L₂).func f = Sum.inl f := rfl
 
-@[simp] lemma rel_add₁ (L₁ : Language.{u₁}) (L₂ : Language.{u₂}) (r : L₁.Rel k) :
+lemma rel_add₁ (L₁ : Language) (L₂ : Language) (r : L₁.Rel k) :
     (add₁ L₁ L₂).rel r = Sum.inl r := rfl
 
-@[simp] lemma func_add₂ (L₁ : Language.{u₁}) (L₂ : Language.{u₂}) (f : L₂.Func k) :
+lemma func_add₂ (L₁ : Language) (L₂ : Language) (f : L₂.Func k) :
     (add₂ L₁ L₂).func f = Sum.inr f := rfl
 
-@[simp] lemma rel_add₂ (L₁ : Language.{u₁}) (L₂ : Language.{u₂}) (r : L₂.Rel k) :
+lemma rel_add₂ (L₁ : Language) (L₂ : Language) (r : L₂.Rel k) :
     (add₂ L₁ L₂).rel r = Sum.inr r := rfl
+
+@[simp] lemma add₂_star (L₁ : Language) (L₂ : Language) [Star L₂] :
+    (add₂ L₁ L₂).func Star.star = Star.star := rfl
+
+@[simp] lemma add₁_zero (L₁ : Language) (L₂ : Language) [L₁.Zero] :
+    (add₁ L₁ L₂).func Zero.zero = Zero.zero := rfl
+
+@[simp] lemma add₁_one (L₁ : Language) (L₂ : Language) [L₁.One] :
+    (add₁ L₁ L₂).func One.one = One.one := rfl
+
+@[simp] lemma add₁_add (L₁ : Language) (L₂ : Language) [L₁.Add] :
+    (add₁ L₁ L₂).func Add.add = Add.add := rfl
+
+@[simp] lemma add₁_mul (L₁ : Language) (L₂ : Language) [L₁.Mul] :
+    (add₁ L₁ L₂).func Mul.mul = Mul.mul := rfl
+
+@[simp] lemma add₁_eq (L₁ : Language) (L₂ : Language) [L₁.Eq] :
+    (add₁ L₁ L₂).rel Eq.eq = Eq.eq := rfl
+
+@[simp] lemma add₁_lt (L₁ : Language) (L₂ : Language) [L₁.LT] :
+    (add₁ L₁ L₂).rel LT.lt = LT.lt := rfl
 
 def sigma (L : ι → Language) (i : ι) : L i →ᵥ Language.sigma L := ⟨fun f => ⟨i, f⟩, fun r => ⟨i, r⟩⟩
 
-@[simp] lemma func_sigma (L : ι → Language) (i : ι) (f : (L i).Func k) : (sigma L i).func f = ⟨i, f⟩ := rfl
+lemma func_sigma (L : ι → Language) (i : ι) (f : (L i).Func k) : (sigma L i).func f = ⟨i, f⟩ := rfl
 
-@[simp] lemma rel_sigma (L : ι → Language) (i : ι) (r : (L i).Rel k) : (sigma L i).rel r = ⟨i, r⟩ := rfl
+lemma rel_sigma (L : ι → Language) (i : ι) (r : (L i).Rel k) : (sigma L i).rel r = ⟨i, r⟩ := rfl
 
 end Hom
 
