@@ -7,7 +7,9 @@ namespace FirstOrder
 section
 
 variable {L : Language.{u}} {μ : Type v}
- {I : Type u} (A : I → Type u) [(ι : I) → Inhabited (A ι)] [s : (ι : I) → FirstOrder.Structure L (A ι)] (𝓤 : Ultrafilter I)
+ {I : Type u} (A : I → Type u)
+ [(ι : I) → Inhabited (A ι)] [s : (ι : I) → FirstOrder.Structure L (A ι)]
+ (𝓤 : Ultrafilter I)
 
 namespace Structure
 
@@ -117,7 +119,6 @@ abbrev FinSubtheory (T : Theory L) := {t : Finset (Sentence L) // ↑t ⊆ T}
 variable (A : FinSubtheory T → Type u) [s : (ι : FinSubtheory T) → Structure L (A ι)]
 
 instance : Inhabited (FinSubtheory T) := ⟨∅, by simp⟩
-
 
 lemma ultrafilter_exists (H : ∀ (ι : FinSubtheory T), (A ι) ⊧* (ι.val : Theory L)) :
     ∃ 𝓤 : Ultrafilter (FinSubtheory T), Set.image (Subformula.domain A) T ⊆ 𝓤.sets :=

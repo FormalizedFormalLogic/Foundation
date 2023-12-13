@@ -600,6 +600,18 @@ end Mod
 
 end Theory
 
+namespace Structure
+
+variable (L)
+
+def theory (M : Type u) [s : Structure L M] : Theory L := Semantics.theory s
+
+variable {M : Type u} [Structure L M]
+
+@[simp] lemma mem_theory_iff {σ} : σ ∈ theory L M ↔ M ⊧ σ := by rfl
+
+end Structure
+
 end FirstOrder
 
 end LO
