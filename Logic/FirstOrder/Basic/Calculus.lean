@@ -62,6 +62,8 @@ abbrev DerivationClx (c : ℕ) : Sequent L → Type u := DerivationCR (·.comple
 
 scoped notation :45 "⊢ᶜ[< " c "] " Γ:45 => DerivationClx c Γ
 
+instance : OneSided (SyntacticFormula L) := ⟨DerivationC⟩
+
 instance : OneSided (Sentence L) := ⟨fun Γ ↦ ⊢ᶜ Γ.map Rew.emb.hom⟩
 
 namespace DerivationCR
@@ -393,6 +395,15 @@ def ofTait {Γ : List (Sentence L)} (d : ⊢¹ Γ) : ⊢ᶜ Γ.map Rew.emb.hom :
 
 end DerivationCR
 
+instance : Tait (SyntacticFormula L) where
+  verum := fun Δ => DerivationCR.verum Δ
+  and := fun dp dq => (dp.and dq).cast (by simp)
+  or := fun d => d.or.cast (by simp)
+  wk := fun d ss => d.wk ss
+  em := fun hp hn => DerivationCR.em hp hn
+
+instance : Tait.Cut (SyntacticFormula L) := ⟨DerivationCR.cCut⟩
+
 instance : Tait (Sentence L) where
   verum := fun Δ =>
     have d : ⊢ᶜ ⊤ :: Δ.map Rew.emb.hom := DerivationCR.verum (Δ.map Rew.emb.hom)
@@ -414,6 +425,19 @@ instance : Tait (Sentence L) where
 instance : Tait.Cut (Sentence L) := ⟨fun {Δ σ} dp dn =>
   DerivationCR.toTait (DerivationCR.cCut (p := Rew.emb.hom σ)
     (DerivationCR.ofTait dp) ((DerivationCR.ofTait dn).cast $ by simp))⟩
+
+def oneSidedToSyntactic {Δ : List (Sentence L)} (b : ⊢¹ Δ) : ⊢¹ (Δ.map Rew.emb.hom : Sequent L) := b
+
+def twoSidedToSyntactic {Γ Δ : List (Sentence L)} (b : Γ ⊢² Δ) :
+    (Γ.map Rew.emb.hom : Sequent L) ⊢² Δ.map Rew.emb.hom :=
+  let b : ⊢¹ (Γ.map Rew.emb.hom : Sequent L).map (~·) ++ Δ.map Rew.emb.hom :=
+    OneSided.cast (oneSidedToSyntactic b) (by simp[Function.comp])
+  b
+
+lemma proofToSyntactic {T : Theory L} {σ} (b : T ⊢ σ) :
+    Rew.emb.hom '' T ⊢ (Rew.emb.hom σ : SyntacticFormula L) := by
+  have := twoSidedToSyntactic b.derivation
+  exact ⟨_, by simp; intro σ hσ; exact ⟨σ, b.antecedent_ss σ hσ, rfl⟩, this⟩
 
 end FirstOrder
 

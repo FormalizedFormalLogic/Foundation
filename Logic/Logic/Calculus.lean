@@ -16,7 +16,7 @@ abbrev OneSided.Derivable [OneSided F] (Δ : List F) : Prop := Nonempty (⊢¹ �
 
 abbrev TwoSided.Derivable [TwoSided F] (Γ Δ : List F) : Prop := Nonempty (Γ ⊢² Δ)
 
-prefix: 45 " ⊢¹! " => OneSided.Derivation
+prefix: 45 " ⊢¹! " => OneSided.Derivable
 
 infix: 45 " ⊢²! " => TwoSided.Derivable
 
@@ -157,7 +157,7 @@ def ofNegRight {p} (b : Γ ⊢² ~p :: Δ) : p :: Γ ⊢² Δ :=
 structure DerivationM (T : Set F) (Γ : List F) where
   antecedent : List F
   antecedent_ss : ∀ p ∈ antecedent, p ∈ T
-  bew : antecedent ⊢² Γ
+  derivation : antecedent ⊢² Γ
 
 infix: 45 " ⊢²' " => DerivationM
 
@@ -165,7 +165,7 @@ variable {T : Set F}
 
 def DerivationMEquivDerivation :
     T ⊢²' Γ ≃ (Δ : {Δ : List F // ∀ π ∈ Δ, π ∈ T}) × Δ ⊢² Γ where
-  toFun := fun b => ⟨⟨b.antecedent, b.antecedent_ss⟩, b.bew⟩
+  toFun := fun b => ⟨⟨b.antecedent, b.antecedent_ss⟩, b.derivation⟩
   invFun := fun p => ⟨p.1, p.1.prop, p.2⟩
   left_inv := fun b => by simp
   right_inv := fun b => by simp
@@ -173,12 +173,12 @@ def DerivationMEquivDerivation :
 def DerivationM.weakening {T U : Set F} {Γ : List F} (b : T ⊢²' Γ) (h : T ⊆ U) : U ⊢²' Γ where
   antecedent := b.antecedent
   antecedent_ss := fun p hp => h (b.antecedent_ss p hp)
-  bew := b.bew
+  derivation := b.derivation
 
 def toDerivationM {Γ Δ} (d : Γ ⊢² Δ) (ss : ∀ p ∈ Γ, p ∈ T) : T ⊢²' Δ where
   antecedent := Γ
   antecedent_ss := ss
-  bew := d
+  derivation := d
 
 def Cut.cut' {Γ₁ Γ₂ Δ₁ Δ₂ : List F} (d₁ : Γ₁ ⊢² p :: Δ₁) (d₂ : p :: Γ₂ ⊢² Δ₂) : Γ₁ ++ Γ₂ ⊢² Δ₁ ++ Δ₂ :=
   let d₁ : Γ₁ ++ Γ₂ ⊢² p :: (Δ₁ ++ Δ₂) := wk d₁ (by simp) (List.cons_subset_cons _ $ by simp)
@@ -190,7 +190,7 @@ namespace DerivationM
 def wk (b : T ⊢²' Γ) (ss : Γ ⊆ Γ') : T ⊢²' Γ' where
   antecedent := b.antecedent
   antecedent_ss := b.antecedent_ss
-  bew := wkRight b.bew ss
+  derivation := wkRight b.derivation ss
 
 def cut (b : T ⊢²' p :: Γ) (b' : T ⊢²' ~p :: Γ) : T ⊢²' Γ where
   antecedent := b.antecedent ++ b'.antecedent
@@ -199,9 +199,9 @@ def cut (b : T ⊢²' p :: Γ) (b' : T ⊢²' ~p :: Γ) : T ⊢²' Γ where
     rintro p (hp | hp)
     · exact b.antecedent_ss _ hp
     · exact b'.antecedent_ss _ hp
-  bew :=
-    let d : b.antecedent ++ b'.antecedent ⊢² p :: Γ := wkLeft b.bew (by simp)
-    let d' : b.antecedent ++ b'.antecedent ⊢² ~p :: Γ := wkLeft b'.bew (by simp)
+  derivation :=
+    let d : b.antecedent ++ b'.antecedent ⊢² p :: Γ := wkLeft b.derivation (by simp)
+    let d' : b.antecedent ++ b'.antecedent ⊢² ~p :: Γ := wkLeft b'.derivation (by simp)
     Cut.cut d' (negLeft d)
 
 def cut' (b : T ⊢²' p :: Γ) (b' : T ⊢²' ~p :: Δ) : T ⊢²' Γ ++ Δ where
@@ -211,9 +211,9 @@ def cut' (b : T ⊢²' p :: Γ) (b' : T ⊢²' ~p :: Δ) : T ⊢²' Γ ++ Δ whe
     rintro p (hp | hp)
     · exact b.antecedent_ss _ hp
     · exact b'.antecedent_ss _ hp
-  bew := by
-    let d : b.antecedent ++ b'.antecedent ⊢² p :: Γ := wkLeft b.bew (by simp)
-    let d' : b.antecedent ++ b'.antecedent ⊢² ~p :: Δ := wkLeft b'.bew (by simp)
+  derivation := by
+    let d : b.antecedent ++ b'.antecedent ⊢² p :: Γ := wkLeft b.derivation (by simp)
+    let d' : b.antecedent ++ b'.antecedent ⊢² ~p :: Δ := wkLeft b'.derivation (by simp)
     exact Gentzen.wk (Cut.cut' d' (negLeft d)) (by simp) (by simp)
 
 def verum (Γ : List F) : T ⊢²' ⊤ :: Γ := ⟨[], by simp, Gentzen.verum _ _⟩
@@ -224,7 +224,7 @@ def deduction [DecidableEq F] {p} (b : insert p T ⊢²' Δ) : T ⊢²' ~p :: Δ
     simp[List.mem_filter]
     intro q hq ne
     simpa[ne] using b.antecedent_ss q hq
-  bew := negRight (wkLeft b.bew $ by
+  derivation := negRight (wkLeft b.derivation $ by
     intro q hq
     by_cases e : q = p <;> simp[List.mem_filter, hq, e])
 
@@ -234,7 +234,7 @@ def deductionNeg [DecidableEq F] {p} (b : insert (~p) T ⊢²' Δ) : T ⊢²' p 
     simp[List.mem_filter]
     intro q hq ne
     simpa[ne] using b.antecedent_ss q hq
-  bew := ofNegLeft (wkLeft b.bew $ by
+  derivation := ofNegLeft (wkLeft b.derivation $ by
     intro q hq
     by_cases e : q = ~p <;> simp[List.mem_filter, hq, e])
 
