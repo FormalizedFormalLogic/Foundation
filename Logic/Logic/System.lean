@@ -32,7 +32,7 @@ def weakening {T U : Set F} {f : F} (b : T ⊢ f) (ss : T ⊆ U) : U ⊢ f := we
 
 lemma Consistent.of_subset {T U : Set F} (h : Consistent U) (ss : T ⊆ U) : Consistent T := ⟨fun b => h.false (weakening b ss)⟩
 
-lemma inConsistent_of_proof {T : Set F} (b : T ⊢ ⊥) : ¬Consistent T := by simp[Consistent]; exact ⟨b⟩
+lemma inconsistent_of_proof {T : Set F} (b : T ⊢ ⊥) : ¬Consistent T := by simp[Consistent]; exact ⟨b⟩
 
 abbrev Provable (T : Set F) (f : F) : Prop := Nonempty (T ⊢ f)
 
@@ -52,6 +52,8 @@ def Independent (T : Set F) (f : F) : Prop := T ⊬ f ∧ T ⊬ ~f
 
 lemma incomplete_iff_exists_independent {T : Set F} :
     ¬System.Complete T ↔ ∃ f, Independent T f := by simp[System.Complete, not_or, Independent]
+
+def theory (T : Set F) : Set F := {p | T ⊢! p}
 
 class Subtheory (T U : Set F) where
   sub : {f : F} → T ⊢ f → U ⊢ f
@@ -143,7 +145,7 @@ lemma satisfiableₛ_iff_consistent {T : Set F} : Semantics.Satisfiableₛ T ↔
       have : T ⊨ ⊥
       { intro M i s hM; have : Semantics.Satisfiableₛ T := ⟨M, i, s, hM⟩; contradiction }
       have : T ⊢ ⊥ := complete this
-      exact System.inConsistent_of_proof this⟩
+      exact System.inconsistent_of_proof this⟩
 
 lemma not_satisfiable_iff_inconsistent {T : Set F} : ¬Semantics.Satisfiableₛ T ↔ T ⊢! ⊥ := by
   simp[satisfiableₛ_iff_consistent, System.Consistent]

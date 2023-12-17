@@ -656,15 +656,11 @@ def iterr (f : Operator L 2) (z : Const L) : (n : ℕ) → Operator L n
 
 section numeral
 
-protected class Zero (L : Language.{u}) where
+protected class Zero (L : Language) where
   zero : Subterm.Const L
 
-protected class One (L : Language.{u}) where
+protected class One (L : Language) where
   one : Subterm.Const L
-
-instance [Language.Zero L] : Operator.Zero L := ⟨⟨Subterm.func Language.Zero.zero ![]⟩⟩
-
-instance [Language.One L] : Operator.One L := ⟨⟨Subterm.func Language.One.one ![]⟩⟩
 
 protected class Add (L : Language) where
   add : Subterm.Operator L 2
@@ -678,9 +674,18 @@ protected class Sub (L : Language) where
 protected class Div (L : Language) where
   div : Subterm.Operator L 2
 
-instance [Language.Add L] : Operator.Add L := ⟨⟨Subterm.func Language.Add.add Subterm.bvar⟩⟩
+protected class Star (L : Language) where
+  star : Subterm.Const L
 
-instance [Language.Mul L] : Operator.Mul L := ⟨⟨Subterm.func Language.Mul.mul Subterm.bvar⟩⟩
+instance [L.Zero] : Operator.Zero L := ⟨⟨Subterm.func Language.Zero.zero ![]⟩⟩
+
+instance [L.One] : Operator.One L := ⟨⟨Subterm.func Language.One.one ![]⟩⟩
+
+instance [L.Add] : Operator.Add L := ⟨⟨Subterm.func Language.Add.add Subterm.bvar⟩⟩
+
+instance [L.Mul] : Operator.Mul L := ⟨⟨Subterm.func Language.Mul.mul Subterm.bvar⟩⟩
+
+instance [L.Star] : Operator.Star L := ⟨⟨Subterm.func Language.Star.star ![]⟩⟩
 
 lemma Zero.term_eq [L.Zero] : (@Zero.zero L _).term = Subterm.func Language.Zero.zero ![] := rfl
 
@@ -689,6 +694,8 @@ lemma One.term_eq [L.One] : (@One.one L _).term = Subterm.func Language.One.one 
 lemma Add.term_eq [L.Add] : (@Add.add L _).term = Subterm.func Language.Add.add Subterm.bvar := rfl
 
 lemma Mul.term_eq [L.Mul] : (@Mul.mul L _).term = Subterm.func Language.Mul.mul Subterm.bvar := rfl
+
+lemma Star.term_eq [L.Star] : (@Star.star L _).term = Subterm.func Language.Star.star ![] := rfl
 
 open Language Subterm
 

@@ -71,7 +71,7 @@ lemma modelsTheory_of_subset {T U : Set F} {s : Struc M} (h : s ⊧ₛ* U) (ss :
 @[simp] lemma modelsTheory_range {f : α → F} {s : Struc M} :
     s ⊧ₛ* Set.range f ↔ ∀ i, s ⊧ₛ (f i) := by simp[modelsTheory]
 
-lemma satisfiableₛ_of_subset {T U : Set F} (h : Satisfiableₛ U) (ss : T ⊆ U) : Satisfiableₛ T :=
+lemma Satisfiableₛ.of_subset {T U : Set F} (h : Satisfiableₛ U) (ss : T ⊆ U) : Satisfiableₛ T :=
   by rcases h with ⟨M, i, s, h⟩; exact ⟨M, i, s, modelsTheory_of_subset h ss⟩
 
 lemma weakening {T U : Set F} {f} (h : T ⊨ f) (ss : T ⊆ U) : U ⊨ f :=
@@ -83,6 +83,8 @@ lemma consequence_iff {T : Set F} {f : F} : T ⊨ f ↔ ¬Satisfiableₛ (insert
   simp[consequence, Satisfiableₛ]; constructor
   · intro h M hM s hf hT; have : s ⊧ₛ f := h M s hT; contradiction
   · intro h M hM s; contrapose; exact h M hM s
+
+def theory (s : Struc M) : Set F := {p | s ⊧ₛ p}
 
 def Subtheory (T U : Set F) : Prop := ∀ {f}, T ⊨ f → U ⊨ f
 
@@ -142,25 +144,70 @@ lemma consequence_iff' {T : Set F} {σ : F} :
 
 end Semantics
 
+def Cumulative (T : ℕ → Set F) : Prop := ∀ s, T s ⊆ T (s + 1)
+
+namespace Cumulative
+
+lemma subset_of_le {T : ℕ → Set F} (H : Cumulative T)
+    {s₁ s₂ : ℕ} (h : s₁ ≤ s₂) : T s₁ ⊆ T s₂ := by
+  suffices : ∀ s d, T s ⊆ T (s + d)
+  · simpa[Nat.add_sub_of_le h] using this s₁ (s₂ - s₁)
+  intro s d
+  induction' d with d ih
+  · simp; rfl
+  · simpa[Nat.add_succ] using subset_trans ih (H (s + d))
+
+lemma finset_mem [DecidableEq F] {T : ℕ → Set F}
+    (H : Cumulative T) {u : Finset F} (hu : ↑u ⊆ ⋃ s, T s) : ∃ s, ↑u ⊆ T s := by
+  induction u using Finset.induction
+  case empty => exact ⟨0, by simp⟩
+  case insert f u _ ih =>
+    simp at hu
+    have : ∃ s, ↑u ⊆ T s := ih (subset_trans (Set.subset_insert _ _) hu)
+    rcases this with ⟨s, hs⟩
+    have : ∃ s', f ∈ T s' := by simpa using (Set.insert_subset_iff.mp hu).1
+    rcases this with ⟨s', hs'⟩
+    exact ⟨max s s', by
+      simp; exact Set.insert_subset
+        (subset_of_le H (Nat.le_max_right s s') hs')
+        (subset_trans hs (subset_of_le H $ Nat.le_max_left s s'))⟩
+
+end Cumulative
+
 variable (F)
 variable {Struc : Type w → Type v} [𝓢 : Semantics F Struc]
 
 class Compact where
-  compact {T : Set F} : Semantics.Satisfiableₛ T ↔ (∀ u : Finset F, (u : Set F) ⊆ T → Semantics.Satisfiableₛ (u : Set F))
+  compact {T : Set F} :
+    Semantics.Satisfiableₛ T ↔ (∀ u : Finset F, ↑u ⊆ T → Semantics.Satisfiableₛ (u : Set F))
 
 variable {F}
 
 namespace Compact
 
-variable [Compact F]
+variable [Compact F] [DecidableEq F]
 variable {M : Type w} [Inhabited M] {s : Struc M}
 
-lemma conseq_compact [DecidableEq F] {f : F} :
+lemma conseq_compact {f : F} :
     T ⊨ f ↔ ∃ u : Finset F, ↑u ⊆ T ∧ u ⊨ f := by
   simp[Semantics.consequence_iff, compact (T := insert (~f) T)]
   constructor
-  · intro ⟨u, ss, hu⟩; exact ⟨Finset.erase u (~f), by simp[ss], by { simp; intro h; exact hu (Semantics.satisfiableₛ_of_subset h (by simp)) }⟩
-  · intro ⟨u, ss, hu⟩; exact ⟨insert (~f) u, by simpa using Set.insert_subset_insert ss, by simpa using hu⟩
+  · intro ⟨u, ss, hu⟩
+    exact ⟨Finset.erase u (~f), by simp[ss],
+      by simp; intro h; exact hu (Semantics.Satisfiableₛ.of_subset h (by simp))⟩
+  · intro ⟨u, ss, hu⟩
+    exact ⟨insert (~f) u,
+      by simpa using Set.insert_subset_insert ss, by simpa using hu⟩
+
+lemma compact_cumulative {T : ℕ → Set F} (hT : Cumulative T) :
+    Semantics.Satisfiableₛ (⋃ s, T s) ↔ ∀ s, Semantics.Satisfiableₛ (T s) :=
+  ⟨by intro H s
+      exact H.of_subset (Set.subset_iUnion T s),
+   by intro H
+      apply compact.mpr
+      intro u hu
+      rcases hT.finset_mem hu with ⟨s, hs⟩
+      exact (H s).of_subset hs ⟩
 
 end Compact
 

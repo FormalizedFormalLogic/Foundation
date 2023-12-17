@@ -64,12 +64,11 @@ abbrev Ind (U) (T : Theory L) := System.Subtheory (Theory.IndScheme U) T
 
 abbrev IOpen (T : Theory L) := Ind Subformula.qfree T
 
-abbrev ISigma (k : ℕ) (T : Theory L) := Ind (Arith.Hierarchy.Sigma k) T
-
-abbrev IPi (k : ℕ) (T : Theory L) := Ind (Arith.Hierarchy.Pi k) T
+abbrev IDelta (k : ℕ) (T : Theory L) := Ind (Arith.Hierarchy.Sigma k) T
 
 abbrev Peano (T : Theory L) := Ind Set.univ T
 
+/-
 namespace Axiom
 
 variable (L)
@@ -104,6 +103,7 @@ instance (u : Set (Subsentence L 1)) : Arith.PAminus (Ind u) :=
 instance (u : Set (Subsentence L 1)) : Arith.Ind u (Ind u) := System.Subtheory.ofSubset _ _ (by simp[Ind])
 
 end Axiom
+-/
 
 end Arith
 

@@ -8,8 +8,6 @@ namespace FirstOrder
 namespace Arith
 open Language
 
-namespace Semantics
-
 instance standardModel : Structure ℒₒᵣ ℕ where
   func := fun _ f =>
     match f with
@@ -42,7 +40,7 @@ instance : Structure.LT ℒₒᵣ ℕ := ⟨fun _ _ => iff_of_eq rfl⟩
 
 instance : ORing ℒₒᵣ := ORing.mk
 
-lemma modelsTheoryPAminusAux : ℕ ⊧* Theory.PAminus ℒₒᵣ := by
+lemma modelsTheoryPAminus : ℕ ⊧* Theory.PAminus ℒₒᵣ := by
   intro σ h
   rcases h <;> simp[models_def, ←le_iff_eq_or_lt]
   case addAssoc => intro l m n; exact add_assoc l m n
@@ -56,21 +54,19 @@ lemma modelsTheoryPAminusAux : ℕ ⊧* Theory.PAminus ℒₒᵣ := by
   case ltTrans => intro l m n; exact Nat.lt_trans
   case ltTri => intro n m; exact Nat.lt_trichotomy n m
 
-theorem modelsTheoryPAminus : ℕ ⊧* Axiom.PAminus ℒₒᵣ := by
-  simp[Axiom.PAminus, modelsTheoryPAminusAux]
-
 lemma modelsSuccInd (σ : Subsentence ℒₒᵣ (k + 1)) : ℕ ⊧ (Arith.succInd σ) := by
   simp[succInd, models_iff, Matrix.constant_eq_singleton, Matrix.comp_vecCons', Subformula.eval_substs]
   intro e hzero hsucc x; induction' x with x ih
   · exact hzero
   · exact hsucc x ih
 
-lemma modelsPeano : ℕ ⊧* Axiom.Peano ℒₒᵣ :=
-  by simp[Axiom.Peano, Axiom.Ind, Theory.IndScheme, modelsSuccInd, modelsTheoryPAminus]
+lemma modelsPeano : ℕ ⊧* (Theory.IndScheme Set.univ ∪ Theory.PAminus ℒₒᵣ ∪ Theory.Eq ℒₒᵣ) :=
+  by simp[Theory.IndScheme, modelsSuccInd, modelsTheoryPAminus]
 
 end standardModel
 
-theorem Peano.Consistent : System.Consistent (Axiom.Peano ℒₒᵣ) :=
+theorem Peano.Consistent :
+    System.Consistent (Theory.IndScheme Set.univ ∪ Theory.PAminus ℒₒᵣ ∪ Theory.Eq ℒₒᵣ) :=
   Sound.consistent_of_model standardModel.modelsPeano
 
 variable (L : Language.{u}) [ORing L]
@@ -83,7 +79,28 @@ structure Cut (M : Type w) [s : Structure L M] where
 structure ClosedCut (M : Type w) [s : Structure L M] extends Structure.ClosedSubset L M where
   closedLt : ∀ x y : M, Subformula.PVal s ![x, y] “#0 < #1” → y ∈ domain → x ∈ domain
 
-end Semantics
+end Arith
+
+abbrev Theory.trueArith : Theory ℒₒᵣ := Structure.theory ℒₒᵣ ℕ
+
+abbrev Language.oRingStar : Language := ℒₒᵣ + Language.unit
+
+namespace Arith
+
+/-
+structure NonstandardNat where
+  toNat : ℕ
+
+notation "ℕ*" => NonstandardNat
+
+def toNonstandardNat : ℕ → ℕ* := NonstandardNat.mk
+
+-/
+
+namespace NonstandardNat
+
+
+end NonstandardNat
 
 end Arith
 

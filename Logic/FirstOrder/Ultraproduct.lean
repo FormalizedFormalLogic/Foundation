@@ -7,7 +7,9 @@ namespace FirstOrder
 section
 
 variable {L : Language.{u}} {μ : Type v}
- {I : Type u} (A : I → Type u) [(ι : I) → Inhabited (A ι)] [s : (ι : I) → FirstOrder.Structure L (A ι)] (𝓤 : Ultrafilter I)
+ {I : Type u} (A : I → Type u)
+ [(ι : I) → Inhabited (A ι)] [s : (ι : I) → FirstOrder.Structure L (A ι)]
+ (𝓤 : Ultrafilter I)
 
 namespace Structure
 
@@ -118,7 +120,6 @@ variable (A : FinSubtheory T → Type u) [s : (ι : FinSubtheory T) → Structur
 
 instance : Inhabited (FinSubtheory T) := ⟨∅, by simp⟩
 
-
 lemma ultrafilter_exists (H : ∀ (ι : FinSubtheory T), (A ι) ⊧* (ι.val : Theory L)) :
     ∃ 𝓤 : Ultrafilter (FinSubtheory T), Set.image (Subformula.domain A) T ⊆ 𝓤.sets :=
   Ultrafilter.exists_ultrafilter_of_finite_inter_nonempty _ (by
@@ -132,7 +133,7 @@ lemma ultrafilter_exists (H : ∀ (ι : FinSubtheory T), (A ι) ⊧* (ι.val : T
 lemma compactnessAux :
     Semantics.Satisfiableₛ T ↔ ∀ ι : FinSubtheory T, Semantics.Satisfiableₛ (ι.val : Theory L) := by
   constructor
-  · rintro h ⟨t, ht⟩; exact Semantics.satisfiableₛ_of_subset h ht
+  · rintro h ⟨t, ht⟩; exact Semantics.Satisfiableₛ.of_subset h ht
   · intro h
     have : ∀ ι : FinSubtheory T, ∃ (M : Type u) (_ : Inhabited M) (_ : Structure L M), M ⊧* (ι.val : Theory L) :=
       by intro ι; exact satisfiableₛ_iff.mp (h ι)

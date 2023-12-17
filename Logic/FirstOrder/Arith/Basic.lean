@@ -83,8 +83,6 @@ lemma consequence_of (σ : Sentence L)
   (Structure.ElementaryEquiv.models (Structure.Model.elementaryEquiv L M)).mpr
     (H (Structure.Model L M))
 
-scoped notation "ℒₒᵣ" => Language.oRing
-
 end Arith
 
 end FirstOrder
