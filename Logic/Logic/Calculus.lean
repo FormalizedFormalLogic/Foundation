@@ -12,6 +12,14 @@ prefix: 45 " ⊢¹ " => OneSided.Derivation
 
 infix: 45 " ⊢² " => TwoSided.Derivation
 
+abbrev OneSided.Derivable [OneSided F] (Δ : List F) : Prop := Nonempty (⊢¹ Δ)
+
+abbrev TwoSided.Derivable [TwoSided F] (Γ Δ : List F) : Prop := Nonempty (Γ ⊢² Δ)
+
+prefix: 45 " ⊢¹! " => OneSided.Derivation
+
+infix: 45 " ⊢²! " => TwoSided.Derivable
+
 class Tait (F : Type u) [LogicSymbol F] extends OneSided F where
   verum (Δ : List F)         : ⊢¹ ⊤ :: Δ
   and {p q : F} {Δ : List F} : ⊢¹ p :: Δ → ⊢¹ q :: Δ → ⊢¹ p ⋏ q :: Δ
@@ -127,11 +135,24 @@ end Tait
 
 namespace Gentzen
 
-variable [Gentzen F]
+variable [Gentzen F] [Gentzen.Cut F] {Γ Δ E : List F}
+
 
 def wkLeft {Γ Γ' Δ : List F} (d : Γ ⊢² Δ) (ss : Γ ⊆ Γ') : Γ' ⊢² Δ := wk d ss (by simp)
 
 def wkRight {Γ Δ Δ' : List F} (d : Γ ⊢² Δ) (ss : Δ ⊆ Δ') : Γ ⊢² Δ' := wk d (by simp) ss
+
+def ofNegLeft {p} (b : ~p :: Γ ⊢² Δ) : Γ ⊢² p :: Δ :=
+  let d : p :: Γ ⊢² p :: Δ :=
+    Gentzen.wk (show [p] ⊢² [p] from em (List.mem_singleton.mpr rfl) (List.mem_singleton.mpr rfl))
+      (by simp) (by simp)
+  Cut.cut (negRight d) (wkRight b (by simp))
+
+def ofNegRight {p} (b : Γ ⊢² ~p :: Δ) : p :: Γ ⊢² Δ :=
+  let d : p :: Γ ⊢² p :: Δ :=
+    Gentzen.wk (show [p] ⊢² [p] from em (List.mem_singleton.mpr rfl) (List.mem_singleton.mpr rfl))
+      (by simp) (by simp)
+  Cut.cut (wkLeft b (by simp)) (negLeft d)
 
 structure DerivationM (T : Set F) (Γ : List F) where
   antecedent : List F
@@ -140,20 +161,24 @@ structure DerivationM (T : Set F) (Γ : List F) where
 
 infix: 45 " ⊢²' " => DerivationM
 
-variable {T : Set F} {Γ Δ E : List F}
+variable {T : Set F}
+
+def DerivationMEquivDerivation :
+    T ⊢²' Γ ≃ (Δ : {Δ : List F // ∀ π ∈ Δ, π ∈ T}) × Δ ⊢² Γ where
+  toFun := fun b => ⟨⟨b.antecedent, b.antecedent_ss⟩, b.bew⟩
+  invFun := fun p => ⟨p.1, p.1.prop, p.2⟩
+  left_inv := fun b => by simp
+  right_inv := fun b => by simp
 
 def DerivationM.weakening {T U : Set F} {Γ : List F} (b : T ⊢²' Γ) (h : T ⊆ U) : U ⊢²' Γ where
   antecedent := b.antecedent
   antecedent_ss := fun p hp => h (b.antecedent_ss p hp)
   bew := b.bew
 
-
-def proofOfDerivation {Γ Δ} (d : Γ ⊢² Δ) (ss : ∀ p ∈ Γ, p ∈ T) : T ⊢²' Δ where
+def toDerivationM {Γ Δ} (d : Γ ⊢² Δ) (ss : ∀ p ∈ Γ, p ∈ T) : T ⊢²' Δ where
   antecedent := Γ
   antecedent_ss := ss
   bew := d
-
-variable [Gentzen.Cut F]
 
 def Cut.cut' {Γ₁ Γ₂ Δ₁ Δ₂ : List F} (d₁ : Γ₁ ⊢² p :: Δ₁) (d₂ : p :: Γ₂ ⊢² Δ₂) : Γ₁ ++ Γ₂ ⊢² Δ₁ ++ Δ₂ :=
   let d₁ : Γ₁ ++ Γ₂ ⊢² p :: (Δ₁ ++ Δ₂) := wk d₁ (by simp) (List.cons_subset_cons _ $ by simp)
@@ -191,11 +216,33 @@ def cut' (b : T ⊢²' p :: Γ) (b' : T ⊢²' ~p :: Δ) : T ⊢²' Γ ++ Δ whe
     let d' : b.antecedent ++ b'.antecedent ⊢² ~p :: Δ := wkLeft b'.bew (by simp)
     exact Gentzen.wk (Cut.cut' d' (negLeft d)) (by simp) (by simp)
 
+def verum (Γ : List F) : T ⊢²' ⊤ :: Γ := ⟨[], by simp, Gentzen.verum _ _⟩
+
+def deduction [DecidableEq F] {p} (b : insert p T ⊢²' Δ) : T ⊢²' ~p :: Δ where
+  antecedent := b.antecedent.filter (· ≠ p)
+  antecedent_ss := by
+    simp[List.mem_filter]
+    intro q hq ne
+    simpa[ne] using b.antecedent_ss q hq
+  bew := negRight (wkLeft b.bew $ by
+    intro q hq
+    by_cases e : q = p <;> simp[List.mem_filter, hq, e])
+
+def deductionNeg [DecidableEq F] {p} (b : insert (~p) T ⊢²' Δ) : T ⊢²' p :: Δ where
+  antecedent := b.antecedent.filter (· ≠ ~p)
+  antecedent_ss := by
+    simp[List.mem_filter]
+    intro q hq ne
+    simpa[ne] using b.antecedent_ss q hq
+  bew := ofNegLeft (wkLeft b.bew $ by
+    intro q hq
+    by_cases e : q = ~p <;> simp[List.mem_filter, hq, e])
+
 end DerivationM
 
 variable (F)
 
-def system : System F where
+instance : System F where
   Bew := fun T p => T ⊢²' [p]
   axm := fun {T p} h =>
     ⟨[p], by simpa,
@@ -205,16 +252,61 @@ def system : System F where
 variable {F}
 
 def toProof :
-    letI := system F
     {Γ Δ : List F} → Γ ⊢² Δ → (∀ q ∈ Γ, T ⊢ q) → T ⊢²' Δ
-  | [],     _, d, _ => proofOfDerivation d (by simp)
+  | [],     _, d, _ => toDerivationM d (by simp)
   | q :: Γ, Δ, d, h =>
     let bn : T ⊢²' ~q :: Δ := toProof (negRight d) (fun q hq => h q (by simp[hq]))
     let b : T ⊢²' [q] := h q (by simp)
     b.cut' bn
 
-instance : letI := system F; LawfulGentzen F :=
-  letI := system F; ⟨toProof⟩
+instance : LawfulGentzen F := ⟨toProof⟩
+
+def proofEquivDerivation {p : F} :
+    T ⊢ p ≃ (Δ : {Δ : List F // ∀ π ∈ Δ, π ∈ T}) × Δ ⊢² [p] :=
+  DerivationMEquivDerivation
+
+lemma provable_iff {p : F} :
+    T ⊢! p ↔ ∃ Δ : List F, (∀ π ∈ Δ, π ∈ T) ∧ Δ ⊢²! [p] :=
+  ⟨by rintro ⟨b⟩; rcases proofEquivDerivation b with ⟨Δ, d⟩; exact ⟨Δ, Δ.prop, ⟨d⟩⟩,
+   by rintro ⟨Δ, h, ⟨d⟩⟩; exact ⟨proofEquivDerivation.symm ⟨⟨Δ, h⟩, d⟩⟩⟩
+
+theorem compact :
+    System.Consistent T ↔ ∀ T' : Finset F, ↑T' ⊆ T → System.Consistent (T' : Set F) :=
+  ⟨fun c u hu => c.of_subset hu,
+   fun h => ⟨by
+    letI := Classical.typeDecidableEq F
+    rintro ⟨Δ, hΔ, d⟩
+    exact (System.unprovable_iff_not_provable.mp $
+      System.consistemt_iff_unprovable.mp $ h Δ.toFinset (by intro p; simpa using hΔ p))
+      (provable_iff.mpr $ ⟨Δ, by simp, ⟨d⟩⟩)⟩⟩
+
+lemma consistent_iff_empty_sequent :
+    System.Consistent T ↔ IsEmpty (T ⊢²' []) :=
+  ⟨by contrapose; simp[System.Consistent]; intro b; exact ⟨b.wk (by simp)⟩,
+   by contrapose; simp[System.Consistent]
+      rintro ⟨Δ, h, d⟩
+      have : Δ ⊢² [] := Cut.cut d (falsum _ _)
+      exact ⟨toDerivationM this h⟩⟩
+
+lemma provable_iff_inConsistent {p} :
+    T ⊢! p ↔ ¬System.Consistent (insert (~p) T) :=
+  ⟨by rintro ⟨⟨Δ, h, d⟩⟩
+      simp[consistent_iff_empty_sequent]
+      exact ⟨⟨~p :: Δ, by simp; intro q hq; right; exact h q hq, negLeft d⟩⟩,
+   by letI := Classical.typeDecidableEq F
+      simp[consistent_iff_empty_sequent]
+      intro b
+      exact ⟨b.deductionNeg⟩⟩
+
+lemma inconsistent_of_provable_and_refutable {p}
+    (bp : T ⊢ p) (br : T ⊢ ~p) : ¬System.Consistent T := fun A => by
+  have : T ⊢²' [] := DerivationM.cut bp br
+  exact (consistent_iff_empty_sequent.mp A).false this
+
+lemma inconsistent_of_provable_and_refutable' {p}
+    (bp : T ⊢! p) (br : T ⊢! ~p) : ¬System.Consistent T := by
+  rcases bp with ⟨bp⟩; rcases br with ⟨br⟩
+  exact inconsistent_of_provable_and_refutable bp br
 
 end Gentzen
 

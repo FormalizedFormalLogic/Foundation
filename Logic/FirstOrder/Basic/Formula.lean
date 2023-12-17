@@ -52,6 +52,14 @@ instance : LogicSymbol (Subformula L μ n) where
   top := verum
   bot := falsum
 
+instance : DeMorgan (Subformula L μ n) where
+  verum := rfl
+  falsum := rfl
+  imply := fun _ _ => rfl
+  and := fun _ _ => rfl
+  or := fun _ _ => rfl
+  neg := neg_neg
+
 instance : UnivQuantifier (Subformula L μ) := ⟨all⟩
 
 instance : ExQuantifier (Subformula L μ) := ⟨ex⟩
@@ -429,10 +437,10 @@ lemma mapl_inj : ∀ {n₁ n₂ μ₁ μ₂} {b : Fin n₁ → Fin n₂} {e : μ
     intro h; exact mapl_inj (b := 0 :> Fin.succ ∘ b)
       (Matrix.injective_vecCons ((Fin.succ_injective _).comp hb) (fun _ => (Fin.succ_ne_zero _).symm)) hf h
 
-lemma emb.hom_Injective {o} [e : IsEmpty o] : Function.Injective (emb.hom : Subformula L o n → Subformula L μ n) :=
+lemma emb.hom_injective {o} [e : IsEmpty o] : Function.Injective (emb.hom : Subformula L o n → Subformula L μ n) :=
   by simp[emb]; exact mapl_inj Function.injective_id (fun x => IsEmpty.elim e x)
 
-lemma shift.hom_Injective : Function.Injective (shift.hom : SyntacticSubformula L n → SyntacticSubformula L n) :=
+lemma shift.hom_injective : Function.Injective (shift.hom : SyntacticSubformula L n → SyntacticSubformula L n) :=
   by simp[shift]; exact mapl_inj Function.injective_id Nat.succ_injective
 
 @[simp] lemma hom_fix_free (p : SyntacticSubformula L (n + 1)) :
@@ -510,7 +518,7 @@ variable {L : Language.{u}} {μ : Type v} {n n₁ n₂ n₂ m m₁ m₂ m₃ : �
 
 def shiftEmb : SyntacticSubformula L n ↪ SyntacticSubformula L n where
   toFun := Rew.shift.hom
-  inj' := Rew.shift.hom_Injective
+  inj' := Rew.shift.hom_injective
 
 lemma shiftEmb_eq_shift (p : SyntacticSubformula L n) :
   shiftEmb p = Rew.shift.hom p := rfl

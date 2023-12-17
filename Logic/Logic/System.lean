@@ -20,6 +20,18 @@ def BewTheory (T U : Set F) : Type u := {f : F} → f ∈ U → T ⊢ f
 
 infix:45 " ⊢* " => System.BewTheory
 
+abbrev Provable (T : Set F) (f : F) : Prop := Nonempty (T ⊢ f)
+
+infix:45 " ⊢! " => System.Provable
+
+noncomputable def Provable.toProof {T : Set F} {f : F} (h : T ⊢! f) : T ⊢ f := Classical.choice h
+
+abbrev Unprovable (T : Set F) (f : F) : Prop := IsEmpty (T ⊢ f)
+
+infix:45 " ⊬ " => System.Unprovable
+
+lemma unprovable_iff_not_provable {T : Set F} {f : F} : T ⊬ f ↔ ¬T ⊢! f := by simp[System.Unprovable]
+
 def BewTheoryEmpty (T : Set F) : T ⊢* ∅ := fun h => by contradiction
 
 def BewTheory.ofSubset {T U : Set F} (h : U ⊆ T) : T ⊢* U := fun hf => axm (h hf)
@@ -34,17 +46,7 @@ lemma Consistent.of_subset {T U : Set F} (h : Consistent U) (ss : T ⊆ U) : Con
 
 lemma inconsistent_of_proof {T : Set F} (b : T ⊢ ⊥) : ¬Consistent T := by simp[Consistent]; exact ⟨b⟩
 
-abbrev Provable (T : Set F) (f : F) : Prop := Nonempty (T ⊢ f)
-
-infix:45 " ⊢! " => System.Provable
-
-noncomputable def Provable.toProof {T : Set F} {f : F} (h : T ⊢! f) : T ⊢ f := Classical.choice h
-
-abbrev Unprovable (T : Set F) (f : F) : Prop := IsEmpty (T ⊢ f)
-
-infix:45 " ⊬ " => System.Unprovable
-
-lemma unprovable_iff_not_provable {T : Set F} {f : F} : T ⊬ f ↔ ¬T ⊢! f := by simp[System.Unprovable]
+lemma consistemt_iff_unprovable {T : Set F} : Consistent T ↔ T ⊬ ⊥ := by rfl
 
 protected def Complete (T : Set F) : Prop := ∀ f, (T ⊢! f) ∨ (T ⊢! ~f)
 
