@@ -157,6 +157,8 @@ class DeMorgan (F : Type*) [LogicSymbol F] where
   or (p q : F)    : ~(p ⋎ q) = ~p ⋏ ~q
   neg (p : F)     : ~~p = p
 
+attribute [simp] DeMorgan.verum DeMorgan.falsum DeMorgan.and DeMorgan.or DeMorgan.neg
+
 namespace LogicSymbol
 
 section
