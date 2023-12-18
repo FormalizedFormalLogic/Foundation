@@ -13,6 +13,7 @@ import Mathlib.Logic.Encodable.Basic
 import Mathlib.Computability.Primrec
 import Mathlib.Computability.Partrec
 import Mathlib.Data.Finset.Sort
+import Mathlib.Data.List.Card
 
 namespace Nat
 variable {α : ℕ → Sort u}
@@ -596,6 +597,37 @@ lemma mapM_map (as : List α) (f : α → Option β) (g : Option β → Option �
 @[simp] lemma allSome_map_some (l : List α) (f : α → β) :
     allSome' (l.map (fun x => some (f x))) = some (l.map f) := by
   simp[allSome', mapM_map]
+
+lemma append_subset_append {l₁ l₂ l : List α} (h : l₁ ⊆ l₂) : l₁ ++ l ⊆ l₂ ++ l :=
+  List.append_subset.mpr ⟨List.subset_append_of_subset_left _ h, subset_append_right l₂ l⟩
+
+lemma subset_of_eq {l₁ l₂ : List α} (e : l₁ = l₂) : l₁ ⊆ l₂ := by simp[e]
+
+@[simp] lemma remove_cons_self [DecidableEq α] (l : List α) (a) :
+  (a :: l).remove a = l.remove a := by simp[remove]
+
+lemma remove_cons_of_ne [DecidableEq α] (l : List α) {a b} (ne : a ≠ b) :
+  (a :: l).remove b = a :: l.remove b := by simp[remove, Ne.symm ne]
+
+lemma remove_subset [DecidableEq α] (a) (l : List α) :
+    l.remove a ⊆ l := by
+  simp[subset_def, mem_remove_iff]
+  intros; simp[*]
+
+lemma remove_subset_remove [DecidableEq α] (a) {l₁ l₂ : List α} (h : l₁ ⊆ l₂) :
+    l₁.remove a ⊆ l₂.remove a := by
+  simp[subset_def, mem_remove_iff]; intros; simp[*]; exact h (by assumption)
+
+lemma remove_cons_subset_cons_remove [DecidableEq α] (a b) (l : List α) :
+    (a :: l).remove b ⊆ a :: l.remove b := by
+  intro x; simp[List.mem_remove_iff]
+  rintro (rfl | hx) nex <;> simp[*]
+
+lemma remove_map_substet_map_remove [DecidableEq α] [DecidableEq β] (f : α → β) (l : List α) (a) :
+    (l.map f).remove (f a) ⊆ (l.remove a).map f := by
+  simp[List.subset_def, List.mem_remove_iff]
+  intro b hb neb;
+  exact ⟨b, ⟨hb, by rintro rfl; exact neb rfl⟩, rfl⟩
 
 end List
 

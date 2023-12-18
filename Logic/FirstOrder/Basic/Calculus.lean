@@ -22,7 +22,7 @@ local postfix:max "⁺" => shifts
 @[simp] lemma shifts_ss (Δ Γ : List (SyntacticSubformula L n)) :
     Δ⁺ ⊆ Γ⁺ ↔ Δ ⊆ Γ := List.map_subset_iff _ Rew.shift.hom_injective
 
-lemma shifts_insert (p : SyntacticSubformula L n) (Δ : List (SyntacticSubformula L n)) :
+lemma shifts_cons (p : SyntacticSubformula L n) (Δ : List (SyntacticSubformula L n)) :
     (p :: Δ)⁺ = Rew.shift.hom p :: Δ⁺ := by simp[shifts]
 
 lemma shifts_union (Δ Γ : List (SyntacticSubformula L n)) :
