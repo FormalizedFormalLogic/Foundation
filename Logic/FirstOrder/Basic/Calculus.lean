@@ -393,6 +393,8 @@ def toTait {Γ : List (Sentence L)} (d : ⊢ᶜ Γ.map Rew.emb.hom) : ⊢¹ Γ :
 
 def ofTait {Γ : List (Sentence L)} (d : ⊢¹ Γ) : ⊢ᶜ Γ.map Rew.emb.hom := d
 
+def toOneSided {Δ : List (Sentence L)} (b : ⊢ᶜ[P] Δ.map Rew.emb.hom) : ⊢¹ Δ := b.cutWeakening (by simp)
+
 end DerivationCR
 
 instance : Tait (SyntacticFormula L) where
