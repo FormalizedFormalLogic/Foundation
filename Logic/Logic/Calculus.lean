@@ -47,7 +47,7 @@ class Gentzen (F : Type u) [LogicSymbol F] extends TwoSided F where
 class Gentzen.Cut (F : Type u) [LogicSymbol F] [Gentzen F] where
   cut {Γ Δ : List F} {p} : Γ ⊢² p :: Δ → p :: Γ ⊢² Δ → Γ ⊢² Δ
 
-class LawfulGentzen (F : Type u) [LogicSymbol F] [System F] extends Gentzen F where
+class LawfulTwoSided (F : Type u) [LogicSymbol F] [TwoSided F] [System F] where
   toProof₁ {Γ} {T : Set F} {p : F} : Γ ⊢² [p] → (∀ q ∈ Γ, T ⊢ q) → T ⊢ p
 
 variable {F : Type*} [LogicSymbol F]
@@ -284,7 +284,7 @@ def toProof :
     let b : T ⊢' [q] := h q (by simp)
     b.cut' bn
 
-instance : LawfulGentzen F := ⟨toProof⟩
+instance : LawfulTwoSided F := ⟨toProof⟩
 
 def proofEquivDerivation {p : F} :
     T ⊢ p ≃ (Δ : {Δ : List F // ∀ π ∈ Δ, π ∈ T}) × Δ ⊢² [p] :=
@@ -335,9 +335,9 @@ lemma inconsistent_of_provable_and_refutable' {p}
 
 end Gentzen
 
-namespace LawfulGentzen
+namespace LawfulTwoSided
 
-variable [System F] [LawfulGentzen F]
+variable [System F] [TwoSided F] [LawfulTwoSided F]
 
 def toProofOfNil {p : F} (b : [] ⊢² [p]) (T : Set F) : T ⊢ p :=
   toProof₁ b (by intro q h; exact False.elim ((List.mem_nil_iff q).mp h))
@@ -345,6 +345,6 @@ def toProofOfNil {p : F} (b : [] ⊢² [p]) (T : Set F) : T ⊢ p :=
 lemma toProof₁! {Γ} {T : Set F} {p : F} (b : Γ ⊢² [p]) (H : ∀ q ∈ Γ, T ⊢! q) : T ⊢! p :=
   ⟨toProof₁ b (fun q hq => (H q hq).toProof)⟩
 
-end LawfulGentzen
+end LawfulTwoSided
 
 end LO

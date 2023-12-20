@@ -4,7 +4,7 @@ namespace LO
 
 namespace FirstOrder
 
-variable {L : Language.{u}} [FirstOrder.ORing L] {μ : Type v}
+variable {L : Language} [FirstOrder.ORing L] {μ : Type v}
 
 namespace Arith
 

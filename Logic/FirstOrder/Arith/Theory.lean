@@ -4,9 +4,7 @@ namespace LO
 
 namespace FirstOrder
 
-variable {L : Language.{u}} [FirstOrder.ORing L]
-  [(k : ℕ) → DecidableEq (L.Func k)] [(k : ℕ) → DecidableEq (L.Rel k)]
-
+variable {L : Language} [FirstOrder.ORing L]
 
 namespace Arith
 

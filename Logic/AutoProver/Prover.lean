@@ -9,36 +9,36 @@ variable {F : Type*} [LogicSymbol F] [Gentzen F]
 
 variable {Γ Δ : List F} {p q r : F}
 
-def rotateLeft (d : Γ ++ [p] ⊢ᴳ Δ) : p :: Γ ⊢ᴳ Δ := wk d (by simp) (by simp)
+def rotateLeft (d : Γ ++ [p] ⊢² Δ) : p :: Γ ⊢² Δ := wk d (by simp) (by simp)
 
-def rotateRight (d : Γ ⊢ᴳ Δ ++ [p]) : Γ ⊢ᴳ p :: Δ := wk d (by simp) (by simp)
+def rotateRight (d : Γ ⊢² Δ ++ [p]) : Γ ⊢² p :: Δ := wk d (by simp) (by simp)
 
-def rEmLeft (h : p ∈ Δ) : p :: Γ ⊢ᴳ Δ := em (by simp) h
+def rEmLeft (h : p ∈ Δ) : p :: Γ ⊢² Δ := em (by simp) h
 
-def rEmRight (h : p ∈ Γ) : Γ ⊢ᴳ p :: Δ := em h (by simp)
+def rEmRight (h : p ∈ Γ) : Γ ⊢² p :: Δ := em h (by simp)
 
-def rNegLeft (dp : Γ ⊢ᴳ Δ ++ [p]) : ~p :: Γ ⊢ᴳ Δ :=
+def rNegLeft (dp : Γ ⊢² Δ ++ [p]) : ~p :: Γ ⊢² Δ :=
   negLeft (wk dp (by simp) (by simp))
 
-def rNegRight (dp : Γ ++ [p] ⊢ᴳ Δ) : Γ ⊢ᴳ ~p :: Δ :=
+def rNegRight (dp : Γ ++ [p] ⊢² Δ) : Γ ⊢² ~p :: Δ :=
   negRight (wk dp (by simp) (by simp))
 
-def rOrLeft (dp : Γ ++ [p] ⊢ᴳ Δ) (dq : Γ ++ [q] ⊢ᴳ Δ) : p ⋎ q :: Γ ⊢ᴳ Δ :=
+def rOrLeft (dp : Γ ++ [p] ⊢² Δ) (dq : Γ ++ [q] ⊢² Δ) : p ⋎ q :: Γ ⊢² Δ :=
   orLeft (wk dp (by simp) (by simp)) (wk dq (by simp) (by simp))
 
-def rOrRight (d : Γ ⊢ᴳ Δ ++ [p, q]) : Γ ⊢ᴳ p ⋎ q :: Δ :=
+def rOrRight (d : Γ ⊢² Δ ++ [p, q]) : Γ ⊢² p ⋎ q :: Δ :=
   orRight (wk d (by simp) $ by simpa using List.subset_cons_of_subset p (List.subset_cons q Δ))
 
-def rAndLeft (d : Γ ++ [p, q] ⊢ᴳ Δ) : p ⋏ q :: Γ ⊢ᴳ Δ :=
+def rAndLeft (d : Γ ++ [p, q] ⊢² Δ) : p ⋏ q :: Γ ⊢² Δ :=
   andLeft (wk d (by simpa using List.subset_cons_of_subset p (List.subset_cons q Γ)) (by simp))
 
-def rAndRight (dp : Γ ⊢ᴳ Δ ++ [p]) (dq : Γ ⊢ᴳ Δ ++ [q]) : Γ ⊢ᴳ p ⋏ q :: Δ :=
+def rAndRight (dp : Γ ⊢² Δ ++ [p]) (dq : Γ ⊢² Δ ++ [q]) : Γ ⊢² p ⋏ q :: Δ :=
   andRight (wk dp (by simp) (by simp)) (wk dq (by simp) (by simp))
 
-def rImplyLeft (dp : Γ ⊢ᴳ Δ ++ [p]) (dq : Γ ++ [q] ⊢ᴳ Δ) : (p ⟶ q) :: Γ ⊢ᴳ Δ :=
+def rImplyLeft (dp : Γ ⊢² Δ ++ [p]) (dq : Γ ++ [q] ⊢² Δ) : (p ⟶ q) :: Γ ⊢² Δ :=
   implyLeft (wk dp (by simp) (by simp)) (wk dq (by simp) (by simp))
 
-def rImplyRight (d : Γ ++ [p] ⊢ᴳ Δ ++ [q]) : Γ ⊢ᴳ (p ⟶ q) :: Δ :=
+def rImplyRight (d : Γ ++ [p] ⊢² Δ ++ [q]) : Γ ⊢² (p ⟶ q) :: Δ :=
   implyRight (wk d (by simp) (by simp))
 
 end Gentzen
@@ -49,13 +49,13 @@ open Qq Lean Elab Meta Tactic Litform Litform.Meta
 #check TwoSided.Derivation
 
 set_option linter.unusedVariables false in
-abbrev DerivationQ {F : Q(Type u)} (instLS : Q(LogicSymbol $F)) (instGz : Q(Gentzen.{u,v} $F)) (L R : List (Lit F)) :=
+abbrev DerivationQ {F : Q(Type u)} (instLS : Q(LogicSymbol $F)) (instGz : Q(Gentzen $F)) (L R : List (Lit F)) :=
   Q(TwoSided.Derivation $(Denotation.toExprₗ (denotation F instLS) L) $(Denotation.toExprₗ (denotation F instLS) R))
 
 namespace DerivationQ
 open Denotation
 
-variable {F : Q(Type u)} {instLS : Q(LogicSymbol $F)} {instGz : Q(Gentzen.{u, v} $F)} (L R : List (Lit F))
+variable {F : Q(Type u)} {instLS : Q(LogicSymbol $F)} {instGz : Q(Gentzen $F)} (L R : List (Lit F))
 
 def DEq {F : Q(Type*)} : Lit F → Lit F → MetaM Bool
   | Litform.atom e,  Litform.atom e'  => Lean.Meta.isDefEq e e'
@@ -166,7 +166,7 @@ def rImplyRight {p q : Lit F} (d : DerivationQ instLS instGz (L ++ [p]) (R ++ [q
     ($(Denotation.toExprₗ (denotation F instLS) R) ++ [$(toExpr F q)])) := d
   q(Gentzen.rImplyRight $d)
 
-def deriveAux {F : Q(Type u)} (instLS : Q(LogicSymbol $F)) (instGz : Q(Gentzen.{u, v} $F)) :
+def deriveAux {F : Q(Type u)} (instLS : Q(LogicSymbol $F)) (instGz : Q(Gentzen $F)) :
     ℕ → Bool → (L R : List (Lit F)) → MetaM (DerivationQ instLS instGz L R)
   | 0,        _,     L,      R       => throwError m!"failed to prove {L} ⊢ {R}"
   | s + 1,    true,  [],     R       => deriveAux instLS instGz s false [] R
@@ -219,7 +219,7 @@ def deriveAux {F : Q(Type u)} (instLS : Q(LogicSymbol $F)) (instGz : Q(Gentzen.{
       let d ← deriveAux instLS instGz s true (L ++ [p]) (R ++ [q])
       return rImplyRight L R d
 
-def derive {F : Q(Type u)} (instLS : Q(LogicSymbol $F)) (instGz : Q(Gentzen.{u, v} $F)) (s : ℕ) (L R : List (Lit F)) :
+def derive {F : Q(Type u)} (instLS : Q(LogicSymbol $F)) (instGz : Q(Gentzen $F)) (s : ℕ) (L R : List (Lit F)) :
     MetaM (DerivationQ instLS instGz L R) := deriveAux instLS instGz s true L R
 
 end DerivationQ
@@ -232,14 +232,15 @@ section
 
 open Litform.Meta Denotation
 
-variable {F : Q(Type u)} (instLS : Q(LogicSymbol $F)) (instSys : Q(System $F)) (instLGz : Q(LawfulGentzen.{u, v} $F))
+variable {F : Q(Type u)} (instLS : Q(LogicSymbol $F)) (instSys : Q(System $F))
+  (instGz : Q(Gentzen $F)) (instLTS : Q(LawfulTwoSided $F))
 
 
 def prove! (s : ℕ) (T : Q(Set $F)) (p : Q($F)) : MetaM Q($T ⊢! $p) :=
   letI := Litform.Meta.denotation F instLS; do
   let lp : Litform.Meta.Lit F ← Denotation.denote F p
-  let d' : Q([] ⊢ᴳ [$p]) ← DerivationQ.derive instLS q(LawfulGentzen.toGentzen) s [] [lp]
-  let b : Q($T ⊢! $p) := q(⟨LawfulGentzen.toProofOfNil $d' $T⟩)
+  let d' : Q([] ⊢² [$p]) ← DerivationQ.derive instLS instGz s [] [lp]
+  let b : Q($T ⊢! $p) := q(⟨LawfulTwoSided.toProofOfNil $d' $T⟩)
   return b
 
 syntax termSeq := "[" (term,*) "]"
@@ -255,13 +256,13 @@ def proverL₀ (T : Q(Set $F)) (seq : Option (TSyntax `LO.AutoProver.termSeq)) :
     TermElabM ((L₀ : List (Lit F)) × Q(∀ q ∈ $(toExprₗ (denotation F instLS) L₀), $T ⊢! q)) :=
   letI := denotation F instLS; do
   let E ← (match seq with
-           | some seq =>
-             match seq with
-             | `(termSeq| [ $ss,* ] ) => do
-               ss.getElems.mapM (fun s => do
-                 proofOfProvable? instLS instSys T (← Term.elabTerm s none))
-             | _                      => return #[]
-           | _        => return #[])
+            | some seq =>
+              match seq with
+              | `(termSeq| [ $ss,* ] ) => do
+                ss.getElems.mapM (fun s => do
+                  proofOfProvable? instLS instSys T (← Term.elabTerm s none))
+              | _                      => return #[]
+            | _        => return #[])
   let E : List ((p : Lit F) × Q($T ⊢! $(toExpr F p))) := Array.toList <| ← E.mapM fun e => do
     let p : Lit F ← denote F e.1
     return ⟨p, e.2⟩
@@ -274,9 +275,9 @@ def proveL₀! (s : ℕ) (T : Q(Set $F)) (p : Q($F))
     (L₀ : List (Lit F)) (H₀ : Q(∀ q ∈ $(toExprₗ (denotation F instLS) L₀), $T ⊢! q)) : MetaM Q($T ⊢! $p) :=
   letI := denotation F instLS; do
   let lp : Lit F ← Denotation.denote F p
-  let d' : Q($(toExprₗ (denotation F instLS) L₀) ⊢ᴳ [$p])
-    ← DerivationQ.derive instLS q(LawfulGentzen.toGentzen) s L₀ [lp]
-  let b : Q($T ⊢! $p) := q(LawfulGentzen.toProof₁! $d' $H₀)
+  let d' : Q($(toExprₗ (denotation F instLS) L₀) ⊢² [$p])
+    ← DerivationQ.derive instLS instGz s L₀ [lp]
+  let b : Q($T ⊢! $p) := q(LawfulTwoSided.toProof₁! $d' $H₀)
   return b
 
 end
@@ -293,10 +294,12 @@ elab "tautology" n:(num)? : tactic => do
     | throwError m! "error: failed to find instance LogicSymbol {F}"
   let .some instSys ← trySynthInstanceQ q(System $F)
     | throwError m! "error: failed to find instance System {F}"
-  let .some instLGZ ← trySynthInstanceQ q(LawfulGentzen.{u, u} $F)
-    | throwError m! "error: failed to find instance LawfulGentzen {F}"
+  let .some instGz ← trySynthInstanceQ q(Gentzen $F)
+    | throwError m! "error: failed to find instance Gentzen {F}"
+  let .some instLTS ← trySynthInstanceQ q(LawfulTwoSided $F)
+    | throwError m! "error: failed to find instance LawfulTwoSided {F}"
   --logInfo m! "start"
-  let b ← prove! instLS instSys instLGZ s T p
+  let b ← prove! instLS instSys instGz instLTS s T p
   Lean.Elab.Tactic.closeMainGoal b
 
 elab "prover" n:(num)? seq:(termSeq)? : tactic => do
@@ -311,10 +314,12 @@ elab "prover" n:(num)? seq:(termSeq)? : tactic => do
     | throwError m! "error: failed to find instance LogicSymbol {F}"
   let .some instSys ← trySynthInstanceQ q(System $F)
     | throwError m! "error: failed to find instance System {F}"
-  let .some instLGz ← trySynthInstanceQ q(LawfulGentzen.{u, u} $F)
-    | throwError m! "error: failed to find instance LawfulGentzen {F}"
+  let .some instGz ← trySynthInstanceQ q(Gentzen $F)
+    | throwError m! "error: failed to find instance Gentzen {F}"
+  let .some instLTS ← trySynthInstanceQ q(LawfulTwoSided $F)
+    | throwError m! "error: failed to find instance LawfulTwoSided {F}"
   let ⟨L₀, H₀⟩ ← proverL₀ instLS instSys T seq
-  let b ← proveL₀! instLS instSys instLGz s T p L₀ H₀
+  let b ← proveL₀! instLS instSys instGz instLTS s T p L₀ H₀
   Lean.Elab.Tactic.closeMainGoal b
 
 end AutoProver

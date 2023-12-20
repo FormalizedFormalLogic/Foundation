@@ -6,8 +6,7 @@ namespace LO
 
 namespace FirstOrder
 
-variable {L : Language.{u}} [Subformula.Operator.Eq L] [Subformula.Operator.LT L]
-  [∀ k, DecidableEq (L.Func k)] [∀ k, DecidableEq (L.Rel k)]
+variable {L : Language} [Subformula.Operator.Eq L] [Subformula.Operator.LT L]
 
 open Subformula
 

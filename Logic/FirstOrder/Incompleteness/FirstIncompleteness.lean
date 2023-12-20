@@ -7,12 +7,12 @@ namespace FirstOrder
 
 section
 
-variable {L : Language.{u}} [(k : ℕ) → DecidableEq (L.Func k)] [(k : ℕ) → DecidableEq (L.Rel k)]
+variable {L : Language}
 
 lemma provable_iff_of_consistent_of_complete {T : Theory L}
   (consis : System.Consistent T) (comp : System.Complete T) :
     T ⊢! σ ↔ ¬T ⊢! ~σ :=
-  ⟨by rintro ⟨b₁⟩ ⟨b₂⟩; exact inconsistent_of_provable_and_refutable b₁ b₂ consis,
+  ⟨by rintro ⟨b₁⟩ ⟨b₂⟩; exact Gentzen.inconsistent_of_provable_and_refutable b₁ b₂ consis,
    by intro h; exact or_iff_not_imp_right.mp (comp σ) h⟩
 
 end
@@ -53,9 +53,9 @@ lemma independent : System.Independent T γ := by
   have h : T ⊢! γ ↔ T ⊢! ~γ := by simpa using diagRefutation_spec T ρ
   exact
     ⟨System.unprovable_iff_not_provable.mpr
-       (fun b => inconsistent_of_provable_and_refutable' b (h.mp b) (consistent_of_sigmaOneSound T)),
+       (fun b => Gentzen.inconsistent_of_provable_and_refutable' b (h.mp b) (consistent_of_sigmaOneSound T)),
      System.unprovable_iff_not_provable.mpr
-       (fun b => inconsistent_of_provable_and_refutable' (h.mpr b) b (consistent_of_sigmaOneSound T))⟩
+       (fun b => Gentzen.inconsistent_of_provable_and_refutable' (h.mpr b) b (consistent_of_sigmaOneSound T))⟩
 
 theorem main : ¬System.Complete T := System.incomplete_iff_exists_independent.mpr ⟨γ, independent T⟩
 

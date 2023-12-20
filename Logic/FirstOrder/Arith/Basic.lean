@@ -53,14 +53,13 @@ end Structure
 
 namespace Arith
 
-class Sound {L : Language} [(k : ℕ) → DecidableEq (L.Func k)] [(k : ℕ) → DecidableEq (L.Rel k)] [Structure L ℕ]
+class Sound {L : Language} [Structure L ℕ]
     (T : Theory L) (F : Sentence L → Prop) where
   sound : ∀ {σ}, F σ → T ⊢! σ → ℕ ⊧ σ
 
 section
 
-variable {L : Language} [(k : ℕ) → DecidableEq (L.Func k)] [(k : ℕ) → DecidableEq (L.Rel k)] [Structure L ℕ]
-    (T : Theory L) (F : Set (Sentence L))
+variable {L : Language} [Structure L ℕ] (T : Theory L) (F : Set (Sentence L))
 
 lemma consistent_of_sound [Sound T F] (hF : F ⊥) : System.Consistent T :=
   ⟨fun b => by simpa using Sound.sound hF ⟨b⟩⟩

@@ -99,11 +99,11 @@ theorem godel_independent : System.Independent T G := by
   rintro (H | H)
   · have h₁ : T ⊢! ~(provableSentence T)/[⸢G⸣] := by prover [goedel_spec T, H]
     have h₂ : T ⊢! (provableSentence T)/[⸢G⸣]  := by simpa using (provableSentence_representation (L := ℒₒᵣ)).mpr H
-    exact inconsistent_of_provable_and_refutable' h₂ h₁ (consistent_of_sigmaOneSound T)
+    exact Gentzen.inconsistent_of_provable_and_refutable' h₂ h₁ (consistent_of_sigmaOneSound T)
   · have : T ⊢! ~G ⟷ (provableSentence T)/[⸢G⸣] := by prover [goedel_spec T]
     have : T ⊢! (provableSentence T)/[⸢G⸣] := by prover [this, H]
     have : T ⊢! G := (provableSentence_representation (L := ℒₒᵣ)).mp this
-    exact inconsistent_of_provable_and_refutable' this H (consistent_of_sigmaOneSound T)
+    exact Gentzen.inconsistent_of_provable_and_refutable' this H (consistent_of_sigmaOneSound T)
 
 theorem main : ¬System.Complete T := System.incomplete_iff_exists_independent.mpr ⟨G, godel_independent T⟩
 
