@@ -428,22 +428,30 @@ instance : Tait.Cut (Sentence L) := ⟨fun {Δ σ} dp dn =>
   DerivationCR.toTait (DerivationCR.cCut (p := Rew.emb.hom σ)
     (DerivationCR.ofTait dp) ((DerivationCR.ofTait dn).cast $ by simp))⟩
 
-def oneSidedToSyntactic {Δ : List (Sentence L)} (b : ⊢¹ Δ) : ⊢¹ (Δ.map Rew.emb.hom : Sequent L) := b
+def oneSidedEquiv {Δ : List (Sentence L)} :
+    ⊢¹ Δ ≃ ⊢¹ (Δ.map Rew.emb.hom : Sequent L) := Equiv.refl _
 
-def twoSidedToSyntactic {Γ Δ : List (Sentence L)} (b : Γ ⊢² Δ) :
-    (Γ.map Rew.emb.hom : Sequent L) ⊢² Δ.map Rew.emb.hom :=
-  let b : ⊢¹ (Γ.map Rew.emb.hom : Sequent L).map (~·) ++ Δ.map Rew.emb.hom :=
-    OneSided.cast (oneSidedToSyntactic b) (by simp[Function.comp])
-  b
-
-lemma proofToSyntactic {T : Theory L} {σ} (b : T ⊢ σ) :
-    Rew.emb.hom '' T ⊢ (Rew.emb.hom σ : SyntacticFormula L) := by
-  have := twoSidedToSyntactic b.derivation
-  exact ⟨_, by simp; intro σ hσ; exact ⟨σ, b.antecedent_ss σ hσ, rfl⟩, this⟩
+def twoSidedEquiv {Γ Δ : List (Sentence L)} :
+    Γ ⊢² Δ ≃ (Γ.map Rew.emb.hom : Sequent L) ⊢² Δ.map Rew.emb.hom :=
+  Tait.equiv.trans <| oneSidedEquiv.trans <| Equiv.trans (by simp[Function.comp]; exact Equiv.refl _) Tait.equiv.symm
 
 abbrev DisjconseqTr (T : Theory L) (Γ : Sequent L) : Type _ := Rew.emb.hom '' T ⊢' Γ
 
 scoped infix: 45 " ⊢'' " => DisjconseqTr
+
+lemma proofToSyntactic {T : Theory L} {σ} (b : T ⊢ σ) :
+    Rew.emb.hom '' T ⊢ (Rew.emb.hom σ : SyntacticFormula L) :=
+  ⟨_, by simp; intro σ hσ; exact ⟨σ, b.antecedent_ss σ hσ, rfl⟩, twoSidedEquiv b.derivation⟩
+
+lemma toProof {T : Theory L} {σ} (b : Rew.emb.hom '' T ⊢ (Rew.emb.hom σ : SyntacticFormula L)) :
+    T ⊢ σ := by
+  rcases Gentzen.proofEquivDerivation b with ⟨⟨Δ, hΔ⟩, d⟩
+  have : ∀ p ∈ Δ, ∃ σ ∈ T, Rew.emb.hom σ = p := by simpa using hΔ
+  choose f hf using this
+  let Δ' := Δ.pmap f (by simp)
+  have : Δ'.map Rew.emb.hom ⊢² [σ].map Rew.emb.hom := by
+    rw[show Δ'.map Rew.emb.hom = Δ from by simp[List.map_pmap, hf]]; exact d
+  exact Gentzen.toDisjconseq (twoSidedEquiv.symm this) (by simp; rintro σ p hp rfl; exact (hf p hp).1)
 
 namespace Gentzen
 
@@ -461,6 +469,14 @@ def genelalizeByNewver {p : SyntacticSubformula L 1}
 def specialize {p : SyntacticSubformula L 1} (t : SyntacticTerm L) :
     Γ ⊢² p/[t] :: Δ → Γ ⊢² (∃' p) :: Δ := fun d ↦
   Tait.toConsRight <| DerivationCR.ex t (Tait.ofConsRight d)
+
+def lMap (Φ : L₁ →ᵥ L₂) {Γ Δ : Sequent L₁} (b : Γ ⊢² Δ) :
+    Γ.map (Subformula.lMap Φ) ⊢² Δ.map (Subformula.lMap Φ) :=
+  Tait.equiv.symm ((DerivationCR.lMapCut Φ b).cast $ by simp[Function.comp])
+
+def lMap' (Φ : L₁ →ᵥ L₂) {Γ Δ : List (Sentence L₁)} (b : Γ ⊢² Δ) :
+    Γ.map (Subformula.lMap Φ) ⊢² Δ.map (Subformula.lMap Φ) :=
+  Tait.equiv.symm ((DerivationCR.lMapCut Φ b).cast $ by simp[Function.comp, lMap_emb])
 
 end Gentzen
 
@@ -482,6 +498,16 @@ def specialize {p : SyntacticSubformula L 1} (t : SyntacticTerm L) :
     T ⊢'' p/[t] :: Δ → T ⊢'' (∃' p) :: Δ := fun d ↦
   let ⟨Γ, d⟩ := Gentzen.DisjconseqEquivDerivation d
   Gentzen.DisjconseqEquivDerivation.symm ⟨Γ, Gentzen.specialize t d⟩
+
+variable (Φ : L₁ →ᵥ L₂) {T : Theory L₁}
+
+def lMap {σ : Sentence L₁} (b : T ⊢ σ) :
+    Theory.lMap Φ T ⊢ Subformula.lMap Φ σ :=
+  Gentzen.toDisjconseq (by simpa using Gentzen.lMap' Φ b.derivation)
+    (by simp; intro σ hσ; exact Set.mem_image_of_mem _ (b.antecedent_ss σ hσ) )
+
+lemma inconsistent_lMap : ¬System.Consistent T → ¬System.Consistent (T.lMap Φ) := by
+  simp[System.Consistent]; intro b; exact ⟨by simpa using lMap Φ b⟩
 
 end System
 

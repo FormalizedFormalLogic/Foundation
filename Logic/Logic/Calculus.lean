@@ -133,6 +133,8 @@ instance : Gentzen.Cut F := ⟨fun d d' => Cut.cut (ofConsRight d) (ofConsLeft d
 
 def equiv : Γ ⊢² Δ ≃ ⊢¹ Γ.map (~·) ++ Δ := Equiv.refl _
 
+def tauto (b : ⊢¹ Δ) : Γ ⊢² Δ := wk b (by simp)
+
 end Tait
 
 namespace Gentzen
@@ -189,6 +191,8 @@ def Cut.cut' {Γ₁ Γ₂ Δ₁ Δ₂ : List F} (d₁ : Γ₁ ⊢² p :: Δ₁) 
   Cut.cut d₁ d₂
 
 namespace Disjconseq
+
+def tauto {Δ} (d : [] ⊢² Δ) : T ⊢' Δ := toDisjconseq d (by simp)
 
 def wk (b : T ⊢' Γ) (ss : Γ ⊆ Γ') : T ⊢' Γ' where
   antecedent := b.antecedent
@@ -309,7 +313,7 @@ lemma consistent_iff_empty_sequent :
       have : Δ ⊢² [] := Cut.cut d (falsum _ _)
       exact ⟨toDisjconseq this h⟩⟩
 
-lemma provable_iff_inConsistent {p} :
+lemma provable_iff_inconsistent {p} :
     T ⊢! p ↔ ¬System.Consistent (insert (~p) T) :=
   ⟨by rintro ⟨⟨Δ, h, d⟩⟩
       simp[consistent_iff_empty_sequent]

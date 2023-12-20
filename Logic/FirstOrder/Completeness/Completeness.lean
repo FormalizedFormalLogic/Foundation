@@ -8,34 +8,35 @@ namespace FirstOrder
 
 open Subformula Completeness
 
-variable {L : Language.{u}} [∀ k, DecidableEq (L.Func k)] [∀ k, DecidableEq (L.Rel k)] {T : Theory L}
+variable {L : Language} {T : Theory L}
 
 section Encodable
 
-variable [∀ k, Encodable (L.Func k)] [∀ k, Encodable (L.Rel k)]
+variable [(k : ℕ) → DecidableEq (L.Func k)] [(k : ℕ) → DecidableEq (L.Rel k)]  [(k : ℕ) → Encodable (L.Func k)] [(k : ℕ) → Encodable (L.Rel k)]
 
 noncomputable def DerivationWA.completeness_of_encodable
-  {Γ : Finset (Sentence L)} (h : ∀ M [Inhabited M] [Structure L M], M ⊧* T → ∃ σ ∈ Γ, M ⊧ σ) :
-    T ⊢ᵀ (Γ.image Rew.emb.hom : Sequent L) := by
-  have : WellFounded (SearchTree.Lt T (Γ.image Rew.emb.hom : Sequent L)) := by
+  {Γ : List (Sentence L)} (h : ∀ M [Inhabited M] [Structure L M], M ⊧* T → ∃ σ ∈ Γ, M ⊧ σ) :
+    T ⊢'' (Γ.map Rew.emb.hom : Sequent L) := by
+  have : WellFounded (SearchTree.Lt T (Γ.map Rew.emb.hom : Sequent L)) := by
     by_contra nwf
-    have : ∃ σ ∈ Γ, (Model T (Γ.image Rew.emb.hom : Sequent L)) ⊧ σ := h _ (Model.models nwf)
+    have : ∃ σ ∈ Γ, (Model T (Γ.map Rew.emb.hom : Sequent L)) ⊧ σ := h _ (Model.models nwf)
     rcases this with ⟨σ, hσ, h⟩
-    have : ¬(Model T (Γ.image Rew.emb.hom : Sequent L)) ⊧ σ := by
+    have : ¬(Model T (Γ.map Rew.emb.hom : Sequent L)) ⊧ σ := by
       simpa using semanticMainLemmaTop nwf (p := Rew.emb.hom σ) (by simp; exact ⟨σ, hσ, rfl⟩)
     contradiction
   exact syntacticMainLemmaTop this
 
 noncomputable def completeness_of_encodable {σ : Sentence L} :
     T ⊨ σ → T ⊢ σ := fun h => by
-  have : T ⊢ᵀ {Rew.emb.hom σ} := DerivationWA.completeness_of_encodable (T := T) (Γ := {σ}) (fun M i s hM => ⟨σ, by simp, h M s hM⟩)
-  exact this.toProof
+  have : T ⊢'' [Rew.emb.hom σ] :=
+    DerivationWA.completeness_of_encodable (T := T) (Γ := {σ}) (fun M i s hM => ⟨σ, List.mem_of_mem_head? rfl, h M s hM⟩)
+  exact toProof this
 
 noncomputable instance : Complete (Sentence L) := ⟨completeness_of_encodable⟩
 
 end Encodable
 
-noncomputable def completeness {σ : Sentence L} :
+noncomputable def completenessDec [(k : ℕ) → DecidableEq (L.Func k)] [(k : ℕ) → DecidableEq (L.Rel k)] {σ : Sentence L} :
     T ⊨ σ → T ⊢ σ := fun h => by
   have : ∃ u : Finset (Sentence L), ↑u ⊆ insert (~σ) T ∧ ¬Semantics.Satisfiableₛ (u : Theory L) := by
     simpa[Compact.compact (T := insert (~σ) T)] using Semantics.consequence_iff.mp h
@@ -54,12 +55,19 @@ noncomputable def completeness {σ : Sentence L} :
     have : Semantics.Satisfiableₛ (u : Theory L) := by
       rw[←image_u']; simpa using (satisfiableₛ_lMap L.ofSubLanguage (fun k => Subtype.val_injective) (fun _ => Subtype.val_injective) h)
     contradiction }
-  have : ¬Proof.Consistent (u' : Theory (languageFinset u)) := fun h => this (Complete.satisfiableₛ_iff_consistent.mpr h)
-  have : ¬Proof.Consistent (u : Theory L) := by rw[←image_u']; simpa using inConsistent_lMap L.ofSubLanguage this
-  have : ¬Proof.Consistent (insert (~σ) T) := fun h => this (h.of_subset ssu)
-  have : Nonempty (T ⊢ σ) := provable_iff_inConsistent.mpr this
+  have : ¬System.Consistent (u' : Theory (languageFinset u)) := fun h => this (Complete.satisfiableₛ_iff_consistent.mpr h)
+  have : ¬System.Consistent (u : Theory L) := by rw[←image_u']; simpa using System.inconsistent_lMap L.ofSubLanguage this
+  have : ¬System.Consistent (insert (~σ) T) := fun h => this (h.of_subset ssu)
+  have : Nonempty (T ⊢ σ) := Gentzen.provable_iff_inconsistent.mpr this
   choose b _ using exists_true_iff_nonempty.mpr this
   exact b
+
+noncomputable def completeness {σ} : T ⊨ σ → T ⊢ σ := fun h =>
+  letI := Classical.typeDecidableEq
+  completenessDec h
+
+theorem completeness_iff' : T ⊨ σ ↔ T ⊢! σ :=
+  ⟨fun h ↦ ⟨completeness h⟩, soundness'⟩
 
 noncomputable instance completeness.sentence : Complete (Sentence L) := ⟨completeness⟩
 

@@ -15,7 +15,7 @@ def subLanguage (L : Language) (pfunc : ∀ k, L.Func k → Prop) (prel : ∀ k,
 
 section subLanguage
 
-variable (L) {pf : ∀ k, L.Func k → Prop} {pr : ∀ k, L.Rel k → Prop}
+variable (L) {pf : (k : ℕ) → L.Func k → Prop} {pr : (k : ℕ) → L.Rel k → Prop}
 
 def ofSubLanguage : subLanguage L pf pr →ᵥ L where
   func := Subtype.val

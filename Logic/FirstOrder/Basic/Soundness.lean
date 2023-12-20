@@ -71,6 +71,8 @@ theorem soundness {T} {σ : Sentence L} : T ⊢ σ → T ⊨ σ := fun b M hM s 
     contradiction
   · simpa using h
 
+theorem soundness' {T} {σ : Sentence L} : T ⊢! σ → T ⊨ σ := fun ⟨b⟩ ↦ soundness b
+
 instance : Sound (Sentence L) := ⟨soundness⟩
 
 end soundness
