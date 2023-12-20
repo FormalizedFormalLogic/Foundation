@@ -102,14 +102,13 @@ lemma formalized_NC (σ : Sentence L) : T₀ ⊢! ((Pr T M)/[⸢σ⸣] ⟶ (Pr T
 lemma formalized_NC' (σ : Sentence L) : T₀ ⊢! (Pr T M)/[⸢σ⸣] ⋏ (Pr T M)/[⸢~σ⸣] ⟶ (Pr T M)/[⸢⊥⸣] := by
   sorry;
 
-lemma formalized_DNI (σ : Sentence L) : T₀ ⊢! (Pr T M)/[⸢σ⸣] ⟶ (Pr T M)/[⸢~~σ⸣] := by sorry -- simp [neg_neg'];
+lemma formalized_DNI (σ : Sentence L) : T₀ ⊢! (Pr T M)/[⸢σ⸣] ⟶ (Pr T M)/[⸢~~σ⸣] := by simp [neg_neg']; tautology;
 
-lemma formalized_DNE (σ : Sentence L) : T₀ ⊢! (Pr T M)/[⸢~~σ⸣] ⟶ (Pr T M)/[⸢σ⸣] := by sorry -- simp [neg_neg'];
+lemma formalized_DNE (σ : Sentence L) : T₀ ⊢! (Pr T M)/[⸢~~σ⸣] ⟶ (Pr T M)/[⸢σ⸣] := by simp [neg_neg']; tautology;
 
-lemma formalized_neg_def (σ : Sentence L) : T ⊢! (Pr T M)/[⸢~σ⸣] ⟷ (Pr T M)/[⸢σ ⟶ ⊥⸣] := by
-  apply sorry;
-  -- . sorry; -- apply imply_intro;
-  -- . sorry; -- apply imply_intro;
+lemma formalized_neg_def (σ : Sentence L) : T₀ ⊢! (Pr T M)/[⸢~σ⸣] ⟷ (Pr T M)/[⸢σ ⟶ ⊥⸣] := by
+  have : ~σ = σ ⟶ ⊥ := sorry;
+  simp [this]; tautology;
 
 end PrCalculus
 
@@ -124,10 +123,10 @@ end ConsistencyFormalization
 
 end HasProvablePred
 
-variable (hDef : ∀ {n : ℕ}, (Subsentence L n) → Prop)
+variable (D : ∀ {n : ℕ}, (Subsentence L n) → Prop)
 
 class Diagonizable where
-  diag (δ : Subsentence L 1) : (hDef δ) → ∃ (σ : Sentence L), (hDef σ) ∧ (T ⊢! σ ⟷ δ/[⸢σ⸣])
+  diag (δ : Subsentence L 1) : (D δ) → ∃ (σ : Sentence L), (D σ) ∧ (T ⊢! σ ⟷ δ/[⸢σ⸣])
 
 section FixedPoints
 
@@ -135,28 +134,27 @@ open HasProvablePred
 
 variable [Subtheory T₀ T] [HasProvablePred T M]
 
-def IsGoedelSentence (G : Sentence L) := T₀ ⊢! G ⟷ ~(Pr T M)/[⸢G⸣]
+variable [hDiag : Diagonizable T₀ D]
 
-variable [hdiag : Diagonizable T₀ hDef]
+def GoedelSentence (G : Sentence L) := T₀ ⊢! G ⟷ ~(Pr T M)/[⸢G⸣]
 
-lemma existsGoedelSentence (h : hDef (~Pr T M)) -- 可証性述語の否定がΠ₁であることの抽象化
-  : ∃ (G : Sentence L), (IsGoedelSentence T₀ T M G) ∧ (hDef G) := by
-  have ⟨G, ⟨hH, hd⟩⟩ := hdiag.diag (~(Pr T M)) h;
-  existsi G; simpa [IsGoedelSentence, hH, Rew.neg'] using hd;
+lemma existsGoedelSentence (h : D (~Pr T M)) : ∃ G, (GoedelSentence T₀ T M G) ∧ (D G) := by
+  have ⟨G, ⟨hH, hd⟩⟩ := hDiag.diag (~(Pr T M)) h;
+  existsi G; simpa [GoedelSentence, hH, Rew.neg'] using hd;
 
-def IsHenkinSentence [Subtheory T₀ T] (H : Sentence L) := T₀ ⊢! H ⟷ (Pr T M)/[⸢H⸣]
 
-lemma existsHenkinSentence (h : hDef (Pr T M)) -- 可証性述語がΣ₁であることの抽象化
-  : ∃ (H : Sentence L), (IsHenkinSentence T₀ T M H) ∧ (hDef H) := by
-  have ⟨H, ⟨hH, hd⟩⟩ := hdiag.diag (Pr T M) h;
-  existsi H; simpa [IsHenkinSentence, hH] using hd;
+def HenkinSentence (H : Sentence L) := T₀ ⊢! H ⟷ (Pr T M)/[⸢H⸣]
 
-def IsKrieselSentence [Subtheory T₀ T] (K σ : Sentence L) := T₀ ⊢! K ⟷ ((Pr T M)/[⸢K⸣] ⟶ σ)
+lemma existsHenkinSentence (h : D (Pr T M)) : ∃ H, (HenkinSentence T₀ T M H) ∧ (D H) := by
+  have ⟨H, ⟨hH, hd⟩⟩ := hDiag.diag (Pr T M) h;
+  existsi H; simpa [HenkinSentence, hH] using hd;
 
-lemma existsKreiselSentence (σ : Sentence L)
-  : ∃ (K : Sentence L), (IsKrieselSentence T₀ T M K σ) := by
-  have ⟨K, ⟨hH, hd⟩⟩ := hdiag.diag ((Pr T M)/[⸢σ⸣]) (by sorry);
-  existsi K; simp [IsKrieselSentence, hH]; sorry;
+
+def KrieselSentence (σ : Sentence L) (K : Sentence L) := T₀ ⊢! K ⟷ ((Pr T M)/[⸢K⸣] ⟶ σ)
+
+lemma existsKreiselSentence (σ) : ∃ K, (KrieselSentence T₀ T M σ K) := by
+  have ⟨K, ⟨hH, hd⟩⟩ := hDiag.diag ((Pr T M)/[⸢σ⸣]) (by sorry);
+  existsi K; simp [KrieselSentence, hH]; sorry;
 
 end FixedPoints
 

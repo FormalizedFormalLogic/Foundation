@@ -16,19 +16,19 @@ variable [hPred : HasProvablePred T M] [hD1 : Derivability1 T₀ T M]
 
 local notation:max "⸢" σ "⸣" => @GoedelNumber.encode L _ _ (σ : Sentence L)
 
-variable {G : Sentence L} (hG : IsGoedelSentence T₀ T M G)
+variable {G : Sentence L} (hG : GoedelSentence T₀ T M G)
 
 variable [hConsis : Theory.Consistent T] [hSoundness : PrSoundness T M (λ σ => hDef σ)]
 
 lemma GoedelSentenceUnprovablility : T ⊬! G := by
-  by_contra hP; simp at hP; simp [IsGoedelSentence] at hG;
+  by_contra hP; simp at hP; simp [GoedelSentence] at hG;
   have h₁ : T ⊢! (Pr T M)/[⸢G⸣] := hD1.D1' hP;
   have h₂ : T ⊢! (Pr T M)/[⸢G⸣] ⟶ ~G := weakening $ by prover [hG];
   have hR : T ⊢! ~G := by prover [h₁, h₂];
   exact broken_consistent hP hR;
 
 lemma GoedelSentenceUnrefutability (a : hDef G) : T ⊬! ~G := by
-  by_contra hR; simp at hR; simp [IsGoedelSentence] at hG;
+  by_contra hR; simp at hR; simp [GoedelSentence] at hG;
   have h₁ : T ⊢! ~G ⟶ (Pr T M)/[⸢G⸣] := weakening $ by prover [hG];
   have h₂ : T ⊢! (Pr T M)/[⸢G⸣] := by prover [h₁, hR];
   have hP : T ⊢! G := hPred.spec.mp $ hSoundness.sounds a h₂;
