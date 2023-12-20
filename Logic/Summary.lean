@@ -7,10 +7,11 @@ namespace LO.Summary.FirstOrder
 
 open LO.FirstOrder
 
-variable {L : Language} [∀ k, DecidableEq (L.Func k)] [∀ k, DecidableEq (L.Rel k)] {T : Theory L}
+variable {L : Language} {T : Theory L}
 
 /- Cut elimination for Tait-calculus -/
-noncomputable example {Δ : Sequent L} : ⊢ᶜ Δ → ⊢ᵀ Δ := DerivationCR.hauptsatz
+example [(k : ℕ) → DecidableEq (L.Func k)] [(k : ℕ) → DecidableEq (L.Rel k)]
+  {Δ : Sequent L} : ⊢ᶜ Δ → ⊢ᵀ Δ := DerivationCR.hauptsatz
 
 #print axioms DerivationCR.hauptsatz
 
@@ -34,7 +35,8 @@ noncomputable example {σ : Sentence L} : T ⊨ σ → T ⊢ σ := FirstOrder.co
 
 open Arith FirstIncompleteness
 
-variable (T : Theory ℒₒᵣ) [DecidablePred T] [EqTheory T] [PAminus T] [SigmaOneSound T] [Theory.Computable T]
+variable (T : Theory ℒₒᵣ) [DecidablePred T]
+  [EqTheory T] [PAminus T] [SigmaOneSound T] [Theory.Computable T]
 
 /- Gödel's first incompleteness theorem -/
 example : ¬System.Complete T :=

@@ -36,7 +36,8 @@ The key results are summarised in `Logic/Summary.lean`.
 
 - Cut-elimination
 ```lean
-noncomputable example {Δ : Sequent L} : ⊢ᶜ Δ → ⊢ᵀ Δ := DerivationCR.hauptsatz
+example [(k : ℕ) → DecidableEq (L.Func k)] [(k : ℕ) → DecidableEq (L.Rel k)]
+  {Δ : Sequent L} : ⊢ᶜ Δ → ⊢ᵀ Δ := DerivationCR.hauptsatz
 ```
 
 - Completeness theorem
