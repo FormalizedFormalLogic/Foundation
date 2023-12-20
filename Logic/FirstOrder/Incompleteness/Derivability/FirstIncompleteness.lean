@@ -1,14 +1,14 @@
-import Logic.Logic.HilbertStyle
+import Logic.AutoProver.Prover
 import Logic.FirstOrder.Incompleteness.Derivability.Theory
 import Logic.FirstOrder.Incompleteness.Derivability.Conditions
 
-open LO.System LO.System.Intuitionistic
+open LO.System
 
 namespace LO.FirstOrder.Incompleteness
 
 open FirstOrder.Theory HasProvablePred
 
-variable {L : Language} [System (Sentence L)] [Intuitionistic (Sentence L)] [GoedelNumber L (Sentence L)]
+variable {L : Language} [System (Sentence L)] [GoedelNumber L (Sentence L)] [Gentzen (Sentence L)] [LawfulTwoSided (Sentence L)]
 variable (T₀ T : Theory L) [Subtheory T₀ T]
 variable {hDef} [Diagonizable T₀ hDef]
 variable (M) [Structure L M]
@@ -21,18 +21,17 @@ variable {G : Sentence L} (hG : IsGoedelSentence T₀ T M G)
 variable [hConsis : Theory.Consistent T] [hSoundness : PrSoundness T M (λ σ => hDef σ)]
 
 lemma GoedelSentenceUnprovablility : T ⊬! G := by
-  by_contra hP; simp at hP;
+  by_contra hP; simp at hP; simp [IsGoedelSentence] at hG;
   have h₁ : T ⊢! (Pr T M)/[⸢G⸣] := hD1.D1' hP;
-  have h₂ : T ⊢! (Pr T M)/[⸢G⸣] ⟶ ~G := by simpa using weakening $ iff_mpr $ iff_contra hG;
-  have hR : T ⊢! ~G := weakening (h₂ ⨀ h₁);
+  have h₂ : T ⊢! (Pr T M)/[⸢G⸣] ⟶ ~G := weakening $ by prover [hG];
+  have hR : T ⊢! ~G := by prover [h₁, h₂];
   exact broken_consistent hP hR;
 
 lemma GoedelSentenceUnrefutability (a : hDef G) : T ⊬! ~G := by
-  by_contra hR; simp at hR;
-  have h₁ : T ⊢! ~G ⟶ (Pr T M)/[⸢G⸣] := by simpa [Subformula.neg_neg'] using weakening $ iff_mp $ iff_contra hG;
-  have h₂ : T ⊢! (Pr T M)/[⸢G⸣] := h₁ ⨀ hR; simp at h₂;
-  have h₃ : M ⊧ ((Pr T M)/[⸢G⸣]) := hSoundness.sounds a h₂;
-  have hP : T ⊢! G := hPred.spec.mp h₃;
+  by_contra hR; simp at hR; simp [IsGoedelSentence] at hG;
+  have h₁ : T ⊢! ~G ⟶ (Pr T M)/[⸢G⸣] := weakening $ by prover [hG];
+  have h₂ : T ⊢! (Pr T M)/[⸢G⸣] := by prover [h₁, hR];
+  have hP : T ⊢! G := hPred.spec.mp $ hSoundness.sounds a h₂;
   exact broken_consistent hP hR;
 
 theorem FirstIncompleteness (a : hDef (~Pr T M)) : Theory.Incomplete T := by

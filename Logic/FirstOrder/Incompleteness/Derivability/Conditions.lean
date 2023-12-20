@@ -1,4 +1,3 @@
-import Logic.Logic.HilbertStyle
 import Logic.FirstOrder.Incompleteness.Derivability.Theory
 import Logic.FirstOrder.Basic.Semantics
 
@@ -12,11 +11,11 @@ import Logic.FirstOrder.Basic.Semantics
 のような型クラスで扱えば良い
 -/
 
-open LO.System LO.System.Intuitionistic
+open LO.System
 
 namespace LO.FirstOrder.Incompleteness
 
-variable {L : Language} [System (Sentence L)]
+variable {L : Language} [System (Sentence L)] [Gentzen (Sentence L)] [LawfulTwoSided (Sentence L)]
 
 class GoedelNumber (L : Language) (α : Type*) where
   encode : α → Subterm.Const L
@@ -57,11 +56,10 @@ class FormalizedCompleteness (P : Sentence L → Prop) where
 class FormalizedDeductionTheorem where
   FDT : ∀ {σ π : Sentence L} [HasProvablePred (T ∪ {σ}) M], T₀ ⊢! (Pr T M)/[⸢σ ⟶ π⸣] ⟷ (Pr (T ∪ {σ}) M)/[⸢π⸣]
 
-variable [Intuitionistic (Sentence L)]
+lemma iff_contra (h : T ⊢! σ ⟷ π) : (T ⊢! ~σ ⟷ ~π) := by prover [h];
 
 lemma FormalizedDeductionTheorem.FDT_neg [HasProvablePred (T ∪ {σ}) M] [FormalizedDeductionTheorem T₀ T M]
-  : T₀ ⊢! ~((Pr T M)/[⸢σ ⟶ π⸣]) ⟷ ~((Pr (T ∪ {σ}) M)/[⸢π⸣]) :=
-  iff_contra FormalizedDeductionTheorem.FDT
+  : T₀ ⊢! ~((Pr T M)/[⸢σ ⟶ π⸣]) ⟷ ~((Pr (T ∪ {σ}) M)/[⸢π⸣]) := iff_contra T₀ FormalizedDeductionTheorem.FDT
 
 section PrCalculus
 
@@ -88,14 +86,12 @@ lemma FormalizedCompleteness.FC' {σ : Sentence L} : (P σ) → T ⊢! σ ⟶ ((
   intro hH;
   exact weakening $ hFC.FC hH;
 
-lemma formalized_imp_intro : (T ⊢! σ ⟶ π) → (T₀ ⊢! (Pr T M)/[⸢σ⸣] ⟶ (Pr T M)/[⸢π⸣]) := by
-  intro H;
-  exact D2 ⨀ D1 H;
+lemma formalized_imp_intro (h : T ⊢! σ ⟶ π) : (T₀ ⊢! (Pr T M)/[⸢σ⸣] ⟶ (Pr T M)/[⸢π⸣]) := by prover [hD2.D2, (hD1.D1 h)];
 
 lemma formalized_NC (σ : Sentence L) : T₀ ⊢! ((Pr T M)/[⸢σ⸣] ⟶ (Pr T M)/[⸢~σ⸣]) ⟶ (Pr T M)/[⸢⊥⸣] := by
-  have : (T ⊢! σ) → (T ⊢! ~σ) → (T ⊢! ⊥) := no_contradiction;
+  have : (T ⊢! σ) → (T ⊢! ~σ) → (T ⊢! ⊥) := λ h₁ h₂ => by prover [h₁, h₂];
   have a : T₀ ⊢! (Pr T M)/[⸢σ ⟶ ~σ⸣] ⟶ (Pr T M)/[⸢σ⸣] ⟶ (Pr T M)/[⸢~σ⸣] := hD2.D2;
-  have b : T₀ ⊢! ~((Pr T M)/[⸢σ⸣] ⟶ (Pr T M)/[⸢~σ⸣]) ⟶ ~(Pr T M)/[⸢σ ⟶ ~σ⸣] := imp_contra₀ $ hD2.D2;
+  have b : T₀ ⊢! ~((Pr T M)/[⸢σ⸣] ⟶ (Pr T M)/[⸢~σ⸣]) ⟶ ~(Pr T M)/[⸢σ ⟶ ~σ⸣] := by prover [hD2.D2];
   sorry;
   /-
   have b : T ⊢! ~(Pr[U](⸢σ⸣) ⟶ Pr[U](⸢~σ⸣)) ⟶ ~Pr[U](⸢σ ⟶ ~σ⸣) := imp_contra₀ (D2 σ (~σ));
@@ -106,14 +102,14 @@ lemma formalized_NC (σ : Sentence L) : T₀ ⊢! ((Pr T M)/[⸢σ⸣] ⟶ (Pr T
 lemma formalized_NC' (σ : Sentence L) : T₀ ⊢! (Pr T M)/[⸢σ⸣] ⋏ (Pr T M)/[⸢~σ⸣] ⟶ (Pr T M)/[⸢⊥⸣] := by
   sorry;
 
-lemma formalized_DNI (σ : Sentence L) : T₀ ⊢! (Pr T M)/[⸢σ⸣] ⟶ (Pr T M)/[⸢~~σ⸣] := by simp [neg_neg'];
+lemma formalized_DNI (σ : Sentence L) : T₀ ⊢! (Pr T M)/[⸢σ⸣] ⟶ (Pr T M)/[⸢~~σ⸣] := by sorry -- simp [neg_neg'];
 
-lemma formalized_DNE (σ : Sentence L) : T₀ ⊢! (Pr T M)/[⸢~~σ⸣] ⟶ (Pr T M)/[⸢σ⸣] := by simp [neg_neg'];
+lemma formalized_DNE (σ : Sentence L) : T₀ ⊢! (Pr T M)/[⸢~~σ⸣] ⟶ (Pr T M)/[⸢σ⸣] := by sorry -- simp [neg_neg'];
 
 lemma formalized_neg_def (σ : Sentence L) : T ⊢! (Pr T M)/[⸢~σ⸣] ⟷ (Pr T M)/[⸢σ ⟶ ⊥⸣] := by
-  apply iff_intro;
-  . sorry; -- apply imply_intro;
-  . sorry; -- apply imply_intro;
+  apply sorry;
+  -- . sorry; -- apply imply_intro;
+  -- . sorry; -- apply imply_intro;
 
 end PrCalculus
 
