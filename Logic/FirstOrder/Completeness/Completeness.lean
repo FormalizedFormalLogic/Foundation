@@ -27,25 +27,24 @@ noncomputable def DerivationWA.completeness_of_encodable
   exact syntacticMainLemmaTop this
 
 noncomputable def completeness_of_encodable {σ : Sentence L} :
-    T ⊨ σ → T ⊢ σ := fun h => by
+    T ⊨ σ → T ⊢ σ := fun h ↦ by
   have : T ⊢'' [Rew.emb.hom σ] :=
-    DerivationWA.completeness_of_encodable (T := T) (Γ := {σ}) (fun M i s hM => ⟨σ, List.mem_of_mem_head? rfl, h M s hM⟩)
+    DerivationWA.completeness_of_encodable (T := T) (Γ := {σ}) (fun M i s hM ↦ ⟨σ, List.mem_of_mem_head? rfl, h M s hM⟩)
   exact toProof this
 
 noncomputable instance : Complete (Sentence L) := ⟨completeness_of_encodable⟩
 
 end Encodable
 
-noncomputable def completenessDec [(k : ℕ) → DecidableEq (L.Func k)] [(k : ℕ) → DecidableEq (L.Rel k)] {σ : Sentence L} :
-    T ⊨ σ → T ⊢ σ := fun h => by
+noncomputable def completeness {σ : Sentence L} :
+    T ⊨ σ → T ⊢ σ := fun h ↦ by
+  letI := Classical.typeDecidableEq
   have : ∃ u : Finset (Sentence L), ↑u ⊆ insert (~σ) T ∧ ¬Semantics.Satisfiableₛ (u : Theory L) := by
     simpa[Compact.compact (T := insert (~σ) T)] using Semantics.consequence_iff.mp h
   choose u hu using this; rcases hu with ⟨ssu, hu⟩
-  haveI : (k : ℕ) → DecidableEq ((languageFinset u).Func k) := fun _ => Classical.typeDecidableEq _
-  haveI : (k : ℕ) → DecidableEq ((languageFinset u).Rel k) := fun _ => Classical.typeDecidableEq _
-  haveI : ∀ k, Encodable ((languageFinset u).Func k) := fun _ => Fintype.toEncodable _
-  haveI : ∀ k, Encodable ((languageFinset u).Rel k) := fun _ => Fintype.toEncodable _
-  let u' : Finset (Sentence (languageFinset u)) := Finset.imageOfFinset u (fun _ hσ => toSubLanguageFinsetSelf hσ)
+  haveI : ∀ k, Encodable ((languageFinset u).Func k) := fun _ ↦ Fintype.toEncodable _
+  haveI : ∀ k, Encodable ((languageFinset u).Rel k) := fun _ ↦ Fintype.toEncodable _
+  let u' : Finset (Sentence (languageFinset u)) := Finset.imageOfFinset u (fun _ hσ ↦ toSubLanguageFinsetSelf hσ)
   have image_u' : u'.image (Subformula.lMap L.ofSubLanguage) = u := by
     { ext τ; simp[Finset.mem_imageOfFinset_iff]
       exact ⟨by rintro ⟨a, ⟨τ, hτ, rfl⟩, rfl⟩; simp[hτ],
@@ -53,18 +52,14 @@ noncomputable def completenessDec [(k : ℕ) → DecidableEq (L.Func k)] [(k : �
   have : ¬Semantics.Satisfiableₛ (u' : Theory (languageFinset u))
   { intro h
     have : Semantics.Satisfiableₛ (u : Theory L) := by
-      rw[←image_u']; simpa using (satisfiableₛ_lMap L.ofSubLanguage (fun k => Subtype.val_injective) (fun _ => Subtype.val_injective) h)
+      rw[←image_u']; simpa using (satisfiableₛ_lMap L.ofSubLanguage (fun k ↦ Subtype.val_injective) (fun _ ↦ Subtype.val_injective) h)
     contradiction }
-  have : ¬System.Consistent (u' : Theory (languageFinset u)) := fun h => this (Complete.satisfiableₛ_iff_consistent.mpr h)
+  have : ¬System.Consistent (u' : Theory (languageFinset u)) := fun h ↦ this (Complete.satisfiableₛ_iff_consistent.mpr h)
   have : ¬System.Consistent (u : Theory L) := by rw[←image_u']; simpa using System.inconsistent_lMap L.ofSubLanguage this
-  have : ¬System.Consistent (insert (~σ) T) := fun h => this (h.of_subset ssu)
+  have : ¬System.Consistent (insert (~σ) T) := fun h ↦ this (h.of_subset ssu)
   have : Nonempty (T ⊢ σ) := Gentzen.provable_iff_inconsistent.mpr this
   choose b _ using exists_true_iff_nonempty.mpr this
   exact b
-
-noncomputable def completeness {σ} : T ⊨ σ → T ⊢ σ := fun h =>
-  letI := Classical.typeDecidableEq
-  completenessDec h
 
 theorem completeness_iff' : T ⊨ σ ↔ T ⊢! σ :=
   ⟨fun h ↦ ⟨completeness h⟩, soundness'⟩
