@@ -54,17 +54,16 @@ abbrev Derivation : Sequent L → Type u := DerivationCR (fun _ => False)
 
 scoped prefix:45 "⊢ᵀ " => Derivation
 
-abbrev DerivationC : Sequent L → Type u := DerivationCR (fun _ => True)
-
-scoped prefix:45 "⊢ᶜ " => DerivationC
 
 abbrev DerivationClx (c : ℕ) : Sequent L → Type u := DerivationCR (·.complexity < c)
 
 scoped notation :45 "⊢ᶜ[< " c "] " Γ:45 => DerivationClx c Γ
 
+abbrev DerivationC : Sequent L → Type u := DerivationCR (fun _ => True)
+
 instance : OneSided (SyntacticFormula L) := ⟨DerivationC⟩
 
-instance : OneSided (Sentence L) := ⟨fun Γ ↦ ⊢ᶜ Γ.map Rew.emb.hom⟩
+instance : OneSided (Sentence L) := ⟨fun Γ ↦ ⊢¹ (Γ.map Rew.emb.hom : Sequent L)⟩
 
 namespace DerivationCR
 variable {P : SyntacticFormula L → Prop} {Δ Δ₁ Δ₂ Γ : Sequent L} {p q r : SyntacticFormula L}
@@ -172,7 +171,7 @@ def cutWeakening {P Q : SyntacticFormula L → Prop} (h : ∀ p, P p → Q p) : 
 
 def ofLe {i j : ℕ} (h : i ≤ j) : ⊢ᶜ[< i] Δ → ⊢ᶜ[< j] Δ := cutWeakening (fun _ hp => lt_of_lt_of_le hp h)
 
-def cutWeakeningCut (d : ⊢ᶜ[P] Δ) : ⊢ᶜ Δ := d.cutWeakening (by simp)
+def cutWeakeningCut (d : ⊢ᶜ[P] Δ) : ⊢¹ Δ := d.cutWeakening (by simp)
 
 alias weakening := wk
 
@@ -181,7 +180,7 @@ def verum' (h : ⊤ ∈ Δ) : ⊢ᶜ[P] Δ := (verum Δ).wk (by simp[h])
 def axL' {k} (r : L.Rel k) (v)
     (h : Subformula.rel r v ∈ Δ) (hn : Subformula.nrel r v ∈ Δ) : ⊢ᶜ[P] Δ := (axL Δ r v).wk (by simp[h, hn])
 
-def cCut (d₁ : ⊢ᶜ p :: Δ) (d₂ : ⊢ᶜ ~p :: Δ) : ⊢ᶜ Δ := cut trivial d₁ d₂
+def cCut (d₁ : ⊢¹ p :: Δ) (d₂ : ⊢¹ ~p :: Δ) : ⊢¹ Δ := cut trivial d₁ d₂
 
 def cutClx {i p} (d₁ : ⊢ᶜ[< i] p :: Δ) (d₂ : ⊢ᶜ[< i] ~p :: Δ) (hp : p.complexity < i) :
     ⊢ᶜ[< i] Δ := cut hp d₁ d₂
@@ -275,7 +274,7 @@ def lMap (Φ : L₁ →ᵥ L₂) {P₁ : SyntacticFormula L₁ → Prop} {P₂ :
 def lMap₀ (Φ : L₁ →ᵥ L₂) {Δ : Sequent L₁} (d : ⊢ᵀ Δ) : ⊢ᵀ Δ.map (.lMap Φ) :=
   d.lMap Φ (fun _ x => x)
 
-def lMapCut (Φ : L₁ →ᵥ L₂) {Δ : Sequent L₁} (d : ⊢ᶜ Δ) : ⊢ᶜ Δ.map (.lMap Φ) :=
+def lMapCut (Φ : L₁ →ᵥ L₂) {Δ : Sequent L₁} (d : ⊢¹ Δ) : ⊢¹ (Δ.map (.lMap Φ) : Sequent L₂) :=
   d.lMap Φ (fun _ x => x)
 
 end Hom
@@ -330,8 +329,8 @@ def rewrite₀ {Δ : Sequent L} (d : ⊢ᵀ Δ) (f : ℕ → SyntacticTerm L) :
 def rewriteClx {i} {Δ : Sequent L} (d : ⊢ᶜ[< i] Δ) (f : ℕ → SyntacticTerm L) :
     ⊢ᶜ[< i] Δ.map ((Rew.rewrite f).hom) := d.rewrite (by simp) f
 
-def rewriteCut {Δ : Sequent L} (d : ⊢ᶜ Δ) (f : ℕ → SyntacticTerm L) :
-    ⊢ᶜ Δ.map ((Rew.rewrite f).hom) := d.rewrite (by simp) f
+def rewriteCut {Δ : Sequent L} (d : ⊢¹ Δ) (f : ℕ → SyntacticTerm L) :
+    ⊢¹ Δ.map ((Rew.rewrite f).hom) := d.rewrite (by simp) f
 
 @[simp] lemma length_rewrite (h) (d : ⊢ᶜ[P] Δ) (f : ℕ → SyntacticTerm L) :
     (d.rewrite h f).length = d.length := by
@@ -373,7 +372,7 @@ def genelalizeByNewver₀ {p : SyntacticSubformula L 1} (hp : ¬p.fvar? m) (hΔ 
   (d : ⊢ᵀ p/[&m] :: Δ) : ⊢ᵀ (∀' p) :: Δ := d.genelalizeByNewver (by simp) hp hΔ
 
 def genelalizeByNewverCut {p : SyntacticSubformula L 1} (hp : ¬p.fvar? m) (hΔ : ∀ q ∈ Δ, ¬q.fvar? m)
-  (d : ⊢ᶜ p/[&m] :: Δ) : ⊢ᶜ (∀' p) :: Δ := d.genelalizeByNewver (by simp) hp hΔ
+  (d : ⊢¹ p/[&m] :: Δ) : ⊢¹ (∀' p) :: Δ := d.genelalizeByNewver (by simp) hp hΔ
 
 def exOfInstances (v : List (SyntacticTerm L)) (p : SyntacticSubformula L 1)
   (h : ⊢ᶜ[P] v.map (p/[·]) ++ Γ) : ⊢ᶜ[P] (∃' p) :: Γ := by
@@ -389,9 +388,9 @@ def exOfInstances' (v : List (SyntacticTerm L)) (p : SyntacticSubformula L 1)
     (h.wk $ by simp; exact List.subset_append_of_subset_right _ (List.subset_cons _ _))).wk
     (by simp)
 
-def toTait {Γ : List (Sentence L)} (d : ⊢ᶜ Γ.map Rew.emb.hom) : ⊢¹ Γ := d
+def toTait {Γ : List (Sentence L)} (d : ⊢¹ (Γ.map Rew.emb.hom : Sequent L)) : ⊢¹ Γ := d
 
-def ofTait {Γ : List (Sentence L)} (d : ⊢¹ Γ) : ⊢ᶜ Γ.map Rew.emb.hom := d
+def ofTait {Γ : List (Sentence L)} (d : ⊢¹ Γ) : ⊢¹ (Γ.map Rew.emb.hom : Sequent L) := d
 
 def toOneSided {Δ : List (Sentence L)} (b : ⊢ᶜ[P] Δ.map Rew.emb.hom) : ⊢¹ Δ := b.cutWeakening (by simp)
 
@@ -408,14 +407,14 @@ instance : Tait.Cut (SyntacticFormula L) := ⟨DerivationCR.cCut⟩
 
 instance : Tait (Sentence L) where
   verum := fun Δ =>
-    have d : ⊢ᶜ ⊤ :: Δ.map Rew.emb.hom := DerivationCR.verum (Δ.map Rew.emb.hom)
+    have d := DerivationCR.verum (P := fun _ => True) (Δ.map Rew.emb.hom)
     DerivationCR.toTait (d.cast $ by simp)
   and := fun {σ π Δ} dσ dπ =>
-    let dσ : ⊢ᶜ Rew.emb.hom σ :: Δ.map Rew.emb.hom := DerivationCR.ofTait dσ
-    let dπ : ⊢ᶜ Rew.emb.hom π :: Δ.map Rew.emb.hom := DerivationCR.ofTait dπ
+    let dσ : ⊢¹ Rew.emb.hom σ :: Δ.map Rew.emb.hom := DerivationCR.ofTait dσ
+    let dπ : ⊢¹ Rew.emb.hom π :: Δ.map Rew.emb.hom := DerivationCR.ofTait dπ
     DerivationCR.toTait ((dσ.and dπ).cast $ by simp)
   or := fun {σ π Δ} d =>
-    let d : ⊢ᶜ Rew.emb.hom σ :: Rew.emb.hom π :: Δ.map Rew.emb.hom := DerivationCR.ofTait d
+    let d : ⊢¹ Rew.emb.hom σ :: Rew.emb.hom π :: Δ.map Rew.emb.hom := DerivationCR.ofTait d
     DerivationCR.toTait (d.or.cast $ by simp)
   wk := fun {Δ Δ'} d ss =>
     d.wk (List.map_subset _ ss)

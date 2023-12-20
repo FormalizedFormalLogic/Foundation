@@ -339,7 +339,7 @@ def hauptsatzClx : {i : ℕ} → ⊢ᶜ[< i] Δ → ⊢ᵀ Δ
   | 0,     d => d.cutWeakening (by simp)
   | i + 1, d => d.elimination.hauptsatzClx
 
-def toClx : {Δ : Sequent L} → ⊢ᶜ Δ → (i : ℕ) × ⊢ᶜ[< i] Δ
+def toClx : {Δ : Sequent L} → ⊢¹ Δ → (i : ℕ) × ⊢ᶜ[< i] Δ
   | _, axL Δ r v            => ⟨0, axL Δ r v⟩
   | _, verum Δ              => ⟨0, verum Δ⟩
   | _, and dp dq            => ⟨max dp.toClx.1 dq.toClx.1, and (dp.toClx.2.ofLe (by simp)) (dq.toClx.2.ofLe (by simp))⟩
@@ -350,11 +350,11 @@ def toClx : {Δ : Sequent L} → ⊢ᶜ Δ → (i : ℕ) × ⊢ᶜ[< i] Δ
   | _, @cut _ _ _ p _ dp dn =>
     ⟨max (max dp.toClx.1 dn.toClx.1) p.complexity.succ, cut (by simp) (dp.toClx.2.ofLe (by simp)) (dn.toClx.2.ofLe (by simp))⟩
 
-def hauptsatz : ⊢ᶜ Δ → ⊢ᵀ Δ := fun d => hauptsatzClx d.toClx.2
+def hauptsatz : ⊢¹ Δ → ⊢ᵀ Δ := fun d => hauptsatzClx d.toClx.2
 
-lemma iff_cut {L :Language} {Δ : Sequent L} : Nonempty (⊢ᵀ Δ) ↔ Nonempty (⊢ᶜ Δ) :=
+lemma iff_cut {L :Language} {Δ : Sequent L} : Nonempty (⊢ᵀ Δ) ↔ Nonempty (⊢¹ Δ) :=
   haveI := Classical.typeDecidableEq
-  ⟨by rintro ⟨d⟩; exact ⟨cutWeakeningCut d⟩, by rintro ⟨d⟩; exact ⟨d.hauptsatz⟩⟩
+  ⟨by rintro ⟨d⟩; exact ⟨cutWeakeningCut d⟩, by rintro ⟨d⟩; exact ⟨hauptsatz d⟩⟩
 
 end DerivationCR
 

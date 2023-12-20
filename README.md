@@ -24,7 +24,7 @@ Formalizing Logic in Lean4
 |                                     |                                     | Definition                      | Notation  |
 | :----:                              | ----                                | ----                            | :----:    |
 | $\vdash_\mathrm{T} \Gamma$          | Derivation in Tait-Calculus         |  `LO.FirstOrder.Derivation`     | `⊢ᵀ Γ`    |
-| $(\rm Cut)\vdash_\mathrm{T} \Gamma$ | Derivation in Tait-Calculus + Cut   |  `LO.FirstOrder.DerivationC`    | `⊢ᶜ Γ`    |
+| $(\rm Cut)\vdash_\mathrm{T} \Gamma$ | Derivation in Tait-Calculus + Cut   |  `LO.FirstOrder.DerivationC`    | `⊢¹ Γ`    |
 | $M \models \sigma$                  | Tarski's truth definition condition |  `LO.FirstOrder.Subformula.Val` | `M ⊧ σ`   |
 | $T \vdash \sigma$                   | Proof, Provability                  |  `LO.FirstOrder.Proof`          | `T ⊢ σ`, `T ⊢! σ` |
 
@@ -37,7 +37,7 @@ The key results are summarised in `Logic/Summary.lean`.
 - Cut-elimination
 ```lean
 example [(k : ℕ) → DecidableEq (L.Func k)] [(k : ℕ) → DecidableEq (L.Rel k)]
-  {Δ : Sequent L} : ⊢ᶜ Δ → ⊢ᵀ Δ := DerivationCR.hauptsatz
+  {Δ : Sequent L} : ⊢¹ Δ → ⊢ᵀ Δ := DerivationCR.hauptsatz
 ```
 
 - Completeness theorem

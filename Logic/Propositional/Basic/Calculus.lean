@@ -26,8 +26,6 @@ scoped prefix:45 "⊢ᴾᵀ " => Derivation
 
 abbrev DerivationC : Sequent α → Type _ := DerivationCR (fun _ => True)
 
-scoped prefix:45 "⊢ᴾᶜ " => DerivationC
-
 abbrev DerivationClx (c : ℕ) : Sequent α → Type _ := DerivationCR (·.complexity < c)
 
 scoped notation :45 "⊢ᴾᶜ[< " c "] " Γ:45 => DerivationClx c Γ
@@ -64,7 +62,7 @@ def verum' (h : ⊤ ∈ Δ) : ⊢ᴾᶜ[P] Δ := (verum Δ).wk (by simp[h])
 def axL' (a : α)
     (h : Formula.atom a ∈ Δ) (hn : Formula.natom a ∈ Δ) : ⊢ᴾᶜ[P] Δ := (axL Δ a).wk (by simp[h, hn])
 
-def cCut {p} (d₁ : ⊢ᴾᶜ p :: Δ) (d₂ : ⊢ᴾᶜ (~p) :: Δ) : ⊢ᴾᶜ Δ := cut trivial d₁ d₂
+def cCut {p} (d₁ : ⊢¹ p :: Δ) (d₂ : ⊢¹ (~p) :: Δ) : ⊢¹ Δ := cut trivial d₁ d₂
 
 def em {p : Formula α} {Δ : Sequent α} (hpos : p ∈ Δ) (hneg : ~p ∈ Δ) : ⊢ᴾᶜ[P] Δ := by
   induction p using Formula.rec' generalizing Δ <;> simp at hneg
