@@ -131,16 +131,19 @@ variable [Tait.Cut F]
 
 instance : Gentzen.Cut F := ⟨fun d d' => Cut.cut (ofConsRight d) (ofConsLeft d')⟩
 
+def equiv : Γ ⊢² Δ ≃ ⊢¹ Γ.map (~·) ++ Δ := Equiv.refl _
+
 end Tait
 
 namespace Gentzen
 
 variable [Gentzen F] [Gentzen.Cut F] {Γ Δ E : List F}
 
-
 def wkLeft {Γ Γ' Δ : List F} (d : Γ ⊢² Δ) (ss : Γ ⊆ Γ') : Γ' ⊢² Δ := wk d ss (by simp)
 
 def wkRight {Γ Δ Δ' : List F} (d : Γ ⊢² Δ) (ss : Δ ⊆ Δ') : Γ ⊢² Δ' := wk d (by simp) ss
+
+def verum' (h : ⊤ ∈ Δ) : Γ ⊢² Δ := wkRight (verum Γ Δ) (by simp[h])
 
 def ofNegLeft {p} (b : ~p :: Γ ⊢² Δ) : Γ ⊢² p :: Δ :=
   let d : p :: Γ ⊢² p :: Δ :=
@@ -154,28 +157,28 @@ def ofNegRight {p} (b : Γ ⊢² ~p :: Δ) : p :: Γ ⊢² Δ :=
       (by simp) (by simp)
   Cut.cut (wkLeft b (by simp)) (negLeft d)
 
-structure DerivationM (T : Set F) (Γ : List F) where
+structure Disjconseq (T : Set F) (Γ : List F) where
   antecedent : List F
   antecedent_ss : ∀ p ∈ antecedent, p ∈ T
   derivation : antecedent ⊢² Γ
 
-infix: 45 " ⊢²' " => DerivationM
+infix: 45 " ⊢' " => Disjconseq
 
 variable {T : Set F}
 
-def DerivationMEquivDerivation :
-    T ⊢²' Γ ≃ (Δ : {Δ : List F // ∀ π ∈ Δ, π ∈ T}) × Δ ⊢² Γ where
+def DisjconseqEquivDerivation :
+    T ⊢' Γ ≃ (Δ : {Δ : List F // ∀ π ∈ Δ, π ∈ T}) × Δ ⊢² Γ where
   toFun := fun b => ⟨⟨b.antecedent, b.antecedent_ss⟩, b.derivation⟩
   invFun := fun p => ⟨p.1, p.1.prop, p.2⟩
   left_inv := fun b => by simp
   right_inv := fun b => by simp
 
-def DerivationM.weakening {T U : Set F} {Γ : List F} (b : T ⊢²' Γ) (h : T ⊆ U) : U ⊢²' Γ where
+def Disjconseq.weakening {T U : Set F} {Γ : List F} (b : T ⊢' Γ) (h : T ⊆ U) : U ⊢' Γ where
   antecedent := b.antecedent
   antecedent_ss := fun p hp => h (b.antecedent_ss p hp)
   derivation := b.derivation
 
-def toDerivationM {Γ Δ} (d : Γ ⊢² Δ) (ss : ∀ p ∈ Γ, p ∈ T) : T ⊢²' Δ where
+def toDisjconseq {Γ Δ} (d : Γ ⊢² Δ) (ss : ∀ p ∈ Γ, p ∈ T) : T ⊢' Δ where
   antecedent := Γ
   antecedent_ss := ss
   derivation := d
@@ -185,14 +188,14 @@ def Cut.cut' {Γ₁ Γ₂ Δ₁ Δ₂ : List F} (d₁ : Γ₁ ⊢² p :: Δ₁) 
   let d₂ : p :: (Γ₁ ++ Γ₂) ⊢² Δ₁ ++ Δ₂ := wk d₂ (List.cons_subset_cons _ $ by simp) (by simp)
   Cut.cut d₁ d₂
 
-namespace DerivationM
+namespace Disjconseq
 
-def wk (b : T ⊢²' Γ) (ss : Γ ⊆ Γ') : T ⊢²' Γ' where
+def wk (b : T ⊢' Γ) (ss : Γ ⊆ Γ') : T ⊢' Γ' where
   antecedent := b.antecedent
   antecedent_ss := b.antecedent_ss
   derivation := wkRight b.derivation ss
 
-def cut (b : T ⊢²' p :: Γ) (b' : T ⊢²' ~p :: Γ) : T ⊢²' Γ where
+def cut (b : T ⊢' p :: Γ) (b' : T ⊢' ~p :: Γ) : T ⊢' Γ where
   antecedent := b.antecedent ++ b'.antecedent
   antecedent_ss := by
     simp
@@ -204,7 +207,7 @@ def cut (b : T ⊢²' p :: Γ) (b' : T ⊢²' ~p :: Γ) : T ⊢²' Γ where
     let d' : b.antecedent ++ b'.antecedent ⊢² ~p :: Γ := wkLeft b'.derivation (by simp)
     Cut.cut d' (negLeft d)
 
-def cut' (b : T ⊢²' p :: Γ) (b' : T ⊢²' ~p :: Δ) : T ⊢²' Γ ++ Δ where
+def cut' (b : T ⊢' p :: Γ) (b' : T ⊢' ~p :: Δ) : T ⊢' Γ ++ Δ where
   antecedent := b.antecedent ++ b'.antecedent
   antecedent_ss := by
     simp
@@ -216,9 +219,27 @@ def cut' (b : T ⊢²' p :: Γ) (b' : T ⊢²' ~p :: Δ) : T ⊢²' Γ ++ Δ whe
     let d' : b.antecedent ++ b'.antecedent ⊢² ~p :: Δ := wkLeft b'.derivation (by simp)
     exact Gentzen.wk (Cut.cut' d' (negLeft d)) (by simp) (by simp)
 
-def verum (Γ : List F) : T ⊢²' ⊤ :: Γ := ⟨[], by simp, Gentzen.verum _ _⟩
+def verum (Γ : List F) : T ⊢' ⊤ :: Γ := ⟨[], by simp, Gentzen.verum _ _⟩
 
-def deduction [DecidableEq F] {p} (b : insert p T ⊢²' Δ) : T ⊢²' ~p :: Δ where
+def verum' (h : ⊤ ∈ Γ) : T ⊢' Γ := wk (verum Γ) (by simp[h])
+
+def and (bp : T ⊢' p :: Δ) (bq : T ⊢' q :: Δ) : T ⊢' p ⋏ q :: Δ where
+  antecedent := bp.antecedent ++ bq.antecedent
+  antecedent_ss := by
+    simp
+    rintro p (hp | hp)
+    · exact bp.antecedent_ss _ hp
+    · exact bq.antecedent_ss _ hp
+  derivation := Gentzen.andRight
+      (Gentzen.wkLeft bp.derivation (List.subset_append_left _ _))
+      (Gentzen.wkLeft bq.derivation (List.subset_append_right _ _))
+
+def or (b : T ⊢' p :: q :: Δ) : T ⊢' p ⋎ q :: Δ where
+  antecedent := b.antecedent
+  antecedent_ss := b.antecedent_ss
+  derivation := Gentzen.orRight b.derivation
+
+def deduction [DecidableEq F] {p} (b : insert p T ⊢' Δ) : T ⊢' ~p :: Δ where
   antecedent := b.antecedent.filter (· ≠ p)
   antecedent_ss := by
     simp[List.mem_filter]
@@ -228,7 +249,7 @@ def deduction [DecidableEq F] {p} (b : insert p T ⊢²' Δ) : T ⊢²' ~p :: Δ
     intro q hq
     by_cases e : q = p <;> simp[List.mem_filter, hq, e])
 
-def deductionNeg [DecidableEq F] {p} (b : insert (~p) T ⊢²' Δ) : T ⊢²' p :: Δ where
+def deductionNeg [DecidableEq F] {p} (b : insert (~p) T ⊢' Δ) : T ⊢' p :: Δ where
   antecedent := b.antecedent.filter (· ≠ ~p)
   antecedent_ss := by
     simp[List.mem_filter]
@@ -238,12 +259,12 @@ def deductionNeg [DecidableEq F] {p} (b : insert (~p) T ⊢²' Δ) : T ⊢²' p 
     intro q hq
     by_cases e : q = ~p <;> simp[List.mem_filter, hq, e])
 
-end DerivationM
+end Disjconseq
 
 variable (F)
 
 instance : System F where
-  Bew := fun T p => T ⊢²' [p]
+  Bew := fun T p => T ⊢' [p]
   axm := fun {T p} h =>
     ⟨[p], by simpa,
       em (List.mem_singleton.mpr rfl) (List.mem_singleton.mpr rfl)⟩
@@ -252,18 +273,18 @@ instance : System F where
 variable {F}
 
 def toProof :
-    {Γ Δ : List F} → Γ ⊢² Δ → (∀ q ∈ Γ, T ⊢ q) → T ⊢²' Δ
-  | [],     _, d, _ => toDerivationM d (by simp)
+    {Γ Δ : List F} → Γ ⊢² Δ → (∀ q ∈ Γ, T ⊢ q) → T ⊢' Δ
+  | [],     _, d, _ => toDisjconseq d (by simp)
   | q :: Γ, Δ, d, h =>
-    let bn : T ⊢²' ~q :: Δ := toProof (negRight d) (fun q hq => h q (by simp[hq]))
-    let b : T ⊢²' [q] := h q (by simp)
+    let bn : T ⊢' ~q :: Δ := toProof (negRight d) (fun q hq => h q (by simp[hq]))
+    let b : T ⊢' [q] := h q (by simp)
     b.cut' bn
 
 instance : LawfulGentzen F := ⟨toProof⟩
 
 def proofEquivDerivation {p : F} :
     T ⊢ p ≃ (Δ : {Δ : List F // ∀ π ∈ Δ, π ∈ T}) × Δ ⊢² [p] :=
-  DerivationMEquivDerivation
+  DisjconseqEquivDerivation
 
 lemma provable_iff {p : F} :
     T ⊢! p ↔ ∃ Δ : List F, (∀ π ∈ Δ, π ∈ T) ∧ Δ ⊢²! [p] :=
@@ -281,12 +302,12 @@ theorem compact :
       (provable_iff.mpr $ ⟨Δ, by simp, ⟨d⟩⟩)⟩⟩
 
 lemma consistent_iff_empty_sequent :
-    System.Consistent T ↔ IsEmpty (T ⊢²' []) :=
+    System.Consistent T ↔ IsEmpty (T ⊢' []) :=
   ⟨by contrapose; simp[System.Consistent]; intro b; exact ⟨b.wk (by simp)⟩,
    by contrapose; simp[System.Consistent]
       rintro ⟨Δ, h, d⟩
       have : Δ ⊢² [] := Cut.cut d (falsum _ _)
-      exact ⟨toDerivationM this h⟩⟩
+      exact ⟨toDisjconseq this h⟩⟩
 
 lemma provable_iff_inConsistent {p} :
     T ⊢! p ↔ ¬System.Consistent (insert (~p) T) :=
@@ -300,7 +321,7 @@ lemma provable_iff_inConsistent {p} :
 
 lemma inconsistent_of_provable_and_refutable {p}
     (bp : T ⊢ p) (br : T ⊢ ~p) : ¬System.Consistent T := fun A => by
-  have : T ⊢²' [] := DerivationM.cut bp br
+  have : T ⊢' [] := Disjconseq.cut bp br
   exact (consistent_iff_empty_sequent.mp A).false this
 
 lemma inconsistent_of_provable_and_refutable' {p}

@@ -441,6 +441,50 @@ lemma proofToSyntactic {T : Theory L} {σ} (b : T ⊢ σ) :
   have := twoSidedToSyntactic b.derivation
   exact ⟨_, by simp; intro σ hσ; exact ⟨σ, b.antecedent_ss σ hσ, rfl⟩, this⟩
 
+abbrev DisjconseqTr (T : Theory L) (Γ : Sequent L) : Type _ := Rew.emb.hom '' T ⊢' Γ
+
+scoped infix: 45 " ⊢'' " => DisjconseqTr
+
+namespace Gentzen
+
+variable {Γ Δ : Sequent L}
+
+def genelalizeByNewver {p : SyntacticSubformula L 1}
+    (hp : ¬p.fvar? m) (hΓ : ∀ q ∈ Γ, ¬q.fvar? m) (hΔ : ∀ q ∈ Δ, ¬q.fvar? m) :
+    Γ ⊢² p/[&m] :: Δ → Γ ⊢² (∀' p) :: Δ := fun d ↦
+  Tait.toConsRight <| DerivationCR.genelalizeByNewverCut hp
+    (by simp; rintro q (⟨q, hq, rfl⟩ | hq)
+        · simpa[Subformula.fvar?] using hΓ q (by simp[hq])
+        · simpa using hΔ q (by simp[hq]))
+    (Tait.ofConsRight d)
+
+def specialize {p : SyntacticSubformula L 1} (t : SyntacticTerm L) :
+    Γ ⊢² p/[t] :: Δ → Γ ⊢² (∃' p) :: Δ := fun d ↦
+  Tait.toConsRight <| DerivationCR.ex t (Tait.ofConsRight d)
+
+end Gentzen
+
+namespace System
+
+variable {T : Theory L} {Γ Δ : Sequent L}
+
+def genelalizeByNewver {p : SyntacticSubformula L 1} (hp : ¬p.fvar? m) (hΔ : ∀ q ∈ Δ, ¬q.fvar? m) :
+    T ⊢'' p/[&m] :: Δ → T ⊢'' (∀' p) :: Δ := fun d ↦
+  let ⟨Γ, d⟩ := Gentzen.DisjconseqEquivDerivation d
+  Gentzen.DisjconseqEquivDerivation.symm ⟨Γ,
+    Gentzen.genelalizeByNewver hp
+      (by intro q hq
+          have : ∃ σ ∈ T, Rew.emb.hom σ = q := by simpa using Γ.prop q hq
+          rcases this with ⟨σ, _, rfl⟩; simp[Subformula.fvar?])
+      hΔ d⟩
+
+def specialize {p : SyntacticSubformula L 1} (t : SyntacticTerm L) :
+    T ⊢'' p/[t] :: Δ → T ⊢'' (∃' p) :: Δ := fun d ↦
+  let ⟨Γ, d⟩ := Gentzen.DisjconseqEquivDerivation d
+  Gentzen.DisjconseqEquivDerivation.symm ⟨Γ, Gentzen.specialize t d⟩
+
+end System
+
 end FirstOrder
 
 end LO

@@ -10,10 +10,10 @@ variable {L : Language.{u}}
   [∀ k, DecidableEq (L.Func k)] [∀ k, DecidableEq (L.Rel k)]
   [∀ k, Encodable (L.Func k)] [∀ k, Encodable (L.Rel k)]
 
-def newVar (Γ : Sequent L) : ℕ := Γ.sup Subformula.upper
+def newVar (Γ : Sequent L) : ℕ := (Γ.map Subformula.upper).foldr max 0
 
 lemma not_fvar?_newVar {p : SyntacticFormula L} {Γ : Sequent L} (h : p ∈ Γ) : ¬fvar? p (newVar Γ) :=
-  not_fvar?_of_lt_upper p (by simpa[newVar] using Finset.le_sup h)
+  not_fvar?_of_lt_upper p (by simpa[newVar] using List.le_max_of_le (List.mem_map_of_mem _ h) (by simp))
 
 namespace DerivationWA
 
@@ -21,7 +21,7 @@ open Subformula
 variable {P : SyntacticFormula L → Prop} {T : Theory L} {Δ : Sequent L}
 
 protected def all_nvar {p} (h : ∀' p ∈ Δ)
-  (b : T ⊢ᵀ (insert ([→ &(newVar Δ)].hom p) Δ)) : T ⊢ᵀ Δ where
+  (b : T ⊢ᵀ p/[&(newVar Δ)] :: Δ : T ⊢ᵀ Δ where
   leftHand := b.leftHand
   hleftHand := b.hleftHand
   derivation :=
