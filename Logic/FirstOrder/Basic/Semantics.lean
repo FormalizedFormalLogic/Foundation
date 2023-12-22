@@ -607,7 +607,7 @@ variable (M : Type u) [s : Structure L M] { T : Theory L} [Theory.Mod M T]
 
 lemma models {σ : Sentence L} (hσ : σ ∈ T) : M ⊧ σ := Semantics.Mod.models M s hσ
 
-lemma of_ss {T₁ T₂ : Theory L} [Theory.Mod M T₁] (ss : T₂ ⊆ T₁) : Theory.Mod M T₂ :=
+def of_ss {T₁ T₂ : Theory L} [Theory.Mod M T₁] (ss : T₂ ⊆ T₁) : Theory.Mod M T₂ :=
   Semantics.Mod.of_ss M s ss
 
 lemma of_subtheory [Inhabited M] {T₁ T₂ : Theory L} [Theory.Mod M T₁] (h : Semantics.Subtheory T₂ T₁) : Theory.Mod M T₂ :=
@@ -621,11 +621,13 @@ namespace Structure
 
 variable (L)
 
-def theory (M : Type u) [s : Structure L M] : Theory L := Semantics.theory s
+abbrev theory (M : Type u) [s : Structure L M] : Theory L := Semantics.theory s
 
-variable {M : Type u} [Structure L M]
+variable {L} {M : Type u} [Structure L M]
 
 @[simp] lemma mem_theory_iff {σ} : σ ∈ theory L M ↔ M ⊧ σ := by rfl
+
+lemma subset_of_models : T ⊆ theory L M ↔ M ⊧* T := ⟨fun h _ hσ ↦ h hσ, fun h _ hσ ↦ h hσ⟩
 
 end Structure
 

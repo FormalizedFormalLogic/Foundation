@@ -237,6 +237,8 @@ lemma models : ModelOfSatEq sat ⊧* T :=
     Structure.Eq.QuotEq.elementaryEquiv (Semantics.modelsTheory_of_subset (ModelOfSat.models sat) EqTheory.eq)
   e.modelsTheory.mpr (ModelOfSat.models _)
 
+instance mod : Theory.Mod (ModelOfSatEq sat) T := ⟨models sat⟩
+
 open Subterm Subformula
 
 noncomputable instance [Operator.Zero L] : Zero (ModelOfSatEq sat) := ⟨(@Operator.Zero.zero L _).val ![]⟩
