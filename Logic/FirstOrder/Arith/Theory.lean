@@ -66,42 +66,46 @@ abbrev IDelta (k : ℕ) (T : Theory L) := Ind (Arith.Hierarchy.Sigma k) T
 
 abbrev Peano (T : Theory L) := Ind Set.univ T
 
-/-
 namespace Axiom
 
 variable (L)
 
-def PAminus : Theory L := Theory.PAminus L ∪ Theory.Eq L
+def paminus : Theory L := Theory.Eq L ∪ Theory.PAminus L
 
 variable {L}
 
-def Ind (U : Set (Subsentence L 1)) : Theory L := Axiom.PAminus L ∪ Theory.IndScheme U
+def ind (U : Set (Subsentence L 1)) : Theory L := Axiom.paminus L ∪ Theory.IndScheme U
 
 variable (L)
 
-abbrev IOpen : Theory L := Ind Subformula.qfree
+abbrev iopen : Theory L := ind Subformula.qfree
 
-abbrev ISigma (k : ℕ) : Theory L := Ind (Arith.Hierarchy.Sigma k)
+abbrev idelta (k : ℕ) : Theory L := ind (Arith.Hierarchy.Sigma k)
 
-abbrev IPi (k : ℕ) : Theory L := Ind (Arith.Hierarchy.Pi k)
+abbrev peano : Theory L := ind Set.univ
 
-abbrev Peano : Theory L := Ind Set.univ
+instance : EqTheory (paminus L) where
+  eq := by simp[paminus]
 
-instance : EqTheory (PAminus L) where
-  eq := by simp[PAminus]
+instance : Arith.PAminus (paminus L) := System.Subtheory.ofSubset _ _ (by simp[paminus])
 
-instance : Arith.PAminus (PAminus L) := System.Subtheory.ofSubset _ _ (by simp[PAminus])
+instance (u : Set (Subsentence L 1)) : EqTheory (ind u) where
+  eq := by simp[ind]; exact Set.subset_union_of_subset_left (by simp) _
 
-instance (u : Set (Subsentence L 1)) : EqTheory (Ind u) where
-  eq := by simp[Ind]; exact Set.subset_union_of_subset_left (by simp) _
+instance (u : Set (Subsentence L 1)) : Arith.PAminus (ind u) :=
+  System.Subtheory.ofSubset _ _ (by simp[ind, paminus]; exact Set.subset_union_of_subset_left (by simp) _)
 
-instance (u : Set (Subsentence L 1)) : Arith.PAminus (Ind u) :=
-  System.Subtheory.ofSubset _ _ (by simp[Ind, PAminus]; exact Set.subset_union_of_subset_left (by simp) _)
+instance (u : Set (Subsentence L 1)) : Arith.Ind u (ind u) := System.Subtheory.ofSubset _ _ (by simp[ind])
 
-instance (u : Set (Subsentence L 1)) : Arith.Ind u (Ind u) := System.Subtheory.ofSubset _ _ (by simp[Ind])
+notation "𝐏𝐀⁻" => paminus ℒₒᵣ
+
+notation "𝐈open" => iopen ℒₒᵣ
+
+prefix:max "𝐈Δ" => idelta ℒₒᵣ
+
+notation "𝐏𝐀" => peano ℒₒᵣ
 
 end Axiom
--/
 
 end Arith
 
