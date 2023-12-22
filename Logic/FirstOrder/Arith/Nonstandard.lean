@@ -55,7 +55,7 @@ notation "ℕ⋆" => Nonstandard
 
 def star : ℕ⋆ := Subterm.Operator.val (L := ℒₒᵣ⋆) Subterm.Operator.Star.star ![]
 
-local notation "∞" => star
+local notation "⋆" => star
 
 lemma models_union_trueArithWithStarUnbounded : ℕ⋆ ⊧* ⋃ c, trueArithWithStarUnbounded c := ModelOfSatEq.models _
 
@@ -84,7 +84,7 @@ instance : Theory.Mod ℕ⋆ 𝐓𝐀 := ⟨trueArith⟩
 instance : Theory.Mod ℕ⋆ (Theory.PAminus ℒₒᵣ) :=
   Theory.Mod.of_ss (T₁ := 𝐓𝐀) _ (Structure.subset_of_models.mpr $ Arith.Standard.modelsTheoryPAminus)
 
-lemma star_unbounded (n : ℕ) : n < ∞ := by
+lemma star_unbounded (n : ℕ) : n < ⋆ := by
   have : ℕ⋆ ⊧ (“!!(Subterm.Operator.numeral ℒₒᵣ⋆ n) < ⋆” : Sentence ℒₒᵣ⋆) :=
     models_union_trueArithWithStarUnbounded
       (Set.mem_iUnion_of_mem (n + 1) (Set.mem_union_right _ $ Set.mem_range_self $ Fin.last n))
