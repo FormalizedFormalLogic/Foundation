@@ -127,7 +127,7 @@ def eqvSetoid (H : M ⊧* Theory.Eq L) : Setoid M := Setoid.mk (eqv L) (eqv_equi
 
 def QuotEq := Quotient (eqvSetoid H)
 
-instance [Inhabited M] : Inhabited (QuotEq H) := ⟨⟦default⟧⟩
+instance QuotEq.inhabited [Inhabited M] : Inhabited (QuotEq H) := ⟨⟦default⟧⟩
 
 lemma of_eq_of {a b : M} : (⟦a⟧ : QuotEq H) = ⟦b⟧ ↔ eqv L a b := Quotient.eq (r := eqvSetoid H)
 
@@ -141,7 +141,7 @@ def rel ⦃k⦄ (r : L.Rel k) (v : Fin k → QuotEq H) : Prop :=
 
 variable {H}
 
-instance QuotEqStruc : Structure L (QuotEq H) where
+instance struc : Structure L (QuotEq H) where
   func := QuotEq.func H
   rel := QuotEq.rel H
 
@@ -187,7 +187,7 @@ lemma rel_eq (a b : QuotEq H) : (@Subformula.Operator.Eq.eq L _).val (M := QuotE
   simpa[Eval!, Matrix.fun_eq_vec₂, Empty.eq_elim] using
     eval_mk (H := H) (e := ![a, b]) (ε := Empty.elim) (p := Subformula.Operator.Eq.eq.sentence)
 
-instance : Structure.Eq L (QuotEq H) := ⟨rel_eq⟩
+instance structureEq : Structure.Eq L (QuotEq H) := ⟨rel_eq⟩
 
 end QuotEq
 
@@ -217,6 +217,57 @@ lemma satisfiableₛ_iff_eq {T : Theory L} [EqTheory T] :
     have e : Structure.Eq.QuotEq H ≡ₑ[L] M := Structure.Eq.QuotEq.elementaryEquiv H
     exact ⟨Structure.Eq.QuotEq H, inferInstance, inferInstance, inferInstance, e.modelsTheory.mpr hM⟩
   · intro ⟨M, i, s, _, hM⟩; exact ⟨M, i, s, hM⟩
+
+def ModelOfSatEq {T : Theory L} [EqTheory T] (sat : Semantics.Satisfiableₛ T) : Type _ :=
+  have H : ModelOfSat sat ⊧* Theory.Eq L := Semantics.modelsTheory_of_subset (ModelOfSat.models sat) EqTheory.eq
+  Structure.Eq.QuotEq H
+
+namespace ModelOfSatEq
+
+variable {T : Theory L} [EqTheory T] (sat : Semantics.Satisfiableₛ T)
+
+noncomputable instance : Inhabited (ModelOfSatEq sat) := Structure.Eq.QuotEq.inhabited _
+
+noncomputable instance struc : Structure L (ModelOfSatEq sat) := Structure.Eq.QuotEq.struc
+
+noncomputable instance : Structure.Eq L (ModelOfSatEq sat) := Structure.Eq.QuotEq.structureEq
+
+lemma models : ModelOfSatEq sat ⊧* T :=
+  have e : ModelOfSatEq sat ≡ₑ[L] ModelOfSat sat :=
+    Structure.Eq.QuotEq.elementaryEquiv (Semantics.modelsTheory_of_subset (ModelOfSat.models sat) EqTheory.eq)
+  e.modelsTheory.mpr (ModelOfSat.models _)
+
+open Subterm Subformula
+
+noncomputable instance [Operator.Zero L] : Zero (ModelOfSatEq sat) := ⟨(@Operator.Zero.zero L _).val ![]⟩
+
+instance strucZero [Operator.Zero L] : Structure.Zero L (ModelOfSatEq sat) := ⟨rfl⟩
+
+noncomputable instance [Operator.One L] : One (ModelOfSatEq sat) := ⟨(@Operator.One.one L _).val ![]⟩
+
+instance [Operator.One L] : Structure.One L (ModelOfSatEq sat) := ⟨rfl⟩
+
+noncomputable instance [Operator.Add L] : Add (ModelOfSatEq sat) :=
+  ⟨fun x y => (@Operator.Add.add L _).val ![x, y]⟩
+
+instance [Operator.Add L] : Structure.Add L (ModelOfSatEq sat) := ⟨fun _ _ => rfl⟩
+
+noncomputable instance [Operator.Mul L] : Mul (ModelOfSatEq sat) :=
+  ⟨fun x y => (@Operator.Mul.mul L _).val ![x, y]⟩
+
+instance [Operator.Mul L] : Structure.Mul L (ModelOfSatEq sat) := ⟨fun _ _ => rfl⟩
+
+instance [Operator.LT L] : LT (ModelOfSatEq sat) :=
+  ⟨fun x y => (@Operator.LT.lt L _).val ![x, y]⟩
+
+instance [Operator.LT L] : Structure.LT L (ModelOfSatEq sat) := ⟨fun _ _ => iff_of_eq rfl⟩
+
+instance [Operator.Mem L] : Membership (ModelOfSatEq sat) (ModelOfSatEq sat) :=
+  ⟨fun x y => (@Operator.Mem.mem L _).val ![x, y]⟩
+
+instance [Operator.Mem L] : Structure.Mem L (ModelOfSatEq sat) := ⟨fun _ _ => iff_of_eq rfl⟩
+
+end ModelOfSatEq
 
 end FirstOrder
 
