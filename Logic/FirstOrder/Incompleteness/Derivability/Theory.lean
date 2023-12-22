@@ -1,5 +1,4 @@
-import Logic.Logic.System
-import Logic.FirstOrder.Basic.Formula
+import Logic.FirstOrder.Basic
 import Logic.AutoProver.Prover
 
 open LO.System
@@ -8,10 +7,7 @@ namespace LO.FirstOrder.Theory
 
 open Subformula
 
-variable
-  {L : Language.{u}}
-  [∀ k, DecidableEq (L.Func k)] [∀ k, DecidableEq (L.Rel k)] [System (Sentence L)] [Gentzen (Sentence L)] [LawfulTwoSided (Sentence L)]
-  (T : Theory L)
+variable {L : Language} (T : Theory L)
 
 class Complete where
   complete : System.Complete T
@@ -55,14 +51,10 @@ lemma broken_consistent [hc : Theory.Consistent T] (hp : T ⊢! σ) (hr : T ⊢!
   have : T ⊢! ⊥ := by prover [hp, hr];
   exact hc.consistent.false this.some;
 
-lemma consistent_or {T} {σ : Sentence L} : Theory.Inconsistent (T ∪ {σ}) → T ⊢! ~σ := by
-  intro h
-  have := provable_falsum_of_inconsistent h;
-  have : T ⊢! σ ⟶ ⊥ := sorry; -- deduction.mpr (provable_falsum_of_inconsistent h)
-  exact by prover [this];
+lemma consistent_or {T} {σ : Sentence L} : Theory.Inconsistent (insert σ T) → T ⊢! ~σ :=
+  fun h => Gentzen.refutable_iff_inconsistent.mpr h.inconsistent
 
-@[simp]
-lemma axm : T ∪ {σ} ⊢! σ := sorry
+@[simp] lemma axm : insert σ T ⊢! σ := ⟨System.axm $ Set.mem_insert σ T⟩
 
 lemma imply_dilemma (h₁ : T ⊢! σ ⟶ π ⟶ ρ) (h₂ : T ⊢! σ ⟶ π) : T ⊢! σ ⟶ ρ := by prover [h₁, h₂];
 

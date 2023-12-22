@@ -323,6 +323,16 @@ lemma provable_iff_inconsistent {p} :
       intro b
       exact ⟨b.deductionNeg⟩⟩
 
+lemma refutable_iff_inconsistent {p} :
+    T ⊢! ~p ↔ ¬System.Consistent (insert (p) T) :=
+  ⟨by rintro ⟨⟨Δ, h, d⟩⟩
+      simp[consistent_iff_empty_sequent]
+      exact ⟨⟨p :: Δ, by simp; intro q hq; right; exact h q hq, ofNegRight d⟩⟩,
+   by letI := Classical.typeDecidableEq F
+      simp[consistent_iff_empty_sequent]
+      intro b
+      exact ⟨b.deduction⟩⟩
+
 lemma inconsistent_of_provable_and_refutable {p}
     (bp : T ⊢ p) (br : T ⊢ ~p) : ¬System.Consistent T := fun A => by
   have : T ⊢' [] := Disjconseq.cut bp br

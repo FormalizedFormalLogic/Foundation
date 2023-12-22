@@ -8,7 +8,7 @@ namespace LO.FirstOrder.Incompleteness
 
 open FirstOrder.Theory HasProvablePred
 
-variable {L : Language} [System (Sentence L)] [GoedelNumber L (Sentence L)] [Gentzen (Sentence L)] [LawfulTwoSided (Sentence L)]
+variable {L : Language} [GoedelNumber L (Sentence L)]
 variable (T₀ T : Theory L) [Subtheory T₀ T]
 variable {hDef} [Diagonizable T₀ hDef]
 variable (M) [Structure L M]

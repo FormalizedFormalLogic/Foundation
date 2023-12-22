@@ -15,7 +15,7 @@ open LO.System
 
 namespace LO.FirstOrder.Incompleteness
 
-variable {L : Language} [System (Sentence L)] [Gentzen (Sentence L)] [LawfulTwoSided (Sentence L)]
+variable {L : Language}
 
 class GoedelNumber (L : Language) (α : Type*) where
   encode : α → Subterm.Const L
