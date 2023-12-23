@@ -121,9 +121,8 @@ lemma coprime_mul_succ {n m a} (h : n ≤ m) (ha : m - n ∣ a) : Coprime (n * a
       simpa[Nat.add_sub_cancel_left] using Nat.dvd_sub (le_add_right _ _) hn
         (Dvd.dvd.mul_left this n)
     simp[this] at pp
---    apply not_prime_one at pp
---    exact pp
-    )
+    apply not_prime_one at pp
+    exact pp)
 
 lemma pairwise_coprime_coprimeList (l : List ℕ) : ((coprimeList l).map Prod.snd).Pairwise Coprime := by
   have : (coprimeList l).map Prod.snd = List.ofFn (fun i : Fin l.length => (i + 1) * (listSup l)! + 1) := by

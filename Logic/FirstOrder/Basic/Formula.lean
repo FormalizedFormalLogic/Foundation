@@ -699,13 +699,16 @@ abbrev fvar? (p : Subformula L μ n) (x : μ) : Prop := x ∈ p.fvarList
 lemma rew_eq_of_funEqOn {ω₁ ω₂ : Rew L μ₁ n₁ μ₂ n₂} {p}
   (hb : ∀ x, ω₁ #x = ω₂ #x) (hf : Function.funEqOn (fvar? p) (ω₁ ∘ Subterm.fvar) (ω₂ ∘ Subterm.fvar)) :
     ω₁.hom p = ω₂.hom p := by
-  induction p using rec' generalizing n₂ <;> simp[*, Rew.rel, Rew.nrel] <;> simp[fvar?, fvarList] at hf
+  unfold fvar? at*
+  induction p using rec' generalizing n₂ <;> simp[*, Rew.rel, Rew.nrel] <;> simp[fvarList] at hf
   case hrel =>
     funext i
-    exact Subterm.rew_eq_of_funEqOn _ _ _ hb (hf.of_subset (by intro x hx; exact ⟨i, hx⟩))
+    exact Subterm.rew_eq_of_funEqOn _ _ _ hb
+      (hf.of_subset (fun x hx ↦ ⟨i, hx⟩))
   case hnrel =>
     funext i
-    exact Subterm.rew_eq_of_funEqOn _ _ _ hb (hf.of_subset (by intro x hx; exact ⟨i, hx⟩))
+    exact Subterm.rew_eq_of_funEqOn _ _ _ hb
+      (hf.of_subset (fun x hx ↦ ⟨i, hx⟩))
   case hand ihp ihq =>
     exact ⟨ihp hb (hf.of_subset (fun x hx => Or.inl hx)), ihq hb (hf.of_subset (fun x hx => Or.inr hx))⟩
   case hor ihp ihq =>
