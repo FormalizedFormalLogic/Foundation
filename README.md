@@ -36,28 +36,47 @@ The key results are summarised in `Logic/Summary.lean`.
 
 ### First-Order logic
 
-- Cut-elimination
-```lean
-example [(k : ℕ) → DecidableEq (L.Func k)] [(k : ℕ) → DecidableEq (L.Rel k)]
-  {Δ : Sequent L} : ⊢¹ Δ → ⊢ᵀ Δ := DerivationCR.hauptsatz
-```
+- [Cut-elimination](https://iehality.github.io/lean4-logic/Logic/FirstOrder/Hauptsatz.html#LO.FirstOrder.DerivationCR.hauptsatz)
+  ```lean
+  def LO.FirstOrder.DerivationCR.hauptsatz
+      {L : LO.FirstOrder.Language}
+      [(k : ℕ) → DecidableEq (LO.FirstOrder.Language.Func L k)]
+      [(k : ℕ) → DecidableEq (LO.FirstOrder.Language.Rel L k)]
+      {Δ : LO.FirstOrder.Sequent L} :
+      ⊢¹ Δ → LO.FirstOrder.Derivation Δ
+  ```
 
-- Completeness theorem
-```lean
-noncomputable example {σ : Sentence L} : T ⊨ σ → T ⊢ σ := FirstOrder.completeness
-```
+- [Completeness theorem](https://iehality.github.io/lean4-logic/Logic/FirstOrder/Completeness/Completeness.html#LO.FirstOrder.completeness)
+  ```lean
+  noncomputable def LO.FirstOrder.completeness
+      {L : LO.FirstOrder.Language}
+      {T : LO.FirstOrder.Theory L}
+      {σ : LO.FirstOrder.Sentence L} :
+      T ⊨ σ → T ⊢ σ
+  ```
 
-- Gödel's first incompleteness theorem
-```lean
-variable (T : Theory ℒₒᵣ)
-  [DecidablePred T] [EqTheory T] [PAminus T] [SigmaOneSound T] [Theory.Computable T]
-
-example : ¬System.Complete T :=
-  FirstOrder.Arith.first_incompleteness T
-
-example : T ⊬ undecidable T ∧ T ⊬ ~undecidable T :=
-  FirstOrder.Arith.undecidable T
-```
+- [Gödel's first incompleteness theorem](https://iehality.github.io/lean4-logic/Logic/FirstOrder/Incompleteness/FirstIncompleteness.html#LO.FirstOrder.Arith.first_incompleteness)
+  ```lean
+  theorem LO.FirstOrder.Arith.first_incompleteness
+      (T : LO.FirstOrder.Theory ℒₒᵣ)
+      [DecidablePred T]
+      [LO.FirstOrder.EqTheory T]
+      [LO.FirstOrder.Arith.PAminus T]
+      [LO.FirstOrder.Arith.SigmaOneSound T]
+      [LO.FirstOrder.Theory.Computable T] :
+      ¬LO.System.Complete T
+  ```
+  - [undecidable sentence](https://iehality.github.io/lean4-logic/Logic/FirstOrder/Incompleteness/FirstIncompleteness.html#LO.FirstOrder.Arith.undecidable)
+    ```lean
+    theorem LO.FirstOrder.Arith.undecidable
+        (T : LO.FirstOrder.Theory ℒₒᵣ)
+        [DecidablePred T]
+        [LO.FirstOrder.EqTheory T]
+        [LO.FirstOrder.Arith.PAminus T]
+        [LO.FirstOrder.Arith.SigmaOneSound T]
+        [LO.FirstOrder.Theory.Computable T] :
+        T ⊬ LO.FirstOrder.Arith.FirstIncompleteness.undecidable T ∧ T ⊬ ~LO.FirstOrder.Arith.FirstIncompleteness.undecidable T
+    ```
 
 ## References
 - J. Han, F. van Doorn, A formalization of forcing and the unprovability of the continuum hypothesis
