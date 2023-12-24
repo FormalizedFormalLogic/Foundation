@@ -6,14 +6,14 @@ namespace FirstOrder
 
 namespace Structure
 
-structure Model (L : Language.{u}) (M : Type w) :=
+structure Model (L : Language) (M : Type*) :=
   intro : M
 
 namespace Model
 
 variable [Structure L M]
 
-def equiv (L : Language.{u}) (M : Type w) : M ≃ Model L M where
+def equiv (L : Language) (M : Type*) : M ≃ Model L M where
   toFun := fun x => ⟨x⟩
   invFun := Model.intro
   left_inv := by intro x; simp
@@ -23,7 +23,7 @@ instance : Structure L (Model L M) := Structure.ofEquiv (equiv L M)
 
 instance [Inhabited M] : Inhabited (Model L M) := ⟨equiv L M default⟩
 
-lemma elementaryEquiv (L : Language.{u}) (M : Type u) [Structure L M] : M ≡ₑ[L] Model L M :=
+lemma elementaryEquiv (L : Language) (M : Type*) [Structure L M] : M ≡ₑ[L] Model L M :=
   ElementaryEquiv.ofEquiv _
 
 section

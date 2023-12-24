@@ -482,7 +482,7 @@ def modelsTheory_iff_modelsTheory_s {M : Type u} [s : Structure L M] {T : Theory
   M ⊧* T ↔ s ⊧ₛ* T := by rfl
 
 section
-variable {M : Type u} [s : Structure L M]
+variable {M : Type u} [s : Structure L M] {T : Theory L}
 
 lemma models_def : M ⊧ = Subformula.Val s Empty.elim := rfl
 
@@ -490,25 +490,42 @@ lemma models_iff {σ : Sentence L} : M ⊧ σ ↔ Subformula.Val s Empty.elim σ
 
 lemma models_def' : Semantics.models s = Subformula.Val s Empty.elim := rfl
 
-lemma modelsTheory_iff {T : Theory L} : M ⊧* T ↔ (∀ ⦃p⦄, p ∈ T → M ⊧ p) := of_eq rfl
+lemma modelsTheory_iff : M ⊧* T ↔ (∀ ⦃p⦄, p ∈ T → M ⊧ p) := of_eq rfl
 
 lemma models_iff_models {σ : Sentence L} :
     M ⊧ σ ↔ Semantics.models s σ := of_eq rfl
 
-lemma consequence_iff {T : Theory L} {σ : Sentence L} :
+lemma consequence_iff {σ : Sentence L} :
     T ⊨ σ ↔ (∀ (M : Type u) [Inhabited M] [Structure L M], M ⊧* T → M ⊧ σ) := of_eq rfl
 
-lemma consequence_iff' {T : Theory L} {σ : Sentence L} :
+lemma consequence_iff' {σ : Sentence L} :
     T ⊨ σ ↔ (∀ (M : Type u) [Inhabited M] [Structure L M] [Theory.Mod M T], M ⊧ σ) :=
   ⟨fun h M _ s _ => Semantics.consequence_iff'.mp h M s,
    fun h M i s hs => @h M i s ⟨hs⟩⟩
 
-lemma satisfiableₛ_iff {T : Theory L} :
+lemma satisfiableₛ_iff :
     Semantics.Satisfiableₛ T ↔ ∃ (M : Type u) (_ : Inhabited M) (_ : Structure L M), M ⊧* T :=
   of_eq rfl
 
-lemma satisfiableₛ_intro {T : Theory L} (M : Type u) [i : Inhabited M] [s : Structure L M] (h : M ⊧* T) :
+lemma satisfiableₛ_intro (M : Type u) [i : Inhabited M] [s : Structure L M] (h : M ⊧* T) :
     Semantics.Satisfiableₛ T := ⟨M, i, s, h⟩
+
+noncomputable def ModelOfSat (h : Semantics.Satisfiableₛ T) : Type u :=
+  Classical.choose (satisfiableₛ_iff.mp h)
+
+noncomputable instance inhabitedModelOfSat (h : Semantics.Satisfiableₛ T) :
+    Inhabited (ModelOfSat h) := by
+  choose i _ _ using Classical.choose_spec h; exact i
+
+noncomputable def StructureModelOfSatAux (h : Semantics.Satisfiableₛ T) :
+    { s : Structure L (ModelOfSat h) // ModelOfSat h ⊧* T } := by
+  choose _ s h using Classical.choose_spec h
+  exact ⟨s, h⟩
+
+noncomputable instance StructureModelOfSat (h : Semantics.Satisfiableₛ T) :
+    Structure L (ModelOfSat h) := StructureModelOfSatAux h
+
+lemma ModelOfSat.models (h : Semantics.Satisfiableₛ T) : ModelOfSat h ⊧* T := (StructureModelOfSatAux h).prop
 
 lemma valid_iff {σ : Sentence L} :
     Semantics.Valid σ ↔ ∀ ⦃M : Type u⦄ [Inhabited M] [Structure L M], M ⊧ σ :=
@@ -590,7 +607,7 @@ variable (M : Type u) [s : Structure L M] { T : Theory L} [Theory.Mod M T]
 
 lemma models {σ : Sentence L} (hσ : σ ∈ T) : M ⊧ σ := Semantics.Mod.models M s hσ
 
-lemma of_ss {T₁ T₂ : Theory L} [Theory.Mod M T₁] (ss : T₂ ⊆ T₁) : Theory.Mod M T₂ :=
+def of_ss {T₁ T₂ : Theory L} [Theory.Mod M T₁] (ss : T₂ ⊆ T₁) : Theory.Mod M T₂ :=
   Semantics.Mod.of_ss M s ss
 
 lemma of_subtheory [Inhabited M] {T₁ T₂ : Theory L} [Theory.Mod M T₁] (h : Semantics.Subtheory T₂ T₁) : Theory.Mod M T₂ :=
@@ -604,11 +621,13 @@ namespace Structure
 
 variable (L)
 
-def theory (M : Type u) [s : Structure L M] : Theory L := Semantics.theory s
+abbrev theory (M : Type u) [s : Structure L M] : Theory L := Semantics.theory s
 
-variable {M : Type u} [Structure L M]
+variable {L} {M : Type u} [Structure L M]
 
 @[simp] lemma mem_theory_iff {σ} : σ ∈ theory L M ↔ M ⊧ σ := by rfl
+
+lemma subset_of_models : T ⊆ theory L M ↔ M ⊧* T := ⟨fun h _ hσ ↦ h hσ, fun h _ hσ ↦ h hσ⟩
 
 end Structure
 

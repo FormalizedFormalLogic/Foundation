@@ -297,7 +297,7 @@ private lemma decodeZipWithRec_primrec {f : σ → α × β → γ} (hf : Primre
         apply list_casesOn (fst.comp snd) (Primrec.const _)
           (by apply to₂'; simp[Function.uncurry]; rw[casesOn_eq_uncurry]
               apply list_casesOn (snd.comp $ snd.comp fst) (const _)
-                (by simp[Function.uncurry]
+                (by unfold Function.uncurry
                     apply option_map (list_get?.comp (snd.comp $ fst.comp $ fst.comp fst)
                       (Primrec₂.natPair.comp
                         (snd.comp $ unpair.comp $ pred.comp $ fst.comp $ unpair.comp $ snd.comp $ fst.comp $ fst.comp $ fst.comp fst)
@@ -679,7 +679,13 @@ lemma list_subset [DecidableEq α] : PrimrecRel (· ⊆ · : List α → List α
 
 lemma list_all {α : Type*} {β : Type*} [Primcodable α] [Primcodable β]
   {p : α → β → Bool} {l : α → List β} (hp : Primrec₂ p) (hl : Primrec l) : Primrec (fun a => (l a).all (p a)) :=
-  list_foldr hl (const true) ((dom_bool₂ _).comp₂ (hp.comp₂ Primrec₂.left (fst.comp₂ Primrec₂.right)) (snd.comp₂ Primrec₂.right))
+  have : Primrec fun a ↦ (l a).foldr (fun b s ↦ p a b && s) true :=
+    list_foldr hl (const true)
+      ((dom_bool₂ _).comp₂ (hp.comp₂ Primrec₂.left (fst.comp₂ Primrec₂.right)) (snd.comp₂ Primrec₂.right))
+  this.of_eq <| by
+    intro a
+    generalize l a = bs
+    induction bs <;> simp[*]
 
 lemma list_replicate {α : Type*} [Primcodable α] : Primrec₂ (@List.replicate α) := by
    have : Primrec₂ (fun p ih => p.2 :: ih.2 : ℕ × α → ℕ × List α → List α) :=

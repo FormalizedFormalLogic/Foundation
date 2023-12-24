@@ -74,11 +74,11 @@ def shiftb (b : ℕ → UTerm L μ) (n : ℕ) : ℕ → UTerm L μ := fun x =>
   if x < n then UTerm.bvar x
   else UTerm.bShifts n (b (x - n))
 
-@[simp] lemma shiftb_zero (b : ℕ → UTerm L μ) : shiftb b 0 = b := by simp[shiftb]
+@[simp] lemma shiftb_zero (b : ℕ → UTerm L μ) : shiftb b 0 = b := by unfold shiftb; simp
 
 @[simp] lemma shiftb_shiftb_zero (b : ℕ → UTerm L μ) (m₁ m₂) :
     shiftb (shiftb b m₁) m₂ = shiftb b (m₁ + m₂) := by
-  simp[shiftb]
+  unfold shiftb
   funext x
   by_cases hm₂ : x < m₂
   · have : x < m₁ + m₂ := lt_add_of_nonneg_of_lt (Nat.zero_le m₁) hm₂

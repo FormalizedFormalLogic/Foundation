@@ -157,8 +157,9 @@ lemma subset_of_le {T : ℕ → Set F} (H : Cumulative T)
   · simp; rfl
   · simpa[Nat.add_succ] using subset_trans ih (H (s + d))
 
-lemma finset_mem [DecidableEq F] {T : ℕ → Set F}
+lemma finset_mem {T : ℕ → Set F}
     (H : Cumulative T) {u : Finset F} (hu : ↑u ⊆ ⋃ s, T s) : ∃ s, ↑u ⊆ T s := by
+  haveI := Classical.decEq
   induction u using Finset.induction
   case empty => exact ⟨0, by simp⟩
   case insert f u _ ih =>
@@ -185,10 +186,10 @@ variable {F}
 
 namespace Compact
 
-variable [Compact F] [DecidableEq F]
+variable [Compact F]
 variable {M : Type w} [Inhabited M] {s : Struc M}
 
-lemma conseq_compact {f : F} :
+lemma conseq_compact [DecidableEq F] {f : F} :
     T ⊨ f ↔ ∃ u : Finset F, ↑u ⊆ T ∧ u ⊨ f := by
   simp[Semantics.consequence_iff, compact (T := insert (~f) T)]
   constructor

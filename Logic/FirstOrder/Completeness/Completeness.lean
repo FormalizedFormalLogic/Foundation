@@ -61,7 +61,7 @@ noncomputable def completeness {σ : Sentence L} :
   choose b _ using exists_true_iff_nonempty.mpr this
   exact b
 
-theorem completeness_iff' : T ⊨ σ ↔ T ⊢! σ :=
+theorem completeness_iff : T ⊨ σ ↔ T ⊢! σ :=
   ⟨fun h ↦ ⟨completeness h⟩, soundness'⟩
 
 noncomputable instance completeness.sentence : Complete (Sentence L) := ⟨completeness⟩

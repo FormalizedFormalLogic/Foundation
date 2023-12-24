@@ -41,7 +41,8 @@ attribute [instance] Structure.ORing.mk
 
 namespace Structure
 
-variable [FirstOrder.ORing L] {M : Type u} [ORingSymbol M] [Structure L M] [Structure.ORing L M]
+variable [Operator.Zero L] [Operator.One L] [Operator.Add L] {M : Type u} [ORingSymbol M]
+  [Structure L M] [Structure.Zero L M] [Structure.One L M] [Structure.Add L M]
 
 @[simp] lemma numeral_eq_numeral : (z : ℕ) → (Subterm.Operator.numeral L z).val ![] = (ORingSymbol.numeral z : M)
   | 0     => by simp[ORingSymbol.numeral, Subterm.Operator.numeral_zero]

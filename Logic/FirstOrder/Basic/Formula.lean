@@ -699,13 +699,16 @@ abbrev fvar? (p : Subformula L μ n) (x : μ) : Prop := x ∈ p.fvarList
 lemma rew_eq_of_funEqOn {ω₁ ω₂ : Rew L μ₁ n₁ μ₂ n₂} {p}
   (hb : ∀ x, ω₁ #x = ω₂ #x) (hf : Function.funEqOn (fvar? p) (ω₁ ∘ Subterm.fvar) (ω₂ ∘ Subterm.fvar)) :
     ω₁.hom p = ω₂.hom p := by
-  induction p using rec' generalizing n₂ <;> simp[*, Rew.rel, Rew.nrel] <;> simp[fvar?, fvarList] at hf
+  unfold fvar? at*
+  induction p using rec' generalizing n₂ <;> simp[*, Rew.rel, Rew.nrel] <;> simp[fvarList] at hf
   case hrel =>
     funext i
-    exact Subterm.rew_eq_of_funEqOn _ _ _ hb (hf.of_subset (by intro x hx; exact ⟨i, hx⟩))
+    exact Subterm.rew_eq_of_funEqOn _ _ _ hb
+      (hf.of_subset (fun x hx ↦ ⟨i, hx⟩))
   case hnrel =>
     funext i
-    exact Subterm.rew_eq_of_funEqOn _ _ _ hb (hf.of_subset (by intro x hx; exact ⟨i, hx⟩))
+    exact Subterm.rew_eq_of_funEqOn _ _ _ hb
+      (hf.of_subset (fun x hx ↦ ⟨i, hx⟩))
   case hand ihp ihq =>
     exact ⟨ihp hb (hf.of_subset (fun x hx => Or.inl hx)), ihq hb (hf.of_subset (fun x hx => Or.inr hx))⟩
   case hor ihp ihq =>
@@ -777,8 +780,28 @@ def lMap (Φ : L₁ →ᵥ L₂) {n} : Subformula L₁ μ n →L Subformula L₂
 lemma lMap_rel {k} (r : L₁.Rel k) (v : Fin k → Subterm L₁ μ n) :
     lMap Φ (rel r v) = rel (Φ.rel r) (fun i => (v i).lMap Φ) := rfl
 
+@[simp] lemma lMap_rel₀ (r : L₁.Rel 0) (v : Fin 0 → Subterm L₁ μ n) :
+    lMap Φ (rel r v) = rel (Φ.rel r) ![] := by simp[lMap_rel, Matrix.empty_eq]
+
+@[simp] lemma lMap_rel₁ (r : L₁.Rel 1) (t : Subterm L₁ μ n) :
+    lMap Φ (rel r ![t]) = rel (Φ.rel r) ![t.lMap Φ] := by simp[lMap_rel, Matrix.constant_eq_singleton]
+
+@[simp] lemma lMap_rel₂ (r : L₁.Rel 2) (t₁ t₂ : Subterm L₁ μ n) :
+    lMap Φ (rel r ![t₁, t₂]) = rel (Φ.rel r) ![t₁.lMap Φ, t₂.lMap Φ] := by
+  simp[lMap_rel]; funext i; induction i using Fin.induction <;> simp
+
 lemma lMap_nrel {k} (r : L₁.Rel k) (v : Fin k → Subterm L₁ μ n) :
     lMap Φ (nrel r v) = nrel (Φ.rel r) (fun i => (v i).lMap Φ) := rfl
+
+@[simp] lemma lMap_nrel₀ (r : L₁.Rel 0) (v : Fin 0 → Subterm L₁ μ n) :
+    lMap Φ (nrel r v) = nrel (Φ.rel r) ![] := by simp[lMap_nrel, Matrix.empty_eq]
+
+@[simp] lemma lMap_nrel₁ (r : L₁.Rel 1) (t : Subterm L₁ μ n) :
+    lMap Φ (nrel r ![t]) = nrel (Φ.rel r) ![t.lMap Φ] := by simp[lMap_nrel, Matrix.constant_eq_singleton]
+
+@[simp] lemma lMap_nrel₂ (r : L₁.Rel 2) (t₁ t₂ : Subterm L₁ μ n) :
+    lMap Φ (nrel r ![t₁, t₂]) = nrel (Φ.rel r) ![t₁.lMap Φ, t₂.lMap Φ] := by
+  simp[lMap_nrel]; funext i; induction i using Fin.induction <;> simp
 
 @[simp] lemma lMap_all (p : Subformula L₁ μ (n + 1)) :
     lMap Φ (∀' p) = ∀' lMap Φ p := rfl

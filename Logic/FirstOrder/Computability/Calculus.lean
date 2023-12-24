@@ -324,9 +324,9 @@ def isProofFn (T : Theory L) [DecidablePred T] : Sentence L → ℕ → Bool :=
 -- TODO: move to Vorspiel
 def Bool.toOpt : Bool → Option Unit := fun b => bif b then some () else none
 
-@[simp] lemma isSome_bool_to_opt (b) : Option.isSome (Bool.toOpt b) = b := by cases b <;> simp
+@[simp] lemma isSome_bool_to_opt (b) : Option.isSome (Bool.toOpt b) = b := by cases b <;> simp[Bool.toOpt]
 
-@[simp] lemma to_opt_eq_some_iff (b) : Bool.toOpt b = some () ↔ b := by cases b <;> simp
+@[simp] lemma to_opt_eq_some_iff (b) : Bool.toOpt b = some () ↔ b := by cases b <;> simp[Bool.toOpt]
 
 def provableFn (T : Theory L) [DecidablePred T] : Sentence L →. Unit := fun x =>
   Nat.rfindOpt (fun e => Bool.toOpt (isProofFn T x e))

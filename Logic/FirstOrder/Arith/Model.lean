@@ -8,7 +8,11 @@ namespace FirstOrder
 namespace Arith
 open Language
 
-instance standardModel : Structure ℒₒᵣ ℕ where
+section model
+
+variable (M : Type*) [Zero M] [One M] [Add M] [Mul M] [LT M]
+
+instance standardModel : Structure ℒₒᵣ M where
   func := fun _ f =>
     match f with
     | ORing.Func.zero => fun _ => 0
@@ -20,25 +24,42 @@ instance standardModel : Structure ℒₒᵣ ℕ where
     | ORing.Rel.eq => fun v => v 0 = v 1
     | ORing.Rel.lt => fun v => v 0 < v 1
 
-instance : Structure.Eq ℒₒᵣ ℕ :=
+instance : Structure.Eq ℒₒᵣ M :=
   ⟨by intro a b; simp[standardModel, Subformula.Operator.val, Subformula.Operator.Eq.sentence_eq, Subformula.eval_rel]⟩
 
-namespace standardModel
-variable {μ : Type v} (e : Fin n → ℕ) (ε : μ → ℕ)
+instance : Structure.Zero ℒₒᵣ M := ⟨rfl⟩
 
-instance : Structure.Zero ℒₒᵣ ℕ := ⟨rfl⟩
+instance : Structure.One ℒₒᵣ M := ⟨rfl⟩
 
-instance : Structure.One ℒₒᵣ ℕ := ⟨rfl⟩
+instance : Structure.Add ℒₒᵣ M := ⟨fun _ _ => rfl⟩
 
-instance : Structure.Add ℒₒᵣ ℕ := ⟨fun _ _ => rfl⟩
+instance : Structure.Mul ℒₒᵣ M := ⟨fun _ _ => rfl⟩
 
-instance : Structure.Mul ℒₒᵣ ℕ := ⟨fun _ _ => rfl⟩
+instance : Structure.Eq ℒₒᵣ M := ⟨fun _ _ => iff_of_eq rfl⟩
 
-instance : Structure.Eq ℒₒᵣ ℕ := ⟨fun _ _ => iff_of_eq rfl⟩
-
-instance : Structure.LT ℒₒᵣ ℕ := ⟨fun _ _ => iff_of_eq rfl⟩
+instance : Structure.LT ℒₒᵣ M := ⟨fun _ _ => iff_of_eq rfl⟩
 
 instance : ORing ℒₒᵣ := ORing.mk
+
+lemma standardModel_unique (s : Structure ℒₒᵣ M)
+    [Structure.Zero ℒₒᵣ M] [Structure.One ℒₒᵣ M] [Structure.Add ℒₒᵣ M] [Structure.Mul ℒₒᵣ M]
+    [Structure.Eq ℒₒᵣ M] [Structure.LT ℒₒᵣ M] : s = standardModel M := Structure.ext _ _
+  (funext₃ fun k f _ =>
+    match k, f with
+    | _, Language.Zero.zero => by simp[Matrix.empty_eq]; rfl
+    | _, Language.One.one   => by simp[Matrix.empty_eq]; rfl
+    | _, Language.Add.add   => by simp; rfl
+    | _, Language.Mul.mul   => by simp; rfl)
+  (funext₃ fun k r _ =>
+    match k, r with
+    | _, Language.Eq.eq => by simp; rfl
+    | _, Language.LT.lt => by simp; rfl)
+
+end model
+
+namespace Standard
+
+variable {μ : Type v} (e : Fin n → ℕ) (ε : μ → ℕ)
 
 lemma modelsTheoryPAminus : ℕ ⊧* Theory.PAminus ℒₒᵣ := by
   intro σ h
@@ -63,11 +84,11 @@ lemma modelsSuccInd (σ : Subsentence ℒₒᵣ (k + 1)) : ℕ ⊧ (Arith.succIn
 lemma modelsPeano : ℕ ⊧* (Theory.IndScheme Set.univ ∪ Theory.PAminus ℒₒᵣ ∪ Theory.Eq ℒₒᵣ) :=
   by simp[Theory.IndScheme, modelsSuccInd, modelsTheoryPAminus]
 
-end standardModel
+end Standard
 
 theorem Peano.Consistent :
     System.Consistent (Theory.IndScheme Set.univ ∪ Theory.PAminus ℒₒᵣ ∪ Theory.Eq ℒₒᵣ) :=
-  Sound.consistent_of_model standardModel.modelsPeano
+  Sound.consistent_of_model Standard.modelsPeano
 
 variable (L : Language.{u}) [ORing L]
 
@@ -83,26 +104,7 @@ end Arith
 
 abbrev Theory.trueArith : Theory ℒₒᵣ := Structure.theory ℒₒᵣ ℕ
 
-abbrev Language.oRingStar : Language := ℒₒᵣ + Language.unit
-
-namespace Arith
-
-/-
-structure NonstandardNat where
-  toNat : ℕ
-
-notation "ℕ*" => NonstandardNat
-
-def toNonstandardNat : ℕ → ℕ* := NonstandardNat.mk
-
--/
-
-namespace NonstandardNat
-
-
-end NonstandardNat
-
-end Arith
+notation "𝐓𝐀" => Theory.trueArith
 
 end FirstOrder
 
