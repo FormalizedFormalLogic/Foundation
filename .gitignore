@@ -2,3 +2,5 @@
 /lake-packages/*
 *.olean
 /.lake
+
+.vscode/settings.json
