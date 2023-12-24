@@ -30,23 +30,23 @@ instance [Inhabited I] [(i : I) → Inhabited (A i)] : Inhabited (Uprod A 𝓤) 
 
 end Structure
 
-namespace Subterm
+namespace Semiterm
 
 open Structure
 
 variable (e : Fin n → Uprod A 𝓤) (ε : μ → Uprod A 𝓤)
 
-lemma val_Uprod (t : Subterm L μ n) :
+lemma val_Uprod (t : Semiterm L μ n) :
     t.val! (Uprod A 𝓤) e ε = ⟨fun i ↦ t.val (s i) (fun x ↦ (e x).val i) (fun x ↦ (ε x).val i)⟩ :=
   by induction t <;> simp[*, val_func]
 
-end Subterm
+end Semiterm
 
 open Structure
 
 variable {A} {𝓤}
 
-namespace Subformula
+namespace Semiformula
 
 variable {e : Fin n → Uprod A 𝓤} {ε : μ → Uprod A 𝓤}
 
@@ -54,10 +54,10 @@ lemma val_vecCons_val_eq {z : Uprod A 𝓤} {i : I} :
     (z.val i :> fun x ↦ (e x).val i) = (fun x ↦ ((z :> e) x).val i) :=
   by simp[Matrix.comp_vecCons (Uprod.val · i), Function.comp]
 
-lemma eval_Uprod {p : Subformula L μ n} :
+lemma eval_Uprod {p : Semiformula L μ n} :
     Eval! (Uprod A 𝓤) e ε p ↔ {i | Eval (s i) (fun x ↦ (e x).val i) (fun x ↦ (ε x).val i) p} ∈ 𝓤 := by
   induction p using rec' <;>
-  simp[*, Prop.top_eq_true, Prop.bot_eq_false, eval_rel, eval_nrel, Subterm.val_Uprod]
+  simp[*, Prop.top_eq_true, Prop.bot_eq_false, eval_rel, eval_nrel, Semiterm.val_Uprod]
   case hverum => exact Filter.univ_mem
   case hnrel k r v =>
     exact Ultrafilter.compl_mem_iff_not_mem.symm
@@ -98,15 +98,15 @@ lemma val_Uprod {p : Formula L μ} :
     Val! (Uprod A 𝓤) ε p ↔ {i | Val (s i) (fun x ↦ (ε x).val i) p} ∈ 𝓤 :=
   by simp[Val, eval_Uprod, Matrix.empty_eq]
 
-end Subformula
+end Semiformula
 
 lemma models_Uprod {σ : Sentence L} :
     (Uprod A 𝓤) ⊧ σ ↔ {i | Semantics.models (s i) σ} ∈ 𝓤 :=
-  by simp[models_def, Subformula.val_Uprod, Empty.eq_elim]
+  by simp[models_def, Semiformula.val_Uprod, Empty.eq_elim]
 
 variable (A)
 
-def Subformula.domain (σ : Sentence L) := {i | (A i) ⊧ σ}
+def Semiformula.domain (σ : Sentence L) := {i | (A i) ⊧ σ}
 
 end
 
@@ -121,10 +121,10 @@ variable (A : FinSubtheory T → Type u) [s : (i : FinSubtheory T) → Structure
 instance : Inhabited (FinSubtheory T) := ⟨∅, by simp⟩
 
 lemma ultrafilter_exists (H : ∀ (i : FinSubtheory T), (A i) ⊧* (i.val : Theory L)) :
-    ∃ 𝓤 : Ultrafilter (FinSubtheory T), Set.image (Subformula.domain A) T ⊆ 𝓤.sets :=
+    ∃ 𝓤 : Ultrafilter (FinSubtheory T), Set.image (Semiformula.domain A) T ⊆ 𝓤.sets :=
   Ultrafilter.exists_ultrafilter_of_finite_inter_nonempty _ (by
     haveI : DecidableEq (Set (FinSubtheory T)) := fun _ _ => Classical.propDecidable _
-    simp[Finset.subset_image_iff, Subformula.domain]
+    simp[Finset.subset_image_iff, Semiformula.domain]
     intro t ht
     use t; use ht
     intro σ hσ
@@ -138,9 +138,9 @@ lemma compactnessAux :
     have : ∀ i : FinSubtheory T, ∃ (M : Type u) (_ : Inhabited M) (_ : Structure L M), M ⊧* (i.val : Theory L) :=
       by intro i; exact satisfiableₛ_iff.mp (h i)
     choose A si s hA using this
-    have : ∃ 𝓤 : Ultrafilter (FinSubtheory T), Set.image (Subformula.domain A) T ⊆ 𝓤.sets := ultrafilter_exists A hA
+    have : ∃ 𝓤 : Ultrafilter (FinSubtheory T), Set.image (Semiformula.domain A) T ⊆ 𝓤.sets := ultrafilter_exists A hA
     rcases this with ⟨𝓤, h𝓤⟩
-    have : Structure.Uprod A 𝓤 ⊧* T := by intro σ hσ; exact models_Uprod.mpr (h𝓤 $ Set.mem_image_of_mem (Subformula.domain A) hσ)
+    have : Structure.Uprod A 𝓤 ⊧* T := by intro σ hσ; exact models_Uprod.mpr (h𝓤 $ Set.mem_image_of_mem (Semiformula.domain A) hσ)
     exact satisfiableₛ_intro (Structure.Uprod A 𝓤) this
 
 theorem compactness :

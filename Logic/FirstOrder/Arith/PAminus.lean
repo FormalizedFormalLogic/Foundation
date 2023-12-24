@@ -171,22 +171,22 @@ lemma eq_nat_of_lt_nat : ∀ {n : ℕ} {x : M}, x < n → ∃ m : ℕ, x = m
 
 open Hierarchy
 
-lemma val_numeral {n} : ∀ (t : Subterm ℒₒᵣ Empty n),
-    ∀ v, Subterm.val! M (v ·) Empty.elim t = (Subterm.val! ℕ v Empty.elim t)
+lemma val_numeral {n} : ∀ (t : Semiterm ℒₒᵣ Empty n),
+    ∀ v, Semiterm.val! M (v ·) Empty.elim t = (Semiterm.val! ℕ v Empty.elim t)
   | #_,                                _ => by simp
-  | Subterm.func Language.Zero.zero _, e => by simp
-  | Subterm.func Language.One.one _,   e => by simp
-  | Subterm.func Language.Add.add v,   e => by simp[Subterm.val_func, val_numeral (v 0), val_numeral (v 1)]
-  | Subterm.func Language.Mul.mul v,   e => by simp[Subterm.val_func, val_numeral (v 0), val_numeral (v 1)]
+  | Semiterm.func Language.Zero.zero _, e => by simp
+  | Semiterm.func Language.One.one _,   e => by simp
+  | Semiterm.func Language.Add.add v,   e => by simp[Semiterm.val_func, val_numeral (v 0), val_numeral (v 1)]
+  | Semiterm.func Language.Mul.mul v,   e => by simp[Semiterm.val_func, val_numeral (v 0), val_numeral (v 1)]
 
-lemma sigma_one_completeness : ∀ {n} {σ : Subsentence ℒₒᵣ n},
-    Sigma 1 σ → ∀ {e}, Subformula.PVal! ℕ e σ → Subformula.PVal! M (e ·) σ
+lemma sigma_one_completeness : ∀ {n} {σ : Semisentence ℒₒᵣ n},
+    Sigma 1 σ → ∀ {e}, Semiformula.PVal! ℕ e σ → Semiformula.PVal! M (e ·) σ
   | _, _, Hierarchy.verum _ _ _,               _ => by simp
   | _, _, Hierarchy.falsum _ _ _,              _ => by simp
-  | _, _, Hierarchy.rel _ _ Language.Eq.eq v,  e => by simp[Subformula.eval_rel, Matrix.comp_vecCons', val_numeral]
-  | _, _, Hierarchy.nrel _ _ Language.Eq.eq v, e => by simp[Subformula.eval_nrel, Matrix.comp_vecCons', val_numeral]
-  | _, _, Hierarchy.rel _ _ Language.LT.lt v,  e => by simp[Subformula.eval_rel, Matrix.comp_vecCons', val_numeral]
-  | _, _, Hierarchy.nrel _ _ Language.LT.lt v, e => by simp[Subformula.eval_nrel, Matrix.comp_vecCons', val_numeral]
+  | _, _, Hierarchy.rel _ _ Language.Eq.eq v,  e => by simp[Semiformula.eval_rel, Matrix.comp_vecCons', val_numeral]
+  | _, _, Hierarchy.nrel _ _ Language.Eq.eq v, e => by simp[Semiformula.eval_nrel, Matrix.comp_vecCons', val_numeral]
+  | _, _, Hierarchy.rel _ _ Language.LT.lt v,  e => by simp[Semiformula.eval_rel, Matrix.comp_vecCons', val_numeral]
+  | _, _, Hierarchy.nrel _ _ Language.LT.lt v, e => by simp[Semiformula.eval_nrel, Matrix.comp_vecCons', val_numeral]
   | _, _, Hierarchy.and hp hq,                 e => by
     simp; intro ep eq; exact ⟨sigma_one_completeness hp ep, sigma_one_completeness hq eq⟩
   | _, _, Hierarchy.or hp hq,                  e => by

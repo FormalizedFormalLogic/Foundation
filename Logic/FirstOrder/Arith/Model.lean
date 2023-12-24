@@ -25,7 +25,7 @@ instance standardModel : Structure ℒₒᵣ M where
     | ORing.Rel.lt => fun v => v 0 < v 1
 
 instance : Structure.Eq ℒₒᵣ M :=
-  ⟨by intro a b; simp[standardModel, Subformula.Operator.val, Subformula.Operator.Eq.sentence_eq, Subformula.eval_rel]⟩
+  ⟨by intro a b; simp[standardModel, Semiformula.Operator.val, Semiformula.Operator.Eq.sentence_eq, Semiformula.eval_rel]⟩
 
 instance : Structure.Zero ℒₒᵣ M := ⟨rfl⟩
 
@@ -75,8 +75,8 @@ lemma modelsTheoryPAminus : ℕ ⊧* Theory.PAminus ℒₒᵣ := by
   case ltTrans => intro l m n; exact Nat.lt_trans
   case ltTri => intro n m; exact Nat.lt_trichotomy n m
 
-lemma modelsSuccInd (σ : Subsentence ℒₒᵣ (k + 1)) : ℕ ⊧ (Arith.succInd σ) := by
-  simp[succInd, models_iff, Matrix.constant_eq_singleton, Matrix.comp_vecCons', Subformula.eval_substs]
+lemma modelsSuccInd (σ : Semisentence ℒₒᵣ (k + 1)) : ℕ ⊧ (Arith.succInd σ) := by
+  simp[succInd, models_iff, Matrix.constant_eq_singleton, Matrix.comp_vecCons', Semiformula.eval_substs]
   intro e hzero hsucc x; induction' x with x ih
   · exact hzero
   · exact hsucc x ih
@@ -95,10 +95,10 @@ variable (L : Language.{u}) [ORing L]
 structure Cut (M : Type w) [s : Structure L M] where
   domain : Set M
   closedSucc : ∀ x ∈ domain, (ᵀ“#0 + 1”).bVal s ![x] ∈ domain
-  closedLt : ∀ x y : M, Subformula.PVal s ![x, y] “#0 < #1” → y ∈ domain → x ∈ domain
+  closedLt : ∀ x y : M, Semiformula.PVal s ![x, y] “#0 < #1” → y ∈ domain → x ∈ domain
 
 structure ClosedCut (M : Type w) [s : Structure L M] extends Structure.ClosedSubset L M where
-  closedLt : ∀ x y : M, Subformula.PVal s ![x, y] “#0 < #1” → y ∈ domain → x ∈ domain
+  closedLt : ∀ x y : M, Semiformula.PVal s ![x, y] “#0 < #1” → y ∈ domain → x ∈ domain
 
 end Arith
 

@@ -8,7 +8,7 @@ namespace FirstOrder
 
 namespace Completeness
 
-open Subformula Encodable System
+open Semiformula Encodable System
 variable {L : Language.{u}}
   [∀ k, DecidableEq (L.Func k)] [∀ k, DecidableEq (L.Rel k)]
   [∀ k, Encodable (L.Func k)] [∀ k, Encodable (L.Rel k)]
@@ -16,18 +16,18 @@ variable {T : Theory L} {Γ : Sequent L}
 
 inductive Redux (T : Theory L) : Code L → Sequent L → Sequent L → Prop
   | axLRefl   {Γ : Sequent L} {k} (r : L.Rel k) (v) :
-    Subformula.rel r v ∉ Γ ∨ Subformula.nrel r v ∉ Γ → Redux T (Code.axL r v) Γ Γ
+    Semiformula.rel r v ∉ Γ ∨ Semiformula.nrel r v ∉ Γ → Redux T (Code.axL r v) Γ Γ
   | verumRefl {Γ : Sequent L} : ⊤ ∉ Γ → Redux T Code.verum Γ Γ
   | and₁      {Γ : Sequent L} {p q : SyntacticFormula L} : p ⋏ q ∈ Γ → Redux T (Code.and p q) (p :: Γ) Γ
   | and₂      {Γ : Sequent L} {p q : SyntacticFormula L} : p ⋏ q ∈ Γ → Redux T (Code.and p q) (q :: Γ) Γ
   | andRefl   {Γ : Sequent L} {p q : SyntacticFormula L} : p ⋏ q ∉ Γ → Redux T (Code.and p q) Γ Γ
   | or        {Γ : Sequent L} {p q : SyntacticFormula L} : p ⋎ q ∈ Γ → Redux T (Code.or p q) (p :: q :: Γ) Γ
   | orRefl    {Γ : Sequent L} {p q : SyntacticFormula L} : p ⋎ q ∉ Γ → Redux T (Code.or p q) Γ Γ
-  | all       {Γ : Sequent L} {p : SyntacticSubformula L 1} : ∀' p ∈ Γ → Redux T (Code.all p) (p/[&(newVar Γ)] :: Γ) Γ
-  | allRefl   {Γ : Sequent L} {p : SyntacticSubformula L 1} : ∀' p ∉ Γ → Redux T (Code.all p) Γ Γ
-  | ex        {Γ : Sequent L} {p : SyntacticSubformula L 1} {t : SyntacticTerm L} :
+  | all       {Γ : Sequent L} {p : SyntacticSemiformula L 1} : ∀' p ∈ Γ → Redux T (Code.all p) (p/[&(newVar Γ)] :: Γ) Γ
+  | allRefl   {Γ : Sequent L} {p : SyntacticSemiformula L 1} : ∀' p ∉ Γ → Redux T (Code.all p) Γ Γ
+  | ex        {Γ : Sequent L} {p : SyntacticSemiformula L 1} {t : SyntacticTerm L} :
     ∃' p ∈ Γ → Redux T (Code.ex p t) (p/[t] :: Γ) Γ
-  | exRefl    {Γ : Sequent L} {p : SyntacticSubformula L 1} {t : SyntacticTerm L} :
+  | exRefl    {Γ : Sequent L} {p : SyntacticSemiformula L 1} {t : SyntacticTerm L} :
     ∃' p ∉ Γ → Redux T (Code.ex p t) Γ Γ
   | id        {Γ : Sequent L} {σ : Sentence L} (hσ : σ ∈ T) : Redux T (Code.id σ) ((~Rew.emb.hom σ) :: Γ) Γ
   | idRefl    {Γ : Sequent L} {σ : Sentence L} (hσ : σ ∉ T) : Redux T (Code.id σ) Γ Γ
@@ -233,7 +233,7 @@ lemma chainSet_or {p q : SyntacticFormula L} (h : p ⋎ q ∈ ⛓️) : p ∈ �
   { have : p ⋎ q ∈ ⛓️[(encode $ Code.or p q).pair s] := chain_monotone nwf (Nat.right_le_pair _ _) hs
     contradiction }
 
-lemma chainSet_all {p : SyntacticSubformula L 1} (h : ∀' p ∈ ⛓️) : ∃ t, p/[t] ∈ ⛓️ := by
+lemma chainSet_all {p : SyntacticSemiformula L 1} (h : ∀' p ∈ ⛓️) : ∃ t, p/[t] ∈ ⛓️ := by
   have : ∃ s, ∀' p ∈ ⛓️[s] := by simpa[chainSet] using h
   rcases this with ⟨s, hs⟩
   have : ⛓️[(encode $ Code.all p).pair s + 1] ≺[Code.all p] ⛓️[(encode $ Code.all p).pair s] := chain_spec' nwf _ _
@@ -243,7 +243,7 @@ lemma chainSet_all {p : SyntacticSubformula L 1} (h : ∀' p ∈ ⛓️) : ∃ t
   { have : ∀' p ∈ ⛓️[(encode $ Code.all p).pair s] := chain_monotone nwf (Nat.right_le_pair _ _) hs
     contradiction }
 
-lemma chainSet_ex {p : SyntacticSubformula L 1} (h : ∃' p ∈ ⛓️) : ∀ t, p/[t] ∈ ⛓️ := fun t => by
+lemma chainSet_ex {p : SyntacticSemiformula L 1} (h : ∃' p ∈ ⛓️) : ∀ t, p/[t] ∈ ⛓️ := fun t => by
   have : ∃ s, ∃' p ∈ ⛓️[s] := by simpa[chainSet] using h
   rcases this with ⟨s, hs⟩
   have : ⛓️[(encode $ Code.ex p t).pair s + 1] ≺[Code.ex p t] ⛓️[(encode $ Code.ex p t).pair s] := chain_spec' nwf _ _
@@ -266,17 +266,17 @@ def Model (T : Theory L) (Γ : Sequent L) := SyntacticTerm L
 instance : Inhabited (Model T Γ) := ⟨(default : SyntacticTerm L)⟩
 
 instance Model.structure (T : Theory L) (Γ : Sequent L) : Structure L (Model T Γ) where
-  func := fun _ f v => Subterm.func f v
+  func := fun _ f v => Semiterm.func f v
   rel  := fun _ r v => nrel r v ∈ chainSet T Γ
 
-@[simp] lemma Model.val {e : Fin n → SyntacticTerm L} {ε} (t : SyntacticSubterm L n) :
-    Subterm.val (Model.structure T Γ) e ε t = Rew.bind e ε t := by
-  induction t <;> simp[*, Subterm.val_func, Rew.func]; rfl
+@[simp] lemma Model.val {e : Fin n → SyntacticTerm L} {ε} (t : SyntacticSemiterm L n) :
+    Semiterm.val (Model.structure T Γ) e ε t = Rew.bind e ε t := by
+  induction t <;> simp[*, Semiterm.val_func, Rew.func]; rfl
 
 @[simp] lemma Model.rel {k} (r : L.Rel k) (v : Fin k → SyntacticTerm L) :
     (Model.structure T Γ).rel r v ↔ nrel r v ∈ ⛓️ := of_eq rfl
 
-lemma semanticMainLemma_val : (p : SyntacticFormula L) → p ∈ ⛓️ → ¬Val (Model.structure T Γ) Subterm.fvar p
+lemma semanticMainLemma_val : (p : SyntacticFormula L) → p ∈ ⛓️ → ¬Val (Model.structure T Γ) Semiterm.fvar p
   | ⊤,        h => by by_contra; exact chainSet_verum nwf h
   | ⊥,        _ => by simp
   | rel r v,  h => by { rcases chainSet_axL nwf r v with (hr | hr); { contradiction }; { simpa[eval_rel] using hr } }
@@ -285,9 +285,9 @@ lemma semanticMainLemma_val : (p : SyntacticFormula L) → p ∈ ⛓️ → ¬Va
       simp; intro _ _
       have : p ∈ ⛓️ ∨ q ∈ ⛓️ := chainSet_and nwf h
       rcases this with (h | h)
-      · have : ¬Val (Model.structure T Γ) Subterm.fvar p := semanticMainLemma_val p h
+      · have : ¬Val (Model.structure T Γ) Semiterm.fvar p := semanticMainLemma_val p h
         contradiction
-      · have : ¬Val (Model.structure T Γ) Subterm.fvar q := semanticMainLemma_val q h
+      · have : ¬Val (Model.structure T Γ) Semiterm.fvar q := semanticMainLemma_val q h
         contradiction
   | p ⋎ q,    h => by
       have hpq : p ∈ ⛓️ ∧ q ∈ ⛓️ := chainSet_or nwf h
@@ -297,13 +297,13 @@ lemma semanticMainLemma_val : (p : SyntacticFormula L) → p ∈ ⛓️ → ¬Va
   | ∀' p,     h => by
       have : ∃ u, [→ u].hom p ∈ ⛓️ := chainSet_all nwf h
       rcases this with ⟨u, hu⟩
-      have : ¬Eval (Model.structure T Γ) ![u] Subterm.fvar p := by
+      have : ¬Eval (Model.structure T Γ) ![u] Semiterm.fvar p := by
         simpa[eval_substs, Matrix.constant_eq_singleton] using semanticMainLemma_val ([→ u].hom p) hu
       simp; exact ⟨u, this⟩
   | ∃' p,     h => by
       simp; intro u
       have : [→ u].hom p ∈ ⛓️ := chainSet_ex nwf h u
-      have : ¬Eval (Model.structure T Γ) ![u] Subterm.fvar p := by
+      have : ¬Eval (Model.structure T Γ) ![u] Semiterm.fvar p := by
         simpa[eval_substs, Matrix.constant_eq_singleton] using semanticMainLemma_val ([→ u].hom p) this
       assumption
   termination_by semanticMainLemma_val p _ => p.complexity
@@ -311,7 +311,7 @@ lemma semanticMainLemma_val : (p : SyntacticFormula L) → p ∈ ⛓️ → ¬Va
 lemma Model.models : Model T Γ ⊧* T := by
   intro σ hσ; simpa using semanticMainLemma_val nwf _ (chainSet_id nwf hσ)
 
-lemma semanticMainLemmaTop {p : SyntacticFormula L} (h : p ∈ Γ) : ¬Val (Model.structure T Γ) Subterm.fvar p :=
+lemma semanticMainLemmaTop {p : SyntacticFormula L} (h : p ∈ Γ) : ¬Val (Model.structure T Γ) Semiterm.fvar p :=
   semanticMainLemma_val nwf p (Set.mem_iUnion.mpr ⟨0, by simp[chain, chainU, h]⟩)
 
 end NotWellFounded

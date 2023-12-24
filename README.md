@@ -27,7 +27,7 @@ https://iehality.github.io/lean4-logic/
 | :----:                              | ----                                | ----                            | :----:    |
 | $\vdash_\mathrm{T} \Gamma$          | Derivation in Tait-Calculus         |  `LO.FirstOrder.Derivation`     | `⊢ᵀ Γ`    |
 | $(\rm Cut)\vdash_\mathrm{T} \Gamma$ | Derivation in Tait-Calculus + Cut   |  `LO.FirstOrder.DerivationC`    | `⊢¹ Γ`    |
-| $M \models \sigma$                  | Tarski's truth definition condition |  `LO.FirstOrder.Subformula.Val` | `M ⊧ σ`   |
+| $M \models \sigma$                  | Tarski's truth definition condition |  `LO.FirstOrder.Semiformula.Val` | `M ⊧ σ`   |
 | $T \vdash \sigma$                   | Proof, Provability                  |  `LO.FirstOrder.Proof`          | `T ⊢ σ`, `T ⊢! σ` |
 
 ## Theorem

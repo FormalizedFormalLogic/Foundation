@@ -75,9 +75,9 @@ protected lemma func {k} (f : L.Func k) (v : Fin k → M₁) :
 protected lemma rel {k} (r : L.Rel k) (v : Fin k → M₁) :
     s₁.rel r v → s₂.rel r (φ ∘ v) := map_rel φ r v
 
-lemma val_term (e : Fin n → M₁) (ε : μ → M₁) (t : Subterm L μ n) :
+lemma val_term (e : Fin n → M₁) (ε : μ → M₁) (t : Semiterm L μ n) :
     φ (t.val s₁ e ε) = t.val s₂ (φ ∘ e) (φ ∘ ε) := by
-  induction t <;> simp[*, Subterm.val_func, HomClass.func, Function.comp]
+  induction t <;> simp[*, Semiterm.val_func, HomClass.func, Function.comp]
 
 end HomClass
 
@@ -149,13 +149,13 @@ end ClosedSubset
 
 end Structure
 
-namespace Subformula
+namespace Semiformula
 open Structure
 
 variable {F : Type*} [EmbeddingClass F L M₁ M₂] (φ : F)
 variable {e₁ : Fin n → M₁} {ε₁ : μ → M₁}
 
-lemma eval_hom_iff_of_qfree : ∀ {n} {e₁ : Fin n → M₁} {ε₁ : μ → M₁} {p : Subformula L μ n}, p.qfree →
+lemma eval_hom_iff_of_qfree : ∀ {n} {e₁ : Fin n → M₁} {ε₁ : μ → M₁} {p : Semiformula L μ n}, p.qfree →
     (Eval s₁ e₁ ε₁ p ↔ Eval s₂ (φ ∘ e₁) (φ ∘ ε₁) p)
   | _, e₁, ε₁, ⊤,        _ => by simp
   | _, e₁, ε₁, ⊥,        _ => by simp
@@ -164,11 +164,11 @@ lemma eval_hom_iff_of_qfree : ∀ {n} {e₁ : Fin n → M₁} {ε₁ : μ → M�
   | _, e₁, ε₁, p ⋏ q,    h => by simp at h ⊢; simp[eval_hom_iff_of_qfree h.1, eval_hom_iff_of_qfree h.2]
   | _, e₁, ε₁, p ⋎ q,    h => by simp at h ⊢; simp[eval_hom_iff_of_qfree h.1, eval_hom_iff_of_qfree h.2]
 
-lemma eval_hom_univClosure {n} {ε₁ : μ → M₁} {p : Subformula L μ n} (hp : p.qfree) :
+lemma eval_hom_univClosure {n} {ε₁ : μ → M₁} {p : Semiformula L μ n} (hp : p.qfree) :
     Val s₂ (φ ∘ ε₁) (univClosure p) → Val s₁ ε₁ (univClosure p) := by
   simp; intro h e₁; exact (eval_hom_iff_of_qfree φ hp).mpr (h (φ ∘ e₁))
 
-end Subformula
+end Semiformula
 
 end
 
@@ -223,19 +223,19 @@ variable {e₁ : Fin n → M₁} {ε₁ : μ → M₁}
 
 lemma models_hom_iff_of_qfree {σ : Sentence L} (hσ : σ.qfree) : M₁ ⊧ σ ↔ M₂ ⊧ σ := by
   simpa[Matrix.empty_eq, Empty.eq_elim] using
-    Subformula.eval_hom_iff_of_qfree (e₁ := finZeroElim) (ε₁ := Empty.elim) φ hσ
+    Semiformula.eval_hom_iff_of_qfree (e₁ := finZeroElim) (ε₁ := Empty.elim) φ hσ
 
-lemma models_hom_univClosure {n} {σ : Subsentence L n} (hσ : σ.qfree) :
+lemma models_hom_univClosure {n} {σ : Semisentence L n} (hσ : σ.qfree) :
     M₂ ⊧ (univClosure σ) → M₁ ⊧ (univClosure σ) := by
   simpa[Matrix.empty_eq, Empty.eq_elim, models_iff] using
-    Subformula.eval_hom_univClosure (ε₁ := Empty.elim) φ hσ
+    Semiformula.eval_hom_univClosure (ε₁ := Empty.elim) φ hσ
 
-lemma models_hom_univClosure_of_submodels (H : M₁ ↪ₛ[L] M₂) {n} {σ : Subsentence L n} (hσ : σ.qfree) :
+lemma models_hom_univClosure_of_submodels (H : M₁ ↪ₛ[L] M₂) {n} {σ : Semisentence L n} (hσ : σ.qfree) :
     M₂ ⊧ (univClosure σ) → M₁ ⊧ (univClosure σ) := models_hom_univClosure H hσ
 
 section
 
-open Subformula
+open Semiformula
 variable [s : Structure L M] (φ : M ≃ N)
 
 lemma ElementaryEquiv.ofEquiv :
@@ -254,8 +254,8 @@ section Definability
 
 variable {L : Language.{u}} {α : Type u} [Structure L α]
 
-def DefinableIn {k} (C : Set (Subsentence L k)) (R : Set (Fin k → α)) : Prop :=
-  ∃ p ∈ C, ∀ v, v ∈ R ↔ Subformula.PVal! α v p
+def DefinableIn {k} (C : Set (Semisentence L k)) (R : Set (Fin k → α)) : Prop :=
+  ∃ p ∈ C, ∀ v, v ∈ R ↔ Semiformula.PVal! α v p
 
 end Definability
 

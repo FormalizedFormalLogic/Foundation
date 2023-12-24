@@ -29,7 +29,7 @@ end ORingSymbol
 
 namespace FirstOrder
 
-open Subterm Subformula
+open Semiterm Semiformula
 
 class ORing (L : Language) extends
   Operator.Zero L, Operator.One L, Operator.Add L, Operator.Mul L, Operator.Eq L, Operator.LT L
@@ -44,11 +44,11 @@ namespace Structure
 variable [Operator.Zero L] [Operator.One L] [Operator.Add L] {M : Type u} [ORingSymbol M]
   [Structure L M] [Structure.Zero L M] [Structure.One L M] [Structure.Add L M]
 
-@[simp] lemma numeral_eq_numeral : (z : ℕ) → (Subterm.Operator.numeral L z).val ![] = (ORingSymbol.numeral z : M)
-  | 0     => by simp[ORingSymbol.numeral, Subterm.Operator.numeral_zero]
-  | 1     => by simp[ORingSymbol.numeral, Subterm.Operator.numeral_one]
-  | z + 2 => by simp[ORingSymbol.numeral, Subterm.Operator.numeral_add_two,
-                  Subterm.Operator.val_comp, Matrix.fun_eq_vec₂, numeral_eq_numeral (z + 1)]
+@[simp] lemma numeral_eq_numeral : (z : ℕ) → (Semiterm.Operator.numeral L z).val ![] = (ORingSymbol.numeral z : M)
+  | 0     => by simp[ORingSymbol.numeral, Semiterm.Operator.numeral_zero]
+  | 1     => by simp[ORingSymbol.numeral, Semiterm.Operator.numeral_one]
+  | z + 2 => by simp[ORingSymbol.numeral, Semiterm.Operator.numeral_add_two,
+                  Semiterm.Operator.val_comp, Matrix.fun_eq_vec₂, numeral_eq_numeral (z + 1)]
 
 end Structure
 

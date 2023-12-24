@@ -5,19 +5,19 @@ namespace LO
 
 namespace FirstOrder
 
-open Subformula
+open Semiformula
 variable {L : Language.{u}}
   [∀ k, DecidableEq (L.Func k)] [∀ k, DecidableEq (L.Rel k)]
   [∀ k, Encodable (L.Func k)] [∀ k, Encodable (L.Rel k)]
 
-def newVar (Γ : Sequent L) : ℕ := (Γ.map Subformula.upper).foldr max 0
+def newVar (Γ : Sequent L) : ℕ := (Γ.map Semiformula.upper).foldr max 0
 
 lemma not_fvar?_newVar {p : SyntacticFormula L} {Γ : Sequent L} (h : p ∈ Γ) : ¬fvar? p (newVar Γ) :=
   not_fvar?_of_lt_upper p (by simpa[newVar] using List.le_max_of_le (List.mem_map_of_mem _ h) (by simp))
 
 namespace System
 
-open Subformula
+open Semiformula
 variable {P : SyntacticFormula L → Prop} {T : Theory L} {Δ : Sequent L}
 
 def allNvar {p} (h : ∀' p ∈ Δ) :
@@ -43,8 +43,8 @@ inductive Code (L : Language.{u})
   | verum : Code L
   | and : SyntacticFormula L → SyntacticFormula L → Code L
   | or : SyntacticFormula L → SyntacticFormula L → Code L
-  | all : SyntacticSubformula L 1 → Code L
-  | ex : SyntacticSubformula L 1 → SyntacticTerm L → Code L
+  | all : SyntacticSemiformula L 1 → Code L
+  | ex : SyntacticSemiformula L 1 → SyntacticTerm L → Code L
   | id : Sentence L → Code L
 
 def Code.equiv (L : Language.{u}) :
@@ -53,8 +53,8 @@ def Code.equiv (L : Language.{u}) :
     Unit ⊕
     (SyntacticFormula L × SyntacticFormula L) ⊕
     (SyntacticFormula L × SyntacticFormula L) ⊕
-    (SyntacticSubformula L 1) ⊕
-    (SyntacticSubformula L 1 × SyntacticTerm L) ⊕
+    (SyntacticSemiformula L 1) ⊕
+    (SyntacticSemiformula L 1 × SyntacticTerm L) ⊕
     (Sentence L) where
   toFun := fun c =>
     match c with
@@ -78,7 +78,7 @@ def Code.equiv (L : Language.{u}) :
   right_inv := fun x => by
     rcases x with (⟨_, _, _⟩ | ⟨⟩ | ⟨_, _⟩ | ⟨_, _⟩ | _ | ⟨_, _⟩ | _) <;> simp
 
-attribute [local instance] Subterm.encodable Subformula.encodable in
+attribute [local instance] Semiterm.encodable Semiformula.encodable in
 instance : Encodable (Code L) := Encodable.ofEquiv _ (Code.equiv L)
 
 end System

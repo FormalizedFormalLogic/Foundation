@@ -27,17 +27,17 @@ variable {T : Theory ℒₒᵣ} [EqTheory T] [PAminus T] [DecidablePred T] [Sigm
 variable (T)
 
 private lemma diagRefutation_re : RePred (fun σ => T ⊢! ~σ/[⸢σ⸣]) := by
-  have : Partrec fun σ : Subsentence ℒₒᵣ 1 => (provableFn T (~σ/[⸢σ⸣])).map (fun _ => ()) :=
+  have : Partrec fun σ : Semisentence ℒₒᵣ 1 => (provableFn T (~σ/[⸢σ⸣])).map (fun _ => ()) :=
     Partrec.map
       ((provableFn_partrec T).comp <| Primrec.to_comp
-        <| (Subformula.neg_primrec (L := ℒₒᵣ)).comp
-        <| (Subformula.substs₁_primrec (L := ℒₒᵣ)).comp
-          ((Subterm.Operator.const_primrec (L := ℒₒᵣ)).comp
-            <| (Subterm.Operator.numeral_primrec (L := ℒₒᵣ)).comp .encode) .id)
+        <| (Semiformula.neg_primrec (L := ℒₒᵣ)).comp
+        <| (Semiformula.substs₁_primrec (L := ℒₒᵣ)).comp
+          ((Semiterm.Operator.const_primrec (L := ℒₒᵣ)).comp
+            <| (Semiterm.Operator.numeral_primrec (L := ℒₒᵣ)).comp .encode) .id)
       (.const ())
   exact this.of_eq <| by intro σ; ext; simp[←provable_iff_provableFn]
 
-noncomputable def diagRefutation : Subsentence ℒₒᵣ 1 := pred (fun σ => T ⊢! ~σ/[⸢σ⸣])
+noncomputable def diagRefutation : Semisentence ℒₒᵣ 1 := pred (fun σ => T ⊢! ~σ/[⸢σ⸣])
 
 local notation "ρ" => diagRefutation T
 
@@ -45,7 +45,7 @@ noncomputable def undecidable : Sentence ℒₒᵣ := ρ/[⸢ρ⸣]
 
 local notation "γ" => undecidable T
 
-lemma diagRefutation_spec (σ : Subsentence ℒₒᵣ 1) :
+lemma diagRefutation_spec (σ : Semisentence ℒₒᵣ 1) :
     T ⊢! ρ/[⸢σ⸣] ↔ T ⊢! ~σ/[⸢σ⸣] := by
   simpa[diagRefutation] using pred_representation T (diagRefutation_re T) (x := σ)
 

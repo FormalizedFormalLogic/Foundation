@@ -11,10 +11,10 @@ abbrev withStar := Language.add ℒₒᵣ Language.unit
 
 local notation "ℒₒᵣ⋆" => withStar
 
-def starUnbounded (c : ℕ) : Theory ℒₒᵣ⋆ := Set.range fun n : Fin c ↦ “!!(Subterm.Operator.numeral ℒₒᵣ⋆ n) < ⋆”
+def starUnbounded (c : ℕ) : Theory ℒₒᵣ⋆ := Set.range fun n : Fin c ↦ “!!(Semiterm.Operator.numeral ℒₒᵣ⋆ n) < ⋆”
 
 def trueArithWithStarUnbounded (n : ℕ) : Theory ℒₒᵣ⋆ :=
-  Theory.Eq ℒₒᵣ⋆ ∪ (Subformula.lMap (Language.Hom.add₁ _ _) '' 𝐓𝐀) ∪ starUnbounded n
+  Theory.Eq ℒₒᵣ⋆ ∪ (Semiformula.lMap (Language.Hom.add₁ _ _) '' 𝐓𝐀) ∪ starUnbounded n
 
 lemma trueArithWithStarUnbounded.cumulative : Cumulative trueArithWithStarUnbounded := fun c =>
   Set.union_subset_union_right _ <|
@@ -53,14 +53,14 @@ namespace Nonstandard
 
 notation "ℕ⋆" => Nonstandard
 
-def star : ℕ⋆ := Subterm.Operator.val (L := ℒₒᵣ⋆) Subterm.Operator.Star.star ![]
+def star : ℕ⋆ := Semiterm.Operator.val (L := ℒₒᵣ⋆) Semiterm.Operator.Star.star ![]
 
 local notation "⋆" => star
 
 lemma models_union_trueArithWithStarUnbounded : ℕ⋆ ⊧* ⋃ c, trueArithWithStarUnbounded c := ModelOfSatEq.models _
 
 lemma trueArith : ℕ⋆ ⊧* 𝐓𝐀 := by
-  have : ℕ⋆ ⊧* Subformula.lMap (Language.Hom.add₁ _ _) '' 𝐓𝐀 :=
+  have : ℕ⋆ ⊧* Semiformula.lMap (Language.Hom.add₁ _ _) '' 𝐓𝐀 :=
     Semantics.modelsTheory_of_subset models_union_trueArithWithStarUnbounded
       (Set.subset_iUnion_of_subset 0 $ Set.subset_union_of_subset_left (Set.subset_union_right _ _ ) _)
   intro σ hσ
@@ -72,11 +72,11 @@ lemma trueArith : ℕ⋆ ⊧* 𝐓𝐀 := by
     haveI : Structure.Add ℒₒᵣ ℕ⋆ := ⟨fun _ _ => rfl⟩
     haveI : Structure.Mul ℒₒᵣ ℕ⋆ := ⟨fun _ _ => rfl⟩
     haveI : Structure.Eq ℒₒᵣ ℕ⋆ := ⟨fun _ _ => by
-      simp[Subformula.Operator.val, Subformula.Operator.Eq.sentence_eq,
-        ←Subformula.eval_lMap, Matrix.fun_eq_vec₂]⟩
+      simp[Semiformula.Operator.val, Semiformula.Operator.Eq.sentence_eq,
+        ←Semiformula.eval_lMap, Matrix.fun_eq_vec₂]⟩
     haveI : Structure.LT ℒₒᵣ ℕ⋆ := ⟨fun _ _ => iff_of_eq rfl⟩
     exact standardModel_unique _ _
-  have : s ⊧ₛ σ := Subformula.models_lMap.mp (this (Set.mem_image_of_mem _ hσ))
+  have : s ⊧ₛ σ := Semiformula.models_lMap.mp (this (Set.mem_image_of_mem _ hσ))
   exact e ▸ this
 
 instance : Theory.Mod ℕ⋆ 𝐓𝐀 := ⟨trueArith⟩
@@ -85,7 +85,7 @@ instance : Theory.Mod ℕ⋆ (Theory.PAminus ℒₒᵣ) :=
   Theory.Mod.of_ss (T₁ := 𝐓𝐀) _ (Structure.subset_of_models.mpr $ Arith.Standard.modelsTheoryPAminus)
 
 lemma star_unbounded (n : ℕ) : n < ⋆ := by
-  have : ℕ⋆ ⊧ (“!!(Subterm.Operator.numeral ℒₒᵣ⋆ n) < ⋆” : Sentence ℒₒᵣ⋆) :=
+  have : ℕ⋆ ⊧ (“!!(Semiterm.Operator.numeral ℒₒᵣ⋆ n) < ⋆” : Sentence ℒₒᵣ⋆) :=
     models_union_trueArithWithStarUnbounded
       (Set.mem_iUnion_of_mem (n + 1) (Set.mem_union_right _ $ Set.mem_range_self $ Fin.last n))
   simpa [models_iff] using this

@@ -6,16 +6,16 @@ namespace LO
 
 namespace FirstOrder
 
-variable {L : Language} [Subformula.Operator.Eq L] [Subformula.Operator.LT L]
+variable {L : Language} [Semiformula.Operator.Eq L] [Semiformula.Operator.LT L]
 
-open Subformula
+open Semiformula
 
-def LT.le : Operator L 2 := Subformula.Operator.Eq.eq.or Subformula.Operator.LT.lt
+def LT.le : Operator L 2 := Semiformula.Operator.Eq.eq.or Semiformula.Operator.LT.lt
 
-lemma le_eq (t₁ t₂ : Subterm L μ n) : LT.le.operator ![t₁, t₂] = “!!t₁ = !!t₂ ∨ !!t₁ < !!t₂” := by
+lemma le_eq (t₁ t₂ : Semiterm L μ n) : LT.le.operator ![t₁, t₂] = “!!t₁ = !!t₂ ∨ !!t₁ < !!t₂” := by
   simp[Operator.operator, Operator.or, LT.le, ←Rew.hom_comp_app, ←Matrix.fun_eq_vec₂]
 
-namespace Subformula
+namespace Semiformula
 
 syntax:45 foterm:45 " ≤ " foterm:0 : foformula
 
@@ -55,18 +55,18 @@ variable [L.Mul]
 
 def divides : Finitary.{u, v} L 2 := Abbrev.divides.toOperator
 
-lemma divides_eq (t₁ t₂ : Subterm L μ n) :
+lemma divides_eq (t₁ t₂ : Semiterm L μ n) :
   divides.operator ![t₁, t₂] = “∃ #0 * !!(.bShift t₁) = !!(.bShift t₂)” := by
   simp[divides, Abbrev.divides, Abbrev.toOperator, substs_ex]
 
 end
 -/
 
-end Subformula
+end Semiformula
 
 namespace Theory.Order
 
-inductive Total (L : Language) [Subformula.Operator.Eq L] [Subformula.Operator.LT L] : Sentence L → Prop
+inductive Total (L : Language) [Semiformula.Operator.Eq L] [Semiformula.Operator.LT L] : Sentence L → Prop
   | ltTrans  : Total L “∀ ∀ ∀ (#0 < #1 → #1 < #2 → #0 < #2)”
   | ltIrrefl : Total L “∀ (¬#0 < #0)”
   | ltTri    : Total L “∀ ∀ (#0 < #1 ∨ #0 = #1 ∨#1 < #0)”
@@ -78,7 +78,7 @@ variable {T : Theory L} [EqTheory T]
 
 noncomputable def leIffEqOrLt : T ⊢ “∀ ∀ (#0 ≤ #1 ↔ #0 = #1 ∨ #0 < #1)” :=
   Complete.complete
-    (consequence_iff.mpr $ fun _ _ _ _ => by simp[models_def, Subformula.Operator.LE.def_of_Eq_of_LT])
+    (consequence_iff.mpr $ fun _ _ _ _ => by simp[models_def, Semiformula.Operator.LE.def_of_Eq_of_LT])
 
 class MTotal (M : Type*) [_root_.LT M] :=
   ltTrans : ∀ x y z : M, x < y → y < z → x < z

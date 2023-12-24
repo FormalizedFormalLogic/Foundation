@@ -4,34 +4,34 @@ namespace LO
 
 namespace FirstOrder
 
-inductive Subformula (L : Language.{u}) (μ : Type v) : ℕ → Type (max u v) where
-  | verum  {n} : Subformula L μ n
-  | falsum {n} : Subformula L μ n
-  | rel    {n} : {arity : ℕ} → L.Rel arity → (Fin arity → Subterm L μ n) → Subformula L μ n
-  | nrel   {n} : {arity : ℕ} → L.Rel arity → (Fin arity → Subterm L μ n) → Subformula L μ n
-  | and    {n} : Subformula L μ n → Subformula L μ n → Subformula L μ n
-  | or     {n} : Subformula L μ n → Subformula L μ n → Subformula L μ n
-  | all    {n} : Subformula L μ (n + 1) → Subformula L μ n
-  | ex     {n} : Subformula L μ (n + 1) → Subformula L μ n
+inductive Semiformula (L : Language.{u}) (μ : Type v) : ℕ → Type (max u v) where
+  | verum  {n} : Semiformula L μ n
+  | falsum {n} : Semiformula L μ n
+  | rel    {n} : {arity : ℕ} → L.Rel arity → (Fin arity → Semiterm L μ n) → Semiformula L μ n
+  | nrel   {n} : {arity : ℕ} → L.Rel arity → (Fin arity → Semiterm L μ n) → Semiformula L μ n
+  | and    {n} : Semiformula L μ n → Semiformula L μ n → Semiformula L μ n
+  | or     {n} : Semiformula L μ n → Semiformula L μ n → Semiformula L μ n
+  | all    {n} : Semiformula L μ (n + 1) → Semiformula L μ n
+  | ex     {n} : Semiformula L μ (n + 1) → Semiformula L μ n
 
-abbrev Formula (L : Language.{u}) (μ : Type v) := Subformula L μ 0
+abbrev Formula (L : Language.{u}) (μ : Type v) := Semiformula L μ 0
 
 abbrev Sentence (L : Language.{u}) := Formula L Empty
 
-abbrev Subsentence (L : Language.{u}) (n : ℕ) := Subformula L Empty n
+abbrev Semisentence (L : Language.{u}) (n : ℕ) := Semiformula L Empty n
 
-abbrev SyntacticSubformula (L : Language.{u}) (n : ℕ) := Subformula L ℕ n
+abbrev SyntacticSemiformula (L : Language.{u}) (n : ℕ) := Semiformula L ℕ n
 
-abbrev SyntacticFormula (L : Language.{u}) := SyntacticSubformula L 0
+abbrev SyntacticFormula (L : Language.{u}) := SyntacticSemiformula L 0
 
-namespace Subformula
+namespace Semiformula
 
 variable
   {L : Language.{u}} {L₁ : Language.{u₁}} {L₂ : Language.{u₂}} {L₃ : Language.{u₃}}
   {μ : Type v} {μ₁ : Type v₁} {μ₂ : Type v₂} {μ₃ : Type v₃}
   {n n₁ n₂ n₂ m m₁ m₂ m₃ : ℕ}
 
-def neg {n} : Subformula L μ n → Subformula L μ n
+def neg {n} : Semiformula L μ n → Semiformula L μ n
   | verum    => falsum
   | falsum   => verum
   | rel r v  => nrel r v
@@ -41,10 +41,10 @@ def neg {n} : Subformula L μ n → Subformula L μ n
   | all p    => ex (neg p)
   | ex p     => all (neg p)
 
-lemma neg_neg (p : Subformula L μ n) : neg (neg p) = p :=
+lemma neg_neg (p : Semiformula L μ n) : neg (neg p) = p :=
   by induction p <;> simp[*, neg]
 
-instance : LogicSymbol (Subformula L μ n) where
+instance : LogicSymbol (Semiformula L μ n) where
   tilde := neg
   arrow := fun p q => or (neg p) q
   wedge := and
@@ -52,7 +52,7 @@ instance : LogicSymbol (Subformula L μ n) where
   top := verum
   bot := falsum
 
-instance : DeMorgan (Subformula L μ n) where
+instance : DeMorgan (Semiformula L μ n) where
   verum := rfl
   falsum := rfl
   imply := fun _ _ => rfl
@@ -60,15 +60,15 @@ instance : DeMorgan (Subformula L μ n) where
   or := fun _ _ => rfl
   neg := neg_neg
 
-instance : UnivQuantifier (Subformula L μ) := ⟨all⟩
+instance : UnivQuantifier (Semiformula L μ) := ⟨all⟩
 
-instance : ExQuantifier (Subformula L μ) := ⟨ex⟩
+instance : ExQuantifier (Semiformula L μ) := ⟨ex⟩
 
 section ToString
 
 variable [∀ k, ToString (L.Func k)] [∀ k, ToString (L.Rel k)] [ToString μ]
 
-def toStr : ∀ {n}, Subformula L μ n → String
+def toStr : ∀ {n}, Semiformula L μ n → String
   | _, ⊤                         => "\\top"
   | _, ⊥                         => "\\bot"
   | _, rel (arity := 0) r _      => "{" ++ toString r ++ "}"
@@ -80,68 +80,68 @@ def toStr : ∀ {n}, Subformula L μ n → String
   | n, all p                     => "(\\forall x_{" ++ toString n ++ "}) " ++ toStr p
   | n, ex p                      => "(\\exists x_{" ++ toString n ++ "}) " ++ toStr p
 
-instance : Repr (Subformula L μ n) := ⟨fun t _ => toStr t⟩
+instance : Repr (Semiformula L μ n) := ⟨fun t _ => toStr t⟩
 
-instance : ToString (Subformula L μ n) := ⟨toStr⟩
+instance : ToString (Semiformula L μ n) := ⟨toStr⟩
 
 end ToString
 
-@[simp] lemma neg_top : ~(⊤ : Subformula L μ n) = ⊥ := rfl
+@[simp] lemma neg_top : ~(⊤ : Semiformula L μ n) = ⊥ := rfl
 
-@[simp] lemma neg_bot : ~(⊥ : Subformula L μ n) = ⊤ := rfl
+@[simp] lemma neg_bot : ~(⊥ : Semiformula L μ n) = ⊤ := rfl
 
-@[simp] lemma neg_rel {k} (r : L.Rel k) (v : Fin k → Subterm L μ n) : ~(rel r v) = nrel r v := rfl
+@[simp] lemma neg_rel {k} (r : L.Rel k) (v : Fin k → Semiterm L μ n) : ~(rel r v) = nrel r v := rfl
 
-@[simp] lemma neg_nrel {k} (r : L.Rel k) (v : Fin k → Subterm L μ n) : ~(nrel r v) = rel r v := rfl
+@[simp] lemma neg_nrel {k} (r : L.Rel k) (v : Fin k → Semiterm L μ n) : ~(nrel r v) = rel r v := rfl
 
-@[simp] lemma neg_and (p q : Subformula L μ n) : ~(p ⋏ q) = ~p ⋎ ~q := rfl
+@[simp] lemma neg_and (p q : Semiformula L μ n) : ~(p ⋏ q) = ~p ⋎ ~q := rfl
 
-@[simp] lemma neg_or (p q : Subformula L μ n) : ~(p ⋎ q) = ~p ⋏ ~q := rfl
+@[simp] lemma neg_or (p q : Semiformula L μ n) : ~(p ⋎ q) = ~p ⋏ ~q := rfl
 
-@[simp] lemma neg_all (p : Subformula L μ (n + 1)) : ~(∀' p) = ∃' ~p := rfl
+@[simp] lemma neg_all (p : Semiformula L μ (n + 1)) : ~(∀' p) = ∃' ~p := rfl
 
-@[simp] lemma neg_ex (p : Subformula L μ (n + 1)) : ~(∃' p) = ∀' ~p := rfl
+@[simp] lemma neg_ex (p : Semiformula L μ (n + 1)) : ~(∃' p) = ∀' ~p := rfl
 
-@[simp] lemma neg_neg' (p : Subformula L μ n) : ~~p = p := neg_neg p
+@[simp] lemma neg_neg' (p : Semiformula L μ n) : ~~p = p := neg_neg p
 
-@[simp] lemma neg_inj (p q : Subformula L μ n) : ~p = ~q ↔ p = q := by
+@[simp] lemma neg_inj (p q : Semiformula L μ n) : ~p = ~q ↔ p = q := by
   constructor
   · intro h; simpa using congr_arg (~·) h
   · exact congr_arg _
 
-lemma neg_eq (p : Subformula L μ n) : ~p = neg p := rfl
+lemma neg_eq (p : Semiformula L μ n) : ~p = neg p := rfl
 
-lemma imp_eq (p q : Subformula L μ n) : p ⟶ q = ~p ⋎ q := rfl
+lemma imp_eq (p q : Semiformula L μ n) : p ⟶ q = ~p ⋎ q := rfl
 
-lemma iff_eq (p q : Subformula L μ n) : p ⟷ q = (~p ⋎ q) ⋏ (~q ⋎ p) := rfl
+lemma iff_eq (p q : Semiformula L μ n) : p ⟷ q = (~p ⋎ q) ⋏ (~q ⋎ p) := rfl
 
-lemma ball_eq (p q : Subformula L μ (n + 1)) : (∀[p] q) = ∀' (p ⟶ q) := rfl
+lemma ball_eq (p q : Semiformula L μ (n + 1)) : (∀[p] q) = ∀' (p ⟶ q) := rfl
 
-lemma bex_eq (p q : Subformula L μ (n + 1)) : (∃[p] q) = ∃' (p ⋏ q) := rfl
+lemma bex_eq (p q : Semiformula L μ (n + 1)) : (∃[p] q) = ∃' (p ⋏ q) := rfl
 
-@[simp] lemma neg_ball (p q : Subformula L μ (n + 1)) : ~(∀[p] q) = ∃[p] ~q := by
+@[simp] lemma neg_ball (p q : Semiformula L μ (n + 1)) : ~(∀[p] q) = ∃[p] ~q := by
   simp[LogicSymbol.ball, LogicSymbol.bex, imp_eq]
 
-@[simp] lemma neg_bex (p q : Subformula L μ (n + 1)) : ~(∃[p] q) = ∀[p] ~q := by
+@[simp] lemma neg_bex (p q : Semiformula L μ (n + 1)) : ~(∃[p] q) = ∀[p] ~q := by
   simp[LogicSymbol.ball, LogicSymbol.bex, imp_eq]
 
-@[simp] lemma and_inj (p₁ q₁ p₂ q₂ : Subformula L μ n) : p₁ ⋏ p₂ = q₁ ⋏ q₂ ↔ p₁ = q₁ ∧ p₂ = q₂ :=
+@[simp] lemma and_inj (p₁ q₁ p₂ q₂ : Semiformula L μ n) : p₁ ⋏ p₂ = q₁ ⋏ q₂ ↔ p₁ = q₁ ∧ p₂ = q₂ :=
 by simp[Wedge.wedge]
 
-@[simp] lemma or_inj (p₁ q₁ p₂ q₂ : Subformula L μ n) : p₁ ⋎ p₂ = q₁ ⋎ q₂ ↔ p₁ = q₁ ∧ p₂ = q₂ :=
+@[simp] lemma or_inj (p₁ q₁ p₂ q₂ : Semiformula L μ n) : p₁ ⋎ p₂ = q₁ ⋎ q₂ ↔ p₁ = q₁ ∧ p₂ = q₂ :=
 by simp[Vee.vee]
 
-@[simp] lemma all_inj (p q : Subformula L μ (n + 1)) : ∀' p = ∀' q ↔ p = q :=
+@[simp] lemma all_inj (p q : Semiformula L μ (n + 1)) : ∀' p = ∀' q ↔ p = q :=
   by simp[UnivQuantifier.univ]
 
-@[simp] lemma ex_inj (p q : Subformula L μ (n + 1)) : ∃' p = ∃' q ↔ p = q :=
+@[simp] lemma ex_inj (p q : Semiformula L μ (n + 1)) : ∃' p = ∃' q ↔ p = q :=
   by simp[ExQuantifier.ex]
 
-abbrev rel! (L : Language.{u}) (k) (r : L.Rel k) (v : Fin k → Subterm L μ n) := rel r v
+abbrev rel! (L : Language.{u}) (k) (r : L.Rel k) (v : Fin k → Semiterm L μ n) := rel r v
 
-abbrev nrel! (L : Language.{u}) (k) (r : L.Rel k) (v : Fin k → Subterm L μ n) := nrel r v
+abbrev nrel! (L : Language.{u}) (k) (r : L.Rel k) (v : Fin k → Semiterm L μ n) := nrel r v
 
-def complexity : {n : ℕ} → Subformula L μ n → ℕ
+def complexity : {n : ℕ} → Semiformula L μ n → ℕ
 | _, ⊤        => 0
 | _, ⊥        => 0
 | _, rel _ _  => 0
@@ -151,37 +151,37 @@ def complexity : {n : ℕ} → Subformula L μ n → ℕ
 | _, ∀' p     => p.complexity + 1
 | _, ∃' p     => p.complexity + 1
 
-@[simp] lemma complexity_top : complexity (⊤ : Subformula L μ n) = 0 := rfl
+@[simp] lemma complexity_top : complexity (⊤ : Semiformula L μ n) = 0 := rfl
 
-@[simp] lemma complexity_bot : complexity (⊥ : Subformula L μ n) = 0 := rfl
+@[simp] lemma complexity_bot : complexity (⊥ : Semiformula L μ n) = 0 := rfl
 
-@[simp] lemma complexity_rel {k} (r : L.Rel k) (v : Fin k → Subterm L μ n) : complexity (rel r v) = 0 := rfl
+@[simp] lemma complexity_rel {k} (r : L.Rel k) (v : Fin k → Semiterm L μ n) : complexity (rel r v) = 0 := rfl
 
-@[simp] lemma complexity_nrel {k} (r : L.Rel k) (v : Fin k → Subterm L μ n) : complexity (nrel r v) = 0 := rfl
+@[simp] lemma complexity_nrel {k} (r : L.Rel k) (v : Fin k → Semiterm L μ n) : complexity (nrel r v) = 0 := rfl
 
-@[simp] lemma complexity_and (p q : Subformula L μ n) : complexity (p ⋏ q) = max p.complexity q.complexity + 1 := rfl
-@[simp] lemma complexity_and' (p q : Subformula L μ n) : complexity (and p q) = max p.complexity q.complexity + 1 := rfl
+@[simp] lemma complexity_and (p q : Semiformula L μ n) : complexity (p ⋏ q) = max p.complexity q.complexity + 1 := rfl
+@[simp] lemma complexity_and' (p q : Semiformula L μ n) : complexity (and p q) = max p.complexity q.complexity + 1 := rfl
 
-@[simp] lemma complexity_or (p q : Subformula L μ n) : complexity (p ⋎ q) = max p.complexity q.complexity + 1 := rfl
-@[simp] lemma complexity_or' (p q : Subformula L μ n) : complexity (or p q) = max p.complexity q.complexity + 1 := rfl
+@[simp] lemma complexity_or (p q : Semiformula L μ n) : complexity (p ⋎ q) = max p.complexity q.complexity + 1 := rfl
+@[simp] lemma complexity_or' (p q : Semiformula L μ n) : complexity (or p q) = max p.complexity q.complexity + 1 := rfl
 
-@[simp] lemma complexity_all (p : Subformula L μ (n + 1)) : complexity (∀' p) = p.complexity + 1 := rfl
-@[simp] lemma complexity_all' (p : Subformula L μ (n + 1)) : complexity (all p) = p.complexity + 1 := rfl
+@[simp] lemma complexity_all (p : Semiformula L μ (n + 1)) : complexity (∀' p) = p.complexity + 1 := rfl
+@[simp] lemma complexity_all' (p : Semiformula L μ (n + 1)) : complexity (all p) = p.complexity + 1 := rfl
 
-@[simp] lemma complexity_ex (p : Subformula L μ (n + 1)) : complexity (∃' p) = p.complexity + 1 := rfl
-@[simp] lemma complexity_ex' (p : Subformula L μ (n + 1)) : complexity (ex p) = p.complexity + 1 := rfl
+@[simp] lemma complexity_ex (p : Semiformula L μ (n + 1)) : complexity (∃' p) = p.complexity + 1 := rfl
+@[simp] lemma complexity_ex' (p : Semiformula L μ (n + 1)) : complexity (ex p) = p.complexity + 1 := rfl
 
 @[elab_as_elim]
-def cases' {C : ∀ n, Subformula L μ n → Sort w}
+def cases' {C : ∀ n, Semiformula L μ n → Sort w}
   (hverum  : ∀ {n : ℕ}, C n ⊤)
   (hfalsum : ∀ {n : ℕ}, C n ⊥)
-  (hrel    : ∀ {n k : ℕ} (r : L.Rel k) (v : Fin k → Subterm L μ n), C n (rel r v))
-  (hnrel   : ∀ {n k : ℕ} (r : L.Rel k) (v : Fin k → Subterm L μ n), C n (nrel r v))
-  (hand    : ∀ {n : ℕ} (p q : Subformula L μ n), C n (p ⋏ q))
-  (hor     : ∀ {n : ℕ} (p q : Subformula L μ n), C n (p ⋎ q))
-  (hall    : ∀ {n : ℕ} (p : Subformula L μ (n + 1)), C n (∀' p))
-  (hex     : ∀ {n : ℕ} (p : Subformula L μ (n + 1)), C n (∃' p)) :
-    ∀ {n : ℕ} (p : Subformula L μ n), C n p
+  (hrel    : ∀ {n k : ℕ} (r : L.Rel k) (v : Fin k → Semiterm L μ n), C n (rel r v))
+  (hnrel   : ∀ {n k : ℕ} (r : L.Rel k) (v : Fin k → Semiterm L μ n), C n (nrel r v))
+  (hand    : ∀ {n : ℕ} (p q : Semiformula L μ n), C n (p ⋏ q))
+  (hor     : ∀ {n : ℕ} (p q : Semiformula L μ n), C n (p ⋎ q))
+  (hall    : ∀ {n : ℕ} (p : Semiformula L μ (n + 1)), C n (∀' p))
+  (hex     : ∀ {n : ℕ} (p : Semiformula L μ (n + 1)), C n (∃' p)) :
+    ∀ {n : ℕ} (p : Semiformula L μ n), C n p
   | _, verum    => hverum
   | _, falsum   => hfalsum
   | _, rel r v  => hrel r v
@@ -192,16 +192,16 @@ def cases' {C : ∀ n, Subformula L μ n → Sort w}
   | _, ex p     => hex p
 
 @[elab_as_elim]
-def rec' {C : ∀ n, Subformula L μ n → Sort w}
+def rec' {C : ∀ n, Semiformula L μ n → Sort w}
   (hverum  : ∀ {n : ℕ}, C n ⊤)
   (hfalsum : ∀ {n : ℕ}, C n ⊥)
-  (hrel    : ∀ {n k : ℕ} (r : L.Rel k) (v : Fin k → Subterm L μ n), C n (rel r v))
-  (hnrel   : ∀ {n k : ℕ} (r : L.Rel k) (v : Fin k → Subterm L μ n), C n (nrel r v))
-  (hand    : ∀ {n : ℕ} (p q : Subformula L μ n), C n p → C n q → C n (p ⋏ q))
-  (hor     : ∀ {n : ℕ} (p q : Subformula L μ n), C n p → C n q → C n (p ⋎ q))
-  (hall    : ∀ {n : ℕ} (p : Subformula L μ (n + 1)), C (n + 1) p → C n (∀' p))
-  (hex     : ∀ {n : ℕ} (p : Subformula L μ (n + 1)), C (n + 1) p → C n (∃' p)) :
-    ∀ {n : ℕ} (p : Subformula L μ n), C n p
+  (hrel    : ∀ {n k : ℕ} (r : L.Rel k) (v : Fin k → Semiterm L μ n), C n (rel r v))
+  (hnrel   : ∀ {n k : ℕ} (r : L.Rel k) (v : Fin k → Semiterm L μ n), C n (nrel r v))
+  (hand    : ∀ {n : ℕ} (p q : Semiformula L μ n), C n p → C n q → C n (p ⋏ q))
+  (hor     : ∀ {n : ℕ} (p q : Semiformula L μ n), C n p → C n q → C n (p ⋎ q))
+  (hall    : ∀ {n : ℕ} (p : Semiformula L μ (n + 1)), C (n + 1) p → C n (∀' p))
+  (hex     : ∀ {n : ℕ} (p : Semiformula L μ (n + 1)), C (n + 1) p → C n (∃' p)) :
+    ∀ {n : ℕ} (p : Semiformula L μ n), C n p
   | _, verum    => hverum
   | _, falsum   => hfalsum
   | _, rel r v  => hrel r v
@@ -211,14 +211,14 @@ def rec' {C : ∀ n, Subformula L μ n → Sort w}
   | _, all p    => hall p (rec' hverum hfalsum hrel hnrel hand hor hall hex p)
   | _, ex p     => hex p (rec' hverum hfalsum hrel hnrel hand hor hall hex p)
 
-@[simp] lemma complexity_neg (p : Subformula L μ n) : complexity (~p) = complexity p :=
+@[simp] lemma complexity_neg (p : Semiformula L μ n) : complexity (~p) = complexity p :=
   by induction p using rec' <;> simp[*]
 
 section Decidable
 
 variable [∀ k, DecidableEq (L.Func k)] [∀ k, DecidableEq (L.Rel k)] [DecidableEq μ]
 
-def hasDecEq : {n : ℕ} → (p q : Subformula L μ n) → Decidable (p = q)
+def hasDecEq : {n : ℕ} → (p q : Semiformula L μ n) → Decidable (p = q)
   | _, ⊤,        q => by cases q using cases' <;>
       { simp; try { exact isFalse not_false }; try { exact isTrue trivial } }
   | _, ⊥,        q => by cases q using cases' <;>
@@ -266,22 +266,22 @@ def hasDecEq : {n : ℕ} → (p q : Subformula L μ n) → Decidable (p = q)
       cases q using cases' <;> try { simp; exact isFalse not_false }
       case hex p' => simp; exact hasDecEq p p'
 
-instance : DecidableEq (Subformula L μ n) := hasDecEq
+instance : DecidableEq (Semiformula L μ n) := hasDecEq
 
 end Decidable
 
-end Subformula
+end Semiformula
 
 namespace Rew
 
-open Subformula
+open Semiformula
 
 variable
   {L : Language.{u}} {L₁ : Language.{u₁}} {L₂ : Language.{u₂}} {L₃ : Language.{u₃}}
   {μ : Type v} {μ₁ : Type v₁} {μ₂ : Type v₂} {μ₃ : Type v₃}
   {n n₁ n₂ n₂ m m₁ m₂ m₃ : ℕ}
 
-def loMap : ⦃n₁ n₂ : ℕ⦄ → Rew L μ₁ n₁ μ₂ n₂ → Subformula L μ₁ n₁ → Subformula L μ₂ n₂
+def loMap : ⦃n₁ n₂ : ℕ⦄ → Rew L μ₁ n₁ μ₂ n₂ → Semiformula L μ₁ n₁ → Semiformula L μ₂ n₂
   | _, _, _, ⊤        => ⊤
   | _, _, _, ⊥        => ⊥
   | _, _, ω, rel r v  => rel r (ω ∘ v)
@@ -295,117 +295,117 @@ section
 
 variable (ω : Rew L μ₁ n₁ μ₂ n₂)
 
-lemma loMap_neg (p : Subformula L μ₁ n₁) :
+lemma loMap_neg (p : Semiformula L μ₁ n₁) :
     ω.loMap (~p) = ~ω.loMap p :=
-  by induction p using Subformula.rec' generalizing n₂ <;> simp[*, loMap, ←Subformula.neg_eq]
+  by induction p using Semiformula.rec' generalizing n₂ <;> simp[*, loMap, ←Semiformula.neg_eq]
 
-lemma ext_loMap' {ω₁ ω₂ : Rew L μ₁ n₁ μ₂ n₂} (h : ω₁ = ω₂) (p : Subformula L μ₁ n₁) : ω₁.loMap p = ω₂.loMap p:= by simp[h]
+lemma ext_loMap' {ω₁ ω₂ : Rew L μ₁ n₁ μ₂ n₂} (h : ω₁ = ω₂) (p : Semiformula L μ₁ n₁) : ω₁.loMap p = ω₂.loMap p:= by simp[h]
 
-lemma neg' (p : Subformula L μ₁ n₁) : ω.loMap (~p) = ~ω.loMap p := loMap_neg ω p
+lemma neg' (p : Semiformula L μ₁ n₁) : ω.loMap (~p) = ~ω.loMap p := loMap_neg ω p
 
-lemma or' (p q : Subformula L μ₁ n₁) : ω.loMap (p ⋎ q) = ω.loMap p ⋎ ω.loMap q := by rfl
+lemma or' (p q : Semiformula L μ₁ n₁) : ω.loMap (p ⋎ q) = ω.loMap p ⋎ ω.loMap q := by rfl
 
-def hom (ω : Rew L μ₁ n₁ μ₂ n₂) : Subformula L μ₁ n₁ →L Subformula L μ₂ n₂ where
+def hom (ω : Rew L μ₁ n₁ μ₂ n₂) : Semiformula L μ₁ n₁ →L Semiformula L μ₂ n₂ where
   map_top' := by rfl
   map_bot' := by rfl
   map_neg' := ω.loMap_neg
   map_and' := fun p q => by rfl
   map_or' := fun p q => by rfl
-  map_imply' := fun p q => by simp[Subformula.imp_eq, neg', or']
+  map_imply' := fun p q => by simp[Semiformula.imp_eq, neg', or']
 
 /-
-instance : FunLike (Rew L μ₁ n₁ μ₂ n₂) (Subformula L μ₁ n₁) (fun _ => Subformula L μ₂ n₂) where
+instance : FunLike (Rew L μ₁ n₁ μ₂ n₂) (Semiformula L μ₁ n₁) (fun _ => Semiformula L μ₂ n₂) where
   coe := fun ω => loMap ω
   coe_injective' := fun ω₁ ω₂ h => ext_loMap ω₁ ω₂ (congr_fun h)
 
-instance : CoeFun (Rew L μ₁ n₁ μ₂ n₂) (fun _ => Subformula L μ₁ n₁ → Subformula L μ₂ n₂) := FunLike.hasCoeToFun
+instance : CoeFun (Rew L μ₁ n₁ μ₂ n₂) (fun _ => Semiformula L μ₁ n₁ → Semiformula L μ₂ n₂) := FunLike.hasCoeToFun
 
-scoped[FirstOrder] notation:max ω "ᵀ" => (ω : Subterm _ _ _ → Subterm _ _ _)
+scoped[FirstOrder] notation:max ω "ᵀ" => (ω : Semiterm _ _ _ → Semiterm _ _ _)
 
-scoped[FirstOrder] notation:max ω "ᴾ" => (ω : Subformula _ _ _ → Subformula _ _ _)
+scoped[FirstOrder] notation:max ω "ᴾ" => (ω : Semiformula _ _ _ → Semiformula _ _ _)
 
-lemma neg' (p : Subformula L μ₁ n₁) : ω (~p) = ~ω p := loMap_neg ω p
+lemma neg' (p : Semiformula L μ₁ n₁) : ω (~p) = ~ω p := loMap_neg ω p
 
-lemma or' (p q : Subformula L μ₁ n₁) : ω (p ⋎ q) = ω p ⋎ ω q := by rfl
+lemma or' (p q : Semiformula L μ₁ n₁) : ω (p ⋎ q) = ω p ⋎ ω q := by rfl
 
-instance : LogicSymbol.homClass (Rew L μ₁ n₁ μ₂ n₂) (Subformula L μ₁ n₁) (Subformula L μ₂ n₂) where
+instance : LogicSymbol.homClass (Rew L μ₁ n₁ μ₂ n₂) (Semiformula L μ₁ n₁) (Semiformula L μ₂ n₂) where
   map_top := fun ω => by rfl
   map_bot := fun ω => by rfl
   map_neg := loMap_neg
   map_and := fun ω p q => by rfl
   map_or := fun ω p q => by rfl
-  map_imply := fun ω p q => by simp[Subformula.imp_eq, neg', or']
+  map_imply := fun ω p q => by simp[Semiformula.imp_eq, neg', or']
 
 -/
 
 lemma hom_eq_loMap : ω.hom = ω.loMap := rfl
 
-protected lemma rel {k} {r : L.Rel k} {v : Fin k → Subterm L μ₁ n₁} :
+protected lemma rel {k} {r : L.Rel k} {v : Fin k → Semiterm L μ₁ n₁} :
     ω.hom (rel r v) = rel r (fun i => ω (v i)) := rfl
 
-protected lemma nrel {k} {r : L.Rel k} {v : Fin k → Subterm L μ₁ n₁} :
+protected lemma nrel {k} {r : L.Rel k} {v : Fin k → Semiterm L μ₁ n₁} :
     ω.hom (nrel r v) = nrel r (fun i => ω (v i)) := by rfl
 
-lemma rel' {k} {r : L.Rel k} {v : Fin k → Subterm L μ₁ n₁} :
+lemma rel' {k} {r : L.Rel k} {v : Fin k → Semiterm L μ₁ n₁} :
     ω.hom (rel r v) = rel r (ω ∘ v) := by rfl
 
-lemma nrel' {k} {r : L.Rel k} {v : Fin k → Subterm L μ₁ n₁} :
+lemma nrel' {k} {r : L.Rel k} {v : Fin k → Semiterm L μ₁ n₁} :
     ω.hom (nrel r v) = nrel r (ω ∘ v) := by rfl
 
-@[simp] lemma rel0 {r : L.Rel 0} {v : Fin 0 → Subterm L μ₁ n₁} :
+@[simp] lemma rel0 {r : L.Rel 0} {v : Fin 0 → Semiterm L μ₁ n₁} :
     ω.hom (rel r v) = rel r ![] := by simp[ω.rel, Matrix.empty_eq]
 
-@[simp] lemma rel1 {r : L.Rel 1} {t : Subterm L μ₁ n₁} :
+@[simp] lemma rel1 {r : L.Rel 1} {t : Semiterm L μ₁ n₁} :
     ω.hom (rel r ![t]) = rel r ![ω t] := by simp[ω.rel, Matrix.constant_eq_singleton]
 
-@[simp] lemma rel2 {r : L.Rel 2} {t₁ t₂ : Subterm L μ₁ n₁} :
+@[simp] lemma rel2 {r : L.Rel 2} {t₁ t₂ : Semiterm L μ₁ n₁} :
     ω.hom (rel r ![t₁, t₂]) = rel r ![ω t₁, ω t₂] := by simp[ω.rel]; funext i; induction i using Fin.induction <;> simp
 
-@[simp] lemma rel3 {r : L.Rel 3} {t₁ t₂ t₃ : Subterm L μ₁ n₁} :
+@[simp] lemma rel3 {r : L.Rel 3} {t₁ t₂ t₃ : Semiterm L μ₁ n₁} :
     ω.hom (rel r ![t₁, t₂, t₃]) = rel r ![ω t₁, ω t₂, ω t₃] := by
   simp[ω.rel]; funext i; induction' i using Fin.induction with i <;> simp; induction' i using Fin.induction with i <;> simp
 
-@[simp] lemma nrel0 {r : L.Rel 0} {v : Fin 0 → Subterm L μ₁ n₁} :
+@[simp] lemma nrel0 {r : L.Rel 0} {v : Fin 0 → Semiterm L μ₁ n₁} :
     ω.hom (nrel r v) = nrel r ![] := by simp[ω.nrel, Matrix.empty_eq]
 
-@[simp] lemma nrel1 {r : L.Rel 1} {t : Subterm L μ₁ n₁} :
+@[simp] lemma nrel1 {r : L.Rel 1} {t : Semiterm L μ₁ n₁} :
     ω.hom (nrel r ![t]) = nrel r ![ω t] := by simp[ω.nrel, Matrix.constant_eq_singleton]
 
-@[simp] lemma nrel2 {r : L.Rel 2} {t₁ t₂ : Subterm L μ₁ n₁} :
+@[simp] lemma nrel2 {r : L.Rel 2} {t₁ t₂ : Semiterm L μ₁ n₁} :
     ω.hom (nrel r ![t₁, t₂]) = nrel r ![ω t₁, ω t₂] := by simp[ω.nrel]; funext i; induction i using Fin.induction <;> simp
 
-@[simp] lemma nrel3 {r : L.Rel 3} {t₁ t₂ t₃ : Subterm L μ₁ n₁} :
+@[simp] lemma nrel3 {r : L.Rel 3} {t₁ t₂ t₃ : Semiterm L μ₁ n₁} :
     ω.hom (nrel r ![t₁, t₂, t₃]) = nrel r ![ω t₁, ω t₂, ω t₃] := by
   simp[ω.nrel]; funext i; induction' i using Fin.induction with i <;> simp; induction' i using Fin.induction with i <;> simp
 
-@[simp] protected lemma all {p : Subformula L μ₁ (n₁ + 1)} :
+@[simp] protected lemma all {p : Semiformula L μ₁ (n₁ + 1)} :
     ω.hom (∀' p) = ∀' ω.q.hom p := by rfl
 
-@[simp] protected lemma ex {p : Subformula L μ₁ (n₁ + 1)} :
+@[simp] protected lemma ex {p : Semiformula L μ₁ (n₁ + 1)} :
     ω.hom (∃' p) = ∃' ω.q.hom p := by rfl
 
-@[simp] protected lemma ball {p q : Subformula L μ₁ (n₁ + 1)} :
+@[simp] protected lemma ball {p q : Semiformula L μ₁ (n₁ + 1)} :
     ω.hom (∀[p] q) = ∀[ω.q.hom p] ω.q.hom q := by simp[ball_eq]
 
-@[simp] protected lemma bex {p q : Subformula L μ₁ (n₁ + 1)} :
+@[simp] protected lemma bex {p q : Semiformula L μ₁ (n₁ + 1)} :
     ω.hom (∃[p] q) = ∃[ω.q.hom p] ω.q.hom q := by simp[bex_eq]
 
 attribute [irreducible] hom
 
-@[simp] lemma complexity (p : Subformula L μ₁ n₁) : (ω.hom p).complexity = p.complexity := by
-  induction p using Subformula.rec' generalizing n₂ <;> simp[*, Rew.rel, Rew.nrel]
+@[simp] lemma complexity (p : Semiformula L μ₁ n₁) : (ω.hom p).complexity = p.complexity := by
+  induction p using Semiformula.rec' generalizing n₂ <;> simp[*, Rew.rel, Rew.nrel]
 
 lemma hom_ext' {ω₁ ω₂ : Rew L μ₁ n₁ μ₂ n₂} (h : ω₁ = ω₂) {p} : ω₁.hom p = ω₂.hom p := by simp[h]
 
 end
 
-@[simp] lemma hom_id_eq : (Rew.id.hom : Subformula L μ n →L Subformula L μ n) = LogicSymbol.Hom.id := by
-  ext p; induction p using Subformula.rec' <;> simp[Rew.rel, Rew.nrel, *]
+@[simp] lemma hom_id_eq : (Rew.id.hom : Semiformula L μ n →L Semiformula L μ n) = LogicSymbol.Hom.id := by
+  ext p; induction p using Semiformula.rec' <;> simp[Rew.rel, Rew.nrel, *]
 
 lemma hom_comp_eq (ω₂ : Rew L μ₂ n₂ μ₃ n₃) (ω₁ : Rew L μ₁ n₁ μ₂ n₂) : (ω₂.comp ω₁).hom = ω₂.hom.comp ω₁.hom := by
-  ext p; simp; induction p using Subformula.rec' generalizing n₂ n₃ <;> simp[Rew.rel, Rew.nrel, comp_app, q_comp, *]
+  ext p; simp; induction p using Semiformula.rec' generalizing n₂ n₃ <;> simp[Rew.rel, Rew.nrel, comp_app, q_comp, *]
 
-lemma hom_comp_app (ω₂ : Rew L μ₂ n₂ μ₃ n₃) (ω₁ : Rew L μ₁ n₁ μ₂ n₂) (p : Subformula L μ₁ n₁) :
+lemma hom_comp_app (ω₂ : Rew L μ₂ n₂ μ₃ n₃) (ω₁ : Rew L μ₁ n₁ μ₂ n₂) (p : Semiformula L μ₁ n₁) :
     (ω₂.comp ω₁).hom p = ω₂.hom (ω₁.hom p) := by simp[hom_comp_eq]
 
 lemma mapl_inj : ∀ {n₁ n₂ μ₁ μ₂} {b : Fin n₁ → Fin n₂} {e : μ₁ → μ₂},
@@ -437,69 +437,69 @@ lemma mapl_inj : ∀ {n₁ n₂ μ₁ μ₂} {b : Fin n₁ → Fin n₂} {e : μ
     intro h; exact mapl_inj (b := 0 :> Fin.succ ∘ b)
       (Matrix.injective_vecCons ((Fin.succ_injective _).comp hb) (fun _ => (Fin.succ_ne_zero _).symm)) hf h
 
-lemma emb.hom_injective {o} [e : IsEmpty o] : Function.Injective (emb.hom : Subformula L o n → Subformula L μ n) :=
+lemma emb.hom_injective {o} [e : IsEmpty o] : Function.Injective (emb.hom : Semiformula L o n → Semiformula L μ n) :=
   by simp[emb]; exact mapl_inj Function.injective_id (fun x => IsEmpty.elim e x)
 
-lemma shift.hom_injective : Function.Injective (shift.hom : SyntacticSubformula L n → SyntacticSubformula L n) :=
+lemma shift.hom_injective : Function.Injective (shift.hom : SyntacticSemiformula L n → SyntacticSemiformula L n) :=
   by simp[shift]; exact mapl_inj Function.injective_id Nat.succ_injective
 
-@[simp] lemma hom_fix_free (p : SyntacticSubformula L (n + 1)) :
+@[simp] lemma hom_fix_free (p : SyntacticSemiformula L (n + 1)) :
     fix.hom (free.hom p) = p := by simp[←hom_comp_app]
 
-@[simp] lemma hom_free_fix (p : SyntacticSubformula L n) :
+@[simp] lemma hom_free_fix (p : SyntacticSemiformula L n) :
     free.hom (fix.hom p) = p := by simp[←hom_comp_app]
 
-@[simp] lemma hom_substs_mbar_zero_comp_shift_eq_free (p : SyntacticSubformula L 1) :
+@[simp] lemma hom_substs_mbar_zero_comp_shift_eq_free (p : SyntacticSemiformula L 1) :
     (substs ![&0]).hom (Rew.shift.hom p) = free.hom p := by simp[←hom_comp_app, substs_mbar_zero_comp_shift_eq_free]
 
-@[simp] protected lemma emb_univClosure {o} [e : IsEmpty o] {σ : Subformula L o n} :
-    (emb.hom (univClosure σ) : Subformula L μ 0) = univClosure (emb.hom σ) := by induction n <;> simp[*]
+@[simp] protected lemma emb_univClosure {o} [e : IsEmpty o] {σ : Semiformula L o n} :
+    (emb.hom (univClosure σ) : Semiformula L μ 0) = univClosure (emb.hom σ) := by induction n <;> simp[*]
 
 variable (ω : Rew L μ₁ n₁ μ₂ n₂)
 
-@[simp] lemma eq_top_iff {p : Subformula L μ₁ n₁} : ω.hom p = ⊤ ↔ p = ⊤ := by
-  cases p using Subformula.rec' <;> simp[Rew.rel, Rew.nrel]
+@[simp] lemma eq_top_iff {p : Semiformula L μ₁ n₁} : ω.hom p = ⊤ ↔ p = ⊤ := by
+  cases p using Semiformula.rec' <;> simp[Rew.rel, Rew.nrel]
 
-@[simp] lemma eq_bot_iff {p : Subformula L μ₁ n₁} : ω.hom p = ⊥ ↔ p = ⊥ := by
-  cases p using Subformula.rec' <;> simp[Rew.rel, Rew.nrel]
+@[simp] lemma eq_bot_iff {p : Semiformula L μ₁ n₁} : ω.hom p = ⊥ ↔ p = ⊥ := by
+  cases p using Semiformula.rec' <;> simp[Rew.rel, Rew.nrel]
 
-lemma eq_rel_iff {p : Subformula L μ₁ n₁} {k} {r : L.Rel k} {v} :
-    ω.hom p = Subformula.rel r v ↔ ∃ v', ω ∘ v' = v ∧ p = Subformula.rel r v' := by
-  cases p using Subformula.rec' <;> simp[Rew.rel, Rew.nrel]
+lemma eq_rel_iff {p : Semiformula L μ₁ n₁} {k} {r : L.Rel k} {v} :
+    ω.hom p = Semiformula.rel r v ↔ ∃ v', ω ∘ v' = v ∧ p = Semiformula.rel r v' := by
+  cases p using Semiformula.rec' <;> simp[Rew.rel, Rew.nrel]
   case hrel k' r' v =>
     by_cases hk : k' = k <;> simp[hk]; rcases hk with rfl; simp
     by_cases hr : r' = r <;> simp[hr, Function.funext_iff]
 
-lemma eq_nrel_iff {p : Subformula L μ₁ n₁} {k} {r : L.Rel k} {v} :
-    ω.hom p = Subformula.nrel r v ↔ ∃ v', ω ∘ v' = v ∧ p = Subformula.nrel r v' := by
-  cases p using Subformula.rec' <;> simp[Rew.rel, Rew.nrel]
+lemma eq_nrel_iff {p : Semiformula L μ₁ n₁} {k} {r : L.Rel k} {v} :
+    ω.hom p = Semiformula.nrel r v ↔ ∃ v', ω ∘ v' = v ∧ p = Semiformula.nrel r v' := by
+  cases p using Semiformula.rec' <;> simp[Rew.rel, Rew.nrel]
   case hnrel k' r' v =>
     by_cases hk : k' = k <;> simp[hk]; rcases hk with rfl; simp
     by_cases hr : r' = r <;> simp[hr, Function.funext_iff]
 
-@[simp] lemma eq_and_iff {p : Subformula L μ₁ n₁} {q₁ q₂} :
+@[simp] lemma eq_and_iff {p : Semiformula L μ₁ n₁} {q₁ q₂} :
     ω.hom p = q₁ ⋏ q₂ ↔ ∃ p₁ p₂, ω.hom p₁ = q₁ ∧ ω.hom p₂ = q₂ ∧ p = p₁ ⋏ p₂ := by
-  cases p using Subformula.rec' <;> simp[Rew.rel, Rew.nrel]
+  cases p using Semiformula.rec' <;> simp[Rew.rel, Rew.nrel]
 
-@[simp] lemma eq_or_iff {p : Subformula L μ₁ n₁} {q₁ q₂} :
+@[simp] lemma eq_or_iff {p : Semiformula L μ₁ n₁} {q₁ q₂} :
     ω.hom p = q₁ ⋎ q₂ ↔ ∃ p₁ p₂, ω.hom p₁ = q₁ ∧ ω.hom p₂ = q₂ ∧ p = p₁ ⋎ p₂ := by
-  cases p using Subformula.rec' <;> simp[Rew.rel, Rew.nrel]
+  cases p using Semiformula.rec' <;> simp[Rew.rel, Rew.nrel]
 
-lemma eq_all_iff {p : Subformula L μ₁ n₁} {q} :
+lemma eq_all_iff {p : Semiformula L μ₁ n₁} {q} :
     ω.hom p = ∀' q ↔ ∃ p', ω.q.hom p' = q ∧ p = ∀' p' := by
-  cases p using Subformula.rec' <;> simp[Rew.rel, Rew.nrel]
+  cases p using Semiformula.rec' <;> simp[Rew.rel, Rew.nrel]
 
-lemma eq_ex_iff {p : Subformula L μ₁ n₁} {q} :
+lemma eq_ex_iff {p : Semiformula L μ₁ n₁} {q} :
     ω.hom p = ∃' q ↔ ∃ p', ω.q.hom p' = q ∧ p = ∃' p' := by
-  cases p using Subformula.rec' <;> simp[Rew.rel, Rew.nrel]
+  cases p using Semiformula.rec' <;> simp[Rew.rel, Rew.nrel]
 
-@[simp] lemma eq_neg_iff {p : Subformula L μ₁ n₁} {q₁ q₂} :
+@[simp] lemma eq_neg_iff {p : Semiformula L μ₁ n₁} {q₁ q₂} :
     ω.hom p = q₁ ⟶ q₂ ↔ ∃ p₁ p₂, ω.hom p₁ = q₁ ∧ ω.hom p₂ = q₂ ∧ p = p₁ ⟶ p₂ := by
   simp[imp_eq]; constructor
   · rintro ⟨p₁, hp₁, q₂, rfl, rfl⟩; exact ⟨~p₁, by simp[hp₁]⟩
   · rintro ⟨p₁, rfl, p₂, rfl, rfl⟩; exact ⟨~p₁, by simp, p₂, by simp⟩
 
-lemma eq_ball_iff {p : Subformula L μ₁ n₁} {q₁ q₂} :
+lemma eq_ball_iff {p : Semiformula L μ₁ n₁} {q₁ q₂} :
     (ω.hom p = ∀[q₁] q₂) ↔ ∃ p₁ p₂, ω.q.hom p₁ = q₁ ∧ ω.q.hom p₂ = q₂ ∧ p = ∀[p₁] p₂ := by
   simp[LogicSymbol.ball, eq_all_iff]; constructor
   · rintro ⟨p', ⟨p₁, rfl, p₂, rfl, rfl⟩, rfl⟩; exact ⟨p₁, rfl, p₂, rfl, rfl⟩
@@ -512,18 +512,18 @@ scoped syntax (name := substsHomNotation) term:max "/[" term,* "]" : term
 scoped macro_rules (kind := substsHomNotation)
   | `($p:term /[$terms:term,*]) => `((Rew.substs ![$terms,*]).hom $p)
 
-namespace Subformula
+namespace Semiformula
 
 variable {L : Language.{u}} {μ : Type v} {n n₁ n₂ n₂ m m₁ m₂ m₃ : ℕ}
 
-def shiftEmb : SyntacticSubformula L n ↪ SyntacticSubformula L n where
+def shiftEmb : SyntacticSemiformula L n ↪ SyntacticSemiformula L n where
   toFun := Rew.shift.hom
   inj' := Rew.shift.hom_injective
 
-lemma shiftEmb_eq_shift (p : SyntacticSubformula L n) :
+lemma shiftEmb_eq_shift (p : SyntacticSemiformula L n) :
   shiftEmb p = Rew.shift.hom p := rfl
 
-def qr : ∀ {n}, Subformula L μ n → ℕ
+def qr : ∀ {n}, Semiformula L μ n → ℕ
   | _, ⊤        => 0
   | _, ⊥        => 0
   | _, rel _ _  => 0
@@ -533,76 +533,76 @@ def qr : ∀ {n}, Subformula L μ n → ℕ
   | _, ∀' p     => p.qr + 1
   | _, ∃' p     => p.qr + 1
 
-@[simp] lemma qr_top : (⊤ : Subformula L μ n).qr = 0 := rfl
+@[simp] lemma qr_top : (⊤ : Semiformula L μ n).qr = 0 := rfl
 
-@[simp] lemma qr_bot : (⊥ : Subformula L μ n).qr = 0 := rfl
+@[simp] lemma qr_bot : (⊥ : Semiformula L μ n).qr = 0 := rfl
 
-@[simp] lemma qr_rel {k} (r : L.Rel k) (v : Fin k → Subterm L μ n) : (rel r v).qr = 0 := rfl
+@[simp] lemma qr_rel {k} (r : L.Rel k) (v : Fin k → Semiterm L μ n) : (rel r v).qr = 0 := rfl
 
-@[simp] lemma qr_nrel {k} (r : L.Rel k) (v : Fin k → Subterm L μ n) : (nrel r v).qr = 0 := rfl
+@[simp] lemma qr_nrel {k} (r : L.Rel k) (v : Fin k → Semiterm L μ n) : (nrel r v).qr = 0 := rfl
 
-@[simp] lemma qr_and (p q : Subformula L μ n) : (p ⋏ q).qr = max p.qr q.qr := rfl
+@[simp] lemma qr_and (p q : Semiformula L μ n) : (p ⋏ q).qr = max p.qr q.qr := rfl
 
-@[simp] lemma qr_or (p q : Subformula L μ n) : (p ⋎ q).qr = max p.qr q.qr := rfl
+@[simp] lemma qr_or (p q : Semiformula L μ n) : (p ⋎ q).qr = max p.qr q.qr := rfl
 
-@[simp] lemma qr_all (p : Subformula L μ (n + 1)) : (∀' p).qr = p.qr + 1 := rfl
+@[simp] lemma qr_all (p : Semiformula L μ (n + 1)) : (∀' p).qr = p.qr + 1 := rfl
 
-@[simp] lemma qr_ex (p : Subformula L μ (n + 1)) : (∃' p).qr = p.qr + 1 := rfl
+@[simp] lemma qr_ex (p : Semiformula L μ (n + 1)) : (∃' p).qr = p.qr + 1 := rfl
 
-@[simp] lemma qr_neg (p : Subformula L μ n) : (~p).qr = p.qr := by
+@[simp] lemma qr_neg (p : Semiformula L μ n) : (~p).qr = p.qr := by
   induction' p using rec' <;> simp[*]
 
-@[simp] lemma qr_imply (p q : Subformula L μ n) : (p ⟶ q).qr = max p.qr q.qr :=
+@[simp] lemma qr_imply (p q : Semiformula L μ n) : (p ⟶ q).qr = max p.qr q.qr :=
   by simp[imp_eq]
 
-@[simp] lemma qr_iff (p q : Subformula L μ n) : (p ⟷ q).qr = max p.qr q.qr :=
+@[simp] lemma qr_iff (p q : Semiformula L μ n) : (p ⟷ q).qr = max p.qr q.qr :=
   by simp[iff_eq, total_of]
 
-def qfree (p : Subformula L μ n) : Prop := p.qr = 0
+def qfree (p : Semiformula L μ n) : Prop := p.qr = 0
 
-@[simp] lemma qfree_top : (⊤ : Subformula L μ n).qfree := rfl
+@[simp] lemma qfree_top : (⊤ : Semiformula L μ n).qfree := rfl
 
-@[simp] lemma qfree_bot : (⊥ : Subformula L μ n).qfree := rfl
+@[simp] lemma qfree_bot : (⊥ : Semiformula L μ n).qfree := rfl
 
-@[simp] lemma qfree_rel {k} (r : L.Rel k) (v : Fin k → Subterm L μ n) : (rel r v).qfree := rfl
+@[simp] lemma qfree_rel {k} (r : L.Rel k) (v : Fin k → Semiterm L μ n) : (rel r v).qfree := rfl
 
-@[simp] lemma qfree_nrel {k} (r : L.Rel k) (v : Fin k → Subterm L μ n) : (nrel r v).qfree := rfl
+@[simp] lemma qfree_nrel {k} (r : L.Rel k) (v : Fin k → Semiterm L μ n) : (nrel r v).qfree := rfl
 
-@[simp] lemma qfree_and {p q : Subformula L μ n} : (p ⋏ q).qfree ↔ p.qfree ∧ q.qfree := by simp[qfree]
+@[simp] lemma qfree_and {p q : Semiformula L μ n} : (p ⋏ q).qfree ↔ p.qfree ∧ q.qfree := by simp[qfree]
 
-@[simp] lemma qfree_or {p q : Subformula L μ n} : (p ⋎ q).qfree ↔ p.qfree ∧ q.qfree := by simp[qfree]
+@[simp] lemma qfree_or {p q : Semiformula L μ n} : (p ⋎ q).qfree ↔ p.qfree ∧ q.qfree := by simp[qfree]
 
-@[simp] lemma not_qfree_all {p : Subformula L μ (n + 1)} : ¬(∀' p).qfree := by simp[qfree]
+@[simp] lemma not_qfree_all {p : Semiformula L μ (n + 1)} : ¬(∀' p).qfree := by simp[qfree]
 
-@[simp] lemma not_qfree_ex {p : Subformula L μ (n + 1)} : ¬(∃' p).qfree := by simp[qfree]
+@[simp] lemma not_qfree_ex {p : Semiformula L μ (n + 1)} : ¬(∃' p).qfree := by simp[qfree]
 
-@[simp] lemma qfree_neg {p : Subformula L μ n} : (~p).qfree ↔ p.qfree := by
+@[simp] lemma qfree_neg {p : Semiformula L μ n} : (~p).qfree ↔ p.qfree := by
   simp[qfree]
 
-@[simp] lemma qfree_imply {p q : Subformula L μ n} : (p ⟶ q).qfree ↔ p.qfree ∧ q.qfree :=
+@[simp] lemma qfree_imply {p q : Semiformula L μ n} : (p ⟶ q).qfree ↔ p.qfree ∧ q.qfree :=
   by simp[qfree]
 
-@[simp] lemma qfree_iff {p q : Subformula L μ n} : (p ⟷ q).qfree ↔ p.qfree ∧ q.qfree :=
+@[simp] lemma qfree_iff {p q : Semiformula L μ n} : (p ⟷ q).qfree ↔ p.qfree ∧ q.qfree :=
   by simp[qfree]
 
 structure Operator (L : Language.{u}) (n : ℕ) where
-  sentence : Subsentence L n
+  sentence : Semisentence L n
 
 abbrev Const (L : Language.{u}) := Operator L 0
 
 namespace Operator
 
-def operator {arity : ℕ} (o : Operator L arity) (v : Fin arity → Subterm L μ n) : Subformula L μ n :=
+def operator {arity : ℕ} (o : Operator L arity) (v : Fin arity → Semiterm L μ n) : Semiformula L μ n :=
   (Rew.substs v).hom (Rew.emb.hom o.sentence)
 
-def const (c : Const L) : Subformula L μ n := c.operator ![]
+def const (c : Const L) : Semiformula L μ n := c.operator ![]
 
-instance : Coe (Const L) (Subformula L μ n) := ⟨Operator.const⟩
+instance : Coe (Const L) (Semiformula L μ n) := ⟨Operator.const⟩
 
-def comp (o : Operator L k) (w : Fin k → Subterm.Operator L l) : Operator L l :=
+def comp (o : Operator L k) (w : Fin k → Semiterm.Operator L l) : Operator L l :=
   ⟨o.operator (fun x => (w x).term)⟩
 
-lemma operator_comp (o : Operator L k) (w : Fin k → Subterm.Operator L l) (v : Fin l → Subterm L μ n) :
+lemma operator_comp (o : Operator L k) (w : Fin k → Semiterm.Operator L l) (v : Fin l → Semiterm L μ n) :
   (o.comp w).operator v = o.operator (fun x => (w x).operator v) := by
     simp[operator, comp, ←Rew.hom_comp_app]; congr 2
     ext <;> simp[Rew.comp_app]
@@ -613,33 +613,33 @@ def and {k} (o₁ o₂ : Operator L k) : Operator L k := ⟨o₁.sentence ⋏ o�
 
 def or {k} (o₁ o₂ : Operator L k) : Operator L k := ⟨o₁.sentence ⋎ o₂.sentence⟩
 
-@[simp] lemma operator_and (o₁ o₂ : Operator L k) (v : Fin k → Subterm L μ n) :
+@[simp] lemma operator_and (o₁ o₂ : Operator L k) (v : Fin k → Semiterm L μ n) :
   (o₁.and o₂).operator v = o₁.operator v ⋏ o₂.operator v := by simp[operator, and]
 
-@[simp] lemma operator_or (o₁ o₂ : Operator L k) (v : Fin k → Subterm L μ n) :
+@[simp] lemma operator_or (o₁ o₂ : Operator L k) (v : Fin k → Semiterm L μ n) :
   (o₁.or o₂).operator v = o₁.operator v ⋎ o₂.operator v := by simp[operator, or]
 
 protected class Eq (L : Language) where
-  eq : Subformula.Operator L 2
+  eq : Semiformula.Operator L 2
 
 protected class LT (L : Language) where
-  lt : Subformula.Operator L 2
+  lt : Semiformula.Operator L 2
 
 protected class LE (L : Language) where
-  le : Subformula.Operator L 2
+  le : Semiformula.Operator L 2
 
 protected class Mem (L : Language) where
-  mem : Subformula.Operator L 2
+  mem : Semiformula.Operator L 2
 
-instance [Language.Eq L] : Operator.Eq L := ⟨⟨Subformula.rel Language.Eq.eq Subterm.bvar⟩⟩
+instance [Language.Eq L] : Operator.Eq L := ⟨⟨Semiformula.rel Language.Eq.eq Semiterm.bvar⟩⟩
 
-instance [Language.LT L] : Operator.LT L := ⟨⟨Subformula.rel Language.LT.lt Subterm.bvar⟩⟩
+instance [Language.LT L] : Operator.LT L := ⟨⟨Semiformula.rel Language.LT.lt Semiterm.bvar⟩⟩
 
 instance [Operator.Eq L] [Operator.LT L] : Operator.LE L := ⟨Eq.eq.or LT.lt⟩
 
-lemma Eq.sentence_eq [L.Eq] : (@Operator.Eq.eq L _).sentence = Subformula.rel Language.Eq.eq Subterm.bvar := rfl
+lemma Eq.sentence_eq [L.Eq] : (@Operator.Eq.eq L _).sentence = Semiformula.rel Language.Eq.eq Semiterm.bvar := rfl
 
-lemma LT.sentence_eq [L.LT] : (@Operator.LT.lt L _).sentence = Subformula.rel Language.LT.lt Subterm.bvar := rfl
+lemma LT.sentence_eq [L.LT] : (@Operator.LT.lt L _).sentence = Semiformula.rel Language.LT.lt Semiterm.bvar := rfl
 
 lemma LE.def_of_Eq_of_LT [Operator.Eq L] [Operator.LT L] :
     (@Operator.LE.le L _) = Eq.eq.or LT.lt := rfl
@@ -654,8 +654,8 @@ def formulaRec {C : SyntacticFormula L → Sort _}
   (hnrel   : ∀ {l : ℕ} (r : L.Rel l) (v : Fin l → SyntacticTerm L), C (nrel r v))
   (hand    : ∀ (p q : SyntacticFormula L), C p → C q → C (p ⋏ q))
   (hor     : ∀ (p q : SyntacticFormula L), C p → C q → C (p ⋎ q))
-  (hall    : ∀ (p : SyntacticSubformula L 1), C (Rew.free.hom p) → C (∀' p))
-  (hex     : ∀ (p : SyntacticSubformula L 1), C (Rew.free.hom p) → C (∃' p)) :
+  (hall    : ∀ (p : SyntacticSemiformula L 1), C (Rew.free.hom p) → C (∀' p))
+  (hex     : ∀ (p : SyntacticSemiformula L 1), C (Rew.free.hom p) → C (∃' p)) :
     ∀ (p : SyntacticFormula L), C p
   | ⊤        => hverum
   | ⊥        => hfalsum
@@ -667,7 +667,7 @@ def formulaRec {C : SyntacticFormula L → Sort _}
   | ∃' p     => hex p (formulaRec hverum hfalsum hrel hnrel hand hor hall hex (Rew.free.hom p))
   termination_by formulaRec _ _ _ _ _ _ _ _ p => p.complexity
 
-def fvarList : {n : ℕ} → Subformula L μ n → List μ
+def fvarList : {n : ℕ} → Semiformula L μ n → List μ
   | _, ⊤        => []
   | _, ⊥        => []
   | _, rel _ v  => List.join $ Matrix.toList (fun i => (v i).fvarList)
@@ -677,37 +677,37 @@ def fvarList : {n : ℕ} → Subformula L μ n → List μ
   | _, ∀' p     => p.fvarList
   | _, ∃' p     => p.fvarList
 
-abbrev fvar? (p : Subformula L μ n) (x : μ) : Prop := x ∈ p.fvarList
+abbrev fvar? (p : Semiformula L μ n) (x : μ) : Prop := x ∈ p.fvarList
 
-@[simp] lemma fvarList_top : fvarList (⊤ : Subformula L μ n) = [] := rfl
+@[simp] lemma fvarList_top : fvarList (⊤ : Semiformula L μ n) = [] := rfl
 
-@[simp] lemma fvarList_bot : fvarList (⊥ : Subformula L μ n) = [] := rfl
+@[simp] lemma fvarList_bot : fvarList (⊥ : Semiformula L μ n) = [] := rfl
 
-@[simp] lemma fvarList_all (p : Subformula L μ (n + 1)) : fvarList (∀' p) = fvarList p := rfl
+@[simp] lemma fvarList_all (p : Semiformula L μ (n + 1)) : fvarList (∀' p) = fvarList p := rfl
 
-@[simp] lemma fvarList_ex (p : Subformula L μ (n + 1)) : fvarList (∃' p) = fvarList p := rfl
+@[simp] lemma fvarList_ex (p : Semiformula L μ (n + 1)) : fvarList (∃' p) = fvarList p := rfl
 
-@[simp] lemma fvarList_neg (p : Subformula L μ n) : fvarList (~p) = fvarList p := by
+@[simp] lemma fvarList_neg (p : Semiformula L μ n) : fvarList (~p) = fvarList p := by
   induction p using rec' <;> simp[*, fvarList, ←neg_eq]
 
-@[simp] lemma fvarList_sentence {o : Type w} [IsEmpty o] (p : Subformula L o n) : fvarList p = [] := by
+@[simp] lemma fvarList_sentence {o : Type w} [IsEmpty o] (p : Semiformula L o n) : fvarList p = [] := by
   induction p using rec' <;> simp[*, fvarList, ←neg_eq]
 
-@[simp] lemma fvarList_emb {o : Type w} [IsEmpty o] (p : Subformula L o n) : fvarList (Rew.emb.hom p : Subformula L μ n) = [] := by
+@[simp] lemma fvarList_emb {o : Type w} [IsEmpty o] (p : Semiformula L o n) : fvarList (Rew.emb.hom p : Semiformula L μ n) = [] := by
   induction p using rec' <;> simp[*, Rew.rel, Rew.nrel, fvarList, ←neg_eq]
 
 lemma rew_eq_of_funEqOn {ω₁ ω₂ : Rew L μ₁ n₁ μ₂ n₂} {p}
-  (hb : ∀ x, ω₁ #x = ω₂ #x) (hf : Function.funEqOn (fvar? p) (ω₁ ∘ Subterm.fvar) (ω₂ ∘ Subterm.fvar)) :
+  (hb : ∀ x, ω₁ #x = ω₂ #x) (hf : Function.funEqOn (fvar? p) (ω₁ ∘ Semiterm.fvar) (ω₂ ∘ Semiterm.fvar)) :
     ω₁.hom p = ω₂.hom p := by
   unfold fvar? at*
   induction p using rec' generalizing n₂ <;> simp[*, Rew.rel, Rew.nrel] <;> simp[fvarList] at hf
   case hrel =>
     funext i
-    exact Subterm.rew_eq_of_funEqOn _ _ _ hb
+    exact Semiterm.rew_eq_of_funEqOn _ _ _ hb
       (hf.of_subset (fun x hx ↦ ⟨i, hx⟩))
   case hnrel =>
     funext i
-    exact Subterm.rew_eq_of_funEqOn _ _ _ hb
+    exact Semiterm.rew_eq_of_funEqOn _ _ _ hb
       (hf.of_subset (fun x hx ↦ ⟨i, hx⟩))
   case hand ihp ihq =>
     exact ⟨ihp hb (hf.of_subset (fun x hx => Or.inl hx)), ihq hb (hf.of_subset (fun x hx => Or.inr hx))⟩
@@ -718,128 +718,128 @@ lemma rew_eq_of_funEqOn {ω₁ ω₂ : Rew L μ₁ n₁ μ₂ n₂} {p}
   case hex ih =>
     exact ih (fun x => by cases x using Fin.cases <;> simp[hb]) (fun x hx => by simp; exact congr_arg _ (hf x hx))
 
-lemma rew_eq_of_funEqOn₀ {ω₁ ω₂ : Rew L μ₁ 0 μ₂ n₂} {p} (hf : Function.funEqOn (fvar? p) (ω₁ ∘ Subterm.fvar) (ω₂ ∘ Subterm.fvar)) : ω₁.hom p = ω₂.hom p :=
+lemma rew_eq_of_funEqOn₀ {ω₁ ω₂ : Rew L μ₁ 0 μ₂ n₂} {p} (hf : Function.funEqOn (fvar? p) (ω₁ ∘ Semiterm.fvar) (ω₂ ∘ Semiterm.fvar)) : ω₁.hom p = ω₂.hom p :=
   rew_eq_of_funEqOn (fun x => Fin.elim0 x) hf
 
-def upper (p : SyntacticSubformula L n) : ℕ := Finset.sup p.fvarList.toFinset id + 1
+def upper (p : SyntacticSemiformula L n) : ℕ := Finset.sup p.fvarList.toFinset id + 1
 
-lemma not_fvar?_of_lt_upper (p : SyntacticSubformula L n) (h : p.upper ≤ m) : ¬fvar? p m := by
+lemma not_fvar?_of_lt_upper (p : SyntacticSemiformula L n) (h : p.upper ≤ m) : ¬fvar? p m := by
   simp[upper, Nat.add_one_le_iff, fvar?] at h ⊢
   intro hm
   have : m ≤ Finset.sup p.fvarList.toFinset id :=
     Finset.le_sup (s := p.fvarList.toFinset) (b := m) (f := id) (by simpa using hm)
   exact irrefl_of _ _ $ lt_of_lt_of_le h this
 
-@[simp] lemma not_fvar?_upper (p : SyntacticSubformula L n) : ¬fvar? p p.upper :=
+@[simp] lemma not_fvar?_upper (p : SyntacticSemiformula L n) : ¬fvar? p p.upper :=
   not_fvar?_of_lt_upper p (by simp)
 
-lemma ne_of_ne_complexity {p q : Subformula L μ n} (h : p.complexity ≠ q.complexity) : p ≠ q :=
+lemma ne_of_ne_complexity {p q : Semiformula L μ n} (h : p.complexity ≠ q.complexity) : p ≠ q :=
   by rintro rfl; contradiction
 
-@[simp] lemma ex_ne_subst (p : Subformula L μ 1) (t) : [→ t].hom p ≠ ∃' p := ne_of_ne_complexity (by simp)
+@[simp] lemma ex_ne_subst (p : Semiformula L μ 1) (t) : [→ t].hom p ≠ ∃' p := ne_of_ne_complexity (by simp)
 
-@[simp] lemma ne_or_left (p q : Subformula L μ n) : p ≠ p ⋎ q := ne_of_ne_complexity (by simp)
+@[simp] lemma ne_or_left (p q : Semiformula L μ n) : p ≠ p ⋎ q := ne_of_ne_complexity (by simp)
 
-@[simp] lemma ne_or_right (p q : Subformula L μ n) : q ≠ p ⋎ q := ne_of_ne_complexity (by simp)
+@[simp] lemma ne_or_right (p q : Semiformula L μ n) : q ≠ p ⋎ q := ne_of_ne_complexity (by simp)
 
-inductive Open : {n : ℕ} → Subformula L μ n → Prop
+inductive Open : {n : ℕ} → Semiformula L μ n → Prop
   | verum                      : Open ⊤
   | falsum                     : Open ⊥
   | rel {k} (r : L.Rel k) (v)  : Open (rel r v)
   | nrel {k} (r : L.Rel k) (v) : Open (nrel r v)
-  | and {p q : Subformula L μ n}   : Open p → Open q → Open (p ⋏ q)
-  | or {p q : Subformula L μ n}    : Open p → Open q → Open (p ⋎ q)
+  | and {p q : Semiformula L μ n}   : Open p → Open q → Open (p ⋏ q)
+  | or {p q : Semiformula L μ n}    : Open p → Open q → Open (p ⋎ q)
 
 attribute [simp] Open.verum Open.falsum Open.rel Open.nrel
 
 variable {L : Language.{u}} {L₁ : Language.{u₁}} {{L₂ : Language.{u₂}}} {L₃ : Language.{u₃}} {μ : Type v} {Φ : L₁ →ᵥ L₂}
 
-def lMapAux (Φ : L₁ →ᵥ L₂) : ∀ {n}, Subformula L₁ μ n → Subformula L₂ μ n
+def lMapAux (Φ : L₁ →ᵥ L₂) : ∀ {n}, Semiformula L₁ μ n → Semiformula L₂ μ n
   | _, ⊤        => ⊤
   | _, ⊥        => ⊥
-  | _, rel r v  => rel (Φ.rel r) (Subterm.lMap Φ ∘ v)
-  | _, nrel r v => nrel (Φ.rel r) (Subterm.lMap Φ ∘ v)
+  | _, rel r v  => rel (Φ.rel r) (Semiterm.lMap Φ ∘ v)
+  | _, nrel r v => nrel (Φ.rel r) (Semiterm.lMap Φ ∘ v)
   | _, p ⋏ q    => lMapAux Φ p ⋏ lMapAux Φ q
   | _, p ⋎ q    => lMapAux Φ p ⋎ lMapAux Φ q
   | _, ∀' p     => ∀' lMapAux Φ p
   | _, ∃' p     => ∃' lMapAux Φ p
 
-lemma lMapAux_neg {n} (p : Subformula L₁ μ n) :
+lemma lMapAux_neg {n} (p : Semiformula L₁ μ n) :
     (~p).lMapAux Φ = ~p.lMapAux Φ :=
-  by induction p using Subformula.rec' <;> simp[*, lMapAux, ←Subformula.neg_eq]
+  by induction p using Semiformula.rec' <;> simp[*, lMapAux, ←Semiformula.neg_eq]
 
-def lMap (Φ : L₁ →ᵥ L₂) {n} : Subformula L₁ μ n →L Subformula L₂ μ n where
+def lMap (Φ : L₁ →ᵥ L₂) {n} : Semiformula L₁ μ n →L Semiformula L₂ μ n where
   toTr := lMapAux Φ
   map_top' := by simp[lMapAux]
   map_bot' := by simp[lMapAux]
   map_and' := by simp[lMapAux]
   map_or'  := by simp[lMapAux]
   map_neg' := by simp[lMapAux_neg]
-  map_imply' := by simp[Subformula.imp_eq, lMapAux_neg, ←Subformula.neg_eq, lMapAux]
+  map_imply' := by simp[Semiformula.imp_eq, lMapAux_neg, ←Semiformula.neg_eq, lMapAux]
 
-lemma lMap_rel {k} (r : L₁.Rel k) (v : Fin k → Subterm L₁ μ n) :
+lemma lMap_rel {k} (r : L₁.Rel k) (v : Fin k → Semiterm L₁ μ n) :
     lMap Φ (rel r v) = rel (Φ.rel r) (fun i => (v i).lMap Φ) := rfl
 
-@[simp] lemma lMap_rel₀ (r : L₁.Rel 0) (v : Fin 0 → Subterm L₁ μ n) :
+@[simp] lemma lMap_rel₀ (r : L₁.Rel 0) (v : Fin 0 → Semiterm L₁ μ n) :
     lMap Φ (rel r v) = rel (Φ.rel r) ![] := by simp[lMap_rel, Matrix.empty_eq]
 
-@[simp] lemma lMap_rel₁ (r : L₁.Rel 1) (t : Subterm L₁ μ n) :
+@[simp] lemma lMap_rel₁ (r : L₁.Rel 1) (t : Semiterm L₁ μ n) :
     lMap Φ (rel r ![t]) = rel (Φ.rel r) ![t.lMap Φ] := by simp[lMap_rel, Matrix.constant_eq_singleton]
 
-@[simp] lemma lMap_rel₂ (r : L₁.Rel 2) (t₁ t₂ : Subterm L₁ μ n) :
+@[simp] lemma lMap_rel₂ (r : L₁.Rel 2) (t₁ t₂ : Semiterm L₁ μ n) :
     lMap Φ (rel r ![t₁, t₂]) = rel (Φ.rel r) ![t₁.lMap Φ, t₂.lMap Φ] := by
   simp[lMap_rel]; funext i; induction i using Fin.induction <;> simp
 
-lemma lMap_nrel {k} (r : L₁.Rel k) (v : Fin k → Subterm L₁ μ n) :
+lemma lMap_nrel {k} (r : L₁.Rel k) (v : Fin k → Semiterm L₁ μ n) :
     lMap Φ (nrel r v) = nrel (Φ.rel r) (fun i => (v i).lMap Φ) := rfl
 
-@[simp] lemma lMap_nrel₀ (r : L₁.Rel 0) (v : Fin 0 → Subterm L₁ μ n) :
+@[simp] lemma lMap_nrel₀ (r : L₁.Rel 0) (v : Fin 0 → Semiterm L₁ μ n) :
     lMap Φ (nrel r v) = nrel (Φ.rel r) ![] := by simp[lMap_nrel, Matrix.empty_eq]
 
-@[simp] lemma lMap_nrel₁ (r : L₁.Rel 1) (t : Subterm L₁ μ n) :
+@[simp] lemma lMap_nrel₁ (r : L₁.Rel 1) (t : Semiterm L₁ μ n) :
     lMap Φ (nrel r ![t]) = nrel (Φ.rel r) ![t.lMap Φ] := by simp[lMap_nrel, Matrix.constant_eq_singleton]
 
-@[simp] lemma lMap_nrel₂ (r : L₁.Rel 2) (t₁ t₂ : Subterm L₁ μ n) :
+@[simp] lemma lMap_nrel₂ (r : L₁.Rel 2) (t₁ t₂ : Semiterm L₁ μ n) :
     lMap Φ (nrel r ![t₁, t₂]) = nrel (Φ.rel r) ![t₁.lMap Φ, t₂.lMap Φ] := by
   simp[lMap_nrel]; funext i; induction i using Fin.induction <;> simp
 
-@[simp] lemma lMap_all (p : Subformula L₁ μ (n + 1)) :
+@[simp] lemma lMap_all (p : Semiformula L₁ μ (n + 1)) :
     lMap Φ (∀' p) = ∀' lMap Φ p := rfl
 
-@[simp] lemma lMap_ex (p : Subformula L₁ μ (n + 1)) :
+@[simp] lemma lMap_ex (p : Semiformula L₁ μ (n + 1)) :
     lMap Φ (∃' p) = ∃' lMap Φ p := rfl
 
-lemma lMap_bind (b : Fin n₁ → Subterm L₁ μ₂ n₂) (e : μ₁ → Subterm L₁ μ₂ n₂) (p) :
-    lMap Φ ((Rew.bind b e).hom p) = (Rew.bind (Subterm.lMap Φ ∘ b) (Subterm.lMap Φ ∘ e)).hom (lMap Φ p) := by
+lemma lMap_bind (b : Fin n₁ → Semiterm L₁ μ₂ n₂) (e : μ₁ → Semiterm L₁ μ₂ n₂) (p) :
+    lMap Φ ((Rew.bind b e).hom p) = (Rew.bind (Semiterm.lMap Φ ∘ b) (Semiterm.lMap Φ ∘ e)).hom (lMap Φ p) := by
   induction p using rec' generalizing μ₂ n₂ <;>
-  simp[*, Rew.rel, Rew.nrel, lMap_rel, lMap_nrel, Subterm.lMap_bind, Rew.q_bind, Matrix.comp_vecCons', Subterm.lMap_bShift, Function.comp]
+  simp[*, Rew.rel, Rew.nrel, lMap_rel, lMap_nrel, Semiterm.lMap_bind, Rew.q_bind, Matrix.comp_vecCons', Semiterm.lMap_bShift, Function.comp]
 
 lemma lMap_map (b : Fin n₁ → Fin n₂) (e : μ₁ → μ₂) (p) :
     lMap Φ ((Rew.map b e).hom p) = (Rew.map b e).hom (lMap Φ p) := lMap_bind _ _ _
 
-lemma lMap_rewrite (f : μ → Subterm L₁ μ n) (p : Subformula L₁ μ n) :
-    lMap Φ ((Rew.rewrite f).hom p) = (Rew.rewrite (Subterm.lMap Φ ∘ f)).hom (lMap Φ p) :=
+lemma lMap_rewrite (f : μ → Semiterm L₁ μ n) (p : Semiformula L₁ μ n) :
+    lMap Φ ((Rew.rewrite f).hom p) = (Rew.rewrite (Semiterm.lMap Φ ∘ f)).hom (lMap Φ p) :=
   by simp[Rew.rewrite, lMap_bind, Function.comp]
 
-lemma lMap_substs (w : Fin k → Subterm L₁ μ n) (p : Subformula L₁ μ k) :
-    lMap Φ ((Rew.substs w).hom p) = (Rew.substs (Subterm.lMap Φ ∘ w)).hom (lMap Φ p) := lMap_bind _ _ _
+lemma lMap_substs (w : Fin k → Semiterm L₁ μ n) (p : Semiformula L₁ μ k) :
+    lMap Φ ((Rew.substs w).hom p) = (Rew.substs (Semiterm.lMap Φ ∘ w)).hom (lMap Φ p) := lMap_bind _ _ _
 
-lemma lMap_shift (p : SyntacticSubformula L₁ n) : lMap Φ (Rew.shift.hom p) = Rew.shift.hom (lMap Φ p) := lMap_bind _ _ _
+lemma lMap_shift (p : SyntacticSemiformula L₁ n) : lMap Φ (Rew.shift.hom p) = Rew.shift.hom (lMap Φ p) := lMap_bind _ _ _
 
-lemma lMap_free (p : SyntacticSubformula L₁ (n + 1)) : lMap Φ (Rew.free.hom p) = Rew.free.hom (lMap Φ p) := by
+lemma lMap_free (p : SyntacticSemiformula L₁ (n + 1)) : lMap Φ (Rew.free.hom p) = Rew.free.hom (lMap Φ p) := by
   simp[Rew.free, lMap_bind, Function.comp, Matrix.comp_vecConsLast]
 
-lemma lMap_fix (p : SyntacticSubformula L₁ n) : lMap Φ (Rew.fix.hom p) = Rew.fix.hom (lMap Φ p) :=
+lemma lMap_fix (p : SyntacticSemiformula L₁ n) : lMap Φ (Rew.fix.hom p) = Rew.fix.hom (lMap Φ p) :=
   by simp[Rew.fix, lMap_bind, Function.comp]; congr; { funext x; cases x <;> simp }
 
-lemma lMap_emb {o : Type w} [IsEmpty o] (p : Subformula L₁ o n) :
-    (lMap Φ (Rew.emb.hom p) : Subformula L₂ μ n) = Rew.emb.hom (lMap Φ p) := lMap_bind _ _ _
+lemma lMap_emb {o : Type w} [IsEmpty o] (p : Semiformula L₁ o n) :
+    (lMap Φ (Rew.emb.hom p) : Semiformula L₂ μ n) = Rew.emb.hom (lMap Φ p) := lMap_bind _ _ _
 
-end Subformula
+end Semiformula
 
 namespace Rew
 
-open Subformula
+open Semiformula
 
 variable
   {L L' : Language.{u}} {L₁ : Language.{u₁}} {L₂ : Language.{u₂}} {L₃ : Language.{u₃}}
@@ -847,24 +847,24 @@ variable
   {n n₁ n₂ n₃ : ℕ}
 variable (ω : Rew L μ₁ n₁ μ₂ n₂)
 
-lemma hom_operator (o : Operator L k) (v : Fin k → Subterm L μ₁ n₁) :
+lemma hom_operator (o : Operator L k) (v : Fin k → Semiterm L μ₁ n₁) :
     ω.hom (o.operator v) = o.operator (fun i => ω (v i)) := by
   simp[Operator.operator, ←Rew.hom_comp_app]; congr 2
   ext <;> simp[Rew.comp_app]; contradiction
 
-lemma hom_operator' (o : Operator L k) (v : Fin k → Subterm L μ₁ n₁) :
+lemma hom_operator' (o : Operator L k) (v : Fin k → Semiterm L μ₁ n₁) :
     ω.hom (o.operator v) = o.operator (ω ∘ v) := ω.hom_operator o v
 
-@[simp] lemma hom_finitary0 (o : Operator L 0) (v : Fin 0 → Subterm L μ₁ n₁) :
+@[simp] lemma hom_finitary0 (o : Operator L 0) (v : Fin 0 → Semiterm L μ₁ n₁) :
     ω.hom (o.operator v) = o.operator ![] := by simp[ω.hom_operator', Matrix.empty_eq]
 
-@[simp] lemma hom_finitary1 (o : Operator L 1) (t : Subterm L μ₁ n₁) :
+@[simp] lemma hom_finitary1 (o : Operator L 1) (t : Semiterm L μ₁ n₁) :
     ω.hom (o.operator ![t]) = o.operator ![ω t] := by simp[ω.hom_operator']
 
-@[simp] lemma hom_finitary2 (o : Operator L 2) (t₁ t₂ : Subterm L μ₁ n₁) :
+@[simp] lemma hom_finitary2 (o : Operator L 2) (t₁ t₂ : Semiterm L μ₁ n₁) :
     ω.hom (o.operator ![t₁, t₂]) = o.operator ![ω t₁, ω t₂] := by simp[ω.hom_operator']
 
-@[simp] lemma hom_finitary3 (o : Operator L 3) (t₁ t₂ t₃ : Subterm L μ₁ n₁) :
+@[simp] lemma hom_finitary3 (o : Operator L 3) (t₁ t₂ t₃ : Semiterm L μ₁ n₁) :
     ω.hom (o.operator ![t₁, t₂, t₃]) = o.operator ![ω t₁, ω t₂, ω t₃] := by simp[ω.hom_operator']
 
 @[simp] lemma hom_const (o : Const L) : ω.hom (Operator.const c) = Operator.const c := by
@@ -876,7 +876,7 @@ abbrev Theory (L : Language.{u}) := Set (Sentence L)
 
 abbrev SyntacticTheory (L : Language.{u}) := Set (SyntacticFormula L)
 
-def Theory.lMap (Φ : L₁ →ᵥ L₂) (T : Theory L₁) : Theory L₂ := Subformula.lMap Φ '' T
+def Theory.lMap (Φ : L₁ →ᵥ L₂) (T : Theory L₁) : Theory L₂ := Semiformula.lMap Φ '' T
 
 end FirstOrder
 

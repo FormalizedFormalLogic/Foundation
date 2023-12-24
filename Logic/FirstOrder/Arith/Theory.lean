@@ -8,19 +8,19 @@ variable {L : Language} [FirstOrder.ORing L]
 
 namespace Arith
 
-def succInd (p : Subformula L μ (k + 1)) : Formula L μ :=
+def succInd (p : Semiformula L μ (k + 1)) : Formula L μ :=
   “∀* (!((Rew.substs (ᵀ“0” :> (#·))).hom p) → ∀ (!((Rew.substs  (ᵀ“#0” :> (#·.succ))).hom p) →
    !((Rew.substs (ᵀ“#0 + 1” :> (#·.succ))).hom p)) → ∀ !p)”
 
-def succInd' (p : Subformula.Operator L (k + 1)) : Formula L μ :=
+def succInd' (p : Semiformula.Operator L (k + 1)) : Formula L μ :=
   “∀* (!(p.operator (ᵀ“0” :> (#·))) →
        ∀ (!(p.operator (#0 :> (#·.succ))) → !(p.operator (ᵀ“#0 + 1” :> (#·.succ)))) →
        ∀ !(p.operator (#0 :> (#·.succ))))”
 
-def leastNumber (p : Subformula L μ (k + 1)) : Formula L μ :=
+def leastNumber (p : Semiformula L μ (k + 1)) : Formula L μ :=
   “∀* (∃ !p → ∃ (!p ∧ ∀[#0 < #1] ¬!((Rew.substs (#0 :> (#·.succ.succ))).hom p)))”
 
-def orderInd (p : Subformula L μ (k + 1)) : Formula L μ :=
+def orderInd (p : Semiformula L μ (k + 1)) : Formula L μ :=
   “∀* (∀ (∀[#0 < #1] !((Rew.substs (#0 :> (#·.succ.succ))).hom p) → !p) → ∀ !p)”
 
 variable (L)
@@ -48,7 +48,7 @@ inductive PAminus : Theory L
 
 variable {L}
 
-def IndScheme (u : Set (Subsentence L 1)) : Theory L := succInd '' u
+def IndScheme (u : Set (Semisentence L 1)) : Theory L := succInd '' u
 
 variable (L)
 
@@ -60,7 +60,7 @@ abbrev PAminus (T : Theory L) := System.Subtheory (Theory.PAminus L) T
 
 abbrev Ind (U) (T : Theory L) := System.Subtheory (Theory.IndScheme U) T
 
-abbrev IOpen (T : Theory L) := Ind Subformula.qfree T
+abbrev IOpen (T : Theory L) := Ind Semiformula.qfree T
 
 abbrev IDelta (k : ℕ) (T : Theory L) := Ind (Arith.Hierarchy.Sigma k) T
 
@@ -74,11 +74,11 @@ def paminus : Theory L := Theory.Eq L ∪ Theory.PAminus L
 
 variable {L}
 
-def ind (U : Set (Subsentence L 1)) : Theory L := Axiom.paminus L ∪ Theory.IndScheme U
+def ind (U : Set (Semisentence L 1)) : Theory L := Axiom.paminus L ∪ Theory.IndScheme U
 
 variable (L)
 
-abbrev iopen : Theory L := ind Subformula.qfree
+abbrev iopen : Theory L := ind Semiformula.qfree
 
 abbrev idelta (k : ℕ) : Theory L := ind (Arith.Hierarchy.Sigma k)
 
@@ -89,13 +89,13 @@ instance : EqTheory (paminus L) where
 
 instance : Arith.PAminus (paminus L) := System.Subtheory.ofSubset _ _ (by simp[paminus])
 
-instance (u : Set (Subsentence L 1)) : EqTheory (ind u) where
+instance (u : Set (Semisentence L 1)) : EqTheory (ind u) where
   eq := by simp[ind]; exact Set.subset_union_of_subset_left (by simp) _
 
-instance (u : Set (Subsentence L 1)) : Arith.PAminus (ind u) :=
+instance (u : Set (Semisentence L 1)) : Arith.PAminus (ind u) :=
   System.Subtheory.ofSubset _ _ (by simp[ind, paminus]; exact Set.subset_union_of_subset_left (by simp) _)
 
-instance (u : Set (Subsentence L 1)) : Arith.Ind u (ind u) := System.Subtheory.ofSubset _ _ (by simp[ind])
+instance (u : Set (Semisentence L 1)) : Arith.Ind u (ind u) := System.Subtheory.ofSubset _ _ (by simp[ind])
 
 notation "𝐏𝐀⁻" => paminus ℒₒᵣ
 

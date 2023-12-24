@@ -36,12 +36,12 @@ open Srt
 variable {L : FirstOrder.Language.{u}} {ξ : Type vₑ} {Ξ : Type vₛ}
 
 abbrev ESubterm (L : FirstOrder.Language.{u}) (ξ : Type v) (Ξ : Type v) (m n : ℕ) :=
-  ManySorted.Subterm Srt.elem L.mSO (Srt.type ξ Ξ) (Srt.cases' m n)
+  ManySorted.Semiterm Srt.elem L.mSO (Srt.type ξ Ξ) (Srt.cases' m n)
 
 abbrev SSubterm (L : FirstOrder.Language.{u}) (ξ : Type v) (Ξ : Type v) (m n : ℕ) :=
-  ManySorted.Subterm Srt.set L.mSO (Srt.type ξ Ξ) (Srt.cases' m n)
+  ManySorted.Semiterm Srt.set L.mSO (Srt.type ξ Ξ) (Srt.cases' m n)
 
-abbrev Subformula (L : FirstOrder.Language.{u}) (ξ : Type v) (Ξ : Type v) (m n : ℕ) :=
-  ManySorted.Subformula L.mSO (Srt.type ξ Ξ) (Srt.cases' m n)
+abbrev Semiformula (L : FirstOrder.Language.{u}) (ξ : Type v) (Ξ : Type v) (m n : ℕ) :=
+  ManySorted.Semiformula L.mSO (Srt.type ξ Ξ) (Srt.cases' m n)
 
 end LO.MSO

@@ -6,7 +6,7 @@ namespace LO
 
 namespace FirstOrder
 
-open Subformula Completeness
+open Semiformula Completeness
 
 variable {L : Language} {T : Theory L}
 
@@ -45,10 +45,10 @@ noncomputable def completeness {σ : Sentence L} :
   haveI : ∀ k, Encodable ((languageFinset u).Func k) := fun _ ↦ Fintype.toEncodable _
   haveI : ∀ k, Encodable ((languageFinset u).Rel k) := fun _ ↦ Fintype.toEncodable _
   let u' : Finset (Sentence (languageFinset u)) := Finset.imageOfFinset u (fun _ hσ ↦ toSubLanguageFinsetSelf hσ)
-  have image_u' : u'.image (Subformula.lMap L.ofSubLanguage) = u := by
+  have image_u' : u'.image (Semiformula.lMap L.ofSubLanguage) = u := by
     { ext τ; simp[Finset.mem_imageOfFinset_iff]
       exact ⟨by rintro ⟨a, ⟨τ, hτ, rfl⟩, rfl⟩; simp[hτ],
-        by intro hτ; exact ⟨toSubLanguageFinsetSelf hτ, ⟨τ, hτ, rfl⟩, Subformula.lMap_toSubLanguageFinsetSelf hτ⟩⟩ }
+        by intro hτ; exact ⟨toSubLanguageFinsetSelf hτ, ⟨τ, hτ, rfl⟩, Semiformula.lMap_toSubLanguageFinsetSelf hτ⟩⟩ }
   have : ¬Semantics.Satisfiableₛ (u' : Theory (languageFinset u))
   { intro h
     have : Semantics.Satisfiableₛ (u : Theory L) := by

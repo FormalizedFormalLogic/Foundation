@@ -7,28 +7,28 @@ namespace FirstOrder
 
 abbrev Sequent (L : Language) := List (SyntacticFormula L)
 
-open Subformula
+open Semiformula
 variable {L : Language}
 
-def shifts (Δ : List (SyntacticSubformula L n)) :
-  List (SyntacticSubformula L n) := Δ.map Rew.shift.hom
+def shifts (Δ : List (SyntacticSemiformula L n)) :
+  List (SyntacticSemiformula L n) := Δ.map Rew.shift.hom
 
 local postfix:max "⁺" => shifts
 
-@[simp] lemma mem_shifts_iff {p : SyntacticSubformula L n} {Δ : List (SyntacticSubformula L n)} :
+@[simp] lemma mem_shifts_iff {p : SyntacticSemiformula L n} {Δ : List (SyntacticSemiformula L n)} :
     Rew.shift.hom p ∈ Δ⁺ ↔ p ∈ Δ :=
   List.mem_map_of_injective Rew.shift.hom_injective
 
-@[simp] lemma shifts_ss (Δ Γ : List (SyntacticSubformula L n)) :
+@[simp] lemma shifts_ss (Δ Γ : List (SyntacticSemiformula L n)) :
     Δ⁺ ⊆ Γ⁺ ↔ Δ ⊆ Γ := List.map_subset_iff _ Rew.shift.hom_injective
 
-lemma shifts_cons (p : SyntacticSubformula L n) (Δ : List (SyntacticSubformula L n)) :
+lemma shifts_cons (p : SyntacticSemiformula L n) (Δ : List (SyntacticSemiformula L n)) :
     (p :: Δ)⁺ = Rew.shift.hom p :: Δ⁺ := by simp[shifts]
 
-lemma shifts_union (Δ Γ : List (SyntacticSubformula L n)) :
+lemma shifts_union (Δ Γ : List (SyntacticSemiformula L n)) :
     (Δ ++ Γ)⁺ = Δ⁺ ++ Γ⁺ := by simp[shifts]
 
-@[simp] lemma shifts_emb (Γ : List (Subsentence L n)) :
+@[simp] lemma shifts_emb (Γ : List (Semisentence L n)) :
     (Γ.map Rew.emb.hom)⁺ = Γ.map Rew.emb.hom := by
   simp[shifts, Function.comp, ←Rew.hom_comp_app]
 
@@ -178,7 +178,7 @@ alias weakening := wk
 def verum' (h : ⊤ ∈ Δ) : ⊢ᶜ[P] Δ := (verum Δ).wk (by simp[h])
 
 def axL' {k} (r : L.Rel k) (v)
-    (h : Subformula.rel r v ∈ Δ) (hn : Subformula.nrel r v ∈ Δ) : ⊢ᶜ[P] Δ := (axL Δ r v).wk (by simp[h, hn])
+    (h : Semiformula.rel r v ∈ Δ) (hn : Semiformula.nrel r v ∈ Δ) : ⊢ᶜ[P] Δ := (axL Δ r v).wk (by simp[h, hn])
 
 def cCut (d₁ : ⊢¹ p :: Δ) (d₂ : ⊢¹ ~p :: Δ) : ⊢¹ Δ := cut trivial d₁ d₂
 
@@ -195,7 +195,7 @@ private lemma neg_ne_and {p q : SyntacticFormula L} : ¬~p = p ⋏ q :=
 ne_of_ne_complexity (by simp)
 
 def em {p : SyntacticFormula L} {Δ : Sequent L} (hpos : p ∈ Δ) (hneg : ~p ∈ Δ) : ⊢ᶜ[P] Δ := by
-  induction p using Subformula.formulaRec generalizing Δ <;> simp at hneg
+  induction p using Semiformula.formulaRec generalizing Δ <;> simp at hneg
   case hverum           => exact verum' hpos
   case hfalsum          => exact verum' hneg
   case hrel r v         => exact axL' r v hpos hneg
@@ -240,13 +240,13 @@ variable
 
 lemma shifts_image (Φ : L₁ →ᵥ L₂) {Δ : List (SyntacticFormula L₁)} :
      (Δ.map $ .lMap Φ)⁺ = ((Δ⁺).map (.lMap Φ)) :=
-  by simp[shifts, shiftEmb, Finset.map_eq_image, Finset.image_image, Function.comp, Subformula.lMap_shift]
+  by simp[shifts, shiftEmb, Finset.map_eq_image, Finset.image_image, Function.comp, Semiformula.lMap_shift]
 
 def lMap (Φ : L₁ →ᵥ L₂) {P₁ : SyntacticFormula L₁ → Prop} {P₂ : SyntacticFormula L₂ → Prop}
     (h : ∀ p, P₁ p → P₂ (.lMap Φ p)):
     ∀ {Δ}, ⊢ᶜ[P₁] Δ → ⊢ᶜ[P₂] Δ.map (.lMap Φ)
   | _, axL Δ r v            =>
-      by simp[Subformula.lMap_rel, Subformula.lMap_nrel]; exact axL _ _ _
+      by simp[Semiformula.lMap_rel, Semiformula.lMap_nrel]; exact axL _ _ _
   | _, verum Δ              => by simpa using verum _
   | _, @or _ _ Δ p q d      => by
       have : ⊢ᶜ[P₂] .lMap Φ p ⋎ .lMap Φ q :: Δ.map (.lMap Φ) :=
@@ -258,12 +258,12 @@ def lMap (Φ : L₁ →ᵥ L₂) {P₁ : SyntacticFormula L₁ → Prop} {P₂ :
       this.cast (by simp)
   | _, @all _ _ Δ p d       =>
       have : ⊢ᶜ[P₂] (∀' .lMap Φ p) :: (Δ.map (.lMap Φ)) :=
-        all ((d.lMap Φ h).cast (by simp[←Subformula.lMap_free, shifts_image]))
+        all ((d.lMap Φ h).cast (by simp[←Semiformula.lMap_free, shifts_image]))
       this.cast (by simp)
   | _, @ex _ _ Δ p t d      =>
       have : ⊢ᶜ[P₂] (∃' .lMap Φ p) :: (Δ.map (.lMap Φ)) :=
-        ex (Subterm.lMap Φ t)
-          ((d.lMap Φ h).cast (by simp[Subformula.lMap_substs, Matrix.constant_eq_singleton]))
+        ex (Semiterm.lMap Φ t)
+          ((d.lMap Φ h).cast (by simp[Semiformula.lMap_substs, Matrix.constant_eq_singleton]))
       this.cast (by simp)
   | _, @wk _ _ Δ Γ d ss     => (d.lMap Φ h).wk (List.map_subset _ ss)
   | _, @cut _ _ Δ p hp d dn =>
@@ -279,7 +279,7 @@ def lMapCut (Φ : L₁ →ᵥ L₂) {Δ : Sequent L₁} (d : ⊢¹ Δ) : ⊢¹ (
 
 end Hom
 
-private lemma free_rewrite_eq (f : ℕ → SyntacticTerm L) (p : SyntacticSubformula L 1) :
+private lemma free_rewrite_eq (f : ℕ → SyntacticTerm L) (p : SyntacticSemiformula L 1) :
     Rew.free.hom ((Rew.rewrite (fun x => Rew.bShift (f x))).hom p) =
     (Rew.rewrite (&0 :>ₙ fun x => Rew.shift (f x))).hom (Rew.free.hom p) := by
   simp[←Rew.hom_comp_app]; exact Rew.hom_ext' (by ext x <;> simp[Rew.comp_app, Fin.eq_zero])
@@ -288,7 +288,7 @@ private lemma shift_rewrite_eq (f : ℕ → SyntacticTerm L) (p : SyntacticFormu
     Rew.shift.hom ((Rew.rewrite f).hom p) = (Rew.rewrite (&0 :>ₙ fun x => Rew.shift (f x))).hom (Rew.shift.hom p) := by
   simp[←Rew.hom_comp_app]; exact Rew.hom_ext' (by ext x <;> simp[Rew.comp_app])
 
-private lemma rewrite_subst_eq (f : ℕ → SyntacticTerm L) (t) (p : SyntacticSubformula L 1) :
+private lemma rewrite_subst_eq (f : ℕ → SyntacticTerm L) (t) (p : SyntacticSemiformula L 1) :
     (Rew.rewrite f).hom ([→ t].hom p) = [→ Rew.rewrite f t].hom ((Rew.rewrite (Rew.bShift ∘ f)).hom p) := by
   simp[←Rew.hom_comp_app]; exact Rew.hom_ext' (by ext x <;> simp[Rew.comp_app])
 
@@ -349,10 +349,10 @@ protected def shift (h : ∀ f p, P p → P ((Rew.rewrite f).hom p)) {Δ : Seque
     ⊢ᶜ[P] Δ⁺ :=
   (d.map h Nat.succ).cast (by simp[shifts]; congr)
 
-private lemma map_subst_eq_free (p : SyntacticSubformula L 1) (h : ¬p.fvar? m) :
+private lemma map_subst_eq_free (p : SyntacticSemiformula L 1) (h : ¬p.fvar? m) :
     (Rew.rewriteMap (fun x => if x = m then 0 else x + 1)).hom (p/[&m]) = Rew.free.hom p := by
   simp[←Rew.hom_comp_app];
-  exact Subformula.rew_eq_of_funEqOn (by simp[Rew.comp_app, Fin.eq_zero])
+  exact Semiformula.rew_eq_of_funEqOn (by simp[Rew.comp_app, Fin.eq_zero])
     (fun x hx => by simp[Rew.comp_app]; rintro rfl; contradiction)
 
 private lemma map_rewriteMap_eq_shifts (Δ : Sequent L) (h : ∀ p ∈ Δ, ¬p.fvar? m) :
@@ -361,20 +361,20 @@ private lemma map_rewriteMap_eq_shifts (Δ : Sequent L) (h : ∀ p ∈ Δ, ¬p.f
   intro p hp; exact rew_eq_of_funEqOn₀ (by intro x hx; simp; rintro rfl; have := h p hp; contradiction)
 
 def genelalizeByNewver (h : ∀ f p, P p → P ((Rew.rewrite f).hom p))
-    {p : SyntacticSubformula L 1} (hp : ¬p.fvar? m) (hΔ : ∀ q ∈ Δ, ¬q.fvar? m)
+    {p : SyntacticSemiformula L 1} (hp : ¬p.fvar? m) (hΔ : ∀ q ∈ Δ, ¬q.fvar? m)
     (d : ⊢ᶜ[P] p/[&m] :: Δ) : ⊢ᶜ[P] (∀' p) :: Δ := by
   have : ⊢ᶜ[P] (Rew.free.hom p) :: Δ⁺ :=
     (d.map h (fun x => if x = m then 0 else x + 1)).cast
     (by simp[map_subst_eq_free p hp, map_rewriteMap_eq_shifts Δ hΔ])
   exact all this
 
-def genelalizeByNewver₀ {p : SyntacticSubformula L 1} (hp : ¬p.fvar? m) (hΔ : ∀ q ∈ Δ, ¬q.fvar? m)
+def genelalizeByNewver₀ {p : SyntacticSemiformula L 1} (hp : ¬p.fvar? m) (hΔ : ∀ q ∈ Δ, ¬q.fvar? m)
   (d : ⊢ᵀ p/[&m] :: Δ) : ⊢ᵀ (∀' p) :: Δ := d.genelalizeByNewver (by simp) hp hΔ
 
-def genelalizeByNewverCut {p : SyntacticSubformula L 1} (hp : ¬p.fvar? m) (hΔ : ∀ q ∈ Δ, ¬q.fvar? m)
+def genelalizeByNewverCut {p : SyntacticSemiformula L 1} (hp : ¬p.fvar? m) (hΔ : ∀ q ∈ Δ, ¬q.fvar? m)
   (d : ⊢¹ p/[&m] :: Δ) : ⊢¹ (∀' p) :: Δ := d.genelalizeByNewver (by simp) hp hΔ
 
-def exOfInstances (v : List (SyntacticTerm L)) (p : SyntacticSubformula L 1)
+def exOfInstances (v : List (SyntacticTerm L)) (p : SyntacticSemiformula L 1)
   (h : ⊢ᶜ[P] v.map (p/[·]) ++ Γ) : ⊢ᶜ[P] (∃' p) :: Γ := by
   induction' v with t v ih generalizing Γ <;> simp at h
   · exact weakening h (List.subset_cons _ _)
@@ -382,7 +382,7 @@ def exOfInstances (v : List (SyntacticTerm L)) (p : SyntacticSubformula L 1)
       ((ex t h).wk (by simp; exact List.subset_append_of_subset_right _ (List.subset_cons _ _)))).wk
         (by simp)
 
-def exOfInstances' (v : List (SyntacticTerm L)) (p : SyntacticSubformula L 1)
+def exOfInstances' (v : List (SyntacticTerm L)) (p : SyntacticSemiformula L 1)
   (h : ⊢ᶜ[P] (∃' p) :: v.map (p/[·]) ++ Γ) : ⊢ᶜ[P] (∃' p) :: Γ :=
   (exOfInstances (Γ := (∃' p) :: Γ) v p
     (h.wk $ by simp; exact List.subset_append_of_subset_right _ (List.subset_cons _ _))).wk
@@ -456,25 +456,25 @@ namespace Gentzen
 
 variable {Γ Δ : Sequent L}
 
-def genelalizeByNewver {p : SyntacticSubformula L 1}
+def genelalizeByNewver {p : SyntacticSemiformula L 1}
     (hp : ¬p.fvar? m) (hΓ : ∀ q ∈ Γ, ¬q.fvar? m) (hΔ : ∀ q ∈ Δ, ¬q.fvar? m) :
     Γ ⊢² p/[&m] :: Δ → Γ ⊢² (∀' p) :: Δ := fun d ↦
   Tait.toConsRight <| DerivationCR.genelalizeByNewverCut hp
     (by simp; rintro q (⟨q, hq, rfl⟩ | hq)
-        · simpa[Subformula.fvar?] using hΓ q (by simp[hq])
+        · simpa[Semiformula.fvar?] using hΓ q (by simp[hq])
         · simpa using hΔ q (by simp[hq]))
     (Tait.ofConsRight d)
 
-def specialize {p : SyntacticSubformula L 1} (t : SyntacticTerm L) :
+def specialize {p : SyntacticSemiformula L 1} (t : SyntacticTerm L) :
     Γ ⊢² p/[t] :: Δ → Γ ⊢² (∃' p) :: Δ := fun d ↦
   Tait.toConsRight <| DerivationCR.ex t (Tait.ofConsRight d)
 
 def lMap (Φ : L₁ →ᵥ L₂) {Γ Δ : Sequent L₁} (b : Γ ⊢² Δ) :
-    Γ.map (Subformula.lMap Φ) ⊢² Δ.map (Subformula.lMap Φ) :=
+    Γ.map (Semiformula.lMap Φ) ⊢² Δ.map (Semiformula.lMap Φ) :=
   Tait.equiv.symm ((DerivationCR.lMapCut Φ b).cast $ by simp[Function.comp])
 
 def lMap' (Φ : L₁ →ᵥ L₂) {Γ Δ : List (Sentence L₁)} (b : Γ ⊢² Δ) :
-    Γ.map (Subformula.lMap Φ) ⊢² Δ.map (Subformula.lMap Φ) :=
+    Γ.map (Semiformula.lMap Φ) ⊢² Δ.map (Semiformula.lMap Φ) :=
   Tait.equiv.symm ((DerivationCR.lMapCut Φ b).cast $ by simp[Function.comp, lMap_emb])
 
 end Gentzen
@@ -483,17 +483,17 @@ namespace System
 
 variable {T : Theory L} {Γ Δ : Sequent L}
 
-def genelalizeByNewver {p : SyntacticSubformula L 1} (hp : ¬p.fvar? m) (hΔ : ∀ q ∈ Δ, ¬q.fvar? m) :
+def genelalizeByNewver {p : SyntacticSemiformula L 1} (hp : ¬p.fvar? m) (hΔ : ∀ q ∈ Δ, ¬q.fvar? m) :
     T ⊢'' p/[&m] :: Δ → T ⊢'' (∀' p) :: Δ := fun d ↦
   let ⟨Γ, d⟩ := Gentzen.DisjconseqEquivDerivation d
   Gentzen.DisjconseqEquivDerivation.symm ⟨Γ,
     Gentzen.genelalizeByNewver hp
       (by intro q hq
           have : ∃ σ ∈ T, Rew.emb.hom σ = q := by simpa using Γ.prop q hq
-          rcases this with ⟨σ, _, rfl⟩; simp[Subformula.fvar?])
+          rcases this with ⟨σ, _, rfl⟩; simp[Semiformula.fvar?])
       hΔ d⟩
 
-def specialize {p : SyntacticSubformula L 1} (t : SyntacticTerm L) :
+def specialize {p : SyntacticSemiformula L 1} (t : SyntacticTerm L) :
     T ⊢'' p/[t] :: Δ → T ⊢'' (∃' p) :: Δ := fun d ↦
   let ⟨Γ, d⟩ := Gentzen.DisjconseqEquivDerivation d
   Gentzen.DisjconseqEquivDerivation.symm ⟨Γ, Gentzen.specialize t d⟩
@@ -501,7 +501,7 @@ def specialize {p : SyntacticSubformula L 1} (t : SyntacticTerm L) :
 variable (Φ : L₁ →ᵥ L₂) {T : Theory L₁}
 
 def lMap {σ : Sentence L₁} (b : T ⊢ σ) :
-    Theory.lMap Φ T ⊢ Subformula.lMap Φ σ :=
+    Theory.lMap Φ T ⊢ Semiformula.lMap Φ σ :=
   Gentzen.toDisjconseq (by simpa using Gentzen.lMap' Φ b.derivation)
     (by simp; intro σ hσ; exact Set.mem_image_of_mem _ (b.antecedent_ss σ hσ) )
 

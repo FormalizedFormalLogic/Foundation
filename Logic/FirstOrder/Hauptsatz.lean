@@ -4,13 +4,13 @@ namespace LO
 
 namespace FirstOrder
 
-open Subformula
+open Semiformula
 
 variable {L : Language.{u}} [∀ k, DecidableEq (L.Func k)] [∀ k, DecidableEq (L.Rel k)]
 
-namespace Subformula
+namespace Semiformula
 
-def isVType : {n : ℕ} → Subformula L μ n → Bool
+def isVType : {n : ℕ} → Semiformula L μ n → Bool
   | _, rel _ _  => true
   | _, nrel _ _ => true
   | _, ⊤        => true
@@ -20,17 +20,17 @@ def isVType : {n : ℕ} → Subformula L μ n → Bool
   | _, ∀' _     => false
   | _, ∃' _     => true
 
-lemma ne_and_of_isVType {p q r : Subformula L μ n} (h : isVType p) : p ≠ q ⋏ r := by rintro rfl; simp[isVType] at h
+lemma ne_and_of_isVType {p q r : Semiformula L μ n} (h : isVType p) : p ≠ q ⋏ r := by rintro rfl; simp[isVType] at h
 
-lemma ne_all_of_isVType {p : Subformula L μ n} {q} (h : isVType p) : p ≠ ∀' q := by rintro rfl; simp[isVType] at h
+lemma ne_all_of_isVType {p : Semiformula L μ n} {q} (h : isVType p) : p ≠ ∀' q := by rintro rfl; simp[isVType] at h
 
-@[simp] lemma isVType_shift_iff {p : SyntacticSubformula L n} : isVType (Rew.shift.hom p) = isVType p := by
+@[simp] lemma isVType_shift_iff {p : SyntacticSemiformula L n} : isVType (Rew.shift.hom p) = isVType p := by
   induction p using rec' <;> simp[Rew.rel, Rew.nrel, isVType]
 
-lemma isVType_neg_true_of_eq_false {p : SyntacticSubformula L n} : isVType p = false → isVType (~p) = true := by
+lemma isVType_neg_true_of_eq_false {p : SyntacticSemiformula L n} : isVType p = false → isVType (~p) = true := by
   induction p using rec' <;> simp[Rew.rel, Rew.nrel, isVType]
 
-end Subformula
+end Semiformula
 
 namespace DerivationCR
 
@@ -145,7 +145,7 @@ def andInversion₂ {p q} (d : ⊢ᶜ[P] p ⋏ q :: Δ) : ⊢ᶜ[P] q :: Δ :=
   (andInversion₂Aux d p q).weakening (by simp[List.remove]; exact List.subset_cons_of_subset _ (List.remove_subset _ _))
 
 def allInversionAux : {Δ : Sequent L} → ⊢ᶜ[P] Δ →
-    (p : SyntacticSubformula L 1) → (t : SyntacticTerm L) → ⊢ᶜ[P] p/[t] :: Δ.remove (∀' p)
+    (p : SyntacticSemiformula L 1) → (t : SyntacticTerm L) → ⊢ᶜ[P] p/[t] :: Δ.remove (∀' p)
   | _, @axL _ _ Δ _ r v,     p, t => axL' r v (by simp[List.mem_remove_iff]) (by simp[List.mem_remove_iff])
   | _, @verum _ _ Δ,         p, t => verum' (by simp[List.mem_remove_iff])
   | _, @and _ _ Δ r s dr ds, p, t =>
@@ -162,12 +162,12 @@ def allInversionAux : {Δ : Sequent L} → ⊢ᶜ[P] Δ →
       by_cases e : p' = p
       · simp[e]
         let d' : ⊢ᶜ[P] p/[t] :: Δ :=
-          (d.rewrite hP (t :>ₙ Subterm.fvar)).cast
+          (d.rewrite hP (t :>ₙ Semiterm.fvar)).cast
             (by simp[e, shifts, Function.comp, ←Rew.hom_comp_app,
                   Rew.rewrite_comp_free_eq_substs, Rew.rewrite_comp_shift_eq_id])
         have : d'.length = d.length := by simp
         exact (allInversionAux d' p t).weakening (by
-          rw[List.remove_cons_of_ne]; simp; exact Subformula.ne_of_ne_complexity (by simp))
+          rw[List.remove_cons_of_ne]; simp; exact Semiformula.ne_of_ne_complexity (by simp))
       · have : ⊢ᶜ[P] (Rew.free.hom p' :: shifts (p/[t] :: Δ.remove (∀' p))) :=
           (allInversionAux d (Rew.shift.hom p) (Rew.shift t)).weakening
           (by simp[shifts, ←Rew.hom_comp_app, Rew.shift_comp_substs1]
@@ -271,8 +271,8 @@ def reductionAux {i} : {Δ : Sequent L} →
     · have hrs : r.complexity < i ∧ s.complexity < i := by simpa[e, Nat.succ_le] using hp
       have d₁  : ⊢ᶜ[< i] r :: s :: Δ.remove (r ⋎ s) ++ Γ :=
         (reductionAux d tp hp dΓ).cast (by
-          rw[e, List.remove_cons_of_ne _ (show r ≠ r ⋎ s from (Subformula.ne_of_ne_complexity $ by simp)),
-            List.remove_cons_of_ne _ (show s ≠ r ⋎ s from (Subformula.ne_of_ne_complexity $ by simp))])
+          rw[e, List.remove_cons_of_ne _ (show r ≠ r ⋎ s from (Semiformula.ne_of_ne_complexity $ by simp)),
+            List.remove_cons_of_ne _ (show s ≠ r ⋎ s from (Semiformula.ne_of_ne_complexity $ by simp))])
       have dΓ₁ : ⊢ᶜ[< i] (~r) :: Γ := (dΓ.cast (by simp[e])).andInversion₁ (q := ~s)
       have dΓ₂ : ⊢ᶜ[< i] (~s) :: Γ := (dΓ.cast (by simp[e])).andInversion₂ (p := ~r)
       have d₃  : ⊢ᶜ[< i] s :: Δ.remove (r ⋎ s) ++ Γ :=
@@ -293,7 +293,7 @@ def reductionAux {i} : {Δ : Sequent L} →
     · have d₁₁ : ⊢ᶜ[< i] q/[t] :: (Δ.remove (∃' q) ++ Γ) :=
         (reductionAux d₁ tp hp d₂).cast (by
           rw[←List.cons_append]; congr 1
-          rw[e, List.remove_cons_of_ne]; exact Subformula.ne_of_ne_complexity (by simp))
+          rw[e, List.remove_cons_of_ne]; exact Semiformula.ne_of_ne_complexity (by simp))
       have d₂₁ : ⊢ᶜ[< i] (~q/[t]) :: Γ :=
         (allInversionClx (p := ~q) (by simpa[e] using d₂) t).cast (by simp)
       have : ⊢ᶜ[< i] Δ.remove (∃' q) ++ Γ :=

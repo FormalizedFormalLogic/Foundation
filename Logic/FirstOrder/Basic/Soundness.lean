@@ -6,7 +6,7 @@ namespace LO
 namespace FirstOrder
 
 section soundness
-open Subformula
+open Semiformula
 
 variable {L : Language}
 
@@ -17,7 +17,7 @@ namespace DerivationCR
 lemma sound : ∀ {Γ : Sequent L}, ⊢ᶜ[P] Γ →
     ∀ (M : Type u) [s : Structure L M] (ε : ℕ → M), ∃ p ∈ Γ, Val! M ε p
   | _, @axL _ _ Δ _ r v,     M, s, ε => by
-    by_cases h : s.rel r (Subterm.val! M ![] ε ∘ v)
+    by_cases h : s.rel r (Semiterm.val! M ![] ε ∘ v)
     · exact ⟨rel r v, by simp, h⟩
     · exact ⟨nrel r v, by simp, h⟩
   | _, verum Δ,              M, s, ε => ⟨⊤, by simp⟩
