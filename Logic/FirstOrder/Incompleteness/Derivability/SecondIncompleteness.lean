@@ -21,14 +21,10 @@ open Derivability1 Derivability2 Derivability3
 
 section
 
+-- TODO: 削除したい
+
 variable {T : Theory L}
-lemma imp_contra₀ {p q} (h : T ⊢! p ⟶ q) : (T ⊢! ~q ⟶ ~p) := by prover [h];
-lemma imp_contra₁ {p q} (h : T ⊢! p ⟶ ~q) : (T ⊢! q ⟶ ~p) := by prover [h];
-lemma imp_contra₃ {p q} (h : T ⊢! ~p ⟶ ~q) : (T ⊢! q ⟶ p) := by prover [h];
-lemma imp_trans (hp : T ⊢! p ⟶ q) (hq : T ⊢! q ⟶ r) : T ⊢! p ⟶ r := by prover [hp, hq];
-lemma iff_mp (h : T ⊢! p ⟷ q) : T ⊢! p ⟶ q := by prover [h]
-lemma iff_intro (h₁ : T ⊢! σ ⟶ π) (h₂ : T ⊢! π ⟶ σ): (T ⊢! σ ⟷ π) := by prover [h₁, h₂];
-lemma elim_and_left_dilemma (h₁ : T ⊢! (σ ⋏ π) ⟶ ρ) (h₂ : T ⊢! σ ⟶ π) : (T ⊢! σ ⟶ ρ) := by prover [h₁, h₂];
+lemma imp_contra₀ (h : T ⊢! p ⟶ q) : (T ⊢! ~q ⟶ ~p) := by prover [h];
 lemma iff_unprov (h₁ : T ⊢! p ⟷ q) (h₂ : T ⊬! p) : T ⊬! q := by
   by_contra hC;
   suffices : T ⊢! p; aesop;
@@ -37,17 +33,18 @@ lemma iff_unprov (h₁ : T ⊢! p ⟷ q) (h₂ : T ⊬! p) : T ⊬! q := by
 
 end
 
-lemma FormalizedConsistency (σ : Sentence L) : T₀ ⊢! ~((Pr T M)/[⸢σ⸣]) ⟶ Con[T, M] := by
+lemma formalizedImp (h : T ⊢! σ ⟶ π) : (T₀ ⊢! (Pr T M)/[⸢σ⸣] ⟶ (Pr T M)/[⸢π⸣]) := by prover [hD2.D2, (hD1.D1 h)];
+
+lemma formalizedConsistency (σ : Sentence L) : T₀ ⊢! ~((Pr T M)/[⸢σ⸣]) ⟶ Con[T, M] := by
   have h₁ : T ⊢! ⊥ ⟶ σ := by tautology;
-  have h₂ : T₀ ⊢! (Pr T M)/[⸢⊥⸣] ⟶ (Pr T M)/[⸢σ⸣] := by prover [hD2.D2, hD1.D1 b];
-  exact imp_contra₀ h₂;
+  exact imp_contra₀ (formalizedImp _ _ _ h₁);
 
 variable (U : Theory L) [Subtheory T₀ U] in
 private lemma extend {σ : Sentence L}
   : (U ⊢! Con[T, M] ⟶ ~(Pr T M)/[⸢σ⸣]) ↔ (U ⊢! ((Pr T M)/[⸢σ⸣]) ⟶ ((Pr T M)/[⸢~σ⸣])) := by
   apply Iff.intro;
   . intro H;
-    have : U ⊢! ~((Pr T M)/[⸢~σ⸣]) ⟶ Con[T, M] := Theory.weakening $ FormalizedConsistency T₀ T M (~σ);
+    have : U ⊢! ~((Pr T M)/[⸢~σ⸣]) ⟶ Con[T, M] := Theory.weakening $ formalizedConsistency T₀ T M (~σ);
     exact by prover [H, this];
   . intro H;
     have : T₀ ⊢! ((Pr T M)/[⸢σ⸣] ⋏ (Pr T M)/[⸢~σ⸣]) ⟶ ((Pr T M)/[⸢⊥⸣]) := formalized_NC' σ;
@@ -61,7 +58,7 @@ lemma formalizedGoedelSentenceUnprovablility : T ⊢! Con[T, M] ⟶ ~(Pr T M)/[�
   have h₁ : T ⊢! ((Pr T M)/[⸢G⸣]) ⟶ ((Pr T M)/[⸢((Pr T M)/[⸢G⸣])⸣]) := hD3.D3';
   have h₂ : T₀ ⊢! (Pr T M)/[⸢G⸣] ⟶ ~G := by prover [hG];
   have h₂ : T ⊢! (Pr T M)/[⸢G⸣] ⟶ ~G := Theory.weakening h₂;
-  have h₃ : T₀ ⊢! (Pr T M)/[⸢(Pr T M)/[⸢G⸣]⸣] ⟶ (Pr T M)/[⸢~G⸣] := formalized_imp_intro h₂;
+  have h₃ : T₀ ⊢! (Pr T M)/[⸢(Pr T M)/[⸢G⸣]⸣] ⟶ (Pr T M)/[⸢~G⸣] := formalizedImp _ _ _ h₂;
   have h₄ : T ⊢! (Pr T M)/[⸢(Pr T M)/[⸢G⸣]⸣] ⟶ (Pr T M)/[⸢~G⸣] := Theory.weakening h₃;
   have h₅ : T ⊢! (Pr T M)/[⸢G⸣] ⟶ (Pr T M)/[⸢~G⸣] := by prover [h₁, h₄];
   exact (extend T₀ T M T).mpr $ h₅;
@@ -69,7 +66,7 @@ lemma formalizedGoedelSentenceUnprovablility : T ⊢! Con[T, M] ⟶ ~(Pr T M)/[�
 lemma equality_GoedelSentence_Consistency : T ⊢! G ⟷ Con[T, M] := by
   simp [GoedelSentence] at hG;
   have h₁ : T ⊢! Con[T, M] ⟶ ~(Pr T M)/[⸢G⸣] := formalizedGoedelSentenceUnprovablility T₀ T M hG;
-  have h₂ : T ⊢! ~(Pr T M)/[⸢G⸣] ⟶ Con[T, M] := Theory.weakening $ FormalizedConsistency T₀ T M G;
+  have h₂ : T ⊢! ~(Pr T M)/[⸢G⸣] ⟶ Con[T, M] := Theory.weakening $ formalizedConsistency T₀ T M G;
   have : T ⊢! G ⟷ ~(Pr T M)/[⸢G⸣] := weakening hG;
   exact by prover [this, h₁, h₂];
 
