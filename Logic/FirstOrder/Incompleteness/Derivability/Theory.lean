@@ -36,7 +36,7 @@ instance : Subtheory T (T ∪ {σ}) where
     exact weakening h (by simp)
 
 @[simp]
-lemma weakening [hs : Subtheory T₀ T] : (T₀ ⊢! σ) → (T ⊢! σ) := by
+lemma weakening {T₀ T : Theory L} [hs : Subtheory T₀ T] {σ} : (T₀ ⊢! σ) → (T ⊢! σ) := by
   simp;
   intro H;
   exact ⟨hs.sub H⟩;
