@@ -1,4 +1,4 @@
-import Logic.FirstOrder.Basic.Semantics
+import Logic.FirstOrder.Basic.Semantics.Semantics
 import Logic.FirstOrder.Basic.Calculus
 
 namespace LO

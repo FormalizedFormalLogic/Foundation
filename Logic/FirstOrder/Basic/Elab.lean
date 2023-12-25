@@ -1,5 +1,5 @@
-import Logic.FirstOrder.Basic.Term
-import Logic.FirstOrder.Basic.Formula
+import Logic.FirstOrder.Basic.Operator
+
 open Lean PrettyPrinter Delaborator SubExpr
 
 namespace LO

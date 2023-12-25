@@ -1,5 +1,5 @@
 import Logic.Logic.Semantics
-import Logic.FirstOrder.Basic.Formula
+import Logic.FirstOrder.Basic.Syntax.Formula
 
 namespace LO
 
@@ -14,8 +14,6 @@ variable {L : Language.{u}} {μ : Type v} {μ₁ : Type v₁} {μ₂ : Type v₂
 namespace Structure
 
 instance [Inhabited M] : Inhabited (Structure L M) := ⟨{ func := fun _ _ => default, rel := fun _ _ _ => True }⟩
-
-
 
 protected def lMap (φ : L₁ →ᵥ L₂) {M : Type w} (S : Structure L₂ M) : Structure L₁ M where
   func := fun _ f => S.func (φ.func f)
@@ -99,36 +97,6 @@ lemma val_substs (w : Fin n₁ → Semiterm L μ n₂) (t : Semiterm L μ n₁) 
     (Rew.castLE h t).val s e₂ ε = t.val s (fun x => e₂ (x.castLE h)) ε  := by
   simp[val_rew]; congr
 
-def Operator.val {M : Type w} [s : Structure L M] (o : Operator L k) (v : Fin k → M) : M :=
-  Semiterm.val s v Empty.elim o.term
-
-lemma val_operator {k} (o : Operator L k) (v) :
-    val s e ε (o.operator v) = o.val (fun x => (v x).val s e ε) := by
-  simp[Operator.operator, val_substs]; congr; funext x; contradiction
-
-@[simp] lemma val_const (o : Const L) :
-    val s e ε o.const = o.val ![] := by
-  simp[Operator.const, val_operator, Matrix.empty_eq]
-
-@[simp] lemma val_operator₀ (o : Const L) :
-    val s e ε (o.operator v) = o.val ![] := by
-  simp[val_operator, Matrix.empty_eq]
-
-@[simp] lemma val_operator₁ (o : Operator L 1) :
-    val s e ε (o.operator ![t]) = o.val ![t.val s e ε] := by
-  simp[val_operator, Matrix.empty_eq]; congr; funext i; cases' i using Fin.cases with i <;> simp
-
-@[simp] lemma val_operator₂ (o : Operator L 2) (t u) :
-    val s e ε (o.operator ![t, u]) = o.val ![t.val s e ε, u.val s e ε] :=
-  by simp[val_operator]; congr; funext i; cases' i using Fin.cases with i <;> simp
-
-namespace Operator
-
-lemma val_comp (o₁ : Operator L k) (o₂ : Fin k → Operator L m) (v : Fin m → M) :
-  (o₁.comp o₂).val v = o₁.val (fun i => (o₂ i).val v) := by simp[comp, val, val_operator]
-
-end Operator
-
 section Language
 
 variable (φ : L₁ →ᵥ L₂) (e : Fin n → M) (ε : μ → M)
@@ -172,42 +140,6 @@ lemma ofEquiv_val (e : Fin n → N) (ε : μ → N) (t : Semiterm L μ n) :
   induction t <;> simp[*, Semiterm.val_func, ofEquiv_func φ, Function.comp]
 
 end
-
-open Semiterm
-
-protected class Zero (L : Language.{u}) [Operator.Zero L] (M : Type w) [Zero M] [s : Structure L M] where
-  zero : (@Operator.Zero.zero L _).val ![] = (0 : M)
-
-protected class One (L : Language.{u}) [Operator.One L] (M : Type w) [One M] [s : Structure L M] where
-  one : (@Operator.One.one L _).val ![] = (1 : M)
-
-protected class Add (L : Language.{u}) [Operator.Add L] (M : Type w) [Add M] [s : Structure L M] where
-  add : ∀ a b : M, (@Operator.Add.add L _).val ![a, b] = a + b
-
-protected class Mul (L : Language.{u}) [Operator.Mul L] (M : Type w) [Mul M] [s : Structure L M] where
-  mul : ∀ a b : M, (@Operator.Mul.mul L _).val ![a, b] = a * b
-
-attribute [simp] Zero.zero One.one Add.add Mul.mul
-
-@[simp] lemma zero_eq_of_lang [L.Zero] {M : Type w} [Zero M] [Structure L M] [Structure.Zero L M] :
-    Structure.func (L := L) Language.Zero.zero ![] = (0 : M) := by
-  simpa[Operator.val, Semiterm.Operator.Zero.zero, val_func, ←Matrix.fun_eq_vec₂] using
-    Structure.Zero.zero (L := L) (M := M)
-
-@[simp] lemma one_eq_of_lang [L.One] {M : Type w} [One M] [Structure L M] [Structure.One L M] :
-    Structure.func (L := L) Language.One.one ![] = (1 : M) := by
-  simpa[Operator.val, Semiterm.Operator.One.one, val_func, ←Matrix.fun_eq_vec₂] using
-    Structure.One.one (L := L) (M := M)
-
-@[simp] lemma add_eq_of_lang [L.Add] {M : Type w} [Add M] [Structure L M] [Structure.Add L M] {v : Fin 2 → M} :
-    Structure.func (L := L) Language.Add.add v = v 0 + v 1 := by
-  simpa[Operator.val, val_func, ←Matrix.fun_eq_vec₂] using
-    Structure.Add.add (L := L) (v 0) (v 1)
-
-@[simp] lemma mul_eq_of_lang [L.Mul] {M : Type w} [Mul M] [Structure L M] [Structure.Mul L M] {v : Fin 2 → M} :
-    Structure.func (L := L) Language.Mul.mul v = v 0 * v 1 := by
-  simpa[Operator.val, val_func, ←Matrix.fun_eq_vec₂] using
-    Structure.Mul.mul (L := L) (v 0) (v 1)
 
 end Structure
 
@@ -354,69 +286,9 @@ variable (ε : ℕ → M)
 
 end Syntactic
 
-def Operator.val {M : Type w} [s : Structure L M] {k} (o : Operator L k) (v : Fin k → M) : Prop :=
-  Semiformula.Eval s v Empty.elim o.sentence
-
-@[simp] lemma val_operator_and {k} {o₁ o₂ : Operator L k} {v : Fin k → M} :
-    (o₁.and o₂).val v ↔ o₁.val v ∧ o₂.val v := by simp[Operator.and, Operator.val]
-
-@[simp] lemma val_operator_or {k} {o₁ o₂ : Operator L k} {v : Fin k → M} :
-    (o₁.or o₂).val v ↔ o₁.val v ∨ o₂.val v := by simp[Operator.or, Operator.val]
-
-lemma eval_operator {k} {o : Operator L k} {v : Fin k → Semiterm L μ n} :
-    Eval s e ε (o.operator v) ↔ o.val (fun i => (v i).val s e ε) := by
-  simp[Operator.operator, eval_substs, Operator.val]
-
-@[simp] lemma eval_operator₀ {o : Const L} {v} :
-    Eval s e ε (o.operator v) ↔ o.val (M := M) ![] := by
-  simp[eval_operator, Matrix.empty_eq]
-
-@[simp] lemma eval_operator₁ {o : Operator L 1} {t : Semiterm L μ n} :
-    Eval s e ε (o.operator ![t]) ↔ o.val ![t.val s e ε] := by
-  simp[eval_operator, Matrix.constant_eq_singleton]
-
-@[simp] lemma eval_operator₂ {o : Operator L 2} {t₁ t₂ : Semiterm L μ n} :
-    Eval s e ε (o.operator ![t₁, t₂]) ↔ o.val ![t₁.val s e ε, t₂.val s e ε] := by
-  simp[eval_operator]; apply of_eq; congr; funext i; cases' i using Fin.cases with i <;> simp
-
 end Semiformula
 
 namespace Structure
-
-section
-
-open Semiformula
-
-protected class Eq (L : Language.{u}) [Operator.Eq L] (M : Type w) [s : Structure L M] where
-  eq : ∀ a b : M, (@Operator.Eq.eq L _).val ![a, b] ↔ a = b
-
-protected class LT (L : Language.{u}) [Operator.LT L] (M : Type w) [LT M] [s : Structure L M] where
-  lt : ∀ a b : M, (@Operator.LT.lt L _).val ![a, b] ↔ a < b
-
-protected class LE (L : Language.{u}) [Operator.LE L] (M : Type w) [LE M] [s : Structure L M] where
-  le : ∀ a b : M, (@Operator.LE.le L _).val ![a, b] ↔ a ≤ b
-
-class Mem (L : Language.{u}) [Operator.Mem L] (M : Type w) [Membership M M] [s : Structure L M] where
-  mem : ∀ a b : M, (@Operator.Mem.mem L _).val ![a, b] ↔ a ∈ b
-
-attribute [simp] Structure.Eq.eq Structure.LT.lt Structure.LE.le Structure.Mem.mem
-
-@[simp] lemma le_iff_of_eq_of_lt [Operator.Eq L] [Operator.LT L] {M : Type w} [LT M]
-    [Structure L M] [Structure.Eq L M] [Structure.LT L M] {a b : M} :
-    (@Operator.LE.le L _).val ![a, b] ↔ a = b ∨ a < b := by
-  simp[Operator.LE.def_of_Eq_of_LT]
-
-@[simp] lemma eq_lang [L.Eq] {M : Type w} [Structure L M] [Structure.Eq L M] {v : Fin 2 → M} :
-    Structure.rel (L := L) Language.Eq.eq v ↔ v 0 = v 1 := by
-  simpa[Operator.val, Semiformula.Operator.Eq.sentence_eq, eval_rel, ←Matrix.fun_eq_vec₂] using
-    Structure.Eq.eq (L := L) (v 0) (v 1)
-
-@[simp] lemma lt_lang [L.LT] {M : Type w} [LT M] [Structure L M] [Structure.LT L M] {v : Fin 2 → M} :
-    Structure.rel (L := L) Language.LT.lt v ↔ v 0 < v 1 := by
-  simpa[Operator.val, Semiformula.Operator.LT.sentence_eq, eval_rel, ←Matrix.fun_eq_vec₂] using
-    Structure.LT.lt (L := L) (v 0) (v 1)
-
-end
 
 section
 
@@ -442,10 +314,6 @@ lemma eval_ofEquiv_iff : ∀ {n} {e : Fin n → N} {ε : μ → N} {p : Semiform
     simp; exact
     ⟨by rintro ⟨x, h⟩; exists φ.symm x; simpa[Matrix.comp_vecCons''] using eval_ofEquiv_iff.mp h,
      by rintro ⟨x, h⟩; exists φ x; apply eval_ofEquiv_iff.mpr; simpa[Matrix.comp_vecCons''] using h⟩
-
-lemma operator_val_ofEquiv_iff {k : ℕ} {o : Operator L k} {v : Fin k → N} :
-    letI : Structure L N := ofEquiv φ
-    o.val v ↔ o.val (φ.symm ∘ v) := by simp[Operator.val, eval_ofEquiv_iff, Empty.eq_elim]
 
 end
 

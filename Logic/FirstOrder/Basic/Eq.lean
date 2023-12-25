@@ -1,5 +1,5 @@
 import Logic.FirstOrder.Basic.Elab
-import Logic.FirstOrder.Basic.Elementary
+import Logic.FirstOrder.Basic.Semantics.Elementary
 
 namespace LO
 

@@ -1,4 +1,4 @@
-import Logic.FirstOrder.Basic.Language
+import Logic.FirstOrder.Basic.Syntax.Language
 
 namespace LO
 
@@ -14,7 +14,7 @@ scoped prefix:max "#" => Semiterm.bvar
 
 abbrev Term (L : Language.{u}) (μ : Type v) := Semiterm L μ 0
 
-abbrev SyntacticSemiterm (L : Language.{u}) (n : ℕ) := Semiterm L ℕ n
+abbrev SyntacticSemiterm (L : Language) (n : ℕ) := Semiterm L ℕ n
 
 abbrev SyntacticTerm (L : Language.{u}) := SyntacticSemiterm L 0
 
@@ -601,167 +601,7 @@ lemma lMap_fix (t : SyntacticSemiterm L₁ n) : (fix t).lMap Φ = fix (t.lMap Φ
 
 end lMap
 
-structure Operator (L : Language.{u}) (n : ℕ) where
-  term : Semiterm L Empty n
-
-abbrev Const (L : Language.{u}) := Operator L 0
-
-def Semiterm.fn {k} (f : L.Func k) : Operator L k := ⟨Semiterm.func f (#·)⟩
-
-namespace Operator
-
-def equiv : Operator L n ≃ Semiterm L Empty n where
-  toFun := Operator.term
-  invFun := Operator.mk
-  left_inv := by intro _; simp
-  right_inv := by intro _; simp
-
-def operator {arity : ℕ} (o : Operator L arity) (v : Fin arity → Semiterm L μ n) : Semiterm L μ n :=
-  Rew.substs v (Rew.emb o.term)
-
-def const (c : Const L) : Semiterm L μ n := c.operator ![]
-
-instance : Coe (Const L) (Semiterm L μ n) := ⟨Operator.const⟩
-
-def comp (o : Operator L k) (w : Fin k → Operator L l) : Operator L l :=
-  ⟨o.operator (fun x => (w x).term)⟩
-
-lemma operator_comp (o : Operator L k) (w : Fin k → Operator L l) (v : Fin l → Semiterm L μ n) :
-  (o.comp w).operator v = o.operator (fun x => (w x).operator v) := by
-    simp[operator, comp, ←Rew.comp_app]; congr 1
-    ext <;> simp[Rew.comp_app]; contradiction
-
-def bvar (x : Fin n) : Operator L n := ⟨#x⟩
-
-lemma operator_bvar (x : Fin k) (v : Fin k → Semiterm L μ n) : (bvar x).operator v = v x := by
-  simp[operator, bvar]
-
--- f.operator ![ ... f.operator ![f.operator ![z, t 0], t 1], ... ,t (n-1)]
-def foldr (f : Operator L 2) (z : Operator L k) : List (Operator L k) → Operator L k
-  | []      => z
-  | o :: os => f.comp ![foldr f z os, o]
-
-@[simp] lemma foldr_nil (f : Operator L 2) (z : Operator L k) : f.foldr z [] = z := rfl
-
-@[simp] lemma operator_foldr_cons (f : Operator L 2) (z : Operator L k) (o : Operator L k) (os : List (Operator L k))
-  (v : Fin k → Semiterm L μ n) :
-    (f.foldr z (o :: os)).operator v = f.operator ![(f.foldr z os).operator v, o.operator v] := by
-  simp[foldr, operator_comp, Matrix.fun_eq_vec₂]
-
-def iterr (f : Operator L 2) (z : Const L) : (n : ℕ) → Operator L n
-  | 0     => z
-  | _ + 1 => f.foldr (bvar 0) (List.ofFn fun x => bvar x.succ)
-
-@[simp] lemma iterr_zero (f : Operator L 2) (z : Const L) : f.iterr z 0 = z := rfl
-
-section numeral
-
-protected class Zero (L : Language) where
-  zero : Semiterm.Const L
-
-protected class One (L : Language) where
-  one : Semiterm.Const L
-
-protected class Add (L : Language) where
-  add : Semiterm.Operator L 2
-
-protected class Mul (L : Language) where
-  mul : Semiterm.Operator L 2
-
-protected class Sub (L : Language) where
-  sub : Semiterm.Operator L 2
-
-protected class Div (L : Language) where
-  div : Semiterm.Operator L 2
-
-protected class Star (L : Language) where
-  star : Semiterm.Const L
-
-instance [L.Zero] : Operator.Zero L := ⟨⟨Semiterm.func Language.Zero.zero ![]⟩⟩
-
-instance [L.One] : Operator.One L := ⟨⟨Semiterm.func Language.One.one ![]⟩⟩
-
-instance [L.Add] : Operator.Add L := ⟨⟨Semiterm.func Language.Add.add Semiterm.bvar⟩⟩
-
-instance [L.Mul] : Operator.Mul L := ⟨⟨Semiterm.func Language.Mul.mul Semiterm.bvar⟩⟩
-
-instance [L.Star] : Operator.Star L := ⟨⟨Semiterm.func Language.Star.star ![]⟩⟩
-
-lemma Zero.term_eq [L.Zero] : (@Zero.zero L _).term = Semiterm.func Language.Zero.zero ![] := rfl
-
-lemma One.term_eq [L.One] : (@One.one L _).term = Semiterm.func Language.One.one ![] := rfl
-
-lemma Add.term_eq [L.Add] : (@Add.add L _).term = Semiterm.func Language.Add.add Semiterm.bvar := rfl
-
-lemma Mul.term_eq [L.Mul] : (@Mul.mul L _).term = Semiterm.func Language.Mul.mul Semiterm.bvar := rfl
-
-lemma Star.term_eq [L.Star] : (@Star.star L _).term = Semiterm.func Language.Star.star ![] := rfl
-
-open Language Semiterm
-
-def numeral (L : Language) [Operator.Zero L] [Operator.One L] [Operator.Add L] : ℕ → Const L
-  | 0     => Zero.zero
-  | n + 1 => Add.add.foldr One.one (List.replicate n One.one)
-
-variable [hz : Operator.Zero L] [ho : Operator.One L] [ha : Operator.Add L]
-
-lemma numeral_zero : numeral L 0 = Zero.zero := by rfl
-
-lemma numeral_one : numeral L 1 = One.one := by rfl
-
-lemma numeral_succ (hz : z ≠ 0) : numeral L (z + 1) = Operator.Add.add.comp ![numeral L z, One.one] := by
-  simp[numeral]
-  cases' z with z
-  · simp at hz
-  · simp[Operator.foldr]
-
-lemma numeral_add_two : numeral L (z + 2) = Operator.Add.add.comp ![numeral L (z + 1), One.one] :=
-  numeral_succ (by simp)
-
-abbrev godelNumber (L : Language) [Operator.Zero L] [Operator.One L] [Operator.Add L]
-    {α : Type*} [Primcodable α] (a : α) : Semiterm.Const L :=
-  Semiterm.Operator.numeral L (Encodable.encode a)
-
-end numeral
-
-end Operator
-
 end Semiterm
-
-namespace Rew
-
-open Semiterm
-
-variable
-  {L L' : Language.{u}} {L₁ : Language.{u₁}} {L₂ : Language.{u₂}} {L₃ : Language.{u₃}}
-  {μ μ' : Type v} {μ₁ : Type v₁} {μ₂ : Type v₂} {μ₃ : Type v₃}
-  {n n₁ n₂ n₃ : ℕ}
-variable (ω : Rew L μ₁ n₁ μ₂ n₂)
-
-protected lemma operator (o : Operator L k) (v : Fin k → Semiterm L μ₁ n₁) :
-    ω (o.operator v) = o.operator (fun i => ω (v i)) := by
-  simp[Operator.operator, ←comp_app]; congr 1
-  ext <;> simp[comp_app]; try contradiction
-
-protected lemma operator' (o : Operator L k) (v : Fin k → Semiterm L μ₁ n₁) :
-    ω (o.operator v) = o.operator (ω ∘ v) := ω.operator o v
-
-@[simp] lemma finitary0 (o : Operator L 0) (v : Fin 0 → Semiterm L μ₁ n₁) :
-    ω (o.operator v) = o.operator ![] := by simp[ω.operator', Matrix.empty_eq]
-
-@[simp] lemma finitary1 (o : Operator L 1) (t : Semiterm L μ₁ n₁) :
-    ω (o.operator ![t]) = o.operator ![ω t] := by simp[ω.operator']
-
-@[simp] lemma finitary2 (o : Operator L 2) (t₁ t₂ : Semiterm L μ₁ n₁) :
-    ω (o.operator ![t₁, t₂]) = o.operator ![ω t₁, ω t₂] := by simp[ω.operator']
-
-@[simp] lemma finitary3 (o : Operator L 3) (t₁ t₂ t₃ : Semiterm L μ₁ n₁) :
-    ω (o.operator ![t₁, t₂, t₃]) = o.operator ![ω t₁, ω t₂, ω t₃] := by simp[ω.operator']
-
-@[simp] protected lemma const (c : Const L) : ω c = c :=
-  by simp[Operator.const, Empty.eq_elim]
-
-end Rew
 
 end FirstOrder
 

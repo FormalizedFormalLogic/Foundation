@@ -1,4 +1,5 @@
-import Logic.FirstOrder.Basic.Elementary
+import Logic.FirstOrder.Basic.Operator
+import Logic.FirstOrder.Basic.Semantics.Elementary
 
 namespace LO
 

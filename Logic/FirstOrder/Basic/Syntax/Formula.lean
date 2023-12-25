@@ -1,4 +1,4 @@
-import Logic.FirstOrder.Basic.Term
+import Logic.FirstOrder.Basic.Syntax.Term
 
 namespace LO
 
@@ -585,67 +585,6 @@ def qfree (p : Semiformula L μ n) : Prop := p.qr = 0
 @[simp] lemma qfree_iff {p q : Semiformula L μ n} : (p ⟷ q).qfree ↔ p.qfree ∧ q.qfree :=
   by simp[qfree]
 
-structure Operator (L : Language.{u}) (n : ℕ) where
-  sentence : Semisentence L n
-
-abbrev Const (L : Language.{u}) := Operator L 0
-
-namespace Operator
-
-def operator {arity : ℕ} (o : Operator L arity) (v : Fin arity → Semiterm L μ n) : Semiformula L μ n :=
-  (Rew.substs v).hom (Rew.emb.hom o.sentence)
-
-def const (c : Const L) : Semiformula L μ n := c.operator ![]
-
-instance : Coe (Const L) (Semiformula L μ n) := ⟨Operator.const⟩
-
-def comp (o : Operator L k) (w : Fin k → Semiterm.Operator L l) : Operator L l :=
-  ⟨o.operator (fun x => (w x).term)⟩
-
-lemma operator_comp (o : Operator L k) (w : Fin k → Semiterm.Operator L l) (v : Fin l → Semiterm L μ n) :
-  (o.comp w).operator v = o.operator (fun x => (w x).operator v) := by
-    simp[operator, comp, ←Rew.hom_comp_app]; congr 2
-    ext <;> simp[Rew.comp_app]
-    · congr
-    · contradiction
-
-def and {k} (o₁ o₂ : Operator L k) : Operator L k := ⟨o₁.sentence ⋏ o₂.sentence⟩
-
-def or {k} (o₁ o₂ : Operator L k) : Operator L k := ⟨o₁.sentence ⋎ o₂.sentence⟩
-
-@[simp] lemma operator_and (o₁ o₂ : Operator L k) (v : Fin k → Semiterm L μ n) :
-  (o₁.and o₂).operator v = o₁.operator v ⋏ o₂.operator v := by simp[operator, and]
-
-@[simp] lemma operator_or (o₁ o₂ : Operator L k) (v : Fin k → Semiterm L μ n) :
-  (o₁.or o₂).operator v = o₁.operator v ⋎ o₂.operator v := by simp[operator, or]
-
-protected class Eq (L : Language) where
-  eq : Semiformula.Operator L 2
-
-protected class LT (L : Language) where
-  lt : Semiformula.Operator L 2
-
-protected class LE (L : Language) where
-  le : Semiformula.Operator L 2
-
-protected class Mem (L : Language) where
-  mem : Semiformula.Operator L 2
-
-instance [Language.Eq L] : Operator.Eq L := ⟨⟨Semiformula.rel Language.Eq.eq Semiterm.bvar⟩⟩
-
-instance [Language.LT L] : Operator.LT L := ⟨⟨Semiformula.rel Language.LT.lt Semiterm.bvar⟩⟩
-
-instance [Operator.Eq L] [Operator.LT L] : Operator.LE L := ⟨Eq.eq.or LT.lt⟩
-
-lemma Eq.sentence_eq [L.Eq] : (@Operator.Eq.eq L _).sentence = Semiformula.rel Language.Eq.eq Semiterm.bvar := rfl
-
-lemma LT.sentence_eq [L.LT] : (@Operator.LT.lt L _).sentence = Semiformula.rel Language.LT.lt Semiterm.bvar := rfl
-
-lemma LE.def_of_Eq_of_LT [Operator.Eq L] [Operator.LT L] :
-    (@Operator.LE.le L _) = Eq.eq.or LT.lt := rfl
-
-end Operator
-
 @[elab_as_elim]
 def formulaRec {C : SyntacticFormula L → Sort _}
   (hverum  : C ⊤)
@@ -836,41 +775,6 @@ lemma lMap_emb {o : Type w} [IsEmpty o] (p : Semiformula L₁ o n) :
     (lMap Φ (Rew.emb.hom p) : Semiformula L₂ μ n) = Rew.emb.hom (lMap Φ p) := lMap_bind _ _ _
 
 end Semiformula
-
-namespace Rew
-
-open Semiformula
-
-variable
-  {L L' : Language.{u}} {L₁ : Language.{u₁}} {L₂ : Language.{u₂}} {L₃ : Language.{u₃}}
-  {μ μ' : Type v} {μ₁ : Type v₁} {μ₂ : Type v₂} {μ₃ : Type v₃}
-  {n n₁ n₂ n₃ : ℕ}
-variable (ω : Rew L μ₁ n₁ μ₂ n₂)
-
-lemma hom_operator (o : Operator L k) (v : Fin k → Semiterm L μ₁ n₁) :
-    ω.hom (o.operator v) = o.operator (fun i => ω (v i)) := by
-  simp[Operator.operator, ←Rew.hom_comp_app]; congr 2
-  ext <;> simp[Rew.comp_app]; contradiction
-
-lemma hom_operator' (o : Operator L k) (v : Fin k → Semiterm L μ₁ n₁) :
-    ω.hom (o.operator v) = o.operator (ω ∘ v) := ω.hom_operator o v
-
-@[simp] lemma hom_finitary0 (o : Operator L 0) (v : Fin 0 → Semiterm L μ₁ n₁) :
-    ω.hom (o.operator v) = o.operator ![] := by simp[ω.hom_operator', Matrix.empty_eq]
-
-@[simp] lemma hom_finitary1 (o : Operator L 1) (t : Semiterm L μ₁ n₁) :
-    ω.hom (o.operator ![t]) = o.operator ![ω t] := by simp[ω.hom_operator']
-
-@[simp] lemma hom_finitary2 (o : Operator L 2) (t₁ t₂ : Semiterm L μ₁ n₁) :
-    ω.hom (o.operator ![t₁, t₂]) = o.operator ![ω t₁, ω t₂] := by simp[ω.hom_operator']
-
-@[simp] lemma hom_finitary3 (o : Operator L 3) (t₁ t₂ t₃ : Semiterm L μ₁ n₁) :
-    ω.hom (o.operator ![t₁, t₂, t₃]) = o.operator ![ω t₁, ω t₂, ω t₃] := by simp[ω.hom_operator']
-
-@[simp] lemma hom_const (o : Const L) : ω.hom (Operator.const c) = Operator.const c := by
-  simp[Operator.const, ω.hom_operator']
-
-end Rew
 
 abbrev Theory (L : Language.{u}) := Set (Sentence L)
 

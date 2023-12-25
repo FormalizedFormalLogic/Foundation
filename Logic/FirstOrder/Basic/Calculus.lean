@@ -1,5 +1,5 @@
 import Logic.Logic.Calculus
-import Logic.FirstOrder.Basic.Formula
+import Logic.FirstOrder.Basic.Syntax.Formula
 
 namespace LO
 

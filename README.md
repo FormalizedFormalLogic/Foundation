@@ -75,7 +75,8 @@ The key results are summarised in `Logic/Summary.lean`.
         [LO.FirstOrder.Arith.PAminus T]
         [LO.FirstOrder.Arith.SigmaOneSound T]
         [LO.FirstOrder.Theory.Computable T] :
-        T ⊬ LO.FirstOrder.Arith.FirstIncompleteness.undecidable T ∧ T ⊬ ~LO.FirstOrder.Arith.FirstIncompleteness.undecidable T
+        T ⊬ LO.FirstOrder.Arith.FirstIncompleteness.undecidable T ∧
+        T ⊬ ~LO.FirstOrder.Arith.FirstIncompleteness.undecidable T
     ```
 
 ## References
