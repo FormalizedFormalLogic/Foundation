@@ -18,12 +18,14 @@ import Logic.Propositional.Basic.Formula
 
 -- FirstOrder
 
-import Logic.FirstOrder.Basic.Language
-import Logic.FirstOrder.Basic.Term
-import Logic.FirstOrder.Basic.Formula
-import Logic.FirstOrder.Basic.Elab
-import Logic.FirstOrder.Basic.Semantics
+import Logic.FirstOrder.Basic.Syntax.Language
+import Logic.FirstOrder.Basic.Syntax.Term
+import Logic.FirstOrder.Basic.Syntax.Formula
+import Logic.FirstOrder.Basic.Semantics.Semantics
+import Logic.FirstOrder.Basic.Semantics.Elementary
 import Logic.FirstOrder.Basic.Calculus
+import Logic.FirstOrder.Basic.Operator
+import Logic.FirstOrder.Basic.Elab
 import Logic.FirstOrder.Basic.Eq
 import Logic.FirstOrder.Basic.Soundness
 
@@ -47,6 +49,7 @@ import Logic.FirstOrder.Order.Le
 import Logic.FirstOrder.Arith.Hierarchy
 import Logic.FirstOrder.Arith.Theory
 import Logic.FirstOrder.Arith.Model
+import Logic.FirstOrder.Arith.Nonstandard
 import Logic.FirstOrder.Arith.PAminus
 
 import Logic.FirstOrder.Incompleteness.FirstIncompleteness
