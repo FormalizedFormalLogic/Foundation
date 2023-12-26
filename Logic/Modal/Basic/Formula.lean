@@ -101,13 +101,15 @@ by simp[Vee.vee]
 
 @[simp] lemma dia_inj (p q : Formula α) : ◇p = ◇q ↔ p = q := by simp[Dia.dia]
 
-instance : DeMorgan (Formula α) where
+instance : ModalDeMorgan (Formula α) where
   verum := rfl
   falsum := rfl
   and := by simp
   or := by simp
   imply := by simp[imp_eq]
   neg := by simp
+  box := by simp
+  dia := by simp
 
 def complexity : Formula α → ℕ
 | ⊤       => 0
@@ -116,8 +118,8 @@ def complexity : Formula α → ℕ
 | natom _ => 0
 | p ⋏ q   => max p.complexity q.complexity + 1
 | p ⋎ q   => max p.complexity q.complexity + 1
-| box p   => p.complexity + 1
-| dia p   => p.complexity + 1
+| □p      => p.complexity + 1
+| ◇p     => p.complexity + 1
 
 @[simp] lemma complexity_top : complexity (⊤ : Formula α) = 0 := rfl
 
@@ -156,8 +158,8 @@ def cases' {C : Formula α → Sort w}
   | natom a => hnrel a
   | p ⋏ q   => hand p q
   | p ⋎ q   => hor p q
-  | box p   => hbox p
-  | dia p   => hdia p
+  | □p      => hbox p
+  | ◇p     => hdia p
 
 @[elab_as_elim]
 def rec' {C : Formula α → Sort w}
@@ -176,8 +178,8 @@ def rec' {C : Formula α → Sort w}
   | natom a => hnrel a
   | p ⋏ q   => hand p q (rec' hverum hfalsum hrel hnrel hand hor hbox hdia p) (rec' hverum hfalsum hrel hnrel hand hor hbox hdia q)
   | p ⋎ q   => hor p q (rec' hverum hfalsum hrel hnrel hand hor hbox hdia p) (rec' hverum hfalsum hrel hnrel hand hor hbox hdia q)
-  | box p   => hbox p (rec' hverum hfalsum hrel hnrel hand hor hbox hdia p)
-  | dia p   => hdia p (rec' hverum hfalsum hrel hnrel hand hor hbox hdia p)
+  | □p      => hbox p (rec' hverum hfalsum hrel hnrel hand hor hbox hdia p)
+  | ◇p     => hdia p (rec' hverum hfalsum hrel hnrel hand hor hbox hdia p)
 
 @[simp] lemma complexity_neg (p : Formula α) : complexity (~p) = complexity p :=
   by induction p using rec' <;> simp[*]

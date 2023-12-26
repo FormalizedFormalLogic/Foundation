@@ -15,4 +15,8 @@ prefix:74 "◇" => Dia.dia
 
 attribute [match_pattern] Box.box Dia.dia
 
+class ModalDeMorgan (F : Type*) [ModalLogicSymbol F] extends DeMorgan F where
+  box (p : F) : □p = ~(◇(~p))
+  dia (p : F) : ◇p = ~(□(~p))
+
 end LO
