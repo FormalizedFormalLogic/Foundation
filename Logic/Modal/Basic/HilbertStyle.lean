@@ -1,5 +1,5 @@
 import Logic.Logic.HilbertStyle2
-import Logic.Modal.Basic.Formula
+import Logic.Modal.LogicSymbol
 
 namespace LO
 
@@ -9,13 +9,13 @@ section Axioms
 
 variable (F : Type u) [ModalLogicSymbol F]
 
-class HasNeccesitation extends Hilbert.Classical F where
-  nec {Γ : List F} {p : F} : (Γ ⊢ᴴ p) → (Γ ⊢ᴴ □p)
+class HasNecessitation extends Hilbert.Classical F where
+  necessitation {Γ : List F} {p : F} : (Γ ⊢ᴴ p) → (Γ ⊢ᴴ □p)
 
 class HasAxiomK extends Hilbert.Classical F where
   K (Γ : List F) (p q : F) : Γ ⊢ᴴ □(p ⟶ q) ⟶ □p ⟶ □q
 
-class LogicK extends HasNeccesitation F, HasAxiomK F
+class LogicK extends HasNecessitation F, HasAxiomK F
 notation "𝗞" => LogicK
 
 class HasAxiomT extends Hilbert.Classical F where

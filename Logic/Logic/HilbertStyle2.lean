@@ -9,7 +9,7 @@ variable {F : Type u} [LogicSymbol F]
 notation Γ "⊢ᴴ" p => Γ ⊢² [p]
 
 class Minimal (F : Type u) [LogicSymbol F] extends TwoSided F where
-  MP           {Γ : List F} {p q : F}   : (Γ ⊢ᴴ p ⟶ q) → (Γ ⊢ᴴ p) → (Γ ⊢ᴴ q)
+  modus_ponens {Γ : List F} {p q : F}   : (Γ ⊢ᴴ p ⟶ q) → (Γ ⊢ᴴ p) → (Γ ⊢ᴴ q)
   verum        (Γ : List F)             : Γ ⊢ᴴ ⊤
   imply₁       (Γ : List F) (p q : F)   : Γ ⊢ᴴ p ⟶ (q ⟶ p)
   imply₂       (Γ : List F) (p q r : F) : Γ ⊢ᴴ (p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r
