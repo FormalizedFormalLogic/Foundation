@@ -8,36 +8,67 @@ namespace Modal
 
 open Formula
 
-variable {α : Type*} [h : System (Formula α)]
-variable {p : Formula α}
+variable {α β : Type u} {p : Formula α} (f : Frame β)
 
-def LogicK.proves [𝗞 (Formula α)] (p : Formula α) := ∅ ⊢ᴴ p
-local notation "⊢ᴴ(𝗞) " p => LogicK.proves p
-
-variable (f : Frame β)
-
-theorem LogicK.weakSoundness [𝗞 (Formula α)]
-  : (⊢ᴴ(𝗞) p) → (f ⊨ᶠ p) := by
+theorem Hilbert.LogicK.WeakSoundness : (⊢ᴴ(𝗞) p) → (f ⊨ᶠ p) := by
   intro h;
-  induction p using rec' <;> simp [satisfy];
-  . intro w; sorry;
-  . intro V w; sorry;
-  . intro V w; sorry;
-  . intro V w; sorry;
-  . intro V w; sorry;
-  . intro V w;
-    intro w' hRel;
+  cases h
+  case axm => aesop;
+  case verum => simp [satisfies];
+  case imply₁ =>
+    intro V w;
+    simp [satisfies_imp2];
+    aesop;
+  case imply₂ =>
+    intro V w;
+    simp [satisfies_imp2];
+    aesop;
+  case conj₁ =>
+    intro V w;
+    simp [satisfies_imp2];
+    simp [satisfies];
+    aesop;
+  case conj₂ =>
+    intro V w;
+    simp [satisfies_imp2];
+    simp [satisfies];
+  case conj₃ =>
+    intro V w;
+    simp [satisfies_imp2];
+    simp [satisfies];
+    aesop;
+  case disj₁ =>
+    intro V w;
+    simp [satisfies_imp2];
+    simp [satisfies];
+    aesop;
+  case disj₂ =>
+    intro V w;
+    simp [satisfies_imp2];
+    simp [satisfies];
+    aesop;
+  case disj₃ =>
+    intro V w;
+    simp [satisfies_imp2];
+    simp [satisfies];
+    aesop;
+  case explode p =>
+    simp [models_imp2];
+    simp [satisfies];
+  case em p =>
+    intro V w;
+    simp [satisfies, satisfies_neg'];
+    apply Classical.em;
+  case modus_ponens q d₁ d₂ =>
     sorry;
-  . intro V w;
-    sorry;
-
-def LogicS4.proves [𝗦𝟰 (Formula α)] (p : Formula α) := ∅ ⊢ᴴ p
-local notation "⊢ᴴ(𝗦𝟰) " p => LogicS4.proves p
-
-theorem LogicS4.weakSoundness [𝗦𝟰 (Formula α)] (hRefl : f.Reflexive) (hTrans : f.Transitive)
-  : (⊢ᴴ(𝗦𝟰) p) → (f ⊨ᶠ p) := by
-  induction p using rec' <;> simp [satisfy];
-  repeat sorry;
+    -- apply framesMP;
+    -- rcases q with ⟨q₁, q₂⟩;
+    -- exact frames_imp2.mp (WeakSoundness d₁) (WeakSoundness d₂);
+  case necessitation d =>
+    apply framesNec;
+    sorry
+    -- exact WeakSoundness d;
+  case K p => apply framesK;
 
 end Modal
 

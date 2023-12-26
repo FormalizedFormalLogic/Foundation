@@ -9,6 +9,7 @@ variable {F : Type u} [LogicSymbol F]
 notation Γ "⊢ᴴ" p => Γ ⊢² [p]
 
 class Minimal (F : Type u) [LogicSymbol F] extends TwoSided F where
+  axm          (Γ : List F) (p : F)     : p ∈ Γ → Γ ⊢ᴴ p
   modus_ponens {Γ : List F} {p q : F}   : (Γ ⊢ᴴ p ⟶ q) → (Γ ⊢ᴴ p) → (Γ ⊢ᴴ q)
   verum        (Γ : List F)             : Γ ⊢ᴴ ⊤
   imply₁       (Γ : List F) (p q : F)   : Γ ⊢ᴴ p ⟶ (q ⟶ p)
@@ -25,6 +26,8 @@ theorem deduction.mp [Minimal F] (Γ : List F): (Γ ⊢ᴴ p ⟶ q) → ((p :: �
 
 theorem deduction.mpr [Minimal F] (Γ : List F): ((p :: Γ) ⊢ᴴ q) → (Γ ⊢ᴴ p ⟶ q) := by sorry;
 -/
+
+infixl:90 " ⨀ " => Minimal.modus_ponens
 
 class Intuitionistic (F : Type u) [LogicSymbol F] extends Minimal F where
   explode (Γ : List F) (p : F) : Γ ⊢ᴴ ⊥ ⟶ p

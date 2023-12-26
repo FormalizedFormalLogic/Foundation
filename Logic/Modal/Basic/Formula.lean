@@ -1,3 +1,4 @@
+import Logic.Propositional.Basic.Formula
 import Logic.Modal.LogicSymbol
 
 namespace LO
@@ -145,8 +146,8 @@ def complexity : Formula α → ℕ
 def cases' {C : Formula α → Sort w}
     (hverum  : C ⊤)
     (hfalsum : C ⊥)
-    (hrel    : ∀ a : α, C (atom a))
-    (hnrel   : ∀ a : α, C (natom a))
+    (hatom   : ∀ a : α, C (atom a))
+    (hnatom  : ∀ a : α, C (natom a))
     (hand    : ∀ (p q : Formula α), C (p ⋏ q))
     (hor     : ∀ (p q : Formula α), C (p ⋎ q))
     (hbox    : ∀ (p : Formula α), C (□p))
@@ -154,8 +155,8 @@ def cases' {C : Formula α → Sort w}
     : (p : Formula α) → C p
   | ⊤       => hverum
   | ⊥       => hfalsum
-  | atom a  => hrel a
-  | natom a => hnrel a
+  | atom a  => hatom a
+  | natom a => hnatom a
   | p ⋏ q   => hand p q
   | p ⋎ q   => hor p q
   | □p      => hbox p
@@ -165,8 +166,8 @@ def cases' {C : Formula α → Sort w}
 def rec' {C : Formula α → Sort w}
   (hverum  : C ⊤)
   (hfalsum : C ⊥)
-  (hrel    : ∀ a : α, C (atom a))
-  (hnrel   : ∀ a : α, C (natom a))
+  (hatom   : ∀ a : α, C (atom a))
+  (hnatom  : ∀ a : α, C (natom a))
   (hand    : ∀ (p q : Formula α), C p → C q → C (p ⋏ q))
   (hor     : ∀ (p q : Formula α), C p → C q → C (p ⋎ q))
   (hbox    : ∀ (p : Formula α), C p → C (□p))
@@ -174,12 +175,12 @@ def rec' {C : Formula α → Sort w}
   : (p : Formula α) → C p
   | ⊤       => hverum
   | ⊥       => hfalsum
-  | atom a  => hrel a
-  | natom a => hnrel a
-  | p ⋏ q   => hand p q (rec' hverum hfalsum hrel hnrel hand hor hbox hdia p) (rec' hverum hfalsum hrel hnrel hand hor hbox hdia q)
-  | p ⋎ q   => hor p q (rec' hverum hfalsum hrel hnrel hand hor hbox hdia p) (rec' hverum hfalsum hrel hnrel hand hor hbox hdia q)
-  | □p      => hbox p (rec' hverum hfalsum hrel hnrel hand hor hbox hdia p)
-  | ◇p     => hdia p (rec' hverum hfalsum hrel hnrel hand hor hbox hdia p)
+  | atom a  => hatom a
+  | natom a => hnatom a
+  | p ⋏ q   => hand p q (rec' hverum hfalsum hatom hnatom hand hor hbox hdia p) (rec' hverum hfalsum hatom hnatom hand hor hbox hdia q)
+  | p ⋎ q   => hor p q (rec' hverum hfalsum hatom hnatom hand hor hbox hdia p) (rec' hverum hfalsum hatom hnatom hand hor hbox hdia q)
+  | □p      => hbox p (rec' hverum hfalsum hatom hnatom hand hor hbox hdia p)
+  | ◇p     => hdia p (rec' hverum hfalsum hatom hnatom hand hor hbox hdia p)
 
 @[simp] lemma complexity_neg (p : Formula α) : complexity (~p) = complexity p :=
   by induction p using rec' <;> simp[*]
@@ -242,5 +243,19 @@ end Formula
 abbrev Theory (α : Type*) := Set (Formula α)
 
 end Modal
+
+namespace Propositional
+
+def Formula.toMF {α : Type u} : Formula α → Modal.Formula α
+  | ⊤        => ⊤
+  | ⊥        => ⊥
+  | .atom a  => .atom a
+  | .natom a => .natom a
+  | p ⋏ q    => p.toMF ⋏ q.toMF
+  | p ⋎ q    => p.toMF ⋎ q.toMF
+
+instance : Coe (Formula α) (Modal.Formula α) := ⟨Formula.toMF⟩
+
+end Propositional
 
 end LO
