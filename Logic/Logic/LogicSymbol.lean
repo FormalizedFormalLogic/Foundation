@@ -193,6 +193,14 @@ instance Prop_HasLogicSymbols : LogicSymbol Prop where
 
 @[simp] lemma Prop_iff_eq (p q : Prop) : (p ⟷ q) = (p ↔ q) := by simp[LogicSymbol.iff, iff_iff_implies_and_implies]
 
+instance : DeMorgan Prop where
+  verum := by simp
+  falsum := by simp
+  imply := fun _ _ => by simp[imp_iff_not_or]
+  and := fun _ _ => by simp[-not_and, not_and_or]
+  or := fun _ _ => by simp[not_or]
+  neg := fun _ => by simp
+
 class HomClass (F : Type _) (α β : outParam (Type _)) [LogicSymbol α] [LogicSymbol β] extends FunLike F α (fun _ => β) where
   map_top : ∀ (f : F), f ⊤ = ⊤
   map_bot : ∀ (f : F), f ⊥ = ⊥
