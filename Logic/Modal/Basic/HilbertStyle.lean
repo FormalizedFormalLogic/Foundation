@@ -1,5 +1,5 @@
 import Logic.Logic.HilbertStyle2
-import Logic.Modal.Basic.Formula
+import Logic.Modal.Basic.Formula2
 
 namespace LO
 
@@ -17,8 +17,6 @@ class HasNecessitation where
 class HasAxiomK where
   K (Γ : List F) (p q : F) : Γ ⊢ᴴ □(p ⟶ q) ⟶ □p ⟶ □q
 
-class LogicK extends Hilbert.Classical F, HasNecessitation F, HasAxiomK F
-
 class HasAxiomT where
   T (Γ : List F) (p : F) : Γ ⊢ᴴ □p ⟶ p
 
@@ -31,31 +29,39 @@ class HasAxiomB where
 class HasAxiom4 where
   A4 (Γ : List F) (p : F) : Γ ⊢ᴴ □p ⟶ □□p
 
-class LogicS4 extends LogicK F, HasAxiomT F, HasAxiom4 F
-
-class LogicS5 extends LogicS4 F, HasAxiomB F
-
 class HasAxiom5 where
   A5 (Γ : List F) (p q : F) : Γ ⊢ᴴ ◇p ⟶ □◇p
 
 class HasAxiomL where
   L (Γ : List F) (p : F) : Γ ⊢ᴴ □(□p ⟶ p) ⟶ □p
 
-class LogicGL extends LogicK F, HasAxiomL F
-
 class HasAxiomDot2 where
   Dot2 (Γ : List F) (p : F) : Γ ⊢ᴴ ◇□p ⟶ □◇p
-
-class LogicS4Dot2 extends LogicS4 F, HasAxiomDot2 F
 
 class HasAxiomDot3 where
   Dot3 (Γ : List F) (p : F) : Γ ⊢ᴴ □(□p ⟶ □q) ⋎ □(□q ⟶ □p)
 
-class LogicS4Dot3 extends LogicS4 F, HasAxiomDot3 F
-
 class HasAxiomGrz where
   Grz (Γ : List F) (p : F) : Γ ⊢ᴴ □(□(p ⟶ □p) ⟶ p) ⟶ p
 
+/-- McKinsey Axiom -/
+class HasAxiomM where
+  M (Γ : List F) (p : F) : Γ ⊢ᴴ □◇p ⟶ ◇□p
+
+class HasAxiomCD where
+  CD (Γ : List F) (p : F) : Γ ⊢ᴴ ◇p ⟶ □p
+
+class HasAxiomC4 where
+  C4 (Γ : List F) (p : F) : Γ ⊢ᴴ □□p ⟶ □p
+
+class LogicK extends Hilbert.Classical F, HasNecessitation F, HasAxiomK F
+class LogicKD extends LogicK F, HasAxiomD F
+class LogicKT extends LogicK F, HasAxiomT F
+class LogicS4 extends LogicK F, HasAxiomT F, HasAxiom4 F
+class LogicS5 extends LogicK F, HasAxiomT F, HasAxiom5 F
+class LogicGL extends LogicK F, HasAxiomL F
+class LogicS4Dot2 extends LogicS4 F, HasAxiomDot2 F
+class LogicS4Dot3 extends LogicS4 F, HasAxiomDot3 F
 class LogicS4Grz extends LogicS4 F, HasAxiomGrz F
 
 end Axioms
@@ -93,6 +99,7 @@ abbrev Proves (p : Formula α) := ∅ ⊢ᴴ(𝗞) p
 prefix:45 "⊢ᴴ(𝗞) " => Proves
 
 instance : LogicK (Formula α) where
+  neg := rfl
   necessitation := LogicK.Derives'.necessitation
   K := LogicK.Derives'.K
   axm := LogicK.Derives'.axm
@@ -130,9 +137,9 @@ def Derives.length {Γ : List (Formula α)} {p : Formula α} : Γ ⊢ᴴ(𝗞) p
 
 def Proves.length {p : Formula α} : ⊢ᴴ(𝗞) p → ℕ := Derives.length
 
-lemma Derives.length_lt_imp1 (d₁ : Derives Γ (p ⟶ q)) (d₂ : Derives Γ p) : d₁.length > d₂.length := by sorry;
+lemma Derives.length_lt_imp1 (d₁ : Γ ⊢ᴴ(𝗞) p) (d₂ : Γ ⊢ᴴ(𝗞) (p ⟶ q)) : d₁.length < d₂.length := by sorry;
 
-lemma Derives.length_lt_imp2 (d₁ : Derives Γ (p ⟶ q)) (d₂ : Derives Γ q) : d₁.length > d₂.length := by sorry;
+lemma Derives.length_lt_imp2 (d₁ :  Γ ⊢ᴴ(𝗞) q) (d₂ : Γ ⊢ᴴ(𝗞) (p ⟶ q)) : d₁.length < d₂.length := by sorry;
 
 end LogicK
 
