@@ -24,7 +24,7 @@ def modelStar (c : ℕ) : Structure Language.unit ℕ where
   func := fun _ ⟨⟨⟩⟩ _ => c
   rel  := fun _ r _ => PEmpty.elim r
 
-lemma satisfiable_trueArithWithStarUnbounded (c : ℕ) : Semantics.Satisfiableₛ (trueArithWithStarUnbounded c) := by
+lemma satisfiable_trueArithWithStarUnbounded (c : ℕ) : Semantics.SatisfiableTheory (trueArithWithStarUnbounded c) := by
   letI : Structure Language.unit ℕ := modelStar c
   haveI : Structure.Zero ℒₒᵣ⋆ ℕ := ⟨rfl⟩
   haveI : Structure.One ℒₒᵣ⋆ ℕ := ⟨rfl⟩
@@ -35,10 +35,10 @@ lemma satisfiable_trueArithWithStarUnbounded (c : ℕ) : Semantics.Satisfiable�
     simp[starUnbounded, models_iff]; exact Fin.prop
   have : ℕ ⊧* trueArithWithStarUnbounded c := by
     simp[trueArithWithStarUnbounded, models_iff]; exact this
-  exact satisfiableₛ_intro ℕ this
+  exact satisfiableTheory_intro ℕ this
 
 lemma satisfiable_union_trueArithWithStarUnbounded :
-    Semantics.Satisfiableₛ (⋃ c, trueArithWithStarUnbounded c) :=
+    Semantics.SatisfiableTheory (⋃ c, trueArithWithStarUnbounded c) :=
   (Compact.compact_cumulative trueArithWithStarUnbounded.cumulative).mpr
     satisfiable_trueArithWithStarUnbounded
 
@@ -61,7 +61,7 @@ lemma models_union_trueArithWithStarUnbounded : ℕ⋆ ⊧* ⋃ c, trueArithWith
 
 lemma trueArith : ℕ⋆ ⊧* 𝐓𝐀 := by
   have : ℕ⋆ ⊧* Semiformula.lMap (Language.Hom.add₁ _ _) '' 𝐓𝐀 :=
-    Semantics.modelsTheory_of_subset models_union_trueArithWithStarUnbounded
+    Semantics.realizeTheory_of_subset models_union_trueArithWithStarUnbounded
       (Set.subset_iUnion_of_subset 0 $ Set.subset_union_of_subset_left (Set.subset_union_right _ _ ) _)
   intro σ hσ
   let s : Structure ℒₒᵣ ℕ⋆ := (ModelOfSatEq.struc satisfiable_union_trueArithWithStarUnbounded).lMap
@@ -76,7 +76,7 @@ lemma trueArith : ℕ⋆ ⊧* 𝐓𝐀 := by
         ←Semiformula.eval_lMap, Matrix.fun_eq_vec₂]⟩
     haveI : Structure.LT ℒₒᵣ ℕ⋆ := ⟨fun _ _ => iff_of_eq rfl⟩
     exact standardModel_unique _ _
-  have : s ⊧ₛ σ := Semiformula.models_lMap.mp (this (Set.mem_image_of_mem _ hσ))
+  have : s.toStruc ⊧ₛ σ := Semiformula.models_lMap.mp (this (Set.mem_image_of_mem _ hσ))
   exact e ▸ this
 
 instance : Theory.Mod ℕ⋆ 𝐓𝐀 := ⟨trueArith⟩

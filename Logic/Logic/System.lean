@@ -98,13 +98,13 @@ def System.hom [System F] {G : Type u} [LogicSymbol G] (F : G →L F) : System G
   weakening' := fun h => by simp; exact System.weakening' (Set.image_subset F h)
 
 variable (F)
-variable [LogicSymbol F] [𝓑 : System F] {Struc : Type w → Type v} [𝓢 : Semantics F Struc]
+variable [LogicSymbol F] [𝓑 : System F] {α: Type*} [𝓢 : Semantics F α]
 
 class Sound where
   sound : ∀ {T : Set F} {p : F}, T ⊢ p → T ⊨ p
 
-class SoundOn (M : Type w) (s : Struc M) (H : Set F) where
-  sound : ∀ {T : Set F} {p : F}, p ∈ H → T ⊢ p → s ⊧ₛ p
+class SoundOn (M : Type w) (a : α) (H : Set F) where
+  sound : ∀ {T : Set F} {p : F}, p ∈ H → T ⊢ p → a ⊧ₛ p
 
 class Complete extends Sound F where
   complete : ∀ {T : Set F} {p : F}, T ⊨ p → T ⊢ p
@@ -114,23 +114,23 @@ variable {F}
 namespace Sound
 
 variable [Sound F]
-variable {M : Type w} [Inhabited M] {s : Struc M}
+variable {a : α}
 
 lemma sound' {T : Set F} {f : F} : T ⊢! f → T ⊨ f := by rintro ⟨b⟩; exact sound b
 
 lemma not_provable_of_countermodel {T : Set F} {p : F}
-  (hT : s ⊧ₛ* T) (hp : ¬s ⊧ₛ p) : IsEmpty (T ⊢ p) :=
-  ⟨fun b => by have : s ⊧ₛ p := Sound.sound b M s hT; contradiction⟩
+  (hT : a ⊧ₛ* T) (hp : ¬a ⊧ₛ p) : IsEmpty (T ⊢ p) :=
+  ⟨fun b => by have : a ⊧ₛ p := Sound.sound b hT; contradiction⟩
 
 lemma consistent_of_model {T : Set F}
-  (hT : s ⊧ₛ* T) : System.Consistent T :=
+  (hT : a ⊧ₛ* T) : System.Consistent T :=
   not_provable_of_countermodel (p := ⊥) hT (by simp)
 
-lemma consistent_of_satisfiable {T : Set F} : Semantics.Satisfiableₛ T → System.Consistent T := by
-  rintro ⟨M, _, s, h⟩; exact consistent_of_model h
+lemma consistent_of_satisfiable {T : Set F} : Semantics.SatisfiableTheory T → System.Consistent T := by
+  rintro ⟨_, h⟩; exact consistent_of_model h
 
-lemma models_of_proof {T : Set F} {f} (h : s ⊧ₛ* T) (b : T ⊢ f) : s ⊧ₛ f :=
-  Sound.sound b M s h
+lemma models_of_proof {T : Set F} {f} (h : a ⊧ₛ* T) (b : T ⊢ f) : a ⊧ₛ f :=
+  Sound.sound b h
 
 lemma modelsTheory_of_proofTheory {T U : Set F} (h : s ⊧ₛ* T) (b : T ⊢* U) : s ⊧ₛ* U :=
   fun _ hf => models_of_proof h (b hf)
@@ -141,16 +141,16 @@ namespace Complete
 
 variable [Complete F]
 
-lemma satisfiableₛ_iff_consistent {T : Set F} : Semantics.Satisfiableₛ T ↔ System.Consistent T :=
+lemma satisfiableTheory_iff_consistent {T : Set F} : Semantics.SatisfiableTheory T ↔ System.Consistent T :=
   ⟨Sound.consistent_of_satisfiable,
    by contrapose; intro h
       have : T ⊨ ⊥
-      { intro M i s hM; have : Semantics.Satisfiableₛ T := ⟨M, i, s, hM⟩; contradiction }
+      { intro a hM; have : Semantics.SatisfiableTheory T := ⟨a, hM⟩; contradiction }
       have : T ⊢ ⊥ := complete this
       exact System.inconsistent_of_proof this⟩
 
-lemma not_satisfiable_iff_inconsistent {T : Set F} : ¬Semantics.Satisfiableₛ T ↔ T ⊢! ⊥ := by
-  simp[satisfiableₛ_iff_consistent, System.Consistent]
+lemma not_satisfiable_iff_inconsistent {T : Set F} : ¬Semantics.SatisfiableTheory T ↔ T ⊢! ⊥ := by
+  simp[satisfiableTheory_iff_consistent, System.Consistent]
 
 lemma consequence_iff_provable {T : Set F} {f : F} : T ⊨ f ↔ T ⊢! f :=
 ⟨fun h => ⟨complete h⟩, by rintro ⟨b⟩; exact Sound.sound b⟩

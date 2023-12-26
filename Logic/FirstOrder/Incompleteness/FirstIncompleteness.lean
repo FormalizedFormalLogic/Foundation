@@ -26,8 +26,8 @@ variable {T : Theory ℒₒᵣ} [EqTheory T] [PAminus T] [DecidablePred T] [Sigm
 
 variable (T)
 
-private lemma diagRefutation_re : RePred (fun σ => T ⊢! ~σ/[⸢σ⸣]) := by
-  have : Partrec fun σ : Semisentence ℒₒᵣ 1 => (provableFn T (~σ/[⸢σ⸣])).map (fun _ => ()) :=
+private lemma diagRefutation_re : RePred (fun σ ↦ T ⊢! ~σ/[⸢σ⸣]) := by
+  have : Partrec fun σ : Semisentence ℒₒᵣ 1 ↦ (provableFn T (~σ/[⸢σ⸣])).map (fun _ ↦ ()) :=
     Partrec.map
       ((provableFn_partrec T).comp <| Primrec.to_comp
         <| (Semiformula.neg_primrec (L := ℒₒᵣ)).comp

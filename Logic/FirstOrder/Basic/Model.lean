@@ -24,7 +24,7 @@ instance : Structure L (Model L M) := Structure.ofEquiv (equiv L M)
 
 instance [Inhabited M] : Inhabited (Model L M) := ⟨equiv L M default⟩
 
-lemma elementaryEquiv (L : Language) (M : Type*) [Structure L M] : M ≡ₑ[L] Model L M :=
+lemma elementaryEquiv (L : Language) (M : Type*) [Inhabited M] [Structure L M] : M ≡ₑ[L] Model L M :=
   ElementaryEquiv.ofEquiv _
 
 section

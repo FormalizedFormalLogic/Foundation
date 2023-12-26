@@ -193,8 +193,8 @@ lemma eval_lMap {p : Semiformula L₁ μ n} :
       extendStructure.rel Φ s₁ (injr k) r (fun i => Semiterm.val s₁ e ε (v i))
 
 lemma models_lMap (σ : Sentence L₁) :
-    Semantics.models (s₁.extendStructure Φ) (Semiformula.lMap Φ σ) ↔ Semantics.models s₁ σ := by
-  simp[Semantics.models, Val, eval_lMap Φ injf injr]
+    Semantics.realize (s₁.extendStructure Φ).toStruc (Semiformula.lMap Φ σ) ↔ Semantics.realize s₁.toStruc σ := by
+  simp[Semantics.realize, Val, eval_lMap Φ injf injr]
 
 end extendStructure
 
@@ -210,17 +210,19 @@ variable
 lemma lMap_models_lMap_iff {T : Theory L₁} {σ : Sentence L₁} :
     Theory.lMap Φ T ⊨ Semiformula.lMap Φ σ ↔ T ⊨ σ := by
   constructor
-  · intro h M _ s₁ hs₁
-    exact (Structure.extendStructure.models_lMap Φ injf injr s₁ σ).mp $
-      h M (s₁.extendStructure Φ)
-      (by simp[Semantics.modelsTheory, Theory.lMap];
-          intro σ hσ; exact (Structure.extendStructure.models_lMap (Φ := Φ) injf injr s₁ σ).mpr (hs₁ hσ))
+  · intro h s₁ hs₁
+    exact (Structure.extendStructure.models_lMap Φ injf injr s₁.struc σ).mp $ h
+      (by simp[Semantics.realizeTheory, Theory.lMap];
+          intro σ hσ; exact (Structure.extendStructure.models_lMap (Φ := Φ) injf injr s₁.struc σ).mpr (hs₁ hσ))
   · exact lMap_models_lMap
 
-lemma satisfiableₛ_lMap {T : Theory L₁} (s : Semantics.Satisfiableₛ T) :
-    Semantics.Satisfiableₛ (Semiformula.lMap Φ '' T) := by
-  rcases s with ⟨M, i, s, hM⟩
-  exact ⟨M, i, s.extendStructure Φ, by simp; intro σ hσ; exact (Structure.extendStructure.models_lMap Φ injf injr s σ).mpr (hM hσ)⟩
+lemma satisfiableTheory_lMap {T : Theory L₁} (s : Semantics.SatisfiableTheory T) :
+    Semantics.SatisfiableTheory (Semiformula.lMap Φ '' T) := by
+  rcases s with ⟨⟨M, i, s⟩, hM⟩
+  exact ⟨⟨M, i, s.extendStructure Φ⟩, by
+    simp[Semantics.realizeTheory]
+    intro σ hσ
+    exact (Structure.extendStructure.models_lMap Φ injf injr s σ).mpr (hM hσ)⟩
 
 end lMap
 

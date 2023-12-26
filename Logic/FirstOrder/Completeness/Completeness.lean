@@ -29,7 +29,7 @@ noncomputable def DerivationWA.completeness_of_encodable
 noncomputable def completeness_of_encodable {σ : Sentence L} :
     T ⊨ σ → T ⊢ σ := fun h ↦ by
   have : T ⊢'' [Rew.emb.hom σ] :=
-    DerivationWA.completeness_of_encodable (T := T) (Γ := {σ}) (fun M i s hM ↦ ⟨σ, List.mem_of_mem_head? rfl, h M s hM⟩)
+    DerivationWA.completeness_of_encodable (T := T) (Γ := {σ}) (fun M i s hM ↦ ⟨σ, List.mem_of_mem_head? rfl, h hM⟩)
   exact toProof this
 
 noncomputable instance : Complete (Sentence L) := ⟨completeness_of_encodable⟩
@@ -39,7 +39,7 @@ end Encodable
 noncomputable def completeness {σ : Sentence L} :
     T ⊨ σ → T ⊢ σ := fun h ↦ by
   letI := Classical.typeDecidableEq
-  have : ∃ u : Finset (Sentence L), ↑u ⊆ insert (~σ) T ∧ ¬Semantics.Satisfiableₛ (u : Theory L) := by
+  have : ∃ u : Finset (Sentence L), ↑u ⊆ insert (~σ) T ∧ ¬Semantics.SatisfiableTheory (u : Theory L) := by
     simpa[Compact.compact (T := insert (~σ) T)] using Semantics.consequence_iff.mp h
   choose u hu using this; rcases hu with ⟨ssu, hu⟩
   haveI : ∀ k, Encodable ((languageFinset u).Func k) := fun _ ↦ Fintype.toEncodable _
@@ -49,12 +49,12 @@ noncomputable def completeness {σ : Sentence L} :
     { ext τ; simp[Finset.mem_imageOfFinset_iff]
       exact ⟨by rintro ⟨a, ⟨τ, hτ, rfl⟩, rfl⟩; simp[hτ],
         by intro hτ; exact ⟨toSubLanguageFinsetSelf hτ, ⟨τ, hτ, rfl⟩, Semiformula.lMap_toSubLanguageFinsetSelf hτ⟩⟩ }
-  have : ¬Semantics.Satisfiableₛ (u' : Theory (languageFinset u))
+  have : ¬Semantics.SatisfiableTheory (u' : Theory (languageFinset u))
   { intro h
-    have : Semantics.Satisfiableₛ (u : Theory L) := by
-      rw[←image_u']; simpa using (satisfiableₛ_lMap L.ofSubLanguage (fun k ↦ Subtype.val_injective) (fun _ ↦ Subtype.val_injective) h)
+    have : Semantics.SatisfiableTheory (u : Theory L) := by
+      rw[←image_u']; simpa using (satisfiableTheory_lMap L.ofSubLanguage (fun k ↦ Subtype.val_injective) (fun _ ↦ Subtype.val_injective) h)
     contradiction }
-  have : ¬System.Consistent (u' : Theory (languageFinset u)) := fun h ↦ this (Complete.satisfiableₛ_iff_consistent.mpr h)
+  have : ¬System.Consistent (u' : Theory (languageFinset u)) := fun h ↦ this (Complete.satisfiableTheory_iff_consistent.mpr h)
   have : ¬System.Consistent (u : Theory L) := by rw[←image_u']; simpa using System.inconsistent_lMap L.ofSubLanguage this
   have : ¬System.Consistent (insert (~σ) T) := fun h ↦ this (h.of_subset ssu)
   have : Nonempty (T ⊢ σ) := Gentzen.provable_iff_inconsistent.mpr this

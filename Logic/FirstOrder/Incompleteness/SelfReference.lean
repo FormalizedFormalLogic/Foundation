@@ -16,11 +16,11 @@ variable {T : Theory ℒₒᵣ} [EqTheory T] [PAminus T] [SigmaOneSound T]
 open Encodable Semiformula
 
 noncomputable def ssbs : Semisentence ℒₒᵣ 3 :=
-  graphTotal₂ (fun (σ π : Semisentence ℒₒᵣ 1) => σ/[(⸢π⸣ : Semiterm ℒₒᵣ Empty 0)])
+  graphTotal₂ (fun (σ π : Semisentence ℒₒᵣ 1) ↦ σ/[(⸢π⸣ : Semiterm ℒₒᵣ Empty 0)])
 
 lemma ssbs_spec (σ π : Semisentence ℒₒᵣ 1) :
     T ⊢! ∀' (ssbs/[#0, ⸢σ⸣, ⸢π⸣] ⟷ “#0 = !!⸢σ/[(⸢π⸣ : Semiterm ℒₒᵣ Empty 0)]⸣”) :=
-  representation_computable₂ T (f := fun (σ π : Semisentence ℒₒᵣ 1) => σ/[(⸢π⸣ : Semiterm ℒₒᵣ Empty 0)])
+  representation_computable₂ T (f := fun (σ π : Semisentence ℒₒᵣ 1) ↦ σ/[(⸢π⸣ : Semiterm ℒₒᵣ Empty 0)])
     (Primrec₂.to_comp <| (Semiformula.substs₁_primrec (L := ℒₒᵣ)).comp₂
       ((Semiterm.Operator.const_primrec (L := ℒₒᵣ)).comp₂ <|
         (Semiterm.Operator.numeral_primrec (L := ℒₒᵣ)).comp₂ $ Primrec.encode.comp₂ .right) <|

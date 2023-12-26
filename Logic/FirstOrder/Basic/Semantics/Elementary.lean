@@ -8,7 +8,8 @@ section
 
 variable {L : Language}
 variable {M : Type*} {M₁ : Type*} {M₂ : Type*} {M₃ : Type*}
-variable [s : Structure L M] [s₁ : Structure L M₁] [s₂ : Structure L M₂] [s₃ : Structure L M₃]
+variable [Inhabited M] [Inhabited M₁] [Inhabited M₂] [Inhabited M₃]
+  [s : Structure L M] [s₁ : Structure L M₁] [s₂ : Structure L M₂] [s₃ : Structure L M₃]
 
 namespace Structure
 
@@ -174,7 +175,9 @@ end
 
 section
 
-variable {L : Language} {M₁ : Type u} {M₂ : Type u} [s₁ : Structure L M₁] [s₂ : Structure L M₂]
+variable {L : Language} {M : Type u} {M₁ : Type u} {M₂ : Type u} {M₃ : Type u}
+variable [Inhabited M] [Inhabited M₁] [Inhabited M₂] [Inhabited M₃]
+  [s : Structure L M] [s₁ : Structure L M₁] [s₂ : Structure L M₂] [s₃ : Structure L M₃]
 
 namespace Structure
 
@@ -189,24 +192,24 @@ variable {L M₁ M₂}
 namespace ElementaryEquiv
 
 @[refl]
-lemma refl (M) [Structure L M] : M ≡ₑ[L] M := fun σ => by rfl
+lemma refl (M) [Inhabited M] [Structure L M] : M ≡ₑ[L] M := fun σ => by rfl
 
 @[symm]
-lemma symm {M₁ M₂} [Structure L M₁] [Structure L M₂] : (M₁ ≡ₑ[L] M₂) → (M₂ ≡ₑ[L] M₁) :=
+lemma symm : (M₁ ≡ₑ[L] M₂) → (M₂ ≡ₑ[L] M₁) :=
   fun h σ => (h σ).symm
 
 @[trans]
-lemma trans {M₁ M₂ M₃ : Type u} [Structure L M₁] [Structure L M₂] [Structure L M₃] :
+lemma trans :
     (M₁ ≡ₑ[L] M₂) → (M₂ ≡ₑ[L] M₃) → (M₁ ≡ₑ[L] M₃) :=
   fun h₁ h₂ σ => Iff.trans (h₁ σ) (h₂ σ)
 
-lemma models {M₁ M₂} [Structure L M₁] [Structure L M₂] (h : M₁ ≡ₑ[L] M₂) :
+lemma models (h : M₁ ≡ₑ[L] M₂) :
     ∀ {σ : Sentence L}, M₁ ⊧ σ ↔ M₂ ⊧ σ := @h
 
-lemma modelsTheory {M₁ M₂} [Structure L M₁] [Structure L M₂] (h : M₁ ≡ₑ[L] M₂) {T : Theory L} :
+lemma modelsTheory (h : M₁ ≡ₑ[L] M₂) {T : Theory L} :
     M₁ ⊧* T ↔ M₂ ⊧* T := by simp[modelsTheory_iff, h.models]
 
-lemma ofEquiv [Structure L M] (φ : M ≃ N) :
+lemma ofEquiv [Inhabited N] (φ : M ≃ N) :
     letI : Structure L N := Structure.ofEquiv φ
     M ≡ₑ[L] N := fun σ => by
   letI : Structure L N := Structure.ofEquiv φ
@@ -238,7 +241,7 @@ section
 open Semiformula
 variable [s : Structure L M] (φ : M ≃ N)
 
-lemma ElementaryEquiv.ofEquiv :
+lemma ElementaryEquiv.ofEquiv [Inhabited N] :
     letI : Structure L N := Structure.ofEquiv φ
     M ≡ₑ[L] N := fun σ => by
   letI : Structure L N := Structure.ofEquiv φ

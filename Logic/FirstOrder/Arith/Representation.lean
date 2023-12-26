@@ -41,7 +41,7 @@ def code (c : Code k) : Semisentence ℒₒᵣ (k + 1) := (Rew.bind ![] (#0 :> (
 section model
 
 variable
-  {M : Type} [DecidableEq M] [ORingSymbol M]
+  {M : Type} [Inhabited M] [DecidableEq M] [ORingSymbol M]
   [Structure ℒₒᵣ M] [Structure.ORing ℒₒᵣ M]
   [Theory.Mod M (Theory.PAminus ℒₒᵣ)]
 

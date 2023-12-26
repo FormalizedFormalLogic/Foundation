@@ -17,8 +17,8 @@ example [(k : ℕ) → DecidableEq (L.Func k)] [(k : ℕ) → DecidableEq (L.Rel
 
 /- Compactness theorem -/
 example (T : Theory L) :
-    Semantics.Satisfiableₛ T ↔
-    ∀ T' : Finset (Sentence L), ↑T' ⊆ T → Semantics.Satisfiableₛ (T' : Theory L) :=
+    Semantics.SatisfiableTheory T ↔
+    ∀ T' : Finset (Sentence L), ↑T' ⊆ T → Semantics.SatisfiableTheory (T' : Theory L) :=
   FirstOrder.compactness
 
 #print axioms FirstOrder.compactness

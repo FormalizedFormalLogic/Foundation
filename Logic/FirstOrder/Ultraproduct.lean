@@ -100,8 +100,8 @@ lemma val_Uprod {p : Formula L μ} :
 
 end Semiformula
 
-lemma models_Uprod {σ : Sentence L} :
-    (Uprod A 𝓤) ⊧ σ ↔ {i | Semantics.models (s i) σ} ∈ 𝓤 :=
+lemma models_Uprod [Inhabited I] [(i : I) → Inhabited (A i)] {σ : Sentence L} :
+    (Uprod A 𝓤) ⊧ σ ↔ {i | Semantics.realize (s i).toStruc σ} ∈ 𝓤 :=
   by simp[models_def, Semiformula.val_Uprod, Empty.eq_elim]
 
 variable (A)
@@ -120,7 +120,8 @@ variable (A : FinSubtheory T → Type u) [s : (i : FinSubtheory T) → Structure
 
 instance : Inhabited (FinSubtheory T) := ⟨∅, by simp⟩
 
-lemma ultrafilter_exists (H : ∀ (i : FinSubtheory T), (A i) ⊧* (i.val : Theory L)) :
+lemma ultrafilter_exists [(t : FinSubtheory T) → Inhabited (A t)]
+    (H : ∀ (i : FinSubtheory T), (A i) ⊧* (i.val : Theory L)) :
     ∃ 𝓤 : Ultrafilter (FinSubtheory T), Set.image (Semiformula.domain A) T ⊆ 𝓤.sets :=
   Ultrafilter.exists_ultrafilter_of_finite_inter_nonempty _ (by
     haveI : DecidableEq (Set (FinSubtheory T)) := fun _ _ => Classical.propDecidable _
@@ -131,20 +132,20 @@ lemma ultrafilter_exists (H : ∀ (i : FinSubtheory T), (A i) ⊧* (i.val : Theo
     exact H ⟨t, ht⟩ hσ)
 
 lemma compactnessAux :
-    Semantics.Satisfiableₛ T ↔ ∀ i : FinSubtheory T, Semantics.Satisfiableₛ (i.val : Theory L) := by
+    Semantics.SatisfiableTheory T ↔ ∀ i : FinSubtheory T, Semantics.SatisfiableTheory (i.val : Theory L) := by
   constructor
-  · rintro h ⟨t, ht⟩; exact Semantics.Satisfiableₛ.of_subset h ht
+  · rintro h ⟨t, ht⟩; exact Semantics.SatisfiableTheory.of_subset h ht
   · intro h
     have : ∀ i : FinSubtheory T, ∃ (M : Type u) (_ : Inhabited M) (_ : Structure L M), M ⊧* (i.val : Theory L) :=
-      by intro i; exact satisfiableₛ_iff.mp (h i)
+      by intro i; exact satisfiableTheory_iff.mp (h i)
     choose A si s hA using this
     have : ∃ 𝓤 : Ultrafilter (FinSubtheory T), Set.image (Semiformula.domain A) T ⊆ 𝓤.sets := ultrafilter_exists A hA
     rcases this with ⟨𝓤, h𝓤⟩
     have : Structure.Uprod A 𝓤 ⊧* T := by intro σ hσ; exact models_Uprod.mpr (h𝓤 $ Set.mem_image_of_mem (Semiformula.domain A) hσ)
-    exact satisfiableₛ_intro (Structure.Uprod A 𝓤) this
+    exact satisfiableTheory_intro (Structure.Uprod A 𝓤) this
 
 theorem compactness :
-    Semantics.Satisfiableₛ T ↔ ∀ T' : Finset (Sentence L), ↑T' ⊆ T → Semantics.Satisfiableₛ (T' : Theory L) := by
+    Semantics.SatisfiableTheory T ↔ ∀ T' : Finset (Sentence L), ↑T' ⊆ T → Semantics.SatisfiableTheory (T' : Theory L) := by
   rw[compactnessAux]; simp
 
 instance : Compact (Sentence L) := ⟨compactness⟩
