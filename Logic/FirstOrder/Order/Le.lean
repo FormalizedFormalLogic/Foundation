@@ -93,7 +93,7 @@ lemma provOf (σ : Sentence L)
          [Structure.Eq L M]
          [Structure.LT L M]
          [Theory.Mod M T],
-         M ⊧ σ) :
+         M ⊧ₘ σ) :
     T ⊨ σ := consequence_iff_eq.mpr fun M _ _ _ hT =>
   letI : Theory.Mod (Structure.Model L M) T := ⟨((Structure.ElementaryEquiv.modelsTheory (Structure.Model.elementaryEquiv L M)).mp hT)⟩
   (Structure.ElementaryEquiv.models (Structure.Model.elementaryEquiv L M)).mpr

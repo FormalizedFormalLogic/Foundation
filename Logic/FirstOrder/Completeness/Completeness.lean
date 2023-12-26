@@ -15,13 +15,13 @@ section Encodable
 variable [(k : ℕ) → DecidableEq (L.Func k)] [(k : ℕ) → DecidableEq (L.Rel k)]  [(k : ℕ) → Encodable (L.Func k)] [(k : ℕ) → Encodable (L.Rel k)]
 
 noncomputable def DerivationWA.completeness_of_encodable
-  {Γ : List (Sentence L)} (h : ∀ M [Inhabited M] [Structure L M], M ⊧* T → ∃ σ ∈ Γ, M ⊧ σ) :
+  {Γ : List (Sentence L)} (h : ∀ M [Inhabited M] [Structure L M], M ⊧ₘ* T → ∃ σ ∈ Γ, M ⊧ₘ σ) :
     T ⊢'' (Γ.map Rew.emb.hom : Sequent L) := by
   have : WellFounded (SearchTree.Lt T (Γ.map Rew.emb.hom : Sequent L)) := by
     by_contra nwf
-    have : ∃ σ ∈ Γ, (Model T (Γ.map Rew.emb.hom : Sequent L)) ⊧ σ := h _ (Model.models nwf)
+    have : ∃ σ ∈ Γ, (Model T (Γ.map Rew.emb.hom : Sequent L)) ⊧ₘ σ := h _ (Model.models nwf)
     rcases this with ⟨σ, hσ, h⟩
-    have : ¬(Model T (Γ.map Rew.emb.hom : Sequent L)) ⊧ σ := by
+    have : ¬(Model T (Γ.map Rew.emb.hom : Sequent L)) ⊧ₘ σ := by
       simpa using semanticMainLemmaTop nwf (p := Rew.emb.hom σ) (by simp; exact ⟨σ, hσ, rfl⟩)
     contradiction
   exact syntacticMainLemmaTop this

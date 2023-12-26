@@ -45,9 +45,9 @@ instance : Semantics (Formula α) (Set α) := ⟨val⟩
 namespace Val
 variable {v : Set α}
 
-@[simp] protected lemma atom : v ⊧ₛ (atom a) ↔ a ∈ v := iff_of_eq rfl
+@[simp] protected lemma atom : v ⊧ (atom a) ↔ a ∈ v := iff_of_eq rfl
 
-@[simp] protected lemma natom : v ⊧ₛ (natom a) ↔ a ∉ v := iff_of_eq rfl
+@[simp] protected lemma natom : v ⊧ (natom a) ↔ a ∉ v := iff_of_eq rfl
 
 end Val
 

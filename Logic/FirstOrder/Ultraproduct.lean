@@ -101,12 +101,12 @@ lemma val_Uprod {p : Formula L μ} :
 end Semiformula
 
 lemma models_Uprod [Inhabited I] [(i : I) → Inhabited (A i)] {σ : Sentence L} :
-    (Uprod A 𝓤) ⊧ σ ↔ {i | Semantics.realize (s i).toStruc σ} ∈ 𝓤 :=
+    (Uprod A 𝓤) ⊧ₘ σ ↔ {i | Semantics.realize (s i).toStruc σ} ∈ 𝓤 :=
   by simp[models_def, Semiformula.val_Uprod, Empty.eq_elim]
 
 variable (A)
 
-def Semiformula.domain (σ : Sentence L) := {i | (A i) ⊧ σ}
+def Semiformula.domain (σ : Sentence L) := {i | (A i) ⊧ₘ σ}
 
 end
 
@@ -121,7 +121,7 @@ variable (A : FinSubtheory T → Type u) [s : (i : FinSubtheory T) → Structure
 instance : Inhabited (FinSubtheory T) := ⟨∅, by simp⟩
 
 lemma ultrafilter_exists [(t : FinSubtheory T) → Inhabited (A t)]
-    (H : ∀ (i : FinSubtheory T), (A i) ⊧* (i.val : Theory L)) :
+    (H : ∀ (i : FinSubtheory T), (A i) ⊧ₘ* (i.val : Theory L)) :
     ∃ 𝓤 : Ultrafilter (FinSubtheory T), Set.image (Semiformula.domain A) T ⊆ 𝓤.sets :=
   Ultrafilter.exists_ultrafilter_of_finite_inter_nonempty _ (by
     haveI : DecidableEq (Set (FinSubtheory T)) := fun _ _ => Classical.propDecidable _
@@ -136,12 +136,12 @@ lemma compactnessAux :
   constructor
   · rintro h ⟨t, ht⟩; exact Semantics.SatisfiableTheory.of_subset h ht
   · intro h
-    have : ∀ i : FinSubtheory T, ∃ (M : Type u) (_ : Inhabited M) (_ : Structure L M), M ⊧* (i.val : Theory L) :=
+    have : ∀ i : FinSubtheory T, ∃ (M : Type u) (_ : Inhabited M) (_ : Structure L M), M ⊧ₘ* (i.val : Theory L) :=
       by intro i; exact satisfiableTheory_iff.mp (h i)
     choose A si s hA using this
     have : ∃ 𝓤 : Ultrafilter (FinSubtheory T), Set.image (Semiformula.domain A) T ⊆ 𝓤.sets := ultrafilter_exists A hA
     rcases this with ⟨𝓤, h𝓤⟩
-    have : Structure.Uprod A 𝓤 ⊧* T := by intro σ hσ; exact models_Uprod.mpr (h𝓤 $ Set.mem_image_of_mem (Semiformula.domain A) hσ)
+    have : Structure.Uprod A 𝓤 ⊧ₘ* T := by intro σ hσ; exact models_Uprod.mpr (h𝓤 $ Set.mem_image_of_mem (Semiformula.domain A) hσ)
     exact satisfiableTheory_intro (Structure.Uprod A 𝓤) this
 
 theorem compactness :

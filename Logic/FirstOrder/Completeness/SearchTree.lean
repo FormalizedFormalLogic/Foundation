@@ -308,7 +308,7 @@ lemma semanticMainLemma_val : (p : SyntacticFormula L) → p ∈ ⛓️ → ¬Va
       assumption
   termination_by semanticMainLemma_val p _ => p.complexity
 
-lemma Model.models : Model T Γ ⊧* T := by
+lemma Model.models : Model T Γ ⊧ₘ* T := by
   intro σ hσ; simpa using semanticMainLemma_val nwf _ (chainSet_id nwf hσ)
 
 lemma semanticMainLemmaTop {p : SyntacticFormula L} (h : p ∈ Γ) : ¬Val (Model.structure T Γ) Semiterm.fvar p :=

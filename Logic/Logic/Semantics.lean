@@ -21,22 +21,22 @@ variable {α : Type*} [𝓢 : Semantics F α]
 
 def realizeTheory (a : α) (T : Set F) : Prop := ∀ ⦃f⦄, f ∈ T → realize a f
 
-postfix:max " ⊧ₛ " => realize
+postfix:max " ⊧ " => realize
 
-infix:60 " ⊧ₛ* " => realizeTheory
+infix:60 " ⊧* " => realizeTheory
 
-def consequence (T : Set F) (f : F) : Prop := ∀ ⦃a : α⦄, a ⊧ₛ* T → a ⊧ₛ f
+def consequence (T : Set F) (f : F) : Prop := ∀ ⦃a : α⦄, a ⊧* T → a ⊧ f
 
--- note that ⊨ (\vDash) is *NOT* ⊧ (\models)
+-- note that ⊨ (\vDash) is *NOT* ⊧ₘ (\models)
 infix:55 " ⊨ " => consequence
 
-def Valid (f : F) : Prop := ∀ ⦃a : α⦄, a ⊧ₛ f
+def Valid (f : F) : Prop := ∀ ⦃a : α⦄, a ⊧ f
 
-def ValidTheory (T : Set F) : Prop := ∀ ⦃a : α⦄, a ⊧ₛ* T
+def ValidTheory (T : Set F) : Prop := ∀ ⦃a : α⦄, a ⊧* T
 
-def Satisfiable (f : F) : Prop := ∃ a : α, a ⊧ₛ f
+def Satisfiable (f : F) : Prop := ∃ a : α, a ⊧ f
 
-def SatisfiableTheory (T : Set F) : Prop := ∃ a : α, a ⊧ₛ* T
+def SatisfiableTheory (T : Set F) : Prop := ∃ a : α, a ⊧* T
 
 lemma valid_neg_iff (f : F) : Valid (~f) ↔ ¬Satisfiable f := by simp[Valid, Satisfiable]
 
@@ -44,27 +44,27 @@ lemma not_satisfiable_finset [DecidableEq F] (t : Finset F) :
     ¬SatisfiableTheory (t : Set F) ↔ Valid (t.image (~·)).disj :=
   by simp[SatisfiableTheory, realizeTheory, Valid, Finset.map_disj]
 
-lemma realizeTheory_of_subset {T U : Set F} {a : α} (h : a ⊧ₛ* U) (ss : T ⊆ U) : a ⊧ₛ* T :=
+lemma realizeTheory_of_subset {T U : Set F} {a : α} (h : a ⊧* U) (ss : T ⊆ U) : a ⊧* T :=
   fun _ hf => h (ss hf)
 
-@[simp] lemma realizeTheoryEmpty {a : α} : a ⊧ₛ* (∅ : Set F) := fun p => by simp
+@[simp] lemma realizeTheoryEmpty {a : α} : a ⊧* (∅ : Set F) := fun p => by simp
 
 @[simp] lemma realizeTheory_insert {T : Set F} {f : F} {a : α} :
-    a ⊧ₛ* insert f T ↔ a ⊧ₛ f ∧ a ⊧ₛ* T := by
+    a ⊧* insert f T ↔ a ⊧ f ∧ a ⊧* T := by
   simp[realizeTheory]
 
 @[simp] lemma realizeTheory_union {T U : Set F} {a : α} :
-    a ⊧ₛ* T ∪ U ↔ a ⊧ₛ* T ∧ a ⊧ₛ* U := by
+    a ⊧* T ∪ U ↔ a ⊧* T ∧ a ⊧* U := by
   simp[realizeTheory]
   exact
   ⟨fun h => ⟨fun f hf => h (Or.inl hf), fun f hf => h (Or.inr hf)⟩,
    by rintro ⟨h₁, h₂⟩ f (h | h); exact h₁ h; exact h₂ h⟩
 
 @[simp] lemma realizeTheory_image {ι} {f : ι → F} {A : Set ι} {a : α} :
-    a ⊧ₛ* f '' A ↔ ∀ i ∈ A, a ⊧ₛ (f i) := by simp[realizeTheory]
+    a ⊧* f '' A ↔ ∀ i ∈ A, a ⊧ (f i) := by simp[realizeTheory]
 
 @[simp] lemma realizeTheory_range {ι} {f : ι → F} {a : α} :
-    a ⊧ₛ* Set.range f ↔ ∀ i, a ⊧ₛ (f i) := by simp[realizeTheory]
+    a ⊧* Set.range f ↔ ∀ i, a ⊧ (f i) := by simp[realizeTheory]
 
 lemma SatisfiableTheory.of_subset {T U : Set F} (h : SatisfiableTheory U) (ss : T ⊆ U) : SatisfiableTheory T :=
   by rcases h with ⟨a, h⟩; exact ⟨a, realizeTheory_of_subset h ss⟩
@@ -76,10 +76,10 @@ lemma of_mem {T : Set F} {f} (h : f ∈ T) : T ⊨ f := fun _ hs => hs h
 
 lemma consequence_iff {T : Set F} {f : F} : T ⊨ f ↔ ¬SatisfiableTheory (insert (~f) T) := by
   simp[consequence, SatisfiableTheory]; constructor
-  · intro h a hf hT; have : a ⊧ₛ f := h hT; contradiction
+  · intro h a hf hT; have : a ⊧ f := h hT; contradiction
   · intro h a; contrapose; exact h a
 
-def theory (a : α) : Set F := {p | a ⊧ₛ p}
+def theory (a : α) : Set F := {p | a ⊧ p}
 
 def Subtheory (T U : Set F) : Prop := ∀ {f}, T ⊨ f → U ⊨ f
 
@@ -98,8 +98,8 @@ def ofSubset (h : T ⊆ U) : Subtheory T U := fun b => weakening b h
 
 end Subtheory
 
-lemma realizeTheory_of_subtheory {a : α} {T U : Set F} (h : a ⊧ₛ* U) (ss : Subtheory T U) :
-    a ⊧ₛ* T := fun _ hf => (ss (of_mem hf)) h
+lemma realizeTheory_of_subtheory {a : α} {T U : Set F} (h : a ⊧* U) (ss : Subtheory T U) :
+    a ⊧* T := fun _ hf => (ss (of_mem hf)) h
 
 namespace Equivalent
 
@@ -115,13 +115,13 @@ variable (T U T₁ T₂ T₃ : Set F)
 end Equivalent
 
 class Mod (a : α) (T : Set F) where
-  realizeTheory : a ⊧ₛ* T
+  realizeTheory : a ⊧* T
 
 namespace Mod
 
 variable (a : α) {T : Set F} [Mod a T]
 
-lemma models {f : F} (hf : f ∈ T) : a ⊧ₛ f := realizeTheory hf
+lemma models {f : F} (hf : f ∈ T) : a ⊧ f := realizeTheory hf
 
 def of_ss {T₁ T₂ : Set F} [Mod a T₁] (ss : T₂ ⊆ T₁) : Mod a T₂ :=
   ⟨realizeTheory_of_subset realizeTheory ss⟩
@@ -132,7 +132,7 @@ def of_subtheory {T₁ T₂ : Set F} [Mod a T₁] (h : Subtheory T₂ T₁) : Mo
 end Mod
 
 lemma consequence_iff' {T : Set F} {σ : F} :
-    T ⊨ σ ↔ (∀ (a : α) [Mod a T], a ⊧ₛ σ) :=
+    T ⊨ σ ↔ (∀ (a : α) [Mod a T], a ⊧ σ) :=
   ⟨fun h _ hM => h hM.realizeTheory, fun H a hs => @H a ⟨hs⟩⟩
 
 end Semantics

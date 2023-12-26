@@ -66,8 +66,8 @@ end DerivationCR
 theorem soundness {T} {σ : Sentence L} : T ⊢ σ → T ⊨ σ := fun b s hT => by
   rcases b.derivation.sound s.Dom default with ⟨p, hp, h⟩
   simp at hp; rcases hp with (⟨π, hπ, rfl⟩ | rfl)
-  · have : s.Dom ⊧ π := hT (b.antecedent_ss π hπ)
-    have : ¬s.Dom ⊧ π := by simpa using h
+  · have : s.Dom ⊧ₘ π := hT (b.antecedent_ss π hπ)
+    have : ¬s.Dom ⊧ₘ π := by simpa using h
     contradiction
   · simpa using h
 

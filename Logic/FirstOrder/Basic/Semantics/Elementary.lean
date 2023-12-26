@@ -183,7 +183,7 @@ namespace Structure
 
 variable (L M₁ M₂)
 
-def ElementaryEquiv : Prop := ∀ σ : Sentence L, M₁ ⊧ σ ↔ M₂ ⊧ σ
+def ElementaryEquiv : Prop := ∀ σ : Sentence L, M₁ ⊧ₘ σ ↔ M₂ ⊧ₘ σ
 
 notation:50 M₁ " ≡ₑ[" L "] " M₂ => ElementaryEquiv L M₁ M₂
 
@@ -204,10 +204,10 @@ lemma trans :
   fun h₁ h₂ σ => Iff.trans (h₁ σ) (h₂ σ)
 
 lemma models (h : M₁ ≡ₑ[L] M₂) :
-    ∀ {σ : Sentence L}, M₁ ⊧ σ ↔ M₂ ⊧ σ := @h
+    ∀ {σ : Sentence L}, M₁ ⊧ₘ σ ↔ M₂ ⊧ₘ σ := @h
 
 lemma modelsTheory (h : M₁ ≡ₑ[L] M₂) {T : Theory L} :
-    M₁ ⊧* T ↔ M₂ ⊧* T := by simp[modelsTheory_iff, h.models]
+    M₁ ⊧ₘ* T ↔ M₂ ⊧ₘ* T := by simp[modelsTheory_iff, h.models]
 
 lemma ofEquiv [Inhabited N] (φ : M ≃ N) :
     letI : Structure L N := Structure.ofEquiv φ
@@ -224,17 +224,17 @@ section EmbeddingClass
 variable {F : Type*} [Structure.EmbeddingClass F L M₁ M₂] (φ : F)
 variable {e₁ : Fin n → M₁} {ε₁ : μ → M₁}
 
-lemma models_hom_iff_of_qfree {σ : Sentence L} (hσ : σ.qfree) : M₁ ⊧ σ ↔ M₂ ⊧ σ := by
+lemma models_hom_iff_of_qfree {σ : Sentence L} (hσ : σ.qfree) : M₁ ⊧ₘ σ ↔ M₂ ⊧ₘ σ := by
   simpa[Matrix.empty_eq, Empty.eq_elim] using
     Semiformula.eval_hom_iff_of_qfree (e₁ := finZeroElim) (ε₁ := Empty.elim) φ hσ
 
 lemma models_hom_univClosure {n} {σ : Semisentence L n} (hσ : σ.qfree) :
-    M₂ ⊧ (univClosure σ) → M₁ ⊧ (univClosure σ) := by
+    M₂ ⊧ₘ (univClosure σ) → M₁ ⊧ₘ (univClosure σ) := by
   simpa[Matrix.empty_eq, Empty.eq_elim, models_iff] using
     Semiformula.eval_hom_univClosure (ε₁ := Empty.elim) φ hσ
 
 lemma models_hom_univClosure_of_submodels (H : M₁ ↪ₛ[L] M₂) {n} {σ : Semisentence L n} (hσ : σ.qfree) :
-    M₂ ⊧ (univClosure σ) → M₁ ⊧ (univClosure σ) := models_hom_univClosure H hσ
+    M₂ ⊧ₘ (univClosure σ) → M₁ ⊧ₘ (univClosure σ) := models_hom_univClosure H hσ
 
 section
 

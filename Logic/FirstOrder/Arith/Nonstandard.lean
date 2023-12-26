@@ -31,9 +31,9 @@ lemma satisfiable_trueArithWithStarUnbounded (c : ℕ) : Semantics.SatisfiableTh
   haveI : Structure.Add ℒₒᵣ⋆ ℕ := ⟨fun _ _ => rfl⟩
   haveI : Structure.Eq ℒₒᵣ⋆ ℕ := ⟨fun _ _ => iff_of_eq rfl⟩
   haveI : Structure.LT ℒₒᵣ⋆ ℕ := ⟨fun _ _ => iff_of_eq rfl⟩
-  have : ℕ ⊧* starUnbounded c := by
+  have : ℕ ⊧ₘ* starUnbounded c := by
     simp[starUnbounded, models_iff]; exact Fin.prop
-  have : ℕ ⊧* trueArithWithStarUnbounded c := by
+  have : ℕ ⊧ₘ* trueArithWithStarUnbounded c := by
     simp[trueArithWithStarUnbounded, models_iff]; exact this
   exact satisfiableTheory_intro ℕ this
 
@@ -57,10 +57,10 @@ def star : ℕ⋆ := Semiterm.Operator.val (L := ℒₒᵣ⋆) Semiterm.Operator
 
 local notation "⋆" => star
 
-lemma models_union_trueArithWithStarUnbounded : ℕ⋆ ⊧* ⋃ c, trueArithWithStarUnbounded c := ModelOfSatEq.models _
+lemma models_union_trueArithWithStarUnbounded : ℕ⋆ ⊧ₘ* ⋃ c, trueArithWithStarUnbounded c := ModelOfSatEq.models _
 
-lemma trueArith : ℕ⋆ ⊧* 𝐓𝐀 := by
-  have : ℕ⋆ ⊧* Semiformula.lMap (Language.Hom.add₁ _ _) '' 𝐓𝐀 :=
+lemma trueArith : ℕ⋆ ⊧ₘ* 𝐓𝐀 := by
+  have : ℕ⋆ ⊧ₘ* Semiformula.lMap (Language.Hom.add₁ _ _) '' 𝐓𝐀 :=
     Semantics.realizeTheory_of_subset models_union_trueArithWithStarUnbounded
       (Set.subset_iUnion_of_subset 0 $ Set.subset_union_of_subset_left (Set.subset_union_right _ _ ) _)
   intro σ hσ
@@ -76,7 +76,7 @@ lemma trueArith : ℕ⋆ ⊧* 𝐓𝐀 := by
         ←Semiformula.eval_lMap, Matrix.fun_eq_vec₂]⟩
     haveI : Structure.LT ℒₒᵣ ℕ⋆ := ⟨fun _ _ => iff_of_eq rfl⟩
     exact standardModel_unique _ _
-  have : s.toStruc ⊧ₛ σ := Semiformula.models_lMap.mp (this (Set.mem_image_of_mem _ hσ))
+  have : s.toStruc ⊧ σ := Semiformula.models_lMap.mp (this (Set.mem_image_of_mem _ hσ))
   exact e ▸ this
 
 instance : Theory.Mod ℕ⋆ 𝐓𝐀 := ⟨trueArith⟩
@@ -85,7 +85,7 @@ instance : Theory.Mod ℕ⋆ (Theory.PAminus ℒₒᵣ) :=
   Theory.Mod.of_ss (T₁ := 𝐓𝐀) _ (Structure.subset_of_models.mpr $ Arith.Standard.modelsTheoryPAminus)
 
 lemma star_unbounded (n : ℕ) : n < ⋆ := by
-  have : ℕ⋆ ⊧ (“!!(Semiterm.Operator.numeral ℒₒᵣ⋆ n) < ⋆” : Sentence ℒₒᵣ⋆) :=
+  have : ℕ⋆ ⊧ₘ (“!!(Semiterm.Operator.numeral ℒₒᵣ⋆ n) < ⋆” : Sentence ℒₒᵣ⋆) :=
     models_union_trueArithWithStarUnbounded
       (Set.mem_iUnion_of_mem (n + 1) (Set.mem_union_right _ $ Set.mem_range_self $ Fin.last n))
   simpa [models_iff] using this

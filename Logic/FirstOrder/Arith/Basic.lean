@@ -56,7 +56,7 @@ namespace Arith
 
 class Sound {L : Language} [Structure L ℕ]
     (T : Theory L) (F : Sentence L → Prop) where
-  sound : ∀ {σ}, F σ → T ⊢! σ → ℕ ⊧ σ
+  sound : ∀ {σ}, F σ → T ⊢! σ → ℕ ⊧ₘ σ
 
 section
 
@@ -76,7 +76,7 @@ lemma consequence_of (σ : Sentence L)
          [Structure L M]
          [Structure.ORing L M]
          [Theory.Mod M T],
-         M ⊧ σ) :
+         M ⊧ₘ σ) :
     T ⊨ σ := consequence_iff_eq.mpr fun M _ _ _ hT =>
   letI : Theory.Mod (Structure.Model L M) T :=
     ⟨((Structure.ElementaryEquiv.modelsTheory (Structure.Model.elementaryEquiv L M)).mp hT)⟩

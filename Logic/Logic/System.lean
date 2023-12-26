@@ -104,7 +104,7 @@ class Sound where
   sound : ∀ {T : Set F} {p : F}, T ⊢ p → T ⊨ p
 
 class SoundOn (M : Type w) (a : α) (H : Set F) where
-  sound : ∀ {T : Set F} {p : F}, p ∈ H → T ⊢ p → a ⊧ₛ p
+  sound : ∀ {T : Set F} {p : F}, p ∈ H → T ⊢ p → a ⊧ p
 
 class Complete extends Sound F where
   complete : ∀ {T : Set F} {p : F}, T ⊨ p → T ⊢ p
@@ -119,20 +119,20 @@ variable {a : α}
 lemma sound' {T : Set F} {f : F} : T ⊢! f → T ⊨ f := by rintro ⟨b⟩; exact sound b
 
 lemma not_provable_of_countermodel {T : Set F} {p : F}
-  (hT : a ⊧ₛ* T) (hp : ¬a ⊧ₛ p) : IsEmpty (T ⊢ p) :=
-  ⟨fun b => by have : a ⊧ₛ p := Sound.sound b hT; contradiction⟩
+  (hT : a ⊧* T) (hp : ¬a ⊧ p) : IsEmpty (T ⊢ p) :=
+  ⟨fun b => by have : a ⊧ p := Sound.sound b hT; contradiction⟩
 
 lemma consistent_of_model {T : Set F}
-  (hT : a ⊧ₛ* T) : System.Consistent T :=
+  (hT : a ⊧* T) : System.Consistent T :=
   not_provable_of_countermodel (p := ⊥) hT (by simp)
 
 lemma consistent_of_satisfiable {T : Set F} : Semantics.SatisfiableTheory T → System.Consistent T := by
   rintro ⟨_, h⟩; exact consistent_of_model h
 
-lemma models_of_proof {T : Set F} {f} (h : a ⊧ₛ* T) (b : T ⊢ f) : a ⊧ₛ f :=
+lemma models_of_proof {T : Set F} {f} (h : a ⊧* T) (b : T ⊢ f) : a ⊧ f :=
   Sound.sound b h
 
-lemma modelsTheory_of_proofTheory {T U : Set F} (h : s ⊧ₛ* T) (b : T ⊢* U) : s ⊧ₛ* U :=
+lemma modelsTheory_of_proofTheory {T U : Set F} (h : s ⊧* T) (b : T ⊢* U) : s ⊧* U :=
   fun _ hf => models_of_proof h (b hf)
 
 end Sound

@@ -61,7 +61,7 @@ namespace Standard
 
 variable {μ : Type v} (e : Fin n → ℕ) (ε : μ → ℕ)
 
-lemma modelsTheoryPAminus : ℕ ⊧* Theory.PAminus ℒₒᵣ := by
+lemma modelsTheoryPAminus : ℕ ⊧ₘ* Theory.PAminus ℒₒᵣ := by
   intro σ h
   rcases h <;> simp[models_def, ←le_iff_eq_or_lt]
   case addAssoc => intro l m n; exact add_assoc l m n
@@ -75,13 +75,13 @@ lemma modelsTheoryPAminus : ℕ ⊧* Theory.PAminus ℒₒᵣ := by
   case ltTrans => intro l m n; exact Nat.lt_trans
   case ltTri => intro n m; exact Nat.lt_trichotomy n m
 
-lemma modelsSuccInd (σ : Semisentence ℒₒᵣ (k + 1)) : ℕ ⊧ (Arith.succInd σ) := by
+lemma modelsSuccInd (σ : Semisentence ℒₒᵣ (k + 1)) : ℕ ⊧ₘ (Arith.succInd σ) := by
   simp[succInd, models_iff, Matrix.constant_eq_singleton, Matrix.comp_vecCons', Semiformula.eval_substs]
   intro e hzero hsucc x; induction' x with x ih
   · exact hzero
   · exact hsucc x ih
 
-lemma modelsPeano : ℕ ⊧* (Theory.IndScheme Set.univ ∪ Theory.PAminus ℒₒᵣ ∪ Theory.Eq ℒₒᵣ) :=
+lemma modelsPeano : ℕ ⊧ₘ* (Theory.IndScheme Set.univ ∪ Theory.PAminus ℒₒᵣ ∪ Theory.Eq ℒₒᵣ) :=
   by simp[Theory.IndScheme, modelsSuccInd, modelsTheoryPAminus]
 
 end Standard

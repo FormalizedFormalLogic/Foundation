@@ -25,7 +25,7 @@ instance [LO.Complete F] : Intuitionistic F where
   modus_ponens := fun {T p q} b₁ b₂ =>
     Complete.consequence_iff_provable.mp (fun a hM => by
       rcases b₁ with ⟨b₁⟩; rcases b₂ with ⟨b₂⟩
-      have : a ⊧ₛ p → a ⊧ₛ q := by simpa using Sound.models_of_proof hM b₁
+      have : a ⊧ p → a ⊧ q := by simpa using Sound.models_of_proof hM b₁
       exact this (Sound.models_of_proof hM b₂))
   verum  := fun T => Complete.consequence_iff_provable.mp (fun _ _ => by simp)
   imply₁ := fun T p q => Complete.consequence_iff_provable.mp (fun _ _ => by simp; exact fun a _ => a)
