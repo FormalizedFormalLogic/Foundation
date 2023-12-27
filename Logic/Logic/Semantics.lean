@@ -6,6 +6,10 @@ import Logic.Logic.LogicSymbol
 This file defines the semantics of formulas based on Tarski's truth definitions.
 Also provides a characterization of compactness.
 
+## Main Definitions
+* `LO.Semantics`: The realization of a formula.
+* `LO.Compact`: The semantic compactness of logic.
+
 -/
 
 namespace LO

@@ -5,6 +5,10 @@ import Logic.Logic.System
 
 This file defines a characterization of Tait style calculus and Gentzen style calculus.
 
+## Main Definitions
+* `LO.Tait`
+* `LO.Gentzen`
+
 -/
 
 namespace LO

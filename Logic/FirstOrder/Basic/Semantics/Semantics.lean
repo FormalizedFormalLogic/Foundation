@@ -1,6 +1,13 @@
 import Logic.Logic.Semantics
 import Logic.FirstOrder.Basic.Syntax.Formula
 
+/-!
+# Semantics of first-order logic
+
+This file defines the structure and the evaluation of terms and formulas by Tarski's truth definition.
+
+-/
+
 namespace LO
 
 namespace FirstOrder

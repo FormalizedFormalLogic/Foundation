@@ -3,8 +3,13 @@ import Logic.Vorspiel.Vorspiel
 /-!
 # Logic Symbols
 
-This file defines structure that has logical connectives $\top, \bot, \land, \lor, \to, \lnot$ `LogicSymbol F`
-and their homomorphisms `F →L G`.
+This file defines structure that has logical connectives $\top, \bot, \land, \lor, \to, \lnot$
+and their homomorphisms.
+
+## Main Definitions
+* `LO.LogicSymbol` is defined so that `LO.LogicSymbol F` is a type that has logical connectives $\top, \bot, \land, \lor, \to, \lnot$.
+* `LO.LogicSymbol.Hom` is defined so that `f : F →L G` is a homomorphism from `F` to `G`, i.e.,
+a function that preserves logical connectives.
 
 -/
 
