@@ -7,19 +7,23 @@ namespace Modal
 
 inductive Formula (α : Type u) : Type u where
   | atom   : α → Formula α
-  | verum  : Formula α
   | falsum : Formula α
   | imp    : Formula α → Formula α → Formula α
-  | and    : Formula α → Formula α → Formula α
-  | or     : Formula α → Formula α → Formula α
   | box    : Formula α → Formula α
-  | dia    : Formula α → Formula α
 
 namespace Formula
 
 variable {α : Type u}
 
-def neg (p : Formula α) : Formula α := imp p falsum
+@[simp] def neg (p : Formula α) : Formula α := imp p falsum
+
+@[simp] def verum : Formula α := neg falsum
+
+@[simp] def or (p q : Formula α) : Formula α := imp (neg p) (q)
+
+@[simp] def and (p q : Formula α) : Formula α := neg (imp p (neg q))
+
+@[simp] def dia (p : Formula α) : Formula α := neg (box (neg p))
 
 instance : ModalLogicSymbol (Formula α) where
   tilde := neg
@@ -36,20 +40,22 @@ section ToString
 variable [ToString α]
 
 def toStr : Formula α → String
+  | ◇p     => "\\Diamond " ++ toStr p
   | ⊤       => "\\top"
   | ⊥       => "\\bot"
   | atom a  => "{" ++ toString a ++ "}"
-  | p ⋏ q   => "\\left(" ++ toStr p ++ " \\land " ++ toStr q ++ "\\right)"
-  | p ⋎ q   => "\\left(" ++ toStr p ++ " \\lor "  ++ toStr q ++ "\\right)"
   | p ⟶ q   => "\\left(" ++ toStr p ++ " \\to "   ++ toStr q ++ "\\right)"
-  | box p      => "\\Box " ++ toStr p
-  | dia p      => "\\Diamond " ++ toStr p
+  | □p      => "\\Box " ++ toStr p
 
 instance : Repr (Formula α) := ⟨fun t _ => toStr t⟩
 
 instance : ToString (Formula α) := ⟨toStr⟩
 
 end ToString
+
+@[simp] lemma or_eq (p q : Formula α) : p ⋎ q = or p q := rfl
+
+@[simp] lemma and_eq (p q : Formula α) : p ⋏ q = and p q := rfl
 
 lemma neg_eq (p : Formula α) : ~p = neg p := rfl
 
@@ -66,27 +72,16 @@ lemma iff_eq (p q : Formula α) : p ⟷ q = (p ⟶ q) ⋏ (q ⟶ p) := rfl
 @[simp] lemma box_inj (p q : Formula α) : □p = □q ↔ p = q := by simp[Box.box]
 
 @[simp] lemma dia_inj (p q : Formula α) : ◇p = ◇q ↔ p = q := by simp[Dia.dia]
+
 def complexity : Formula α → ℕ
 | atom _  => 0
-| ⊤       => 0
 | ⊥       => 0
-| p ⋏ q   => max p.complexity q.complexity + 1
-| p ⋎ q   => max p.complexity q.complexity + 1
 | p ⟶ q  => max p.complexity q.complexity + 1
 | □p      => p.complexity + 1
-| ◇p     => p.complexity + 1
-
-@[simp] lemma complexity_top : complexity (⊤ : Formula α) = 0 := rfl
 
 @[simp] lemma complexity_bot : complexity (⊥ : Formula α) = 0 := rfl
 
 @[simp] lemma complexity_atom (a : α) : complexity (atom a) = 0 := rfl
-
-@[simp] lemma complexity_and (p q : Formula α) : complexity (p ⋏ q) = max p.complexity q.complexity + 1 := rfl
-@[simp] lemma complexity_and' (p q : Formula α) : complexity (and p q) = max p.complexity q.complexity + 1 := rfl
-
-@[simp] lemma complexity_or (p q : Formula α) : complexity (p ⋎ q) = max p.complexity q.complexity + 1 := rfl
-@[simp] lemma complexity_or' (p q : Formula α) : complexity (or p q) = max p.complexity q.complexity + 1 := rfl
 
 @[simp] lemma complexity_imp (p q : Formula α) : complexity (p ⟶ q) = max p.complexity q.complexity + 1 := rfl
 @[simp] lemma complexity_imp' (p q : Formula α) : complexity (imp p q) = max p.complexity q.complexity + 1 := rfl
@@ -94,48 +89,29 @@ def complexity : Formula α → ℕ
 @[simp] lemma complexity_box (p : Formula α) : complexity (□p) = p.complexity + 1 := rfl
 @[simp] lemma complexity_box' (p : Formula α) : complexity (box p) = p.complexity + 1 := rfl
 
-@[simp] lemma complexity_dia (p : Formula α) : complexity (◇p) = p.complexity + 1 := rfl
-@[simp] lemma complexity_dia' (p : Formula α) : complexity (dia p) = p.complexity + 1 := rfl
-
 @[elab_as_elim]
 def cases' {C : Formula α → Sort w}
-    (hverum  : C ⊤)
     (hfalsum : C ⊥)
     (hatom   : ∀ a : α, C (atom a))
-    (hand    : ∀ (p q : Formula α), C (p ⋏ q))
-    (hor     : ∀ (p q : Formula α), C (p ⋎ q))
     (himp    : ∀ (p q : Formula α), C (p ⟶ q))
     (hbox    : ∀ (p : Formula α), C (□p))
-    (hdia    : ∀ (p : Formula α), C (◇p))
     : (p : Formula α) → C p
-  | ⊤       => hverum
   | ⊥       => hfalsum
   | atom a  => hatom a
-  | p ⋏ q   => hand p q
-  | p ⋎ q   => hor p q
   | p ⟶ q  => himp p q
   | □p      => hbox p
-  | ◇p     => hdia p
 
 @[elab_as_elim]
 def rec' {C : Formula α → Sort w}
-  (hverum  : C ⊤)
   (hfalsum : C ⊥)
   (hatom   : ∀ a : α, C (atom a))
-  (hand    : ∀ (p q : Formula α), C p → C q → C (p ⋏ q))
-  (hor     : ∀ (p q : Formula α), C p → C q → C (p ⋎ q))
   (himp    : ∀ (p q : Formula α), C p → C q → C (p ⟶ q))
   (hbox    : ∀ (p : Formula α), C p → C (□p))
-  (hdia    : ∀ (p : Formula α), C p → C (◇p))
   : (p : Formula α) → C p
-  | ⊤       => hverum
   | ⊥       => hfalsum
   | atom a  => hatom a
-  | p ⋏ q   => hand p q (rec' hverum hfalsum hatom hand hor himp hbox hdia p) (rec' hverum hfalsum hatom hand hor himp hbox hdia q)
-  | p ⋎ q   => hor p q (rec' hverum hfalsum hatom hand hor himp hbox hdia p) (rec' hverum hfalsum hatom hand hor himp hbox hdia q)
-  | p ⟶ q  => himp p q (rec' hverum hfalsum hatom hand hor himp hbox hdia p) (rec' hverum hfalsum hatom hand hor himp hbox hdia q)
-  | □p      => hbox p (rec' hverum hfalsum hatom hand hor himp hbox hdia p)
-  | ◇p     => hdia p (rec' hverum hfalsum hatom hand hor himp hbox hdia p)
+  | p ⟶ q  => himp p q (rec' hfalsum hatom himp hbox p) (rec' hfalsum hatom himp hbox q)
+  | □p      => hbox p (rec' hfalsum hatom himp hbox p)
 
 -- @[simp] lemma complexity_neg (p : Formula α) : complexity (~p) = p.complexity + 1 :=
 --   by induction p using rec' <;> try { simp[neg_eq, neg, *]; rfl;}
@@ -145,33 +121,12 @@ section Decidable
 variable [DecidableEq α]
 
 def hasDecEq : (p q : Formula α) → Decidable (p = q)
-  | ⊤, q => by
-    cases q using cases' <;>
-    { simp; try { exact isFalse not_false }; try { exact isTrue trivial } }
   | ⊥, q => by
     cases q using cases' <;>
     { simp; try { exact isFalse not_false }; try { exact isTrue trivial } }
   | atom a, q => by
     cases q using cases' <;> try { simp; exact isFalse not_false }
     simp; exact decEq _ _
-  | p ⋏ q, r => by
-    cases r using cases' <;> try { simp; exact isFalse not_false }
-    case hand p' q' =>
-      exact match hasDecEq p p' with
-      | isTrue hp =>
-        match hasDecEq q q' with
-        | isTrue hq  => isTrue (hp ▸ hq ▸ rfl)
-        | isFalse hq => isFalse (by simp[hp, hq])
-      | isFalse hp => isFalse (by simp[hp])
-  | p ⋎ q, r => by
-    cases r using cases' <;> try { simp; exact isFalse not_false }
-    case hor p' q' =>
-      exact match hasDecEq p p' with
-      | isTrue hp =>
-        match hasDecEq q q' with
-        | isTrue hq  => isTrue (hp ▸ hq ▸ rfl)
-        | isFalse hq => isFalse (by simp[hp, hq])
-      | isFalse hp => isFalse (by simp[hp])
   | p ⟶ q, r => by
     cases r using cases' <;> try { simp; exact isFalse not_false }
     case himp p' q' =>
@@ -187,14 +142,33 @@ def hasDecEq : (p q : Formula α) → Decidable (p = q)
       exact match hasDecEq p p' with
       | isTrue hp  => isTrue (hp ▸ rfl)
       | isFalse hp => isFalse (by simp[hp])
-  | ◇p, q => by
-    cases q using cases' <;> try { simp; exact isFalse not_false }
-    case hdia p' =>
-      exact match hasDecEq p p' with
-      | isTrue hp  => isTrue (hp ▸ rfl)
-      | isFalse hp => isFalse (by simp[hp])
 
 end Decidable
+
+def multibox (p : Formula α) : ℕ → Formula α
+  | 0     => p
+  | n + 1 => □(multibox p n)
+
+notation "□^" n:90 p => multibox p n
+
+def multidia (p : Formula α) : ℕ → Formula α
+  | 0     => p
+  | n + 1 => ◇(multidia p n)
+
+notation "◇^" n:90 p => multidia p n
+
+section Geach
+
+def Geach' (p q : Formula α) : ℕ → ℕ → ℕ → ℕ → Formula α
+  | 0,     0,     0,     0     => p ⟶ q
+  | 0,     0,     m + 1, 0     => Geach' p (□q) 0 0 m 0
+  | 0,     0,     m,     n + 1 => Geach' p (◇q) 0 0 m n
+  | k + 1, 0,     m,     n     => Geach' (◇p) q k 0 m n
+  | k,     l + 1, m,     n     => Geach' (□p) q k l m n
+
+def Geach (p: Formula α) := Geach' p p
+
+end Geach
 
 end Formula
 

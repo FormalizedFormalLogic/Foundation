@@ -10,7 +10,7 @@ notation Γ "⊢ᴴ" p => Γ ⊢² [p]
 
 class Minimal (F : Type u) [LogicSymbol F] extends TwoSided F where
   neg          {p : F}                  : ~p = p ⟶ ⊥
-  axm          (Γ : List F) (p : F)     : p ∈ Γ → Γ ⊢ᴴ p
+  axm          {Γ : List F} {p : F}     : p ∈ Γ → Γ ⊢ᴴ p
   modus_ponens {Γ : List F} {p q : F}   : (Γ ⊢ᴴ p ⟶ q) → (Γ ⊢ᴴ p) → (Γ ⊢ᴴ q)
   verum        (Γ : List F)             : Γ ⊢ᴴ ⊤
   imply₁       (Γ : List F) (p q : F)   : Γ ⊢ᴴ p ⟶ (q ⟶ p)

@@ -1,4 +1,4 @@
-import Logic.Modal.Basic.Formula
+import Logic.Modal.Basic.Formula2
 import Logic.Modal.Basic.HilbertStyle
 import Logic.Modal.Basic.Semantics
 
@@ -10,65 +10,21 @@ open Formula
 
 variable {α β : Type u} {p : Formula α} (f : Frame β)
 
-theorem Hilbert.LogicK.WeakSoundness : (⊢ᴴ(𝗞) p) → (f ⊨ᶠ p) := by
+theorem Hilbert.LogicK.WeakSoundness {p : Formula α} (f : Frame β) : (⊢ᴴ(𝗞)! p) → (⊨ᶠ[f] p) := by
   intro h;
-  cases h
-  case axm => aesop;
-  case verum => simp [satisfies];
-  case imply₁ =>
+  cases' h.some <;> simp_all [satisfies_imp, satisfies];
+  case disj₃ p =>
     intro V w;
-    simp [satisfies_imp2];
-    aesop;
-  case imply₂ =>
-    intro V w;
-    simp [satisfies_imp2];
-    aesop;
-  case conj₁ =>
-    intro V w;
-    simp [satisfies_imp2];
-    simp [satisfies];
-    aesop;
-  case conj₂ =>
-    intro V w;
-    simp [satisfies_imp2];
-    simp [satisfies];
-  case conj₃ =>
-    intro V w;
-    simp [satisfies_imp2];
-    simp [satisfies];
-    aesop;
-  case disj₁ =>
-    intro V w;
-    simp [satisfies_imp2];
-    simp [satisfies];
-    aesop;
-  case disj₂ =>
-    intro V w;
-    simp [satisfies_imp2];
-    simp [satisfies];
-    aesop;
-  case disj₃ =>
-    intro V w;
-    simp [satisfies_imp2];
-    simp [satisfies];
-    aesop;
-  case explode p =>
-    simp [models_imp2];
-    simp [satisfies];
-  case em p =>
-    intro V w;
-    simp [satisfies, satisfies_neg'];
-    apply Classical.em;
-  case modus_ponens q d₁ d₂ =>
-    sorry;
-    -- apply framesMP;
-    -- rcases q with ⟨q₁, q₂⟩;
-    -- exact frames_imp2.mp (WeakSoundness d₁) (WeakSoundness d₂);
-  case necessitation d =>
-    apply framesNec;
-    sorry
-    -- exact WeakSoundness d;
-  case K p => apply framesK;
+    by_cases (w ⊨ˢ[⟨f, V⟩] p) <;> simp_all;
+  case modus_ponens q d₁ d₂ => exact frames_ModusPonens (WeakSoundness f (Nonempty.intro d₂)) (WeakSoundness f (Nonempty.intro d₁));
+  case necessitation q d => exact frames_Necessitation $ WeakSoundness f (Nonempty.intro d);
+  termination_by WeakSoundness p f d => (d.some.length)
+
+theorem Hilbert.LogicK.Consistent : (⊬ᴴ(𝗞)! (⊥ : Formula α)) := by
+  by_contra hC; simp at hC;
+  have w := f.nonempty.some;
+  suffices ⊨ᶠ[f] (⊥ : Formula α) by simp_all [satisfies_bot]; exact this w;
+  exact WeakSoundness f hC;
 
 end Modal
 

@@ -47,57 +47,55 @@ variable {α β : Type*}
 
 def satisfies (m : Model α β) (w : α) : Formula β → Prop
   | atom  p => m.val w p
-  | ⊤       => True
   | ⊥       => False
-  | p ⋏ q   => p.satisfies m w ∧ q.satisfies m w
-  | p ⋎ q   => p.satisfies m w ∨ q.satisfies m w
-  | p ⟶ q  => p.satisfies m w → q.satisfies m w
+  | p ⟶ q  => (p.satisfies m w) → (q.satisfies m w)
   | □p      => ∀w', m.rel w w' → p.satisfies m w'
-  | ◇p     => ∃w', m.rel w w' ∧ p.satisfies m w'
 
-notation "[" m "," w "] ⊨ˢ " p => satisfies m w p
-notation "[" m "," w "] ⊭ˢ " p => ¬([m, w] ⊨ˢ p)
+notation w " ⊨ˢ[" m "] " p => satisfies m w p
+notation w " ⊭ˢ[" m "] " p => ¬(w ⊨ˢ[m] p)
 
-notation "[" f "," v "," w "] ⊨ˢ " p => [(Model.mk f v), w] ⊨ˢ p
-notation "[" f "," v "," w "] ⊭ˢ " p => ¬([f, v, w] ⊨ˢ p)
+lemma satisfies_atom : (w ⊨ˢ[m] atom p) ↔ m.val w p := by simp [satisfies];
 
-lemma satisfies_box : ([m, w] ⊨ˢ □p) ↔ (∀w', m.rel w w' → ([m, w'] ⊨ˢ p)) := by simp [satisfies];
+lemma satisfies_top : (w ⊨ˢ[m] ⊤) := by simp [satisfies];
 
-lemma satisfies_dia : ([m, w] ⊨ˢ ◇p) ↔ (∃w', m.rel w w' ∧ ([m, w'] ⊨ˢ p)) := by simp [satisfies];
+lemma satisfies_bot : (w ⊨ˢ[m] ⊥) ↔ False := by simp [satisfies];
 
-lemma satisfies_neg : ([m, w] ⊨ˢ (neg p)) ↔ ([m, w] ⊭ˢ p) := by simp [satisfies];
+lemma satisfies_and : (w ⊨ˢ[m] p ⋏ q) ↔ (w ⊨ˢ[m] p) ∧ (w ⊨ˢ[m] q) := by simp [satisfies];
 
-lemma satisfies_neg' : ([m, w] ⊨ˢ ~p) ↔ ([m, w] ⊭ˢ p) := by simp [satisfies];
+-- lemma satisfies_or : (w ⊨ˢ[m] p ⋎ q) ↔ (w ⊨ˢ[m] p) ∨ (w ⊨ˢ[m] q) := by simp [satisfies];
 
-lemma satisfies_imp : ([m, w] ⊨ˢ p ⟶ q) ↔ ([m, w] ⊨ˢ p) → ([m, w] ⊨ˢ q) := by simp [satisfies];
+lemma satisfies_imp : (w ⊨ˢ[m] p ⟶ q) ↔ (w ⊨ˢ[m] p) → (w ⊨ˢ[m] q) := by simp [satisfies];
 
-@[simp]
-def models (m : Model α β) (p : Formula β) := ∀w, ([m, w] ⊨ˢ p)
-notation m " ⊨ᵐ "  p => models m p
-notation m " ⊭ᵐ "  p => ¬(m ⊨ᵐ p)
+lemma satisfies_box : (w ⊨ˢ[m] □p) ↔ (∀w', m.rel w w' → (w' ⊨ˢ[m] p)) := by simp [satisfies];
+lemma satisfies_dia : (w ⊨ˢ[m] ◇p) ↔ (∃w', m.rel w w' ∧ (w' ⊨ˢ[m] p)) := by simp [satisfies];
 
-lemma models_MP {m : Model α β} : (m ⊨ᵐ p ⟶ q) ↔ (m ⊨ᵐ p) → (m ⊨ᵐ q) := by sorry;
+lemma satisfies_neg : (w ⊨ˢ[m] (neg p)) ↔ (w ⊭ˢ[m] p) := by simp [satisfies];
+lemma satisfies_neg' : (w ⊨ˢ[m] ~p) ↔ (w ⊭ˢ[m] p) := by simp [satisfies];
 
 @[simp]
-def frames (f : Frame α) (p : Formula β) := ∀v, (Model.mk f v) ⊨ᵐ p
-notation f " ⊨ᶠ "  p => frames f p
-notation f " ⊭ᶠ "  p => ¬(f ⊨ᶠ p)
+def models (m : Model α β) (p : Formula β) := ∀w, (w ⊨ˢ[m] p)
 
-lemma frames_MP {f : Frame α} : (f ⊨ᶠ p ⟶ q) ↔ (f ⊨ᶠ p) → (f ⊨ᶠ q) := by
-  apply Iff.intro;
-  . intro h₁ h₂ v;
-    exact models_MP.mp (h₁ v) (h₂ v);
-  . intro h V;
-    sorry;
+notation "⊨ᵐ[" m "] "  p => models m p
+notation "⊭ᵐ[" m "] "  p => ¬(⊨ᵐ[m] p)
 
-lemma frames_Nec {f : Frame α} : (f ⊨ᶠ p) → (f ⊨ᶠ □p) := by
+lemma models_ModusPonens {m : Model α β} : (⊨ᵐ[m] p ⟶ q) → (⊨ᵐ[m] p) → (⊨ᵐ[m] q) := by simp_all [satisfies_imp];
+
+@[simp]
+def frames (f : Frame α) (p : Formula β) := ∀v, ⊨ᵐ[⟨f, v⟩] p
+
+notation "⊨ᶠ[" f "] " p => frames f p
+notation "⊭ᶠ[" f "] " p => ¬(⊨ᶠ[f] p)
+
+lemma frames_ModusPonens {f : Frame α} : (⊨ᶠ[f] p ⟶ q) → (⊨ᶠ[f] p) → (⊨ᶠ[f] q) := by simp_all [satisfies_imp];
+
+lemma frames_Necessitation {f : Frame α} : (⊨ᶠ[f] p) → (⊨ᶠ[f] □p) := by
   intro h v w;
   simp [satisfies];
   aesop;
 
 variable (f : Frame α) {p q : Formula β}
 
-lemma frames_K : f ⊨ᶠ □(p ⟶ q) ⟶ □p ⟶ □q := by
+lemma frames_AxiomK : ⊨ᶠ[f] □(p ⟶ q) ⟶ □p ⟶ □q := by
   intro v w;
   simp [satisfies_imp];
   simp [satisfies];
@@ -106,53 +104,53 @@ lemma frames_K : f ⊨ᶠ □(p ⟶ q) ⟶ □p ⟶ □q := by
   simp [satisfies_neg] at this;
   aesop;
 
-lemma defines_T : (f ⊨ᶠ □p ⟶ p) ↔ (f.Reflexive) := by
+lemma defines_T : (⊨ᶠ[f] □p ⟶ p) ↔ (f.Reflexive) := by
   constructor;
   . sorry;
   . intro hRefl v w;
     simp [satisfies];
     aesop;
 
-lemma defines_D  : (f ⊨ᶠ □p ⟶ ◇p) ↔ (f.Serial) := by
+lemma defines_D  : (⊨ᶠ[f] □p ⟶ ◇p) ↔ (f.Serial) := by
   apply Iff.intro;
   . intro h;
     by_contra hC; simp at hC;
     have ⟨w₁, r₁⟩ := hC;
     simp [satisfies_imp] at h;
     let V : α → β → Prop := λ _ _ => True;
-    have : [⟨f, V⟩, w₁] ⊨ˢ □p := by simp [satisfies]; simp_all;
-    have : [⟨f, V⟩, w₁] ⊭ˢ ◇p := by simp [satisfies]; simp_all;
+    have : w₁ ⊨ˢ[⟨f, V⟩] □p := by simp [satisfies]; simp_all;
+    have : w₁ ⊭ˢ[⟨f, V⟩] ◇p := by simp [satisfies]; simp_all;
     aesop;
   . intro hSerial v w₁;
     let ⟨w₂, r₁₂⟩ := hSerial w₁;
     simp [satisfies_imp, satisfies];
     aesop;
 
-lemma defines_B : (f ⊨ᶠ p ⟶ □◇p) ↔ (f.Symmetric) := by
+lemma defines_B : (⊨ᶠ[f] p ⟶ □◇p) ↔ (f.Symmetric) := by
   constructor;
   . sorry;
   . simp [satisfies_imp, satisfies]; aesop;
 
-lemma defines_A4 : (f ⊨ᶠ □p ⟶ □□p) ↔ (f.Transitive) := by
+lemma defines_A4 : (⊨ᶠ[f] □p ⟶ □□p) ↔ (f.Transitive) := by
   constructor;
   . sorry;
   . intro hTrans v w₁;
     simp [satisfies_imp, satisfies];
     aesop;
 
-lemma defines_A5 : (f ⊨ᶠ ◇p ⟶ □◇p) ↔ (f.Euclidean) := by
+lemma defines_A5 : (⊨ᶠ[f] ◇p ⟶ □◇p) ↔ (f.Euclidean) := by
   constructor;
   . sorry;
   . intro hEucl v w₁;
     simp [satisfies_imp, satisfies];
     aesop;
 
-lemma defines_L : (f ⊨ᶠ □(□p ⟶ p) ⟶ □p) ↔ (f.Transitive ∧ ¬f.InfiniteAscent) := by
+lemma defines_L : (⊨ᶠ[f] □(□p ⟶ p) ⟶ □p) ↔ (f.Transitive ∧ ¬f.InfiniteAscent) := by
   constructor;
   . sorry;
   . sorry;
 
-lemma defines_Dot2 : (f ⊨ᶠ □p ⟶ ◇□p) ↔ (f.Directed) := by
+lemma defines_Dot2 : (⊨ᶠ[f] □p ⟶ ◇□p) ↔ (f.Directed) := by
   constructor;
   . sorry;
   . sorry;

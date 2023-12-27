@@ -66,80 +66,92 @@ class LogicS4Grz extends LogicS4 F, HasAxiomGrz F
 
 end Axioms
 
-
 namespace LogicK
 
 variable {α : Type u}
 
-inductive Derives' : List (Formula α) → List (Formula α) → Type _
-  | axm (Γ p)            : p ∈ Γ → Derives' Γ [p]
-  | modus_ponens {Γ p q} : Derives' Γ [p ⟶ q] → Derives' Γ [p] → Derives' Γ [q]
-  | verum (Γ)            : Derives' Γ [⊤]
-  | imply₁ (Γ) (p q)     : Derives' Γ [p ⟶ q ⟶ p]
-  | imply₂ (Γ) (p q r)   : Derives' Γ [(p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r]
-  | conj₁ (Γ) (p q)      : Derives' Γ [p ⋏ q ⟶ p]
-  | conj₂ (Γ) (p q)      : Derives' Γ [p ⋏ q ⟶ q]
-  | conj₃ (Γ) (p q)      : Derives' Γ [p ⟶ q ⟶ p ⋏ q]
-  | disj₁ (Γ) (p q)      : Derives' Γ [p ⟶ p ⋎ q]
-  | disj₂ (Γ) (p q)      : Derives' Γ [q ⟶ p ⋎ q]
-  | disj₃ (Γ) (p q r)    : Derives' Γ [(p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r)]
-  | explode (Γ) (p)      : Derives' Γ [⊥ ⟶ p]
-  | em (Γ) (p)           : Derives' Γ [p ⋎ ~p]
-  | necessitation {Γ p}  : Derives' Γ [p] → Derives' Γ [□p]
-  | K (Γ) (p q)          : Derives' Γ [□(p ⟶ q) ⟶ □p ⟶ □q]
+inductive DerivationH' : List (Formula α) → List (Formula α) → Type _
+  | axm {Γ p}            : p ∈ Γ → DerivationH' Γ [p]
+  | modus_ponens {Γ p q} : DerivationH' Γ [p ⟶ q] → DerivationH' Γ [p] → DerivationH' Γ [q]
+  | verum (Γ)            : DerivationH' Γ [⊤]
+  | imply₁ (Γ) (p q)     : DerivationH' Γ [p ⟶ q ⟶ p]
+  | imply₂ (Γ) (p q r)   : DerivationH' Γ [(p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r]
+  | conj₁ (Γ) (p q)      : DerivationH' Γ [p ⋏ q ⟶ p]
+  | conj₂ (Γ) (p q)      : DerivationH' Γ [p ⋏ q ⟶ q]
+  | conj₃ (Γ) (p q)      : DerivationH' Γ [p ⟶ q ⟶ p ⋏ q]
+  | disj₁ (Γ) (p q)      : DerivationH' Γ [p ⟶ p ⋎ q]
+  | disj₂ (Γ) (p q)      : DerivationH' Γ [q ⟶ p ⋎ q]
+  | disj₃ (Γ) (p q r)    : DerivationH' Γ [(p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r)]
+  | explode (Γ) (p)      : DerivationH' Γ [⊥ ⟶ p]
+  | em (Γ) (p)           : DerivationH' Γ [p ⋎ ~p]
+  | necessitation {Γ p}  : DerivationH' Γ [p] → DerivationH' Γ [□p]
+  | K (Γ) (p q)          : DerivationH' Γ [□(p ⟶ q) ⟶ □p ⟶ □q]
 
-instance : TwoSided (Formula α) := ⟨LogicK.Derives'⟩
+instance : TwoSided (Formula α) := ⟨LogicK.DerivationH'⟩
 
-def Derives (Γ : List (Formula α)) (p : Formula α) := LogicK.Derives' Γ [p]
+def DerivationH (Γ : List (Formula α)) (p : Formula α) := LogicK.DerivationH' Γ [p]
 
-infixl:45 " ⊢ᴴ(𝗞) " => Derives
+infixl:45 " ⊢ᴴ(𝗞) " => DerivationH
 
-abbrev Proves (p : Formula α) := ∅ ⊢ᴴ(𝗞) p
+abbrev DerivableH (Γ : List (Formula α)) (p : Formula α) := Nonempty (Γ ⊢ᴴ(𝗞) p)
 
-prefix:45 "⊢ᴴ(𝗞) " => Proves
+notation Γ " ⊢ᴴ(𝗞)! " p => DerivableH Γ p
+
+abbrev ProofH (p : Formula α) := ∅ ⊢ᴴ(𝗞) p
+
+prefix:45 "⊢ᴴ(𝗞) " => ProofH
+
+abbrev ProvableH (p : Formula α) := Nonempty (⊢ᴴ(𝗞) p)
+
+prefix:45 "⊢ᴴ(𝗞)! " => ProvableH
+
+abbrev UnprovableH (p : Formula α) := IsEmpty (⊢ᴴ(𝗞) p)
+
+prefix:45 "⊬ᴴ(𝗞)!" => UnprovableH
 
 instance : LogicK (Formula α) where
   neg := rfl
-  necessitation := LogicK.Derives'.necessitation
-  K := LogicK.Derives'.K
-  axm := LogicK.Derives'.axm
-  modus_ponens := LogicK.Derives'.modus_ponens
-  verum := LogicK.Derives'.verum
-  imply₁ := LogicK.Derives'.imply₁
-  imply₂ := LogicK.Derives'.imply₂
-  conj₁ := LogicK.Derives'.conj₁
-  conj₂ := LogicK.Derives'.conj₂
-  conj₃ := LogicK.Derives'.conj₃
-  disj₁ := LogicK.Derives'.disj₁
-  disj₂ := LogicK.Derives'.disj₂
-  disj₃ := LogicK.Derives'.disj₃
-  explode := LogicK.Derives'.explode
-  em := LogicK.Derives'.em
+  necessitation := LogicK.DerivationH'.necessitation
+  K := LogicK.DerivationH'.K
+  axm := LogicK.DerivationH'.axm
+  modus_ponens := LogicK.DerivationH'.modus_ponens
+  verum := LogicK.DerivationH'.verum
+  imply₁ := LogicK.DerivationH'.imply₁
+  imply₂ := LogicK.DerivationH'.imply₂
+  conj₁ := LogicK.DerivationH'.conj₁
+  conj₂ := LogicK.DerivationH'.conj₂
+  conj₃ := LogicK.DerivationH'.conj₃
+  disj₁ := LogicK.DerivationH'.disj₁
+  disj₂ := LogicK.DerivationH'.disj₂
+  disj₃ := LogicK.DerivationH'.disj₃
+  explode := LogicK.DerivationH'.explode
+  em := LogicK.DerivationH'.em
 
-def Derives'.length {Γ Δ : List (Formula α)} : Derives' Γ Δ → ℕ
-  | axm _ _ _ => 0
+def DerivationH'.length {Γ Δ : List (Formula α)} : DerivationH' Γ Δ → ℕ
   | modus_ponens d₁ d₂ => d₁.length + d₂.length + 1
   | necessitation d₁ => d₁.length + 1
-  | verum _ => 0
-  | imply₁ _ _ _ => 0
-  | imply₂ _ _ _ _ => 0
-  | conj₁ _ _ _ => 0
-  | conj₂ _ _ _ => 0
-  | conj₃ _ _ _ => 0
-  | disj₁ _ _ _ => 0
-  | disj₂ _ _ _ => 0
-  | disj₃ _ _ _ _ => 0
-  | explode _ _ => 0
-  | em _ _ => 0
-  | K _ _ _ => 0
+  | _ => 0
 
-def Derives.length {Γ : List (Formula α)} {p : Formula α} : Γ ⊢ᴴ(𝗞) p → ℕ := Derives'.length
+namespace DerivationH
 
-def Proves.length {p : Formula α} : ⊢ᴴ(𝗞) p → ℕ := Derives.length
+def length {Γ : List (Formula α)} {p : Formula α} : Γ ⊢ᴴ(𝗞) p → ℕ := DerivationH'.length
 
-lemma Derives.length_lt_imp1 (d₁ : Γ ⊢ᴴ(𝗞) p) (d₂ : Γ ⊢ᴴ(𝗞) (p ⟶ q)) : d₁.length < d₂.length := by sorry;
+protected def cast (d : Γ ⊢ᴴ(𝗞) p) (e₁ : Γ = Δ) (e₂ : p = q) : Δ ⊢ᴴ(𝗞) q := cast (by simp [e₁,e₂]) d
 
-lemma Derives.length_lt_imp2 (d₁ :  Γ ⊢ᴴ(𝗞) q) (d₂ : Γ ⊢ᴴ(𝗞) (p ⟶ q)) : d₁.length < d₂.length := by sorry;
+@[simp] lemma length_cast (d : Γ ⊢ᴴ(𝗞) p) (e₁ : Γ = Δ) (e₂ : p = q) : (d.cast e₁ e₂).length = d.length := by
+  rcases e₁ with rfl; rcases e₂ with rfl; simp [DerivationH.cast]
+
+def castL (d : Γ ⊢ᴴ(𝗞) p) (e₁ : Γ = Δ) : Δ ⊢ᴴ(𝗞) p := d.cast e₁ rfl
+
+@[simp] lemma length_castL (d : Γ ⊢ᴴ(𝗞) p) (e₁ : Γ = Δ) : (d.castL e₁).length = d.length := length_cast d e₁ rfl
+
+def castR (d : Γ ⊢ᴴ(𝗞) p) (e₂ : p = q) : Γ ⊢ᴴ(𝗞) q := d.cast rfl e₂
+
+@[simp] lemma length_castR (d : Γ ⊢ᴴ(𝗞) p) (e₂ : p = q) : (d.castR e₂).length = d.length := length_cast d rfl e₂
+
+end DerivationH
+
+def ProofH.length {p : Formula α} : ⊢ᴴ(𝗞) p → ℕ := DerivationH.length
 
 end LogicK
 
@@ -147,34 +159,20 @@ namespace LogicS4
 
 variable {α : Type u}
 
-inductive Derives' : List (Formula α) → List (Formula α) → Type _
-  | modus_ponens {Γ p q} : (Derives' Γ [p ⟶ q]) → (Derives' Γ [p]) → (Derives' Γ [q])
-  | verum (Γ) : Derives' Γ [⊤]
-  | imply₁ (Γ) (p q) : Derives' Γ [p ⟶ q ⟶ p]
-  | imply₂ (Γ) (p q r) : Derives' Γ [(p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r]
-  | conj₁ (Γ) (p q) : Derives' Γ [p ⋏ q ⟶ p]
-  | conj₂ (Γ) (p q) : Derives' Γ [p ⋏ q ⟶ q]
-  | conj₃ (Γ) (p q) : Derives' Γ [p ⟶ q ⟶ p ⋏ q]
-  | disj₁ (Γ) (p q) : Derives' Γ [p ⟶ p ⋎ q]
-  | disj₂ (Γ) (p q) : Derives' Γ [q ⟶ p ⋎ q]
-  | disj₃ (Γ) (p q r) : Derives' Γ [(p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r)]
-  | explode (Γ) (p) : Derives' Γ [⊥ ⟶ p]
-  | em (Γ) (p) : Derives' Γ [p ⋎ ~p]
-  | necessitation {Γ p} : (Derives' Γ [p]) → (Derives' Γ [□p])
-  | K (Γ) (p q) : Derives' Γ [□(p ⟶ q) ⟶ □p ⟶ □q]
-  | T (Γ) (p) : Derives' Γ [□p ⟶ p]
-  | A4 (Γ) (p) : Derives' Γ [□p ⟶ □□p]
+inductive DerivationH' : List (Formula α) → List (Formula α) → Type _
+  | drvK : LogicK.DerivationH' Γ Δ → DerivationH' Γ Δ
+  | T (Γ) (p) : DerivationH' Γ [□p ⟶ p]
+  | A4 (Γ) (p) : DerivationH' Γ [□p ⟶ □□p]
 
-instance : TwoSided (Formula α) := ⟨LogicS4.Derives'⟩
+instance : TwoSided (Formula α) := ⟨LogicS4.DerivationH'⟩
 
-def Derives (Γ : List (Formula α)) (p : Formula α) := Derives' Γ [p]
+def DerivationH (Γ : List (Formula α)) (p : Formula α) := DerivationH' Γ [p]
 
-infixl:45 " ⊢ᴴ(𝗦𝟰) " => Derives
+infixl:45 " ⊢ᴴ(𝗦𝟰) " => DerivationH
 
-abbrev Proves (p : Formula α) := ∅ ⊢ᴴ(𝗦𝟰) p
+abbrev ProofH (p : Formula α) := ∅ ⊢ᴴ(𝗦𝟰) p
 
-prefix:45 "⊢ᴴ(𝗦𝟰) " => Proves
-
+prefix:45 "⊢ᴴ(𝗦𝟰) " => ProofH
 
 end LogicS4
 
@@ -183,33 +181,30 @@ namespace LogicS5
 
 variable {α : Type u}
 
-inductive Derives' : List (Formula α) → List (Formula α) → Type _
-  | modus_ponens {Γ p q} : (Derives' Γ [p ⟶ q]) → (Derives' Γ [p]) → (Derives' Γ [q])
-  | necessitation {Γ p} : (Derives' Γ [p]) → (Derives' Γ [□p])
-  | verum (Γ) : Derives' Γ [⊤]
-  | K (Γ) (p q) : Derives' Γ [□(p ⟶ q) ⟶ □p ⟶ □q]
-  | T (Γ) (p) : Derives' Γ [□p ⟶ p]
-  | B (Γ) (p) : Derives' Γ [p ⟶ □◇p]
-  | A4 (Γ) (p) : Derives' Γ [□p ⟶ □□p]
+inductive DerivationH' : List (Formula α) → List (Formula α) → Type _
+  | drvK : LogicK.DerivationH' Γ Δ → DerivationH' Γ Δ
+  | T (Γ) (p) : DerivationH' Γ [□p ⟶ p]
+  | B (Γ) (p) : DerivationH' Γ [p ⟶ □◇p]
+  | A4 (Γ) (p) : DerivationH' Γ [□p ⟶ □□p]
 
-instance : TwoSided (Formula α) := ⟨LogicS5.Derives'⟩
+instance : TwoSided (Formula α) := ⟨LogicS5.DerivationH'⟩
 
-def Derives (Γ : List (Formula α)) (p : Formula α) := Derives' Γ [p]
+def DerivationH (Γ : List (Formula α)) (p : Formula α) := DerivationH' Γ [p]
 
-infixl:45 " ⊢ᴴ(𝗦𝟱) " => Derives
+infixl:45 " ⊢ᴴ(𝗦𝟱) " => DerivationH
 
-abbrev Proves (p : Formula α) := ∅ ⊢ᴴ(𝗦𝟱) p
+abbrev ProofH (p : Formula α) := ∅ ⊢ᴴ(𝗦𝟱) p
 
-prefix:45 "⊢ᴴ(𝗦𝟱) " => Proves
+prefix:45 "⊢ᴴ(𝗦𝟱) " => ProofH
 
 
 /-
 instance : LogicS5 (Formula α) where
-  necessitation := LogicS5.Derives'.necessitation
-  K := LogicS5.Derives'.K _ _ _
-  T := LogicS5.Derives'.T _ _
-  B := LogicS5.Derives'.B _ _
-  A4 := LogicS5.Derives'.A4 _ _
+  necessitation := LogicS5.DerivationH'.necessitation
+  K := LogicS5.DerivationH'.K _ _ _
+  T := LogicS5.DerivationH'.T _ _
+  B := LogicS5.DerivationH'.B _ _
+  A4 := LogicS5.DerivationH'.A4 _ _
 -/
 
 end LogicS5
@@ -219,29 +214,29 @@ namespace LogicGL
 
 variable {α : Type u}
 
-inductive Derives' : List (Formula α) → List (Formula α) → Type _
-  | modus_ponens {Γ p q} : (Derives' Γ [p ⟶ q]) → (Derives' Γ [p]) → (Derives' Γ [q])
-  | necessitation {Γ p} : (Derives' Γ [p]) → (Derives' Γ [□p])
-  | verum (Γ) : Derives' Γ [⊤]
-  | K (Γ) (p q) : Derives' Γ [□(p ⟶ q) ⟶ □p ⟶ □q]
-  | L (Γ) (p) : Derives' Γ [□(□p ⟶ p) ⟶ □p]
+inductive DerivationH' : List (Formula α) → List (Formula α) → Type _
+  | modus_ponens {Γ p q} : (DerivationH' Γ [p ⟶ q]) → (DerivationH' Γ [p]) → (DerivationH' Γ [q])
+  | necessitation {Γ p} : (DerivationH' Γ [p]) → (DerivationH' Γ [□p])
+  | verum (Γ) : DerivationH' Γ [⊤]
+  | K (Γ) (p q) : DerivationH' Γ [□(p ⟶ q) ⟶ □p ⟶ □q]
+  | L (Γ) (p) : DerivationH' Γ [□(□p ⟶ p) ⟶ □p]
 
-instance : TwoSided (Formula α) := ⟨LogicGL.Derives'⟩
+instance : TwoSided (Formula α) := ⟨LogicGL.DerivationH'⟩
 
-def Derives (Γ : List (Formula α)) (p : Formula α) := Derives' Γ [p]
+def DerivationH (Γ : List (Formula α)) (p : Formula α) := DerivationH' Γ [p]
 
-infixl:45 " ⊢ᴴ(𝗚𝗟) " => Derives
+infixl:45 " ⊢ᴴ(𝗚𝗟) " => DerivationH
 
-abbrev Proves (p : Formula α) := ∅ ⊢ᴴ(𝗚𝗟) p
+abbrev ProofH (p : Formula α) := ∅ ⊢ᴴ(𝗚𝗟) p
 
-prefix:45 "⊢ᴴ(𝗚𝗟) " => Proves
+prefix:45 "⊢ᴴ(𝗚𝗟) " => ProofH
 
 
 /-
 instance : LogicGL (Formula α) where
-  necessitation := LogicGL.Derives'.necessitation
-  K := LogicGL.Derives'.K _ _ _
-  L := LogicGL.Derives'.L _ _
+  necessitation := LogicGL.DerivationH'.necessitation
+  K := LogicGL.DerivationH'.K _ _ _
+  L := LogicGL.DerivationH'.L _ _
 -/
 
 end LogicGL
@@ -251,33 +246,33 @@ namespace LogicS4Dot2
 
 variable {α : Type u}
 
-inductive Derives' : List (Formula α) → List (Formula α) → Type _
-  | modus_ponens {Γ p q} : (Derives' Γ [p ⟶ q]) → (Derives' Γ [p]) → (Derives' Γ [q])
-  | necessitation {Γ p} : (Derives' Γ [p]) → (Derives' Γ [□p])
-  | verum (Γ) : Derives' Γ [⊤]
-  | K (Γ) (p q) : Derives' Γ [□(p ⟶ q) ⟶ □p ⟶ □q]
-  | T (Γ) (p) : Derives' Γ [□p ⟶ p]
-  | B (Γ) (p) : Derives' Γ [p ⟶ □◇p]
-  | A4 (Γ) (p) : Derives' Γ [□p ⟶ □□p]
-  | Dot2 (Γ) (p) : Derives' Γ [◇□p ⟶ □◇p]
+inductive DerivationH' : List (Formula α) → List (Formula α) → Type _
+  | modus_ponens {Γ p q} : (DerivationH' Γ [p ⟶ q]) → (DerivationH' Γ [p]) → (DerivationH' Γ [q])
+  | necessitation {Γ p} : (DerivationH' Γ [p]) → (DerivationH' Γ [□p])
+  | verum (Γ) : DerivationH' Γ [⊤]
+  | K (Γ) (p q) : DerivationH' Γ [□(p ⟶ q) ⟶ □p ⟶ □q]
+  | T (Γ) (p) : DerivationH' Γ [□p ⟶ p]
+  | B (Γ) (p) : DerivationH' Γ [p ⟶ □◇p]
+  | A4 (Γ) (p) : DerivationH' Γ [□p ⟶ □□p]
+  | Dot2 (Γ) (p) : DerivationH' Γ [◇□p ⟶ □◇p]
 
-instance : TwoSided (Formula α) := ⟨LogicS4Dot2.Derives'⟩
+instance : TwoSided (Formula α) := ⟨LogicS4Dot2.DerivationH'⟩
 
-def Derives (Γ : List (Formula α)) (p : Formula α) := Derives' Γ [p]
+def DerivationH (Γ : List (Formula α)) (p : Formula α) := DerivationH' Γ [p]
 
-infixl:45 " ⊢ᴴ(𝗦𝟰.𝟮) " => Derives
+infixl:45 " ⊢ᴴ(𝗦𝟰.𝟮) " => DerivationH
 
-abbrev Proves (p : Formula α) := ∅ ⊢ᴴ(𝗦𝟰.𝟮) p
+abbrev ProofH (p : Formula α) := ∅ ⊢ᴴ(𝗦𝟰.𝟮) p
 
-prefix:45 "⊢ᴴ(𝗦𝟰.𝟮) " => Proves
+prefix:45 "⊢ᴴ(𝗦𝟰.𝟮) " => ProofH
 
 /-
 instance : LogicS4Dot2 (Formula α) where
-  necessitation := LogicS4Dot2.Derives'.necessitation
-  K := LogicS4Dot2.Derives'.K _ _ _
-  T := LogicS4Dot2.Derives'.T _ _
-  A4 := LogicS4Dot2.Derives'.A4 _ _
-  Dot2 := LogicS4Dot2.Derives'.Dot2 _ _
+  necessitation := LogicS4Dot2.DerivationH'.necessitation
+  K := LogicS4Dot2.DerivationH'.K _ _ _
+  T := LogicS4Dot2.DerivationH'.T _ _
+  A4 := LogicS4Dot2.DerivationH'.A4 _ _
+  Dot2 := LogicS4Dot2.DerivationH'.Dot2 _ _
 -/
 
 end LogicS4Dot2
@@ -287,32 +282,32 @@ namespace LogicS4Dot3
 
 variable {α : Type u}
 
-inductive Derives' : List (Formula α) → List (Formula α) → Type _
-  | modus_ponens {Γ p q} : (Derives' Γ [p ⟶ q]) → (Derives' Γ [p]) → (Derives' Γ [q])
-  | necessitation {Γ p} : (Derives' Γ [p]) → (Derives' Γ [□p])
-  | verum (Γ) : Derives' Γ [⊤]
-  | K (Γ) (p q) : Derives' Γ [□(p ⟶ q) ⟶ □p ⟶ □q]
-  | T (Γ) (p) : Derives' Γ [□p ⟶ p]
-  | A4 (Γ) (p) : Derives' Γ [□p ⟶ □□p]
-  | Dot3 (Γ) (p) : Derives' Γ [□(□p ⟶ □q) ⋎ □(□q ⟶ □p)]
+inductive DerivationH' : List (Formula α) → List (Formula α) → Type _
+  | modus_ponens {Γ p q} : (DerivationH' Γ [p ⟶ q]) → (DerivationH' Γ [p]) → (DerivationH' Γ [q])
+  | necessitation {Γ p} : (DerivationH' Γ [p]) → (DerivationH' Γ [□p])
+  | verum (Γ) : DerivationH' Γ [⊤]
+  | K (Γ) (p q) : DerivationH' Γ [□(p ⟶ q) ⟶ □p ⟶ □q]
+  | T (Γ) (p) : DerivationH' Γ [□p ⟶ p]
+  | A4 (Γ) (p) : DerivationH' Γ [□p ⟶ □□p]
+  | Dot3 (Γ) (p) : DerivationH' Γ [□(□p ⟶ □q) ⋎ □(□q ⟶ □p)]
 
-instance : TwoSided (Formula α) := ⟨LogicS4Dot3.Derives'⟩
+instance : TwoSided (Formula α) := ⟨LogicS4Dot3.DerivationH'⟩
 
-def Derives (Γ : List (Formula α)) (p : Formula α) := Derives' Γ [p]
+def DerivationH (Γ : List (Formula α)) (p : Formula α) := DerivationH' Γ [p]
 
-infixl:45 " ⊢ᴴ(𝗦𝟰.𝟯) " => Derives
+infixl:45 " ⊢ᴴ(𝗦𝟰.𝟯) " => DerivationH
 
-abbrev Proves (p : Formula α) := ∅ ⊢ᴴ(𝗦𝟰.𝟯) p
+abbrev ProofH (p : Formula α) := ∅ ⊢ᴴ(𝗦𝟰.𝟯) p
 
-prefix:45 "⊢ᴴ(𝗦𝟰.𝟯) " => Proves
+prefix:45 "⊢ᴴ(𝗦𝟰.𝟯) " => ProofH
 
 /-
 instance : LogicS4Dot3 (Formula α) where
-  necessitation := LogicS4Dot3.Derives'.necessitation
-  K := LogicS4Dot3.Derives'.K _ _ _
-  T := LogicS4Dot3.Derives'.T _ _
-  A4 := LogicS4Dot3.Derives'.A4 _ _
-  Dot3 := LogicS4Dot3.Derives'.Dot3 _ _
+  necessitation := LogicS4Dot3.DerivationH'.necessitation
+  K := LogicS4Dot3.DerivationH'.K _ _ _
+  T := LogicS4Dot3.DerivationH'.T _ _
+  A4 := LogicS4Dot3.DerivationH'.A4 _ _
+  Dot3 := LogicS4Dot3.DerivationH'.Dot3 _ _
 -/
 
 end LogicS4Dot3
@@ -322,32 +317,32 @@ namespace LogicS4Grz
 
 variable {α : Type u}
 
-inductive Derives' : List (Formula α) → List (Formula α) → Type _
-  | modus_ponens {Γ p q} : (Derives' Γ [p ⟶ q]) → (Derives' Γ [p]) → (Derives' Γ [q])
-  | necessitation {Γ p} : (Derives' Γ [p]) → (Derives' Γ [□p])
-  | verum (Γ) : Derives' Γ [⊤]
-  | K (Γ) (p q) : Derives' Γ [□(p ⟶ q) ⟶ □p ⟶ □q]
-  | T (Γ) (p) : Derives' Γ [□p ⟶ p]
-  | A4 (Γ) (p) : Derives' Γ [□p ⟶ □□p]
-  | Grz (Γ) (p) : Derives' Γ [□(□(p ⟶ □p) ⟶ p) ⟶ p]
+inductive DerivationH' : List (Formula α) → List (Formula α) → Type _
+  | modus_ponens {Γ p q} : (DerivationH' Γ [p ⟶ q]) → (DerivationH' Γ [p]) → (DerivationH' Γ [q])
+  | necessitation {Γ p} : (DerivationH' Γ [p]) → (DerivationH' Γ [□p])
+  | verum (Γ) : DerivationH' Γ [⊤]
+  | K (Γ) (p q) : DerivationH' Γ [□(p ⟶ q) ⟶ □p ⟶ □q]
+  | T (Γ) (p) : DerivationH' Γ [□p ⟶ p]
+  | A4 (Γ) (p) : DerivationH' Γ [□p ⟶ □□p]
+  | Grz (Γ) (p) : DerivationH' Γ [□(□(p ⟶ □p) ⟶ p) ⟶ p]
 
-instance : TwoSided (Formula α) := ⟨LogicS4Grz.Derives'⟩
+instance : TwoSided (Formula α) := ⟨LogicS4Grz.DerivationH'⟩
 
-def Derives (Γ : List (Formula α)) (p : Formula α) := Derives' Γ [p]
+def DerivationH (Γ : List (Formula α)) (p : Formula α) := DerivationH' Γ [p]
 
-infixl:45 " ⊢ᴴ(𝗦𝟰𝗚𝗿𝘇) " => Derives
+infixl:45 " ⊢ᴴ(𝗦𝟰𝗚𝗿𝘇) " => DerivationH
 
-abbrev Proves (p : Formula α) := ∅ ⊢ᴴ(𝗦𝟰𝗚𝗿𝘇) p
+abbrev ProofH (p : Formula α) := ∅ ⊢ᴴ(𝗦𝟰𝗚𝗿𝘇) p
 
-prefix:45 "⊢ᴴ(𝗦𝟰𝗚𝗿𝘇) " => Proves
+prefix:45 "⊢ᴴ(𝗦𝟰𝗚𝗿𝘇) " => ProofH
 
 /-
 instance : LogicS4Grz (Formula α) where
-  necessitation := LogicS4Grz.Derives'.necessitation
-  K := LogicS4Grz.Derives'.K _ _ _
-  T := LogicS4Grz.Derives'.T _ _
-  A4 := LogicS4Grz.Derives'.A4 _ _
-  Grz := LogicS4Grz.Derives'.Grz _ _
+  necessitation := LogicS4Grz.DerivationH'.necessitation
+  K := LogicS4Grz.DerivationH'.K _ _ _
+  T := LogicS4Grz.DerivationH'.T _ _
+  A4 := LogicS4Grz.DerivationH'.A4 _ _
+  Grz := LogicS4Grz.DerivationH'.Grz _ _
 -/
 
 end LogicS4Grz

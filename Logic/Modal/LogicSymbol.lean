@@ -19,4 +19,6 @@ class ModalDeMorgan (F : Type*) [ModalLogicSymbol F] extends DeMorgan F where
   box (p : F) : □p = ~(◇(~p))
   dia (p : F) : ◇p = ~(□(~p))
 
+attribute [simp] ModalDeMorgan.box ModalDeMorgan.dia
+
 end LO
