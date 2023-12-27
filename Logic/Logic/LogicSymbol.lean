@@ -1,6 +1,12 @@
 import Logic.Vorspiel.Vorspiel
 
-universe u v
+/-!
+# Logic Symbols
+
+This file defines structure that has logical connectives $\top, \bot, \land, \lor, \to, \lnot$ `LogicSymbol F`
+and their homomorphisms `F →L G`.
+
+-/
 
 namespace LO
 

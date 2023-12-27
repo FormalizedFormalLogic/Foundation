@@ -2,6 +2,16 @@ import Logic.Logic.System
 import Logic.Vorspiel.Computability
 import Logic.Vorspiel.Meta
 
+/-!
+# Language of first-order logic
+
+This file defines the language of first-order logic.
+
+- `LO.FirstOrder.Language.empty` is the empty language.
+- `LO.FirstOrder.Language.constant C` is a language with only constants of the element `C`.
+- `LO.FirstOrder.Language.oRing`, `ℒₒᵣ` is the language of ordered ring.
+-/
+
 namespace LO
 
 open Primrec

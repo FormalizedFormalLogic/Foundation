@@ -1,5 +1,12 @@
 import Logic.Logic.System
 
+/-!
+# Sequent calculus and variants
+
+This file defines a characterization of Tait style calculus and Gentzen style calculus.
+
+-/
+
 namespace LO
 
 class OneSided (F : Type u) where
