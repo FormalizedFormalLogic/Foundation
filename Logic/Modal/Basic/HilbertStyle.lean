@@ -1,5 +1,5 @@
 import Logic.Logic.HilbertStyle2
-import Logic.Modal.Basic.Formula2
+import Logic.Modal.Basic.Formula
 
 namespace LO
 

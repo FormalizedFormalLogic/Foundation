@@ -1,4 +1,4 @@
-import Logic.Modal.Basic.Formula2
+import Logic.Modal.Basic.Formula
 import Logic.Modal.Basic.HilbertStyle
 import Logic.Modal.Basic.Semantics
 
