@@ -159,7 +159,8 @@ notation "◇^" n:90 p => multidia p n
 
 section Geach
 
-def Geach' (p q : Formula α) : ℕ → ℕ → ℕ → ℕ → Formula α
+/-- `◇ᵏ□ˡp ⟶ □ᵐ◇ⁿq`   -/
+def Geach' (p q : Formula α) : (k : ℕ) → (l : ℕ) → (m : ℕ) → (n : ℕ) → Formula α
   | 0,     0,     0,     0     => p ⟶ q
   | 0,     0,     m + 1, 0     => Geach' p (□q) 0 0 m 0
   | 0,     0,     m,     n + 1 => Geach' p (◇q) 0 0 m n
@@ -167,6 +168,32 @@ def Geach' (p q : Formula α) : ℕ → ℕ → ℕ → ℕ → Formula α
   | k,     l + 1, m,     n     => Geach' (□p) q k l m n
 
 def Geach (p: Formula α) := Geach' p p
+
+variable (p : Formula α)
+
+abbrev axiomT := □p ⟶ p
+lemma axiomT_def : axiomT p = Geach p 0 1 0 0 := rfl
+
+abbrev axiomB := p ⟶ □◇p
+lemma axiomB_def : axiomB p = Geach p 0 0 1 1 := rfl
+
+abbrev axiomD := □p ⟶ ◇p
+lemma axiomD_def : axiomD p = Geach p 0 1 0 1 := rfl
+
+abbrev axiom4 := □p ⟶ □□p
+lemma axiom4_def : axiom4 p = Geach p 0 1 2 0 := rfl
+
+abbrev axiom5 := ◇p ⟶ □◇p
+lemma axiom5_def : axiom5 p = Geach p 1 0 1 1 := rfl
+
+abbrev axiomDot2 := ◇□p ⟶ □◇p
+lemma axiomDot2_def : axiomDot2 p = Geach p 1 1 1 1 := rfl
+
+abbrev axiomCD := ◇p ⟶ □p
+lemma axiomCD_def : axiomCD p = Geach p 1 0 1 0 := rfl
+
+abbrev axiomC4 := □□p ⟶ □p
+lemma axiomC4_def : axiomC4 p = Geach p 0 2 1 0 := rfl
 
 end Geach
 
