@@ -1,3 +1,11 @@
+/-
+ Reserved to ompare the strengh of normal modal logic proof systems.
+
+ ## References
+
+ * <https://plato.stanford.edu/entries/logic-modal/#MapRelBetModLog>
+-/
+
 import Logic.Modal.Basic.HilbertStyle
 
 namespace LO.Modal.Hilbert
