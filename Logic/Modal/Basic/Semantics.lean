@@ -8,7 +8,7 @@ namespace Modal
 
 variable {α β : Type u}
 
-abbrev Context (β : Type u) := Finset (Formula β)
+abbrev Context (β : Type u) := Set (Formula β)
 
 namespace Context
 
@@ -199,6 +199,11 @@ end Context
 
 
 namespace Formula
+
+@[simp]
+def frame_consequence (f : Frame α) (Γ : Context β) (p : Formula β) := ∀ V w, (w ⊧ˢ[⟨f, V⟩] Γ) → (w ⊧ˢ[⟨f, V⟩] p)
+
+notation Γ " ⊨ᶠ[" f "] " p => Formula.frame_consequence f Γ p
 
 @[simp]
 def model_consequences (m : Model α β) (Γ : Context β) (p : Formula β) := ∀ w, (w ⊧ˢ[m] Γ) → (w ⊧ˢ[m] p)
