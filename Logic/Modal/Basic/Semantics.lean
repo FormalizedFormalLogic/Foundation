@@ -1,6 +1,5 @@
 import Logic.Logic.System
 import Logic.Modal.Basic.Formula
-import Mathlib.Init.Set
 
 namespace LO
 
@@ -145,9 +144,9 @@ lemma neg_def' : (⊧ᵐ[m] ~p) →  ¬(⊧ᵐ[m] p) := id neg_def
 
 lemma bot_def : ¬(⊧ᵐ[m] ⊥) := by simp [models]; existsi m.nonempty.some; simp;
 
-lemma preserveModusPonens : (⊧ᵐ[m] p ⟶ q) → (⊧ᵐ[m] p) → (⊧ᵐ[m] q) := by simp_all [models, satisfies.imp_def];
+lemma preserve_ModusPonens : (⊧ᵐ[m] p ⟶ q) → (⊧ᵐ[m] p) → (⊧ᵐ[m] q) := by simp_all [models, satisfies.imp_def];
 
-lemma preserveNecessitation : (⊧ᵐ[m] p) → (⊧ᵐ[m] □p) := by simp_all [models, satisfies];
+lemma preserve_Necessitation : (⊧ᵐ[m] p) → (⊧ᵐ[m] □p) := by simp_all [models, satisfies];
 
 end models
 
@@ -162,9 +161,9 @@ variable {f : Frame α}
 
 lemma bot_def : ¬(⊧ᶠ[f] (⊥ : Formula β)) := by simp [frames, models.bot_def];
 
-lemma preserveModusPonens : (⊧ᶠ[f] p ⟶ q) → (⊧ᶠ[f] p) → (⊧ᶠ[f] q) := by simp_all [models, frames, satisfies];
+lemma preserve_ModusPonens : (⊧ᶠ[f] p ⟶ q) → (⊧ᶠ[f] p) → (⊧ᶠ[f] q) := by simp_all [models, frames, satisfies];
 
-lemma preserveNecessitation : (⊧ᶠ[f] p) → (⊧ᶠ[f] □p) := by simp_all [models, frames, satisfies];
+lemma preserve_Necessitation : (⊧ᶠ[f] p) → (⊧ᶠ[f] □p) := by simp_all [models, frames, satisfies];
 
 end frames
 
@@ -177,9 +176,9 @@ namespace frameclasses
 
 variable {fc : Frameclass α}
 
-lemma preserveModusPonens : (⊧ᶠᶜ[fc] p ⟶ q) → (⊧ᶠᶜ[fc] p) → (⊧ᶠᶜ[fc] q) := by simp_all [frameclasses, frames, models, satisfies.imp_def];
+lemma preserve_ModusPonens : (⊧ᶠᶜ[fc] p ⟶ q) → (⊧ᶠᶜ[fc] p) → (⊧ᶠᶜ[fc] q) := by simp_all [frameclasses, frames, models, satisfies.imp_def];
 
-lemma preserveNecessitation : (⊧ᶠᶜ[fc] p) → (⊧ᶠᶜ[fc] □p) := by simp_all [frameclasses, frames, models, satisfies];
+lemma preserve_Necessitation : (⊧ᶠᶜ[fc] p) → (⊧ᶠᶜ[fc] □p) := by simp_all [frameclasses, frames, models, satisfies];
 
 end frameclasses
 
@@ -241,20 +240,13 @@ namespace FrameConsequence
 
 variable {f : Frame α} {Γ Γ' : Context β} {p q : Formula β}
 
-lemma preserveAxiomK : (Γ ⊨ᶠ[f] □(p ⟶ q) ⟶ □p ⟶ □q) := by aesop;
+lemma preserve_AxiomK : (Γ ⊨ᶠ[f] □(p ⟶ q) ⟶ □p ⟶ □q) := by aesop;
 
-lemma preserveWeakening : (Γ ⊆ Γ') → (Γ ⊨ᶠ[f] p) → (Γ' ⊨ᶠ[f] p) := by aesop;
+lemma preserve_Weakening : (Γ ⊆ Γ') → (Γ ⊨ᶠ[f] p) → (Γ' ⊨ᶠ[f] p) := by aesop;
 
-lemma preserveModalPonens : (Γ ⊨ᶠ[f] p ⟶ q) → (Γ ⊨ᶠ[f] p) → (Γ ⊨ᶠ[f] q) := by
-  intro h₁ h₂;
-  unfold FrameConsequence;
-  intro V w hΓ;
-  replace h₁ := h₁ V w hΓ;
-  replace h₂ := h₂ V w hΓ;
-  exact satisfies.imp_def.mp h₁ h₂;
+lemma preserve_ModusPonens : (Γ ⊨ᶠ[f] p ⟶ q) → (Γ ⊨ᶠ[f] p) → (Γ ⊨ᶠ[f] q) := by aesop;
 
-lemma preserveNecessitation : (Γ ⊨ᶠ[f] p) → (Γ ⊨ᶠ[f] □p) := by
-  sorry;
+lemma preserve_Necessitation : (Γ ⊨ᶠ[f] p) → (Γ ⊨ᶠ[f] □p) := by sorry;
   -- simp [FrameConsequence, frames.preserveNecessitation];
 
 end FrameConsequence
