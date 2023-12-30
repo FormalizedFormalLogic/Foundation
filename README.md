@@ -25,7 +25,6 @@ https://iehality.github.io/lean4-logic/
 
 |                                     |                                     | Definition                      | Notation  |
 | :----:                              | ----                                | ----                            | :----:    |
-| $\vdash_\mathrm{T} \Gamma$          | Derivation in Tait-Calculus         |  `LO.FirstOrder.Derivation`     | `⊢ᵀ Γ`    |
 | $(\rm Cut)\vdash_\mathrm{T} \Gamma$ | Derivation in Tait-Calculus + Cut   |  `LO.FirstOrder.DerivationC`    | `⊢¹ Γ`    |
 | $M \models \sigma$                  | Tarski's truth definition condition |  `LO.FirstOrder.Models`         | `M ⊧ₘ σ`   |
 | $T \vdash \sigma$                   | Proof, Provability                  |  `LO.FirstOrder.Proof`          | `T ⊢ σ`, `T ⊢! σ` |
@@ -43,7 +42,7 @@ The key results are summarised in `Logic/Summary.lean`.
       [(k : ℕ) → DecidableEq (LO.FirstOrder.Language.Func L k)]
       [(k : ℕ) → DecidableEq (LO.FirstOrder.Language.Rel L k)]
       {Δ : LO.FirstOrder.Sequent L} :
-      ⊢¹ Δ → LO.FirstOrder.Derivation Δ
+      ⊢¹ Δ → { d : ⊢¹ Δ // LO.FirstOrder.Derivation.CutFree d }
   ```
 
 - [Completeness theorem](https://iehality.github.io/lean4-logic/Logic/FirstOrder/Completeness/Completeness.html#LO.FirstOrder.completeness)

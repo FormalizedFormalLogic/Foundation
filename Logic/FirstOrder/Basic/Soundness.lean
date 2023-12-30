@@ -10,24 +10,22 @@ open Semiformula
 
 variable {L : Language}
 
-variable {P : SyntacticFormula L → Prop}
+namespace Derivation
 
-namespace DerivationCR
-
-lemma sound : ∀ {Γ : Sequent L}, ⊢ᶜ[P] Γ →
+lemma sound : ∀ {Γ : Sequent L}, ⊢¹ Γ →
     ∀ (M : Type u) [s : Structure L M] (ε : ℕ → M), ∃ p ∈ Γ, Val! M ε p
-  | _, @axL _ _ Δ _ r v,     M, s, ε => by
+  | _, @axL _ Δ _ r v,     M, s, ε => by
     by_cases h : s.rel r (Semiterm.val! M ![] ε ∘ v)
     · exact ⟨rel r v, by simp, h⟩
     · exact ⟨nrel r v, by simp, h⟩
-  | _, verum Δ,              M, s, ε => ⟨⊤, by simp⟩
-  | _, @or _ _ Δ p q d,      M, s, ε => by
+  | _, verum Δ,            M, s, ε => ⟨⊤, by simp⟩
+  | _, @or _ Δ p q d,      M, s, ε => by
     have : Val! M ε p ∨ Val! M ε q ∨ ∃ q ∈ Δ, Val! M ε q := by simpa using sound d M ε
     rcases this with (hp | hq | ⟨r, hr, hhr⟩)
     · exact ⟨p ⋎ q, by simp, by simp[hp]⟩
     · exact ⟨p ⋎ q, by simp, by simp[hq]⟩
     · exact ⟨r, by simp[hr], hhr⟩
-  | _, @and _ _ Δ p q dp dq, M, s, ε => by
+  | _, @and _ Δ p q dp dq, M, s, ε => by
     have : Val! M ε p ∨ ∃ r ∈ Δ, Val! M ε r := by simpa using sound dp M ε
     rcases this with (hp | ⟨r, hr, hhr⟩)
     · have : Val! M ε q ∨ ∃ r ∈ Δ, Val! M ε r := by simpa using sound dq M ε
@@ -35,36 +33,36 @@ lemma sound : ∀ {Γ : Sequent L}, ⊢ᶜ[P] Γ →
       · exact ⟨p ⋏ q, by simp, by simp[hp, hq]⟩
       · exact ⟨r, by simp[hr], hhr⟩
     · exact ⟨r, by simp[hr], hhr⟩
-  | _, @all _ _ Δ p d,       M, s, ε => by
+  | _, @all _ Δ p d,       M, s, ε => by
     have : (∀ a : M, Eval! M ![a] ε p) ∨ ∃ q ∈ Δ, Val! M ε q := by
       simpa[shifts, shiftEmb, Matrix.vecConsLast_vecEmpty, forall_or_right]
         using fun a : M => sound d M (a :>ₙ ε)
     rcases this with (hp | ⟨q, hq, hhq⟩)
     · exact ⟨∀' p, by simp, hp⟩
     · exact ⟨q, by simp[hq], hhq⟩
-  | _, @ex _ _ Δ p t d,      M, s, ε => by
+  | _, @ex _ Δ p t d,      M, s, ε => by
     have : Eval! M ![t.val! M ![] ε] ε p ∨ ∃ p ∈ Δ, Val! M ε p := by
       simpa[eval_substs, Matrix.constant_eq_singleton] using sound d M ε
     rcases this with (hp | ⟨q, hq, hhq⟩)
     · exact ⟨∃' p, by simp, t.val! M ![] ε, hp⟩
     · exact ⟨q, by simp[hq], hhq⟩
-  | _, @wk _ _ Δ Γ d ss,     M, s, ε => by
-    have : ∃ p ∈ Δ, Val! M ε p := d.sound M ε
+  | _, @wk _ Δ Γ d ss,     M, s, ε => by
+    have : ∃ p ∈ Δ, Val! M ε p := sound d M ε
     rcases this with ⟨p, hp, h⟩
     exact ⟨p, ss hp, h⟩
-  | _, @cut _ _ Δ p _ d dn,  M, s, ε => by
-    have h : Val! M ε p ∨ ∃ q ∈ Δ, Val! M ε q := by simpa using d.sound M ε
-    have hn : ¬Val! M ε p ∨ ∃ q ∈ Δ, Val! M ε q := by simpa using dn.sound M ε
+  | _, @cut _ Δ p d dn,    M, s, ε => by
+    have h : Val! M ε p ∨ ∃ q ∈ Δ, Val! M ε q := by simpa using sound d M ε
+    have hn : ¬Val! M ε p ∨ ∃ q ∈ Δ, Val! M ε q := by simpa using sound dn M ε
     rcases h with (h | ⟨q, h, hq⟩)
     · rcases hn with (hn | ⟨q, hn, hq⟩)
       · contradiction
       · exact ⟨q, by simp[hn], hq⟩
     · exact ⟨q, by simp[h], hq⟩
 
-end DerivationCR
+end Derivation
 
 theorem soundness {T} {σ : Sentence L} : T ⊢ σ → T ⊨ σ := fun b s hT => by
-  rcases b.derivation.sound s.Dom default with ⟨p, hp, h⟩
+  rcases Derivation.sound b.derivation s.Dom default with ⟨p, hp, h⟩
   simp at hp; rcases hp with (⟨π, hπ, rfl⟩ | rfl)
   · have : s.Dom ⊧ₘ π := hT (b.antecedent_ss π hπ)
     have : ¬s.Dom ⊧ₘ π := by simpa using h
