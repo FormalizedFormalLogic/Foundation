@@ -19,13 +19,13 @@ end
 
 namespace Arith
 
-
 namespace FirstIncompleteness
 
 variable {T : Theory ℒₒᵣ} [EqTheory T] [PAminus T] [DecidablePred T] [SigmaOneSound T] [Theory.Computable T]
 
 variable (T)
 
+/-- Set $D \coloneqq \{\sigma\ |\ T \vdash \lnot\sigma(\ulcorner \sigma \urcorner)\}$ is r.e. -/
 private lemma diagRefutation_re : RePred (fun σ ↦ T ⊢! ~σ/[⸢σ⸣]) := by
   have : Partrec fun σ : Semisentence ℒₒᵣ 1 ↦ (provableFn T (~σ/[⸢σ⸣])).map (fun _ ↦ ()) :=
     Partrec.map
@@ -41,14 +41,18 @@ noncomputable def diagRefutation : Semisentence ℒₒᵣ 1 := pred (fun σ => T
 
 local notation "ρ" => diagRefutation T
 
+/-- Define sentence $\gamma := \rho(\ulcorner \rho \urcorner)$ -/
 noncomputable def undecidable : Sentence ℒₒᵣ := ρ/[⸢ρ⸣]
 
 local notation "γ" => undecidable T
 
+/-- ρ is a sentence that represents $D$ -/
 lemma diagRefutation_spec (σ : Semisentence ℒₒᵣ 1) :
     T ⊢! ρ/[⸢σ⸣] ↔ T ⊢! ~σ/[⸢σ⸣] := by
   simpa[diagRefutation] using pred_representation T (diagRefutation_re T) (x := σ)
 
+/-- It is obvious that $T \vdash \gamma \iff T \vdash \lnot \gamma$. Since
+ $T$ is consistent, $\gamma$ is independent from $T$ -/
 lemma independent : System.Independent T γ := by
   have h : T ⊢! γ ↔ T ⊢! ~γ := by simpa using diagRefutation_spec T ρ
   exact

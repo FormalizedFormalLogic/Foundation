@@ -12,7 +12,7 @@ Term transformations such as rewritings, substitutions, and embeddings are handl
 - `LO.FirstOrder.Rew.rewrite f` is a rewriting of the free variables occurring in the term by `f : μ₁ → Semiterm L μ₂ n`.
 - `LO.FirstOrder.Rew.substs v` is a substitution of the bounded variables occurring in the term by `v : Fin n → Semiterm L μ n'`.
 - `LO.FirstOrder.Rew.bShift` is a transformation of the bounded variables occurring in the term by `#x ↦ #(Fin.succ x)`.
-- `LO.FirstOrder.Rew.Shift` is a transformation of the free variables occurring in the term by `&x ↦ &(x + 1)`.
+- `LO.FirstOrder.Rew.shift` is a transformation of the free variables occurring in the term by `&x ↦ &(x + 1)`.
 - `LO.FirstOrder.Rew.emb` is a embedding of the term with no free variables.
 -/
 

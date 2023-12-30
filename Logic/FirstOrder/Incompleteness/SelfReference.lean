@@ -38,6 +38,7 @@ lemma substs_diag (θ σ : Semisentence ℒₒᵣ 1) :
 
 variable (T)
 
+/-- Fixpoint Lemma -/
 theorem main (θ : Semisentence ℒₒᵣ 1) :
     T ⊢! fixpoint θ ⟷ θ/[⸢fixpoint θ⸣] :=
   Complete.consequence_iff_provable.mp (consequence_of _ _ (fun M _ _ _ _ _ => by
@@ -84,6 +85,7 @@ open SelfReference
 
 variable (T)
 
+/-- Gödel Sentence $G$ -/
 noncomputable def goedel : Sentence ℒₒᵣ := fixpoint (~provableSentence T)
 
 local notation "G" => goedel T
