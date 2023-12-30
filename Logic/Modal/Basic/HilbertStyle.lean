@@ -102,6 +102,10 @@ abbrev DerivableH := Nonempty (Γ ⊢ᴴ(Λ) p)
 
 notation:45 Γ " ⊢ᴴ(" Λ ")! " p => DerivableH Λ Γ p
 
+abbrev Underivable := IsEmpty (Γ ⊢ᴴ(Λ) p)
+
+notation:45 Γ " ⊬ᴴ(" Λ ")! " p => Underivable Λ Γ p
+
 
 abbrev ProofH := ∅ ⊢ᴴ(Λ) p
 
@@ -139,59 +143,26 @@ def castR (d : Γ ⊢ᴴ(Λ) p) (e₂ : p = q) : Γ ⊢ᴴ(Λ) q := d.cast rfl e
 
 @[simp] lemma length_castR (d : Γ ⊢ᴴ(Λ) p) (e₂ : p = q) : (d.castR e₂).length = d.length := length_cast d rfl e₂
 
-@[elab_as_elim]
-def rec'
-  {C : (Γ : Set (Formula α)) → (p : Formula α) → Sort _}
-  (haxm : ∀ {Γ p}, (h : p ∈ Γ) → C Γ p)
-  (hmaxm : ∀ {Γ p}, (h : p ∈ Λ) → C Γ p)
-  (hwk : ∀ {Γ Δ p} (_ : Γ ⊆ Δ) (_ : Γ ⊢ᴴ(Λ) p), C Γ p → C Δ p)
-  (hmodus_ponens : ∀ {Γ p q} (_ : Γ ⊢ᴴ(Λ) (p ⟶ q)) (_ : Γ ⊢ᴴ(Λ) p), C Γ (p ⟶ q) → C Γ p → C Γ q)
-  (hnecessitation : ∀ {Γ p} (_ : Γ ⊢ᴴ(Λ) p), C Γ p → C Γ (□p))
-  (hverum : ∀ (Γ), C Γ ⊤)
-  (himply₁ : ∀ (Γ p q), C Γ (p ⟶ q ⟶ p))
-  (himply₂ : ∀ (Γ p q r), C Γ ((p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r))
-  (hconj₁ : ∀ (Γ p q), C Γ (p ⋏ q ⟶ p))
-  (hconj₂ : ∀ (Γ p q), C Γ (p ⋏ q ⟶ q))
-  (hconj₃ : ∀ (Γ p q), C Γ (p ⟶ q ⟶ p ⋏ q))
-  (hdisj₁ : ∀ (Γ p q), C Γ (p ⟶ p ⋎ q))
-  (hdisj₂ : ∀ (Γ p q), C Γ (q ⟶ p ⋎ q))
-  (hdisj₃ : ∀ (Γ p q r), C Γ ((p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r)))
-  (hexplode : ∀ (Γ p), C Γ (⊥ ⟶ p))
-  (hdne : ∀ (Γ p), C Γ (~~p ⟶ p))
-  : ∀ {Γ p}, (d : Γ ⊢ᴴ(Λ) p) → (C Γ p)
-  | _, _, axm h => haxm h
-  | _, _, maxm h => hmaxm h
-  | _, _, wk h d => hwk h d
-    (rec' haxm hmaxm hwk hmodus_ponens hnecessitation hverum himply₁ himply₂ hconj₁ hconj₂ hconj₃ hdisj₁ hdisj₂ hdisj₃ hexplode hdne d)
-  | _, _, modus_ponens d₁ d₂ =>
-    hmodus_ponens d₁ d₂
-    (rec' haxm hmaxm hwk hmodus_ponens hnecessitation hverum himply₁ himply₂ hconj₁ hconj₂ hconj₃ hdisj₁ hdisj₂ hdisj₃ hexplode hdne d₁)
-    (rec' haxm hmaxm hwk hmodus_ponens hnecessitation hverum himply₁ himply₂ hconj₁ hconj₂ hconj₃ hdisj₁ hdisj₂ hdisj₃ hexplode hdne d₂)
-  | _, _, necessitation d =>
-    hnecessitation d
-    (rec' haxm hmaxm hwk hmodus_ponens hnecessitation hverum himply₁ himply₂ hconj₁ hconj₂ hconj₃ hdisj₁ hdisj₂ hdisj₃ hexplode hdne d)
-  | _, _, (verum Γ) => hverum Γ
-  | _, _, (imply₁ Γ p q) => himply₁ Γ p q
-  | _, _, (imply₂ Γ p q r) => himply₂ Γ p q r
-  | _, _, (conj₁ Γ p q) => hconj₁ Γ p q
-  | _, _, (conj₂ Γ p q) => hconj₂ Γ p q
-  | _, _, (conj₃ Γ p q) => hconj₃ Γ p q
-  | _, _, (disj₁ Γ p q) => hdisj₁ Γ p q
-  | _, _, (disj₂ Γ p q) => hdisj₂ Γ p q
-  | _, _, (disj₃ Γ p q r) => hdisj₃ Γ p q r
-  | _, _, (explode Γ p) => hexplode Γ p
-  | _, _, (dne Γ p) => hdne Γ p
-
 end DerivationH
+
+def ProofH.length (d : ⊢ᴴ(Λ) p) : ℕ := DerivationH.length Λ (by simpa using d)
+
+lemma ProvableH.dne : (⊢ᴴ(Λ)! ~~p) → (⊢ᴴ(Λ)! p) := by
+  intro d;
+  have h₁ := @DerivationH.dne _ Λ ∅ p;
+  have h₂ := d.some; simp [ProofH, DerivationH] at h₂;
+  simp_all [ProvableH, ProofH, DerivationH];
+  exact ⟨(DerivationH.modus_ponens h₁ h₂)⟩
+
 
 namespace LogicK
 
 @[simp]
 private def ModalAxioms : (Set (Formula α)) := { □(p ⟶ q) ⟶ □p ⟶ □q | (p : Formula α) (q : Formula α)}
 
-notation "𝗞" => ModalAxioms
+notation "𝐊" => ModalAxioms
 
-abbrev DerivationH := @Hilbert.DerivationH α 𝗞
+abbrev DerivationH := @Hilbert.DerivationH α 𝐊
 
 instance : LogicK (Formula α) where
   Bew            := DerivationH
@@ -213,25 +184,19 @@ instance : LogicK (Formula α) where
   dne Γ p        := ⟨DerivationH.dne Γ p⟩
   K Γ p q        := ⟨DerivationH.maxm (by simp)⟩
 
-lemma ProvableH.dne : (⊢ᴴ(𝗞)! ~~p) → (⊢ᴴ(𝗞)! p) := by
-  intro d;
-  have h₁ := @DerivationH.dne _ 𝗞 ∅ p;
-  have h₂ := d.some; simp [ProofH, DerivationH] at h₂;
-  simp_all [ProvableH, ProofH, DerivationH];
-  exact ⟨(DerivationH.modus_ponens h₁ h₂)⟩
-
 end LogicK
+
 
 namespace LogicS4
 
 @[simp]
-private def ModalAxioms : Set (Formula α) := 𝗞
+private def ModalAxioms : Set (Formula α) := 𝐊
   ∪ { □p ⟶ p | p : Formula α} -- T
   ∪ { □p ⟶ □□p | p : Formula α} -- 4
 
-notation "𝗦𝟰" => ModalAxioms
+notation "𝐒𝟒" => ModalAxioms
 
-abbrev DerivationH := @Hilbert.DerivationH α 𝗦𝟰
+abbrev DerivationH := @Hilbert.DerivationH α 𝐒𝟒
 
 /--
   TODO: S5なども同様にやればよいが，もっと省略出来ないのだろうか？
@@ -264,14 +229,14 @@ end LogicS4
 namespace LogicS5
 
 @[simp]
-private def ModalAxioms : Set (Formula α) :=𝗞
+private def ModalAxioms : Set (Formula α) := 𝐊
   ∪ { □p ⟶ p | p : Formula α} -- T
   ∪ { p ⟶ □◇p | p : Formula α} -- B
   ∪ { □p ⟶ □□p | p : Formula α} -- 4
 
-notation "𝗦𝟱" => ModalAxioms
+notation "𝐒𝟓" => ModalAxioms
 
-abbrev DerivationH := @Hilbert.DerivationH α 𝗦𝟱
+abbrev DerivationH := @Hilbert.DerivationH α 𝐒𝟓
 
 end LogicS5
 
@@ -281,11 +246,11 @@ namespace LogicGL
 variable {α : Type u}
 
 @[simp]
-private def ModalAxioms : Set (Formula α) := 𝗞 ∪ { □(□p ⟶ p) ⟶ □p | p : Formula α} -- L
+private def ModalAxioms : Set (Formula α) := 𝐊 ∪ { □(□p ⟶ p) ⟶ □p | p : Formula α} -- L
 
-notation "𝗚𝗟" => ModalAxioms
+notation "𝐆𝐋" => ModalAxioms
 
-abbrev DerivationH := @Hilbert.DerivationH α 𝗚𝗟
+abbrev DerivationH := @Hilbert.DerivationH α 𝐆𝐋
 
 end LogicGL
 
@@ -293,11 +258,11 @@ end LogicGL
 namespace LogicS4Dot2
 
 @[simp]
-private def ModalAxioms : Set (Formula α) := 𝗦𝟰 ∪ { ◇□p ⟶ □◇p | p : Formula α}  -- Dot2
+private def ModalAxioms : Set (Formula α) := 𝐒𝟒 ∪ { ◇□p ⟶ □◇p | p : Formula α}  -- Dot2
 
-notation "𝗦𝟰.𝟮" => ModalAxioms
+notation "𝐒𝟒.𝟐" => ModalAxioms
 
-abbrev DerivationH := @Hilbert.DerivationH α 𝗦𝟰.𝟮
+abbrev DerivationH := @Hilbert.DerivationH α 𝐒𝟒.𝟐
 
 end LogicS4Dot2
 
@@ -305,11 +270,11 @@ end LogicS4Dot2
 namespace LogicS4Dot3
 
 @[simp]
-private def ModalAxioms : Set (Formula α) := 𝗦𝟰 ∪ { □(□p ⟶ □q) ⋎ □(□q ⟶ □p) | (p : Formula α) (q : Formula α) }  -- Dot3
+private def ModalAxioms : Set (Formula α) := 𝐒𝟒 ∪ { □(□p ⟶ □q) ⋎ □(□q ⟶ □p) | (p : Formula α) (q : Formula α) }  -- Dot3
 
-notation "𝗦𝟰.𝟯" => ModalAxioms
+notation "𝐒𝟒.𝟑" => ModalAxioms
 
-abbrev DerivationH := @Hilbert.DerivationH α 𝗦𝟰.𝟯
+abbrev DerivationH := @Hilbert.DerivationH α 𝐒𝟒.𝟑
 
 end LogicS4Dot3
 
@@ -317,11 +282,11 @@ end LogicS4Dot3
 namespace LogicS4Grz
 
 @[simp]
-private def ModalAxioms : Set (Formula α) := 𝗦𝟰 ∪ { □(□(p ⟶ □p) ⟶ p) ⟶ p | p : Formula α}  -- Grz
+private def ModalAxioms : Set (Formula α) := 𝐒𝟒 ∪ { □(□(p ⟶ □p) ⟶ p) ⟶ p | p : Formula α}  -- Grz
 
-notation "𝗦𝟰𝗚𝗿𝘇" => ModalAxioms
+notation "𝐒𝟒𝐆𝐫𝐳" => ModalAxioms
 
-abbrev DerivationH := @Hilbert.DerivationH α 𝗦𝟰𝗚𝗿𝘇
+abbrev DerivationH := @Hilbert.DerivationH α 𝐒𝟒𝐆𝐫𝐳
 
 end LogicS4Grz
 
