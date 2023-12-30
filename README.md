@@ -25,7 +25,7 @@ https://iehality.github.io/lean4-logic/
 
 |                                     |                                     | Definition                      | Notation  |
 | :----:                              | ----                                | ----                            | :----:    |
-| $(\rm Cut)\vdash_\mathrm{T} \Gamma$ | Derivation in Tait-Calculus + Cut   |  `LO.FirstOrder.DerivationC`    | `⊢¹ Γ`    |
+| $(\rm Cut)\vdash_\mathrm{T} \Gamma$ | Derivation in Tait-Calculus + Cut   |  `LO.FirstOrder.Derivation`    | `⊢¹ Γ`    |
 | $M \models \sigma$                  | Tarski's truth definition condition |  `LO.FirstOrder.Models`         | `M ⊧ₘ σ`   |
 | $T \vdash \sigma$                   | Proof, Provability                  |  `LO.FirstOrder.Proof`          | `T ⊢ σ`, `T ⊢! σ` |
 
@@ -35,9 +35,9 @@ The key results are summarised in `Logic/Summary.lean`.
 
 ### First-Order logic
 
-- [Cut-elimination](https://iehality.github.io/lean4-logic/Logic/FirstOrder/Hauptsatz.html#LO.FirstOrder.DerivationCR.hauptsatz)
+- [Cut-elimination](https://iehality.github.io/lean4-logic/Logic/FirstOrder/Hauptsatz.html#LO.FirstOrder.Derivation.hauptsatz)
   ```lean
-  def LO.FirstOrder.DerivationCR.hauptsatz
+  def LO.FirstOrder.Derivation.hauptsatz
       {L : LO.FirstOrder.Language}
       [(k : ℕ) → DecidableEq (LO.FirstOrder.Language.Func L k)]
       [(k : ℕ) → DecidableEq (LO.FirstOrder.Language.Rel L k)]
