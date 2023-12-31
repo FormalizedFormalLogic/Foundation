@@ -13,13 +13,23 @@ namespace Context
 
 variable (Γ : Context β)
 
-def Maximal := ∀ p, p ∈ Γ ∨ ¬p ∈ Γ
+def box : Context β := {□p | p ∈ Γ}
+
+prefix:74 "□" => Context.box
+
+lemma box_empty : □(∅ : Context β) = ∅ := by simp [box]
+
+def dia (Γ : Context β) : Context β := {◇p | p ∈ Γ}
+
+prefix:74 "◇" => Context.dia
+
+lemma dia_empty : ◇(∅ : Context β) = ∅ := by simp [dia]
 
 end Context
 
 
 structure Frame (α : Type*) where
-  nonempty : Nonempty α
+  nonempty : Inhabited α
   rel : α → α → Prop
 
 namespace Frame
@@ -96,10 +106,10 @@ def trivialVal (α β : Type u) : α → β → Prop := λ _ _ => True
 namespace Formula
 
 def satisfies (m : Model α β) (w : α) : Formula β → Prop
-  | atom  a => a ∈ m.val w
-  | ⊥       => False
-  | p ⟶ q  => (p.satisfies m w) → (q.satisfies m w)
-  | □p      => ∀w', m.rel w w' → p.satisfies m w'
+  | atom a  => a ∈ m.val w
+  | falsum  => False
+  | imp p q => (p.satisfies m w) → (q.satisfies m w)
+  | box p   => ∀w', m.rel w w' → p.satisfies m w'
 
 notation w " ⊧ˢ[" m "] " p => satisfies m w p
 
@@ -137,12 +147,12 @@ variable {m : Model α β}
 lemma neg_def : (⊧ᵐ[m] (neg p)) →  ¬(⊧ᵐ[m] p) := by
   simp only [models];
   intro w; simp;
-  existsi m.nonempty.some;
+  existsi m.nonempty.default;
   apply satisfies.neg_def.mp $ w _;
 
 lemma neg_def' : (⊧ᵐ[m] ~p) →  ¬(⊧ᵐ[m] p) := id neg_def
 
-lemma bot_def : ¬(⊧ᵐ[m] ⊥) := by simp [models]; existsi m.nonempty.some; simp;
+lemma bot_def : ¬(⊧ᵐ[m] ⊥) := by simp [models]; existsi m.nonempty.default; simp;
 
 lemma preserve_ModusPonens : (⊧ᵐ[m] p ⟶ q) → (⊧ᵐ[m] p) → (⊧ᵐ[m] q) := by simp_all [models, satisfies.imp_def];
 
@@ -181,6 +191,10 @@ lemma preserve_ModusPonens : (⊧ᶠᶜ[fc] p ⟶ q) → (⊧ᶠᶜ[fc] p) → (
 lemma preserve_Necessitation : (⊧ᶠᶜ[fc] p) → (⊧ᶠᶜ[fc] □p) := by simp_all [frameclasses, frames, models, satisfies];
 
 end frameclasses
+
+
+def defines (fc : Frameclass α) (p : Formula β) := ∀ f, (f ∈ fc) ↔ (⊧ᶠ[f] p)
+
 
 end Formula
 
@@ -240,14 +254,13 @@ namespace FrameConsequence
 
 variable {f : Frame α} {Γ Γ' : Context β} {p q : Formula β}
 
+lemma def_emptyctx : (∅ ⊨ᶠ[f] p) ↔ (⊧ᶠ[f] p) := by aesop;
+
 lemma preserve_AxiomK : (Γ ⊨ᶠ[f] □(p ⟶ q) ⟶ □p ⟶ □q) := by aesop;
 
 lemma preserve_Weakening : (Γ ⊆ Γ') → (Γ ⊨ᶠ[f] p) → (Γ' ⊨ᶠ[f] p) := by aesop;
 
 lemma preserve_ModusPonens : (Γ ⊨ᶠ[f] p ⟶ q) → (Γ ⊨ᶠ[f] p) → (Γ ⊨ᶠ[f] q) := by aesop;
-
-lemma preserve_Necessitation : (Γ ⊨ᶠ[f] p) → (Γ ⊨ᶠ[f] □p) := by sorry;
-  -- simp [FrameConsequence, frames.preserveNecessitation];
 
 end FrameConsequence
 
@@ -257,7 +270,6 @@ def ModelConsequence (m : Model α β) (Γ : Context β) (p : Formula β) := Γ 
 notation Γ " ⊨ᵐ[" m "] " p => Formula.ModelConsequence m Γ p
 
 lemma ModelConsequence.cast {m : Model α β} {Γ Γ' : Context β} {p : Formula β} : (Γ ⊆ Γ') → (Γ ⊨ᵐ[m] p) → (Γ' ⊨ᵐ[m] p) := by aesop;
-
 
 @[simp]
 def FrameclassConsequence (fc : Frameclass α) (Γ : Context β) (p : Formula β) := ∀ f ∈ fc, Γ ⊨ᶠ[f] p
