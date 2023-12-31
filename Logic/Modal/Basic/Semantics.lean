@@ -118,7 +118,7 @@ namespace satisfies
 @[simp] lemma or_def : (w ⊧ˢ[m] p ⋎ q) ↔ (w ⊧ˢ[m] p) ∨ (w ⊧ˢ[m] q) := by
   simp [satisfies];
   constructor;
-  . by_cases (w ⊧ˢ[m] p) <;> simp_all;
+  . apply Classical.or_iff_not_imp_left.mpr;
   . intros; simp_all [false_or];
 
 @[simp] lemma imp_def : (w ⊧ˢ[m] p ⟶ q) ↔ (w ⊧ˢ[m] p) → (w ⊧ˢ[m] q) := by simp [satisfies];
