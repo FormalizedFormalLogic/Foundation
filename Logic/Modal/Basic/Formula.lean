@@ -157,7 +157,100 @@ def multidia (p : Formula α) : ℕ → Formula α
 
 notation "◇^" n:90 p => multidia p n
 
-section Geach
+end Formula
+
+abbrev Context (α : Type u) := Set (Formula α)
+
+namespace Context
+
+variable (Γ : Context β)
+
+def box : Context β := {□p | p ∈ Γ}
+
+prefix:74 "□" => Context.box
+
+lemma box_empty : □(∅ : Context β) = ∅ := by simp [box]
+
+def dia (Γ : Context β) : Context β := {◇p | p ∈ Γ}
+
+prefix:74 "◇" => Context.dia
+
+lemma dia_empty : ◇(∅ : Context β) = ∅ := by simp [dia]
+
+end Context
+
+
+section Axioms
+
+variable (p q : Formula α)
+
+@[simp] abbrev axiomK := □(p ⟶ q) ⟶ □p ⟶ □q
+@[simp] def axiomK.ctx : Context α := { axiomK p q | (p) (q) }
+notation "𝐊" => axiomK.ctx
+
+@[simp] abbrev axiomT := □p ⟶ p
+@[simp] def axiomT.ctx : Context α := { axiomT p | p }
+notation "𝐓" => axiomT.ctx
+
+@[simp] abbrev axiomB := p ⟶ □◇p
+@[simp] def axiomB.ctx : Context α := { axiomB p | p }
+notation "𝐁" => axiomB.ctx
+
+@[simp] abbrev axiomD := □p ⟶ ◇p
+@[simp] def axiomD.ctx : Context α := { axiomD p | p }
+notation "𝐃" => axiomD.ctx
+
+@[simp] abbrev axiom4 := □p ⟶ □□p
+@[simp] def axiom4.ctx : Context α := { axiom4 p | p }
+notation "𝟒" => axiom4.ctx
+
+@[simp] abbrev axiom5 := ◇p ⟶ □◇p
+@[simp] def axiom5.ctx : Context α := { axiom5 p | p }
+notation "𝟓" => axiom5.ctx
+
+@[simp] abbrev axiomL := □(□p ⟶ p) ⟶ □p
+@[simp] def axiomL.ctx : Context α := { axiomL p | p }
+notation "𝐋" => axiomL.ctx
+
+@[simp] abbrev axiomDot2 := ◇□p ⟶ □◇p
+@[simp] def axiomDot2.ctx : Context α := { axiomDot2 p | p }
+notation ".𝟐" => axiomDot2.ctx
+
+@[simp] abbrev axiomDot3 := □(□p ⟶ □q) ⋎ □(□q ⟶ □p)
+@[simp] def axiomDot3.ctx : Context α := { axiomDot3 p q | (p) (q) }
+notation ".𝟑" => axiomDot3.ctx
+
+@[simp] abbrev axiomGrz := □(□(p ⟶ □p) ⟶ p) ⟶ p
+@[simp] def axiomGrz.ctx : Context α := { axiomGrz p | p }
+notation "𝐆𝐫𝐳" => axiomGrz.ctx
+
+@[simp] abbrev axiomCD := ◇p ⟶ □p
+@[simp] def axiomCD.ctx : Context α := { axiomCD p | p }
+notation "𝐂𝐃" => axiomCD.ctx
+
+@[simp] abbrev axiomC4 := □□p ⟶ □p
+@[simp] def axiomC4.ctx : Context α := { axiomC4 p | p }
+notation "𝐂𝟒" => axiomC4.ctx
+
+private abbrev axiomsGL.ctx : Set (Formula α) := 𝐊 ∪ 𝐋
+notation "𝐆𝐋" => axiomsGL.ctx
+
+private abbrev axiomsS4.ctx : Set (Formula α) := 𝐊 ∪ 𝐓 ∪ 𝟒
+notation "𝐒𝟒" => axiomsS4.ctx
+
+private abbrev axiomsS4Dot2.ctx : Set (Formula α) := 𝐒𝟒 ∪ .𝟐
+notation "𝐒𝟒.𝟐" => axiomsS4Dot2.ctx
+
+private abbrev axiomsS4Dot3.ctx : Set (Formula α) := 𝐒𝟒 ∪ .𝟑
+notation "𝐒𝟒.𝟑" => axiomsS4Dot3.ctx
+
+private abbrev axiomsS4Grz.ctx : Set (Formula α) := 𝐒𝟒 ∪ 𝐆𝐫𝐳
+notation "𝐒𝟒𝐆𝐫𝐳" => axiomsS4Grz.ctx
+
+private abbrev axiomsS5.ctx : Set (Formula α) := 𝐊 ∪ 𝐓 ∪ 𝟓
+notation "𝐒𝟓" => axiomsS5.ctx
+
+end Axioms
 
 /-- `◇ᵏ□ˡp ⟶ □ᵐ◇ⁿq`   -/
 def Geach' (p q : Formula α) : (k : ℕ) → (l : ℕ) → (m : ℕ) → (n : ℕ) → Formula α
@@ -169,35 +262,20 @@ def Geach' (p q : Formula α) : (k : ℕ) → (l : ℕ) → (m : ℕ) → (n : �
 
 def Geach (p: Formula α) := Geach' p p
 
+namespace Geach
+
 variable (p : Formula α)
 
-abbrev axiomT := □p ⟶ p
 lemma axiomT_def : axiomT p = Geach p 0 1 0 0 := rfl
-
-abbrev axiomB := p ⟶ □◇p
 lemma axiomB_def : axiomB p = Geach p 0 0 1 1 := rfl
-
-abbrev axiomD := □p ⟶ ◇p
 lemma axiomD_def : axiomD p = Geach p 0 1 0 1 := rfl
-
-abbrev axiom4 := □p ⟶ □□p
 lemma axiom4_def : axiom4 p = Geach p 0 1 2 0 := rfl
-
-abbrev axiom5 := ◇p ⟶ □◇p
 lemma axiom5_def : axiom5 p = Geach p 1 0 1 1 := rfl
-
-abbrev axiomDot2 := ◇□p ⟶ □◇p
 lemma axiomDot2_def : axiomDot2 p = Geach p 1 1 1 1 := rfl
-
-abbrev axiomCD := ◇p ⟶ □p
 lemma axiomCD_def : axiomCD p = Geach p 1 0 1 0 := rfl
-
-abbrev axiomC4 := □□p ⟶ □p
 lemma axiomC4_def : axiomC4 p = Geach p 0 2 1 0 := rfl
 
 end Geach
-
-end Formula
 
 end Modal
 

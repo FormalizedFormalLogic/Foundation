@@ -7,96 +7,88 @@ namespace Modal
 
 variable {α β : Type u}
 
-abbrev Context (β : Type u) := Set (Formula β)
-
-namespace Context
-
-variable (Γ : Context β)
-
-def box : Context β := {□p | p ∈ Γ}
-
-prefix:74 "□" => Context.box
-
-lemma box_empty : □(∅ : Context β) = ∅ := by simp [box]
-
-def dia (Γ : Context β) : Context β := {◇p | p ∈ Γ}
-
-prefix:74 "◇" => Context.dia
-
-lemma dia_empty : ◇(∅ : Context β) = ∅ := by simp [dia]
-
-end Context
-
-
 structure Frame (α : Type*) where
   nonempty : Inhabited α
   rel : α → α → Prop
 
 namespace Frame
 
-variable (α : Type u) (f : Frame α)
+variable {α : Type u} (f : Frame α)
 
 class Finite extends Frame α where
   finite : Finite α
 
 local infix:50 " ≺ " => f.rel
 
-@[simp] def Reflexive := _root_.Reflexive f.rel
+class Reflexive extends Frame α where
+  reflexive := Reflexive f.rel
 
-@[simp] def Transitive := _root_.Transitive f.rel
+class Transitive extends Frame α where
+  transitive := Transitive f.rel
 
-@[simp] def Symmetric := _root_.Symmetric f.rel
+class Symmetric extends Frame α where
+  symmetric := Symmetric f.rel
 
-@[simp] def Euclidean := ∀ ⦃w₁ w₂ w₃⦄, w₁ ≺ w₂ → w₁ ≺ w₃ → (w₂ ≺ w₃)
+class Euclidean extends Frame α where
+  euclidean := ∀ ⦃w₁ w₂ w₃⦄, w₁ ≺ w₂ → w₁ ≺ w₃ → (w₂ ≺ w₃)
 
-@[simp] def Serial := ∀w₁, ∃w₂, w₁ ≺ w₂
+class Serial extends Frame α where
+  serial := ∀w₁, ∃w₂, w₁ ≺ w₂
 
-@[simp] def Confluency := ∀ ⦃w₁ w₂ w₃⦄, ((w₁ ≺ w₂ ∧ w₂ ≺ w₃) → ∃ w₄, w₂ ≺ w₄ ∧ w₃ ≺ w₄)
+class Confluency extends Frame α where
+  confluency := ∀ ⦃w₁ w₂ w₃⦄, ((w₁ ≺ w₂ ∧ w₂ ≺ w₃) → ∃ w₄, w₂ ≺ w₄ ∧ w₃ ≺ w₄)
 
-@[simp] def InfiniteAscent := ∃ (f : ℕ → α), ∀ n, f n ≺ f (n+1)
+class NonInfiniteAscent extends Frame α where
+  nonInfiniteAscent := ¬(∃ (f : ℕ → α), ∀ n, f n ≺ f (n + 1))
 
-@[simp] def Density := ∀ ⦃w₁ w₂⦄, w₁ ≺ w₂ → ∃w₃, w₁ ≺ w₃ ∧ w₃ ≺ w₂
+class Density extends Frame α where
+  density := ∀ ⦃w₁ w₂⦄, w₁ ≺ w₂ → ∃w₃, w₁ ≺ w₃ ∧ w₃ ≺ w₂
 
-@[simp] def Functionality := ∀ ⦃w₁ w₂ w₃⦄, w₁ ≺ w₂ ∧ w₁ ≺ w₃ → w₂ = w₃
+class Functionality extends Frame α where
+  functionality := ∀ ⦃w₁ w₂ w₃⦄, w₁ ≺ w₂ ∧ w₁ ≺ w₃ → w₂ = w₃
 
-@[simp] def RightConvergence := ∀ ⦃w₁ w₂ w₃⦄, w₁ ≺ w₂ ∧ w₁ ≺ w₃ → w₂ ≺ w₃ ∨ w₃ ≺ w₂ ∨ w₂ = w₃
+class RightConvergence extends Frame α where
+  rightConvergence := ∀ ⦃w₁ w₂ w₃⦄, w₁ ≺ w₂ ∧ w₁ ≺ w₃ → w₂ ≺ w₃ ∨ w₃ ≺ w₂ ∨ w₂ = w₃
 
 end Frame
 
 
-abbrev Frameclass (α : Type*) := Set (Frame α)
+structure Frameclass (α : Type*) where
+  frames : Set (Frame α)
 
 namespace Frameclass
 
-variable (α : Type*)
+variable {α : Type u} (fc : Frameclass α)
 
-def Trivial : Frameclass α := Set.univ
+class Reflexive extends Frameclass α where
+  reflexive := ∀ f ∈ fc.frames, Frame.Reflexive f
 
-@[simp] def Reflexive : Frameclass α := Frame.Reflexive α
+class Symmetric extends Frameclass α where
+  symmetric := ∀ f ∈ fc.frames, Frame.Symmetric f
 
-@[simp] def Transitive : Frameclass α := Frame.Transitive α
+class Transitive extends Frameclass α where
+  transitive := ∀ f ∈ fc.frames, Frame.Transitive f
 
-@[simp] def Symmetric : Frameclass α := Frame.Symmetric α
+class Euclidean extends Frameclass α where
+  euclidean := ∀ f ∈ fc.frames, Frame.Euclidean f
 
-@[simp] def Euclidean : Frameclass α := Frame.Euclidean α
+class Serial extends Frameclass α where
+  serial := ∀ f ∈ fc.frames, Frame.Serial f
 
-@[simp] def Serial : Frameclass α := Frame.Serial α
+class Confluency extends Frameclass α where
+  confluency := ∀ f ∈ fc.frames, Frame.Confluency f
 
-@[simp] def Confluency : Frameclass α := Frame.Confluency α
+class Density extends Frameclass α where
+  density := ∀ f ∈ fc.frames, Frame.Density f
 
-@[simp] def InfiniteAscent : Frameclass α := Frame.InfiniteAscent α
+class Functionality extends Frameclass α where
+  functionality := ∀ f ∈ fc.frames, Frame.Functionality f
 
-@[simp] def Transitive_and_NotInfiniteAscent : Frameclass α := λ f => f ∈ Transitive α ∧ f ∉ InfiniteAscent α
-
-@[simp] def Density : Frameclass α := Frame.Density α
-
-@[simp] def Functionality : Frameclass α := Frame.Functionality α
-
-@[simp] def RightConvergence : Frameclass α := Frame.RightConvergence α
-
-instance : Nonempty (Frameclass α) := ⟨Trivial α⟩
+class RightConvergence extends Frameclass α where
+  rightConvergence := ∀ f ∈ fc.frames, Frame.RightConvergence f
 
 end Frameclass
+
 
 structure Model (α β : Type u) extends Frame α where
   val : α → Set β
@@ -178,7 +170,7 @@ lemma preserve_Necessitation : (⊧ᶠ[f] p) → (⊧ᶠ[f] □p) := by simp_all
 end frames
 
 
-def frameclasses (fc : Frameclass α) (p : Formula β) := ∀ f, fc f → (⊧ᶠ[f] p)
+def frameclasses (fc : Frameclass α) (p : Formula β) := ∀ f ∈ fc.frames, (⊧ᶠ[f] p)
 
 notation "⊧ᶠᶜ[" fc "] " p => frameclasses fc p
 
@@ -191,10 +183,6 @@ lemma preserve_ModusPonens : (⊧ᶠᶜ[fc] p ⟶ q) → (⊧ᶠᶜ[fc] p) → (
 lemma preserve_Necessitation : (⊧ᶠᶜ[fc] p) → (⊧ᶠᶜ[fc] □p) := by simp_all [frameclasses, frames, models, satisfies];
 
 end frameclasses
-
-
-def defines (fc : Frameclass α) (p : Formula β) := ∀ f, (f ∈ fc) ↔ (⊧ᶠ[f] p)
-
 
 end Formula
 
@@ -228,15 +216,17 @@ def frameclasses (fc : Frameclass α) (Γ : Context β) := ∀ p ∈ Γ, (⊧ᶠ
 
 notation "⊧ᶠᶜ[" fc "] " Γ => frameclasses fc Γ
 
-lemma frameclasses.model {fc : Frameclass α} {M : Model α β} {Γ : Context β} (h : ⊧ᶠᶜ[fc] Γ) : (M.toFrame ∈ fc) → (⊧ᵐ[M] Γ) := by
+lemma frameclasses.model {fc : Frameclass α} {M : Model α β} {Γ : Context β} (h : ⊧ᶠᶜ[fc] Γ) : (M.toFrame ∈ fc.frames) → (⊧ᵐ[M] Γ) := by
   intro hm p hp;
   apply h; assumption; assumption;
+
+def defines (P : Frameclass α → Type*) (Γ : Context β) := ∀ fc, P fc → (∀ f, (f ∈ fc.frames) ↔ (⊧ᶠ[f] Γ))
 
 def ModelSatisfiable (m : Model α β) (Γ : Context β) := ∃ w, w ⊧ˢ[m] Γ
 
 def FrameSatisfiable (f : Frame α) (Γ : Context β) := ∃ V, ModelSatisfiable ⟨f, V⟩ Γ
 
-def FrameclassSatisfiable (fc : Frameclass α) (Γ : Context β) := ∃ f ∈ fc, FrameSatisfiable f Γ
+def FrameclassSatisfiable (fc : Frameclass α) (Γ : Context β) := ∃ f ∈ fc.frames, FrameSatisfiable f Γ
 
 end Context
 
@@ -272,7 +262,7 @@ notation Γ " ⊨ᵐ[" m "] " p => Formula.ModelConsequence m Γ p
 lemma ModelConsequence.cast {m : Model α β} {Γ Γ' : Context β} {p : Formula β} : (Γ ⊆ Γ') → (Γ ⊨ᵐ[m] p) → (Γ' ⊨ᵐ[m] p) := by aesop;
 
 @[simp]
-def FrameclassConsequence (fc : Frameclass α) (Γ : Context β) (p : Formula β) := ∀ f ∈ fc, Γ ⊨ᶠ[f] p
+def FrameclassConsequence (fc : Frameclass α) (Γ : Context β) (p : Formula β) := ∀ f ∈ fc.frames, Γ ⊨ᶠ[f] p
 
 notation Γ " ⊨ᶠᶜ[" fc "] " p => Formula.FrameclassConsequence fc Γ p
 
@@ -301,42 +291,25 @@ notation Γ " ⊨ᶠᶜ[" fc "] " Δ => Context.FrameclassConsequence fc Γ Δ
 end Context
 
 
-variable {f : Frame α} {p q : Formula β}
+variable {f : Frame α} {p q q₁ q₂ : Formula β}
 
 open Formula Frameclass
 
 attribute [simp] Formula.models Formula.frames Formula.frameclasses Formula.satisfies.imp_def Formula.satisfies
+attribute [simp] Context.defines Context.frames
 
-lemma frameclasses_AxiomK : ⊧ᶠᶜ[Trivial α] □(p ⟶ q) ⟶ □p ⟶ □q := by aesop;
-
-lemma frameclasses_AxiomT : ⊧ᶠᶜ[Reflexive α] (□p ⟶ p) := by aesop;
-
-lemma frameclasses_AxiomD : ⊧ᶠᶜ[Serial α] (□p ⟶ ◇p) := by aesop;
-
-lemma frameclasses_AxiomB : ⊧ᶠᶜ[Symmetric α] (p ⟶ □◇p) := by aesop;
-
-lemma frameclasses_Axiom4 : ⊧ᶠᶜ[Transitive α] (□p ⟶ □□p) := by aesop;
-
-lemma frameclasses_Axiom5 : ⊧ᶠᶜ[Euclidean α] (◇p ⟶ □◇p) := by aesop;
-
-lemma frameclasses_AxiomL : ⊧ᶠᶜ[Transitive_and_NotInfiniteAscent α] (□(□p ⟶ p) ⟶ □p) := by sorry;
-
-lemma frameclasses_AxiomDot2 : ⊧ᶠᶜ[Confluency α] (◇□p ⟶ □◇p) := by sorry;
-
-lemma frameclasses_AxiomDot3 : ⊧ᶠᶜ[Functionality α] ( □(□p ⟶ □q) ⋎ □(□q ⟶ □p)) := by sorry;
-
-lemma frameclasses_AxiomCD : ⊧ᶠᶜ[Confluency α] (◇p ⟶ □p) := by sorry;
-
-lemma frameclasses_AxiomC4 : ⊧ᶠᶜ[Density α] (□□p ⟶ □p) := by sorry;
-
-lemma defines_T : (⊧ᶠ[f] □p ⟶ p) ↔ (f.Reflexive α) := by
+lemma axiomT.defines : (𝐓 : Context β).defines (@Reflexive α) := by
+  intro fc hfc f;
   constructor;
   . sorry;
-  . apply frameclasses_AxiomT;
+  . sorry;
 
-lemma defines_D  : (⊧ᶠ[f] □p ⟶ ◇p) ↔ (f.Serial) := by
-  apply Iff.intro;
-  . intro h;
+lemma axiomD.defines : (𝐃 : Context β).defines (@Serial α) := by
+  intro fc hfc f;
+  constructor;
+  . sorry;
+    /-
+    intro h;
     by_contra hC; simp at hC;
     have ⟨w₁, r₁⟩ := hC;
     simp [satisfies.imp_def] at h;
@@ -344,32 +317,50 @@ lemma defines_D  : (⊧ᶠ[f] □p ⟶ ◇p) ↔ (f.Serial) := by
     have : w₁ ⊧ˢ[⟨f, V⟩] □p := by simp [satisfies]; simp_all;
     have : ¬w₁ ⊧ˢ[⟨f, V⟩] ◇p := by simp [satisfies]; simp_all;
     sorry;
-  . apply frameclasses_AxiomD;
+    -/
+  . sorry;
 
-lemma defines_B : (⊧ᶠ[f] p ⟶ □◇p) ↔ (f.Symmetric) := by
+lemma axiomB.defines : (𝐁 : Context β).defines (@Symmetric α) := by
+  intro fc hfc f;
   constructor;
   . sorry;
-  . apply frameclasses_AxiomB;
+  . sorry;
 
-lemma defines_A4 : (⊧ᶠ[f] □p ⟶ □□p) ↔ (f.Transitive) := by
+lemma axiom4.defines : (𝟒 : Context β).defines (@Transitive α) := by
+  intro fc hfc f;
   constructor;
   . sorry;
-  . apply frameclasses_Axiom4;
+  . sorry;
 
-lemma defines_A5 : (⊧ᶠ[f] ◇p ⟶ □◇p) ↔ (f.Euclidean) := by
+lemma axiom5.defines : (𝟓 : Context β).defines (@Euclidean α) := by
+  intro fc hfc f;
   constructor;
   . sorry;
-  . apply frameclasses_Axiom5;
+  . sorry;
 
-lemma defines_L : (⊧ᶠ[f] □(□p ⟶ p) ⟶ □p) ↔ (f.Transitive ∧ ¬f.InfiniteAscent) := by
+lemma axiomDot2.defines : (.𝟐 : Context β).defines (@Confluency α) := by
+  intro fc hfc f;
   constructor;
   . sorry;
-  . apply frameclasses_AxiomL;
+  . sorry;
 
-lemma defines_Dot2 : (⊧ᶠ[f] ◇□p ⟶ □◇p) ↔ (f.Confluency) := by
+lemma axiomDot3.defines : (.𝟑 : Context β).defines (@Functionality α) := by
+  intro fc hfc f;
   constructor;
   . sorry;
-  . apply frameclasses_AxiomDot2;
+  . sorry;
+
+lemma axiomCD.defines : (𝐂𝐃 : Context β).defines (@Confluency α) := by
+  intro fc hfc f;
+  constructor;
+  . sorry;
+  . sorry;
+
+lemma axiomC4.defines : (𝐂𝟒 : Context β).defines (@Density α) := by
+  intro fc hfc f;
+  constructor;
+  . sorry;
+  . sorry;
 
 end Modal
 

@@ -157,11 +157,6 @@ lemma ProvableH.dne : (⊢ᴴ(Λ)! ~~p) → (⊢ᴴ(Λ)! p) := by
 
 namespace LogicK
 
-@[simp]
-private def ModalAxioms : (Set (Formula α)) := { □(p ⟶ q) ⟶ □p ⟶ □q | (p : Formula α) (q : Formula α)}
-
-notation "𝐊" => ModalAxioms
-
 abbrev DerivationH := @Hilbert.DerivationH α 𝐊
 
 instance : LogicK (Formula α) where
@@ -188,13 +183,6 @@ end LogicK
 
 
 namespace LogicS4
-
-@[simp]
-private def ModalAxioms : Set (Formula α) := 𝐊
-  ∪ { □p ⟶ p | p : Formula α} -- T
-  ∪ { □p ⟶ □□p | p : Formula α} -- 4
-
-notation "𝐒𝟒" => ModalAxioms
 
 abbrev DerivationH := @Hilbert.DerivationH α 𝐒𝟒
 
@@ -228,27 +216,12 @@ end LogicS4
 
 namespace LogicS5
 
-@[simp]
-private def ModalAxioms : Set (Formula α) := 𝐊
-  ∪ { □p ⟶ p | p : Formula α} -- T
-  ∪ { p ⟶ □◇p | p : Formula α} -- B
-  ∪ { □p ⟶ □□p | p : Formula α} -- 4
-
-notation "𝐒𝟓" => ModalAxioms
-
 abbrev DerivationH := @Hilbert.DerivationH α 𝐒𝟓
 
 end LogicS5
 
 
 namespace LogicGL
-
-variable {α : Type u}
-
-@[simp]
-private def ModalAxioms : Set (Formula α) := 𝐊 ∪ { □(□p ⟶ p) ⟶ □p | p : Formula α} -- L
-
-notation "𝐆𝐋" => ModalAxioms
 
 abbrev DerivationH := @Hilbert.DerivationH α 𝐆𝐋
 
@@ -257,22 +230,12 @@ end LogicGL
 
 namespace LogicS4Dot2
 
-@[simp]
-private def ModalAxioms : Set (Formula α) := 𝐒𝟒 ∪ { ◇□p ⟶ □◇p | p : Formula α}  -- Dot2
-
-notation "𝐒𝟒.𝟐" => ModalAxioms
-
 abbrev DerivationH := @Hilbert.DerivationH α 𝐒𝟒.𝟐
 
 end LogicS4Dot2
 
 
 namespace LogicS4Dot3
-
-@[simp]
-private def ModalAxioms : Set (Formula α) := 𝐒𝟒 ∪ { □(□p ⟶ □q) ⋎ □(□q ⟶ □p) | (p : Formula α) (q : Formula α) }  -- Dot3
-
-notation "𝐒𝟒.𝟑" => ModalAxioms
 
 abbrev DerivationH := @Hilbert.DerivationH α 𝐒𝟒.𝟑
 
@@ -281,15 +244,9 @@ end LogicS4Dot3
 
 namespace LogicS4Grz
 
-@[simp]
-private def ModalAxioms : Set (Formula α) := 𝐒𝟒 ∪ { □(□(p ⟶ □p) ⟶ p) ⟶ p | p : Formula α}  -- Grz
-
-notation "𝐒𝟒𝐆𝐫𝐳" => ModalAxioms
-
 abbrev DerivationH := @Hilbert.DerivationH α 𝐒𝟒𝐆𝐫𝐳
 
 end LogicS4Grz
-
 
 end Hilbert
 
