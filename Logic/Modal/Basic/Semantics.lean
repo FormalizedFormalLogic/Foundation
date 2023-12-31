@@ -115,7 +115,11 @@ namespace satisfies
 
 @[simp] lemma and_def : (w ⊧ˢ[m] p ⋏ q) ↔ (w ⊧ˢ[m] p) ∧ (w ⊧ˢ[m] q) := by simp [satisfies];
 
--- lemma satisfies_or : (w ⊧ˢ[m] p ⋎ q) ↔ (w ⊧ˢ[m] p) ∨ (w ⊧ˢ[m] q) := by simp [satisfies];
+@[simp] lemma or_def : (w ⊧ˢ[m] p ⋎ q) ↔ (w ⊧ˢ[m] p) ∨ (w ⊧ˢ[m] q) := by
+  simp [satisfies];
+  constructor;
+  . by_cases (w ⊧ˢ[m] p) <;> simp_all;
+  . intros; simp_all [false_or];
 
 @[simp] lemma imp_def : (w ⊧ˢ[m] p ⟶ q) ↔ (w ⊧ˢ[m] p) → (w ⊧ˢ[m] q) := by simp [satisfies];
 

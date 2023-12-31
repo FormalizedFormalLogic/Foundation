@@ -18,10 +18,6 @@ theorem LogicK.sounds' (Γ : Set (Formula α)) (hΓ : Γ = ∅) (p : Formula α)
   case maxm Γ p ih =>
     let ⟨_, ⟨_, hq⟩⟩ := ih; rw [←hq];
     apply preserve_AxiomK;
-  case disj₃ p q r =>
-    intro V w;
-    -- TODO: ここで排中律を仮定する必要は本当にあるのだろうか？
-    by_cases (w ⊧ˢ[⟨f, V⟩] p) <;> simp_all [satisfies];
 
 lemma LogicK.sounds {p : Formula α} (f : Frame β) (h : ⊢ᴴ(𝐊) p) : (⊧ᶠ[f] p) := by
   exact (show (⊢ᴴ(𝐊) p) → (⊧ᶠ[f] p) by simpa [Context.box_empty] using sounds' ∅ rfl p f;) h;
