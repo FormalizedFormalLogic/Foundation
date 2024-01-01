@@ -10,23 +10,38 @@ import Logic.Modal.Basic.HilbertStyle
 
 namespace LO.Modal.Hilbert
 
+open HasAxiomT HasAxiomD HasAxiomB HasAxiom4 HasAxiom5
+
 section S5Equivalence
 
-variable (F : Type u) [ModalLogicSymbol F] [TwoSided F]
+variable (F : Type u) [ModalLogicSymbol F] [System F] [Hilbert.Classical F] [HasNecessitation F] [HasAxiomK F] [LogicK F]
+variable [HasAxiomT F] [HasAxiomD F] [HasAxiomB F] [HasAxiom4 F] [HasAxiom5 F]
 
-class LogicKTB5 extends LogicK F, HasAxiomT F, HasAxiom5 F
+private abbrev LogicKT5 := LogicS5
 
-class LogicKT45 extends LogicK F, HasAxiomT F, HasAxiom4 F, HasAxiom5 F
+class LogicKTB5 [LogicK F] [HasAxiomT F] [HasAxiomB F] [HasAxiom5 F]
 
-class LogicKT4B5 extends LogicK F, HasAxiomT F, HasAxiom4 F, HasAxiomB F, HasAxiom5 F
+instance [LogicKTB5 F] : LogicKT5 F where
 
-class LogicKDB5 extends LogicK F, HasAxiomD F, HasAxiomB F, HasAxiom5 F
+class LogicKT45 [LogicK F] [HasAxiomT F] [HasAxiom4 F] [HasAxiom5 F]
 
-class LogicKD4B5 extends LogicK F, HasAxiomD F, HasAxiom4 F, HasAxiomB F, HasAxiom5 F
+instance [LogicKT45 F] : LogicKT5 F where
 
-class LogicKT4B extends LogicK F, HasAxiomT F, HasAxiom4 F, HasAxiomB F
+class LogicKT4B [LogicK F] [HasAxiomT F] [HasAxiom4 F] [HasAxiomB F]
 
-class LogicKD4B extends LogicK F, HasAxiomD F, HasAxiom4 F, HasAxiomB F
+class LogicKT4B5 [LogicK F] [HasAxiomT F] [HasAxiom4 F] [HasAxiomB F] [HasAxiom5 F]
+
+instance [LogicKT4B5 F] : LogicKT4B F where
+
+instance [LogicKT4B5 F] : LogicKT5 F where
+
+class LogicKDB5 [LogicK F] [HasAxiomD F] [HasAxiomB F] [HasAxiom5 F]
+
+class LogicKD4B [LogicK F] [HasAxiomD F] [HasAxiom4 F] [HasAxiomB F]
+
+class LogicKD4B5 [LogicK F] [HasAxiomD F] [HasAxiom4 F] [HasAxiomB F] [HasAxiom5 F]
+
+instance [LogicKD4B5 F] : LogicKD4B F where
 
 end S5Equivalence
 
