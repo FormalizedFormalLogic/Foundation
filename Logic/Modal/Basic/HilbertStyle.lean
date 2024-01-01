@@ -7,77 +7,70 @@ namespace Modal
 
 namespace Hilbert
 
-instance : Hilbert.NegEquiv (Formula α) where
-  neg_equiv := rfl
-
 section Axioms
 
-variable (F : Type u) [ModalLogicSymbol F] [System F]
+variable {F : Type u} [ModalLogicSymbol F] (Bew : Set F → F → Sort*)
 
 class HasNecessitation where
-  necessitation {Γ : Set F} {p : F} : (Γ ⊢! p) → (Γ ⊢! (□p))
+  necessitation {Γ : Set F} {p : F} : (Bew Γ p) → (Bew Γ (□p))
 
 class HasAxiomK where
-  K (Γ : Set F) (p q : F) : Γ ⊢! □(p ⟶ q) ⟶ □p ⟶ □q
+  K (Γ : Set F) (p q : F) : Bew Γ (□(p ⟶ q) ⟶ □p ⟶ □q)
 
 class HasAxiomT where
-  T (Γ : Set F) (p : F) : Γ ⊢! □p ⟶ p
+  T (Γ : Set F) (p : F) : Bew Γ (□p ⟶ p)
 
 class HasAxiomD where
-  D (Γ : Set F) (p : F) : Γ ⊢! □p ⟶ ◇p
+  D (Γ : Set F) (p : F) : Bew Γ (□p ⟶ ◇p)
 
 class HasAxiomB where
-  B (Γ : Set F) (p q : F) : Γ ⊢! p ⟶ □◇p
+  B (Γ : Set F) (p q : F) : Bew Γ (p ⟶ □◇p)
 
 class HasAxiom4 where
-  A4 (Γ : Set F) (p : F) : Γ ⊢! □p ⟶ □□p
+  A4 (Γ : Set F) (p : F) : Bew Γ (□p ⟶ □□p)
 
 class HasAxiom5 where
-  A5 (Γ : Set F) (p : F) : Γ ⊢! ◇p ⟶ □◇p
+  A5 (Γ : Set F) (p : F) : Bew Γ (◇p ⟶ □◇p)
 
 class HasAxiomL where
-  L (Γ : Set F) (p : F) : Γ ⊢! □(□p ⟶ p) ⟶ □p
+  L (Γ : Set F) (p : F) : Bew Γ (□(□p ⟶ p) ⟶ □p)
 
 class HasAxiomDot2 where
-  Dot2 (Γ : Set F) (p : F) : Γ ⊢! ◇□p ⟶ □◇p
+  Dot2 (Γ : Set F) (p : F) : Bew Γ (◇□p ⟶ □◇p)
 
 class HasAxiomDot3 where
-  Dot3 (Γ : Set F) (p q : F) : Γ ⊢! □(□p ⟶ □q) ⋎ □(□q ⟶ □p)
+  Dot3 (Γ : Set F) (p q : F) : Bew Γ (□(□p ⟶ □q) ⋎ □(□q ⟶ □p))
 
 class HasAxiomGrz where
-  Grz (Γ : Set F) (p : F) : Γ ⊢! □(□(p ⟶ □p) ⟶ p) ⟶ p
+  Grz (Γ : Set F) (p : F) : Bew Γ (□(□(p ⟶ □p) ⟶ p) ⟶ p)
 
 /-- McKinsey Axiom -/
 class HasAxiomM where
-  M (Γ : Set F) (p : F) : Γ ⊢! □◇p ⟶ ◇□p
+  M (Γ : Set F) (p : F) : Bew Γ (□◇p ⟶ ◇□p)
 
 class HasAxiomCD where
-  CD (Γ : Set F) (p : F) : Γ ⊢! ◇p ⟶ □p
+  CD (Γ : Set F) (p : F) : Bew Γ (◇p ⟶ □p)
 
 class HasAxiomC4 where
-  C4 (Γ : Set F) (p : F) : Γ ⊢! □□p ⟶ □p
+  C4 (Γ : Set F) (p : F) : Bew Γ (□□p ⟶ □p)
 
-class LogicK [Hilbert.Classical F] [HasNecessitation F] [HasAxiomK F]
+class LogicK extends Hilbert.Classical Bew, HasNecessitation Bew, HasAxiomK Bew
 
-variable [Hilbert.Classical F] [HasNecessitation F] [HasAxiomK F]
+class LogicKD extends LogicK Bew, HasAxiomD Bew
 
-class LogicKD [LogicK F] [HasAxiomD F]
+class LogicKT extends LogicK Bew, HasAxiomT Bew
 
-class LogicKT [LogicK F] [HasAxiomT F]
+class LogicGL extends LogicK Bew, HasAxiomL Bew
 
-class LogicGL [LogicK F] [HasAxiomL F]
+class LogicS4 extends LogicK Bew, HasAxiomT Bew, HasAxiom4 Bew
 
-class LogicS4 extends LogicK F, HasAxiomT F, HasAxiom4 F
+class LogicS4Dot2 extends LogicS4 Bew, HasAxiomDot2 Bew
 
-variable [LogicK F] [HasAxiomT F] [HasAxiom4 F]
+class LogicS4Dot3 extends LogicS4 Bew, HasAxiomDot3 Bew
 
-class LogicS4Dot2 [LogicS4 F] [HasAxiomDot2 F]
+class LogicS4Grz extends LogicS4 Bew, HasAxiomGrz Bew
 
-class LogicS4Dot3 [LogicS4 F] [HasAxiomDot3 F]
-
-class LogicS4Grz [LogicS4 F] [HasAxiomGrz F]
-
-class LogicS5 [LogicK F] [HasAxiomT F] [HasAxiom5 F]
+class LogicS5 extends LogicK Bew, HasAxiomT Bew, HasAxiom5 Bew
 
 end Axioms
 
@@ -122,10 +115,25 @@ notation:45 "⊬ᴴ(" Λ ")!" p => Unprovable Λ p
 
 namespace Deduction
 
-instance instSystem : System (Formula α) where
-  Bew := @Hilbert.Deduction α Λ
-  axm := axm
-  weakening' := wk
+instance : Hilbert.Classical (Deduction Λ) where
+  neg          := rfl;
+  axm          := by apply axm;
+  weakening'   := by apply wk;
+  modus_ponens := by apply modus_ponens;
+  verum        := by apply verum;
+  imply₁       := by apply imply₁;
+  imply₂       := by apply imply₂;
+  conj₁        := by apply conj₁;
+  conj₂        := by apply conj₂;
+  conj₃        := by apply conj₃;
+  disj₁        := by apply disj₁;
+  disj₂        := by apply disj₂;
+  disj₃        := by apply disj₃;
+  explode      := by apply explode;
+  dne          := by apply dne;
+
+instance : HasNecessitation (Deduction Λ) where
+  necessitation := by apply necessitation;
 
 def length {Γ : Set (Formula α)} {p : Formula α} : (Γ ⊢ᴹ(Λ) p) → ℕ
   | modus_ponens d₁ d₂ => d₁.length + d₂.length + 1
@@ -214,131 +222,74 @@ open Deduction
 
 namespace LogicK
 
-instance : System (Formula α) := instSystem 𝐊
+instance inst (h : 𝐊 ⊆ Λ) : (LogicK (@Deduction α Λ)) where
+  K _ p q := Deduction.maxm $ Set.mem_of_subset_of_mem h (by simp);
 
-instance : Hilbert.Classical (Formula α) where
-  modus_ponens hpq hp := ⟨modus_ponens (hpq.some) (hp.some)⟩
-  verum Γ        := ⟨verum Γ⟩
-  imply₁ Γ p q   := ⟨imply₁ Γ p q⟩
-  imply₂ Γ p q r := ⟨imply₂ Γ p q r⟩
-  conj₁ Γ p q    := ⟨conj₁ Γ p q⟩
-  conj₂ Γ p q    := ⟨conj₂ Γ p q⟩
-  conj₃ Γ p q    := ⟨conj₃ Γ p q⟩
-  disj₁ Γ p q    := ⟨disj₁ Γ p q⟩
-  disj₂ Γ p q    := ⟨disj₂ Γ p q⟩
-  disj₃ Γ p q r  := ⟨disj₃ Γ p q r⟩
-  explode Γ p    := ⟨explode Γ p⟩
-  dne Γ p        := ⟨dne Γ p⟩
-
-instance : HasAxiomK (Formula α) where
-  K _ _ _ := ⟨Deduction.maxm (by simp)⟩;
-
-instance : HasNecessitation (Formula α) where
-  necessitation h := ⟨Deduction.necessitation h.some⟩
-
-instance : LogicK (Formula α) where
+instance : LogicK (@Deduction α 𝐊) := inst 𝐊 Set.Subset.rfl
 
 end LogicK
 
 
 namespace LogicGL
 
-instance : System (Formula α) := instSystem 𝐆𝐋
+instance : LogicK (@Deduction α 𝐆𝐋) := LogicK.inst _ (by simp [axiomsGL.ctx])
 
-instance : HasAxiomL (Formula α) where
-  L Γ p := ⟨Deduction.maxm (by simp)⟩;
-
-lemma iK (d : Γ ⊢ᴹ(𝐊) p) : (Γ ⊢ᴹ(𝐆𝐋) p) := d.maxm_strengthen (by simp [axiomsGL.ctx];)
-
-lemma iL (d : Γ ⊢ᴹ(𝐋) p) : (Γ ⊢ᴹ(𝐆𝐋) p) := d.maxm_strengthen (by simp [axiomsGL.ctx];)
+instance : LogicGL (@Deduction α 𝐆𝐋) where
+  L _ _ := by apply Deduction.maxm; simp;
 
 end LogicGL
 
 
 namespace LogicS4
 
-lemma stronger_K (d : Γ ⊢ᴹ(𝐊) p) : (Γ ⊢ᴹ(𝐒𝟒) p) := d.maxm_strengthen (by simp only [axiomsS4.ctx.includeK];)
+instance inst (_ : 𝐒𝟒 ⊆ Λ) : (LogicS4 (@Deduction α Λ)) where
+  K _ p q := Deduction.maxm $ Set.mem_of_subset_of_mem (by assumption) (by simp);
+  T _ p := Deduction.maxm $ Set.mem_of_subset_of_mem (by assumption) (by simp);
+  A4 _ p := Deduction.maxm $ Set.mem_of_subset_of_mem (by assumption) (by simp);
 
-instance : System (Formula α) := instSystem 𝐒𝟒
-
-instance : Hilbert.Classical (Formula α) where
-  modus_ponens hpq hp := ⟨modus_ponens (hpq.some) (hp.some)⟩
-  verum Γ        := ⟨verum Γ⟩
-  imply₁ Γ p q   := ⟨imply₁ Γ p q⟩
-  imply₂ Γ p q r := ⟨imply₂ Γ p q r⟩
-  conj₁ Γ p q    := ⟨conj₁ Γ p q⟩
-  conj₂ Γ p q    := ⟨conj₂ Γ p q⟩
-  conj₃ Γ p q    := ⟨conj₃ Γ p q⟩
-  disj₁ Γ p q    := ⟨disj₁ Γ p q⟩
-  disj₂ Γ p q    := ⟨disj₂ Γ p q⟩
-  disj₃ Γ p q r  := ⟨disj₃ Γ p q r⟩
-  explode Γ p    := ⟨explode Γ p⟩
-  dne Γ p        := ⟨dne Γ p⟩
-
-instance : HasAxiomK (Formula α) where
-  K _ _ _ := ⟨Deduction.maxm (by simp)⟩;
-
-instance : HasNecessitation (Formula α) where
-  necessitation h := ⟨Deduction.necessitation h.some⟩
-
-instance : HasAxiomT (Formula α) where
-  T _ _ := ⟨Deduction.maxm (by simp)⟩;
-
-instance : HasAxiom4 (Formula α) where
-  A4 _ _ := ⟨Deduction.maxm (by simp)⟩
-
-instance : LogicS4 (Formula α) where
+instance : LogicS4 (@Deduction α 𝐒𝟒) := inst 𝐒𝟒 Set.Subset.rfl
 
 end LogicS4
 
 
 namespace LogicS4Dot2
 
-instance : System (Formula α) := instSystem 𝐒𝟒.𝟐
+instance : LogicS4 (@Deduction α 𝐒𝟒.𝟐) := LogicS4.inst _ (by simp)
 
-instance : HasAxiomDot2 (Formula α) where
-  Dot2 _ _ := ⟨Deduction.maxm (by simp)⟩;
-
-lemma stronger_S4 (d : Γ ⊢ᴹ(𝐒𝟒) p) : (Γ ⊢ᴹ(𝐒𝟒.𝟐) p) := d.maxm_strengthen (by simp [axiomsS4Dot2.ctx];)
+instance : LogicS4Dot2 (@Deduction α 𝐒𝟒.𝟐) where
+  Dot2 _ _ := by apply Deduction.maxm; simp;
 
 end LogicS4Dot2
 
 
 namespace LogicS4Dot3
 
-instance : System (Formula α) := instSystem 𝐒𝟒.𝟑
+instance : LogicS4 (@Deduction α 𝐒𝟒.𝟑) := LogicS4.inst _ (by simp)
 
-instance : HasAxiomDot3 (Formula α) where
-  Dot3 _ p q := ⟨Deduction.maxm (by apply Set.mem_union_right; existsi p, q; simp;)⟩
-
-lemma stronger_S4 (d : Γ ⊢ᴹ(𝐒𝟒) p) : (Γ ⊢ᴹ(𝐒𝟒.𝟑) p) := d.maxm_strengthen (by simp [axiomsS4Dot2.ctx];)
+instance : LogicS4Dot3 (@Deduction α 𝐒𝟒.𝟑) where
+  Dot3 _ p q := by apply Deduction.maxm; apply Set.mem_union_right; existsi p, q; simp;
 
 end LogicS4Dot3
 
 
 namespace LogicS4Grz
 
-instance : System (Formula α) := instSystem 𝐒𝟒𝐆𝐫𝐳
+instance : LogicS4 (@Deduction α 𝐒𝟒𝐆𝐫𝐳) := LogicS4.inst _ (by simp)
 
-instance : HasAxiomGrz (Formula α) where
-  Grz _ _ := ⟨Deduction.maxm (by simp)⟩
-
-lemma stronger_S4 (d : Γ ⊢ᴹ(𝐒𝟒) p) : (Γ ⊢ᴹ(𝐒𝟒𝐆𝐫𝐳) p) := d.maxm_strengthen (by simp [axiomsS4Dot2.ctx];)
+instance : LogicS4Grz (@Deduction α 𝐒𝟒𝐆𝐫𝐳) where
+  Grz _ _ := by apply Deduction.maxm; simp;
 
 end LogicS4Grz
 
 
 namespace LogicS5
 
-instance : System (Formula α) := instSystem 𝐒𝟓
+instance inst (_ : 𝐒𝟓 ⊆ Λ) : (LogicS5 (@Deduction α Λ)) where
+  K _ p q := Deduction.maxm $ Set.mem_of_subset_of_mem (by assumption) (by simp);
+  T _ p := Deduction.maxm $ Set.mem_of_subset_of_mem (by assumption) (by simp);
+  A5 _ p := Deduction.maxm $ Set.mem_of_subset_of_mem (by assumption) (by simp);
 
-instance : HasAxiomT (Formula α) where
-  T _ _ := ⟨Deduction.maxm (by simp)⟩
-
-instance : HasAxiom5 (Formula α) where
-  A5 _ _ := ⟨Deduction.maxm (by simp)⟩
-
-lemma stronger_K (d : Γ ⊢ᴹ(𝐊) p) : (Γ ⊢ᴹ(𝐒𝟓) p) := d.maxm_strengthen (by simp only [axiomsS5.ctx.includeK];)
+instance : LogicS5 (@Deduction α 𝐒𝟓) := inst 𝐒𝟓 Set.Subset.rfl
 
 end LogicS5
 

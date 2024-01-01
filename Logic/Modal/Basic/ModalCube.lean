@@ -12,36 +12,35 @@ namespace LO.Modal.Hilbert
 
 open HasAxiomT HasAxiomD HasAxiomB HasAxiom4 HasAxiom5
 
+variable {Bew : Type u} [ModalLogicSymbol Bew] (Bew : Set Bew → Bew → Sort*)
+
 section S5Equivalence
 
-variable (F : Type u) [ModalLogicSymbol F] [System F] [Hilbert.Classical F] [HasNecessitation F] [HasAxiomK F] [LogicK F]
-variable [HasAxiomT F] [HasAxiomD F] [HasAxiomB F] [HasAxiom4 F] [HasAxiom5 F]
+private abbrev LogicKT5 := LogicS5 Bew
 
-private abbrev LogicKT5 := LogicS5
+class LogicKTB5 extends LogicK Bew, HasAxiomT Bew, HasAxiomB Bew, HasAxiom5 Bew
 
-class LogicKTB5 [LogicK F] [HasAxiomT F] [HasAxiomB F] [HasAxiom5 F]
+instance [LogicKTB5 Bew] : LogicKT5 Bew where
 
-instance [LogicKTB5 F] : LogicKT5 F where
+class LogicKT45 extends LogicK Bew, HasAxiomT Bew, HasAxiom4 Bew, HasAxiom5 Bew
 
-class LogicKT45 [LogicK F] [HasAxiomT F] [HasAxiom4 F] [HasAxiom5 F]
+instance [LogicKT45 Bew] : LogicKT5 Bew where
 
-instance [LogicKT45 F] : LogicKT5 F where
+class LogicKT4B extends LogicK Bew, HasAxiomT Bew, HasAxiom4 Bew, HasAxiomB Bew
 
-class LogicKT4B [LogicK F] [HasAxiomT F] [HasAxiom4 F] [HasAxiomB F]
+class LogicKT4B5 extends LogicK Bew, HasAxiomT Bew, HasAxiom4 Bew, HasAxiomB Bew, HasAxiom5 Bew
 
-class LogicKT4B5 [LogicK F] [HasAxiomT F] [HasAxiom4 F] [HasAxiomB F] [HasAxiom5 F]
+instance [LogicKT4B5 Bew] : LogicKT4B Bew where
 
-instance [LogicKT4B5 F] : LogicKT4B F where
+instance [LogicKT4B5 Bew] : LogicKT5 Bew where
 
-instance [LogicKT4B5 F] : LogicKT5 F where
+class LogicKDB5 extends LogicK Bew, HasAxiomD Bew, HasAxiomB Bew, HasAxiom5 Bew
 
-class LogicKDB5 [LogicK F] [HasAxiomD F] [HasAxiomB F] [HasAxiom5 F]
+class LogicKD4B extends LogicK Bew, HasAxiomD Bew, HasAxiom4 Bew, HasAxiomB Bew
 
-class LogicKD4B [LogicK F] [HasAxiomD F] [HasAxiom4 F] [HasAxiomB F]
+class LogicKD4B5 extends LogicK Bew, HasAxiomD Bew, HasAxiom4 Bew, HasAxiomB Bew, HasAxiom5 Bew
 
-class LogicKD4B5 [LogicK F] [HasAxiomD F] [HasAxiom4 F] [HasAxiomB F] [HasAxiom5 F]
-
-instance [LogicKD4B5 F] : LogicKD4B F where
+instance [LogicKD4B5 Bew] : LogicKD4B Bew where
 
 end S5Equivalence
 

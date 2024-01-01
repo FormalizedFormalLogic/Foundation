@@ -3,35 +3,29 @@ import Logic.Logic.Calculus
 
 namespace LO
 
-class Hilbert (F : Type u) where
-  Derivation : Finset F → F → Type u
+class Deduction {F : Type u} [LogicSymbol F] (Bew : Set F → F → Sort*) where
+  axm : ∀ {f}, f ∈ T → Bew T f
+  weakening' : ∀ {T U f}, T ⊆ U → Bew T f → Bew U f
 
 namespace Hilbert
 
-instance [TwoSided F] : Hilbert F := by
-  apply Hilbert.mk;
-  intro Γ p;
-  exact TwoSided.Derivation Γ.toList [p];
-
-variable {F : Type u} [LogicSymbol F] [System F]
-
-class NegEquiv (F : Type*) [LogicSymbol F] where
-  neg_equiv {p : F} : ~p = p ⟶ ⊥
+variable {F : Type u} [LogicSymbol F] (Bew : Set F → F → Sort*)
 
 /--
   Minimal Logic.
 -/
-class Minimal (F : Type u) [LogicSymbol F] [System F] extends NegEquiv F where
-  modus_ponens {Γ : Set F} {p q}       : (Γ ⊢! (p ⟶ q)) → (Γ ⊢! p) → (Γ ⊢! q)
-  verum        (Γ : Set F)             : Γ ⊢! ⊤
-  imply₁       (Γ : Set F) (p q : F)   : Γ ⊢! (p ⟶ (q ⟶ p))
-  imply₂       (Γ : Set F) (p q r : F) : Γ ⊢! ((p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r)
-  conj₁        (Γ : Set F) (p q : F)   : Γ ⊢! (p ⋏ q ⟶ p)
-  conj₂        (Γ : Set F) (p q : F)   : Γ ⊢! (p ⋏ q ⟶ q)
-  conj₃        (Γ : Set F) (p q : F)   : Γ ⊢! (p ⟶ q ⟶ p ⋏ q)
-  disj₁        (Γ : Set F) (p q : F)   : Γ ⊢! (p ⟶ p ⋎ q)
-  disj₂        (Γ : Set F) (p q : F)   : Γ ⊢! (q ⟶ p ⋎ q)
-  disj₃        (Γ : Set F) (p q r : F) : Γ ⊢! ((p ⟶ r) ⟶ (q ⟶ r) ⟶ p ⋎ q ⟶ r)
+class Minimal extends Deduction Bew where
+  neg          {p : F}                 : ~p = p ⟶ ⊥
+  modus_ponens {Γ : Set F} {p q}       : (Bew Γ (p ⟶ q)) → (Bew Γ p) → (Bew Γ q)
+  verum        (Γ : Set F)             : Bew Γ ⊤
+  imply₁       (Γ : Set F) (p q : F)   : Bew Γ (p ⟶ (q ⟶ p))
+  imply₂       (Γ : Set F) (p q r : F) : Bew Γ ((p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r)
+  conj₁        (Γ : Set F) (p q : F)   : Bew Γ (p ⋏ q ⟶ p)
+  conj₂        (Γ : Set F) (p q : F)   : Bew Γ (p ⋏ q ⟶ q)
+  conj₃        (Γ : Set F) (p q : F)   : Bew Γ (p ⟶ q ⟶ p ⋏ q)
+  disj₁        (Γ : Set F) (p q : F)   : Bew Γ (p ⟶ p ⋎ q)
+  disj₂        (Γ : Set F) (p q : F)   : Bew Γ (q ⟶ p ⋎ q)
+  disj₃        (Γ : Set F) (p q r : F) : Bew Γ ((p ⟶ r) ⟶ (q ⟶ r) ⟶ p ⋎ q ⟶ r)
 
 open Minimal
 
@@ -39,13 +33,13 @@ infixl:90 " ⨀ " => modus_ponens
 
 namespace Minimal
 
-variable [Minimal F]
+variable [Minimal Bew]
 
 /-
 @[simp]
-lemma imp_id (Γ : Finset F) (p : F) : Γ ⊢! p ⟶ p := (imply₂ Γ p (p ⟶ p) p) ⨀ (imply₁ Γ p (p ⟶ p)) ⨀ (imply₁ Γ p p)
+lemma imp_id (Γ : Finset F) (p : F) : Bew Γ p ⟶ p := (imply₂ Γ p (p ⟶ p) p) ⨀ (imply₁ Γ p (p ⟶ p)) ⨀ (imply₁ Γ p p)
 
-theorem deduction [Insert F (Finset F)] {Γ : Finset F} {p : F} : (Γ ⊢! p ⟶ q) ↔ ((insert p Γ) ⊢ᴴ! q) := by
+theorem deduction [Insert F (Finset F)] {Γ : Finset F} {p : F} : (Bew Γ p ⟶ q) ↔ ((insert p Γ) ⊢ᴴ! q) := by
   apply Iff.intro;
   . intro h; sorry;
   . intro h; sorry;
@@ -59,8 +53,8 @@ end Minimal
 
   Modal companion of `𝐒𝟒`
 -/
-class Intuitionistic (F : Type u) [LogicSymbol F] [System F] extends Minimal F where
-  explode (Γ : Finset F) (p : F) : Γ ⊢! (⊥ ⟶ p)
+class Intuitionistic extends Minimal Bew where
+  explode (Γ : Set F) (p : F) : Bew Γ (⊥ ⟶ p)
 
 open Intuitionistic
 
@@ -69,8 +63,8 @@ open Intuitionistic
 
   Modal companion of `𝐒𝟒.𝟐`
 -/
-class WEM (F : Type u) [LogicSymbol F] [System F] extends Intuitionistic F where
-  wem (Γ : Finset F) (p : F) : Γ ⊢! (~p ⋎ ~~p)
+class WEM extends Intuitionistic Bew where
+  wem (Γ : Set F) (p : F) : Bew Γ (~p ⋎ ~~p)
 
 
 /--
@@ -78,16 +72,16 @@ class WEM (F : Type u) [LogicSymbol F] [System F] extends Intuitionistic F where
 
   Modal companion of `𝐒𝟒.𝟑`
 -/
-class GD (F : Type u) [LogicSymbol F] [System F] extends Intuitionistic F where
-  dummett (Γ : Finset F) (p q : F) : Γ ⊢! ((p ⟶ q) ⋎ (q ⟶ p))
+class GD extends Intuitionistic Bew where
+  dummett (Γ : Set F) (p q : F) : Bew Γ ((p ⟶ q) ⋎ (q ⟶ p))
 
 /--
   Classical Logic.
 
   Modal companion of `𝐒𝟓`
 -/
-class Classical (F : Type u) [LogicSymbol F] [System F] extends Intuitionistic F where
-  dne (Γ : Finset F) (p : F) : Γ ⊢! (~~p ⟶ p)
+class Classical extends Intuitionistic Bew where
+  dne (Γ : Set F) (p : F) : Bew Γ (~~p ⟶ p)
 
 open Classical
 
@@ -95,9 +89,9 @@ namespace Classical
 
 open Minimal Intuitionistic Classical
 
-variable [Classical F]
+variable [Classical Bew]
 
-instance : WEM F where
+instance : WEM Bew where
   wem Γ p := by sorry;
 
 -- TODO:
