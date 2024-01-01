@@ -13,10 +13,15 @@ instance [TwoSided F] : Hilbert F := by
   intro Γ p;
   exact TwoSided.Derivation Γ.toList [p];
 
-variable {F : Type u} [LogicSymbol F]
+variable {F : Type u} [LogicSymbol F] [System F]
 
-class Minimal (F : Type u) [LogicSymbol F] extends System F where
-  neg          {p : F}                 : ~p = p ⟶ ⊥
+class NegEquiv (F : Type*) [LogicSymbol F] where
+  neg_equiv {p : F} : ~p = p ⟶ ⊥
+
+/--
+  Minimal Logic.
+-/
+class Minimal (F : Type u) [LogicSymbol F] [System F] extends NegEquiv F where
   modus_ponens {Γ : Set F} {p q}       : (Γ ⊢! (p ⟶ q)) → (Γ ⊢! p) → (Γ ⊢! q)
   verum        (Γ : Set F)             : Γ ⊢! ⊤
   imply₁       (Γ : Set F) (p q : F)   : Γ ⊢! (p ⟶ (q ⟶ p))
@@ -49,21 +54,39 @@ theorem deduction [Insert F (Finset F)] {Γ : Finset F} {p : F} : (Γ ⊢! p ⟶
 end Minimal
 
 
-class Intuitionistic (F : Type u) [LogicSymbol F] extends Minimal F where
+/--
+  Intuitionistic Logic.
+
+  Modal companion of `𝐒𝟒`
+-/
+class Intuitionistic (F : Type u) [LogicSymbol F] [System F] extends Minimal F where
   explode (Γ : Finset F) (p : F) : Γ ⊢! (⊥ ⟶ p)
 
 open Intuitionistic
 
-/-- Logic for Weak version of Excluded Middle. -/
-class WEM (F : Type u) [LogicSymbol F] extends Intuitionistic F where
+/--
+  Logic for Weak version of Excluded Middle.
+
+  Modal companion of `𝐒𝟒.𝟐`
+-/
+class WEM (F : Type u) [LogicSymbol F] [System F] extends Intuitionistic F where
   wem (Γ : Finset F) (p : F) : Γ ⊢! (~p ⋎ ~~p)
 
 
-/-- known as *Gödel-Dummett Logic*. -/
-class Dummettean (F : Type u) [LogicSymbol F] extends Intuitionistic F where
+/--
+  Gödel-Dummett Logic.
+
+  Modal companion of `𝐒𝟒.𝟑`
+-/
+class GD (F : Type u) [LogicSymbol F] [System F] extends Intuitionistic F where
   dummett (Γ : Finset F) (p q : F) : Γ ⊢! ((p ⟶ q) ⋎ (q ⟶ p))
 
-class Classical (F : Type u) [LogicSymbol F] extends Intuitionistic F where
+/--
+  Classical Logic.
+
+  Modal companion of `𝐒𝟓`
+-/
+class Classical (F : Type u) [LogicSymbol F] [System F] extends Intuitionistic F where
   dne (Γ : Finset F) (p : F) : Γ ⊢! (~~p ⟶ p)
 
 open Classical

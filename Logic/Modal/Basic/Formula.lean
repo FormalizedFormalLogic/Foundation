@@ -179,6 +179,13 @@ lemma dia_empty : ◇(∅ : Context β) = ∅ := by simp [dia]
 
 end Context
 
+lemma _root_.Set.subset_triunion₁ (s₁ s₂ s₃ : Set α) : s₁ ⊆ (s₁ ∪ s₂ ∪ s₃) := Set.Subset.trans
+  (Set.subset_union_left _ _) (Set.subset_union_left _ _)
+
+lemma _root_.Set.subset_triunion₂  (s₁ s₂ s₃ : Set α) : s₂ ⊆ (s₁ ∪ s₂ ∪ s₃) := Set.Subset.trans
+  (Set.subset_union_right _ _) (Set.subset_union_left _ _)
+
+lemma _root_.Set.subset_triunion₃ (s₁ s₂ s₃ : Set α) : s₃ ⊆ (s₁ ∪ s₂ ∪ s₃) := Set.subset_union_right _ _
 
 section Axioms
 
@@ -232,23 +239,35 @@ notation "𝐂𝐃" => axiomCD.ctx
 @[simp] def axiomC4.ctx : Context α := { axiomC4 p | p }
 notation "𝐂𝟒" => axiomC4.ctx
 
-private abbrev axiomsGL.ctx : Set (Formula α) := 𝐊 ∪ 𝐋
+abbrev axiomsGL.ctx : Set (Formula α) := 𝐊 ∪ 𝐋
 notation "𝐆𝐋" => axiomsGL.ctx
 
-private abbrev axiomsS4.ctx : Set (Formula α) := 𝐊 ∪ 𝐓 ∪ 𝟒
+abbrev axiomsS4.ctx : Set (Formula α) := 𝐊 ∪ 𝐓 ∪ 𝟒
 notation "𝐒𝟒" => axiomsS4.ctx
 
-private abbrev axiomsS4Dot2.ctx : Set (Formula α) := 𝐒𝟒 ∪ .𝟐
+@[simp] lemma axiomsS4.ctx.includeK : 𝐊 ⊆ (𝐒𝟒 : Set (Formula α)) := by apply Set.subset_triunion₁
+
+@[simp] lemma axiomsS4.ctx.includeT : 𝐓 ⊆ (𝐒𝟒 : Set (Formula α)) := by apply Set.subset_triunion₂
+
+@[simp] lemma axiomsS4.ctx.include4 : 𝟒 ⊆ (𝐒𝟒 : Set (Formula α)) := by apply Set.subset_triunion₃
+
+abbrev axiomsS4Dot2.ctx : Set (Formula α) := 𝐒𝟒 ∪ .𝟐
 notation "𝐒𝟒.𝟐" => axiomsS4Dot2.ctx
 
-private abbrev axiomsS4Dot3.ctx : Set (Formula α) := 𝐒𝟒 ∪ .𝟑
+abbrev axiomsS4Dot3.ctx : Set (Formula α) := 𝐒𝟒 ∪ .𝟑
 notation "𝐒𝟒.𝟑" => axiomsS4Dot3.ctx
 
-private abbrev axiomsS4Grz.ctx : Set (Formula α) := 𝐒𝟒 ∪ 𝐆𝐫𝐳
+abbrev axiomsS4Grz.ctx : Set (Formula α) := 𝐒𝟒 ∪ 𝐆𝐫𝐳
 notation "𝐒𝟒𝐆𝐫𝐳" => axiomsS4Grz.ctx
 
-private abbrev axiomsS5.ctx : Set (Formula α) := 𝐊 ∪ 𝐓 ∪ 𝟓
+abbrev axiomsS5.ctx : Set (Formula α) := 𝐊 ∪ 𝐓 ∪ 𝟓
 notation "𝐒𝟓" => axiomsS5.ctx
+
+@[simp] lemma axiomsS5.ctx.includeK : 𝐊 ⊆ (𝐒𝟓 : Set (Formula α)) := by apply Set.subset_triunion₁
+
+@[simp] lemma axiomsS5.ctx.includeT : 𝐓 ⊆ (𝐒𝟓 : Set (Formula α)) := by apply Set.subset_triunion₂
+
+@[simp] lemma axiomsS5.ctx.include5 : 𝟓 ⊆ (𝐒𝟓 : Set (Formula α)) := by apply Set.subset_triunion₃
 
 end Axioms
 

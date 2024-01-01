@@ -15,39 +15,39 @@ namespace Frame
 
 variable {α : Type u} (f : Frame α)
 
-class Finite extends Frame α where
+class Finite where
   finite : Finite α
 
 local infix:50 " ≺ " => f.rel
 
-class Reflexive extends Frame α where
+class Reflexive where
   reflexive := Reflexive f.rel
 
-class Transitive extends Frame α where
+class Transitive where
   transitive := Transitive f.rel
 
-class Symmetric extends Frame α where
+class Symmetric where
   symmetric := Symmetric f.rel
 
-class Euclidean extends Frame α where
+class Euclidean where
   euclidean := ∀ ⦃w₁ w₂ w₃⦄, w₁ ≺ w₂ → w₁ ≺ w₃ → (w₂ ≺ w₃)
 
-class Serial extends Frame α where
+class Serial where
   serial := ∀w₁, ∃w₂, w₁ ≺ w₂
 
-class Confluency extends Frame α where
+class Confluency where
   confluency := ∀ ⦃w₁ w₂ w₃⦄, ((w₁ ≺ w₂ ∧ w₂ ≺ w₃) → ∃ w₄, w₂ ≺ w₄ ∧ w₃ ≺ w₄)
 
-class NonInfiniteAscent extends Frame α where
+class NonInfiniteAscent where
   nonInfiniteAscent := ¬(∃ (f : ℕ → α), ∀ n, f n ≺ f (n + 1))
 
-class Density extends Frame α where
+class Density where
   density := ∀ ⦃w₁ w₂⦄, w₁ ≺ w₂ → ∃w₃, w₁ ≺ w₃ ∧ w₃ ≺ w₂
 
-class Functionality extends Frame α where
+class Functionality where
   functionality := ∀ ⦃w₁ w₂ w₃⦄, w₁ ≺ w₂ ∧ w₁ ≺ w₃ → w₂ = w₃
 
-class RightConvergence extends Frame α where
+class RightConvergence where
   rightConvergence := ∀ ⦃w₁ w₂ w₃⦄, w₁ ≺ w₂ ∧ w₁ ≺ w₃ → w₂ ≺ w₃ ∨ w₃ ≺ w₂ ∨ w₂ = w₃
 
 end Frame
@@ -60,31 +60,31 @@ namespace Frameclass
 
 variable {α : Type u} (fc : Frameclass α)
 
-class Reflexive extends Frameclass α where
+class Reflexive where
   reflexive := ∀ f ∈ fc.frames, Frame.Reflexive f
 
-class Symmetric extends Frameclass α where
+class Symmetric where
   symmetric := ∀ f ∈ fc.frames, Frame.Symmetric f
 
-class Transitive extends Frameclass α where
+class Transitive where
   transitive := ∀ f ∈ fc.frames, Frame.Transitive f
 
-class Euclidean extends Frameclass α where
+class Euclidean where
   euclidean := ∀ f ∈ fc.frames, Frame.Euclidean f
 
-class Serial extends Frameclass α where
+class Serial where
   serial := ∀ f ∈ fc.frames, Frame.Serial f
 
-class Confluency extends Frameclass α where
+class Confluency where
   confluency := ∀ f ∈ fc.frames, Frame.Confluency f
 
-class Density extends Frameclass α where
+class Density where
   density := ∀ f ∈ fc.frames, Frame.Density f
 
-class Functionality extends Frameclass α where
+class Functionality where
   functionality := ∀ f ∈ fc.frames, Frame.Functionality f
 
-class RightConvergence extends Frameclass α where
+class RightConvergence where
   rightConvergence := ∀ f ∈ fc.frames, Frame.RightConvergence f
 
 end Frameclass
@@ -97,96 +97,96 @@ def trivialVal (α β : Type u) : α → β → Prop := λ _ _ => True
 
 namespace Formula
 
-def satisfies (m : Model α β) (w : α) : Formula β → Prop
+def Satisfies (m : Model α β) (w : α) : Formula β → Prop
   | atom a  => a ∈ m.val w
   | falsum  => False
-  | imp p q => (p.satisfies m w) → (q.satisfies m w)
-  | box p   => ∀w', m.rel w w' → p.satisfies m w'
+  | imp p q => (p.Satisfies m w) → (q.Satisfies m w)
+  | box p   => ∀w', m.rel w w' → p.Satisfies m w'
 
-notation w " ⊧ˢ[" m "] " p => satisfies m w p
+notation w " ⊧ᴹˢ[" m "] " p => Satisfies m w p
 
-namespace satisfies
+namespace Satisfies
 
-@[simp] lemma atom_def : (w ⊧ˢ[m] atom a) ↔ a ∈ m.val w := by simp [satisfies];
+@[simp] lemma atom_def : (w ⊧ᴹˢ[m] atom a) ↔ a ∈ m.val w := by simp [Satisfies];
 
-@[simp] lemma top_def : (w ⊧ˢ[m] ⊤) := by simp [satisfies];
+@[simp] lemma top_def : (w ⊧ᴹˢ[m] ⊤) := by simp [Satisfies];
 
-@[simp] lemma bot_def : (w ⊧ˢ[m] ⊥) ↔ False := by simp [satisfies];
+@[simp] lemma bot_def : (w ⊧ᴹˢ[m] ⊥) ↔ False := by simp [Satisfies];
 
-@[simp] lemma and_def : (w ⊧ˢ[m] p ⋏ q) ↔ (w ⊧ˢ[m] p) ∧ (w ⊧ˢ[m] q) := by simp [satisfies];
+@[simp] lemma and_def : (w ⊧ᴹˢ[m] p ⋏ q) ↔ (w ⊧ᴹˢ[m] p) ∧ (w ⊧ᴹˢ[m] q) := by simp [Satisfies];
 
-@[simp] lemma or_def : (w ⊧ˢ[m] p ⋎ q) ↔ (w ⊧ˢ[m] p) ∨ (w ⊧ˢ[m] q) := by
-  simp [satisfies];
+@[simp] lemma or_def : (w ⊧ᴹˢ[m] p ⋎ q) ↔ (w ⊧ᴹˢ[m] p) ∨ (w ⊧ᴹˢ[m] q) := by
+  simp [Satisfies];
   constructor;
   . apply Classical.or_iff_not_imp_left.mpr;
   . intros; simp_all [false_or];
 
-@[simp] lemma imp_def : (w ⊧ˢ[m] p ⟶ q) ↔ (w ⊧ˢ[m] p) → (w ⊧ˢ[m] q) := by simp [satisfies];
+@[simp] lemma imp_def : (w ⊧ᴹˢ[m] p ⟶ q) ↔ (w ⊧ᴹˢ[m] p) → (w ⊧ᴹˢ[m] q) := by simp [Satisfies];
 
-@[simp] lemma box_def : (w ⊧ˢ[m] □p) ↔ (∀w', m.rel w w' → (w' ⊧ˢ[m] p)) := by simp [satisfies];
-@[simp] lemma dia_def : (w ⊧ˢ[m] ◇p) ↔ (∃w', m.rel w w' ∧ (w' ⊧ˢ[m] p)) := by simp [satisfies];
+@[simp] lemma box_def : (w ⊧ᴹˢ[m] □p) ↔ (∀w', m.rel w w' → (w' ⊧ᴹˢ[m] p)) := by simp [Satisfies];
+@[simp] lemma dia_def : (w ⊧ᴹˢ[m] ◇p) ↔ (∃w', m.rel w w' ∧ (w' ⊧ᴹˢ[m] p)) := by simp [Satisfies];
 
-@[simp] lemma neg_def : (w ⊧ˢ[m] (neg p)) ↔ ¬(w ⊧ˢ[m] p) := by simp [satisfies];
-@[simp] lemma neg_def' : (w ⊧ˢ[m] ~p) ↔ ¬(w ⊧ˢ[m] p) := by simp [satisfies];
+@[simp] lemma neg_def : (w ⊧ᴹˢ[m] (neg p)) ↔ ¬(w ⊧ᴹˢ[m] p) := by simp [Satisfies];
+@[simp] lemma neg_def' : (w ⊧ᴹˢ[m] ~p) ↔ ¬(w ⊧ᴹˢ[m] p) := by simp [Satisfies];
 
-end satisfies
+end Satisfies
 
 
-def models (m : Model α β) (p : Formula β) := ∀w, (w ⊧ˢ[m] p)
+def Models (m : Model α β) (p : Formula β) := ∀w, (w ⊧ᴹˢ[m] p)
 
-notation "⊧ᵐ[" m "] "  p => models m p
+notation "⊧ᴹᵐ[" m "] "  p => Models m p
 
-namespace models
+namespace Models
 
 variable {m : Model α β}
 
-lemma neg_def : (⊧ᵐ[m] (neg p)) →  ¬(⊧ᵐ[m] p) := by
-  simp only [models];
+lemma neg_def : (⊧ᴹᵐ[m] (neg p)) →  ¬(⊧ᴹᵐ[m] p) := by
+  simp only [Models];
   intro w; simp;
   existsi m.nonempty.default;
-  apply satisfies.neg_def.mp $ w _;
+  apply Satisfies.neg_def.mp $ w _;
 
-lemma neg_def' : (⊧ᵐ[m] ~p) →  ¬(⊧ᵐ[m] p) := id neg_def
+lemma neg_def' : (⊧ᴹᵐ[m] ~p) →  ¬(⊧ᴹᵐ[m] p) := id neg_def
 
-lemma bot_def : ¬(⊧ᵐ[m] ⊥) := by simp [models]; existsi m.nonempty.default; simp;
+lemma bot_def : ¬(⊧ᴹᵐ[m] ⊥) := by simp [Models]; existsi m.nonempty.default; simp;
 
-lemma preserve_ModusPonens : (⊧ᵐ[m] p ⟶ q) → (⊧ᵐ[m] p) → (⊧ᵐ[m] q) := by simp_all [models, satisfies.imp_def];
+lemma preserve_ModusPonens : (⊧ᴹᵐ[m] p ⟶ q) → (⊧ᴹᵐ[m] p) → (⊧ᴹᵐ[m] q) := by simp_all [Models, Satisfies.imp_def];
 
-lemma preserve_Necessitation : (⊧ᵐ[m] p) → (⊧ᵐ[m] □p) := by simp_all [models, satisfies];
+lemma preserve_Necessitation : (⊧ᴹᵐ[m] p) → (⊧ᴹᵐ[m] □p) := by simp_all [Models, Satisfies];
 
-end models
+end Models
 
 
-def frames (f : Frame α) (p : Formula β) := ∀v, ⊧ᵐ[⟨f, v⟩] p
+def Frames (f : Frame α) (p : Formula β) := ∀v, ⊧ᴹᵐ[⟨f, v⟩] p
 
-notation "⊧ᶠ[" f "] " p => frames f p
+notation "⊧ᴹᶠ[" f "] " p => Frames f p
 
-namespace frames
+namespace Frames
 
 variable {f : Frame α}
 
-lemma bot_def : ¬(⊧ᶠ[f] (⊥ : Formula β)) := by simp [frames, models.bot_def];
+lemma bot_def : ¬(⊧ᴹᶠ[f] (⊥ : Formula β)) := by simp [Frames, Models.bot_def];
 
-lemma preserve_ModusPonens : (⊧ᶠ[f] p ⟶ q) → (⊧ᶠ[f] p) → (⊧ᶠ[f] q) := by simp_all [models, frames, satisfies];
+lemma preserve_ModusPonens : (⊧ᴹᶠ[f] p ⟶ q) → (⊧ᴹᶠ[f] p) → (⊧ᴹᶠ[f] q) := by simp_all [Models, Frames, Satisfies];
 
-lemma preserve_Necessitation : (⊧ᶠ[f] p) → (⊧ᶠ[f] □p) := by simp_all [models, frames, satisfies];
+lemma preserve_Necessitation : (⊧ᴹᶠ[f] p) → (⊧ᴹᶠ[f] □p) := by simp_all [Models, Frames, Satisfies];
 
-end frames
+end Frames
 
 
-def frameclasses (fc : Frameclass α) (p : Formula β) := ∀ f ∈ fc.frames, (⊧ᶠ[f] p)
+def Frameclasses (fc : Frameclass α) (p : Formula β) := ∀ f ∈ fc.frames, (⊧ᴹᶠ[f] p)
 
-notation "⊧ᶠᶜ[" fc "] " p => frameclasses fc p
+notation "⊧ᴹᶠᶜ[" fc "] " p => Frameclasses fc p
 
-namespace frameclasses
+namespace Frameclasses
 
 variable {fc : Frameclass α}
 
-lemma preserve_ModusPonens : (⊧ᶠᶜ[fc] p ⟶ q) → (⊧ᶠᶜ[fc] p) → (⊧ᶠᶜ[fc] q) := by simp_all [frameclasses, frames, models, satisfies.imp_def];
+lemma preserve_ModusPonens : (⊧ᴹᶠᶜ[fc] p ⟶ q) → (⊧ᴹᶠᶜ[fc] p) → (⊧ᴹᶠᶜ[fc] q) := by simp_all [Frameclasses, Frames, Models, Satisfies.imp_def];
 
-lemma preserve_Necessitation : (⊧ᶠᶜ[fc] p) → (⊧ᶠᶜ[fc] □p) := by simp_all [frameclasses, frames, models, satisfies];
+lemma preserve_Necessitation : (⊧ᴹᶠᶜ[fc] p) → (⊧ᴹᶠᶜ[fc] □p) := by simp_all [Frameclasses, Frames, Models, Satisfies];
 
-end frameclasses
+end Frameclasses
 
 end Formula
 
@@ -194,39 +194,41 @@ end Formula
 namespace Context
 
 @[simp]
-def satisfies (m : Model α β) (w : α) (Γ : Context β) := ∀ p ∈ Γ, (w ⊧ˢ[m] p)
+def Satisfies (m : Model α β) (w : α) (Γ : Context β) := ∀ p ∈ Γ, (w ⊧ᴹˢ[m] p)
 
-notation w " ⊧ˢ[" m "] " Γ => satisfies m w Γ
+notation w " ⊧ᴹˢ[" m "] " Γ => Satisfies m w Γ
 
 
-def models (m : Model α β) (Γ : Context β) := ∀ p ∈ Γ, (⊧ᵐ[m] p)
+def Models (m : Model α β) (Γ : Context β) := ∀ p ∈ Γ, (⊧ᴹᵐ[m] p)
 
-notation "⊧ᵐ[" m "] " Γ => models m Γ
+notation "⊧ᴹᵐ[" m "] " Γ => Models m Γ
 
-namespace models
+namespace Models
 
-lemma neg_singleton_def {M : Model α β} {p : Formula β} : (⊧ᵐ[M] {~p}) → (¬⊧ᵐ[M] {p}) := by
+lemma neg_singleton_def {M : Model α β} {p : Formula β} : (⊧ᴹᵐ[M] {~p}) → (¬⊧ᴹᵐ[M] {p}) := by
   intro hnp hp;
-  exact Formula.models.neg_def (show  ⊧ᵐ[M] ~p by aesop) (show  ⊧ᵐ[M] p by aesop);
+  exact Formula.Models.neg_def (show  ⊧ᴹᵐ[M] ~p by aesop) (show  ⊧ᴹᵐ[M] p by aesop);
 
-end models
+end Models
 
-def frames (f : Frame α) (Γ : Context β) := ∀ p ∈ Γ, (⊧ᶠ[f] p)
+def Frames (f : Frame α) (Γ : Context β) := ∀ p ∈ Γ, (⊧ᴹᶠ[f] p)
 
-notation "⊧ᶠ[" f "] " Γ => frames f Γ
+notation "⊧ᴹᶠ[" f "] " Γ => Frames f Γ
 
 
-def frameclasses (fc : Frameclass α) (Γ : Context β) := ∀ p ∈ Γ, (⊧ᶠᶜ[fc] p)
+def Frameclasses (fc : Frameclass α) (Γ : Context β) := ∀ p ∈ Γ, (⊧ᴹᶠᶜ[fc] p)
 
-notation "⊧ᶠᶜ[" fc "] " Γ => frameclasses fc Γ
+notation "⊧ᴹᶠᶜ[" fc "] " Γ => Frameclasses fc Γ
 
-lemma frameclasses.model {fc : Frameclass α} {M : Model α β} {Γ : Context β} (h : ⊧ᶠᶜ[fc] Γ) : (M.toFrame ∈ fc.frames) → (⊧ᵐ[M] Γ) := by
+lemma Frameclasses.model {fc : Frameclass α} {M : Model α β} {Γ : Context β} (h : ⊧ᴹᶠᶜ[fc] Γ) : (M.toFrame ∈ fc.frames) → (⊧ᴹᵐ[M] Γ) := by
   intro hm p hp;
   apply h; assumption; assumption;
 
-def defines (P : Frameclass α → Type*) (Γ : Context β) := ∀ fc, P fc → (∀ f, (f ∈ fc.frames) ↔ (⊧ᶠ[f] Γ))
+def defines (P : Frameclass α → Type*) (Γ : Context β) := ∀ fc, P fc → (∀ f, (f ∈ fc.frames) ↔ (⊧ᴹᶠ[f] Γ))
 
-def ModelSatisfiable (m : Model α β) (Γ : Context β) := ∃ w, w ⊧ˢ[m] Γ
+def Defines (fc : Frameclass α) (Γ : Context β) := ∀ f, (f ∈ fc.frames) ↔ (⊧ᴹᶠ[f] Γ)
+
+def ModelSatisfiable (m : Model α β) (Γ : Context β) := ∃ w, w ⊧ᴹˢ[m] Γ
 
 def FrameSatisfiable (f : Frame α) (Γ : Context β) := ∃ V, ModelSatisfiable ⟨f, V⟩ Γ
 
@@ -238,43 +240,43 @@ end Context
 namespace Formula
 
 @[simp]
-def FrameConsequence (f : Frame α) (Γ : Context β) (p : Formula β) := ∀ V w, (w ⊧ˢ[⟨f, V⟩] Γ) → (w ⊧ˢ[⟨f, V⟩] p)
+def FrameConsequence (f : Frame α) (Γ : Context β) (p : Formula β) := ∀ V w, (w ⊧ᴹˢ[⟨f, V⟩] Γ) → (w ⊧ᴹˢ[⟨f, V⟩] p)
 
-notation Γ " ⊨ᶠ[" f "] " p => FrameConsequence f Γ p
+notation Γ " ⊨ᴹᶠ[" f "] " p => FrameConsequence f Γ p
 
-notation Γ " ⊭ᶠ[" f "] " p => ¬(Γ ⊨ᶠ[f] p)
+notation Γ " ⊭ᴹᶠ[" f "] " p => ¬(Γ ⊨ᴹᶠ[f] p)
 
 namespace FrameConsequence
 
 variable {f : Frame α} {Γ Γ' : Context β} {p q : Formula β}
 
-lemma def_emptyctx : (∅ ⊨ᶠ[f] p) ↔ (⊧ᶠ[f] p) := by aesop;
+lemma def_emptyctx : (∅ ⊨ᴹᶠ[f] p) ↔ (⊧ᴹᶠ[f] p) := by aesop;
 
-lemma preserve_AxiomK : (Γ ⊨ᶠ[f] □(p ⟶ q) ⟶ □p ⟶ □q) := by aesop;
+lemma preserve_AxiomK : (Γ ⊨ᴹᶠ[f] □(p ⟶ q) ⟶ □p ⟶ □q) := by aesop;
 
-lemma preserve_Weakening : (Γ ⊆ Γ') → (Γ ⊨ᶠ[f] p) → (Γ' ⊨ᶠ[f] p) := by aesop;
+lemma preserve_Weakening : (Γ ⊆ Γ') → (Γ ⊨ᴹᶠ[f] p) → (Γ' ⊨ᴹᶠ[f] p) := by aesop;
 
-lemma preserve_ModusPonens : (Γ ⊨ᶠ[f] p ⟶ q) → (Γ ⊨ᶠ[f] p) → (Γ ⊨ᶠ[f] q) := by aesop;
+lemma preserve_ModusPonens : (Γ ⊨ᴹᶠ[f] p ⟶ q) → (Γ ⊨ᴹᶠ[f] p) → (Γ ⊨ᴹᶠ[f] q) := by aesop;
 
 end FrameConsequence
 
 @[simp]
-def ModelConsequence (m : Model α β) (Γ : Context β) (p : Formula β) := Γ ⊨ᶠ[m.toFrame] p
+def ModelConsequence (m : Model α β) (Γ : Context β) (p : Formula β) := Γ ⊨ᴹᶠ[m.toFrame] p
 
-notation Γ " ⊨ᵐ[" m "] " p => Formula.ModelConsequence m Γ p
+notation Γ " ⊨ᴹᵐ[" m "] " p => Formula.ModelConsequence m Γ p
 
-lemma ModelConsequence.cast {m : Model α β} {Γ Γ' : Context β} {p : Formula β} : (Γ ⊆ Γ') → (Γ ⊨ᵐ[m] p) → (Γ' ⊨ᵐ[m] p) := by aesop;
+lemma ModelConsequence.cast {m : Model α β} {Γ Γ' : Context β} {p : Formula β} : (Γ ⊆ Γ') → (Γ ⊨ᴹᵐ[m] p) → (Γ' ⊨ᴹᵐ[m] p) := by aesop;
 
 @[simp]
-def FrameclassConsequence (fc : Frameclass α) (Γ : Context β) (p : Formula β) := ∀ f ∈ fc.frames, Γ ⊨ᶠ[f] p
+def FrameclassConsequence (fc : Frameclass α) (Γ : Context β) (p : Formula β) := ∀ f ∈ fc.frames, Γ ⊨ᴹᶠ[f] p
 
-notation Γ " ⊨ᶠᶜ[" fc "] " p => Formula.FrameclassConsequence fc Γ p
+notation Γ " ⊨ᴹᶠᶜ[" fc "] " p => Formula.FrameclassConsequence fc Γ p
 
 namespace FrameclassConsequence
 
 variable {fc : Frameclass α} {Γ Γ' : Context β} {p : Formula β}
 
-lemma cast {fc : Frameclass α} {Γ Γ' : Context β} {p : Formula β} : (Γ ⊆ Γ') → (Γ ⊨ᶠᶜ[fc] p) → (Γ' ⊨ᶠᶜ[fc] p) := by aesop;
+lemma weakening {fc : Frameclass α} {Γ Γ' : Context β} {p : Formula β} : (Γ ⊆ Γ') → (Γ ⊨ᴹᶠᶜ[fc] p) → (Γ' ⊨ᴹᶠᶜ[fc] p) := by aesop;
 
 end FrameclassConsequence
 
@@ -283,85 +285,85 @@ end Formula
 
 namespace Context
 
-def ModelConsequence (m : Model α β) (Γ Δ : Context β) := ∀ p ∈ Δ, (Γ ⊨ᵐ[m] p)
+def ModelConsequence (m : Model α β) (Γ Δ : Context β) := ∀ p ∈ Δ, (Γ ⊨ᴹᵐ[m] p)
 
-notation Γ " ⊨ᵐ[" m "] " Δ => Context.ModelConsequence m Γ Δ
+notation Γ " ⊨ᴹᵐ[" m "] " Δ => Context.ModelConsequence m Γ Δ
 
 
-def FrameclassConsequence (fc : Frameclass α) (Γ Δ : Context β) := ∀ p ∈ Δ, (Γ ⊨ᶠᶜ[fc] p)
+def FrameclassConsequence (fc : Frameclass α) (Γ Δ : Context β) := ∀ p ∈ Δ, (Γ ⊨ᴹᶠᶜ[fc] p)
 
-notation Γ " ⊨ᶠᶜ[" fc "] " Δ => Context.FrameclassConsequence fc Γ Δ
+notation Γ " ⊨ᴹᶠᶜ[" fc "] " Δ => Context.FrameclassConsequence fc Γ Δ
 
 end Context
 
 
-variable {f : Frame α} {p q q₁ q₂ : Formula β}
+variable {f : Frame α} {p q q₁ q₂ : Formula β} {fc : Frameclass α}
 
 open Formula Frameclass
 
-attribute [simp] Formula.models Formula.frames Formula.frameclasses Formula.satisfies.imp_def Formula.satisfies
-attribute [simp] Context.defines Context.frames
+attribute [simp] Formula.Models Formula.Frames Formula.Frameclasses Formula.Satisfies.imp_def Formula.Satisfies
+attribute [simp] Context.defines Context.Frames
 
-lemma axiomT.defines : (𝐓 : Context β).defines (@Reflexive α) := by
-  intro fc hfc f;
+lemma axiomT.defines : fc.Reflexive → (𝐓 : Context β).Defines fc := by
+  intro hfc f;
   constructor;
   . sorry;
   . sorry;
 
-lemma axiomD.defines : (𝐃 : Context β).defines (@Serial α) := by
-  intro fc hfc f;
+lemma axiomD.defines : fc.Serial → (𝐃 : Context β).Defines fc := by
+  intro hfc f;
   constructor;
   . sorry;
     /-
     intro h;
     by_contra hC; simp at hC;
     have ⟨w₁, r₁⟩ := hC;
-    simp [satisfies.imp_def] at h;
+    simp [Satisfies.imp_def] at h;
     let V : α → β → Prop := λ _ _ => True;
-    have : w₁ ⊧ˢ[⟨f, V⟩] □p := by simp [satisfies]; simp_all;
-    have : ¬w₁ ⊧ˢ[⟨f, V⟩] ◇p := by simp [satisfies]; simp_all;
+    have : w₁ ⊧ᴹˢ[⟨f, V⟩] □p := by simp [Satisfies]; simp_all;
+    have : ¬w₁ ⊧ᴹˢ[⟨f, V⟩] ◇p := by simp [Satisfies]; simp_all;
     sorry;
     -/
   . sorry;
 
-lemma axiomB.defines : (𝐁 : Context β).defines (@Symmetric α) := by
-  intro fc hfc f;
+lemma axiomB.defines : fc.Symmetric → (𝐁 : Context β).Defines fc := by
+  intro hfc f;
   constructor;
   . sorry;
   . sorry;
 
-lemma axiom4.defines : (𝟒 : Context β).defines (@Transitive α) := by
-  intro fc hfc f;
+lemma axiom4.defines : fc.Transitive → (𝟒 : Context β).Defines fc := by
+  intro hfc f;
   constructor;
   . sorry;
   . sorry;
 
-lemma axiom5.defines : (𝟓 : Context β).defines (@Euclidean α) := by
-  intro fc hfc f;
+lemma axiom5.defines : fc.Euclidean → (𝟓 : Context β).Defines fc := by
+  intro hfc f;
   constructor;
   . sorry;
   . sorry;
 
-lemma axiomDot2.defines : (.𝟐 : Context β).defines (@Confluency α) := by
-  intro fc hfc f;
+lemma axiomDot2.defines : fc.Confluency → (.𝟐 : Context β).Defines fc := by
+  intro hfc f;
   constructor;
   . sorry;
   . sorry;
 
-lemma axiomDot3.defines : (.𝟑 : Context β).defines (@Functionality α) := by
-  intro fc hfc f;
+lemma axiomDot3.defines : fc.Functionality → (.𝟑 : Context β).Defines fc := by
+  intro hfc f;
   constructor;
   . sorry;
   . sorry;
 
-lemma axiomCD.defines : (𝐂𝐃 : Context β).defines (@Confluency α) := by
-  intro fc hfc f;
+lemma axiomCD.defines : fc.RightConvergence →  (𝐂𝐃 : Context β).Defines fc := by
+  intro hfc f;
   constructor;
   . sorry;
   . sorry;
 
-lemma axiomC4.defines : (𝐂𝟒 : Context β).defines (@Density α) := by
-  intro fc hfc f;
+lemma axiomC4.defines : fc.Density → (𝐂𝟒 : Context β).Defines fc := by
+  intro hfc f;
   constructor;
   . sorry;
   . sorry;
