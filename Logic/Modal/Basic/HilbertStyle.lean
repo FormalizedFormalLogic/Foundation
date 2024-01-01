@@ -5,10 +5,10 @@ namespace LO
 
 namespace Modal
 
-instance : NegEquiv (Formula α) where
-  neg_equiv := rfl
-
 namespace Hilbert
+
+instance : Hilbert.NegEquiv (Formula α) where
+  neg_equiv := rfl
 
 section Axioms
 
