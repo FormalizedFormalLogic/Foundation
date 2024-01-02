@@ -29,7 +29,7 @@ theorem LogicK.sounds' (Γ : Set (Formula α)) (hΓ : Γ = ∅) (p : Formula α)
 lemma LogicK.sounds {p : Formula α} (f : Frame β) (h : ⊢ᴹ(𝐊) p) : (⊧ᴹᶠ[f] p) := by
   exact (show (⊢ᴹ(𝐊) p) → (⊧ᴹᶠ[f] p) by simpa [Context.box_empty] using sounds' ∅ rfl p f;) h;
 
-theorem LogicK.unprovable_bot {f : Frame β} : (⊬ᴴ(𝐊)! (⊥ : Formula α)) := by
+theorem LogicK.unprovable_bot {f : Frame β} : (⊬ᴹ(𝐊)! (⊥ : Formula α)) := by
   by_contra hC; simp at hC;
   suffices h : ⊧ᴹᶠ[f] (⊥ : Formula α) by exact Frames.bot_def h;
   exact sounds f hC.some;

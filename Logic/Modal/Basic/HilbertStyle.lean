@@ -101,8 +101,8 @@ variable (Λ : Set (Formula α)) (Γ : Set (Formula α)) (p : Formula α)
 abbrev Deducible := Nonempty (Γ ⊢ᴹ(Λ) p)
 notation:45 Γ " ⊢ᴹ(" Λ ")! " p => Deducible Λ Γ p
 
-abbrev Undeducible := IsEmpty (Γ ⊢ᴹ(Λ) p)
-notation:45 Γ " ⊬ᴴ(" Λ ")! " p => Undeducible Λ Γ p
+abbrev Undeducible := ¬(Γ ⊢ᴹ(Λ)! p)
+notation:45 Γ " ⊬ᴹ(" Λ ")! " p => Undeducible Λ Γ p
 
 abbrev Proof := ∅ ⊢ᴹ(Λ) p
 notation:45 "⊢ᴹ(" Λ ") " p => Proof Λ p
@@ -111,7 +111,7 @@ abbrev Provable := Nonempty (⊢ᴹ(Λ) p)
 notation:45 "⊢ᴹ(" Λ ")! " p => Provable Λ p
 
 abbrev Unprovable := IsEmpty (⊢ᴹ(Λ) p)
-notation:45 "⊬ᴴ(" Λ ")!" p => Unprovable Λ p
+notation:45 "⊬ᴹ(" Λ ")!" p => Unprovable Λ p
 
 namespace Deduction
 
@@ -214,7 +214,7 @@ structure Partial where
   inter : (Γ₁ ∩ Γ₂) = ∅
 
 structure UnprovablePartial extends Partial Γ₁ Γ₂ Δ where
-  unprovable := ⊬ᴴ(Λ)! ⟪Γ₁ ⟹ Γ₂⟫
+  unprovable := ⊬ᴹ(Λ)! ⟪Γ₁ ⟹ Γ₂⟫
 
 end
 
