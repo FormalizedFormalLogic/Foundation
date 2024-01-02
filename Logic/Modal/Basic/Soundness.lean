@@ -4,13 +4,15 @@ import Logic.Modal.Basic.Semantics
 
 namespace LO.Modal
 
-namespace Hilbert
-
 open Formula FrameConsequence
 
 variable {α β : Type u}
 
-theorem LogicK.sounds' (Γ : Set (Formula α)) (hΓ : Γ = ∅) (p : Formula α) (f : Frame β) (d : Γ ⊢ᴹ(𝐊) p) : (Γ ⊨ᴹᶠ[f] p) := by
+/-
+  TODO: より一般にこの形で証明できる事実ではないだろうか？
+  [LogicK.Hilbert Bew] (Γ : Set (Formula α)) (hΓ : Γ = ∅) (p : Formula α) (f : Frame β) (d : Bew Γ p) : (Γ ⊨ᴹᶠ[f] p)
+-/
+theorem LogicK.Hilbert.sounds' (Γ : Set (Formula α)) (hΓ : Γ = ∅) (p : Formula α) (f : Frame β) (d : Γ ⊢ᴹ(𝐊) p) : (Γ ⊨ᴹᶠ[f] p) := by
   induction d <;> try {simp_all [Satisfies];}
   case wk ih =>
     simp_all only [def_emptyctx];
@@ -26,14 +28,12 @@ theorem LogicK.sounds' (Γ : Set (Formula α)) (hΓ : Γ = ∅) (p : Formula α)
     | inl hp => exact hpr hp;
     | inr hq => exact hqr hq;
 
-lemma LogicK.sounds {p : Formula α} (f : Frame β) (h : ⊢ᴹ(𝐊) p) : (⊧ᴹᶠ[f] p) := by
+lemma LogicK.Hilbert.sounds {p : Formula α} (f : Frame β) (h : ⊢ᴹ(𝐊) p) : (⊧ᴹᶠ[f] p) := by
   exact (show (⊢ᴹ(𝐊) p) → (⊧ᴹᶠ[f] p) by simpa [Context.box_empty] using sounds' ∅ rfl p f;) h;
 
-theorem LogicK.unprovable_bot {f : Frame β} : (⊬ᴹ(𝐊)! (⊥ : Formula α)) := by
+theorem LogicK.Hilbert.unprovable_bot {f : Frame β} : (⊬ᴹ(𝐊)! (⊥ : Formula α)) := by
   by_contra hC; simp at hC;
   suffices h : ⊧ᴹᶠ[f] (⊥ : Formula α) by exact Frames.bot_def h;
   exact sounds f hC.some;
-
-end Hilbert
 
 end LO.Modal

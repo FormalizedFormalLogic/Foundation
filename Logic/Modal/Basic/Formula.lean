@@ -61,6 +61,8 @@ lemma neg_eq (p : Formula α) : ~p = neg p := rfl
 
 lemma iff_eq (p q : Formula α) : p ⟷ q = (p ⟶ q) ⋏ (q ⟶ p) := rfl
 
+lemma dia_eq (p : Formula α) : ◇p = ~(□(~p)) := rfl
+
 @[simp] lemma neg_inj (p q : Formula α) : ~p = ~q ↔ p = q := by simp[neg_eq, neg, *]
 
 @[simp] lemma and_inj (p₁ q₁ p₂ q₂ : Formula α) : p₁ ⋏ p₂ = q₁ ⋏ q₂ ↔ p₁ = q₁ ∧ p₂ = q₂ := by simp[Wedge.wedge]

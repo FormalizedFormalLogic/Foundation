@@ -1,5 +1,5 @@
 /-
- Reserved to ompare the strengh of normal modal logic proof systems.
+ Reserved to compare the strengh of normal modal logic proof systems.
 
  ## References
 
@@ -8,40 +8,56 @@
 
 import Logic.Modal.Basic.HilbertStyle
 
-namespace LO.Modal.Hilbert
+namespace LO.Modal
 
-open HasAxiomT HasAxiomD HasAxiomB HasAxiom4 HasAxiom5
+open Hilbert
 
-variable {Bew : Type u} [ModalLogicSymbol Bew] (Bew : Set Bew → Bew → Sort*)
+variable {F : Type u} [ModalLogicSymbol F] (Bew : Set F → F → Sort*)
 
-section S5Equivalence
+section LogicS5
 
-private abbrev LogicKT5 := LogicS5 Bew
+instance [LogicS5.Hilbert Bew] : HasAxiomD Bew where
+  D _ _ := by sorry;
 
-class LogicKTB5 extends LogicK Bew, HasAxiomT Bew, HasAxiomB Bew, HasAxiom5 Bew
+instance [LogicS5.Hilbert Bew] : HasAxiomB Bew where
+  B _ p := by sorry;
 
-instance [LogicKTB5 Bew] : LogicKT5 Bew where
+instance [LogicS5.Hilbert Bew] : HasAxiom4 Bew where
+  A4 _ _ := by sorry;
 
-class LogicKT45 extends LogicK Bew, HasAxiomT Bew, HasAxiom4 Bew, HasAxiom5 Bew
+/-- `𝐒𝟓` Without `𝐓` -/
+class LogicKDB5.Hilbert extends LogicK.Hilbert Bew, HasAxiomD Bew, HasAxiomB Bew, HasAxiom5 Bew
 
-instance [LogicKT45 Bew] : LogicKT5 Bew where
+instance [LogicKDB5.Hilbert Bew] : HasAxiom4 Bew where
+  A4 _ _ := by sorry;
 
-class LogicKT4B extends LogicK Bew, HasAxiomT Bew, HasAxiom4 Bew, HasAxiomB Bew
+instance [LogicKDB5.Hilbert Bew] : LogicS5.Hilbert Bew where
+  K _ p q := by sorry;
+  T _ p := by sorry;
+  A5 _ p := by sorry;
 
-class LogicKT4B5 extends LogicK Bew, HasAxiomT Bew, HasAxiom4 Bew, HasAxiomB Bew, HasAxiom5 Bew
+instance [LogicS5.Hilbert Bew] : LogicKDB5.Hilbert Bew where
 
-instance [LogicKT4B5 Bew] : LogicKT4B Bew where
+/-- `𝐒𝟓` Without `𝟓` -/
+class LogicKT4B.Hilbert extends LogicK.Hilbert Bew, HasAxiomT Bew, HasAxiom4 Bew, HasAxiomB Bew
 
-instance [LogicKT4B5 Bew] : LogicKT5 Bew where
+instance [LogicKT4B.Hilbert Bew] : LogicS5.Hilbert Bew where
+  K _ _ := by sorry;
+  T _ _ := by sorry;
+  A5 _ _ := by sorry;
 
-class LogicKDB5 extends LogicK Bew, HasAxiomD Bew, HasAxiomB Bew, HasAxiom5 Bew
+instance [LogicS5.Hilbert Bew] : LogicKT4B.Hilbert Bew where
 
-class LogicKD4B extends LogicK Bew, HasAxiomD Bew, HasAxiom4 Bew, HasAxiomB Bew
+-- Without `𝐓` and `𝟓`
+class LogicKD4B.Hilbert extends LogicK.Hilbert Bew, HasAxiomD Bew, HasAxiom4 Bew, HasAxiomB Bew
 
-class LogicKD4B5 extends LogicK Bew, HasAxiomD Bew, HasAxiom4 Bew, HasAxiomB Bew, HasAxiom5 Bew
+instance [LogicKD4B.Hilbert Bew] : LogicS5.Hilbert Bew where
+  K _ _ := by sorry;
+  T _ _ := by sorry;
+  A5 _ _ := by sorry;
 
-instance [LogicKD4B5 Bew] : LogicKD4B Bew where
+instance [LogicS5.Hilbert Bew] : LogicKD4B.Hilbert Bew where
 
-end S5Equivalence
+end LogicS5
 
-end LO.Modal.Hilbert
+end LO.Modal
