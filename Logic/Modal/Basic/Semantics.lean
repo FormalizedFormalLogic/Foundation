@@ -1,5 +1,28 @@
 import Logic.Logic.System
 import Logic.Modal.Basic.Formula
+import Logic.Modal.Basic.Axioms
+
+section BinaryRels
+
+variable {α : Type u} (rel : α → α → Prop)
+local infix:50 " ≺ " => rel
+
+def _root_.Euclidean := ∀ ⦃w₁ w₂ w₃⦄, w₁ ≺ w₂ → w₁ ≺ w₃ → (w₂ ≺ w₃)
+
+def _root_.Serial := ∀w₁, ∃w₂, w₁ ≺ w₂
+
+def _root_.Confluent := ∀ ⦃w₁ w₂ w₃⦄, ((w₁ ≺ w₂ ∧ w₂ ≺ w₃) → ∃ w₄, w₂ ≺ w₄ ∧ w₃ ≺ w₄)
+
+def _root_.NonInfiniteAscent := ¬(∃ (f : ℕ → α), ∀ n, f n ≺ f (n + 1))
+
+def _root_.Dense := ∀ ⦃w₁ w₂⦄, w₁ ≺ w₂ → ∃w₃, w₁ ≺ w₃ ∧ w₃ ≺ w₂
+
+def _root_.Functional := ∀ ⦃w₁ w₂ w₃⦄, w₁ ≺ w₂ ∧ w₁ ≺ w₃ → w₂ = w₃
+
+def _root_.RightConvergent := ∀ ⦃w₁ w₂ w₃⦄, w₁ ≺ w₂ ∧ w₁ ≺ w₃ → w₂ ≺ w₃ ∨ w₃ ≺ w₂ ∨ w₂ = w₃
+
+end BinaryRels
+
 
 namespace LO
 
@@ -150,9 +173,9 @@ lemma neg_def' : (⊧ᴹᵐ[m] ~p) →  ¬(⊧ᴹᵐ[m] p) := id neg_def
 
 lemma bot_def : ¬(⊧ᴹᵐ[m] ⊥) := by simp [Models]; existsi m.nonempty.default; simp;
 
-lemma preserve_ModusPonens : (⊧ᴹᵐ[m] p ⟶ q) → (⊧ᴹᵐ[m] p) → (⊧ᴹᵐ[m] q) := by simp_all [Models, Satisfies.imp_def];
+lemma modus_ponens : (⊧ᴹᵐ[m] p ⟶ q) → (⊧ᴹᵐ[m] p) → (⊧ᴹᵐ[m] q) := by simp_all [Models, Satisfies.imp_def];
 
-lemma preserve_Necessitation : (⊧ᴹᵐ[m] p) → (⊧ᴹᵐ[m] □p) := by simp_all [Models, Satisfies];
+lemma necessitation : (⊧ᴹᵐ[m] p) → (⊧ᴹᵐ[m] □p) := by simp_all [Models, Satisfies];
 
 end Models
 
@@ -167,9 +190,9 @@ variable {f : Frame α}
 
 lemma bot_def : ¬(⊧ᴹᶠ[f] (⊥ : Formula β)) := by simp [Frames, Models.bot_def];
 
-lemma preserve_ModusPonens : (⊧ᴹᶠ[f] p ⟶ q) → (⊧ᴹᶠ[f] p) → (⊧ᴹᶠ[f] q) := by simp_all [Models, Frames, Satisfies];
+lemma modus_ponens : (⊧ᴹᶠ[f] p ⟶ q) → (⊧ᴹᶠ[f] p) → (⊧ᴹᶠ[f] q) := by simp_all [Models, Frames, Satisfies];
 
-lemma preserve_Necessitation : (⊧ᴹᶠ[f] p) → (⊧ᴹᶠ[f] □p) := by simp_all [Models, Frames, Satisfies];
+lemma necessitation : (⊧ᴹᶠ[f] p) → (⊧ᴹᶠ[f] □p) := by simp_all [Models, Frames, Satisfies];
 
 end Frames
 
@@ -182,9 +205,9 @@ namespace Frameclasses
 
 variable {fc : Frameclass α}
 
-lemma preserve_ModusPonens : (⊧ᴹᶠᶜ[fc] p ⟶ q) → (⊧ᴹᶠᶜ[fc] p) → (⊧ᴹᶠᶜ[fc] q) := by simp_all [Frameclasses, Frames, Models, Satisfies.imp_def];
+lemma modus_ponens : (⊧ᴹᶠᶜ[fc] p ⟶ q) → (⊧ᴹᶠᶜ[fc] p) → (⊧ᴹᶠᶜ[fc] q) := by simp_all [Frameclasses, Frames, Models, Satisfies.imp_def];
 
-lemma preserve_Necessitation : (⊧ᴹᶠᶜ[fc] p) → (⊧ᴹᶠᶜ[fc] □p) := by simp_all [Frameclasses, Frames, Models, Satisfies];
+lemma necessitation : (⊧ᴹᶠᶜ[fc] p) → (⊧ᴹᶠᶜ[fc] □p) := by simp_all [Frameclasses, Frames, Models, Satisfies];
 
 end Frameclasses
 
@@ -252,11 +275,11 @@ variable {f : Frame α} {Γ Γ' : Context β} {p q : Formula β}
 
 lemma def_emptyctx : (∅ ⊨ᴹᶠ[f] p) ↔ (⊧ᴹᶠ[f] p) := by aesop;
 
-lemma preserve_AxiomK : (Γ ⊨ᴹᶠ[f] □(p ⟶ q) ⟶ □p ⟶ □q) := by aesop;
+lemma axiomK : (Γ ⊨ᴹᶠ[f] AxiomK p q) := by aesop;
 
-lemma preserve_Weakening : (Γ ⊆ Γ') → (Γ ⊨ᴹᶠ[f] p) → (Γ' ⊨ᴹᶠ[f] p) := by aesop;
+lemma weakening : (Γ ⊆ Γ') → (Γ ⊨ᴹᶠ[f] p) → (Γ' ⊨ᴹᶠ[f] p) := by aesop;
 
-lemma preserve_ModusPonens : (Γ ⊨ᴹᶠ[f] p ⟶ q) → (Γ ⊨ᴹᶠ[f] p) → (Γ ⊨ᴹᶠ[f] q) := by aesop;
+lemma modus_ponens : (Γ ⊨ᴹᶠ[f] p ⟶ q) → (Γ ⊨ᴹᶠ[f] p) → (Γ ⊨ᴹᶠ[f] q) := by aesop;
 
 end FrameConsequence
 
@@ -299,22 +322,22 @@ notation Γ " ⊨ᴹᶠᶜ[" fc "] " Δ => Context.FrameclassConsequence fc Γ �
 end Context
 
 
-variable {f : Frame α} {p q q₁ q₂ : Formula β} {fc : Frameclass α}
+section Defines
 
-open Formula Frameclass
+attribute [simp] Formula.Frames Formula.Models Context.Models Context.Frames
 
-attribute [simp] Formula.Models Formula.Frames Formula.Frameclasses Formula.Satisfies.imp_def Formula.Satisfies
-attribute [simp] Context.defines Context.Frames
+variable {f : Frame α} {p q q₁ q₂ : Formula β}
 
-lemma axiomT.defines : fc.Reflexive → (𝐓 : Context β).Defines fc := by
-  intro hfc f;
+lemma AxiomT.ctx.defines : (Reflexive f.rel) ↔ (⊧ᴹᶠ[f] (𝐓 : Context β)) := by
+  simp [ctx];
   constructor;
-  . sorry;
+  . aesop;
   . sorry;
 
-lemma axiomD.defines : fc.Serial → (𝐃 : Context β).Defines fc := by
-  intro hfc f;
+lemma AxiomD.ctx.defines : (Serial f.rel) ↔ (⊧ᴹᶠ[f] (𝐃 : Context β)) := by
+  simp [ctx];
   constructor;
+  . intro hf p V w h; sorry;
   . sorry;
     /-
     intro h;
@@ -326,49 +349,50 @@ lemma axiomD.defines : fc.Serial → (𝐃 : Context β).Defines fc := by
     have : ¬w₁ ⊧ᴹˢ[⟨f, V⟩] ◇p := by simp [Satisfies]; simp_all;
     sorry;
     -/
+
+lemma AxiomB.ctx.defines : (Symmetric f.rel) ↔ (⊧ᴹᶠ[f] (𝐁 : Context β)) := by
+  simp [ctx];
+  constructor;
+  . aesop;
   . sorry;
 
-lemma axiomB.defines : fc.Symmetric → (𝐁 : Context β).Defines fc := by
-  intro hfc f;
+lemma Axiom4.ctx.defines : (Transitive f.rel) ↔ (⊧ᴹᶠ[f] (𝟒 : Context β)) := by
+  simp [ctx];
+  constructor;
+  . aesop;
+  . sorry;
+
+lemma Axiom5.ctx.defines : (Euclidean f.rel) ↔ (⊧ᴹᶠ[f] (𝟓 : Context β)) := by
+  simp [ctx];
+  constructor;
+  . aesop;
+  . sorry;
+
+lemma AxiomDot2.ctx.defines : (Confluent f.rel) ↔ (⊧ᴹᶠ[f] (.𝟐 : Context β)) := by
+  simp [ctx];
   constructor;
   . sorry;
   . sorry;
 
-lemma axiom4.defines : fc.Transitive → (𝟒 : Context β).Defines fc := by
-  intro hfc f;
+lemma AxiomDot3.ctx.defines : (Functional f.rel) ↔ (⊧ᴹᶠ[f] (.𝟑 : Context β)) := by
+  simp [ctx];
   constructor;
   . sorry;
   . sorry;
 
-lemma axiom5.defines : fc.Euclidean → (𝟓 : Context β).Defines fc := by
-  intro hfc f;
+lemma AxiomCD.ctx.defines : (RightConvergent f.rel) ↔ (⊧ᴹᶠ[f] (𝐂𝐃 : Context β)) := by
+  simp [ctx];
   constructor;
   . sorry;
   . sorry;
 
-lemma axiomDot2.defines : fc.Confluency → (.𝟐 : Context β).Defines fc := by
-  intro hfc f;
+lemma AxiomC4.ctx.defines : (Dense f.rel) ↔ (⊧ᴹᶠ[f] (𝐂𝟒 : Context β)) := by
+  simp [ctx];
   constructor;
   . sorry;
   . sorry;
 
-lemma axiomDot3.defines : fc.Functionality → (.𝟑 : Context β).Defines fc := by
-  intro hfc f;
-  constructor;
-  . sorry;
-  . sorry;
-
-lemma axiomCD.defines : fc.RightConvergence →  (𝐂𝐃 : Context β).Defines fc := by
-  intro hfc f;
-  constructor;
-  . sorry;
-  . sorry;
-
-lemma axiomC4.defines : fc.Density → (𝐂𝟒 : Context β).Defines fc := by
-  intro hfc f;
-  constructor;
-  . sorry;
-  . sorry;
+end Defines
 
 end Modal
 

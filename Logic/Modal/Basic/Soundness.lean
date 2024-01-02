@@ -17,7 +17,7 @@ theorem LogicK.sounds' (Γ : Set (Formula α)) (hΓ : Γ = ∅) (p : Formula α)
     exact ih (by aesop);
   case maxm Γ p ih =>
     let ⟨_, ⟨_, hq⟩⟩ := ih; rw [←hq];
-    apply preserve_AxiomK;
+    apply axiomK;
   case disj₃ p q r =>
     simp only [hΓ, FrameConsequence, Satisfies.imp_def];
     intro V w _ hpr hqr hpq;
