@@ -127,28 +127,50 @@ notation:45 "⊬ᴹ(" Λ ")!" p => Unprovable Λ p
 
 namespace Deduction
 
+/-
+TODO: 証明は合っていると思うがinstanceのときにこの補題を用いるとnoncomputableになってしまう
+
+lemma weakening' {Γ Δ p} (hΓΔ : Γ ⊆ Δ) (dΓ : Γ ⊢ᴹ(Λ) p) : Δ ⊢ᴹ(Λ) p := by
+  induction dΓ with
+  | axm h => exact axm (hΓΔ h)
+  | maxm h => apply maxm h
+  | modus_ponens _ _ ih₁ ih₂ => exact modus_ponens ih₁ ih₂
+  | necessitation _ ih => exact necessitation ih
+  | verum => apply verum
+  | imply₁ => apply imply₁
+  | imply₂ => apply imply₂
+  | conj₁ => apply conj₁
+  | conj₂ => apply conj₂
+  | conj₃ => apply conj₃
+  | disj₁ => apply disj₁
+  | disj₂ => apply disj₂
+  | disj₃ => apply disj₃
+  | explode => apply explode
+  | dne => apply dne
+-/
+
 instance : Hilbert.Classical (Deduction Λ) where
   neg          := rfl;
-  axm          := by apply axm;
-  weakening'   := by apply wk;
-  modus_ponens := by apply modus_ponens;
-  verum        := by apply verum;
-  imply₁       := by apply imply₁;
-  imply₂       := by apply imply₂;
-  conj₁        := by apply conj₁;
-  conj₂        := by apply conj₂;
-  conj₃        := by apply conj₃;
-  disj₁        := by apply disj₁;
-  disj₂        := by apply disj₂;
-  disj₃        := by apply disj₃;
-  explode      := by apply explode;
-  dne          := by apply dne;
+  axm          := axm;
+  weakening' hs hd := wk hs hd;
+  modus_ponens := modus_ponens;
+  verum        := verum;
+  imply₁       := imply₁;
+  imply₂       := imply₂;
+  conj₁        := conj₁;
+  conj₂        := conj₂;
+  conj₃        := conj₃;
+  disj₁        := disj₁;
+  disj₂        := disj₂;
+  disj₃        := disj₃;
+  explode      := explode;
+  dne          := dne;
 
 instance : HasNecessitation (Deduction Λ) where
   necessitation := by apply necessitation;
 
 def length {Γ : Set (Formula α)} {p : Formula α} : (Γ ⊢ᴹ(Λ) p) → ℕ
-  | modus_ponens d₁ d₂ => d₁.length + d₂.length + 1
+  | modus_ponens d₁ d₂ => (max d₁.length d₂.length) + 1
   | necessitation d₁ => d₁.length + 1
   | _ => 0
 
@@ -167,7 +189,7 @@ def castR (d : Γ ⊢ᴹ(Λ) p) (e₂ : p = q) : Γ ⊢ᴹ(Λ) q := d.cast rfl e
 
 @[simp] lemma length_castR (d : Γ ⊢ᴹ(Λ) p) (e₂ : p = q) : (d.castR e₂).length = d.length := length_cast d rfl e₂
 
-lemma maxm_strengthen {Λ Λ'} (dΛ : Γ ⊢ᴹ(Λ) p) : (Λ ⊆ Λ') → (Γ ⊢ᴹ(Λ') p) := by
+lemma maxm_subset {Λ Λ'} (dΛ : Γ ⊢ᴹ(Λ) p) : (Λ ⊆ Λ') → (Γ ⊢ᴹ(Λ') p) := by
   intro hΛ;
   induction dΛ with
   | axm ih => exact axm ih
