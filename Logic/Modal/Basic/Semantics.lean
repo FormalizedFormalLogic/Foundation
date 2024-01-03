@@ -31,25 +31,25 @@ class Symmetric where
   symmetric := Symmetric f.rel
 
 class Euclidean where
-  euclidean := ∀ ⦃w₁ w₂ w₃⦄, w₁ ≺ w₂ → w₁ ≺ w₃ → (w₂ ≺ w₃)
+  euclidean := Euclidean f.rel
 
 class Serial where
-  serial := ∀w₁, ∃w₂, w₁ ≺ w₂
+  serial := Serial f.rel
 
-class Confluency where
-  confluency := ∀ ⦃w₁ w₂ w₃⦄, ((w₁ ≺ w₂ ∧ w₂ ≺ w₃) → ∃ w₄, w₂ ≺ w₄ ∧ w₃ ≺ w₄)
+class Confluent where
+  confluent := Confluent f.rel
 
 class NonInfiniteAscent where
-  nonInfiniteAscent := ¬(∃ (f : ℕ → α), ∀ n, f n ≺ f (n + 1))
+  nonInfiniteAscent := NonInfiniteAscent f.rel
 
-class Density where
-  density := ∀ ⦃w₁ w₂⦄, w₁ ≺ w₂ → ∃w₃, w₁ ≺ w₃ ∧ w₃ ≺ w₂
+class Dense where
+  dense := Dense f.rel
 
-class Functionality where
-  functionality := ∀ ⦃w₁ w₂ w₃⦄, w₁ ≺ w₂ ∧ w₁ ≺ w₃ → w₂ = w₃
+class Functional where
+  functional := Functional f.rel
 
-class RightConvergence where
-  rightConvergence := ∀ ⦃w₁ w₂ w₃⦄, w₁ ≺ w₂ ∧ w₁ ≺ w₃ → w₂ ≺ w₃ ∨ w₃ ≺ w₂ ∨ w₂ = w₃
+class RightConvergent where
+  rightConvergent := RightConvergent f.rel
 
 end Frame
 
@@ -80,16 +80,16 @@ class Serial where
   serial := ∀ f ∈ fc.frames, Frame.Serial f
 
 class Confluency where
-  confluency := ∀ f ∈ fc.frames, Frame.Confluency f
+  confluency := ∀ f ∈ fc.frames, Frame.Confluent f
 
 class Density where
-  density := ∀ f ∈ fc.frames, Frame.Density f
+  density := ∀ f ∈ fc.frames, Frame.Dense f
 
 class Functionality where
-  functionality := ∀ f ∈ fc.frames, Frame.Functionality f
+  functionality := ∀ f ∈ fc.frames, Frame.Functional f
 
 class RightConvergence where
-  rightConvergence := ∀ f ∈ fc.frames, Frame.RightConvergence f
+  rightConvergence := ∀ f ∈ fc.frames, Frame.RightConvergent f
 
 end Frameclass
 
@@ -364,7 +364,7 @@ lemma AxiomB.defines : Defines α (AxiomB p) := by
   . aesop;
   . sorry;
 
-
+@[simp]
 instance : AxiomDefinability (Axiom4 p) where
   definability := Transitive
 
@@ -375,6 +375,7 @@ lemma Axiom4.defines : Defines α (Axiom4 p) := by
   . sorry;
 
 
+@[simp]
 instance : AxiomDefinability (Axiom5 p) where
   definability := Euclidean
 
@@ -385,8 +386,10 @@ lemma Axiom5.defines : Defines α (Axiom5 p) := by
   . sorry;
 
 
+@[simp]
 instance : AxiomDefinability (AxiomDot2 p) where
   definability := Confluent
+
 lemma AxiomDot2.defines : Defines α (AxiomDot2 p) := by
   intro f;
   constructor;
@@ -394,6 +397,7 @@ lemma AxiomDot2.defines : Defines α (AxiomDot2 p) := by
   . sorry;
 
 
+@[simp]
 instance : AxiomDefinability (AxiomDot3 p q) where
   definability := Functional
 
@@ -404,6 +408,7 @@ lemma AxiomDot3.defines : Defines α (AxiomDot3 p q) := by
   . sorry;
 
 
+@[simp]
 instance : AxiomDefinability (AxiomCD p) where
   definability := RightConvergent
 
@@ -414,6 +419,7 @@ lemma AxiomCD.defines : Defines α (AxiomCD p) := by
   . sorry;
 
 
+@[simp]
 instance : AxiomDefinability (AxiomC4 p) where
   definability := Dense
 
@@ -424,6 +430,7 @@ lemma AxiomC4.defines : Defines α (AxiomC4 p) := by
   . sorry;
 
 
+@[simp]
 instance : AxiomDefinability (AxiomL p) where
   definability := NonInfiniteAscent
 
