@@ -1,5 +1,16 @@
 import Logic.FirstOrder.Basic.Syntax.Term
 
+/-!
+# Formulas of first-order logic
+
+This file defines the formulas of first-order logic.
+
+`p : Semiformula L μ n` is a (semi-)formula of language `L` with bounded variables of `Fin n` and free variables of `μ`.
+The quantification is represented by de Bruijn index.
+
+Term rewriting `LO.FirstOrder.Rew` is naturally converted to formula rewriting by `LO.FirstOrder.Rew.hom`.
+-/
+
 namespace LO
 
 namespace FirstOrder

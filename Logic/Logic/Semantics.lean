@@ -1,5 +1,17 @@
 import Logic.Logic.LogicSymbol
 
+/-!
+# Basic definitions and properties of semantics-related notions
+
+This file defines the semantics of formulas based on Tarski's truth definitions.
+Also provides a characterization of compactness.
+
+## Main Definitions
+* `LO.Semantics`: The realization of a formula.
+* `LO.Compact`: The semantic compactness of logic.
+
+-/
+
 namespace LO
 
 variable {F : Type*} [LogicSymbol F]
@@ -27,7 +39,7 @@ infix:60 " ⊧* " => realizeTheory
 
 def consequence (T : Set F) (f : F) : Prop := ∀ ⦃a : α⦄, a ⊧* T → a ⊧ f
 
--- note that ⊨ (\vDash) is *NOT* ⊧ₘ (\models)
+-- note that ⊨ (\vDash) is *NOT* ⊧ (\models)
 infix:55 " ⊨ " => consequence
 
 def Valid (f : F) : Prop := ∀ ⦃a : α⦄, a ⊧ f

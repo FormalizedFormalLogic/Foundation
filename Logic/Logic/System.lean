@@ -1,5 +1,18 @@
 import Logic.Logic.Semantics
 
+/-!
+# Basic definitions and properties of proof-related notions
+
+This file defines a characterization of the proof/provability/calculus of formulas.
+Also defines soundness and completeness.
+
+## Main Definitions
+* `LO.System`: Proof system of logic.
+* `LO.Sound`: Soundness of the proof system.
+* `LO.Complete`: Completeness of the proof system.
+
+-/
+
 namespace LO
 
 variable {F : Type u} [LogicSymbol F]

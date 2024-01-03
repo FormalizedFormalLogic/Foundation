@@ -101,7 +101,7 @@ lemma val_Uprod {p : Formula L μ} :
 end Semiformula
 
 lemma models_Uprod [Inhabited I] [(i : I) → Inhabited (A i)] {σ : Sentence L} :
-    (Uprod A 𝓤) ⊧ₘ σ ↔ {i | Semantics.realize (s i).toStruc σ} ∈ 𝓤 :=
+    (Uprod A 𝓤) ⊧ₘ σ ↔ {i | (A i) ⊧ₘ σ} ∈ 𝓤 :=
   by simp[models_def, Semiformula.val_Uprod, Empty.eq_elim]
 
 variable (A)
