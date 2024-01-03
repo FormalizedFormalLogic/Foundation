@@ -1,6 +1,7 @@
 import Logic.Logic.HilbertStyle2
 import Logic.Modal.Basic.Formula
 import Logic.Modal.Basic.Axioms
+import Logic.Modal.Basic.Logics
 
 namespace LO
 
@@ -88,10 +89,9 @@ variable {α : Type u}
 /--
   Hilbert-style deduction system
 -/
-inductive Deduction (Λ : Set (Formula α)) : Set (Formula α) → (Formula α) → Type _
+inductive Deduction (Λ : Logic (Formula α)) : Set (Formula α) → (Formula α) → Type _
   | axm {Γ p}            : p ∈ Γ → Deduction Λ Γ p
   | maxm {Γ p}           : p ∈ Λ → Deduction Λ Γ p
-  | wk {Γ Δ p}           : Γ ⊆ Δ → Deduction Λ Γ p → Deduction Λ Δ p
   | modus_ponens {Γ p q} : Deduction Λ Γ (p ⟶ q) → Deduction Λ Γ p → Deduction Λ Γ q
   | necessitation {Γ p}  : Deduction Λ Γ p → Deduction Λ Γ (□p)
   | verum (Γ)            : Deduction Λ Γ ⊤
@@ -108,7 +108,7 @@ inductive Deduction (Λ : Set (Formula α)) : Set (Formula α) → (Formula α) 
 
 notation:45 Γ " ⊢ᴹ(" Λ ") " p => Deduction Λ Γ p
 
-variable (Λ : Set (Formula α)) (Γ : Set (Formula α)) (p : Formula α)
+variable (Λ : Logic (Formula α)) (Γ : Set (Formula α)) (p : Formula α)
 
 abbrev Deducible := Nonempty (Γ ⊢ᴹ(Λ) p)
 notation:45 Γ " ⊢ᴹ(" Λ ")! " p => Deducible Λ Γ p
@@ -127,32 +127,32 @@ notation:45 "⊬ᴹ(" Λ ")!" p => Unprovable Λ p
 
 namespace Deduction
 
-/-
-TODO: 証明は合っていると思うがinstanceのときにこの補題を用いるとnoncomputableになってしまう
-
-lemma weakening' {Γ Δ p} (hΓΔ : Γ ⊆ Δ) (dΓ : Γ ⊢ᴹ(Λ) p) : Δ ⊢ᴹ(Λ) p := by
-  induction dΓ with
-  | axm h => exact axm (hΓΔ h)
-  | maxm h => apply maxm h
-  | modus_ponens _ _ ih₁ ih₂ => exact modus_ponens ih₁ ih₂
-  | necessitation _ ih => exact necessitation ih
-  | verum => apply verum
-  | imply₁ => apply imply₁
-  | imply₂ => apply imply₂
-  | conj₁ => apply conj₁
-  | conj₂ => apply conj₂
-  | conj₃ => apply conj₃
-  | disj₁ => apply disj₁
-  | disj₂ => apply disj₂
-  | disj₃ => apply disj₃
-  | explode => apply explode
-  | dne => apply dne
--/
+def weakening' {Γ Δ p} (hs : Γ ⊆ Δ) : (Γ ⊢ᴹ(Λ) p) → (Δ ⊢ᴹ(Λ) p)
+  | axm h => axm (hs h)
+  | maxm h => maxm h
+  | modus_ponens h₁ h₂ => by
+      have ih₁ := weakening' hs h₁;
+      have ih₂ := weakening' hs h₂;
+      exact modus_ponens ih₁ ih₂;
+  | necessitation h => by
+      have ih := weakening' hs h;
+      exact necessitation ih;
+  | verum _ => by apply verum
+  | imply₁ _ _ _ => by apply imply₁
+  | imply₂ _ _ _ _ => by apply imply₂
+  | conj₁ _ _ _ => by apply conj₁
+  | conj₂ _ _ _ => by apply conj₂
+  | conj₃ _ _ _ => by apply conj₃
+  | disj₁ _ _ _ => by apply disj₁
+  | disj₂ _ _ _ => by apply disj₂
+  | disj₃ _ _ _ _ => by apply disj₃
+  | explode _ _ => by apply explode
+  | dne _ _ => by apply dne
 
 instance : Hilbert.Classical (Deduction Λ) where
   neg          := rfl;
   axm          := axm;
-  weakening' hs hd := wk hs hd;
+  weakening'   := weakening' Λ;
   modus_ponens := modus_ponens;
   verum        := verum;
   imply₁       := imply₁;
@@ -174,7 +174,7 @@ def length {Γ : Set (Formula α)} {p : Formula α} : (Γ ⊢ᴹ(Λ) p) → ℕ
   | necessitation d₁ => d₁.length + 1
   | _ => 0
 
-variable {Λ : Set (Formula α)} {Γ : Set (Formula α)} {p q : Formula α}
+variable {Λ : Logic (Formula α)} {Γ : Set (Formula α)} {p q : Formula α}
 
 protected def cast (d : Γ ⊢ᴹ(Λ) p) (e₁ : Γ = Δ) (e₂ : p = q) : Δ ⊢ᴹ(Λ) q := cast (by simp [e₁,e₂]) d
 
@@ -194,7 +194,6 @@ lemma maxm_subset {Λ Λ'} (dΛ : Γ ⊢ᴹ(Λ) p) : (Λ ⊆ Λ') → (Γ ⊢ᴹ
   induction dΛ with
   | axm ih => exact axm ih
   | maxm ih => exact maxm (hΛ ih)
-  | wk ss _ ih => exact wk ss ih;
   | modus_ponens _ _ ih₁ ih₂ => exact modus_ponens ih₁ ih₂
   | necessitation _ ih => exact necessitation ih
   | verum => apply verum

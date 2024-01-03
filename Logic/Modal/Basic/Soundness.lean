@@ -14,10 +14,7 @@ variable {α β : Type u}
 -/
 theorem LogicK.Hilbert.sounds' (Γ : Set (Formula α)) (hΓ : Γ = ∅) (p : Formula α) (f : Frame β) (d : Γ ⊢ᴹ(𝐊) p) : (Γ ⊨ᴹᶠ[f] p) := by
   induction d <;> try {simp_all [Satisfies];}
-  case wk ih =>
-    simp_all only [def_emptyctx];
-    exact ih (by aesop);
-  case maxm Γ p ih =>
+  case maxm p ih =>
     let ⟨_, ⟨_, hq⟩⟩ := ih; rw [←hq];
     apply axiomK;
   case disj₃ p q r =>

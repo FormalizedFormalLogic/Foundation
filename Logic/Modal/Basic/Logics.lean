@@ -1,0 +1,138 @@
+import Logic.Modal.Basic.Formula
+import Logic.Modal.Basic.Axioms
+
+lemma _root_.Set.subset_triunion₁ (s₁ s₂ s₃ : Set F) : s₁ ⊆ (s₁ ∪ s₂ ∪ s₃) := Set.Subset.trans
+  (Set.subset_union_left _ _) (Set.subset_union_left _ _)
+
+lemma _root_.Set.subset_triunion₂  (s₁ s₂ s₃ : Set F) : s₂ ⊆ (s₁ ∪ s₂ ∪ s₃) := Set.Subset.trans
+  (Set.subset_union_right _ _) (Set.subset_union_left _ _)
+
+lemma _root_.Set.subset_triunion₃ (s₁ s₂ s₃ : Set F) : s₃ ⊆ (s₁ ∪ s₂ ∪ s₃) := Set.subset_union_right _ _
+
+attribute [simp] Set.Subset.rfl
+
+namespace LO.Modal
+
+variable {F : Type u} [ModalLogicSymbol F] {p q : F}
+
+abbrev Logic (F : Type u) [ModalLogicSymbol F] := Set F
+
+
+abbrev LogicK : Logic F := AxiomK.ctx
+
+namespace LogicK
+
+@[simp] lemma includes_AxiomK : (AxiomK p q) ∈ 𝐊 := by simp [LogicK]
+@[simp] lemma subsets_AxiomK : AxiomK.ctx ⊆ (𝐊 : Logic F) := by simp [LogicK];
+
+end LogicK
+
+
+def LogicKD : Logic F := 𝐊 ∪ AxiomD.ctx
+notation "𝐊𝐃" => LogicKD
+
+/-
+abbrev LogicKD4 : Logic F := AxiomK ∪ AxiomD ∪ 𝟒
+abbrev LogicKD5 : Logic F := AxiomK ∪ AxiomD ∪ 𝟓
+abbrev LogicKDB : Logic F := AxiomK ∪ AxiomD ∪ 𝐁
+abbrev LogicKD45 : Logic F := AxiomK ∪ AxiomD ∪ 𝟒 ∪ 𝟓
+
+abbrev LogicKT : Logic F := AxiomK ∪ 𝐓
+abbrev LogicKTB : Logic F := AxiomK ∪ AxiomT ∪ 𝐁
+abbrev LogicKT4 : Logic F := AxiomK ∪ AxiomT ∪ 𝟒
+abbrev LogicKT5 : Logic F := AxiomK ∪ AxiomT ∪ 𝟓
+
+abbrev LogicKB : Logic F := AxiomK ∪ 𝐁
+abbrev LogicKB5 : Logic F := AxiomK ∪ 𝐁 ∪ 𝟓
+
+abbrev LogicK4 : Logic F := AxiomK ∪ 𝟒
+abbrev LogicK45 : Logic F := AxiomK ∪ 𝟒 ∪ 𝟓
+
+abbrev LogicK5 : Logic F := AxiomK ∪ 𝟓
+-/
+
+def LogicKT4 : Logic F := 𝐊 ∪ AxiomT.ctx ∪ Axiom4.ctx
+
+@[simp] abbrev LogicS4 {F} := @LogicKT4 F
+notation "𝐒𝟒" => LogicS4
+
+namespace LogicS4
+
+@[simp] lemma includes_AxiomK : AxiomK p q ∈ (𝐒𝟒 : Logic F) := by simp [LogicKT4]
+@[simp] lemma includes_AxiomT : AxiomT p ∈ (𝐒𝟒 : Logic F) := by simp [LogicKT4]
+@[simp] lemma includes_Axiom4 : Axiom4 p ∈ (𝐒𝟒 : Logic F) := by simp [LogicKT4]
+@[simp] lemma subsets_K : AxiomK.ctx ⊆ (𝐒𝟒 : Logic F) := by apply Set.subset_triunion₁
+@[simp] lemma subsets_T : AxiomT.ctx ⊆ (𝐒𝟒 : Logic F) := by apply Set.subset_triunion₂
+@[simp] lemma subsets_4 : Axiom4.ctx ⊆ (𝐒𝟒 : Logic F) := by apply Set.subset_triunion₃
+
+end LogicS4
+
+
+def LogicS4Dot2 : Logic F := 𝐒𝟒 ∪ AxiomDot2.ctx
+
+notation "𝐒𝟒.𝟐" => LogicS4Dot2
+
+namespace LogicS4Dot2
+
+@[simp] lemma includes_AxiomDot2 : AxiomDot2 p ∈ (𝐒𝟒.𝟐 : Logic F) := by simp [LogicS4Dot2]
+@[simp] lemma subsets_Dot2 : AxiomDot2.ctx ⊆ (𝐒𝟒.𝟐 : Logic F) := by simp [LogicS4Dot2]
+@[simp] lemma subsets_LogicS4_ctx : 𝐒𝟒 ⊆ (𝐒𝟒.𝟐 : Logic F) := by simp [LogicKT4, LogicS4Dot2]
+
+end LogicS4Dot2
+
+
+def LogicS4Dot3 : Logic F := 𝐒𝟒 ∪ AxiomDot3.ctx
+notation "𝐒𝟒.𝟑" => LogicS4Dot3
+
+namespace LogicS4Dot3
+
+@[simp] lemma includes_AxiomDot3 : AxiomDot3 p q ∈ (𝐒𝟒.𝟑 : Logic F) := by simp [LogicS4Dot3]
+@[simp] lemma subsets_Dot2 : AxiomDot3.ctx ⊆ (𝐒𝟒.𝟑 : Logic F) := by simp [LogicS4Dot3]
+@[simp] lemma subsets_LogicS4_ctx : 𝐒𝟒 ⊆ (𝐒𝟒.𝟑 : Logic F) := by simp [LogicS4Dot3]
+
+end LogicS4Dot3
+
+
+def LogicS4Grz : Logic F := 𝐒𝟒 ∪ AxiomGrz.ctx
+notation "𝐒𝟒𝐆𝐫𝐳" => LogicS4Grz
+
+namespace LogicS4Grz
+
+@[simp] lemma includes_AxiomGrz : AxiomGrz p ∈ (𝐒𝟒𝐆𝐫𝐳 : Logic F) := by simp [LogicS4Grz]
+@[simp] lemma subsets_Dot2 : AxiomGrz.ctx ⊆ (𝐒𝟒𝐆𝐫𝐳 : Logic F) := by simp [LogicS4Grz]
+@[simp] lemma subsets_LogicS4_ctx : 𝐒𝟒 ⊆ (𝐒𝟒𝐆𝐫𝐳 : Logic F) := by simp [LogicS4Grz]
+
+end LogicS4Grz
+
+
+def LogicKT5 : Logic F := 𝐊 ∪ AxiomT.ctx ∪ 𝟓
+
+@[simp] abbrev LogicS5 {F} := @LogicKT5 F
+notation "𝐒𝟓" => LogicS5
+
+namespace LogicS5
+
+@[simp] lemma includes_AxiomK : AxiomK p q ∈ (𝐒𝟓 : Logic F) := by simp [LogicKT5]
+@[simp] lemma includes_AxiomT : AxiomT p ∈ (𝐒𝟓 : Logic F) := by simp [LogicKT5]
+@[simp] lemma includes_Axiom5 : Axiom5 p ∈ (𝐒𝟓 : Logic F) := by simp [LogicKT5]
+@[simp] lemma subsets_K : AxiomK.ctx ⊆ (𝐒𝟓 : Logic F) := by apply Set.subset_triunion₁
+@[simp] lemma subsets_T : AxiomT.ctx ⊆ (𝐒𝟓 : Logic F) := by apply Set.subset_triunion₂
+@[simp] lemma subsets_5 : Axiom5.ctx ⊆ (𝐒𝟓 : Logic F) := by apply Set.subset_triunion₃
+
+end LogicS5
+
+
+def LogicGL : Logic F := 𝐊 ∪ AxiomL.ctx
+notation "𝐆𝐋" => LogicGL
+
+namespace LogicGL
+
+@[simp] lemma includes_AxiomK : AxiomK p q ∈ (𝐆𝐋 : Logic F) := by simp [LogicGL]
+@[simp] lemma includes_AxiomL : AxiomL p ∈ (𝐆𝐋 : Logic F) := by simp [LogicGL]
+@[simp] lemma subsets_K : AxiomK.ctx ⊆ (𝐆𝐋 : Logic F) := by simp [LogicGL, LogicK]
+@[simp] lemma subsets_L : AxiomL.ctx ⊆ (𝐆𝐋 : Logic F) := by simp [LogicGL]
+@[simp] lemma subsets_LogicK_ctx : 𝐊 ⊆ (𝐆𝐋 : Logic F) := by simp [LogicK, LogicGL]
+
+end LogicGL
+
+end LO.Modal

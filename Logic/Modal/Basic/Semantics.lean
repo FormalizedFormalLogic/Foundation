@@ -1,28 +1,6 @@
-import Logic.Logic.System
+import Logic.Modal.BinaryRelations
 import Logic.Modal.Basic.Formula
 import Logic.Modal.Basic.Axioms
-
-section BinaryRels
-
-variable {α : Type u} (rel : α → α → Prop)
-local infix:50 " ≺ " => rel
-
-def _root_.Euclidean := ∀ ⦃w₁ w₂ w₃⦄, w₁ ≺ w₂ → w₁ ≺ w₃ → (w₂ ≺ w₃)
-
-def _root_.Serial := ∀w₁, ∃w₂, w₁ ≺ w₂
-
-def _root_.Confluent := ∀ ⦃w₁ w₂ w₃⦄, ((w₁ ≺ w₂ ∧ w₂ ≺ w₃) → ∃ w₄, w₂ ≺ w₄ ∧ w₃ ≺ w₄)
-
-def _root_.NonInfiniteAscent := ¬(∃ (f : ℕ → α), ∀ n, f n ≺ f (n + 1))
-
-def _root_.Dense := ∀ ⦃w₁ w₂⦄, w₁ ≺ w₂ → ∃w₃, w₁ ≺ w₃ ∧ w₃ ≺ w₂
-
-def _root_.Functional := ∀ ⦃w₁ w₂ w₃⦄, w₁ ≺ w₂ ∧ w₁ ≺ w₃ → w₂ = w₃
-
-def _root_.RightConvergent := ∀ ⦃w₁ w₂ w₃⦄, w₁ ≺ w₂ ∧ w₁ ≺ w₃ → w₂ ≺ w₃ ∨ w₃ ≺ w₂ ∨ w₂ = w₃
-
-end BinaryRels
-
 
 namespace LO
 
@@ -80,6 +58,9 @@ structure Frameclass (α : Type*) where
   frames : Set (Frame α)
 
 namespace Frameclass
+
+def Trivial (α) : Frameclass α where
+  frames := Set.univ
 
 variable {α : Type u} (fc : Frameclass α)
 
@@ -247,10 +228,6 @@ lemma Frameclasses.model {fc : Frameclass α} {M : Model α β} {Γ : Context β
   intro hm p hp;
   apply h; assumption; assumption;
 
-def defines (P : Frameclass α → Type*) (Γ : Context β) := ∀ fc, P fc → (∀ f, (f ∈ fc.frames) ↔ (⊧ᴹᶠ[f] Γ))
-
-def Defines (fc : Frameclass α) (Γ : Context β) := ∀ f, (f ∈ fc.frames) ↔ (⊧ᴹᶠ[f] Γ)
-
 def ModelSatisfiable (m : Model α β) (Γ : Context β) := ∃ w, w ⊧ᴹˢ[m] Γ
 
 def FrameSatisfiable (f : Frame α) (Γ : Context β) := ∃ V, ModelSatisfiable ⟨f, V⟩ Γ
@@ -324,70 +301,134 @@ end Context
 
 section Defines
 
-attribute [simp] Formula.Frames Formula.Models Context.Models Context.Frames
-
 variable {f : Frame α} {p q q₁ q₂ : Formula β}
 
-lemma AxiomT.ctx.defines : (Reflexive f.rel) ↔ (⊧ᴹᶠ[f] (𝐓 : Context β)) := by
-  simp [ctx];
+class AxiomDefinability (p : Formula β) where
+  definability {α : Type*} (rel : α → α → Prop) : Prop
+
+@[simp]
+def Defines (α) (a : Formula β) [AxiomDefinability a] := ∀ (f : Frame α), (AxiomDefinability.definability a f.rel) ↔ (⊧ᴹᶠ[f] a)
+
+open AxiomDefinability
+
+attribute [simp] Formula.Frames Formula.Models Context.Models Context.Frames
+attribute [simp] Reflexive Serial Symmetric Transitive Euclidean Confluent NonInfiniteAscent Dense Functional RightConvergent
+
+@[simp]
+instance AxiomK.definability : AxiomDefinability (AxiomK p q) where
+  definability _ := True
+
+lemma AxiomK.defines : Defines α (AxiomK p q) := by aesop;
+
+
+@[simp]
+instance AxiomT.definability : AxiomDefinability (AxiomT p) where
+  definability := Reflexive
+
+lemma AxiomT.defines : Defines α (AxiomT p) := by
+  intro f;
   constructor;
   . aesop;
   . sorry;
 
-lemma AxiomD.ctx.defines : (Serial f.rel) ↔ (⊧ᴹᶠ[f] (𝐃 : Context β)) := by
-  simp [ctx];
+
+@[simp]
+instance AxiomD.definability : AxiomDefinability (AxiomD p) where
+  definability := Serial
+
+lemma AxiomD.defines : Defines α (AxiomD p) := by
+  intro f;
   constructor;
-  . intro hf p V w h; sorry;
-  . sorry;
-    /-
-    intro h;
+  . intro hd V w h;
+    simp_all;
+    have ⟨w', hw'⟩ := hd w;
+    existsi w';
+    simp_all;
+  . intro h;
     by_contra hC; simp at hC;
-    have ⟨w₁, r₁⟩ := hC;
-    simp [Satisfies.imp_def] at h;
+    have ⟨w, hw⟩ := hC; clear hC;
     let V : α → β → Prop := λ _ _ => True;
-    have : w₁ ⊧ᴹˢ[⟨f, V⟩] □p := by simp [Satisfies]; simp_all;
-    have : ¬w₁ ⊧ᴹˢ[⟨f, V⟩] ◇p := by simp [Satisfies]; simp_all;
-    sorry;
-    -/
+    have : w ⊧ᴹˢ[⟨f, V⟩] □p ⟶ ◇p := h V w;
+    have : w ⊧ᴹˢ[⟨f, V⟩] □p := by simp; simp_all;
+    have : ¬w ⊧ᴹˢ[⟨f, V⟩] ◇p := by simp; simp_all;
+    aesop;
 
-lemma AxiomB.ctx.defines : (Symmetric f.rel) ↔ (⊧ᴹᶠ[f] (𝐁 : Context β)) := by
-  simp [ctx];
+
+@[simp]
+instance : AxiomDefinability (AxiomB p) where
+  definability := Symmetric
+
+lemma AxiomB.defines : Defines α (AxiomB p) := by
+  intro f;
   constructor;
   . aesop;
   . sorry;
 
-lemma Axiom4.ctx.defines : (Transitive f.rel) ↔ (⊧ᴹᶠ[f] (𝟒 : Context β)) := by
-  simp [ctx];
+
+instance : AxiomDefinability (Axiom4 p) where
+  definability := Transitive
+
+lemma Axiom4.defines : Defines α (Axiom4 p) := by
+  intro f;
   constructor;
   . aesop;
   . sorry;
 
-lemma Axiom5.ctx.defines : (Euclidean f.rel) ↔ (⊧ᴹᶠ[f] (𝟓 : Context β)) := by
-  simp [ctx];
+
+instance : AxiomDefinability (Axiom5 p) where
+  definability := Euclidean
+
+lemma Axiom5.defines : Defines α (Axiom5 p) := by
+  intro f;
   constructor;
   . aesop;
   . sorry;
 
-lemma AxiomDot2.ctx.defines : (Confluent f.rel) ↔ (⊧ᴹᶠ[f] (.𝟐 : Context β)) := by
-  simp [ctx];
+
+instance : AxiomDefinability (AxiomDot2 p) where
+  definability := Confluent
+lemma AxiomDot2.defines : Defines α (AxiomDot2 p) := by
+  intro f;
   constructor;
   . sorry;
   . sorry;
 
-lemma AxiomDot3.ctx.defines : (Functional f.rel) ↔ (⊧ᴹᶠ[f] (.𝟑 : Context β)) := by
-  simp [ctx];
+
+instance : AxiomDefinability (AxiomDot3 p q) where
+  definability := Functional
+
+lemma AxiomDot3.defines : Defines α (AxiomDot3 p q) := by
+  intro f;
   constructor;
   . sorry;
   . sorry;
 
-lemma AxiomCD.ctx.defines : (RightConvergent f.rel) ↔ (⊧ᴹᶠ[f] (𝐂𝐃 : Context β)) := by
-  simp [ctx];
+
+instance : AxiomDefinability (AxiomCD p) where
+  definability := RightConvergent
+
+lemma AxiomCD.defines : Defines α (AxiomCD p) := by
+  intro f;
   constructor;
   . sorry;
   . sorry;
 
-lemma AxiomC4.ctx.defines : (Dense f.rel) ↔ (⊧ᴹᶠ[f] (𝐂𝟒 : Context β)) := by
-  simp [ctx];
+
+instance : AxiomDefinability (AxiomC4 p) where
+  definability := Dense
+
+lemma AxiomC4.defines : Defines α (AxiomC4 p) := by
+  intro f;
+  constructor;
+  . sorry;
+  . sorry;
+
+
+instance : AxiomDefinability (AxiomL p) where
+  definability := NonInfiniteAscent
+
+lemma AxiomL.defines : Defines α (AxiomL p) := by
+  intro f;
   constructor;
   . sorry;
   . sorry;
