@@ -19,23 +19,32 @@ https://iehality.github.io/lean4-logic/
     - **Arith**: Arithmetic
     - **Incompleteness**: Incompleteness theorem
   - **SecondOrder**: Monadic second-order logic
+  - **Modal**: Variants of modal logics
+    - **Normal**: Normal propositional modal logic
 
 ## Definition
+
 ### First-Order logic
+
+|                                     |                                     | Definition                 |     Notation      |
+| :---------------------------------: | ----------------------------------- | -------------------------- | :---------------: |
+| $(\rm Cut)\vdash_\mathrm{T} \Gamma$ | Derivation in Tait-Calculus + Cut   | `LO.FirstOrder.Derivation` |      `⊢¹ Γ`       |
+|         $M \models \sigma$          | Tarski's truth definition condition | `LO.FirstOrder.Models`     |     `M ⊧ₘ σ`      |
+|          $T \vdash \sigma$          | Proof, Provability                  | `LO.FirstOrder.Proof`      | `T ⊢ σ`, `T ⊢! σ` |
 
 ### Normal Modal Logic
 
-In this formalization, _(Modal) Logic_ means sets of formulae.
+In this formalization, _(Modal) Logic_ means set of axioms.
 
-| Logic            | Definition                   | Notation | Remarks         |
-| :--------------- | ---------------------------- | :------- | --------------- |
-| $\mathbf{K}$     | `LO.Modal.Normal.LogicK`     | `𝐊`      |                 |
-| $\mathbf{S4}$    | `LO.Modal.Normal.LogicS4`    | `𝐒𝟒`     | Alias of `𝐊𝐓𝟒`. |
-| $\mathbf{S4.2}$  | `LO.Modal.Normal.LogicS4Grz` | `𝐒𝟒.𝟐`   |                 |
-| $\mathbf{S4.3}$  | `LO.Modal.Normal.LogicS4Grz` | `𝐒𝟒.𝟑`   |                 |
-| $\mathbf{S4Grz}$ | `LO.Modal.Normal.LogicS4Grz` | `𝐒𝟒𝐆𝐫𝐳`  |                 |
-| $\mathbf{S5}$    | `LO.Modal.Normal.LogicS5`    | `𝐒𝟓`     | Alias of `𝐊𝐓𝟓`. |
-| $\mathbf{GL}$    | `LO.Modal.Normal.LogicGL`    | `𝐆𝐋`     |                 |
+| Logic            | Definition                    | Notation | Remarks         |
+| :--------------- | ----------------------------- | :------- | --------------- |
+| $\mathbf{K}$     | `LO.Modal.Normal.LogicK`      | `𝐊`      |                 |
+| $\mathbf{S4}$    | `LO.Modal.Normal.LogicS4`     | `𝐒𝟒`     | Alias of `𝐊𝐓𝟒`. |
+| $\mathbf{S4.2}$  | `LO.Modal.Normal.LogicS4Dot2` | `𝐒𝟒.𝟐`   |                 |
+| $\mathbf{S4.3}$  | `LO.Modal.Normal.LogicS4Dot3` | `𝐒𝟒.𝟑`   |                 |
+| $\mathbf{S4Grz}$ | `LO.Modal.Normal.LogicS4Grz`  | `𝐒𝟒𝐆𝐫𝐳`  |                 |
+| $\mathbf{S5}$    | `LO.Modal.Normal.LogicS5`     | `𝐒𝟓`     | Alias of `𝐊𝐓𝟓`. |
+| $\mathbf{GL}$    | `LO.Modal.Normal.LogicGL`     | `𝐆𝐋`     |                 |
 
 |                                   |                                            | Definition                                 |   Notation   |
 | :-------------------------------: | ------------------------------------------ | :----------------------------------------- | :----------: |
@@ -51,14 +60,14 @@ The key results are summarised in `Logic/Summary.lean`.
 
 ### First-Order logic
 
-- [Cut-elimination](https://iehality.github.io/lean4-logic/Logic/FirstOrder/Hauptsatz.html#LO.FirstOrder.DerivationCR.hauptsatz)
+- [Cut-elimination](https://iehality.github.io/lean4-logic/Logic/FirstOrder/Hauptsatz.html#LO.FirstOrder.Derivation.hauptsatz)
   ```lean
-  def LO.FirstOrder.DerivationCR.hauptsatz
+  def LO.FirstOrder.Derivation.hauptsatz
       {L : LO.FirstOrder.Language}
       [(k : ℕ) → DecidableEq (LO.FirstOrder.Language.Func L k)]
       [(k : ℕ) → DecidableEq (LO.FirstOrder.Language.Rel L k)]
       {Δ : LO.FirstOrder.Sequent L} :
-      ⊢¹ Δ → LO.FirstOrder.Derivation Δ
+      ⊢¹ Δ → { d : ⊢¹ Δ // LO.FirstOrder.Derivation.CutFree d }
   ```
 
 - [Completeness theorem](https://iehality.github.io/lean4-logic/Logic/FirstOrder/Completeness/Completeness.html#LO.FirstOrder.completeness)
@@ -110,4 +119,5 @@ The key results are summarised in `Logic/Summary.lean`.
 - W. Pohlers, Proof Theory: The First Step into Impredicativity
 - P. Hájek, P. Pudlák, Metamathematics of First-Order Arithmetic
 - R. Kaye, Models of Peano arithmetic
+- 田中 一之, ゲーデルと20世紀の論理学
 - 菊池 誠 (編者), 数学における証明と真理 ─ 様相論理と数学基礎論
