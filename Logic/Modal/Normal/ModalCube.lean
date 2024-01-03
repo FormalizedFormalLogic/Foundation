@@ -6,9 +6,9 @@
  * <https://plato.stanford.edu/entries/logic-modal/#MapRelBetModLog>
 -/
 
-import Logic.Modal.Basic.HilbertStyle
+import Logic.Modal.Normal.HilbertStyle
 
-namespace LO.Modal
+namespace LO.Modal.Normal
 
 open Hilbert
 
@@ -60,4 +60,4 @@ instance [LogicS5.Hilbert Bew] : LogicKD4B.Hilbert Bew where
 
 end LogicS5
 
-end LO.Modal
+end LO.Modal.Normal

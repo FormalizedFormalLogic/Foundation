@@ -1,9 +1,6 @@
-import Logic.Propositional.Basic.Formula
-import Logic.Modal.LogicSymbol
+import Logic.Modal.Normal.LogicSymbol
 
-namespace LO
-
-namespace Modal
+namespace LO.Modal.Normal
 
 inductive Formula (α : Type u) : Type u where
   | atom   : α → Formula α
@@ -181,6 +178,4 @@ lemma dia_empty : ◇(∅ : Context β) = ∅ := by simp [dia]
 
 end Context
 
-end Modal
-
-end LO
+end LO.Modal.Normal

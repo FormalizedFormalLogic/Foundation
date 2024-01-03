@@ -1,6 +1,6 @@
  import Logic.Logic.LogicSymbol
 
-namespace LO
+namespace LO.Modal.Normal
 
 @[notation_class] class Box (α : Sort _) where
   box : α → α
@@ -21,4 +21,4 @@ class ModalDeMorgan (F : Type*) [ModalLogicSymbol F] extends DeMorgan F where
 
 attribute [simp] ModalDeMorgan.box ModalDeMorgan.dia
 
-end LO
+end LO.Modal.Normal

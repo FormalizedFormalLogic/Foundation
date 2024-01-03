@@ -1,6 +1,6 @@
-import Logic.Modal.Basic.Formula
+import Logic.Modal.Normal.Formula
 
-namespace LO.Modal
+namespace LO.Modal.Normal
 
 variable {F : Type u} [ModalLogicSymbol F] (p q : F)
 
@@ -70,4 +70,4 @@ notation "𝐂𝟒" => AxiomC4.ctx
 @[simp] lemma AxiomC4.ctx.includesAxiomC4 : (AxiomC4 p) ∈ 𝐂𝟒 := by simp [ctx];
 
 
-end LO.Modal
+end LO.Modal.Normal

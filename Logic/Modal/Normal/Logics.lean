@@ -1,5 +1,5 @@
-import Logic.Modal.Basic.Formula
-import Logic.Modal.Basic.Axioms
+import Logic.Modal.Normal.Formula
+import Logic.Modal.Normal.Axioms
 
 lemma _root_.Set.subset_triunion₁ (s₁ s₂ s₃ : Set F) : s₁ ⊆ (s₁ ∪ s₂ ∪ s₃) := Set.Subset.trans
   (Set.subset_union_left _ _) (Set.subset_union_left _ _)
@@ -11,7 +11,7 @@ lemma _root_.Set.subset_triunion₃ (s₁ s₂ s₃ : Set F) : s₃ ⊆ (s₁ �
 
 attribute [simp] Set.Subset.rfl
 
-namespace LO.Modal
+namespace LO.Modal.Normal
 
 variable {F : Type u} [ModalLogicSymbol F] {p q : F}
 
@@ -135,4 +135,4 @@ namespace LogicGL
 
 end LogicGL
 
-end LO.Modal
+end LO.Modal.Normal

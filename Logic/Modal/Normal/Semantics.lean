@@ -1,10 +1,8 @@
-import Logic.Modal.BinaryRelations
-import Logic.Modal.Basic.Formula
-import Logic.Modal.Basic.Axioms
+import Logic.Vorspiel.BinaryRelations
+import Logic.Modal.Normal.Formula
+import Logic.Modal.Normal.Axioms
 
-namespace LO
-
-namespace Modal
+namespace LO.Modal.Normal
 
 variable {α β : Type u}
 
@@ -442,6 +440,4 @@ lemma AxiomL.defines : Defines α (AxiomL p) := by
 
 end Defines
 
-end Modal
-
-end LO
+end LO.Modal.Normal

@@ -1,8 +1,8 @@
-import Logic.Modal.Basic.Formula
-import Logic.Modal.Basic.HilbertStyle
-import Logic.Modal.Basic.Semantics
+import Logic.Modal.Normal.Formula
+import Logic.Modal.Normal.HilbertStyle
+import Logic.Modal.Normal.Semantics
 
-namespace LO.Modal
+namespace LO.Modal.Normal
 
 open Formula FrameConsequence
 
@@ -12,7 +12,7 @@ variable {α β : Type u}
   TODO: より一般にこの形で証明できる事実ではないだろうか？
   [LogicK.Hilbert Bew] (Γ : Set (Formula α)) (hΓ : Γ = ∅) (p : Formula α) (f : Frame β) (d : Bew Γ p) : (Γ ⊨ᴹᶠ[f] p)
 -/
-theorem LogicK.Hilbert.sounds' (Γ : Set (Formula α)) (hΓ : Γ = ∅) (p : Formula α) (f : Frame β) (d : Γ ⊢ᴹ(𝐊) p) : (Γ ⊨ᴹᶠ[f] p) := by
+lemma LogicK.Hilbert.sounds' (Γ : Set (Formula α)) (hΓ : Γ = ∅) (p : Formula α) (f : Frame β) (d : Γ ⊢ᴹ(𝐊) p) : (Γ ⊨ᴹᶠ[f] p) := by
   induction d <;> try {simp_all [Satisfies];}
   case maxm p ih =>
     let ⟨_, ⟨_, hq⟩⟩ := ih; rw [←hq];
@@ -25,12 +25,12 @@ theorem LogicK.Hilbert.sounds' (Γ : Set (Formula α)) (hΓ : Γ = ∅) (p : For
     | inl hp => exact hpr hp;
     | inr hq => exact hqr hq;
 
-lemma LogicK.Hilbert.sounds {p : Formula α} (f : Frame β) (h : ⊢ᴹ(𝐊) p) : (⊧ᴹᶠ[f] p) := by
+theorem LogicK.Hilbert.sounds {p : Formula α} (f : Frame β) (h : ⊢ᴹ(𝐊) p) : (⊧ᴹᶠ[f] p) := by
   exact (show (⊢ᴹ(𝐊) p) → (⊧ᴹᶠ[f] p) by simpa [Context.box_empty] using sounds' ∅ rfl p f;) h;
 
-theorem LogicK.Hilbert.unprovable_bot {f : Frame β} : (⊬ᴹ(𝐊)! (⊥ : Formula α)) := by
+theorem LogicK.Hilbert.consistency {f : Frame β} : (⊬ᴹ(𝐊)! (⊥ : Formula α)) := by
   by_contra hC; simp at hC;
   suffices h : ⊧ᴹᶠ[f] (⊥ : Formula α) by exact Frames.bot_def h;
   exact sounds f hC.some;
 
-end LO.Modal
+end LO.Modal.Normal

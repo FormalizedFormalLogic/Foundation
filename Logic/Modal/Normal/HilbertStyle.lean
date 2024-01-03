@@ -1,13 +1,13 @@
 import Logic.Logic.HilbertStyle2
-import Logic.Modal.Basic.Formula
-import Logic.Modal.Basic.Axioms
-import Logic.Modal.Basic.Logics
+import Logic.Modal.Normal.Formula
+import Logic.Modal.Normal.Axioms
+import Logic.Modal.Normal.Logics
 
 namespace LO
 
 namespace Hilbert
 
-open LO.Modal
+open LO.Modal.Normal
 
 variable {F : Type u} [ModalLogicSymbol F] (Bew : Set F → F → Sort*)
 
@@ -57,7 +57,7 @@ class HasAxiomC4 where
 end Hilbert
 
 
-namespace Modal
+namespace Modal.Normal
 
 open Hilbert
 
@@ -298,6 +298,6 @@ def LogicS5.Hilbert.ofS5Subset (_ : 𝐒𝟓 ⊆ Λ) : (LogicS5.Hilbert (@Deduct
 
 instance : LogicS5.Hilbert (@Deduction α 𝐒𝟓) := LogicS5.Hilbert.ofS5Subset 𝐒𝟓 Set.Subset.rfl
 
-end Modal
+end Modal.Normal
 
 end LO

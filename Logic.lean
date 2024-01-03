@@ -60,4 +60,4 @@ import Logic.FirstOrder.Incompleteness.SelfReference
 
 -- Modal Logic
 
-import Logic.Modal.Basic
+import Logic.Modal.Normal

@@ -23,12 +23,27 @@ https://iehality.github.io/lean4-logic/
 ## Definition
 ### First-Order logic
 
-|                                     |                                     | Definition                      | Notation  |
-| :----:                              | ----                                | ----                            | :----:    |
-| $\vdash_\mathrm{T} \Gamma$          | Derivation in Tait-Calculus         |  `LO.FirstOrder.Derivation`     | `⊢ᵀ Γ`    |
-| $(\rm Cut)\vdash_\mathrm{T} \Gamma$ | Derivation in Tait-Calculus + Cut   |  `LO.FirstOrder.DerivationC`    | `⊢¹ Γ`    |
-| $M \models \sigma$                  | Tarski's truth definition condition |  `LO.FirstOrder.Models`         | `M ⊧ₘ σ`   |
-| $T \vdash \sigma$                   | Proof, Provability                  |  `LO.FirstOrder.Proof`          | `T ⊢ σ`, `T ⊢! σ` |
+### Normal Modal Logic
+
+In this formalization, _(Modal) Logic_ means sets of formulae.
+
+| Logic            | Definition                   | Notation | Remarks         |
+| :--------------- | ---------------------------- | :------- | --------------- |
+| $\mathbf{K}$     | `LO.Modal.Normal.LogicK`     | `𝐊`      |                 |
+| $\mathbf{S4}$    | `LO.Modal.Normal.LogicS4`    | `𝐒𝟒`     | Alias of `𝐊𝐓𝟒`. |
+| $\mathbf{S4.2}$  | `LO.Modal.Normal.LogicS4Grz` | `𝐒𝟒.𝟐`   |                 |
+| $\mathbf{S4.3}$  | `LO.Modal.Normal.LogicS4Grz` | `𝐒𝟒.𝟑`   |                 |
+| $\mathbf{S4Grz}$ | `LO.Modal.Normal.LogicS4Grz` | `𝐒𝟒𝐆𝐫𝐳`  |                 |
+| $\mathbf{S5}$    | `LO.Modal.Normal.LogicS5`    | `𝐒𝟓`     | Alias of `𝐊𝐓𝟓`. |
+| $\mathbf{GL}$    | `LO.Modal.Normal.LogicGL`    | `𝐆𝐋`     |                 |
+
+|                                   |                                            | Definition                                 |   Notation   |
+| :-------------------------------: | ------------------------------------------ | :----------------------------------------- | :----------: |
+|      $M, w \models \varphi$       | Satisfy                                    | `LO.Modal.Normal.Formula.Satisfies`        | `w ⊧ᴹˢ[M] φ` |
+|        $M \models \varphi$        | Valid on model (Models)                    | `LO.Modal.Normal.Formula.Models`           |  `⊧ᴹᵐ[M] φ`  |
+|        $F \models \varphi$        | Valid on frame (Frames)                    | `LO.Modal.Normal.Formula.Frames`           |  `⊧ᴹᶠ[M] φ`  |
+|    $\Gamma \models^F \varphi$     | Consequence on frame                       | `LO.Modal.Normal.Formula.FrameConsequence` | `Γ ⊨ᴹᶠ[M] φ` |
+| $\Gamma \vdash_{\Lambda} \varphi$ | Hilbert-style Deduction on logic $\Lambda$ | `LO.Modal.Normal.Deduction`                | `Γ ⊢ᴹ(Λ) φ`  |
 
 ## Theorem
 
@@ -79,9 +94,20 @@ The key results are summarised in `Logic/Summary.lean`.
         T ⊬ ~LO.FirstOrder.Arith.FirstIncompleteness.undecidable T
     ```
 
+### Normal Modal Logic
+
+- [Soundness of Hilbert-style deduction for $\mathbf{K}$](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Soundness.html#LO.Modal.Normal.LogicK.Hilbert.sounds)
+  ```lean
+  theorem LogicK.Hilbert.sounds (f : Frame β) : ⊢ᴹ(𝐊) p → ⊧ᴹᶠ[f] p
+  ```
+  - [Consistency](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Soundness.html#LO.Modal.Normal.LogicK.Hilbert.consistency)
+  ```lean
+  theorem LogicK.Hilbert.consistency : ⊬ᴹ(𝐊)! ⊥
+  ```
+
 ## References
 - J. Han, F. van Doorn, A formalization of forcing and the unprovability of the continuum hypothesis
 - W. Pohlers, Proof Theory: The First Step into Impredicativity
 - P. Hájek, P. Pudlák, Metamathematics of First-Order Arithmetic
 - R. Kaye, Models of Peano arithmetic
-- 田中 一之, ゲーデルと20世紀の論理学
+- 菊池 誠 (編者), 数学における証明と真理 ─ 様相論理と数学基礎論

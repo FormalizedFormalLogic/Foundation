@@ -1,7 +1,7 @@
-import Logic.Modal.Basic.Formula
-import Logic.Modal.Basic.Axioms
+import Logic.Modal.Normal.Formula
+import Logic.Modal.Normal.Axioms
 
-namespace LO.Modal
+namespace LO.Modal.Normal
 
 /-- `◇ᵏ□ˡp ⟶ □ᵐ◇ⁿq`   -/
 def Geach' (p q : Formula α) : (k : ℕ) → (l : ℕ) → (m : ℕ) → (n : ℕ) → Formula α
@@ -28,4 +28,4 @@ lemma AxiomC4_def : AxiomC4 p = Geach p 0 2 1 0 := rfl
 
 end Geach
 
-end LO.Modal
+end LO.Modal.Normal
