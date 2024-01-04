@@ -6,15 +6,14 @@ namespace LO.Modal.Normal
 
 open Formula FrameConsequence
 
-variable {α β : Type u} [Inhabited β]
-variable (Λ : Logic (Formula α)) [hΛ : LogicDefines β Λ]
+variable (α β : Type u) [Inhabited β]
 
 /-
   TODO: より一般にこの形で証明できる事実ではないだろうか？
   [LogicK.Hilbert Bew] (Γ : Set (Formula α)) (hΓ : Γ = ∅) (p : Formula α) (f : Frame β) (d : Bew Γ p) : (Γ ⊨ᴹᶠ[f] p)
 -/
 lemma Logic.Hilbert.sounds
-  (Λ : Logic (Formula α)) [hΛ : LogicDefines β Λ]
+  (Λ : Logic (Formula α)) [hΛ : LogicDefines β α Λ]
   (p : Formula α)
   (f : Frame β) (hf : LogicDefines.definability Λ f.rel)
   (d : ⊢ᴹ(Λ) p) : (⊧ᴹᶠ[f] p) := by
@@ -38,26 +37,34 @@ lemma Logic.Hilbert.sounds
   -/
 
 lemma Logic.Hilbert.consistent
-  (β) [Inhabited β]
-  (Λ : Logic (Formula α)) [hΛ : LogicDefines β Λ]
+  (Λ : Logic (Formula α)) [hΛ : LogicDefines β α Λ]
   : (⊬ᴹ(Λ)! (⊥ : Formula α)) := by
   by_contra hC; simp at hC;
   suffices h : ∃ (f : Frame β), ⊧ᴹᶠ[f] (⊥ : Formula α) by
     let ⟨f, hf⟩ := h;
     exact Frames.bot_def hf;
   have ⟨tf, htf⟩ := hΛ.trivial_frame;
-  existsi tf; exact Logic.Hilbert.sounds Λ ⊥ tf htf hC.some;
+  existsi tf; exact Logic.Hilbert.sounds _ _ Λ ⊥ tf htf hC.some;
 
-theorem LogicK.Hilbert.sounds {p : Formula α} (f : Frame β) (hf : (@LogicK.defines β α).definability f.rel)
+variable {α β : Type u} [Inhabited β] {p : Formula α} (f : Frame β)
+
+lemma LogicK.Hilbert.sounds' (hf : (@LogicK.defines β α).definability f.rel)
   : (⊢ᴹ(𝐊) p) → (⊧ᴹᶠ[f] p) := by
-  exact Logic.Hilbert.sounds 𝐊 p f hf;
+  exact Logic.Hilbert.sounds _ _ 𝐊 p f hf;
 
-theorem LogicK.Hilbert.consistency : ⊬ᴹ(𝐊)! (⊥ : Formula α) := Logic.Hilbert.consistent β 𝐊
+/--
+  Logic `𝐊` does not require nothing about frames relation.
+-/
+theorem LogicK.Hilbert.sounds
+  : (⊢ᴹ(𝐊) p) → (⊧ᴹᶠ[f] p) := by
+  exact LogicK.Hilbert.sounds' _ (by simp)
+
+theorem LogicK.Hilbert.consistency : ⊬ᴹ(𝐊)! (⊥ : Formula α) := Logic.Hilbert.consistent α β 𝐊
 
 theorem LogicKD.Hilbert.sounds {p : Formula α} (f : Frame β) (hf : (@LogicKD.defines β α).definability f.rel)
   (h : ⊢ᴹ(𝐊𝐃) p) : (⊧ᴹᶠ[f] p) := by
-  exact Logic.Hilbert.sounds 𝐊𝐃 p f hf h;
+  exact Logic.Hilbert.sounds _ _ 𝐊𝐃 p f hf h;
 
-theorem LogicKD.Hilbert.consistency : ⊬ᴹ(𝐊𝐃)! (⊥ : Formula α) := Logic.Hilbert.consistent β 𝐊𝐃
+theorem LogicKD.Hilbert.consistency : ⊬ᴹ(𝐊𝐃)! (⊥ : Formula α) := Logic.Hilbert.consistent α β 𝐊𝐃
 
 end LO.Modal.Normal
