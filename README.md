@@ -3,10 +3,10 @@ Formalizing Logic in Lean4
 
 https://iehality.github.io/lean4-logic/
 
-## Index
+## Table of Contents
 
 - [lean4-logic](#lean4-logic)
-  - [Index](#index)
+  - [Table of Contents](#table-of-contents)
   - [Structure](#structure)
   - [Propositional Logic](#propositional-logic)
     - [Definition](#definition)
@@ -48,8 +48,8 @@ The key results are summarised in `Logic/Summary.lean`.
 
 |                                     |                                     | Definition                    | Notation |
 | :----:                              | ----                                | ----                          | :----:   |
-| $(\rm Cut)\vdash_\mathrm{T} \Gamma$ | Derivation in Tait-Calculus + Cut   | `LO.Propositional.Derivation` | `⊢¹ Γ`   |
-| $v \models p$                       | Tarski's truth definition condition | `LO.Propositional.semantics`  | `v ⊧ p`  |
+| $(\rm Cut)\vdash_\mathrm{T} \Gamma$ | Derivation in Tait-Calculus + Cut   | [LO.Propositional.Derivation](https://iehality.github.io/lean4-logic/Logic/Propositional/Basic/Calculus.html#LO.Propositional.Derivation) | `⊢¹ Γ`   |
+| $v \models p$                       | Tarski's truth definition condition | [LO.Propositional.semantics](https://iehality.github.io/lean4-logic/Logic/Propositional/Basic/Semantics.html#LO.Propositional.semantics) | `v ⊧ p`  |
 
 ### Theorem
 
@@ -67,8 +67,8 @@ The key results are summarised in `Logic/Summary.lean`.
 ### Definition
 |                                     |                                     | Definition                 | Notation |
 | :----:                              | ----                                | ----                       | :----:   |
-| $(\rm Cut)\vdash_\mathrm{T} \Gamma$ | Derivation in Tait-Calculus + Cut   | `LO.FirstOrder.Derivation` | `⊢¹ Γ`   |
-| $M \models \sigma$                  | Tarski's truth definition condition | `LO.FirstOrder.Models`     | `M ⊧ₘ σ` |
+| $(\rm Cut)\vdash_\mathrm{T} \Gamma$ | Derivation in Tait-Calculus + Cut   | [LO.FirstOrder.Derivation](https://iehality.github.io/lean4-logic/Logic/FirstOrder/Basic/Calculus.html#LO.FirstOrder.Derivation) | `⊢¹ Γ`   |
+| $M \models \sigma$                  | Tarski's truth definition condition | [LO.FirstOrder.Models](https://iehality.github.io/lean4-logic/Logic/FirstOrder/Basic/Semantics/Semantics.html#LO.FirstOrder.Models) | `M ⊧ₘ σ` |
 
 ### Theorem
 
@@ -124,21 +124,21 @@ In this formalization, _(Modal) Logic_ means set of axioms.
 
 | Logic            | Definition                    | Notation | Remarks         |
 | :--------------- | ----------------------------- | :------- | --------------- |
-| $\mathbf{K}$     | `LO.Modal.Normal.LogicK`      | `𝐊`      |                 |
-| $\mathbf{S4}$    | `LO.Modal.Normal.LogicS4`     | `𝐒𝟒`     | Alias of `𝐊𝐓𝟒`. |
-| $\mathbf{S4.2}$  | `LO.Modal.Normal.LogicS4Dot2` | `𝐒𝟒.𝟐`   |                 |
-| $\mathbf{S4.3}$  | `LO.Modal.Normal.LogicS4Dot3` | `𝐒𝟒.𝟑`   |                 |
-| $\mathbf{S4Grz}$ | `LO.Modal.Normal.LogicS4Grz`  | `𝐒𝟒𝐆𝐫𝐳`  |                 |
-| $\mathbf{S5}$    | `LO.Modal.Normal.LogicS5`     | `𝐒𝟓`     | Alias of `𝐊𝐓𝟓`. |
-| $\mathbf{GL}$    | `LO.Modal.Normal.LogicGL`     | `𝐆𝐋`     |                 |
+| $\mathbf{K}$     | [LO.Modal.Normal.LogicK](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Logics.html#LO.Modal.Normal.LogicK) | `𝐊`      |                 |
+| $\mathbf{S4}$    | [LO.Modal.Normal.LogicS4](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Logics.html#LO.Modal.Normal.LogicS4) | `𝐒𝟒`     | Alias of `𝐊𝐓𝟒`. |
+| $\mathbf{S4.2}$  | [LO.Modal.Normal.LogicS4Dot2](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Logics.html#LO.Modal.Normal.LogicS4Dot2) | `𝐒𝟒.𝟐`   |                 |
+| $\mathbf{S4.3}$  | [LO.Modal.Normal.LogicS4Dot3](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Logics.html#LO.Modal.Normal.LogicS4Dot3) | `𝐒𝟒.𝟑`   |                 |
+| $\mathbf{S4Grz}$ | [LO.Modal.Normal.LogicS4Grz](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Logics.html#LO.Modal.Normal.LogicS4Grz) | `𝐒𝟒𝐆𝐫𝐳`  |                 |
+| $\mathbf{S5}$    | [LO.Modal.Normal.LogicS5](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Logics.html#LO.Modal.Normal.LogicS5) | `𝐒𝟓`     | Alias of `𝐊𝐓𝟓`. |
+| $\mathbf{GL}$    | [LO.Modal.Normal.LogicGL](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Logics.html#LO.Modal.Normal.LogicGL) | `𝐆𝐋`     |                 |
 
 |                                   |                                            | Definition                                 |   Notation   |
 | :-------------------------------: | ------------------------------------------ | :----------------------------------------- | :----------: |
-|      $M, w \models \varphi$       | Satisfy                                    | `LO.Modal.Normal.Formula.Satisfies`        | `w ⊧ᴹˢ[M] φ` |
-|        $M \models \varphi$        | Valid on model (Models)                    | `LO.Modal.Normal.Formula.Models`           |  `⊧ᴹᵐ[M] φ`  |
-|        $F \models \varphi$        | Valid on frame (Frames)                    | `LO.Modal.Normal.Formula.Frames`           |  `⊧ᴹᶠ[F] φ`  |
-|    $\Gamma \models^F \varphi$     | Consequence on frame                       | `LO.Modal.Normal.Formula.FrameConsequence` | `Γ ⊨ᴹᶠ[F] φ` |
-| $\Gamma \vdash_{\Lambda} \varphi$ | Hilbert-style Deduction on logic $\Lambda$ | `LO.Modal.Normal.Deduction`                | `Γ ⊢ᴹ(Λ) φ`  |
+|      $M, w \models \varphi$       | Satisfy                                    | [LO.Modal.Normal.Formula.Satisfies](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Semantics.html#LO.Modal.Normal.Formula.Satisfies) | `w ⊧ᴹˢ[M] φ` |
+|        $M \models \varphi$        | Valid on model (Models)                    | [LO.Modal.Normal.Formula.Models](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Semantics.html#LO.Modal.Normal.Formula.Models) |  `⊧ᴹᵐ[M] φ`  |
+|        $F \models \varphi$        | Valid on frame (Frames)                    | [LO.Modal.Normal.Formula.Frames](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Semantics.html#LO.Modal.Normal.Formula.Frames) |  `⊧ᴹᶠ[F] φ`  |
+|    $\Gamma \models^F \varphi$     | Consequence on frame                       | [LO.Modal.Normal.Formula.FrameConsequence](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Semantics.html#LO.Modal.Normal.Formula.FrameConsequence) | `Γ ⊨ᴹᶠ[F] φ` |
+| $\Gamma \vdash_{\Lambda} \varphi$ | Hilbert-style Deduction on logic $\Lambda$ | [LO.Modal.Normal.Deduction](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/HilbertStyle.html#LO.Modal.Normal.Deduction) | `Γ ⊢ᴹ(Λ) φ`  |
 
 ### Theorem
 
