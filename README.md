@@ -24,13 +24,19 @@ https://iehality.github.io/lean4-logic/
 
 ## Definition
 
-### First-Order logic
+### Propositional Logic
 
-|                                     |                                     | Definition                      | Notation  |
-| :----:                              | ----                                | ----                            | :----:    |
-| $(\rm Cut)\vdash_\mathrm{T} \Gamma$ | Derivation in Tait-Calculus + Cut   |  `LO.FirstOrder.Derivation`    | `⊢¹ Γ`    |
-| $M \models \sigma$                  | Tarski's truth definition condition |  `LO.FirstOrder.Models`         | `M ⊧ₘ σ`   |
-| $T \vdash \sigma$                   | Proof, Provability                  |  `LO.FirstOrder.Proof`          | `T ⊢ σ`, `T ⊢! σ` |
+|                                     |                                     | Definition                    | Notation |
+| :----:                              | ----                                | ----                          | :----:   |
+| $(\rm Cut)\vdash_\mathrm{T} \Gamma$ | Derivation in Tait-Calculus + Cut   | `LO.Propositional.Derivation` | `⊢¹ Γ`   |
+| $v \models p$                       | Tarski's truth definition condition | `LO.Propositional.semantics`  | `v ⊧ p`  |
+
+### First-Order Logic
+
+|                                     |                                     | Definition                 | Notation |
+| :----:                              | ----                                | ----                       | :----:   |
+| $(\rm Cut)\vdash_\mathrm{T} \Gamma$ | Derivation in Tait-Calculus + Cut   | `LO.FirstOrder.Derivation` | `⊢¹ Γ`   |
+| $M \models \sigma$                  | Tarski's truth definition condition | `LO.FirstOrder.Models`     | `M ⊧ₘ σ` |
 
 ### Normal Modal Logic
 
