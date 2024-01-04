@@ -225,7 +225,7 @@ def derive {F : Q(Type u)} (instLS : Q(LogicSymbol $F)) (instGz : Q(Gentzen $F))
 end DerivationQ
 
 def isExprProvable? (ty : Q(Prop)) : MetaM ((u : Level) × (F : Q(Type u)) × Q(Set $F) × Q($F)) := do
-  let ~q(@System.Provable $F $instLS $instSys $T $p) := ty | throwError "error: not a prop _ ⊢! _"
+  let ~q(@System.Provable $F $instSys $T $p) := ty | throwError "error: not a prop _ ⊢! _"
   return ⟨_, F, T, p⟩
 
 section
@@ -260,7 +260,7 @@ def proverL₀ (T : Q(Set $F)) (seq : Option (TSyntax `LO.AutoProver.termSeq)) :
               match seq with
               | `(termSeq| [ $ss,* ] ) => do
                 ss.getElems.mapM (fun s => do
-                  proofOfProvable? instLS instSys T (← Term.elabTerm s none))
+                  proofOfProvable? instSys T (← Term.elabTerm s none))
               | _                      => return #[]
             | _        => return #[])
   let E : List ((p : Lit F) × Q($T ⊢! $(toExpr F p))) := Array.toList <| ← E.mapM fun e => do

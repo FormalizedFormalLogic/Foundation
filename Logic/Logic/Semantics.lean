@@ -81,6 +81,16 @@ lemma realizeTheory_of_subset {T U : Set F} {a : α} (h : a ⊧* U) (ss : T ⊆ 
 lemma SatisfiableTheory.of_subset {T U : Set F} (h : SatisfiableTheory U) (ss : T ⊆ U) : SatisfiableTheory T :=
   by rcases h with ⟨a, h⟩; exact ⟨a, realizeTheory_of_subset h ss⟩
 
+lemma consequence_iff_not_satisfiable {f : F} :
+    T ⊨ f ↔ ¬SatisfiableTheory (insert (~f) T) :=
+  ⟨by rintro hT ⟨a, ha⟩
+      have : a ⊧ f := hT (realizeTheory_of_subset ha (Set.subset_insert (~f) T))
+      have : ¬a ⊧ f := by simpa using ha (Set.mem_insert (~f) T)
+      contradiction,
+   by intro h a ha; by_contra hn
+      have : SatisfiableTheory (insert (~f) T) := ⟨a, by simp[*]⟩
+      contradiction⟩
+
 lemma weakening {T U : Set F} {f} (h : T ⊨ f) (ss : T ⊆ U) : U ⊨ f :=
   fun _ hs => h (realizeTheory_of_subset hs ss)
 

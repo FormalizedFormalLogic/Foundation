@@ -11,9 +11,9 @@ variable {L : Language} {T : Theory L}
 
 /- Cut elimination for Tait-calculus -/
 example [(k : ℕ) → DecidableEq (L.Func k)] [(k : ℕ) → DecidableEq (L.Rel k)]
-  {Δ : Sequent L} : ⊢¹ Δ → ⊢ᵀ Δ := DerivationCR.hauptsatz
+  {Δ : Sequent L} : ⊢¹ Δ → { d : ⊢¹ Δ // Derivation.CutFree d } := Derivation.hauptsatz
 
-#print axioms DerivationCR.hauptsatz
+#print axioms Derivation.hauptsatz
 
 /- Compactness theorem -/
 example (T : Theory L) :

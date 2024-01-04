@@ -17,9 +17,9 @@ namespace LO
 
 variable {F : Type u} [LogicSymbol F]
 
-/- Deduction System of F -/
+/-- Deduction System -/
 
-class System (F : Type u) [LogicSymbol F] where
+class System (F : Type u) where
   Bew : Set F → F → Type u
   axm : ∀ {f}, f ∈ T → Bew T f
   weakening' : ∀ {T U f}, T ⊆ U → Bew T f → Bew U f
@@ -32,6 +32,10 @@ instance : HasTurnstile F (Type u) := ⟨𝓑.Bew⟩
 def BewTheory (T U : Set F) : Type u := {f : F} → f ∈ U → T ⊢ f
 
 infix:45 " ⊢* " => System.BewTheory
+
+def ProvableTheory (T U : Set F) : Prop := Nonempty (T ⊢* U)
+
+infix:45 " ⊢*! " => System.ProvableTheory
 
 abbrev Provable (T : Set F) (f : F) : Prop := Nonempty (T ⊢ f)
 
@@ -59,7 +63,9 @@ lemma Consistent.of_subset {T U : Set F} (h : Consistent U) (ss : T ⊆ U) : Con
 
 lemma inconsistent_of_proof {T : Set F} (b : T ⊢ ⊥) : ¬Consistent T := by simp[Consistent]; exact ⟨b⟩
 
-lemma consistemt_iff_unprovable {T : Set F} : Consistent T ↔ T ⊬ ⊥ := by rfl
+lemma inconsistent_of_provable {T : Set F} (b : T ⊢! ⊥) : ¬Consistent T := by simp[Consistent]
+
+lemma consistent_iff_unprovable {T : Set F} : Consistent T ↔ T ⊬ ⊥ := by rfl
 
 protected def Complete (T : Set F) : Prop := ∀ f, (T ⊢! f) ∨ (T ⊢! ~f)
 
@@ -69,6 +75,10 @@ lemma incomplete_iff_exists_independent {T : Set F} :
     ¬System.Complete T ↔ ∃ f, Independent T f := by simp[System.Complete, not_or, Independent]
 
 def theory (T : Set F) : Set F := {p | T ⊢! p}
+
+@[simp] lemma subset_theory {T : Set F} : T ⊆ theory T := fun _ h ↦ ⟨System.axm h⟩
+
+noncomputable def provableTheory_theory {T : Set F} : T ⊢* theory T := λ b ↦ b.toProof
 
 class Subtheory (T U : Set F) where
   sub : {f : F} → T ⊢ f → U ⊢ f
@@ -151,6 +161,9 @@ lemma modelsTheory_of_proofTheory {T U : Set F} (h : s ⊧* T) (b : T ⊢* U) : 
 end Sound
 
 namespace Complete
+
+noncomputable def of! [Sound F] (H : ∀ {T : Set F} {p : F}, T ⊨ p → T ⊢! p) : Complete F where
+  complete := fun h ↦ (H h).toProof
 
 variable [Complete F]
 
