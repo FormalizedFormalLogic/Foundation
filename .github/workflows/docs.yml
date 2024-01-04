@@ -29,7 +29,7 @@ jobs:
             deps-${{ runner.os }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}
             deps-${{ runner.os }}-${{ hashFiles('lean-toolchain') }}
       - run: |
-          lake -Kenv=dev exe cache get && lake -Kenv=dev build && lake -Kenv=dev build Logic:docs
+          lake -R -Kenv=dev exe cache get && lake -R -Kenv=dev build && lake -R -Kenv=dev build Logic:docs
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:
