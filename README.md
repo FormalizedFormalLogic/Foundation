@@ -125,6 +125,7 @@ In this formalization, _(Modal) Logic_ means set of axioms.
 | Logic            | Definition                    | Notation | Remarks         |
 | :--------------- | ----------------------------- | :------- | --------------- |
 | $\mathbf{K}$     | [LO.Modal.Normal.LogicK](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Logics.html#LO.Modal.Normal.LogicK) | `𝐊`      |                 |
+| $\mathbf{KD}$     | [LO.Modal.Normal.LogicKD](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Logics.html#LO.Modal.Normal.LogicKD) | `𝐊𝐃`      |                 |
 | $\mathbf{S4}$    | [LO.Modal.Normal.LogicS4](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Logics.html#LO.Modal.Normal.LogicS4) | `𝐒𝟒`     | Alias of `𝐊𝐓𝟒`. |
 | $\mathbf{S4.2}$  | [LO.Modal.Normal.LogicS4Dot2](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Logics.html#LO.Modal.Normal.LogicS4Dot2) | `𝐒𝟒.𝟐`   |                 |
 | $\mathbf{S4.3}$  | [LO.Modal.Normal.LogicS4Dot3](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Logics.html#LO.Modal.Normal.LogicS4Dot3) | `𝐒𝟒.𝟑`   |                 |
@@ -142,24 +143,26 @@ In this formalization, _(Modal) Logic_ means set of axioms.
 
 ### Theorem
 
-- [Soundness of Hilbert-style deduction for $\mathbf{K}$](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Soundness.html#LO.Modal.Normal.LogicK.Hilbert.sounds)
+- [Soundness of Hilbert-style deduction](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Soundness.html#LO.Modal.Normal.Logic.Hilbert.sounds)
   ```lean
-  theorem LO.Modal.Normal.LogicK.Hilbert.sounds
+  theorem LO.Modal.Normal.Logic.Hilbert.sounds
       {α : Type u}
-      {β : Type u}
+      {β : Type u} [Inhabited β]
+      (Λ : Logic (Formula α)) [LogicDefines α β Λ]
       {p : LO.Modal.Normal.Formula α}
-      (f : LO.Modal.Normal.Frame β)
-      (h : ⊢ᴹ(𝐊) p) :
+      (f : LO.Modal.Normal.Frame β) (hf : LogicDefines.definability Λ f.rel)
+      (h : ⊢ᴹ(Λ) p) :
       ⊧ᴹᶠ[f] p
   ```
-  - [Consistency](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Soundness.html#LO.Modal.Normal.LogicK.Hilbert.consistency)
+  - [Consistency](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Soundness.html#LO.Modal.Normal.Logic.Hilbert.consistency)
     ```lean
-    theorem LO.Modal.Normal.LogicK.Hilbert.consistency
+    theorem LO.Modal.Normal.Logic.Hilbert.consistency
         {α : Type u}
-        {β : Type u} 
-        {f : LO.Modal.Normal.Frame β} :
-        ⊬ᴹ(𝐊)! ⊥
+        {β : Type u}
+        (Λ : Logic (Formula α)) [LogicDefines α β Λ] :
+        ⊬ᴹ(Λ)! ⊥
     ```
+  -  **WIP:** Currently, these theorems was proved where only `Λ` is `𝐊`, `𝐊𝐃`. For example, if it is proved that `𝐒𝟒` defines some frame reachability (i.e. satisfies `LogicDefines`), then these theorems are obviously proved.
 
 ## References
 - J. Han, F. van Doorn, A formalization of forcing and the unprovability of the continuum hypothesis
