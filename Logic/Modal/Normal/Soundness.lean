@@ -6,31 +6,58 @@ namespace LO.Modal.Normal
 
 open Formula FrameConsequence
 
-variable {α β : Type u}
+variable {α β : Type u} [Inhabited β]
+variable (Λ : Logic (Formula α)) [hΛ : LogicDefines β Λ]
 
 /-
   TODO: より一般にこの形で証明できる事実ではないだろうか？
   [LogicK.Hilbert Bew] (Γ : Set (Formula α)) (hΓ : Γ = ∅) (p : Formula α) (f : Frame β) (d : Bew Γ p) : (Γ ⊨ᴹᶠ[f] p)
 -/
-lemma LogicK.Hilbert.sounds' (Γ : Set (Formula α)) (hΓ : Γ = ∅) (p : Formula α) (f : Frame β) (d : Γ ⊢ᴹ(𝐊) p) : (Γ ⊨ᴹᶠ[f] p) := by
+lemma Logic.sounds
+  (Λ : Logic (Formula α)) [hΛ : LogicDefines β Λ]
+  (p : Formula α)
+  (f : Frame β) (hf : LogicDefines.definability Λ f.rel)
+  (d : ⊢ᴹ(Λ) p) : (⊧ᴹᶠ[f] p) := by
   induction d <;> try {simp_all [Satisfies];}
   case maxm p ih =>
-    let ⟨_, ⟨_, hq⟩⟩ := ih; rw [←hq];
-    apply axiomK;
+    exact (hΛ.defines f).mp hf p ih;
   case disj₃ p q r =>
-    simp only [hΓ, FrameConsequence, Satisfies.imp_def];
-    intro V w _ hpr hqr hpq;
+    simp only [Frames, Models, Satisfies.imp_def];
+    intro V w hpr hqr hpq;
     simp only [Satisfies.or_def] at hpq;
     cases hpq with
     | inl hp => exact hpr hp;
     | inr hq => exact hqr hq;
+  /-
+  case necessitation p dp ih =>
+    simp only [FrameConsequence, Satisfies.box_def];
+    intro V w hΓ w' rww';
+    apply ih V w';
+    intro q hq;
+    exact hw rww' (hΓ q hq);
+  -/
 
-theorem LogicK.Hilbert.sounds {p : Formula α} (f : Frame β) (h : ⊢ᴹ(𝐊) p) : (⊧ᴹᶠ[f] p) := by
-  exact (show (⊢ᴹ(𝐊) p) → (⊧ᴹᶠ[f] p) by simpa [Context.box_empty] using sounds' ∅ rfl p f;) h;
-
-theorem LogicK.Hilbert.consistency {f : Frame β} : (⊬ᴹ(𝐊)! (⊥ : Formula α)) := by
+lemma Logic.consistent
+  (β) [Inhabited β]
+  (Λ : Logic (Formula α)) [hΛ : LogicDefines β Λ]
+  : (⊬ᴹ(Λ)! (⊥ : Formula α)) := by
   by_contra hC; simp at hC;
-  suffices h : ⊧ᴹᶠ[f] (⊥ : Formula α) by exact Frames.bot_def h;
-  exact sounds f hC.some;
+  suffices h : ∃ (f : Frame β), ⊧ᴹᶠ[f] (⊥ : Formula α) by
+    let ⟨f, hf⟩ := h;
+    exact Frames.bot_def hf;
+  have ⟨tf, htf⟩ := hΛ.trivial_frame;
+  existsi tf; exact Logic.sounds Λ ⊥ tf htf hC.some;
+
+theorem LogicK.sounds {p : Formula α} (f : Frame β) (hf : (@LogicK.defines β α).definability f.rel)
+  : (⊢ᴹ(𝐊) p) → (⊧ᴹᶠ[f] p) := by
+  exact Logic.sounds 𝐊 p f hf;
+
+theorem LogicK.consistency : ⊬ᴹ(𝐊)! (⊥ : Formula α) := Logic.consistent β 𝐊
+
+theorem LogicKD.sounds {p : Formula α} (f : Frame β) (hf : (@LogicKD.defines β α).definability f.rel)
+  (h : ⊢ᴹ(𝐊𝐃) p) : (⊧ᴹᶠ[f] p) := by
+  exact Logic.sounds 𝐊𝐃 p f hf h;
+
+theorem LogicKD.consistency : ⊬ᴹ(𝐊𝐃)! (⊥ : Formula α) := Logic.consistent β 𝐊𝐃
 
 end LO.Modal.Normal

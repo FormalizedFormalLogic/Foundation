@@ -1,6 +1,7 @@
 import Logic.Vorspiel.BinaryRelations
 import Logic.Modal.Normal.Formula
 import Logic.Modal.Normal.Axioms
+import Logic.Modal.Normal.Logics
 
 namespace LO.Modal.Normal
 
@@ -205,18 +206,30 @@ def Models (m : Model α β) (Γ : Context β) := ∀ p ∈ Γ, (⊧ᴹᵐ[m] p)
 
 notation "⊧ᴹᵐ[" m "] " Γ => Models m Γ
 
-namespace Models
-
-lemma neg_singleton_def {M : Model α β} {p : Formula β} : (⊧ᴹᵐ[M] {~p}) → (¬⊧ᴹᵐ[M] {p}) := by
+lemma models_neg_singleton {M : Model α β} {p : Formula β} : (⊧ᴹᵐ[M] {~p}) → (¬⊧ᴹᵐ[M] {p}) := by
   intro hnp hp;
   exact Formula.Models.neg_def (show  ⊧ᴹᵐ[M] ~p by aesop) (show  ⊧ᴹᵐ[M] p by aesop);
 
-end Models
+lemma models_union {M : Model α β} {Γ Δ : Context β} : (⊧ᴹᵐ[M] Γ ∪ Δ) ↔ (⊧ᴹᵐ[M] Γ) ∧ (⊧ᴹᵐ[M] Δ) := by
+  constructor;
+  . intro h; simp_all [Context.Models];
+  . intros h p hp;
+    cases hp with
+    | inl hp => exact h.left p hp;
+    | inr hp => exact h.right p hp;
+
 
 def Frames (f : Frame α) (Γ : Context β) := ∀ p ∈ Γ, (⊧ᴹᶠ[f] p)
 
 notation "⊧ᴹᶠ[" f "] " Γ => Frames f Γ
 
+lemma frames_union {f : Frame α} {Γ Δ : Context β} : (⊧ᴹᶠ[f] Γ ∪ Δ) ↔ (⊧ᴹᶠ[f] Γ) ∧ (⊧ᴹᶠ[f] Δ) := by
+  constructor;
+  . intro h; simp_all [Context.Frames];
+  . intros h p hp;
+    cases hp with
+    | inl hp => exact h.left p hp;
+    | inr hp => exact h.right p hp;
 
 def Frameclasses (fc : Frameclass α) (Γ : Context β) := ∀ p ∈ Γ, (⊧ᴹᶠᶜ[fc] p)
 
@@ -297,147 +310,137 @@ notation Γ " ⊨ᴹᶠᶜ[" fc "] " Δ => Context.FrameclassConsequence fc Γ �
 end Context
 
 
-section Defines
-
-variable {f : Frame α} {p q q₁ q₂ : Formula β}
-
-class AxiomDefinability (p : Formula β) where
-  definability {α : Type*} (rel : α → α → Prop) : Prop
-
-@[simp]
-def Defines (α) (a : Formula β) [AxiomDefinability a] := ∀ (f : Frame α), (AxiomDefinability.definability a f.rel) ↔ (⊧ᴹᶠ[f] a)
-
-open AxiomDefinability
+section Definabilities
 
 attribute [simp] Formula.Frames Formula.Models Context.Models Context.Frames
 attribute [simp] Reflexive Serial Symmetric Transitive Euclidean Confluent NonInfiniteAscent Dense Functional RightConvergent
+attribute [simp] AxiomK.ctx AxiomT.ctx AxiomD.ctx AxiomB.ctx Axiom4.ctx Axiom5.ctx
+
+section AxiomDefinabilities
+
+variable (β)
 
 @[simp]
-instance AxiomK.definability : AxiomDefinability (AxiomK p q) where
-  definability _ := True
+lemma AxiomK.defines : ∀ (f : Frame α), (⊧ᴹᶠ[f] (𝐊 : Context β)) := by aesop;
 
-lemma AxiomK.defines : Defines α (AxiomK p q) := by aesop;
-
-
-@[simp]
-instance AxiomT.definability : AxiomDefinability (AxiomT p) where
-  definability := Reflexive
-
-lemma AxiomT.defines : Defines α (AxiomT p) := by
+lemma AxiomT.defines : ∀ (f : Frame α), (Reflexive f.rel) ↔ (⊧ᴹᶠ[f] (𝐓 : Context β)) := by
   intro f;
   constructor;
   . aesop;
   . sorry;
 
-
-@[simp]
-instance AxiomD.definability : AxiomDefinability (AxiomD p) where
-  definability := Serial
-
-lemma AxiomD.defines : Defines α (AxiomD p) := by
+lemma AxiomD.defines  : ∀ (f : Frame α), (Serial f.rel) ↔ (⊧ᴹᶠ[f] (𝐃 : Context β)) := by
   intro f;
   constructor;
-  . intro hd V w h;
-    simp_all;
+  . intro hd p hp V w;
     have ⟨w', hw'⟩ := hd w;
-    existsi w';
-    simp_all;
-  . intro h;
+    aesop;
+  . intro h; simp only [Context.Frames] at h;
     by_contra hC; simp at hC;
     have ⟨w, hw⟩ := hC; clear hC;
     let V : α → β → Prop := λ _ _ => True;
-    have : w ⊧ᴹˢ[⟨f, V⟩] □p ⟶ ◇p := h V w;
-    have : w ⊧ᴹˢ[⟨f, V⟩] □p := by simp; simp_all;
-    have : ¬w ⊧ᴹˢ[⟨f, V⟩] ◇p := by simp; simp_all;
+    have : ∀ (p : Formula β), w ⊧ᴹˢ[⟨f, V⟩] □p ⟶ ◇p := by intros; exact h _ (by simp) V w;
+    have : ∀ (p : Formula β), w ⊧ᴹˢ[⟨f, V⟩] □p := by simp_all;
+    have : ∀ (p : Formula β), ¬w ⊧ᴹˢ[⟨f, V⟩] ◇p := by simp_all;
     aesop;
 
-
-@[simp]
-instance : AxiomDefinability (AxiomB p) where
-  definability := Symmetric
-
-lemma AxiomB.defines : Defines α (AxiomB p) := by
+lemma AxiomB.defines : ∀ (f : Frame α), (Symmetric f.rel) ↔ (⊧ᴹᶠ[f] (𝐁 : Context β)) := by
   intro f;
   constructor;
   . aesop;
   . sorry;
 
-@[simp]
-instance : AxiomDefinability (Axiom4 p) where
-  definability := Transitive
-
-lemma Axiom4.defines : Defines α (Axiom4 p) := by
+lemma Axiom4.defines : ∀ (f : Frame α), (Transitive f.rel) ↔ (⊧ᴹᶠ[f] (𝟒 : Context β)) := by
   intro f;
   constructor;
   . aesop;
   . sorry;
 
-
-@[simp]
-instance : AxiomDefinability (Axiom5 p) where
-  definability := Euclidean
-
-lemma Axiom5.defines : Defines α (Axiom5 p) := by
+lemma Axiom5.defines : ∀ (f : Frame α), (Euclidean f.rel) ↔ (⊧ᴹᶠ[f] (𝟓 : Context β)) := by
   intro f;
   constructor;
   . aesop;
   . sorry;
 
-
-@[simp]
-instance : AxiomDefinability (AxiomDot2 p) where
-  definability := Confluent
-
-lemma AxiomDot2.defines : Defines α (AxiomDot2 p) := by
+lemma AxiomDot2.defines : ∀ (f : Frame α), (Confluent f.rel) ↔ (⊧ᴹᶠ[f] (.𝟐 : Context β)) := by
   intro f;
   constructor;
   . sorry;
   . sorry;
 
-
-@[simp]
-instance : AxiomDefinability (AxiomDot3 p q) where
-  definability := Functional
-
-lemma AxiomDot3.defines : Defines α (AxiomDot3 p q) := by
+lemma AxiomDot3.defines : ∀ (f : Frame α), (Functional f.rel) ↔ (⊧ᴹᶠ[f] (.𝟑 : Context β)) := by
   intro f;
   constructor;
   . sorry;
   . sorry;
 
-
-@[simp]
-instance : AxiomDefinability (AxiomCD p) where
-  definability := RightConvergent
-
-lemma AxiomCD.defines : Defines α (AxiomCD p) := by
+lemma AxiomCD.defines : ∀ (f : Frame α), (RightConvergent f.rel) ↔ (⊧ᴹᶠ[f] (𝐂𝐃 : Context β)) := by
   intro f;
   constructor;
   . sorry;
   . sorry;
 
-
-@[simp]
-instance : AxiomDefinability (AxiomC4 p) where
-  definability := Dense
-
-lemma AxiomC4.defines : Defines α (AxiomC4 p) := by
+lemma AxiomC4.defines : ∀ (f : Frame α), (Dense f.rel) ↔ (⊧ᴹᶠ[f] (𝐂𝟒 : Context β)) := by
   intro f;
   constructor;
   . sorry;
   . sorry;
 
-
-@[simp]
-instance : AxiomDefinability (AxiomL p) where
-  definability := NonInfiniteAscent
-
-lemma AxiomL.defines : Defines α (AxiomL p) := by
+lemma AxiomL.defines : ∀ (f : Frame α), (NonInfiniteAscent f.rel) ↔ (⊧ᴹᶠ[f] (𝐋 : Context β)) := by
   intro f;
   constructor;
   . sorry;
   . sorry;
 
-end Defines
+end AxiomDefinabilities
+
+section LogicDefinabilities
+
+variable (α β) [hα : Inhabited α]
+
+class LogicDefines (Λ : Logic (Formula β)) where
+  definability (rel : α → α → Prop) : Prop
+  defines : ∀ (f : Frame α), (definability f.rel) ↔ (⊧ᴹᶠ[f] Λ)
+  trivial_frame : ∃ (f : Frame α), definability f.rel
+
+attribute [simp] LogicK LogicKD LogicKT4
+
+@[simp, instance]
+def LogicK.defines : LogicDefines α β (𝐊 : Logic (Formula β)) where
+  definability _ := True
+  defines := by intros; aesop;
+  trivial_frame := by existsi (⟨hα, (λ _ _ => True)⟩ : Frame α); simp;
+
+lemma LogicDefines_union_K {f : Frame α} (Λ : Logic (Formula β)) {P : (α → α → Prop) → Prop} :
+  ((P f.rel ↔ ⊧ᴹᶠ[f] Λ)) → ((P f.rel) ↔ (⊧ᴹᶠ[f] 𝐊 ∪ Λ)) := by
+  intro h;
+  constructor;
+  . intros;
+    apply Context.frames_union.mpr;
+    aesop;
+  . intro hf;
+    have := Context.frames_union.mp hf;
+    aesop;
+
+@[simp, instance]
+def LogicKD.defines : LogicDefines α β (𝐊𝐃 : Logic (Formula β)) where
+  definability := Serial
+  defines := by
+    intro f;
+    apply LogicDefines_union_K α β 𝐃;
+    exact AxiomD.defines _ f;
+  trivial_frame := by existsi (⟨hα, (λ _ _ => True)⟩ : Frame α); simp;
+
+@[simp, instance]
+def LogicS4.defines : LogicDefines α β (𝐒𝟒 : Logic (Formula β)) where
+  definability f := Symmetric f ∧ Transitive f
+  defines := by
+    simp only [LogicS4, LogicKT4];
+    sorry;
+  trivial_frame := by existsi (⟨hα, (λ _ _ => True)⟩ : Frame α); simp;
+
+end LogicDefinabilities
+
+end Definabilities
 
 end LO.Modal.Normal

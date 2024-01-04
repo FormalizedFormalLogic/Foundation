@@ -237,8 +237,6 @@ notation "⟪" Γ "⟹" "⟫" => Sequent Γ ∅
 
 def ProofS (Γ Δ : Finset (Formula α)) := ⊢ᴹ(Λ) ⟪Γ ⟹ Δ⟫
 
-#check ⟪ {(⊤ : Formula α)} ⟹ {(⊤ : Formula α)} ⟫
-
 variable [Union (Finset (Formula α))] [Inter (Finset (Formula α))]
 variable (Γ₁ Γ₂ Δ : Finset (Formula α))
 
