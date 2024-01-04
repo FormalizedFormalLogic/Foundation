@@ -105,9 +105,9 @@ def complexity : Formula α → ℕ
 
 @[simp] lemma complexity_bot : complexity (⊥ : Formula α) = 0 := rfl
 
-@[simp] lemma complexity_rel (a : α) : complexity (atom a) = 0 := rfl
+@[simp] lemma complexity_atom (a : α) : complexity (atom a) = 0 := rfl
 
-@[simp] lemma complexity_nrel (a : α) : complexity (natom a) = 0 := rfl
+@[simp] lemma complexity_natom (a : α) : complexity (natom a) = 0 := rfl
 
 @[simp] lemma complexity_and (p q : Formula α) : complexity (p ⋏ q) = max p.complexity q.complexity + 1 := rfl
 @[simp] lemma complexity_and' (p q : Formula α) : complexity (and p q) = max p.complexity q.complexity + 1 := rfl
@@ -119,14 +119,14 @@ def complexity : Formula α → ℕ
 def cases' {C : Formula α → Sort w}
     (hverum  : C ⊤)
     (hfalsum : C ⊥)
-    (hrel    : ∀ a : α, C (atom a))
-    (hnrel   : ∀ a : α, C (natom a))
+    (hatom   : ∀ a : α, C (atom a))
+    (hnatom  : ∀ a : α, C (natom a))
     (hand    : ∀ (p q : Formula α), C (p ⋏ q))
     (hor     : ∀ (p q : Formula α), C (p ⋎ q)) : (p : Formula α) → C p
   | ⊤       => hverum
   | ⊥       => hfalsum
-  | atom a  => hrel a
-  | natom a => hnrel a
+  | atom a  => hatom a
+  | natom a => hnatom a
   | p ⋏ q   => hand p q
   | p ⋎ q   => hor p q
 
@@ -134,16 +134,16 @@ def cases' {C : Formula α → Sort w}
 def rec' {C : Formula α → Sort w}
   (hverum  : C ⊤)
   (hfalsum : C ⊥)
-  (hrel    : ∀ a : α, C (atom a))
-  (hnrel   : ∀ a : α, C (natom a))
+  (hatom   : ∀ a : α, C (atom a))
+  (hnatom  : ∀ a : α, C (natom a))
   (hand    : ∀ (p q : Formula α), C p → C q → C (p ⋏ q))
   (hor     : ∀ (p q : Formula α), C p → C q → C (p ⋎ q)) : (p : Formula α) → C p
   | ⊤       => hverum
   | ⊥       => hfalsum
-  | atom a  => hrel a
-  | natom a => hnrel a
-  | p ⋏ q   => hand p q (rec' hverum hfalsum hrel hnrel hand hor p) (rec' hverum hfalsum hrel hnrel hand hor q)
-  | p ⋎ q   => hor p q (rec' hverum hfalsum hrel hnrel hand hor p) (rec' hverum hfalsum hrel hnrel hand hor q)
+  | atom a  => hatom a
+  | natom a => hnatom a
+  | p ⋏ q   => hand p q (rec' hverum hfalsum hatom hnatom hand hor p) (rec' hverum hfalsum hatom hnatom hand hor q)
+  | p ⋎ q   => hor p q (rec' hverum hfalsum hatom hnatom hand hor p) (rec' hverum hfalsum hatom hnatom hand hor q)
 
 @[simp] lemma complexity_neg (p : Formula α) : complexity (~p) = complexity p :=
   by induction p using rec' <;> simp[*]

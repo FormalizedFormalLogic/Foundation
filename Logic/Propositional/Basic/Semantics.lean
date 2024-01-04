@@ -40,14 +40,14 @@ def val : Formula α →L F where
 
 end val
 
-instance : Semantics (Formula α) (Set α) := ⟨val⟩
+instance : Semantics (Formula α) (α → Prop) := ⟨val⟩
 
 namespace Val
-variable {v : Set α}
+variable {v : α → Prop}
 
-@[simp] protected lemma atom : v ⊧ (atom a) ↔ a ∈ v := iff_of_eq rfl
+@[simp] protected lemma atom : v ⊧ (atom a) ↔ v a := iff_of_eq rfl
 
-@[simp] protected lemma natom : v ⊧ (natom a) ↔ a ∉ v := iff_of_eq rfl
+@[simp] protected lemma natom : v ⊧ (natom a) ↔ ¬v a := iff_of_eq rfl
 
 end Val
 

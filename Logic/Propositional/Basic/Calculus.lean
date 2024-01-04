@@ -45,8 +45,8 @@ def em {p : Formula α} {Δ : Sequent α} (hpos : p ∈ Δ) (hneg : ~p ∈ Δ) :
   induction p using Formula.rec' generalizing Δ <;> simp at hneg
   case hverum           => exact verum' hpos
   case hfalsum          => exact verum' hneg
-  case hrel a           => exact axL' a hpos hneg
-  case hnrel a          => exact axL' a hneg hpos
+  case hatom a          => exact axL' a hpos hneg
+  case hnatom a         => exact axL' a hneg hpos
   case hand p q ihp ihq =>
     have ihp : ⊢¹ p :: ~p :: ~q :: Δ := ihp (by simp) (by simp)
     have ihq : ⊢¹ q :: ~p :: ~q :: Δ := ihq (by simp) (by simp)
