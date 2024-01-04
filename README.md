@@ -3,7 +3,27 @@ Formalizing Logic in Lean4
 
 https://iehality.github.io/lean4-logic/
 
+## Index
+
+- [lean4-logic](#lean4-logic)
+  - [Index](#index)
+  - [Structure](#structure)
+  - [Propositional Logic](#propositional-logic)
+    - [Definition](#definition)
+    - [Theorem](#theorem)
+  - [First-Order Logic](#first-order-logic)
+    - [Definition](#definition-1)
+    - [Theorem](#theorem-1)
+  - [Normal Modal Logic](#normal-modal-logic)
+    - [Definition](#definition-2)
+    - [Theorem](#theorem-2)
+  - [References](#references)
+
+
 ## Structure
+
+The key results are summarised in `Logic/Summary.lean`.
+
 - **Logic**
   - **Vorspiel**: Supplementary definitions and theorems for Mathlib
   - **Logic**
@@ -22,49 +42,35 @@ https://iehality.github.io/lean4-logic/
   - **Modal**: Variants of modal logics
     - **Normal**: Normal propositional modal logic
 
-## Definition
+## Propositional Logic
 
-### Propositional Logic
+### Definition
 
 |                                     |                                     | Definition                    | Notation |
 | :----:                              | ----                                | ----                          | :----:   |
 | $(\rm Cut)\vdash_\mathrm{T} \Gamma$ | Derivation in Tait-Calculus + Cut   | `LO.Propositional.Derivation` | `⊢¹ Γ`   |
 | $v \models p$                       | Tarski's truth definition condition | `LO.Propositional.semantics`  | `v ⊧ p`  |
 
-### First-Order Logic
+### Theorem
 
+- [Completeness theorem](https://iehality.github.io/lean4-logic/Logic/Propositional/Basic/Completeness.html#LO.Propositional.completeness)
+  ```lean
+  noncomputable def LO.Propositional.completeness
+      {α : Type u_1}
+      {T : LO.Propositional.Theory α}
+      {p : LO.Propositional.Formula α} :
+      T ⊨ p → T ⊢ p
+  ```
+
+## First-Order Logic
+
+### Definition
 |                                     |                                     | Definition                 | Notation |
 | :----:                              | ----                                | ----                       | :----:   |
 | $(\rm Cut)\vdash_\mathrm{T} \Gamma$ | Derivation in Tait-Calculus + Cut   | `LO.FirstOrder.Derivation` | `⊢¹ Γ`   |
 | $M \models \sigma$                  | Tarski's truth definition condition | `LO.FirstOrder.Models`     | `M ⊧ₘ σ` |
 
-### Normal Modal Logic
-
-In this formalization, _(Modal) Logic_ means set of axioms.
-
-| Logic            | Definition                    | Notation | Remarks         |
-| :--------------- | ----------------------------- | :------- | --------------- |
-| $\mathbf{K}$     | `LO.Modal.Normal.LogicK`      | `𝐊`      |                 |
-| $\mathbf{S4}$    | `LO.Modal.Normal.LogicS4`     | `𝐒𝟒`     | Alias of `𝐊𝐓𝟒`. |
-| $\mathbf{S4.2}$  | `LO.Modal.Normal.LogicS4Dot2` | `𝐒𝟒.𝟐`   |                 |
-| $\mathbf{S4.3}$  | `LO.Modal.Normal.LogicS4Dot3` | `𝐒𝟒.𝟑`   |                 |
-| $\mathbf{S4Grz}$ | `LO.Modal.Normal.LogicS4Grz`  | `𝐒𝟒𝐆𝐫𝐳`  |                 |
-| $\mathbf{S5}$    | `LO.Modal.Normal.LogicS5`     | `𝐒𝟓`     | Alias of `𝐊𝐓𝟓`. |
-| $\mathbf{GL}$    | `LO.Modal.Normal.LogicGL`     | `𝐆𝐋`     |                 |
-
-|                                   |                                            | Definition                                 |   Notation   |
-| :-------------------------------: | ------------------------------------------ | :----------------------------------------- | :----------: |
-|      $M, w \models \varphi$       | Satisfy                                    | `LO.Modal.Normal.Formula.Satisfies`        | `w ⊧ᴹˢ[M] φ` |
-|        $M \models \varphi$        | Valid on model (Models)                    | `LO.Modal.Normal.Formula.Models`           |  `⊧ᴹᵐ[M] φ`  |
-|        $F \models \varphi$        | Valid on frame (Frames)                    | `LO.Modal.Normal.Formula.Frames`           |  `⊧ᴹᶠ[M] φ`  |
-|    $\Gamma \models^F \varphi$     | Consequence on frame                       | `LO.Modal.Normal.Formula.FrameConsequence` | `Γ ⊨ᴹᶠ[M] φ` |
-| $\Gamma \vdash_{\Lambda} \varphi$ | Hilbert-style Deduction on logic $\Lambda$ | `LO.Modal.Normal.Deduction`                | `Γ ⊢ᴹ(Λ) φ`  |
-
-## Theorem
-
-The key results are summarised in `Logic/Summary.lean`.
-
-### First-Order logic
+### Theorem
 
 - [Cut-elimination](https://iehality.github.io/lean4-logic/Logic/FirstOrder/Hauptsatz.html#LO.FirstOrder.Derivation.hauptsatz)
   ```lean
@@ -109,16 +115,51 @@ The key results are summarised in `Logic/Summary.lean`.
         T ⊬ ~LO.FirstOrder.Arith.FirstIncompleteness.undecidable T
     ```
 
-### Normal Modal Logic
+
+## Normal Modal Logic
+
+### Definition
+
+In this formalization, _(Modal) Logic_ means set of axioms.
+
+| Logic            | Definition                    | Notation | Remarks         |
+| :--------------- | ----------------------------- | :------- | --------------- |
+| $\mathbf{K}$     | `LO.Modal.Normal.LogicK`      | `𝐊`      |                 |
+| $\mathbf{S4}$    | `LO.Modal.Normal.LogicS4`     | `𝐒𝟒`     | Alias of `𝐊𝐓𝟒`. |
+| $\mathbf{S4.2}$  | `LO.Modal.Normal.LogicS4Dot2` | `𝐒𝟒.𝟐`   |                 |
+| $\mathbf{S4.3}$  | `LO.Modal.Normal.LogicS4Dot3` | `𝐒𝟒.𝟑`   |                 |
+| $\mathbf{S4Grz}$ | `LO.Modal.Normal.LogicS4Grz`  | `𝐒𝟒𝐆𝐫𝐳`  |                 |
+| $\mathbf{S5}$    | `LO.Modal.Normal.LogicS5`     | `𝐒𝟓`     | Alias of `𝐊𝐓𝟓`. |
+| $\mathbf{GL}$    | `LO.Modal.Normal.LogicGL`     | `𝐆𝐋`     |                 |
+
+|                                   |                                            | Definition                                 |   Notation   |
+| :-------------------------------: | ------------------------------------------ | :----------------------------------------- | :----------: |
+|      $M, w \models \varphi$       | Satisfy                                    | `LO.Modal.Normal.Formula.Satisfies`        | `w ⊧ᴹˢ[M] φ` |
+|        $M \models \varphi$        | Valid on model (Models)                    | `LO.Modal.Normal.Formula.Models`           |  `⊧ᴹᵐ[M] φ`  |
+|        $F \models \varphi$        | Valid on frame (Frames)                    | `LO.Modal.Normal.Formula.Frames`           |  `⊧ᴹᶠ[F] φ`  |
+|    $\Gamma \models^F \varphi$     | Consequence on frame                       | `LO.Modal.Normal.Formula.FrameConsequence` | `Γ ⊨ᴹᶠ[F] φ` |
+| $\Gamma \vdash_{\Lambda} \varphi$ | Hilbert-style Deduction on logic $\Lambda$ | `LO.Modal.Normal.Deduction`                | `Γ ⊢ᴹ(Λ) φ`  |
+
+### Theorem
 
 - [Soundness of Hilbert-style deduction for $\mathbf{K}$](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Soundness.html#LO.Modal.Normal.LogicK.Hilbert.sounds)
   ```lean
-  theorem LogicK.Hilbert.sounds (f : Frame β) : ⊢ᴹ(𝐊) p → ⊧ᴹᶠ[f] p
+  theorem LO.Modal.Normal.LogicK.Hilbert.sounds
+      {α : Type u}
+      {β : Type u}
+      {p : LO.Modal.Normal.Formula α}
+      (f : LO.Modal.Normal.Frame β)
+      (h : ⊢ᴹ(𝐊) p) :
+      ⊧ᴹᶠ[f] p
   ```
   - [Consistency](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Soundness.html#LO.Modal.Normal.LogicK.Hilbert.consistency)
-  ```lean
-  theorem LogicK.Hilbert.consistency : ⊬ᴹ(𝐊)! ⊥
-  ```
+    ```lean
+    theorem LO.Modal.Normal.LogicK.Hilbert.consistency
+        {α : Type u}
+        {β : Type u} 
+        {f : LO.Modal.Normal.Frame β} :
+        ⊬ᴹ(𝐊)! ⊥
+    ```
 
 ## References
 - J. Han, F. van Doorn, A formalization of forcing and the unprovability of the continuum hypothesis
