@@ -57,3 +57,7 @@ import Logic.FirstOrder.Arith.PAminus
 
 import Logic.FirstOrder.Incompleteness.FirstIncompleteness
 import Logic.FirstOrder.Incompleteness.SelfReference
+
+-- Modal Logic
+
+import Logic.Modal.Normal
