@@ -81,13 +81,13 @@ lemma modelsSuccInd (σ : Semisentence ℒₒᵣ (k + 1)) : ℕ ⊧ₘ (Arith.su
   · exact hzero
   · exact hsucc x ih
 
-lemma modelsPeano : ℕ ⊧ₘ* (Theory.IndScheme Set.univ ∪ Theory.PAminus ℒₒᵣ ∪ Theory.Eq ℒₒᵣ) :=
+lemma modelsPeano : ℕ ⊧ₘ* (Theory.IndScheme Set.univ ∪ Theory.PAminus ℒₒᵣ ∪ 𝐄𝐪) :=
   by simp[Theory.IndScheme, modelsSuccInd, modelsTheoryPAminus]
 
 end Standard
 
 theorem Peano.Consistent :
-    System.Consistent (Theory.IndScheme Set.univ ∪ Theory.PAminus ℒₒᵣ ∪ Theory.Eq ℒₒᵣ) :=
+    System.Consistent (Theory.IndScheme Set.univ ∪ Theory.PAminus ℒₒᵣ ∪ 𝐄𝐪) :=
   Sound.consistent_of_model Standard.modelsPeano
 
 variable (L : Language.{u}) [ORing L]

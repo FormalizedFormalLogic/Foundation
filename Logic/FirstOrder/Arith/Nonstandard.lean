@@ -14,7 +14,7 @@ local notation "ℒₒᵣ⋆" => withStar
 def starUnbounded (c : ℕ) : Theory ℒₒᵣ⋆ := Set.range fun n : Fin c ↦ “!!(Semiterm.Operator.numeral ℒₒᵣ⋆ n) < ⋆”
 
 def trueArithWithStarUnbounded (n : ℕ) : Theory ℒₒᵣ⋆ :=
-  Theory.Eq ℒₒᵣ⋆ ∪ (Semiformula.lMap (Language.Hom.add₁ _ _) '' 𝐓𝐀) ∪ starUnbounded n
+  𝐄𝐪 ∪ (Semiformula.lMap (Language.Hom.add₁ _ _) '' 𝐓𝐀) ∪ starUnbounded n
 
 lemma trueArithWithStarUnbounded.cumulative : Cumulative trueArithWithStarUnbounded := fun c =>
   Set.union_subset_union_right _ <|

@@ -41,8 +41,6 @@ class Sub (T U : Theory L) where
 
 section Eq
 
-variable (L)
-
 inductive Eq : Theory L
   | refl : Eq “∀ #0 = #0”
   | symm : Eq “∀ ∀ (#1 = #0 → #0 = #1)”
@@ -52,7 +50,7 @@ inductive Eq : Theory L
   | relExt {k} (r : L.Rel k) :
     Eq “∀* (!(Semiformula.vecEq varSumInL varSumInR) → !(Semiformula.rel r varSumInL) → !(Semiformula.rel r varSumInR))”
 
-notation "𝐄𝐪 " => Eq _
+notation "𝐄𝐪 " => Eq
 
 end Eq
 
