@@ -257,8 +257,45 @@ section Definability
 
 variable {L : Language.{u}} {α : Type u} [Structure L α]
 
-def DefinableIn {k} (C : Set (Semisentence L k)) (R : Set (Fin k → α)) : Prop :=
-  ∃ p ∈ C, ∀ v, v ∈ R ↔ Semiformula.PVal! α v p
+def Definable {k} (C : Semisentence L k → Prop) (R : Set (Fin k → α)) : Prop :=
+  ∃ p, C p ∧ (∀ v, v ∈ R ↔ Semiformula.PVal! α v p)
+
+def DefinableFunction {k} (C : Semisentence L (k + 1) → Prop) (f : (Fin k → α) → α) : Prop :=
+  Definable C { w | Matrix.vecHead w = f (Matrix.vecTail w) }
+
+namespace Definable
+
+variable {k} {C : Semisentence L k → Prop}
+
+section AndOrClosed
+
+variable [LogicSymbol.AndOrClosed C]
+
+@[simp] lemma empty : Definable C (∅ : Set (Fin k → α)) := ⟨⊥, by simp⟩
+
+@[simp] lemma univ : Definable C (Set.univ : Set (Fin k → α)) := ⟨⊤, by simp⟩
+
+lemma union {s t : Set (Fin k → α)} (hs : Definable C s) (ht : Definable C t) :
+    Definable C (s ∪ t) := by
+  rcases hs with ⟨p, _, _⟩; rcases ht with ⟨q, _, _⟩; exact ⟨p ⋎ q, by simp[LogicSymbol.AndOrClosed.or, *]⟩
+
+lemma inter {s t : Set (Fin k → α)} (hs : Definable C s) (ht : Definable C t) :
+    Definable C (s ∩ t) := by
+  rcases hs with ⟨p, _, _⟩; rcases ht with ⟨q, _, _⟩; exact ⟨p ⋏ q, by simp[LogicSymbol.AndOrClosed.and, *]⟩
+
+end AndOrClosed
+
+section Closed
+
+variable [LogicSymbol.Closed C]
+
+lemma compl {s : Set (Fin k → α)} (hs : Definable C s) :
+    Definable C sᶜ := by
+  rcases hs with ⟨p, _, _⟩; exact ⟨~p, by simp[LogicSymbol.Closed.not, *]⟩
+
+end Closed
+
+end Definable
 
 end Definability
 

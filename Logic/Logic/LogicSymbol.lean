@@ -323,6 +323,8 @@ class Closed {F} [LogicSymbol F] (C : F → Prop) extends AndOrClosed C where
   not {f : F} : C f → C (~f)
   imply {f g : F} : C f → C g → C (f ⟶ g)
 
+attribute [simp] AndOrClosed.verum AndOrClosed.falsum
+
 end LogicSymbol
 
 end LO

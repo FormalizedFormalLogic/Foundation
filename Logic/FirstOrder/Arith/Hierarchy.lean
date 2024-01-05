@@ -4,14 +4,30 @@ namespace LO
 
 namespace FirstOrder
 
-variable {L : Language} [FirstOrder.ORing L] {μ : Type v}
+variable {L : Language} [FirstOrder.Semiformula.Operator.LT L] {μ : Type v}
 
 namespace Arith
 
-local notation "Σ" => Bool.true
-local notation "Π" => Bool.false
+inductive VType := | sigma | pi
 
-inductive Hierarchy : Bool → ℕ → {n : ℕ} → Semiformula L μ n → Prop
+namespace VType
+
+notation "Σ" => sigma
+notation "Π" => pi
+
+def alt : VType → VType
+  | Σ => Π
+  | Π => Σ
+
+@[simp] lemma alt_sigma : Σ.alt = Π := rfl
+
+@[simp] lemma alt_pi : Π.alt = Σ := rfl
+
+@[simp] lemma alt_alt (b : VType) : b.alt.alt = b := by rcases b <;> simp
+
+end VType
+
+inductive Hierarchy : VType → ℕ → {n : ℕ} → Semiformula L μ n → Prop
   | verum (b s n)                             : Hierarchy b s (⊤ : Semiformula L μ n)
   | falsum (b s n)                            : Hierarchy b s (⊥ : Semiformula L μ n)
   | rel (b s) {k} (r : L.Rel k) (v : Fin k → Semiterm L μ n) : Hierarchy b s (Semiformula.rel r v)
@@ -78,7 +94,7 @@ lemma ex' {b s n} {p : Semiformula L μ (n + 1)} (t : Semiterm L μ n) {t' : Sem
   (ht : Rew.bShift t = t') (hp : Hierarchy b s p) :
     Hierarchy b s “∃[#0 < !!t'] !p” := by rw[←ht]; exact hp.bex _
 
-lemma zero_eq_alt {p : Semiformula L μ n} : Hierarchy b 0 p → Hierarchy (!b) 0 p := by
+lemma zero_eq_alt {p : Semiformula L μ n} : Hierarchy b 0 p → Hierarchy b.alt 0 p := by
   generalize hz : 0 = z
   rw[eq_comm] at hz
   intro h
@@ -91,7 +107,9 @@ lemma zero_eq_alt {p : Semiformula L μ n} : Hierarchy b 0 p → Hierarchy (!b) 
 
 lemma pi_zero_iff_sigma_zero {p : Semiformula L μ n} : Pi 0 p ↔ Sigma 0 p := ⟨zero_eq_alt, zero_eq_alt⟩
 
-lemma neg {p : Semiformula L μ n} : Hierarchy b s p → Hierarchy (!b) s (~p) := by
+@[simp] lemma alt_zero_iff_zero {p : Semiformula L μ n} : Hierarchy b.alt 0 p ↔ Hierarchy b 0 p := by rcases b <;> simp[pi_zero_iff_sigma_zero]
+
+lemma neg {p : Semiformula L μ n} : Hierarchy b s p → Hierarchy b.alt s (~p) := by
   intro h; induction h <;> simp[*]
   case bex ih => exact ball _ ih
   case ball ih => exact bex _ ih
@@ -135,14 +153,36 @@ lemma rew_iff (ω : Rew L μ₁ n₁ μ₂ n₂) {p : Semiformula L μ₁ n₁} 
       exact (ih ω.q rfl).ex
 -/
 
-lemma neg_iff {p : Semiformula L μ n} : Hierarchy b s (~p) ↔ Hierarchy (!b) s p :=
+lemma neg_iff {p : Semiformula L μ n} : Hierarchy b s (~p) ↔ Hierarchy b.alt s p :=
   ⟨fun h => by simpa using neg h, fun h => by simpa using neg h⟩
 
 lemma exClosure : {n : ℕ} → {p : Semiformula L μ n} → Sigma (s + 1) p → Sigma (s + 1) (exClosure p)
   | 0,     _, hp => hp
   | n + 1, p, hp => by simpa using exClosure (hp.ex)
 
+instance : LogicSymbol.AndOrClosed (Hierarchy b s : Semiformula L μ k → Prop) where
+  verum := verum _ _ _
+  falsum := falsum _ _ _
+  and := and
+  or := or
+
+instance : LogicSymbol.Closed (Hierarchy b 0 : Semiformula L μ k → Prop) where
+  not := by simp[neg_iff]
+  imply := by simp[Semiformula.imp_eq, neg_iff]; intro p q hp hq; simp[*]
+
 end Hierarchy
+
+section definability
+
+variable {M} [Structure ℒₒᵣ M]
+
+abbrev Hierarchy.Definable (b : VType) (s : ℕ) {k} (t : Set (Fin k → M)) : Prop :=
+  FirstOrder.Definable (Hierarchy b s : Semisentence ℒₒᵣ k → Prop) t
+
+abbrev Hierarchy.DefinableFunction (b : VType) (s : ℕ) {k} (t : (Fin k → M) → M) : Prop :=
+  FirstOrder.DefinableFunction (Hierarchy b s : Semisentence ℒₒᵣ (k + 1) → Prop) t
+
+end definability
 
 variable {L : Language} [(k : ℕ) → DecidableEq (L.Func k)] [(k : ℕ) → DecidableEq (L.Rel k)]
   [ORing L] [Structure L ℕ]
