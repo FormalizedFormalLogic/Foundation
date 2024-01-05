@@ -289,6 +289,7 @@ lemma LogicKD.def_FrameClass : ∀ f, (Serial f) ↔ (f ∈ FrameClass α β �
     apply (AxiomD.defines β f).mpr;
     rcases hp; aesop;
 
+/-
 lemma LogicS4.def_FrameClass : ∀ f, (Reflexive f ∧ Transitive f) ↔ (f ∈ FrameClass α β 𝐒𝟒) := by
   intro f;
   constructor;
@@ -299,6 +300,7 @@ lemma LogicS4.def_FrameClass : ∀ f, (Reflexive f ∧ Transitive f) ↔ (f ∈ 
     aesop;
   . intro hp;
     sorry;
+-/
 
 end LogicDefinabilities
 
