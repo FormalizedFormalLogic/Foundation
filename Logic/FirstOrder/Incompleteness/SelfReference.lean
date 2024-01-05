@@ -11,7 +11,7 @@ namespace Arith
 
 namespace SelfReference
 
-variable {T : Theory ℒₒᵣ} [EqTheory T] [System.Subtheory 𝐏𝐀⁻ T] [SigmaOneSound T]
+variable {T : Theory ℒₒᵣ} [𝐄𝐪 ≾ T] [𝐏𝐀⁻ ≾ T] [SigmaOneSound T]
 
 open Encodable Semiformula
 
@@ -65,7 +65,7 @@ end SelfReference
 
 namespace FirstIncompletenessBySelfReference
 
-variable {T : Theory ℒₒᵣ} [EqTheory T] [System.Subtheory 𝐏𝐀⁻ T] [SigmaOneSound T]
+variable {T : Theory ℒₒᵣ} [𝐄𝐪 ≾ T] [𝐏𝐀⁻ ≾ T] [SigmaOneSound T]
 
 section ProvableSentence
 

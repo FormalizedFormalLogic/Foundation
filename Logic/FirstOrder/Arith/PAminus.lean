@@ -14,6 +14,7 @@ namespace PAminus
 noncomputable section
 
 namespace Model
+
 open Language
 variable
   {M : Type} [Inhabited M] [DecidableEq M] [ORingSymbol M]
@@ -209,7 +210,7 @@ lemma sigma_one_completeness : ∀ {n} {σ : Semisentence ℒₒᵣ n},
 
 end Model
 
-variable {T : Theory ℒₒᵣ} [EqTheory T] [System.Subtheory 𝐏𝐀⁻ T]
+variable {T : Theory ℒₒᵣ} [𝐄𝐪 ≾ T] [𝐏𝐀⁻ ≾ T]
 
 theorem sigma_one_completeness {σ : Sentence ℒₒᵣ} (hσ : Hierarchy.Sigma 1 σ) :
     ℕ ⊧ₘ σ → T ⊢ σ := fun H =>

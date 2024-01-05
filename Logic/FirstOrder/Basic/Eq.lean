@@ -1,5 +1,6 @@
 import Logic.FirstOrder.Basic.Elab
 import Logic.FirstOrder.Basic.Semantics.Elementary
+import Logic.FirstOrder.Basic.Soundness
 
 namespace LO
 
@@ -51,20 +52,17 @@ inductive Eq : Theory L
   | relExt {k} (r : L.Rel k) :
     Eq “∀* (!(Semiformula.vecEq varSumInL varSumInR) → !(Semiformula.rel r varSumInL) → !(Semiformula.rel r varSumInR))”
 
+notation "𝐄𝐪 " => Eq _
+
 end Eq
 
 end Theory
-
-class EqTheory (T : Theory L) where
-  eq : Theory.Eq L ⊆ T
-
-attribute [simp] EqTheory.eq
 
 namespace Structure
 
 namespace Eq
 
-@[simp] lemma modelsEqTheory {M : Type u} [Inhabited M] [Structure L M] [Structure.Eq L M] : M ⊧ₘ* Theory.Eq L := by
+@[simp] lemma modelsEqTheory {M : Type u} [Inhabited M] [Structure L M] [Structure.Eq L M] : M ⊧ₘ* (𝐄𝐪 : Theory L) := by
   intro σ h
   cases h <;> simp[models_def, Semiformula.vecEq, Semiterm.val_func]
   · intro e h; congr; funext i; exact h i
@@ -79,7 +77,7 @@ def eqv (a b : M) : Prop := (@Semiformula.Operator.Eq.eq L _).val ![a, b]
 
 variable {L}
 
-variable (H : M ⊧ₘ* Theory.Eq L)
+variable (H : M ⊧ₘ* (𝐄𝐪 : Theory L))
 
 open Semiterm Theory Semiformula
 
@@ -123,7 +121,7 @@ lemma eqv_equivalence : Equivalence (eqv L (M := M)) where
   symm := eqv_symm H
   trans := eqv_trans H
 
-def eqvSetoid (H : M ⊧ₘ* Theory.Eq L) : Setoid M := Setoid.mk (eqv L) (eqv_equivalence H)
+def eqvSetoid (H : M ⊧ₘ* (𝐄𝐪 : Theory L)) : Setoid M := Setoid.mk (eqv L) (eqv_equivalence H)
 
 def QuotEq := Quotient (eqvSetoid H)
 
@@ -195,36 +193,36 @@ end Eq
 
 end Structure
 
-lemma consequence_iff_eq {T : Theory L} [EqTheory T] {σ : Sentence L} :
+lemma consequence_iff_eq {T : Theory L} [𝐄𝐪 ≾ T] {σ : Sentence L} :
     T ⊨ σ ↔ (∀ (M : Type u) [Inhabited M] [Structure L M] [Structure.Eq L M], M ⊧ₘ* T → M ⊧ₘ σ) := by
   simp[consequence_iff]; constructor
   · intro h M i s _ hM; exact h M hM
   · intro h M i s hM
-    have H : M ⊧ₘ* Theory.Eq L := Semantics.realizeTheory_of_subset hM EqTheory.eq
+    have H : M ⊧ₘ* (𝐄𝐪 : Theory L) := Sound.modelsTheory_of_subtheory hM
     have e : Structure.Eq.QuotEq H ≡ₑ[L] M := Structure.Eq.QuotEq.elementaryEquiv H
     exact e.models.mp $ h (Structure.Eq.QuotEq H) (e.modelsTheory.mpr hM)
 
-lemma consequence_iff_eq' {T : Theory L} [EqTheory T] {σ : Sentence L} :
+lemma consequence_iff_eq' {T : Theory L} [𝐄𝐪 ≾ T] {σ : Sentence L} :
     T ⊨ σ ↔ (∀ (M : Type u) [Inhabited M] [Structure L M] [Structure.Eq L M] [Theory.Mod M T], M ⊧ₘ σ) := by
   rw[consequence_iff_eq]
   exact ⟨fun h M _ _ _ hT => h M Semantics.Mod.realizeTheory, fun h M i s e hT => @h M i s e ⟨hT⟩⟩
 
-lemma satisfiableTheory_iff_eq {T : Theory L} [EqTheory T] :
+lemma satisfiableTheory_iff_eq {T : Theory L} [𝐄𝐪 ≾ T] :
     Semantics.SatisfiableTheory T ↔ (∃ (M : Type u) (_ : Inhabited M) (_ : Structure L M) (_ : Structure.Eq L M), M ⊧ₘ* T) := by
   simp[satisfiableTheory_iff]; constructor
   · intro ⟨M, i, s, hM⟩;
-    have H : M ⊧ₘ* Theory.Eq L := Semantics.realizeTheory_of_subset hM EqTheory.eq
+    have H : M ⊧ₘ* (𝐄𝐪 : Theory L) := Sound.modelsTheory_of_subtheory hM
     have e : Structure.Eq.QuotEq H ≡ₑ[L] M := Structure.Eq.QuotEq.elementaryEquiv H
     exact ⟨Structure.Eq.QuotEq H, inferInstance, inferInstance, inferInstance, e.modelsTheory.mpr hM⟩
   · intro ⟨M, i, s, _, hM⟩; exact ⟨M, i, s, hM⟩
 
-def ModelOfSatEq {T : Theory L} [EqTheory T] (sat : Semantics.SatisfiableTheory T) : Type _ :=
-  have H : ModelOfSat sat ⊧ₘ* Theory.Eq L := Semantics.realizeTheory_of_subset (ModelOfSat.models sat) EqTheory.eq
+def ModelOfSatEq {T : Theory L} [𝐄𝐪 ≾ T] (sat : Semantics.SatisfiableTheory T) : Type _ :=
+  have H : ModelOfSat sat ⊧ₘ* (𝐄𝐪 : Theory L) := Sound.modelsTheory_of_subtheory (ModelOfSat.models sat)
   Structure.Eq.QuotEq H
 
 namespace ModelOfSatEq
 
-variable {T : Theory L} [EqTheory T] (sat : Semantics.SatisfiableTheory T)
+variable {T : Theory L} [𝐄𝐪 ≾ T] (sat : Semantics.SatisfiableTheory T)
 
 noncomputable instance : Inhabited (ModelOfSatEq sat) := Structure.Eq.QuotEq.inhabited _
 
@@ -234,7 +232,7 @@ noncomputable instance : Structure.Eq L (ModelOfSatEq sat) := Structure.Eq.QuotE
 
 lemma models : ModelOfSatEq sat ⊧ₘ* T :=
   have e : ModelOfSatEq sat ≡ₑ[L] ModelOfSat sat :=
-    Structure.Eq.QuotEq.elementaryEquiv (Semantics.realizeTheory_of_subset (ModelOfSat.models sat) EqTheory.eq)
+    Structure.Eq.QuotEq.elementaryEquiv (Sound.modelsTheory_of_subtheory (ModelOfSat.models sat))
   e.modelsTheory.mpr (ModelOfSat.models _)
 
 instance mod : Theory.Mod (ModelOfSatEq sat) T := ⟨models sat⟩

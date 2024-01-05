@@ -83,6 +83,8 @@ noncomputable def provableTheory_theory {T : Set F} : T ⊢* theory T := λ b �
 class Subtheory (T U : Set F) where
   sub : {f : F} → T ⊢ f → U ⊢ f
 
+infix:50 " ≾ " => Subtheory
+
 class Equivalent (T U : Set F) where
   ofLeft : {f : F} → T ⊢ f → U ⊢ f
   ofRight : {f : F} → U ⊢ f → T ⊢ f
@@ -91,12 +93,16 @@ namespace Subtheory
 
 variable (T U T₁ T₂ T₃ : Set F)
 
-@[refl] instance : Subtheory T T := ⟨id⟩
+@[refl] instance : T ≾ T := ⟨id⟩
 
-@[trans] protected def trans [Subtheory T₁ T₂] [Subtheory T₂ T₃] : Subtheory T₁ T₃ :=
+@[trans] protected def trans [T₁ ≾ T₂] [T₂ ≾ T₃] : T₁ ≾ T₃ :=
   ⟨fun {f} b => sub (sub b : T₂ ⊢ f)⟩
 
-def ofSubset (h : T ⊆ U) : Subtheory T U := ⟨fun b => weakening b h⟩
+variable {T U}
+
+def ofSubset (h : T ⊆ U) : T ≾ U := ⟨fun b => weakening b h⟩
+
+def bewTheory [T ≾ U] : U ⊢* T := λ hp ↦ sub (axm hp)
 
 end Subtheory
 
@@ -157,6 +163,9 @@ lemma models_of_proof {T : Set F} {f} (h : a ⊧* T) (b : T ⊢ f) : a ⊧ f :=
 
 lemma modelsTheory_of_proofTheory {T U : Set F} (h : s ⊧* T) (b : T ⊢* U) : s ⊧* U :=
   fun _ hf => models_of_proof h (b hf)
+
+lemma modelsTheory_of_subtheory {T U : Set F} [U ≾ T] (h : s ⊧* T) : s ⊧* U :=
+  modelsTheory_of_proofTheory h System.Subtheory.bewTheory
 
 end Sound
 

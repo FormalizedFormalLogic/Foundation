@@ -67,7 +67,7 @@ lemma consistent_of_sound [Sound T F] (hF : F ⊥) : System.Consistent T :=
 
 end
 
-variable [ORing L] (T : Theory L) [EqTheory T]
+variable [ORing L] (T : Theory L) [𝐄𝐪 ≾ T]
 
 lemma consequence_of (σ : Sentence L)
   (H : ∀ (M : Type u)
