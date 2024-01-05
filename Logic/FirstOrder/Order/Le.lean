@@ -64,26 +64,12 @@ end
 
 end Semiformula
 
-namespace Theory.Order
-
-inductive Total (L : Language) [Semiformula.Operator.Eq L] [Semiformula.Operator.LT L] : Sentence L → Prop
-  | ltTrans  : Total L “∀ ∀ ∀ (#0 < #1 → #1 < #2 → #0 < #2)”
-  | ltIrrefl : Total L “∀ (¬#0 < #0)”
-  | ltTri    : Total L “∀ ∀ (#0 < #1 ∨ #0 = #1 ∨#1 < #0)”
-
-end Theory.Order
-
 namespace Order
 variable {T : Theory L} [EqTheory T]
 
 noncomputable def leIffEqOrLt : T ⊢ “∀ ∀ (#0 ≤ #1 ↔ #0 = #1 ∨ #0 < #1)” :=
   Complete.complete
     (consequence_iff.mpr $ fun _ _ _ _ => by simp[models_def, Semiformula.Operator.LE.def_of_Eq_of_LT])
-
-class MTotal (M : Type*) [_root_.LT M] :=
-  ltTrans : ∀ x y z : M, x < y → y < z → x < z
-  ltIrrefl : ∀ x : M, ¬x < x
-  ltTri : ∀ x y : M, x < y ∨ x = y ∨ y < x
 
 lemma provOf (σ : Sentence L)
   (H : ∀ (M : Type u)

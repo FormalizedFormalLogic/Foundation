@@ -5,7 +5,7 @@ namespace LO
 
 namespace FirstOrder
 
-variable {L : Language.{u}} {μ : Type v} [Semiformula.Operator.Eq L]
+variable {L : Language} {μ : Type*} [Semiformula.Operator.Eq L]
 namespace Semiterm
 
 def varSumInL {k} : Fin k → Semiterm L μ (k + k) := fun i => #(Fin.castLE (by simp) i)
@@ -270,6 +270,21 @@ instance [Operator.Mem L] : Membership (ModelOfSatEq sat) (ModelOfSatEq sat) :=
 instance [Operator.Mem L] : Structure.Mem L (ModelOfSatEq sat) := ⟨fun _ _ => iff_of_eq rfl⟩
 
 end ModelOfSatEq
+
+namespace Semiformula
+
+def existsUnique (p : Semiformula L μ (n + 1)) : Semiformula L μ n :=
+  ∃' (p ⋏ (∀' ((Rew.substs (#0 :> (#·.succ.succ))).hom p ⟶ “#0 = #1”)))
+
+prefix:64 "∃! " => existsUnique
+
+variable {M : Type*} [s : Structure L M] [Structure.Eq L M]
+
+@[simp] lemma eval_existsUnique {e ε} {p : Semiformula L μ (n + 1)} :
+    Eval s e ε (∃! p) ↔ ∃! x, Eval s (x :> e) ε p := by
+  simp[existsUnique, Semiformula.eval_substs, Matrix.comp_vecCons', ExistsUnique]
+
+end Semiformula
 
 end FirstOrder
 
