@@ -46,66 +46,27 @@ inductive PAminus : Theory L
   | ltTrans       : PAminus “∀ ∀ ∀ (#2 < #1 ∧ #1 < #0 → #2 < #0)”
   | ltTri         : PAminus “∀ ∀ (#1 < #0 ∨ #1 = #0 ∨ #0 < #1)”
 
+notation "𝐏𝐀⁻" => PAminus ℒₒᵣ
+
 variable {L}
 
 def IndScheme (u : Set (Semisentence L 1)) : Theory L := succInd '' u
 
 variable (L)
 
+abbrev IndSchemeOpen : Theory L := IndScheme Semiformula.qfree
+
+notation "𝐈open" => IndSchemeOpen ℒₒᵣ
+
+abbrev IndSchemeDelta (k : ℕ) : Theory L := IndScheme (Arith.Hierarchy.Sigma k)
+
+prefix:max "𝐈Δ" => IndSchemeDelta ℒₒᵣ
+
+abbrev Peano : Theory L := IndScheme Set.univ
+
+notation "𝐏𝐀" => Peano ℒₒᵣ
+
 end Theory
-
-variable {L}
-
-abbrev PAminus (T : Theory L) := System.Subtheory (Theory.PAminus L) T
-
-abbrev Ind (U) (T : Theory L) := System.Subtheory (Theory.IndScheme U) T
-
-abbrev IOpen (T : Theory L) := Ind Semiformula.qfree T
-
-abbrev IDelta (k : ℕ) (T : Theory L) := Ind (Arith.Hierarchy.Sigma k) T
-
-abbrev Peano (T : Theory L) := Ind Set.univ T
-
-namespace Axiom
-
-variable (L)
-
-def paminus : Theory L := Theory.Eq L ∪ Theory.PAminus L
-
-variable {L}
-
-def ind (U : Set (Semisentence L 1)) : Theory L := Axiom.paminus L ∪ Theory.IndScheme U
-
-variable (L)
-
-abbrev iopen : Theory L := ind Semiformula.qfree
-
-abbrev idelta (k : ℕ) : Theory L := ind (Arith.Hierarchy.Sigma k)
-
-abbrev peano : Theory L := ind Set.univ
-
-instance : EqTheory (paminus L) where
-  eq := by simp[paminus]
-
-instance : Arith.PAminus (paminus L) := System.Subtheory.ofSubset _ _ (by simp[paminus])
-
-instance (u : Set (Semisentence L 1)) : EqTheory (ind u) where
-  eq := by simp[ind]; exact Set.subset_union_of_subset_left (by simp) _
-
-instance (u : Set (Semisentence L 1)) : Arith.PAminus (ind u) :=
-  System.Subtheory.ofSubset _ _ (by simp[ind, paminus]; exact Set.subset_union_of_subset_left (by simp) _)
-
-instance (u : Set (Semisentence L 1)) : Arith.Ind u (ind u) := System.Subtheory.ofSubset _ _ (by simp[ind])
-
-notation "𝐏𝐀⁻" => paminus ℒₒᵣ
-
-notation "𝐈open" => iopen ℒₒᵣ
-
-prefix:max "𝐈Δ" => idelta ℒₒᵣ
-
-notation "𝐏𝐀" => peano ℒₒᵣ
-
-end Axiom
 
 end Arith
 

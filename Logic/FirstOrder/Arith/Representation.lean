@@ -43,7 +43,7 @@ section model
 variable
   {M : Type} [Inhabited M] [DecidableEq M] [ORingSymbol M]
   [Structure ℒₒᵣ M] [Structure.ORing ℒₒᵣ M]
-  [Theory.Mod M (Theory.PAminus ℒₒᵣ)]
+  [𝐏𝐀⁻.Mod M]
 
 lemma codeAux_uniq {k} {c : Code k} {v : Fin k → M} {z z' : M} :
     Semiformula.Val! M (z :> v) (codeAux c) → Semiformula.Val! M (z' :> v) (codeAux c) → z = z' := by
@@ -155,7 +155,7 @@ lemma codeOfPartrec_spec {k} {f : Vector ℕ k →. ℕ} (hf : Nat.Partrec' f) {
     exact ⟨c, models_code hc⟩
   exact Classical.epsilon_spec this y v
 
-variable {T : Theory ℒₒᵣ} [EqTheory T] [PAminus T] [DecidablePred T] [SigmaOneSound T] [Theory.Computable T]
+variable {T : Theory ℒₒᵣ} [EqTheory T] [System.Subtheory 𝐏𝐀⁻ T] [DecidablePred T] [SigmaOneSound T] [Theory.Computable T]
 
 section representation
 
@@ -187,7 +187,7 @@ lemma provable_computable_code_uniq {k} {f : Vector ℕ k → ℕ}
     T ⊢! ∀' ((Rew.substs $ #0 :> (⸢v ·⸣)).hom (code $ codeOfPartrec f)
       ⟷ “#0 = !!(⸢f (Vector.ofFn v)⸣)”) :=
   Complete.consequence_iff_provable.mp (consequence_of _ _ (fun M _ _ _ _ _ => by
-    haveI : Theory.Mod M (Theory.PAminus ℒₒᵣ) :=
+    haveI : 𝐏𝐀⁻.Mod M :=
       Theory.Mod.of_subtheory (T₁ := T) M (Semantics.ofSystemSubtheory _ _)
     have Hfv : Semiformula.PVal! M (f (Vector.ofFn v) :> (v ·)) (code (codeOfPartrec f)) := by
       simpa[models_iff, Semiformula.eval_substs, Matrix.comp_vecCons'] using

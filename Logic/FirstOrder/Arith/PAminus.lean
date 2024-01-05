@@ -18,7 +18,7 @@ open Language
 variable
   {M : Type} [Inhabited M] [DecidableEq M] [ORingSymbol M]
   [Structure ℒₒᵣ M] [Structure.ORing ℒₒᵣ M]
-  [Theory.Mod M (Theory.PAminus ℒₒᵣ)]
+  [𝐏𝐀⁻.Mod M]
 
 instance : LE M := ⟨fun x y => x = y ∨ x < y⟩
 
@@ -209,12 +209,12 @@ lemma sigma_one_completeness : ∀ {n} {σ : Semisentence ℒₒᵣ n},
 
 end Model
 
-variable {T : Theory ℒₒᵣ} [EqTheory T] [PAminus T]
+variable {T : Theory ℒₒᵣ} [EqTheory T] [System.Subtheory 𝐏𝐀⁻ T]
 
 theorem sigma_one_completeness {σ : Sentence ℒₒᵣ} (hσ : Hierarchy.Sigma 1 σ) :
     ℕ ⊧ₘ σ → T ⊢ σ := fun H =>
   Complete.complete (consequence_of _ _ (fun M _ _ _ _ _ => by
-    haveI : Theory.Mod M (Theory.PAminus ℒₒᵣ) := Theory.Mod.of_subtheory (T₁ := T) M (Semantics.ofSystemSubtheory _ _)
+    haveI : 𝐏𝐀⁻.Mod M := Theory.Mod.of_subtheory (T₁ := T) M (Semantics.ofSystemSubtheory _ _)
     simpa[Matrix.empty_eq] using @Model.sigma_one_completeness M _ _ _ _ _ _ _ hσ ![] (by simpa[models_iff] using H)))
 
 end
