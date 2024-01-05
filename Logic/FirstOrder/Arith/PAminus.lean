@@ -1,4 +1,5 @@
 import Logic.FirstOrder.Arith.Model
+import Logic.Vorspiel.ExistsUnique
 import Mathlib.Algebra.Order.Monoid.Canonical.Defs
 
 --import Logic.FirstOrder.Principia.Meta
@@ -161,6 +162,31 @@ lemma le_of_lt_succ {x y : M} : x < y + 1 ↔ x ≤ y :=
     have : y = x + z' := by simpa[←add_assoc] using h
     simp[this],
    by intro h; exact lt_of_le_of_lt h (lt_add_one y)⟩
+
+lemma msub_existsUnique (x y : M) : ∃! z, (x ≥ y → x = y + z) ∧ (x < y → z = 0) := by
+  have : y ≤ x ∨ x < y := le_or_lt y x
+  rcases this with (hxy | hxy) <;> simp[hxy]
+  · simp [show ¬x < y from not_lt.mpr hxy]
+    have : ∃ z, x = y + z := exists_add_of_le hxy
+    rcases this with ⟨z, rfl⟩
+    exact ExistsUnique.intro z rfl (fun x h => (add_left_cancel h).symm)
+  · simp [show ¬y ≤ x from not_le.mpr hxy]
+
+def msub (x y : M) : M := Classical.choose! (msub_existsUnique x y)
+
+infix:65 " -̇ " => msub
+
+lemma msub_spec_of_ge {x y : M} (h : x ≥ y) : x = y + (x -̇ y) := (Classical.choose!_spec (msub_existsUnique x y)).1 h
+
+lemma msub_spec_of_lt {x y : M} (h : x < y) : x -̇ y = 0 := (Classical.choose!_spec (msub_existsUnique x y)).2 h
+
+lemma msub_eq_iff {x y z : M} : z = x -̇ y ↔ ((x ≥ y → x = y + z) ∧ (x < y → z = 0)) := Classical.choose!_eq_iff _
+
+/-
+lemma msub_definable : Σᴬ[0]-Function₂ (λ x y : M ↦ x -̇ y) :=
+  ⟨“(#2 ≤ #1 → #1 = #2 + #0) ∧ (#1 < #2 → #0 = 0)”,
+    by sorry, by intro v; simp[msub_eq_iff]; rfl⟩
+-/
 
 lemma eq_nat_of_lt_nat : ∀ {n : ℕ} {x : M}, x < n → ∃ m : ℕ, x = m
   | 0,     x, hx => by simp[not_neg] at hx

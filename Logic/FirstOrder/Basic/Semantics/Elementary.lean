@@ -255,13 +255,13 @@ end
 
 section Definability
 
-variable {L : Language.{u}} {α : Type u} [Structure L α]
+variable {α : Type u} [Structure L α]
 
-def Definable {k} (C : Semisentence L k → Prop) (R : Set (Fin k → α)) : Prop :=
-  ∃ p, C p ∧ (∀ v, v ∈ R ↔ Semiformula.PVal! α v p)
+def Definable {k} (C : Semisentence L k → Prop) (R : (Fin k → α) → Prop) : Prop :=
+  ∃ p, C p ∧ (∀ v, R v ↔ Semiformula.PVal! α v p)
 
 def DefinableFunction {k} (C : Semisentence L (k + 1) → Prop) (f : (Fin k → α) → α) : Prop :=
-  Definable C { w | Matrix.vecHead w = f (Matrix.vecTail w) }
+  Definable C fun w ↦ Matrix.vecHead w = f (Matrix.vecTail w)
 
 namespace Definable
 
@@ -271,16 +271,16 @@ section AndOrClosed
 
 variable [LogicSymbol.AndOrClosed C]
 
-@[simp] lemma empty : Definable C (∅ : Set (Fin k → α)) := ⟨⊥, by simp⟩
+@[simp] lemma falsum : Definable C (λ _ ↦ False : (Fin k → α) → Prop) := ⟨⊥, by simp⟩
 
-@[simp] lemma univ : Definable C (Set.univ : Set (Fin k → α)) := ⟨⊤, by simp⟩
+@[simp] lemma verum : Definable C (λ _ ↦ True : (Fin k → α) → Prop) := ⟨⊤, by simp⟩
 
-lemma union {s t : Set (Fin k → α)} (hs : Definable C s) (ht : Definable C t) :
-    Definable C (s ∪ t) := by
+lemma or {P Q : (Fin k → α) → Prop} (hs : Definable C P) (ht : Definable C Q) :
+    Definable C (λ x ↦ P x ∨ Q x) := by
   rcases hs with ⟨p, _, _⟩; rcases ht with ⟨q, _, _⟩; exact ⟨p ⋎ q, by simp[LogicSymbol.AndOrClosed.or, *]⟩
 
-lemma inter {s t : Set (Fin k → α)} (hs : Definable C s) (ht : Definable C t) :
-    Definable C (s ∩ t) := by
+lemma and {P Q : (Fin k → α) → Prop} (hs : Definable C P) (ht : Definable C Q) :
+    Definable C (λ x ↦ P x ∧ Q x) := by
   rcases hs with ⟨p, _, _⟩; rcases ht with ⟨q, _, _⟩; exact ⟨p ⋏ q, by simp[LogicSymbol.AndOrClosed.and, *]⟩
 
 end AndOrClosed
