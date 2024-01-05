@@ -9,7 +9,7 @@ open Formula FrameConsequence
 variable (α β : Type u) [Inhabited β]
 
 lemma Logic.Hilbert.sounds
-  (Λ : Logic (Formula α))
+  (Λ : Logic α)
   (f : Frame β) (hf : f ∈ (FrameClass β α Λ))
   {p : Formula α}
   (d : ⊢ᴹ(Λ) p) : (⊧ᴹᶠ[f] p) := by
@@ -23,7 +23,7 @@ lemma Logic.Hilbert.sounds
     | inr hq => exact hqr hq;
 
 lemma Logic.Hilbert.consistent
-  (Λ : Logic (Formula α))
+  (Λ : Logic α)
   (hf : ∃ f, f ∈ (FrameClass β α Λ))
   : (⊬ᴹ(Λ)! (⊥ : Formula α)) := by
   by_contra hC; simp at hC;

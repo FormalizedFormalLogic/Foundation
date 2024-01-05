@@ -272,11 +272,11 @@ section LogicDefinabilities
 attribute [simp] LogicKD LogicKT4
 
 @[simp]
-def FrameClass (α β) (Λ : Logic (Formula β)) : Set (Frame α) := { f : Frame α | ⊧ᴹᶠ[f] Λ }
+def FrameClass (α β) (Λ : Logic β) : Set (Frame α) := { f : Frame α | ⊧ᴹᶠ[f] Λ }
 
-lemma FrameClass.union (Λ₁ Λ₂ : Logic (Formula β)) : FrameClass α β (Λ₁ ∪ Λ₂) = FrameClass α β Λ₁ ∩ FrameClass α β Λ₂ := by aesop;
+lemma FrameClass.union (Λ₁ Λ₂ : Logic β) : FrameClass α β (Λ₁ ∪ Λ₂) = FrameClass α β Λ₁ ∩ FrameClass α β Λ₂ := by aesop;
 
-lemma LogicK.def_FrameClass : ∀ f, f ∈ FrameClass α β (𝐊 : Logic (Formula β)) := by aesop;
+lemma LogicK.def_FrameClass : ∀ f, f ∈ FrameClass α β (𝐊 : Logic β) := by aesop;
 
 lemma LogicKD.def_FrameClass : ∀ f, (Serial f) ↔ (f ∈ FrameClass α β 𝐊𝐃) := by
   intro f;
