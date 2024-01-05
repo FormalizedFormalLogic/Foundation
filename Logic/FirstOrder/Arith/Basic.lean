@@ -31,6 +31,8 @@ namespace FirstOrder
 
 open Semiterm Semiformula
 
+abbrev Polynomial (n : ℕ) : Type := Semiterm ℒₒᵣ Empty n
+
 class ORing (L : Language) extends
   Operator.Zero L, Operator.One L, Operator.Add L, Operator.Mul L, Operator.Eq L, Operator.LT L
 

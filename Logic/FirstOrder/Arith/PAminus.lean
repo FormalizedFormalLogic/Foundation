@@ -14,13 +14,13 @@ namespace PAminus
 
 noncomputable section
 
+variable {M : Type} [Inhabited M] [DecidableEq M] [ORingSymbol M]
+  [Structure ℒₒᵣ M] [Structure.ORing ℒₒᵣ M]
+  [𝐏𝐀⁻.Mod M]
+
 namespace Model
 
 open Language
-variable
-  {M : Type} [Inhabited M] [DecidableEq M] [ORingSymbol M]
-  [Structure ℒₒᵣ M] [Structure.ORing ℒₒᵣ M]
-  [𝐏𝐀⁻.Mod M]
 
 instance : LE M := ⟨fun x y => x = y ∨ x < y⟩
 
@@ -163,31 +163,6 @@ lemma le_of_lt_succ {x y : M} : x < y + 1 ↔ x ≤ y :=
     simp[this],
    by intro h; exact lt_of_le_of_lt h (lt_add_one y)⟩
 
-lemma msub_existsUnique (x y : M) : ∃! z, (x ≥ y → x = y + z) ∧ (x < y → z = 0) := by
-  have : y ≤ x ∨ x < y := le_or_lt y x
-  rcases this with (hxy | hxy) <;> simp[hxy]
-  · simp [show ¬x < y from not_lt.mpr hxy]
-    have : ∃ z, x = y + z := exists_add_of_le hxy
-    rcases this with ⟨z, rfl⟩
-    exact ExistsUnique.intro z rfl (fun x h => (add_left_cancel h).symm)
-  · simp [show ¬y ≤ x from not_le.mpr hxy]
-
-def msub (x y : M) : M := Classical.choose! (msub_existsUnique x y)
-
-infix:65 " -̇ " => msub
-
-lemma msub_spec_of_ge {x y : M} (h : x ≥ y) : x = y + (x -̇ y) := (Classical.choose!_spec (msub_existsUnique x y)).1 h
-
-lemma msub_spec_of_lt {x y : M} (h : x < y) : x -̇ y = 0 := (Classical.choose!_spec (msub_existsUnique x y)).2 h
-
-lemma msub_eq_iff {x y z : M} : z = x -̇ y ↔ ((x ≥ y → x = y + z) ∧ (x < y → z = 0)) := Classical.choose!_eq_iff _
-
-/-
-lemma msub_definable : Σᴬ[0]-Function₂ (λ x y : M ↦ x -̇ y) :=
-  ⟨“(#2 ≤ #1 → #1 = #2 + #0) ∧ (#1 < #2 → #0 = 0)”,
-    by sorry, by intro v; simp[msub_eq_iff]; rfl⟩
--/
-
 lemma eq_nat_of_lt_nat : ∀ {n : ℕ} {x : M}, x < n → ∃ m : ℕ, x = m
   | 0,     x, hx => by simp[not_neg] at hx
   | n + 1, x, hx => by
@@ -243,6 +218,45 @@ theorem sigma_one_completeness {σ : Sentence ℒₒᵣ} (hσ : Hierarchy.Sigma 
   Complete.complete (consequence_of _ _ (fun M _ _ _ _ _ => by
     haveI : 𝐏𝐀⁻.Mod M := Theory.Mod.of_subtheory (T₁ := T) M (Semantics.ofSystemSubtheory _ _)
     simpa[Matrix.empty_eq] using @Model.sigma_one_completeness M _ _ _ _ _ _ _ hσ ![] (by simpa[models_iff] using H)))
+
+namespace Model
+
+section msub
+
+lemma msub_existsUnique (x y : M) : ∃! z, (x ≥ y → x = y + z) ∧ (x < y → z = 0) := by
+  have : y ≤ x ∨ x < y := le_or_lt y x
+  rcases this with (hxy | hxy) <;> simp[hxy]
+  · simp [show ¬x < y from not_lt.mpr hxy]
+    have : ∃ z, x = y + z := exists_add_of_le hxy
+    rcases this with ⟨z, rfl⟩
+    exact ExistsUnique.intro z rfl (fun x h => (add_left_cancel h).symm)
+  · simp [show ¬y ≤ x from not_le.mpr hxy]
+
+def msub (x y : M) : M := Classical.choose! (msub_existsUnique x y)
+
+infix:65 " -̇ " => msub
+
+lemma msub_spec_of_ge {x y : M} (h : x ≥ y) : x = y + (x -̇ y) := (Classical.choose!_spec (msub_existsUnique x y)).1 h
+
+lemma msub_spec_of_lt {x y : M} (h : x < y) : x -̇ y = 0 := (Classical.choose!_spec (msub_existsUnique x y)).2 h
+
+lemma msub_eq_iff {x y z : M} : z = x -̇ y ↔ ((x ≥ y → x = y + z) ∧ (x < y → z = 0)) := Classical.choose!_eq_iff _
+
+lemma msub_definable : Σᴬ[0]-Function₂ (λ x y : M ↦ x -̇ y) :=
+  ⟨“(#2 ≤ #1 → #1 = #2 + #0) ∧ (#1 < #2 → #0 = 0)”,
+    by simp[Hierarchy.zero_iff_sigma_zero], by intro v; simp[msub_eq_iff]; rfl⟩
+
+@[simp] lemma msub_le_self {x y : M} : x -̇ y ≤ x := by
+  have : y ≤ x ∨ x < y := le_or_lt y x
+  rcases this with (hxy | hxy) <;> simp[hxy]
+  · simpa [← msub_spec_of_ge hxy] using show x -̇ y ≤ y + (x -̇ y) from le_add_self
+  · simp[msub_spec_of_lt hxy]
+
+lemma msub_polybounded : PolyBounded₂ (λ x y : M ↦ x -̇ y) := ⟨#0, λ v ↦ by simp⟩
+
+end msub
+
+end Model
 
 end
 

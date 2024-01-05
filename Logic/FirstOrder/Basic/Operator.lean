@@ -217,9 +217,11 @@ instance [Language.LT L] : Operator.LT L := ⟨⟨Semiformula.rel Language.LT.lt
 
 instance [Operator.Eq L] [Operator.LT L] : Operator.LE L := ⟨Eq.eq.or LT.lt⟩
 
-lemma Eq.sentence_eq [L.Eq] : (@Operator.Eq.eq L _).sentence = Semiformula.rel Language.Eq.eq Semiterm.bvar := rfl
+lemma Eq.sentence_eq [L.Eq] : (@Eq.eq L _).sentence = Semiformula.rel Language.Eq.eq Semiterm.bvar := rfl
 
-lemma LT.sentence_eq [L.LT] : (@Operator.LT.lt L _).sentence = Semiformula.rel Language.LT.lt Semiterm.bvar := rfl
+lemma LT.sentence_eq [L.LT] : (@LT.lt L _).sentence = Semiformula.rel Language.LT.lt Semiterm.bvar := rfl
+
+lemma LE.sentence_eq [L.Eq] [L.LT] : (@LE.le L _).sentence = Eq.eq.sentence ⋎ LT.lt.sentence := rfl
 
 lemma LE.def_of_Eq_of_LT [Operator.Eq L] [Operator.LT L] :
     (@Operator.LE.le L _) = Eq.eq.or LT.lt := rfl

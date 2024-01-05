@@ -107,6 +107,8 @@ lemma zero_eq_alt {p : Semiformula L μ n} : Hierarchy b 0 p → Hierarchy b.alt
 
 lemma pi_zero_iff_sigma_zero {p : Semiformula L μ n} : Pi 0 p ↔ Sigma 0 p := ⟨zero_eq_alt, zero_eq_alt⟩
 
+lemma zero_iff_sigma_zero {p : Semiformula L μ n} : Hierarchy b 0 p ↔ Hierarchy Σ 0 p := by rcases b <;> simp[pi_zero_iff_sigma_zero]
+
 @[simp] lemma alt_zero_iff_zero {p : Semiformula L μ n} : Hierarchy b.alt 0 p ↔ Hierarchy b 0 p := by rcases b <;> simp[pi_zero_iff_sigma_zero]
 
 lemma neg {p : Semiformula L μ n} : Hierarchy b s p → Hierarchy b.alt s (~p) := by
@@ -153,8 +155,10 @@ lemma rew_iff (ω : Rew L μ₁ n₁ μ₂ n₂) {p : Semiformula L μ₁ n₁} 
       exact (ih ω.q rfl).ex
 -/
 
-lemma neg_iff {p : Semiformula L μ n} : Hierarchy b s (~p) ↔ Hierarchy b.alt s p :=
+@[simp] lemma neg_iff {p : Semiformula L μ n} : Hierarchy b s (~p) ↔ Hierarchy b.alt s p :=
   ⟨fun h => by simpa using neg h, fun h => by simpa using neg h⟩
+
+@[simp] lemma imp_iff {p q : Semiformula L μ n} : Hierarchy b s (p ⟶ q) ↔ (Hierarchy b.alt s p ∧ Hierarchy b s q) := by simp[Semiformula.imp_eq]
 
 lemma exClosure : {n : ℕ} → {p : Semiformula L μ n} → Sigma (s + 1) p → Sigma (s + 1) (exClosure p)
   | 0,     _, hp => hp
@@ -196,10 +200,10 @@ abbrev DefinableFunction (b : VType) (s : ℕ) {k} (f : (Fin k → M) → M) : P
   FirstOrder.DefinableFunction (Hierarchy b s : Semisentence ℒₒᵣ (k + 1) → Prop) f
 
 abbrev DefinableFunction₁ (b : VType) (s : ℕ) (f : M → M) : Prop :=
-  Hierarchy.DefinableFunction b s (k := 1) (fun v => f (Matrix.vecHead v))
+  DefinableFunction b s (k := 1) (fun v => f (Matrix.vecHead v))
 
 abbrev DefinableFunction₂ (b : VType) (s : ℕ) (f : M → M → M) : Prop :=
-  Hierarchy.DefinableFunction b s (k := 2) (fun v => f (v 0) (v 1))
+  DefinableFunction b s (k := 2) (fun v => f (v 0) (v 1))
 
 abbrev SigmaDefinableFunction₁ (s : ℕ) (f : M → M) : Prop := DefinableFunction₁ Σ s f
 
@@ -219,9 +223,26 @@ notation "Πᴬ[" s "]-Function₂" => PiDefinableFunction₂ s
 
 variable {f : M → M}
 
-
-
 end definability
+
+section
+
+variable {L : Language} [L.Eq] [L.LT]
+
+@[simp] lemma equal {t u : Semiterm L μ n} : Hierarchy b s “!!t = !!u” := by
+  simp[Semiformula.Operator.operator, Matrix.fun_eq_vec₂,
+    Semiformula.Operator.Eq.sentence_eq]
+
+@[simp] lemma lt {t u : Semiterm L μ n} : Hierarchy b s “!!t < !!u” := by
+  simp[Semiformula.Operator.operator, Matrix.fun_eq_vec₂,
+    Semiformula.Operator.Eq.sentence_eq, Semiformula.Operator.LT.sentence_eq]
+
+@[simp] lemma le {t u : Semiterm L μ n} : Hierarchy b s “!!t ≤ !!u” := by
+  simp[Semiformula.Operator.operator, Matrix.fun_eq_vec₂,
+    Semiformula.Operator.Eq.sentence_eq, Semiformula.Operator.LT.sentence_eq,
+    Semiformula.Operator.LE.sentence_eq]
+
+end
 
 end Hierarchy
 

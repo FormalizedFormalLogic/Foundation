@@ -90,6 +90,8 @@ theorem Peano.Consistent :
     System.Consistent (Theory.IndScheme Set.univ ∪ Theory.PAminus ℒₒᵣ ∪ 𝐄𝐪) :=
   Sound.consistent_of_model Standard.modelsPeano
 
+section
+
 variable (L : Language.{u}) [ORing L]
 
 structure Cut (M : Type w) [s : Structure L M] where
@@ -100,11 +102,28 @@ structure Cut (M : Type w) [s : Structure L M] where
 structure ClosedCut (M : Type w) [s : Structure L M] extends Structure.ClosedSubset L M where
   closedLt : ∀ x y : M, Semiformula.PVal s ![x, y] “#0 < #1” → y ∈ domain → x ∈ domain
 
-end Arith
+end
 
 abbrev Theory.trueArith : Theory ℒₒᵣ := Structure.theory ℒₒᵣ ℕ
 
 notation "𝐓𝐀" => Theory.trueArith
+
+section
+
+variable {M : Type} [LE M] [Structure ℒₒᵣ M]
+
+def PolyBounded {k} (f : (Fin k → M) → M) : Prop :=
+  ∃ t : Polynomial k, ∀ v : Fin k → M, f v ≤ t.bVal! M v
+
+abbrev PolyBounded₁ (f : M → M) : Prop :=
+  PolyBounded (k := 1) (fun v => f (Matrix.vecHead v))
+
+abbrev PolyBounded₂ (f : M → M → M) : Prop :=
+  PolyBounded (k := 2) (fun v => f (v 0) (v 1))
+
+end
+
+end Arith
 
 end FirstOrder
 
