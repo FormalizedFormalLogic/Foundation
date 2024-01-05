@@ -90,7 +90,7 @@ lemma ball' {b s n} {p : Semiformula L μ (n + 1)} (t : Semiterm L μ n) {t' : S
   (ht : Rew.bShift t = t') (hp : Hierarchy b s p) :
     Hierarchy b s “∀[#0 < !!t'] !p” := by rw[←ht]; exact hp.ball _
 
-lemma ex' {b s n} {p : Semiformula L μ (n + 1)} (t : Semiterm L μ n) {t' : Semiterm L μ (n + 1)}
+lemma bex' {b s n} {p : Semiformula L μ (n + 1)} (t : Semiterm L μ n) {t' : Semiterm L μ (n + 1)}
   (ht : Rew.bShift t = t') (hp : Hierarchy b s p) :
     Hierarchy b s “∃[#0 < !!t'] !p” := by rw[←ht]; exact hp.bex _
 
@@ -183,18 +183,26 @@ abbrev Definable (b : VType) (s : ℕ) {k} (t : (Fin k → M) → Prop) : Prop :
   FirstOrder.Definable (Hierarchy b s : Semisentence ℒₒᵣ k → Prop) t
 
 abbrev DefinablePred (b : VType) (s : ℕ) (P : M → Prop) : Prop :=
-  Definable b s (k := 1) { v | P (Matrix.vecHead v) }
+  Definable b s (k := 1) λ v ↦ P (Matrix.vecHead v)
 
 abbrev DefinableRel (b : VType) (s : ℕ) (R : M → M → Prop) : Prop :=
-  Definable b s (k := 2) { v | R (v 0) (v 1) }
+  Definable b s (k := 2) λ v ↦ R (v 0) (v 1)
 
-abbrev SigmaDefinablePred (s : ℕ) (t : Set M) : Prop := DefinablePred Σ s t
+abbrev SigmaDefinablePred (s : ℕ) (P : M → Prop) : Prop := DefinablePred Σ s P
 
-notation "Σᴬ[" s "]-Pred" => SigmaDefinablePred s
+notation "Σᴬ[" s "]-Predicate" => SigmaDefinablePred s
 
-abbrev PiDefinable₁ (s : ℕ) (t : Set M) : Prop := DefinablePred Π s t
+abbrev PiDefinablePred (s : ℕ) (t : Set M) : Prop := DefinablePred Π s t
 
-notation "Πᴬ[" s "]-Pred" => PiDefinable₁ s
+notation "Πᴬ[" s "]-Predicate" => PiDefinablePred s
+
+abbrev SigmaDefinableRel (s : ℕ) (P : M → M → Prop) : Prop := DefinableRel Σ s P
+
+notation "Σᴬ[" s "]-Relation" => SigmaDefinableRel s
+
+abbrev PiDefinableRel (s : ℕ) (t : Set M) : Prop := DefinablePred Π s t
+
+notation "Πᴬ[" s "]-Relation" => PiDefinableRel s
 
 abbrev DefinableFunction (b : VType) (s : ℕ) {k} (f : (Fin k → M) → M) : Prop :=
   FirstOrder.DefinableFunction (Hierarchy b s : Semisentence ℒₒᵣ (k + 1) → Prop) f

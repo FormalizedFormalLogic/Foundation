@@ -10,10 +10,6 @@ namespace Arith
 
 open Encodable
 
-lemma Hierarchy.equal {t u : Semiterm ℒₒᵣ μ n} : Hierarchy b s “!!t = !!u” := by
-  simp[Semiformula.Operator.operator, Matrix.fun_eq_vec₂,
-    Semiformula.Operator.Eq.sentence_eq, Semiformula.Operator.LT.sentence_eq]
-
 scoped notation: max "⸢" a "⸣" => Semiterm.Operator.godelNumber ℒₒᵣ a
 
 @[simp] lemma godelNumber_encode_eq {α} [Primcodable α] (a : α) :
