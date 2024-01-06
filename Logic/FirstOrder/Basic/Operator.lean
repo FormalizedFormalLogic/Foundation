@@ -131,6 +131,32 @@ abbrev godelNumber (L : Language) [Operator.Zero L] [Operator.One L] [Operator.A
 
 end numeral
 
+lemma bv_operator {k} (o : Operator L k) (v : Fin k → Semiterm L μ (n + 1)) :
+    (o.operator v).bv = .biUnion o.term.bv fun i ↦ (v i).bv  := by
+  simp[operator]
+  generalize o.term = s
+  induction s <;> try simp [Rew.func, bv_func, Finset.biUnion_biUnion, *]
+  case fvar => contradiction
+
+lemma positive_operator_iff {k} {o : Operator L k} {v : Fin k → Semiterm L μ (n + 1)} :
+    (o.operator v).Positive ↔ ∀ i ∈ o.term.bv, (v i).Positive := by
+  simp [Positive, bv_operator]
+  exact ⟨fun h i hi x hx ↦ h x i hi hx, fun h x i hi hx ↦ h i hi x hx⟩
+
+@[simp] lemma positive_const (c : Const L) : (c : Semiterm L μ (n + 1)).Positive := by simp [const, positive_operator_iff]
+
+@[simp] lemma Add.positive_iff [L.Add] (t u : Semiterm L μ (n + 1)) :
+    (Operator.Add.add.operator ![t, u]).Positive ↔ t.Positive ∧ u.Positive := by
+  simp [positive_operator_iff, Add.term_eq, bv_func]
+  exact ⟨by intro h; exact ⟨h 0, h 1⟩,
+    by intro h i; cases i using Fin.cases <;> simp [Fin.eq_zero, *]⟩
+
+@[simp] lemma Mul.positive_iff [L.Mul] (t u : Semiterm L μ (n + 1)) :
+    (Operator.Mul.mul.operator ![t, u]).Positive ↔ t.Positive ∧ u.Positive := by
+  simp [positive_operator_iff, Mul.term_eq, bv_func]
+  exact ⟨by intro h; exact ⟨h 0, h 1⟩,
+    by intro h i; cases i using Fin.cases <;> simp [Fin.eq_zero, *]⟩
+
 end Operator
 
 def Operator.val {M : Type w} [s : Structure L M] (o : Operator L k) (v : Fin k → M) : M :=
@@ -311,6 +337,29 @@ lemma hom_operator' (o : Semiformula.Operator L k) (v : Fin k → Semiterm L μ�
 
 @[simp] lemma hom_const (o : Semiformula.Const L) : ω.hom (Semiformula.Operator.const c) = Semiformula.Operator.const c := by
   simp[Semiformula.Operator.const, ω.hom_operator']
+
+open Semiformula
+
+lemma eq_equal_iff [L.Eq] {p} {t u : Semiterm L μ₂ n₂} :
+    ω.hom p = Operator.Eq.eq.operator ![t, u] ↔ ∃ t' u', ω t' = t ∧ ω u' = u ∧ p = Operator.Eq.eq.operator ![t', u'] := by
+  cases p using Semiformula.rec' <;> simp[Rew.rel, Rew.nrel, Operator.operator, Operator.Eq.sentence_eq]
+  case hrel k' r' v =>
+    by_cases hk : k' = 2 <;> simp[hk]; rcases hk with rfl; simp
+    by_cases hr : r' = Language.Eq.eq <;> simp[hr, Function.funext_iff]
+    constructor
+    · rintro H; exact ⟨v 0, H 0, v 1, H 1, by intro i; cases i using Fin.cases <;> simp [Fin.eq_zero]⟩
+    · rintro ⟨t', rfl, u', rfl, H⟩; intro i; cases i using Fin.cases <;> simp [H, Fin.eq_zero]
+
+lemma eq_lt_iff [L.LT] {p} {t u : Semiterm L μ₂ n₂} :
+    ω.hom p = Operator.LT.lt.operator ![t, u] ↔
+    ∃ t' u', ω t' = t ∧ ω u' = u ∧ p = Operator.LT.lt.operator ![t', u'] := by
+  cases p using Semiformula.rec' <;> simp[Rew.rel, Rew.nrel, Operator.operator, Operator.LT.sentence_eq]
+  case hrel k' r' v =>
+    by_cases hk : k' = 2 <;> simp[hk]; rcases hk with rfl; simp
+    by_cases hr : r' = Language.LT.lt <;> simp[hr, Function.funext_iff]
+    constructor
+    · rintro H; exact ⟨v 0, H 0, v 1, H 1, by intro i; cases i using Fin.cases <;> simp [Fin.eq_zero]⟩
+    · rintro ⟨t', rfl, u', rfl, H⟩; intro i; cases i using Fin.cases <;> simp [H, Fin.eq_zero]
 
 end Rew
 

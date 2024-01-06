@@ -86,6 +86,47 @@ end Decidable
 
 abbrev func! (k) (f : L.Func k) (v : Fin k → Semiterm L μ n) := func f v
 
+def bv : Semiterm L μ n → Finset (Fin n)
+  | #x       => {x}
+  | &_       => ∅
+  | func _ v => .biUnion .univ fun i ↦ bv (v i)
+
+@[simp] lemma bv_bvar : (#x : Semiterm L μ n).bv = {x} := rfl
+
+@[simp] lemma bv_fvar : (&x : Semiterm L μ n).bv = ∅ := rfl
+
+lemma bv_func {k} (f : L.Func k) (v : Fin k → Semiterm L μ n) : (func f v).bv = .biUnion .univ fun i ↦ bv (v i) := rfl
+
+@[simp] lemma bv_constant (f : L.Func 0) (v : Fin 0 → Semiterm L μ n) : (func f v).bv = ∅ := rfl
+
+def Positive (t : Semiterm L μ (n + 1)) : Prop := ∀ x ∈ t.bv, 0 < x
+
+namespace Positive
+
+@[simp] protected lemma bvar : Positive (#x : Semiterm L μ (n + 1)) ↔ 0 < x := by simp[Positive]
+
+@[simp] protected lemma fvar : Positive (&x : Semiterm L μ (n + 1)) := by simp[Positive]
+
+@[simp] protected lemma func {k} (f : L.Func k) (v : Fin k → Semiterm L μ (n + 1)) :
+    Positive (func f v) ↔ ∀ i, Positive (v i) := by simp[Positive, bv]; rw [forall_comm]
+
+end Positive
+
+variable [DecidableEq μ]
+
+def fv : Semiterm L μ n → Finset μ
+  | #_       => ∅
+  | &x       => {x}
+  | func _ v => .biUnion .univ fun i ↦ fv (v i)
+
+@[simp] lemma fv_bvar : (#x : Semiterm L μ n).fv = ∅ := rfl
+
+@[simp] lemma fv_fvar : (&x : Semiterm L μ n).fv = {x} := rfl
+
+lemma fv_func {k} (f : L.Func k) (v : Fin k → Semiterm L μ n) : (func f v).fv = .biUnion .univ fun i ↦ fv (v i) := rfl
+
+@[simp] lemma fv_constant (f : L.Func 0) (v : Fin 0 → Semiterm L μ n) : (func f v).fv = ∅ := rfl
+
 end Semiterm
 
 structure Rew (L : Language.{u}) (μ₁ : Type ν₁) (n₁ : ℕ) (μ₂ : Type ν₂) (n₂ : ℕ) where
@@ -277,6 +318,24 @@ section bShift
 
 @[simp] lemma bShift_fvar (x : μ) : bShift (&x : Semiterm L μ n) = &x := rfl
 
+@[simp] lemma bShift_ne_zero (t : Semiterm L μ n) : bShift t ≠ #0 := by
+  cases t <;> simp[Rew.func, Fin.succ_ne_zero]
+
+@[simp] lemma bShift_positive (t : Semiterm L μ n) : (bShift t).Positive := by
+  induction t <;> simp [Rew.func, *]
+
+lemma positive_iff {t : Semiterm L μ (n + 1)} : t.Positive ↔ ∃ t', t = bShift t' :=
+  ⟨by induction t <;> simp
+      case bvar x =>
+        intro hx; exact ⟨#(x.pred (Fin.pos_iff_ne_zero.mp hx)), by simp⟩
+      case fvar x => exact ⟨&x, by simp⟩
+      case func k f v ih =>
+        intro h
+        have : ∀ i, ∃ t', v i = bShift t' := fun i => ih i (h i)
+        choose w hw using this
+        exact ⟨func f w, by simp [Rew.func]; funext i; exact hw i⟩,
+   by rintro ⟨t', rfl⟩; simp⟩
+
 @[simp] lemma leftConcat_bShift_comp_bvar :
     (#0 :> bShift ∘ bvar : Fin (n + 1) → Semiterm L μ (n + 1)) = bvar :=
   funext (Fin.cases (by simp) (by simp))
@@ -343,6 +402,16 @@ variable (ω : Rew L μ₁ n₁ μ₂ n₂)
   have := ext' (ω.q_comp_bShift) t; simpa only [comp_app] using this
 
 @[simp] lemma q_id : (Rew.id : Rew L μ n μ n).q = Rew.id := by ext x; { cases x using Fin.cases <;> simp }; { simp }
+
+@[simp] lemma q_eq_zero_iff : ω.q t = #0 ↔ t = #0 := by
+  cases t <;> simp [Rew.func]
+  case bvar i =>
+    cases i using Fin.cases <;> simp [Fin.succ_ne_zero]
+
+@[simp] lemma q_positive_iff : (ω.q t).Positive ↔ t.Positive := by
+  induction t <;> simp [Rew.func, *]
+  case bvar x =>
+    cases x using Fin.cases <;> simp
 
 @[simp] lemma qpow_id {k} : (Rew.id : Rew L μ n μ n).qpow k = Rew.id := by induction k <;> simp[*]
 
