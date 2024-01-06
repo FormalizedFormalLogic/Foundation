@@ -4,7 +4,7 @@ namespace LO
 
 namespace FirstOrder
 
-variable {L : Language} [FirstOrder.Semiformula.Operator.LT L] {μ : Type v}
+variable {L : Language} [L.LT] {μ : Type v}
 
 namespace Arith
 
@@ -28,57 +28,62 @@ def alt : VType → VType
 end VType
 
 inductive Hierarchy : VType → ℕ → {n : ℕ} → Semiformula L μ n → Prop
-  | verum (b s n)                             : Hierarchy b s (⊤ : Semiformula L μ n)
-  | falsum (b s n)                            : Hierarchy b s (⊥ : Semiformula L μ n)
-  | rel (b s) {k} (r : L.Rel k) (v : Fin k → Semiterm L μ n) : Hierarchy b s (Semiformula.rel r v)
-  | nrel (b s) {k} (r : L.Rel k) (v)          : Hierarchy b s (Semiformula.nrel r v)
-  | and {b s n} {p q : Semiformula L μ n}      : Hierarchy b s p → Hierarchy b s q → Hierarchy b s (p ⋏ q)
-  | or {b s n} {p q : Semiformula L μ n}       : Hierarchy b s p → Hierarchy b s q → Hierarchy b s (p ⋎ q)
-  | ball {b s n} {p : Semiformula L μ (n + 1)} :
-    (t : Semiterm L μ n) → Hierarchy b s p → Hierarchy b s “∀[#0 < !!(Rew.bShift t)] !p”
-  | bex {b s n} {p : Semiformula L μ (n + 1)}  :
-    (t : Semiterm L μ n) → Hierarchy b s p → Hierarchy b s “∃[#0 < !!(Rew.bShift t)] !p”
-  | ex {s n} {p : Semiformula L μ (n + 1)}     : Hierarchy Σ (s + 1) p → Hierarchy Σ (s + 1) (∃' p)
-  | all {s n} {p : Semiformula L μ (n + 1)}    : Hierarchy Π (s + 1) p → Hierarchy Π (s + 1) (∀' p)
-  | sigma {s n} {p : Semiformula L μ (n + 1)}  : Hierarchy Π s p → Hierarchy Σ (s + 1) (∃' p)
-  | pi {s n} {p : Semiformula L μ (n + 1)}     : Hierarchy Σ s p → Hierarchy Π (s + 1) (∀' p)
+  | verum (b s n)                                : Hierarchy b s (⊤ : Semiformula L μ n)
+  | falsum (b s n)                               : Hierarchy b s (⊥ : Semiformula L μ n)
+  | rel (b s) {k} (r : L.Rel k) (v)              : Hierarchy b s (Semiformula.rel r v)
+  | nrel (b s) {k} (r : L.Rel k) (v)             : Hierarchy b s (Semiformula.nrel r v)
+  | and {b s n} {p q : Semiformula L μ n}        : Hierarchy b s p → Hierarchy b s q → Hierarchy b s (p ⋏ q)
+  | or {b s n} {p q : Semiformula L μ n}         : Hierarchy b s p → Hierarchy b s q → Hierarchy b s (p ⋎ q)
+  | ball {b s n} {p : Semiformula L μ (n + 1)} {t : Semiterm L μ (n + 1)} :
+    t.Positive → Hierarchy b s p → Hierarchy b s (∀[“#0 < !!t”] p)
+  | bex {b s n} {p : Semiformula L μ (n + 1)} {t : Semiterm L μ (n + 1)} :
+    t.Positive → Hierarchy b s p → Hierarchy b s (∃[“#0 < !!t”] p)
+  | ex {s n} {p : Semiformula L μ (n + 1)}       : Hierarchy Σ (s + 1) p → Hierarchy Σ (s + 1) (∃' p)
+  | all {s n} {p : Semiformula L μ (n + 1)}      : Hierarchy Π (s + 1) p → Hierarchy Π (s + 1) (∀' p)
+  | sigma {s n} {p : Semiformula L μ (n + 1)}    : Hierarchy Π s p → Hierarchy Σ (s + 1) (∃' p)
+  | pi {s n} {p : Semiformula L μ (n + 1)}       : Hierarchy Σ s p → Hierarchy Π (s + 1) (∀' p)
+  | accum {b} (b') {s n} {p : Semiformula L μ n} : Hierarchy b s p → Hierarchy b' (s + 1) p
 
 attribute [simp] Hierarchy.verum Hierarchy.falsum Hierarchy.rel Hierarchy.nrel
 
-abbrev Hierarchy.Sigma (s : ℕ) : Semiformula L μ n → Prop := Hierarchy Σ s
-
-abbrev Hierarchy.Pi (s : ℕ) : Semiformula L μ n → Prop := Hierarchy Π s
-
 namespace Hierarchy
 
-lemma mono_succ {b} {s : ℕ} {p : Semiformula L μ n} (hp : Hierarchy b s p) : Hierarchy b (s + 1) p := by
-  induction hp
-  case verum       => exact verum _ _ _
-  case falsum      => exact falsum _ _ _
-  case rel r v     => exact rel _ _ r v
-  case nrel r v    => exact nrel _ _ r v
-  case and ihp ihq => exact and ihp ihq
-  case or ihp ihq  => exact or ihp ihq
-  case ball ih     => exact ball _ ih
-  case bex ih      => exact bex _ ih
-  case ex ih       => exact ex ih
-  case all ih      => exact all ih
-  case sigma ih    => exact sigma ih
-  case pi ih       => exact pi ih
-
-lemma mono {b} {s s' : ℕ} (h : s ≤ s') {p : Semiformula L μ n} (hp : Hierarchy b s p) : Hierarchy b s' p := by
-  have : ∀ d, Hierarchy b (s + d) p := by
+lemma strict_mono {s s' : ℕ} {p : Semiformula L μ n} (hp : Hierarchy b s p) (h : s < s') (b') : Hierarchy b' s' p := by
+  have : ∀ d, Hierarchy b' (s + d + 1) p := by
     intro d
     induction' d with s ih
-    · exact hp
-    · simpa[Nat.add_succ] using mono_succ ih
-  simpa[Nat.add_sub_of_le h] using this (s' - s)
+    · simpa using hp.accum b'
+    · simpa [Nat.succ_eq_add_one, ←add_assoc] using ih.accum b'
+  simpa [show s + (s' - Nat.succ s) + 1 = s' from by simpa [Nat.succ_add] using Nat.add_sub_of_le h] using this (s' - s.succ)
+
+lemma mono {b} {s s' : ℕ} {p : Semiformula L μ n} (hp : Hierarchy b s p) (h : s ≤ s') : Hierarchy b s' p := by
+  rcases Nat.lt_or_eq_of_le h with (lt | rfl)
+  · exact hp.strict_mono lt b
+  · assumption
 
 @[simp] lemma and_iff {p q : Semiformula L μ n} : Hierarchy b s (p ⋏ q) ↔ Hierarchy b s p ∧ Hierarchy b s q :=
-  ⟨by rintro ⟨⟩; simp[*], by rintro ⟨hp, hq⟩; exact Hierarchy.and hp hq⟩
+  ⟨by generalize hr : p ⋏ q = r
+      intro H
+      induction H <;> try simp [LogicSymbol.ball, LogicSymbol.bex] at hr
+      case and =>
+        rcases hr with ⟨rfl, rfl⟩
+        constructor <;> assumption
+      case accum ih =>
+        rcases hr with rfl
+        exact ⟨(ih rfl).1.accum _, (ih rfl).2.accum _⟩,
+   by rintro ⟨hp, hq⟩; exact Hierarchy.and hp hq⟩
 
 @[simp] lemma or_iff {p q : Semiformula L μ n} : Hierarchy b s (p ⋎ q) ↔ Hierarchy b s p ∧ Hierarchy b s q :=
-  ⟨by rintro ⟨⟩; simp[*], by rintro ⟨hp, hq⟩; exact Hierarchy.or hp hq⟩
+  ⟨by generalize hr : p ⋎ q = r
+      intro H
+      induction H <;> try simp [LogicSymbol.ball, LogicSymbol.bex] at hr
+      case or =>
+        rcases hr with ⟨rfl, rfl⟩
+        constructor <;> assumption
+      case accum ih =>
+        rcases hr with rfl
+        exact ⟨(ih rfl).1.accum _, (ih rfl).2.accum _⟩,
+      by rintro ⟨hp, hq⟩; exact Hierarchy.or hp hq⟩
 
 @[simp] lemma conj_iff {p : Fin m → Semiformula L μ n} :
     Hierarchy b s (Matrix.conj p) ↔ ∀ i, Hierarchy b s (p i) := by
@@ -86,13 +91,24 @@ lemma mono {b} {s s' : ℕ} (h : s ≤ s') {p : Semiformula L μ n} (hp : Hierar
   · exact ⟨by rintro ⟨hz, hs⟩ i; cases i using Fin.cases <;> simp[*],
            by intro h; exact ⟨h 0, fun _ => h _⟩⟩
 
-lemma ball' {b s n} {p : Semiformula L μ (n + 1)} (t : Semiterm L μ n) {t' : Semiterm L μ (n + 1)}
-  (ht : Rew.bShift t = t') (hp : Hierarchy b s p) :
-    Hierarchy b s “∀[#0 < !!t'] !p” := by rw[←ht]; exact hp.ball _
+section
 
-lemma bex' {b s n} {p : Semiformula L μ (n + 1)} (t : Semiterm L μ n) {t' : Semiterm L μ (n + 1)}
-  (ht : Rew.bShift t = t') (hp : Hierarchy b s p) :
-    Hierarchy b s “∃[#0 < !!t'] !p” := by rw[←ht]; exact hp.bex _
+variable {L : Language} [L.Eq] [L.LT]
+
+@[simp] lemma equal {t u : Semiterm L μ n} : Hierarchy b s “!!t = !!u” := by
+  simp[Semiformula.Operator.operator, Matrix.fun_eq_vec₂,
+    Semiformula.Operator.Eq.sentence_eq]
+
+@[simp] lemma lt {t u : Semiterm L μ n} : Hierarchy b s “!!t < !!u” := by
+  simp[Semiformula.Operator.operator, Matrix.fun_eq_vec₂,
+    Semiformula.Operator.Eq.sentence_eq, Semiformula.Operator.LT.sentence_eq]
+
+@[simp] lemma le {t u : Semiterm L μ n} : Hierarchy b s “!!t ≤ !!u” := by
+  simp[Semiformula.Operator.operator, Matrix.fun_eq_vec₂,
+    Semiformula.Operator.Eq.sentence_eq, Semiformula.Operator.LT.sentence_eq,
+    Semiformula.Operator.LE.sentence_eq]
+
+end
 
 lemma zero_eq_alt {p : Semiformula L μ n} : Hierarchy b 0 p → Hierarchy b.alt 0 p := by
   generalize hz : 0 = z
@@ -102,65 +118,121 @@ lemma zero_eq_alt {p : Semiformula L μ n} : Hierarchy b 0 p → Hierarchy b.alt
   case and _ _ ihp ihq =>
     exact ⟨ihp hz, ihq hz⟩
   case or _ _ ihp ihq => exact ⟨ihp hz, ihq hz⟩
-  case ball _ _ ih => exact ball _ (ih hz)
-  case bex _ _ ih => exact bex _ (ih hz)
+  case ball pos _ ih => exact ball pos (ih hz)
+  case bex pos _ ih => exact bex pos (ih hz)
 
-lemma pi_zero_iff_sigma_zero {p : Semiformula L μ n} : Pi 0 p ↔ Sigma 0 p := ⟨zero_eq_alt, zero_eq_alt⟩
+lemma pi_zero_iff_sigma_zero {p : Semiformula L μ n} : Hierarchy Π 0 p ↔ Hierarchy Σ 0 p := ⟨zero_eq_alt, zero_eq_alt⟩
 
 lemma zero_iff_sigma_zero {p : Semiformula L μ n} : Hierarchy b 0 p ↔ Hierarchy Σ 0 p := by rcases b <;> simp[pi_zero_iff_sigma_zero]
 
 @[simp] lemma alt_zero_iff_zero {p : Semiformula L μ n} : Hierarchy b.alt 0 p ↔ Hierarchy b 0 p := by rcases b <;> simp[pi_zero_iff_sigma_zero]
 
 lemma neg {p : Semiformula L μ n} : Hierarchy b s p → Hierarchy b.alt s (~p) := by
-  intro h; induction h <;> simp[*]
-  case bex ih => exact ball _ ih
-  case ball ih => exact bex _ ih
+  intro h; induction h <;> try simp[*]
+  case bex pos _ ih => exact ball pos ih
+  case ball pos _ ih => exact bex pos ih
   case ex ih => exact all ih
   case all ih => exact ex ih
   case sigma ih => exact pi ih
   case pi ih => exact sigma ih
-
-lemma rew (ω : Rew L μ₁ n₁ μ₂ n₂) {p : Semiformula L μ₁ n₁} : Hierarchy b s p → Hierarchy b s (ω.hom p) := by
-  intro h; induction h generalizing n₂ <;> simp[*, Rew.rel,Rew.nrel]
-  case bex ih => exact bex _ (ih _)
-  case ball ih => exact ball _ (ih _)
-  case ex ih => exact ex (ih _)
-  case all ih => exact all (ih _)
-  case sigma ih => exact sigma (ih _)
-  case pi ih => exact pi (ih _)
-
-/-
-lemma rew_iff (ω : Rew L μ₁ n₁ μ₂ n₂) {p : Semiformula L μ₁ n₁} : Hierarchy b s (ω.hom p) ↔ Hierarchy b s p := by
-  constructor
-  · generalize eq : ω.hom p = q
-    intro hq; induction hq generalizing p n₁
-      <;> simp[Rew.eq_rel_iff, Rew.eq_nrel_iff, Rew.eq_ball_iff, Rew.eq_all_iff, Rew.eq_ex_iff] at eq
-    case verum => rcases eq with rfl; simp
-    case falsum => rcases eq with rfl; simp
-    case rel => rcases eq with ⟨v', rfl, rfl⟩; simp
-    case nrel => rcases eq with ⟨v', rfl, rfl⟩; simp
-    case and ihp ihq =>
-      rcases eq with ⟨p₁, rfl, p₂, rfl, rfl⟩
-      simpa using ⟨ihp ω rfl, ihq ω rfl⟩
-    case or ihp ihq =>
-      rcases eq with ⟨p₁, rfl, p₂, rfl, rfl⟩
-      simpa using ⟨ihp ω rfl, ihq ω rfl⟩
-    case ball ih =>
-
-    case all ih =>
-      rcases eq with ⟨p, rfl, rfl⟩
-      exact (ih ω.q rfl).all
-    case ex ih =>
-      rcases eq with ⟨p, rfl, rfl⟩
-      exact (ih ω.q rfl).ex
--/
+  case accum ih => exact ih.accum _
 
 @[simp] lemma neg_iff {p : Semiformula L μ n} : Hierarchy b s (~p) ↔ Hierarchy b.alt s p :=
   ⟨fun h => by simpa using neg h, fun h => by simpa using neg h⟩
 
 @[simp] lemma imp_iff {p q : Semiformula L μ n} : Hierarchy b s (p ⟶ q) ↔ (Hierarchy b.alt s p ∧ Hierarchy b s q) := by simp[Semiformula.imp_eq]
 
-lemma exClosure : {n : ℕ} → {p : Semiformula L μ n} → Sigma (s + 1) p → Sigma (s + 1) (exClosure p)
+@[simp] lemma ball_iff {b s n} {p : Semiformula L μ (n + 1)} {t : Semiterm L μ (n + 1)} (ht : t.Positive) :
+    Hierarchy b s (∀[“#0 < !!t”] p) ↔ Hierarchy b s p :=
+  ⟨by generalize hq : (∀[“#0 < !!t”] p) = q
+      intro H
+      induction H <;> try simp [LogicSymbol.ball, LogicSymbol.bex] at hq
+      case ball p t pt hp ih =>
+        rcases hq with ⟨rfl, rfl⟩
+        assumption
+      case all hp ih =>
+        rcases hq with rfl
+        simpa using hp
+      case pi s _ _ hp ih =>
+        rcases hq with rfl
+        exact (show Hierarchy Σ s p from by simpa using hp).accum _
+      case accum hp ih =>
+        rcases hq with rfl
+        simp at hp
+        exact (ih ht rfl).accum _,
+   by intro hp; exact hp.ball ht⟩
+
+@[simp] lemma bex_iff {b s n} {p : Semiformula L μ (n + 1)} {t : Semiterm L μ (n + 1)} (ht : t.Positive) :
+    Hierarchy b s (∃[“#0 < !!t”] p) ↔ Hierarchy b s p :=
+  ⟨by generalize hq : (∃[“#0 < !!t”] p) = q
+      intro H
+      induction H <;> try simp [LogicSymbol.ball, LogicSymbol.bex] at hq
+      case bex p t pt hp ih =>
+        rcases hq with ⟨rfl, rfl⟩
+        assumption
+      case ex hp ih =>
+        rcases hq with rfl
+        simpa using hp
+      case sigma s _ _ hp ih =>
+        rcases hq with rfl
+        exact (show Hierarchy Π s p from by simpa using hp).accum _
+      case accum hp ih =>
+        rcases hq with rfl
+        simp at hp
+        exact (ih ht rfl).accum _,
+   by intro hp; exact hp.bex ht⟩
+
+lemma rew (ω : Rew L μ₁ n₁ μ₂ n₂) {p : Semiformula L μ₁ n₁} : Hierarchy b s p → Hierarchy b s (ω.hom p) := by
+  intro h; induction h generalizing n₂ <;> try simp [*, Rew.rel,Rew.nrel]
+  case ex ih => exact ex (ih _)
+  case all ih => exact all (ih _)
+  case sigma ih => exact sigma (ih _)
+  case pi ih => exact pi (ih _)
+  case accum ih => exact (ih ω).accum _
+
+@[simp] lemma rew_iff {ω : Rew L μ₁ n₁ μ₂ n₂} {p : Semiformula L μ₁ n₁} :
+    Hierarchy b s (ω.hom p) ↔ Hierarchy b s p := by
+  constructor
+  · generalize eq : ω.hom p = q
+    intro hq
+    induction hq generalizing p n₁
+      <;> try simp [Rew.eq_rel_iff, Rew.eq_nrel_iff, Rew.eq_ball_iff, Rew.eq_bex_iff, Rew.eq_all_iff, Rew.eq_ex_iff] at eq
+    case verum => rcases eq with rfl; simp
+    case falsum => rcases eq with rfl; simp
+    case rel => rcases eq with ⟨v', rfl, rfl⟩; simp
+    case nrel => rcases eq with ⟨v', rfl, rfl⟩; simp
+    case and ihp ihq =>
+      rcases eq with ⟨p₁, rfl, p₂, rfl, rfl⟩
+      simpa using ⟨ihp rfl, ihq rfl⟩
+    case or ihp ihq =>
+      rcases eq with ⟨p₁, rfl, p₂, rfl, rfl⟩
+      simpa using ⟨ihp rfl, ihq rfl⟩
+    case ball pos _ ih =>
+      simp [Rew.eq_lt_iff] at eq
+      rcases eq with ⟨hp, ⟨u, rfl, s, hs, rfl⟩, p, rfl, rfl⟩
+      simpa [show u.Positive from by simpa using pos] using ih rfl
+    case bex pos _ ih =>
+      simp [Rew.eq_lt_iff] at eq
+      rcases eq with ⟨hp, ⟨u, rfl, s, hs, rfl⟩, p, rfl, rfl⟩
+      simpa [show u.Positive from by simpa using pos] using ih rfl
+    case all ih =>
+      rcases eq with ⟨p, rfl, rfl⟩
+      exact (ih rfl).all
+    case ex ih =>
+      rcases eq with ⟨p, rfl, rfl⟩
+      exact (ih rfl).ex
+    case pi ih =>
+      rcases eq with ⟨p, rfl, rfl⟩
+      exact (ih rfl).pi
+    case sigma ih =>
+      rcases eq with ⟨p, rfl, rfl⟩
+      exact (ih rfl).sigma
+    case accum ih =>
+      rcases eq with rfl
+      exact (ih rfl).accum _
+  · exact rew _
+
+lemma exClosure : {n : ℕ} → {p : Semiformula L μ n} → Hierarchy Σ (s + 1) p → Hierarchy Σ (s + 1) (exClosure p)
   | 0,     _, hp => hp
   | n + 1, p, hp => by simpa using exClosure (hp.ex)
 
@@ -233,34 +305,15 @@ variable {f : M → M}
 
 end definability
 
-section
-
-variable {L : Language} [L.Eq] [L.LT]
-
-@[simp] lemma equal {t u : Semiterm L μ n} : Hierarchy b s “!!t = !!u” := by
-  simp[Semiformula.Operator.operator, Matrix.fun_eq_vec₂,
-    Semiformula.Operator.Eq.sentence_eq]
-
-@[simp] lemma lt {t u : Semiterm L μ n} : Hierarchy b s “!!t < !!u” := by
-  simp[Semiformula.Operator.operator, Matrix.fun_eq_vec₂,
-    Semiformula.Operator.Eq.sentence_eq, Semiformula.Operator.LT.sentence_eq]
-
-@[simp] lemma le {t u : Semiterm L μ n} : Hierarchy b s “!!t ≤ !!u” := by
-  simp[Semiformula.Operator.operator, Matrix.fun_eq_vec₂,
-    Semiformula.Operator.Eq.sentence_eq, Semiformula.Operator.LT.sentence_eq,
-    Semiformula.Operator.LE.sentence_eq]
-
-end
-
 end Hierarchy
 
 variable {L : Language} [(k : ℕ) → DecidableEq (L.Func k)] [(k : ℕ) → DecidableEq (L.Rel k)]
-  [ORing L] [Structure L ℕ]
+  [L.LT] [Structure L ℕ]
 
-abbrev SigmaOneSound (T : Theory L) := Sound (L := L) T (Hierarchy.Sigma 1)
+abbrev SigmaOneSound (T : Theory L) := Sound T (Hierarchy Σ 1)
 
 lemma consistent_of_sigmaOneSound (T : Theory L) [SigmaOneSound T] :
-    System.Consistent T := consistent_of_sound T (Hierarchy.Sigma 1) (by simp)
+    System.Consistent T := consistent_of_sound T (Hierarchy Σ 1) (by simp)
 
 end Arith
 

@@ -82,20 +82,16 @@ lemma code_uniq {k} {c : Code k} {v : Fin k → M} {z z' : M} :
 
 end model
 
-lemma codeAux_sigma_one {k} (c : Nat.ArithPart₁.Code k) : Hierarchy.Sigma 1 (codeAux c) := by
-  induction c <;> simp[codeAux, Semiformula.Operator.operator, Matrix.fun_eq_vec₂,
-    Semiformula.Operator.Eq.sentence_eq, Semiformula.Operator.LT.sentence_eq]
-  case comp c d ihc ihg =>
-    exact Hierarchy.exClosure (by simp; exact ⟨Hierarchy.rew _ ihc, fun i => Hierarchy.rew _ (ihg i)⟩)
-  case rfind k c ih =>
-    exact ⟨Hierarchy.rew _ ih, by
-      suffices : Hierarchy.Sigma 1 (n := 0) (∀[“#0 < &0”] ∃' “#0 ≠ 0” ⋏ (Rew.bind ![] (#0 :> #1 :> (&·.succ))).hom (codeAux c))
-      · simpa[Semiformula.Operator.operator, Matrix.fun_eq_vec₂,
-          Semiformula.Operator.Eq.sentence_eq, Semiformula.Operator.LT.sentence_eq] using this
-      exact Hierarchy.ball' &0 (by simp) (Hierarchy.ex $ by
-        simp[Hierarchy.neg_iff, Hierarchy.equal]; exact Hierarchy.rew _ ih)⟩
+lemma xxx {p q : Prop} (h : p) (e : p = q) : q := e ▸ h
 
-lemma code_sigma_one {k} (c : Nat.ArithPart₁.Code k) : Hierarchy.Sigma 1 (code c) :=
+lemma codeAux_sigma_one {k} (c : Nat.ArithPart₁.Code k) : Hierarchy Σ 1 (codeAux c) := by
+  induction c <;> simp[codeAux, Matrix.fun_eq_vec₂]
+  case comp c d ihc ihg =>
+    exact Hierarchy.exClosure (by simp [ihc, ihg])
+  case rfind k c ih =>
+    simp [ih]; apply Hierarchy.ex; simp [ih]
+
+lemma code_sigma_one {k} (c : Nat.ArithPart₁.Code k) : Hierarchy Σ 1 (code c) :=
   Hierarchy.rew _ (codeAux_sigma_one c)
 
 lemma models_codeAux {c : Code k} {f : Vector ℕ k →. ℕ} (hc : c.eval f) (y : ℕ) (v : Fin k → ℕ) :
@@ -158,7 +154,7 @@ section representation
 lemma provable_iff_mem_partrec {k} {f : Vector ℕ k →. ℕ} (hf : Nat.Partrec' f) {y : ℕ} {v : Fin k → ℕ} :
     (T ⊢! (Rew.substs $ ⸢y⸣ :> fun i => ⸢v i⸣).hom (code $ codeOfPartrec f)) ↔ y ∈ f (Vector.ofFn v) := by
   let σ : Sentence ℒₒᵣ := (Rew.substs $ ⸢y⸣ :> fun i => ⸢v i⸣).hom (code $ codeOfPartrec f)
-  have sigma : Hierarchy.Sigma 1 σ :=
+  have sigma : Hierarchy Σ 1 σ :=
     (Hierarchy.rew (Rew.substs $ ⸢y⸣ :> fun i => ⸢v i⸣) (code_sigma_one (codeOfPartrec f)))
   constructor
   · rintro ⟨b⟩

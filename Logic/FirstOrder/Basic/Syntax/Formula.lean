@@ -148,6 +148,9 @@ by simp[Vee.vee]
 @[simp] lemma ex_inj (p q : Semiformula L μ (n + 1)) : ∃' p = ∃' q ↔ p = q :=
   by simp[ExQuantifier.ex]
 
+@[simp] lemma imp_inj {p₁ p₂ q₁ q₂ : Semiformula L μ n} :
+    p₁ ⟶ p₂ = q₁ ⟶ q₂ ↔ p₁ = q₁ ∧ p₂ = q₂ := by simp [imp_eq]
+
 abbrev rel! (L : Language.{u}) (k) (r : L.Rel k) (v : Fin k → Semiterm L μ n) := rel r v
 
 abbrev nrel! (L : Language.{u}) (k) (r : L.Rel k) (v : Fin k → Semiterm L μ n) := nrel r v
@@ -514,7 +517,13 @@ lemma eq_ball_iff {p : Semiformula L μ₁ n₁} {q₁ q₂} :
     (ω.hom p = ∀[q₁] q₂) ↔ ∃ p₁ p₂, ω.q.hom p₁ = q₁ ∧ ω.q.hom p₂ = q₂ ∧ p = ∀[p₁] p₂ := by
   simp[LogicSymbol.ball, eq_all_iff]; constructor
   · rintro ⟨p', ⟨p₁, rfl, p₂, rfl, rfl⟩, rfl⟩; exact ⟨p₁, rfl, p₂, rfl, rfl⟩
-  · rintro ⟨p₁, rfl, p₂, rfl, rfl⟩; simp; exact ⟨p₁, rfl, p₂, rfl, rfl⟩
+  · rintro ⟨p₁, rfl, p₂, rfl, rfl⟩; simp
+
+lemma eq_bex_iff {p : Semiformula L μ₁ n₁} {q₁ q₂} :
+    (ω.hom p = ∃[q₁] q₂) ↔ ∃ p₁ p₂, ω.q.hom p₁ = q₁ ∧ ω.q.hom p₂ = q₂ ∧ p = ∃[p₁] p₂ := by
+  simp[LogicSymbol.bex, eq_ex_iff]; constructor
+  · rintro ⟨p', ⟨p₁, rfl, p₂, rfl, rfl⟩, rfl⟩; exact ⟨p₁, rfl, p₂, rfl, rfl⟩
+  · rintro ⟨p₁, rfl, p₂, rfl, rfl⟩; simp
 
 end Rew
 

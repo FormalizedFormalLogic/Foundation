@@ -4,7 +4,7 @@ namespace LO
 
 namespace FirstOrder
 
-variable {L : Language} [FirstOrder.ORing L]
+variable {L : Language} [L.ORing]
 
 namespace Arith
 
@@ -58,7 +58,7 @@ abbrev IndSchemeOpen : Theory L := IndScheme Semiformula.qfree
 
 notation "𝐈open" => IndSchemeOpen ℒₒᵣ
 
-abbrev IndSchemeDelta (k : ℕ) : Theory L := IndScheme (Arith.Hierarchy.Sigma k)
+abbrev IndSchemeDelta (k : ℕ) : Theory L := IndScheme (Arith.Hierarchy Σ k)
 
 prefix:max "𝐈Δ" => IndSchemeDelta ℒₒᵣ
 

@@ -252,6 +252,18 @@ lemma LE.sentence_eq [L.Eq] [L.LT] : (@LE.le L _).sentence = Eq.eq.sentence ⋎ 
 lemma LE.def_of_Eq_of_LT [Operator.Eq L] [Operator.LT L] :
     (@Operator.LE.le L _) = Eq.eq.or LT.lt := rfl
 
+@[simp] lemma Eq.equal_inj [L.Eq] {t₁ t₂ u₁ u₂ : Semiterm L μ₂ n₂} :
+    Eq.eq.operator ![t₁, u₁] = Eq.eq.operator ![t₂, u₂] ↔ t₁ = t₂ ∧ u₁ = u₂ := by
+  simp [operator, Eq.sentence_eq, Matrix.fun_eq_vec₂]
+
+@[simp] lemma LT.lt_inj [L.LT] {t₁ t₂ u₁ u₂ : Semiterm L μ₂ n₂} :
+    LT.lt.operator ![t₁, u₁] = LT.lt.operator ![t₂, u₂] ↔ t₁ = t₂ ∧ u₁ = u₂ := by
+  simp [operator, LT.sentence_eq, Matrix.fun_eq_vec₂]
+
+@[simp] lemma LE.le_inj [L.Eq] [L.LT] {t₁ t₂ u₁ u₂ : Semiterm L μ₂ n₂} :
+    LE.le.operator ![t₁, u₁] = LE.le.operator ![t₂, u₂] ↔ t₁ = t₂ ∧ u₁ = u₂ := by
+  simp [operator, LE.sentence_eq, Eq.sentence_eq, LT.sentence_eq, Matrix.fun_eq_vec₂]
+
 end Operator
 
 def Operator.val {M : Type w} [s : Structure L M] {k} (o : Operator L k) (v : Fin k → M) : Prop :=
@@ -395,6 +407,9 @@ class Mem [Operator.Mem L] [Membership M M] where
 
 attribute [simp] Zero.zero One.one Add.add Mul.mul Eq.eq LT.lt LE.le Mem.mem
 
+instance [L.Eq] [L.LT] [Structure.Eq L M] [PartialOrder M] [Structure.LT L M] :
+  Structure.LE L M := ⟨by intro a b; simp [Operator.LE.def_of_Eq_of_LT]; exact le_iff_eq_or_lt.symm⟩
+
 variable {L}
 
 @[simp] lemma zero_eq_of_lang [L.Zero] [Zero M] [Structure.Zero L M] :
@@ -417,7 +432,7 @@ variable {L}
   simpa[val_func, ←Matrix.fun_eq_vec₂] using
     Structure.Mul.mul (L := L) (v 0) (v 1)
 
-@[simp] lemma le_iff_of_eq_of_lt [Operator.Eq L] [Operator.LT L] [LT M] [Structure.Eq L M] [Structure.LT L M] {a b : M} :
+lemma le_iff_of_eq_of_lt [Operator.Eq L] [Operator.LT L] [LT M] [Structure.Eq L M] [Structure.LT L M] {a b : M} :
     (@Operator.LE.le L _).val ![a, b] ↔ a = b ∨ a < b := by
   simp[Operator.LE.def_of_Eq_of_LT]
 
