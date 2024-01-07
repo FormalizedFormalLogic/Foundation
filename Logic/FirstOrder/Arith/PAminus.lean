@@ -344,13 +344,19 @@ def IsPrime (x : M) : Prop := 1 < x ∧ ∀ y ≤ x, (y ∣ x → y = 1 ∨ y = 
 lemma isPrime_definable : Σᴬ[0]-Predicate (λ x : M ↦ IsPrime x) := by
   have : Σᴬ[0]-Relation (λ x y : M ↦ x ∣ y) := dvd_definable
   rcases this with ⟨dvd, hdvd, sdvd⟩
-  let prime : Semisentence ℒₒᵣ 1 := “1 < #0” ⋏ (∀[“#0 < #1 + 1”] dvd ⟶ “#0 = 1 ∨ #0 = #1”)
+  let prime : Semisentence ℒₒᵣ 1 := “1 < #0” ⋏ (∀[“#0 < #1 + 1”] dvd/[#0, #1] ⟶ “#0 = 1 ∨ #0 = #1”)
   exact ⟨prime, by simp[prime, hdvd, Hierarchy.pi_zero_iff_sigma_zero],
     fun v ↦ by
       simp [Semiformula.eval_substs, Matrix.comp_vecCons', Matrix.vecHead, Matrix.constant_eq_singleton,
         IsPrime, ← sdvd, le_of_lt_succ]⟩
 
 end Prime
+
+section Pow2
+
+def Pow2 (x : M) : Prop := 1 < x ∧ ∀ p ≤ x, IsPrime p → p ∣ x  → p = 2
+
+end Pow2
 
 end Model
 
