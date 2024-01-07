@@ -274,6 +274,16 @@ lemma eval_rew (ω : Rew L μ₁ n₁ μ₂ n₂) (p : Semiformula L μ₁ n₁)
   case hall => simp[Function.comp]; exact iff_of_eq $ forall_congr (fun x => by congr; funext i; cases i using Fin.cases <;> simp)
   case hex => simp[Function.comp]; exact exists_congr (fun x => iff_of_eq $ by congr; funext i; cases i using Fin.cases <;> simp)
 
+lemma eval_rew_q {x e₂ ε₂} (ω : Rew L μ₁ n₁ μ₂ n₂) (p : Semiformula L μ₁ (n₁ + 1)) :
+    Eval s (x :> e₂) ε₂ (ω.q.hom p) ↔
+    Eval s
+      (x :> Semiterm.val s e₂ ε₂ ∘ ω ∘ Semiterm.bvar)
+      (Semiterm.val s e₂ ε₂ ∘ ω ∘ Semiterm.fvar) p := by
+  simp [eval_rew, Function.comp]
+  apply iff_of_eq; congr 2
+  · funext x
+    cases x using Fin.cases <;> simp
+
 lemma eval_map (b : Fin n₁ → Fin n₂) (f : μ₁ → μ₂) (e : Fin n₂ → M) (ε : μ₂ → M) (p : Semiformula L μ₁ n₁) :
     Eval s e ε ((Rew.map b f).hom p) ↔ Eval s (e ∘ b) (ε ∘ f) p :=
   by simp[eval_rew, Function.comp]
@@ -293,6 +303,10 @@ lemma eval_substs {k} (w : Fin k → Semiterm L μ n) (p : Semiformula L μ k) :
 @[simp] lemma eval_emb (p : Semiformula L Empty n) :
     Eval s e ε (Rew.emb.hom p) ↔ Eval s e Empty.elim p := by
   simp[eval_rew, Function.comp]; apply iff_of_eq; congr; funext x; contradiction
+
+@[simp] lemma eval_toS {e : Fin n → M} {ε} (p : Formula L (Fin n)) :
+    Eval s e ε (Rew.toS.hom p) ↔ Eval s ![] e p := by
+  simp [Rew.toS, eval_rew, Function.comp, Matrix.empty_eq]
 
 section Syntactic
 

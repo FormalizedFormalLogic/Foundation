@@ -222,6 +222,10 @@ def bShiftAdd (m : ℕ) : Rew L μ n μ (n + m) :=
 def castLE {n n' : ℕ} (h : n ≤ n') : Rew L μ n μ n' :=
   map (Fin.castLE h) id
 
+def toS : Rew L (Fin n) 0 Empty n := Rew.bind ![] (#·)
+
+def toF : Rew L Empty n (Fin n) 0 := Rew.bind (&·) Empty.elim
+
 protected def q (ω : Rew L μ₁ n₁ μ₂ n₂) : Rew L μ₁ (n₁ + 1) μ₂ (n₂ + 1) :=
   bind (#0 :> bShift ∘ ω ∘ bvar) (bShift ∘ ω ∘ fvar)
 
@@ -385,6 +389,12 @@ section castLE
 
 end castLE
 
+section toS
+
+@[simp] lemma toS_fvar {n} (x : Fin n) : toS (&x : Term L (Fin n)) = #x := rfl
+
+end toS
+
 section q
 
 variable (ω : Rew L μ₁ n₁ μ₂ n₂)
@@ -442,6 +452,11 @@ lemma q_rewrite (f : μ₁ → Semiterm L μ₂ n) :
 @[simp] lemma q_castLE {n n'} (h : n ≤ n') :
     (castLE h : Rew L μ n μ n').q = castLE (Nat.add_le_add_right h 1) := by
   ext x <;> simp; cases x using Fin.cases <;> simp
+
+lemma q_toS :
+    (toS : Rew L (Fin n) 0 Empty n).q = bind ![#0] (#·.succ) := by
+  ext x <;> simp; cases x using Fin.cases <;> try simp
+  · exact Fin.elim0 (by assumption)
 
 @[simp] lemma qpow_castLE {n n'} (h : n ≤ n') :
     (castLE h : Rew L μ n μ n').qpow k = castLE (Nat.add_le_add_right h k) := by
