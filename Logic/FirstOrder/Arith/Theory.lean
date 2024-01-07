@@ -56,9 +56,9 @@ abbrev IndSchemeOpen : Theory L := IndScheme Semiformula.qfree
 
 notation "𝐈open" => IndSchemeOpen ℒₒᵣ
 
-abbrev IndSchemeDelta (k : ℕ) : Theory L := IndScheme (Arith.Hierarchy Σ k)
+abbrev IndSchemeSigma (k : ℕ) : Theory L := IndScheme (Arith.Hierarchy Σ k)
 
-prefix:max "𝐈Δ" => IndSchemeDelta ℒₒᵣ
+prefix:max "𝐈𝚺" => IndSchemeSigma ℒₒᵣ
 
 abbrev Peano : Theory L := IndScheme Set.univ
 
