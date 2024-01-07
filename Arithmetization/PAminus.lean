@@ -1,11 +1,9 @@
-import Mathlib.Topology.Basic
+import Arithmetization.Vorspiel.Vorspiel
 import Logic.FirstOrder.Arith.PAminus
 
 namespace LO.FirstOrder
 
 namespace Arith
-
-namespace PAminus
 
 noncomputable section
 
@@ -13,9 +11,13 @@ variable {M : Type} [Inhabited M] [DecidableEq M] [ORingSymbol M]
   [Structure ℒₒᵣ M] [Structure.ORing ℒₒᵣ M]
   [𝐏𝐀⁻.Mod M]
 
-namespace Model
+namespace PAminus.Model
 
 variable {x y z : M}
+
+lemma lt_iff_succ_le : x < y ↔ x + 1 ≤ y := by simp [← le_of_lt_succ]
+
+lemma le_iff_lt_succ : x ≤ y ↔ x < y + 1 := by simp [le_of_lt_succ]
 
 section msub
 
@@ -49,6 +51,16 @@ lemma msub_definable : Σᴬ[0]-Function₂ (λ x y : M ↦ x -̇ y) :=
   · simp[msub_spec_of_lt hxy]
 
 lemma msub_polybounded : PolyBounded₂ (λ x y : M ↦ x -̇ y) := ⟨#0, λ _ ↦ by simp⟩
+
+@[simp] lemma msub_self (x : M) : x -̇ x = 0 :=
+  add_right_eq_self.mp (msub_spec_of_ge (x := x) (y := x) (by rfl)).symm
+
+lemma msub_spec_of_le (h : x ≤ y) : x -̇ y = 0 := by
+  rcases lt_or_eq_of_le h with (lt | rfl) <;> simp [msub_spec_of_lt, *]
+
+lemma msub_add_right (h : y ≤ x) : x -̇ y + y = x := by symm; rw [add_comm]; exact msub_spec_of_ge h
+
+lemma msub_add_left (h : y ≤ x) : y + (x -̇ y) = x := by symm; exact msub_spec_of_ge h
 
 end msub
 
@@ -146,11 +158,9 @@ def Pow2 (x : M) : Prop := 1 < x ∧ ∀ p ≤ x, IsPrime p → p ∣ x  → p =
 
 end Pow2
 
-end Model
+end PAminus.Model
 
 end
-
-end PAminus
 
 end Arith
 
