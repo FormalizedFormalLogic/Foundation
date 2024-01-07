@@ -82,8 +82,6 @@ lemma code_uniq {k} {c : Code k} {v : Fin k → M} {z z' : M} :
 
 end model
 
-lemma xxx {p q : Prop} (h : p) (e : p = q) : q := e ▸ h
-
 lemma codeAux_sigma_one {k} (c : Nat.ArithPart₁.Code k) : Hierarchy Σ 1 (codeAux c) := by
   induction c <;> simp[codeAux, Matrix.fun_eq_vec₂]
   case comp c d ihc ihg =>

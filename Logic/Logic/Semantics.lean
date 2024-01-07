@@ -78,6 +78,9 @@ lemma realizeTheory_of_subset {T U : Set F} {a : α} (h : a ⊧* U) (ss : T ⊆ 
 @[simp] lemma realizeTheory_range {ι} {f : ι → F} {a : α} :
     a ⊧* Set.range f ↔ ∀ i, a ⊧ (f i) := by simp[realizeTheory]
 
+@[simp] lemma realizeTheory_setOf {P : F → Prop} :
+    a ⊧* setOf P ↔ ∀ f, P f → a ⊧ f := by rfl
+
 lemma SatisfiableTheory.of_subset {T U : Set F} (h : SatisfiableTheory U) (ss : T ⊆ U) : SatisfiableTheory T :=
   by rcases h with ⟨a, h⟩; exact ⟨a, realizeTheory_of_subset h ss⟩
 

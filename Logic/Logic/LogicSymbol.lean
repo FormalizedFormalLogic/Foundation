@@ -84,9 +84,11 @@ def univClosure : {n : ℕ} → α n → α 0
   | 0,     a => a
   | _ + 1, a => univClosure (∀' a)
 
-@[simp] lemma univClosure_zero (a : α 0) : univClosure a = a := rfl
+prefix:64 "∀* " => univClosure
 
-@[simp] lemma univClosure_succ {n} (a : α (n + 1)) : univClosure a = univClosure (∀' a) := rfl
+@[simp] lemma univClosure_zero (a : α 0) : ∀* a = a := rfl
+
+@[simp] lemma univClosure_succ {n} (a : α (n + 1)) : ∀* a = ∀* ∀' a := rfl
 
 end UnivQuantifier
 
@@ -98,9 +100,11 @@ def exClosure : {n : ℕ} → α n → α 0
   | 0,     a => a
   | _ + 1, a => exClosure (∃' a)
 
-@[simp] lemma exClosure_zero (a : α 0) : exClosure a = a := rfl
+prefix:64 "∃* " => exClosure
 
-@[simp] lemma exClosure_succ {n} (a : α (n + 1)) : exClosure a = exClosure (∃' a) := rfl
+@[simp] lemma exClosure_zero (a : α 0) : ∃* a = a := rfl
+
+@[simp] lemma exClosure_succ {n} (a : α (n + 1)) : ∃* a = ∃* ∃' a := rfl
 
 end ExQuantifier
 

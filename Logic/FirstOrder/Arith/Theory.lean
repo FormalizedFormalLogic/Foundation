@@ -6,22 +6,20 @@ namespace FirstOrder
 
 variable {L : Language} [L.ORing]
 
+abbrev Formula.univClosure {n} (p : Formula L (Fin n)) : Sentence L := ∀* (Rew.toS.hom p)
+
+prefix:64 "∀ᵤ* " => Formula.univClosure
+
 namespace Arith
 
-def succInd (p : Semiformula L μ (k + 1)) : Formula L μ :=
-  “∀* (!((Rew.substs (ᵀ“0” :> (#·))).hom p) → ∀ (!((Rew.substs  (ᵀ“#0” :> (#·.succ))).hom p) →
-   !((Rew.substs (ᵀ“#0 + 1” :> (#·.succ))).hom p)) → ∀ !p)”
 
-def succInd' (p : Semiformula.Operator L (k + 1)) : Formula L μ :=
-  “∀* (!(p.operator (ᵀ“0” :> (#·))) →
-       ∀ (!(p.operator (#0 :> (#·.succ))) → !(p.operator (ᵀ“#0 + 1” :> (#·.succ)))) →
-       ∀ !(p.operator (#0 :> (#·.succ))))”
+def succInd {ξ} (p : Semiformula L ξ 1) : Formula L ξ := “!p [0] → ∀ (!p [#0] → !p [#0 + 1]) → ∀ !p [#0]”
 
-def leastNumber (p : Semiformula L μ (k + 1)) : Formula L μ :=
-  “∀* (∃ !p → ∃ (!p ∧ ∀[#0 < #1] ¬!((Rew.substs (#0 :> (#·.succ.succ))).hom p)))”
+def orderInd {ξ} (p : Semiformula L ξ 1) : Formula L ξ := “∀ (∀[#0 < #1] !p [#0] → !p [#0]) → ∀ !p [#0]”
 
-def orderInd (p : Semiformula L μ (k + 1)) : Formula L μ :=
-  “∀* (∀ (∀[#0 < #1] !((Rew.substs (#0 :> (#·.succ.succ))).hom p) → !p) → ∀ !p)”
+def leastNumber {ξ} (p : Semiformula L ξ 1) : Formula L ξ := “∃ !p [#0] → ∃ (!p [#0] ∧ ∀[#0 < #1] ¬!p [#0])”
+
+def succIndᵤ {n} (p : Semiformula L (Fin n) 1) : Sentence L := ∀ᵤ* succInd p
 
 variable (L)
 
@@ -50,7 +48,7 @@ notation "𝐏𝐀⁻" => PAminus ℒₒᵣ
 
 variable {L}
 
-def IndScheme (u : Set (Semisentence L 1)) : Theory L := succInd '' u
+def IndScheme (u : {n : ℕ} → Set (Semiformula L (Fin n) 1)) : Theory L := { ∀ᵤ* succInd p | (n : ℕ) (p ∈ @u n) }
 
 variable (L)
 

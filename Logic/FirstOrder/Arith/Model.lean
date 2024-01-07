@@ -61,7 +61,7 @@ namespace Standard
 
 variable {μ : Type v} (e : Fin n → ℕ) (ε : μ → ℕ)
 
-lemma modelsTheoryPAminus : ℕ ⊧ₘ* Theory.PAminus ℒₒᵣ := by
+lemma modelsTheoryPAminus : ℕ ⊧ₘ* 𝐏𝐀⁻ := by
   intro σ h
   rcases h <;> simp[models_def, ←le_iff_eq_or_lt]
   case addAssoc => intro l m n; exact add_assoc l m n
@@ -75,19 +75,19 @@ lemma modelsTheoryPAminus : ℕ ⊧ₘ* Theory.PAminus ℒₒᵣ := by
   case ltTrans => intro l m n; exact Nat.lt_trans
   case ltTri => intro n m; exact Nat.lt_trichotomy n m
 
-lemma modelsSuccInd (σ : Semisentence ℒₒᵣ (k + 1)) : ℕ ⊧ₘ (Arith.succInd σ) := by
-  simp[succInd, models_iff, Matrix.constant_eq_singleton, Matrix.comp_vecCons', Semiformula.eval_substs]
+lemma modelsSuccInd (p : Semiformula ℒₒᵣ (Fin n) 1) : ℕ ⊧ₘ (∀ᵤ* succInd p) := by
+  simp[Formula.univClosure, succInd, models_iff, Matrix.constant_eq_singleton, Matrix.comp_vecCons',
+    Semiformula.eval_substs, Semiformula.eval_rew_q Rew.toS, Function.comp]
   intro e hzero hsucc x; induction' x with x ih
   · exact hzero
   · exact hsucc x ih
 
-lemma modelsPeano : ℕ ⊧ₘ* (Theory.IndScheme Set.univ ∪ Theory.PAminus ℒₒᵣ ∪ 𝐄𝐪) :=
-  by simp[Theory.IndScheme, modelsSuccInd, modelsTheoryPAminus]
+lemma modelsPeano : ℕ ⊧ₘ* 𝐏𝐀 ∪ 𝐏𝐀⁻ ∪ 𝐄𝐪 :=
+  by simp[Theory.Peano, Theory.IndScheme, modelsTheoryPAminus]; rintro _ k p rfl; simp [modelsSuccInd]
 
 end Standard
 
-theorem Peano.Consistent :
-    System.Consistent (Theory.IndScheme Set.univ ∪ Theory.PAminus ℒₒᵣ ∪ 𝐄𝐪) :=
+theorem Peano.Consistent : System.Consistent (𝐏𝐀 ∪ 𝐏𝐀⁻ ∪ 𝐄𝐪) :=
   Sound.consistent_of_model Standard.modelsPeano
 
 section
