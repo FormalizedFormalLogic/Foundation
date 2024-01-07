@@ -88,8 +88,7 @@ lemma codeAux_sigma_one {k} (c : Nat.ArithPart₁.Code k) : Hierarchy Σ 1 (code
   induction c <;> simp[codeAux, Matrix.fun_eq_vec₂]
   case comp c d ihc ihg =>
     exact Hierarchy.exClosure (by simp [ihc, ihg])
-  case rfind k c ih =>
-    simp [ih]; apply Hierarchy.ex; simp [ih]
+  case rfind k c ih => simp [ih]
 
 lemma code_sigma_one {k} (c : Nat.ArithPart₁.Code k) : Hierarchy Σ 1 (code c) :=
   Hierarchy.rew _ (codeAux_sigma_one c)

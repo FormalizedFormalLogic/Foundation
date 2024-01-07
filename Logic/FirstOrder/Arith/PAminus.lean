@@ -181,36 +181,14 @@ lemma val_numeral {n} : ∀ (t : Semiterm ℒₒᵣ Empty n),
   | Semiterm.func Language.Add.add v,   e => by simp[Semiterm.val_func, val_numeral (v 0), val_numeral (v 1)]
   | Semiterm.func Language.Mul.mul v,   e => by simp[Semiterm.val_func, val_numeral (v 0), val_numeral (v 1)]
 
-lemma sigma_zero_completeness : ∀ {n} {σ : Semisentence ℒₒᵣ n},
-    Hierarchy Σ 0 σ → ∀ {e}, Semiformula.PVal! ℕ e σ → Semiformula.PVal! M (e ·) σ
+lemma sigma_one_completeness : ∀ {n} {σ : Semisentence ℒₒᵣ n},
+    Hierarchy Σ 1 σ → ∀ {e}, Semiformula.PVal! ℕ e σ → Semiformula.PVal! M (e ·) σ
   | _, _, Hierarchy.verum _ _ _,               _ => by simp
   | _, _, Hierarchy.falsum _ _ _,              _ => by simp
   | _, _, Hierarchy.rel _ _ Language.Eq.eq v,  e => by simp[Semiformula.eval_rel, Matrix.comp_vecCons', val_numeral]
   | _, _, Hierarchy.nrel _ _ Language.Eq.eq v, e => by simp[Semiformula.eval_nrel, Matrix.comp_vecCons', val_numeral]
   | _, _, Hierarchy.rel _ _ Language.LT.lt v,  e => by simp[Semiformula.eval_rel, Matrix.comp_vecCons', val_numeral]
   | _, _, Hierarchy.nrel _ _ Language.LT.lt v, e => by simp[Semiformula.eval_nrel, Matrix.comp_vecCons', val_numeral]
-  | _, _, Hierarchy.and hp hq,                 e => by
-    simp; intro ep eq; exact ⟨sigma_zero_completeness hp ep, sigma_zero_completeness hq eq⟩
-  | _, _, Hierarchy.or hp hq,                  e => by
-    simp; rintro (h | h)
-    · left; exact sigma_zero_completeness hp h
-    · right; exact sigma_zero_completeness hq h
-  | _, _, Hierarchy.ball pt hp,                 e => by
-    rcases Rew.positive_iff.mp pt with ⟨t, rfl⟩
-    simp[val_numeral]; intro h x hx
-    rcases eq_nat_of_lt_nat hx with ⟨x, rfl⟩
-    simpa[Matrix.comp_vecCons'] using sigma_zero_completeness hp (h x (by simpa using hx))
-  | _, _, Hierarchy.bex pt hp,                  e => by
-    rcases Rew.positive_iff.mp pt with ⟨t, rfl⟩
-    simp[val_numeral]; intro x hx h
-    exact ⟨x, by simpa using hx, by simpa[Matrix.comp_vecCons'] using sigma_zero_completeness hp h⟩
-
-lemma sigma_one_completeness : ∀ {n} {σ : Semisentence ℒₒᵣ n},
-    Hierarchy Σ 1 σ → ∀ {e}, Semiformula.PVal! ℕ e σ → Semiformula.PVal! M (e ·) σ
-  | _, _, Hierarchy.verum _ _ _,               _ => by simp
-  | _, _, Hierarchy.falsum _ _ _,              _ => by simp
-  | _, _, Hierarchy.rel _ _ r v,               e => sigma_zero_completeness (by simp)
-  | _, _, Hierarchy.nrel _ _ r v,              e => sigma_zero_completeness (by simp)
   | _, _, Hierarchy.and hp hq,                 e => by
     simp; intro ep eq; exact ⟨sigma_one_completeness hp ep, sigma_one_completeness hq eq⟩
   | _, _, Hierarchy.or hp hq,                  e => by
@@ -232,7 +210,6 @@ lemma sigma_one_completeness : ∀ {n} {σ : Semisentence ℒₒᵣ n},
     exact ⟨x, by simpa[Matrix.comp_vecCons'] using sigma_one_completeness this h⟩
   | _, _, Hierarchy.ex hp,                     e => by
     simp; intro x hx; exact ⟨x, by simpa[Matrix.comp_vecCons'] using sigma_one_completeness hp hx⟩
-  | _, _, Hierarchy.accum _ hp,                e => sigma_zero_completeness (by simpa [Hierarchy.zero_iff_sigma_zero] using hp)
 
 end Model
 
@@ -275,7 +252,7 @@ lemma msub_eq_iff : z = x -̇ y ↔ ((x ≥ y → x = y + z) ∧ (x < y → z = 
 
 lemma msub_definable : Σᴬ[0]-Function₂ (λ x y : M ↦ x -̇ y) :=
   ⟨“(#2 ≤ #1 → #1 = #2 + #0) ∧ (#1 < #2 → #0 = 0)”,
-    by simp[Hierarchy.zero_iff_sigma_zero], by intro v; simp[msub_eq_iff]; rfl⟩
+    by simp[Hierarchy.pi_zero_iff_sigma_zero], by intro v; simp[msub_eq_iff]; rfl⟩
 
 @[simp] lemma msub_le_self (x y : M) : x -̇ y ≤ x := by
   have : y ≤ x ∨ x < y := le_or_lt y x
@@ -368,7 +345,7 @@ lemma isPrime_definable : Σᴬ[0]-Predicate (λ x : M ↦ IsPrime x) := by
   have : Σᴬ[0]-Relation (λ x y : M ↦ x ∣ y) := dvd_definable
   rcases this with ⟨dvd, hdvd, sdvd⟩
   let prime : Semisentence ℒₒᵣ 1 := “1 < #0” ⋏ (∀[“#0 < #1 + 1”] dvd ⟶ “#0 = 1 ∨ #0 = #1”)
-  exact ⟨prime, by simp[prime, hdvd, Hierarchy.zero_iff_sigma_zero],
+  exact ⟨prime, by simp[prime, hdvd, Hierarchy.pi_zero_iff_sigma_zero],
     fun v ↦ by
       simp [Semiformula.eval_substs, Matrix.comp_vecCons', Matrix.vecHead, Matrix.constant_eq_singleton,
         IsPrime, ← sdvd, le_of_lt_succ]⟩
