@@ -567,7 +567,7 @@ lemma mapM'_eq_none_iff {f : α → Option β} {l : List α} : l.mapM' f = none 
       rcases hb : f a with (_ | b); { simp }
       rcases hbs : mapM' f l with (_ | bs)
       { exact Or.inr (ih.mp hbs) }
-      { have : False := by simpa[Option.pure_eq_some] using (H (b :: bs) b hb) bs hbs
+      { have : False := by simpa[Option.pure_eq_some] using (H b hb) bs hbs
         contradiction } }
     { rintro (h | h)
       { simp[h] }

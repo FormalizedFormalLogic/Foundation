@@ -479,7 +479,7 @@ variable {β : Type*} [Encodable β]
 
 lemma decode_list :
     (e : ℕ) → (decode e : Option (List β)) = (Denumerable.ofNat (List ℕ) e).mapM' (decode : ℕ → Option β)
-  | 0     => by simp; rfl
+  | 0     => by simp
   | e + 1 =>
     have : e.unpair.2 < e + 1 := Nat.lt_succ_of_le e.unpair_right_le
     by  simp; rcases h : (decode e.unpair.1 : Option β) with (_ | b) <;> simp[seq_eq_bind, Option.bind_eq_bind]
