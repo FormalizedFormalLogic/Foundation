@@ -44,15 +44,18 @@ theorem sound : ⊢¹ Δ → Semantics.Valid Δ.disj := by
 
 end Derivation
 
-instance : Sound (Formula α) := ⟨by
-  rintro T p ⟨Γ, hΓ, d⟩ v hT
+
+lemma soundness {T : Theory α} {p} : T ⊢ p → T ⊨ p := by
+  rintro ⟨Γ, hΓ, d⟩ v hT
   by_contra hv
   have : ∀ v, v ⊧ p ∨ ∃ q ∈ Γ, ¬v ⊧ q := by
     simpa [Semantics.Valid, List.map_disj] using Derivation.sound (Tait.ofConsRight d)
   have : ∃ q ∈ Γ, ¬v ⊧ q := by simpa [hv] using this v
   rcases this with ⟨q, hqΓ, hq⟩
   have : v ⊧ q := hT (hΓ q hqΓ)
-  contradiction⟩
+  contradiction
+
+instance : Sound (Formula α) := ⟨soundness⟩
 
 section complete
 
