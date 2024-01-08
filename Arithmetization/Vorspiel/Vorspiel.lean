@@ -31,12 +31,6 @@ end Rew
 
 namespace Semiformula
 
-@[simp] lemma univClosure_inj {p q : Semiformula L μ n} : ∀* p = ∀* q ↔ p = q := by
-  induction n <;> simp [*]
-
-@[simp] lemma exClosure_inj {p q : Semiformula L μ n} : ∃* p = ∃* q ↔ p = q := by
-  induction n <;> simp [*]
-
 variable {L : Language} [L.Eq] [L.LT]
 
 @[simp] lemma eq_qfree (t u : Semiterm L μ n) : (“!!t = !!u”).qfree := by simp [Operator.operator, Operator.Eq.sentence_eq]

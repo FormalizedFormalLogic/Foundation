@@ -1,4 +1,4 @@
-import Arithmetization.Vorspiel.Vorspiel
+import Arithmetization.Definability
 import Logic.FirstOrder.Arith.PAminus
 
 namespace LO.FirstOrder
