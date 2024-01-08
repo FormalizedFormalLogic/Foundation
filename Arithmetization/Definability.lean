@@ -2,61 +2,92 @@ import Arithmetization.Vorspiel.Vorspiel
 
 namespace LO.FirstOrder
 
+def Defined {k} (R : (Fin k → M) → Prop) [Structure L M] (p : LO.FirstOrder.Semisentence L k) : Prop :=
+  ∀ v, R v ↔ Semiformula.PVal! M v p
+
+namespace Defined
+
+variable [Structure L M]
+
+lemma pval {k} {R : (Fin k → M) → Prop} {p : LO.FirstOrder.Semisentence L k} (h : Defined R p) (v) :
+    Semiformula.PVal! M v p ↔ R v := (h v).symm
+
+end Defined
+
 namespace Arith
 
 section definability
 
 variable {M} [Structure ℒₒᵣ M]
 
-protected abbrev Definable (b : VType) (s : ℕ) {k} (t : (Fin k → M) → Prop) : Prop :=
-  FirstOrder.Definable (Hierarchy b s : Semisentence ℒₒᵣ k → Prop) t
+abbrev FormulaHierarchy (b : VType) (s : ℕ) (L : Language) [L.LT] (n) :=
+  { p : Semisentence L n // Hierarchy b s p }
 
-abbrev DefinablePred (b : VType) (s : ℕ) (P : M → Prop) : Prop :=
-  Arith.Definable b s (k := 1) λ v ↦ P (Matrix.vecHead v)
+abbrev SigmaFormula (s : ℕ) (L : Language) [L.LT] (n) := FormulaHierarchy Σ s L n
 
-abbrev DefinableRel (b : VType) (s : ℕ) (R : M → M → Prop) : Prop :=
-  Arith.Definable b s (k := 2) λ v ↦ R (v 0) (v 1)
+abbrev PiFormula (s : ℕ) (L : Language) [L.LT] (n) := FormulaHierarchy Π s L n
 
-abbrev SigmaDefinablePred (s : ℕ) (P : M → Prop) : Prop := DefinablePred Σ s P
+notation "Σᴬ[" s "]" => SigmaFormula s ℒₒᵣ
 
-notation "Σᴬ[" s "]-Predicate" => SigmaDefinablePred s
+notation "Πᴬ[" s "]" => PiFormula s ℒₒᵣ
 
-abbrev PiDefinablePred (s : ℕ) (t : Set M) : Prop := DefinablePred Π s t
+namespace FormulaHierarchy
 
-notation "Πᴬ[" s "]-Predicate" => PiDefinablePred s
+variable (b : VType) (s : ℕ) (L : Language) [L.LT] (n)
 
-abbrev SigmaDefinableRel (s : ℕ) (P : M → M → Prop) : Prop := DefinableRel Σ s P
+@[simp] lemma hierarchy (p : FormulaHierarchy b s L n) : Hierarchy b s p.val := p.prop
 
-notation "Σᴬ[" s "]-Relation" => SigmaDefinableRel s
+end FormulaHierarchy
 
-abbrev PiDefinableRel (s : ℕ) (t : Set M) : Prop := DefinablePred Π s t
+protected abbrev Defined (b s) {k} (R : (Fin k → M) → Prop) (p : FormulaHierarchy b s ℒₒᵣ k) : Prop :=
+  Defined R p.val
 
-notation "Πᴬ[" s "]-Relation" => PiDefinableRel s
+abbrev DefinedPred (b : VType) (s : ℕ) (P : M → Prop) (p : FormulaHierarchy b s ℒₒᵣ 1) : Prop :=
+  Arith.Defined b s (λ v ↦ P (v 0)) p
 
-abbrev DefinableFunction (b : VType) (s : ℕ) {k} (f : (Fin k → M) → M) : Prop :=
-  FirstOrder.DefinableFunction (Hierarchy b s : Semisentence ℒₒᵣ (k + 1) → Prop) f
+abbrev DefinedRel (b : VType) (s : ℕ) (R : M → M → Prop) (p : FormulaHierarchy b s ℒₒᵣ 2) : Prop :=
+  Arith.Defined b s (λ v ↦ R (v 0) (v 1)) p
 
-abbrev DefinableFunction₁ (b : VType) (s : ℕ) (f : M → M) : Prop :=
-  DefinableFunction b s (k := 1) (fun v => f (Matrix.vecHead v))
+abbrev SigmaDefinedPred (s : ℕ) (P : M → Prop) (p : Σᴬ[s] 1) : Prop := DefinedPred Σ s P p
 
-abbrev DefinableFunction₂ (b : VType) (s : ℕ) (f : M → M → M) : Prop :=
-  DefinableFunction b s (k := 2) (fun v => f (v 0) (v 1))
+notation "Σᴬ[" s "]-Predicate" => SigmaDefinedPred s
 
-abbrev SigmaDefinableFunction₁ (s : ℕ) (f : M → M) : Prop := DefinableFunction₁ Σ s f
+abbrev PiDefinedPred (s : ℕ) (t : Set M) (p : Πᴬ[s] 1) : Prop := DefinedPred Π s t p
 
-notation "Σᴬ[" s "]-Function₁" => SigmaDefinableFunction₁ s
+notation "Πᴬ[" s "]-Predicate" => PiDefinedPred s
 
-abbrev PiDefinableFunction₁ (s : ℕ) (f : M → M) : Prop := DefinableFunction₁ Π s f
+abbrev SigmaDefinedRel (s : ℕ) (R : M → M → Prop) (p : Σᴬ[s] 2) : Prop := DefinedRel Σ s R p
 
-notation "Πᴬ[" s "]-Function₁" => PiDefinableFunction₁ s
+notation "Σᴬ[" s "]-Relation" => SigmaDefinedRel s
 
-abbrev SigmaDefinableFunction₂ (s : ℕ) (f : M → M → M) : Prop := DefinableFunction₂ Σ s f
+abbrev PiDefinedRel (s : ℕ) (R : M → M → Prop) (p : Πᴬ[s] 2) : Prop := DefinedRel Π s R p
 
-notation "Σᴬ[" s "]-Function₂" => SigmaDefinableFunction₂ s
+notation "Πᴬ[" s "]-Relation" => PiDefinedRel s
 
-abbrev PiDefinableFunction₂ (s : ℕ) (f : M → M → M) : Prop := DefinableFunction₂ Π s f
+abbrev DefinedFunction (b : VType) (s : ℕ) {k} (f : (Fin k → M) → M) (p : FormulaHierarchy b s ℒₒᵣ (k + 1)) : Prop :=
+  Arith.Defined b s (fun v => v 0 = f (v ·.succ)) p
 
-notation "Πᴬ[" s "]-Function₂" => PiDefinableFunction₂ s
+abbrev DefinedFunction₁ (b : VType) (s : ℕ) (f : M → M) (p : FormulaHierarchy b s ℒₒᵣ 2) : Prop :=
+  DefinedFunction b s (fun v => f (v 0)) p
+
+abbrev DefinedFunction₂ (b : VType) (s : ℕ) (f : M → M → M) (p : FormulaHierarchy b s ℒₒᵣ 3) : Prop :=
+  DefinedFunction b s (fun v => f (v 0) (v 1)) p
+
+abbrev SigmaDefinedFunction₁ (s : ℕ) (f : M → M) (p : Σᴬ[s] 2) : Prop := DefinedFunction₁ Σ s f p
+
+notation "Σᴬ[" s "]-Function₁" => SigmaDefinedFunction₁ s
+
+abbrev PiDefinedFunction₁ (s : ℕ) (f : M → M) (p : Πᴬ[s] 2) : Prop := DefinedFunction₁ Π s f p
+
+notation "Πᴬ[" s "]-Function₁" => PiDefinedFunction₁ s
+
+abbrev SigmaDefinedFunction₂ (s : ℕ) (f : M → M → M) (p : Σᴬ[s] 3) : Prop := DefinedFunction₂ Σ s f p
+
+notation "Σᴬ[" s "]-Function₂" => SigmaDefinedFunction₂ s
+
+abbrev PiDefinedFunction₂ (s : ℕ) (f : M → M → M) (p : Πᴬ[s] 3) : Prop := DefinedFunction₂ Π s f p
+
+notation "Πᴬ[" s "]-Function₂" => PiDefinedFunction₂ s
 
 variable {f : M → M}
 
@@ -66,14 +97,14 @@ section
 
 variable {M : Type} [LE M] [Structure ℒₒᵣ M]
 
-def PolyBounded {k} (f : (Fin k → M) → M) : Prop :=
-  ∃ t : Polynomial k, ∀ v : Fin k → M, f v ≤ t.bVal! M v
+def PolyBounded {k} (f : (Fin k → M) → M) (t : Polynomial k) : Prop :=
+  ∀ v : Fin k → M, f v ≤ t.bVal! M v
 
-abbrev PolyBounded₁ (f : M → M) : Prop :=
-  PolyBounded (k := 1) (fun v => f (Matrix.vecHead v))
+abbrev PolyBounded₁ (f : M → M) (t : Polynomial 1) : Prop :=
+  PolyBounded (k := 1) (fun v => f (Matrix.vecHead v)) t
 
-abbrev PolyBounded₂ (f : M → M → M) : Prop :=
-  PolyBounded (k := 2) (fun v => f (v 0) (v 1))
+abbrev PolyBounded₂ (f : M → M → M) (t : Polynomial 2) : Prop :=
+  PolyBounded (k := 2) (fun v => f (v 0) (v 1)) t
 
 end
 

@@ -40,9 +40,11 @@ lemma msub_spec_of_lt (h : x < y) : x -̇ y = 0 := (Classical.choose!_spec (msub
 
 lemma msub_eq_iff : z = x -̇ y ↔ ((x ≥ y → x = y + z) ∧ (x < y → z = 0)) := Classical.choose!_eq_iff _
 
-lemma msub_definable : Σᴬ[0]-Function₂ (λ x y : M ↦ x -̇ y) :=
-  ⟨“(#2 ≤ #1 → #1 = #2 + #0) ∧ (#1 < #2 → #0 = 0)”,
-    by simp[Hierarchy.pi_zero_iff_sigma_zero], by intro v; simp[msub_eq_iff]; rfl⟩
+def msubDefinition : Σᴬ[0] 3 :=
+  ⟨“(#2 ≤ #1 → #1 = #2 + #0) ∧ (#1 < #2 → #0 = 0)”, by simp[Hierarchy.pi_zero_iff_sigma_zero]⟩
+
+lemma msub_definable : Σᴬ[0]-Function₂ (λ x y : M ↦ x -̇ y) msubDefinition := by
+  intro v; simp [msubDefinition, msub_eq_iff]
 
 @[simp] lemma msub_le_self (x y : M) : x -̇ y ≤ x := by
   have : y ≤ x ∨ x < y := le_or_lt y x
@@ -50,7 +52,7 @@ lemma msub_definable : Σᴬ[0]-Function₂ (λ x y : M ↦ x -̇ y) :=
   · simpa [← msub_spec_of_ge hxy] using show x -̇ y ≤ y + (x -̇ y) from le_add_self
   · simp[msub_spec_of_lt hxy]
 
-lemma msub_polybounded : PolyBounded₂ (λ x y : M ↦ x -̇ y) := ⟨#0, λ _ ↦ by simp⟩
+lemma msub_polybounded : PolyBounded₂ (λ x y : M ↦ x -̇ y) #0 := λ _ ↦ by simp
 
 @[simp] lemma msub_self (x : M) : x -̇ x = 0 :=
   add_right_eq_self.mp (msub_spec_of_ge (x := x) (y := x) (by rfl)).symm
@@ -80,9 +82,10 @@ lemma dvd_iff_bounded {x y : M} : x ∣ y ↔ ∃ z ≤ y, y = x * z := by
     · rintro ⟨z, rfl⟩; exact ⟨z, le_mul_self_of_pos_left (pos_iff_ne_zero.mpr hx), rfl⟩
     · rintro ⟨z, hz, rfl⟩; exact dvd_mul_right x z
 
-lemma dvd_definable : Σᴬ[0]-Relation (λ x y : M ↦ x ∣ y) :=
-  ⟨∃[“#0 < #2 + 1”] “#2 = #1 * #0”, by simp,
-  λ v ↦ by simp[dvd_iff_bounded, Matrix.vecHead, Matrix.vecTail, le_of_lt_succ]⟩
+def dvdDefinition : Σᴬ[0] 2 := ⟨“∃[#0 < #2 + 1] #2 = #1 * #0”, by simp⟩
+
+lemma dvd_definable : Σᴬ[0]-Relation (λ x y : M ↦ x ∣ y) dvdDefinition :=
+  λ v ↦ by simp[dvd_iff_bounded, Matrix.vecHead, Matrix.vecTail, le_of_lt_succ, dvdDefinition]
 
 end Dvd
 
@@ -141,14 +144,13 @@ lemma prime_iff_bounded {x : M} : Prime x ↔ 1 < x ∧ ∀ y ≤ x, (y ∣ x �
 def IsPrime (x : M) : Prop := 1 < x ∧ ∀ y ≤ x, (y ∣ x → y = 1 ∨ y = x)
 -- TODO: prove IsPrime x ↔ Prime x
 
-lemma isPrime_definable : Σᴬ[0]-Predicate (λ x : M ↦ IsPrime x) := by
-  have : Σᴬ[0]-Relation (λ x y : M ↦ x ∣ y) := dvd_definable
-  rcases this with ⟨dvd, hdvd, sdvd⟩
-  let prime : Semisentence ℒₒᵣ 1 := “1 < #0” ⋏ (∀[“#0 < #1 + 1”] dvd/[#0, #1] ⟶ “#0 = 1 ∨ #0 = #1”)
-  exact ⟨prime, by simp[prime, hdvd, Hierarchy.pi_zero_iff_sigma_zero],
-    fun v ↦ by
-      simp [Semiformula.eval_substs, Matrix.comp_vecCons', Matrix.vecHead, Matrix.constant_eq_singleton,
-        IsPrime, ← sdvd, le_of_lt_succ]⟩
+def isPrimeDefinition : Σᴬ[0] 1 :=
+  ⟨“1 < #0” ⋏ (∀[“#0 < #1 + 1”] dvdDefinition/[#0, #1] ⟶ “#0 = 1 ∨ #0 = #1”), by simp [Hierarchy.pi_zero_iff_sigma_zero]⟩
+
+lemma isPrime_definable : Σᴬ[0]-Predicate (λ x : M ↦ IsPrime x) isPrimeDefinition := by
+  intro v
+  simp [Semiformula.eval_substs, Matrix.comp_vecCons', Matrix.vecHead, Matrix.constant_eq_singleton,
+    IsPrime, isPrimeDefinition, le_of_lt_succ, dvd_definable.pval]
 
 end Prime
 

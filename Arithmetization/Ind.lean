@@ -152,9 +152,11 @@ lemma ediv_spec_of_pos (x : M) (h : 0 < y) : ∃ v < y, x = y * (x /ₑ y) + v :
 lemma ediv_graph {x y z : M} : z = x /ₑ y ↔ ((0 < y → ∃ v < y, x = y * z + v) ∧ (y = 0 → z = 0)) :=
   Classical.choose!_eq_iff _
 
-lemma ediv_definable : Σᴬ[0]-Function₂ (λ x y : M ↦ x /ₑ y) :=
-  ⟨“(0 < #2 → ∃[#0 < #3] (#2 = #3 * #1 + #0)) ∧ (#2 = 0 → #0 = 0)”,
-    by simp[Hierarchy.pi_zero_iff_sigma_zero], by intro v; simp[ediv_graph]; rfl⟩
+def edivDefinition : Σᴬ[0] 3 :=
+  ⟨“(0 < #2 → ∃[#0 < #3] (#2 = #3 * #1 + #0)) ∧ (#2 = 0 → #0 = 0)”, by simp[Hierarchy.pi_zero_iff_sigma_zero]⟩
+
+lemma ediv_definable : Σᴬ[0]-Function₂ (λ x y : M ↦ x /ₑ y) edivDefinition := by
+  intro v; simp[ediv_graph, edivDefinition, Matrix.vecHead, Matrix.vecTail]
 
 lemma ediv_spec_of_pos' (x : M) (h : 0 < y) : ∃ v < y, x = (x /ₑ y) * y + v := by
   simpa [_root_.mul_comm] using ediv_spec_of_pos x h
@@ -171,7 +173,7 @@ lemma ediv_spec_of_pos' (x : M) (h : 0 < y) : ∃ v < y, x = (x /ₑ y) * y + v 
   have : 1 * (x /ₑ y) ≤ y * (x /ₑ y) := mul_le_mul_of_nonneg_right (le_iff_lt_succ.mpr (by simp[hy])) (by simp)
   simpa using le_trans this (mul_ediv_le x y)
 
-lemma ediv_polybounded : PolyBounded₂ (λ x y : M ↦ x /ₑ y) := ⟨#0, λ _ ↦ by simp⟩
+lemma ediv_polybounded : PolyBounded₂ (λ x y : M ↦ x /ₑ y) #0 := λ _ ↦ by simp
 
 @[simp] lemma ediv_mul_le (x y : M) : x /ₑ y * y ≤ x := by rw [_root_.mul_comm]; exact mul_ediv_le _ _
 
@@ -233,13 +235,16 @@ lemma cpair_graph {x y z : M} :
     z = ⟨x ; y⟩ ↔ ∃ r < 2, (x + y) * (x + y + 1) + 2 * y = 2 * z + r := by
   simp [cpair, ediv_graph, ←ediv_mul_add_self, _root_.mul_comm]
 
-lemma cpair_definable : Σᴬ[0]-Function₂ (λ x y : M ↦ ⟨x ; y⟩) := by
-  let cpair : Semisentence ℒₒᵣ 3 := “∃[#0 < 2] (#2 + #3) * (#2 + #3 + 1) + 2 * #3 = 2 * #1 + #0”
-  exact ⟨cpair, by simp[Hierarchy.pi_zero_iff_sigma_zero], by
-    intro v; simp [Matrix.vecHead, Matrix.vecTail, Matrix.constant_eq_singleton, cpair_graph]⟩
+def cpairDefinition : Σᴬ[0] 3 :=
+  ⟨“∃[#0 < 2] (#2 + #3) * (#2 + #3 + 1) + 2 * #3 = 2 * #1 + #0”, by simp[Hierarchy.pi_zero_iff_sigma_zero]⟩
 
-lemma cpair_polybounded : PolyBounded₂ (λ x y : M ↦ ⟨x ; y⟩) :=
-  ⟨ᵀ“(#0 + #1) * (#0 + #1 + 1) + #1 * 2”, λ _ ↦ by simp[cpair, ←ediv_mul_add_self]⟩
+def cpairPolyBound : Polynomial 2 := ᵀ“(#0 + #1) * (#0 + #1 + 1) + #1 * 2”
+
+lemma cpair_definable : Σᴬ[0]-Function₂ (λ x y : M ↦ ⟨x ; y⟩) cpairDefinition := by
+  intro v; simp [Matrix.vecHead, Matrix.vecTail, Matrix.constant_eq_singleton, cpair_graph, cpairDefinition]
+
+lemma cpair_polybounded : PolyBounded₂ (λ x y : M ↦ ⟨x ; y⟩) cpairPolyBound :=
+  λ _ ↦ by simp[cpair, ←ediv_mul_add_self, cpairPolyBound]
 
 end cpair
 
