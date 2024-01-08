@@ -154,7 +154,7 @@ end Prime
 
 section Pow2
 
-def Pow2 (x : M) : Prop := 1 < x ∧ ∀ p ≤ x, IsPrime p → p ∣ x  → p = 2
+def Pow2 (x : M) : Prop := 1 < x ∧ ∀ p ≤ x, IsPrime p → p ∣ x → p = 2
 
 end Pow2
 

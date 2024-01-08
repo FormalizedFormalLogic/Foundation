@@ -131,6 +131,8 @@ lemma remainder (x : M) {y} (hy : 0 < y) : ∃! u, ∃ v < y, x = y * u + v := b
       exact ⟨v, this, e⟩
   exact (exists_unique_congr iff).mpr this
 
+section ediv
+
 lemma ediv_existsUnique (x y : M) : ∃! u, (0 < y → ∃ v < y, x = y * u + v) ∧ (y = 0 → u = 0) := by
   have : 0 ≤ y := by exact _root_.zero_le y
   rcases this with (rfl | hy) <;> simp [*]
@@ -147,18 +149,29 @@ lemma ediv_spec_of_pos (x : M) (h : 0 < y) : ∃ v < y, x = y * (x /ₑ y) + v :
 @[simp] lemma ediv_spec_zero (x : M) : x /ₑ 0 = 0 :=
   (Classical.choose!_spec (ediv_existsUnique x 0)).2 (by simp)
 
-lemma ediv_eq_iff {x y z : M} : z = x /ₑ y ↔ ((0 < y → ∃ v < y, x = y * z + v) ∧ (y = 0 → z = 0)) :=
+lemma ediv_graph {x y z : M} : z = x /ₑ y ↔ ((0 < y → ∃ v < y, x = y * z + v) ∧ (y = 0 → z = 0)) :=
   Classical.choose!_eq_iff _
 
 lemma ediv_definable : Σᴬ[0]-Function₂ (λ x y : M ↦ x /ₑ y) :=
   ⟨“(0 < #2 → ∃[#0 < #3] (#2 = #3 * #1 + #0)) ∧ (#2 = 0 → #0 = 0)”,
-    by simp[Hierarchy.pi_zero_iff_sigma_zero], by intro v; simp[ediv_eq_iff]; rfl⟩
+    by simp[Hierarchy.pi_zero_iff_sigma_zero], by intro v; simp[ediv_graph]; rfl⟩
+
+lemma ediv_spec_of_pos' (x : M) (h : 0 < y) : ∃ v < y, x = (x /ₑ y) * y + v := by
+  simpa [_root_.mul_comm] using ediv_spec_of_pos x h
 
 @[simp] lemma mul_ediv_le (x y : M) : y * (x /ₑ y) ≤ x := by
   have : 0 ≤ y := by exact _root_.zero_le y
   rcases this with (rfl | hy) <;> simp [*]
   rcases ediv_spec_of_pos x hy with ⟨v, _, e⟩
   simpa [← e] using show y * (x /ₑ y) ≤ y * (x /ₑ y) + v from le_self_add
+
+@[simp] lemma ediv_le (x y : M) : x /ₑ y ≤ x := by
+  have : 0 ≤ y := by exact _root_.zero_le y
+  rcases this with (rfl | hy) <;> simp [*]
+  have : 1 * (x /ₑ y) ≤ y * (x /ₑ y) := mul_le_mul_of_nonneg_right (le_iff_lt_succ.mpr (by simp[hy])) (by simp)
+  simpa using le_trans this (mul_ediv_le x y)
+
+lemma ediv_polybounded : PolyBounded₂ (λ x y : M ↦ x /ₑ y) := ⟨#0, λ _ ↦ by simp⟩
 
 @[simp] lemma ediv_mul_le (x y : M) : x /ₑ y * y ≤ x := by rw [_root_.mul_comm]; exact mul_ediv_le _ _
 
@@ -168,22 +181,67 @@ lemma lt_mul_ediv (x : M) {y} (hy : 0 < y) : x < y * (x /ₑ y + 1) := by
        _ < y * (x /ₑ y + 1) := by simp [mul_add, hv]
 
 @[simp] lemma ediv_one (x : M) : x /ₑ 1 = x :=
-  le_antisymm (by simpa using mul_ediv_le x 1) (le_iff_lt_succ.mpr $ by simpa using lt_mul_ediv x one_pos)
+  le_antisymm (by simp) (le_iff_lt_succ.mpr $ by simpa using lt_mul_ediv x one_pos)
 
-@[simp] lemma ediv_mul (x : M) {y} (hy : 0 < y) : (x * y) /ₑ y = x := by
-  rcases ediv_spec_of_pos (x * y) hy with ⟨v, hv, e⟩
+lemma ediv_mul_add (x : M) {y r} (hy : 0 < y) (hr : r < y) : (x * y + r) /ₑ y = x := by
+  rcases ediv_spec_of_pos (x * y + r) hy with ⟨v, hv, e⟩
   symm; apply eq_of_le_of_not_lt
-  · have : x * y < ((x * y) /ₑ y + 1) * y := calc
-      x * y = ((x * y) /ₑ y) * y + v      := by simpa [@mul_comm _ _ y] using e
-      _     < ((x * y) /ₑ y + 1) * y      := by simp [add_mul, hv]
+  · have : x * y < ((x * y + r) /ₑ y + 1) * y := calc
+      x * y ≤ x * y + r                  := le_self_add
+      _     = ((x * y + r) /ₑ y) * y + v := by simpa [@mul_comm _ _ y] using e
+      _     < ((x * y + r) /ₑ y + 1) * y := by simp [add_mul, hv]
     exact le_iff_lt_succ.mpr <| lt_of_mul_lt_mul_of_nonneg_right this (by simp)
   · intro H
-    have : x * y < y * ((x * y) /ₑ y) + v := calc
-      x * y < (((x * y) /ₑ y)) * y   := (mul_lt_mul_right hy).mpr H
-      _     ≤ y * ((x * y) /ₑ y) + v := by simp [_root_.mul_comm _ _]
-    exact ne_of_lt this e
+    have : ((x * y + r) /ₑ y) * y < (x + 1) * y := calc
+      ((x * y + r) /ₑ y) * y ≤ x * y + r   := by simp
+      _                      < (x + 1) * y := by simp [add_mul, hr]
+    have : (x * y + r) /ₑ y ≤ x := le_iff_lt_succ.mpr ((mul_lt_mul_right hy).mp this)
+    have : x < x := lt_of_lt_of_le H this
+    exact LT.lt.false this
+
+lemma ediv_mul_add_self (x : M) {y z} (hy : 0 < y) : (x + z * y) /ₑ y = x /ₑ y + z := by
+  rcases ediv_spec_of_pos' x hy with ⟨r, hr, ex⟩
+  simpa [add_mul, add_right_comm, ← ex] using ediv_mul_add (x /ₑ y + z) hy hr
+
+@[simp] lemma ediv_mul_left (x : M) {y} (hy : 0 < y) : (x * y) /ₑ y = x := by
+  simpa using ediv_mul_add x hy hy
+
+@[simp] lemma ediv_mul_right (x : M) {y} (hy : 0 < y) : (y * x) /ₑ y = x := by
+  simpa [_root_.mul_comm] using ediv_mul_add x hy hy
+
+@[simp] lemma ediv_eq_zero_of_lt (y : M) {x} (h : x < y) : x /ₑ y = 0 := by
+  simpa using ediv_mul_add 0 (pos_of_gt h) h
+
+@[simp] lemma ediv_self {x : M} (hx : 0 < x) : x /ₑ x = 1 := by
+  simpa using ediv_mul_left 1 hx
+
+@[simp] lemma zero_ediv (x : M) : 0 /ₑ x = 0 := by
+  have : 0 ≤ x := by exact _root_.zero_le x
+  rcases this with (rfl | hy) <;> simp [*]
 
 @[simp] lemma ediv_mul' (x : M) {y} (hy : 0 < y) : (y * x) /ₑ y = x := by simp [_root_.mul_comm, hy]
+
+end ediv
+
+section cpair
+
+def cpair (x y : M) : M := ((x + y) * (x + y + 1)) /ₑ 2 + y
+
+notation "⟨" x " ; " y "⟩" => cpair x y
+
+lemma cpair_graph {x y z : M} :
+    z = ⟨x ; y⟩ ↔ ∃ r < 2, (x + y) * (x + y + 1) + 2 * y = 2 * z + r := by
+  simp [cpair, ediv_graph, ←ediv_mul_add_self, _root_.mul_comm]
+
+lemma cpair_definable : Σᴬ[0]-Function₂ (λ x y : M ↦ ⟨x ; y⟩) := by
+  let cpair : Semisentence ℒₒᵣ 3 := “∃[#0 < 2] (#2 + #3) * (#2 + #3 + 1) + 2 * #3 = 2 * #1 + #0”
+  exact ⟨cpair, by simp[Hierarchy.pi_zero_iff_sigma_zero], by
+    intro v; simp [Matrix.vecHead, Matrix.vecTail, Matrix.constant_eq_singleton, cpair_graph]⟩
+
+lemma cpair_polybounded : PolyBounded₂ (λ x y : M ↦ ⟨x ; y⟩) :=
+  ⟨ᵀ“(#0 + #1) * (#0 + #1 + 1) + #1 * 2”, λ _ ↦ by simp[cpair, ←ediv_mul_add_self]⟩
+
+end cpair
 
 end IOpen.Model
 
