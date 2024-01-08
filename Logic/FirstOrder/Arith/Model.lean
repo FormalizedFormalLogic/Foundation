@@ -108,21 +108,6 @@ abbrev Theory.trueArith : Theory ℒₒᵣ := Structure.theory ℒₒᵣ ℕ
 
 notation "𝐓𝐀" => Theory.trueArith
 
-section
-
-variable {M : Type} [LE M] [Structure ℒₒᵣ M]
-
-def PolyBounded {k} (f : (Fin k → M) → M) : Prop :=
-  ∃ t : Polynomial k, ∀ v : Fin k → M, f v ≤ t.bVal! M v
-
-abbrev PolyBounded₁ (f : M → M) : Prop :=
-  PolyBounded (k := 1) (fun v => f (Matrix.vecHead v))
-
-abbrev PolyBounded₂ (f : M → M → M) : Prop :=
-  PolyBounded (k := 2) (fun v => f (v 0) (v 1))
-
-end
-
 end Arith
 
 end FirstOrder
