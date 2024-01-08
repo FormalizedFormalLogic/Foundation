@@ -83,7 +83,7 @@ lemma modelsSuccInd (p : Semiformula ℒₒᵣ (Fin n) 1) : ℕ ⊧ₘ (∀ᵤ* 
   · exact hsucc x ih
 
 lemma modelsPeano : ℕ ⊧ₘ* 𝐏𝐀 ∪ 𝐏𝐀⁻ ∪ 𝐄𝐪 :=
-  by simp[Theory.Peano, Theory.IndScheme, modelsTheoryPAminus]; rintro _ k p rfl; simp [modelsSuccInd]
+  by simp[Theory.Peano, Theory.IndScheme, modelsTheoryPAminus, Set.univ]; rintro _ k p _ rfl; simp [modelsSuccInd]
 
 end Standard
 

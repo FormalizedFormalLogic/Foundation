@@ -48,7 +48,8 @@ notation "𝐏𝐀⁻" => PAminus ℒₒᵣ
 
 variable {L}
 
-def IndScheme (u : {n : ℕ} → Set (Semiformula L (Fin n) 1)) : Theory L := { ∀ᵤ* succInd p | (n : ℕ) (p ∈ @u n) }
+def IndScheme (Γ : {n : ℕ} → Semiformula L (Fin n) 1 → Prop) : Theory L :=
+  { q | ∃ (n : ℕ) (p : Semiformula L (Fin n) 1), Γ p ∧ q = ∀ᵤ* succInd p }
 
 variable (L)
 
