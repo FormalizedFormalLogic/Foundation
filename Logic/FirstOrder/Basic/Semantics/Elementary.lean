@@ -253,52 +253,6 @@ end EmbeddingClass
 
 end
 
-section Definability
-
-variable {α : Type u} [Structure L α]
-
-def Definable {k} (C : Semisentence L k → Prop) (R : (Fin k → α) → Prop) : Prop :=
-  ∃ p, C p ∧ (∀ v, R v ↔ Semiformula.PVal! α v p)
-
-def DefinableFunction {k} (C : Semisentence L (k + 1) → Prop) (f : (Fin k → α) → α) : Prop :=
-  Definable C fun w ↦ Matrix.vecHead w = f (Matrix.vecTail w)
-
-namespace Definable
-
-variable {k} {C : Semisentence L k → Prop}
-
-section AndOrClosed
-
-variable [LogicSymbol.AndOrClosed C]
-
-@[simp] lemma falsum : Definable C (λ _ ↦ False : (Fin k → α) → Prop) := ⟨⊥, by simp⟩
-
-@[simp] lemma verum : Definable C (λ _ ↦ True : (Fin k → α) → Prop) := ⟨⊤, by simp⟩
-
-lemma or {P Q : (Fin k → α) → Prop} (hs : Definable C P) (ht : Definable C Q) :
-    Definable C (λ x ↦ P x ∨ Q x) := by
-  rcases hs with ⟨p, _, _⟩; rcases ht with ⟨q, _, _⟩; exact ⟨p ⋎ q, by simp[LogicSymbol.AndOrClosed.or, *]⟩
-
-lemma and {P Q : (Fin k → α) → Prop} (hs : Definable C P) (ht : Definable C Q) :
-    Definable C (λ x ↦ P x ∧ Q x) := by
-  rcases hs with ⟨p, _, _⟩; rcases ht with ⟨q, _, _⟩; exact ⟨p ⋏ q, by simp[LogicSymbol.AndOrClosed.and, *]⟩
-
-end AndOrClosed
-
-section Closed
-
-variable [LogicSymbol.Closed C]
-
-lemma compl {s : Set (Fin k → α)} (hs : Definable C s) :
-    Definable C sᶜ := by
-  rcases hs with ⟨p, _, _⟩; exact ⟨~p, by simp[LogicSymbol.Closed.not, *]⟩
-
-end Closed
-
-end Definable
-
-end Definability
-
 end FirstOrder
 
 end LO
