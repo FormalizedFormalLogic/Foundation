@@ -148,6 +148,12 @@ by simp[Vee.vee]
 @[simp] lemma ex_inj (p q : Semiformula L μ (n + 1)) : ∃' p = ∃' q ↔ p = q :=
   by simp[ExQuantifier.ex]
 
+@[simp] lemma univClosure_inj (p q : Semiformula L μ n) : ∀* p = ∀* q ↔ p = q := by
+  induction n <;> simp [*]
+
+@[simp] lemma exClosure_inj (p q : Semiformula L μ n) : ∃* p = ∃* q ↔ p = q := by
+  induction n <;> simp [*]
+
 @[simp] lemma imp_inj {p₁ p₂ q₁ q₂ : Semiformula L μ n} :
     p₁ ⟶ p₂ = q₁ ⟶ q₂ ↔ p₁ = q₁ ∧ p₂ = q₂ := by simp [imp_eq]
 

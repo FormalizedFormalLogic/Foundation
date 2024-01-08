@@ -33,10 +33,7 @@ open Semiterm Semiformula
 
 abbrev Polynomial (n : ℕ) : Type := Semiterm ℒₒᵣ Empty n
 
-class ORing (L : Language) extends
-  Operator.Zero L, Operator.One L, Operator.Add L, Operator.Mul L, Operator.Eq L, Operator.LT L
-
-class Structure.ORing (L : Language) [ORing L] (M : Type w) [ORingSymbol M] [Structure L M] extends
+class Structure.ORing (L : Language) [L.ORing] (M : Type w) [ORingSymbol M] [Structure L M] extends
   Structure.Zero L M, Structure.One L M, Structure.Add L M, Structure.Mul L M, Structure.Eq L M, Structure.LT L M
 
 attribute [instance] Structure.ORing.mk
@@ -69,7 +66,7 @@ lemma consistent_of_sound [Sound T F] (hF : F ⊥) : System.Consistent T :=
 
 end
 
-variable [ORing L] (T : Theory L) [𝐄𝐪 ≾ T]
+variable {L : Language} [L.ORing] (T : Theory L) [𝐄𝐪 ≾ T]
 
 lemma consequence_of (σ : Sentence L)
   (H : ∀ (M : Type u)
