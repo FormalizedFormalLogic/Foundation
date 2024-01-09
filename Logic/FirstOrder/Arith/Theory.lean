@@ -53,13 +53,13 @@ def IndScheme (Γ : {n : ℕ} → Semiformula L (Fin n) 1 → Prop) : Theory L :
 
 variable (L)
 
-abbrev IndSchemeOpen : Theory L := IndScheme Semiformula.Open
+abbrev IOpen : Theory L := IndScheme Semiformula.Open
 
-notation "𝐈open" => IndSchemeOpen ℒₒᵣ
+notation "𝐈open" => IOpen ℒₒᵣ
 
-abbrev IndSchemeSigma (k : ℕ) : Theory L := IndScheme (Arith.Hierarchy Σ k)
+abbrev ISigma (k : ℕ) : Theory L := IndScheme (Arith.Hierarchy Σ k)
 
-prefix:max "𝐈𝚺" => IndSchemeSigma ℒₒᵣ
+prefix:max "𝐈𝚺" => ISigma ℒₒᵣ
 
 abbrev Peano : Theory L := IndScheme Set.univ
 

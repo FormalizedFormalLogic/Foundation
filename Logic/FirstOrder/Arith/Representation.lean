@@ -160,7 +160,7 @@ lemma provable_iff_mem_partrec {k} {f : Vector ℕ k →. ℕ} (hf : Nat.Partrec
         Arith.Sound.sound sigma ⟨b⟩
     exact (codeOfPartrec_spec hf).mp this
   · intro h
-    exact ⟨PAminus.sigma_one_completeness sigma (by
+    exact ⟨Arith.sigma_one_completeness sigma (by
       simp[models_iff, Semiformula.eval_rew, Matrix.empty_eq,
         Function.comp, Matrix.comp_vecCons', codeOfPartrec_spec hf, h])⟩
 
