@@ -95,6 +95,13 @@ lemma msub_msub : a ∸ b ∸ c = a ∸ (b + c) := by
       · simp [show a ∸ b = 0 from msub_spec_of_lt (not_le.mp hb)]
     · exact msub_spec_of_lt (not_le.mp hc)
 
+lemma pos_msub_iff_lt : 0 < a ∸ b ↔ b < a :=
+  ⟨by contrapose; simp; exact msub_spec_of_le,
+   by intro h; by_contra hs
+      simp at hs
+      have : a = b := by simpa [hs] using msub_spec_of_ge (show b ≤ a from LT.lt.le h)
+      simp [this] at h⟩
+
 end msub
 
 section Dvd

@@ -37,6 +37,9 @@ variable (b : VType) (s : ℕ) (L : Language) [L.LT] (n)
 
 @[simp] lemma hierarchy (p : FormulaHierarchy b s L n) : Hierarchy b s p.val := p.prop
 
+@[simp] lemma hierarchy_zero (p : FormulaHierarchy b 0 L n) : Hierarchy b' s p.val :=
+  Hierarchy.of_zero p.hierarchy
+
 end FormulaHierarchy
 
 protected abbrev Defined (b s) {k} (R : (Fin k → M) → Prop) (p : FormulaHierarchy b s ℒₒᵣ k) : Prop :=
