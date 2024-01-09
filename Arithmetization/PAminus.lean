@@ -11,13 +11,17 @@ variable {M : Type} [Inhabited M] [DecidableEq M] [ORingSymbol M]
   [Structure ℒₒᵣ M] [Structure.ORing ℒₒᵣ M]
   [𝐏𝐀⁻.Mod M]
 
-namespace PAminus.Model
+namespace Model
 
 variable {a b c : M}
 
-lemma lt_iff_succ_le : a < b ↔ a + 1 ≤ b := by simp [← le_of_lt_succ]
+lemma lt_iff_succ_le : a < b ↔ a + 1 ≤ b := by simp [le_iff_lt_succ]
 
-lemma le_iff_lt_succ : a ≤ b ↔ a < b + 1 := by simp [le_of_lt_succ]
+lemma pos_iff_one_le : 0 < a ↔ 1 ≤ a := by simp [lt_iff_succ_le]
+
+@[simp] lemma le_mul_self (a : M) : a ≤ a * a := by
+  have : 0 ≤ a := by exact zero_le a
+  rcases this with (rfl | pos) <;> simp [*, ←pos_iff_one_le]
 
 section msub
 
@@ -65,14 +69,14 @@ lemma msub_add_self_of_le (h : b ≤ a) : a ∸ b + b = a := by symm; rw [add_co
 lemma add_tmsub_self_of_le (h : b ≤ a) : b + (a ∸ b) = a := by symm; exact msub_spec_of_ge h
 
 @[simp] lemma add_msub_self : (a + b) ∸ b = a := by
-  symm; simpa [@_root_.add_comm _ _ b] using msub_spec_of_ge (@le_add_self _ _ b a)
+  symm; simpa [add_comm b] using msub_spec_of_ge (@le_add_self _ _ b a)
 
 @[simp] lemma add_msub_self' : (b + a) ∸ b = a := by simp [add_comm]
 
 @[simp] lemma zero_msub (a : M) : 0 ∸ a = 0 := msub_spec_of_le (by simp)
 
 @[simp] lemma msub_zero (a : M) : a ∸ 0 = a := by
-  simpa using msub_add_self_of_le (show 0 ≤ a from _root_.zero_le a)
+  simpa using msub_add_self_of_le (show 0 ≤ a from zero_le a)
 
 lemma msub_remove_left (e : a = b + c) : a ∸ c = b := by simp[e]
 
@@ -112,13 +116,13 @@ lemma dvd_iff_bounded {a b : M} : a ∣ b ↔ ∃ c ≤ b, b = a * c := by
 def dvdDefinition : Σᴬ[0] 2 := ⟨“∃[#0 < #2 + 1] #2 = #1 * #0”, by simp⟩
 
 lemma dvd_definable : Σᴬ[0]-Relation (λ a b : M ↦ a ∣ b) dvdDefinition :=
-  λ v ↦ by simp[dvd_iff_bounded, Matrix.vecHead, Matrix.vecTail, le_of_lt_succ, dvdDefinition]
+  λ v ↦ by simp[dvd_iff_bounded, Matrix.vecHead, Matrix.vecTail, le_iff_lt_succ, dvdDefinition]
 
 end Dvd
 
 @[simp] lemma lt_one_iff_eq_zero : a < 1 ↔ a = 0 := ⟨by
   intro hx
-  have : a ≤ 0 := by exact le_of_lt_succ.mp (show a < 0 + 1 from by simpa using hx)
+  have : a ≤ 0 := by exact le_iff_lt_succ.mpr (show a < 0 + 1 from by simpa using hx)
   exact nonpos_iff_eq_zero.mp this,
   by rintro rfl; exact zero_lt_one⟩
 
@@ -177,17 +181,25 @@ def isPrimeDefinition : Σᴬ[0] 1 :=
 lemma isPrime_definable : Σᴬ[0]-Predicate (λ a : M ↦ IsPrime a) isPrimeDefinition := by
   intro v
   simp [Semiformula.eval_substs, Matrix.comp_vecCons', Matrix.vecHead, Matrix.constant_eq_singleton,
-    IsPrime, isPrimeDefinition, le_of_lt_succ, dvd_definable.pval]
+    IsPrime, isPrimeDefinition, le_iff_lt_succ, dvd_definable.pval]
 
 end Prime
 
 section Pow2
 
-def Pow2 (a : M) : Prop := 1 < a ∧ ∀ p ≤ a, IsPrime p → p ∣ a → p = 2
+def Pow2 (a : M) : Prop := 0 < a ∧ ∀ r ≤ a, 1 < r → r ∣ a → 2 ∣ r
+
+def pow2Definition : Σᴬ[0] 1 :=
+  ⟨“0 < #0 ∧ ∀[#0 < #1 + 1] (1 < #0 →  !dvdDefinition [#0, #1] → !dvdDefinition [2, #0])”, by simp [Hierarchy.pi_zero_iff_sigma_zero]⟩
+
+lemma pow2_definable : Σᴬ[0]-Predicate (Pow2 : M → Prop) pow2Definition := by
+  intro v
+  simp [Semiformula.eval_substs, Matrix.comp_vecCons', Matrix.vecHead, Matrix.constant_eq_singleton,
+    Pow2, pow2Definition, le_iff_lt_succ, dvd_definable.pval]
 
 end Pow2
 
-end PAminus.Model
+end Model
 
 end
 
