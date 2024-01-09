@@ -264,6 +264,15 @@ lemma LE.def_of_Eq_of_LT [Operator.Eq L] [Operator.LT L] :
     LE.le.operator ![t₁, u₁] = LE.le.operator ![t₂, u₂] ↔ t₁ = t₂ ∧ u₁ = u₂ := by
   simp [operator, LE.sentence_eq, Eq.sentence_eq, LT.sentence_eq, Matrix.fun_eq_vec₂]
 
+variable {L : Language} [L.Eq] [L.LT]
+
+@[simp] lemma Eq.open (t u : Semiterm L μ n) : (Eq.eq.operator ![t, u]).Open := by simp [Operator.operator, Operator.Eq.sentence_eq]
+
+@[simp] lemma LT.open (t u : Semiterm L μ n) : (LT.lt.operator ![t, u]).Open := by simp [Operator.operator, Operator.LT.sentence_eq]
+
+@[simp] lemma LE.open (t u : Semiterm L μ n) : (LE.le.operator ![t, u]).Open := by
+  simp [Operator.operator, Operator.LE.sentence_eq, Operator.Eq.sentence_eq, Operator.LT.sentence_eq]
+
 end Operator
 
 def Operator.val {M : Type w} [s : Structure L M] {k} (o : Operator L k) (v : Fin k → M) : Prop :=

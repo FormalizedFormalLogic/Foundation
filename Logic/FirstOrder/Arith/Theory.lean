@@ -53,7 +53,7 @@ def IndScheme (Γ : {n : ℕ} → Semiformula L (Fin n) 1 → Prop) : Theory L :
 
 variable (L)
 
-abbrev IndSchemeOpen : Theory L := IndScheme Semiformula.qfree
+abbrev IndSchemeOpen : Theory L := IndScheme Semiformula.Open
 
 notation "𝐈open" => IndSchemeOpen ℒₒᵣ
 

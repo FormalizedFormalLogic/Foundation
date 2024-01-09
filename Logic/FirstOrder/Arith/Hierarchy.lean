@@ -304,6 +304,11 @@ instance : LogicSymbol.Closed (Hierarchy b 0 : Semiformula L μ k → Prop) wher
   not := by simp[neg_iff]
   imply := by simp[Semiformula.imp_eq, neg_iff]; intro p q hp hq; simp[*]
 
+lemma Open {p : Semiformula L μ n} : p.Open → Hierarchy b s p := by
+  induction p using Semiformula.rec' <;> simp
+  case hand ihp ihq => intro hp hq; exact ⟨ihp hp, ihq hq⟩
+  case hor ihp ihq => intro hp hq; exact ⟨ihp hp, ihq hq⟩
+
 end Hierarchy
 
 variable {L : Language} [(k : ℕ) → DecidableEq (L.Func k)] [(k : ℕ) → DecidableEq (L.Rel k)]

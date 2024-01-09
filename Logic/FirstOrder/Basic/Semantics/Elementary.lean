@@ -156,18 +156,18 @@ open Structure
 variable {F : Type*} [EmbeddingClass F L M₁ M₂] (φ : F)
 variable {e₁ : Fin n → M₁} {ε₁ : μ → M₁}
 
-lemma eval_hom_iff_of_qfree : ∀ {n} {e₁ : Fin n → M₁} {ε₁ : μ → M₁} {p : Semiformula L μ n}, p.qfree →
+lemma eval_hom_iff_of_open : ∀ {n} {e₁ : Fin n → M₁} {ε₁ : μ → M₁} {p : Semiformula L μ n}, p.Open →
     (Eval s₁ e₁ ε₁ p ↔ Eval s₂ (φ ∘ e₁) (φ ∘ ε₁) p)
   | _, e₁, ε₁, ⊤,        _ => by simp
   | _, e₁, ε₁, ⊥,        _ => by simp
   | _, e₁, ε₁, rel r v,  _ => by simp[Function.comp, eval_rel, ←EmbeddingClass.rel φ, HomClass.val_term]
   | _, e₁, ε₁, nrel r v, _ => by simp[Function.comp, eval_nrel, ←EmbeddingClass.rel φ, HomClass.val_term]
-  | _, e₁, ε₁, p ⋏ q,    h => by simp at h ⊢; simp[eval_hom_iff_of_qfree h.1, eval_hom_iff_of_qfree h.2]
-  | _, e₁, ε₁, p ⋎ q,    h => by simp at h ⊢; simp[eval_hom_iff_of_qfree h.1, eval_hom_iff_of_qfree h.2]
+  | _, e₁, ε₁, p ⋏ q,    h => by simp at h ⊢; simp[eval_hom_iff_of_open h.1, eval_hom_iff_of_open h.2]
+  | _, e₁, ε₁, p ⋎ q,    h => by simp at h ⊢; simp[eval_hom_iff_of_open h.1, eval_hom_iff_of_open h.2]
 
-lemma eval_hom_univClosure {n} {ε₁ : μ → M₁} {p : Semiformula L μ n} (hp : p.qfree) :
+lemma eval_hom_univClosure {n} {ε₁ : μ → M₁} {p : Semiformula L μ n} (hp : p.Open) :
     Val s₂ (φ ∘ ε₁) (univClosure p) → Val s₁ ε₁ (univClosure p) := by
-  simp; intro h e₁; exact (eval_hom_iff_of_qfree φ hp).mpr (h (φ ∘ e₁))
+  simp; intro h e₁; exact (eval_hom_iff_of_open φ hp).mpr (h (φ ∘ e₁))
 
 end Semiformula
 
@@ -224,16 +224,16 @@ section EmbeddingClass
 variable {F : Type*} [Structure.EmbeddingClass F L M₁ M₂] (φ : F)
 variable {e₁ : Fin n → M₁} {ε₁ : μ → M₁}
 
-lemma models_hom_iff_of_qfree {σ : Sentence L} (hσ : σ.qfree) : M₁ ⊧ₘ σ ↔ M₂ ⊧ₘ σ := by
+lemma models_hom_iff_of_open {σ : Sentence L} (hσ : σ.Open) : M₁ ⊧ₘ σ ↔ M₂ ⊧ₘ σ := by
   simpa[Matrix.empty_eq, Empty.eq_elim] using
-    Semiformula.eval_hom_iff_of_qfree (e₁ := finZeroElim) (ε₁ := Empty.elim) φ hσ
+    Semiformula.eval_hom_iff_of_open (e₁ := finZeroElim) (ε₁ := Empty.elim) φ hσ
 
-lemma models_hom_univClosure {n} {σ : Semisentence L n} (hσ : σ.qfree) :
+lemma models_hom_univClosure {n} {σ : Semisentence L n} (hσ : σ.Open) :
     M₂ ⊧ₘ (univClosure σ) → M₁ ⊧ₘ (univClosure σ) := by
   simpa[Matrix.empty_eq, Empty.eq_elim, models_iff] using
     Semiformula.eval_hom_univClosure (ε₁ := Empty.elim) φ hσ
 
-lemma models_hom_univClosure_of_submodels (H : M₁ ↪ₛ[L] M₂) {n} {σ : Semisentence L n} (hσ : σ.qfree) :
+lemma models_hom_univClosure_of_submodels (H : M₁ ↪ₛ[L] M₂) {n} {σ : Semisentence L n} (hσ : σ.Open) :
     M₂ ⊧ₘ (univClosure σ) → M₁ ⊧ₘ (univClosure σ) := models_hom_univClosure H hσ
 
 section

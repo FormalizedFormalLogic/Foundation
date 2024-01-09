@@ -584,32 +584,32 @@ def qr : ∀ {n}, Semiformula L μ n → ℕ
 @[simp] lemma qr_iff (p q : Semiformula L μ n) : (p ⟷ q).qr = max p.qr q.qr :=
   by simp[iff_eq, total_of]
 
-def qfree (p : Semiformula L μ n) : Prop := p.qr = 0
+def Open (p : Semiformula L μ n) : Prop := p.qr = 0
 
-@[simp] lemma qfree_top : (⊤ : Semiformula L μ n).qfree := rfl
+@[simp] lemma open_top : (⊤ : Semiformula L μ n).Open := rfl
 
-@[simp] lemma qfree_bot : (⊥ : Semiformula L μ n).qfree := rfl
+@[simp] lemma open_bot : (⊥ : Semiformula L μ n).Open := rfl
 
-@[simp] lemma qfree_rel {k} (r : L.Rel k) (v : Fin k → Semiterm L μ n) : (rel r v).qfree := rfl
+@[simp] lemma open_rel {k} (r : L.Rel k) (v : Fin k → Semiterm L μ n) : (rel r v).Open := rfl
 
-@[simp] lemma qfree_nrel {k} (r : L.Rel k) (v : Fin k → Semiterm L μ n) : (nrel r v).qfree := rfl
+@[simp] lemma open_nrel {k} (r : L.Rel k) (v : Fin k → Semiterm L μ n) : (nrel r v).Open := rfl
 
-@[simp] lemma qfree_and {p q : Semiformula L μ n} : (p ⋏ q).qfree ↔ p.qfree ∧ q.qfree := by simp[qfree]
+@[simp] lemma open_and {p q : Semiformula L μ n} : (p ⋏ q).Open ↔ p.Open ∧ q.Open := by simp[Open]
 
-@[simp] lemma qfree_or {p q : Semiformula L μ n} : (p ⋎ q).qfree ↔ p.qfree ∧ q.qfree := by simp[qfree]
+@[simp] lemma open_or {p q : Semiformula L μ n} : (p ⋎ q).Open ↔ p.Open ∧ q.Open := by simp[Open]
 
-@[simp] lemma not_qfree_all {p : Semiformula L μ (n + 1)} : ¬(∀' p).qfree := by simp[qfree]
+@[simp] lemma not_open_all {p : Semiformula L μ (n + 1)} : ¬(∀' p).Open := by simp[Open]
 
-@[simp] lemma not_qfree_ex {p : Semiformula L μ (n + 1)} : ¬(∃' p).qfree := by simp[qfree]
+@[simp] lemma not_open_ex {p : Semiformula L μ (n + 1)} : ¬(∃' p).Open := by simp[Open]
 
-@[simp] lemma qfree_neg {p : Semiformula L μ n} : (~p).qfree ↔ p.qfree := by
-  simp[qfree]
+@[simp] lemma open_neg {p : Semiformula L μ n} : (~p).Open ↔ p.Open := by
+  simp[Open]
 
-@[simp] lemma qfree_imply {p q : Semiformula L μ n} : (p ⟶ q).qfree ↔ p.qfree ∧ q.qfree :=
-  by simp[qfree]
+@[simp] lemma open_imply {p q : Semiformula L μ n} : (p ⟶ q).Open ↔ p.Open ∧ q.Open :=
+  by simp[Open]
 
-@[simp] lemma qfree_iff {p q : Semiformula L μ n} : (p ⟷ q).qfree ↔ p.qfree ∧ q.qfree :=
-  by simp[qfree]
+@[simp] lemma open_iff {p q : Semiformula L μ n} : (p ⟷ q).Open ↔ p.Open ∧ q.Open :=
+  by simp[Open]
 
 @[elab_as_elim]
 def formulaRec {C : SyntacticFormula L → Sort _}
@@ -707,16 +707,6 @@ lemma ne_of_ne_complexity {p q : Semiformula L μ n} (h : p.complexity ≠ q.com
 
 @[simp] lemma ne_or_right (p q : Semiformula L μ n) : q ≠ p ⋎ q := ne_of_ne_complexity (by simp)
 
-inductive Open : {n : ℕ} → Semiformula L μ n → Prop
-  | verum                      : Open ⊤
-  | falsum                     : Open ⊥
-  | rel {k} (r : L.Rel k) (v)  : Open (rel r v)
-  | nrel {k} (r : L.Rel k) (v) : Open (nrel r v)
-  | and {p q : Semiformula L μ n}   : Open p → Open q → Open (p ⋏ q)
-  | or {p q : Semiformula L μ n}    : Open p → Open q → Open (p ⋎ q)
-
-attribute [simp] Open.verum Open.falsum Open.rel Open.nrel
-
 variable {L : Language.{u}} {L₁ : Language.{u₁}} {{L₂ : Language.{u₂}}} {L₃ : Language.{u₃}} {μ : Type v} {Φ : L₁ →ᵥ L₂}
 
 def lMapAux (Φ : L₁ →ᵥ L₂) : ∀ {n}, Semiformula L₁ μ n → Semiformula L₂ μ n
@@ -801,6 +791,15 @@ lemma lMap_emb {o : Type w} [IsEmpty o] (p : Semiformula L₁ o n) :
     (lMap Φ (Rew.emb.hom p) : Semiformula L₂ μ n) = Rew.emb.hom (lMap Φ p) := lMap_bind _ _ _
 
 end Semiformula
+
+namespace Rew
+
+variable {L :Language} {μ μ₁ μ₂ : Type*} {n n₁ n₂} (ω : Rew L μ₁ n₁ μ₂ n₂)
+
+@[simp] protected lemma open_iff {p : Semiformula L μ₁ n₁} : (ω.hom p).Open ↔ p.Open := by
+  induction p using Semiformula.rec' <;> try simp [Rew.rel, Rew.nrel, *]
+
+end Rew
 
 abbrev Theory (L : Language.{u}) := Set (Sentence L)
 
