@@ -15,33 +15,3 @@ lemma fun_eq_vec₄ {v : Fin 4 → α} : v = ![v 0, v 1, v 2, v 3] := by
   rfl
 
 end Matrix
-
-namespace LO
-
-namespace FirstOrder
-
-namespace Rew
-
-variable {L :Language} {μ μ₁ μ₂ : Type*} {n n₁ n₂} (ω : Rew L μ₁ n₁ μ₂ n₂)
-
-@[simp] protected lemma qfree {p : Semiformula L μ₁ n₁} : (ω.hom p).qfree ↔ p.qfree := by
-  induction p using Semiformula.rec' <;> try simp [Rew.rel, Rew.nrel, *]
-
-end Rew
-
-namespace Semiformula
-
-variable {L : Language} [L.Eq] [L.LT]
-
-@[simp] lemma eq_qfree (t u : Semiterm L μ n) : (“!!t = !!u”).qfree := by simp [Operator.operator, Operator.Eq.sentence_eq]
-
-@[simp] lemma lt_qfree (t u : Semiterm L μ n) : (“!!t < !!u”).qfree := by simp [Operator.operator, Operator.LT.sentence_eq]
-
-@[simp] lemma le_qfree (t u : Semiterm L μ n) : (“!!t ≤ !!u”).qfree := by
-  simp [Operator.operator, Operator.LE.sentence_eq, Operator.Eq.sentence_eq, Operator.LT.sentence_eq]
-
-end Semiformula
-
-end FirstOrder
-
-end LO

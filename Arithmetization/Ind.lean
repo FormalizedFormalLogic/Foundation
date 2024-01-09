@@ -6,17 +6,28 @@ namespace Arith
 
 namespace Theory
 
-variable {L : Language} [L.ORing] {C : {n : ℕ} → Set (Semiformula L (Fin n) 1)}
+variable {L : Language} [L.ORing] {C C' : {n : ℕ} → (Semiformula L (Fin n) 1 → Prop)}
 
-lemma mem_IndScheme_of_mem {p : Semiformula L (Fin n) 1} (hp : p ∈ C) :
+lemma mem_IndScheme_of_mem {p : Semiformula L (Fin n) 1} (hp : C p) :
     ∀ᵤ* succInd p ∈ IndScheme C := by
   simp[IndScheme, Formula.univClosure, Semiformula.univClosure_inj]
   exact ⟨n, p, hp, rfl⟩
 
-lemma mem_Iopen_of_qfree {p : Semiformula L (Fin n) 1} (hp : p.qfree) :
+lemma mem_Iopen_of_qfree {p : Semiformula L (Fin n) 1} (hp : p.Open) :
     ∀ᵤ* succInd p ∈ IndSchemeOpen L := by
   simp[IndScheme, Formula.univClosure, Semiformula.univClosure_inj]
   exact ⟨n, p, hp, rfl⟩
+
+lemma IndScheme_subset (h : ∀ {n} {p : Semiformula L (Fin n) 1},  C p → C' p) : IndScheme C ⊆ IndScheme C' := by
+  intro _; simp [IndScheme]; rintro n p hp rfl; exact ⟨n, p, h hp, rfl⟩
+
+abbrev IndSchemeSigma₀ (L : Language) [L.ORing] := IndSchemeSigma L 0
+
+notation "𝐈𝚺₀" => IndSchemeSigma₀ ℒₒᵣ
+
+abbrev IndSchemeSigma₁ (L : Language) [L.ORing] := IndSchemeSigma L 1
+
+notation "𝐈𝚺₁" => IndSchemeSigma₁ ℒₒᵣ
 
 end Theory
 
@@ -79,12 +90,12 @@ namespace IOpen.Model
 variable [𝐈open.Mod M]
 
 lemma induction₂ {P : M → M → M → Prop}
-    (hP : ∃ p : Semiformula ℒₒᵣ (Fin 2) 1, p.qfree ∧ (∀ x a b, P a b x ↔ Semiformula.Eval! M ![x] ![a, b] p)) (a b) :
+    (hP : ∃ p : Semiformula ℒₒᵣ (Fin 2) 1, p.Open ∧ (∀ x a b, P a b x ↔ Semiformula.Eval! M ![x] ![a, b] p)) (a b) :
     P a b 0 → (∀ x, P a b x → P a b (x + 1)) → ∀ x, P a b x :=
-  IndScheme.Model.induction₂ (C := Semiformula.qfree) (by simpa) a b
+  IndScheme.Model.induction₂ (C := Semiformula.Open) (by simpa) a b
 
 lemma leastNumber₂ {P : M → M → M → Prop}
-    (hP : ∃ p : Semiformula ℒₒᵣ (Fin 2) 1, p.qfree ∧ (∀ x a b, P a b x ↔ Semiformula.Eval! M ![x] ![a, b] p)) (a b x) :
+    (hP : ∃ p : Semiformula ℒₒᵣ (Fin 2) 1, p.Open ∧ (∀ x a b, P a b x ↔ Semiformula.Eval! M ![x] ![a, b] p)) (a b x) :
     P a b 0 → ¬P a b x → ∃ x, P a b x ∧ ¬P a b (x + 1) := fun h0 hx ↦ by
   simpa using (not_imp_not.mpr <| induction₂ hP a b h0) (by simp; exact ⟨x, hx⟩)
 
@@ -139,10 +150,6 @@ lemma ediv_existsUnique (a b : M) : ∃! u, (0 < b → ∃ v < b, a = b * u + v)
 def ediv (a b : M) : M := Classical.choose! (ediv_existsUnique a b)
 
 infix:70 " /ₑ " => ediv
-
-def rem (a b : M) : M := a ∸ b * (a /ₑ b)
-
-infix:60 " mod " => rem
 
 lemma ediv_spec_of_pos (a : M) (h : 0 < b) : ∃ v < b, a = b * (a /ₑ b) + v :=
   (Classical.choose!_spec (ediv_existsUnique a b)).1 h
@@ -227,6 +234,14 @@ lemma ediv_mul_add_self (a c : M) {b} (pos : 0 < b) : (a * b + c) /ₑ b = a + c
 
 @[simp] lemma ediv_mul' (a : M) {b} (pos : 0 < b) : (b * a) /ₑ b = a := by simp [_root_.mul_comm, pos]
 
+end ediv
+
+section remainder
+
+def rem (a b : M) : M := a ∸ b * (a /ₑ b)
+
+infix:60 " mod " => rem
+
 lemma ediv_add_remainder (a b : M) : b * (a /ₑ b) + (a mod b) = a :=
   add_tmsub_self_of_le (mul_ediv_le a b)
 
@@ -243,7 +258,7 @@ lemma remainder_mul_add_of_lt (a : M) {b} (pos : 0 < b) {r} (hr : r < b) : (a * 
 
 @[simp] lemma remainder_self {a : M} (pos : 0 < a) : a mod a = 0 := by simp [rem, pos]
 
-end ediv
+end remainder
 
 section cpair
 
@@ -269,6 +284,32 @@ lemma cpair_polybounded : PolyBounded₂ (λ a b : M ↦ ⟨a ; b⟩) cpairPolyB
 end cpair
 
 end IOpen.Model
+
+namespace ISigma
+
+lemma iSigma_subset_mono {s₁ s₂} (h : s₁ ≤ s₂) : 𝐈𝚺 s₁ ⊆ 𝐈𝚺 s₂ :=
+  Theory.IndScheme_subset (fun H ↦ H.mono h)
+
+def mod_IOpen_of_mod_ISigma (s) [(𝐈𝚺 s).Mod M] : 𝐈open.Mod M :=
+  Theory.Mod.of_ss M (show 𝐈open ⊆ 𝐈𝚺 s from Theory.IndScheme_subset Hierarchy.Open)
+
+def mod_ISigma_of_le {s₁ s₂} (h : s₁ ≤ s₂) [(𝐈𝚺 s₂).Mod M] : (𝐈𝚺 s₁).Mod M :=
+  Theory.Mod.of_ss M (iSigma_subset_mono h)
+
+instance [𝐈𝚺₀.Mod M] : 𝐈open.Mod M := mod_IOpen_of_mod_ISigma 0
+
+instance [𝐈𝚺₁.Mod M] : 𝐈open.Mod M := mod_IOpen_of_mod_ISigma 1
+
+instance [𝐈𝚺₁.Mod M] : 𝐈𝚺₀.Mod M := mod_ISigma_of_le (show 0 ≤ 1 from by simp)
+
+end ISigma
+
+namespace ISigma₀.Model
+
+variable [𝐈𝚺₀.Mod M]
+
+
+end ISigma₀.Model
 
 end
 
