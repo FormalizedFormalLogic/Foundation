@@ -1,5 +1,6 @@
 import Arithmetization.Definability
 import Logic.FirstOrder.Arith.PAminus
+import Mathlib.Algebra.GCDMonoid.Basic
 
 namespace LO.FirstOrder
 
@@ -18,6 +19,13 @@ variable {a b c : M}
 lemma lt_iff_succ_le : a < b ↔ a + 1 ≤ b := by simp [le_iff_lt_succ]
 
 lemma pos_iff_one_le : 0 < a ↔ 1 ≤ a := by simp [lt_iff_succ_le]
+
+@[simp] lemma not_nonpos (a : M) : ¬a < 0 := by simp
+
+lemma lt_two_iff_le_one : a < 2 ↔ a ≤ 1 := by
+  simp [lt_iff_succ_le,
+    show a + 1 ≤ 2 ↔ a ≤ 1 from by
+      rw[show (2 : M) = 1 + 1 from one_add_one_eq_two.symm]; exact add_le_add_iff_right 1]
 
 @[simp] lemma le_mul_self (a : M) : a ≤ a * a := by
   have : 0 ≤ a := by exact zero_le a
@@ -95,12 +103,15 @@ lemma msub_msub : a ∸ b ∸ c = a ∸ (b + c) := by
       · simp [show a ∸ b = 0 from msub_spec_of_lt (not_le.mp hb)]
     · exact msub_spec_of_lt (not_le.mp hc)
 
-lemma pos_msub_iff_lt : 0 < a ∸ b ↔ b < a :=
+@[simp] lemma pos_msub_iff_lt : 0 < a ∸ b ↔ b < a :=
   ⟨by contrapose; simp; exact msub_spec_of_le,
    by intro h; by_contra hs
       simp at hs
       have : a = b := by simpa [hs] using msub_spec_of_ge (show b ≤ a from LT.lt.le h)
       simp [this] at h⟩
+
+@[simp] lemma msub_eq_zero_iff_le : a ∸ b = 0 ↔ a ≤ b :=
+  not_iff_not.mp (by simp [←pos_iff_ne_zero])
 
 end msub
 
@@ -152,7 +163,13 @@ lemma dvd_antisymm : a ∣ b → b ∣ a → a = b := by
     · simp [show a = 0 from by simpa using hy]
     · exact le_antisymm (le_of_dvd lty hx) (le_of_dvd ltx hy)
 
-lemma dvd_one : a ∣ 1 ↔ a = 1 := ⟨by { intro hx; exact dvd_antisymm hx (by simp) }, by rintro rfl; simp⟩
+lemma dvd_one_iff : a ∣ 1 ↔ a = 1 := ⟨by { intro hx; exact dvd_antisymm hx (by simp) }, by rintro rfl; simp⟩
+
+theorem units_eq_one (u : Mˣ) : u = 1 :=
+  Units.ext <| dvd_one_iff.mp ⟨u.inv, u.val_inv.symm⟩
+
+@[simp] lemma unit_iff_eq_one {a : M} : IsUnit a ↔ a = 1 :=
+  ⟨by rintro ⟨u, rfl⟩; simp [units_eq_one u], by rintro rfl; simp⟩
 
 section Prime
 
@@ -160,9 +177,17 @@ lemma eq_one_or_eq_of_dvd_of_prime {p a : M} (pp : Prime p) (hxp : a ∣ p) : a 
   have : p ∣ a ∨ a ∣ 1 := pp.left_dvd_or_dvd_right_of_dvd_mul (show a ∣ p * 1 from by simpa using hxp)
   rcases this with (hx | hx)
   · right; exact dvd_antisymm hxp hx
-  · left; exact dvd_one.mp hx
+  · left; exact dvd_one_iff.mp hx
 
 /-
+lemma irreducible_iff_bounded {a : M} : Irreducible a ↔ 1 < a ∧ ∀ b ≤ a, (b ∣ a → b = 1 ∨ b = a) := by
+  constructor
+  · intro ha
+    have : 1 < a := by
+      by_contra A
+      simp [Irreducible.ne_one ha, Irreducible.ne_zero ha, le_one_iff_eq_zero_or_one] at A
+    exact ⟨this, by {  }⟩
+
 lemma prime_iff_bounded {a : M} : Prime a ↔ 1 < a ∧ ∀ b ≤ a, (b ∣ a → b = 1 ∨ b = a) := by
   constructor
   · intro prim
@@ -192,19 +217,31 @@ lemma isPrime_definable : Σᴬ[0]-Predicate (λ a : M ↦ IsPrime a) isPrimeDef
 
 end Prime
 
-section Pow2
+section IsPow2
 
-def Pow2 (a : M) : Prop := 0 < a ∧ ∀ r ≤ a, 1 < r → r ∣ a → 2 ∣ r
+def IsPow2 (a : M) : Prop := 0 < a ∧ ∀ r ≤ a, 1 < r → r ∣ a → 2 ∣ r
 
 def pow2Definition : Σᴬ[0] 1 :=
   ⟨“0 < #0 ∧ ∀[#0 < #1 + 1] (1 < #0 →  !dvdDefinition [#0, #1] → !dvdDefinition [2, #0])”, by simp [Hierarchy.pi_zero_iff_sigma_zero]⟩
 
-lemma pow2_definable : Σᴬ[0]-Predicate (Pow2 : M → Prop) pow2Definition := by
+lemma pow2_definable : Σᴬ[0]-Predicate (IsPow2 : M → Prop) pow2Definition := by
   intro v
   simp [Semiformula.eval_substs, Matrix.comp_vecCons', Matrix.vecHead, Matrix.constant_eq_singleton,
-    Pow2, pow2Definition, le_iff_lt_succ, dvd_definable.pval]
+    IsPow2, pow2Definition, le_iff_lt_succ, dvd_definable.pval]
 
-end Pow2
+lemma IsPow2.pos {a : M} (h : IsPow2 a) : 0 < a := h.1
+
+lemma IsPow2.dvd {a : M} (h : IsPow2 a) {r} (hr : r ≤ a) : 1 < r → r ∣ a → 2 ∣ r := h.2 r hr
+
+@[simp] lemma pow2_one : IsPow2 (1 : M) := ⟨by simp, by
+  intro r hr hhr hd
+  rcases show r = 0 ∨ r = 1 from le_one_iff_eq_zero_or_one.mp hr with (rfl | rfl)
+  · simp
+  · simp at hhr⟩
+
+lemma IsPow2.two_dvd {a : M} (h : IsPow2 a) (lt : 1 < a) : 2 ∣ a := h.dvd (le_refl _) lt (by simp)
+
+end IsPow2
 
 end Model
 

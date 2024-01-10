@@ -166,10 +166,16 @@ lemma ediv_mul_add_self (a c : M) {b} (pos : 0 < b) : (a * b + c) /ₑ b = a + c
   simpa using ediv_mul_left 1 hx
 
 @[simp] lemma zero_ediv (a : M) : 0 /ₑ a = 0 := by
-  have : 0 ≤ a := by exact zero_le a
-  rcases this with (rfl | pos) <;> simp [*]
+  rcases zero_le a with (rfl | pos) <;> simp [*]
 
 @[simp] lemma ediv_mul' (a : M) {b} (pos : 0 < b) : (b * a) /ₑ b = a := by simp [mul_comm, pos]
+
+lemma mul_ediv_self_of_dvd {a b : M} : a * (b /ₑ a) = b ↔ a ∣ b := by
+  rcases zero_le a with (rfl | pos)
+  · simp[eq_comm]
+  · constructor
+    · intro e; rw [←e]; simp
+    · rintro ⟨r, rfl⟩; simp [pos]
 
 end ediv
 
@@ -200,6 +206,9 @@ lemma remainder_mul_add_of_lt (a : M) {b} (pos : 0 < b) {r} (hr : r < b) : (a * 
 @[simp] lemma remainder_mul_add (a c : M) (pos : 0 < b) : (a * b + c) mod b = c mod b := by
   simp [rem, ediv_mul_add_self, pos, mul_add, ←msub_msub, show b * a = a * b from mul_comm _ _]
 
+@[simp] lemma remainder_mul_add' (a c : M) (pos : 0 < b) : (b * a + c) mod b = c mod b := by
+  simp [mul_comm b a, pos]
+
 @[simp] lemma remainder_eq_self_of_lt {a b : M} (h : a < b) : a mod b = a := by
   simpa using remainder_mul_add_of_lt 0 (pos_of_gt h) h
 
@@ -213,7 +222,61 @@ lemma remainder_mul_add_of_lt (a : M) {b} (pos : 0 < b) {r} (hr : r < b) : (a * 
   have : a mod b = r := by simpa [←ha] using this
   simp [this, hr]
 
+lemma remainder_eq_zero_iff_dvd {a b : M} : b mod a = 0 ↔ a ∣ b := by
+  simp [rem]
+  constructor
+  · intro H; exact mul_ediv_self_of_dvd.mp (le_antisymm (mul_ediv_le b a) H)
+  · intro H; simp [mul_ediv_self_of_dvd.mpr H]
+
+lemma remainder_mul {a b m : M} (pos : 0 < m) : (a * b) mod m = ((a mod m) * (b mod m)) mod m := calc
+  (a * b) mod m = ((m * (a /ₑ m) + (a mod m)) * (m * (b /ₑ m) + (b mod m))) mod m := by simp [ediv_add_remainder]
+  _             = ((a mod m) * (b mod m)) mod m                                   := by simp [add_mul, mul_add, pos, mul_left_comm _ m, add_assoc, mul_assoc]
+
+lemma remainder_two (a : M) : a mod 2 = 0 ∨ a mod 2 = 1 :=
+  le_one_iff_eq_zero_or_one.mp <| lt_two_iff_le_one.mp <| remainder_lt a (b := 2) (by simp)
+
 end remainder
+
+lemma two_dvd_mul {a b : M} : 2 ∣ a * b → 2 ∣ a ∨ 2 ∣ b := by
+  intro H; by_contra A
+  simp [not_or] at A
+  have ha : a mod 2 = 1 := by
+    have : a mod 2 = 0 ∨ a mod 2 = 1 := remainder_two a
+    simpa [show a mod 2 ≠ 0 from by simpa [←remainder_eq_zero_iff_dvd] using A.1] using this
+  have hb : b mod 2 = 1 := by
+    have : b mod 2 = 0 ∨ b mod 2 = 1 :=
+      le_one_iff_eq_zero_or_one.mp <| lt_two_iff_le_one.mp <| remainder_lt b (b := 2) (by simp)
+    simpa [show b mod 2 ≠ 0 from by simpa [←remainder_eq_zero_iff_dvd] using A.2] using this
+  have : a * b mod 2 = 1 := by simp [remainder_mul, ha, hb]; exact remainder_eq_self_of_lt one_lt_two
+  have : ¬2 ∣ a * b := by simp [←remainder_eq_zero_iff_dvd, this]
+  contradiction
+
+lemma two_prime : Prime (2 : M) := ⟨by simp, by simp, by intro a b h; exact two_dvd_mul h⟩
+
+lemma pow2_mul_two {a : M} : IsPow2 (2 * a) ↔ IsPow2 a :=
+  ⟨by intro H
+      have : ∀ r ≤ a, 1 < r → r ∣ a → 2 ∣ r := by
+        intro r hr ltr dvd
+        exact H.dvd (show r ≤ 2 * a from le_trans hr (le_mul_of_one_le_left (by simp) one_le_two)) ltr (Dvd.dvd.mul_left dvd 2)
+      exact ⟨by simpa using H.pos, this⟩,
+   by intro H
+      exact ⟨by simpa using H.pos, by
+        intro r _ hr hd
+        rcases two_prime.left_dvd_or_dvd_right_of_dvd_mul hd with (hd | hd)
+        · exact hd
+        · exact H.dvd (show r ≤ a from le_of_dvd H.pos hd) hr hd⟩⟩
+
+lemma pow2_elim {p : M} : IsPow2 p ↔ p = 1 ∨ ∃ q, p = 2 * q ∧ IsPow2 q :=
+  ⟨by intro H
+      by_cases hp : 1 < p
+      · have : 2 ∣ p := H.two_dvd hp
+        rcases this with ⟨q, rfl⟩
+        right; exact ⟨q, rfl, pow2_mul_two.mp H⟩
+      · have : p = 1 := le_antisymm (by simpa using hp) (pos_iff_one_le.mp H.pos)
+        left; exact this,
+   by rintro (rfl | ⟨q, rfl, hq⟩) <;> simp [pow2_one, pow2_mul_two, *]⟩
+
+-- lemma pow_dvd {p q : M} (hp : IsPow2 p) (hq : IsPow2 q) : p ≤ q → p ∣ q := by {  }
 
 section sqrt
 

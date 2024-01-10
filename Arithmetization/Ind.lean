@@ -25,7 +25,7 @@ variable (L)
 
 abbrev IHierarchy (b : VType) (k : ℕ) : Theory L := IndScheme (Arith.Hierarchy b k)
 
-notation "𝐈Hr " => IHierarchy ℒₒᵣ
+notation "𝐈𝚪" => IHierarchy ℒₒᵣ
 
 abbrev IPi (k : ℕ) : Theory L := IndScheme (Arith.Hierarchy Π k)
 
@@ -68,7 +68,8 @@ lemma induction_eval {n} {p : Semiformula ℒₒᵣ (Fin n) 1} (hp : C p) (v) :
     ∀ x, Semiformula.Eval! M ![x] v p := by
   have : M ⊧ₘ (∀ᵤ* succInd p) :=
     Theory.Mod.models (T := Theory.IndScheme C) M (by simpa [Theory.IOpen] using Theory.mem_IndScheme_of_mem hp)
-  simp [models_iff, succInd, Semiformula.eval_substs, Semiformula.eval_rew_q Rew.toS, Function.comp, Matrix.constant_eq_singleton] at this
+  simp [models_iff, succInd, Semiformula.eval_substs,
+    Semiformula.eval_rew_q Rew.toS, Function.comp, Matrix.constant_eq_singleton] at this
   exact this v
 
 lemma induction {n} (P : (Fin n → M) → M → Prop)
@@ -107,11 +108,13 @@ end IndScheme
 
 section ISigma
 
+section Theory
+
 lemma iSigma_subset_mono {s₁ s₂} (h : s₁ ≤ s₂) : 𝐈𝚺 s₁ ⊆ 𝐈𝚺 s₂ :=
   Theory.IndScheme_subset (fun H ↦ H.mono h)
 
-def mod_IOpen_of_mod_IHierarchy (b s) [(𝐈Hr b s).Mod M] : 𝐈open.Mod M :=
-  Theory.Mod.of_ss M (show 𝐈open ⊆ 𝐈Hr b s from Theory.IndScheme_subset Hierarchy.Open)
+def mod_IOpen_of_mod_IHierarchy (b s) [(𝐈𝚪 b s).Mod M] : 𝐈open.Mod M :=
+  Theory.Mod.of_ss M (show 𝐈open ⊆ 𝐈𝚪 b s from Theory.IndScheme_subset Hierarchy.Open)
 
 def mod_ISigma_of_le {s₁ s₂} (h : s₁ ≤ s₂) [(𝐈𝚺 s₂).Mod M] : (𝐈𝚺 s₁).Mod M :=
   Theory.Mod.of_ss M (iSigma_subset_mono h)
@@ -122,9 +125,7 @@ instance [𝐈𝚺₁.Mod M] : 𝐈open.Mod M := mod_IOpen_of_mod_IHierarchy Σ 
 
 instance [𝐈𝚺₁.Mod M] : 𝐈𝚺₀.Mod M := mod_ISigma_of_le (show 0 ≤ 1 from by simp)
 
-variable {b : VType} {s : ℕ} [(𝐈Hr b s).Mod M]
-
-@[simp] lemma not_nonpos (a : M) : ¬a < 0 := by simp
+variable {b : VType} {s : ℕ} [(𝐈𝚪 b s).Mod M]
 
 lemma hierarchy_induction {n} (P : (Fin n → M) → M → Prop)
     (hP : ∃ p : Semisentence ℒₒᵣ (n + 1), Hierarchy b s p ∧ ∀ v x, P v x ↔ Semiformula.PVal! M (x :> v) p) (v) :
@@ -181,7 +182,7 @@ lemma hierarchy_neg_induction {n} (P : (Fin n → M) → M → Prop)
 
 variable (M b s)
 
-lemma models_IHierarchy_alt : M ⊧ₘ* 𝐈Hr b.alt s := by
+lemma models_IHierarchy_alt : M ⊧ₘ* 𝐈𝚪 b.alt s := by
   intro p
   simp [Theory.IHierarchy, Theory.IndScheme]
   rintro n p hp rfl
@@ -197,7 +198,7 @@ lemma models_IHierarchy_alt : M ⊧ₘ* 𝐈Hr b.alt s := by
           by intro v x; simp [Semiformula.eval_rew, Function.comp, Matrix.constant_eq_singleton]⟩ v
   exact this H0 Hsucc x
 
-def hierarchy_mod_alt : (𝐈Hr b.alt s).Mod M := ⟨models_IHierarchy_alt M b s⟩
+def hierarchy_mod_alt : (𝐈𝚪 b.alt s).Mod M := ⟨models_IHierarchy_alt M b s⟩
 
 variable {M b s}
 
@@ -205,14 +206,18 @@ instance [𝐈𝚺₀.Mod M] : 𝐈𝚷₀.Mod M := hierarchy_mod_alt M Σ 0
 
 instance [𝐈𝚷₀.Mod M] : 𝐈𝚺₀.Mod M := hierarchy_mod_alt M Π 0
 
+end Theory
+
 end ISigma
 
-namespace ISigma₀.Model
+section ISigma₀
 
 variable [𝐈𝚺₀.Mod M]
 
+lemma even_or_odd : ∀ x : M, ∃ y ≤ x, x = 2 * y ∨ x = 2 * y + 1 := by
 
-end ISigma₀.Model
+
+end ISigma₀
 
 end Model
 
