@@ -97,11 +97,11 @@ lemma ediv_spec_of_pos (a : M) (h : 0 < b) : ∃ v < b, a = b * (a /ₑ b) + v :
 lemma ediv_graph {a b c : M} : c = a /ₑ b ↔ ((0 < b → ∃ v < b, a = b * c + v) ∧ (b = 0 → c = 0)) :=
   Classical.choose!_eq_iff _
 
-def edivDefinition : Σᴬ[0] 3 :=
+def edivdef : Σᴬ[0] 3 :=
   ⟨“(0 < #2 → ∃[#0 < #3] (#2 = #3 * #1 + #0)) ∧ (#2 = 0 → #0 = 0)”, by simp[Hierarchy.pi_zero_iff_sigma_zero]⟩
 
-lemma ediv_definable : Σᴬ[0]-Function₂ (λ a b : M ↦ a /ₑ b) edivDefinition := by
-  intro v; simp[ediv_graph, edivDefinition, Matrix.vecHead, Matrix.vecTail]
+lemma ediv_defined : Σᴬ[0]-Function₂ (λ a b : M ↦ a /ₑ b) edivdef := by
+  intro v; simp[ediv_graph, edivdef, Matrix.vecHead, Matrix.vecTail]
 
 lemma ediv_spec_of_pos' (a : M) (h : 0 < b) : ∃ v < b, a = (a /ₑ b) * b + v := by
   simpa [mul_comm] using ediv_spec_of_pos a h
@@ -185,17 +185,17 @@ def rem (a b : M) : M := a ∸ b * (a /ₑ b)
 
 infix:60 " mod " => rem
 
-def remDefinition : Σᴬ[0] 3 :=
-  ⟨“∃[#0 < #2 + 1] (!edivDefinition [#0, #2, #3] ∧ !msubDefinition [#1, #2, #3 * #0])”, by simp⟩
+def remdef : Σᴬ[0] 3 :=
+  ⟨“∃[#0 < #2 + 1] (!edivdef [#0, #2, #3] ∧ !msubdef [#1, #2, #3 * #0])”, by simp⟩
 
 lemma rem_graph (a b c : M) : a = b mod c ↔ ∃ x ≤ b, (x = b /ₑ c ∧ a = b ∸ c * x) := by
   simp [rem]; constructor
   · rintro rfl; exact ⟨b /ₑ c, by simp, rfl, by rfl⟩
   · rintro ⟨_, _, rfl, rfl⟩; simp
 
-lemma rem_definable : Σᴬ[0]-Function₂ (λ a b : M ↦ a mod b) remDefinition := by
-  intro v; simp [Matrix.vecHead, Matrix.vecTail, remDefinition,
-    rem_graph, Semiformula.eval_substs, ediv_definable.pval, msub_definable.pval, le_iff_lt_succ]
+lemma rem_defined : Σᴬ[0]-Function₂ (λ a b : M ↦ a mod b) remdef := by
+  intro v; simp [Matrix.vecHead, Matrix.vecTail, remdef,
+    rem_graph, Semiformula.eval_substs, ediv_defined.pval, msub_defined.pval, le_iff_lt_succ]
 
 lemma ediv_add_remainder (a b : M) : b * (a /ₑ b) + (a mod b) = a :=
   add_tmsub_self_of_le (mul_ediv_le a b)
@@ -266,7 +266,10 @@ lemma pow2_mul_two {a : M} : IsPow2 (2 * a) ↔ IsPow2 a :=
         · exact hd
         · exact H.dvd (show r ≤ a from le_of_dvd H.pos hd) hr hd⟩⟩
 
-lemma pow2_elim {p : M} : IsPow2 p ↔ p = 1 ∨ ∃ q, p = 2 * q ∧ IsPow2 q :=
+lemma pow2_mul_four {a : M} : IsPow2 (4 * a) ↔ IsPow2 a := by
+  simp [←two_mul_two_eq_four, mul_assoc, pow2_mul_two]
+
+lemma IsPow2.elim {p : M} : IsPow2 p ↔ p = 1 ∨ ∃ q, p = 2 * q ∧ IsPow2 q :=
   ⟨by intro H
       by_cases hp : 1 < p
       · have : 2 ∣ p := H.two_dvd hp
@@ -275,6 +278,14 @@ lemma pow2_elim {p : M} : IsPow2 p ↔ p = 1 ∨ ∃ q, p = 2 * q ∧ IsPow2 q :
       · have : p = 1 := le_antisymm (by simpa using hp) (pos_iff_one_le.mp H.pos)
         left; exact this,
    by rintro (rfl | ⟨q, rfl, hq⟩) <;> simp [pow2_one, pow2_mul_two, *]⟩
+
+@[simp] lemma pow2_two : IsPow2 (2 : M) := IsPow2.elim.mpr (Or.inr ⟨1, by simp⟩)
+
+lemma IsPow2.elim' {p : M} : IsPow2 p ↔ p = 1 ∨ 1 < p ∧ ∃ q, p = 2 * q ∧ IsPow2 q := by
+  by_cases hp : 1 < p <;> simp [hp]
+  · exact IsPow2.elim
+  · have : p = 0 ∨ p = 1 := le_one_iff_eq_zero_or_one.mp (show p ≤ 1 from by simpa using hp)
+    rcases this with (rfl | rfl) <;> simp
 
 -- lemma pow_dvd {p q : M} (hp : IsPow2 p) (hq : IsPow2 q) : p ≤ q → p ∣ q := by {  }
 
@@ -311,11 +322,11 @@ prefix:75 "√" => sqrt
 
 lemma sqrt_graph {a b : M} : b = √a ↔ b * b ≤ a ∧ a < (b + 1) * (b + 1) := Classical.choose!_eq_iff _
 
-def sqrtDefinition : Σᴬ[0] 2 :=
+def sqrtdef : Σᴬ[0] 2 :=
   ⟨“#0 * #0 ≤ #1 ∧ #1 < (#0 + 1) * (#0 + 1)”, by simp[Hierarchy.pi_zero_iff_sigma_zero]⟩
 
-lemma sqrt_definable : Σᴬ[0]-Function₁ (λ a : M ↦ √a) sqrtDefinition := by
-  intro v; simp[sqrt_graph, sqrtDefinition, Matrix.vecHead, Matrix.vecTail]
+lemma sqrt_defined : Σᴬ[0]-Function₁ (λ a : M ↦ √a) sqrtdef := by
+  intro v; simp[sqrt_graph, sqrtdef, Matrix.vecHead, Matrix.vecTail]
 
 lemma eq_sqrt (x a : M) : x * x ≤ a ∧ a < (x + 1) * (x + 1) → x = √a := Classical.choose_uniq (sqrt_exists_unique a)
 
@@ -334,13 +345,13 @@ lemma cpair_graph {a b c : M} :
     c = ⟨a ; b⟩ ↔ ∃ r < 2, (a + b) * (a + b + 1) + 2 * b = 2 * c + r := by
   simp [cpair, ediv_graph, ←ediv_add_mul_self, mul_comm]
 
-def cpairDefinition : Σᴬ[0] 3 :=
+def cpairdef : Σᴬ[0] 3 :=
   ⟨“∃[#0 < 2] (#2 + #3) * (#2 + #3 + 1) + 2 * #3 = 2 * #1 + #0”, by simp[Hierarchy.pi_zero_iff_sigma_zero]⟩
 
 def cpairPolyBound : Polynomial 2 := ᵀ“(#0 + #1) * (#0 + #1 + 1) + #1 * 2”
 
-lemma cpair_definable : Σᴬ[0]-Function₂ (λ a b : M ↦ ⟨a ; b⟩) cpairDefinition := by
-  intro v; simp [Matrix.vecHead, Matrix.vecTail, Matrix.constant_eq_singleton, cpair_graph, cpairDefinition]
+lemma cpair_defined : Σᴬ[0]-Function₂ (λ a b : M ↦ ⟨a ; b⟩) cpairdef := by
+  intro v; simp [Matrix.vecHead, Matrix.vecTail, Matrix.constant_eq_singleton, cpair_graph, cpairdef]
 
 lemma cpair_polybounded : PolyBounded₂ (λ a b : M ↦ ⟨a ; b⟩) cpairPolyBound :=
   λ _ ↦ by simp[cpair, ←ediv_add_mul_self, cpairPolyBound]
@@ -352,8 +363,8 @@ namespace LenBit
 /-- $\mathrm{LenBit} (2^i, a) \iff \text{$i$th-bit of $a$ is $1$}$. -/
 def LenBit (w a : M) : Prop := (a /ₑ w) mod 2 = 1
 
-def lenBitDefinition : Σᴬ[0] 2 :=
-  ⟨“∃[#0 < #2 + 1] !remDefinition [1, #0, 2]”, by simp⟩
+def lenBitdef : Σᴬ[0] 2 :=
+  ⟨“∃[#0 < #2 + 1] !remdef [1, #0, 2]”, by simp⟩
 
 end LenBit
 

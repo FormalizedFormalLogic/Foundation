@@ -125,7 +125,8 @@ instance [𝐈𝚺₁.Mod M] : 𝐈open.Mod M := mod_IOpen_of_mod_IHierarchy Σ 
 
 instance [𝐈𝚺₁.Mod M] : 𝐈𝚺₀.Mod M := mod_ISigma_of_le (show 0 ≤ 1 from by simp)
 
-variable {b : VType} {s : ℕ} [(𝐈𝚪 b s).Mod M]
+variable (M)
+variable (b : VType) (s : ℕ) [(𝐈𝚪 b s).Mod M]
 
 lemma hierarchy_induction {n} (P : (Fin n → M) → M → Prop)
     (hP : ∃ p : Semisentence ℒₒᵣ (n + 1), Hierarchy b s p ∧ ∀ v x, P v x ↔ Semiformula.PVal! M (x :> v) p) (v) :
@@ -152,17 +153,25 @@ lemma hierarchy_order_induction {n} (P : (Fin n → M) → M → Prop)
     · exact H y hx)
   intro x; exact this (x + 1) x (lt_add_one x)
 
+lemma hierarchy_order_induction₀ (P : M → Prop)
+    (hP : ∃ p : FormulaHierarchy b s ℒₒᵣ 1, DefinedPred b s P p) :
+    (∀ x, (∀ y < x, P y) → P x) → ∀ x, P x := by
+  rcases hP with ⟨p, hp⟩
+  exact hierarchy_order_induction M b s (n := 0) (fun _ x ↦ P x)
+    ⟨(Rew.rewrite Empty.elim).hom p.val, by simp,
+     by intro v x; simp [Semiformula.eval_rewrite, Empty.eq_elim, hp.pval]⟩ ![]
+
 lemma hierarchy_neg_induction {n} (P : (Fin n → M) → M → Prop)
     (hP : ∃ p : Semisentence ℒₒᵣ (n + 1), Hierarchy b s p ∧ ∀ v x, P v x ↔ Semiformula.PVal! M (x :> v) p) (v) :
     ¬P v 0 → (∀ x, ¬P v x → ¬P v (x + 1)) → ∀ x, ¬P v x := by
   intro H0 Hsucc x hx
-  have := hierarchy_induction (b := b) (s := s) (λ v x ↦ x ≤ v 0 → P (Matrix.vecTail v) (v 0 ∸ x))
+  have := hierarchy_induction M b s (λ v x ↦ x ≤ v 0 → P (Matrix.vecTail v) (v 0 ∸ x))
     (by rcases hP with ⟨p, hp, hp_iff⟩
-        exact ⟨“#0 ≤ #1 → ∃[#0 < #2 + 1] (!msubDefinition [#0, #2, #1] ∧ !((Rew.substs (#0 :> (#·.succ.succ.succ))).hom p))”,
+        exact ⟨“#0 ≤ #1 → ∃[#0 < #2 + 1] (!msubdef [#0, #2, #1] ∧ !((Rew.substs (#0 :> (#·.succ.succ.succ))).hom p))”,
           by simp [hp],
           by intro v x
              simp [Matrix.vecHead, Matrix.vecTail, Semiformula.eval_substs, Function.comp,
-               Matrix.comp_vecCons', Matrix.constant_eq_singleton, ←hp_iff, msub_definable.pval]
+               Matrix.comp_vecCons', Matrix.constant_eq_singleton, ←hp_iff, msub_defined.pval]
              apply imp_congr_right; intro _
              exact ⟨by intro H; exact ⟨v 0 ∸ x, by simp [H, ←le_iff_lt_succ]⟩,
                     by rintro ⟨r, _, rfl, H⟩; exact H⟩⟩) (x :> v)
@@ -180,8 +189,6 @@ lemma hierarchy_neg_induction {n} (P : (Fin n → M) → M → Prop)
   have : P v 0 := by simpa using this x (by rfl)
   contradiction
 
-variable (M b s)
-
 lemma models_IHierarchy_alt : M ⊧ₘ* 𝐈𝚪 b.alt s := by
   intro p
   simp [Theory.IHierarchy, Theory.IndScheme]
@@ -193,7 +200,7 @@ lemma models_IHierarchy_alt : M ⊧ₘ* 𝐈𝚪 b.alt s := by
     (∀ x, Semiformula.Eval! M ![x] v p → Semiformula.Eval! M ![x + 1] v p) →
       ∀ x, Semiformula.Eval! M ![x] v p := by
     simpa using
-      hierarchy_neg_induction (b := b) (s := s) (λ v x ↦ ¬Semiformula.Eval! M ![x] v p)
+      hierarchy_neg_induction M b s (λ v x ↦ ¬Semiformula.Eval! M ![x] v p)
         ⟨~(Rew.bind ![#0] (#·.succ)).hom p, by simp [hp],
           by intro v x; simp [Semiformula.eval_rew, Function.comp, Matrix.constant_eq_singleton]⟩ v
   exact this H0 Hsucc x
@@ -209,15 +216,6 @@ instance [𝐈𝚷₀.Mod M] : 𝐈𝚺₀.Mod M := hierarchy_mod_alt M Π 0
 end Theory
 
 end ISigma
-
-section ISigma₀
-
-variable [𝐈𝚺₀.Mod M]
-
-lemma even_or_odd : ∀ x : M, ∃ y ≤ x, x = 2 * y ∨ x = 2 * y + 1 := by
-
-
-end ISigma₀
 
 end Model
 

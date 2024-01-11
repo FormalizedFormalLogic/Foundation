@@ -2,14 +2,14 @@ import Arithmetization.Vorspiel.Vorspiel
 
 namespace LO.FirstOrder
 
-def Defined {k} (R : (Fin k → M) → Prop) [Structure L M] (p : LO.FirstOrder.Semisentence L k) : Prop :=
+def Defined {k} (R : (Fin k → M) → Prop) [Structure L M] (p : Semisentence L k) : Prop :=
   ∀ v, R v ↔ Semiformula.PVal! M v p
 
 namespace Defined
 
 variable [Structure L M]
 
-lemma pval {k} {R : (Fin k → M) → Prop} {p : LO.FirstOrder.Semisentence L k} (h : Defined R p) (v) :
+lemma pval {k} {R : (Fin k → M) → Prop} {p : Semisentence L k} (h : Defined R p) (v) :
     Semiformula.PVal! M v p ↔ R v := (h v).symm
 
 end Defined

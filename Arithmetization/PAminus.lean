@@ -27,6 +27,30 @@ lemma lt_two_iff_le_one : a < 2 ↔ a ≤ 1 := by
     show a + 1 ≤ 2 ↔ a ≤ 1 from by
       rw[show (2 : M) = 1 + 1 from one_add_one_eq_two.symm]; exact add_le_add_iff_right 1]
 
+@[simp] lemma lt_one_iff_eq_zero : a < 1 ↔ a = 0 := ⟨by
+  intro hx
+  have : a ≤ 0 := by exact le_iff_lt_succ.mpr (show a < 0 + 1 from by simpa using hx)
+  exact nonpos_iff_eq_zero.mp this,
+  by rintro rfl; exact zero_lt_one⟩
+
+lemma le_one_iff_eq_zero_or_one : a ≤ 1 ↔ a = 0 ∨ a = 1 :=
+  ⟨by intro h; rcases h with (rfl | ltx)
+      · simp
+      · simp [show a = 0 from by simpa using ltx],
+   by rintro (rfl | rfl) <;> simp⟩
+
+lemma le_two_iff_eq_zero_or_one_or_two : a ≤ 2 ↔ a = 0 ∨ a = 1 ∨ a = 2 :=
+  ⟨by intro h; rcases h with (rfl | lt)
+      · simp
+      · rcases lt_two_iff_le_one.mp lt with (rfl | lt)
+        · simp
+        · simp [show a = 0 from by simpa using lt],
+   by rintro (rfl | rfl | rfl) <;> simp [one_le_two]⟩
+
+lemma two_mul_two_eq_four : 2 * 2 = (4 : M) := by
+  rw [←one_add_one_eq_two, mul_add, add_mul, mul_one, ←add_assoc,
+    one_add_one_eq_two, two_add_one_eq_three, three_add_one_eq_four]
+
 @[simp] lemma le_mul_self (a : M) : a ≤ a * a := by
   have : 0 ≤ a := by exact zero_le a
   rcases this with (rfl | pos) <;> simp [*, ←pos_iff_one_le]
@@ -52,11 +76,11 @@ lemma msub_spec_of_lt (h : a < b) : a ∸ b = 0 := (Classical.choose!_spec (msub
 
 lemma msub_eq_iff : c = a ∸ b ↔ ((a ≥ b → a = b + c) ∧ (a < b → c = 0)) := Classical.choose!_eq_iff _
 
-def msubDefinition : Σᴬ[0] 3 :=
+def msubdef : Σᴬ[0] 3 :=
   ⟨“(#2 ≤ #1 → #1 = #2 + #0) ∧ (#1 < #2 → #0 = 0)”, by simp[Hierarchy.pi_zero_iff_sigma_zero]⟩
 
-lemma msub_definable : Σᴬ[0]-Function₂ (λ a b : M ↦ a ∸ b) msubDefinition := by
-  intro v; simp [msubDefinition, msub_eq_iff]
+lemma msub_defined : Σᴬ[0]-Function₂ (λ a b : M ↦ a ∸ b) msubdef := by
+  intro v; simp [msubdef, msub_eq_iff]
 
 @[simp] lemma msub_le_self (a b : M) : a ∸ b ≤ a := by
   have : b ≤ a ∨ a < b := le_or_lt b a
@@ -131,24 +155,12 @@ lemma dvd_iff_bounded {a b : M} : a ∣ b ↔ ∃ c ≤ b, b = a * c := by
     · rintro ⟨c, rfl⟩; exact ⟨c, le_mul_self_of_pos_left (pos_iff_ne_zero.mpr hx), rfl⟩
     · rintro ⟨c, hz, rfl⟩; exact dvd_mul_right a c
 
-def dvdDefinition : Σᴬ[0] 2 := ⟨“∃[#0 < #2 + 1] #2 = #1 * #0”, by simp⟩
+def dvddef : Σᴬ[0] 2 := ⟨“∃[#0 < #2 + 1] #2 = #1 * #0”, by simp⟩
 
-lemma dvd_definable : Σᴬ[0]-Relation (λ a b : M ↦ a ∣ b) dvdDefinition :=
-  λ v ↦ by simp[dvd_iff_bounded, Matrix.vecHead, Matrix.vecTail, le_iff_lt_succ, dvdDefinition]
+lemma dvd_defined : Σᴬ[0]-Relation (λ a b : M ↦ a ∣ b) dvddef :=
+  λ v ↦ by simp[dvd_iff_bounded, Matrix.vecHead, Matrix.vecTail, le_iff_lt_succ, dvddef]
 
 end Dvd
-
-@[simp] lemma lt_one_iff_eq_zero : a < 1 ↔ a = 0 := ⟨by
-  intro hx
-  have : a ≤ 0 := by exact le_iff_lt_succ.mpr (show a < 0 + 1 from by simpa using hx)
-  exact nonpos_iff_eq_zero.mp this,
-  by rintro rfl; exact zero_lt_one⟩
-
-lemma le_one_iff_eq_zero_or_one : a ≤ 1 ↔ a = 0 ∨ a = 1 :=
-  ⟨by intro h; rcases h with (rfl | ltx)
-      · simp
-      · simp [show a = 0 from by simpa using ltx],
-   by rintro (rfl | rfl) <;> simp⟩
 
 lemma le_of_dvd (h : 0 < b) : a ∣ b → a ≤ b := by
   rintro ⟨c, rfl⟩
@@ -207,13 +219,13 @@ lemma prime_iff_bounded {a : M} : Prime a ↔ 1 < a ∧ ∀ b ≤ a, (b ∣ a �
 def IsPrime (a : M) : Prop := 1 < a ∧ ∀ b ≤ a, (b ∣ a → b = 1 ∨ b = a)
 -- TODO: prove IsPrime a ↔ Prime a
 
-def isPrimeDefinition : Σᴬ[0] 1 :=
-  ⟨“1 < #0” ⋏ (∀[“#0 < #1 + 1”] dvdDefinition/[#0, #1] ⟶ “#0 = 1 ∨ #0 = #1”), by simp [Hierarchy.pi_zero_iff_sigma_zero]⟩
+def isPrimedef : Σᴬ[0] 1 :=
+  ⟨“1 < #0” ⋏ (∀[“#0 < #1 + 1”] dvddef/[#0, #1] ⟶ “#0 = 1 ∨ #0 = #1”), by simp [Hierarchy.pi_zero_iff_sigma_zero]⟩
 
-lemma isPrime_definable : Σᴬ[0]-Predicate (λ a : M ↦ IsPrime a) isPrimeDefinition := by
+lemma isPrime_defined : Σᴬ[0]-Predicate (λ a : M ↦ IsPrime a) isPrimedef := by
   intro v
   simp [Semiformula.eval_substs, Matrix.comp_vecCons', Matrix.vecHead, Matrix.constant_eq_singleton,
-    IsPrime, isPrimeDefinition, le_iff_lt_succ, dvd_definable.pval]
+    IsPrime, isPrimedef, le_iff_lt_succ, dvd_defined.pval]
 
 end Prime
 
@@ -221,13 +233,13 @@ section IsPow2
 
 def IsPow2 (a : M) : Prop := 0 < a ∧ ∀ r ≤ a, 1 < r → r ∣ a → 2 ∣ r
 
-def pow2Definition : Σᴬ[0] 1 :=
-  ⟨“0 < #0 ∧ ∀[#0 < #1 + 1] (1 < #0 →  !dvdDefinition [#0, #1] → !dvdDefinition [2, #0])”, by simp [Hierarchy.pi_zero_iff_sigma_zero]⟩
+def pow2def : Σᴬ[0] 1 :=
+  ⟨“0 < #0 ∧ ∀[#0 < #1 + 1] (1 < #0 →  !dvddef [#0, #1] → !dvddef [2, #0])”, by simp [Hierarchy.pi_zero_iff_sigma_zero]⟩
 
-lemma pow2_definable : Σᴬ[0]-Predicate (IsPow2 : M → Prop) pow2Definition := by
+lemma pow2_defined : Σᴬ[0]-Predicate (IsPow2 : M → Prop) pow2def := by
   intro v
   simp [Semiformula.eval_substs, Matrix.comp_vecCons', Matrix.vecHead, Matrix.constant_eq_singleton,
-    IsPow2, pow2Definition, le_iff_lt_succ, dvd_definable.pval]
+    IsPow2, pow2def, le_iff_lt_succ, dvd_defined.pval]
 
 lemma IsPow2.pos {a : M} (h : IsPow2 a) : 0 < a := h.1
 
@@ -239,7 +251,20 @@ lemma IsPow2.dvd {a : M} (h : IsPow2 a) {r} (hr : r ≤ a) : 1 < r → r ∣ a �
   · simp
   · simp at hhr⟩
 
+@[simp] lemma not_pow2_zero : ¬IsPow2 (0 : M) := by
+  intro h; have := h.pos; simp at this
+
 lemma IsPow2.two_dvd {a : M} (h : IsPow2 a) (lt : 1 < a) : 2 ∣ a := h.dvd (le_refl _) lt (by simp)
+
+lemma IsPow2.of_dvd {a b : M} (h : b ∣ a) : IsPow2 a → IsPow2 b := by
+  intro ha
+  have : 0 < b := by
+    by_contra e
+    have : a = 0 := by simpa [show b = 0 from by simpa using e] using h
+    rcases this with rfl
+    simpa using ha.pos
+  exact ⟨this, fun r hr ltr hb ↦
+    ha.dvd (show r ≤ a from le_trans hr (le_of_dvd ha.pos h)) ltr (dvd_trans hb h)⟩
 
 end IsPow2
 
