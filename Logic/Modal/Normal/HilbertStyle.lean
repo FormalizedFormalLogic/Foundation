@@ -1,7 +1,6 @@
 import Logic.Logic.HilbertStyle2
 import Logic.Modal.Normal.Formula
 import Logic.Modal.Normal.Axioms
-import Logic.Modal.Normal.Logics
 
 namespace LO
 
@@ -89,7 +88,7 @@ variable {α : Type u}
 /--
   Hilbert-style deduction system
 -/
-inductive Deduction (Λ : Logic (Formula α)) : Set (Formula α) → (Formula α) → Type _
+inductive Deduction (Λ : AxiomSet α) : Set (Formula α) → (Formula α) → Type _
   | axm {Γ p}            : p ∈ Γ → Deduction Λ Γ p
   | maxm {Γ p}           : p ∈ Λ → Deduction Λ Γ p
   | modus_ponens {Γ p q} : Deduction Λ Γ (p ⟶ q) → Deduction Λ Γ p → Deduction Λ Γ q
@@ -108,7 +107,7 @@ inductive Deduction (Λ : Logic (Formula α)) : Set (Formula α) → (Formula α
 
 notation:45 Γ " ⊢ᴹ(" Λ ") " p => Deduction Λ Γ p
 
-variable (Λ : Logic (Formula α)) (Γ : Set (Formula α)) (p : Formula α)
+variable (Λ : AxiomSet α) (Γ : Set (Formula α)) (p : Formula α)
 
 abbrev Deducible := Nonempty (Γ ⊢ᴹ(Λ) p)
 notation:45 Γ " ⊢ᴹ(" Λ ")! " p => Deducible Λ Γ p
@@ -174,7 +173,7 @@ def length {Γ : Set (Formula α)} {p : Formula α} : (Γ ⊢ᴹ(Λ) p) → ℕ
   | necessitation d₁ => d₁.length + 1
   | _ => 0
 
-variable {Λ : Logic (Formula α)} {Γ : Set (Formula α)} {p q : Formula α}
+variable {Λ : AxiomSet α} {Γ : Set (Formula α)} {p q : Formula α}
 
 protected def cast (d : Γ ⊢ᴹ(Λ) p) (e₁ : Γ = Δ) (e₂ : p = q) : Δ ⊢ᴹ(Λ) q := cast (by simp [e₁,e₂]) d
 
@@ -236,8 +235,6 @@ notation "⟪" "⟹" Δ "⟫" => Sequent ∅ Δ
 notation "⟪" Γ "⟹" "⟫" => Sequent Γ ∅
 
 def ProofS (Γ Δ : Finset (Formula α)) := ⊢ᴹ(Λ) ⟪Γ ⟹ Δ⟫
-
-#check ⟪ {(⊤ : Formula α)} ⟹ {(⊤ : Formula α)} ⟫
 
 variable [Union (Finset (Formula α))] [Inter (Finset (Formula α))]
 variable (Γ₁ Γ₂ Δ : Finset (Formula α))
