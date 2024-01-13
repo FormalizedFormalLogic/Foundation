@@ -47,6 +47,17 @@ lemma le_two_iff_eq_zero_or_one_or_two : a ≤ 2 ↔ a = 0 ∨ a = 1 ∨ a = 2 :
         · simp [show a = 0 from by simpa using lt],
    by rintro (rfl | rfl | rfl) <;> simp [one_le_two]⟩
 
+lemma le_three_iff_eq_zero_or_one_or_two_or_three : a ≤ 3 ↔ a = 0 ∨ a = 1 ∨ a = 2 ∨ a = 3 :=
+  ⟨by intro h; rcases h with (rfl | lt)
+      · simp
+      · have : a ≤2 := by simpa [←le_iff_lt_succ, ←two_add_one_eq_three] using lt
+        rcases this with (rfl| lt)
+        · simp
+        · rcases lt_two_iff_le_one.mp lt with (rfl | lt)
+          · simp
+          · simp [show a = 0 from by simpa using lt],
+   by rintro (rfl | rfl | rfl | rfl) <;> simp [one_le_two, ←two_add_one_eq_three]⟩
+
 lemma two_mul_two_eq_four : 2 * 2 = (4 : M) := by
   rw [←one_add_one_eq_two, mul_add, add_mul, mul_one, ←add_assoc,
     one_add_one_eq_two, two_add_one_eq_three, three_add_one_eq_four]
@@ -54,6 +65,24 @@ lemma two_mul_two_eq_four : 2 * 2 = (4 : M) := by
 @[simp] lemma le_mul_self (a : M) : a ≤ a * a := by
   have : 0 ≤ a := by exact zero_le a
   rcases this with (rfl | pos) <;> simp [*, ←pos_iff_one_le]
+
+@[simp] lemma le_sq (a : M) : a ≤ a^2 := by simp [sq]
+
+lemma sq_le_sq_iff : a ≤ b ↔ a^2 ≤ b^2 := by simp [sq]; apply mul_self_le_mul_self_iff <;> simp
+
+lemma sq_lt_sq_iff : a < b ↔ a^2 < b^2 := by simp [sq]; apply mul_self_lt_mul_self_iff <;> simp
+
+lemma le_mul_of_pos_right (h : 0 < b) : a ≤ a * b := le_mul_of_one_le_right (by simp) (pos_iff_one_le.mp h)
+
+lemma le_mul_of_pos_left (h : 0 < b) : a ≤ b * a := le_mul_of_one_le_left (by simp) (pos_iff_one_le.mp h)
+
+lemma lt_mul_of_pos_of_one_lt_right (pos : 0 < a) (h : 1 < b) : a < a * b := _root_.lt_mul_of_one_lt_right pos h
+
+lemma lt_mul_of_pos_of_one_lt_left (pos : 0 < a) (h : 1 < b) : a < b * a := _root_.lt_mul_of_one_lt_left pos h
+
+lemma mul_le_mul_left (h : b ≤ c) : a * b ≤ a * c := mul_le_mul_of_nonneg_left h (by simp)
+
+lemma mul_le_mul_right (h : b ≤ c) : b * a ≤ c * a := mul_le_mul_of_nonneg_right h (by simp)
 
 section msub
 
@@ -255,6 +284,12 @@ lemma IsPow2.dvd {a : M} (h : IsPow2 a) {r} (hr : r ≤ a) : 1 < r → r ∣ a �
   intro h; have := h.pos; simp at this
 
 lemma IsPow2.two_dvd {a : M} (h : IsPow2 a) (lt : 1 < a) : 2 ∣ a := h.dvd (le_refl _) lt (by simp)
+
+lemma IsPow2.two_dvd' {a : M} (h : IsPow2 a) (lt : a ≠ 1) : 2 ∣ a :=
+  h.dvd (le_refl _) (by
+    by_contra A; simp [le_one_iff_eq_zero_or_one] at A
+    rcases A with (rfl | rfl) <;> simp at h lt)
+    (by simp)
 
 lemma IsPow2.of_dvd {a b : M} (h : b ∣ a) : IsPow2 a → IsPow2 b := by
   intro ha

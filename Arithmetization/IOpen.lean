@@ -55,7 +55,7 @@ lemma remainder (a : M) {b} (pos : 0 < b) : ∃! u, ∃ v < b, a = b * u + v := 
       · exact this a pos u' hu' u hu (Ne.symm ne) (Ne.lt_of_le ne $ by simpa using lt)
       have : a < a := by calc
         a < b * (u + 1) := hu.2
-        _ ≤ b * u'      := (mul_le_mul_left pos).mpr (lt_iff_succ_le.mp lt)
+        _ ≤ b * u'      := (_root_.mul_le_mul_left pos).mpr (lt_iff_succ_le.mp lt)
         _ ≤ a           := hu'.1
       exact LT.lt.false this)
   have iff : ∀ u, (∃ v < b, a = b * u + v) ↔ (b * u ≤ a ∧ a < b * (u + 1)) := by
@@ -113,7 +113,7 @@ lemma ediv_spec_of_pos' (a : M) (h : 0 < b) : ∃ v < b, a = (a /ₑ b) * b + v 
   simpa [← e] using show b * (a /ₑ b) ≤ b * (a /ₑ b) + v from le_self_add
 
 @[simp] lemma ediv_le (a b : M) : a /ₑ b ≤ a := by
-  have : 0 ≤ b := by exact zero_le b
+  have : 0 ≤ b := zero_le b
   rcases this with (rfl | pos) <;> simp [*]
   have : 1 * (a /ₑ b) ≤ b * (a /ₑ b) := mul_le_mul_of_nonneg_right (le_iff_lt_succ.mpr (by simp[pos])) (by simp)
   simpa using le_trans this (mul_ediv_le a b)
@@ -206,6 +206,9 @@ lemma remainder_mul_add_of_lt (a : M) {b} (pos : 0 < b) {r} (hr : r < b) : (a * 
 @[simp] lemma remainder_mul_add (a c : M) (pos : 0 < b) : (a * b + c) mod b = c mod b := by
   simp [rem, ediv_mul_add_self, pos, mul_add, ←msub_msub, show b * a = a * b from mul_comm _ _]
 
+@[simp] lemma remainder_add_mul (a b : M) (pos : 0 < c) : (a + b * c) mod c = a mod c := by
+  simp [add_comm a (b * c), pos]
+
 @[simp] lemma remainder_mul_add' (a c : M) (pos : 0 < b) : (b * a + c) mod b = c mod b := by
   simp [mul_comm b a, pos]
 
@@ -221,6 +224,11 @@ lemma remainder_mul_add_of_lt (a : M) {b} (pos : 0 < b) {r} (hr : r < b) : (a * 
   have : ((a /ₑ b) * b + r) mod b = r := remainder_mul_add_of_lt _ pos hr
   have : a mod b = r := by simpa [←ha] using this
   simp [this, hr]
+
+@[simp] lemma remainder_le_add (a b : M) : a mod b ≤ a + b := by
+  have : 0 ≤ b := zero_le b
+  rcases this with (rfl | pos) <;> simp [*]
+  exact le_trans (le_of_lt (remainder_lt a pos)) (by simp)
 
 lemma remainder_eq_zero_iff_dvd {a b : M} : b mod a = 0 ↔ a ∣ b := by
   simp [rem]
@@ -281,6 +289,19 @@ lemma IsPow2.elim {p : M} : IsPow2 p ↔ p = 1 ∨ ∃ q, p = 2 * q ∧ IsPow2 q
 
 @[simp] lemma pow2_two : IsPow2 (2 : M) := IsPow2.elim.mpr (Or.inr ⟨1, by simp⟩)
 
+lemma IsPow2.div_two {p : M} (h : IsPow2 p) (ne : p ≠ 1) : IsPow2 (p /ₑ 2) := by
+  rcases IsPow2.elim.mp h with (rfl | ⟨q, rfl, pq⟩)
+  · simp at ne
+  simpa
+
+lemma IsPow2.two_mul_div_two {p : M} (h : IsPow2 p) (ne : p ≠ 1) : 2 * (p /ₑ 2) = p := by
+  rcases IsPow2.elim.mp h with (rfl | ⟨q, rfl, _⟩)
+  · simp at ne
+  simp
+
+lemma IsPow2.div_two_mul_two {p : M} (h : IsPow2 p) (ne : p ≠ 1) : (p /ₑ 2) * 2 = p := by
+  simp [mul_comm, h.two_mul_div_two ne]
+
 lemma IsPow2.elim' {p : M} : IsPow2 p ↔ p = 1 ∨ 1 < p ∧ ∃ q, p = 2 * q ∧ IsPow2 q := by
   by_cases hp : 1 < p <;> simp [hp]
   · exact IsPow2.elim
@@ -330,8 +351,52 @@ lemma sqrt_defined : Σᴬ[0]-Function₁ (λ a : M ↦ √a) sqrtdef := by
 
 lemma eq_sqrt (x a : M) : x * x ≤ a ∧ a < (x + 1) * (x + 1) → x = √a := Classical.choose_uniq (sqrt_exists_unique a)
 
+@[simp] lemma sq_sqrt_le (a : M) : (√a)^2 ≤ a := by simp [sq]
+
 @[simp] lemma sqrt_mul_self (a : M) : √(a * a) = a :=
   Eq.symm <| eq_sqrt a (a * a) (by simp; exact mul_self_lt_mul_self (by simp) (by simp))
+
+@[simp] lemma sqrt_sq (a : M) : √(a^2) = a := by simp [sq]
+
+@[simp] lemma sqrt_zero : √(0 : M) = 0 := by simpa using sqrt_mul_self (0 : M)
+
+@[simp] lemma sqrt_one : √(1 : M) = 1 := by simpa using sqrt_mul_self (1 : M)
+
+@[simp] lemma sqrt_two : √(2 : M) = 1 :=
+  Eq.symm <| eq_sqrt 1 2 (by simp [one_le_two, one_add_one_eq_two, one_lt_two])
+
+@[simp] lemma sqrt_three : √(3 : M) = 1 :=
+  Eq.symm <| eq_sqrt 1 3 (by
+    simp [one_add_one_eq_two, two_mul_two_eq_four]
+    constructor
+    · simp [←two_add_one_eq_three]
+    · simp [←three_add_one_eq_four])
+
+@[simp] lemma sqrt_le_self (a : M) : √a ≤ a := by
+  by_contra A
+  have : a < a := calc
+    a ≤ a^2    := le_sq a
+    _ < (√a)^2 := by simpa [sq] using mul_self_lt_mul_self (by simp) (by simpa using A)
+    _ ≤ a      := sq_sqrt_le a
+  simp_all
+
+lemma sqrt_lt_self_of_one_lt {a : M} (h : 1 < a) : √a < a := by
+  by_contra A
+  have : a * a ≤ √a * √a := mul_self_le_mul_self (by simp) (by simpa using A)
+  have : a * a ≤ a := le_trans this (sqrt_spec_le a)
+  exact not_lt.mpr this (lt_mul_self h)
+
+lemma sqrt_le_of_le_sq {a b : M} : a ≤ b^2 → √a ≤ b := by
+  intro h; by_contra A
+  have : a < a := calc
+    a ≤ b^2    := h
+    _ < (√a)^2 := sq_lt_sq_iff.mp (by simpa using A)
+    _ ≤ a      := by simp
+  simp_all
+
+lemma sq_lt_of_lt_sqrt {a b : M} : a < √b → a^2 < b := by
+  intro h; by_contra A
+  exact not_le.mpr h (sqrt_le_of_le_sq $ show b ≤ a^2 from by simpa using A)
 
 end sqrt
 
