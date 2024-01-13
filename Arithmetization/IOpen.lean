@@ -372,6 +372,9 @@ lemma eq_sqrt (x a : M) : x * x ≤ a ∧ a < (x + 1) * (x + 1) → x = √a := 
     · simp [←two_add_one_eq_three]
     · simp [←three_add_one_eq_four])
 
+@[simp] lemma sqrt_four : √(4 : M) = 2 := by
+  simp [←two_mul_two_eq_four]
+
 @[simp] lemma sqrt_le_self (a : M) : √a ≤ a := by
   by_contra A
   have : a < a := calc

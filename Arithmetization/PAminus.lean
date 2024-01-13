@@ -62,6 +62,9 @@ lemma two_mul_two_eq_four : 2 * 2 = (4 : M) := by
   rw [←one_add_one_eq_two, mul_add, add_mul, mul_one, ←add_assoc,
     one_add_one_eq_two, two_add_one_eq_three, three_add_one_eq_four]
 
+lemma two_pow_two_eq_four : 2 ^ 2 = (4 : M) := by
+  simp [sq, two_mul_two_eq_four]
+
 @[simp] lemma le_mul_self (a : M) : a ≤ a * a := by
   have : 0 ≤ a := by exact zero_le a
   rcases this with (rfl | pos) <;> simp [*, ←pos_iff_one_le]
@@ -76,6 +79,8 @@ lemma le_mul_of_pos_right (h : 0 < b) : a ≤ a * b := le_mul_of_one_le_right (b
 
 lemma le_mul_of_pos_left (h : 0 < b) : a ≤ b * a := le_mul_of_one_le_left (by simp) (pos_iff_one_le.mp h)
 
+@[simp] lemma le_two_mul_left : a ≤ 2 * a := le_mul_of_pos_left (by simp)
+
 lemma lt_mul_of_pos_of_one_lt_right (pos : 0 < a) (h : 1 < b) : a < a * b := _root_.lt_mul_of_one_lt_right pos h
 
 lemma lt_mul_of_pos_of_one_lt_left (pos : 0 < a) (h : 1 < b) : a < b * a := _root_.lt_mul_of_one_lt_left pos h
@@ -83,6 +88,10 @@ lemma lt_mul_of_pos_of_one_lt_left (pos : 0 < a) (h : 1 < b) : a < b * a := _roo
 lemma mul_le_mul_left (h : b ≤ c) : a * b ≤ a * c := mul_le_mul_of_nonneg_left h (by simp)
 
 lemma mul_le_mul_right (h : b ≤ c) : b * a ≤ c * a := mul_le_mul_of_nonneg_right h (by simp)
+
+theorem lt_of_mul_lt_mul_left (h : a * b < a * c) : b < c := lt_of_mul_lt_mul_of_nonneg_left h (by simp)
+
+theorem lt_of_mul_lt_mul_right (h : b * a < c * a) : b < c := lt_of_mul_lt_mul_of_nonneg_right h (by simp)
 
 section msub
 
@@ -195,6 +204,9 @@ lemma le_of_dvd (h : 0 < b) : a ∣ b → a ≤ b := by
   rintro ⟨c, rfl⟩
   exact le_mul_self_of_pos_right
     (pos_iff_ne_zero.mpr (show c ≠ 0 from by rintro rfl; simp at h))
+
+lemma not_dvd_of_lt (pos : 0 < b) : b < a → ¬a ∣ b := by
+  intro hb h; exact not_le.mpr hb (le_of_dvd pos h)
 
 lemma dvd_antisymm : a ∣ b → b ∣ a → a = b := by
   intro hx hy
