@@ -146,7 +146,7 @@ In this formalization, _(Modal) Logic_ means set of axioms.
 - [Soundness of Hilbert-style deduction](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Soundness.html#LO.Modal.Normal.Logic.Hilbert.sounds)
   ```lean
   theorem LO.Modal.Normal.Logic.Hilbert.sounds
-      {α : Type u}
+      {α : Type u} [Inhabited α]
       {β : Type u} [Inhabited β]
       (Λ : AxiomSet α)
       (f : Frame β) (hf : f ∈ (FrameClass β α Λ))
@@ -163,7 +163,7 @@ In this formalization, _(Modal) Logic_ means set of axioms.
         (hf : ∃ f, f ∈ (FrameClass β α Λ)) :
         ⊬ᴹ(Λ)! ⊥
     ```
-  -  **WIP:** Currently, these theorems was proved where only `Λ` is `𝐊`, `𝐊𝐃`. For example, if it is proved that `𝐒𝟒` defines some frame reachability (i.e. satisfies `LogicDefines`), then these theorems are obviously proved.
+  -  **WIP:** Currently, these theorems was proved where only `Λ` is `𝐊`, `𝐊𝐃`, `𝐒𝟒`, `𝐒𝟓`.
 
 ## References
 - J. Han, F. van Doorn, A formalization of forcing and the unprovability of the continuum hypothesis
