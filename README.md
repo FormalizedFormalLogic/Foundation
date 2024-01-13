@@ -148,7 +148,7 @@ In this formalization, _(Modal) Logic_ means set of axioms.
   theorem LO.Modal.Normal.Logic.Hilbert.sounds
       {α : Type u}
       {β : Type u} [Inhabited β]
-      (Λ : Logic α)
+      (Λ : AxiomSet α)
       (f : Frame β) (hf : f ∈ (FrameClass β α Λ))
       {p : LO.Modal.Normal.Formula α}
       (h : ⊢ᴹ(Λ) p) :
@@ -159,7 +159,7 @@ In this formalization, _(Modal) Logic_ means set of axioms.
     theorem LO.Modal.Normal.Logic.Hilbert.consistency
         {α : Type u}
         {β : Type u}
-        (Λ : Logic α)
+        (Λ : AxiomSet α)
         (hf : ∃ f, f ∈ (FrameClass β α Λ)) :
         ⊬ᴹ(Λ)! ⊥
     ```

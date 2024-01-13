@@ -1,19 +1,22 @@
 import Logic.Vorspiel.BinaryRelations
 import Logic.Modal.Normal.Formula
 import Logic.Modal.Normal.Axioms
-import Logic.Modal.Normal.Logics
+
 
 namespace LO.Modal.Normal
+
+open Formula
 
 variable {α β : Type u} [Inhabited α]
 
 abbrev Frame (α : Type u) := α → α → Prop
+abbrev Valuation (α β : Type u) := α → Set β
 
 structure Model (α β : Type u) where
   frame : Frame α
-  val : α → Set β
+  val : Valuation α β
 
-def trivialVal (α β : Type u) : α → β → Prop := λ _ _ => True
+def trivialVal (α β : Type u) : Valuation α β := λ _ _ => True
 
 namespace Formula
 
