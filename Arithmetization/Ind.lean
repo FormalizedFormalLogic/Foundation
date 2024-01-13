@@ -154,12 +154,28 @@ lemma hierarchy_order_induction {n} (P : (Fin n → M) → M → Prop)
   intro x; exact this (x + 1) x (lt_add_one x)
 
 lemma hierarchy_order_induction₀ (P : M → Prop)
-    (hP : ∃ p : FormulaHierarchy b s ℒₒᵣ 1, DefinedPred b s P p) :
+    (hP : ∃ p : SentenceHierarchy b s ℒₒᵣ 1, DefinedPred b s P p) :
     (∀ x, (∀ y < x, P y) → P x) → ∀ x, P x := by
   rcases hP with ⟨p, hp⟩
   exact hierarchy_order_induction M b s (n := 0) (fun _ x ↦ P x)
     ⟨(Rew.rewrite Empty.elim).hom p.val, by simp,
      by intro v x; simp [Semiformula.eval_rewrite, Empty.eq_elim, hp.pval]⟩ ![]
+
+lemma hierarchy_order_induction₁ (P : M → M → Prop)
+    (hP : ∃ p : SentenceHierarchy b s ℒₒᵣ 2, DefinedRel b s P p) (a) :
+    (∀ x, (∀ y < x, P a y) → P a x) → ∀ x, P a x := by
+  rcases hP with ⟨p, hp⟩
+  exact hierarchy_order_induction M b s (n := 1) (fun v x ↦ P (v 0) x)
+    ⟨(Rew.bind ![&0, #0] Empty.elim).hom p.val, by simp,
+     by intro v x; simp [Semiformula.eval_rew, Empty.eq_elim, hp.pval]⟩ ![a]
+
+lemma hierarchy_order_induction₂ (P : M → M → M → Prop)
+    (hP : ∃ p : SentenceHierarchy b s ℒₒᵣ 3, Arith.Defined b s (λ v ↦ P (v 0) (v 1) (v 2)) p) (a₁ a₂) :
+    (∀ x, (∀ y < x, P a₁ a₂ y) → P a₁ a₂ x) → ∀ x, P a₁ a₂ x := by
+  rcases hP with ⟨p, hp⟩
+  simpa using hierarchy_order_induction M b s (n := 2) (fun v x ↦ P (v 0) (v 1) x)
+    ⟨(Rew.bind ![&0, &1, #0] Empty.elim).hom p.val, by simp,
+     by intro v x; simp [Semiformula.eval_rew, Empty.eq_elim, hp.pval]⟩ ![a₁, a₂]
 
 lemma hierarchy_neg_induction {n} (P : (Fin n → M) → M → Prop)
     (hP : ∃ p : Semisentence ℒₒᵣ (n + 1), Hierarchy b s p ∧ ∀ v x, P v x ↔ Semiformula.PVal! M (x :> v) p) (v) :

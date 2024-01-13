@@ -20,36 +20,44 @@ section definability
 
 variable {M} [Structure ℒₒᵣ M]
 
-abbrev FormulaHierarchy (b : VType) (s : ℕ) (L : Language) [L.LT] (n) :=
-  { p : Semisentence L n // Hierarchy b s p }
+abbrev FormulaHierarchy (b : VType) (s : ℕ) (L : Language) [L.LT] (μ : Type*) (n) :=
+  { p : Semiformula L μ  n // Hierarchy b s p }
 
-abbrev SigmaFormula (s : ℕ) (L : Language) [L.LT] (n) := FormulaHierarchy Σ s L n
+abbrev SentenceHierarchy (b : VType) (s : ℕ) (L : Language) [L.LT] (n) := FormulaHierarchy b s L Empty n
 
-abbrev PiFormula (s : ℕ) (L : Language) [L.LT] (n) := FormulaHierarchy Π s L n
+abbrev SigmaSentence (s : ℕ) (L : Language) [L.LT] (n) := SentenceHierarchy Σ s L n
 
-notation "Σᴬ[" s "]" => SigmaFormula s ℒₒᵣ
+abbrev PiSentence (s : ℕ) (L : Language) [L.LT] (n) := SentenceHierarchy Π s L n
 
-notation "Πᴬ[" s "]" => PiFormula s ℒₒᵣ
+notation "Σᴬ[" s "]" => SigmaSentence s ℒₒᵣ
+
+notation "Πᴬ[" s "]" => PiSentence s ℒₒᵣ
 
 namespace FormulaHierarchy
 
-variable (b : VType) (s : ℕ) (L : Language) [L.LT] (n)
+variable (b : VType) (s : ℕ) (L : Language) [L.LT] (μ : Type*) (n)
 
-@[simp] lemma hierarchy (p : FormulaHierarchy b s L n) : Hierarchy b s p.val := p.prop
+@[simp] lemma hierarchy (p : FormulaHierarchy b s L μ n) : Hierarchy b s p.val := p.prop
 
-@[simp] lemma hierarchy_zero (p : FormulaHierarchy b 0 L n) : Hierarchy b' s p.val :=
+@[simp] lemma hierarchy_zero (p : FormulaHierarchy b 0 L μ n) : Hierarchy b' s p.val :=
   Hierarchy.of_zero p.hierarchy
 
 end FormulaHierarchy
 
-protected abbrev Defined (b s) {k} (R : (Fin k → M) → Prop) (p : FormulaHierarchy b s ℒₒᵣ k) : Prop :=
+protected abbrev Defined (b s) {k} (R : (Fin k → M) → Prop) (p : SentenceHierarchy b s ℒₒᵣ k) : Prop :=
   Defined R p.val
 
-abbrev DefinedPred (b : VType) (s : ℕ) (P : M → Prop) (p : FormulaHierarchy b s ℒₒᵣ 1) : Prop :=
+abbrev DefinedPred (b : VType) (s : ℕ) (P : M → Prop) (p : SentenceHierarchy b s ℒₒᵣ 1) : Prop :=
   Arith.Defined b s (λ v ↦ P (v 0)) p
 
-abbrev DefinedRel (b : VType) (s : ℕ) (R : M → M → Prop) (p : FormulaHierarchy b s ℒₒᵣ 2) : Prop :=
+abbrev DefinedRel (b : VType) (s : ℕ) (R : M → M → Prop) (p : SentenceHierarchy b s ℒₒᵣ 2) : Prop :=
   Arith.Defined b s (λ v ↦ R (v 0) (v 1)) p
+
+abbrev DefinedRel₃ (b : VType) (s : ℕ) (R : M → M → M → Prop) (p : SentenceHierarchy b s ℒₒᵣ 3) : Prop :=
+  Arith.Defined b s (λ v ↦ R (v 0) (v 1) (v 2)) p
+
+abbrev DefinedRel₄ (b : VType) (s : ℕ) (R : M → M → M → M → Prop) (p : SentenceHierarchy b s ℒₒᵣ 4) : Prop :=
+  Arith.Defined b s (λ v ↦ R (v 0) (v 1) (v 2) (v 3)) p
 
 abbrev SigmaDefinedPred (s : ℕ) (P : M → Prop) (p : Σᴬ[s] 1) : Prop := DefinedPred Σ s P p
 
@@ -67,13 +75,13 @@ abbrev PiDefinedRel (s : ℕ) (R : M → M → Prop) (p : Πᴬ[s] 2) : Prop := 
 
 notation "Πᴬ[" s "]-Relation" => PiDefinedRel s
 
-abbrev DefinedFunction (b : VType) (s : ℕ) {k} (f : (Fin k → M) → M) (p : FormulaHierarchy b s ℒₒᵣ (k + 1)) : Prop :=
+abbrev DefinedFunction (b : VType) (s : ℕ) {k} (f : (Fin k → M) → M) (p : SentenceHierarchy b s ℒₒᵣ (k + 1)) : Prop :=
   Arith.Defined b s (fun v => v 0 = f (v ·.succ)) p
 
-abbrev DefinedFunction₁ (b : VType) (s : ℕ) (f : M → M) (p : FormulaHierarchy b s ℒₒᵣ 2) : Prop :=
+abbrev DefinedFunction₁ (b : VType) (s : ℕ) (f : M → M) (p : SentenceHierarchy b s ℒₒᵣ 2) : Prop :=
   DefinedFunction b s (fun v => f (v 0)) p
 
-abbrev DefinedFunction₂ (b : VType) (s : ℕ) (f : M → M → M) (p : FormulaHierarchy b s ℒₒᵣ 3) : Prop :=
+abbrev DefinedFunction₂ (b : VType) (s : ℕ) (f : M → M → M) (p : SentenceHierarchy b s ℒₒᵣ 3) : Prop :=
   DefinedFunction b s (fun v => f (v 0) (v 1)) p
 
 abbrev SigmaDefinedFunction₁ (s : ℕ) (f : M → M) (p : Σᴬ[s] 2) : Prop := DefinedFunction₁ Σ s f p
