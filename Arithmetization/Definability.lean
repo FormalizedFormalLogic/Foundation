@@ -63,13 +63,17 @@ abbrev SigmaDefinedPred (s : ℕ) (P : M → Prop) (p : Σᴬ[s] 1) : Prop := De
 
 notation "Σᴬ[" s "]-Predicate" => SigmaDefinedPred s
 
-abbrev PiDefinedPred (s : ℕ) (t : Set M) (p : Πᴬ[s] 1) : Prop := DefinedPred Π s t p
-
-notation "Πᴬ[" s "]-Predicate" => PiDefinedPred s
-
 abbrev SigmaDefinedRel (s : ℕ) (R : M → M → Prop) (p : Σᴬ[s] 2) : Prop := DefinedRel Σ s R p
 
 notation "Σᴬ[" s "]-Relation" => SigmaDefinedRel s
+
+abbrev SigmaDefinedRel₃ (s : ℕ) (R : M → M → M → Prop) (p : Σᴬ[s] 3) : Prop := DefinedRel₃ Σ s R p
+
+notation "Σᴬ[" s "]-Relation₃" => SigmaDefinedRel₃ s
+
+abbrev PiDefinedPred (s : ℕ) (t : Set M) (p : Πᴬ[s] 1) : Prop := DefinedPred Π s t p
+
+notation "Πᴬ[" s "]-Predicate" => PiDefinedPred s
 
 abbrev PiDefinedRel (s : ℕ) (R : M → M → Prop) (p : Πᴬ[s] 2) : Prop := DefinedRel Π s R p
 
