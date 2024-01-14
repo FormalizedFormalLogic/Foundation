@@ -259,6 +259,11 @@ lemma two_dvd_mul {a b : M} : 2 ∣ a * b → 2 ∣ a ∨ 2 ∣ b := by
   have : ¬2 ∣ a * b := by simp [←remainder_eq_zero_iff_dvd, this]
   contradiction
 
+lemma even_or_odd (a : M) : ∃ x, a = 2 * x ∨ a = 2 * x + 1 :=
+  ⟨a /ₑ 2, by
+    have : 2 * (a /ₑ 2) + (a mod 2) = a := ediv_add_remainder a 2
+    rcases remainder_two a with (e | e) <;> { simp[e] at this; simp [this] }⟩
+
 lemma two_prime : Prime (2 : M) := ⟨by simp, by simp, by intro a b h; exact two_dvd_mul h⟩
 
 lemma pow2_mul_two {a : M} : IsPow2 (2 * a) ↔ IsPow2 a :=
