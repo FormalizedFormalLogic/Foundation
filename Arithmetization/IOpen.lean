@@ -170,6 +170,12 @@ lemma ediv_mul_add_self (a c : M) {b} (pos : 0 < b) : (a * b + c) /ₑ b = a + c
 
 @[simp] lemma ediv_mul' (a : M) {b} (pos : 0 < b) : (b * a) /ₑ b = a := by simp [mul_comm, pos]
 
+lemma ediv_add_self_left {a} (pos : 0 < a) (b : M) : (a + b) /ₑ a = 1 + b /ₑ a := by
+  simpa using ediv_mul_add_self 1 b pos
+
+lemma ediv_add_self_right (a : M) {b} (pos : 0 < b) : (a + b) /ₑ b = a /ₑ b + 1 := by
+  simpa using ediv_add_mul_self a 1 pos
+
 lemma mul_ediv_self_of_dvd {a b : M} : a * (b /ₑ a) = b ↔ a ∣ b := by
   rcases zero_le a with (rfl | pos)
   · simp[eq_comm]
@@ -209,6 +215,9 @@ lemma remainder_mul_add_of_lt (a : M) {b} (pos : 0 < b) {r} (hr : r < b) : (a * 
 @[simp] lemma remainder_add_mul (a b : M) (pos : 0 < c) : (a + b * c) mod c = a mod c := by
   simp [add_comm a (b * c), pos]
 
+@[simp] lemma remainder_add_mul' (a b : M) (pos : 0 < c) : (a + c * b) mod c = a mod c := by
+  simp [mul_comm c b, pos]
+
 @[simp] lemma remainder_mul_add' (a c : M) (pos : 0 < b) : (b * a + c) mod b = c mod b := by
   simp [mul_comm b a, pos]
 
@@ -225,16 +234,31 @@ lemma remainder_mul_add_of_lt (a : M) {b} (pos : 0 < b) {r} (hr : r < b) : (a * 
   have : a mod b = r := by simpa [←ha] using this
   simp [this, hr]
 
-@[simp] lemma remainder_le_add (a b : M) : a mod b ≤ a + b := by
-  have : 0 ≤ b := zero_le b
-  rcases this with (rfl | pos) <;> simp [*]
-  exact le_trans (le_of_lt (remainder_lt a pos)) (by simp)
+@[simp] lemma remainder_le (a b : M) : a mod b ≤ a := by
+  simp [rem]
 
 lemma remainder_eq_zero_iff_dvd {a b : M} : b mod a = 0 ↔ a ∣ b := by
   simp [rem]
   constructor
   · intro H; exact mul_ediv_self_of_dvd.mp (le_antisymm (mul_ediv_le b a) H)
   · intro H; simp [mul_ediv_self_of_dvd.mpr H]
+
+@[simp] lemma remainder_add_remove_right {a b : M} (pos : 0 < b) : (a + b) mod b = a mod b := by
+  simpa using remainder_add_mul a 1 pos
+
+lemma remainder_add_remove_right_of_dvd {a b m : M} (h : m ∣ b) (pos : 0 < m) : (a + b) mod m = a mod m := by
+  rcases h with ⟨b, rfl⟩; simp [pos]
+
+@[simp] lemma remainder_add_remove_left {a b : M} (pos : 0 < a) : (a + b) mod a = b mod a := by
+  simpa using remainder_mul_add 1 b pos
+
+lemma remainder_add_remove_left_of_dvd {a b m : M} (h : m ∣ a) (pos : 0 < m) : (a + b) mod m = b mod m := by
+  rcases h with ⟨b, rfl⟩; simp [pos]
+
+lemma remainder_add {a b m : M} (pos : 0 < m) : (a + b) mod m = ((a mod m) + (b mod m)) mod m := calc
+  (a + b) mod m = ((m * (a /ₑ m) + (a mod m)) + (m * (b /ₑ m) + (b mod m))) mod m := by simp [ediv_add_remainder]
+  _             = ((a mod m) + (b mod m)) mod m                                   := by simp [add_mul, mul_add, pos, mul_left_comm _ m,
+                                                                                          add_assoc, mul_assoc, add_left_comm]
 
 lemma remainder_mul {a b m : M} (pos : 0 < m) : (a * b) mod m = ((a mod m) * (b mod m)) mod m := calc
   (a * b) mod m = ((m * (a /ₑ m) + (a mod m)) * (m * (b /ₑ m) + (b mod m))) mod m := by simp [ediv_add_remainder]
@@ -367,10 +391,10 @@ lemma eq_sqrt (x a : M) : x * x ≤ a ∧ a < (x + 1) * (x + 1) → x = √a := 
 
 @[simp] lemma sqrt_one : √(1 : M) = 1 := by simpa using sqrt_mul_self (1 : M)
 
-@[simp] lemma sqrt_two : √(2 : M) = 1 :=
+lemma sqrt_two : √(2 : M) = 1 :=
   Eq.symm <| eq_sqrt 1 2 (by simp [one_le_two, one_add_one_eq_two, one_lt_two])
 
-@[simp] lemma sqrt_three : √(3 : M) = 1 :=
+lemma sqrt_three : √(3 : M) = 1 :=
   Eq.symm <| eq_sqrt 1 3 (by
     simp [one_add_one_eq_two, two_mul_two_eq_four]
     constructor
@@ -379,6 +403,11 @@ lemma eq_sqrt (x a : M) : x * x ≤ a ∧ a < (x + 1) * (x + 1) → x = √a := 
 
 @[simp] lemma sqrt_four : √(4 : M) = 2 := by
   simp [←two_mul_two_eq_four]
+
+@[simp] lemma two_ne_square (a : M) : 2 ≠ a^2 := by
+  intro h
+  rcases show a = √2 from by rw [h]; simp with rfl
+  simp [sqrt_two] at h
 
 @[simp] lemma sqrt_le_self (a : M) : √a ≤ a := by
   by_contra A
@@ -431,15 +460,71 @@ lemma cpair_polybounded : PolyBounded₂ (λ a b : M ↦ ⟨a ; b⟩) cpairPolyB
 
 end cpair
 
-namespace LenBit
+section LenBit
 
 /-- $\mathrm{LenBit} (2^i, a) \iff \text{$i$th-bit of $a$ is $1$}$. -/
-def LenBit (w a : M) : Prop := (a /ₑ w) mod 2 = 1
+def LenBit (i a : M) : Prop := ¬2 ∣ (a /ₑ i)
 
-def lenBitdef : Σᴬ[0] 2 :=
-  ⟨“∃[#0 < #2 + 1] !remdef [1, #0, 2]”, by simp⟩
+def lenbitdef : Σᴬ[0] 2 :=
+  ⟨“∃[#0 < #2 + 1] (!edivdef [#0, #2, #1] ∧ ¬!dvddef [2, #0])”, by simp⟩
+
+lemma lenbit_defined : Σᴬ[0]-Relation (LenBit : M → M → Prop) lenbitdef := by
+  intro v; simp[sqrt_graph, lenbitdef, Matrix.vecHead, Matrix.vecTail, ediv_defined.pval, dvd_defined.pval, LenBit, ←le_iff_lt_succ]
+  constructor
+  · intro h; exact ⟨v 1 /ₑ v 0, by simp, rfl, h⟩
+  · rintro ⟨z, hz, rfl, h⟩; exact h
+
+lemma LenBit.le {i a : M} (h : LenBit i a) : i ≤ a := by
+  by_contra A; simp [LenBit, show a < i from by simpa using A] at h
+
+lemma not_lenbit_of_lt {i a : M} (h : a < i) : ¬LenBit i a := by
+  intro A; exact not_le.mpr h A.le
+
+@[simp] lemma LenBit.zero (a : M) : ¬LenBit 0 a := by simp [LenBit]
+
+@[simp] lemma LenBit.on_zero (a : M) : ¬LenBit a 0 := by simp [LenBit]
+
+lemma LenBit.one (a : M) : LenBit 1 a ↔ ¬2 ∣ a := by simp [LenBit]
+
+lemma LenBit.iff_rem {i a : M} : LenBit i a ↔ (a /ₑ i) mod 2 = 1 := by
+  simp [LenBit]; rcases remainder_two (a /ₑ i) with (h | h) <;> simp [h, ←remainder_eq_zero_iff_dvd]
+
+@[simp] lemma LenBit.self {a : M} (pos : 0 < a) : LenBit a a := by simp [LenBit.iff_rem, pos, one_lt_two]
+
+lemma LenBit.remainder {i a k : M} (h : 2 * i ∣ k) : LenBit i (a mod k) ↔ LenBit i a := by
+  have : 0 ≤ i := zero_le i
+  rcases (eq_or_lt_of_le this) with (rfl | pos)
+  · simp
+  rcases h with ⟨k', hk'⟩
+  calc
+    LenBit i (a mod k) ↔ ((a mod k) /ₑ i) mod 2 = 1                             := LenBit.iff_rem
+    _                  ↔ (2 * k') * (a /ₑ k) + ((a mod k) /ₑ i) mod 2 = 1       := by simp [mul_assoc]
+    _                  ↔ (((2 * k') * (a /ₑ k) * i + (a mod k)) /ₑ i) mod 2 = 1 := by simp [ediv_mul_add_self, pos]
+    _                  ↔ ((k * (a /ₑ k) + (a mod k)) /ₑ i) mod 2 = 1            := iff_of_eq (by
+                                                                                      congr 3
+                                                                                      simp [mul_right_comm _ (a /ₑ k), mul_right_comm 2 k' i, ←hk'])
+    _                  ↔ LenBit i a                                             := by simp [ediv_add_remainder a k, LenBit.iff_rem]
+
+@[simp] lemma LenBit.remainder_two_mul_self {a i : M} : LenBit i (a mod 2 * i) ↔ LenBit i a := LenBit.remainder (by simp)
+
+lemma LenBit.add {i a b : M} (h : 2 * i ∣ b) : LenBit i (a + b) ↔ LenBit i a := by
+  have : 0 ≤ i := zero_le i
+  rcases (eq_or_lt_of_le this) with (rfl | pos)
+  · simp
+  rcases h with ⟨b', hb'⟩
+  have hb' : b = 2 * b' * i := by simp [hb', mul_right_comm]
+  calc
+    LenBit i (a + b) ↔ ((a + b) /ₑ i) mod 2 = 1    := LenBit.iff_rem
+    _                ↔ (a /ₑ i) + 2 * b' mod 2 = 1 := by rw [hb', ediv_add_mul_self _ _ pos]
+    _                ↔ LenBit i a                  := by simp [LenBit.iff_rem]
+
+lemma LenBit.add_self {i a : M} (h : a < i) : LenBit i (a + i) := by
+  have pos : 0 < i := by exact pos_of_gt h
+  simp [LenBit.iff_rem, ediv_add_self_right _ pos, h, one_lt_two]
 
 end LenBit
+
+example {a b c : ℕ} : (a * b) * c = (a * c) * b := by exact Nat.mul_right_comm a b c
 
 end IOpen
 

@@ -108,6 +108,11 @@ instance : CovariantClass M M (· * ·) (· ≤ ·) := ⟨by intro; exact mul_le
 
 @[simp] lemma one_lt_sq_iff {a : M} : 1 < a^2 ↔ 1 < a := by simp [sq]
 
+@[simp] lemma mul_self_eq_one_iff {a : M} : a * a = 1 ↔ a = 1 :=
+  not_iff_not.mp (by simp [ne_iff_lt_or_gt])
+
+@[simp] lemma sq_eq_one_iff {a : M} : a^2 = 1 ↔ a = 1 := by simp [sq]
+
 section msub
 
 lemma msub_existsUnique (a b : M) : ∃! c, (a ≥ b → a = b + c) ∧ (a < b → c = 0) := by

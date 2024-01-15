@@ -24,6 +24,46 @@ namespace LO
 
 namespace FirstOrder.Arith
 
+attribute [simp] Semiformula.eval_substs Matrix.vecHead Matrix.vecTail Matrix.comp_vecCons' Matrix.constant_eq_singleton
+
+section
+
+variable [ToString μ]
+
+open Semiterm Semiformula
+
+def termToStr : Semiterm ℒₒᵣ μ n → String
+  | #x                        => "x_{" ++ toString (n - 1 - (x : ℕ)) ++ "}"
+  | &x                        => "a_{" ++ toString x ++ "}"
+  | func Language.Zero.zero _ => "0"
+  | func Language.One.one _   => "1"
+  | func Language.Add.add v   => "(" ++ termToStr (v 0) ++ " + " ++ termToStr (v 1) ++ ")"
+  | func Language.Mul.mul v   => "(" ++ termToStr (v 0) ++ " \\cdot " ++ termToStr (v 1) ++ ")"
+
+instance : Repr (Semiterm ℒₒᵣ μ n) := ⟨fun t _ => termToStr t⟩
+
+instance : ToString (Semiterm ℒₒᵣ μ n) := ⟨termToStr⟩
+
+def formulaToStr : ∀ {n}, Semiformula ℒₒᵣ μ n → String
+  | _, ⊤                             => "\\top"
+  | _, ⊥                             => "\\bot"
+  | _, rel Language.Eq.eq v          => termToStr (v 0) ++ " = " ++ termToStr (v 1)
+  | _, rel Language.LT.lt v          => termToStr (v 0) ++ " < " ++ termToStr (v 1)
+  | _, nrel Language.Eq.eq v         => termToStr (v 0) ++ " \\not = " ++ termToStr (v 1)
+  | _, nrel Language.LT.lt v         => termToStr (v 0) ++ " \\not < " ++ termToStr (v 1)
+  | _, p ⋏ q                         => "[" ++ formulaToStr p ++ "]" ++ " \\land " ++ "[" ++ formulaToStr q ++ "]"
+  | _, p ⋎ q                         => "[" ++ formulaToStr p ++ "]" ++ " \\lor "  ++ "[" ++ formulaToStr q ++ "]"
+  | n, ∀' (rel Language.LT.lt v ⟶ p) => "(\\forall x_{" ++ toString n ++ "} < " ++ termToStr (v 1) ++ ") " ++ "[" ++ formulaToStr p ++ "]"
+  | n, ∃' (rel Language.LT.lt v ⋏ p) => "(\\exists x_{" ++ toString n ++ "} < " ++ termToStr (v 1) ++ ") " ++ "[" ++ formulaToStr p  ++ "]"
+  | n, ∀' p                          => "(\\forall x_{" ++ toString n ++ "}) " ++ "[" ++ formulaToStr p ++ "]"
+  | n, ∃' p                          => "(\\exists x_{" ++ toString n ++ "}) " ++ "[" ++ formulaToStr p ++ "]"
+
+instance : Repr (Semiformula ℒₒᵣ μ n) := ⟨fun t _ => formulaToStr t⟩
+
+instance : ToString (Semiformula ℒₒᵣ μ n) := ⟨formulaToStr⟩
+
+end
+
 namespace Hierarchy
 
 variable {L : Language} [L.LT]
