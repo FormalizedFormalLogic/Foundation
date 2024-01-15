@@ -145,7 +145,7 @@ In this formalization, _(Modal) Logic_ means set of axioms.
 |        $M \models \varphi$        | Valid on model (Models)                    | [LO.Modal.Normal.Formula.Models](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Semantics.html#LO.Modal.Normal.Formula.Models) |  `⊧ᴹᵐ[M] φ`  |
 |        $F \models \varphi$        | Valid on frame (Frames)                    | [LO.Modal.Normal.Formula.Frames](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Semantics.html#LO.Modal.Normal.Formula.Frames) |  `⊧ᴹᶠ[F] φ`  |
 |    $\Gamma \models^F \varphi$     | Consequence on frame                       | [LO.Modal.Normal.Formula.FrameConsequence](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Semantics.html#LO.Modal.Normal.Formula.FrameConsequence) | `Γ ⊨ᴹᶠ[F] φ` |
-| $\Gamma \vdash_{\Lambda} \varphi$ | Hilbert-style Deduction on logic $\Lambda$ | [LO.Modal.Normal.Deduction](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/HilbertStyle.html#LO.Modal.Normal.Deduction) | `Γ ⊢ᴹ(Λ) φ`  |
+| $\Gamma \vdash_{\Lambda} \varphi$ | Hilbert-style Deduction on logic $\Lambda$ | [LO.Modal.Normal.Deduction](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/HilbertStyle.html#LO.Modal.Normal.Deduction) | `Γ ⊢ᴹ[Λ] φ`  |
 
 ### Theorem
 
@@ -157,7 +157,7 @@ In this formalization, _(Modal) Logic_ means set of axioms.
       (Λ : AxiomSet α)
       (f : Frame β) (hf : f ∈ (FrameClass β α Λ))
       {p : LO.Modal.Normal.Formula α}
-      (h : ⊢ᴹ(Λ) p) :
+      (h : ⊢ᴹ[Λ] p) :
       ⊧ᴹᶠ[f] p
   ```
   - [Consistency](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Soundness.html#LO.Modal.Normal.Logic.Hilbert.consistency)
@@ -167,7 +167,7 @@ In this formalization, _(Modal) Logic_ means set of axioms.
         {β : Type u}
         (Λ : AxiomSet α)
         (hf : ∃ f, f ∈ (FrameClass β α Λ)) :
-        ⊬ᴹ(Λ)! ⊥
+        ⊬ᴹ[Λ]! ⊥
     ```
   -  **WIP:** Currently, these theorems was proved where only `Λ` is `𝐊`, `𝐊𝐃`, `𝐒𝟒`, `𝐒𝟓`.
 

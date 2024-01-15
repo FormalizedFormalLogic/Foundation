@@ -24,6 +24,8 @@ def Satisfies (m : Model α β) (w : α) : Formula β → Prop
   | atom a  => a ∈ m.val w
   | falsum  => False
   | imp p q => (p.Satisfies m w) → (q.Satisfies m w)
+  | and p q => (p.Satisfies m w) ∧ (q.Satisfies m w)
+  | or p q  => (p.Satisfies m w) ∨ (q.Satisfies m w)
   | box p   => ∀w', m.frame w w' → p.Satisfies m w'
 
 notation w " ⊧ᴹˢ[" m "] " p => Satisfies m w p
@@ -40,11 +42,7 @@ variable {m : Model α β}
 
 @[simp] lemma and_def : (w ⊧ᴹˢ[m] p ⋏ q) ↔ (w ⊧ᴹˢ[m] p) ∧ (w ⊧ᴹˢ[m] q) := by simp [Satisfies];
 
-@[simp] lemma or_def : (w ⊧ᴹˢ[m] p ⋎ q) ↔ (w ⊧ᴹˢ[m] p) ∨ (w ⊧ᴹˢ[m] q) := by
-  simp [Satisfies];
-  constructor;
-  . apply Classical.or_iff_not_imp_left.mpr;
-  . intros; simp_all [false_or];
+@[simp] lemma or_def : (w ⊧ᴹˢ[m] p ⋎ q) ↔ (w ⊧ᴹˢ[m] p) ∨ (w ⊧ᴹˢ[m] q) := by simp [Satisfies];
 
 @[simp] lemma imp_def : (w ⊧ᴹˢ[m] p ⟶ q) ↔ (w ⊧ᴹˢ[m] p) → (w ⊧ᴹˢ[m] q) := by simp [Satisfies];
 
@@ -154,53 +152,7 @@ lemma not_Frames {f : Frame α} {Γ : Context β} : (∃ V w, ¬(w ⊧ᴹˢ[⟨f
   existsi V, w;
   assumption;
 
-def FrameSatisfiable (Γ : Context β) := ∃ (f : Frame α), ⊧ᴹᶠ[f] Γ
-
 end Context
-
-
-namespace Formula
-
-@[simp]
-def FrameConsequence (f : Frame α) (Γ : Context β) (p : Formula β) := ∀ V w, (w ⊧ᴹˢ[⟨f, V⟩] Γ) → (w ⊧ᴹˢ[⟨f, V⟩] p)
-
-notation Γ " ⊨ᴹᶠ[" f "] " p => FrameConsequence f Γ p
-
-notation Γ " ⊭ᴹᶠ[" f "] " p => ¬(Γ ⊨ᴹᶠ[f] p)
-
-namespace FrameConsequence
-
-variable {f : Frame α} {Γ Γ' : Context β} {p q : Formula β}
-
-lemma def_emptyctx : (∅ ⊨ᴹᶠ[f] p) ↔ (⊧ᴹᶠ[f] p) := by aesop;
-
-lemma axiomK : (Γ ⊨ᴹᶠ[f] AxiomK p q) := by aesop;
-
-lemma weakening : (Γ ⊆ Γ') → (Γ ⊨ᴹᶠ[f] p) → (Γ' ⊨ᴹᶠ[f] p) := by aesop;
-
-lemma modus_ponens : (Γ ⊨ᴹᶠ[f] p ⟶ q) → (Γ ⊨ᴹᶠ[f] p) → (Γ ⊨ᴹᶠ[f] q) := by aesop;
-
-end FrameConsequence
-
-@[simp]
-def ModelConsequence (m : Model α β) (Γ : Context β) (p : Formula β) := Γ ⊨ᴹᶠ[m.frame] p
-
-notation Γ " ⊨ᴹᵐ[" m "] " p => Formula.ModelConsequence m Γ p
-
-lemma ModelConsequence.weakening {m : Model α β} {Γ Γ' : Context β} {p : Formula β} : (Γ ⊆ Γ') → (Γ ⊨ᴹᵐ[m] p) → (Γ' ⊨ᴹᵐ[m] p) := by aesop;
-
-end Formula
-
-
-namespace Context
-
-def ModelConsequence (m : Model α β) (Γ Δ : Context β) := ∀ p ∈ Δ, (Γ ⊨ᴹᵐ[m] p)
-
-notation Γ " ⊨ᴹᵐ[" m "] " Δ => Context.ModelConsequence m Γ Δ
-
-
-end Context
-
 
 section Definabilities
 

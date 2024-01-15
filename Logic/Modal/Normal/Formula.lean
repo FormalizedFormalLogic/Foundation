@@ -6,6 +6,8 @@ inductive Formula (α : Type u) : Type u where
   | atom   : α → Formula α
   | falsum : Formula α
   | imp    : Formula α → Formula α → Formula α
+  | and    : Formula α → Formula α → Formula α
+  | or     : Formula α → Formula α → Formula α
   | box    : Formula α → Formula α
 
 namespace Formula
@@ -15,10 +17,6 @@ variable {α : Type u}
 @[simp] def neg (p : Formula α) : Formula α := imp p falsum
 
 @[simp] def verum : Formula α := neg falsum
-
-@[simp] def or (p q : Formula α) : Formula α := imp (neg p) (q)
-
-@[simp] def and (p q : Formula α) : Formula α := neg (imp p (neg q))
 
 @[simp] def dia (p : Formula α) : Formula α := neg (box (neg p))
 
@@ -42,6 +40,8 @@ def toStr : Formula α → String
   | ⊥       => "\\bot"
   | atom a  => "{" ++ toString a ++ "}"
   | p ⟶ q   => "\\left(" ++ toStr p ++ " \\to "   ++ toStr q ++ "\\right)"
+  | p ⋏ q   => "\\left(" ++ toStr p ++ " \\land " ++ toStr q ++ "\\right)"
+  | p ⋎ q   => "\\left(" ++ toStr p ++ " \\lor "   ++ toStr q ++ "\\right)"
   | □p      => "\\Box " ++ toStr p
 
 instance : Repr (Formula α) := ⟨fun t _ => toStr t⟩
@@ -76,6 +76,8 @@ def complexity : Formula α → ℕ
 | atom _  => 0
 | ⊥       => 0
 | p ⟶ q  => max p.complexity q.complexity + 1
+| p ⋏ q   => max p.complexity q.complexity + 1
+| p ⋎ q   => max p.complexity q.complexity + 1
 | □p      => p.complexity + 1
 
 @[simp] lemma complexity_bot : complexity (⊥ : Formula α) = 0 := rfl
@@ -93,11 +95,15 @@ def cases' {C : Formula α → Sort w}
     (hfalsum : C ⊥)
     (hatom   : ∀ a : α, C (atom a))
     (himp    : ∀ (p q : Formula α), C (p ⟶ q))
+    (hand    : ∀ (p q : Formula α), C (p ⋏ q))
+    (hor     : ∀ (p q : Formula α), C (p ⋎ q))
     (hbox    : ∀ (p : Formula α), C (□p))
     : (p : Formula α) → C p
   | ⊥       => hfalsum
   | atom a  => hatom a
   | p ⟶ q  => himp p q
+  | p ⋏ q   => hand p q
+  | p ⋎ q   => hor p q
   | □p      => hbox p
 
 @[elab_as_elim]
@@ -105,12 +111,16 @@ def rec' {C : Formula α → Sort w}
   (hfalsum : C ⊥)
   (hatom   : ∀ a : α, C (atom a))
   (himp    : ∀ (p q : Formula α), C p → C q → C (p ⟶ q))
+  (hand   : ∀ (p q : Formula α), C p → C q → C (p ⋏ q))
+  (hor    : ∀ (p q : Formula α), C p → C q → C (p ⋎ q))
   (hbox    : ∀ (p : Formula α), C p → C (□p))
   : (p : Formula α) → C p
   | ⊥       => hfalsum
   | atom a  => hatom a
-  | p ⟶ q  => himp p q (rec' hfalsum hatom himp hbox p) (rec' hfalsum hatom himp hbox q)
-  | □p      => hbox p (rec' hfalsum hatom himp hbox p)
+  | p ⟶ q  => himp p q (rec' hfalsum hatom himp hand hor hbox p) (rec' hfalsum hatom himp hand hor hbox q)
+  | p ⋏ q   => hand p q (rec' hfalsum hatom himp hand hor hbox p) (rec' hfalsum hatom himp hand hor hbox q)
+  | p ⋎ q   => hor p q (rec' hfalsum hatom himp hand hor hbox p) (rec' hfalsum hatom himp hand hor hbox q)
+  | □p      => hbox p (rec' hfalsum hatom himp hand hor hbox p)
 
 -- @[simp] lemma complexity_neg (p : Formula α) : complexity (~p) = p.complexity + 1 :=
 --   by induction p using rec' <;> try { simp[neg_eq, neg, *]; rfl;}
@@ -135,12 +145,32 @@ def hasDecEq : (p q : Formula α) → Decidable (p = q)
         | isTrue hq  => isTrue (hp ▸ hq ▸ rfl)
         | isFalse hq => isFalse (by simp[hp, hq])
       | isFalse hp => isFalse (by simp[hp])
+  | p ⋏ q, r => by
+    cases r using cases' <;> try { simp; exact isFalse not_false }
+    case hand p' q' =>
+      exact match hasDecEq p p' with
+      | isTrue hp =>
+        match hasDecEq q q' with
+        | isTrue hq  => isTrue (hp ▸ hq ▸ rfl)
+        | isFalse hq => isFalse (by simp[hp, hq])
+      | isFalse hp => isFalse (by simp[hp])
+  | p ⋎ q, r => by
+    cases r using cases' <;> try { simp; exact isFalse not_false }
+    case hor p' q' =>
+      exact match hasDecEq p p' with
+      | isTrue hp =>
+        match hasDecEq q q' with
+        | isTrue hq  => isTrue (hp ▸ hq ▸ rfl)
+        | isFalse hq => isFalse (by simp[hp, hq])
+      | isFalse hp => isFalse (by simp[hp])
   | □p, q => by
     cases q using cases' <;> try { simp; exact isFalse not_false }
     case hbox p' =>
       exact match hasDecEq p p' with
       | isTrue hp  => isTrue (hp ▸ rfl)
       | isFalse hp => isFalse (by simp[hp])
+
+instance : DecidableEq (Formula α) := hasDecEq
 
 end Decidable
 
