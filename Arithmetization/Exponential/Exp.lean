@@ -45,9 +45,9 @@ lemma ext_add_of_dvd_sq_right {u z₁ z₂ : M} (pos : 0 < u) (h : u^2 ∣ z₂)
 lemma ext_add_of_dvd_sq_left {u z₁ z₂ : M} (pos : 0 < u) (h : u^2 ∣ z₁) : ext u (z₁ + z₂) = ext u z₂ := by
   rw [add_comm]; exact ext_add_of_dvd_sq_right pos h
 
-lemma ext_rem {i j z : M} (ppi : IsPPow2 i) (ppj : IsPPow2 j) (hij : i < j) : ext i (z mod j) = ext i z := by
+lemma ext_rem {i j z : M} (ppi : PPow2 i) (ppj : PPow2 j) (hij : i < j) : ext i (z mod j) = ext i z := by
   have := ediv_add_remainder z j
-  have : i^2 ∣ j := ppi.pow2.sq.dvd_of_le ppj.pow2 (IsPPow2.sq_le_of_lt ppi ppj hij)
+  have : i^2 ∣ j := ppi.pow2.sq.dvd_of_le ppj.pow2 (PPow2.sq_le_of_lt ppi ppj hij)
   calc
     ext i (z mod j) = ext i (j * (z /ₑ j) + (z mod j)) := by symm; exact ext_add_of_dvd_sq_left ppi.pos (Dvd.dvd.mul_right this (z /ₑ j))
     _               = ext i z                          := by simp [ediv_add_remainder]
@@ -58,15 +58,15 @@ def Exp.Seqₛ.Even (X Y u : M) : Prop := ext (u^2) X = 2 * ext u X ∧ ext (u^2
 
 def Exp.Seqₛ.Odd (X Y u : M) : Prop := ext (u^2) X = 2 * ext u X + 1 ∧ ext (u^2) Y = 2 * (ext u Y)^2
 
-def Exp.Seqₛ (y X Y : M) : Prop := ∀ u ≤ y, u ≠ 2 → IsPPow2 u → Seqₛ.Even X Y u ∨ Seqₛ.Odd X Y u
+def Exp.Seqₛ (y X Y : M) : Prop := ∀ u ≤ y, u ≠ 2 → PPow2 u → Seqₛ.Even X Y u ∨ Seqₛ.Odd X Y u
 
-def Exp.Seqₘ (x y X Y : M) : Prop := ∃ u ≤ y^2, u ≠ 2 ∧ IsPPow2 u ∧ ext u X = x ∧ ext u Y = y
+def Exp.Seqₘ (x y X Y : M) : Prop := ∃ u ≤ y^2, u ≠ 2 ∧ PPow2 u ∧ ext u X = x ∧ ext u Y = y
 
 def Exp (x y : M) : Prop := (x = 0 ∧ y = 1) ∨ ∃ X ≤ y^4, ∃ Y ≤ y^4, Exp.Seq₀ X Y ∧ Exp.Seqₛ y X Y ∧ Exp.Seqₘ x y X Y
 
 lemma Exp.Seqₛ.iff (y X Y : M) :
   Exp.Seqₛ y X Y ↔
-  ∀ u ≤ y, u ≠ 2 → IsPPow2 u →
+  ∀ u ≤ y, u ≠ 2 → PPow2 u →
     ((∃ ext_u_X ≤ X, ext_u_X = ext u X ∧ 2 * ext_u_X = ext (u^2) X)     ∧ (∃ ext_u_Y ≤ Y, ext_u_Y = ext u Y ∧ ext_u_Y^2 = ext (u^2) Y)) ∨
     ((∃ ext_u_X ≤ X, ext_u_X = ext u X ∧ 2 * ext_u_X + 1 = ext (u^2) X) ∧ (∃ ext_u_Y ≤ Y, ext_u_Y = ext u Y ∧ 2 * ext_u_Y^2 = ext (u^2) Y)) :=
   ⟨by intro H u hu ne2 ppu
@@ -93,7 +93,7 @@ lemma Exp.graph_iff (x y : M) :
     (x = 0 ∧ y = 1) ∨ ∃ X ≤ y^4, ∃ Y ≤ y^4,
       (1 = ext 4 X ∧ 2 = ext 4 Y) ∧
       Exp.Seqₛ y X Y ∧
-      (∃ u ≤ y^2, u ≠ 2 ∧ IsPPow2 u ∧ x = ext u X ∧ y = ext u Y) :=
+      (∃ u ≤ y^2, u ≠ 2 ∧ PPow2 u ∧ x = ext u X ∧ y = ext u Y) :=
   ⟨by rintro (H | ⟨X, bX, Y, bY, H₀, Hₛ, ⟨u, hu, ne2, ppu, hX, hY⟩⟩)
       · exact Or.inl H
       · exact Or.inr ⟨X, bX, Y, bY, ⟨H₀.1.symm, H₀.2.symm⟩, Hₛ, ⟨u, hu, ne2, ppu, hX.symm, hY.symm⟩⟩,
@@ -129,12 +129,12 @@ lemma two_lt_four : (2 : M) < 4 := lt_trans _ _ _ two_lt_three three_lt_four
 
 lemma seq₀_zero_two : Seq₀ (seqX₀ : M) (seqY₀ : M) := by simp [seqX₀, seqY₀, Seq₀, ext, one_lt_four, two_lt_four]
 
-lemma Seq₀.rem {X Y i : M} (h : Seq₀ X Y) (ppi : IsPPow2 i) (hi : 4 < i) :
+lemma Seq₀.rem {X Y i : M} (h : Seq₀ X Y) (ppi : PPow2 i) (hi : 4 < i) :
     Seq₀ (X mod i) (Y mod i) := by
   rw [Seq₀, ext_rem, ext_rem] <;> try simp [ppi, hi]
   exact h
 
-lemma Seqₛ.rem {y y' X Y i : M} (h : Seqₛ y X Y) (ppi : IsPPow2 i) (hi : y'^2 < i) (hy : y' ≤ y) :
+lemma Seqₛ.rem {y y' X Y i : M} (h : Seqₛ y X Y) (ppi : PPow2 i) (hi : y'^2 < i) (hy : y' ≤ y) :
     Seqₛ y' (X mod i) (Y mod i) := by
   intro j hj ne2 ppj
   have : j^2 < i := lt_of_le_of_lt (sq_le_sq_iff.mp hj) hi
@@ -157,9 +157,9 @@ lemma ext_append_last (i X : M) {z} (hz : z < i) :
     ext i (append i X z) = z := by
   simp [ext, append, ediv_add_mul_self, show 0 < i from pos_of_gt hz, hz]
 
-lemma ext_append_of_lt {i j : M} (hi : IsPPow2 i) (hj : IsPPow2 j) (hij : i < j) (X z : M) :
+lemma ext_append_of_lt {i j : M} (hi : PPow2 i) (hj : PPow2 j) (hij : i < j) (X z : M) :
     ext i (append j X z) = ext i X := by
-  have : i^2 ∣ j := IsPow2.dvd_of_le hi.pow2.sq hj.pow2 (IsPPow2.sq_le_of_lt hi hj hij)
+  have : i^2 ∣ j := Pow2.dvd_of_le hi.pow2.sq hj.pow2 (PPow2.sq_le_of_lt hi hj hij)
   calc
     ext i (append j X z) = ext i ((X mod j) + z * j)        := rfl
     _                    = ext i (X mod j)                  := ext_add_of_dvd_sq_right hi.pos (Dvd.dvd.mul_left this z)
@@ -167,12 +167,12 @@ lemma ext_append_of_lt {i j : M} (hi : IsPPow2 i) (hj : IsPPow2 j) (hij : i < j)
                                                                   refine Eq.symm <| ext_add_of_dvd_sq_right hi.pos (Dvd.dvd.mul_right this _)
     _                    = ext i X                          := by simp [ediv_add_remainder]
 
-lemma Seq₀.append {X Y i x y : M} (H : Seq₀ X Y) (ppi : IsPPow2 i) (hi : 4 < i) :
+lemma Seq₀.append {X Y i x y : M} (H : Seq₀ X Y) (ppi : PPow2 i) (hi : 4 < i) :
     Seq₀ (append i X x) (append i Y y) := by
   rw [Seq₀, ext_append_of_lt, ext_append_of_lt] <;> try simp [ppi, hi]
   exact H
 
-lemma Seqₛ.append {z x y X Y i : M} (h : Seqₛ z X Y) (ppi : IsPPow2 i) (hz : z < i) :
+lemma Seqₛ.append {z x y X Y i : M} (h : Seqₛ z X Y) (ppi : PPow2 i) (hz : z < i) :
     Seqₛ z (append (i^2) X x) (append (i^2) Y y) := by
   intro j hj ne2 ppj
   have : j < i^2 := lt_of_lt_of_le (lt_of_le_of_lt hj hz) (by simp)
@@ -200,8 +200,8 @@ lemma pow_four_eq_sq_sq (x : M) : x^4 = (x^2)^2 := by simp [pow_four, sq, mul_as
     ⟨4, by simp [two_pow_two_eq_four], by simp, by simp [ext, one_lt_four, two_lt_four]⟩⟩
 
 lemma pow2_ext_of_seq₀_of_seqₛ {y X Y : M} (h₀ : Exp.Seq₀ X Y) (hₛ : Exp.Seqₛ y X Y)
-    {i} (ne2 : i ≠ 2) (hi : i ≤ y^2) (ppi : IsPPow2 i) : IsPow2 (ext i Y) := by
-  refine hierarchy_order_induction₂ M Σ 0 (fun y Y i ↦ i ≠ 2 → i ≤ y^2 → IsPPow2 i → IsPow2 (ext i Y))
+    {i} (ne2 : i ≠ 2) (hi : i ≤ y^2) (ppi : PPow2 i) : Pow2 (ext i Y) := by
+  refine hierarchy_order_induction₂ M Σ 0 (fun y Y i ↦ i ≠ 2 → i ≤ y^2 → PPow2 i → Pow2 (ext i Y))
     ⟨⟨“#2 ≠ 2 → #2 ≤ #0 * #0 → !ppow2def [#2] → ∃[#0 < #2 + 1] (!extdef [#0, #3, #2] ∧ !pow2def [#0])”, by simp⟩,
      by intro v
         simp [sq, Semiformula.eval_substs, pow2_defined.pval, ppow2_defined.pval, ext_defined.pval]
@@ -211,7 +211,7 @@ lemma pow2_ext_of_seq₀_of_seqₛ {y X Y : M} (h₀ : Exp.Seq₀ X Y) (hₛ : E
   simp; intro i IH ne2 hi ppi
   by_cases ei : i = 4
   · rcases ei with rfl; simp [h₀.2]
-  · have ppsq : IsPow2 (ext (√i) Y) :=
+  · have ppsq : Pow2 (ext (√i) Y) :=
       IH (√i) (sqrt_lt_self_of_one_lt ppi.one_lt) (ppi.sqrt_ne_two ne2 ei) (le_trans (by simp) hi) (ppi.sqrt ne2)
     rcases show Seqₛ.Even X Y (√i) ∨ Seqₛ.Odd X Y (√i) from
       hₛ (√i) (sqrt_le_of_le_sq $ hi) (ppi.sqrt_ne_two ne2 ei) (ppi.sqrt ne2) with (heven | hodd)
@@ -220,14 +220,14 @@ lemma pow2_ext_of_seq₀_of_seqₛ {y X Y : M} (h₀ : Exp.Seq₀ X Y) (hₛ : E
     · have : ext i Y = 2*(ext (√i) Y)^2 := by simpa [ppi.sq_sqrt_eq ne2] using hodd.2
       simp [this, ppsq]
 
-lemma range_pow2 {x y : M} (h : Exp x y) : IsPow2 y := by
+lemma range_pow2 {x y : M} (h : Exp x y) : Pow2 y := by
   rcases h with (⟨rfl, rfl⟩ | ⟨X, bX, Y, bY, H₀, Hₛ, ⟨u, hu, ne2, ppu, rfl, rfl⟩⟩)
   · simp
   · exact pow2_ext_of_seq₀_of_seqₛ H₀ Hₛ ne2 hu ppu
 
 lemma le_sq_ext_of_seq₀_of_seqₛ {y X Y : M} (h₀ : Exp.Seq₀ X Y) (hₛ : Exp.Seqₛ y X Y)
-    {i} (ne2 : i ≠ 2) (hi : i ≤ y^2) (ppi : IsPPow2 i) : i ≤ (ext i Y)^2 := by
-  refine hierarchy_order_induction₂ M Σ 0 (fun y Y i ↦ i ≠ 2 → i ≤ y^2 → IsPPow2 i → i ≤ (ext i Y)^2)
+    {i} (ne2 : i ≠ 2) (hi : i ≤ y^2) (ppi : PPow2 i) : i ≤ (ext i Y)^2 := by
+  refine hierarchy_order_induction₂ M Σ 0 (fun y Y i ↦ i ≠ 2 → i ≤ y^2 → PPow2 i → i ≤ (ext i Y)^2)
     ⟨⟨“#2 ≠ 2 → #2 ≤ #0 * #0 → !ppow2def [#2] → ∃[#0 < #2 + 1] (!extdef [#0, #3, #2] ∧ #3 ≤ #0 * #0)”, by simp⟩,
      by intro v
         simp [sq, Semiformula.eval_substs, pow2_defined.pval, ppow2_defined.pval, ext_defined.pval]
@@ -252,8 +252,8 @@ lemma le_sq_ext_of_seq₀_of_seqₛ {y X Y : M} (h₀ : Exp.Seq₀ X Y) (hₛ : 
 example {a b c : ℕ} : a * (b * c) = b * (a * c) := by exact Nat.mul_left_comm a b c
 
 lemma two_mul_ext_le_of_seq₀_of_seqₛ {y X Y : M} (h₀ : Exp.Seq₀ X Y) (hₛ : Exp.Seqₛ y X Y)
-    {i} (ne2 : i ≠ 2) (hi : i ≤ y^2) (ppi : IsPPow2 i) : 2 * ext i Y ≤ i := by
-  refine hierarchy_order_induction₂ M Σ 0 (fun y Y i ↦ i ≠ 2 → i ≤ y^2 → IsPPow2 i → 2 * (ext i Y) ≤ i)
+    {i} (ne2 : i ≠ 2) (hi : i ≤ y^2) (ppi : PPow2 i) : 2 * ext i Y ≤ i := by
+  refine hierarchy_order_induction₂ M Σ 0 (fun y Y i ↦ i ≠ 2 → i ≤ y^2 → PPow2 i → 2 * (ext i Y) ≤ i)
     ⟨⟨“#2 ≠ 2 → #2 ≤ #0 * #0 → !ppow2def [#2] → ∃[#0 < #2 + 1] (!extdef [#0, #3, #2] ∧ 2 * #0 ≤ #3)”, by simp⟩,
      by intro v
         simp [sq, Semiformula.eval_substs, pow2_defined.pval, ppow2_defined.pval, ext_defined.pval]
@@ -333,8 +333,8 @@ lemma bit_zero {x y : M} : Exp x y → Exp (2 * x) (y ^ 2) := by
     · have : Seqₛ y X' Y' := hseqₛ.append ppi (by simp [←hYy, ppi.pos])
       exact this j hjy jne2 ppj
     · have : i = j := by
-        have : IsPow2 y := by simpa [hYy] using pow2_ext_of_seq₀_of_seqₛ hseq₀ hseqₛ ne2 hi ppi
-        exact IsPPow2.sq_uniq this ppi ppj
+        have : Pow2 y := by simpa [hYy] using pow2_ext_of_seq₀_of_seqₛ hseq₀ hseqₛ ne2 hi ppi
+        exact PPow2.sq_uniq this ppi ppj
           ⟨by simp [←hYy, ppi.pos], hi⟩ ⟨by simpa using hjy, hj⟩
       rcases this with rfl
       left; simp [Seqₛ.Even]
@@ -418,8 +418,8 @@ lemma bit_one {x y : M} : Exp x y → Exp (2 * x + 1) (2 * y ^ 2) := by
     · have : Seqₛ y X' Y' := hseqₛ.append ppi (by simp [←hYy, ppi.pos])
       exact this j hjy jne2 ppj
     · have : i = j := by
-        have : IsPow2 y := by simpa [hYy] using pow2_ext_of_seq₀_of_seqₛ hseq₀ hseqₛ ne2 hi ppi
-        exact IsPPow2.two_mul_sq_uniq this ppi ppj
+        have : Pow2 y := by simpa [hYy] using pow2_ext_of_seq₀_of_seqₛ hseq₀ hseqₛ ne2 hi ppi
+        exact PPow2.two_mul_sq_uniq this ppi ppj
           ⟨by simp [←hYy, ppi.pos], le_trans hi (by simp)⟩ ⟨by simpa using hjy, hj⟩
       rcases this with rfl
       right; simp [Seqₛ.Odd]
@@ -440,8 +440,8 @@ lemma exp_odd_two_mul_sq {x y : M} : Exp (2 * x + 1) (2 * y ^ 2) ↔ Exp x y :=
    bit_one⟩
 
 lemma two_le_ext_of_seq₀_of_seqₛ {y X Y : M} (h₀ : Exp.Seq₀ X Y) (hₛ : Exp.Seqₛ y X Y)
-    {i} (ne2 : i ≠ 2) (hi : i ≤ y^2) (ppi : IsPPow2 i) : 2 ≤ ext i Y := by
-  refine hierarchy_order_induction₂ M Σ 0 (fun y Y i ↦ i ≠ 2 → i ≤ y^2 → IsPPow2 i → 2 ≤ ext i Y)
+    {i} (ne2 : i ≠ 2) (hi : i ≤ y^2) (ppi : PPow2 i) : 2 ≤ ext i Y := by
+  refine hierarchy_order_induction₂ M Σ 0 (fun y Y i ↦ i ≠ 2 → i ≤ y^2 → PPow2 i → 2 ≤ ext i Y)
     ⟨⟨“#2 ≠ 2 → #2 ≤ #0 * #0 → !ppow2def [#2] → ∃[#0 < #2 + 1] (!extdef [#0, #3, #2] ∧ 2 ≤ #0)”, by simp⟩,
      by intro v
         simp [sq, ppow2_defined.pval, ext_defined.pval]
@@ -466,8 +466,8 @@ lemma two_le_ext_of_seq₀_of_seqₛ {y X Y : M} (h₀ : Exp.Seq₀ X Y) (hₛ :
         _ = ext i Y            := by simpa [ppi.sq_sqrt_eq ne2] using Eq.symm hodd.2
 
 lemma ext_le_ext_of_seq₀_of_seqₛ {y X Y : M} (h₀ : Exp.Seq₀ X Y) (hₛ : Exp.Seqₛ y X Y)
-    {i} (ne2 : i ≠ 2) (hi : i ≤ y^2) (ppi : IsPPow2 i) : ext i X < ext i Y := by
-  refine hierarchy_order_induction₃ M Σ 0 (fun y X Y i ↦ i ≠ 2 → i ≤ y^2 → IsPPow2 i → ext i X < ext i Y)
+    {i} (ne2 : i ≠ 2) (hi : i ≤ y^2) (ppi : PPow2 i) : ext i X < ext i Y := by
+  refine hierarchy_order_induction₃ M Σ 0 (fun y X Y i ↦ i ≠ 2 → i ≤ y^2 → PPow2 i → ext i X < ext i Y)
     ⟨⟨“#3 ≠ 2 → #3 ≤ #0 * #0 → !ppow2def [#3] →
         ∃[#0 < #2 + 1] (!extdef [#0, #4, #2] ∧ ∃[#0 < #4 + 1] (!extdef [#0, #5, #4] ∧ #1 < #0))”, by simp⟩,
      by intro v
@@ -508,12 +508,6 @@ lemma dom_lt_range {x y : M} (h : Exp x y) : x < y := by
 
 lemma not_exp_of_le {x y : M} (h : x ≤ y) : ¬Exp y x := by
   intro hxy; exact not_le.mpr (dom_lt_range hxy) h
-
-protected lemma uniq {x y₁ y₂ : M} : Exp x y₁ → Exp x y₂ → y₁ = y₂ := by
-  sorry
-
-protected lemma inj {x₁ x₂ y : M} : Exp x₁ y → Exp x₂ y → x₁ = x₂ := by
-  sorry
 
 @[simp] lemma one_not_even (a : M) : 1 ≠ 2 * a := by
   intro h
@@ -575,7 +569,86 @@ lemma exp_succ_mul_two {x y : M} : Exp (x + 1) (2 * y) ↔ Exp x y :=
   ⟨by intro h; rcases exp_succ.mp h with ⟨y', e, h⟩; simpa [show y = y' from by simpa using e] using h,
    by intro h; exact exp_succ.mpr ⟨y, rfl, h⟩⟩
 
-#eval (Rew.toF.hom Exp.def.val)
+lemma one_le_ext_of_seq₀_of_seqₛ {y X Y : M} (h₀ : Exp.Seq₀ X Y) (hₛ : Exp.Seqₛ y X Y)
+    {i} (ne2 : i ≠ 2) (hi : i ≤ y^2) (ppi : PPow2 i) : 1 ≤ ext i X := by
+  refine hierarchy_order_induction₂ M Σ 0 (fun y X i ↦ i ≠ 2 → i ≤ y^2 → PPow2 i → 1 ≤ ext i X)
+    ⟨⟨“#2 ≠ 2 → #2 ≤ #0 * #0 → !ppow2def [#2] →
+        ∃[#0 < #2 + 1] (!extdef [#0, #3, #2] ∧ 1 ≤ #0)”, by simp⟩,
+     by intro v
+        simp [sq, ppow2_defined.pval, ext_defined.pval, ←le_iff_lt_succ]
+        apply imp_congr_right; intro _; apply imp_congr_right; intro _; apply imp_congr_right; intro _
+        exact ⟨fun h ↦ ⟨ext (v 2) (v 1), by simp [h]⟩,
+          by rintro ⟨_, _, rfl, h⟩; exact h⟩⟩ y X ?_ i ne2 hi ppi
+  simp; intro i IH ne2 hi ppi
+  by_cases ne4 : i = 4
+  · rcases ne4 with rfl; simp [h₀.1, h₀.2, one_lt_two]
+  · have IH : 1 ≤ ext (√i) X :=
+    IH (√i) (sqrt_lt_self_of_one_lt ppi.one_lt) (ppi.sqrt_ne_two ne2 ne4) (le_trans (by simp) hi) (ppi.sqrt ne2)
+    rcases show Seqₛ.Even X Y (√i) ∨ Seqₛ.Odd X Y (√i) from
+      hₛ (√i) (sqrt_le_of_le_sq $ hi) (ppi.sqrt_ne_two ne2 ne4) (ppi.sqrt ne2) with (heven | hodd)
+    · have : ext i X = 2 * ext (√i) X := by simpa [ppi.sq_sqrt_eq ne2] using heven.1
+      exact le_trans IH (by simp [this])
+    · have : ext i X = 2 * ext (√i) X + 1 := by simpa [ppi.sq_sqrt_eq ne2] using hodd.1
+      simp [this]
+
+lemma zero_uniq {y : M} (h : Exp 0 y) : y = 1 := by
+  rcases h with (⟨_, rfl⟩ | ⟨X, _, Y, _, H₀, Hₛ, ⟨u, hu, ne2, ppu, hX, _⟩⟩)
+  · rfl
+  · have : 1 ≤ ext u X  := one_le_ext_of_seq₀_of_seqₛ H₀ Hₛ ne2 hu ppu
+    simp [hX] at this
+
+lemma succ_lt_s {y : M} (h : Exp (x + 1) y) : 2 ≤ y := by
+  rcases h with (⟨h, rfl⟩ | ⟨X, _, Y, _, H₀, Hₛ, ⟨u, hu, ne2, ppu, _, hY⟩⟩)
+  · simp at h
+  · simpa [hY] using two_le_ext_of_seq₀_of_seqₛ H₀ Hₛ ne2 hu ppu
+
+lemma zero_or_succ (a : M) : a = 0 ∨ ∃ a', a = a' + 1 := by
+  rcases zero_le a with (rfl | pos)
+  · simp
+  · right; exact ⟨a ∸ 1, by rw [msub_add_self_of_le]; simp [pos_iff_one_le.mp pos]⟩
+
+protected lemma uniq {x y₁ y₂ : M} : Exp x y₁ → Exp x y₂ → y₁ = y₂ := by
+  intro h₁ h₂
+  wlog h : y₁ ≤ y₂
+  · exact Eq.symm <| this h₂ h₁ (show y₂ ≤ y₁ from le_of_not_ge h)
+  refine hierarchy_order_induction₀ M Σ 0 (fun y₂ ↦ ∀ x < y₂, ∀ y₁ ≤ y₂, Exp x y₁ → Exp x y₂ → y₁ = y₂)
+      ⟨⟨“∀[#0 < #1] ∀[#0 < #2 + 1] (!Exp.def [#1, #0] → !Exp.def [#1, #2] → #0 = #2)”,
+         by simp [Hierarchy.pi_zero_iff_sigma_zero]⟩,
+       by intro v
+          simp [sq, Semiformula.eval_substs, Exp.defined.pval, ←le_iff_lt_succ]⟩
+    ?_ y₂ x h₂.dom_lt_range y₁ h h₁ h₂
+  simp; intro y₂ H x _ y₁ h h₁ h₂
+  rcases zero_or_succ x with (rfl | ⟨x, rfl⟩)
+  · simp [h₁.zero_uniq, h₂.zero_uniq]
+  · rcases exp_succ.mp h₁ with ⟨y₁, rfl, h₁'⟩
+    rcases exp_succ.mp h₂ with ⟨y₂, rfl, h₂'⟩
+    have : y₁ = y₂ := H y₂ (lt_mul_of_pos_of_one_lt_left h₂'.range_pos one_lt_two)
+      x h₂'.dom_lt_range y₁ (by simpa using h) h₁' h₂'
+    simp [this]
+
+protected lemma inj {x₁ x₂ y : M} : Exp x₁ y → Exp x₂ y → x₁ = x₂ := by
+  intro h₁ h₂
+  refine hierarchy_order_induction₀ M Σ 0 (fun y ↦ ∀ x₁ < y, ∀ x₂ < y, Exp x₁ y → Exp x₂ y → x₁ = x₂)
+      ⟨⟨“∀[#0 < #1] ∀[#0 < #2] (!Exp.def [#1, #2] → !Exp.def [#0, #2] → #1 = #0)”,
+         by simp [Hierarchy.pi_zero_iff_sigma_zero]⟩,
+       by intro v
+          simp [sq, Semiformula.eval_substs, Exp.defined.pval, ←le_iff_lt_succ]⟩
+    ?_ y x₁ h₁.dom_lt_range x₂ h₂.dom_lt_range h₁ h₂
+  simp; intro y H x₁ _ x₂ _ h₁ h₂
+  rcases zero_or_succ x₁ with (rfl | ⟨x₁, rfl⟩) <;> rcases zero_or_succ x₂ with (rfl | ⟨x₂, rfl⟩)
+  · rfl
+  · rcases h₁.zero_uniq
+    rcases exp_succ.mp h₂ with ⟨z, hz⟩
+    simp at hz
+  · rcases h₂.zero_uniq
+    rcases exp_succ.mp h₁ with ⟨z, hz⟩
+    simp at hz
+  · rcases exp_succ.mp h₁ with ⟨y, rfl, hy₁⟩
+    have hy₂ : Exp x₂ y := exp_succ_mul_two.mp h₂
+    have : x₁ = x₂ :=
+      H y (lt_mul_of_pos_of_one_lt_left hy₁.range_pos one_lt_two)
+        x₁ hy₁.dom_lt_range x₂ hy₂.dom_lt_range hy₁ hy₂
+    simp [this]
 
 end Exp
 
