@@ -20,6 +20,8 @@ lemma fun_eq_vec₄ {v : Fin 4 → α} : v = ![v 0, v 1, v 2, v 3] := by
 
 end Matrix
 
+instance : ToString Empty := ⟨Empty.elim⟩
+
 namespace LO
 
 namespace FirstOrder.Arith
