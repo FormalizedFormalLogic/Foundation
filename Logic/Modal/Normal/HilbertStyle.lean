@@ -44,7 +44,6 @@ class HasAxiomDot3 where
 class HasAxiomGrz where
   Grz (Γ : Finset F) (p : F) : Bew Γ $ AxiomGrz p
 
-/-- McKinsey Axiom -/
 class HasAxiomM where
   M (Γ : Finset F) (p : F) : Bew Γ $ AxiomM p
 
@@ -62,9 +61,9 @@ open Hilbert
 
 section Logics
 
-variable {F : Type u} [ModalLogicSymbol F] [DecidableEq F] (Bew : Finset F → F → Sort*)
+variable {F : Type u} [ModalLogicSymbol F] [NegDefinition F] [ModalDuality F] [DecidableEq F] (Bew : Finset F → F → Sort*)
 
-class LogicK.Hilbert extends Hilbert.Classical Bew, HasNecessitation Bew, HasAxiomK Bew
+class LogicK.Hilbert [ModalDuality F] extends Hilbert.Classical Bew, HasNecessitation Bew, HasAxiomK Bew
 
 class LogicKD.Hilbert extends LogicK.Hilbert Bew, HasAxiomD Bew
 
@@ -72,13 +71,13 @@ class LogicS4.Hilbert extends LogicK.Hilbert Bew, HasAxiomT Bew, HasAxiom4 Bew
 
 class LogicS5.Hilbert extends LogicK.Hilbert Bew, HasAxiomT Bew, HasAxiom5 Bew
 
+class LogicS4Dot2.Hilbert extends LogicS4.Hilbert Bew, HasAxiomDot2 Bew
+
+class LogicS4Dot3.Hilbert extends LogicS4.Hilbert Bew, HasAxiomDot3 Bew
+
+class LogicS4Grz.Hilbert extends LogicS4.Hilbert Bew, HasAxiomGrz Bew
+
 class LogicGL.Hilbert extends LogicK.Hilbert Bew, HasAxiomL Bew
-
-class LogicS4Dot2.Hilbert extends LogicK.Hilbert Bew, HasAxiomDot2 Bew
-
-class LogicS4Dot3.Hilbert extends LogicK.Hilbert Bew, HasAxiomDot3 Bew
-
-class LogicS4Grz.Hilbert extends LogicK.Hilbert Bew, HasAxiomGrz Bew
 
 end Logics
 
@@ -167,7 +166,6 @@ def weakening' {Γ Δ p} (hs : Γ ⊆ Δ) : (Γ ⊢ᴹ[Λ] p) → (Δ ⊢ᴹ[Λ]
   | dne _ _ => by apply dne
 
 instance : Hilbert.Classical (Deduction Λ) where
-  neg_def      := rfl;
   axm          := axm;
   weakening'   := weakening';
   modus_ponens := modus_ponens;
@@ -254,21 +252,20 @@ variable [DecidableEq α]
 open Deduction Hilbert
 
 def LogicK.Hilbert.ofKSubset (h : 𝐊 ⊆ Λ) : (LogicK.Hilbert (@Deduction α Λ)) where
-  K _ p q := Deduction.maxm $ Set.mem_of_subset_of_mem h (by simp);
+  K _ _ _ := Deduction.maxm $ Set.mem_of_subset_of_mem h (by simp);
 
 instance : LogicK.Hilbert (@Deduction α 𝐊) := LogicK.Hilbert.ofKSubset 𝐊 Set.Subset.rfl
 
+def LogicGL.Hilbert.ofGLSubset (h : 𝐆𝐋 ⊆ Λ) : (LogicGL.Hilbert (@Deduction α Λ)) where
+  K _ _ _ := Deduction.maxm $ Set.mem_of_subset_of_mem h (by simp);
+  L _ _ := Deduction.maxm $ Set.mem_of_subset_of_mem h (by simp);
 
-instance : LogicK.Hilbert (@Deduction α 𝐆𝐋) := LogicK.Hilbert.ofKSubset _ (by simp)
-
-instance : LogicGL.Hilbert (@Deduction α 𝐆𝐋) where
-  L _ _ := by apply Deduction.maxm; simp;
-
+instance : LogicGL.Hilbert (@Deduction α 𝐆𝐋) := LogicGL.Hilbert.ofGLSubset _ Set.Subset.rfl
 
 def LogicS4.Hilbert.ofS4Subset (_ : 𝐒𝟒 ⊆ Λ) : (LogicS4.Hilbert (@Deduction α Λ)) where
-  K _ p q := Deduction.maxm $ Set.mem_of_subset_of_mem (by assumption) (by simp);
-  T _ p := Deduction.maxm $ Set.mem_of_subset_of_mem (by assumption) (by simp);
-  A4 _ p := Deduction.maxm $ Set.mem_of_subset_of_mem (by assumption) (by simp);
+  K _ _ _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by assumption) (by simp);
+  T _ _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by assumption) (by simp);
+  A4 _ _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by assumption) (by simp);
 
 instance : LogicS4.Hilbert (@Deduction α 𝐒𝟒) := LogicS4.Hilbert.ofS4Subset 𝐒𝟒 Set.Subset.rfl
 
@@ -292,9 +289,9 @@ instance : LogicS4Grz.Hilbert (@Deduction α 𝐒𝟒𝐆𝐫𝐳) where
 
 
 def LogicS5.Hilbert.ofS5Subset (_ : 𝐒𝟓 ⊆ Λ) : (LogicS5.Hilbert (@Deduction α Λ)) where
-  K _ p q := Deduction.maxm $ Set.mem_of_subset_of_mem (by assumption) (by simp);
-  T _ p := Deduction.maxm $ Set.mem_of_subset_of_mem (by assumption) (by simp);
-  A5 _ p := Deduction.maxm $ Set.mem_of_subset_of_mem (by assumption) (by simp);
+  K _ _ _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by assumption) (by simp);
+  T _ _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by assumption) (by simp);
+  A5 _ _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by assumption) (by simp);
 
 instance : LogicS5.Hilbert (@Deduction α 𝐒𝟓) := LogicS5.Hilbert.ofS5Subset 𝐒𝟓 Set.Subset.rfl
 

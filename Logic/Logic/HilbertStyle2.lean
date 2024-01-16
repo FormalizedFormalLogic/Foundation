@@ -9,7 +9,7 @@ class Deduction {F : Type u} [LogicSymbol F] (Bew : Finset F → F → Sort*) wh
 
 namespace Hilbert
 
-variable {F : Type u} [LogicSymbol F] [DecidableEq F]
+variable {F : Type u} [LogicSymbol F] [DecidableEq F] [NegDefinition F]
 
 section
 
@@ -18,8 +18,7 @@ variable (Bew : Finset F → F → Sort*)
 /--
   Minimal Propositional Logic.
 -/
-class Minimal extends Deduction Bew where
-  neg_def      {p : F}                    : ~p = p ⟶ ⊥
+class Minimal [NegDefinition F] extends Deduction Bew where
   modus_ponens {Γ : Finset F} {p q : F}   : (Bew Γ (p ⟶ q)) → (Bew Γ p) → (Bew Γ q)
   verum        (Γ : Finset F)             : Bew Γ ⊤
   imply₁       (Γ : Finset F) (p q : F)   : Bew Γ (p ⟶ (q ⟶ p))
@@ -116,8 +115,7 @@ lemma imp_id : Bew Γ (p ⟶ p) := (imply₂ Γ p (p ⟶ p) p) ⨀ (imply₁ _ _
 lemma dni : Bew Γ (p ⟶ ~~p) := by
   have h₁ : Bew (insert (p ⟶ ⊥) (insert p Γ)) (p ⟶ ⊥) := axm (by simp);
   have h₂ : Bew (insert (p ⟶ ⊥) (insert p Γ)) p := axm (by simp);
-  repeat rw [hM.neg_def];
-  exact dt $ dt $ h₁ ⨀ h₂;
+  simpa using dt $ dt $ h₁ ⨀ h₂;
 
 end Minimal
 
@@ -131,8 +129,8 @@ instance : HasEFQ Bew where
     have h₁ : Bew (insert ⊥ Γ) ⊥ := axm (by simp);
     have h₂ := c.imply₁ (insert ⊥ Γ) ⊥ (p ⟶ ⊥);
     have h₃ := h₂ ⨀ h₁;
-    have h₄ := c.dne (insert ⊥ Γ) p; simp [c.neg_def] at h₄;
-    have h₅ := h₄ ⨀ h₃;
+    have h₄ := c.dne (insert ⊥ Γ) p;
+    have h₅ := (by simpa using h₄) ⨀ h₃;
     exact dt h₅;
 
 instance : Intuitionistic Bew where

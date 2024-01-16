@@ -14,31 +14,32 @@ section Axioms
 
 variable {F : Type u} [ModalLogicSymbol F] (p q : F)
 
-@[simp] abbrev AxiomK := □(p ⟶ q) ⟶ □p ⟶ □q
+/-- a.k.a. Distribution Axiom -/
+def AxiomK := □(p ⟶ q) ⟶ □p ⟶ □q
 
-@[simp] abbrev AxiomT := □p ⟶ p
+def AxiomT := □p ⟶ p
 
-@[simp] abbrev AxiomB := p ⟶ □◇p
+def AxiomB := p ⟶ □◇p
 
-@[simp] abbrev AxiomD := □p ⟶ ◇p
+def AxiomD := □p ⟶ ◇p
 
-@[simp] abbrev Axiom4 := □p ⟶ □□p
+def Axiom4 := □p ⟶ □□p
 
-@[simp] abbrev Axiom5 := ◇p ⟶ □◇p
+def Axiom5 := ◇p ⟶ □◇p
 
-@[simp] abbrev AxiomL := □(□p ⟶ p) ⟶ □p
+def AxiomDot2 := ◇□p ⟶ □◇p
 
-@[simp] abbrev AxiomDot2 := ◇□p ⟶ □◇p
+def AxiomDot3 := □(□p ⟶ □q) ⋎ □(□q ⟶ □p)
 
-@[simp] abbrev AxiomDot3 := □(□p ⟶ □q) ⋎ □(□q ⟶ □p)
+def AxiomGrz := □(□(p ⟶ □p) ⟶ p) ⟶ p
 
-@[simp] abbrev AxiomGrz := □(□(p ⟶ □p) ⟶ p) ⟶ p
+def AxiomM := (□◇p ⟶ ◇□p)
 
-@[simp] abbrev AxiomM := (□◇p ⟶ ◇□p)
+def AxiomCD := ◇p ⟶ □p
 
-@[simp] abbrev AxiomCD := ◇p ⟶ □p
+def AxiomC4 := □□p ⟶ □p
 
-@[simp] abbrev AxiomC4 := □□p ⟶ □p
+def AxiomL := □(□p ⟶ p) ⟶ □p
 
 end Axioms
 
@@ -50,7 +51,7 @@ variable (p q : Formula α)
 
 def AxiomK.set : AxiomSet α := { AxiomK p q | (p) (q) }
 notation "𝐊" => AxiomK.set
-@[simp] lemma AxiomK.includes_AxiomK : (AxiomK p q) ∈ 𝐊 := by simp [set];
+@[simp] lemma AxiomK.includes_AxiomK : (AxiomK p q) ∈ 𝐊 := by simp [set, AxiomK];
 
 def AxiomT.set : AxiomSet α := { AxiomT p | p }
 notation "𝐓" => AxiomT.set
@@ -119,7 +120,7 @@ notation "𝐒𝟒" => LogicS4
 
 namespace LogicS4
 
-@[simp] lemma includes_AxiomK : AxiomK p q ∈ 𝐒𝟒 := by simp [LogicKT4]
+@[simp] lemma includes_AxiomK : AxiomK p q ∈ 𝐒𝟒 := by simp [LogicS4, LogicKT4]
 @[simp] lemma includes_AxiomT : AxiomT p ∈ 𝐒𝟒 := by simp [LogicKT4]
 @[simp] lemma includes_Axiom4 : Axiom4 p ∈ 𝐒𝟒 := by simp [LogicKT4]
 @[simp] lemma subsets_K : 𝐊 ⊆ (𝐒𝟒 : AxiomSet α) := by apply Set.subset_triunion₁
