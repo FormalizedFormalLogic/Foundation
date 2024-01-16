@@ -16,7 +16,6 @@ structure Model (α β : Type u) where
   frame : Frame α
   val : Valuation α β
 
-def trivialVal (α β : Type u) : Valuation α β := λ _ _ => True
 
 namespace Formula
 
@@ -80,7 +79,7 @@ lemma necessitation : (⊧ᴹᵐ[m] p) → (⊧ᴹᵐ[m] □p) := by simp_all [M
 end Models
 
 
-def Frames (f : Frame α) (p : Formula β) := ∀v, ⊧ᴹᵐ[⟨f, v⟩] p
+def Frames (f : Frame α) (p : Formula β) := ∀ V, ⊧ᴹᵐ[⟨f, V⟩] p
 
 notation "⊧ᴹᶠ[" f "] " p => Frames f p
 
@@ -157,57 +156,57 @@ end Context
 section Definabilities
 
 attribute [simp] Formula.Frames Formula.Models Context.Models Context.Frames
-attribute [simp] AxiomK.set AxiomT.set AxiomD.set AxiomB.set Axiom4.set Axiom5.set
 
 section AxiomDefinabilities
 
 variable (β) [Inhabited β]
 
 @[simp]
-lemma AxiomK.defines : ∀ (f : Frame α), (⊧ᴹᶠ[f] (𝐊 : AxiomSet β)) := by aesop;
+lemma AxiomK.defines : ∀ (f : Frame α), (⊧ᴹᶠ[f] (𝐊 : AxiomSet β)) := by
+  simp [AxiomK, AxiomK.set];
+  aesop;
 
 lemma AxiomT.defines : ∀ (f : Frame α), (Reflexive f) ↔ (⊧ᴹᶠ[f] (𝐓 : AxiomSet β)) := by
   intro f;
   constructor;
-  . aesop;
+  . simp [AxiomT, AxiomT.set]; aesop;
   . contrapose;
     intro hRefl; simp [Reflexive] at hRefl;
     have ⟨w, hw⟩ := hRefl;
     apply Context.not_Frames;
-    simp;
+    simp [AxiomT, AxiomT.set];
     existsi (λ w' a' => (w = w') → (a' ≠ default)), w, (atom default);
     constructor;
-    . simp;
-      intro w';
+    . intro w';
       by_cases w = w';
       . simp_all;
       . simp_all; intros; trivial;
-    . simp; aesop;
+    . aesop;
 
 lemma AxiomD.defines  : ∀ (f : Frame α), (Serial f) ↔ (⊧ᴹᶠ[f] (𝐃 : AxiomSet β)) := by
   intro f;
   constructor;
-  . intro hd p hp V w;
+  . simp [AxiomD, AxiomD.set];
+    intro hd p hp w;
     have ⟨w', hw'⟩ := hd w;
     aesop;
-  . intro h; simp only [Context.Frames] at h;
-    by_contra hC; simp [Serial] at hC;
-    have ⟨w, hw⟩ := hC; clear hC;
-    let V : α → β → Prop := λ _ _ => True;
-    have : ∀ (p : Formula β), w ⊧ᴹˢ[⟨f, V⟩] □p ⟶ ◇p := by intros; exact h _ (by simp) V w;
-    have : ∀ (p : Formula β), w ⊧ᴹˢ[⟨f, V⟩] □p := by simp_all;
-    have : ∀ (p : Formula β), ¬w ⊧ᴹˢ[⟨f, V⟩] ◇p := by simp_all;
+  . contrapose;
+    intro hSerial; simp [Serial] at hSerial;
+    have ⟨w, hw⟩ := hSerial;
+    apply Context.not_Frames;
+    existsi (λ _ _ => True), w;
+    simp [AxiomD, AxiomD.set];
     aesop;
 
 lemma AxiomB.defines : ∀ (f : Frame α), (Symmetric f) ↔ (⊧ᴹᶠ[f] (𝐁 : AxiomSet β)) := by
   intro f;
   constructor;
-  . aesop;
+  . simp [AxiomB, AxiomB.set]; aesop;
   . contrapose;
     intro hSymm; simp [Symmetric] at hSymm;
     have ⟨w₁, w₂, hw₁w₂, hw₂w₁⟩ := hSymm;
     apply Context.not_Frames;
-    simp;
+    simp [AxiomB, AxiomB.set];
     existsi (λ w' _ => w' = w₁), w₁, (atom default);
     constructor;
     . simp; trivial;
@@ -220,12 +219,12 @@ lemma AxiomB.defines : ∀ (f : Frame α), (Symmetric f) ↔ (⊧ᴹᶠ[f] (𝐁
 lemma Axiom4.defines : ∀ (f : Frame α), (Transitive f) ↔ (⊧ᴹᶠ[f] (𝟒 : AxiomSet β)) := by
   intro f;
   constructor;
-  . aesop;
+  . simp [Axiom4, Axiom4.set]; aesop;
   . contrapose;
     intro hTrans; simp [Transitive] at hTrans;
     have ⟨w₁, w₂, w₃, _, _, _⟩ := hTrans;
     apply Context.not_Frames;
-    simp;
+    simp [Axiom4, Axiom4.set];
     existsi (λ w' a' => w' = w₃ → a' ≠ default), w₁, (atom default);
     constructor;
     . intro w';
@@ -237,48 +236,53 @@ lemma Axiom4.defines : ∀ (f : Frame α), (Transitive f) ↔ (⊧ᴹᶠ[f] (�
 lemma Axiom5.defines : ∀ (f : Frame α), (Euclidean f) ↔ (⊧ᴹᶠ[f] (𝟓 : AxiomSet β)) := by
   intro f;
   constructor;
-  . aesop;
+  . simp [Axiom5, Axiom5.set]; aesop;
   . contrapose;
     intro hEucl; simp [Euclidean] at hEucl;
     have ⟨w₁, w₂, w₃, _, _, _⟩ := hEucl;
     apply Context.not_Frames;
-    simp;
-    existsi (λ w' _ => ¬f w₂ w'), w₁, (atom default);
-    existsi w₃;
+    simp [Axiom5, Axiom5.set];
+    existsi (λ w' _ => ¬f w₂ w'), w₁, (atom default), w₃;
     constructor;
     . simp; simp[*]; trivial;
     . existsi (by assumption), w₂, (by assumption);
       intros; simp; aesop;
 
-lemma AxiomDot2.defines : ∀ (f : Frame α), (Confluent f) ↔ (⊧ᴹᶠ[f] (.𝟐 : AxiomSet β)) := by
-  intro f;
-  constructor;
-  . sorry;
-  . sorry;
+lemma AxiomDot2.defines : ∀ (f : Frame α), (Confluent f) ↔ (⊧ᴹᶠ[f] (.𝟐 : AxiomSet β)) := by sorry
 
-lemma AxiomDot3.defines : ∀ (f : Frame α), (Functional f) ↔ (⊧ᴹᶠ[f] (.𝟑 : AxiomSet β)) := by
-  intro f;
-  constructor;
-  . sorry;
-  . sorry;
+lemma AxiomDot3.defines : ∀ (f : Frame α), (Functional f) ↔ (⊧ᴹᶠ[f] (.𝟑 : AxiomSet β)) := by sorry
 
-lemma AxiomCD.defines : ∀ (f : Frame α), (RightConvergent f) ↔ (⊧ᴹᶠ[f] (𝐂𝐃 : AxiomSet β)) := by
-  intro f;
-  constructor;
-  . sorry;
-  . sorry;
+lemma AxiomCD.defines : ∀ (f : Frame α), (RightConvergent f) ↔ (⊧ᴹᶠ[f] (𝐂𝐃 : AxiomSet β)) := by sorry
 
-lemma AxiomC4.defines : ∀ (f : Frame α), (Dense f) ↔ (⊧ᴹᶠ[f] (𝐂𝟒 : AxiomSet β)) := by
-  intro f;
-  constructor;
-  . sorry;
-  . sorry;
+lemma AxiomC4.defines : ∀ (f : Frame α), (Dense f) ↔ (⊧ᴹᶠ[f] (𝐂𝟒 : AxiomSet β)) := by sorry
 
-lemma AxiomL.defines : ∀ (f : Frame α), (NonInfiniteAscent f) ↔ (⊧ᴹᶠ[f] (𝐋 : AxiomSet β)) := by
+lemma AxiomL.defines : ∀ (f : Frame α), (Transitive f ∧ WellFounded f) ↔ (⊧ᴹᶠ[f] (𝐋 : AxiomSet β)) := by sorry
+
+/-
+lemma AxiomL.defines [DecidableEq α] : ∀ (f : Frame α), (Transitive f ∧ WellFounded f) ↔ (⊧ᴹᶠ[f] (𝐋 : AxiomSet β)) := by
   intro f;
   constructor;
-  . sorry;
-  . sorry;
+  . rintro ⟨hTrans, hWF⟩;
+    simp [AxiomL, AxiomL.set];
+    intro p V w h₁;
+    by_contra hC; simp at hC;
+  . contrapose;
+    intro h;
+    cases (not_and_or.mp h) with
+    | inl hnT =>
+      simp [Transitive] at hnT;
+      have ⟨w₁, w₂, w₃, _, _, _⟩ := hnT;
+      apply Context.not_Frames;
+      simp [AxiomL, AxiomL.set];
+      existsi (λ w' _ => w' ≠ w₂ ∧ w' ≠ w₃), w₁, (atom default);
+      constructor;
+      . intro x hx;
+        by_cases x = w₂;
+        . intros a; have := a w₃ (by aesop); aesop;
+        . sorry;
+      . existsi w₂; aesop;
+    | inr hnWF => sorry;
+-/
 
 end AxiomDefinabilities
 
@@ -295,23 +299,31 @@ lemma FrameClass.union (Λ₁ Λ₂ : AxiomSet β) : FrameClass α β (Λ₁ ∪
 
 lemma FrameClass.triunion (Λ₁ Λ₂ Λ₃ : AxiomSet β) : FrameClass α β (Λ₁ ∪ Λ₂ ∪ Λ₃) = FrameClass α β Λ₁ ∩ FrameClass α β Λ₂ ∩ FrameClass α β Λ₃ := by aesop;
 
-lemma LogicK.def_FrameClass : ∀ f, f ∈ FrameClass α β (𝐊 : AxiomSet β) := by aesop;
+lemma LogicK.def_FrameClass : ∀ f, f ∈ FrameClass α β (𝐊 : AxiomSet β) := by apply AxiomK.defines;
 
 @[simp]
-lemma LogicK.trivialFrame : ∃ f, f ∈ FrameClass α β (𝐊 : AxiomSet β) := by existsi ((λ _ _ => True)); aesop;
+lemma LogicK.trivialFrame : ∃ f, f ∈ FrameClass α β (𝐊 : AxiomSet β) := by
+  existsi (λ _ _ => True);
+  apply def_FrameClass;
 
 lemma LogicKD.def_FrameClass : ∀ f, (Serial f) ↔ (f ∈ FrameClass α β 𝐊𝐃) := by
+  simp only [LogicKD];
   intro f;
   constructor;
-  . intro hSerial p hp;
-    have : ⊧ᴹᶠ[f] (𝐊 : AxiomSet β) := (AxiomK.defines β f);
-    have : ⊧ᴹᶠ[f] (𝐃 : AxiomSet β) := (AxiomD.defines β f).mp hSerial;
+  . intro hSerial;
+    apply Context.frames_union.mpr ⟨
+      (AxiomK.defines β f),
+      (AxiomD.defines β f).mp hSerial
+    ⟩;
+  . intro hp; rw [(FrameClass.union 𝐊 𝐃)] at hp;
+    apply (AxiomD.defines β f).mpr;
     aesop;
-  . intro hp; rw [LogicKD, (FrameClass.union 𝐊 𝐃)] at hp;
-    apply (AxiomD.defines β f).mpr; aesop;
 
 @[simp]
-lemma LogicKD.trivialFrame : ∃ f, f ∈ FrameClass α β 𝐊𝐃 := by existsi ((λ _ _ => True)); aesop;
+lemma LogicKD.trivialFrame : ∃ f, f ∈ FrameClass α β 𝐊𝐃 := by
+  existsi (λ _ _ => True);
+  apply (def_FrameClass _).mp;
+  simp [Serial];
 
 lemma LogicS4.def_FrameClass : ∀ f, (Reflexive f ∧ Transitive f) ↔ (f ∈ FrameClass α β 𝐒𝟒) := by
   simp only [LogicS4];
@@ -330,7 +342,10 @@ lemma LogicS4.def_FrameClass : ∀ f, (Reflexive f ∧ Transitive f) ↔ (f ∈ 
     . apply (Axiom4.defines β f).mpr; aesop;
 
 @[simp]
-lemma LogicS4.trivialFrame : ∃ f, f ∈ FrameClass α β 𝐒𝟒 := by existsi ((λ _ _ => True)); aesop;
+lemma LogicS4.trivialFrame : ∃ f, f ∈ FrameClass α β 𝐒𝟒 := by
+  existsi ((λ _ _ => True));
+  apply (def_FrameClass _).mp;
+  simp [Reflexive, Transitive];
 
 lemma LogicS5.def_FrameClass : ∀ f, (Reflexive f ∧ Euclidean f) ↔ (f ∈ FrameClass α β 𝐒𝟓) := by
   simp only [LogicS5];
@@ -353,6 +368,26 @@ lemma LogicS5.trivialFrame : ∃ f, f ∈ FrameClass α β 𝐒𝟓 := by
   existsi (λ _ _ => True);
   apply (LogicS5.def_FrameClass _).mp
   simp [Reflexive, Euclidean];
+
+/-
+lemma LogicGL.def_FrameClass : ∀ f, (Transitive f ∧ WellFounded f) ↔ (f ∈ FrameClass α β 𝐆𝐋) := by
+  simp only [LogicGL];
+  intro f;
+  constructor;
+  . intro hR;
+    apply Context.frames_union.mpr ⟨
+      (AxiomK.defines β f),
+      (AxiomL.defines β f).mp hR
+    ⟩;
+  . intro hp;
+    apply (AxiomL.defines β f).mpr;
+    aesop;
+
+lemma LogicGL.trivialFrame : ∃ f, f ∈ FrameClass α β 𝐆𝐋 := by
+  existsi (λ _ _ => True);
+  apply (def_FrameClass _).mp;
+  simp [Transitive];
+-/
 
 end LogicDefinabilities
 
