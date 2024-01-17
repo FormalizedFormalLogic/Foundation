@@ -170,10 +170,10 @@ lemma ediv_mul_add_self (a c : M) {b} (pos : 0 < b) : (a * b + c) /ₑ b = a + c
 
 @[simp] lemma ediv_mul' (a : M) {b} (pos : 0 < b) : (b * a) /ₑ b = a := by simp [mul_comm, pos]
 
-lemma ediv_add_self_left {a} (pos : 0 < a) (b : M) : (a + b) /ₑ a = 1 + b /ₑ a := by
+@[simp] lemma ediv_add_self_left {a} (pos : 0 < a) (b : M) : (a + b) /ₑ a = 1 + b /ₑ a := by
   simpa using ediv_mul_add_self 1 b pos
 
-lemma ediv_add_self_right (a : M) {b} (pos : 0 < b) : (a + b) /ₑ b = a /ₑ b + 1 := by
+@[simp] lemma ediv_add_self_right (a : M) {b} (pos : 0 < b) : (a + b) /ₑ b = a /ₑ b + 1 := by
   simpa using ediv_add_mul_self a 1 pos
 
 lemma mul_ediv_self_of_dvd {a b : M} : a * (b /ₑ a) = b ↔ a ∣ b := by
@@ -206,6 +206,13 @@ lemma rem_defined : Σᴬ[0]-Function₂ (λ a b : M ↦ a mod b) remdef := by
 lemma ediv_add_remainder (a b : M) : b * (a /ₑ b) + (a mod b) = a :=
   add_tmsub_self_of_le (mul_ediv_le a b)
 
+@[simp] lemma remainder_zero (a : M) : a mod 0 = a := by simp [rem]
+
+@[simp] lemma remainder_self (a : M) : a mod a = 0 := by
+  rcases zero_le a with (rfl | h)
+  · simp
+  · simp [rem, h]
+
 lemma remainder_mul_add_of_lt (a : M) {b} (pos : 0 < b) {r} (hr : r < b) : (a * b + r) mod b = r := by
   simp [rem, ediv_mul_add a pos hr, mul_comm]
 
@@ -221,12 +228,16 @@ lemma remainder_mul_add_of_lt (a : M) {b} (pos : 0 < b) {r} (hr : r < b) : (a * 
 @[simp] lemma remainder_mul_add' (a c : M) (pos : 0 < b) : (b * a + c) mod b = c mod b := by
   simp [mul_comm b a, pos]
 
+@[simp] lemma remainder_mul_self_left (a b : M) : (a * b) mod b = 0 := by
+  rcases zero_le b with (rfl | h)
+  · simp
+  · simpa using remainder_mul_add_of_lt a h h
+
+@[simp] lemma remainder_mul_self_right (a b : M) : (b * a) mod b = 0 := by
+  simp [mul_comm]
+
 @[simp] lemma remainder_eq_self_of_lt {a b : M} (h : a < b) : a mod b = a := by
   simpa using remainder_mul_add_of_lt 0 (pos_of_gt h) h
-
-@[simp] lemma remainder_zero (a : M) : a mod 0 = a := by simp [rem]
-
-@[simp] lemma remainder_self {a : M} (pos : 0 < a) : a mod a = 0 := by simp [rem, pos]
 
 @[simp] lemma remainder_lt (a : M) {b} (pos : 0 < b) : a mod b < b := by
   rcases ediv_spec_of_pos' a pos with ⟨r, hr, ha⟩
@@ -266,6 +277,12 @@ lemma remainder_mul {a b m : M} (pos : 0 < m) : (a * b) mod m = ((a mod m) * (b 
 
 lemma remainder_two (a : M) : a mod 2 = 0 ∨ a mod 2 = 1 :=
   le_one_iff_eq_zero_or_one.mp <| lt_two_iff_le_one.mp <| remainder_lt a (b := 2) (by simp)
+
+@[simp] lemma remainder_two_not_zero_iff {a : M} : ¬a mod 2 = 0 ↔ a mod 2 = 1 := by
+  rcases remainder_two a with (h | h) <;> simp [*]
+
+@[simp] lemma remainder_two_not_one_iff {a : M} : ¬a mod 2 = 1 ↔ a mod 2 = 0 := by
+  rcases remainder_two a with (h | h) <;> simp [*]
 
 end remainder
 

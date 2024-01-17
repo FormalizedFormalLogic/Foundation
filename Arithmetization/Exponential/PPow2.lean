@@ -173,12 +173,12 @@ protected lemma sq {i : M} (ppi : PPow2 i) : PPow2 (i^2) := by
      by intro j hj pj lt2
         have hsqi : i < i^2 := lt_square_of_lt ppi.one_lt
         have hmi : m < i^2 := lt_of_lt_of_le hm (two_mul_le_sq $ one_lt_iff_two_le.mp $ sppm.one_lt hi)
-        rw [LenBit.add_pow2_iff] <;> try simp [pj, ppi.pow2, hmi]
+        rw [LenBit.add_pow2_iff_of_lt] <;> try simp [pj, ppi.pow2, hmi]
         constructor
         · rintro (rfl | hj)
           · simp; rw [LenBit.add_pow2] <;> simp [hi, ppi.pow2, hsqi]
           · have : (√j)^2 = j := sppm.sq_sqrt_eq hj pj (ne_of_gt lt2)
-            rw [LenBit.add_pow2_iff] <;> try simp [ppi.pow2, pj.sqrt this, hmi]
+            rw [LenBit.add_pow2_iff_of_lt] <;> try simp [ppi.pow2, pj.sqrt this, hmi]
             simp [sppm.sqrt hj pj (ne_of_gt lt2), this]
         · rintro ⟨ej, lb⟩
           have hsqj : √j < i^2 := lt_of_mul_lt_mul_left (a := 2) (by calc

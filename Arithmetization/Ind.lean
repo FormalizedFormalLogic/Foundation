@@ -136,6 +136,14 @@ lemma hierarchy_induction {n} (P : (Fin n → M) → M → Prop)
     exact ⟨(Rew.bind (#0 :> (&·)) Empty.elim).hom p, by simp [hp],
       by intro v x; simp [Semiformula.eval_rew, Function.comp, Matrix.comp_vecCons', Empty.eq_elim, hp_iff]⟩) v
 
+lemma hierarchy_induction₀ (P : M → Prop)
+    (hP : ∃ p : SentenceHierarchy b s ℒₒᵣ 1, DefinedPred b s P p) :
+    P 0 → (∀ x, P x → P (x + 1)) → ∀ x, P x := by
+  rcases hP with ⟨p, hp⟩
+  exact hierarchy_induction M b s (n := 0) (fun _ x ↦ P x)
+    ⟨(Rew.rewrite Empty.elim).hom p.val, by simp,
+     by intro v x; simp [Semiformula.eval_rewrite, Empty.eq_elim, hp.pval]⟩ ![]
+
 lemma hierarchy_order_induction {n} (P : (Fin n → M) → M → Prop)
     (hP : ∃ p, Hierarchy (L := ℒₒᵣ) b s p ∧ ∀ v x, P v x ↔ Semiformula.Eval! M ![x] v p) (v) :
     (∀ x, (∀ y < x, P v y) → P v x) → ∀ x, P v x := by

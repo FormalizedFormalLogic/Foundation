@@ -13,9 +13,11 @@ variable {M : Type} [Inhabited M] [DecidableEq M] [ORingSymbol M]
   [Structure ℒₒᵣ M] [Structure.ORing ℒₒᵣ M]
   [𝐏𝐀⁻.Mod M]
 
-variable [𝐈𝚺₀.Mod M]
-
 namespace Model
+
+section ISigma₀
+
+variable [𝐈𝚺₀.Mod M]
 
 def ext (u z : M) : M := z /ₑ u mod u
 
@@ -612,10 +614,9 @@ protected lemma uniq {x y₁ y₂ : M} : Exp x y₁ → Exp x y₂ → y₁ = y�
   wlog h : y₁ ≤ y₂
   · exact Eq.symm <| this h₂ h₁ (show y₂ ≤ y₁ from le_of_not_ge h)
   refine hierarchy_order_induction₀ M Σ 0 (fun y₂ ↦ ∀ x < y₂, ∀ y₁ ≤ y₂, Exp x y₁ → Exp x y₂ → y₁ = y₂)
-      ⟨⟨“∀[#0 < #1] ∀[#0 < #2 + 1] (!Exp.def [#1, #0] → !Exp.def [#1, #2] → #0 = #2)”,
-         by simp [Hierarchy.pi_zero_iff_sigma_zero]⟩,
-       by intro v
-          simp [sq, Semiformula.eval_substs, Exp.defined.pval, ←le_iff_lt_succ]⟩
+    ⟨⟨“∀[#0 < #1] ∀[#0 < #2 + 1] (!Exp.def [#1, #0] → !Exp.def [#1, #2] → #0 = #2)”,
+       by simp [Hierarchy.pi_zero_iff_sigma_zero]⟩,
+     by intro v; simp [Exp.defined.pval, ←le_iff_lt_succ]⟩
     ?_ y₂ x h₂.dom_lt_range y₁ h h₁ h₂
   simp; intro y₂ H x _ y₁ h h₁ h₂
   rcases zero_or_succ x with (rfl | ⟨x, rfl⟩)
@@ -629,10 +630,10 @@ protected lemma uniq {x y₁ y₂ : M} : Exp x y₁ → Exp x y₂ → y₁ = y�
 protected lemma inj {x₁ x₂ y : M} : Exp x₁ y → Exp x₂ y → x₁ = x₂ := by
   intro h₁ h₂
   refine hierarchy_order_induction₀ M Σ 0 (fun y ↦ ∀ x₁ < y, ∀ x₂ < y, Exp x₁ y → Exp x₂ y → x₁ = x₂)
-      ⟨⟨“∀[#0 < #1] ∀[#0 < #2] (!Exp.def [#1, #2] → !Exp.def [#0, #2] → #1 = #0)”,
-         by simp [Hierarchy.pi_zero_iff_sigma_zero]⟩,
-       by intro v
-          simp [sq, Semiformula.eval_substs, Exp.defined.pval, ←le_iff_lt_succ]⟩
+    ⟨⟨“∀[#0 < #1] ∀[#0 < #2] (!Exp.def [#1, #2] → !Exp.def [#0, #2] → #1 = #0)”,
+       by simp [Hierarchy.pi_zero_iff_sigma_zero]⟩,
+     by intro v
+        simp [sq, Semiformula.eval_substs, Exp.defined.pval, ←le_iff_lt_succ]⟩
     ?_ y x₁ h₁.dom_lt_range x₂ h₂.dom_lt_range h₁ h₂
   simp; intro y H x₁ _ x₂ _ h₁ h₂
   rcases zero_or_succ x₁ with (rfl | ⟨x₁, rfl⟩) <;> rcases zero_or_succ x₂ with (rfl | ⟨x₂, rfl⟩)
@@ -651,6 +652,94 @@ protected lemma inj {x₁ x₂ y : M} : Exp x₁ y → Exp x₂ y → x₁ = x�
     simp [this]
 
 end Exp
+
+end ISigma₀
+
+section ISigma₁
+
+variable [𝐈𝚺₁.Mod M]
+
+namespace Exp
+
+lemma range_exists (x : M) : ∃ y, Exp x y := by
+  refine hierarchy_induction₀ M Σ 1 (fun x ↦ ∃ y, Exp x y)
+    ⟨⟨“∃ !Exp.def [#1, #0]”, by simp [Hierarchy.pi_zero_iff_sigma_zero]⟩,
+     by intro v; simp [Exp.defined.pval]⟩
+    ?_ ?_ x
+  · exact ⟨1, by simp⟩
+  · simp; intro x y h; exact ⟨2 * y, exp_succ_mul_two.mpr h⟩
+
+lemma range_exists_unique (x : M) : ∃! y, Exp x y := by
+  rcases range_exists x with ⟨y, h⟩
+  exact ExistsUnique.intro y h (by intro y' h'; exact h'.uniq h)
+
+end Exp
+
+def exponential (a : M) : M := Classical.choose! (Exp.range_exists_unique a)
+
+prefix:max "exp " => exponential
+
+section exponential
+
+lemma exp_exponential (a : M) : Exp a (exp a) := Classical.choose!_spec (Exp.range_exists_unique a)
+
+lemma exponential_graph {a b : M} : a = exp b ↔ Exp b a := Classical.choose!_eq_iff _
+
+def expdef : Σᴬ[0] 2 := ⟨“!Exp.def [#1, #0]”, by simp⟩
+
+lemma exp_defined : Σᴬ[0]-Function₁ (exponential : M → M) expdef := by
+  intro v; simp [expdef, exponential_graph, Exp.defined.pval]
+
+lemma exponential_of_exp {a b : M} (h : Exp a b) : exp a = b :=
+  Eq.symm <| exponential_graph.mpr h
+
+lemma exponential_inj : Function.Injective (exponential : M → M) := λ a _ H ↦
+  (exp_exponential a).inj (exponential_graph.mp H)
+
+@[simp] lemma exp_zero : exp (0 : M) = 1 := exponential_of_exp (by simp)
+
+@[simp] lemma exp_one : exp (1 : M) = 2 := exponential_of_exp (by simp)
+
+lemma exp_succ (a : M) : exp (a + 1) = 2 * exp a :=
+  exponential_of_exp <| Exp.exp_succ_mul_two.mpr <| exp_exponential a
+
+lemma exp_even (a : M) : exp (2 * a) = (exp a)^2 :=
+  exponential_of_exp <| Exp.exp_even_sq.mpr <| exp_exponential a
+
+@[simp] lemma lt_exp (a : M) : a < exp a := (exp_exponential a).dom_lt_range
+
+@[simp] lemma exp_pos (a : M) : 0 < exp a := (exp_exponential a).range_pos
+
+@[simp] lemma exp_pow2 (a : M) : Pow2 (exp a) := (exp_exponential a).range_pow2
+
+end exponential
+
+def Bit (i a : M) : Prop := LenBit (exp i) a
+
+infix:50 " ∈ᵇ " => Bit
+
+notation:50 a:50 " ∉ᵇ " b:50 => ¬ (a ∈ᵇ b)
+
+def bitdef : Σᴬ[0] 2 := ⟨“∃[#0 < #2 + 1] (!expdef [#0, #1] ∧ !lenbitdef [#0, #2])”, by simp⟩
+
+lemma bit_defined : Σᴬ[0]-Relation (Bit : M → M → Prop) bitdef := by
+  intro v; simp [bitdef, lenbit_defined.pval, exp_defined.pval, ←le_iff_lt_succ]
+  constructor
+  · intro h; exact ⟨exp (v 0), by simp [h.le], rfl, h⟩
+  · rintro ⟨_, _, rfl, h⟩; exact h
+
+namespace Bit
+
+@[simp] lemma not_mem_zero (i : M) : i ∉ᵇ 0 := by simp [Bit]
+
+open Classical in
+noncomputable def insert (i a : M) : M := if i ∈ᵇ a then a else a + exp i
+
+
+
+end Bit
+
+end ISigma₁
 
 end Model
 
