@@ -2,7 +2,6 @@ import Logic.Vorspiel.BinaryRelations
 import Logic.Modal.Normal.Formula
 import Logic.Modal.Normal.Axioms
 
-
 namespace LO.Modal.Normal
 
 open Formula
@@ -22,9 +21,9 @@ namespace Formula
 def Satisfies (m : Model α β) (w : α) : Formula β → Prop
   | atom a  => a ∈ m.val w
   | falsum  => False
-  | imp p q => (p.Satisfies m w) → (q.Satisfies m w)
   | and p q => (p.Satisfies m w) ∧ (q.Satisfies m w)
   | or p q  => (p.Satisfies m w) ∨ (q.Satisfies m w)
+  | imp p q => ¬(p.Satisfies m w) ∨ (q.Satisfies m w)
   | box p   => ∀w', m.frame w w' → p.Satisfies m w'
 
 notation w " ⊧ᴹˢ[" m "] " p => Satisfies m w p
@@ -43,7 +42,8 @@ variable {m : Model α β}
 
 @[simp] lemma or_def : (w ⊧ᴹˢ[m] p ⋎ q) ↔ (w ⊧ᴹˢ[m] p) ∨ (w ⊧ᴹˢ[m] q) := by simp [Satisfies];
 
-@[simp] lemma imp_def : (w ⊧ᴹˢ[m] p ⟶ q) ↔ (w ⊧ᴹˢ[m] p) → (w ⊧ᴹˢ[m] q) := by simp [Satisfies];
+lemma imp_def : (w ⊧ᴹˢ[m] p ⟶ q) ↔ ¬(w ⊧ᴹˢ[m] p) ∨ (w ⊧ᴹˢ[m] q) := by simp [Satisfies];
+@[simp] lemma imp_def' : (w ⊧ᴹˢ[m] p ⟶ q) ↔ (w ⊧ᴹˢ[m] p) → (w ⊧ᴹˢ[m] q) := by simp [Satisfies, imp_iff_not_or];
 
 @[simp] lemma box_def : (w ⊧ᴹˢ[m] □p) ↔ (∀w', m.frame w w' → (w' ⊧ᴹˢ[m] p)) := by simp [Satisfies];
 @[simp] lemma dia_def : (w ⊧ᴹˢ[m] ◇p) ↔ (∃w', m.frame w w' ∧ (w' ⊧ᴹˢ[m] p)) := by simp [Satisfies];
@@ -72,7 +72,7 @@ lemma neg_def' : (⊧ᴹᵐ[m] ~p) →  ¬(⊧ᴹᵐ[m] p) := id neg_def
 
 lemma bot_def : ¬(⊧ᴹᵐ[m] ⊥) := by simp [Models];
 
-lemma modus_ponens : (⊧ᴹᵐ[m] p ⟶ q) → (⊧ᴹᵐ[m] p) → (⊧ᴹᵐ[m] q) := by simp_all [Models, Satisfies.imp_def];
+lemma modus_ponens : (⊧ᴹᵐ[m] p ⟶ q) → (⊧ᴹᵐ[m] p) → (⊧ᴹᵐ[m] q) := by simp_all [Models, Satisfies.imp_def'];
 
 lemma necessitation : (⊧ᴹᵐ[m] p) → (⊧ᴹᵐ[m] □p) := by simp_all [Models, Satisfies];
 
@@ -89,7 +89,9 @@ variable {f : Frame α}
 
 lemma bot_def : ¬(⊧ᴹᶠ[f] (⊥ : Formula β)) := by simp [Frames, Models.bot_def];
 
-lemma modus_ponens : (⊧ᴹᶠ[f] p ⟶ q) → (⊧ᴹᶠ[f] p) → (⊧ᴹᶠ[f] q) := by simp_all [Models, Frames, Satisfies];
+lemma modus_ponens : (⊧ᴹᶠ[f] p ⟶ q) → (⊧ᴹᶠ[f] p) → (⊧ᴹᶠ[f] q) := by
+  intro h₁ h₂ V;
+  apply Models.modus_ponens (h₁ V) (h₂ V);
 
 lemma necessitation : (⊧ᴹᶠ[f] p) → (⊧ᴹᶠ[f] □p) := by simp_all [Models, Frames, Satisfies];
 
