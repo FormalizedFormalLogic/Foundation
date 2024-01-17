@@ -733,9 +733,14 @@ namespace Bit
 @[simp] lemma not_mem_zero (i : M) : i ∉ᵇ 0 := by simp [Bit]
 
 open Classical in
-noncomputable def insert (i a : M) : M := if i ∈ᵇ a then a else a + exp i
+noncomputable def bitInsert (i a : M) : M := if i ∈ᵇ a then a else a + exp i
 
-
+@[simp] lemma mem_bitInsert_iff {i j a : M} :
+    i ∈ᵇ bitInsert j a ↔ i = j ∨ i ∈ᵇ a := by
+  by_cases h : j ∈ᵇ a <;> simp [h, bitInsert]
+  · by_cases e : i = j <;> simp [h, e]
+  · simpa [exponential_inj.eq_iff] using
+      lenbit_add_pow2_iff_of_not_lenbit (exp_pow2 i) (exp_pow2 j) h
 
 end Bit
 

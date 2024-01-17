@@ -348,6 +348,13 @@ lemma sqrt_defined : Σᴬ[0]-Function₁ (λ a : M ↦ √a) sqrtdef := by
 
 lemma eq_sqrt (x a : M) : x * x ≤ a ∧ a < (x + 1) * (x + 1) → x = √a := Classical.choose_uniq (sqrt_exists_unique a)
 
+lemma sqrt_eq_of_le_of_lt {x a : M} (le : x * x ≤ a) (lt : a < (x + 1) * (x + 1)) : √a = x :=
+  Eq.symm <| eq_sqrt x a ⟨le, lt⟩
+
+lemma sqrt_eq_of_le_of_le {x a : M} (le : x * x ≤ a) (h : a ≤ x * x + 2 * x) : √a = x :=
+  sqrt_eq_of_le_of_lt le (by simp [add_mul_self_eq]; exact le_iff_lt_succ.mp h)
+
+
 @[simp] lemma sq_sqrt_le (a : M) : (√a)^2 ≤ a := by simp [sq]
 
 @[simp] lemma sqrt_mul_self (a : M) : √(a * a) = a :=
@@ -377,6 +384,9 @@ lemma sqrt_three : √(3 : M) = 1 :=
   rcases show a = √2 from by rw [h]; simp with rfl
   simp [sqrt_two] at h
 
+@[simp] lemma sqrt_le_add (a : M) : a ≤ √a * √a + 2 * √a :=
+  le_iff_lt_succ.mpr (by have := sqrt_spec_lt a; rw [add_mul_self_eq] at this; simpa using this)
+
 @[simp] lemma sqrt_le_self (a : M) : √a ≤ a := by
   by_contra A
   have : a < a := calc
@@ -405,28 +415,56 @@ lemma sq_lt_of_lt_sqrt {a b : M} : a < √b → a^2 < b := by
 
 end sqrt
 
-section cpair
+section pair
 
-def cpair (a b : M) : M := ((a + b) * (a + b + 1)) /ₑ 2 + b
+open Classical
 
-notation "⟨" a " ; " b "⟩" => cpair a b
+-- https://github.com/leanprover-community/mathlib4/blob/b075cdd0e6ad8b5a3295e7484b2ae59e9b2ec2a7/Mathlib/Data/Nat/Pairing.lean#L37
+def pair (a b : M) : M := if a < b then b * b + a else a * a + a + b
 
-lemma cpair_graph {a b c : M} :
-    c = ⟨a ; b⟩ ↔ ∃ r < 2, (a + b) * (a + b + 1) + 2 * b = 2 * c + r := by
-  simp [cpair, ediv_graph, ←ediv_add_mul_self, mul_comm]
+notation "⟨" a " ; " b "⟩" => pair a b
 
-def cpairdef : Σᴬ[0] 3 :=
-  ⟨“∃[#0 < 2] (#2 + #3) * (#2 + #3 + 1) + 2 * #3 = 2 * #1 + #0”, by simp[Hierarchy.pi_zero_iff_sigma_zero]⟩
+lemma pair_graph {a b c : M} :
+    c = ⟨a ; b⟩ ↔ (a < b ∧ c = b * b + a) ∨ (b ≤ a ∧ c = a * a + a + b) := by
+  simp [pair]
+  by_cases h : a < b
+  · simp [h, show ¬b ≤ a from by simpa using h]
+  · simp [h, show b ≤ a from by simpa using h]
 
-def cpairPolyBound : Polynomial 2 := ᵀ“(#0 + #1) * (#0 + #1 + 1) + #1 * 2”
+def pairdef : Σᴬ[0] 3 := ⟨“(#1 < #2 ∧ #0 = #2 * #2 + #1) ∨ (#2 ≤ #1 ∧ #0 = #1 * #1 + #1 + #2)”, by simp⟩
 
-lemma cpair_defined : Σᴬ[0]-Function₂ (λ a b : M ↦ ⟨a ; b⟩) cpairdef := by
-  intro v; simp [Matrix.vecHead, Matrix.vecTail, Matrix.constant_eq_singleton, cpair_graph, cpairdef]
+lemma pair_defined : Σᴬ[0]-Function₂ (λ a b : M ↦ ⟨a ; b⟩) pairdef := by
+  intro v; simp [pair_graph, pairdef]
 
-lemma cpair_polybounded : PolyBounded₂ (λ a b : M ↦ ⟨a ; b⟩) cpairPolyBound :=
-  λ _ ↦ by simp[cpair, ←ediv_add_mul_self, cpairPolyBound]
+def unpair (a : M) : M × M := if a ∸ √a * √a < √a then (a ∸ √a * √a, √a) else (√a, a ∸ √a * √a ∸ √a)
 
-end cpair
+abbrev pi₁ (a : M) : M := (unpair a).1
+
+abbrev pi₂ (a : M) : M := (unpair a).2
+
+@[simp] lemma pair_unpair (a : M) : ⟨pi₁ a ; pi₂ a⟩ = a := by
+  simp [pi₁, pi₂, unpair]
+  split_ifs with h
+  · simp [pair, h]; exact add_tmsub_self_of_le (by simp)
+  · simp; simp [pair, h]
+    have : a ∸ √a * √a ∸ √a ≤ √a := by simp [add_comm (2 * √a), ←two_mul]
+    simp [not_lt.mpr this]
+    calc
+      √a * √a + √a + (a ∸ √a * √a ∸ √a) = √a * √a + (a ∸ √a * √a) := by simp [add_assoc]; exact add_tmsub_self_of_le (by simpa using h)
+      _                                 = a                       := add_tmsub_self_of_le (by simp)
+
+@[simp] lemma unpair_pair (a b : M) : unpair ⟨a ; b⟩ = (a, b) := by
+  simp [pair]; split_ifs with h
+  · have : √(b * b + a) = b := sqrt_eq_of_le_of_le (by simp) (by simp; exact le_trans (le_of_lt h) (by simp))
+    simp [unpair, this, show ¬b ≤ a from by simpa using h]
+  · have : √(a * a + (a + b)) = a :=
+      sqrt_eq_of_le_of_le (by simp [add_assoc]) (by simp [add_assoc, two_mul, show b ≤ a from by simpa using h])
+    simp [unpair, this, add_assoc]
+
+def pairEquiv : M × M ≃ M :=
+  ⟨Function.uncurry pair, unpair, fun ⟨a, b⟩ => unpair_pair a b, pair_unpair⟩
+
+end pair
 
 end IOpen
 

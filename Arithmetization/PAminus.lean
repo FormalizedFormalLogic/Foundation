@@ -96,6 +96,14 @@ lemma msub_msub : a ∸ b ∸ c = a ∸ (b + c) := by
 @[simp] lemma msub_eq_zero_iff_le : a ∸ b = 0 ↔ a ≤ b :=
   not_iff_not.mp (by simp [←pos_iff_ne_zero])
 
+@[simp] lemma tsub_le_iff_right {a b c : M} : a ∸ b ≤ c ↔ a ≤ c + b := by
+  by_cases h : b ≤ a
+  · calc
+      a ∸ b ≤ c ↔ (a ∸ b) + b ≤ c + b := by simp
+      _         ↔ a ≤ c + b           := by rw [msub_add_self_of_le h]
+  · simp [msub_spec_of_lt (show a < b from by simpa using h)]
+    exact le_trans (le_of_lt $ show a < b from by simpa using h) (by simp)
+
 end msub
 
 section Dvd
