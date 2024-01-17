@@ -17,14 +17,7 @@ lemma AxiomSet.sounds
   (f : Frame β) (hf : f ∈ (FrameClass β α Λ))
   {p : Formula α}
   (d : ⊢ᴹ[Λ] p) : (⊧ᴹᶠ[f] p) := by
-  induction d <;> try {simp_all [Satisfies];}
-  case disj₃ p q r =>
-    simp only [Frames, Models, Satisfies.imp_def];
-    intro V w hpr hqr hpq;
-    simp only [Satisfies.or_def] at hpq;
-    cases hpq with
-    | inl hp => exact hpr hp;
-    | inr hq => exact hqr hq;
+  induction d <;> aesop;
 
 lemma AxiomSet.consistent
   (Λ : AxiomSet α)
@@ -37,7 +30,6 @@ lemma AxiomSet.consistent
   have ⟨tf, htf⟩ := hf;
   existsi tf;
   exact AxiomSet.sounds _ _ Λ tf htf hC.some;
-
 
 variable {α β : Type u} [Inhabited α] [Inhabited β] [DecidableEq α] [DecidableEq β] {p : Formula α} (f : Frame β)
 

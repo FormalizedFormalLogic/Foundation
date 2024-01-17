@@ -56,11 +56,11 @@ instance : ToString (Formula α) := ⟨toStr⟩
 
 end ToString
 
-@[simp] lemma or_eq (p q : Formula α) : p ⋎ q = or p q := rfl
+lemma or_eq (p q : Formula α) : or p q = p ⋎ q := rfl
 
-@[simp] lemma and_eq (p q : Formula α) : p ⋏ q = and p q := rfl
+lemma and_eq (p q : Formula α) : and p q = p ⋏ q := rfl
 
-lemma neg_eq (p : Formula α) : ~p = neg p := rfl
+lemma neg_eq (p : Formula α) : neg p = ~p := rfl
 
 lemma iff_eq (p q : Formula α) : p ⟷ q = (p ⟶ q) ⋏ (q ⟶ p) := rfl
 
