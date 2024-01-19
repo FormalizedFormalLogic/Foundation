@@ -6,47 +6,39 @@ namespace LO.Modal.Normal
 
 open Formula
 
-variable (α β : Type u) [DecidableEq α] [Inhabited β]
-
+@[simp]
 def AxiomSet.Consistent {α} (Λ : AxiomSet α) := ⊬ᴹ[Λ]! ⊥
 
 open AxiomSet
 
-lemma AxiomSet.sounds
-  (Λ : AxiomSet α)
-  (f : Frame β) (hf : f ∈ (FrameClass β α Λ))
-  {p : Formula α}
-  (d : ⊢ᴹ[Λ] p) : (⊧ᴹᶠ[f] p) := by
-  induction d <;> aesop;
+variable {α β} [Inhabited α] [Inhabited β] {Λ : AxiomSet α} {p : Formula α}
 
-lemma AxiomSet.consistent
-  (Λ : AxiomSet α)
-  (hf : ∃ f, f ∈ (FrameClass β α Λ))
-  : Consistent Λ := by
-  by_contra hC; simp [Consistent] at hC;
-  suffices h : ∃ (f : Frame β), ⊧ᴹᶠ[f] (⊥ : Formula α) by
-    let ⟨f, hf⟩ := h;
-    exact Frames.bot_def hf;
+lemma AxiomSet.sounds (h : ⊢ᴹ[Λ] p) : (⊧ᴹ[(𝔽(Λ) : FrameClass β)] p) := by
+  induction h <;> try { simp [FrameClasses, Frames, Models]; try intros; aesop; }
+  case modus_ponens ih₁ ih₂ => exact FrameClasses.modus_ponens ih₁ ih₂;
+
+lemma AxiomSet.consistent (hf : ∃ (F : Frame β), F ∈ 𝔽(Λ)) : Consistent Λ := by
+  by_contra hC; simp at hC;
+  suffices h : ∃ (F : Frame β), ⊧ᴹ[F] (⊥ : Formula α) by aesop;
   have ⟨tf, htf⟩ := hf;
   existsi tf;
-  exact AxiomSet.sounds _ _ Λ tf htf hC.some;
+  apply AxiomSet.sounds hC.some;
+  assumption;
 
-variable {α β : Type u} [Inhabited α] [Inhabited β] [DecidableEq α] [DecidableEq β] {p : Formula α} (f : Frame β)
+theorem LogicK.sounds : (⊢ᴹ[𝐊] p) → (⊧ᴹ[(𝔽((𝐊 : AxiomSet α)) : FrameClass β)] p) := by apply AxiomSet.sounds;
+theorem LogicK.consistent : Consistent (𝐊 : AxiomSet α) := @AxiomSet.consistent α β _ _ trivialFrame
 
-theorem LogicK.sounds : (⊢ᴹ[𝐊] p) → (⊧ᴹᶠ[f] p) := AxiomSet.sounds _ _ _ f (def_FrameClass f)
-theorem LogicK.consistent : Consistent (𝐊 : AxiomSet α) := AxiomSet.consistent α β _ trivialFrame
+theorem LogicKD.sounds : (⊢ᴹ[𝐊𝐃] p) → (⊧ᴹ[(𝔽((𝐊𝐃 : AxiomSet α)) : FrameClass β)] p) := by apply AxiomSet.sounds;
+theorem LogicKD.consistent : Consistent (𝐊𝐃 : AxiomSet α) := @AxiomSet.consistent α β _ _ trivialFrame
 
-theorem LogicKD.sounds (hf : Serial f) (h : ⊢ᴹ[𝐊𝐃] p) : (⊧ᴹᶠ[f] p) := AxiomSet.sounds _ _ _ f ((def_FrameClass f).mp hf) h
-theorem LogicKD.consistent : Consistent (𝐊𝐃 : AxiomSet α) := AxiomSet.consistent α β _ trivialFrame
+theorem LogicS4.sounds : (⊢ᴹ[𝐒𝟒] p) → (⊧ᴹ[(𝔽((𝐒𝟒 : AxiomSet α)) : FrameClass β)] p)  := by apply AxiomSet.sounds;
+theorem LogicS4.consistent : Consistent (𝐒𝟒 : AxiomSet α) := @AxiomSet.consistent α β _ _ trivialFrame
 
-theorem LogicS4.sounds (hf : Reflexive f ∧ Transitive f) (h : ⊢ᴹ[𝐒𝟒] p) : (⊧ᴹᶠ[f] p) := AxiomSet.sounds _ _ _ f ((def_FrameClass f).mp hf) h
-theorem LogicS4.consistent : Consistent (𝐒𝟒 : AxiomSet α) := AxiomSet.consistent α β _ trivialFrame
-
-theorem LogicS5.sounds (hf : Reflexive f ∧ Euclidean f) (h : ⊢ᴹ[𝐒𝟓] p) : (⊧ᴹᶠ[f] p) := AxiomSet.sounds _ _ _ f ((def_FrameClass f).mp hf) h
-theorem LogicS5.consistent : Consistent (𝐒𝟓 : AxiomSet α) := AxiomSet.consistent α β _ trivialFrame
+theorem LogicS5.sounds : (⊢ᴹ[𝐒𝟓] p) → (⊧ᴹ[(𝔽((𝐒𝟓 : AxiomSet α)) : FrameClass β)] p)  := by apply AxiomSet.sounds;
+theorem LogicS5.consistent : Consistent (𝐒𝟓 : AxiomSet α) := @AxiomSet.consistent α β _ _ trivialFrame
 
 /-
-theorem LogicGL.sounds (hf : NonInfiniteAscent f) (h : ⊢ᴹ[𝐆𝐋] p) : (⊧ᴹᶠ[f] p) := AxiomSet.sounds _ _ _ f ((def_FrameClass f).mp hf) h
+theorem LogicGL.sounds (hf : NonInfiniteAscent f) (h : ⊢ᴹ[𝐆𝐋] p) : (⊧ᴹ[f] p) := AxiomSet.sounds _ _ _ f ((def_FrameClass f).mp hf) h
 theorem LogicGL.consistent : Consistent (𝐆𝐋 : AxiomSet α) := AxiomSet.consistent α β _ trivialFrame
 -/
 

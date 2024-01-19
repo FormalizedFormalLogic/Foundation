@@ -194,24 +194,22 @@ notation "◇^" n:90 p => multidia p n
 
 end Formula
 
-abbrev Context (α : Type u) := Set (Formula α)
+abbrev Theory (α : Type u) := Set (Formula α)
 
-namespace Context
+namespace Theory
 
-variable (Γ : Context β)
+variable (Γ : Theory β)
 
-def box : Context β := {□p | p ∈ Γ}
+def box : Theory β := { □p | p ∈ Γ }
+prefix:74 "□" => Theory.box
 
-prefix:74 "□" => Context.box
+lemma box_empty : □(∅ : Theory β) = ∅ := by simp [box]
 
-lemma box_empty : □(∅ : Context β) = ∅ := by simp [box]
+def dia : Theory β := {◇p | p ∈ Γ}
+prefix:74 "◇" => Theory.dia
 
-def dia (Γ : Context β) : Context β := {◇p | p ∈ Γ}
+lemma dia_empty : ◇(∅ : Theory β) = ∅ := by simp [dia]
 
-prefix:74 "◇" => Context.dia
-
-lemma dia_empty : ◇(∅ : Context β) = ∅ := by simp [dia]
-
-end Context
+end Theory
 
 end LO.Modal.Normal
