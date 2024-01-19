@@ -38,6 +38,9 @@ notation "Πᴬ[" s "]" => PiSentence s ℒₒᵣ
 
 namespace FormulaHierarchy
 
+abbrev of_zero (p : FormulaHierarchy b 0 ℒₒᵣ μ k) : FormulaHierarchy b' s ℒₒᵣ μ k :=
+  ⟨p, p.prop.of_zero⟩
+
 variable (b : VType) (s : ℕ) (L : Language) [L.LT] (μ : Type*) (n)
 
 @[simp] lemma hierarchy (p : FormulaHierarchy b s L μ n) : Hierarchy b s p.val := p.prop
@@ -174,11 +177,25 @@ variable {b : VType} {s : ℕ}
 
 def Defined.definable {k} {P : (Fin k → M) → Prop} {p : SentenceHierarchy b s ℒₒᵣ k} (h : Arith.Defined b s P p) : Definable b s P := ⟨p, h⟩
 
+def Definable.of_zero {k} {P : (Fin k → M) → Prop} (h : Definable b' 0 P) : Definable b s P := by
+  rcases h with ⟨p, h⟩
+  exact ⟨p.of_zero, by intro x; simpa using h x⟩
+
 instance Definable.eq : DefinableRel b s ((· = ·) : M → M → Prop) := DefinedRel.eq.definable
 
 instance Definable.lt : DefinableRel b s ((· < ·) : M → M → Prop) := DefinedRel.lt.definable
 
 instance Definable.le : DefinableRel b s ((· ≤ ·) : M → M → Prop) := DefinedRel.le.definable
+
+@[aesop safe apply] lemma DefinablePredWithParam.comp {P : M → Prop} (hP : DefinablePredWithParam b s P)
+    {k} {f : (Fin k → M) → M} (hf : IsPolynomialWithParam f) :
+    DefinableWithParam b s (fun v ↦ P (f v)) := by
+  rcases hP with ⟨lp, wp, p, hp⟩
+  rcases hf with ⟨lf, wf, t, hf⟩
+  let p' : Semiformula ℒₒᵣ (Fin (lp + lf)) 1 := (Rew.rewriteMap (Fin.castLE (by simp))).hom p.val
+  let t' : Semiterm ℒₒᵣ (Fin (lp + lf)) k := Rew.rewriteMap (Fin.natAdd _) t
+  exact ⟨lp + lf, Matrix.vecAppend rfl wp wf, ⟨p' /[t'], by simp⟩,
+    by intro v; simp [Semiterm.val_rew, Semiformula.eval_rew, Function.comp, Matrix.vecAppend_eq_ite, hf, ←hp]⟩
 
 @[aesop safe apply] lemma DefinablePred.comp_definable_with_param {P : M → Prop} [hP : DefinablePred b s P]
     {k} {f : (Fin k → M) → M} (hf : IsPolynomialWithParam f) :
@@ -241,6 +258,9 @@ instance Definable.le : DefinableRel b s ((· ≤ ·) : M → M → Prop) := Def
     {k} {f g h : (Fin k → M) → M} (hf : IsPolynomialWithParam f) (hg : IsPolynomialWithParam g) (hh : IsPolynomialWithParam h) :
     DefinableWithParam b s (fun v ↦ F (g v) (h v) = f v) :=
   cast (by congr; funext v; simp [eq_comm]) <| DefinableFunction₂.comp_definable_with_param_right (b := b) (s := s) (F := F) hf hg hh
+
+lemma DefinablePredWithParam.of_iff {p : M → Prop} (q) (h : ∀ x, p x ↔ q x) (H : DefinablePredWithParam b s q) : DefinablePredWithParam b s p := by
+  rwa [show p = q from by funext v; simp [h]]
 
 namespace DefinableWithParam
 
@@ -349,8 +369,11 @@ lemma imp {P₁ P₂ : (Fin k → M) → Prop} (h₁ : DefinableWithParam b.alt 
 @[aesop safe apply] lemma of_sigma_zero {P : (Fin k → M) → Prop} : DefinableWithParam Σ 0 P → DefinableWithParam b s P := by
   rintro ⟨l, w, p, h⟩; exact ⟨l, w, ⟨p.val, p.prop.of_zero⟩, by simpa using h⟩
 
-lemma zero_alt {P : (Fin k → M) → Prop} : DefinableWithParam b 0 P → DefinableWithParam b' 0 P := by
-  rintro ⟨l, w, p, h⟩; exact ⟨l, w, ⟨p.val, Hierarchy.zero_iff.mp p.prop⟩, by simpa using h⟩
+lemma zero_alt {P : (Fin k → M) → Prop} : DefinableWithParam b 0 P → DefinableWithParam b' s P := by
+  rintro ⟨l, w, p, h⟩; exact ⟨l, w, ⟨p.val, Hierarchy.of_zero p.prop⟩, by simpa using h⟩
+
+@[aesop safe apply] lemma imp₀' {P₁ P₂ : (Fin k → M) → Prop} (h₁ : DefinableWithParam b 0 P₁) (h₂ : DefinableWithParam b s P₂) :
+    DefinableWithParam b s (fun v ↦ P₁ v → P₂ v) := h₁.zero_alt.imp h₂
 
 @[aesop safe apply] lemma imp₀ {P₁ P₂ : (Fin k → M) → Prop} (h₁ : DefinableWithParam b 0 P₁) (h₂ : DefinableWithParam b 0 P₂) :
     DefinableWithParam b 0 (fun v ↦ P₁ v → P₂ v) := h₁.zero_alt.imp h₂
@@ -362,9 +385,10 @@ lemma zero_alt {P : (Fin k → M) → Prop} : DefinableWithParam b 0 P → Defin
     DefinableWithParam b 0 (fun v ↦ P₁ v ↔ P₂ v) := by
   simp [iff_iff_implies_and_implies]; aesop
 
+example : DefinablePredWithParam Σ 0 (fun x : M ↦ x < 0 + x → ∃ z < x, z = 6) := by aesop
+
 end DefinableWithParam
 
-end definability
 
 variable {f : M → M}
 
@@ -372,17 +396,71 @@ section
 
 variable {M : Type} [LE M] [Structure ℒₒᵣ M]
 
-def PolyBounded {k} (f : (Fin k → M) → M) (t : Polynomial k) : Prop :=
-  ∀ v : Fin k → M, f v ≤ t.bVal! M v
+class PolyBounded {k} (f : (Fin k → M) → M) : Prop where
+  intro : ∃ t : Polynomial k, ∀ v : Fin k → M, f v ≤ t.bVal! M v
 
-abbrev PolyBounded₁ (f : M → M) (t : Polynomial 1) : Prop :=
-  PolyBounded (k := 1) (fun v => f (Matrix.vecHead v)) t
+abbrev PolyBounded₁ (f : M → M) : Prop :=
+  PolyBounded (k := 1) (fun v => f (Matrix.vecHead v))
 
-abbrev PolyBounded₂ (f : M → M → M) (t : Polynomial 2) : Prop :=
-  PolyBounded (k := 2) (fun v => f (v 0) (v 1)) t
+abbrev PolyBounded₂ (f : M → M → M) : Prop :=
+  PolyBounded (k := 2) (fun v => f (v 0) (v 1))
 
 end
 
+namespace DefinableWithParam
+
+@[aesop safe apply] lemma elim_function₁ {f : M → M} [hf : PolyBounded₁ f] [DefinableFunction₁ b s f]
+    {t : (Fin k → M) → M} (ht : IsPolynomialWithParam t)
+    {P : (Fin k → M) → M → Prop} (h : DefinableWithParam b s (fun w ↦ P (w ·.succ) (w 0))) :
+    DefinableWithParam b s (fun v ↦ P v (f (t v))) := by
+  rcases hf with ⟨u, hu⟩
+  have : DefinableWithParam b s (fun v : Fin k → M ↦ ∃ z ≤ u.bVal! M ![t v], z = f (t v) ∧  P v z) := by
+    apply bex_le
+    · rcases ht with ⟨lt, wt, tt, ht⟩
+      exact ⟨lt, wt, Rew.embSubsts ![tt] u, by intro v; simp [Semiterm.val_embSubsts, ←ht]⟩
+    · apply and
+      · apply DefinableFunction₁.comp_definable_with_param_right (by simp)
+          (by rcases ht with ⟨lt, wt, tt, ht⟩
+              exact ⟨lt, wt, Rew.bShift tt, by
+                intro v; rw [show v = v 0 :> (v ·.succ) from by funext x; cases x using Fin.cases <;> simp]; simp [Semiterm.val_bShift, ←ht]⟩)
+      · exact h
+  exact this.of_iff _ (by
+    intro v
+    constructor
+    · intro h; exact ⟨f (t v), by simp [h]; exact hu ![t v]⟩
+    · rintro ⟨z, _, rfl, hz⟩; exact hz)
+
+@[aesop safe apply] lemma elim_function₂ {f : M → M → M} [hf : PolyBounded₂ f] [DefinableFunction₂ b s f]
+    {t₁ : (Fin k → M) → M} (ht₁ : IsPolynomialWithParam t₁)
+    {t₂ : (Fin k → M) → M} (ht₂ : IsPolynomialWithParam t₂)
+    {P : (Fin k → M) → M → Prop} (h : DefinableWithParam b s (fun w ↦ P (w ·.succ) (w 0))) :
+    DefinableWithParam b s (fun v ↦ P v (f (t₁ v) (t₂ v))) := by
+  rcases hf with ⟨u, hu⟩
+  have : DefinableWithParam b s (fun v : Fin k → M ↦ ∃ z ≤ u.bVal! M ![t₁ v, t₂ v], z = f (t₁ v) (t₂ v) ∧ P v z) := by
+    apply bex_le
+    · rcases ht₁ with ⟨lt₁, wt₁, tt₁, ht₁⟩
+      rcases ht₂ with ⟨lt₂, wt₂, tt₂, ht₂⟩
+      exact ⟨lt₁ + lt₂, Matrix.vecAppend rfl wt₁ wt₂,
+        Rew.embSubsts ![Rew.rewriteMap (Fin.castLE (by simp)) tt₁, Rew.rewriteMap (Fin.natAdd lt₁) tt₂] u,
+          by intro v; simp [Semiterm.val_rewriteMap, Matrix.vecAppend_eq_ite, Semiterm.val_embSubsts, ←ht₁, ←ht₂]⟩
+    · apply and
+      · apply DefinableFunction₂.comp_definable_with_param_right (by simp)
+          (by rcases ht₁ with ⟨lt, wt, tt, ht⟩
+              exact ⟨lt, wt, Rew.bShift tt, by
+                intro v; rw [show v = v 0 :> (v ·.succ) from by funext x; cases x using Fin.cases <;> simp]; simp [Semiterm.val_bShift, ←ht]⟩)
+          (by rcases ht₂ with ⟨lt, wt, tt, ht⟩
+              exact ⟨lt, wt, Rew.bShift tt, by
+                intro v; rw [show v = v 0 :> (v ·.succ) from by funext x; cases x using Fin.cases <;> simp]; simp [Semiterm.val_bShift, ←ht]⟩)
+      · exact h
+  exact this.of_iff _ (by
+    intro v
+    constructor
+    · intro h; exact ⟨f (t₁ v) (t₂ v), by simp [h]; exact hu ![t₁ v, t₂ v]⟩
+    · rintro ⟨z, _, rfl, hz⟩; exact hz)
+
+end DefinableWithParam
+
+end definability
 end Arith
 
 

@@ -14,9 +14,9 @@ namespace Model
 
 variable {a b c : M}
 
-section msub
+section sub
 
-lemma msub_existsUnique (a b : M) : ∃! c, (a ≥ b → a = b + c) ∧ (a < b → c = 0) := by
+lemma sub_existsUnique (a b : M) : ∃! c, (a ≥ b → a = b + c) ∧ (a < b → c = 0) := by
   have : b ≤ a ∨ a < b := le_or_lt b a
   rcases this with (hxy | hxy) <;> simp[hxy]
   · simp [show ¬a < b from not_lt.mpr hxy]
@@ -25,86 +25,90 @@ lemma msub_existsUnique (a b : M) : ∃! c, (a ≥ b → a = b + c) ∧ (a < b �
     exact ExistsUnique.intro c rfl (fun a h => (add_left_cancel h).symm)
   · simp [show ¬b ≤ a from not_le.mpr hxy]
 
-def msub (a b : M) : M := Classical.choose! (msub_existsUnique a b)
+def sub (a b : M) : M := Classical.choose! (sub_existsUnique a b)
 
-infixl:65 " ∸ " => msub
+instance : Sub M := ⟨sub⟩
 
-lemma msub_spec_of_ge (h : a ≥ b) : a = b + (a ∸ b) := (Classical.choose!_spec (msub_existsUnique a b)).1 h
+lemma sub_spec_of_ge (h : a ≥ b) : a = b + (a - b) := (Classical.choose!_spec (sub_existsUnique a b)).1 h
 
-lemma msub_spec_of_lt (h : a < b) : a ∸ b = 0 := (Classical.choose!_spec (msub_existsUnique a b)).2 h
+lemma sub_spec_of_lt (h : a < b) : a - b = 0 := (Classical.choose!_spec (sub_existsUnique a b)).2 h
 
-lemma msub_eq_iff : c = a ∸ b ↔ ((a ≥ b → a = b + c) ∧ (a < b → c = 0)) := Classical.choose!_eq_iff _
+lemma sub_eq_iff : c = a - b ↔ ((a ≥ b → a = b + c) ∧ (a < b → c = 0)) := Classical.choose!_eq_iff (sub_existsUnique a b)
 
-def msubdef : Σᴬ[0] 3 :=
+def subdef : Σᴬ[0] 3 :=
   ⟨“(#2 ≤ #1 → #1 = #2 + #0) ∧ (#1 < #2 → #0 = 0)”, by simp[Hierarchy.pi_zero_iff_sigma_zero]⟩
 
-lemma msub_defined : Σᴬ[0]-Function₂ (λ a b : M ↦ a ∸ b) msubdef := by
-  intro v; simp [msubdef, msub_eq_iff]
+lemma sub_defined : Σᴬ[0]-Function₂ ((· - ·) : M → M → M) subdef := by
+  intro v; simp [subdef, sub_eq_iff]
 
-@[simp] lemma msub_le_self (a b : M) : a ∸ b ≤ a := by
+instance {b : VType} : DefinableFunction₂ b s ((· - ·) : M → M → M) := sub_defined.definable.of_zero
+
+@[simp] lemma sub_le_self (a b : M) : a - b ≤ a := by
   have : b ≤ a ∨ a < b := le_or_lt b a
   rcases this with (hxy | hxy) <;> simp[hxy]
-  · simpa [← msub_spec_of_ge hxy] using show a ∸ b ≤ b + (a ∸ b) from le_add_self
-  · simp[msub_spec_of_lt hxy]
+  · simpa [← sub_spec_of_ge hxy] using show a - b ≤ b + (a - b) from le_add_self
+  · simp[sub_spec_of_lt hxy]
 
-lemma msub_polybounded : PolyBounded₂ (λ a b : M ↦ a ∸ b) #0 := λ _ ↦ by simp
+instance sub_polybounded : PolyBounded₂ (λ a b : M ↦ a - b) := ⟨#0, λ _ ↦ by simp⟩
 
-@[simp] lemma msub_self (a : M) : a ∸ a = 0 :=
-  add_right_eq_self.mp (msub_spec_of_ge (a := a) (b := a) (by rfl)).symm
+@[simp] lemma sub_self (a : M) : a - a = 0 :=
+  add_right_eq_self.mp (sub_spec_of_ge (a := a) (b := a) (by rfl)).symm
 
-lemma msub_spec_of_le (h : a ≤ b) : a ∸ b = 0 := by
-  rcases lt_or_eq_of_le h with (lt | rfl) <;> simp [msub_spec_of_lt, *]
+lemma sub_spec_of_le (h : a ≤ b) : a - b = 0 := by
+  rcases lt_or_eq_of_le h with (lt | rfl) <;> simp [sub_spec_of_lt, *]
 
-lemma msub_add_self_of_le (h : b ≤ a) : a ∸ b + b = a := by symm; rw [add_comm]; exact msub_spec_of_ge h
+lemma sub_add_self_of_le (h : b ≤ a) : a - b + b = a := by symm; rw [add_comm]; exact sub_spec_of_ge h
 
-lemma add_tmsub_self_of_le (h : b ≤ a) : b + (a ∸ b) = a := by symm; exact msub_spec_of_ge h
+lemma add_tsub_self_of_le (h : b ≤ a) : b + (a - b) = a := by symm; exact sub_spec_of_ge h
 
-@[simp] lemma add_msub_self : (a + b) ∸ b = a := by
-  symm; simpa [add_comm b] using msub_spec_of_ge (@le_add_self _ _ b a)
+@[simp] lemma add_sub_self : (a + b) - b = a := by
+  symm; simpa [add_comm b] using sub_spec_of_ge (@le_add_self _ _ b a)
 
-@[simp] lemma add_msub_self' : (b + a) ∸ b = a := by simp [add_comm]
+@[simp] lemma add_sub_self' : (b + a) - b = a := by simp [add_comm]
 
-@[simp] lemma zero_msub (a : M) : 0 ∸ a = 0 := msub_spec_of_le (by simp)
+@[simp] lemma zero_sub (a : M) : 0 - a = 0 := sub_spec_of_le (by simp)
 
-@[simp] lemma msub_zero (a : M) : a ∸ 0 = a := by
-  simpa using msub_add_self_of_le (show 0 ≤ a from zero_le a)
+@[simp] lemma sub_zero (a : M) : a - 0 = a := by
+  simpa using sub_add_self_of_le (show 0 ≤ a from zero_le a)
 
-lemma msub_remove_left (e : a = b + c) : a ∸ c = b := by simp[e]
+lemma sub_remove_left (e : a = b + c) : a - c = b := by simp[e]
 
-lemma msub_msub : a ∸ b ∸ c = a ∸ (b + c) := by
+lemma sub_sub : a - b - c = a - (b + c) := by
   by_cases ha : b + c ≤ a
-  · exact msub_remove_left <| msub_remove_left <| by
-      simp [add_assoc, show c + b = b + c from add_comm _ _, msub_add_self_of_le, ha]
-  · simp [msub_spec_of_lt (show a < b + c from not_le.mp ha)]
-    by_cases hc : c ≤ a ∸ b
+  · exact sub_remove_left <| sub_remove_left <| by
+      simp [add_assoc, show c + b = b + c from add_comm _ _, sub_add_self_of_le, ha]
+  · simp [sub_spec_of_lt (show a < b + c from not_le.mp ha)]
+    by_cases hc : c ≤ a - b
     · by_cases hb : b ≤ a
       · have : a < a := calc
           a < b + c       := not_le.mp ha
-          _ ≤ b + (a ∸ b) := by simp[hc]
-          _ = a           := add_tmsub_self_of_le hb
+          _ ≤ b + (a - b) := by simp[hc]
+          _ = a           := add_tsub_self_of_le hb
         simp at this
-      · simp [show a ∸ b = 0 from msub_spec_of_lt (not_le.mp hb)]
-    · exact msub_spec_of_lt (not_le.mp hc)
+      · simp [show a - b = 0 from sub_spec_of_lt (not_le.mp hb)]
+    · exact sub_spec_of_lt (not_le.mp hc)
 
-@[simp] lemma pos_msub_iff_lt : 0 < a ∸ b ↔ b < a :=
-  ⟨by contrapose; simp; exact msub_spec_of_le,
+@[simp] lemma pos_sub_iff_lt : 0 < a - b ↔ b < a :=
+  ⟨by contrapose; simp; exact sub_spec_of_le,
    by intro h; by_contra hs
       simp at hs
-      have : a = b := by simpa [hs] using msub_spec_of_ge (show b ≤ a from LT.lt.le h)
+      have : a = b := by simpa [hs] using sub_spec_of_ge (show b ≤ a from LT.lt.le h)
       simp [this] at h⟩
 
-@[simp] lemma msub_eq_zero_iff_le : a ∸ b = 0 ↔ a ≤ b :=
+@[simp] lemma sub_eq_zero_iff_le : a - b = 0 ↔ a ≤ b :=
   not_iff_not.mp (by simp [←pos_iff_ne_zero])
 
-@[simp] lemma tsub_le_iff_right {a b c : M} : a ∸ b ≤ c ↔ a ≤ c + b := by
-  by_cases h : b ≤ a
-  · calc
-      a ∸ b ≤ c ↔ (a ∸ b) + b ≤ c + b := by simp
-      _         ↔ a ≤ c + b           := by rw [msub_add_self_of_le h]
-  · simp [msub_spec_of_lt (show a < b from by simpa using h)]
-    exact le_trans (le_of_lt $ show a < b from by simpa using h) (by simp)
+instance : OrderedSub M where
+  tsub_le_iff_right := by
+    intro a b c
+    by_cases h : b ≤ a
+    · calc
+        a - b ≤ c ↔ (a - b) + b ≤ c + b := by simp
+        _         ↔ a ≤ c + b           := by rw [sub_add_self_of_le h]
+    · simp [sub_spec_of_lt (show a < b from by simpa using h)]
+      exact le_trans (le_of_lt $ show a < b from by simpa using h) (by simp)
 
-end msub
+end sub
 
 section Dvd
 
@@ -126,6 +130,8 @@ def dvddef : Σᴬ[0] 2 := ⟨“∃[#0 < #2 + 1] #2 = #1 * #0”, by simp⟩
 
 lemma dvd_defined : Σᴬ[0]-Relation (λ a b : M ↦ a ∣ b) dvddef :=
   λ v ↦ by simp[dvd_iff_bounded, Matrix.vecHead, Matrix.vecTail, le_iff_lt_succ, dvddef]
+
+instance {b s} : DefinableRel b s ((· ∣ ·) : M → M → Prop) := dvd_defined.definable.of_zero
 
 end Dvd
 

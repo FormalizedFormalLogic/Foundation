@@ -24,11 +24,85 @@ instance : ToString Empty := ⟨Empty.elim⟩
 
 namespace LO
 
-namespace FirstOrder.Arith
+namespace FirstOrder
 
-attribute [simp] Semiformula.eval_substs Matrix.vecHead Matrix.vecTail Matrix.comp_vecCons' Matrix.constant_eq_singleton
 
-section
+namespace Rew
+
+def embSubsts (v : Fin k → Semiterm L μ n) : Rew L Empty k μ n := Rew.bind v Empty.elim
+
+section embSubsts
+
+variable {k} (w : Fin k → Semiterm L μ n)
+
+@[simp] lemma embSubsts_bvar (x : Fin k) : embSubsts w #x = w x :=
+  by simp[embSubsts]
+
+@[simp] lemma embSubsts_zero (w : Fin 0 → Term L μ) : embSubsts w = Rew.emb := by
+  ext x <;> try simp
+  · exact Fin.elim0 x
+  · exact Empty.elim x
+
+lemma substs_comp_embSubsts (v : Fin l → Semiterm L μ k) (w : Fin k → Semiterm L μ n) :
+    (substs w).comp (embSubsts v) = embSubsts (substs w ∘ v) := by
+  ext x <;> simp[comp_app]
+  exact Empty.elim x
+
+@[simp] lemma embSubsts_eq_id : (embSubsts Semiterm.bvar : Rew L Empty n μ n) = Rew.emb := by
+  ext x <;> try simp
+  · exact Empty.elim x
+
+lemma q_embSubsts (w : Fin k → Semiterm L μ n) :
+    (embSubsts w).q = embSubsts (#0 :> bShift ∘ w) := by ext x; { cases x using Fin.cases <;> simp }; { simp; exact Empty.elim x }
+
+end embSubsts
+
+end Rew
+
+scoped syntax (name := embSubstsHomNotation) term:max ".[" term,* "]" : term
+
+scoped macro_rules (kind := embSubstsHomNotation)
+  | `($p:term .[$terms:term,*]) => `((Rew.embSubsts ![$terms,*]).hom $p)
+
+namespace Semiterm
+
+variable {M : Type w} {s : Structure L M} {e : Fin n → M} {ε : μ → M}
+
+lemma val_rewriteMap (f : μ₁ → μ₂) (t : Semiterm L μ₁ n) :
+    (Rew.rewriteMap f t).val s e ε₂ = t.val s e (fun x => ε₂ (f x)) :=
+  by simp[val_rew]; congr
+
+lemma val_embSubsts (w : Fin k → Semiterm L μ n) (t : Semiterm L Empty k) :
+    (Rew.embSubsts w t).val s e ε = t.bVal s (fun x ↦ (w x).val s e ε) := by
+  simp [val_rew, Empty.eq_elim]; congr
+
+end Semiterm
+
+namespace Semiformula
+
+variable {M : Type w} {s : Structure L M} {e : Fin n → M} {ε : μ → M}
+
+lemma eval_embSubsts {k} (w : Fin k → Semiterm L μ n) (σ : Semisentence L k) :
+    Eval s e ε ((Rew.embSubsts w).hom σ) ↔ PVal s (fun x ↦ (w x).val s e ε) σ := by
+  simp[eval_rew, Function.comp, Empty.eq_elim]
+
+open Lean PrettyPrinter Delaborator SubExpr
+
+syntax foformula ".[" foterm,* "]" : foformula
+
+macro_rules
+  | `(“ $p:foformula .[ $t:foterm,* ] ”) => do
+    let v ← t.getElems.foldrM (β := Lean.TSyntax _) (init := ← `(![])) (fun a s => `(ᵀ“$a” :> $s))
+    `((Rew.embSubsts $v).hom “$p”)
+
+end Semiformula
+
+namespace Arith
+
+attribute [simp] Semiformula.eval_substs Semiformula.eval_embSubsts
+  Matrix.vecHead Matrix.vecTail Matrix.comp_vecCons' Matrix.constant_eq_singleton
+
+section ToString
 
 variable [ToString μ]
 
@@ -64,7 +138,7 @@ instance : Repr (Semiformula ℒₒᵣ μ n) := ⟨fun t _ => formulaToStr t⟩
 
 instance : ToString (Semiformula ℒₒᵣ μ n) := ⟨formulaToStr⟩
 
-end
+end ToString
 
 namespace Hierarchy
 
@@ -85,6 +159,8 @@ lemma iff_iff {p q : Semiformula L μ n} :
 
 end Hierarchy
 
-end FirstOrder.Arith
+end Arith
+
+end FirstOrder
 
 end LO
