@@ -1,3 +1,4 @@
+import Logic.FirstOrder.Arith.PAminus
 import Arithmetization.Vorspiel.Vorspiel
 
 namespace LO.FirstOrder
@@ -18,7 +19,9 @@ namespace Arith
 
 section definability
 
-variable {M} [Structure ℒₒᵣ M]
+variable {M : Type} [Inhabited M] [DecidableEq M] [ORingSymbol M]
+  [Structure ℒₒᵣ M] [Structure.ORing ℒₒᵣ M]
+  [𝐏𝐀⁻.Mod M]
 
 abbrev FormulaHierarchy (b : VType) (s : ℕ) (L : Language) [L.LT] (μ : Type*) (n) :=
   { p : Semiformula L μ  n // Hierarchy b s p }
@@ -104,9 +107,266 @@ abbrev PiDefinedFunction₂ (s : ℕ) (f : M → M → M) (p : Πᴬ[s] 3) : Pro
 
 notation "Πᴬ[" s "]-Function₂" => PiDefinedFunction₂ s
 
-variable {f : M → M}
+def eqdef : SentenceHierarchy b s ℒₒᵣ 2 := ⟨“#0 = #1”, by simp⟩
+
+def ltdef : SentenceHierarchy b s ℒₒᵣ 2 := ⟨“#0 < #1”, by simp⟩
+
+def ledef : SentenceHierarchy b s ℒₒᵣ 2 := ⟨“#0 ≤ #1”, by simp⟩
+
+def DefinedRel.eq : DefinedRel b s ((· = ·) : M → M → Prop) eqdef := by intro v; simp [eqdef]
+
+def DefinedRel.lt : DefinedRel b s ((· < ·) : M → M → Prop) ltdef := by intro v; simp [ltdef]
+
+def DefinedRel.le : DefinedRel b s ((· ≤ ·) : M → M → Prop) ledef := by intro v; simp [ledef]
+
+def IsPolynomialWithParam {k} (f : (Fin k → M) → M) : Prop :=
+  ∃ l, ∃ w, ∃ t : Semiterm ℒₒᵣ (Fin l) k, ∀ v, f v = Semiterm.val! M v w t
+
+namespace IsPolynomialWithParam
+
+@[simp] def const {k} (c : M) : IsPolynomialWithParam (fun _ : Fin k → M ↦ c) := ⟨1, ![c], &0, by simp⟩
+
+@[simp] def var {k} (i : Fin k) : IsPolynomialWithParam (fun v : Fin k → M ↦ v i) := ⟨0, ![], #i, by simp⟩
+
+@[aesop safe apply] def add {k} {f g : (Fin k → M) → M} (hf : IsPolynomialWithParam f) (hg : IsPolynomialWithParam g) :
+    IsPolynomialWithParam (fun v ↦ f v + g v) := by
+  rcases hf with ⟨lf, wf, tf, hf⟩
+  rcases hg with ⟨lg, wg, tg, hg⟩
+  exact ⟨lf + lg, Matrix.vecAppend rfl wf wg,
+    ᵀ“!!(Rew.rewriteMap (Fin.castLE (by simp)) tf) + !!(Rew.rewriteMap (Fin.natAdd _) tg)”, by
+      intro v; simp [Semiterm.val_rew, Function.comp, Matrix.vecAppend_eq_ite, hf, hg]⟩
+
+@[aesop safe apply] def mul {k} {f g : (Fin k → M) → M} (hf : IsPolynomialWithParam f) (hg : IsPolynomialWithParam g) :
+    IsPolynomialWithParam (fun v ↦ f v * g v) := by
+  rcases hf with ⟨lf, wf, tf, hf⟩
+  rcases hg with ⟨lg, wg, tg, hg⟩
+  exact ⟨lf + lg, Matrix.vecAppend rfl wf wg,
+    ᵀ“!!(Rew.rewriteMap (Fin.castLE (by simp)) tf) * !!(Rew.rewriteMap (Fin.natAdd _) tg)”, by
+      intro v; simp [Semiterm.val_rew, Function.comp, Matrix.vecAppend_eq_ite, hf, hg]⟩
+
+end IsPolynomialWithParam
+
+variable (b : VType) (s : ℕ)
+
+class Definable {k} (P : (Fin k → M) → Prop) : Prop where
+  intro : ∃ p : SentenceHierarchy b s ℒₒᵣ k, Arith.Defined b s P p
+
+abbrev DefinablePred (P : M → Prop) : Prop := Definable (k := 1) b s (fun v ↦ P (v 0))
+
+abbrev DefinableRel (P : M → M → Prop) : Prop := Definable (k := 2) b s (fun v ↦ P (v 0) (v 1))
+
+abbrev DefinableRel₃ (P : M → M → M → Prop) : Prop := Definable (k := 3) b s (fun v ↦ P (v 0) (v 1) (v 2))
+
+abbrev DefinableFunction {k} (f : (Fin k → M) → M) : Prop := Definable b s (k := k + 1) (fun v ↦ v 0 = f (v ·.succ))
+
+abbrev DefinableFunction₁ (f : M → M) : Prop := DefinableFunction b s (k := 1) (fun v ↦ f (v 0))
+
+abbrev DefinableFunction₂ (f : M → M → M) : Prop := DefinableFunction b s (k := 2) (fun v ↦ f (v 0) (v 1))
+
+abbrev DefinableFunction₃ (f : M → M → M → M) : Prop := DefinableFunction b s (k := 3) (fun v ↦ f (v 0) (v 1) (v 3))
+
+def DefinableWithParam {k} (P : (Fin k → M) → Prop) : Prop :=
+  ∃ l, ∃ w, ∃ p : FormulaHierarchy b s ℒₒᵣ (Fin l) k, ∀ v, P v ↔ Semiformula.Eval! M v w p.val
+
+abbrev DefinablePredWithParam (P : M → Prop) : Prop := DefinableWithParam b s (k := 1) (fun v ↦ P (v 0))
+
+variable {b : VType} {s : ℕ}
+
+def Defined.definable {k} {P : (Fin k → M) → Prop} {p : SentenceHierarchy b s ℒₒᵣ k} (h : Arith.Defined b s P p) : Definable b s P := ⟨p, h⟩
+
+instance Definable.eq : DefinableRel b s ((· = ·) : M → M → Prop) := DefinedRel.eq.definable
+
+instance Definable.lt : DefinableRel b s ((· < ·) : M → M → Prop) := DefinedRel.lt.definable
+
+instance Definable.le : DefinableRel b s ((· ≤ ·) : M → M → Prop) := DefinedRel.le.definable
+
+@[aesop safe apply] lemma DefinablePred.comp_definable_with_param {P : M → Prop} [hP : DefinablePred b s P]
+    {k} {f : (Fin k → M) → M} (hf : IsPolynomialWithParam f) :
+    DefinableWithParam b s (fun v ↦ P (f v)) := by
+  rcases hP with ⟨p, hp⟩
+  rcases hf with ⟨lf, wf, tf, hf⟩
+  exact ⟨lf, wf, ⟨p.val .[tf], by simp⟩,
+    by intro v; simp [Semiterm.val_rew, Function.comp, Matrix.vecAppend_eq_ite, hf, hp.pval]⟩
+
+@[aesop safe apply] lemma DefinableRel.comp_definable_with_param {R : M → M → Prop} [hR : DefinableRel b s R]
+    {k} {f g : (Fin k → M) → M} (hf : IsPolynomialWithParam f) (hg : IsPolynomialWithParam g) :
+    DefinableWithParam b s (fun v ↦ R (f v) (g v)) := by
+  rcases hR with ⟨p, hp⟩
+  rcases hf with ⟨lf, wf, tf, hf⟩
+  rcases hg with ⟨lg, wg, tg, hg⟩
+  exact ⟨lf + lg, Matrix.vecAppend rfl wf wg, ⟨p.val .[Rew.rewriteMap (Fin.castLE (by simp)) tf, Rew.rewriteMap (Fin.natAdd _) tg], by simp⟩,
+    by intro v; simp [Semiterm.val_rew, Function.comp, Matrix.vecAppend_eq_ite, hp.pval, ←hf, ←hg]⟩
+
+@[aesop safe apply] lemma DefinableRel₃.comp_definable_with_param {R : M → M → M → Prop} [hR : DefinableRel₃ b s R]
+    {k} {f g h : (Fin k → M) → M} (hf : IsPolynomialWithParam f) (hg : IsPolynomialWithParam g) (hh : IsPolynomialWithParam h) :
+    DefinableWithParam b s (fun v ↦ R (f v) (g v) (h v)) := by
+  rcases hR with ⟨p, hp⟩
+  rcases hf with ⟨lf, wf, tf, hf⟩
+  rcases hg with ⟨lg, wg, tg, hg⟩
+  rcases hh with ⟨lh, wh, th, hh⟩
+  exact ⟨lf + lg + lh, Matrix.vecAppend rfl (Matrix.vecAppend rfl wf wg) wh,
+    let tf' : Semiterm ℒₒᵣ (Fin (lf + lg)) k := Rew.rewriteMap (Fin.castLE (by simp)) tf
+    let tg' : Semiterm ℒₒᵣ (Fin (lf + lg)) k := Rew.rewriteMap (Fin.natAdd _) tg
+    ⟨p.val .[Rew.rewriteMap (Fin.castLE (by simp)) tf', Rew.rewriteMap (Fin.castLE (by simp)) tg', Rew.rewriteMap (Fin.natAdd _) th], by simp⟩,
+    by intro v; simp [Semiterm.val_rew, Function.comp, Matrix.vecAppend_eq_ite, hp.pval, ←hf, ←hg, ←hh]⟩
+
+@[aesop safe apply] lemma DefinableFunction₁.comp_definable_with_param_right {F : M → M} [hP : DefinableFunction₁ b s F]
+    {k} {f g : (Fin k → M) → M} (hf : IsPolynomialWithParam f) (hg : IsPolynomialWithParam g) :
+    DefinableWithParam b s (fun v ↦ f v = F (g v)) := by
+  rcases hP with ⟨p, hp⟩
+  rcases hf with ⟨lf, wf, tf, hf⟩
+  rcases hg with ⟨lg, wg, tg, hg⟩
+  exact ⟨lf + lg, Matrix.vecAppend rfl wf wg, ⟨p.val .[Rew.rewriteMap (Fin.castLE (by simp)) tf, Rew.rewriteMap (Fin.natAdd _) tg], by simp⟩,
+    by intro v; simp [Semiterm.val_rew, Function.comp, Matrix.vecAppend_eq_ite, hf, hg, hp.pval]⟩
+
+@[aesop safe apply] lemma DefinableFunction₁.comp_definable_with_param_left {F : M → M} [hP : DefinableFunction₁ b s F]
+    {k} {f g : (Fin k → M) → M} (hf : IsPolynomialWithParam f) (hg : IsPolynomialWithParam g) :
+    DefinableWithParam b s (fun v ↦ F (g v) = f v) :=
+  cast (by congr; funext v; simp [eq_comm]) <| DefinableFunction₁.comp_definable_with_param_right (b := b) (s := s) (F := F) hf hg
+
+@[aesop safe apply] lemma DefinableFunction₂.comp_definable_with_param_right {F : M → M→ M} [hP : DefinableFunction₂ b s F]
+    {k} {f g h : (Fin k → M) → M} (hf : IsPolynomialWithParam f) (hg : IsPolynomialWithParam g) (hh : IsPolynomialWithParam h) :
+    DefinableWithParam b s (fun v ↦ f v = F (g v) (h v)) := by
+  rcases hP with ⟨p, hp⟩
+  rcases hf with ⟨lf, wf, tf, hf⟩
+  rcases hg with ⟨lg, wg, tg, hg⟩
+  rcases hh with ⟨lh, wh, th, hh⟩
+  exact ⟨lf + lg + lh, Matrix.vecAppend rfl (Matrix.vecAppend rfl wf wg) wh,
+    let tf' : Semiterm ℒₒᵣ (Fin (lf + lg)) k := Rew.rewriteMap (Fin.castLE (by simp)) tf
+    let tg' : Semiterm ℒₒᵣ (Fin (lf + lg)) k := Rew.rewriteMap (Fin.natAdd _) tg
+    ⟨p.val .[Rew.rewriteMap (Fin.castLE (by simp)) tf', Rew.rewriteMap (Fin.castLE (by simp)) tg', Rew.rewriteMap (Fin.natAdd _) th], by simp⟩,
+    by intro v; simp [Semiterm.val_rew, Function.comp, Matrix.vecAppend_eq_ite, hp.pval, ←hf, ←hg, ←hh]⟩
+
+@[aesop safe apply] lemma DefinableFunction₂.comp_definable_with_param_left {F : M → M → M} [hP : DefinableFunction₂ b s F]
+    {k} {f g h : (Fin k → M) → M} (hf : IsPolynomialWithParam f) (hg : IsPolynomialWithParam g) (hh : IsPolynomialWithParam h) :
+    DefinableWithParam b s (fun v ↦ F (g v) (h v) = f v) :=
+  cast (by congr; funext v; simp [eq_comm]) <| DefinableFunction₂.comp_definable_with_param_right (b := b) (s := s) (F := F) hf hg hh
+
+namespace DefinableWithParam
+
+lemma of_iff {p : (Fin k → M) → Prop} (q) (h : ∀ v, p v ↔ q v) (H : DefinableWithParam b s q) : DefinableWithParam b s p := by
+  rwa [show p = q from by funext v; simp [h]]
+
+@[simp] lemma const (p : Prop) : DefinableWithParam b s (fun _ : (Fin k → M) ↦ p) := by
+  by_cases hp : p
+  · exact ⟨0, ![], ⟨⊤, by simp⟩, by intro x; simp [hp]⟩
+  · exact ⟨0, ![], ⟨⊥, by simp⟩, by intro x; simp [hp]⟩
+
+@[aesop safe apply] lemma eq {k} {f g : (Fin k → M) → M} (hf : IsPolynomialWithParam f) (hg : IsPolynomialWithParam g) :
+    DefinableWithParam b s (fun v ↦ f v = g v) := Definable.eq.comp_definable_with_param hf hg
+
+/-
+
+  rcases hf with ⟨lf, wf, tf, hf⟩
+  rcases hg with ⟨lg, wg, tg, hg⟩
+  exact ⟨lf + lg, Matrix.vecAppend rfl wf wg,
+    ⟨“!!(Rew.rewriteMap (Fin.castLE (by simp)) tf) = !!(Rew.rewriteMap (Fin.natAdd _) tg)”, by simp⟩,
+    by intro v; simp [Semiterm.val_rew, Function.comp, Matrix.vecAppend_eq_ite, hf, hg]⟩
+
+@[aesop safe apply] lemma lt {k} {f g : (Fin k → M) → M} (hf : IsPolynomialWithParam f) (hg : IsPolynomialWithParam g) :
+    DefinableWithParam b s (fun v ↦ f v < g v) := by
+  rcases hf with ⟨lf, wf, tf, hf⟩
+  rcases hg with ⟨lg, wg, tg, hg⟩
+  exact ⟨lf + lg, Matrix.vecAppend rfl wf wg,
+    ⟨“!!(Rew.rewriteMap (Fin.castLE (by simp)) tf) < !!(Rew.rewriteMap (Fin.natAdd _) tg)”, by simp⟩,
+    by intro v; simp [Semiterm.val_rew, Function.comp, Matrix.vecAppend_eq_ite, hf, hg]⟩
+
+@[aesop safe apply] lemma le {k} {f g : (Fin k → M) → M} (hf : IsPolynomialWithParam f) (hg : IsPolynomialWithParam g) :
+    DefinableWithParam b s (fun v ↦ f v ≤ g v) := by
+  rcases hf with ⟨lf, wf, tf, hf⟩
+  rcases hg with ⟨lg, wg, tg, hg⟩
+  exact ⟨lf + lg, Matrix.vecAppend rfl wf wg,
+    ⟨“!!(Rew.rewriteMap (Fin.castLE (by simp)) tf) ≤ !!(Rew.rewriteMap (Fin.natAdd _) tg)”, by simp⟩,
+    by intro v; simp [Semiterm.val_rew, Function.comp, Matrix.vecAppend_eq_ite, hf, hg]⟩
+
+@[simp] lemma verum : DefinableWithParam b s (fun _ : (Fin k → M) ↦ True) := ⟨0, ![], ⟨⊤, by simp⟩, by intro x; simp⟩
+
+@[simp] lemma falsum : DefinableWithParam b s (fun _ : (Fin k → M) ↦ False) := ⟨0, ![], ⟨⊥, by simp⟩, by intro x; simp⟩
+
+-/
+
+@[aesop safe apply] lemma and {P₁ P₂ : (Fin k → M) → Prop} (h₁ : DefinableWithParam b s P₁) (h₂ : DefinableWithParam b s P₂) :
+    DefinableWithParam b s (fun v ↦ P₁ v ∧ P₂ v) := by
+  rcases h₁ with ⟨l₁, w₁, p₁, h₁⟩; rcases h₂ with ⟨l₂, w₂, p₂, h₂⟩
+  exact ⟨l₁ + l₂, Matrix.vecAppend rfl w₁ w₂,
+    ⟨(Rew.rewriteMap (Fin.castLE (by simp))).hom p₁.val ⋏ (Rew.rewriteMap (Fin.natAdd l₁)).hom p₂.val, by simp⟩,
+    by intro x; simp [h₁, h₂, Semiformula.eval_rew, Function.comp, Matrix.vecAppend_eq_ite]⟩
+
+@[aesop safe apply] lemma or {P₁ P₂ : (Fin k → M) → Prop} (h₁ : DefinableWithParam b s P₁) (h₂ : DefinableWithParam b s P₂) :
+    DefinableWithParam b s (fun v ↦ P₁ v ∨ P₂ v) := by
+  rcases h₁ with ⟨l₁, w₁, p₁, h₁⟩; rcases h₂ with ⟨l₂, w₂, p₂, h₂⟩
+  exact ⟨l₁ + l₂, Matrix.vecAppend rfl w₁ w₂,
+    ⟨(Rew.rewriteMap (Fin.castLE (by simp))).hom p₁.val ⋎ (Rew.rewriteMap (Fin.natAdd l₁)).hom p₂.val, by simp⟩,
+    by intro x; simp [h₁, h₂, Semiformula.eval_rew, Function.comp, Matrix.vecAppend_eq_ite]⟩
+
+lemma not {P : (Fin k → M) → Prop} (h : DefinableWithParam b.alt s P) :
+    DefinableWithParam b s (fun v ↦ ¬P v) := by
+  rcases h with ⟨l, w, p, h⟩; exact ⟨l, w, ⟨~p.val, by simp⟩, by intro x; simp [h]⟩
+
+@[aesop safe apply] lemma ball_lt {P : (Fin k → M) → M → Prop} {f : (Fin k → M) → M}
+    (hf : IsPolynomialWithParam f) (h : DefinableWithParam b s (fun w ↦ P (w ·.succ) (w 0))) :
+    DefinableWithParam b s (fun v ↦ ∀ x < f v, P v x) := by
+  rcases hf with ⟨l₁, w₁, t, ht⟩
+  rcases h with ⟨l₂, w₂, p, hp⟩
+  exact ⟨l₁ + l₂, Matrix.vecAppend rfl w₁ w₂,
+    ⟨“∀[#0 < !!(Rew.bShift <| Rew.rewriteMap (Fin.castLE (by simp)) t)] !((Rew.rewriteMap (Fin.natAdd l₁)).hom p.val)”, by simp⟩,
+    by intro v; simp [Semiterm.val_rew, Semiformula.eval_rew, Function.comp, Matrix.vecAppend_eq_ite, ←ht, ←hp]⟩
+
+@[aesop safe apply] lemma ball_le {P : (Fin k → M) → M → Prop} {f : (Fin k → M) → M}
+    (hf : IsPolynomialWithParam f) (h : DefinableWithParam b s (fun w ↦ P (w ·.succ) (w 0))) :
+    DefinableWithParam b s (fun v ↦ ∀ x ≤ f v, P v x) := by
+  rcases hf with ⟨l₁, w₁, t, ht⟩
+  rcases h with ⟨l₂, w₂, p, hp⟩
+  exact ⟨l₁ + l₂, Matrix.vecAppend rfl w₁ w₂,
+    ⟨“∀[#0 < !!(Rew.bShift <| Rew.rewriteMap (Fin.castLE (by simp)) t) + 1] !((Rew.rewriteMap (Fin.natAdd l₁)).hom p.val)”, by simp⟩,
+    by intro v; simp [Semiterm.val_rew, Semiformula.eval_rew, Function.comp, Matrix.vecAppend_eq_ite, ←ht, ←hp, Model.le_iff_lt_succ]⟩
+
+@[aesop safe apply] lemma bex_lt {P : (Fin k → M) → M → Prop} {f : (Fin k → M) → M}
+    (hf : IsPolynomialWithParam f) (h : DefinableWithParam b s (fun w ↦ P (w ·.succ) (w 0))) :
+    DefinableWithParam b s (fun v ↦ ∃ x < f v, P v x) := by
+  rcases hf with ⟨l₁, w₁, t, ht⟩
+  rcases h with ⟨l₂, w₂, p, hp⟩
+  exact ⟨l₁ + l₂, Matrix.vecAppend rfl w₁ w₂,
+    ⟨“∃[#0 < !!(Rew.bShift <| Rew.rewriteMap (Fin.castLE (by simp)) t)] !((Rew.rewriteMap (Fin.natAdd l₁)).hom p.val)”, by simp⟩,
+    by intro v; simp [Semiterm.val_rew, Semiformula.eval_rew, Function.comp, Matrix.vecAppend_eq_ite, ←ht, ←hp]⟩
+
+@[aesop safe apply] lemma bex_le {P : (Fin k → M) → M → Prop} {f : (Fin k → M) → M}
+    (hf : IsPolynomialWithParam f) (h : DefinableWithParam b s (fun w ↦ P (w ·.succ) (w 0))) :
+    DefinableWithParam b s (fun v ↦ ∃ x ≤ f v, P v x) := by
+  rcases hf with ⟨l₁, w₁, t, ht⟩
+  rcases h with ⟨l₂, w₂, p, hp⟩
+  exact ⟨l₁ + l₂, Matrix.vecAppend rfl w₁ w₂,
+    ⟨“∃[#0 < !!(Rew.bShift <| Rew.rewriteMap (Fin.castLE (by simp)) t) + 1] !((Rew.rewriteMap (Fin.natAdd l₁)).hom p.val)”, by simp⟩,
+    by intro v; simp [Semiterm.val_rew, Semiformula.eval_rew, Function.comp, Matrix.vecAppend_eq_ite, ←ht, ←hp, Model.le_iff_lt_succ]⟩
+
+lemma imp {P₁ P₂ : (Fin k → M) → Prop} (h₁ : DefinableWithParam b.alt s P₁) (h₂ : DefinableWithParam b s P₂) :
+    DefinableWithParam b s (fun v ↦ P₁ v → P₂ v) := by
+  rcases h₁ with ⟨l₁, w₁, p₁, h₁⟩; rcases h₂ with ⟨l₂, w₂, p₂, h₂⟩
+  exact ⟨l₁ + l₂, Matrix.vecAppend rfl w₁ w₂,
+      ⟨(Rew.rewriteMap (Fin.castLE (by simp))).hom p₁.val ⟶ (Rew.rewriteMap (Fin.natAdd l₁)).hom p₂.val, by simp⟩, by
+      intro x; simp [h₁, h₂, Semiformula.eval_rew, Function.comp, Matrix.vecAppend_eq_ite]⟩
+
+@[aesop safe apply] lemma of_sigma_zero {P : (Fin k → M) → Prop} : DefinableWithParam Σ 0 P → DefinableWithParam b s P := by
+  rintro ⟨l, w, p, h⟩; exact ⟨l, w, ⟨p.val, p.prop.of_zero⟩, by simpa using h⟩
+
+lemma zero_alt {P : (Fin k → M) → Prop} : DefinableWithParam b 0 P → DefinableWithParam b' 0 P := by
+  rintro ⟨l, w, p, h⟩; exact ⟨l, w, ⟨p.val, Hierarchy.zero_iff.mp p.prop⟩, by simpa using h⟩
+
+@[aesop safe apply] lemma imp₀ {P₁ P₂ : (Fin k → M) → Prop} (h₁ : DefinableWithParam b 0 P₁) (h₂ : DefinableWithParam b 0 P₂) :
+    DefinableWithParam b 0 (fun v ↦ P₁ v → P₂ v) := h₁.zero_alt.imp h₂
+
+@[aesop safe apply] lemma not₀ {P : (Fin k → M) → Prop} (h : DefinableWithParam b 0 P) :
+    DefinableWithParam b 0 (fun v ↦ ¬P v) := h.zero_alt.not
+
+@[aesop safe apply] lemma iff₀ {P₁ P₂ : (Fin k → M) → Prop} (h₁ : DefinableWithParam b 0 P₁) (h₂ : DefinableWithParam b 0 P₂) :
+    DefinableWithParam b 0 (fun v ↦ P₁ v ↔ P₂ v) := by
+  simp [iff_iff_implies_and_implies]; aesop
+
+end DefinableWithParam
 
 end definability
+
+variable {f : M → M}
 
 section
 
