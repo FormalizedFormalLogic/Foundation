@@ -323,9 +323,7 @@ lemma FrameClass.triunion (Λ₁ Λ₂ Λ₃ : AxiomSet β) : (𝔽(Λ₁ ∪ Λ
 
 lemma LogicK.def_FrameClass : F ∈ 𝔽((𝐊 : AxiomSet β)) := by apply AxiomK.defines;
 
-lemma LogicK.trivialFrame : ∃ (F : Frame α), F ∈ 𝔽((𝐊 : AxiomSet β)) := by
-  existsi (λ _ _ => True);
-  apply def_FrameClass;
+instance : Nonempty (𝔽((𝐊 : AxiomSet β)) : FrameClass α) := ⟨(λ _ _ => True), (by apply LogicK.def_FrameClass)⟩
 
 lemma LogicKD.def_FrameClass : (Serial F) ↔ F ∈ 𝔽((𝐊𝐃 : AxiomSet β)) := by
   simp only [LogicKD, FrameClass.union];
@@ -338,11 +336,10 @@ lemma LogicKD.def_FrameClass : (Serial F) ↔ F ∈ 𝔽((𝐊𝐃 : AxiomSet β
     apply (AxiomD.defines β F).mpr;
     simp_all;
 
-@[simp]
-lemma LogicKD.trivialFrame : ∃ (F: Frame α), F ∈ 𝔽((𝐊𝐃 : AxiomSet β)) := by
-  existsi (λ _ _ => True);
-  apply (def_FrameClass _).mp;
-  simp [Serial];
+instance : Nonempty (𝔽((𝐊𝐃 : AxiomSet β)) : FrameClass α) := ⟨
+  (λ _ _ => True),
+  (by apply (LogicKD.def_FrameClass _).mp; simp [Serial];)
+⟩
 
 lemma LogicS4.def_FrameClass : (Reflexive F ∧ Transitive F) ↔ (F ∈ 𝔽((𝐒𝟒 : AxiomSet β))) := by
   simp only [LogicS4, LogicKT4, FrameClass.triunion];
@@ -357,11 +354,10 @@ lemma LogicS4.def_FrameClass : (Reflexive F ∧ Transitive F) ↔ (F ∈ 𝔽((�
     . apply (AxiomT.defines β F).mpr; simp_all;
     . apply (Axiom4.defines β F).mpr; simp_all;
 
-@[simp]
-lemma LogicS4.trivialFrame : ∃ (F: Frame α), F ∈ 𝔽((𝐒𝟒 : AxiomSet β)) := by
-  existsi ((λ _ _ => True));
-  apply (def_FrameClass _).mp;
-  simp [Reflexive, Transitive];
+instance : Nonempty (𝔽((𝐒𝟒 : AxiomSet β)) : FrameClass α) := ⟨
+  (λ _ _ => True),
+  (by apply (LogicS4.def_FrameClass _).mp; simp [Reflexive, Transitive];)
+⟩
 
 lemma LogicS5.def_FrameClass : (Reflexive F ∧ Euclidean F) ↔ F ∈ 𝔽((𝐒𝟓 : AxiomSet β)) := by
   simp only [LogicS5, LogicKT5, FrameClass.triunion];
@@ -376,11 +372,10 @@ lemma LogicS5.def_FrameClass : (Reflexive F ∧ Euclidean F) ↔ F ∈ 𝔽((�
     . apply (AxiomT.defines β F).mpr; simp_all;
     . apply (Axiom5.defines β F).mpr; simp_all;
 
-@[simp]
-lemma LogicS5.trivialFrame : ∃ (F: Frame α), F ∈ 𝔽((𝐒𝟓 : AxiomSet β)) := by
-  existsi (λ _ _ => True);
-  apply (LogicS5.def_FrameClass _).mp
-  simp [Reflexive, Euclidean];
+instance : Nonempty (𝔽((𝐒𝟓 : AxiomSet β)) : FrameClass α) := ⟨
+  (λ _ _ => True),
+  (by apply (LogicS5.def_FrameClass _).mp; simp [Reflexive, Euclidean];)
+⟩
 
 /-
 lemma LogicGL.def_FrameClass : ∀ f, (Transitive f ∧ WellFounded f) ↔ (F ∈ FrameClass α β 𝐆𝐋) := by
