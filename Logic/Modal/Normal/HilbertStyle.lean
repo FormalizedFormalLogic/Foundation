@@ -126,6 +126,9 @@ namespace Deduction
 
 variable {Λ : AxiomSet α} {Γ : Finset (Formula α)} {p q : Formula α}
 
+@[simp]
+lemma axm_singleton : {p} ⊢ᴹ[Λ] p := by apply axm (by simp);
+
 def length {Γ : Finset (Formula α)} {p : Formula α} : (Γ ⊢ᴹ[Λ] p) → ℕ
   | modus_ponens d₁ d₂ => (max d₁.length d₂.length) + 1
   | necessitation d₁ => d₁.length + 1
@@ -202,6 +205,14 @@ lemma maxm_subset {Λ Λ'} (dΛ : Γ ⊢ᴹ[Λ] p) : (Λ ⊆ Λ') → (Γ ⊢ᴹ
   | dne => apply dne
 
 end Deduction
+
+namespace Deducible
+
+@[simp] lemma axm_singleton : {p} ⊢ᴹ[Λ]! p := ⟨Deduction.axm_singleton⟩
+
+lemma modus_ponens {Γ p q} (d₁ : Γ ⊢ᴹ[Λ]! (p ⟶ q)) (d₂ : Γ ⊢ᴹ[Λ]! p) : Γ ⊢ᴹ[Λ]! q := ⟨Deduction.modus_ponens d₁.some d₂.some⟩
+
+end Deducible
 
 def Proof.length (d : ⊢ᴹ[Λ] p) : ℕ := Deduction.length (by simpa using d)
 
