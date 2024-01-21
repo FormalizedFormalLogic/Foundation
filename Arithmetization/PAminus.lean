@@ -1,4 +1,4 @@
-import Arithmetization.Lemmata
+import Arithmetization.Definability.Definability
 
 namespace LO.FirstOrder
 
@@ -35,21 +35,21 @@ lemma sub_spec_of_lt (h : a < b) : a - b = 0 := (Classical.choose!_spec (sub_exi
 
 lemma sub_eq_iff : c = a - b ↔ ((a ≥ b → a = b + c) ∧ (a < b → c = 0)) := Classical.choose!_eq_iff (sub_existsUnique a b)
 
-def subdef : Σᴬ[0] 3 :=
-  ⟨“(#2 ≤ #1 → #1 = #2 + #0) ∧ (#1 < #2 → #0 = 0)”, by simp[Hierarchy.pi_zero_iff_sigma_zero]⟩
-
-lemma sub_defined : Σᴬ[0]-Function₂ ((· - ·) : M → M → M) subdef := by
-  intro v; simp [subdef, sub_eq_iff]
-
-instance {b : VType} : DefinableFunction₂ b s ((· - ·) : M → M → M) := sub_defined.definable.of_zero
-
 @[simp] lemma sub_le_self (a b : M) : a - b ≤ a := by
   have : b ≤ a ∨ a < b := le_or_lt b a
   rcases this with (hxy | hxy) <;> simp[hxy]
   · simpa [← sub_spec_of_ge hxy] using show a - b ≤ b + (a - b) from le_add_self
   · simp[sub_spec_of_lt hxy]
 
-instance sub_polybounded : PolyBounded₂ (λ a b : M ↦ a - b) := ⟨#0, λ _ ↦ by simp⟩
+def subdef : Σᴬ[0] 3 :=
+  ⟨“(#2 ≤ #1 → #1 = #2 + #0) ∧ (#1 < #2 → #0 = 0)”, by simp[Hierarchy.pi_zero_iff_sigma_zero]⟩
+
+lemma sub_defined : Σᴬ[0]-Function₂ ((· - ·) : M → M → M) subdef := by
+  intro v; simp [subdef, sub_eq_iff]
+
+instance {b s} : DefinableFunction₂ b s ((· - ·) : M → M → M) := defined_to_with_param₀ subdef sub_defined
+
+instance sub_polybounded : PolyBounded₂ ((· - ·) : M → M → M) := ⟨#0, λ _ ↦ by simp⟩
 
 @[simp] lemma sub_self (a : M) : a - a = 0 :=
   add_right_eq_self.mp (sub_spec_of_ge (a := a) (b := a) (by rfl)).symm
@@ -131,7 +131,7 @@ def dvddef : Σᴬ[0] 2 := ⟨“∃[#0 < #2 + 1] #2 = #1 * #0”, by simp⟩
 lemma dvd_defined : Σᴬ[0]-Relation (λ a b : M ↦ a ∣ b) dvddef :=
   λ v ↦ by simp[dvd_iff_bounded, Matrix.vecHead, Matrix.vecTail, le_iff_lt_succ, dvddef]
 
-instance {b s} : DefinableRel b s ((· ∣ ·) : M → M → Prop) := dvd_defined.definable.of_zero
+instance {b s} : DefinableRel b s ((· ∣ ·) : M → M → Prop) := defined_to_with_param₀ _ dvd_defined
 
 end Dvd
 

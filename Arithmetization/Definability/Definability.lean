@@ -84,7 +84,7 @@ variable (b : VType) (s : ℕ) (L : Language) [L.LT] (μ : Type*) (n)
 
 @[simp] lemma hierarchy (p : FormulaHierarchy b s L μ n) : Hierarchy b s p.val := p.prop
 
-@[simp] lemma hierarchy_zero (p : FormulaHierarchy b 0 L μ n) : Hierarchy b' s p.val :=
+@[simp] lemma hierarchy_zero {b b' s} (p : FormulaHierarchy b 0 L μ n) : Hierarchy b' s p.val :=
   Hierarchy.of_zero p.hierarchy
 
 end FormulaHierarchy
@@ -180,6 +180,9 @@ abbrev DefinableFunction₂ (f : M → M → M) : Prop := DefinableFunction b s 
 variable {b s}
 
 lemma defined_to_with_param {k} {P : (Fin k → M) → Prop} (p : SentenceHierarchy b s ℒₒᵣ k) (hP : Defined P p.val) :
+    Definable b s P := ⟨⟨Rew.emb.hom p.val, by simp⟩, by intro; simp [hP.pval]⟩
+
+lemma defined_to_with_param₀ {k} {P : (Fin k → M) → Prop} (p : SentenceHierarchy b' 0 ℒₒᵣ k) (hP : Defined P p.val) :
     Definable b s P := ⟨⟨Rew.emb.hom p.val, by simp⟩, by intro; simp [hP.pval]⟩
 
 namespace Definable
@@ -337,6 +340,10 @@ end Semipolynomial
 
 namespace Definable
 
+lemma of_zero {P : (Fin k → M) → Prop} (h : Definable b 0 P) : Definable b' s P := by
+  rcases h with ⟨⟨p, hp⟩⟩
+  exact ⟨⟨p.of_zero, by simp [hp]⟩⟩
+
 lemma const {P : Prop} : Definable b s (fun _ : Fin k → M ↦ P) := by
   by_cases hP : P
   · exact ⟨⟨⊤, by simp⟩, by intro; simp[hP]⟩
@@ -360,6 +367,14 @@ lemma imp {P₁ P₂ : (Fin k → M) → Prop} (h₁ : Definable b.alt s P₁) (
     Definable b s (fun v ↦ P₁ v → P₂ v) := by
   rcases h₁ with ⟨p₁, h₁⟩; rcases h₂ with ⟨p₂, h₂⟩
   exact ⟨⟨p₁ ⟶ p₂, by simp⟩, by intro x; simp [h₁, h₂, h₁.eval, h₂.eval]⟩
+
+lemma iff {P₁ P₂ : (Fin k → M) → Prop} (h₁ : Definable b s P₁) (h₁' : Definable b.alt s P₁) (h₂ : Definable b s P₂) (h₂' : Definable b.alt s P₂) :
+    Definable b s (fun v ↦ P₁ v ↔ P₂ v) := by
+  simp [iff_iff_implies_and_implies]
+  apply and <;>  apply imp <;> simp [*]
+
+lemma iff₀ {P₁ P₂ : (Fin k → M) → Prop} (h₁ : Definable b 0 P₁) (h₂ : Definable b 0 P₂) :
+    Definable b 0 (fun v ↦ P₁ v ↔ P₂ v) := iff h₁ h₁.of_zero h₂ h₂.of_zero
 
 lemma ball_lt {P : (Fin k → M) → M → Prop} {f : (Fin k → M) → M}
     (hf : Semipolynomial b s f) (h : Definable b s (fun w ↦ P (w ·.succ) (w 0))) :
@@ -409,6 +424,16 @@ lemma bex_le {P : (Fin k → M) → M → Prop} {f : (Fin k → M) → M}
         · intro h; exact ⟨f v, hbf v, rfl, h⟩
         · rintro ⟨_, _, rfl, h⟩; exact h⟩
 
+lemma all {P : (Fin k → M) → M → Prop} (h : Definable Π (s + 1) (fun w ↦ P (w ·.succ) (w 0))) :
+    Definable Π (s + 1) (fun v ↦ ∀ x, P v x) := by
+  rcases h with ⟨p, hp⟩
+  exact ⟨⟨∀' p, by simp⟩, by intro v; simp [hp.eval]⟩
+
+lemma ex {P : (Fin k → M) → M → Prop} (h : Definable Σ (s + 1) (fun w ↦ P (w ·.succ) (w 0))) :
+    Definable Σ (s + 1) (fun v ↦ ∃ x, P v x) := by
+  rcases h with ⟨p, hp⟩
+  exact ⟨⟨∃' p, by simp⟩, by intro v; simp [hp.eval]⟩
+
 @[simp] lemma val_id' (t : Semiterm ℒₒᵣ M n) (e : Fin n → Fin k) :
     DefinableFunction b s fun v : Fin k → M => Semiterm.val! M (fun x ↦ v (e x)) id t :=
   ⟨⟨“#0 = !!(Rew.substs (fun x ↦ #(e x).succ) t)”, by simp⟩, by intro v; simp [Semiterm.val_substs]⟩
@@ -448,7 +473,7 @@ end Semipolynomial
 
 namespace Definable
 
-@[aesop safe apply] lemma comp₁ {k} {P : M → Prop} {f : (Fin k → M) → M} [hP : DefinablePred b s P] (hf : Semipolynomial b s f) :
+lemma comp₁ {k} {P : M → Prop} {f : (Fin k → M) → M} [hP : DefinablePred b s P] (hf : Semipolynomial b s f) :
     Definable b s (fun v ↦ P (f v)) := by
   rcases hf.bounded with ⟨bf, hbf⟩
   have : Definable b s (fun v ↦ ∃ z ≤ Semiterm.val! M v id bf, z = f v ∧ P z) :=
@@ -458,7 +483,7 @@ namespace Definable
     · intro h; exact ⟨f v, hbf v, rfl, h⟩
     · rintro ⟨_, _, rfl, h⟩; exact h)
 
-@[aesop safe apply] lemma comp₂ {k} {R : M → M → Prop} {f₁ f₂ : (Fin k → M) → M}
+lemma comp₂ {k} {R : M → M → Prop} {f₁ f₂ : (Fin k → M) → M}
     [hR : DefinableRel b s R] (hf₁ : Semipolynomial b s f₁) (hf₂ : Semipolynomial b s f₂) :
     Definable b s (fun v ↦ R (f₁ v) (f₂ v)) := by
   rcases hf₁.bounded with ⟨bf₁, hbf₁⟩
@@ -474,7 +499,7 @@ namespace Definable
     · intro h; exact ⟨f₁ v, hbf₁ v, f₂ v, hbf₂ v, rfl, rfl, h⟩
     · rintro ⟨_, _, _, _, rfl, rfl, h⟩; exact h)
 
-@[aesop safe apply] lemma comp₃ {k} {R : M → M → M → Prop} {f₁ f₂ f₃ : (Fin k → M) → M}
+lemma comp₃ {k} {R : M → M → M → Prop} {f₁ f₂ f₃ : (Fin k → M) → M}
     [hR : DefinableRel₃ b s R] (hf₁ : Semipolynomial b s f₁) (hf₂ : Semipolynomial b s f₂) (hf₃ : Semipolynomial b s f₃) :
     Definable b s (fun v ↦ R (f₁ v) (f₂ v) (f₃ v)) := by
   rcases hf₁.bounded with ⟨bf₁, hbf₁⟩
@@ -537,21 +562,28 @@ attribute [aesop (rule_sets [Definability]) norm]
   pow_four
   Definable.const
 
-attribute [aesop (rule_sets [Definability]) safe apply]
+attribute [aesop 1 (rule_sets [Definability]) safe]
   Semipolynomial.comp₁
   Semipolynomial.comp₂
   Definable.comp₁
   Definable.comp₂
   Definable.comp₃
   Definable.const
-  Definable.and
-  Definable.or
+
+attribute [aesop 4 (rule_sets [Definability]) safe]
   Definable.not
   Definable.imp
+  Definable.iff₀
   Definable.ball_lt
   Definable.ball_le
   Definable.bex_lt
   Definable.bex_le
+
+attribute [aesop 8 (rule_sets [Definability]) safe]
+  Definable.and
+  Definable.or
+  Definable.all
+  Definable.ex
 
 macro "definability" (config)? : tactic =>
   `(tactic| aesop (options := { terminal := true }) (rule_sets [$(Lean.mkIdent `Definability):ident]))

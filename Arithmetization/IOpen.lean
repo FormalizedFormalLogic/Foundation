@@ -16,31 +16,35 @@ section IOpen
 
 variable [𝐈open.Mod M]
 
-lemma open_induction₁ {P : M → M → Prop}
-    (hP : ∃ p : Semiformula ℒₒᵣ (Fin 1) 1, p.Open ∧ ∀ x a, P a x ↔ Semiformula.Eval! M ![x] ![a] p) (a) :
-    P a 0 → (∀ x, P a x → P a (x + 1)) → ∀ x, P a x :=
-  induction₁ (C := Semiformula.Open) (by simpa) a
+@[elab_as_elim]
+lemma open_induction {P : M → Prop}
+    (hP : ∃ p : Semiformula ℒₒᵣ M 1, p.Open ∧ ∀ x, P x ↔ Semiformula.Eval! M ![x] id p)
+    (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x :=
+  induction (C := Semiformula.Open)
+    (by rcases hP with ⟨p, hp, hhp⟩
+        exact ⟨p.fvEnumInv', (Rew.rewriteMap p.fvEnum').hom p, by simp[hp],
+          by  intro x; simp [Semiformula.eval_rewriteMap, hhp]
+              exact Semiformula.eval_iff_of_funEqOn p (by intro z hz; simp [Semiformula.fvEnumInv'_fvEnum' _ hz])⟩) zero succ
 
-lemma open_induction₂ {P : M → M → M → Prop}
-    (hP : ∃ p : Semiformula ℒₒᵣ (Fin 2) 1, p.Open ∧ (∀ x a b, P a b x ↔ Semiformula.Eval! M ![x] ![a, b] p)) (a b) :
-    P a b 0 → (∀ x, P a b x → P a b (x + 1)) → ∀ x, P a b x :=
-  induction₂ (C := Semiformula.Open) (by simpa) a b
-
-lemma open_leastNumber₁ {P : M → M → Prop}
-    (hP : ∃ p : Semiformula ℒₒᵣ (Fin 1) 1, p.Open ∧ (∀ x a, P a x ↔ Semiformula.Eval! M ![x] ![a] p)) (a x) :
-    P a 0 → ¬P a x → ∃ x, P a x ∧ ¬P a (x + 1) := fun h0 hx ↦ by
-  simpa using (not_imp_not.mpr <| open_induction₁ hP a h0) (by simp; exact ⟨x, hx⟩)
-
-lemma open_leastNumber₂ {P : M → M → M → Prop}
-    (hP : ∃ p : Semiformula ℒₒᵣ (Fin 2) 1, p.Open ∧ (∀ x a b, P a b x ↔ Semiformula.Eval! M ![x] ![a, b] p)) (a b x) :
-    P a b 0 → ¬P a b x → ∃ x, P a b x ∧ ¬P a b (x + 1) := fun h0 hx ↦ by
-  simpa using (not_imp_not.mpr <| open_induction₂ hP a b h0) (by simp; exact ⟨x, hx⟩)
+lemma open_leastNumber {P : M → Prop}
+    (hP : ∃ p : Semiformula ℒₒᵣ M 1, p.Open ∧ ∀ x, P x ↔ Semiformula.Eval! M ![x] id p)
+    (zero : P 0) {a} (counterex : ¬P a) : ∃ x, P x ∧ ¬P (x + 1) := by
+  by_contra A
+  have : ∀ x, P x := by
+    intro x; induction x using open_induction
+    · exact hP
+    case zero => exact zero
+    case succ n ih =>
+      simp at A
+      exact A n ih
+  have : P a := this a
+  contradiction
 
 lemma remainder (a : M) {b} (pos : 0 < b) : ∃! u, ∃ v < b, a = b * u + v := by
   have : ∃! u, b * u ≤ a ∧ a < b * (u + 1) := by
     have : ∃ u, b * u ≤ a ∧ a < b * (u + 1) := by
       have : a < b * (a + 1) → ∃ u, b * u ≤ a ∧ a < b * (u + 1) := by
-        simpa using open_leastNumber₂ (P := λ a b u ↦ b * u ≤ a) ⟨“&1 * #0 ≤ &0”, by simp, by simp⟩ a b (a + 1)
+        simpa using open_leastNumber (P := λ u ↦ b * u ≤ a) ⟨“&b * #0 ≤ &a”, by simp, by intro x; simp⟩
       simp at this
       have hx : a < b * (a + 1) := by
         have : a + 0 < b * a + b :=
@@ -63,8 +67,8 @@ lemma remainder (a : M) {b} (pos : 0 < b) : ∃! u, ∃ v < b, a = b * u + v := 
     · rintro ⟨v, hv, rfl⟩
       simp [mul_add, hv]
     · intro h
-      let v := a ∸ b * u
-      have e : a = b*u + v := by simp [add_tmsub_self_of_le h.1]
+      let v := a - b * u
+      have e : a = b*u + v := by simp [add_tsub_self_of_le h.1]
       have : v < b := by
         by_contra hyv
         have hyv : b ≤ v := by simpa using hyv
@@ -100,7 +104,7 @@ lemma ediv_graph {a b c : M} : c = a /ₑ b ↔ ((0 < b → ∃ v < b, a = b * c
 def edivdef : Σᴬ[0] 3 :=
   ⟨“(0 < #2 → ∃[#0 < #3] (#2 = #3 * #1 + #0)) ∧ (#2 = 0 → #0 = 0)”, by simp[Hierarchy.pi_zero_iff_sigma_zero]⟩
 
-lemma ediv_defined : Σᴬ[0]-Function₂ (λ a b : M ↦ a /ₑ b) edivdef := by
+lemma ediv_defined : Σᴬ[0]-Function₂ ((· /ₑ ·) : M → M → M) edivdef := by
   intro v; simp[ediv_graph, edivdef, Matrix.vecHead, Matrix.vecTail]
 
 lemma ediv_spec_of_pos' (a : M) (h : 0 < b) : ∃ v < b, a = (a /ₑ b) * b + v := by
@@ -118,7 +122,9 @@ lemma ediv_spec_of_pos' (a : M) (h : 0 < b) : ∃ v < b, a = (a /ₑ b) * b + v 
   have : 1 * (a /ₑ b) ≤ b * (a /ₑ b) := mul_le_mul_of_nonneg_right (le_iff_lt_succ.mpr (by simp[pos])) (by simp)
   simpa using le_trans this (mul_ediv_le a b)
 
-lemma ediv_polybounded : PolyBounded₂ (λ a b : M ↦ a /ₑ b) #0 := λ _ ↦ by simp
+instance ediv_polybounded : PolyBounded₂ ((· /ₑ ·) : M → M → M) := ⟨#0, λ _ ↦ by simp⟩
+
+instance : DefinableFunction₂ b s ((· /ₑ ·) : M → M → M) := defined_to_with_param₀ _ ediv_defined
 
 @[simp] lemma ediv_mul_le (a b : M) : a /ₑ b * b ≤ a := by rw [mul_comm]; exact mul_ediv_le _ _
 
@@ -187,24 +193,26 @@ end ediv
 
 section remainder
 
-def rem (a b : M) : M := a ∸ b * (a /ₑ b)
+def rem (a b : M) : M := a - b * (a /ₑ b)
 
 infix:60 " mod " => rem
 
 def remdef : Σᴬ[0] 3 :=
-  ⟨“∃[#0 < #2 + 1] (!edivdef [#0, #2, #3] ∧ !msubdef [#1, #2, #3 * #0])”, by simp⟩
+  ⟨“∃[#0 < #2 + 1] (!edivdef [#0, #2, #3] ∧ !subdef [#1, #2, #3 * #0])”, by simp⟩
 
-lemma rem_graph (a b c : M) : a = b mod c ↔ ∃ x ≤ b, (x = b /ₑ c ∧ a = b ∸ c * x) := by
+lemma rem_graph (a b c : M) : a = b mod c ↔ ∃ x ≤ b, (x = b /ₑ c ∧ a = b - c * x) := by
   simp [rem]; constructor
   · rintro rfl; exact ⟨b /ₑ c, by simp, rfl, by rfl⟩
   · rintro ⟨_, _, rfl, rfl⟩; simp
 
-lemma rem_defined : Σᴬ[0]-Function₂ (λ a b : M ↦ a mod b) remdef := by
+lemma rem_defined : Σᴬ[0]-Function₂ ((· mod ·) : M → M → M) remdef := by
   intro v; simp [Matrix.vecHead, Matrix.vecTail, remdef,
-    rem_graph, Semiformula.eval_substs, ediv_defined.pval, msub_defined.pval, le_iff_lt_succ]
+    rem_graph, Semiformula.eval_substs, ediv_defined.pval, sub_defined.pval, le_iff_lt_succ]
+
+instance : DefinableFunction₂ b s ((· mod ·) : M → M → M) := defined_to_with_param₀ _ rem_defined
 
 lemma ediv_add_remainder (a b : M) : b * (a /ₑ b) + (a mod b) = a :=
-  add_tmsub_self_of_le (mul_ediv_le a b)
+  add_tsub_self_of_le (mul_ediv_le a b)
 
 @[simp] lemma remainder_zero (a : M) : a mod 0 = a := by simp [rem]
 
@@ -217,7 +225,7 @@ lemma remainder_mul_add_of_lt (a : M) {b} (pos : 0 < b) {r} (hr : r < b) : (a * 
   simp [rem, ediv_mul_add a pos hr, mul_comm]
 
 @[simp] lemma remainder_mul_add (a c : M) (pos : 0 < b) : (a * b + c) mod b = c mod b := by
-  simp [rem, ediv_mul_add_self, pos, mul_add, ←msub_msub, show b * a = a * b from mul_comm _ _]
+  simp [rem, ediv_mul_add_self, pos, mul_add, ←sub_sub, show b * a = a * b from mul_comm _ _]
 
 @[simp] lemma remainder_add_mul (a b : M) (pos : 0 < c) : (a + b * c) mod c = a mod c := by
   simp [add_comm a (b * c), pos]
@@ -247,6 +255,8 @@ lemma remainder_mul_add_of_lt (a : M) {b} (pos : 0 < b) {r} (hr : r < b) : (a * 
 
 @[simp] lemma remainder_le (a b : M) : a mod b ≤ a := by
   simp [rem]
+
+instance remainder_polybounded : PolyBounded₂ ((· mod ·) : M → M → M) := ⟨#0, by intro v; simp⟩
 
 lemma remainder_eq_zero_iff_dvd {a b : M} : b mod a = 0 ↔ a ∣ b := by
   simp [rem]
@@ -312,7 +322,7 @@ section sqrt
 lemma sqrt_exists_unique (a : M) : ∃! x, x * x ≤ a ∧ a < (x + 1) * (x + 1) := by
   have : ∃ x, x * x ≤ a ∧ a < (x + 1) * (x + 1) := by
     have : a < (a + 1) * (a + 1) → ∃ x, x * x ≤ a ∧ a < (x + 1) * (x + 1) := by
-      simpa using open_leastNumber₁ (P := λ a x ↦ x * x ≤ a) ⟨“#0 * #0 ≤ &0”, by simp, by simp⟩ a (a + 1)
+      simpa using open_leastNumber (P := λ x ↦ x * x ≤ a) ⟨“#0 * #0 ≤ &a”, by simp, by simp⟩
     have hn : a < (a + 1) * (a + 1) := calc
       a ≤ a * a             := le_mul_self a
       _ < a * a + 1         := lt_add_one (a * a)
@@ -345,6 +355,8 @@ def sqrtdef : Σᴬ[0] 2 :=
 
 lemma sqrt_defined : Σᴬ[0]-Function₁ (λ a : M ↦ √a) sqrtdef := by
   intro v; simp[sqrt_graph, sqrtdef, Matrix.vecHead, Matrix.vecTail]
+
+instance : DefinableFunction₁ b s ((√·) : M → M) := defined_to_with_param₀ _ sqrt_defined
 
 lemma eq_sqrt (x a : M) : x * x ≤ a ∧ a < (x + 1) * (x + 1) → x = √a := Classical.choose_uniq (sqrt_exists_unique a)
 
@@ -395,6 +407,8 @@ lemma sqrt_three : √(3 : M) = 1 :=
     _ ≤ a      := sq_sqrt_le a
   simp_all
 
+instance : PolyBounded₁ ((√·) : M → M) := ⟨#0, by intro v; simp⟩
+
 lemma sqrt_lt_self_of_one_lt {a : M} (h : 1 < a) : √a < a := by
   by_contra A
   have : a * a ≤ √a * √a := mul_self_le_mul_self (by simp) (by simpa using A)
@@ -436,7 +450,7 @@ def pairdef : Σᴬ[0] 3 := ⟨“(#1 < #2 ∧ #0 = #2 * #2 + #1) ∨ (#2 ≤ #1
 lemma pair_defined : Σᴬ[0]-Function₂ (λ a b : M ↦ ⟨a ; b⟩) pairdef := by
   intro v; simp [pair_graph, pairdef]
 
-def unpair (a : M) : M × M := if a ∸ √a * √a < √a then (a ∸ √a * √a, √a) else (√a, a ∸ √a * √a ∸ √a)
+def unpair (a : M) : M × M := if a - √a * √a < √a then (a - √a * √a, √a) else (√a, a - √a * √a - √a)
 
 abbrev pi₁ (a : M) : M := (unpair a).1
 
@@ -445,13 +459,15 @@ abbrev pi₂ (a : M) : M := (unpair a).2
 @[simp] lemma pair_unpair (a : M) : ⟨pi₁ a ; pi₂ a⟩ = a := by
   simp [pi₁, pi₂, unpair]
   split_ifs with h
-  · simp [pair, h]; exact add_tmsub_self_of_le (by simp)
+  · simp [pair, h]
   · simp; simp [pair, h]
-    have : a ∸ √a * √a ∸ √a ≤ √a := by simp [add_comm (2 * √a), ←two_mul]
+    have : a - √a * √a - √a ≤ √a := by simp [add_comm (2 * √a), ←two_mul]
     simp [not_lt.mpr this]
+    have :√a ≤ a - √a * √a := by simpa using h
     calc
-      √a * √a + √a + (a ∸ √a * √a ∸ √a) = √a * √a + (a ∸ √a * √a) := by simp [add_assoc]; exact add_tmsub_self_of_le (by simpa using h)
-      _                                 = a                       := add_tmsub_self_of_le (by simp)
+      √a * √a + √a + (a - √a * √a - √a) = √a * √a + (a - √a * √a) := by simp [add_assoc]
+                                                                        rw [add_tsub_self_of_le, add_tsub_self_of_le] <;> simp [this]
+      _                                 = a                       := add_tsub_self_of_le (by simp)
 
 @[simp] lemma unpair_pair (a b : M) : unpair ⟨a ; b⟩ = (a, b) := by
   simp [pair]; split_ifs with h

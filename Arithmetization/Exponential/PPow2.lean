@@ -42,6 +42,8 @@ def ppow2def : Σᴬ[0] 1 :=
 lemma ppow2_defined : Σᴬ[0]-Predicate (PPow2 : M → Prop) ppow2def := by
   intro v; simp[PPow2, ppow2def, Matrix.vecHead, Matrix.vecTail, lenbit_defined.pval, pow2_defined.pval, sppow2_defined.pval]
 
+instance {b s} : DefinablePred b s (PPow2 : M → Prop) := defined_to_with_param₀ _ ppow2_defined
+
 namespace SPPow2
 
 variable {m : M} (hm : SPPow2 m)
@@ -91,29 +93,31 @@ lemma of_sqrt {i : M} (pi : Pow2 i) (him : i ≤ m) (hsqi : (√i)^2 = i) (hi : 
 
 lemma sq_le_of_lt {i j : M} (pi : Pow2 i) (pj : Pow2 j) (hi : LenBit i m) (hj : LenBit j m) : i < j → i^2 ≤ j := by
   intro hij
-  refine hierarchy_order_induction₁ M Σ 0
-    (fun m j ↦ ∀ i < j, Pow2 i → Pow2 j → LenBit i m → LenBit j m → i^2 ≤ j)
-    ⟨⟨“ ∀[#0 < #2](!pow2def [#0] → !pow2def [#2] → !lenbitdef [#0, #1] → !lenbitdef [#2, #1] → #0 * #0 ≤ #2)”, by simp⟩,
-      by intro v; simp [Semiformula.eval_substs, Matrix.vecHead, pow2_defined.pval, lenbit_defined.pval, sq]⟩ m ?_ j i hij pi pj hi hj
-  simp; intro j ih i hij pi pj  hi hj
-  by_cases jne2 : j = 2
-  · rcases jne2 with rfl
-    have : 2 ≤ i := one_lt_iff_two_le.mp (hm.one_lt hi)
-    exact False.elim ((not_lt.mpr this) hij)
-  · by_cases ine2 : i = 2
-    · rcases ine2 with rfl
-      simpa [sq, two_mul_two_eq_four] using pj.four_le hij
-    · have : √i < √j := by
-        by_contra A
-        have : j ≤ i := by
-          simpa [hm.sq_sqrt_eq hi pi ine2, hm.sq_sqrt_eq hj pj jne2] using
-            sq_le_sq_iff.mp (show √j ≤ √i from by simpa using A)
-        exact False.elim ((not_lt.mpr this) (by simpa using hij))
-      have : i ≤ √j := by
-        simpa [hm.sq_sqrt_eq hi pi ine2] using
-          ih (√j) (sqrt_lt_self_of_one_lt (hm.one_lt hj)) (√i) this
-            (pi.sqrt (hm.sq_sqrt_eq hi pi ine2)) (pj.sqrt (hm.sq_sqrt_eq hj pj jne2)) (hm.sqrt hi pi ine2) (hm.sqrt hj pj jne2)
-      simpa [hm.sq_sqrt_eq hj pj jne2] using sq_le_sq_iff.mp this
+  suffices : ∀ i < j, Pow2 i → Pow2 j → LenBit i m → LenBit j m → i^2 ≤ j
+  · exact this i hij pi pj hi hj
+  clear i pi hi hij pj hj
+  induction j using hierarchy_order_induction_sigma₀
+  · definability
+  case ind j IH =>
+    intro i hij pi pj  hi hj
+    by_cases jne2 : j = 2
+    · rcases jne2 with rfl
+      have : 2 ≤ i := one_lt_iff_two_le.mp (hm.one_lt hi)
+      exact False.elim ((not_lt.mpr this) hij)
+    · by_cases ine2 : i = 2
+      · rcases ine2 with rfl
+        simpa [sq, two_mul_two_eq_four] using pj.four_le hij
+      · have : √i < √j := by
+          by_contra A
+          have : j ≤ i := by
+            simpa [hm.sq_sqrt_eq hi pi ine2, hm.sq_sqrt_eq hj pj jne2] using
+              sq_le_sq_iff.mp (show √j ≤ √i from by simpa using A)
+          exact False.elim ((not_lt.mpr this) (by simpa using hij))
+        have : i ≤ √j := by
+          simpa [hm.sq_sqrt_eq hi pi ine2] using
+            IH (√j) (sqrt_lt_self_of_one_lt (hm.one_lt hj)) (√i) this
+              (pi.sqrt (hm.sq_sqrt_eq hi pi ine2)) (pj.sqrt (hm.sq_sqrt_eq hj pj jne2)) (hm.sqrt hi pi ine2) (hm.sqrt hj pj jne2)
+        simpa [hm.sq_sqrt_eq hj pj jne2] using sq_le_sq_iff.mp this
 
 lemma last_uniq {i j : M} (pi : Pow2 i) (pj : Pow2 j) (hi : LenBit i m) (hj : LenBit j m)
     (hsqi : m < i^2) (hsqj : m < j^2) : i = j := by
@@ -261,24 +265,27 @@ lemma sq_ne_four {i : M} (hi : PPow2 i) (ne2 : i ≠ 2) : i^2 ≠ 4 := by
 
 lemma sq_le_of_lt {i j : M} (hi : PPow2 i) (hj : PPow2 j) : i < j → i^2 ≤ j := by
   intro hij
-  refine hierarchy_order_induction₀ M Σ 0 (fun j ↦ ∀ i < j, PPow2 i → PPow2 j → i^2 ≤ j)
-    ⟨⟨“ ∀[#0 < #1](!ppow2def [#0] → !ppow2def [#1] → #0 * #0 ≤ #1)”, by simp⟩,
-      by intro v; simp [Semiformula.eval_substs, Matrix.vecHead, ppow2_defined.pval, sq]⟩ ?_ j i hij hi hj
-  simp; intro j ih i hij hi hj
-  by_cases ej : j = 2
-  · have : 2 ≤ i := by simpa [one_add_one_eq_two] using lt_iff_succ_le.mp hi.one_lt
-    exact False.elim ((not_lt.mpr this) (by simpa [ej] using hij))
-  · by_cases ei : i = 2
-    · rcases ei with rfl
-      simpa [sq, two_mul_two_eq_four] using hj.four_le ej
-    · have : √i < √j := by
-        by_contra A
-        have : j ≤ i := by simpa [hi.sq_sqrt_eq ei, hj.sq_sqrt_eq ej] using sq_le_sq_iff.mp (show √j ≤ √i from by simpa using A)
-        exact False.elim ((not_lt.mpr this) (by simpa using hij))
-      have : i ≤ √j := by
-        simpa [hi.sq_sqrt_eq ei] using
-          ih (√j) (sqrt_lt_self_of_one_lt hj.one_lt) (√i) this (hi.sqrt ei) (hj.sqrt ej)
-      simpa [hj.sq_sqrt_eq ej] using sq_le_sq_iff.mp this
+  suffices : ∀ i < j, PPow2 i → PPow2 j → i^2 ≤ j
+  · exact this i hij hi hj
+  clear hi hij hj
+  induction j using hierarchy_order_induction_sigma₀
+  · definability
+  case ind j IH =>
+    intro i hij hi hj
+    by_cases ej : j = 2
+    · have : 2 ≤ i := by simpa [one_add_one_eq_two] using lt_iff_succ_le.mp hi.one_lt
+      exact False.elim ((not_lt.mpr this) (by simpa [ej] using hij))
+    · by_cases ei : i = 2
+      · rcases ei with rfl
+        simpa [sq, two_mul_two_eq_four] using hj.four_le ej
+      · have : √i < √j := by
+          by_contra A
+          have : j ≤ i := by simpa [hi.sq_sqrt_eq ei, hj.sq_sqrt_eq ej] using sq_le_sq_iff.mp (show √j ≤ √i from by simpa using A)
+          exact False.elim ((not_lt.mpr this) (by simpa using hij))
+        have : i ≤ √j := by
+          simpa [hi.sq_sqrt_eq ei] using
+            IH (√j) (sqrt_lt_self_of_one_lt hj.one_lt) (√i) this (hi.sqrt ei) (hj.sqrt ej)
+        simpa [hj.sq_sqrt_eq ej] using sq_le_sq_iff.mp this
 
 lemma sq_uniq {y i j : M} (py : Pow2 y) (ppi : PPow2 i) (ppj : PPow2 j)
     (hi : y < i ∧ i ≤ y^2) (hj : y < j ∧ j ≤ y^2) : i = j := by

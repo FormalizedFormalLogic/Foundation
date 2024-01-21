@@ -26,6 +26,8 @@ lemma pow2_defined : Σᴬ[0]-Predicate (Pow2 : M → Prop) pow2def := by
   simp [Semiformula.eval_substs, Matrix.comp_vecCons', Matrix.vecHead, Matrix.constant_eq_singleton,
     Pow2, pow2def, le_iff_lt_succ, dvd_defined.pval]
 
+instance {b s} : DefinablePred b s (Pow2 : M → Prop) := defined_to_with_param₀ _ pow2_defined
+
 lemma Pow2.pos {a : M} (h : Pow2 a) : 0 < a := h.1
 
 lemma Pow2.dvd {a : M} (h : Pow2 a) {r} (hr : r ≤ a) : 1 < r → r ∣ a → 2 ∣ r := h.2 r hr
@@ -119,6 +121,8 @@ lemma lenbit_defined : Σᴬ[0]-Relation (LenBit : M → M → Prop) lenbitdef :
   · intro h; exact ⟨v 1 /ₑ v 0, by simp, rfl, h⟩
   · rintro ⟨z, hz, rfl, h⟩; exact h
 
+instance {b s} : DefinableRel b s (LenBit : M → M → Prop) := defined_to_with_param₀ _ lenbit_defined
+
 lemma LenBit.le {i a : M} (h : LenBit i a) : i ≤ a := by
   by_contra A; simp [LenBit, show a < i from by simpa using A] at h
 
@@ -188,24 +192,26 @@ namespace Pow2
 lemma mul {a b : M} (ha : Pow2 a) (hb : Pow2 b) : Pow2 (a * b) := by
   wlog hab : a ≤ b
   · simpa [mul_comm] using this hb ha (by simp at hab; exact LT.lt.le hab)
-  refine hierarchy_order_induction₀ M Σ 0
-    (fun b ↦ ∀ a ≤ b, Pow2 a → Pow2 b → Pow2 (a * b))
-    ⟨⟨“∀[#0 < #1 + 1] (!pow2def [#0] → !pow2def [#1] → !pow2def [#0 * #1])”, by simp⟩,
-     by intro v; simp [le_iff_lt_succ, Semiformula.eval_substs, Matrix.vecHead, pow2_defined.pval]⟩ ?_ b a hab ha hb
-  simp; intro b H a hab ha hb
-  have : a = 1 ∨ 1 < a ∧ ∃ a', a = 2 * a' ∧ Pow2 a' := Pow2.elim'.mp ha
-  rcases this with (rfl | ⟨lta, a, rfl, ha⟩)
-  · simpa using hb
-  · have : b = 1 ∨ 1 < b ∧ ∃ b', b = 2 * b' ∧ Pow2 b' := Pow2.elim'.mp hb
-    rcases this with (rfl | ⟨ltb, b, rfl, hb⟩)
-    · simpa using ha
-    · have ltb : b < 2 * b := lt_two_mul_self (pos_iff_ne_zero.mpr $ by rintro rfl; simp at ltb)
-      have hab : a ≤ b := le_of_mul_le_mul_left hab (by simp)
-      have : Pow2 (a * b) := H b ltb a hab (by assumption) (by assumption)
-      suffices : Pow2 (4 * a * b)
-      · have : (2 * a) * (2 * b) = 4 * a * b := by simp [mul_assoc, mul_left_comm a 2 b, ←two_mul_two_eq_four]
-        simpa [this]
-      simpa [mul_assoc, pow2_mul_four] using this
+  suffices : ∀ b : M, ∀ a ≤ b, Pow2 a → Pow2 b → Pow2 (a * b)
+  · exact this b a hab ha hb
+  intro b
+  induction b using hierarchy_order_induction_sigma₀
+  · definability
+  case ind IH a b IH =>
+    intro a hab ha hb
+    have : a = 1 ∨ 1 < a ∧ ∃ a', a = 2 * a' ∧ Pow2 a' := Pow2.elim'.mp ha
+    rcases this with (rfl | ⟨lta, a, rfl, ha⟩)
+    · simpa using hb
+    · have : b = 1 ∨ 1 < b ∧ ∃ b', b = 2 * b' ∧ Pow2 b' := Pow2.elim'.mp hb
+      rcases this with (rfl | ⟨ltb, b, rfl, hb⟩)
+      · simpa using ha
+      · have ltb : b < 2 * b := lt_two_mul_self (pos_iff_ne_zero.mpr $ by rintro rfl; simp at ltb)
+        have hab : a ≤ b := le_of_mul_le_mul_left hab (by simp)
+        have : Pow2 (a * b) := IH b ltb a hab (by assumption) (by assumption)
+        suffices : Pow2 (4 * a * b)
+        · have : (2 * a) * (2 * b) = 4 * a * b := by simp [mul_assoc, mul_left_comm a 2 b, ←two_mul_two_eq_four]
+          simpa [this]
+        simpa [mul_assoc, pow2_mul_four] using this
 
 @[simp] lemma mul_iff {a b : M} : Pow2 (a * b) ↔ Pow2 a ∧ Pow2 b :=
   ⟨fun h ↦ ⟨h.of_dvd (by simp), h.of_dvd (by simp)⟩, by rintro ⟨ha, hb⟩; exact ha.mul hb⟩
@@ -217,22 +223,22 @@ lemma sq {a : M} : Pow2 a → Pow2 (a^2) := by
   simp [_root_.sq]
 
 lemma dvd_of_le {a b : M} (ha : Pow2 a) (hb : Pow2 b) : a ≤ b → a ∣ b := by
-  intro hab
-  refine hierarchy_order_induction₀ M Σ 0 (fun b ↦ ∀ a ≤ b, Pow2 a → Pow2 b → a ∣ b)
-    ⟨⟨“∀[#0 < #1 + 1] (!pow2def [#0] → !pow2def [#1] → !dvddef [#0, #1]) ”, by simp⟩,
-      by intro v; simp [le_iff_lt_succ, Semiformula.eval_substs, Matrix.vecHead, pow2_defined.pval, dvd_defined.pval]⟩
-    ?_ b a hab ha hb
-  simp; intro b H a hab ha hb
-  have : b = 1 ∨ 1 < b ∧ ∃ b', b = 2 * b' ∧ Pow2 b' := Pow2.elim'.mp hb
-  rcases this with (rfl | ⟨ltb, b, rfl, hb⟩)
-  · rcases le_one_iff_eq_zero_or_one.mp hab with (rfl | rfl) <;> simp
-    · simp at ha
-  · have : a = 1 ∨ 1 < a ∧ ∃ a', a = 2 * a' ∧ Pow2 a' := Pow2.elim'.mp ha
-    rcases this with (rfl | ⟨lta, a, rfl, ha⟩)
-    · simp
-    · have ltb : b < 2 * b := lt_two_mul_self (pos_iff_ne_zero.mpr $ by rintro rfl; simp at ltb)
-      have hab : a ≤ b := le_of_mul_le_mul_left hab (by simp)
-      exact mul_dvd_mul_left 2 <| H b ltb a hab (by assumption) (by assumption)
+  suffices : ∀ b : M, ∀ a ≤ b, Pow2 a → Pow2 b → a ∣ b
+  · intro hab; exact this b a hab ha hb
+  intro b; induction b using hierarchy_order_induction_sigma₀
+  · definability
+  case ind b IH =>
+    intro a hab ha hb
+    have : b = 1 ∨ 1 < b ∧ ∃ b', b = 2 * b' ∧ Pow2 b' := Pow2.elim'.mp hb
+    rcases this with (rfl | ⟨ltb, b, rfl, hb⟩)
+    · rcases le_one_iff_eq_zero_or_one.mp hab with (rfl | rfl) <;> simp
+      · simp at ha
+    · have : a = 1 ∨ 1 < a ∧ ∃ a', a = 2 * a' ∧ Pow2 a' := Pow2.elim'.mp ha
+      rcases this with (rfl | ⟨lta, a, rfl, ha⟩)
+      · simp
+      · have ltb : b < 2 * b := lt_two_mul_self (pos_iff_ne_zero.mpr $ by rintro rfl; simp at ltb)
+        have hab : a ≤ b := le_of_mul_le_mul_left hab (by simp)
+        exact mul_dvd_mul_left 2 <| IH b ltb a hab (by assumption) (by assumption)
 
 lemma le_iff_dvd {a b : M} (ha : Pow2 a) (hb : Pow2 b) : a ≤ b ↔ a ∣ b :=
   ⟨Pow2.dvd_of_le ha hb, le_of_dvd hb.pos⟩
@@ -264,22 +270,23 @@ lemma lt_iff_two_mul_le {a b : M} (ha : Pow2 a) (hb : Pow2 b) : a < b ↔ 2 * a 
   · simp [eb, ←lt_two_iff_le_one]
   · rw [←hb.two_mul_div_two eb]; simp [le_iff_lt_two ha (hb.div_two eb)]
 
+
 lemma sq_or_dsq {a : M} (pa : Pow2 a) : ∃ b, a = b^2 ∨ a = 2 * b^2 := by
   suffices : ∃ b ≤ a, a = b^2 ∨ a = 2 * b^2
   · rcases this with ⟨b, _, h⟩
     exact ⟨b, h⟩
-  refine hierarchy_order_induction₀ M Σ 0 (fun a ↦ Pow2 a → ∃ b ≤ a, a = b^2 ∨ a = 2 * b^2)
-    ⟨⟨“!pow2def [#0] → ∃[#0 < #1 + 1] (#1 = #0 * #0 ∨ #1 = 2 * (#0 * #0)) ”, by simp⟩,
-      by intro v; simp [←le_iff_lt_succ, Semiformula.eval_substs, pow2_defined.pval, Matrix.vecHead, _root_.sq]⟩
-    ?_ a pa
-  simp; intro a IH pa
-  rcases Pow2.elim'.mp pa with (rfl | ⟨ha, a, rfl, pa'⟩)
-  · exact ⟨1, by simp⟩
-  · have : 0 < a := by simpa [←pos_iff_one_le] using one_lt_iff_two_le.mp ha
-    rcases IH a (lt_mul_of_one_lt_left this one_lt_two) pa' with ⟨b, _, (rfl | rfl)⟩
-    · exact ⟨b, le_trans (by simp) le_two_mul_left, by right; rfl⟩
-    · exact ⟨2 * b, by simp; exact le_trans (by simp) le_two_mul_left,
-      by left; simp [_root_.sq, mul_assoc, mul_left_comm]⟩
+  revert pa
+  induction a using hierarchy_order_induction_sigma₀
+  · definability
+  case ind a IH =>
+    intro pa
+    rcases Pow2.elim'.mp pa with (rfl | ⟨ha, a, rfl, pa'⟩)
+    · exact ⟨1, by simp⟩
+    · have : 0 < a := by simpa [←pos_iff_one_le] using one_lt_iff_two_le.mp ha
+      rcases IH a (lt_mul_of_one_lt_left this one_lt_two) pa' with ⟨b, _, (rfl | rfl)⟩
+      · exact ⟨b, le_trans (by simp) le_two_mul_left, by right; rfl⟩
+      · exact ⟨2 * b, by simp; exact le_trans (by simp) le_two_mul_left,
+        by left; simp [_root_.sq, mul_assoc, mul_left_comm]⟩
 
 lemma sqrt {a : M} (h : Pow2 a) (hsq : (√a)^2 = a) : Pow2 (√a) := by
   rw [←hsq] at h; simpa using h
