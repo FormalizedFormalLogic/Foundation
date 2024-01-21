@@ -109,10 +109,6 @@ namespace Semiterm
 
 variable {M : Type w} {s : Structure L M} {e : Fin n → M} {ε : μ → M}
 
-lemma val_rewriteMap (f : μ₁ → μ₂) (t : Semiterm L μ₁ n) :
-    (Rew.rewriteMap f t).val s e ε₂ = t.val s e (fun x => ε₂ (f x)) :=
-  by simp[val_rew]; congr
-
 lemma val_embSubsts (w : Fin k → Semiterm L μ n) (t : Semiterm L Empty k) :
     (Rew.embSubsts w t).val s e ε = t.bVal s (fun x ↦ (w x).val s e ε) := by
   simp [val_rew, Empty.eq_elim]; congr
@@ -127,6 +123,26 @@ lemma eval_embSubsts {k} (w : Fin k → Semiterm L μ n) (σ : Semisentence L k)
     Eval s e ε ((Rew.embSubsts w).hom σ) ↔ PVal s (fun x ↦ (w x).val s e ε) σ := by
   simp[eval_rew, Function.comp, Empty.eq_elim]
 
+section fvEnum'
+
+variable [DecidableEq μ] [Inhabited μ]
+
+def fvEnum' (p : Semiformula L μ n) : μ → ℕ := p.fvarList.indexOf
+
+def fvEnumInv' (p : Semiformula L μ n) : ℕ → μ :=
+  fun i ↦ if hi : i < p.fvarList.length then p.fvarList.get ⟨i, hi⟩ else default
+
+lemma fvEnumInv'_fvEnum' (p : Semiformula L μ n) {x : μ} (hx : x ∈ p.fvarList) :
+    fvEnumInv' p (fvEnum' p x) = x := by
+  simp [fvEnumInv', fvEnum']; intro h
+  exact False.elim <| not_le.mpr (List.indexOf_lt_length.mpr $ hx) h
+
+end fvEnum'
+
+end Semiformula
+
+section
+
 open Lean PrettyPrinter Delaborator SubExpr
 
 syntax foformula ".[" foterm,* "]" : foformula
@@ -136,7 +152,7 @@ macro_rules
     let v ← t.getElems.foldrM (β := Lean.TSyntax _) (init := ← `(![])) (fun a s => `(ᵀ“$a” :> $s))
     `((Rew.embSubsts $v).hom “$p”)
 
-end Semiformula
+end
 
 namespace Arith
 
