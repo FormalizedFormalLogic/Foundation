@@ -1,8 +1,56 @@
-import Arithmetization.Definability
-import Logic.FirstOrder.Arith.PAminus
+import Arithmetization.Vorspiel.Vorspiel
 import Mathlib.Algebra.GCDMonoid.Basic
 
 namespace LO.FirstOrder
+
+namespace Semiterm
+
+@[elab_as_elim]
+def arithCases {n} {C : Semiterm ℒₒᵣ ξ n → Sort w}
+  (hbvar : ∀ x : Fin n, C #x)
+  (hfvar : ∀ x : ξ, C &x)
+  (hzero : C ᵀ“0”)
+  (hone  : C ᵀ“1”)
+  (hadd  : ∀ (t u : Semiterm ℒₒᵣ ξ n), C ᵀ“!!t + !!u”)
+  (hmul  : ∀ (t u : Semiterm ℒₒᵣ ξ n), C ᵀ“!!t * !!u”) :
+    ∀ (t : Semiterm ℒₒᵣ ξ n), C t
+  | #x                        => hbvar x
+  | &x                        => hfvar x
+  | func Language.Zero.zero _ => by
+      simpa [Matrix.empty_eq, Operator.const, Operator.operator, Operator.numeral, Operator.Zero.term_eq] using hzero
+  | func Language.One.one _   => by
+      simpa [Matrix.empty_eq, Operator.const, Operator.operator, Operator.numeral, Operator.One.term_eq] using hone
+  | func Language.Add.add v   => by
+    simpa [Operator.operator, Operator.Add.term_eq, Rew.func, ←Matrix.fun_eq_vec₂] using hadd (v 0) (v 1)
+  | func Language.Mul.mul v   => by
+    simpa [Operator.operator, Operator.Mul.term_eq, Rew.func, ←Matrix.fun_eq_vec₂] using hmul (v 0) (v 1)
+
+@[elab_as_elim]
+def arithRec {n} {C : Semiterm ℒₒᵣ ξ n → Sort w}
+  (hbvar : ∀ x : Fin n, C #x)
+  (hfvar : ∀ x : ξ, C &x)
+  (hzero : C ᵀ“0”)
+  (hone  : C ᵀ“1”)
+  (hadd  : ∀ {t u : Semiterm ℒₒᵣ ξ n}, C t → C u → C ᵀ“!!t + !!u”)
+  (hmul  : ∀ {t u : Semiterm ℒₒᵣ ξ n}, C t → C u → C ᵀ“!!t * !!u”) :
+    ∀ (t : Semiterm ℒₒᵣ ξ n), C t
+  | #x                        => hbvar x
+  | &x                        => hfvar x
+  | func Language.Zero.zero _ => by
+      simpa [Matrix.empty_eq, Operator.const, Operator.operator, Operator.numeral, Operator.Zero.term_eq] using hzero
+  | func Language.One.one _   => by
+      simpa [Matrix.empty_eq, Operator.const, Operator.operator, Operator.numeral, Operator.One.term_eq] using hone
+  | func Language.Add.add v   => by
+    have ih0 := arithRec hbvar hfvar hzero hone hadd hmul (v 0)
+    have ih1 := arithRec hbvar hfvar hzero hone hadd hmul (v 1)
+    simpa [Operator.operator, Operator.Add.term_eq, Rew.func, ←Matrix.fun_eq_vec₂] using hadd ih0 ih1
+  | func Language.Mul.mul v   => by
+    have ih0 := arithRec hbvar hfvar hzero hone hadd hmul (v 0)
+    have ih1 := arithRec hbvar hfvar hzero hone hadd hmul (v 1)
+    simpa [Operator.operator, Operator.Mul.term_eq, Rew.func, ←Matrix.fun_eq_vec₂] using hmul ih0 ih1
+  termination_by arithRec _ _ _ _ _ _ t => t.complexity
+
+end Semiterm
 
 namespace Arith
 
@@ -103,6 +151,8 @@ lemma pow_four_eq_sq_sq (x : M) : x^4 = (x^2)^2 := by simp [pow_four, sq, mul_as
 
 instance : CovariantClass M M (· * ·) (· ≤ ·) := ⟨by intro; exact mul_le_mul_left⟩
 
+instance : CovariantClass M M (· + ·) (· ≤ ·) := ⟨by intro; simp⟩
+
 @[simp] lemma one_lt_mul_self_iff {a : M} : 1 < a * a ↔ 1 < a :=
   ⟨(fun h ↦ by push_neg at h ⊢; exact mul_le_one' h h).mtr, fun h ↦ one_lt_mul'' h h⟩
 
@@ -122,6 +172,13 @@ lemma two_mul_lt_sq {i : M} (h : 2 < i) : 2 * i < i ^ 2 := by
 
 lemma succ_le_double_of_pos {a : M} (h : 0 < a) : a + 1 ≤ 2 * a := by
   simpa [two_mul] using pos_iff_one_le.mp h
+
+lemma polynomial_mono (t : Semiterm ℒₒᵣ ξ n) {e₁ e₂ : Fin n → M} {ε₁ ε₂ : ξ → M}
+    (he : ∀ i, e₁ i ≤ e₂ i) (hε : ∀ i, ε₁ i ≤ ε₂ i) :
+    t.val! M e₁ ε₁ ≤ t.val! M e₂ ε₂ := by
+  induction t using Semiterm.arithRec <;> try simp [he, hε, Semiterm.val_func, *]
+  case hadd iht ihu => exact add_le_add iht ihu
+  case hmul iht ihu => exact mul_le_mul iht ihu (by simp) (by simp)
 
 end Model
 

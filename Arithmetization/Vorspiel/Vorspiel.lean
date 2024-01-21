@@ -26,6 +26,47 @@ namespace LO
 
 namespace FirstOrder
 
+variable {L :Language} [L.Zero] [L.One] [L.Add] [L.Mul]
+
+namespace Semiterm
+
+def complexity : Semiterm L ξ n → ℕ
+  | #_       => 0
+  | &_       => 0
+  | func _ v => Finset.sup Finset.univ (fun i ↦ complexity (v i)) + 1
+
+@[simp] lemma complexity_bvar (x : Fin n) : (#x : Semiterm L ξ n).complexity = 0 := rfl
+
+@[simp] lemma complexity_fvar (x : ξ) : (&x : Semiterm L ξ n).complexity = 0 := rfl
+
+lemma complexity_func {k} (f : L.Func k) (v : Fin k → Semiterm L ξ n) : (func f v).complexity = Finset.sup Finset.univ (fun i ↦ complexity (v i)) + 1 := rfl
+
+@[simp] lemma complexity_func_lt {k} (f : L.Func k) (v : Fin k → Semiterm L ξ n) (i) :
+    (v i).complexity < (func f v).complexity := by
+  simp [complexity_func, Nat.lt_add_one_iff]; exact Finset.le_sup (f := fun i ↦ complexity (v i)) (by simp)
+
+@[simp] lemma complexity_zero : (ᵀ“0” : Semiterm L ξ n).complexity = 1 := by
+  simp [Operator.const, Operator.operator, Operator.numeral, Operator.Zero.term_eq, complexity_func]
+
+@[simp] lemma complexity_one : (ᵀ“1” : Semiterm L ξ n).complexity = 1 := by
+  simp [Operator.const, Operator.operator, Operator.numeral, Operator.One.term_eq, complexity_func]
+
+@[simp] lemma complexity_add (t u : Semiterm L ξ n) :
+    (ᵀ“!!t + !!u” : Semiterm L ξ n).complexity = max t.complexity u.complexity + 1 := by
+  simp [Operator.const, Operator.operator, Operator.numeral, Operator.Add.term_eq, complexity_func, Rew.func]
+  rw [show (Finset.univ : Finset (Fin 2)) = {0, 1} from by ext i; cases i using Fin.cases <;> simp [Fin.eq_zero]]
+  simp [sup_eq_max]
+
+@[simp] lemma complexity_mul (t u : Semiterm L ξ n) :
+    (ᵀ“!!t * !!u” : Semiterm L ξ n).complexity = max t.complexity u.complexity + 1 := by
+  simp [Operator.const, Operator.operator, Operator.numeral, Operator.Mul.term_eq, complexity_func, Rew.func]
+  rw [show (Finset.univ : Finset (Fin 2)) = {0, 1} from by ext i; cases i using Fin.cases <;> simp [Fin.eq_zero]]
+  simp [sup_eq_max]
+
+lemma val_bShift' (e : Fin (n + 1) → M) (t : Semiterm L μ n) :
+    (Rew.bShift t).val s e ε = t.val s (e ·.succ) ε := by simp[val_rew, Function.comp]
+
+end Semiterm
 
 namespace Rew
 
