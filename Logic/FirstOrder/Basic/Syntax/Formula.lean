@@ -149,10 +149,10 @@ by simp[Vee.vee]
   by simp[ExQuantifier.ex]
 
 @[simp] lemma univClosure_inj (p q : Semiformula L μ n) : ∀* p = ∀* q ↔ p = q := by
-  induction n <;> simp [*]
+  induction n <;> simp [*, univClosure_succ]
 
 @[simp] lemma exClosure_inj (p q : Semiformula L μ n) : ∃* p = ∃* q ↔ p = q := by
-  induction n <;> simp [*]
+  induction n <;> simp [*, exClosure_succ]
 
 @[simp] lemma imp_inj {p₁ p₂ q₁ q₂ : Semiformula L μ n} :
     p₁ ⟶ p₂ = q₁ ⟶ q₂ ↔ p₁ = q₁ ∧ p₂ = q₂ := by simp [imp_eq]
@@ -289,6 +289,43 @@ def hasDecEq : {n : ℕ} → (p q : Semiformula L μ n) → Decidable (p = q)
 instance : DecidableEq (Semiformula L μ n) := hasDecEq
 
 end Decidable
+
+def fv [DecidableEq μ] : {n : ℕ} → Semiformula L μ n → Finset μ
+  | _, rel _ v  => .biUnion .univ fun i ↦ (v i).fv
+  | _, nrel _ v => .biUnion .univ fun i ↦ (v i).fv
+  | _, ⊤        => ∅
+  | _, ⊥        => ∅
+  | _, p ⋏ q    => fv p ∪ fv q
+  | _, p ⋎ q    => fv p ∪ fv q
+  | _, ∀' p     => fv p
+  | _, ∃' p     => fv p
+
+section fv
+
+variable [DecidableEq μ]
+
+lemma fv_rel {k} (r : L.Rel k) (v : Fin k → Semiterm L μ n) : (rel r v).fv = .biUnion .univ fun i ↦ (v i).fv := rfl
+
+lemma fv_nrel {k} (r : L.Rel k) (v : Fin k → Semiterm L μ n) : (nrel r v).fv = .biUnion .univ fun i ↦ (v i).fv := rfl
+
+@[simp] lemma fv_verum : (⊤ : Semiformula L μ n).fv = ∅ := rfl
+
+@[simp] lemma fv_falsum : (⊥ : Semiformula L μ n).fv = ∅ := rfl
+
+@[simp] lemma fv_and (p q : Semiformula L μ n) : (p ⋏ q).fv = p.fv ∪ q.fv := rfl
+
+@[simp] lemma fv_or (p q : Semiformula L μ n) : (p ⋎ q).fv = p.fv ∪ q.fv := rfl
+
+@[simp] lemma fv_all (p : Semiformula L μ (n + 1)) : (∀' p).fv = p.fv := rfl
+
+@[simp] lemma fv_ex (p : Semiformula L μ (n + 1)) : (∃' p).fv = p.fv := rfl
+
+@[simp] lemma fv_not (p : Semiformula L μ n) : (~p).fv = p.fv := by
+  induction p using rec' <;> simp [*, fv_rel, fv_nrel]
+
+@[simp] lemma fv_imp (p q : Semiformula L μ n) : (p ⟶ q).fv = p.fv ∪ q.fv := by simp [imp_eq]
+
+end fv
 
 end Semiformula
 
@@ -473,7 +510,7 @@ lemma shift.hom_injective : Function.Injective (shift.hom : SyntacticSemiformula
     (substs ![&0]).hom (Rew.shift.hom p) = free.hom p := by simp[←hom_comp_app, substs_mbar_zero_comp_shift_eq_free]
 
 @[simp] protected lemma emb_univClosure {o} [e : IsEmpty o] {σ : Semiformula L o n} :
-    (emb.hom (univClosure σ) : Semiformula L μ 0) = univClosure (emb.hom σ) := by induction n <;> simp[*]
+    (emb.hom (univClosure σ) : Semiformula L μ 0) = univClosure (emb.hom σ) := by induction n <;> simp[*, univClosure_succ]
 
 variable (ω : Rew L μ₁ n₁ μ₂ n₂)
 
@@ -530,6 +567,25 @@ lemma eq_bex_iff {p : Semiformula L μ₁ n₁} {q₁ q₂} :
   simp[LogicSymbol.bex, eq_ex_iff]; constructor
   · rintro ⟨p', ⟨p₁, rfl, p₂, rfl, rfl⟩, rfl⟩; exact ⟨p₁, rfl, p₂, rfl, rfl⟩
   · rintro ⟨p₁, rfl, p₂, rfl, rfl⟩; simp
+
+lemma eq_hom_rewriteMap_of_funEqOn_fv {μ₁ μ₂ n₁ n₂} [DecidableEq μ₁]
+    (p : Semiformula L μ₁ n₁) (f g : μ₁ → Semiterm L μ₂ n₂) (h : Function.funEqOn (· ∈ p.fv) f g) :
+    (Rew.rewriteMap f).hom p = (Rew.rewriteMap g).hom p := by
+  induction p using rec'
+  case hverum => simp
+  case hfalsum => simp
+  case hrel r v =>
+    simp [Rew.rel]; funext i
+    exact eq_rewriteMap_of_funEqOn_fv (v i) f g (by intro x (hx : x ∈ (v i).fv); exact h _ (by simp [fv_rel]; exact ⟨i, hx⟩))
+  case hnrel r v =>
+    simp [Rew.nrel]; funext i
+    exact eq_rewriteMap_of_funEqOn_fv (v i) f g (by intro x (hx : x ∈ (v i).fv); exact h _ (by simp [fv_nrel]; exact ⟨i, hx⟩))
+  case hand p q ihp ihq =>
+    simp; exact ⟨ihp (by intro x (hx : x ∈ p.fv); exact h _ (by simp [hx])), ihq (by intro x (hx : x ∈ q.fv); exact h _ (by simp [hx]))⟩
+  case hor p q ihp ihq =>
+    simp; exact ⟨ihp (by intro x (hx : x ∈ p.fv); exact h _ (by simp [hx])), ihq (by intro x (hx : x ∈ q.fv); exact h _ (by simp [hx]))⟩
+  case hall p ih => simp; exact ih (by intro x (hx : x ∈ fv p); exact h _ (by simp [hx]))
+  case hex p ih => simp; exact ih (by intro x (hx : x ∈ fv p); exact h _ (by simp [hx]))
 
 end Rew
 
@@ -790,7 +846,29 @@ lemma lMap_fix (p : SyntacticSemiformula L₁ n) : lMap Φ (Rew.fix.hom p) = Rew
 lemma lMap_emb {o : Type w} [IsEmpty o] (p : Semiformula L₁ o n) :
     (lMap Φ (Rew.emb.hom p) : Semiformula L₂ μ n) = Rew.emb.hom (lMap Φ p) := lMap_bind _ _ _
 
+section fvEnum
+
+variable [DecidableEq μ] [Inhabited μ]
+
+def fvEnum (p : Semiformula L μ n) : μ → Fin (p.fvarList.length + 1) :=
+  fun x ↦ ⟨p.fvarList.indexOf x, by simp [Nat.lt_succ, List.indexOf_le_length]⟩
+
+def fvEnumInv (p : Semiformula L μ n) : Fin (p.fvarList.length + 1) → μ :=
+  fun i ↦ if hi : ↑i < p.fvarList.length then p.fvarList.get ⟨i, hi⟩ else default
+
+lemma fvEnumInv_fvEnum (p : Semiformula L μ n) {x : μ} (hx : x ∈ p.fvarList) :
+    fvEnumInv p (fvEnum p x) = x := by
+  simp [fvEnumInv, fvEnum]; intro h
+  exact False.elim <| not_le.mpr (List.indexOf_lt_length.mpr $ hx) h
+
+end fvEnum
+
 end Semiformula
+
+def Formula.fvUnivClosure [DecidableEq μ] (p : Formula L μ) : Sentence L :=
+  ∀* (Rew.toS.hom <| (Rew.rewriteMap (Semiformula.fvEnum p)).hom p)
+
+prefix:64 "∀ᶠ* " => Formula.fvUnivClosure
 
 namespace Rew
 

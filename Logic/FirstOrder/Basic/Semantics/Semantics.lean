@@ -104,6 +104,10 @@ lemma val_rewrite (f : μ₁ → Semiterm L μ₂ n) (t : Semiterm L μ₁ n) :
     (Rew.rewrite f t).val s e ε₂ = t.val s e (fun x => (f x).val s e ε₂) :=
   by simp[val_rew]; congr
 
+lemma val_rewriteMap (f : μ₁ → μ₂) (t : Semiterm L μ₁ n) :
+    (Rew.rewriteMap f t).val s e ε₂ = t.val s e (fun x => ε₂ (f x)) :=
+  by simp[val_rew]; congr
+
 lemma val_substs (w : Fin n₁ → Semiterm L μ n₂) (t : Semiterm L μ n₁) :
     (Rew.substs w t).val s e₂ ε = t.val s (fun x => (w x).val s e₂ ε) ε :=
   by simp[val_rew]; congr
@@ -145,6 +149,13 @@ lemma val_fix (a : M) (t : SyntacticSemiterm L n) :
   by simp[val_rew]; congr <;> simp[Function.comp]; exact funext (Nat.cases (by simp) (by simp))
 
 end Syntactic
+
+lemma val_eq_of_funEqOn (t : Semiterm L μ n) (h : Function.funEqOn t.fvar? ε ε') :
+    val s e ε t = val s e ε' t := by
+  induction t <;> simp [val_func]
+  case fvar x => exact h x (by simp [fvar?])
+  case func k f v ih =>
+    congr; funext i; exact ih i (by intro x hx; exact h x (by simp; exact ⟨i, hx⟩))
 
 end Semiterm
 
@@ -244,8 +255,8 @@ lemma eval_nrel {k} {r : L.Rel k} {v} :
     Eval s e ε (∀' p) ↔ ∀ x : M, Eval s (x :> e) ε p := of_eq rfl
 
 @[simp] lemma eval_univClosure {e'} {p : Semiformula L μ n'} :
-    Eval s e' ε (univClosure p) ↔ ∀ e, Eval s e ε p := by
-  induction' n' with n' ih generalizing e' <;> simp[*, eq_finZeroElim]
+    Eval s e' ε (∀* p) ↔ ∀ e, Eval s e ε p := by
+  induction' n' with n' ih generalizing e' <;> simp[*, eq_finZeroElim, univClosure_succ]
   constructor
   · intro h e; simpa using h (Matrix.vecTail e) (Matrix.vecHead e)
   · intro h e x; exact h (x :> e)
@@ -259,7 +270,7 @@ lemma eval_nrel {k} {r : L.Rel k} {v} :
 
 @[simp] lemma eval_exClosure {e'} {p : Semiformula L μ n'} :
     Eval s e' ε (exClosure p) ↔ ∃ e, Eval s e ε p := by
-  induction' n' with n' ih generalizing e' <;> simp[*, eq_finZeroElim]
+  induction' n' with n' ih generalizing e' <;> simp[*, eq_finZeroElim, exClosure_succ]
   constructor
   · rintro ⟨e, x, h⟩; exact ⟨x :> e, h⟩
   · rintro ⟨e, h⟩; exact ⟨Matrix.vecTail e, Matrix.vecHead e, by simpa using h⟩
@@ -292,6 +303,10 @@ lemma eval_rewrite (f : μ₁ → Semiterm L μ₂ n) (p : Semiformula L μ₁ n
     Eval s e ε₂ ((Rew.rewrite f).hom p) ↔ Eval s e (fun x => (f x).val s e ε₂) p :=
   by simp[eval_rew, Function.comp]
 
+lemma eval_rewriteMap (f : μ₁ → μ₂) (p : Semiformula L μ₁ n) :
+    Eval s e ε₂ ((Rew.rewriteMap f).hom p) ↔ Eval s e (fun x => ε₂ (f x)) p :=
+  by simp[eval_rew, Function.comp]
+
 @[simp] lemma eval_castLE (h : n₁ ≤ n₂) (p : Semiformula L μ n₁) :
     Eval s e₂ ε ((Rew.castLE h).hom p) ↔ Eval s (fun x => e₂ (x.castLE h)) ε p := by
   simp[eval_rew, Function.comp]
@@ -321,6 +336,45 @@ variable (ε : ℕ → M)
   by simp[eval_rew, Function.comp]
 
 end Syntactic
+
+lemma eval_iff_of_funEqOn (p : Semiformula L μ n) (h : Function.funEqOn (fvar? p) ε ε') :
+    Eval s e ε p ↔ Eval s e ε' p := by
+  unfold fvar? at h
+  induction p using Semiformula.rec'
+  case hverum => simp
+  case hfalsum => simp
+  case hrel k r v =>
+    simp [eval_rel]; apply iff_of_eq; congr
+    funext i
+    exact Semiterm.val_eq_of_funEqOn (v i) (fun x hx ↦ h x (by simp [fvarList]; exact ⟨i, hx⟩))
+  case hnrel k r v =>
+    simp [eval_nrel]; apply iff_of_eq; congr
+    funext i
+    exact Semiterm.val_eq_of_funEqOn (v i) (fun x hx ↦ h x (by simp [fvarList]; exact ⟨i, hx⟩))
+  case hand p q ihp ihq =>
+    simp; apply and_congr
+    · exact ihp (fun x (hx : x ∈ p.fvarList) ↦ h x $ by simp [hx, fvarList])
+    · exact ihq (fun x (hx : x ∈ q.fvarList) ↦ h x $ by simp [hx, fvarList])
+  case hor p q ihp ihq =>
+    simp; apply or_congr
+    · exact ihp (fun x (hx : x ∈ p.fvarList) ↦ h x $ by simp [hx, fvarList])
+    · exact ihq (fun x (hx : x ∈ q.fvarList) ↦ h x $ by simp [hx, fvarList])
+  case hall p ih =>
+    simp; apply forall_congr'; intro x
+    exact ih (fun x hx ↦ h _ $ by simp [fvar?]; exact hx)
+  case hex p ih =>
+    simp; apply exists_congr; intro x
+    exact ih (fun x hx ↦ h _ $ by simp [fvar?]; exact hx)
+
+@[simp] lemma val_fvUnivClosure [Inhabited μ] [DecidableEq μ] {p : Formula L μ} :
+    Val s Empty.elim (∀ᶠ* p) ↔ ∀ ε, Val s ε p := by
+  simp [Formula.fvUnivClosure, eval_rewriteMap]
+  constructor
+  · intro h ε
+    have := h (fun i ↦ ε $ Semiformula.fvEnumInv _ i)
+    exact (eval_iff_of_funEqOn p (by intro x hx; simp [fvEnumInv_fvEnum p hx])).mp this
+  · intro h e
+    exact h (fun x ↦ e $ Semiformula.fvEnum p x)
 
 end Semiformula
 

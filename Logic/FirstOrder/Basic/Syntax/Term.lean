@@ -304,6 +304,14 @@ variable (e : μ₁ → μ₂)
 
 @[simp] lemma rewriteMap_id : rewriteMap (L := L) (n := n) (id : μ → μ) = Rew.id := by ext <;> simp
 
+lemma eq_rewriteMap_of_funEqOn_fv [DecidableEq μ₁] (t : Semiterm L μ₁ n₁) (f g : μ₁ → Semiterm L μ₂ n₂) (h : Function.funEqOn (· ∈ t.fv) f g) :
+    Rew.rewriteMap f t = Rew.rewriteMap g t := by
+  induction t <;> simp [Rew.func]
+  case fvar x => exact h x (by simp)
+  case func f v ih =>
+    funext i
+    exact ih i (fun x hx ↦ h x (by simp [Semiterm.fv_func]; exact ⟨i, hx⟩))
+
 end rewriteMap
 
 section emb
@@ -641,6 +649,10 @@ abbrev fvar? (t : Semiterm L μ n) (x : μ) : Prop := x ∈ t.fvarList
 @[simp] lemma fvarList_emb {o : Type w} [e : IsEmpty o] {t : Semiterm L o n} : fvarList (Rew.emb t : Semiterm L μ n) = [] := by
   induction t <;> simp[*, List.eq_nil_iff_forall_not_mem, Rew.func]
   case fvar x => { exact IsEmpty.elim' e x }
+
+@[simp] lemma fvarList_to_finset [DecidableEq μ] (t : Semiterm L μ n) : t.fvarList.toFinset = t.fv := by
+  induction t <;> try simp [fvarList, fv_func]
+  case func ih => ext x; simp [←ih]
 
 lemma rew_eq_of_funEqOn (ω₁ ω₂ : Rew L μ₁ n₁ μ₂ n₂) (t : Semiterm L μ₁ n₁)
   (hb : ∀ x, ω₁ #x = ω₂ #x)

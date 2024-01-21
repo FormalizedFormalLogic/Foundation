@@ -4,14 +4,9 @@ namespace LO
 
 namespace FirstOrder
 
-variable {L : Language} [L.ORing]
-
-abbrev Formula.univClosure {n} (p : Formula L (Fin n)) : Sentence L := ∀* (Rew.toS.hom p)
-
-prefix:64 "∀ᵤ* " => Formula.univClosure
+variable {L : Language} [L.ORing] {ξ : Type*} [DecidableEq ξ]
 
 namespace Arith
-
 
 def succInd {ξ} (p : Semiformula L ξ 1) : Formula L ξ := “!p [0] → ∀ (!p [#0] → !p [#0 + 1]) → ∀ !p [#0]”
 
@@ -19,7 +14,7 @@ def orderInd {ξ} (p : Semiformula L ξ 1) : Formula L ξ := “∀ (∀[#0 < #1
 
 def leastNumber {ξ} (p : Semiformula L ξ 1) : Formula L ξ := “∃ !p [#0] → ∃ (!p [#0] ∧ ∀[#0 < #1] ¬!p [#0])”
 
-def succIndᵤ {n} (p : Semiformula L (Fin n) 1) : Sentence L := ∀ᵤ* succInd p
+def succIndᵤ (p : Semiformula L ξ 1) : Sentence L := ∀ᶠ* succInd p
 
 variable (L)
 
@@ -48,8 +43,8 @@ notation "𝐏𝐀⁻" => PAminus ℒₒᵣ
 
 variable {L}
 
-def IndScheme (Γ : {n : ℕ} → Semiformula L (Fin n) 1 → Prop) : Theory L :=
-  { q | ∃ (n : ℕ) (p : Semiformula L (Fin n) 1), Γ p ∧ q = ∀ᵤ* succInd p }
+def IndScheme (Γ : Semiformula L ℕ 1 → Prop) : Theory L :=
+  { q | ∃ (p : Semiformula L ℕ 1), Γ p ∧ q = ∀ᶠ* succInd p }
 
 variable (L)
 

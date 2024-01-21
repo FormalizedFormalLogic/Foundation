@@ -88,7 +88,7 @@ prefix:64 "∀* " => univClosure
 
 @[simp] lemma univClosure_zero (a : α 0) : ∀* a = a := rfl
 
-@[simp] lemma univClosure_succ {n} (a : α (n + 1)) : ∀* a = ∀* ∀' a := rfl
+lemma univClosure_succ {n} (a : α (n + 1)) : ∀* a = ∀* ∀' a := rfl
 
 end UnivQuantifier
 
@@ -104,7 +104,7 @@ prefix:64 "∃* " => exClosure
 
 @[simp] lemma exClosure_zero (a : α 0) : ∃* a = a := rfl
 
-@[simp] lemma exClosure_succ {n} (a : α (n + 1)) : ∃* a = ∃* ∃' a := rfl
+lemma exClosure_succ {n} (a : α (n + 1)) : ∃* a = ∃* ∃' a := rfl
 
 end ExQuantifier
 
@@ -122,11 +122,11 @@ def univClosure₂₂ : {m n : ℕ} → α m n → α m 0
 
 @[simp] lemma univClosure₂₁_zero {n} (a : α 0 n) : univClosure₂₁ a = a := rfl
 
-@[simp] lemma univClosure₂₁_succ {m n} (a : α (m + 1) n) : univClosure₂₁ a = univClosure₂₁ (∀¹ a) := rfl
+lemma univClosure₂₁_succ {m n} (a : α (m + 1) n) : univClosure₂₁ a = univClosure₂₁ (∀¹ a) := rfl
 
 @[simp] lemma univClosure₂₂_zero {m} (a : α m 0) : univClosure₂₂ a = a := rfl
 
-@[simp] lemma univClosure₂₂_succ {m n} (a : α m (n + 1)) : univClosure₂₂ a = univClosure₂₂ (∀² a) := rfl
+lemma univClosure₂₂_succ {m n} (a : α m (n + 1)) : univClosure₂₂ a = univClosure₂₂ (∀² a) := rfl
 
 end UnivQuantifier₂
 
@@ -144,11 +144,11 @@ def exClosure₂₂ : {m n : ℕ} → α m n → α m 0
 
 @[simp] lemma exClosure₂₁_zero {n} (a : α 0 n) : exClosure₂₁ a = a := rfl
 
-@[simp] lemma exClosure₂₁_succ {m n} (a : α (m + 1) n) : exClosure₂₁ a = exClosure₂₁ (∃¹ a) := rfl
+lemma exClosure₂₁_succ {m n} (a : α (m + 1) n) : exClosure₂₁ a = exClosure₂₁ (∃¹ a) := rfl
 
 @[simp] lemma exClosure₂₂_zero {m} (a : α m 0) : exClosure₂₂ a = a := rfl
 
-@[simp] lemma exClosure₂₂_succ {m n} (a : α m (n + 1)) : exClosure₂₂ a = exClosure₂₂ (∃² a) := rfl
+lemma exClosure₂₂_succ {m n} (a : α m (n + 1)) : exClosure₂₂ a = exClosure₂₂ (∃² a) := rfl
 
 end ExQuantifier₂
 

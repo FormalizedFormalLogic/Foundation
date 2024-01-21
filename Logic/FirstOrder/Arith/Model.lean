@@ -75,15 +75,15 @@ lemma modelsTheoryPAminus : ℕ ⊧ₘ* 𝐏𝐀⁻ := by
   case ltTrans => intro l m n; exact Nat.lt_trans
   case ltTri => intro n m; exact Nat.lt_trichotomy n m
 
-lemma modelsSuccInd (p : Semiformula ℒₒᵣ (Fin n) 1) : ℕ ⊧ₘ (∀ᵤ* succInd p) := by
-  simp[Formula.univClosure, succInd, models_iff, Matrix.constant_eq_singleton, Matrix.comp_vecCons',
+lemma modelsSuccInd (p : Semiformula ℒₒᵣ ℕ 1) : ℕ ⊧ₘ (∀ᶠ* succInd p) := by
+  simp[Empty.eq_elim, succInd, models_iff, Matrix.constant_eq_singleton, Matrix.comp_vecCons',
     Semiformula.eval_substs, Semiformula.eval_rew_q Rew.toS, Function.comp]
   intro e hzero hsucc x; induction' x with x ih
   · exact hzero
   · exact hsucc x ih
 
 lemma modelsPeano : ℕ ⊧ₘ* 𝐏𝐀 ∪ 𝐏𝐀⁻ ∪ 𝐄𝐪 :=
-  by simp[Theory.Peano, Theory.IndScheme, modelsTheoryPAminus, Set.univ]; rintro _ k p _ rfl; simp [modelsSuccInd]
+  by simp[Theory.Peano, Theory.IndScheme, modelsTheoryPAminus, Set.univ]; rintro _ p _ rfl; simp [modelsSuccInd]
 
 end Standard
 
