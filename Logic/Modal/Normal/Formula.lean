@@ -9,6 +9,7 @@ inductive Formula (α : Type u) : Type u where
   | and    : Formula α → Formula α → Formula α
   | or     : Formula α → Formula α → Formula α
   | box    : Formula α → Formula α
+  deriving DecidableEq
 
 namespace Formula
 
@@ -192,23 +193,50 @@ def multidia (p : Formula α) : ℕ → Formula α
 
 notation "◇^" n:90 p => multidia p n
 
+def isBox : Formula α → Bool
+  | □_ => true
+  | _  => false
+
 end Formula
 
 abbrev Theory (α : Type u) := Set (Formula α)
 
 namespace Theory
 
-variable (Γ : Theory β)
+variable (Γ : Theory α)
 
-def box : Theory β := { □p | p ∈ Γ }
+def box : Theory α := .box '' Γ
 prefix:74 "□" => Theory.box
 
-lemma box_empty : □(∅ : Theory β) = ∅ := by simp [box]
+@[simp]
+lemma box_subset {Γ Δ : Theory α} (d : Γ ⊆ Δ) : □Γ ⊆ □Δ := by
+  simp_all [box, Set.subset_def];
 
-def dia : Theory β := {◇p | p ∈ Γ}
+def dia : Theory α := .dia '' Γ
 prefix:74 "◇" => Theory.dia
 
-lemma dia_empty : ◇(∅ : Theory β) = ∅ := by simp [dia]
+@[simp]
+lemma dia_subset {Γ Δ : Theory α} (d : Γ ⊆ Δ) : ◇Γ ⊆ ◇Δ := by
+  simp_all [dia, Set.subset_def];
+
+def prebox : Theory α := .box ⁻¹' Γ
+prefix:73 "□⁻¹" => Theory.prebox
+
+@[simp]
+lemma prebox_subset {Γ Δ : Theory α} (d : Γ ⊆ Δ) : □⁻¹Γ ⊆ □⁻¹Δ := by
+  simp_all [prebox, Set.subset_def];
+
+def predia : Theory α := .dia ⁻¹' Γ
+prefix:73 "◇⁻¹" => Theory.predia
+
+@[simp]
+lemma predia_subset {Γ Δ : Theory α} (d : Γ ⊆ Δ) : ◇⁻¹Γ ⊆ ◇⁻¹Δ := by
+  simp_all [predia, Set.subset_def];
+
+def box_prebox {Γ} : □(□⁻¹Γ) = { □p | (p : Formula α) (_ : □p ∈ Γ) } := by aesop;
+
+@[simp]
+def box_prebox_subset {Γ : Theory α} : □(□⁻¹Γ) ⊆ Γ := by simp [box_prebox, Set.subset_def];
 
 end Theory
 

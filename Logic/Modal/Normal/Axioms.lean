@@ -107,7 +107,9 @@ section Logics
 
 abbrev LogicK : AxiomSet α := AxiomK.set
 
-section LogicK
+namespace LogicK
+
+@[simp] lemma subsets_K : 𝐊 ⊆ (𝐊 : AxiomSet α) := by apply Set.Subset.refl
 
 end LogicK
 

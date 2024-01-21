@@ -81,13 +81,37 @@ class LogicGL.Hilbert extends LogicK.Hilbert Bew, HasAxiomL Bew
 
 end Logics
 
+abbrev Context (α : Type u) := Finset (Formula α)
+
+namespace Context
+
+instance : Coe (Context α) (Theory α) := ⟨Finset.toSet⟩
+
+variable [DecidableEq α]
+variable (Γ : Context α)
+
+def box : Context α := Γ.image Formula.box
+prefix:73 "□" => box
+
+@[simp]
+lemma box_coe : (□(↑Γ : Theory α)) = ↑(□Γ : Context α) := by
+  simp only [Theory.box, Context.box, Finset.coe_image];
+
+def dia : Context α := Γ.image Formula.dia
+prefix:73 "◇" => dia
+
+@[simp]
+lemma dia_coe : (◇(↑Γ : Theory α)) = ↑(◇Γ : Context α) := by
+  simp only [Theory.dia, Context.dia, Finset.coe_image];
+
+end Context
 
 variable {α : Type u} [DecidableEq α]
 
 /--
   Hilbert-style deduction system
 -/
-inductive Deduction (Λ : AxiomSet α) : Finset (Formula α) → (Formula α) → Type _
+inductive Deduction (Λ : AxiomSet α) : (Context α) → (Formula α) → Type _
   | axm {Γ p}            : p ∈ Γ → Deduction Λ Γ p
   | maxm {Γ p}           : p ∈ Λ → Deduction Λ Γ p
   | modus_ponens {Γ p q} : Deduction Λ Γ (p ⟶ q) → Deduction Λ Γ p → Deduction Λ Γ q
@@ -105,7 +129,7 @@ inductive Deduction (Λ : AxiomSet α) : Finset (Formula α) → (Formula α) �
 
 notation:45 Γ " ⊢ᴹ[" Λ "] " p => Deduction Λ Γ p
 
-variable (Λ : AxiomSet α) (Γ : Finset (Formula α)) (p : Formula α)
+variable (Λ : AxiomSet α) (Γ : (Context α)) (p : Formula α)
 
 abbrev Deducible := Nonempty (Γ ⊢ᴹ[Λ] p)
 notation:45 Γ " ⊢ᴹ[" Λ "]! " p => Deducible Λ Γ p
@@ -124,12 +148,12 @@ notation:45 "⊬ᴹ[" Λ "]! " p => Unprovable Λ p
 
 namespace Deduction
 
-variable {Λ : AxiomSet α} {Γ : Finset (Formula α)} {p q : Formula α}
+variable {Λ : AxiomSet α} {Γ : (Context α)} {p q : Formula α}
 
 @[simp]
 lemma axm_singleton : {p} ⊢ᴹ[Λ] p := by apply axm (by simp);
 
-def length {Γ : Finset (Formula α)} {p : Formula α} : (Γ ⊢ᴹ[Λ] p) → ℕ
+def length {Γ : (Context α)} {p : Formula α} : (Γ ⊢ᴹ[Λ] p) → ℕ
   | modus_ponens d₁ d₂ => (max d₁.length d₂.length) + 1
   | necessitation d₁ => d₁.length + 1
   | _ => 0
@@ -208,9 +232,29 @@ end Deduction
 
 namespace Deducible
 
+variable {Λ}
+
 @[simp] lemma axm_singleton : {p} ⊢ᴹ[Λ]! p := ⟨Deduction.axm_singleton⟩
 
 lemma modus_ponens {Γ p q} (d₁ : Γ ⊢ᴹ[Λ]! (p ⟶ q)) (d₂ : Γ ⊢ᴹ[Λ]! p) : Γ ⊢ᴹ[Λ]! q := ⟨Deduction.modus_ponens d₁.some d₂.some⟩
+
+lemma conj₁ (Γ p q) : Γ ⊢ᴹ[Λ]! (p ⋏ q) ⟶ p := ⟨Deduction.conj₁ Γ p q⟩
+lemma conj₁' {Γ p q} (d : Γ ⊢ᴹ[Λ]! (p ⋏ q)) : Γ ⊢ᴹ[Λ]! p := (conj₁ _ _ _).modus_ponens d
+
+lemma conj₂ (Γ p q) : Γ ⊢ᴹ[Λ]! (p ⋏ q) ⟶ q := ⟨Deduction.conj₂ Γ p q⟩
+lemma conj₂' {Γ p q} (d : Γ ⊢ᴹ[Λ]! (p ⋏ q)) : Γ ⊢ᴹ[Λ]! q := (conj₂ _ _ _).modus_ponens d
+
+lemma conj₃ (Γ p q) : Γ ⊢ᴹ[Λ]! p ⟶ q ⟶ (p ⋏ q) := ⟨Deduction.conj₃ Γ p q⟩
+lemma conj₃' {Γ p q} (d₁ : Γ ⊢ᴹ[Λ]! p) (d₂ : Γ ⊢ᴹ[Λ]! q) : Γ ⊢ᴹ[Λ]! (p ⋏ q) := (conj₃ _ _ _).modus_ponens d₁ |>.modus_ponens d₂
+
+lemma disj₁ (Γ p q) : Γ ⊢ᴹ[Λ]! p ⟶ (p ⋎ q) := ⟨Deduction.disj₁ Γ p q⟩
+lemma disj₁' {Γ p q} (d : Γ ⊢ᴹ[Λ]! p) : Γ ⊢ᴹ[Λ]! (p ⋎ q) := (disj₁ _ _ _).modus_ponens d
+
+lemma disj₂ (Γ p q) : Γ ⊢ᴹ[Λ]! q ⟶ (p ⋎ q) := ⟨Deduction.disj₂ Γ p q⟩
+lemma disj₂' {Γ p q} (d : Γ ⊢ᴹ[Λ]! q) : Γ ⊢ᴹ[Λ]! (p ⋎ q) := (disj₂ _ _ _).modus_ponens d
+
+lemma disj₃ (Γ p q r) : Γ ⊢ᴹ[Λ]! (p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r) := ⟨Deduction.disj₃ Γ p q r⟩
+lemma disj₃' {Γ p q r} (d₁ : Γ ⊢ᴹ[Λ]! (p ⟶ r)) (d₂ : Γ ⊢ᴹ[Λ]! (q ⟶ r)) (d₃ : Γ ⊢ᴹ[Λ]! (p ⋎ q)) : Γ ⊢ᴹ[Λ]! r := (disj₃ _ _ _ _).modus_ponens d₁ |>.modus_ponens d₂ |>.modus_ponens d₃
 
 end Deducible
 
@@ -236,7 +280,7 @@ variable [IsCommutative _ (λ (p q : Formula α) => p ⋏ q)]
          [IsAssociative _ (λ (p q : Formula α) => p ⋏ q)]
          [IsAssociative _ (λ (p q : Formula α) => p ⋎ q)]
 
-def Sequent (Γ Δ : Finset (Formula α)) : Formula α := ((Γ.fold (· ⋏ ·) ⊤ id) ⟶ (Δ.fold (· ⋎ ·) ⊥ id))
+def Sequent (Γ Δ : (Context α)) : Formula α := ((Γ.fold (· ⋏ ·) ⊤ id) ⟶ (Δ.fold (· ⋎ ·) ⊥ id))
 
 notation "⟪" Γ "⟹" Δ "⟫" => Sequent Γ Δ
 
@@ -244,10 +288,10 @@ notation "⟪" "⟹" Δ "⟫" => Sequent ∅ Δ
 
 notation "⟪" Γ "⟹" "⟫" => Sequent Γ ∅
 
-def ProofS (Γ Δ : Finset (Formula α)) := ⊢ᴹ[Λ] ⟪Γ ⟹ Δ⟫
+def ProofS (Γ Δ : (Context α)) := ⊢ᴹ[Λ] ⟪Γ ⟹ Δ⟫
 
-variable [Union (Finset (Formula α))] [Inter (Finset (Formula α))]
-variable (Γ₁ Γ₂ Δ : Finset (Formula α))
+variable [Union ((Context α))] [Inter ((Context α))]
+variable (Γ₁ Γ₂ Δ : (Context α))
 
 structure Partial where
   union : (Γ₁ ∪ Γ₂) = Δ
@@ -266,6 +310,25 @@ def LogicK.Hilbert.ofKSubset (h : 𝐊 ⊆ Λ) : (LogicK.Hilbert (@Deduction α 
   K _ _ _ := Deduction.maxm $ Set.mem_of_subset_of_mem h (by simp);
 
 instance : LogicK.Hilbert (@Deduction α 𝐊) := LogicK.Hilbert.ofKSubset 𝐊 Set.Subset.rfl
+
+lemma LogicK.Hilbert.deduction_by_boxed_context {Λ : AxiomSet α} (h : 𝐊 ⊆ Λ) {Γ p} (d : Γ ⊢ᴹ[Λ] p) : (□Γ ⊢ᴹ[Λ] □p) := by
+  induction d with
+  | axm h => exact axm (by simp [Context.box]; aesop;)
+  | maxm h => exact necessitation $ maxm h;
+  | @modus_ponens p q _ _ ih₁ ih₂ =>
+      have : □Γ ⊢ᴹ[Λ] (□(p ⟶ q) ⟶ (□p ⟶ □q)) := by apply maxm (by simp_all [AxiomK.set, AxiomK]; aesop);
+      exact this.modus_ponens ih₁ |>.modus_ponens ih₂;
+  | necessitation _ ih => exact necessitation ih
+  | verum => exact necessitation $ verum _
+  | imply₁ => exact necessitation $ imply₁ _ _ _
+  | imply₂ => exact necessitation $ imply₂ _ _ _ _
+  | conj₁ => exact necessitation $ conj₁ _ _ _
+  | conj₂ => exact necessitation $ conj₂ _ _ _
+  | conj₃ => exact necessitation $ conj₃ _ _ _
+  | disj₁ => exact necessitation $ disj₁ _ _ _
+  | disj₂ => exact necessitation $ disj₂ _ _ _
+  | disj₃ => exact necessitation $ disj₃ _ _ _ _
+  | dne => exact necessitation $ dne _ _
 
 def LogicGL.Hilbert.ofGLSubset (h : 𝐆𝐋 ⊆ Λ) : (LogicGL.Hilbert (@Deduction α Λ)) where
   K _ _ _ := Deduction.maxm $ Set.mem_of_subset_of_mem h (by simp);

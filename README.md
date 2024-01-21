@@ -129,7 +129,7 @@ $\mathbf{PA^-}$ is not to be included in $\mathbf{I\Sigma}_n$ or $\mathbf{PA}$ f
 In this formalization, _(Modal) Logic_ means set of axioms.
 
 | Logic            | Definition                    | Notation | Remarks         |
-| :--------------- | ----------------------------- | :------- | --------------- |
+| :--------------: | ----------------------------- | :------- | --------------- |
 | $\mathbf{K}$     | [LO.Modal.Normal.LogicK](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Logics.html#LO.Modal.Normal.LogicK) | `𝐊`      |                 |
 | $\mathbf{KD}$     | [LO.Modal.Normal.LogicKD](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Logics.html#LO.Modal.Normal.LogicKD) | `𝐊𝐃`      |                 |
 | $\mathbf{S4}$    | [LO.Modal.Normal.LogicS4](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Logics.html#LO.Modal.Normal.LogicS4) | `𝐒𝟒`     | Alias of `𝐊𝐓𝟒`. |
@@ -170,6 +170,20 @@ In this formalization, _(Modal) Logic_ means set of axioms.
         ⊬ᴹ[Λ]! ⊥
     ```
   -  **WIP:** Currently, these theorems was proved where only `Λ` is `𝐊`, `𝐊𝐃`, `𝐒𝟒`, `𝐒𝟓`.
+- Strong Completeness of Hilbert-style deduction for `𝐊`
+  ```
+  def Completeness
+    {α β : Type u}
+    (Λ : AxiomSet β)
+    (𝔽 : FrameClass α)
+    := ∀ (Γ : Theory β) (p : Formula β), (Γ ⊨ᴹ[𝔽] p) → (Γ ⊢ᴹ[Λ]! p)
+
+  theorem LogicK.Hilbert.completes
+    {β : Type u} [inst✝ : DecidableEq β] :
+    Completeness
+      (𝐊 : AxiomSet β)
+      (𝔽((𝐊 : AxiomSet β)) : FrameClass (MaximalConsistentTheory (𝐊 : AxiomSet β)))
+  ```
 
 ## References
 - J. Han, F. van Doorn, A formalization of forcing and the unprovability of the continuum hypothesis
@@ -178,3 +192,5 @@ In this formalization, _(Modal) Logic_ means set of axioms.
 - R. Kaye, Models of Peano arithmetic
 - 田中 一之, ゲーデルと20世紀の論理学
 - 菊池 誠 (編者), 数学における証明と真理 ─ 様相論理と数学基礎論
+- P. Blackburn, M. de Rijke, Y. Venema, Modal Logic
+- [Open Logic Project](https://builds.openlogicproject.org/)
