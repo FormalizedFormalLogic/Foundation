@@ -216,12 +216,18 @@ prefix:74 "□" => Theory.box
 lemma box_subset {Γ Δ : Theory α} (d : Γ ⊆ Δ) : □Γ ⊆ □Δ := by
   simp_all [box, Set.subset_def];
 
+lemma box_union {Γ Δ : Theory α} : □(Γ ∪ Δ) = □Γ ∪ □Δ := by
+  simp_all [box, Set.image_union]
+
 def dia : Theory α := .dia '' Γ
 prefix:74 "◇" => Theory.dia
 
 @[simp]
 lemma dia_subset {Γ Δ : Theory α} (d : Γ ⊆ Δ) : ◇Γ ⊆ ◇Δ := by
   simp_all [dia, Set.subset_def];
+
+lemma dia_union {Γ Δ : Theory α} : ◇(Γ ∪ Δ) = ◇Γ ∪ ◇Δ := by
+  simp_all [dia, Set.image_union]
 
 def prebox : Theory α := .box ⁻¹' Γ
 prefix:73 "□⁻¹" => Theory.prebox
@@ -243,5 +249,36 @@ def box_prebox {Γ} : □(□⁻¹Γ) = { □p | (p : Formula α) (_ : □p ∈ 
 def box_prebox_subset {Γ : Theory α} : □(□⁻¹Γ) ⊆ Γ := by simp [box_prebox, Set.subset_def];
 
 end Theory
+
+abbrev Context (α : Type u) := Finset (Formula α)
+
+namespace Context
+
+-- instance : Coe (Context α) (Theory α) := ⟨Finset.toSet⟩
+
+variable [DecidableEq α]
+variable (Γ : Context α)
+
+def box : Context α := Γ.image Formula.box
+prefix:73 "□" => box
+
+lemma box_union {Γ₁ Γ₂ : Context α} : (□(Γ₁ ∪ Γ₂) : Context α) = (□Γ₁ ∪ □Γ₂ : Context α) := by
+  simp only [Theory.box, Context.box, Finset.image_union]
+
+@[simp]
+lemma box_coe : (□(↑Γ : Theory α)) = ↑(□Γ : Context α) := by
+  simp only [Theory.box, Context.box, Finset.coe_image];
+
+def dia : Context α := Γ.image Formula.dia
+prefix:73 "◇" => dia
+
+lemma dia_union {Γ₁ Γ₂ : Context α} : (◇(Γ₁ ∪ Γ₂) : Context α) = (◇Γ₁ ∪ ◇Γ₂ : Context α) := by
+  simp only [Theory.dia, Context.dia, Finset.image_union]
+
+@[simp]
+lemma dia_coe : (◇(↑Γ : Theory α)) = ↑(◇Γ : Context α) := by
+  simp only [Theory.dia, Context.dia, Finset.coe_image];
+
+end Context
 
 end LO.Modal.Normal

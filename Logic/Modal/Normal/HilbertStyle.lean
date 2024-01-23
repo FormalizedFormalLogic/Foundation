@@ -3,6 +3,8 @@ import Logic.Logic.HilbertStyle2
 import Logic.Modal.Normal.Formula
 import Logic.Modal.Normal.Axioms
 
+attribute [simp] Finset.subset_union_right Finset.subset_union_left
+
 namespace LO
 
 namespace Hilbert
@@ -12,7 +14,7 @@ open LO.Modal.Normal
 variable {F : Type u} [ModalLogicSymbol F] [DecidableEq F] (Bew : Finset F → F → Sort*)
 
 class HasNecessitation where
-  necessitation {Γ : Finset F} {p : F} : (Bew Γ p) → (Bew Γ (□p))
+  necessitation {Γ p} : (Bew ∅ p) → (Bew Γ (□p))
 
 class HasAxiomK where
   K (Γ : Finset F) (p q : F) : Bew Γ $ AxiomK p q
@@ -81,41 +83,16 @@ class LogicGL.Hilbert extends LogicK.Hilbert Bew, HasAxiomL Bew
 
 end Logics
 
-abbrev Context (α : Type u) := Finset (Formula α)
-
-namespace Context
-
-instance : Coe (Context α) (Theory α) := ⟨Finset.toSet⟩
-
-variable [DecidableEq α]
-variable (Γ : Context α)
-
-def box : Context α := Γ.image Formula.box
-prefix:73 "□" => box
-
-@[simp]
-lemma box_coe : (□(↑Γ : Theory α)) = ↑(□Γ : Context α) := by
-  simp only [Theory.box, Context.box, Finset.coe_image];
-
-def dia : Context α := Γ.image Formula.dia
-prefix:73 "◇" => dia
-
-@[simp]
-lemma dia_coe : (◇(↑Γ : Theory α)) = ↑(◇Γ : Context α) := by
-  simp only [Theory.dia, Context.dia, Finset.coe_image];
-
-end Context
-
 variable {α : Type u} [DecidableEq α]
 
 /--
   Hilbert-style deduction system
 -/
-inductive Deduction (Λ : AxiomSet α) : (Context α) → (Formula α) → Type _
+inductive Deduction (Λ : AxiomSet α) : (Context α) → (Formula α) → Type _ where
   | axm {Γ p}            : p ∈ Γ → Deduction Λ Γ p
   | maxm {Γ p}           : p ∈ Λ → Deduction Λ Γ p
-  | modus_ponens {Γ p q} : Deduction Λ Γ (p ⟶ q) → Deduction Λ Γ p → Deduction Λ Γ q
-  | necessitation {Γ p}  : Deduction Λ Γ p → Deduction Λ Γ (□p)
+  | modus_ponens {Γ₁ Γ₂ p q} : Deduction Λ Γ₁ (p ⟶ q) → Deduction Λ Γ₂ p → Deduction Λ (Γ₁ ∪ Γ₂) q
+  | necessitation {Γ p}  : Deduction Λ ∅ p → Deduction Λ Γ (□p)
   | verum (Γ)            : Deduction Λ Γ ⊤
   | imply₁ (Γ) (p q)     : Deduction Λ Γ (p ⟶ q ⟶ p)
   | imply₂ (Γ) (p q r)   : Deduction Λ Γ ((p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r)
@@ -175,12 +152,9 @@ def weakening' {Γ Δ p} (hs : Γ ⊆ Δ) : (Γ ⊢ᴹ[Λ] p) → (Δ ⊢ᴹ[Λ]
   | axm h => axm (hs h)
   | maxm h => maxm h
   | modus_ponens h₁ h₂ => by
-      have ih₁ := weakening' hs h₁;
-      have ih₂ := weakening' hs h₂;
-      exact modus_ponens ih₁ ih₂;
-  | necessitation h => by
-      have ih := weakening' hs h;
-      exact necessitation ih;
+      simp [Finset.union_subset_iff] at hs;
+      simpa using (h₁.weakening' hs.1).modus_ponens (h₂.weakening' hs.2);
+  | necessitation h => necessitation $ h.weakening' (by simp)
   | verum _ => by apply verum
   | imply₁ _ _ _ => by apply imply₁
   | imply₂ _ _ _ _ => by apply imply₂
@@ -207,8 +181,9 @@ instance : Hilbert.Classical (Deduction Λ) where
   disj₃        := disj₃;
   dne          := dne;
 
-instance : HasNecessitation (Deduction Λ) where
-  necessitation := by apply necessitation;
+def modus_ponens' {Γ p q} : (Γ ⊢ᴹ[Λ] (p ⟶ q)) → (Γ ⊢ᴹ[Λ] p) → (Γ ⊢ᴹ[Λ] q) := Hilbert.modus_ponens'
+
+instance : HasNecessitation (Deduction Λ) := ⟨necessitation⟩
 
 lemma maxm_subset {Λ Λ'} (dΛ : Γ ⊢ᴹ[Λ] p) : (Λ ⊆ Λ') → (Γ ⊢ᴹ[Λ'] p) := by
   intro hΛ;
@@ -228,10 +203,17 @@ lemma maxm_subset {Λ Λ'} (dΛ : Γ ⊢ᴹ[Λ] p) : (Λ ⊆ Λ') → (Γ ⊢ᴹ
   | disj₃ => apply disj₃
   | dne => apply dne
 
-/-
-lemma efq : Γ ⊢ᴹ[Λ] (⊥ ⟶ p) := by
-  have h := HasEFQ.efq Γ p;
+def dtl {Γ p q} : (Γ ⊢ᴹ[Λ] (p ⟶ q)) → ((insert p Γ) ⊢ᴹ[Λ] q) := Hilbert.dtl
+
+/--
+  TODO: 成り立つはず．
+  - <https://www.mv.helsinki.fi/home/negri/selected_pub/dedthm.pdf>
 -/
+def dtr {Γ p q} : ((insert p Γ) ⊢ᴹ[Λ] q) → (Γ ⊢ᴹ[Λ] (p ⟶ q)) := by sorry;
+
+instance : HasDT (Deduction Λ) := ⟨dtr⟩
+
+def efq (Γ p) : Γ ⊢ᴹ[Λ] (⊥ ⟶ p) := HasEFQ.efq Γ p
 
 end Deduction
 
@@ -241,29 +223,30 @@ variable {Λ}
 
 @[simp] lemma axm_singleton : {p} ⊢ᴹ[Λ]! p := ⟨Deduction.axm_singleton⟩
 
-lemma modus_ponens {Γ p q} (d₁ : Γ ⊢ᴹ[Λ]! (p ⟶ q)) (d₂ : Γ ⊢ᴹ[Λ]! p) : Γ ⊢ᴹ[Λ]! q := ⟨Deduction.modus_ponens d₁.some d₂.some⟩
+lemma modus_ponens {Γ₁ Γ₂ p q} (d₁ : Γ₁ ⊢ᴹ[Λ]! (p ⟶ q)) (d₂ : Γ₂ ⊢ᴹ[Λ]! p) : (Γ₁ ∪ Γ₂) ⊢ᴹ[Λ]! q := ⟨Deduction.modus_ponens d₁.some d₂.some⟩
+lemma modus_ponens' {Γ p q} (d₁ : Γ ⊢ᴹ[Λ]! (p ⟶ q)) (d₂ : Γ ⊢ᴹ[Λ]! p) : Γ ⊢ᴹ[Λ]! q := ⟨Hilbert.modus_ponens' d₁.some d₂.some⟩
 
 lemma conj₁ (Γ p q) : Γ ⊢ᴹ[Λ]! (p ⋏ q) ⟶ p := ⟨Deduction.conj₁ Γ p q⟩
-lemma conj₁' {Γ p q} (d : Γ ⊢ᴹ[Λ]! (p ⋏ q)) : Γ ⊢ᴹ[Λ]! p := (conj₁ _ _ _).modus_ponens d
+lemma conj₁' {Γ p q} (d : Γ ⊢ᴹ[Λ]! (p ⋏ q)) : Γ ⊢ᴹ[Λ]! p := (conj₁ _ _ _).modus_ponens' d
 
 lemma conj₂ (Γ p q) : Γ ⊢ᴹ[Λ]! (p ⋏ q) ⟶ q := ⟨Deduction.conj₂ Γ p q⟩
-lemma conj₂' {Γ p q} (d : Γ ⊢ᴹ[Λ]! (p ⋏ q)) : Γ ⊢ᴹ[Λ]! q := (conj₂ _ _ _).modus_ponens d
+lemma conj₂' {Γ p q} (d : Γ ⊢ᴹ[Λ]! (p ⋏ q)) : Γ ⊢ᴹ[Λ]! q := (conj₂ _ _ _).modus_ponens' d
 
 lemma conj₃ (Γ p q) : Γ ⊢ᴹ[Λ]! p ⟶ q ⟶ (p ⋏ q) := ⟨Deduction.conj₃ Γ p q⟩
-lemma conj₃' {Γ p q} (d₁ : Γ ⊢ᴹ[Λ]! p) (d₂ : Γ ⊢ᴹ[Λ]! q) : Γ ⊢ᴹ[Λ]! (p ⋏ q) := (conj₃ _ _ _).modus_ponens d₁ |>.modus_ponens d₂
+lemma conj₃' {Γ p q} (d₁ : Γ ⊢ᴹ[Λ]! p) (d₂ : Γ ⊢ᴹ[Λ]! q) : Γ ⊢ᴹ[Λ]! (p ⋏ q) := (conj₃ _ _ _).modus_ponens' d₁ |>.modus_ponens' d₂
 
 lemma disj₁ (Γ p q) : Γ ⊢ᴹ[Λ]! p ⟶ (p ⋎ q) := ⟨Deduction.disj₁ Γ p q⟩
-lemma disj₁' {Γ p q} (d : Γ ⊢ᴹ[Λ]! p) : Γ ⊢ᴹ[Λ]! (p ⋎ q) := (disj₁ _ _ _).modus_ponens d
+lemma disj₁' {Γ p q} (d : Γ ⊢ᴹ[Λ]! p) : Γ ⊢ᴹ[Λ]! (p ⋎ q) := (disj₁ _ _ _).modus_ponens' d
 
 lemma disj₂ (Γ p q) : Γ ⊢ᴹ[Λ]! q ⟶ (p ⋎ q) := ⟨Deduction.disj₂ Γ p q⟩
-lemma disj₂' {Γ p q} (d : Γ ⊢ᴹ[Λ]! q) : Γ ⊢ᴹ[Λ]! (p ⋎ q) := (disj₂ _ _ _).modus_ponens d
+lemma disj₂' {Γ p q} (d : Γ ⊢ᴹ[Λ]! q) : Γ ⊢ᴹ[Λ]! (p ⋎ q) := (disj₂ _ _ _).modus_ponens' d
 
 lemma disj₃ (Γ p q r) : Γ ⊢ᴹ[Λ]! (p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r) := ⟨Deduction.disj₃ Γ p q r⟩
 lemma disj₃' {Γ p q r} (d₁ : Γ ⊢ᴹ[Λ]! (p ⟶ r)) (d₂ : Γ ⊢ᴹ[Λ]! (q ⟶ r)) (d₃ : Γ ⊢ᴹ[Λ]! (p ⋎ q)) : Γ ⊢ᴹ[Λ]! r :=
   (disj₃ _ _ _ _)
-    |>.modus_ponens d₁
-    |>.modus_ponens d₂
-    |>.modus_ponens d₃
+    |>.modus_ponens' d₁
+    |>.modus_ponens' d₂
+    |>.modus_ponens' d₃
 
 end Deducible
 
@@ -280,6 +263,96 @@ lemma Provable.consistent_no_bot : (⊬ᴹ[Λ]! ⊥) → (⊥ ∉ Λ) := by
   intro h; by_contra hC;
   have : ⊢ᴹ[Λ]! ⊥ := ⟨Deduction.maxm hC⟩;
   aesop;
+
+@[simp] def TheoryDeducible (Λ) (Γ : Theory α) (p) := ∃ (Δ : Context α), (↑Δ ⊆ Γ) ∧ (Δ ⊢ᴹ[Λ]! p)
+notation:40 Γ " ⊢ᴹ[" Λ "]! " p => TheoryDeducible Λ Γ p
+
+@[simp] abbrev TheoryUndeducible (Λ) (Γ : Theory α) (p) := ¬(Γ ⊢ᴹ[Λ]! p)
+notation:40 Γ " ⊬ᴹ[" Λ "]! " p => TheoryUndeducible Λ Γ p
+
+namespace TheoryDeducible
+
+variable {Λ : AxiomSet α}
+
+lemma axm {Γ : Theory α} {p} : (p ∈ Γ) → (Γ ⊢ᴹ[Λ]! p) := by
+  intro hp;
+  existsi {p}, (by aesop);
+  exact ⟨(Deduction.axm (by simp))⟩;
+
+lemma maxm {Γ : Theory α} {p} : (p ∈ Λ) → (Γ ⊢ᴹ[Λ]! p) := by
+  intro hp;
+  existsi ∅, (by aesop);
+  exact ⟨(Deduction.maxm hp)⟩;
+
+lemma modus_ponens' {Γ : Theory α} {p q : Formula α} : (Γ ⊢ᴹ[Λ]! (p ⟶ q)) → (Γ ⊢ᴹ[Λ]! p) → (Γ ⊢ᴹ[Λ]! q) := by
+  intro h₁ h₂;
+  simp [TheoryDeducible] at h₁ h₂;
+  have ⟨Δ₁, ⟨hΔ₁₁, ⟨hΔ₁₂⟩⟩⟩ := h₁;
+  have ⟨Δ₂, ⟨hΔ₂₁, ⟨hΔ₂₂⟩⟩⟩ := h₂;
+
+  have hpq : (Δ₁ ∪ Δ₂) ⊢ᴹ[Λ] (p ⟶ q) := hΔ₁₂.weakening' (by simp);
+  have hp : (Δ₁ ∪ Δ₂) ⊢ᴹ[Λ] p := hΔ₂₂.weakening' (by simp);
+
+  existsi (Δ₁ ∪ Δ₂), (by aesop);
+  exact ⟨(hpq.modus_ponens' hp)⟩
+
+lemma monotone : Monotone (λ (Γ : Theory α) => Γ ⊢ᴹ[Λ]! p) := by
+  rintro _ _ h ⟨Δ, hΔ₁, ⟨hΔ₂⟩⟩;
+  existsi Δ;
+  constructor;
+  . apply Set.Subset.trans hΔ₁ h;
+  . exact ⟨hΔ₂⟩;
+
+lemma conj₁ (Γ : Theory α) (p q : Formula α) : (Γ ⊢ᴹ[Λ]! (p ⋏ q) ⟶ p) := by
+  simp [TheoryDeducible];
+  existsi ∅, by simp;
+  apply Deducible.conj₁ ∅ p q;
+
+lemma conj₁' {Γ : Theory α} {p q : Formula α } (d : Γ ⊢ᴹ[Λ]! (p ⋏ q)) : Γ ⊢ᴹ[Λ]! p := (conj₁ _ _ _).modus_ponens' d
+
+lemma conj₂ (Γ : Theory α) (p q : Formula α) : (Γ ⊢ᴹ[Λ]! (p ⋏ q) ⟶ q) := by
+  simp [TheoryDeducible];
+  existsi ∅, by simp;
+  apply Deducible.conj₂ ∅ p q;
+
+lemma conj₂' {Γ : Theory α} {p q : Formula α } (d : Γ ⊢ᴹ[Λ]! (p ⋏ q)) : Γ ⊢ᴹ[Λ]! q := (conj₂ _ _ _).modus_ponens' d
+
+lemma conj₃ (Γ : Theory α) (p q : Formula α) : (Γ ⊢ᴹ[Λ]! p ⟶ q ⟶ (p ⋏ q)) := by
+  simp [TheoryDeducible];
+  existsi ∅, by simp;
+  apply Deducible.conj₃ ∅ p q;
+
+lemma conj₃' {Γ : Theory α} {p q : Formula α } (d₁ : Γ ⊢ᴹ[Λ]! p) (d₂ : Γ ⊢ᴹ[Λ]! q) : Γ ⊢ᴹ[Λ]! (p ⋏ q) :=
+  (conj₃ _ _ _)
+    |>.modus_ponens' d₁
+    |>.modus_ponens' d₂
+
+lemma disj₁ (Γ : Theory α) (p q : Formula α) : (Γ ⊢ᴹ[Λ]! p ⟶ (p ⋎ q)) := by
+  simp [TheoryDeducible];
+  existsi ∅, by simp;
+  apply Deducible.disj₁ ∅ p q;
+
+lemma disj₁' {Γ : Theory α} {p q : Formula α } (d : Γ ⊢ᴹ[Λ]! p) : Γ ⊢ᴹ[Λ]! (p ⋎ q) := (disj₁ _ _ _).modus_ponens' d
+
+lemma disj₂ (Γ : Theory α) (p q : Formula α) : (Γ ⊢ᴹ[Λ]! q ⟶ (p ⋎ q)) := by
+  simp [TheoryDeducible];
+  existsi ∅, by simp;
+  apply Deducible.disj₂ ∅ p q;
+
+lemma disj₂' {Γ : Theory α} {p q : Formula α } (d : Γ ⊢ᴹ[Λ]! q) : Γ ⊢ᴹ[Λ]! (p ⋎ q) := (disj₂ _ _ _).modus_ponens' d
+
+lemma disj₃ (Γ : Theory α) (p q r : Formula α) : (Γ ⊢ᴹ[Λ]! (p ⟶ r) ⟶ (q ⟶ r) ⟶ ((p ⋎ q) ⟶ r)) := by
+  simp [TheoryDeducible];
+  existsi ∅, by simp;
+  apply Deducible.disj₃ ∅ p q r;
+
+lemma disj₃' {Γ : Theory α} {p q r : Formula α } (d₁ : Γ ⊢ᴹ[Λ]! (p ⟶ r)) (d₂ : Γ ⊢ᴹ[Λ]! (q ⟶ r)) (d₃ : Γ ⊢ᴹ[Λ]! (p ⋎ q)) : Γ ⊢ᴹ[Λ]! r :=
+  (disj₃ _ _ _ _)
+    |>.modus_ponens' d₁
+    |>.modus_ponens' d₂
+    |>.modus_ponens' d₃
+
+end TheoryDeducible
 
 -- TODO: 直接有限モデルを構成する方法（鹿島『コンピュータサイエンスにおける様相論理』2.8参照）で必要になる筈の定義だが，使わないかも知れない．
 section
@@ -315,18 +388,18 @@ variable [DecidableEq α]
 
 open Deduction Hilbert
 
-def LogicK.Hilbert.ofKSubset (h : 𝐊 ⊆ Λ) : (LogicK.Hilbert (@Deduction α Λ)) where
+def LogicK.Hilbert.ofKSubset (h : 𝐊 ⊆ Λ) : (LogicK.Hilbert (Deduction (Λ : AxiomSet α))) where
   K _ _ _ := Deduction.maxm $ Set.mem_of_subset_of_mem h (by simp);
 
-instance : LogicK.Hilbert (@Deduction α 𝐊) := LogicK.Hilbert.ofKSubset 𝐊 Set.Subset.rfl
+instance : LogicK.Hilbert (Deduction (𝐊 : AxiomSet α)) := LogicK.Hilbert.ofKSubset 𝐊 Set.Subset.rfl
 
 lemma LogicK.Hilbert.deduction_by_boxed_context {Λ : AxiomSet α} (h : 𝐊 ⊆ Λ) {Γ p} (d : Γ ⊢ᴹ[Λ] p) : (□Γ ⊢ᴹ[Λ] □p) := by
   induction d with
   | axm h => exact axm (by simp [Context.box]; aesop;)
   | maxm h => exact necessitation $ maxm h;
-  | @modus_ponens p q _ _ ih₁ ih₂ =>
-      have : □Γ ⊢ᴹ[Λ] (□(p ⟶ q) ⟶ (□p ⟶ □q)) := by apply maxm (by simp_all [AxiomK.set, AxiomK]; aesop);
-      exact this.modus_ponens ih₁ |>.modus_ponens ih₂;
+  | @modus_ponens Γ₁ Γ₂ p q _ _ ih₁ ih₂ =>
+      have d : □Γ₁ ∪ □Γ₂ ⊢ᴹ[Λ] (□(p ⟶ q) ⟶ (□p ⟶ □q)) := .maxm (by simp_all [AxiomK.set, AxiomK]; aesop);
+      simpa [Context.box_union] using d |>.modus_ponens' (ih₁.weakening' (by simp)) |>.modus_ponens' (ih₂.weakening' (by simp));
   | necessitation _ ih => exact necessitation ih
   | verum => exact necessitation $ verum _
   | imply₁ => exact necessitation $ imply₁ _ _ _
@@ -339,44 +412,44 @@ lemma LogicK.Hilbert.deduction_by_boxed_context {Λ : AxiomSet α} (h : 𝐊 ⊆
   | disj₃ => exact necessitation $ disj₃ _ _ _ _
   | dne => exact necessitation $ dne _ _
 
-def LogicGL.Hilbert.ofGLSubset (h : 𝐆𝐋 ⊆ Λ) : (LogicGL.Hilbert (@Deduction α Λ)) where
+def LogicGL.Hilbert.ofGLSubset (h : 𝐆𝐋 ⊆ Λ) : (LogicGL.Hilbert (Deduction (Λ : AxiomSet α))) where
   K _ _ _ := Deduction.maxm $ Set.mem_of_subset_of_mem h (by simp);
   L _ _ := Deduction.maxm $ Set.mem_of_subset_of_mem h (by simp);
 
-instance : LogicGL.Hilbert (@Deduction α 𝐆𝐋) := LogicGL.Hilbert.ofGLSubset _ Set.Subset.rfl
+instance : LogicGL.Hilbert (Deduction (𝐆𝐋 : AxiomSet α)) := LogicGL.Hilbert.ofGLSubset _ Set.Subset.rfl
 
-def LogicS4.Hilbert.ofS4Subset (_ : 𝐒𝟒 ⊆ Λ) : (LogicS4.Hilbert (@Deduction α Λ)) where
+def LogicS4.Hilbert.ofS4Subset (_ : 𝐒𝟒 ⊆ Λ) : (LogicS4.Hilbert (Deduction (Λ : AxiomSet α))) where
   K _ _ _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by assumption) (by simp);
   T _ _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by assumption) (by simp);
   A4 _ _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by assumption) (by simp);
 
-instance : LogicS4.Hilbert (@Deduction α 𝐒𝟒) := LogicS4.Hilbert.ofS4Subset 𝐒𝟒 Set.Subset.rfl
+instance : LogicS4.Hilbert (Deduction (𝐒𝟒 : AxiomSet α)) := LogicS4.Hilbert.ofS4Subset 𝐒𝟒 Set.Subset.rfl
 
 
-instance : LogicS4.Hilbert (@Deduction α 𝐒𝟒.𝟐) := LogicS4.Hilbert.ofS4Subset _ (by simp)
+instance : LogicS4.Hilbert (Deduction (𝐒𝟒.𝟐 : AxiomSet α)) := LogicS4.Hilbert.ofS4Subset _ (by simp)
 
-instance : LogicS4Dot2.Hilbert (@Deduction α 𝐒𝟒.𝟐) where
+instance : LogicS4Dot2.Hilbert (Deduction (𝐒𝟒.𝟐 : AxiomSet α)) where
   Dot2 _ _ := by apply Deduction.maxm; simp;
 
 
-instance : LogicS4.Hilbert (@Deduction α 𝐒𝟒.𝟑) := LogicS4.Hilbert.ofS4Subset _ (by simp)
+instance : LogicS4.Hilbert (Deduction (𝐒𝟒.𝟑 : AxiomSet α)) := LogicS4.Hilbert.ofS4Subset _ (by simp)
 
-instance : LogicS4Dot3.Hilbert (@Deduction α 𝐒𝟒.𝟑) where
+instance : LogicS4Dot3.Hilbert (Deduction (𝐒𝟒.𝟑 : AxiomSet α)) where
   Dot3 _ p q := by apply Deduction.maxm; apply Set.mem_union_right; existsi p, q; simp;
 
 
-instance : LogicS4.Hilbert (@Deduction α 𝐒𝟒𝐆𝐫𝐳) := LogicS4.Hilbert.ofS4Subset _ (by simp)
+instance : LogicS4.Hilbert (Deduction (𝐒𝟒𝐆𝐫𝐳 : AxiomSet α)) := LogicS4.Hilbert.ofS4Subset _ (by simp)
 
-instance : LogicS4Grz.Hilbert (@Deduction α 𝐒𝟒𝐆𝐫𝐳) where
+instance : LogicS4Grz.Hilbert (Deduction (𝐒𝟒𝐆𝐫𝐳 : AxiomSet α)) where
   Grz _ _ := by apply Deduction.maxm; simp;
 
 
-def LogicS5.Hilbert.ofS5Subset (_ : 𝐒𝟓 ⊆ Λ) : (LogicS5.Hilbert (@Deduction α Λ)) where
+def LogicS5.Hilbert.ofS5Subset (_ : 𝐒𝟓 ⊆ Λ) : (LogicS5.Hilbert (Deduction (Λ : AxiomSet α))) where
   K _ _ _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by assumption) (by simp);
   T _ _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by assumption) (by simp);
   A5 _ _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by assumption) (by simp);
 
-instance : LogicS5.Hilbert (@Deduction α 𝐒𝟓) := LogicS5.Hilbert.ofS5Subset 𝐒𝟓 Set.Subset.rfl
+instance : LogicS5.Hilbert (Deduction (𝐒𝟓 : AxiomSet α)) := LogicS5.Hilbert.ofS5Subset 𝐒𝟓 Set.Subset.rfl
 
 end Modal.Normal
 

@@ -2,7 +2,6 @@ import Mathlib.Logic.Encodable.Lattice
 import Logic.Modal.Normal.Formula
 import Logic.Modal.Normal.HilbertStyle
 import Logic.Modal.Normal.Semantics
-import Logic.Modal.Normal.Soundness
 
 /-!
 # Completeness of Normal Modal Logic
@@ -21,136 +20,6 @@ attribute [simp] Finset.subset_union_right Finset.subset_union_left
 attribute [simp] Set.insert_subset_iff
 
 variable {α β : Type u} [Inhabited α] [DecidableEq β] [Inhabited β]
-
-def Formula.FrameConsequence (F : Frame α) (Γ : Theory β) (p : Formula β) := ∀ V w, (⊧ᴹ[⟨F, V⟩, w] Γ) → (⊧ᴹ[⟨F, V⟩, w] p)
-notation Γ " ⊨ᴹ[" F "] " p => Formula.FrameConsequence F Γ p
-notation Γ " ⊭ᴹ[" F "] " p => ¬(Γ ⊨ᴹ[F] p)
-
-lemma Formula.FrameConsequence.modus_ponens {F : Frame α} {Γ : Theory β} {p : Formula β} : (Γ ⊨ᴹ[F] p ⟶ q) → (Γ ⊨ᴹ[F] p) → (Γ ⊨ᴹ[F] q) := by
-  intro hpq hp V w h;
-  have hpq := by simpa using hpq V w h;
-  have hp := by simpa using hp V w h;
-  exact hpq hp;
-
-def Formula.FrameClassConsequence (𝔽 : FrameClass α) (Γ : Theory β) (p : Formula β) := ∀ F ∈ 𝔽, Γ ⊨ᴹ[F] p
-notation Γ " ⊨ᴹ[" 𝔽 "] " p => Formula.FrameClassConsequence 𝔽 Γ p
-notation Γ " ⊭ᴹ[" 𝔽 "] " p => ¬(Γ ⊨ᴹ[𝔽] p)
-
-namespace Formula.FrameClassConsequence
-
-lemma modus_ponens {𝔽 : FrameClass α} {Γ : Theory β} {p : Formula β} : (Γ ⊨ᴹ[𝔽] p ⟶ q) → (Γ ⊨ᴹ[𝔽] p) → (Γ ⊨ᴹ[𝔽] q) := by
-  simp [Formula.FrameClassConsequence];
-  intro hpq hp F hF;
-  exact (hpq F hF).modus_ponens (hp F hF);
-
-/-
-lemma neg {𝔽 : FrameClass α} {Γ : Theory β} {p : Formula β} : (Γ ⊨ᴹ[𝔽] p) ↔ (Γ ⊭ᴹ[𝔽] ~p) := by
-  constructor;
-  . intro h₁;
-    by_contra h₂;
-    have := h₂.modus_ponens h₁;
-    simp [FrameClassConsequence, FrameConsequence, Satisfies] at this;
-  . intro h;
-    simp [Formula.FrameClassConsequence];
-    intro F hF;
--/
-
-end Formula.FrameClassConsequence
-
-@[simp]
-def ExtendedDeducible (Λ) (Γ : Theory β) (p) := ∃ (Δ : Context β), (↑Δ ⊆ Γ) ∧ (Δ ⊢ᴹ[Λ]! p)
-notation:40 Γ " ⊢ᴹ[" Λ "]! " p => ExtendedDeducible Λ Γ p
-
-namespace ExtendedDeducible
-
-variable {Λ : AxiomSet β}
-
-lemma axm {Γ : Theory β} {p} : (p ∈ Γ) → (Γ ⊢ᴹ[Λ]! p) := by
-  intro hp;
-  existsi {p}, (by aesop);
-  exact ⟨(Deduction.axm (by simp))⟩;
-
-lemma maxm {Γ : Theory β} {p} : (p ∈ Λ) → (Γ ⊢ᴹ[Λ]! p) := by
-  intro hp;
-  existsi ∅, (by aesop);
-  exact ⟨(Deduction.maxm hp)⟩;
-
-lemma modus_ponens {Γ : Theory β} {p q : Formula β} : (Γ ⊢ᴹ[Λ]! (p ⟶ q)) → (Γ ⊢ᴹ[Λ]! p) → (Γ ⊢ᴹ[Λ]! q) := by
-  intro h₁ h₂;
-  simp [ExtendedDeducible] at h₁ h₂;
-  have ⟨Δ₁, ⟨hΔ₁₁, ⟨hΔ₁₂⟩⟩⟩ := h₁;
-  have ⟨Δ₂, ⟨hΔ₂₁, ⟨hΔ₂₂⟩⟩⟩ := h₂;
-
-  have hpq : (Δ₁ ∪ Δ₂) ⊢ᴹ[Λ] (p ⟶ q) := hΔ₁₂.weakening' (by simp);
-  have hp : (Δ₁ ∪ Δ₂) ⊢ᴹ[Λ] p := hΔ₂₂.weakening' (by simp);
-
-  existsi (Δ₁ ∪ Δ₂), (by aesop);
-  exact ⟨(hpq.modus_ponens hp)⟩
-
-lemma monotone : Monotone (λ (Γ : Theory β) => Γ ⊢ᴹ[Λ]! p) := by
-  rintro _ _ h ⟨Δ, hΔ₁, ⟨hΔ₂⟩⟩;
-  existsi Δ;
-  constructor;
-  . apply Set.Subset.trans hΔ₁ h;
-  . exact ⟨hΔ₂⟩;
-
-lemma conj₁ (Γ : Theory β) (p q : Formula β) : (Γ ⊢ᴹ[Λ]! (p ⋏ q) ⟶ p) := by
-  simp [ExtendedDeducible];
-  existsi ∅, by simp;
-  apply Deducible.conj₁ ∅ p q;
-
-lemma conj₁' {Γ : Theory β} {p q : Formula β } (d : Γ ⊢ᴹ[Λ]! (p ⋏ q)) : Γ ⊢ᴹ[Λ]! p := (conj₁ _ _ _).modus_ponens d
-
-lemma conj₂ (Γ : Theory β) (p q : Formula β) : (Γ ⊢ᴹ[Λ]! (p ⋏ q) ⟶ q) := by
-  simp [ExtendedDeducible];
-  existsi ∅, by simp;
-  apply Deducible.conj₂ ∅ p q;
-
-lemma conj₂' {Γ : Theory β} {p q : Formula β } (d : Γ ⊢ᴹ[Λ]! (p ⋏ q)) : Γ ⊢ᴹ[Λ]! q := (conj₂ _ _ _).modus_ponens d
-
-lemma conj₃ (Γ : Theory β) (p q : Formula β) : (Γ ⊢ᴹ[Λ]! p ⟶ q ⟶ (p ⋏ q)) := by
-  simp [ExtendedDeducible];
-  existsi ∅, by simp;
-  apply Deducible.conj₃ ∅ p q;
-
-lemma conj₃' {Γ : Theory β} {p q : Formula β } (d₁ : Γ ⊢ᴹ[Λ]! p) (d₂ : Γ ⊢ᴹ[Λ]! q) : Γ ⊢ᴹ[Λ]! (p ⋏ q) :=
-  (conj₃ _ _ _).modus_ponens d₁
-    |>.modus_ponens d₂
-
-lemma disj₁ (Γ : Theory β) (p q : Formula β) : (Γ ⊢ᴹ[Λ]! p ⟶ (p ⋎ q)) := by
-  simp [ExtendedDeducible];
-  existsi ∅, by simp;
-  apply Deducible.disj₁ ∅ p q;
-
-lemma disj₁' {Γ : Theory β} {p q : Formula β } (d : Γ ⊢ᴹ[Λ]! p) : Γ ⊢ᴹ[Λ]! (p ⋎ q) := (disj₁ _ _ _).modus_ponens d
-
-lemma disj₂ (Γ : Theory β) (p q : Formula β) : (Γ ⊢ᴹ[Λ]! q ⟶ (p ⋎ q)) := by
-  simp [ExtendedDeducible];
-  existsi ∅, by simp;
-  apply Deducible.disj₂ ∅ p q;
-
-lemma disj₂' {Γ : Theory β} {p q : Formula β } (d : Γ ⊢ᴹ[Λ]! q) : Γ ⊢ᴹ[Λ]! (p ⋎ q) := (disj₂ _ _ _).modus_ponens d
-
-lemma disj₃ (Γ : Theory β) (p q r : Formula β) : (Γ ⊢ᴹ[Λ]! (p ⟶ r) ⟶ (q ⟶ r) ⟶ ((p ⋎ q) ⟶ r)) := by
-  simp [ExtendedDeducible];
-  existsi ∅, by simp;
-  apply Deducible.disj₃ ∅ p q r;
-
-lemma disj₃' {Γ : Theory β} {p q r : Formula β } (d₁ : Γ ⊢ᴹ[Λ]! (p ⟶ r)) (d₂ : Γ ⊢ᴹ[Λ]! (q ⟶ r)) (d₃ : Γ ⊢ᴹ[Λ]! (p ⋎ q)) : Γ ⊢ᴹ[Λ]! r :=
-  (disj₃ _ _ _ _)
-    |>.modus_ponens d₁
-    |>.modus_ponens d₂
-    |>.modus_ponens d₃
-
-end ExtendedDeducible
-
-@[simp]
-abbrev ExtendedUndeducible (Λ) (Γ : Theory β) (p) := ¬(Γ ⊢ᴹ[Λ]! p)
-notation:40 Γ " ⊬ᴹ[" Λ "]! " p => ExtendedUndeducible Λ Γ p
-
-def Theory.FrameSatisfiable (F : Frame α) (Γ : Theory β) := ∃ V w, ⊧ᴹ[⟨F, V⟩, w] Γ
-
-def Theory.FrameClassSatisfiable (𝔽 : FrameClass α) (Γ : Theory β) := ∃ F ∈ 𝔽, Γ.FrameSatisfiable F
 
 section
 
@@ -199,13 +68,13 @@ lemma consistent_no_falsum' : ⊥ ∉ Γ := by
   simp;
 
 @[simp]
-lemma consistent_no_provable : (Γ ⊬ᴹ[Λ]! ⊥) := by
+lemma consistent_not_deducible_falsum : (Γ ⊬ᴹ[Λ]! ⊥) := by
   by_contra hC;
   have ⟨Δ, hΔ₁, ⟨hΔ₂⟩⟩ := hC;
   simp [Theory.Inconsistent, Theory.Consistent] at hConsisΓ;
   exact hConsisΓ Δ hΔ₁ |>.false hΔ₂;
 
-lemma consistent_neither_provable (p) : (Γ ⊬ᴹ[Λ]! p) ∨ (Γ ⊬ᴹ[Λ]! ~p) := by
+lemma consistent_neither_undeducible (p) : (Γ ⊬ᴹ[Λ]! p) ∨ (Γ ⊬ᴹ[Λ]! ~p) := by
   by_contra hC; simp only [not_or] at hC;
 
   have h₁ := hC.1; simp at h₁;
@@ -216,7 +85,7 @@ lemma consistent_neither_provable (p) : (Γ ⊬ᴹ[Λ]! p) ∨ (Γ ⊬ᴹ[Λ]! ~
 
   simp [Theory.Inconsistent, Theory.Consistent] at hConsisΓ;
   exact hConsisΓ (x ∪ y) (by aesop) |>.false
-    $ modus_ponens (hy₂.weakening' (by simp)) (hx₂.weakening' (by simp));
+    $ modus_ponens' (hy₂.weakening' (by simp)) (hx₂.weakening' (by simp));
 
 lemma consistent_subset {Γ₁ Γ₂ : Theory β} : (Γ₁ ⊆ Γ₂) → (Consistent Λ Γ₂) → (Consistent Λ Γ₁) := by
   intro hs hConsisΓ₂ hInconsisΓ₁;
@@ -266,7 +135,7 @@ lemma inconsistent_insert_neg {Γ : Theory β} : (Γ ⊢ᴹ[Λ]! p) ↔ (Inconsi
     . simp only [coe_insert];
       apply Set.insert_subset_insert;
       simpa;
-    . exact ⟨(axm (by simp)).modus_ponens (hΔ₂.weakening' (by simp))⟩;
+    . exact ⟨(axm (by simp)).modus_ponens' (hΔ₂.weakening' (by simp))⟩;
   . intro h;
     simp only [Theory.Inconsistent] at h;
     have ⟨Δ, hΔ₁, ⟨hΔ₂⟩⟩ := h;
@@ -276,8 +145,8 @@ lemma inconsistent_insert_neg {Γ : Theory β} : (Γ ⊢ᴹ[Λ]! p) ↔ (Inconsi
       -- by_contra hC;
       -- have : ~p ∈ Δ := by sorry;
       sorry;
-    . have : Δ ⊢ᴹ[Λ] ⊥ ⟶ p := by sorry; -- TODO: EFQ
-      exact ⟨this.modus_ponens hΔ₂⟩;
+    . have : Δ ⊢ᴹ[Λ] ⊥ ⟶ p := Deduction.efq Δ p
+      exact ⟨this.modus_ponens' hΔ₂⟩;
 
 lemma consistent_insert_neg {Γ : Theory β} : (Γ ⊬ᴹ[Λ]! p) ↔ (Consistent Λ (insert (~p) Γ)) := inconsistent_insert_neg.not
 
@@ -317,7 +186,7 @@ variable (hMCΓ : MaximalConsistent Λ Γ)
 lemma axiomset_include : Λ ⊆ Γ := by
   intro p hp;
   by_contra hC;
-  apply consistent_false hMCΓ.1 {~p} (by have := hMCΓ.2 p; aesop) ⟨(axm (by simp [NegDefinition.neg])).modus_ponens (maxm hp)⟩;
+  apply consistent_false hMCΓ.1 {~p} (by have := hMCΓ.2 p; aesop) ⟨(axm (by simp [NegDefinition.neg])).modus_ponens' (maxm hp)⟩;
 
 lemma member_of_maximal_consistent : (p ∈ Γ) ↔ (Γ ⊢ᴹ[Λ]! p) := by
   constructor;
@@ -326,18 +195,18 @@ lemma member_of_maximal_consistent : (p ∈ Γ) ↔ (Γ ⊢ᴹ[Λ]! p) := by
     suffices ~p ∉ Γ by have := hMCΓ.2 p; aesop;
     by_contra hC;
     have ⟨Δ, ⟨hΔ₁, ⟨hΔ₂⟩⟩⟩ := h;
-    have : (insert (~p) Δ) ⊢ᴹ[Λ] ⊥ := (axm (by simp [NegDefinition.neg])).modus_ponens (hΔ₂.weakening' (by simp));
+    have : (insert (~p) Δ) ⊢ᴹ[Λ] ⊥ := (axm (by simp [NegDefinition.neg])).modus_ponens' (hΔ₂.weakening' (by simp));
     have : ↑(insert (~p) Δ) ⊆ Γ := by simp_all [coe_insert, Set.insert_subset_iff];
     apply consistent_false hMCΓ.1 _ (by assumption) ⟨(by assumption)⟩;
 
 lemma not_member_of_maximal_consistent : (p ∉ Γ) ↔ (Γ ⊬ᴹ[Λ]! p) := by
   simpa using (member_of_maximal_consistent hMCΓ).not;
 
-lemma maximal_consistent_modus_ponens {p q : Formula β} : (p ∈ Γ) → ((p ⟶ q) ∈ Γ) → (q ∈ Γ) := by
+lemma maximal_consistent_modus_ponens' {p q : Formula β} : ((p ⟶ q) ∈ Γ) → (p ∈ Γ) → (q ∈ Γ) := by
   intro hp hpq;
   have dp  := (member_of_maximal_consistent hMCΓ).mp hp;
   have dpq := (member_of_maximal_consistent hMCΓ).mp hpq;
-  exact (member_of_maximal_consistent hMCΓ).mpr $ dpq.modus_ponens dp;
+  exact (member_of_maximal_consistent hMCΓ).mpr $ dp.modus_ponens' dpq;
 
 lemma maximal_neg_include : (~p ∈ Γ) ↔ (p ∉ Γ) := by
   constructor;
@@ -345,7 +214,7 @@ lemma maximal_neg_include : (~p ∈ Γ) ↔ (p ∉ Γ) := by
     by_contra hC;
     have hp : ({p, ~p}) ⊢ᴹ[Λ] p := axm (by simp);
     have hnp : ({p, ~p}) ⊢ᴹ[Λ] ~p := axm (by simp);
-    apply consistent_false hMCΓ.1 {p, ~p} (by aesop;) ⟨hnp.modus_ponens hp⟩;
+    apply consistent_false hMCΓ.1 {p, ~p} (by aesop;) ⟨hnp.modus_ponens' hp⟩;
   . have := hMCΓ.2 p; aesop;
 
 lemma maximal_imp_include : (p ⟶ q ∈ Γ) ↔ (p ∉ Γ) ∨ (q ∈ Γ) := by
@@ -355,24 +224,30 @@ lemma maximal_imp_include : (p ⟶ q ∈ Γ) ↔ (p ∉ Γ) ∨ (q ∈ Γ) := by
     apply (member_of_maximal_consistent hMCΓ).mpr;
     have hp : ({p, p ⟶ q}) ⊢ᴹ[Λ] p := axm (by simp);
     have hpq : ({p, p ⟶ q}) ⊢ᴹ[Λ] p ⟶ q := axm (by simp);
-    have := hpq.modus_ponens hp;
+    have := hpq.modus_ponens' hp;
     existsi {p, p ⟶ q}, (by aesop)
-    exact ⟨hpq.modus_ponens hp⟩;
+    exact ⟨hpq.modus_ponens' hp⟩;
   . intros h;
     cases h;
     case inl h =>
       have := (maximal_neg_include hMCΓ).mpr h;
-      have d₁ : Γ ⊢ᴹ[Λ]! (~p ⟶ (p ⟶ q)) := by sorry; -- TODO: Propositional tautology
+      have d₁ : Γ ⊢ᴹ[Λ]! (~p ⟶ (p ⟶ q)) := by
+        existsi ∅;
+        constructor;
+        . simp;
+        . have dp : ({p, ~p}) ⊢ᴹ[Λ] p := axm (by simp);
+          have dnp : ({p, ~p}) ⊢ᴹ[Λ] ~p := axm (by simp);
+          exact ⟨(Deduction.efq _ _).modus_ponens' (modus_ponens' dnp dp) |>.dtr |>.dtr⟩;
       have d₂ : Γ ⊢ᴹ[Λ]! ~p := by existsi {~p}; aesop;
       apply (member_of_maximal_consistent hMCΓ).mpr;
-      exact d₁.modus_ponens d₂;
+      exact d₁.modus_ponens' d₂;
     case inr h =>
       have d₁ : Γ ⊢ᴹ[Λ]! (q ⟶ (p ⟶ q)) := by
         existsi ∅, by simp;
         exact ⟨imply₁ _ _ _⟩;
       have d₂ : Γ ⊢ᴹ[Λ]! q := by existsi {q}; aesop;
       apply (member_of_maximal_consistent hMCΓ).mpr;
-      exact d₁.modus_ponens d₂;
+      exact d₁.modus_ponens' d₂;
 
 lemma maximal_imp_include' : (p ⟶ q ∈ Γ) ↔ ((p ∈ Γ) → (q ∈ Γ)) := by
   constructor;
@@ -393,22 +268,22 @@ lemma maximal_and_include : (p ⋏ q ∈ Γ) ↔ (p ∈ Γ) ∧ (q ∈ Γ) := by
     . exact h.conj₂';
   . rintro ⟨hp, hq⟩;
     simp_all only [(member_of_maximal_consistent hMCΓ)];
-    exact ExtendedDeducible.conj₃' hp hq;
+    exact .conj₃' hp hq;
 
 lemma maximal_or_include : (p ⋎ q ∈ Γ) ↔ (p ∈ Γ) ∨ (q ∈ Γ) := by
   constructor;
   . intros h;
     by_contra hC; simp [not_or] at hC;
-    have : Γ ⊢ᴹ[Λ]! ⊥ := ExtendedDeducible.disj₃'
+    have : Γ ⊢ᴹ[Λ]! ⊥ := .disj₃'
       (show Γ ⊢ᴹ[Λ]! (p ⟶ ⊥) by exact .axm (by apply maximal_neg_include hMCΓ |>.mpr; aesop;))
       (show Γ ⊢ᴹ[Λ]! (q ⟶ ⊥) by exact .axm (by apply maximal_neg_include hMCΓ |>.mpr; aesop;))
       (show Γ ⊢ᴹ[Λ]! (p ⋎ q) by exact .axm h);
-    exact consistent_no_provable hMCΓ.1 this;
+    exact consistent_not_deducible_falsum hMCΓ.1 this;
   . intro h;
     simp_all only [(member_of_maximal_consistent hMCΓ)];
     cases h;
-    case inl h => exact ExtendedDeducible.disj₁' h;
-    case inr h => exact ExtendedDeducible.disj₂' h;
+    case inl h => exact .disj₁' h;
+    case inr h => exact .disj₂' h;
 
 end MaximalConsistent
 
@@ -451,8 +326,8 @@ prefix:73  "□⁻¹" => prebox
 @[simp] def predia := ◇⁻¹Ω.theory
 prefix:73  "◇⁻¹" => predia
 
-lemma modus_ponens {p q : Formula β} : (p ∈ Ω) → ((p ⟶ q) ∈ Ω) → (q ∈ Ω) := by
-  apply maximal_consistent_modus_ponens (Ω.mc);
+lemma modus_ponens' {p q : Formula β} : ((p ⟶ q) ∈ Ω) → (p ∈ Ω) → (q ∈ Ω) := by
+  apply maximal_consistent_modus_ponens' (Ω.mc);
 
 lemma membership_iff {p : Formula β} : (p ∈ Ω) ↔ (Ω.theory ⊢ᴹ[Λ]! p) := by
   apply member_of_maximal_consistent (Ω.mc);
@@ -494,7 +369,7 @@ lemma lindenbaum_step_consistent {Γ : Theory β} (hConsisΓ : Consistent Λ Γ)
   case inr hp => sorry;
 
 @[simp]
-def lindenbaum_step_iUnion (Γ : Theory β) := iUnion (lindenbaum_step Λ Γ)
+def lindenbaum_step_iUnion (Γ : Theory β) := ⋃ p, (lindenbaum_step Λ Γ p)
 notation Γ "[" Λ "]⁺" => lindenbaum_step_iUnion Λ Γ
 
 lemma lindenbaum_step_iUnion_maximal (Γ) : ∀ (p : Formula β), p ∈ Γ[Λ]⁺ ∨ ~p ∈ Γ[Λ]⁺ := by
@@ -517,15 +392,7 @@ lemma lindenbaum
   constructor;
   . apply lindenbaum_step_iUnion_subset_original;
   . constructor;
-    . simp;
-      have :=
-        @iUnion_decode₂
-          (Formula β)
-          (Formula β)
-          _
-          (lindenbaum_step Λ Γ)
-      rw [←this];
-      sorry;
+    . sorry;
     . apply lindenbaum_step_iUnion_maximal Λ Γ;
 
 lemma lindenbaum' (hConsisΓ : Consistent Λ Γ) : ∃ (Ω : MaximalConsistentTheory Λ), (Γ ⊆ Ω) := by
@@ -596,7 +463,8 @@ lemma val_def {Λ : AxiomSet β} {Ω : MaximalConsistentTheory Λ} {a : β} :
 
 lemma axiomT (hT : 𝐓 ⊆ Λ) : Reflexive (CanonicalModel Λ).frame := by
   intro Ω p hp;
-  apply Ω.modus_ponens hp (by apply Ω.membership_iff.mpr $ .maxm (hT $ (by apply AxiomT.set.includes_AxiomT)));
+  have : □p ⟶ p ∈ Ω := Ω.membership_iff.mpr $ .maxm (hT $ (by apply AxiomT.set.includes_AxiomT));
+  apply Ω.modus_ponens' this hp;
 
 lemma axiomD (hD : 𝐃 ⊆ Λ) : Serial (CanonicalModel Λ).frame := by
   intro Ω;
@@ -609,9 +477,10 @@ lemma axiomB (hB : 𝐁 ⊆ Λ) : Symmetric (CanonicalModel Λ).frame := by
 
 lemma axiom4 (h4 : 𝟒 ⊆ Λ) : Transitive (CanonicalModel Λ).frame := by
   intro Ω₁ Ω₂ Ω₃ h₁₂ h₂₃ p hp;
-  simp [frame_def] at h₁₂ h₂₃;
-  have := Ω₁.modus_ponens (by aesop) (by apply Ω₁.membership_iff.mpr $ .maxm (h4 $ (by apply Axiom4.set.includes_Axiom4)));
-  aesop;
+  apply h₂₃;
+  apply h₁₂;
+  have : □p ⟶ □□p ∈ Ω₁ := Ω₁.membership_iff.mpr $ .maxm (h4 $ (by apply Axiom4.set.includes_Axiom4));
+  exact Ω₁.modus_ponens' this (by aesop);
 
 lemma axiom5 (h5 : 𝟓 ⊆ Λ) : Euclidean (CanonicalModel Λ).frame := by
   intro Ω₁ Ω₂ Ω₃ h₁₂ h₁₃ p hp;

@@ -181,6 +181,49 @@ lemma not_Frames {F: Frame α} {Γ : Theory β} : (∃ V w, ¬(⊧ᴹ[⟨F, V⟩
 
 end Theory
 
+def Formula.FrameConsequence (F : Frame α) (Γ : Theory β) (p : Formula β) := ∀ V w, (⊧ᴹ[⟨F, V⟩, w] Γ) → (⊧ᴹ[⟨F, V⟩, w] p)
+notation Γ " ⊨ᴹ[" F "] " p => Formula.FrameConsequence F Γ p
+notation Γ " ⊭ᴹ[" F "] " p => ¬(Γ ⊨ᴹ[F] p)
+
+namespace Formula.FrameConsequence
+
+lemma modus_ponens' {F : Frame α} {Γ : Theory β} {p : Formula β} : (Γ ⊨ᴹ[F] p ⟶ q) → (Γ ⊨ᴹ[F] p) → (Γ ⊨ᴹ[F] q) := by
+  intro hpq hp V w h;
+  have hpq := by simpa using hpq V w h;
+  have hp := by simpa using hp V w h;
+  exact hpq hp;
+
+end Formula.FrameConsequence
+
+def Formula.FrameClassConsequence (𝔽 : FrameClass α) (Γ : Theory β) (p : Formula β) := ∀ F ∈ 𝔽, Γ ⊨ᴹ[F] p
+notation Γ " ⊨ᴹ[" 𝔽 "] " p => Formula.FrameClassConsequence 𝔽 Γ p
+notation Γ " ⊭ᴹ[" 𝔽 "] " p => ¬(Γ ⊨ᴹ[𝔽] p)
+
+namespace Formula.FrameClassConsequence
+
+lemma modus_ponens' {𝔽 : FrameClass α} {Γ : Theory β} {p : Formula β} : (Γ ⊨ᴹ[𝔽] p ⟶ q) → (Γ ⊨ᴹ[𝔽] p) → (Γ ⊨ᴹ[𝔽] q) := by
+  simp [Formula.FrameClassConsequence];
+  intro hpq hp F hF;
+  exact (hpq F hF).modus_ponens' (hp F hF);
+
+/-
+lemma neg {𝔽 : FrameClass α} {Γ : Theory β} {p : Formula β} : (Γ ⊨ᴹ[𝔽] p) ↔ (Γ ⊭ᴹ[𝔽] ~p) := by
+  constructor;
+  . intro h₁;
+    by_contra h₂;
+    have := h₂.modus_ponens' h₁;
+    simp [FrameClassConsequence, FrameConsequence, Satisfies] at this;
+  . intro h;
+    simp [Formula.FrameClassConsequence];
+    intro F hF;
+-/
+
+end Formula.FrameClassConsequence
+
+def Theory.FrameSatisfiable (F : Frame α) (Γ : Theory β) := ∃ V w, ⊧ᴹ[⟨F, V⟩, w] Γ
+
+def Theory.FrameClassSatisfiable (𝔽 : FrameClass α) (Γ : Theory β) := ∃ F ∈ 𝔽, Γ.FrameSatisfiable F
+
 section Definabilities
 
 section AxiomDefinabilities
