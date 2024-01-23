@@ -56,13 +56,13 @@ namespace Arith
 
 noncomputable section
 
-variable {M : Type} [Inhabited M] [DecidableEq M] [ORingSymbol M]
-  [Structure ℒₒᵣ M] [Structure.ORing ℒₒᵣ M]
-  [𝐏𝐀⁻.Mod M]
+variable {M : Type} [Zero M] [One M] [Add M] [Mul M] [LT M] [𝐏𝐀⁻.Mod M]
 
 namespace Model
 
 variable {a b c : M}
+
+instance : Nonempty M := ⟨0⟩
 
 lemma lt_iff_succ_le : a < b ↔ a + 1 ≤ b := by simp [le_iff_lt_succ]
 

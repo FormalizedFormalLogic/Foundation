@@ -1,4 +1,5 @@
 import Arithmetization.Ind
+import Mathlib.Logic.Nonempty
 
 namespace LO.FirstOrder
 
@@ -6,9 +7,7 @@ namespace Arith
 
 noncomputable section
 
-variable {M : Type} [Inhabited M] [DecidableEq M] [ORingSymbol M]
-  [Structure ℒₒᵣ M] [Structure.ORing ℒₒᵣ M]
-  [𝐏𝐀⁻.Mod M]
+variable {M : Type} [Zero M] [One M] [Add M] [Mul M] [LT M] [𝐏𝐀⁻.Mod M]
 
 namespace Model
 
@@ -22,6 +21,7 @@ lemma open_induction {P : M → Prop}
     (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x :=
   induction (C := Semiformula.Open)
     (by rcases hP with ⟨p, hp, hhp⟩
+        haveI : Inhabited M := Classical.inhabited_of_nonempty'
         exact ⟨p.fvEnumInv', (Rew.rewriteMap p.fvEnum').hom p, by simp[hp],
           by  intro x; simp [Semiformula.eval_rewriteMap, hhp]
               exact Semiformula.eval_iff_of_funEqOn p (by intro z hz; simp [Semiformula.fvEnumInv'_fvEnum' _ hz])⟩) zero succ

@@ -58,9 +58,7 @@ namespace Arith
 
 section definability
 
-variable {M : Type} [Inhabited M] [DecidableEq M] [ORingSymbol M]
-  [Structure ℒₒᵣ M] [Structure.ORing ℒₒᵣ M]
-  [𝐏𝐀⁻.Mod M]
+variable {M : Type} [Zero M] [One M] [Add M] [Mul M] [LT M] [𝐏𝐀⁻.Mod M]
 
 abbrev FormulaHierarchy (b : VType) (s : ℕ) (L : Language) [L.LT] (μ : Type*) (n) :=
   { p : Semiformula L μ  n // Hierarchy b s p }
@@ -519,7 +517,6 @@ lemma comp₃ {k} {R : M → M → M → Prop} {f₁ f₂ f₃ : (Fin k → M) �
     · intro h; exact ⟨f₁ v, hbf₁ v, f₂ v, hbf₂ v, f₃ v, hbf₃ v, rfl, rfl, rfl, h⟩
     · rintro ⟨_, _, _, _, _, _, rfl, rfl, rfl, h⟩; exact h)
 
-
 end Definable
 
 lemma DefinableFunction₁.comp {k} {f : M → M} {g : (Fin k → M) → M}
@@ -584,6 +581,9 @@ attribute [aesop 8 (rule_sets [Definability]) safe]
   Definable.or
   Definable.all
   Definable.ex
+
+macro "definability" : attr =>
+  `(attr|aesop 4 (rule_sets [$(Lean.mkIdent `Definability):ident]) safe)
 
 macro "definability" (config)? : tactic =>
   `(tactic| aesop (options := { terminal := true }) (rule_sets [$(Lean.mkIdent `Definability):ident]))

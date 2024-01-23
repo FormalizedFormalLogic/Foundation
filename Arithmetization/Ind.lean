@@ -49,9 +49,7 @@ end Theory
 
 noncomputable section
 
-variable {M : Type} [Inhabited M] [DecidableEq M] [ORingSymbol M]
-  [Structure ℒₒᵣ M] [Structure.ORing ℒₒᵣ M]
-  [𝐏𝐀⁻.Mod M]
+variable {M : Type} [Zero M] [One M] [Add M] [Mul M] [LT M] [𝐏𝐀⁻.Mod M]
 
 namespace Model
 
@@ -104,6 +102,7 @@ lemma hierarchy_induction {P : M → Prop} (hP : DefinablePred b s P)
     (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x :=
   induction (P := P) (C := Hierarchy b s) (by
     rcases hP with ⟨p, hp⟩
+    haveI : Inhabited M := Classical.inhabited_of_nonempty'
     exact ⟨p.val.fvEnumInv', (Rew.rewriteMap p.val.fvEnum').hom p.val, by simp [hp],
       by  intro x; simp [Semiformula.eval_rewriteMap]
           have : (Semiformula.Eval! M ![x] fun x => p.val.fvEnumInv' (p.val.fvEnum' x)) p.val ↔ (Semiformula.Eval! M ![x] id) p.val :=
