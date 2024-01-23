@@ -206,7 +206,7 @@ lemma maxm_subset {Λ Λ'} (dΛ : Γ ⊢ᴹ[Λ] p) : (Λ ⊆ Λ') → (Γ ⊢ᴹ
 def dtl {Γ p q} : (Γ ⊢ᴹ[Λ] (p ⟶ q)) → ((insert p Γ) ⊢ᴹ[Λ] q) := Hilbert.dtl
 
 /--
-  TODO: 成り立つはず．
+  TODO: 成り立つはず?
   - <https://www.mv.helsinki.fi/home/negri/selected_pub/dedthm.pdf>
 -/
 def dtr {Γ p q} : ((insert p Γ) ⊢ᴹ[Λ] q) → (Γ ⊢ᴹ[Λ] (p ⟶ q)) := by sorry;

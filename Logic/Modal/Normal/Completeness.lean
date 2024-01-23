@@ -1,4 +1,4 @@
-import Mathlib.Logic.Encodable.Lattice
+import Logic.Propositional.Basic.Completeness
 import Logic.Modal.Normal.Formula
 import Logic.Modal.Normal.HilbertStyle
 import Logic.Modal.Normal.Semantics
@@ -97,17 +97,8 @@ lemma consistent_insert {Γ : Theory β} {p : Formula β} : (Consistent Λ (inse
 
 lemma consistent_empty (hConsisΛ : Theory.Consistent Λ Λ) : Theory.Consistent Λ ∅ := consistent_subset (by simp) hConsisΛ
 
-lemma inconsistent_insert {p} : (Inconsistent Λ (insert p Γ)) → (∃ (Δ : Context β), ↑Δ ⊆ Γ ∧ Deducible Λ (insert (~p) Δ) ⊥) := by
-  simp only [Theory.Inconsistent];
-  intro h;
-  have ⟨Δ, hΔ₁, ⟨hΔ₂⟩⟩ := h;
-  existsi (Δ \ {p});
-  constructor;
-  . aesop;
-  . sorry
-    -- simp [Theory.Consistent, Theory.Inconsistent] at hConsisΓ;
-    -- have := hConsisΓ (Δ \ {p}) (by aesop);
-    -- by_contra hC; simp at hC;
+lemma consistent_either (hConsisΓ : Consistent Λ Γ) : ∀ p, (Consistent Λ (insert p Γ)) ∨ (Consistent Λ (insert (~p) Γ)) := by
+  sorry;
 
 lemma frameclass_unsatisfiable_insert_neg {𝔽 : FrameClass α} {Γ : Theory β} : (Γ ⊭ᴹ[𝔽] p) ↔ (Theory.FrameClassSatisfiable 𝔽 (insert (~p) Γ)) := by
   constructor;
@@ -336,69 +327,43 @@ end MaximalConsistentTheory
 
 section Lindenbaum
 
-variable (Λ : AxiomSet β) (hConsisΛ : Consistent Λ Λ)
-variable [Encodable (Formula β)]
+lemma exists_maximal_consistent_theory' :
+  ∃ m ∈ {Γ | Theory.Consistent Λ Γ}, Γ ⊆ m ∧ ∀ a ∈ {Γ | Theory.Consistent Λ Γ}, m ⊆ a → a = m
+  := zorn_subset_nonempty { Γ : Theory β | Consistent Λ Γ } (by
+    intro c hc chain hnc;
+    existsi (⋃₀ c);
+    simp;
+    constructor;
+    . by_contra hC;
+      simp [Theory.Consistent, Theory.Inconsistent] at hC;
+      rcases hC with ⟨s, hs, ⟨s_consis⟩⟩;
+      rcases Set.subset_mem_chain_of_finite c hnc chain (s := s) (Finset.finite_toSet s) hs with ⟨U, hUc, hsU⟩
+      have : Theory.Consistent Λ U := by aesop;
+      have := consistent_subset hsU (by aesop);
+      simp [Theory.Consistent, Theory.Inconsistent] at this;
+      exact this s Set.Subset.rfl |>.false s_consis;
+    . intro s a;
+      exact Set.subset_sUnion_of_mem a;
+  ) Γ hConsisΓ
 
-open Encodable Denumerable
-
-@[instance]
-noncomputable def consistent_decidable : ∀ Γ p, Decidable (Consistent Λ (insert p Γ)) := by
-  intros;
-  apply Classical.dec;
-
-noncomputable def lindenbaum_step (Γ : Theory β) (p : Formula β) : Theory β :=
-  if (Consistent Λ (insert p Γ)) then (insert p Γ) else insert (~p) Γ
-
-notation Γ "[" Λ ", " p "]" => lindenbaum_step Λ Γ p
-
-lemma lindenbaum_step_include (Γ : Theory β) : ∀ p, (p ∈ Γ[Λ, p]) ∨ (~p ∈ Γ[Λ, p]) := by
-  intro p;
-  simp [lindenbaum_step];
-  by_cases hConsis : Consistent Λ (insert p Γ) <;> aesop;
-
-@[simp]
-lemma lindenbaum_step_subset (Γ : Theory β) (p : Formula β) : Γ ⊆ lindenbaum_step Λ Γ p := by
-  simp only [lindenbaum_step];
-  by_cases hConsis : Consistent Λ (insert p Γ) <;> aesop;
-
-lemma lindenbaum_step_consistent {Γ : Theory β} (hConsisΓ : Consistent Λ Γ) : ∀ p, Consistent Λ (Γ[Λ, p]) := by
-  intro p;
-  simp [lindenbaum_step];
-  split;
-  case inl => simpa;
-  case inr hp => sorry;
-
-@[simp]
-def lindenbaum_step_iUnion (Γ : Theory β) := ⋃ p, (lindenbaum_step Λ Γ p)
-notation Γ "[" Λ "]⁺" => lindenbaum_step_iUnion Λ Γ
-
-lemma lindenbaum_step_iUnion_maximal (Γ) : ∀ (p : Formula β), p ∈ Γ[Λ]⁺ ∨ ~p ∈ Γ[Λ]⁺ := by
-  intro p;
-  simp [lindenbaum_step_iUnion];
-  cases lindenbaum_step_include Λ Γ p;
-  case inl h => left; existsi p; assumption;
-  case inr h => right; existsi p; assumption;
-
-lemma lindenbaum_step_iUnion_subset_original (Γ : Theory β) : Γ ⊆ Γ[Λ]⁺ := by
-  intro p hp;
-  simp [lindenbaum_step];
-  existsi p;
-  aesop;
-
-lemma lindenbaum
-  (hConsisΓ : Consistent Λ Γ)
-  : ∃ (Γ' : Theory β), (Γ ⊆ Γ') ∧ (MaximalConsistent Λ Γ') := by
-  existsi Γ[Λ]⁺;
-  constructor;
-  . apply lindenbaum_step_iUnion_subset_original;
-  . constructor;
-    . sorry;
-    . apply lindenbaum_step_iUnion_maximal Λ Γ;
-
-lemma lindenbaum' (hConsisΓ : Consistent Λ Γ) : ∃ (Ω : MaximalConsistentTheory Λ), (Γ ⊆ Ω) := by
-  have ⟨Ω, hΩ⟩ := lindenbaum Λ hConsisΓ;
-  existsi ⟨Ω, hΩ.2.1, hΩ.2.2⟩;
-  exact hΩ.1;
+/--
+  a.k.a. Lindenbaum Lemma
+-/
+lemma exists_maximal_consistent_theory : ∃ (Ω : MaximalConsistentTheory Λ), (Γ ⊆ Ω) := by
+  have ⟨Ω, ⟨h₁, ⟨h₂, h₃⟩⟩⟩ := exists_maximal_consistent_theory' hConsisΓ;
+  existsi ⟨Ω, h₁, (by
+    simp [Maximal, -NegDefinition.neg];
+    intro p;
+    have := consistent_either h₁ p;
+    cases this;
+    case inl h =>
+      have := h₃ (insert p Ω) h (by simp);
+      left; rw [←this]; simp;
+    case inr h =>
+      have := h₃ (insert (~p) Ω) h (by simp);
+      right; rw [←this]; simp;
+  )⟩;
+  exact h₂;
 
 end Lindenbaum
 
@@ -429,7 +394,7 @@ lemma mct_mem_box_iff {Ω : MaximalConsistentTheory Λ} {p : Formula β} : (□p
     intro hC;
     have := (not_member_of_maximal_consistent Ω.mc).mp hC;
     have := consistent_insert_neg.mp $ not_imp_not.mpr (prebox_prov hK) this;
-    have ⟨Ω', hΩ'⟩ := lindenbaum' Λ this;
+    have ⟨Ω', hΩ'⟩ := exists_maximal_consistent_theory this;
     simp;
     existsi Ω';
     constructor;
@@ -443,18 +408,17 @@ def CanonicalModel (Λ : AxiomSet β) : Model (MaximalConsistentTheory Λ) β wh
 
 namespace CanonicalModel
 
-@[simp]
 lemma frame_def {Λ : AxiomSet β} {Ω₁ Ω₂ : MaximalConsistentTheory Λ} :
   (CanonicalModel Λ).frame Ω₁ Ω₂ ↔ (□⁻¹Ω₁) ⊆ Ω₂ := by rfl
 
-/-
 lemma frame_def' {Λ : AxiomSet β} {Ω₁ Ω₂ : MaximalConsistentTheory Λ} :
-  (CanonicalModel Λ).frame Ω₁ Ω₂ ↔ (Ω₁ ⊆ ◇Ω₂) := by
-  simp;
+  (CanonicalModel Λ).frame Ω₁ Ω₂ ↔ (◇Ω₂ ⊆ Ω₁) := by
+  simp [frame_def];
   constructor;
-  . intro h p hp; sorry;
-  . intro h p hp; sorry;
--/
+  . intro h p hp;
+    sorry;
+  . intro h;
+    sorry;
 
 @[simp]
 lemma val_def {Λ : AxiomSet β} {Ω : MaximalConsistentTheory Λ} {a : β} :
@@ -472,8 +436,12 @@ lemma axiomD (hD : 𝐃 ⊆ Λ) : Serial (CanonicalModel Λ).frame := by
 
 lemma axiomB (hB : 𝐁 ⊆ Λ) : Symmetric (CanonicalModel Λ).frame := by
   intro Ω₁ Ω₂ h p hp;
-  -- simp [frame_def'] at h;
   sorry;
+  /-
+  simp [frame_def'] at h;
+  apply h;
+  have : p ⟶ □◇p ∈ Ω₂ := Ω₂.membership_iff.mpr $ .maxm (hB $ (by apply AxiomB.set.includes_AxiomB));
+  -/
 
 lemma axiom4 (h4 : 𝟒 ⊆ Λ) : Transitive (CanonicalModel Λ).frame := by
   intro Ω₁ Ω₂ Ω₃ h₁₂ h₂₃ p hp;
@@ -482,10 +450,21 @@ lemma axiom4 (h4 : 𝟒 ⊆ Λ) : Transitive (CanonicalModel Λ).frame := by
   have : □p ⟶ □□p ∈ Ω₁ := Ω₁.membership_iff.mpr $ .maxm (h4 $ (by apply Axiom4.set.includes_Axiom4));
   exact Ω₁.modus_ponens' this (by aesop);
 
-lemma axiom5 (h5 : 𝟓 ⊆ Λ) : Euclidean (CanonicalModel Λ).frame := by
-  intro Ω₁ Ω₂ Ω₃ h₁₂ h₁₃ p hp;
-  -- simp [frame_def'] at h₁₂ h₁₃;
-  sorry;
+lemma axiom5 (h5 : 𝟓 ⊆ Λ) : Euclidean (CanonicalModel Λ).frame := by sorry;
+  /-
+  intro Ω₁ Ω₂ Ω₃ h₁₂ h₁₃;
+  simp [frame_def] at h₁₂;
+  simp [frame_def'] at h₁₃;
+  simp [frame_def'];
+  intro p hp;
+  have : ◇p ∈ Ω₁ := by admit;
+  have h₁ : Ω₁.theory ⊢ᴹ[Λ]! ◇p := .axm this;
+  have h₂ : Ω₁.theory ⊢ᴹ[Λ]! ◇p ⟶ □◇p := by admit;
+  have := Ω₁.membership_iff.mpr $ h₂.modus_ponens' h₁;
+  apply h₁₂
+  -/
+  -- suffices h : Ω₁ ⊆ □⁻¹Ω₁ by exact Set.Subset.trans (Set.Subset.trans h₁₃ h) h₁₂;
+
 
 end CanonicalModel
 
@@ -521,10 +500,10 @@ lemma truthlemma {p : Formula β} : ∀ {Ω}, (⊧ᴹ[CanonicalModel Λ, Ω] p) 
       exact h Ω' hΩ';
     . intro h Ω' hΩ';
       apply ih.mpr;
-      simp [Set.subset_def] at hΩ';
+      simp [Set.subset_def, CanonicalModel.frame_def] at hΩ';
       exact hΩ' p (by aesop);
 
-lemma truthlemma' {Γ : Theory β} : ∀ {Ω : MaximalConsistentTheory Λ}, (⊧ᴹ[CanonicalModel Λ, Ω] Γ) ↔ (Γ ⊆ Ω) := by
+lemma truthlemma' {Γ : Theory β} : ∀ {Ω}, (⊧ᴹ[CanonicalModel Λ, Ω] Γ) ↔ (Γ ⊆ Ω) := by
   intro Ω;
   constructor;
   . simp [Set.subset_def];
@@ -539,7 +518,7 @@ lemma truthlemma' {Γ : Theory β} : ∀ {Ω : MaximalConsistentTheory Λ}, (⊧
 theorem LogicK.Hilbert.completes : Completeness (𝐊 : AxiomSet β) (𝔽((𝐊 : AxiomSet β)) : FrameClass (MaximalConsistentTheory (𝐊 : AxiomSet β))) := by
   apply completeness_def.mpr;
   intro Γ hConsisΓ;
-  let ⟨Ω, hΩ⟩ := lindenbaum' (𝐊 : AxiomSet β) hConsisΓ;
+  let ⟨Ω, hΩ⟩ := exists_maximal_consistent_theory hConsisΓ;
   existsi (CanonicalModel 𝐊).frame;
   constructor;
   . apply LogicK.def_FrameClass;
@@ -550,7 +529,7 @@ theorem LogicK.Hilbert.completes : Completeness (𝐊 : AxiomSet β) (𝔽((𝐊
 theorem LogicS4.Hilbert.completes : Completeness (𝐒𝟒 : AxiomSet β) (𝔽((𝐒𝟒 : AxiomSet β)) : FrameClass (MaximalConsistentTheory (𝐒𝟒 : AxiomSet β))) := by
   apply completeness_def.mpr;
   intro Γ hConsisΓ;
-  let ⟨Ω, hΩ⟩ := lindenbaum' (𝐒𝟒 : AxiomSet β) hConsisΓ;
+  let ⟨Ω, hΩ⟩ := exists_maximal_consistent_theory hConsisΓ;
   existsi (CanonicalModel 𝐒𝟒).frame;
   constructor;
   . apply (LogicS4.def_FrameClass _).mp;
@@ -564,7 +543,7 @@ theorem LogicS4.Hilbert.completes : Completeness (𝐒𝟒 : AxiomSet β) (𝔽(
 theorem LogicS5.Hilbert.completes : Completeness (𝐒𝟓 : AxiomSet β) (𝔽((𝐒𝟓 : AxiomSet β)) : FrameClass (MaximalConsistentTheory (𝐒𝟓 : AxiomSet β))) := by
   apply completeness_def.mpr;
   intro Γ hConsisΓ;
-  let ⟨Ω, hΩ⟩ := lindenbaum' (𝐒𝟓 : AxiomSet β) hConsisΓ;
+  let ⟨Ω, hΩ⟩ := exists_maximal_consistent_theory hConsisΓ;
   existsi (CanonicalModel 𝐒𝟓).frame;
   constructor;
   . apply (LogicS5.def_FrameClass _).mp;

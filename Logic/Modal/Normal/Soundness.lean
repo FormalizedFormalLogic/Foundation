@@ -15,9 +15,9 @@ def AxiomSet.Consistent (Λ : AxiomSet α) := ⊬ᴹ[Λ]! ⊥
 
 open AxiomSet
 
-variable  {Λ : AxiomSet α} {Γ : Context α} {p : Formula α}
+variable {Λ : AxiomSet α} {p : Formula α}
 
-private lemma AxiomSet.sounds' (Γ) (_ : Γ = ∅) (h : Deducible Λ Γ p) : (⊧ᴹ[(𝔽(Λ) : FrameClass β)] p) := by
+private lemma AxiomSet.sounds' (Γ : Context α) (_ : Γ = ∅) (h : Deducible Λ Γ p) : (⊧ᴹ[(𝔽(Λ) : FrameClass β)] p) := by
   induction h.some <;> try { simp [FrameClasses, Frames, Models]; try intros; aesop; }
   case modus_ponens h₁ h₂ ih₁ ih₂ he => exact FrameClasses.modus_ponens (ih₁ (by aesop) ⟨h₁⟩) (ih₂ (by aesop) ⟨h₂⟩);
 
