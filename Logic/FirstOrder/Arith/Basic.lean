@@ -65,7 +65,6 @@ variable {L : Language} [L.ORing] (T : Theory L) [𝐄𝐪 ≾ T]
 
 lemma consequence_of (σ : Sentence L)
   (H : ∀ (M : Type u)
-         [Inhabited M]
          [Zero M] [One M] [Add M] [Mul M] [LT M]
          [Structure L M]
          [Structure.ORing L M]

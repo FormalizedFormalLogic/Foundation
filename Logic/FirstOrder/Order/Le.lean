@@ -73,7 +73,7 @@ noncomputable def leIffEqOrLt : T ⊢ “∀ ∀ (#0 ≤ #1 ↔ #0 = #1 ∨ #0 <
 
 lemma provOf (σ : Sentence L)
   (H : ∀ (M : Type u)
-         [Inhabited M]
+         [Nonempty M]
          [_root_.LT M]
          [Structure L M]
          [Structure.Eq L M]

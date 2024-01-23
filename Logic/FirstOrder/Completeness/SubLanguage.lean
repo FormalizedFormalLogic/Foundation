@@ -147,7 +147,7 @@ instance subLanguageStructure {pf : ∀ k, L.Func k → Prop} {pr : ∀ k, L.Rel
   {M : Type w} (s : Structure L M) : Structure (Language.subLanguage L pf pr) M :=
   s.lMap (Language.ofSubLanguage L)
 
-noncomputable def extendStructure (Φ : L₁ →ᵥ L₂) {M : Type w} [Inhabited M] (s : Structure L₁ M) : Structure L₂ M where
+noncomputable def extendStructure (Φ : L₁ →ᵥ L₂) {M : Type w} [Nonempty M] (s : Structure L₁ M) : Structure L₂ M where
   func := fun {k} f₂ v => Classical.epsilon (fun y => ∃ f₁ : L₁.Func k, Φ.func f₁ = f₂ ∧ y = s.func f₁ v)
   rel  := fun {k} r₂ v => ∃ r₁ : L₁.Rel k, Φ.rel r₁ = r₂ ∧ s.rel r₁ v
 
@@ -157,7 +157,7 @@ variable
   (Φ : L₁ →ᵥ L₂)
   (injf : ∀ k, Function.Injective (Φ.func : L₁.Func k → L₂.Func k))
   (injr : ∀ k, Function.Injective (Φ.rel : L₁.Rel k → L₂.Rel k))
-  {M : Type u} [Inhabited M] (s₁ : Structure L₁ M)
+  {M : Type u} [Nonempty M] (s₁ : Structure L₁ M)
   {n} (e : Fin n → M) (ε : μ → M)
 
 protected lemma func

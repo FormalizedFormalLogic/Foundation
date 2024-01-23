@@ -15,7 +15,7 @@ section Encodable
 variable [(k : ℕ) → DecidableEq (L.Func k)] [(k : ℕ) → DecidableEq (L.Rel k)]  [(k : ℕ) → Encodable (L.Func k)] [(k : ℕ) → Encodable (L.Rel k)]
 
 noncomputable def DerivationWA.completeness_of_encodable
-  {Γ : List (Sentence L)} (h : ∀ M [Inhabited M] [Structure L M], M ⊧ₘ* T → ∃ σ ∈ Γ, M ⊧ₘ σ) :
+  {Γ : List (Sentence L)} (h : ∀ M [Nonempty M] [Structure L M], M ⊧ₘ* T → ∃ σ ∈ Γ, M ⊧ₘ σ) :
     T ⊢'' (Γ.map Rew.emb.hom : Sequent L) := by
   have : WellFounded (SearchTree.Lt T (Γ.map Rew.emb.hom : Sequent L)) := by
     by_contra nwf

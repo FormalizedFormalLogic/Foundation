@@ -8,7 +8,7 @@ section
 
 variable {L : Language.{u}} {μ : Type v}
  {I : Type u} (A : I → Type u)
- [(i : I) → Inhabited (A i)] [s : (i : I) → FirstOrder.Structure L (A i)]
+ [(i : I) → Nonempty (A i)] [s : (i : I) → FirstOrder.Structure L (A i)]
  (𝓤 : Ultrafilter I)
 
 namespace Structure
@@ -20,7 +20,7 @@ instance UprodStruc : Structure.{u,u} L (Uprod A 𝓤) where
   func := fun _ f v => ⟨fun i ↦ (s i).func f (fun x ↦ (v x).val i)⟩
   rel  := fun _ r v => {i | (s i).rel r (fun x ↦ (v x).val i)} ∈ 𝓤
 
-instance [Inhabited I] [(i : I) → Inhabited (A i)] : Inhabited (Uprod A 𝓤) := ⟨⟨default⟩⟩
+instance [Nonempty I] [(i : I) → Nonempty (A i)] : Nonempty (Uprod A 𝓤) := Nonempty.map (⟨·⟩) inferInstance
 
 @[simp] lemma func_Uprod {k} (f : L.Func k) (v : Fin k → Uprod A 𝓤) :
     Structure.func f v = ⟨fun i ↦ (s i).func f (fun x ↦ (v x).val i)⟩ := rfl
@@ -100,7 +100,7 @@ lemma val_Uprod {p : Formula L μ} :
 
 end Semiformula
 
-lemma models_Uprod [Inhabited I] [(i : I) → Inhabited (A i)] {σ : Sentence L} :
+lemma models_Uprod [Nonempty I] [(i : I) → Nonempty (A i)] {σ : Sentence L} :
     (Uprod A 𝓤) ⊧ₘ σ ↔ {i | (A i) ⊧ₘ σ} ∈ 𝓤 :=
   by simp[models_def, Semiformula.val_Uprod, Empty.eq_elim]
 
@@ -118,9 +118,9 @@ abbrev FinSubtheory (T : Theory L) := {t : Finset (Sentence L) // ↑t ⊆ T}
 
 variable (A : FinSubtheory T → Type u) [s : (i : FinSubtheory T) → Structure L (A i)]
 
-instance : Inhabited (FinSubtheory T) := ⟨∅, by simp⟩
+instance : Nonempty (FinSubtheory T) := ⟨∅, by simp⟩
 
-lemma ultrafilter_exists [(t : FinSubtheory T) → Inhabited (A t)]
+lemma ultrafilter_exists [(t : FinSubtheory T) → Nonempty (A t)]
     (H : ∀ (i : FinSubtheory T), (A i) ⊧ₘ* (i.val : Theory L)) :
     ∃ 𝓤 : Ultrafilter (FinSubtheory T), Set.image (Semiformula.domain A) T ⊆ 𝓤.sets :=
   Ultrafilter.exists_ultrafilter_of_finite_inter_nonempty _ (by
@@ -136,7 +136,7 @@ lemma compactnessAux :
   constructor
   · rintro h ⟨t, ht⟩; exact Semantics.SatisfiableTheory.of_subset h ht
   · intro h
-    have : ∀ i : FinSubtheory T, ∃ (M : Type u) (_ : Inhabited M) (_ : Structure L M), M ⊧ₘ* (i.val : Theory L) :=
+    have : ∀ i : FinSubtheory T, ∃ (M : Type u) (_ : Nonempty M) (_ : Structure L M), M ⊧ₘ* (i.val : Theory L) :=
       by intro i; exact satisfiableTheory_iff.mp (h i)
     choose A si s hA using this
     have : ∃ 𝓤 : Ultrafilter (FinSubtheory T), Set.image (Semiformula.domain A) T ⊆ 𝓤.sets := ultrafilter_exists A hA

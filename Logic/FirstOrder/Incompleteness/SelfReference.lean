@@ -41,7 +41,7 @@ variable (T)
 /-- Fixpoint Lemma -/
 theorem main (θ : Semisentence ℒₒᵣ 1) :
     T ⊢! fixpoint θ ⟷ θ/[⸢fixpoint θ⸣] :=
-  Complete.consequence_iff_provable.mp (oRing_consequence_of _ _ (fun M _ _ _ _ _ _ _ => by
+  Complete.consequence_iff_provable.mp (oRing_consequence_of _ _ (fun M _ _ _ _ _ _ => by
     haveI : 𝐏𝐀⁻.Mod M := Theory.Mod.of_subtheory (T₁ := T) M (Semantics.ofSystemSubtheory _ _)
     have hssbs : ∀ σ π : Semisentence ℒₒᵣ 1, ∀ z,
         PVal! M ![z, encode σ, encode π] ssbs ↔ z = encode (σ/[(⸢π⸣ : Semiterm ℒₒᵣ Empty 0)]) := by

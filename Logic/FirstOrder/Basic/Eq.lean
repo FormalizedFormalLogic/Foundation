@@ -60,7 +60,7 @@ namespace Structure
 
 namespace Eq
 
-@[simp] lemma modelsEqTheory {M : Type u} [Inhabited M] [Structure L M] [Structure.Eq L M] : M ⊧ₘ* (𝐄𝐪 : Theory L) := by
+@[simp] lemma modelsEqTheory {M : Type u} [Nonempty M] [Structure L M] [Structure.Eq L M] : M ⊧ₘ* (𝐄𝐪 : Theory L) := by
   intro σ h
   cases h <;> simp[models_def, Semiformula.vecEq, Semiterm.val_func]
   · intro e h; congr; funext i; exact h i
@@ -69,7 +69,7 @@ namespace Eq
 
 variable (L)
 
-variable {M : Type u} [Inhabited M] [Structure L M]
+variable {M : Type u} [Nonempty M] [Structure L M]
 
 def eqv (a b : M) : Prop := (@Semiformula.Operator.Eq.eq L _).val ![a, b]
 
@@ -123,7 +123,7 @@ def eqvSetoid (H : M ⊧ₘ* (𝐄𝐪 : Theory L)) : Setoid M := Setoid.mk (eqv
 
 def QuotEq := Quotient (eqvSetoid H)
 
-instance QuotEq.inhabited : Inhabited (QuotEq H) := ⟨⟦default⟧⟩
+instance QuotEq.inhabited : Nonempty (QuotEq H) := Nonempty.map (⟦·⟧) inferInstance
 
 lemma of_eq_of {a b : M} : (⟦a⟧ : QuotEq H) = ⟦b⟧ ↔ eqv L a b := Quotient.eq (r := eqvSetoid H)
 
@@ -192,26 +192,28 @@ end Eq
 end Structure
 
 lemma consequence_iff_eq {T : Theory L} [𝐄𝐪 ≾ T] {σ : Sentence L} :
-    T ⊨ σ ↔ (∀ (M : Type u) [Inhabited M] [Structure L M] [Structure.Eq L M], M ⊧ₘ* T → M ⊧ₘ σ) := by
+    T ⊨ σ ↔ (∀ (M : Type u) [Nonempty M] [Structure L M] [Structure.Eq L M], M ⊧ₘ* T → M ⊧ₘ σ) := by
   simp[consequence_iff]; constructor
-  · intro h M i s _ hM; exact h M hM
-  · intro h M i s hM
+  · intro h M x s _ hM; exact h M x hM
+  · intro h M x s hM
+    haveI : Nonempty M := ⟨x⟩
     have H : M ⊧ₘ* (𝐄𝐪 : Theory L) := Sound.modelsTheory_of_subtheory hM
     have e : Structure.Eq.QuotEq H ≡ₑ[L] M := Structure.Eq.QuotEq.elementaryEquiv H
-    exact e.models.mp $ h (Structure.Eq.QuotEq H) (e.modelsTheory.mpr hM)
+    exact e.models.mp $ h (Structure.Eq.QuotEq H) ⟦x⟧ (e.modelsTheory.mpr hM)
 
 lemma consequence_iff_eq' {T : Theory L} [𝐄𝐪 ≾ T] {σ : Sentence L} :
-    T ⊨ σ ↔ (∀ (M : Type u) [Inhabited M] [Structure L M] [Structure.Eq L M] [Theory.Mod M T], M ⊧ₘ σ) := by
+    T ⊨ σ ↔ (∀ (M : Type u) [Nonempty M] [Structure L M] [Structure.Eq L M] [Theory.Mod M T], M ⊧ₘ σ) := by
   rw[consequence_iff_eq]
   exact ⟨fun h M _ _ _ hT => h M Semantics.Mod.realizeTheory, fun h M i s e hT => @h M i s e ⟨hT⟩⟩
 
 lemma satisfiableTheory_iff_eq {T : Theory L} [𝐄𝐪 ≾ T] :
-    Semantics.SatisfiableTheory T ↔ (∃ (M : Type u) (_ : Inhabited M) (_ : Structure L M) (_ : Structure.Eq L M), M ⊧ₘ* T) := by
+    Semantics.SatisfiableTheory T ↔ (∃ (M : Type u) (_ : Nonempty M) (_ : Structure L M) (_ : Structure.Eq L M), M ⊧ₘ* T) := by
   simp[satisfiableTheory_iff]; constructor
-  · intro ⟨M, i, s, hM⟩;
+  · intro ⟨M, x, s, hM⟩;
+    haveI : Nonempty M := ⟨x⟩
     have H : M ⊧ₘ* (𝐄𝐪 : Theory L) := Sound.modelsTheory_of_subtheory hM
     have e : Structure.Eq.QuotEq H ≡ₑ[L] M := Structure.Eq.QuotEq.elementaryEquiv H
-    exact ⟨Structure.Eq.QuotEq H, inferInstance, inferInstance, inferInstance, e.modelsTheory.mpr hM⟩
+    exact ⟨Structure.Eq.QuotEq H, ⟦x⟧, inferInstance, inferInstance, e.modelsTheory.mpr hM⟩
   · intro ⟨M, i, s, _, hM⟩; exact ⟨M, i, s, hM⟩
 
 def ModelOfSatEq {T : Theory L} [𝐄𝐪 ≾ T] (sat : Semantics.SatisfiableTheory T) : Type _ :=
@@ -222,7 +224,7 @@ namespace ModelOfSatEq
 
 variable {T : Theory L} [𝐄𝐪 ≾ T] (sat : Semantics.SatisfiableTheory T)
 
-noncomputable instance : Inhabited (ModelOfSatEq sat) := Structure.Eq.QuotEq.inhabited _
+noncomputable instance : Nonempty (ModelOfSatEq sat) := Structure.Eq.QuotEq.inhabited _
 
 noncomputable instance struc : Structure L (ModelOfSatEq sat) := Structure.Eq.QuotEq.struc
 

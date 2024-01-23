@@ -22,9 +22,10 @@ def equiv (L : Language) (M : Type*) : M ≃ Model L M where
 
 instance : Structure L (Model L M) := Structure.ofEquiv (equiv L M)
 
-instance [Inhabited M] : Inhabited (Model L M) := ⟨equiv L M default⟩
+instance [h : Nonempty M] : Nonempty (Model L M) := by
+  rcases h with ⟨x⟩; exact ⟨equiv L M x⟩
 
-lemma elementaryEquiv (L : Language) (M : Type*) [Inhabited M] [Structure L M] : M ≡ₑ[L] Model L M :=
+lemma elementaryEquiv (L : Language) (M : Type*) [Nonempty M] [Structure L M] : M ≡ₑ[L] Model L M :=
   ElementaryEquiv.ofEquiv _
 
 section

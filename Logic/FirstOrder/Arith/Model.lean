@@ -112,11 +112,10 @@ variable (T : Theory ℒₒᵣ) [𝐄𝐪 ≾ T]
 
 lemma oRing_consequence_of (σ : Sentence ℒₒᵣ)
   (H : ∀ (M : Type)
-         [Inhabited M]
          [Zero M] [One M] [Add M] [Mul M] [LT M]
          [Theory.Mod M T],
          M ⊧ₘ σ) :
-    T ⊨ σ := consequence_of T σ fun M _ _ _ _ _ _ s _ _ ↦ by
+    T ⊨ σ := consequence_of T σ fun M _ _ _ _ _ s _ _ ↦ by
   rcases standardModel_unique M s
   exact H M
 

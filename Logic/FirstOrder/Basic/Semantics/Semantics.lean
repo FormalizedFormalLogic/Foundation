@@ -20,12 +20,14 @@ variable {L : Language.{u}} {μ : Type v} {μ₁ : Type v₁} {μ₂ : Type v₂
 
 structure Struc (L : Language) where
   Dom : Type*
-  inhabited : Inhabited Dom
+  nonempty : Nonempty Dom
   struc : Structure L Dom
 
 namespace Structure
 
-instance [Inhabited M] : Inhabited (Structure L M) := ⟨{ func := fun _ _ => default, rel := fun _ _ _ => True }⟩
+instance [n : Nonempty M] : Nonempty (Structure L M) := by
+  rcases n with ⟨x⟩
+  exact ⟨{ func := fun _ _ _ => x, rel := fun _ _ _ => True }⟩
 
 protected def lMap (φ : L₁ →ᵥ L₂) {M : Type w} (S : Structure L₂ M) : Structure L₁ M where
   func := fun _ f => S.func (φ.func f)
@@ -46,13 +48,13 @@ protected abbrev Decidable (L : Language.{u}) (M : Type w) [s : Structure L M] :
 
 noncomputable instance [Structure L M] : Structure.Decidable L M := fun r v => Classical.dec (rel r v)
 
-@[reducible] def toStruc [i : Inhabited M] (s : Structure L M) : Struc L := ⟨M, i, s⟩
+@[reducible] def toStruc [i : Nonempty M] (s : Structure L M) : Struc L := ⟨M, i, s⟩
 
 end Structure
 
 namespace Struc
 
-instance (s : Struc L) : Inhabited s.Dom := s.inhabited
+instance (s : Struc L) : Nonempty s.Dom := s.nonempty
 
 instance (s : Struc L) : Structure L s.Dom := s.struc
 
@@ -414,7 +416,7 @@ instance semantics : Semantics (Sentence L) (Struc.{u, u} L) where
 
 section
 
-variable (M : Type u) [Inhabited M] [s : Structure L M] {T U : Theory L}
+variable (M : Type u) [Nonempty M] [s : Structure L M] {T U : Theory L}
 
 abbrev Models : Sentence L →L Prop := Semantics.realize s.toStruc
 
@@ -447,34 +449,34 @@ lemma models_iff_models {σ : Sentence L} :
     M ⊧ₘ σ ↔ Semantics.realize s.toStruc σ := of_eq rfl
 
 lemma consequence_iff {σ : Sentence L} :
-    T ⊨ σ ↔ (∀ (M : Type u) [Inhabited M] [Structure L M], M ⊧ₘ* T → M ⊧ₘ σ) :=
+    T ⊨ σ ↔ (∀ (M : Type u) [Nonempty M] [Structure L M], M ⊧ₘ* T → M ⊧ₘ σ) :=
   ⟨fun h _ _ _ hT ↦ h hT, fun h s hT ↦ h s.Dom hT⟩
 
 lemma consequence_iff' {σ : Sentence L} :
-    T ⊨ σ ↔ (∀ (M : Type u) [Inhabited M] [Structure L M] [Theory.Mod M T], M ⊧ₘ σ) :=
+    T ⊨ σ ↔ (∀ (M : Type u) [Nonempty M] [Structure L M] [Theory.Mod M T], M ⊧ₘ σ) :=
   ⟨fun h _ _ s _ => Semantics.consequence_iff'.mp h s.toStruc,
-   fun h s hs => @h s.Dom s.inhabited s.struc ⟨hs⟩⟩
+   fun h s hs => @h s.Dom s.nonempty s.struc ⟨hs⟩⟩
 
 lemma valid_iff {σ : Sentence L} :
-    Semantics.Valid σ ↔ ∀ (M : Type u) [Inhabited M] [Structure L M], M ⊧ₘ σ :=
+    Semantics.Valid σ ↔ ∀ (M : Type u) [Nonempty M] [Structure L M], M ⊧ₘ σ :=
   ⟨fun hσ _ _ s ↦ @hσ s.toStruc, fun h s ↦ h s.Dom⟩
 
 lemma validₛ_iff {T : Theory L} :
-    Semantics.ValidTheory T ↔ ∀ (M : Type u) [Inhabited M] [Structure L M], M ⊧ₘ* T :=
+    Semantics.ValidTheory T ↔ ∀ (M : Type u) [Nonempty M] [Structure L M], M ⊧ₘ* T :=
   ⟨fun hT _ _ s ↦ @hT s.toStruc, fun h s ↦ h s.Dom⟩
 
 lemma satisfiableTheory_iff :
-    Semantics.SatisfiableTheory T ↔ ∃ (M : Type u) (_ : Inhabited M) (_ : Structure L M), M ⊧ₘ* T :=
-  ⟨by rintro ⟨s, hs⟩; exact ⟨s.Dom, s.inhabited, s.struc, hs⟩, by rintro ⟨M, i, s, hT⟩; exact ⟨s.toStruc, hT⟩⟩
+    Semantics.SatisfiableTheory T ↔ ∃ (M : Type u) (_ : Nonempty M) (_ : Structure L M), M ⊧ₘ* T :=
+  ⟨by rintro ⟨s, hs⟩; exact ⟨s.Dom, s.nonempty, s.struc, hs⟩, by rintro ⟨M, i, s, hT⟩; exact ⟨s.toStruc, hT⟩⟩
 
-lemma satisfiableTheory_intro (M : Type u) [Inhabited M] [s : Structure L M] (h : M ⊧ₘ* T) :
+lemma satisfiableTheory_intro (M : Type u) [Nonempty M] [s : Structure L M] (h : M ⊧ₘ* T) :
     Semantics.SatisfiableTheory T := ⟨s.toStruc, h⟩
 
 noncomputable def ModelOfSat (h : Semantics.SatisfiableTheory T) : Type u :=
   Classical.choose (satisfiableTheory_iff.mp h)
 
-noncomputable instance inhabitedModelOfSat (h : Semantics.SatisfiableTheory T) :
-    Inhabited (ModelOfSat h) := by
+noncomputable instance nonemptyModelOfSat (h : Semantics.SatisfiableTheory T) :
+    Nonempty (ModelOfSat h) := by
   choose i _ _ using Classical.choose_spec (satisfiableTheory_iff.mp h); exact i
 
 noncomputable def StructureModelOfSatAux (h : Semantics.SatisfiableTheory T) :
@@ -494,7 +496,7 @@ namespace Semiformula
 variable {L₁ L₂ : Language.{u}} {Φ : L₁ →ᵥ L₂}
 
 section lMap
-variable {M : Type u} [Inhabited M] {s₂ : Structure L₂ M} {n} {e : Fin n → M} {ε : μ → M}
+variable {M : Type u} [Nonempty M] {s₂ : Structure L₂ M} {n} {e : Fin n → M} {ε : μ → M}
 
 lemma eval_lMap {p : Semiformula L₁ μ n} :
     Eval s₂ e ε (lMap Φ p) ↔ Eval (s₂.lMap Φ) e ε p :=
@@ -516,15 +518,15 @@ lemma lMap_models_lMap {L₁ L₂ : Language.{u}} {Φ : L₁ →ᵥ L₂}  {T : 
     h (fun q hq => Semiformula.models_lMap.mp $ hM (Set.mem_image_of_mem _ hq))
   exact Semiformula.models_lMap.mpr this
 
-@[simp] lemma ModelsTheory.empty [Inhabited M] [Structure L M] : M ⊧ₘ* (∅ : Theory L) := by intro _; simp
+@[simp] lemma ModelsTheory.empty [Nonempty M] [Structure L M] : M ⊧ₘ* (∅ : Theory L) := by intro _; simp
 
-lemma ModelsTheory.of_ss [Inhabited M] [Structure L M] {T U : Theory L} (h : M ⊧ₘ* U) (ss : T ⊆ U) : M ⊧ₘ* T :=
+lemma ModelsTheory.of_ss [Nonempty M] [Structure L M] {T U : Theory L} (h : M ⊧ₘ* U) (ss : T ⊆ U) : M ⊧ₘ* T :=
   fun _ hσ => h (ss hσ)
 
 namespace Theory
 
 variable {L₁ L₂ : Language.{u}}
-variable {M : Type u} [Inhabited M] [s₂ : Structure L₂ M]
+variable {M : Type u} [Nonempty M] [s₂ : Structure L₂ M]
 variable {Φ : L₁ →ᵥ L₂}
 
 lemma modelsTheory_onTheory₁ {T₁ : Theory L₁} :
@@ -533,14 +535,14 @@ lemma modelsTheory_onTheory₁ {T₁ : Theory L₁} :
 
 namespace Mod
 
-variable (M : Type u) [Inhabited M] [s : Structure L M] { T : Theory L} [Theory.Mod M T]
+variable (M : Type u) [Nonempty M] [s : Structure L M] { T : Theory L} [Theory.Mod M T]
 
 lemma models {σ : Sentence L} (hσ : σ ∈ T) : M ⊧ₘ σ := Semantics.Mod.models s.toStruc hσ
 
 def of_ss {T₁ T₂ : Theory L} [Theory.Mod M T₁] (ss : T₂ ⊆ T₁) : Theory.Mod M T₂ :=
   Semantics.Mod.of_ss s.toStruc ss
 
-lemma of_subtheory [Inhabited M] {T₁ T₂ : Theory L} [Theory.Mod M T₁] (h : Semantics.Subtheory T₂ T₁) : Theory.Mod M T₂ :=
+lemma of_subtheory [Nonempty M] {T₁ T₂ : Theory L} [Theory.Mod M T₁] (h : Semantics.Subtheory T₂ T₁) : Theory.Mod M T₂ :=
   Semantics.Mod.of_subtheory _ h
 
 end Mod
@@ -551,9 +553,9 @@ namespace Structure
 
 variable (L)
 
-abbrev theory (M : Type u) [Inhabited M] [s : Structure L M] : Theory L := Semantics.theory s.toStruc
+abbrev theory (M : Type u) [Nonempty M] [s : Structure L M] : Theory L := Semantics.theory s.toStruc
 
-variable {L} {M : Type u} [Inhabited M] [Structure L M]
+variable {L} {M : Type u} [Nonempty M] [Structure L M]
 
 @[simp] lemma mem_theory_iff {σ} : σ ∈ theory L M ↔ M ⊧ₘ σ := by rfl
 

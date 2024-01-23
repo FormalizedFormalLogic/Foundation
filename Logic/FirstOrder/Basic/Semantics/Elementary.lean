@@ -8,7 +8,7 @@ section
 
 variable {L : Language}
 variable {M : Type*} {M₁ : Type*} {M₂ : Type*} {M₃ : Type*}
-variable [Inhabited M] [Inhabited M₁] [Inhabited M₂] [Inhabited M₃]
+variable [Nonempty M] [Nonempty M₁] [Nonempty M₂] [Nonempty M₃]
   [s : Structure L M] [s₁ : Structure L M₁] [s₂ : Structure L M₂] [s₃ : Structure L M₃]
 
 namespace Structure
@@ -176,7 +176,7 @@ end
 section
 
 variable {L : Language} {M : Type u} {M₁ : Type u} {M₂ : Type u} {M₃ : Type u}
-variable [Inhabited M] [Inhabited M₁] [Inhabited M₂] [Inhabited M₃]
+variable [Nonempty M] [Nonempty M₁] [Nonempty M₂] [Nonempty M₃]
   [s : Structure L M] [s₁ : Structure L M₁] [s₂ : Structure L M₂] [s₃ : Structure L M₃]
 
 namespace Structure
@@ -192,7 +192,7 @@ variable {L M₁ M₂}
 namespace ElementaryEquiv
 
 @[refl]
-lemma refl (M) [Inhabited M] [Structure L M] : M ≡ₑ[L] M := fun σ => by rfl
+lemma refl (M) [Nonempty M] [Structure L M] : M ≡ₑ[L] M := fun σ => by rfl
 
 @[symm]
 lemma symm : (M₁ ≡ₑ[L] M₂) → (M₂ ≡ₑ[L] M₁) :=
@@ -209,7 +209,7 @@ lemma models (h : M₁ ≡ₑ[L] M₂) :
 lemma modelsTheory (h : M₁ ≡ₑ[L] M₂) {T : Theory L} :
     M₁ ⊧ₘ* T ↔ M₂ ⊧ₘ* T := by simp[modelsTheory_iff, h.models]
 
-lemma ofEquiv [Inhabited N] (φ : M ≃ N) :
+lemma ofEquiv [Nonempty N] (φ : M ≃ N) :
     letI : Structure L N := Structure.ofEquiv φ
     M ≡ₑ[L] N := fun σ => by
   letI : Structure L N := Structure.ofEquiv φ
@@ -241,7 +241,7 @@ section
 open Semiformula
 variable [s : Structure L M] (φ : M ≃ N)
 
-lemma ElementaryEquiv.ofEquiv [Inhabited N] :
+lemma ElementaryEquiv.ofEquiv [Nonempty N] :
     letI : Structure L N := Structure.ofEquiv φ
     M ≡ₑ[L] N := fun σ => by
   letI : Structure L N := Structure.ofEquiv φ
