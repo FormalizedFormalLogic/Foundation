@@ -450,13 +450,22 @@ def pairdef : Σᴬ[0] 3 := ⟨“(#1 < #2 ∧ #0 = #2 * #2 + #1) ∨ (#2 ≤ #1
 lemma pair_defined : Σᴬ[0]-Function₂ (λ a b : M ↦ ⟨a ; b⟩) pairdef := by
   intro v; simp [pair_graph, pairdef]
 
+instance {b s} : DefinableFunction₂ b s (pair : M → M → M) := defined_to_with_param₀ _ pair_defined
+
+instance : PolyBounded₂ (pair : M → M → M) :=
+  ⟨ᵀ“(#1 * #1 + #0) + (#0 * #0 + #0 + #1)”, by intro v; simp [pair]; split_ifs <;> try simp [pair, *]⟩
+
 def unpair (a : M) : M × M := if a - √a * √a < √a then (a - √a * √a, √a) else (√a, a - √a * √a - √a)
 
 abbrev pi₁ (a : M) : M := (unpair a).1
 
 abbrev pi₂ (a : M) : M := (unpair a).2
 
-@[simp] lemma pair_unpair (a : M) : ⟨pi₁ a ; pi₂ a⟩ = a := by
+prefix: 80 "π₁" => pi₁
+
+prefix: 80 "π₂" => pi₂
+
+@[simp] lemma pair_unpair (a : M) : ⟨π₁ a ; π₂ a⟩ = a := by
   simp [pi₁, pi₂, unpair]
   split_ifs with h
   · simp [pair, h]
@@ -477,8 +486,39 @@ abbrev pi₂ (a : M) : M := (unpair a).2
       sqrt_eq_of_le_of_le (by simp [add_assoc]) (by simp [add_assoc, two_mul, show b ≤ a from by simpa using h])
     simp [unpair, this, add_assoc]
 
-def pairEquiv : M × M ≃ M :=
-  ⟨Function.uncurry pair, unpair, fun ⟨a, b⟩ => unpair_pair a b, pair_unpair⟩
+@[simp] lemma pi₁_pair (a b : M) : π₁ ⟨a ; b⟩ = a := by simp [pi₁]
+
+@[simp] lemma pi₂_pair (a b : M) : π₂ ⟨a ; b⟩ = b := by simp [pi₂]
+
+def pairEquiv : M × M ≃ M := ⟨Function.uncurry pair, unpair, fun ⟨a, b⟩ => unpair_pair a b, pair_unpair⟩
+
+@[simp] lemma pi₁_le_self (a : M) : π₁ a ≤ a := by simp [pi₁, unpair]; split_ifs <;> simp
+
+@[simp] lemma pi₂_le_self (a : M) : π₂ a ≤ a := by simp [pi₂, unpair]; split_ifs <;> simp [add_assoc]
+
+instance : PolyBounded₁ (pi₁ : M → M) := ⟨ᵀ“#0”, by intro v; simp⟩
+
+instance : PolyBounded₁ (pi₂ : M → M) := ⟨ᵀ“#0”, by intro v; simp⟩
+
+def pi₁def : Σᴬ[0] 2 := ⟨“∃[#0 < #2 + 1] !pairdef [#2, #1, #0]”, by simp⟩
+
+def pi₂def : Σᴬ[0] 2 := ⟨“∃[#0 < #2 + 1] !pairdef [#2, #0, #1]”, by simp⟩
+
+lemma pi₁_defined : Σᴬ[0]-Function₁ (pi₁ : M → M) pi₁def := by
+  intro v; simp [pi₁def, pair_defined.pval]
+  constructor
+  · intro h; exact ⟨π₂ v 1, by simp [←le_iff_lt_succ],  by simp [h]⟩
+  · rintro ⟨a, _, e⟩; simp [e]
+
+instance {b s} : DefinableFunction₁ b s (pi₁ : M → M) := defined_to_with_param₀ _ pi₁_defined
+
+lemma pi₂_defined : Σᴬ[0]-Function₁ (pi₂ : M → M) pi₂def := by
+  intro v; simp [pi₂def, pair_defined.pval]
+  constructor
+  · intro h; exact ⟨π₁ v 1, by simp [←le_iff_lt_succ], by simp [h]⟩
+  · rintro ⟨a, _, e⟩; simp [e]
+
+instance {b s} : DefinableFunction₁ b s (pi₂ : M → M) := defined_to_with_param₀ _ pi₂_defined
 
 end pair
 
