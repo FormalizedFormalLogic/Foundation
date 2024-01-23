@@ -12,9 +12,7 @@ namespace Arith
 
 noncomputable section
 
-variable {M : Type} [Inhabited M] [DecidableEq M] [ORingSymbol M]
-  [Structure ℒₒᵣ M] [Structure.ORing ℒₒᵣ M]
-  [𝐏𝐀⁻.Mod M]
+variable {M : Type} [Inhabited M] [DecidableEq M] [Zero M] [One M] [Add M] [Mul M] [LT M] [𝐏𝐀⁻.Mod M]
 
 open Language
 
@@ -215,9 +213,9 @@ variable {T : Theory ℒₒᵣ} [𝐄𝐪 ≾ T] [𝐏𝐀⁻ ≾ T]
 
 theorem sigma_one_completeness {σ : Sentence ℒₒᵣ} (hσ : Hierarchy Σ 1 σ) :
     ℕ ⊧ₘ σ → T ⊢ σ := fun H =>
-  Complete.complete (consequence_of _ _ (fun M _ _ _ _ _ => by
+  Complete.complete (oRing_consequence_of _ _ (fun M _ _ _ _ _ _ _ => by
     haveI : 𝐏𝐀⁻.Mod M := Theory.Mod.of_subtheory (T₁ := T) M (Semantics.ofSystemSubtheory _ _)
-    simpa[Matrix.empty_eq] using @Model.pval_of_pval_nat_of_sigma_one M _ _ _ _ _ _ _ hσ ![] (by simpa[models_iff] using H)))
+    simpa [Matrix.empty_eq] using Model.pval_of_pval_nat_of_sigma_one (M := M) hσ H))
 
 end
 
