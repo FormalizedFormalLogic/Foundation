@@ -106,6 +106,11 @@ instance : OrderedSub M where
     · simp [sub_spec_of_lt (show a < b from by simpa using h)]
       exact le_trans (le_of_lt $ show a < b from by simpa using h) (by simp)
 
+lemma zero_or_succ (a : M) : a = 0 ∨ ∃ a', a = a' + 1 := by
+  rcases zero_le a with (rfl | pos)
+  · simp
+  · right; exact ⟨a - 1, by rw [sub_add_self_of_le]; simp [pos_iff_one_le.mp pos]⟩
+
 end sub
 
 section Dvd

@@ -3,15 +3,11 @@ import Mathlib.Tactic.Linarith
 
 namespace LO.FirstOrder
 
-attribute [simp] Semiformula.eval_substs Matrix.vecHead Matrix.vecTail Matrix.comp_vecCons' Matrix.constant_eq_singleton
-
 namespace Arith
 
 noncomputable section
 
-variable {M : Type} [Inhabited M] [DecidableEq M] [ORingSymbol M]
-  [Structure ℒₒᵣ M] [Structure.ORing ℒₒᵣ M]
-  [𝐏𝐀⁻.Mod M]
+variable {M : Type} [Zero M] [One M] [Add M] [Mul M] [LT M] [𝐏𝐀⁻.Mod M]
 
 namespace Model
 
@@ -19,24 +15,24 @@ section ISigma₀
 
 variable [𝐈𝚺₀.Mod M]
 
-def ext (u z : M) : M := z /ₑ u mod u
+def ext (u z : M) : M := z / u mod u
 
-lemma ext_graph (a b c : M) : a = ext b c ↔ ∃ x ≤ c, x = c /ₑ b ∧ a = x mod b := by
+lemma ext_graph (a b c : M) : a = ext b c ↔ ∃ x ≤ c, x = c / b ∧ a = x mod b := by
   simp [ext]; constructor
-  · rintro rfl; exact ⟨c /ₑ b, by simp, rfl, by rfl⟩
+  · rintro rfl; exact ⟨c / b, by simp, rfl, by rfl⟩
   · rintro ⟨_, _, rfl, rfl⟩; simp
 
 def extdef : Σᴬ[0] 3 :=
-  ⟨“∃[#0 < #3 + 1] (!edivdef [#0, #3, #2] ∧ !remdef [#1, #0, #2])”, by simp⟩
+  ⟨“∃[#0 < #3 + 1] (!divdef [#0, #3, #2] ∧ !remdef [#1, #0, #2])”, by simp⟩
 
 lemma ext_defined : Σᴬ[0]-Function₂ (λ a b : M ↦ ext a b) extdef := by
   intro v; simp [Matrix.vecHead, Matrix.vecTail, extdef,
-    ext_graph, Semiformula.eval_substs, ediv_defined.pval, rem_defined.pval, le_iff_lt_succ]
+    ext_graph, Semiformula.eval_substs, div_defined.pval, rem_defined.pval, le_iff_lt_succ]
 
 instance : DefinableFunction₂ b s (ext : M → M → M) := defined_to_with_param₀ _ ext_defined
 
 @[simp] lemma ext_le_add (u z : M) : ext u z ≤ z :=
-  le_trans (remainder_le (z /ₑ u) u) (by simp [add_comm])
+  le_trans (remainder_le (z / u) u) (by simp [add_comm])
 
 instance : PolyBounded₂ (ext : M → M → M) := ⟨#1, by intro v; simp⟩
 
@@ -46,17 +42,17 @@ lemma ext_add_of_dvd_sq_right {u z₁ z₂ : M} (pos : 0 < u) (h : u^2 ∣ z₂)
   simp [ext]
   have : ∃ z', z₂ = z' * u * u := by rcases h with ⟨u', rfl⟩; exact ⟨u', by simp [mul_comm _ u', mul_assoc]; simp [sq]⟩
   rcases this with ⟨z₂, rfl⟩
-  simp [ediv_add_mul_self, pos]
+  simp [div_add_mul_self, pos]
 
 lemma ext_add_of_dvd_sq_left {u z₁ z₂ : M} (pos : 0 < u) (h : u^2 ∣ z₁) : ext u (z₁ + z₂) = ext u z₂ := by
   rw [add_comm]; exact ext_add_of_dvd_sq_right pos h
 
 lemma ext_rem {i j z : M} (ppi : PPow2 i) (ppj : PPow2 j) (hij : i < j) : ext i (z mod j) = ext i z := by
-  have := ediv_add_remainder z j
+  have := div_add_remainder z j
   have : i^2 ∣ j := ppi.pow2.sq.dvd_of_le ppj.pow2 (PPow2.sq_le_of_lt ppi ppj hij)
   calc
-    ext i (z mod j) = ext i (j * (z /ₑ j) + (z mod j)) := by symm; exact ext_add_of_dvd_sq_left ppi.pos (Dvd.dvd.mul_right this (z /ₑ j))
-    _               = ext i z                          := by simp [ediv_add_remainder]
+    ext i (z mod j) = ext i (j * (z / j) + (z mod j)) := by symm; exact ext_add_of_dvd_sq_left ppi.pos (Dvd.dvd.mul_right this (z / j))
+    _               = ext i z                          := by simp [div_add_remainder]
 
 def Exp.Seq₀ (X Y : M) : Prop := ext 4 X = 1 ∧ ext 4 Y = 2
 
@@ -163,17 +159,16 @@ lemma append_lt (i X : M) {z} (hz : z < i) : append i X z < i^2 := calc
 
 lemma ext_append_last (i X : M) {z} (hz : z < i) :
     ext i (append i X z) = z := by
-  simp [ext, append, ediv_add_mul_self, show 0 < i from pos_of_gt hz, hz]
+  simp [ext, append, div_add_mul_self, show 0 < i from pos_of_gt hz, hz]
 
 lemma ext_append_of_lt {i j : M} (hi : PPow2 i) (hj : PPow2 j) (hij : i < j) (X z : M) :
     ext i (append j X z) = ext i X := by
   have : i^2 ∣ j := Pow2.dvd_of_le hi.pow2.sq hj.pow2 (PPow2.sq_le_of_lt hi hj hij)
   calc
-    ext i (append j X z) = ext i ((X mod j) + z * j)        := rfl
-    _                    = ext i (X mod j)                  := ext_add_of_dvd_sq_right hi.pos (Dvd.dvd.mul_left this z)
-    _                    = ext i (j * (X /ₑ j) + (X mod j)) := by rw [add_comm]
-                                                                  refine Eq.symm <| ext_add_of_dvd_sq_right hi.pos (Dvd.dvd.mul_right this _)
-    _                    = ext i X                          := by simp [ediv_add_remainder]
+    ext i (append j X z) = ext i ((X mod j) + z * j)       := rfl
+    _                    = ext i (X mod j)                 := ext_add_of_dvd_sq_right hi.pos (Dvd.dvd.mul_left this z)
+    _                    = ext i (j * (X / j) + (X mod j)) := by rw [add_comm]; refine Eq.symm <| ext_add_of_dvd_sq_right hi.pos (Dvd.dvd.mul_right this _)
+    _                    = ext i X                         := by simp [div_add_remainder]
 
 lemma Seq₀.append {X Y i x y : M} (H : Seq₀ X Y) (ppi : PPow2 i) (hi : 4 < i) :
     Seq₀ (append i X x) (append i Y y) := by
@@ -583,11 +578,6 @@ lemma succ_lt_s {y : M} (h : Exp (x + 1) y) : 2 ≤ y := by
   · simp at h
   · simpa [hY] using two_le_ext_of_seq₀_of_seqₛ H₀ Hₛ ne2 hu ppu
 
-lemma zero_or_succ (a : M) : a = 0 ∨ ∃ a', a = a' + 1 := by
-  rcases zero_le a with (rfl | pos)
-  · simp
-  · right; exact ⟨a - 1, by rw [sub_add_self_of_le]; simp [pos_iff_one_le.mp pos]⟩
-
 protected lemma uniq {x y₁ y₂ : M} : Exp x y₁ → Exp x y₂ → y₁ = y₂ := by
   intro h₁ h₂
   wlog h : y₁ ≤ y₂
@@ -631,7 +621,210 @@ protected lemma inj {x₁ x₂ y : M} : Exp x₁ y → Exp x₂ y → x₁ = x�
           x₁ hy₁.dom_lt_range x₂ hy₂.dom_lt_range hy₁ hy₂
       simp [this]
 
+lemma exp_elim {x y : M} : Exp x y ↔ (x = 0 ∧ y = 1) ∨ ∃ x', ∃ y', x = x' + 1 ∧ y = 2 * y' ∧ Exp x' y' :=
+  ⟨by intro h
+      rcases zero_or_succ x with (rfl | ⟨x', rfl⟩)
+      · simp [h.zero_uniq]
+      · right; rcases exp_succ.mp h with ⟨y', rfl, H⟩
+        exact ⟨x', y', rfl, rfl, H⟩,
+   by rintro (⟨rfl, rfl⟩ | ⟨x, y, rfl, rfl, h⟩)
+      · simp
+      · exact exp_succ_mul_two.mpr h⟩
+
+lemma monotone {x₁ x₂ y₁ y₂ : M} : Exp x₁ y₁ → Exp x₂ y₂ → x₁ < x₂ → y₁ < y₂ := by
+  revert x₁ x₂ y₂
+  suffices : ∀ x₁ < y₁, ∀ y₂ ≤ y₁, ∀ x₂ < y₂, Exp x₁ y₁ → Exp x₂ y₂ → x₂ ≤ x₁
+  · intro x₁ x₂ y₂ h₁ h₂; contrapose; simp
+    intro hy
+    exact this x₁ h₁.dom_lt_range y₂ hy x₂ h₂.dom_lt_range h₁ h₂
+  induction y₁ using hierarchy_order_induction_sigma₀
+  · definability
+  case ind y₁ IH =>
+    intro x₁ _ y₂ hy x₂ _ h₁ h₂
+    rcases zero_or_succ x₁ with (rfl | ⟨x₁, rfl⟩) <;> rcases zero_or_succ x₂ with (rfl | ⟨x₂, rfl⟩)
+    · simp
+    · rcases show y₁ = 1 from h₁.zero_uniq
+      rcases le_one_iff_eq_zero_or_one.mp hy with (rfl | rfl)
+      · have := h₂.range_pos; simp at this
+      · exact False.elim <| not_lt.mpr h₂.succ_lt_s one_lt_two
+    · simp
+    · rcases exp_succ.mp h₁ with ⟨y₁, rfl, h₁'⟩
+      rcases exp_succ.mp h₂ with ⟨y₂, rfl, h₂'⟩
+      have : x₂ ≤ x₁ := IH y₁ (lt_mul_of_pos_of_one_lt_left h₁'.range_pos one_lt_two)
+        x₁ h₁'.dom_lt_range y₂ (le_of_mul_le_mul_left hy (by simp)) x₂ h₂'.dom_lt_range h₁' h₂'
+      simpa using this
+
+lemma monotone_le {x₁ x₂ y₁ y₂ : M} (h₁ : Exp x₁ y₁) (h₂ : Exp x₂ y₂) : x₁ ≤ x₂ → y₁ ≤ y₂ := by
+  rintro (rfl | h)
+  · exact (h₁.uniq h₂).le
+  · exact le_of_lt (monotone h₁ h₂ h)
+
+lemma monotone_iff {x₁ x₂ y₁ y₂ : M} (h₁ : Exp x₁ y₁) (h₂ : Exp x₂ y₂) : x₁ < x₂ ↔ y₁ < y₂ := by
+  constructor
+  · exact monotone h₁ h₂
+  · contrapose; simp; exact monotone_le h₂ h₁
+
+lemma add_mul {x₁ x₂ y₁ y₂ : M} (h₁ : Exp x₁ y₁) (h₂ : Exp x₂ y₂) : Exp (x₁ + x₂) (y₁ * y₂) := by
+  wlog hy : y₁ ≥ y₂
+  · simpa [add_comm, mul_comm] using this h₂ h₁ (le_of_not_ge hy)
+  revert y₂
+  suffices : ∀ y₂ ≤ y₁, Exp x₂ y₂ → Exp (x₁ + x₂) (y₁ * y₂)
+  · intro y₂ h₂ hy; exact this y₂ hy h₂
+  induction x₂ using hierarchy_induction_sigma₀
+  · definability
+  case zero =>
+    intro y₂ _ h₂
+    simpa [show y₂ = 1 from h₂.zero_uniq] using h₁
+  case succ x₂ IH =>
+    intro y₂ hy h₂
+    rcases exp_succ.mp h₂ with ⟨y₂, rfl, H₂⟩
+    have : Exp (x₁ + x₂) (y₁ * y₂) := IH y₂ (le_trans (by simp) hy) H₂
+    simpa [←add_assoc, mul_left_comm y₁ 2 y₂] using exp_succ_mul_two.mpr this
+
 end Exp
+
+lemma log_exists_unique_pos {y : M} (hy : 0 < y) : ∃! x, x < y ∧ ∃ y' ≤ y, Exp x y' ∧ y < 2 * y' := by
+  have : ∃ x < y, ∃ y' ≤ y, Exp x y' ∧ y < 2 * y' := by
+    revert hy
+    induction y using hierarchy_polynomial_induction_sigma₀
+    · definability
+    case zero => simp
+    case even y IH =>
+      intro hy
+      rcases (IH (by simpa using hy) : ∃ x < y, ∃ y' ≤ y, Exp x y' ∧ y < 2 * y') with ⟨x, hxy, y', gey, H, lty⟩
+      exact ⟨x + 1, lt_of_lt_of_le (by simp [hxy]) (succ_le_double_of_pos (pos_of_gt hxy)),
+        2 * y', by simpa using gey, Exp.exp_succ_mul_two.mpr H, by simpa using lty⟩
+    case odd y IH =>
+      intro hy
+      rcases (zero_le y : 0 ≤ y) with (rfl | pos)
+      · simp; exact ⟨1, by simp [one_lt_two]⟩
+      · rcases (IH pos : ∃ x < y, ∃ y' ≤ y, Exp x y' ∧ y < 2 * y') with ⟨x, hxy, y', gey, H, lty⟩
+        exact ⟨x + 1, by simp; exact lt_of_lt_of_le hxy (by simp),
+          2 * y', le_trans (by simpa using gey) le_self_add, Exp.exp_succ_mul_two.mpr H, two_mul_add_one_lt_two_mul_of_lt lty⟩
+  rcases this with ⟨x, hx⟩
+  exact ExistsUnique.intro x hx (fun x' ↦ by
+    intro hx'
+    by_contra A
+    wlog lt : x < x'
+    · exact this hy x' hx' x hx (Ne.symm A) (lt_of_le_of_ne (by simpa using lt) A)
+    rcases hx with ⟨_, z, _, H, hyz⟩
+    rcases hx' with ⟨_, z', hzy', H', _⟩
+    have : z < z' := Exp.monotone H H' lt
+    have : y < y := calc
+      y < 2 * z := hyz
+      _ ≤ z'    := (Pow2.lt_iff_two_mul_le H.range_pow2 H'.range_pow2).mp this
+      _ ≤ y     := hzy'
+    simp at this)
+
+lemma log_exists_unique (y : M) : ∃! x, (y = 0 → x = 0) ∧ (0 < y → x < y ∧ ∃ y' ≤ y, Exp x y' ∧ y < 2 * y') := by
+  by_cases hy : y = 0
+  · rcases hy; simp
+  · simp [hy, pos_iff_ne_zero.mpr hy, log_exists_unique_pos]
+
+def log (a : M) : M := Classical.choose! (log_exists_unique a)
+
+@[simp] lemma log_zero : log (0 : M) = 0 :=
+  (Classical.choose!_spec (log_exists_unique (0 : M))).1 rfl
+
+lemma log_pos {y : M} (pos : 0 < y) : ∃ y' ≤ y, Exp (log y) y' ∧ y < 2 * y' :=
+  ((Classical.choose!_spec (log_exists_unique y)).2 pos).2
+
+lemma log_lt_self_of_pos {y : M} (pos : 0 < y) : log y < y :=
+  ((Classical.choose!_spec (log_exists_unique y)).2 pos).1
+
+@[simp] lemma log_le_self (a : M) : log a ≤ a := by
+  rcases zero_le a with (rfl | pos)
+  · simp
+  · exact le_of_lt <| log_lt_self_of_pos pos
+
+lemma log_graph {x y : M} : x = log y ↔ (y = 0 → x = 0) ∧ (0 < y → x < y ∧ ∃ y' ≤ y, Exp x y' ∧ y < 2 * y') := Classical.choose!_eq_iff _
+
+def logdef : Σᴬ[0] 2 := ⟨“(#1 = 0 → #0 = 0) ∧ (0 < #1 → #0 < #1 ∧ ∃[#0 < #2 + 1] (!Exp.def [#1, #0] ∧ #2 < 2 * #0))”, by simp⟩
+
+lemma log_defined : Σᴬ[0]-Function₁ (log : M → M) logdef := by
+  intro v; simp [logdef, log_graph, Exp.defined.pval, ←le_iff_lt_succ]
+
+instance {b s} : DefinableFunction₁ b s (log : M → M) := defined_to_with_param₀ _ log_defined
+
+instance : PolyBounded₁ (log : M → M) := ⟨#0, λ _ ↦ by simp⟩
+
+lemma log_eq_of_pos {x y : M} (pos : 0 < y) {y'} (H : Exp x y') (hy' : y' ≤ y) (hy : y < 2 * y') : log y = x :=
+  (log_exists_unique_pos pos).unique ⟨log_lt_self_of_pos pos, log_pos pos⟩ ⟨lt_of_lt_of_le H.dom_lt_range hy', y', hy', H, hy⟩
+
+@[simp] lemma log_one : log (1 : M) = 0 := log_eq_of_pos (by simp) (y' := 1) (by simp) (by rfl) (by simp [one_lt_two])
+
+lemma log_two_mul_of_pos {y : M} (pos : 0 < y) : log (2 * y) = log y + 1 := by
+  rcases log_pos pos with ⟨y', hy', H, hy⟩
+  exact log_eq_of_pos (by simpa using pos) (Exp.exp_succ_mul_two.mpr H) (by simpa using hy') (by simpa using hy)
+
+lemma log_two_mul_add_one_of_pos {y : M} (pos : 0 < y) : log (2 * y + 1) = log y + 1 := by
+  rcases log_pos pos with ⟨y', hy', H, hy⟩
+  exact log_eq_of_pos (by simp) (Exp.exp_succ_mul_two.mpr H)
+    (le_trans (by simpa using hy') le_self_add) (two_mul_add_one_lt_two_mul_of_lt hy)
+
+lemma log_eq_of_exp {x y : M} (H : Exp x y) : log y = x :=
+  log_eq_of_pos H.range_pos H (by { rfl }) (lt_mul_of_pos_of_one_lt_left H.range_pos one_lt_two)
+
+lemma exp_of_pow2 {p : M} (pp : Pow2 p) : Exp (log p) p := by
+  rcases log_pos pp.pos with ⟨q, hq, H, hp⟩
+  suffices : p = q
+  · simpa [this] using H
+  by_contra ne
+  have : q < p := lt_of_le_of_ne hq (Ne.symm ne)
+  have : 2 * q < 2 * q := calc
+    2 * q ≤ p     := (Pow2.lt_iff_two_mul_le H.range_pow2 pp).mp this
+    _     < 2 * q := hp
+  simp at this
+
+lemma log_mul_pow2 {a p : M} (pos : 0 < a) (pp : Pow2 p) : log (a * p) = log a + log p := by
+  rcases log_pos pos with ⟨a', ha', Ha, ha⟩
+  rcases log_pos pp.pos with ⟨p', hp', Hp, hp⟩
+  exact log_eq_of_pos (mul_pos pos pp.pos) (Exp.add_mul Ha Hp) (mul_le_mul' ha' hp') (by
+    rcases Hp.uniq (exp_of_pow2 pp)
+    simp [←mul_assoc]; exact mul_lt_mul_of_pos_right ha pp.pos)
+
+def binaryLength (a : M) : M := if 0 < a then log a + 1 else 0
+
+notation "‖" a "‖" => binaryLength a
+
+@[simp] lemma binary_length_zero : ‖(0 : M)‖ = 0 := by simp [binaryLength]
+
+lemma binary_length_of_pos {a : M} (pos : 0 < a) : ‖a‖ = log a + 1 := by simp [binaryLength, pos]
+
+@[simp] lemma binary_length_le (a : M) : ‖a‖ ≤ a := by
+  rcases zero_le a with (rfl | pos)
+  · simp
+  · simp [pos, binary_length_of_pos, ←lt_iff_succ_le, log_lt_self_of_pos]
+
+lemma binary_length_graph {i a : M} : i = ‖a‖ ↔ (0 < a → ∃ k ≤ a, k = log a ∧ i = k + 1) ∧ (a = 0 → i = 0) := by
+  rcases zero_le a with (rfl | pos)
+  · simp
+  · simp [binary_length_of_pos, pos, pos_iff_ne_zero.mp pos]
+    constructor
+    · rintro rfl; exact ⟨log a, by simp⟩
+    · rintro ⟨_, _, rfl, rfl⟩; rfl
+
+def binarylengthdef : Σᴬ[0] 2 := ⟨“(0 < #1 → ∃[#0 < #2 + 1] (!logdef [#0, #2] ∧ #1 = #0 + 1)) ∧ (#1 = 0 → #0 = 0)”, by simp⟩
+
+lemma binary_length_defined : Σᴬ[0]-Function₁ (binaryLength : M → M) binarylengthdef := by
+  intro v; simp [binarylengthdef, binary_length_graph, log_defined.pval, ←le_iff_lt_succ]
+
+instance {b s} : DefinableFunction₁ b s (binaryLength : M → M) := defined_to_with_param₀ _ binary_length_defined
+
+instance : PolyBounded₁ (binaryLength : M → M) := ⟨#0, λ _ ↦ by simp⟩
+
+@[simp] lemma binary_length_one : ‖(1 : M)‖ = 1 := by simp [binaryLength]
+
+lemma binary_length_two_mul_of_pos {a : M} (pos : 0 < a) : ‖2 * a‖ = ‖a‖ + 1 := by
+  simp [pos, binary_length_of_pos, log_two_mul_of_pos]
+
+lemma binary_length_two_mul_add_one (a : M) : ‖2 * a + 1‖ = ‖a‖ + 1 := by
+  rcases zero_le a with (rfl | pos)
+  · simp
+  · simp [pos, binary_length_of_pos, log_two_mul_add_one_of_pos]
+
+lemma binary_length_mul_pow2 {a p : M} (pos : 0 < a) (pp : Pow2 p) : ‖a * p‖ = ‖a‖ + log p := by
+  simp [binary_length_of_pos, pos, pp.pos, log_mul_pow2 pos pp, add_right_comm (log a) (log p) 1]
 
 end ISigma₀
 
@@ -657,7 +850,7 @@ end Exp
 
 def exponential (a : M) : M := Classical.choose! (Exp.range_exists_unique a)
 
-prefix:max "exp " => exponential
+prefix:80 "exp " => exponential
 
 section exponential
 
@@ -669,6 +862,8 @@ def expdef : Σᴬ[0] 2 := ⟨“!Exp.def [#1, #0]”, by simp⟩
 
 lemma exp_defined : Σᴬ[0]-Function₁ (exponential : M → M) expdef := by
   intro v; simp [expdef, exponential_graph, Exp.defined.pval]
+
+instance {b s} : DefinableFunction₁ b s (exponential : M → M) := defined_to_with_param₀ _ exp_defined
 
 lemma exponential_of_exp {a b : M} (h : Exp a b) : exp a = b :=
   Eq.symm <| exponential_graph.mpr h
@@ -692,37 +887,24 @@ lemma exp_even (a : M) : exp (2 * a) = (exp a)^2 :=
 
 @[simp] lemma exp_pow2 (a : M) : Pow2 (exp a) := (exp_exponential a).range_pow2
 
+@[simp] lemma exponential_monotone {a b : M} : exp a < exp b ↔ a < b :=
+  Iff.symm <| Exp.monotone_iff (exp_exponential a) (exp_exponential b)
+
+@[simp] lemma log_exponential (a : M) : log (exp a) = a := log_eq_of_exp (exp_exponential a)
+
+@[simp] lemma binary_length_exponential (a : M) : ‖exp a‖ = a + 1 := by
+  simp [binary_length_of_pos]
+
+lemma exp_add (a b : M) : exp (a + b) = exp a * exp b :=
+  exponential_of_exp (Exp.add_mul (exp_exponential a) (exp_exponential b))
+
+lemma log_mul_exp {a : M} (pos : 0 < a) (i : M) : log (a * exp i) = log a + i := by
+  simp [log_mul_pow2 pos (exp_pow2 i)]
+
+lemma binary_length_mul_exp {a : M} (pos : 0 < a) (i : M) : ‖a * exp i‖ = ‖a‖ + i := by
+  simp [binary_length_mul_pow2 pos (exp_pow2 i)]
+
 end exponential
-
-def Bit (i a : M) : Prop := LenBit (exp i) a
-
-infix:50 " ∈ᵇ " => Bit
-
-notation:50 a:50 " ∉ᵇ " b:50 => ¬ (a ∈ᵇ b)
-
-def bitdef : Σᴬ[0] 2 := ⟨“∃[#0 < #2 + 1] (!expdef [#0, #1] ∧ !lenbitdef [#0, #2])”, by simp⟩
-
-lemma bit_defined : Σᴬ[0]-Relation (Bit : M → M → Prop) bitdef := by
-  intro v; simp [bitdef, lenbit_defined.pval, exp_defined.pval, ←le_iff_lt_succ]
-  constructor
-  · intro h; exact ⟨exp (v 0), by simp [h.le], rfl, h⟩
-  · rintro ⟨_, _, rfl, h⟩; exact h
-
-namespace Bit
-
-@[simp] lemma not_mem_zero (i : M) : i ∉ᵇ 0 := by simp [Bit]
-
-open Classical in
-noncomputable def bitInsert (i a : M) : M := if i ∈ᵇ a then a else a + exp i
-
-@[simp] lemma mem_bitInsert_iff {i j a : M} :
-    i ∈ᵇ bitInsert j a ↔ i = j ∨ i ∈ᵇ a := by
-  by_cases h : j ∈ᵇ a <;> simp [h, bitInsert]
-  · by_cases e : i = j <;> simp [h, e]
-  · simpa [exponential_inj.eq_iff] using
-      lenbit_add_pow2_iff_of_not_lenbit (exp_pow2 i) (exp_pow2 j) h
-
-end Bit
 
 end ISigma₁
 
