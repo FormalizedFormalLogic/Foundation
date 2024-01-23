@@ -228,6 +228,11 @@ lemma maxm_subset {Λ Λ'} (dΛ : Γ ⊢ᴹ[Λ] p) : (Λ ⊆ Λ') → (Γ ⊢ᴹ
   | disj₃ => apply disj₃
   | dne => apply dne
 
+/-
+lemma efq : Γ ⊢ᴹ[Λ] (⊥ ⟶ p) := by
+  have h := HasEFQ.efq Γ p;
+-/
+
 end Deduction
 
 namespace Deducible
@@ -254,7 +259,11 @@ lemma disj₂ (Γ p q) : Γ ⊢ᴹ[Λ]! q ⟶ (p ⋎ q) := ⟨Deduction.disj₂ 
 lemma disj₂' {Γ p q} (d : Γ ⊢ᴹ[Λ]! q) : Γ ⊢ᴹ[Λ]! (p ⋎ q) := (disj₂ _ _ _).modus_ponens d
 
 lemma disj₃ (Γ p q r) : Γ ⊢ᴹ[Λ]! (p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r) := ⟨Deduction.disj₃ Γ p q r⟩
-lemma disj₃' {Γ p q r} (d₁ : Γ ⊢ᴹ[Λ]! (p ⟶ r)) (d₂ : Γ ⊢ᴹ[Λ]! (q ⟶ r)) (d₃ : Γ ⊢ᴹ[Λ]! (p ⋎ q)) : Γ ⊢ᴹ[Λ]! r := (disj₃ _ _ _ _).modus_ponens d₁ |>.modus_ponens d₂ |>.modus_ponens d₃
+lemma disj₃' {Γ p q r} (d₁ : Γ ⊢ᴹ[Λ]! (p ⟶ r)) (d₂ : Γ ⊢ᴹ[Λ]! (q ⟶ r)) (d₃ : Γ ⊢ᴹ[Λ]! (p ⋎ q)) : Γ ⊢ᴹ[Λ]! r :=
+  (disj₃ _ _ _ _)
+    |>.modus_ponens d₁
+    |>.modus_ponens d₂
+    |>.modus_ponens d₃
 
 end Deducible
 

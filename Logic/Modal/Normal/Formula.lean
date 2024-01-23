@@ -63,6 +63,10 @@ lemma and_eq (p q : Formula α) : and p q = p ⋏ q := rfl
 
 lemma neg_eq (p : Formula α) : neg p = ~p := rfl
 
+lemma imp_eq (p q : Formula α) : imp p q = p ⟶ q := rfl
+
+lemma box_eq (p : Formula α) : box p = □p := rfl
+
 lemma iff_eq (p q : Formula α) : p ⟷ q = (p ⟶ q) ⋏ (q ⟶ p) := rfl
 
 lemma dia_eq (p : Formula α) : ◇p = ~(□(~p)) := rfl
