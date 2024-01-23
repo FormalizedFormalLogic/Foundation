@@ -173,6 +173,10 @@ lemma two_mul_lt_sq {i : M} (h : 2 < i) : 2 * i < i ^ 2 := by
 lemma succ_le_double_of_pos {a : M} (h : 0 < a) : a + 1 ≤ 2 * a := by
   simpa [two_mul] using pos_iff_one_le.mp h
 
+lemma two_mul_add_one_lt_two_mul_of_lt (h : a < b) : 2 * a + 1 < 2 * b := calc
+  2 * a + 1 < 2 * (a + 1) := by simp [mul_add, one_lt_two]
+  _         ≤ 2 * b       := by simp [←lt_iff_succ_le, h]
+
 lemma polynomial_mono (t : Semiterm ℒₒᵣ ξ n) {e₁ e₂ : Fin n → M} {ε₁ ε₂ : ξ → M}
     (he : ∀ i, e₁ i ≤ e₂ i) (hε : ∀ i, ε₁ i ≤ ε₂ i) :
     t.val! M e₁ ε₁ ≤ t.val! M e₂ ε₂ := by
