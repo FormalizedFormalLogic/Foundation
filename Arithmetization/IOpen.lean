@@ -40,6 +40,29 @@ lemma open_leastNumber {P : M → Prop}
   have : P a := this a
   contradiction
 
+lemma div_exists_unique_pos (a : M) {b} (pos : 0 < b) : ∃! u, b * u ≤ a ∧ a < b * (u + 1) := by
+  have : ∃ u, b * u ≤ a ∧ a < b * (u + 1) := by
+    have : a < b * (a + 1) → ∃ u, b * u ≤ a ∧ a < b * (u + 1) := by
+      simpa using open_leastNumber (P := λ u ↦ b * u ≤ a) ⟨“&b * #0 ≤ &a”, by simp, by intro x; simp⟩
+    simp at this
+    have hx : a < b * (a + 1) := by
+      have : a + 0 < b * a + b :=
+        add_lt_add_of_le_of_lt (le_mul_self_of_pos_left pos) pos
+      simpa [mul_add] using this
+    exact this hx
+  rcases this with ⟨u, hu⟩
+  exact ExistsUnique.intro u hu (by
+    intro u' hu'
+    by_contra ne
+    wlog lt : u < u'
+    · exact this a pos u' hu' u hu (Ne.symm ne) (Ne.lt_of_le ne $ by simpa using lt)
+    have : a < a := by calc
+      a < b * (u + 1) := hu.2
+      _ ≤ b * u'      := (_root_.mul_le_mul_left pos).mpr (lt_iff_succ_le.mp lt)
+      _ ≤ a           := hu'.1
+    exact LT.lt.false this)
+
+/-
 lemma remainder (a : M) {b} (pos : 0 < b) : ∃! u, ∃ v < b, a = b * u + v := by
   have : ∃! u, b * u ≤ a ∧ a < b * (u + 1) := by
     have : ∃ u, b * u ≤ a ∧ a < b * (u + 1) := by
@@ -79,38 +102,76 @@ lemma remainder (a : M) {b} (pos : 0 < b) : ∃! u, ∃ v < b, a = b * u + v := 
         exact LT.lt.false this
       exact ⟨v, this, e⟩
   exact (exists_unique_congr iff).mpr this
+-/
 
 section div
 
-lemma div_exists_unique (a b : M) : ∃! u, (0 < b → ∃ v < b, a = b * u + v) ∧ (b = 0 → u = 0) := by
+lemma div_exists_unique (a b : M) : ∃! u, (0 < b → b * u ≤ a ∧ a < b * (u + 1)) ∧ (b = 0 → u = 0) := by
   have : 0 ≤ b := by exact zero_le b
   rcases this with (rfl | pos) <;> simp [*]
-  · simpa [pos_iff_ne_zero.mp pos] using remainder a pos
+  · simpa [pos_iff_ne_zero.mp pos] using div_exists_unique_pos a pos
 
 instance : Div M := ⟨fun a b ↦ Classical.choose! (div_exists_unique a b)⟩
 
-lemma div_spec_of_pos (a : M) (h : 0 < b) : ∃ v < b, a = b * (a / b) + v :=
-  (Classical.choose!_spec (div_exists_unique a b)).1 h
+lemma mul_div_le_pos (a : M) (h : 0 < b) : b * (a / b) ≤ a := ((Classical.choose!_spec (div_exists_unique a b)).1 h).1
 
-@[simp] lemma div_spec_zero (a : M) : a / 0 = 0 :=
-  (Classical.choose!_spec (div_exists_unique a 0)).2 (by simp)
+lemma mul_div_les (a : M) (h : 0 < b) : a < b * (a / b + 1) := ((Classical.choose!_spec (div_exists_unique a b)).1 h).2
 
-lemma div_graph {a b c : M} : c = a / b ↔ ((0 < b → ∃ v < b, a = b * c + v) ∧ (b = 0 → c = 0)) :=
+lemma eq_mul_div_add_of_pos (a : M) {b} (hb : 0 < b) : ∃ r < b, a = b * (a / b) + r := by
+  let r := a - b * (a / b)
+  have e : a = b * (a / b) + r := by simp [add_tsub_self_of_le (mul_div_le_pos a hb)]
+  exact ⟨r, by
+    by_contra A
+    have hyv : b ≤ r := by simpa using A
+    have : a < a := by calc
+          a < b * (a / b + 1) := mul_div_les a hb
+          _ ≤ b * (a / b) + r := by simpa [mul_add] using hyv
+          _ = a               := e.symm
+    simp at this, e⟩
+
+@[simp] lemma div_spec_zero (a : M) : a / 0 = 0 := (Classical.choose!_spec (div_exists_unique a 0)).2 (by simp)
+
+lemma div_graph {a b c : M} : c = a / b ↔ ((0 < b → b * c ≤ a ∧ a < b * (c + 1)) ∧ (b = 0 → c = 0)) :=
   Classical.choose!_eq_iff _
 
 def divdef : Σᴬ[0] 3 :=
-  ⟨“(0 < #2 → ∃[#0 < #3] (#2 = #3 * #1 + #0)) ∧ (#2 = 0 → #0 = 0)”, by simp[Hierarchy.pi_zero_iff_sigma_zero]⟩
+  ⟨“(0 < #2 → #2 * #0 ≤ #1 ∧ #1 < #2 * (#0 + 1)) ∧ (#2 = 0 → #0 = 0)”, by simp[Hierarchy.pi_zero_iff_sigma_zero]⟩
 
 lemma div_defined : Σᴬ[0]-Function₂ ((· / ·) : M → M → M) divdef := by
   intro v; simp[div_graph, divdef, Matrix.vecHead, Matrix.vecTail]
 
 lemma div_spec_of_pos' (a : M) (h : 0 < b) : ∃ v < b, a = (a / b) * b + v := by
-  simpa [mul_comm] using div_spec_of_pos a h
+  simpa [mul_comm] using eq_mul_div_add_of_pos a h
+
+lemma div_eq_of {b : M} (hb : b * c ≤ a) (ha : a < b * (c + 1)) : a / b = c := by
+  have pos : 0 < b := pos_of_mul_pos_left (pos_of_gt ha) (by simp)
+  exact (div_exists_unique_pos a pos).unique ⟨mul_div_le_pos a pos, mul_div_les a pos⟩ ⟨hb, ha⟩
+
+lemma div_mul_add (a b : M) {r} (hr : r < b) : (a * b + r) / b = a :=
+  div_eq_of (by simp [mul_comm]) (by simp [mul_comm b a, mul_add, hr])
+
+@[simp] lemma zero_div (a : M) : 0 / a = 0 := by
+  rcases zero_le a with (rfl | pos)
+  · simp
+  · exact div_eq_of (by simp) (by simpa)
+
+lemma div_mul (a b c : M) : a / (b * c) = a / b / c := by
+  rcases zero_le b with (rfl | hb)
+  · simp
+  rcases zero_le c with (rfl | hc)
+  · simp
+  exact div_eq_of
+    (by calc
+          b * c * (a / b / c) ≤ b * (a / b) := by simp [mul_assoc]; exact mul_le_mul_left (mul_div_le_pos (a / b) hc)
+          _                   ≤ a := mul_div_le_pos a hb)
+    (by calc
+          a < b * (a / b + 1)         := mul_div_les a hb
+          _ ≤ b * c * (a / b / c + 1) := by simp [mul_assoc]; exact mul_le_mul_left (lt_iff_succ_le.mp <| mul_div_les (a / b) hc))
 
 @[simp] lemma mul_div_le (a b : M) : b * (a / b) ≤ a := by
   have : 0 ≤ b := by exact zero_le b
   rcases this with (rfl | pos) <;> simp [*]
-  rcases div_spec_of_pos a pos with ⟨v, _, e⟩
+  rcases eq_mul_div_add_of_pos a pos with ⟨v, _, e⟩
   simpa [← e] using show b * (a / b) ≤ b * (a / b) + v from le_self_add
 
 @[simp] lemma div_le (a b : M) : a / b ≤ a := by
@@ -126,50 +187,31 @@ instance : DefinableFunction₂ b s ((· / ·) : M → M → M) := defined_to_wi
 @[simp] lemma div_mul_le (a b : M) : a / b * b ≤ a := by rw [mul_comm]; exact mul_div_le _ _
 
 lemma lt_mul_div (a : M) {b} (pos : 0 < b) : a < b * (a / b + 1) := by
-  rcases div_spec_of_pos a pos with ⟨v, hv, e⟩
+  rcases eq_mul_div_add_of_pos a pos with ⟨v, hv, e⟩
   calc a = b * (a / b) + v := e
        _ < b * (a / b + 1) := by simp [mul_add, hv]
 
 @[simp] lemma div_one (a : M) : a / 1 = a :=
   le_antisymm (by simp) (le_iff_lt_succ.mpr $ by simpa using lt_mul_div a one_pos)
 
-lemma div_mul_add (a : M) {b r} (pos : 0 < b) (hr : r < b) : (a * b + r) / b = a := by
-  rcases div_spec_of_pos (a * b + r) pos with ⟨v, hv, e⟩
-  symm; apply eq_of_le_of_not_lt
-  · have : a * b < ((a * b + r) / b + 1) * b := calc
-      a * b ≤ a * b + r                  := le_self_add
-      _     = ((a * b + r) / b) * b + v := by simpa [@mul_comm _ _ b] using e
-      _     < ((a * b + r) / b + 1) * b := by simp [add_mul, hv]
-    exact le_iff_lt_succ.mpr <| lt_of_mul_lt_mul_of_nonneg_right this (by simp)
-  · intro H
-    have : ((a * b + r) / b) * b < (a + 1) * b := calc
-      ((a * b + r) / b) * b ≤ a * b + r   := by simp
-      _                      < (a + 1) * b := by simp [add_mul, hr]
-    have : (a * b + r) / b ≤ a := le_iff_lt_succ.mpr ((mul_lt_mul_right pos).mp this)
-    have : a < a := lt_of_lt_of_le H this
-    exact LT.lt.false this
-
 lemma div_add_mul_self (a c : M) {b} (pos : 0 < b) : (a + c * b) / b = a / b + c := by
   rcases div_spec_of_pos' a pos with ⟨r, hr, ex⟩
-  simpa [add_mul, add_right_comm, ← ex] using div_mul_add (a / b + c) pos hr
+  simpa [add_mul, add_right_comm, ← ex] using div_mul_add (a / b + c) _ hr
 
 lemma div_mul_add_self (a c : M) {b} (pos : 0 < b) : (a * b + c) / b = a + c / b := by
   simp [div_add_mul_self, pos, add_comm]
 
 @[simp] lemma div_mul_left (a : M) {b} (pos : 0 < b) : (a * b) / b = a := by
-  simpa using div_mul_add a pos pos
+  simpa using div_mul_add a _ pos
 
 @[simp] lemma div_mul_right (a : M) {b} (pos : 0 < b) : (b * a) / b = a := by
-  simpa [mul_comm] using div_mul_add a pos pos
+  simpa [mul_comm] using div_mul_add a _ pos
 
 @[simp] lemma div_eq_zero_of_lt (b : M) {a} (h : a < b) : a / b = 0 := by
-  simpa using div_mul_add 0 (pos_of_gt h) h
+  simpa using div_mul_add 0 b h
 
 @[simp] lemma div_self {a : M} (hx : 0 < a) : a / a = 1 := by
   simpa using div_mul_left 1 hx
-
-@[simp] lemma zero_div (a : M) : 0 / a = 0 := by
-  rcases zero_le a with (rfl | pos) <;> simp [*]
 
 @[simp] lemma div_mul' (a : M) {b} (pos : 0 < b) : (b * a) / b = a := by simp [mul_comm, pos]
 
@@ -223,8 +265,8 @@ lemma div_add_remainder (a b : M) : b * (a / b) + (a mod b) = a :=
   · simp
   · simp [rem, h]
 
-lemma remainder_mul_add_of_lt (a : M) {b} (pos : 0 < b) {r} (hr : r < b) : (a * b + r) mod b = r := by
-  simp [rem, div_mul_add a pos hr, mul_comm]
+lemma remainder_mul_add_of_lt (a b : M) {r} (hr : r < b) : (a * b + r) mod b = r := by
+  simp [rem, div_mul_add a b hr, mul_comm]
 
 @[simp] lemma remainder_mul_add (a c : M) (pos : 0 < b) : (a * b + c) mod b = c mod b := by
   simp [rem, div_mul_add_self, pos, mul_add, ←sub_sub, show b * a = a * b from mul_comm _ _]
@@ -241,17 +283,17 @@ lemma remainder_mul_add_of_lt (a : M) {b} (pos : 0 < b) {r} (hr : r < b) : (a * 
 @[simp] lemma remainder_mul_self_left (a b : M) : (a * b) mod b = 0 := by
   rcases zero_le b with (rfl | h)
   · simp
-  · simpa using remainder_mul_add_of_lt a h h
+  · simpa using remainder_mul_add_of_lt a b h
 
 @[simp] lemma remainder_mul_self_right (a b : M) : (b * a) mod b = 0 := by
   simp [mul_comm]
 
 @[simp] lemma remainder_eq_self_of_lt {a b : M} (h : a < b) : a mod b = a := by
-  simpa using remainder_mul_add_of_lt 0 (pos_of_gt h) h
+  simpa using remainder_mul_add_of_lt 0 b h
 
 @[simp] lemma remainder_lt (a : M) {b} (pos : 0 < b) : a mod b < b := by
   rcases div_spec_of_pos' a pos with ⟨r, hr, ha⟩
-  have : ((a / b) * b + r) mod b = r := remainder_mul_add_of_lt _ pos hr
+  have : ((a / b) * b + r) mod b = r := remainder_mul_add_of_lt _ _ hr
   have : a mod b = r := by simpa [←ha] using this
   simp [this, hr]
 
@@ -554,6 +596,10 @@ lemma hierarchy_polynomial_induction (b : VType) (s : ℕ) [(𝐈𝚪 b s).Mod M
 @[elab_as_elim] lemma hierarchy_polynomial_induction_sigma₁ [𝐈𝚺₁.Mod M] {P : M → Prop} (hP : DefinablePred Σ 1 P)
     (zero : P 0) (even : ∀ x, P x → P (2 * x)) (odd : ∀ x, P x → P (2 * x + 1)) : ∀ x, P x :=
   hierarchy_polynomial_induction Σ 1 hP zero even odd
+
+@[elab_as_elim] lemma hierarchy_polynomial_induction_pi₁ [𝐈𝚷₁.Mod M] {P : M → Prop} (hP : DefinablePred Π 1 P)
+    (zero : P 0) (even : ∀ x, P x → P (2 * x)) (odd : ∀ x, P x → P (2 * x + 1)) : ∀ x, P x :=
+  hierarchy_polynomial_induction Π 1 hP zero even odd
 
 end Model
 

@@ -111,6 +111,24 @@ lemma zero_or_succ (a : M) : a = 0 ∨ ∃ a', a = a' + 1 := by
   · simp
   · right; exact ⟨a - 1, by rw [sub_add_self_of_le]; simp [pos_iff_one_le.mp pos]⟩
 
+lemma pred_lt_self_of_pos (h : 0 < a) : a - 1 < a := by
+  rcases zero_or_succ a with (rfl | ⟨a, rfl⟩)
+  · simp_all
+  · simp
+
+lemma tsub_lt_iff_left (h : b ≤ a) : a - b < c ↔ a < c + b := AddLECancellable.tsub_lt_iff_right (add_le_cancel b) h
+
+lemma sub_mul (h : b ≤ a) : (a - b) * c = a * c - b * c := by
+  have : a = (a - b) + b := (tsub_eq_iff_eq_add_of_le h).mp rfl
+  calc
+    (a - b) * c = (a - b) * c + b * c - b * c := by simp
+    _           = (a - b + b) * c - b * c     := by simp [add_mul]
+    _           = a * c - b * c               := by simp [sub_add_self_of_le h]
+
+lemma mul_sub (h : b ≤ a) : c * (a - b) = c * a - c * b := by simp [mul_comm c, sub_mul, h]
+
+lemma add_sub_of_le (h : c ≤ b) (a : M) : a + b - c = a + (b - c) := add_tsub_assoc_of_le h a
+
 end sub
 
 section Dvd
