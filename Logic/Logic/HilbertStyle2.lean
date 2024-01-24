@@ -100,19 +100,31 @@ infixr:90 " ⨀ " => modus_ponens'
 def dtl {Γ p q} (d : Bew Γ (p ⟶ q)) : Bew (insert p Γ) q := (weakening' (by simp) d) ⨀ (axm (by simp))
 
 @[simp]
-lemma imp_id : Bew Γ (p ⟶ p) := ((imply₂ Γ p (p ⟶ p) p) ⨀ (imply₁ _ _ _)) ⨀ (imply₁ _ _ _)
+def imp_id : Bew Γ (p ⟶ p) := ((imply₂ Γ p (p ⟶ p) p) ⨀ (imply₁ _ _ _)) ⨀ (imply₁ _ _ _)
 
-lemma dni : Bew Γ (p ⟶ ~~p) := by
+def dni : Bew Γ (p ⟶ ~~p) := by
   have h₁ : Bew (insert (p ⟶ ⊥) (insert p Γ)) (p ⟶ ⊥) := axm (by simp);
   have h₂ : Bew (insert (p ⟶ ⊥) (insert p Γ)) p := axm (by simp);
   simpa using dtr $ dtr $ h₁ ⨀ h₂;
 
-end Minimal
+def contra₀' {Γ p q} : (Bew Γ (p ⟶ q)) → (Bew Γ (~q ⟶ ~p)) := by
+  intro h;
+  simp [NegDefinition.neg];
+  apply dtr;
+  apply dtr;
+  have d₁ : Bew (insert p $ insert (q ⟶ ⊥) Γ) (q ⟶ ⊥) := axm (by simp);
+  have d₂ : Bew (insert p $ insert (q ⟶ ⊥) Γ) p := axm (by simp);
+  simpa using d₁ ⨀ h ⨀ d₂;
 
+end Minimal
 
 section Classical
 
 variable [c : Classical Bew] [HasDT Bew]
+
+def iff_dn : Bew Γ (p ⟷ ~~p) := by
+  simp only [LogicSymbol.iff];
+  exact (conj₃ _ _ _ ⨀ (dni _ _)) ⨀ (dne _ _);
 
 instance : HasEFQ Bew where
   efq Γ p := by

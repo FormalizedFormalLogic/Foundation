@@ -219,6 +219,10 @@ lemma box_subset {Γ Δ : Theory α} (d : Γ ⊆ Δ) : □Γ ⊆ □Δ := by
 lemma box_union {Γ Δ : Theory α} : □(Γ ∪ Δ) = □Γ ∪ □Δ := by
   simp_all [box, Set.image_union]
 
+lemma box_mem {Γ : Theory α} : p ∈ □Γ ↔ (∃ q ∈ Γ, □q = p) := by
+  simp_all [box]
+  rfl;
+
 def dia : Theory α := .dia '' Γ
 prefix:74 "◇" => Theory.dia
 
@@ -229,8 +233,17 @@ lemma dia_subset {Γ Δ : Theory α} (d : Γ ⊆ Δ) : ◇Γ ⊆ ◇Δ := by
 lemma dia_union {Γ Δ : Theory α} : ◇(Γ ∪ Δ) = ◇Γ ∪ ◇Δ := by
   simp_all [dia, Set.image_union]
 
+lemma dia_mem {Γ : Theory α} : p ∈ ◇Γ ↔ (∃ q ∈ Γ, ◇q = p) := by
+  simp_all [dia]
+  rfl;
+
 def prebox : Theory α := .box ⁻¹' Γ
 prefix:73 "□⁻¹" => Theory.prebox
+
+def box_prebox {Γ} : □(□⁻¹Γ) = { □p | (p : Formula α) (_ : □p ∈ Γ) } := by aesop;
+
+@[simp]
+def box_prebox_subset {Γ : Theory α} : □(□⁻¹Γ) ⊆ Γ := by simp [box_prebox, Set.subset_def];
 
 @[simp]
 lemma prebox_subset {Γ Δ : Theory α} (d : Γ ⊆ Δ) : □⁻¹Γ ⊆ □⁻¹Δ := by
@@ -243,10 +256,10 @@ prefix:73 "◇⁻¹" => Theory.predia
 lemma predia_subset {Γ Δ : Theory α} (d : Γ ⊆ Δ) : ◇⁻¹Γ ⊆ ◇⁻¹Δ := by
   simp_all [predia, Set.subset_def];
 
-def box_prebox {Γ} : □(□⁻¹Γ) = { □p | (p : Formula α) (_ : □p ∈ Γ) } := by aesop;
+def dia_predia {Γ} : ◇(◇⁻¹Γ) = { ◇p | (p : Formula α) (_ : ◇p ∈ Γ) } := by aesop;
 
 @[simp]
-def box_prebox_subset {Γ : Theory α} : □(□⁻¹Γ) ⊆ Γ := by simp [box_prebox, Set.subset_def];
+def dia_predia_subset {Γ : Theory α} : ◇(◇⁻¹Γ) ⊆ Γ := by simp [dia_predia, Set.subset_def];
 
 end Theory
 
