@@ -186,6 +186,10 @@ instance [𝐈𝚺₀.Mod M] : 𝐈𝚷₀.Mod M := hierarchy_mod_alt Σ 0
 
 instance [𝐈𝚷₀.Mod M] : 𝐈𝚺₀.Mod M := hierarchy_mod_alt Π 0
 
+instance [𝐈𝚺₁.Mod M] : 𝐈𝚷₁.Mod M := hierarchy_mod_alt Σ 1
+
+instance [𝐈𝚷₁.Mod M] : 𝐈𝚺₁.Mod M := hierarchy_mod_alt Π 1
+
 end Theory
 
 end ISigma

@@ -747,6 +747,8 @@ lemma exp_even (a : M) : exp (2 * a) = (exp a)^2 :=
 
 @[simp] lemma exp_pos (a : M) : 0 < exp a := (exp_exponential a).range_pos
 
+@[simp] lemma one_le_exp (a : M) : 1 ≤ exp a := pos_iff_one_le.mp (by simp)
+
 @[simp] lemma exp_pow2 (a : M) : Pow2 (exp a) := (exp_exponential a).range_pow2
 
 @[simp] lemma exponential_monotone {a b : M} : exp a < exp b ↔ a < b :=

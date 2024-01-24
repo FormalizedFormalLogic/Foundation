@@ -115,7 +115,7 @@ instance : Div M := ⟨fun a b ↦ Classical.choose! (div_exists_unique a b)⟩
 
 lemma mul_div_le_pos (a : M) (h : 0 < b) : b * (a / b) ≤ a := ((Classical.choose!_spec (div_exists_unique a b)).1 h).1
 
-lemma mul_div_les (a : M) (h : 0 < b) : a < b * (a / b + 1) := ((Classical.choose!_spec (div_exists_unique a b)).1 h).2
+lemma lt_mul_div_succ (a : M) (h : 0 < b) : a < b * (a / b + 1) := ((Classical.choose!_spec (div_exists_unique a b)).1 h).2
 
 lemma eq_mul_div_add_of_pos (a : M) {b} (hb : 0 < b) : ∃ r < b, a = b * (a / b) + r := by
   let r := a - b * (a / b)
@@ -124,7 +124,7 @@ lemma eq_mul_div_add_of_pos (a : M) {b} (hb : 0 < b) : ∃ r < b, a = b * (a / b
     by_contra A
     have hyv : b ≤ r := by simpa using A
     have : a < a := by calc
-          a < b * (a / b + 1) := mul_div_les a hb
+          a < b * (a / b + 1) := lt_mul_div_succ a hb
           _ ≤ b * (a / b) + r := by simpa [mul_add] using hyv
           _ = a               := e.symm
     simp at this, e⟩
@@ -145,10 +145,12 @@ lemma div_spec_of_pos' (a : M) (h : 0 < b) : ∃ v < b, a = (a / b) * b + v := b
 
 lemma div_eq_of {b : M} (hb : b * c ≤ a) (ha : a < b * (c + 1)) : a / b = c := by
   have pos : 0 < b := pos_of_mul_pos_left (pos_of_gt ha) (by simp)
-  exact (div_exists_unique_pos a pos).unique ⟨mul_div_le_pos a pos, mul_div_les a pos⟩ ⟨hb, ha⟩
+  exact (div_exists_unique_pos a pos).unique ⟨mul_div_le_pos a pos, lt_mul_div_succ a pos⟩ ⟨hb, ha⟩
 
 lemma div_mul_add (a b : M) {r} (hr : r < b) : (a * b + r) / b = a :=
   div_eq_of (by simp [mul_comm]) (by simp [mul_comm b a, mul_add, hr])
+
+lemma div_mul_add' (a b : M) {r} (hr : r < b) : (b * a + r) / b = a := by simpa [mul_comm] using div_mul_add a b hr
 
 @[simp] lemma zero_div (a : M) : 0 / a = 0 := by
   rcases zero_le a with (rfl | pos)
@@ -165,8 +167,8 @@ lemma div_mul (a b c : M) : a / (b * c) = a / b / c := by
           b * c * (a / b / c) ≤ b * (a / b) := by simp [mul_assoc]; exact mul_le_mul_left (mul_div_le_pos (a / b) hc)
           _                   ≤ a := mul_div_le_pos a hb)
     (by calc
-          a < b * (a / b + 1)         := mul_div_les a hb
-          _ ≤ b * c * (a / b / c + 1) := by simp [mul_assoc]; exact mul_le_mul_left (lt_iff_succ_le.mp <| mul_div_les (a / b) hc))
+          a < b * (a / b + 1)         := lt_mul_div_succ a hb
+          _ ≤ b * c * (a / b / c + 1) := by simp [mul_assoc]; exact mul_le_mul_left (lt_iff_succ_le.mp <| lt_mul_div_succ (a / b) hc))
 
 @[simp] lemma mul_div_le (a b : M) : b * (a / b) ≤ a := by
   have : 0 ≤ b := by exact zero_le b
@@ -232,6 +234,10 @@ lemma div_lt_of_pos_of_one_lt {a b : M} (ha : 0 < a) (hb : 1 < b) : a / b < a :=
   rcases zero_le (a / b) with (e | lt)
   · simp [←e, ha]
   · exact lt_of_lt_of_le (lt_mul_of_one_lt_left lt hb) (mul_div_le a b)
+
+lemma le_two_mul_div_two_add_one (a : M) : a ≤ 2 * (a / 2) + 1 := by
+  have : a < 2 * (a / 2 + 1) := lt_mul_div_succ a (show 0 < 2 from by simp)
+  exact le_iff_lt_succ.mpr (by simpa [add_assoc, one_add_one_eq_two, mul_add] using this)
 
 end div
 
