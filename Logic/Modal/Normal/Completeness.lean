@@ -113,7 +113,16 @@ lemma frameclass_unsatisfiable_insert_neg {𝔽 : FrameClass α} {Γ : Theory β
 
 lemma frameclass_satisfiable_insert_neg {𝔽 : FrameClass α} {Γ : Theory β} : (Γ ⊨ᴹ[𝔽] p) ↔ ¬(Theory.FrameClassSatisfiable 𝔽 (insert (~p) Γ)) := by simpa using frameclass_unsatisfiable_insert_neg.not
 
-lemma inconsistent_insert_neg {Γ : Theory β} : (Γ ⊢ᴹ[Λ]! p) ↔ (Inconsistent Λ (insert (~p) Γ)) := by
+lemma inconsistent_insert : (Inconsistent Λ (insert p Γ)) → (∃ (Δ : Context β), (↑Δ ⊆ Γ) ∧ (Deducible Λ (insert p Δ) ⊥)) := by
+  intro hInconsisΓp;
+  simp [Theory.Inconsistent, Theory.Consistent] at hInconsisΓp hConsisΓ;
+  have ⟨Δ, hΔ, ⟨dΔ⟩⟩ := hInconsisΓp;
+  existsi (erase Δ p);
+  constructor;
+  . aesop;
+  . exact ⟨dΔ.weakening' (by apply Finset.insert_erase_subset)⟩
+
+lemma inconsistent_insert_neg : (Γ ⊢ᴹ[Λ]! p) ↔ (Inconsistent Λ (insert (~p) Γ)) := by
   constructor;
   . intro h;
     simp only [Theory.Inconsistent];
@@ -125,14 +134,9 @@ lemma inconsistent_insert_neg {Γ : Theory β} : (Γ ⊢ᴹ[Λ]! p) ↔ (Inconsi
       simpa;
     . exact ⟨(axm (by simp)).modus_ponens' (hΔ₂.weakening' (by simp))⟩;
   . intro h;
-    simp only [Theory.Inconsistent] at h;
-    have ⟨Δ, hΔ₁, ⟨hΔ₂⟩⟩ := h;
-    sorry;
-    -- existsi (Δ \ {~p});
-    -- constructor;
-    -- . aesop;
-    -- . have : (Δ \ {~p}) ⊢ᴹ[Λ] ⊥ ⟶ p := Deduction.efq _ p;
-    --   exact ⟨this.modus_ponens' hΔ₂⟩;
+    have ⟨Δ, hΔ, dΔ⟩ := inconsistent_insert h;
+    existsi Δ;
+    exact ⟨hΔ, Deducible.dne' (by simpa using dΔ.dtr)⟩;
 
 lemma consistent_insert_neg {Γ : Theory β} : (Γ ⊬ᴹ[Λ]! p) ↔ (Consistent Λ (insert (~p) Γ)) := inconsistent_insert_neg.not
 
@@ -164,7 +168,16 @@ lemma consistent_false (Δ : Context β) (h : ↑Δ ⊆ Γ) : (Undeducible Λ Δ
   simpa using (hConsisΓ Δ h);
 
 lemma consistent_either (hConsisΓ : Consistent Λ Γ) : ∀ p, (Consistent Λ (insert p Γ)) ∨ (Consistent Λ (insert (~p) Γ)) := by
-  sorry;
+  intro p;
+  by_contra hC; simp [not_or, Theory.Consistent] at hC;
+  have ⟨Δ₁, hΔ₁, dΔ₁⟩ := inconsistent_insert hC.1;
+  have ⟨Δ₂, hΔ₂, dΔ₂⟩ := inconsistent_insert hC.2;
+  have : ↑(Δ₂ ∪ Δ₁) ⊆ Γ := by aesop;
+  apply hConsisΓ;
+  existsi (Δ₂ ∪ Δ₁);
+  constructor;
+  . assumption;
+  . exact dΔ₂.dtr.modus_ponens $ dΔ₁.dtr;
 
 def Theory.MaximalConsistent (Λ) (Γ : Theory β) := Theory.Consistent Λ Γ ∧ Maximal Γ
 

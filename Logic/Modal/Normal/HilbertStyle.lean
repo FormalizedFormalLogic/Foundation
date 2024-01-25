@@ -217,6 +217,9 @@ instance : HasDT (Deduction Λ) := ⟨dtr⟩
 def efq (Γ p) : Γ ⊢ᴹ[Λ] (⊥ ⟶ p) := HasEFQ.efq Γ p
 
 def dni (Γ p) : Γ ⊢ᴹ[Λ] (p ⟶ ~~p) := Hilbert.dni Γ p
+def dni' {Γ p} (d : Γ ⊢ᴹ[Λ] p) : Γ ⊢ᴹ[Λ] ~~p := dni _ _ |>.modus_ponens' d
+
+def dne' {Γ p} (d : Γ ⊢ᴹ[Λ] ~~p) : Γ ⊢ᴹ[Λ] p := dne _ _ |>.modus_ponens' d
 
 def iff_dn (Γ p) : Γ ⊢ᴹ[Λ] (p ⟷ ~~p) := Hilbert.iff_dn Γ p
 
@@ -291,7 +294,10 @@ lemma efq (Γ p) : Γ ⊢ᴹ[Λ]! (⊥ ⟶ p) := ⟨Deduction.efq Γ p⟩
 lemma efq' {Γ p} (d : Γ ⊢ᴹ[Λ]! ⊥) : Γ ⊢ᴹ[Λ]! p := (efq _ _).modus_ponens' d
 
 lemma dni (Γ p) : Γ ⊢ᴹ[Λ]! (p ⟶ ~~p) := ⟨Deduction.dni Γ p⟩
-lemma dni' {Γ p} (d : Γ ⊢ᴹ[Λ]! p) : Γ ⊢ᴹ[Λ]! ~~p := (dni _ _).modus_ponens' d
+lemma dni' {Γ p} (d : Γ ⊢ᴹ[Λ]! p) : Γ ⊢ᴹ[Λ]! ~~p := ⟨Deduction.dni' d.some⟩
+
+lemma dne (Γ p) : Γ ⊢ᴹ[Λ]! (~~p ⟶ p) := ⟨Deduction.dne Γ p⟩
+lemma dne' {Γ p} (d : Γ ⊢ᴹ[Λ]! ~~p) : Γ ⊢ᴹ[Λ]! p := ⟨Deduction.dne' d.some⟩
 
 lemma dtl {Γ p q} (d : Γ ⊢ᴹ[Λ]! (p ⟶ q)) : ((insert p Γ) ⊢ᴹ[Λ]! q) := ⟨Deduction.dtl d.some⟩
 lemma dtr {Γ p q} (d : (insert p Γ) ⊢ᴹ[Λ]! q) : Γ ⊢ᴹ[Λ]! (p ⟶ q) := ⟨Deduction.dtr d.some⟩
