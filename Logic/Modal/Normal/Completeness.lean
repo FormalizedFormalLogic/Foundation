@@ -2,13 +2,6 @@ import Logic.Propositional.Basic.Completeness
 import Logic.Modal.Normal.HilbertStyle
 import Logic.Modal.Normal.Semantics
 
-/-!
-# Completeness of Normal Modal Logic
-
-## References
-- <https://builds.openlogicproject.org/open-logic-complete.pdf>
--/
-
 namespace LO.Modal.Normal
 
 open Finset Set
