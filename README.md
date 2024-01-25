@@ -149,7 +149,7 @@ In this formalization, _(Modal) Logic_ means set of axioms.
 
 ### Theorem
 
-- [Soundness of Hilbert-style deduction](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Soundness.html#LO.Modal.Normal.Logic.Hilbert.sounds)
+- [Soundness of Hilbert-style deduction](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Soundness.html#LO.Modal.Normal.Logic.Hilbert.sounds) for `𝐊` extend `𝐓`, `𝐁`, `𝐃`, `𝟒`, `𝟓` Extensions (i.e. `𝐊𝐃`, `𝐒𝟒`, `𝐒𝟓`, etc.)
   ```lean
   theorem LO.Modal.Normal.Logic.Hilbert.sounds
       {α : Type u} [Inhabited α]
@@ -170,7 +170,7 @@ In this formalization, _(Modal) Logic_ means set of axioms.
         ⊬ᴹ[Λ]! ⊥
     ```
   -  **WIP:** Currently, these theorems was proved where only `Λ` is `𝐊`, `𝐊𝐃`, `𝐒𝟒`, `𝐒𝟓`.
-- Strong Completeness of Hilbert-style deduction for `𝐊`
+- Strong Completeness of Hilbert-style deduction for `𝐊` extend `𝐓`, `𝐁`, `𝐃`, `𝟒`, `𝟓` Extensions
   ```
   def Completeness
     {α β : Type u}
