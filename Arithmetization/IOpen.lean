@@ -490,10 +490,10 @@ open Classical
 -- https://github.com/leanprover-community/mathlib4/blob/b075cdd0e6ad8b5a3295e7484b2ae59e9b2ec2a7/Mathlib/Data/Nat/Pairing.lean#L37
 def pair (a b : M) : M := if a < b then b * b + a else a * a + a + b
 
-notation "⟨" a " ; " b "⟩" => pair a b
+notation "⟪" a ", " b "⟫" => pair a b
 
 lemma pair_graph {a b c : M} :
-    c = ⟨a ; b⟩ ↔ (a < b ∧ c = b * b + a) ∨ (b ≤ a ∧ c = a * a + a + b) := by
+    c = ⟪a, b⟫ ↔ (a < b ∧ c = b * b + a) ∨ (b ≤ a ∧ c = a * a + a + b) := by
   simp [pair]
   by_cases h : a < b
   · simp [h, show ¬b ≤ a from by simpa using h]
@@ -501,7 +501,7 @@ lemma pair_graph {a b c : M} :
 
 def pairdef : Σᴬ[0] 3 := ⟨“(#1 < #2 ∧ #0 = #2 * #2 + #1) ∨ (#2 ≤ #1 ∧ #0 = #1 * #1 + #1 + #2)”, by simp⟩
 
-lemma pair_defined : Σᴬ[0]-Function₂ (λ a b : M ↦ ⟨a ; b⟩) pairdef := by
+lemma pair_defined : Σᴬ[0]-Function₂ (λ a b : M ↦ ⟪a, b⟫) pairdef := by
   intro v; simp [pair_graph, pairdef]
 
 instance {b s} : DefinableFunction₂ b s (pair : M → M → M) := defined_to_with_param₀ _ pair_defined
@@ -519,7 +519,7 @@ prefix: 80 "π₁" => pi₁
 
 prefix: 80 "π₂" => pi₂
 
-@[simp] lemma pair_unpair (a : M) : ⟨π₁ a ; π₂ a⟩ = a := by
+@[simp] lemma pair_unpair (a : M) : ⟪π₁ a, π₂ a⟫ = a := by
   simp [pi₁, pi₂, unpair]
   split_ifs with h
   · simp [pair, h]
@@ -532,7 +532,7 @@ prefix: 80 "π₂" => pi₂
                                                                         rw [add_tsub_self_of_le, add_tsub_self_of_le] <;> simp [this]
       _                                 = a                       := add_tsub_self_of_le (by simp)
 
-@[simp] lemma unpair_pair (a b : M) : unpair ⟨a ; b⟩ = (a, b) := by
+@[simp] lemma unpair_pair (a b : M) : unpair ⟪a, b⟫ = (a, b) := by
   simp [pair]; split_ifs with h
   · have : √(b * b + a) = b := sqrt_eq_of_le_of_le (by simp) (by simp; exact le_trans (le_of_lt h) (by simp))
     simp [unpair, this, show ¬b ≤ a from by simpa using h]
@@ -540,9 +540,9 @@ prefix: 80 "π₂" => pi₂
       sqrt_eq_of_le_of_le (by simp [add_assoc]) (by simp [add_assoc, two_mul, show b ≤ a from by simpa using h])
     simp [unpair, this, add_assoc]
 
-@[simp] lemma pi₁_pair (a b : M) : π₁ ⟨a ; b⟩ = a := by simp [pi₁]
+@[simp] lemma pi₁_pair (a b : M) : π₁ ⟪a, b⟫ = a := by simp [pi₁]
 
-@[simp] lemma pi₂_pair (a b : M) : π₂ ⟨a ; b⟩ = b := by simp [pi₂]
+@[simp] lemma pi₂_pair (a b : M) : π₂ ⟪a, b⟫ = b := by simp [pi₂]
 
 def pairEquiv : M × M ≃ M := ⟨Function.uncurry pair, unpair, fun ⟨a, b⟩ => unpair_pair a b, pair_unpair⟩
 

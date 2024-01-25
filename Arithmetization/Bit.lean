@@ -178,6 +178,8 @@ lemma le_of_subset {a b : M} (h : a ⊆ b) : a ≤ b := by
 lemma mem_ext {a b : M} (h : ∀ i, i ∈ a ↔ i ∈ b) : a = b :=
   le_antisymm (le_of_subset $ fun i hi ↦ (h i).mp hi) (le_of_subset $ fun i hi ↦ (h i).mpr hi)
 
+theorem finset_comprehension (P : M → Prop) (n : M) : ∃ s < exp n, ∀ i < n, i ∈ s ↔ P i := by {  }
+
 end Model
 
 end
