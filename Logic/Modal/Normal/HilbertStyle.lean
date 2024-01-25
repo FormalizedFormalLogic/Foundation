@@ -1,4 +1,3 @@
-import Mathlib.Data.Finset.Basic
 import Logic.Logic.HilbertStyle2
 import Logic.Modal.Normal.Formula
 import Logic.Modal.Normal.Axioms
@@ -11,7 +10,7 @@ namespace Hilbert
 
 open LO.Modal.Normal
 
-variable {F : Type u} [ModalLogicSymbol F] [DecidableEq F] (Bew : Finset F → F → Sort*)
+variable {F : Type u} [ModalLogicSymbol F] [DecidableEq F] [NegDefinition F] (Bew : Finset F → F → Sort*)
 
 class HasNecessitation where
   necessitation {Γ p} : (Bew ∅ p) → (Bew Γ (□p))
@@ -54,6 +53,27 @@ class HasAxiomCD where
 
 class HasAxiomC4 where
   C4 (Γ : Finset F) (p : F) : Bew Γ $ AxiomC4 p
+
+variable {Bew : Finset F → F → Sort*}
+variable [ModalDuality F] [HasDT Bew] [HasNecessitation Bew] [HasAxiomK Bew]
+
+lemma box_iff' [Minimal Bew] {Γ p q} (d : Bew ∅ (p ⟷ q)) : Bew Γ (□p ⟷ □q) := by
+  have dp₁ : Bew ∅ (□(p ⟶ q) ⟶ (□p ⟶ □q)) := by simpa using HasAxiomK.K ∅ p q;
+  have dp₂ : Bew ∅ (□(p ⟶ q)) := HasNecessitation.necessitation $ Hilbert.iff_mp' d;
+
+  have dq₁ : Bew ∅ (□(q ⟶ p) ⟶ (□q ⟶ □p)) := by simpa using HasAxiomK.K ∅ q p;
+  have dq₂ : Bew ∅ (□(q ⟶ p)) := HasNecessitation.necessitation $ Hilbert.iff_mpr' d;
+
+  exact Hilbert.iff_intro
+    (Deduction.weakening' (by simp) (modus_ponens' dp₁ dp₂))
+    (Deduction.weakening' (by simp) (modus_ponens' dq₁ dq₂))
+
+lemma equiv_dianeg_negbox [Classical Bew] (Γ p) : Bew Γ ((◇~p) ⟷ (~(□p))) := by
+  simp only [ModalDuality.dia]
+  apply Hilbert.neg_iff';
+  apply box_iff';
+  apply iff_symm';
+  apply equiv_dn;
 
 end Hilbert
 
@@ -211,37 +231,28 @@ def dtl {Γ p q} : (Γ ⊢ᴹ[Λ] (p ⟶ q)) → ((insert p Γ) ⊢ᴹ[Λ] q) :=
   - <https://www.mv.helsinki.fi/home/negri/selected_pub/dedthm.pdf> p10, Thm.2
 -/
 def dtr {Γ p q} : ((insert p Γ) ⊢ᴹ[Λ] q) → (Γ ⊢ᴹ[Λ] (p ⟶ q)) := by sorry;
+/-
+  intro d;
+  induction d with
+  | @axm Δ q ih =>
+    simp [hΓ', Finset.mem_insert] at ih;
+    sorry;
+  | maxm ih => exact modus_ponens' (imply₁ _ _ _) (maxm ih);
+  | necessitation ih₁ ih₂ => exact modus_ponens' (imply₁ _ _ _) (necessitation ih₁);
+  | @modus_ponens Δ₁ Δ₂ q r h₁ h₂ ih₁ ih₂ => sorry;
+  | verum => exact modus_ponens' (imply₁ _ _ _) (verum _);
+  | imply₁ => exact modus_ponens' (imply₁ _ _ _) (imply₁ _ _ _);
+  | imply₂ => exact modus_ponens' (imply₁ _ _ _) (imply₂ _ _ _ _);
+  | conj₁ => exact modus_ponens' (imply₁ _ _ _) (conj₁ _ _ _);
+  | conj₂ => exact modus_ponens' (imply₁ _ _ _) (conj₂ _ _ _);
+  | conj₃ => exact modus_ponens' (imply₁ _ _ _) (conj₃ _ _ _);
+  | disj₁ => exact modus_ponens' (imply₁ _ _ _) (disj₁ _ _ _);
+  | disj₂ => exact modus_ponens' (imply₁ _ _ _) (disj₂ _ _ _);
+  | disj₃ => exact modus_ponens' (imply₁ _ _ _) (disj₃ _ _ _ _);
+  | dne => exact modus_ponens' (imply₁ _ _ _) (dne _ _)
+-/
 
 instance : HasDT (Deduction Λ) := ⟨dtr⟩
-
-def efq (Γ p) : Γ ⊢ᴹ[Λ] (⊥ ⟶ p) := HasEFQ.efq Γ p
-
-def dni (Γ p) : Γ ⊢ᴹ[Λ] (p ⟶ ~~p) := Hilbert.dni Γ p
-def dni' {Γ p} (d : Γ ⊢ᴹ[Λ] p) : Γ ⊢ᴹ[Λ] ~~p := dni _ _ |>.modus_ponens' d
-
-def dne' {Γ p} (d : Γ ⊢ᴹ[Λ] ~~p) : Γ ⊢ᴹ[Λ] p := dne _ _ |>.modus_ponens' d
-
-def iff_dn (Γ p) : Γ ⊢ᴹ[Λ] (p ⟷ ~~p) := Hilbert.iff_dn Γ p
-
-def contra₀' {Γ p q} (d : Γ ⊢ᴹ[Λ] (p ⟶ q)) : Γ ⊢ᴹ[Λ] (~q ⟶ ~p) := Hilbert.contra₀' d
-
-def conj₁' {Γ p q} (d : Γ ⊢ᴹ[Λ] (p ⋏ q)) : (Γ ⊢ᴹ[Λ] p) := Deduction.conj₁ _ _ _ |>.modus_ponens' d
-def conj₂' {Γ p q} (d : Γ ⊢ᴹ[Λ] (p ⋏ q)) : (Γ ⊢ᴹ[Λ] q) := Deduction.conj₂ _ _ _ |>.modus_ponens' d
-def conj₃' {Γ p q} (d₁ : Γ ⊢ᴹ[Λ] p) (d₂ : Γ ⊢ᴹ[Λ] q) : (Γ ⊢ᴹ[Λ] (p ⋏ q)) := Deduction.conj₃ _ _ _ |>.modus_ponens' d₁ |>.modus_ponens' d₂
-
-def iff_mp {Γ p q} (d : Γ ⊢ᴹ[Λ] (p ⟷ q)) : (Γ ⊢ᴹ[Λ] (p ⟶ q)) := by
-  simp [LogicSymbol.iff] at d;
-  exact conj₁' d
-
-def iff_mpr {Γ p q} (d : Γ ⊢ᴹ[Λ] (p ⟷ q)) : (Γ ⊢ᴹ[Λ] (q ⟶ p)) := by
-  simp [LogicSymbol.iff] at d;
-  exact conj₂' d
-
-def iff_intro {Γ p q} : (Γ ⊢ᴹ[Λ] (p ⟶ q)) → (Γ ⊢ᴹ[Λ] (q ⟶ p)) → (Γ ⊢ᴹ[Λ] (p ⟷ q)) := by
-  simp [LogicSymbol.iff];
-  apply conj₃'
-
-def iff_swap {Γ p q} (d : Γ ⊢ᴹ[Λ] (p ⟷ q)) : Γ ⊢ᴹ[Λ] (q ⟷ p) := iff_intro d.iff_mpr d.iff_mp
 
 end Deduction
 
@@ -249,72 +260,76 @@ namespace Deducible
 
 variable {Λ}
 
-lemma axm {Γ p} (h : p ∈ Γ) : Γ ⊢ᴹ[Λ]! p := ⟨Deduction.axm h⟩
+lemma axm {Γ p} (h : p ∈ Γ) : Γ ⊢ᴹ[Λ]! p := ⟨.axm h⟩
 @[simp] lemma axm_insert {Γ p} : (insert p Γ) ⊢ᴹ[Λ]! p := axm (by simp)
-@[simp] lemma axm_singleton : {p} ⊢ᴹ[Λ]! p := ⟨Deduction.axm_singleton⟩
+@[simp] lemma axm_singleton : {p} ⊢ᴹ[Λ]! p := ⟨.axm_singleton⟩
 
-lemma modus_ponens {Γ₁ Γ₂ p q} (d₁ : Γ₁ ⊢ᴹ[Λ]! (p ⟶ q)) (d₂ : Γ₂ ⊢ᴹ[Λ]! p) : (Γ₁ ∪ Γ₂) ⊢ᴹ[Λ]! q := ⟨Deduction.modus_ponens d₁.some d₂.some⟩
+lemma maxm {Γ p} (h : p ∈ Λ) : Γ ⊢ᴹ[Λ]! p := ⟨.maxm h⟩
+
+lemma modus_ponens {Γ₁ Γ₂ p q} (d₁ : Γ₁ ⊢ᴹ[Λ]! (p ⟶ q)) (d₂ : Γ₂ ⊢ᴹ[Λ]! p) : (Γ₁ ∪ Γ₂) ⊢ᴹ[Λ]! q := ⟨.modus_ponens d₁.some d₂.some⟩
 lemma modus_ponens' {Γ p q} (d₁ : Γ ⊢ᴹ[Λ]! (p ⟶ q)) (d₂ : Γ ⊢ᴹ[Λ]! p) : Γ ⊢ᴹ[Λ]! q := ⟨Hilbert.modus_ponens' d₁.some d₂.some⟩
 
-lemma necessitation {Γ p} (d : ∅ ⊢ᴹ[Λ]! p) : Γ ⊢ᴹ[Λ]! □p := ⟨Deduction.necessitation d.some⟩
+lemma necessitation {Γ p} (d : ∅ ⊢ᴹ[Λ]! p) : Γ ⊢ᴹ[Λ]! □p := ⟨.necessitation d.some⟩
 
-lemma weakening' {Γ Δ p} (d : Γ ⊢ᴹ[Λ]! p) (hs : Γ ⊆ Δ) : Δ ⊢ᴹ[Λ]! p := ⟨Deduction.weakening' hs d.some⟩
+lemma weakening' {Γ Δ p} (d : Γ ⊢ᴹ[Λ]! p) (hs : Γ ⊆ Δ) : Δ ⊢ᴹ[Λ]! p := ⟨.weakening' hs d.some⟩
 
-lemma verum (Γ) : Γ ⊢ᴹ[Λ]! ⊤ := ⟨Deduction.verum Γ⟩
+lemma verum (Γ) : Γ ⊢ᴹ[Λ]! ⊤ := ⟨.verum Γ⟩
 
-lemma boxverum (Γ) : Γ ⊢ᴹ[Λ]! □⊤ := ⟨Deduction.necessitation (Deduction.verum ∅)⟩
+lemma boxverum (Γ) : Γ ⊢ᴹ[Λ]! □⊤ := ⟨.necessitation (.verum ∅)⟩
 
-lemma iff_dn (Γ p) : Γ ⊢ᴹ[Λ]! (p ⟷ ~~p) := ⟨Deduction.iff_dn Γ p⟩
+lemma conj₁ (Γ p q) : Γ ⊢ᴹ[Λ]! (p ⋏ q) ⟶ p := ⟨.conj₁ Γ p q⟩
+lemma conj₁' {Γ p q} (d : Γ ⊢ᴹ[Λ]! (p ⋏ q)) : Γ ⊢ᴹ[Λ]! p := ⟨Hilbert.conj₁' d.some⟩
 
-lemma iff_swap {Γ p q} (d : Γ ⊢ᴹ[Λ]! (p ⟷ q)) : Γ ⊢ᴹ[Λ]! (q ⟷ p) := ⟨Deduction.iff_swap d.some⟩
+lemma conj₂ (Γ p q) : Γ ⊢ᴹ[Λ]! (p ⋏ q) ⟶ q := ⟨.conj₂ Γ p q⟩
+lemma conj₂' {Γ p q} (d : Γ ⊢ᴹ[Λ]! (p ⋏ q)) : Γ ⊢ᴹ[Λ]! q := ⟨Hilbert.conj₂' d.some⟩
 
-lemma conj₁ (Γ p q) : Γ ⊢ᴹ[Λ]! (p ⋏ q) ⟶ p := ⟨Deduction.conj₁ Γ p q⟩
-lemma conj₁' {Γ p q} (d : Γ ⊢ᴹ[Λ]! (p ⋏ q)) : Γ ⊢ᴹ[Λ]! p := (conj₁ _ _ _).modus_ponens' d
+lemma conj₃ (Γ p q) : Γ ⊢ᴹ[Λ]! p ⟶ q ⟶ (p ⋏ q) := ⟨.conj₃ Γ p q⟩
+lemma conj₃' {Γ p q} (d₁ : Γ ⊢ᴹ[Λ]! p) (d₂ : Γ ⊢ᴹ[Λ]! q) : Γ ⊢ᴹ[Λ]! (p ⋏ q) := ⟨Hilbert.conj₃' d₁.some d₂.some⟩
 
-lemma conj₂ (Γ p q) : Γ ⊢ᴹ[Λ]! (p ⋏ q) ⟶ q := ⟨Deduction.conj₂ Γ p q⟩
-lemma conj₂' {Γ p q} (d : Γ ⊢ᴹ[Λ]! (p ⋏ q)) : Γ ⊢ᴹ[Λ]! q := (conj₂ _ _ _).modus_ponens' d
+lemma disj₁ (Γ p q) : Γ ⊢ᴹ[Λ]! p ⟶ (p ⋎ q) := ⟨.disj₁ Γ p q⟩
+lemma disj₁' {Γ p q} (d : Γ ⊢ᴹ[Λ]! p) : Γ ⊢ᴹ[Λ]! (p ⋎ q) := ⟨Hilbert.disj₁' d.some⟩
 
-lemma conj₃ (Γ p q) : Γ ⊢ᴹ[Λ]! p ⟶ q ⟶ (p ⋏ q) := ⟨Deduction.conj₃ Γ p q⟩
-lemma conj₃' {Γ p q} (d₁ : Γ ⊢ᴹ[Λ]! p) (d₂ : Γ ⊢ᴹ[Λ]! q) : Γ ⊢ᴹ[Λ]! (p ⋏ q) := (conj₃ _ _ _).modus_ponens' d₁ |>.modus_ponens' d₂
+lemma disj₂ (Γ p q) : Γ ⊢ᴹ[Λ]! q ⟶ (p ⋎ q) := ⟨.disj₂ Γ p q⟩
+lemma disj₂' {Γ p q} (d : Γ ⊢ᴹ[Λ]! q) : Γ ⊢ᴹ[Λ]! (p ⋎ q) := ⟨Hilbert.disj₂' d.some⟩
 
-lemma disj₁ (Γ p q) : Γ ⊢ᴹ[Λ]! p ⟶ (p ⋎ q) := ⟨Deduction.disj₁ Γ p q⟩
-lemma disj₁' {Γ p q} (d : Γ ⊢ᴹ[Λ]! p) : Γ ⊢ᴹ[Λ]! (p ⋎ q) := (disj₁ _ _ _).modus_ponens' d
+lemma disj₃ (Γ p q r) : Γ ⊢ᴹ[Λ]! (p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r) := ⟨.disj₃ Γ p q r⟩
+lemma disj₃' {Γ p q r} (d₁ : Γ ⊢ᴹ[Λ]! (p ⟶ r)) (d₂ : Γ ⊢ᴹ[Λ]! (q ⟶ r)) (d₃ : Γ ⊢ᴹ[Λ]! (p ⋎ q)) : Γ ⊢ᴹ[Λ]! r := ⟨Hilbert.disj₃' d₁.some d₂.some d₃.some⟩
 
-lemma disj₂ (Γ p q) : Γ ⊢ᴹ[Λ]! q ⟶ (p ⋎ q) := ⟨Deduction.disj₂ Γ p q⟩
-lemma disj₂' {Γ p q} (d : Γ ⊢ᴹ[Λ]! q) : Γ ⊢ᴹ[Λ]! (p ⋎ q) := (disj₂ _ _ _).modus_ponens' d
+lemma efq (Γ p) : Γ ⊢ᴹ[Λ]! (⊥ ⟶ p) := ⟨HasEFQ.efq Γ p⟩
+lemma efq' {Γ p} (d : Γ ⊢ᴹ[Λ]! ⊥) : Γ ⊢ᴹ[Λ]! p := ⟨Hilbert.efq' d.some⟩
 
-lemma disj₃ (Γ p q r) : Γ ⊢ᴹ[Λ]! (p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r) := ⟨Deduction.disj₃ Γ p q r⟩
-lemma disj₃' {Γ p q r} (d₁ : Γ ⊢ᴹ[Λ]! (p ⟶ r)) (d₂ : Γ ⊢ᴹ[Λ]! (q ⟶ r)) (d₃ : Γ ⊢ᴹ[Λ]! (p ⋎ q)) : Γ ⊢ᴹ[Λ]! r :=
-  (disj₃ _ _ _ _)
-    |>.modus_ponens' d₁
-    |>.modus_ponens' d₂
-    |>.modus_ponens' d₃
+lemma dni (Γ p) : Γ ⊢ᴹ[Λ]! (p ⟶ ~~p) := ⟨Hilbert.dni Γ p⟩
+lemma dni' {Γ p} (d : Γ ⊢ᴹ[Λ]! p) : Γ ⊢ᴹ[Λ]! ~~p := ⟨Hilbert.dni' d.some⟩
 
-lemma efq (Γ p) : Γ ⊢ᴹ[Λ]! (⊥ ⟶ p) := ⟨Deduction.efq Γ p⟩
-lemma efq' {Γ p} (d : Γ ⊢ᴹ[Λ]! ⊥) : Γ ⊢ᴹ[Λ]! p := (efq _ _).modus_ponens' d
+lemma dne (Γ p) : Γ ⊢ᴹ[Λ]! (~~p ⟶ p) := ⟨.dne Γ p⟩
+lemma dne' {Γ p} (d : Γ ⊢ᴹ[Λ]! ~~p) : Γ ⊢ᴹ[Λ]! p := ⟨Hilbert.dne' d.some⟩
 
-lemma dni (Γ p) : Γ ⊢ᴹ[Λ]! (p ⟶ ~~p) := ⟨Deduction.dni Γ p⟩
-lemma dni' {Γ p} (d : Γ ⊢ᴹ[Λ]! p) : Γ ⊢ᴹ[Λ]! ~~p := ⟨Deduction.dni' d.some⟩
+lemma dtl {Γ p q} (d : Γ ⊢ᴹ[Λ]! (p ⟶ q)) : ((insert p Γ) ⊢ᴹ[Λ]! q) := ⟨.dtl d.some⟩
 
-lemma dne (Γ p) : Γ ⊢ᴹ[Λ]! (~~p ⟶ p) := ⟨Deduction.dne Γ p⟩
-lemma dne' {Γ p} (d : Γ ⊢ᴹ[Λ]! ~~p) : Γ ⊢ᴹ[Λ]! p := ⟨Deduction.dne' d.some⟩
+lemma dtr {Γ p q} (d : (insert p Γ) ⊢ᴹ[Λ]! q) : Γ ⊢ᴹ[Λ]! (p ⟶ q) := ⟨.dtr d.some⟩
 
-lemma dtl {Γ p q} (d : Γ ⊢ᴹ[Λ]! (p ⟶ q)) : ((insert p Γ) ⊢ᴹ[Λ]! q) := ⟨Deduction.dtl d.some⟩
-lemma dtr {Γ p q} (d : (insert p Γ) ⊢ᴹ[Λ]! q) : Γ ⊢ᴹ[Λ]! (p ⟶ q) := ⟨Deduction.dtr d.some⟩
+lemma iff_intro {Γ p q} (d₁ : Γ ⊢ᴹ[Λ]! (p ⟶ q)) (d₂ : Γ ⊢ᴹ[Λ]! (q ⟶ p)) : Γ ⊢ᴹ[Λ]! (p ⟷ q) := ⟨Hilbert.iff_intro d₁.some d₂.some⟩
+
+lemma equiv_dn (Γ p) : Γ ⊢ᴹ[Λ]! (p ⟷ ~~p) := ⟨Hilbert.equiv_dn Γ p⟩
+
+lemma iff_symm' {Γ p q} (d : Γ ⊢ᴹ[Λ]! (p ⟷ q)) : Γ ⊢ᴹ[Λ]! (q ⟷ p) := ⟨Hilbert.iff_symm' d.some⟩
+
+lemma iff_mp' {Γ p q} (d : Γ ⊢ᴹ[Λ]! (p ⟷ q)) : Γ ⊢ᴹ[Λ]! (p ⟶ q) := ⟨Hilbert.iff_mp' d.some⟩
+
+lemma iff_mpr' {Γ p q} (d : Γ ⊢ᴹ[Λ]! (p ⟷ q)) : Γ ⊢ᴹ[Λ]! (q ⟶ p) := ⟨Hilbert.iff_mpr' d.some⟩
+
+lemma iff_right' {Γ p q} (dpq : Γ ⊢ᴹ[Λ]! (p ⟷ q)) (dp : Γ ⊢ᴹ[Λ]! p) : Γ ⊢ᴹ[Λ]! q := ⟨Hilbert.iff_right' dpq.some dp.some⟩
+
+lemma iff_left' {Γ p q} (dpq : Γ ⊢ᴹ[Λ]! (p ⟷ q)) (dq : Γ ⊢ᴹ[Λ]! q) : Γ ⊢ᴹ[Λ]! p := ⟨Hilbert.iff_left' dpq.some dq.some⟩
 
 lemma iff_def {Γ p q} : (Γ ⊢ᴹ[Λ]! (p ⟷ q)) ↔ (Γ ⊢ᴹ[Λ]! (p ⟶ q)) ∧ (Γ ⊢ᴹ[Λ]! (q ⟶ p)) := by
   constructor;
   . intro h; exact ⟨conj₁' h, conj₂' h⟩;
   . intro h; exact conj₃' h.1 h.2
 
-lemma contra₀' {Γ p q} (d : Γ ⊢ᴹ[Λ]! (p ⟶ q)) : Γ ⊢ᴹ[Λ]! (~q ⟶ ~p) := ⟨Deduction.contra₀' d.some⟩
+lemma contra₀' {Γ p q} (d : Γ ⊢ᴹ[Λ]! (p ⟶ q)) : Γ ⊢ᴹ[Λ]! (~q ⟶ ~p) := ⟨Hilbert.contra₀' d.some⟩
 
-lemma neg_iff {Γ p q} (d : Γ ⊢ᴹ[Λ]! (p ⟷ q)) : Γ ⊢ᴹ[Λ]! (~p ⟷ ~q) := by
-  apply iff_def.mpr;
-  have ⟨d₁, d₂⟩ := iff_def.mp d;
-  constructor;
-  . exact contra₀' d₂;
-  . exact contra₀' d₁
+lemma neg_iff' {Γ p q} (d : Γ ⊢ᴹ[Λ]! (p ⟷ q)) : Γ ⊢ᴹ[Λ]! (~p ⟷ ~q) := ⟨Hilbert.neg_iff' d.some⟩
 
 end Deducible
 
@@ -394,22 +409,13 @@ lemma deduction_by_boxed_context {Γ p} (d : Γ ⊢ᴹ[Λ] p) : (□Γ ⊢ᴹ[Λ
   | disj₃ => exact necessitation $ disj₃ _ _ _ _
   | dne => exact necessitation $ dne _ _
 
-lemma deduction_box_iff {Γ p q} (d : ⊢ᴹ[Λ] (p ⟷ q)) : Γ ⊢ᴹ[Λ] (□p ⟷ □q) := by
-  have dpq : Γ ⊢ᴹ[Λ] (□(p ⟶ q) ⟶ (□p ⟶ □q)) := .maxm $ (hK $ by apply AxiomK.includes_AxiomK;);
-  have := dpq.modus_ponens' d.iff_mp.necessitation;
+lemma box_iff' {Γ p q} (d : ⊢ᴹ[Λ]! (p ⟷ q)) : Γ ⊢ᴹ[Λ]! (□p ⟷ □q) := by
+  have := ofKSubset _ hK;
+  exact ⟨LO.Hilbert.box_iff' d.some⟩
 
-  have dqp : Γ ⊢ᴹ[Λ] (□(q ⟶ p) ⟶ (□q ⟶ □p)) := .maxm $ (hK $ by apply AxiomK.includes_AxiomK;);
-  have := dqp.modus_ponens' d.iff_mpr.necessitation;
-
-  exact Deduction.iff_intro (dpq.modus_ponens' d.iff_mp.necessitation) (dqp.modus_ponens' d.iff_mpr.necessitation)
-
-lemma deducible_box_iff {Γ p q} (d : ⊢ᴹ[Λ]! (p ⟷ q)) : Γ ⊢ᴹ[Λ]! (□p ⟷ □q) := ⟨deduction_box_iff hK d.some⟩
-
-lemma deducible_dianeg_negbox_iff (Γ p) : Γ ⊢ᴹ[Λ]! ((◇~p) ⟷ (~(□p))) := by
-  apply Deducible.neg_iff;
-  apply deducible_box_iff hK;
-  apply Deducible.iff_swap;
-  apply Deducible.iff_dn;
+lemma equiv_dianeg_negbox (Γ p) : Γ ⊢ᴹ[Λ]! ((◇~p) ⟷ (~(□p))) := by
+  have := ofKSubset _ hK;
+  exact ⟨LO.Hilbert.equiv_dianeg_negbox _ _⟩
 
 end LogicK.Hilbert
 
@@ -503,9 +509,9 @@ lemma boxverum (Γ : Theory α) : (Γ ⊢ᴹ[Λ]! □⊤) := by
   existsi ∅, by simp;
   apply Deducible.boxverum;
 
-lemma iff_dn (Γ : Theory α) (p : Formula α) : (Γ ⊢ᴹ[Λ]! (p ⟷ ~~p)) := by
+lemma equiv_dn (Γ : Theory α) (p : Formula α) : (Γ ⊢ᴹ[Λ]! (p ⟷ ~~p)) := by
   existsi ∅, by simp;
-  apply Deducible.iff_dn ∅ p;
+  apply Deducible.equiv_dn ∅ p;
 
 lemma conj₁ (Γ : Theory α) (p q : Formula α) : (Γ ⊢ᴹ[Λ]! (p ⋏ q) ⟶ p) := by
   simp [TheoryDeducible];

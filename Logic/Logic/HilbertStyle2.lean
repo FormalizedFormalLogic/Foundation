@@ -97,6 +97,36 @@ def modus_ponens' {Γ p q} (d₁ : Bew Γ (p ⟶ q)) (d₂ : Bew Γ p) : Bew Γ 
 
 infixr:90 " ⨀ " => modus_ponens'
 
+def conj₁' {Γ p q} : Bew Γ (p ⋏ q) → Bew Γ p := modus_ponens' (conj₁ _ _ _)
+
+def conj₂' {Γ p q} : Bew Γ (p ⋏ q) → Bew Γ q := modus_ponens' (conj₂ _ _ _)
+
+def conj₃' {Γ p q} (d₁ : Bew Γ p) (d₂: Bew Γ q) : Bew Γ (p ⋏ q) := (conj₃ _ _ _ ⨀ d₁) ⨀ d₂
+
+def disj₁' {Γ p q} (d : Bew Γ p) : Bew Γ (p ⋎ q) := (disj₁ _ _ _ ⨀ d)
+
+def disj₂' {Γ p q} (d : Bew Γ q) : Bew Γ (p ⋎ q) := (disj₂ _ _ _ ⨀ d)
+
+def disj₃' {Γ p q r} (d₁ : Bew Γ (p ⟶ r)) (d₂ : Bew Γ (q ⟶ r)) (d₃ : Bew Γ (p ⋎ q)) : Bew Γ r := (((disj₃ _ _ _ _) ⨀ d₁) ⨀ d₂) ⨀ d₃
+
+def iff_mp' {Γ p q} (d : Bew Γ (p ⟷ q)) : Bew Γ (p ⟶ q) := by
+  simp [LogicSymbol.iff] at d;
+  exact conj₁' d
+
+def iff_right' {Γ p q} (dpq : Bew Γ (p ⟷ q)) (dp : Bew Γ p) : Bew Γ q := (iff_mp' dpq) ⨀ dp
+
+def iff_mpr' {Γ p q} (d : Bew Γ (p ⟷ q)) : Bew Γ (q ⟶ p) := by
+  simp [LogicSymbol.iff] at d;
+  exact conj₂' d
+
+def iff_left' {Γ p q} (dpq : Bew Γ (p ⟷ q)) (dq : Bew Γ q) : Bew Γ p := (iff_mpr' dpq) ⨀ dq
+
+def iff_intro {Γ p q} (dpq : Bew Γ (p ⟶ q)) (dqp : Bew Γ (q ⟶ p)) : Bew Γ (p ⟷ q) := by
+  simp [LogicSymbol.iff];
+  exact conj₃' dpq dqp
+
+def iff_symm' {Γ p q} (d : Bew Γ (p ⟷ q)) : Bew Γ (q ⟷ p) := iff_intro (iff_mpr' d) (iff_mp' d)
+
 def dtl {Γ p q} (d : Bew Γ (p ⟶ q)) : Bew (insert p Γ) q := (weakening' (by simp) d) ⨀ (axm (by simp))
 
 @[simp]
@@ -107,6 +137,8 @@ def dni : Bew Γ (p ⟶ ~~p) := by
   have h₂ : Bew (insert (p ⟶ ⊥) (insert p Γ)) p := axm (by simp);
   simpa using dtr $ dtr $ h₁ ⨀ h₂;
 
+def dni' {Γ p} : (Bew Γ p) → (Bew Γ (~~p)) := modus_ponens' (dni _ _)
+
 def contra₀' {Γ p q} : (Bew Γ (p ⟶ q)) → (Bew Γ (~q ⟶ ~p)) := by
   intro h;
   simp [NegDefinition.neg];
@@ -116,13 +148,25 @@ def contra₀' {Γ p q} : (Bew Γ (p ⟶ q)) → (Bew Γ (~q ⟶ ~p)) := by
   have d₂ : Bew (insert p $ insert (q ⟶ ⊥) Γ) p := axm (by simp);
   simpa using d₁ ⨀ h ⨀ d₂;
 
+def efq' [HasEFQ Bew] {Γ p} : (Bew Γ ⊥) → (Bew Γ p) := modus_ponens' (HasEFQ.efq _ _)
+
+def neg_iff' {Γ p q} (d : Bew Γ (p ⟷ q)) : Bew Γ (~p ⟷ ~q) := by
+  simp only [LogicSymbol.iff];
+  apply conj₃';
+  . apply contra₀';
+    apply iff_mpr' d;
+  . apply contra₀';
+    apply iff_mp' d
+
 end Minimal
 
 section Classical
 
 variable [c : Classical Bew] [HasDT Bew]
 
-def iff_dn : Bew Γ (p ⟷ ~~p) := by
+def dne' {Γ p} : (Bew Γ (~~p)) → (Bew Γ p) := modus_ponens' (dne _ _)
+
+def equiv_dn : Bew Γ (p ⟷ ~~p) := by
   simp only [LogicSymbol.iff];
   exact (conj₃ _ _ _ ⨀ (dni _ _)) ⨀ (dne _ _);
 

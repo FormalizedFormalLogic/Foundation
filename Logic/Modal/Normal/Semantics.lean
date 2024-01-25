@@ -120,14 +120,6 @@ abbrev FrameClass (α : Type u) := Set (Frame α)
 def Formula.FrameClasses (𝔽 : FrameClass α) (p : Formula β) := ∀ F ∈ 𝔽, ⊧ᴹ[F] p
 notation "⊧ᴹ[" 𝔽 "] " p => Formula.FrameClasses 𝔽 p
 
-@[simp]
-def Theory.FrameClasses (𝔽 : FrameClass α) (Γ : Theory β) := ∀ p ∈ Γ, ⊧ᴹ[𝔽] p
-notation "⊧ᴹ[" 𝔽 "] " Γ => Theory.FrameClasses 𝔽 Γ
-
-@[simp]
-def AxiomSetFrameClass (Λ : AxiomSet β) : FrameClass α := { F | ⊧ᴹ[F] Λ }
-notation "𝔽(" Λ ")" => AxiomSetFrameClass Λ
-
 namespace Formula.FrameClasses
 
 variable {𝔽 : FrameClass α} {p q : Formula β}
@@ -141,6 +133,22 @@ lemma necessitation : (⊧ᴹ[𝔽] p) → (⊧ᴹ[𝔽] □p) := by
   apply Frames.necessitation (h F hF);
 
 end Formula.FrameClasses
+
+@[simp]
+def Theory.FrameClasses (𝔽 : FrameClass α) (Γ : Theory β) := ∀ p ∈ Γ, ⊧ᴹ[𝔽] p
+notation "⊧ᴹ[" 𝔽 "] " Γ => Theory.FrameClasses 𝔽 Γ
+
+@[simp]
+def AxiomSetFrameClass (Λ : AxiomSet β) : FrameClass α := { F | ⊧ᴹ[F] Λ }
+notation "𝔽(" Λ ")" => AxiomSetFrameClass Λ
+
+namespace AxiomSetFrameClass
+
+lemma union (Λ₁ Λ₂ : AxiomSet β) : (𝔽(Λ₁ ∪ Λ₂) : FrameClass α) = 𝔽(Λ₁) ∩ 𝔽(Λ₂) := by aesop;
+
+lemma triunion (Λ₁ Λ₂ Λ₃ : AxiomSet β) : (𝔽(Λ₁ ∪ Λ₂ ∪ Λ₃) : FrameClass α) = 𝔽(Λ₁) ∩ 𝔽(Λ₂) ∩ 𝔽(Λ₃) := by aesop;
+
+end AxiomSetFrameClass
 
 namespace Theory
 
@@ -205,18 +213,6 @@ lemma modus_ponens' {𝔽 : FrameClass α} {Γ : Theory β} {p : Formula β} : (
   simp [Formula.FrameClassConsequence];
   intro hpq hp F hF;
   exact (hpq F hF).modus_ponens' (hp F hF);
-
-/-
-lemma neg {𝔽 : FrameClass α} {Γ : Theory β} {p : Formula β} : (Γ ⊨ᴹ[𝔽] p) ↔ (Γ ⊭ᴹ[𝔽] ~p) := by
-  constructor;
-  . intro h₁;
-    by_contra h₂;
-    have := h₂.modus_ponens' h₁;
-    simp [FrameClassConsequence, FrameConsequence, Satisfies] at this;
-  . intro h;
-    simp [Formula.FrameClassConsequence];
-    intro F hF;
--/
 
 end Formula.FrameClassConsequence
 
@@ -360,16 +356,12 @@ variable [Inhabited α] [Inhabited β] (F: Frame α)
 
 attribute [simp] LogicKD LogicKT4
 
-lemma FrameClass.union (Λ₁ Λ₂ : AxiomSet β) : (𝔽(Λ₁ ∪ Λ₂) : FrameClass α) = 𝔽(Λ₁) ∩ 𝔽(Λ₂) := by aesop;
-
-lemma FrameClass.triunion (Λ₁ Λ₂ Λ₃ : AxiomSet β) : (𝔽(Λ₁ ∪ Λ₂ ∪ Λ₃) : FrameClass α) = 𝔽(Λ₁) ∩ 𝔽(Λ₂) ∩ 𝔽(Λ₃) := by aesop;
-
 lemma LogicK.def_FrameClass : F ∈ 𝔽((𝐊 : AxiomSet β)) := by apply AxiomK.defines;
 
 instance : Nonempty (𝔽((𝐊 : AxiomSet β)) : FrameClass α) := ⟨(λ _ _ => True), (by apply LogicK.def_FrameClass)⟩
 
 lemma LogicKD.def_FrameClass : (Serial F) ↔ F ∈ 𝔽((𝐊𝐃 : AxiomSet β)) := by
-  simp only [LogicKD, FrameClass.union];
+  simp only [LogicKD, AxiomSetFrameClass.union];
   constructor;
   . intro hSerial;
     have := (AxiomK.defines β F);
@@ -385,7 +377,7 @@ instance : Nonempty (𝔽((𝐊𝐃 : AxiomSet β)) : FrameClass α) := ⟨
 ⟩
 
 lemma LogicS4.def_FrameClass : (Reflexive F ∧ Transitive F) ↔ (F ∈ 𝔽((𝐒𝟒 : AxiomSet β))) := by
-  simp only [LogicS4, LogicKT4, FrameClass.triunion];
+  simp only [LogicS4, LogicKT4, AxiomSetFrameClass.triunion];
   constructor;
   . rintro ⟨hRefl, hTrans⟩;
     have := (AxiomK.defines β F);
@@ -403,7 +395,7 @@ instance : Nonempty (𝔽((𝐒𝟒 : AxiomSet β)) : FrameClass α) := ⟨
 ⟩
 
 lemma LogicS5.def_FrameClass : (Reflexive F ∧ Euclidean F) ↔ F ∈ 𝔽((𝐒𝟓 : AxiomSet β)) := by
-  simp only [LogicS5, LogicKT5, FrameClass.triunion];
+  simp only [LogicS5, LogicKT5, AxiomSetFrameClass.triunion];
   constructor;
   . rintro ⟨hRefl, hEucl⟩;
     have := (AxiomK.defines β F);

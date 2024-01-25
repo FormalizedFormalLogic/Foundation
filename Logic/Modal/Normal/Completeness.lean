@@ -1,5 +1,4 @@
 import Logic.Propositional.Basic.Completeness
-import Logic.Modal.Normal.Formula
 import Logic.Modal.Normal.HilbertStyle
 import Logic.Modal.Normal.Semantics
 
@@ -237,9 +236,9 @@ lemma maximal_imp_include : (p ⟶ q ∈ Γ) ↔ (p ∉ Γ) ∨ (q ∈ Γ) := by
         existsi ∅;
         constructor;
         . simp;
-        . have dp : ({p, ~p}) ⊢ᴹ[Λ] p := axm (by simp);
-          have dnp : ({p, ~p}) ⊢ᴹ[Λ] ~p := axm (by simp);
-          exact ⟨(Deduction.efq _ _).modus_ponens' (modus_ponens' dnp dp) |>.dtr |>.dtr⟩;
+        . have dp : Deducible Λ ({p, ~p}) p := .axm (by simp);
+          have dnp : Deducible Λ ({p, ~p}) (~p) := .axm (by simp);
+          exact (Deducible.efq _ _).modus_ponens' (dnp.modus_ponens' dp) |>.dtr |>.dtr;
       have d₂ : Γ ⊢ᴹ[Λ]! ~p := by existsi {~p}; aesop;
       apply (member_of_maximal_consistent hMCΓ).mpr;
       exact d₁.modus_ponens' d₂;
@@ -345,7 +344,7 @@ lemma iff_congr : (Ω.theory ⊢ᴹ[Λ]! (p ⟷ q)) → ((p ∈ Ω) ↔ (q ∈ �
   . intro hq;
     exact membership_iff.mpr $ TheoryDeducible.conj₂' hpq |>.modus_ponens' (membership_iff.mp hq);
 
-lemma dn_include : (p ∈ Ω) ↔ (~~p ∈ Ω) := iff_congr (.iff_dn Ω.theory p)
+lemma dn_include : (p ∈ Ω) ↔ (~~p ∈ Ω) := iff_congr (.equiv_dn Ω.theory p)
 
 lemma neg_include : (~p ∈ Ω) ↔ (p ∉ Ω) := maximal_neg_include (Ω.mc)
 
@@ -465,7 +464,7 @@ lemma frame_def': (CanonicalModel Λ).frame Ω₁ Ω₂ ↔ (◇Ω₂ ⊆ Ω₁)
     have : ~(□p) ∈ Ω₁ := by
       suffices h : Ω₁.theory ⊢ᴹ[Λ]! ((◇~p) ⟷ ~(□p)) by exact MaximalConsistentTheory.iff_congr h |>.mp this;
       existsi ∅, (by simp);
-      exact LogicK.Hilbert.deducible_dianeg_negbox_iff hK ∅ p;
+      exact LogicK.Hilbert.equiv_dianeg_negbox hK ∅ p;
     have := neg_include.mp this;
     aesop;
 
@@ -476,7 +475,7 @@ lemma val_def {a : β} :
 
 lemma axiomT (hT : 𝐓 ⊆ Λ) : Reflexive (CanonicalModel Λ).frame := by
   intro Ω p hp;
-  have : □p ⟶ p ∈ Ω := membership_iff.mpr $ .maxm (hT $ (by apply AxiomT.set.includes_AxiomT));
+  have : □p ⟶ p ∈ Ω := membership_iff.mpr $ .maxm (hT $ (by apply AxiomT.set.include));
   apply Ω.modus_ponens' this hp;
 
 lemma axiomD (hD : 𝐃 ⊆ Λ) : Serial (CanonicalModel Λ).frame := by
@@ -486,7 +485,7 @@ lemma axiomD (hD : 𝐃 ⊆ Λ) : Serial (CanonicalModel Λ).frame := by
   by_contra hC;
   simp [Theory.Consistent, Theory.Inconsistent] at hC;
   have d₁ : Ω.theory ⊢ᴹ[Λ]! □⊥ := prebox_prov hK hC;
-  have d₂ : Ω.theory ⊢ᴹ[Λ]! (□⊥ ⟶ ◇⊥) := .maxm (hD $ (by apply AxiomD.set.includes_AxiomD));
+  have d₂ : Ω.theory ⊢ᴹ[Λ]! (□⊥ ⟶ ◇⊥) := .maxm (hD $ (by apply AxiomD.set.include));
   have d₃ : Ω.theory ⊢ᴹ[Λ]! ~(◇⊥) := by simpa using (TheoryDeducible.boxverum Ω.theory).dni';
   exact consistent_undeducible_falsum Ω.consistent $
     d₃ |>.modus_ponens' $
@@ -499,7 +498,7 @@ lemma axiomB (hB : 𝐁 ⊆ Λ) : Symmetric (CanonicalModel Λ).frame := by
   intro p hp;
   have ⟨q, hq, _⟩ := dia_mem.mp hp;
   have d₁ : Ω₁.theory ⊢ᴹ[Λ]! q := membership_iff.mp hq;
-  have d₂ : Ω₁.theory ⊢ᴹ[Λ]! (q ⟶ □◇q) := .maxm (hB $ (by apply AxiomB.set.includes_AxiomB));
+  have d₂ : Ω₁.theory ⊢ᴹ[Λ]! (q ⟶ □◇q) := .maxm (hB $ (by apply AxiomB.set.include));
   have := membership_iff.mpr $ d₂.modus_ponens' d₁;
   aesop
 
@@ -507,7 +506,7 @@ lemma axiom4 (h4 : 𝟒 ⊆ Λ) : Transitive (CanonicalModel Λ).frame := by
   intro Ω₁ Ω₂ Ω₃ h₁₂ h₂₃ p hp;
   apply h₂₃;
   apply h₁₂;
-  have : □p ⟶ □□p ∈ Ω₁ := membership_iff.mpr $ .maxm (h4 $ (by apply Axiom4.set.includes_Axiom4));
+  have : □p ⟶ □□p ∈ Ω₁ := membership_iff.mpr $ .maxm (h4 $ (by apply Axiom4.set.include));
   exact Ω₁.modus_ponens' this (by aesop);
 
 lemma axiom5 (h5 : 𝟓 ⊆ Λ) : Euclidean (CanonicalModel Λ).frame := by
@@ -518,7 +517,7 @@ lemma axiom5 (h5 : 𝟓 ⊆ Λ) : Euclidean (CanonicalModel Λ).frame := by
   intro p hp;
   have ⟨q, _, _⟩ := dia_mem.mp hp;
   have d₁ : Ω₁.theory ⊢ᴹ[Λ]! ◇q := .axm (by aesop);
-  have d₂ : Ω₁.theory ⊢ᴹ[Λ]! ◇q ⟶ □◇q := .maxm (h5 $ (by apply Axiom5.set.includes_Axiom5));
+  have d₂ : Ω₁.theory ⊢ᴹ[Λ]! ◇q ⟶ □◇q := .maxm (h5 $ (by apply Axiom5.set.include));
   have := membership_iff.mpr $ d₂.modus_ponens' d₁;
   aesop;
 
@@ -588,10 +587,10 @@ theorem LogicS4.Hilbert.completes : Completeness (𝐒𝟒 : AxiomSet β) (𝔽(
   constructor;
   . apply (LogicS4.def_FrameClass _).mp;
     constructor;
-    . apply CanonicalModel.axiomT (subsets_T); -- TODO: なぜか`simp`が効かない
+    . apply CanonicalModel.axiomT (by simp);
     . apply CanonicalModel.axiom4 (by simp);
   . existsi (CanonicalModel 𝐒𝟒).val, Ω;
-    apply truthlemma' (by exact subsets_K) |>.mpr;
+    apply truthlemma' (by exact subset_K) |>.mpr;
     assumption;
 
 theorem LogicS5.Hilbert.completes : Completeness (𝐒𝟓 : AxiomSet β) (𝔽((𝐒𝟓 : AxiomSet β)) : FrameClass (MaximalConsistentTheory (𝐒𝟓 : AxiomSet β))) := by
@@ -605,7 +604,7 @@ theorem LogicS5.Hilbert.completes : Completeness (𝐒𝟓 : AxiomSet β) (𝔽(
     . apply CanonicalModel.axiomT (by simp);
     . apply CanonicalModel.axiom5 (by simp) (by simp);
   . existsi (CanonicalModel 𝐒𝟓).val, Ω;
-    apply truthlemma' (by exact subsets_K) |>.mpr;
+    apply truthlemma' (by exact subset_K) |>.mpr;
     assumption;
 
 end LO.Modal.Normal

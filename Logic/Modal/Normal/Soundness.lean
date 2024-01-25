@@ -1,4 +1,3 @@
-import Logic.Modal.Normal.Formula
 import Logic.Modal.Normal.HilbertStyle
 import Logic.Modal.Normal.Semantics
 
