@@ -226,20 +226,10 @@ lemma maxm_subset {Λ Λ'} (dΛ : Γ ⊢ᴹ[Λ] p) : (Λ ⊆ Λ') → (Γ ⊢ᴹ
 
 def dtl {Γ p q} : (Γ ⊢ᴹ[Λ] (p ⟶ q)) → ((insert p Γ) ⊢ᴹ[Λ] q) := Hilbert.dtl
 
-/--
-  TODO: 成り立つはず?
-  - <https://www.mv.helsinki.fi/home/negri/selected_pub/dedthm.pdf> p10, Thm.2
--/
-def dtr {Γ p q} : ((insert p Γ) ⊢ᴹ[Λ] q) → (Γ ⊢ᴹ[Λ] (p ⟶ q)) := by sorry;
-/-
-  intro d;
+private noncomputable def dtrAux (Γ p q) (d : Γ ⊢ᴹ[Λ] q) : ((Γ.erase p) ⊢ᴹ[Λ] (p ⟶ q)) := by
   induction d with
-  | @axm Δ q ih =>
-    simp [hΓ', Finset.mem_insert] at ih;
-    sorry;
-  | maxm ih => exact modus_ponens' (imply₁ _ _ _) (maxm ih);
-  | necessitation ih₁ ih₂ => exact modus_ponens' (imply₁ _ _ _) (necessitation ih₁);
-  | @modus_ponens Δ₁ Δ₂ q r h₁ h₂ ih₁ ih₂ => sorry;
+  | maxm h => exact modus_ponens' (imply₁ _ _ _) (maxm h);
+  | necessitation h => exact modus_ponens' (imply₁ _ _ _) (necessitation h);
   | verum => exact modus_ponens' (imply₁ _ _ _) (verum _);
   | imply₁ => exact modus_ponens' (imply₁ _ _ _) (imply₁ _ _ _);
   | imply₂ => exact modus_ponens' (imply₁ _ _ _) (imply₂ _ _ _ _);
@@ -250,9 +240,33 @@ def dtr {Γ p q} : ((insert p Γ) ⊢ᴹ[Λ] q) → (Γ ⊢ᴹ[Λ] (p ⟶ q)) :=
   | disj₂ => exact modus_ponens' (imply₁ _ _ _) (disj₂ _ _ _);
   | disj₃ => exact modus_ponens' (imply₁ _ _ _) (disj₃ _ _ _ _);
   | dne => exact modus_ponens' (imply₁ _ _ _) (dne _ _)
--/
+  | @axm Γ q ih =>
+    by_cases h : p = q
+    case pos =>
+      subst h
+      exact Hilbert.imp_id (Γ.erase p) p;
+    case neg =>
+      have d₁ : (Γ.erase p) ⊢ᴹ[Λ] (q ⟶ p ⟶ q) := imply₁ _ q p
+      have d₂ : (Γ.erase p) ⊢ᴹ[Λ] q := axm (by
+        simp [Finset.mem_erase];
+        aesop;
+      )
+      exact d₁.modus_ponens' d₂;
+  | @modus_ponens Γ₁ Γ₂ a b _ _ ih₁ ih₂ =>
+      have d₁ : Finset.erase (Γ₁ ∪ Γ₂) p ⊢ᴹ[Λ] (p ⟶ a) ⟶ p ⟶ b := (imply₂ _ p a b).modus_ponens' ih₁ |>.weakening' (by
+        apply Finset.erase_subset_erase;
+        simp;
+      );
+      have d₂ : Finset.erase (Γ₁ ∪ Γ₂) p ⊢ᴹ[Λ] (p ⟶ a) := ih₂.weakening' (by
+        apply Finset.erase_subset_erase;
+        simp;
+      );
+      exact d₁.modus_ponens' d₂;
 
-instance : HasDT (Deduction Λ) := ⟨dtr⟩
+noncomputable def dtr {Γ p q} (d : (insert p Γ) ⊢ᴹ[Λ] q) : (Γ ⊢ᴹ[Λ] (p ⟶ q)) := by
+  exact dtrAux (insert p Γ) p q d |>.weakening' (by apply Finset.erase_insert_subset);
+
+noncomputable instance : HasDT (Deduction Λ) := ⟨dtr⟩
 
 end Deduction
 
