@@ -16,11 +16,11 @@ open AxiomSet
 
 variable {Λ : AxiomSet α} {p : Formula α}
 
-private lemma AxiomSet.sounds' (Γ : Context α) (_ : Γ = ∅) (h : Deducible Λ Γ p) : (⊧ᴹ[(𝔽(Λ) : FrameClass β)] p) := by
+private lemma AxiomSet.soundsAux (Γ : Context α) (_ : Γ = ∅) (h : Deducible Λ Γ p) : (⊧ᴹ[(𝔽(Λ) : FrameClass β)] p) := by
   induction h.some <;> try { simp [FrameClasses, Frames, Models]; try intros; aesop; }
   case modus_ponens h₁ h₂ ih₁ ih₂ he => exact FrameClasses.modus_ponens (ih₁ (by aesop) ⟨h₁⟩) (ih₂ (by aesop) ⟨h₂⟩);
 
-lemma AxiomSet.sounds (h : ⊢ᴹ[Λ]! p) : (⊧ᴹ[(𝔽(Λ) : FrameClass β)] p) := AxiomSet.sounds' ∅ rfl h
+lemma AxiomSet.sounds (h : ⊢ᴹ[Λ]! p) : (⊧ᴹ[(𝔽(Λ) : FrameClass β)] p) := AxiomSet.soundsAux ∅ rfl h
 
 lemma AxiomSet.consistent (β) [Inhabited β] [h : Nonempty (𝔽(Λ) : FrameClass β)] : Consistent Λ := by
   by_contra hC; simp at hC;

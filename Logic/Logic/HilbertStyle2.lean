@@ -91,21 +91,49 @@ variable {Bew : Finset F → F → Sort*} (Γ : Finset F) (p q r : F)
 
 section Minimal
 
-variable [hM : Minimal Bew] [HasDT Bew]
+variable [hM : Minimal Bew] [hDT : HasDT Bew] [hEFQ : HasEFQ Bew]
 
 def modus_ponens' {Γ p q} (d₁ : Bew Γ (p ⟶ q)) (d₂ : Bew Γ p) : Bew Γ q := by simpa using d₁ ⨀ d₂
 
 infixr:90 " ⨀ " => modus_ponens'
 
+abbrev efq := hEFQ.efq
+
+def efq' {Γ p} : (Bew Γ ⊥) → (Bew Γ p) := modus_ponens' (efq _ _)
+
+abbrev dtr {Γ p q} (d : Bew (insert p Γ) q) := HasDT.dtr d
+
+def verum (Γ : Finset F) : Bew Γ ⊤ := hM.verum Γ
+
+abbrev imply₁ := hM.imply₁
+
+def imply₁' {Γ p q} : Bew Γ p → Bew Γ (q ⟶ p) := modus_ponens' (imply₁ _ _ _)
+
+abbrev imply₂ := hM.imply₂
+
+def imply₂' {Γ p q r} (d₁ : Bew Γ (p ⟶ q ⟶ r)) (d₂ : Bew Γ (p ⟶ q)) (d₃ : Bew Γ p) : Bew Γ r := (((imply₂ _ _ _ _) ⨀ d₁) ⨀ d₂) ⨀ d₃
+
+abbrev conj₁ := hM.conj₁
+
 def conj₁' {Γ p q} : Bew Γ (p ⋏ q) → Bew Γ p := modus_ponens' (conj₁ _ _ _)
+
+abbrev conj₂ := hM.conj₂
 
 def conj₂' {Γ p q} : Bew Γ (p ⋏ q) → Bew Γ q := modus_ponens' (conj₂ _ _ _)
 
+abbrev conj₃ := hM.conj₃
+
 def conj₃' {Γ p q} (d₁ : Bew Γ p) (d₂: Bew Γ q) : Bew Γ (p ⋏ q) := (conj₃ _ _ _ ⨀ d₁) ⨀ d₂
+
+abbrev disj₁ := hM.disj₁
 
 def disj₁' {Γ p q} (d : Bew Γ p) : Bew Γ (p ⋎ q) := (disj₁ _ _ _ ⨀ d)
 
+abbrev disj₂ := hM.disj₂
+
 def disj₂' {Γ p q} (d : Bew Γ q) : Bew Γ (p ⋎ q) := (disj₂ _ _ _ ⨀ d)
+
+abbrev disj₃ := hM.disj₃
 
 def disj₃' {Γ p q r} (d₁ : Bew Γ (p ⟶ r)) (d₂ : Bew Γ (q ⟶ r)) (d₃ : Bew Γ (p ⋎ q)) : Bew Γ r := (((disj₃ _ _ _ _) ⨀ d₁) ⨀ d₂) ⨀ d₃
 
@@ -129,8 +157,11 @@ def iff_symm' {Γ p q} (d : Bew Γ (p ⟷ q)) : Bew Γ (q ⟷ p) := iff_intro (i
 
 def dtl {Γ p q} (d : Bew Γ (p ⟶ q)) : Bew (insert p Γ) q := (weakening' (by simp) d) ⨀ (axm (by simp))
 
-@[simp]
 def imp_id : Bew Γ (p ⟶ p) := ((imply₂ Γ p (p ⟶ p) p) ⨀ (imply₁ _ _ _)) ⨀ (imply₁ _ _ _)
+
+def id_insert (Γ p) : Bew (insert p Γ) p := axm (by simp)
+
+def id_singleton (p) : Bew {p} p := id_insert ∅ p
 
 def dni : Bew Γ (p ⟶ ~~p) := by
   have h₁ : Bew (insert (p ⟶ ⊥) (insert p Γ)) (p ⟶ ⊥) := axm (by simp);
@@ -148,8 +179,6 @@ def contra₀' {Γ p q} : (Bew Γ (p ⟶ q)) → (Bew Γ (~q ⟶ ~p)) := by
   have d₂ : Bew (insert p $ insert (q ⟶ ⊥) Γ) p := axm (by simp);
   simpa using d₁ ⨀ h ⨀ d₂;
 
-def efq' [HasEFQ Bew] {Γ p} : (Bew Γ ⊥) → (Bew Γ p) := modus_ponens' (HasEFQ.efq _ _)
-
 def neg_iff' {Γ p q} (d : Bew Γ (p ⟷ q)) : Bew Γ (~p ⟷ ~q) := by
   simp only [LogicSymbol.iff];
   apply conj₃';
@@ -163,6 +192,8 @@ end Minimal
 section Classical
 
 variable [c : Classical Bew] [HasDT Bew]
+
+def dne : Bew Γ (~~p ⟶ p) := c.dne Γ p
 
 def dne' {Γ p} : (Bew Γ (~~p)) → (Bew Γ p) := modus_ponens' (dne _ _)
 
