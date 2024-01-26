@@ -94,7 +94,7 @@ lemma log_two_mul_add_one_of_pos {y : M} (pos : 0 < y) : log (2 * y + 1) = log y
   exact log_eq_of_pos (by simp) (Exp.exp_succ_mul_two.mpr H)
     (le_trans (by simpa using hy') le_self_add) (two_mul_add_one_lt_two_mul_of_lt hy)
 
-lemma log_eq_of_exp {x y : M} (H : Exp x y) : log y = x :=
+lemma Exp.log_eq_of_exp {x y : M} (H : Exp x y) : log y = x :=
   log_eq_of_pos H.range_pos H (by { rfl }) (lt_mul_of_pos_of_one_lt_left H.range_pos one_lt_two)
 
 lemma exp_of_pow2 {p : M} (pp : Pow2 p) : Exp (log p) p := by
@@ -184,13 +184,102 @@ lemma binary_length_mul_pow2_add_of_lt {a p b : M} (pos : 0 < a) (pp : Pow2 p) (
 lemma binary_length_mul_pow2 {a p : M} (pos : 0 < a) (pp : Pow2 p) : ‖a * p‖ = ‖a‖ + log p := by
   simp [binary_length_of_pos, pos, pp.pos, log_mul_pow2 pos pp, add_right_comm (log a) (log p) 1]
 
+lemma binary_length_monotone {a b : M} (h : a ≤ b) : ‖a‖ ≤ ‖b‖ := by
+  rcases zero_le a with (rfl | posa)
+  · simp
+  · simp [binary_length_of_pos posa, binary_length_of_pos (lt_of_lt_of_le posa h)]
+    exact log_monotone h
+
+lemma le_log_of_lt_binary_length {a b : M} (h : a < ‖b‖) : a ≤ log b := by
+  have : 0 < b := by by_contra A; rcases (show b = 0 from by simpa using A); simp_all
+  exact le_iff_lt_succ.mpr (by simpa [binary_length_of_pos this] using h)
+
+lemma exp_log_le_self {a b : M} (pos : 0 < a) (h : Exp (log a) b) : b ≤ a := by
+  rcases log_pos pos with ⟨_, _, H, _⟩; rcases H.uniq h
+  assumption
+
+lemma lt_exp_log_self {a b : M} (pos : 0 < a) (h : Exp (log a) b) : a < 2 * b := by
+  rcases log_pos pos with ⟨_, _, H, _⟩; rcases H.uniq h
+  assumption
+
+lemma le_iff_le_log_of_exp {x y a : M} (H : Exp x y) (pos : 0 < a) : y ≤ a ↔ x ≤ log a :=
+  ⟨by rcases H.log_eq_of_exp; exact log_monotone,
+   fun h ↦ by rcases log_pos pos with ⟨a', ha', Haa', _⟩; exact le_trans (Exp.monotone_le H Haa' h) ha'⟩
+
+lemma brange_exists_unique (a : M) : ∀ x < ‖a‖, ∃! y, Exp x y := by
+  suffices : ∀ x < ‖a‖, ∃ y ≤ a, Exp x y
+  · intro x hx; rcases this x hx with ⟨_, _, H⟩
+    exact ExistsUnique.intro _ H (fun y' H' ↦ H'.uniq H)
+  intro x
+  induction x using hierarchy_induction_sigma₀
+  · definability
+  case zero =>
+    intro _
+    have : 0 < a := by by_contra A; rcases (show a = 0 from by simpa using A); simp_all
+    exact ⟨1, pos_iff_one_le.mp this, by simp⟩
+  case succ x IH =>
+    intro hx
+    rcases (IH (lt_of_le_of_lt (by simp) hx) : ∃ y ≤ a, Exp x y) with ⟨y, hy, H⟩
+    have : 0 < a := by by_contra A; rcases (show a = 0 from by simpa using A); simp_all
+    have : 2 * y ≤ a := (le_iff_le_log_of_exp H.succ this).mpr (le_log_of_lt_binary_length hx)
+    exact ⟨2 * y, this, H.succ⟩
+
+lemma bexp_exists_unique (a x : M) : ∃! y, (x < ‖a‖ → Exp x y) ∧ (‖a‖ ≤ x → y = 0) := by
+  by_cases hx : x < ‖a‖
+  · simp [hx, show ¬‖a‖ ≤ x from by simpa using hx, log_exists_unique_pos]
+    exact brange_exists_unique a x hx
+  · simp [hx, show ‖a‖ ≤ x from by simpa using hx]
+
+def bexp (a x : M) : M := Classical.choose! (bexp_exists_unique a x)
+
+lemma exp_bexp_of_lt {a x : M} (h : x < ‖a‖) : Exp x (bexp a x) :=
+  (Classical.choose!_spec (bexp_exists_unique a x)).1 h
+
+lemma bexp_eq_zero_of_le {a x : M} (h : ‖a‖ ≤ x) : bexp a x = 0 :=
+  (Classical.choose!_spec (bexp_exists_unique a x)).2 h
+
+@[simp] lemma exp_bexp_of_lt_iff {a x : M} : Exp x (bexp a x) ↔ x < ‖a‖ :=
+  ⟨by intro h; by_contra A
+      have : bexp a x = 0 := bexp_eq_zero_of_le (not_lt.mp A)
+      simp [this] at h
+      have := h.range_pos; simp_all,
+   exp_bexp_of_lt⟩
+
+@[simp] lemma bexp_le_self (a x : M) : bexp a x ≤ a := by
+  rcases show x < ‖a‖ ∨ ‖a‖ ≤ x from lt_or_ge _ _ with (lt | le)
+  · have : 0 < a := by by_contra A; rcases (show a = 0 from by simpa using A); simp_all
+    exact (le_iff_le_log_of_exp (exp_bexp_of_lt lt) this).mpr (le_log_of_lt_binary_length lt)
+  · simp [bexp_eq_zero_of_le le]
+
+lemma bexp_graph {y a x : M} : y = bexp a x ↔ ∃ l ≤ a, l = ‖a‖ ∧ (x < l → Exp x y) ∧ (l ≤ x → y = 0) :=
+  ⟨by rintro rfl; exact ⟨‖a‖, by simp, rfl, exp_bexp_of_lt, bexp_eq_zero_of_le⟩, by
+    rintro ⟨_, _, rfl, hlt, hle⟩
+    rcases show x < ‖a‖ ∨ ‖a‖ ≤ x from lt_or_ge _ _ with (lt | le)
+    · exact (hlt lt).uniq (exp_bexp_of_lt lt)
+    · rcases hle le; simp [bexp_eq_zero_of_le le]⟩
+
+def bexpdef : Σᴬ[0] 3 := ⟨“∃[#0 < #2 + 1] (!binarylengthdef [#0, #2] ∧ (#3 < #0 → !Exp.def [#3, #1]) ∧ (#0 ≤ #3 → #1 = 0))”, by simp⟩
+
+lemma bexp_defined : Σᴬ[0]-Function₂ (bexp : M → M → M) bexpdef := by
+  intro v; simp [bexpdef, bexp_graph, Exp.defined.pval, binary_length_defined.pval, ←le_iff_lt_succ]
+
+instance {b s} : DefinableFunction₂ b s (bexp : M → M → M) := defined_to_with_param₀ _ bexp_defined
+
+instance : PolyBounded₂ (bexp : M → M → M) := ⟨#0, λ _ ↦ by simp⟩
+
+lemma bexp_monotone_iff {a i j : M} (hi : i < ‖a‖) (hj : j < ‖a‖) : bexp a i < bexp a j ↔ i < j :=
+  Iff.symm <| Exp.monotone_iff (by simp [hi]) (by simp [hj])
+
+lemma bexp_monotone_le_iff {a i j : M} (hi : i < ‖a‖) (hj : j < ‖a‖) : bexp a i ≤ bexp a j ↔ i ≤ j :=
+  Iff.symm <| Exp.monotone_le_iff (by simp [hi]) (by simp [hj])
+
 end ISigma₀
 
 section ISigma₁
 
 variable [𝐈𝚺₁.Mod M]
 
-@[simp] lemma log_exponential (a : M) : log (exp a) = a := log_eq_of_exp (exp_exponential a)
+@[simp] lemma log_exponential (a : M) : log (exp a) = a := (exp_exponential a).log_eq_of_exp
 
 lemma exponential_log_le_self {a : M} (pos : 0 < a) : exp (log a) ≤ a := by
   rcases log_pos pos with ⟨_, _, H, _⟩

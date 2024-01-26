@@ -549,6 +549,8 @@ lemma exp_succ_mul_two {x y : M} : Exp (x + 1) (2 * y) ↔ Exp x y :=
   ⟨by intro h; rcases exp_succ.mp h with ⟨y', e, h⟩; simpa [show y = y' from by simpa using e] using h,
    by intro h; exact exp_succ.mpr ⟨y, rfl, h⟩⟩
 
+alias ⟨of_succ_two_mul, succ⟩ := exp_succ_mul_two
+
 lemma one_le_ext_of_seq₀_of_seqₛ {y X Y : M} (h₀ : Exp.Seq₀ X Y) (hₛ : Exp.Seqₛ y X Y)
     {i} (ne2 : i ≠ 2) (hi : i ≤ y^2) (ppi : PPow2 i) : 1 ≤ ext i X := by
   revert ne2 hi ppi
@@ -615,7 +617,7 @@ protected lemma inj {x₁ x₂ y : M} : Exp x₁ y → Exp x₂ y → x₁ = x�
       rcases exp_succ.mp h₁ with ⟨z, hz⟩
       simp at hz
     · rcases exp_succ.mp h₁ with ⟨y, rfl, hy₁⟩
-      have hy₂ : Exp x₂ y := exp_succ_mul_two.mp h₂
+      have hy₂ : Exp x₂ y := h₂.of_succ_two_mul
       have : x₁ = x₂ :=
         IH y (lt_mul_of_pos_of_one_lt_left hy₁.range_pos one_lt_two)
           x₁ hy₁.dom_lt_range x₂ hy₂.dom_lt_range hy₁ hy₂
@@ -629,7 +631,7 @@ lemma exp_elim {x y : M} : Exp x y ↔ (x = 0 ∧ y = 1) ∨ ∃ x', ∃ y', x =
         exact ⟨x', y', rfl, rfl, H⟩,
    by rintro (⟨rfl, rfl⟩ | ⟨x, y, rfl, rfl, h⟩)
       · simp
-      · exact exp_succ_mul_two.mpr h⟩
+      · exact h.succ⟩
 
 lemma monotone {x₁ x₂ y₁ y₂ : M} : Exp x₁ y₁ → Exp x₂ y₂ → x₁ < x₂ → y₁ < y₂ := by
   revert x₁ x₂ y₂
@@ -684,7 +686,7 @@ lemma add_mul {x₁ x₂ y₁ y₂ : M} (h₁ : Exp x₁ y₁) (h₂ : Exp x₂ 
     intro y₂ hy h₂
     rcases exp_succ.mp h₂ with ⟨y₂, rfl, H₂⟩
     have : Exp (x₁ + x₂) (y₁ * y₂) := IH y₂ (le_trans (by simp) hy) H₂
-    simpa [←add_assoc, mul_left_comm y₁ 2 y₂] using exp_succ_mul_two.mpr this
+    simpa [←add_assoc, mul_left_comm y₁ 2 y₂] using this.succ
 
 end Exp
 
@@ -702,7 +704,7 @@ lemma range_exists (x : M) : ∃ y, Exp x y := by
   case zero => exact ⟨1, by simp⟩
   case succ x IH =>
     rcases IH with ⟨y, IH⟩
-    exact ⟨2 * y, exp_succ_mul_two.mpr IH⟩
+    exact ⟨2 * y, IH.succ⟩
 
 lemma range_exists_unique (x : M) : ∃! y, Exp x y := by
   rcases range_exists x with ⟨y, h⟩
