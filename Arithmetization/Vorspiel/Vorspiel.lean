@@ -22,6 +22,11 @@ end Matrix
 
 instance : ToString Empty := ⟨Empty.elim⟩
 
+class Hash (α : Type*) where
+  hash : α → α → α
+
+infix:80 " # " => Hash.hash
+
 namespace LO
 
 namespace FirstOrder

@@ -266,6 +266,8 @@ lemma div_add_remainder (a b : M) : b * (a / b) + (a mod b) = a :=
 
 @[simp] lemma remainder_zero (a : M) : a mod 0 = a := by simp [rem]
 
+@[simp] lemma zero_remainder (a : M) : 0 mod a = 0 := by simp [rem]
+
 @[simp] lemma remainder_self (a : M) : a mod a = 0 := by
   rcases zero_le a with (rfl | h)
   · simp
