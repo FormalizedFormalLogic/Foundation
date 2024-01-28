@@ -149,18 +149,18 @@ lemma sqrt {i : M} (ppi : PPow2 i) (ne2 : i ≠ 2) : PPow2 (√i) := by
   rcases this.mp him with ⟨e, H⟩
   have psqi : Pow2 (√i) := Pow2.sq_iff.mp (by simp [e, pi])
   have one_lt_sqi : 1 < √i := one_lt_sq_iff.mp (by simpa [e] using sppm.one_lt him)
-  have : SPPow2 (m mod (2 * √i)) :=
-    ⟨ by simpa [LenBit.remainder] using sppm.not_lenbit_one,
-      (LenBit.remainder_pow2 (by simp) (by simp [psqi]) (by simp [one_lt_sqi])).mpr sppm.lenbit_two,
+  have : SPPow2 (m % (2 * √i)) :=
+    ⟨ by simpa [LenBit.mod] using sppm.not_lenbit_one,
+      (LenBit.mod_pow2 (by simp) (by simp [psqi]) (by simp [one_lt_sqi])).mpr sppm.lenbit_two,
       by  intro j hj pj lt2
-          have hjsi : j < 2 * √i := lt_of_le_of_lt hj (remainder_lt _ (by simp [psqi.pos]))
+          have hjsi : j < 2 * √i := lt_of_le_of_lt hj (mod_lt _ (by simp [psqi.pos]))
           have : LenBit j m ↔ (√j) ^ 2 = j ∧ LenBit (√j) m := sppm.lenbit_iff (le_trans hj (by simp)) pj lt2
-          rw [LenBit.remainder_pow2, this] <;> try simp [pj, psqi, hjsi]
+          rw [LenBit.mod_pow2, this] <;> try simp [pj, psqi, hjsi]
           intro hsqj
           have : Pow2 (√j) := pj.sqrt hsqj
-          rw [LenBit.remainder_pow2] <;> try simp [psqi, this]
+          rw [LenBit.mod_pow2] <;> try simp [psqi, this]
           · exact lt_of_le_of_lt (by simp) hjsi⟩
-  exact ⟨psqi, m mod (2 * √i), remainder_lt _ (by simp [psqi.pos]), this, by simp [H]⟩
+  exact ⟨psqi, m % (2 * √i), mod_lt _ (by simp [psqi.pos]), this, by simp [H]⟩
 
 lemma exists_spp {i : M} (h : PPow2 i) : ∃ m < 2 * i, SPPow2 m ∧ LenBit i m := h.2
 

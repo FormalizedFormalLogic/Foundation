@@ -63,7 +63,7 @@ lemma div_exists_unique_pos (a : M) {b} (pos : 0 < b) : ∃! u, b * u ≤ a ∧ 
     exact LT.lt.false this)
 
 /-
-lemma remainder (a : M) {b} (pos : 0 < b) : ∃! u, ∃ v < b, a = b * u + v := by
+lemma mod (a : M) {b} (pos : 0 < b) : ∃! u, ∃ v < b, a = b * u + v := by
   have : ∃! u, b * u ≤ a ∧ a < b * (u + 1) := by
     have : ∃ u, b * u ≤ a ∧ a < b * (u + 1) := by
       have : a < b * (a + 1) → ∃ u, b * u ≤ a ∧ a < b * (u + 1) := by
@@ -241,135 +241,137 @@ lemma le_two_mul_div_two_add_one (a : M) : a ≤ 2 * (a / 2) + 1 := by
 
 end div
 
-section remainder
+section mod
 
 def rem (a b : M) : M := a - b * (a / b)
 
-infix:60 " mod " => rem
+instance : Mod M := ⟨rem⟩
+
+lemma mod_def (a b : M) : a % b = a - b * (a / b) := rfl
 
 def remdef : Σᴬ[0] 3 :=
   ⟨“∃[#0 < #2 + 1] (!divdef [#0, #2, #3] ∧ !subdef [#1, #2, #3 * #0])”, by simp⟩
 
-lemma rem_graph (a b c : M) : a = b mod c ↔ ∃ x ≤ b, (x = b / c ∧ a = b - c * x) := by
-  simp [rem]; constructor
+lemma rem_graph (a b c : M) : a = b % c ↔ ∃ x ≤ b, (x = b / c ∧ a = b - c * x) := by
+  simp [mod_def]; constructor
   · rintro rfl; exact ⟨b / c, by simp, rfl, by rfl⟩
   · rintro ⟨_, _, rfl, rfl⟩; simp
 
-lemma rem_defined : Σᴬ[0]-Function₂ ((· mod ·) : M → M → M) remdef := by
+lemma rem_defined : Σᴬ[0]-Function₂ ((· % ·) : M → M → M) remdef := by
   intro v; simp [Matrix.vecHead, Matrix.vecTail, remdef,
     rem_graph, Semiformula.eval_substs, div_defined.pval, sub_defined.pval, le_iff_lt_succ]
 
-instance : DefinableFunction₂ b s ((· mod ·) : M → M → M) := defined_to_with_param₀ _ rem_defined
+instance : DefinableFunction₂ b s ((· % ·) : M → M → M) := defined_to_with_param₀ _ rem_defined
 
-lemma div_add_remainder (a b : M) : b * (a / b) + (a mod b) = a :=
+lemma div_add_mod (a b : M) : b * (a / b) + (a % b) = a :=
   add_tsub_self_of_le (mul_div_le a b)
 
-@[simp] lemma remainder_zero (a : M) : a mod 0 = a := by simp [rem]
+@[simp] lemma mod_zero (a : M) : a % 0 = a := by simp [mod_def]
 
-@[simp] lemma zero_remainder (a : M) : 0 mod a = 0 := by simp [rem]
+@[simp] lemma zero_mod (a : M) : 0 % a = 0 := by simp [mod_def]
 
-@[simp] lemma remainder_self (a : M) : a mod a = 0 := by
+@[simp] lemma mod_self (a : M) : a % a = 0 := by
   rcases zero_le a with (rfl | h)
   · simp
-  · simp [rem, h]
+  · simp [mod_def, h]
 
-lemma remainder_mul_add_of_lt (a b : M) {r} (hr : r < b) : (a * b + r) mod b = r := by
-  simp [rem, div_mul_add a b hr, mul_comm]
+lemma mod_mul_add_of_lt (a b : M) {r} (hr : r < b) : (a * b + r) % b = r := by
+  simp [mod_def, div_mul_add a b hr, mul_comm]
 
-@[simp] lemma remainder_mul_add (a c : M) (pos : 0 < b) : (a * b + c) mod b = c mod b := by
-  simp [rem, div_mul_add_self, pos, mul_add, ←sub_sub, show b * a = a * b from mul_comm _ _]
+@[simp] lemma mod_mul_add (a c : M) (pos : 0 < b) : (a * b + c) % b = c % b := by
+  simp [mod_def, div_mul_add_self, pos, mul_add, ←sub_sub, show b * a = a * b from mul_comm _ _]
 
-@[simp] lemma remainder_add_mul (a b : M) (pos : 0 < c) : (a + b * c) mod c = a mod c := by
+@[simp] lemma mod_add_mul (a b : M) (pos : 0 < c) : (a + b * c) % c = a % c := by
   simp [add_comm a (b * c), pos]
 
-@[simp] lemma remainder_add_mul' (a b : M) (pos : 0 < c) : (a + c * b) mod c = a mod c := by
+@[simp] lemma mod_add_mul' (a b : M) (pos : 0 < c) : (a + c * b) % c = a % c := by
   simp [mul_comm c b, pos]
 
-@[simp] lemma remainder_mul_add' (a c : M) (pos : 0 < b) : (b * a + c) mod b = c mod b := by
+@[simp] lemma mod_mul_add' (a c : M) (pos : 0 < b) : (b * a + c) % b = c % b := by
   simp [mul_comm b a, pos]
 
-@[simp] lemma remainder_mul_self_left (a b : M) : (a * b) mod b = 0 := by
+@[simp] lemma mod_mul_self_left (a b : M) : (a * b) % b = 0 := by
   rcases zero_le b with (rfl | h)
   · simp
-  · simpa using remainder_mul_add_of_lt a b h
+  · simpa using mod_mul_add_of_lt a b h
 
-@[simp] lemma remainder_mul_self_right (a b : M) : (b * a) mod b = 0 := by
+@[simp] lemma mod_mul_self_right (a b : M) : (b * a) % b = 0 := by
   simp [mul_comm]
 
-@[simp] lemma remainder_eq_self_of_lt {a b : M} (h : a < b) : a mod b = a := by
-  simpa using remainder_mul_add_of_lt 0 b h
+@[simp] lemma mod_eq_self_of_lt {a b : M} (h : a < b) : a % b = a := by
+  simpa using mod_mul_add_of_lt 0 b h
 
-@[simp] lemma remainder_lt (a : M) {b} (pos : 0 < b) : a mod b < b := by
+@[simp] lemma mod_lt (a : M) {b} (pos : 0 < b) : a % b < b := by
   rcases div_spec_of_pos' a pos with ⟨r, hr, ha⟩
-  have : ((a / b) * b + r) mod b = r := remainder_mul_add_of_lt _ _ hr
-  have : a mod b = r := by simpa [←ha] using this
+  have : ((a / b) * b + r) % b = r := mod_mul_add_of_lt _ _ hr
+  have : a % b = r := by simpa [←ha] using this
   simp [this, hr]
 
-@[simp] lemma remainder_le (a b : M) : a mod b ≤ a := by
-  simp [rem]
+@[simp] lemma mod_le (a b : M) : a % b ≤ a := by
+  simp [mod_def]
 
-instance remainder_polybounded : PolyBounded₂ ((· mod ·) : M → M → M) := ⟨#0, by intro v; simp⟩
+instance mod_polybounded : PolyBounded₂ ((· % ·) : M → M → M) := ⟨#0, by intro v; simp⟩
 
-lemma remainder_eq_zero_iff_dvd {a b : M} : b mod a = 0 ↔ a ∣ b := by
-  simp [rem]
+lemma mod_eq_zero_iff_dvd {a b : M} : b % a = 0 ↔ a ∣ b := by
+  simp [mod_def]
   constructor
   · intro H; exact mul_div_self_of_dvd.mp (le_antisymm (mul_div_le b a) H)
   · intro H; simp [mul_div_self_of_dvd.mpr H]
 
-@[simp] lemma remainder_add_remove_right {a b : M} (pos : 0 < b) : (a + b) mod b = a mod b := by
-  simpa using remainder_add_mul a 1 pos
+@[simp] lemma mod_add_remove_right {a b : M} (pos : 0 < b) : (a + b) % b = a % b := by
+  simpa using mod_add_mul a 1 pos
 
-lemma remainder_add_remove_right_of_dvd {a b m : M} (h : m ∣ b) (pos : 0 < m) : (a + b) mod m = a mod m := by
+lemma mod_add_remove_right_of_dvd {a b m : M} (h : m ∣ b) (pos : 0 < m) : (a + b) % m = a % m := by
   rcases h with ⟨b, rfl⟩; simp [pos]
 
-@[simp] lemma remainder_add_remove_left {a b : M} (pos : 0 < a) : (a + b) mod a = b mod a := by
-  simpa using remainder_mul_add 1 b pos
+@[simp] lemma mod_add_remove_left {a b : M} (pos : 0 < a) : (a + b) % a = b % a := by
+  simpa using mod_mul_add 1 b pos
 
-lemma remainder_add_remove_left_of_dvd {a b m : M} (h : m ∣ a) (pos : 0 < m) : (a + b) mod m = b mod m := by
+lemma mod_add_remove_left_of_dvd {a b m : M} (h : m ∣ a) (pos : 0 < m) : (a + b) % m = b % m := by
   rcases h with ⟨b, rfl⟩; simp [pos]
 
-lemma remainder_add {a b m : M} (pos : 0 < m) : (a + b) mod m = ((a mod m) + (b mod m)) mod m := calc
-  (a + b) mod m = ((m * (a / m) + (a mod m)) + (m * (b / m) + (b mod m))) mod m := by simp [div_add_remainder]
-  _             = ((a mod m) + (b mod m)) mod m                                   := by simp [add_mul, mul_add, pos, mul_left_comm _ m,
-                                                                                          add_assoc, mul_assoc, add_left_comm]
+lemma mod_add {a b m : M} (pos : 0 < m) : (a + b) % m = (a % m + b % m) % m := calc
+  (a + b) % m = ((m * (a / m) + a % m) + (m * (b / m) + b % m)) % m := by simp [div_add_mod]
+  _           = (m * (a / m) + m * (b / m) + (a % m) + (b % m)) % m := by simp [←add_assoc, add_right_comm]
+  _           = (a % m + b % m) % m                                 := by simp [add_assoc, pos]
 
-lemma remainder_mul {a b m : M} (pos : 0 < m) : (a * b) mod m = ((a mod m) * (b mod m)) mod m := calc
-  (a * b) mod m = ((m * (a / m) + (a mod m)) * (m * (b / m) + (b mod m))) mod m := by simp [div_add_remainder]
-  _             = ((a mod m) * (b mod m)) mod m                                   := by simp [add_mul, mul_add, pos, mul_left_comm _ m, add_assoc, mul_assoc]
+lemma mod_mul {a b m : M} (pos : 0 < m) : (a * b) % m = ((a % m) * (b % m)) % m := calc
+  (a * b) % m = ((m * (a / m) + (a % m)) * (m * (b / m) + b % m)) % m := by simp [div_add_mod]
+  _           = ((a % m) * (b % m)) % m                               := by simp [add_mul, mul_add, pos, mul_left_comm _ m, add_assoc, mul_assoc]
 
-lemma remainder_two (a : M) : a mod 2 = 0 ∨ a mod 2 = 1 :=
-  le_one_iff_eq_zero_or_one.mp <| lt_two_iff_le_one.mp <| remainder_lt a (b := 2) (by simp)
+lemma mod_two (a : M) : a % 2 = 0 ∨ a % 2 = 1 :=
+  le_one_iff_eq_zero_or_one.mp <| lt_two_iff_le_one.mp <| mod_lt a (b := 2) (by simp)
 
-@[simp] lemma remainder_two_not_zero_iff {a : M} : ¬a mod 2 = 0 ↔ a mod 2 = 1 := by
-  rcases remainder_two a with (h | h) <;> simp [*]
+@[simp] lemma mod_two_not_zero_iff {a : M} : ¬a % 2 = 0 ↔ a % 2 = 1 := by
+  rcases mod_two a with (h | h) <;> simp [*]
 
-@[simp] lemma remainder_two_not_one_iff {a : M} : ¬a mod 2 = 1 ↔ a mod 2 = 0 := by
-  rcases remainder_two a with (h | h) <;> simp [*]
+@[simp] lemma mod_two_not_one_iff {a : M} : ¬a % 2 = 1 ↔ a % 2 = 0 := by
+  rcases mod_two a with (h | h) <;> simp [*]
 
-end remainder
+end mod
 
 lemma two_dvd_mul {a b : M} : 2 ∣ a * b → 2 ∣ a ∨ 2 ∣ b := by
   intro H; by_contra A
   simp [not_or] at A
-  have ha : a mod 2 = 1 := by
-    have : a mod 2 = 0 ∨ a mod 2 = 1 := remainder_two a
-    simpa [show a mod 2 ≠ 0 from by simpa [←remainder_eq_zero_iff_dvd] using A.1] using this
-  have hb : b mod 2 = 1 := by
-    have : b mod 2 = 0 ∨ b mod 2 = 1 :=
-      le_one_iff_eq_zero_or_one.mp <| lt_two_iff_le_one.mp <| remainder_lt b (b := 2) (by simp)
-    simpa [show b mod 2 ≠ 0 from by simpa [←remainder_eq_zero_iff_dvd] using A.2] using this
-  have : a * b mod 2 = 1 := by simp [remainder_mul, ha, hb]; exact remainder_eq_self_of_lt one_lt_two
-  have : ¬2 ∣ a * b := by simp [←remainder_eq_zero_iff_dvd, this]
+  have ha : a % 2 = 1 := by
+    have : a % 2 = 0 ∨ a % 2 = 1 := mod_two a
+    simpa [show a % 2 ≠ 0 from by simpa [←mod_eq_zero_iff_dvd] using A.1] using this
+  have hb : b % 2 = 1 := by
+    have : b % 2 = 0 ∨ b % 2 = 1 :=
+      le_one_iff_eq_zero_or_one.mp <| lt_two_iff_le_one.mp <| mod_lt b (b := 2) (by simp)
+    simpa [show b % 2 ≠ 0 from by simpa [←mod_eq_zero_iff_dvd] using A.2] using this
+  have : a * b % 2 = 1 := by simp [mod_mul, ha, hb]; exact mod_eq_self_of_lt one_lt_two
+  have : ¬2 ∣ a * b := by simp [←mod_eq_zero_iff_dvd, this]
   contradiction
 
 lemma even_or_odd (a : M) : ∃ x, a = 2 * x ∨ a = 2 * x + 1 :=
   ⟨a / 2, by
-    have : 2 * (a / 2) + (a mod 2) = a := div_add_remainder a 2
-    rcases remainder_two a with (e | e) <;> { simp[e] at this; simp [this] }⟩
+    have : 2 * (a / 2) + (a % 2) = a := div_add_mod a 2
+    rcases mod_two a with (e | e) <;> { simp[e] at this; simp [this] }⟩
 
 lemma even_or_odd' (a : M) : a = 2 * (a / 2) ∨ a = 2 * (a / 2) + 1 := by
-  have : 2 * (a / 2) + (a mod 2) = a := div_add_remainder a 2
-  rcases remainder_two a with (e | e) <;>  simp [e] at this <;> simp [*]
+  have : 2 * (a / 2) + (a % 2) = a := div_add_mod a 2
+  rcases mod_two a with (e | e) <;>  simp [e] at this <;> simp [*]
 
 lemma two_prime : Prime (2 : M) := ⟨by simp, by simp, by intro a b h; exact two_dvd_mul h⟩
 

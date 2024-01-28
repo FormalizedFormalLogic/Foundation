@@ -15,9 +15,9 @@ section ISigma₀
 
 variable [𝐈𝚺₀.Mod M]
 
-def ext (u z : M) : M := z / u mod u
+def ext (u z : M) : M := z / u % u
 
-lemma ext_graph (a b c : M) : a = ext b c ↔ ∃ x ≤ c, x = c / b ∧ a = x mod b := by
+lemma ext_graph (a b c : M) : a = ext b c ↔ ∃ x ≤ c, x = c / b ∧ a = x % b := by
   simp [ext]; constructor
   · rintro rfl; exact ⟨c / b, by simp, rfl, by rfl⟩
   · rintro ⟨_, _, rfl, rfl⟩; simp
@@ -32,7 +32,7 @@ lemma ext_defined : Σᴬ[0]-Function₂ (λ a b : M ↦ ext a b) extdef := by
 instance : DefinableFunction₂ b s (ext : M → M → M) := defined_to_with_param₀ _ ext_defined
 
 @[simp] lemma ext_le_add (u z : M) : ext u z ≤ z :=
-  le_trans (remainder_le (z / u) u) (by simp [add_comm])
+  le_trans (mod_le (z / u) u) (by simp [add_comm])
 
 instance : PolyBounded₂ (ext : M → M → M) := ⟨#1, by intro v; simp⟩
 
@@ -47,12 +47,12 @@ lemma ext_add_of_dvd_sq_right {u z₁ z₂ : M} (pos : 0 < u) (h : u^2 ∣ z₂)
 lemma ext_add_of_dvd_sq_left {u z₁ z₂ : M} (pos : 0 < u) (h : u^2 ∣ z₁) : ext u (z₁ + z₂) = ext u z₂ := by
   rw [add_comm]; exact ext_add_of_dvd_sq_right pos h
 
-lemma ext_rem {i j z : M} (ppi : PPow2 i) (ppj : PPow2 j) (hij : i < j) : ext i (z mod j) = ext i z := by
-  have := div_add_remainder z j
+lemma ext_rem {i j z : M} (ppi : PPow2 i) (ppj : PPow2 j) (hij : i < j) : ext i (z % j) = ext i z := by
+  have := div_add_mod z j
   have : i^2 ∣ j := ppi.pow2.sq.dvd_of_le ppj.pow2 (PPow2.sq_le_of_lt ppi ppj hij)
   calc
-    ext i (z mod j) = ext i (j * (z / j) + (z mod j)) := by symm; exact ext_add_of_dvd_sq_left ppi.pos (Dvd.dvd.mul_right this (z / j))
-    _               = ext i z                          := by simp [div_add_remainder]
+    ext i (z % j) = ext i (j * (z / j) + (z % j)) := by symm; exact ext_add_of_dvd_sq_left ppi.pos (Dvd.dvd.mul_right this (z / j))
+    _               = ext i z                          := by simp [div_add_mod]
 
 def Exp.Seq₀ (X Y : M) : Prop := ext 4 X = 1 ∧ ext 4 Y = 2
 
@@ -134,12 +134,12 @@ lemma two_lt_four : (2 : M) < 4 := lt_trans _ _ _ two_lt_three three_lt_four
 lemma seq₀_zero_two : Seq₀ (seqX₀ : M) (seqY₀ : M) := by simp [seqX₀, seqY₀, Seq₀, ext, one_lt_four, two_lt_four]
 
 lemma Seq₀.rem {X Y i : M} (h : Seq₀ X Y) (ppi : PPow2 i) (hi : 4 < i) :
-    Seq₀ (X mod i) (Y mod i) := by
+    Seq₀ (X % i) (Y % i) := by
   rw [Seq₀, ext_rem, ext_rem] <;> try simp [ppi, hi]
   exact h
 
 lemma Seqₛ.rem {y y' X Y i : M} (h : Seqₛ y X Y) (ppi : PPow2 i) (hi : y'^2 < i) (hy : y' ≤ y) :
-    Seqₛ y' (X mod i) (Y mod i) := by
+    Seqₛ y' (X % i) (Y % i) := by
   intro j hj ne2 ppj
   have : j^2 < i := lt_of_le_of_lt (sq_le_sq_iff.mp hj) hi
   have : j < i := lt_of_le_of_lt (le_trans hj $ by simp) hi
@@ -150,11 +150,11 @@ lemma Seqₛ.rem {y y' X Y i : M} (h : Seqₛ y X Y) (ppi : PPow2 i) (hi : y'^2 
 lemma seqₛ_one_zero_two : Seqₛ (1 : M) (seqX₀ : M) (seqY₀ : M) := by
   intro u leu; rcases le_one_iff_eq_zero_or_one.mp leu with (rfl | rfl) <;> simp
 
-def append (i X z : M) : M := (X mod i) + z * i
+def append (i X z : M) : M := (X % i) + z * i
 
 lemma append_lt (i X : M) {z} (hz : z < i) : append i X z < i^2 := calc
-  append i X z = (X mod i) + z * i := rfl
-  _            < (1 + z) * i       := by simp [add_mul]; exact remainder_lt _ (pos_of_gt hz)
+  append i X z = (X % i) + z * i := rfl
+  _            < (1 + z) * i       := by simp [add_mul]; exact mod_lt _ (pos_of_gt hz)
   _            ≤ i^2               := by simp [sq, add_comm]; exact mul_le_mul_of_nonneg_right (lt_iff_succ_le.mp hz) (by simp)
 
 lemma ext_append_last (i X : M) {z} (hz : z < i) :
@@ -165,10 +165,10 @@ lemma ext_append_of_lt {i j : M} (hi : PPow2 i) (hj : PPow2 j) (hij : i < j) (X 
     ext i (append j X z) = ext i X := by
   have : i^2 ∣ j := Pow2.dvd_of_le hi.pow2.sq hj.pow2 (PPow2.sq_le_of_lt hi hj hij)
   calc
-    ext i (append j X z) = ext i ((X mod j) + z * j)       := rfl
-    _                    = ext i (X mod j)                 := ext_add_of_dvd_sq_right hi.pos (Dvd.dvd.mul_left this z)
-    _                    = ext i (j * (X / j) + (X mod j)) := by rw [add_comm]; refine Eq.symm <| ext_add_of_dvd_sq_right hi.pos (Dvd.dvd.mul_right this _)
-    _                    = ext i X                         := by simp [div_add_remainder]
+    ext i (append j X z) = ext i ((X % j) + z * j)       := rfl
+    _                    = ext i (X % j)                 := ext_add_of_dvd_sq_right hi.pos (Dvd.dvd.mul_left this z)
+    _                    = ext i (j * (X / j) + (X % j)) := by rw [add_comm]; refine Eq.symm <| ext_add_of_dvd_sq_right hi.pos (Dvd.dvd.mul_right this _)
+    _                    = ext i X                         := by simp [div_add_mod]
 
 lemma Seq₀.append {X Y i x y : M} (H : Seq₀ X Y) (ppi : PPow2 i) (hi : 4 < i) :
     Seq₀ (append i X x) (append i Y y) := by
@@ -281,8 +281,8 @@ lemma exp_exists_sq_of_exp_even {x y : M} : Exp (2 * x) y → ∃ y', y = y'^2 �
   rcases this with (⟨hXi, hYi⟩ | ⟨hXi, _⟩)
   · have hXx : x = ext (√i) X := by simpa [ppi.sq_sqrt_eq ne2, hXx] using hXi
     have hYy : y = (ext (√i) Y)^2 := by simpa [ppi.sq_sqrt_eq ne2, hYy] using hYi
-    let X' := X mod i
-    let Y' := Y mod i
+    let X' := X % i
+    let Y' := Y % i
     have bX' : X' ≤ (ext (√i) Y)^4 := by simp [pow_four_eq_sq_sq, ←hYy]; exact le_trans (le_of_lt $ by simp [ppi.pos]) hi
     have bY' : Y' ≤ (ext (√i) Y)^4 := by simp [pow_four_eq_sq_sq, ←hYy]; exact le_trans (le_of_lt $ by simp [ppi.pos]) hi
     have hseqₛ' : Seqₛ (ext (√i) Y) X' Y' :=
@@ -297,7 +297,7 @@ lemma exp_exists_sq_of_exp_even {x y : M} : Exp (2 * x) y → ∃ y', y = y'^2 �
   · have : 2 ∣ ext i X := by simp [hXx]
     have : ¬2 ∣ ext i X := by
       simp [show ext i X = 2 * ext (√i) X + 1 from by simpa [ppi.sq_sqrt_eq ne2] using hXi,
-        ←remainder_eq_zero_iff_dvd, one_lt_two]
+        ←mod_eq_zero_iff_dvd, one_lt_two]
     contradiction
 
 lemma bit_zero {x y : M} : Exp x y → Exp (2 * x) (y ^ 2) := by
@@ -355,12 +355,12 @@ lemma exp_exists_sq_of_exp_odd {x y : M} : Exp (2 * x + 1) y → ∃ y', y = 2 *
   rcases this with (⟨hXi, _⟩ | ⟨hXi, hYi⟩)
   · have hXx : 2 * x + 1 = 2 * ext (√i) X := by simpa [ppi.sq_sqrt_eq ne2, hXx] using hXi
     have : 2 ∣ 2 * x + 1 := by rw [hXx]; simp
-    have : ¬2 ∣ 2 * x + 1 := by simp [←remainder_eq_zero_iff_dvd, one_lt_two]
+    have : ¬2 ∣ 2 * x + 1 := by simp [←mod_eq_zero_iff_dvd, one_lt_two]
     contradiction
   · have hXx : x = ext (√i) X := by simpa [ppi.sq_sqrt_eq ne2, hXx] using hXi
     have hYy : y = 2 * (ext (√i) Y)^2 := by simpa [ppi.sq_sqrt_eq ne2, hYy] using hYi
-    let X' := X mod i
-    let Y' := Y mod i
+    let X' := X % i
+    let Y' := Y % i
     have bsqi : √i ≤ (ext (√i) Y)^2 := le_sq_ext_of_seq₀_of_seqₛ hseq₀ hseqₛ (ppi.sqrt_ne_two ne2 ne4) (le_trans (by simp) hi) (ppi.sqrt ne2)
     have bi : i ≤ ext (√i) Y^4 := by simpa [pow_four_eq_sq_sq, ppi.sq_sqrt_eq ne2] using sq_le_sq_iff.mp bsqi
     have bX' : X' ≤ (ext (√i) Y)^4 := le_trans (le_of_lt $ by simp [ppi.pos]) bi

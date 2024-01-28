@@ -140,11 +140,13 @@ lemma log_monotone {a b : M} (h : a ≤ b) : log a ≤ log b := by
 
 def binaryLength (a : M) : M := if 0 < a then log a + 1 else 0
 
-notation "‖" a "‖" => binaryLength a
+instance : Length M := ⟨binaryLength⟩
 
-@[simp] lemma binary_length_zero : ‖(0 : M)‖ = 0 := by simp [binaryLength]
+lemma length_eq_binaryLength (a : M) : ‖a‖ = if 0 < a then log a + 1 else 0 := rfl
 
-lemma binary_length_of_pos {a : M} (pos : 0 < a) : ‖a‖ = log a + 1 := by simp [binaryLength, pos]
+@[simp] lemma binary_length_zero : ‖(0 : M)‖ = 0 := by simp [length_eq_binaryLength]
+
+lemma binary_length_of_pos {a : M} (pos : 0 < a) : ‖a‖ = log a + 1 := by simp [length_eq_binaryLength, pos]
 
 @[simp] lemma binary_length_le (a : M) : ‖a‖ ≤ a := by
   rcases zero_le a with (rfl | pos)
@@ -161,14 +163,14 @@ lemma binary_length_graph {i a : M} : i = ‖a‖ ↔ (0 < a → ∃ k ≤ a, k 
 
 def binarylengthdef : Σᴬ[0] 2 := ⟨“(0 < #1 → ∃[#0 < #2 + 1] (!logdef [#0, #2] ∧ #1 = #0 + 1)) ∧ (#1 = 0 → #0 = 0)”, by simp⟩
 
-lemma binary_length_defined : Σᴬ[0]-Function₁ (binaryLength : M → M) binarylengthdef := by
+lemma binary_length_defined : Σᴬ[0]-Function₁ (‖·‖ : M → M) binarylengthdef := by
   intro v; simp [binarylengthdef, binary_length_graph, log_defined.pval, ←le_iff_lt_succ]
 
-instance {b s} : DefinableFunction₁ b s (binaryLength : M → M) := defined_to_with_param₀ _ binary_length_defined
+instance {b s} : DefinableFunction₁ b s (‖·‖ : M → M) := defined_to_with_param₀ _ binary_length_defined
 
-instance : PolyBounded₁ (binaryLength : M → M) := ⟨#0, λ _ ↦ by simp⟩
+instance : PolyBounded₁ (‖·‖ : M → M) := ⟨#0, λ _ ↦ by simp⟩
 
-@[simp] lemma binary_length_one : ‖(1 : M)‖ = 1 := by simp [binaryLength]
+@[simp] lemma binary_length_one : ‖(1 : M)‖ = 1 := by simp [length_eq_binaryLength]
 
 lemma Exp.binary_length_eq {x y : M} (H : Exp x y) : ‖y‖ = x + 1 := by
   simp [binary_length_of_pos H.range_pos]; exact H.log_eq_of_exp
@@ -306,7 +308,7 @@ lemma bexp_eq_of_exp {a x : M} (h : x < ‖a‖) (H : Exp x y) : bexp a x = y :=
 
 @[simp] lemma bexp_pos_zero {a : M} (h : 0 < a) : bexp a 0 = 1 := bexp_eq_of_exp (by simpa) (by simp)
 
-def fbit (a i : M) : M := (a / bexp a i) mod 2
+def fbit (a i : M) : M := (a / bexp a i) % 2
 
 @[simp] lemma fbit_lt_two (a i : M) : fbit a i < 2 := by simp [fbit]
 
@@ -347,7 +349,7 @@ lemma lt_two_mul_exponential_log {a : M} (pos : 0 < a) : a < 2 * exp (log a) := 
   assumption
 
 @[simp] lemma binary_length_exponential (a : M) : ‖exp a‖ = a + 1 := by
-  simp [binary_length_of_pos]
+  simp [binary_length_of_pos (exp_pos a)]
 
 lemma exp_add (a b : M) : exp (a + b) = exp a * exp b :=
   exponential_of_exp (Exp.add_mul (exp_exponential a) (exp_exponential b))

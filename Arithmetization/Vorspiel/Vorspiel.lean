@@ -27,6 +27,12 @@ class Hash (α : Type*) where
 
 infix:80 " # " => Hash.hash
 
+class Length (α : Type*) where
+  length : α → α
+
+notation "‖" x "‖" => Length.length x
+
+
 namespace LO
 
 namespace FirstOrder
