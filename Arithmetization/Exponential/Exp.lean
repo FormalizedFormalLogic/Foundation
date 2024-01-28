@@ -150,7 +150,7 @@ lemma Seqₛ.rem {y y' X Y i : M} (h : Seqₛ y X Y) (ppi : PPow2 i) (hi : y'^2 
 lemma seqₛ_one_zero_two : Seqₛ (1 : M) (seqX₀ : M) (seqY₀ : M) := by
   intro u leu; rcases le_one_iff_eq_zero_or_one.mp leu with (rfl | rfl) <;> simp
 
-def append (i X z : M) : M := (X % i) + z * i
+def append (i X z : M) : M := X % i + z * i
 
 lemma append_lt (i X : M) {z} (hz : z < i) : append i X z < i^2 := calc
   append i X z = (X % i) + z * i := rfl

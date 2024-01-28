@@ -64,7 +64,11 @@ variable {a b c : M}
 
 instance : Nonempty M := ⟨0⟩
 
+lemma lt_succ_iff_le {x y : M} : x < y + 1 ↔ x ≤ y := Iff.symm le_iff_lt_succ
+
 lemma lt_iff_succ_le : a < b ↔ a + 1 ≤ b := by simp [le_iff_lt_succ]
+
+lemma succ_le_iff_lt : a + 1 ≤ b ↔ a < b := by simp [le_iff_lt_succ]
 
 lemma pos_iff_one_le : 0 < a ↔ 1 ≤ a := by simp [lt_iff_succ_le]
 
@@ -152,6 +156,8 @@ lemma pow_four_eq_sq_sq (x : M) : x^4 = (x^2)^2 := by simp [pow_four, sq, mul_as
 instance : CovariantClass M M (· * ·) (· ≤ ·) := ⟨by intro; exact mul_le_mul_left⟩
 
 instance : CovariantClass M M (· + ·) (· ≤ ·) := ⟨by intro; simp⟩
+
+instance : CovariantClass M M (Function.swap (· * ·)) (· ≤ ·) := ⟨by intro; exact mul_le_mul_right⟩
 
 @[simp] lemma one_lt_mul_self_iff {a : M} : 1 < a * a ↔ 1 < a :=
   ⟨(fun h ↦ by push_neg at h ⊢; exact mul_le_one' h h).mtr, fun h ↦ one_lt_mul'' h h⟩

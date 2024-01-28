@@ -200,6 +200,9 @@ lemma div_add_mul_self (a c : M) {b} (pos : 0 < b) : (a + c * b) / b = a / b + c
   rcases div_spec_of_pos' a pos with ⟨r, hr, ex⟩
   simpa [add_mul, add_right_comm, ← ex] using div_mul_add (a / b + c) _ hr
 
+lemma div_add_mul_self' (a c : M) {b} (pos : 0 < b) : (a + b * c) / b = a / b + c := by
+  simpa [mul_comm] using div_add_mul_self a c pos
+
 lemma div_mul_add_self (a c : M) {b} (pos : 0 < b) : (a * b + c) / b = a + c / b := by
   simp [div_add_mul_self, pos, add_comm]
 
@@ -338,6 +341,11 @@ lemma mod_add {a b m : M} (pos : 0 < m) : (a + b) % m = (a % m + b % m) % m := c
 lemma mod_mul {a b m : M} (pos : 0 < m) : (a * b) % m = ((a % m) * (b % m)) % m := calc
   (a * b) % m = ((m * (a / m) + (a % m)) * (m * (b / m) + b % m)) % m := by simp [div_add_mod]
   _           = ((a % m) * (b % m)) % m                               := by simp [add_mul, mul_add, pos, mul_left_comm _ m, add_assoc, mul_assoc]
+
+@[simp] lemma mod_div (a b : M) : a % b / b = 0 := by
+  rcases zero_le b with (rfl | pos)
+  · simp
+  · exact div_eq_zero_of_lt b (by simp [pos])
 
 lemma mod_two (a : M) : a % 2 = 0 ∨ a % 2 = 1 :=
   le_one_iff_eq_zero_or_one.mp <| lt_two_iff_le_one.mp <| mod_lt a (b := 2) (by simp)
