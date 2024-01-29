@@ -3,6 +3,7 @@ import Logic.Propositional.Basic
 import Logic.FirstOrder.Hauptsatz
 import Logic.FirstOrder.Completeness.Completeness
 import Logic.FirstOrder.Incompleteness.FirstIncompleteness
+import Logic.Modal.Normal.Completeness
 
 namespace LO.Summary
 
@@ -73,5 +74,19 @@ example : T ⊬ undecidable T ∧ T ⊬ ~undecidable T :=
 #print axioms FirstOrder.Arith.undecidable
 
 end FirstOrder
+
+namespace Modal
+
+open LO.Modal LO.Modal.Normal
+
+variable {β : Type*} [DecidableEq β]
+
+/-- Strong completeness theorem for 𝐊 -/
+example : Completeness (𝐊 : AxiomSet β) (𝔽((𝐊 : AxiomSet β)) : FrameClass (MaximalConsistentTheory (𝐊 : AxiomSet β))) := LogicK.Hilbert.completes
+
+#print axioms LogicK.Hilbert.completes
+
+end Modal
+
 
 end LO.Summary

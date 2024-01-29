@@ -7,6 +7,7 @@ https://iehality.github.io/lean4-logic/
 
 - [lean4-logic](#lean4-logic)
   - [Table of Contents](#table-of-contents)
+  - [Usage](#usage)
   - [Structure](#structure)
   - [Propositional Logic](#propositional-logic)
     - [Definition](#definition)
@@ -19,6 +20,11 @@ https://iehality.github.io/lean4-logic/
     - [Theorem](#theorem-2)
   - [References](#references)
 
+## Usage
+  Add following to `lakefile.lean`.
+  ```lean
+  require logic from git "https://github.com/iehality/lean4-logic"
+  ```
 
 ## Structure
 
@@ -52,6 +58,15 @@ The key results are summarised in `Logic/Summary.lean`.
 | $v \models p$                       | Tarski's truth definition condition | [LO.Propositional.semantics](https://iehality.github.io/lean4-logic/Logic/Propositional/Basic/Semantics.html#LO.Propositional.semantics) | `v ⊧ p`  |
 
 ### Theorem
+
+- [Soundness theorem](https://iehality.github.io/lean4-logic/Logic/Propositional/Basic/Completeness.html#LO.Propositional.soundness)
+  ```lean
+  theorem LO.Propositional.soundness
+    {α : Type u_1}
+    {T : LO.Propositional.Theory α}
+    {p : LO.Propositional.Formula α} :
+    T ⊢ p → T ⊨ p
+  ```
 
 - [Completeness theorem](https://iehality.github.io/lean4-logic/Logic/Propositional/Basic/Completeness.html#LO.Propositional.completeness)
   ```lean
@@ -87,6 +102,15 @@ $\mathbf{PA^-}$ is not to be included in $\mathbf{I\Sigma}_n$ or $\mathbf{PA}$ f
       [(k : ℕ) → DecidableEq (LO.FirstOrder.Language.Rel L k)]
       {Δ : LO.FirstOrder.Sequent L} :
       ⊢¹ Δ → { d : ⊢¹ Δ // LO.FirstOrder.Derivation.CutFree d }
+  ```
+
+- [Soundness theorem](https://iehality.github.io/lean4-logic/Logic/FirstOrder/Basic/Soundness.html#LO.FirstOrder.soundness)
+  ```lean
+  theorem LO.FirstOrder.soundness
+      {L : LO.FirstOrder.Language}
+      {T : Set (LO.FirstOrder.Sentence L)}
+      {σ : LO.FirstOrder.Sentence L} :
+      T ⊢ σ → T ⊨ σ
   ```
 
 - [Completeness theorem](https://iehality.github.io/lean4-logic/Logic/FirstOrder/Completeness/Completeness.html#LO.FirstOrder.completeness)
