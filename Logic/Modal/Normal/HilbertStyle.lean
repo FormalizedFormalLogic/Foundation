@@ -229,74 +229,65 @@ lemma maxm_subset {Λ Λ'} (dΛ : Γ ⊢ᴹ[Λ] p) : (Λ ⊆ Λ') → (Γ ⊢ᴹ
 
 def modus_ponens' {Γ p q} : (Γ ⊢ᴹ[Λ] (p ⟶ q)) → (Γ ⊢ᴹ[Λ] p) → (Γ ⊢ᴹ[Λ] q) := Hilbert.modus_ponens'
 
-private noncomputable def dtrAux (Γ p q) (d : Γ ⊢ᴹ[Λ] q) : ((Γ \ {p}) ⊢ᴹ[Λ] (p ⟶ q)) := by
-  induction d with
-  | maxm h => exact modus_ponens' (imply₁ _ _ _) (maxm h);
-  | necessitation h => exact modus_ponens' (imply₁ _ _ _) (necessitation h);
-  | verum => exact modus_ponens' (imply₁ _ _ _) (verum _);
-  | imply₁ => exact modus_ponens' (imply₁ _ _ _) (imply₁ _ _ _);
-  | imply₂ => exact modus_ponens' (imply₁ _ _ _) (imply₂ _ _ _ _);
-  | conj₁ => exact modus_ponens' (imply₁ _ _ _) (conj₁ _ _ _);
-  | conj₂ => exact modus_ponens' (imply₁ _ _ _) (conj₂ _ _ _);
-  | conj₃ => exact modus_ponens' (imply₁ _ _ _) (conj₃ _ _ _);
-  | disj₁ => exact modus_ponens' (imply₁ _ _ _) (disj₁ _ _ _);
-  | disj₂ => exact modus_ponens' (imply₁ _ _ _) (disj₂ _ _ _);
-  | disj₃ => exact modus_ponens' (imply₁ _ _ _) (disj₃ _ _ _ _);
-  | dne => exact modus_ponens' (imply₁ _ _ _) (dne _ _)
-  | @axm Γ q ih =>
+private def dtrAux (Γ) (p q : Formula α) : (Γ ⊢ᴹ[Λ] q) → ((Γ \ {p}) ⊢ᴹ[Λ] (p ⟶ q))
+  | maxm h          => modus_ponens' (imply₁ _ _ _) (maxm h)
+  | necessitation h => modus_ponens' (imply₁ _ _ _) (necessitation h)
+  | verum _         => modus_ponens' (imply₁ _ _ _) (verum _)
+  | imply₁ _ _ _    => modus_ponens' (imply₁ _ _ _) (imply₁ _ _ _)
+  | imply₂ _ _ _ _  => modus_ponens' (imply₁ _ _ _) (imply₂ _ _ _ _)
+  | conj₁ _ _ _     => modus_ponens' (imply₁ _ _ _) (conj₁ _ _ _)
+  | conj₂ _ _ _     => modus_ponens' (imply₁ _ _ _) (conj₂ _ _ _)
+  | conj₃ _ _ _     => modus_ponens' (imply₁ _ _ _) (conj₃ _ _ _)
+  | disj₁ _ _ _     => modus_ponens' (imply₁ _ _ _) (disj₁ _ _ _)
+  | disj₂ _ _ _     => modus_ponens' (imply₁ _ _ _) (disj₂ _ _ _)
+  | disj₃ _ _ _ _   => modus_ponens' (imply₁ _ _ _) (disj₃ _ _ _ _)
+  | dne _ _         => modus_ponens' (imply₁ _ _ _) (dne _ _)
+  | @axm _ _ Γ q ih => by
     by_cases h : p = q
     case pos =>
-      subst h
-      exact Hilbert.imp_id (Γ \ {p}) p;
+      simpa [h] using Hilbert.imp_id (Γ \ {p}) p;
     case neg =>
       have d₁ : (Γ \ {p}) ⊢ᴹ[Λ] (q ⟶ p ⟶ q) := imply₁ _ q p
-      have d₂ : (Γ \ {p}) ⊢ᴹ[Λ] q := axm (by
-        simp [Finset.mem_erase];
-        aesop;
-      )
+      have d₂ : (Γ \ {p}) ⊢ᴹ[Λ] q := axm (Set.mem_diff_singleton.mpr ⟨ih, Ne.symm h⟩)
       exact d₁.modus_ponens' d₂;
-  | @modus_ponens Γ₁ Γ₂ a b _ _ ih₁ ih₂ =>
-      have d₁ : ((Γ₁ ∪ Γ₂) \ {p}) ⊢ᴹ[Λ] (p ⟶ a) ⟶ p ⟶ b := (imply₂ _ p a b).modus_ponens' ih₁ |>.weakening' (by
-        apply Set.diff_subset_diff;
-        all_goals simp;
-      );
-      have d₂ : ((Γ₁ ∪ Γ₂) \ {p}) ⊢ᴹ[Λ] (p ⟶ a) := ih₂.weakening' (by
-        apply Set.diff_subset_diff ;
-        all_goals simp;
-      );
-      exact d₁.modus_ponens' d₂;
+  | @modus_ponens _ _ Γ₁ Γ₂ a b h₁ h₂ =>
+      have ih₁ : Γ₁ \ {p} ⊢ᴹ[Λ] p ⟶ a ⟶ b := dtrAux Γ₁ p (a ⟶ b) h₁
+      have ih₂ : Γ₂ \ {p} ⊢ᴹ[Λ] p ⟶ a := dtrAux Γ₂ p a h₂
+      have d₁ : ((Γ₁ ∪ Γ₂) \ {p}) ⊢ᴹ[Λ] (p ⟶ a) ⟶ p ⟶ b :=
+        (imply₂ _ p a b).modus_ponens' ih₁ |>.weakening' (Set.diff_subset_diff (by { exact Set.subset_union_left Γ₁ Γ₂ }) (by simp))
+      have d₂ : ((Γ₁ ∪ Γ₂) \ {p}) ⊢ᴹ[Λ] (p ⟶ a) :=
+        ih₂.weakening' (Set.diff_subset_diff (Set.subset_union_right Γ₁ Γ₂) (by simp))
+      d₁.modus_ponens' d₂
 
-noncomputable def dtr {Γ p q} (d : (insert p Γ) ⊢ᴹ[Λ] q) : (Γ ⊢ᴹ[Λ] (p ⟶ q)) := by
+def dtr {Γ p q} (d : (insert p Γ) ⊢ᴹ[Λ] q) : (Γ ⊢ᴹ[Λ] (p ⟶ q)) := by
   exact dtrAux (insert p Γ) p q d |>.weakening' (by simp;);
 
-noncomputable instance : HasDT (Deduction Λ) := ⟨dtr⟩
+instance : HasDT (Deduction Λ) := ⟨dtr⟩
 
-noncomputable def compact (d : Γ ⊢ᴹ[Λ] p) : (Δ : { Δ : Context α | ↑Δ ⊆ Γ}) × (Δ ⊢ᴹ[Λ] p) := by
-  induction d with
-  | @axm Γ p h => exact ⟨⟨{p}, by simpa⟩, axm (by simp)⟩
-  | maxm h => exact ⟨⟨∅, by simp⟩, maxm h⟩
-  | @modus_ponens Γ₁ Γ₂ p q _ _ ih₁ ih₂ =>
-      have ⟨⟨Δ₁, hs₁⟩, d₁⟩ := ih₁;
-      have ⟨⟨Δ₂, hs₂⟩, d₂⟩ := ih₂;
+def compact {Γ p} : (Γ ⊢ᴹ[Λ] p) → (Δ : { Δ : Context α | ↑Δ ⊆ Γ}) × (Δ ⊢ᴹ[Λ] p)
+  | @axm _ _ Γ p h  => ⟨⟨{p}, by simpa⟩, axm (by simp)⟩
+  | maxm h          => ⟨⟨∅, by simp⟩, maxm h⟩
+  | @modus_ponens _ _ Γ₁ Γ₂ p q h₁ h₂ => by
+      have ⟨⟨Δ₁, hs₁⟩, d₁⟩ := h₁.compact;
+      have ⟨⟨Δ₂, hs₂⟩, d₂⟩ := h₂.compact;
       simp at hs₁ d₁ hs₂ d₂;
       exact ⟨
         ⟨Δ₁ ∪ Δ₂, by simp [hs₁, hs₂];⟩,
         by simpa using modus_ponens' (d₁.weakening' (by simp)) (d₂.weakening' (by simp));
       ⟩
-  | necessitation =>
-      exact ⟨⟨∅, (by simp)⟩, by apply necessitation; simpa;⟩
-  | verum _ => exact ⟨⟨∅, by simp⟩, verum _⟩
-  | imply₁ _ _ _ => exact ⟨⟨∅, by simp⟩, imply₁ _ _ _⟩
-  | imply₂ _ _ _ _ => exact ⟨⟨∅, by simp⟩, imply₂ _ _ _ _⟩
-  | conj₁ _ _ _ => exact ⟨⟨∅, by simp⟩, conj₁ _ _ _⟩
-  | conj₂ _ _ _ => exact ⟨⟨∅, by simp⟩, conj₂ _ _ _⟩
-  | conj₃ _ _ _ => exact ⟨⟨∅, by simp⟩, conj₃ _ _ _⟩
-  | disj₁ _ _ _ => exact ⟨⟨∅, by simp⟩, disj₁ _ _ _⟩
-  | disj₂ _ _ _ => exact ⟨⟨∅, by simp⟩, disj₂ _ _ _⟩
-  | disj₃ _ _ _ _ => exact ⟨⟨∅, by simp⟩, disj₃ _ _ _ _⟩
-  | dne _ _ => exact ⟨⟨∅, by simp⟩, dne _ _⟩
+  | necessitation _ => ⟨⟨∅, (by simp)⟩, by apply necessitation; simpa;⟩
+  | verum _         => ⟨⟨∅, by simp⟩, verum _⟩
+  | imply₁ _ _ _    => ⟨⟨∅, by simp⟩, imply₁ _ _ _⟩
+  | imply₂ _ _ _ _  => ⟨⟨∅, by simp⟩, imply₂ _ _ _ _⟩
+  | conj₁ _ _ _     => ⟨⟨∅, by simp⟩, conj₁ _ _ _⟩
+  | conj₂ _ _ _     => ⟨⟨∅, by simp⟩, conj₂ _ _ _⟩
+  | conj₃ _ _ _     => ⟨⟨∅, by simp⟩, conj₃ _ _ _⟩
+  | disj₁ _ _ _     => ⟨⟨∅, by simp⟩, disj₁ _ _ _⟩
+  | disj₂ _ _ _     => ⟨⟨∅, by simp⟩, disj₂ _ _ _⟩
+  | disj₃ _ _ _ _   => ⟨⟨∅, by simp⟩, disj₃ _ _ _ _⟩
+  | dne _ _         => ⟨⟨∅, by simp⟩, dne _ _⟩
 
-noncomputable instance : Hilbert.Compact (Deduction Λ) := ⟨compact⟩
+instance : Hilbert.Compact (Deduction Λ) := ⟨compact⟩
 
 end Deduction
 
