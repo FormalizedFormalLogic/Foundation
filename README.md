@@ -129,7 +129,7 @@ $\mathbf{PA^-}$ is not to be included in $\mathbf{I\Sigma}_n$ or $\mathbf{PA}$ f
 In this formalization, _(Modal) Logic_ means set of axioms.
 
 | Logic            | Definition                    | Notation | Remarks         |
-| :--------------- | ----------------------------- | :------- | --------------- |
+| :--------------: | ----------------------------- | :------- | --------------- |
 | $\mathbf{K}$     | [LO.Modal.Normal.LogicK](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Logics.html#LO.Modal.Normal.LogicK) | `𝐊`      |                 |
 | $\mathbf{KD}$     | [LO.Modal.Normal.LogicKD](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Logics.html#LO.Modal.Normal.LogicKD) | `𝐊𝐃`      |                 |
 | $\mathbf{S4}$    | [LO.Modal.Normal.LogicS4](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Logics.html#LO.Modal.Normal.LogicS4) | `𝐒𝟒`     | Alias of `𝐊𝐓𝟒`. |
@@ -145,11 +145,11 @@ In this formalization, _(Modal) Logic_ means set of axioms.
 |        $M \models \varphi$        | Valid on model (Models)                    | [LO.Modal.Normal.Formula.Models](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Semantics.html#LO.Modal.Normal.Formula.Models) |  `⊧ᴹᵐ[M] φ`  |
 |        $F \models \varphi$        | Valid on frame (Frames)                    | [LO.Modal.Normal.Formula.Frames](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Semantics.html#LO.Modal.Normal.Formula.Frames) |  `⊧ᴹᶠ[F] φ`  |
 |    $\Gamma \models^F \varphi$     | Consequence on frame                       | [LO.Modal.Normal.Formula.FrameConsequence](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Semantics.html#LO.Modal.Normal.Formula.FrameConsequence) | `Γ ⊨ᴹᶠ[F] φ` |
-| $\Gamma \vdash_{\Lambda} \varphi$ | Hilbert-style Deduction on logic $\Lambda$ | [LO.Modal.Normal.Deduction](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/HilbertStyle.html#LO.Modal.Normal.Deduction) | `Γ ⊢ᴹ(Λ) φ`  |
+| $\Gamma \vdash_{\Lambda} \varphi$ | Hilbert-style Deduction on logic $\Lambda$ | [LO.Modal.Normal.Deduction](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/HilbertStyle.html#LO.Modal.Normal.Deduction) | `Γ ⊢ᴹ[Λ] φ`  |
 
 ### Theorem
 
-- [Soundness of Hilbert-style deduction](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Soundness.html#LO.Modal.Normal.Logic.Hilbert.sounds)
+- [Soundness of Hilbert-style deduction](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Soundness.html#LO.Modal.Normal.Logic.Hilbert.sounds) for `𝐊` extend `𝐓`, `𝐁`, `𝐃`, `𝟒`, `𝟓` Extensions (i.e. `𝐊𝐃`, `𝐒𝟒`, `𝐒𝟓`, etc.)
   ```lean
   theorem LO.Modal.Normal.Logic.Hilbert.sounds
       {α : Type u} [Inhabited α]
@@ -157,7 +157,7 @@ In this formalization, _(Modal) Logic_ means set of axioms.
       (Λ : AxiomSet α)
       (f : Frame β) (hf : f ∈ (FrameClass β α Λ))
       {p : LO.Modal.Normal.Formula α}
-      (h : ⊢ᴹ(Λ) p) :
+      (h : ⊢ᴹ[Λ] p) :
       ⊧ᴹᶠ[f] p
   ```
   - [Consistency](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Soundness.html#LO.Modal.Normal.Logic.Hilbert.consistency)
@@ -167,9 +167,23 @@ In this formalization, _(Modal) Logic_ means set of axioms.
         {β : Type u}
         (Λ : AxiomSet α)
         (hf : ∃ f, f ∈ (FrameClass β α Λ)) :
-        ⊬ᴹ(Λ)! ⊥
+        ⊬ᴹ[Λ]! ⊥
     ```
   -  **WIP:** Currently, these theorems was proved where only `Λ` is `𝐊`, `𝐊𝐃`, `𝐒𝟒`, `𝐒𝟓`.
+- Strong Completeness of Hilbert-style deduction for `𝐊` extend `𝐓`, `𝐁`, `𝐃`, `𝟒`, `𝟓` Extensions
+  ```
+  def Completeness
+    {α β : Type u}
+    (Λ : AxiomSet β)
+    (𝔽 : FrameClass α)
+    := ∀ (Γ : Theory β) (p : Formula β), (Γ ⊨ᴹ[𝔽] p) → (Γ ⊢ᴹ[Λ]! p)
+
+  theorem LogicK.Hilbert.completes
+    {β : Type u} [inst✝ : DecidableEq β] :
+    Completeness
+      (𝐊 : AxiomSet β)
+      (𝔽((𝐊 : AxiomSet β)) : FrameClass (MaximalConsistentTheory (𝐊 : AxiomSet β)))
+  ```
 
 ## References
 - J. Han, F. van Doorn, A formalization of forcing and the unprovability of the continuum hypothesis
@@ -177,4 +191,7 @@ In this formalization, _(Modal) Logic_ means set of axioms.
 - P. Hájek, P. Pudlák, Metamathematics of First-Order Arithmetic
 - R. Kaye, Models of Peano arithmetic
 - 田中 一之, ゲーデルと20世紀の論理学
-- 菊池 誠 (編者), 数学における証明と真理 ─ 様相論理と数学基礎論
+- 菊池 誠 (編者), 『数学における証明と真理 ─ 様相論理と数学基礎論』
+- P. Blackburn, M. de Rijke, Y. Venema, "Modal Logic"
+- Open Logic Project, ["The Open Logic Text"](https://builds.openlogicproject.org/)
+- R. Hakli, S. Negri, "Does the deduction theorem fail for modal logic?"

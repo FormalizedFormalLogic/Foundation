@@ -174,6 +174,11 @@ class DeMorgan (F : Type*) [LogicSymbol F] where
 
 attribute [simp] DeMorgan.verum DeMorgan.falsum DeMorgan.and DeMorgan.or DeMorgan.neg
 
+class NegDefinition (F : Type*) [LogicSymbol F] where
+  neg {p : F} : ~p = p ⟶ ⊥
+
+attribute [simp] NegDefinition.neg
+
 namespace LogicSymbol
 
 section

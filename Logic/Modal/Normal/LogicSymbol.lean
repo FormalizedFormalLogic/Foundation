@@ -15,10 +15,16 @@ prefix:74 "◇" => Dia.dia
 
 attribute [match_pattern] Box.box Dia.dia
 
-class ModalDeMorgan (F : Type*) [ModalLogicSymbol F] extends DeMorgan F where
-  box (p : F) : □p = ~(◇(~p))
-  dia (p : F) : ◇p = ~(□(~p))
+/-- Diamond(`◇`) defined by Box(`□`) -/
+class ModalDuality (F : Type*) [ModalLogicSymbol F] where
+  dia {p : F} : ◇p = ~(□(~p))
 
-attribute [simp] ModalDeMorgan.box ModalDeMorgan.dia
+attribute [simp] ModalDuality.dia
+
+/-- Box(`□`) defined by Diamond(`◇`) -/
+class ModalDuality' (F : Type*) [ModalLogicSymbol F] where
+  box {p : F} : □p = ~(◇(~p))
+
+attribute [simp] ModalDuality'.box
 
 end LO.Modal.Normal
