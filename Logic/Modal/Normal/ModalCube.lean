@@ -12,7 +12,7 @@ namespace LO.Modal.Normal
 
 open Hilbert
 
-variable {F : Type u} [DecidableEq F] [ModalLogicSymbol F] [NegDefinition F] [ModalDuality F] (Bew : Finset F → F → Sort*)
+variable {F : Type u} [DecidableEq F] [ModalLogicSymbol F] [NegDefinition F] [ModalDuality F] (Bew : Set F → F → Type*)
 
 section LogicS5
 

@@ -5,4 +5,4 @@ import Logic.Modal.Normal.Semantics
 import Logic.Modal.Normal.HilbertStyle
 import Logic.Modal.Normal.Soundness
 import Logic.Modal.Normal.Completeness
-import Logic.Modal.Normal.ModalCube
+-- import Logic.Modal.Normal.ModalCube

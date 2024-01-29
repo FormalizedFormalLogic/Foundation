@@ -2,7 +2,7 @@ import Logic.Logic.HilbertStyle2
 import Logic.Modal.Normal.Formula
 import Logic.Modal.Normal.Axioms
 
-attribute [simp] Finset.subset_union_right Finset.subset_union_left Finset.subset_insert
+attribute [simp] Set.subset_union_of_subset_left Set.subset_union_of_subset_right -- Finset.subset_insert
 
 namespace LO
 
@@ -10,51 +10,51 @@ namespace Hilbert
 
 open LO.Modal.Normal
 
-variable {F : Type u} [ModalLogicSymbol F] [DecidableEq F] [NegDefinition F] (Bew : Finset F → F → Sort*)
+variable {F : Type u} [ModalLogicSymbol F] [DecidableEq F] [NegDefinition F] (Bew : Set F → F → Sort*)
 
 class HasNecessitation where
   necessitation {Γ p} : (Bew ∅ p) → (Bew Γ (□p))
 
 class HasAxiomK where
-  K (Γ : Finset F) (p q : F) : Bew Γ $ AxiomK p q
+  K (Γ : Set F) (p q : F) : Bew Γ $ AxiomK p q
 
 class HasAxiomT where
-  T (Γ : Finset F) (p : F) : Bew Γ $ AxiomT p
+  T (Γ : Set F) (p : F) : Bew Γ $ AxiomT p
 
 class HasAxiomD where
-  D (Γ : Finset F) (p : F) : Bew Γ $ AxiomD p
+  D (Γ : Set F) (p : F) : Bew Γ $ AxiomD p
 
 class HasAxiomB where
-  B (Γ : Finset F) (p q : F) : Bew Γ $ AxiomB p
+  B (Γ : Set F) (p q : F) : Bew Γ $ AxiomB p
 
 class HasAxiom4 where
-  A4 (Γ : Finset F) (p : F) : Bew Γ $ Axiom4 p
+  A4 (Γ : Set F) (p : F) : Bew Γ $ Axiom4 p
 
 class HasAxiom5 where
-  A5 (Γ : Finset F) (p : F) : Bew Γ $ Axiom5 p
+  A5 (Γ : Set F) (p : F) : Bew Γ $ Axiom5 p
 
 class HasAxiomL where
-  L (Γ : Finset F) (p : F) : Bew Γ $ AxiomL p
+  L (Γ : Set F) (p : F) : Bew Γ $ AxiomL p
 
 class HasAxiomDot2 where
-  Dot2 (Γ : Finset F) (p : F) : Bew Γ $ AxiomDot2 p
+  Dot2 (Γ : Set F) (p : F) : Bew Γ $ AxiomDot2 p
 
 class HasAxiomDot3 where
-  Dot3 (Γ : Finset F) (p q : F) : Bew Γ $ AxiomDot3 p q
+  Dot3 (Γ : Set F) (p q : F) : Bew Γ $ AxiomDot3 p q
 
 class HasAxiomGrz where
-  Grz (Γ : Finset F) (p : F) : Bew Γ $ AxiomGrz p
+  Grz (Γ : Set F) (p : F) : Bew Γ $ AxiomGrz p
 
 class HasAxiomM where
-  M (Γ : Finset F) (p : F) : Bew Γ $ AxiomM p
+  M (Γ : Set F) (p : F) : Bew Γ $ AxiomM p
 
 class HasAxiomCD where
-  CD (Γ : Finset F) (p : F) : Bew Γ $ AxiomCD p
+  CD (Γ : Set F) (p : F) : Bew Γ $ AxiomCD p
 
 class HasAxiomC4 where
-  C4 (Γ : Finset F) (p : F) : Bew Γ $ AxiomC4 p
+  C4 (Γ : Set F) (p : F) : Bew Γ $ AxiomC4 p
 
-variable {Bew : Finset F → F → Sort*}
+variable {Bew : Set F → F → Type*}
 variable [ModalDuality F] [HasDT Bew] [HasNecessitation Bew] [HasAxiomK Bew]
 
 def necessitation {Γ p} (d : Bew ∅ p) : Bew Γ (□p) := HasNecessitation.necessitation d
@@ -92,7 +92,7 @@ open Hilbert
 
 section Logics
 
-variable {F : Type u} [ModalLogicSymbol F] [NegDefinition F] [ModalDuality F] [DecidableEq F] (Bew : Finset F → F → Sort*)
+variable {F : Type u} [ModalLogicSymbol F] [NegDefinition F] [ModalDuality F] [DecidableEq F] (Bew : Set F → F → Type*)
 
 class LogicK.Hilbert [ModalDuality F] extends Hilbert.Classical Bew, HasNecessitation Bew, HasAxiomK Bew
 
@@ -117,7 +117,7 @@ variable {α : Type u} [DecidableEq α]
 /--
   Hilbert-style deduction system
 -/
-inductive Deduction (Λ : AxiomSet α) : (Context α) → (Formula α) → Type _ where
+inductive Deduction (Λ : AxiomSet α) : (Theory α) → (Formula α) → Type _ where
   | axm {Γ p}            : p ∈ Γ → Deduction Λ Γ p
   | maxm {Γ p}           : p ∈ Λ → Deduction Λ Γ p
   | modus_ponens {Γ₁ Γ₂ p q} : Deduction Λ Γ₁ (p ⟶ q) → Deduction Λ Γ₂ p → Deduction Λ (Γ₁ ∪ Γ₂) q
@@ -135,7 +135,7 @@ inductive Deduction (Λ : AxiomSet α) : (Context α) → (Formula α) → Type 
 
 notation:45 Γ " ⊢ᴹ[" Λ "] " p => Deduction Λ Γ p
 
-variable (Λ : AxiomSet α) (Γ : (Context α)) (p : Formula α)
+variable (Λ : AxiomSet α) (Γ : (Theory α)) (p : Formula α)
 
 abbrev Deducible := Nonempty (Γ ⊢ᴹ[Λ] p)
 notation:45 Γ " ⊢ᴹ[" Λ "]! " p => Deducible Λ Γ p
@@ -154,9 +154,9 @@ notation:45 "⊬ᴹ[" Λ "]! " p => Unprovable Λ p
 
 namespace Deduction
 
-variable {Λ : AxiomSet α} {Γ : (Context α)} {p q : Formula α}
+variable {Λ : AxiomSet α} {Γ : Theory α} {p q : Formula α}
 
-def length {Γ : (Context α)} {p : Formula α} : (Γ ⊢ᴹ[Λ] p) → ℕ
+def length {Γ : Theory α} {p : Formula α} : (Γ ⊢ᴹ[Λ] p) → ℕ
   | modus_ponens d₁ d₂ => (max d₁.length d₂.length) + 1
   | necessitation d₁ => d₁.length + 1
   | _ => 0
@@ -229,7 +229,7 @@ lemma maxm_subset {Λ Λ'} (dΛ : Γ ⊢ᴹ[Λ] p) : (Λ ⊆ Λ') → (Γ ⊢ᴹ
 
 def modus_ponens' {Γ p q} : (Γ ⊢ᴹ[Λ] (p ⟶ q)) → (Γ ⊢ᴹ[Λ] p) → (Γ ⊢ᴹ[Λ] q) := Hilbert.modus_ponens'
 
-private noncomputable def dtrAux (Γ p q) (d : Γ ⊢ᴹ[Λ] q) : ((Γ.erase p) ⊢ᴹ[Λ] (p ⟶ q)) := by
+private noncomputable def dtrAux (Γ p q) (d : Γ ⊢ᴹ[Λ] q) : ((Γ \ {p}) ⊢ᴹ[Λ] (p ⟶ q)) := by
   induction d with
   | maxm h => exact modus_ponens' (imply₁ _ _ _) (maxm h);
   | necessitation h => exact modus_ponens' (imply₁ _ _ _) (necessitation h);
@@ -247,29 +247,56 @@ private noncomputable def dtrAux (Γ p q) (d : Γ ⊢ᴹ[Λ] q) : ((Γ.erase p) 
     by_cases h : p = q
     case pos =>
       subst h
-      exact Hilbert.imp_id (Γ.erase p) p;
+      exact Hilbert.imp_id (Γ \ {p}) p;
     case neg =>
-      have d₁ : (Γ.erase p) ⊢ᴹ[Λ] (q ⟶ p ⟶ q) := imply₁ _ q p
-      have d₂ : (Γ.erase p) ⊢ᴹ[Λ] q := axm (by
+      have d₁ : (Γ \ {p}) ⊢ᴹ[Λ] (q ⟶ p ⟶ q) := imply₁ _ q p
+      have d₂ : (Γ \ {p}) ⊢ᴹ[Λ] q := axm (by
         simp [Finset.mem_erase];
         aesop;
       )
       exact d₁.modus_ponens' d₂;
   | @modus_ponens Γ₁ Γ₂ a b _ _ ih₁ ih₂ =>
-      have d₁ : Finset.erase (Γ₁ ∪ Γ₂) p ⊢ᴹ[Λ] (p ⟶ a) ⟶ p ⟶ b := (imply₂ _ p a b).modus_ponens' ih₁ |>.weakening' (by
-        apply Finset.erase_subset_erase;
-        simp;
+      have d₁ : ((Γ₁ ∪ Γ₂) \ {p}) ⊢ᴹ[Λ] (p ⟶ a) ⟶ p ⟶ b := (imply₂ _ p a b).modus_ponens' ih₁ |>.weakening' (by
+        apply Set.diff_subset_diff;
+        all_goals simp;
       );
-      have d₂ : Finset.erase (Γ₁ ∪ Γ₂) p ⊢ᴹ[Λ] (p ⟶ a) := ih₂.weakening' (by
-        apply Finset.erase_subset_erase;
-        simp;
+      have d₂ : ((Γ₁ ∪ Γ₂) \ {p}) ⊢ᴹ[Λ] (p ⟶ a) := ih₂.weakening' (by
+        apply Set.diff_subset_diff ;
+        all_goals simp;
       );
       exact d₁.modus_ponens' d₂;
 
 noncomputable def dtr {Γ p q} (d : (insert p Γ) ⊢ᴹ[Λ] q) : (Γ ⊢ᴹ[Λ] (p ⟶ q)) := by
-  exact dtrAux (insert p Γ) p q d |>.weakening' (by apply Finset.erase_insert_subset);
+  exact dtrAux (insert p Γ) p q d |>.weakening' (by simp;);
 
 noncomputable instance : HasDT (Deduction Λ) := ⟨dtr⟩
+
+noncomputable def compact (d : Γ ⊢ᴹ[Λ] p) : (Δ : { Δ : Context α | ↑Δ ⊆ Γ}) × (Δ ⊢ᴹ[Λ] p) := by
+  induction d with
+  | @axm Γ p h => exact ⟨⟨{p}, by simpa⟩, axm (by simp)⟩
+  | maxm h => exact ⟨⟨∅, by simp⟩, maxm h⟩
+  | @modus_ponens Γ₁ Γ₂ p q _ _ ih₁ ih₂ =>
+      have ⟨⟨Δ₁, hs₁⟩, d₁⟩ := ih₁;
+      have ⟨⟨Δ₂, hs₂⟩, d₂⟩ := ih₂;
+      simp at hs₁ d₁ hs₂ d₂;
+      exact ⟨
+        ⟨Δ₁ ∪ Δ₂, by simp [hs₁, hs₂];⟩,
+        by simpa using modus_ponens' (d₁.weakening' (by simp)) (d₂.weakening' (by simp));
+      ⟩
+  | necessitation =>
+      exact ⟨⟨∅, (by simp)⟩, by apply necessitation; simpa;⟩
+  | verum _ => exact ⟨⟨∅, by simp⟩, verum _⟩
+  | imply₁ _ _ _ => exact ⟨⟨∅, by simp⟩, imply₁ _ _ _⟩
+  | imply₂ _ _ _ _ => exact ⟨⟨∅, by simp⟩, imply₂ _ _ _ _⟩
+  | conj₁ _ _ _ => exact ⟨⟨∅, by simp⟩, conj₁ _ _ _⟩
+  | conj₂ _ _ _ => exact ⟨⟨∅, by simp⟩, conj₂ _ _ _⟩
+  | conj₃ _ _ _ => exact ⟨⟨∅, by simp⟩, conj₃ _ _ _⟩
+  | disj₁ _ _ _ => exact ⟨⟨∅, by simp⟩, disj₁ _ _ _⟩
+  | disj₂ _ _ _ => exact ⟨⟨∅, by simp⟩, disj₂ _ _ _⟩
+  | disj₃ _ _ _ _ => exact ⟨⟨∅, by simp⟩, disj₃ _ _ _ _⟩
+  | dne _ _ => exact ⟨⟨∅, by simp⟩, dne _ _⟩
+
+noncomputable instance : Hilbert.Compact (Deduction Λ) := ⟨compact⟩
 
 end Deduction
 
@@ -295,6 +322,12 @@ lemma weakening' {Γ Δ p} (d : Γ ⊢ᴹ[Λ]! p) (hs : Γ ⊆ Δ) : Δ ⊢ᴹ[�
 lemma verum (Γ) : Γ ⊢ᴹ[Λ]! ⊤ := ⟨.verum Γ⟩
 
 lemma boxverum (Γ) : Γ ⊢ᴹ[Λ]! □⊤ := ⟨.necessitation (.verum ∅)⟩
+
+lemma imply₁ (Γ p q) : Γ ⊢ᴹ[Λ]! (p ⟶ q ⟶ p) := ⟨.imply₁ Γ p q⟩
+lemma imply₁' {Γ p q} (d : Γ ⊢ᴹ[Λ]! p) : Γ ⊢ᴹ[Λ]! (q ⟶ p) := ⟨Hilbert.imply₁' d.some⟩
+
+lemma imply₂ (Γ p q r) : Γ ⊢ᴹ[Λ]! ((p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r) := ⟨Hilbert.imply₂ Γ p q r⟩
+lemma imply₂' {Γ p q r} (d₁ : Γ ⊢ᴹ[Λ]! (p ⟶ q ⟶ r)) (d₂ : Γ ⊢ᴹ[Λ]! (p ⟶ q)) (d₃ : Γ ⊢ᴹ[Λ]! p) : Γ ⊢ᴹ[Λ]! r := ⟨Hilbert.imply₂' d₁.some d₂.some d₃.some⟩
 
 lemma conj₁ (Γ p q) : Γ ⊢ᴹ[Λ]! (p ⋏ q) ⟶ p := ⟨Hilbert.conj₁ Γ p q⟩
 lemma conj₁' {Γ p q} (d : Γ ⊢ᴹ[Λ]! (p ⋏ q)) : Γ ⊢ᴹ[Λ]! p := ⟨Hilbert.conj₁' d.some⟩
@@ -350,6 +383,13 @@ lemma contra₀' {Γ p q} (d : Γ ⊢ᴹ[Λ]! (p ⟶ q)) : Γ ⊢ᴹ[Λ]! (~q �
 
 lemma neg_iff' {Γ p q} (d : Γ ⊢ᴹ[Λ]! (p ⟷ q)) : Γ ⊢ᴹ[Λ]! (~p ⟷ ~q) := ⟨Hilbert.neg_iff' d.some⟩
 
+lemma compact {Γ p} (d : Γ ⊢ᴹ[Λ]! p) : ∃ (Δ : Context α), ↑Δ ⊆ Γ ∧ (↑Δ ⊢ᴹ[Λ]! p) := by
+  have ⟨⟨Δ, hΔ⟩, dΔ⟩ := d.some.compact;
+  existsi Δ;
+  constructor;
+  . simpa using hΔ;
+  . exact ⟨dΔ⟩
+
 end Deducible
 
 def Proof.length (d : ⊢ᴹ[Λ] p) : ℕ := Deduction.length (by simpa using d)
@@ -359,7 +399,7 @@ lemma Provable.dne : (⊢ᴹ[Λ]! ~~p) → (⊢ᴹ[Λ]! p) := by
   have h₁ : ⊢ᴹ[Λ] ~~p ⟶ p := Deduction.dne ∅ p;
   have h₂ := d.some; simp [Proof, Deduction] at h₂;
   simp_all [Provable, Proof, Deduction];
-  exact ⟨(Deduction.modus_ponens h₁ h₂)⟩
+  exact ⟨(Deduction.modus_ponens' h₁ h₂)⟩
 
 lemma Provable.consistent_no_bot : (⊬ᴹ[Λ]! ⊥) → (⊥ ∉ Λ) := by
   intro h; by_contra hC;
@@ -367,6 +407,7 @@ lemma Provable.consistent_no_bot : (⊬ᴹ[Λ]! ⊥) → (⊥ ∉ Λ) := by
   aesop;
 
 -- TODO: 直接有限モデルを構成する方法（鹿島『コンピュータサイエンスにおける様相論理』2.8参照）で必要になる筈の定義だが，使わないかも知れない．
+/-
 section
 
 variable [IsCommutative _ (λ (p q : Formula α) => p ⋏ q)]
@@ -374,7 +415,7 @@ variable [IsCommutative _ (λ (p q : Formula α) => p ⋏ q)]
          [IsAssociative _ (λ (p q : Formula α) => p ⋏ q)]
          [IsAssociative _ (λ (p q : Formula α) => p ⋎ q)]
 
-def Sequent (Γ Δ : (Context α)) : Formula α := ((Γ.fold (· ⋏ ·) ⊤ id) ⟶ (Δ.fold (· ⋎ ·) ⊥ id))
+def Sequent (Γ Δ : (Theory α)) : Formula α := ((Γ.fold (· ⋏ ·) ⊤ id) ⟶ (Δ.fold (· ⋎ ·) ⊥ id))
 
 notation "⟪" Γ "⟹" Δ "⟫" => Sequent Γ Δ
 
@@ -382,10 +423,10 @@ notation "⟪" "⟹" Δ "⟫" => Sequent ∅ Δ
 
 notation "⟪" Γ "⟹" "⟫" => Sequent Γ ∅
 
-def ProofS (Γ Δ : (Context α)) := ⊢ᴹ[Λ] ⟪Γ ⟹ Δ⟫
+def ProofS (Γ Δ : (Theory α)) := ⊢ᴹ[Λ] ⟪Γ ⟹ Δ⟫
 
-variable [Union ((Context α))] [Inter ((Context α))]
-variable (Γ₁ Γ₂ Δ : (Context α))
+variable [Union ((Theory α))] [Inter ((Theory α))]
+variable (Γ₁ Γ₂ Δ : (Theory α))
 
 structure Partial where
   union : (Γ₁ ∪ Γ₂) = Δ
@@ -395,6 +436,7 @@ structure UnprovablePartial extends Partial Γ₁ Γ₂ Δ where
   unprovable := ⊬ᴹ[Λ]! ⟪Γ₁ ⟹ Γ₂⟫
 
 end
+-/
 
 variable [DecidableEq α]
 
@@ -411,12 +453,14 @@ variable {Λ : AxiomSet α} (hK : 𝐊 ⊆ Λ)
 
 lemma deduction_by_boxed_context {Γ p} (d : Γ ⊢ᴹ[Λ] p) : (□Γ ⊢ᴹ[Λ] □p) := by
   induction d with
-  | axm h => exact axm (by simp [Context.box]; aesop;)
+  | axm h => exact axm (by simp [Theory.box]; aesop;)
   | maxm h => exact .necessitation $ maxm h;
   | @modus_ponens Γ₁ Γ₂ p q _ _ ih₁ ih₂ =>
       have d : □Γ₁ ∪ □Γ₂ ⊢ᴹ[Λ] (□(p ⟶ q) ⟶ (□p ⟶ □q)) := .maxm (by simp_all [AxiomK.set, AxiomK]; aesop);
-      simpa [Context.box_union] using d |>.modus_ponens' (ih₁.weakening' (by simp)) |>.modus_ponens' (ih₂.weakening' (by simp));
-  | necessitation _ ih => exact .necessitation ih
+      simpa [Theory.box_union] using d |>.modus_ponens' (ih₁.weakening' (by simp)) |>.modus_ponens' (ih₂.weakening' (by simp));
+  | necessitation _ ih =>
+      simp at ih;
+      exact .necessitation ih
   | verum =>  exact .necessitation $ .verum _
   | imply₁ => exact .necessitation $ .imply₁ _ _ _
   | imply₂ => exact .necessitation $ .imply₂ _ _ _ _
@@ -477,8 +521,8 @@ def LogicS5.Hilbert.ofS5Subset (_ : 𝐒𝟓 ⊆ Λ) : (LogicS5.Hilbert (Deducti
 
 instance : LogicS5.Hilbert (Deduction (𝐒𝟓 : AxiomSet α)) := LogicS5.Hilbert.ofS5Subset 𝐒𝟓 Set.Subset.rfl
 
-
-@[simp] def TheoryDeducible (Λ) (Γ : Theory α) (p) := ∃ (Δ : Context α), (↑Δ ⊆ Γ) ∧ (Δ ⊢ᴹ[Λ]! p)
+/-
+@[simp] def TheoryDeducible (Λ) (Γ : Theory α) (p) := ∃ (Δ : Theory α), (↑Δ ⊆ Γ) ∧ (Δ ⊢ᴹ[Λ]! p)
 
 -- TODO: 不便なのでなんとかして`Finset`の`Γ`を与えた時勝手に`↑Γ`しないように出来ないだろうかと思う．
 notation:40 Γ " ⊢ᴹ[" Λ "]! " p => TheoryDeducible Λ Γ p
@@ -588,6 +632,7 @@ lemma dni (Γ : Theory α) (p : Formula α) : (Γ ⊢ᴹ[Λ]! (p ⟶ ~~p)) := by
 lemma dni' {Γ : Theory α} {p : Formula α } (d : Γ ⊢ᴹ[Λ]! p) : Γ ⊢ᴹ[Λ]! ~~p := (dni _ _).modus_ponens' d
 
 end TheoryDeducible
+-/
 
 end Modal.Normal
 

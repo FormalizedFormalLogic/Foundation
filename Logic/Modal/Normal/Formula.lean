@@ -213,6 +213,9 @@ def box : Theory α := .box '' Γ
 prefix:74 "□" => Theory.box
 
 @[simp]
+lemma box_empty : □(∅ : Theory α) = ∅ := by simp [box]
+
+@[simp]
 lemma box_subset {Γ Δ : Theory α} (d : Γ ⊆ Δ) : □Γ ⊆ □Δ := by
   simp_all [box, Set.subset_def];
 
@@ -225,6 +228,9 @@ lemma box_mem {Γ : Theory α} : p ∈ □Γ ↔ (∃ q ∈ Γ, □q = p) := by
 
 def dia : Theory α := .dia '' Γ
 prefix:74 "◇" => Theory.dia
+
+@[simp]
+lemma dia_empty : ◇(∅ : Theory α) = ∅ := by simp [dia]
 
 @[simp]
 lemma dia_subset {Γ Δ : Theory α} (d : Γ ⊆ Δ) : ◇Γ ⊆ ◇Δ := by

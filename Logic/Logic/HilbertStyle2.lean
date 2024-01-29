@@ -3,7 +3,7 @@ import Logic.Logic.Calculus
 
 namespace LO
 
-class Deduction {F : Type u} [LogicSymbol F] (Bew : Finset F → F → Sort*) where
+class Deduction {F : Type u} [LogicSymbol F] (Bew : Set F → F → Type*) where
   axm : ∀ {f}, f ∈ Γ → Bew Γ f
   weakening' : ∀ {T U f}, T ⊆ U → Bew T f → Bew U f
 
@@ -13,44 +13,47 @@ variable {F : Type u} [LogicSymbol F] [DecidableEq F] [NegDefinition F]
 
 section
 
-variable (Bew : Finset F → F → Sort*)
+variable (Bew : Set F → F → Type*)
 
 /--
   Minimal Propositional Logic.
 -/
 class Minimal [NegDefinition F] extends Deduction Bew where
-  modus_ponens {Γ₁ Γ₂ : Finset F} {p q : F} : (Bew Γ₁ (p ⟶ q)) → (Bew Γ₂ p) → (Bew (Γ₁ ∪ Γ₂) q)
-  verum        (Γ : Finset F)             : Bew Γ ⊤
-  imply₁       (Γ : Finset F) (p q : F)   : Bew Γ (p ⟶ (q ⟶ p))
-  imply₂       (Γ : Finset F) (p q r : F) : Bew Γ ((p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r)
-  conj₁        (Γ : Finset F) (p q : F)   : Bew Γ (p ⋏ q ⟶ p)
-  conj₂        (Γ : Finset F) (p q : F)   : Bew Γ (p ⋏ q ⟶ q)
-  conj₃        (Γ : Finset F) (p q : F)   : Bew Γ (p ⟶ q ⟶ p ⋏ q)
-  disj₁        (Γ : Finset F) (p q : F)   : Bew Γ (p ⟶ p ⋎ q)
-  disj₂        (Γ : Finset F) (p q : F)   : Bew Γ (q ⟶ p ⋎ q)
-  disj₃        (Γ : Finset F) (p q r : F) : Bew Γ ((p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q) ⟶ r)
+  modus_ponens {Γ₁ Γ₂ : Set F} {p q : F} : (Bew Γ₁ (p ⟶ q)) → (Bew Γ₂ p) → (Bew (Γ₁ ∪ Γ₂) q)
+  verum        (Γ : Set F)             : Bew Γ ⊤
+  imply₁       (Γ : Set F) (p q : F)   : Bew Γ (p ⟶ (q ⟶ p))
+  imply₂       (Γ : Set F) (p q r : F) : Bew Γ ((p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r)
+  conj₁        (Γ : Set F) (p q : F)   : Bew Γ (p ⋏ q ⟶ p)
+  conj₂        (Γ : Set F) (p q : F)   : Bew Γ (p ⋏ q ⟶ q)
+  conj₃        (Γ : Set F) (p q : F)   : Bew Γ (p ⟶ q ⟶ p ⋏ q)
+  disj₁        (Γ : Set F) (p q : F)   : Bew Γ (p ⟶ p ⋎ q)
+  disj₂        (Γ : Set F) (p q : F)   : Bew Γ (q ⟶ p ⋎ q)
+  disj₃        (Γ : Set F) (p q r : F) : Bew Γ ((p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q) ⟶ r)
 
 /-- Supplymental -/
 class HasDT where
-  dtr {Γ : Finset F} {p q : F} : (Bew (insert p Γ) q) → (Bew Γ (p ⟶ q))
+  dtr {Γ : Set F} {p q : F} : (Bew (insert p Γ) q) → (Bew Γ (p ⟶ q))
 
 class HasEFQ where
-  efq (Γ : Finset F) (p : F) : Bew Γ (⊥ ⟶ p)
+  efq (Γ : Set F) (p : F) : Bew Γ (⊥ ⟶ p)
 
 class HasWeakLEM where
-  wlem (Γ : Finset F) (p : F) : Bew Γ (~p ⋎ ~~p)
+  wlem (Γ : Set F) (p : F) : Bew Γ (~p ⋎ ~~p)
 
 class HasLEM where
-  lem (Γ : Finset F) (p : F) : Bew Γ (p ⋎ ~p)
+  lem (Γ : Set F) (p : F) : Bew Γ (p ⋎ ~p)
 
 class HasDNE where
-  dne (Γ : Finset F) (p : F) : Bew Γ (~~p ⟶ p)
+  dne (Γ : Set F) (p : F) : Bew Γ (~~p ⟶ p)
 
 class HasDummett where
-  dummett (Γ : Finset F) (p q : F) : Bew Γ ((p ⟶ q) ⋎ (q ⟶ p))
+  dummett (Γ : Set F) (p q : F) : Bew Γ ((p ⟶ q) ⋎ (q ⟶ p))
 
 class HasPeirce where
-  peirce (Γ : Finset F) (p q : F) : Bew Γ (((p ⟶ q) ⟶ p) ⟶ p)
+  peirce (Γ : Set F) (p q : F) : Bew Γ (((p ⟶ q) ⟶ p) ⟶ p)
+
+class Compact where
+  compact {Γ p} : (Bew Γ p) → ((Δ : { Δ : Finset F | ↑Δ ⊆ Γ}) × (Bew ↑Δ p))
 
 /--
   Intuitionistic Propositional Logic.
@@ -87,7 +90,7 @@ open Deduction Minimal HasDT Intuitionistic Classical HasDNE
 
 infixr:90 " ⨀ " => modus_ponens
 
-variable {Bew : Finset F → F → Sort*} (Γ : Finset F) (p q r : F)
+variable {Bew : Set F → F → Type*} (Γ : Set F) (p q r : F)
 
 section Minimal
 
@@ -103,7 +106,7 @@ def efq' {Γ p} : (Bew Γ ⊥) → (Bew Γ p) := modus_ponens' (efq _ _)
 
 abbrev dtr {Γ p q} (d : Bew (insert p Γ) q) := HasDT.dtr d
 
-def verum (Γ : Finset F) : Bew Γ ⊤ := hM.verum Γ
+def verum (Γ : Set F) : Bew Γ ⊤ := hM.verum Γ
 
 abbrev imply₁ := hM.imply₁
 
@@ -155,18 +158,21 @@ def iff_intro {Γ p q} (dpq : Bew Γ (p ⟶ q)) (dqp : Bew Γ (q ⟶ p)) : Bew �
 
 def iff_symm' {Γ p q} (d : Bew Γ (p ⟷ q)) : Bew Γ (q ⟷ p) := iff_intro (iff_mpr' d) (iff_mp' d)
 
-def dtl {Γ p q} (d : Bew Γ (p ⟶ q)) : Bew (insert p Γ) q := (weakening' (by simp) d) ⨀ (axm (by simp))
+def dtl {Γ p q} (d : Bew Γ (p ⟶ q)) : Bew (insert p Γ) q := modus_ponens' (weakening' (by simp) d) (axm (by simp))
 
 def imp_id : Bew Γ (p ⟶ p) := ((imply₂ Γ p (p ⟶ p) p) ⨀ (imply₁ _ _ _)) ⨀ (imply₁ _ _ _)
 
 def id_insert (Γ p) : Bew (insert p Γ) p := axm (by simp)
 
-def id_singleton (p) : Bew {p} p := id_insert ∅ p
+def id_singleton (p) : Bew {p} p := by simpa using id_insert ∅ p
 
 def dni : Bew Γ (p ⟶ ~~p) := by
+  simp [NegDefinition.neg]
   have h₁ : Bew (insert (p ⟶ ⊥) (insert p Γ)) (p ⟶ ⊥) := axm (by simp);
   have h₂ : Bew (insert (p ⟶ ⊥) (insert p Γ)) p := axm (by simp);
-  simpa using dtr $ dtr $ h₁ ⨀ h₂;
+  apply dtr;
+  apply dtr;
+  exact h₁ ⨀ h₂;
 
 def dni' {Γ p} : (Bew Γ p) → (Bew Γ (~~p)) := modus_ponens' (dni _ _)
 
