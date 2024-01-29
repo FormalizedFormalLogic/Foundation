@@ -85,6 +85,8 @@ lemma log_eq_of_pos {x y : M} (pos : 0 < y) {y'} (H : Exp x y') (hy' : y' ≤ y)
 
 @[simp] lemma log_one : log (1 : M) = 0 := log_eq_of_pos (by simp) (y' := 1) (by simp) (by rfl) (by simp [one_lt_two])
 
+@[simp] lemma log_two : log (2 : M) = 1 := log_eq_of_pos (by simp) (y' := 2) (by simp) (by rfl) (by simp [one_lt_two])
+
 lemma log_two_mul_of_pos {y : M} (pos : 0 < y) : log (2 * y) = log y + 1 := by
   rcases log_pos pos with ⟨y', hy', H, hy⟩
   exact log_eq_of_pos (by simpa using pos) (Exp.exp_succ_mul_two.mpr H) (by simpa using hy') (by simpa using hy)

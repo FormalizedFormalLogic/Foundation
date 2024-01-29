@@ -94,8 +94,8 @@ lemma le_log_of_mem {i a : M} (h : i ∈ a) : i ≤ log a := (exp_le_iff_le_log 
 
 lemma succ_mem_iff_mem_div_two {i a : M} : i + 1 ∈ a ↔ i ∈ a / 2 := by simp [mem_iff_bit, Bit, LenBit.iff_rem, exp_succ, div_mul]
 
-lemma lt_binary_length_of_mem {i a : M} (h : i ∈ a) : i < ‖a‖ := by
-  simpa [binary_length_of_pos (pos_of_nonempty h), ←le_iff_lt_succ] using le_log_of_mem h
+lemma lt_length_of_mem {i a : M} (h : i ∈ a) : i < ‖a‖ := by
+  simpa [length_of_pos (pos_of_nonempty h), ←le_iff_lt_succ] using le_log_of_mem h
 
 lemma lt_exp_iff {a i : M} : a < exp i ↔ ∀ j ∈ a, j < i :=
   ⟨fun h j hj ↦ exponential_monotone.mp <| lt_of_le_of_lt (exp_le_of_mem hj) h,

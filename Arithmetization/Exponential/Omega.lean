@@ -85,6 +85,15 @@ lemma hash_comm (a b : M) : a # b = b # a := (exp_hash a b).uniq (by simpa [mul_
   have : Exp ‖a‖ (a # 1) := by simpa using (exp_hash a 1)
   exact lt_exp_length this
 
+@[simp] lemma lt_hash_one_righs (a : M) : a # 1 ≤ 2 * a + 1 := by
+  rcases zero_le a with (rfl | pos)
+  · simp
+  · have : 0 < 2 * a + 1 := by simp
+    exact (le_iff_lt_length_of_exp (exp_hash a 1) this).mpr (by
+      simp [mul_comm 2 a]
+      have : ‖a * 2 + 1‖ = ‖a‖ + 1 := by
+        simpa using length_mul_pow2_add_of_lt pos (show Pow2 2 from by simp) one_lt_two
+      simp [this])
 
 end Model
 
