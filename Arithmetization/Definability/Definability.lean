@@ -10,6 +10,8 @@ def Graph (f : α → σ) : σ → α → Prop := fun y x ↦ y = f x
 
 def Graph₂ (f : α → β → σ) : σ → α → β → Prop := fun y x₁ x₂ ↦ y = f x₁ x₂
 
+def Graph₃ (f : α → β → γ → σ) : σ → α → β → γ → Prop := fun y x₁ x₂ x₃ ↦ y = f x₁ x₂ x₃
+
 lemma Graph.eq {f : α → σ} {y x} (h : Graph f y x) : f x = y := h.symm
 
 lemma Graph.iff_left (f : α → σ) {y x} : f x = y ↔ Graph f y x := by simp [Graph, eq_comm]
@@ -21,6 +23,12 @@ lemma Graph₂.eq {f : α → β → σ} {y x₁ x₂} (h : Graph₂ f y x₁ x�
 lemma Graph₂.iff_left (f : α → β → σ) {y x₁ x₂} : f x₁ x₂ = y ↔ Graph₂ f y x₁ x₂ := by simp [Graph₂, eq_comm]
 
 lemma Graph₂.iff_right (f : α → β → σ) {y x₁ x₂} : y = f x₁ x₂ ↔ Graph₂ f y x₁ x₂ := by simp [Graph₂]
+
+lemma Graph₃.eq {f : α → β → γ → σ} {y x₁ x₂ x₃} (h : Graph₃ f y x₁ x₂ x₃) : f x₁ x₂ x₃ = y := h.symm
+
+lemma Graph₃.iff_left (f : α → β → γ → σ) {y x₁ x₂ x₃} : f x₁ x₂ x₃ = y ↔ Graph₃ f y x₁ x₂ x₃ := by simp [Graph₃, eq_comm]
+
+lemma Graph₃.iff_right (f : α → β → γ → σ) {y x₁ x₂ x₃} : y = f x₁ x₂ x₃ ↔ Graph₃ f y x₁ x₂ x₃ := by simp [Graph₃]
 
 end Function
 
@@ -113,6 +121,10 @@ abbrev SigmaDefinedRel₃ (s : ℕ) (R : M → M → M → Prop) (p : Σᴬ[s] 3
 
 notation "Σᴬ[" s "]-Relation₃" => SigmaDefinedRel₃ s
 
+abbrev SigmaDefinedRel₄ (s : ℕ) (R : M → M → M → M → Prop) (p : Σᴬ[s] 4) : Prop := DefinedRel₄ Σ s R p
+
+notation "Σᴬ[" s "]-Relation₄" => SigmaDefinedRel₄ s
+
 abbrev PiDefinedPred (s : ℕ) (t : Set M) (p : Πᴬ[s] 1) : Prop := DefinedPred Π s t p
 
 notation "Πᴬ[" s "]-Predicate" => PiDefinedPred s
@@ -130,6 +142,9 @@ abbrev DefinedFunction₁ (b : VType) (s : ℕ) (f : M → M) (p : SentenceHiera
 abbrev DefinedFunction₂ (b : VType) (s : ℕ) (f : M → M → M) (p : SentenceHierarchy b s ℒₒᵣ 3) : Prop :=
   DefinedFunction b s (fun v => f (v 0) (v 1)) p
 
+abbrev DefinedFunction₃ (b : VType) (s : ℕ) (f : M → M → M → M) (p : SentenceHierarchy b s ℒₒᵣ 4) : Prop :=
+  DefinedFunction b s (fun v => f (v 0) (v 1) (v 2)) p
+
 abbrev SigmaDefinedFunction₁ (s : ℕ) (f : M → M) (p : Σᴬ[s] 2) : Prop := DefinedFunction₁ Σ s f p
 
 notation "Σᴬ[" s "]-Function₁" => SigmaDefinedFunction₁ s
@@ -145,6 +160,14 @@ notation "Σᴬ[" s "]-Function₂" => SigmaDefinedFunction₂ s
 abbrev PiDefinedFunction₂ (s : ℕ) (f : M → M → M) (p : Πᴬ[s] 3) : Prop := DefinedFunction₂ Π s f p
 
 notation "Πᴬ[" s "]-Function₂" => PiDefinedFunction₂ s
+
+abbrev SigmaDefinedFunction₃ (s : ℕ) (f : M → M → M → M) (p : Σᴬ[s] 4) : Prop := DefinedFunction₃ Σ s f p
+
+notation "Σᴬ[" s "]-Function₃" => SigmaDefinedFunction₃ s
+
+abbrev PiDefinedFunction₃ (s : ℕ) (f : M → M → M → M) (p : Πᴬ[s] 4) : Prop := DefinedFunction₃ Π s f p
+
+notation "Πᴬ[" s "]-Function₃" => PiDefinedFunction₃ s
 
 def eqdef : SentenceHierarchy b s ℒₒᵣ 2 := ⟨“#0 = #1”, by simp⟩
 
@@ -169,11 +192,15 @@ abbrev DefinableRel (P : M → M → Prop) : Prop := Definable b s (k := 2) (fun
 
 abbrev DefinableRel₃ (P : M → M → M → Prop) : Prop := Definable b s (k := 3) (fun v ↦ P (v 0) (v 1) (v 2))
 
+abbrev DefinableRel₄ (P : M → M → M → M → Prop) : Prop := Definable b s (k := 4) (fun v ↦ P (v 0) (v 1) (v 2) (v 3))
+
 abbrev DefinableFunction (f : (Fin k → M) → M) : Prop := Definable b s (k := k + 1) (fun v ↦ v 0 = f (v ·.succ))
 
 abbrev DefinableFunction₁ (f : M → M) : Prop := DefinableFunction b s (k := 1) (fun v ↦ f (v 0))
 
 abbrev DefinableFunction₂ (f : M → M → M) : Prop := DefinableFunction b s (k := 2) (fun v ↦ f (v 0) (v 1))
+
+abbrev DefinableFunction₃ (f : M → M → M → M) : Prop := DefinableFunction b s (k := 3) (fun v ↦ f (v 0) (v 1) (v 2))
 
 variable {b s}
 
@@ -216,6 +243,9 @@ instance DefinableFunction₁.graph {f : M → M} [h : DefinableFunction₁ b s 
 instance DefinableFunction₂.graph {f : M → M → M} [h : DefinableFunction₂ b s f] :
   DefinableRel₃ b s (Function.Graph₂ f) := h
 
+instance DefinableFunction₃.graph {f : M → M → M → M} [h : DefinableFunction₃ b s f] :
+  DefinableRel₄ b s (Function.Graph₃ f) := h
+
 namespace DefinableRel
 
 instance eq : DefinableRel b s ((· = ·) : M → M → Prop) := ⟨⟨“#0 = #1”, by simp⟩, by intro; simp⟩
@@ -244,6 +274,8 @@ class PolyBounded (f : (Fin k → M) → M) : Prop where
 abbrev PolyBounded₁ (f : M → M) : Prop := PolyBounded (k := 1) (fun v => f (v 0))
 
 abbrev PolyBounded₂ (f : M → M → M) : Prop := PolyBounded (k := 2) (fun v => f (v 0) (v 1))
+
+abbrev PolyBounded₃ (f : M → M → M → M) : Prop := PolyBounded (k := 3) (fun v => f (v 0) (v 1) (v 2))
 
 variable {b s}
 
@@ -282,6 +314,13 @@ lemma PolyBounded₁.comp {f : M → M} {k} {g : (Fin k → M) → M} (hf : Poly
 lemma PolyBounded₂.comp {f : M → M → M} {k} {g₁ g₂ : (Fin k → M) → M} (hf : PolyBounded₂ f) (hg₁ : PolyBounded g₁) (hg₂ : PolyBounded g₂) :
     PolyBounded (fun v ↦ f (g₁ v) (g₂ v)) := PolyBounded.comp hf (g := ![g₁, g₂]) (fun i ↦ by cases i using Fin.cases <;> simp [*])
 
+lemma PolyBounded₃.comp {f : M → M → M → M} {k} {g₁ g₂ g₃ : (Fin k → M) → M}
+    (hf : PolyBounded₃ f) (hg₁ : PolyBounded g₁) (hg₂ : PolyBounded g₂) (hg₃ : PolyBounded g₃) :
+    PolyBounded (fun v ↦ f (g₁ v) (g₂ v) (g₃ v)) := PolyBounded.comp hf (g := ![g₁, g₂, g₃])
+      (fun i ↦ by
+        cases' i using Fin.cases with i <;> simp [*]
+        cases' i using Fin.cases with i <;> simp [*])
+
 namespace PolyBounded₂
 
 instance add : PolyBounded₂ ((· + ·) : M → M → M) where
@@ -306,6 +345,8 @@ abbrev Semipolynomial₁ (f : M → M) : Prop := Semipolynomial b s (k := 1) (fu
 
 abbrev Semipolynomial₂ (f : M → M → M) : Prop := Semipolynomial b s (k := 2) (fun v => f (v 0) (v 1))
 
+abbrev Semipolynomial₃ (f : M → M → M → M) : Prop := Semipolynomial b s (k := 3) (fun v => f (v 0) (v 1) (v 2))
+
 variable {b s}
 
 lemma Semipolynomial.bounded {f : (Fin k → M) → M} (h : Semipolynomial b s f) : PolyBounded f := h.1
@@ -314,11 +355,15 @@ lemma Semipolynomial₁.bounded {f : M → M} (h : Semipolynomial₁ b s f) : Po
 
 lemma Semipolynomial₂.bounded {f : M → M → M} (h : Semipolynomial₂ b s f) : PolyBounded₂ f := h.1
 
+lemma Semipolynomial₃.bounded {f : M → M → M → M} (h : Semipolynomial₃ b s f) : PolyBounded₃ f := h.1
+
 lemma Semipolynomial.definable {f : (Fin k → M) → M} (h : Semipolynomial b s f) : DefinableFunction b s f := h.2
 
 lemma Semipolynomial₁.definable {f : M → M} (h : Semipolynomial₁ b s f) : DefinableFunction₁ b s f := h.2
 
 lemma Semipolynomial₂.definable {f : M → M → M} (h : Semipolynomial₂ b s f) : DefinableFunction₂ b s f := h.2
+
+lemma Semipolynomial₃.definable {f : M → M → M → M} (h : Semipolynomial₃ b s f) : DefinableFunction₃ b s f := h.2
 
 namespace Semipolynomial
 
@@ -330,6 +375,9 @@ lemma of_polybounded_of_definable (f : (Fin k → M) → M) [hb : PolyBounded f]
 
 @[simp] lemma of_polybounded_of_definable₂ (f : M → M → M) [hb : PolyBounded₂ f] [hf : DefinableFunction₂ b s f] :
     Semipolynomial₂ b s f := ⟨hb, hf⟩
+
+@[simp] lemma of_polybounded_of_definable₃ (f : M → M → M → M) [hb : PolyBounded₃ f] [hf : DefinableFunction₃ b s f] :
+    Semipolynomial₃ b s f := ⟨hb, hf⟩
 
 lemma finmap {f : (Fin k → M) → M} (hf : Semipolynomial b s f) (e : Fin k → Fin n) :
     Semipolynomial b s fun v ↦ f (fun i ↦ v (e i)) := ⟨hf.bounded.finmap e, hf.definable.finmap e⟩
@@ -517,6 +565,27 @@ lemma comp₃ {k} {R : M → M → M → Prop} {f₁ f₂ f₃ : (Fin k → M) �
     · intro h; exact ⟨f₁ v, hbf₁ v, f₂ v, hbf₂ v, f₃ v, hbf₃ v, rfl, rfl, rfl, h⟩
     · rintro ⟨_, _, _, _, _, _, rfl, rfl, rfl, h⟩; exact h)
 
+lemma comp₄ {k} {R : M → M → M → M → Prop} {f₁ f₂ f₃ f₄ : (Fin k → M) → M}
+    [hR : DefinableRel₄ b s R] (hf₁ : Semipolynomial b s f₁) (hf₂ : Semipolynomial b s f₂) (hf₃ : Semipolynomial b s f₃) (hf₄ : Semipolynomial b s f₄) :
+    Definable b s (fun v ↦ R (f₁ v) (f₂ v) (f₃ v) (f₄ v)) := by
+  rcases hf₁.bounded with ⟨bf₁, hbf₁⟩
+  rcases hf₂.bounded with ⟨bf₂, hbf₂⟩
+  rcases hf₃.bounded with ⟨bf₃, hbf₃⟩
+  rcases hf₄.bounded with ⟨bf₄, hbf₄⟩
+  have : Definable b s (fun v ↦
+      ∃ z₁ ≤ Semiterm.val! M v id bf₁, ∃ z₂ ≤ Semiterm.val! M v id bf₂, ∃ z₃ ≤ Semiterm.val! M v id bf₃, ∃ z₄ ≤ Semiterm.val! M v id bf₄,
+        z₁ = f₁ v ∧ z₂ = f₂ v ∧ z₃ = f₃ v ∧ z₄ = f₄ v ∧ R z₁ z₂ z₃ z₄) :=
+    bex_le (Semipolynomial.val_id _) <| bex_le (Semipolynomial.val_id' _ _) <| bex_le (Semipolynomial.val_id' _ _) <| bex_le (Semipolynomial.val_id' _ _)
+        <| and (by simpa using hf₁.definable.rel.finmap (n := k + 4) (3 :> (·.succ.succ.succ.succ)))
+        <| and (by simpa using hf₂.definable.rel.finmap (n := k + 4) (2 :> (·.succ.succ.succ.succ)))
+        <| and (by simpa using hf₃.definable.rel.finmap (n := k + 4) (1 :> (·.succ.succ.succ.succ)))
+        <| and (by simpa using hf₄.definable.rel.finmap (n := k + 4) (0 :> (·.succ.succ.succ.succ)))
+        <| by simpa using hR.finmap (n := k + 4) ![3, 2, 1, 0]
+  exact this.of_iff _ (by
+    intro v; constructor
+    · intro h; exact ⟨f₁ v, hbf₁ v, f₂ v, hbf₂ v, f₃ v, hbf₃ v, f₄ v, hbf₄ v, rfl, rfl, rfl, rfl, h⟩
+    · rintro ⟨_, _, _, _, _, _, _, _, rfl, rfl, rfl, rfl, h⟩; exact h)
+
 end Definable
 
 lemma DefinableFunction₁.comp {k} {f : M → M} {g : (Fin k → M) → M}
@@ -531,12 +600,22 @@ lemma DefinableFunction₂.comp {k} {f : M → M → M} {g₁ g₂ : (Fin k → 
   have := Definable.comp₃ (k := k + 1) (R := Function.Graph₂ f) (Semipolynomial.var 0) (hg₁.finmap Fin.succ) (hg₂.finmap Fin.succ)
   simpa using this
 
+lemma DefinableFunction₃.comp {k} {f : M → M → M → M} {g₁ g₂ g₃ : (Fin k → M) → M}
+    (hf : DefinableFunction₃ b s f) (hg₁ : Semipolynomial b s g₁) (hg₂ : Semipolynomial b s g₂) (hg₃ : Semipolynomial b s g₃)  :
+    DefinableFunction b s (fun v ↦ f (g₁ v) (g₂ v) (g₃ v)) := by
+  have := Definable.comp₄ (k := k + 1) (R := Function.Graph₃ f) (Semipolynomial.var 0) (hg₁.finmap Fin.succ) (hg₂.finmap Fin.succ) (hg₃.finmap Fin.succ)
+  simpa using this
+
 lemma Semipolynomial₁.comp {k} {f : M → M} {g : (Fin k → M) → M} (hf : Semipolynomial₁ b s f) (hg : Semipolynomial b s g) :
     Semipolynomial b s (fun v ↦ f (g v)) := ⟨hf.bounded.comp hg.bounded, hf.definable.comp hg⟩
 
 lemma Semipolynomial₂.comp {k} {f : M → M → M} {g₁ g₂ : (Fin k → M) → M}
     (hf : Semipolynomial₂ b s f) (hg₁ : Semipolynomial b s g₁) (hg₂ : Semipolynomial b s g₂) :
     Semipolynomial b s (fun v ↦ f (g₁ v) (g₂ v)) := ⟨hf.bounded.comp hg₁.bounded hg₂.bounded, hf.definable.comp hg₁ hg₂⟩
+
+lemma Semipolynomial₃.comp {k} {f : M → M → M → M} {g₁ g₂ g₃ : (Fin k → M) → M}
+    (hf : Semipolynomial₃ b s f) (hg₁ : Semipolynomial b s g₁) (hg₂ : Semipolynomial b s g₂) (hg₃ : Semipolynomial b s g₃) :
+    Semipolynomial b s (fun v ↦ f (g₁ v) (g₂ v) (g₃ v)) := ⟨hf.bounded.comp hg₁.bounded hg₂.bounded hg₃.bounded, hf.definable.comp hg₁ hg₂ hg₃⟩
 
 lemma Semipolynomial.comp₁ {k} {f : M → M} {g : (Fin k → M) → M}
     [hfb : PolyBounded₁ f] [hfd : DefinableFunction₁ b s f] (hg : Semipolynomial b s g) :
@@ -545,6 +624,10 @@ lemma Semipolynomial.comp₁ {k} {f : M → M} {g : (Fin k → M) → M}
 lemma Semipolynomial.comp₂ {k} {f : M → M → M} {g₁ g₂ : (Fin k → M) → M}
     [hfb : PolyBounded₂ f] [hfd : DefinableFunction₂ b s f] (hg₁ : Semipolynomial b s g₁) (hg₂ : Semipolynomial b s g₂) :
     Semipolynomial b s (fun v ↦ f (g₁ v) (g₂ v)) := Semipolynomial₂.comp ⟨hfb, hfd⟩ hg₁ hg₂
+
+lemma Semipolynomial.comp₃ {k} {f : M → M → M → M} {g₁ g₂ g₃ : (Fin k → M) → M}
+    [hfb : PolyBounded₃ f] [hfd : DefinableFunction₃ b s f] (hg₁ : Semipolynomial b s g₁) (hg₂ : Semipolynomial b s g₂) (hg₃ : Semipolynomial b s g₃) :
+    Semipolynomial b s (fun v ↦ f (g₁ v) (g₂ v) (g₃ v)) := Semipolynomial₃.comp ⟨hfb, hfd⟩ hg₁ hg₂ hg₃
 
 section
 
