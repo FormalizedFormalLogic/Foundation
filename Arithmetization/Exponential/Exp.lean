@@ -141,7 +141,7 @@ lemma Seq₀.rem {X Y i : M} (h : Seq₀ X Y) (ppi : PPow2 i) (hi : 4 < i) :
 lemma Seqₛ.rem {y y' X Y i : M} (h : Seqₛ y X Y) (ppi : PPow2 i) (hi : y'^2 < i) (hy : y' ≤ y) :
     Seqₛ y' (X % i) (Y % i) := by
   intro j hj ne2 ppj
-  have : j^2 < i := lt_of_le_of_lt (sq_le_sq_iff.mp hj) hi
+  have : j^2 < i := lt_of_le_of_lt (sq_le_sq.mpr hj) hi
   have : j < i := lt_of_le_of_lt (le_trans hj $ by simp) hi
   rcases h j (le_trans hj hy) ne2 ppj with (H | H)
   · left; simpa [Seqₛ.Even, ext_rem, ppj, ppj.sq, ppi, *] using H
@@ -179,11 +179,11 @@ lemma Seqₛ.append {z x y X Y i : M} (h : Seqₛ z X Y) (ppi : PPow2 i) (hz : z
     Seqₛ z (append (i^2) X x) (append (i^2) Y y) := by
   intro j hj ne2 ppj
   have : j < i^2 := lt_of_lt_of_le (lt_of_le_of_lt hj hz) (by simp)
-  have : j^2 < i^2 := sq_lt_sq_iff.mp (lt_of_le_of_lt hj hz)
+  have : j^2 < i^2 := sq_lt_sq.mpr (lt_of_le_of_lt hj hz)
   rcases h j hj ne2 ppj with (H | H) <;> simp [Even, Odd]
-  · left; rw [ext_append_of_lt, ext_append_of_lt, ext_append_of_lt, ext_append_of_lt] <;> try simp [ppi.sq, ppj.sq, *]
+  · left; rw [ext_append_of_lt, ext_append_of_lt, ext_append_of_lt, ext_append_of_lt] <;> try simp [ppi.sq, ppj.sq, lt_of_le_of_lt hj hz, *]
     exact H
-  · right; rw [ext_append_of_lt, ext_append_of_lt, ext_append_of_lt, ext_append_of_lt] <;> try simp [ppi.sq, ppj.sq, *]
+  · right; rw [ext_append_of_lt, ext_append_of_lt, ext_append_of_lt, ext_append_of_lt] <;> try simp [ppi.sq, ppj.sq, lt_of_le_of_lt hj hz, *]
     exact H
 
 @[simp] lemma exp_zero_one : Exp (0 : M) 1 := Or.inl (by simp)
@@ -234,11 +234,11 @@ lemma le_sq_ext_of_seq₀_of_seqₛ {y X Y : M} (h₀ : Exp.Seq₀ X Y) (hₛ : 
         hₛ (√i) (sqrt_le_of_le_sq $ hi) (ppi.sqrt_ne_two ne2 ei) (ppi.sqrt ne2) with (heven | hodd)
       · have : ext i Y = (ext (√i) Y)^2 := by simpa [ppi.sq_sqrt_eq ne2] using heven.2
         have : √i ≤ ext i Y := by simpa [this] using IH
-        simpa [ppi.sq_sqrt_eq ne2] using sq_le_sq_iff.mp this
+        simpa [ppi.sq_sqrt_eq ne2] using sq_le_sq.mpr this
       · have : ext i Y = 2*(ext (√i) Y)^2 := by simpa [ppi.sq_sqrt_eq ne2] using hodd.2
         have : 2 * √i ≤ ext i Y := by simpa [this] using mul_le_mul_left (a := 2) IH
         have : √i ≤ ext i Y := le_trans (le_mul_of_pos_left $ by simp) this
-        simpa [ppi.sq_sqrt_eq ne2] using sq_le_sq_iff.mp this
+        simpa [ppi.sq_sqrt_eq ne2] using sq_le_sq.mpr this
 
 example {a b c : ℕ} : a * (b * c) = b * (a * c) := by exact Nat.mul_left_comm a b c
 
@@ -259,12 +259,12 @@ lemma two_mul_ext_le_of_seq₀_of_seqₛ {y X Y : M} (h₀ : Exp.Seq₀ X Y) (h�
         calc
           2 * ext i Y ≤ 2 * (2 * ext i Y)  := le_mul_of_pos_left (by simp)
           _           = (2 * ext (√i) Y)^2 := by simp [this, sq, mul_left_comm, mul_assoc]
-          _           ≤ (√i)^2             := sq_le_sq_iff.mp IH
+          _           ≤ (√i)^2             := sq_le_sq.mpr IH
           _           = i                  := ppi.sq_sqrt_eq ne2
       · have : ext i Y = 2*(ext (√i) Y)^2 := by simpa [ppi.sq_sqrt_eq ne2] using hodd.2
         calc
           2 * ext i Y = (2 * ext (√i) Y)^2 := by simp [this, sq, mul_left_comm, mul_assoc]
-          _           ≤ (√i)^2             := sq_le_sq_iff.mp IH
+          _           ≤ (√i)^2             := sq_le_sq.mpr IH
           _           = i                  := ppi.sq_sqrt_eq ne2
 
 lemma exp_exists_sq_of_exp_even {x y : M} : Exp (2 * x) y → ∃ y', y = y'^2 ∧ Exp x y' := by
@@ -304,7 +304,7 @@ lemma bit_zero {x y : M} : Exp x y → Exp (2 * x) (y ^ 2) := by
   rintro (⟨hx, rfl⟩ | ⟨X, _, Y, _, hseq₀, hseqₛ, i, hi, ne2, ppi, hXx, hYy⟩)
   · rcases hx with rfl; simp
   have hxsqi : 2 * x < i ^ 2 := lt_of_lt_of_le (by simp [←hXx, ppi.pos]) (two_mul_le_sq ppi.two_le)
-  have hysqi : y ^ 2 < i ^ 2 := sq_lt_sq_iff.mp $ by simp [←hYy, ppi.pos]
+  have hysqi : y ^ 2 < i ^ 2 := sq_lt_sq.mpr $ by simp [←hYy, ppi.pos]
   have hiisq : i < i^2 := lt_square_of_lt ppi.one_lt
   let X' := append (i^2) X (2 * x)
   let Y' := append (i^2) Y (y ^ 2)
@@ -325,12 +325,12 @@ lemma bit_zero {x y : M} : Exp x y → Exp (2 * x) (y ^ 2) := by
         exact PPow2.sq_uniq this ppi ppj
           ⟨by simp [←hYy, ppi.pos], hi⟩ ⟨by simpa using hjy, hj⟩
       rcases this with rfl
-      left; simp [Seqₛ.Even]
+      left; simp [Seqₛ.Even] at*
       rw [ext_append_last, ext_append_last, ext_append_of_lt , ext_append_of_lt] <;>
         simp [ppi, ppi.sq, hxsqi, hysqi, hiisq, hXx, hYy]
   have hseqₘ' : Seqₘ (2 * x) (y ^ 2) X' Y' :=
-    ⟨i ^ 2, sq_le_sq_iff.mp hi, ppi.sq_ne_two, ppi.sq,
-     by simp; rw [ext_append_last, ext_append_last] <;> try simp [hxsqi, hysqi]⟩
+    ⟨i ^ 2, sq_le_sq.mpr hi, ppi.sq_ne_two, ppi.sq,
+     by simp at *; rw [ext_append_last, ext_append_last] <;> try simp [hxsqi, hysqi]⟩
   exact Or.inr <| ⟨X', bX', Y', bY', hseq₀', hseqₛ', hseqₘ'⟩
 
 lemma exp_even {x y : M} : Exp (2 * x) y ↔ ∃ y', y = y'^2 ∧ Exp x y' :=
@@ -362,7 +362,7 @@ lemma exp_exists_sq_of_exp_odd {x y : M} : Exp (2 * x + 1) y → ∃ y', y = 2 *
     let X' := X % i
     let Y' := Y % i
     have bsqi : √i ≤ (ext (√i) Y)^2 := le_sq_ext_of_seq₀_of_seqₛ hseq₀ hseqₛ (ppi.sqrt_ne_two ne2 ne4) (le_trans (by simp) hi) (ppi.sqrt ne2)
-    have bi : i ≤ ext (√i) Y^4 := by simpa [pow_four_eq_sq_sq, ppi.sq_sqrt_eq ne2] using sq_le_sq_iff.mp bsqi
+    have bi : i ≤ ext (√i) Y^4 := by simpa [pow_four_eq_sq_sq, ppi.sq_sqrt_eq ne2] using sq_le_sq.mpr bsqi
     have bX' : X' ≤ (ext (√i) Y)^4 := le_trans (le_of_lt $ by simp [ppi.pos]) bi
     have bY' : Y' ≤ (ext (√i) Y)^4 := le_trans (le_of_lt $ by simp [ppi.pos]) bi
     have hseqₛ' : Seqₛ (ext (√i) Y) X' Y' :=
@@ -388,7 +388,7 @@ lemma bit_one {x y : M} : Exp x y → Exp (2 * x + 1) (2 * y ^ 2) := by
     · exact lt_of_mul_lt_mul_left this
     calc
       2 * (2 * y ^ 2) = (2 * y)^2 := by simp [sq, mul_assoc, mul_left_comm y 2]
-      _               ≤ i^2       := sq_le_sq_iff.mp (by simpa [hYy] using this)
+      _               ≤ i^2       := sq_le_sq.mpr (by simpa [hYy] using this)
       _               < 2 * i^2   := lt_mul_of_one_lt_left ppi.sq.pos one_lt_two
   have hiisq : i < i^2 := lt_square_of_lt ppi.one_lt
   let X' := append (i^2) X (2 * x + 1)
@@ -414,7 +414,7 @@ lemma bit_one {x y : M} : Exp x y → Exp (2 * x + 1) (2 * y ^ 2) := by
       rw [ext_append_last, ext_append_last, ext_append_of_lt , ext_append_of_lt] <;>
         simp [ppi, ppi.sq, hxsqi, hysqi, hiisq, hXx, hYy]
   have hseqₘ' : Seqₘ (2 * x + 1) (2 * y ^ 2) X' Y' :=
-    ⟨i ^ 2, sq_le_sq_iff.mp (le_trans hi $ by simp), ppi.sq_ne_two, ppi.sq,
+    ⟨i ^ 2, sq_le_sq.mpr (le_trans hi $ by simp), ppi.sq_ne_two, ppi.sq,
      by simp; rw [ext_append_last, ext_append_last] <;> try simp [hxsqi, hysqi]⟩
   exact Or.inr <| ⟨X', bX', Y', bY', hseq₀', hseqₛ', hseqₘ'⟩
 

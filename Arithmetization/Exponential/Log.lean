@@ -21,7 +21,7 @@ lemma log_exists_unique_pos {y : M} (hy : 0 < y) : ∃! x, x < y ∧ ∃ y' ≤ 
     induction y using hierarchy_polynomial_induction_sigma₀
     · definability
     case zero => simp
-    case even y IH =>
+    case even y _ IH =>
       intro hy
       rcases (IH (by simpa using hy) : ∃ x < y, ∃ y' ≤ y, Exp x y' ∧ y < 2 * y') with ⟨x, hxy, y', gey, H, lty⟩
       exact ⟨x + 1, lt_of_lt_of_le (by simp [hxy]) (succ_le_double_of_pos (pos_of_gt hxy)),
@@ -254,6 +254,30 @@ lemma lt_exp_length {a b : M} (h : Exp ‖a‖ b) : a < b := by
   simp [length_of_pos pos] at h
   rcases Exp.exp_succ.mp h with ⟨b, rfl, H⟩
   exact lt_exp_log_self H
+
+lemma sq_len_le_three_mul (a : M) : ‖a‖ ^ 2 ≤ 3 * a := by
+  induction a using hierarchy_polynomial_induction_sigma₀
+  · definability
+  case zero => simp
+  case even a pos IH =>
+    calc
+      ‖2 * a‖ ^ 2 = (‖a‖ + 1) ^ 2         := by rw [length_two_mul_of_pos pos]
+      _           = ‖a‖ ^ 2 + 2 * ‖a‖ + 1 := by simp [sq, add_mul_self_eq]
+      _           ≤ 3 * a + 2 * ‖a‖ + 1   := by simpa using IH
+      _           ≤ 3 * a + 2 * a + 1     := by simp
+      _           ≤ 3 * a + 2 * a + a     := by simp [←pos_iff_one_le, pos]
+      _           = 3 * (2 * a)           := by simp_all only [←two_add_one_eq_three, two_mul, add_mul, add_assoc, one_mul]
+  case odd a IH =>
+    rcases zero_le a with (rfl | pos)
+    · simp [←two_add_one_eq_three]
+    calc
+      ‖2 * a + 1‖ ^ 2 = (‖a‖ + 1) ^ 2         := by rw [length_two_mul_add_one a]
+      _               = ‖a‖ ^ 2 + 2 * ‖a‖ + 1 := by simp [sq, add_mul_self_eq]
+      _               ≤ 3 * a + 2 * ‖a‖ + 1   := by simpa using IH
+      _               ≤ 3 * a + 2 * a + 1     := by simp
+      _               ≤ 3 * a + 2 * a + a     := by simp [←pos_iff_one_le, pos]
+      _               = 3 * (2 * a)           := by simp_all only [←two_add_one_eq_three, two_mul, add_mul, add_assoc, one_mul]
+      _               ≤ 3 * (2 * a + 1)       := by simp
 
 lemma brange_exists_unique (a : M) : ∀ x < ‖a‖, ∃! y, Exp x y := by
   suffices : ∀ x < ‖a‖, ∃ y ≤ a, Exp x y

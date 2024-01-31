@@ -107,13 +107,13 @@ lemma sq_le_of_lt {i j : M} (pi : Pow2 i) (pj : Pow2 j) (hi : LenBit i m) (hj : 
           by_contra A
           have : j ≤ i := by
             simpa [hm.sq_sqrt_eq hi pi ine2, hm.sq_sqrt_eq hj pj jne2] using
-              sq_le_sq_iff.mp (show √j ≤ √i from by simpa using A)
+              sq_le_sq.mpr (show √j ≤ √i from by simpa using A)
           exact False.elim ((not_lt.mpr this) (by simpa using hij))
         have : i ≤ √j := by
           simpa [hm.sq_sqrt_eq hi pi ine2] using
             IH (√j) (sqrt_lt_self_of_one_lt (hm.one_lt hj)) (√i) this
               (pi.sqrt (hm.sq_sqrt_eq hi pi ine2)) (pj.sqrt (hm.sq_sqrt_eq hj pj jne2)) (hm.sqrt hi pi ine2) (hm.sqrt hj pj jne2)
-        simpa [hm.sq_sqrt_eq hj pj jne2] using sq_le_sq_iff.mp this
+        simpa [hm.sq_sqrt_eq hj pj jne2] using sq_le_sq.mpr this
 
 lemma last_uniq {i j : M} (pi : Pow2 i) (pj : Pow2 j) (hi : LenBit i m) (hj : LenBit j m)
     (hsqi : m < i^2) (hsqj : m < j^2) : i = j := by
@@ -257,7 +257,7 @@ lemma sqrt_ne_two {i : M} (hi : PPow2 i) (ne2 : i ≠ 2) (ne4 : i ≠ 4) : √i 
   contradiction
 
 lemma sq_ne_four {i : M} (hi : PPow2 i) (ne2 : i ≠ 2) : i^2 ≠ 4 := by
-  simpa [two_pow_two_eq_four] using ne_of_gt (sq_lt_sq_iff.mp (hi.two_lt ne2))
+  simpa [two_pow_two_eq_four] using ne_of_gt (sq_lt_sq.mpr (hi.two_lt ne2))
 
 lemma sq_le_of_lt {i j : M} (hi : PPow2 i) (hj : PPow2 j) : i < j → i^2 ≤ j := by
   intro hij
@@ -276,12 +276,12 @@ lemma sq_le_of_lt {i j : M} (hi : PPow2 i) (hj : PPow2 j) : i < j → i^2 ≤ j 
         simpa [sq, two_mul_two_eq_four] using hj.four_le ej
       · have : √i < √j := by
           by_contra A
-          have : j ≤ i := by simpa [hi.sq_sqrt_eq ei, hj.sq_sqrt_eq ej] using sq_le_sq_iff.mp (show √j ≤ √i from by simpa using A)
+          have : j ≤ i := by simpa [hi.sq_sqrt_eq ei, hj.sq_sqrt_eq ej] using sq_le_sq.mpr (show √j ≤ √i from by simpa using A)
           exact False.elim ((not_lt.mpr this) (by simpa using hij))
         have : i ≤ √j := by
           simpa [hi.sq_sqrt_eq ei] using
             IH (√j) (sqrt_lt_self_of_one_lt hj.one_lt) (√i) this (hi.sqrt ei) (hj.sqrt ej)
-        simpa [hj.sq_sqrt_eq ej] using sq_le_sq_iff.mp this
+        simpa [hj.sq_sqrt_eq ej] using sq_le_sq.mpr this
 
 lemma sq_uniq {y i j : M} (py : Pow2 y) (ppi : PPow2 i) (ppj : PPow2 j)
     (hi : y < i ∧ i ≤ y^2) (hj : y < j ∧ j ≤ y^2) : i = j := by
@@ -289,7 +289,7 @@ lemma sq_uniq {y i j : M} (py : Pow2 y) (ppi : PPow2 i) (ppj : PPow2 j)
   wlog hij : i < j
   · exact this py ppj ppi hj hi (Ne.symm ne) (Ne.lt_of_le' ne (by simpa using hij))
   have : y^2 < y^2 := calc
-    y^2 < i^2 := sq_lt_sq_iff.mp hi.1
+    y^2 < i^2 := sq_lt_sq.mpr hi.1
     _   ≤ j   := sq_le_of_lt ppi ppj hij
     _   ≤ y^2 := hj.2
   simp_all
@@ -305,7 +305,7 @@ lemma two_mul_sq_uniq {y i j : M} (py : Pow2 y) (ppi : PPow2 i) (ppj : PPow2 j)
     _   < (2 * y)^2 := by
       simp [sq, mul_assoc]; rw [mul_left_comm]
       exact lt_mul_of_pos_of_one_lt_left (by simpa using pos_iff_ne_zero.mp py.pos) (by simp [one_lt_two])
-  have : i < 2 * y := sq_lt_sq_iff.mpr this
+  have : i < 2 * y := sq_lt_sq.mp this
   have : y < y := lt_of_lt_of_le hi.1 ((ppi.pow2.le_iff_lt_two py).mpr this)
   simp_all
 

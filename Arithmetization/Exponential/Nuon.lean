@@ -287,6 +287,9 @@ lemma SeriesSegment.le {U I L A k n : M} (H : SeriesSegment U I L A k n) :
     _ ≤ ‖I‖ * (k / ‖I‖) + k % ‖I‖ := by simpa [mul_comm] using hT.le_add
     _ = k                         := div_add_mod k ‖I‖
 
+lemma SeriesSegment.zero {U I L A : M} (Upos : 0 < U) : SeriesSegment U I L A 0 0 :=
+  ⟨0, by rfl, ⟨0, Upos, by simp [IsSeries]⟩, ⟨0, Upos, by simp [IsSegment]⟩⟩
+
 lemma SeriesSegment.uniq {U I L A k n₁ n₂ : M} (H₁ : SeriesSegment U I L A k n₁) (H₂ : SeriesSegment U I L A k n₂) :
     n₁ = n₂ := by
   rcases H₁ with ⟨nₘ₁, _, hT₁, hS₁⟩
@@ -371,7 +374,8 @@ lemma div_mod_succ (a b : M) : ((a + 1) / b = a / b + 1 ∧ (a + 1) % b = 0 ∧ 
 lemma SeriesSegment.succ {k n : M} (hk : k < ‖I‖^2) (H : SeriesSegment U I L A k n) :
     SeriesSegment U I L A (k + 1) (n + fbit A k) := by
   have hhk : (k + 1)/‖I‖ ≤ ‖I‖ := by simpa using div_monotone (succ_le_iff_lt.mpr hk) ‖I‖
-  have hnk := H.le
+  have hnk : n ≤ k := H.le
+  have Ipos : 0 < I := by simpa using pos_of_gt hk
   rcases H with ⟨nₘ, hnₘn, HT, HS⟩
   have hnₘL : ‖nₘ + ‖I‖‖ ≤ ‖L‖ := by
     have : k / ‖I‖ < ‖I‖ := div_lt_of_lt_mul (by simpa [sq] using hk)
@@ -400,6 +404,85 @@ lemma SeriesSegment.succ {k n : M} (hk : k < ‖I‖^2) (H : SeriesSegment U I L
     have HT' : Series U I L A ((k + 1) / ‖I‖) nₘ := by simpa [hdiv] using HT
     exact ⟨nₘ, le_trans hnₘn le_self_add, HT', HS'⟩
 
+/-- Define $I$, $L$, $U$ to satisfy the following:
+  1. $I$, $L$, $U$ are polynomial of $A$.
+  2. $(I \# L)^2 \le U$
+  3. $\| \| I \|^2 \| \le \|L\|$
+  4. $\| A \| < \|I\|^2$
+-/
+
+def polyI (A : M) : M := bexp (2 * A) (√‖A‖)
+
+def polyL (A : M) : M := ‖polyI A‖ ^ 2
+
+lemma len_polyI {A : M} (pos : 0 < A) : ‖polyI A‖ = √‖A‖ + 1 :=
+  len_bexp (show √‖A‖ < ‖2 * A‖ from by simp [length_two_mul_of_pos pos, lt_succ_iff_le])
+
+lemma polyI_le {A : M} (pos : 0 < A) : ‖A‖ < ‖polyI A‖ ^ 2 := by simp [len_polyI pos]
+
+lemma two_add_two_eq_four : 2 + 2 = (4 : M) := by simp [←three_add_one_eq_four, ←two_add_one_eq_three, ←one_add_one_eq_two, add_assoc]
+
+lemma four_mul_eq_two_mul_two_mul (a : M) : 4 * a = 2 * (2 * a) := by simp [←two_add_two_eq_four, add_mul, two_mul]
+
+@[simp] lemma two_mul_sqrt_le_self (a : M) : 2 * √a ≤ a + 1 := le_trans (two_mul_le_sq_add_one (√a)) (by simp)
+
+lemma four_mul_hash_self (a : M) : (4 * a) # (4 * a) ≤ (a # a) ^ (4 * 4) := calc
+  (4 * a) # (4 * a) ≤ ((4 * a) # (2 * a)) ^ 2 := by simp [four_mul_eq_two_mul_two_mul, hash_two_mul_le_sq_hash]
+  _                 ≤ ((4 * a) # a) ^ 4       := by simp [pow_four_eq_sq_sq, hash_two_mul_le_sq_hash]
+  _                 ≤ ((a # (2 * a)) ^ 2) ^ 4 := by rw [hash_comm (4 * a) a]
+                                                    simp [four_mul_eq_two_mul_two_mul, pow_four_eq_sq_sq, hash_two_mul_le_sq_hash]
+  _                 ≤ ((a # a) ^ 4) ^ 4       := by simp [pow_four_eq_sq_sq, hash_two_mul_le_sq_hash]
+  _                 ≤ (a # a) ^ (4 * 4)       := by simp [←pow_mul]
+
+@[simp] lemma pos_sq_iff {a : M} : 0 < √a ↔ 0 < a :=
+  ⟨fun h ↦ lt_of_lt_of_le h (by simp),
+    by intro h; by_contra A; simp at A;
+       simp [show a = 0 from by simpa [A] using sqrt_lt_sq a] at h⟩
+
+@[simp] lemma pow_four_le_pow_four {a b : M} : a ^ 4 ≤ b ^ 4 ↔ a ≤ b := by simp [pow_four_eq_sq_sq]
+
+lemma polyI_hash_self_polybounded {A : M} (pos : 0 < A) : (polyI A) # (polyI A) ≤ (2 * A + 1) ^ 4 := calc
+  (polyI A) # (polyI A) = bexp ((polyI A) # (polyI A)) ((√‖A‖ + 1) ^ 2) := Eq.symm <| by simpa [sq, len_polyI pos] using bexp_eq_hash (polyI A) (polyI A)
+  _                     ≤ bexp ((2 * A) # (2 * A)) ((2 * √‖A‖) ^ 2)     :=
+    (bexp_monotone_le
+      (by simp [length_hash, lt_succ_iff_le, ←sq, len_polyI pos])
+      (by simp [length_hash, lt_succ_iff_le, ←sq, len_polyI pos, length_two_mul_of_pos pos])).mpr
+    (by simp [two_mul, ←pos_iff_one_le, pos])
+  _                     ≤ bexp ((2 * A) # (2 * A)) (4 * (√‖A‖) ^ 2)     := by simp [mul_pow, two_pow_two_eq_four]
+  _                     ≤ (bexp (A # 1) ((√‖A‖) ^ 2)) ^ 4               := by { sorry }
+  _                     ≤ (bexp (A # 1) ‖A‖) ^ 4                        := by
+    simp; exact (bexp_monotone_le (by simp [length_hash, lt_succ_iff_le]) (by simp [length_hash, lt_succ_iff_le])).mpr (by simp)
+  _                     = (A # 1) ^ 4                                   := by congr 1; simpa using bexp_eq_hash A 1
+  _                     ≤ (2 * A + 1) ^ 4                               := by simp
+
+lemma polyU {A : M} (pos : 0 < A) : (polyI A) # (polyL A) ≤ (2 * A + 1) ^ (4 * 4 * 4) := calc
+  (polyI A) # (polyL A) ≤ (polyI A) # (3 * polyI A)         := hash_monotone (by rfl) (by simp [polyL, sq_len_le_three_mul])
+  _                     ≤ (4 * polyI A) # (4 * polyI A)     := hash_monotone (le_mul_of_pos_left $ by simp) (mul_le_mul_right $ by simp [←three_add_one_eq_four])
+  _                     ≤ ((polyI A) # (polyI A)) ^ (4 * 4) := four_mul_hash_self _
+  _                     ≤ ((2 * A + 1) ^ 4) ^ (4 * 4)       := by simp [pow_mul, polyI_hash_self_polybounded pos]
+  _                     = (2 * A + 1) ^ (4 * 4 * 4)         := by simp [←pow_mul]
+
+/--/
+lemma SeriesSegment.exists {k : M} (hk : k < ‖I‖^2) : ∃ n, SeriesSegment U I L A k n := by
+  suffices : ∃ n ≤ k, SeriesSegment U I L A k n
+  · rcases this with ⟨n, _, h⟩; exact ⟨n, h⟩
+  revert hk
+  induction k using hierarchy_induction_sigma₀
+  · sorry -- simp [SeriesSegment, Segment, Series, IsSegment, IsSeries]
+  case zero =>
+    intro _
+    exact ⟨0, by rfl, SeriesSegment.zero $ lt_of_lt_of_le (by simp) hU⟩
+  case succ k IH =>
+    intro hk
+    rcases IH (lt_of_le_of_lt (by simp) hk) with ⟨n, hn, Hn⟩
+    exact ⟨n + fbit A k, add_le_add hn (by simp), Hn.succ hU hIL Ipos (lt_of_le_of_lt (by simp) hk)⟩
+
+lemma SeriesSegment.le_len_self {k : M} (hk : k < ‖I‖^2) (H : SeriesSegment U I L A k n) : n ≤ ‖A‖ := by
+  revert hk H n
+  suffices : ∀ k, ∀ n ≤ k, SeriesSegment U I L A k n →
+
+
+lemma nuonAux_exists_unique {k : M} (hk : k < ‖I‖^2) : ∃ n, SeriesSegment U I L A k n := by
 
 
 end

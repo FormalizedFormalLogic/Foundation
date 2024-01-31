@@ -125,11 +125,11 @@ lemma two_pos : (0 : M) < 2 := by exact _root_.two_pos
   have : 0 ≤ a := by exact zero_le a
   rcases this with (rfl | pos) <;> simp [*, ←pos_iff_one_le]
 
-@[simp] lemma le_sq (a : M) : a ≤ a^2 := by simp [sq]
+@[simp] lemma le_sq (a : M) : a ≤ a ^ 2 := by simp [sq]
 
-lemma sq_le_sq_iff : a ≤ b ↔ a^2 ≤ b^2 := by simp [sq]; apply mul_self_le_mul_self_iff <;> simp
+@[simp] lemma sq_le_sq : a ^ 2 ≤ b ^ 2 ↔ a ≤ b := by simp [sq]; symm; apply mul_self_le_mul_self_iff <;> simp
 
-lemma sq_lt_sq_iff : a < b ↔ a^2 < b^2 := by simp [sq]; apply mul_self_lt_mul_self_iff <;> simp
+@[simp] lemma sq_lt_sq : a ^ 2 < b ^ 2 ↔ a < b := by simp [sq]; symm; apply mul_self_lt_mul_self_iff <;> simp
 
 lemma le_mul_of_pos_right (h : 0 < b) : a ≤ a * b := le_mul_of_one_le_right (by simp) (pos_iff_one_le.mp h)
 
@@ -164,6 +164,8 @@ instance : CovariantClass M M (Function.swap (· * ·)) (· ≤ ·) := ⟨by int
 @[simp] lemma one_lt_mul_self_iff {a : M} : 1 < a * a ↔ 1 < a :=
   ⟨(fun h ↦ by push_neg at h ⊢; exact mul_le_one' h h).mtr, fun h ↦ one_lt_mul'' h h⟩
 
+@[simp] lemma opos_lt_sq_pos_iff {a : M} : 0 < a^2 ↔ 0 < a := by simp [sq, pos_iff_ne_zero]
+
 @[simp] lemma one_lt_sq_iff {a : M} : 1 < a^2 ↔ 1 < a := by simp [sq]
 
 @[simp] lemma mul_self_eq_one_iff {a : M} : a * a = 1 ↔ a = 1 :=
@@ -174,6 +176,13 @@ instance : CovariantClass M M (Function.swap (· * ·)) (· ≤ ·) := ⟨by int
 lemma lt_square_of_lt {a : M} (pos : 1 < a) : a < a^2 := lt_self_pow pos Nat.one_lt_two
 
 lemma two_mul_le_sq {i : M} (h : 2 ≤ i) : 2 * i ≤ i ^ 2 := by simp [sq]; exact mul_le_mul_right h
+
+lemma two_mul_le_sq_add_one (i : M) : 2 * i ≤ i ^ 2 + 1 := by
+  rcases zero_le i with (rfl | pos)
+  · simp
+  · rcases pos_iff_one_le.mp pos with (rfl | lt)
+    · simp [one_add_one_eq_two]
+    · exact le_trans (two_mul_le_sq (one_lt_iff_two_le.mp lt)) (by simp)
 
 lemma two_mul_lt_sq {i : M} (h : 2 < i) : 2 * i < i ^ 2 := by
   simp [sq]; exact (mul_lt_mul_right (show 0 < i from pos_of_gt h)).mpr h

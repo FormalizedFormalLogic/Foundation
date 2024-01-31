@@ -98,12 +98,28 @@ lemma hash_comm (a b : M) : a # b = b # a := (exp_hash a b).uniq (by simpa [mul_
 
 lemma lt_hash_iff {a b c : M} : a < b # c ↔ ‖a‖ ≤ ‖b‖ * ‖c‖ := (exp_hash b c).lt_iff_len_le
 
+lemma hash_le_iff {a b c : M} : b # c ≤ a ↔ ‖b‖ * ‖c‖ < ‖a‖ :=
+  not_iff_not.mp <| by simp [lt_hash_iff]
+
 lemma lt_hash_one_iff {a b : M} : a < b # 1 ↔ ‖a‖ ≤ ‖b‖ := by simpa using lt_hash_iff (a := a) (b := b) (c := 1)
 
 lemma hash_monotone {a₁ a₂ b₁ b₂ : M} (h₁ : a₁ ≤ b₁) (h₂ : a₂ ≤ b₂) : a₁ # a₂ ≤ b₁ # b₂ :=
   (exp_hash a₁ a₂).monotone_le (exp_hash b₁ b₂) (mul_le_mul (length_monotone h₁) (length_monotone h₂) (by simp) (by simp))
 
 lemma bexp_eq_hash (a b : M) : bexp (a # b) (‖a‖ * ‖b‖) = a # b := bexp_eq_of_exp (by simp [length_hash]) (exp_hash a b)
+
+lemma hash_two_mul (a : M) {b} (pos : 0 < b) : a # (2 * b) = (a # b) * (a # 1) := by
+  have h₁ : Exp (‖a‖ * ‖b‖ + ‖a‖) (a # (2 * b)) := by
+    simpa [length_two_mul_of_pos pos, mul_add] using exp_hash a (2 * b)
+  have h₂ : Exp (‖a‖ * ‖b‖ + ‖a‖) (a # b * a # 1) := (exp_hash a b).add_mul (exp_hash_one a)
+  exact h₁.uniq h₂
+
+lemma hash_two_mul_le_sq_hash (a b : M) : a # (2 * b) ≤ (a # b) ^ 2 := by
+  rcases zero_le b with (rfl | pos)
+  · simp
+  · simp [hash_two_mul a pos, sq]
+    exact hash_monotone (by rfl) (pos_iff_one_le.mp pos)
+
 
 end Model
 

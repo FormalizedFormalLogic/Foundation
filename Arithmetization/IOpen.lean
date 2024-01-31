@@ -463,8 +463,9 @@ lemma sqrt_eq_of_le_of_lt {x a : M} (le : x * x ≤ a) (lt : a < (x + 1) * (x + 
 lemma sqrt_eq_of_le_of_le {x a : M} (le : x * x ≤ a) (h : a ≤ x * x + 2 * x) : √a = x :=
   sqrt_eq_of_le_of_lt le (by simp [add_mul_self_eq]; exact le_iff_lt_succ.mp h)
 
+@[simp] lemma sq_sqrt_le (a : M) : (√a) ^ 2 ≤ a := by simp [sq]
 
-@[simp] lemma sq_sqrt_le (a : M) : (√a)^2 ≤ a := by simp [sq]
+@[simp] lemma sqrt_lt_sq (a : M) : a < (√a + 1) ^ 2 := by simp [sq]
 
 @[simp] lemma sqrt_mul_self (a : M) : √(a * a) = a :=
   Eq.symm <| eq_sqrt a (a * a) (by simp; exact mul_self_lt_mul_self (by simp) (by simp))
@@ -516,7 +517,7 @@ lemma sqrt_le_of_le_sq {a b : M} : a ≤ b^2 → √a ≤ b := by
   intro h; by_contra A
   have : a < a := calc
     a ≤ b^2    := h
-    _ < (√a)^2 := sq_lt_sq_iff.mp (by simpa using A)
+    _ < (√a)^2 := sq_lt_sq.mpr (by simpa using A)
     _ ≤ a      := by simp
   simp_all
 
@@ -623,7 +624,7 @@ end IOpen
 
 @[elab_as_elim]
 lemma hierarchy_polynomial_induction (b : VType) (s : ℕ) [(𝐈𝚪 b s).Mod M] {P : M → Prop} (hP : DefinablePred b s P)
-    (zero : P 0) (even : ∀ x, P x → P (2 * x)) (odd : ∀ x, P x → P (2 * x + 1)) : ∀ x, P x := by
+    (zero : P 0) (even : ∀ x > 0, P x → P (2 * x)) (odd : ∀ x, P x → P (2 * x + 1)) : ∀ x, P x := by
   haveI : 𝐈open.Mod M := mod_IOpen_of_mod_IHierarchy b s
   intro x; induction x using hierarchy_order_induction
   · exact b
@@ -635,19 +636,19 @@ lemma hierarchy_polynomial_induction (b : VType) (s : ℕ) [(𝐈𝚪 b s).Mod M
     · exact zero
     · have : x / 2 < x := div_lt_of_pos_of_one_lt pos one_lt_two
       rcases even_or_odd' x with (hx | hx)
-      · simpa [←hx] using even (x / 2) (IH (x / 2) this)
+      · simpa [←hx] using even (x / 2) (by by_contra A; simp at A; simp [show x = 0 from by simpa [A] using hx] at pos) (IH (x / 2) this)
       · simpa [←hx] using odd (x / 2) (IH (x / 2) this)
 
 @[elab_as_elim] lemma hierarchy_polynomial_induction_sigma₀ [𝐈𝚺₀.Mod M] {P : M → Prop} (hP : DefinablePred Σ 0 P)
-    (zero : P 0) (even : ∀ x, P x → P (2 * x)) (odd : ∀ x, P x → P (2 * x + 1)) : ∀ x, P x :=
+    (zero : P 0) (even : ∀ x > 0, P x → P (2 * x)) (odd : ∀ x, P x → P (2 * x + 1)) : ∀ x, P x :=
   hierarchy_polynomial_induction Σ 0 hP zero even odd
 
 @[elab_as_elim] lemma hierarchy_polynomial_induction_sigma₁ [𝐈𝚺₁.Mod M] {P : M → Prop} (hP : DefinablePred Σ 1 P)
-    (zero : P 0) (even : ∀ x, P x → P (2 * x)) (odd : ∀ x, P x → P (2 * x + 1)) : ∀ x, P x :=
+    (zero : P 0) (even : ∀ x > 0, P x → P (2 * x)) (odd : ∀ x, P x → P (2 * x + 1)) : ∀ x, P x :=
   hierarchy_polynomial_induction Σ 1 hP zero even odd
 
 @[elab_as_elim] lemma hierarchy_polynomial_induction_pi₁ [𝐈𝚷₁.Mod M] {P : M → Prop} (hP : DefinablePred Π 1 P)
-    (zero : P 0) (even : ∀ x, P x → P (2 * x)) (odd : ∀ x, P x → P (2 * x + 1)) : ∀ x, P x :=
+    (zero : P 0) (even : ∀ x > 0, P x → P (2 * x)) (odd : ∀ x, P x → P (2 * x + 1)) : ∀ x, P x :=
   hierarchy_polynomial_induction Π 1 hP zero even odd
 
 end Model
