@@ -119,6 +119,8 @@ lemma two_mul_two_eq_four : 2 * 2 = (4 : M) := by
 lemma two_pow_two_eq_four : 2 ^ 2 = (4 : M) := by
   simp [sq, two_mul_two_eq_four]
 
+lemma two_pos : (0 : M) < 2 := by exact _root_.two_pos
+
 @[simp] lemma le_mul_self (a : M) : a ≤ a * a := by
   have : 0 ≤ a := by exact zero_le a
   rcases this with (rfl | pos) <;> simp [*, ←pos_iff_one_le]

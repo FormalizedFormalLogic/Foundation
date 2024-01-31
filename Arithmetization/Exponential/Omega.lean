@@ -56,6 +56,8 @@ instance : Hash M := ⟨fun a b ↦ Classical.choose! (hash_exists_unique a b)�
 
 lemma exp_hash (a b : M) : Exp (‖a‖ * ‖b‖) (a # b) := Classical.choose!_spec (hash_exists_unique a b)
 
+lemma exp_hash_one (a : M) : Exp ‖a‖ (a # 1) := by simpa using exp_hash a 1
+
 def hashdef : Σᴬ[0] 3 :=
   ⟨“∃[#0 < #2 + 1] ∃[#0 < #4 + 1] (!binarylengthdef [#1, #3] ∧ !binarylengthdef [#0, #4] ∧ !Exp.def [#1 * #0, #2])”, by simp⟩
 
@@ -88,12 +90,20 @@ lemma hash_comm (a b : M) : a # b = b # a := (exp_hash a b).uniq (by simpa [mul_
 @[simp] lemma lt_hash_one_righs (a : M) : a # 1 ≤ 2 * a + 1 := by
   rcases zero_le a with (rfl | pos)
   · simp
-  · have : 0 < 2 * a + 1 := by simp
-    exact (le_iff_lt_length_of_exp (exp_hash a 1) this).mpr (by
+  · exact (le_iff_lt_length_of_exp (exp_hash a 1)).mpr (by
       simp [mul_comm 2 a]
       have : ‖a * 2 + 1‖ = ‖a‖ + 1 := by
         simpa using length_mul_pow2_add_of_lt pos (show Pow2 2 from by simp) one_lt_two
       simp [this])
+
+lemma lt_hash_iff {a b c : M} : a < b # c ↔ ‖a‖ ≤ ‖b‖ * ‖c‖ := (exp_hash b c).lt_iff_len_le
+
+lemma lt_hash_one_iff {a b : M} : a < b # 1 ↔ ‖a‖ ≤ ‖b‖ := by simpa using lt_hash_iff (a := a) (b := b) (c := 1)
+
+lemma hash_monotone {a₁ a₂ b₁ b₂ : M} (h₁ : a₁ ≤ b₁) (h₂ : a₂ ≤ b₂) : a₁ # a₂ ≤ b₁ # b₂ :=
+  (exp_hash a₁ a₂).monotone_le (exp_hash b₁ b₂) (mul_le_mul (length_monotone h₁) (length_monotone h₂) (by simp) (by simp))
+
+lemma bexp_eq_hash (a b : M) : bexp (a # b) (‖a‖ * ‖b‖) = a # b := bexp_eq_of_exp (by simp [length_hash]) (exp_hash a b)
 
 end Model
 

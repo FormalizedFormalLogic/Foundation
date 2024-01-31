@@ -108,7 +108,7 @@ def Exp.def : Σᴬ[0] 2 := ⟨
     ∃[#0 < #2 * #2 * #2 * #2 + 1] ∃[#0 < #3 * #3 * #3 * #3 + 1] (
       (!extdef [1, 4, #1] ∧ !extdef [2, 4, #0]) ∧
       !Exp.Seqₛ.def [#3, #1, #0] ∧
-      ∃[#0 < #4 * #4 + 1] (#0 ≠ 2 ∧ !ppow2def [#0] ∧ !extdef [#3, #0, #2] ∧!extdef [#4, #0, #1])))”, by { simp }⟩
+      ∃[#0 < #4 * #4 + 1] (#0 ≠ 2 ∧ !ppow2def [#0] ∧ !extdef [#3, #0, #2] ∧!extdef [#4, #0, #1])))”, by simp⟩
 
 lemma Exp.defined : Σᴬ[0]-Relation (Exp : M → M → Prop) Exp.def := by
   intro v; simp [Exp.graph_iff, Exp.def, ppow2_defined.pval, ext_defined.pval, Exp.Seqₛ.defined.pval, ←le_iff_lt_succ, pow_four, sq]
@@ -574,6 +574,9 @@ lemma zero_uniq {y : M} (h : Exp 0 y) : y = 1 := by
   · rfl
   · have : 1 ≤ ext u X  := one_le_ext_of_seq₀_of_seqₛ H₀ Hₛ ne2 hu ppu
     simp [hX] at this
+
+@[simp] lemma zero_uniq_iff {y : M} : Exp 0 y ↔ y = 1 :=
+  ⟨zero_uniq, by rintro rfl; simp⟩
 
 lemma succ_lt_s {y : M} (h : Exp (x + 1) y) : 2 ≤ y := by
   rcases h with (⟨h, rfl⟩ | ⟨X, _, Y, _, H₀, Hₛ, ⟨u, hu, ne2, ppu, _, hY⟩⟩)

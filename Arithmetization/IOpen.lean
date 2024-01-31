@@ -206,6 +206,9 @@ lemma div_add_mul_self' (a c : M) {b} (pos : 0 < b) : (a + b * c) / b = a / b + 
 lemma div_mul_add_self (a c : M) {b} (pos : 0 < b) : (a * b + c) / b = a + c / b := by
   simp [div_add_mul_self, pos, add_comm]
 
+lemma div_mul_add_self' (a c : M) {b} (pos : 0 < b) : (b * a + c) / b = a + c / b := by
+  simp [mul_comm b a, div_mul_add_self, pos]
+
 @[simp] lemma div_mul_left (a : M) {b} (pos : 0 < b) : (a * b) / b = a := by
   simpa using div_mul_add a _ pos
 
@@ -214,6 +217,11 @@ lemma div_mul_add_self (a c : M) {b} (pos : 0 < b) : (a * b + c) / b = a + c / b
 
 @[simp] lemma div_eq_zero_of_lt (b : M) {a} (h : a < b) : a / b = 0 := by
   simpa using div_mul_add 0 b h
+
+@[simp] lemma div_sq (a : M) : a^2 / a = a := by
+  rcases zero_le a with (rfl | pos)
+  · simp
+  · simp [sq, pos]
 
 @[simp] lemma div_self {a : M} (hx : 0 < a) : a / a = 1 := by
   simpa using div_mul_left 1 hx
@@ -241,6 +249,27 @@ lemma div_lt_of_pos_of_one_lt {a b : M} (ha : 0 < a) (hb : 1 < b) : a / b < a :=
 lemma le_two_mul_div_two_add_one (a : M) : a ≤ 2 * (a / 2) + 1 := by
   have : a < 2 * (a / 2 + 1) := lt_mul_div_succ a (show 0 < 2 from by simp)
   exact le_iff_lt_succ.mpr (by simpa [add_assoc, one_add_one_eq_two, mul_add] using this)
+
+lemma div_monotone {a b : M} (h : a ≤ b) (c : M) : a / c ≤ b / c := by
+  rcases zero_le c with (rfl | pos)
+  · simp
+  by_contra A
+  have : b / c + 1 ≤ a / c := succ_le_iff_lt.mpr (by simpa using A)
+  have : a < a := calc
+    a ≤ b               := h
+    _ < c * (b / c + 1) := lt_mul_div b pos
+    _ ≤ c * (a / c)     := mul_le_mul_left this
+    _ ≤ a               := mul_div_le a c
+  simp_all
+
+lemma div_lt_of_lt_mul {a b c : M} (h : a < b * c) : a / c < b := by
+  by_contra hb
+  simp at hb
+  have : a < a := calc
+    a < b * c     := h
+    _ ≤ a / c * c := mul_le_mul_right hb
+    _ ≤ a         := by simp
+  simp_all
 
 end div
 
@@ -346,6 +375,8 @@ lemma mod_mul {a b m : M} (pos : 0 < m) : (a * b) % m = ((a % m) * (b % m)) % m 
   rcases zero_le b with (rfl | pos)
   · simp
   · exact div_eq_zero_of_lt b (by simp [pos])
+
+@[simp] lemma mod_one (a : M) : a % 1 = 0 := lt_one_iff_eq_zero.mp <| mod_lt a (by simp)
 
 lemma mod_two (a : M) : a % 2 = 0 ∨ a % 2 = 1 :=
   le_one_iff_eq_zero_or_one.mp <| lt_two_iff_le_one.mp <| mod_lt a (b := 2) (by simp)

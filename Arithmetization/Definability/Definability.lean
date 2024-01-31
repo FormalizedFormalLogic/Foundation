@@ -645,9 +645,11 @@ attribute [aesop (rule_sets [Definability]) norm]
 attribute [aesop 1 (rule_sets [Definability]) safe]
   Semipolynomial.comp₁
   Semipolynomial.comp₂
+  Semipolynomial.comp₃
   Definable.comp₁
   Definable.comp₂
   Definable.comp₃
+  Definable.comp₄
   Definable.const
 
 attribute [aesop 4 (rule_sets [Definability]) safe]

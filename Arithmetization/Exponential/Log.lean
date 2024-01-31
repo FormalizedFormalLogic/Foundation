@@ -204,6 +204,8 @@ lemma pos_of_lt_length {a b : M} (h : a < ‖b‖) : 0 < b := by
   ⟨by intro h; by_contra A; rcases (show a = 0 from by simpa using A); simp_all,
    by intro h; exact pos_iff_one_le.mpr (by simpa using length_monotone (pos_iff_one_le.mp h))⟩
 
+@[simp] lemma length_eq_zero_iff {a : M} : ‖a‖ = 0 ↔ a = 0 := not_iff_not.mp (by simp [←pos_iff_ne_zero])
+
 lemma le_log_of_lt_length {a b : M} (h : a < ‖b‖) : a ≤ log b := by
   have : 0 < b := pos_of_lt_length h
   exact le_iff_lt_succ.mpr (by simpa [length_of_pos this] using h)
@@ -214,13 +216,13 @@ lemma exp_log_le_self {a b : M} (pos : 0 < a) (h : Exp (log a) b) : b ≤ a := b
 
 lemma lt_exp_log_self {a b : M} (h : Exp (log a) b) : a < 2 * b := by
   rcases zero_le a with (rfl | pos)
-  · simp at h; simp [h.zero_uniq]
+  · simp at h; simp [h]
   rcases log_pos pos with ⟨_, _, H, _⟩; rcases H.uniq h
   assumption
 
 lemma lt_exp_len_self {a b : M} (h : Exp ‖a‖ b) : a < b := by
   rcases zero_le a with (rfl | pos)
-  · simp at h; simp [h.zero_uniq]
+  · simp at h; simp [h]
   simp [length_of_pos pos] at h
   rcases Exp.exp_succ.mp h with ⟨b, rfl, H⟩
   exact lt_exp_log_self H
@@ -229,16 +231,26 @@ lemma le_iff_le_log_of_exp {x y a : M} (H : Exp x y) (pos : 0 < a) : y ≤ a ↔
   ⟨by rcases H.log_eq_of_exp; exact log_monotone,
    fun h ↦ by rcases log_pos pos with ⟨a', ha', Haa', _⟩; exact le_trans (Exp.monotone_le H Haa' h) ha'⟩
 
-lemma le_iff_lt_length_of_exp {x y a : M} (H : Exp x y) (pos : 0 < a) : y ≤ a ↔ x < ‖a‖ := by
-   simp [le_iff_le_log_of_exp H pos, length_of_pos pos, ←le_iff_lt_succ]
+lemma le_iff_lt_length_of_exp {x y a : M} (H : Exp x y) : y ≤ a ↔ x < ‖a‖ := by
+  rcases zero_le a with (rfl | pos)
+  · simp; exact pos_iff_ne_zero.mp H.range_pos
+  simp [le_iff_le_log_of_exp H pos, length_of_pos pos, ←le_iff_lt_succ]
+
+lemma Exp.lt_iff_log_lt {x y a : M} (H : Exp x y) (pos : 0 < a) : a < y ↔ log a < x :=
+  not_iff_not.mp (by simpa using le_iff_le_log_of_exp H pos)
+
+lemma Exp.lt_iff_len_le {x y a : M} (H : Exp x y) : a < y ↔ ‖a‖ ≤ x := not_iff_not.mp (by simpa using le_iff_lt_length_of_exp H)
+
+lemma Exp.le_of_lt_length {x y a : M} (H : Exp x y) : x < ‖a‖ → y ≤ a := fun h ↦
+  (le_iff_lt_length_of_exp H).mpr h
 
 lemma Exp.le_log {x y : M} (H : Exp x y) : x ≤ log y := (le_iff_le_log_of_exp H H.range_pos).mp (by rfl)
 
-lemma Exp.lt_length {x y : M} (H : Exp x y) : x < ‖y‖ := (le_iff_lt_length_of_exp H H.range_pos).mp (by rfl)
+lemma Exp.lt_length {x y : M} (H : Exp x y) : x < ‖y‖ := (le_iff_lt_length_of_exp H).mp (by rfl)
 
 lemma lt_exp_length {a b : M} (h : Exp ‖a‖ b) : a < b := by
   rcases zero_le a with (rfl | pos)
-  · simp at h; simp [h.zero_uniq]
+  · simp at h; simp [h]
   simp [length_of_pos pos] at h
   rcases Exp.exp_succ.mp h with ⟨b, rfl, H⟩
   exact lt_exp_log_self H
@@ -316,31 +328,39 @@ lemma bexp_eq_of_lt_length {i a a' : M} (ha : i < ‖a‖) (ha' : i < ‖a'‖) 
   have H' : Exp i (bexp a' i) := by simp [ha']
   exact H.uniq H'
 
-@[simp] def bexp_pow2 {a x : M} (h : x < ‖a‖) : Pow2 (bexp a x) := (exp_bexp_of_lt h).range_pow2
+@[simp] lemma bexp_pow2 {a x : M} (h : x < ‖a‖) : Pow2 (bexp a x) := (exp_bexp_of_lt h).range_pow2
 
-@[simp] def lt_bexp {a x : M} (h : x < ‖a‖) : x < bexp a x := (exp_bexp_of_lt h).dom_lt_range
+@[simp] lemma lt_bexp {a x : M} (h : x < ‖a‖) : x < bexp a x := (exp_bexp_of_lt h).dom_lt_range
 
-@[simp] def bexp_pos {a x : M} (h : x < ‖a‖) : 0 < bexp a x := (exp_bexp_of_lt h).range_pos
+@[simp] lemma bexp_pos {a x : M} (h : x < ‖a‖) : 0 < bexp a x := (exp_bexp_of_lt h).range_pos
 
-def lt_bexp_len {a x : M} (h : ‖x‖ < ‖a‖) : x < bexp a ‖x‖ := lt_exp_len_self (exp_bexp_of_lt h)
+lemma lt_bexp_len {a x : M} (h : ‖x‖ < ‖a‖) : x < bexp a ‖x‖ := lt_exp_len_self (exp_bexp_of_lt h)
 
 lemma bexp_eq_of_exp {a x : M} (h : x < ‖a‖) (H : Exp x y) : bexp a x = y := (exp_bexp_of_lt h).uniq H
 
 lemma log_bexp {a x : M} (h : x < ‖a‖) : log (bexp a x) = x := Exp.log_eq_of_exp (exp_bexp_of_lt h)
 
+lemma len_bexp {a x : M} (h : x < ‖a‖) : ‖bexp a x‖ = x + 1 := by rw [length_of_pos (bexp_pos h), log_bexp h]
+
 @[simp] lemma bexp_zero_zero : bexp (0 : M) 0 = 0 := bexp_eq_zero_of_le (by simp)
 
 @[simp] lemma bexp_pos_zero {a : M} (h : 0 < a) : bexp a 0 = 1 := bexp_eq_of_exp (by simpa) (by simp)
 
-def bexp_monotone {a₁ x₁ a₂ x₂ : M} (h₁ : x₁ < ‖a₁‖) (h₂ : x₂ < ‖a₂‖) :
+lemma bexp_monotone {a₁ x₁ a₂ x₂ : M} (h₁ : x₁ < ‖a₁‖) (h₂ : x₂ < ‖a₂‖) :
   bexp a₁ x₁ < bexp a₂ x₂ ↔ x₁ < x₂ := Iff.symm <| (exp_bexp_of_lt h₁).monotone_iff (exp_bexp_of_lt h₂)
 
-def bexp_monotone_le {a₁ x₁ a₂ x₂ : M} (h₁ : x₁ < ‖a₁‖) (h₂ : x₂ < ‖a₂‖) :
+lemma bexp_monotone_le {a₁ x₁ a₂ x₂ : M} (h₁ : x₁ < ‖a₁‖) (h₂ : x₂ < ‖a₂‖) :
   bexp a₁ x₁ ≤ bexp a₂ x₂ ↔ x₁ ≤ x₂ := Iff.symm <| (exp_bexp_of_lt h₁).monotone_le_iff (exp_bexp_of_lt h₂)
+
+lemma bexp_add {x₁ x₂ a : M} (h : x₁ + x₂ < ‖a‖) :
+    bexp a (x₁ + x₂) = bexp a x₁ * bexp a x₂ :=
+  (exp_bexp_of_lt h).uniq ((exp_bexp_of_lt (lt_of_le_of_lt le_self_add h)).add_mul (exp_bexp_of_lt (lt_of_le_of_lt le_add_self h)))
 
 def fbit (a i : M) : M := (a / bexp a i) % 2
 
 @[simp] lemma fbit_lt_two (a i : M) : fbit a i < 2 := by simp [fbit]
+
+@[simp] lemma fbit_le_one (a i : M) : fbit a i ≤ 1 := lt_two_iff_le_one.mp (by simp [fbit])
 
 lemma fbit_eq_one_iff {a i : M} : fbit a i = 1 ↔ LenBit (bexp a i) a := by simp [fbit, LenBit.iff_rem]
 
@@ -358,7 +378,7 @@ lemma fbit_defined : Σᴬ[0]-Function₂ (fbit : M → M → M) fbitdef := by
 
 instance {b s} : DefinableFunction₂ b s (fbit : M → M → M) := defined_to_with_param₀ _ fbit_defined
 
-instance : PolyBounded₂ (fbit : M → M → M) := ⟨ᵀ“1”, λ _ ↦ lt_two_iff_le_one.mp (by simp [fbit])⟩
+instance : PolyBounded₂ (fbit : M → M → M) := ⟨ᵀ“1”, λ _ ↦ by simp⟩
 
 end ISigma₀
 
