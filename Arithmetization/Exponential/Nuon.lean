@@ -195,6 +195,8 @@ lemma ext_append_lt (I L S : M) {i j X} (hi : i ≤ ‖I‖) (hij : j < i) :
   _                        = (S % bexp (I # L) (i * ‖L‖) + (S / bexp (I # L) (i * ‖L‖)) * bexp (I # L) (i * ‖L‖)){L}[j] := Eq.symm <| ext_add₁_bexp hi hij
   _                        = S{L}[j]                                                         := by rw [add_comm, mul_comm, div_add_mod]
 
+section
+
 variable {L A : M}
 
 def IsSegment (L A start intv S : M) : Prop := ∀ i < intv, S{L}[i + 1] = S{L}[i] + fbit A (start + i)
@@ -287,8 +289,11 @@ lemma SeriesSegment.le {U I L A k n : M} (H : SeriesSegment U I L A k n) :
     _ ≤ ‖I‖ * (k / ‖I‖) + k % ‖I‖ := by simpa [mul_comm] using hT.le_add
     _ = k                         := div_add_mod k ‖I‖
 
-lemma SeriesSegment.zero {U I L A : M} (Upos : 0 < U) : SeriesSegment U I L A 0 0 :=
+lemma SeriesSegment.initial {U I L A : M} (Upos : 0 < U) : SeriesSegment U I L A 0 0 :=
   ⟨0, by rfl, ⟨0, Upos, by simp [IsSeries]⟩, ⟨0, Upos, by simp [IsSegment]⟩⟩
+
+lemma SeriesSegment.zero {U I L k : M} (Upos : 0 < U) : SeriesSegment U I L 0 k 0 :=
+  ⟨0, by rfl, ⟨0, Upos, fun _ _ ↦ ⟨0, Upos, fun _ _ ↦ by simp, by simp⟩, by simp⟩, ⟨0, Upos, fun _ _ ↦ by simp, by simp⟩⟩
 
 lemma SeriesSegment.uniq {U I L A k n₁ n₂ : M} (H₁ : SeriesSegment U I L A k n₁) (H₂ : SeriesSegment U I L A k n₂) :
     n₁ = n₂ := by
@@ -296,8 +301,6 @@ lemma SeriesSegment.uniq {U I L A k n₁ n₂ : M} (H₁ : SeriesSegment U I L A
   rcases H₂ with ⟨nₘ₂, _, hT₂, hS₂⟩
   rcases show nₘ₁ = nₘ₂ from hT₁.uniq hT₂
   exact hS₁.uniq hS₂
-
-section
 
 variable {U I L A : M} (hU : (I # L)^2 ≤ U) (hIL : ‖‖I‖^2‖ ≤ ‖L‖) (Ipos : 0 < I)
 
@@ -404,6 +407,10 @@ lemma SeriesSegment.succ {k n : M} (hk : k < ‖I‖^2) (H : SeriesSegment U I L
     have HT' : Series U I L A ((k + 1) / ‖I‖) nₘ := by simpa [hdiv] using HT
     exact ⟨nₘ, le_trans hnₘn le_self_add, HT', HS'⟩
 
+end
+
+section
+
 /-- Define $I$, $L$, $U$ to satisfy the following:
   1. $I$, $L$, $U$ are polynomial of $A$.
   2. $(I \# L)^2 \le U$
@@ -414,6 +421,8 @@ lemma SeriesSegment.succ {k n : M} (hk : k < ‖I‖^2) (H : SeriesSegment U I L
 def polyI (A : M) : M := bexp (2 * A) (√‖A‖)
 
 def polyL (A : M) : M := ‖polyI A‖ ^ 2
+
+def polyU (A : M) : M := (2 * A + 1) ^ (4 * 4 * 4 * 2)
 
 lemma len_polyI {A : M} (pos : 0 < A) : ‖polyI A‖ = √‖A‖ + 1 :=
   len_bexp (show √‖A‖ < ‖2 * A‖ from by simp [length_two_mul_of_pos pos, lt_succ_iff_le])
@@ -441,6 +450,14 @@ lemma four_mul_hash_self (a : M) : (4 * a) # (4 * a) ≤ (a # a) ^ (4 * 4) := ca
 
 @[simp] lemma pow_four_le_pow_four {a b : M} : a ^ 4 ≤ b ^ 4 ↔ a ≤ b := by simp [pow_four_eq_sq_sq]
 
+lemma bexp_four_mul {a a' x : M} (hx : 4 * x < ‖a‖) (hx' : x < ‖a'‖) :
+    bexp a (4 * x) = (bexp a' x) ^ 4 := by
+  rw [four_mul_eq_two_mul_two_mul, bexp_two_mul (a' := a), bexp_two_mul (a := a), pow_four_eq_sq_sq]
+  · exact lt_of_le_of_lt (by simp [four_mul_eq_two_mul_two_mul]) hx
+  · exact hx'
+  · simpa [four_mul_eq_two_mul_two_mul] using hx
+  · exact lt_of_le_of_lt (by simp [four_mul_eq_two_mul_two_mul]) hx
+
 lemma polyI_hash_self_polybounded {A : M} (pos : 0 < A) : (polyI A) # (polyI A) ≤ (2 * A + 1) ^ 4 := calc
   (polyI A) # (polyI A) = bexp ((polyI A) # (polyI A)) ((√‖A‖ + 1) ^ 2) := Eq.symm <| by simpa [sq, len_polyI pos] using bexp_eq_hash (polyI A) (polyI A)
   _                     ≤ bexp ((2 * A) # (2 * A)) ((2 * √‖A‖) ^ 2)     :=
@@ -449,46 +466,132 @@ lemma polyI_hash_self_polybounded {A : M} (pos : 0 < A) : (polyI A) # (polyI A) 
       (by simp [length_hash, lt_succ_iff_le, ←sq, len_polyI pos, length_two_mul_of_pos pos])).mpr
     (by simp [two_mul, ←pos_iff_one_le, pos])
   _                     ≤ bexp ((2 * A) # (2 * A)) (4 * (√‖A‖) ^ 2)     := by simp [mul_pow, two_pow_two_eq_four]
-  _                     ≤ (bexp (A # 1) ((√‖A‖) ^ 2)) ^ 4               := by { sorry }
+  _                     = (bexp (A # 1) ((√‖A‖) ^ 2)) ^ 4               :=
+    bexp_four_mul
+      (by simp [length_hash, lt_succ_iff_le, ←sq, len_polyI pos, length_two_mul_of_pos pos, ←two_pow_two_eq_four, ←mul_pow])
+      (by simp [length_hash, lt_succ_iff_le])
   _                     ≤ (bexp (A # 1) ‖A‖) ^ 4                        := by
     simp; exact (bexp_monotone_le (by simp [length_hash, lt_succ_iff_le]) (by simp [length_hash, lt_succ_iff_le])).mpr (by simp)
   _                     = (A # 1) ^ 4                                   := by congr 1; simpa using bexp_eq_hash A 1
   _                     ≤ (2 * A + 1) ^ 4                               := by simp
 
-lemma polyU {A : M} (pos : 0 < A) : (polyI A) # (polyL A) ≤ (2 * A + 1) ^ (4 * 4 * 4) := calc
+lemma polyI_hash_polyL_polybounded {A : M} (pos : 0 < A) : (polyI A) # (polyL A) ≤ (2 * A + 1) ^ (4 * 4 * 4) := calc
   (polyI A) # (polyL A) ≤ (polyI A) # (3 * polyI A)         := hash_monotone (by rfl) (by simp [polyL, sq_len_le_three_mul])
   _                     ≤ (4 * polyI A) # (4 * polyI A)     := hash_monotone (le_mul_of_pos_left $ by simp) (mul_le_mul_right $ by simp [←three_add_one_eq_four])
   _                     ≤ ((polyI A) # (polyI A)) ^ (4 * 4) := four_mul_hash_self _
   _                     ≤ ((2 * A + 1) ^ 4) ^ (4 * 4)       := by simp [pow_mul, polyI_hash_self_polybounded pos]
   _                     = (2 * A + 1) ^ (4 * 4 * 4)         := by simp [←pow_mul]
 
-/--/
-lemma SeriesSegment.exists {k : M} (hk : k < ‖I‖^2) : ∃ n, SeriesSegment U I L A k n := by
-  suffices : ∃ n ≤ k, SeriesSegment U I L A k n
+lemma sq_polyI_hash_polyL_polybounded {A : M} (pos : 0 < A) : ((polyI A) # (polyL A)) ^ 2 ≤ polyU A := calc
+  ((polyI A) # (polyL A)) ^ 2 ≤ ((2 * A + 1) ^ (4 * 4 * 4)) ^ 2 := by simp [polyI_hash_polyL_polybounded pos]
+  _                           = polyU A                         := by simp [polyU, pow_mul]
+
+def NuonAux (A k n : M) : Prop := SeriesSegment (polyU A) (polyI A) (polyL A) A k n
+
+@[simp] lemma NuonAux.initial (A : M) : NuonAux A 0 0 := SeriesSegment.initial (by simp [polyU])
+
+@[simp] lemma NuonAux.initial_iff (A n : M) : NuonAux A 0 n ↔ n = 0 := ⟨fun h ↦ h.uniq (NuonAux.initial A), by rintro rfl; simp⟩
+
+@[simp] lemma NuonAux.zero (k : M) : NuonAux 0 k 0 := SeriesSegment.zero (by simp [polyU])
+
+lemma NuonAux.le {A k n : M} (H : NuonAux A k n) : n ≤ k := SeriesSegment.le H
+
+lemma NuonAux.uniq {A k n₁ n₂ : M} (H₁ : NuonAux A k n₁) (H₂ : NuonAux A k n₂) : n₁ = n₂ := SeriesSegment.uniq H₁ H₂
+
+lemma NuonAux.succ {A k : M} (H : NuonAux A k n) (hk : k ≤ ‖A‖) : NuonAux A (k + 1) (n + fbit A k) := by
+  rcases zero_le A with (rfl | pos)
+  · rcases show n = 0 from H.uniq (NuonAux.zero k); simp
+  exact SeriesSegment.succ (sq_polyI_hash_polyL_polybounded pos) (by simp [polyL]) (lt_of_le_of_lt hk $ polyI_le pos) H
+
+lemma NuonAux.exists {k : M} (hk : k ≤ ‖A‖) : ∃ n, NuonAux A k n := by
+  suffices : ∃ n ≤ k, NuonAux A k n
   · rcases this with ⟨n, _, h⟩; exact ⟨n, h⟩
   revert hk
   induction k using hierarchy_induction_sigma₀
   · sorry -- simp [SeriesSegment, Segment, Series, IsSegment, IsSeries]
   case zero =>
-    intro _
-    exact ⟨0, by rfl, SeriesSegment.zero $ lt_of_lt_of_le (by simp) hU⟩
+    intro _; exact ⟨0, by simp⟩
   case succ k IH =>
     intro hk
-    rcases IH (lt_of_le_of_lt (by simp) hk) with ⟨n, hn, Hn⟩
-    exact ⟨n + fbit A k, add_le_add hn (by simp), Hn.succ hU hIL Ipos (lt_of_le_of_lt (by simp) hk)⟩
+    rcases IH (le_trans (by simp) hk) with ⟨n, hn, Hn⟩
+    exact ⟨n + fbit A k, add_le_add hn (by simp), Hn.succ (le_trans (by simp) hk)⟩
 
-lemma SeriesSegment.le_len_self {k : M} (hk : k < ‖I‖^2) (H : SeriesSegment U I L A k n) : n ≤ ‖A‖ := by
-  revert hk H n
-  suffices : ∀ k, ∀ n ≤ k, SeriesSegment U I L A k n →
+lemma NuonAux.succ_elim {A k : M} (hk : k ≤ ‖A‖) (H : NuonAux A (k + 1) n) : ∃ n', n = n' + fbit A k ∧ NuonAux A k n' := by
+  rcases NuonAux.exists hk with ⟨n', H'⟩
+  rcases H.uniq (H'.succ hk)
+  exact ⟨n', rfl, H'⟩
 
+lemma NuonAux.succ_iff {A k : M} (hk : k ≤ ‖A‖) : NuonAux A (k + 1) (n + fbit A k) ↔ NuonAux A k n := by
+  constructor
+  · intro H
+    rcases NuonAux.exists hk with ⟨n', H'⟩
+    rcases show n' = n from by simpa using (H'.succ hk).uniq H
+    exact H'
+  · exact (NuonAux.succ · hk)
 
-lemma nuonAux_exists_unique {k : M} (hk : k < ‖I‖^2) : ∃ n, SeriesSegment U I L A k n := by
+@[simp] lemma fbit_two_mul_zero_eq_zero (a : M) : fbit (2 * a) 0 = 0 := by
+  rcases zero_le a with (rfl | pos)
+  · simp
+  · have : bexp (2 * a) 0 = 1 := bexp_eq_of_exp (by simp [pos]) (by simp)
+    simp [fbit, this]
 
+@[simp] lemma fbit_two_mul_add_one_zero_eq_one (a : M) : fbit (2 * a + 1) 0 = 1 := by simp [fbit, one_lt_two]
+
+lemma NuonAux.two_mul {k n : M} (hk : k ≤ ‖A‖) : NuonAux A k n → NuonAux (2 * A) (k + 1) n := by
+  revert n hk
+  suffices : ∀ n ≤ k, k ≤ ‖A‖ → NuonAux A k n → NuonAux (2 * A) (k + 1) n
+  · intro n hk H
+    exact this n H.le hk H
+  induction k using hierarchy_induction_sigma₀
+  · sorry
+  case zero =>
+    simp; simpa using (NuonAux.initial (2 * A)).succ (by simp)
+  case succ k IH =>
+    intro n hn hk H
+    rcases H.succ_elim (le_trans (by simp) hk) with ⟨n', rfl, H'⟩
+    have IH : NuonAux (2 * A) (k + 1) n' := IH n' H'.le (le_trans (by simp) hk) H'
+    simpa using IH.succ (le_trans hk (length_monotone $ by simp))
+
+lemma NuonAux.two_mul_add_one {k n : M} (hk : k ≤ ‖A‖) : NuonAux A k n → NuonAux (2 * A + 1) (k + 1) (n + 1) := by
+  revert n hk
+  suffices : ∀ n ≤ k, k ≤ ‖A‖ → NuonAux A k n → NuonAux (2 * A + 1) (k + 1) (n + 1)
+  · intro n hk H
+    exact this n H.le hk H
+  induction k using hierarchy_induction_sigma₀
+  · sorry
+  case zero =>
+    simpa using (NuonAux.initial (2 * A + 1)).succ (by simp)
+  case succ k IH =>
+    intro n hn hk H
+    rcases H.succ_elim (le_trans (by simp) hk) with ⟨n', rfl, H'⟩
+    have IH : NuonAux (2 * A + 1) (k + 1) (n' + 1) := IH n' H'.le (le_trans (by simp) hk) H'
+    simpa [add_right_comm n' 1] using IH.succ (le_trans hk (by simp [length_two_mul_add_one]))
 
 end
 
-
 end Nuon
+
+def Nuon (A n : M) : Prop := Nuon.NuonAux A ‖A‖ n
+
+lemma Nuon.exists_unique (A : M) : ∃! n, Nuon A n := by
+  rcases show ∃ n, Nuon A n from NuonAux.exists (by simp) with ⟨n, hn⟩
+  exact ExistsUnique.intro n hn (fun n' hn' ↦ hn'.uniq hn)
+
+def nuon (a : M) : M := Classical.choose! (Nuon.exists_unique a)
+
+@[simp] lemma nuon_nuon (a : M) : Nuon a (nuon a) := Classical.choose!_spec (Nuon.exists_unique a)
+
+lemma Nuon.nuon_eq {a b : M} (h : Nuon a b) : nuon a = b := (nuon_nuon a).uniq h
+
+lemma nuon_bit0 (a : M) : nuon (2 * a) = nuon a := by
+  rcases zero_le a with (rfl | pos)
+  · simp
+  · have : Nuon (2 * a) (nuon a) := by simpa [Nuon, length_two_mul_of_pos pos] using (nuon_nuon a).two_mul (by simp)
+    exact this.nuon_eq
+
+lemma nuon_bit1 (a : M) : nuon (2 * a + 1) = nuon a + 1 := by
+  have : Nuon (2 * a + 1) (nuon a + 1) := by simpa [Nuon, length_two_mul_add_one] using (nuon_nuon a).two_mul_add_one (by simp)
+  exact this.nuon_eq
 
 end Model
 

@@ -271,6 +271,12 @@ lemma div_lt_of_lt_mul {a b c : M} (h : a < b * c) : a / c < b := by
     _ ≤ a         := by simp
   simp_all
 
+lemma div_cancel_left {c} (pos : 0 < c) (a b : M) : (c * a) / (c * b) = a / b := by simp [div_mul, pos]
+
+lemma div_cancel_right {c} (pos : 0 < c) (a b : M) : (a * c) / (b * c) = a / b := by simp [mul_comm _ c, div_cancel_left pos]
+
+@[simp] lemma two_mul_add_one_div_two (a : M) : (2 * a + 1) / 2 = a := by simp [div_mul_add_self', one_lt_two]
+
 end div
 
 section mod

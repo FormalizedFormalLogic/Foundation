@@ -312,6 +312,8 @@ lemma exp_bexp_of_lt {a x : M} (h : x < ‖a‖) : Exp x (bexp a x) :=
 lemma bexp_eq_zero_of_le {a x : M} (h : ‖a‖ ≤ x) : bexp a x = 0 :=
   (Classical.choose!_spec (bexp_exists_unique a x)).2 h
 
+@[simp] lemma bexp_zero (x : M): bexp 0 x = 0 := bexp_eq_zero_of_le (by simp)
+
 @[simp] lemma exp_bexp_of_lt_iff {a x : M} : Exp x (bexp a x) ↔ x < ‖a‖ :=
   ⟨by intro h; by_contra A
       have : bexp a x = 0 := bexp_eq_zero_of_le (not_lt.mp A)
@@ -380,6 +382,22 @@ lemma bexp_add {x₁ x₂ a : M} (h : x₁ + x₂ < ‖a‖) :
     bexp a (x₁ + x₂) = bexp a x₁ * bexp a x₂ :=
   (exp_bexp_of_lt h).uniq ((exp_bexp_of_lt (lt_of_le_of_lt le_self_add h)).add_mul (exp_bexp_of_lt (lt_of_le_of_lt le_add_self h)))
 
+lemma bexp_two_mul {a a' x : M} (hx : 2 * x < ‖a‖) (hx' : x < ‖a'‖) :
+    bexp a (2 * x) = (bexp a' x) ^ 2 :=
+  bexp_eq_of_exp hx (exp_bexp_of_lt hx').bit_zero
+
+lemma bexp_two_mul_succ {a i : M} : bexp (2 * a) (i + 1) = 2 * bexp a i := by
+  rcases zero_le a with (rfl | pos)
+  · simp
+  rcases show i ≥ ‖a‖ ∨ i < ‖a‖ from le_or_lt ‖a‖ i with (h | h)
+  · simp [bexp_eq_zero_of_le, h, show ‖2 * a‖ ≤ i + 1 from by simp [length_two_mul_of_pos pos, h]]
+  · exact bexp_eq_of_exp (by simp [length_two_mul_of_pos pos, h]) (exp_bexp_of_lt h).succ
+
+lemma bexp_two_mul_add_one_succ {a i : M} : bexp (2 * a + 1) (i + 1) = 2 * bexp a i := by
+  rcases show i ≥ ‖a‖ ∨ i < ‖a‖ from le_or_lt ‖a‖ i with (h | h)
+  · simp [bexp_eq_zero_of_le, h, show ‖2 * a + 1‖ ≤ i + 1 from by simp [length_two_mul_add_one, h]]
+  · exact bexp_eq_of_exp (by simp [length_two_mul_add_one, h]) (exp_bexp_of_lt h).succ
+
 def fbit (a i : M) : M := (a / bexp a i) % 2
 
 @[simp] lemma fbit_lt_two (a i : M) : fbit a i < 2 := by simp [fbit]
@@ -403,6 +421,14 @@ lemma fbit_defined : Σᴬ[0]-Function₂ (fbit : M → M → M) fbitdef := by
 instance {b s} : DefinableFunction₂ b s (fbit : M → M → M) := defined_to_with_param₀ _ fbit_defined
 
 instance : PolyBounded₂ (fbit : M → M → M) := ⟨ᵀ“1”, λ _ ↦ by simp⟩
+
+@[simp] lemma fbit_zero (i : M) : fbit 0 i = 0 := by simp [fbit]
+
+@[simp] lemma fbit_mul_two_mul (a i : M) : fbit (2 * a) (i + 1) = fbit a i := by
+  simp [fbit, bexp_two_mul_succ, div_cancel_left]
+
+@[simp] lemma fbit_mul_two_add_one_mul (a i : M) : fbit (2 * a + 1) (i + 1) = fbit a i := by
+  simp [fbit, bexp_two_mul_add_one_succ, div_cancel_left, div_mul]
 
 end ISigma₀
 
