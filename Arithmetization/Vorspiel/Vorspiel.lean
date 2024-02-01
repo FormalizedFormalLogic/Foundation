@@ -39,7 +39,7 @@ namespace LO
 
 namespace FirstOrder
 
-variable {L :Language} [L.Zero] [L.One] [L.Add] [L.Mul]
+variable {L : Language} [L.Zero] [L.One] [L.Add] [L.Mul]
 
 namespace Semiterm
 
@@ -78,6 +78,33 @@ lemma complexity_func {k} (f : L.Func k) (v : Fin k → Semiterm L ξ n) : (func
 
 lemma val_bShift' (e : Fin (n + 1) → M) (t : Semiterm L μ n) :
     (Rew.bShift t).val s e ε = t.val s (e ·.succ) ε := by simp[val_rew, Function.comp]
+
+namespace Operator
+
+variable {L : Language} [Operator.One L] [Operator.Mul L]
+
+def npow (L : Language) [Operator.One L] [Operator.Mul L] (n : ℕ) : Operator L 1 := op(*).foldr (One.one.comp ![]) (List.replicate n (bvar 0))
+
+lemma npow_zero : npow L 0 = One.one.comp ![] := rfl
+
+lemma npow_succ : npow L (n + 1) = op(*).comp ![npow L n, bvar 0] := by simp [npow, foldr]
+
+@[simp] lemma npow_positive_iff {L : Language} [Operator.One L] [L.Mul] (t : Semiterm L μ (n + 1)) (k : ℕ) :
+    ((Operator.npow L k).operator ![t]).Positive ↔ k = 0 ∨ t.Positive := by
+  cases k <;> simp [positive_operator_iff, operator_comp, npow_zero, npow_succ]
+  case succ k _ =>
+    simp [Mul.term_eq, bv_func]
+    constructor
+    · intro h; exact h 1 0 (by simp [bvar])
+    · intro h _ _ _
+      exact h
+
+variable {M : Type*} {s : Structure L M}
+
+@[simp] lemma val_bvar {n} (x : Fin n) (v : Fin n → M) :
+    (Operator.bvar (L := L) x).val v = v x := by simp [Operator.bvar, Operator.val]
+
+end Operator
 
 end Semiterm
 
@@ -158,12 +185,14 @@ section
 
 open Lean PrettyPrinter Delaborator SubExpr
 
+syntax foterm " ^ⁿ " num  : foterm
 syntax foformula ".[" foterm,* "]" : foformula
 
 macro_rules
   | `(“ $p:foformula .[ $t:foterm,* ] ”) => do
     let v ← t.getElems.foldrM (β := Lean.TSyntax _) (init := ← `(![])) (fun a s => `(ᵀ“$a” :> $s))
     `((Rew.embSubsts $v).hom “$p”)
+  | `(ᵀ“ $t:foterm ^ⁿ $n:num ”)          => `(Semiterm.Operator.const (Operator.npow _ $n ![ᵀ“$t”]))
 
 end
 

@@ -203,6 +203,15 @@ lemma polynomial_mono (t : Semiterm ℒₒᵣ ξ n) {e₁ e₂ : Fin n → M} {�
   case hadd iht ihu => exact add_le_add iht ihu
   case hmul iht ihu => exact mul_le_mul iht ihu (by simp) (by simp)
 
+open Semiterm
+
+@[simp] lemma val_npow (k : ℕ) (a : M) :
+    (Operator.npow ℒₒᵣ k).val ![a] = a ^ k := by
+  induction k <;> simp [Operator.npow_zero, Operator.npow_succ, Operator.val_comp, Matrix.empty_eq, Matrix.comp_vecCons']
+  case succ k IH =>
+    rw [Matrix.fun_eq_vec₂ (v := fun i => Operator.val ((Operator.npow ℒₒᵣ k :> ![Operator.bvar 0]) i) ![a]), pow_succ]
+    simp [npowRec, mul_comm a, IH]
+
 end Model
 
 end
