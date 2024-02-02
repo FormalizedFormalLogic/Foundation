@@ -117,6 +117,9 @@ lemma val_substs (w : Fin n₁ → Semiterm L μ n₂) (t : Semiterm L μ n₁) 
 @[simp] lemma val_bShift (a : M) (t : Semiterm L μ n) :
     (Rew.bShift t).val s (a :> e) ε = t.val s e ε := by simp[val_rew, Function.comp]
 
+lemma val_bShift' (e : Fin (n + 1) → M) (t : Semiterm L μ n) :
+    (Rew.bShift t).val s e ε = t.val s (e ·.succ) ε := by simp[val_rew, Function.comp]
+
 @[simp] lemma val_emb {o : Type v'} [i : IsEmpty o] (t : Semiterm L o n) :
     (Rew.emb t : Semiterm L μ n).val s e ε = t.val s e i.elim := by
   simp[val_rew]; congr; { funext x; exact i.elim' x }
@@ -124,6 +127,10 @@ lemma val_substs (w : Fin n₁ → Semiterm L μ n₂) (t : Semiterm L μ n₁) 
 @[simp] lemma val_castLE (h : n₁ ≤ n₂) (t : Semiterm L μ n₁) :
     (Rew.castLE h t).val s e₂ ε = t.val s (fun x => e₂ (x.castLE h)) ε  := by
   simp[val_rew]; congr
+
+lemma val_embSubsts (w : Fin k → Semiterm L μ n) (t : Semiterm L Empty k) :
+    (Rew.embSubsts w t).val s e ε = t.bVal s (fun x ↦ (w x).val s e ε) := by
+  simp [val_rew, Empty.eq_elim]; congr
 
 section Language
 
@@ -324,6 +331,10 @@ lemma eval_substs {k} (w : Fin k → Semiterm L μ n) (p : Semiformula L μ k) :
 @[simp] lemma eval_toS {e : Fin n → M} {ε} (p : Formula L (Fin n)) :
     Eval s e ε (Rew.toS.hom p) ↔ Eval s ![] e p := by
   simp [Rew.toS, eval_rew, Function.comp, Matrix.empty_eq]
+
+lemma eval_embSubsts {k} (w : Fin k → Semiterm L μ n) (σ : Semisentence L k) :
+    Eval s e ε ((Rew.embSubsts w).hom σ) ↔ PVal s (fun x ↦ (w x).val s e ε) σ := by
+  simp[eval_rew, Function.comp, Empty.eq_elim]
 
 section Syntactic
 

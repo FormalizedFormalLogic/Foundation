@@ -127,6 +127,21 @@ lemma fv_func {k} (f : L.Func k) (v : Fin k → Semiterm L μ n) : (func f v).fv
 
 @[simp] lemma fv_constant (f : L.Func 0) (v : Fin 0 → Semiterm L μ n) : (func f v).fv = ∅ := rfl
 
+def complexity : Semiterm L ξ n → ℕ
+  | #_       => 0
+  | &_       => 0
+  | func _ v => Finset.sup Finset.univ (fun i ↦ complexity (v i)) + 1
+
+@[simp] lemma complexity_bvar (x : Fin n) : (#x : Semiterm L ξ n).complexity = 0 := rfl
+
+@[simp] lemma complexity_fvar (x : ξ) : (&x : Semiterm L ξ n).complexity = 0 := rfl
+
+lemma complexity_func {k} (f : L.Func k) (v : Fin k → Semiterm L ξ n) : (func f v).complexity = Finset.sup Finset.univ (fun i ↦ complexity (v i)) + 1 := rfl
+
+@[simp] lemma complexity_func_lt {k} (f : L.Func k) (v : Fin k → Semiterm L ξ n) (i) :
+    (v i).complexity < (func f v).complexity := by
+  simp [complexity_func, Nat.lt_add_one_iff]; exact Finset.le_sup (f := fun i ↦ complexity (v i)) (by simp)
+
 end Semiterm
 
 structure Rew (L : Language.{u}) (μ₁ : Type ν₁) (n₁ : ℕ) (μ₂ : Type ν₂) (n₂ : ℕ) where
@@ -225,6 +240,8 @@ def castLE {n n' : ℕ} (h : n ≤ n') : Rew L μ n μ n' :=
 def toS : Rew L (Fin n) 0 Empty n := Rew.bind ![] (#·)
 
 def toF : Rew L Empty n (Fin n) 0 := Rew.bind (&·) Empty.elim
+
+def embSubsts (v : Fin k → Semiterm L μ n) : Rew L Empty k μ n := Rew.bind v Empty.elim
 
 protected def q (ω : Rew L μ₁ n₁ μ₂ n₂) : Rew L μ₁ (n₁ + 1) μ₂ (n₂ + 1) :=
   bind (#0 :> bShift ∘ ω ∘ bvar) (bShift ∘ ω ∘ fvar)
@@ -403,6 +420,29 @@ section toS
 
 end toS
 
+section embSubsts
+
+variable {k} (w : Fin k → Semiterm L μ n)
+
+@[simp] lemma embSubsts_bvar (x : Fin k) : embSubsts w #x = w x :=
+  by simp[embSubsts]
+
+@[simp] lemma embSubsts_zero (w : Fin 0 → Term L μ) : embSubsts w = Rew.emb := by
+  ext x <;> try simp
+  · exact Fin.elim0 x
+  · exact Empty.elim x
+
+lemma substs_comp_embSubsts (v : Fin l → Semiterm L μ k) (w : Fin k → Semiterm L μ n) :
+    (substs w).comp (embSubsts v) = embSubsts (substs w ∘ v) := by
+  ext x <;> simp[comp_app]
+  exact Empty.elim x
+
+@[simp] lemma embSubsts_eq_id : (embSubsts Semiterm.bvar : Rew L Empty n μ n) = Rew.emb := by
+  ext x <;> try simp
+  · exact Empty.elim x
+
+end embSubsts
+
 section q
 
 variable (ω : Rew L μ₁ n₁ μ₂ n₂)
@@ -472,6 +512,10 @@ lemma q_toS :
 
 lemma q_substs (w : Fin n → Semiterm L μ n') :
     (substs w).q = substs (#0 :> bShift ∘ w) := by ext x; { cases x using Fin.cases <;> simp }; { simp }
+
+lemma q_embSubsts (w : Fin k → Semiterm L μ n) :
+    (embSubsts w).q = embSubsts (#0 :> bShift ∘ w) := by ext x; { cases x using Fin.cases <;> simp }; { simp; exact Empty.elim x }
+
 
 end q
 
@@ -617,6 +661,11 @@ def substsUnexpander : Lean.PrettyPrinter.Unexpander
   | _ => throw ()
 
 scoped notation "⇑" => Rew.shift
+
+scoped syntax (name := embSubstsHomNotation) term:max ".[" term,* "]" : term
+
+scoped macro_rules (kind := embSubstsHomNotation)
+  | `($p:term .[$terms:term,*]) => `((Rew.embSubsts ![$terms,*]).hom $p)
 
 namespace Semiterm
 

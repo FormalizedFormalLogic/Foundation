@@ -19,6 +19,7 @@ syntax:70 "ᵀ⟨" term "⟩(" foterm,* ")" : foterm
 syntax:50 foterm:50 " + " foterm:51 : foterm
 syntax:60 foterm:60 " * " foterm:61 : foterm
 syntax:65 foterm:65 " ^ " foterm:66 : foterm
+syntax foterm " ^' " num  : foterm
 syntax:67 "exp " foterm:68 : foterm
 syntax:75 "⟨" foterm ", " foterm "⟩" : foterm
 
@@ -45,6 +46,7 @@ macro_rules
   | `(ᵀ“ $t:foterm + $u:foterm ”)                  => `(Operator.Add.add.operator ![ᵀ“$t”, ᵀ“$u”])
   | `(ᵀ“ $t:foterm * $u:foterm ”)                  => `(Operator.Mul.mul.operator ![ᵀ“$t”, ᵀ“$u”])
   | `(ᵀ“ $t:foterm ^ $u:foterm ”)                  => `(Operator.Pow.pow.operator ![ᵀ“$t”, ᵀ“$u”])
+  | `(ᵀ“ $t:foterm ^' $n:num ”)                    => `((Operator.npow _ $n).operator ![ᵀ“$t”])
   | `(ᵀ“ exp $t:foterm ”)                          => `(Operator.Exp.exp.operator ![ᵀ“$t”])
   | `(ᵀ“ ⟨ $t:foterm, $u:foterm ⟩ ”)               => `(Operator.Pairing.pair.operator ![ᵀ“$t”, ᵀ“$u”])
   | `(ᵀ“ ᵀ⇑$t:foterm ”)                           => `(Rew.shift ᵀ“$t”)
@@ -58,7 +60,7 @@ macro_rules
 
 #check (ᵀ“ ᵀ⟨Operator.Add.add⟩(&2 + &0, ᵀ⟨Operator.Zero.zero⟩())” : Semiterm Language.oRing ℕ 8)
 #check (ᵀ“ ᵀ⟨Operator.Add.add⟩(&2 + &0, ᵀ⟨Operator.Zero.zero⟩())” : Semiterm Language.oRing ℕ 8)
-#check ᵀ“ᵀ⇑(⋆ * #3 + 9)”
+#check (ᵀ“#3 ^' 2” : Semiterm Language.oRing ℕ 8)
 #check Semiterm.func Language.Mul.mul (ᵀ“1” :> ᵀ“3” :> Matrix.vecEmpty)
 
 section delab
@@ -174,6 +176,7 @@ syntax:25 "∀* " foformula:24 : foformula
 syntax:max "∃[" foformula "] " foformula:35 : foformula
 
 syntax foformula "[" foterm,* "]" : foformula
+syntax foformula ".[" foterm,* "]" : foformula
 syntax:max "⇑" foformula:10 : foformula
 
 syntax "(" foformula ")" : foformula
@@ -203,6 +206,9 @@ macro_rules
   | `(“ $p:foformula [ $t:foterm,* ] ”)            => do
     let v ← t.getElems.foldrM (β := Lean.TSyntax _) (init := ← `(![])) (fun a s => `(ᵀ“$a” :> $s))
     `((Rew.substs $v).hom “$p”)
+  | `(“ $p:foformula .[ $t:foterm,* ] ”) => do
+    let v ← t.getElems.foldrM (β := Lean.TSyntax _) (init := ← `(![])) (fun a s => `(ᵀ“$a” :> $s))
+    `((Rew.embSubsts $v).hom “$p”)
   | `(“ ⇑$p:foformula ”)                         => `(Rew.shift.hom “$p”)
   | `(“ ( $x ) ”)                                  => `(“$x”)
 
