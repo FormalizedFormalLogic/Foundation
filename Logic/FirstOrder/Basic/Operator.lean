@@ -43,6 +43,20 @@ def bvar (x : Fin n) : Operator L n := ⟨#x⟩
 lemma operator_bvar (x : Fin k) (v : Fin k → Semiterm L μ n) : (bvar x).operator v = v x := by
   simp[operator, bvar]
 
+lemma bv_operator {k} (o : Operator L k) (v : Fin k → Semiterm L μ (n + 1)) :
+    (o.operator v).bv = .biUnion o.term.bv fun i ↦ (v i).bv  := by
+  simp[operator]
+  generalize o.term = s
+  induction s <;> try simp [Rew.func, bv_func, Finset.biUnion_biUnion, *]
+  case fvar => contradiction
+
+lemma positive_operator_iff {k} {o : Operator L k} {v : Fin k → Semiterm L μ (n + 1)} :
+    (o.operator v).Positive ↔ ∀ i ∈ o.term.bv, (v i).Positive := by
+  simp [Positive, bv_operator]
+  exact ⟨fun h i hi x hx ↦ h x i hi hx, fun h x i hi hx ↦ h i hi x hx⟩
+
+@[simp] lemma positive_const (c : Const L) : (c : Semiterm L μ (n + 1)).Positive := by simp [const, positive_operator_iff]
+
 -- f.operator ![ ... f.operator ![f.operator ![z, t 0], t 1], ... ,t (n-1)]
 def foldr (f : Operator L 2) (z : Operator L k) : List (Operator L k) → Operator L k
   | []      => z
@@ -131,20 +145,6 @@ abbrev godelNumber (L : Language) [Operator.Zero L] [Operator.One L] [Operator.A
 
 end numeral
 
-lemma bv_operator {k} (o : Operator L k) (v : Fin k → Semiterm L μ (n + 1)) :
-    (o.operator v).bv = .biUnion o.term.bv fun i ↦ (v i).bv  := by
-  simp[operator]
-  generalize o.term = s
-  induction s <;> try simp [Rew.func, bv_func, Finset.biUnion_biUnion, *]
-  case fvar => contradiction
-
-lemma positive_operator_iff {k} {o : Operator L k} {v : Fin k → Semiterm L μ (n + 1)} :
-    (o.operator v).Positive ↔ ∀ i ∈ o.term.bv, (v i).Positive := by
-  simp [Positive, bv_operator]
-  exact ⟨fun h i hi x hx ↦ h x i hi hx, fun h x i hi hx ↦ h i hi x hx⟩
-
-@[simp] lemma positive_const (c : Const L) : (c : Semiterm L μ (n + 1)).Positive := by simp [const, positive_operator_iff]
-
 @[simp] lemma Add.positive_iff [L.Add] (t u : Semiterm L μ (n + 1)) :
     (Operator.Add.add.operator ![t, u]).Positive ↔ t.Positive ∧ u.Positive := by
   simp [positive_operator_iff, Add.term_eq, bv_func]
@@ -157,7 +157,57 @@ lemma positive_operator_iff {k} {o : Operator L k} {v : Fin k → Semiterm L μ 
   exact ⟨by intro h; exact ⟨h 0, h 1⟩,
     by intro h i; cases i using Fin.cases <;> simp [Fin.eq_zero, *]⟩
 
+section npow
+
+def npow (L : Language) [Operator.One L] [Operator.Mul L] (n : ℕ) : Operator L 1 :=
+  Operator.Mul.mul.foldr (One.one.comp ![]) (List.replicate n (bvar 0))
+
+variable [Operator.One L] [Operator.Mul L]
+
+
+lemma npow_zero : npow L 0 = One.one.comp ![] := rfl
+
+lemma npow_succ : npow L (n + 1) = Operator.Mul.mul.comp ![npow L n, bvar 0] := by simp [npow, foldr]
+
+end npow
+
+@[simp] lemma npow_positive_iff {L : Language} [Operator.One L] [L.Mul] (t : Semiterm L μ (n + 1)) (k : ℕ) :
+    ((Operator.npow L k).operator ![t]).Positive ↔ k = 0 ∨ t.Positive := by
+  cases k <;> simp [positive_operator_iff, operator_comp, npow_zero, npow_succ]
+  case succ k _ =>
+    simp [Mul.term_eq, bv_func]
+    constructor
+    · intro h; exact h 1 0 (by simp [bvar])
+    · intro h _ _ _
+      exact h
+
 end Operator
+
+section complexity
+
+variable {L : Language} [L.Zero] [L.One] [L.Add] [L.Mul]
+
+@[simp] lemma complexity_zero : ((Operator.Zero.zero : Const L) : Semiterm L ξ n).complexity = 1 := by
+  simp [Operator.const, Operator.operator, Operator.numeral, Operator.Zero.term_eq, complexity_func]
+
+@[simp] lemma complexity_one : ((Operator.One.one : Const L) : Semiterm L ξ n).complexity = 1 := by
+  simp [Operator.const, Operator.operator, Operator.numeral, Operator.One.term_eq, complexity_func]
+
+@[simp] lemma complexity_add (t u : Semiterm L ξ n) :
+    (Operator.Add.add.operator ![t, u]).complexity = max t.complexity u.complexity + 1 := by
+  simp [Operator.const, Operator.operator, Operator.numeral, Operator.Add.term_eq, complexity_func, Rew.func]
+  rw [show (Finset.univ : Finset (Fin 2)) = {0, 1} from by ext i; cases i using Fin.cases <;> simp [Fin.eq_zero]]
+  simp [sup_eq_max]
+
+@[simp] lemma complexity_mul (t u : Semiterm L ξ n) :
+    (Operator.Mul.mul.operator ![t, u]).complexity = max t.complexity u.complexity + 1 := by
+  simp [Operator.const, Operator.operator, Operator.numeral, Operator.Mul.term_eq, complexity_func, Rew.func]
+  rw [show (Finset.univ : Finset (Fin 2)) = {0, 1} from by ext i; cases i using Fin.cases <;> simp [Fin.eq_zero]]
+  simp [sup_eq_max]
+
+end complexity
+
+section semantics
 
 def Operator.val {M : Type w} [s : Structure L M] (o : Operator L k) (v : Fin k → M) : M :=
   Semiterm.val s v Empty.elim o.term
@@ -186,6 +236,11 @@ lemma val_operator {k} (o : Operator L k) (v) :
 
 lemma Operator.val_comp (o₁ : Operator L k) (o₂ : Fin k → Operator L m) (v : Fin m → M) :
   (o₁.comp o₂).val v = o₁.val (fun i => (o₂ i).val v) := by simp[comp, val, val_operator]
+
+@[simp] lemma Operator.val_bvar {n} (x : Fin n) (v : Fin n → M) :
+    (Operator.bvar (L := L) x).val v = v x := by simp [Operator.bvar, Operator.val]
+
+end semantics
 
 end Semiterm
 
