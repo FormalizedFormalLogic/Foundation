@@ -1,4 +1,3 @@
-
 import Logic.Propositional.Basic
 import Logic.FirstOrder.Hauptsatz
 import Logic.FirstOrder.Completeness.Completeness

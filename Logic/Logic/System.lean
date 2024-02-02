@@ -145,7 +145,7 @@ namespace Sound
 variable [Sound F]
 variable {a : α}
 
-lemma sound' {T : Set F} {f : F} : T ⊢! f → T ⊨ f := by rintro ⟨b⟩; exact sound b
+lemma sound! {T : Set F} {f : F} : T ⊢! f → T ⊨ f := by rintro ⟨b⟩; exact sound b
 
 lemma not_provable_of_countermodel {T : Set F} {p : F}
   (hT : a ⊧* T) (hp : ¬a ⊧ p) : IsEmpty (T ⊢ p) :=
@@ -179,8 +179,7 @@ variable [Complete F]
 lemma satisfiableTheory_iff_consistent {T : Set F} : Semantics.SatisfiableTheory T ↔ System.Consistent T :=
   ⟨Sound.consistent_of_satisfiable,
    by contrapose; intro h
-      have : T ⊨ ⊥
-      { intro a hM; have : Semantics.SatisfiableTheory T := ⟨a, hM⟩; contradiction }
+      have : T ⊨ ⊥ := by intro a hM; have : Semantics.SatisfiableTheory T := ⟨a, hM⟩; contradiction
       have : T ⊢ ⊥ := complete this
       exact System.inconsistent_of_proof this⟩
 
@@ -189,6 +188,8 @@ lemma not_satisfiable_iff_inconsistent {T : Set F} : ¬Semantics.SatisfiableTheo
 
 lemma consequence_iff_provable {T : Set F} {f : F} : T ⊨ f ↔ T ⊢! f :=
 ⟨fun h => ⟨complete h⟩, by rintro ⟨b⟩; exact Sound.sound b⟩
+
+alias ⟨complete!, _⟩ := consequence_iff_provable
 
 end Complete
 

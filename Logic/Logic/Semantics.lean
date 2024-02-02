@@ -139,7 +139,7 @@ variable (T U T₁ T₂ T₃ : Set F)
 
 end Equivalent
 
-class Mod (a : α) (T : Set F) where
+class Mod (a : α) (T : Set F) : Prop where
   realizeTheory : a ⊧* T
 
 namespace Mod
@@ -196,7 +196,7 @@ end Cumulative
 variable (F)
 variable {α : Type*} [Semantics F α]
 
-class Compact where
+class Compact : Prop where
   compact {T : Set F} :
     Semantics.SatisfiableTheory T ↔ (∀ u : Finset F, ↑u ⊆ T → Semantics.SatisfiableTheory (u : Set F))
 

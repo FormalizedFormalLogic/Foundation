@@ -50,7 +50,7 @@ inductive Eq : Theory L
   | relExt {k} (r : L.Rel k) :
     Eq “∀* (!(Semiformula.vecEq varSumInL varSumInR) → !(Semiformula.rel r varSumInL) → !(Semiformula.rel r varSumInR))”
 
-notation "𝐄𝐪 " => Eq
+notation "𝐄𝐪" => Eq
 
 end Eq
 
@@ -283,6 +283,14 @@ variable {M : Type*} [s : Structure L M] [Structure.Eq L M]
   simp[existsUnique, Semiformula.eval_substs, Matrix.comp_vecCons', ExistsUnique]
 
 end Semiformula
+
+namespace Theory
+
+variable (M : Type u) [Nonempty M] [Structure L M] [Structure.Eq L M]
+
+instance : (𝐄𝐪 : Theory L).Mod M := Mod.of_models Structure.Eq.modelsEqTheory
+
+end Theory
 
 end FirstOrder
 

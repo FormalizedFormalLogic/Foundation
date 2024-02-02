@@ -46,7 +46,7 @@ theorem main (θ : Semisentence ℒₒᵣ 1) :
     have hssbs : ∀ σ π : Semisentence ℒₒᵣ 1, ∀ z,
         PVal! M ![z, encode σ, encode π] ssbs ↔ z = encode (σ/[(⸢π⸣ : Semiterm ℒₒᵣ Empty 0)]) := by
       simpa[models_iff, Semiformula.eval_substs, Matrix.comp_vecCons', Matrix.constant_eq_singleton] using
-      fun σ π => consequence_iff'.mp (Sound.sound' (ssbs_spec (T := T) σ π)) M
+      fun σ π => consequence_iff'.mp (Sound.sound! (ssbs_spec (T := T) σ π)) M
     simp[models_iff, Semiformula.eval_substs, Matrix.comp_vecCons']
     suffices : PVal! M ![] (fixpoint θ) ↔ PVal! M ![encode (fixpoint θ)] θ
     · simpa[Matrix.constant_eq_singleton] using this

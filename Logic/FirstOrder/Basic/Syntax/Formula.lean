@@ -895,6 +895,16 @@ abbrev SyntacticTheory (L : Language.{u}) := Set (SyntacticFormula L)
 
 def Theory.lMap (Φ : L₁ →ᵥ L₂) (T : Theory L₁) : Theory L₂ := Semiformula.lMap Φ '' T
 
+namespace Theory
+
+variable (T U : Theory L)
+
+instance {L : Language} : Add (Theory L) := ⟨(· ∪ ·)⟩
+
+lemma add_def : T + U = T ∪ U := rfl
+
+end Theory
+
 end FirstOrder
 
 end LO

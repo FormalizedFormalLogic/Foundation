@@ -517,12 +517,6 @@ end System
 
 namespace Theory
 
-variable (T U : Theory L)
-
-instance {L : Language} : Add (Theory L) := ⟨(· ∪ ·)⟩
-
-lemma add_def : T + U = T ∪ U := rfl
-
 instance {T U : Theory L} : T ≾ T + U := ⟨fun {f} hf ↦ System.weakening hf (by simp [add_def])⟩
 
 instance {T U : Theory L} : U ≾ T + U := ⟨fun {f} hf ↦ System.weakening hf (by simp [add_def])⟩

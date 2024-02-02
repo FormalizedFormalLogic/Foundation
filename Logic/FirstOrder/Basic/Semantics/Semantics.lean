@@ -536,25 +536,39 @@ lemma ModelsTheory.of_ss [Nonempty M] [Structure L M] {T U : Theory L} (h : M �
 
 namespace Theory
 
-variable {L₁ L₂ : Language.{u}}
+section
+
+variable {L₁ L₂ : Language.{u}} {Φ : L₁ →ᵥ L₂}
+
 variable {M : Type u} [Nonempty M] [s₂ : Structure L₂ M]
-variable {Φ : L₁ →ᵥ L₂}
 
 lemma modelsTheory_onTheory₁ {T₁ : Theory L₁} :
     ModelsTheory (s := s₂) (T₁.lMap Φ) ↔ ModelsTheory (s := s₂.lMap Φ) T₁ :=
   by simp[Semiformula.models_lMap, Theory.lMap, modelsTheory_iff, @modelsTheory_iff (T := T₁)]
 
+end
+
 namespace Mod
 
-variable (M : Type u) [Nonempty M] [s : Structure L M] { T : Theory L} [Theory.Mod M T]
+variable (M : Type u) [Nonempty M] [s : Structure L M] (T U : Theory L) [Theory.Mod M T]
+
+lemma modelsTheory : M ⊧ₘ* T := Semantics.Mod.realizeTheory
+
+variable {T U}
 
 lemma models {σ : Sentence L} (hσ : σ ∈ T) : M ⊧ₘ σ := Semantics.Mod.models s.toStruc hσ
 
-def of_ss {T₁ T₂ : Theory L} [Theory.Mod M T₁] (ss : T₂ ⊆ T₁) : Theory.Mod M T₂ :=
+lemma of_ss {T₁ T₂ : Theory L} [Theory.Mod M T₁] (ss : T₂ ⊆ T₁) : Theory.Mod M T₂ :=
   Semantics.Mod.of_ss s.toStruc ss
 
 lemma of_subtheory [Nonempty M] {T₁ T₂ : Theory L} [Theory.Mod M T₁] (h : Semantics.Subtheory T₂ T₁) : Theory.Mod M T₂ :=
   Semantics.Mod.of_subtheory _ h
+
+variable {M}
+
+lemma of_models (h : M ⊧ₘ* T) : Theory.Mod (L := L) M T := ⟨fun _ hp ↦ h hp⟩
+
+instance [T.Mod M] [U.Mod M] : (T + U).Mod M := of_models (by simp [add_def]; exact ⟨modelsTheory M T, modelsTheory M U⟩)
 
 end Mod
 

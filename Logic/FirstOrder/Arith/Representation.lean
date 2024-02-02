@@ -177,7 +177,7 @@ lemma provable_computable_code_uniq {k} {f : Vector ℕ k → ℕ}
       Theory.Mod.of_subtheory (T₁ := T) M (Semantics.ofSystemSubtheory _ _)
     have Hfv : Semiformula.PVal! M (f (Vector.ofFn v) :> (v ·)) (code (codeOfPartrec f)) := by
       simpa[models_iff, Semiformula.eval_substs, Matrix.comp_vecCons'] using
-        consequence_iff'.mp (Sound.sound' (provable_iff_computable T hf v)) M
+        consequence_iff'.mp (Sound.sound! (provable_iff_computable T hf v)) M
     simp[models_iff, Semiformula.eval_substs, Matrix.comp_vecCons']
     intro x; constructor
     · intro H; exact code_uniq H Hfv
