@@ -850,6 +850,16 @@ section fvEnum
 
 variable [DecidableEq μ] [Inhabited μ]
 
+def fvEnum' (p : Semiformula L μ n) : μ → ℕ := p.fvarList.indexOf
+
+def fvEnumInv' (p : Semiformula L μ n) : ℕ → μ :=
+  fun i ↦ if hi : i < p.fvarList.length then p.fvarList.get ⟨i, hi⟩ else default
+
+lemma fvEnumInv'_fvEnum' (p : Semiformula L μ n) {x : μ} (hx : x ∈ p.fvarList) :
+    fvEnumInv' p (fvEnum' p x) = x := by
+  simp [fvEnumInv', fvEnum']; intro h
+  exact False.elim <| not_le.mpr (List.indexOf_lt_length.mpr $ hx) h
+
 def fvEnum (p : Semiformula L μ n) : μ → Fin (p.fvarList.length + 1) :=
   fun x ↦ ⟨p.fvarList.indexOf x, by simp [Nat.lt_succ, List.indexOf_le_length]⟩
 
