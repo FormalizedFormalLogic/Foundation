@@ -1,5 +1,17 @@
 import Logic.FirstOrder.Arith.PAminus
 
+instance [Zero α] : Nonempty α := ⟨0⟩
+
+namespace Set
+
+@[simp] lemma subset_union_three₁ (s t u : Set α) : s ⊆ s ∪ t ∪ u := Set.subset_union_of_subset_left (by simp) _
+
+@[simp] lemma subset_union_three₂ (s t u : Set α) : t ⊆ s ∪ t ∪ u := Set.subset_union_of_subset_left (by simp) _
+
+@[simp] lemma subset_union_three₃ (s t u : Set α) : u ⊆ s ∪ t ∪ u := Set.subset_union_of_subset_right (by rfl) _
+
+end Set
+
 namespace Matrix
 
 lemma fun_eq_vec₃ {v : Fin 3 → α} : v = ![v 0, v 1, v 2] := by
@@ -20,6 +32,9 @@ lemma fun_eq_vec₄ {v : Fin 4 → α} : v = ![v 0, v 1, v 2, v 3] := by
 
 @[simp] lemma cons_app_six {n : ℕ} (a : α) (s : Fin n.succ.succ.succ.succ.succ.succ → α) : (a :> s) 6 = s 5 := rfl
 
+lemma eq_vecCons' (s : Fin (n + 1) → C) : s = s 0 :> (s ·.succ) :=
+   funext $ Fin.cases (by simp) (by simp)
+
 end Matrix
 
 instance : ToString Empty := ⟨Empty.elim⟩
@@ -34,167 +49,43 @@ class Length (α : Type*) where
 
 notation "‖" x "‖" => Length.length x
 
-
 namespace LO
 
 namespace FirstOrder
 
-variable {L : Language} [L.Zero] [L.One] [L.Add] [L.Mul]
-
 namespace Semiterm
 
-def complexity : Semiterm L ξ n → ℕ
-  | #_       => 0
-  | &_       => 0
-  | func _ v => Finset.sup Finset.univ (fun i ↦ complexity (v i)) + 1
+@[simp] lemma bshift_positive (t : Semiterm L ξ n) : Positive (Rew.bShift t) := by
+  induction t <;> simp
 
-@[simp] lemma complexity_bvar (x : Fin n) : (#x : Semiterm L ξ n).complexity = 0 := rfl
-
-@[simp] lemma complexity_fvar (x : ξ) : (&x : Semiterm L ξ n).complexity = 0 := rfl
-
-lemma complexity_func {k} (f : L.Func k) (v : Fin k → Semiterm L ξ n) : (func f v).complexity = Finset.sup Finset.univ (fun i ↦ complexity (v i)) + 1 := rfl
-
-@[simp] lemma complexity_func_lt {k} (f : L.Func k) (v : Fin k → Semiterm L ξ n) (i) :
-    (v i).complexity < (func f v).complexity := by
-  simp [complexity_func, Nat.lt_add_one_iff]; exact Finset.le_sup (f := fun i ↦ complexity (v i)) (by simp)
-
-@[simp] lemma complexity_zero : (ᵀ“0” : Semiterm L ξ n).complexity = 1 := by
-  simp [Operator.const, Operator.operator, Operator.numeral, Operator.Zero.term_eq, complexity_func]
-
-@[simp] lemma complexity_one : (ᵀ“1” : Semiterm L ξ n).complexity = 1 := by
-  simp [Operator.const, Operator.operator, Operator.numeral, Operator.One.term_eq, complexity_func]
-
-@[simp] lemma complexity_add (t u : Semiterm L ξ n) :
-    (ᵀ“!!t + !!u” : Semiterm L ξ n).complexity = max t.complexity u.complexity + 1 := by
-  simp [Operator.const, Operator.operator, Operator.numeral, Operator.Add.term_eq, complexity_func, Rew.func]
-  rw [show (Finset.univ : Finset (Fin 2)) = {0, 1} from by ext i; cases i using Fin.cases <;> simp [Fin.eq_zero]]
-  simp [sup_eq_max]
-
-@[simp] lemma complexity_mul (t u : Semiterm L ξ n) :
-    (ᵀ“!!t * !!u” : Semiterm L ξ n).complexity = max t.complexity u.complexity + 1 := by
-  simp [Operator.const, Operator.operator, Operator.numeral, Operator.Mul.term_eq, complexity_func, Rew.func]
-  rw [show (Finset.univ : Finset (Fin 2)) = {0, 1} from by ext i; cases i using Fin.cases <;> simp [Fin.eq_zero]]
-  simp [sup_eq_max]
-
-lemma val_bShift' (e : Fin (n + 1) → M) (t : Semiterm L μ n) :
-    (Rew.bShift t).val s e ε = t.val s (e ·.succ) ε := by simp[val_rew, Function.comp]
-
-namespace Operator
-
-variable {L : Language} [Operator.One L] [Operator.Mul L]
-
-def npow (L : Language) [Operator.One L] [Operator.Mul L] (n : ℕ) : Operator L 1 := op(*).foldr (One.one.comp ![]) (List.replicate n (bvar 0))
-
-lemma npow_zero : npow L 0 = One.one.comp ![] := rfl
-
-lemma npow_succ : npow L (n + 1) = op(*).comp ![npow L n, bvar 0] := by simp [npow, foldr]
-
-@[simp] lemma npow_positive_iff {L : Language} [Operator.One L] [L.Mul] (t : Semiterm L μ (n + 1)) (k : ℕ) :
-    ((Operator.npow L k).operator ![t]).Positive ↔ k = 0 ∨ t.Positive := by
-  cases k <;> simp [positive_operator_iff, operator_comp, npow_zero, npow_succ]
-  case succ k _ =>
-    simp [Mul.term_eq, bv_func]
-    constructor
-    · intro h; exact h 1 0 (by simp [bvar])
-    · intro h _ _ _
-      exact h
+lemma bv_eq_empty_of_positive {t : Semiterm L ξ 1} (ht : t.Positive) : t.bv = ∅ :=
+  Finset.eq_empty_of_forall_not_mem <| by simp [Positive, Fin.eq_zero] at ht ⊢; assumption
 
 variable {M : Type*} {s : Structure L M}
 
-@[simp] lemma val_bvar {n} (x : Fin n) (v : Fin n → M) :
-    (Operator.bvar (L := L) x).val v = v x := by simp [Operator.bvar, Operator.val]
+@[simp] lemma val_toS {e : Fin n → M} (t : Semiterm L (Fin n) 0) :
+    bVal s e (Rew.toS t) = val s ![] e t := by
+  simp[val_rew, Matrix.empty_eq]; congr
 
-end Operator
+@[simp] lemma val_toF {e : Fin n → M} (t : Semiterm L Empty n) :
+    val s ![] e (Rew.toF t) = bVal s e t := by
+  simp[val_rew, Matrix.empty_eq]; congr
+  funext i; simp; contradiction
 
 end Semiterm
 
 namespace Rew
 
-def embSubsts (v : Fin k → Semiterm L μ n) : Rew L Empty k μ n := Rew.bind v Empty.elim
+lemma substs_bv (t : Semiterm L ξ n) (v : Fin n → Semiterm L ξ m) :
+    (Rew.substs v t).bv = t.bv.biUnion (fun i ↦ (v i).bv) := by
+  induction t <;> simp [Rew.func, Semiterm.bv_func, Finset.biUnion_biUnion, *]
 
-section embSubsts
-
-variable {k} (w : Fin k → Semiterm L μ n)
-
-@[simp] lemma embSubsts_bvar (x : Fin k) : embSubsts w #x = w x :=
-  by simp[embSubsts]
-
-@[simp] lemma embSubsts_zero (w : Fin 0 → Term L μ) : embSubsts w = Rew.emb := by
-  ext x <;> try simp
-  · exact Fin.elim0 x
-  · exact Empty.elim x
-
-lemma substs_comp_embSubsts (v : Fin l → Semiterm L μ k) (w : Fin k → Semiterm L μ n) :
-    (substs w).comp (embSubsts v) = embSubsts (substs w ∘ v) := by
-  ext x <;> simp[comp_app]
-  exact Empty.elim x
-
-@[simp] lemma embSubsts_eq_id : (embSubsts Semiterm.bvar : Rew L Empty n μ n) = Rew.emb := by
-  ext x <;> try simp
-  · exact Empty.elim x
-
-lemma q_embSubsts (w : Fin k → Semiterm L μ n) :
-    (embSubsts w).q = embSubsts (#0 :> bShift ∘ w) := by ext x; { cases x using Fin.cases <;> simp }; { simp; exact Empty.elim x }
-
-end embSubsts
+@[simp] lemma substs_positive (t : Semiterm L ξ n) (v : Fin n → Semiterm L ξ (m + 1)) :
+    (Rew.substs v t).Positive ↔ ∀ i ∈ t.bv, (v i).Positive := by
+  simp [Semiterm.Positive, substs_bv]
+  exact ⟨fun H i hi x hx ↦ H x i hi hx, fun H x i hi hx ↦ H i hi x hx⟩
 
 end Rew
-
-scoped syntax (name := embSubstsHomNotation) term:max ".[" term,* "]" : term
-
-scoped macro_rules (kind := embSubstsHomNotation)
-  | `($p:term .[$terms:term,*]) => `((Rew.embSubsts ![$terms,*]).hom $p)
-
-namespace Semiterm
-
-variable {M : Type w} {s : Structure L M} {e : Fin n → M} {ε : μ → M}
-
-lemma val_embSubsts (w : Fin k → Semiterm L μ n) (t : Semiterm L Empty k) :
-    (Rew.embSubsts w t).val s e ε = t.bVal s (fun x ↦ (w x).val s e ε) := by
-  simp [val_rew, Empty.eq_elim]; congr
-
-end Semiterm
-
-namespace Semiformula
-
-variable {M : Type w} {s : Structure L M} {e : Fin n → M} {ε : μ → M}
-
-lemma eval_embSubsts {k} (w : Fin k → Semiterm L μ n) (σ : Semisentence L k) :
-    Eval s e ε ((Rew.embSubsts w).hom σ) ↔ PVal s (fun x ↦ (w x).val s e ε) σ := by
-  simp[eval_rew, Function.comp, Empty.eq_elim]
-
-section fvEnum'
-
-variable [DecidableEq μ] [Inhabited μ]
-
-def fvEnum' (p : Semiformula L μ n) : μ → ℕ := p.fvarList.indexOf
-
-def fvEnumInv' (p : Semiformula L μ n) : ℕ → μ :=
-  fun i ↦ if hi : i < p.fvarList.length then p.fvarList.get ⟨i, hi⟩ else default
-
-lemma fvEnumInv'_fvEnum' (p : Semiformula L μ n) {x : μ} (hx : x ∈ p.fvarList) :
-    fvEnumInv' p (fvEnum' p x) = x := by
-  simp [fvEnumInv', fvEnum']; intro h
-  exact False.elim <| not_le.mpr (List.indexOf_lt_length.mpr $ hx) h
-
-end fvEnum'
-
-end Semiformula
-
-section
-
-open Lean PrettyPrinter Delaborator SubExpr
-
-syntax foterm " ^ⁿ " num  : foterm
-syntax foformula ".[" foterm,* "]" : foformula
-
-macro_rules
-  | `(“ $p:foformula .[ $t:foterm,* ] ”) => do
-    let v ← t.getElems.foldrM (β := Lean.TSyntax _) (init := ← `(![])) (fun a s => `(ᵀ“$a” :> $s))
-    `((Rew.embSubsts $v).hom “$p”)
-  | `(ᵀ“ $t:foterm ^ⁿ $n:num ”)          => `(Semiterm.Operator.const (Operator.npow _ $n ![ᵀ“$t”]))
-
-end
 
 namespace Arith
 
@@ -258,7 +149,126 @@ lemma iff_iff {p q : Semiformula L μ n} :
 
 end Hierarchy
 
+section model
+
+variable {T : Theory ℒₒᵣ} [𝐄𝐪 ≾ T]
+
+variable (M : Type) [Zero M] [One M] [Add M] [Mul M] [LT M] [T.Mod M]
+
+lemma oring_sound {σ : Sentence ℒₒᵣ} (h : T ⊢! σ) : M ⊧ₘ σ := consequence_iff'.mp (LO.Sound.sound! h) M
+
+end model
+
 end Arith
+
+namespace Theory.Mod
+
+variable (M : Type _) [Nonempty M] [Structure L M] (T U : Theory L)
+
+lemma of_provably_subtheory (_ : T ≾ U) [U.Mod M] : T.Mod M :=
+  of_subtheory M (Semantics.ofSystemSubtheory T U)
+
+lemma of_provably_subtheory' [T ≾ U] [U.Mod M] : T.Mod M := of_provably_subtheory M T U inferInstance
+
+lemma of_add_left [(T + U).Mod M] : T.Mod M := of_ss M (show T ⊆ T + U from by simp [Theory.add_def])
+
+lemma of_add_right [(T + U).Mod M] : U.Mod M := of_ss M (show U ⊆ T + U from by simp [Theory.add_def])
+
+variable [L.Eq]
+
+-- instance of_add_left_eq [(T + 𝐄𝐪 : Theory L).Mod M] : T.Mod M := of_add_left M T 𝐄𝐪
+
+end Theory.Mod
+
+section
+
+variable {L : Language}
+
+def ballClosure : {n : ℕ} → (Fin n → Semiformula L ξ 1) → Semiformula L ξ n → Formula L ξ
+  | 0,     _, q => q
+  | _ + 1, p, q => ballClosure (p ·.succ) (∀[(p 0)/[#0]] q)
+
+@[simp] lemma ball_closure_zero (p : Fin 0 → Semiformula L ξ 1) (q : Semiformula L ξ 0) : ballClosure p q = q := rfl
+
+lemma ball_closure_succ (p : Fin (n + 1) → Semiformula L ξ 1) (q : Semiformula L ξ (n + 1)) :
+    ballClosure p q = ballClosure (p ·.succ) (∀[(p 0)/[#0]] q) := rfl
+
+def bexClosure : {n : ℕ} → (Fin n → Semiformula L ξ 1) → Semiformula L ξ n → Formula L ξ
+  | 0,     _, q => q
+  | _ + 1, p, q => bexClosure (p ·.succ) (∃[(p 0)/[#0]] q)
+
+@[simp] lemma bex_closure_zero (p : Fin 0 → Semiformula L ξ 1) (q : Semiformula L ξ 0) : bexClosure p q = q := rfl
+
+lemma bex_closure_succ (p : Fin (n + 1) → Semiformula L ξ 1) (q : Semiformula L ξ (n + 1)) :
+    bexClosure p q = bexClosure (p ·.succ) (∃[(p 0)/[#0]] q) := rfl
+
+namespace Semiformula
+
+variable {M : Type _} [Nonempty M] {s : Structure L M}
+
+variable {n : ℕ} {ε : ξ → M}
+
+@[simp] lemma eval_ballClosure {p : Fin n → Semiformula L ξ 1} {q : Semiformula L ξ n} :
+    Val s ε (ballClosure p q) ↔ ∀ e : Fin n → M, (∀ i, Eval s ![e i] ε (p i)) → Eval s e ε q := by
+  induction' n with n IH
+  · simp [Matrix.empty_eq]
+  · simp [ball_closure_succ, IH]
+    constructor
+    · intro H e h
+      simpa [←Matrix.eq_vecCons'] using H (e ·.succ) (fun i ↦ h i.succ) (e 0) (h 0)
+    · intro H e h x hx
+      exact H (x :> e) (Fin.cases (by simpa [Matrix.empty_eq] using hx) (fun i ↦ by simpa using h i))
+
+@[simp] lemma eval_bexClosure {p : Fin n → Semiformula L ξ 1} {q : Semiformula L ξ n} :
+    Val s ε (bexClosure p q) ↔ ∃ e : Fin n → M, (∀ i, Eval s ![e i] ε (p i)) ∧ Eval s e ε q := by
+  induction' n with n IH
+  · simp [Matrix.empty_eq]
+  · simp [bex_closure_succ, IH]
+    constructor
+    · rintro ⟨e, he, x, hx, H⟩
+      exact ⟨x :> e, Fin.cases hx he, H⟩
+    · rintro ⟨e, h, H⟩
+      exact ⟨(e ·.succ), fun i ↦ h i.succ, e 0, h 0, by simpa [←Matrix.eq_vecCons'] using H⟩
+
+end Semiformula
+
+namespace Arith.Hierarchy
+
+variable [L.LT] {μ : Type v}
+
+lemma ballClosure_iff {b s n} {p : Semiformula L ξ n} {v : Fin n → Semiterm L ξ 1} (hv : ∀ i, (v i).Positive) :
+    Hierarchy b s (ballClosure (fun i ↦ “#0 < !!(v i)”) p) ↔ Hierarchy b s p := by
+  induction' n with n IH <;> simp [ballClosure, ←Rew.comp_app]
+  refine Iff.trans (IH (p := “∀[#0 < !!([→ #0] (v 0))] !p”) (v := (v ·.succ)) (by intro; simp [hv])) ?_
+  rw [ball_iff]; simp [Semiterm.bv_eq_empty_of_positive (hv 0)]
+
+lemma bexClosure_iff {b s n} {p : Semiformula L ξ n} {v : Fin n → Semiterm L ξ 1} (hv : ∀ i, (v i).Positive) :
+    Hierarchy b s (bexClosure (fun i ↦ “#0 < !!(v i)”) p) ↔ Hierarchy b s p := by
+  induction' n with n IH <;> simp [bexClosure, ←Rew.comp_app]
+  refine Iff.trans (IH (p := “∃[#0 < !!([→ #0] (v 0))] !p”) (v := (v ·.succ)) (by intro; simp [hv])) ?_
+  rw [bex_iff]; simp [Semiterm.bv_eq_empty_of_positive (hv 0)]
+
+@[simp] lemma matrix_conj_iff {b s n} {p : Fin m → Semiformula L ξ n} :
+    Hierarchy b s (Matrix.conj fun j ↦ p j) ↔ ∀ j, Hierarchy b s (p j) := by
+  cases m <;> simp
+
+lemma remove_forall {p : Semiformula L ξ (n + 1)} : Hierarchy b s (∀' p) → Hierarchy b s p := by
+  intro h; rcases h
+  case ball => simpa
+  case all => assumption
+  case pi h => exact h.accum _
+  case dummy_sigma h => exact h.accum _
+
+lemma remove_exists {p : Semiformula L ξ (n + 1)} : Hierarchy b s (∃' p) → Hierarchy b s p := by
+  intro h; rcases h
+  case bex => simpa
+  case ex => assumption
+  case sigma h => exact h.accum _
+  case dummy_pi h => exact h.accum _
+
+end Arith.Hierarchy
+
+end
 
 end FirstOrder
 
