@@ -15,11 +15,25 @@ section
 
 variable (Bew : Set F → F → Type*)
 
+class HasModusPonens where
+  modus_ponens {Γ₁ Γ₂ p q} : (Bew Γ₁ (p ⟶ q)) → (Bew Γ₂ p) → (Bew (Γ₁ ∪ Γ₂) q)
+
+section
+
+variable {Bew : Set F → F → Type*} [HasModusPonens Bew]
+
+abbrev modus_ponens {Γ₁ Γ₂ p q} (d₁ : Bew Γ₁ (p ⟶ q)) (d₂ : Bew Γ₂ p) : Bew (Γ₁ ∪ Γ₂) q := HasModusPonens.modus_ponens d₁ d₂
+infixr:90 "⨀" => modus_ponens
+
+def modus_ponens' {Γ p q} (d₁ : Bew Γ (p ⟶ q)) (d₂ : Bew Γ p) : Bew Γ q := by simpa using d₁ ⨀ d₂
+infixr:90 "⨀" => modus_ponens'
+
+end
+
 /--
   Minimal Propositional Logic.
 -/
-class Minimal [NegDefinition F] extends Deduction Bew where
-  modus_ponens {Γ₁ Γ₂ : Set F} {p q : F} : (Bew Γ₁ (p ⟶ q)) → (Bew Γ₂ p) → (Bew (Γ₁ ∪ Γ₂) q)
+class Minimal [NegDefinition F] extends Deduction Bew, HasModusPonens Bew where
   verum        (Γ : Set F)             : Bew Γ ⊤
   imply₁       (Γ : Set F) (p q : F)   : Bew Γ (p ⟶ (q ⟶ p))
   imply₂       (Γ : Set F) (p q r : F) : Bew Γ ((p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r)
@@ -88,17 +102,11 @@ end
 
 open Deduction Minimal HasDT Intuitionistic Classical HasDNE
 
-infixr:90 " ⨀ " => modus_ponens
-
-variable {Bew : Set F → F → Type*} (Γ : Set F) (p q r : F)
+variable {Bew : Set F → F → Type u} (Γ : Set F) (p q r : F)
 
 section Minimal
 
 variable [hM : Minimal Bew] [hDT : HasDT Bew] [hEFQ : HasEFQ Bew]
-
-def modus_ponens' {Γ p q} (d₁ : Bew Γ (p ⟶ q)) (d₂ : Bew Γ p) : Bew Γ q := by simpa using d₁ ⨀ d₂
-
-infixr:90 " ⨀ " => modus_ponens'
 
 abbrev efq := hEFQ.efq
 
@@ -219,6 +227,94 @@ instance : HasLEM Bew where
   lem Γ p := by sorry;
 
 end Classical
+
+section
+
+variable [LogicSymbol F] [NegDefinition F]
+variable (Bew : Set F → F → Type u) [hd : Deduction Bew] [HasModusPonens Bew] [HasDT Bew] [Minimal Bew] [Classical Bew]
+
+local infix:20 " ⊢ " => Bew
+
+variable (Γ : Set F) (p : F)
+
+@[simp] def Deducible := Nonempty (Bew Γ p)
+local infix:20 "⊢!" => Deducible Bew
+
+namespace Deducible
+
+variable {Bew : Set F → F → Type u} [hd : Deduction Bew] [HasModusPonens Bew]
+
+def modus_ponens {Γ₁ Γ₂ : Set F} {p q : F} (d₁ : Deducible Bew Γ₁ (p ⟶ q)) (d₂ : Deducible Bew Γ₂ p) : Deducible Bew (Γ₁ ∪ Γ₂) q := ⟨d₁.some ⨀ d₂.some⟩
+
+def modus_ponens' {Γ : Set F} {p q : F} (d₁ : Deducible Bew Γ (p ⟶ q)) (d₂ : Deducible Bew Γ p) : Deducible Bew Γ q := by simpa using d₁.modus_ponens d₂
+
+end Deducible
+
+@[simp] def Undeducible := ¬(Γ ⊢! p)
+local infix:20 "⊬!" => Undeducible Bew
+
+@[simp] def Inconsistent := Γ ⊢! ⊥
+
+@[simp] def Consistent := ¬(Inconsistent Bew Γ)
+
+lemma consistent_iff_undeducible_falsum : Consistent Bew Γ ↔ (Γ ⊬! ⊥) := Iff.rfl
+
+lemma consistent_no_falsum {Γ} (h : Consistent Bew Γ) : ⊥ ∉ Γ := by
+  by_contra hC;
+  exact h ⟨hd.axm hC⟩
+
+lemma consistent_of_subset {Γ Δ : Set F} (h : Γ ⊆ Δ) (hConsis : Consistent Bew Δ) : Consistent Bew Γ := by
+  intro hD;
+  exact hConsis ⟨hd.weakening' h hD.some⟩;
+
+lemma consistent_of_insert {p} (hConsis : Consistent Bew (insert p Γ)) : Consistent Bew Γ := consistent_of_subset Bew (by simp) hConsis
+
+lemma consistent_no_falsum_subset {Γ Δ} (hConsis : Consistent Bew Γ) (hΔ : Δ ⊆ Γ) : ⊥ ∉ Δ := consistent_no_falsum Bew $ consistent_of_subset Bew hΔ hConsis
+
+lemma consistent_subset_undeducible_falsum {Γ Δ} (hConsis : Consistent Bew Γ) (hΔ : Δ ⊆ Γ) : (Δ ⊬! ⊥) := by
+  by_contra hC;
+  simp_all [Consistent, Undeducible, Deducible];
+  exact hConsis.false $ hd.weakening' hΔ hC.some;
+
+lemma consistent_neither_undeducible {Γ : Set F} (hConsis : Consistent Bew Γ) (p) : (Γ ⊬! p) ∨ (Γ ⊬! ~p) := by
+  by_contra hC; simp only [not_or] at hC;
+  have h₁ : Γ ⊢! p  := by simpa using hC.1;
+  have h₂ : Γ ⊢! p ⟶ ⊥ := by simpa using hC.2;
+  exact hConsis $ h₂.modus_ponens' h₁;
+
+lemma inconsistent_of_deduction {Γ : Set F} (d : Γ ⊢ ⊥) : Inconsistent Bew Γ := ⟨d⟩
+
+lemma inconsistent_of_deducible {Γ : Set F} (d : Γ ⊢! ⊥) : Inconsistent Bew Γ := by simpa [Inconsistent];
+
+lemma inconsistent_insert_falsum : Inconsistent Bew (insert ⊥ Γ) := ⟨hd.axm (by simp)⟩
+
+lemma inconsistent_insert {Γ p} (h : Inconsistent Bew (insert p Γ)) : (∃ Δ, (Δ ⊆ Γ) ∧ ((insert p Δ) ⊢! ⊥)) := by
+  existsi Γ;
+  constructor;
+  . rfl;
+  . exact h;
+
+/--
+  **This lemma require classical logic.**
+-/
+lemma inconsistent_iff_insert_neg {Γ p} : Inconsistent Bew (insert (~p) Γ) ↔ (Γ ⊢! p) := by
+  constructor;
+  . intro h;
+    have : Γ ⊢ ~~p := by simpa using (dtr h.some);
+    exact ⟨(dne' this)⟩
+  . intro h;
+    have : Γ ⊢ ((p ⟶ ⊥) ⟶ ⊥) := by simpa using dni' h.some
+    exact ⟨by simpa using (dtl this)⟩;
+
+lemma consistent_iff_insert_neg {Γ p} : Consistent Bew (insert (~p) Γ) ↔ (Γ ⊬! p) := (inconsistent_iff_insert_neg Bew).not
+
+lemma consistent_either {Γ : Set F} (hConsis : Consistent Bew Γ) (p) : (Consistent Bew (insert p Γ)) ∨ (Consistent Bew (insert (~p) Γ)) := by
+  by_contra hC; simp [not_or, Consistent] at hC;
+  have ⟨Δ₁, hΔ₁, ⟨dΔ₁⟩⟩ := inconsistent_insert Bew hC.1;
+  have ⟨Δ₂, hΔ₂, ⟨dΔ₂⟩⟩ := inconsistent_insert Bew hC.2;
+  exact consistent_subset_undeducible_falsum _ hConsis (by aesop) ⟨(dtr dΔ₂) ⨀ (dtr dΔ₁)⟩;
+
+end
 
 end Hilbert
 

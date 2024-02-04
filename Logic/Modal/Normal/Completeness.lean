@@ -1,5 +1,5 @@
 import Logic.Propositional.Basic.Completeness
-import Logic.Modal.Normal.HilbertStyle
+import Logic.Modal.Normal.Deduction
 import Logic.Modal.Normal.Semantics
 
 namespace LO.Modal.Normal
@@ -19,14 +19,6 @@ variable (Λ : AxiomSet β) (Γ : Theory β)
 
 def Theory.Maximal := ∀ p, (p ∈ Γ) ∨ (~p ∈ Γ)
 
-def Theory.Inconsistent (Γ : Theory β) := Γ ⊢ᴹ[Λ]! ⊥
-
-def Theory.Consistent (Γ : Theory β) := ¬(Inconsistent Λ Γ)
-
-def Formula.Inconsistent (p : Formula β) := Theory.Inconsistent {p}
-
-def Formula.Consistent (p : Formula β) := Theory.Consistent {p}
-
 def WeakCompleteness := ∀ (p : Formula β), (⊧ᴹ[(𝔽(Λ) : FrameClass α)] p) → (⊢ᴹ[Λ]! p)
 
 def Completeness (𝔽 : FrameClass α) := ∀ (Γ : Theory β) (p : Formula β), (Γ ⊨ᴹ[𝔽] p) → (Γ ⊢ᴹ[Λ]! p)
@@ -34,52 +26,35 @@ def Completeness (𝔽 : FrameClass α) := ∀ (Γ : Theory β) (p : Formula β)
 end
 
 variable {Λ : AxiomSet β}
-variable {Γ : Theory β} (hConsisΓ : Theory.Consistent Λ Γ)
+variable {Γ : Theory β} (hConsisΓ : Consistent Λ Γ)
 
 @[simp]
-lemma inconsistent_insert_falsum : Theory.Inconsistent Λ (insert ⊥ Γ) := by simp [Theory.Inconsistent];
+lemma inconsistent_insert_falsum : Inconsistent Λ (insert ⊥ Γ) := Hilbert.inconsistent_insert_falsum (· ⊢ᴹ[Λ] ·) Γ
 
--- lemma consistent_subset_undeducible_falsum (Δ : Theory β) (hΔ : ↑Δ ⊆ Γ) : IsEmpty (Δ ⊢ᴹ[Λ] ⊥) := by
---   simp [Theory.Inconsistent, Theory.Consistent] at hConsisΓ;
---   by_contra hC; simp at hC;
---   exact hConsisΓ.false $ hC.some.weakening' hΔ;
-
-lemma consistent_subset_undeducible_falsum (Δ : Theory β) (hΔ : ↑Δ ⊆ Γ) : (Δ ⊬ᴹ[Λ]! ⊥) := by
-  simp [Theory.Inconsistent, Theory.Consistent] at hConsisΓ;
-  by_contra hC;
-  exact hConsisΓ.false $ hC.some.weakening' hΔ;
-
-lemma consistent_no_falsum : ∀ (Δ : Theory β), ↑Δ ⊆ Γ → ⊥ ∉ Δ := by
-  intro Δ hΔ;
-  by_contra hC;
-  have h₁ : Δ ⊢ᴹ[Λ]! ⊥ := .axm hC;
-  have h₂ : Δ ⊬ᴹ[Λ]! ⊥ := consistent_subset_undeducible_falsum hConsisΓ Δ hΔ;
-  exact h₂ h₁;
-
-lemma consistent_no_falsum' : ⊥ ∉ Γ := by
-  by_contra;
-  apply consistent_no_falsum hConsisΓ {⊥} (by aesop);
-  simp;
+lemma consistent_iff_undeducible_falsum : Consistent Λ Γ ↔ (Γ ⊬ᴹ[Λ]! ⊥) := Hilbert.consistent_iff_undeducible_falsum (· ⊢ᴹ[Λ] ·) Γ
 
 @[simp]
-lemma consistent_undeducible_falsum : (Γ ⊬ᴹ[Λ]! ⊥) := by
-  by_contra hC;
-  simp [Theory.Inconsistent, Theory.Consistent] at hConsisΓ;
+lemma consistent_undeducible_falsum : Γ ⊬ᴹ[Λ]! ⊥ := consistent_iff_undeducible_falsum.mp hConsisΓ
 
-lemma consistent_neither_undeducible (p) : (Γ ⊬ᴹ[Λ]! p) ∨ (Γ ⊬ᴹ[Λ]! ~p) := by
-  by_contra hC; simp only [not_or] at hC;
-  have h₁ := hC.1; simp at h₁;
-  have h₂ := hC.2; simp at h₂;
-  exact consistent_undeducible_falsum hConsisΓ ⟨h₂.some.modus_ponens' h₁.some⟩;
+lemma consistent_subset_undeducible_falsum (Δ) (hΔ : Δ ⊆ Γ) : (Δ ⊬ᴹ[Λ]! ⊥) := Hilbert.consistent_subset_undeducible_falsum (· ⊢ᴹ[Λ] ·) hConsisΓ hΔ
 
-lemma consistent_subset {Γ₁ Γ₂ : Theory β} : (Γ₁ ⊆ Γ₂) → (Consistent Λ Γ₂) → (Consistent Λ Γ₁) := by
-  intro hs hConsisΓ₂ hInconsisΓ₁;
-  simp [Theory.Consistent, Theory.Inconsistent] at hInconsisΓ₁;
-  exact consistent_undeducible_falsum hConsisΓ₂ $ hInconsisΓ₁.weakening' (by assumption);
+lemma consistent_no_falsum : ⊥ ∉ Γ := Hilbert.consistent_no_falsum (· ⊢ᴹ[Λ] ·) hConsisΓ
 
-lemma consistent_insert {Γ : Theory β} {p : Formula β} : (Consistent Λ (insert p Γ)) → (Consistent Λ Γ) := consistent_subset (by simp)
+lemma consistent_no_falsum_subset (hΔ : Δ ⊆ Γ) : ⊥ ∉ Δ := Hilbert.consistent_no_falsum_subset (· ⊢ᴹ[Λ] ·) hConsisΓ hΔ
 
-lemma consistent_empty (hConsisΛ : Theory.Consistent Λ Λ) : Theory.Consistent Λ ∅ := consistent_subset (by simp) hConsisΛ
+lemma consistent_neither_undeducible (p) : (Γ ⊬ᴹ[Λ]! p) ∨ (Γ ⊬ᴹ[Λ]! ~p) := Hilbert.consistent_neither_undeducible (· ⊢ᴹ[Λ] ·) hConsisΓ p
+
+lemma consistent_of_subset (h : Γ₁ ⊆ Γ₂) : (Consistent Λ Γ₂) → (Consistent Λ Γ₁) := Hilbert.consistent_of_subset (· ⊢ᴹ[Λ] ·) h
+
+lemma consistent_insert {Γ : Theory β} {p : Formula β} : (Consistent Λ (insert p Γ)) → (Consistent Λ Γ) := consistent_of_subset (by simp)
+
+lemma consistent_empty (hConsisΛ : Theory.Consistent Λ Λ) : Theory.Consistent Λ ∅ := consistent_of_subset (by simp) hConsisΛ
+
+lemma inconsistent_insert (h : Inconsistent Λ (insert p Γ)) : (∃ Δ, (Δ ⊆ Γ) ∧ ((insert p Δ) ⊢ᴹ[Λ]! ⊥)) := Hilbert.inconsistent_insert (· ⊢ᴹ[Λ] ·) h
+
+lemma consistent_iff_insert_neg  : (Consistent Λ (insert (~p) Γ)) ↔ (Γ ⊬ᴹ[Λ]! p)  := Hilbert.consistent_iff_insert_neg (· ⊢ᴹ[Λ] ·)
+
+lemma consistent_either (hConsisΓ : Consistent Λ Γ) : ∀ p, (Consistent Λ (insert p Γ)) ∨ (Consistent Λ (insert (~p) Γ)) := Hilbert.consistent_either (· ⊢ᴹ[Λ] ·) hConsisΓ
 
 lemma frameclass_unsatisfiable_insert_neg {𝔽 : FrameClass α} {Γ : Theory β} : (Γ ⊭ᴹ[𝔽] p) ↔ (Theory.FrameClassSatisfiable 𝔽 (insert (~p) Γ)) := by
   constructor;
@@ -96,17 +71,6 @@ lemma frameclass_unsatisfiable_insert_neg {𝔽 : FrameClass α} {Γ : Theory β
     exact h₁ $ hCon F hF V w h₂;
 
 lemma frameclass_satisfiable_insert_neg {𝔽 : FrameClass α} {Γ : Theory β} : (Γ ⊨ᴹ[𝔽] p) ↔ ¬(Theory.FrameClassSatisfiable 𝔽 (insert (~p) Γ)) := by simpa using frameclass_unsatisfiable_insert_neg.not
-
-lemma inconsistent_insert : (Inconsistent Λ (insert p Γ)) → (∃ (Δ : Theory β), (↑Δ ⊆ Γ) ∧ ((insert p Δ) ⊢ᴹ[Λ]! ⊥)) := by
-  intro hInconsisΓp;
-  existsi Γ; all_goals simpa;
-
-lemma inconsistent_insert_neg : (Γ ⊢ᴹ[Λ]! p) ↔ (Inconsistent Λ (insert (~p) Γ)) := by
-  constructor;
-  . intro h; simpa using h.dni'.dtl;
-  . intro h; exact h.dtr.dne';
-
-lemma consistent_insert_neg {Γ : Theory β} : (Γ ⊬ᴹ[Λ]! p) ↔ (Consistent Λ (insert (~p) Γ)) := inconsistent_insert_neg.not
 
 lemma completeness_def {𝔽 : FrameClass α} : (Completeness Λ 𝔽) ↔ (∀ Γ, Consistent Λ Γ → FrameClassSatisfiable 𝔽 Γ) := by
   constructor;
@@ -126,18 +90,11 @@ lemma completeness_def {𝔽 : FrameClass α} : (Completeness Λ 𝔽) ↔ (∀ 
     intro Δ p h₁ h₂;
     existsi (insert (~p) Δ);
     constructor;
-    . apply consistent_insert_neg.mp;
+    . apply consistent_iff_insert_neg.mpr;
       simpa using h₂;
     . apply frameclass_satisfiable_insert_neg.mp;
       exact h₁;
 
-lemma consistent_either (hConsisΓ : Consistent Λ Γ) : ∀ p, (Consistent Λ (insert p Γ)) ∨ (Consistent Λ (insert (~p) Γ)) := by
-  intro p;
-  by_contra hC; simp [not_or, Theory.Consistent] at hC;
-  have ⟨Δ₁, hΔ₁, dΔ₁⟩ := inconsistent_insert hC.1;
-  have ⟨Δ₂, hΔ₂, dΔ₂⟩ := inconsistent_insert hC.2;
-  have := dΔ₂.dtr.modus_ponens dΔ₁.dtr;
-  exact consistent_subset_undeducible_falsum hConsisΓ _ (by aesop) this;
 
 def Theory.MaximalConsistent (Λ) (Γ : Theory β) := Theory.Consistent Λ Γ ∧ Maximal Γ
 
@@ -307,7 +264,7 @@ lemma and_membership_iff : (p ⋏ q ∈ Ω) ↔ (p ∈ Ω) ∧ (q ∈ Ω) := max
 lemma or_membership_iff : (p ⋎ q ∈ Ω) ↔ (p ∈ Ω) ∨ (q ∈ Ω) := maximal_consistent_or_membership_iff (Ω.mc)
 
 @[simp]
-lemma no_falsum : ⊥ ∉ Ω := consistent_no_falsum' Ω.consistent
+lemma no_falsum : ⊥ ∉ Ω := consistent_no_falsum Ω.consistent
 
 @[simp]
 lemma neither_mem : ¬((p ∈ Ω) ∧ (~p ∈ Ω)) := by
@@ -329,7 +286,7 @@ lemma exists_maximal_consistent_theory' :
       replace hC : ⋃₀ c ⊢ᴹ[Λ]! ⊥ := by simpa [Theory.Consistent, Theory.Inconsistent] using hC;
       rcases hC.compact with ⟨s, hs, s_consis⟩;
       rcases Set.subset_mem_chain_of_finite c hnc chain (s := s) (Finset.finite_toSet s) hs with ⟨U, hUc, hsU⟩
-      exact (consistent_subset hsU (by apply hc; simpa)) s_consis;
+      exact (consistent_of_subset hsU (by apply hc; simpa)) s_consis;
     . intro s a;
       exact Set.subset_sUnion_of_mem a;
   ) Γ hConsisΓ
@@ -353,26 +310,13 @@ open MaximalConsistentTheory
 
 variable (hK : 𝐊 ⊆ Λ)
 
-/-
-lemma boxed_context_deducible {Γ : Theory β} (h : Γ ⊢ᴹ[Λ]! p) : (□Γ ⊢ᴹ[Λ]! □p) := by
-  have ⟨Δ, hΔ₁, ⟨hΔ₂⟩⟩ := h;
-  existsi □Δ;
-  constructor
-  . simpa using box_subset hΔ₁;
-  . exact ⟨LogicK.Hilbert.deduction_by_boxed_context hK hΔ₂⟩;
--/
-
-lemma prebox_prov {Γ : Theory β} (h : □⁻¹Γ ⊢ᴹ[Λ]! p) : (Γ ⊢ᴹ[Λ]! □p) := by
-  have : □(□⁻¹Γ) ⊢ᴹ[Λ]! □p := ⟨LogicK.Hilbert.deduction_by_boxed_context hK h.some⟩;
-  exact this.weakening' (by simp);
-
 lemma mct_mem_box_iff {Ω : MaximalConsistentTheory Λ} {p : Formula β} : (□p ∈ Ω) ↔ (∀ (Ω' : MaximalConsistentTheory Λ), □⁻¹Ω ⊆ Ω' → p ∈ Ω') := by
   constructor;
   . aesop;
   . contrapose;
     intro hC;
     have := (maximal_consistent_iff_not_membership_undeducible Ω.mc).mp hC;
-    have := consistent_insert_neg.mp $ not_imp_not.mpr (prebox_prov hK) this;
+    have := consistent_iff_insert_neg.mpr $ not_imp_not.mpr (preboxed_ctx_necessitation hK) this;
     have ⟨Ω', hΩ'⟩ := exists_maximal_consistent_theory this;
     simp;
     existsi Ω';
@@ -409,7 +353,7 @@ lemma frame_def': (CanonicalModel Λ).frame Ω₁ Ω₂ ↔ (◇Ω₂ ⊆ Ω₁)
       simpa using h $ neg_membership_iff.mpr hnp
     have : ~(□p) ∈ Ω₁ := by
       suffices h : Ω₁.theory ⊢ᴹ[Λ]! ((◇~p) ⟷ ~(□p)) by exact MaximalConsistentTheory.iff_congr h |>.mp this;
-      exact LogicK.Hilbert.equiv_dianeg_negbox hK _ p;
+      apply equiv_dianeg_negbox hK;
     have := neg_membership_iff.mp this;
     aesop;
 
@@ -429,7 +373,7 @@ lemma axiomD (hD : 𝐃 ⊆ Λ) : Serial (CanonicalModel Λ).frame := by
   suffices h : Consistent Λ (□⁻¹Ω.theory) by exact exists_maximal_consistent_theory h;
   by_contra hC;
   simp [Theory.Consistent, Theory.Inconsistent] at hC;
-  have d₁ : Ω.theory ⊢ᴹ[Λ]! □⊥ := prebox_prov hK hC;
+  have d₁ : Ω.theory ⊢ᴹ[Λ]! □⊥ := preboxed_ctx_necessitation hK hC;
   have d₂ : Ω.theory ⊢ᴹ[Λ]! (□⊥ ⟶ ◇⊥) := .maxm (hD $ (by apply AxiomD.set.include));
   have d₃ : Ω.theory ⊢ᴹ[Λ]! ~(◇⊥) := by simpa using (Deducible.boxverum Ω.theory).dni';
   exact consistent_undeducible_falsum Ω.consistent $

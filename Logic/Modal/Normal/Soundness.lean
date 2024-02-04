@@ -1,5 +1,5 @@
-import Logic.Modal.Normal.HilbertStyle
 import Logic.Modal.Normal.Semantics
+import Logic.Modal.Normal.Deduction
 
 attribute [simp] Finset.union_eq_empty
 
