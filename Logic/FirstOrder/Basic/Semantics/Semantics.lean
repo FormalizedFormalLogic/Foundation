@@ -328,6 +328,11 @@ lemma eval_substs {k} (w : Fin k → Semiterm L μ n) (p : Semiformula L μ k) :
     Eval s e ε (Rew.emb.hom p) ↔ Eval s e Empty.elim p := by
   simp[eval_rew, Function.comp]; apply iff_of_eq; congr; funext x; contradiction
 
+@[simp] lemma eval_empty [h : IsEmpty o] (p : Formula L o) :
+    Eval s e ε (Rew.empty.hom p) ↔ Eval s ![] h.elim p := by
+  simp[eval_rew, Function.comp, Matrix.empty_eq]
+  apply iff_of_eq; congr; funext x; exact h.elim' x
+
 @[simp] lemma eval_toS {e : Fin n → M} {ε} (p : Formula L (Fin n)) :
     Eval s e ε (Rew.toS.hom p) ↔ Eval s ![] e p := by
   simp [Rew.toS, eval_rew, Function.comp, Matrix.empty_eq]
@@ -379,15 +384,24 @@ lemma eval_iff_of_funEqOn (p : Semiformula L μ n) (h : Function.funEqOn (fvar? 
     simp; apply exists_congr; intro x
     exact ih (fun x hx ↦ h _ $ by simp [fvar?]; exact hx)
 
-@[simp] lemma val_fvUnivClosure [Inhabited μ] [DecidableEq μ] {p : Formula L μ} :
+lemma val_fvUnivClosure_inhabited [h : Nonempty μ] [DecidableEq μ] {p : Formula L μ} :
     Val s Empty.elim (∀ᶠ* p) ↔ ∀ ε, Val s ε p := by
   simp [Formula.fvUnivClosure, eval_rewriteMap]
+  haveI : Inhabited μ := ⟨Classical.ofNonempty⟩
   constructor
   · intro h ε
-    have := h (fun i ↦ ε $ Semiformula.fvEnumInv _ i)
-    exact (eval_iff_of_funEqOn p (by intro x hx; simp [fvEnumInv_fvEnum p hx])).mp this
+    have := h (fun i ↦ ε $ Semiformula.fvListingInv _ i)
+    exact (eval_iff_of_funEqOn p (by intro x hx; simp [fvListingInv_fvListing hx])).mp this
   · intro h e
-    exact h (fun x ↦ e $ Semiformula.fvEnum p x)
+    exact h (fun x ↦ e $ Semiformula.fvListing p x)
+
+@[simp] lemma val_fvUnivClosure [Nonempty M] [DecidableEq μ] {p : Formula L μ} :
+    Val s Empty.elim (∀ᶠ* p) ↔ ∀ ε, Val s ε p := by
+  by_cases hμ : Nonempty μ
+  · exact val_fvUnivClosure_inhabited
+  · haveI hμ : IsEmpty μ := not_nonempty_iff.mp hμ
+    simp [Formula.fv_univ_closure_sentence p, IsEmpty.eq_elim]
+    simp [Matrix.empty_eq]
 
 end Semiformula
 

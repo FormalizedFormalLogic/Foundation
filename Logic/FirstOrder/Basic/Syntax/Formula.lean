@@ -846,39 +846,45 @@ lemma lMap_fix (p : SyntacticSemiformula L₁ n) : lMap Φ (Rew.fix.hom p) = Rew
 lemma lMap_emb {o : Type w} [IsEmpty o] (p : Semiformula L₁ o n) :
     (lMap Φ (Rew.emb.hom p) : Semiformula L₂ μ n) = Rew.emb.hom (lMap Φ p) := lMap_bind _ _ _
 
-section fvEnum
+section fvListing
 
 variable [DecidableEq μ] [Inhabited μ]
 
-def fvEnum' (p : Semiformula L μ n) : μ → ℕ := p.fvarList.indexOf
+def fvEnum (p : Semiformula L μ n) : μ → ℕ := p.fvarList.indexOf
 
-def fvEnumInv' (p : Semiformula L μ n) : ℕ → μ :=
+def fvEnumInv (p : Semiformula L μ n) : ℕ → μ :=
   fun i ↦ if hi : i < p.fvarList.length then p.fvarList.get ⟨i, hi⟩ else default
 
-lemma fvEnumInv'_fvEnum' (p : Semiformula L μ n) {x : μ} (hx : x ∈ p.fvarList) :
-    fvEnumInv' p (fvEnum' p x) = x := by
-  simp [fvEnumInv', fvEnum']; intro h
-  exact False.elim <| not_le.mpr (List.indexOf_lt_length.mpr $ hx) h
-
-def fvEnum (p : Semiformula L μ n) : μ → Fin (p.fvarList.length + 1) :=
-  fun x ↦ ⟨p.fvarList.indexOf x, by simp [Nat.lt_succ, List.indexOf_le_length]⟩
-
-def fvEnumInv (p : Semiformula L μ n) : Fin (p.fvarList.length + 1) → μ :=
-  fun i ↦ if hi : ↑i < p.fvarList.length then p.fvarList.get ⟨i, hi⟩ else default
-
-lemma fvEnumInv_fvEnum (p : Semiformula L μ n) {x : μ} (hx : x ∈ p.fvarList) :
+lemma fvEnumInv_fvEnum {p : Semiformula L μ n} {x : μ} (hx : x ∈ p.fvarList) :
     fvEnumInv p (fvEnum p x) = x := by
   simp [fvEnumInv, fvEnum]; intro h
   exact False.elim <| not_le.mpr (List.indexOf_lt_length.mpr $ hx) h
 
-end fvEnum
+def fvListing (p : Semiformula L μ n) : μ → Fin (p.fvarList.length + 1) :=
+  fun x ↦ ⟨p.fvarList.indexOf x, by simp [Nat.lt_succ, List.indexOf_le_length]⟩
+
+def fvListingInv (p : Semiformula L μ n) : Fin (p.fvarList.length + 1) → μ :=
+  fun i ↦ if hi : ↑i < p.fvarList.length then p.fvarList.get ⟨i, hi⟩ else default
+
+lemma fvListingInv_fvListing {p : Semiformula L μ n} {x : μ} (hx : x ∈ p.fvarList) :
+    fvListingInv p (fvListing p x) = x := by
+  simp [fvListingInv, fvListing]; intro h
+  exact False.elim <| not_le.mpr (List.indexOf_lt_length.mpr $ hx) h
+
+end fvListing
 
 end Semiformula
 
 def Formula.fvUnivClosure [DecidableEq μ] (p : Formula L μ) : Sentence L :=
-  ∀* (Rew.toS.hom <| (Rew.rewriteMap (Semiformula.fvEnum p)).hom p)
+  ∀* (Rew.toS.hom <| (Rew.rewriteMap (Semiformula.fvListing p)).hom p)
 
 prefix:64 "∀ᶠ* " => Formula.fvUnivClosure
+
+@[simp] lemma Formula.fv_univ_closure_sentence [h : IsEmpty μ] [DecidableEq μ] (σ : Formula L μ) :
+  Formula.fvUnivClosure σ = ∀' Rew.empty.hom σ := by
+  simp [fvUnivClosure, ←Rew.hom_comp_app, Rew.eq_empty]
+  have : σ.fvarList.length = 0 := by simp
+  rw [this]; rfl
 
 namespace Rew
 

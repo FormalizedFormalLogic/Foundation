@@ -226,7 +226,9 @@ def map (b : Fin n₁ → Fin n₂) (e : μ₁ → μ₂) : Rew L μ₁ n₁ μ�
 def substs {n'} (v : Fin n → Semiterm L μ n') : Rew L μ n μ n' :=
   bind v fvar
 
-def emb {o : Type v₁} [h : IsEmpty o] {μ : Type v₂} {n} : Rew L o n μ n := map id h.elim'
+def emb {o : Type v₁} [h : IsEmpty o] {μ : Type v₂} {n} : Rew L o n μ n := map id h.elim
+
+def empty {o : Type v₁} [h : IsEmpty o] {μ : Type v₂} {n} : Rew L o 0 μ n := map Fin.elim0 h.elim
 
 def bShift : Rew L μ n μ (n + 1) :=
   map Fin.succ id
@@ -338,6 +340,9 @@ variable {o : Type v₂} [IsEmpty o]
 @[simp] lemma emb_bvar (x : Fin n) : emb (μ := μ) (#x : Semiterm L o n) = #x := rfl
 
 @[simp] lemma emb_eq_id : (emb : Rew L o n o n) = Rew.id := by ext x <;> simp; exact isEmptyElim x
+
+lemma eq_empty [h : IsEmpty μ₁] (ω : Rew L μ₁ 0 μ₂ n) :
+  ω = empty := by ext x; { exact x.elim0 }; { exact h.elim' x }
 
 end emb
 
