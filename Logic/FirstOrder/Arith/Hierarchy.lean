@@ -27,6 +27,27 @@ def alt : VType → VType
 
 end VType
 
+def eqvClass (T : Theory L) (C : Set ι) (f : ι → Sentence L) : Set ι := {i | ∃ j ∈ C, T ⊢! f j ⟷ f i}
+
+/-
+
+structure Class (T : Theory L) where
+  domain : Set (Sentence L)
+  closed' : ∀ σ τ, T ⊢! σ ⟷ τ → σ ∈ domain → τ ∈ domain
+
+inductive BoundedHierarchy : VType → ℕ → {n : ℕ} → Semiformula L μ n → Prop
+  | open {b s p}                                   : p.Open → BoundedHierarchy b s p
+  | pi {s n} {p : Semiformula L μ (n + 1)} {t : Semiterm L μ (n + 1)} :
+    t.Positive → BoundedHierarchy Σ s p → BoundedHierarchy Π (s + 1) (∀[“#0 < !!t”] p)
+  | sigma {s n} {p : Semiformula L μ (n + 1)} {t : Semiterm L μ (n + 1)} :
+    t.Positive → BoundedHierarchy Π s p → BoundedHierarchy Σ (s + 1) (∃[“#0 < !!t”] p)
+  | all {s n} {p : Semiformula L μ (n + 1)} {t : Semiterm L μ (n + 1)} :
+    t.Positive → BoundedHierarchy Π (s + 1) p → BoundedHierarchy Π (s + 1) (∀[“#0 < !!t”] p)
+  | ex {s n} {p : Semiformula L μ (n + 1)} {t : Semiterm L μ (n + 1)} :
+    t.Positive → BoundedHierarchy Σ (s + 1) p → BoundedHierarchy Σ (s + 1) (∃[“#0 < !!t”] p)
+
+-/
+
 inductive Hierarchy : VType → ℕ → {n : ℕ} → Semiformula L μ n → Prop
   | verum (b s n)                                    : Hierarchy b s (⊤ : Semiformula L μ n)
   | falsum (b s n)                                   : Hierarchy b s (⊥ : Semiformula L μ n)
