@@ -1,4 +1,6 @@
 import Logic.FirstOrder.Completeness.Completeness
+import Logic.FirstOrder.Order.Le
+import Logic.FirstOrder.Class.Init
 
 namespace LO.FirstOrder
 
@@ -203,6 +205,9 @@ class Atom (c : Class T) : Prop where
   rel : ∀ {k} (r : L.Rel k) (v), Semiformula.rel r v ∈ c.domain
   nrel : ∀ {k} (r : L.Rel k) (v), Semiformula.nrel r v ∈ c.domain
 
+class Not (c : Class T) : Prop where
+  not {p : SyntacticFormula L} : p ∈ c.domain → ∃ r ∈ c.domain, r ↔[T] (~p)
+
 class And (c : Class T) : Prop where
   and {p q : SyntacticFormula L} : p ∈ c.domain → q ∈ c.domain → ∃ r ∈ c.domain, r ↔[T] (p ⋏ q)
 
@@ -231,7 +236,30 @@ variable [c.Atom] [Nonempty (Term L ξ)]
   have : mem c (Semiformula.nrel r (&↑·)) := (mem_of_mem_domain (Atom.nrel r (& ·)))
   simpa [Rew.nrel] using mem_rew (Rew.bind ![] (fun x ↦ if hx : x < k then v ⟨x, hx⟩ else t) : Rew L ℕ 0 ξ n) this
 
+@[simp] lemma mem_eq [L.Eq] (t u : Semiterm L ξ n) : c.mem “!!t = !!u” := by
+  simp [Semiformula.Operator.operator, Rew.rel, Semiformula.Operator.Eq.eq]
+
+@[simp] lemma mem_not_eq [L.Eq] (t u : Semiterm L ξ n) : c.mem “!!t ≠ !!u” := by
+  simp [Semiformula.Operator.operator, Rew.rel, Semiformula.Operator.Eq.eq]
+
+@[simp] lemma mem_lt [L.LT] (t u : Semiterm L ξ n) : c.mem “!!t < !!u” := by
+  simp [Semiformula.Operator.operator, Rew.rel, Semiformula.Operator.LT.lt]
+
+@[simp] lemma mem_not_lt [L.LT] (t u : Semiterm L ξ n) : c.mem “!!t ≮ !!u” := by
+  simp [Semiformula.Operator.operator, Rew.rel, Semiformula.Operator.LT.lt]
+
 end Atom
+
+section Not
+
+variable [c.Not]
+
+lemma mem_not {p : Semiformula L ξ n} (hp : c.mem p) : c.mem (~p) := by
+  rcases hp with ⟨f, p, hp, rfl⟩
+  rcases Not.not hp with ⟨q, hq, H⟩
+  simpa using mem_rew (Rew.bind ![] f) (mem_of_equiv H (mem_of_mem_domain hq))
+
+end Not
 
 section And
 
@@ -269,7 +297,33 @@ lemma mem_or {p q : Semiformula L ξ n} (hp : c.mem p) (hq : c.mem q) : c.mem (p
   · congr; ext <;> simp [Rew.comp_app]
   · congr; ext <;> simp [Rew.comp_app]
 
+variable [c.Not]
+
+lemma mem_imply {p q : Semiformula L ξ n} (hp : c.mem p) (hq : c.mem q) : c.mem (p ⟶ q) := by
+  simp [Semiformula.imp_eq]; exact mem_or (mem_not hp) hq
+
+variable [c.And]
+
+lemma mem_iff {p q : Semiformula L ξ n} (hp : c.mem p) (hq : c.mem q) : c.mem (p ⟷ q) := by
+  simp [LO.LogicSymbol.iff]; exact mem_and (mem_imply hp hq) (mem_imply hq hp)
+
 end Or
+
+section
+
+variable [c.Atom] [c.And] [c.Or] [Nonempty (Term L ξ)]
+
+@[simp] lemma mem_le [L.Eq] [L.LT] (t u : Semiterm L ξ n) : c.mem “!!t ≤ !!u” := by
+  simp [Semiformula.Operator.operator, Rew.rel,
+    Semiformula.Operator.LE.sentence_eq, Semiformula.Operator.Eq.eq, Semiformula.Operator.LT.lt]
+  apply mem_or <;> simp
+
+@[simp] lemma mem_not_le [L.Eq] [L.LT] (t u : Semiterm L ξ n) : c.mem “¬!!t ≤ !!u” := by
+  simp [Semiformula.Operator.operator, Rew.rel,
+    Semiformula.Operator.LE.sentence_eq, Semiformula.Operator.Eq.eq, Semiformula.Operator.LT.lt]
+  apply mem_and <;> simp
+
+end
 
 def generatedFromRewriteClosedSet (T : Theory L) (s : Set (SyntacticFormula L))
     (H : ∀ p ∈ s, ∀ f : ℕ → Term L ℕ, (Rew.rewrite f).hom p ∈ s) : Class T where
@@ -280,12 +334,17 @@ def generatedFromRewriteClosedSet (T : Theory L) (s : Set (SyntacticFormula L))
   equivalent_closed := by
     intro p q H hp; exact mem_equivalent_closure_of_equivalent H hp
 
-def generated_and {s : Set (SyntacticFormula L)} {H : ∀ p ∈ s, ∀ f : ℕ → Term L ℕ, (Rew.rewrite f).hom p ∈ s}
+lemma generated_not {s : Set (SyntacticFormula L)} {H : ∀ p ∈ s, ∀ f : ℕ → Term L ℕ, (Rew.rewrite f).hom p ∈ s}
+    (h : ∀ p ∈ s, ∃ r ∈ s, r ↔[T] (~p)) : (generatedFromRewriteClosedSet T s H).Not := ⟨by
+  rintro p ⟨p₀, hp₀, Hp⟩
+  exact ⟨~p₀, h _ hp₀, Hp.not⟩⟩
+
+lemma generated_and {s : Set (SyntacticFormula L)} {H : ∀ p ∈ s, ∀ f : ℕ → Term L ℕ, (Rew.rewrite f).hom p ∈ s}
     (h : ∀ p ∈ s, ∀ q ∈ s, ∃ r ∈ s, r ↔[T] (p ⋏ q)) : (generatedFromRewriteClosedSet T s H).And := ⟨by
   rintro p q ⟨p₀, hp₀, Hp⟩ ⟨q₀, hq₀, Hq⟩
   exact ⟨p₀ ⋏ q₀, h _ hp₀ _ hq₀, Hp.and Hq⟩⟩
 
-def generated_or {s : Set (SyntacticFormula L)} {H : ∀ p ∈ s, ∀ f : ℕ → Term L ℕ, (Rew.rewrite f).hom p ∈ s}
+lemma generated_or {s : Set (SyntacticFormula L)} {H : ∀ p ∈ s, ∀ f : ℕ → Term L ℕ, (Rew.rewrite f).hom p ∈ s}
     (h : ∀ p ∈ s, ∀ q ∈ s, ∃ r ∈ s, r ↔[T] (p ⋎ q)) : (generatedFromRewriteClosedSet T s H).Or := ⟨by
   rintro p q ⟨p₀, hp₀, Hp⟩ ⟨q₀, hq₀, Hq⟩
   exact ⟨p₀ ⋎ q₀, h _ hp₀ _ hq₀, Hp.or Hq⟩⟩
@@ -301,10 +360,41 @@ instance : (openClass T).Atom where
   rel := fun r v ↦ subset_equivalent_closure (Semiformula.open_rel r v)
   nrel := fun r v ↦ subset_equivalent_closure (Semiformula.open_nrel r v)
 
+instance : (openClass T).Not :=
+  Class.generated_not (by intro p (hp : p.Open); exact ⟨~p, Semiformula.open_neg.mpr hp, by rfl⟩)
+
 instance : (openClass T).And :=
-  Class.generated_and (by intro p (hp : p.Open) q (hq : q.Open); exact ⟨p ⋏ q, Semiformula.open_and.mpr ⟨hp, hq⟩,by rfl⟩)
+  Class.generated_and (by intro p (hp : p.Open) q (hq : q.Open); exact ⟨p ⋏ q, Semiformula.open_and.mpr ⟨hp, hq⟩, by rfl⟩)
 
 instance : (openClass T).Or :=
-  Class.generated_or (by intro p (hp : p.Open) q (hq : q.Open); exact ⟨p ⋎ q, Semiformula.open_or.mpr ⟨hp, hq⟩,by rfl⟩)
+  Class.generated_or (by intro p (hp : p.Open) q (hq : q.Open); exact ⟨p ⋎ q, Semiformula.open_or.mpr ⟨hp, hq⟩, by rfl⟩)
+
+section
+
+-- https://github.com/leanprover-community/mathlib4/blob/77d078e25cc501fae6907bfbcd80821920125266/Mathlib/Tactic/Measurability.lean#L25-L26
+open Lean.Parser.Tactic (config)
+
+attribute [aesop 1 (rule_sets [FormulaClass]) norm]
+  Class.mem_imply
+  Class.mem_iff
+
+attribute [aesop 2 (rule_sets [FormulaClass]) norm]
+  Class.mem_and
+  Class.mem_or
+  Class.mem_rew
+  Class.mem_not
+
+macro "formula_class" : attr =>
+  `(attr|aesop 4 (rule_sets [$(Lean.mkIdent `FormulaClass):ident]) safe)
+
+macro "formula_class" (config)? : tactic =>
+  `(tactic| aesop (options := { terminal := true }) (rule_sets [$(Lean.mkIdent `FormulaClass):ident]))
+
+macro "formula_class?" (config)? : tactic =>
+  `(tactic| aesop? (options := { terminal := true }) (rule_sets [$(Lean.mkIdent `FormulaClass):ident]))
+
+example : (openClass T).mem (“¬0 < 6 → &6 + #5 ≠ 0” : Semiformula ℒₒᵣ ℕ 8) := by formula_class
+
+end
 
 end LO.FirstOrder
