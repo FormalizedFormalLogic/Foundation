@@ -19,24 +19,27 @@ inductive Deduction : Theory α → Formula α → Type _
   | disj₃ Γ p q r    : Deduction Γ ((p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r))
   | efq Γ p          : Deduction Γ (⊥ ⟶ p)
 
-notation:45 Γ " ⊢ᴵ " p => Deduction Γ p
+infix:45 " ⊢ᴵ " => Deduction
 
 variable (Γ : Theory α) (p : Formula α)
 
-abbrev Deducible := Nonempty (Γ ⊢ᴵ p)
-notation:45 Γ " ⊢ᴵ! " p => Deducible Γ p
+abbrev Deducible := Hilbert.Deducible (@Deduction α)
+infix:45 " ⊢ᴵ! " => Deducible
 
-abbrev Undeducible := ¬(Γ ⊢ᴵ! p)
-notation:45 Γ " ⊬ᴵ! " p => Undeducible Γ p
+abbrev Undeducible := Hilbert.Undeducible (@Deduction α)
+infix:45 " ⊬ᴵ! " => Undeducible
 
-abbrev Proof := ∅ ⊢ᴵ p
-notation:45 "⊢ᴵ " p => Proof p
+@[simp] abbrev Proof := ∅ ⊢ᴵ p
+prefix:45 "⊢ᴵ " => Proof
 
-abbrev Provable := Nonempty (⊢ᴵ p)
-notation:45 "⊢ᴵ! " p => Provable p
+@[simp] abbrev Provable := Nonempty (⊢ᴵ p)
+prefix:45 "⊢ᴵ! " => Provable
 
-abbrev Unprovable := IsEmpty (⊢ᴵ p)
-notation:45 "⊬ᴵ! " p => Unprovable p
+@[simp] abbrev Unprovable := IsEmpty (⊢ᴵ p)
+prefix:45 "⊬ᴵ! " => Unprovable
+
+abbrev Theory.Consistent := Hilbert.Consistent (@Deduction α) Γ
+abbrev Theory.Inconsistent := Hilbert.Inconsistent (@Deduction α) Γ
 
 namespace Deduction
 

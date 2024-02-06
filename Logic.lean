@@ -20,6 +20,9 @@ import Logic.Propositional.Basic.Semantics
 import Logic.Propositional.Basic.Completeness
 import Logic.Propositional.Basic
 
+-- Propositional Intuitionistic
+import Logic.Propositional.Intuitionistic
+
 -- FirstOrder
 
 import Logic.FirstOrder.Basic.Syntax.Language
