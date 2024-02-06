@@ -4,6 +4,7 @@ import Logic.Modal.Normal.Semantics
 
 namespace LO.Modal.Normal
 
+open Hilbert
 open Finset Set
 open Formula Theory
 open Deduction
@@ -154,7 +155,7 @@ lemma maximal_consistent_imp_membership_iff : (p ⟶ q ∈ Γ) ↔ (p ∉ Γ) �
       apply (maximal_consistent_iff_membership_deducible hMCΓ).mpr;
       exact d₁.modus_ponens' d₂;
     case inr h =>
-      have d₁ : Γ ⊢ᴹ[Λ]! (q ⟶ (p ⟶ q)) := ⟨imply₁ _ _ _⟩;
+      have d₁ : Γ ⊢ᴹ[Λ]! (q ⟶ (p ⟶ q)) := imply₁! _ _ _;
       have d₂ : Γ ⊢ᴹ[Λ]! q := .axm h;
       apply (maximal_consistent_iff_membership_deducible hMCΓ).mpr;
       exact d₁.modus_ponens' d₂;
@@ -174,8 +175,8 @@ lemma maximal_consistent_and_membership_iff : (p ⋏ q ∈ Γ) ↔ (p ∈ Γ) �
   . intros h;
     simp_all only [(maximal_consistent_iff_membership_deducible hMCΓ)];
     constructor;
-    . exact h.conj₁';
-    . exact h.conj₂';
+    . exact conj₁'! h;
+    . exact conj₂'! h;
   . rintro ⟨hp, hq⟩;
     simp_all only [(maximal_consistent_iff_membership_deducible hMCΓ)];
     exact .conj₃' hp hq;
@@ -184,7 +185,7 @@ lemma maximal_consistent_or_membership_iff : (p ⋎ q ∈ Γ) ↔ (p ∈ Γ) ∨
   constructor;
   . intros h;
     by_contra hC; simp [not_or] at hC;
-    have : Γ ⊢ᴹ[Λ]! ⊥ := .disj₃'
+    have : Γ ⊢ᴹ[Λ]! ⊥ := disj₃'!
       (show Γ ⊢ᴹ[Λ]! (p ⟶ ⊥) by exact .axm (by apply maximal_consistent_neg_membership_iff hMCΓ |>.mpr; aesop;))
       (show Γ ⊢ᴹ[Λ]! (q ⟶ ⊥) by exact .axm (by apply maximal_consistent_neg_membership_iff hMCΓ |>.mpr; aesop;))
       (show Γ ⊢ᴹ[Λ]! (p ⋎ q) by exact .axm h);
@@ -192,8 +193,8 @@ lemma maximal_consistent_or_membership_iff : (p ⋎ q ∈ Γ) ↔ (p ∈ Γ) ∨
   . intro h;
     simp_all only [(maximal_consistent_iff_membership_deducible hMCΓ)];
     cases h;
-    case inl h => exact .disj₁' h;
-    case inr h => exact .disj₂' h;
+    case inl h => exact disj₁'! h;
+    case inr h => exact disj₂'! h;
 
 end MaximalConsistent
 

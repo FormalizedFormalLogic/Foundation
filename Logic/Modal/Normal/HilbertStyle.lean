@@ -55,8 +55,11 @@ section
 variable {Bew : Set F → F → Type u}
 
 local infixr:50 " ⊢ " => Bew
+local infixr:50 " ⊢! " => Deducible Bew
 
-variable [ModalDuality F] [HasDT Bew] [Minimal Bew] [HasNecessitation Bew] [HasAxiomK Bew]
+variable [ModalDuality F]
+variable [HasDT Bew] [Minimal Bew] [HasNecessitation Bew] [HasAxiomK Bew]
+variable [Classical Bew]
 
 open HasNecessitation
 
@@ -65,10 +68,10 @@ def necessitation {Γ : Set F} {p} (d : Bew ∅ p) : Γ ⊢ □p := HasNecessita
 open HasAxiomK
 
 def AxiomK (Γ : Set F) (p q) :  Γ ⊢ (AxiomK p q) := HasAxiomK.K Γ p q
-
 def AxiomK' {Γ : Set F} {p q} (d₁ : Γ ⊢ (□(p ⟶ q))) (d₂ : Γ ⊢ □p) : Γ ⊢ □q := ((AxiomK Γ p q) ⨀ d₁) ⨀ d₂
 
 def boxverum (Γ : Set F) : Γ ⊢ □⊤ := necessitation (verum _)
+lemma boxverum! (Γ : Set F) : Γ ⊢! □⊤ := ⟨boxverum Γ⟩
 
 def box_iff' {Γ : Set F} {p q : F} (d : ∅ ⊢ p ⟷ q) : Γ ⊢ (□p ⟷ □q) := by
   have dp₁ : ∅ ⊢ (□(p ⟶ q) ⟶ (□p ⟶ □q)) := AxiomK ∅ p q;
@@ -81,12 +84,16 @@ def box_iff' {Γ : Set F} {p q : F} (d : ∅ ⊢ p ⟷ q) : Γ ⊢ (□p ⟷ □
     (Deduction.weakening' (by simp) (modus_ponens' dp₁ dp₂))
     (Deduction.weakening' (by simp) (modus_ponens' dq₁ dq₂))
 
-def equiv_dianeg_negbox [Classical Bew] (Γ p) : Γ ⊢ ◇~p ⟷ ~(□p) := by
+lemma box_iff'! {Γ : Set F} {p q : F} (d : ∅ ⊢! p ⟷ q) : Γ ⊢! (□p ⟷ □q) := ⟨box_iff' d.some⟩
+
+def equiv_dianeg_negbox (Γ p) : Γ ⊢ ◇~p ⟷ ~(□p) := by
   simp only [ModalDuality.dia]
   apply Hilbert.neg_iff';
   apply box_iff';
   apply iff_symm';
   apply equiv_dn;
+
+lemma equiv_dianeg_negbox! (Γ p) : Γ ⊢! ◇~p ⟷ ~(□p) := ⟨equiv_dianeg_negbox Γ p⟩
 
 end
 

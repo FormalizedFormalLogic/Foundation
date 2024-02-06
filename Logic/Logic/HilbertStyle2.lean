@@ -136,6 +136,10 @@ abbrev conj₃ := hM.conj₃
 
 def conj₃' {Γ p q} (d₁ : Bew Γ p) (d₂: Bew Γ q) : Bew Γ (p ⋏ q) := (conj₃ _ _ _ ⨀ d₁) ⨀ d₂
 
+def conj_symm' {Γ p q} : Bew Γ (p ⋏ q) → Bew Γ (q ⋏ p) := by
+  intro h;
+  exact conj₃' (conj₂' h) (conj₁' h);
+
 abbrev disj₁ := hM.disj₁
 
 def disj₁' {Γ p q} (d : Bew Γ p) : Bew Γ (p ⋎ q) := (disj₁ _ _ _ ⨀ d)
@@ -147,6 +151,10 @@ def disj₂' {Γ p q} (d : Bew Γ q) : Bew Γ (p ⋎ q) := (disj₂ _ _ _ ⨀ d)
 abbrev disj₃ := hM.disj₃
 
 def disj₃' {Γ p q r} (d₁ : Bew Γ (p ⟶ r)) (d₂ : Bew Γ (q ⟶ r)) (d₃ : Bew Γ (p ⋎ q)) : Bew Γ r := (((disj₃ _ _ _ _) ⨀ d₁) ⨀ d₂) ⨀ d₃
+
+def disj_symm' {Γ p q} : Bew Γ (p ⋎ q) → Bew Γ (q ⋎ p) := by
+  intro h;
+  exact disj₃' (disj₂ _ _ _) (disj₁ _ _ _) h;
 
 def iff_mp' {Γ p q} (d : Bew Γ (p ⟷ q)) : Bew Γ (p ⟶ q) := by
   simp [LogicSymbol.iff] at d;
@@ -238,24 +246,90 @@ local infix:20 " ⊢ " => Bew
 variable (Γ : Set F) (p : F)
 
 @[simp] def Deducible := Nonempty (Bew Γ p)
+@[simp] def Undeducible := ¬(Deducible Bew Γ p)
+
+section Deducible
+
+variable {Bew : Set F → F → Type u} [Deduction Bew]
+variable [HasDT Bew] [HasModusPonens Bew] [Minimal Bew] [Classical Bew]
+
 local infix:20 "⊢!" => Deducible Bew
+local infix:20 "⊬!" => Undeducible Bew
 
-namespace Deducible
+lemma axm! (f : F) (h : f ∈ Γ) : Γ ⊢! f := ⟨axm h⟩
 
-variable {Bew : Set F → F → Type u} [hd : Deduction Bew] [HasModusPonens Bew]
+lemma modus_ponens! {Γ₁ Γ₂ : Set F} {p q : F} (d₁ : Γ₁ ⊢! (p ⟶ q)) (d₂ : Γ₂ ⊢! p) : Deducible Bew (Γ₁ ∪ Γ₂) q := ⟨d₁.some ⨀ d₂.some⟩
+lemma modus_ponens'! {Γ : Set F} {p q : F} (d₁ : Γ ⊢! (p ⟶ q)) (d₂ : Γ ⊢! p) : Γ ⊢! q := by simpa using modus_ponens! d₁ d₂
 
-def modus_ponens {Γ₁ Γ₂ : Set F} {p q : F} (d₁ : Deducible Bew Γ₁ (p ⟶ q)) (d₂ : Deducible Bew Γ₂ p) : Deducible Bew (Γ₁ ∪ Γ₂) q := ⟨d₁.some ⨀ d₂.some⟩
+lemma verum! (Γ : Set F) : Γ ⊢! ⊤ := ⟨verum Γ⟩
 
-def modus_ponens' {Γ : Set F} {p q : F} (d₁ : Deducible Bew Γ (p ⟶ q)) (d₂ : Deducible Bew Γ p) : Deducible Bew Γ q := by simpa using d₁.modus_ponens d₂
+lemma imply₁! (Γ : Set F) (p q : F) : Γ ⊢! (p ⟶ q ⟶ p) := ⟨imply₁ Γ p q⟩
+lemma imply₁'! {Γ : Set F} {p q : F} (d : Γ ⊢! p) : Γ ⊢! (q ⟶ p) := ⟨imply₁' d.some⟩
+
+lemma imply₂! (Γ : Set F) (p q r : F) : Γ ⊢! ((p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r) := ⟨imply₂ Γ p q r⟩
+lemma imply₂'! {Γ : Set F} {p q r : F} (d₁ : Γ ⊢! (p ⟶ q ⟶ r)) (d₂ : Γ ⊢! (p ⟶ q)) (d₃ : Γ ⊢! p) : Γ ⊢! r := ⟨imply₂' d₁.some d₂.some d₃.some⟩
+
+lemma conj₁! (Γ : Set F) (p q : F) : Γ ⊢! (p ⋏ q ⟶ p) := ⟨conj₁ Γ p q⟩
+lemma conj₁'! {Γ : Set F} {p q : F} (d : Γ ⊢! (p ⋏ q)) : Γ ⊢! p := ⟨conj₁' d.some⟩
+
+lemma conj₂! (Γ : Set F) (p q : F) : Γ ⊢! (p ⋏ q ⟶ q) := ⟨conj₂ Γ p q⟩
+lemma conj₂'! {Γ : Set F} {p q : F} (d : Γ ⊢! (p ⋏ q)) : Γ ⊢! q := ⟨conj₂' d.some⟩
+
+lemma conj₃! (Γ : Set F) (p q : F) : Γ ⊢! (p ⟶ q ⟶ p ⋏ q) := ⟨conj₃ Γ p q⟩
+lemma conj₃'! {Γ : Set F} {p q : F} (d₁ : Γ ⊢! p) (d₂: Γ ⊢! q) : Γ ⊢! (p ⋏ q) := ⟨conj₃' d₁.some d₂.some⟩
+
+lemma conj_symm'! {Γ : Set F} {p q : F} (d : Γ ⊢! (p ⋏ q)) : Γ ⊢! (q ⋏ p) := ⟨conj_symm' d.some⟩
+
+lemma disj₁! (Γ : Set F) (p q : F) : Γ ⊢! (p ⟶ p ⋎ q) := ⟨disj₁ Γ p q⟩
+lemma disj₁'! {Γ : Set F} {p q : F} (d : Γ ⊢! p) : Γ ⊢! (p ⋎ q) := ⟨disj₁' d.some⟩
+
+lemma disj₂! (Γ : Set F) (p q : F) : Γ ⊢! (q ⟶ p ⋎ q) := ⟨disj₂ Γ p q⟩
+lemma disj₂'! {Γ : Set F} {p q : F} (d : Γ ⊢! q) : Γ ⊢! (p ⋎ q) := ⟨disj₂' d.some⟩
+
+lemma disj₃! (Γ : Set F) (p q r : F) : Γ ⊢! ((p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q) ⟶ r) := ⟨disj₃ Γ p q r⟩
+lemma disj₃'! {Γ : Set F} {p q r : F} (d₁ : Γ ⊢! (p ⟶ r)) (d₂ : Γ ⊢! (q ⟶ r)) (d₃ : Γ ⊢! (p ⋎ q)) : Γ ⊢! r := ⟨disj₃' d₁.some d₂.some d₃.some⟩
+
+lemma disj_symm'! {Γ : Set F} {p q : F} (d : Γ ⊢! (p ⋎ q)) : Γ ⊢! (q ⋎ p) := ⟨disj_symm' d.some⟩
+
+lemma efq! [HasEFQ Bew] (Γ : Set F) (p : F) : Γ ⊢! (⊥ ⟶ p) := ⟨efq Γ p⟩
+lemma efq'! [HasEFQ Bew] {Γ : Set F} {p} (d : Γ ⊢! ⊥) : Γ ⊢! p := ⟨efq' d.some⟩
+
+lemma dni! (Γ : Set F) (p : F) : Γ ⊢! (p ⟶ ~~p) := ⟨dni Γ p⟩
+lemma dni'! {Γ : Set F} {p} (d : Γ ⊢! p) : Γ ⊢! (~~p) := ⟨dni' d.some⟩
+
+lemma dne! [HasDNE Bew] (Γ : Set F) (p : F) : Γ ⊢! (~~p ⟶ p) := ⟨dne Γ p⟩
+lemma dne'! [HasDNE Bew] {Γ : Set F} {p} (d : Γ ⊢! (~~p)) : Γ ⊢! p := ⟨dne' d.some⟩
+
+lemma equiv_dn! (Γ : Set F) (p : F) : Γ ⊢! (p ⟷ ~~p) := ⟨equiv_dn Γ p⟩
+
+lemma iff_intro! {Γ : Set F} {p q : F} (dpq : Γ ⊢! (p ⟶ q)) (dqp : Γ ⊢! (q ⟶ p)) : Γ ⊢! (p ⟷ q) := ⟨iff_intro dpq.some dqp.some⟩
+
+lemma iff_symm'! {Γ : Set F} {p q : F} (d : Γ ⊢! (p ⟷ q)) : Γ ⊢! (q ⟷ p) := ⟨iff_symm' d.some⟩
+
+lemma iff_mp'! {Γ : Set F} {p q : F} (d : Γ ⊢! (p ⟷ q)) : Γ ⊢! (p ⟶ q) := ⟨iff_mp' d.some⟩
+lemma iff_mpr'! {Γ : Set F} {p q : F} (d : Γ ⊢! (p ⟷ q)) : Γ ⊢! (q ⟶ p) := ⟨iff_mpr' d.some⟩
+
+lemma iff_left'! {Γ : Set F} {p q : F} (dpq : Γ ⊢! (p ⟷ q)) (dq : Γ ⊢! q) : Γ ⊢! p := ⟨iff_left' dpq.some dq.some⟩
+lemma iff_right'! {Γ : Set F} {p q : F} (dpq : Γ ⊢! (p ⟷ q)) (dp : Γ ⊢! p) : Γ ⊢! q := ⟨iff_right' dpq.some dp.some⟩
+
+lemma iff_def! {Γ : Set F} {p q : F} : (Γ ⊢! (p ⟷ q)) ↔ (Γ ⊢! (p ⟶ q)) ∧ (Γ ⊢! (q ⟶ p)) := by
+  constructor;
+  . intro h; exact ⟨iff_mp'! h, iff_mpr'! h⟩
+  . intro h; exact iff_intro! h.1 h.2
+
+lemma neg_iff'! {Γ : Set F} {p q : F} (d : Γ ⊢! (p ⟷ q)) : Γ ⊢! (~p ⟷ ~q) := ⟨neg_iff' d.some⟩
+
+lemma contra₀'! {Γ : Set F} {p q : F} (d : Γ ⊢! (p ⟶ q)) : Γ ⊢! (~q ⟶ ~p) := ⟨contra₀' d.some⟩
 
 end Deducible
 
-@[simp] def Undeducible := ¬(Γ ⊢! p)
+section Consistency
+
+local infix:20 "⊢!" => Deducible Bew
 local infix:20 "⊬!" => Undeducible Bew
 
 @[simp] def Inconsistent := Γ ⊢! ⊥
-
-@[simp] def Consistent := ¬(Inconsistent Bew Γ)
+@[simp] def Consistent := Γ ⊬! ⊥
 
 lemma consistent_iff_undeducible_falsum : Consistent Bew Γ ↔ (Γ ⊬! ⊥) := Iff.rfl
 
@@ -280,7 +354,7 @@ lemma consistent_neither_undeducible {Γ : Set F} (hConsis : Consistent Bew Γ) 
   by_contra hC; simp only [not_or] at hC;
   have h₁ : Γ ⊢! p  := by simpa using hC.1;
   have h₂ : Γ ⊢! p ⟶ ⊥ := by simpa using hC.2;
-  exact hConsis $ h₂.modus_ponens' h₁;
+  exact hConsis $ modus_ponens'! h₂ h₁;
 
 lemma inconsistent_of_deduction {Γ : Set F} (d : Γ ⊢ ⊥) : Inconsistent Bew Γ := ⟨d⟩
 
@@ -313,6 +387,8 @@ lemma consistent_either {Γ : Set F} (hConsis : Consistent Bew Γ) (p) : (Consis
   have ⟨Δ₁, hΔ₁, ⟨dΔ₁⟩⟩ := inconsistent_insert Bew hC.1;
   have ⟨Δ₂, hΔ₂, ⟨dΔ₂⟩⟩ := inconsistent_insert Bew hC.2;
   exact consistent_subset_undeducible_falsum _ hConsis (by aesop) ⟨(dtr dΔ₂) ⨀ (dtr dΔ₁)⟩;
+
+end Consistency
 
 end
 
