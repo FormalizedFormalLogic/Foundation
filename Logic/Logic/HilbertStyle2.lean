@@ -136,6 +136,10 @@ abbrev conj₃ := hM.conj₃
 
 def conj₃' {Γ p q} (d₁ : Bew Γ p) (d₂: Bew Γ q) : Bew Γ (p ⋏ q) := (conj₃ _ _ _ ⨀ d₁) ⨀ d₂
 
+def conj_symm' {Γ p q} : Bew Γ (p ⋏ q) → Bew Γ (q ⋏ p) := by
+  intro h;
+  exact conj₃' (conj₂' h) (conj₁' h);
+
 abbrev disj₁ := hM.disj₁
 
 def disj₁' {Γ p q} (d : Bew Γ p) : Bew Γ (p ⋎ q) := (disj₁ _ _ _ ⨀ d)
@@ -316,8 +320,6 @@ lemma conj₂'! {Γ : Set F} {p q : F} (d : Γ ⊢! (p ⋏ q)) : Γ ⊢! q := �
 
 lemma conj₃! (Γ : Set F) (p q : F) : Γ ⊢! (p ⟶ q ⟶ p ⋏ q) := ⟨conj₃ Γ p q⟩
 lemma conj₃'! {Γ : Set F} {p q : F} (d₁ : Γ ⊢! p) (d₂: Γ ⊢! q) : Γ ⊢! (p ⋏ q) := ⟨conj₃' d₁.some d₂.some⟩
-
-lemma conj_symm'! {Γ : Set F} {p q : F} (d : Γ ⊢! (p ⋏ q)) : Γ ⊢! (q ⋏ p) := ⟨conj_symm' d.some⟩
 
 lemma disj₁! (Γ : Set F) (p q : F) : Γ ⊢! (p ⟶ p ⋎ q) := ⟨disj₁ Γ p q⟩
 lemma disj₁'! {Γ : Set F} {p q : F} (d : Γ ⊢! p) : Γ ⊢! (p ⋎ q) := ⟨disj₁' d.some⟩

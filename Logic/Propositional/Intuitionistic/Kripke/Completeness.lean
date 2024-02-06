@@ -4,6 +4,7 @@ import Logic.Propositional.Intuitionistic.Kripke.Semantics
 namespace LO.Propositional.Intuitionistic
 
 open Formula Theory Kripke
+open Hilbert
 
 section Consistency
 
@@ -172,19 +173,19 @@ lemma truthlemma {Ω : ConsistentPrimeTheory β} {p : Formula β} : (Ω ⊩[(Can
     constructor;
     . intro h;
       obtain ⟨hp, hq⟩ := h;
-      have dp : Ω.theory ⊢ᴵ p := ihp.mp hp |>.some;
-      have dq : Ω.theory ⊢ᴵ q := ihq.mp hq |>.some;
-      exact ⟨Hilbert.conj₃' dp dq⟩;
+      have dp : Ω.theory ⊢ᴵ! p := ihp.mp hp;
+      have dq : Ω.theory ⊢ᴵ! q := ihq.mp hq;
+      exact conj₃'! dp dq;
     . intro h;
       constructor;
-      . apply ihp.mpr; exact ⟨Hilbert.conj₁' h.some⟩;
-      . apply ihq.mpr; exact ⟨Hilbert.conj₂' h.some⟩;
+      . apply ihp.mpr; exact conj₁'! h;
+      . apply ihq.mpr; exact conj₂'! h;
   | hor p q ihp ihq =>
     constructor;
     . intro h; simp at h;
       cases h with
-      | inl h => simp [ihp] at h; exact ⟨Hilbert.disj₁' h.some⟩;
-      | inr h => simp [ihq] at h; exact ⟨Hilbert.disj₂' h.some⟩;
+      | inl h => simp [ihp] at h; exact disj₁'! h;
+      | inr h => simp [ihq] at h; exact disj₂'! h;
     . intro h;
       cases Ω.disjprop' (Ω.closed' h) with
       | inl h => left; exact ihp.mpr ⟨.axm h⟩;
