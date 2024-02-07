@@ -6,7 +6,7 @@ import Logic.Modal.Normal.Deduction
 import Logic.Modal.Normal.Semantics
 import Logic.Modal.Normal.Soundness
 import Logic.Modal.Normal.Completeness
--- import Logic.Modal.Normal.ModalCube
+import Logic.Modal.Normal.ModalCube
 
 import Logic.Modal.Normal.GL.Semantics
 import Logic.Modal.Normal.GL.Soundness
