@@ -99,20 +99,12 @@ namespace LogicKT4B
 
 lemma FrameClassDefinability : @FrameClassDefinability α β 𝐊𝐓𝟒𝐁 (λ F => (Reflexive F ∧ Transitive F ∧ Symmetric F)) := by
   intro F;
-  simp only [LogicKT4B, AxiomSetFrameClass.tetraunion];
-  constructor;
-  . rintro ⟨hRefl, hTrans, hSymm⟩;
-    have := (AxiomK.defines β F);
-    have := (AxiomT.defines β F).mp hRefl;
-    have := (Axiom4.defines β F).mp hTrans;
-    have := (AxiomB.defines β F).mp hSymm;
-    simp_all;
-  . intros;
-    constructor;
-    . apply (AxiomT.defines β F).mpr; simp_all;
-    constructor;
-    . apply (Axiom4.defines β F).mpr; simp_all;
-    . apply (AxiomB.defines β F).mpr; simp_all;
+  simp [LogicKT4B, AxiomSetFrameClass.tetraunion];
+  have := AxiomK.defines β F;
+  have := AxiomT.defines β F;
+  have := Axiom4.defines β F;
+  have := AxiomB.defines β F;
+  aesop;
 
 abbrev CanonicalModel {β} := Normal.CanonicalModel (𝐊𝐓𝟒𝐁 : AxiomSet β)
 theorem Hilbert.completes : Completeness (𝐊𝐓𝟒𝐁 : AxiomSet β) (𝔽((𝐊𝐓𝟒𝐁 : AxiomSet β)) : FrameClass (MaximalConsistentTheory (𝐊𝐓𝟒𝐁 : AxiomSet β))) := by
