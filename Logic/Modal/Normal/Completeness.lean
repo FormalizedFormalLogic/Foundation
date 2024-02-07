@@ -359,11 +359,13 @@ lemma val_def {a : β} :
   a ∈ (CanonicalModel Λ).val Ω ↔ (atom a) ∈ Ω
   := by rfl
 
+@[simp]
 lemma axiomT (hT : 𝐓 ⊆ Λ) : Reflexive (CanonicalModel Λ).frame := by
   intro Ω p hp;
   have d₁ : Ω.theory ⊢ᴹ[Λ]! (□p ⟶ p) := Deducible.maxm! (hT $ (by apply AxiomT.set.include));
   apply Ω.modus_ponens' (membership_iff.mpr d₁) hp;
 
+@[simp]
 lemma axiomD (hD : 𝐃 ⊆ Λ) : Serial (CanonicalModel Λ).frame := by
   have := Deduction.instBoxedNecessitation hK; -- TODO: it can be removed?
 
@@ -379,6 +381,7 @@ lemma axiomD (hD : 𝐃 ⊆ Λ) : Serial (CanonicalModel Λ).frame := by
   have d₅ : Ω.theory ⊢ᴹ[Λ]! ⊥ := modus_ponens'! d₃ d₄;
   exact consistent_undeducible_falsum Ω.consitent d₅;
 
+@[simp]
 lemma axiomB (hB : 𝐁 ⊆ Λ) : Symmetric (CanonicalModel Λ).frame := by
   intro Ω₁ Ω₂ h;
   simp [frame_def] at h;
@@ -391,6 +394,7 @@ lemma axiomB (hB : 𝐁 ⊆ Λ) : Symmetric (CanonicalModel Λ).frame := by
   have := membership_iff.mpr d₃;
   aesop
 
+@[simp]
 lemma axiom4 (h4 : 𝟒 ⊆ Λ) : Transitive (CanonicalModel Λ).frame := by
   intro Ω₁ Ω₂ Ω₃ h₁₂ h₂₃ p hp;
   apply h₂₃;
@@ -398,6 +402,7 @@ lemma axiom4 (h4 : 𝟒 ⊆ Λ) : Transitive (CanonicalModel Λ).frame := by
   have d₁ : Ω₁.theory ⊢ᴹ[Λ]! (□p ⟶ □□p) := Deducible.maxm! (h4 $ (by apply Axiom4.set.include));
   exact Ω₁.modus_ponens' (membership_iff.mpr d₁) hp;
 
+@[simp]
 lemma axiom5 (h5 : 𝟓 ⊆ Λ) : Euclidean (CanonicalModel Λ).frame := by
   intro Ω₁ Ω₂ Ω₃ h₁₂ h₁₃;
   simp [frame_def] at h₁₂;
@@ -446,43 +451,40 @@ lemma truthlemma' {Γ : Theory β} : ∀ {Ω}, (Ω ⊩ᴹ[CanonicalModel Λ] Γ)
 
 -- TODO: ほとんど同じ記述なのでどうにかして共通化したい．
 
+abbrev LogicK.CanonicalModel {β} := Normal.CanonicalModel (𝐊 : AxiomSet β)
 theorem LogicK.Hilbert.completes : Completeness (𝐊 : AxiomSet β) (𝔽((𝐊 : AxiomSet β)) : FrameClass (MaximalConsistentTheory (𝐊 : AxiomSet β))) := by
   apply completeness_def.mpr;
   intro Γ hConsisΓ;
   let ⟨Ω, hΩ⟩ := exists_maximal_consistent_theory hConsisΓ;
-  existsi (CanonicalModel 𝐊).frame;
+  existsi CanonicalModel.frame;
   constructor;
-  . apply LogicK.def_FrameClass;
-  . existsi (CanonicalModel 𝐊).val, Ω;
+  . apply FrameClassDefinability.mp; simp_all;
+  . existsi CanonicalModel.val, Ω;
     apply truthlemma' (by simp) |>.mpr;
     assumption;
 
+abbrev LogicS4.CanonicalModel {β} := Normal.CanonicalModel (𝐒𝟒 : AxiomSet β)
 theorem LogicS4.Hilbert.completes : Completeness (𝐒𝟒 : AxiomSet β) (𝔽((𝐒𝟒 : AxiomSet β)) : FrameClass (MaximalConsistentTheory (𝐒𝟒 : AxiomSet β))) := by
   apply completeness_def.mpr;
   intro Γ hConsisΓ;
   let ⟨Ω, hΩ⟩ := exists_maximal_consistent_theory hConsisΓ;
-  existsi (CanonicalModel 𝐒𝟒).frame;
+  existsi CanonicalModel.frame;
   constructor;
-  . apply (LogicS4.def_FrameClass _).mp;
-    constructor;
-    . apply CanonicalModel.axiomT (by simp);
-    . apply CanonicalModel.axiom4 (by simp);
-  . existsi (CanonicalModel 𝐒𝟒).val, Ω;
-    apply truthlemma' (by exact subset_K) |>.mpr;
+  . apply FrameClassDefinability.mp; simp_all;
+  . existsi CanonicalModel.val, Ω;
+    apply truthlemma' (by simp) |>.mpr;
     assumption;
 
+abbrev LogicS5.CanonicalModel {β} := Normal.CanonicalModel (𝐒𝟓 : AxiomSet β)
 theorem LogicS5.Hilbert.completes : Completeness (𝐒𝟓 : AxiomSet β) (𝔽((𝐒𝟓 : AxiomSet β)) : FrameClass (MaximalConsistentTheory (𝐒𝟓 : AxiomSet β))) := by
   apply completeness_def.mpr;
   intro Γ hConsisΓ;
   let ⟨Ω, hΩ⟩ := exists_maximal_consistent_theory hConsisΓ;
-  existsi (CanonicalModel 𝐒𝟓).frame;
+  existsi CanonicalModel.frame;
   constructor;
-  . apply (LogicS5.def_FrameClass _).mp;
-    constructor;
-    . apply CanonicalModel.axiomT (by simp);
-    . apply CanonicalModel.axiom5 (by simp) (by simp);
-  . existsi (CanonicalModel 𝐒𝟓).val, Ω;
-    apply truthlemma' (by exact subset_K) |>.mpr;
+  . apply FrameClassDefinability.mp; simp_all;
+  . existsi CanonicalModel.val, Ω;
+    apply truthlemma' (by simp) |>.mpr;
     assumption;
 
 end LO.Modal.Normal

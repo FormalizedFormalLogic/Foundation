@@ -9,8 +9,7 @@ open Formula
 
 variable {α β} [Inhabited α] [DecidableEq α] [Inhabited β]
 
-@[simp]
-def AxiomSet.Consistent (Λ : AxiomSet α) := ⊬ᴹ[Λ]! ⊥
+@[simp] def AxiomSet.Consistent (Λ : AxiomSet α) := ⊬ᴹ[Λ]! ⊥
 
 open AxiomSet
 
@@ -44,18 +43,10 @@ lemma AxiomSet.consistent (β) [Inhabited β] [h : Nonempty (𝔽(Λ) : FrameCla
   apply AxiomSet.sounds (by simpa using hC);
   simpa;
 
-theorem LogicK.sounds : (⊢ᴹ[𝐊]! p) → (⊧ᴹ[(𝔽((𝐊 : AxiomSet α)) : FrameClass β)] p) := by apply AxiomSet.sounds;
 theorem LogicK.consistent : Consistent (𝐊 : AxiomSet α) := AxiomSet.consistent β
-
-theorem LogicKD.sounds : (⊢ᴹ[𝐊𝐃]! p) → (⊧ᴹ[(𝔽((𝐊𝐃 : AxiomSet α)) : FrameClass β)] p) := by apply AxiomSet.sounds;
 theorem LogicKD.consistent : Consistent (𝐊𝐃 : AxiomSet α) := AxiomSet.consistent β
-
-theorem LogicS4.sounds : (⊢ᴹ[𝐒𝟒]! p) → (⊧ᴹ[(𝔽((𝐒𝟒 : AxiomSet α)) : FrameClass β)] p) := by apply AxiomSet.sounds;
 theorem LogicS4.consistent : Consistent (𝐒𝟒 : AxiomSet α) := AxiomSet.consistent β
-
-theorem LogicS5.sounds : (⊢ᴹ[𝐒𝟓]! p) → (⊧ᴹ[(𝔽((𝐒𝟓 : AxiomSet α)) : FrameClass β)] p) := by apply AxiomSet.sounds;
 theorem LogicS5.consistent : Consistent (𝐒𝟓 : AxiomSet α) := AxiomSet.consistent β
-
 /-
 theorem LogicGL.sounds (hf : NonInfiniteAscent f) (h : ⊢ᴹ[𝐆𝐋] p) : (⊧ᴹ[f] p) := AxiomSet.sounds _ _ _ f ((def_FrameClass f).mp hf) h
 theorem LogicGL.consistent : Consistent (𝐆𝐋 : AxiomSet α) := AxiomSet.consistent α β _ trivialFrame

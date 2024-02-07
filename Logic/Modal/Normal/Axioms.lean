@@ -171,7 +171,7 @@ end LogicS4Grz
 
 
 def LogicKT5 : AxiomSet α := 𝐊 ∪ 𝐓 ∪ 𝟓
-@[simp] abbrev LogicS5 {F} := @LogicKT5 F
+@[simp] abbrev LogicS5 {α} := @LogicKT5 α
 notation "𝐒𝟓" => LogicS5
 
 namespace LogicS5

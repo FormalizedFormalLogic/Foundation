@@ -216,6 +216,10 @@ lemma union (Λ₁ Λ₂ : AxiomSet β) : (𝔽(Λ₁ ∪ Λ₂) : FrameClass α
 
 lemma triunion (Λ₁ Λ₂ Λ₃ : AxiomSet β) : (𝔽(Λ₁ ∪ Λ₂ ∪ Λ₃) : FrameClass α) = 𝔽(Λ₁) ∩ 𝔽(Λ₂) ∩ 𝔽(Λ₃) := by aesop;
 
+lemma tetraunion (Λ₁ Λ₂ Λ₃ Λ₄ : AxiomSet β) : (𝔽(Λ₁ ∪ Λ₂ ∪ Λ₃ ∪ Λ₄) : FrameClass α) = 𝔽(Λ₁) ∩ 𝔽(Λ₂) ∩ 𝔽(Λ₃) ∩ 𝔽(Λ₄) := by aesop;
+
+lemma pentaunion (Λ₁ Λ₂ Λ₃ Λ₄ Λ₅ : AxiomSet β) : (𝔽(Λ₁ ∪ Λ₂ ∪ Λ₃ ∪ Λ₄ ∪ Λ₅) : FrameClass α) = 𝔽(Λ₁) ∩ 𝔽(Λ₂) ∩ 𝔽(Λ₃) ∩ 𝔽(Λ₄) ∩ 𝔽(Λ₅) := by aesop;
+
 end AxiomSetFrameClass
 
 namespace Theory
@@ -420,16 +424,32 @@ end AxiomDefinabilities
 
 section LogicDefinabilities
 
-variable [Inhabited α] [Inhabited β] (F: Frame α)
+variable [Inhabited α] [Inhabited β] {F: Frame α}
 
-attribute [simp] LogicKD LogicKT4
+def FrameClassDefinability (Λ : AxiomSet β) (P : Frame α → Prop) := ∀ {F : Frame α}, (P F) ↔ (F ∈ 𝔽(Λ))
 
-lemma LogicK.def_FrameClass : F ∈ 𝔽((𝐊 : AxiomSet β)) := by apply AxiomK.defines;
+namespace FrameClassDefinability
 
-instance : Nonempty (𝔽((𝐊 : AxiomSet β)) : FrameClass α) := ⟨(λ _ _ => True), (by apply LogicK.def_FrameClass)⟩
+variable {Λ : AxiomSet β} {P : Frame α → Prop} (hD : FrameClassDefinability Λ P)
 
-lemma LogicKD.def_FrameClass : (Serial F) ↔ F ∈ 𝔽((𝐊𝐃 : AxiomSet β)) := by
-  simp only [LogicKD, AxiomSetFrameClass.union];
+lemma nonempty (hP : P (λ _ _ => True)) : Nonempty (𝔽(Λ) : FrameClass α) := ⟨
+  (λ _ _ => True),
+  (by apply hD.mp; simpa)
+⟩
+
+end FrameClassDefinability
+
+instance LogicK.FrameClassDefinability : @FrameClassDefinability α β 𝐊 (λ _ => True) := by
+  intro F;
+  constructor;
+  . intros; apply AxiomK.defines;
+  . simp;
+
+instance : Nonempty (𝔽((𝐊 : AxiomSet β)) : FrameClass α) := LogicK.FrameClassDefinability.nonempty (by trivial)
+
+instance LogicKD.FrameClassDefinability : @FrameClassDefinability α β 𝐊𝐃 Serial := by
+  intro F;
+  simp [LogicKD, AxiomSetFrameClass.union, -AxiomSetFrameClass];
   constructor;
   . intro hSerial;
     have := (AxiomK.defines β F);
@@ -439,13 +459,11 @@ lemma LogicKD.def_FrameClass : (Serial F) ↔ F ∈ 𝔽((𝐊𝐃 : AxiomSet β
     apply (AxiomD.defines β F).mpr;
     simp_all;
 
-instance : Nonempty (𝔽((𝐊𝐃 : AxiomSet β)) : FrameClass α) := ⟨
-  (λ _ _ => True),
-  (by apply (LogicKD.def_FrameClass _).mp; simp [Serial];)
-⟩
+instance : Nonempty (𝔽((𝐊𝐃 : AxiomSet β)) : FrameClass α) := LogicKD.FrameClassDefinability.nonempty (by simp [Serial])
 
-lemma LogicS4.def_FrameClass : (Reflexive F ∧ Transitive F) ↔ (F ∈ 𝔽((𝐒𝟒 : AxiomSet β))) := by
-  simp only [LogicS4, LogicKT4, AxiomSetFrameClass.triunion];
+instance LogicS4.FrameClassDefinability : @FrameClassDefinability α β 𝐒𝟒 (λ F => (Reflexive F ∧ Transitive F)) := by
+  intro F;
+  simp [LogicKT4, AxiomSetFrameClass.triunion, -AxiomSetFrameClass];
   constructor;
   . rintro ⟨hRefl, hTrans⟩;
     have := (AxiomK.defines β F);
@@ -457,13 +475,11 @@ lemma LogicS4.def_FrameClass : (Reflexive F ∧ Transitive F) ↔ (F ∈ 𝔽((�
     . apply (AxiomT.defines β F).mpr; simp_all;
     . apply (Axiom4.defines β F).mpr; simp_all;
 
-instance : Nonempty (𝔽((𝐒𝟒 : AxiomSet β)) : FrameClass α) := ⟨
-  (λ _ _ => True),
-  (by apply (LogicS4.def_FrameClass _).mp; simp [Reflexive, Transitive];)
-⟩
+instance : Nonempty (𝔽((𝐒𝟒 : AxiomSet β)) : FrameClass α) := LogicS4.FrameClassDefinability.nonempty (by simp [Reflexive, Transitive])
 
-lemma LogicS5.def_FrameClass : (Reflexive F ∧ Euclidean F) ↔ F ∈ 𝔽((𝐒𝟓 : AxiomSet β)) := by
-  simp only [LogicS5, LogicKT5, AxiomSetFrameClass.triunion];
+instance LogicS5.FrameClassDefinability : @FrameClassDefinability α β 𝐒𝟓 (λ F => (Reflexive F ∧ Euclidean F)) := by
+  intro F;
+  simp [LogicKT5, AxiomSetFrameClass.triunion, -AxiomSetFrameClass];
   constructor;
   . rintro ⟨hRefl, hEucl⟩;
     have := (AxiomK.defines β F);
@@ -475,30 +491,7 @@ lemma LogicS5.def_FrameClass : (Reflexive F ∧ Euclidean F) ↔ F ∈ 𝔽((�
     . apply (AxiomT.defines β F).mpr; simp_all;
     . apply (Axiom5.defines β F).mpr; simp_all;
 
-instance : Nonempty (𝔽((𝐒𝟓 : AxiomSet β)) : FrameClass α) := ⟨
-  (λ _ _ => True),
-  (by apply (LogicS5.def_FrameClass _).mp; simp [Reflexive, Euclidean];)
-⟩
-
-/-
-lemma LogicGL.def_FrameClass : ∀ f, (Transitive f ∧ WellFounded f) ↔ (F ∈ FrameClass α β 𝐆𝐋) := by
-  simp only [LogicGL];
-  intro f;
-  constructor;
-  . intro hR;
-    apply Theory.frames_union.mpr ⟨
-      (AxiomK.defines β F),
-      (AxiomL.defines β F).mp hR
-    ⟩;
-  . intro hp;
-    apply (AxiomL.defines β F).mpr;
-    aesop;
-
-lemma LogicGL.trivialFrame : ∃ f, F ∈ FrameClass α β 𝐆𝐋 := by
-  existsi (λ _ _ => True);
-  apply (def_FrameClass _).mp;
-  simp [Transitive];
--/
+instance : Nonempty (𝔽((𝐒𝟓 : AxiomSet β)) : FrameClass α) := LogicS5.FrameClassDefinability.nonempty (by simp [Reflexive, Euclidean])
 
 end LogicDefinabilities
 
