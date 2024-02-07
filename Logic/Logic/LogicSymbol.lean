@@ -15,6 +15,26 @@ a function that preserves logical connectives.
 
 namespace LO
 
+
+inductive Polarity := | sigma | pi
+
+namespace Polarity
+
+notation "Σ" => sigma
+notation "Π" => pi
+
+def alt : Polarity → Polarity
+  | Σ => Π
+  | Π => Σ
+
+@[simp] lemma alt_sigma : Σ.alt = Π := rfl
+
+@[simp] lemma alt_pi : Π.alt = Σ := rfl
+
+@[simp] lemma alt_alt (b : Polarity) : b.alt.alt = b := by rcases b <;> simp
+
+end Polarity
+
 section logicNotation
 
 @[notation_class] class Tilde (α : Sort _) where
@@ -109,6 +129,20 @@ lemma exClosure_succ {n} (a : α (n + 1)) : ∃* a = ∃* ∃' a := rfl
 end ExQuantifier
 
 section UnivQuantifier₂
+
+section
+
+variable {α : ℕ → Sort u} [UnivQuantifier α] [ExQuantifier α]
+
+def quant : Polarity → α (n + 1) → α n
+  | Σ, p => ∃' p
+  | Π, p => ∀' p
+
+@[simp] lemma quant_sigma (p : α (n + 1)) : quant Σ p = ∃' p := rfl
+
+@[simp] lemma quant_pi (p : α (n + 1)) : quant Π p = ∀' p := rfl
+
+end
 
 variable {α : ℕ → ℕ → Sort u} [UnivQuantifier₂ α]
 
