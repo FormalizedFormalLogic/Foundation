@@ -154,7 +154,7 @@ lemma provable_iff_mem_partrec {k} {f : Vector ℕ k →. ℕ} (hf : Nat.Partrec
   · rintro ⟨b⟩
     have : Semiformula.PVal! ℕ (y :> v) (code $ codeOfPartrec f) := by
       simpa[models_iff, Semiformula.eval_rew, Matrix.empty_eq, Function.comp, Matrix.comp_vecCons'] using
-        Arith.Sound.sound sigma ⟨b⟩
+        Arith.SoundOn.sound sigma ⟨b⟩
     exact (codeOfPartrec_spec hf).mp this
   · intro h
     exact ⟨Arith.sigma_one_completeness sigma (by

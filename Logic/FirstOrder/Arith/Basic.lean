@@ -48,7 +48,7 @@ end Structure
 
 namespace Arith
 
-class Sound {L : Language} [Structure L ℕ]
+class SoundOn {L : Language} [Structure L ℕ]
     (T : Theory L) (F : Sentence L → Prop) where
   sound : ∀ {σ}, F σ → T ⊢! σ → ℕ ⊧ₘ σ
 
@@ -56,8 +56,8 @@ section
 
 variable {L : Language} [Structure L ℕ] (T : Theory L) (F : Set (Sentence L))
 
-lemma consistent_of_sound [Sound T F] (hF : F ⊥) : System.Consistent T :=
-  ⟨fun b => by simpa using Sound.sound hF ⟨b⟩⟩
+lemma consistent_of_sound [SoundOn T F] (hF : F ⊥) : System.Consistent T :=
+  ⟨fun b => by simpa using SoundOn.sound hF ⟨b⟩⟩
 
 end
 
