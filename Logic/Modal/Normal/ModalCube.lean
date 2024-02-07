@@ -97,7 +97,7 @@ namespace LogicKT4B
 @[simp] lemma subset_4 : 𝟒 ⊆ (𝐊𝐓𝟒𝐁 : AxiomSet α) := by simp [LogicKT4B, LogicK]
 @[simp] lemma subset_B : 𝐁 ⊆ (𝐊𝐓𝟒𝐁 : AxiomSet α) := by simp [LogicKT4B, LogicK]
 
-lemma FrameClassDefinability : @FrameClassDefinability α β 𝐊𝐓𝟒𝐁 (λ F => (Reflexive F ∧ Transitive F ∧ Symmetric F)) := by
+instance FrameClassDefinability : @FrameClassDefinability α β 𝐊𝐓𝟒𝐁 (λ F => (Reflexive F ∧ Transitive F ∧ Symmetric F)) := by
   intro F;
   simp [LogicKT4B, AxiomSetFrameClass.tetraunion];
   have := AxiomK.defines β F;
@@ -126,20 +126,21 @@ theorem equivalent_S5_KT4B : (𝐒𝟓 : AxiomSet β) ≃ᴸ 𝐊𝐓𝟒𝐁 :=
     exact h F (by
       have ⟨hRefl, hTrans, hSymm⟩ := LogicKT4B.FrameClassDefinability.mpr hF;
       apply LogicS5.FrameClassDefinability.mp;
-      constructor;
-      . simpa;
-      . exact eucl_of_symm_trans hSymm hTrans;
+      exact ⟨
+        by simpa,
+        eucl_of_symm_trans hSymm hTrans,
+      ⟩;
     ),
   by
     intro p h F hF;
     exact h F (by
       have ⟨hRefl, hEucl⟩ := LogicS5.FrameClassDefinability.mpr hF;
       apply LogicKT4B.FrameClassDefinability.mp;
-      constructor;
-      . simpa;
-      constructor;
-      . exact trans_of_refl_eucl hRefl hEucl;
-      . exact symm_of_refl_eucl hRefl hEucl;
+      exact ⟨
+        by simpa,
+        trans_of_refl_eucl hRefl hEucl,
+        symm_of_refl_eucl hRefl hEucl,
+      ⟩;
     );
 ⟩
 
