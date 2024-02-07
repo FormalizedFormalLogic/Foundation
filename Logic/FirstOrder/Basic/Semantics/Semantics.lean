@@ -320,6 +320,14 @@ lemma eval_rewriteMap (f : μ₁ → μ₂) (p : Semiformula L μ₁ n) :
     Eval s e₂ ε ((Rew.castLE h).hom p) ↔ Eval s (fun x => e₂ (x.castLE h)) ε p := by
   simp[eval_rew, Function.comp]
 
+@[simp] lemma eval_bShift (p : Semiformula L μ n) :
+    Eval s (x :> e) ε (Rew.bShift.hom p) ↔ Eval s e ε p :=
+  by simp[eval_rew, Function.comp]
+
+lemma eval_bShift' (p : Semiformula L μ n) :
+    Eval s e' ε (Rew.bShift.hom p) ↔ Eval s (e' ·.succ) ε p :=
+  by simp[eval_rew, Function.comp]
+
 lemma eval_substs {k} (w : Fin k → Semiterm L μ n) (p : Semiformula L μ k) :
     Eval s e ε ((Rew.substs w).hom p) ↔ Eval s (fun i => (w i).val s e ε) ε p :=
   by simp[eval_rew, Function.comp]

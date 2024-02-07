@@ -42,6 +42,8 @@ notation p:80 " ↔[" T "] " q:80 => Equivalent T p q
   intro hp hq M x _ hT ε e
   exact Iff.trans (hp M x hT ε e) (hq M x hT ε e)
 
+lemma of_subtheory (H : T ≾ T') (h : p ↔[T] q) : p ↔[T'] q := LO.Sound.sound <| H.sub <| LO.Complete.complete h
+
 lemma rew [DecidableEq ξ'] (h : p ↔[T] q) (ω : Rew L ξ n ξ' n') : (ω.hom p) ↔[T] (ω.hom q) := by
   simp [Equivalent, consequence_iff, models_iff, eval_rew, Function.comp] at h ⊢
   intro M x _ hT ε e; exact h M x hT _ _
@@ -110,40 +112,65 @@ lemma ex_or_ex (p q : Semiformula L ξ (n + 1)) :
     · exact Or.inl ⟨a, h⟩
     · exact Or.inr ⟨b, h⟩
 
+lemma dummy_quantifier_all (p : Semiformula L ξ n) :
+    (∀' Rew.bShift.hom p) ↔[T] p := by
+  simp [Equivalent, consequence_iff, models_iff, eval_substs, Matrix.comp_vecCons']
+
+lemma dummy_quantifier_ex (p : Semiformula L ξ n) :
+    (∃' Rew.bShift.hom p) ↔[T] p := by
+  simp [Equivalent, consequence_iff, models_iff, eval_substs, Matrix.comp_vecCons']
+
 end Equivalent
 
 end Semiformula
 
 def rewClosure (s : Set (Semiformula L ξ n)) : Set (Semiformula L ξ n) := { p | ∃ p₀ ∈ s, ∃ ω : Rew L ξ n ξ n, p = ω.hom p₀ }
 
-def equivalentClosure (T : Theory L) (s : Set (Semiformula L ξ n)) : Set (Semiformula L ξ n) := { p | ∃ p₀ ∈ s, p₀ ↔[T] p }
+def eqvClosure (T : Theory L) (s : Set (Semiformula L ξ n)) : Set (Semiformula L ξ n) := { p | ∃ p₀ ∈ s, p₀ ↔[T] p }
 
-section equivalentClosure
+section eqvClosure
 
 variable {T : Theory L} {s : Set (Semiformula L ξ n)}
 
 lemma mem_equivalent_closure_of_equivalent {p q : Semiformula L ξ n} (h : p ↔[T] q) :
-    p ∈ equivalentClosure T s → q ∈ equivalentClosure T s := by
+    p ∈ eqvClosure T s → q ∈ eqvClosure T s := by
   rintro ⟨p₀, hp₀, h₀⟩; exact ⟨p₀, hp₀, h₀.trans h⟩
 
-lemma subset_equivalent_closure : s ⊆ equivalentClosure T s := by
+lemma subset_equivalent_closure : s ⊆ eqvClosure T s := by
   intro p hp; exact ⟨p, hp, by rfl⟩
 
-end equivalentClosure
+@[simp] lemma eqv_eqv : eqvClosure T (eqvClosure T s) = eqvClosure T s := by
+  ext p; simp [eqvClosure]; constructor
+  · rintro ⟨q, ⟨r, hr, hrq⟩, hqp⟩
+    exact ⟨r, hr, hrq.trans hqp⟩
+  · rintro ⟨q, hq, hqp⟩
+    exact ⟨q, ⟨q, hq, by rfl⟩, hqp⟩
 
-structure Class (T : Theory L) where
+end eqvClosure
+
+@[ext] structure Class (L : Language) where
   domain : Set (SyntacticFormula L)
   rewrite_closed : ∀ p ∈ domain, ∀ f : ℕ → Term L ℕ, (Rew.rewrite f).hom p ∈ domain
-  equivalent_closed : ∀ p q : SyntacticFormula L, p ↔[T] q → p ∈ domain → q ∈ domain
+  --equivalent_closed : ∀ p q : SyntacticFormula L, p ↔[T] q → p ∈ domain → q ∈ domain
 
 namespace Class
 
-variable {T : Theory L} {c : Class T}
+variable {c : Class L}
 
-def mem (c : Class T) (p : Semiformula L ξ n) : Prop :=
+protected def eqvClosure (c : Class L) (T : Theory L) : Class L where
+  domain := eqvClosure T c.domain
+  rewrite_closed := by rintro p ⟨p', hp', H⟩ f; exact ⟨(Rew.rewrite f).hom p', c.rewrite_closed p' hp' f, H.rew _⟩
+
+def mem (c : Class L) (p : Semiformula L ξ n) : Prop :=
     ∃ v : ℕ → Semiterm L ξ n, ∃ p₀ ∈ c.domain, p = (Rew.bind ![] v).hom p₀
 
-lemma mem_of_equiv_of_nonempty (hξ : Nonempty ξ) {p q : Semiformula L ξ n} (H : p ↔[T] q) : c.mem p → c.mem q := by
+lemma mem_eqv_closure_domain (H : p ↔[T] q) : p ∈ c.domain → q ∈ (c.eqvClosure T).domain :=
+  fun hp ↦ ⟨p, hp, H⟩
+
+@[simp] lemma eqv_eqv : (c.eqvClosure T).eqvClosure T = c.eqvClosure T := by
+  ext; simp [Class.eqvClosure]
+
+lemma mem_eqv_closure_of_equiv_of_nonempty (hξ : Nonempty ξ) {p q : Semiformula L ξ n} (H : p ↔[T] q) : c.mem p → (c.eqvClosure T).mem q := by
   haveI : Inhabited ξ := Classical.inhabited_of_nonempty hξ
   rintro ⟨v, p, hp, rfl⟩
   generalize hω : ((Rew.bind (fun x ↦ &x.val) (fun x ↦ &(x + n))).comp (Rew.rewriteMap q.fvEnum) : Rew L ξ n ℕ 0) = ω
@@ -155,7 +182,7 @@ lemma mem_of_equiv_of_nonempty (hξ : Nonempty ξ) {p q : Semiformula L ξ n} (H
     · intro x hx
       simp [Rew.comp_app, Semiformula.fvEnumInv_fvEnum hx]
   have hp' : (Rew.hom (Rew.rewrite fun x ↦ ω (v x))) p ∈ c.domain := c.rewrite_closed p hp (fun x ↦ ω (v x))
-  have : q₀ ∈ c.domain := c.equivalent_closed _ _ (by
+  have : q₀ ∈ (c.eqvClosure T).domain := mem_eqv_closure_domain (by
     simp [Semiformula.Equivalent, consequence_iff, models_iff, Semiformula.eval_rew, Function.comp, Matrix.empty_eq] at H ⊢
     intro M x _ hT ε
     have : Semiformula.Val! M (fun x ↦ Semiterm.val! M (fun x ↦ (ω #x).val! M ![] ε) (fun x ↦ (ω &x).val! M ![] ε) (v x)) p ↔
@@ -166,9 +193,9 @@ lemma mem_of_equiv_of_nonempty (hξ : Nonempty ξ) {p q : Semiformula L ξ n} (H
     funext x; simp [Semiterm.val_rew ω (v x), Function.comp]) hp'
   exact ⟨_, q₀, this, hq⟩
 
-lemma mem_of_equiv {p q : Semiformula L ξ n} (H : p ↔[T] q) : c.mem p → c.mem q := by
+lemma mem_eqv_closure_of_equiv {p q : Semiformula L ξ n} (H : p ↔[T] q) : c.mem p → (c.eqvClosure T).mem q := by
   by_cases hξ : Nonempty ξ
-  · exact mem_of_equiv_of_nonempty hξ H
+  · exact mem_eqv_closure_of_equiv_of_nonempty hξ H
   · haveI hξ : IsEmpty ξ := not_nonempty_iff.mp hξ
     rintro ⟨v, p, hp, rfl⟩
     generalize hω : (Rew.bind (fun x ↦ &x.val) hξ.elim : Rew L ξ n ℕ 0) = ω
@@ -179,7 +206,7 @@ lemma mem_of_equiv {p q : Semiformula L ξ n} (H : p ↔[T] q) : c.mem p → c.m
       · simp [Rew.comp_app]
       · intro x _; exact hξ.elim' x
     have hp' : (Rew.hom (Rew.rewrite fun x ↦ ω (v x))) p ∈ c.domain := c.rewrite_closed p hp (fun x ↦ ω (v x))
-    have : q₀ ∈ c.domain := c.equivalent_closed _ _ (by
+    have : q₀ ∈ (c.eqvClosure T).domain := mem_eqv_closure_domain (by
       simp [Semiformula.Equivalent, consequence_iff, models_iff, Semiformula.eval_rew, Function.comp, Matrix.empty_eq, hξ.eq_elim] at H ⊢
       intro M x _ hT ε
       have := H M x hT (fun x ↦ (ω #x).val! M ![] ε)
@@ -188,7 +215,10 @@ lemma mem_of_equiv {p q : Semiformula L ξ n} (H : p ↔[T] q) : c.mem p → c.m
       funext x; simp [Semiterm.val_rew ω (v x), Function.comp, hξ.eq_elim]) hp'
     exact ⟨_, q₀, this, hq⟩
 
-lemma mem_iff_of_equiv {p q : Semiformula L ξ n} (H : p ↔[T] q) : c.mem p ↔ c.mem q :=
+lemma mem_of_equiv {p q : Semiformula L ξ n} (H : p ↔[T] q) : (c.eqvClosure T).mem p → (c.eqvClosure T).mem q := by
+  intro h; simpa using mem_eqv_closure_of_equiv H h
+
+lemma mem_iff_of_equiv {p q : Semiformula L ξ n} (H : p ↔[T] q) : (c.eqvClosure T).mem p ↔ (c.eqvClosure T).mem q :=
   ⟨mem_of_equiv H, mem_of_equiv H.symm⟩
 
 lemma mem_of_mem_domain {p : SyntacticFormula L} (h : p ∈ c.domain) : c.mem p := ⟨(&·), _, h, by simp⟩
@@ -199,20 +229,41 @@ lemma mem_rew {p₁ : Semiformula L ξ₁ n₁} (ω : Rew L ξ₁ n₁ ξ₂ n�
 
 lemma cast {p q : Semiformula L ξ n} (hp : c.mem p) (e : p = q) : c.mem q := e ▸ hp
 
-class Atom (c : Class T) : Prop where
+instance : LE (Class L) := ⟨fun c c' ↦ c.domain ⊆ c'.domain⟩
+
+namespace LE
+
+variable {c c' : Class L}
+
+@[refl] protected lemma refl : c ≤ c := Set.Subset.rfl
+
+@[trans] protected lemma trans {c₁ c₂ c₃ : Class L} : c₁ ≤ c₂ → c₂ ≤ c₃ → c₁ ≤ c₃ := Set.Subset.trans
+
+lemma mem (H : c ≤ c') {p : Semiformula L ξ n} (hp : c.mem p) : c'.mem p := by
+  rcases hp with ⟨f, p, hp, rfl⟩
+  exact ⟨f, p, H hp, rfl⟩
+
+end LE
+
+lemma le_eqvClosure (c : Class L) (T : Theory L) : c ≤ c.eqvClosure T := by intro p hp; exact subset_equivalent_closure hp
+
+lemma le_of_subtheory (c : Class L) {T T' : Theory L} (h : T ≾ T') : c.eqvClosure T ≤ c.eqvClosure T' := by
+  rintro p ⟨p', hp', H⟩; exact ⟨p', hp', H.of_subtheory h⟩
+
+class Atom (c : Class L) : Prop where
   verum : ⊤ ∈ c.domain
   falsum : ⊥ ∈ c.domain
   rel : ∀ {k} (r : L.Rel k) (v), Semiformula.rel r v ∈ c.domain
   nrel : ∀ {k} (r : L.Rel k) (v), Semiformula.nrel r v ∈ c.domain
 
-class Not (c : Class T) : Prop where
-  not {p : SyntacticFormula L} : p ∈ c.domain → ∃ r ∈ c.domain, r ↔[T] (~p)
+class Not (c : Class L) : Prop where
+  not {p : SyntacticFormula L} : p ∈ c.domain → ~p ∈ c.domain
 
-class And (c : Class T) : Prop where
-  and {p q : SyntacticFormula L} : p ∈ c.domain → q ∈ c.domain → ∃ r ∈ c.domain, r ↔[T] (p ⋏ q)
+class And (c : Class L) : Prop where
+  and {p q : SyntacticFormula L} : p ∈ c.domain → q ∈ c.domain → p ⋏ q ∈ c.domain
 
-class Or (c : Class T) : Prop where
-  or {p q : SyntacticFormula L} : p ∈ c.domain → q ∈ c.domain → ∃ r ∈ c.domain, r ↔[T] (p ⋎ q)
+class Or (c : Class L) : Prop where
+  or {p q : SyntacticFormula L} : p ∈ c.domain → q ∈ c.domain → p ⋎ q ∈ c.domain
 
 section Atom
 
@@ -248,6 +299,14 @@ variable [c.Atom] [Nonempty (Term L ξ)]
 @[simp] lemma mem_not_lt [L.LT] (t u : Semiterm L ξ n) : c.mem “!!t ≮ !!u” := by
   simp [Semiformula.Operator.operator, Rew.rel, Semiformula.Operator.LT.lt]
 
+def of_le (c c' : Class L) [c.Atom] (h : c ≤ c') : c'.Atom where
+  verum := h Atom.verum
+  falsum := h Atom.falsum
+  rel := fun r v ↦ h (Atom.rel r v)
+  nrel := fun r v ↦ h (Atom.nrel r v)
+
+instance : (c.eqvClosure T).Atom := of_le c _ (le_eqvClosure c T)
+
 end Atom
 
 section Not
@@ -256,8 +315,9 @@ variable [c.Not]
 
 lemma mem_not {p : Semiformula L ξ n} (hp : c.mem p) : c.mem (~p) := by
   rcases hp with ⟨f, p, hp, rfl⟩
-  rcases Not.not hp with ⟨q, hq, H⟩
-  simpa using mem_rew (Rew.bind ![] f) (mem_of_equiv H (mem_of_mem_domain hq))
+  simpa using mem_rew (Rew.bind ![] f) (mem_of_mem_domain (Not.not hp))
+
+instance : (c.eqvClosure T).Not := ⟨by rintro p ⟨p', hp', H⟩; exact ⟨~p', Not.not hp', H.not⟩⟩
 
 end Not
 
@@ -270,13 +330,14 @@ lemma mem_and {p q : Semiformula L ξ n} (hp : c.mem p) (hq : c.mem q) : c.mem (
   rcases hq with ⟨g, q, hq, rfl⟩
   have hp' : (Rew.rewriteMap (Nat.bit false)).hom p ∈ c.domain := c.rewrite_closed _ hp _
   have hq' : (Rew.rewriteMap (Nat.bit true)).hom q ∈ c.domain := c.rewrite_closed _ hq _
-  rcases And.and hp' hq' with ⟨r, hr, H⟩
   let fg : ℕ → Semiterm L ξ n :=
     fun x ↦ Nat.bitCasesOn (C := fun _ ↦ Semiterm L ξ n) x (fun b x ↦ b.casesOn (f x) (g x))
-  refine cast (mem_rew (Rew.bind ![] fg) <| mem_of_equiv H <| c.mem_of_mem_domain hr) ?_
+  refine cast (mem_rew (Rew.bind ![] fg) <| c.mem_of_mem_domain (And.and hp' hq')) ?_
   simp [←Rew.hom_comp_app]; constructor
   · congr; ext <;> simp [Rew.comp_app]
   · congr; ext <;> simp [Rew.comp_app]
+
+instance : (c.eqvClosure T).And := ⟨by rintro p q ⟨p', hp', Hp⟩ ⟨q', hq', Hq⟩; exact ⟨p' ⋏ q', And.and hp' hq', Hp.and Hq⟩⟩
 
 end And
 
@@ -289,13 +350,14 @@ lemma mem_or {p q : Semiformula L ξ n} (hp : c.mem p) (hq : c.mem q) : c.mem (p
   rcases hq with ⟨g, q, hq, rfl⟩
   have hp' : (Rew.rewriteMap (Nat.bit false)).hom p ∈ c.domain := c.rewrite_closed _ hp _
   have hq' : (Rew.rewriteMap (Nat.bit true)).hom q ∈ c.domain := c.rewrite_closed _ hq _
-  rcases Or.or hp' hq' with ⟨r, hr, H⟩
   let fg : ℕ → Semiterm L ξ n :=
     fun x ↦ Nat.bitCasesOn (C := fun _ ↦ Semiterm L ξ n) x (fun b x ↦ b.casesOn (f x) (g x))
-  refine cast (mem_rew (Rew.bind ![] fg) <| mem_of_equiv H <| c.mem_of_mem_domain hr) ?_
+  refine cast (mem_rew (Rew.bind ![] fg) <| c.mem_of_mem_domain (Or.or hp' hq')) ?_
   simp [←Rew.hom_comp_app]; constructor
   · congr; ext <;> simp [Rew.comp_app]
   · congr; ext <;> simp [Rew.comp_app]
+
+instance : (c.eqvClosure T).Or := ⟨by rintro p q ⟨p', hp', Hp⟩ ⟨q', hq', Hq⟩; exact ⟨p' ⋎ q', Or.or hp' hq', Hp.or Hq⟩⟩
 
 variable [c.Not]
 
@@ -325,49 +387,23 @@ variable [c.Atom] [c.And] [c.Or] [Nonempty (Term L ξ)]
 
 end
 
-def generatedFromRewriteClosedSet (T : Theory L) (s : Set (SyntacticFormula L))
-    (H : ∀ p ∈ s, ∀ f : ℕ → Term L ℕ, (Rew.rewrite f).hom p ∈ s) : Class T where
-  domain := equivalentClosure T s
-  rewrite_closed := by
-    rintro p ⟨p₀, hs₀, hp⟩ f
-    exact ⟨(Rew.rewrite f).hom p₀, H p₀ hs₀ f, hp.rew (Rew.rewrite f)⟩
-  equivalent_closed := by
-    intro p q H hp; exact mem_equivalent_closure_of_equivalent H hp
-
-lemma generated_not {s : Set (SyntacticFormula L)} {H : ∀ p ∈ s, ∀ f : ℕ → Term L ℕ, (Rew.rewrite f).hom p ∈ s}
-    (h : ∀ p ∈ s, ∃ r ∈ s, r ↔[T] (~p)) : (generatedFromRewriteClosedSet T s H).Not := ⟨by
-  rintro p ⟨p₀, hp₀, Hp⟩
-  exact ⟨~p₀, h _ hp₀, Hp.not⟩⟩
-
-lemma generated_and {s : Set (SyntacticFormula L)} {H : ∀ p ∈ s, ∀ f : ℕ → Term L ℕ, (Rew.rewrite f).hom p ∈ s}
-    (h : ∀ p ∈ s, ∀ q ∈ s, ∃ r ∈ s, r ↔[T] (p ⋏ q)) : (generatedFromRewriteClosedSet T s H).And := ⟨by
-  rintro p q ⟨p₀, hp₀, Hp⟩ ⟨q₀, hq₀, Hq⟩
-  exact ⟨p₀ ⋏ q₀, h _ hp₀ _ hq₀, Hp.and Hq⟩⟩
-
-lemma generated_or {s : Set (SyntacticFormula L)} {H : ∀ p ∈ s, ∀ f : ℕ → Term L ℕ, (Rew.rewrite f).hom p ∈ s}
-    (h : ∀ p ∈ s, ∀ q ∈ s, ∃ r ∈ s, r ↔[T] (p ⋎ q)) : (generatedFromRewriteClosedSet T s H).Or := ⟨by
-  rintro p q ⟨p₀, hp₀, Hp⟩ ⟨q₀, hq₀, Hq⟩
-  exact ⟨p₀ ⋎ q₀, h _ hp₀ _ hq₀, Hp.or Hq⟩⟩
-
 end Class
 
-def openClass {L : Language} (T : Theory L) : Class T :=
-  Class.generatedFromRewriteClosedSet T Semiformula.Open (by intro p hp f; simpa [Set.mem_def] using hp)
+def openClass (L : Language) : Class L where
+  domain := Semiformula.Open
+  rewrite_closed := by intro p hp f; simpa [Set.mem_def] using hp
 
-instance : (openClass T).Atom where
-  verum := subset_equivalent_closure Semiformula.open_top
-  falsum := subset_equivalent_closure Semiformula.open_bot
-  rel := fun r v ↦ subset_equivalent_closure (Semiformula.open_rel r v)
-  nrel := fun r v ↦ subset_equivalent_closure (Semiformula.open_nrel r v)
+instance : (openClass L).Atom where
+  verum := Semiformula.open_top
+  falsum := Semiformula.open_bot
+  rel := fun r v ↦ Semiformula.open_rel r v
+  nrel := fun r v ↦ Semiformula.open_nrel r v
 
-instance : (openClass T).Not :=
-  Class.generated_not (by intro p (hp : p.Open); exact ⟨~p, Semiformula.open_neg.mpr hp, by rfl⟩)
+instance : (openClass T).Not := ⟨Semiformula.open_neg.mpr⟩
 
-instance : (openClass T).And :=
-  Class.generated_and (by intro p (hp : p.Open) q (hq : q.Open); exact ⟨p ⋏ q, Semiformula.open_and.mpr ⟨hp, hq⟩, by rfl⟩)
+instance : (openClass T).And := ⟨fun hp hq ↦ Semiformula.open_and.mpr ⟨hp, hq⟩⟩
 
-instance : (openClass T).Or :=
-  Class.generated_or (by intro p (hp : p.Open) q (hq : q.Open); exact ⟨p ⋎ q, Semiformula.open_or.mpr ⟨hp, hq⟩, by rfl⟩)
+instance : (openClass T).Or := ⟨fun hp hq ↦ Semiformula.open_or.mpr ⟨hp, hq⟩⟩
 
 section
 
@@ -393,7 +429,7 @@ macro "formula_class" (config)? : tactic =>
 macro "formula_class?" (config)? : tactic =>
   `(tactic| aesop? (options := { terminal := true }) (rule_sets [$(Lean.mkIdent `FormulaClass):ident]))
 
-example : (openClass T).mem (“¬0 < 6 → &6 + #5 ≠ 0” : Semiformula ℒₒᵣ ℕ 8) := by formula_class
+example : (openClass ℒₒᵣ).mem (“¬0 < 6 → &6 + #5 ≠ 0” : Semiformula ℒₒᵣ ℕ 8) := by { formula_class }
 
 end
 
