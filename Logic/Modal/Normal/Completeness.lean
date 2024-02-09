@@ -355,9 +355,7 @@ lemma frame_def': (CanonicalModel Λ).frame Ω₁ Ω₂ ↔ (◇Ω₂ ⊆ Ω₁.
     aesop;
 
 @[simp]
-lemma val_def {a : β} :
-  a ∈ (CanonicalModel Λ).val Ω ↔ (atom a) ∈ Ω
-  := by rfl
+lemma val_def {a : β} : (CanonicalModel Λ).val Ω a ↔ (atom a) ∈ Ω := by rfl
 
 @[simp]
 lemma axiomT (hT : 𝐓 ⊆ Λ) : Reflexive (CanonicalModel Λ).frame := by
