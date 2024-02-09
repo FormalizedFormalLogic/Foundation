@@ -321,6 +321,20 @@ lemma neg_iff'! {Γ : Set F} {p q : F} (d : Γ ⊢! (p ⟷ q)) : Γ ⊢! (~p ⟷
 
 lemma contra₀'! {Γ : Set F} {p q : F} (d : Γ ⊢! (p ⟶ q)) : Γ ⊢! (~q ⟶ ~p) := ⟨contra₀' d.some⟩
 
+lemma dtr! {Γ : Set F} {p q : F} (d : (insert p Γ) ⊢! q) : Γ ⊢! (p ⟶ q) := ⟨dtr d.some⟩
+lemma dtr_not! {Γ : Set F} {p q : F} : (Γ ⊬! (p ⟶ q)) → ((insert p Γ) ⊬! q) := by
+  contrapose;
+  simp;
+  intro d;
+  exact ⟨dtr d⟩
+
+lemma dtl! {Γ : Set F} {p q : F} (d : Γ ⊢! (p ⟶ q)) : (insert p Γ) ⊢! q := ⟨dtl d.some⟩
+lemma dtl_not! {Γ : Set F} {p q : F} : ((insert p Γ) ⊬! q) → (Γ ⊬! (p ⟶ q)) := by
+  contrapose;
+  simp;
+  intro d;
+  exact ⟨dtl d⟩
+
 end Deducible
 
 section Consistency
