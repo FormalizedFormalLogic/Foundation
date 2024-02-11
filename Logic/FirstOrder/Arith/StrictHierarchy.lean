@@ -69,8 +69,8 @@ lemma zero_iff_delta_zero {Γ} {p : Semiformula L μ n} :
 end StrictHierarchy
 
 def SHClass (L : Language) [L.LT] (Γ : Polarity) (s : ℕ) : Class L where
-  domain := StrictHierarchy Γ s
-  rewrite_closed := by intro p hp f; exact hp.rew _
+  Domain := StrictHierarchy Γ s
+  rew_closed := by intro _ _ ω p hp; exact hp.rew ω
 
 notation Γ "ᴴ("s")" => SHClass _ Γ s
 
@@ -93,7 +93,7 @@ variable (Γ : Polarity) (s : ℕ) (T : Theory L)
 open StrictHierarchy Semiformula
 
 lemma accumlative_succ (Γ Γ' s) : Γᴴ(s)[T] ≤ Γ'ᴴ(s + 1)[T] := by
-  rintro p ⟨p', hp', Hp⟩
+  rintro _ p ⟨p', hp', Hp⟩
   cases Γ <;> cases Γ'
   · exact ⟨p', hp'.succ, Hp⟩
   · exact ⟨∀' Rew.bShift.hom p', (rew hp' _).pi, Equivalent.trans (Equivalent.dummy_quantifier_all p') Hp⟩
@@ -116,7 +116,7 @@ lemma accumlative (Γ Γ') {s s'} (h : s < s') : Γᴴ(s)[T] ≤ Γ'ᴴ(s')[T] :
   · rw [←SHClassIn.eqDeltaZero T Γ]; exact accumlative T Γ Γ (by simp)
 
 lemma openClass_le : openClass L ≤ SHClass L Σ 0 := by
-  intro p hp
+  intro _ p hp
   simp [SHClass, Set.mem_def, zero_iff_delta_zero]
   exact Hierarchy.of_open hp
 
@@ -136,22 +136,30 @@ open Hierarchy SHClassIn StrictHierarchy Semiformula
 instance atom : (Δ₀[T]).Atom := SHClassIn.atom Σ 0 T
 
 instance not : (Δ₀[T]).Not := ⟨by
-  rintro p ⟨p', hp', Hp⟩
+  rintro _ p ⟨p', hp', Hp⟩
   exact ⟨~p',
     zero_iff_delta_zero.mpr
       (by simp [←Hierarchy.zero_iff_delta_zero (Γ := Σ), pi_zero_iff_sigma_zero]; exact zero_iff_delta_zero.mp hp'),
     Hp.not⟩⟩
 
 instance and : (Δ₀[T]).And := ⟨by
-  rintro p q ⟨p', hp', Hp⟩ ⟨q', hq', Hq⟩
+  rintro _ p q ⟨p', hp', Hp⟩ ⟨q', hq', Hq⟩
   have hp' : DeltaZero p' := zero_iff_delta_zero.mp hp'
   have hq' : DeltaZero q' := zero_iff_delta_zero.mp hq'
   exact ⟨p' ⋏ q', zero_iff_delta_zero.mpr (Hierarchy.and hp' hq'), Hp.and Hq⟩⟩
 
 instance or : (Δ₀[T]).Or := ⟨by
-  rintro p q ⟨p', hp', Hp⟩ ⟨q', hq', Hq⟩
+  rintro _ p q ⟨p', hp', Hp⟩ ⟨q', hq', Hq⟩
   have hp' : DeltaZero p' := zero_iff_delta_zero.mp hp'
   have hq' : DeltaZero q' := zero_iff_delta_zero.mp hq'
   exact ⟨p' ⋎ q', zero_iff_delta_zero.mpr (Hierarchy.or hp' hq'), Hp.or Hq⟩⟩
+
+/-
+instance ball : (Δ₀[T]).BAll := ⟨by {
+  rintro _ p ⟨p', hp', H⟩
+  have hp' : DeltaZero p' := zero_iff_delta_zero.mp hp'
+  exact ⟨∀[“#0 < &0”] p', zero_iff_delta_zero.mpr (Hierarchy.ball (by simp) hp'), by {  }⟩
+   }⟩
+-/
 
 end DeltaZeroIn

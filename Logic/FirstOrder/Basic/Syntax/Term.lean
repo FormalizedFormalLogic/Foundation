@@ -218,7 +218,7 @@ def bind (b : Fin n₁ → Semiterm L μ₂ n₂) (e : μ₁ → Semiterm L μ�
 
 def rewrite (f : μ₁ → Semiterm L μ₂ n) : Rew L μ₁ n μ₂ n := bind Semiterm.bvar f
 
-def rewriteMap (e : μ₁ → μ₂) : Rew L μ₁ n μ₂ n := bind Semiterm.bvar (fun m => &(e m))
+def rewriteMap (e : μ₁ → μ₂) : Rew L μ₁ n μ₂ n := rewrite (fun m => &(e m))
 
 def map (b : Fin n₁ → Fin n₂) (e : μ₁ → μ₂) : Rew L μ₁ n₁ μ₂ n₂ :=
   bind (fun n => #(b n)) (fun m => &(e m))
