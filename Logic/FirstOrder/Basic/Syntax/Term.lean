@@ -770,6 +770,22 @@ lemma lMap_fix (t : SyntacticSemiterm L₁ n) : (fix t).lMap Φ = fix (t.lMap Φ
 
 end lMap
 
+section fvEnum
+
+variable [DecidableEq μ] [Inhabited μ]
+
+def fvEnum (t : Semiterm L μ n) : μ → ℕ := t.fvarList.indexOf
+
+def fvEnumInv (t : Semiterm L μ n) : ℕ → μ :=
+  fun i ↦ if hi : i < t.fvarList.length then t.fvarList.get ⟨i, hi⟩ else default
+
+lemma fvEnumInv_fvEnum {t : Semiterm L μ n} {x : μ} (hx : x ∈ t.fvarList) :
+    fvEnumInv t (fvEnum t x) = x := by
+  simp [fvEnumInv, fvEnum]; intro h
+  exact False.elim <| not_le.mpr (List.indexOf_lt_length.mpr $ hx) h
+
+end fvEnum
+
 end Semiterm
 
 end FirstOrder
