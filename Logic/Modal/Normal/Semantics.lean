@@ -55,6 +55,8 @@ lemma imp_def : (w ⊩ᴹ[M] p ⟶ q) ↔ (w ⊮ᴹ[M] p) ∨ (w ⊩ᴹ[M] q) :=
 
 lemma modus_ponens (m₁ : w ⊩ᴹ[M] p ⟶ q) : (w ⊩ᴹ[M] p) → (w ⊩ᴹ[M] q) := by simpa [imp_def'] using m₁;
 
+lemma modus_ponens (m₁ : ⊧ᴹ[M, w] p ⟶ q) : (⊧ᴹ[M, w] p) → (⊧ᴹ[M, w] q) := by simpa [imp_def'] using m₁;
+
 end Satisfies
 
 def Models (M : Model α β) (p : Formula β) := ∀w, (w ⊩ᴹ[M] p)
@@ -154,6 +156,18 @@ notation w "⊩ᴹ[" M "] " Γ => Theory.Satisfies M w Γ
 notation w "⊮ᴹ[" M "] " Γ => Theory.Unsatisfies M w Γ
 
 variable [DecidableEq β]
+
+variable [DecidableEq β]
+
+lemma Theory.satisfies_conj {Δ : Context β} {Γ : Theory β} (hs : ↑Δ ⊆ Γ) {M : Model α β} {w : α} : (⊧ᴹ[M, w] Γ) → (⊧ᴹ[M, w] Δ.conj) := by
+  intro hΓ;
+  induction Δ using Finset.induction_on with
+  | empty => simp [Finset.conj];
+  | @insert p Δ _ ih =>
+    -- have := Finset.toList_insert h;
+    -- simp [Finset.conj] at this;
+    suffices ⊧ᴹ[M,w] (Δ.conj ⋏ p) by simpa [←Context.insert_conj] using this;
+    simp_all [Finset.coe_insert, Set.insert_subset_iff];
 
 @[simp]
 def Theory.Models (M : Model α β) (Γ : Theory β) := ∀ p ∈ Γ, ⊧ᴹ[M] p

@@ -35,10 +35,12 @@ private lemma AxiomSet.soundsAux {Γ : Theory α} (hΓ : Γ = ∅) (d : Γ ⊢�
 
 theorem AxiomSet.sounds (d : ⊢ᴹ[Λ]! p) : (⊧ᴹ[(𝔽(Λ) : FrameClass β)] p) := AxiomSet.soundsAux rfl d
 
-theorem AxiomSet.ssounds : (Γ ⊢ᴹ[Λ]! p) → (Γ ⊨ᴹ[(𝔽(Λ) : FrameClass β)] p) := by
-  intro d;
+theorem AxiomSet.ssounds (d : Γ ⊢ᴹ[Λ]! p) : (Γ ⊨ᴹ[(𝔽(Λ) : FrameClass β)] p) := by
   obtain ⟨Δ, ⟨sΔ, dΔ⟩⟩ := d.compact;
-  sorry
+  have h₂ : ⊧ᴹ[(𝔽(Λ) : FrameClass β)] (Δ.conj ⟶ p) := AxiomSet.sounds $ Deducible.dtr_strong dΔ;
+  intro F hF V w hΓ;
+  simp [FrameClasses, Frames, Models] at h₂;
+  exact h₂ F hF V w (Theory.satisfies_conj sΔ hΓ);
 
 lemma AxiomSet.consistent (β) [Inhabited β] [h : Nonempty (𝔽(Λ) : FrameClass β)] : Consistent Λ := by
   by_contra hC;
