@@ -1,4 +1,5 @@
 import Logic.FirstOrder.Arith.Hierarchy
+import Logic.FirstOrder.Class.Class
 
 namespace LO
 
@@ -27,6 +28,28 @@ lemma rew {p : Semiformula L μ₁ n₁} (h : StrictHierarchy Γ s p) (ω : Rew 
   case pi ih => exact (ih ω.q).pi
   case ex ih => exact (ih ω.q).ex
   case all ih => exact (ih ω.q).all
+
+lemma rew_iff {p : Semiformula L μ₁ n₁} (ω : Rew L μ₁ n₁ μ₂ n₂) :
+    StrictHierarchy Γ s (ω.hom p) ↔ StrictHierarchy Γ s p :=
+  ⟨by
+    generalize hq : ω.hom p = q
+    intro h;
+    induction h generalizing n₁ <;> try simp [Rew.eq_ball_iff, Rew.eq_bex_iff, Rew.eq_all_iff, Rew.eq_ex_iff] at hq ⊢
+    case zero q h =>
+      rcases hq; exact zero (Hierarchy.rew_iff.mp h)
+    case sigma h ih =>
+      rcases hq with ⟨_, rfl, rfl⟩
+      exact (ih ω.q rfl).sigma
+    case pi h ih =>
+      rcases hq with ⟨_, rfl, rfl⟩
+      exact (ih ω.q rfl).pi
+    case ex h ih =>
+      rcases hq with ⟨_, rfl, rfl⟩
+      exact (ih ω.q rfl).ex
+    case all ih =>
+      rcases hq with ⟨_, rfl, rfl⟩
+      exact (ih ω.q rfl).all,
+  fun h ↦ h.rew ω⟩
 
 lemma succ {Γ} {p : Semiformula L μ₁ n₁} (h : StrictHierarchy Γ s p) :
     StrictHierarchy Γ (s + 1) p := by

@@ -265,6 +265,12 @@ class And (c : Class L) : Prop where
 class Or (c : Class L) : Prop where
   or {p q : SyntacticFormula L} : p ∈ c.domain → q ∈ c.domain → p ⋎ q ∈ c.domain
 
+class BAll (c : Class L) [L.LT] : Prop where
+  ball {p : SyntacticSemiformula L 1} {t} : Rew.free.hom p ∈ c.domain → t.Positive → (∀[“#0 < !!t”] p) ∈ c.domain
+
+class BEx (c : Class L) [L.LT] : Prop where
+  bex {p : SyntacticSemiformula L 1} {t} : Rew.free.hom p ∈ c.domain → t.Positive → (∃[“#0 < !!t”] p) ∈ c.domain
+
 section Atom
 
 variable [c.Atom] [Nonempty (Term L ξ)]
@@ -370,6 +376,17 @@ lemma mem_iff {p q : Semiformula L ξ n} (hp : c.mem p) (hq : c.mem q) : c.mem (
   simp [LO.LogicSymbol.iff]; exact mem_and (mem_imply hp hq) (mem_imply hq hp)
 
 end Or
+
+section BAll
+
+variable [L.LT] [c.BAll]
+
+/-
+lemma mem_ball {p : Semiformula L ξ (n + 1)} (hp : c.mem p) {t} (ht : t.Positive) : c.mem (∀[“#0 < !!t”] p) := by
+  rcases hp with ⟨f, p, hp, rfl⟩
+-/
+
+end BAll
 
 section
 

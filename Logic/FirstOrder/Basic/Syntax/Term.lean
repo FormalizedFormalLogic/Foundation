@@ -625,6 +625,9 @@ lemma free_comp_substs_eq_substs_comp_shift {n'} (w : Fin n' → SyntacticSemite
     free.comp (substs w) = (substs (free ∘ w)).comp shift :=
   by ext x <;> simp[comp_app]
 
+@[simp] lemma rewriteMap_comp_rewriteMap (f : μ₁ → μ₂) (g : μ₂ → μ₃) :
+  (rewriteMap (L := L) (n := n) g).comp (rewriteMap f) = rewriteMap (g ∘ f) := by ext x <;> simp [comp_app]
+
 @[simp] lemma fix_free_app (t : SyntacticSemiterm L (n + 1)) : fix (free t) = t := by simp[←comp_app]
 
 @[simp] lemma free_fix_app (t : SyntacticSemiterm L n) : free (fix t) = t := by simp[←comp_app]

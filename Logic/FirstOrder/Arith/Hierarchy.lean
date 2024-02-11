@@ -1,5 +1,4 @@
 import Logic.FirstOrder.Arith.Basic
-import Logic.FirstOrder.Class.Class
 
 namespace LO
 
