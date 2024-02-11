@@ -237,40 +237,13 @@ lemma pentaunion (Λ₁ Λ₂ Λ₃ Λ₄ Λ₅ : AxiomSet β) : (𝔽(Λ₁ ∪
 
 end AxiomSetFrameClass
 
-variable [Inhabited α]
-
 namespace Theory
 
 lemma models_neg_singleton [Inhabited α] {M : Model α β} {p : Formula β} : (⊧ᴹ[M] {~p}) → (¬⊧ᴹ[M] {p}) := by
   intro hnp hp;
   exact Formula.Models.neg_def (hnp (~p) (by simp)) (hp p (by simp));
 
-lemma models_union {M : Model α β} {Γ₁ Γ₂ : Theory β} : (⊧ᴹ[M] Γ₁ ∪ Γ₂) ↔ (⊧ᴹ[M] Γ₁) ∧ (⊧ᴹ[M] Γ₂) := by
-  constructor;
-  . intro h; simp_all [Theory.Models];
-  . intros h p hp;
-    rcases hp with (_ | _);
-    . exact h.left p (by assumption);
-    . exact h.right p (by assumption);
-
-lemma frames_union {F: Frame α} {Γ₁ Γ₂ : Theory β} : (⊧ᴹ[F] Γ₁ ∪ Γ₂) ↔ (⊧ᴹ[F] Γ₁) ∧ (⊧ᴹ[F] Γ₂) := by
-  constructor;
-  . intro h; simp_all [Theory.Frames];
-  . intros h p hp;
-    rcases hp with (_ | _);
-    . exact h.left p (by assumption);
-    . exact h.right p (by assumption);
-
-lemma frames_triunion {F: Frame α} {Γ₁ Γ₂ Γ₃ : Theory β} : (⊧ᴹ[F] Γ₁ ∪ Γ₂ ∪ Γ₃) ↔ (⊧ᴹ[F] Γ₁) ∧ (⊧ᴹ[F] Γ₂) ∧ (⊧ᴹ[F] Γ₃) := by
-  constructor;
-  . intro h; simp_all [Theory.Frames];
-  . intros h p hp;
-    rcases hp with (_ | _) | _;
-    . exact h.left p (by assumption);
-    . exact h.right.left p (by assumption);
-    . exact h.right.right p (by assumption);
-
-lemma not_Frames {F: Frame α} {Γ : Theory β} : (∃ V w, (w ⊮ᴹ[⟨F, V⟩] Γ)) → ¬(⊧ᴹ[F] Γ) := by
+lemma not_Frames {F: Frame α} {Γ : Theory β} : (∃ V w, ¬(⊧ᴹ[⟨F, V⟩, w] Γ)) → ¬(⊧ᴹ[F] Γ) := by
   simp [Frames, Satisfies, Formula.Frames, Formula.Models];
   intros V w p hp h;
   existsi p, hp, V, w;
