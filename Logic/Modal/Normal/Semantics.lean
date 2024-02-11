@@ -50,6 +50,8 @@ lemma imp_def : (⊧ᴹ[M, w] p ⟶ q) ↔ ¬(⊧ᴹ[M, w] p) ∨ (⊧ᴹ[M, w] 
 @[simp] lemma neg_def : (⊧ᴹ[M, w] (neg p)) ↔ ¬(⊧ᴹ[M, w] p) := by simp [Satisfies];
 @[simp] lemma neg_def' : (⊧ᴹ[M, w] ~p) ↔ ¬(⊧ᴹ[M, w] p) := by simp [Satisfies];
 
+lemma modus_ponens (m₁ : ⊧ᴹ[M, w] p ⟶ q) : (⊧ᴹ[M, w] p) → (⊧ᴹ[M, w] q) := by simpa [imp_def'] using m₁;
+
 end Satisfies
 
 
@@ -72,6 +74,26 @@ lemma modus_ponens : (⊧ᴹ[M] p ⟶ q) → (⊧ᴹ[M] p) → (⊧ᴹ[M] q) := 
 
 lemma necessitation : (⊧ᴹ[M] p) → (⊧ᴹ[M] □p) := by simp_all [Models, Satisfies];
 
+lemma imply₁ : ⊧ᴹ[M] p ⟶ q ⟶ p := by simp_all [Models];
+
+lemma imply₂ : ⊧ᴹ[M] (p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r := by simp_all [Models];
+
+lemma conj₁ : ⊧ᴹ[M] p ⋏ q ⟶ p := by simp_all [Models];
+
+lemma conj₂ : ⊧ᴹ[M] p ⋏ q ⟶ q := by simp_all [Models];
+
+lemma conj₃ : ⊧ᴹ[M] p ⟶ q ⟶ p ⋏ q := by simp_all [Models];
+
+lemma disj₁ : ⊧ᴹ[M] p ⟶ p ⋎ q := by simp_all [Models];
+
+lemma disj₂ : ⊧ᴹ[M] q ⟶ p ⋎ q := by simp_all [Models];
+
+lemma disj₃ : ⊧ᴹ[M] (p ⟶ r) ⟶ (q ⟶ r) ⟶ p ⋎ q ⟶ r := by simp_all [Models]; aesop;
+
+lemma dne : ⊧ᴹ[M] ~~p ⟶ p := by simp_all [Models];
+
+lemma verum : ⊧ᴹ[M] ⊤ := by simp [Models];
+
 end Models
 
 
@@ -87,11 +109,31 @@ variable {F: Frame α}
 
 lemma modus_ponens : (⊧ᴹ[F] p ⟶ q) → (⊧ᴹ[F] p) → (⊧ᴹ[F] q) := by
   intro h₁ h₂ V;
-  apply Models.modus_ponens (h₁ V) (h₂ V);
+  exact Models.modus_ponens (h₁ V) (h₂ V);
 
 lemma necessitation : (⊧ᴹ[F] p) → (⊧ᴹ[F] □p) := by
   intro h V;
-  apply Models.necessitation (h V);
+  exact Models.necessitation (h V);
+
+lemma verum : ⊧ᴹ[F] (⊤ : Formula β) := by simp only [Frames, Models.verum, forall_const];
+
+lemma imply₁ : ⊧ᴹ[F] p ⟶ q ⟶ p := by simp only [Frames, Models.imply₁, forall_const];
+
+lemma imply₂ : ⊧ᴹ[F] (p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r := by simp only [Frames, Models.imply₂, forall_const];
+
+lemma conj₁ : ⊧ᴹ[F] p ⋏ q ⟶ p := by simp only [Frames, Models.conj₁, forall_const];
+
+lemma conj₂ : ⊧ᴹ[F] p ⋏ q ⟶ q := by simp only [Frames, Models.conj₂, forall_const];
+
+lemma conj₃ : ⊧ᴹ[F] p ⟶ q ⟶ p ⋏ q := by simp only [Frames, Models.conj₃, forall_const];
+
+lemma disj₁ : ⊧ᴹ[F] p ⟶ p ⋎ q := by simp only [Frames, Models.disj₁, forall_const];
+
+lemma disj₂ : ⊧ᴹ[F] q ⟶ p ⋎ q := by simp only [Frames, Models.disj₂, forall_const];
+
+lemma disj₃ : ⊧ᴹ[F] (p ⟶ r) ⟶ (q ⟶ r) ⟶ p ⋎ q ⟶ r := by simp only [Frames, Models.disj₃, forall_const];
+
+lemma dne : ⊧ᴹ[F] ~~p ⟶ p := by simp only [Frames, Models.dne, forall_const];
 
 end Frames
 
@@ -106,6 +148,8 @@ end Formula
 @[simp]
 def Theory.Satisfies (M : Model α β) (w : α) (Γ : Theory β) := ∀ p ∈ Γ, ⊧ᴹ[M, w] p
 notation "⊧ᴹ[" M "," w "] " Γ => Theory.Satisfies M w Γ
+
+variable [DecidableEq β]
 
 @[simp]
 def Theory.Models (M : Model α β) (Γ : Theory β) := ∀ p ∈ Γ, ⊧ᴹ[M] p
@@ -126,11 +170,31 @@ variable {𝔽 : FrameClass α} {p q : Formula β}
 
 lemma modus_ponens : (⊧ᴹ[𝔽] p ⟶ q) → (⊧ᴹ[𝔽] p) → (⊧ᴹ[𝔽] q) := by
   intro h₁ h₂ F hF;
-  apply Frames.modus_ponens (h₁ F hF) (h₂ F hF);
+  exact Frames.modus_ponens (h₁ F hF) (h₂ F hF);
 
 lemma necessitation : (⊧ᴹ[𝔽] p) → (⊧ᴹ[𝔽] □p) := by
   intro h F hF;
-  apply Frames.necessitation (h F hF);
+  exact Frames.necessitation (h F hF);
+
+lemma verum : ⊧ᴹ[𝔽] (⊤ : Formula β) := by simp [FrameClasses, Frames.verum];
+
+lemma imply₁ : ⊧ᴹ[𝔽] p ⟶ q ⟶ p := by simp [FrameClasses, Frames.imply₁];
+
+lemma imply₂ : ⊧ᴹ[𝔽] (p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r := by simp [FrameClasses, Frames.imply₂];
+
+lemma conj₁ : ⊧ᴹ[𝔽] p ⋏ q ⟶ p := by simp [FrameClasses, Frames.conj₁];
+
+lemma conj₂ : ⊧ᴹ[𝔽] p ⋏ q ⟶ q := by simp [FrameClasses, Frames.conj₂];
+
+lemma conj₃ : ⊧ᴹ[𝔽] p ⟶ q ⟶ p ⋏ q := by simp [FrameClasses, Frames.conj₃];
+
+lemma disj₁ : ⊧ᴹ[𝔽] p ⟶ p ⋎ q := by simp [FrameClasses, Frames.disj₁];
+
+lemma disj₂ : ⊧ᴹ[𝔽] q ⟶ p ⋎ q := by simp [FrameClasses, Frames.disj₂];
+
+lemma disj₃ : ⊧ᴹ[𝔽] (p ⟶ r) ⟶ (q ⟶ r) ⟶ p ⋎ q ⟶ r := by simp [FrameClasses, Frames.disj₃];
+
+lemma dne : ⊧ᴹ[𝔽] ~~p ⟶ p := by simp only [FrameClasses, Frames.dne, implies_true, forall_const];
 
 end Formula.FrameClasses
 

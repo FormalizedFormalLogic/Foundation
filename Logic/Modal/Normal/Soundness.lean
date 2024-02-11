@@ -16,19 +16,33 @@ open AxiomSet
 
 variable {Λ : AxiomSet α} {p : Formula α}
 
-private lemma AxiomSet.soundsAux (Γ : Theory α) (_ : Γ = ∅) (h : Deducible Λ Γ p) : (⊧ᴹ[(𝔽(Λ) : FrameClass β)] p) := by
-  induction h.some <;> try { simp [FrameClasses, Frames, Models]; try intros; aesop; }
-  case modus_ponens h₁ h₂ ih₁ ih₂ he => exact FrameClasses.modus_ponens (ih₁ (by aesop) ⟨h₁⟩) (ih₂ (by aesop) ⟨h₂⟩);
+open FrameClasses in
+private lemma AxiomSet.soundsAux {Γ : Theory α} (hΓ : Γ = ∅) (d : Γ ⊢ᴹ[Λ]! p) : (⊧ᴹ[(𝔽(Λ) : FrameClass β)] p) := by
+  induction d.some with
+  | axm => subst hΓ; contradiction;
+  | maxm => intros _ hF _ _; apply hF; simpa;
+  | modus_ponens h₁ h₂ ih₁ ih₂ => exact modus_ponens (ih₁ (by simp_all) ⟨h₁⟩) (ih₂ (by simp_all) ⟨h₂⟩);
+  | necessitation h ih => exact necessitation (ih rfl ⟨h⟩);
+  | verum => exact verum;
+  | imply₁ => exact imply₁;
+  | imply₂ => exact imply₂;
+  | conj₁ => exact conj₁;
+  | conj₂ => exact conj₂;
+  | conj₃ => exact conj₃;
+  | disj₁ => exact disj₁;
+  | disj₂ => exact disj₂;
+  | disj₃ => exact disj₃;
+  | dne => exact dne;
 
-lemma AxiomSet.sounds (h : ⊢ᴹ[Λ]! p) : (⊧ᴹ[(𝔽(Λ) : FrameClass β)] p) := AxiomSet.soundsAux ∅ rfl h
+theorem AxiomSet.sounds (d : ⊢ᴹ[Λ]! p) : (⊧ᴹ[(𝔽(Λ) : FrameClass β)] p) := AxiomSet.soundsAux rfl d
 
 lemma AxiomSet.consistent (β) [Inhabited β] [h : Nonempty (𝔽(Λ) : FrameClass β)] : Consistent Λ := by
-  by_contra hC; simp at hC;
-  suffices h : ∃ (F : Frame β), ⊧ᴹ[F] (⊥ : Formula α) by aesop;
-  have ⟨tf, htf⟩ := h.some;
-  existsi tf;
-  apply AxiomSet.sounds hC;
-  assumption;
+  by_contra hC;
+  suffices h : ∃ (F : Frame β), ⊧ᴹ[F] (⊥ : Formula α) by simp_all;
+  obtain ⟨F, hF⟩ := h.some;
+  existsi F;
+  apply AxiomSet.sounds (by simpa using hC);
+  simpa;
 
 theorem LogicK.sounds : (⊢ᴹ[𝐊]! p) → (⊧ᴹ[(𝔽((𝐊 : AxiomSet α)) : FrameClass β)] p) := by apply AxiomSet.sounds;
 theorem LogicK.consistent : Consistent (𝐊 : AxiomSet α) := AxiomSet.consistent β
