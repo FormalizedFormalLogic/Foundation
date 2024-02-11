@@ -56,6 +56,8 @@ lemma imp_def : (w ⊩ᴹ[M] p ⟶ q) ↔ (w ⊮ᴹ[M] p) ∨ (w ⊩ᴹ[M] q) :=
 
 lemma modus_ponens (m₁ : w ⊩ᴹ[M] p ⟶ q) : (w ⊩ᴹ[M] p) → (w ⊩ᴹ[M] q) := by simpa [imp_def'] using m₁;
 
+lemma modus_ponens (m₁ : ⊧ᴹ[M, w] p ⟶ q) : (⊧ᴹ[M, w] p) → (⊧ᴹ[M, w] q) := by simpa [imp_def'] using m₁;
+
 end Satisfies
 
 def Models (M : Model α β) (p : Formula β) := ∀w, (w ⊩ᴹ[M] p)
@@ -153,6 +155,8 @@ notation w "⊩ᴹ[" M "] " Γ => Theory.Satisfies M w Γ
 
 @[simp] abbrev Theory.Unsatisfies (M : Model α β) (w : α) (Γ : Theory β) := ¬(w ⊩ᴹ[M] Γ)
 notation w "⊮ᴹ[" M "] " Γ => Theory.Unsatisfies M w Γ
+
+variable [DecidableEq β]
 
 variable [DecidableEq β]
 
