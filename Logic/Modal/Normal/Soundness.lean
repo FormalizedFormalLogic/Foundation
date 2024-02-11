@@ -7,7 +7,7 @@ namespace LO.Modal.Normal
 
 open Formula
 
-variable {α β} [Inhabited α] [DecidableEq α] [Inhabited β]
+variable {α β} [Inhabited α] [DecidableEq α]
 
 @[simp] def AxiomSet.Consistent (Λ : AxiomSet α) := ⊬ᴹ[Λ]! ⊥
 
@@ -42,6 +42,8 @@ theorem AxiomSet.ssounds (d : Γ ⊢ᴹ[Λ]! p) : (Γ ⊨ᴹ[(𝔽(Λ) : FrameCl
   simp [FrameClasses, Frames, Models] at h₂;
   exact h₂ F hF V w (Theory.satisfies_conj sΔ hΓ);
 
+section
+
 lemma AxiomSet.consistent (β) [Inhabited β] [h : Nonempty (𝔽(Λ) : FrameClass β)] : Consistent Λ := by
   by_contra hC;
   suffices h : ∃ (F : Frame β), ⊧ᴹ[F] (⊥ : Formula α) by simp_all;
@@ -49,6 +51,8 @@ lemma AxiomSet.consistent (β) [Inhabited β] [h : Nonempty (𝔽(Λ) : FrameCla
   existsi F;
   apply AxiomSet.sounds (by simpa using hC);
   simpa;
+
+variable [Inhabited β]
 
 theorem LogicK.consistent : Consistent (𝐊 : AxiomSet α) := AxiomSet.consistent β
 theorem LogicKD.consistent : Consistent (𝐊𝐃 : AxiomSet α) := AxiomSet.consistent β

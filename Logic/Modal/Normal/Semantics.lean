@@ -66,7 +66,8 @@ namespace Models
 
 variable {M : Model α β}
 
-@[simp] lemma neg_def [Inhabited α] : (⊧ᴹ[M] (~p)) → ¬(⊧ᴹ[M] p) := by
+@[simp]
+lemma neg_def [Inhabited α] : (⊧ᴹ[M] (~p)) → ¬(⊧ᴹ[M] p) := by
   simp [Models];
   intro h;
   existsi default;
@@ -97,6 +98,7 @@ lemma disj₃ : ⊧ᴹ[M] (p ⟶ r) ⟶ (q ⟶ r) ⟶ p ⋎ q ⟶ r := by simp_a
 lemma dne : ⊧ᴹ[M] ~~p ⟶ p := by simp_all [Models];
 
 lemma verum : ⊧ᴹ[M] ⊤ := by simp [Models];
+
 
 end Models
 
@@ -234,6 +236,8 @@ lemma tetraunion (Λ₁ Λ₂ Λ₃ Λ₄ : AxiomSet β) : (𝔽(Λ₁ ∪ Λ₂
 lemma pentaunion (Λ₁ Λ₂ Λ₃ Λ₄ Λ₅ : AxiomSet β) : (𝔽(Λ₁ ∪ Λ₂ ∪ Λ₃ ∪ Λ₄ ∪ Λ₅) : FrameClass α) = 𝔽(Λ₁) ∩ 𝔽(Λ₂) ∩ 𝔽(Λ₃) ∩ 𝔽(Λ₄) ∩ 𝔽(Λ₅) := by simp [AxiomSetFrameClass]; aesop;
 
 end AxiomSetFrameClass
+
+variable [Inhabited α]
 
 namespace Theory
 

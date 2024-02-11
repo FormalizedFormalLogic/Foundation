@@ -1,5 +1,6 @@
 import Logic.Modal.Normal.Deduction
 import Logic.Modal.Normal.Semantics
+import Logic.Modal.Normal.Soundness
 
 namespace LO.Modal.Normal
 
@@ -302,7 +303,9 @@ end Lindenbaum
 
 open MaximalConsistentTheory
 
-variable (hK : 𝐊 ⊆ Λ)
+lemma MaximalConsistentTheory.inhabited (h : AxiomSet.Consistent Λ) : Inhabited (MaximalConsistentTheory Λ) := ⟨
+  exists_maximal_consistent_theory (by simp [Theory.Consistent, Theory.Inconsistent]; exact h) |>.choose
+⟩
 
 lemma mct_mem_box_iff {Ω : MaximalConsistentTheory Λ} {p : Formula β} : (□p ∈ Ω) ↔ (∀ (Ω' : MaximalConsistentTheory Λ), (□⁻¹Ω ⊆ Ω'.theory) → (p ∈ Ω')) := by
   have := Deduction.instBoxedNecessitation hK;
