@@ -1,5 +1,5 @@
 import Logic.Logic.Semantics
-import Logic.FirstOrder.Basic.Syntax.Formula
+import Logic.FirstOrder.Basic.Syntax.Rew
 
 /-!
 # Semantics of first-order logic

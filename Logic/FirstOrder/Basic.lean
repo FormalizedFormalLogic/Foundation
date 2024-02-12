@@ -1,6 +1,7 @@
 import Logic.FirstOrder.Basic.Syntax.Language
 import Logic.FirstOrder.Basic.Syntax.Term
 import Logic.FirstOrder.Basic.Syntax.Formula
+import Logic.FirstOrder.Basic.Syntax.Rew
 import Logic.FirstOrder.Basic.Semantics.Semantics
 import Logic.FirstOrder.Basic.Semantics.Elementary
 import Logic.FirstOrder.Basic.Operator
