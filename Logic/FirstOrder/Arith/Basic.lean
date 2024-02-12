@@ -24,6 +24,36 @@ end ORingSymbol
 
 namespace FirstOrder
 
+namespace Language
+
+variable {L : Language} [L.ORing]
+
+def oringEmb : ℒₒᵣ →ᵥ L where
+  func := fun {k} f ↦
+    match k, f with
+    | _, Zero.zero => Zero.zero
+    | _, One.one   => One.one
+    | _, Add.add   => Add.add
+    | _, Mul.mul   => Mul.mul
+  rel := fun {k} r ↦
+    match k, r with
+    | _, Eq.eq => Eq.eq
+    | _, LT.lt => LT.lt
+
+@[simp] lemma oringEmb_zero : (oringEmb : ℒₒᵣ →ᵥ L).func Zero.zero = Zero.zero := rfl
+
+@[simp] lemma oringEmb_one : (oringEmb : ℒₒᵣ →ᵥ L).func One.one = One.one := rfl
+
+@[simp] lemma oringEmb_add : (oringEmb : ℒₒᵣ →ᵥ L).func Add.add = Add.add := rfl
+
+@[simp] lemma oringEmb_mul : (oringEmb : ℒₒᵣ →ᵥ L).func Mul.mul = Mul.mul := rfl
+
+@[simp] lemma oringEmb_eq : (oringEmb : ℒₒᵣ →ᵥ L).rel Eq.eq = Eq.eq := rfl
+
+@[simp] lemma oringEmb_lt : (oringEmb : ℒₒᵣ →ᵥ L).rel LT.lt = LT.lt := rfl
+
+end Language
+
 open Semiterm Semiformula
 
 abbrev Polynomial (n : ℕ) : Type := Semiterm ℒₒᵣ Empty n

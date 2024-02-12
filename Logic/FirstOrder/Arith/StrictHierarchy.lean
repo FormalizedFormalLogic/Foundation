@@ -1,13 +1,15 @@
-import Logic.FirstOrder.Arith.Hierarchy
+import Logic.FirstOrder.Arith.PAminus
 import Logic.FirstOrder.Class.Class
 
 namespace LO
 
 namespace FirstOrder
 
-variable {L : Language} [L.LT] {μ : Type v}
-
 namespace Arith
+
+section
+
+variable {L : Language} [L.LT]
 
 inductive StrictHierarchy : Polarity → ℕ → {n : ℕ} → Semiformula L μ n → Prop
   | zero {Γ p}                                : DeltaZero p → StrictHierarchy Γ s p
@@ -68,30 +70,25 @@ lemma zero_iff_delta_zero {Γ} {p : Semiformula L μ n} :
 
 end StrictHierarchy
 
-def SHClass {L : Language} [L.LT] {ξ : Type*} (Γ : Polarity) (s : ℕ) : Class L ξ where
+def SHClass (L : Language) [L.LT] (ξ : Type*) (Γ : Polarity) (s : ℕ) : Class L ξ where
   Domain := StrictHierarchy Γ s
   rew_closed := by intro _ _ ω p hp; exact hp.rew ω
 
-notation Γ "ᴴ("s")" => SHClass Γ s
+-- notation Γ "ᴴ("s")" => SHClass _ _ Γ s
 
-abbrev SHClassIn {ξ : Type*} [DecidableEq ξ] (Γ s) (T : Theory L) := (SHClass (L := L) (ξ := ξ) Γ s).eqvClosure T
+abbrev SHClassIn (ξ : Type*) [DecidableEq ξ] (Γ s) (T : Theory L) := (SHClass L ξ Γ s).eqvClosure T
 
-notation Γ "ᴴ("s")[" T "]" => SHClassIn Γ s T
+-- notation Γ "ᴴ("s")[" T "]" => SHClassIn _ Γ s T
 
-abbrev DeltaZeroIn {ξ : Type*} [DecidableEq ξ] (T : Theory L) := (SHClass (L := L) (ξ := ξ) Σ 0).eqvClosure T
+abbrev DeltaZeroIn (ξ : Type*) [DecidableEq ξ] (T : Theory L) := (SHClass L ξ Σ 0).eqvClosure T
 
-notation "Δ₀[" T "]" => DeltaZeroIn T
+-- notation "Δ₀[" T "]" => DeltaZeroIn _ T
 
 variable {ξ : Type*} [DecidableEq ξ]
 
-lemma SHClassIn.eqDeltaZero (T : Theory L) (Γ) : (Γᴴ(0)[T] : Class L ξ) = Δ₀[T] := by
+lemma SHClassIn.eqDeltaZero (T : Theory L) (Γ) : SHClassIn ξ Γ 0 T = DeltaZeroIn ξ T := by
   simp [SHClassIn, DeltaZeroIn]; congr 1
   ext p; simp [SHClass, Set.mem_def, StrictHierarchy.zero_iff_delta_zero]
-
-namespace SHClass
-
-
-end SHClass
 
 namespace SHClassIn
 
@@ -99,7 +96,7 @@ variable (Γ : Polarity) (s : ℕ) (T : Theory L)
 
 open StrictHierarchy Semiformula
 
-lemma accumlative_succ (Γ Γ' s) : (Γᴴ(s)[T] : Class L ξ) ≤ Γ'ᴴ(s + 1)[T] := by
+lemma accumlative_succ (Γ Γ' s) : SHClassIn ξ Γ s T ≤ SHClassIn ξ Γ' (s + 1) T := by
   rintro _ p ⟨p', hp', Hp⟩
   cases Γ <;> cases Γ'
   · exact ⟨p', hp'.succ, Hp⟩
@@ -107,7 +104,7 @@ lemma accumlative_succ (Γ Γ' s) : (Γᴴ(s)[T] : Class L ξ) ≤ Γ'ᴴ(s + 1)
   · exact ⟨∃' Rew.bShift.hom p', (rew hp' _).sigma, Equivalent.trans (Equivalent.dummy_quantifier_ex p') Hp⟩
   · exact ⟨p', hp'.succ, Hp⟩
 
-lemma accumlative (Γ Γ') {s s'} (h : s < s') : (Γᴴ(s)[T] : Class L ξ) ≤ Γ'ᴴ(s')[T] := by
+lemma accumlative (Γ Γ') {s s'} (h : s < s') : SHClassIn ξ Γ s T ≤ SHClassIn ξ Γ' s' T := by
   generalize hk : s' - s - 1 = k
   have : s' = s + 1 + k := by simp [←hk, Nat.sub_sub]; exact (Nat.sub_eq_iff_eq_add' h).mp rfl
   rcases this with rfl
@@ -117,24 +114,24 @@ lemma accumlative (Γ Γ') {s s'} (h : s < s') : (Γᴴ(s)[T] : Class L ξ) ≤ 
   · simp [show s + 1 + k.succ = s + 1 + k + 1 from by simp [Nat.add_succ]]
     exact Class.LE.trans ih (accumlative_succ T _ _ _)
 
-@[simp] lemma delta_zero_le : (Δ₀[T] : Class L ξ) ≤ Γᴴ(s)[T] := by
+@[simp] lemma delta_zero_le : DeltaZeroIn ξ T ≤ SHClassIn ξ Γ s T := by
   cases s
   · simp [SHClassIn.eqDeltaZero]; rfl
   · rw [←SHClassIn.eqDeltaZero T Γ]; exact accumlative T Γ Γ (by simp)
 
-lemma openClass_le : openClass L ξ ≤ Σᴴ(0) := by
+lemma openClass_le : openClass L ξ ≤ SHClass L ξ Σ 0 := by
   intro _ p hp
   simp [SHClass, Set.mem_def, zero_iff_delta_zero]
   exact Hierarchy.of_open hp
 
-lemma openClass_le' : openClass L ξ ≤ Γᴴ(s)[T] :=
+lemma openClass_le' : openClass L ξ ≤ SHClassIn ξ Γ s T :=
   Class.LE.trans openClass_le (Class.LE.trans (Class.le_eqvClosure _ _) (delta_zero_le Γ s T))
 
-instance atom : (Γᴴ(s)[T] : Class L ξ).Atom := Class.of_le (openClass L ξ) _ (openClass_le' Γ s T)
+instance atom : (SHClassIn ξ Γ s T : Class L ξ).Atom := Class.of_le (openClass L ξ) _ (openClass_le' Γ s T)
 
 variable {Γ s T} {ξ₁ : Type*} [DecidableEq ξ₁] {ξ₂ : Type*} [DecidableEq ξ₂]
 
-@[formula_class] def rew {p : Semiformula L ξ₁ n₁} (hp : Γᴴ(s)[T].Domain p) (ω : Rew L ξ₁ n₁ ξ₂ n₂) : Γᴴ(s)[T].Domain (ω.hom p) := by
+@[formula_class] def rew {p : Semiformula L ξ₁ n₁} (hp : (SHClassIn ξ₁ Γ s T).Domain p) (ω : Rew L ξ₁ n₁ ξ₂ n₂) : (SHClassIn ξ₂ Γ s T).Domain (ω.hom p) := by
   rcases hp with ⟨p', hp', H⟩
   exact ⟨ω.hom p', StrictHierarchy.rew hp' ω, H.rew ω⟩
 
@@ -146,37 +143,41 @@ variable (Γ : Polarity) (s : ℕ) (T : Theory L)
 
 open Hierarchy SHClassIn StrictHierarchy Semiformula
 
-instance atom : (Δ₀[T] : Class L ξ).Atom := SHClassIn.atom Σ 0 T
+instance atom : (DeltaZeroIn ξ T).Atom := SHClassIn.atom Σ 0 T
 
-instance not : (Δ₀[T] : Class L ξ).Not := ⟨by
+instance not : (DeltaZeroIn ξ T).Not := ⟨by
   rintro _ p ⟨p', hp', Hp⟩
   exact ⟨~p',
     zero_iff_delta_zero.mpr
       (by simp [←Hierarchy.zero_iff_delta_zero (Γ := Σ), pi_zero_iff_sigma_zero]; exact zero_iff_delta_zero.mp hp'),
     Hp.not⟩⟩
 
-instance and : (Δ₀[T] : Class L ξ).And := ⟨by
+instance and : (DeltaZeroIn ξ T).And := ⟨by
   rintro _ p q ⟨p', hp', Hp⟩ ⟨q', hq', Hq⟩
   have hp' : DeltaZero p' := zero_iff_delta_zero.mp hp'
   have hq' : DeltaZero q' := zero_iff_delta_zero.mp hq'
   exact ⟨p' ⋏ q', zero_iff_delta_zero.mpr (Hierarchy.and hp' hq'), Hp.and Hq⟩⟩
 
-instance or : (Δ₀[T] : Class L ξ).Or := ⟨by
+instance or : (DeltaZeroIn ξ T).Or := ⟨by
   rintro _ p q ⟨p', hp', Hp⟩ ⟨q', hq', Hq⟩
   have hp' : DeltaZero p' := zero_iff_delta_zero.mp hp'
   have hq' : DeltaZero q' := zero_iff_delta_zero.mp hq'
   exact ⟨p' ⋎ q', zero_iff_delta_zero.mpr (Hierarchy.or hp' hq'), Hp.or Hq⟩⟩
 
-instance ball : (Δ₀[T] : Class L ξ).BAll := ⟨by
+instance ball : (DeltaZeroIn ξ T).BAll := ⟨by
   rintro _ p t ⟨p', hp', H⟩ ht
   have hp' : DeltaZero p' := zero_iff_delta_zero.mp hp'
   exact ⟨∀[“#0 < !!t”] p', zero_iff_delta_zero.mpr (Hierarchy.ball ht hp'),
     Semiformula.Equivalent.ball (by rfl) H⟩⟩
 
-instance bex : (Δ₀[T] : Class L ξ).BEx := ⟨by
+instance bex : (DeltaZeroIn ξ T).BEx := ⟨by
   rintro _ p t ⟨p', hp', H⟩ ht
   have hp' : DeltaZero p' := zero_iff_delta_zero.mp hp'
   exact ⟨∃[“#0 < !!t”] p', zero_iff_delta_zero.mpr (Hierarchy.bex ht hp'),
     Semiformula.Equivalent.bex (by rfl) H⟩⟩
 
 end DeltaZeroIn
+
+end
+
+end Arith

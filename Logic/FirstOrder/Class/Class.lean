@@ -189,6 +189,11 @@ protected def eqvClosure (c : Class L ξ) (T : Theory L) : Class L ξ where
     rintro n n' ω p ⟨p', hp', H⟩
     exact ⟨ω.hom p', c.rew_closed ω p' hp', H.rew ω⟩
 
+lemma domain_eqvClosure {T : Theory L} {n} {p q : Semiformula L ξ n} (hp : (c.eqvClosure T).Domain p) (h : p ↔[T] q) :
+    (c.eqvClosure T).Domain q := by
+  rcases hp with ⟨p', hp', H⟩
+  exact ⟨p', hp', H.trans h⟩
+
 instance : LE (Class L ξ) := ⟨fun c c' ↦ ∀ {n} {p : Semiformula L ξ n}, c.Domain p → c'.Domain p⟩
 
 namespace LE
@@ -368,7 +373,6 @@ attribute [aesop 3 (rule_sets [FormulaClass]) norm]
   Class.Not.not
   Class.All.all
   Class.Ex.ex
-
 
 macro "formula_class" : attr =>
   `(attr|aesop 0 (rule_sets [$(Lean.mkIdent `FormulaClass):ident]) safe)
