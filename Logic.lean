@@ -48,9 +48,13 @@ import Logic.FirstOrder.Completeness.SubLanguage
 import Logic.FirstOrder.Completeness.SearchTree
 import Logic.FirstOrder.Completeness.Completeness
 
+import Logic.FirstOrder.Class.Init
+import Logic.FirstOrder.Class.Class
+
 import Logic.FirstOrder.Order.Le
 
 import Logic.FirstOrder.Arith.Hierarchy
+import Logic.FirstOrder.Arith.StrictHierarchy
 import Logic.FirstOrder.Arith.Theory
 import Logic.FirstOrder.Arith.Model
 import Logic.FirstOrder.Arith.Nonstandard
