@@ -391,87 +391,6 @@ lemma AxiomCD.defines : (RightConvergent F) ↔ (⊧ᴹ[F] (𝐂𝐃 : AxiomSet 
 
 lemma AxiomC4.defines : (Dense F) ↔ (⊧ᴹ[F] (𝐂𝟒 : AxiomSet β)) := by sorry
 
-lemma AxiomL.implies_transitive  : (⊧ᴹ[F] (𝐋 : AxiomSet β)) → Transitive F := by
-  contrapose;
-  intro hT; simp [Transitive] at hT;
-  obtain ⟨w₁, w₂, w₃, r₂₃, r₁₂, nr₁₃⟩ := hT;
-  apply Theory.not_Frames;
-  simp [AxiomL, AxiomL.set];
-  existsi (λ w' _ => (w' ≠ w₂ ∧ w' ≠ w₃)), w₁, (atom default);
-  constructor;
-  . intro x hx h;
-    by_cases hx₂ : x = w₂;
-    . simp_all [hx₂]; simpa using h w₃ r₂₃;
-    . by_cases hx₃ : x = w₃ <;> simp_all [hx₃];
-  . existsi w₂;
-    aesop;
-
-lemma AxiomL.implies_cwf  : (⊧ᴹ[F] (𝐋 : AxiomSet β)) → ConverseWellFounded F := by
-  contrapose;
-  intro hCF;
-  obtain ⟨X, hX₁, hX₂⟩ := by simpa using WellFounded.wellFounded_iff_has_min.not.mp hCF;
-  let V : Valuation α β := λ w _ => w ∉ X;
-  let w := hX₁.some;
-  let a : Formula β := atom default;
-  apply Theory.not_Frames;
-  simp [Theory.Satisfies, AxiomL.set, AxiomL, -Satisfies.box_def];
-  existsi V, w, a;
-  constructor;
-  . simp only [Formula.Satisfies.box_def];
-    intro x _;
-    by_cases hxs : x ∈ X
-    . obtain ⟨y, hy₁, hy₂⟩ := hX₂ x hxs;
-      simp only [Formula.Satisfies.imp_def];
-      left;
-      simp;
-      existsi y;
-      constructor;
-      . simpa [flip] using hy₂;
-      . simpa;
-    . aesop;
-  . obtain ⟨w', hw'₁, hw'₂⟩ := hX₂ w (by apply Set.Nonempty.some_mem);
-    simp;
-    existsi w';
-    constructor;
-    . simpa [flip] using hw'₂;
-    . simp_all;
-
-lemma AxiomL.implied_by_transitive_cwf : (Transitive F ∧ ConverseWellFounded F) → (⊧ᴹ[F] (𝐋 : AxiomSet β)) := by
-  rintro ⟨hTrans, hWF⟩;
-  simp [AxiomL, AxiomL.set];
-  intro p V w;
-  simp only [Formula.Satisfies.imp_def'];
-  suffices (¬⊧ᴹ[⟨F, V⟩,w] □p) → (¬⊧ᴹ[⟨F, V⟩,w] □(□p ⟶ p)) by exact not_imp_not.mp this;
-
-  intro h; simp at h;
-  obtain ⟨z, rwz, hz⟩ := h;
-  obtain ⟨xm, ⟨hxm₁, hxm₂⟩⟩ := hWF.has_min ({ x | (F w x) ∧ (¬⊧ᴹ[⟨F, V⟩, x] p) }) (by existsi z; simp [rwz, hz])
-
-  have h₁ : (⊧ᴹ[⟨F, V⟩, xm] □p) := by
-    simp only [Satisfies.box_def];
-    intro y hy;
-    have : F w y := hTrans (by simp_all) hy;
-    by_contra hC;
-    have := hxm₂ y ⟨(hTrans (by simp_all) hy), hC⟩;
-    contradiction;
-  have h₂ : (¬⊧ᴹ[⟨F, V⟩, xm] (□p ⟶ p)) := by
-    simp only [Formula.Satisfies.imp_def', not_imp];
-    constructor;
-    . exact h₁
-    . simp_all;
-  have h₃ : ¬(⊧ᴹ[⟨F, V⟩, w] □(□p ⟶ p)) := by
-    simp [Satisfies.box_def, -Satisfies.imp_def'];
-    existsi xm;
-    constructor;
-    . simp_all;
-    . exact h₂;
-  exact h₃;
-
-lemma AxiomL.defines : (Transitive F ∧ ConverseWellFounded F) ↔ (⊧ᴹ[F] (𝐋 : AxiomSet β)) := ⟨
-    by apply implied_by_transitive_cwf,
-    by intro h; exact ⟨AxiomL.implies_transitive β F h, AxiomL.implies_cwf β F h⟩
-  ⟩
-
 end AxiomDefinabilities
 
 section LogicDefinabilities
@@ -545,26 +464,6 @@ instance : Nonempty (𝔽((𝐒𝟓 : AxiomSet β)) : FrameClass α) := by
   existsi (λ _ _ => True);
   apply LogicS5.FrameClassDefinability.mp;
   simp [Reflexive, Euclidean]
-
-instance LogicGL.FrameClassDefinability : @FrameClassDefinability α β 𝐆𝐋 (λ F => (Transitive F ∧ ConverseWellFounded F)) := by
-  intro F;
-  simp [LogicGL, AxiomSetFrameClass.union];
-  have := AxiomK.defines β F;
-  have := AxiomL.defines β F;
-  aesop;
-
-/-
-instance : Nonempty (𝔽((𝐆𝐋 : AxiomSet β)) : FrameClass α) := ⟨
-  (λ _ _ => False),
-  (by
-    apply LogicGL.FrameClassDefinability.mp;
-    constructor;
-    . simp [Transitive];
-    . simp [ConverseWellFounded];
-      sorry;
-  )
-⟩
--/
 
 end LogicDefinabilities
 
