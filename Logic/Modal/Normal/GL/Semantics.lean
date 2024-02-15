@@ -97,7 +97,6 @@ end AxiomL
 
 namespace LogicGL
 
-@[instance]
 lemma defines_trans_converseWellFounded : @FrameClassDefinability α β 𝐆𝐋 (λ F => (Transitive F ∧ ConverseWellFounded F)) := by
   intro F;
   simp [LogicGL, AxiomSetFrameClass.union];
@@ -105,7 +104,6 @@ lemma defines_trans_converseWellFounded : @FrameClassDefinability α β 𝐆𝐋
   have := AxiomL.defines β F;
   aesop;
 
-@[instance]
 lemma defines_finite_trans_irreflexive [Finite α] : @FrameClassDefinability α β 𝐆𝐋 (λ F => (Transitive F ∧ Irreflexive F)) := by
   intro F;
   simp;
@@ -127,8 +125,7 @@ lemma defines_finite_trans_irreflexive [Finite α] : @FrameClassDefinability α 
         simp_all;
     )⟩
 
-@[instance]
-lemma existsTrivialFiniteFrame [Finite α] : Nonempty (𝔽((𝐆𝐋 : AxiomSet β)) : FrameClass α) := ⟨
+instance existsTrivialFiniteFrame [Finite α] : Nonempty (𝔽((𝐆𝐋 : AxiomSet β)) : FrameClass α) := ⟨
   (λ _ _ => False),
   (by
     apply defines_finite_trans_irreflexive.mp;
