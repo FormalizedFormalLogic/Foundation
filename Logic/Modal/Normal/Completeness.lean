@@ -203,41 +203,32 @@ end MaximalConsistent
 
 structure MaximalConsistentTheory (Λ : AxiomSet β) where
   theory : Theory β
-  consistent : Consistent Λ theory
-  maximal : Maximal theory
+  mc : MaximalConsistent Λ theory
 
 namespace MaximalConsistentTheory
 
 variable (Ω Ω₁ Ω₂ : MaximalConsistentTheory Λ)
 
-@[simp]
-def membership (p : Formula β) (Ω : MaximalConsistentTheory Λ) := p ∈ Ω.theory
+@[simp] def membership (p : Formula β) (Ω : MaximalConsistentTheory Λ) := p ∈ Ω.theory
 instance : Membership (Formula β) (MaximalConsistentTheory Λ) := ⟨membership⟩
 
-@[simp]
-def subset := Ω₁.theory ⊆ Ω₂.theory
+@[simp] def subset := Ω₁.theory ⊆ Ω₂.theory
 instance : HasSubset (MaximalConsistentTheory Λ) := ⟨subset⟩
 
-@[simp] def subset1 (Γ : Theory β) (Ω : MaximalConsistentTheory Λ) := Γ ⊆ Ω.theory
-@[simp] def subset2 (Ω : MaximalConsistentTheory Λ) (Γ : Theory β) := Ω.theory ⊆ Γ
-infix:50 " ⊆ " => subset1
-infix:50 " ⊆ " => subset2
+lemma consitent : Consistent Λ Ω.theory := Ω.mc.1
 
-lemma mc : MaximalConsistent Λ Ω.theory := by
-  constructor;
-  . exact Ω.consistent;
-  . exact Ω.maximal;
+lemma maximal : Maximal Ω.theory := Ω.mc.2
 
-@[simp] def box := □Ω.theory
+abbrev box := □Ω.theory
 prefix:73  "□" => box
 
-@[simp] def dia := ◇Ω.theory
+abbrev dia := ◇Ω.theory
 prefix:73  "◇" => dia
 
-@[simp] def prebox := □⁻¹Ω.theory
+abbrev prebox := □⁻¹Ω.theory
 prefix:73  "□⁻¹" => prebox
 
-@[simp] def predia := ◇⁻¹Ω.theory
+abbrev predia := ◇⁻¹Ω.theory
 prefix:73  "◇⁻¹" => predia
 
 variable  {Ω : MaximalConsistentTheory Λ}
@@ -268,7 +259,7 @@ lemma and_membership_iff : (p ⋏ q ∈ Ω) ↔ (p ∈ Ω) ∧ (q ∈ Ω) := max
 lemma or_membership_iff : (p ⋎ q ∈ Ω) ↔ (p ∈ Ω) ∨ (q ∈ Ω) := maximal_consistent_or_membership_iff (Ω.mc)
 
 @[simp]
-lemma no_falsum : ⊥ ∉ Ω := consistent_no_falsum Ω.consistent
+lemma no_falsum : ⊥ ∉ Ω := consistent_no_falsum Ω.consitent
 
 @[simp]
 lemma neither_mem : ¬((p ∈ Ω) ∧ (~p ∈ Ω)) := by
@@ -298,7 +289,7 @@ lemma exists_maximal_consistent_theory' :
 /--
   a.k.a. Lindenbaum Lemma
 -/
-lemma exists_maximal_consistent_theory : ∃ (Ω : MaximalConsistentTheory Λ), (Γ ⊆ Ω) := by
+lemma exists_maximal_consistent_theory : ∃ (Ω : MaximalConsistentTheory Λ), (Γ ⊆ Ω.theory) := by
   have ⟨Ω, ⟨h₁, ⟨h₂, h₃⟩⟩⟩ := exists_maximal_consistent_theory' hConsisΓ;
   existsi ⟨Ω, h₁, (by
     intro p;
@@ -314,7 +305,7 @@ open MaximalConsistentTheory
 
 variable (hK : 𝐊 ⊆ Λ)
 
-lemma mct_mem_box_iff {Ω : MaximalConsistentTheory Λ} {p : Formula β} : (□p ∈ Ω) ↔ (∀ (Ω' : MaximalConsistentTheory Λ), □⁻¹Ω ⊆ Ω' → p ∈ Ω') := by
+lemma mct_mem_box_iff {Ω : MaximalConsistentTheory Λ} {p : Formula β} : (□p ∈ Ω) ↔ (∀ (Ω' : MaximalConsistentTheory Λ), (□⁻¹Ω ⊆ Ω'.theory) → (p ∈ Ω')) := by
   have := Deduction.instBoxedNecessitation hK;
   constructor;
   . aesop;
@@ -330,7 +321,7 @@ lemma mct_mem_box_iff {Ω : MaximalConsistentTheory Λ} {p : Formula β} : (□p
     . exact neg_membership_iff.mp (by aesop);
 
 def CanonicalModel (Λ : AxiomSet β) : Model (MaximalConsistentTheory Λ) β where
-  frame (Ω₁ Ω₂) := (□⁻¹Ω₁) ⊆ Ω₂
+  frame (Ω₁ Ω₂) := (□⁻¹Ω₁) ⊆ Ω₂.theory
   val (Ω a) := (atom a) ∈ Ω
 
 
@@ -338,16 +329,16 @@ namespace CanonicalModel
 
 variable {Λ : AxiomSet β} (hK : 𝐊 ⊆ Λ) {Ω Ω₁ Ω₂ : MaximalConsistentTheory Λ}
 
-lemma frame_def: (CanonicalModel Λ).frame Ω₁ Ω₂ ↔ (□⁻¹Ω₁) ⊆ Ω₂ := by rfl
+lemma frame_def: (CanonicalModel Λ).frame Ω₁ Ω₂ ↔ (□⁻¹Ω₁) ⊆ Ω₂.theory := by rfl
 
-lemma frame_def': (CanonicalModel Λ).frame Ω₁ Ω₂ ↔ (◇Ω₂ ⊆ Ω₁) := by
+lemma frame_def': (CanonicalModel Λ).frame Ω₁ Ω₂ ↔ (◇Ω₂ ⊆ Ω₁.theory) := by
   have := Deduction.instBoxedNecessitation hK;
   have := Deduction.ofKSubset hK;
 
   simp only [frame_def];
   constructor;
   . intro h p hp;
-    have ⟨q, hq₁, hq₂⟩ := Theory.dia_mem.mp hp;
+    have ⟨q, hq₁, hq₂⟩ := Set.dia_mem_iff.mp hp;
     rw [←hq₂, ModalDuality.dia];
     apply (Ω₁.neg_membership_iff).mpr;
     by_contra hC;
@@ -356,9 +347,7 @@ lemma frame_def': (CanonicalModel Λ).frame Ω₁ Ω₂ ↔ (◇Ω₂ ⊆ Ω₁)
   . intro h p;
     contrapose;
     intro hnp;
-    have : ◇(~p) ∈ Ω₁ := by
-      simp [MaximalConsistentTheory.dia, Theory.dia, -Formula.dia, -Formula.neg] at h;
-      simpa using h $ neg_membership_iff.mpr hnp
+    have : ◇(~p) ∈ Ω₁ := by simpa using h $ dia_mem_intro $ neg_membership_iff.mpr hnp;
     have : ~(□p) ∈ Ω₁ := by
       suffices h : Ω₁.theory ⊢ᴹ[Λ]! ((◇~p) ⟷ ~(□p)) by exact MaximalConsistentTheory.iff_congr h |>.mp this;
       apply equiv_dianeg_negbox!;
@@ -376,7 +365,7 @@ lemma axiomT (hT : 𝐓 ⊆ Λ) : Reflexive (CanonicalModel Λ).frame := by
   apply Ω.modus_ponens' (membership_iff.mpr d₁) hp;
 
 lemma axiomD (hD : 𝐃 ⊆ Λ) : Serial (CanonicalModel Λ).frame := by
-  have := Deduction.instBoxedNecessitation hK;
+  have := Deduction.instBoxedNecessitation hK; -- TODO: it can be removed?
 
   intro Ω;
   simp [frame_def];
@@ -388,14 +377,14 @@ lemma axiomD (hD : 𝐃 ⊆ Λ) : Serial (CanonicalModel Λ).frame := by
   have d₃ : Ω.theory ⊢ᴹ[Λ]! ~(◇⊥) := dni'! $ boxverum! Ω.theory;
   have d₄ : Ω.theory ⊢ᴹ[Λ]! ◇⊥ := modus_ponens'! d₂ d₁;
   have d₅ : Ω.theory ⊢ᴹ[Λ]! ⊥ := modus_ponens'! d₃ d₄;
-  exact consistent_undeducible_falsum Ω.consistent d₅;
+  exact consistent_undeducible_falsum Ω.consitent d₅;
 
 lemma axiomB (hB : 𝐁 ⊆ Λ) : Symmetric (CanonicalModel Λ).frame := by
   intro Ω₁ Ω₂ h;
   simp [frame_def] at h;
   simp [(frame_def' hK)];
   intro p hp;
-  have ⟨q, hq, _⟩ := Theory.dia_mem.mp hp;
+  have ⟨q, hq, _⟩ := Set.dia_mem_iff.mp hp;
   have d₁ : Ω₁.theory ⊢ᴹ[Λ]! q := membership_iff.mp hq;
   have d₂ : Ω₁.theory ⊢ᴹ[Λ]! (q ⟶ □◇q) := Deducible.maxm! (hB $ (by apply AxiomB.set.include));
   have d₃ : Ω₁.theory ⊢ᴹ[Λ]! □◇q := modus_ponens'! d₂ d₁;
@@ -415,7 +404,7 @@ lemma axiom5 (h5 : 𝟓 ⊆ Λ) : Euclidean (CanonicalModel Λ).frame := by
   simp [(frame_def' hK)] at h₁₃;
   simp [(frame_def' hK)];
   intro p hp;
-  have ⟨q, _, _⟩ := Theory.dia_mem.mp hp;
+  have ⟨q, _, _⟩ := Set.dia_mem_iff.mp hp;
   have d₁ : Ω₁.theory ⊢ᴹ[Λ]! ◇q := axm! (by aesop)
   have d₂ : Ω₁.theory ⊢ᴹ[Λ]! ◇q ⟶ □◇q := Deducible.maxm! (h5 $ (by apply Axiom5.set.include));
   have d₃ : Ω₁.theory ⊢ᴹ[Λ]! □◇q := modus_ponens'! d₂ d₁;
@@ -445,7 +434,7 @@ lemma truthlemma {p : Formula β} : ∀ {Ω}, (⊧ᴹ[CanonicalModel Λ, Ω] p) 
       simp [Set.subset_def, CanonicalModel.frame_def] at hΩ';
       exact hΩ' p h;
 
-lemma truthlemma' {Γ : Theory β} : ∀ {Ω}, (⊧ᴹ[CanonicalModel Λ, Ω] Γ) ↔ (Γ ⊆ Ω) := by
+lemma truthlemma' {Γ : Theory β} : ∀ {Ω}, (⊧ᴹ[CanonicalModel Λ, Ω] Γ) ↔ (Γ ⊆ Ω.theory) := by
   intro Ω;
   constructor;
   . simp [Set.subset_def];

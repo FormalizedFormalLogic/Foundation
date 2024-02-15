@@ -47,7 +47,10 @@ lemma box_subset {s t : Set α} (h : s ⊆ t) : s.box ⊆ t.box := by simp_all [
 
 lemma box_union {s t : Set α} : (s ∪ t).box = s.box ∪ t.box := by simp_all [Set.image_union, box];
 
-lemma box_mem {s : Set α} {a : α} : p ∈ s.box ↔ (∃ q ∈ s, □q = p) := by simp_all [Set.mem_image, box]
+@[simp]
+lemma box_mem_intro {s : Set α} {a : α} : a ∈ s → □a ∈ s.box := by simp_all [box]; aesop;
+
+lemma box_mem_iff {s : Set α} {p : α} : p ∈ s.box ↔ (∃ q ∈ s, □q = p) := by simp_all [Set.mem_image, box]
 
 
 def dia (s : Set α) : Set α := Dia.dia '' s
@@ -59,7 +62,10 @@ lemma dia_subset {s t : Set α} (h : s ⊆ t) : s.dia ⊆ t.dia := by simp_all [
 
 lemma dia_union {s t : Set α} : (s ∪ t).dia = s.dia ∪ t.dia := by simp_all [Set.image_union, dia];
 
-lemma dia_mem {s : Set α} {a : α} : p ∈ s.dia ↔ (∃ q ∈ s, ◇q = p) := by simp_all [Set.mem_image, dia]
+@[simp]
+lemma dia_mem_intro {s : Set α} {a : α} : a ∈ s → ◇a ∈ s.dia := by simp_all [dia]; aesop;
+
+lemma dia_mem_iff {s : Set α} {p : α} : p ∈ s.dia ↔ (∃ q ∈ s, ◇q = p) := by simp_all [Set.mem_image, dia]
 
 
 def prebox (s : Set α) := Box.box ⁻¹' s

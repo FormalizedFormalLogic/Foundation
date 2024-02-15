@@ -280,12 +280,12 @@ def boxedNecessitation {Γ p} : (Γ ⊢ᴹ[Λ] p) → (□Γ ⊢ᴹ[Λ] □p)
   | disj₃ _ _ _ _ => .necessitation $ .disj₃ _ _ _ _
   | dne _ _ => .necessitation $ .dne _ _
   | necessitation h => .necessitation $ .necessitation h
-  | axm h => by exact axm (by simp [Theory.box]; aesop;)
+  | axm h => by exact axm (by simp_all)
   | @modus_ponens _ _ Γ₁ Γ₂ a b h₁ h₂ => by
       have d : □Γ₁ ∪ □Γ₂ ⊢ᴹ[Λ] (□(a ⟶ b) ⟶ (□a ⟶ □b)) := .maxm (by apply hK; simp_all [AxiomK.set, AxiomK]);
       have d₁ : (□Γ₁ ∪ □Γ₂) ⊢ᴹ[Λ] □(a ⟶ b) := boxedNecessitation h₁ |>.weakening' (by simp);
       have d₂ : (□Γ₁ ∪ □Γ₂) ⊢ᴹ[Λ] □a := boxedNecessitation h₂ |>.weakening' (by simp);
-      simpa [Theory.box_union] using d.modus_ponens' d₁ |>.modus_ponens' d₂;
+      simpa [Set.box_union] using d.modus_ponens' d₁ |>.modus_ponens' d₂;
 
 instance instBoxedNecessitation : HasBoxedNecessitation (Deduction Λ) := ⟨by apply boxedNecessitation; simpa;⟩
 
