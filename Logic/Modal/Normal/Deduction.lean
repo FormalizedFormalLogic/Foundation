@@ -197,86 +197,9 @@ namespace Deducible
 
 variable {Λ}
 
-@[deprecated] lemma axm {Γ p} (h : p ∈ Γ) : Γ ⊢ᴹ[Λ]! p := ⟨.axm h⟩
+lemma axm! {Γ p} (h : p ∈ Γ) : (Γ ⊢ᴹ[Λ]! p) := ⟨Deduction.axm h⟩
 
-@[deprecated] lemma maxm {Γ p} (h : p ∈ Λ) : Γ ⊢ᴹ[Λ]! p := ⟨.maxm h⟩
-
-@[deprecated] lemma modus_ponens {Γ₁ Γ₂ p q} (d₁ : Γ₁ ⊢ᴹ[Λ]! (p ⟶ q)) (d₂ : Γ₂ ⊢ᴹ[Λ]! p) : (Γ₁ ∪ Γ₂) ⊢ᴹ[Λ]! q := ⟨.modus_ponens d₁.some d₂.some⟩
-@[deprecated] lemma modus_ponens' {Γ p q} (d₁ : Γ ⊢ᴹ[Λ]! (p ⟶ q)) (d₂ : Γ ⊢ᴹ[Λ]! p) : Γ ⊢ᴹ[Λ]! q := ⟨Hilbert.modus_ponens' d₁.some d₂.some⟩
-
-@[deprecated] lemma necessitation {Γ p} (d : ∅ ⊢ᴹ[Λ]! p) : Γ ⊢ᴹ[Λ]! □p := ⟨.necessitation d.some⟩
-
-@[deprecated] lemma weakening' {Γ Δ p} (d : Γ ⊢ᴹ[Λ]! p) (hs : Γ ⊆ Δ) : Δ ⊢ᴹ[Λ]! p := ⟨.weakening' hs d.some⟩
-
-@[simp, deprecated] lemma id_insert (Γ p) : ((insert p Γ) ⊢ᴹ[Λ]! p) := ⟨Hilbert.id_insert Γ p⟩
-
-@[simp, deprecated] lemma id_singleton (p) : ({p} ⊢ᴹ[Λ]! p) := ⟨Hilbert.id_singleton p⟩
-
-@[deprecated] lemma verum (Γ) : Γ ⊢ᴹ[Λ]! ⊤ := ⟨.verum Γ⟩
-
-@[deprecated] lemma boxverum (Γ) : Γ ⊢ᴹ[Λ]! □⊤ := ⟨.necessitation (.verum ∅)⟩
-
-@[deprecated] lemma imply₁ (Γ p q) : Γ ⊢ᴹ[Λ]! (p ⟶ q ⟶ p) := ⟨.imply₁ Γ p q⟩
-@[deprecated] lemma imply₁' {Γ p q} (d : Γ ⊢ᴹ[Λ]! p) : Γ ⊢ᴹ[Λ]! (q ⟶ p) := ⟨Hilbert.imply₁' d.some⟩
-
-@[deprecated] lemma imply₂ (Γ p q r) : Γ ⊢ᴹ[Λ]! ((p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r) := ⟨Hilbert.imply₂ Γ p q r⟩
-@[deprecated] lemma imply₂' {Γ p q r} (d₁ : Γ ⊢ᴹ[Λ]! (p ⟶ q ⟶ r)) (d₂ : Γ ⊢ᴹ[Λ]! (p ⟶ q)) (d₃ : Γ ⊢ᴹ[Λ]! p) : Γ ⊢ᴹ[Λ]! r := ⟨Hilbert.imply₂' d₁.some d₂.some d₃.some⟩
-
-@[deprecated] lemma conj₁ (Γ p q) : Γ ⊢ᴹ[Λ]! (p ⋏ q) ⟶ p := ⟨Hilbert.conj₁ Γ p q⟩
-@[deprecated] lemma conj₁' {Γ p q} (d : Γ ⊢ᴹ[Λ]! (p ⋏ q)) : Γ ⊢ᴹ[Λ]! p := ⟨Hilbert.conj₁' d.some⟩
-
-@[deprecated] lemma conj₂ (Γ p q) : Γ ⊢ᴹ[Λ]! (p ⋏ q) ⟶ q := ⟨.conj₂ Γ p q⟩
-@[deprecated] lemma conj₂' {Γ p q} (d : Γ ⊢ᴹ[Λ]! (p ⋏ q)) : Γ ⊢ᴹ[Λ]! q := ⟨Hilbert.conj₂' d.some⟩
-
-@[deprecated] lemma conj₃ (Γ p q) : Γ ⊢ᴹ[Λ]! p ⟶ q ⟶ (p ⋏ q) := ⟨Hilbert.conj₃ Γ p q⟩
-@[deprecated] lemma conj₃' {Γ p q} (d₁ : Γ ⊢ᴹ[Λ]! p) (d₂ : Γ ⊢ᴹ[Λ]! q) : Γ ⊢ᴹ[Λ]! (p ⋏ q) := ⟨Hilbert.conj₃' d₁.some d₂.some⟩
-
-@[deprecated] lemma disj₁ (Γ p q) : Γ ⊢ᴹ[Λ]! p ⟶ (p ⋎ q) := ⟨Hilbert.disj₁ Γ p q⟩
-@[deprecated] lemma disj₁' {Γ p q} (d : Γ ⊢ᴹ[Λ]! p) : Γ ⊢ᴹ[Λ]! (p ⋎ q) := ⟨Hilbert.disj₁' d.some⟩
-
-@[deprecated] lemma disj₂ (Γ p q) : Γ ⊢ᴹ[Λ]! q ⟶ (p ⋎ q) := ⟨Hilbert.disj₂ Γ p q⟩
-@[deprecated] lemma disj₂' {Γ p q} (d : Γ ⊢ᴹ[Λ]! q) : Γ ⊢ᴹ[Λ]! (p ⋎ q) := ⟨Hilbert.disj₂' d.some⟩
-
-@[deprecated] lemma disj₃ (Γ p q r) : Γ ⊢ᴹ[Λ]! (p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r) := ⟨.disj₃ Γ p q r⟩
-@[deprecated] lemma disj₃' {Γ p q r} (d₁ : Γ ⊢ᴹ[Λ]! (p ⟶ r)) (d₂ : Γ ⊢ᴹ[Λ]! (q ⟶ r)) (d₃ : Γ ⊢ᴹ[Λ]! (p ⋎ q)) : Γ ⊢ᴹ[Λ]! r := ⟨Hilbert.disj₃' d₁.some d₂.some d₃.some⟩
-
-@[deprecated] lemma efq (Γ p) : Γ ⊢ᴹ[Λ]! (⊥ ⟶ p) := ⟨Hilbert.efq Γ p⟩
-@[deprecated] lemma efq' {Γ p} (d : Γ ⊢ᴹ[Λ]! ⊥) : Γ ⊢ᴹ[Λ]! p := ⟨Hilbert.efq' d.some⟩
-
-@[deprecated] lemma dni (Γ p) : Γ ⊢ᴹ[Λ]! (p ⟶ ~~p) := ⟨Hilbert.dni Γ p⟩
-@[deprecated] lemma dni' {Γ p} (d : Γ ⊢ᴹ[Λ]! p) : Γ ⊢ᴹ[Λ]! ~~p := ⟨Hilbert.dni' d.some⟩
-
-@[deprecated] lemma dne (Γ p) : Γ ⊢ᴹ[Λ]! (~~p ⟶ p) := ⟨Hilbert.dne Γ p⟩
-@[deprecated] lemma dne' {Γ p} (d : Γ ⊢ᴹ[Λ]! ~~p) : Γ ⊢ᴹ[Λ]! p := ⟨Hilbert.dne' d.some⟩
-
-@[deprecated] lemma dtl {Γ p q} (d : Γ ⊢ᴹ[Λ]! (p ⟶ q)) : ((insert p Γ) ⊢ᴹ[Λ]! q) := ⟨Hilbert.dtl d.some⟩
-@[deprecated] lemma dtr {Γ p q} (d : (insert p Γ) ⊢ᴹ[Λ]! q) : Γ ⊢ᴹ[Λ]! (p ⟶ q) := ⟨Hilbert.dtr d.some⟩
-
-@[deprecated] lemma iff_intro {Γ p q} (d₁ : Γ ⊢ᴹ[Λ]! (p ⟶ q)) (d₂ : Γ ⊢ᴹ[Λ]! (q ⟶ p)) : Γ ⊢ᴹ[Λ]! (p ⟷ q) := ⟨Hilbert.iff_intro d₁.some d₂.some⟩
-
-@[deprecated] lemma equiv_dn (Γ p) : Γ ⊢ᴹ[Λ]! (p ⟷ ~~p) := ⟨Hilbert.equiv_dn Γ p⟩
-
-@[deprecated] lemma iff_symm' {Γ p q} (d : Γ ⊢ᴹ[Λ]! (p ⟷ q)) : Γ ⊢ᴹ[Λ]! (q ⟷ p) := ⟨Hilbert.iff_symm' d.some⟩
-
-@[deprecated] lemma iff_mp' {Γ p q} (d : Γ ⊢ᴹ[Λ]! (p ⟷ q)) : Γ ⊢ᴹ[Λ]! (p ⟶ q) := ⟨Hilbert.iff_mp' d.some⟩
-
-@[deprecated] lemma iff_mpr' {Γ p q} (d : Γ ⊢ᴹ[Λ]! (p ⟷ q)) : Γ ⊢ᴹ[Λ]! (q ⟶ p) := ⟨Hilbert.iff_mpr' d.some⟩
-
-@[deprecated] lemma iff_right' {Γ p q} (dpq : Γ ⊢ᴹ[Λ]! (p ⟷ q)) (dp : Γ ⊢ᴹ[Λ]! p) : Γ ⊢ᴹ[Λ]! q := ⟨Hilbert.iff_right' dpq.some dp.some⟩
-
-@[deprecated] lemma iff_left' {Γ p q} (dpq : Γ ⊢ᴹ[Λ]! (p ⟷ q)) (dq : Γ ⊢ᴹ[Λ]! q) : Γ ⊢ᴹ[Λ]! p := ⟨Hilbert.iff_left' dpq.some dq.some⟩
-
-@[deprecated]
-lemma iff_def {Γ p q} : (Γ ⊢ᴹ[Λ]! (p ⟷ q)) ↔ (Γ ⊢ᴹ[Λ]! (p ⟶ q)) ∧ (Γ ⊢ᴹ[Λ]! (q ⟶ p)) := by
-  constructor;
-  . intro h; exact ⟨conj₁' h, conj₂' h⟩;
-  . intro h; exact conj₃' h.1 h.2
-
-@[deprecated]
-lemma contra₀' {Γ p q} (d : Γ ⊢ᴹ[Λ]! (p ⟶ q)) : Γ ⊢ᴹ[Λ]! (~q ⟶ ~p) := ⟨Hilbert.contra₀' d.some⟩
-
-@[deprecated]
-lemma neg_iff' {Γ p q} (d : Γ ⊢ᴹ[Λ]! (p ⟷ q)) : Γ ⊢ᴹ[Λ]! (~p ⟷ ~q) := ⟨Hilbert.neg_iff' d.some⟩
+lemma maxm! {Γ p} (h : p ∈ Λ) : (Γ ⊢ᴹ[Λ]! p) := ⟨Deduction.maxm h⟩
 
 lemma compact {Γ p} (d : Γ ⊢ᴹ[Λ]! p) : ∃ (Δ : Context α), ↑Δ ⊆ Γ ∧ (↑Δ ⊢ᴹ[Λ]! p) := by
   have ⟨⟨Δ, hΔ⟩, dΔ⟩ := d.some.compact;
@@ -346,40 +269,43 @@ namespace Deduction
 
 variable {Λ : AxiomSet α} (hK : 𝐊 ⊆ Λ)
 
-lemma ctx_necessitation {Γ p} (d : Γ ⊢ᴹ[Λ] p) : (□Γ ⊢ᴹ[Λ] □p) := by
-  induction d with
-  | axm h => exact axm (by simp [Theory.box]; aesop;)
-  | maxm h => exact .necessitation $ maxm h;
-  | @modus_ponens Γ₁ Γ₂ p q _ _ ih₁ ih₂ =>
-      have d : □Γ₁ ∪ □Γ₂ ⊢ᴹ[Λ] (□(p ⟶ q) ⟶ (□p ⟶ □q)) := .maxm (by simp_all [AxiomK.set, AxiomK]; aesop);
-      simpa [Theory.box_union] using d |>.modus_ponens' (ih₁.weakening' (by simp)) |>.modus_ponens' (ih₂.weakening' (by simp));
-  | necessitation _ ih =>
-      simp at ih;
-      exact .necessitation ih
-  | verum =>  exact .necessitation $ .verum _
-  | imply₁ => exact .necessitation $ .imply₁ _ _ _
-  | imply₂ => exact .necessitation $ .imply₂ _ _ _ _
-  | conj₁  => exact .necessitation $ .conj₁ _ _ _
-  | conj₂  => exact .necessitation $ .conj₂ _ _ _
-  | conj₃  => exact .necessitation $ .conj₃ _ _ _
-  | disj₁  => exact .necessitation $ .disj₁ _ _ _
-  | disj₂  => exact .necessitation $ .disj₂ _ _ _
-  | disj₃  => exact .necessitation $ .disj₃ _ _ _ _
-  | dne    => exact .necessitation $ .dne _ _
+def boxedNecessitation {Γ p} : (Γ ⊢ᴹ[Λ] p) → (□Γ ⊢ᴹ[Λ] □p)
+  | maxm h => .necessitation $ .maxm h
+  | verum _  => .necessitation $ .verum _
+  | imply₁ _ _ _ => .necessitation $ .imply₁ _ _ _
+  | imply₂ _ _ _ _ => .necessitation $ .imply₂ _ _ _ _
+  | conj₁ _ _ _ => .necessitation $ .conj₁ _ _ _
+  | conj₂ _ _ _ => .necessitation $ .conj₂ _ _ _
+  | conj₃ _ _ _ => .necessitation $ .conj₃ _ _ _
+  | disj₁ _ _ _ => .necessitation $ .disj₁ _ _ _
+  | disj₂ _ _ _ => .necessitation $ .disj₂ _ _ _
+  | disj₃ _ _ _ _ => .necessitation $ .disj₃ _ _ _ _
+  | dne _ _ => .necessitation $ .dne _ _
+  | necessitation h => .necessitation $ .necessitation h
+  | axm h => by exact axm (by simp [Theory.box]; aesop;)
+  | @modus_ponens _ _ Γ₁ Γ₂ a b h₁ h₂ => by
+      have d : □Γ₁ ∪ □Γ₂ ⊢ᴹ[Λ] (□(a ⟶ b) ⟶ (□a ⟶ □b)) := .maxm (by simp_all [AxiomK.set, AxiomK]; aesop);
+      have d₁ : (□Γ₁ ∪ □Γ₂) ⊢ᴹ[Λ] □(a ⟶ b) := boxedNecessitation h₁ |>.weakening' (by simp);
+      have d₂ : (□Γ₁ ∪ □Γ₂) ⊢ᴹ[Λ] □a := boxedNecessitation h₂ |>.weakening' (by simp);
+      simpa [Theory.box_union] using d.modus_ponens' d₁ |>.modus_ponens' d₂;
 
-lemma preboxed_ctx_necessitation {Γ p} (h : □⁻¹Γ ⊢ᴹ[Λ]! p) : (Γ ⊢ᴹ[Λ]! □p) := by
-  have : □(□⁻¹Γ) ⊢ᴹ[Λ]! □p := ⟨ctx_necessitation hK h.some⟩;
-  exact this.weakening' (by simp);
+instance : HasBoxedNecessitation (Deduction Λ) := ⟨(boxedNecessitation hK)⟩
+
+@[deprecated]
+lemma ctx_necessitation! {Γ p} (d : Γ ⊢ᴹ[Λ]! p) : (□Γ ⊢ᴹ[Λ]! □p) := ⟨boxedNecessitation hK d.some⟩
+
+@[deprecated]
+lemma preboxed_ctx_necessitation! {Γ p} (h : □⁻¹Γ ⊢ᴹ[Λ]! p) : (Γ ⊢ᴹ[Λ]! □p) := Hilbert.weakening! (by simp) $ ctx_necessitation! hK h
 
 @[deprecated]
 lemma box_iff' {Γ p q} (d : ⊢ᴹ[Λ]! (p ⟷ q)) : Γ ⊢ᴹ[Λ]! (□p ⟷ □q) := by
   have := ofKSubset _ hK;
-  exact ⟨LO.Hilbert.box_iff' d.some⟩
+  exact LO.Hilbert.box_iff'! d
 
 @[deprecated]
 lemma equiv_dianeg_negbox (Γ p) : Γ ⊢ᴹ[Λ]! ((◇~p) ⟷ (~(□p))) := by
   have := ofKSubset _ hK;
-  exact ⟨LO.Hilbert.equiv_dianeg_negbox _ _⟩
+  exact LO.Hilbert.equiv_dianeg_negbox! _ _
 
 end Deduction
 

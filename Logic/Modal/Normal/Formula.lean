@@ -42,7 +42,6 @@ section ToString
 variable [ToString α]
 
 def toStr : Formula α → String
-  | ◇p     => "\\Diamond " ++ toStr p
   | ⊤       => "\\top"
   | ⊥       => "\\bot"
   | atom a  => "{" ++ toString a ++ "}"
@@ -86,10 +85,10 @@ lemma dia_eq (p : Formula α) : ◇p = ~(□(~p)) := rfl
 def complexity : Formula α → ℕ
 | atom _  => 0
 | ⊥       => 0
-| p ⟶ q  => max p.complexity q.complexity + 1
+| p ⟶ q   => max p.complexity q.complexity + 1
 | p ⋏ q   => max p.complexity q.complexity + 1
 | p ⋎ q   => max p.complexity q.complexity + 1
-| □p      => p.complexity + 1
+| box p   => p.complexity + 1
 
 @[simp] lemma complexity_bot : complexity (⊥ : Formula α) = 0 := rfl
 
@@ -126,12 +125,12 @@ def rec' {C : Formula α → Sort w}
   (hor    : ∀ (p q : Formula α), C p → C q → C (p ⋎ q))
   (hbox    : ∀ (p : Formula α), C p → C (□p))
   : (p : Formula α) → C p
-  | ⊥       => hfalsum
-  | atom a  => hatom a
+  | ⊥      => hfalsum
+  | atom a => hatom a
   | p ⟶ q  => himp p q (rec' hfalsum hatom himp hand hor hbox p) (rec' hfalsum hatom himp hand hor hbox q)
-  | p ⋏ q   => hand p q (rec' hfalsum hatom himp hand hor hbox p) (rec' hfalsum hatom himp hand hor hbox q)
-  | p ⋎ q   => hor p q (rec' hfalsum hatom himp hand hor hbox p) (rec' hfalsum hatom himp hand hor hbox q)
-  | □p      => hbox p (rec' hfalsum hatom himp hand hor hbox p)
+  | p ⋏ q  => hand p q (rec' hfalsum hatom himp hand hor hbox p) (rec' hfalsum hatom himp hand hor hbox q)
+  | p ⋎ q  => hor p q (rec' hfalsum hatom himp hand hor hbox p) (rec' hfalsum hatom himp hand hor hbox q)
+  | □p     => hbox p (rec' hfalsum hatom himp hand hor hbox p)
 
 -- @[simp] lemma complexity_neg (p : Formula α) : complexity (~p) = p.complexity + 1 :=
 --   by induction p using rec' <;> try { simp[neg_eq, neg, *]; rfl;}

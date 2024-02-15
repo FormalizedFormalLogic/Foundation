@@ -11,6 +11,9 @@ variable {F : Type u} [ModalLogicSymbol F] [DecidableEq F] [NegDefinition F] (Be
 class HasNecessitation where
   necessitation {Γ p} : (Bew ∅ p) → (Bew Γ (□p))
 
+class HasBoxedNecessitation where
+  boxed_necessitation {Γ p} : (Bew Γ p) → (Bew (Γ.box) (□p))
+
 class HasAxiomK where
   K (Γ : Set F) (p q : F) : Bew Γ $ AxiomK p q
 
@@ -64,6 +67,21 @@ variable [Classical Bew]
 open HasNecessitation
 
 def necessitation {Γ : Set F} {p} (d : Bew ∅ p) : Γ ⊢ □p := HasNecessitation.necessitation d
+
+def necessitation! {Γ : Set F} {p} (d : Bew ∅ p) : Γ ⊢! □p := ⟨necessitation d⟩
+
+open HasBoxedNecessitation
+
+variable [HasBoxedNecessitation Bew]
+
+def boxed_necessitation {Γ : Set F} {p} (d : Γ ⊢ p) : Γ.box ⊢ □p := HasBoxedNecessitation.boxed_necessitation d
+
+def boxed_necessitation! {Γ : Set F} {p} (d : Γ ⊢! p) : Γ.box ⊢! □p := ⟨boxed_necessitation d.some⟩
+
+def preboxed_necessitation {Γ : Set F} {p} (d : Γ.prebox ⊢ p) : Γ ⊢ □p := by
+  exact Deduction.weakening' Set.prebox_box_subset $ boxed_necessitation d;
+
+def preboxed_necessitation! {Γ : Set F} {p} (d : Γ.prebox ⊢! p) : Γ ⊢! □p := ⟨preboxed_necessitation d.some⟩
 
 open HasAxiomK
 

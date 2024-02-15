@@ -136,10 +136,6 @@ abbrev conj₃ := hM.conj₃
 
 def conj₃' {Γ p q} (d₁ : Bew Γ p) (d₂: Bew Γ q) : Bew Γ (p ⋏ q) := (conj₃ _ _ _ ⨀ d₁) ⨀ d₂
 
-def conj_symm' {Γ p q} : Bew Γ (p ⋏ q) → Bew Γ (q ⋏ p) := by
-  intro h;
-  exact conj₃' (conj₂' h) (conj₁' h);
-
 abbrev disj₁ := hM.disj₁
 
 def disj₁' {Γ p q} (d : Bew Γ p) : Bew Γ (p ⋎ q) := (disj₁ _ _ _ ⨀ d)
@@ -209,6 +205,47 @@ def neg_iff' {Γ p q} (d : Bew Γ (p ⟷ q)) : Bew Γ (~p ⟷ ~q) := by
   . apply contra₀';
     apply iff_mp' d
 
+def trans' {Γ p q r} (h₁ : Bew Γ (p ⟶ q)) (h₂ : Bew Γ (q ⟶ r)) : Bew Γ (p ⟶ r) := by
+  apply dtr;
+  have : Bew (insert p Γ) p := axm (by simp);
+  have : Bew (insert p Γ) q := modus_ponens' (weakening' (by simp) h₁) this;
+  have : Bew (insert p Γ) r := modus_ponens' (weakening' (by simp) h₂) this;
+  exact this
+
+def assoc_left' {Γ p q r} (h : Bew Γ ((p ⋏ q) ⋏ r)) : Bew Γ (p ⋏ (q ⋏ r)) := by
+  have dpq := conj₁' h;
+  have dp := conj₁' dpq;
+  have dq := conj₂' dpq;
+  have dr := conj₂' h;
+  exact conj₃' dp (conj₃' dq dr)
+
+def assoc_left (Γ p q r) : Bew Γ ((p ⋏ q) ⋏ r ⟶ p ⋏ (q ⋏ r)) := by
+  apply dtr;
+  exact assoc_left' (axm (by simp))
+
+def assoc_right' {Γ p q r} (h : Bew Γ (p ⋏ (q ⋏ r))) : Bew Γ ((p ⋏ q) ⋏ r) := by
+  have dp := conj₁' h;
+  have dqr := conj₂' h;
+  have dq := conj₁' dqr;
+  have dr := conj₂' dqr;
+  exact conj₃' (conj₃' dp dq) dr
+
+def assoc_right (Γ p q r) : Bew Γ (p ⋏ (q ⋏ r) ⟶ (p ⋏ q) ⋏ r) := by
+  apply dtr;
+  exact assoc_right' (axm (by simp))
+
+def assoc (Γ p q r) : Bew Γ ((p ⋏ q) ⋏ r ⟷ p ⋏ (q ⋏ r)) := iff_intro (by apply assoc_left) (by apply assoc_right)
+
+def conj_symm' {Γ p q} : Bew Γ (p ⋏ q) → Bew Γ (q ⋏ p) := by
+  intro h;
+  exact conj₃' (conj₂' h) (conj₁' h);
+
+def conj_symm (Γ p q) : Bew Γ ((p ⋏ q) ⟶ (q ⋏ p)) := by
+  apply dtr;
+  exact conj_symm' (axm (by simp))
+
+def conj_symm_iff (Γ p q) : Bew Γ ((p ⋏ q) ⟷ (q ⋏ p)) := iff_intro (by apply conj_symm) (by apply conj_symm)
+
 end Minimal
 
 section Classical
@@ -256,7 +293,9 @@ variable [HasDT Bew] [HasModusPonens Bew] [Minimal Bew] [Classical Bew]
 local infix:20 "⊢!" => Deducible Bew
 local infix:20 "⊬!" => Undeducible Bew
 
-lemma axm! (f : F) (h : f ∈ Γ) : Γ ⊢! f := ⟨axm h⟩
+lemma axm! {Γ : Set F} {f : F} (h : f ∈ Γ) : Γ ⊢! f := ⟨axm h⟩
+
+lemma weakening! {Γ Δ : Set F} {p : F} (h : Γ ⊆ Δ) (d : Γ ⊢! p) : Δ ⊢! p := ⟨weakening' h d.some⟩
 
 lemma modus_ponens! {Γ₁ Γ₂ : Set F} {p q : F} (d₁ : Γ₁ ⊢! (p ⟶ q)) (d₂ : Γ₂ ⊢! p) : Deducible Bew (Γ₁ ∪ Γ₂) q := ⟨d₁.some ⨀ d₂.some⟩
 lemma modus_ponens'! {Γ : Set F} {p q : F} (d₁ : Γ ⊢! (p ⟶ q)) (d₂ : Γ ⊢! p) : Γ ⊢! q := by simpa using modus_ponens! d₁ d₂
