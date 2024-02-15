@@ -315,12 +315,13 @@ open MaximalConsistentTheory
 variable (hK : 𝐊 ⊆ Λ)
 
 lemma mct_mem_box_iff {Ω : MaximalConsistentTheory Λ} {p : Formula β} : (□p ∈ Ω) ↔ (∀ (Ω' : MaximalConsistentTheory Λ), □⁻¹Ω ⊆ Ω' → p ∈ Ω') := by
+  have := Deduction.instBoxedNecessitation hK;
   constructor;
   . aesop;
   . contrapose;
     intro hC;
     have := (maximal_consistent_iff_not_membership_undeducible Ω.mc).mp hC;
-    have := consistent_iff_insert_neg.mpr $ not_imp_not.mpr (Deduction.preboxed_ctx_necessitation! hK) this;
+    have := consistent_iff_insert_neg.mpr $ not_imp_not.mpr preboxed_necessitation! this;
     have ⟨Ω', hΩ'⟩ := exists_maximal_consistent_theory this;
     simp;
     existsi Ω';
@@ -340,6 +341,9 @@ variable {Λ : AxiomSet β} (hK : 𝐊 ⊆ Λ) {Ω Ω₁ Ω₂ : MaximalConsiste
 lemma frame_def: (CanonicalModel Λ).frame Ω₁ Ω₂ ↔ (□⁻¹Ω₁) ⊆ Ω₂ := by rfl
 
 lemma frame_def': (CanonicalModel Λ).frame Ω₁ Ω₂ ↔ (◇Ω₂ ⊆ Ω₁) := by
+  have := Deduction.instBoxedNecessitation hK;
+  have := Deduction.ofKSubset hK;
+
   simp only [frame_def];
   constructor;
   . intro h p hp;
@@ -357,7 +361,7 @@ lemma frame_def': (CanonicalModel Λ).frame Ω₁ Ω₂ ↔ (◇Ω₂ ⊆ Ω₁)
       simpa using h $ neg_membership_iff.mpr hnp
     have : ~(□p) ∈ Ω₁ := by
       suffices h : Ω₁.theory ⊢ᴹ[Λ]! ((◇~p) ⟷ ~(□p)) by exact MaximalConsistentTheory.iff_congr h |>.mp this;
-      apply Deduction.equiv_dianeg_negbox hK;
+      apply equiv_dianeg_negbox!;
     have := neg_membership_iff.mp this;
     aesop;
 
@@ -372,14 +376,16 @@ lemma axiomT (hT : 𝐓 ⊆ Λ) : Reflexive (CanonicalModel Λ).frame := by
   apply Ω.modus_ponens' (membership_iff.mpr d₁) hp;
 
 lemma axiomD (hD : 𝐃 ⊆ Λ) : Serial (CanonicalModel Λ).frame := by
+  have := Deduction.instBoxedNecessitation hK;
+
   intro Ω;
   simp [frame_def];
   suffices h : Consistent Λ (□⁻¹Ω.theory) by exact exists_maximal_consistent_theory h;
   by_contra hC;
   simp [Theory.Consistent, Theory.Inconsistent] at hC;
-  have d₁ : Ω.theory ⊢ᴹ[Λ]! □⊥ := Deduction.preboxed_ctx_necessitation! hK hC;
+  have d₁ : Ω.theory ⊢ᴹ[Λ]! □⊥ := preboxed_necessitation! hC;
   have d₂ : Ω.theory ⊢ᴹ[Λ]! (□⊥ ⟶ ◇⊥) := Deducible.maxm! (hD $ (by apply AxiomD.set.include));
-  have d₃ : Ω.theory ⊢ᴹ[Λ]! ~(◇⊥) := by sorry -- by simpa using (boxverum! Ω.theory).dni'!;
+  have d₃ : Ω.theory ⊢ᴹ[Λ]! ~(◇⊥) := dni'! $ boxverum! Ω.theory;
   have d₄ : Ω.theory ⊢ᴹ[Λ]! ◇⊥ := modus_ponens'! d₂ d₁;
   have d₅ : Ω.theory ⊢ᴹ[Λ]! ⊥ := modus_ponens'! d₃ d₄;
   exact consistent_undeducible_falsum Ω.consistent d₅;

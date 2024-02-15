@@ -260,14 +260,12 @@ variable [DecidableEq α]
 
 open Deduction Hilbert
 
-def Deduction.ofKSubset (h : 𝐊 ⊆ Λ) : (Hilbert.K (Deduction (Λ : AxiomSet α))) where
-  K _ _ _ := Deduction.maxm $ Set.mem_of_subset_of_mem h (by simp);
+variable {Λ : AxiomSet α} (hK : 𝐊 ⊆ Λ)
 
-instance : Hilbert.K (Deduction (𝐊 : AxiomSet α)) := Deduction.ofKSubset _ (by rfl)
+instance Deduction.ofKSubset : Hilbert.K (Deduction Λ) where
+  K _ _ _ := Deduction.maxm $ Set.mem_of_subset_of_mem hK (by simp);
 
 namespace Deduction
-
-variable {Λ : AxiomSet α} (hK : 𝐊 ⊆ Λ)
 
 def boxedNecessitation {Γ p} : (Γ ⊢ᴹ[Λ] p) → (□Γ ⊢ᴹ[Λ] □p)
   | maxm h => .necessitation $ .maxm h
@@ -284,31 +282,16 @@ def boxedNecessitation {Γ p} : (Γ ⊢ᴹ[Λ] p) → (□Γ ⊢ᴹ[Λ] □p)
   | necessitation h => .necessitation $ .necessitation h
   | axm h => by exact axm (by simp [Theory.box]; aesop;)
   | @modus_ponens _ _ Γ₁ Γ₂ a b h₁ h₂ => by
-      have d : □Γ₁ ∪ □Γ₂ ⊢ᴹ[Λ] (□(a ⟶ b) ⟶ (□a ⟶ □b)) := .maxm (by simp_all [AxiomK.set, AxiomK]; aesop);
+      have d : □Γ₁ ∪ □Γ₂ ⊢ᴹ[Λ] (□(a ⟶ b) ⟶ (□a ⟶ □b)) := .maxm (by apply hK; simp_all [AxiomK.set, AxiomK]);
       have d₁ : (□Γ₁ ∪ □Γ₂) ⊢ᴹ[Λ] □(a ⟶ b) := boxedNecessitation h₁ |>.weakening' (by simp);
       have d₂ : (□Γ₁ ∪ □Γ₂) ⊢ᴹ[Λ] □a := boxedNecessitation h₂ |>.weakening' (by simp);
       simpa [Theory.box_union] using d.modus_ponens' d₁ |>.modus_ponens' d₂;
 
-instance : HasBoxedNecessitation (Deduction Λ) := ⟨(boxedNecessitation hK)⟩
-
-@[deprecated]
-lemma ctx_necessitation! {Γ p} (d : Γ ⊢ᴹ[Λ]! p) : (□Γ ⊢ᴹ[Λ]! □p) := ⟨boxedNecessitation hK d.some⟩
-
-@[deprecated]
-lemma preboxed_ctx_necessitation! {Γ p} (h : □⁻¹Γ ⊢ᴹ[Λ]! p) : (Γ ⊢ᴹ[Λ]! □p) := Hilbert.weakening! (by simp) $ ctx_necessitation! hK h
-
-@[deprecated]
-lemma box_iff' {Γ p q} (d : ⊢ᴹ[Λ]! (p ⟷ q)) : Γ ⊢ᴹ[Λ]! (□p ⟷ □q) := by
-  have := ofKSubset _ hK;
-  exact LO.Hilbert.box_iff'! d
-
-@[deprecated]
-lemma equiv_dianeg_negbox (Γ p) : Γ ⊢ᴹ[Λ]! ((◇~p) ⟷ (~(□p))) := by
-  have := ofKSubset _ hK;
-  exact LO.Hilbert.equiv_dianeg_negbox! _ _
+instance instBoxedNecessitation : HasBoxedNecessitation (Deduction Λ) := ⟨by apply boxedNecessitation; simpa;⟩
 
 end Deduction
 
+/-
 def Deduction.ofGLSubset (h : 𝐆𝐋 ⊆ Λ) : (Hilbert.GL (Deduction (Λ : AxiomSet α))) where
   K _ _ _ := Deduction.maxm $ Set.mem_of_subset_of_mem h (by simp);
   L _ _ := Deduction.maxm $ Set.mem_of_subset_of_mem h (by simp);
@@ -343,6 +326,7 @@ def Deduction.ofS5Subset (_ : 𝐒𝟓 ⊆ Λ) : (Hilbert.S5 (Deduction (Λ : Ax
   A5 _ _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by assumption) (by simp);
 
 instance : Hilbert.S5 (Deduction (𝐒𝟓 : AxiomSet α)) := Deduction.ofS5Subset 𝐒𝟓 (by rfl)
+-/
 
 end Modal.Normal
 
