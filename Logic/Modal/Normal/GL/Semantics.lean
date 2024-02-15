@@ -65,7 +65,7 @@ private lemma impliedby : (Transitive F ∧ ConverseWellFounded F) → (⊧ᴹ[F
 
   intro h; simp [Unsatisfies] at h;
   obtain ⟨z, rwz, hz⟩ := h;
-  obtain ⟨xm, ⟨hxm₁, hxm₂⟩⟩ := hWF.has_min ({ x | (F w x) ∧ (x ⊮ᴹ[⟨F, V⟩] p) }) (by existsi z; simp [rwz, hz]; exact hz)
+  obtain ⟨xm, ⟨hxm₁, hxm₂⟩⟩ := hWF.has_min ({ x | (F w x) ∧ (x ⊮ᴹ[⟨F, V⟩] p) }) (by existsi z; simp [rwz, hz];)
 
   have h₁ : (xm ⊩ᴹ[⟨F, V⟩] □p) := by
     simp [Satisfies.box_def];
