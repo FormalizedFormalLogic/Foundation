@@ -429,24 +429,16 @@ variable [Inhabited α] [Inhabited β] {F: Frame α}
 
 def FrameClassDefinability (Λ : AxiomSet β) (P : Frame α → Prop) := ∀ {F : Frame α}, (P F) ↔ (F ∈ 𝔽(Λ))
 
-namespace FrameClassDefinability
-
-variable {Λ : AxiomSet β} {P : Frame α → Prop} (hD : FrameClassDefinability Λ P)
-
-lemma nonempty (hP : P (λ _ _ => True)) : Nonempty (𝔽(Λ) : FrameClass α) := ⟨
-  (λ _ _ => True),
-  (by apply hD.mp; simpa)
-⟩
-
-end FrameClassDefinability
-
 instance LogicK.FrameClassDefinability : @FrameClassDefinability α β 𝐊 (λ _ => True) := by
   intro F;
   constructor;
   . intros; apply AxiomK.defines;
   . simp;
 
-instance : Nonempty (𝔽((𝐊 : AxiomSet β)) : FrameClass α) := LogicK.FrameClassDefinability.nonempty (by trivial)
+instance : Nonempty (𝔽((𝐊 : AxiomSet β)) : FrameClass α) := by
+  existsi (λ _ _ => True);
+  apply LogicK.FrameClassDefinability.mp;
+  trivial;
 
 instance LogicKD.FrameClassDefinability : @FrameClassDefinability α β 𝐊𝐃 Serial := by
   intro F;
@@ -460,7 +452,10 @@ instance LogicKD.FrameClassDefinability : @FrameClassDefinability α β 𝐊𝐃
     apply (AxiomD.defines β F).mpr;
     simp_all;
 
-instance : Nonempty (𝔽((𝐊𝐃 : AxiomSet β)) : FrameClass α) := LogicKD.FrameClassDefinability.nonempty (by simp [Serial])
+instance : Nonempty (𝔽((𝐊𝐃 : AxiomSet β)) : FrameClass α) := by
+  existsi (λ _ _ => True);
+  apply LogicKD.FrameClassDefinability.mp;
+  simp [Serial];
 
 instance LogicS4.FrameClassDefinability : @FrameClassDefinability α β 𝐒𝟒 (λ F => (Reflexive F ∧ Transitive F)) := by
   intro F;
@@ -476,7 +471,10 @@ instance LogicS4.FrameClassDefinability : @FrameClassDefinability α β 𝐒𝟒
     . apply (AxiomT.defines β F).mpr; simp_all;
     . apply (Axiom4.defines β F).mpr; simp_all;
 
-instance : Nonempty (𝔽((𝐒𝟒 : AxiomSet β)) : FrameClass α) := LogicS4.FrameClassDefinability.nonempty (by simp [Reflexive, Transitive])
+instance : Nonempty (𝔽((𝐒𝟒 : AxiomSet β)) : FrameClass α) := by
+  existsi (λ _ _ => True);
+  apply LogicS4.FrameClassDefinability.mp;
+  simp [Reflexive, Transitive];
 
 instance LogicS5.FrameClassDefinability : @FrameClassDefinability α β 𝐒𝟓 (λ F => (Reflexive F ∧ Euclidean F)) := by
   intro F;
@@ -492,7 +490,10 @@ instance LogicS5.FrameClassDefinability : @FrameClassDefinability α β 𝐒𝟓
     . apply (AxiomT.defines β F).mpr; simp_all;
     . apply (Axiom5.defines β F).mpr; simp_all;
 
-instance : Nonempty (𝔽((𝐒𝟓 : AxiomSet β)) : FrameClass α) := LogicS5.FrameClassDefinability.nonempty (by simp [Reflexive, Euclidean])
+instance : Nonempty (𝔽((𝐒𝟓 : AxiomSet β)) : FrameClass α) := by
+  existsi (λ _ _ => True);
+  apply LogicS5.FrameClassDefinability.mp;
+  simp [Reflexive, Euclidean]
 
 end LogicDefinabilities
 
