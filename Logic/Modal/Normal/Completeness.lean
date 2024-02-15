@@ -413,7 +413,7 @@ lemma axiom5 (h5 : 𝟓 ⊆ Λ) : Euclidean (CanonicalModel Λ).frame := by
 
 end CanonicalModel
 
-lemma truthlemma {p : Formula β} : ∀ {Ω}, (⊧ᴹ[CanonicalModel Λ, Ω] p) ↔ (p ∈ Ω) := by
+lemma truthlemma {p : Formula β} : ∀ {Ω}, (Ω ⊩ᴹ[CanonicalModel Λ] p) ↔ (p ∈ Ω) := by
   induction p using rec' with
   | hatom => aesop;
   | hfalsum => simp;
@@ -434,7 +434,7 @@ lemma truthlemma {p : Formula β} : ∀ {Ω}, (⊧ᴹ[CanonicalModel Λ, Ω] p) 
       simp [Set.subset_def, CanonicalModel.frame_def] at hΩ';
       exact hΩ' p h;
 
-lemma truthlemma' {Γ : Theory β} : ∀ {Ω}, (⊧ᴹ[CanonicalModel Λ, Ω] Γ) ↔ (Γ ⊆ Ω.theory) := by
+lemma truthlemma' {Γ : Theory β} : ∀ {Ω}, (Ω ⊩ᴹ[CanonicalModel Λ] Γ) ↔ (Γ ⊆ Ω.theory) := by
   intro Ω;
   constructor;
   . simp [Set.subset_def];

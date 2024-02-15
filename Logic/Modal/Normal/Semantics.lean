@@ -25,37 +25,39 @@ def Satisfies (M : Model α β) (w : α) : Formula β → Prop
   | imp p q => ¬(p.Satisfies M w) ∨ (q.Satisfies M w)
   | box p   => ∀w', M.frame w w' → p.Satisfies M w'
 
-notation "⊧ᴹ[" M "," w "] " p => Satisfies M w p
-
 namespace Satisfies
+
+notation w "⊩ᴹ[" M "] " p => Satisfies M w p
 
 variable {M : Model α β}
 
-@[simp] lemma atom_def : (⊧ᴹ[M, w] atom a) ↔ a ∈ M.val w := by simp [Satisfies];
+@[simp] lemma atom_def : (w ⊩ᴹ[M] atom a) ↔ a ∈ M.val w := by simp [Satisfies];
 
-@[simp] lemma top_def : (⊧ᴹ[M, w] ⊤) := by simp [Satisfies];
+@[simp] lemma top_def : (w ⊩ᴹ[M] ⊤) := by simp [Satisfies];
 
-@[simp] lemma bot_def : (⊧ᴹ[M, w] ⊥) ↔ False := by simp [Satisfies];
+@[simp] lemma bot_def : (w ⊩ᴹ[M] ⊥) ↔ False := by simp [Satisfies];
 
-@[simp] lemma and_def : (⊧ᴹ[M, w] p ⋏ q) ↔ (⊧ᴹ[M, w] p) ∧ (⊧ᴹ[M, w] q) := by simp [Satisfies];
+@[simp] lemma and_def : (w ⊩ᴹ[M] p ⋏ q) ↔ (w ⊩ᴹ[M] p) ∧ (w ⊩ᴹ[M] q) := by simp [Satisfies];
 
-@[simp] lemma or_def : (⊧ᴹ[M, w] p ⋎ q) ↔ (⊧ᴹ[M, w] p) ∨ (⊧ᴹ[M, w] q) := by simp [Satisfies];
+@[simp] lemma or_def : (w ⊩ᴹ[M] p ⋎ q) ↔ (w ⊩ᴹ[M] p) ∨ (w ⊩ᴹ[M] q) := by simp [Satisfies];
 
-lemma imp_def : (⊧ᴹ[M, w] p ⟶ q) ↔ ¬(⊧ᴹ[M, w] p) ∨ (⊧ᴹ[M, w] q) := by simp [Satisfies];
-@[simp] lemma imp_def' : (⊧ᴹ[M, w] p ⟶ q) ↔ (⊧ᴹ[M, w] p) → (⊧ᴹ[M, w] q) := by simp [Satisfies, imp_iff_not_or];
+lemma imp_def : (w ⊩ᴹ[M] p ⟶ q) ↔ ¬(w ⊩ᴹ[M] p) ∨ (w ⊩ᴹ[M] q) := by simp [Satisfies];
+@[simp] lemma imp_def' : (w ⊩ᴹ[M] p ⟶ q) ↔ (w ⊩ᴹ[M] p) → (w ⊩ᴹ[M] q) := by simp [Satisfies, imp_iff_not_or];
 
-@[simp] lemma box_def : (⊧ᴹ[M, w] □p) ↔ (∀w', M.frame w w' → (⊧ᴹ[M, w'] p)) := by simp [Satisfies];
-@[simp] lemma dia_def : (⊧ᴹ[M, w] ◇p) ↔ (∃w', M.frame w w' ∧ (⊧ᴹ[M, w'] p)) := by simp [Satisfies];
+@[simp] lemma box_def : (w ⊩ᴹ[M] □p) ↔ (∀w', M.frame w w' → (w' ⊩ᴹ[M] p)) := by simp [Satisfies];
+@[simp] lemma dia_def : (w ⊩ᴹ[M] ◇p) ↔ (∃w', M.frame w w' ∧ (w' ⊩ᴹ[M] p)) := by simp [Satisfies];
 
-@[simp] lemma neg_def : (⊧ᴹ[M, w] (neg p)) ↔ ¬(⊧ᴹ[M, w] p) := by simp [Satisfies];
-@[simp] lemma neg_def' : (⊧ᴹ[M, w] ~p) ↔ ¬(⊧ᴹ[M, w] p) := by simp [Satisfies];
+@[simp] lemma neg_def : (w ⊩ᴹ[M] (neg p)) ↔ ¬(w ⊩ᴹ[M] p) := by simp [Satisfies];
+@[simp] lemma neg_def' : (w ⊩ᴹ[M] ~p) ↔ ¬(w ⊩ᴹ[M] p) := by simp [Satisfies];
 
-lemma modus_ponens (m₁ : ⊧ᴹ[M, w] p ⟶ q) : (⊧ᴹ[M, w] p) → (⊧ᴹ[M, w] q) := by simpa [imp_def'] using m₁;
+lemma modus_ponens (m₁ : w ⊩ᴹ[M] p ⟶ q) : (w ⊩ᴹ[M] p) → (w ⊩ᴹ[M] q) := by simpa [imp_def'] using m₁;
 
 end Satisfies
 
+abbrev Unsatisfies (M : Model α β) (w : α) (p : Formula β) := ¬(w ⊩ᴹ[M] p)
+notation w "⊮ᴹ[" M "] " p => Unsatisfies M w p
 
-def Models (M : Model α β) (p : Formula β) := ∀w, (⊧ᴹ[M, w] p)
+def Models (M : Model α β) (p : Formula β) := ∀w, (w ⊩ᴹ[M] p)
 notation "⊧ᴹ[" M "] "  p => Models M p
 
 namespace Models
@@ -137,7 +139,7 @@ lemma dne : ⊧ᴹ[F] ~~p ⟶ p := by simp only [Frames, Models.dne, forall_cons
 
 end Frames
 
-lemma not_Frames : (∃ V w, ¬(⊧ᴹ[⟨F, V⟩, w] p)) → ¬(⊧ᴹ[F] p) := by
+lemma not_Frames : (∃ V w, (w ⊮ᴹ[⟨F, V⟩] p)) → ¬(⊧ᴹ[F] p) := by
   simp;
   intro V w hw hf;
   exact hw $ hf V w;
@@ -145,9 +147,11 @@ lemma not_Frames : (∃ V w, ¬(⊧ᴹ[⟨F, V⟩, w] p)) → ¬(⊧ᴹ[F] p) :=
 end Formula
 
 
-@[simp]
-def Theory.Satisfies (M : Model α β) (w : α) (Γ : Theory β) := ∀ p ∈ Γ, ⊧ᴹ[M, w] p
-notation "⊧ᴹ[" M "," w "] " Γ => Theory.Satisfies M w Γ
+@[simp] def Theory.Satisfies (M : Model α β) (w : α) (Γ : Theory β) := ∀ p ∈ Γ, w ⊩ᴹ[M] p
+notation w "⊩ᴹ[" M "] " Γ => Theory.Satisfies M w Γ
+
+@[simp] abbrev Theory.Unsatisfies (M : Model α β) (w : α) (Γ : Theory β) := ¬(w ⊩ᴹ[M] Γ)
+notation w "⊮ᴹ[" M "] " Γ => Theory.Unsatisfies M w Γ
 
 variable [DecidableEq β]
 
@@ -245,7 +249,7 @@ lemma frames_triunion {F: Frame α} {Γ₁ Γ₂ Γ₃ : Theory β} : (⊧ᴹ[F]
     . exact h.right.left p (by assumption);
     . exact h.right.right p (by assumption);
 
-lemma not_Frames {F: Frame α} {Γ : Theory β} : (∃ V w, ¬(⊧ᴹ[⟨F, V⟩, w] Γ)) → ¬(⊧ᴹ[F] Γ) := by
+lemma not_Frames {F: Frame α} {Γ : Theory β} : (∃ V w, (w ⊮ᴹ[⟨F, V⟩] Γ)) → ¬(⊧ᴹ[F] Γ) := by
   simp [Frames, Satisfies, Formula.Frames, Formula.Models];
   intros V w p hp h;
   existsi p, hp, V, w;
@@ -253,7 +257,7 @@ lemma not_Frames {F: Frame α} {Γ : Theory β} : (∃ V w, ¬(⊧ᴹ[⟨F, V⟩
 
 end Theory
 
-def Formula.FrameConsequence (F : Frame α) (Γ : Theory β) (p : Formula β) := ∀ V w, (⊧ᴹ[⟨F, V⟩, w] Γ) → (⊧ᴹ[⟨F, V⟩, w] p)
+def Formula.FrameConsequence (F : Frame α) (Γ : Theory β) (p : Formula β) := ∀ V w, (w ⊩ᴹ[⟨F, V⟩] Γ) → (w ⊩ᴹ[⟨F, V⟩] p)
 notation Γ " ⊨ᴹ[" F "] " p => Formula.FrameConsequence F Γ p
 notation Γ " ⊭ᴹ[" F "] " p => ¬(Γ ⊨ᴹ[F] p)
 
@@ -280,7 +284,7 @@ lemma modus_ponens' {𝔽 : FrameClass α} {Γ : Theory β} {p : Formula β} : (
 
 end Formula.FrameClassConsequence
 
-def Theory.FrameSatisfiable (F : Frame α) (Γ : Theory β) := ∃ V w, ⊧ᴹ[⟨F, V⟩, w] Γ
+def Theory.FrameSatisfiable (F : Frame α) (Γ : Theory β) := ∃ V w, w ⊩ᴹ[⟨F, V⟩] Γ
 
 def Theory.FrameClassSatisfiable (𝔽 : FrameClass α) (Γ : Theory β) := ∃ F ∈ 𝔽, Γ.FrameSatisfiable F
 
