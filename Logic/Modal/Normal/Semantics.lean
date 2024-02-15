@@ -9,7 +9,7 @@ open Formula
 variable {α β : Type u} [Inhabited α]
 
 abbrev Frame (α : Type u) := α → α → Prop
-abbrev Valuation (α β : Type u) := α → Set β
+abbrev Valuation (α β : Type u) := α → β → Prop
 
 structure Model (α β : Type u) where
   frame : Frame α
@@ -18,7 +18,7 @@ structure Model (α β : Type u) where
 namespace Formula
 
 def Satisfies (M : Model α β) (w : α) : Formula β → Prop
-  | atom a  => a ∈ M.val w
+  | atom a  => M.val w a
   | falsum  => False
   | and p q => (p.Satisfies M w) ∧ (q.Satisfies M w)
   | or p q  => (p.Satisfies M w) ∨ (q.Satisfies M w)
@@ -27,15 +27,14 @@ def Satisfies (M : Model α β) (w : α) : Formula β → Prop
 
 notation w " ⊩ᴹ[" M "] " p => Satisfies M w p
 
-@[simp]
-abbrev Unsatisfies (M : Model α β) (w : α) (p : Formula β) := ¬(w ⊩ᴹ[M] p)
+@[simp] abbrev Unsatisfies (M : Model α β) (w : α) (p : Formula β) := ¬(w ⊩ᴹ[M] p)
 notation w " ⊮ᴹ[" M "] " p => Unsatisfies M w p
 
 namespace Satisfies
 
 variable {M : Model α β}
 
-@[simp] lemma atom_def : (w ⊩ᴹ[M] atom a) ↔ a ∈ M.val w := by simp [Satisfies];
+@[simp] lemma atom_def : (w ⊩ᴹ[M] atom a) ↔ M.val w a := by simp [Satisfies];
 
 @[simp] lemma top_def : (w ⊩ᴹ[M] ⊤) := by simp [Satisfies];
 
@@ -319,9 +318,8 @@ lemma AxiomT.defines : (Reflexive F) ↔ (⊧ᴹ[F] (𝐓 : AxiomSet β)) := by
     . intro w';
       by_cases w = w';
       . simp_all;
-      . simp_all; intros; trivial;
+      . simp_all;
     . simp;
-      aesop;
 
 lemma AxiomD.defines : (Serial F) ↔ (⊧ᴹ[F] (𝐃 : AxiomSet β)) := by
   constructor;
@@ -348,12 +346,12 @@ lemma AxiomB.defines : (Symmetric F) ↔ (⊧ᴹ[F] (𝐁 : AxiomSet β)) := by
     simp [AxiomB, AxiomB.set];
     existsi (λ w' _ => w' = w₁), w₁, (atom default);
     constructor;
-    . simp; trivial;
+    . simp;
     . existsi w₂, (by assumption);
       intro w';
       by_cases w' = w₁;
       . aesop;
-      . simp [*]; intros; aesop;
+      . simp_all;
 
 lemma Axiom4.defines : (Transitive F) ↔ (⊧ᴹ[F] (𝟒 : AxiomSet β)) := by
   constructor;
@@ -368,7 +366,7 @@ lemma Axiom4.defines : (Transitive F) ↔ (⊧ᴹ[F] (𝟒 : AxiomSet β)) := by
     . intro w';
       by_cases w' = w₃;
       . aesop;
-      . simp [*]; intros; trivial;
+      . simp_all;
     . existsi w₂, (by assumption), w₃, (by assumption); aesop;
 
 lemma Axiom5.defines : (Euclidean F) ↔ (⊧ᴹ[F] (𝟓 : AxiomSet β)) := by
@@ -381,7 +379,7 @@ lemma Axiom5.defines : (Euclidean F) ↔ (⊧ᴹ[F] (𝟓 : AxiomSet β)) := by
     simp [Axiom5, Axiom5.set];
     existsi (λ w' _ => ¬F w₂ w'), w₁, (atom default), w₃;
     constructor;
-    . simp; simp[*]; trivial;
+    . simp_all;
     . existsi (by assumption), w₂, (by assumption);
       intros; simp; aesop;
 
@@ -392,34 +390,6 @@ lemma AxiomDot3.defines : (Functional F) ↔ (⊧ᴹ[F] (.𝟑 : AxiomSet β)) :
 lemma AxiomCD.defines : (RightConvergent F) ↔ (⊧ᴹ[F] (𝐂𝐃 : AxiomSet β)) := by sorry
 
 lemma AxiomC4.defines : (Dense F) ↔ (⊧ᴹ[F] (𝐂𝟒 : AxiomSet β)) := by sorry
-
-lemma AxiomL.defines : (Transitive F ∧ WellFounded F) ↔ (⊧ᴹ[F] (𝐋 : AxiomSet β)) := by sorry
-
-/-
-lemma AxiomL.defines [DecidableEq α] : ∀ (F: Frame α), (Transitive f ∧ WellFounded f) ↔ (⊧ᴹ[F] (𝐋 : AxiomSet β)) := by
-  intro f;
-  constructor;
-  . rintro ⟨hTrans, hWF⟩;
-    simp [AxiomL, AxiomL.set];
-    intro p V w h₁;
-    by_contra hC; simp at hC;
-  . contrapose;
-    intro h;
-    cases (not_and_or.mp h) with
-    | inl hnT =>
-      simp [Transitive] at hnT;
-      have ⟨w₁, w₂, w₃, _, _, _⟩ := hnT;
-      apply Theory.not_Frames;
-      simp [AxiomL, AxiomL.set];
-      existsi (λ w' _ => w' ≠ w₂ ∧ w' ≠ w₃), w₁, (atom default);
-      constructor;
-      . intro x hx;
-        by_cases x = w₂;
-        . intros a; have := a w₃ (by aesop); aesop;
-        . sorry;
-      . existsi w₂; aesop;
-    | inr hnWF => sorry;
--/
 
 end AxiomDefinabilities
 

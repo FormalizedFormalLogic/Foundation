@@ -219,3 +219,4 @@ In this formalization, _(Modal) Logic_ means set of axioms.
 - P. Blackburn, M. de Rijke, Y. Venema, "Modal Logic"
 - Open Logic Project, ["The Open Logic Text"](https://builds.openlogicproject.org/)
 - R. Hakli, S. Negri, "Does the deduction theorem fail for modal logic?"
+- G. Boolos, "The Logic of Provability"
