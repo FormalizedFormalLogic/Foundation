@@ -55,8 +55,6 @@ lemma imp_def : (w ⊩ᴹ[M] p ⟶ q) ↔ (w ⊮ᴹ[M] p) ∨ (w ⊩ᴹ[M] q) :=
 
 lemma modus_ponens (m₁ : w ⊩ᴹ[M] p ⟶ q) : (w ⊩ᴹ[M] p) → (w ⊩ᴹ[M] q) := by simpa [imp_def'] using m₁;
 
-lemma modus_ponens (m₁ : ⊧ᴹ[M, w] p ⟶ q) : (⊧ᴹ[M, w] p) → (⊧ᴹ[M, w] q) := by simpa [imp_def'] using m₁;
-
 end Satisfies
 
 def Models (M : Model α β) (p : Formula β) := ∀w, (w ⊩ᴹ[M] p)
@@ -161,14 +159,14 @@ variable [DecidableEq β]
 
 variable [DecidableEq β]
 
-lemma Theory.satisfies_conj {Δ : Context β} {Γ : Theory β} (hs : ↑Δ ⊆ Γ) {M : Model α β} {w : α} : (⊧ᴹ[M, w] Γ) → (⊧ᴹ[M, w] Δ.conj) := by
+lemma Theory.satisfies_conj {Δ : Context β} {Γ : Theory β} (hs : ↑Δ ⊆ Γ) {M : Model α β} {w : α} : (w ⊩ᴹ[M] Γ) → (w ⊩ᴹ[M] Δ.conj) := by
   intro hΓ;
   induction Δ using Finset.induction_on with
   | empty => simp [Finset.conj];
   | @insert p Δ _ ih =>
     -- have := Finset.toList_insert h;
     -- simp [Finset.conj] at this;
-    suffices ⊧ᴹ[M,w] (Δ.conj ⋏ p) by simpa [←Context.insert_conj] using this;
+    suffices w ⊩ᴹ[M] (Δ.conj ⋏ p) by simpa [←Context.insert_conj] using this;
     simp_all [Finset.coe_insert, Set.insert_subset_iff];
 
 @[simp]
@@ -243,7 +241,7 @@ lemma models_neg_singleton [Inhabited α] {M : Model α β} {p : Formula β} : (
   intro hnp hp;
   exact Formula.Models.neg_def (hnp (~p) (by simp)) (hp p (by simp));
 
-lemma not_Frames {F: Frame α} {Γ : Theory β} : (∃ V w, ¬(⊧ᴹ[⟨F, V⟩, w] Γ)) → ¬(⊧ᴹ[F] Γ) := by
+lemma not_Frames {F: Frame α} {Γ : Theory β} : (∃ V w, (w ⊮ᴹ[⟨F, V⟩] Γ)) → ¬(⊧ᴹ[F] Γ) := by
   simp [Frames, Satisfies, Formula.Frames, Formula.Models];
   intros V w p hp h;
   existsi p, hp, V, w;

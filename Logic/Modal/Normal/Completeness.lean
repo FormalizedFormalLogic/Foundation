@@ -301,6 +301,8 @@ lemma exists_maximal_consistent_theory : ∃ (Ω : MaximalConsistentTheory Λ), 
 
 end Lindenbaum
 
+variable (hK : 𝐊 ⊆ Λ)
+
 open MaximalConsistentTheory
 
 lemma MaximalConsistentTheory.inhabited (h : AxiomSet.Consistent Λ) : Inhabited (MaximalConsistentTheory Λ) := ⟨

@@ -208,10 +208,10 @@ lemma compact {Γ p} (d : Γ ⊢ᴹ[Λ]! p) : ∃ (Δ : Context α), ↑Δ ⊆ �
   . simpa using hΔ;
   . exact ⟨dΔ⟩
 
-lemma dtr_strong {Δ : Context α} {p : Formula α} : (↑Δ ⊢ᴹ[Λ]! p) → (⊢ᴹ[Λ]! Δ.conj ⟶ p) := by
+lemma dtr_strong {Δ : Context α} {p : Formula α} : (↑Δ ⊢ᴹ[Λ]! p) → (∅ ⊢ᴹ[Λ]! Δ.conj ⟶ p) := by
   intro d;
   induction Δ using Finset.induction_on generalizing p with
-  | empty => exact Deducible.imply₁' (by simpa using d)
+  | empty => exact imply₁'! (by simpa using d)
   | @insert q Δ h ih => sorry;
 
 end Deducible
