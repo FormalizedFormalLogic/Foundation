@@ -25,9 +25,13 @@ def Satisfies (M : Model α β) (w : α) : Formula β → Prop
   | imp p q => ¬(p.Satisfies M w) ∨ (q.Satisfies M w)
   | box p   => ∀w', M.frame w w' → p.Satisfies M w'
 
-namespace Satisfies
+notation w " ⊩ᴹ[" M "] " p => Satisfies M w p
 
-notation w "⊩ᴹ[" M "] " p => Satisfies M w p
+@[simp]
+abbrev Unsatisfies (M : Model α β) (w : α) (p : Formula β) := ¬(w ⊩ᴹ[M] p)
+notation w " ⊮ᴹ[" M "] " p => Unsatisfies M w p
+
+namespace Satisfies
 
 variable {M : Model α β}
 
@@ -41,21 +45,18 @@ variable {M : Model α β}
 
 @[simp] lemma or_def : (w ⊩ᴹ[M] p ⋎ q) ↔ (w ⊩ᴹ[M] p) ∨ (w ⊩ᴹ[M] q) := by simp [Satisfies];
 
-lemma imp_def : (w ⊩ᴹ[M] p ⟶ q) ↔ ¬(w ⊩ᴹ[M] p) ∨ (w ⊩ᴹ[M] q) := by simp [Satisfies];
+lemma imp_def : (w ⊩ᴹ[M] p ⟶ q) ↔ (w ⊮ᴹ[M] p) ∨ (w ⊩ᴹ[M] q) := by simp [Satisfies];
 @[simp] lemma imp_def' : (w ⊩ᴹ[M] p ⟶ q) ↔ (w ⊩ᴹ[M] p) → (w ⊩ᴹ[M] q) := by simp [Satisfies, imp_iff_not_or];
 
 @[simp] lemma box_def : (w ⊩ᴹ[M] □p) ↔ (∀w', M.frame w w' → (w' ⊩ᴹ[M] p)) := by simp [Satisfies];
 @[simp] lemma dia_def : (w ⊩ᴹ[M] ◇p) ↔ (∃w', M.frame w w' ∧ (w' ⊩ᴹ[M] p)) := by simp [Satisfies];
 
-@[simp] lemma neg_def : (w ⊩ᴹ[M] (neg p)) ↔ ¬(w ⊩ᴹ[M] p) := by simp [Satisfies];
-@[simp] lemma neg_def' : (w ⊩ᴹ[M] ~p) ↔ ¬(w ⊩ᴹ[M] p) := by simp [Satisfies];
+@[simp] lemma neg_def : (w ⊩ᴹ[M] (neg p)) ↔ (w ⊮ᴹ[M] p) := by simp [Satisfies];
+@[simp] lemma neg_def' : (w ⊩ᴹ[M] ~p) ↔ (w ⊮ᴹ[M] p) := by simp [Satisfies];
 
 lemma modus_ponens (m₁ : w ⊩ᴹ[M] p ⟶ q) : (w ⊩ᴹ[M] p) → (w ⊩ᴹ[M] q) := by simpa [imp_def'] using m₁;
 
 end Satisfies
-
-abbrev Unsatisfies (M : Model α β) (w : α) (p : Formula β) := ¬(w ⊩ᴹ[M] p)
-notation w "⊮ᴹ[" M "] " p => Unsatisfies M w p
 
 def Models (M : Model α β) (p : Formula β) := ∀w, (w ⊩ᴹ[M] p)
 notation "⊧ᴹ[" M "] "  p => Models M p
