@@ -9,7 +9,7 @@ open Formula
 
 variable {α β} [Inhabited α] [DecidableEq α]
 
-@[simp] def AxiomSet.Consistent (Λ : AxiomSet α) := ⊬ᴹ[Λ]! ⊥
+@[simp] def AxiomSet.Consistent (Λ : AxiomSet α) := ∅ ⊬ᴹ[Λ]! ⊥
 
 open AxiomSet
 
@@ -33,7 +33,7 @@ private lemma AxiomSet.soundsAux {Γ : Theory α} (hΓ : Γ = ∅) (d : Γ ⊢�
   | disj₃ => exact disj₃;
   | dne => exact dne;
 
-theorem AxiomSet.sounds (d : ⊢ᴹ[Λ]! p) : (⊧ᴹ[(𝔽(Λ) : FrameClass β)] p) := AxiomSet.soundsAux rfl d
+theorem AxiomSet.sounds (d : ∅ ⊢ᴹ[Λ]! p) : (⊧ᴹ[(𝔽(Λ) : FrameClass β)] p) := AxiomSet.soundsAux rfl d
 
 theorem AxiomSet.ssounds (d : Γ ⊢ᴹ[Λ]! p) : (Γ ⊨ᴹ[(𝔽(Λ) : FrameClass β)] p) := by
   obtain ⟨Δ, ⟨sΔ, dΔ⟩⟩ := d.compact;

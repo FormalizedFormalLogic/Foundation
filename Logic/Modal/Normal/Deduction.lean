@@ -42,17 +42,9 @@ notation:45 Γ " ⊢ᴹ[" Λ "]! " p => Deducible Λ Γ p
 abbrev Undeducible := ¬(Γ ⊢ᴹ[Λ]! p)
 notation:45 Γ " ⊬ᴹ[" Λ "]! " p => Undeducible Λ Γ p
 
-abbrev Proof := ∅ ⊢ᴹ[Λ] p
-notation:45 "⊢ᴹ[" Λ "] " p => Proof Λ p
+abbrev Theory.Consistent := Hilbert.Consistent (@Deduction α Λ) Γ
 
-abbrev Provable := Nonempty (⊢ᴹ[Λ] p)
-notation:45 "⊢ᴹ[" Λ "]! " p => Provable Λ p
-
-abbrev Unprovable := IsEmpty (⊢ᴹ[Λ] p)
-notation:45 "⊬ᴹ[" Λ "]! " p => Unprovable Λ p
-
-abbrev Theory.Consistent := Deduction.Consistent (@Deduction α Λ) Γ
-abbrev Theory.Inconsistent := Deduction.Inconsistent (@Deduction α Λ) Γ
+abbrev Theory.Inconsistent := Hilbert.Inconsistent (@Deduction α Λ) Γ
 
 namespace Deduction
 
@@ -215,20 +207,6 @@ lemma dtr_strong {Δ : Context α} {p : Formula α} : (↑Δ ⊢ᴹ[Λ]! p) → 
   | @insert q Δ h ih => sorry;
 
 end Deducible
-
-def Proof.length (d : ⊢ᴹ[Λ] p) : ℕ := Deduction.length (by simpa using d)
-
-lemma Provable.dne : (⊢ᴹ[Λ]! ~~p) → (⊢ᴹ[Λ]! p) := by
-  intro d;
-  have h₁ : ⊢ᴹ[Λ] ~~p ⟶ p := Deduction.dne ∅ p;
-  have h₂ := d.some; simp [Proof, Deduction] at h₂;
-  simp_all [Provable, Proof, Deduction];
-  exact ⟨(Deduction.modus_ponens' h₁ h₂)⟩
-
-lemma Provable.consistent_no_bot : (⊬ᴹ[Λ]! ⊥) → (⊥ ∉ Λ) := by
-  intro h; by_contra hC;
-  have : ⊢ᴹ[Λ]! ⊥ := ⟨Deduction.maxm hC⟩;
-  aesop;
 
 -- TODO: 直接有限モデルを構成する方法（鹿島『コンピュータサイエンスにおける様相論理』2.8参照）で必要になる筈の定義だが，使わないかも知れない．
 /-

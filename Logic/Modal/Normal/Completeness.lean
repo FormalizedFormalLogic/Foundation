@@ -19,7 +19,7 @@ variable (Λ : AxiomSet β) (Γ : Theory β)
 
 def Theory.Maximal := ∀ p, (p ∈ Γ) ∨ (~p ∈ Γ)
 
-def WeakCompleteness := ∀ (p : Formula β), (⊧ᴹ[(𝔽(Λ) : FrameClass α)] p) → (⊢ᴹ[Λ]! p)
+-- def WeakCompleteness := ∀ (p : Formula β), (⊧ᴹ[(𝔽(Λ) : FrameClass α)] p) → (∅ ⊢ᴹ[Λ]! p)
 
 def Completeness (𝔽 : FrameClass α) := ∀ (Γ : Theory β) (p : Formula β), (Γ ⊨ᴹ[𝔽] p) → (Γ ⊢ᴹ[Λ]! p)
 
