@@ -59,4 +59,6 @@ theorem LogicKD.consistent : Consistent (𝐊𝐃 : AxiomSet α) := AxiomSet.con
 theorem LogicS4.consistent : Consistent (𝐒𝟒 : AxiomSet α) := AxiomSet.consistent β
 theorem LogicS5.consistent : Consistent (𝐒𝟓 : AxiomSet α) := AxiomSet.consistent β
 
+end
+
 end LO.Modal.Normal
