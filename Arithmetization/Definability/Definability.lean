@@ -35,10 +35,12 @@ section definability
 
 variable {M : Type} [Zero M] [One M] [Add M] [Mul M] [LT M] [𝐏𝐀⁻.Mod M]
 
-abbrev FormulaHierarchy (b : VType) (s : ℕ) (L : Language) [L.LT] (μ : Type*) (n) :=
+namespace Definability
+
+abbrev FormulaHierarchy (b : Polarity) (s : ℕ) (L : Language) [L.LT] (μ : Type*) (n) :=
   { p : Semiformula L μ  n // Hierarchy b s p }
 
-abbrev SentenceHierarchy (b : VType) (s : ℕ) (L : Language) [L.LT] (n) := FormulaHierarchy b s L Empty n
+abbrev SentenceHierarchy (b : Polarity) (s : ℕ) (L : Language) [L.LT] (n) := FormulaHierarchy b s L Empty n
 
 abbrev SigmaSentence (s : ℕ) (L : Language) [L.LT] (n) := SentenceHierarchy Σ s L n
 
@@ -53,7 +55,7 @@ namespace FormulaHierarchy
 abbrev of_zero (p : FormulaHierarchy b 0 ℒₒᵣ μ k) : FormulaHierarchy b' s ℒₒᵣ μ k :=
   ⟨p, p.prop.of_zero⟩
 
-variable (b : VType) (s : ℕ) (L : Language) [L.LT] (μ : Type*) (n)
+variable (b : Polarity) (s : ℕ) (L : Language) [L.LT] (μ : Type*) (n)
 
 @[simp] lemma hierarchy (p : FormulaHierarchy b s L μ n) : Hierarchy b s p.val := p.prop
 
@@ -72,18 +74,22 @@ def le : SentenceHierarchy b s ℒₒᵣ 2 := ⟨“#0 ≤ #1”, by simp⟩
 
 end SentenceHierarchy
 
+end Definability
+
 namespace Model
 
-abbrev DefinedPred (b : VType) (s : ℕ) (P : M → Prop) (p : SentenceHierarchy b s ℒₒᵣ 1) : Prop :=
+open Definability
+
+abbrev DefinedPred (b : Polarity) (s : ℕ) (P : M → Prop) (p : SentenceHierarchy b s ℒₒᵣ 1) : Prop :=
   Defined (λ v ↦ P (v 0)) p.val
 
-abbrev DefinedRel (b : VType) (s : ℕ) (R : M → M → Prop) (p : SentenceHierarchy b s ℒₒᵣ 2) : Prop :=
+abbrev DefinedRel (b : Polarity) (s : ℕ) (R : M → M → Prop) (p : SentenceHierarchy b s ℒₒᵣ 2) : Prop :=
   Defined (λ v ↦ R (v 0) (v 1)) p.val
 
-abbrev DefinedRel₃ (b : VType) (s : ℕ) (R : M → M → M → Prop) (p : SentenceHierarchy b s ℒₒᵣ 3) : Prop :=
+abbrev DefinedRel₃ (b : Polarity) (s : ℕ) (R : M → M → M → Prop) (p : SentenceHierarchy b s ℒₒᵣ 3) : Prop :=
   Defined (λ v ↦ R (v 0) (v 1) (v 2)) p.val
 
-abbrev DefinedRel₄ (b : VType) (s : ℕ) (R : M → M → M → M → Prop) (p : SentenceHierarchy b s ℒₒᵣ 4) : Prop :=
+abbrev DefinedRel₄ (b : Polarity) (s : ℕ) (R : M → M → M → M → Prop) (p : SentenceHierarchy b s ℒₒᵣ 4) : Prop :=
   Defined (λ v ↦ R (v 0) (v 1) (v 2) (v 3)) p.val
 
 abbrev SigmaDefinedPred (s : ℕ) (P : M → Prop) (p : Σᴬ[s] 1) : Prop := DefinedPred Σ s P p
@@ -110,16 +116,16 @@ abbrev PiDefinedRel (s : ℕ) (R : M → M → Prop) (p : Πᴬ[s] 2) : Prop := 
 
 notation "Πᴬ[" s "]-Relation" => PiDefinedRel s
 
-abbrev DefinedFunction (b : VType) (s : ℕ) {k} (f : (Fin k → M) → M) (p : SentenceHierarchy b s ℒₒᵣ (k + 1)) : Prop :=
+abbrev DefinedFunction (b : Polarity) (s : ℕ) {k} (f : (Fin k → M) → M) (p : SentenceHierarchy b s ℒₒᵣ (k + 1)) : Prop :=
   Defined (fun v => v 0 = f (v ·.succ)) p.val
 
-abbrev DefinedFunction₁ (b : VType) (s : ℕ) (f : M → M) (p : SentenceHierarchy b s ℒₒᵣ 2) : Prop :=
+abbrev DefinedFunction₁ (b : Polarity) (s : ℕ) (f : M → M) (p : SentenceHierarchy b s ℒₒᵣ 2) : Prop :=
   DefinedFunction b s (fun v => f (v 0)) p
 
-abbrev DefinedFunction₂ (b : VType) (s : ℕ) (f : M → M → M) (p : SentenceHierarchy b s ℒₒᵣ 3) : Prop :=
+abbrev DefinedFunction₂ (b : Polarity) (s : ℕ) (f : M → M → M) (p : SentenceHierarchy b s ℒₒᵣ 3) : Prop :=
   DefinedFunction b s (fun v => f (v 0) (v 1)) p
 
-abbrev DefinedFunction₃ (b : VType) (s : ℕ) (f : M → M → M → M) (p : SentenceHierarchy b s ℒₒᵣ 4) : Prop :=
+abbrev DefinedFunction₃ (b : Polarity) (s : ℕ) (f : M → M → M → M) (p : SentenceHierarchy b s ℒₒᵣ 4) : Prop :=
   DefinedFunction b s (fun v => f (v 0) (v 1) (v 2)) p
 
 abbrev SigmaDefinedFunction₁ (s : ℕ) (f : M → M) (p : Σᴬ[s] 2) : Prop := DefinedFunction₁ Σ s f p
@@ -152,7 +158,7 @@ def DefinedRel.lt : DefinedRel b s ((· < ·) : M → M → Prop) SentenceHierar
 
 def DefinedRel.le : DefinedRel b s ((· ≤ ·) : M → M → Prop) SentenceHierarchy.le := by intro v; simp [SentenceHierarchy.le]
 
-variable (b : VType) (s : ℕ)
+variable (b : Polarity) (s : ℕ)
 
 class Definable {k} (P : (Fin k → M) → Prop) : Prop where
   definable : ∃ p : FormulaHierarchy b s ℒₒᵣ M k, DefinedWithParam P p.val
