@@ -148,6 +148,8 @@ variable (a : α) {T : Set F} [Mod a T]
 
 lemma models {f : F} (hf : f ∈ T) : a ⊧ f := realizeTheory hf
 
+lemma iff : Mod a T ↔ a ⊧* T := ⟨by rintro ⟨h⟩; exact h, fun h ↦ ⟨h⟩⟩
+
 def of_ss {T₁ T₂ : Set F} [Mod a T₁] (ss : T₂ ⊆ T₁) : Mod a T₂ :=
   ⟨realizeTheory_of_subset realizeTheory ss⟩
 

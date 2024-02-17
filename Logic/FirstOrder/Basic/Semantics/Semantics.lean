@@ -462,6 +462,8 @@ infix:55 " ⊧ₘ* " => ModelsTheory
 
 abbrev Theory.Mod (T : Theory L) := Semantics.Mod s.toStruc T
 
+lemma Theory.Mod.iff {T : Theory L} : T.Mod M ↔ M ⊧ₘ* T := iff_of_eq <| by simp [Mod, Semantics.Mod.iff]
+
 abbrev Realize (M : Type u) [s : Structure L M] : Formula L M →L Prop := Semiformula.Val s id
 
 postfix:max " ⊧ₘᵣ " => Realize
@@ -526,7 +528,7 @@ end
 
 namespace Semiformula
 
-variable {L₁ L₂ : Language.{u}} {Φ : L₁ →ᵥ L₂}
+variable {L₁ L₂ : Language} {Φ : L₁ →ᵥ L₂}
 
 section lMap
 variable {M : Type u} [Nonempty M] {s₂ : Structure L₂ M} {n} {e : Fin n → M} {ε : μ → M}

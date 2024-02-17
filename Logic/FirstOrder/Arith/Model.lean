@@ -8,6 +8,36 @@ namespace FirstOrder
 namespace Arith
 open Language
 
+section
+
+variable {L : Language} [L.ORing]
+
+@[simp] lemma oringEmb_operator_zero_val :
+    Semiterm.Operator.Zero.zero.term.lMap (Language.oringEmb : ℒₒᵣ →ᵥ L) = Semiterm.Operator.Zero.zero.term := by
+  simp [Semiterm.Operator.Zero.term_eq, Semiterm.lMap_func, Matrix.empty_eq]
+
+@[simp] lemma oringEmb_operator_one_val :
+    Semiterm.Operator.One.one.term.lMap (Language.oringEmb : ℒₒᵣ →ᵥ L) = Semiterm.Operator.One.one.term := by
+  simp [Semiterm.Operator.One.term_eq, Semiterm.lMap_func, Matrix.empty_eq]
+
+@[simp] lemma oringEmb_operator_add_val :
+    Semiterm.Operator.Add.add.term.lMap (Language.oringEmb : ℒₒᵣ →ᵥ L) = Semiterm.Operator.Add.add.term := by
+  simp [Semiterm.Operator.Add.term_eq, Semiterm.lMap_func, Matrix.empty_eq]
+
+@[simp] lemma oringEmb_operator_mul_val :
+    Semiterm.Operator.Mul.mul.term.lMap (Language.oringEmb : ℒₒᵣ →ᵥ L) = Semiterm.Operator.Mul.mul.term := by
+  simp [Semiterm.Operator.Mul.term_eq, Semiterm.lMap_func, Matrix.empty_eq]
+
+@[simp] lemma oringEmb_operator_eq_val :
+    .lMap (Language.oringEmb : ℒₒᵣ →ᵥ L) Semiformula.Operator.Eq.eq.sentence = Semiformula.Operator.Eq.eq.sentence := by
+  simp [Semiformula.Operator.Eq.sentence_eq, Semiformula.lMap_rel, Matrix.empty_eq]
+
+@[simp] lemma oringEmb_operator_lt_val :
+    .lMap (Language.oringEmb : ℒₒᵣ →ᵥ L) Semiformula.Operator.LT.lt.sentence = Semiformula.Operator.LT.lt.sentence := by
+  simp [Semiformula.Operator.LT.sentence_eq, Semiformula.lMap_rel, Matrix.empty_eq]
+
+end
+
 section model
 
 variable (M : Type*) [Zero M] [One M] [Add M] [Mul M] [LT M]
@@ -59,6 +89,49 @@ lemma standardModel_unique (s : Structure ℒₒᵣ M)
     [hZero : Structure.Zero ℒₒᵣ M] [hOne : Structure.One ℒₒᵣ M] [hAdd : Structure.Add ℒₒᵣ M] [hMul : Structure.Mul ℒₒᵣ M]
     [hEq : Structure.Eq ℒₒᵣ M] [hLT : Structure.LT ℒₒᵣ M] : s = standardModel M :=
   standardModel_unique' M s hZero hOne hAdd hMul hEq hLT
+
+variable {L : Language} [L.ORing] [s : Structure L M]
+  [Structure.Zero L M] [Structure.One L M] [Structure.Add L M] [Structure.Mul L M] [Structure.Eq L M] [Structure.LT L M]
+
+lemma standardModel_lMap_oringEmb_eq_standardModel : s.lMap (Language.oringEmb : ℒₒᵣ →ᵥ L) = standardModel M := by
+  apply standardModel_unique' M _
+  · exact @Structure.Zero.mk ℒₒᵣ M (s.lMap Language.oringEmb) _ _ (by simp [Semiterm.Operator.val, ←Semiterm.val_lMap]; exact Structure.Zero.zero)
+  · exact @Structure.One.mk ℒₒᵣ M (s.lMap Language.oringEmb) _ _ (by simp [Semiterm.Operator.val, ←Semiterm.val_lMap]; exact Structure.One.one)
+  · exact @Structure.Add.mk ℒₒᵣ M (s.lMap Language.oringEmb) _ _ (fun a b ↦ by simp [Semiterm.Operator.val, ←Semiterm.val_lMap]; exact Structure.Add.add a b)
+  · exact @Structure.Mul.mk ℒₒᵣ M (s.lMap Language.oringEmb) _ _ (fun a b ↦ by simp [Semiterm.Operator.val, ←Semiterm.val_lMap]; exact Structure.Mul.mul a b)
+  · exact @Structure.Eq.mk ℒₒᵣ M (s.lMap Language.oringEmb) _ (fun a b ↦ by
+      simp [Semiformula.Operator.val, ←Semiformula.eval_lMap]; exact Structure.Eq.eq a b)
+  · exact @Structure.LT.mk ℒₒᵣ M (s.lMap Language.oringEmb) _ _ (fun a b ↦ by
+      simp [Semiformula.Operator.val, ←Semiformula.eval_lMap]; exact Structure.LT.lt a b)
+
+variable {M} {e : Fin n → M} {ε : ξ → M}
+
+@[simp] lemma val_lMap_oringEmb {t : Semiterm ℒₒᵣ ξ n} :
+    (t.lMap Language.oringEmb : Semiterm L ξ n).val! M e ε = t.val! M e ε := by
+  simp [Semiterm.val_lMap, standardModel_lMap_oringEmb_eq_standardModel]
+
+@[simp] lemma eval_lMap_oringEmb {p : Semiformula ℒₒᵣ ξ n} :
+    Semiformula.Eval! M e ε (.lMap Language.oringEmb p : Semiformula L ξ n) ↔ Semiformula.Eval! M e ε p := by
+  simp [Semiformula.eval_lMap, standardModel_lMap_oringEmb_eq_standardModel]
+
+section
+
+variable {M : Type} [Zero M] [One M] [Add M] [Mul M] [LT M] [s : Structure L M]
+  [Structure.Zero L M] [Structure.One L M] [Structure.Add L M] [Structure.Mul L M] [Structure.Eq L M] [Structure.LT L M]
+
+@[simp] lemma modelsTheory_lMap_oringEmb (T : Theory ℒₒᵣ) :
+    M ⊧ₘ* (T.lMap oringEmb : Theory L) ↔ M ⊧ₘ* T := by
+  simp [modelsTheory_iff]
+  constructor
+  · intro H p hp
+    exact eval_lMap_oringEmb.mp <| @H (Semiformula.lMap oringEmb p) (Set.mem_image_of_mem _ hp)
+  · simp [Theory.lMap]
+    intro H p hp; exact eval_lMap_oringEmb.mpr (H hp)
+
+lemma mod_lMap_oringEmb (T : Theory ℒₒᵣ) :
+    (T.lMap oringEmb : Theory L).Mod M ↔ T.Mod M := by simp [Theory.Mod.iff]
+
+end
 
 end model
 
