@@ -1,6 +1,7 @@
 import Arithmetization.Lemmata
 import Arithmetization.Definability.Init
 import Arithmetization.Vorspiel.Graph
+import Logic.FirstOrder.Arith.StrictHierarchy
 import Aesop
 
 namespace LO.FirstOrder

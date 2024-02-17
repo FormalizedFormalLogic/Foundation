@@ -1,4 +1,5 @@
 import Logic.FirstOrder.Arith.PAminus
+import Logic.FirstOrder.Arith.StrictHierarchy
 
 instance [Zero α] : Nonempty α := ⟨0⟩
 
@@ -51,6 +52,52 @@ notation "‖" x "‖" => Length.length x
 
 namespace LO
 
+section
+
+variable (F : Type*) [LogicSymbol F] {T U : Set F}
+
+class TheoryCut [System F] where
+  theoryCut {T : Set F} {U : Set F} {p : F} : T ⊢* U → U ⊢ p → T ⊢ p
+
+variable {F}
+
+namespace System
+
+variable [System F]
+
+namespace Subtheory
+
+lemma of_theoryCut [TheoryCut F] (h : U ⊢* T) : T ≾ U := ⟨fun hf ↦ TheoryCut.theoryCut h hf⟩
+
+end Subtheory
+
+lemma provableTheory_iff : T ⊢*! U ↔ ∀ f ∈ U, T ⊢! f :=
+  ⟨by rintro ⟨h⟩ f hf; exact ⟨h hf⟩, fun h ↦ ⟨fun hf ↦ (h _ hf).toProof⟩⟩
+
+end System
+
+namespace Gentzen
+
+variable [Gentzen F] [Gentzen.Cut F]
+
+instance : TheoryCut F := ⟨Gentzen.proofCut⟩
+
+end Gentzen
+
+namespace Complete
+
+variable [𝓑 : System F] {α : Type*} [𝓢 : Semantics F α] [Complete F]
+
+lemma provableTheory_iff : T ⊢*! U ↔ (∀ s, s ⊧* T → s ⊧* U) := by
+  simp [System.provableTheory_iff, ←consequence_iff_provable]
+  constructor
+  · intro h s hs f hf; exact h f hf hs
+  · intro h f hf s hs; exact h s hs hf
+
+end Complete
+
+end
+
 namespace FirstOrder
 
 namespace Semiterm
@@ -85,7 +132,19 @@ lemma substs_bv (t : Semiterm L ξ n) (v : Fin n → Semiterm L ξ m) :
   simp [Semiterm.Positive, substs_bv]
   exact ⟨fun H i hi x hx ↦ H x i hi hx, fun H x i hi hx ↦ H i hi x hx⟩
 
+lemma embSubsts_bv (t : Semiterm L Empty n) (v : Fin n → Semiterm L ξ m) :
+    (Rew.embSubsts v t).bv = t.bv.biUnion (fun i ↦ (v i).bv) := by
+  induction t <;> simp [Rew.func, Semiterm.bv_func, Finset.biUnion_biUnion, *]
+  · contradiction
+
+@[simp] lemma embSubsts_positive (t : Semiterm L Empty n) (v : Fin n → Semiterm L ξ (m + 1)) :
+    (Rew.embSubsts v t).Positive ↔ ∀ i ∈ t.bv, (v i).Positive := by
+  simp [Semiterm.Positive, embSubsts_bv]
+  exact ⟨fun H i hi x hx ↦ H x i hi hx, fun H x i hi hx ↦ H i hi x hx⟩
+
 end Rew
+
+
 
 namespace Arith
 
@@ -267,6 +326,75 @@ lemma remove_exists {p : Semiformula L ξ (n + 1)} : Hierarchy b s (∃' p) → 
   case dummy_pi h => exact h.accum _
 
 end Arith.Hierarchy
+
+namespace Arith.HClassIn
+
+variable [L.LT]
+
+variable [DecidableEq ξ] {ξ₁ : Type*} [DecidableEq ξ₁] {ξ₂ : Type*} [DecidableEq ξ₂]
+
+lemma hClass_sigma_zero_le_hClass {Γ} {s : ℕ} : HClass L ξ Σ 0 ≤ HClass L ξ Γ s := by
+  intro _ p hp; exact Hierarchy.mono (by simpa [Hierarchy.zero_iff_delta_zero] using hp) (zero_le s)
+
+variable (T : Theory L)
+
+lemma deltaZeroIn_le_hClassIn (Γ s) : DeltaZeroIn ξ T ≤ HClassIn ξ Γ s T :=
+  Class.eqvClosure_monotone hClass_sigma_zero_le_hClass T
+
+variable {T}
+
+lemma of_deltaZeroIn {p : Semiformula L ξ n} (hp : (DeltaZeroIn ξ T).Domain p) : (HClassIn ξ Γ s T).Domain p :=
+  deltaZeroIn_le_hClassIn T Γ s hp
+
+@[formula_class] def rew {p : Semiformula L ξ₁ n₁} (hp : (HClassIn ξ₁ Γ s T).Domain p) (ω : Rew L ξ₁ n₁ ξ₂ n₂) : (HClassIn ξ₂ Γ s T).Domain (ω.hom p) := by
+  rcases hp with ⟨p', hp', H⟩
+  exact ⟨ω.hom p', Hierarchy.rew ω hp', H.rew ω⟩
+
+lemma all {p : Semiformula L ξ (n + 1)} : (HClassIn ξ Π (s + 1) T).Domain p → (HClassIn ξ Π (s + 1) T).Domain (∀' p) := by
+  rintro ⟨p', hp', H⟩; exact ⟨_, Hierarchy.all hp', H.all⟩
+
+lemma ex {p : Semiformula L ξ (n + 1)} : (HClassIn ξ Σ (s + 1) T).Domain p → (HClassIn ξ Σ (s + 1) T).Domain (∃' p) := by
+  rintro ⟨p', hp', H⟩; exact ⟨_, Hierarchy.ex hp', H.ex⟩
+
+lemma pi {p : Semiformula L ξ (n + 1)} : (HClassIn ξ Σ s T).Domain p → (HClassIn ξ Π (s + 1) T).Domain (∀' p) := by
+  rintro ⟨p', hp', H⟩; exact ⟨_, Hierarchy.pi hp', H.all⟩
+
+lemma sigma {p : Semiformula L ξ (n + 1)} : (HClassIn ξ Π s T).Domain p → (HClassIn ξ Σ (s + 1) T).Domain (∃' p) := by
+  rintro ⟨p', hp', H⟩; exact ⟨_, Hierarchy.sigma hp', H.ex⟩
+
+lemma dummy_pi {p : Semiformula L ξ (n + 1)} : (HClassIn ξ Σ (s + 1) T).Domain p → (HClassIn ξ Π (s + 1 + 1) T).Domain (∃' p) := by
+  rintro ⟨p', hp', H⟩; exact ⟨_, hp'.dummy_pi, H.ex⟩
+
+lemma dummy_sigma {p : Semiformula L ξ (n + 1)} : (HClassIn ξ Π (s + 1) T).Domain p → (HClassIn ξ Σ (s + 1 + 1) T).Domain (∀' p) := by
+  rintro ⟨p', hp', H⟩; exact ⟨_, hp'.dummy_sigma, H.all⟩
+
+end Arith.HClassIn
+
+namespace Class
+
+variable [L.LT] {ξ : Type*} [DecidableEq ξ] {c : Class L ξ}
+
+protected lemma ballClosure [c.BAll] {n} {p : Semiformula L ξ n} {v : Fin n → Semiterm L ξ 1}
+    (hv : ∀ i, (v i).Positive) (H : c.Domain p) : c.Domain (ballClosure (fun i ↦ “#0 < !!(v i)”) p) := by
+  induction' n with n IH <;> simp [H, ballClosure, ←Rew.comp_app]
+  have : c.Domain “∀[#0 < !!([→ #0] (v 0))] !p” :=
+    Class.BAll.ball (t := Rew.substs ![#0] (v 0)) H (by simp [Semiterm.bv_eq_empty_of_positive (hv 0)])
+  exact IH (fun i ↦ hv i.succ) this
+
+protected lemma bexClosure [c.BEx] {n} {p : Semiformula L ξ n} {v : Fin n → Semiterm L ξ 1}
+    (hv : ∀ i, (v i).Positive) (H : c.Domain p) :
+    c.Domain (bexClosure (fun i ↦ “#0 < !!(v i)”) p) := by
+  induction' n with n IH <;> simp [H, bexClosure, ←Rew.comp_app]
+  have : c.Domain “∃[#0 < !!([→ #0] (v 0))] !p” :=
+    Class.BEx.bex (t := Rew.substs ![#0] (v 0)) H (by simp [Semiterm.bv_eq_empty_of_positive (hv 0)])
+  exact IH (fun i ↦ hv i.succ) this
+
+lemma matrix_conj [c.Atom] [c.And] {n} {p : Fin m → Semiformula L ξ n} (H : ∀ j, c.Domain (p j)) :
+    c.Domain (Matrix.conj p) := by
+  induction' m with m ih <;> simp [Matrix.conj]
+  · exact And.and (H 0) (ih fun j ↦ by simpa using H j.succ)
+
+end Class
 
 end
 
