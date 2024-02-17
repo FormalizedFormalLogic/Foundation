@@ -41,9 +41,9 @@ instance : Structure.LT ℒₒᵣ M := ⟨fun _ _ => iff_of_eq rfl⟩
 
 instance : ORing ℒₒᵣ := ORing.mk
 
-lemma standardModel_unique (s : Structure ℒₒᵣ M)
-    [Structure.Zero ℒₒᵣ M] [Structure.One ℒₒᵣ M] [Structure.Add ℒₒᵣ M] [Structure.Mul ℒₒᵣ M]
-    [Structure.Eq ℒₒᵣ M] [Structure.LT ℒₒᵣ M] : s = standardModel M := Structure.ext _ _
+lemma standardModel_unique' (s : Structure ℒₒᵣ M)
+    (hZero : Structure.Zero ℒₒᵣ M) (hOne : Structure.One ℒₒᵣ M) (hAdd : Structure.Add ℒₒᵣ M) (hMul : Structure.Mul ℒₒᵣ M)
+    (hEq : Structure.Eq ℒₒᵣ M) (hLT : Structure.LT ℒₒᵣ M) : s = standardModel M := Structure.ext _ _
   (funext₃ fun k f _ =>
     match k, f with
     | _, Language.Zero.zero => by simp[Matrix.empty_eq]; rfl
@@ -54,6 +54,11 @@ lemma standardModel_unique (s : Structure ℒₒᵣ M)
     match k, r with
     | _, Language.Eq.eq => by simp; rfl
     | _, Language.LT.lt => by simp; rfl)
+
+lemma standardModel_unique (s : Structure ℒₒᵣ M)
+    [hZero : Structure.Zero ℒₒᵣ M] [hOne : Structure.One ℒₒᵣ M] [hAdd : Structure.Add ℒₒᵣ M] [hMul : Structure.Mul ℒₒᵣ M]
+    [hEq : Structure.Eq ℒₒᵣ M] [hLT : Structure.LT ℒₒᵣ M] : s = standardModel M :=
+  standardModel_unique' M s hZero hOne hAdd hMul hEq hLT
 
 end model
 

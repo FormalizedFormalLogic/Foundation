@@ -445,28 +445,28 @@ open Semiterm Semiformula
 
 variable (L) (M : Type*) [Structure L M]
 
-protected class Zero [Operator.Zero L] [Zero M] where
+protected class Zero [Operator.Zero L] [Zero M] : Prop where
   zero : (@Operator.Zero.zero L _).val ![] = (0 : M)
 
-protected class One [Operator.One L] [One M] where
+protected class One [Operator.One L] [One M] : Prop where
   one : (@Operator.One.one L _).val ![] = (1 : M)
 
-protected class Add [Operator.Add L] [Add M] where
+protected class Add [Operator.Add L] [Add M] : Prop where
   add : ∀ a b : M, (@Operator.Add.add L _).val ![a, b] = a + b
 
-protected class Mul [Operator.Mul L] [Mul M] where
+protected class Mul [Operator.Mul L] [Mul M] : Prop where
   mul : ∀ a b : M, (@Operator.Mul.mul L _).val ![a, b] = a * b
 
-protected class Eq [Operator.Eq L] where
+protected class Eq [Operator.Eq L] : Prop where
   eq : ∀ a b : M, (@Operator.Eq.eq L _).val ![a, b] ↔ a = b
 
-protected class LT [Operator.LT L] [LT M] where
+protected class LT [Operator.LT L] [LT M] : Prop where
   lt : ∀ a b : M, (@Operator.LT.lt L _).val ![a, b] ↔ a < b
 
-protected class LE [Operator.LE L] [LE M] where
+protected class LE [Operator.LE L] [LE M] : Prop where
   le : ∀ a b : M, (@Operator.LE.le L _).val ![a, b] ↔ a ≤ b
 
-class Mem [Operator.Mem L] [Membership M M] where
+class Mem [Operator.Mem L] [Membership M M] : Prop where
   mem : ∀ a b : M, (@Operator.Mem.mem L _).val ![a, b] ↔ a ∈ b
 
 attribute [simp] Zero.zero One.one Add.add Mul.mul Eq.eq LT.lt LE.le Mem.mem
