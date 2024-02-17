@@ -209,6 +209,9 @@ end LE
 
 lemma le_eqvClosure (c : Class L ξ) (T : Theory L) : c ≤ c.eqvClosure T := by intro _ p hp; exact subset_equivalent_closure hp
 
+lemma eqvClosure_monotone {c c' : Class L ξ} (h : c ≤ c') (T : Theory L) : c.eqvClosure T ≤ c'.eqvClosure T := by
+  rintro _ p ⟨p', hp, H⟩; exact ⟨p', h hp, H⟩
+
 lemma le_of_subtheory (c : Class L ξ) {T T' : Theory L} (h : T ≾ T') : c.eqvClosure T ≤ c.eqvClosure T' := by
   rintro _ p ⟨p', hp', H⟩; exact ⟨p', hp', H.of_subtheory h⟩
 
@@ -263,7 +266,7 @@ def of_le (c c' : Class L ξ) [c.Atom] (h : c ≤ c') : c'.Atom where
   rel := fun r v ↦ h (Atom.rel r v)
   nrel := fun r v ↦ h (Atom.nrel r v)
 
-instance : (c.eqvClosure T).Atom := of_le c _ (le_eqvClosure c T)
+instance eqvClosure_atom : (c.eqvClosure T).Atom := of_le c _ (le_eqvClosure c T)
 
 end Atom
 
@@ -271,7 +274,7 @@ section Not
 
 variable [c.Not]
 
-instance : (c.eqvClosure T).Not := ⟨by rintro _ p ⟨p', hp', H⟩; exact ⟨~p', Not.not hp', H.not⟩⟩
+instance eqvClosure_not : (c.eqvClosure T).Not := ⟨by rintro _ p ⟨p', hp', H⟩; exact ⟨~p', Not.not hp', H.not⟩⟩
 
 end Not
 
@@ -279,7 +282,7 @@ section And
 
 variable [c.And]
 
-instance : (c.eqvClosure T).And := ⟨by rintro _ p q ⟨p', hp', Hp⟩ ⟨q', hq', Hq⟩; exact ⟨p' ⋏ q', And.and hp' hq', Hp.and Hq⟩⟩
+instance eqvClosure_and : (c.eqvClosure T).And := ⟨by rintro _ p q ⟨p', hp', Hp⟩ ⟨q', hq', Hq⟩; exact ⟨p' ⋏ q', And.and hp' hq', Hp.and Hq⟩⟩
 
 end And
 
@@ -287,7 +290,7 @@ section Or
 
 variable [c.Or]
 
-instance : (c.eqvClosure T).Or := ⟨by rintro _ p q ⟨p', hp', Hp⟩ ⟨q', hq', Hq⟩; exact ⟨p' ⋎ q', Or.or hp' hq', Hp.or Hq⟩⟩
+instance eqvClosure_or : (c.eqvClosure T).Or := ⟨by rintro _ p q ⟨p', hp', Hp⟩ ⟨q', hq', Hq⟩; exact ⟨p' ⋎ q', Or.or hp' hq', Hp.or Hq⟩⟩
 
 variable [c.Not]
 
@@ -305,7 +308,7 @@ section BAll
 
 variable [L.LT] [c.BAll]
 
-instance : (c.eqvClosure T).BAll :=
+instance eqvClosure_ball : (c.eqvClosure T).BAll :=
   ⟨by rintro n p t ⟨p', hp', H⟩ ht; exact ⟨∀[“#0 < !!t”] p', BAll.ball hp' ht, Semiformula.Equivalent.ball (by rfl) H⟩⟩
 
 end BAll
@@ -314,7 +317,7 @@ section BEx
 
 variable [L.LT] [c.BEx]
 
-instance : (c.eqvClosure T).BEx :=
+instance eqvClosure_bex : (c.eqvClosure T).BEx :=
   ⟨by rintro n p t ⟨p', hp', H⟩ ht; exact ⟨∃[“#0 < !!t”] p', BEx.bex hp' ht, Semiformula.Equivalent.bex (by rfl) H⟩⟩
 
 end BEx

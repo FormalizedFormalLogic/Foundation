@@ -70,9 +70,64 @@ lemma zero_iff_delta_zero {Γ} {p : Semiformula L μ n} :
 
 end StrictHierarchy
 
+def HClass (L : Language) [L.LT] (ξ : Type*) (Γ : Polarity) (s : ℕ) : Class L ξ where
+  Domain := Hierarchy Γ s
+  rew_closed := fun ω _ hp ↦ hp.rew ω
+
+abbrev HClassIn (ξ : Type*) [DecidableEq ξ] (Γ s) (T : Theory L) := (HClass L ξ Γ s).eqvClosure T
+
+abbrev DeltaZeroIn (ξ : Type*) [DecidableEq ξ] (T : Theory L) := HClassIn ξ Σ 0 T
+
+namespace HClass
+
+variable {L : Language} [L.LT] {ξ : Type*} [DecidableEq ξ]
+
+open Hierarchy
+
+instance not : (HClass L ξ Γ 0).Not := ⟨fun h ↦ by
+  simpa [HClass, zero_iff_delta_zero] using Hierarchy.neg h⟩
+
+instance and : (HClass L ξ Γ s).And := ⟨Hierarchy.and⟩
+
+instance or : (HClass L ξ Γ s).Or := ⟨Hierarchy.or⟩
+
+instance ball : (HClass L ξ Γ s).BAll := ⟨fun hp ht ↦ Hierarchy.ball ht hp⟩
+
+instance bex : (HClass L ξ Γ s).BEx := ⟨fun hp ht ↦ Hierarchy.bex ht hp⟩
+
+lemma accumlative_succ (Γ Γ' s) : HClass L ξ Γ s ≤ HClass L ξ Γ' (s + 1) := by
+  intro _ p hp; exact Hierarchy.accum hp Γ'
+
+lemma openClass_le (Γ s) : openClass L ξ ≤ HClass L ξ Γ s := by
+  intro _ p hp
+  simp [HClass, Set.mem_def, zero_iff_delta_zero]
+  exact Hierarchy.of_open hp
+
+instance atom : (HClass L ξ Γ s : Class L ξ).Atom := Class.of_le (openClass L ξ) _ (openClass_le Γ s)
+
+end HClass
+
+namespace HClassIn
+
+variable [DecidableEq ξ]
+
+instance atom : (HClassIn ξ Γ s T : Class L ξ).Atom := Class.eqvClosure_atom
+
+instance and : (HClassIn ξ Γ s T : Class L ξ).And := Class.eqvClosure_and
+
+instance or : (HClassIn ξ Γ s T : Class L ξ).Or := Class.eqvClosure_or
+
+instance ball : (HClassIn ξ Γ s T : Class L ξ).BAll := Class.eqvClosure_ball
+
+instance bex : (HClassIn ξ Γ s T : Class L ξ).BEx := Class.eqvClosure_bex
+
+instance not : (DeltaZeroIn ξ T : Class L ξ).Not := Class.eqvClosure_not
+
+end HClassIn
+
 def SHClass (L : Language) [L.LT] (ξ : Type*) (Γ : Polarity) (s : ℕ) : Class L ξ where
   Domain := StrictHierarchy Γ s
-  rew_closed := by intro _ _ ω p hp; exact hp.rew ω
+  rew_closed := fun ω _ hp ↦ hp.rew ω
 
 -- notation Γ "ᴴ("s")" => SHClass _ _ Γ s
 
@@ -80,15 +135,10 @@ abbrev SHClassIn (ξ : Type*) [DecidableEq ξ] (Γ s) (T : Theory L) := (SHClass
 
 -- notation Γ "ᴴ("s")[" T "]" => SHClassIn _ Γ s T
 
-abbrev DeltaZeroIn (ξ : Type*) [DecidableEq ξ] (T : Theory L) := (SHClass L ξ Σ 0).eqvClosure T
-
 -- notation "Δ₀[" T "]" => DeltaZeroIn _ T
 
+/-
 variable {ξ : Type*} [DecidableEq ξ]
-
-lemma SHClassIn.eqDeltaZero (T : Theory L) (Γ) : SHClassIn ξ Γ 0 T = DeltaZeroIn ξ T := by
-  simp [SHClassIn, DeltaZeroIn]; congr 1
-  ext p; simp [SHClass, Set.mem_def, StrictHierarchy.zero_iff_delta_zero]
 
 namespace SHClassIn
 
@@ -114,18 +164,22 @@ lemma accumlative (Γ Γ') {s s'} (h : s < s') : SHClassIn ξ Γ s T ≤ SHClass
   · simp [show s + 1 + k.succ = s + 1 + k + 1 from by simp [Nat.add_succ]]
     exact Class.LE.trans ih (accumlative_succ T _ _ _)
 
+/-
 @[simp] lemma delta_zero_le : DeltaZeroIn ξ T ≤ SHClassIn ξ Γ s T := by
   cases s
   · simp [SHClassIn.eqDeltaZero]; rfl
   · rw [←SHClassIn.eqDeltaZero T Γ]; exact accumlative T Γ Γ (by simp)
+-/
 
 lemma openClass_le : openClass L ξ ≤ SHClass L ξ Σ 0 := by
   intro _ p hp
   simp [SHClass, Set.mem_def, zero_iff_delta_zero]
   exact Hierarchy.of_open hp
 
+/-
 lemma openClass_le' : openClass L ξ ≤ SHClassIn ξ Γ s T :=
   Class.LE.trans openClass_le (Class.LE.trans (Class.le_eqvClosure _ _) (delta_zero_le Γ s T))
+-/
 
 instance atom : (SHClassIn ξ Γ s T : Class L ξ).Atom := Class.of_le (openClass L ξ) _ (openClass_le' Γ s T)
 
@@ -177,6 +231,7 @@ instance bex : (DeltaZeroIn ξ T).BEx := ⟨by
     Semiformula.Equivalent.bex (by rfl) H⟩⟩
 
 end DeltaZeroIn
+-/
 
 end
 
