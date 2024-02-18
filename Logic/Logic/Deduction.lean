@@ -224,7 +224,7 @@ def neg_iff' {Γ p q} (d : Bew Γ (p ⟷ q)) : Bew Γ (~p ⟷ ~q) := by
   . apply contra₀';
     apply iff_mp' d
 
-def trans' {Γ p q r} (h₁ : Bew Γ (p ⟶ q)) (h₂ : Bew Γ (q ⟶ r)) : Bew Γ (p ⟶ r) := by
+def imp_trans' {Γ p q r} (h₁ : Bew Γ (p ⟶ q)) (h₂ : Bew Γ (q ⟶ r)) : Bew Γ (p ⟶ r) := by
   apply dtr;
   have : Bew (insert p Γ) p := axm (by simp);
   have : Bew (insert p Γ) q := modus_ponens' (weakening' (by simp) h₁) this;
@@ -264,6 +264,14 @@ def conj_symm (Γ p q) : Bew Γ ((p ⋏ q) ⟶ (q ⋏ p)) := by
   exact conj_symm' (axm (by simp))
 
 def conj_symm_iff (Γ p q) : Bew Γ ((p ⋏ q) ⟷ (q ⋏ p)) := iff_intro (by apply conj_symm) (by apply conj_symm)
+
+def iff_id (Γ p) : Bew Γ (p ⟷ p) := iff_intro (by apply imp_id) (by apply imp_id)
+
+def imp_top {Γ p} (d : Bew Γ (⊤ ⟶ p)) : Bew Γ p := d ⨀ (verum Γ)
+
+def iff_left_top {Γ p} (d : Bew Γ (⊤ ⟷ p)) : Bew Γ p := imp_top (iff_mp' d)
+
+def iff_right_top {Γ p} (d : Bew Γ (p ⟷ ⊤)) : Bew Γ p := imp_top (iff_mpr' d)
 
 end Minimal
 
@@ -387,6 +395,15 @@ lemma dtl_not! {Γ : Set F} {p q : F} : ((insert p Γ) ⊬! q) → (Γ ⊬! (p �
   simp [Undeducible, Deducible];
   intro d;
   exact ⟨dtl d⟩
+
+lemma imp_id! (Γ : Set F) (p : F) : Γ ⊢! (p ⟶ p) := ⟨imp_id Γ p⟩
+
+lemma imp_top! {Γ : Set F} {p : F} (d : Γ ⊢! (⊤ ⟶ p)) : Γ ⊢! p := ⟨imp_top d.some⟩
+
+lemma iff_left_top! {Γ : Set F} {p : F} (d : Γ ⊢! (⊤ ⟷ p)) : Γ ⊢! p := ⟨iff_left_top d.some⟩
+lemma iff_right_top! {Γ : Set F} {p : F} (d : Γ ⊢! (p ⟷ ⊤)) : Γ ⊢! p := ⟨iff_right_top d.some⟩
+
+lemma imp_trans'! {Γ : Set F} {p q r : F} (h₁ : Γ ⊢! (p ⟶ q)) (h₂ : Γ ⊢! (q ⟶ r)) : Γ ⊢! (p ⟶ r) := ⟨imp_trans' h₁.some h₂.some⟩
 
 end Deducible
 
