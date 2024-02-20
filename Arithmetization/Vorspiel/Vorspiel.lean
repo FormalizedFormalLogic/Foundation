@@ -333,13 +333,20 @@ variable [L.LT]
 
 variable [DecidableEq ξ] {ξ₁ : Type*} [DecidableEq ξ₁] {ξ₂ : Type*} [DecidableEq ξ₂]
 
-lemma hClass_sigma_zero_le_hClass {Γ} {s : ℕ} : HClass L ξ Σ 0 ≤ HClass L ξ Γ s := by
-  intro _ p hp; exact Hierarchy.mono (by simpa [Hierarchy.zero_iff_delta_zero] using hp) (zero_le s)
+open Class
+
+lemma hClass_domain (p : Semiformula L ξ n) : (HClass L ξ Γ s).Domain p ↔ Hierarchy Γ s p := by rfl
+
+lemma hClass_zero_le_hClass (Γ s) : HClass L ξ Γ' 0 ≤ HClass L ξ Γ s := by
+  intro _ p hp; exact Hierarchy.mono (by simpa [hClass_domain, Hierarchy.zero_iff_delta_zero] using hp) (zero_le s)
 
 variable (T : Theory L)
 
+lemma zero_le (Γ s) : HClassIn ξ Γ' 0 T ≤ HClassIn ξ Γ s T :=
+  eqvClosure_monotone (hClass_zero_le_hClass Γ s) T
+
 lemma deltaZeroIn_le_hClassIn (Γ s) : DeltaZeroIn ξ T ≤ HClassIn ξ Γ s T :=
-  Class.eqvClosure_monotone hClass_sigma_zero_le_hClass T
+  Class.eqvClosure_monotone (hClass_zero_le_hClass Γ s) T
 
 variable {T}
 

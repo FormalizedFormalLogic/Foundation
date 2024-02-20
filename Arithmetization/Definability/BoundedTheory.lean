@@ -1,4 +1,7 @@
-import Arithmetization.Definability.Definability
+import Arithmetization.Lemmata
+import Arithmetization.Vorspiel.Graph
+import Logic.FirstOrder.Arith.StrictHierarchy
+import Aesop
 
 lemma Matrix.succ_pred {n : ℕ} (P : Fin n.succ → Prop) : (∀ i, P i) ↔ (P 0 ∧ ∀ i : Fin n, P i.succ) :=
   ⟨fun h ↦ ⟨h 0, fun i ↦ h i.succ⟩, fun h ↦ Fin.cases h.1 h.2⟩
@@ -7,24 +10,27 @@ namespace LO.FirstOrder
 
 namespace Arith
 
-notation "Δ₀[" T "]" => DeltaZeroIn _ T
+section
+
+variable {L : Language} [L.Eq] [L.LT] (ξ : Type*) [DecidableEq ξ]
+
+abbrev HClassInWithEq (Γ s) (T : Theory L) := HClassIn ξ Γ s (T + 𝐄𝐪)
+
+abbrev DeltaZeroInWithEq (T : Theory L) := DeltaZeroIn ξ (T + 𝐄𝐪)
+
+notation Γ "ᴴ("s")[" T "]" => HClassInWithEq _ Γ s T
+
+notation "Δ₀[" T "]" => DeltaZeroInWithEq _ T
+
+end
 
 namespace Definability
-
-namespace FormulaHierarchy
-
-variable {L : Language} [L.LT] [Structure L M]
-
-def eval (p : SentenceHierarchy b s L k) (v : Fin k → M) : Prop :=
-  Semiformula.PVal! M v p.val
-
-end FormulaHierarchy
 
 variable {T : Theory ℒₒᵣ}
 
 structure DeltaZeroRelation (T : Theory ℒₒᵣ) (k : ℕ) where
   definition : Semisentence ℒₒᵣ k
-  definition_deltaZero : Δ₀[T + 𝐄𝐪].Domain definition
+  definition_deltaZero : Δ₀[T].Domain definition
 
 namespace DeltaZeroRelation
 
@@ -234,7 +240,7 @@ def atom {k n} (p : DeltaZeroRelation T k) (v : Fin k → Semiterm ℒₒᵣ[T] 
     <| bexClosure (fun i ↦ “#0 < !!(Rew.bShift $ Rew.toF $ polybound (v i)) + 1”)
       <| (Matrix.conj fun i : Fin k ↦ (Rew.embSubsts (#i :> (& ·))).hom (ofTerm $ v i).toFormula) ⋏ Rew.emb.hom p.definition
 
-lemma toFormula_deltaZero (d : Denotation T n) : Δ₀[T + 𝐄𝐪].Domain d.toFormula := by
+lemma toFormula_deltaZero (d : Denotation T n) : Δ₀[T].Domain d.toFormula := by
   induction d <;> simp [Denotation.toFormula]
   case comp p d t IH =>
     exact HClassIn.rew
@@ -242,7 +248,7 @@ lemma toFormula_deltaZero (d : Denotation T n) : Δ₀[T + 𝐄𝐪].Domain d.to
         (Class.And.and (Class.matrix_conj fun j ↦ HClassIn.rew (IH j) _) (HClassIn.rew p.definition_deltaZero _))) _
 
 lemma atom_deltaZero {k n} (p : DeltaZeroRelation T k) (v : Fin k → Semiterm ℒₒᵣ[T] Empty n) :
-    Δ₀[T + 𝐄𝐪].Domain (Denotation.atom p v) := by
+    Δ₀[T].Domain (Denotation.atom p v) := by
   simp [Denotation.atom]
   exact HClassIn.rew (Class.bexClosure (by simp)
     <| Class.And.and (Class.matrix_conj fun _ ↦ HClassIn.rew (toFormula_deltaZero _) _) (HClassIn.rew p.definition_deltaZero _)) _
@@ -325,13 +331,13 @@ instance : Structure.Mul ℒₒᵣ[T] M :=
 
 instance : Structure.Eq ℒₒᵣ[T] M :=
   ⟨by intro a b
-      simp[DeltaZeroRelation.eval, FormulaHierarchy.eval, Semiformula.Operator.val,
+      simp[DeltaZeroRelation.eval, Semiformula.Operator.val,
         Semiformula.Operator.Eq.sentence_eq, Semiformula.eval_rel, Language.Eq.eq]
       simp [DeltaZeroRelation.eq]⟩
 
 instance : Structure.LT ℒₒᵣ[T] M :=
   ⟨by intro a b
-      simp [DeltaZeroRelation.eval, FormulaHierarchy.eval, Semiformula.Operator.val, Semiformula.Operator.LT.sentence_eq, Semiformula.eval_rel, Language.LT.lt]
+      simp [DeltaZeroRelation.eval, Semiformula.Operator.val, Semiformula.Operator.LT.sentence_eq, Semiformula.eval_rel, Language.LT.lt]
       simp [DeltaZeroRelation.lt]⟩
 
 variable [𝐏𝐀⁻.Mod M]
@@ -361,7 +367,7 @@ lemma pval_of_term_to_formula {t : Semiterm ℒₒᵣ[T] Empty n} {y : M} {v} :
 
 lemma pval_atom_iff {k n} (e : Fin n → M) (p : DeltaZeroRelation T k) (v : Fin k → Semiterm ℒₒᵣ[T] Empty n) :
     Semiformula.PVal! M e (Denotation.atom p v) ↔ p.eval fun i => (v i).bVal! M e := by
-  simp [FormulaHierarchy.eval, Denotation.atom, Denotation.toFormula, Model.lt_succ_iff_le]
+  simp [Denotation.atom, Denotation.toFormula, Model.lt_succ_iff_le]
   constructor
   · rintro ⟨w, bw, hw, H⟩
     suffices : w = fun i ↦ (v i).bVal! M e
@@ -384,6 +390,8 @@ abbrev HClassInBL (ξ : Type*) [DecidableEq ξ] (Γ : Polarity) (s : ℕ) (T : T
 
 abbrev DeltaZeroInBL (ξ : Type*) [DecidableEq ξ] (T : Theory ℒₒᵣ) : Class ℒₒᵣ[T] ξ :=
     HClassInBL ξ Σ 0 T
+
+notation Γ "ᴴ'("s")[" T "]" => HClassInBL _ Γ s T
 
 notation "Δ₀'[" T "]" => DeltaZeroInBL _ T
 
@@ -422,18 +430,18 @@ end hierarchy
 variable {T : Theory ℒₒᵣ} [𝐏𝐀⁻ ≾ T]
 
 lemma arithmetize_lt_deltaZero (t u : Semiterm ℒₒᵣ[T] Empty n) :
-    Δ₀[T + 𝐄𝐪].Domain (arithmetize “!!t < !!u”) := by
+    Δ₀[T].Domain (arithmetize “!!t < !!u”) := by
   simp [Semiformula.Operator.operator, Semiformula.Operator.LT.sentence_eq, Rew.rel]
   exact Denotation.atom_deltaZero _ _
 
 lemma arithmetize_le_deltaZero (t u : Semiterm ℒₒᵣ[T] Empty n) :
-    Δ₀[T + 𝐄𝐪].Domain (arithmetize “!!t ≤ !!u”) := by
+    Δ₀[T].Domain (arithmetize “!!t ≤ !!u”) := by
   simp [Semiformula.Operator.operator, Semiformula.Operator.Eq.sentence_eq,
     Semiformula.Operator.LT.sentence_eq, Semiformula.Operator.LE.sentence_eq, Rew.rel]
   exact Class.Or.or (Denotation.atom_deltaZero _ _) (Denotation.atom_deltaZero _ _)
 
 lemma arithmetize_hClassIn_of_hierarchy {p : Semisentence ℒₒᵣ[T] n} (hp : Hierarchy Γ s p) :
-    (HClassIn Empty Γ s (T + 𝐄𝐪)).Domain (arithmetize p) := by
+    Γᴴ(s)[T].Domain (arithmetize p) := by
   induction hp <;> try simp
   case rel p v =>
     exact HClassIn.of_deltaZeroIn (Denotation.atom_deltaZero p v)
@@ -476,8 +484,8 @@ lemma arithmetize_hClassIn_of_hierarchy {p : Semisentence ℒₒᵣ[T] n} (hp : 
   case dummy_pi p _ ih => exact HClassIn.dummy_pi ih
   case dummy_sigma p _ ih => exact HClassIn.dummy_sigma ih
 
-lemma arithmetize_hClassIn {p : Semisentence ℒₒᵣ[T] n} (hp : (HClassInBL Empty Γ s T).Domain p) :
-    (HClassIn Empty Γ s (T + 𝐄𝐪)).Domain (arithmetize p) := by
+lemma arithmetize_hClassIn {p : Semisentence ℒₒᵣ[T] n} (hp : Γᴴ'(s)[T].Domain p) :
+    Γᴴ(s)[T].Domain (arithmetize p) := by
   rcases hp with ⟨p', hp', H⟩
   exact Class.domain_eqvClosure (arithmetize_hClassIn_of_hierarchy hp') (by
     apply oRing_consequence_of
@@ -487,7 +495,27 @@ lemma arithmetize_hClassIn {p : Semisentence ℒₒᵣ[T] n} (hp : (HClassInBL E
     have : M ⊧ₘ (∀ᶠ* ∀* (p' ⟷ p)) := consequence_iff.mp H M (by simp [Theory.add_def, Theory.Mod.modelsTheory])
     simp [models_iff, Empty.eq_elim] at this ⊢; intro e; exact this e)
 
+lemma arithmetize_deltaZero {p : Semisentence ℒₒᵣ[T] n} (hp : Δ₀'[T].Domain p) :
+    Δ₀[T].Domain (arithmetize p) := arithmetize_hClassIn hp
+
 end boundedLanguage
+
+abbrev BSemiformula (T : Theory ℒₒᵣ) (Γ : Polarity) (s : ℕ) (ξ : Type*) [DecidableEq ξ] (n : ℕ) : Type _ :=
+  { p : Semiformula ℒₒᵣ[T] ξ n // Γᴴ'(s)[T].Domain p }
+
+abbrev BSemisentence (T : Theory ℒₒᵣ) (Γ : Polarity) (s : ℕ) (n : ℕ) : Type _ := BSemiformula T Γ s Empty n
+
+abbrev BSemiformulaΔ₀ (T : Theory ℒₒᵣ) (ξ : Type*) [DecidableEq ξ] (n : ℕ) : Type _ := BSemiformula T Σ 0 ξ n
+
+abbrev BSemisentenceΔ₀ (T : Theory ℒₒᵣ) (n : ℕ) : Type _ := BSemiformulaΔ₀ T Empty n
+
+namespace BSemiformula
+
+variable {Γ : Polarity} {s : ℕ} {T : Theory ℒₒᵣ} {ξ : Type*} [DecidableEq ξ] {n : ℕ}
+
+@[simp] lemma HClassInBL_val (p : BSemiformula T Γ s ξ n) : Γᴴ'(s)[T].Domain p.val := p.property
+
+end BSemiformula
 
 end Definability
 
