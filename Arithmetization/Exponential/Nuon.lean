@@ -488,6 +488,10 @@ lemma sq_polyI_hash_polyL_polybounded {A : M} (pos : 0 < A) : ((polyI A) # (poly
 
 def NuonAux (A k n : M) : Prop := SeriesSegment (polyU A) (polyI A) (polyL A) A k n
 
+def ispolydef : Σᴬ[0] 2 :=
+  ⟨“∃[#0 < #2 + 1] (!binarylengthdef [#0, #2] ∧ ∃[#0 < #1 + 1] !sqrtdef [#0, #1] ∧ !bexpdef [#2, #3, #0])”, by simp⟩
+
+/--/
 @[simp] lemma NuonAux.initial (A : M) : NuonAux A 0 0 := SeriesSegment.initial (by simp [polyU])
 
 @[simp] lemma NuonAux.initial_iff (A n : M) : NuonAux A 0 n ↔ n = 0 := ⟨fun h ↦ h.uniq (NuonAux.initial A), by rintro rfl; simp⟩
@@ -528,14 +532,6 @@ lemma NuonAux.succ_iff {A k : M} (hk : k ≤ ‖A‖) : NuonAux A (k + 1) (n + f
     rcases show n' = n from by simpa using (H'.succ hk).uniq H
     exact H'
   · exact (NuonAux.succ · hk)
-
-@[simp] lemma fbit_two_mul_zero_eq_zero (a : M) : fbit (2 * a) 0 = 0 := by
-  rcases zero_le a with (rfl | pos)
-  · simp
-  · have : bexp (2 * a) 0 = 1 := bexp_eq_of_exp (by simp [pos]) (by simp)
-    simp [fbit, this]
-
-@[simp] lemma fbit_two_mul_add_one_zero_eq_one (a : M) : fbit (2 * a + 1) 0 = 1 := by simp [fbit, one_lt_two]
 
 lemma NuonAux.two_mul {k n : M} (hk : k ≤ ‖A‖) : NuonAux A k n → NuonAux (2 * A) (k + 1) n := by
   revert n hk

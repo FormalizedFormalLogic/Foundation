@@ -430,6 +430,14 @@ instance : PolyBounded₂ (fbit : M → M → M) := ⟨ᵀ“1”, λ _ ↦ by s
 @[simp] lemma fbit_mul_two_add_one_mul (a i : M) : fbit (2 * a + 1) (i + 1) = fbit a i := by
   simp [fbit, bexp_two_mul_add_one_succ, div_cancel_left, div_mul]
 
+@[simp] lemma fbit_two_mul_zero_eq_zero (a : M) : fbit (2 * a) 0 = 0 := by
+  rcases zero_le a with (rfl | pos)
+  · simp
+  · have : bexp (2 * a) 0 = 1 := bexp_eq_of_exp (by simp [pos]) (by simp)
+    simp [fbit, this]
+
+@[simp] lemma fbit_two_mul_add_one_zero_eq_one (a : M) : fbit (2 * a + 1) 0 = 1 := by simp [fbit, one_lt_two]
+
 end ISigma₀
 
 section ISigma₁
