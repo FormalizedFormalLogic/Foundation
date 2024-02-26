@@ -15,9 +15,9 @@ scoped notation: max "⸢" a "⸣" => Semiterm.Operator.godelNumber ℒₒᵣ a
 @[simp] lemma godelNumber_encode_eq {α} [Primcodable α] (a : α) :
     (⸢encode a⸣ : Semiterm.Const ℒₒᵣ) = ⸢a⸣ := by simp[Semiterm.Operator.godelNumber]
 
-open Nat.PartArith
+open Nat.ArithPart₁
 
-def codeAux : {k : ℕ} → Nat.PartArith.Code k → Formula ℒₒᵣ (Fin (k + 1))
+def codeAux : {k : ℕ} → Nat.ArithPart₁.Code k → Formula ℒₒᵣ (Fin (k + 1))
   | _, Code.zero _    => “&0 = 0”
   | _, Code.one _     => “&0 = 1”
   | _, Code.add i j   => “&0 = !!&i.succ + !!&j.succ”
@@ -85,7 +85,7 @@ lemma codeAux_sigma_one {k} (c : Nat.ArithPart₁.Code k) : Hierarchy Σ 1 (code
     exact Hierarchy.exClosure (by simp [ihc, ihg])
   case rfind k c ih => simp [ih]
 
-lemma code_sigma_one {k} (c : Nat.ArithPart₁.Code k) : Hierarchy.Sigma 1 (code c) :=
+lemma code_sigma_one {k} (c : Nat.ArithPart₁.Code k) : Hierarchy Σ 1 (code c) :=
   Hierarchy.rew _ (codeAux_sigma_one c)
 
 lemma models_codeAux {c : Code k} {f : Vector ℕ k →. ℕ} (hc : c.eval f) (y : ℕ) (v : Fin k → ℕ) :
@@ -135,8 +135,8 @@ noncomputable def codeOfPartrec {k} (f : Vector ℕ k →. ℕ) : Code k :=
   Classical.epsilon (fun c => ∀ y v, Semiformula.PVal! ℕ (y :> v) (code c) ↔ y ∈ f (Vector.ofFn v))
 
 lemma codeOfPartrec_spec {k} {f : Vector ℕ k →. ℕ} (hf : Nat.Partrec' f) {y : ℕ} {v : Fin k → ℕ} :
-    Subformula.PVal! ℕ (y :> v) (code $ codeOfPartrec f) ↔ y ∈ f (Vector.ofFn v) := by
-  have : ∃ c, ∀ y v, Subformula.PVal! ℕ (y :> v) (code c) ↔ y ∈ f (Vector.ofFn v) := by
+    Semiformula.PVal! ℕ (y :> v) (code $ codeOfPartrec f) ↔ y ∈ f (Vector.ofFn v) := by
+  have : ∃ c, ∀ y v, Semiformula.PVal! ℕ (y :> v) (code c) ↔ y ∈ f (Vector.ofFn v) := by
     rcases Nat.ArithPart₁.exists_code (of_partrec hf) with ⟨c, hc⟩
     exact ⟨c, models_code hc⟩
   exact Classical.epsilon_spec this y v
