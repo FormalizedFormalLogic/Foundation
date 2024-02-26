@@ -9,7 +9,7 @@ variable {L : Language.{u}} {μ : Type v}
 
 def UTerm.encodable : Encodable (UTerm L μ) := Encodable.ofEquiv (WType (Edge L μ)) (equivW L μ)
 
-def Subterm.encodable : Encodable (Subterm L μ n) :=
+def Semiterm.encodable : Encodable (Semiterm L μ n) :=
   letI : Encodable (UTerm L μ) := UTerm.encodable
   Encodable.ofEquiv { t : UTerm L μ // t.bv ≤ n } UTerm.subtEquiv
 
@@ -17,7 +17,7 @@ def UFormula.encodable : Encodable (UFormula L μ) :=
   letI : Encodable (UTerm L μ) := UTerm.encodable
   Encodable.ofEquiv (WType (UFormula.Edge L μ)) (equivW L μ)
 
-def Subformula.encodable : Encodable (Subformula L μ n) :=
+def Semiformula.encodable : Encodable (Semiformula L μ n) :=
   letI : Encodable (UFormula L μ) := UFormula.encodable
   Encodable.ofEquiv { p : UFormula L μ // p.bv ≤ n } UFormula.subfEquiv
 

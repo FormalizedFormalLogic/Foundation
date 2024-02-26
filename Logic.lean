@@ -15,15 +15,22 @@ import Logic.AutoProver.Prover
 -- Propositional
 
 import Logic.Propositional.Basic.Formula
+import Logic.Propositional.Basic.Calculus
+import Logic.Propositional.Basic.Semantics
+import Logic.Propositional.Basic.Completeness
+import Logic.Propositional.Basic
 
 -- FirstOrder
 
-import Logic.FirstOrder.Basic.Language
-import Logic.FirstOrder.Basic.Term
-import Logic.FirstOrder.Basic.Formula
-import Logic.FirstOrder.Basic.Elab
-import Logic.FirstOrder.Basic.Semantics
+import Logic.FirstOrder.Basic.Syntax.Language
+import Logic.FirstOrder.Basic.Syntax.Term
+import Logic.FirstOrder.Basic.Syntax.Formula
+import Logic.FirstOrder.Basic.Syntax.Rew
+import Logic.FirstOrder.Basic.Semantics.Semantics
+import Logic.FirstOrder.Basic.Semantics.Elementary
 import Logic.FirstOrder.Basic.Calculus
+import Logic.FirstOrder.Basic.Operator
+import Logic.FirstOrder.Basic.Elab
 import Logic.FirstOrder.Basic.Eq
 import Logic.FirstOrder.Basic.Soundness
 
@@ -42,12 +49,21 @@ import Logic.FirstOrder.Completeness.SubLanguage
 import Logic.FirstOrder.Completeness.SearchTree
 import Logic.FirstOrder.Completeness.Completeness
 
+import Logic.FirstOrder.Class.Init
+import Logic.FirstOrder.Class.Class
+
 import Logic.FirstOrder.Order.Le
 
 import Logic.FirstOrder.Arith.Hierarchy
+import Logic.FirstOrder.Arith.StrictHierarchy
 import Logic.FirstOrder.Arith.Theory
 import Logic.FirstOrder.Arith.Model
+import Logic.FirstOrder.Arith.Nonstandard
 import Logic.FirstOrder.Arith.PAminus
 
 import Logic.FirstOrder.Incompleteness.FirstIncompleteness
 import Logic.FirstOrder.Incompleteness.SelfReference
+
+-- Modal Logic
+
+import Logic.Modal.Normal

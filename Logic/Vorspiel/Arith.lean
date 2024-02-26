@@ -376,7 +376,7 @@ lemma dvd (i j : Fin n) : Arith₁ (fun v => isDvdNat (v.get i) (v.get j)) := by
       refine ⟨k,
         ⟨by symm; simp; left; simp[hk, mul_comm],
          by intro m hm; symm; simp[mul_comm m, Ne.symm (hkm m hm), le_of_lt (lt_of_lt_of_le hm hkvj)]⟩,
-        by simp[isLeNat]; exact not_lt.mpr hkvj⟩
+        by simp[isLeNat, hkvj]⟩
     · exact ⟨v.get j + 1, ⟨by symm; simp, by
         intro m hm; symm; simp[lt_succ.mp hm]; intro A
         have : v.get i ∣ v.get j := by rw[←A]; exact Nat.dvd_mul_left (Vector.get v i) m
@@ -392,11 +392,11 @@ lemma rem (i j : Fin n) : Arith₁ (fun v => v.get i % v.get j) := by
     have hmvi : m < v.get i := lt_of_lt_of_le hm <| Nat.mod_le (v.get i) (v.get j)
     have hsub : v.get j ∣ v.get i % v.get j - m := by
       have : v.get i - m - (v.get i - v.get i % v.get j) = v.get i % v.get j - m := by
-        rw[Nat.sub_eq_iff_eq_add (Nat.sub_le_sub_left _ (le_of_lt hm)), Nat.sub_eq_iff_eq_add (le_of_lt hmvi),
+        rw[Nat.sub_eq_iff_eq_add (Nat.sub_le_sub_left (le_of_lt hm) _), Nat.sub_eq_iff_eq_add (le_of_lt hmvi),
           ←Nat.sub_add_comm (le_of_lt hm), Nat.add_sub_of_le (Nat.mod_le (v.get i) (v.get j)),
           Nat.sub_add_cancel (le_of_lt hmvi)]
       rw[←this]
-      exact Nat.dvd_sub (Nat.sub_le_sub_left _ (le_of_lt hm)) A (@Nat.dvd_sub_mod (v.get j) (v.get i))
+      exact Nat.dvd_sub (Nat.sub_le_sub_left (le_of_lt hm) _) A (@Nat.dvd_sub_mod (v.get j) (v.get i))
     have hpos : 0 < v.get i % v.get j - m := Nat.lt_sub_of_add_lt (by simpa using hm)
     have : v.get i % v.get j - m < v.get j := by
       have : v.get i % v.get j < v.get j :=
@@ -448,7 +448,7 @@ lemma beta_unbeta_recSequence_zero (f : Vector ℕ n → ℕ) (g : Vector ℕ (n
 lemma beta_unbeta_recSequence_succ (f : Vector ℕ n → ℕ) (g : Vector ℕ (n + 2) → ℕ) (z : ℕ) (v : Vector ℕ n)
   {m : ℕ} (hm : m < z) :
     Nat.beta (unbeta (recSequence f g z v)) (m + 1) = g (m ::ᵥ Nat.beta (unbeta (recSequence f g z v)) m ::ᵥ v) := by
-  rw[beta_unbeta_recSequence_eq f g z v m (Nat.lt_add_right m z 1 hm),
+  rw[beta_unbeta_recSequence_eq f g z v m (Nat.lt_add_right 1 hm),
     beta_unbeta_recSequence_eq f g z v (m + 1) (Nat.add_lt_add_right hm 1)]
   simp
 

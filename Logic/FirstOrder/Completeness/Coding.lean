@@ -5,43 +5,46 @@ namespace LO
 
 namespace FirstOrder
 
-open Subformula
+open Semiformula
 variable {L : Language.{u}}
   [∀ k, DecidableEq (L.Func k)] [∀ k, DecidableEq (L.Rel k)]
   [∀ k, Encodable (L.Func k)] [∀ k, Encodable (L.Rel k)]
 
-def newVar (Γ : Sequent L) : ℕ := Γ.sup Subformula.upper
+def newVar (Γ : Sequent L) : ℕ := (Γ.map Semiformula.upper).foldr max 0
 
 lemma not_fvar?_newVar {p : SyntacticFormula L} {Γ : Sequent L} (h : p ∈ Γ) : ¬fvar? p (newVar Γ) :=
-  not_fvar?_of_lt_upper p (by simpa[newVar] using Finset.le_sup h)
+  not_fvar?_of_lt_upper p (by simpa[newVar] using List.le_max_of_le (List.mem_map_of_mem _ h) (by simp))
 
-namespace DerivationWA
+namespace System
 
-open Subformula
+open Semiformula
 variable {P : SyntacticFormula L → Prop} {T : Theory L} {Δ : Sequent L}
 
-protected def all_nvar {p} (h : ∀' p ∈ Δ)
-  (b : T ⊢ᵀ (insert ([→ &(newVar Δ)].hom p) Δ)) : T ⊢ᵀ Δ where
-  leftHand := b.leftHand
-  hleftHand := b.hleftHand
-  derivation :=
-    let d₁ : ⊢ᵀ (insert ([→ &(newVar Δ)].hom p) (Δ ∪ b.leftHand.image Rew.emb.hom)) := by simpa using b.derivation
-    let d₂ : ⊢ᵀ insert (∀' p) (Δ ∪ b.leftHand.image Rew.emb.hom) :=
-      d₁.genelalizeByNewver₀ (by simpa[fvar?] using not_fvar?_newVar h)
-        (by simp; rintro q (hq | ⟨σ, _, rfl⟩); { exact not_fvar?_newVar hq }; { simp[fvar?] })
-    d₂.cast (Finset.insert_eq_of_mem $ by simp[h])
+def allNvar {p} (h : ∀' p ∈ Δ) :
+    T ⊢'' p/[&(newVar Δ)] :: Δ → T ⊢'' Δ := fun b ↦
+  let b : T ⊢'' (∀' p) :: Δ :=
+    genelalizeByNewver (by simpa[fvar?] using not_fvar?_newVar h) (fun _ ↦ not_fvar?_newVar) b
+  Gentzen.Disjconseq.wk b (by simp[h])
 
-end DerivationWA
+protected def id {σ} (hσ : σ ∈ T) :
+    T ⊢'' ~Rew.emb.hom σ :: Δ → T ⊢'' Δ := fun b ↦ by
+  have := Gentzen.negLeft b.derivation
+  exact Gentzen.toDisjconseq this
+    (by simp only [List.mem_cons, DeMorgan.neg]; rintro p (rfl | hp)
+        · exact Set.mem_image_of_mem _ hσ
+        · exact b.antecedent_ss p hp )
 
-namespace DerivationWA
+end System
+
+namespace System
 
 inductive Code (L : Language.{u})
   | axL : {k : ℕ} → (r : L.Rel k) → (v : Fin k → SyntacticTerm L) → Code L
   | verum : Code L
   | and : SyntacticFormula L → SyntacticFormula L → Code L
   | or : SyntacticFormula L → SyntacticFormula L → Code L
-  | all : SyntacticSubformula L 1 → Code L
-  | ex : SyntacticSubformula L 1 → SyntacticTerm L → Code L
+  | all : SyntacticSemiformula L 1 → Code L
+  | ex : SyntacticSemiformula L 1 → SyntacticTerm L → Code L
   | id : Sentence L → Code L
 
 def Code.equiv (L : Language.{u}) :
@@ -50,8 +53,8 @@ def Code.equiv (L : Language.{u}) :
     Unit ⊕
     (SyntacticFormula L × SyntacticFormula L) ⊕
     (SyntacticFormula L × SyntacticFormula L) ⊕
-    (SyntacticSubformula L 1) ⊕
-    (SyntacticSubformula L 1 × SyntacticTerm L) ⊕
+    (SyntacticSemiformula L 1) ⊕
+    (SyntacticSemiformula L 1 × SyntacticTerm L) ⊕
     (Sentence L) where
   toFun := fun c =>
     match c with
@@ -75,10 +78,10 @@ def Code.equiv (L : Language.{u}) :
   right_inv := fun x => by
     rcases x with (⟨_, _, _⟩ | ⟨⟩ | ⟨_, _⟩ | ⟨_, _⟩ | _ | ⟨_, _⟩ | _) <;> simp
 
-attribute [local instance] Subterm.encodable Subformula.encodable in
+attribute [local instance] Semiterm.encodable Semiformula.encodable in
 instance : Encodable (Code L) := Encodable.ofEquiv _ (Code.equiv L)
 
-end DerivationWA
+end System
 
 end FirstOrder
 

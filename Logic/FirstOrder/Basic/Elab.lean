@@ -1,12 +1,12 @@
-import Logic.FirstOrder.Basic.Term
-import Logic.FirstOrder.Basic.Formula
+import Logic.FirstOrder.Basic.Operator
+
 open Lean PrettyPrinter Delaborator SubExpr
 
 namespace LO
 
 namespace FirstOrder
 
-namespace Subterm
+namespace Semiterm
 
 declare_syntax_cat foterm
 syntax:max "#" term:max : foterm
@@ -19,6 +19,7 @@ syntax:70 "ᵀ⟨" term "⟩(" foterm,* ")" : foterm
 syntax:50 foterm:50 " + " foterm:51 : foterm
 syntax:60 foterm:60 " * " foterm:61 : foterm
 syntax:65 foterm:65 " ^ " foterm:66 : foterm
+syntax foterm " ^' " num  : foterm
 syntax:67 "exp " foterm:68 : foterm
 syntax:75 "⟨" foterm ", " foterm "⟩" : foterm
 
@@ -38,13 +39,14 @@ macro_rules
   | `(ᵀ“ ⋆ ”)                                      => `(Operator.Star.star.const)
   | `(ᵀ“ $name:ident ”)                            => `(& $(quote name.getId.getString!))
   | `(ᵀ“ !! $t:term ”)                             => `($t)
-  | `(ᵀ“ $n:num ”)                                 => `(Subterm.Operator.const (Operator.numeral _ $n))
+  | `(ᵀ“ $n:num ”)                                 => `(Semiterm.Operator.const (Operator.numeral _ $n))
   | `(ᵀ“ ᵀ⟨ $d:term ⟩( $t:foterm,* ) ”)            => do
     let v ← t.getElems.foldrM (β := Lean.TSyntax _) (init := ← `(![])) (fun a s => `(ᵀ“$a” :> $s))
     `(Operator.operator $d $v)
   | `(ᵀ“ $t:foterm + $u:foterm ”)                  => `(Operator.Add.add.operator ![ᵀ“$t”, ᵀ“$u”])
   | `(ᵀ“ $t:foterm * $u:foterm ”)                  => `(Operator.Mul.mul.operator ![ᵀ“$t”, ᵀ“$u”])
   | `(ᵀ“ $t:foterm ^ $u:foterm ”)                  => `(Operator.Pow.pow.operator ![ᵀ“$t”, ᵀ“$u”])
+  | `(ᵀ“ $t:foterm ^' $n:num ”)                    => `((Operator.npow _ $n).operator ![ᵀ“$t”])
   | `(ᵀ“ exp $t:foterm ”)                          => `(Operator.Exp.exp.operator ![ᵀ“$t”])
   | `(ᵀ“ ⟨ $t:foterm, $u:foterm ⟩ ”)               => `(Operator.Pairing.pair.operator ![ᵀ“$t”, ᵀ“$u”])
   | `(ᵀ“ ᵀ⇑$t:foterm ”)                           => `(Rew.shift ᵀ“$t”)
@@ -56,10 +58,10 @@ macro_rules
   | `(ᵀ“ ᵀᵇ $t:foterm ”)                           => `(Rew.fix ᵀ“$t”)
   | `(ᵀ“ ( $x ) ”)                                 => `(ᵀ“$x”)
 
-#check (ᵀ“ ᵀ⟨Operator.Add.add⟩(&2 + &0, ᵀ⟨Operator.Zero.zero⟩())” : Subterm Language.oRing ℕ 8)
-#check (ᵀ“ ᵀ⟨Operator.Add.add⟩(&2 + &0, ᵀ⟨Operator.Zero.zero⟩())” : Subterm Language.oRing ℕ 8)
-#check ᵀ“ᵀ⇑(⋆ * #3 + 9)”
-#check Subterm.func Language.Mul.mul (ᵀ“1” :> ᵀ“3” :> Matrix.vecEmpty)
+#check (ᵀ“ ᵀ⟨Operator.Add.add⟩(&2 + &0, ᵀ⟨Operator.Zero.zero⟩())” : Semiterm Language.oRing ℕ 8)
+#check (ᵀ“ ᵀ⟨Operator.Add.add⟩(&2 + &0, ᵀ⟨Operator.Zero.zero⟩())” : Semiterm Language.oRing ℕ 8)
+#check (ᵀ“#3 ^' 2” : Semiterm Language.oRing ℕ 8)
+#check Semiterm.func Language.Mul.mul (ᵀ“1” :> ᵀ“3” :> Matrix.vecEmpty)
 
 section delab
 
@@ -67,7 +69,7 @@ instance : Coe NumLit (TSyntax `foterm) where
   coe s := ⟨s.raw⟩
 
 /-
-@[app_unexpander Subterm.fvar]
+@[app_unexpander Semiterm.fvar]
 def unexpsnderFver : Unexpander
   | `($_ $name:str) => `($name)
   | _ => throw ()
@@ -103,7 +105,7 @@ def unexpandShift : Unexpander
   | `($_ [→ ᵀ“$t₁”, ᵀ“$t₂”, ᵀ“$t₃”] ᵀ“$t”) => `(ᵀ“ $t ᵀ[$t₁, $t₂, $t₃] ”)
   | _           => throw ()
 
-@[app_unexpander Subterm.Operator.operator]
+@[app_unexpander Semiterm.Operator.operator]
 def unexpandFuncArith : Unexpander
   | `($_ op(+) ![ᵀ“$t:foterm”, ᵀ“$u:foterm”]) => `(ᵀ“ ($t + $u) ”)
   | `($_ op(+) ![ᵀ“$t:foterm”, #$x:term     ]) => `(ᵀ“ ($t + #$x) ”)
@@ -141,19 +143,19 @@ def unexpandFuncArith : Unexpander
 
   | _                                             => throw ()
 
---#check Operator.numeral Language.oRing 99
---#check (ᵀ“1 + 8” : Subterm Language.oRing ℕ 8)
---#check (Subterm.func Language.Mul.mul (ᵀ“1” :> ᵀ“3” :> Matrix.vecEmpty) : Subterm Language.oRing ℕ 8)
---#check [→ &0, &5] ᵀ“3 * #3 + 9”
---#check Rew.shift ᵀ“(3 * #3 + 9)”
---#check ᵀ“(3 * #3 * x + y + z)”
+#check Operator.numeral Language.oRing 99
+#check (ᵀ“1 + 8” : Semiterm Language.oRing ℕ 8)
+#check (Semiterm.func Language.Mul.mul (ᵀ“1” :> ᵀ“3” :> Matrix.vecEmpty) : Semiterm Language.oRing ℕ 8)
+#check [→ &0, &5] ᵀ“3 * #3 + 9”
+#check Rew.shift ᵀ“(3 * #3 + 9)”
+#check ᵀ“(3 * #3 * x + y + z)”
 
 end delab
 
-end Subterm
+end Semiterm
 
 
-namespace Subformula
+namespace Semiformula
 
 declare_syntax_cat foformula
 syntax "⊤" : foformula
@@ -174,6 +176,7 @@ syntax:25 "∀* " foformula:24 : foformula
 syntax:max "∃[" foformula "] " foformula:35 : foformula
 
 syntax foformula "[" foterm,* "]" : foformula
+syntax foformula ".[" foterm,* "]" : foformula
 syntax:max "⇑" foformula:10 : foformula
 
 syntax "(" foformula ")" : foformula
@@ -203,6 +206,9 @@ macro_rules
   | `(“ $p:foformula [ $t:foterm,* ] ”)            => do
     let v ← t.getElems.foldrM (β := Lean.TSyntax _) (init := ← `(![])) (fun a s => `(ᵀ“$a” :> $s))
     `((Rew.substs $v).hom “$p”)
+  | `(“ $p:foformula .[ $t:foterm,* ] ”) => do
+    let v ← t.getElems.foldrM (β := Lean.TSyntax _) (init := ← `(![])) (fun a s => `(ᵀ“$a” :> $s))
+    `((Rew.embSubsts $v).hom “$p”)
   | `(“ ⇑$p:foformula ”)                         => `(Rew.shift.hom “$p”)
   | `(“ ( $x ) ”)                                  => `(“$x”)
 
@@ -233,7 +239,7 @@ def unexpsnderEq : Unexpander
 def unexpsnderLe : Unexpander
   | `($_) => `(op(<))
 
-@[app_unexpander Subformula.rel]
+@[app_unexpander Semiformula.rel]
 def unexpandFunc : Unexpander
   | `($_ $c ![])                 => `(“ ⟨$c⟩() ”)
   | `($_ $f ![ᵀ“ $t ”])          => `(“ ⟨$f⟩($t) ”)
@@ -331,7 +337,7 @@ def unexpandShift : Unexpander
   | `($_ “$p:foformula”) => `(“ ⇑ $p ”)
   | _                     => throw ()
 
-@[app_unexpander Subformula.Operator.operator]
+@[app_unexpander Semiformula.Operator.operator]
 def unexpandOpArith : Unexpander
   | `($_ op(=) ![ᵀ“$t:foterm”,  ᵀ“$u:foterm”]) => `(“ $t:foterm = $u   ”)
   | `($_ op(=) ![ᵀ“$t:foterm”,  #$y:term    ]) => `(“ $t:foterm = #$y  ”)
@@ -378,7 +384,7 @@ def unexpandOpArith : Unexpander
 
 end delab
 
-end Subformula
+end Semiformula
 
 end FirstOrder
 

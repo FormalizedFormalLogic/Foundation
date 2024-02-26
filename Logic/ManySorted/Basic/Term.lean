@@ -51,28 +51,28 @@ namespace LO
 
 namespace ManySorted
 
-inductive Subterm {S : Type w} : (s : S) → (L : Language.{w, u} S) → (μ : S → Type v) → (S → ℕ) → Type _
-  | bvar {n} (sort : S) : Fin (n sort) → Subterm sort L μ n
-  | fvar {n} (sort : S) : μ sort → Subterm sort L μ n
+inductive Semiterm {S : Type w} : (s : S) → (L : Language.{w, u} S) → (μ : S → Type v) → (S → ℕ) → Type _
+  | bvar {n} (sort : S) : Fin (n sort) → Semiterm sort L μ n
+  | fvar {n} (sort : S) : μ sort → Semiterm sort L μ n
   | func {n} {sort : S} {arity : S → ℕ} :
-    L.Func sort arity → ((s : S) → Fin (arity s) → Subterm s L μ n) → Subterm sort L μ n
+    L.Func sort arity → ((s : S) → Fin (arity s) → Semiterm s L μ n) → Semiterm sort L μ n
 
-scoped notation:max "#" x "∷" s:max => Subterm.bvar s x
-scoped notation:max "&" x "∷" s:max => Subterm.fvar s x
-scoped prefix:max "#"  => Subterm.bvar _
-scoped prefix:max "&"  => Subterm.fvar _
+scoped notation:max "#" x "∷" s:max => Semiterm.bvar s x
+scoped notation:max "&" x "∷" s:max => Semiterm.fvar s x
+scoped prefix:max "#"  => Semiterm.bvar _
+scoped prefix:max "&"  => Semiterm.fvar _
 
-abbrev Term {S : Type w} (s : S) (L : Language.{w, u} S) (μ : S → Type v) := Subterm s L μ 0
+abbrev Term {S : Type w} (s : S) (L : Language.{w, u} S) (μ : S → Type v) := Semiterm s L μ 0
 
-abbrev SyntacticSubterm {S : Type w} (s : S) (L : Language.{w, u} S) (n : ℕ) := Subterm s L (fun _ => ℕ) n
+abbrev SyntacticSemiterm {S : Type w} (s : S) (L : Language.{w, u} S) (n : ℕ) := Semiterm s L (fun _ => ℕ) n
 
-abbrev SyntacticTerm {S : Type w} (s : S) (L : Language.{w, u} S) := Subterm s L (fun _ => ℕ) 0
+abbrev SyntacticTerm {S : Type w} (s : S) (L : Language.{w, u} S) := Semiterm s L (fun _ => ℕ) 0
 
-namespace Subterm
+namespace Semiterm
 
 variable {S : Type w} {L : Language.{w, u} S} {μ : S → Type v}
 
-def cast {n n' : S → ℕ} (t : Subterm s L μ n) (h : n = n')  : Subterm s L μ n' := h ▸ t
+def cast {n n' : S → ℕ} (t : Semiterm s L μ n) (h : n = n')  : Semiterm s L μ n' := h ▸ t
 
 section Decidable
 
@@ -80,15 +80,15 @@ variable
   [(sort : S) → (arity : S → ℕ) → DecidableEq (L.Func sort arity)]
   [Fintype S] [DecidableEq S] [(s : S) → DecidableEq (μ s)]
 
-def hasDecEq : (s : S) → (t u : Subterm s L μ n) → Decidable (t = u)
+def hasDecEq : (s : S) → (t u : Semiterm s L μ n) → Decidable (t = u)
   | _, #x∷_,                     #y∷_                     => by simp; exact decEq x y
-  | _, #x∷_,                     &y∷_                     => isFalse Subterm.noConfusion
-  | _, #x∷_,                     func f v                 => isFalse Subterm.noConfusion
-  | _, &x∷_,                     #y∷_                     => isFalse Subterm.noConfusion
+  | _, #x∷_,                     &y∷_                     => isFalse Semiterm.noConfusion
+  | _, #x∷_,                     func f v                 => isFalse Semiterm.noConfusion
+  | _, &x∷_,                     #y∷_                     => isFalse Semiterm.noConfusion
   | _, &x∷_,                     &y∷_                     => by simp; exact decEq x y
-  | _, &x∷_,                     func f v                 => isFalse Subterm.noConfusion
-  | _, func f v,                 #y∷_                     => isFalse Subterm.noConfusion
-  | _, func f v,                 &y∷_                     => isFalse Subterm.noConfusion
+  | _, &x∷_,                     func f v                 => isFalse Semiterm.noConfusion
+  | _, func f v,                 #y∷_                     => isFalse Semiterm.noConfusion
+  | _, func f v,                 &y∷_                     => isFalse Semiterm.noConfusion
   | s, @func _ _ _ _ _ a₁ f₁ v₁, @func _ _ _ _ _ a₂ f₂ v₂ => by
       by_cases ea : a₁ = a₂
       · rcases ea with rfl
@@ -100,35 +100,35 @@ def hasDecEq : (s : S) → (t u : Subterm s L μ n) → Decidable (t = u)
         · exact isFalse (by simp[ef])
       · exact isFalse (by simp[ea])
 
-instance (s : S) : DecidableEq (Subterm s L μ n) := hasDecEq s
+instance (s : S) : DecidableEq (Semiterm s L μ n) := hasDecEq s
 
 end Decidable
 
-end Subterm
+end Semiterm
 
 structure Rew {S : Type w} (L : Language.{w,u} S) (μ₁ : S → Type ν₁) (n₁ : S → ℕ) (μ₂ : S → Type ν₂) (n₂ : S → ℕ) where
-  toFun : (s : S) → Subterm s L μ₁ n₁ → Subterm s L μ₂ n₂
-  func' : ∀ {s : S} {arity : S → ℕ} (f : L.Func s arity) (v : (s : S) → Fin (arity s) → Subterm s L μ₁ n₁),
-    toFun s (Subterm.func f v) = Subterm.func f (fun s i => toFun s (v s i))
+  toFun : (s : S) → Semiterm s L μ₁ n₁ → Semiterm s L μ₂ n₂
+  func' : ∀ {s : S} {arity : S → ℕ} (f : L.Func s arity) (v : (s : S) → Fin (arity s) → Semiterm s L μ₁ n₁),
+    toFun s (Semiterm.func f v) = Semiterm.func f (fun s i => toFun s (v s i))
 
 abbrev SyntacticRew (L : Language.{w, u} S) (n₁ n₂ : S → ℕ) := Rew L (fun _ => ℕ) n₁ (fun _ => ℕ) n₂
 
 namespace Rew
 
-open Subterm
+open Semiterm
 variable {S : Type w} [DecidableEq S] {L : Language.{w, u} S}
 {μ : S → Type v} {μ₁ : S → Type v₁} {μ₂ : S → Type v₂}
 {n n₁ n₂ : S → ℕ}
 
-def trm (ω : Rew L μ₁ n₁ μ₂ n₂) {s : S} : Subterm s L μ₁ n₁ → Subterm s L μ₂ n₂ := ω.toFun s
+def trm (ω : Rew L μ₁ n₁ μ₂ n₂) {s : S} : Semiterm s L μ₁ n₁ → Semiterm s L μ₂ n₂ := ω.toFun s
 
 section
 variable {ω : Rew L μ₁ n₁ μ₂ n₂}
 
-protected lemma func {s} {k : S → ℕ} (f : L.Func s k) (v : (s : S) → (i : Fin (k s)) → Subterm s L μ₁ n₁) :
+protected lemma func {s} {k : S → ℕ} (f : L.Func s k) (v : (s : S) → (i : Fin (k s)) → Semiterm s L μ₁ n₁) :
     ω.trm (func f v) = func f (fun s i => ω.trm (v s i)) := ω.func' f v
 
-lemma ext' {ω₁ ω₂ : Rew L μ₁ n₁ μ₂ n₂} (h : ∀ s, ∀ t : Subterm s L μ₁ n₁, ω₁.trm t = ω₂.trm t) : ω₁ = ω₂ := by
+lemma ext' {ω₁ ω₂ : Rew L μ₁ n₁ μ₂ n₂} (h : ∀ s, ∀ t : Semiterm s L μ₁ n₁, ω₁.trm t = ω₂.trm t) : ω₁ = ω₂ := by
   rcases ω₁; rcases ω₂; simp
   funext s t; simpa using h s t
 
@@ -145,7 +145,7 @@ protected def id : Rew L μ n μ n where
   toFun := fun _ => id
   func' := fun _ _ => rfl
 
-@[simp] lemma id_app (t : Subterm s L μ n) : Rew.id.trm t = t := rfl
+@[simp] lemma id_app (t : Semiterm s L μ n) : Rew.id.trm t = t := rfl
 
 protected def comp (ω₂ : Rew L μ₂ n₂ μ₃ n₃) (ω₁ : Rew L μ₁ n₁ μ₂ n₂) : Rew L μ₁ n₁ μ₃ n₃ where
   toFun := fun _ t => ω₂.trm (ω₁.trm t)
@@ -153,7 +153,7 @@ protected def comp (ω₂ : Rew L μ₂ n₂ μ₃ n₃) (ω₁ : Rew L μ₁ n�
 
 infixr:70 " ⊚ " => Rew.comp
 
-lemma comp_app (ω₂ : Rew L μ₂ n₂ μ₃ n₃) (ω₁ : Rew L μ₁ n₁ μ₂ n₂) {s} (t : Subterm s L μ₁ n₁) :
+lemma comp_app (ω₂ : Rew L μ₂ n₂ μ₃ n₃) (ω₁ : Rew L μ₁ n₁ μ₂ n₂) {s} (t : Semiterm s L μ₁ n₁) :
     (ω₂ ⊚ ω₁).trm t = ω₂.trm (ω₁.trm t) := rfl
 
 lemma comp_assoc (ω₃ : Rew L μ₃ n₃ μ₄ n₄) (ω₂ : Rew L μ₂ n₂ μ₃ n₃) (ω₁ : Rew L μ₁ n₁ μ₂ n₂) :
@@ -163,15 +163,15 @@ lemma comp_assoc (ω₃ : Rew L μ₃ n₃ μ₄ n₄) (ω₂ : Rew L μ₂ n₂
 
 @[simp] lemma comp_id (ω : Rew L μ₁ n₁ μ₂ n₂) : ω ⊚ Rew.id = ω := by ext <;> simp[comp_app]
 
-def bindAux (b : (s : S) → Fin (n₁ s) → Subterm s L μ₂ n₂) (e : (s : S) → μ₁ s → Subterm s L μ₂ n₂) :
-    (s : S) → Subterm s L μ₁ n₁ → Subterm s L μ₂ n₂
+def bindAux (b : (s : S) → Fin (n₁ s) → Semiterm s L μ₂ n₂) (e : (s : S) → μ₁ s → Semiterm s L μ₂ n₂) :
+    (s : S) → Semiterm s L μ₁ n₁ → Semiterm s L μ₂ n₂
   | _, #x∷s     => b s x
   | _, &x∷s     => e s x
   | _, func f v => func f (fun s i => bindAux b e s (v s i))
 
 def bind
-    (b : (s : S) → Fin (n₁ s) → Subterm s L μ₂ n₂)
-    (e : (s : S) → μ₁ s → Subterm s L μ₂ n₂) : Rew L μ₁ n₁ μ₂ n₂ where
+    (b : (s : S) → Fin (n₁ s) → Semiterm s L μ₂ n₂)
+    (e : (s : S) → μ₁ s → Semiterm s L μ₂ n₂) : Rew L μ₁ n₁ μ₂ n₂ where
   toFun := bindAux b e
   func' := fun _ _ => rfl
 
@@ -182,7 +182,7 @@ def bShift (s : S) : Rew L μ n μ (Nat.indexedSucc s n) :=
   map (Fin.condSucc s) (fun _ => id)
 
 lemma eq_id_of_eq {ω : Rew L μ n μ n} (hb : ∀ s x, ω.trm #x∷s = #x∷s) (he : ∀ s x, ω.trm &x∷s = &x∷s)
-    {s} (t : Subterm s L μ n) : ω.trm t = t := by
+    {s} (t : Semiterm s L μ n) : ω.trm t = t := by
   have : ω = Rew.id := by ext <;> simp[*]
   simp[this]
 

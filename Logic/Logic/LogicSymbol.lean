@@ -1,8 +1,39 @@
 import Logic.Vorspiel.Vorspiel
 
-universe u v
+/-!
+# Logic Symbols
+
+This file defines structure that has logical connectives $\top, \bot, \land, \lor, \to, \lnot$
+and their homomorphisms.
+
+## Main Definitions
+* `LO.LogicSymbol` is defined so that `LO.LogicSymbol F` is a type that has logical connectives $\top, \bot, \land, \lor, \to, \lnot$.
+* `LO.LogicSymbol.Hom` is defined so that `f : F →L G` is a homomorphism from `F` to `G`, i.e.,
+a function that preserves logical connectives.
+
+-/
 
 namespace LO
+
+
+inductive Polarity := | sigma | pi
+
+namespace Polarity
+
+notation "Σ" => sigma
+notation "Π" => pi
+
+def alt : Polarity → Polarity
+  | Σ => Π
+  | Π => Σ
+
+@[simp] lemma alt_sigma : Σ.alt = Π := rfl
+
+@[simp] lemma alt_pi : Π.alt = Σ := rfl
+
+@[simp] lemma alt_alt (b : Polarity) : b.alt.alt = b := by rcases b <;> simp
+
+end Polarity
 
 section logicNotation
 
@@ -73,9 +104,11 @@ def univClosure : {n : ℕ} → α n → α 0
   | 0,     a => a
   | _ + 1, a => univClosure (∀' a)
 
-@[simp] lemma univClosure_zero (a : α 0) : univClosure a = a := rfl
+prefix:64 "∀* " => univClosure
 
-@[simp] lemma univClosure_succ {n} (a : α (n + 1)) : univClosure a = univClosure (∀' a) := rfl
+@[simp] lemma univClosure_zero (a : α 0) : ∀* a = a := rfl
+
+lemma univClosure_succ {n} (a : α (n + 1)) : ∀* a = ∀* ∀' a := rfl
 
 end UnivQuantifier
 
@@ -87,13 +120,29 @@ def exClosure : {n : ℕ} → α n → α 0
   | 0,     a => a
   | _ + 1, a => exClosure (∃' a)
 
-@[simp] lemma exClosure_zero (a : α 0) : exClosure a = a := rfl
+prefix:64 "∃* " => exClosure
 
-@[simp] lemma exClosure_succ {n} (a : α (n + 1)) : exClosure a = exClosure (∃' a) := rfl
+@[simp] lemma exClosure_zero (a : α 0) : ∃* a = a := rfl
+
+lemma exClosure_succ {n} (a : α (n + 1)) : ∃* a = ∃* ∃' a := rfl
 
 end ExQuantifier
 
 section UnivQuantifier₂
+
+section
+
+variable {α : ℕ → Sort u} [UnivQuantifier α] [ExQuantifier α]
+
+def quant : Polarity → α (n + 1) → α n
+  | Σ, p => ∃' p
+  | Π, p => ∀' p
+
+@[simp] lemma quant_sigma (p : α (n + 1)) : quant Σ p = ∃' p := rfl
+
+@[simp] lemma quant_pi (p : α (n + 1)) : quant Π p = ∀' p := rfl
+
+end
 
 variable {α : ℕ → ℕ → Sort u} [UnivQuantifier₂ α]
 
@@ -107,11 +156,11 @@ def univClosure₂₂ : {m n : ℕ} → α m n → α m 0
 
 @[simp] lemma univClosure₂₁_zero {n} (a : α 0 n) : univClosure₂₁ a = a := rfl
 
-@[simp] lemma univClosure₂₁_succ {m n} (a : α (m + 1) n) : univClosure₂₁ a = univClosure₂₁ (∀¹ a) := rfl
+lemma univClosure₂₁_succ {m n} (a : α (m + 1) n) : univClosure₂₁ a = univClosure₂₁ (∀¹ a) := rfl
 
 @[simp] lemma univClosure₂₂_zero {m} (a : α m 0) : univClosure₂₂ a = a := rfl
 
-@[simp] lemma univClosure₂₂_succ {m n} (a : α m (n + 1)) : univClosure₂₂ a = univClosure₂₂ (∀² a) := rfl
+lemma univClosure₂₂_succ {m n} (a : α m (n + 1)) : univClosure₂₂ a = univClosure₂₂ (∀² a) := rfl
 
 end UnivQuantifier₂
 
@@ -129,11 +178,11 @@ def exClosure₂₂ : {m n : ℕ} → α m n → α m 0
 
 @[simp] lemma exClosure₂₁_zero {n} (a : α 0 n) : exClosure₂₁ a = a := rfl
 
-@[simp] lemma exClosure₂₁_succ {m n} (a : α (m + 1) n) : exClosure₂₁ a = exClosure₂₁ (∃¹ a) := rfl
+lemma exClosure₂₁_succ {m n} (a : α (m + 1) n) : exClosure₂₁ a = exClosure₂₁ (∃¹ a) := rfl
 
 @[simp] lemma exClosure₂₂_zero {m} (a : α m 0) : exClosure₂₂ a = a := rfl
 
-@[simp] lemma exClosure₂₂_succ {m n} (a : α m (n + 1)) : exClosure₂₂ a = exClosure₂₂ (∃² a) := rfl
+lemma exClosure₂₂_succ {m n} (a : α m (n + 1)) : exClosure₂₂ a = exClosure₂₂ (∃² a) := rfl
 
 end ExQuantifier₂
 
@@ -156,6 +205,13 @@ class DeMorgan (F : Type*) [LogicSymbol F] where
   and (p q : F)   : ~(p ⋏ q) = ~p ⋎ ~q
   or (p q : F)    : ~(p ⋎ q) = ~p ⋏ ~q
   neg (p : F)     : ~~p = p
+
+attribute [simp] DeMorgan.verum DeMorgan.falsum DeMorgan.and DeMorgan.or DeMorgan.neg
+
+class NegDefinition (F : Type*) [LogicSymbol F] where
+  neg {p : F} : ~p = p ⟶ ⊥
+
+attribute [simp] NegDefinition.neg
 
 namespace LogicSymbol
 
@@ -190,6 +246,14 @@ instance Prop_HasLogicSymbols : LogicSymbol Prop where
 @[simp] lemma Prop_or_eq (p q : Prop) : (p ⋎ q) = (p ∨ q) := rfl
 
 @[simp] lemma Prop_iff_eq (p q : Prop) : (p ⟷ q) = (p ↔ q) := by simp[LogicSymbol.iff, iff_iff_implies_and_implies]
+
+instance : DeMorgan Prop where
+  verum := by simp
+  falsum := by simp
+  imply := fun _ _ => by simp[imp_iff_not_or]
+  and := fun _ _ => by simp[-not_and, not_and_or]
+  or := fun _ _ => by simp[not_or]
+  neg := fun _ => by simp
 
 class HomClass (F : Type _) (α β : outParam (Type _)) [LogicSymbol α] [LogicSymbol β] extends FunLike F α (fun _ => β) where
   map_top : ∀ (f : F), f ⊤ = ⊤
@@ -301,6 +365,8 @@ class AndOrClosed {F} [LogicSymbol F] (C : F → Prop) where
 class Closed {F} [LogicSymbol F] (C : F → Prop) extends AndOrClosed C where
   not {f : F} : C f → C (~f)
   imply {f g : F} : C f → C g → C (f ⟶ g)
+
+attribute [simp] AndOrClosed.verum AndOrClosed.falsum
 
 end LogicSymbol
 

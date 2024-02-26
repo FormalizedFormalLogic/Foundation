@@ -4,26 +4,17 @@ namespace LO
 
 namespace FirstOrder
 
-variable {L : Language.{u}} [FirstOrder.ORing L]
-  [(k : ℕ) → DecidableEq (L.Func k)] [(k : ℕ) → DecidableEq (L.Rel k)]
-
+variable {L : Language} [L.ORing] {ξ : Type*} [DecidableEq ξ]
 
 namespace Arith
 
-def succInd (p : Subformula L μ (k + 1)) : Formula L μ :=
-  “∀* (!((Rew.substs (ᵀ“0” :> (#·))).hom p) → ∀ (!((Rew.substs  (ᵀ“#0” :> (#·.succ))).hom p) →
-   !((Rew.substs (ᵀ“#0 + 1” :> (#·.succ))).hom p)) → ∀ !p)”
+def succInd {ξ} (p : Semiformula L ξ 1) : Formula L ξ := “!p [0] → ∀ (!p [#0] → !p [#0 + 1]) → ∀ !p [#0]”
 
-def succInd' (p : Subformula.Operator L (k + 1)) : Formula L μ :=
-  “∀* (!(p.operator (ᵀ“0” :> (#·))) →
-       ∀ (!(p.operator (#0 :> (#·.succ))) → !(p.operator (ᵀ“#0 + 1” :> (#·.succ)))) →
-       ∀ !(p.operator (#0 :> (#·.succ))))”
+def orderInd {ξ} (p : Semiformula L ξ 1) : Formula L ξ := “∀ (∀[#0 < #1] !p [#0] → !p [#0]) → ∀ !p [#0]”
 
-def leastNumber (p : Subformula L μ (k + 1)) : Formula L μ :=
-  “∀* (∃ !p → ∃ (!p ∧ ∀[#0 < #1] ¬!((Rew.substs (#0 :> (#·.succ.succ))).hom p)))”
+def leastNumber {ξ} (p : Semiformula L ξ 1) : Formula L ξ := “∃ !p [#0] → ∃ (!p [#0] ∧ ∀[#0 < #1] ¬!p [#0])”
 
-def orderInd (p : Subformula L μ (k + 1)) : Formula L μ :=
-  “∀* (∀ (∀[#0 < #1] !((Rew.substs (#0 :> (#·.succ.succ))).hom p) → !p) → ∀ !p)”
+def succIndᵤ (p : Semiformula L ξ 1) : Sentence L := ∀ᶠ* succInd p
 
 variable (L)
 
@@ -48,62 +39,28 @@ inductive PAminus : Theory L
   | ltTrans       : PAminus “∀ ∀ ∀ (#2 < #1 ∧ #1 < #0 → #2 < #0)”
   | ltTri         : PAminus “∀ ∀ (#1 < #0 ∨ #1 = #0 ∨ #0 < #1)”
 
+notation "𝐏𝐀⁻" => PAminus ℒₒᵣ
+
 variable {L}
 
-def IndScheme (u : Set (Subsentence L 1)) : Theory L := succInd '' u
+def IndScheme (Γ : Semiformula L ℕ 1 → Prop) : Theory L :=
+  { q | ∃ (p : Semiformula L ℕ 1), Γ p ∧ q = ∀ᶠ* succInd p }
 
 variable (L)
+
+abbrev IOpen : Theory L := IndScheme Semiformula.Open
+
+notation "𝐈open" => IOpen ℒₒᵣ
+
+abbrev ISigma (k : ℕ) : Theory L := IndScheme (Arith.Hierarchy Σ k)
+
+prefix:max "𝐈𝚺" => ISigma ℒₒᵣ
+
+abbrev Peano : Theory L := IndScheme Set.univ
+
+notation "𝐏𝐀" => Peano ℒₒᵣ
 
 end Theory
-
-variable {L}
-
-abbrev PAminus (T : Theory L) := System.Subtheory (Theory.PAminus L) T
-
-abbrev Ind (U) (T : Theory L) := System.Subtheory (Theory.IndScheme U) T
-
-abbrev IOpen (T : Theory L) := Ind Subformula.qfree T
-
-abbrev IDelta (k : ℕ) (T : Theory L) := Ind (Arith.Hierarchy.Sigma k) T
-
-abbrev Peano (T : Theory L) := Ind Set.univ T
-
-/-
-namespace Axiom
-
-variable (L)
-
-def PAminus : Theory L := Theory.PAminus L ∪ Theory.Eq L
-
-variable {L}
-
-def Ind (U : Set (Subsentence L 1)) : Theory L := Axiom.PAminus L ∪ Theory.IndScheme U
-
-variable (L)
-
-abbrev IOpen : Theory L := Ind Subformula.qfree
-
-abbrev ISigma (k : ℕ) : Theory L := Ind (Arith.Hierarchy.Sigma k)
-
-abbrev IPi (k : ℕ) : Theory L := Ind (Arith.Hierarchy.Pi k)
-
-abbrev Peano : Theory L := Ind Set.univ
-
-instance : EqTheory (PAminus L) where
-  eq := by simp[PAminus]
-
-instance : Arith.PAminus (PAminus L) := System.Subtheory.ofSubset _ _ (by simp[PAminus])
-
-instance (u : Set (Subsentence L 1)) : EqTheory (Ind u) where
-  eq := by simp[Ind]; exact Set.subset_union_of_subset_left (by simp) _
-
-instance (u : Set (Subsentence L 1)) : Arith.PAminus (Ind u) :=
-  System.Subtheory.ofSubset _ _ (by simp[Ind, PAminus]; exact Set.subset_union_of_subset_left (by simp) _)
-
-instance (u : Set (Subsentence L 1)) : Arith.Ind u (Ind u) := System.Subtheory.ofSubset _ _ (by simp[Ind])
-
-end Axiom
--/
 
 end Arith
 

@@ -2,6 +2,16 @@ import Logic.Logic.System
 import Logic.Vorspiel.Computability
 import Logic.Vorspiel.Meta
 
+/-!
+# Language of first-order logic
+
+This file defines the language of first-order logic.
+
+- `LO.FirstOrder.Language.empty` is the empty language.
+- `LO.FirstOrder.Language.constant C` is a language with only constants of the element `C`.
+- `LO.FirstOrder.Language.oRing`, `ℒₒᵣ` is the language of ordered ring.
+-/
+
 namespace LO
 
 open Primrec
@@ -19,7 +29,7 @@ class IsRelational (L : Language) where
 class IsConstant (L : Language) extends IsRelational L where
   rel_empty  : ∀ k, IsEmpty (L.Rel k)
 
-protected def empty : Language.{u} where
+protected def empty : Language where
   Func := fun _ => PEmpty
   Rel  := fun _ => PEmpty
 
@@ -135,8 +145,8 @@ instance Func1IsEmpty : IsEmpty (oRing.Func 1) := ⟨by rintro ⟨⟩⟩
 
 instance FuncGe3IsEmpty : ∀ k ≥ 3, IsEmpty (oRing.Func k)
   | 0       => by simp
-  | 1       => by simp
-  | 2       => by simp
+  | 1       => by simp [show ¬3 ≤ 1 from of_decide_eq_false rfl]
+  | 2       => by simp [show ¬3 ≤ 2 from of_decide_eq_false rfl]
   | (n + 3) => fun _ => ⟨by rintro ⟨⟩⟩
 
 private lemma Func_encodeDecode_primrec : Primrec₂ (fun k e =>
@@ -155,19 +165,31 @@ instance (k) : Primcodable (oRing.Func k) where
   prim := nat_iff.mp <| (Primrec.encode.comp (Func_encodeDecode_primrec.comp (Primrec.const k) Primrec.id)).of_eq (fun e => by
     simp[Encodable.decode]
     rcases k with (_ | k)
-    · rcases e with (_ | e) <;> simp; rcases e with (_ | e) <;> simp
+    · rcases e with (_ | e) <;> simp
+      · rfl
+      · rcases e with (_ | e) <;> simp
+        · rfl
     · rcases k with (_ | k) <;> simp
       · rcases k with (_ | k) <;> simp
-        · rcases e with (_ | e) <;> simp; rcases e with (_ | e) <;> simp)
+        · rcases e with (_ | e) <;> simp
+          · rfl
+          · rcases e with (_ | e) <;> simp
+            · rfl)
 
 instance : UniformlyPrimcodable oRing.Func := UniformlyPrimcodable.ofEncodeDecode
   (Func_encodeDecode_primrec.of_eq $ fun k e => by
     simp[Encodable.encodeDecode, Encodable.decode]
     rcases k with (_ | k)
-    · rcases e with (_ | e) <;> simp; rcases e with (_ | e) <;> simp
+    · rcases e with (_ | e) <;> simp
+      ·rfl
+      · rcases e with (_ | e) <;> simp
+        · rfl
     · rcases k with (_ | k) <;> simp
       · rcases k with (_ | k) <;> simp
-        · rcases e with (_ | e) <;> simp; rcases e with (_ | e) <;> simp)
+        · rcases e with (_ | e) <;> simp
+          · rfl
+          · rcases e with (_ | e) <;> simp
+            · rfl)
 
 instance (k) : Encodable (oRing.Rel k) where
   encode := fun x =>
@@ -196,7 +218,9 @@ instance (k) : Primcodable (oRing.Rel k) where
     rcases k with (_ | k) <;> simp
     rcases k with (_ | k) <;> simp
     rcases e with (_ | e) <;> simp
-    rcases e with (_ | e) <;> simp)
+    · rfl
+    · rcases e with (_ | e) <;> simp
+      · rfl)
 
 instance : UniformlyPrimcodable oRing.Rel := UniformlyPrimcodable.ofEncodeDecode
   (Rel_encodeDecode_primrec.of_eq $ fun k e => by
@@ -205,7 +229,9 @@ instance : UniformlyPrimcodable oRing.Rel := UniformlyPrimcodable.ofEncodeDecode
     rcases k with (_ | k) <;> simp
     rcases k with (_ | k) <;> simp
     rcases e with (_ | e) <;> simp
-    rcases e with (_ | e) <;> simp)
+    · rfl
+    · rcases e with (_ | e) <;> simp
+      · rfl)
 
 end ORing
 
@@ -269,34 +295,34 @@ instance : _root_.Add Language := ⟨add⟩
 
 def sigma (L : ι → Language) : Language := ⟨fun k => Σ i, (L i).Func k, fun k => Σ i, (L i).Rel k⟩
 
-protected class Eq (L : Language.{u}) where
+protected class Eq (L : Language) where
   eq : L.Rel 2
 
-protected class LT (L : Language.{u}) where
+protected class LT (L : Language) where
   lt : L.Rel 2
 
-protected class Zero (L : Language.{u}) where
+protected class Zero (L : Language) where
   zero : L.Func 0
 
-protected class One (L : Language.{u}) where
+protected class One (L : Language) where
   one : L.Func 0
 
-protected class Add (L : Language.{u}) where
+protected class Add (L : Language) where
   add : L.Func 2
 
-protected class Mul (L : Language.{u}) where
+protected class Mul (L : Language) where
   mul : L.Func 2
 
-protected class Pow (L : Language.{u}) where
+protected class Pow (L : Language) where
   pow : L.Func 2
 
-protected class Exp (L : Language.{u}) where
+protected class Exp (L : Language) where
   exp : L.Func 1
 
-class Pairing (L : Language.{u}) where
+class Pairing (L : Language) where
   pair : L.Func 2
 
-class Star (L : Language.{u}) where
+class Star (L : Language) where
   star : L.Func 0
 
 attribute [match_pattern] Zero.zero One.one Add.add Mul.mul Eq.eq LT.lt Star.star

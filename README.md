@@ -1,7 +1,35 @@
 # lean4-logic
 Formalizing Logic in Lean4
 
+https://iehality.github.io/lean4-logic/
+
+## Table of Contents
+
+- [lean4-logic](#lean4-logic)
+  - [Table of Contents](#table-of-contents)
+  - [Usage](#usage)
+  - [Structure](#structure)
+  - [Propositional Logic](#propositional-logic)
+    - [Definition](#definition)
+    - [Theorem](#theorem)
+  - [First-Order Logic](#first-order-logic)
+    - [Definition](#definition-1)
+    - [Theorem](#theorem-1)
+  - [Normal Modal Logic](#normal-modal-logic)
+    - [Definition](#definition-2)
+    - [Theorem](#theorem-2)
+  - [References](#references)
+
+## Usage
+  Add following to `lakefile.lean`.
+  ```lean
+  require logic from git "https://github.com/iehality/lean4-logic"
+  ```
+
 ## Structure
+
+The key results are summarised in `Logic/Summary.lean`.
+
 - **Logic**
   - **Vorspiel**: Supplementary definitions and theorems for Mathlib
   - **Logic**
@@ -17,44 +45,169 @@ Formalizing Logic in Lean4
     - **Arith**: Arithmetic
     - **Incompleteness**: Incompleteness theorem
   - **SecondOrder**: Monadic second-order logic
+  - **Modal**: Variants of modal logics
+    - **Normal**: Normal propositional modal logic
 
-## Definition
-### First-Order logic
+## Propositional Logic
 
-|                                     |                                     | Definition                      | Notation  |
-| :----:                              | ----                                | ----                            | :----:    |
-| $\vdash_\mathrm{T} \Gamma$          | Derivation in Tait-Calculus         |  `LO.FirstOrder.Derivation`     | `⊢ᵀ Γ`    |
-| $(\rm Cut)\vdash_\mathrm{T} \Gamma$ | Derivation in Tait-Calculus + Cut   |  `LO.FirstOrder.DerivationC`    | `⊢ᶜ Γ`    |
-| $M \models \sigma$                  | Tarski's truth definition condition |  `LO.FirstOrder.Subformula.Val` | `M ⊧ σ`   |
-| $T \vdash \sigma$                   | Proof, Provability                  |  `LO.FirstOrder.Proof`          | `T ⊢ σ`, `T ⊢! σ` |
+### Definition
 
-## Theorem
+|                                     |                                     | Definition                    | Notation |
+| :----:                              | ----                                | ----                          | :----:   |
+| $(\rm Cut)\vdash_\mathrm{T} \Gamma$ | Derivation in Tait-Calculus + Cut   | [LO.Propositional.Derivation](https://iehality.github.io/lean4-logic/Logic/Propositional/Basic/Calculus.html#LO.Propositional.Derivation) | `⊢¹ Γ`   |
+| $v \models p$                       | Tarski's truth definition condition | [LO.Propositional.semantics](https://iehality.github.io/lean4-logic/Logic/Propositional/Basic/Semantics.html#LO.Propositional.semantics) | `v ⊧ p`  |
 
-The key results are summarised in `Logic/Summary.lean`.
+### Theorem
 
-### First-Order logic
+- [Soundness theorem](https://iehality.github.io/lean4-logic/Logic/Propositional/Basic/Completeness.html#LO.Propositional.soundness)
+  ```lean
+  theorem LO.Propositional.soundness
+    {α : Type u_1}
+    {T : LO.Propositional.Theory α}
+    {p : LO.Propositional.Formula α} :
+    T ⊢ p → T ⊨ p
+  ```
 
-- Cut-elimination
-```lean
-noncomputable example {Δ : Sequent L} : ⊢ᶜ Δ → ⊢ᵀ Δ := DerivationCR.hauptsatz
-```
+- [Completeness theorem](https://iehality.github.io/lean4-logic/Logic/Propositional/Basic/Completeness.html#LO.Propositional.completeness)
+  ```lean
+  noncomputable def LO.Propositional.completeness
+      {α : Type u_1}
+      {T : LO.Propositional.Theory α}
+      {p : LO.Propositional.Formula α} :
+      T ⊨ p → T ⊢ p
+  ```
 
-- Completeness theorem
-```lean
-noncomputable example {σ : Sentence L} : T ⊨ σ → T ⊢ σ := FirstOrder.completeness
-```
+## First-Order Logic
 
-- Gödel's first incompleteness theorem
-```lean
-variable (T : Theory ℒₒᵣ)
-  [DecidablePred T] [EqTheory T] [PAminus T] [SigmaOneSound T] [Theory.Computable T]
+$\mathbf{PA^-}$ is not to be included in $\mathbf{I\Sigma}_n$ or $\mathbf{PA}$ for simplicity in this formalization.
 
-example : ¬System.Complete T :=
-  FirstOrder.Arith.first_incompleteness T
+### Definition
+|                                     |                                                | Definition                 | Notation |
+| :----:                              | ----                                           | ----                       | :----:   |
+| $(\rm Cut)\vdash_\mathrm{T} \Gamma$ | Derivation in Tait-Calculus + Cut              | [LO.FirstOrder.Derivation](https://iehality.github.io/lean4-logic/Logic/FirstOrder/Basic/Calculus.html#LO.FirstOrder.Derivation) | `⊢¹ Γ`   |
+| $M \models \sigma$                  | Tarski's truth definition condition            | [LO.FirstOrder.Models](https://iehality.github.io/lean4-logic/Logic/FirstOrder/Basic/Semantics/Semantics.html#LO.FirstOrder.Models) | `M ⊧ₘ σ` |
+| $\mathbf{Eq}$                       | Axiom of equality                              | [LO.FirstOrder.Theory.Eq](https://iehality.github.io/lean4-logic/Logic/FirstOrder/Basic/Eq.html#LO.FirstOrder.Theory.Eq) | `𝐄𝐪` |
+| $\mathbf{PA^-}$                     | Finitely axiomatized fragment of $\mathbf{PA}$ | [LO.FirstOrder.Arith.Theory.PAminus](https://iehality.github.io/lean4-logic/Logic/FirstOrder/Arith/Theory.html#LO.FirstOrder.Arith.Theory.PAminus) | `𝐏𝐀⁻` |
+| $\mathbf{I}_\mathrm{open}$          | Induction of open formula                      | [LO.FirstOrder.Arith.Theory.IOpen](https://iehality.github.io/lean4-logic/Logic/FirstOrder/Arith/Theory.html#LO.FirstOrder.Arith.Theory.IOpen) | `𝐈open` |
+| $\mathbf{I\Sigma}_n$                | Induction of $\Sigma_n$ formula                | [LO.FirstOrder.Arith.Theory.ISigma](https://iehality.github.io/lean4-logic/Logic/FirstOrder/Arith/Theory.html#LO.FirstOrder.Arith.Theory.ISigma) | `𝐈𝚺` |
+| $\mathbf{PA}$                       | Peano arithmetic                               | [LO.FirstOrder.Arith.Theory.Peano](https://iehality.github.io/lean4-logic/Logic/FirstOrder/Arith/Theory.html#LO.FirstOrder.Arith.Theory.Peano) | `𝐏𝐀` |
 
-example : T ⊬ undecidable T ∧ T ⊬ ~undecidable T :=
-  FirstOrder.Arith.undecidable T
-```
+### Theorem
+
+- [Cut-elimination](https://iehality.github.io/lean4-logic/Logic/FirstOrder/Hauptsatz.html#LO.FirstOrder.Derivation.hauptsatz)
+  ```lean
+  def LO.FirstOrder.Derivation.hauptsatz
+      {L : LO.FirstOrder.Language}
+      [(k : ℕ) → DecidableEq (LO.FirstOrder.Language.Func L k)]
+      [(k : ℕ) → DecidableEq (LO.FirstOrder.Language.Rel L k)]
+      {Δ : LO.FirstOrder.Sequent L} :
+      ⊢¹ Δ → { d : ⊢¹ Δ // LO.FirstOrder.Derivation.CutFree d }
+  ```
+
+- [Soundness theorem](https://iehality.github.io/lean4-logic/Logic/FirstOrder/Basic/Soundness.html#LO.FirstOrder.soundness)
+  ```lean
+  theorem LO.FirstOrder.soundness
+      {L : LO.FirstOrder.Language}
+      {T : Set (LO.FirstOrder.Sentence L)}
+      {σ : LO.FirstOrder.Sentence L} :
+      T ⊢ σ → T ⊨ σ
+  ```
+
+- [Completeness theorem](https://iehality.github.io/lean4-logic/Logic/FirstOrder/Completeness/Completeness.html#LO.FirstOrder.completeness)
+  ```lean
+  noncomputable def LO.FirstOrder.completeness
+      {L : LO.FirstOrder.Language}
+      {T : LO.FirstOrder.Theory L}
+      {σ : LO.FirstOrder.Sentence L} :
+      T ⊨ σ → T ⊢ σ
+  ```
+
+- [Gödel's first incompleteness theorem](https://iehality.github.io/lean4-logic/Logic/FirstOrder/Incompleteness/FirstIncompleteness.html#LO.FirstOrder.Arith.first_incompleteness)
+  ```lean
+  theorem LO.FirstOrder.Arith.first_incompleteness
+      (T : LO.FirstOrder.Theory ℒₒᵣ)
+      [DecidablePred T]
+      [𝐄𝐪 ≾ T]
+      [𝐏𝐀⁻ ≾ T]
+      [LO.FirstOrder.Arith.SigmaOneSound T]
+      [LO.FirstOrder.Theory.Computable T] :
+      ¬LO.System.Complete T
+  ```
+  - [undecidable sentence](https://iehality.github.io/lean4-logic/Logic/FirstOrder/Incompleteness/FirstIncompleteness.html#LO.FirstOrder.Arith.undecidable)
+    ```lean
+    theorem LO.FirstOrder.Arith.undecidable
+        (T : LO.FirstOrder.Theory ℒₒᵣ)
+        [DecidablePred T]
+        [𝐄𝐪 ≾ T]
+        [𝐏𝐀⁻ ≾ T]
+        [LO.FirstOrder.Arith.SigmaOneSound T]
+        [LO.FirstOrder.Theory.Computable T] :
+        T ⊬ LO.FirstOrder.Arith.FirstIncompleteness.undecidable T ∧
+        T ⊬ ~LO.FirstOrder.Arith.FirstIncompleteness.undecidable T
+    ```
+
+## Normal Modal Logic
+
+### Definition
+
+In this formalization, _(Modal) Logic_ means set of axioms.
+
+| Logic            | Definition                    | Notation | Remarks         |
+| :--------------: | ----------------------------- | :------- | --------------- |
+| $\mathbf{K}$     | [LO.Modal.Normal.LogicK](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Logics.html#LO.Modal.Normal.LogicK) | `𝐊`      |                 |
+| $\mathbf{KD}$     | [LO.Modal.Normal.LogicKD](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Logics.html#LO.Modal.Normal.LogicKD) | `𝐊𝐃`      |                 |
+| $\mathbf{S4}$    | [LO.Modal.Normal.LogicS4](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Logics.html#LO.Modal.Normal.LogicS4) | `𝐒𝟒`     | Alias of `𝐊𝐓𝟒`. |
+| $\mathbf{S4.2}$  | [LO.Modal.Normal.LogicS4Dot2](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Logics.html#LO.Modal.Normal.LogicS4Dot2) | `𝐒𝟒.𝟐`   |                 |
+| $\mathbf{S4.3}$  | [LO.Modal.Normal.LogicS4Dot3](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Logics.html#LO.Modal.Normal.LogicS4Dot3) | `𝐒𝟒.𝟑`   |                 |
+| $\mathbf{S4Grz}$ | [LO.Modal.Normal.LogicS4Grz](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Logics.html#LO.Modal.Normal.LogicS4Grz) | `𝐒𝟒𝐆𝐫𝐳`  |                 |
+| $\mathbf{S5}$    | [LO.Modal.Normal.LogicS5](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Logics.html#LO.Modal.Normal.LogicS5) | `𝐒𝟓`     | Alias of `𝐊𝐓𝟓`. |
+| $\mathbf{GL}$    | [LO.Modal.Normal.LogicGL](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Logics.html#LO.Modal.Normal.LogicGL) | `𝐆𝐋`     |                 |
+
+|                                   |                                            | Definition                                 |   Notation   |
+| :-------------------------------: | ------------------------------------------ | :----------------------------------------- | :----------: |
+|      $M, w \models \varphi$       | Satisfy                                    | [LO.Modal.Normal.Formula.Satisfies](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Semantics.html#LO.Modal.Normal.Formula.Satisfies) | `w ⊧ᴹˢ[M] φ` |
+|        $M \models \varphi$        | Valid on model (Models)                    | [LO.Modal.Normal.Formula.Models](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Semantics.html#LO.Modal.Normal.Formula.Models) |  `⊧ᴹᵐ[M] φ`  |
+|        $F \models \varphi$        | Valid on frame (Frames)                    | [LO.Modal.Normal.Formula.Frames](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Semantics.html#LO.Modal.Normal.Formula.Frames) |  `⊧ᴹᶠ[F] φ`  |
+|    $\Gamma \models^F \varphi$     | Consequence on frame                       | [LO.Modal.Normal.Formula.FrameConsequence](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Semantics.html#LO.Modal.Normal.Formula.FrameConsequence) | `Γ ⊨ᴹᶠ[F] φ` |
+| $\Gamma \vdash_{\Lambda} \varphi$ | Hilbert-style Deduction on logic $\Lambda$ | [LO.Modal.Normal.Deduction](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/HilbertStyle.html#LO.Modal.Normal.Deduction) | `Γ ⊢ᴹ[Λ] φ`  |
+
+### Theorem
+
+- [Soundness of Hilbert-style deduction](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Soundness.html#LO.Modal.Normal.Logic.Hilbert.sounds) for `𝐊` extend `𝐓`, `𝐁`, `𝐃`, `𝟒`, `𝟓` Extensions (i.e. `𝐊𝐃`, `𝐒𝟒`, `𝐒𝟓`, etc.)
+  ```lean
+  theorem LO.Modal.Normal.Logic.Hilbert.sounds
+      {α : Type u} [Inhabited α]
+      {β : Type u} [Inhabited β]
+      (Λ : AxiomSet α)
+      (f : Frame β) (hf : f ∈ (FrameClass β α Λ))
+      {p : LO.Modal.Normal.Formula α}
+      (h : ⊢ᴹ[Λ] p) :
+      ⊧ᴹᶠ[f] p
+  ```
+  - [Consistency](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Soundness.html#LO.Modal.Normal.Logic.Hilbert.consistency)
+    ```lean
+    theorem LO.Modal.Normal.Logic.Hilbert.consistency
+        {α : Type u}
+        {β : Type u}
+        (Λ : AxiomSet α)
+        (hf : ∃ f, f ∈ (FrameClass β α Λ)) :
+        ⊬ᴹ[Λ]! ⊥
+    ```
+  -  **WIP:** Currently, these theorems was proved where only `Λ` is `𝐊`, `𝐊𝐃`, `𝐒𝟒`, `𝐒𝟓`.
+- Strong Completeness of Hilbert-style deduction for `𝐊` extend `𝐓`, `𝐁`, `𝐃`, `𝟒`, `𝟓` Extensions
+  ```
+  def Completeness
+    {α β : Type u}
+    (Λ : AxiomSet β)
+    (𝔽 : FrameClass α)
+    := ∀ (Γ : Theory β) (p : Formula β), (Γ ⊨ᴹ[𝔽] p) → (Γ ⊢ᴹ[Λ]! p)
+
+  theorem LogicK.Hilbert.completes
+    {β : Type u} [inst✝ : DecidableEq β] :
+    Completeness
+      (𝐊 : AxiomSet β)
+      (𝔽((𝐊 : AxiomSet β)) : FrameClass (MaximalConsistentTheory (𝐊 : AxiomSet β)))
+  ```
 
 ## References
 - J. Han, F. van Doorn, A formalization of forcing and the unprovability of the continuum hypothesis
@@ -62,3 +215,8 @@ example : T ⊬ undecidable T ∧ T ⊬ ~undecidable T :=
 - P. Hájek, P. Pudlák, Metamathematics of First-Order Arithmetic
 - R. Kaye, Models of Peano arithmetic
 - 田中 一之, ゲーデルと20世紀の論理学
+- 菊池 誠 (編者), 『数学における証明と真理 ─ 様相論理と数学基礎論』
+- P. Blackburn, M. de Rijke, Y. Venema, "Modal Logic"
+- Open Logic Project, ["The Open Logic Text"](https://builds.openlogicproject.org/)
+- R. Hakli, S. Negri, "Does the deduction theorem fail for modal logic?"
+- G. Boolos, "The Logic of Provability"

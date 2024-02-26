@@ -1,12 +1,25 @@
 import Logic.Logic.Semantics
 
+/-!
+# Basic definitions and properties of proof-related notions
+
+This file defines a characterization of the proof/provability/calculus of formulas.
+Also defines soundness and completeness.
+
+## Main Definitions
+* `LO.System`: Proof system of logic.
+* `LO.Sound`: Soundness of the proof system.
+* `LO.Complete`: Completeness of the proof system.
+
+-/
+
 namespace LO
 
 variable {F : Type u} [LogicSymbol F]
 
-/- Deduction System of F -/
+/-- Deduction System -/
 
-class System (F : Type u) [LogicSymbol F] where
+class System (F : Type u) where
   Bew : Set F → F → Type u
   axm : ∀ {f}, f ∈ T → Bew T f
   weakening' : ∀ {T U f}, T ⊆ U → Bew T f → Bew U f
@@ -19,6 +32,22 @@ instance : HasTurnstile F (Type u) := ⟨𝓑.Bew⟩
 def BewTheory (T U : Set F) : Type u := {f : F} → f ∈ U → T ⊢ f
 
 infix:45 " ⊢* " => System.BewTheory
+
+def ProvableTheory (T U : Set F) : Prop := Nonempty (T ⊢* U)
+
+infix:45 " ⊢*! " => System.ProvableTheory
+
+abbrev Provable (T : Set F) (f : F) : Prop := Nonempty (T ⊢ f)
+
+infix:45 " ⊢! " => System.Provable
+
+noncomputable def Provable.toProof {T : Set F} {f : F} (h : T ⊢! f) : T ⊢ f := Classical.choice h
+
+abbrev Unprovable (T : Set F) (f : F) : Prop := IsEmpty (T ⊢ f)
+
+infix:45 " ⊬ " => System.Unprovable
+
+lemma unprovable_iff_not_provable {T : Set F} {f : F} : T ⊬ f ↔ ¬T ⊢! f := by simp[System.Unprovable]
 
 def BewTheoryEmpty (T : Set F) : T ⊢* ∅ := fun h => by contradiction
 
@@ -34,17 +63,9 @@ lemma Consistent.of_subset {T U : Set F} (h : Consistent U) (ss : T ⊆ U) : Con
 
 lemma inconsistent_of_proof {T : Set F} (b : T ⊢ ⊥) : ¬Consistent T := by simp[Consistent]; exact ⟨b⟩
 
-abbrev Provable (T : Set F) (f : F) : Prop := Nonempty (T ⊢ f)
+lemma inconsistent_of_provable {T : Set F} (b : T ⊢! ⊥) : ¬Consistent T := by simp[Consistent]
 
-infix:45 " ⊢! " => System.Provable
-
-noncomputable def Provable.toProof {T : Set F} {f : F} (h : T ⊢! f) : T ⊢ f := Classical.choice h
-
-abbrev Unprovable (T : Set F) (f : F) : Prop := IsEmpty (T ⊢ f)
-
-infix:45 " ⊬ " => System.Unprovable
-
-lemma unprovable_iff_not_provable {T : Set F} {f : F} : T ⊬ f ↔ ¬T ⊢! f := by simp[System.Unprovable]
+lemma consistent_iff_unprovable {T : Set F} : Consistent T ↔ T ⊬ ⊥ := by rfl
 
 protected def Complete (T : Set F) : Prop := ∀ f, (T ⊢! f) ∨ (T ⊢! ~f)
 
@@ -55,8 +76,14 @@ lemma incomplete_iff_exists_independent {T : Set F} :
 
 def theory (T : Set F) : Set F := {p | T ⊢! p}
 
+@[simp] lemma subset_theory {T : Set F} : T ⊆ theory T := fun _ h ↦ ⟨System.axm h⟩
+
+noncomputable def provableTheory_theory {T : Set F} : T ⊢* theory T := λ b ↦ b.toProof
+
 class Subtheory (T U : Set F) where
   sub : {f : F} → T ⊢ f → U ⊢ f
+
+infix:50 " ≾ " => Subtheory
 
 class Equivalent (T U : Set F) where
   ofLeft : {f : F} → T ⊢ f → U ⊢ f
@@ -66,12 +93,16 @@ namespace Subtheory
 
 variable (T U T₁ T₂ T₃ : Set F)
 
-@[refl] instance : Subtheory T T := ⟨id⟩
+@[refl] instance : T ≾ T := ⟨id⟩
 
-@[trans] protected def trans [Subtheory T₁ T₂] [Subtheory T₂ T₃] : Subtheory T₁ T₃ :=
+@[trans] protected def trans [T₁ ≾ T₂] [T₂ ≾ T₃] : T₁ ≾ T₃ :=
   ⟨fun {f} b => sub (sub b : T₂ ⊢ f)⟩
 
-def ofSubset (h : T ⊆ U) : Subtheory T U := ⟨fun b => weakening b h⟩
+variable {T U}
+
+def ofSubset (h : T ⊆ U) : T ≾ U := ⟨fun b => weakening b h⟩
+
+def bewTheory [T ≾ U] : U ⊢* T := λ hp ↦ sub (axm hp)
 
 end Subtheory
 
@@ -96,13 +127,13 @@ def System.hom [System F] {G : Type u} [LogicSymbol G] (F : G →L F) : System G
   weakening' := fun h => by simp; exact System.weakening' (Set.image_subset F h)
 
 variable (F)
-variable [LogicSymbol F] [𝓑 : System F] {Struc : Type w → Type v} [𝓢 : Semantics F Struc]
+variable [LogicSymbol F] [𝓑 : System F] {α: Type*} [𝓢 : Semantics F α]
 
 class Sound where
   sound : ∀ {T : Set F} {p : F}, T ⊢ p → T ⊨ p
 
-class SoundOn (M : Type w) (s : Struc M) (H : Set F) where
-  sound : ∀ {T : Set F} {p : F}, p ∈ H → T ⊢ p → s ⊧ₛ p
+class SoundOn (M : Type w) (a : α) (H : Set F) where
+  sound : ∀ {T : Set F} {p : F}, p ∈ H → T ⊢ p → a ⊧ p
 
 class Complete extends Sound F where
   complete : ∀ {T : Set F} {p : F}, T ⊨ p → T ⊢ p
@@ -112,46 +143,53 @@ variable {F}
 namespace Sound
 
 variable [Sound F]
-variable {M : Type w} [Inhabited M] {s : Struc M}
+variable {a : α}
 
-lemma sound' {T : Set F} {f : F} : T ⊢! f → T ⊨ f := by rintro ⟨b⟩; exact sound b
+lemma sound! {T : Set F} {f : F} : T ⊢! f → T ⊨ f := by rintro ⟨b⟩; exact sound b
 
 lemma not_provable_of_countermodel {T : Set F} {p : F}
-  (hT : s ⊧ₛ* T) (hp : ¬s ⊧ₛ p) : IsEmpty (T ⊢ p) :=
-  ⟨fun b => by have : s ⊧ₛ p := Sound.sound b M s hT; contradiction⟩
+  (hT : a ⊧* T) (hp : ¬a ⊧ p) : IsEmpty (T ⊢ p) :=
+  ⟨fun b => by have : a ⊧ p := Sound.sound b hT; contradiction⟩
 
 lemma consistent_of_model {T : Set F}
-  (hT : s ⊧ₛ* T) : System.Consistent T :=
+  (hT : a ⊧* T) : System.Consistent T :=
   not_provable_of_countermodel (p := ⊥) hT (by simp)
 
-lemma consistent_of_satisfiable {T : Set F} : Semantics.Satisfiableₛ T → System.Consistent T := by
-  rintro ⟨M, _, s, h⟩; exact consistent_of_model h
+lemma consistent_of_satisfiable {T : Set F} : Semantics.SatisfiableTheory T → System.Consistent T := by
+  rintro ⟨_, h⟩; exact consistent_of_model h
 
-lemma models_of_proof {T : Set F} {f} (h : s ⊧ₛ* T) (b : T ⊢ f) : s ⊧ₛ f :=
-  Sound.sound b M s h
+lemma models_of_proof {T : Set F} {f} (h : a ⊧* T) (b : T ⊢ f) : a ⊧ f :=
+  Sound.sound b h
 
-lemma modelsTheory_of_proofTheory {T U : Set F} (h : s ⊧ₛ* T) (b : T ⊢* U) : s ⊧ₛ* U :=
+lemma modelsTheory_of_proofTheory {T U : Set F} (h : s ⊧* T) (b : T ⊢* U) : s ⊧* U :=
   fun _ hf => models_of_proof h (b hf)
+
+lemma modelsTheory_of_subtheory {T U : Set F} [U ≾ T] (h : s ⊧* T) : s ⊧* U :=
+  modelsTheory_of_proofTheory h System.Subtheory.bewTheory
 
 end Sound
 
 namespace Complete
 
+noncomputable def of! [Sound F] (H : ∀ {T : Set F} {p : F}, T ⊨ p → T ⊢! p) : Complete F where
+  complete := fun h ↦ (H h).toProof
+
 variable [Complete F]
 
-lemma satisfiableₛ_iff_consistent {T : Set F} : Semantics.Satisfiableₛ T ↔ System.Consistent T :=
+lemma satisfiableTheory_iff_consistent {T : Set F} : Semantics.SatisfiableTheory T ↔ System.Consistent T :=
   ⟨Sound.consistent_of_satisfiable,
    by contrapose; intro h
-      have : T ⊨ ⊥
-      { intro M i s hM; have : Semantics.Satisfiableₛ T := ⟨M, i, s, hM⟩; contradiction }
+      have : T ⊨ ⊥ := by intro a hM; have : Semantics.SatisfiableTheory T := ⟨a, hM⟩; contradiction
       have : T ⊢ ⊥ := complete this
       exact System.inconsistent_of_proof this⟩
 
-lemma not_satisfiable_iff_inconsistent {T : Set F} : ¬Semantics.Satisfiableₛ T ↔ T ⊢! ⊥ := by
-  simp[satisfiableₛ_iff_consistent, System.Consistent]
+lemma not_satisfiable_iff_inconsistent {T : Set F} : ¬Semantics.SatisfiableTheory T ↔ T ⊢! ⊥ := by
+  simp[satisfiableTheory_iff_consistent, System.Consistent]
 
 lemma consequence_iff_provable {T : Set F} {f : F} : T ⊨ f ↔ T ⊢! f :=
 ⟨fun h => ⟨complete h⟩, by rintro ⟨b⟩; exact Sound.sound b⟩
+
+alias ⟨complete!, _⟩ := consequence_iff_provable
 
 end Complete
 
@@ -172,61 +210,5 @@ lemma ofSystemSubtheory (T₁ T₂ : Set F) [System.Subtheory T₁ T₂] : Seman
   fun hf => (Sound.sound $ System.Subtheory.sub $ Complete.complete hf)
 
 end Semantics
-
-class OneSided (F : Type*) [LogicSymbol F] where
-  Derivation : List F → Type*
-  verum (Δ : List F) : Derivation (⊤ :: Δ)
-  and {p q : F} {Δ : List F} : Derivation (p :: Δ) → Derivation (q :: Δ) → Derivation (p ⋏ q :: Δ)
-  or {p q : F} {Δ : List F} : Derivation (p :: q :: Δ) → Derivation (p ⋎ q :: Δ)
-  wk {Δ Γ : List F} : Derivation Δ → Δ ⊆ Γ → Derivation Γ
-  em {p} {Δ : List F} (hp : ~p ∈ Δ) : Derivation (p :: Δ)
-
-scoped prefix:45 "⊢ᴸ " => OneSided.Derivation
-
-class LawfulOneSided (F : Type*) [LogicSymbol F] [System F] extends OneSided F where
-  toProofEmpty {p : F} : ⊢ᴸ [p] → ∅ ⊢ p
-
-namespace LawfulOneSided
-
-variable {F : Type*} [LogicSymbol F] [System F] [LawfulOneSided F]
-
-def toProof {p : F} (b : ⊢ᴸ [p]) (T : Set F) : T ⊢ p :=
-  System.weakening (toProofEmpty b) (Set.empty_subset T)
-
-end LawfulOneSided
-
-class TwoSided (F : Type*) where
-  Derivation : List F → List F → Type*
-
-infix: 45 " ⊢ᴳ " => TwoSided.Derivation
-
-class Gentzen (F : Type u) [LogicSymbol F] extends TwoSided F where
-  verum (Γ Δ : List F)                : Γ ⊢ᴳ ⊤ :: Δ
-  falsum (Γ Δ : List F)               : ⊥ :: Γ ⊢ᴳ Δ
-  negLeft {p : F} {Γ Δ : List F}      : Γ ⊢ᴳ p :: Δ → ~p :: Γ ⊢ᴳ Δ
-  negRight {p : F} {Γ Δ : List F}     : p :: Γ ⊢ᴳ Δ → Γ ⊢ᴳ ~p :: Δ
-  andLeft {p q : F} {Γ Δ : List F}    : p :: q :: Γ ⊢ᴳ Δ → p ⋏ q :: Γ ⊢ᴳ Δ
-  andRight {p q : F} {Γ Δ : List F}   : Γ ⊢ᴳ p :: Δ → Γ ⊢ᴳ q :: Δ → Γ ⊢ᴳ p ⋏ q :: Δ
-  orLeft {p q : F} {Γ Δ : List F}     : p :: Γ ⊢ᴳ Δ → q :: Γ ⊢ᴳ Δ → p ⋎ q :: Γ ⊢ᴳ Δ
-  orRight {p q : F} {Γ Δ : List F}    : Γ ⊢ᴳ p :: q :: Δ → Γ ⊢ᴳ p ⋎ q :: Δ
-  implyLeft {p q : F} {Γ Δ : List F}  : Γ ⊢ᴳ p :: Δ → q :: Γ ⊢ᴳ Δ → (p ⟶ q) :: Γ ⊢ᴳ Δ
-  implyRight {p q : F} {Γ Δ : List F} : p :: Γ ⊢ᴳ q :: Δ → Γ ⊢ᴳ (p ⟶ q) :: Δ
-  wk {Γ Γ' Δ Δ' : List F} : Γ ⊢ᴳ Δ → Γ ⊆ Γ' → Δ ⊆ Δ' → Γ' ⊢ᴳ Δ'
-  em {p} {Γ Δ : List F} (hΓ : p ∈ Γ) (hΔ : p ∈ Δ) : Γ ⊢ᴳ Δ
-
-class LawfulGentzen (F : Type u) [LogicSymbol F] [System F] extends Gentzen F where
-  toProof₁ {Γ} {T : Set F} {p : F} : Γ ⊢ᴳ [p] → (∀ q ∈ Γ, T ⊢ q) → T ⊢ p
-
-namespace LawfulGentzen
-
-variable {F : Type*} [LogicSymbol F] [System F] [LawfulGentzen F]
-
-def toProofOfNil {p : F} (b : [] ⊢ᴳ [p]) (T : Set F) : T ⊢ p :=
-  toProof₁ b (by intro q h; exact False.elim ((List.mem_nil_iff q).mp h))
-
-lemma toProof₁! {Γ} {T : Set F} {p : F} (b : Γ ⊢ᴳ [p]) (H : ∀ q ∈ Γ, T ⊢! q) : T ⊢! p :=
-  ⟨toProof₁ b (fun q hq => (H q hq).toProof)⟩
-
-end LawfulGentzen
 
 end LO

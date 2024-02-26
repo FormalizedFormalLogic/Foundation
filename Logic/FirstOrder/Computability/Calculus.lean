@@ -13,15 +13,13 @@ variable [(k : ℕ) → Primcodable (L.Func k)] [(k : ℕ) → Primcodable (L.Re
 
 namespace Derivation
 
-open DerivationCR
-
 inductive Code (L : Language.{u})
   | axL : {k : ℕ} → (r : L.Rel k) → (v : Fin k → SyntacticTerm L) → Code L
   | verum : Code L
   | and : SyntacticFormula L → SyntacticFormula L → Code L
   | or : SyntacticFormula L → SyntacticFormula L → Code L
-  | all : SyntacticSubformula L 1 → Code L
-  | ex : SyntacticSubformula L 1 → SyntacticTerm L → Code L
+  | all : SyntacticSemiformula L 1 → Code L
+  | ex : SyntacticSemiformula L 1 → SyntacticTerm L → Code L
   | wk : List (SyntacticFormula L) → Code L
 
 def Code.equiv (L : Language.{u}) :
@@ -30,8 +28,8 @@ def Code.equiv (L : Language.{u}) :
     Unit ⊕
     (SyntacticFormula L × SyntacticFormula L) ⊕
     (SyntacticFormula L × SyntacticFormula L) ⊕
-    (SyntacticSubformula L 1) ⊕
-    (SyntacticSubformula L 1 × SyntacticTerm L) ⊕
+    (SyntacticSemiformula L 1) ⊕
+    (SyntacticSemiformula L 1 × SyntacticTerm L) ⊕
     List (SyntacticFormula L) where
   toFun := fun c =>
     match c with
@@ -65,17 +63,17 @@ def sequents : ProofList L → List (List (SyntacticFormula L)) := List.map Prod
 
 def isProper : ProofList L → Bool
   | []                     => true
-  | (Code.axL r v, Γ) :: l => isProper l && Subformula.rel r v ∈ Γ && Subformula.nrel r v ∈ Γ
+  | (Code.axL r v, Γ) :: l => isProper l && Semiformula.rel r v ∈ Γ && Semiformula.nrel r v ∈ Γ
   | (Code.verum,   Γ) :: l => isProper l && ⊤ ∈ Γ
   | (Code.and p q, Γ) :: l => isProper l && p ⋏ q ∈ Γ && p :: Γ ∈ sequents l && q :: Γ ∈ sequents l
   | (Code.or p q,  Γ) :: l => isProper l && p ⋎ q ∈ Γ && p :: q :: Γ ∈ sequents l
   | (Code.all p,   Γ) :: l => isProper l && ∀' p ∈ Γ && Rew.free.hom p :: Γ.map Rew.shift.hom ∈ sequents l
-  | (Code.ex p t,  Γ) :: l => isProper l && ∃' p ∈ Γ && (Rew.substs ![t]).hom p :: Γ ∈ sequents l
+  | (Code.ex p t,  Γ) :: l => isProper l && ∃' p ∈ Γ && p/[t] :: Γ ∈ sequents l
   | (Code.wk Δ,    Γ) :: l => isProper l && Δ ⊆ Γ && Δ ∈ sequents l
 
 private def F (Γ : List (SyntacticFormula L)) (seq : List (List (SyntacticFormula L))) : Code L → Bool := fun c =>
   Sum.recOn (Code.equiv L c)
-    (fun f => Subformula.rel f.2.1 f.2.2 ∈ Γ && Subformula.nrel f.2.1 f.2.2 ∈ Γ)
+    (fun f => Semiformula.rel f.2.1 f.2.2 ∈ Γ && Semiformula.nrel f.2.1 f.2.2 ∈ Γ)
   <| fun c => c.casesOn (fun _ => ⊤ ∈ Γ)
   <| fun c => c.casesOn (fun p => p.1 ⋏ p.2 ∈ Γ && p.1 :: Γ ∈ seq && p.2 :: Γ ∈ seq)
   <| fun c => c.casesOn (fun p => p.1 ⋎ p.2 ∈ Γ && p.1 :: p.2 :: Γ ∈ seq)
@@ -92,23 +90,23 @@ instance : Primcodable
       (Unit ⊕
         SyntacticFormula L × SyntacticFormula L ⊕
           SyntacticFormula L × SyntacticFormula L ⊕
-            SyntacticSubformula L 1 ⊕ SyntacticSubformula L 1 × SyntacticTerm L ⊕ List (SyntacticFormula L))) ×
+            SyntacticSemiformula L 1 ⊕ SyntacticSemiformula L 1 × SyntacticTerm L ⊕ List (SyntacticFormula L))) ×
     (SyntacticFormula L × SyntacticFormula L ⊕
       SyntacticFormula L × SyntacticFormula L ⊕
-        SyntacticSubformula L 1 ⊕ SyntacticSubformula L 1 × SyntacticTerm L ⊕ List (SyntacticFormula L))) := Primcodable.prod
+        SyntacticSemiformula L 1 ⊕ SyntacticSemiformula L 1 × SyntacticTerm L ⊕ List (SyntacticFormula L))) := Primcodable.prod
 
 private lemma F_primrec : Primrec₂ (fun (p : List (SyntacticFormula L) × List (List (SyntacticFormula L))) => F p.1 p.2) :=
   to₂' <| sum_casesOn (of_equiv.comp snd)
     ((dom_bool₂ _).comp₂
-      (by apply list_mem.comp₂ (Subformula.rel_primrec.comp₂ Primrec₂.right) (fst.comp₂ $ fst.comp₂ Primrec₂.left))
-      (by apply list_mem.comp₂ (Subformula.nrel_primrec.comp₂ Primrec₂.right) (fst.comp₂ $ fst.comp₂ Primrec₂.left)))
+      (by apply list_mem.comp₂ (Semiformula.rel_primrec.comp₂ Primrec₂.right) (fst.comp₂ $ fst.comp₂ Primrec₂.left))
+      (by apply list_mem.comp₂ (Semiformula.nrel_primrec.comp₂ Primrec₂.right) (fst.comp₂ $ fst.comp₂ Primrec₂.left)))
   <| to₂' <| sum_casesOn snd
     (by apply list_mem.comp₂ (Primrec₂.const ⊤) (fst.comp₂ $ fst.comp₂ $ fst.comp₂ Primrec₂.left))
   <| to₂' <| sum_casesOn snd
     ((dom_bool₂ _).comp₂
       ((dom_bool₂ _).comp₂
         (by apply list_mem.comp₂
-              (Subformula.and_primrec.comp₂ (fst.comp₂ Primrec₂.right) (snd.comp₂ Primrec₂.right))
+              (Semiformula.and_primrec.comp₂ (fst.comp₂ Primrec₂.right) (snd.comp₂ Primrec₂.right))
               (fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ Primrec₂.left))
         (by apply (list_mem (α := List (SyntacticFormula L))).comp₂
               (list_cons.comp₂ (fst.comp₂ Primrec₂.right) (fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ Primrec₂.left))
@@ -119,7 +117,7 @@ private lemma F_primrec : Primrec₂ (fun (p : List (SyntacticFormula L) × List
   <| to₂' <| sum_casesOn snd
     ((dom_bool₂ _).comp₂
       (by apply list_mem.comp₂
-            (Subformula.or_primrec.comp₂ (fst.comp₂ Primrec₂.right) (snd.comp₂ Primrec₂.right))
+            (Semiformula.or_primrec.comp₂ (fst.comp₂ Primrec₂.right) (snd.comp₂ Primrec₂.right))
             (fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ Primrec₂.left))
       (by apply list_mem.comp₂
             (by apply list_cons.comp₂ (fst.comp₂ Primrec₂.right) $ list_cons.comp₂
@@ -129,23 +127,23 @@ private lemma F_primrec : Primrec₂ (fun (p : List (SyntacticFormula L) × List
   <| to₂' <| sum_casesOn snd
     ((dom_bool₂ _).comp₂
       (by apply list_mem.comp₂
-            (Subformula.all_primrec.comp₂ Primrec₂.right)
+            (Semiformula.all_primrec.comp₂ Primrec₂.right)
             (fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ Primrec₂.left))
       (by apply list_mem.comp₂
             (list_cons.comp₂
-              (Subformula.free_primrec.comp₂ Primrec₂.right)
+              (Semiformula.free_primrec.comp₂ Primrec₂.right)
               (to₂' <| by apply list_map
                             (fst.comp $ fst.comp $ fst.comp $ fst.comp $ fst.comp $ fst.comp $ fst)
-                            (Subformula.shift_primrec.comp₂ Primrec₂.right)))
+                            (Semiformula.shift_primrec.comp₂ Primrec₂.right)))
             (snd.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ Primrec₂.left)))
   <| to₂' <| sum_casesOn snd
     ((dom_bool₂ _).comp₂
       (by apply list_mem.comp₂
-            (Subformula.ex_primrec.comp₂ $ fst.comp₂ Primrec₂.right)
+            (Semiformula.ex_primrec.comp₂ $ fst.comp₂ Primrec₂.right)
             (fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ Primrec₂.left))
       (by apply list_mem.comp₂
             (by apply list_cons.comp₂
-                  (by apply Subformula.substs₁_primrec.comp₂ (snd.comp₂ Primrec₂.right) (fst.comp₂ Primrec₂.right))
+                  (by apply Semiformula.substs₁_primrec.comp₂ (snd.comp₂ Primrec₂.right) (fst.comp₂ Primrec₂.right))
                   (by apply fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ Primrec₂.left))
             (snd.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ Primrec₂.left)))
   <| (dom_bool₂ _).comp₂
@@ -186,75 +184,80 @@ lemma isProper_append {l₁ l₂ : ProofList L} (h₁ : isProper l₁) (h₂ : i
     case ex => { exact ⟨⟨ih h₁.1.1, h₁.1.2⟩, Or.inl h₁.2⟩ }
     case wk => { exact ⟨⟨ih h₁.1.1, h₁.1.2⟩, Or.inl h₁.2⟩ }
 
-lemma derivation_of_isProper : (l : ProofList L) → isProper l → ∀ Γ ∈ sequents l, Nonempty (⊢ᵀ Γ.toFinset)
+open Derivation
+
+lemma derivation_of_isProper : (l : ProofList L) → isProper l → ∀ Γ ∈ sequents l, Nonempty (⊢¹ Γ)
   | [],                     _, Δ, hΔ => by simp[sequents] at hΔ
   | (Code.axL r v, Γ) :: l, H, Δ, hΔ => by
     simp[isProper] at H; rcases H with ⟨⟨ih, h₁⟩, h₂⟩
     simp[sequents] at hΔ; rcases hΔ with (rfl | hΔ)
-    · exact ⟨axL _ r v (by simpa using h₁) (by simpa using h₂)⟩
+    · exact ⟨axL' r v (by simpa using h₁) (by simpa using h₂)⟩
     · exact derivation_of_isProper l ih Δ (by simpa[sequents] using hΔ)
   | (Code.verum,   Γ) :: l, H, Δ, hΔ => by
     simp[isProper] at H; rcases H with ⟨ih, h⟩
     simp[sequents] at hΔ; rcases hΔ with (rfl | hΔ)
-    · exact ⟨verum _ (by simp[h])⟩
+    · exact ⟨verum' (by simp[h])⟩
     · exact derivation_of_isProper l ih _ (by simpa[sequents] using hΔ)
   | (Code.and p q, Γ) :: l, H, Δ, hΔ => by
     simp[isProper] at H; rcases H with ⟨⟨⟨hl, H⟩, hp⟩, hq⟩
     simp[sequents] at hΔ; rcases hΔ with (rfl | hΔ)
-    · have : Nonempty (⊢ᵀ List.toFinset (p :: Δ)) := derivation_of_isProper l hl _ hp
+    · have : Nonempty (⊢¹ p :: Δ) := derivation_of_isProper l hl _ hp
       rcases this with ⟨bp⟩
-      have : Nonempty (⊢ᵀ List.toFinset (q :: Δ)) := derivation_of_isProper l hl _ hq
+      have : Nonempty (⊢¹ q :: Δ) := derivation_of_isProper l hl _ hq
       rcases this with ⟨bq⟩
-      have : ⊢ᵀ insert (p ⋏ q) Δ.toFinset := and Δ.toFinset p q (by simpa using bp) (by simpa using bq)
-      exact ⟨this.cast (by simp[H])⟩
+      have : ⊢¹ p ⋏ q :: Δ := and (by simpa using bp) (by simpa using bq)
+      exact ⟨this.weakening (by simp[H])⟩
     · exact derivation_of_isProper l hl _ (by simpa[sequents] using hΔ)
   | (Code.or p q, Γ) :: l,  H, Δ, hΔ => by
     simp[isProper] at H; rcases H with ⟨⟨hl, H⟩, hpq⟩
     simp[sequents] at hΔ; rcases hΔ with (rfl | hΔ)
     · rcases derivation_of_isProper l hl _ hpq with ⟨b⟩
-      have : ⊢ᵀ insert (p ⋎ q) Δ.toFinset := DerivationCR.or Δ.toFinset p q (by simpa using b)
-      exact ⟨this.cast (by simp[H])⟩
+      have : ⊢¹ p ⋎ q :: Δ := Derivation.or (by simpa using b)
+      exact ⟨this.weakening (by simp[H])⟩
     · exact derivation_of_isProper l hl _ (by simpa[sequents] using hΔ)
   | (Code.all p, Γ) :: l,   H, Δ, hΔ => by
     simp[isProper] at H; rcases H with ⟨⟨hl, H⟩, hp⟩
     simp[sequents] at hΔ; rcases hΔ with (rfl | hΔ)
     · rcases derivation_of_isProper l hl _ hp with ⟨b⟩
-      have : ⊢ᵀ insert (∀' p) Δ.toFinset :=
-        DerivationCR.all Δ.toFinset p (by simpa[shifts, List.toFinset_map, Finset.map_eq_image] using b)
-      exact ⟨this.cast (by simp[H])⟩
+      have : ⊢¹ (∀' p) :: Δ :=
+        Derivation.all (by simpa[shifts, List.toFinset_map, Finset.map_eq_image] using b)
+      exact ⟨this.weakening (by simp[H])⟩
     · exact derivation_of_isProper l hl _ (by simpa[sequents] using hΔ)
   | (Code.ex p t, Γ) :: l,    H, Δ, hΔ => by
     simp[isProper] at H; rcases H with ⟨⟨hl, H⟩, hp⟩
     simp[sequents] at hΔ; rcases hΔ with (rfl | hΔ)
     · rcases derivation_of_isProper l hl _ hp with ⟨b⟩
-      have : ⊢ᵀ insert (∃' p) Δ.toFinset := DerivationCR.ex Δ.toFinset t p (by simpa using b)
-      exact ⟨this.cast (by simp[H])⟩
+      have : ⊢¹ (∃' p) :: Δ := Derivation.ex t (by simpa using b)
+      exact ⟨this.weakening (by simp[H])⟩
     · exact derivation_of_isProper l hl _ (by simpa[sequents] using hΔ)
   | (Code.wk E,   Γ) :: l,    H, Δ, hΔ => by
     simp[isProper] at H; rcases H with ⟨⟨hl, H⟩, h⟩
     simp[sequents] at hΔ; rcases hΔ with (rfl | hΔ)
     · rcases derivation_of_isProper l hl E h with ⟨b⟩
-      exact ⟨b.weakening (by intro x; simp; intro hx; exact H hx)⟩
+      exact ⟨b.weakening H⟩
     · exact derivation_of_isProper l hl _ (by simpa[sequents] using hΔ)
 
-noncomputable def ofDerivation : {Γ : Sequent L} → ⊢ᵀ Γ → ProofList L
-  | _, DerivationCR.axL Γ r v _ _   => [(Code.axL r v, Γ.toList)]
-  | _, DerivationCR.verum Γ _       => [(Code.verum, Γ.toList)]
-  | _, DerivationCR.and Γ p q bp bq =>
-    (Code.and p q, (insert (p ⋏ q) Γ).toList) ::
-    (Code.wk (insert p Γ).toList, p :: (insert (p ⋏ q) Γ).toList) ::
-    (Code.wk (insert q Γ).toList, q :: (insert (p ⋏ q) Γ).toList) :: (ofDerivation bp ++ ofDerivation bq)
-  | _, DerivationCR.or Γ p q bpq    =>
-    (Code.or p q, (insert (p ⋎ q) Γ).toList) ::
-    (Code.wk (insert p $ insert q Γ).toList, p :: q :: (insert (p ⋎ q) Γ).toList) :: ofDerivation bpq
-  | _, DerivationCR.all Γ p b       =>
-    (Code.all p, (insert (∀' p) Γ).toList) ::
-    (Code.wk (insert (Rew.free.hom p) $ shifts Γ).toList, Rew.free.hom p :: (insert (∀' p) Γ).toList.map Rew.shift.hom) :: ofDerivation b
-  | _, DerivationCR.ex Γ t p b      =>
-    (Code.ex p t, (insert (∃' p) Γ).toList) ::
-    (Code.wk (insert ((Rew.substs ![t]).hom p) Γ).toList, (Rew.substs ![t]).hom p :: (insert (∃' p) Γ).toList) :: ofDerivation b
+noncomputable def ofDerivation : {Γ : Sequent L} → { d : ⊢¹ Γ // CutFree d } → ProofList L
+  | _, ⟨axL Γ r v, _⟩          => [(Code.axL r v, .rel r v :: .nrel r v :: Γ)]
+  | _, ⟨verum Γ, _⟩            => [(Code.verum, ⊤ :: Γ)]
+  | _, ⟨@and _ Γ p q bp bq, H⟩ =>
+    have H : CutFree bp ∧ CutFree bq := by simpa [CutFree] using H
+    (Code.and p q, p ⋏ q :: Γ) ::
+    (Code.wk (p :: Γ), p :: p ⋏ q :: Γ) ::
+    (Code.wk (q :: Γ), q :: p ⋏ q :: Γ) :: (ofDerivation ⟨bp, H.1⟩ ++ ofDerivation ⟨bq, H.2⟩)
+  | _, ⟨@or _ Γ p q bpq, H⟩    =>
+    (Code.or p q, p ⋎ q :: Γ) :: (Code.wk (p :: q :: Γ), p :: q :: (p ⋎ q :: Γ)) :: ofDerivation ⟨bpq, by simpa[CutFree] using H⟩
+  | _, ⟨@all _ Γ p b, H⟩       =>
+    (Code.all p, (∀' p) :: Γ) ::
+    (Code.wk (Rew.free.hom p :: shifts Γ), Rew.free.hom p :: ((∀' p) :: Γ).map Rew.shift.hom) :: ofDerivation ⟨b, by simpa[CutFree] using H⟩
+  | _, ⟨@ex _ Γ p t b, H⟩      =>
+    (Code.ex p t, (∃' p) :: Γ) :: (Code.wk (p/[t] :: Γ), p/[t] :: (∃' p) :: Γ) :: ofDerivation ⟨b, by simpa[CutFree] using H⟩
+  | _, ⟨@wk _ Γ Γ' b _, H⟩     =>
+    (Code.wk Γ, Γ') :: ofDerivation ⟨b, by simpa[CutFree] using H⟩
+  termination_by ofDerivation d => length d.val
 
-lemma mem_ofDerivation {Γ : Sequent L} (b : ⊢ᵀ Γ) : Γ.toList ∈ sequents (ofDerivation b) := by
+lemma mem_ofDerivation {Γ : Sequent L} (b : { d : ⊢¹ Γ // CutFree d }) : Γ ∈ sequents (ofDerivation b) := by
+  rcases b with ⟨b, hb⟩
   cases b <;> simp[ofDerivation, sequents]
   { contradiction }
 
@@ -271,44 +274,51 @@ lemma Finset.mem_cons_cons [DecidableEq α] (s : Finset α) (a b : α) : s ⊆ i
 lemma Finset.toList_subset_toList {s₁ s₂ : Finset α} : s₁.toList ⊆ s₂.toList ↔ s₁ ⊆ s₂ := by
   simp[List.subset_def]; rfl
 
-lemma isProper_ofDerivation : ∀ {Γ : Sequent L} (b : ⊢ᵀ Γ), isProper (ofDerivation b)
-  | _, DerivationCR.axL Γ r v h₁ h₂ => by simp[ofDerivation, isProper, h₁, h₂]
-  | _, DerivationCR.verum Γ h       => by simp[ofDerivation, isProper, h]
-  | _, DerivationCR.and Γ p q bp bq => by
+lemma isProper_ofDerivation : ∀ {Γ : Sequent L} (b : { d : ⊢¹ Γ // CutFree d }), isProper (ofDerivation b)
+  | _, ⟨@axL _ Γ _ r v, _⟩     => by simp[ofDerivation, isProper]
+  | _, ⟨@verum _ Γ, _⟩         => by simp[ofDerivation, isProper]
+  | _, ⟨@and _ Γ p q bp bq, H⟩ => by
+    have H : CutFree bp ∧ CutFree bq := by simpa [CutFree] using H
+    simp[ofDerivation]
     simp[isProper, sequents_cons, List.mem_cons_cons, mem_ofDerivation]
-    exact ⟨⟨isProper_append (isProper_ofDerivation bp) (isProper_ofDerivation bq), by simp[List.subset_def]; intro x hx; exact Or.inr (Or.inr hx)⟩,
-      by simp[List.subset_def]; intro x hx; exact Or.inr (Or.inr hx)⟩
-  | _, DerivationCR.or Γ p q bpq    => by
+    exact isProper_append (isProper_ofDerivation ⟨bp, H.1⟩) (isProper_ofDerivation ⟨bq, H.2⟩)
+  | _, ⟨@or _ Γ p q b, H⟩      => by
+    simp[ofDerivation]
     simp[isProper, sequents_cons, List.mem_cons_cons, mem_ofDerivation]
-    exact ⟨isProper_ofDerivation bpq, by simp[List.subset_def]; intro x hx; simp[hx]⟩
-  | _, DerivationCR.all Γ p b       => by
+    exact ⟨isProper_ofDerivation ⟨b, by simpa[CutFree] using H⟩, by simp[List.subset_def]; intro x hx; simp[hx]⟩
+  | _, ⟨@all _ Γ p b, H⟩       => by
+    simp[ofDerivation]
     simp[isProper, sequents_cons, List.mem_cons_cons, mem_ofDerivation]
-    exact ⟨isProper_ofDerivation b, by simp[List.subset_def, shifts_eq_image]; intro x hx; exact (Or.inr $ Or.inr $ ⟨x, hx, rfl⟩)⟩
-  | _, DerivationCR.ex Γ t p b      => by
+    exact ⟨isProper_ofDerivation ⟨b, by simpa[CutFree] using H⟩, List.subset_cons_of_subset _ $ List.subset_cons_of_subset _ $ by simp[shifts]⟩
+  | _, ⟨@ex _ Γ p t b, H⟩      => by
+    simp[ofDerivation]
     simp[isProper, sequents_cons, List.mem_cons_cons, mem_ofDerivation]
-    exact ⟨isProper_ofDerivation b, by simp[List.subset_def]; intro x hx; simp[hx]⟩
+    exact isProper_ofDerivation ⟨b, by simpa[CutFree] using H⟩
+  | _, ⟨@wk _ Γ Γ' b ss, H⟩    => by
+    simp[ofDerivation]
+    simp[isProper, sequents_cons, List.mem_cons_cons, mem_ofDerivation, ss]
+    exact isProper_ofDerivation ⟨b, by simpa[CutFree] using H⟩
+  termination_by isProper_ofDerivation d => length d.val
 
-lemma derivable_iff_isProper {Γ : Sequent L} : Nonempty (⊢ᵀ Γ) ↔ ∃ l, isProper l ∧ Γ.toList ∈ sequents l :=
-  ⟨by rintro ⟨b⟩; exact ⟨ofDerivation b, isProper_ofDerivation b, mem_ofDerivation b⟩,
-   by rintro ⟨l, hl⟩; rcases derivation_of_isProper l hl.1 _ hl.2 with ⟨d⟩; exact ⟨d.cast (by simp)⟩⟩
+lemma derivable_iff_isProper {Γ : Sequent L} : Nonempty (⊢¹ Γ) ↔ ∃ l, isProper l ∧ Γ ∈ sequents l :=
+  ⟨by rintro h
+      rcases iff_cut.mpr h with ⟨b⟩
+      exact ⟨ofDerivation b, isProper_ofDerivation b, mem_ofDerivation b⟩,
+   by rintro ⟨l, hl⟩
+      rcases derivation_of_isProper l hl.1 _ hl.2 with ⟨d⟩
+      exact ⟨d⟩⟩
 
 lemma provable_iff {T : Theory L} [DecidablePred T] {σ : Sentence L} :
-    Nonempty (T ⊢ σ) ↔ ∃ l, ∃ U : List (Sentence L), (U.map (~·)).all (T ·) ∧ (σ :: U).map Rew.emb.hom ∈ sequents l ∧ isProper l := by
+    T ⊢! σ ↔ ∃ l, ∃ U : List (Sentence L), U.all (T ·) ∧ (σ :: U.map (~·)).map Rew.emb.hom ∈ sequents l ∧ isProper l := by
   exact ⟨by
     rintro ⟨U, hU, d⟩
-    rcases derivable_iff_isProper.mp (iff_cut.mpr ⟨d⟩) with ⟨l, hl, hmem⟩
-    let l' := (Code.wk ((insert σ U).image Rew.emb.hom).toList, ((σ :: U.toList).map Rew.emb.hom)) :: l
-    have hl' : isProper l' := by simp[isProper, hl]; exact ⟨by simp[List.subset_def], by simp[Finset.insert_eq, hmem]⟩
-    exact ⟨l', U.toList, by
-      simp[List.subsetSet]; intro x hx
-      have : ∃ y ∈ T, ~y = x := by simpa using hU hx
-      rcases this with ⟨y, hy, rfl⟩; simpa[hy], by simp, hl'⟩,
+    rcases derivable_iff_isProper.mp ⟨d⟩ with ⟨l, hl, hmem⟩
+    let l' := (Code.wk ((U.map (~·) ++ [σ]).map Rew.emb.hom), ((σ :: U.map (~·)).map Rew.emb.hom)) :: l
+    have hl' : isProper l' := by simpa[isProper, hl] using hmem
+    exact ⟨l', U, by simpa[List.subsetSet] using hU, by simp, hl'⟩,
   by rintro ⟨l, U, hU, hl, hproper⟩
      rcases derivation_of_isProper l hproper _ hl with ⟨d⟩
-     exact ⟨{
-       leftHand := U.toFinset
-       hleftHand := by intro x; simp; intro hx; exact ⟨~x, by { simp at hU; exact ⟨hU x hx, by simp⟩ }⟩
-       derivation := cutWeakeningCut (d.cast (by simp[List.toFinset_map, Finset.insert_eq])) }⟩⟩
+     exact Gentzen.provable_iff.mpr ⟨U, by simpa using hU, ⟨Derivation.toOneSided (d.wk $ by simp)⟩⟩⟩
 
 end ProofList
 
@@ -318,14 +328,14 @@ open Derivation ProofList
 
 def isProofFn (T : Theory L) [DecidablePred T] : Sentence L → ℕ → Bool :=
   fun σ e => (decode e : Option (ProofList L × List (Sentence L))).casesOn false
-  <| fun A => bif (A.2.map (~·)).all (T ·) && (σ :: A.2).map Rew.emb.hom ∈ sequents A.1 && isProper A.1 then true else false
+  <| fun A => bif A.2.all (T ·) && (σ :: A.2.map (~·)).map Rew.emb.hom ∈ sequents A.1 && isProper A.1 then true else false
 
 -- TODO: move to Vorspiel
 def Bool.toOpt : Bool → Option Unit := fun b => bif b then some () else none
 
-@[simp] lemma isSome_bool_to_opt (b) : Option.isSome (Bool.toOpt b) = b := by cases b <;> simp
+@[simp] lemma isSome_bool_to_opt (b) : Option.isSome (Bool.toOpt b) = b := by cases b <;> simp[Bool.toOpt]
 
-@[simp] lemma to_opt_eq_some_iff (b) : Bool.toOpt b = some () ↔ b := by cases b <;> simp
+@[simp] lemma to_opt_eq_some_iff (b) : Bool.toOpt b = some () ↔ b := by cases b <;> simp[Bool.toOpt]
 
 def provableFn (T : Theory L) [DecidablePred T] : Sentence L →. Unit := fun x =>
   Nat.rfindOpt (fun e => Bool.toOpt (isProofFn T x e))
@@ -336,7 +346,7 @@ lemma provable_iff_isProofFn {T : Theory L} [DecidablePred T] {σ : Sentence L} 
   constructor
   · rintro ⟨l, U, hU, hl, hproper⟩
     use encode (l, U)
-    have : (U.map (~·)).all (T ·) := by simp; intro x hx; exact hU x hx
+    have : U.all (T ·) := by simp; intro x hx; exact hU x hx
     simp[hU, hl, hproper, this]
   · simp; intro e
     rcases decode e.unpair.1 with (_ | ⟨l⟩) <;> simp
@@ -370,12 +380,13 @@ lemma isProofFn_computable :
     (dom_bool₂.comp
       (dom_bool₂.comp
         (list_all (Theory.Computable.comp.comp Computable₂.right)
-          (Primrec.to_comp $ Primrec.list_map (Primrec.snd.comp .snd) (Subformula.neg_primrec.comp₂ .right)))
+          (Computable.snd.comp .snd))
         (Primrec.to_comp $ by
           apply Primrec.list_mem.comp
             (Primrec.list_map
-              (Primrec.list_cons.comp (Primrec.fst.comp .fst) (Primrec.snd.comp .snd))
-                <| Subformula.emb_primrec.comp₂ .right)
+              (Primrec.list_cons.comp (Primrec.fst.comp .fst)
+                (Primrec.list_map (Primrec.snd.comp .snd) $ Semiformula.neg_primrec.comp₂ .right))
+                <| Semiformula.emb_primrec.comp₂ .right)
             (Primrec.list_map (Primrec.fst.comp .snd) <| Primrec.snd.comp₂ .right)))
       (Primrec.to_comp $ isProper_primrec.comp $ Primrec.fst.comp .snd))
     (const true)

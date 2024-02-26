@@ -1,4 +1,4 @@
-import Logic.FirstOrder.Basic.Semantics
+import Logic.FirstOrder.Basic.Semantics.Semantics
 
 namespace LO
 
@@ -8,7 +8,8 @@ section
 
 variable {L : Language}
 variable {M : Type*} {M₁ : Type*} {M₂ : Type*} {M₃ : Type*}
-variable [s : Structure L M] [s₁ : Structure L M₁] [s₂ : Structure L M₂] [s₃ : Structure L M₃]
+variable [Nonempty M] [Nonempty M₁] [Nonempty M₂] [Nonempty M₃]
+  [s : Structure L M] [s₁ : Structure L M₁] [s₂ : Structure L M₂] [s₃ : Structure L M₃]
 
 namespace Structure
 
@@ -75,9 +76,9 @@ protected lemma func {k} (f : L.Func k) (v : Fin k → M₁) :
 protected lemma rel {k} (r : L.Rel k) (v : Fin k → M₁) :
     s₁.rel r v → s₂.rel r (φ ∘ v) := map_rel φ r v
 
-lemma val_term (e : Fin n → M₁) (ε : μ → M₁) (t : Subterm L μ n) :
+lemma val_term (e : Fin n → M₁) (ε : μ → M₁) (t : Semiterm L μ n) :
     φ (t.val s₁ e ε) = t.val s₂ (φ ∘ e) (φ ∘ ε) := by
-  induction t <;> simp[*, Subterm.val_func, HomClass.func, Function.comp]
+  induction t <;> simp[*, Semiterm.val_func, HomClass.func, Function.comp]
 
 end HomClass
 
@@ -149,38 +150,40 @@ end ClosedSubset
 
 end Structure
 
-namespace Subformula
+namespace Semiformula
 open Structure
 
 variable {F : Type*} [EmbeddingClass F L M₁ M₂] (φ : F)
 variable {e₁ : Fin n → M₁} {ε₁ : μ → M₁}
 
-lemma eval_hom_iff_of_qfree : ∀ {n} {e₁ : Fin n → M₁} {ε₁ : μ → M₁} {p : Subformula L μ n}, p.qfree →
+lemma eval_hom_iff_of_open : ∀ {n} {e₁ : Fin n → M₁} {ε₁ : μ → M₁} {p : Semiformula L μ n}, p.Open →
     (Eval s₁ e₁ ε₁ p ↔ Eval s₂ (φ ∘ e₁) (φ ∘ ε₁) p)
   | _, e₁, ε₁, ⊤,        _ => by simp
   | _, e₁, ε₁, ⊥,        _ => by simp
   | _, e₁, ε₁, rel r v,  _ => by simp[Function.comp, eval_rel, ←EmbeddingClass.rel φ, HomClass.val_term]
   | _, e₁, ε₁, nrel r v, _ => by simp[Function.comp, eval_nrel, ←EmbeddingClass.rel φ, HomClass.val_term]
-  | _, e₁, ε₁, p ⋏ q,    h => by simp at h ⊢; simp[eval_hom_iff_of_qfree h.1, eval_hom_iff_of_qfree h.2]
-  | _, e₁, ε₁, p ⋎ q,    h => by simp at h ⊢; simp[eval_hom_iff_of_qfree h.1, eval_hom_iff_of_qfree h.2]
+  | _, e₁, ε₁, p ⋏ q,    h => by simp at h ⊢; simp[eval_hom_iff_of_open h.1, eval_hom_iff_of_open h.2]
+  | _, e₁, ε₁, p ⋎ q,    h => by simp at h ⊢; simp[eval_hom_iff_of_open h.1, eval_hom_iff_of_open h.2]
 
-lemma eval_hom_univClosure {n} {ε₁ : μ → M₁} {p : Subformula L μ n} (hp : p.qfree) :
+lemma eval_hom_univClosure {n} {ε₁ : μ → M₁} {p : Semiformula L μ n} (hp : p.Open) :
     Val s₂ (φ ∘ ε₁) (univClosure p) → Val s₁ ε₁ (univClosure p) := by
-  simp; intro h e₁; exact (eval_hom_iff_of_qfree φ hp).mpr (h (φ ∘ e₁))
+  simp; intro h e₁; exact (eval_hom_iff_of_open φ hp).mpr (h (φ ∘ e₁))
 
-end Subformula
+end Semiformula
 
 end
 
 section
 
-variable {L : Language} {M₁ : Type u} {M₂ : Type u} [s₁ : Structure L M₁] [s₂ : Structure L M₂]
+variable {L : Language} {M : Type u} {M₁ : Type u} {M₂ : Type u} {M₃ : Type u}
+variable [Nonempty M] [Nonempty M₁] [Nonempty M₂] [Nonempty M₃]
+  [s : Structure L M] [s₁ : Structure L M₁] [s₂ : Structure L M₂] [s₃ : Structure L M₃]
 
 namespace Structure
 
 variable (L M₁ M₂)
 
-def ElementaryEquiv : Prop := ∀ σ : Sentence L, M₁ ⊧ σ ↔ M₂ ⊧ σ
+def ElementaryEquiv : Prop := ∀ σ : Sentence L, M₁ ⊧ₘ σ ↔ M₂ ⊧ₘ σ
 
 notation:50 M₁ " ≡ₑ[" L "] " M₂ => ElementaryEquiv L M₁ M₂
 
@@ -189,24 +192,24 @@ variable {L M₁ M₂}
 namespace ElementaryEquiv
 
 @[refl]
-lemma refl (M) [Structure L M] : M ≡ₑ[L] M := fun σ => by rfl
+lemma refl (M) [Nonempty M] [Structure L M] : M ≡ₑ[L] M := fun σ => by rfl
 
 @[symm]
-lemma symm {M₁ M₂} [Structure L M₁] [Structure L M₂] : (M₁ ≡ₑ[L] M₂) → (M₂ ≡ₑ[L] M₁) :=
+lemma symm : (M₁ ≡ₑ[L] M₂) → (M₂ ≡ₑ[L] M₁) :=
   fun h σ => (h σ).symm
 
 @[trans]
-lemma trans {M₁ M₂ M₃ : Type u} [Structure L M₁] [Structure L M₂] [Structure L M₃] :
+lemma trans :
     (M₁ ≡ₑ[L] M₂) → (M₂ ≡ₑ[L] M₃) → (M₁ ≡ₑ[L] M₃) :=
   fun h₁ h₂ σ => Iff.trans (h₁ σ) (h₂ σ)
 
-lemma models {M₁ M₂} [Structure L M₁] [Structure L M₂] (h : M₁ ≡ₑ[L] M₂) :
-    ∀ {σ : Sentence L}, M₁ ⊧ σ ↔ M₂ ⊧ σ := @h
+lemma models (h : M₁ ≡ₑ[L] M₂) :
+    ∀ {σ : Sentence L}, M₁ ⊧ₘ σ ↔ M₂ ⊧ₘ σ := @h
 
-lemma modelsTheory {M₁ M₂} [Structure L M₁] [Structure L M₂] (h : M₁ ≡ₑ[L] M₂) {T : Theory L} :
-    M₁ ⊧* T ↔ M₂ ⊧* T := by simp[modelsTheory_iff, h.models]
+lemma modelsTheory (h : M₁ ≡ₑ[L] M₂) {T : Theory L} :
+    M₁ ⊧ₘ* T ↔ M₂ ⊧ₘ* T := by simp[modelsTheory_iff, h.models]
 
-lemma ofEquiv [Structure L M] (φ : M ≃ N) :
+lemma ofEquiv [Nonempty N] (φ : M ≃ N) :
     letI : Structure L N := Structure.ofEquiv φ
     M ≡ₑ[L] N := fun σ => by
   letI : Structure L N := Structure.ofEquiv φ
@@ -221,24 +224,24 @@ section EmbeddingClass
 variable {F : Type*} [Structure.EmbeddingClass F L M₁ M₂] (φ : F)
 variable {e₁ : Fin n → M₁} {ε₁ : μ → M₁}
 
-lemma models_hom_iff_of_qfree {σ : Sentence L} (hσ : σ.qfree) : M₁ ⊧ σ ↔ M₂ ⊧ σ := by
+lemma models_hom_iff_of_open {σ : Sentence L} (hσ : σ.Open) : M₁ ⊧ₘ σ ↔ M₂ ⊧ₘ σ := by
   simpa[Matrix.empty_eq, Empty.eq_elim] using
-    Subformula.eval_hom_iff_of_qfree (e₁ := finZeroElim) (ε₁ := Empty.elim) φ hσ
+    Semiformula.eval_hom_iff_of_open (e₁ := finZeroElim) (ε₁ := Empty.elim) φ hσ
 
-lemma models_hom_univClosure {n} {σ : Subsentence L n} (hσ : σ.qfree) :
-    M₂ ⊧ (univClosure σ) → M₁ ⊧ (univClosure σ) := by
+lemma models_hom_univClosure {n} {σ : Semisentence L n} (hσ : σ.Open) :
+    M₂ ⊧ₘ (univClosure σ) → M₁ ⊧ₘ (univClosure σ) := by
   simpa[Matrix.empty_eq, Empty.eq_elim, models_iff] using
-    Subformula.eval_hom_univClosure (ε₁ := Empty.elim) φ hσ
+    Semiformula.eval_hom_univClosure (ε₁ := Empty.elim) φ hσ
 
-lemma models_hom_univClosure_of_submodels (H : M₁ ↪ₛ[L] M₂) {n} {σ : Subsentence L n} (hσ : σ.qfree) :
-    M₂ ⊧ (univClosure σ) → M₁ ⊧ (univClosure σ) := models_hom_univClosure H hσ
+lemma models_hom_univClosure_of_submodels (H : M₁ ↪ₛ[L] M₂) {n} {σ : Semisentence L n} (hσ : σ.Open) :
+    M₂ ⊧ₘ (univClosure σ) → M₁ ⊧ₘ (univClosure σ) := models_hom_univClosure H hσ
 
 section
 
-open Subformula
+open Semiformula
 variable [s : Structure L M] (φ : M ≃ N)
 
-lemma ElementaryEquiv.ofEquiv :
+lemma ElementaryEquiv.ofEquiv [Nonempty N] :
     letI : Structure L N := Structure.ofEquiv φ
     M ≡ₑ[L] N := fun σ => by
   letI : Structure L N := Structure.ofEquiv φ
@@ -249,15 +252,6 @@ end
 end EmbeddingClass
 
 end
-
-section Definability
-
-variable {L : Language.{u}} {α : Type u} [Structure L α]
-
-def DefinableIn {k} (C : Set (Subsentence L k)) (R : Set (Fin k → α)) : Prop :=
-  ∃ p ∈ C, ∀ v, v ∈ R ↔ Subformula.PVal! α v p
-
-end Definability
 
 end FirstOrder
 

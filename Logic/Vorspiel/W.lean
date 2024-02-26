@@ -44,7 +44,7 @@ abbrev ofWType (w : WType β) (n) (h : w.depth ≤ n) : SubWType β n := ⟨w, h
 
 @[simp] lemma depth_le (t : SubWType β n) : t.val.depth ≤ n := t.property
 
-def elim' (γ : Type*) (fγ : (Σ a : α, β a → γ) → γ) (s) : SubWType β s → γ := fun ⟨t, _⟩ => t.elim γ fγ
+abbrev elim' (γ : Type*) (fγ : (Σ a : α, β a → γ) → γ) (s) : SubWType β s → γ := fun ⟨t, _⟩ => t.elim γ fγ
 
 lemma elim_const {w₁ : SubWType β s₁} {w₂ : SubWType β s₂} (h : w₁.val = w₂.val) (γ) (fγ : (Σ a : α, β a → γ) → γ) :
     elim' γ fγ s₁ w₁ = elim' γ fγ s₂ w₂ := by
@@ -124,9 +124,10 @@ lemma elimDecode_eq_induction (f : α → List γ → γ) (s e) :
         $ fun a => (((Denumerable.ofNat (List ℕ) e.unpair.2).mapM' (elimDecode β f s)).bind
           $ fun l => if l.length = Fintype.card (β a) then some l else none).map
             $ fun v => f a v) := by
+  unfold elimDecode
   rcases s with (_ | s)
-  · simp[elimDecode]
-  · simp[elimDecode, SubWType.decode_succ, Option.map_bind', decode_list, Function.comp, List.mapM'_option_map]; congr
+  · simp
+  · simp[SubWType.decode_succ, Option.map_bind', decode_list, Function.comp, List.mapM'_option_map]; congr
     funext a
     rcases hw : List.mapM' (decode : ℕ → Option (SubWType β s)) (Denumerable.ofNat (List ℕ) e.unpair.2) with (_ | w) <;> simp
     { simp[List.toVector]
@@ -208,7 +209,7 @@ lemma encode_eq_elim' : ∀ w : SubWType β s, encode w = elim' ℕ encode s w :
       { exact this }
       rw[Encodable.encode_sigma_val, Encodable.encode_sigma_val, encode_fintypeArrow, encode_finArrow, encode_list]
       simp[Function.comp]; rw[←encode_finArrow, encode_fintypeArrow (β a)]; simp
-      congr; funext i; simp; rw[ih]; rfl }
+      congr; funext i; simp; rw[ih] }
 
 lemma encodeDecode_eq_elimDecode (s e : ℕ) : encodeDecode (SubWType β s) e = elimDecode β (fun a l => encode (a, l)) s e := by
   simp[elimDecode, encodeDecode_eq_encode_map_decode]
@@ -290,6 +291,7 @@ lemma elim_eq_elimL [Inhabited γ] (f : (a : α) × (β a → γ) → γ) :
 
 lemma decode_elimL_eq (f : α → List γ → γ) :
     (decode e : Option (WType β)).map (elimL f) = (SubWType.elimDecode β f e.unpair.1 e.unpair.2) := by
+  unfold elimL
   simp[elimL, decode_eq, Function.comp, SubWType.elimDecode, SubWType.elim']
   rcases (decode e.unpair.2) with (_ | ⟨_, _⟩) <;> simp[SubWType.toW]
 
@@ -312,9 +314,10 @@ def mk₁ (a : α) (w : WType β) : Option (WType β) := mkL a [w]
 def mkFin {k} (a : α) (v : Fin k → WType β) : Option (WType β) := mkL a (List.ofFn v)
 
 lemma encode_mk_eq (a : α) (f : β a → WType β) :
-    encode (mk a f) = (Finset.sup Finset.univ (fun n => (f n).depth) + 1).pair ((encode a).pair (encode $ fun b => (encode $ f b).unpair.2)) := by
+    encode (mk a f) =
+    (Finset.sup Finset.univ (fun n => (f n).depth) + 1).pair ((encode a).pair (encode $ fun b => (encode $ f b).unpair.2)) := by
   simp[encode_eq, SubWType.ofW, depth, SubWType.encode_mk]
-  funext b; simp[SubWType.encode_eq_elim']; apply SubWType.elim_const; simp
+  funext b; simp[SubWType.encode_eq_elim']
 
 lemma mk₀_eq (a : α) [h : IsEmpty (β a)] : mk₀ a = some (⟨a, h.elim'⟩ : WType β) := by
   simp[mk₀, mkL, Fintype.card_eq_zero_iff.mpr h]

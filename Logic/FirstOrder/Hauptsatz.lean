@@ -4,13 +4,13 @@ namespace LO
 
 namespace FirstOrder
 
-open Subformula
+open Semiformula
 
 variable {L : Language.{u}} [∀ k, DecidableEq (L.Func k)] [∀ k, DecidableEq (L.Rel k)]
 
-namespace Subformula
+namespace Semiformula
 
-def isVType : {n : ℕ} → Subformula L μ n → Bool
+def isVType : {n : ℕ} → Semiformula L μ n → Bool
   | _, rel _ _  => true
   | _, nrel _ _ => true
   | _, ⊤        => true
@@ -20,277 +20,412 @@ def isVType : {n : ℕ} → Subformula L μ n → Bool
   | _, ∀' _     => false
   | _, ∃' _     => true
 
-lemma ne_and_of_isVType {p q r : Subformula L μ n} (h : isVType p) : p ≠ q ⋏ r := by rintro rfl; simp[isVType] at h
+lemma ne_and_of_isVType {p q r : Semiformula L μ n} (h : isVType p) : p ≠ q ⋏ r := by rintro rfl; simp[isVType] at h
 
-lemma ne_all_of_isVType {p : Subformula L μ n} {q} (h : isVType p) : p ≠ ∀' q := by rintro rfl; simp[isVType] at h
+lemma ne_all_of_isVType {p : Semiformula L μ n} {q} (h : isVType p) : p ≠ ∀' q := by rintro rfl; simp[isVType] at h
 
-@[simp] lemma isVType_shift_iff {p : SyntacticSubformula L n} : isVType (Rew.shift.hom p) = isVType p := by
+@[simp] lemma isVType_shift_iff {p : SyntacticSemiformula L n} : isVType (Rew.shift.hom p) = isVType p := by
   induction p using rec' <;> simp[Rew.rel, Rew.nrel, isVType]
 
-lemma isVType_neg_true_of_eq_false {p : SyntacticSubformula L n} : isVType p = false → isVType (~p) = true := by
+lemma isVType_neg_true_of_eq_false {p : SyntacticSemiformula L n} : isVType p = false → isVType (~p) = true := by
   induction p using rec' <;> simp[Rew.rel, Rew.nrel, isVType]
 
-end Subformula
+end Semiformula
 
-namespace DerivationCR
+namespace Derivation
 
-variable {P : SyntacticFormula L → Prop} (hP : ∀ f p, P p → P ((Rew.rewrite f).hom p)) {Δ Δ₁ Δ₂ Γ : Sequent L}
+variable {C : Set (SyntacticFormula L)} (hC : ∀ f p, p ∈ C → (Rew.rewrite f).hom p ∈ C) {Δ Δ₁ Δ₂ Γ : Sequent L}
 
-def andInversion₁Aux : {Δ : Sequent L} → (d : ⊢ᶜ[P] Δ) → (p q : SyntacticFormula L) → ⊢ᶜ[P] insert p (Δ.erase (p ⋏ q))
-  | _, axL Δ r v hpos hneg, p, q => axL _ r v (by simp[hpos]) (by simp[hneg])
-  | _, verum Δ h,           p, q => verum _ (by simp[h])
-  | _, and Δ p' q' dp dq,   p, q => by
-    by_cases e : p' = p ∧ q' = q
-    · simp[e]; exact (andInversion₁Aux dp p q).weakening
-        (by simp[Finset.subset_iff]; rintro x hx (rfl | hΔ); { exact Or.inl e.1 }; { exact Or.inr ⟨hx, hΔ⟩ })
-    · have ne : p' ⋏ q' ≠ p ⋏ q := by simp[e]
-      have dp : ⊢ᶜ[P] (insert p' $ insert p (Δ.erase (p ⋏ q))) :=
-        (andInversion₁Aux dp p q).weakening (by simp[Finset.subset_iff]; rintro x hx (rfl | hhx) <;> simp[*])
-      have dq : ⊢ᶜ[P] (insert q' $ insert p (Δ.erase (p ⋏ q))) :=
-        (andInversion₁Aux dq p q).weakening (by simp[Finset.subset_iff]; rintro x hx (rfl | hhx) <;> simp[*])
-      exact (and _ _ _ dp dq).cast (by simp[Finset.erase_insert_of_ne ne, Finset.Insert.comm p])
-  | _, or Δ r s d,          p, q =>
-    have : ⊢ᶜ[P] (insert r $ insert s $ insert p $ Δ.erase (p ⋏ q)) :=
-      (andInversion₁Aux d p q).weakening (by simp[Finset.subset_iff]; rintro x hx (rfl | rfl | hhx) <;> simp[*])
-    (or _ _ _ this).cast (by simp[Finset.erase_insert_of_ne, Finset.Insert.comm p])
-  | _, all Δ r d,           p, q =>
-    have : ⊢ᶜ[P] insert (Rew.free.hom r) (shifts $ insert p $ Δ.erase (p ⋏ q)) :=
-      (andInversion₁Aux d (Rew.shift.hom p) (Rew.shift.hom q)).weakening
-        (by simp[shifts_insert, shifts_erase, Finset.subset_iff]; rintro x hx (rfl | hhx) <;> simp[*])
-    (all _ _ this).cast (by simp[Finset.erase_insert_of_ne, Finset.Insert.comm p])
-  | _, ex Δ t r d,          p, q =>
-    have : ⊢ᶜ[P] insert ([→ t].hom r) (insert p $ Δ.erase (p ⋏ q)) :=
-      (andInversion₁Aux d p q).weakening (by simp[Finset.subset_iff]; rintro x hx (rfl | hhx) <;> simp[*])
-    (ex _ t r this).cast (by simp[Finset.erase_insert_of_ne, Finset.Insert.comm p])
-  | _, cut Δ Γ r hr dΔ dΓ,  p, q =>
-    have dΔ : ⊢ᶜ[P] (insert r $ insert p $ Δ.erase (p ⋏ q)) :=
-      (andInversion₁Aux dΔ p q).weakening (by simp[Finset.subset_iff]; rintro x hx (rfl | hhx) <;> simp[*])
-    have dΓ : ⊢ᶜ[P] (insert (~r) $ insert p $ Γ.erase (p ⋏ q)) :=
-      (andInversion₁Aux dΓ p q).weakening (by simp[Finset.subset_iff]; rintro x hx (rfl | hhx) <;> simp[*])
-    (cut _ _ r hr dΔ dΓ).cast (by simp[Finset.erase_union])
+abbrev Restricted (C : Set (SyntacticFormula L)) (Δ : Sequent L) := {d : ⊢¹ Δ // CutRestricted C d}
 
-def andInversion₁ {p q} (d : ⊢ᶜ[P] insert (p ⋏ q) Δ) : ⊢ᶜ[P] insert p Δ :=
-  (andInversion₁Aux d p q).weakening (by simp; exact Finset.insert_subset_insert _ (Finset.erase_subset _ _))
+scoped notation :45 "⊢ᶜ[" C "] " Γ:45 => Restricted C Γ
 
-def andInversion₂Aux : {Δ : Sequent L} → ⊢ᶜ[P] Δ → (p q : SyntacticFormula L) → ⊢ᶜ[P] insert q (Δ.erase (p ⋏ q))
-  | _, axL Δ r v hpos hneg, p, q => axL _ r v (by simp[hpos]) (by simp[hneg])
-  | _, verum Δ h,           p, q => verum _ (by simp[h])
-  | _, and Δ p' q' dp dq,   p, q => by
-    by_cases e : p' = p ∧ q' = q
-    · simp[e]; exact (andInversion₂Aux dq p q).weakening
-        (by simp[Finset.subset_iff]; rintro x hx (rfl | hΔ); { exact Or.inl e.2 }; { exact Or.inr ⟨hx, hΔ⟩ })
-    · have ne : p' ⋏ q' ≠ p ⋏ q := by simp[e]
-      have dp : ⊢ᶜ[P] (insert p' $ insert q (Δ.erase (p ⋏ q))) :=
-        (andInversion₂Aux dp p q).weakening (by simp[Finset.subset_iff]; rintro x hx (rfl | hhx) <;> simp[*])
-      have dq : ⊢ᶜ[P] (insert q' $ insert q (Δ.erase (p ⋏ q))) :=
-        (andInversion₂Aux dq p q).weakening (by simp[Finset.subset_iff]; rintro x hx (rfl | hhx) <;> simp[*])
-      exact (and _ _ _ dp dq).cast (by simp[Finset.erase_insert_of_ne ne, Finset.Insert.comm q])
-  | _, or Δ r s d,          p, q =>
-    have : ⊢ᶜ[P] (insert r $ insert s $ insert q $ Δ.erase (p ⋏ q)) :=
-      (andInversion₂Aux d p q).weakening (by simp[Finset.subset_iff]; rintro x hx (rfl | rfl | hhx) <;> simp[*])
-    (or _ _ _ this).cast (by simp[Finset.erase_insert_of_ne, Finset.Insert.comm q])
-  | _, all Δ r d,           p, q =>
-    have : ⊢ᶜ[P] insert (Rew.free.hom r) (shifts $ insert q $ Δ.erase (p ⋏ q)) :=
-      (andInversion₂Aux d (Rew.shift.hom p) (Rew.shift.hom q)).weakening
-        (by simp[shifts_insert, shifts_erase, Finset.subset_iff]; rintro x hx (rfl | hhx) <;> simp[*])
-    (all _ _ this).cast (by simp[Finset.erase_insert_of_ne, Finset.Insert.comm q])
-  | _, ex Δ t r d,          p, q =>
-    have : ⊢ᶜ[P] insert ([→ t].hom r) (insert q $ Δ.erase (p ⋏ q)) :=
-      (andInversion₂Aux d p q).weakening (by simp[Finset.subset_iff]; rintro x hx (rfl | hhx) <;> simp[*])
-    (ex _ t r this).cast (by simp[Finset.erase_insert_of_ne, Finset.Insert.comm q])
-  | _, cut Δ Γ r hr dΔ dΓ,  p, q =>
-    have dΔ : ⊢ᶜ[P] (insert r $ insert q $ Δ.erase (p ⋏ q)) :=
-      (andInversion₂Aux dΔ p q).weakening (by simp[Finset.subset_iff]; rintro x hx (rfl | hhx) <;> simp[*])
-    have dΓ : ⊢ᶜ[P] (insert (~r) $ insert q $ Γ.erase (p ⋏ q)) :=
-      (andInversion₂Aux dΓ p q).weakening (by simp[Finset.subset_iff]; rintro x hx (rfl | hhx) <;> simp[*])
-    (cut _ _ r hr dΔ dΓ).cast (by simp[Finset.erase_union])
+abbrev RestrictedComplexity (c : ℕ) (Δ : Sequent L) := ⊢ᶜ[{p | p.complexity < c}] Δ
 
-def andInversion₂ {p q} (d : ⊢ᶜ[P] insert (p ⋏ q) Δ) : ⊢ᶜ[P] insert q Δ :=
-  (andInversion₂Aux d p q).weakening (by simp; exact Finset.insert_subset_insert _ (Finset.erase_subset _ _))
+scoped notation :45 "⊢ᶜ[< " c "] " Γ:45 => RestrictedComplexity c Γ
 
+namespace Restricted
 
-def allInversionAux : {Δ : Sequent L} → ⊢ᶜ[P] Δ →
-    (p : SyntacticSubformula L 1) → (t : SyntacticTerm L) → ⊢ᶜ[P] insert ([→ t].hom p) (Δ.erase (∀' p))
-  | _, axL Δ r v hpos hneg, p, t => axL _ r v (by simp[hpos]) (by simp[hneg])
-  | _, verum Δ h,           p, t => verum _ (by simp[h])
-  | _, and Δ r s dr ds,     p, t =>
-      have dr : ⊢ᶜ[P] (insert r $ insert ([→ t].hom p) $ Δ.erase (∀' p)) :=
-        (allInversionAux dr p t).weakening (by simp[Finset.subset_iff]; rintro x hx (rfl | hhx) <;> simp[*])
-      have ds : ⊢ᶜ[P] (insert s $ insert ([→ t].hom p) $ Δ.erase (∀' p)) :=
-        (allInversionAux ds p t).weakening (by simp[Finset.subset_iff]; rintro x hx (rfl | hhx) <;> simp[*])
-      (and _ _ _ dr ds).cast (by simp[Finset.erase_insert_of_ne, Finset.Insert.comm])
-  | _, or Δ r s d,          p, t =>
-      have : ⊢ᶜ[P] (insert r $ insert s $ insert ([→ t].hom p) $ Δ.erase (∀' p)) :=
-        (allInversionAux d p t).weakening (by simp[Finset.subset_iff]; rintro x hx (rfl | rfl | hhx) <;> simp[*])
-      (or _ _ _ this).weakening (by simp[Finset.erase_insert_of_ne, Finset.Insert.comm])
-  | _, all Δ p' d,          p, t => by
+@[simp] lemma cutRestricted (d : ⊢ᶜ[C] Δ) : CutRestricted C (d : ⊢¹ Δ) := d.prop
+
+def axL' {k} (r : L.Rel k) (v) (hp : Semiformula.rel r v ∈ Δ) (hn : Semiformula.nrel r v ∈ Δ) :
+    ⊢ᶜ[C] Δ := ⟨Derivation.axL' r v hp hn, by simp[Derivation.axL']⟩
+
+def verum' (h : ⊤ ∈ Δ) : ⊢ᶜ[C] Δ := ⟨Derivation.verum' h, by simp[Derivation.verum']⟩
+
+def and (dp : ⊢ᶜ[C] p :: Δ) (dq : ⊢ᶜ[C] q :: Δ) : ⊢ᶜ[C] p ⋏ q :: Δ := ⟨Derivation.and dp.val dq.val, by simp⟩
+
+def or (d : ⊢ᶜ[C] p :: q :: Δ) : ⊢ᶜ[C] p ⋎ q :: Δ := ⟨Derivation.or d.val, by simp⟩
+
+def all {p} (d : ⊢ᶜ[C] Rew.free.hom p :: shifts Δ) : ⊢ᶜ[C] (∀' p) :: Δ := ⟨Derivation.all d.val, by simp⟩
+
+def ex {p} (t) (d : ⊢ᶜ[C] p/[t] :: Δ) : ⊢ᶜ[C] (∃' p) :: Δ := ⟨Derivation.ex t d.val, by simp⟩
+
+def wk (d : ⊢ᶜ[C] Γ) (h : Γ ⊆ Δ) : ⊢ᶜ[C] Δ := ⟨d.val.wk h, by simp⟩
+
+def cut (dp : ⊢ᶜ[C] p :: Δ) (dn : ⊢ᶜ[C] ~p :: Δ) (h : p ∈ C) : ⊢ᶜ[C] Δ := ⟨Derivation.cut dp.val dn.val, by simp[h]⟩
+
+def rewrite (f : ℕ → SyntacticTerm L) (d : ⊢ᶜ[C] Δ) : ⊢ᶜ[C] Δ.map (Rew.rewrite f).hom :=
+  ⟨Derivation.rewrite d f, CutRestricted.rewrite hC f (by simp)⟩
+
+def shifts (d : ⊢ᶜ[C] Δ) : ⊢ᶜ[C] shifts Δ := d.rewrite hC _
+
+abbrev cast (d : ⊢ᶜ[C] Γ) (e : Γ = Δ) : ⊢ᶜ[C] Δ := ⟨Derivation.cast d e, by simp⟩
+
+@[simp] lemma length_rewrite (f : ℕ → SyntacticTerm L) (d : ⊢ᶜ[C] Δ) : length (d.rewrite hC f).val = length d.val := by
+  simp[rewrite]
+
+def ofSubset {C C' : Set (SyntacticFormula L)} {Δ} (h : C ⊆ C') (d : ⊢ᶜ[C] Δ) : ⊢ᶜ[C'] Δ := ⟨d, d.cutRestricted.of_subset h⟩
+
+end Restricted
+
+def RestrictedComplexity.ofLe {i j : ℕ} (hij : i ≤ j) (d : ⊢ᶜ[< i] Δ) : ⊢ᶜ[< j] Δ := d.ofSubset (by simp; intro _ h; exact lt_of_lt_of_le h hij)
+
+def andInversion₁Aux : {Δ : Sequent L} → ⊢ᶜ[C] Δ → (p q : SyntacticFormula L) → ⊢ᶜ[C] p :: Δ.remove (p ⋏ q)
+  | _, ⟨@axL _ Δ _ r v, _⟩,       p, q =>
+    Restricted.axL' r v (by simp[List.mem_remove_iff]) (by simp[List.mem_remove_iff])
+  | _, ⟨@verum _ Δ, _⟩,           p, q =>
+    Restricted.verum' (by simp[List.mem_remove_iff])
+  | _, ⟨@and _ Δ p' q' dp dq, H⟩, p, q => by
+    have H : CutRestricted C dp ∧ CutRestricted C dq := by simpa using H
+    by_cases e : p = p' ∧ q = q'
+    · exact (andInversion₁Aux ⟨dp, H.1⟩ p q).wk
+        (by rcases e with ⟨rfl, rfl⟩; simp[List.subset_def, List.mem_remove_iff]; intros; simp[*])
+    · have ne : p ⋏ q ≠ p' ⋏ q' := by simpa[-not_and] using e
+      have dp : ⊢ᶜ[C] (p' :: p :: (Δ.remove (p ⋏ q))) :=
+        (andInversion₁Aux ⟨dp, H.1⟩ p q).wk (by simp[List.subset_def, List.mem_remove_iff]; intros; simp[*])
+      have dq : ⊢ᶜ[C] (q' :: p :: (Δ.remove (p ⋏ q))) :=
+        (andInversion₁Aux ⟨dq, H.2⟩ p q).wk (by simp[List.subset_def, List.mem_remove_iff]; intros; simp[*])
+      exact (dp.and dq).wk (by
+        simp[List.subset_def, List.mem_remove_iff, -not_and]
+        constructor
+        · right; simpa using Ne.symm ne
+        · intros; simp[*])
+  | _, ⟨@or _ Δ r s d, H⟩,        p, q =>
+    have H : CutRestricted C d := by simpa using H
+    have : ⊢ᶜ[C] (r :: s :: p :: Δ.remove (p ⋏ q)) :=
+      (andInversion₁Aux ⟨d, H⟩ p q).wk (by simp[List.subset_def, List.mem_remove_iff]; intros; simp[*])
+    this.or.wk (by
+      simp[List.subset_def, List.mem_remove_iff]; intros; simp[*])
+  | _, ⟨@all _ Δ r d, H⟩,         p, q =>
+    have H : CutRestricted C d := by simpa using H
+    have : ⊢ᶜ[C] Rew.free.hom r :: shifts (p :: Δ.remove (p ⋏ q)) :=
+      (andInversion₁Aux ⟨d, H⟩ (Rew.shift.hom p) (Rew.shift.hom q)).wk (by
+        simp[shifts]
+        exact (List.Perm.subset_congr_right (List.Perm.swap _ _ _)).mp
+          (List.subset_cons_of_subset _ $
+            subset_trans (List.remove_cons_subset_cons_remove _ _ _) $
+              List.cons_subset_cons _ $ subset_trans (by simp) (List.remove_map_substet_map_remove _ _ _)))
+    this.all.wk ((List.Perm.subset_congr_left (List.Perm.swap _ _ _)).mp $
+      List.cons_subset_cons _ $ by simp[List.subset_def, List.mem_remove_iff]; intros; simp[*])
+  | _, ⟨@ex _ Δ r t d, H⟩,        p, q =>
+    have H : CutRestricted C d := by simpa using H
+    have : ⊢ᶜ[C] r/[t] :: p :: Δ.remove (p ⋏ q) :=
+      (andInversion₁Aux ⟨d, H⟩ p q).wk (by simp[List.subset_def, List.mem_remove_iff]; intros; simp[*])
+    (this.ex t).wk (by simp[List.subset_def, List.mem_remove_iff]; intros; simp[*])
+  | _, ⟨@wk _ Δ Γ d ss, H⟩,       p, q =>
+    have H : CutRestricted C d := by simpa using H
+    (andInversion₁Aux ⟨d, H⟩ p q).wk
+      (List.cons_subset_cons _ $ List.remove_subset_remove _ ss)
+  | _, ⟨@cut _ Δ r d dn, H⟩,      p, q =>
+    have H : r ∈ C ∧ CutRestricted C d ∧ CutRestricted C dn := by simpa using H
+    have d : ⊢ᶜ[C] r :: p :: Δ.remove (p ⋏ q) :=
+      (andInversion₁Aux ⟨d, H.2.1⟩ p q).wk (by simp[List.subset_def, List.mem_remove_iff]; intros; simp[*])
+    have dn : ⊢ᶜ[C] (~r) :: p :: Δ.remove (p ⋏ q) :=
+      (andInversion₁Aux ⟨dn, H.2.2⟩ p q).wk (by simp[List.subset_def, List.mem_remove_iff]; intros; simp[*])
+    d.cut dn H.1
+  termination_by andInversion₁Aux _ d _ _ => length d.val
+
+def andInversion₁ {p q} (d : ⊢ᶜ[C] p ⋏ q :: Δ) : ⊢ᶜ[C] p :: Δ :=
+  (andInversion₁Aux d p q).wk (by simp[List.remove]; exact List.subset_cons_of_subset _ (List.remove_subset _ _))
+
+def andInversion₂Aux : {Δ : Sequent L} → ⊢ᶜ[C] Δ → (p q : SyntacticFormula L) → ⊢ᶜ[C] q :: Δ.remove (p ⋏ q)
+  | _, ⟨@axL _ Δ _ r v, _⟩,       p, q =>
+    Restricted.axL' r v (by simp[List.mem_remove_iff]) (by simp[List.mem_remove_iff])
+  | _, ⟨@verum _ Δ, _⟩,           p, q =>
+    Restricted.verum' (by simp[List.mem_remove_iff])
+  | _, ⟨@and _ Δ p' q' dp dq, H⟩, p, q => by
+    have H : CutRestricted C dp ∧ CutRestricted C dq := by simpa using H
+    by_cases e : p = p' ∧ q = q'
+    · exact (andInversion₂Aux ⟨dq, H.2⟩ p q).wk
+        (by rcases e with ⟨rfl, rfl⟩; simp[List.subset_def, List.mem_remove_iff]; intros; simp[*])
+    · have ne : p ⋏ q ≠ p' ⋏ q' := by simpa[-not_and] using e
+      have dp : ⊢ᶜ[C] (p' :: q :: (Δ.remove (p ⋏ q))) :=
+        (andInversion₂Aux ⟨dp, H.1⟩ p q).wk (by simp[List.subset_def, List.mem_remove_iff]; intros; simp[*])
+      have dq : ⊢ᶜ[C] (q' :: q :: (Δ.remove (p ⋏ q))) :=
+        (andInversion₂Aux ⟨dq, H.2⟩ p q).wk (by simp[List.subset_def, List.mem_remove_iff]; intros; simp[*])
+      exact (dp.and dq).wk (by
+        simp[List.subset_def, List.mem_remove_iff, -not_and]
+        constructor
+        · right; simpa using Ne.symm ne
+        · intros; simp[*])
+  | _, ⟨@or _ Δ r s d, H⟩,        p, q =>
+    have H : CutRestricted C d := by simpa using H
+    have : ⊢ᶜ[C] (r :: s :: q :: Δ.remove (p ⋏ q)) :=
+      (andInversion₂Aux ⟨d, H⟩ p q).wk (by simp[List.subset_def, List.mem_remove_iff]; intros; simp[*])
+    this.or.wk (by
+      simp[List.subset_def, List.mem_remove_iff]; intros; simp[*])
+  | _, ⟨@all _ Δ r d, H⟩,         p, q =>
+    have H : CutRestricted C d := by simpa using H
+    have : ⊢ᶜ[C] Rew.free.hom r :: shifts (q :: Δ.remove (p ⋏ q)) :=
+      (andInversion₂Aux ⟨d, H⟩ (Rew.shift.hom p) (Rew.shift.hom q)).wk (by
+        simp[shifts]
+        exact (List.Perm.subset_congr_right (List.Perm.swap _ _ _)).mp
+          (List.subset_cons_of_subset _ $
+            subset_trans (List.remove_cons_subset_cons_remove _ _ _) $
+              List.cons_subset_cons _ $ subset_trans (by simp) (List.remove_map_substet_map_remove _ _ _)))
+    this.all.wk ((List.Perm.subset_congr_left (List.Perm.swap _ _ _)).mp $
+      List.cons_subset_cons _ $ by simp[List.subset_def, List.mem_remove_iff]; intros; simp[*])
+  | _, ⟨@ex _ Δ r t d, H⟩,        p, q =>
+    have H : CutRestricted C d := by simpa using H
+    have : ⊢ᶜ[C] r/[t] :: q :: Δ.remove (p ⋏ q) :=
+      (andInversion₂Aux ⟨d, H⟩ p q).wk (by simp[List.subset_def, List.mem_remove_iff]; intros; simp[*])
+    (this.ex t).wk (by simp[List.subset_def, List.mem_remove_iff]; intros; simp[*])
+  | _, ⟨@wk _ Δ Γ d ss, H⟩,       p, q =>
+    have H : CutRestricted C d := by simpa using H
+    (andInversion₂Aux ⟨d, H⟩ p q).wk
+      (List.cons_subset_cons _ $ List.remove_subset_remove _ ss)
+  | _, ⟨@cut _ Δ r d dn, H⟩,      p, q =>
+    have H : r ∈ C ∧ CutRestricted C d ∧ CutRestricted C dn := by simpa using H
+    have d : ⊢ᶜ[C] r :: q :: Δ.remove (p ⋏ q) :=
+      (andInversion₂Aux ⟨d, H.2.1⟩ p q).wk (by simp[List.subset_def, List.mem_remove_iff]; intros; simp[*])
+    have dn : ⊢ᶜ[C] (~r) :: q :: Δ.remove (p ⋏ q) :=
+      (andInversion₂Aux ⟨dn, H.2.2⟩ p q).wk (by simp[List.subset_def, List.mem_remove_iff]; intros; simp[*])
+    d.cut dn H.1
+  termination_by andInversion₂Aux _ d _ _ => length d.val
+
+def andInversion₂ {p q} (d : ⊢ᶜ[C] p ⋏ q :: Δ) : ⊢ᶜ[C] q :: Δ :=
+  (andInversion₂Aux d p q).wk (by simp[List.remove]; exact List.subset_cons_of_subset _ (List.remove_subset _ _))
+
+def allInversionAux : {Δ : Sequent L} → ⊢ᶜ[C] Δ →
+    (p : SyntacticSemiformula L 1) → (t : SyntacticTerm L) → ⊢ᶜ[C] p/[t] :: Δ.remove (∀' p)
+  | _, ⟨@axL _ Δ _ r v, _⟩,     p, t => Restricted.axL' r v (by simp[List.mem_remove_iff]) (by simp[List.mem_remove_iff])
+  | _, ⟨@verum _ Δ, _⟩,         p, t => Restricted.verum' (by simp[List.mem_remove_iff])
+  | _, ⟨@and _ Δ r s dr ds, H⟩, p, t =>
+      have H : CutRestricted C dr ∧ CutRestricted C ds := by simpa using H
+      have dr : ⊢ᶜ[C] r :: p/[t] :: Δ.remove (∀' p) :=
+        (allInversionAux ⟨dr, H.1⟩ p t).wk (by simp[List.subset_def, List.mem_remove_iff]; intros; simp[*])
+      have ds : ⊢ᶜ[C] (s :: p/[t] :: Δ.remove (∀' p)) :=
+        (allInversionAux ⟨ds, H.2⟩ p t).wk (by simp[List.subset_def, List.mem_remove_iff]; intros; simp[*])
+      (dr.and ds).wk (by simp[List.subset_def, List.mem_remove_iff]; intros; simp[*])
+  | _, ⟨@or _ Δ r s d, H⟩,      p, t =>
+      have H : CutRestricted C d := by simpa using H
+      have : ⊢ᶜ[C] (r :: s :: p/[t] :: Δ.remove (∀' p)) :=
+        (allInversionAux ⟨d, H⟩ p t).wk (by simp[List.subset_def, List.mem_remove_iff]; intros; simp[*])
+      this.or.wk (by simp[List.subset_def, List.mem_remove_iff]; intros; simp[*])
+  | _, ⟨@all _ Δ p' d, H⟩,      p, t => by
+      have H : CutRestricted C d := by simpa using H
       by_cases e : p' = p
       · simp[e]
-        let d' : ⊢ᶜ[P] insert ([→ t].hom p) Δ :=
-          (d.rewrite hP (t :>ₙ Subterm.fvar)).cast
-            (by simp[shifts_eq_image, Finset.image_image, Function.comp, e,
-                  ←Rew.hom_comp_app, Rew.rewrite_comp_free_eq_substs, Rew.rewrite_comp_shift_eq_id]; )
-        have : d'.length = d.length := by simp
-        exact (allInversionAux d' p t).weakening (by simp[Finset.subset_iff]; rintro x hx (rfl | hhx) <;> simp[*])
-      · have ne : ∀' p' ≠ ∀' p := by simpa using e
-        have : ⊢ᶜ[P] (insert (Rew.free.hom p') $ shifts $ insert ([→ t].hom p) $ Δ.erase (∀' p)) :=
-          (allInversionAux d (Rew.shift.hom p) (Rew.shift t)).weakening (by
-            simp[←Rew.hom_comp_app, Rew.shift_comp_substs1, shifts_insert, shifts_erase, Finset.subset_iff];
-            rintro x hhx (rfl | hx) <;> simp[*]; exact Or.inr (Or.inr hhx))
-        exact (all _ p' this).cast (by simp[Finset.erase_insert_of_ne ne, Finset.Insert.comm])
-  | _, ex Δ u q d,          p, t =>
-    have : ⊢ᶜ[P] (insert ([→ u].hom q) $ insert ([→ t].hom p) $ Δ.erase (∀' p)) :=
-      (allInversionAux d p t).weakening (by simp[Finset.subset_iff]; rintro x hx (rfl | hhx) <;> simp[*])
-    ((ex _ u q this).cast (by simp[Finset.erase_insert_of_ne, Finset.Insert.comm]))
-  | _, cut Δ Γ r hr dΔ dΓ,  p, t =>
-    have dΔ : ⊢ᶜ[P] (insert r $ insert ([→ t].hom p) $ Δ.erase (∀' p)) :=
-      (allInversionAux dΔ p t).weakening (by simp[Finset.subset_iff]; rintro x hx (rfl | hhx) <;> simp[*])
-    have dΓ : ⊢ᶜ[P] (insert (~r) $ insert ([→ t].hom p) $ Γ.erase (∀' p)) :=
-      (allInversionAux dΓ p t).weakening (by simp[Finset.subset_iff]; rintro x hx (rfl | hhx) <;> simp[*])
-    (cut _ _ r hr dΔ dΓ).cast (by simp[Finset.erase_union])
-  termination_by allInversionAux _ d _ _ => d.length
+        let d' : ⊢ᶜ[C] p/[t] :: Δ :=
+          (Restricted.rewrite hC (t :>ₙ Semiterm.fvar) ⟨d, H⟩).cast
+            (by simp[e, shifts, Function.comp, ←Rew.hom_comp_app,
+                  Rew.rewrite_comp_free_eq_substs, Rew.rewrite_comp_shift_eq_id])
+        exact (allInversionAux d' p t).wk (by
+          rw[List.remove_cons_of_ne]; simp; exact Semiformula.ne_of_ne_complexity (by simp))
+      · have : ⊢ᶜ[C] (Rew.free.hom p' :: shifts (p/[t] :: Δ.remove (∀' p))) :=
+          (allInversionAux ⟨d, H⟩ (Rew.shift.hom p) (Rew.shift t)).wk
+          (by simp[shifts, ←Rew.hom_comp_app, Rew.shift_comp_substs1]
+              exact subset_trans (List.remove_cons_subset_cons_remove _ _ _)
+                (List.cons_subset_cons _ $ List.subset_cons_of_subset _ $
+                subset_trans (by simp) $ List.remove_map_substet_map_remove _ _ _))
+        exact this.all.wk (by simp[List.subset_def, List.mem_remove_iff, e]; intros; simp[*])
+  | _, ⟨@ex _ Δ q u d, H⟩,      p, t =>
+    have H : CutRestricted C d := by simpa using H
+    have : ⊢ᶜ[C] q/[u] :: p/[t] :: Δ.remove (∀' p) :=
+      (allInversionAux ⟨d, H⟩ p t).wk (by simp[List.subset_def, List.mem_remove_iff]; intros; simp[*])
+    (this.ex u).wk (by simp[List.subset_def, List.mem_remove_iff]; intros; simp[*])
+  | _, ⟨@wk _ Δ Γ d ss, H⟩,     p, t =>
+    have H : CutRestricted C d := by simpa using H
+    (allInversionAux ⟨d, H⟩ p t).wk
+      (List.cons_subset_cons _ $ List.remove_subset_remove _ ss)
+  | _, ⟨@cut _ Δ r d dn, H⟩, p, t =>
+    have H : r ∈ C ∧ CutRestricted C d ∧ CutRestricted C dn := by simpa using H
+    have d : ⊢ᶜ[C] r :: p/[t] :: Δ.remove (∀' p) :=
+      (allInversionAux ⟨d, H.2.1⟩ p t).wk (by simp[List.subset_def, List.mem_remove_iff]; intros; simp[*])
+    have dn : ⊢ᶜ[C] ((~r) :: p/[t] :: Δ.remove (∀' p)) :=
+      (allInversionAux ⟨dn, H.2.2⟩ p t).wk (by simp[List.subset_def, List.mem_remove_iff]; intros; simp[*])
+    d.cut dn H.1
+  termination_by allInversionAux _ d _ _ => length d.val
 
-def allInversion (d : ⊢ᶜ[P] insert (∀' p) Δ) (t) : ⊢ᶜ[P] insert ([→ t].hom p) Δ :=
-  (allInversionAux hP d p t).weakening (by simp; exact Finset.insert_subset_insert _ (Finset.erase_subset _ _))
+def allInversion (d : ⊢ᶜ[C] (∀' p) :: Δ) (t) : ⊢ᶜ[C] p/[t] :: Δ :=
+  (allInversionAux hC d p t).wk (by simp; exact List.subset_cons_of_subset _ (List.remove_subset _ _))
 
-def allInversionClx {i} (d : ⊢ᶜ[< i] insert (∀' p) Δ) (t) : ⊢ᶜ[< i] insert ([→ t].hom p) Δ :=
-  allInversion (by simp) d t
+def falsumElimAux : {Δ : Sequent L} → ⊢ᶜ[C] Δ → ⊢ᶜ[C] Δ.remove ⊥
+  | _, ⟨@axL _ Δ _ r v, _⟩     => Restricted.axL' r v (by simp[List.mem_remove_iff]) (by simp[List.mem_remove_iff])
+  | _, ⟨@verum _ Δ, _⟩         => Restricted.verum' (by simp[List.mem_remove_iff])
+  | _, ⟨@and _ Δ p q dp dq, H⟩  =>
+    have H : CutRestricted C dp ∧ CutRestricted C dq := by simpa using H
+    have dp : ⊢ᶜ[C] p :: (Δ.remove ⊥) := (falsumElimAux ⟨dp, H.1⟩).wk (by simp[List.subset_def, List.mem_remove_iff]; intros; simp[*])
+    have dq : ⊢ᶜ[C] q :: (Δ.remove ⊥) := (falsumElimAux ⟨dq, H.2⟩).wk (by simp[List.subset_def, List.mem_remove_iff]; intros; simp[*])
+    (dp.and dq).cast (by rw[List.remove_cons_of_ne]; simp)
+  | _, ⟨@or _ Δ p q d, H⟩      =>
+    have : ⊢ᶜ[C] p :: q :: Δ.remove ⊥ :=
+      (falsumElimAux ⟨d, by simpa using H⟩).wk (by simp[List.subset_def, List.mem_remove_iff]; intros; simp[*])
+    this.or.cast (by rw[List.remove_cons_of_ne]; simp)
+  | _, ⟨@all _ Δ p d, H⟩       =>
+    have : ⊢ᶜ[C] Rew.free.hom p :: (shifts $ Δ.remove ⊥) :=
+      (falsumElimAux ⟨d, by simpa using H⟩).wk
+        (subset_trans (List.remove_cons_subset_cons_remove _ _ _) $ List.cons_subset_cons _ $
+          subset_trans (by simp[shifts]) $ List.remove_map_substet_map_remove _ _ _)
+    this.all.cast (by rw[List.remove_cons_of_ne]; simp)
+  | _, ⟨@ex _ Δ p t d, H⟩      =>
+    have H : CutRestricted C d := by simpa using H
+    have : ⊢ᶜ[C] p/[t] :: Δ.remove ⊥ := (falsumElimAux ⟨d, H⟩).wk (by simp[List.subset_def, List.mem_remove_iff]; intros; simp[*])
+    (this.ex t).cast (by rw[List.remove_cons_of_ne]; simp)
+  | _, ⟨@wk _ Δ Γ d ss, H⟩     => (falsumElimAux ⟨d, by simpa using H⟩).wk (List.remove_subset_remove _ ss)
+  | _, ⟨@cut _ Δ p d dn, H⟩ =>
+    have H : p ∈ C ∧ CutRestricted C d ∧ CutRestricted C dn := by simpa using H
+    have d : ⊢ᶜ[C] p :: Δ.remove ⊥ := (falsumElimAux ⟨d, H.2.1⟩).wk (by simp[List.subset_def, List.mem_remove_iff]; intros; simp[*])
+    have dn : ⊢ᶜ[C] (~p) :: Δ.remove ⊥ := (falsumElimAux ⟨dn, H.2.2⟩).wk (by simp[List.subset_def, List.mem_remove_iff]; intros; simp[*])
+    d.cut dn H.1
+  termination_by falsumElimAux _ d => length d.val
 
-def falsumElimAux : {Δ : Sequent L} → ⊢ᶜ[P] Δ → ⊢ᶜ[P] Δ.erase ⊥
-  | _, axL Δ r v hpos hneg => axL _ r v (by simp[hpos]) (by simp[hneg])
-  | _, verum Δ h           => verum _ (by simp[h])
-  | _, and Δ p q dp dq     =>
-    have dp : ⊢ᶜ[P] insert p (Δ.erase ⊥) := dp.falsumElimAux.weakening (by simp[Finset.subset_iff]; rintro x hx (rfl | hhx) <;> simp[*])
-    have dq : ⊢ᶜ[P] insert q (Δ.erase ⊥) := dq.falsumElimAux.weakening (by simp[Finset.subset_iff]; rintro x hx (rfl | hhx) <;> simp[*])
-    (and _ p q dp dq).cast (by simp[Finset.erase_insert_of_ne])
-  | _, or Δ p q d          =>
-    have : ⊢ᶜ[P] (insert p $ insert q $ Δ.erase ⊥) :=
-      d.falsumElimAux.weakening (by simp[Finset.subset_iff]; rintro x hx (rfl | hhx) <;> simp[*])
-    (or _ _ _ this).cast (by simp[Finset.erase_insert_of_ne])
-  | _, all Δ p d           =>
-    have : ⊢ᶜ[P] (insert (Rew.free.hom p) (shifts $ Δ.erase ⊥)) :=
-      d.falsumElimAux.weakening
-        (by {simp[Finset.subset_iff, shifts_eq_image]; rintro x hx (rfl | ⟨y, hy, rfl⟩); { exact Or.inl rfl };
-             { exact Or.inr ⟨y, ⟨by rintro rfl; simp at hx, hy⟩, rfl⟩ } } )
-    (all _ _ this).cast (by simp[Finset.erase_insert_of_ne])
-  | _, ex Δ t p d          =>
-    have : ⊢ᶜ[P] (insert ([→ t].hom p) $ Δ.erase ⊥) := d.falsumElimAux.weakening (by simp[Finset.subset_iff]; rintro x hx (rfl | hhx) <;> simp[*])
-    (ex _ t p this).cast (by simp[Finset.erase_insert_of_ne])
-  | _, cut Δ Γ p hp dΔ dΓ  =>
-    have dΔ : ⊢ᶜ[P] (insert p $ Δ.erase ⊥) := dΔ.falsumElimAux.weakening (by simp[Finset.subset_iff]; rintro x hx (rfl | hhx) <;> simp[*])
-    have dΓ : ⊢ᶜ[P] (insert (~p) $ Γ.erase ⊥) := dΓ.falsumElimAux.weakening (by simp[Finset.subset_iff]; rintro x hx (rfl | hhx) <;> simp[*])
-    (cut _ _ p hp dΔ dΓ).cast (by simp[Finset.erase_union])
-
-def falsumElim (d : ⊢ᶜ[P] insert ⊥ Δ) : ⊢ᶜ[P] Δ := d.falsumElimAux.weakening (by simp; exact Finset.erase_subset _ _)
+def falsumElim (d : ⊢ᶜ[C] ⊥ :: Δ) : ⊢ᶜ[C] Δ := (falsumElimAux d).wk (by simp; exact List.remove_subset _ _)
 
 def reductionAux {i} : {Δ : Sequent L} →
     ⊢ᶜ[< i] Δ → {p : SyntacticFormula L} → p.isVType = true → p.complexity ≤ i →
-    {Γ : Sequent L} → ⊢ᶜ[< i] insert (~p) Γ → ⊢ᶜ[< i] Δ.erase p ∪ Γ
-  | _, axL Δ r v hpos hneg,  p, _,  _,  Γ, dΓ => by
+    {Γ : Sequent L} → ⊢ᶜ[< i] (~p) :: Γ → ⊢ᶜ[< i] Δ.remove p ++ Γ
+  | _, ⟨@axL _ Δ _ r v, _⟩,     p, _,  _,  Γ, dΓ => by
     by_cases e₁ : p = rel r v
-    · exact dΓ.weakening (by simp[e₁, hpos, hneg, Finset.subset_iff]; intro x hx; exact Or.inr hx)
+    · exact dΓ.wk (by simp[e₁, List.mem_remove_iff])
     · by_cases e₂ : p = nrel r v
-      · exact dΓ.weakening (by simp[e₂, hpos, hneg, Finset.subset_iff]; intro x hx; exact Or.inr hx)
-      · exact axL _ r v (by simp[Ne.symm e₁, hpos]) (by simp[Ne.symm e₂, hneg])
-  | _, verum Δ h,            p, _,  _,  Γ, dΓ => by
+      · exact dΓ.wk (by simp[e₂, List.mem_remove_iff])
+      · exact Restricted.axL' r v (by simp[Ne.symm e₁, List.mem_remove_iff]) (by simp[Ne.symm e₂, List.mem_remove_iff])
+  | _, ⟨@verum _ Δ, _⟩,         p, _,  _,  Γ, dΓ => by
     by_cases e : p = ⊤
-    · have : ⊢ᶜ[< i] insert ⊥ Γ := dΓ.cast (by simp[e])
-      have : ⊢ᶜ[< i] Γ := this.falsumElim
-      exact this.weakening (Finset.subset_union_right _ _)
-    · exact verum _ (by simp[Ne.symm e, h])
-  | _, and Δ r s dr ds,     p, tp, hp, Γ, dΓ => by
+    · have : ⊢ᶜ[< i] ⊥ :: Γ := dΓ.cast (by simp[e])
+      have : ⊢ᶜ[< i] Γ := falsumElim this
+      exact this.wk (by simp)
+    · exact Restricted.verum' (by simp[List.mem_remove_iff, Ne.symm e])
+  | _, ⟨@and _ Δ r s dr ds, H⟩, p, tp, hp, Γ, dΓ => by
+    have H : CutRestricted {p | p.complexity < i} dr ∧ CutRestricted {p | p.complexity < i} ds := by simpa using H
     have e : p ≠ r ⋏ s := ne_and_of_isVType tp
-    have dr : ⊢ᶜ[< i] insert r (Δ.erase p ∪ Γ) :=
-      (reductionAux dr tp hp dΓ).weakening (by simp[Finset.subset_iff]; rintro x (⟨hxp, (rfl | hhxp)⟩ | hhx) <;> simp[*])
-    have ds : ⊢ᶜ[< i] insert s (Δ.erase p ∪ Γ) :=
-      (reductionAux ds tp hp dΓ).weakening (by simp[Finset.subset_iff]; rintro x (⟨hxp, (rfl | hhxp)⟩ | hhx) <;> simp[*])
-    exact (and _ _ _ dr ds).cast (by simp[Finset.erase_insert_of_ne (Ne.symm e)])
-  | _, all Δ q d,            p, tp, hp, Γ, dΓ => by
+    have dr : ⊢ᶜ[< i] r :: (Δ.remove p ++ Γ) :=
+      (reductionAux ⟨dr, H.1⟩ tp hp dΓ).wk (by
+        rw[←List.cons_append]
+        apply List.append_subset_append
+        simp[List.subset_def, List.mem_remove_iff]; intros; simp[*])
+    have ds : ⊢ᶜ[< i] s :: (Δ.remove p ++ Γ) :=
+      (reductionAux ⟨ds, H.2⟩ tp hp dΓ).wk (by
+        rw[←List.cons_append]
+        apply List.append_subset_append
+        simp[List.subset_def, List.mem_remove_iff]; intros; simp[*])
+    exact (dr.and ds).cast (by rw[List.remove_cons_of_ne _ (Ne.symm e), List.cons_append])
+  | _, ⟨@all _ Δ q d, H⟩,       p, tp, hp, Γ, dΓ => by
     have e : p ≠ ∀' q := ne_all_of_isVType tp
-    have : ⊢ᶜ[< i] (insert (~Rew.shift.hom p) (shifts Γ)) := (dΓ.shift (by simp)).cast (by simp[shifts_insert])
-    have : ⊢ᶜ[< i] insert (Rew.free.hom q) (shifts $ Δ.erase p ∪ Γ) :=
-      (reductionAux d (by simp[tp]) (by simp[hp]) this).weakening
-        (by simp[Finset.subset_iff]; rintro x (⟨hx, (rfl | hhx)⟩ | hhx);
-            · simp[*]
-            · simp[shifts_eq_image] at hhx ⊢; rcases hhx with ⟨y, hy, rfl⟩; exact Or.inr ⟨y, Or.inl ⟨by rintro rfl; contradiction, hy⟩, rfl⟩
-            · simp[shifts_eq_image] at hhx ⊢; rcases hhx with ⟨y, hy, rfl⟩; exact Or.inr ⟨y, Or.inr hy, rfl⟩)
-    have : ⊢ᶜ[< i] insert (∀' q) (Δ.erase p ∪ Γ) := all _ _ this
-    exact this.cast (by simp[Finset.erase_insert_of_ne (Ne.symm e)])
-  | _, or Δ r s d,           p, tp, hp, Γ, dΓ => by
+    have : ⊢ᶜ[< i] ~Rew.shift.hom p :: shifts Γ := (dΓ.shifts (by simp)).cast (by simp[shifts_cons])
+    have : ⊢ᶜ[< i] Rew.free.hom q :: shifts (Δ.remove p ++ Γ) :=
+      (reductionAux ⟨d, by simpa using H⟩ (by simp[tp]) (by simp[hp]) this).wk
+        (by simp[shifts]
+            constructor
+            · exact subset_trans (List.remove_cons_subset_cons_remove _ _ _)
+                (List.cons_subset_cons _ $
+                  List.subset_append_of_subset_left _ $ List.remove_map_substet_map_remove _ _ _)
+            · rw[←List.cons_append]
+              exact List.subset_append_right _ _)
+    have : ⊢ᶜ[< i] (∀' q) :: (Δ.remove p ++ Γ) := this.all
+    exact this.cast (by rw[List.remove_cons_of_ne _ (Ne.symm e), List.cons_append])
+  | _, ⟨@or _ Δ r s d, H⟩,      p, tp, hp, Γ, dΓ => by
     by_cases e : p = r ⋎ s
     · have hrs : r.complexity < i ∧ s.complexity < i := by simpa[e, Nat.succ_le] using hp
-      have d₁ : ⊢ᶜ[< i] (insert r $ insert s $ (Δ.erase (r ⋎ s)) ∪ Γ) :=
-        (reductionAux d tp hp dΓ).cast (by simp[e, Finset.erase_insert_of_ne])
-      have dΓ₁ : ⊢ᶜ[< i] insert (~r) Γ := (dΓ.cast (by simp[e])).andInversion₁ (q := ~s)
-      have dΓ₂ : ⊢ᶜ[< i] insert (~s) Γ := (dΓ.cast (by simp[e])).andInversion₂ (p := ~r)
-      have d₃ : ⊢ᶜ[< i] (insert s $ (Δ.erase (r ⋎ s)) ∪ Γ) :=
-        (cut (insert s $ (Δ.erase (r ⋎ s)) ∪ Γ) Γ r hrs.1 d₁ dΓ₁).cast (by simp)
-      have : ⊢ᶜ[< i] (Δ.erase (r ⋎ s)) ∪ Γ :=
-        (cut ((Δ.erase (r ⋎ s)) ∪ Γ) Γ s hrs.2 d₃ dΓ₂).cast (by simp)
+      have d₁  : ⊢ᶜ[< i] r :: s :: Δ.remove (r ⋎ s) ++ Γ :=
+        (reductionAux ⟨d, by simpa using H⟩ tp hp dΓ).cast (by
+          rw[e, List.remove_cons_of_ne _ (show r ≠ r ⋎ s from (Semiformula.ne_of_ne_complexity $ by simp)),
+            List.remove_cons_of_ne _ (show s ≠ r ⋎ s from (Semiformula.ne_of_ne_complexity $ by simp))])
+      have dΓ₁ : ⊢ᶜ[< i] (~r) :: Γ := andInversion₁ (q := ~s) (dΓ.cast (by simp[e]))
+      have dΓ₂ : ⊢ᶜ[< i] (~s) :: Γ := andInversion₂ (p := ~r) (dΓ.cast (by simp[e]))
+      have d₃  : ⊢ᶜ[< i] s :: Δ.remove (r ⋎ s) ++ Γ :=
+        d₁.cut (dΓ₁.wk $ List.cons_subset_cons _ $ List.subset_append_right _ _) hrs.1
+      have : ⊢ᶜ[< i] (Δ.remove (r ⋎ s)) ++ Γ :=
+        d₃.cut (dΓ₂.wk $ List.cons_subset_cons _ $ List.subset_append_right _ _) hrs.2
       exact this.cast (by simp[e])
-    · have : ⊢ᶜ[< i] (insert r $ insert s $ (Δ.erase p) ∪ Γ) :=
-        (reductionAux d tp hp dΓ).weakening (by simp[Finset.subset_iff]; rintro x (⟨hx, (rfl | rfl | hhx)⟩ | hx) <;> simp[*])
-      have : ⊢ᶜ[< i] (insert (r ⋎ s) $ (Δ.erase p) ∪ Γ) := or _ _ _ this
-      exact this.cast (by simp[e, Finset.erase_insert_of_ne (Ne.symm e)])
-  | _, ex Δ t q d₁,          p, tp, hp, Γ, d₂ => by
+    · have : ⊢ᶜ[< i] r :: s :: (Δ.remove p ++ Γ) :=
+        (reductionAux ⟨d, by simpa using H⟩ tp hp dΓ).wk (by
+          rw[←List.cons_append, ←List.cons_append]
+          exact List.append_subset_append
+            (subset_trans (List.remove_cons_subset_cons_remove _ _ _) $
+              List.cons_subset_cons _ $ List.remove_cons_subset_cons_remove _ _ _))
+      have : ⊢ᶜ[< i] r ⋎ s :: (Δ.remove p ++ Γ) := this.or
+      exact this.cast (by rw[List.remove_cons_of_ne _ (Ne.symm e), List.cons_append])
+  | _, ⟨@ex _ Δ q t d₁, H⟩,     p, tp, hp, Γ, d₂ => by
     by_cases e : p = ∃' q
-    · have d₁₁ : ⊢ᶜ[< i] (insert ([→ t].hom q) $ (Δ.erase (∃' q) ∪ Γ)) :=
-        (reductionAux d₁ tp hp d₂).cast (by simp[e, Finset.erase_insert_of_ne])
-      have d₂₁ : ⊢ᶜ[< i] (insert (~[→ t].hom q) Γ) :=
-        by simpa using allInversionClx (p := ~q) (by simpa[e] using d₂) t
-      have : ⊢ᶜ[< i] Δ.erase (∃' q) ∪ Γ :=
-        (cut (Δ.erase (∃' q) ∪ Γ) Γ ([→ t].hom q)
-          (by simp; exact Nat.succ_le.mp (by simpa[e] using hp)) d₁₁ d₂₁).cast (by simp)
+    · have d₁₁ : ⊢ᶜ[< i] q/[t] :: (Δ.remove (∃' q) ++ Γ) :=
+        (reductionAux ⟨d₁, by simpa using H⟩ tp hp d₂).cast (by
+          rw[←List.cons_append]; congr 1
+          rw[e, List.remove_cons_of_ne]; exact Semiformula.ne_of_ne_complexity (by simp))
+      have d₂₁ : ⊢ᶜ[< i] (~q/[t]) :: Γ :=
+        (allInversion (p := ~q) (by simp) (by simpa[e] using d₂) t).cast (by simp)
+      have : ⊢ᶜ[< i] Δ.remove (∃' q) ++ Γ :=
+        d₁₁.cut (d₂₁.wk $ List.cons_subset_cons _ $ List.subset_append_right _ _)
+          (by simp; exact Nat.succ_le.mp (by simpa[e] using hp))
       exact this.cast (by simp[e])
-    · have : ⊢ᶜ[< i] (insert ([→ t].hom q) $ Δ.erase p ∪ Γ) :=
-        (reductionAux d₁ tp hp d₂).weakening (by simp[Finset.subset_iff]; rintro x (⟨hxp, (rfl | hhxp)⟩ | hhx) <;> simp[*])
-      have : ⊢ᶜ[< i] (insert (∃' q) $ Δ.erase p ∪ Γ) := ex _ t q this
-      exact this.cast (by simp[Finset.erase_insert_of_ne (Ne.symm e)])
-  | _, cut Δ₁ Δ₂ r hr d₁ d₂, p, tp, hp, Γ, dΓ =>
-    have d₁₁ : ⊢ᶜ[< i] (insert r $ Δ₁.erase p ∪ Γ) :=
-      (reductionAux d₁ tp hp dΓ).weakening (by simp[Finset.subset_iff]; rintro x (⟨hx, (rfl | hhx)⟩ | hx) <;> simp[*])
-    have d₂₁ : ⊢ᶜ[< i] (insert (~r) $ Δ₂.erase p ∪ Γ) :=
-      (reductionAux d₂ tp hp dΓ).weakening (by simp[Finset.subset_iff]; rintro x (⟨hx, (rfl | hhx)⟩ | hx) <;> simp[*])
-    have : ⊢ᶜ[< i] (Δ₁ ∪ Δ₂).erase p ∪ Γ :=
-      (cut (Δ₁.erase p ∪ Γ) (Δ₂.erase p ∪ Γ) r hr d₁₁ d₂₁).cast (by rw[←Finset.union_union_distrib_right, Finset.erase_union])
-    this
+    · have : ⊢ᶜ[< i] q/[t] :: (Δ.remove p ++ Γ) :=
+        (reductionAux ⟨d₁, by simpa using H⟩ tp hp d₂).wk (by
+          rw[←List.cons_append]
+          exact List.append_subset_append (List.remove_cons_subset_cons_remove _ _ _))
+      have : ⊢ᶜ[< i] (∃' q) :: (Δ.remove p ++ Γ) := this.ex t
+      exact this.cast (by rw[List.remove_cons_of_ne _ (Ne.symm e), List.cons_append])
+  | _, ⟨@wk _ Δ Δ' d ss, H⟩,    p, tp, hp, Γ, dΓ =>
+    (reductionAux ⟨d, by simpa using H⟩ tp hp dΓ).wk (List.append_subset_append $ List.remove_subset_remove _ $ ss)
+  | _, ⟨@cut _ Δ r d dn, H⟩, p, tp, hp, Γ, dΓ =>
+    have H : r.complexity < i ∧ CutRestricted {p | p.complexity < i} d ∧ CutRestricted {p | p.complexity < i} dn := by simpa using H
+    have d₁ : ⊢ᶜ[< i] r :: (Δ.remove p ++ Γ) :=
+      (reductionAux ⟨d, H.2.1⟩ tp hp dΓ).wk (by
+        rw[←List.cons_append]
+        exact List.append_subset_append (List.remove_cons_subset_cons_remove _ _ _))
+    have dn₁ : ⊢ᶜ[< i] (~r) :: (Δ.remove p ++ Γ) :=
+      (reductionAux ⟨dn, H.2.2⟩ tp hp dΓ).wk (by
+        rw[←List.cons_append]
+        exact List.append_subset_append (List.remove_cons_subset_cons_remove _ _ _))
+    d₁.cut dn₁ H.1
+  termination_by reductionAux d _ _ _ _ _ => length d.val
 
-def reduction {i} {p} (hp : p.complexity ≤ i) : ⊢ᶜ[< i] insert p Δ → ⊢ᶜ[< i] insert (~p) Γ → ⊢ᶜ[< i] Δ ∪ Γ := fun dΔ dΓ => by
+def reduction {i} {p} (hp : p.complexity ≤ i) : ⊢ᶜ[< i] p :: Δ → ⊢ᶜ[< i] (~p) :: Δ → ⊢ᶜ[< i] Δ := fun dp dn => by
   cases tp : p.isVType
   · have : (~p).isVType = true := isVType_neg_true_of_eq_false tp
-    exact (reductionAux dΓ this (by simp[hp]) (Γ := Δ) (dΔ.cast (by simp))).weakening
-      (by simp[Finset.union_comm]; exact Finset.union_subset_union (by rfl) (Finset.erase_subset _ _))
-  · exact (reductionAux dΔ tp hp dΓ).weakening (Finset.union_subset_union (by simp; exact Finset.erase_subset _ _) (by rfl))
+    exact (reductionAux (p := ~p) dn this (by simp[hp]) (Γ := Δ) (dp.cast $ by simp)).wk
+      (by simp; exact List.remove_subset _ _)
+  · exact (reductionAux dp tp hp dn).wk (by simp; exact List.remove_subset _ _)
 
 def elimination {i} : {Δ : Sequent L} → ⊢ᶜ[< i + 1] Δ → ⊢ᶜ[< i] Δ
-  | _, axL Δ r v hpos hneg => axL Δ r v hpos hneg
-  | _, verum Δ h           => verum Δ h
-  | _, and Δ p q dp dq     => and Δ p q dp.elimination dq.elimination
-  | _, or Δ p q d          => or Δ p q d.elimination
-  | _, all Δ p d           => all Δ p d.elimination
-  | _, ex Δ t p d          => ex Δ t p d.elimination
-  | _, cut _ _ _ hp dΔ dΓ  => reduction (Nat.lt_add_one_iff.mp hp) dΔ.elimination dΓ.elimination
+  | _, ⟨axL Δ r v, _⟩       => Restricted.axL' r v (by simp) (by simp)
+  | _, ⟨verum Δ, _⟩         => Restricted.verum' (by simp)
+  | _, ⟨and dp dq, H⟩       =>
+    have H : CutRestricted {p | p.complexity < i + 1} dp ∧ CutRestricted {p | p.complexity < i + 1} dq := by simpa using H
+    (elimination ⟨dp, H.1⟩).and (elimination ⟨dq, H.2⟩)
+  | _, ⟨or d, H⟩            => (elimination ⟨d, by simpa using H⟩).or
+  | _, ⟨all d, H⟩           => (elimination ⟨d, by simpa using H⟩).all
+  | _, ⟨ex t d, H⟩          => (elimination ⟨d, by simpa using H⟩).ex
+  | _, ⟨wk d ss, H⟩         => (elimination ⟨d, by simpa using H⟩).wk ss
+  | _, ⟨@cut _ _ p d dn, H⟩ =>
+    have H : p.complexity < i + 1 ∧
+      CutRestricted {p | p.complexity < i + 1} d ∧ CutRestricted {p | p.complexity < i + 1} dn := by simpa using H
+    reduction (Nat.lt_add_one_iff.mp H.1) (elimination ⟨d, H.2.1⟩) (elimination ⟨dn, H.2.2⟩)
+  termination_by elimination d => length d.val
 
-def hauptsatzClx : {i : ℕ} → ⊢ᶜ[< i] Δ → ⊢ᵀ Δ
-  | 0,     d => d.cutWeakening (by simp)
-  | i + 1, d => d.elimination.hauptsatzClx
+def hauptsatzClx : {i : ℕ} → ⊢ᶜ[< i] Δ → { d : ⊢¹ Δ // CutFree d }
+  | 0,     d => ⟨d.val, by simpa using d.prop⟩
+  | i + 1, d => hauptsatzClx (elimination d)
 
-def toClx : {Δ : Sequent L} → ⊢ᶜ Δ → (i : ℕ) × ⊢ᶜ[< i] Δ
-  | _, axL Δ r v hpos hneg => ⟨0, axL Δ r v hpos hneg⟩
-  | _, verum Δ h           => ⟨0, verum Δ h⟩
-  | _, and Δ p q dp dq     => ⟨max dp.toClx.1 dq.toClx.1, and Δ p q (dp.toClx.2.ofLe (by simp)) (dq.toClx.2.ofLe (by simp))⟩
-  | _, or Δ p q d          => ⟨d.toClx.1, or Δ p q d.toClx.2⟩
-  | _, all Δ p d           => ⟨d.toClx.1, all Δ p d.toClx.2⟩
-  | _, ex Δ t p d          => ⟨d.toClx.1, ex Δ t p d.toClx.2⟩
-  | _, cut Δ Γ p _ dΔ dΓ   =>
-    ⟨max (max dΔ.toClx.1 dΓ.toClx.1) p.complexity.succ, cut Δ Γ  p (by simp) (dΔ.toClx.2.ofLe (by simp)) (dΓ.toClx.2.ofLe (by simp))⟩
+def toClx : {Δ : Sequent L} → ⊢¹ Δ → (i : ℕ) × ⊢ᶜ[< i] Δ
+  | _, axL Δ r v        => ⟨0, ⟨axL Δ r v, by simp⟩⟩
+  | _, verum Δ          => ⟨0, ⟨verum Δ, by simp⟩⟩
+  | _, and dp dq        => ⟨max dp.toClx.1 dq.toClx.1, (dp.toClx.2.ofLe (by simp)).and (dq.toClx.2.ofLe (by simp))⟩
+  | _, or d             => ⟨d.toClx.1, d.toClx.2.or⟩
+  | _, all d            => ⟨d.toClx.1, d.toClx.2.all⟩
+  | _, ex t d           => ⟨d.toClx.1, d.toClx.2.ex t⟩
+  | _, wk d ss          => ⟨d.toClx.1, d.toClx.2.wk ss⟩
+  | _, @cut _ _ p dp dn =>
+    ⟨max (max dp.toClx.1 dn.toClx.1) p.complexity.succ, (dp.toClx.2.ofLe (by simp)).cut (dn.toClx.2.ofLe (by simp)) (by simp)⟩
 
-def hauptsatz : ⊢ᶜ Δ → ⊢ᵀ Δ := fun d => hauptsatzClx d.toClx.2
+def hauptsatz : ⊢¹ Δ → { d : ⊢¹ Δ // CutFree d } := fun d => hauptsatzClx d.toClx.2
 
-lemma iff_cut : Nonempty (⊢ᵀ Δ) ↔ Nonempty (⊢ᶜ Δ) :=
-  ⟨by rintro ⟨d⟩; exact ⟨cutWeakeningCut d⟩, by rintro ⟨d⟩; exact ⟨d.hauptsatz⟩⟩
+lemma iff_cut {L : Language} {Δ : Sequent L} : Nonempty { d : ⊢¹ Δ // CutFree d } ↔ ⊢¹! Δ :=
+  haveI := Classical.typeDecidableEq
+  ⟨by rintro ⟨d⟩; exact ⟨d⟩, by rintro ⟨d⟩; exact ⟨hauptsatz d⟩⟩
 
-end DerivationCR
+end Derivation
 
 end FirstOrder
 

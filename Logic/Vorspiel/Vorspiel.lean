@@ -13,6 +13,7 @@ import Mathlib.Logic.Encodable.Basic
 import Mathlib.Computability.Primrec
 import Mathlib.Computability.Partrec
 import Mathlib.Data.Finset.Sort
+import Mathlib.Data.List.Card
 
 namespace Nat
 variable {α : ℕ → Sort u}
@@ -348,6 +349,23 @@ lemma pair_le_pair_of_le {a₁ a₂ b₁ b₂ : ℕ} (ha : a₁ ≤ a₂) (hb : 
 
 end Nat
 
+namespace Fin
+
+lemma pos_of_coe_ne_zero {i : Fin (n + 1)} (h : (i : ℕ) ≠ 0) :
+    0 < i := Nat.pos_of_ne_zero h
+
+@[simp] lemma one_pos' : (0 : Fin (n + 2)) < 1 := pos_of_coe_ne_zero (Nat.succ_ne_zero 0)
+
+@[simp] lemma two_pos : (0 : Fin (n + 3)) < 2 := pos_of_coe_ne_zero (Nat.succ_ne_zero 1)
+
+@[simp] lemma three_pos : (0 : Fin (n + 4)) < 3 := pos_of_coe_ne_zero (Nat.succ_ne_zero 2)
+
+@[simp] lemma four_pos : (0 : Fin (n + 5)) < 4 := pos_of_coe_ne_zero (Nat.succ_ne_zero 3)
+
+@[simp] lemma five_pos : (0 : Fin (n + 6)) < 5 := pos_of_coe_ne_zero (Nat.succ_ne_zero 4)
+
+end Fin
+
 namespace Fintype
 variable {ι : Type _} [Fintype ι]
 
@@ -390,7 +408,7 @@ end Empty
 namespace IsEmpty
 variable {o : Sort u} (h : IsEmpty o)
 
-lemma eq_elim {α : Sort u} (f : o → α) : f = h.elim' := funext h.elim
+lemma eq_elim {α : Sort*} (f : o → α) : f = h.elim' := funext h.elim
 
 end IsEmpty
 
@@ -545,7 +563,7 @@ lemma mapM'_eq_none_iff {f : α → Option β} {l : List α} : l.mapM' f = none 
       rcases hb : f a with (_ | b); { simp }
       rcases hbs : mapM' f l with (_ | bs)
       { exact Or.inr (ih.mp hbs) }
-      { have : False := by simpa[Option.pure_eq_some] using (H (b :: bs) b hb) bs hbs
+      { have : False := by simpa[Option.pure_eq_some] using (H b hb) bs hbs
         contradiction } }
     { rintro (h | h)
       { simp[h] }
@@ -592,6 +610,37 @@ lemma mapM_map (as : List α) (f : α → Option β) (g : Option β → Option �
 @[simp] lemma allSome_map_some (l : List α) (f : α → β) :
     allSome' (l.map (fun x => some (f x))) = some (l.map f) := by
   simp[allSome', mapM_map]
+
+lemma append_subset_append {l₁ l₂ l : List α} (h : l₁ ⊆ l₂) : l₁ ++ l ⊆ l₂ ++ l :=
+  List.append_subset.mpr ⟨List.subset_append_of_subset_left _ h, subset_append_right l₂ l⟩
+
+lemma subset_of_eq {l₁ l₂ : List α} (e : l₁ = l₂) : l₁ ⊆ l₂ := by simp[e]
+
+@[simp] lemma remove_cons_self [DecidableEq α] (l : List α) (a) :
+  (a :: l).remove a = l.remove a := by simp[remove]
+
+lemma remove_cons_of_ne [DecidableEq α] (l : List α) {a b} (ne : a ≠ b) :
+  (a :: l).remove b = a :: l.remove b := by simp[remove, Ne.symm ne]
+
+lemma remove_subset [DecidableEq α] (a) (l : List α) :
+    l.remove a ⊆ l := by
+  simp[subset_def, mem_remove_iff]
+  intros; simp[*]
+
+lemma remove_subset_remove [DecidableEq α] (a) {l₁ l₂ : List α} (h : l₁ ⊆ l₂) :
+    l₁.remove a ⊆ l₂.remove a := by
+  simp[subset_def, mem_remove_iff]; intros; simp[*]; exact h (by assumption)
+
+lemma remove_cons_subset_cons_remove [DecidableEq α] (a b) (l : List α) :
+    (a :: l).remove b ⊆ a :: l.remove b := by
+  intro x; simp[List.mem_remove_iff]
+  rintro (rfl | hx) nex <;> simp[*]
+
+lemma remove_map_substet_map_remove [DecidableEq α] [DecidableEq β] (f : α → β) (l : List α) (a) :
+    (l.map f).remove (f a) ⊆ (l.remove a).map f := by
+  simp[List.subset_def, List.mem_remove_iff]
+  intro b hb neb;
+  exact ⟨b, ⟨hb, by rintro rfl; exact neb rfl⟩, rfl⟩
 
 end List
 
