@@ -19,9 +19,9 @@ scoped notation: max "⸢" a "⸣" => Subterm.Operator.godelNumber ℒₒᵣ a
 @[simp] lemma godelNumber_encode_eq {α} [Primcodable α] (a : α) :
     (⸢encode a⸣ : Subterm.Const ℒₒᵣ) = ⸢a⸣ := by simp[Subterm.Operator.godelNumber]
 
-open Nat.ArithPart₁
+open Nat.PartArith
 
-def codeAux : {k : ℕ} → Nat.ArithPart₁.Code k → Formula ℒₒᵣ (Fin (k + 1))
+def codeAux : {k : ℕ} → Nat.PartArith.Code k → Formula ℒₒᵣ (Fin (k + 1))
   | _, Code.zero _    => “&0 = 0”
   | _, Code.one _     => “&0 = 1”
   | _, Code.add i j   => “&0 = !!&i.succ + !!&j.succ”
@@ -86,7 +86,7 @@ lemma code_uniq {k} {c : Code k} {v : Fin k → M} {z z' : M} :
 
 end model
 
-lemma codeAux_sigma_one {k} (c : Nat.ArithPart₁.Code k) : Hierarchy.Sigma 1 (codeAux c) := by
+lemma codeAux_sigma_one {k} (c : Nat.PartArith.Code k) : Hierarchy.Sigma 1 (codeAux c) := by
   induction c <;> simp[codeAux, Subformula.Operator.operator, Matrix.fun_eq_vec₂,
     Subformula.Operator.Eq.sentence_eq, Subformula.Operator.LT.sentence_eq]
   case comp c d ihc ihg =>
@@ -99,7 +99,7 @@ lemma codeAux_sigma_one {k} (c : Nat.ArithPart₁.Code k) : Hierarchy.Sigma 1 (c
       exact Hierarchy.ball' &0 (by simp) (Hierarchy.ex $ by
         simp[Hierarchy.neg_iff, Hierarchy.equal]; exact Hierarchy.rew _ ih)⟩
 
-lemma code_sigma_one {k} (c : Nat.ArithPart₁.Code k) : Hierarchy.Sigma 1 (code c) :=
+lemma code_sigma_one {k} (c : Nat.PartArith.Code k) : Hierarchy.Sigma 1 (code c) :=
   Hierarchy.rew _ (codeAux_sigma_one c)
 
 lemma models_codeAux {c : Code k} {f : Vector ℕ k →. ℕ} (hc : c.eval f) (y : ℕ) (v : Fin k → ℕ) :
@@ -151,7 +151,7 @@ noncomputable def codeOfPartrec {k} (f : Vector ℕ k →. ℕ) : Code k :=
 lemma codeOfPartrec_spec {k} {f : Vector ℕ k →. ℕ} (hf : Nat.Partrec' f) {y : ℕ} {v : Fin k → ℕ} :
     Subformula.PVal! ℕ (y :> v) (code $ codeOfPartrec f) ↔ y ∈ f (Vector.ofFn v) := by
   have : ∃ c, ∀ y v, Subformula.PVal! ℕ (y :> v) (code c) ↔ y ∈ f (Vector.ofFn v) := by
-    rcases Nat.ArithPart₁.exists_code (of_partrec hf) with ⟨c, hc⟩
+    rcases Nat.PartArith.exists_code (of_partrec hf) with ⟨c, hc⟩
     exact ⟨c, models_code hc⟩
   exact Classical.epsilon_spec this y v
 
