@@ -27,7 +27,7 @@ namespace Matrix
 open Fin
 section
 universe u
-variable {n : ℕ} {α : Type u}
+variable {n : ℕ} {α β : Type u}
 
 infixr:70 " :> " => vecCons
 
@@ -45,6 +45,8 @@ end Matrix
 open Vector Part
 
 namespace Nat
+
+variable {m n : ℕ}
 
 lemma pos_of_eq_one (h : n = 1) : 0 < n := by simp[h]
 
