@@ -1,6 +1,27 @@
+/-
+Copyright (c) 2024 Shogo Saito. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Shogo Saito. Adapted for mathlib by Hunter Monroe
+-/
 import Mathlib.Computability.Halting
 import Mathlib.Data.Nat.Prime
 import Mathlib.Data.Fin.VecNotation
+
+/-!
+# Arithmetization of Partial Recursive Functions
+
+As a step toward proving Gödel's incompleteness theorems, this file
+arithmetizes facts about partial recursive functions.
+
+## Main result
+
+- `exists_code`: Arithmetized proof that a universal partial recursive
+  exists
+
+## Tags
+
+Gödel, partial recursive function
+-/
 
 namespace Matrix
 open Fin
