@@ -4,7 +4,6 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Shogo Saito. Adapted for mathlib by Hunter Monroe
 -/
 import Mathlib.Computability.Halting
-import Mathlib.Data.Nat.Prime
 import Mathlib.Data.Fin.VecNotation
 
 /-!
@@ -16,7 +15,7 @@ arithmetizes facts about partial recursive functions.
 ## Main result
 
 - `exists_code`: Arithmetized proof that a universal partial recursive
-  exists
+  exists (to be added shortly)
 
 ## Tags
 
@@ -110,8 +109,7 @@ def ball (n : ℕ) (p : ℕ → ℕ) : ℕ := n.rec 1 (fun n ih => (p n).pos.and
 @[simp] lemma ball_pos_iff {p : ℕ → ℕ} {n : ℕ} : 0 < ball n p ↔ ∀ m < n, 0 < p m := by
   induction' n with n ih <;> simp[ball, Nat.lt_succ_iff] at*
   · simp[ih]; exact ⟨
-    by rintro ⟨hn, hp⟩ m hm; rcases lt_or_eq_of_le hm with (hm | rfl); {exact hp _ hm };
-      {exact hn },
+    by rintro ⟨hn, hp⟩ m hm; rcases lt_or_eq_of_le hm with (hm | rfl); {exact hp _ hm };{exact hn },
     by intro h; exact ⟨h n (Nat.le_refl n), fun m hm => h m (le_of_lt hm)⟩⟩
 
 @[simp] lemma ball_eq_zero_iff {p : ℕ → ℕ} {n : ℕ} : ball n p = 0 ↔ ∃ m < n, p m = 0 := by
@@ -143,6 +141,8 @@ end Nat
 namespace Nat.PartArith
 
 open Primrec
+
+variable {n : ℕ}
 
 lemma to_partrec' {n} {f : Vector ℕ n →. ℕ} (hf : PartArith f) : Partrec' f := by
   induction hf
@@ -187,8 +187,8 @@ lemma of_eq {n} {f g : Vector ℕ n →. ℕ} (hf : PartArith f) (H : ∀ i, f i
 
 lemma bind (f : Vector ℕ n → ℕ →. ℕ) (hf : @PartArith (n + 1) fun v => f v.tail v.head) {g}
     (hg : @PartArith n g) : @PartArith n fun v => (g v).bind (f v) :=
-  (hf.comp (g :> fun i v => v.get i) (fun i => by cases i using Fin.cases <;> simp[*];
-      exact proj _)).of_eq (by
+  (hf.comp (g :> fun i v => v.get i)
+  (fun i => by cases i using Fin.cases <;> simp[*]; exact proj _)).of_eq (by
     intro v; simp
     rcases Part.eq_none_or_eq_some (g v) with (hgv | ⟨x, hgv⟩)
     · simp[hgv, mOfFn]
@@ -228,6 +228,8 @@ lemma rfind'₁ {n} (i : Fin n) {f : ℕ → ℕ → ℕ} (h : Arith (n := 2)
 end Nat.PartArith
 
 namespace Nat.Arith
+
+variable {n : ℕ}
 
 lemma of_eq {n} {f g : Vector ℕ n → ℕ} (hf : Arith f) (H : ∀ i, f i = g i) : Arith g :=
   (funext H : f = g) ▸ hf
