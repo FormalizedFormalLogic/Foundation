@@ -500,6 +500,15 @@ lemma arithmetize_deltaZero {p : Semisentence ℒₒᵣ[T] n} (hp : Δ₀'[T].Do
 
 end boundedLanguage
 
+abbrev HSemiformulaIn (T : Theory ℒₒᵣ) (Γ : Polarity) (s : ℕ) (ξ : Type*) [DecidableEq ξ] (n : ℕ) : Type _ :=
+  { p : Semiformula ℒₒᵣ ξ n // Γᴴ(s)[T].Domain p }
+
+abbrev HSemisentenceIn (T : Theory ℒₒᵣ) (Γ : Polarity) (s : ℕ) (n : ℕ) : Type _ := HSemiformulaIn T Γ s Empty n
+
+abbrev HSemiformulaΔ₀In (T : Theory ℒₒᵣ) (ξ : Type*) [DecidableEq ξ] (n : ℕ) : Type _ := HSemiformulaIn T Σ 0 ξ n
+
+abbrev HSemisentenceΔ₀In (T : Theory ℒₒᵣ) (n : ℕ) : Type _ := HSemiformulaΔ₀In T Empty n
+
 abbrev BSemiformula (T : Theory ℒₒᵣ) (Γ : Polarity) (s : ℕ) (ξ : Type*) [DecidableEq ξ] (n : ℕ) : Type _ :=
   { p : Semiformula ℒₒᵣ[T] ξ n // Γᴴ'(s)[T].Domain p }
 

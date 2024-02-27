@@ -289,6 +289,13 @@ variable {n : ℕ} {ε : ξ → M}
     · rintro ⟨e, h, H⟩
       exact ⟨(e ·.succ), fun i ↦ h i.succ, e 0, h 0, by simpa [←Matrix.eq_vecCons'] using H⟩
 
+variable [DecidableEq ξ] {e : Fin n → M} {T : Theory L} [T.Mod M]
+
+lemma Equivalent.eval_iff {p q : Semiformula L ξ n} (H : p ↔[T] q) (e : Fin n → M) (ε : ξ → M) :
+    Eval s e ε p ↔ Eval s e ε q := by
+  simp [Equivalent, consequence_iff, models_iff] at H
+  exact H M (Classical.choice inferInstance) ((Theory.Mod.iff M).mp inferInstance) ε e
+
 end Semiformula
 
 namespace Arith.Hierarchy

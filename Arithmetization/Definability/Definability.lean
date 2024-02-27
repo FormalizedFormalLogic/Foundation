@@ -1,6 +1,7 @@
 import Arithmetization.Lemmata
 import Arithmetization.Definability.Init
 import Arithmetization.Definability.BoundedTheory
+import Aesop
 
 namespace LO.FirstOrder
 
@@ -32,167 +33,209 @@ namespace Arith
 
 section definability
 
-variable {T : Theory ℒₒᵣ}
-variable {M : Type} [DecidableEq M] [Zero M] [One M] [Add M] [Mul M] [LT M] [T.Mod M]
+variable {M : Type} [Zero M] [One M] [Add M] [Mul M] [LT M] [𝐏𝐀⁻.Mod M]
 
 namespace Definability
 
-namespace FormulaHierarchy
+abbrev HSemiformula (Γ : Polarity) (s : ℕ) (L : Language) [L.LT] (μ : Type*) (n) :=
+  { p : Semiformula L μ  n // Hierarchy Γ s p }
 
--- abbrev of_zero (p : FormulaHierarchy Γ 0 ℒₒᵣ μ k) : FormulaHierarchy b' s ℒₒᵣ μ k :=
---   ⟨p, p.prop.of_zero⟩
+abbrev SentenceHierarchy (Γ : Polarity) (s : ℕ) (L : Language) [L.LT] (n) := HSemiformula Γ s L Empty n
+
+namespace HSemiformula
+
+abbrev of_zero (p : HSemiformula Γ 0 ℒₒᵣ μ k) : HSemiformula b' s ℒₒᵣ μ k :=
+  ⟨p, p.prop.of_zero⟩
 
 variable (Γ : Polarity) (s : ℕ) (L : Language) [L.LT] (μ : Type*) (n)
 
-end FormulaHierarchy
+@[simp] lemma hierarchy (p : HSemiformula Γ s L μ n) : Hierarchy Γ s p.val := p.prop
 
-namespace BSemisentence
+@[simp] lemma hierarchy_zero {Γ b' s} (p : HSemiformula Γ 0 L μ n) : Hierarchy b' s p.val :=
+  Hierarchy.of_zero p.hierarchy
 
-def eq : BSemisentence T Γ s 2 := ⟨“#0 = #1”, by simp⟩
+end HSemiformula
 
-def lt : BSemisentence T Γ s 2 := ⟨“#0 < #1”, by simp⟩
+namespace SentenceHierarchy
 
-def le : BSemisentence T Γ s 2 := ⟨“#0 ≤ #1”, by simp⟩
+def eq : SentenceHierarchy Γ s ℒₒᵣ 2 := ⟨“#0 = #1”, by simp⟩
 
-end BSemisentence
+def lt : SentenceHierarchy Γ s ℒₒᵣ 2 := ⟨“#0 < #1”, by simp⟩
+
+def le : SentenceHierarchy Γ s ℒₒᵣ 2 := ⟨“#0 ≤ #1”, by simp⟩
+
+end SentenceHierarchy
 
 end Definability
 
 namespace Model
 
 open Definability
-
-variable (T Γ s)
-
-abbrev DefinedPred (P : M → Prop) (p : BSemisentence T Γ s 1) : Prop :=
+/-
+abbrev DefinedPred (Γ : Polarity) (s : ℕ) (P : M → Prop) (p : SentenceHierarchy Γ s ℒₒᵣ 1) : Prop :=
   Defined (λ v ↦ P (v 0)) p.val
 
-abbrev DefinedRel (R : M → M → Prop) (p : BSemisentence T Γ s 2) : Prop :=
+abbrev DefinedRel (Γ : Polarity) (s : ℕ) (R : M → M → Prop) (p : SentenceHierarchy Γ s ℒₒᵣ 2) : Prop :=
   Defined (λ v ↦ R (v 0) (v 1)) p.val
 
-abbrev DefinedRel₃ (R : M → M → M → Prop) (p : BSemisentence T Γ s 3) : Prop :=
+abbrev DefinedRel₃ (Γ : Polarity) (s : ℕ) (R : M → M → M → Prop) (p : SentenceHierarchy Γ s ℒₒᵣ 3) : Prop :=
   Defined (λ v ↦ R (v 0) (v 1) (v 2)) p.val
 
-abbrev DefinedRel₄ (R : M → M → M → M → Prop) (p : BSemisentence T Γ s 4) : Prop :=
+abbrev DefinedRel₄ (Γ : Polarity) (s : ℕ) (R : M → M → M → M → Prop) (p : SentenceHierarchy Γ s ℒₒᵣ 4) : Prop :=
   Defined (λ v ↦ R (v 0) (v 1) (v 2) (v 3)) p.val
 
-notation Γ "ᴴ(" s ")[" T "]-Predicate" => DefinedPred T Γ s
-
-notation Γ "ᴴ(" s ")[" T "]-Relation" => DefinedRel T Γ s
-
-notation Γ "ᴴ(" s ")[" T "]-Relation₃" => DefinedRel₃ T Γ s
-
-notation Γ "ᴴ(" s ")[" T "]-Relation₄" => DefinedRel₄ T Γ s
-
-abbrev DefinedFunction {k} (f : (Fin k → M) → M) (p : BSemisentence T Γ s (k + 1)) : Prop :=
+abbrev DefinedFunction (Γ : Polarity) (s : ℕ) {k} (f : (Fin k → M) → M) (p : SentenceHierarchy Γ s ℒₒᵣ (k + 1)) : Prop :=
   Defined (fun v => v 0 = f (v ·.succ)) p.val
 
-abbrev DefinedFunction₁ (f : M → M) (p : BSemisentence T Γ s 2) : Prop :=
-  DefinedFunction T Γ s (fun v => f (v 0)) p
+abbrev DefinedFunction₁ (Γ : Polarity) (s : ℕ) (f : M → M) (p : SentenceHierarchy Γ s ℒₒᵣ 2) : Prop :=
+  DefinedFunction Γ s (fun v => f (v 0)) p
 
-abbrev DefinedFunction₂ (f : M → M → M) (p : BSemisentence T Γ s 3) : Prop :=
-  DefinedFunction T Γ s (fun v => f (v 0) (v 1)) p
+abbrev DefinedFunction₂ (Γ : Polarity) (s : ℕ) (f : M → M → M) (p : SentenceHierarchy Γ s ℒₒᵣ 3) : Prop :=
+  DefinedFunction Γ s (fun v => f (v 0) (v 1)) p
 
-abbrev DefinedFunction₃ (f : M → M → M → M) (p : BSemisentence T Γ s 4) : Prop :=
-  DefinedFunction T Γ s (fun v => f (v 0) (v 1) (v 2)) p
+abbrev DefinedFunction₃ (Γ : Polarity) (s : ℕ) (f : M → M → M → M) (p : SentenceHierarchy Γ s ℒₒᵣ 4) : Prop :=
+  DefinedFunction Γ s (fun v => f (v 0) (v 1) (v 2)) p
 
-notation Γ "ᴴ(" s ")[" T "]-Function₁" => DefinedFunction₁ T Γ s
+notation Γ "(" s ")-Predicate " P " via " p => DefinedPred Γ s P p
 
-notation Γ "ᴴ(" s ")[" T "]-Function₂" => DefinedFunction₂ T Γ s
+notation Γ "(" s ")-Relation " P " via " p => DefinedRel Γ s P p
 
-notation Γ "ᴴ(" s ")[" T "]-Function₃" => DefinedFunction₃ T Γ s
+notation Γ "(" s ")-Relation₃ " P " via " p => DefinedRel₃ Γ s P p
 
-def DefinedRel.eq : DefinedRel T Γ s ((· = ·) : M → M → Prop) BSemisentence.eq := by intro v; simp [BSemisentence.eq]
+notation Γ "(" s ")-Relation₄ " P " via " p => DefinedRel₄ Γ s P p
 
-def DefinedRel.lt : DefinedRel T Γ s ((· < ·) : M → M → Prop) BSemisentence.lt := by intro v; simp [BSemisentence.lt]
+notation Γ "(" s ")-Function₁ " f " via " p => DefinedFunction₁ Γ s f p
 
-def DefinedRel.le [𝐏𝐀⁻.Mod M] :
-    DefinedRel T Γ s ((· ≤ ·) : M → M → Prop) BSemisentence.le := by intro v; simp [BSemisentence.le]
+notation Γ "(" s ")-Function₂ " f " via " p => DefinedFunction₂ Γ s f p
+
+notation Γ "(" s ")-Function₃ " f " via " p => DefinedFunction₃ Γ s f p
+
+def DefinedRel.eq : Γ(s)-Relation ((· = ·) : M → M → Prop) via SentenceHierarchy.eq := by intro v; simp [SentenceHierarchy.eq]
+
+def DefinedRel.lt : Γ(s)-Relation ((· < ·) : M → M → Prop) via SentenceHierarchy.lt := by intro v; simp [SentenceHierarchy.lt]
+
+def DefinedRel.le : Γ(s)-Relation ((· ≤ ·) : M → M → Prop) via SentenceHierarchy.le := by intro v; simp [SentenceHierarchy.le]
+
+-/
+
+variable (Γ : Polarity) (s : ℕ)
 
 class Definable {k} (P : (Fin k → M) → Prop) : Prop where
-  definable : ∃ p : BSemiformula T Γ s M k, DefinedWithParam P p.val
+  definable : ∃ p : HSemiformula Γ s ℒₒᵣ M k, DefinedWithParam P p.val
 
-abbrev DefinablePred (P : M → Prop) : Prop := Definable T Γ s (k := 1) (fun v ↦ P (v 0))
+abbrev DefinablePred (P : M → Prop) : Prop := Definable Γ s (k := 1) (fun v ↦ P (v 0))
 
-abbrev DefinableRel (P : M → M → Prop) : Prop := Definable T Γ s (k := 2) (fun v ↦ P (v 0) (v 1))
+abbrev DefinableRel (P : M → M → Prop) : Prop := Definable Γ s (k := 2) (fun v ↦ P (v 0) (v 1))
 
-abbrev DefinableRel₃ (P : M → M → M → Prop) : Prop := Definable T Γ s (k := 3) (fun v ↦ P (v 0) (v 1) (v 2))
+abbrev DefinableRel₃ (P : M → M → M → Prop) : Prop := Definable Γ s (k := 3) (fun v ↦ P (v 0) (v 1) (v 2))
 
-abbrev DefinableRel₄ (P : M → M → M → M → Prop) : Prop := Definable T Γ s (k := 4) (fun v ↦ P (v 0) (v 1) (v 2) (v 3))
+abbrev DefinableRel₄ (P : M → M → M → M → Prop) : Prop := Definable Γ s (k := 4) (fun v ↦ P (v 0) (v 1) (v 2) (v 3))
 
-abbrev DefinableFunction (f : (Fin k → M) → M) : Prop := Definable T Γ s (k := k + 1) (fun v ↦ v 0 = f (v ·.succ))
+abbrev DefinableFunction (f : (Fin k → M) → M) : Prop := Definable Γ s (k := k + 1) (fun v ↦ v 0 = f (v ·.succ))
 
-abbrev DefinableFunction₁ (f : M → M) : Prop := DefinableFunction T Γ s (k := 1) (fun v ↦ f (v 0))
+abbrev DefinableFunction₁ (f : M → M) : Prop := DefinableFunction Γ s (k := 1) (fun v ↦ f (v 0))
 
-abbrev DefinableFunction₂ (f : M → M → M) : Prop := DefinableFunction T Γ s (k := 2) (fun v ↦ f (v 0) (v 1))
+abbrev DefinableFunction₂ (f : M → M → M) : Prop := DefinableFunction Γ s (k := 2) (fun v ↦ f (v 0) (v 1))
 
-abbrev DefinableFunction₃ (f : M → M → M → M) : Prop := DefinableFunction T Γ s (k := 3) (fun v ↦ f (v 0) (v 1) (v 2))
+abbrev DefinableFunction₃ (f : M → M → M → M) : Prop := DefinableFunction Γ s (k := 3) (fun v ↦ f (v 0) (v 1) (v 2))
 
-variable {T Γ s}
+notation Γ "(" s ")-Predicate " P => DefinablePred Γ s P
 
-lemma defined_to_with_param {k} {P : (Fin k → M) → Prop} (p : BSemisentence T Γ s k) (hP : Defined P p.val) :
-    Definable T Γ s P := ⟨⟨Rew.emb.hom p.val, HClassIn.rew p.property _⟩, by intro; simp [hP.pval]⟩
+notation Γ "(" s ")-Relation " P => DefinableRel Γ s P
 
-lemma defined_to_with_param₀ {k} {P : (Fin k → M) → Prop} (p : BSemisentence T Γ' 0 k) (hP : Defined P p.val) :
-    Definable T Γ s P := ⟨⟨Rew.emb.hom p.val, HClassIn.rew (HClassIn.zero_le _ Γ s p.property) _⟩, by intro; simp [hP.pval]⟩
+notation Γ "(" s ")-Relation₃ " P => DefinableRel₃ Γ s P
+
+notation Γ "(" s ")-Relation₄ " P => DefinableRel₄ Γ s P
+
+notation Γ "(" s ")-Function₁ " f => DefinableFunction₁ Γ s f
+
+notation Γ "(" s ")-Function₂ " f => DefinableFunction₂ Γ s f
+
+notation Γ "(" s ")-Function₃ " f => DefinableFunction₃ Γ s f
+
+variable {Γ s}
+
+lemma defined_to_with_param {k} {P : (Fin k → M) → Prop} (p : SentenceHierarchy Γ s ℒₒᵣ k) (hP : Defined P p.val) :
+    Definable Γ s P := ⟨⟨Rew.emb.hom p.val, by simp⟩, by intro; simp [hP.pval]⟩
+
+lemma defined_to_with_param₀ {k} {P : (Fin k → M) → Prop} (p : SentenceHierarchy b' 0 ℒₒᵣ k) (hP : Defined P p.val) :
+    Definable Γ s P := ⟨⟨Rew.emb.hom p.val, by simp⟩, by intro; simp [hP.pval]⟩
+
+section
+
+variable {T : Theory ℒₒᵣ} [T.Mod M]
+
+lemma HSemifromula.definable_of_defined {k} {P : (Fin k → M) → Prop} (p : HSemisentenceIn T Γ s k) (hP : Defined P p.val) :
+    Definable Γ s P :=
+  ⟨by rcases p.prop with ⟨σ, hσ, H⟩
+      exact ⟨⟨Rew.emb.hom σ, by simpa using hσ⟩, by
+        intro v; simp
+        simp [H.eval_iff, hP.pval]⟩⟩
+
+lemma HSemifromula.definable_of_defined₀ {k} {P : (Fin k → M) → Prop} (p : HSemisentenceIn T b' 0 k) (hP : Defined P p.val) :
+    Definable Γ s P :=
+  ⟨by rcases p.prop with ⟨σ, hσ, H⟩
+      exact ⟨⟨Rew.emb.hom σ, by simpa [Hierarchy.zero_iff_delta_zero] using Hierarchy.of_zero hσ⟩, by
+        intro v; simp
+        simp [H.eval_iff, hP.pval]⟩⟩
+
+end
 
 namespace Definable
 
-lemma of_iff {p : (Fin k → M) → Prop} (q) (h : ∀ x, p x ↔ q x) (H : Definable T Γ s q) : Definable T Γ s p := by
+lemma of_iff {p : (Fin k → M) → Prop} (q) (h : ∀ x, p x ↔ q x) (H : Definable Γ s q) : Definable Γ s p := by
   rwa [show p = q from by funext v; simp [h]]
 
-lemma finmap {P : (Fin k → M) → Prop} (h : Definable T Γ s P) (f : Fin k → Fin n) :
-    Definable T Γ s fun v ↦ P (fun i ↦ v (f i)) := by
+lemma finmap {P : (Fin k → M) → Prop} (h : Definable Γ s P) (f : Fin k → Fin n) :
+    Definable Γ s fun v ↦ P (fun i ↦ v (f i)) := by
   rcases h with ⟨p, h⟩
-  exact ⟨⟨(Rew.substs (fun i ↦ #(f i))).hom p, HClassIn.rew p.property _⟩, by intro v; simp [h.eval]⟩
+  exact ⟨⟨(Rew.substs (fun i ↦ #(f i))).hom p, by simp⟩, by intro v; simp [h.eval]⟩
 
 end Definable
 
 namespace DefinableFunction
 
-lemma of_eq {f : (Fin k → M) → M} (g) (h : ∀ v, f v = g v) (H : DefinableFunction T Γ s f) : DefinableFunction T Γ s g := by
+lemma of_eq {f : (Fin k → M) → M} (g) (h : ∀ v, f v = g v) (H : DefinableFunction Γ s f) : DefinableFunction Γ s g := by
   rwa [show g = f from by funext v; simp [h]]
 
-lemma finmap {f : (Fin k → M) → M} (hf : DefinableFunction T Γ s f) (e : Fin k → Fin n) :
-    DefinableFunction T Γ s fun v ↦ f (fun i ↦ v (e i)) := by
+lemma finmap {f : (Fin k → M) → M} (hf : DefinableFunction Γ s f) (e : Fin k → Fin n) :
+    DefinableFunction Γ s fun v ↦ f (fun i ↦ v (e i)) := by
   have := Definable.finmap (n := n + 1) hf (0 :> fun i ↦ (e i).succ); simp at this
   exact this.of_iff _ (by intro x; simp)
 
-lemma rel {f : (Fin k → M) → M} (h : DefinableFunction T Γ s f) :
-  Definable T Γ s (fun v ↦ v 0 = f (v ·.succ)) := h
+lemma rel {f : (Fin k → M) → M} (h : DefinableFunction Γ s f) :
+  Definable Γ s (fun v ↦ v 0 = f (v ·.succ)) := h
 
 end DefinableFunction
 
-instance DefinableFunction₁.graph {f : M → M} [h : DefinableFunction₁ T Γ s f] :
-  DefinableRel T Γ s (Function.Graph f) := h
+instance DefinableFunction₁.graph {f : M → M} [h : DefinableFunction₁ Γ s f] :
+  DefinableRel Γ s (Function.Graph f) := h
 
-instance DefinableFunction₂.graph {f : M → M → M} [h : DefinableFunction₂ T Γ s f] :
-  DefinableRel₃ T Γ s (Function.Graph₂ f) := h
+instance DefinableFunction₂.graph {f : M → M → M} [h : DefinableFunction₂ Γ s f] :
+  DefinableRel₃ Γ s (Function.Graph₂ f) := h
 
-instance DefinableFunction₃.graph {f : M → M → M → M} [h : DefinableFunction₃ T Γ s f] :
-  DefinableRel₄ T Γ s (Function.Graph₃ f) := h
+instance DefinableFunction₃.graph {f : M → M → M → M} [h : DefinableFunction₃ Γ s f] :
+  DefinableRel₄ Γ s (Function.Graph₃ f) := h
 
 namespace DefinableRel
 
-instance eq : DefinableRel T Γ s ((· = ·) : M → M → Prop) := ⟨⟨“#0 = #1”, by simp⟩, by intro; simp⟩
+instance eq : DefinableRel Γ s ((· = ·) : M → M → Prop) := ⟨⟨“#0 = #1”, by simp⟩, by intro; simp⟩
 
-instance lt : DefinableRel T Γ s ((· < ·) : M → M → Prop) := ⟨⟨“#0 < #1”, by simp⟩, by intro; simp⟩
+instance lt : DefinableRel Γ s ((· < ·) : M → M → Prop) := ⟨⟨“#0 < #1”, by simp⟩, by intro; simp⟩
 
-instance le [𝐏𝐀⁻.Mod M] : DefinableRel T Γ s ((· ≤ ·) : M → M → Prop) := ⟨⟨“#0 ≤ #1”, by simp⟩, by intro; simp⟩
+instance le : DefinableRel Γ s ((· ≤ ·) : M → M → Prop) := ⟨⟨“#0 ≤ #1”, by simp⟩, by intro; simp⟩
 
 end DefinableRel
 
 namespace DefinableFunction₂
 
-instance add : DefinableFunction₂ T Γ s ((· + ·) : M → M → M) where
+instance add : DefinableFunction₂ Γ s ((· + ·) : M → M → M) where
   definable := ⟨⟨“#0 = #1 + #2”, by simp⟩, by intro _; simp⟩
 
-instance mul : DefinableFunction₂ T Γ s ((· * ·) : M → M → M) where
+instance mul : DefinableFunction₂ Γ s ((· * ·) : M → M → M) where
   definable := ⟨⟨“#0 = #1 * #2”, by simp⟩, by intro _; simp⟩
 
 end DefinableFunction₂
-
-/--/
 
 variable (Γ s)
 
