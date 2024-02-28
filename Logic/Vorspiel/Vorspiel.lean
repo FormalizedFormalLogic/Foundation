@@ -12,7 +12,6 @@ import Mathlib.Order.Filter.Ultrafilter
 import Mathlib.Logic.Encodable.Basic
 import Mathlib.Computability.Primrec
 import Mathlib.Computability.Partrec
-import Mathlib.Data.Finset.Sort
 import Mathlib.Data.List.Card
 
 namespace Nat
