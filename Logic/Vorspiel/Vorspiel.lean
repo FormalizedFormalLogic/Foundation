@@ -41,14 +41,6 @@ lemma rec_eq {α : Sort*} (a : α) (f₁ f₂ : ℕ → α → α) (n : ℕ) (H 
   · have : (n.rec a f₁ : α) = n.rec a f₂ := ih (fun m hm a =>  H m (Nat.lt.step hm) a)
     simpa[this] using H n (Nat.lt.base n) (n.rec a f₂)
 
-lemma least_number (P : ℕ → Prop) (hP : ∃ x, P x) : ∃ x, P x ∧ ∀ z < x, ¬P z := by
-  rcases hP with ⟨n, hn⟩
-  induction' n using Nat.strongRec with n ih
-  by_cases H : ∃ m < n, P m
-  · rcases H with ⟨m, hm, hPm⟩
-    exact ih m hm hPm
-  · exact ⟨n, hn, by simpa using H⟩
-
 def toFin (n : ℕ) : ℕ → Option (Fin n) := fun x => if hx : x < n then some ⟨x, hx⟩ else none
 
 end Nat

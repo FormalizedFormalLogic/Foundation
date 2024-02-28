@@ -1,4 +1,4 @@
-import Logic.Vorspiel.Vorspiel
+--import Logic.Vorspiel.Vorspiel
 import Logic.Vorspiel.GodelBetaFunction
 import Logic.Vorspiel.PartArith
 import Mathlib.Computability.Halting
@@ -9,6 +9,14 @@ import Mathlib.Data.Nat.Prime
 open Vector Part
 
 namespace Nat.Arith
+
+lemma least_number (P : ℕ → Prop) (hP : ∃ x, P x) : ∃ x, P x ∧ ∀ z < x, ¬P z := by
+  rcases hP with ⟨n, hn⟩
+  induction' n using Nat.strongRec with n ih
+  by_cases H : ∃ m < n, P m
+  · rcases H with ⟨m, hm, hPm⟩
+    exact ih m hm hPm
+  · exact ⟨n, hn, by simpa using H⟩
 
 protected lemma sqrt {n} (i : Fin n) : Arith (fun v => sqrt (v.get i)) := by
   have := PartArith.implicit_fun i (fun _ x => x * x) ((mul 0 1).comp₂ _ head head)
@@ -179,6 +187,11 @@ lemma beta_eq_rec (f : Vector ℕ n → ℕ) (g : Vector ℕ (n + 2) → ℕ) {z
   induction' m with m ih <;> simp[h0]
   · rw[hs m (lt.base m), ←ih (fun i hi => hs i (lt.step hi))]
 
+variable {α : Type _}
+
+lemma get_one {α : Type*} {n} (v : Vector α (n + 2)) : v.get 1 = v.tail.head := by
+  rw[←Vector.get_zero, Vector.get_tail_succ]; rfl
+
 lemma prec {n f g} (hf : @Arith n f) (hg : @Arith (n + 2) g) :
     @Arith (n + 1) (fun v => v.head.rec (f v.tail) fun y IH => g (y ::ᵥ IH ::ᵥ v.tail)) := by
   let F : Vector ℕ (n + 2) → ℕ := fun v =>
@@ -194,9 +207,9 @@ lemma prec {n f g} (hf : @Arith n f) (hg : @Arith (n + 2) g) :
     ((equal 0 1).comp₂ _ ((beta 0 1).comp₂ _ head zero) hf.tail.tail)
     ((@ball (n + 2) (fun v i =>
       isEqNat (Nat.beta v.head (i + 1)) (g (i ::ᵥ Nat.beta v.head i ::ᵥ v.tail.tail))) hp 1).of_eq $ by
-        simp[Vector.get_one])
+        simp[get_one])
   have : @Arith (n + 2) (fun v => Nat.beta v.head v.tail.head) :=
-    (beta 0 1).of_eq (by simp [Vector.get_one])
+    (beta 0 1).of_eq (by simp [get_one])
   have := PartArith.map (fun v x => Nat.beta x v.head) this (PartArith.rfindPos hF)
   exact this.of_eq <| by
     intro v; simp[Part.eq_some_iff]
