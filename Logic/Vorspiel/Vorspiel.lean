@@ -85,7 +85,7 @@ def unexpandVecCons : Unexpander
   | `($(_) $a ![$as,*]) => `(![$a, $as,*])
   | _                   => throw ()
 
-#check ![1, 2]
+--#check ![1, 2]
 
 end delab
 

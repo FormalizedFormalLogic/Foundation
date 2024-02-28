@@ -58,10 +58,10 @@ macro_rules
   | `(ᵀ“ ᵀᵇ $t:foterm ”)                           => `(Rew.fix ᵀ“$t”)
   | `(ᵀ“ ( $x ) ”)                                 => `(ᵀ“$x”)
 
-#check (ᵀ“ ᵀ⟨Operator.Add.add⟩(&2 + &0, ᵀ⟨Operator.Zero.zero⟩())” : Semiterm Language.oRing ℕ 8)
-#check (ᵀ“ ᵀ⟨Operator.Add.add⟩(&2 + &0, ᵀ⟨Operator.Zero.zero⟩())” : Semiterm Language.oRing ℕ 8)
-#check (ᵀ“#3 ^' 2” : Semiterm Language.oRing ℕ 8)
-#check Semiterm.func Language.Mul.mul (ᵀ“1” :> ᵀ“3” :> Matrix.vecEmpty)
+--#check (ᵀ“ ᵀ⟨Operator.Add.add⟩(&2 + &0, ᵀ⟨Operator.Zero.zero⟩())” : Semiterm Language.oRing ℕ 8)
+--#check (ᵀ“ ᵀ⟨Operator.Add.add⟩(&2 + &0, ᵀ⟨Operator.Zero.zero⟩())” : Semiterm Language.oRing ℕ 8)
+--#check (ᵀ“#3 ^' 2” : Semiterm Language.oRing ℕ 8)
+--#check Semiterm.func Language.Mul.mul (ᵀ“1” :> ᵀ“3” :> Matrix.vecEmpty)
 
 section delab
 
@@ -143,12 +143,12 @@ def unexpandFuncArith : Unexpander
 
   | _                                             => throw ()
 
-#check Operator.numeral Language.oRing 99
-#check (ᵀ“1 + 8” : Semiterm Language.oRing ℕ 8)
-#check (Semiterm.func Language.Mul.mul (ᵀ“1” :> ᵀ“3” :> Matrix.vecEmpty) : Semiterm Language.oRing ℕ 8)
-#check [→ &0, &5] ᵀ“3 * #3 + 9”
-#check Rew.shift ᵀ“(3 * #3 + 9)”
-#check ᵀ“(3 * #3 * x + y + z)”
+--#check Operator.numeral Language.oRing 99
+--#check (ᵀ“1 + 8” : Semiterm Language.oRing ℕ 8)
+--#check (Semiterm.func Language.Mul.mul (ᵀ“1” :> ᵀ“3” :> Matrix.vecEmpty) : Semiterm Language.oRing ℕ 8)
+--#check [→ &0, &5] ᵀ“3 * #3 + 9”
+--#check Rew.shift ᵀ“(3 * #3 + 9)”
+--#check ᵀ“(3 * #3 * x + y + z)”
 
 end delab
 
@@ -212,9 +212,9 @@ macro_rules
   | `(“ ⇑$p:foformula ”)                         => `(Rew.shift.hom “$p”)
   | `(“ ( $x ) ”)                                  => `(“$x”)
 
-#check “ ¬(∀ ∀ (#0 + 1) * #1 < #0 + #1 ∨ 0 < 5) ”
-#check “⋀ i, #i < #i + 9”
-#check “0 < 1 ∨ 0 = 1 ∨1 < 0”
+--#check “ ¬(∀ ∀ (#0 + 1) * #1 < #0 + #1 ∨ 0 < 5) ”
+--#check “⋀ i, #i < #i + 9”
+--#check “0 < 1 ∨ 0 = 1 ∨1 < 0”
 
 syntax:10 foformula:9 " → " foformula:10 : foformula
 syntax:10 foformula:10 " ↔ " foformula:10 : foformula
@@ -375,12 +375,12 @@ def unexpandOpArith : Unexpander
 
   | _                                             => throw ()
 
-#check “ ¬∃ ∀ ((#0 + 1) * #1 < #0 + #1 ↔ 0 < &5) ”
-#check (“0 < 0 → ∀ 0 < #0 → 0 ≮ 2” : Sentence Language.oRing)
-#check “¬⊤ ∨ ((#0 < 5)) [#3, 7][2, #3]”
-#check “⋀ i, #i < #i + 9”
-#check “∀[#0 < 1] #0 = 0”
-#check “x < y → y < z → x < z”
+--#check “ ¬∃ ∀ ((#0 + 1) * #1 < #0 + #1 ↔ 0 < &5) ”
+--#check (“0 < 0 → ∀ 0 < #0 → 0 ≮ 2” : Sentence Language.oRing)
+--#check “¬⊤ ∨ ((#0 < 5)) [#3, 7][2, #3]”
+--#check “⋀ i, #i < #i + 9”
+--#check “∀[#0 < 1] #0 = 0”
+--#check “x < y → y < z → x < z”
 
 end delab
 

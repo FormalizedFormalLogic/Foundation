@@ -46,7 +46,7 @@ end Gentzen
 namespace AutoProver
 open Qq Lean Elab Meta Tactic Litform Litform.Meta
 
-#check TwoSided.Derivation
+--#check TwoSided.Derivation
 
 set_option linter.unusedVariables false in
 abbrev DerivationQ {F : Q(Type u)} (instLS : Q(LogicSymbol $F)) (instGz : Q(Gentzen $F)) (L R : List (Lit F)) :=
