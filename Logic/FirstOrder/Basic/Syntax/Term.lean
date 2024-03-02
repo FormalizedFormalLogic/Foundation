@@ -1,200 +1,104 @@
 import Logic.FirstOrder.Basic.Syntax.Language
+import Mathlib.ModelTheory.Syntax
 
 /-!
 # Terms of first-order logic
 
 This file defines the terms of first-order logic.
 
-The bounded variables are denoted by `#x` for `x : Fin n`, and free variables are denoted by `&x` for `x : ξ`.
-`t : Semiterm L ξ n` is a (semi-)term of language `L` with bounded variables of `Fin n` and free variables of `ξ`.
+The bounded variables are denoted by `&.x` for `x : Fin n`, and free variables are denoted by `%.x` for `x : α`.
+`t : L.Semiterm α n` is a (semi-)term of language `L` with bounded variables of `Fin n` and free variables of `α`.
 
 -/
 
-namespace LO
-
 namespace FirstOrder
 
-inductive Semiterm (L : Language) (ξ : Type*) (n : ℕ)
-  | bvar : Fin n → Semiterm L ξ n
-  | fvar : ξ → Semiterm L ξ n
-  | func : ∀ {arity}, L.Func arity → (Fin arity → Semiterm L ξ n) → Semiterm L ξ n
+abbrev Language.Semiterm (L : Language) (α : Type*) (n : ℕ) := L.Term (α ⊕ Fin n)
 
-scoped prefix:max "&" => Semiterm.fvar
-scoped prefix:max "#" => Semiterm.bvar
+scoped[FirstOrder] prefix:arg "&" => FirstOrder.Language.Term.var ∘ Sum.inr
 
-abbrev Term (L : Language) (ξ : Type*) := Semiterm L ξ 0
+abbrev Language.SyntacticSemiterm (L : Language) (n : ℕ) := L.Semiterm ℕ n
 
-abbrev SyntacticSemiterm (L : Language) (n : ℕ) := Semiterm L ℕ n
+abbrev Language.SyntacticTerm (L : Language) := L.Term ℕ
 
-abbrev SyntacticTerm (L : Language) := SyntacticSemiterm L 0
-
-namespace Semiterm
+namespace Language.Term
 
 variable
   {L L' : Language.{u}} {L₁ : Language.{u₁}} {L₂ : Language.{u₂}} {L₃ : Language.{u₃}}
-  {ξ ξ' : Type v} {ξ₁ : Type v₁} {ξ₂ : Type v₂} {ξ₃ : Type v₃}
+  {α α' : Type v} {α₁ : Type v₁} {α₂ : Type v₂} {α₃ : Type v₃}
   {n n₁ n₂ n₃ : ℕ}
-
-instance [Inhabited ξ] : Inhabited (Semiterm L ξ n) := ⟨&default⟩
-
-section ToString
-
-variable [∀ k, ToString (L.Func k)] [ToString ξ]
-
-def toStr : Semiterm L ξ n → String
-  | #x                        => "x_{" ++ toString (n - 1 - (x : ℕ)) ++ "}"
-  | &x                        => "z_{" ++ toString x ++ "}"
-  | func (arity := 0) c _     => toString c
-  | func (arity := _ + 1) f v => "{" ++ toString f ++ "} \\left(" ++ String.vecToStr (fun i => toStr (v i)) ++ "\\right)"
-
-instance : Repr (Semiterm L ξ n) := ⟨fun t _ => toStr t⟩
-
-instance : ToString (Semiterm L ξ n) := ⟨toStr⟩
-
-end ToString
 
 section Decidable
 
-variable [∀ k, DecidableEq (L.Func k)] [DecidableEq ξ]
+variable [(k : ℕ) → DecidableEq (L.Functions k)] [DecidableEq α]
 
-def hasDecEq : (t u : Semiterm L ξ n) → Decidable (Eq t u)
-  | #x,                   #y                   => by simp; exact decEq x y
-  | #_,                   &_                   => isFalse Semiterm.noConfusion
-  | #_,                   func _ _             => isFalse Semiterm.noConfusion
-  | &_,                   #_                   => isFalse Semiterm.noConfusion
-  | &x,                   &y                   => by simp; exact decEq x y
-  | &_,                   func _ _             => isFalse Semiterm.noConfusion
-  | func _ _,             #_                   => isFalse Semiterm.noConfusion
-  | func _ _,             &_                   => isFalse Semiterm.noConfusion
-  | @func L ξ _ k₁ r₁ v₁, @func L ξ _ k₂ r₂ v₂ => by
+-- This should be included in Mathlib.ModelTheory.Syntax.
+def hasDecEq : (t u : L.Term α) → Decidable (Eq t u)
+  | var x,              var y                => by simp; exact decEq x y
+  | var _,              func _ _             => isFalse Term.noConfusion
+  | func _ _,           var _                => isFalse Term.noConfusion
+  | @func L α k₁ f₁ v₁, @func L α k₂ f₂ v₂ => by
       by_cases e : k₁ = k₂
       · rcases e with rfl
-        exact match decEq r₁ r₂ with
+        exact match decEq f₁ f₂ with
         | isTrue h => by simp[h]; exact Matrix.decVec _ _ (fun i => hasDecEq (v₁ i) (v₂ i))
         | isFalse h => isFalse (by simp[h])
       · exact isFalse (by simp[e])
 
-instance : DecidableEq (Semiterm L ξ n) := hasDecEq
+instance : DecidableEq (L.Term α) := hasDecEq
 
 end Decidable
 
-abbrev func! (k) (f : L.Func k) (v : Fin k → Semiterm L ξ n) := func f v
+section
 
-def bv : Semiterm L ξ n → Finset (Fin n)
-  | #x       => {x}
-  | &_       => ∅
-  | func _ v => .biUnion .univ fun i ↦ bv (v i)
+abbrev bvar (x : Fin n) : L.Semiterm α n := var (Sum.inr x)
 
-@[simp] lemma bv_bvar : (#x : Semiterm L ξ n).bv = {x} := rfl
+abbrev fvar (x : α) : L.Semiterm α n := var (Sum.inl x)
 
-@[simp] lemma bv_fvar : (&x : Semiterm L ξ n).bv = ∅ := rfl
+-- These notations are based on https://github.com/leanprover-community/mathlib4/blob/e7991a6bedc97ed0ea667ae44d268634e5dd8815/Mathlib/ModelTheory/Syntax.lean#L260-L260, but I don't think they are good notations.
+scoped[FirstOrder] prefix:max "%." => FirstOrder.Language.Term.fvar
 
-lemma bv_func {k} (f : L.Func k) (v : Fin k → Semiterm L ξ n) : (func f v).bv = .biUnion .univ fun i ↦ bv (v i) := rfl
+scoped[FirstOrder] prefix:max "&." => FirstOrder.Language.Term.bvar
 
-@[simp] lemma bv_constant (f : L.Func 0) (v : Fin 0 → Semiterm L ξ n) : (func f v).bv = ∅ := rfl
+variable [DecidableEq α]
 
-def Positive (t : Semiterm L ξ (n + 1)) : Prop := ∀ x ∈ t.bv, 0 < x
+def bv (t : Semiterm L α n) : Finset (Fin n) := Finset.eraseNone <| t.varFinset.image Sum.getRight?
+
+@[simp] lemma bv_bvar : (&.x : Semiterm L α n).bv = {x} := rfl
+
+@[simp] lemma bv_fvar : (%.x : Semiterm L α n).bv = ∅ := rfl
+
+lemma bv_func {k} (f : L.Functions k) (v : Fin k → Semiterm L α n) : (func f v).bv = .biUnion .univ fun i ↦ (v i).bv := by
+  simp [bv, Finset.biUnion_image]; ext; simp
+
+@[simp] lemma bv_constant (f : L.Functions 0) (v : Fin 0 → Semiterm L α n) : (func f v).bv = ∅ := rfl
+
+def Positive (t : Semiterm L α (n + 1)) : Prop := ∀ x ∈ t.bv, 0 < x
 
 namespace Positive
 
-@[simp] protected lemma bvar : Positive (#x : Semiterm L ξ (n + 1)) ↔ 0 < x := by simp[Positive]
+@[simp] protected lemma bvar : Positive (&.x : Semiterm L α (n + 1)) ↔ 0 < x := by simp[Positive]
 
-@[simp] protected lemma fvar : Positive (&x : Semiterm L ξ (n + 1)) := by simp[Positive]
+@[simp] protected lemma fvar : Positive (%.x : Semiterm L α (n + 1)) := by simp[Positive]
 
-@[simp] protected lemma func {k} (f : L.Func k) (v : Fin k → Semiterm L ξ (n + 1)) :
+@[simp] protected lemma func {k} (f : L.Functions k) (v : Fin k → Semiterm L α (n + 1)) :
     Positive (func f v) ↔ ∀ i, Positive (v i) := by simp[Positive, bv]; rw [forall_comm]
 
 end Positive
 
-variable [DecidableEq ξ]
+def fv (t : Semiterm L α n) : Finset α := Finset.eraseNone <| t.varFinset.image Sum.getLeft?
 
-def fv : Semiterm L ξ n → Finset ξ
-  | #_       => ∅
-  | &x       => {x}
-  | func _ v => .biUnion .univ fun i ↦ fv (v i)
+@[simp] lemma fv_bvar : (&.x : Semiterm L α n).fv = ∅ := rfl
 
-@[simp] lemma fv_bvar : (#x : Semiterm L ξ n).fv = ∅ := rfl
+@[simp] lemma fv_fvar : (%.x : Semiterm L α n).fv = {x} := rfl
 
-@[simp] lemma fv_fvar : (&x : Semiterm L ξ n).fv = {x} := rfl
+lemma fv_func {k} (f : L.Functions k) (v : Fin k → Semiterm L α n) : (func f v).fv = .biUnion .univ fun i ↦ fv (v i) := by
+  simp [fv, Finset.biUnion_image]; ext; simp
 
-lemma fv_func {k} (f : L.Func k) (v : Fin k → Semiterm L ξ n) : (func f v).fv = .biUnion .univ fun i ↦ fv (v i) := rfl
+@[simp] lemma fv_constant (f : L.Functions 0) (v : Fin 0 → Semiterm L α n) : (func f v).fv = ∅ := rfl
 
-@[simp] lemma fv_constant (f : L.Func 0) (v : Fin 0 → Semiterm L ξ n) : (func f v).fv = ∅ := rfl
+end
 
-def complexity : Semiterm L ξ n → ℕ
-  | #_       => 0
-  | &_       => 0
-  | func _ v => Finset.sup Finset.univ (fun i ↦ complexity (v i)) + 1
-
-@[simp] lemma complexity_bvar (x : Fin n) : (#x : Semiterm L ξ n).complexity = 0 := rfl
-
-@[simp] lemma complexity_fvar (x : ξ) : (&x : Semiterm L ξ n).complexity = 0 := rfl
-
-lemma complexity_func {k} (f : L.Func k) (v : Fin k → Semiterm L ξ n) : (func f v).complexity = Finset.sup Finset.univ (fun i ↦ complexity (v i)) + 1 := rfl
-
-@[simp] lemma complexity_func_lt {k} (f : L.Func k) (v : Fin k → Semiterm L ξ n) (i) :
-    (v i).complexity < (func f v).complexity := by
-  simp [complexity_func, Nat.lt_add_one_iff]; exact Finset.le_sup (f := fun i ↦ complexity (v i)) (by simp)
-
-def fvarList : Semiterm L ξ n → List ξ
-  | #_       => []
-  | &x       => [x]
-  | func _ v => List.join $ Matrix.toList (fun i => fvarList (v i))
-
-abbrev fvar? (t : Semiterm L ξ n) (x : ξ) : Prop := x ∈ t.fvarList
-
-@[simp] lemma fvarList_bvar : fvarList (#x : Semiterm L ξ n) = [] := rfl
-
-@[simp] lemma fvarList_fvar : fvarList (&x : Semiterm L ξ n) = [x] := rfl
-
-@[simp] lemma mem_fvarList_func {k} {f : L.Func k} {v : Fin k → Semiterm L ξ n} :
-    x ∈ (func f v).fvarList ↔ ∃ i, x ∈ (v i).fvarList :=
-  by simp[fvarList]
-
-@[simp] lemma fvarList_empty {o : Type w} [e : IsEmpty o] {t : Semiterm L o n} : fvarList t = [] := by
-  induction t <;> simp[List.eq_nil_iff_forall_not_mem]
-  case fvar x => exact IsEmpty.elim e x
-
-@[simp] lemma fvarList_to_finset [DecidableEq ξ] (t : Semiterm L ξ n) : t.fvarList.toFinset = t.fv := by
-  induction t <;> try simp [fvarList, fv_func]
-  case func ih => ext x; simp [←ih]
-
-section lMap
-
-variable (Φ : L₁ →ᵥ L₂)
-
-def lMap (Φ : L₁ →ᵥ L₂) : Semiterm L₁ ξ n → Semiterm L₂ ξ n
-  | #x       => #x
-  | &x       => &x
-  | func f v => func (Φ.func f) (fun i => lMap Φ (v i))
-
-@[simp] lemma lMap_bvar (x : Fin n) : (#x : Semiterm L₁ ξ n).lMap Φ = #x := rfl
-
-@[simp] lemma lMap_fvar (x : ξ) : (&x : Semiterm L₁ ξ n).lMap Φ = &x := rfl
-
-lemma lMap_func {k} (f : L₁.Func k) (v : Fin k → Semiterm L₁ ξ n) :
-    (func f v).lMap Φ = func (Φ.func f) (fun i => lMap Φ (v i)) := rfl
-
-end lMap
-
-section fvEnum
-
-variable [DecidableEq ξ] [Inhabited ξ]
-
-def fvEnum (t : Semiterm L ξ n) : ξ → ℕ := t.fvarList.indexOf
-
-def fvEnumInv (t : Semiterm L ξ n) : ℕ → ξ :=
-  fun i ↦ if hi : i < t.fvarList.length then t.fvarList.get ⟨i, hi⟩ else default
-
-lemma fvEnumInv_fvEnum {t : Semiterm L ξ n} {x : ξ} (hx : x ∈ t.fvarList) :
-    fvEnumInv t (fvEnum t x) = x := by
-  simp [fvEnumInv, fvEnum]; intro h
-  exact False.elim <| not_le.mpr (List.indexOf_lt_length.mpr $ hx) h
-
-end fvEnum
-
-end Semiterm
+end Language.Term
 
 end FirstOrder
-
-end LO
