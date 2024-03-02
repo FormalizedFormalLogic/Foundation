@@ -8,7 +8,7 @@ and their homomorphisms.
 
 ## Main Definitions
 * `LO.LogicSymbol` is defined so that `LO.LogicSymbol F` is a type that has logical connectives $\top, \bot, \land, \lor, \to, \lnot$.
-* `LO.LogicSymbol.Hom` is defined so that `f : F →L G` is a homomorphism from `F` to `G`, i.e.,
+* `LO.LogicSymbol.Hom` is defined so that `f : F →L G` is a Boolean homomorphism from `F` to `G`, i.e.,
 a function that preserves logical connectives.
 
 -/
