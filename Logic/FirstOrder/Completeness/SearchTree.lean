@@ -175,8 +175,8 @@ lemma chain_spec (s) : ⛓️[s + 1] ≺⟨s⟩ ⛓️[s] :=
   by simpa[chainU_val_fst_eq nwf s] using SearchTree.seq_of_lt (chainU_spec nwf s)
 
 lemma chain_monotone {s u : ℕ} (h : s ≤ u) : ⛓️[s] ⊆ ⛓️[u] := by
-  suffices : ∀ d, ⛓️[s] ⊆ ⛓️[s + d]
-  simpa[Nat.add_sub_of_le h] using this (u - s)
+  suffices ∀ d, ⛓️[s] ⊆ ⛓️[s + d] by
+    simpa[Nat.add_sub_of_le h] using this (u - s)
   intro d; induction' d with d ih
   · simp
   · simp[Nat.add_succ]; exact subset_trans ih $ ReduxNat.antimonotone (chain_spec nwf (s + d))
@@ -194,18 +194,18 @@ lemma chainSet_verum : ⊤ ∉ ⛓️ := by
 
 lemma chainSet_axL {k} (r : L.Rel k) (v : Fin k → SyntacticTerm L) : rel r v ∉ ⛓️ ∨ nrel r v ∉ ⛓️ := by
   by_contra h
-  have : (∃ s₁, rel r v ∈ ⛓️[s₁]) ∧ (∃ s₂, nrel r v ∈ ⛓️[s₂])
-  { have h : rel r v ∈ ⛓️ ∧ nrel r v ∈ ⛓️ := by simpa[not_or] using h
-    simpa[chainSet] using h }
+  have : (∃ s₁, rel r v ∈ ⛓️[s₁]) ∧ (∃ s₂, nrel r v ∈ ⛓️[s₂]) := by
+    have h : rel r v ∈ ⛓️ ∧ nrel r v ∈ ⛓️ := by simpa[not_or] using h
+    simpa[chainSet] using h
   rcases this with ⟨⟨s₁, hs₁⟩, ⟨s₂, hs₂⟩⟩
-  have : rel r v ∈ ⛓️[(encode $ Code.axL r v).pair (max s₁ s₂)] ∧ nrel r v ∈ ⛓️[(encode $ Code.axL r v).pair (max s₁ s₂)]
-  { exact ⟨chain_monotone nwf (le_trans (by simp) (Nat.right_le_pair _ _)) hs₁,
-    chain_monotone nwf (le_trans (by simp) (Nat.right_le_pair _ _)) hs₂⟩ }
-  have : ¬(rel r v ∈ ⛓️[(encode $ Code.axL r v).pair (max s₁ s₂)] ∧ nrel r v ∈ ⛓️[(encode $ Code.axL r v).pair (max s₁ s₂)])
-  { rw[not_and_or]
+  have : rel r v ∈ ⛓️[(encode $ Code.axL r v).pair (max s₁ s₂)] ∧ nrel r v ∈ ⛓️[(encode $ Code.axL r v).pair (max s₁ s₂)] := by
+    exact ⟨chain_monotone nwf (le_trans (by simp) (Nat.right_le_pair _ _)) hs₁,
+    chain_monotone nwf (le_trans (by simp) (Nat.right_le_pair _ _)) hs₂⟩
+  have : ¬(rel r v ∈ ⛓️[(encode $ Code.axL r v).pair (max s₁ s₂)] ∧ nrel r v ∈ ⛓️[(encode $ Code.axL r v).pair (max s₁ s₂)]) := by
+    rw[not_and_or]
     have : ⛓️[(encode $ Code.axL r v).pair (max s₁ s₂) + 1] ≺[Code.axL r v] ⛓️[(encode $ Code.axL r v).pair (max s₁ s₂)] := chain_spec' nwf _ _
     generalize ⛓️[(encode $ Code.axL r v).pair (max s₁ s₂) + 1] = Δ' at this
-    rcases this; assumption }
+    rcases this; assumption
   contradiction
 
 lemma chainSet_and {p q : SyntacticFormula L} (h : p ⋏ q ∈ ⛓️) : p ∈ ⛓️ ∨ q ∈ ⛓️ := by
@@ -306,7 +306,7 @@ lemma semanticMainLemma_val : (p : SyntacticFormula L) → p ∈ ⛓️ → ¬Va
       have : ¬Eval (Model.structure T Γ) ![u] Semiterm.fvar p := by
         simpa[eval_substs, Matrix.constant_eq_singleton] using semanticMainLemma_val ([→ u].hom p) this
       assumption
-  termination_by semanticMainLemma_val p _ => p.complexity
+  termination_by p _ => p.complexity
 
 lemma Model.models : Model T Γ ⊧ₘ* T := by
   intro σ hσ; simpa using semanticMainLemma_val nwf _ (chainSet_id nwf hσ)

@@ -78,6 +78,7 @@ instance : AddCommMonoid M where
   zero_add  := fun x => Model.add_comm x 0 ▸ Model.add_zero x
   add_zero  := Model.add_zero
   add_comm  := Model.add_comm
+  nsmul := nsmulRec
 
 instance : CommMonoid M where
   mul_assoc := Model.mul_assoc

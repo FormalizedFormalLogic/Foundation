@@ -315,7 +315,7 @@ lemma provable_iff {T : Theory L} [DecidablePred T] {σ : Sentence L} :
     rcases derivable_iff_isProper.mp ⟨d⟩ with ⟨l, hl, hmem⟩
     let l' := (Code.wk ((U.map (~·) ++ [σ]).map Rew.emb.hom), ((σ :: U.map (~·)).map Rew.emb.hom)) :: l
     have hl' : isProper l' := by simpa[isProper, hl] using hmem
-    exact ⟨l', U, by simpa[List.subsetSet] using hU, by simp, hl'⟩,
+    exact ⟨l', U, by simpa[List.subsetSet] using hU, by simp [l'], hl'⟩,
   by rintro ⟨l, U, hU, hl, hproper⟩
      rcases derivation_of_isProper l hproper _ hl with ⟨d⟩
      exact Gentzen.provable_iff.mpr ⟨U, by simpa using hU, ⟨Derivation.toOneSided (d.wk $ by simp)⟩⟩⟩

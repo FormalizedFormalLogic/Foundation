@@ -34,11 +34,11 @@ variable
   {n n₁ n₂ n₃ : ℕ}
 variable (ω : Rew L ξ₁ n₁ ξ₂ n₂)
 
-instance : FunLike (Rew L ξ₁ n₁ ξ₂ n₂) (Semiterm L ξ₁ n₁) (fun _ => Semiterm L ξ₂ n₂) where
+instance : FunLike (Rew L ξ₁ n₁ ξ₂ n₂) (Semiterm L ξ₁ n₁) (Semiterm L ξ₂ n₂) where
   coe := fun f => f.toFun
   coe_injective' := fun f g h => by rcases f; rcases g; simp; exact h
 
-instance : CoeFun (Rew L ξ₁ n₁ ξ₂ n₂) (fun _ => Semiterm L ξ₁ n₁ → Semiterm L ξ₂ n₂) := FunLike.hasCoeToFun
+instance : CoeFun (Rew L ξ₁ n₁ ξ₂ n₂) (fun _ => Semiterm L ξ₁ n₁ → Semiterm L ξ₂ n₂) := DFunLike.hasCoeToFun
 
 protected lemma func {k} (f : L.Func k) (v : Fin k → Semiterm L ξ₁ n₁) :
     ω (func f v) = func f (fun i => ω (v i)) := ω.func' f v
@@ -60,7 +60,7 @@ lemma func'' {k} (f : L.Func k) (v : Fin k → Semiterm L ξ₁ n₁) :
   simp[Rew.func]; funext i; induction' i using Fin.induction with i <;> simp; induction' i using Fin.induction with i <;> simp
 
 @[ext] lemma ext (ω₁ ω₂ : Rew L ξ₁ n₁ ξ₂ n₂) (hb : ∀ x, ω₁ #x = ω₂ #x) (hf : ∀ x, ω₁ &x = ω₂ &x) : ω₁ = ω₂ := by
-  apply FunLike.ext ω₁ ω₂; intro t
+  apply DFunLike.ext ω₁ ω₂; intro t
   induction t <;> simp[*, ω₁.func, ω₂.func]
 
 lemma ext' {ω₁ ω₂ : Rew L ξ₁ n₁ ξ₂ n₂} (h : ω₁ = ω₂) (t) : ω₁ t = ω₂ t := by simp[h]
@@ -904,7 +904,7 @@ def formulaRec {C : SyntacticFormula L → Sort _}
   | p ⋎ q    => hor p q (formulaRec hverum hfalsum hrel hnrel hand hor hall hex p) (formulaRec hverum hfalsum hrel hnrel hand hor hall hex q)
   | ∀' p     => hall p (formulaRec hverum hfalsum hrel hnrel hand hor hall hex (Rew.free.hom p))
   | ∃' p     => hex p (formulaRec hverum hfalsum hrel hnrel hand hor hall hex (Rew.free.hom p))
-  termination_by formulaRec _ _ _ _ _ _ _ _ p => p.complexity
+  termination_by p => p.complexity
 
 @[simp] lemma fvarList_emb {o : Type w} [IsEmpty o] (p : Semiformula L o n) : fvarList (Rew.emb.hom p : Semiformula L ξ n) = [] := by
   induction p using rec' <;> simp[*, Rew.rel, Rew.nrel, fvarList, ←neg_eq]

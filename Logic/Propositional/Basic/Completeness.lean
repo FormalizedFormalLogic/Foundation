@@ -182,8 +182,8 @@ lemma satisfiableTheory_of_consistent (consisT : Consistent T) : Semantics.Satis
     Semantics.realizeTheory_of_subset maximalConsistentTheory_satisfiable (by simp)⟩
 
 theorem completeness! : T ⊨ p → T ⊢! p := by
-  suffices : Consistent (insert (~p) T) → Semantics.SatisfiableTheory (insert (~p) T)
-  · contrapose
+  suffices Consistent (insert (~p) T) → Semantics.SatisfiableTheory (insert (~p) T) by
+    contrapose
     simp; intro hp hs
     have : Semantics.SatisfiableTheory (insert (~p) T) :=
       this (consistent_insert_iff_not_refutable.mpr $ by simpa)

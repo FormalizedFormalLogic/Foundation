@@ -101,8 +101,7 @@ lemma models_codeAux {c : Code k} {f : Vector ℕ k →. ℕ} (hc : c.eval f) (y
     by_cases hv : v i = v j <;> simp[hv, Nat.isEqNat, eq_comm]
   case lt i j =>
     by_cases hv : v i < v j <;> simp[hv, Nat.isLtNat, eq_comm]
-    · simp[Nat.not_le.mpr hv]
-    · intro _; exact Nat.not_lt.mp hv
+    · simp [Nat.not_lt.mp hv]
   case add => simp[eq_comm]
   case mul => simp[eq_comm]
   case proj => simp[eq_comm]
@@ -153,7 +152,7 @@ lemma provable_iff_mem_partrec {k} {f : Vector ℕ k →. ℕ} (hf : Nat.Partrec
   constructor
   · rintro ⟨b⟩
     have : Semiformula.PVal! ℕ (y :> v) (code $ codeOfPartrec f) := by
-      simpa[models_iff, Semiformula.eval_rew, Matrix.empty_eq, Function.comp, Matrix.comp_vecCons'] using
+      simpa [σ, models_iff, Semiformula.eval_rew, Matrix.empty_eq, Function.comp, Matrix.comp_vecCons'] using
         Arith.SoundOn.sound sigma ⟨b⟩
     exact (codeOfPartrec_spec hf).mp this
   · intro h
@@ -205,7 +204,7 @@ theorem representation {f : α →. σ} (hf : Partrec f) {x y} :
     Nat.Partrec'.part_iff.mpr
       (Partrec.bind (Computable.ofOption $ Primrec.to_comp $ Primrec.decode.comp Primrec.vector_head)
       (Partrec.to₂ <| Partrec.map (hf.comp .snd) (Computable.encode.comp₂ .right)))
-  simpa[Matrix.constant_eq_singleton] using
+  simpa [f', Matrix.constant_eq_singleton] using
     provable_iff_mem_partrec this (y := encode y) (v := ![encode x])
 
 theorem representation_computable {f : α → σ} (hf : Computable f) (a) :
@@ -217,7 +216,7 @@ theorem representation_computable {f : α → σ} (hf : Computable f) (a) :
           Computable.option_map
             (Computable.decode.comp .vector_head) <|
               Computable.encode.comp₂ <| hf.comp₂ .right
-  simpa[Matrix.comp_vecCons', Matrix.constant_eq_singleton] using
+  simpa [f', Matrix.comp_vecCons', Matrix.constant_eq_singleton] using
     provable_computable_code_uniq T this ![encode a]
 
 theorem representation_computable₂ {f : α → β → σ} (hf : Computable₂ f) (a b) :
@@ -232,7 +231,7 @@ theorem representation_computable₂ {f : α → β → σ} (hf : Computable₂ 
               Computable.option_map
                 (Computable.decode.comp $ Computable.vector_head.comp $ Computable.vector_tail.comp .fst) <|
                   Computable.encode.comp₂ <| hf.comp₂ (Computable.snd.comp₂ .left) .right
-  simpa[Matrix.comp_vecCons' (fun x : ℕ => (⸢x⸣ : Semiterm ℒₒᵣ Empty 1)),
+  simpa [f', Matrix.comp_vecCons' (fun x : ℕ => (⸢x⸣ : Semiterm ℒₒᵣ Empty 1)),
     Matrix.constant_eq_singleton, graphTotal₂] using
       provable_computable_code_uniq T this ![encode a, encode b]
 

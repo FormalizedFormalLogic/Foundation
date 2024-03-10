@@ -124,7 +124,7 @@ lemma encodeDecode_eq_encode_map_decode {e : ℕ} : encodeDecode α e = (decode 
 
 lemma decode_encodeDecode : encodeDecode α e = some i → ∃ a : α, decode i = some a := by
   simp[encodeDecode]
-  cases h : (decode e : Option α) <;> simp
+  cases (decode e : Option α) <;> simp
   rintro rfl; simp
 
 variable {α : Type u_1} {P : α → Prop} [Encodable α] [DecidablePred P]
@@ -137,7 +137,7 @@ lemma encode_decode_subtype (e : ℕ) :
 lemma encodeDecode_subtype' (e : ℕ) :
     encodeDecode {x // P x} e = (decode (α := α) e).bind (fun a => if P a then some (encode a) else none) := by
   simp[encodeDecode, encode_decode_subtype]
-  rcases h : (decode e : Option α) with (_ | a) <;> simp
+  rcases (decode e : Option α) with (_ | a) <;> simp
   { by_cases ha : P a <;> simp[*] }
 
 lemma encodeDecode_subtype (e : ℕ) :
@@ -149,10 +149,8 @@ lemma encodeDecode_ofEquiv (α) [Encodable α] {β} (e : β ≃ α) :
     haveI : Encodable β := Encodable.ofEquiv α e
     encodeDecode β = encodeDecode α := by
   funext n; simp[encodeDecode, Encodable.decode_ofEquiv e]
-  rcases h : (decode n : Option α) with (_ | ⟨a⟩) <;> simp
-  { simp[@Encodable.encode_none _ (Encodable.ofEquiv α e)] }
-  { have := @Encodable.encode_some _ (Encodable.ofEquiv α e) (e.symm a); rw[this];
-    simpa using Encodable.encode_ofEquiv e (e.symm a) }
+  rcases (decode n : Option α) with (_ | ⟨a⟩) <;> simp
+  simpa using Encodable.encode_ofEquiv e (e.symm a)
 
 lemma encodeDecode_ofEquiv_prim (α) {β} [Primcodable α] (e : β ≃ α) :
     haveI : Primcodable β := Primcodable.ofEquiv α e
@@ -172,7 +170,7 @@ lemma encode_decode_sigma_of_none {β : α → Type*} [(a : α) → Encodable (�
 
 lemma encode_decode_sigma_of_some {β : α → Type*} [(a : α) → Encodable (β a)] {e : ℕ} {a : α} (h : decode e.unpair.1 = some a) :
     encodeDecode ((a : α) × β a) e = (encodeDecode (β a) e.unpair.2).map fun b => (encode a).pair b := by
-  simp[encodeDecode, h]; rcases h : decode e.unpair.2 with (_ | b) <;> simp
+  simp[encodeDecode, h]; rcases decode e.unpair.2 with (_ | b) <;> simp
 
 end Encodable
 
@@ -238,7 +236,7 @@ lemma nat_strong_rec' (f : α → ℕ → σ) {g : α × ℕ → List σ → Opt
   (H : ∀ a n, g (a, n) ((List.range n).map (f a)) = some (f a n)) : Primrec₂ f := by
   let g' : α → List σ → Option σ := fun a l => g (a, l.length) l
   have : Primrec₂ g' := hg.comp₂ (pair fst (list_length.comp snd)) Primrec₂.right
-  exact nat_strong_rec f this (by simpa using H)
+  exact nat_strong_rec f this (by simpa [g'] using H)
 
 lemma nat_strong_rec'2 (f : α → ℕ × ℕ → σ) {g : α × (ℕ × ℕ) → List σ → Option σ} (hg : Primrec₂ g)
   (H : ∀ a n m, g (a, (n, m)) ((List.range (n.pair m)).map (fun i => f a i.unpair)) = some (f a (n, m))) : Primrec₂ f := by
@@ -267,7 +265,7 @@ lemma option_list_mapM'
     intro k bs
     induction bs <;> simp[Option.pure_eq_some, Option.bind_eq_bind, *]
     { simp[Option.map_eq_bind, Function.comp] }
-  exact this.of_eq (by simp[e])
+  exact this.of_eq (by simp [F, e])
 
 lemma to₂' {f : α → β → σ} (hf : Primrec (fun p => f p.1 p.2 : α × β → σ)) : Primrec₂ f := hf
 
@@ -318,11 +316,11 @@ lemma list_zipWith_param {f : σ → α × β → γ} (hf : Primrec₂ f) :
       $ fun p => List.zipWith (fun a b => f x (a, b)) p.1 p.2
   have : Primrec₂ F := nat_strong_rec' F h (fun x e => by
     simp[decodeZipWithRec]
-    rcases has : (decode (e.unpair.1)) with (_ | as) <;> simp
-    rcases hbs : (decode (e.unpair.2)) with (_ | bs) <;> simp
+    rcases has : (decode (e.unpair.1)) with (_ | as) <;> simp [has, F]
+    rcases hbs : (decode (e.unpair.2)) with (_ | bs) <;> simp [F]
     rcases as with (_ | ⟨a, as⟩) <;> simp
     rcases bs with (_ | ⟨b, bs⟩) <;> simp
-    have : e.unpair.1.pred.unpair.2.pair e.unpair.2.pred.unpair.2 < e
+    have : e.unpair.1.pred.unpair.2.pair e.unpair.2.pred.unpair.2 < e := by
     { have lt₁ : e.unpair.1.pred.unpair.2 < e.unpair.1 :=
         lt_of_le_of_lt (Nat.unpair_right_le _) (Nat.pred_lt (fun eq => by simp[eq] at has))
       have lt₂ : e.unpair.2.pred.unpair.2 < e.unpair.2 :=
@@ -499,8 +497,7 @@ lemma decode_finArrow (β : Type*) [Primcodable β] (e : ℕ) :
 
 lemma decode_fintypeArrow (ι : Type*) [Fintype ι] [Primcodable ι] [DecidableEq ι] (β : Type*) [Primcodable β] (e : ℕ) :
     (decode (α := ι → β) e) = (decode (α := List β) e).bind (fun l => (l.toVector (Fintype.card ι)).map fintypeArrowEquivVector.symm) := by
-  simp[Primcodable.ofEquiv_toEncodable, Encodable.decode_ofEquiv]
-  rw[Encodable.decode_ofEquiv, decode_vector]; simp
+  simp [Primcodable.ofEquiv_toEncodable, Encodable.decode_ofEquiv, decode_vector]
   rcases (decode e : Option (List β)) with (_ | bs) <;> simp; { rfl }
 
 lemma encode_list (l : List β) :
@@ -607,11 +604,9 @@ lemma finArrow_map {f} (hf : Primrec f) (k) : Primrec (fun v i => f (v i) : (Fin
       (option_map (Primrec.decode.comp snd) (by apply list_map snd (hf.comp₂ Primrec₂.right))))
   exact decode_iff.mp (encode_iff.mp $ this.of_eq $ fun e => by
     simp[encodeDecode_eq_encode_map_decode, decode_finArrow]
-    rcases has : (decode e) with (_ | as) <;> simp[Function.comp]
-    { rfl }
-    { rcases hv : (as.toVector k) with (_ | v) <;> simp
-      { rfl }
-      { rw[Encodable.encode_some]; simp[encode_finArrow, Function.comp] } })
+    rcases (decode e) with (_ | as) <;> simp [Function.comp]
+    { rcases (as.toVector k) with (_ | v) <;> simp
+      { simp[encode_finArrow, Function.comp] } })
 
 lemma finArrow_app {v : σ → Fin n → α} {f} (hv : Primrec v) (hf : Primrec f) : Primrec (fun x => (v x) (f x) : σ → α) :=
   have : Primrec (fun x => (List.ofFn (v x)).get? (f x)) := list_get?.comp (finArrow_list_ofFn.comp hv) (fin_val.comp hf)
@@ -623,11 +618,11 @@ lemma finite_change {f} (hf : Primrec f) (g : ℕ → α) (h : ∃ m, ∀ x ≥ 
   · exact hf.of_eq <| by intro n; exact Eq.symm <| h n (Nat.zero_le n)
   · let g' : ℕ → α := fun x => if x < m then g x else f x
     have : Primrec g' :=
-      ih g' (by simp; intro x hx lt; exact (False.elim $ Nat.not_le.mpr lt hx))
+      ih g' (by simp [g']; intro x hx lt; exact (False.elim $ Nat.not_le.mpr lt hx))
     have : Primrec (fun x => if x = m then g m else g' x) :=
       Primrec.ite (Primrec.eq.comp Primrec.id (const m)) (const (g m)) this
     exact this.of_eq <| by
-      intro x; simp
+      intro x; simp [g']
       by_cases hx : x = m <;> simp[hx]
       intro hhx
       have : m < x := Ne.lt_of_le' hx hhx
@@ -651,7 +646,6 @@ lemma nat_toFin {n : ℕ} : Primrec (Nat.toFin n) :=
   encode_iff.mp <| (Primrec.ite (nat_lt.comp Primrec.id (const n)) succ (const 0)).of_eq <| by
     intro x; simp[Nat.toFin]
     by_cases hx : x < n <;> simp[hx]
-    · rfl
     · rfl
 
 lemma decide_eq_iff (p : Prop) [Decidable p] (b : Bool) : decide p = b ↔ (p ↔ b = true) := by cases b <;> simp
@@ -718,18 +712,17 @@ lemma list_all {α : Type*} {β : Type*} [Primcodable α] [Primcodable β]
       (list_get?.comp (list_reverse.comp $ hl.comp $ fst.comp fst) (fst.comp snd))
       (const false) (by apply dom_bool₂.comp₂ (hp.comp₂ (fst.comp₂ $ fst.comp₂ .left) .right) (snd.comp₂ $ snd.comp₂ .left))
   have hf : Computable₂ f := (nat_rec snd (const true) this).to₂
-  have := hf.comp Computable.id (list_length.comp hl)
-  exact this.of_eq <| by
-    intro a; simp
-    generalize l a = l
-    induction' l with b l ih <;> simp
-    { have : List.get? (List.reverse l ++ [b]) (List.length l) = some b := by
-        simpa using List.get?_concat_length l.reverse b
-      simp[this]; rw[←ih]
+  exact (hf.comp Computable.id (list_length.comp hl)).of_eq <| by
+    intro a; simp [f]
+    generalize l a = la
+    induction' la with b la' ih <;> simp
+    { have : List.get? (List.reverse la' ++ [b]) la'.length = some b := by
+        simpa using List.get?_concat_length la'.reverse b
+      simp [this]; rw [←ih]
       exact congr_arg₂ (· && ·) rfl (Nat.rec_eq _ _ _ _ (by
         intro m hm k
-        have : (l.reverse ++ [b]).get? m = l.reverse.get? m := List.get?_append (by simp[hm])
-        simp[this])) }
+        have : (la'.reverse ++ [b]).get? m = la'.reverse.get? m := List.get?_append (by simp[hm])
+        simp [this])) }
 
 end Computable
 

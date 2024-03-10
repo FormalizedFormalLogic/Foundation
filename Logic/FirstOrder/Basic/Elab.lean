@@ -96,7 +96,7 @@ def unexpsnderAdd : Unexpander
 def unexpsnderMul : Unexpander
   | `($_) => `(op(*))
 
-@[app_unexpander FunLike.coe]
+@[app_unexpander DFunLike.coe]
 def unexpandShift : Unexpander
   | `($_ ⇑                          ᵀ“$t”) => `(ᵀ“ ᵀ⇑$t ”)
   | `($_ [→ ]                       ᵀ“$t”) => `(ᵀ“ $t ᵀ[] ”)
@@ -303,7 +303,7 @@ def unexpandBEx : Unexpander
   | `($_ $t:term         “$q:foformula”) => `(“ (∃[!$t] $q) ”)
   | _                                     => throw ()
 
-@[app_unexpander FunLike.coe]
+@[app_unexpander DFunLike.coe]
 def unexpandRewToFum : Unexpander
   | `($_ [→ ᵀ“$t:foterm”]                “$p:foformula”) => `(“ ($p:foformula)[$t ] ”)
   | `($_ [→ #$x]                          “$p:foformula”) => `(“ ($p:foformula)[#$x] ”)
@@ -332,7 +332,7 @@ def unexpandMatrixConj : Unexpander
   | `($_ fun $i:ident => “$p:foformula”) => `(“ (⋀ $i, $p) ”)
   | _                                     => throw ()
 
-@[app_unexpander FunLike.coe]
+@[app_unexpander DFunLike.coe]
 def unexpandShift : Unexpander
   | `($_ “$p:foformula”) => `(“ ⇑ $p ”)
   | _                     => throw ()

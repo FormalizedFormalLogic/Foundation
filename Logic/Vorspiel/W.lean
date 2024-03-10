@@ -102,9 +102,9 @@ lemma decode_succ :
 lemma encode_mk (a : α) (f : β a → WType β) (h) :
     encode (ofWType ⟨a, f⟩ (s + 1) h) = (encode a).pair (encode $ fun b => encode (ofWType (f b) s (by simp[depth] at h; exact h b))) := by
   simp[Primcodable.SubWType, primcodable_succ, Primcodable.ofEquiv_toEncodable]
-  rw[Encodable.encode_ofEquiv equiv_succ, equiv_succ]; simp[ofWType]
-  rw[Encodable.encode_sigma_val]
-  simp; exact encode_fintypeArrow' (β a) (SubWType β s) _
+  rw [Encodable.encode_ofEquiv equiv_succ, equiv_succ, ofWType, Equiv.coe_fn_mk, Encodable.encode_sigma_val, Nat.pair_eq_pair]
+  simp
+  exact encode_fintypeArrow' (β a) (SubWType β s) _
 
 lemma encode_cast (w : SubWType β s) {s'} (hs : s = s') : encode w = encode (cast hs w) := by
   rcases hs with rfl; simp
@@ -198,18 +198,18 @@ lemma primrec_elimDecode_param_comp {f : σ → α × List γ → γ} {g : σ �
 end elimDecode
 
 lemma encode_eq_elim' : ∀ w : SubWType β s, encode w = elim' ℕ encode s w := by
-  { induction' s with s ih
-    · simp; intro ⟨w, h⟩; simpa using lt_of_lt_of_le (depth_pos w) h
-    · rintro ⟨⟨a, f⟩, hw⟩; simp[elim', elim, Primcodable.SubWType, primcodable_succ, Primcodable.ofEquiv_toEncodable]
-      rw[Encodable.encode_ofEquiv equiv_succ]
-      simp[equiv_succ, Encodable.encode_sigma_val]
-      suffices :
-        encode (⟨a, fun b => ofWType (f b) s (by simp[depth, Nat.succ_eq_add_one] at hw; exact hw b)⟩ : (a : α) × (β a → SubWType β s)) =
-        encode (⟨a, fun b => elim ℕ encode (f b)⟩ : (a : α) × (β a → ℕ))
-      { exact this }
-      rw[Encodable.encode_sigma_val, Encodable.encode_sigma_val, encode_fintypeArrow, encode_finArrow, encode_list]
-      simp[Function.comp]; rw[←encode_finArrow, encode_fintypeArrow (β a)]; simp
-      congr; funext i; simp; rw[ih] }
+  induction' s with s ih
+  · simp; intro ⟨w, h⟩; simpa using lt_of_lt_of_le (depth_pos w) h
+  · letI : Primcodable { t : WType β // t.depth ≤ s } := Primcodable.SubWType (β := β) s
+    rintro ⟨⟨a, f⟩, hw⟩
+    simp only [primcodable_succ, ofEquiv_toEncodable, sigma_toEncodable_eq, elim', elim, encode_sigma_val]
+    rw [Encodable.encode_ofEquiv equiv_succ]
+    simp only [equiv_succ, Equiv.coe_fn_mk, encode_sigma_val, Nat.pair_eq_pair, true_and]
+    rw [encode_fintypeArrow, encode_finArrow, encode_list]
+    simp only [List.map_ofFn]
+    rw[←encode_finArrow, encode_fintypeArrow (β a)]
+    simp
+    congr; funext i; simp; rw[ih]
 
 lemma encodeDecode_eq_elimDecode (s e : ℕ) : encodeDecode (SubWType β s) e = elimDecode β (fun a l => encode (a, l)) s e := by
   simp[elimDecode, encodeDecode_eq_encode_map_decode]
@@ -224,14 +224,14 @@ instance uniformlyPrimcodable : UniformlyPrimcodable (SubWType β) :=
 
 lemma depth_eq_elimDecode (s e : ℕ) :
     (decode e : Option (SubWType β s)).map (fun w => w.val.depth) = elimDecode β (fun a l => l.sup + 1) s e := by
-  have : ∀ w : SubWType β s, depth w.val = elim' ℕ (fun p => Finset.sup Finset.univ p.snd + 1) s w
-  { induction' s with s ih
+  have : ∀ w : SubWType β s, depth w.val = elim' ℕ (fun p => Finset.sup Finset.univ p.snd + 1) s w := by
+    induction' s with s ih
     · simp; intro ⟨w, h⟩; simpa using lt_of_lt_of_le (depth_pos w) h
     · rintro ⟨⟨a, f⟩, hw⟩;
       simp[depth, ih, elim', elim]
       have : ∀ (b : β a), depth (f b) = elim ℕ (fun p => Finset.sup Finset.univ p.snd + 1) (f b) :=
         fun b => ih ⟨f b, by simp[depth, Nat.succ_eq_add_one] at hw; exact hw b⟩
-      simp[this] }
+      simp[this]
   simp[elimDecode, encodeDecode_eq_encode_map_decode]
   rcases (decode e) <;> simp[this]; congr
   funext ⟨a, f⟩; simp[List.sup_ofFn, fintypeArrowEquivFinArrow_eq]
@@ -400,9 +400,9 @@ lemma w_mk₁ (f : σ → α) (h : ∀ x, Fintype.card (β (f x)) = 1) (hf : Pri
         (Primrec.encode.comp $ list_cons.comp (snd.comp $ unpair.comp $ Primrec.encode.comp snd) (const [])))
   exact Primrec₂.encode_iff.mp (this.of_eq $ fun x w => by
     simp[encode_mk_eq, encode_fintypeArrow_card_one (h x) ℕ _ (fintypeEquivFin.symm ((0 : Fin 1).cast (h x).symm))]
-    have : Finset.univ = {fintypeEquivFin.symm ((0 : Fin 1).cast (h x).symm)}
-    { have : Subsingleton (β (f x)) := Fintype.card_le_one_iff_subsingleton.mp (by simp[h x])
-      ext; simp; exact this.allEq _ _ }
+    have : Finset.univ = {fintypeEquivFin.symm ((0 : Fin 1).cast (h x).symm)} := by
+      have : Subsingleton (β (f x)) := Fintype.card_le_one_iff_subsingleton.mp (by simp[h x])
+      ext; simp; exact this.allEq _ _
     rw[this, Finset.sup_singleton])
 
 lemma w_mk₂ (f : σ → α) (h : ∀ x, Fintype.card (β (f x)) = 2) (hf : Primrec f) :

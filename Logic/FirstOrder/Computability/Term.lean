@@ -222,7 +222,7 @@ lemma funcL_primrec :
   this.of_eq (fun ⟨k, f⟩ l => by
       simp[WType.mkL, Edge]
       by_cases hl : l.length = k <;> simp[hl, funcL]
-      { funext i; rw[Encodable.fintypeArrowEquivFinArrow_symm_app]; simp; congr })
+      { funext i; congr })
 
 lemma funcL_primrec' (k : ℕ) :
   Primrec₂ (funcL ⟨k, ·⟩ : L.Func k → List (UTerm L μ) → Option (UTerm L μ)) :=
@@ -247,7 +247,7 @@ private lemma elim_eq {b : σ → ℕ → γ} {e : σ → μ → γ} {u : σ →
     elim (b x) (e x) (fun {k} f v => u x (⟨k, f⟩, List.ofFn v)) t =
     WType.elimL (fun p l => F b e u x (p, l)) (equivW L μ t) := by
   induction t <;> simp[elim, WType.elimL_mk, F, *]
-  { simp[Edge]; congr; funext i; rw[fintypeArrowEquivFinArrow_app]; congr; ext; simp }
+  { simp[Edge] }
 
 lemma elim_primrec_param {σ γ} [Primcodable σ] [Primcodable γ]
   {b : σ → ℕ → γ} {e : σ → μ → γ} {u : σ → ((k : ℕ) × L.Func k) × List γ → γ} {t : σ → UTerm L μ}
@@ -471,7 +471,7 @@ lemma foldr_primrec (f : Operator L 2) (z : Operator L k) : Primrec (foldr f z) 
     by apply (comp_primrec₂ f).comp₂ (Primrec.snd.comp₂ .right) (Primrec.fst.comp₂ .right)
   have := Primrec.list_foldr Primrec.id (.const z) this
   exact this.of_eq <| by
-    intro l; induction l <;> simp[foldr, *] at*; simp[*]
+    intro l; induction l <;> simp[foldr, *] at*
 
 variable [Operator.Zero L] [Operator.One L] [Operator.Add L]
 

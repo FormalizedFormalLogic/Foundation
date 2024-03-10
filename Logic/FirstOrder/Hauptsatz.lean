@@ -134,7 +134,7 @@ def andInversion₁Aux : {Δ : Sequent L} → ⊢ᶜ[C] Δ → (p q : SyntacticF
     have dn : ⊢ᶜ[C] (~r) :: p :: Δ.remove (p ⋏ q) :=
       (andInversion₁Aux ⟨dn, H.2.2⟩ p q).wk (by simp[List.subset_def, List.mem_remove_iff]; intros; simp[*])
     d.cut dn H.1
-  termination_by andInversion₁Aux _ d _ _ => length d.val
+  termination_by _ d _ _ => length d.val
 
 def andInversion₁ {p q} (d : ⊢ᶜ[C] p ⋏ q :: Δ) : ⊢ᶜ[C] p :: Δ :=
   (andInversion₁Aux d p q).wk (by simp[List.remove]; exact List.subset_cons_of_subset _ (List.remove_subset _ _))
@@ -192,7 +192,7 @@ def andInversion₂Aux : {Δ : Sequent L} → ⊢ᶜ[C] Δ → (p q : SyntacticF
     have dn : ⊢ᶜ[C] (~r) :: q :: Δ.remove (p ⋏ q) :=
       (andInversion₂Aux ⟨dn, H.2.2⟩ p q).wk (by simp[List.subset_def, List.mem_remove_iff]; intros; simp[*])
     d.cut dn H.1
-  termination_by andInversion₂Aux _ d _ _ => length d.val
+  termination_by _ d _ _ => length d.val
 
 def andInversion₂ {p q} (d : ⊢ᶜ[C] p ⋏ q :: Δ) : ⊢ᶜ[C] q :: Δ :=
   (andInversion₂Aux d p q).wk (by simp[List.remove]; exact List.subset_cons_of_subset _ (List.remove_subset _ _))
@@ -246,7 +246,7 @@ def allInversionAux : {Δ : Sequent L} → ⊢ᶜ[C] Δ →
     have dn : ⊢ᶜ[C] ((~r) :: p/[t] :: Δ.remove (∀' p)) :=
       (allInversionAux ⟨dn, H.2.2⟩ p t).wk (by simp[List.subset_def, List.mem_remove_iff]; intros; simp[*])
     d.cut dn H.1
-  termination_by allInversionAux _ d _ _ => length d.val
+  termination_by _ d _ _ => length d.val
 
 def allInversion (d : ⊢ᶜ[C] (∀' p) :: Δ) (t) : ⊢ᶜ[C] p/[t] :: Δ :=
   (allInversionAux hC d p t).wk (by simp; exact List.subset_cons_of_subset _ (List.remove_subset _ _))
@@ -279,7 +279,7 @@ def falsumElimAux : {Δ : Sequent L} → ⊢ᶜ[C] Δ → ⊢ᶜ[C] Δ.remove �
     have d : ⊢ᶜ[C] p :: Δ.remove ⊥ := (falsumElimAux ⟨d, H.2.1⟩).wk (by simp[List.subset_def, List.mem_remove_iff]; intros; simp[*])
     have dn : ⊢ᶜ[C] (~p) :: Δ.remove ⊥ := (falsumElimAux ⟨dn, H.2.2⟩).wk (by simp[List.subset_def, List.mem_remove_iff]; intros; simp[*])
     d.cut dn H.1
-  termination_by falsumElimAux _ d => length d.val
+  termination_by _ d => length d.val
 
 def falsumElim (d : ⊢ᶜ[C] ⊥ :: Δ) : ⊢ᶜ[C] Δ := (falsumElimAux d).wk (by simp; exact List.remove_subset _ _)
 
@@ -379,7 +379,7 @@ def reductionAux {i} : {Δ : Sequent L} →
         rw[←List.cons_append]
         exact List.append_subset_append (List.remove_cons_subset_cons_remove _ _ _))
     d₁.cut dn₁ H.1
-  termination_by reductionAux d _ _ _ _ _ => length d.val
+  termination_by _ d _ _ _ _ _ => length d.val
 
 def reduction {i} {p} (hp : p.complexity ≤ i) : ⊢ᶜ[< i] p :: Δ → ⊢ᶜ[< i] (~p) :: Δ → ⊢ᶜ[< i] Δ := fun dp dn => by
   cases tp : p.isVType

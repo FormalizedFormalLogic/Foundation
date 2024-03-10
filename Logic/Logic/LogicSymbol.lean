@@ -255,7 +255,7 @@ instance : DeMorgan Prop where
   or := fun _ _ => by simp[not_or]
   neg := fun _ => by simp
 
-class HomClass (F : Type _) (α β : outParam (Type _)) [LogicSymbol α] [LogicSymbol β] extends FunLike F α (fun _ => β) where
+class HomClass (F : Type _) (α β : outParam (Type _)) [LogicSymbol α] [LogicSymbol β] [FunLike F α β] where
   map_top : ∀ (f : F), f ⊤ = ⊤
   map_bot : ∀ (f : F), f ⊥ = ⊥
   map_neg : ∀ (f : F) (p : α), f (~ p) = ~f p
@@ -267,11 +267,11 @@ attribute [simp] HomClass.map_top HomClass.map_bot HomClass.map_neg HomClass.map
 
 namespace HomClass
 
-variable (F : Type _) (α β : outParam (Type _)) [LogicSymbol α] [LogicSymbol β]
+variable (F : Type _) (α β : outParam (Type _)) [LogicSymbol α] [LogicSymbol β] [FunLike F α β]
 variable [HomClass F α β]
 variable (f : F) (a b : α)
 
-instance : CoeFun F (fun _ => α → β) := ⟨FunLike.coe⟩
+instance : CoeFun F (fun _ => α → β) := ⟨DFunLike.coe⟩
 
 @[simp] lemma map_iff : f (a ⟷ b) = f a ⟷ f b := by simp[LogicSymbol.iff]
 
@@ -300,13 +300,13 @@ def unexpsnderToFun : Unexpander
 namespace Hom
 variable {α β γ}
 
-instance : FunLike (α →L β) α (fun _ => β) where
+instance : FunLike (α →L β) α β where
   coe := toTr
   coe_injective' := by intro f g h; rcases f; rcases g; simp; exact h
 
-instance : CoeFun (α →L β) (fun _ => α → β) := FunLike.hasCoeToFun
+instance : CoeFun (α →L β) (fun _ => α → β) := DFunLike.hasCoeToFun
 
-@[ext] lemma ext (f g : α →L β) (h : ∀ x, f x = g x) : f = g := FunLike.ext f g h
+@[ext] lemma ext (f g : α →L β) (h : ∀ x, f x = g x) : f = g := DFunLike.ext f g h
 
 instance : HomClass (α →L β) α β where
   map_top := map_top'
@@ -389,17 +389,17 @@ def conj : {n : ℕ} → (Fin n → α) → α
 
 @[simp] lemma conj_cons {a : α} {v : Fin n → α} : conj (a :> v) = a ⋏ conj v := rfl
 
-@[simp] lemma conj_hom_prop [LogicSymbol.HomClass F α Prop]
+@[simp] lemma conj_hom_prop [FunLike F α Prop] [LogicSymbol.HomClass F α Prop]
   (f : F) (v : Fin n → α) : f (conj v) = ∀ i, f (v i) := by
   induction' n with n ih <;> simp[conj]
   · simp[ih]; constructor
     · intro ⟨hz, hs⟩ i; cases i using Fin.cases; { exact hz }; { exact hs _ }
     · intro h; exact ⟨h 0, fun i => h _⟩
 
-lemma hom_conj [LogicSymbol.HomClass F α β] (f : F) (v : Fin n → α) : f (conj v) = conj (f ∘ v) := by
+lemma hom_conj [FunLike F α β] [LogicSymbol.HomClass F α β] (f : F) (v : Fin n → α) : f (conj v) = conj (f ∘ v) := by
   induction' n with n ih <;> simp[*, conj]
 
-lemma hom_conj' [LogicSymbol.HomClass F α β] (f : F) (v : Fin n → α) : f (conj v) = conj fun i => f (v i) := hom_conj f v
+lemma hom_conj' [FunLike F α β] [LogicSymbol.HomClass F α β] (f : F) (v : Fin n → α) : f (conj v) = conj fun i => f (v i) := hom_conj f v
 
 end And
 
@@ -419,7 +419,7 @@ def conj : List α → α
 
 @[simp] lemma conj_cons {a : α} {as : List α} : conj (a :: as) = a ⋏ as.conj := rfl
 
-lemma map_conj [LogicSymbol.HomClass F α Prop] (f : F) (l : List α) : f l.conj ↔ ∀ a ∈ l, f a := by
+lemma map_conj [FunLike F α Prop] [LogicSymbol.HomClass F α Prop] (f : F) (l : List α) : f l.conj ↔ ∀ a ∈ l, f a := by
   induction l <;> simp[*]
 
 def disj : List α → α
@@ -430,7 +430,7 @@ def disj : List α → α
 
 @[simp] lemma disj_cons {a : α} {as : List α} : disj (a :: as) = a ⋎ as.disj := rfl
 
-lemma map_disj [LogicSymbol.HomClass F α Prop] (f : F) (l : List α) : f l.disj ↔ ∃ a ∈ l, f a := by
+lemma map_disj [FunLike F α Prop] [LogicSymbol.HomClass F α Prop] (f : F) (l : List α) : f l.disj ↔ ∃ a ∈ l, f a := by
   induction l <;> simp[*]
 
 end
@@ -445,12 +445,12 @@ variable [LogicSymbol α]
 
 noncomputable def conj (s : Finset α) : α := s.toList.conj
 
-lemma map_conj [LogicSymbol.HomClass F α Prop] (f : F) (s : Finset α) : f s.conj ↔ ∀ a ∈ s, f a := by
+lemma map_conj [FunLike F α Prop] [LogicSymbol.HomClass F α Prop] (f : F) (s : Finset α) : f s.conj ↔ ∀ a ∈ s, f a := by
   simpa using List.map_conj f s.toList
 
 noncomputable def disj (s : Finset α) : α := s.toList.disj
 
-lemma map_disj [LogicSymbol.HomClass F α Prop] (f : F) (s : Finset α) : f s.disj ↔ ∃ a ∈ s, f a := by
+lemma map_disj [FunLike F α Prop] [LogicSymbol.HomClass F α Prop] (f : F) (s : Finset α) : f s.disj ↔ ∃ a ∈ s, f a := by
   simpa using List.map_disj f s.toList
 
 end

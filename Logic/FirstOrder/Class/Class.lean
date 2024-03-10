@@ -10,8 +10,8 @@ variable {μ : Type*}
 
 lemma hom_eq_id_of_eq_on_fvar_list (ω : Rew L μ n μ n) (hb : ∀ x, ω (#x) = #x) (hf : ∀ x ∈ p.fvarList, ω (&x) = &x) :
     ω.hom p = p := by
-  suffices : ω.hom p = Rew.id.hom p
-  · simpa using this
+  suffices ω.hom p = Rew.id.hom p by
+    simpa using this
   apply Semiformula.rew_eq_of_funEqOn
   · simpa using hb
   · intro x hx; simp [hf x hx]
@@ -33,44 +33,56 @@ notation p:80 " ↔[" T "] " q:80 => Equivalent T p q
 @[refl] protected lemma refl : p ↔[T] p := by simp [Equivalent, consequence_iff, models_iff]
 
 @[symm] protected lemma symm : p ↔[T] q → q ↔[T] p := by
-  simp [Equivalent, consequence_iff, models_iff]
+  simp only [Equivalent, consequence_iff, models_iff, val_fvUnivClosure, eval_univClosure,
+    LogicSymbol.HomClass.map_iff, LogicSymbol.Prop_iff_eq, Nonempty.forall]
   intro h M x _ hT ε e
   exact Iff.symm <| h M x hT ε e
 
 @[trans] protected lemma trans : p ↔[T] q → q ↔[T] r → p ↔[T] r := by
-  simp [Equivalent, consequence_iff, models_iff]
+  simp only [Equivalent, consequence_iff, models_iff, Semiformula.val_fvUnivClosure, Semiformula.eval_univClosure,
+    LogicSymbol.HomClass.map_iff, LogicSymbol.Prop_iff_eq]
   intro hp hq M x _ hT ε e
-  exact Iff.trans (hp M x hT ε e) (hq M x hT ε e)
+  exact Iff.trans (hp M hT ε e) (hq M hT ε e)
 
 lemma of_subtheory (H : T ≾ T') (h : p ↔[T] q) : p ↔[T'] q := LO.Sound.sound <| H.sub <| LO.Complete.complete h
 
 lemma rew [DecidableEq ξ'] (h : p ↔[T] q) (ω : Rew L ξ n ξ' n') : (ω.hom p) ↔[T] (ω.hom q) := by
-  simp [Equivalent, consequence_iff, models_iff, eval_rew, Function.comp] at h ⊢
+  simp only [Equivalent, consequence_iff, models_iff, val_fvUnivClosure, eval_univClosure,
+    LogicSymbol.HomClass.map_iff, LogicSymbol.Prop_iff_eq, Nonempty.forall, eval_rew,
+    Function.comp] at h ⊢
   intro M x _ hT ε e; exact h M x hT _ _
 
 lemma not {p₁ p₂ : Semiformula L ξ n} (hp : p₁ ↔[T] p₂) : (~p₁) ↔[T] (~p₂) := by
-  simp [Equivalent, consequence_iff, models_iff, eval_rew, Function.comp] at hp ⊢
+  simp only [Equivalent, consequence_iff, models_iff, val_fvUnivClosure, eval_univClosure,
+    LogicSymbol.HomClass.map_iff, LogicSymbol.Prop_iff_eq, Nonempty.forall,
+    LogicSymbol.HomClass.map_neg, LogicSymbol.Prop_neg_eq] at hp ⊢
   intro M x _ hT ε e; rw [hp M x hT ε e]
 
 lemma and {p₁ p₂ q₁ q₂ : Semiformula L ξ n} (hp : p₁ ↔[T] p₂) (hq : q₁ ↔[T] q₂) : (p₁ ⋏ q₁) ↔[T] (p₂ ⋏ q₂) := by
-  simp [Equivalent, consequence_iff, models_iff, eval_rew, Function.comp] at hp hq ⊢
+  simp only [Equivalent, consequence_iff, models_iff, val_fvUnivClosure, eval_univClosure,
+    LogicSymbol.HomClass.map_iff, LogicSymbol.Prop_iff_eq, Nonempty.forall,
+    LogicSymbol.HomClass.map_and, LogicSymbol.Prop_and_eq] at hp hq ⊢
   intro M x _ hT ε e; rw [hp M x hT ε e, hq M x hT ε e]
 
 lemma or {p₁ p₂ q₁ q₂ : Semiformula L ξ n} (hp : p₁ ↔[T] p₂) (hq : q₁ ↔[T] q₂) : (p₁ ⋎ q₁) ↔[T] (p₂ ⋎ q₂) := by
-  simp [Equivalent, consequence_iff, models_iff, eval_rew, Function.comp] at hp hq ⊢
+  simp only [Equivalent, consequence_iff, models_iff, val_fvUnivClosure, eval_univClosure,
+    LogicSymbol.HomClass.map_iff, LogicSymbol.Prop_iff_eq, Nonempty.forall,
+    LogicSymbol.HomClass.map_or, LogicSymbol.Prop_or_eq] at hp hq ⊢
   intro M x _ hT ε e; rw [hp M x hT ε e, hq M x hT ε e]
 
 lemma imp {p₁ p₂ q₁ q₂ : Semiformula L ξ n} (hp : p₁ ↔[T] p₂) (hq : q₁ ↔[T] q₂) :
     (p₁ ⟶ q₁) ↔[T] (p₂ ⟶ q₂) := or (not hp) hq
 
 lemma all {p₁ p₂ : Semiformula L ξ (n + 1)} (hp : p₁ ↔[T] p₂) : (∀' p₁) ↔[T] (∀' p₂) := by
-  simp [Equivalent, consequence_iff, models_iff, eval_rew, Function.comp] at hp ⊢
+  simp only [Equivalent, consequence_iff, models_iff, val_fvUnivClosure, eval_univClosure,
+    LogicSymbol.HomClass.map_iff, LogicSymbol.Prop_iff_eq, Nonempty.forall, eval_all] at hp ⊢
   intro M x _ hT ε e
   apply forall_congr'; intro a
   exact hp M x hT ε (a :> e)
 
 lemma ex {p₁ p₂ : Semiformula L ξ (n + 1)} (hp : p₁ ↔[T] p₂) : (∃' p₁) ↔[T] (∃' p₂) := by
-  simp [Equivalent, consequence_iff, models_iff, eval_rew, Function.comp] at hp ⊢
+  simp only [Equivalent, consequence_iff, models_iff, val_fvUnivClosure, eval_univClosure,
+    LogicSymbol.HomClass.map_iff, LogicSymbol.Prop_iff_eq, Nonempty.forall, eval_ex] at hp ⊢
   intro M x _ hT ε e
   apply exists_congr; intro a
   exact hp M x hT ε (a :> e)
@@ -361,15 +373,15 @@ section
 -- https://github.com/leanprover-community/mathlib4/blob/77d078e25cc501fae6907bfbcd80821920125266/Mathlib/Tactic/Measurability.lean#L25-L26
 open Lean.Parser.Tactic (config)
 
-attribute [aesop 1 (rule_sets [FormulaClass]) norm]
+attribute [aesop 1 (rule_sets := [FormulaClass]) norm]
   Class.mem_imply
   Class.mem_iff
 
-attribute [aesop 3 (rule_sets [FormulaClass]) norm]
+attribute [aesop 3 (rule_sets := [FormulaClass]) norm]
   Class.BAll.ball
   Class.BEx.bex
 
-attribute [aesop 3 (rule_sets [FormulaClass]) norm]
+attribute [aesop 3 (rule_sets := [FormulaClass]) norm]
   Class.And.and
   Class.Or.or
   Class.rew_closed
@@ -381,10 +393,10 @@ macro "formula_class" : attr =>
   `(attr|aesop 0 (rule_sets [$(Lean.mkIdent `FormulaClass):ident]) safe)
 
 macro "formula_class" (config)? : tactic =>
-  `(tactic| aesop (options := { terminal := true }) (rule_sets [$(Lean.mkIdent `FormulaClass):ident]))
+  `(tactic| aesop (config := { terminal := true }) (rule_sets := [$(Lean.mkIdent `FormulaClass):ident]))
 
 macro "formula_class?" (config)? : tactic =>
-  `(tactic| aesop? (options := { terminal := true }) (rule_sets [$(Lean.mkIdent `FormulaClass):ident]))
+  `(tactic| aesop? (config := { terminal := true }) (rule_sets := [$(Lean.mkIdent `FormulaClass):ident]))
 
 example : (openClass ℒₒᵣ ℕ).Domain (“¬0 < 6 → &6 + #5 ≠ 0” : Semiformula ℒₒᵣ ℕ 8) := by { formula_class }
 

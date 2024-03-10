@@ -454,8 +454,8 @@ lemma toProof {T : Theory L} {σ} (b : Rew.emb.hom '' T ⊢ (Rew.emb.hom σ : Sy
   choose f hf using this
   let Δ' := Δ.pmap f (by simp)
   have : Δ'.map Rew.emb.hom ⊢² [σ].map Rew.emb.hom := by
-    rw[show Δ'.map Rew.emb.hom = Δ from by simp[List.map_pmap, hf]]; exact d
-  exact Gentzen.toDisjconseq (twoSidedEquiv.symm this) (by simp; rintro σ p hp rfl; exact (hf p hp).1)
+    rw[show Δ'.map Rew.emb.hom = Δ from by simp [Δ', List.map_pmap, hf]]; exact d
+  exact Gentzen.toDisjconseq (twoSidedEquiv.symm this) (by simp [Δ']; rintro σ p hp rfl; exact (hf p hp).1)
 
 namespace Gentzen
 

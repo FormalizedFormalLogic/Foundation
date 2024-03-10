@@ -47,14 +47,14 @@ private lemma implies_cwf  : (⊧ᴹ[F] (𝐋 : AxiomSet β)) → ConverseWellFo
       existsi y;
       constructor;
       . simpa [flip] using hy₂;
-      . simpa;
+      . simpa [V, w, a];
     . aesop;
   . obtain ⟨w', hw'₁, hw'₂⟩ := hX₂ w (by apply Set.Nonempty.some_mem);
     simp;
     existsi w';
     constructor;
     . simpa [flip] using hw'₂;
-    . simp_all;
+    . simp_all [V, w, a];
 
 private lemma impliedby : (Transitive F ∧ ConverseWellFounded F) → (⊧ᴹ[F] (𝐋 : AxiomSet β)) := by
   rintro ⟨hTrans, hWF⟩;
@@ -96,6 +96,8 @@ end AxiomL
 
 
 namespace LogicGL
+
+variable [Inhabited α]
 
 lemma defines_trans_converseWellFounded : @FrameClassDefinability α β 𝐆𝐋 (λ F => (Transitive F ∧ ConverseWellFounded F)) := by
   intro F;

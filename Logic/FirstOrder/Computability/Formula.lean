@@ -105,7 +105,8 @@ def bind (b : ℕ → UTerm L μ₂) (e : μ₁ → UTerm L μ₂) : UFormula L 
 
 lemma bindq_eq_bind (b : ℕ → UTerm L μ₂) (e : μ₁ → UTerm L μ₂) :
     bindq b e m p = bind (shiftb b m) (UTerm.bShifts m $ e ·) p := by
-  induction' p generalizing b e m <;> simp[bind, bindq, *]
+  induction' p generalizing b e m <;> simp [bind, bindq]
+  all_goals simp [*]
 
 def rewrite (e : μ₁ → UTerm L μ₂) : UFormula L μ₁ → UFormula L μ₂
   | verum    => verum
@@ -390,11 +391,10 @@ lemma encode_rel {k} (r : L.Rel k) (v : Fin k → UTerm L μ) :
     Encodable.encode_ofEquiv (equivW L μ), WType.encode_eq, WType.SubWType.ofW, WType.depth]
   have : (WType.depth (β := Edge L μ) (WType.mk (true, Sum.inl ⟨k, r, v⟩) Empty.elim)) = 1 := rfl
   rw[(WType.SubWType.encode_cast · this)]
-  suffices : encode (WType.SubWType.ofWType (β := Edge L μ) ⟨(true, Sum.inl ⟨k, r, v⟩), Empty.elim⟩ 1 (by rw[this])) =
-    ((Nat.pair 1 (2 * k.pair ((encode r).pair (encode v)))).pair 0)
+  suffices encode (WType.SubWType.ofWType (β := Edge L μ) ⟨(true, Sum.inl ⟨k, r, v⟩), Empty.elim⟩ 1 (by rw[this])) =
+    ((Nat.pair 1 (2 * k.pair ((encode r).pair (encode v)))).pair 0) by
   { rw[←this]; apply congr_arg; simp }
   simp[WType.SubWType.encode_mk, Encodable.encode_fintypeArrow_isEmpty, Edge]
-  rw[encode_prod_val]
 
 lemma encode_nrel {k} (r : L.Rel k) (v : Fin k → UTerm L μ) :
     encode (nrel r v) = Nat.pair 1 ((Nat.pair 0 $ 2 * k.pair $ (encode r).pair (encode v)).pair 0) := by
@@ -402,11 +402,10 @@ lemma encode_nrel {k} (r : L.Rel k) (v : Fin k → UTerm L μ) :
     Encodable.encode_ofEquiv (equivW L μ), WType.encode_eq, WType.SubWType.ofW, WType.depth]
   have : (WType.depth (β := Edge L μ) (WType.mk (false, Sum.inl ⟨k, r, v⟩) Empty.elim)) = 1 := rfl
   rw[(WType.SubWType.encode_cast · this)]
-  suffices : encode (WType.SubWType.ofWType (β := Edge L μ) ⟨(false, Sum.inl ⟨k, r, v⟩), Empty.elim⟩ 1 (by rw[this])) =
-    ((Nat.pair 0 (2 * k.pair ((encode r).pair (encode v)))).pair 0)
+  suffices encode (WType.SubWType.ofWType (β := Edge L μ) ⟨(false, Sum.inl ⟨k, r, v⟩), Empty.elim⟩ 1 (by rw[this])) =
+    ((Nat.pair 0 (2 * k.pair ((encode r).pair (encode v)))).pair 0) by
   { rw[←this]; apply congr_arg; simp }
   simp[WType.SubWType.encode_mk, Encodable.encode_fintypeArrow_isEmpty, Edge]
-  rw[encode_prod_val]
 
 lemma rel_primrec :
     Primrec (fun p => rel p.2.1 p.2.2 : (k : ℕ) × L.Rel k × (Fin k → UTerm L μ) → UFormula L μ) := by

@@ -48,8 +48,8 @@ theorem main (θ : Semisentence ℒₒᵣ 1) :
       simpa[models_iff, Semiformula.eval_substs, Matrix.comp_vecCons', Matrix.constant_eq_singleton] using
       fun σ π => consequence_iff'.mp (Sound.sound! (ssbs_spec (T := T) σ π)) M
     simp[models_iff, Semiformula.eval_substs, Matrix.comp_vecCons']
-    suffices : PVal! M ![] (fixpoint θ) ↔ PVal! M ![encode (fixpoint θ)] θ
-    · simpa[Matrix.constant_eq_singleton] using this
+    suffices PVal! M ![] (fixpoint θ) ↔ PVal! M ![encode (fixpoint θ)] θ by
+      simpa[Matrix.constant_eq_singleton] using this
     calc
       PVal! M ![] (fixpoint θ)
       ↔ ∀ z, PVal! M ![z, encode (diag θ), encode (diag θ)] ssbs → PVal! M ![z] θ := by simp[fixpoint, Semiformula.eval_rew,
@@ -95,8 +95,8 @@ lemma goedel_spec : T ⊢! G ⟷ ~(provableSentence T)/[⸢G⸣] := by
 variable [DecidablePred T] [Theory.Computable T]
 
 theorem godel_independent : System.Independent T G := by
-  suffices : ¬(T ⊢! G ∨ T ⊢! ~G)
-  · simpa[System.Independent, not_or] using this
+  suffices ¬(T ⊢! G ∨ T ⊢! ~G) by
+    simpa[System.Independent, not_or] using this
   rintro (H | H)
   · have h₁ : T ⊢! ~(provableSentence T)/[⸢G⸣] := by prover [goedel_spec T, H]
     have h₂ : T ⊢! (provableSentence T)/[⸢G⸣]  := by simpa using (provableSentence_representation (L := ℒₒᵣ)).mpr H

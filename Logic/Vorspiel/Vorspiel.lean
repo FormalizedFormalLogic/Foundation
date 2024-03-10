@@ -1,4 +1,3 @@
-import Mathlib.Tactic.LibrarySearch
 import Mathlib.Order.BoundedOrder
 import Mathlib.Data.Fin.Basic
 import Mathlib.Data.Fin.VecNotation
@@ -268,7 +267,7 @@ end Matrix
 namespace DMatrix
 
 def vecEmpty : Fin 0 → α :=
-  Fin.elim0'
+  Fin.elim0
 
 variable {n} {α : Fin (n + 1) → Type*}
 
@@ -356,7 +355,7 @@ namespace Fin
 lemma pos_of_coe_ne_zero {i : Fin (n + 1)} (h : (i : ℕ) ≠ 0) :
     0 < i := Nat.pos_of_ne_zero h
 
-@[simp] lemma one_pos' : (0 : Fin (n + 2)) < 1 := pos_of_coe_ne_zero (Nat.succ_ne_zero 0)
+@[simp] lemma one_pos'' : (0 : Fin (n + 2)) < 1 := pos_of_coe_ne_zero (Nat.succ_ne_zero 0)
 
 @[simp] lemma two_pos : (0 : Fin (n + 3)) < 2 := pos_of_coe_ne_zero (Nat.succ_ne_zero 1)
 
@@ -416,21 +415,6 @@ lemma eq_elim {α : Sort*} (f : o → α) : f = h.elim' := funext h.elim
 
 end IsEmpty
 
-namespace Set
-variable  {α : Type u} {β : Type v}
-
-lemma subset_image_iff (f : α → β) {s : Set α} {t : Set β} :
-    t ⊆ f '' s ↔ ∃ u, u ⊆ s ∧ f '' u = t :=
-  ⟨by intro h
-      use {a : α | a ∈ s ∧ f a ∈ t}
-      constructor
-      { intros a ha; exact ha.1 }
-      { ext b; constructor <;> simp; { rintro a _ hfa rfl; exact hfa };
-        { intros hb; rcases h hb with ⟨a, ha, rfl⟩; exact ⟨a, ⟨ha, hb⟩, rfl⟩ } },
-   by { rintro ⟨u, hu, rfl⟩; intros b; simp; rintro a ha rfl; exact ⟨a, hu ha, rfl⟩ }⟩
-
-end Set
-
 namespace Function
 
 variable  {α : Type u} {β : Type v}
@@ -459,9 +443,9 @@ def liftVec : ∀ {n} (f : (Fin n → α) → β),
     fun a v => liftVec (n := n) (fun v => f (a :> v))
       (fun v₁ v₂ hv => h (a :> v₁) (a :> v₂) (Fin.cases (by simp; exact refl a) hv)) v
   Quot.liftOn (vecHead v) (ih · (vecTail v))
-  (fun a b hab => by
-    have : ∀ v, f (a :> v) = f (b :> v) := fun v => h _ _ (Fin.cases hab (by simp; intro; exact refl _))
-    simp[this])
+    (fun a b hab => by
+      have : ∀ v, f (a :> v) = f (b :> v) := fun v => h _ _ (Fin.cases hab (by simp; intro; exact refl _))
+      simp [this, ih])
 
 @[simp] lemma liftVec_zero (f : (Fin 0 → α) → β) (h) (v : Fin 0 → Quotient s) : liftVec f h v = f ![] := rfl
 
@@ -526,11 +510,11 @@ lemma getI_map_range [Inhabited α] (f : ℕ → α) (h : i < n) : ((List.range 
 lemma sup_ofFn (f : Fin n → α) : (ofFn f).sup = Finset.sup Finset.univ f := by
   induction' n with n ih <;> simp
   { simp[ih]
-    have : (Finset.univ : Finset (Fin (n + 1))) = insert 0 ((Finset.univ : Finset (Fin n)).image Fin.succ)
-    { ext i; simp }
+    have : (Finset.univ : Finset (Fin (n + 1))) = insert 0 ((Finset.univ : Finset (Fin n)).image Fin.succ) := by
+      ext i; simp
     rw[this, Finset.sup_insert]; simp
-    have : Finset.sup Finset.univ (fun i => f (Fin.succ i)) = Finset.sup {0}ᶜ f
-    { simpa[Function.comp] using Eq.symm <| Finset.sup_image (Finset.univ : Finset (Fin n)) Fin.succ f }
+    have : Finset.sup Finset.univ (fun i => f (Fin.succ i)) = Finset.sup {0}ᶜ f := by
+      simpa[Function.comp] using Eq.symm <| Finset.sup_image (Finset.univ : Finset (Fin n)) Fin.succ f
     rw[this] }
 
 end

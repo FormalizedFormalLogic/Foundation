@@ -6,7 +6,7 @@ namespace LO.Modal.Normal
 
 open Formula
 
-variable {α β : Type u} [Inhabited α]
+variable {α β : Type u}
 
 abbrev Frame (α : Type u) := α → α → Prop
 abbrev Valuation (α β : Type u) := α → β → Prop
@@ -64,13 +64,13 @@ namespace Models
 
 variable {M : Model α β}
 
-@[simp] lemma neg_def : (⊧ᴹ[M] (~p)) → ¬(⊧ᴹ[M] p) := by
+@[simp] lemma neg_def [Inhabited α] : (⊧ᴹ[M] (~p)) → ¬(⊧ᴹ[M] p) := by
   simp [Models];
   intro h;
   existsi default;
   exact h default;
 
-@[simp] lemma bot_def : ¬(⊧ᴹ[M] ⊥) := by simp [Models];
+@[simp] lemma bot_def [Inhabited α] : ¬(⊧ᴹ[M] ⊥) := by simp [Models];
 
 lemma modus_ponens : (⊧ᴹ[M] p ⟶ q) → (⊧ᴹ[M] p) → (⊧ᴹ[M] q) := by simp_all [Models];
 
@@ -107,7 +107,7 @@ namespace Frames
 
 variable {F: Frame α}
 
-@[simp] lemma bot_def : ¬(⊧ᴹ[F] (⊥ : Formula β)) := by simp [Frames];
+@[simp] lemma bot_def [Inhabited α] : ¬(⊧ᴹ[F] (⊥ : Formula β)) := by simp [Frames];
 
 lemma modus_ponens : (⊧ᴹ[F] p ⟶ q) → (⊧ᴹ[F] p) → (⊧ᴹ[F] q) := by
   intro h₁ h₂ V;
@@ -224,7 +224,7 @@ end AxiomSetFrameClass
 
 namespace Theory
 
-lemma models_neg_singleton {M : Model α β} {p : Formula β} : (⊧ᴹ[M] {~p}) → (¬⊧ᴹ[M] {p}) := by
+lemma models_neg_singleton [Inhabited α] {M : Model α β} {p : Formula β} : (⊧ᴹ[M] {~p}) → (¬⊧ᴹ[M] {p}) := by
   intro hnp hp;
   exact Formula.Models.neg_def (hnp (~p) (by simp)) (hp p (by simp));
 

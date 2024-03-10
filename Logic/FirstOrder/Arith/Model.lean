@@ -76,14 +76,14 @@ lemma standardModel_unique' (s : Structure ℒₒᵣ M)
     (hEq : Structure.Eq ℒₒᵣ M) (hLT : Structure.LT ℒₒᵣ M) : s = standardModel M := Structure.ext _ _
   (funext₃ fun k f _ =>
     match k, f with
-    | _, Language.Zero.zero => by simp[Matrix.empty_eq]; rfl
-    | _, Language.One.one   => by simp[Matrix.empty_eq]; rfl
-    | _, Language.Add.add   => by simp; rfl
-    | _, Language.Mul.mul   => by simp; rfl)
+    | _, Language.Zero.zero => by simp[Matrix.empty_eq]
+    | _, Language.One.one   => by simp[Matrix.empty_eq]
+    | _, Language.Add.add   => by simp
+    | _, Language.Mul.mul   => by simp)
   (funext₃ fun k r _ =>
     match k, r with
-    | _, Language.Eq.eq => by simp; rfl
-    | _, Language.LT.lt => by simp; rfl)
+    | _, Language.Eq.eq => by simp
+    | _, Language.LT.lt => by simp)
 
 lemma standardModel_unique (s : Structure ℒₒᵣ M)
     [hZero : Structure.Zero ℒₒᵣ M] [hOne : Structure.One ℒₒᵣ M] [hAdd : Structure.Add ℒₒᵣ M] [hMul : Structure.Mul ℒₒᵣ M]
@@ -160,8 +160,8 @@ lemma modelsSuccInd (p : Semiformula ℒₒᵣ ℕ 1) : ℕ ⊧ₘ (∀ᶠ* succ
   · exact hzero
   · exact hsucc x ih
 
-lemma modelsPeano : ℕ ⊧ₘ* 𝐏𝐀 ∪ 𝐏𝐀⁻ ∪ 𝐄𝐪 :=
-  by simp[Theory.Peano, Theory.IndScheme, modelsTheoryPAminus, Set.univ]; rintro _ p _ rfl; simp [modelsSuccInd]
+lemma modelsPeano : ℕ ⊧ₘ* 𝐏𝐀 ∪ 𝐏𝐀⁻ ∪ 𝐄𝐪 := by
+  simp [Theory.Peano, Theory.IndScheme, modelsTheoryPAminus]; rintro _ p _ rfl; simp [modelsSuccInd]
 
 end Standard
 

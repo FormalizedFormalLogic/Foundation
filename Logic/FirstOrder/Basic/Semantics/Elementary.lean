@@ -38,37 +38,38 @@ notation:25 M " ≃ₛ[" L "] " M' => Iso L M M'
   domain_closed : ∀ {k} (f : L.Func k) {v : Fin k → M}, (∀ i, v i ∈ domain) → s.func f v ∈ domain
 
 class HomClass (F : Type*) (L : outParam (Language.{u}))
-    (M₁ : outParam (Type*)) (M₂ : outParam (Type*)) [s₁ : Structure L M₁] [s₂ : Structure L M₂]
-    extends FunLike F M₁ (fun _ => M₂) where
+    (M₁ : outParam (Type*)) (M₂ : outParam (Type*)) [s₁ : Structure L M₁] [s₂ : Structure L M₂] [FunLike F M₁ M₂] where
   map_func : ∀ (h : F) {k} (f : L.Func k) (v : Fin k → M₁), h (func f v) = func f (h ∘ v)
   map_rel : ∀ (h : F) {k} (r : L.Rel k) (v : Fin k → M₁), s₁.rel r v → s₂.rel r (h ∘ v)
 
 class EmbeddingClass (F : Type*) (L : outParam (Language.{u}))
-    (M₁ : outParam (Type*)) (M₂ : outParam (Type*)) [s₁ : Structure L M₁] [s₂ : Structure L M₂]
+    (M₁ : outParam (Type*)) (M₂ : outParam (Type*)) [s₁ : Structure L M₁] [s₂ : Structure L M₂] [FunLike F M₁ M₂]
     extends HomClass F L M₁ M₂ where
   map_inj (f : F) : Function.Injective f
   map_rel_inv (f : F) {k} (r : L.Rel k) (v : Fin k → M₁) : s₂.rel r (f ∘ v) → s₁.rel r v
 
 class IsoClass (F : Type*) (L : outParam (Language.{u}))
-    (M₁ : outParam (Type*)) (M₂ : outParam (Type*)) [s₁ : Structure L M₁] [s₂ : Structure L M₂]
+    (M₁ : outParam (Type*)) (M₂ : outParam (Type*)) [s₁ : Structure L M₁] [s₂ : Structure L M₂] [FunLike F M₁ M₂]
     extends EmbeddingClass F L M₁ M₂ where
   map_bij (f : F) : Function.Bijective f
 
 variable {L M M₁ M₂ M₃}
 
-instance : HomClass (M₁ →ₛ[L] M₂) L M₁ M₂ where
+instance : FunLike (M₁ →ₛ[L] M₂) M₁ M₂ where
   coe := fun φ => φ.toFun
   coe_injective' := fun φ ψ h => by rcases φ; rcases ψ; simp at h ⊢; ext; exact congr_fun h _
+
+instance : HomClass (M₁ →ₛ[L] M₂) L M₁ M₂ where
   map_func := Hom.func'
   map_rel := Hom.rel'
 
-@[ext] lemma Hom.ext (φ ψ : M₁ →ₛ[L] M₂) (h : ∀ x, φ x = ψ x) : φ = ψ := FunLike.ext φ ψ h
+@[ext] lemma Hom.ext (φ ψ : M₁ →ₛ[L] M₂) (h : ∀ x, φ x = ψ x) : φ = ψ := DFunLike.ext φ ψ h
 
 namespace HomClass
 
-variable {F : Type*} [HomClass F L M₁ M₂] (φ : F)
+variable {F : Type*} [FunLike F M₁ M₂] [HomClass F L M₁ M₂] (φ : F)
 
-@[ext] lemma ext (φ ψ : F) (h : ∀ x, φ x = ψ x) : φ = ψ := FunLike.ext φ ψ h
+@[ext] lemma ext (φ ψ : F) (h : ∀ x, φ x = ψ x) : φ = ψ := DFunLike.ext φ ψ h
 
 protected lemma func {k} (f : L.Func k) (v : Fin k → M₁) :
     φ (s₁.func f v) = s₂.func f (φ ∘ v) := map_func φ f v
@@ -82,19 +83,21 @@ lemma val_term (e : Fin n → M₁) (ε : μ → M₁) (t : Semiterm L μ n) :
 
 end HomClass
 
-instance : EmbeddingClass (M₁ ↪ₛ[L] M₂) L M₁ M₂ where
+instance : FunLike (M₁ ↪ₛ[L] M₂) M₁ M₂ where
   coe := fun φ => φ.toFun
   coe_injective' := fun φ ψ h => by rcases φ; rcases ψ; simp at h ⊢; ext; exact congr_fun h _
+
+instance : EmbeddingClass (M₁ ↪ₛ[L] M₂) L M₁ M₂ where
   map_func := fun φ => φ.func'
   map_rel := fun φ => φ.rel'
   map_inj := Embedding.toFun_inj
   map_rel_inv := fun φ => φ.rel_inv'
 
-@[ext] lemma Embedding.ext (φ ψ : M₁ ↪ₛ[L] M₂) (h : ∀ x, φ x = ψ x) : φ = ψ := FunLike.ext φ ψ h
+@[ext] lemma Embedding.ext (φ ψ : M₁ ↪ₛ[L] M₂) (h : ∀ x, φ x = ψ x) : φ = ψ := DFunLike.ext φ ψ h
 
 namespace EmbeddingClass
 open HomClass
-variable {F : Type*} [EmbeddingClass F L M₁ M₂] (φ : F)
+variable {F : Type*} [FunLike F M₁ M₂] [EmbeddingClass F L M₁ M₂] (φ : F)
 
 def toEmbedding : M₁ ↪ M₂ where
   toFun := φ
@@ -108,16 +111,18 @@ protected lemma rel {k} (r : L.Rel k) (v : Fin k → M₁) :
 
 end EmbeddingClass
 
-instance : IsoClass (M₁ ≃ₛ[L] M₂) L M₁ M₂ where
+instance : FunLike (M₁ ≃ₛ[L] M₂) M₁ M₂ where
   coe := fun φ => φ.toFun
   coe_injective' := fun φ ψ h => by rcases φ; rcases ψ; simp at h ⊢; ext; exact congr_fun h _
+
+instance : IsoClass (M₁ ≃ₛ[L] M₂) L M₁ M₂ where
   map_func := fun φ => φ.func'
   map_rel := fun φ => φ.rel'
   map_inj := fun φ => φ.toFun_inj
   map_rel_inv := fun φ => φ.rel_inv'
   map_bij := fun φ => φ.toFun_bij
 
-@[ext] lemma Iso.ext (φ ψ : M₁ ≃ₛ[L] M₂) (h : ∀ x, φ x = ψ x) : φ = ψ := FunLike.ext φ ψ h
+@[ext] lemma Iso.ext (φ ψ : M₁ ≃ₛ[L] M₂) (h : ∀ x, φ x = ψ x) : φ = ψ := DFunLike.ext φ ψ h
 
 namespace IsoClass
 
@@ -153,7 +158,7 @@ end Structure
 namespace Semiformula
 open Structure
 
-variable {F : Type*} [EmbeddingClass F L M₁ M₂] (φ : F)
+variable {F : Type*} [FunLike F M₁ M₂] [EmbeddingClass F L M₁ M₂] (φ : F)
 variable {e₁ : Fin n → M₁} {ε₁ : μ → M₁}
 
 lemma eval_hom_iff_of_open : ∀ {n} {e₁ : Fin n → M₁} {ε₁ : μ → M₁} {p : Semiformula L μ n}, p.Open →
@@ -221,7 +226,7 @@ end Structure
 
 section EmbeddingClass
 
-variable {F : Type*} [Structure.EmbeddingClass F L M₁ M₂] (φ : F)
+variable {F : Type*} [FunLike F M₁ M₂] [Structure.EmbeddingClass F L M₁ M₂] (φ : F)
 variable {e₁ : Fin n → M₁} {ε₁ : μ → M₁}
 
 lemma models_hom_iff_of_open {σ : Sentence L} (hσ : σ.Open) : M₁ ⊧ₘ σ ↔ M₂ ⊧ₘ σ := by

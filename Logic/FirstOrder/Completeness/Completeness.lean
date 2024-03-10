@@ -46,14 +46,14 @@ noncomputable def completeness {σ : Sentence L} :
   haveI : ∀ k, Encodable ((languageFinset u).Rel k) := fun _ ↦ Fintype.toEncodable _
   let u' : Finset (Sentence (languageFinset u)) := Finset.imageOfFinset u (fun _ hσ ↦ toSubLanguageFinsetSelf hσ)
   have image_u' : u'.image (Semiformula.lMap L.ofSubLanguage) = u := by
-    { ext τ; simp[Finset.mem_imageOfFinset_iff]
-      exact ⟨by rintro ⟨a, ⟨τ, hτ, rfl⟩, rfl⟩; simp[hτ],
-        by intro hτ; exact ⟨toSubLanguageFinsetSelf hτ, ⟨τ, hτ, rfl⟩, Semiformula.lMap_toSubLanguageFinsetSelf hτ⟩⟩ }
-  have : ¬Semantics.SatisfiableTheory (u' : Theory (languageFinset u))
-  { intro h
+    ext τ; simp [u', Finset.mem_imageOfFinset_iff]
+    exact ⟨by rintro ⟨a, ⟨τ, hτ, rfl⟩, rfl⟩; simp[hτ],
+      by intro hτ; exact ⟨toSubLanguageFinsetSelf hτ, ⟨τ, hτ, rfl⟩, Semiformula.lMap_toSubLanguageFinsetSelf hτ⟩⟩
+  have : ¬Semantics.SatisfiableTheory (u' : Theory (languageFinset u)) := by
+    intro h
     have : Semantics.SatisfiableTheory (u : Theory L) := by
       rw[←image_u']; simpa using (satisfiableTheory_lMap L.ofSubLanguage (fun k ↦ Subtype.val_injective) (fun _ ↦ Subtype.val_injective) h)
-    contradiction }
+    contradiction
   have : ¬System.Consistent (u' : Theory (languageFinset u)) := fun h ↦ this (Complete.satisfiableTheory_iff_consistent.mpr h)
   have : ¬System.Consistent (u : Theory L) := by rw[←image_u']; simpa using System.inconsistent_lMap L.ofSubLanguage this
   have : ¬System.Consistent (insert (~σ) T) := fun h ↦ this (h.of_subset ssu)

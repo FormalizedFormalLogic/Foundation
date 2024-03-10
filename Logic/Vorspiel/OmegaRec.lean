@@ -97,10 +97,10 @@ private lemma bindItr_m_lt (m : α → ℕ) (l : α → List α) (a : α) (Ord :
     ∀ a' ∈ bindItr l a k, m a' < m a + 1 - k := by
   induction' k with k ih <;> simp[bindItr]
   { intro a₂ a₁ ha₁ ha₂
-    have : m a₁ ≤ m a - k
-    { have : 0 < m a + 1 - k := by exact Nat.zero_lt_of_lt (ih a₁ ha₁)
+    have : m a₁ ≤ m a - k := by
+      have : 0 < m a + 1 - k := by exact Nat.zero_lt_of_lt (ih a₁ ha₁)
       have : k ≤ m a := Nat.lt_succ.mp (by simpa using Nat.add_lt_of_lt_sub this)
-      apply Nat.lt_succ.mp (by simp[←Nat.succ_sub this]; exact ih a₁ ha₁) }
+      apply Nat.lt_succ.mp (by simp[←Nat.succ_sub this]; exact ih a₁ ha₁)
     exact lt_of_lt_of_le (Ord a₁ a₂ ha₂) this }
 
 private lemma bindItr_eq_nil (m : α → ℕ) (l : α → List α) (a : α) (Ord : ∀ a, ∀ a' ∈ l a, m a' < m a) :
