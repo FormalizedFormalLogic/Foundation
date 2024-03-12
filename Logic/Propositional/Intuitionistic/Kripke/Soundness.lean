@@ -34,9 +34,9 @@ lemma Kripke.soundsAux (Γ : Theory α) (p : Formula α) (h : Γ ⊢ᴵ! p) : (�
 
 theorem Kripke.sounds {Γ : Theory α} {p} : (Γ ⊢ᴵ! p) → (Γ ⊨ᴵ p) := Kripke.soundsAux Γ p
 
-theorem Provable.consistent : ⊬ᴵ! (⊥ : Formula α) := by
+theorem Deduction.consistent : ∅ ⊬ᴵ! (⊥ : Formula α) := by
   by_contra hC;
-  have : ∅ ⊨ᴵ (⊥ : Formula α) := Kripke.sounds (by simpa using hC);
+  have : ∅ ⊨ᴵ (⊥ : Formula α) := Kripke.sounds (by simpa [Undeducible] using hC);
   have : ∅ ⊭ᴵ (⊥ : Formula α) := Kripke.bot_inconsequence
   contradiction
 
