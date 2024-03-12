@@ -23,47 +23,52 @@ end Consistency
 
 namespace Theory
 
-def Maximal (Γ : Theory β) := ∀ p, (p ∈ Γ) ∨ (~p ∈ Γ)
-
 def Closed (Γ : Theory β) := ∀ p, (Γ ⊢ᴵ! p) → (p ∈ Γ)
 
-def DisjProp (Γ : Theory β) := ∀ p q, (p ⋎ q ∈ Γ) → (p ∈ Γ) ∨ (q ∈ Γ)
+def Disjunctive (Γ : Theory β) := ∀ p q, (p ⋎ q ∈ Γ) → (p ∈ Γ) ∨ (q ∈ Γ)
+
+class Prime (T : Theory β) where
+  consistent : Consistent T
+  closed : Closed T
+  disjunctive : Disjunctive T
 
 end Theory
 
-
-class ConsistentPrimeTheory (β) where
+structure PrimeTheory (β) where
   theory : Theory β
-  consistent : Consistent theory
-  closed : Closed theory
-  disjprop : DisjProp theory
+  prime : Prime theory
 
-namespace ConsistentPrimeTheory
+namespace PrimeTheory
 
-@[simp] def membership (p : Formula β) (Ω : ConsistentPrimeTheory β) := p ∈ Ω.theory
-instance : Membership (Formula β) (ConsistentPrimeTheory β) := ⟨membership⟩
+variable (Ω : PrimeTheory β)
 
-@[simp] def subset (Ω₁ Ω₂ : ConsistentPrimeTheory β) := Ω₁.theory ⊆ Ω₂.theory
-instance : HasSubset (ConsistentPrimeTheory β) := ⟨subset⟩
+def consistent : Consistent Ω.theory := Ω.prime.consistent
+def closed : Closed Ω.theory := Ω.prime.closed
+def disjunctive : Disjunctive Ω.theory := Ω.prime.disjunctive
 
-variable (Ω : ConsistentPrimeTheory β)
+@[simp] def membership (p : Formula β) (Ω : PrimeTheory β) := p ∈ Ω.theory
+instance : Membership (Formula β) (PrimeTheory β) := ⟨membership⟩
 
-lemma closed' {p : Formula β} : (Ω.theory ⊢ᴵ! p) → (p ∈ Ω) := Ω.closed p
-lemma disjprop' {p q : Formula β} : (p ⋎ q ∈ Ω) → (p ∈ Ω) ∨ (q ∈ Ω) := Ω.disjprop p q
+@[simp] def subset (Ω₁ Ω₂ : PrimeTheory β) := Ω₁.theory ⊆ Ω₂.theory
+instance : HasSubset (PrimeTheory β) := ⟨subset⟩
 
-@[simp] lemma undeducible_falsum {Ω : ConsistentPrimeTheory β} : Ω.theory ⊬ᴵ! ⊥ := consistent_undeducible_falsum Ω.consistent
+variable {Ω}
+
+@[simp] lemma undeducible_falsum : Ω.theory ⊬ᴵ! ⊥ := consistent_undeducible_falsum Ω.consistent
 
 @[simp] lemma no_falsum : ⊥ ∉ Ω := consistent_no_falsum Ω.consistent
 
-end ConsistentPrimeTheory
+lemma closed' {p : Formula β} : (Ω.theory ⊢ᴵ! p) → (p ∈ Ω) := Ω.closed p
+lemma disjunctive' {p q : Formula β} : (p ⋎ q ∈ Ω) → (p ∈ Ω) ∨ (q ∈ Ω) := Ω.disjunctive p q
 
-section
+end PrimeTheory
+
+section PrimeExpand
 
 variable [Encodable (Formula β)]
 open Encodable
 
 -- variable [∀ (Γ : Theory β) (p : Formula β), Decidable (Γ ⊢ᴵ! p)]
-
 
 open Classical in
 @[simp] def primex_next (Γ : Theory β) (p : Formula β) (n : ℕ) : Theory β :=
@@ -93,7 +98,7 @@ lemma primex_family_closed {Γ : Theory β} (h : Closed Γ) {p i} : Closed (Γ[p
     have := ih q;
     sorry;
 
-lemma primex_family_disjprop {Γ : Theory β} (h : DisjProp Γ) {p i} : DisjProp (Γ[p, i]) := by
+lemma primex_family_disjunctive {Γ : Theory β} (h : Disjunctive Γ) {p i} : Disjunctive (Γ[p, i]) := by
   induction i with
   | zero => simp [primex_family]; simpa;
   | succ i ih => sorry;
@@ -139,19 +144,18 @@ lemma exists_primex (Γ : Theory β) (p : Formula β)
 noncomputable def primex (Γ : Theory β) (p : Formula β) : Theory β := exists_primex Γ p |>.choose
 notation Γ "[" p "]" => primex Γ p
 
-end
-
-
-variable [Encodable (Formula β)]
-
-lemma exists_cpt {Γ : Theory β} (hp : Γ ⊬ᴵ! p) : ∃ Ω : ConsistentPrimeTheory β, (Γ ⊆ Ω.theory ∧ Ω.theory ⊬ᴵ! p) := by
+lemma primeExpand {Γ : Theory β} (hp : Γ ⊬ᴵ! p) : ∃ Ω : PrimeTheory β, (Γ ⊆ Ω.theory ∧ Ω.theory ⊬ᴵ! p) := by
   have ⟨Ω, ⟨h₁, ⟨h₂, h₃⟩⟩⟩ := exists_primex Γ ⊥;
   existsi ⟨Ω, (by sorry), (by sorry), (by sorry)⟩
   constructor;
   . exact h₂;
   . sorry; -- exact h₃;
 
-def CanonicalModel (β) : Kripke.Model (ConsistentPrimeTheory β) β where
+end PrimeExpand
+
+variable [Encodable (Formula β)] -- TODO: remove
+
+def CanonicalModel (β) : Kripke.Model (PrimeTheory β) β where
   frame Ω₁ Ω₂ := Ω₁ ⊆ Ω₂
   val Ω p := atom p ∈ Ω
   trans Ω₁ Ω₂ Ω₃ := Set.Subset.trans
@@ -159,16 +163,21 @@ def CanonicalModel (β) : Kripke.Model (ConsistentPrimeTheory β) β where
   herditary h p hp := by apply h; exact hp;
 
 @[simp]
+lemma CanonicalModel.frame_def {Ω₁ Ω₂ : PrimeTheory β} : (CanonicalModel β).frame Ω₁ Ω₂ ↔ Ω₁ ⊆ Ω₂ := by rfl
+
+@[simp]
 lemma CanonicalModel.val_def {a : β} : (CanonicalModel β).val Ω a ↔ (atom a) ∈ Ω := by rfl
 
-lemma truthlemma {Ω : ConsistentPrimeTheory β} {p : Formula β} : (Ω ⊩[(CanonicalModel β)] p) ↔ (Ω.theory ⊢ᴵ! p) := by
-  induction p using rec' with
+variable [DecidableEq β]
+
+lemma truthlemma {Ω : PrimeTheory β} {p : Formula β} : (Ω ⊩[(CanonicalModel β)] p) ↔ (Ω.theory ⊢ᴵ! p) := by
+  induction p using rec' generalizing Ω with
   | hatom a =>
     constructor;
     . intro h;
       exact ⟨Deduction.axm (CanonicalModel.val_def.mpr h)⟩;
-    . apply ConsistentPrimeTheory.closed;
-  | hfalsum => simp; exact ConsistentPrimeTheory.undeducible_falsum;
+    . apply PrimeTheory.closed;
+  | hfalsum => simp; exact PrimeTheory.undeducible_falsum;
   | hand p q ihp ihq =>
     constructor;
     . intro h;
@@ -187,27 +196,37 @@ lemma truthlemma {Ω : ConsistentPrimeTheory β} {p : Formula β} : (Ω ⊩[(Can
       | inl h => simp [ihp] at h; exact disj₁'! h;
       | inr h => simp [ihq] at h; exact disj₂'! h;
     . intro h;
-      cases Ω.disjprop' (Ω.closed' h) with
+      cases Ω.disjunctive' (Ω.closed' h) with
       | inl h => left; exact ihp.mpr ⟨.axm h⟩;
       | inr h => right; exact ihq.mpr ⟨.axm h⟩;
   | himp p q ihp ihq =>
     constructor;
+    . contrapose;
+      intro h;
+      simp [KripkeSatisfies.imp_def'];
+      have h₁ : insert p Ω.theory ⊬ᴵ! q := dtr_not! h;
+      obtain ⟨Ω', hΩ'₁, hΩ'₂⟩ := primeExpand h₁;
+      existsi Ω';
+      exact ⟨
+        ihp.mpr $ axm! (by aesop),
+        Set.Subset.trans
+          (show Ω.theory ⊆ insert p Ω.theory by aesop)
+          (show insert p Ω.theory ⊆ Ω'.theory by aesop),
+        ihq.not.mpr hΩ'₂
+      ⟩;
     . intro h;
-      simp [KripkeSatisfies.imp_def'] at h;
-      have := h Ω ((CanonicalModel β).frame_refl)
-      simp [ihp, ihq] at this;
-      -- exact ⟨Hilbert.imply₁' (this (by sorry)).some⟩;
-      -- have : Ω.theory ⊢ᴵ (p ⟶ (q ⟶ p)) := Hilbert.imply₁ _ _ _;
-      -- have : Ω.theory ⊢ᴵ (p ⟶ (p ⟶ q)) ⟶ (p ⟶ p) ⟶ (p ⟶ q) := Hilbert.imply₂ _ _ _ _;
-      sorry;
-    . simp [KripkeSatisfies.imp_def'];
-      intro h Ω' hΩΩ';
-      sorry;
+      simp [KripkeSatisfies.imp_def'];
+      by_contra hC; simp at hC;
+      obtain ⟨Ω', ⟨hp, hΩΩ', hq⟩⟩ := hC;
+      have hp : Ω'.theory ⊢ᴵ! p := ihp.mp hp;
+      have hq : Ω'.theory ⊬ᴵ! q := ihq.not.mp hq;
+      have := modus_ponens'! (weakening! hΩΩ' h) hp;
+      contradiction;
 
 lemma Kripke.completes {Γ : Theory β} {p : Formula β} : (Γ ⊨ᴵ p) → (Γ ⊢ᴵ! p) := by
   contrapose;
   intro hnp hp;
-  have ⟨Ω, ⟨hsΩ, hnpΩ⟩⟩ := exists_cpt hnp;
+  have ⟨Ω, ⟨hsΩ, hnpΩ⟩⟩ := primeExpand hnp;
   have := truthlemma.not.mpr hnpΩ;
   have := hp (CanonicalModel β) Ω (by
     intro q hq;

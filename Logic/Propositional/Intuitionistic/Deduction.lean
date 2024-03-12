@@ -29,15 +29,6 @@ infix:45 " ⊢ᴵ! " => Deducible
 abbrev Undeducible := Hilbert.Undeducible (@Deduction α)
 infix:45 " ⊬ᴵ! " => Undeducible
 
-@[simp] abbrev Proof := ∅ ⊢ᴵ p
-prefix:45 "⊢ᴵ " => Proof
-
-@[simp] abbrev Provable := Nonempty (⊢ᴵ p)
-prefix:45 "⊢ᴵ! " => Provable
-
-@[simp] abbrev Unprovable := IsEmpty (⊢ᴵ p)
-prefix:45 "⊬ᴵ! " => Unprovable
-
 abbrev Theory.Consistent := Hilbert.Consistent (@Deduction α) Γ
 abbrev Theory.Inconsistent := Hilbert.Inconsistent (@Deduction α) Γ
 
