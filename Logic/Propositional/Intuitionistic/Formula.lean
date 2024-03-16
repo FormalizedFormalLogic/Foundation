@@ -1,3 +1,4 @@
+import Mathlib.Tactic.Linarith
 import Logic.Logic.LogicSymbol
 
 namespace LO.Propositional.Intuitionistic
@@ -144,6 +145,75 @@ def hasDecEq : (p q : Formula α) → Decidable (p = q)
 instance : DecidableEq (Formula α) := hasDecEq
 
 end Decidable
+
+section Encodable
+
+open Nat
+
+variable [Encodable α]
+
+private def encode : Formula α → Nat
+  | ⊥      => pair 0 0
+  | atom a => pair 0 ((Encodable.encode a) + 1)
+  | p ⟶ q  => pair 1 (pair (p.encode) (q.encode))
+  | p ⋏ q  => pair 2 (pair (p.encode) (q.encode))
+  | p ⋎ q  => pair 3 (pair (p.encode) (q.encode))
+
+private lemma _root_.Nat.unpair_left_lt (h : unpair e = (m, n)) (hm : 1 ≤ m) : n < e := by
+  have := Nat.pair_unpair' h;
+  induction n with
+  | zero => simp_all [pair]; aesop;
+  | succ n ih =>
+    simp_all [pair];
+    split at this;
+    . rw [←this];
+      have : 1 < succ n := LE.le.trans_lt hm (by simpa)
+      have h₁ : succ n < (succ n * succ n) := Nat.lt_mul_self_iff.mpr this;
+      have h₂ : (succ n * succ n) ≤ (succ n * succ n) + m := by apply Nat.le_add_right;
+      exact LT.lt.trans_le h₁ h₂;
+    . aesop;
+
+private def decode (e : ℕ) : Option (Formula α) :=
+  match h : e.unpair with
+  | (0, 0) => some ⊥
+  | (0, k + 1) =>
+    match Encodable.decode k with
+    | some a => some (atom a)
+    | none   => none
+  | (1, k) =>
+    match decode k.unpair.1, decode k.unpair.2 with
+    | some p, some q => some (p ⟶ q)
+    | _, _ => none
+  | (2, k) =>
+    match decode k.unpair.1, decode k.unpair.2 with
+    | some p, some q => some (p ⋏ q)
+    | _, _ => none
+  | (3, k) =>
+    match decode k.unpair.1, decode k.unpair.2 with
+    | some p, some q => some (p ⋎ q)
+    | _, _ => none
+  | _ => none
+decreasing_by
+  all_goals simp_wf;
+  . exact LE.le.trans_lt (Nat.unpair_left_le k) (Nat.unpair_left_lt h (by trivial));
+  . exact LE.le.trans_lt (Nat.unpair_right_le k) (Nat.unpair_left_lt h (by trivial));
+  . exact LE.le.trans_lt (Nat.unpair_left_le k) (Nat.unpair_left_lt h (by trivial));
+  . exact LE.le.trans_lt (Nat.unpair_right_le k) (Nat.unpair_left_lt h (by trivial));
+  . exact LE.le.trans_lt (Nat.unpair_left_le k) (Nat.unpair_left_lt h (by trivial));
+  . exact LE.le.trans_lt (Nat.unpair_right_le k) (Nat.unpair_left_lt h (by trivial));
+
+instance : Encodable (Formula α) where
+  encode := encode
+  decode := decode
+  encodek p := by
+    induction p using rec' with
+    | hfalsum => sorry;
+    | hatom a => sorry;
+    | himp p q  => sorry;
+    | hand p q  => sorry;
+    | hor p q  => sorry;
+
+end Encodable
 
 end Formula
 

@@ -81,7 +81,7 @@ open Encodable
 open Classical
 
 variable {Γ : Theory β} {p : Formula β}
-variable [Encodable (Formula β)]
+variable [Encodable β]
 
 @[simp]
 def insert_family (Γ : Theory β) (p : Formula β) : ℕ → Theory β
@@ -367,7 +367,7 @@ lemma CanonicalModel.frame_def {Ω₁ Ω₂ : PrimeTheory β} : (CanonicalModel 
 @[simp]
 lemma CanonicalModel.val_def {a : β} : (CanonicalModel β).val Ω a ↔ (atom a) ∈ Ω := by rfl
 
-variable [DecidableEq β]
+variable [DecidableEq β] [Encodable β]
 
 lemma truthlemma {Ω : PrimeTheory β} {p : Formula β} : (Ω ⊩[(CanonicalModel β)] p) ↔ (Ω.theory ⊢ᴵ! p) := by
   induction p using rec' generalizing Ω with
