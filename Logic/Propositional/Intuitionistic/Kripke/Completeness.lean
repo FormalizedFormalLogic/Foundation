@@ -197,7 +197,6 @@ lemma prime_family_mono (h : k ≤ m) : Γ[p, k]ᴾ ⊆ Γ[p, m]ᴾ := by
     nth_rw 1 [(show Γ[p, m]ᴾ = (Γ[p, m]ᴾ)[p, 0]ᴵ by rfl)];
     apply subset_iUnion;
 
--- prf_primen_prf_insertn
 lemma exists_insert_family_deducible_of_prime_family_deducible' :  Γ[p, k + 1]ᴾ ⊢ᴵ! q →  ∃ m, (Γ[p, k]ᴾ[p, m]ᴵ ⊢ᴵ! q) := by
   generalize e : Γ[p, k + 1]ᴾ = Γ';
   intro h;
@@ -278,7 +277,6 @@ lemma prime_family_iUnion_disjunctive : Disjunctive (Γ[p]ᴾ) := by
   | inl h => left; apply mem_prime_family_iUnion h;
   | inr h => right; apply mem_prime_family_iUnion h;
 
--- primen_sub_prf
 lemma exists_prime_family_deducible_of_prime_family_iUnion_deducible : Γ[p]ᴾ ⊢ᴵ! q → ∃ k, Γ[p, k]ᴾ ⊢ᴵ! q := by
   generalize e : Γ[p]ᴾ = Γ';
   intro h;
