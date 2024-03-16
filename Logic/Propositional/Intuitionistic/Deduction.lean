@@ -7,7 +7,8 @@ variable {α : Type u} [DecidableEq α]
 
 inductive Deduction : Theory α → Formula α → Type _
   | axm {Γ p}                : p ∈ Γ → Deduction Γ p
-  | modus_ponens {Γ₁ Γ₂ p q} : Deduction Γ₁ (p ⟶ q) → Deduction Γ₂ p → Deduction (Γ₁ ∪ Γ₂) q
+  /-- **Remark**: This is stronger version. -/
+  | modus_ponens {Γ p q} : Deduction Γ (p ⟶ q) → Deduction Γ p → Deduction Γ q
   | verum Γ          : Deduction Γ ⊤
   | imply₁ Γ p q     : Deduction Γ (p ⟶ q ⟶ p)
   | imply₂ Γ p q r   : Deduction Γ ((p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r)
@@ -39,8 +40,8 @@ variable {Γ : Theory α} {p q : Formula α}
 def weakening' {Γ Δ} {p : Formula α} (hs : Γ ⊆ Δ) : (Γ ⊢ᴵ p) → (Δ ⊢ᴵ p)
   | axm h => axm (hs h)
   | modus_ponens h₁ h₂ => by
-      simp [Finset.union_subset_iff] at hs;
-      simpa using (h₁.weakening' hs.1).modus_ponens (h₂.weakening' hs.2);
+      -- simp [Finset.union_subset_iff] at hs;
+      simpa using (h₁.weakening' hs).modus_ponens (h₂.weakening' hs);
   | verum _ => by apply verum
   | imply₁ _ _ _ => by apply imply₁
   | imply₂ _ _ _ _ => by apply imply₂
@@ -55,7 +56,11 @@ def weakening' {Γ Δ} {p : Formula α} (hs : Γ ⊆ Δ) : (Γ ⊢ᴵ p) → (Δ
 instance : Hilbert.Intuitionistic (@Deduction α) where
   axm          := axm;
   weakening'   := weakening';
-  modus_ponens := modus_ponens;
+  modus_ponens h₁ h₂ := by
+    rename_i Γ₁ Γ₂ p q
+    replace h₁ : (Γ₁ ∪ Γ₂) ⊢ᴵ p ⟶ q := h₁.weakening' (by simp);
+    replace h₂ : (Γ₁ ∪ Γ₂) ⊢ᴵ p := h₂.weakening' (by simp);
+    exact modus_ponens h₁ h₂;
   verum        := verum;
   imply₁       := imply₁;
   imply₂       := imply₂;
@@ -88,13 +93,11 @@ private def dtrAux (Γ : Theory α) (p q) : (Γ ⊢ᴵ q) → ((Γ \ {p}) ⊢ᴵ
       have d₁ : (Γ \ {p}) ⊢ᴵ (q ⟶ p ⟶ q) := imply₁ _ q p
       have d₂ : (Γ \ {p}) ⊢ᴵ q := axm (Set.mem_diff_singleton.mpr ⟨ih, Ne.symm h⟩)
       exact d₁.modus_ponens' d₂;
-  | @modus_ponens _ Γ₁ Γ₂ a b h₁ h₂ =>
-      have ih₁ : Γ₁ \ {p} ⊢ᴵ p ⟶ a ⟶ b := dtrAux Γ₁ p (a ⟶ b) h₁
-      have ih₂ : Γ₂ \ {p} ⊢ᴵ p ⟶ a := dtrAux Γ₂ p a h₂
-      have d₁ : ((Γ₁ ∪ Γ₂) \ {p}) ⊢ᴵ (p ⟶ a) ⟶ p ⟶ b :=
-        (imply₂ _ p a b).modus_ponens' ih₁ |>.weakening' (Set.diff_subset_diff (by { exact Set.subset_union_left Γ₁ Γ₂ }) (by simp))
-      have d₂ : ((Γ₁ ∪ Γ₂) \ {p}) ⊢ᴵ (p ⟶ a) :=
-        ih₂.weakening' (Set.diff_subset_diff (Set.subset_union_right Γ₁ Γ₂) (by simp))
+  | @modus_ponens _ Γ a b h₁ h₂ =>
+      have ih₁ : Γ \ {p} ⊢ᴵ p ⟶ a ⟶ b := dtrAux Γ p (a ⟶ b) h₁
+      have ih₂ : Γ \ {p} ⊢ᴵ p ⟶ a := dtrAux Γ p a h₂
+      have d₁ : ((Γ) \ {p}) ⊢ᴵ (p ⟶ a) ⟶ p ⟶ b := (imply₂ _ p a b).modus_ponens' ih₁ |>.weakening' (by simp)
+      have d₂ : ((Γ) \ {p}) ⊢ᴵ (p ⟶ a) := ih₂.weakening' (by simp)
       d₁.modus_ponens' d₂
 
 def dtr {Γ : Theory α} {p q} (d : (insert p Γ) ⊢ᴵ q) : (Γ ⊢ᴵ (p ⟶ q)) := by
@@ -104,7 +107,7 @@ instance : Hilbert.HasDT (@Deduction α) := ⟨dtr⟩
 
 def compact {Γ : Theory α} {p} : (Γ ⊢ᴵ p) → (Δ : { Δ : Context α | ↑Δ ⊆ Γ}) × (Δ ⊢ᴵ p)
   | @axm _ Γ p h  => ⟨⟨{p}, by simpa⟩, axm (by simp)⟩
-  | @modus_ponens _ Γ₁ Γ₂ p q h₁ h₂ => by
+  | @modus_ponens _ Γ p q h₁ h₂ => by
       have ⟨⟨Δ₁, hs₁⟩, d₁⟩ := h₁.compact;
       have ⟨⟨Δ₂, hs₂⟩, d₂⟩ := h₂.compact;
       simp at hs₁ d₁ hs₂ d₂;

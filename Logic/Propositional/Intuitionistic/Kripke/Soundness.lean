@@ -10,10 +10,10 @@ variable {α : Type u} [Inhabited α]
 lemma Kripke.soundsAux (Γ : Theory α) (p : Formula α) (h : Γ ⊢ᴵ! p) : (Γ ⊨ᴵ p) := by
   induction h.some <;> simp [KripkeConsequence];
   case axm => simp_all [Theory.KripkeSatisfies];
-  case modus_ponens Γ₁ Γ₂ p q hpq hp ihpq ihp =>
+  case modus_ponens Γ p q hpq hp ihpq ihp =>
     intro _ M w a;
-    exact ihpq ⟨hpq⟩ M w (by intro q hq; exact a q (by left; simpa))
-      |>.modus_ponens $ ihp ⟨hp⟩ M w (by intro q hq; exact a q (by right; simpa));
+    exact ihpq ⟨hpq⟩ M w (by intro q hq; exact a q (by simpa))
+      |>.modus_ponens $ ihp ⟨hp⟩ M w (by intro q hq; exact a q (by simpa));
   case imply₁ =>
     intro _ _ _ _ _ _ hp _ hw _;
     exact herditary_formula hw hp;
