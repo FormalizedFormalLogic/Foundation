@@ -1,3 +1,11 @@
+/-
+  Rewrite of the Kripke completeness for intuitionistic propositional logic.
+
+  ## References
+  - Huayu Guo, Dongheng Chen, Bruno Bentzen, "Verified completeness in Henkin-style for intuitionistic propositional logic"
+    - paper: https://arxiv.org/abs/2310.01916
+    - inplements: https://github.com/bbentzen/ipl
+-/
 import Logic.Propositional.Intuitionistic.Deduction
 import Logic.Propositional.Intuitionistic.Kripke.Semantics
 
@@ -424,7 +432,7 @@ lemma truthlemma {Ω : PrimeTheory β} {p : Formula β} : (Ω ⊩[(CanonicalMode
       have := modus_ponens'! (weakening! hΩΩ' h) hp;
       contradiction;
 
-lemma Kripke.completes {Γ : Theory β} {p : Formula β} : (Γ ⊨ᴵ p) → (Γ ⊢ᴵ! p) := by
+theorem Kripke.completes {Γ : Theory β} {p : Formula β} : (Γ ⊨ᴵ p) → (Γ ⊢ᴵ! p) := by
   contrapose;
   intro hnp hp;
   have ⟨Ω, ⟨hsΩ, hnpΩ⟩⟩ := prime_expansion hnp;
