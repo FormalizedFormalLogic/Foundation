@@ -235,7 +235,6 @@ lemma mem_prime_family_iUnion (h : q ∈ (Γ[p, m]ᴾ)[p, k]ᴵ) : q ∈ Γ[p]�
   existsi k;
   simpa;
 
-set_option maxHeartbeats 1000000 in -- TODO: too slow
 lemma prime_family_iUnion_disjunctive : Disjunctive (Γ[p]ᴾ) := by
   intros q₁ q₂ hq;
   let k := encode (q₁ ⋎ q₂);
@@ -243,10 +242,10 @@ lemma prime_family_iUnion_disjunctive : Disjunctive (Γ[p]ᴾ) := by
   have hm₀ : (Γ[p, m]ᴾ)[p, 0]ᴵ ⊢ᴵ! q₁ ⋎ q₂ := by simpa using axm! hm;
   have hmₖ : (Γ[p, m]ᴾ)[p, k]ᴵ ⊢ᴵ! q₁ ⋎ q₂ := weakening! (insert_family_mono (zero_le k)) hm₀;
   have h : q₁ ∈ (Γ[p, m]ᴾ)[p, k + 1]ᴵ ∨ q₂ ∈ (Γ[p, m]ᴾ)[p, k + 1]ᴵ := by
-    simp [k, hmₖ];
+    simp only [insert_family, hmₖ, k, Nat.add_eq, add_zero, encodek, ↓reduceIte];
     split;
-    . right; simp;
-    . left; simp;
+    . right; simp only [mem_insert_iff, true_or];
+    . left; simp only [mem_insert_iff, true_or];
   cases h with
   | inl h => left; apply mem_prime_family_iUnion h;
   | inr h => right; apply mem_prime_family_iUnion h;
@@ -285,15 +284,17 @@ lemma exists_prime_family_deducible_of_prime_family_iUnion_deducible : Γ[p]ᴾ 
     | apply disj₃!;
     | apply efq!;
 
-set_option maxHeartbeats 1000000 in -- TODO: too slow
 lemma prime_family_iUnion_closed : Closed (Γ[p]ᴾ) := by
   intro q hq;
   let k := encode (p ⋎ q);
   have hpq : Γ[p]ᴾ ⊢ᴵ! (p ⋎ q) := disj₂'! hq;
   obtain ⟨m, hm⟩ := exists_prime_family_deducible_of_prime_family_iUnion_deducible hpq;
-  have hm₀ : (Γ[p, m]ᴾ)[p, 0]ᴵ ⊢ᴵ! p ⋎ q := by simpa;
+  have hm₀ : (Γ[p, m]ᴾ)[p, 0]ᴵ ⊢ᴵ! p ⋎ q := by simpa only [insert_family];
   have hmₖ : (Γ[p, m]ᴾ)[p, k]ᴵ ⊢ᴵ! p ⋎ q := weakening! (insert_family_mono (zero_le k)) hm₀;
-  have h : q ∈ (Γ[p, m]ᴾ)[p, k + 1]ᴵ := by simp [k, hmₖ, axm!];
+  have h : q ∈ (Γ[p, m]ᴾ)[p, k + 1]ᴵ := by simp only [
+    insert_family, axm!, hmₖ, k, Nat.add_eq, add_zero,
+    encodek, ↓reduceIte, mem_insert_iff, true_or
+  ];
   exact mem_prime_family_iUnion h;
 
 variable (hU : Γ ⊬ᴵ! p)
