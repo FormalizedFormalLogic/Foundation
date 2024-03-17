@@ -205,41 +205,6 @@ lemma prime_family_mono (h : k ≤ m) : Γ[p, k]ᴾ ⊆ Γ[p, m]ᴾ := by
     nth_rw 1 [(show Γ[p, m]ᴾ = (Γ[p, m]ᴾ)[p, 0]ᴵ by rfl)];
     apply subset_iUnion;
 
-lemma exists_insert_family_deducible_of_prime_family_deducible' :  Γ[p, k + 1]ᴾ ⊢ᴵ! q →  ∃ m, (Γ[p, k]ᴾ[p, m]ᴵ ⊢ᴵ! q) := by
-  generalize e : Γ[p, k + 1]ᴾ = Γ';
-  intro h;
-  induction h.some with
-  | axm h₁ =>
-    subst e;
-    obtain ⟨m, hm⟩ := by simpa using h₁;
-    existsi m;
-    exact axm! hm;
-  | modus_ponens h₁ h₂ ih₁ ih₂ =>
-    obtain ⟨m₁, hm₁⟩ := ih₁ ⟨h₁⟩;
-    obtain ⟨m₂, hm₂⟩ := ih₂ ⟨h₂⟩;
-    by_cases hm : m₁ ≤ m₂;
-    case pos =>
-      existsi m₂;
-      exact modus_ponens'! (weakening! (insert_family_mono hm) hm₁) hm₂;
-    case neg =>
-      replace hm : m₂ ≤ m₁ := le_of_not_le hm;
-      existsi m₁;
-      exact modus_ponens'! hm₁ (weakening! (insert_family_mono hm) hm₂);
-  | _ =>
-    existsi 0;
-    try first
-    | apply verum!;
-    | apply imply₁!;
-    | apply imply₂!;
-    | apply conj₁!;
-    | apply conj₂!;
-    | apply conj₃!;
-    | apply disj₁!;
-    | apply disj₂!;
-    | apply disj₃!;
-    | apply efq!;
-
-
 lemma exists_insert_family_deducible_of_prime_family_deducible (h : Γ[p, k + 1]ᴾ ⊢ᴵ! q) : ∃ m, (Γ[p, k]ᴾ[p, m]ᴵ ⊢ᴵ! q) := by
   obtain ⟨m, hm⟩ := exists_insert_family_deducible_of_insert_family_iUnion_deducible h;
   existsi m;

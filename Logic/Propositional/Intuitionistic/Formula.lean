@@ -1,4 +1,3 @@
-import Mathlib.Tactic.Linarith
 import Logic.Logic.LogicSymbol
 
 namespace LO.Propositional.Intuitionistic
