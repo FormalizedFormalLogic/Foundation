@@ -109,8 +109,8 @@ lemma insert_family_mono (h : k ≤ m) : Γ[p, k]ᴵ ⊆ Γ[p, m]ᴵ := by
     . split;
       . split;
         . split;
-          apply Set.Subset.trans ih; aesop;
-          apply Set.Subset.trans ih; aesop;
+          apply Set.Subset.trans ih; simp;
+          apply Set.Subset.trans ih; simp;
         . simpa;
       . simpa;
     . simpa;
@@ -262,6 +262,7 @@ lemma mem_prime_family_iUnion (h : q ∈ (Γ[p, m]ᴾ)[p, k]ᴵ) : q ∈ Γ[p]�
   existsi k;
   simpa;
 
+set_option maxHeartbeats 1000000 in -- TODO: too slow
 lemma prime_family_iUnion_disjunctive : Disjunctive (Γ[p]ᴾ) := by
   intros q₁ q₂ hq;
   let k := encode (q₁ ⋎ q₂);
@@ -311,6 +312,7 @@ lemma exists_prime_family_deducible_of_prime_family_iUnion_deducible : Γ[p]ᴾ 
     | apply disj₃!;
     | apply efq!;
 
+set_option maxHeartbeats 1000000 in -- TODO: too slow
 lemma prime_family_iUnion_closed : Closed (Γ[p]ᴾ) := by
   intro q hq;
   let k := encode (p ⋎ q);
@@ -352,7 +354,7 @@ lemma prime_expansion : ∃ Ω : PrimeTheory β, (Γ ⊆ Ω.theory ∧ Ω.theory
 
 end
 
-variable [Encodable (Formula β)] -- TODO: remove
+variable [Encodable β]
 
 def CanonicalModel (β) : Kripke.Model (PrimeTheory β) β where
   frame Ω₁ Ω₂ := Ω₁ ⊆ Ω₂
@@ -407,10 +409,10 @@ lemma truthlemma {Ω : PrimeTheory β} {p : Formula β} : (Ω ⊩[(CanonicalMode
       obtain ⟨Ω', hΩ'₁, hΩ'₂⟩ := prime_expansion h₁;
       existsi Ω';
       exact ⟨
-        ihp.mpr $ axm! (by aesop),
+        ihp.mpr $ axm! (by apply hΩ'₁; simp_all;),
         Set.Subset.trans
-          (show Ω.theory ⊆ insert p Ω.theory by aesop)
-          (show insert p Ω.theory ⊆ Ω'.theory by aesop),
+          (show Ω.theory ⊆ insert p Ω.theory by simp_all)
+          (show insert p Ω.theory ⊆ Ω'.theory by simp_all),
         ihq.not.mpr hΩ'₂
       ⟩;
     . intro h;
