@@ -317,8 +317,6 @@ lemma conj₂'! {Γ : Set F} {p q : F} (d : Γ ⊢! (p ⋏ q)) : Γ ⊢! q := �
 lemma conj₃! (Γ : Set F) (p q : F) : Γ ⊢! (p ⟶ q ⟶ p ⋏ q) := ⟨conj₃ Γ p q⟩
 lemma conj₃'! {Γ : Set F} {p q : F} (d₁ : Γ ⊢! p) (d₂: Γ ⊢! q) : Γ ⊢! (p ⋏ q) := ⟨conj₃' d₁.some d₂.some⟩
 
-lemma conj_symm'! {Γ : Set F} {p q : F} (d : Γ ⊢! (p ⋏ q)) : Γ ⊢! (q ⋏ p) := ⟨conj_symm' d.some⟩
-
 lemma disj₁! (Γ : Set F) (p q : F) : Γ ⊢! (p ⟶ p ⋎ q) := ⟨disj₁ Γ p q⟩
 lemma disj₁'! {Γ : Set F} {p q : F} (d : Γ ⊢! p) : Γ ⊢! (p ⋎ q) := ⟨disj₁' d.some⟩
 

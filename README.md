@@ -18,6 +18,8 @@ https://iehality.github.io/lean4-logic/
   - [Normal Modal Logic](#normal-modal-logic)
     - [Definition](#definition-2)
     - [Theorem](#theorem-2)
+  - [Intuitionistic Propositional Logic](#intuitionistic-propositional-logic)
+    - [Kripke Semantics](#kripke-semantics)
   - [References](#references)
 
 ## Usage
@@ -209,6 +211,37 @@ In this formalization, _(Modal) Logic_ means set of axioms.
       (𝔽((𝐊 : AxiomSet β)) : FrameClass (MaximalConsistentTheory (𝐊 : AxiomSet β)))
   ```
 
+## Intuitionistic Propositional Logic
+
+### Definitions
+
+|                                   |                                            | Definition                                 |   Notation   |
+| :-------------------------------: | ------------------------------------------ | :----------------------------------------- | :----------: |
+| $\Gamma \vdash \varphi$       | Deduction　 | LO.Propositional.Intuitionistic.Deduction | `Γ ⊢ᴵ p` |
+| | Deductive (Exists deduction) | LO.Propositional.Intuitionistic.Deductive | `Γ ⊢ᴵ! p` |
+
+### Kripkean Semantics
+
+#### Defininitions
+
+|                                   |                                            | Definition                                 |   Notation   |
+| :-------------------------------: | ------------------------------------------ | :----------------------------------------- | :----------: |
+| $w \Vdash^M \varphi$       | Satisfy on Kripkean Model $M$ and its world $w$　 | LO.Propositional.Intuitionistic.Formula.KripkeSatisfies | `w ⊩[M] p` |
+| $M \vDash \varphi$        | Models                    | LO.Propositional.Intuitionistic.Formula.KripkeModels |  `M ⊧ p`  |
+| $\Gamma \models \varphi$        | Conequences                    | LO.Propositional.Intuitionistic.Formula.KripkeConsequence |  `Γ ⊨ᴵ p`  |
+
+#### Theorems
+- Soundness
+  ```lean
+  theorem Kripke.sounds {Γ : Theory β} {p : Formula β} : (Γ ⊢ᴵ! p) → (Γ ⊨ᴵ p)
+  ```
+- Completeness (Kripke completeness)
+  ```lean
+  theorem Kripke.completes
+    [DecidableEq β] [Encodable β]
+    {Γ : Theory β} {p : Formula β} : (Γ ⊨ᴵ p) → (Γ ⊢ᴵ! p)
+  ```
+
 ## References
 - J. Han, F. van Doorn, A formalization of forcing and the unprovability of the continuum hypothesis
 - W. Pohlers, Proof Theory: The First Step into Impredicativity
@@ -220,3 +253,6 @@ In this formalization, _(Modal) Logic_ means set of axioms.
 - Open Logic Project, ["The Open Logic Text"](https://builds.openlogicproject.org/)
 - R. Hakli, S. Negri, "Does the deduction theorem fail for modal logic?"
 - G. Boolos, "The Logic of Provability"
+- Huayu Guo, Dongheng Chen, Bruno Bentzen, _"Verified completeness in Henkin-style for intuitionistic propositional logic"_
+  - https://arxiv.org/abs/2310.01916
+  - https://github.com/bbentzen/ipl
