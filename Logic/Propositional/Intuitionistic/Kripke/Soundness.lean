@@ -10,7 +10,7 @@ variable {α : Type u} [Inhabited α]
 lemma Kripke.soundsAux (Γ : Theory α) (p : Formula α) (h : Γ ⊢ᴵ! p) : (Γ ⊨ᴵ p) := by
   induction h.some <;> simp [KripkeConsequence];
   case axm => simp_all [Theory.KripkeSatisfies];
-  case modus_ponens Γ p q hpq hp ihpq ihp =>
+  case modusPonens _ p q hpq hp ihpq ihp =>
     intro _ M w a;
     exact ihpq ⟨hpq⟩ M w (by intro q hq; exact a q (by simpa))
       |>.modus_ponens $ ihp ⟨hp⟩ M w (by intro q hq; exact a q (by simpa));
@@ -34,10 +34,16 @@ lemma Kripke.soundsAux (Γ : Theory α) (p : Formula α) (h : Γ ⊢ᴵ! p) : (�
 
 theorem Kripke.sounds {Γ : Theory α} {p} : (Γ ⊢ᴵ! p) → (Γ ⊨ᴵ p) := Kripke.soundsAux Γ p
 
+variable {β} [Inhabited β]
+
 theorem Deduction.consistent : ∅ ⊬ᴵ! (⊥ : Formula α) := by
   by_contra hC;
   have : ∅ ⊨ᴵ (⊥ : Formula α) := Kripke.sounds (by simpa [Undeducible] using hC);
-  have : ∅ ⊭ᴵ (⊥ : Formula α) := Kripke.bot_inconsequence
+  have : ∅ ⊭ᴵ (⊥ : Formula α) := by
+    simp [KripkeInconsequence, KripkeConsequence, Theory.KripkeSatisfies];
+    existsi β;
+    existsi default;
+    trivial;
   contradiction
 
 end LO.Propositional.Intuitionistic

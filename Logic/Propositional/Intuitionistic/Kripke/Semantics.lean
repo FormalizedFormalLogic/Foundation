@@ -72,10 +72,7 @@ lemma imp_def : (w ⊩ p ⟶ q) ↔ ∀ w', (w ≺ w') → (¬(w' ⊩ p) ∨ (w'
 
 @[simp]
 lemma imp_def' : (w ⊩ p ⟶ q) ↔ ∀ w', (w ≺ w') → (w' ⊩ p) → (w' ⊩ q) := by
-  simp [KripkeSatisfies];
-  constructor;
-  . intros h w' a; have := h w' a; tauto;
-  . intros h w' a; have := h w' a; tauto;
+  simp [KripkeSatisfies, imp_iff_not_or];
 
 lemma modus_ponens {p q} (hpq : w ⊩ p ⟶ q) (hp : w ⊩ p) : w ⊩ q := by
   have := hpq w M.frame_refl;
@@ -119,11 +116,5 @@ infix:50 " ⊨ᴵ " => Formula.KripkeConsequence
 
 abbrev Formula.KripkeInconsequence (Γ : Theory β) (p : Formula β) := ¬(Γ ⊨ᴵ p)
 infix:50 " ⊭ᴵ " => Formula.KripkeInconsequence
-
-@[simp]
-theorem Kripke.bot_inconsequence {Γ : Theory β} : Γ ⊭ᴵ ⊥ := by
-  by_contra h;
-  simp [Formula.KripkeInconsequence, Formula.KripkeConsequence] at h;
-  sorry;
 
 end LO.Propositional.Intuitionistic
