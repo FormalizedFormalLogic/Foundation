@@ -242,13 +242,13 @@ lemma iUnionPrimeFamily_disjunctive : Disjunctive (Γ[p]ᴾ) := by
   have hm₀ : (Γ[p, m]ᴾ)[p, 0]ᴵ ⊢ᴵ! q₁ ⋎ q₂ := by simpa using axm! hm;
   have hmₖ : (Γ[p, m]ᴾ)[p, k]ᴵ ⊢ᴵ! q₁ ⋎ q₂ := weakening! (insertFamily_mono (zero_le k)) hm₀;
   have h : q₁ ∈ (Γ[p, m]ᴾ)[p, k + 1]ᴵ ∨ q₂ ∈ (Γ[p, m]ᴾ)[p, k + 1]ᴵ := by
-    simp only [insertFamily, hmₖ, k, Nat.add_eq, add_zero, encodek, ↓reduceIte];
+    simp [insertFamily, hmₖ, k];
     split;
     . right; simp only [mem_insert_iff, true_or];
     . left; simp only [mem_insert_iff, true_or];
   cases h with
-  | inl h => left; apply mem_iUnionPrimeFamily h;
-  | inr h => right; apply mem_iUnionPrimeFamily h;
+  | inl h => left; apply mem_iUnionPrimeFamily (by assumption);
+  | inr h => right; apply mem_iUnionPrimeFamily (by assumption);
 
 lemma exists_primeFamily_deducible_of_iUnionPrimeFamily_deducible : Γ[p]ᴾ ⊢ᴵ! q → ∃ k, Γ[p, k]ᴾ ⊢ᴵ! q := by
   generalize e : Γ[p]ᴾ = Γ';
@@ -291,10 +291,7 @@ lemma iUnionPrimeFamily_closed : Closed (Γ[p]ᴾ) := by
   obtain ⟨m, hm⟩ := exists_primeFamily_deducible_of_iUnionPrimeFamily_deducible hpq;
   have hm₀ : (Γ[p, m]ᴾ)[p, 0]ᴵ ⊢ᴵ! p ⋎ q := by simpa only [insertFamily];
   have hmₖ : (Γ[p, m]ᴾ)[p, k]ᴵ ⊢ᴵ! p ⋎ q := weakening! (insertFamily_mono (zero_le k)) hm₀;
-  have h : q ∈ (Γ[p, m]ᴾ)[p, k + 1]ᴵ := by simp only [
-    insertFamily, axm!, hmₖ, k, Nat.add_eq, add_zero,
-    encodek, ↓reduceIte, mem_insert_iff, true_or
-  ];
+  have h : q ∈ (Γ[p, m]ᴾ)[p, k + 1]ᴵ := by simp [insertFamily, axm!, hmₖ, k];
   exact mem_iUnionPrimeFamily (by assumption);
 
 variable (hU : Γ ⊬ᴵ! p)
