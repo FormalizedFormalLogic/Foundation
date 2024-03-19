@@ -1,4 +1,3 @@
-import Logic.Propositional.Basic.Completeness
 import Logic.Modal.Normal.Deduction
 import Logic.Modal.Normal.Semantics
 

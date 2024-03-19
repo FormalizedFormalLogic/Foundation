@@ -1,5 +1,5 @@
 import Logic.AutoProver.Prover
-import Logic.Propositional.Basic
+import Logic.Propositional.Classical.Basic
 import Logic.FirstOrder.Arith.Basic
 
 namespace LO

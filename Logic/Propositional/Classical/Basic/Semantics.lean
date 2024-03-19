@@ -1,9 +1,9 @@
-import Logic.Propositional.Basic.Formula
+import Logic.Propositional.Classical.Basic.Formula
 import Logic.Logic.System
 
 namespace LO
 
-namespace Propositional
+namespace Propositional.Classical
 
 variable {α : Type*}
 
@@ -53,6 +53,6 @@ variable {v : α → Prop}
 
 end Formula
 
-end Propositional
+end Propositional.Classical
 
 end LO

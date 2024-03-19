@@ -19,7 +19,10 @@ https://iehality.github.io/lean4-logic/
     - [Definition](#definition-2)
     - [Theorem](#theorem-2)
   - [Intuitionistic Propositional Logic](#intuitionistic-propositional-logic)
-    - [Kripke Semantics](#kripke-semantics)
+    - [Definitions](#definitions)
+    - [Kripkean Semantics](#kripkean-semantics)
+      - [Defininitions](#defininitions)
+      - [Theorems](#theorems)
   - [References](#references)
 
 ## Usage
@@ -37,16 +40,16 @@ The key results are summarised in `Logic/Summary.lean`.
   - **Logic**
   - **AutoProver**: Automated theorem proving based on proof search
   - **Propositional**: Propositional logic
-    - **Basic**
-  - **ManySorted**: Many-sorted logic
-    - **Basic**
+    - **Classical**: Classical propositional logic
+      - **Basic**
+    - **Intuitionistic**: Intuitionistic propositional logic
+      - **Kriple**: Kripke semantics
   - **FirstOrder**: First-order logic
     - **Basic**
     - **Computability**: encodeing, computability
     - **Completeness**: Completeness theorem
     - **Arith**: Arithmetic
     - **Incompleteness**: Incompleteness theorem
-  - **SecondOrder**: Monadic second-order logic
   - **Modal**: Variants of modal logics
     - **Normal**: Normal propositional modal logic
 
@@ -56,23 +59,23 @@ The key results are summarised in `Logic/Summary.lean`.
 
 |                                     |                                     | Definition                    | Notation |
 | :----:                              | ----                                | ----                          | :----:   |
-| $(\rm Cut)\vdash_\mathrm{T} \Gamma$ | Derivation in Tait-Calculus + Cut   | [LO.Propositional.Derivation](https://iehality.github.io/lean4-logic/Logic/Propositional/Basic/Calculus.html#LO.Propositional.Derivation) | `⊢¹ Γ`   |
-| $v \models p$                       | Tarski's truth definition condition | [LO.Propositional.semantics](https://iehality.github.io/lean4-logic/Logic/Propositional/Basic/Semantics.html#LO.Propositional.semantics) | `v ⊧ p`  |
+| $(\rm Cut)\vdash_\mathrm{T} \Gamma$ | Derivation in Tait-Calculus + Cut   | [LO.Propositional.Classical.Derivation](https://iehality.github.io/lean4-logic/Logic/Propositional/Classical/Basic/Calculus.html#LO.Propositional.Classical.Derivation) | `⊢¹ Γ`   |
+| $v \models p$                       | Tarski's truth definition condition | [LO.Propositional.Classical.semantics](https://iehality.github.io/lean4-logic/Logic/Propositional/Classical/Basic/Semantics.html#LO.Propositional.Classical.semantics) | `v ⊧ p`  |
 
 ### Theorem
 
-- [Soundness theorem](https://iehality.github.io/lean4-logic/Logic/Propositional/Basic/Completeness.html#LO.Propositional.soundness)
+- [Soundness theorem](https://iehality.github.io/lean4-logic/Logic/Propositional/Classical/Basic/Completeness.html#LO.Propositional.Classical.soundness)
   ```lean
-  theorem LO.Propositional.soundness
+  theorem LO.Propositional.Classical.soundness
     {α : Type u_1}
     {T : LO.Propositional.Theory α}
     {p : LO.Propositional.Formula α} :
     T ⊢ p → T ⊨ p
   ```
 
-- [Completeness theorem](https://iehality.github.io/lean4-logic/Logic/Propositional/Basic/Completeness.html#LO.Propositional.completeness)
+- [Completeness theorem](https://iehality.github.io/lean4-logic/Logic/Propositional/Classical/Basic/Completeness.html#LO.Propositional.Classical.completeness)
   ```lean
-  noncomputable def LO.Propositional.completeness
+  noncomputable def LO.Propositional.Classical.completeness
       {α : Type u_1}
       {T : LO.Propositional.Theory α}
       {p : LO.Propositional.Formula α} :

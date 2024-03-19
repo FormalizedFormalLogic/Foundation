@@ -2,7 +2,7 @@ import Logic.Logic.LogicSymbol
 
 namespace LO
 
-namespace Propositional
+namespace Propositional.Classical
 
 inductive Formula (α : Type u) : Type u where
   | verum  : Formula α
@@ -193,6 +193,6 @@ end Formula
 
 abbrev Theory (α : Type*) := Set (Formula α)
 
-end Propositional
+end Propositional.Classical
 
 end LO

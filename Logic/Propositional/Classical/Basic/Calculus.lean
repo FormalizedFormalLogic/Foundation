@@ -1,9 +1,9 @@
-import Logic.Propositional.Basic.Formula
+import Logic.Propositional.Classical.Basic.Formula
 import Logic.Logic.Calculus
 
 namespace LO
 
-namespace Propositional
+namespace Propositional.Classical
 
 variable {α : Type*}
 
@@ -69,6 +69,6 @@ instance : Tait (Formula α) where
 
 instance : Tait.Cut (Formula α) := ⟨Derivation.cut⟩
 
-end Propositional
+end Propositional.Classical
 
 end LO
