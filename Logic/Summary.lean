@@ -1,4 +1,4 @@
-import Logic.Propositional.Basic
+import Logic.Propositional.Classical.Basic
 import Logic.FirstOrder.Hauptsatz
 import Logic.FirstOrder.Completeness.Completeness
 import Logic.FirstOrder.Incompleteness.FirstIncompleteness
@@ -7,21 +7,25 @@ import Logic.Modal.Normal.Completeness
 namespace LO.Summary
 
 namespace Propositional
-open LO.Propositional
 
-variable {α : Type*} {T : LO.Propositional.Theory α}
+namespace Classical
+open LO.Propositional.Classical
+
+variable {α : Type*} {T : LO.Propositional.Classical.Theory α}
 
 /-- Soundness theorem -/
-noncomputable example {p : LO.Propositional.Formula α} :
+noncomputable example {p : LO.Propositional.Classical.Formula α} :
   T ⊢ p → T ⊨ p := soundness
 
 #print axioms soundness
 
 /-- Completeness theorem -/
-noncomputable example {p : LO.Propositional.Formula α} :
+noncomputable example {p : LO.Propositional.Classical.Formula α} :
   T ⊨ p → T ⊢ p := completeness
 
 #print axioms completeness
+
+end Classical
 
 end Propositional
 
