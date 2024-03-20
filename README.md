@@ -247,12 +247,6 @@ In this formalization, _(Modal) Logic_ means set of axioms.
     [DecidableEq β] [Encodable β]
     {p q : Formula β} : (∅ ⊢ᴵ! p ⋎ q) → (∅ ⊢ᴵ! p) ∨ (∅ ⊢ᴵ! q)
   ```
-- [Disjunction Property](https://iehality.github.io/lean4-logic/Logic/Propositional/Intuitionistic/Kripke/Completeness.html#LO.Propositional.Intuitionistic.Deduction.disjunctive)
-  ```lean
-  theorem Deduction.disjunctive
-    [DecidableEq β] [Encodable β]
-    {p q : Formula β} : (∅ ⊢ᴵ! p ⋎ q) → (∅ ⊢ᴵ! p) ∨ (∅ ⊢ᴵ! q)
-  ```
 
 ## References
 - J. Han, F. van Doorn, A formalization of forcing and the unprovability of the continuum hypothesis
