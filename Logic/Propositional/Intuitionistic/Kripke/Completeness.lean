@@ -8,6 +8,7 @@
 -/
 import Logic.Propositional.Intuitionistic.Deduction
 import Logic.Propositional.Intuitionistic.Kripke.Semantics
+import Logic.Propositional.Intuitionistic.Kripke.Soundness
 
 namespace LO.Propositional.Intuitionistic
 
@@ -405,5 +406,147 @@ theorem Kripke.completes {Γ : Theory β} {p : Formula β} : (Γ ⊨ᴵ p) → (
     exact truthlemma.mpr ⟨(Deduction.axm (hsΩ hq))⟩;
   );
   contradiction;
+
+section DisjProp
+
+def DPCounterModel (M₁ : Kripke.Model γ₁ β) (M₂ : Kripke.Model γ₂ β) (w₁ : γ₁) (w₂ : γ₂) : Kripke.Model (Unit ⊕ γ₁ ⊕ γ₂) β where
+  frame w v :=
+    match w, v with
+    | (Sum.inl _), (Sum.inl _) => True
+    | (Sum.inl _), (Sum.inr $ Sum.inl v) => M₁.frame w₁ v
+    | (Sum.inl _), (Sum.inr $ Sum.inr v) => M₂.frame w₂ v
+    | (Sum.inr $ Sum.inl w), (Sum.inr $ Sum.inl v) => M₁.frame w v
+    | (Sum.inr $ Sum.inr w), (Sum.inr $ Sum.inr v) => M₂.frame w v
+    | _, _ => False
+  val w a :=
+    match w with
+    | Sum.inr $ Sum.inl w => M₁.val w a
+    | Sum.inr $ Sum.inr w => M₂.val w a
+    | _ => False
+  refl := by
+    simp only [Reflexive, Sum.forall, forall_const, true_and];
+    constructor <;> { intros; rfl };
+  trans := by
+    simp only [Transitive, Sum.forall, forall_true_left, imp_self, forall_const, true_and, IsEmpty.forall_iff, implies_true, and_true, and_self, imp_false];
+    constructor;
+    . constructor;
+      . intros; apply M₁.trans (by assumption) (by assumption);
+      . intros; apply M₂.trans (by assumption) (by assumption);
+    . constructor;
+      . intros; apply M₁.trans (by assumption) (by assumption);
+      . intros; apply M₂.trans (by assumption) (by assumption);
+  herditary := by
+    simp only [Sum.forall, imp_false, not_false_eq_true, implies_true, forall_true_left, forall_const, IsEmpty.forall_iff, and_self, true_and, and_true];
+    constructor;
+    . intro _ _; apply M₁.herditary;
+    . intro _ _; apply M₂.herditary;
+
+variable {M₁ : Kripke.Model γ₁ β} {M₂ : Kripke.Model γ₂ β}
+
+lemma DPCounterModel_left {p : Formula β} : (w ⊩[M₁] p) ↔ (Sum.inr $ Sum.inl w) ⊩[DPCounterModel M₁ M₂ w₁ w₂] p := by
+  induction p using rec' generalizing w with
+  | hfalsum => simp;
+  | hatom a => simp [DPCounterModel];
+  | hor p₁ p₂ ih₁ ih₂ =>
+    constructor;
+    . intro h;
+      cases h with
+      | inl h => left; apply ih₁.mp h;
+      | inr h => right; apply ih₂.mp h;
+    . intro h;
+      cases h with
+      | inl h => left; apply ih₁.mpr h;
+      | inr h => right; apply ih₂.mpr h;
+  | hand p₁ p₂ ih₁ ih₂ =>
+    simp only [KripkeSatisfies.and_def, not_and_or]
+    constructor;
+    . intro h;
+      constructor;
+      . exact ih₁.mp h.1;
+      . exact ih₂.mp h.2;
+    . intro h;
+      constructor;
+      . exact ih₁.mpr h.1;
+      . exact ih₂.mpr h.2;
+  | himp p₁ p₂ ih₁ ih₂ =>
+    constructor;
+    . simp only [KripkeSatisfies.imp_def'];
+      intro h v hv hp₁;
+      replace ⟨v, hv, hv'⟩ : ∃ v', M₁.frame w v' ∧ v = (Sum.inr (Sum.inl v')) := by
+        simp [DPCounterModel] at hv;
+        split at hv;
+        all_goals simp_all;
+      subst hv';
+      have := ih₁.mpr (by simpa using hp₁);
+      have := h v hv this;
+      exact ih₂.mp this;
+    . simp only [KripkeSatisfies.imp_def'];
+      intro h v hv hp₁;
+      have := ih₁.mp hp₁;
+      have := h (Sum.inr $ Sum.inl v) (by simpa [DPCounterModel]) this;
+      exact ih₂.mpr this;
+
+lemma DPCounterModel_right {p : Formula β} : (w ⊩[M₂] p) ↔ (Sum.inr $ Sum.inr w) ⊩[DPCounterModel M₁ M₂ w₁ w₂] p := by
+  induction p using rec' generalizing w with
+  | hfalsum => simp;
+  | hatom a => simp [DPCounterModel];
+  | hor p₁ p₂ ih₁ ih₂ =>
+    constructor;
+    . intro h;
+      cases h with
+      | inl h => left; apply ih₁.mp h;
+      | inr h => right; apply ih₂.mp h;
+    . intro h;
+      cases h with
+      | inl h => left; apply ih₁.mpr h;
+      | inr h => right; apply ih₂.mpr h;
+  | hand p₁ p₂ ih₁ ih₂ =>
+    simp only [KripkeSatisfies.and_def, not_and_or]
+    constructor;
+    . intro h;
+      constructor;
+      . exact ih₁.mp h.1;
+      . exact ih₂.mp h.2;
+    . intro h;
+      constructor;
+      . exact ih₁.mpr h.1;
+      . exact ih₂.mpr h.2;
+  | himp p₁ p₂ ih₁ ih₂ =>
+    constructor;
+    . simp only [KripkeSatisfies.imp_def'];
+      intro h v hv hp₂;
+      replace ⟨v, hv, hv'⟩ : ∃ v', M₂.frame w v' ∧ v = (Sum.inr (Sum.inr v')) := by
+        simp [DPCounterModel] at hv;
+        split at hv;
+        all_goals simp_all;
+      subst hv';
+      have := ih₁.mpr (by simpa using hp₂);
+      have := h v hv this;
+      exact ih₂.mp this;
+    . simp only [KripkeSatisfies.imp_def'];
+      intro h v hv hp₁;
+      have := ih₁.mp hp₁;
+      have := h (Sum.inr $ Sum.inr v) (by simpa [DPCounterModel]) this;
+      exact ih₂.mpr this;
+
+theorem Deduction.disjunctive {p q : Formula β} : (∅ ⊢ᴵ! p ⋎ q) → (∅ ⊢ᴵ! p) ∨ (∅ ⊢ᴵ! q) := by
+  contrapose;
+  intro h;
+  apply not_imp_not.mpr Kripke.sounds;
+
+  have ⟨(hp : ∅ ⊬ᴵ! p), (hq : ∅ ⊬ᴵ! q)⟩ := not_or.mp h;
+  obtain ⟨γ₁, M₁, w₁, ⟨_, hp⟩⟩ := by simpa [Formula.KripkeConsequence] using not_imp_not.mpr Kripke.completes hp;
+  obtain ⟨γ₂, M₂, w₂, ⟨_, hq⟩⟩ := by simpa [Formula.KripkeConsequence] using not_imp_not.mpr Kripke.completes hq;
+  let M : Kripke.Model (Unit ⊕ γ₁ ⊕ γ₂) β := DPCounterModel M₁ M₂ w₁ w₂;
+
+  simp [Formula.KripkeConsequence, Theory.KripkeSatisfies];
+  existsi _, M, Sum.inl ();
+
+  have : ¬Sum.inl () ⊩[M] p := not_imp_not.mpr (Kripke.herditary_formula (by simp [M]; rfl)) (DPCounterModel_left.not.mp hp)
+  have : ¬Sum.inl () ⊩[M] q := not_imp_not.mpr (Kripke.herditary_formula (by simp [M]; rfl)) (DPCounterModel_right.not.mp hq)
+
+  simp_all only [or_self, not_false_eq_true]
+
+end DisjProp
 
 end LO.Propositional.Intuitionistic

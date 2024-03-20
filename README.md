@@ -231,15 +231,27 @@ In this formalization, _(Modal) Logic_ means set of axioms.
 | $\Gamma \models \varphi$        | Conequences                    | LO.Propositional.Intuitionistic.Formula.KripkeConsequence |  `Γ ⊨ᴵ p`  |
 
 #### Theorems
-- Soundness
+- [Soundness](https://iehality.github.io/lean4-logic/Logic/Propositional/Intuitionistic/Kripke/Soundness.html#LO.Propositional.Intuitionistic.Kripke.sounds)
   ```lean
   theorem Kripke.sounds {Γ : Theory β} {p : Formula β} : (Γ ⊢ᴵ! p) → (Γ ⊨ᴵ p)
   ```
-- Completeness (Kripke completeness)
+- [Completeness](https://iehality.github.io/lean4-logic/Logic/Propositional/Intuitionistic/Kripke/Completeness.html#LO.Propositional.Intuitionistic.Kripke.completes)
   ```lean
   theorem Kripke.completes
     [DecidableEq β] [Encodable β]
     {Γ : Theory β} {p : Formula β} : (Γ ⊨ᴵ p) → (Γ ⊢ᴵ! p)
+  ```
+- [Disjunction Property](https://iehality.github.io/lean4-logic/Logic/Propositional/Intuitionistic/Kripke/Completeness.html#LO.Propositional.Intuitionistic.Deduction.disjunctive)
+  ```lean
+  theorem Deduction.disjunctive
+    [DecidableEq β] [Encodable β]
+    {p q : Formula β} : (∅ ⊢ᴵ! p ⋎ q) → (∅ ⊢ᴵ! p) ∨ (∅ ⊢ᴵ! q)
+  ```
+- [Disjunction Property](https://iehality.github.io/lean4-logic/Logic/Propositional/Intuitionistic/Kripke/Completeness.html#LO.Propositional.Intuitionistic.Deduction.disjunctive)
+  ```lean
+  theorem Deduction.disjunctive
+    [DecidableEq β] [Encodable β]
+    {p q : Formula β} : (∅ ⊢ᴵ! p ⋎ q) → (∅ ⊢ᴵ! p) ∨ (∅ ⊢ᴵ! q)
   ```
 
 ## References
