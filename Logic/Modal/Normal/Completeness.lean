@@ -305,9 +305,11 @@ variable (hK : 𝐊 ⊆ Λ)
 
 open MaximalConsistentTheory
 
+/-
 lemma MaximalConsistentTheory.inhabited (h : AxiomSet.Consistent Λ) : Inhabited (MaximalConsistentTheory Λ) := ⟨
-  exists_maximal_consistent_theory (by simp [Theory.Consistent, Theory.Inconsistent]; exact h) |>.choose
+  exists_maximal_consistent_theory (by simp only [Theory.Consistent, Theory.Inconsistent];) |>.choose
 ⟩
+-/
 
 lemma mct_mem_box_iff {Ω : MaximalConsistentTheory Λ} {p : Formula β} : (□p ∈ Ω) ↔ (∀ (Ω' : MaximalConsistentTheory Λ), (□⁻¹Ω ⊆ Ω'.theory) → (p ∈ Ω')) := by
   have := Deduction.instBoxedNecessitation hK;

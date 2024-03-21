@@ -269,10 +269,23 @@ notation Γ " ⊭ᴹ[" 𝔽 "] " p => ¬(Γ ⊨ᴹ[𝔽] p)
 
 namespace Formula.FrameClassConsequence
 
-lemma modus_ponens' {𝔽 : FrameClass α} {Γ : Theory β} {p : Formula β} : (Γ ⊨ᴹ[𝔽] p ⟶ q) → (Γ ⊨ᴹ[𝔽] p) → (Γ ⊨ᴹ[𝔽] q) := by
+variable  {𝔽 : FrameClass α} {Γ Δ : Theory β} {p : Formula β}
+
+lemma modus_ponens' : (Γ ⊨ᴹ[𝔽] p ⟶ q) → (Γ ⊨ᴹ[𝔽] p) → (Γ ⊨ᴹ[𝔽] q) := by
   simp [Formula.FrameClassConsequence];
   intro hpq hp F hF;
   exact (hpq F hF).modus_ponens' (hp F hF);
+
+lemma weakening (hΓΔ : Γ ⊆ Δ) : (Γ ⊨ᴹ[𝔽] p) → (Δ ⊨ᴹ[𝔽] p) := by
+  intro h F hF V w hΔ;
+  apply h F hF V w;
+  intro p hp;
+  exact hΔ p (hΓΔ hp);
+
+lemma necessitation (Γ : Theory β) : (∅ ⊨ᴹ[𝔽] p) → (Γ ⊨ᴹ[𝔽] □p) := by
+  intro h F hF V w _;
+  have := h F hF V w (by simp);
+  aesop;
 
 end Formula.FrameClassConsequence
 

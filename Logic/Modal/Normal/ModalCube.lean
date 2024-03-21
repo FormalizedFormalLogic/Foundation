@@ -42,7 +42,7 @@ lemma consequence : (Γ ⊨ᴹ[(𝔽(Λ₁) : FrameClass α)] p) → (Γ ⊨ᴹ[
 
 lemma deducible (hComp : Completeness Λ₂ (𝔽(Λ₂) : FrameClass α)) (hd : Γ ⊢ᴹ[Λ₁]! p) : Γ ⊢ᴹ[Λ₂]! p := by
   apply hComp;
-  exact consequence hS $ AxiomSet.ssounds hd;
+  exact consequence hS $ AxiomSet.sounds hd;
 
 end LogicalStrong
 

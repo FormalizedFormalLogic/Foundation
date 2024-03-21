@@ -200,45 +200,7 @@ lemma compact {Γ p} (d : Γ ⊢ᴹ[Λ]! p) : ∃ (Δ : Context α), ↑Δ ⊆ �
   . simpa using hΔ;
   . exact ⟨dΔ⟩
 
-lemma dtr_strong {Δ : Context α} {p : Formula α} : (↑Δ ⊢ᴹ[Λ]! p) → (∅ ⊢ᴹ[Λ]! Δ.conj ⟶ p) := by
-  intro d;
-  induction Δ using Finset.induction_on generalizing p with
-  | empty => exact imply₁'! (by simpa using d)
-  | @insert q Δ h ih => sorry;
-
 end Deducible
-
--- TODO: 直接有限モデルを構成する方法（鹿島『コンピュータサイエンスにおける様相論理』2.8参照）で必要になる筈の定義だが，使わないかも知れない．
-/-
-section
-
-variable [IsCommutative _ (λ (p q : Formula α) => p ⋏ q)]
-         [IsCommutative _ (λ (p q : Formula α) => p ⋎ q)]
-         [IsAssociative _ (λ (p q : Formula α) => p ⋏ q)]
-         [IsAssociative _ (λ (p q : Formula α) => p ⋎ q)]
-
-def Sequent (Γ Δ : (Theory α)) : Formula α := ((Γ.fold (· ⋏ ·) ⊤ id) ⟶ (Δ.fold (· ⋎ ·) ⊥ id))
-
-notation "⟪" Γ "⟹" Δ "⟫" => Sequent Γ Δ
-
-notation "⟪" "⟹" Δ "⟫" => Sequent ∅ Δ
-
-notation "⟪" Γ "⟹" "⟫" => Sequent Γ ∅
-
-def ProofS (Γ Δ : (Theory α)) := ⊢ᴹ[Λ] ⟪Γ ⟹ Δ⟫
-
-variable [Union ((Theory α))] [Inter ((Theory α))]
-variable (Γ₁ Γ₂ Δ : (Theory α))
-
-structure Partial where
-  union : (Γ₁ ∪ Γ₂) = Δ
-  inter : (Γ₁ ∩ Γ₂) = ∅
-
-structure UnprovablePartial extends Partial Γ₁ Γ₂ Δ where
-  unprovable := ⊬ᴹ[Λ]! ⟪Γ₁ ⟹ Γ₂⟫
-
-end
--/
 
 variable [DecidableEq α]
 
@@ -446,23 +408,6 @@ lemma box (h : p ⟷[Λ, ∅] q) : ((□p) ⟷[Λ, Γ] (□q)) := by
   . have d₁ : Γ ⊢ᴹ[Λ]! □(q ⟶ p) := necessitation! (iff_mpr'! h);
     have d₂ : Γ ⊢ᴹ[Λ]! □(q ⟶ p) ⟶ (□q ⟶ □p) := Hilbert.AxiomK! Γ q p;
     exact modus_ponens'! d₂ d₁;
-
-example {p : Formula α} {s : Context α} (d : Γ ⊢ᴹ[Λ]! (insert p s).conj) : Γ ⊢ᴹ[Λ]! p := by
-  induction s using Finset.induction with
-  | empty => simp [Finset.conj] at d; exact conj₁'! d;
-  | @insert q s h ih => sorry;
-
-lemma conjContext_insert {s : Context α} {p : Formula α} : (insert p s).conj ⟷[Λ, Γ] (p ⋏ s.conj) := by
-  simp_all only [DeducibleEquivalent];
-  induction s using Finset.induction with
-  | empty => simp [Finset.conj]; apply and (by rfl) (by rfl);
-  | @insert q s h ih => sorry;
-
-lemma disjContext_insert {s : Context α} {p : Formula α} : (insert p s).disj ⟷[Λ, Γ] (p ⋎ s.disj) := by
-  simp_all only [DeducibleEquivalent];
-  induction s using Finset.induction with
-  | empty => simp [Finset.disj]; apply or (by rfl) (by rfl);
-  | @insert q s h ih => sorry;
 
 end DeducibleEquivalent
 
