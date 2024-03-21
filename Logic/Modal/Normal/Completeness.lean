@@ -1,5 +1,6 @@
 import Logic.Modal.Normal.Deduction
 import Logic.Modal.Normal.Semantics
+import Logic.Modal.Normal.Soundness
 
 namespace LO.Modal.Normal
 
@@ -18,7 +19,7 @@ variable (Λ : AxiomSet β) (Γ : Theory β)
 
 def Theory.Maximal := ∀ p, (p ∈ Γ) ∨ (~p ∈ Γ)
 
-def WeakCompleteness := ∀ (p : Formula β), (⊧ᴹ[(𝔽(Λ) : FrameClass α)] p) → (⊢ᴹ[Λ]! p)
+-- def WeakCompleteness := ∀ (p : Formula β), (⊧ᴹ[(𝔽(Λ) : FrameClass α)] p) → (∅ ⊢ᴹ[Λ]! p)
 
 def Completeness (𝔽 : FrameClass α) := ∀ (Γ : Theory β) (p : Formula β), (Γ ⊨ᴹ[𝔽] p) → (Γ ⊢ᴹ[Λ]! p)
 
@@ -300,9 +301,15 @@ lemma exists_maximal_consistent_theory : ∃ (Ω : MaximalConsistentTheory Λ), 
 
 end Lindenbaum
 
+variable (hK : 𝐊 ⊆ Λ)
+
 open MaximalConsistentTheory
 
-variable (hK : 𝐊 ⊆ Λ)
+/-
+lemma MaximalConsistentTheory.inhabited (h : AxiomSet.Consistent Λ) : Inhabited (MaximalConsistentTheory Λ) := ⟨
+  exists_maximal_consistent_theory (by simp only [Theory.Consistent, Theory.Inconsistent];) |>.choose
+⟩
+-/
 
 lemma mct_mem_box_iff {Ω : MaximalConsistentTheory Λ} {p : Formula β} : (□p ∈ Ω) ↔ (∀ (Ω' : MaximalConsistentTheory Λ), (□⁻¹Ω ⊆ Ω'.theory) → (p ∈ Ω')) := by
   have := Deduction.instBoxedNecessitation hK;

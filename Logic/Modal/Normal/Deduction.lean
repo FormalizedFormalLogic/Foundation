@@ -42,15 +42,6 @@ notation:45 Γ " ⊢ᴹ[" Λ "]! " p => Deducible Λ Γ p
 abbrev Undeducible := ¬(Γ ⊢ᴹ[Λ]! p)
 notation:45 Γ " ⊬ᴹ[" Λ "]! " p => Undeducible Λ Γ p
 
-abbrev Proof := ∅ ⊢ᴹ[Λ] p
-notation:45 "⊢ᴹ[" Λ "] " p => Proof Λ p
-
-abbrev Provable := Nonempty (⊢ᴹ[Λ] p)
-notation:45 "⊢ᴹ[" Λ "]! " p => Provable Λ p
-
-abbrev Unprovable := IsEmpty (⊢ᴹ[Λ] p)
-notation:45 "⊬ᴹ[" Λ "]! " p => Unprovable Λ p
-
 abbrev Theory.Consistent := Deduction.Consistent (@Deduction α Λ) Γ
 abbrev Theory.Inconsistent := Deduction.Inconsistent (@Deduction α Λ) Γ
 
@@ -210,52 +201,6 @@ lemma compact {Γ p} (d : Γ ⊢ᴹ[Λ]! p) : ∃ (Δ : Context α), ↑Δ ⊆ �
 
 end Deducible
 
-def Proof.length (d : ⊢ᴹ[Λ] p) : ℕ := Deduction.length (by simpa using d)
-
-lemma Provable.dne : (⊢ᴹ[Λ]! ~~p) → (⊢ᴹ[Λ]! p) := by
-  intro d;
-  have h₁ : ⊢ᴹ[Λ] ~~p ⟶ p := Deduction.dne ∅ p;
-  have h₂ := d.some; simp [Proof, Deduction] at h₂;
-  simp_all [Provable, Proof, Deduction];
-  exact ⟨(Deduction.modus_ponens' h₁ h₂)⟩
-
-lemma Provable.consistent_no_bot : (⊬ᴹ[Λ]! ⊥) → (⊥ ∉ Λ) := by
-  intro h; by_contra hC;
-  have : ⊢ᴹ[Λ]! ⊥ := ⟨Deduction.maxm hC⟩;
-  aesop;
-
--- TODO: 直接有限モデルを構成する方法（鹿島『コンピュータサイエンスにおける様相論理』2.8参照）で必要になる筈の定義だが，使わないかも知れない．
-/-
-section
-
-variable [IsCommutative _ (λ (p q : Formula α) => p ⋏ q)]
-         [IsCommutative _ (λ (p q : Formula α) => p ⋎ q)]
-         [IsAssociative _ (λ (p q : Formula α) => p ⋏ q)]
-         [IsAssociative _ (λ (p q : Formula α) => p ⋎ q)]
-
-def Sequent (Γ Δ : (Theory α)) : Formula α := ((Γ.fold (· ⋏ ·) ⊤ id) ⟶ (Δ.fold (· ⋎ ·) ⊥ id))
-
-notation "⟪" Γ "⟹" Δ "⟫" => Sequent Γ Δ
-
-notation "⟪" "⟹" Δ "⟫" => Sequent ∅ Δ
-
-notation "⟪" Γ "⟹" "⟫" => Sequent Γ ∅
-
-def ProofS (Γ Δ : (Theory α)) := ⊢ᴹ[Λ] ⟪Γ ⟹ Δ⟫
-
-variable [Union ((Theory α))] [Inter ((Theory α))]
-variable (Γ₁ Γ₂ Δ : (Theory α))
-
-structure Partial where
-  union : (Γ₁ ∪ Γ₂) = Δ
-  inter : (Γ₁ ∩ Γ₂) = ∅
-
-structure UnprovablePartial extends Partial Γ₁ Γ₂ Δ where
-  unprovable := ⊬ᴹ[Λ]! ⟪Γ₁ ⟹ Γ₂⟫
-
-end
--/
-
 variable [DecidableEq α]
 
 open Deduction Hilbert
@@ -327,6 +272,144 @@ def Deduction.ofS5Subset (_ : 𝐒𝟓 ⊆ Λ) : (Hilbert.S5 (Deduction (Λ : Ax
 
 instance : Hilbert.S5 (Deduction (𝐒𝟓 : AxiomSet α)) := Deduction.ofS5Subset 𝐒𝟓 (by rfl)
 -/
+
+namespace Formula
+
+open LO.Hilbert
+
+def DeducibleEquivalent (Λ : AxiomSet α) (Γ : Theory α) (p q : Formula α) : Prop := Γ ⊢ᴹ[Λ]! (p ⟷ q)
+notation p:80 " ⟷[" Λ "," Γ "] " q:80 => DeducibleEquivalent Λ Γ p q
+
+namespace DeducibleEquivalent
+
+variable {Λ : AxiomSet α} {Γ : Theory α} {p q r : Formula α}
+
+@[refl]
+protected lemma refl : p ⟷[Λ, Γ] p := by
+  simp [DeducibleEquivalent];
+  apply iff_intro!;
+  all_goals apply imp_id!
+
+@[symm]
+protected lemma symm : (p ⟷[Λ, Γ] q) → (q ⟷[Λ, Γ] p) := by
+  simp only [DeducibleEquivalent];
+  intro dpq;
+  exact iff_symm'! dpq;
+
+@[trans]
+protected lemma trans : (p ⟷[Λ, Γ] q) → (q ⟷[Λ, Γ] r) → (p ⟷[Λ, Γ] r) := by
+  simp only [DeducibleEquivalent];
+  intro dpq dqr;
+  apply iff_intro!;
+  . exact imp_trans'! (iff_mp'! dpq) (iff_mp'! dqr);
+  . exact imp_trans'! (iff_mpr'! dqr) (iff_mpr'! dpq);
+
+instance : IsEquiv (Formula α) (· ⟷[Λ, Γ] ·) where
+  refl := by apply DeducibleEquivalent.refl
+  symm := by apply DeducibleEquivalent.symm
+  trans := by apply DeducibleEquivalent.trans
+
+@[simp]
+lemma tauto : p ⟷[Λ, Γ] p := by simp [DeducibleEquivalent]; apply iff_intro!; all_goals apply imp_id!
+
+lemma _root_.Set.subset_insert_insert {α} {s : Set α} {a b} : s ⊆ insert a (insert b s) := by
+  have h₁ := Set.subset_insert a s;
+  have h₂ : (insert a s) ⊆ (insert a (insert b s)) := Set.insert_subset_insert (by simp);
+  exact subset_trans h₁ h₂
+
+lemma or (hp : p₁ ⟷[Λ, Γ] p₂) (hq : q₁ ⟷[Λ, Γ] q₂) : ((p₁ ⋎ q₁) ⟷[Λ, Γ] (p₂ ⋎ q₂)) := by
+  simp_all only [DeducibleEquivalent];
+  apply iff_intro!
+  . apply dtr!;
+    exact disj₃'!
+      (by
+        apply dtr!;
+        have d₁ : (insert p₁ (insert (p₁ ⋎ q₁) Γ)) ⊢ᴹ[Λ]! p₁ := axm! (by simp);
+        have d₂ : (insert p₁ (insert (p₁ ⋎ q₁) Γ)) ⊢ᴹ[Λ]! p₁ ⟶ p₂ := weakening! Set.subset_insert_insert (iff_mp'! hp);
+        exact disj₁'! $ modus_ponens'! d₂ d₁;
+      )
+      (by
+        apply dtr!;
+        have d₁ : (insert q₁ (insert (p₁ ⋎ q₁) Γ)) ⊢ᴹ[Λ]! q₁ := axm! (by simp);
+        have d₂ : (insert q₁ (insert (p₁ ⋎ q₁) Γ)) ⊢ᴹ[Λ]! q₁ ⟶ q₂ := weakening! Set.subset_insert_insert (iff_mp'! hq);
+        exact disj₂'! $ modus_ponens'! d₂ d₁;
+      )
+      (show insert (p₁ ⋎ q₁) Γ ⊢ᴹ[Λ]! (p₁ ⋎ q₁) by exact axm! (by simp));
+  . apply dtr!;
+    exact disj₃'!
+      (by
+        apply dtr!;
+        have d₁ : (insert p₂ (insert (p₂ ⋎ q₂) Γ)) ⊢ᴹ[Λ]! p₂ := axm! (by simp);
+        have d₂ : (insert p₂ (insert (p₂ ⋎ q₂) Γ)) ⊢ᴹ[Λ]! p₂ ⟶ p₁ := weakening! Set.subset_insert_insert (iff_mpr'! hp);
+        exact disj₁'! $ modus_ponens'! d₂ d₁;
+      )
+      (by
+        apply dtr!;
+        have d₁ : (insert q₂ (insert (p₂ ⋎ q₂) Γ)) ⊢ᴹ[Λ]! q₂ := axm! (by simp);
+        have d₂ : (insert q₂ (insert (p₂ ⋎ q₂) Γ)) ⊢ᴹ[Λ]! q₂ ⟶ q₁ := weakening! Set.subset_insert_insert (iff_mpr'! hq);
+        exact disj₂'! $ modus_ponens'! d₂ d₁;
+      )
+      (show insert (p₂ ⋎ q₂) Γ ⊢ᴹ[Λ]! (p₂ ⋎ q₂) by exact axm! (by simp));
+
+lemma and (hp : p₁ ⟷[Λ, Γ] p₂) (hq : q₁ ⟷[Λ, Γ] q₂) : ((p₁ ⋏ q₁) ⟷[Λ, Γ] (p₂ ⋏ q₂)) := by
+  simp_all only [DeducibleEquivalent];
+  apply iff_intro!;
+  . apply dtr!;
+    have d : insert (p₁ ⋏ q₁) Γ ⊢ᴹ[Λ]!(p₁ ⋏ q₁) := axm! (by simp)
+    exact conj₃'!
+      (modus_ponens'! (weakening! (by simp) $ iff_mp'! hp) (conj₁'! d))
+      (modus_ponens'! (weakening! (by simp) $ iff_mp'! hq) (conj₂'! d));
+  . apply dtr!;
+    have d : insert (p₂ ⋏ q₂) Γ ⊢ᴹ[Λ]!(p₂ ⋏ q₂) := axm! (by simp)
+    exact conj₃'!
+      (modus_ponens'! (weakening! (by simp) $ iff_mpr'! hp) (conj₁'! d))
+      (modus_ponens'! (weakening! (by simp) $ iff_mpr'! hq) (conj₂'! d));
+
+lemma and_comm (p q : Formula α) : ((p ⋏ q) ⟷[Λ, Γ] (q ⋏ p)) := by
+  simp_all only [DeducibleEquivalent];
+  apply iff_intro!;
+  . apply dtr!;
+    have d₁ : insert (p ⋏ q) Γ ⊢ᴹ[Λ]! (p ⋏ q) := axm! (by simp);
+    exact conj₃'! (conj₂'! d₁) (conj₁'! d₁);
+  . apply dtr!;
+    have d₁ : insert (q ⋏ p) Γ ⊢ᴹ[Λ]! (q ⋏ p) := axm! (by simp);
+    exact conj₃'! (conj₂'! d₁) (conj₁'! d₁);
+
+lemma imp (hp : p₁ ⟷[Λ, Γ] p₂) (hq : q₁ ⟷[Λ, Γ] q₂) : ((p₁ ⟶ q₁) ⟷[Λ, Γ] (p₂ ⟶ q₂)) := by
+  simp_all only [DeducibleEquivalent];
+  apply iff_intro!;
+  . apply dtr!;
+    apply dtr!;
+    have d₁ : insert p₂ (insert (p₁ ⟶ q₁) Γ) ⊢ᴹ[Λ]! (p₁ ⟶ q₁) := axm! (by simp)
+    have d₂ : insert p₂ (insert (p₁ ⟶ q₁) Γ) ⊢ᴹ[Λ]! p₂ := axm! (by simp)
+    have d₃ : insert p₂ (insert (p₁ ⟶ q₁) Γ) ⊢ᴹ[Λ]! q₁ := modus_ponens'! d₁ $ modus_ponens'! (weakening! Set.subset_insert_insert (iff_mpr'! hp)) d₂;
+    exact modus_ponens'! (weakening! Set.subset_insert_insert (iff_mp'! hq)) d₃;
+  . apply dtr!;
+    apply dtr!;
+    have d₁ : insert p₁ (insert (p₂ ⟶ q₂) Γ) ⊢ᴹ[Λ]! (p₂ ⟶ q₂) := axm! (by simp)
+    have d₂ : insert p₁ (insert (p₂ ⟶ q₂) Γ) ⊢ᴹ[Λ]! p₁ := axm! (by simp)
+    have d₃ : insert p₁ (insert (p₂ ⟶ q₂) Γ) ⊢ᴹ[Λ]! q₂ := modus_ponens'! d₁ $ modus_ponens'! (weakening! Set.subset_insert_insert (iff_mp'! hp)) d₂;
+    exact modus_ponens'! (weakening! Set.subset_insert_insert (iff_mpr'! hq)) d₃;
+
+lemma neg (h : p ⟷[Λ, Γ] q) : ((~p) ⟷[Λ, Γ] (~q)) := by
+  simp [DeducibleEquivalent];
+  exact imp h (by simp);
+
+variable [Hilbert.K (Deduction Λ)]
+
+lemma box (h : p ⟷[Λ, ∅] q) : ((□p) ⟷[Λ, Γ] (□q)) := by
+  simp_all only [DeducibleEquivalent];
+  apply iff_intro!;
+  . have d₁ : Γ ⊢ᴹ[Λ]! □(p ⟶ q) := necessitation! (iff_mp'! h);
+    have d₂ : Γ ⊢ᴹ[Λ]! □(p ⟶ q) ⟶ (□p ⟶ □q) := Hilbert.axiomK! Γ p q;
+    exact modus_ponens'! d₂ d₁;
+  . have d₁ : Γ ⊢ᴹ[Λ]! □(q ⟶ p) := necessitation! (iff_mpr'! h);
+    have d₂ : Γ ⊢ᴹ[Λ]! □(q ⟶ p) ⟶ (□q ⟶ □p) := Hilbert.axiomK! Γ q p;
+    exact modus_ponens'! d₂ d₁;
+
+end DeducibleEquivalent
+
+end Formula
 
 end Modal.Normal
 
