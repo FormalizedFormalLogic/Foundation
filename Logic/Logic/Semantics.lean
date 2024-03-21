@@ -14,12 +14,12 @@ Also provides a characterization of compactness.
 
 namespace LO
 
-variable {F : Type*} [LogicSymbol F]
+variable {F : Type*} [LogicalConnective F]
 
-class Semantics (F : Type*) [LogicSymbol F] (α : outParam (Type*)) where
-  realize : α → F →L Prop
+class Semantics (F : Type*) [LogicalConnective F] (α : outParam (Type*)) where
+  realize : α → F →ˡᶜ Prop
 
-class Vocabulary (F : Type*) [LogicSymbol F] (V : outParam (Type*)) where
+class Vocabulary (F : Type*) [LogicalConnective F] (V : outParam (Type*)) where
   voc    : F → Set V
   verum  : voc ⊤ = ∅
   falsum : voc ⊥ = ∅

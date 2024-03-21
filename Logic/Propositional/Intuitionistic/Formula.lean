@@ -16,7 +16,7 @@ namespace Formula
 
 @[simp] def verum : Formula α := neg falsum
 
-instance : LogicSymbol (Formula α) where
+instance : LogicalConnective (Formula α) where
   tilde := neg
   arrow := imp
   wedge := and

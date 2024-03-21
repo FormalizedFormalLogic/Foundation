@@ -642,7 +642,7 @@ lemma neg' (p : Semiformula L ξ₁ n₁) : ω.loMap (~p) = ~ω.loMap p := loMap
 
 lemma or' (p q : Semiformula L ξ₁ n₁) : ω.loMap (p ⋎ q) = ω.loMap p ⋎ ω.loMap q := by rfl
 
-def hom (ω : Rew L ξ₁ n₁ ξ₂ n₂) : Semiformula L ξ₁ n₁ →L Semiformula L ξ₂ n₂ where
+def hom (ω : Rew L ξ₁ n₁ ξ₂ n₂) : Semiformula L ξ₁ n₁ →ˡᶜ Semiformula L ξ₂ n₂ where
   map_top' := by rfl
   map_bot' := by rfl
   map_neg' := ω.loMap_neg
@@ -665,7 +665,7 @@ lemma neg' (p : Semiformula L ξ₁ n₁) : ω (~p) = ~ω p := loMap_neg ω p
 
 lemma or' (p q : Semiformula L ξ₁ n₁) : ω (p ⋎ q) = ω p ⋎ ω q := by rfl
 
-instance : LogicSymbol.homClass (Rew L ξ₁ n₁ ξ₂ n₂) (Semiformula L ξ₁ n₁) (Semiformula L ξ₂ n₂) where
+instance : LogicalConnective.homClass (Rew L ξ₁ n₁ ξ₂ n₂) (Semiformula L ξ₁ n₁) (Semiformula L ξ₂ n₂) where
   map_top := fun ω => by rfl
   map_bot := fun ω => by rfl
   map_neg := loMap_neg
@@ -736,7 +736,7 @@ lemma hom_ext' {ω₁ ω₂ : Rew L ξ₁ n₁ ξ₂ n₂} (h : ω₁ = ω₂) {
 
 end
 
-@[simp] lemma hom_id_eq : (Rew.id.hom : Semiformula L ξ n →L Semiformula L ξ n) = LogicSymbol.Hom.id := by
+@[simp] lemma hom_id_eq : (Rew.id.hom : Semiformula L ξ n →ˡᶜ Semiformula L ξ n) = LogicalConnective.Hom.id := by
   ext p; induction p using Semiformula.rec' <;> simp[Rew.rel, Rew.nrel, *]
 
 lemma hom_comp_eq (ω₂ : Rew L ξ₂ n₂ ξ₃ n₃) (ω₁ : Rew L ξ₁ n₁ ξ₂ n₂) : (ω₂.comp ω₁).hom = ω₂.hom.comp ω₁.hom := by
@@ -838,13 +838,13 @@ lemma eq_ex_iff {p : Semiformula L ξ₁ n₁} {q} :
 
 lemma eq_ball_iff {p : Semiformula L ξ₁ n₁} {q₁ q₂} :
     (ω.hom p = ∀[q₁] q₂) ↔ ∃ p₁ p₂, ω.q.hom p₁ = q₁ ∧ ω.q.hom p₂ = q₂ ∧ p = ∀[p₁] p₂ := by
-  simp[LogicSymbol.ball, eq_all_iff]; constructor
+  simp[LogicalConnective.ball, eq_all_iff]; constructor
   · rintro ⟨p', ⟨p₁, rfl, p₂, rfl, rfl⟩, rfl⟩; exact ⟨p₁, rfl, p₂, rfl, rfl⟩
   · rintro ⟨p₁, rfl, p₂, rfl, rfl⟩; simp
 
 lemma eq_bex_iff {p : Semiformula L ξ₁ n₁} {q₁ q₂} :
     (ω.hom p = ∃[q₁] q₂) ↔ ∃ p₁ p₂, ω.q.hom p₁ = q₁ ∧ ω.q.hom p₂ = q₂ ∧ p = ∃[p₁] p₂ := by
-  simp[LogicSymbol.bex, eq_ex_iff]; constructor
+  simp[LogicalConnective.bex, eq_ex_iff]; constructor
   · rintro ⟨p', ⟨p₁, rfl, p₂, rfl, rfl⟩, rfl⟩; exact ⟨p₁, rfl, p₂, rfl, rfl⟩
   · rintro ⟨p₁, rfl, p₂, rfl, rfl⟩; simp
 

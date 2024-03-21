@@ -7,8 +7,8 @@ This file defines structure that has logical connectives $\top, \bot, \land, \lo
 and their homomorphisms.
 
 ## Main Definitions
-* `LO.LogicSymbol` is defined so that `LO.LogicSymbol F` is a type that has logical connectives $\top, \bot, \land, \lor, \to, \lnot$.
-* `LO.LogicSymbol.Hom` is defined so that `f : F →L G` is a homomorphism from `F` to `G`, i.e.,
+* `LO.LogicalConnective` is defined so that `LO.LogicalConnective F` is a type that has logical connectives $\top, \bot, \land, \lor, \to, \lnot$.
+* `LO.LogicalConnective.Hom` is defined so that `f : F →ˡᶜ G` is a homomorphism from `F` to `G`, i.e.,
 a function that preserves logical connectives.
 
 -/
@@ -49,7 +49,7 @@ section logicNotation
 @[notation_class] class Vee (α : Sort _) where
   vee : α → α → α
 
-class LogicSymbol (α : Sort _)
+class LogicalConnective (α : Sort _)
   extends Top α, Bot α, Tilde α, Arrow α, Wedge α, Vee α
 
 @[notation_class] class UnivQuantifier (α : ℕ → Sort _) where
@@ -198,7 +198,7 @@ prefix:45 "⊩ " => HasVdash.vdash
 
 end logicNotation
 
-class DeMorgan (F : Type*) [LogicSymbol F] where
+class DeMorgan (F : Type*) [LogicalConnective F] where
   verum           : ~(⊤ : F) = ⊥
   falsum          : ~(⊥ : F) = ⊤
   imply (p q : F) : (p ⟶ q) = ~p ⋎ q
@@ -208,24 +208,24 @@ class DeMorgan (F : Type*) [LogicSymbol F] where
 
 attribute [simp] DeMorgan.verum DeMorgan.falsum DeMorgan.and DeMorgan.or DeMorgan.neg
 
-class NegDefinition (F : Type*) [LogicSymbol F] where
+class NegDefinition (F : Type*) [LogicalConnective F] where
   neg {p : F} : ~p = p ⟶ ⊥
 
 attribute [simp] NegDefinition.neg
 
-namespace LogicSymbol
+namespace LogicalConnective
 
 section
-variable {α : Sort _} [LogicSymbol α]
+variable {α : Sort _} [LogicalConnective α]
 
 @[match_pattern] def iff (a b : α) := (a ⟶ b) ⋏ (b ⟶ a)
 
-infix:61 " ⟷ " => LogicSymbol.iff
+infix:61 " ⟷ " => LogicalConnective.iff
 
 end
 
 @[reducible]
-instance Prop_HasLogicSymbols : LogicSymbol Prop where
+instance Prop_HasLogicSymbols : LogicalConnective Prop where
   top := True
   bot := False
   tilde := Not
@@ -245,7 +245,7 @@ instance Prop_HasLogicSymbols : LogicSymbol Prop where
 
 @[simp] lemma Prop_or_eq (p q : Prop) : (p ⋎ q) = (p ∨ q) := rfl
 
-@[simp] lemma Prop_iff_eq (p q : Prop) : (p ⟷ q) = (p ↔ q) := by simp[LogicSymbol.iff, iff_iff_implies_and_implies]
+@[simp] lemma Prop_iff_eq (p q : Prop) : (p ⟷ q) = (p ↔ q) := by simp[LogicalConnective.iff, iff_iff_implies_and_implies]
 
 instance : DeMorgan Prop where
   verum := by simp
@@ -255,7 +255,7 @@ instance : DeMorgan Prop where
   or := fun _ _ => by simp[not_or]
   neg := fun _ => by simp
 
-class HomClass (F : Type _) (α β : outParam (Type _)) [LogicSymbol α] [LogicSymbol β] [FunLike F α β] where
+class HomClass (F : Type _) (α β : outParam (Type _)) [LogicalConnective α] [LogicalConnective β] [FunLike F α β] where
   map_top : ∀ (f : F), f ⊤ = ⊤
   map_bot : ∀ (f : F), f ⊥ = ⊥
   map_neg : ∀ (f : F) (p : α), f (~ p) = ~f p
@@ -267,17 +267,17 @@ attribute [simp] HomClass.map_top HomClass.map_bot HomClass.map_neg HomClass.map
 
 namespace HomClass
 
-variable (F : Type _) (α β : outParam (Type _)) [LogicSymbol α] [LogicSymbol β] [FunLike F α β]
+variable (F : Type _) (α β : outParam (Type _)) [LogicalConnective α] [LogicalConnective β] [FunLike F α β]
 variable [HomClass F α β]
 variable (f : F) (a b : α)
 
 instance : CoeFun F (fun _ => α → β) := ⟨DFunLike.coe⟩
 
-@[simp] lemma map_iff : f (a ⟷ b) = f a ⟷ f b := by simp[LogicSymbol.iff]
+@[simp] lemma map_iff : f (a ⟷ b) = f a ⟷ f b := by simp[LogicalConnective.iff]
 
 end HomClass
 
-variable (α β γ : Type _) [LogicSymbol α] [LogicSymbol β] [LogicSymbol γ]
+variable (α β γ : Type _) [LogicalConnective α] [LogicalConnective β] [LogicalConnective γ]
 
 structure Hom where
   toTr : α → β
@@ -288,27 +288,20 @@ structure Hom where
   map_and' : ∀ p q, toTr (p ⋏ q) = toTr p ⋏ toTr q
   map_or'  : ∀ p q, toTr (p ⋎ q) = toTr p ⋎ toTr q
 
-infix:25 " →L " => Hom
-
--- hide Hom.toTr
-open Lean PrettyPrinter Delaborator SubExpr in
-@[app_unexpander Hom.toTr]
-def unexpsnderToFun : Unexpander
-  | `($_ $h $x) => `($h $x)
-  | _           => throw ()
+infix:25 " →ˡᶜ " => Hom
 
 namespace Hom
 variable {α β γ}
 
-instance : FunLike (α →L β) α β where
+instance : FunLike (α →ˡᶜ β) α β where
   coe := toTr
   coe_injective' := by intro f g h; rcases f; rcases g; simp; exact h
 
-instance : CoeFun (α →L β) (fun _ => α → β) := DFunLike.hasCoeToFun
+instance : CoeFun (α →ˡᶜ β) (fun _ => α → β) := DFunLike.hasCoeToFun
 
-@[ext] lemma ext (f g : α →L β) (h : ∀ x, f x = g x) : f = g := DFunLike.ext f g h
+@[ext] lemma ext (f g : α →ˡᶜ β) (h : ∀ x, f x = g x) : f = g := DFunLike.ext f g h
 
-instance : HomClass (α →L β) α β where
+instance : HomClass (α →ˡᶜ β) α β where
   map_top := map_top'
   map_bot := map_bot'
   map_neg := map_neg'
@@ -316,9 +309,9 @@ instance : HomClass (α →L β) α β where
   map_and := map_and'
   map_or := map_or'
 
-variable (f : α →L β) (a b : α)
+variable (f : α →ˡᶜ β) (a b : α)
 
-protected def id : α →L α where
+protected def id : α →ˡᶜ α where
   toTr := id
   map_top' := by simp
   map_bot' := by simp
@@ -327,9 +320,9 @@ protected def id : α →L α where
   map_and' := by simp
   map_or' := by simp
 
-@[simp] lemma app_id (a : α) : LogicSymbol.Hom.id a = a := rfl
+@[simp] lemma app_id (a : α) : LogicalConnective.Hom.id a = a := rfl
 
-def comp (g : β →L γ) (f : α →L β) : α →L γ where
+def comp (g : β →ˡᶜ γ) (f : α →ˡᶜ β) : α →ˡᶜ γ where
   toTr := g ∘ f
   map_top' := by simp
   map_bot' := by simp
@@ -338,13 +331,13 @@ def comp (g : β →L γ) (f : α →L β) : α →L γ where
   map_and' := by simp
   map_or' := by simp
 
-@[simp] lemma app_comp (g : β →L γ) (f : α →L β) (a : α) :
+@[simp] lemma app_comp (g : β →ˡᶜ γ) (f : α →ˡᶜ β) (a : α) :
      g.comp f a = g (f a) := rfl
 
 end Hom
 
 section quantifier
-variable {α : ℕ → Type u} [∀ i, LogicSymbol (α i)] [UnivQuantifier α] [ExQuantifier α]
+variable {α : ℕ → Type u} [∀ i, LogicalConnective (α i)] [UnivQuantifier α] [ExQuantifier α]
 
 def ball (p : α (n + 1)) (q : α (n + 1)) : α n := ∀' (p ⟶ q)
 
@@ -356,19 +349,19 @@ notation:64 "∃[" p "] " q => bex p q
 
 end quantifier
 
-class AndOrClosed {F} [LogicSymbol F] (C : F → Prop) where
+class AndOrClosed {F} [LogicalConnective F] (C : F → Prop) where
   verum  : C ⊤
   falsum : C ⊥
   and {f g : F} : C f → C g → C (f ⋏ g)
   or  {f g : F} : C f → C g → C (f ⋎ g)
 
-class Closed {F} [LogicSymbol F] (C : F → Prop) extends AndOrClosed C where
+class Closed {F} [LogicalConnective F] (C : F → Prop) extends AndOrClosed C where
   not {f : F} : C f → C (~f)
   imply {f g : F} : C f → C g → C (f ⟶ g)
 
 attribute [simp] AndOrClosed.verum AndOrClosed.falsum
 
-end LogicSymbol
+end LogicalConnective
 
 end LO
 
@@ -379,7 +372,7 @@ namespace Matrix
 section And
 
 variable {α : Type _}
-variable [LogicSymbol α] [LogicSymbol β]
+variable [LogicalConnective α] [LogicalConnective β]
 
 def conj : {n : ℕ} → (Fin n → α) → α
   | 0,     _ => ⊤
@@ -389,17 +382,17 @@ def conj : {n : ℕ} → (Fin n → α) → α
 
 @[simp] lemma conj_cons {a : α} {v : Fin n → α} : conj (a :> v) = a ⋏ conj v := rfl
 
-@[simp] lemma conj_hom_prop [FunLike F α Prop] [LogicSymbol.HomClass F α Prop]
+@[simp] lemma conj_hom_prop [FunLike F α Prop] [LogicalConnective.HomClass F α Prop]
   (f : F) (v : Fin n → α) : f (conj v) = ∀ i, f (v i) := by
   induction' n with n ih <;> simp[conj]
   · simp[ih]; constructor
     · intro ⟨hz, hs⟩ i; cases i using Fin.cases; { exact hz }; { exact hs _ }
     · intro h; exact ⟨h 0, fun i => h _⟩
 
-lemma hom_conj [FunLike F α β] [LogicSymbol.HomClass F α β] (f : F) (v : Fin n → α) : f (conj v) = conj (f ∘ v) := by
+lemma hom_conj [FunLike F α β] [LogicalConnective.HomClass F α β] (f : F) (v : Fin n → α) : f (conj v) = conj (f ∘ v) := by
   induction' n with n ih <;> simp[*, conj]
 
-lemma hom_conj' [FunLike F α β] [LogicSymbol.HomClass F α β] (f : F) (v : Fin n → α) : f (conj v) = conj fun i => f (v i) := hom_conj f v
+lemma hom_conj' [FunLike F α β] [LogicalConnective.HomClass F α β] (f : F) (v : Fin n → α) : f (conj v) = conj fun i => f (v i) := hom_conj f v
 
 end And
 
@@ -409,7 +402,7 @@ namespace List
 
 section
 
-variable {α : Type u} [LogicSymbol α]
+variable {α : Type u} [LogicalConnective α]
 
 def conj : List α → α
   | []      => ⊤
@@ -419,7 +412,7 @@ def conj : List α → α
 
 @[simp] lemma conj_cons {a : α} {as : List α} : conj (a :: as) = a ⋏ as.conj := rfl
 
-lemma map_conj [FunLike F α Prop] [LogicSymbol.HomClass F α Prop] (f : F) (l : List α) : f l.conj ↔ ∀ a ∈ l, f a := by
+lemma map_conj [FunLike F α Prop] [LogicalConnective.HomClass F α Prop] (f : F) (l : List α) : f l.conj ↔ ∀ a ∈ l, f a := by
   induction l <;> simp[*]
 
 def disj : List α → α
@@ -430,7 +423,7 @@ def disj : List α → α
 
 @[simp] lemma disj_cons {a : α} {as : List α} : disj (a :: as) = a ⋎ as.disj := rfl
 
-lemma map_disj [FunLike F α Prop] [LogicSymbol.HomClass F α Prop] (f : F) (l : List α) : f l.disj ↔ ∃ a ∈ l, f a := by
+lemma map_disj [FunLike F α Prop] [LogicalConnective.HomClass F α Prop] (f : F) (l : List α) : f l.disj ↔ ∃ a ∈ l, f a := by
   induction l <;> simp[*]
 
 end
@@ -441,16 +434,16 @@ namespace Finset
 
 section
 
-variable [LogicSymbol α]
+variable [LogicalConnective α]
 
 noncomputable def conj (s : Finset α) : α := s.toList.conj
 
-lemma map_conj [FunLike F α Prop] [LogicSymbol.HomClass F α Prop] (f : F) (s : Finset α) : f s.conj ↔ ∀ a ∈ s, f a := by
+lemma map_conj [FunLike F α Prop] [LogicalConnective.HomClass F α Prop] (f : F) (s : Finset α) : f s.conj ↔ ∀ a ∈ s, f a := by
   simpa using List.map_conj f s.toList
 
 noncomputable def disj (s : Finset α) : α := s.toList.disj
 
-lemma map_disj [FunLike F α Prop] [LogicSymbol.HomClass F α Prop] (f : F) (s : Finset α) : f s.disj ↔ ∃ a ∈ s, f a := by
+lemma map_disj [FunLike F α Prop] [LogicalConnective.HomClass F α Prop] (f : F) (s : Finset α) : f s.disj ↔ ∃ a ∈ s, f a := by
   simpa using List.map_disj f s.toList
 
 end

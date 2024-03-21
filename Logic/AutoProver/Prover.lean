@@ -5,7 +5,7 @@ namespace LO
 
 namespace Gentzen
 
-variable {F : Type*} [LogicSymbol F] [Gentzen F]
+variable {F : Type*} [LogicalConnective F] [Gentzen F]
 
 variable {Γ Δ : List F} {p q r : F}
 
@@ -49,13 +49,13 @@ open Qq Lean Elab Meta Tactic Litform Litform.Meta
 #check TwoSided.Derivation
 
 set_option linter.unusedVariables false in
-abbrev DerivationQ {F : Q(Type u)} (instLS : Q(LogicSymbol $F)) (instGz : Q(Gentzen $F)) (L R : List (Lit F)) :=
+abbrev DerivationQ {F : Q(Type u)} (instLS : Q(LogicalConnective $F)) (instGz : Q(Gentzen $F)) (L R : List (Lit F)) :=
   Q(TwoSided.Derivation $(Denotation.toExprₗ (denotation F instLS) L) $(Denotation.toExprₗ (denotation F instLS) R))
 
 namespace DerivationQ
 open Denotation
 
-variable {F : Q(Type u)} {instLS : Q(LogicSymbol $F)} {instGz : Q(Gentzen $F)} (L R : List (Lit F))
+variable {F : Q(Type u)} {instLS : Q(LogicalConnective $F)} {instGz : Q(Gentzen $F)} (L R : List (Lit F))
 
 def DEq {F : Q(Type*)} : Lit F → Lit F → MetaM Bool
   | Litform.atom e,  Litform.atom e'  => Lean.Meta.isDefEq e e'
@@ -166,7 +166,7 @@ def rImplyRight {p q : Lit F} (d : DerivationQ instLS instGz (L ++ [p]) (R ++ [q
     ($(Denotation.toExprₗ (denotation F instLS) R) ++ [$(toExpr F q)])) := d
   q(Gentzen.rImplyRight $d)
 
-def deriveAux {F : Q(Type u)} (instLS : Q(LogicSymbol $F)) (instGz : Q(Gentzen $F)) :
+def deriveAux {F : Q(Type u)} (instLS : Q(LogicalConnective $F)) (instGz : Q(Gentzen $F)) :
     ℕ → Bool → (L R : List (Lit F)) → MetaM (DerivationQ instLS instGz L R)
   | 0,        _,     L,      R       => throwError m!"failed to prove {L} ⊢ {R}"
   | s + 1,    true,  [],     R       => deriveAux instLS instGz s false [] R
@@ -219,7 +219,7 @@ def deriveAux {F : Q(Type u)} (instLS : Q(LogicSymbol $F)) (instGz : Q(Gentzen $
       let d ← deriveAux instLS instGz s true (L ++ [p]) (R ++ [q])
       return rImplyRight L R d
 
-def derive {F : Q(Type u)} (instLS : Q(LogicSymbol $F)) (instGz : Q(Gentzen $F)) (s : ℕ) (L R : List (Lit F)) :
+def derive {F : Q(Type u)} (instLS : Q(LogicalConnective $F)) (instGz : Q(Gentzen $F)) (s : ℕ) (L R : List (Lit F)) :
     MetaM (DerivationQ instLS instGz L R) := deriveAux instLS instGz s true L R
 
 end DerivationQ
@@ -232,7 +232,7 @@ section
 
 open Litform.Meta Denotation
 
-variable {F : Q(Type u)} (instLS : Q(LogicSymbol $F)) (instSys : Q(System $F))
+variable {F : Q(Type u)} (instLS : Q(LogicalConnective $F)) (instSys : Q(System $F))
   (instGz : Q(Gentzen $F)) (instLTS : Q(LawfulTwoSided $F))
 
 
@@ -290,8 +290,8 @@ elab "tautology" n:(num)? : tactic => do
   let goalType ← Elab.Tactic.getMainTarget
   let ty ← inferPropQ goalType
   let ⟨u, F, T, p⟩ ← isExprProvable? ty
-  let .some instLS ← trySynthInstanceQ (q(LogicSymbol.{u} $F) : Q(Type u))
-    | throwError m! "error: failed to find instance LogicSymbol {F}"
+  let .some instLS ← trySynthInstanceQ (q(LogicalConnective.{u} $F) : Q(Type u))
+    | throwError m! "error: failed to find instance LogicalConnective {F}"
   let .some instSys ← trySynthInstanceQ q(System $F)
     | throwError m! "error: failed to find instance System {F}"
   let .some instGz ← trySynthInstanceQ q(Gentzen $F)
@@ -310,8 +310,8 @@ elab "prover" n:(num)? seq:(termSeq)? : tactic => do
   let goalType ← Elab.Tactic.getMainTarget
   let ty ← inferPropQ goalType
   let ⟨u, F, T, p⟩ ← isExprProvable? ty
-  let .some instLS ← trySynthInstanceQ (q(LogicSymbol.{u} $F) : Q(Type u))
-    | throwError m! "error: failed to find instance LogicSymbol {F}"
+  let .some instLS ← trySynthInstanceQ (q(LogicalConnective.{u} $F) : Q(Type u))
+    | throwError m! "error: failed to find instance LogicalConnective {F}"
   let .some instSys ← trySynthInstanceQ q(System $F)
     | throwError m! "error: failed to find instance System {F}"
   let .some instGz ← trySynthInstanceQ q(Gentzen $F)

@@ -28,7 +28,7 @@ def neg : Formula α → Formula α
 lemma neg_neg (p : Formula α) : neg (neg p) = p :=
   by induction p <;> simp[*, neg]
 
-instance : LogicSymbol (Formula α) where
+instance : LogicalConnective (Formula α) where
   tilde := neg
   arrow := fun p q => or (neg p) q
   wedge := and

@@ -1,4 +1,5 @@
 import Logic.Logic.Semantics
+import Logic.Logic.Deduction
 
 /-!
 # Basic definitions and properties of proof-related notions
@@ -15,27 +16,17 @@ Also defines soundness and completeness.
 
 namespace LO
 
-variable {F : Type u} [LogicSymbol F]
+variable {F : Type*} [LogicalConnective F]
 
 /-- Deduction System -/
 
-class System (F : Type u) where
-  Bew : Set F → F → Type u
-  axm : ∀ {f}, f ∈ T → Bew T f
-  weakening' : ∀ {T U f}, T ⊆ U → Bew T f → Bew U f
+class System (F : Type*) extends HasTurnstile F Type*, Deduction (· ⊢ · : Set F → F → Type _)
 
 namespace System
+
 variable [𝓑 : System F]
 
-instance : HasTurnstile F (Type u) := ⟨𝓑.Bew⟩
-
-def BewTheory (T U : Set F) : Type u := {f : F} → f ∈ U → T ⊢ f
-
-infix:45 " ⊢* " => System.BewTheory
-
-def ProvableTheory (T U : Set F) : Prop := Nonempty (T ⊢* U)
-
-infix:45 " ⊢*! " => System.ProvableTheory
+open Deduction
 
 abbrev Provable (T : Set F) (f : F) : Prop := Nonempty (T ⊢ f)
 
@@ -48,6 +39,14 @@ abbrev Unprovable (T : Set F) (f : F) : Prop := IsEmpty (T ⊢ f)
 infix:45 " ⊬ " => System.Unprovable
 
 lemma unprovable_iff_not_provable {T : Set F} {f : F} : T ⊬ f ↔ ¬T ⊢! f := by simp[System.Unprovable]
+
+def BewTheory (T U : Set F) : Type _ := {f : F} → f ∈ U → T ⊢ f
+
+infix:45 " ⊢* " => System.BewTheory
+
+abbrev ProvableTheory (T U : Set F) : Prop := Nonempty (T ⊢* U)
+
+infix:45 " ⊢*! " => System.ProvableTheory
 
 def BewTheoryEmpty (T : Set F) : T ⊢* ∅ := fun h => by contradiction
 
@@ -76,7 +75,7 @@ lemma incomplete_iff_exists_independent {T : Set F} :
 
 def theory (T : Set F) : Set F := {p | T ⊢! p}
 
-@[simp] lemma subset_theory {T : Set F} : T ⊆ theory T := fun _ h ↦ ⟨System.axm h⟩
+@[simp] lemma subset_theory {T : Set F} : T ⊆ theory T := fun _ h ↦ ⟨axm h⟩
 
 noncomputable def provableTheory_theory {T : Set F} : T ⊢* theory T := λ b ↦ b.toProof
 
@@ -121,13 +120,13 @@ end Equivalent
 
 end System
 
-def System.hom [System F] {G : Type u} [LogicSymbol G] (F : G →L F) : System G where
-  Bew := fun T g => F '' T ⊢ F g
-  axm := fun h => System.axm (Set.mem_image_of_mem F h)
-  weakening' := fun h => by simp; exact System.weakening' (Set.image_subset F h)
+def System.hom [System F] {G : Type*} [LogicalConnective G] (φ : G →ˡᶜ F) : System G where
+  turnstile := fun T g ↦ φ '' T ⊢ φ g
+  axm := fun h ↦ Deduction.axm (Bew := (· ⊢ · : Set F → F → Type _)) (Set.mem_image_of_mem φ h)
+  weakening' := fun h ↦ by simpa using Deduction.weakening' (Set.image_subset φ h)
 
 variable (F)
-variable [LogicSymbol F] [𝓑 : System F] {α: Type*} [𝓢 : Semantics F α]
+variable [LogicalConnective F] [𝓑 : System F] {α: Type*} [𝓢 : Semantics F α]
 
 class Sound where
   sound : ∀ {T : Set F} {p : F}, T ⊢ p → T ⊨ p

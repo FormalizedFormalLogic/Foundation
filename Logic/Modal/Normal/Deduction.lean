@@ -1,4 +1,4 @@
-import Logic.Logic.HilbertStyle2
+import Logic.Logic.Deduction
 import Logic.Modal.Normal.Formula
 import Logic.Modal.Normal.Axioms
 import Logic.Modal.Normal.HilbertStyle

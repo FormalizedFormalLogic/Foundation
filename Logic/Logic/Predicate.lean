@@ -51,12 +51,12 @@ open RewritingT RewritingT.Substs
 
 section Formula
 
-variable (F : ℕ → Type*) [(n : ℕ) → LogicSymbol (F n)] [UnivQuantifier F] [ExQuantifier F]
+variable (F : ℕ → Type*) [(n : ℕ) → LogicalConnective (F n)] [UnivQuantifier F] [ExQuantifier F]
 variable (T : outParam (ℕ → Type*)) [BoundedVariable T]
 variable (R : outParam (ℕ → ℕ → Type*)) [VMonoid R]
 
 class Rewriting where
-  eval {n₁ n₂} : R n₁ n₂ → F n₁ →L F n₂
+  eval {n₁ n₂} : R n₁ n₂ → F n₁ →ˡᶜ F n₂
   q {n₁ n₂} : R n₁ n₂ → R (n₁ + 1) (n₂ + 1)
   q_id {n} : q (1 : R n n) = 1
   q_comp {n₁ n₂ n₃} (ω₂ : R n₂ n₃) (ω₁ : R n₁ n₂) : q (ω₂ • ω₁) = (q ω₂) • (q ω₁)
@@ -97,7 +97,7 @@ end Unsorted
 
 namespace TwoSorted
 
-variable (F : ℕ → ℕ → Type u) [(m n : ℕ) → LogicSymbol (F m n)] [UnivQuantifier₂ F] [ExQuantifier₂ F]
+variable (F : ℕ → ℕ → Type u) [(m n : ℕ) → LogicalConnective (F m n)] [UnivQuantifier₂ F] [ExQuantifier₂ F]
 
 class RewritingT (T₁ T₂ : outParam (ℕ → Type v)) (R : outParam (ℕ → ℕ → ℕ → ℕ → Type w)) where
   id {m n} : R m n m n
@@ -105,7 +105,7 @@ class RewritingT (T₁ T₂ : outParam (ℕ → Type v)) (R : outParam (ℕ → 
   substs {l m k n} (w : Fin l → T₁ m) (v : Fin k → T₂ n) : R l k m n
   q₁ {m₁ n₁ m₂ n₂} : R m₁ n₁ m₂ n₂ → R (m₁ + 1) n₁ (m₂ + 1) n₂
   q₂ {m₁ n₁ m₂ n₂} : R m₁ n₁ m₂ n₂ → R m₁ (n₁ + 1) m₂ (n₂ + 1)
-  eval {m₁ n₁ m₂ n₂} : R m₁ n₁ m₂ n₂ → F m₁ n₁ →L F m₂ n₂
+  eval {m₁ n₁ m₂ n₂} : R m₁ n₁ m₂ n₂ → F m₁ n₁ →ˡᶜ F m₂ n₂
   eval_id {m n} : ∀ f : F m n, eval id f = f
   eval_comp {m₁ n₁ m₂ n₂ m₃ n₃} (ω₂ : R m₂ n₂ m₃ n₃) (ω₁ : R m₁ n₁ m₂ n₂) : ∀ f : F m₁ n₁,
     eval (comp ω₂ ω₁) f = eval ω₂ (eval ω₁ f)

@@ -1,22 +1,21 @@
-import Logic.Logic.System
-import Logic.Logic.Calculus
+import Logic.Logic.LogicSymbol
 
 namespace LO
 
-class Deduction {F : Type u} [LogicSymbol F] (Bew : Set F → F → Type*) where
+class Deduction {F : Type*} (Bew : Set F → F → Type*) where
   axm : ∀ {f}, f ∈ Γ → Bew Γ f
   weakening' : ∀ {T U f}, T ⊆ U → Bew T f → Bew U f
 
 namespace Hilbert
 
-variable {F : Type u} [LogicSymbol F] [DecidableEq F] [NegDefinition F]
+variable {F : Type*} [LogicalConnective F] [DecidableEq F] [NegDefinition F]
 
 section
 
 variable (Bew : Set F → F → Type*)
 
 class HasModusPonens where
-  modus_ponens {Γ₁ Γ₂ p q} : (Bew Γ₁ (p ⟶ q)) → (Bew Γ₂ p) → (Bew (Γ₁ ∪ Γ₂) q)
+  modus_ponens {Γ₁ Γ₂ p q} : Bew Γ₁ (p ⟶ q) → Bew Γ₂ p → Bew (Γ₁ ∪ Γ₂) q
 
 section
 
@@ -34,19 +33,19 @@ end
   Minimal Propositional Logic.
 -/
 class Minimal [NegDefinition F] extends Deduction Bew, HasModusPonens Bew where
-  verum        (Γ : Set F)             : Bew Γ ⊤
-  imply₁       (Γ : Set F) (p q : F)   : Bew Γ (p ⟶ (q ⟶ p))
-  imply₂       (Γ : Set F) (p q r : F) : Bew Γ ((p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r)
-  conj₁        (Γ : Set F) (p q : F)   : Bew Γ (p ⋏ q ⟶ p)
-  conj₂        (Γ : Set F) (p q : F)   : Bew Γ (p ⋏ q ⟶ q)
-  conj₃        (Γ : Set F) (p q : F)   : Bew Γ (p ⟶ q ⟶ p ⋏ q)
-  disj₁        (Γ : Set F) (p q : F)   : Bew Γ (p ⟶ p ⋎ q)
-  disj₂        (Γ : Set F) (p q : F)   : Bew Γ (q ⟶ p ⋎ q)
-  disj₃        (Γ : Set F) (p q r : F) : Bew Γ ((p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q) ⟶ r)
+  verum  (Γ : Set F)             : Bew Γ ⊤
+  imply₁ (Γ : Set F) (p q : F)   : Bew Γ (p ⟶ (q ⟶ p))
+  imply₂ (Γ : Set F) (p q r : F) : Bew Γ ((p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r)
+  conj₁  (Γ : Set F) (p q : F)   : Bew Γ (p ⋏ q ⟶ p)
+  conj₂  (Γ : Set F) (p q : F)   : Bew Γ (p ⋏ q ⟶ q)
+  conj₃  (Γ : Set F) (p q : F)   : Bew Γ (p ⟶ q ⟶ p ⋏ q)
+  disj₁  (Γ : Set F) (p q : F)   : Bew Γ (p ⟶ p ⋎ q)
+  disj₂  (Γ : Set F) (p q : F)   : Bew Γ (q ⟶ p ⋎ q)
+  disj₃  (Γ : Set F) (p q r : F) : Bew Γ ((p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q) ⟶ r)
 
 /-- Supplymental -/
 class HasDT where
-  dtr {Γ : Set F} {p q : F} : (Bew (insert p Γ) q) → (Bew Γ (p ⟶ q))
+  dtr {Γ : Set F} {p q : F} : Bew (insert p Γ) q → Bew Γ (p ⟶ q)
 
 class HasEFQ where
   efq (Γ : Set F) (p : F) : Bew Γ (⊥ ⟶ p)
@@ -74,14 +73,14 @@ class Compact where
 
   Modal companion of `𝐒𝟒`
 -/
-class Intuitionistic extends Minimal Bew, HasEFQ Bew where
+class Intuitionistic extends Minimal Bew, HasEFQ Bew
 
 /--
   Propositional Logic for Weak Law of Excluded Middle.
 
   Modal companion of `𝐒𝟒.𝟐`
 -/
-class WeakLEM extends Intuitionistic Bew, HasWeakLEM Bew where
+class WeakLEM extends Intuitionistic Bew, HasWeakLEM Bew
 
 
 /--
@@ -89,7 +88,7 @@ class WeakLEM extends Intuitionistic Bew, HasWeakLEM Bew where
 
   Modal companion of `𝐒𝟒.𝟑`
 -/
-class GD extends Intuitionistic Bew, HasDummett Bew where
+class GD extends Intuitionistic Bew, HasDummett Bew
 
 /--
   Classical Propositional Logic.
@@ -102,7 +101,7 @@ end
 
 open Deduction Minimal HasDT Intuitionistic Classical HasDNE
 
-variable {Bew : Set F → F → Type u} (Γ : Set F) (p q r : F)
+variable {Bew : Set F → F → Type*} (Γ : Set F) (p q r : F)
 
 section Minimal
 
@@ -153,19 +152,19 @@ def disj_symm' {Γ p q} : Bew Γ (p ⋎ q) → Bew Γ (q ⋎ p) := by
   exact disj₃' (disj₂ _ _ _) (disj₁ _ _ _) h;
 
 def iff_mp' {Γ p q} (d : Bew Γ (p ⟷ q)) : Bew Γ (p ⟶ q) := by
-  simp [LogicSymbol.iff] at d;
+  simp [LogicalConnective.iff] at d;
   exact conj₁' d
 
 def iff_right' {Γ p q} (dpq : Bew Γ (p ⟷ q)) (dp : Bew Γ p) : Bew Γ q := (iff_mp' dpq) ⨀ dp
 
 def iff_mpr' {Γ p q} (d : Bew Γ (p ⟷ q)) : Bew Γ (q ⟶ p) := by
-  simp [LogicSymbol.iff] at d;
+  simp [LogicalConnective.iff] at d;
   exact conj₂' d
 
 def iff_left' {Γ p q} (dpq : Bew Γ (p ⟷ q)) (dq : Bew Γ q) : Bew Γ p := (iff_mpr' dpq) ⨀ dq
 
 def iff_intro {Γ p q} (dpq : Bew Γ (p ⟶ q)) (dqp : Bew Γ (q ⟶ p)) : Bew Γ (p ⟷ q) := by
-  simp [LogicSymbol.iff];
+  simp [LogicalConnective.iff];
   exact conj₃' dpq dqp
 
 def iff_symm' {Γ p q} (d : Bew Γ (p ⟷ q)) : Bew Γ (q ⟷ p) := iff_intro (iff_mpr' d) (iff_mp' d)
@@ -186,9 +185,9 @@ def dni : Bew Γ (p ⟶ ~~p) := by
   apply dtr;
   exact h₁ ⨀ h₂;
 
-def dni' {Γ p} : (Bew Γ p) → (Bew Γ (~~p)) := modus_ponens' (dni _ _)
+def dni' {Γ p} : Bew Γ p → Bew Γ (~~p) := modus_ponens' (dni _ _)
 
-def contra₀' {Γ p q} : (Bew Γ (p ⟶ q)) → (Bew Γ (~q ⟶ ~p)) := by
+def contra₀' {Γ p q} : Bew Γ (p ⟶ q) → Bew Γ (~q ⟶ ~p) := by
   intro h;
   simp [NegDefinition.neg];
   apply dtr;
@@ -198,7 +197,7 @@ def contra₀' {Γ p q} : (Bew Γ (p ⟶ q)) → (Bew Γ (~q ⟶ ~p)) := by
   simpa using d₁ ⨀ h ⨀ d₂;
 
 def neg_iff' {Γ p q} (d : Bew Γ (p ⟷ q)) : Bew Γ (~p ⟷ ~q) := by
-  simp only [LogicSymbol.iff];
+  simp only [LogicalConnective.iff];
   apply conj₃';
   . apply contra₀';
     apply iff_mpr' d;
@@ -257,7 +256,7 @@ def dne : Bew Γ (~~p ⟶ p) := c.dne Γ p
 def dne' {Γ p} : (Bew Γ (~~p)) → (Bew Γ p) := modus_ponens' (dne _ _)
 
 def equiv_dn : Bew Γ (p ⟷ ~~p) := by
-  simp only [LogicSymbol.iff];
+  simp only [LogicalConnective.iff];
   exact (conj₃ _ _ _ ⨀ (dni _ _)) ⨀ (dne _ _);
 
 instance : HasEFQ Bew where
@@ -275,15 +274,15 @@ end Classical
 
 section
 
-variable [LogicSymbol F] [NegDefinition F]
+variable [LogicalConnective F] [NegDefinition F]
 variable (Bew : Set F → F → Type u) [hd : Deduction Bew] [HasModusPonens Bew] [HasDT Bew] [Minimal Bew] [Classical Bew]
 
 local infix:20 " ⊢ " => Bew
 
 variable (Γ : Set F) (p : F)
 
-@[simp] def Deducible := Nonempty (Bew Γ p)
-@[simp] def Undeducible := ¬(Deducible Bew Γ p)
+abbrev Deducible := Nonempty (Bew Γ p)
+abbrev Undeducible := ¬(Deducible Bew Γ p)
 
 section Deducible
 
@@ -379,18 +378,15 @@ section Consistency
 local infix:20 "⊢!" => Deducible Bew
 local infix:20 "⊬!" => Undeducible Bew
 
-@[simp] def Inconsistent := Γ ⊢! ⊥
-@[simp] def Consistent := Γ ⊬! ⊥
+abbrev Inconsistent := Γ ⊢! ⊥
+abbrev Consistent := Γ ⊬! ⊥
 
 lemma consistent_iff_undeducible_falsum : Consistent Bew Γ ↔ (Γ ⊬! ⊥) := Iff.rfl
 
-lemma consistent_no_falsum {Γ} (h : Consistent Bew Γ) : ⊥ ∉ Γ := by
-  by_contra hC;
-  exact h ⟨hd.axm hC⟩
+lemma consistent_no_falsum {Γ} (h : Consistent Bew Γ) : ⊥ ∉ Γ := fun hC ↦ h ⟨hd.axm hC⟩
 
-lemma consistent_of_subset {Γ Δ : Set F} (h : Γ ⊆ Δ) (hConsis : Consistent Bew Δ) : Consistent Bew Γ := by
-  intro hD;
-  exact hConsis ⟨hd.weakening' h hD.some⟩;
+lemma consistent_of_subset {Γ Δ : Set F} (h : Γ ⊆ Δ) (hConsis : Consistent Bew Δ) : Consistent Bew Γ :=
+  fun hD ↦ hConsis ⟨hd.weakening' h hD.some⟩
 
 lemma consistent_of_insert {p} (hConsis : Consistent Bew (insert p Γ)) : Consistent Bew Γ := consistent_of_subset Bew (by simp) hConsis
 

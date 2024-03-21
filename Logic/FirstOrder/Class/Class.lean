@@ -34,13 +34,13 @@ notation p:80 " ↔[" T "] " q:80 => Equivalent T p q
 
 @[symm] protected lemma symm : p ↔[T] q → q ↔[T] p := by
   simp only [Equivalent, consequence_iff, models_iff, val_fvUnivClosure, eval_univClosure,
-    LogicSymbol.HomClass.map_iff, LogicSymbol.Prop_iff_eq, Nonempty.forall]
+    LogicalConnective.HomClass.map_iff, LogicalConnective.Prop_iff_eq, Nonempty.forall]
   intro h M x _ hT ε e
   exact Iff.symm <| h M x hT ε e
 
 @[trans] protected lemma trans : p ↔[T] q → q ↔[T] r → p ↔[T] r := by
   simp only [Equivalent, consequence_iff, models_iff, Semiformula.val_fvUnivClosure, Semiformula.eval_univClosure,
-    LogicSymbol.HomClass.map_iff, LogicSymbol.Prop_iff_eq]
+    LogicalConnective.HomClass.map_iff, LogicalConnective.Prop_iff_eq]
   intro hp hq M x _ hT ε e
   exact Iff.trans (hp M hT ε e) (hq M hT ε e)
 
@@ -48,26 +48,26 @@ lemma of_subtheory (H : T ≾ T') (h : p ↔[T] q) : p ↔[T'] q := LO.Sound.sou
 
 lemma rew [DecidableEq ξ'] (h : p ↔[T] q) (ω : Rew L ξ n ξ' n') : (ω.hom p) ↔[T] (ω.hom q) := by
   simp only [Equivalent, consequence_iff, models_iff, val_fvUnivClosure, eval_univClosure,
-    LogicSymbol.HomClass.map_iff, LogicSymbol.Prop_iff_eq, Nonempty.forall, eval_rew,
+    LogicalConnective.HomClass.map_iff, LogicalConnective.Prop_iff_eq, Nonempty.forall, eval_rew,
     Function.comp] at h ⊢
   intro M x _ hT ε e; exact h M x hT _ _
 
 lemma not {p₁ p₂ : Semiformula L ξ n} (hp : p₁ ↔[T] p₂) : (~p₁) ↔[T] (~p₂) := by
   simp only [Equivalent, consequence_iff, models_iff, val_fvUnivClosure, eval_univClosure,
-    LogicSymbol.HomClass.map_iff, LogicSymbol.Prop_iff_eq, Nonempty.forall,
-    LogicSymbol.HomClass.map_neg, LogicSymbol.Prop_neg_eq] at hp ⊢
+    LogicalConnective.HomClass.map_iff, LogicalConnective.Prop_iff_eq, Nonempty.forall,
+    LogicalConnective.HomClass.map_neg, LogicalConnective.Prop_neg_eq] at hp ⊢
   intro M x _ hT ε e; rw [hp M x hT ε e]
 
 lemma and {p₁ p₂ q₁ q₂ : Semiformula L ξ n} (hp : p₁ ↔[T] p₂) (hq : q₁ ↔[T] q₂) : (p₁ ⋏ q₁) ↔[T] (p₂ ⋏ q₂) := by
   simp only [Equivalent, consequence_iff, models_iff, val_fvUnivClosure, eval_univClosure,
-    LogicSymbol.HomClass.map_iff, LogicSymbol.Prop_iff_eq, Nonempty.forall,
-    LogicSymbol.HomClass.map_and, LogicSymbol.Prop_and_eq] at hp hq ⊢
+    LogicalConnective.HomClass.map_iff, LogicalConnective.Prop_iff_eq, Nonempty.forall,
+    LogicalConnective.HomClass.map_and, LogicalConnective.Prop_and_eq] at hp hq ⊢
   intro M x _ hT ε e; rw [hp M x hT ε e, hq M x hT ε e]
 
 lemma or {p₁ p₂ q₁ q₂ : Semiformula L ξ n} (hp : p₁ ↔[T] p₂) (hq : q₁ ↔[T] q₂) : (p₁ ⋎ q₁) ↔[T] (p₂ ⋎ q₂) := by
   simp only [Equivalent, consequence_iff, models_iff, val_fvUnivClosure, eval_univClosure,
-    LogicSymbol.HomClass.map_iff, LogicSymbol.Prop_iff_eq, Nonempty.forall,
-    LogicSymbol.HomClass.map_or, LogicSymbol.Prop_or_eq] at hp hq ⊢
+    LogicalConnective.HomClass.map_iff, LogicalConnective.Prop_iff_eq, Nonempty.forall,
+    LogicalConnective.HomClass.map_or, LogicalConnective.Prop_or_eq] at hp hq ⊢
   intro M x _ hT ε e; rw [hp M x hT ε e, hq M x hT ε e]
 
 lemma imp {p₁ p₂ q₁ q₂ : Semiformula L ξ n} (hp : p₁ ↔[T] p₂) (hq : q₁ ↔[T] q₂) :
@@ -75,14 +75,14 @@ lemma imp {p₁ p₂ q₁ q₂ : Semiformula L ξ n} (hp : p₁ ↔[T] p₂) (hq
 
 lemma all {p₁ p₂ : Semiformula L ξ (n + 1)} (hp : p₁ ↔[T] p₂) : (∀' p₁) ↔[T] (∀' p₂) := by
   simp only [Equivalent, consequence_iff, models_iff, val_fvUnivClosure, eval_univClosure,
-    LogicSymbol.HomClass.map_iff, LogicSymbol.Prop_iff_eq, Nonempty.forall, eval_all] at hp ⊢
+    LogicalConnective.HomClass.map_iff, LogicalConnective.Prop_iff_eq, Nonempty.forall, eval_all] at hp ⊢
   intro M x _ hT ε e
   apply forall_congr'; intro a
   exact hp M x hT ε (a :> e)
 
 lemma ex {p₁ p₂ : Semiformula L ξ (n + 1)} (hp : p₁ ↔[T] p₂) : (∃' p₁) ↔[T] (∃' p₂) := by
   simp only [Equivalent, consequence_iff, models_iff, val_fvUnivClosure, eval_univClosure,
-    LogicSymbol.HomClass.map_iff, LogicSymbol.Prop_iff_eq, Nonempty.forall, eval_ex] at hp ⊢
+    LogicalConnective.HomClass.map_iff, LogicalConnective.Prop_iff_eq, Nonempty.forall, eval_ex] at hp ⊢
   intro M x _ hT ε e
   apply exists_congr; intro a
   exact hp M x hT ε (a :> e)
@@ -312,7 +312,7 @@ lemma mem_imply {p q : Semiformula L ξ n} (hp : c.Domain p) (hq : c.Domain q) :
 variable [c.And]
 
 lemma mem_iff {p q : Semiformula L ξ n} (hp : c.Domain p) (hq : c.Domain q) : c.Domain (p ⟷ q) := by
-  simp [LO.LogicSymbol.iff]; exact And.and (mem_imply hp hq) (mem_imply hq hp)
+  simp [LO.LogicalConnective.iff]; exact And.and (mem_imply hp hq) (mem_imply hq hp)
 
 end Or
 

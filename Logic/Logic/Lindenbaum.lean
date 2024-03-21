@@ -2,7 +2,7 @@ import Logic.Logic.System
 
 namespace LO
 
-variable {F : Type*} [LogicSymbol F] {α : Type*} [Semantics F α]
+variable {F : Type*} [LogicalConnective F] {α : Type*} [Semantics F α]
 
 namespace Semantics
 

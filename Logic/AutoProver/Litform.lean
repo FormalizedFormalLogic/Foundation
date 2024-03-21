@@ -16,7 +16,7 @@ inductive Litform (α : Type*) : Type _
 
 namespace Litform
 
-instance : LogicSymbol (Litform α) where
+instance : LogicalConnective (Litform α) where
   top   := Litform.verum
   bot   := Litform.falsum
   wedge := Litform.and
@@ -45,7 +45,7 @@ end ToString
 
 namespace Meta
 
-variable (F : Q(Type*)) (ls : Q(LogicSymbol $F))
+variable (F : Q(Type*)) (ls : Q(LogicalConnective $F))
 
 abbrev Lit (F : Q(Type*)) := Litform Q($F)
 

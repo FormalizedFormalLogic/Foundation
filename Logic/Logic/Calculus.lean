@@ -31,17 +31,17 @@ prefix: 45 " ⊢¹! " => OneSided.Derivable
 
 infix: 45 " ⊢²! " => TwoSided.Derivable
 
-class Tait (F : Type u) [LogicSymbol F] extends OneSided F where
+class Tait (F : Type u) [LogicalConnective F] extends OneSided F where
   verum (Δ : List F)         : ⊢¹ ⊤ :: Δ
   and {p q : F} {Δ : List F} : ⊢¹ p :: Δ → ⊢¹ q :: Δ → ⊢¹ p ⋏ q :: Δ
   or {p q : F} {Δ : List F}  : ⊢¹ p :: q :: Δ → ⊢¹ p ⋎ q :: Δ
   wk {Δ Δ' : List F}         : ⊢¹ Δ → Δ ⊆ Δ' → ⊢¹ Δ'
   em {p} {Δ : List F}        : p ∈ Δ → ~p ∈ Δ → ⊢¹ Δ
 
-class Tait.Cut (F : Type u) [LogicSymbol F] [Tait F] where
+class Tait.Cut (F : Type u) [LogicalConnective F] [Tait F] where
   cut {Δ : List F} {p} : ⊢¹ p :: Δ → ⊢¹ ~p :: Δ → ⊢¹ Δ
 
-class Gentzen (F : Type u) [LogicSymbol F] extends TwoSided F where
+class Gentzen (F : Type u) [LogicalConnective F] extends TwoSided F where
   verum (Γ Δ : List F)                : Γ ⊢² ⊤ :: Δ
   falsum (Γ Δ : List F)               : ⊥ :: Γ ⊢² Δ
   negLeft {p : F} {Γ Δ : List F}      : Γ ⊢² p :: Δ → ~p :: Γ ⊢² Δ
@@ -55,13 +55,13 @@ class Gentzen (F : Type u) [LogicSymbol F] extends TwoSided F where
   wk {Γ Γ' Δ Δ' : List F}             : Γ ⊢² Δ → Γ ⊆ Γ' → Δ ⊆ Δ' → Γ' ⊢² Δ'
   em {p} {Γ Δ : List F}               : p ∈ Γ → p ∈ Δ → Γ ⊢² Δ
 
-class Gentzen.Cut (F : Type u) [LogicSymbol F] [Gentzen F] where
+class Gentzen.Cut (F : Type u) [LogicalConnective F] [Gentzen F] where
   cut {Γ Δ : List F} {p} : Γ ⊢² p :: Δ → p :: Γ ⊢² Δ → Γ ⊢² Δ
 
-class LawfulTwoSided (F : Type u) [LogicSymbol F] [TwoSided F] [System F] where
+class LawfulTwoSided (F : Type u) [LogicalConnective F] [TwoSided F] [System F] where
   toProof₁ {Γ} {T : Set F} {p : F} : Γ ⊢² [p] → (∀ q ∈ Γ, T ⊢ q) → T ⊢ p
 
-variable {F : Type*} [LogicSymbol F]
+variable {F : Type*} [LogicalConnective F]
 
 namespace OneSided
 

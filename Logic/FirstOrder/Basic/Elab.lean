@@ -282,21 +282,21 @@ def unexpandArrow : Unexpander
   | `($_ $t:term         “$q:foformula”) => `(“ (!$t → $q) ”)
   | _                                     => throw ()
 
-@[app_unexpander LogicSymbol.iff]
+@[app_unexpander LogicalConnective.iff]
 def unexpandIff : Unexpander
   | `($_ “$p:foformula” “$q:foformula”) => `(“ ($p ↔ $q) ”)
   | `($_ “$p:foformula” $u:term)         => `(“ ($p ↔ !$u) ”)
   | `($_ $t:term         “$q:foformula”) => `(“ (!$t ↔ $q) ”)
   | _                                     => throw ()
 
-@[app_unexpander LogicSymbol.ball]
+@[app_unexpander LogicalConnective.ball]
 def unexpandBall : Unexpander
   | `($_ “$p:foformula” “$q:foformula”) => `(“ (∀[$p] $q) ”)
   | `($_ “$p:foformula” $u:term)         => `(“ (∀[$p] !$u) ”)
   | `($_ $t:term         “$q:foformula”) => `(“ (∀[!$t] $q) ”)
   | _                                     => throw ()
 
-@[app_unexpander LogicSymbol.bex]
+@[app_unexpander LogicalConnective.bex]
 def unexpandBEx : Unexpander
   | `($_ “$p:foformula” “$q:foformula”) => `(“ (∃[$p] $q) ”)
   | `($_ “$p:foformula” $u:term)         => `(“ (∃[$p] !$u) ”)

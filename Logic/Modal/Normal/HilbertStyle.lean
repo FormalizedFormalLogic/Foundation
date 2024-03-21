@@ -1,5 +1,5 @@
-import Logic.Logic.HilbertStyle2
-import Logic.Modal.Normal.LogicSymbol
+import Logic.Logic.Deduction
+import Logic.Modal.Normal.LogicalConnective
 import Logic.Modal.Normal.Axioms
 
 namespace LO.Hilbert

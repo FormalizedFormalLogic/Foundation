@@ -204,7 +204,7 @@ def Eval' (s : Structure L M) (ε : μ → M) : ∀ {n}, (Fin n → M) → Semif
     Eval' s ε e (~p) = ¬Eval' s ε e p :=
   by induction p using rec' <;> simp[*, Eval', ←neg_eq, or_iff_not_imp_left]
 
-def Eval (s : Structure L M) (e : Fin n → M) (ε : μ → M) : Semiformula L μ n →L Prop where
+def Eval (s : Structure L M) (e : Fin n → M) (ε : μ → M) : Semiformula L μ n →ˡᶜ Prop where
   toTr := Eval' s ε e
   map_top' := rfl
   map_bot' := rfl
@@ -214,19 +214,19 @@ def Eval (s : Structure L M) (e : Fin n → M) (ε : μ → M) : Semiformula L �
   map_imply' := by simp[imp_eq, Eval'_neg, ←neg_eq, Eval', imp_iff_not_or]
 
 abbrev Eval! (M : Type w) [s : Structure L M] {n} (e : Fin n → M) (ε : μ → M) :
-    Semiformula L μ n →L Prop := Eval s e ε
+    Semiformula L μ n →ˡᶜ Prop := Eval s e ε
 
-abbrev Val (s : Structure L M) (ε : μ → M) : Formula L μ →L Prop := Eval s ![] ε
+abbrev Val (s : Structure L M) (ε : μ → M) : Formula L μ →ˡᶜ Prop := Eval s ![] ε
 
-abbrev PVal (s : Structure L M) (e : Fin n → M) : Semisentence L n →L Prop := Eval s e Empty.elim
+abbrev PVal (s : Structure L M) (e : Fin n → M) : Semisentence L n →ˡᶜ Prop := Eval s e Empty.elim
 
 abbrev Val! (M : Type w) [s : Structure L M] (ε : μ → M) :
-    Formula L μ →L Prop := Val s ε
+    Formula L μ →ˡᶜ Prop := Val s ε
 
 abbrev PVal! (M : Type w) [s : Structure L M] (e : Fin n → M) :
-    Semiformula L Empty n →L Prop := PVal s e
+    Semiformula L Empty n →ˡᶜ Prop := PVal s e
 
-abbrev Realize (s : Structure L M) : Formula L M →L Prop := Eval s ![] id
+abbrev Realize (s : Structure L M) : Formula L M →ˡᶜ Prop := Eval s ![] id
 
 lemma eval_rel {k} {r : L.Rel k} {v} :
     Eval s e ε (rel r v) ↔ s.rel r (fun i => Semiterm.val s e ε (v i)) := of_eq rfl
@@ -272,7 +272,7 @@ lemma eval_nrel {k} {r : L.Rel k} {v} :
 
 @[simp] lemma eval_ball {p q : Semiformula L μ (n + 1)} :
     Eval s e ε (∀[p] q) ↔ ∀ x : M, Eval s (x :> e) ε p → Eval s (x :> e) ε q := by
-  simp[LogicSymbol.ball]
+  simp[LogicalConnective.ball]
 
 @[simp] lemma eval_ex {p : Semiformula L μ (n + 1)} :
     Eval s e ε (∃' p) ↔ ∃ x : M, Eval s (x :> e) ε p := of_eq rfl
@@ -286,7 +286,7 @@ lemma eval_nrel {k} {r : L.Rel k} {v} :
 
 @[simp] lemma eval_bex {p q : Semiformula L μ (n + 1)} :
     Eval s e ε (∃[p] q) ↔ ∃ x : M, Eval s (x :> e) ε p ⋏ Eval s (x :> e) ε q := by
-  simp[LogicSymbol.bex]
+  simp[LogicalConnective.bex]
 
 lemma eval_rew (ω : Rew L μ₁ n₁ μ₂ n₂) (p : Semiformula L μ₁ n₁) :
     Eval s e₂ ε₂ (ω.hom p) ↔ Eval s (Semiterm.val s e₂ ε₂ ∘ ω ∘ Semiterm.bvar) (Semiterm.val s e₂ ε₂ ∘ ω ∘ Semiterm.fvar) p := by
@@ -451,7 +451,7 @@ section
 
 variable (M : Type u) [Nonempty M] [s : Structure L M] {T U : Theory L}
 
-abbrev Models : Sentence L →L Prop := Semantics.realize s.toStruc
+abbrev Models : Sentence L →ˡᶜ Prop := Semantics.realize s.toStruc
 
 postfix:max " ⊧ₘ " => Models
 
@@ -464,7 +464,7 @@ abbrev Theory.Mod (T : Theory L) := Semantics.Mod s.toStruc T
 
 lemma Theory.Mod.iff {T : Theory L} : T.Mod M ↔ M ⊧ₘ* T := iff_of_eq <| by simp [Mod, Semantics.Mod.iff]
 
-abbrev Realize (M : Type u) [s : Structure L M] : Formula L M →L Prop := Semiformula.Val s id
+abbrev Realize (M : Type u) [s : Structure L M] : Formula L M →ˡᶜ Prop := Semiformula.Val s id
 
 postfix:max " ⊧ₘᵣ " => Realize
 

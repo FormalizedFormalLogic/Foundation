@@ -54,7 +54,7 @@ def neg {n} : Semiformula L ξ n → Semiformula L ξ n
 lemma neg_neg (p : Semiformula L ξ n) : neg (neg p) = p :=
   by induction p <;> simp[*, neg]
 
-instance : LogicSymbol (Semiformula L ξ n) where
+instance : LogicalConnective (Semiformula L ξ n) where
   tilde := neg
   arrow := fun p q => or (neg p) q
   wedge := and
@@ -130,10 +130,10 @@ lemma ball_eq (p q : Semiformula L ξ (n + 1)) : (∀[p] q) = ∀' (p ⟶ q) := 
 lemma bex_eq (p q : Semiformula L ξ (n + 1)) : (∃[p] q) = ∃' (p ⋏ q) := rfl
 
 @[simp] lemma neg_ball (p q : Semiformula L ξ (n + 1)) : ~(∀[p] q) = ∃[p] ~q := by
-  simp[LogicSymbol.ball, LogicSymbol.bex, imp_eq]
+  simp[LogicalConnective.ball, LogicalConnective.bex, imp_eq]
 
 @[simp] lemma neg_bex (p q : Semiformula L ξ (n + 1)) : ~(∃[p] q) = ∀[p] ~q := by
-  simp[LogicSymbol.ball, LogicSymbol.bex, imp_eq]
+  simp[LogicalConnective.ball, LogicalConnective.bex, imp_eq]
 
 @[simp] lemma and_inj (p₁ q₁ p₂ q₂ : Semiformula L ξ n) : p₁ ⋏ p₂ = q₁ ⋏ q₂ ↔ p₁ = q₁ ∧ p₂ = q₂ :=
 by simp[Wedge.wedge]
@@ -455,7 +455,7 @@ lemma lMapAux_neg {n} (p : Semiformula L₁ ξ n) :
     (~p).lMapAux Φ = ~p.lMapAux Φ :=
   by induction p using Semiformula.rec' <;> simp[*, lMapAux, ←Semiformula.neg_eq]
 
-def lMap (Φ : L₁ →ᵥ L₂) {n} : Semiformula L₁ ξ n →L Semiformula L₂ ξ n where
+def lMap (Φ : L₁ →ᵥ L₂) {n} : Semiformula L₁ ξ n →ˡᶜ Semiformula L₂ ξ n where
   toTr := lMapAux Φ
   map_top' := by simp[lMapAux]
   map_bot' := by simp[lMapAux]

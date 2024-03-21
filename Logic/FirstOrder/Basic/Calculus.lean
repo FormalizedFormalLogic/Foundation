@@ -220,7 +220,7 @@ def em {p : SyntacticFormula L} {Δ : Sequent L} (hpos : p ∈ Δ) (hneg : ~p �
     have : ⊢¹ Rew.free.hom p :: Δ⁺ := (ex &0 this).wk
       (by simp; right;
           have := mem_shifts_iff.mpr hneg
-          rwa [Rew.ex, Rew.q_shift, LogicSymbol.HomClass.map_neg] at this)
+          rwa [Rew.ex, Rew.q_shift, LogicalConnective.HomClass.map_neg] at this)
     exact this.all.wk (by simp[hpos])
   case hex p ih         =>
     have : ⊢¹ Rew.free.hom p :: ~Rew.free.hom p :: Δ⁺ := ih (by simp) (by simp)

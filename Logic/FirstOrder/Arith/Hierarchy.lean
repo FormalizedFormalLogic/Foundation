@@ -35,7 +35,7 @@ namespace Hierarchy
 @[simp] lemma and_iff {p q : Semiformula L μ n} : Hierarchy Γ s (p ⋏ q) ↔ Hierarchy Γ s p ∧ Hierarchy Γ s q :=
   ⟨by generalize hr : p ⋏ q = r
       intro H
-      induction H <;> try simp [LogicSymbol.ball, LogicSymbol.bex] at hr
+      induction H <;> try simp [LogicalConnective.ball, LogicalConnective.bex] at hr
       case and =>
         rcases hr with ⟨rfl, rfl⟩
         constructor <;> assumption,
@@ -44,7 +44,7 @@ namespace Hierarchy
 @[simp] lemma or_iff {p q : Semiformula L μ n} : Hierarchy Γ s (p ⋎ q) ↔ Hierarchy Γ s p ∧ Hierarchy Γ s q :=
   ⟨by generalize hr : p ⋎ q = r
       intro H
-      induction H <;> try simp [LogicSymbol.ball, LogicSymbol.bex] at hr
+      induction H <;> try simp [LogicalConnective.ball, LogicalConnective.bex] at hr
       case or =>
         rcases hr with ⟨rfl, rfl⟩
         constructor <;> assumption,
@@ -162,7 +162,7 @@ lemma neg {p : Semiformula L μ n} : Hierarchy Γ s p → Hierarchy Γ.alt s (~p
     Hierarchy Γ s (∀[“#0 < !!t”] p) ↔ Hierarchy Γ s p :=
   ⟨by generalize hq : (∀[“#0 < !!t”] p) = q
       intro H
-      induction H <;> try simp [LogicSymbol.ball, LogicSymbol.bex] at hq
+      induction H <;> try simp [LogicalConnective.ball, LogicalConnective.bex] at hq
       case ball p t pt hp ih =>
         rcases hq with ⟨rfl, rfl⟩
         assumption
@@ -182,7 +182,7 @@ lemma neg {p : Semiformula L μ n} : Hierarchy Γ s p → Hierarchy Γ.alt s (~p
     Hierarchy Γ s (∃[“#0 < !!t”] p) ↔ Hierarchy Γ s p :=
   ⟨by generalize hq : (∃[“#0 < !!t”] p) = q
       intro H
-      induction H <;> try simp [LogicSymbol.ball, LogicSymbol.bex] at hq
+      induction H <;> try simp [LogicalConnective.ball, LogicalConnective.bex] at hq
       case bex p t pt hp ih =>
         rcases hq with ⟨rfl, rfl⟩
         assumption
@@ -202,7 +202,7 @@ lemma pi_of_pi_all {p : Semiformula L μ (n + 1)} : Hierarchy Π s (∀' p) → 
   generalize hr : ∀' p = r
   generalize hb : Π = Γ
   intro H
-  cases H <;> try simp [LogicSymbol.ball, LogicSymbol.bex] at hr
+  cases H <;> try simp [LogicalConnective.ball, LogicalConnective.bex] at hr
   case ball => rcases hr with rfl; simpa
   case all => rcases hr with rfl; simpa
   case pi hp => rcases hr with rfl; exact hp.accum _
@@ -215,7 +215,7 @@ lemma sigma_of_sigma_ex {p : Semiformula L μ (n + 1)} : Hierarchy Σ s (∃' p)
   generalize hr : ∃' p = r
   generalize hb : Σ = Γ
   intro H
-  cases H <;> try simp [LogicSymbol.ball, LogicSymbol.bex] at hr
+  cases H <;> try simp [LogicalConnective.ball, LogicalConnective.bex] at hr
   case bex => rcases hr with rfl; simpa
   case ex => rcases hr with rfl; simpa
   case sigma hp => rcases hr with rfl; exact hp.accum _
@@ -280,13 +280,13 @@ lemma exClosure : {n : ℕ} → {p : Semiformula L μ n} → Hierarchy Σ (s + 1
   | 0,     _, hp => hp
   | n + 1, p, hp => by simpa using exClosure (hp.ex)
 
-instance : LogicSymbol.AndOrClosed (Hierarchy Γ s : Semiformula L μ k → Prop) where
+instance : LogicalConnective.AndOrClosed (Hierarchy Γ s : Semiformula L μ k → Prop) where
   verum := verum _ _ _
   falsum := falsum _ _ _
   and := and
   or := or
 
-instance : LogicSymbol.Closed (Hierarchy Γ 0 : Semiformula L μ k → Prop) where
+instance : LogicalConnective.Closed (Hierarchy Γ 0 : Semiformula L μ k → Prop) where
   not := by simp[neg_iff]
   imply := by simp[Semiformula.imp_eq, neg_iff]; intro p q hp hq; simp[*]
 

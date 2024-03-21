@@ -3,9 +3,9 @@ import Logic.Logic.System
 namespace LO
 
 namespace System
-variable {F : Type u} [LogicSymbol F] [𝓑 : System F]
+variable {F : Type u} [LogicalConnective F] [𝓑 : System F]
 
-class Intuitionistic (F : Type u) [LogicSymbol F] [System F] where
+class Intuitionistic (F : Type u) [LogicalConnective F] [System F] where
   modus_ponens {T : Set F} {p q : F}   : T ⊢! p ⟶ q → T ⊢! p → T ⊢! q
   verum       (T : Set F)             : T ⊢! ⊤
   imply₁      (T : Set F) (p q : F)   : T ⊢! p ⟶ q ⟶ p

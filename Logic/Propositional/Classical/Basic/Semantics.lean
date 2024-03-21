@@ -11,7 +11,7 @@ namespace Formula
 
 section val
 
-variable {F : Type*} [LogicSymbol F] [DeMorgan F] (v : α → F)
+variable {F : Type*} [LogicalConnective F] [DeMorgan F] (v : α → F)
 
 def valAux : Formula α → F
   | atom a  => v a
@@ -25,7 +25,7 @@ lemma valAux_neg (p : Formula α) :
     valAux v (~p) = ~(valAux v p) :=
   by induction p using rec' <;> simp[*, valAux, ←neg_eq, or_iff_not_imp_left]
 
-def val : Formula α →L F where
+def val : Formula α →ˡᶜ F where
   toTr := valAux v
   map_top' := rfl
   map_bot' := rfl

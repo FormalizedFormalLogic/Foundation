@@ -8,7 +8,7 @@ namespace LO.Modal.Normal
 @[notation_class] class Dia (α : Sort _) where
   dia : α → α
 
-class ModalLogicSymbol (α : Sort _) extends LogicSymbol α, Box α, Dia α
+class ModalLogicSymbol (α : Sort _) extends LogicalConnective α, Box α, Dia α
 
 prefix:74 "□" => Box.box
 prefix:74 "◇" => Dia.dia

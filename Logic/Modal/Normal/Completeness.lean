@@ -240,7 +240,7 @@ lemma membership_iff {Ω : MaximalConsistentTheory Λ} {p : Formula β} : (p ∈
 
 lemma iff_congr : (Ω.theory ⊢ᴹ[Λ]! (p ⟷ q)) → ((p ∈ Ω) ↔ (q ∈ Ω)) := by
   intro hpq;
-  simp only [LogicSymbol.iff] at hpq;
+  simp only [LogicalConnective.iff] at hpq;
   constructor;
   . intro hp;
     exact membership_iff.mpr $ modus_ponens'! (conj₁'! hpq) (membership_iff.mp hp)
