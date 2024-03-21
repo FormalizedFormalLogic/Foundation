@@ -26,7 +26,7 @@ variable {T : Theory ℒₒᵣ} [𝐄𝐪 ≾ T] [𝐏𝐀⁻ ≾ T] [DecidableP
 variable (T)
 
 /-- Set $D \coloneqq \{\sigma\ |\ T \vdash \lnot\sigma(\ulcorner \sigma \urcorner)\}$ is r.e. -/
-private lemma diagRefutation_re : RePred (fun σ ↦ T ⊢! ~σ/[⸢σ⸣]) := by
+lemma diagRefutation_re : RePred (fun σ ↦ T ⊢! ~σ/[⸢σ⸣]) := by
   have : Partrec fun σ : Semisentence ℒₒᵣ 1 ↦ (provableFn T (~σ/[⸢σ⸣])).map (fun _ ↦ ()) :=
     Partrec.map
       ((provableFn_partrec T).comp <| Primrec.to_comp

@@ -1,10 +1,10 @@
 import Logic.Logic.Deduction
-import Logic.Modal.Normal.LogicalConnective
+import Logic.Modal.Normal.LogicSymbol
 import Logic.Modal.Normal.Axioms
 
 namespace LO.Hilbert
 
-open LO.Modal.Normal
+open LO.Deduction LO.Modal.Normal
 
 variable {F : Type u} [ModalLogicSymbol F] [DecidableEq F] [NegDefinition F] (Bew : Set F → F → Type u)
 

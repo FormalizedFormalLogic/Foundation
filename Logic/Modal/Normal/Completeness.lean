@@ -83,7 +83,7 @@ lemma completeness_def {𝔽 : FrameClass α} : (Completeness Λ 𝔽) ↔ (∀ 
       have ⟨p, ⟨hp₁, hp₂⟩⟩ := h₂ F hF V w;
       have := h p hp₁;
       contradiction;
-    . simpa [Theory.Consistent, Theory.Inconsistent] using h₁;
+    . simpa [Theory.Consistent, Theory.Inconsistent, Deduction.Consistent, Deduction.Undeducible, Deduction.Deducible] using h₁;
   . contrapose;
     simp [Completeness];
     intro Δ p h₁ h₂;
@@ -277,7 +277,7 @@ lemma exists_maximal_consistent_theory' :
     simp;
     constructor;
     . by_contra hC;
-      replace hC : ⋃₀ c ⊢ᴹ[Λ]! ⊥ := by simpa [Theory.Consistent, Theory.Inconsistent] using hC;
+      replace hC : ⋃₀ c ⊢ᴹ[Λ]! ⊥ := by simpa [Theory.Consistent, Theory.Inconsistent, Deduction.not_consistent] using hC;
       rcases hC.compact with ⟨s, hs, s_consis⟩;
       rcases Set.subset_mem_chain_of_finite c hnc chain (s := s) (Finset.finite_toSet s) hs with ⟨U, hUc, hsU⟩
       exact (consistent_of_subset hsU (by apply hc; simpa)) s_consis;
@@ -371,7 +371,7 @@ lemma axiomD (hD : 𝐃 ⊆ Λ) : Serial (CanonicalModel Λ).frame := by
   suffices h : Consistent Λ (□⁻¹Ω.theory) by exact exists_maximal_consistent_theory h;
   by_contra hC;
   simp [Theory.Consistent, Theory.Inconsistent] at hC;
-  have d₁ : Ω.theory ⊢ᴹ[Λ]! □⊥ := preboxed_necessitation! hC;
+  have d₁ : Ω.theory ⊢ᴹ[Λ]! □⊥ := preboxed_necessitation! (Deduction.not_consistent.mp hC);
   have d₂ : Ω.theory ⊢ᴹ[Λ]! (□⊥ ⟶ ◇⊥) := Deducible.maxm! (hD $ (by apply AxiomD.set.include));
   have d₃ : Ω.theory ⊢ᴹ[Λ]! ~(◇⊥) := dni'! $ boxverum! Ω.theory;
   have d₄ : Ω.theory ⊢ᴹ[Λ]! ◇⊥ := modus_ponens'! d₂ d₁;

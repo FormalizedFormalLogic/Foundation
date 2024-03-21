@@ -87,7 +87,7 @@ section
 variable {L : Language} [Structure L ℕ] (T : Theory L) (F : Set (Sentence L))
 
 lemma consistent_of_sound [SoundOn T F] (hF : F ⊥) : System.Consistent T :=
-  ⟨fun b => by simpa using SoundOn.sound hF ⟨b⟩⟩
+  fun b => by simpa using SoundOn.sound hF b
 
 end
 

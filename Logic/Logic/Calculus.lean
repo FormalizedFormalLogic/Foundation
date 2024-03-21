@@ -279,7 +279,7 @@ end Disjconseq
 variable (F)
 
 instance : System F where
-  Bew := fun T p => T ⊢' [p]
+  turnstile := fun T p => T ⊢' [p]
   axm := fun {T p} h =>
     ⟨[p], by simpa,
       em (List.mem_singleton.mpr rfl) (List.mem_singleton.mpr rfl)⟩
@@ -311,12 +311,12 @@ lemma provable_iff {p : F} :
 theorem compact :
     System.Consistent T ↔ ∀ T' : Finset F, ↑T' ⊆ T → System.Consistent (T' : Set F) :=
   ⟨fun c u hu => c.of_subset hu,
-   fun h => ⟨by
+   fun h => by
     letI := Classical.typeDecidableEq F
     rintro ⟨Δ, hΔ, d⟩
     exact (System.unprovable_iff_not_provable.mp $
       System.consistent_iff_unprovable.mp $ h Δ.toFinset (by intro p; simpa using hΔ p))
-      (provable_iff.mpr $ ⟨Δ, by simp, ⟨d⟩⟩)⟩⟩
+      (provable_iff.mpr $ ⟨Δ, by simp, ⟨d⟩⟩)⟩
 
 theorem compact_inconsistent (h : ¬System.Consistent T) :
     ∃ s : Finset F, ↑s ⊆ T ∧ ¬System.Consistent (s : Set F) := by
@@ -324,8 +324,8 @@ theorem compact_inconsistent (h : ¬System.Consistent T) :
 
 lemma consistent_iff_empty_sequent :
     System.Consistent T ↔ IsEmpty (T ⊢' []) :=
-  ⟨by contrapose; simp[System.Consistent]; intro b; exact ⟨b.wk (by simp)⟩,
-   by contrapose; simp[System.Consistent]
+  ⟨by contrapose; simp[System.Consistent, Deduction.Consistent, Deduction.Undeducible]; intro b; exact ⟨b.wk (by simp)⟩,
+   by contrapose; simp[System.Consistent, Deduction.Consistent, Deduction.Undeducible]
       rintro ⟨Δ, h, d⟩
       have : Δ ⊢² [] := Cut.cut d (falsum _ _)
       exact ⟨toDisjconseq this h⟩⟩
@@ -333,20 +333,20 @@ lemma consistent_iff_empty_sequent :
 lemma provable_iff_inconsistent {p} :
     T ⊢! p ↔ ¬System.Consistent (insert (~p) T) :=
   ⟨by rintro ⟨⟨Δ, h, d⟩⟩
-      simp[consistent_iff_empty_sequent]
+      simp [consistent_iff_empty_sequent]
       exact ⟨⟨~p :: Δ, by simp; intro q hq; right; exact h q hq, negLeft d⟩⟩,
    by letI := Classical.typeDecidableEq F
-      simp[consistent_iff_empty_sequent]
+      simp [consistent_iff_empty_sequent]
       intro b
       exact ⟨b.deductionNeg⟩⟩
 
 lemma refutable_iff_inconsistent {p} :
     T ⊢! ~p ↔ ¬System.Consistent (insert p T) :=
   ⟨by rintro ⟨⟨Δ, h, d⟩⟩
-      simp[consistent_iff_empty_sequent]
+      simp [consistent_iff_empty_sequent]
       exact ⟨⟨p :: Δ, by simp; intro q hq; right; exact h q hq, ofNegRight d⟩⟩,
    by letI := Classical.typeDecidableEq F
-      simp[consistent_iff_empty_sequent]
+      simp [consistent_iff_empty_sequent]
       intro b
       exact ⟨b.deduction⟩⟩
 
@@ -366,10 +366,11 @@ lemma inconsistent_of_provable_and_refutable' {p}
 
 @[simp] lemma consistent_theory_iff_consistent :
     System.Consistent (System.theory T) ↔ System.Consistent T :=
-  ⟨fun h ↦ h.of_subset (by intro _; simp[System.theory]; exact fun h ↦ ⟨System.axm h⟩),
-   fun consis ↦ ⟨fun b ↦ by
+  ⟨fun h ↦ h.of_subset (by intro _; simp[System.theory]; exact fun h ↦ ⟨Deduction.axm h⟩),
+   fun consis ↦ fun b ↦ by
+      rcases b with ⟨b⟩
       have : ¬System.Consistent T := System.inconsistent_of_proof (proofCut System.provableTheory_theory b)
-      contradiction ⟩⟩
+      contradiction⟩
 
 end Gentzen
 

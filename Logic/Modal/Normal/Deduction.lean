@@ -51,8 +51,8 @@ notation:45 "⊢ᴹ[" Λ "]! " p => Provable Λ p
 abbrev Unprovable := IsEmpty (⊢ᴹ[Λ] p)
 notation:45 "⊬ᴹ[" Λ "]! " p => Unprovable Λ p
 
-abbrev Theory.Consistent := Hilbert.Consistent (@Deduction α Λ) Γ
-abbrev Theory.Inconsistent := Hilbert.Inconsistent (@Deduction α Λ) Γ
+abbrev Theory.Consistent := Deduction.Consistent (@Deduction α Λ) Γ
+abbrev Theory.Inconsistent := Deduction.Inconsistent (@Deduction α Λ) Γ
 
 namespace Deduction
 

@@ -511,7 +511,7 @@ def lMap {σ : Sentence L₁} (b : T ⊢ σ) :
     (by simp; intro σ hσ; exact Set.mem_image_of_mem _ (b.antecedent_ss σ hσ) )
 
 lemma inconsistent_lMap : ¬System.Consistent T → ¬System.Consistent (T.lMap Φ) := by
-  simp[System.Consistent]; intro b; exact ⟨by simpa using lMap Φ b⟩
+  simp [System.inconsistent_iff_provable_falsum]; intro ⟨b⟩; exact ⟨by simpa using lMap Φ b⟩
 
 end System
 

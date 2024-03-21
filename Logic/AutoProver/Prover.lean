@@ -232,7 +232,7 @@ section
 
 open Litform.Meta Denotation
 
-variable {F : Q(Type u)} (instLS : Q(LogicalConnective $F)) (instSys : Q(System $F))
+variable {F : Q(Type u)} (instLS : Q(LogicalConnective $F)) (instSys : Q(System.{u,u} $F))
   (instGz : Q(Gentzen $F)) (instLTS : Q(LawfulTwoSided $F))
 
 
@@ -292,7 +292,7 @@ elab "tautology" n:(num)? : tactic => do
   let ⟨u, F, T, p⟩ ← isExprProvable? ty
   let .some instLS ← trySynthInstanceQ (q(LogicalConnective.{u} $F) : Q(Type u))
     | throwError m! "error: failed to find instance LogicalConnective {F}"
-  let .some instSys ← trySynthInstanceQ q(System $F)
+  let .some instSys ← trySynthInstanceQ q(System.{u,u} $F)
     | throwError m! "error: failed to find instance System {F}"
   let .some instGz ← trySynthInstanceQ q(Gentzen $F)
     | throwError m! "error: failed to find instance Gentzen {F}"
@@ -312,7 +312,7 @@ elab "prover" n:(num)? seq:(termSeq)? : tactic => do
   let ⟨u, F, T, p⟩ ← isExprProvable? ty
   let .some instLS ← trySynthInstanceQ (q(LogicalConnective.{u} $F) : Q(Type u))
     | throwError m! "error: failed to find instance LogicalConnective {F}"
-  let .some instSys ← trySynthInstanceQ q(System $F)
+  let .some instSys ← trySynthInstanceQ q(System.{u,u} $F)
     | throwError m! "error: failed to find instance System {F}"
   let .some instGz ← trySynthInstanceQ q(Gentzen $F)
     | throwError m! "error: failed to find instance Gentzen {F}"

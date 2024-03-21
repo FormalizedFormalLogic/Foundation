@@ -111,7 +111,7 @@ lemma mem_or_neg_mem_maximalConsistentTheory (p) :
 
 lemma mem_maximalConsistentTheory_iff :
     p ∈ maximalConsistentTheory consisT ↔ maximalConsistentTheory consisT ⊢! p :=
-  ⟨fun h ↦ ⟨axm h⟩, fun h ↦ by have : p ∈ theory (maximalConsistentTheory consisT) := h; simpa using this⟩
+  ⟨fun h ↦ ⟨Deduction.axm h⟩, fun h ↦ by have : p ∈ theory (maximalConsistentTheory consisT) := h; simpa using this⟩
 
 lemma maximalConsistentTheory_consistent' {p} :
     p ∈ maximalConsistentTheory consisT → ~p ∉ maximalConsistentTheory consisT := by
@@ -155,7 +155,7 @@ lemma maximalConsistentTheory_satisfiable :
   case hnatom =>
     simpa using maximalConsistentTheory_consistent' hp
   case hfalsum =>
-    have : ¬Consistent (maximalConsistentTheory consisT) := inconsistent_of_proof (axm hp)
+    have : ¬Consistent (maximalConsistentTheory consisT) := inconsistent_of_proof (Deduction.axm hp)
     simp_all
   case hand p q ihp ihq =>
     exact ⟨ihp (mem_maximalConsistentTheory_and hp).1, ihq (mem_maximalConsistentTheory_and hp).2⟩
@@ -171,7 +171,7 @@ lemma satisfiableTheory_of_consistent (consisT : Consistent T) : Semantics.Satis
 theorem completeness! : T ⊨ p → T ⊢! p := by
   suffices Consistent (insert (~p) T) → Semantics.SatisfiableTheory (insert (~p) T) by
     contrapose
-    simp; intro hp hs
+    intro hp hs
     have : Semantics.SatisfiableTheory (insert (~p) T) :=
       this (consistent_insert_iff_not_refutable.mpr $ by simpa)
     rcases this with ⟨v, hv⟩

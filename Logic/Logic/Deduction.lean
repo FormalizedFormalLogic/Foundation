@@ -6,6 +6,26 @@ class Deduction {F : Type*} (Bew : Set F → F → Type*) where
   axm : ∀ {f}, f ∈ Γ → Bew Γ f
   weakening' : ∀ {T U f}, T ⊆ U → Bew T f → Bew U f
 
+namespace Deduction
+
+variable {F : Type*} [LogicalConnective F] (Bew : Set F → F → Type*) [Deduction Bew]
+
+variable (Γ : Set F) (p : F)
+
+def Deducible := Nonempty (Bew Γ p)
+
+def Undeducible := ¬Deducible Bew Γ p
+
+def Inconsistent := Deducible Bew Γ ⊥
+
+def Consistent := Undeducible Bew Γ ⊥
+
+variable {Bew Γ p}
+
+lemma not_consistent : ¬Consistent Bew Γ ↔ Deducible Bew Γ ⊥ := by simp [Consistent, Undeducible]
+
+end Deduction
+
 namespace Hilbert
 
 variable {F : Type*} [LogicalConnective F] [DecidableEq F] [NegDefinition F]
@@ -281,9 +301,6 @@ local infix:20 " ⊢ " => Bew
 
 variable (Γ : Set F) (p : F)
 
-abbrev Deducible := Nonempty (Bew Γ p)
-abbrev Undeducible := ¬(Deducible Bew Γ p)
-
 section Deducible
 
 variable {Bew : Set F → F → Type u} [Deduction Bew]
@@ -360,14 +377,14 @@ lemma contra₀'! {Γ : Set F} {p q : F} (d : Γ ⊢! (p ⟶ q)) : Γ ⊢! (~q �
 lemma dtr! {Γ : Set F} {p q : F} (d : (insert p Γ) ⊢! q) : Γ ⊢! (p ⟶ q) := ⟨dtr d.some⟩
 lemma dtr_not! {Γ : Set F} {p q : F} : (Γ ⊬! (p ⟶ q)) → ((insert p Γ) ⊬! q) := by
   contrapose;
-  simp;
+  simp [Undeducible, Deducible];
   intro d;
   exact ⟨dtr d⟩
 
 lemma dtl! {Γ : Set F} {p q : F} (d : Γ ⊢! (p ⟶ q)) : (insert p Γ) ⊢! q := ⟨dtl d.some⟩
 lemma dtl_not! {Γ : Set F} {p q : F} : ((insert p Γ) ⊬! q) → (Γ ⊬! (p ⟶ q)) := by
   contrapose;
-  simp;
+  simp [Undeducible, Deducible];
   intro d;
   exact ⟨dtl d⟩
 
@@ -377,9 +394,6 @@ section Consistency
 
 local infix:20 "⊢!" => Deducible Bew
 local infix:20 "⊬!" => Undeducible Bew
-
-abbrev Inconsistent := Γ ⊢! ⊥
-abbrev Consistent := Γ ⊬! ⊥
 
 lemma consistent_iff_undeducible_falsum : Consistent Bew Γ ↔ (Γ ⊬! ⊥) := Iff.rfl
 
@@ -398,7 +412,7 @@ lemma consistent_subset_undeducible_falsum {Γ Δ} (hConsis : Consistent Bew Γ)
   exact hConsis.false $ hd.weakening' hΔ hC.some;
 
 lemma consistent_neither_undeducible {Γ : Set F} (hConsis : Consistent Bew Γ) (p) : (Γ ⊬! p) ∨ (Γ ⊬! ~p) := by
-  by_contra hC; simp only [not_or] at hC;
+  by_contra hC; simp only [Undeducible, not_or] at hC;
   have h₁ : Γ ⊢! p  := by simpa using hC.1;
   have h₂ : Γ ⊢! p ⟶ ⊥ := by simpa using hC.2;
   exact hConsis $ modus_ponens'! h₂ h₁;
@@ -430,7 +444,7 @@ lemma inconsistent_iff_insert_neg {Γ p} : Inconsistent Bew (insert (~p) Γ) ↔
 lemma consistent_iff_insert_neg {Γ p} : Consistent Bew (insert (~p) Γ) ↔ (Γ ⊬! p) := (inconsistent_iff_insert_neg Bew).not
 
 lemma consistent_either {Γ : Set F} (hConsis : Consistent Bew Γ) (p) : (Consistent Bew (insert p Γ)) ∨ (Consistent Bew (insert (~p) Γ)) := by
-  by_contra hC; simp [not_or, Consistent] at hC;
+  by_contra hC; simp [Undeducible, not_or, Consistent] at hC;
   have ⟨Δ₁, hΔ₁, ⟨dΔ₁⟩⟩ := inconsistent_insert Bew hC.1;
   have ⟨Δ₂, hΔ₂, ⟨dΔ₂⟩⟩ := inconsistent_insert Bew hC.2;
   exact consistent_subset_undeducible_falsum _ hConsis (by aesop) ⟨(dtr dΔ₂) ⨀ (dtr dΔ₁)⟩;
