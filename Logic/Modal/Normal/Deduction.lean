@@ -310,9 +310,8 @@ instance : IsEquiv (Formula α) (· ⟷[Λ, Γ] ·) where
   symm := by apply DeducibleEquivalent.symm
   trans := by apply DeducibleEquivalent.trans
 
-@[simp] lemma bot : (⊥ ⟷[Λ, Γ] ⊥) := by simp [DeducibleEquivalent]; apply iff_intro!; all_goals apply imp_id!
-
-@[simp] lemma top : (⊤ ⟷[Λ, Γ] ⊤) := by simp [DeducibleEquivalent]; apply iff_intro!; all_goals apply imp_id!
+@[simp]
+lemma tauto : p ⟷[Λ, Γ] p := by simp [DeducibleEquivalent]; apply iff_intro!; all_goals apply imp_id!
 
 lemma _root_.Set.subset_insert_insert {α} {s : Set α} {a b} : s ⊆ insert a (insert b s) := by
   have h₁ := Set.subset_insert a s;
@@ -403,10 +402,10 @@ lemma box (h : p ⟷[Λ, ∅] q) : ((□p) ⟷[Λ, Γ] (□q)) := by
   simp_all only [DeducibleEquivalent];
   apply iff_intro!;
   . have d₁ : Γ ⊢ᴹ[Λ]! □(p ⟶ q) := necessitation! (iff_mp'! h);
-    have d₂ : Γ ⊢ᴹ[Λ]! □(p ⟶ q) ⟶ (□p ⟶ □q) := Hilbert.AxiomK! Γ p q;
+    have d₂ : Γ ⊢ᴹ[Λ]! □(p ⟶ q) ⟶ (□p ⟶ □q) := Hilbert.axiomK! Γ p q;
     exact modus_ponens'! d₂ d₁;
   . have d₁ : Γ ⊢ᴹ[Λ]! □(q ⟶ p) := necessitation! (iff_mpr'! h);
-    have d₂ : Γ ⊢ᴹ[Λ]! □(q ⟶ p) ⟶ (□q ⟶ □p) := Hilbert.AxiomK! Γ q p;
+    have d₂ : Γ ⊢ᴹ[Λ]! □(q ⟶ p) ⟶ (□q ⟶ □p) := Hilbert.axiomK! Γ q p;
     exact modus_ponens'! d₂ d₁;
 
 end DeducibleEquivalent

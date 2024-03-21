@@ -66,9 +66,9 @@ variable [Classical Bew]
 
 open HasNecessitation
 
-def necessitation {Γ : Set F} {p} (d : Bew ∅ p) : Γ ⊢ □p := HasNecessitation.necessitation d
+def necessitation {Γ : Set F} {p} (d : (∅ : Set F) ⊢ p) : Γ ⊢ □p := HasNecessitation.necessitation d
 
-def necessitation! {Γ : Set F} {p} (d : Deducible Bew ∅ p) : Γ ⊢! □p := ⟨necessitation d.some⟩
+def necessitation! {Γ : Set F} {p} (d : (∅ : Set F) ⊢! p) : Γ ⊢! □p := ⟨necessitation d.some⟩
 
 open HasBoxedNecessitation
 
@@ -85,19 +85,19 @@ def preboxed_necessitation! {Γ : Set F} {p} (d : Γ.prebox ⊢! p) : Γ ⊢! �
 
 open HasAxiomK
 
-protected def AxiomK (Γ : Set F) (p q) :  Γ ⊢ (AxiomK p q) := HasAxiomK.K Γ p q
-def AxiomK' {Γ : Set F} {p q} (d₁ : Γ ⊢ (□(p ⟶ q))) (d₂ : Γ ⊢ □p) : Γ ⊢ □q := ((Hilbert.AxiomK Γ p q) ⨀ d₁) ⨀ d₂
+protected def axiomK (Γ : Set F) (p q) :  Γ ⊢ (AxiomK p q) := HasAxiomK.K Γ p q
+def axiomK' {Γ : Set F} {p q} (d₁ : Γ ⊢ (□(p ⟶ q))) (d₂ : Γ ⊢ □p) : Γ ⊢ □q := ((Hilbert.axiomK Γ p q) ⨀ d₁) ⨀ d₂
 
-lemma AxiomK! (Γ : Set F) (p q) : Γ ⊢! (AxiomK p q) := ⟨Hilbert.AxiomK Γ p q⟩
+lemma axiomK! (Γ : Set F) (p q) : Γ ⊢! (AxiomK p q) := ⟨Hilbert.axiomK Γ p q⟩
 
 def boxverum (Γ : Set F) : Γ ⊢ □⊤ := necessitation (verum _)
 lemma boxverum! (Γ : Set F) : Γ ⊢! □⊤ := ⟨boxverum Γ⟩
 
 def box_iff' {Γ : Set F} {p q : F} (d : ∅ ⊢ p ⟷ q) : Γ ⊢ (□p ⟷ □q) := by
-  have dp₁ : ∅ ⊢ (□(p ⟶ q) ⟶ (□p ⟶ □q)) := Hilbert.AxiomK ∅ p q;
+  have dp₁ : ∅ ⊢ (□(p ⟶ q) ⟶ (□p ⟶ □q)) := Hilbert.axiomK ∅ p q;
   have dp₂ : ∅ ⊢ (□(p ⟶ q)) := necessitation $ iff_mp' d;
 
-  have dq₁ : ∅ ⊢ (□(q ⟶ p) ⟶ (□q ⟶ □p)) := Hilbert.AxiomK ∅ q p;
+  have dq₁ : ∅ ⊢ (□(q ⟶ p) ⟶ (□q ⟶ □p)) := Hilbert.axiomK ∅ q p;
   have dq₂ : ∅ ⊢ (□(q ⟶ p)) := necessitation $ iff_mpr' d;
 
   exact iff_intro

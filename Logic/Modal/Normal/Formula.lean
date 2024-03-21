@@ -236,12 +236,6 @@ prefix:73 "□" => box
 def dia : Context α := Finset.dia Γ
 prefix:73 "◇" => dia
 
-@[deprecated]
-axiom insert_conj {Γ : Context α} {p : Formula α} : (insert p Γ).conj = Γ.conj ⋏ p
-
-@[deprecated]
-axiom insert_disj {Γ : Context α} {p : Formula α} : (insert p Γ).disj = Γ.disj ⋎ p
-
 end Context
 
 end LO.Modal.Normal
