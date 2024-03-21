@@ -42,9 +42,8 @@ notation:45 Γ " ⊢ᴹ[" Λ "]! " p => Deducible Λ Γ p
 abbrev Undeducible := ¬(Γ ⊢ᴹ[Λ]! p)
 notation:45 Γ " ⊬ᴹ[" Λ "]! " p => Undeducible Λ Γ p
 
-abbrev Theory.Consistent := Hilbert.Consistent (@Deduction α Λ) Γ
-
-abbrev Theory.Inconsistent := Hilbert.Inconsistent (@Deduction α Λ) Γ
+abbrev Theory.Consistent := Deduction.Consistent (@Deduction α Λ) Γ
+abbrev Theory.Inconsistent := Deduction.Inconsistent (@Deduction α Λ) Γ
 
 namespace Deduction
 
