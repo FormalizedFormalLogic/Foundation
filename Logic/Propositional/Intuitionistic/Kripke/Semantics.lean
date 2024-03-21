@@ -51,10 +51,10 @@ local infix:20 "≺" => M.frame
 
 def KripkeSatisfies (M : Kripke.Model α β) (w : α) : Formula β → Prop
   | atom a => M.val w a
-  | ⊥ => False
-  | p ⋏ q => (p.KripkeSatisfies M w) ∧ (q.KripkeSatisfies M w)
-  | p ⋎ q => (p.KripkeSatisfies M w) ∨ (q.KripkeSatisfies M w)
-  | p ⟶ q => ∀ w', (M.frame w w') → (¬(p.KripkeSatisfies M w') ∨ (q.KripkeSatisfies M w'))
+  | ⊥      => False
+  | p ⋏ q  => p.KripkeSatisfies M w ∧ q.KripkeSatisfies M w
+  | p ⋎ q  => p.KripkeSatisfies M w ∨ q.KripkeSatisfies M w
+  | p ⟶ q => ∀ w', (M.frame w w') → (¬p.KripkeSatisfies M w' ∨ q.KripkeSatisfies M w')
 
 notation w " ⊩[" M "] " p => KripkeSatisfies M w p
 

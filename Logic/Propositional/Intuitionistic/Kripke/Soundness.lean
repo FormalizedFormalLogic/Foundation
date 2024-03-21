@@ -7,7 +7,7 @@ open Formula Kripke KripkeSatisfies
 
 variable {α : Type u} [Inhabited α]
 
-lemma Kripke.soundsAux (Γ : Theory α) (p : Formula α) (h : Γ ⊢ᴵ! p) : (Γ ⊨ᴵ p) := by
+lemma Kripke.soundsAux (Γ : Theory α) (p : Formula α) (h : Γ ⊢! p) : Γ ⊨ᴵ p := by
   induction h.some <;> simp [KripkeConsequence];
   case axm => simp_all [Theory.KripkeSatisfies];
   case modusPonens _ p q hpq hp ihpq ihp =>
@@ -32,13 +32,13 @@ lemma Kripke.soundsAux (Γ : Theory α) (p : Formula α) (h : Γ ⊢ᴵ! p) : (�
     | inl h₃ => exact h₁ w₄ (M.frame_trans hw₂w₃ hw₃w₄) h₃;
     | inr h₃ => exact h₂ w₄ hw₃w₄ h₃;
 
-theorem Kripke.sounds {Γ : Theory α} {p} : (Γ ⊢ᴵ! p) → (Γ ⊨ᴵ p) := Kripke.soundsAux Γ p
+theorem Kripke.sounds {Γ : Theory α} {p} : Γ ⊢! p → Γ ⊨ᴵ p := Kripke.soundsAux Γ p
 
 variable {β} [Inhabited β]
 
-theorem Deduction.consistent : ∅ ⊬ᴵ! (⊥ : Formula α) := by
+theorem Deduction.consistent : ∅ ⊬ (⊥ : Formula α) := by
   by_contra hC;
-  have : ∅ ⊨ᴵ (⊥ : Formula α) := Kripke.sounds (by simpa [Undeducible] using hC);
+  have : ∅ ⊨ᴵ (⊥ : Formula α) := Kripke.sounds (by simpa [System.unprovable_iff_not_provable] using hC);
   have : ∅ ⊭ᴵ (⊥ : Formula α) := by
     simp [KripkeInconsequence, KripkeConsequence, Theory.KripkeSatisfies];
     existsi β;
