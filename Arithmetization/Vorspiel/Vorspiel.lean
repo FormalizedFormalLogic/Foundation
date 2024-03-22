@@ -54,7 +54,7 @@ namespace LO
 
 section
 
-variable (F : Type*) [LogicSymbol F] {T U : Set F}
+variable (F : Type*) [LogicalConnective F] {T U : Set F}
 
 class TheoryCut [System F] where
   theoryCut {T : Set F} {U : Set F} {p : F} : T ⊢* U → U ⊢ p → T ⊢ p
@@ -353,7 +353,8 @@ variable {T}
 lemma of_deltaZeroIn {p : Semiformula L ξ n} (hp : (DeltaZeroIn ξ T).Domain p) : (HClassIn ξ Γ s T).Domain p :=
   deltaZeroIn_le_hClassIn T Γ s hp
 
-@[formula_class] def rew {p : Semiformula L ξ₁ n₁} (hp : (HClassIn ξ₁ Γ s T).Domain p) (ω : Rew L ξ₁ n₁ ξ₂ n₂) : (HClassIn ξ₂ Γ s T).Domain (ω.hom p) := by
+@[formula_class] def rew {p : Semiformula L ξ₁ n₁} (hp : (HClassIn ξ₁ Γ s T).Domain p) (ω : Rew L ξ₁ n₁ ξ₂ n₂) :
+    (HClassIn ξ₂ Γ s T).Domain (ω.hom p) := by
   rcases hp with ⟨p', hp', H⟩
   exact ⟨ω.hom p', Hierarchy.rew ω hp', H.rew ω⟩
 

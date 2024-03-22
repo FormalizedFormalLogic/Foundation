@@ -48,7 +48,7 @@ def arithRec {n} {C : Semiterm ℒₒᵣ ξ n → Sort w}
     have ih0 := arithRec hbvar hfvar hzero hone hadd hmul (v 0)
     have ih1 := arithRec hbvar hfvar hzero hone hadd hmul (v 1)
     simpa [Operator.operator, Operator.Mul.term_eq, Rew.func, ←Matrix.fun_eq_vec₂] using hmul ih0 ih1
-  termination_by arithRec _ _ _ _ _ _ t => t.complexity
+  termination_by t => t.complexity
 
 end Semiterm
 
@@ -149,9 +149,9 @@ theorem lt_of_mul_lt_mul_left (h : a * b < a * c) : b < c := lt_of_mul_lt_mul_of
 
 theorem lt_of_mul_lt_mul_right (h : b * a < c * a) : b < c := lt_of_mul_lt_mul_of_nonneg_right h (by simp)
 
-lemma pow_three (x : M) : x^3 = x * x * x := by simp [← two_add_one_eq_three, pow_add, sq]
+lemma pow_three (x : M) : x^3 = x * x * x := by rw [← two_add_one_eq_three, pow_add, sq]; simp
 
-lemma pow_four (x : M) : x^4 = x * x * x * x := by simp [← three_add_one_eq_four, pow_add, pow_three]
+lemma pow_four (x : M) : x^4 = x * x * x * x := by rw [← three_add_one_eq_four, pow_add, pow_three]; simp
 
 lemma pow_four_eq_sq_sq (x : M) : x^4 = (x^2)^2 := by simp [pow_four, sq, mul_assoc]
 
