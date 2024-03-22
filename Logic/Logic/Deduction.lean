@@ -24,6 +24,8 @@ variable {Bew Γ p}
 
 lemma not_consistent : ¬Consistent Bew Γ ↔ Deducible Bew Γ ⊥ := by simp [Consistent, Undeducible]
 
+lemma axm! (h : p ∈ Γ) : Deducible Bew Γ p := ⟨axm h⟩
+
 end Deduction
 
 namespace Hilbert
@@ -39,7 +41,12 @@ class HasModusPonens where
 
 section
 
-variable {Bew : Set F → F → Type*} [HasModusPonens Bew]
+variable {Bew : Set F → F → Type*}
+
+def HasModusPonens.of' [Deduction Bew] (b : {Γ : Set F} → {p q : F} → Bew Γ (p ⟶ q) → Bew Γ p → Bew Γ q) : HasModusPonens Bew :=
+  ⟨fun {Γ₁ Γ₂ _ _}  b₁ b₂ ↦ b (Deduction.weakening' (Set.subset_union_left Γ₁ Γ₂) b₁) (Deduction.weakening' (Set.subset_union_right Γ₁ Γ₂) b₂)⟩
+
+variable [HasModusPonens Bew]
 
 abbrev modus_ponens {Γ₁ Γ₂ p q} (d₁ : Bew Γ₁ (p ⟶ q)) (d₂ : Bew Γ₂ p) : Bew (Γ₁ ∪ Γ₂) q := HasModusPonens.modus_ponens d₁ d₂
 infixr:90 "⨀" => modus_ponens

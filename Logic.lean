@@ -22,6 +22,8 @@ import Logic.Propositional.Classical.Basic
 -- Propositional Intuitionistic
 import Logic.Propositional.Intuitionistic
 
+import Logic.Propositional.Translation
+
 -- FirstOrder
 
 import Logic.FirstOrder.Basic.Syntax.Language

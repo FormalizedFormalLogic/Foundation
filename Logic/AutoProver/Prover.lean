@@ -13,9 +13,9 @@ def rotateLeft (d : Γ ++ [p] ⊢² Δ) : p :: Γ ⊢² Δ := wk d (by simp) (by
 
 def rotateRight (d : Γ ⊢² Δ ++ [p]) : Γ ⊢² p :: Δ := wk d (by simp) (by simp)
 
-def rEmLeft (h : p ∈ Δ) : p :: Γ ⊢² Δ := em (by simp) h
+def rEmLeft (h : p ∈ Δ) : p :: Γ ⊢² Δ := closed _ (by simp) h
 
-def rEmRight (h : p ∈ Γ) : Γ ⊢² p :: Δ := em h (by simp)
+def rEmRight (h : p ∈ Γ) : Γ ⊢² p :: Δ := closed _ h (by simp)
 
 def rNegLeft (dp : Γ ⊢² Δ ++ [p]) : ~p :: Γ ⊢² Δ :=
   negLeft (wk dp (by simp) (by simp))

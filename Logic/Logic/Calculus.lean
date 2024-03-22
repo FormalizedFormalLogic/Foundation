@@ -53,7 +53,7 @@ class Gentzen (F : Type u) [LogicalConnective F] extends TwoSided F where
   implyLeft {p q : F} {Γ Δ : List F}  : Γ ⊢² p :: Δ → q :: Γ ⊢² Δ → (p ⟶ q) :: Γ ⊢² Δ
   implyRight {p q : F} {Γ Δ : List F} : p :: Γ ⊢² q :: Δ → Γ ⊢² (p ⟶ q) :: Δ
   wk {Γ Γ' Δ Δ' : List F}             : Γ ⊢² Δ → Γ ⊆ Γ' → Δ ⊆ Δ' → Γ' ⊢² Δ'
-  em {p} {Γ Δ : List F}               : p ∈ Γ → p ∈ Δ → Γ ⊢² Δ
+  closed (p) {Γ Δ : List F}               : p ∈ Γ → p ∈ Δ → Γ ⊢² Δ
 
 class Gentzen.Cut (F : Type u) [LogicalConnective F] [Gentzen F] where
   cut {Γ Δ : List F} {p} : Γ ⊢² p :: Δ → p :: Γ ⊢² Δ → Γ ⊢² Δ
@@ -134,7 +134,7 @@ instance : Gentzen F where
     simp
     exact ⟨List.subset_append_of_subset_left _ $ List.map_subset _ hΓ,
       List.subset_append_of_subset_right _ $ hΔ⟩)
-  em := fun {p} _ _ hΓ hΔ => em (p := p)
+  closed := fun p _ _ hΓ hΔ => em (p := p)
     (List.mem_append.mpr $ .inr $ hΔ)
     (List.mem_append.mpr $ .inl $ List.mem_map_of_mem (~·) hΓ)
 
@@ -158,17 +158,30 @@ def wkRight {Γ Δ Δ' : List F} (d : Γ ⊢² Δ) (ss : Δ ⊆ Δ') : Γ ⊢² 
 
 def verum' (h : ⊤ ∈ Δ) : Γ ⊢² Δ := wkRight (verum Γ Δ) (by simp[h])
 
+def Cut.cut' {Γ₁ Γ₂ Δ₁ Δ₂ : List F} (d₁ : Γ₁ ⊢² p :: Δ₁) (d₂ : p :: Γ₂ ⊢² Δ₂) : Γ₁ ++ Γ₂ ⊢² Δ₁ ++ Δ₂ :=
+  let d₁ : Γ₁ ++ Γ₂ ⊢² p :: (Δ₁ ++ Δ₂) := wk d₁ (by simp) (List.cons_subset_cons _ $ by simp)
+  let d₂ : p :: (Γ₁ ++ Γ₂) ⊢² Δ₁ ++ Δ₂ := wk d₂ (List.cons_subset_cons _ $ by simp) (by simp)
+  Cut.cut d₁ d₂
+
 def ofNegLeft {p} (b : ~p :: Γ ⊢² Δ) : Γ ⊢² p :: Δ :=
   let d : p :: Γ ⊢² p :: Δ :=
-    Gentzen.wk (show [p] ⊢² [p] from em (List.mem_singleton.mpr rfl) (List.mem_singleton.mpr rfl))
+    Gentzen.wk (show [p] ⊢² [p] from closed _ (List.mem_singleton.mpr rfl) (List.mem_singleton.mpr rfl))
       (by simp) (by simp)
   Cut.cut (negRight d) (wkRight b (by simp))
 
 def ofNegRight {p} (b : Γ ⊢² ~p :: Δ) : p :: Γ ⊢² Δ :=
   let d : p :: Γ ⊢² p :: Δ :=
-    Gentzen.wk (show [p] ⊢² [p] from em (List.mem_singleton.mpr rfl) (List.mem_singleton.mpr rfl))
+    Gentzen.wk (show [p] ⊢² [p] from closed _ (List.mem_singleton.mpr rfl) (List.mem_singleton.mpr rfl))
       (by simp) (by simp)
   Cut.cut (wkLeft b (by simp)) (negLeft d)
+
+def ofImplyRight {p q} (b : Γ ⊢² (p ⟶ q) :: Δ) : p :: Γ ⊢² q :: Δ :=
+  let d : (p ⟶ q) :: p :: Γ ⊢² q :: Δ :=
+    implyLeft (closed p (by simp) (by simp)) (closed q (by simp) (by simp))
+  wk (Cut.cut' b d) (by simp) (by simp)
+
+def modusPonens {p q} (b₁ : Γ ⊢² (p ⟶ q) :: Δ) (b₂ : Γ ⊢² p :: Δ) : Γ ⊢² q :: Δ :=
+  wk (Cut.cut' b₂ (ofImplyRight b₁)) (by simp) (by simp)
 
 structure Disjconseq (T : Set F) (Γ : List F) where
   antecedent : List F
@@ -195,11 +208,6 @@ def toDisjconseq {Γ Δ} (d : Γ ⊢² Δ) (ss : ∀ p ∈ Γ, p ∈ T) : T ⊢'
   antecedent := Γ
   antecedent_ss := ss
   derivation := d
-
-def Cut.cut' {Γ₁ Γ₂ Δ₁ Δ₂ : List F} (d₁ : Γ₁ ⊢² p :: Δ₁) (d₂ : p :: Γ₂ ⊢² Δ₂) : Γ₁ ++ Γ₂ ⊢² Δ₁ ++ Δ₂ :=
-  let d₁ : Γ₁ ++ Γ₂ ⊢² p :: (Δ₁ ++ Δ₂) := wk d₁ (by simp) (List.cons_subset_cons _ $ by simp)
-  let d₂ : p :: (Γ₁ ++ Γ₂) ⊢² Δ₁ ++ Δ₂ := wk d₂ (List.cons_subset_cons _ $ by simp) (by simp)
-  Cut.cut d₁ d₂
 
 namespace Disjconseq
 
@@ -282,7 +290,7 @@ instance : System F where
   turnstile := fun T p => T ⊢' [p]
   axm := fun {T p} h =>
     ⟨[p], by simpa,
-      em (List.mem_singleton.mpr rfl) (List.mem_singleton.mpr rfl)⟩
+      closed _ (List.mem_singleton.mpr rfl) (List.mem_singleton.mpr rfl)⟩
   weakening' := fun ss b => b.weakening ss
 
 variable {F}
@@ -371,6 +379,12 @@ lemma inconsistent_of_provable_and_refutable' {p}
       rcases b with ⟨b⟩
       have : ¬System.Consistent T := System.inconsistent_of_proof (proofCut System.provableTheory_theory b)
       contradiction⟩
+
+instance : Hilbert.HasModusPonens (· ⊢ · : Set F → F → Type _) :=
+  Hilbert.HasModusPonens.of' fun {T p q} ↦ by
+    rintro ⟨Γ₁, h₁, d₁⟩ ⟨Γ₂, h₂, d₂⟩
+    let d₃ : Γ₁ ++ Γ₂ ⊢² [q] := modusPonens (wkLeft d₁ (by simp)) (wkLeft d₂ (by simp))
+    exact ⟨Γ₁ ++ Γ₂, by simp; rintro p (hp | hp); { exact h₁ p hp }; { exact h₂ p hp }, d₃⟩
 
 end Gentzen
 

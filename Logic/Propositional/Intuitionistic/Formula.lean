@@ -51,6 +51,10 @@ end ToString
 @[simp] lemma imp_inj (p₁ q₁ p₂ q₂ : Formula α) : p₁ ⟶ p₂ = q₁ ⟶ q₂ ↔ p₁ = q₁ ∧ p₂ = q₂ := by simp[Arrow.arrow]
 @[simp] lemma neg_inj (p q : Formula α) : ~p = ~q ↔ p = q := by simp[Tilde.tilde]
 
+lemma top_def : (⊤ : Formula α) = ⊥ ⟶ ⊥ := rfl
+
+lemma neg_def (p : Formula α) : ~p = p ⟶ ⊥ := rfl
+
 lemma iff_def (p q : Formula α) : p ⟷ q = (p ⟶ q) ⋏ (q ⟶ p) := by rfl
 
 def complexity : Formula α → ℕ
