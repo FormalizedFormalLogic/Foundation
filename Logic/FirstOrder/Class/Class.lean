@@ -377,7 +377,7 @@ attribute [aesop 1 (rule_sets := [FormulaClass]) norm]
   Class.mem_imply
   Class.mem_iff
 
-attribute [aesop 3 (rule_sets := [FormulaClass]) norm]
+attribute [aesop 2 (rule_sets := [FormulaClass]) norm]
   Class.BAll.ball
   Class.BEx.bex
 
@@ -390,7 +390,7 @@ attribute [aesop 3 (rule_sets := [FormulaClass]) norm]
   Class.Ex.ex
 
 macro "formula_class" : attr =>
-  `(attr|aesop 0 (rule_sets [$(Lean.mkIdent `FormulaClass):ident]) safe)
+  `(attr|aesop 0 (rule_sets := [$(Lean.mkIdent `FormulaClass):ident]) safe)
 
 macro "formula_class" (config)? : tactic =>
   `(tactic| aesop (config := { terminal := true }) (rule_sets := [$(Lean.mkIdent `FormulaClass):ident]))
