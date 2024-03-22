@@ -9,20 +9,20 @@ https://iehality.github.io/lean4-logic/
   - [Table of Contents](#table-of-contents)
   - [Usage](#usage)
   - [Structure](#structure)
-  - [Propositional Logic](#propositional-logic)
+  - [Classical Propositional Logic](#classical-propositional-logic)
     - [Definition](#definition)
     - [Theorem](#theorem)
+  - [Intuitionistic Propositional Logic](#intuitionistic-propositional-logic)
+    - [Definitions](#definitions)
+    - [Kripkean Semantics](#kripkean-semantics)
+      - [Defininitions](#defininitions)
+      - [Theorems](#theorems)
   - [First-Order Logic](#first-order-logic)
     - [Definition](#definition-1)
     - [Theorem](#theorem-1)
   - [Normal Modal Logic](#normal-modal-logic)
     - [Definition](#definition-2)
     - [Theorem](#theorem-2)
-  - [Intuitionistic Propositional Logic](#intuitionistic-propositional-logic)
-    - [Definitions](#definitions)
-    - [Kripkean Semantics](#kripkean-semantics)
-      - [Defininitions](#defininitions)
-      - [Theorems](#theorems)
   - [References](#references)
 
 ## Usage
@@ -53,7 +53,7 @@ The key results are summarised in `Logic/Summary.lean`.
   - **Modal**: Variants of modal logics
     - **Normal**: Normal propositional modal logic
 
-## Propositional Logic
+## Classical Propositional Logic
 
 ### Definition
 
@@ -80,6 +80,43 @@ The key results are summarised in `Logic/Summary.lean`.
       {T : LO.Propositional.Theory α}
       {p : LO.Propositional.Formula α} :
       T ⊨ p → T ⊢ p
+  ```
+
+## Intuitionistic Propositional Logic
+
+### Definitions
+
+|                                   |                                            | Definition                                 |   Notation   |
+| :-------------------------------: | ------------------------------------------ | :----------------------------------------- | :----------: |
+| $\Gamma \vdash \varphi$       | Deduction　 | LO.Propositional.Intuitionistic.Deduction | `Γ ⊢ᴵ p` |
+| | Deductive (Exists deduction) | LO.Propositional.Intuitionistic.Deductive | `Γ ⊢ᴵ! p` |
+
+### Kripkean Semantics
+
+#### Defininitions
+
+|                                   |                                            | Definition                                 |   Notation   |
+| :-------------------------------: | ------------------------------------------ | :----------------------------------------- | :----------: |
+| $w \Vdash^M \varphi$       | Satisfy on Kripkean Model $M$ and its world $w$　 | LO.Propositional.Intuitionistic.Formula.KripkeSatisfies | `w ⊩[M] p` |
+| $M \vDash \varphi$        | Models                    | LO.Propositional.Intuitionistic.Formula.KripkeModels |  `M ⊧ p`  |
+| $\Gamma \models \varphi$        | Conequences                    | LO.Propositional.Intuitionistic.Formula.KripkeConsequence |  `Γ ⊨ᴵ p`  |
+
+#### Theorems
+- [Soundness](https://iehality.github.io/lean4-logic/Logic/Propositional/Intuitionistic/Kripke/Soundness.html#LO.Propositional.Intuitionistic.Kripke.sounds)
+  ```lean
+  theorem Kripke.sounds {Γ : Theory β} {p : Formula β} : (Γ ⊢ᴵ! p) → (Γ ⊨ᴵ p)
+  ```
+- [Completeness](https://iehality.github.io/lean4-logic/Logic/Propositional/Intuitionistic/Kripke/Completeness.html#LO.Propositional.Intuitionistic.Kripke.completes)
+  ```lean
+  theorem Kripke.completes
+    [DecidableEq β] [Encodable β]
+    {Γ : Theory β} {p : Formula β} : (Γ ⊨ᴵ p) → (Γ ⊢ᴵ! p)
+  ```
+- [Disjunction Property](https://iehality.github.io/lean4-logic/Logic/Propositional/Intuitionistic/Kripke/Completeness.html#LO.Propositional.Intuitionistic.Deduction.disjunctive)
+  ```lean
+  theorem Deduction.disjunctive
+    [DecidableEq β] [Encodable β]
+    {p q : Formula β} : (∅ ⊢ᴵ! p ⋎ q) → (∅ ⊢ᴵ! p) ∨ (∅ ⊢ᴵ! q)
   ```
 
 ## First-Order Logic
@@ -212,43 +249,6 @@ In this formalization, _(Modal) Logic_ means set of axioms.
     Completeness
       (𝐊 : AxiomSet β)
       (𝔽((𝐊 : AxiomSet β)) : FrameClass (MaximalConsistentTheory (𝐊 : AxiomSet β)))
-  ```
-
-## Intuitionistic Propositional Logic
-
-### Definitions
-
-|                                   |                                            | Definition                                 |   Notation   |
-| :-------------------------------: | ------------------------------------------ | :----------------------------------------- | :----------: |
-| $\Gamma \vdash \varphi$       | Deduction　 | LO.Propositional.Intuitionistic.Deduction | `Γ ⊢ᴵ p` |
-| | Deductive (Exists deduction) | LO.Propositional.Intuitionistic.Deductive | `Γ ⊢ᴵ! p` |
-
-### Kripkean Semantics
-
-#### Defininitions
-
-|                                   |                                            | Definition                                 |   Notation   |
-| :-------------------------------: | ------------------------------------------ | :----------------------------------------- | :----------: |
-| $w \Vdash^M \varphi$       | Satisfy on Kripkean Model $M$ and its world $w$　 | LO.Propositional.Intuitionistic.Formula.KripkeSatisfies | `w ⊩[M] p` |
-| $M \vDash \varphi$        | Models                    | LO.Propositional.Intuitionistic.Formula.KripkeModels |  `M ⊧ p`  |
-| $\Gamma \models \varphi$        | Conequences                    | LO.Propositional.Intuitionistic.Formula.KripkeConsequence |  `Γ ⊨ᴵ p`  |
-
-#### Theorems
-- [Soundness](https://iehality.github.io/lean4-logic/Logic/Propositional/Intuitionistic/Kripke/Soundness.html#LO.Propositional.Intuitionistic.Kripke.sounds)
-  ```lean
-  theorem Kripke.sounds {Γ : Theory β} {p : Formula β} : (Γ ⊢ᴵ! p) → (Γ ⊨ᴵ p)
-  ```
-- [Completeness](https://iehality.github.io/lean4-logic/Logic/Propositional/Intuitionistic/Kripke/Completeness.html#LO.Propositional.Intuitionistic.Kripke.completes)
-  ```lean
-  theorem Kripke.completes
-    [DecidableEq β] [Encodable β]
-    {Γ : Theory β} {p : Formula β} : (Γ ⊨ᴵ p) → (Γ ⊢ᴵ! p)
-  ```
-- [Disjunction Property](https://iehality.github.io/lean4-logic/Logic/Propositional/Intuitionistic/Kripke/Completeness.html#LO.Propositional.Intuitionistic.Deduction.disjunctive)
-  ```lean
-  theorem Deduction.disjunctive
-    [DecidableEq β] [Encodable β]
-    {p q : Formula β} : (∅ ⊢ᴵ! p ⋎ q) → (∅ ⊢ᴵ! p) ∨ (∅ ⊢ᴵ! q)
   ```
 
 ## References
