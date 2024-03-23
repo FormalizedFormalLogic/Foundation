@@ -409,6 +409,18 @@ instance : Nonempty (𝔽((𝐊𝐃 : AxiomSet β)) : FrameClass α) := by
   apply LogicKD.FrameClassDefinability.mp;
   simp [Serial];
 
+instance LogicK4.FrameClassDefinability : @FrameClassDefinability α β 𝐊𝟒 Transitive := by
+  intro F;
+  simp [LogicK4, AxiomSetFrameClass.union];
+  have := AxiomK.defines β F;
+  have := Axiom4.defines β F;
+  aesop;
+
+instance : Nonempty (𝔽((𝐊𝟒 : AxiomSet β)) : FrameClass α) := by
+  existsi (λ _ _ => True);
+  apply LogicK4.FrameClassDefinability.mp;
+  simp [Transitive];
+
 instance LogicS4.FrameClassDefinability : @FrameClassDefinability α β 𝐒𝟒 (λ F => (Reflexive F ∧ Transitive F)) := by
   intro F;
   simp [LogicKT4, AxiomSetFrameClass.triunion];

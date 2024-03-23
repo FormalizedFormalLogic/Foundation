@@ -119,6 +119,18 @@ end LogicK
 def LogicKD : AxiomSet α := 𝐊 ∪ 𝐃
 notation "𝐊𝐃" => LogicKD
 
+def LogicK4 : AxiomSet α := 𝐊 ∪ 𝟒
+notation "𝐊𝟒" => LogicK4
+
+namespace LogicK4
+
+@[simp] lemma include_AxiomK : AxiomK p q ∈ 𝐊𝟒 := by simp [LogicK4]
+@[simp] lemma include_Axiom4 : Axiom4 p ∈ 𝐊𝟒 := by simp [LogicK4]
+@[simp] lemma subset_K : 𝐊 ⊆ (𝐊𝟒 : AxiomSet α) := by apply Set.subset_union_left
+@[simp] lemma subset_4 : 𝟒 ⊆ (𝐊𝟒 : AxiomSet α) := by apply Set.subset_union_right
+
+end LogicK4
+
 def LogicKT4 : AxiomSet α := 𝐊 ∪ 𝐓 ∪ 𝟒
 @[simp] abbrev LogicS4 : AxiomSet α := LogicKT4
 notation "𝐒𝟒" => LogicS4
