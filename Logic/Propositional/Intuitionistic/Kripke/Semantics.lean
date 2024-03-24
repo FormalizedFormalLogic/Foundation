@@ -51,6 +51,7 @@ local infix:20 "≺" => M.frame
 
 def KripkeSatisfies (M : Kripke.Model α β) (w : α) : Formula β → Prop
   | atom a => M.val w a
+  | ⊤      => True
   | ⊥      => False
   | p ⋏ q  => p.KripkeSatisfies M w ∧ q.KripkeSatisfies M w
   | p ⋎ q  => p.KripkeSatisfies M w ∨ q.KripkeSatisfies M w
@@ -63,7 +64,7 @@ local notation w "⊩" p => w ⊩[M] p
 namespace KripkeSatisfies
 
 @[simp] lemma atom_def : (w ⊩ atom a) ↔ M.val w a := by simp [KripkeSatisfies];
-@[simp] lemma bot_def : (w ⊩ ⊥) ↔ False := by simp [KripkeSatisfies];
+@[simp] lemma bot_def : ¬(w ⊩ ⊥) := by simp [KripkeSatisfies];
 @[simp] lemma top_def : (w ⊩ ⊤) := by simp [KripkeSatisfies];
 @[simp] lemma and_def : (w ⊩ p ⋏ q) ↔ (w ⊩ p) ∧ (w ⊩ q) := by simp [KripkeSatisfies];
 @[simp] lemma or_def : (w ⊩ p ⋎ q) ↔ (w ⊩ p) ∨ (w ⊩ q) := by simp [KripkeSatisfies];
@@ -102,11 +103,11 @@ variable {α β : Type _}
 theorem Kripke.herditary_formula
   {M : Kripke.Model α β} {p : Formula β} {w w' : α}
   (hw : M.frame w w') : (w ⊩[M] p) → (w' ⊩[M] p) := by
-  induction p using Formula.rec'; simp [Formula.KripkeSatisfies] at *;
-  case hatom => apply M.herditary hw;
-  case hand => simp [Formula.KripkeSatisfies] at *; tauto;
-  case hor => simp [Formula.KripkeSatisfies] at *; tauto;
-  case himp => intro hpq v hv; exact hpq v $ M.frame_trans hw hv;
+  induction p using Formula.rec' with
+  | hatom => apply M.herditary hw;
+  | himp => intro hpq v hv; exact hpq v $ M.frame_trans hw hv;
+  | hor => simp_all; tauto;
+  | _ => simp_all;
 
 def Theory.KripkeSatisfies (M : Kripke.Model α β) (w : α) (Γ : Theory β) := ∀ p ∈ Γ, (w ⊩[M] p)
 notation w " ⊩[" M "] " Γ => Theory.KripkeSatisfies M w Γ

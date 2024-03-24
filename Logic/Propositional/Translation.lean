@@ -10,6 +10,7 @@ namespace Intuitionistic
 @[simp]
 def Formula.toClassical : Formula α → Classical.Formula α
   | Formula.atom a => Classical.Formula.atom a
+  | ⊤              => ⊤
   | ⊥              => ⊥
   | p ⋏ q          => p.toClassical ⋏ q.toClassical
   | p ⋎ q          => p.toClassical ⋎ q.toClassical

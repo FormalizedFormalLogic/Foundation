@@ -351,6 +351,7 @@ lemma truthlemma {Ω : PrimeTheory β} {p : Formula β} : (Ω ⊩[(CanonicalMode
     . intro h;
       exact ⟨Deduction.axm (CanonicalModel.val_def.mpr h)⟩;
     . apply PrimeTheory.closed;
+  | hverum => simp; apply verum!;
   | hfalsum => simp [←System.unprovable_iff_not_provable]
   | hand p q ihp ihq =>
     constructor;
@@ -450,6 +451,7 @@ variable {M₁ : Kripke.Model γ₁ β} {M₂ : Kripke.Model γ₂ β}
 lemma DPCounterModel_left {p : Formula β} : (w ⊩[M₁] p) ↔ (Sum.inr $ Sum.inl w) ⊩[DPCounterModel M₁ M₂ w₁ w₂] p := by
   induction p using rec' generalizing w with
   | hfalsum => simp;
+  | hverum => simp;
   | hatom a => simp [DPCounterModel];
   | hor p₁ p₂ ih₁ ih₂ =>
     constructor;
@@ -493,6 +495,7 @@ lemma DPCounterModel_left {p : Formula β} : (w ⊩[M₁] p) ↔ (Sum.inr $ Sum.
 lemma DPCounterModel_right {p : Formula β} : (w ⊩[M₂] p) ↔ (Sum.inr $ Sum.inr w) ⊩[DPCounterModel M₁ M₂ w₁ w₂] p := by
   induction p using rec' generalizing w with
   | hfalsum => simp;
+  | hverum => simp;
   | hatom a => simp [DPCounterModel];
   | hor p₁ p₂ ih₁ ih₂ =>
     constructor;
