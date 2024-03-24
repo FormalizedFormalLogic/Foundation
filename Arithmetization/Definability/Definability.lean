@@ -607,13 +607,13 @@ open Lean.Parser.Tactic (config)
 
 open Definable
 
-attribute [aesop (rule_sets [Definability]) norm]
+attribute [aesop (rule_sets := [Definability]) norm]
   sq
   pow_three
   pow_four
   Definable.const
 
-attribute [aesop 1 (rule_sets [Definability]) safe]
+attribute [aesop 1 (rule_sets := [Definability]) safe]
   Semipolynomial.comp₁
   Semipolynomial.comp₂
   Semipolynomial.comp₃
@@ -623,7 +623,7 @@ attribute [aesop 1 (rule_sets [Definability]) safe]
   Definable.comp₄
   Definable.const
 
-attribute [aesop 4 (rule_sets [Definability]) safe]
+attribute [aesop 4 (rule_sets := [Definability]) safe]
   Definable.not
   Definable.imp
   Definable.iff₀
@@ -632,20 +632,20 @@ attribute [aesop 4 (rule_sets [Definability]) safe]
   Definable.bex_lt
   Definable.bex_le
 
-attribute [aesop 8 (rule_sets [Definability]) safe]
+attribute [aesop 8 (rule_sets := [Definability]) safe]
   Definable.and
   Definable.or
   Definable.all
   Definable.ex
 
 macro "definability" : attr =>
-  `(attr|aesop 4 (rule_sets [$(Lean.mkIdent `Definability):ident]) safe)
+  `(attr|aesop 4 (rule_sets := [$(Lean.mkIdent `Definability):ident]) safe)
 
 macro "definability" (config)? : tactic =>
-  `(tactic| aesop (options := { terminal := true }) (rule_sets [$(Lean.mkIdent `Definability):ident]))
+  `(tactic| aesop (config := { terminal := true }) (rule_sets := [$(Lean.mkIdent `Definability):ident]))
 
 macro "definability?" (config)? : tactic =>
-  `(tactic| aesop? (options := { terminal := true }) (rule_sets [$(Lean.mkIdent `Definability):ident]))
+  `(tactic| aesop? (config := { terminal := true }) (rule_sets := [$(Lean.mkIdent `Definability):ident]))
 
 example (c : M) : Semipolynomial₂ Σ 0 (fun x y : M ↦ c + 2 * x^2) := by definability
 

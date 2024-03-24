@@ -16,12 +16,10 @@ section sub
 
 lemma sub_existsUnique (a b : M) : ∃! c, (a ≥ b → a = b + c) ∧ (a < b → c = 0) := by
   have : b ≤ a ∨ a < b := le_or_lt b a
-  rcases this with (hxy | hxy) <;> simp[hxy]
-  · simp [show ¬a < b from not_lt.mpr hxy]
-    have : ∃ c, a = b + c := exists_add_of_le hxy
-    rcases this with ⟨c, rfl⟩
-    exact ExistsUnique.intro c rfl (fun a h => (add_left_cancel h).symm)
-  · simp [show ¬b ≤ a from not_le.mpr hxy]
+  rcases this with (hxy | hxy) <;> simp [hxy]
+  have : ∃ c, a = b + c := exists_add_of_le hxy
+  rcases this with ⟨c, rfl⟩
+  exact ExistsUnique.intro c rfl (fun a h => (add_left_cancel h).symm)
 
 def sub (a b : M) : M := Classical.choose! (sub_existsUnique a b)
 
@@ -39,16 +37,41 @@ lemma sub_eq_iff : c = a - b ↔ ((a ≥ b → a = b + c) ∧ (a < b → c = 0))
   · simpa [← sub_spec_of_ge hxy] using show a - b ≤ b + (a - b) from le_add_self
   · simp[sub_spec_of_lt hxy]
 
-def subdef : Σᴬ[0] 3 :=
-  ⟨“(#2 ≤ #1 → #1 = #2 + #0) ∧ (#1 < #2 → #0 = 0)”, by simp[Hierarchy.pi_zero_iff_sigma_zero]⟩
+def subf (T : Theory ℒₒᵣ) [𝐏𝐀⁻ ≾ T] : Definability.BoundedDeltaZeroFunction T 2 :=
+  Definability.toBoundedDeltaZeroFunction
+    (“(#2 ≤ #1 → #1 = #2 + #0) ∧ (#1 < #2 → #0 = 0)”)
+    (by formula_class)
+    (Complete.complete! <| by
+      apply oRing_consequence_of
+      intro M _ _ _ _ _ _
+      haveI : T.Mod M := Theory.Mod.of_add_left M T 𝐄𝐪
+      haveI : 𝐏𝐀⁻.Mod M := Theory.Mod.of_provably_subtheory' M _ T
+      simp [models_iff]; intro e
+      exact sub_existsUnique (e 0) (e 1))
+    #0
+    (Complete.complete! <| by {
+      apply oRing_consequence_of
+      intro M _ _ _ _ _ _
+      haveI : T.Mod M := Theory.Mod.of_add_left_left M T 𝐏𝐀⁻ 𝐄𝐪
+      haveI : 𝐏𝐀⁻.Mod M := Theory.Mod.of_provably_subtheory' M _ T
+      simp [models_iff]
+      simp only [Fin.isValue, Matrix.forall_iff, Matrix.cons_val_two, Matrix.vecHead,
+        Matrix.vecTail, Function.comp_apply, Fin.succ_zero_eq_one, Matrix.cons_val_one,
+        Matrix.cons_val_zero, Matrix.cons_val_fin_one, Fin.forall_fin_zero_pi]
+      intro a b c h₁ h₂
+      rcases sub_eq_iff.mpr ⟨h₁, h₂⟩
+      simp })
 
-lemma sub_defined : Σᴬ[0]-Function₂ ((· - ·) : M → M → M) subdef := by
-  intro v; simp [subdef, sub_eq_iff]
+def subdef : Definability.BSemisentenceΔ₀ 𝐏𝐀⁻ 3 :=
+  ⟨“(#2 ≤ #1 → #1 = #2 + #0) ∧ (#1 < #2 → #0 = 0)”, by formula_class⟩
+
+@[simp] lemma subdef_val : Semiformula.PVal! M ![a, b, c] subdef.val ↔ a = b - c := by simp [subdef, sub_eq_iff]
 
 instance {b s} : DefinableFunction₂ b s ((· - ·) : M → M → M) := defined_to_with_param₀ subdef sub_defined
 
 instance sub_polybounded : PolyBounded₂ ((· - ·) : M → M → M) := ⟨#0, λ _ ↦ by simp⟩
 
+/--/
 @[simp] lemma sub_self (a : M) : a - a = 0 :=
   add_right_eq_self.mp (sub_spec_of_ge (a := a) (b := a) (by rfl)).symm
 

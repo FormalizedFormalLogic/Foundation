@@ -3,6 +3,14 @@ import Logic.FirstOrder.Arith.StrictHierarchy
 
 instance [Zero α] : Nonempty α := ⟨0⟩
 
+namespace Matrix
+
+lemma forall_iff {n : ℕ} (p : (Fin (n + 1) → α) → Prop) :
+    (∀ v, p v) ↔ (∀ a, ∀ v, p (a :> v)) :=
+  ⟨fun h a v ↦ h (a :> v), fun h v ↦ by simpa [←eq_vecCons v] using h (v 0) (v ∘ Fin.succ)⟩
+
+end Matrix
+
 namespace Set
 
 @[simp] lemma subset_union_three₁ (s t u : Set α) : s ⊆ s ∪ t ∪ u := Set.subset_union_of_subset_left (by simp) _
@@ -33,7 +41,7 @@ lemma fun_eq_vec₄ {v : Fin 4 → α} : v = ![v 0, v 1, v 2, v 3] := by
 
 @[simp] lemma cons_app_six {n : ℕ} (a : α) (s : Fin n.succ.succ.succ.succ.succ.succ → α) : (a :> s) 6 = s 5 := rfl
 
-lemma eq_vecCons' (s : Fin (n + 1) → C) : s = s 0 :> (s ·.succ) :=
+lemma eq_vecCons' (s : Fin (n + 1) → C) : s 0 :> (s ·.succ) = s :=
    funext $ Fin.cases (by simp) (by simp)
 
 end Matrix
@@ -222,7 +230,7 @@ end Arith
 
 namespace Theory.Mod
 
-variable (M : Type _) [Nonempty M] [Structure L M] (T U : Theory L)
+variable (M : Type _) [Nonempty M] [Structure L M] (T U V : Theory L)
 
 lemma of_provably_subtheory (_ : T ≾ U) [U.Mod M] : T.Mod M :=
   of_subtheory M (Semantics.ofSystemSubtheory T U)
@@ -233,9 +241,9 @@ lemma of_add_left [(T + U).Mod M] : T.Mod M := of_ss M (show T ⊆ T + U from by
 
 lemma of_add_right [(T + U).Mod M] : U.Mod M := of_ss M (show U ⊆ T + U from by simp [Theory.add_def])
 
-variable [L.Eq]
+lemma of_add_left_left [(T + U + V).Mod M] : T.Mod M := @of_add_left _ M _ _ T U (of_add_left M (T + U) V)
 
--- instance of_add_left_eq [(T + 𝐄𝐪 : Theory L).Mod M] : T.Mod M := of_add_left M T 𝐄𝐪
+lemma of_add_left_right [(T + U + V).Mod M] : U.Mod M := @of_add_right _ M _ _ T U (of_add_left M (T + U) V)
 
 end Theory.Mod
 
@@ -274,7 +282,7 @@ variable {n : ℕ} {ε : ξ → M}
   · simp [ball_closure_succ, IH]
     constructor
     · intro H e h
-      simpa [←Matrix.eq_vecCons'] using H (e ·.succ) (fun i ↦ h i.succ) (e 0) (h 0)
+      simpa [Matrix.eq_vecCons'] using H (e ·.succ) (fun i ↦ h i.succ) (e 0) (h 0)
     · intro H e h x hx
       exact H (x :> e) (Fin.cases (by simpa [Matrix.empty_eq] using hx) (fun i ↦ by simpa using h i))
 
@@ -287,7 +295,7 @@ variable {n : ℕ} {ε : ξ → M}
     · rintro ⟨e, he, x, hx, H⟩
       exact ⟨x :> e, Fin.cases hx he, H⟩
     · rintro ⟨e, h, H⟩
-      exact ⟨(e ·.succ), fun i ↦ h i.succ, e 0, h 0, by simpa [←Matrix.eq_vecCons'] using H⟩
+      exact ⟨(e ·.succ), fun i ↦ h i.succ, e 0, h 0, by simpa [Matrix.eq_vecCons'] using H⟩
 
 variable [DecidableEq ξ] {e : Fin n → M} {T : Theory L} [T.Mod M]
 

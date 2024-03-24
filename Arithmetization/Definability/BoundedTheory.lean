@@ -137,22 +137,24 @@ section realize
 
 variable {M : Type} [Zero M] [One M] [Add M] [Mul M] [LT M] [T.Mod M]
 
-@[simp] lemma zero_realize : (zero : BoundedDeltaZeroFunction T 0).function.realize ![] = (0 : M) :=
+noncomputable abbrev realize (f : BoundedDeltaZeroFunction T k) (v : Fin k → M) := f.function.realize v
+
+@[simp] lemma zero_realize : (zero : BoundedDeltaZeroFunction T 0).realize ![] = (0 : M) :=
   Eq.trans rfl DeltaZeroFunction.zero_realize
 
-@[simp] lemma one_realize : (one : BoundedDeltaZeroFunction T 0).function.realize ![] = (1 : M) :=
+@[simp] lemma one_realize : (one : BoundedDeltaZeroFunction T 0).realize ![] = (1 : M) :=
   Eq.trans rfl DeltaZeroFunction.one_realize
 
-@[simp] lemma add_realize (a b : M) : (add : BoundedDeltaZeroFunction T 2).function.realize ![a, b] = a + b :=
+@[simp] lemma add_realize (a b : M) : (add : BoundedDeltaZeroFunction T 2).realize ![a, b] = a + b :=
   Eq.trans rfl (DeltaZeroFunction.add_realize a b)
 
-@[simp] lemma mul_realize (a b : M) : (mul : BoundedDeltaZeroFunction T 2).function.realize ![a, b] = a * b :=
+@[simp] lemma mul_realize (a b : M) : (mul : BoundedDeltaZeroFunction T 2).realize ![a, b] = a * b :=
   Eq.trans rfl (DeltaZeroFunction.mul_realize a b)
 
 variable [𝐏𝐀⁻.Mod M]
 
 lemma realize_le_bound (f : BoundedDeltaZeroFunction T k) (v : Fin k → M) :
-    f.function.realize v ≤ Semiterm.bVal! M v f.bound := by
+    f.realize v ≤ Semiterm.bVal! M v f.bound := by
   have : ∀ v : Fin (k + 1) → M,
       (Semiformula.PVal! M v) f.function.definition → v 0 ≤ Semiterm.bVal! M (v ·.succ) f.bound := by
     simpa [models_def, Semiterm.val_bShift'] using oring_sound M f.bounded
@@ -268,7 +270,7 @@ def arithmetizeAux {n : ℕ} : Semisentence ℒₒᵣ[T] n → Semisentence ℒ�
 lemma arithmetize_aux_not_not (p : Semisentence ℒₒᵣ[T] n) : arithmetizeAux (~p) = ~arithmetizeAux p := by
   induction p using Semiformula.rec' <;> simp [arithmetizeAux, ←Semiformula.neg_eq, *]
 
-def arithmetize : Semisentence ℒₒᵣ[T] n →L Semisentence ℒₒᵣ n where
+def arithmetize : Semisentence ℒₒᵣ[T] n →ˡᶜ Semisentence ℒₒᵣ n where
   toTr := arithmetizeAux
   map_top' := rfl
   map_bot' := rfl
@@ -370,8 +372,8 @@ lemma pval_atom_iff {k n} (e : Fin n → M) (p : DeltaZeroRelation T k) (v : Fin
   simp [Denotation.atom, Denotation.toFormula, Model.lt_succ_iff_le]
   constructor
   · rintro ⟨w, bw, hw, H⟩
-    suffices : w = fun i ↦ (v i).bVal! M e
-    · rcases this; exact H
+    suffices w = fun i ↦ (v i).bVal! M e by
+      rcases this; exact H
     funext i
     exact pval_of_term_to_formula.mp (hw i)
   · intro H
@@ -514,7 +516,8 @@ abbrev BSemiformula (T : Theory ℒₒᵣ) (Γ : Polarity) (s : ℕ) (ξ : Type*
 
 abbrev BSemisentence (T : Theory ℒₒᵣ) (Γ : Polarity) (s : ℕ) (n : ℕ) : Type _ := BSemiformula T Γ s Empty n
 
-abbrev BSemiformulaΔ₀ (T : Theory ℒₒᵣ) (ξ : Type*) [DecidableEq ξ] (n : ℕ) : Type _ := BSemiformula T Σ 0 ξ n
+abbrev BSemiformulaΔ₀ (T : Theory ℒₒᵣ) (ξ : Type*) [DecidableEq ξ] (n : ℕ) : Type _ :=
+  { p : Semiformula ℒₒᵣ[T] ξ n // Δ₀'[T].Domain p }
 
 abbrev BSemisentenceΔ₀ (T : Theory ℒₒᵣ) (n : ℕ) : Type _ := BSemiformulaΔ₀ T Empty n
 
@@ -522,9 +525,50 @@ namespace BSemiformula
 
 variable {Γ : Polarity} {s : ℕ} {T : Theory ℒₒᵣ} {ξ : Type*} [DecidableEq ξ] {n : ℕ}
 
-@[simp] lemma HClassInBL_val (p : BSemiformula T Γ s ξ n) : Γᴴ'(s)[T].Domain p.val := p.property
+@[simp] lemma hClassInBL_val (p : BSemiformula T Γ s ξ n) : Γᴴ'(s)[T].Domain p.val := p.property
+
+@[simp] lemma deltaZeroInBL_val (p : BSemiformulaΔ₀ T ξ n) : Δ₀'[T].Domain p.val := p.property
 
 end BSemiformula
+
+open boundedLanguage
+
+variable {T : Theory ℒₒᵣ} [𝐏𝐀⁻ ≾ T]
+
+def toDeltaZeroRelation (σ : Semisentence ℒₒᵣ[T] k)
+    (hσ : Δ₀'[T].Domain σ) : DeltaZeroRelation T k where
+  definition := arithmetize σ
+  definition_deltaZero := arithmetize_deltaZero hσ
+
+def toBoundedDeltaZeroFunction (σ : Semisentence ℒₒᵣ[T] (k + 1))
+    (hσ : Δ₀'[T].Domain σ)
+    (total : T + 𝐄𝐪 ⊢! ∀* ∃! arithmetize σ)
+    (bound : Polynomial k)
+    (bounded : T + 𝐏𝐀⁻ + 𝐄𝐪 ⊢! ∀* “!(arithmetize σ) → #0 ≤ !!(Rew.bShift bound)”) : BoundedDeltaZeroFunction T k where
+  function := ⟨toDeltaZeroRelation σ hσ, total⟩
+  bound := bound
+  bounded := by simpa [DeltaZeroFunction.definition, toDeltaZeroRelation]
+
+section semantics
+
+variable {M : Type} [Zero M] [One M] [Add M] [Mul M] [LT M] [T.Mod M]
+
+variable {σ : Semisentence ℒₒᵣ[T] (k + 1)}
+    {hσ : Δ₀'[T].Domain σ}
+    {total : T + 𝐄𝐪 ⊢! ∀* ∃! arithmetize σ}
+    {bound : Polynomial k}
+    {bounded : T + 𝐏𝐀⁻ + 𝐄𝐪 ⊢! ∀* “!(arithmetize σ) → #0 ≤ !!(Rew.bShift bound)”}
+
+lemma toBoundedDeltaZeroFunction_realize_iff {a : M} {v : Fin k → M} :
+    a = (toBoundedDeltaZeroFunction σ hσ total bound bounded).realize v ↔ Semiformula.PVal! M (a :> v) σ := by
+  haveI : 𝐏𝐀⁻.Mod M := Theory.Mod.of_provably_subtheory' M _ T
+  simp [DeltaZeroFunction.realize_graph, toBoundedDeltaZeroFunction, toDeltaZeroRelation, DeltaZeroFunction.definition]
+
+lemma toBoundedDeltaZeroFunction_realize_iff' {v : Fin (k + 1) → M} :
+    Semiformula.PVal! M v σ ↔ v 0 = (toBoundedDeltaZeroFunction σ hσ total bound bounded).realize (v ·.succ) := by
+  simp [toBoundedDeltaZeroFunction_realize_iff, Matrix.eq_vecCons']
+
+end semantics
 
 end Definability
 
