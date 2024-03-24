@@ -71,11 +71,14 @@ def extdef : Δ₀Sentence 4 :=
             ∃[#0 < #7 + 1] (!divdef [#0, #7, #2] ∧ !remdef [#5, #0, #1]))))))”, by
     simp⟩
 
+-- TODO: move to Vorspiel
 @[simp] lemma Fin.succ_two_eq_three : (2 : Fin 3).succ = 3 := rfl
 
 @[simp] lemma cons_app_seven {n : ℕ} (a : α) (s : Fin n.succ.succ.succ.succ.succ.succ.succ → α) : (a :> s) 7 = s 6 := rfl
 
 @[simp] lemma cons_app_eight {n : ℕ} (a : α) (s : Fin n.succ.succ.succ.succ.succ.succ.succ.succ → α) : (a :> s) 8 = s 7 := rfl
+
+@[simp] lemma cons_app_nine {n : ℕ} (a : α) (s : Fin n.succ.succ.succ.succ.succ.succ.succ.succ.succ → α) : (a :> s) 9 = s 8 := rfl
 
 lemma ext_defined : Δ₀-Function₃ (ext : M → M → M → M) via extdef := by
   intro v; simp [extdef, length_defined.pval, Exp.defined.pval, div_defined.pval, rem_defined.pval, lt_succ_iff_le, ext_graph]
@@ -483,6 +486,59 @@ lemma sq_polyI_hash_polyL_polybounded {A : M} (pos : 0 < A) : ((polyI A) # (poly
 
 def NuonAux (A k n : M) : Prop := SeriesSegment (polyU A) (polyI A) (polyL A) A k n
 
+def isSegmentDef : Δ₀Sentence 5 :=
+  ⟨“∀[#0 < #4]
+      ∃[#0 < #6 + 1](!extdef [#0, #2, #6, #1 + 1] ∧
+      ∃[#0 < #7 + 1](!extdef [#0, #3, #7, #2] ∧
+      ∃[#0 < 2](!fbitdef [#0, #5, #6 + #3] ∧
+        #2 = #1 + #0)))”, by simp⟩
+
+lemma isSegmentDef_defined : Defined (M := M) (λ v ↦ IsSegment (v 0) (v 1) (v 2) (v 3) (v 4)) isSegmentDef.val := by
+  intro v; simp [IsSegment, isSegmentDef, ext_defined.pval, fbit_defined.pval, lt_succ_iff_le]
+  apply ball_congr; intro x _
+  constructor
+  · intro h; exact ⟨_, by simp, rfl, _, by simp, rfl, _, by simp, rfl, h⟩
+  · rintro ⟨_, _, rfl, _, _, rfl, _, _, rfl, h⟩; exact h
+
+def segmentDef : Δ₀Sentence 7 :=
+  ⟨“∃[#0 < #1](!isSegmentDef [#2, #3, #4, #5, #0] ∧
+      !extdef [#6, #2, #0, 0] ∧ !extdef [#7, #2, #0, #5])”, by simp⟩
+
+lemma segmentDef_defined : Defined (M := M) (λ v ↦ Segment (v 0) (v 1) (v 2) (v 3) (v 4) (v 5) (v 6)) segmentDef.val := by
+  intro v; simp [Segment, segmentDef, ext_defined.pval, isSegmentDef_defined.pval, @Eq.comm _ (v 5), @Eq.comm _ (v 6)]
+  rfl
+
+def isSeriesDef : Δ₀Sentence 6 :=
+  ⟨“∀[#0 < #5]
+      ∃[#0 < #3 + 1](!binarylengthdef [#0, #3] ∧
+      ∃[#0 < #8 + 1](!extdef [#0, #5, #8, #2] ∧
+      ∃[#0 < #9 + 1](!extdef [#0, #6, #9, #3 + 1] ∧
+        !segmentDef [#4, #6, #7, #2 * #3, #2, #1, #0])))”, by simp⟩
+
+lemma bex_eq_le_iff {p : M → Prop} {b : M} :
+    (∃ a ≤ z, a = b ∧ p a) ↔ (b ≤ z ∧ p b) :=
+  ⟨by rintro ⟨a, hp, rfl, hr⟩; exact ⟨hp, hr⟩, by rintro ⟨hp, hr⟩; exact ⟨b, hp, rfl, hr⟩⟩
+
+lemma isSerieDef_defined : Defined (M := M) (λ v ↦ IsSeries (v 0) (v 1) (v 2) (v 3) (v 4) (v 5)) isSeriesDef.val := by
+  intro v; simp [IsSeries, isSeriesDef, length_defined.pval, ext_defined.pval, segmentDef_defined.pval, lt_succ_iff_le]
+  apply ball_congr; intro x _
+  rw [bex_eq_le_iff, bex_eq_le_iff, bex_eq_le_iff]
+  simp; rfl
+
+def seriesDef : Δ₀Sentence 6 := sorry
+
+def seriesSegmentDef : Δ₀Sentence 6 := sorry
+
+def nuonAuxDef : Δ₀Sentence 3 := sorry
+
+lemma nuonAux_defined : Δ₀-Relation₃ (NuonAux : M → M → M → Prop) via nuonAuxDef := by
+  intro v; simp [NuonAux]
+
+
+instance {Γ s} : DefinableRel₃ Γ s (NuonAux : M → M → M → Prop) := defined_to_with_param₀ _ nuonAux_defined
+/--/
+instance : PolyBounded₃ (ext : M → M → M → M) := ⟨#1, λ _ ↦ by simp⟩
+
 def ispolydef : Δ₀Sentence 2 :=
   ⟨“∃[#0 < #2 + 1] (!binarylengthdef [#0, #2] ∧ ∃[#0 < #1 + 1] !sqrtdef [#0, #1] ∧ !bexpdef [#2, #3, #0])”, by simp⟩
 
@@ -506,7 +562,7 @@ lemma NuonAux.exists {k : M} (hk : k ≤ ‖A‖) : ∃ n, NuonAux A k n := by
     rcases this with ⟨n, _, h⟩; exact ⟨n, h⟩
   revert hk
   induction k using hierarchy_induction_sigma₀
-  · sorry -- simp [SeriesSegment, Segment, Series, IsSegment, IsSeries]
+  · definability
   case zero =>
     intro _; exact ⟨0, by simp⟩
   case succ k IH =>
@@ -533,7 +589,7 @@ lemma NuonAux.two_mul {k n : M} (hk : k ≤ ‖A‖) : NuonAux A k n → NuonAux
     intro n hk H
     exact this n H.le hk H
   induction k using hierarchy_induction_sigma₀
-  · sorry
+  · definability
   case zero =>
     simp; simpa using (NuonAux.initial (2 * A)).succ (by simp)
   case succ k IH =>
@@ -548,7 +604,7 @@ lemma NuonAux.two_mul_add_one {k n : M} (hk : k ≤ ‖A‖) : NuonAux A k n →
     intro n hk H
     exact this n H.le hk H
   induction k using hierarchy_induction_sigma₀
-  · sorry
+  · definability
   case zero =>
     simpa using (NuonAux.initial (2 * A + 1)).succ (by simp)
   case succ k IH =>
