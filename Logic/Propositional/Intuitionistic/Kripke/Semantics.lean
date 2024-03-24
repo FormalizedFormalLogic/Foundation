@@ -113,10 +113,10 @@ def Theory.KripkeSatisfies (M : Kripke.Model α β) (w : α) (Γ : Theory β) :=
 notation w " ⊩[" M "] " Γ => Theory.KripkeSatisfies M w Γ
 
 def Formula.KripkeConsequence (Γ : Theory β) (p : Formula β) := ∀ {α : Type*}, ∀ (M : Kripke.Model α β) w, (w ⊩[M] Γ) → (w ⊩[M] p)
-infix:50 " ⊨ᴵ " => Formula.KripkeConsequence
+infix:50 " ⊨ⁱ " => Formula.KripkeConsequence
 
-abbrev Formula.KripkeInconsequence (Γ : Theory β) (p : Formula β) := ¬(Γ ⊨ᴵ p)
-infix:50 " ⊭ᴵ " => Formula.KripkeInconsequence
+abbrev Formula.KripkeInconsequence (Γ : Theory β) (p : Formula β) := ¬(Γ ⊨ⁱ p)
+infix:50 " ⊭ⁱ " => Formula.KripkeInconsequence
 
 @[simp] lemma Theory.KripkeSatisfies_empty (M : Kripke.Model α β) (w : α) : w ⊩[M] ∅ := fun _ ↦ by simp
 

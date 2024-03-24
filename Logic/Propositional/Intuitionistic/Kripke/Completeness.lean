@@ -16,10 +16,10 @@ open Formula Theory Kripke
 open Hilbert
 open Set
 
-
+/-
 section Consistency
 
-variable {Γ : Theory β} (hConsisΓ : System.Consistent Γ)
+variable {Γ : Theory β} (hConsisΓ : Γ.Consistent 𝐄𝐅𝐐)
 
 -- lemma consistent_subset_undeducible_falsum (hΔ : Δ ⊆ Γ) : Δ ⊬ ⊥ := Hilbert.consistent_subset_undeducible_falsum (· ⊢ ·) hConsisΓ hΔ
 
@@ -37,16 +37,17 @@ lemma consistent_of_undeducible : Γ ⊬ p → System.Consistent Γ := by
   contradiction;
 
 end Consistency
+-/
 
 
 namespace Theory
 
-def Closed (Γ : Theory β) := ∀ {p}, Γ ⊢! p → p ∈ Γ
+def Closed (Γ : Theory β) := ∀ {p}, (Γ ⊢ⁱ! p) → p ∈ Γ
 
 def Disjunctive (Γ : Theory β) := ∀ {p q}, p ⋎ q ∈ Γ → p ∈ Γ ∨ q ∈ Γ
 
 class Prime (T : Theory β) where
-  consistent : System.Consistent T
+  consistent : T.Consistent 𝐄𝐅𝐐
   closed : Closed T
   disjunctive : Disjunctive T
 
@@ -66,11 +67,11 @@ instance : HasSubset (PrimeTheory β) := ⟨subset⟩
 
 variable (Ω : PrimeTheory β)
 
-def consistent : System.Consistent Ω.theory := Ω.prime.consistent
+def consistent : Ω.theory.Consistent 𝐄𝐅𝐐 := Ω.prime.consistent
 
 def closed : Closed Ω.theory := Ω.prime.closed
 
-def closed' {p : Formula β} : Ω.theory ⊢! p → p ∈ Ω := Ω.closed
+def closed' {p : Formula β} : (Ω.theory ⊢ⁱ! p) → p ∈ Ω := Ω.closed
 
 def disjunctive : Disjunctive Ω.theory := Ω.prime.disjunctive
 
@@ -78,9 +79,11 @@ def disjunctive' {p q : Formula β} : (p ⋎ q ∈ Ω) → (p ∈ Ω) ∨ (q ∈
 
 variable {Ω}
 
-@[simp] lemma undeducible_falsum : Ω.theory ⊬ ⊥ := Ω.consistent
+@[simp] lemma undeducible_falsum : Ω.theory ⊬ⁱ! ⊥ := Ω.consistent
+  -- simp [Undeducible, Deducible];
+  -- simpa using Ω.consistent
 
-@[simp] lemma no_falsum : ⊥ ∉ Ω := consistent_no_falsum Ω.consistent
+-- @[simp] lemma no_falsum : ⊥ ∉ Ω := consistent_no_falsum Ω.consistent
 
 end PrimeTheory
 
@@ -100,16 +103,16 @@ def insertFamily (Γ : Theory β) (p : Formula β) : ℕ → Theory β
     | some (q : Formula β) =>
       match q with
       | q₁ ⋎ q₂ =>
-        if (insertFamily Γ p n) ⊢! (q₁ ⋎ q₂)
-          then if (insert q₁ (insertFamily Γ p n)) ⊢! p
+        if (insertFamily Γ p n) ⊢ⁱ! (q₁ ⋎ q₂)
+          then if (insert q₁ (insertFamily Γ p n)) ⊢ⁱ! p
             then insert q₂ (insertFamily Γ p n)
             else insert q₁ (insertFamily Γ p n)
           else (insertFamily Γ p n)
       | _ => insertFamily Γ p n
     | _ => insertFamily Γ p n
-notation Γ "[" p "," i "]ᴵ" => insertFamily Γ p i
+notation Γ "[" p "," i "]ⁱ" => insertFamily Γ p i
 
-lemma insertFamily_mono (h : k ≤ m) : Γ[p, k]ᴵ ⊆ Γ[p, m]ᴵ := by
+lemma insertFamily_mono (h : k ≤ m) : Γ[p, k]ⁱ ⊆ Γ[p, m]ⁱ := by
   induction h with
   | refl => rfl;
   | step h ih =>
@@ -124,9 +127,9 @@ lemma insertFamily_mono (h : k ≤ m) : Γ[p, k]ᴵ ⊆ Γ[p, m]ᴵ := by
       . simpa;
     . simpa;
 
-lemma insertFamily_subset_self : Γ ⊆ Γ[p, k]ᴵ := insertFamily_mono (zero_le k)
+lemma insertFamily_subset_self : Γ ⊆ Γ[p, k]ⁱ := insertFamily_mono (zero_le k)
 
-lemma insertFamily_undeducible (h : Γ ⊬ p) : ∀ {i}, Γ[p, i]ᴵ ⊬ p := by
+lemma insertFamily_undeducible (h : Γ ⊬ⁱ! p) : ∀ {i}, Γ[p, i]ⁱ ⊬ⁱ! p := by
   intro i;
   induction i with
   | zero => simpa using h
@@ -141,25 +144,25 @@ lemma insertFamily_undeducible (h : Γ ⊬ p) : ∀ {i}, Γ[p, i]ᴵ ⊬ p := by
         . split;
           . rename_i q₁ q₂ hq₁₂ hq₁;
             by_contra hq₂;
-            replace hq₁ : Γ[p,i]ᴵ ⊢! q₁ ⟶ p := dtr'! (by simpa using hq₁);
-            replace hq₂ : Γ[p,i]ᴵ ⊢! q₂ ⟶ p := dtr'! (by simpa [System.not_unprovable_iff_provable] using hq₂);
-            have : Γ[p,i]ᴵ ⊢! p := disj₃'! hq₁ hq₂ hq₁₂;
+            replace hq₁ : Γ[p,i]ⁱ ⊢ⁱ! q₁ ⟶ p := dtr'! (by simpa using hq₁);
+            replace hq₂ : Γ[p,i]ⁱ ⊢ⁱ! q₂ ⟶ p := dtr'! (by simpa [System.not_unprovable_iff_provable] using hq₂);
+            have : Γ[p,i]ⁱ ⊢ⁱ! p := disj₃'! hq₁ hq₂ hq₁₂;
             contradiction;
           . simp at*; assumption
         . simp at*; assumption
       . simpa using ih
 
-lemma insertFamily_deducible : Γ[p, i]ᴵ ⊢! p → Γ ⊢! p := by
+lemma insertFamily_deducible : (Γ[p, i]ⁱ ⊢ⁱ! p) → (Γ ⊢ⁱ! p) := by
   contrapose;
   intro h;
   exact insertFamily_undeducible h
 
 @[simp]
-def iUnionInsertFamily (Γ : Theory β) (p : Formula β) : Theory β := ⋃ i, Γ[p, i]ᴵ
-notation Γ "[" p "]ᴵ" => iUnionInsertFamily Γ p
+def iUnionInsertFamily (Γ : Theory β) (p : Formula β) : Theory β := ⋃ i, Γ[p, i]ⁱ
+notation Γ "[" p "]ⁱ" => iUnionInsertFamily Γ p
 
-lemma exists_insertFamily_deducible_of_iUnionInsertFamily_deducible : Γ[p]ᴵ ⊢! q → ∃ k, Γ[p, k]ᴵ ⊢! q := by
-  generalize e : Γ[p]ᴵ = Γ';
+lemma exists_insertFamily_deducible_of_iUnionInsertFamily_deducible : (Γ[p]ⁱ ⊢ⁱ! q) → (∃ k, Γ[p, k]ⁱ ⊢ⁱ! q) := by
+  generalize e : Γ[p]ⁱ = Γ';
   intro h;
   induction h.some with
   | axm h₁ =>
@@ -178,6 +181,11 @@ lemma exists_insertFamily_deducible_of_iUnionInsertFamily_deducible : Γ[p]ᴵ �
       replace hm : m₂ ≤ m₁ := le_of_not_le hm;
       existsi m₁;
       exact hm₁ ⨀ (weakening! (insertFamily_mono hm) hm₂);
+  | eaxm ih =>
+    existsi 0;
+    obtain ⟨q, hq⟩ := by simpa [AxiomEFQ.set, AxiomEFQ] using ih;
+    subst hq;
+    apply efq!;
   | _ =>
     existsi 0;
     try first
@@ -190,12 +198,11 @@ lemma exists_insertFamily_deducible_of_iUnionInsertFamily_deducible : Γ[p]ᴵ �
     | apply disj₁!;
     | apply disj₂!;
     | apply disj₃!;
-    | apply efq!;
 
 @[simp]
 def primeFamily (Γ : Theory β) (p : Formula β) : ℕ → Theory β
   | 0 => Γ
-  | n + 1 => ⋃ i, (primeFamily Γ p n)[p, i]ᴵ
+  | n + 1 => ⋃ i, (primeFamily Γ p n)[p, i]ⁱ
 notation Γ "[" p "," i "]ᴾ" => primeFamily Γ p i
 
 lemma primeFamily_mono (h : k ≤ m) : Γ[p, k]ᴾ ⊆ Γ[p, m]ᴾ := by
@@ -203,33 +210,33 @@ lemma primeFamily_mono (h : k ≤ m) : Γ[p, k]ᴾ ⊆ Γ[p, m]ᴾ := by
   | refl => rfl;
   | @step m _ ih =>
     apply Subset.trans ih;
-    nth_rw 1 [(show Γ[p, m]ᴾ = (Γ[p, m]ᴾ)[p, 0]ᴵ by rfl)];
+    nth_rw 1 [(show Γ[p, m]ᴾ = (Γ[p, m]ᴾ)[p, 0]ⁱ by rfl)];
     apply subset_iUnion;
 
-lemma exists_insertFamily_deducible_of_primeFamily_deducible (h : Γ[p, k + 1]ᴾ ⊢! q) : ∃ m, Γ[p, k]ᴾ[p, m]ᴵ ⊢! q := by
+lemma exists_insertFamily_deducible_of_primeFamily_deducible (h : Γ[p, k + 1]ᴾ ⊢ⁱ! q) : ∃ m, Γ[p, k]ᴾ[p, m]ⁱ ⊢ⁱ! q := by
   obtain ⟨m, hm⟩ := exists_insertFamily_deducible_of_iUnionInsertFamily_deducible h;
   existsi m;
   simpa;
 
-lemma primeFamily_deducible : (Γ[p, k]ᴾ ⊢! p) → (Γ ⊢! p) := by
+lemma primeFamily_deducible : (Γ[p, k]ᴾ ⊢ⁱ! p) → (Γ ⊢ⁱ! p) := by
   induction k with
-  | zero => simp
+  | zero => aesop;
   | succ k ih =>
     intro h;
     obtain ⟨m, hm⟩ := exists_insertFamily_deducible_of_primeFamily_deducible h;
     exact ih (insertFamily_deducible hm);
 
-lemma primeFamily_undeducible : Γ ⊬ p → ∀ {k}, Γ[p, k]ᴾ ⊬ p := by
+lemma primeFamily_undeducible : Γ ⊬ⁱ! p → ∀ {k}, Γ[p, k]ᴾ ⊬ⁱ! p := by
   contrapose;
   intro h;
-  obtain ⟨k, (hk : Γ[p, k]ᴾ ⊢! p)⟩ := by simpa [System.not_unprovable_iff_provable] using h;
+  obtain ⟨k, (hk : Γ[p, k]ᴾ ⊢ⁱ! p)⟩ := by simpa [System.not_unprovable_iff_provable] using h;
   simpa [System.not_unprovable_iff_provable] using primeFamily_deducible hk;
 
 @[simp]
 def iUnionPrimeFamily (Γ : Theory β) (p : Formula β) : Theory β := ⋃ i, Γ[p, i]ᴾ
 notation Γ "[" p "]ᴾ" => iUnionPrimeFamily Γ p
 
-lemma mem_iUnionPrimeFamily (h : q ∈ (Γ[p, m]ᴾ)[p, k]ᴵ) : q ∈ Γ[p]ᴾ := by
+lemma mem_iUnionPrimeFamily (h : q ∈ (Γ[p, m]ᴾ)[p, k]ⁱ) : q ∈ Γ[p]ᴾ := by
   simp;
   existsi (m + 1);
   simp;
@@ -240,9 +247,9 @@ lemma iUnionPrimeFamily_disjunctive : Disjunctive (Γ[p]ᴾ) := by
   intros q₁ q₂ hq;
   let k := encode (q₁ ⋎ q₂);
   obtain ⟨m, hm⟩ := by simpa using hq;
-  have hm₀ : (Γ[p, m]ᴾ)[p, 0]ᴵ ⊢! q₁ ⋎ q₂ := by simpa using axm! hm;
-  have hmₖ : (Γ[p, m]ᴾ)[p, k]ᴵ ⊢! q₁ ⋎ q₂ := weakening! (insertFamily_mono (zero_le k)) hm₀;
-  have h : q₁ ∈ (Γ[p, m]ᴾ)[p, k + 1]ᴵ ∨ q₂ ∈ (Γ[p, m]ᴾ)[p, k + 1]ᴵ := by
+  have hm₀ : (Γ[p, m]ᴾ)[p, 0]ⁱ ⊢ⁱ! q₁ ⋎ q₂ := by simpa using axm! hm;
+  have hmₖ : (Γ[p, m]ᴾ)[p, k]ⁱ ⊢ⁱ! q₁ ⋎ q₂ := weakening! (insertFamily_mono (zero_le k)) hm₀;
+  have h : q₁ ∈ (Γ[p, m]ᴾ)[p, k + 1]ⁱ ∨ q₂ ∈ (Γ[p, m]ᴾ)[p, k + 1]ⁱ := by
     simp only [insertFamily, Nat.add_eq, add_zero, encodek, hmₖ, ↓reduceIte, k];
     split;
     . right; simp only [mem_insert_iff, true_or];
@@ -251,7 +258,7 @@ lemma iUnionPrimeFamily_disjunctive : Disjunctive (Γ[p]ᴾ) := by
   | inl h => left; apply mem_iUnionPrimeFamily (by assumption);
   | inr h => right; apply mem_iUnionPrimeFamily (by assumption);
 
-lemma exists_primeFamily_deducible_of_iUnionPrimeFamily_deducible : Γ[p]ᴾ ⊢! q → ∃ k, Γ[p, k]ᴾ ⊢! q := by
+lemma exists_primeFamily_deducible_of_iUnionPrimeFamily_deducible : (Γ[p]ᴾ ⊢ⁱ! q) → (∃ k, Γ[p, k]ᴾ ⊢ⁱ! q) := by
   generalize e : Γ[p]ᴾ = Γ';
   intro h;
   induction h.some with
@@ -271,6 +278,11 @@ lemma exists_primeFamily_deducible_of_iUnionPrimeFamily_deducible : Γ[p]ᴾ ⊢
       replace hm : m₂ ≤ m₁ := le_of_not_le hm;
       existsi m₁;
       exact hm₁ ⨀ (weakening! (primeFamily_mono hm) hm₂);
+  | eaxm ih =>
+    existsi 0;
+    obtain ⟨q, hq⟩ := by simpa [AxiomEFQ.set, AxiomEFQ] using ih;
+    subst hq;
+    apply efq!;
   | _ =>
     existsi 0;
     try first
@@ -283,33 +295,33 @@ lemma exists_primeFamily_deducible_of_iUnionPrimeFamily_deducible : Γ[p]ᴾ ⊢
     | apply disj₁!;
     | apply disj₂!;
     | apply disj₃!;
-    | apply efq!;
+    -- | apply efq!;
 
 lemma iUnionPrimeFamily_closed : Closed (Γ[p]ᴾ) := by
   intro q hq;
   let k := encode (p ⋎ q);
-  have hpq : Γ[p]ᴾ ⊢! (p ⋎ q) := disj₂'! hq;
+  have hpq : Γ[p]ᴾ ⊢ⁱ! (p ⋎ q) := disj₂'! hq;
   obtain ⟨m, hm⟩ := exists_primeFamily_deducible_of_iUnionPrimeFamily_deducible hpq;
-  have hm₀ : (Γ[p, m]ᴾ)[p, 0]ᴵ ⊢! p ⋎ q := by simpa only [insertFamily];
-  have hmₖ : (Γ[p, m]ᴾ)[p, k]ᴵ ⊢! p ⋎ q := weakening! (insertFamily_mono (zero_le k)) hm₀;
-  have h : q ∈ (Γ[p, m]ᴾ)[p, k + 1]ᴵ := by simp only [insertFamily, Nat.add_eq, add_zero,
-    encodek, hmₖ, ↓reduceIte, mem_insert_iff, true_or, axm!, k];
+  have hm₀ : (Γ[p, m]ᴾ)[p, 0]ⁱ ⊢ⁱ! p ⋎ q := by simpa only [insertFamily];
+  have hmₖ : (Γ[p, m]ᴾ)[p, k]ⁱ ⊢ⁱ! p ⋎ q := weakening! (insertFamily_mono (zero_le k)) hm₀;
+  have h : q ∈ (Γ[p, m]ᴾ)[p, k + 1]ⁱ := by
+    simp [insertFamily, hmₖ, k, (show insert p (Γ[p,m]ᴾ[p,encode (p ⋎ q)]ⁱ) ⊢ⁱ! p by apply axm!; simp)];
   exact mem_iUnionPrimeFamily (by assumption);
 
-variable (hU : Γ ⊬ p)
+variable (hU : Γ ⊬ⁱ! p)
 
-lemma iUnionPrimeFamily_undeducible : Γ[p]ᴾ ⊬ p := by
+lemma iUnionPrimeFamily_undeducible : Γ[p]ᴾ ⊬ⁱ! p := by
   by_contra hC;
-  replace hC : Γ[p]ᴾ ⊢! p := by simpa [System.not_unprovable_iff_provable] using hC;
-  obtain ⟨m, (hm : Γ[p, m]ᴾ ⊢! p)⟩ := exists_primeFamily_deducible_of_iUnionPrimeFamily_deducible hC;
-  have : Γ[p, m]ᴾ ⊬ p := primeFamily_undeducible hU;
+  replace hC : Γ[p]ᴾ ⊢ⁱ! p := by simpa [System.not_unprovable_iff_provable] using hC;
+  obtain ⟨m, (hm : Γ[p, m]ᴾ ⊢ⁱ! p)⟩ := exists_primeFamily_deducible_of_iUnionPrimeFamily_deducible hC;
+  have : Γ[p, m]ᴾ ⊬ⁱ! p := primeFamily_undeducible hU;
   contradiction;
 
-lemma iUnionPrimeFamily_consistent : System.Consistent (Γ[p]ᴾ) := by
+lemma iUnionPrimeFamily_consistent : (Γ[p]ᴾ).Consistent 𝐄𝐅𝐐 := by
   by_contra hC;
-  replace hC : Γ[p]ᴾ ⊢! ⊥ := by simpa [System.inconsistent_iff_provable_falsum] using hC;
-  have : Γ[p]ᴾ ⊬ p := iUnionPrimeFamily_undeducible hU;
-  have : Γ[p]ᴾ ⊢! p := efq'! hC;
+  replace hC : Γ[p]ᴾ ⊢ⁱ! ⊥ := by simpa only [Consistent] using hC;
+  have : Γ[p]ᴾ ⊬ⁱ! p := iUnionPrimeFamily_undeducible hU;
+  have : Γ[p]ᴾ ⊢ⁱ! p := efq'! hC;
   contradiction;
 
 lemma iUnionPrimeFamily_subset_self : Γ ⊆ Γ[p]ᴾ := by
@@ -318,7 +330,7 @@ lemma iUnionPrimeFamily_subset_self : Γ ⊆ Γ[p]ᴾ := by
   existsi 0;
   simpa;
 
-lemma prime_expansion : ∃ Ω : PrimeTheory β, (Γ ⊆ Ω.theory ∧ Ω.theory ⊬ p) := by
+lemma prime_expansion : ∃ Ω : PrimeTheory β, (Γ ⊆ Ω.theory ∧ Ω.theory ⊬ⁱ! p) := by
   let Ω : PrimeTheory β := ⟨Γ[p]ᴾ, ⟨iUnionPrimeFamily_consistent hU, iUnionPrimeFamily_closed, iUnionPrimeFamily_disjunctive⟩⟩;
   existsi Ω;
   constructor;
@@ -344,7 +356,7 @@ lemma CanonicalModel.val_def {a : β} : (CanonicalModel β).val Ω a ↔ (atom a
 
 variable [DecidableEq β] [Encodable β]
 
-lemma truthlemma {Ω : PrimeTheory β} {p : Formula β} : (Ω ⊩[(CanonicalModel β)] p) ↔ (Ω.theory ⊢! p) := by
+lemma truthlemma {Ω : PrimeTheory β} {p : Formula β} : (Ω ⊩[(CanonicalModel β)] p) ↔ (Ω.theory ⊢ⁱ! p) := by
   induction p using rec' generalizing Ω with
   | hatom a =>
     constructor;
@@ -357,8 +369,8 @@ lemma truthlemma {Ω : PrimeTheory β} {p : Formula β} : (Ω ⊩[(CanonicalMode
     constructor;
     . intro h;
       obtain ⟨hp, hq⟩ := h;
-      have dp : Ω.theory ⊢! p := ihp.mp hp;
-      have dq : Ω.theory ⊢! q := ihq.mp hq;
+      have dp : Ω.theory ⊢ⁱ! p := ihp.mp hp;
+      have dq : Ω.theory ⊢ⁱ! q := ihq.mp hq;
       exact conj₃'! dp dq;
     . intro h;
       constructor;
@@ -379,7 +391,7 @@ lemma truthlemma {Ω : PrimeTheory β} {p : Formula β} : (Ω ⊩[(CanonicalMode
     . contrapose;
       intro h;
       simp [KripkeSatisfies.imp_def'];
-      have h₁ : insert p Ω.theory ⊬ q := dtr_not'! h;
+      have h₁ : insert p Ω.theory ⊬ⁱ! q := dtr_not'! h;
       obtain ⟨Ω', hΩ'₁, hΩ'₂⟩ := prime_expansion h₁;
       existsi Ω';
       exact ⟨
@@ -393,12 +405,12 @@ lemma truthlemma {Ω : PrimeTheory β} {p : Formula β} : (Ω ⊩[(CanonicalMode
       simp [KripkeSatisfies.imp_def'];
       by_contra hC; simp at hC;
       obtain ⟨Ω', ⟨hp, hΩΩ', hq⟩⟩ := hC;
-      have hp : Ω'.theory ⊢! p := ihp.mp hp;
-      have hq : Ω'.theory ⊬ q := ihq.not.mp hq;
+      have hp : Ω'.theory ⊢ⁱ! p := ihp.mp hp;
+      have hq : Ω'.theory ⊬ⁱ! q := ihq.not.mp hq;
       have := modus_ponens₂'! (weakening! hΩΩ' h) hp;
       contradiction;
 
-theorem Kripke.completes {Γ : Theory β} {p : Formula β} : (Γ ⊨ᴵ p) → (Γ ⊢! p) := by
+theorem Kripke.completes {Γ : Theory β} {p : Formula β} : (Γ ⊨ⁱ p) → (Γ ⊢ⁱ! p) := by
   contrapose;
   intro hnp hp;
   have ⟨Ω, ⟨hsΩ, hnpΩ⟩⟩ := prime_expansion hnp;
@@ -409,7 +421,7 @@ theorem Kripke.completes {Γ : Theory β} {p : Formula β} : (Γ ⊨ᴵ p) → (
   );
   contradiction;
 
-theorem Kripke.complete_iff {Γ : Theory β} {p : Formula β} : Γ ⊨ᴵ p ↔ Γ ⊢! p:=
+theorem Kripke.complete_iff {Γ : Theory β} {p : Formula β} : Γ ⊨ⁱ p ↔ Γ ⊢ⁱ! p:=
   ⟨Kripke.completes, Kripke.sounds⟩
 
 section DisjProp
@@ -536,12 +548,12 @@ lemma DPCounterModel_right {p : Formula β} : (w ⊩[M₂] p) ↔ (Sum.inr $ Sum
       have := h (Sum.inr $ Sum.inr v) (by simpa [DPCounterModel]) this;
       exact ih₂.mpr this;
 
-theorem Deduction.disjunctive {p q : Formula β} : ∅ ⊢! p ⋎ q → ∅ ⊢! p ∨ ∅ ⊢! q := by
+theorem Deduction.disjunctive {p q : Formula β} : ∅ ⊢ⁱ! p ⋎ q → ∅ ⊢ⁱ! p ∨ ∅ ⊢ⁱ! q := by
   contrapose;
   intro h;
   apply not_imp_not.mpr Kripke.sounds;
 
-  have ⟨(hp : ∅ ⊬ p), (hq : ∅ ⊬ q)⟩ := not_or.mp h;
+  have ⟨(hp : ∅ ⊬ⁱ! p), (hq : ∅ ⊬ⁱ! q)⟩ := not_or.mp h;
   obtain ⟨γ₁, M₁, w₁, hp⟩ := by simpa [Formula.KripkeConsequence] using not_imp_not.mpr Kripke.completes hp;
   obtain ⟨γ₂, M₂, w₂, hq⟩ := by simpa [Formula.KripkeConsequence] using not_imp_not.mpr Kripke.completes hq;
   let M : Kripke.Model (Unit ⊕ γ₁ ⊕ γ₂) β := DPCounterModel M₁ M₂ w₁ w₂;

@@ -20,9 +20,8 @@ instance : Coe (Formula α) (Classical.Formula α) := ⟨Formula.toClassical⟩
 
 instance : Coe (Theory α) (Classical.Theory α) := ⟨(Formula.toClassical '' ·)⟩
 
-open Deduction
-
-theorem Deducible.toClassical {T : Theory α} {p} : T ⊢ p → (T : Classical.Theory α) ⊢! p
+/-
+def Deduction.toClassical {T : Theory α} {p} : T ⊢ p → (T : Classical.Theory α) ⊢! p
   | axm h                      => Deduction.axm! (Set.mem_image_of_mem _ h)
   | @modusPonens _ _ p q b₁ b₂ => by
       let b₁' : (T : Classical.Theory α) ⊢! p ⟶ q := Deducible.toClassical b₁
@@ -38,6 +37,7 @@ theorem Deducible.toClassical {T : Theory α} {p} : T ⊢ p → (T : Classical.T
   | disj₁ _ _ _                => by simp; prover
   | disj₂ _ _ _                => by simp; prover
   | disj₃ _ _ _ _              => by simp; prover
+-/
 
 end Intuitionistic
 
