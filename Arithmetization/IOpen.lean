@@ -22,9 +22,9 @@ lemma open_induction {P : M → Prop}
   induction (C := Semiformula.Open)
     (by rcases hP with ⟨p, hp, hhp⟩
         haveI : Inhabited M := Classical.inhabited_of_nonempty'
-        exact ⟨p.fvEnumInv', (Rew.rewriteMap p.fvEnum').hom p, by simp[hp],
+        exact ⟨p.fvEnumInv, (Rew.rewriteMap p.fvEnum).hom p, by simp[hp],
           by  intro x; simp [Semiformula.eval_rewriteMap, hhp]
-              exact Semiformula.eval_iff_of_funEqOn p (by intro z hz; simp [Semiformula.fvEnumInv'_fvEnum' _ hz])⟩) zero succ
+              exact Semiformula.eval_iff_of_funEqOn p (by intro z hz; simp [Semiformula.fvEnumInv_fvEnum hz])⟩) zero succ
 
 lemma open_leastNumber {P : M → Prop}
     (hP : ∃ p : Semiformula ℒₒᵣ M 1, p.Open ∧ ∀ x, P x ↔ Semiformula.Eval! M ![x] id p)
@@ -134,10 +134,10 @@ lemma eq_mul_div_add_of_pos (a : M) {b} (hb : 0 < b) : ∃ r < b, a = b * (a / b
 lemma div_graph {a b c : M} : c = a / b ↔ ((0 < b → b * c ≤ a ∧ a < b * (c + 1)) ∧ (b = 0 → c = 0)) :=
   Classical.choose!_eq_iff _
 
-def divdef : Σᴬ[0] 3 :=
+def divdef : Δ₀Sentence 3 :=
   ⟨“(0 < #2 → #2 * #0 ≤ #1 ∧ #1 < #2 * (#0 + 1)) ∧ (#2 = 0 → #0 = 0)”, by simp[Hierarchy.pi_zero_iff_sigma_zero]⟩
 
-lemma div_defined : Σᴬ[0]-Function₂ ((· / ·) : M → M → M) divdef := by
+lemma div_defined : Δ₀-Function₂ ((· / ·) : M → M → M) via divdef := by
   intro v; simp[div_graph, divdef, Matrix.vecHead, Matrix.vecTail]
 
 lemma div_spec_of_pos' (a : M) (h : 0 < b) : ∃ v < b, a = (a / b) * b + v := by
@@ -287,7 +287,7 @@ instance : Mod M := ⟨rem⟩
 
 lemma mod_def (a b : M) : a % b = a - b * (a / b) := rfl
 
-def remdef : Σᴬ[0] 3 :=
+def remdef : Δ₀Sentence 3 :=
   ⟨“∃[#0 < #2 + 1] (!divdef [#0, #2, #3] ∧ !subdef [#1, #2, #3 * #0])”, by simp⟩
 
 lemma rem_graph (a b c : M) : a = b % c ↔ ∃ x ≤ b, (x = b / c ∧ a = b - c * x) := by
@@ -295,7 +295,7 @@ lemma rem_graph (a b c : M) : a = b % c ↔ ∃ x ≤ b, (x = b / c ∧ a = b - 
   · rintro rfl; exact ⟨b / c, by simp, rfl, by rfl⟩
   · rintro ⟨_, _, rfl, rfl⟩; simp
 
-lemma rem_defined : Σᴬ[0]-Function₂ ((· % ·) : M → M → M) remdef := by
+lemma rem_defined : Δ₀-Function₂ ((· % ·) : M → M → M) via remdef := by
   intro v; simp [Matrix.vecHead, Matrix.vecTail, remdef,
     rem_graph, Semiformula.eval_substs, div_defined.pval, sub_defined.pval, le_iff_lt_succ]
 
@@ -405,7 +405,7 @@ lemma two_dvd_mul {a b : M} : 2 ∣ a * b → 2 ∣ a ∨ 2 ∣ b := by
     have : b % 2 = 0 ∨ b % 2 = 1 :=
       le_one_iff_eq_zero_or_one.mp <| lt_two_iff_le_one.mp <| mod_lt b (b := 2) (by simp)
     simpa [show b % 2 ≠ 0 from by simpa [←mod_eq_zero_iff_dvd] using A.2] using this
-  have : a * b % 2 = 1 := by simp [mod_mul, ha, hb]; exact mod_eq_self_of_lt one_lt_two
+  have : a * b % 2 = 1 := by simp [mod_mul, ha, hb]
   have : ¬2 ∣ a * b := by simp [←mod_eq_zero_iff_dvd, this]
   contradiction
 
@@ -453,10 +453,10 @@ prefix:75 "√" => sqrt
 
 lemma sqrt_graph {a b : M} : b = √a ↔ b * b ≤ a ∧ a < (b + 1) * (b + 1) := Classical.choose!_eq_iff _
 
-def sqrtdef : Σᴬ[0] 2 :=
+def sqrtdef : Δ₀Sentence 2 :=
   ⟨“#0 * #0 ≤ #1 ∧ #1 < (#0 + 1) * (#0 + 1)”, by simp[Hierarchy.pi_zero_iff_sigma_zero]⟩
 
-lemma sqrt_defined : Σᴬ[0]-Function₁ (λ a : M ↦ √a) sqrtdef := by
+lemma sqrt_defined : Δ₀-Function₁ (λ a : M ↦ √a) via sqrtdef := by
   intro v; simp[sqrt_graph, sqrtdef, Matrix.vecHead, Matrix.vecTail]
 
 instance : DefinableFunction₁ b s ((√·) : M → M) := defined_to_with_param₀ _ sqrt_defined
@@ -486,11 +486,7 @@ lemma sqrt_two : √(2 : M) = 1 :=
   Eq.symm <| eq_sqrt 1 2 (by simp [one_le_two, one_add_one_eq_two, one_lt_two])
 
 lemma sqrt_three : √(3 : M) = 1 :=
-  Eq.symm <| eq_sqrt 1 3 (by
-    simp [one_add_one_eq_two, two_mul_two_eq_four]
-    constructor
-    · simp [←two_add_one_eq_three]
-    · simp [←three_add_one_eq_four])
+  Eq.symm <| eq_sqrt 1 3 <| by simp [one_add_one_eq_two, two_mul_two_eq_four, ←three_add_one_eq_four]
 
 @[simp] lemma sqrt_four : √(4 : M) = 2 := by
   simp [←two_mul_two_eq_four]
@@ -549,9 +545,9 @@ lemma pair_graph {a b c : M} :
   · simp [h, show ¬b ≤ a from by simpa using h]
   · simp [h, show b ≤ a from by simpa using h]
 
-def pairdef : Σᴬ[0] 3 := ⟨“(#1 < #2 ∧ #0 = #2 * #2 + #1) ∨ (#2 ≤ #1 ∧ #0 = #1 * #1 + #1 + #2)”, by simp⟩
+def pairdef : Δ₀Sentence 3 := ⟨“(#1 < #2 ∧ #0 = #2 * #2 + #1) ∨ (#2 ≤ #1 ∧ #0 = #1 * #1 + #1 + #2)”, by simp⟩
 
-lemma pair_defined : Σᴬ[0]-Function₂ (λ a b : M ↦ ⟪a, b⟫) pairdef := by
+lemma pair_defined : Δ₀-Function₂ (λ a b : M ↦ ⟪a, b⟫) via pairdef := by
   intro v; simp [pair_graph, pairdef]
 
 instance {b s} : DefinableFunction₂ b s (pair : M → M → M) := defined_to_with_param₀ _ pair_defined
@@ -604,11 +600,11 @@ instance : PolyBounded₁ (pi₁ : M → M) := ⟨ᵀ“#0”, by intro v; simp�
 
 instance : PolyBounded₁ (pi₂ : M → M) := ⟨ᵀ“#0”, by intro v; simp⟩
 
-def pi₁def : Σᴬ[0] 2 := ⟨“∃[#0 < #2 + 1] !pairdef [#2, #1, #0]”, by simp⟩
+def pi₁def : Δ₀Sentence 2 := ⟨“∃[#0 < #2 + 1] !pairdef [#2, #1, #0]”, by simp⟩
 
-def pi₂def : Σᴬ[0] 2 := ⟨“∃[#0 < #2 + 1] !pairdef [#2, #0, #1]”, by simp⟩
+def pi₂def : Δ₀Sentence 2 := ⟨“∃[#0 < #2 + 1] !pairdef [#2, #0, #1]”, by simp⟩
 
-lemma pi₁_defined : Σᴬ[0]-Function₁ (pi₁ : M → M) pi₁def := by
+lemma pi₁_defined : Δ₀-Function₁ (pi₁ : M → M) via pi₁def := by
   intro v; simp [pi₁def, pair_defined.pval]
   constructor
   · intro h; exact ⟨π₂ v 1, by simp [←le_iff_lt_succ],  by simp [h]⟩
@@ -616,7 +612,7 @@ lemma pi₁_defined : Σᴬ[0]-Function₁ (pi₁ : M → M) pi₁def := by
 
 instance {b s} : DefinableFunction₁ b s (pi₁ : M → M) := defined_to_with_param₀ _ pi₁_defined
 
-lemma pi₂_defined : Σᴬ[0]-Function₁ (pi₂ : M → M) pi₂def := by
+lemma pi₂_defined : Δ₀-Function₁ (pi₂ : M → M) via pi₂def := by
   intro v; simp [pi₂def, pair_defined.pval]
   constructor
   · intro h; exact ⟨π₁ v 1, by simp [←le_iff_lt_succ], by simp [h]⟩
@@ -629,7 +625,7 @@ end pair
 end IOpen
 
 @[elab_as_elim]
-lemma hierarchy_polynomial_induction (b : VType) (s : ℕ) [(𝐈𝚪 b s).Mod M] {P : M → Prop} (hP : DefinablePred b s P)
+lemma hierarchy_polynomial_induction (b : Polarity) (s : ℕ) [(𝐈𝚪 b s).Mod M] {P : M → Prop} (hP : DefinablePred b s P)
     (zero : P 0) (even : ∀ x > 0, P x → P (2 * x)) (odd : ∀ x, P x → P (2 * x + 1)) : ∀ x, P x := by
   haveI : 𝐈open.Mod M := mod_IOpen_of_mod_IHierarchy b s
   intro x; induction x using hierarchy_order_induction

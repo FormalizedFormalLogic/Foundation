@@ -16,10 +16,10 @@ variable [𝐈open.Mod M]
 
 def Pow2 (a : M) : Prop := 0 < a ∧ ∀ r ≤ a, 1 < r → r ∣ a → 2 ∣ r
 
-def pow2def : Σᴬ[0] 1 :=
+def pow2def : Δ₀Sentence 1 :=
   ⟨“0 < #0 ∧ ∀[#0 < #1 + 1] (1 < #0 →  !dvddef [#0, #1] → !dvddef [2, #0])”, by simp [Hierarchy.pi_zero_iff_sigma_zero]⟩
 
-lemma pow2_defined : Σᴬ[0]-Predicate (Pow2 : M → Prop) pow2def := by
+lemma pow2_defined : Δ₀-Predicate (Pow2 : M → Prop) via pow2def := by
   intro v
   simp [Semiformula.eval_substs, Matrix.comp_vecCons', Matrix.vecHead, Matrix.constant_eq_singleton,
     Pow2, pow2def, le_iff_lt_succ, dvd_defined.pval]
@@ -110,10 +110,10 @@ section LenBit
 /-- $\mathrm{LenBit} (2^i, a) \iff \text{$i$th-bit of $a$ is $1$}$. -/
 def LenBit (i a : M) : Prop := ¬2 ∣ (a / i)
 
-def lenbitdef : Σᴬ[0] 2 :=
+def lenbitdef : Δ₀Sentence 2 :=
   ⟨“∃[#0 < #2 + 1] (!divdef [#0, #2, #1] ∧ ¬!dvddef [2, #0])”, by simp⟩
 
-lemma lenbit_defined : Σᴬ[0]-Relation (LenBit : M → M → Prop) lenbitdef := by
+lemma lenbit_defined : Δ₀-Relation (LenBit : M → M → Prop) via lenbitdef := by
   intro v; simp[sqrt_graph, lenbitdef, Matrix.vecHead, Matrix.vecTail, div_defined.pval, dvd_defined.pval, LenBit, ←le_iff_lt_succ]
   constructor
   · intro h; exact ⟨v 1 / v 0, by simp, rfl, h⟩
@@ -190,8 +190,8 @@ namespace Pow2
 lemma mul {a b : M} (ha : Pow2 a) (hb : Pow2 b) : Pow2 (a * b) := by
   wlog hab : a ≤ b
   · simpa [mul_comm] using this hb ha (by simp at hab; exact LT.lt.le hab)
-  suffices : ∀ b : M, ∀ a ≤ b, Pow2 a → Pow2 b → Pow2 (a * b)
-  · exact this b a hab ha hb
+  suffices ∀ b : M, ∀ a ≤ b, Pow2 a → Pow2 b → Pow2 (a * b) by
+    exact this b a hab ha hb
   intro b
   induction b using hierarchy_order_induction_sigma₀
   · definability
@@ -206,8 +206,8 @@ lemma mul {a b : M} (ha : Pow2 a) (hb : Pow2 b) : Pow2 (a * b) := by
       · have ltb : b < 2 * b := lt_two_mul_self (pos_iff_ne_zero.mpr $ by rintro rfl; simp at ltb)
         have hab : a ≤ b := le_of_mul_le_mul_left hab (by simp)
         have : Pow2 (a * b) := IH b ltb a hab (by assumption) (by assumption)
-        suffices : Pow2 (4 * a * b)
-        · have : (2 * a) * (2 * b) = 4 * a * b := by simp [mul_assoc, mul_left_comm a 2 b, ←two_mul_two_eq_four]
+        suffices Pow2 (4 * a * b) by
+          have : (2 * a) * (2 * b) = 4 * a * b := by simp [mul_assoc, mul_left_comm a 2 b, ←two_mul_two_eq_four]
           simpa [this]
         simpa [mul_assoc, pow2_mul_four] using this
 
@@ -221,8 +221,8 @@ lemma sq {a : M} : Pow2 a → Pow2 (a^2) := by
   simp [_root_.sq]
 
 lemma dvd_of_le {a b : M} (ha : Pow2 a) (hb : Pow2 b) : a ≤ b → a ∣ b := by
-  suffices : ∀ b : M, ∀ a ≤ b, Pow2 a → Pow2 b → a ∣ b
-  · intro hab; exact this b a hab ha hb
+  suffices  ∀ b : M, ∀ a ≤ b, Pow2 a → Pow2 b → a ∣ b by
+    intro hab; exact this b a hab ha hb
   intro b; induction b using hierarchy_order_induction_sigma₀
   · definability
   case ind b IH =>
@@ -251,8 +251,7 @@ lemma le_iff_lt_two {a b : M} (ha : Pow2 a) (hb : Pow2 b) : a ≤ b ↔ a < 2 * 
     by_cases ea : a = 1
     · rcases ea with rfl
       simpa [←pos_iff_one_le] using hb.pos
-    · suffices : a ∣ b
-      · exact le_of_dvd hb.pos this
+    · suffices a ∣ b from le_of_dvd hb.pos this
       have : a / 2 ∣ b := by
         have : 2 * (a / 2) ∣ 2 * b := by
           simpa [ha.two_mul_div_two ea] using dvd_of_le ha (by simpa using hb) (LT.lt.le h)
@@ -268,16 +267,13 @@ lemma lt_iff_two_mul_le {a b : M} (ha : Pow2 a) (hb : Pow2 b) : a < b ↔ 2 * a 
   · simp [eb, ←lt_two_iff_le_one]
   · rw [←hb.two_mul_div_two eb]; simp [le_iff_lt_two ha (hb.div_two eb)]
 
-
 lemma sq_or_dsq {a : M} (pa : Pow2 a) : ∃ b, a = b^2 ∨ a = 2 * b^2 := by
-  suffices : ∃ b ≤ a, a = b^2 ∨ a = 2 * b^2
-  · rcases this with ⟨b, _, h⟩
+  suffices ∃ b ≤ a, a = b^2 ∨ a = 2 * b^2 by
+    rcases this with ⟨b, _, h⟩
     exact ⟨b, h⟩
-  revert pa
   induction a using hierarchy_order_induction_sigma₀
   · definability
   case ind a IH =>
-    intro pa
     rcases Pow2.elim'.mp pa with (rfl | ⟨ha, a, rfl, pa'⟩)
     · exact ⟨1, by simp⟩
     · have : 0 < a := by simpa [←pos_iff_one_le] using one_lt_iff_two_le.mp ha

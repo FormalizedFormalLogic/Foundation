@@ -17,13 +17,14 @@ variable [𝐈𝚺₀.Mod M]
 
 def SPPow2 (m : M) : Prop := ¬LenBit 1 m ∧ LenBit 2 m ∧ ∀ i ≤ m, Pow2 i → 2 < i → (LenBit i m ↔ (√i)^2 = i ∧ LenBit (√i) m)
 
-def sppow2def : Σᴬ[0] 1 :=
+def sppow2def : Δ₀Sentence 1 :=
   ⟨“¬!lenbitdef [1, #0] ∧ !lenbitdef [2, #0] ∧
       ∀[#0 < #1 + 1] (!pow2def [#0] → 2 < #0 →
         (!lenbitdef [#0, #1] ↔ ∃[#0 < #1 + 1] (!sqrtdef [#0, #1] ∧ #0 * #0 = #1 ∧ !lenbitdef [#0, #2])))”, by simp⟩
 
-lemma sppow2_defined : Σᴬ[0]-Predicate (SPPow2 : M → Prop) sppow2def := by
-  intro v; simp[SPPow2, sppow2def, Matrix.vecHead, Matrix.vecTail, lenbit_defined.pval, pow2_defined.pval, sqrt_defined.pval, ←le_iff_lt_succ, sq]
+lemma sppow2_defined : Δ₀-Predicate (SPPow2 : M → Prop) via sppow2def := by
+  intro v
+  simp [SPPow2, sppow2def, Matrix.vecHead, Matrix.vecTail, lenbit_defined.pval, pow2_defined.pval, sqrt_defined.pval, ←le_iff_lt_succ, sq]
   intro _ _; apply ball_congr; intro x _; apply imp_congr_right; intro _; apply imp_congr_right; intro _; apply iff_congr
   · simp
   · constructor
@@ -32,10 +33,10 @@ lemma sppow2_defined : Σᴬ[0]-Predicate (SPPow2 : M → Prop) sppow2def := by
 
 def PPow2 (i : M) : Prop := Pow2 i ∧ ∃ m < 2 * i, SPPow2 m ∧ LenBit i m
 
-def ppow2def : Σᴬ[0] 1 :=
+def ppow2def : Δ₀Sentence 1 :=
   ⟨“!pow2def [#0] ∧ ∃[#0 < 2 * #1] (!sppow2def [#0] ∧ !lenbitdef [#1, #0])”, by simp⟩
 
-lemma ppow2_defined : Σᴬ[0]-Predicate (PPow2 : M → Prop) ppow2def := by
+lemma ppow2_defined : Δ₀-Predicate (PPow2 : M → Prop) via ppow2def := by
   intro v; simp[PPow2, ppow2def, Matrix.vecHead, Matrix.vecTail, lenbit_defined.pval, pow2_defined.pval, sppow2_defined.pval]
 
 instance {b s} : DefinablePred b s (PPow2 : M → Prop) := defined_to_with_param₀ _ ppow2_defined
@@ -89,8 +90,7 @@ lemma of_sqrt {i : M} (pi : Pow2 i) (him : i ≤ m) (hsqi : (√i)^2 = i) (hi : 
 
 lemma sq_le_of_lt {i j : M} (pi : Pow2 i) (pj : Pow2 j) (hi : LenBit i m) (hj : LenBit j m) : i < j → i^2 ≤ j := by
   intro hij
-  suffices : ∀ i < j, Pow2 i → Pow2 j → LenBit i m → LenBit j m → i^2 ≤ j
-  · exact this i hij pi pj hi hj
+  suffices ∀ i < j, Pow2 i → Pow2 j → LenBit i m → LenBit j m → i^2 ≤ j from this i hij pi pj hi hj
   clear i pi hi hij pj hj
   induction j using hierarchy_order_induction_sigma₀
   · definability
@@ -261,8 +261,7 @@ lemma sq_ne_four {i : M} (hi : PPow2 i) (ne2 : i ≠ 2) : i^2 ≠ 4 := by
 
 lemma sq_le_of_lt {i j : M} (hi : PPow2 i) (hj : PPow2 j) : i < j → i^2 ≤ j := by
   intro hij
-  suffices : ∀ i < j, PPow2 i → PPow2 j → i^2 ≤ j
-  · exact this i hij hi hj
+  suffices ∀ i < j, PPow2 i → PPow2 j → i^2 ≤ j from this i hij hi hj
   clear hi hij hj
   induction j using hierarchy_order_induction_sigma₀
   · definability

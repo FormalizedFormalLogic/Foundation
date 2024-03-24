@@ -1,5 +1,4 @@
 import Arithmetization.Exponential.Exp
-import Mathlib.Tactic.Linarith
 
 namespace LO.FirstOrder
 
@@ -17,17 +16,14 @@ variable [𝐈𝚺₀.Mod M]
 
 lemma log_exists_unique_pos {y : M} (hy : 0 < y) : ∃! x, x < y ∧ ∃ y' ≤ y, Exp x y' ∧ y < 2 * y' := by
   have : ∃ x < y, ∃ y' ≤ y, Exp x y' ∧ y < 2 * y' := by
-    revert hy
     induction y using hierarchy_polynomial_induction_sigma₀
     · definability
-    case zero => simp
+    case zero => simp at hy
     case even y _ IH =>
-      intro hy
       rcases (IH (by simpa using hy) : ∃ x < y, ∃ y' ≤ y, Exp x y' ∧ y < 2 * y') with ⟨x, hxy, y', gey, H, lty⟩
       exact ⟨x + 1, lt_of_lt_of_le (by simp [hxy]) (succ_le_double_of_pos (pos_of_gt hxy)),
         2 * y', by simpa using gey, Exp.exp_succ_mul_two.mpr H, by simpa using lty⟩
     case odd y IH =>
-      intro hy
       rcases (zero_le y : 0 ≤ y) with (rfl | pos)
       · simp; exact ⟨1, by simp [one_lt_two]⟩
       · rcases (IH pos : ∃ x < y, ∃ y' ≤ y, Exp x y' ∧ y < 2 * y') with ⟨x, hxy, y', gey, H, lty⟩
@@ -71,9 +67,9 @@ lemma log_lt_self_of_pos {y : M} (pos : 0 < y) : log y < y :=
 
 lemma log_graph {x y : M} : x = log y ↔ (y = 0 → x = 0) ∧ (0 < y → x < y ∧ ∃ y' ≤ y, Exp x y' ∧ y < 2 * y') := Classical.choose!_eq_iff _
 
-def logdef : Σᴬ[0] 2 := ⟨“(#1 = 0 → #0 = 0) ∧ (0 < #1 → #0 < #1 ∧ ∃[#0 < #2 + 1] (!Exp.def [#1, #0] ∧ #2 < 2 * #0))”, by simp⟩
+def logdef : Δ₀Sentence 2 := ⟨“(#1 = 0 → #0 = 0) ∧ (0 < #1 → #0 < #1 ∧ ∃[#0 < #2 + 1] (!Exp.def [#1, #0] ∧ #2 < 2 * #0))”, by simp⟩
 
-lemma log_defined : Σᴬ[0]-Function₁ (log : M → M) logdef := by
+lemma log_defined : Δ₀-Function₁ (log : M → M) via logdef := by
   intro v; simp [logdef, log_graph, Exp.defined.pval, ←le_iff_lt_succ]
 
 instance {b s} : DefinableFunction₁ b s (log : M → M) := defined_to_with_param₀ _ log_defined
@@ -101,8 +97,7 @@ lemma Exp.log_eq_of_exp {x y : M} (H : Exp x y) : log y = x :=
 
 lemma exp_of_pow2 {p : M} (pp : Pow2 p) : Exp (log p) p := by
   rcases log_pos pp.pos with ⟨q, hq, H, hp⟩
-  suffices : p = q
-  · simpa [this] using H
+  suffices p = q by simpa [this] using H
   by_contra ne
   have : q < p := lt_of_le_of_ne hq (Ne.symm ne)
   have : 2 * q < 2 * q := calc
@@ -163,9 +158,9 @@ lemma length_graph {i a : M} : i = ‖a‖ ↔ (0 < a → ∃ k ≤ a, k = log a
     · rintro rfl; exact ⟨log a, by simp⟩
     · rintro ⟨_, _, rfl, rfl⟩; rfl
 
-def binarylengthdef : Σᴬ[0] 2 := ⟨“(0 < #1 → ∃[#0 < #2 + 1] (!logdef [#0, #2] ∧ #1 = #0 + 1)) ∧ (#1 = 0 → #0 = 0)”, by simp⟩
+def binarylengthdef : Δ₀Sentence 2 := ⟨“(0 < #1 → ∃[#0 < #2 + 1] (!logdef [#0, #2] ∧ #1 = #0 + 1)) ∧ (#1 = 0 → #0 = 0)”, by simp⟩
 
-lemma length_defined : Σᴬ[0]-Function₁ (‖·‖ : M → M) binarylengthdef := by
+lemma length_defined : Δ₀-Function₁ (‖·‖ : M → M) via binarylengthdef := by
   intro v; simp [binarylengthdef, length_graph, log_defined.pval, ←le_iff_lt_succ]
 
 instance {b s} : DefinableFunction₁ b s (‖·‖ : M → M) := defined_to_with_param₀ _ length_defined
@@ -280,8 +275,8 @@ lemma sq_len_le_three_mul (a : M) : ‖a‖ ^ 2 ≤ 3 * a := by
       _               ≤ 3 * (2 * a + 1)       := by simp
 
 lemma brange_exists_unique (a : M) : ∀ x < ‖a‖, ∃! y, Exp x y := by
-  suffices : ∀ x < ‖a‖, ∃ y ≤ a, Exp x y
-  · intro x hx; rcases this x hx with ⟨_, _, H⟩
+  suffices ∀ x < ‖a‖, ∃ y ≤ a, Exp x y by
+    intro x hx; rcases this x hx with ⟨_, _, H⟩
     exact ExistsUnique.intro _ H (fun y' H' ↦ H'.uniq H)
   intro x
   induction x using hierarchy_induction_sigma₀
@@ -334,9 +329,9 @@ lemma bexp_graph {y a x : M} : y = bexp a x ↔ ∃ l ≤ a, l = ‖a‖ ∧ (x 
     · exact (hlt lt).uniq (exp_bexp_of_lt lt)
     · rcases hle le; simp [bexp_eq_zero_of_le le]⟩
 
-def bexpdef : Σᴬ[0] 3 := ⟨“∃[#0 < #2 + 1] (!binarylengthdef [#0, #2] ∧ (#3 < #0 → !Exp.def [#3, #1]) ∧ (#0 ≤ #3 → #1 = 0))”, by simp⟩
+def bexpdef : Δ₀Sentence 3 := ⟨“∃[#0 < #2 + 1] (!binarylengthdef [#0, #2] ∧ (#3 < #0 → !Exp.def [#3, #1]) ∧ (#0 ≤ #3 → #1 = 0))”, by simp⟩
 
-lemma bexp_defined : Σᴬ[0]-Function₂ (bexp : M → M → M) bexpdef := by
+lemma bexp_defined : Δ₀-Function₂ (bexp : M → M → M) via bexpdef := by
   intro v; simp [bexpdef, bexp_graph, Exp.defined.pval, length_defined.pval, ←le_iff_lt_succ]
 
 instance {b s} : DefinableFunction₂ b s (bexp : M → M → M) := defined_to_with_param₀ _ bexp_defined
@@ -410,9 +405,9 @@ lemma fbit_eq_zero_iff {a i : M} : fbit a i = 0 ↔ ¬LenBit (bexp a i) a := by 
 
 lemma fbit_eq_zero_of_le {a i : M} (hi : ‖a‖ ≤ i) : fbit a i = 0 := by simp [fbit, bexp_eq_zero_of_le hi]
 
-def fbitdef : Σᴬ[0] 3 := ⟨“∃[#0 < #2 + 1] (!bexpdef [#0, #2, #3] ∧ ∃[#0 < #3 + 1] (!divdef [#0, #3, #1] ∧ !remdef [#2, #0, 2]))”, by simp⟩
+def fbitdef : Δ₀Sentence 3 := ⟨“∃[#0 < #2 + 1] (!bexpdef [#0, #2, #3] ∧ ∃[#0 < #3 + 1] (!divdef [#0, #3, #1] ∧ !remdef [#2, #0, 2]))”, by simp⟩
 
-lemma fbit_defined : Σᴬ[0]-Function₂ (fbit : M → M → M) fbitdef := by
+lemma fbit_defined : Δ₀-Function₂ (fbit : M → M → M) via fbitdef := by
   intro v; simp [fbitdef, bexp_defined.pval, div_defined.pval, rem_defined.pval, ←le_iff_lt_succ, fbit]
   constructor
   · intro h; exact ⟨bexp (v 1) (v 2), by simp, rfl, _, by simp, rfl, h⟩

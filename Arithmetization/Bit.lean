@@ -17,9 +17,9 @@ def Bit (i a : M) : Prop := LenBit (exp i) a
 
 instance : Membership M M := ⟨Bit⟩
 
-def bitdef : Σᴬ[0] 2 := ⟨“∃[#0 < #2 + 1] (!expdef [#0, #1] ∧ !lenbitdef [#0, #2])”, by simp⟩
+def bitdef : Δ₀Sentence 2 := ⟨“∃[#0 < #2 + 1] (!expdef [#0, #1] ∧ !lenbitdef [#0, #2])”, by simp⟩
 
-lemma bit_defined : Σᴬ[0]-Relation ((· ∈ ·) : M → M → Prop) bitdef := by
+lemma bit_defined : Δ₀-Relation ((· ∈ ·) : M → M → Prop) via bitdef := by
   intro v; simp [bitdef, lenbit_defined.pval, exp_defined.pval, ←le_iff_lt_succ]
   constructor
   · intro h; exact ⟨exp (v 0), by simp [h.le], rfl, h⟩
@@ -106,9 +106,9 @@ lemma lt_exp_iff {a i : M} : a < exp i ↔ ∀ j ∈ a, j < i :=
 
 instance : HasSubset M := ⟨fun a b ↦ ∀ ⦃i⦄, i ∈ a → i ∈ b⟩
 
-def bitSubsetdef : Σᴬ[0] 2 := ⟨“∀[#0 < #1] (!bitdef [#0, #1] → !bitdef [#0, #2])”, by simp⟩
+def bitSubsetdef : Δ₀Sentence 2 := ⟨“∀[#0 < #1] (!bitdef [#0, #1] → !bitdef [#0, #2])”, by simp⟩
 
-lemma bitSubset_defined : Σᴬ[0]-Relation ((· ⊆ ·) : M → M → Prop) bitSubsetdef := by
+lemma bitSubset_defined : Δ₀-Relation ((· ⊆ ·) : M → M → Prop) via bitSubsetdef := by
   intro v; simp [bitSubsetdef, bit_defined.pval]
   exact ⟨by intro h x _ hx; exact h hx, by intro h x hx; exact h x (lt_of_mem hx) hx⟩
 

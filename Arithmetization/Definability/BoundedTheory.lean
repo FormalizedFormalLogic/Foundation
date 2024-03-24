@@ -1,3 +1,4 @@
+/-
 import Arithmetization.Lemmata
 import Arithmetization.Vorspiel.Graph
 import Logic.FirstOrder.Arith.StrictHierarchy
@@ -575,3 +576,4 @@ end Definability
 end Arith
 
 end LO.FirstOrder
+-/

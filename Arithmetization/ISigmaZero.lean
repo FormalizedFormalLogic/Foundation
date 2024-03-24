@@ -9,9 +9,7 @@ namespace Arith
 
 noncomputable section
 
-variable {M : Type} [Inhabited M] [DecidableEq M] [ORingSymbol M]
-  [Structure ℒₒᵣ M] [Structure.ORing ℒₒᵣ M]
-  [𝐏𝐀⁻.Mod M]
+variable {M : Type} [Nonempty M] [Zero M] [One M] [Add M] [Mul M] [LT M] [𝐏𝐀⁻.Mod M]
 
 namespace Model
 

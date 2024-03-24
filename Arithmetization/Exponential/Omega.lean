@@ -58,10 +58,10 @@ lemma exp_hash (a b : M) : Exp (‖a‖ * ‖b‖) (a # b) := Classical.choose!_
 
 lemma exp_hash_one (a : M) : Exp ‖a‖ (a # 1) := by simpa using exp_hash a 1
 
-def hashdef : Σᴬ[0] 3 :=
+def hashdef : Δ₀Sentence 3 :=
   ⟨“∃[#0 < #2 + 1] ∃[#0 < #4 + 1] (!binarylengthdef [#1, #3] ∧ !binarylengthdef [#0, #4] ∧ !Exp.def [#1 * #0, #2])”, by simp⟩
 
-lemma hash_defined : Σᴬ[0]-Function₂ (Hash.hash : M → M → M) hashdef := by
+lemma hash_defined : Δ₀-Function₂ (Hash.hash : M → M → M) via hashdef := by
   intro v; simp[hashdef, length_defined.pval, Exp.defined.pval, ←le_iff_lt_succ]
   constructor
   · intro h; exact ⟨‖v 1‖, by simp, ‖v 2‖, by simp, rfl, rfl, by rw [h]; exact exp_hash _ _⟩

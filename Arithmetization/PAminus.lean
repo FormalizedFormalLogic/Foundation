@@ -37,41 +37,18 @@ lemma sub_eq_iff : c = a - b ↔ ((a ≥ b → a = b + c) ∧ (a < b → c = 0))
   · simpa [← sub_spec_of_ge hxy] using show a - b ≤ b + (a - b) from le_add_self
   · simp[sub_spec_of_lt hxy]
 
-def subf (T : Theory ℒₒᵣ) [𝐏𝐀⁻ ≾ T] : Definability.BoundedDeltaZeroFunction T 2 :=
-  Definability.toBoundedDeltaZeroFunction
-    (“(#2 ≤ #1 → #1 = #2 + #0) ∧ (#1 < #2 → #0 = 0)”)
-    (by formula_class)
-    (Complete.complete! <| by
-      apply oRing_consequence_of
-      intro M _ _ _ _ _ _
-      haveI : T.Mod M := Theory.Mod.of_add_left M T 𝐄𝐪
-      haveI : 𝐏𝐀⁻.Mod M := Theory.Mod.of_provably_subtheory' M _ T
-      simp [models_iff]; intro e
-      exact sub_existsUnique (e 0) (e 1))
-    #0
-    (Complete.complete! <| by {
-      apply oRing_consequence_of
-      intro M _ _ _ _ _ _
-      haveI : T.Mod M := Theory.Mod.of_add_left_left M T 𝐏𝐀⁻ 𝐄𝐪
-      haveI : 𝐏𝐀⁻.Mod M := Theory.Mod.of_provably_subtheory' M _ T
-      simp [models_iff]
-      simp only [Fin.isValue, Matrix.forall_iff, Matrix.cons_val_two, Matrix.vecHead,
-        Matrix.vecTail, Function.comp_apply, Fin.succ_zero_eq_one, Matrix.cons_val_one,
-        Matrix.cons_val_zero, Matrix.cons_val_fin_one, Fin.forall_fin_zero_pi]
-      intro a b c h₁ h₂
-      rcases sub_eq_iff.mpr ⟨h₁, h₂⟩
-      simp })
+open Definability
 
-def subdef : Definability.BSemisentenceΔ₀ 𝐏𝐀⁻ 3 :=
-  ⟨“(#2 ≤ #1 → #1 = #2 + #0) ∧ (#1 < #2 → #0 = 0)”, by formula_class⟩
+def subdef : Δ₀Sentence 3 :=
+  ⟨“(#2 ≤ #1 → #1 = #2 + #0) ∧ (#1 < #2 → #0 = 0)”, by simp[Hierarchy.pi_zero_iff_sigma_zero]⟩
 
-@[simp] lemma subdef_val : Semiformula.PVal! M ![a, b, c] subdef.val ↔ a = b - c := by simp [subdef, sub_eq_iff]
+lemma sub_defined : Δ₀-Function₂ ((· - ·) : M → M → M) via subdef := by
+  intro v; simp [subdef, sub_eq_iff]
 
 instance {b s} : DefinableFunction₂ b s ((· - ·) : M → M → M) := defined_to_with_param₀ subdef sub_defined
 
 instance sub_polybounded : PolyBounded₂ ((· - ·) : M → M → M) := ⟨#0, λ _ ↦ by simp⟩
 
-/--/
 @[simp] lemma sub_self (a : M) : a - a = 0 :=
   add_right_eq_self.mp (sub_spec_of_ge (a := a) (b := a) (by rfl)).symm
 
@@ -170,9 +147,9 @@ lemma dvd_iff_bounded {a b : M} : a ∣ b ↔ ∃ c ≤ b, b = a * c := by
     · rintro ⟨c, rfl⟩; exact ⟨c, le_mul_self_of_pos_left (pos_iff_ne_zero.mpr hx), rfl⟩
     · rintro ⟨c, hz, rfl⟩; exact dvd_mul_right a c
 
-def dvddef : Σᴬ[0] 2 := ⟨“∃[#0 < #2 + 1] #2 = #1 * #0”, by simp⟩
+def dvddef : Δ₀Sentence 2 := ⟨“∃[#0 < #2 + 1] #2 = #1 * #0”, by simp⟩
 
-lemma dvd_defined : Σᴬ[0]-Relation (λ a b : M ↦ a ∣ b) dvddef :=
+lemma dvd_defined : Δ₀-Relation (λ a b : M ↦ a ∣ b) via dvddef :=
   λ v ↦ by simp[dvd_iff_bounded, Matrix.vecHead, Matrix.vecTail, le_iff_lt_succ, dvddef]
 
 instance {b s} : DefinableRel b s ((· ∣ ·) : M → M → Prop) := defined_to_with_param₀ _ dvd_defined
@@ -239,10 +216,10 @@ lemma prime_iff_bounded {a : M} : Prime a ↔ 1 < a ∧ ∀ b ≤ a, (b ∣ a �
 def IsPrime (a : M) : Prop := 1 < a ∧ ∀ b ≤ a, (b ∣ a → b = 1 ∨ b = a)
 -- TODO: prove IsPrime a ↔ Prime a
 
-def isPrimedef : Σᴬ[0] 1 :=
+def isPrimedef : Δ₀Sentence 1 :=
   ⟨“1 < #0” ⋏ (∀[“#0 < #1 + 1”] dvddef/[#0, #1] ⟶ “#0 = 1 ∨ #0 = #1”), by simp [Hierarchy.pi_zero_iff_sigma_zero]⟩
 
-lemma isPrime_defined : Σᴬ[0]-Predicate (λ a : M ↦ IsPrime a) isPrimedef := by
+lemma isPrime_defined : Δ₀-Predicate (λ a : M ↦ IsPrime a) via isPrimedef := by
   intro v
   simp [Semiformula.eval_substs, Matrix.comp_vecCons', Matrix.vecHead, Matrix.constant_eq_singleton,
     IsPrime, isPrimedef, le_iff_lt_succ, dvd_defined.pval]

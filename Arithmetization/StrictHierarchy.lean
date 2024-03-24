@@ -6,7 +6,7 @@ variable {L : Language} [L.LT] {μ : Type v}
 
 namespace Arith
 
-inductive StrictHierarchy : VType → ℕ → {n : ℕ} → Semiformula L μ n → Prop
+inductive StrictHierarchy : Polarity → ℕ → {n : ℕ} → Semiformula L μ n → Prop
   | zero (b s n) {p : Semiformula L μ n}             : Hierarchy Σ 0 p → StrictHierarchy b s p
   | and {b s n} {p q : Semiformula L μ n}            : StrictHierarchy b s p → StrictHierarchy b s q → StrictHierarchy b s (p ⋏ q)
   | or {b s n} {p q : Semiformula L μ n}             : StrictHierarchy b s p → StrictHierarchy b s q → StrictHierarchy b s (p ⋎ q)

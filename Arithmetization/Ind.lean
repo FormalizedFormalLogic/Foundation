@@ -21,7 +21,7 @@ lemma IndScheme_subset (h : ∀ {p : Semiformula L ℕ 1},  C p → C' p) : IndS
 
 variable (L)
 
-abbrev IHierarchy (b : VType) (k : ℕ) : Theory L := IndScheme (Arith.Hierarchy b k)
+abbrev IHierarchy (Γ : Polarity) (k : ℕ) : Theory L := IndScheme (Arith.Hierarchy Γ k)
 
 notation "𝐈𝚪" => IHierarchy ℒₒᵣ
 
@@ -84,7 +84,7 @@ lemma iSigma_subset_mono {s₁ s₂} (h : s₁ ≤ s₂) : 𝐈𝚺 s₁ ⊆ �
   Theory.IndScheme_subset (fun H ↦ H.mono h)
 
 def mod_IOpen_of_mod_IHierarchy (b s) [(𝐈𝚪 b s).Mod M] : 𝐈open.Mod M :=
-  Theory.Mod.of_ss M (show 𝐈open ⊆ 𝐈𝚪 b s from Theory.IndScheme_subset Hierarchy.Open)
+  Theory.Mod.of_ss M (show 𝐈open ⊆ 𝐈𝚪 b s from Theory.IndScheme_subset Hierarchy.of_open)
 
 def mod_ISigma_of_le {s₁ s₂} (h : s₁ ≤ s₂) [(𝐈𝚺 s₂).Mod M] : (𝐈𝚺 s₁).Mod M :=
   Theory.Mod.of_ss M (iSigma_subset_mono h)
@@ -95,7 +95,7 @@ instance [𝐈𝚺₁.Mod M] : 𝐈open.Mod M := mod_IOpen_of_mod_IHierarchy Σ 
 
 instance [𝐈𝚺₁.Mod M] : 𝐈𝚺₀.Mod M := mod_ISigma_of_le (show 0 ≤ 1 from by simp)
 
-variable (b : VType) (s : ℕ) [(𝐈𝚪 b s).Mod M]
+variable (b : Polarity) (s : ℕ) [(𝐈𝚪 b s).Mod M]
 
 @[elab_as_elim]
 lemma hierarchy_induction {P : M → Prop} (hP : DefinablePred b s P)
@@ -103,10 +103,10 @@ lemma hierarchy_induction {P : M → Prop} (hP : DefinablePred b s P)
   induction (P := P) (C := Hierarchy b s) (by
     rcases hP with ⟨p, hp⟩
     haveI : Inhabited M := Classical.inhabited_of_nonempty'
-    exact ⟨p.val.fvEnumInv', (Rew.rewriteMap p.val.fvEnum').hom p.val, by simp [hp],
+    exact ⟨p.val.fvEnumInv, (Rew.rewriteMap p.val.fvEnum).hom p.val, by simp [hp],
       by  intro x; simp [Semiformula.eval_rewriteMap]
-          have : (Semiformula.Eval! M ![x] fun x => p.val.fvEnumInv' (p.val.fvEnum' x)) p.val ↔ (Semiformula.Eval! M ![x] id) p.val :=
-            Semiformula.eval_iff_of_funEqOn _ (by intro x hx; simp [Semiformula.fvEnumInv'_fvEnum' _ hx])
+          have : (Semiformula.Eval! M ![x] fun x => p.val.fvEnumInv (p.val.fvEnum x)) p.val ↔ (Semiformula.Eval! M ![x] id) p.val :=
+            Semiformula.eval_iff_of_funEqOn _ (by intro x hx; simp [Semiformula.fvEnumInv_fvEnum hx])
           simp [this, hp.eval]⟩)
     zero succ
 
@@ -119,8 +119,8 @@ lemma hierarchy_induction {P : M → Prop} (hP : DefinablePred b s P)
 @[elab_as_elim]
 lemma hierarchy_order_induction {P : M → Prop} (hP : DefinablePred b s P)
     (ind : ∀ x, (∀ y < x, P y) → P x) : ∀ x, P x := by
-  suffices : ∀ x, ∀ y < x, P y
-  · intro x; exact this (x + 1) x (by simp)
+  suffices ∀ x, ∀ y < x, P y by
+    intro x; exact this (x + 1) x (by simp)
   intro x; induction x using hierarchy_induction
   · exact b
   · exact s

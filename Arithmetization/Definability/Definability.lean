@@ -1,6 +1,7 @@
 import Arithmetization.Lemmata
 import Arithmetization.Definability.Init
-import Arithmetization.Definability.BoundedTheory
+--import Arithmetization.Definability.BoundedTheory
+import Arithmetization.Vorspiel.Graph
 import Aesop
 
 namespace LO.FirstOrder
@@ -42,6 +43,8 @@ abbrev HSemiformula (Γ : Polarity) (s : ℕ) (L : Language) [L.LT] (μ : Type*)
 
 abbrev SentenceHierarchy (Γ : Polarity) (s : ℕ) (L : Language) [L.LT] (n) := HSemiformula Γ s L Empty n
 
+scoped[LO.FirstOrder.Arith] notation "Δ₀Sentence " n => Definability.SentenceHierarchy Σ 0 ℒₒᵣ n
+
 namespace HSemiformula
 
 abbrev of_zero (p : HSemiformula Γ 0 ℒₒᵣ μ k) : HSemiformula b' s ℒₒᵣ μ k :=
@@ -71,7 +74,7 @@ end Definability
 namespace Model
 
 open Definability
-/-
+
 abbrev DefinedPred (Γ : Polarity) (s : ℕ) (P : M → Prop) (p : SentenceHierarchy Γ s ℒₒᵣ 1) : Prop :=
   Defined (λ v ↦ P (v 0)) p.val
 
@@ -98,25 +101,37 @@ abbrev DefinedFunction₃ (Γ : Polarity) (s : ℕ) (f : M → M → M → M) (p
 
 notation Γ "(" s ")-Predicate " P " via " p => DefinedPred Γ s P p
 
+notation "Δ₀-Predicate " P " via " p => DefinedPred Σ 0 P p
+
 notation Γ "(" s ")-Relation " P " via " p => DefinedRel Γ s P p
+
+notation "Δ₀-Relation " P " via " p => DefinedRel Σ 0 P p
 
 notation Γ "(" s ")-Relation₃ " P " via " p => DefinedRel₃ Γ s P p
 
+notation "Δ₀-Relation₃ " P " via " p => DefinedRel₃ Σ 0 P p
+
 notation Γ "(" s ")-Relation₄ " P " via " p => DefinedRel₄ Γ s P p
+
+notation "Δ₀-Relation₄ " P " via " p => DefinedRel₄ Σ 0 P p
 
 notation Γ "(" s ")-Function₁ " f " via " p => DefinedFunction₁ Γ s f p
 
+notation "Δ₀-Function₁ " f " via " p => DefinedFunction₁ Σ 0 f p
+
 notation Γ "(" s ")-Function₂ " f " via " p => DefinedFunction₂ Γ s f p
 
+notation "Δ₀-Function₂ " f " via " p => DefinedFunction₂ Σ 0 f p
+
 notation Γ "(" s ")-Function₃ " f " via " p => DefinedFunction₃ Γ s f p
+
+notation "Δ₀-Function₃ " f " via " p => DefinedFunction₃ Σ 0 f p
 
 def DefinedRel.eq : Γ(s)-Relation ((· = ·) : M → M → Prop) via SentenceHierarchy.eq := by intro v; simp [SentenceHierarchy.eq]
 
 def DefinedRel.lt : Γ(s)-Relation ((· < ·) : M → M → Prop) via SentenceHierarchy.lt := by intro v; simp [SentenceHierarchy.lt]
 
 def DefinedRel.le : Γ(s)-Relation ((· ≤ ·) : M → M → Prop) via SentenceHierarchy.le := by intro v; simp [SentenceHierarchy.le]
-
--/
 
 variable (Γ : Polarity) (s : ℕ)
 
@@ -160,26 +175,6 @@ lemma defined_to_with_param {k} {P : (Fin k → M) → Prop} (p : SentenceHierar
 
 lemma defined_to_with_param₀ {k} {P : (Fin k → M) → Prop} (p : SentenceHierarchy b' 0 ℒₒᵣ k) (hP : Defined P p.val) :
     Definable Γ s P := ⟨⟨Rew.emb.hom p.val, by simp⟩, by intro; simp [hP.pval]⟩
-
-section
-
-variable {T : Theory ℒₒᵣ} [T.Mod M]
-
-lemma HSemifromula.definable_of_defined {k} {P : (Fin k → M) → Prop} (p : HSemisentenceIn T Γ s k) (hP : Defined P p.val) :
-    Definable Γ s P :=
-  ⟨by rcases p.prop with ⟨σ, hσ, H⟩
-      exact ⟨⟨Rew.emb.hom σ, by simpa using hσ⟩, by
-        intro v; simp
-        simp [H.eval_iff, hP.pval]⟩⟩
-
-lemma HSemifromula.definable_of_defined₀ {k} {P : (Fin k → M) → Prop} (p : HSemisentenceIn T b' 0 k) (hP : Defined P p.val) :
-    Definable Γ s P :=
-  ⟨by rcases p.prop with ⟨σ, hσ, H⟩
-      exact ⟨⟨Rew.emb.hom σ, by simpa [Hierarchy.zero_iff_delta_zero] using Hierarchy.of_zero hσ⟩, by
-        intro v; simp
-        simp [H.eval_iff, hP.pval]⟩⟩
-
-end
 
 namespace Definable
 

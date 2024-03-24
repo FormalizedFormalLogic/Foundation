@@ -62,17 +62,14 @@ lemma ext_graph (z S L i : M) : z = S{L}[i] ↔
       rcases h lt with ⟨b, hb, Hb, hL, _, HhL, _, _, rfl, rfl⟩
       exact ⟨b, hb, Hb, by rw [HhL.uniq (exp_hash_one L)]⟩
 
-def extdef : Σᴬ[0] 4 :=
+def extdef : Δ₀Sentence 4 :=
   ⟨ “∃[#0 < #3 + 1] (!binarylengthdef [#0, #3] ∧ ∃[#0 < #3 + 1] (!binarylengthdef [#0, #3] ∧
       (#1 ≤ #5 * #0 → #2 = 0) ∧
       (#5 * #0 < #1 →
         ∃[#0 < #5 + 1] (!Exp.def [#6 * #1, #0] ∧
           ∃[#0 < 2 * #5 + 1 + 1] (!Exp.def [#2, #0] ∧
             ∃[#0 < #7 + 1] (!divdef [#0, #7, #2] ∧ !remdef [#5, #0, #1]))))))”, by
-    simp
-    rw [Hierarchy.bex_iff]
-    · simp
-    · simp; decide ⟩
+    simp⟩
 
 @[simp] lemma Fin.succ_two_eq_three : (2 : Fin 3).succ = 3 := rfl
 
@@ -80,7 +77,7 @@ def extdef : Σᴬ[0] 4 :=
 
 @[simp] lemma cons_app_eight {n : ℕ} (a : α) (s : Fin n.succ.succ.succ.succ.succ.succ.succ.succ → α) : (a :> s) 8 = s 7 := rfl
 
-lemma ext_defined : Σᴬ[0]-Function₃ (ext : M → M → M → M) extdef := by
+lemma ext_defined : Δ₀-Function₃ (ext : M → M → M → M) via extdef := by
   intro v; simp [extdef, length_defined.pval, Exp.defined.pval, div_defined.pval, rem_defined.pval, lt_succ_iff_le, ext_graph]
 
 instance {b s} : DefinableFunction₃ b s (ext : M → M → M → M) := defined_to_with_param₀ _ ext_defined
@@ -240,8 +237,7 @@ lemma Segment.uniq {U L A start intv nₛ nₑ₁ nₑ₂ : M}
     (H₁ : Segment U L A start intv nₛ nₑ₁) (H₂ : Segment U L A start intv nₛ nₑ₂) : nₑ₁ = nₑ₂ := by
   rcases H₁ with ⟨S₁, _, HS₁, Hₛ, rfl⟩
   rcases H₂ with ⟨S₂, _, HS₂, rfl, rfl⟩
-  suffices : ∀ i ≤ intv, S₁{L}[i] = S₂{L}[i]
-  · exact this intv (by rfl)
+  suffices ∀ i ≤ intv, S₁{L}[i] = S₂{L}[i] from this intv (by rfl)
   intro i; induction i using hierarchy_induction_sigma₀
   · definability
   case zero => intro _; exact Hₛ
@@ -269,8 +265,7 @@ lemma Series.le_add {U I L A iter n : M} (H : Series U I L A iter n) : n ≤ ‖
 lemma Series.uniq {U I L A iter n₁ n₂ : M} (H₁ : Series U I L A iter n₁) (H₂ : Series U I L A iter n₂) : n₁ = n₂ := by
   rcases H₁ with ⟨T₁, _, HT₁, Hₛ₁, rfl⟩
   rcases H₂ with ⟨T₂, _, HT₂, Hₛ₂, rfl⟩
-  suffices : ∀ i ≤ iter, T₁{L}[i] = T₂{L}[i]
-  · exact this iter (by rfl)
+  suffices ∀ i ≤ iter, T₁{L}[i] = T₂{L}[i] from this iter (by rfl)
   intro i; induction i using hierarchy_induction_sigma₀
   · definability
   case zero => intro _; simp [Hₛ₁, Hₛ₂]
@@ -422,7 +417,7 @@ def polyI (A : M) : M := bexp (2 * A) (√‖A‖)
 
 def polyL (A : M) : M := ‖polyI A‖ ^ 2
 
-def polyU (A : M) : M := (2 * A + 1) ^ (4 * 4 * 4 * 2)
+def polyU (A : M) : M := (2 * A + 1) ^ 128
 
 lemma len_polyI {A : M} (pos : 0 < A) : ‖polyI A‖ = √‖A‖ + 1 :=
   len_bexp (show √‖A‖ < ‖2 * A‖ from by simp [length_two_mul_of_pos pos, lt_succ_iff_le])
@@ -435,13 +430,13 @@ lemma four_mul_eq_two_mul_two_mul (a : M) : 4 * a = 2 * (2 * a) := by simp [←t
 
 @[simp] lemma two_mul_sqrt_le_self (a : M) : 2 * √a ≤ a + 1 := le_trans (two_mul_le_sq_add_one (√a)) (by simp)
 
-lemma four_mul_hash_self (a : M) : (4 * a) # (4 * a) ≤ (a # a) ^ (4 * 4) := calc
+lemma four_mul_hash_self (a : M) : (4 * a) # (4 * a) ≤ (a # a) ^ 16 := calc
   (4 * a) # (4 * a) ≤ ((4 * a) # (2 * a)) ^ 2 := by simp [four_mul_eq_two_mul_two_mul, hash_two_mul_le_sq_hash]
   _                 ≤ ((4 * a) # a) ^ 4       := by simp [pow_four_eq_sq_sq, hash_two_mul_le_sq_hash]
   _                 ≤ ((a # (2 * a)) ^ 2) ^ 4 := by rw [hash_comm (4 * a) a]
                                                     simp [four_mul_eq_two_mul_two_mul, pow_four_eq_sq_sq, hash_two_mul_le_sq_hash]
   _                 ≤ ((a # a) ^ 4) ^ 4       := by simp [pow_four_eq_sq_sq, hash_two_mul_le_sq_hash]
-  _                 ≤ (a # a) ^ (4 * 4)       := by simp [←pow_mul]
+  _                 ≤ (a # a) ^ 16       := by simp [←pow_mul]
 
 @[simp] lemma pos_sq_iff {a : M} : 0 < √a ↔ 0 < a :=
   ⟨fun h ↦ lt_of_lt_of_le h (by simp),
@@ -475,23 +470,22 @@ lemma polyI_hash_self_polybounded {A : M} (pos : 0 < A) : (polyI A) # (polyI A) 
   _                     = (A # 1) ^ 4                                   := by congr 1; simpa using bexp_eq_hash A 1
   _                     ≤ (2 * A + 1) ^ 4                               := by simp
 
-lemma polyI_hash_polyL_polybounded {A : M} (pos : 0 < A) : (polyI A) # (polyL A) ≤ (2 * A + 1) ^ (4 * 4 * 4) := calc
+lemma polyI_hash_polyL_polybounded {A : M} (pos : 0 < A) : (polyI A) # (polyL A) ≤ (2 * A + 1) ^ 64 := calc
   (polyI A) # (polyL A) ≤ (polyI A) # (3 * polyI A)         := hash_monotone (by rfl) (by simp [polyL, sq_len_le_three_mul])
   _                     ≤ (4 * polyI A) # (4 * polyI A)     := hash_monotone (le_mul_of_pos_left $ by simp) (mul_le_mul_right $ by simp [←three_add_one_eq_four])
-  _                     ≤ ((polyI A) # (polyI A)) ^ (4 * 4) := four_mul_hash_self _
-  _                     ≤ ((2 * A + 1) ^ 4) ^ (4 * 4)       := by simp [pow_mul, polyI_hash_self_polybounded pos]
-  _                     = (2 * A + 1) ^ (4 * 4 * 4)         := by simp [←pow_mul]
+  _                     ≤ ((polyI A) # (polyI A)) ^ (4 * 4) := by simpa using four_mul_hash_self _
+  _                     ≤ ((2 * A + 1) ^ 4) ^ (4 * 4)       := by simp only [pow_mul, pow_four_le_pow_four, polyI_hash_self_polybounded pos]
+  _                     = (2 * A + 1) ^ 64         := by simp [←pow_mul]
 
 lemma sq_polyI_hash_polyL_polybounded {A : M} (pos : 0 < A) : ((polyI A) # (polyL A)) ^ 2 ≤ polyU A := calc
-  ((polyI A) # (polyL A)) ^ 2 ≤ ((2 * A + 1) ^ (4 * 4 * 4)) ^ 2 := by simp [polyI_hash_polyL_polybounded pos]
-  _                           = polyU A                         := by simp [polyU, pow_mul]
+  ((polyI A) # (polyL A)) ^ 2 ≤ ((2 * A + 1) ^ 64) ^ 2 := by simp [polyI_hash_polyL_polybounded pos]
+  _                           = polyU A                         := by simp [polyU, ←pow_mul]
 
 def NuonAux (A k n : M) : Prop := SeriesSegment (polyU A) (polyI A) (polyL A) A k n
 
-def ispolydef : Σᴬ[0] 2 :=
+def ispolydef : Δ₀Sentence 2 :=
   ⟨“∃[#0 < #2 + 1] (!binarylengthdef [#0, #2] ∧ ∃[#0 < #1 + 1] !sqrtdef [#0, #1] ∧ !bexpdef [#2, #3, #0])”, by simp⟩
 
-/--/
 @[simp] lemma NuonAux.initial (A : M) : NuonAux A 0 0 := SeriesSegment.initial (by simp [polyU])
 
 @[simp] lemma NuonAux.initial_iff (A n : M) : NuonAux A 0 n ↔ n = 0 := ⟨fun h ↦ h.uniq (NuonAux.initial A), by rintro rfl; simp⟩
@@ -508,8 +502,8 @@ lemma NuonAux.succ {A k : M} (H : NuonAux A k n) (hk : k ≤ ‖A‖) : NuonAux 
   exact SeriesSegment.succ (sq_polyI_hash_polyL_polybounded pos) (by simp [polyL]) (lt_of_le_of_lt hk $ polyI_le pos) H
 
 lemma NuonAux.exists {k : M} (hk : k ≤ ‖A‖) : ∃ n, NuonAux A k n := by
-  suffices : ∃ n ≤ k, NuonAux A k n
-  · rcases this with ⟨n, _, h⟩; exact ⟨n, h⟩
+  suffices ∃ n ≤ k, NuonAux A k n by
+    rcases this with ⟨n, _, h⟩; exact ⟨n, h⟩
   revert hk
   induction k using hierarchy_induction_sigma₀
   · sorry -- simp [SeriesSegment, Segment, Series, IsSegment, IsSeries]
@@ -535,8 +529,8 @@ lemma NuonAux.succ_iff {A k : M} (hk : k ≤ ‖A‖) : NuonAux A (k + 1) (n + f
 
 lemma NuonAux.two_mul {k n : M} (hk : k ≤ ‖A‖) : NuonAux A k n → NuonAux (2 * A) (k + 1) n := by
   revert n hk
-  suffices : ∀ n ≤ k, k ≤ ‖A‖ → NuonAux A k n → NuonAux (2 * A) (k + 1) n
-  · intro n hk H
+  suffices ∀ n ≤ k, k ≤ ‖A‖ → NuonAux A k n → NuonAux (2 * A) (k + 1) n by
+    intro n hk H
     exact this n H.le hk H
   induction k using hierarchy_induction_sigma₀
   · sorry
@@ -550,8 +544,8 @@ lemma NuonAux.two_mul {k n : M} (hk : k ≤ ‖A‖) : NuonAux A k n → NuonAux
 
 lemma NuonAux.two_mul_add_one {k n : M} (hk : k ≤ ‖A‖) : NuonAux A k n → NuonAux (2 * A + 1) (k + 1) (n + 1) := by
   revert n hk
-  suffices : ∀ n ≤ k, k ≤ ‖A‖ → NuonAux A k n → NuonAux (2 * A + 1) (k + 1) (n + 1)
-  · intro n hk H
+  suffices ∀ n ≤ k, k ≤ ‖A‖ → NuonAux A k n → NuonAux (2 * A + 1) (k + 1) (n + 1) by
+    intro n hk H
     exact this n H.le hk H
   induction k using hierarchy_induction_sigma₀
   · sorry
