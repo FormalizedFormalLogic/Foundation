@@ -63,7 +63,8 @@ lemma ext_graph (z S L i : M) : z = S{L}[i] ↔
       exact ⟨b, hb, Hb, by rw [HhL.uniq (exp_hash_one L)]⟩
 
 def extdef : Δ₀Sentence 4 :=
-  ⟨ “∃[#0 < #3 + 1] (!binarylengthdef [#0, #3] ∧ ∃[#0 < #3 + 1] (!binarylengthdef [#0, #3] ∧
+  ⟨“∃[#0 < #3 + 1] (!binarylengthdef [#0, #3] ∧
+    ∃[#0 < #3 + 1] (!binarylengthdef [#0, #3] ∧
       (#1 ≤ #5 * #0 → #2 = 0) ∧
       (#5 * #0 < #1 →
         ∃[#0 < #5 + 1] (!Exp.def [#6 * #1, #0] ∧
@@ -72,8 +73,6 @@ def extdef : Δ₀Sentence 4 :=
     simp⟩
 
 -- TODO: move to Vorspiel
-@[simp] lemma Fin.succ_two_eq_three : (2 : Fin 3).succ = 3 := rfl
-
 @[simp] lemma cons_app_seven {n : ℕ} (a : α) (s : Fin n.succ.succ.succ.succ.succ.succ.succ → α) : (a :> s) 7 = s 6 := rfl
 
 @[simp] lemma cons_app_eight {n : ℕ} (a : α) (s : Fin n.succ.succ.succ.succ.succ.succ.succ.succ → α) : (a :> s) 8 = s 7 := rfl
@@ -519,28 +518,56 @@ lemma bex_eq_le_iff {p : M → Prop} {b : M} :
     (∃ a ≤ z, a = b ∧ p a) ↔ (b ≤ z ∧ p b) :=
   ⟨by rintro ⟨a, hp, rfl, hr⟩; exact ⟨hp, hr⟩, by rintro ⟨hp, hr⟩; exact ⟨b, hp, rfl, hr⟩⟩
 
+lemma bex_eq_lt_iff {p : M → Prop} {b : M} :
+    (∃ a < z, a = b ∧ p a) ↔ (b < z ∧ p b) :=
+  ⟨by rintro ⟨a, hp, rfl, hr⟩; exact ⟨hp, hr⟩, by rintro ⟨hp, hr⟩; exact ⟨b, hp, rfl, hr⟩⟩
+
 lemma isSerieDef_defined : Defined (M := M) (λ v ↦ IsSeries (v 0) (v 1) (v 2) (v 3) (v 4) (v 5)) isSeriesDef.val := by
   intro v; simp [IsSeries, isSeriesDef, length_defined.pval, ext_defined.pval, segmentDef_defined.pval, lt_succ_iff_le]
   apply ball_congr; intro x _
   rw [bex_eq_le_iff, bex_eq_le_iff, bex_eq_le_iff]
   simp; rfl
 
-def seriesDef : Δ₀Sentence 6 := sorry
+def seriesDef : Δ₀Sentence 6 :=
+  ⟨“∃[#0 < #1](!isSeriesDef [#1, #2, #3, #4, #5, #0] ∧ !extdef [0, #3, #0, 0] ∧ !extdef [#6, #3, #0, #5])”, by simp⟩
 
-def seriesSegmentDef : Δ₀Sentence 6 := sorry
+lemma seriesDef_defined : Defined (M := M) (λ v ↦ Series (v 0) (v 1) (v 2) (v 3) (v 4) (v 5)) seriesDef.val := by
+  intro v; simp [Series, seriesDef, isSerieDef_defined.pval, ext_defined.pval]
+  apply exists_congr; intro T
+  apply and_congr_right; intros
+  apply and_congr_right; intros
+  simp [Eq.comm]
 
-def nuonAuxDef : Δ₀Sentence 3 := sorry
+def seriesSegmentDef : Δ₀Sentence 6 :=
+  ⟨“∃[#0 < #6 + 1]
+      ∃[#0 < #3 + 1](!binarylengthdef [#0, #3] ∧
+      ∃[#0 < #7 + 1](!divdef [#0, #7, #1] ∧
+      ∃[#0 < #8 + 1](!remdef [#0, #8, #2] ∧
+        !seriesDef [#4, #5, #6, #7, #1, #3] ∧
+        !segmentDef [#4, #6, #7, #2 * #1, #0, #3, #9])))”, by simp⟩
+
+lemma seriesSegmentDef_defined : Defined (M := M) (λ v ↦ SeriesSegment (v 0) (v 1) (v 2) (v 3) (v 4) (v 5)) seriesSegmentDef.val := by
+  intro v; simp [SeriesSegment, seriesSegmentDef,
+    length_defined.pval, div_defined.pval, rem_defined.pval, seriesDef_defined.pval, segmentDef_defined.pval, lt_succ_iff_le]
+  apply exists_congr; intro nₖ
+  apply and_congr_right; intros
+  rw [bex_eq_le_iff, bex_eq_le_iff, bex_eq_le_iff]; simp; rfl
+
+def nuonAuxDef : Δ₀Sentence 3 :=
+  ⟨“∃[#0 < #1 + 1](!binarylengthdef [#0, #1] ∧
+    ∃[#0 < #1 + 1](!sqrtdef [#0, #1] ∧
+    ∃[#0 < 2 * #3 + 1](!bexpdef [#0, 2 * #3, #1] ∧
+    ∃[#0 < #1 + 1](!binarylengthdef [#0, #1] ∧
+      !seriesSegmentDef [(2 * #4 + 1) ^' 128, #1, #0 ^' 2, #4, #5, #6]))))”, by simp⟩
 
 lemma nuonAux_defined : Δ₀-Relation₃ (NuonAux : M → M → M → Prop) via nuonAuxDef := by
-  intro v; simp [NuonAux]
-
+  intro v; simp [NuonAux, polyU, polyI, polyL, nuonAuxDef,
+    length_defined.pval, sqrt_defined.pval, bexp_defined.pval, seriesSegmentDef_defined.pval, lt_succ_iff_le]
+  rw [bex_eq_le_iff, bex_eq_le_iff, bex_eq_le_iff, bex_eq_le_iff]; simp
 
 instance {Γ s} : DefinableRel₃ Γ s (NuonAux : M → M → M → Prop) := defined_to_with_param₀ _ nuonAux_defined
-/--/
-instance : PolyBounded₃ (ext : M → M → M → M) := ⟨#1, λ _ ↦ by simp⟩
 
-def ispolydef : Δ₀Sentence 2 :=
-  ⟨“∃[#0 < #2 + 1] (!binarylengthdef [#0, #2] ∧ ∃[#0 < #1 + 1] !sqrtdef [#0, #1] ∧ !bexpdef [#2, #3, #0])”, by simp⟩
+instance : PolyBounded₃ (ext : M → M → M → M) := ⟨#1, λ _ ↦ by simp⟩
 
 @[simp] lemma NuonAux.initial (A : M) : NuonAux A 0 0 := SeriesSegment.initial (by simp [polyU])
 
@@ -629,6 +656,8 @@ def nuon (a : M) : M := Classical.choose! (Nuon.exists_unique a)
 
 lemma Nuon.nuon_eq {a b : M} (h : Nuon a b) : nuon a = b := (nuon_nuon a).uniq h
 
+lemma Nuon.nuon_eq_iff {a b : M} : b = nuon a ↔ Nuon a b := Classical.choose!_eq_iff (Nuon.exists_unique a)
+
 lemma nuon_bit0 (a : M) : nuon (2 * a) = nuon a := by
   rcases zero_le a with (rfl | pos)
   · simp
@@ -638,6 +667,17 @@ lemma nuon_bit0 (a : M) : nuon (2 * a) = nuon a := by
 lemma nuon_bit1 (a : M) : nuon (2 * a + 1) = nuon a + 1 := by
   have : Nuon (2 * a + 1) (nuon a + 1) := by simpa [Nuon, length_two_mul_add_one] using (nuon_nuon a).two_mul_add_one (by simp)
   exact this.nuon_eq
+
+def nuonDef : Δ₀Sentence 2 :=
+  ⟨“∃[#0 < #2 + 1](!binarylengthdef [#0, #2] ∧
+    !Nuon.nuonAuxDef [#2, #0, #1])”, by simp⟩
+
+lemma nuon_defined : Δ₀-Function₁ (nuon : M → M) via nuonDef := by
+  intro v; simp [Nuon.nuon_eq_iff, Nuon, nuonDef,
+    length_defined.pval, Nuon.nuonAux_defined.pval, lt_succ_iff_le]
+  rw [Nuon.bex_eq_le_iff]; simp
+
+instance {b s} : DefinableFunction₁ b s (nuon : M → M) := defined_to_with_param₀ _ nuon_defined
 
 end Model
 
