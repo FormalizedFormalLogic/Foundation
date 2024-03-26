@@ -102,11 +102,10 @@ instance : Hilbert.Classical (Deduction Λ) where
 
 instance : HasNecessitation (Deduction Λ) := ⟨necessitation⟩
 
-lemma maxm_subset {Λ Λ'} (dΛ : Γ ⊢ᴹ[Λ] p) : (Λ ⊆ Λ') → (Γ ⊢ᴹ[Λ'] p) := by
-  intro hΛ;
+lemma maxm_subset {Λ Λ'} (h : Λ ⊆ Λ') (dΛ : Γ ⊢ᴹ[Λ] p) : (Γ ⊢ᴹ[Λ'] p) := by
   induction dΛ with
   | axm ih => exact axm ih
-  | maxm ih => exact maxm (hΛ ih)
+  | maxm ih => exact maxm (h ih)
   | modus_ponens _ _ ih₁ ih₂ => exact modus_ponens ih₁ ih₂
   | necessitation _ ih => exact necessitation ih
   | verum => apply verum
@@ -119,6 +118,8 @@ lemma maxm_subset {Λ Λ'} (dΛ : Γ ⊢ᴹ[Λ] p) : (Λ ⊆ Λ') → (Γ ⊢ᴹ
   | disj₂ => apply disj₂
   | disj₃ => apply disj₃
   | dne => apply dne
+
+lemma maxm_subset! {Λ Λ'} (h : Λ ⊆ Λ') (dΛ : Γ ⊢ᴹ[Λ]! p) : (Γ ⊢ᴹ[Λ']! p) := ⟨maxm_subset h dΛ.some⟩
 
 private def dtrAux (Γ) (p q : Formula α) : (Γ ⊢ᴹ[Λ] q) → ((Γ \ {p}) ⊢ᴹ[Λ] (p ⟶ q))
   | maxm h          => (imply₁ _ _ _) ⨀ (maxm h)

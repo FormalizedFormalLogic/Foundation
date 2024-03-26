@@ -241,4 +241,7 @@ theorem negEquivalence_int_classical : (Γ ⊢ⁱ! ~p) ↔ (Γ ⊢ᶜ! ~p) := by
 
 end Deduction
 
+def AxiomSet.Disjunctive (Λ : AxiomSet α) := ∀ {p q}, (∅ ⊢ᴾ[Λ]! p ⋎ q) → (∅ ⊢ᴾ[Λ]! p) ∨ (∅ ⊢ᴾ[Λ]! q)
+
+
 end LO.Propositional.Intuitionistic
