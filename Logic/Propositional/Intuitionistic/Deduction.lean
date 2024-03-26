@@ -182,6 +182,63 @@ instance : Hilbert.Classical (· ⊢ᶜ · : Theory α → Formula α → Type _
   disj₃        := disj₃;
   dne Γ p      := eaxm (by simp [AxiomDNE.set, AxiomDNE]);
 
+theorem deducible_Classical_of_Int (d : Γ ⊢ⁱ! p) : (Γ ⊢ᶜ! p) := by
+  induction d.some with
+  | axm => apply axm! (by assumption)
+  | eaxm ih =>
+    obtain ⟨q, hq⟩ := by simpa only [AxiomEFQ.set, AxiomEFQ] using ih;
+    subst hq;
+    apply efq!;
+  | modusPonens h₁ h₂ ih₁ ih₂ => exact (ih₁ ⟨h₁⟩) ⨀ (ih₂ ⟨h₂⟩)
+  | _ =>
+    try first
+    | apply verum!
+    | apply imply₁!
+    | apply imply₂!
+    | apply conj₁!
+    | apply conj₂!
+    | apply conj₃!
+    | apply disj₁!
+    | apply disj₂!
+    | apply disj₃!
+
+instance : HasDT (· ⊢ᶜ · : Theory α → Formula α → Type _) := ⟨dtr⟩
+
+/-- a.k.a. Glivenko's Theorem -/
+theorem negnegEquivalence_Int_Classical : (Γ ⊢ⁱ! ~~p) ↔ (Γ ⊢ᶜ! p) := by
+  constructor;
+  . intro d;
+    exact dne'! $ deducible_Classical_of_Int d;
+  . intro d;
+    induction d.some with
+    | axm h => exact dni'! $ axm! h;
+    | @modusPonens p q h₁ h₂ ih₁ ih₂ =>
+      have : Γ ⊢ⁱ! ~~p ⟶ ~~q := dn_distribute_imp_left'! $ ih₁ ⟨h₁⟩;
+      exact (by assumption) ⨀ ih₂ ⟨h₂⟩;
+    | eaxm ih =>
+      obtain ⟨q, hq⟩ := by simpa only [AxiomDNE.set, AxiomDNE] using ih;
+      subst hq;
+      exact dn_disctribute_imp_right'! $ contra₀'! $ dni!;
+    | _ =>
+      apply dni'!;
+      try first
+      | apply verum!
+      | apply imply₁!
+      | apply imply₂!
+      | apply conj₁!
+      | apply conj₂!
+      | apply conj₃!
+      | apply disj₁!
+      | apply disj₂!
+      | apply disj₃!
+
+abbrev glivenko : (Γ ⊢ⁱ! ~~p) ↔ Γ ⊢ᶜ! p := negnegEquivalence_Int_Classical
+
+theorem negEquivalence_int_classical : (Γ ⊢ⁱ! ~p) ↔ (Γ ⊢ᶜ! ~p) := by
+  constructor;
+  . intro d; exact glivenko.mp $ dni'! d;
+  . intro d; exact tne'! $ glivenko.mpr d;
+
 end Deduction
 
 end LO.Propositional.Intuitionistic

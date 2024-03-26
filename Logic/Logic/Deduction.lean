@@ -481,6 +481,109 @@ def conj_neg' (h : Γ ⊢ ~p ⋏ ~q) : Γ ⊢ ~(p ⋎ q) := by
   apply dtr';
   exact disj₃' dnp dnq (by deduct);
 
+def tne : Bew Γ (~~(~p) ⟶ ~p) := by
+  have : Bew Γ (p ⟶ ~~p) := dni;
+  have : Bew Γ (~~(~p) ⟶ ~p) := contra₀' (by assumption)
+  assumption
+
+lemma tne! : Γ ⊢! ~~(~p) ⟶ ~p := ⟨tne⟩
+
+def tne' : Bew Γ (~~(~p)) → Bew Γ (~p) := modus_ponens₂' tne
+
+lemma tne'! (h : Γ ⊢! ~~(~p)) : Γ ⊢! ~p := ⟨tne' h.some⟩
+
+def imp_swap' {Γ p q r} (h : Bew Γ (p ⟶ q ⟶ r)) : Bew Γ (q ⟶ p ⟶ r) := by
+  apply dtr';
+  apply dtr';
+  rw [(show insert p (insert q Γ) = insert q (insert p Γ) by aesop)];
+  apply dtl';
+  apply dtl';
+  simpa;
+
+@[tautology]
+def dn_distribute_imp_left : Bew Γ (~~(p ⟶ q) ⟶ (~~p ⟶ ~~q)) := by
+  have : Bew {p ⟶ q} (~~p ⟶ ~~q) := contra₀' $ contra₀' $ axm (by simp);
+  have : Bew ∅ ((p ⟶ q) ⟶ ~~p ⟶ ~~q) := dtr' (by simpa);
+  have : Bew ∅ (~~p ⟶ (p ⟶ q) ⟶  ~~q) := imp_swap' (by simpa);
+  have : Bew {~~p} ((p ⟶ q) ⟶ (~~q)) := by simpa using dtl' this;
+  have : Bew {~~p} (~~(p ⟶ q) ⟶ ~~(~~q)) := contra₀' $ contra₀' $ (by assumption);
+  have : Bew {~~p} (~~(p ⟶ q) ⟶ ~~q) := imp_trans' (by assumption) $ tne;
+  have : Bew ∅ (~~p ⟶ ~~(p ⟶ q) ⟶ ~~q) := dtr' (by simpa);
+  have : Bew ∅ (~~(p ⟶ q) ⟶ ~~p ⟶  ~~q) := imp_swap' (by simpa);
+  exact weakening' (by simp) this
+
+lemma dn_distribute_imp_left! : Γ ⊢! (~~(p ⟶ q) ⟶ (~~p ⟶ ~~q)) := ⟨dn_distribute_imp_left⟩
+
+def dn_distribute_imp_left' : Γ ⊢ (~~(p ⟶ q)) → Γ ⊢ (~~p ⟶ ~~q) := modus_ponens₂' (dn_distribute_imp_left)
+
+lemma dn_distribute_imp_left'! (h : Γ ⊢! ~~(p ⟶ q)) : Γ ⊢! ~~p ⟶ ~~q := ⟨dn_distribute_imp_left' h.some⟩
+
+def efq_include [HasEFQ Bew] (h₁ : p ∈ Γ) (h₂ : ~p ∈ Γ) : Bew Γ q := by
+  have d₁ : Γ ⊢ p := axm h₁;
+  have d₂ : Γ ⊢ ~p := axm h₂;
+  have : Γ ⊢ ⊥ := (by simpa [NegDefinition.neg] using d₂) ⨀ d₁;
+  deduct;
+
+@[tautology]
+def imp_intro_of_or [HasEFQ Bew] : Bew Γ ((~p ⋎ q) ⟶ (p ⟶ q)) := by
+  have d₁ : Bew Γ (~p ⟶ (p ⟶ q)) := by
+    apply dtr';
+    apply dtr';
+    exact efq_include (show p ∈ insert p (insert (~p) Γ) by simp) (by simp);
+  have d₂ : Bew Γ (q ⟶ (p ⟶ q)) := by
+    apply dtr';
+    apply dtr';
+    exact axm (show q ∈ insert p (insert q Γ) by simp);
+  exact disj₃ ⨀ d₁ ⨀ d₂
+
+@[tautology]
+def neg_or : Bew Γ (~(p ⋎ q) ⟶ (~p ⋏ ~q)) := by
+  have d₁ : Bew ∅ (~(p ⋎ q) ⟶ ~p) := contra₀' $ disj₁;
+  have d₂ : Bew ∅ (~(p ⋎ q) ⟶ ~q) := contra₀' $ disj₂;
+  have : Bew {~(p ⋎ q)} (~p) := by simpa using dtl' d₁;
+  have : Bew {~(p ⋎ q)} (~q) := by simpa using dtl' d₂;
+  have : Bew ∅ (~(p ⋎ q) ⟶ (~p ⋏ ~q)) := dtr' $ conj₃' (by simpa using dtl' d₁) (by simpa using dtl' d₂);
+  exact weakening' (by simp) this;
+
+@[tautology]
+def intro_bot_of_and : Bew Γ (p ⋏ ~p ⟶ ⊥) := by
+  apply dtr';
+  have : Bew {p ⋏ ~p} (p ⋏ ~p) := axm (by simp);
+  have : Bew {p ⋏ ~p} p := conj₁' (by assumption);
+  have : Bew {p ⋏ ~p} (~p) := conj₂' (by assumption);
+  have : Bew {p ⋏ ~p} (p ⟶ ⊥) := by simpa [NegDefinition.neg];
+  have : Bew {p ⋏ ~p} ⊥ := (by assumption) ⨀ (by assumption);
+  exact weakening' (by simp) this
+
+@[tautology]
+def dn_distribute_imp_right [HasEFQ Bew] : Bew Γ ((~~p ⟶ ~~q) ⟶ ~~(p ⟶ q)) := by
+  have : Bew ∅ (~(p ⟶ q) ⟶ ~(~p ⋎ q)) := contra₀' $ imp_intro_of_or;
+  have : Bew ∅ (~(~p ⋎ q) ⟶ (~~p ⋏ ~q)) := neg_or
+  have : Bew ∅ (~(p ⟶ q) ⟶ (~~p ⋏ ~q)) := imp_trans' (by assumption) (by assumption);
+
+  let Γ' := (insert (~(p ⟶ q)) (insert (~~p ⟶ ~~q) Γ));
+
+  have d₁ : Bew Γ' ((~q ⋏ ~~p)) := weakening' (show {~(p ⟶ q)} ⊆ Γ' by aesop) $ conj_symm' $ by simpa using dtl' this;
+  have d₂ : Bew Γ' ((~q ⋏ ~~q)) := by
+    have dnq : Bew Γ' (~q) := conj₁' d₁;
+    have dnnq : Bew Γ' (~~q) := (axm (by aesop)) ⨀ (conj₂' d₁);
+    exact conj₃' dnq dnnq;
+  have d₃ : Bew Γ' ((~q ⋏ ~~q) ⟶ ⊥) := intro_bot_of_and;
+  have : Bew (insert (~(p ⟶ q)) (insert (~~p ⟶ ~~q) Γ)) ⊥ := d₃ ⨀ d₂;
+
+  nth_rw 5 [NegDefinition.neg];
+  apply dtr';
+  apply dtr';
+
+  assumption;
+
+@[tautology]
+lemma dn_disctribute_imp_right! [HasEFQ Bew] : Γ ⊢! ((~~p ⟶ ~~q) ⟶ ~~(p ⟶ q)) := ⟨dn_distribute_imp_right⟩
+
+def dn_distribute_imp_right' [HasEFQ Bew] : Bew Γ (~~p ⟶ ~~q) → Bew Γ (~~(p ⟶ q)) := modus_ponens₂' (dn_distribute_imp_right)
+
+lemma dn_disctribute_imp_right'! [HasEFQ Bew] (d : Γ ⊢! (~~p ⟶ ~~q)) : Γ ⊢! (~~(p ⟶ q)) := ⟨dn_distribute_imp_right' d.some⟩
+
 @[tautology] def conj_neg : Γ ⊢ (~p ⋏ ~q) ⟶ (~(p ⋎ q)) := by deduct;
 
 @[tautology]

@@ -163,4 +163,20 @@ theorem companion_Int_S4 {p : Intuitionistic.Formula α} : (∅ ⊢ⁱ! p) ↔ (
   . apply embed_Int_S4;
   . apply embed_S4_Int;
 
+open Intuitionistic.Deduction (glivenko)
+
+lemma embed_Classical_S4 {p : Intuitionistic.Formula α} : (∅ ⊢ᶜ! p) ↔ (∅ ⊢ᴹ[(𝐒𝟒 : AxiomSet α)]! ◇pᵍ) := by
+  constructor;
+  . intro h;
+    have := glivenko.mpr h;
+    have := companion_Int_S4.mp this;
+    simp only [GTranslation.neg_def] at this;
+    simpa using axiomT'! this;
+  . intro h;
+    have : ∅ ⊢ᴹ[𝐒𝟒]! □~(□~pᵍ) := by simpa using necessitation! h;
+    rw [←GTranslation.neg_def] at this;
+    rw [←GTranslation.neg_def] at this;
+    have := companion_Int_S4.mpr this;
+    exact glivenko.mp this;
+
 end LO.Modal.Normal
