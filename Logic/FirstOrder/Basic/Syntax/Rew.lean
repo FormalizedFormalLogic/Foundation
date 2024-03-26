@@ -28,10 +28,7 @@ abbrev SyntacticRew (L : Language) (n₁ n₂ : ℕ) := Rew L ℕ n₁ ℕ n₂
 namespace Rew
 
 open Semiterm
-variable
-  {L L' : Language.{u}} {L₁ : Language.{u₁}} {L₂ : Language.{u₂}} {L₃ : Language.{u₃}}
-  {ξ ξ' : Type v} {ξ₁ : Type v₁} {ξ₂ : Type v₂} {ξ₃ : Type v₃}
-  {n n₁ n₂ n₃ : ℕ}
+variable {L L' L₁ L₂ L₃ : Language} {ξ ξ' ξ₁ ξ₂ ξ₃ : Type*} {n n₁ n₂ n₃ : ℕ}
 variable (ω : Rew L ξ₁ n₁ ξ₂ n₂)
 
 instance : FunLike (Rew L ξ₁ n₁ ξ₂ n₂) (Semiterm L ξ₁ n₁) (Semiterm L ξ₂ n₂) where
@@ -555,12 +552,9 @@ scoped macro_rules (kind := embSubstsHomNotation)
 -/
 namespace Semiterm
 
-variable
-  {L L' : Language.{u}} {L₁ : Language.{u₁}} {L₂ : Language.{u₂}} {L₃ : Language.{u₃}}
-  {ξ ξ' : Type v} {ξ₁ : Type v₁} {ξ₂ : Type v₂} {ξ₃ : Type v₃}
-  {n n₁ n₂ n₃ : ℕ}
+variable {L L' L₁ L₂ L₃ : Language} {ξ ξ' ξ₁ ξ₂ ξ₃ : Type*} {n n₁ n₂ n₃ : ℕ}
 
-@[simp] lemma fvarList_emb {o : Type w} [e : IsEmpty o] {t : Semiterm L o n} : fvarList (Rew.emb t : Semiterm L ξ n) = [] := by
+@[simp] lemma fvarList_emb {o : Type*} [e : IsEmpty o] {t : Semiterm L o n} : fvarList (Rew.emb t : Semiterm L ξ n) = [] := by
   induction t <;> simp[*, List.eq_nil_iff_forall_not_mem, Rew.func]
   case fvar x => { exact IsEmpty.elim' e x }
 
@@ -614,9 +608,7 @@ namespace Rew
 open Semiformula
 
 variable
-  {L : Language.{u}} {L₁ : Language.{u₁}} {L₂ : Language.{u₂}} {L₃ : Language.{u₃}}
-  {ξ : Type v} {ξ₁ : Type v₁} {ξ₂ : Type v₂} {ξ₃ : Type v₃}
-  {n n₁ n₂ n₂ m m₁ m₂ m₃ : ℕ}
+  {L L₁ L₂ L₃ : Language} {ξ ξ₁ ξ₂ ξ₃ : Type*} {n n₁ n₂ n₂ m m₁ m₂ m₃ : ℕ}
 
 def loMap : ⦃n₁ n₂ : ℕ⦄ → Rew L ξ₁ n₁ ξ₂ n₂ → Semiformula L ξ₁ n₁ → Semiformula L ξ₂ n₂
   | _, _, _, ⊤        => ⊤
@@ -876,7 +868,7 @@ scoped macro_rules (kind := substsHomNotation)
 
 namespace Semiformula
 
-variable {L : Language.{u}} {ξ : Type v} {n n₁ n₂ n₂ m m₁ m₂ m₃ : ℕ}
+variable {L : Language} {ξ : Type*} {n n₁ n₂ n₂ m m₁ m₂ m₃ : ℕ}
 
 def shiftEmb : SyntacticSemiformula L n ↪ SyntacticSemiformula L n where
   toFun := Rew.shift.hom
@@ -906,7 +898,7 @@ def formulaRec {C : SyntacticFormula L → Sort _}
   | ∃' p     => hex p (formulaRec hverum hfalsum hrel hnrel hand hor hall hex (Rew.free.hom p))
   termination_by p => p.complexity
 
-@[simp] lemma fvarList_emb {o : Type w} [IsEmpty o] (p : Semiformula L o n) : fvarList (Rew.emb.hom p : Semiformula L ξ n) = [] := by
+@[simp] lemma fvarList_emb {o : Type*} [IsEmpty o] (p : Semiformula L o n) : fvarList (Rew.emb.hom p : Semiformula L ξ n) = [] := by
   induction p using rec' <;> simp[*, Rew.rel, Rew.nrel, fvarList, ←neg_eq]
 
 lemma rew_eq_of_funEqOn {ω₁ ω₂ : Rew L ξ₁ n₁ ξ₂ n₂} {p}
@@ -938,7 +930,7 @@ lemma rew_eq_of_funEqOn₀ {ω₁ ω₂ : Rew L ξ₁ 0 ξ₂ n₂} {p} (hf : Fu
 
 section lMap
 
-variable {L : Language.{u}} {L₁ : Language.{u₁}} {L₂ : Language.{u₂}} {L₃ : Language.{u₃}} {ξ : Type v} {Φ : L₁ →ᵥ L₂}
+variable {L : Language.{u}} {L₁ : Language.{u₁}} {L₂ : Language.{u₂}} {L₃ : Language.{u₃}} {ξ : Type*} {Φ : L₁ →ᵥ L₂}
 
 lemma lMap_bind (b : Fin n₁ → Semiterm L₁ ξ₂ n₂) (e : ξ₁ → Semiterm L₁ ξ₂ n₂) (p) :
     lMap Φ ((Rew.bind b e).hom p) = (Rew.bind (Semiterm.lMap Φ ∘ b) (Semiterm.lMap Φ ∘ e)).hom (lMap Φ p) := by
@@ -963,7 +955,7 @@ lemma lMap_free (p : SyntacticSemiformula L₁ (n + 1)) : lMap Φ (Rew.free.hom 
 lemma lMap_fix (p : SyntacticSemiformula L₁ n) : lMap Φ (Rew.fix.hom p) = Rew.fix.hom (lMap Φ p) :=
   by simp[Rew.fix, lMap_bind, Function.comp]; congr; { funext x; cases x <;> simp }
 
-lemma lMap_emb {o : Type w} [IsEmpty o] (p : Semiformula L₁ o n) :
+lemma lMap_emb {o : Type*} [IsEmpty o] (p : Semiformula L₁ o n) :
     (lMap Φ (Rew.emb.hom p) : Semiformula L₂ ξ n) = Rew.emb.hom (lMap Φ p) := lMap_bind _ _ _
 
 end lMap

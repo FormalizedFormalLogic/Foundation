@@ -14,7 +14,7 @@ namespace LO
 
 namespace FirstOrder
 
-inductive Semiformula (L : Language.{u}) (ξ : Type v) : ℕ → Type (max u v) where
+inductive Semiformula (L : Language) (ξ : Type*) : ℕ → Type _ where
   | verum  {n} : Semiformula L ξ n
   | falsum {n} : Semiformula L ξ n
   | rel    {n} : {arity : ℕ} → L.Rel arity → (Fin arity → Semiterm L ξ n) → Semiformula L ξ n
@@ -24,21 +24,21 @@ inductive Semiformula (L : Language.{u}) (ξ : Type v) : ℕ → Type (max u v) 
   | all    {n} : Semiformula L ξ (n + 1) → Semiformula L ξ n
   | ex     {n} : Semiformula L ξ (n + 1) → Semiformula L ξ n
 
-abbrev Formula (L : Language.{u}) (ξ : Type v) := Semiformula L ξ 0
+abbrev Formula (L : Language) (ξ : Type*) := Semiformula L ξ 0
 
-abbrev Sentence (L : Language.{u}) := Formula L Empty
+abbrev Sentence (L : Language) := Formula L Empty
 
-abbrev Semisentence (L : Language.{u}) (n : ℕ) := Semiformula L Empty n
+abbrev Semisentence (L : Language) (n : ℕ) := Semiformula L Empty n
 
-abbrev SyntacticSemiformula (L : Language.{u}) (n : ℕ) := Semiformula L ℕ n
+abbrev SyntacticSemiformula (L : Language) (n : ℕ) := Semiformula L ℕ n
 
-abbrev SyntacticFormula (L : Language.{u}) := SyntacticSemiformula L 0
+abbrev SyntacticFormula (L : Language) := SyntacticSemiformula L 0
 
 namespace Semiformula
 
 variable
-  {L : Language.{u}} {L₁ : Language.{u₁}} {L₂ : Language.{u₂}} {L₃ : Language.{u₃}}
-  {ξ : Type v} {ξ₁ : Type v₁} {ξ₂ : Type v₂} {ξ₃ : Type v₃}
+  {L : Language} {L₁ : Language} {L₂ : Language} {L₃ : Language}
+  {ξ ξ₁ ξ₂ ξ₃ : Type*}
   {n n₁ n₂ n₂ m m₁ m₂ m₃ : ℕ}
 
 def neg {n} : Semiformula L ξ n → Semiformula L ξ n
@@ -156,9 +156,9 @@ by simp[Vee.vee]
 @[simp] lemma imp_inj {p₁ p₂ q₁ q₂ : Semiformula L ξ n} :
     p₁ ⟶ p₂ = q₁ ⟶ q₂ ↔ p₁ = q₁ ∧ p₂ = q₂ := by simp [imp_eq]
 
-abbrev rel! (L : Language.{u}) (k) (r : L.Rel k) (v : Fin k → Semiterm L ξ n) := rel r v
+abbrev rel! (L : Language) (k) (r : L.Rel k) (v : Fin k → Semiterm L ξ n) := rel r v
 
-abbrev nrel! (L : Language.{u}) (k) (r : L.Rel k) (v : Fin k → Semiterm L ξ n) := nrel r v
+abbrev nrel! (L : Language) (k) (r : L.Rel k) (v : Fin k → Semiterm L ξ n) := nrel r v
 
 def complexity : {n : ℕ} → Semiformula L ξ n → ℕ
 | _, ⊤        => 0
@@ -330,7 +330,7 @@ end Semiformula
 
 namespace Semiformula
 
-variable {L : Language.{u}} {ξ : Type v} {n n₁ n₂ n₂ m m₁ m₂ m₃ : ℕ}
+variable {L : Language} {ξ : Type*} {n n₁ n₂ n₂ m m₁ m₂ m₃ : ℕ}
 
 def qr : ∀ {n}, Semiformula L ξ n → ℕ
   | _, ⊤        => 0
@@ -417,7 +417,7 @@ abbrev fvar? (p : Semiformula L ξ n) (x : ξ) : Prop := x ∈ p.fvarList
 @[simp] lemma fvarList_neg (p : Semiformula L ξ n) : fvarList (~p) = fvarList p := by
   induction p using rec' <;> simp[*, fvarList, ←neg_eq]
 
-@[simp] lemma fvarList_sentence {o : Type w} [IsEmpty o] (p : Semiformula L o n) : fvarList p = [] := by
+@[simp] lemma fvarList_sentence {o : Type*} [IsEmpty o] (p : Semiformula L o n) : fvarList p = [] := by
   induction p using rec' <;> simp[*, fvarList, ←neg_eq]
 
 def upper (p : SyntacticSemiformula L n) : ℕ := Finset.sup p.fvarList.toFinset id + 1
@@ -439,7 +439,7 @@ lemma ne_of_ne_complexity {p q : Semiformula L ξ n} (h : p.complexity ≠ q.com
 
 @[simp] lemma ne_or_right (p q : Semiformula L ξ n) : q ≠ p ⋎ q := ne_of_ne_complexity (by simp)
 
-variable {L : Language.{u}} {L₁ : Language.{u₁}} {L₂ : Language.{u₂}} {L₃ : Language.{u₃}} {ξ : Type v} {Φ : L₁ →ᵥ L₂}
+variable {L : Language} {L₁ : Language} {L₂ : Language} {L₃ : Language} {ξ : Type*} {Φ : L₁ →ᵥ L₂}
 
 def lMapAux (Φ : L₁ →ᵥ L₂) : ∀ {n}, Semiformula L₁ ξ n → Semiformula L₂ ξ n
   | _, ⊤        => ⊤
@@ -525,9 +525,9 @@ end fvListing
 
 end Semiformula
 
-abbrev Theory (L : Language.{u}) := Set (Sentence L)
+abbrev Theory (L : Language) := Set (Sentence L)
 
-abbrev SyntacticTheory (L : Language.{u}) := Set (SyntacticFormula L)
+abbrev SyntacticTheory (L : Language) := Set (SyntacticFormula L)
 
 def Theory.lMap (Φ : L₁ →ᵥ L₂) (T : Theory L₁) : Theory L₂ := Semiformula.lMap Φ '' T
 

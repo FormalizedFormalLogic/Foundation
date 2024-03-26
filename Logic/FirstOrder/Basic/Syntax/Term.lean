@@ -30,10 +30,7 @@ abbrev SyntacticTerm (L : Language) := SyntacticSemiterm L 0
 
 namespace Semiterm
 
-variable
-  {L L' : Language.{u}} {L₁ : Language.{u₁}} {L₂ : Language.{u₂}} {L₃ : Language.{u₃}}
-  {ξ ξ' : Type v} {ξ₁ : Type v₁} {ξ₂ : Type v₂} {ξ₃ : Type v₃}
-  {n n₁ n₂ n₃ : ℕ}
+variable {L L' L₁ L₂ L₃ : Language} {ξ ξ' ξ₁ ξ₂ ξ₃ : Type*} {n n₁ n₂ n₃ : ℕ}
 
 instance [Inhabited ξ] : Inhabited (Semiterm L ξ n) := ⟨&default⟩
 
@@ -151,7 +148,7 @@ abbrev fvar? (t : Semiterm L ξ n) (x : ξ) : Prop := x ∈ t.fvarList
     x ∈ (func f v).fvarList ↔ ∃ i, x ∈ (v i).fvarList :=
   by simp[fvarList]
 
-@[simp] lemma fvarList_empty {o : Type w} [e : IsEmpty o] {t : Semiterm L o n} : fvarList t = [] := by
+@[simp] lemma fvarList_empty {o : Type*} [e : IsEmpty o] {t : Semiterm L o n} : fvarList t = [] := by
   induction t <;> simp[List.eq_nil_iff_forall_not_mem]
   case fvar x => exact IsEmpty.elim e x
 
