@@ -210,6 +210,19 @@ variable {Λ : AxiomSet α} (hK : 𝐊 ⊆ Λ)
 instance Deduction.ofKSubset : Hilbert.K (Deduction Λ) where
   K _ _ _ := Deduction.maxm $ Set.mem_of_subset_of_mem hK (by simp);
 
+def Deduction.ofK4Subset (_ : 𝐊𝟒 ⊆ Λ) : (Hilbert.K4 (Deduction (Λ : AxiomSet α))) where
+  K _ _ _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by assumption) (by simp);
+  A4 _ _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by assumption) (by simp);
+
+instance : Hilbert.K4 (Deduction (𝐊𝟒 : AxiomSet α)) := Deduction.ofK4Subset (by rfl)
+
+def Deduction.ofS4Subset (_ : 𝐒𝟒 ⊆ Λ) : (Hilbert.S4 (Deduction (Λ : AxiomSet α))) where
+  K _ _ _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by assumption) (by simp);
+  T _ _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by assumption) (by simp);
+  A4 _ _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by assumption) (by simp);
+
+instance : Hilbert.S4 (Deduction (𝐒𝟒 : AxiomSet α)) := Deduction.ofS4Subset (by rfl)
+
 namespace Deduction
 
 def boxedNecessitation {Γ p} : (Γ ⊢ᴹ[Λ] p) → (□Γ ⊢ᴹ[Λ] □p)
@@ -235,6 +248,7 @@ def boxedNecessitation {Γ p} : (Γ ⊢ᴹ[Λ] p) → (□Γ ⊢ᴹ[Λ] □p)
 instance instBoxedNecessitation : HasBoxedNecessitation (Deduction Λ) := ⟨by apply boxedNecessitation; simpa;⟩
 
 end Deduction
+
 
 /-
 def Deduction.ofGLSubset (h : 𝐆𝐋 ⊆ Λ) : (Hilbert.GL (Deduction (Λ : AxiomSet α))) where

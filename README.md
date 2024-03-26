@@ -250,6 +250,15 @@ In this formalization, _(Modal) Logic_ means set of axioms.
       (𝐊 : AxiomSet β)
       (𝔽((𝐊 : AxiomSet β)) : FrameClass (MaximalConsistentTheory (𝐊 : AxiomSet β)))
   ```
+- [Gödel-McKensey-Tarski Theorem](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/ModalCompanion.html#LO.Modal.Normal.companion_Int_S4)
+  ```lean
+  def GTranslation : Intuitionistic.Formula α → Formula α
+  postfix:75 "ᵍ" => GTranslation
+
+  theorem companion_Int_S4
+    [DecidableEq α] [Encodable α] [Inhabited α]
+    {p : Intuitionistic.Formula β} : (∅ ⊢! p) ↔ (∅ ⊢ᴹ[𝐒𝟒]! pᵍ)
+  ```
 
 ## References
 - J. Han, F. van Doorn, A formalization of forcing and the unprovability of the continuum hypothesis

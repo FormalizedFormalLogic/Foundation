@@ -85,12 +85,17 @@ def preboxed_necessitation! {Γ : Set F} {p} (d : Γ.prebox ⊢! p) : Γ ⊢! �
 
 open HasAxiomK
 
-protected def axiomK (Γ : Set F) (p q) :  Γ ⊢ (AxiomK p q) := HasAxiomK.K Γ p q
+def axiomK (Γ : Set F) (p q) :  Γ ⊢ (AxiomK p q) := HasAxiomK.K Γ p q
+
 def axiomK' {Γ : Set F} {p q} (d₁ : Γ ⊢ (□(p ⟶ q))) (d₂ : Γ ⊢ □p) : Γ ⊢ □q := ((Hilbert.axiomK Γ p q) ⨀ d₁) ⨀ d₂
 
 lemma axiomK! (Γ : Set F) (p q) : Γ ⊢! (AxiomK p q) := ⟨Hilbert.axiomK Γ p q⟩
 
+lemma axiomK'! {Γ : Set F} {p q} (d₁ : Γ ⊢! (□(p ⟶ q))) (d₂ : Γ ⊢! □p) : Γ ⊢! □q := ⟨axiomK' d₁.some d₂.some⟩
+
+
 def boxverum (Γ : Set F) : Γ ⊢ □⊤ := necessitation (verum _)
+
 lemma boxverum! (Γ : Set F) : Γ ⊢! □⊤ := ⟨boxverum Γ⟩
 
 def box_iff' {Γ : Set F} {p q : F} (d : ∅ ⊢ p ⟷ q) : Γ ⊢ (□p ⟷ □q) := by
@@ -115,6 +120,47 @@ def equiv_dianeg_negbox (Γ p) : Γ ⊢ ◇~p ⟷ ~(□p) := by
 
 lemma equiv_dianeg_negbox! (Γ p) : Γ ⊢! ◇~p ⟷ ~(□p) := ⟨equiv_dianeg_negbox Γ p⟩
 
+lemma box_imp' {Γ : Set F} {p q : F} (d : ∅ ⊢ p ⟶ q) : Γ ⊢ (□p ⟶ □q) := by
+  have d₁ : ∅ ⊢ □(p ⟶ q) ⟶ (□p ⟶ □q) := by apply axiomK;
+  have d₂ : ∅ ⊢ □(p ⟶ q) := necessitation d;
+  exact weakening' (by simp) $ modus_ponens' d₁ d₂;
+
+lemma collect_box_and' {Γ : Set F} {p q : F} (d : Γ ⊢ □p ⋏ □q) : Γ ⊢ □(p ⋏ q) := by
+  have : ∅ ⊢ p ⟶ (q ⟶ (p ⋏ q)) := by apply conj₃;
+  have : ∅ ⊢ □p ⟶ □(q ⟶ (p ⋏ q)) := box_imp' (by assumption)
+  have : ∅ ⊢ □p ⟶ (□q ⟶ □(p ⋏ q)) := imp_trans' (by assumption) (by apply axiomK);
+  simpa using modus_ponens (modus_ponens this (conj₁' d)) (conj₂' d)
+
+lemma collect_box_and'! {Γ : Set F} {p q : F} (d : Γ ⊢! □p ⋏ □q) : Γ ⊢! □(p ⋏ q) := ⟨collect_box_and' d.some⟩
+
+lemma collect_box_or' {Γ : Set F} {p q : F} (d : Γ ⊢ □p ⋎ □q) : Γ ⊢ □(p ⋎ q) := by
+  have : Γ ⊢ □p ⟶ □(p ⋎ q) := box_imp' (by apply disj₁);
+  have : Γ ⊢ □q ⟶ □(p ⋎ q) := box_imp' (by apply disj₂);
+  exact disj₃' (by assumption) (by assumption) d;
+
+lemma collect_box_or'! {Γ : Set F} {p q : F} (d : Γ ⊢! □p ⋎ □q) : Γ ⊢! □(p ⋎ q) := ⟨collect_box_or' d.some⟩
+
+variable [HasAxiom4 Bew]
+
+def axiom4 (Γ : Set F) (p) :  Γ ⊢ (Axiom4 p) := HasAxiom4.A4 Γ p
+
+def axiom4' {Γ : Set F} {p} (d₁ : Γ ⊢ □p) : Γ ⊢ □□p := (Hilbert.axiom4 Γ p) ⨀ d₁
+
+lemma axiom4! (Γ : Set F) (p) : Γ ⊢! (Axiom4 p) := ⟨Hilbert.axiom4 Γ p⟩
+
+lemma axiom4'! {Γ : Set F} {p} (d : Γ ⊢! □p) : Γ ⊢! □□p := ⟨axiom4' d.some⟩
+
+
+variable [HasAxiomT Bew]
+
+def axiomT (Γ : Set F) (p) :  Γ ⊢ (AxiomT p) := HasAxiomT.T Γ p
+
+def axiomT' {Γ : Set F} {p} (d₁ : Γ ⊢ □p) : Γ ⊢ p := (Hilbert.axiomT Γ p) ⨀ d₁
+
+lemma axiomT! (Γ : Set F) (p) : Γ ⊢! (AxiomT p) := ⟨Hilbert.axiomT Γ p⟩
+
+lemma axiomT'! {Γ : Set F} {p} (d : Γ ⊢! □p) : Γ ⊢! p := ⟨axiomT' d.some⟩
+
 end
 
 section Logics
@@ -124,6 +170,8 @@ variable {F : Type u} [ModalLogicSymbol F] [NegDefinition F] [ModalDuality F] [D
 class K [ModalDuality F] extends Hilbert.Classical Bew, HasNecessitation Bew, HasAxiomK Bew
 
 class KD extends Hilbert.K Bew, HasAxiomD Bew
+
+class K4 extends Hilbert.K Bew, HasAxiom4 Bew
 
 class S4 extends Hilbert.K Bew, HasAxiomT Bew, HasAxiom4 Bew
 

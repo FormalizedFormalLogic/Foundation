@@ -1,6 +1,4 @@
 /-
- Reserved to compare the strengh of normal modal logic proof systems.
-
  ## References
 
  * <https://plato.stanford.edu/entries/logic-modal/#MapRelBetModLog>
@@ -70,6 +68,8 @@ instance : IsStrictOrder (AxiomSet β) (· <ᴸ ·) where
 variable {Λ₁ Λ₂ : AxiomSet β} (hS : Λ₁ <ᴸ Λ₂)
 variable [DecidableEq β]
 
+lemma deducible (hComp : Completeness Λ₂ (𝔽(Λ₂) : FrameClass α)) (hd : Γ ⊢ᴹ[Λ₁]! p) : Γ ⊢ᴹ[Λ₂]! p := LogicalStrong.deducible hS.left hComp hd
+
 end LogicStrictStronger
 
 abbrev LogicalEquivalence (Λ₁ Λ₂ : AxiomSet β) := (Λ₁ ≤ᴸ Λ₂) ∧ (Λ₂ ≤ᴸ Λ₁)
@@ -119,6 +119,29 @@ instance FrameClassDefinability : @FrameClassDefinability α β 𝐊𝐓 (λ F =
 
 end LogicKT
 
+lemma strong_K4_S4 : (𝐊𝟒 : AxiomSet β) ≤ᴸ 𝐒𝟒 := by
+  apply LogicalStrong.iff.mpr;
+  intro _ F hF;
+  obtain ⟨_, hTrans⟩ := LogicS4.FrameClassDefinability.mpr hF;
+  apply LogicK4.FrameClassDefinability.mp;
+  assumption;
+
+lemma deducible_strong_K4_S4 : (Γ ⊢ᴹ[𝐊𝟒]! p) → (Γ ⊢ᴹ[𝐒𝟒]! p) := LogicalStrong.deducible strong_K4_S4 LogicS4.Hilbert.completes
+
+-- TODO: replace `(Fin 2)` to `Nontrivial`
+theorem sstrong_K4_S4 : (𝐊𝟒 : AxiomSet (Fin 2)) <ᴸ 𝐒𝟒 := by
+  constructor;
+  . apply strong_K4_S4;
+  . apply LogicalStrong.not_iff.mpr;
+    existsi _, (λ _ w₂ => w₂ = 1);
+    constructor;
+    . apply LogicK4.FrameClassDefinability.mp;
+      simp [Transitive];
+    . apply LogicS4.FrameClassDefinability.not.mp;
+      simp [Transitive, Reflexive]
+      use 0;
+      trivial;
+
 theorem sstrong_KD_KT : (𝐊𝐃 : AxiomSet (Fin 2)) <ᴸ 𝐊𝐓 := by
   constructor;
   . apply LogicalStrong.iff.mpr;
@@ -133,7 +156,7 @@ theorem sstrong_KD_KT : (𝐊𝐃 : AxiomSet (Fin 2)) <ᴸ 𝐊𝐓 := by
       simp [Serial];
     . apply LogicKT.FrameClassDefinability.not.mp;
       simp [Reflexive]
-      existsi 0;
+      use 0;
       trivial;
 
 theorem sstrong_S4_S5 : (𝐒𝟒 : AxiomSet (Fin 3)) <ᴸ 𝐒𝟓 := by
