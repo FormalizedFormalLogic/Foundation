@@ -1,5 +1,4 @@
 import Logic.FirstOrder.Arith.PAminus
-import Logic.FirstOrder.Class.Class
 
 namespace LO
 
@@ -69,6 +68,8 @@ lemma zero_iff_delta_zero {Γ} {p : Semiformula L μ n} :
   · intro h; exact zero h
 
 end StrictHierarchy
+
+/-
 
 def HClass (L : Language) [L.LT] (ξ : Type*) (Γ : Polarity) (s : ℕ) : Class L ξ where
   Domain := Hierarchy Γ s
@@ -233,6 +234,7 @@ instance bex : (DeltaZeroIn ξ T).BEx := ⟨by
 end DeltaZeroIn
 -/
 
+-/
 end
 
 end Arith
