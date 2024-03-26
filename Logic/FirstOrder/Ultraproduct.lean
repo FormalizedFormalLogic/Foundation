@@ -6,6 +6,8 @@ namespace FirstOrder
 
 section
 
+universe u v
+
 variable {L : Language.{u}} {μ : Type v}
  {I : Type u} (A : I → Type u)
  [(i : I) → Nonempty (A i)] [s : (i : I) → FirstOrder.Structure L (A i)]

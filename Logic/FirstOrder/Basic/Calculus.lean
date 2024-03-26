@@ -32,7 +32,7 @@ lemma shifts_union (Δ Γ : List (SyntacticSemiformula L n)) :
     (Γ.map Rew.emb.hom)⁺ = Γ.map Rew.emb.hom := by
   simp[shifts, Function.comp, ←Rew.hom_comp_app]
 
-inductive Derivation : Sequent L → Type u
+inductive Derivation : Sequent L → Type _
 | axL (Δ) {k} (r : L.Rel k) (v) : Derivation (rel r v :: nrel r v :: Δ)
 | verum (Δ)    : Derivation (⊤ :: Δ)
 | or {Δ p q}   : Derivation (p :: q :: Δ) → Derivation (p ⋎ q :: Δ)

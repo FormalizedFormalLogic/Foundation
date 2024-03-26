@@ -120,7 +120,7 @@ variable [Encodable α]
 lemma embed_S4_Int : (∅ ⊢ᴹ[(𝐒𝟒 : AxiomSet α)]! pᵍ) → (∅ ⊢! p) := by
   contrapose;
   intro h;
-  obtain ⟨γ, MI, w, ⟨_, h⟩⟩ := by simpa [Intuitionistic.Formula.KripkeConsequence] using not_imp_not.mpr Intuitionistic.Kripke.completes h;
+  obtain ⟨γ, MI, w, h⟩ := by simpa [Intuitionistic.Formula.KripkeConsequence] using not_imp_not.mpr Intuitionistic.Kripke.completes h;
   have : Inhabited γ := ⟨w⟩;
   let M : Modal.Normal.Model γ α := {
     frame := MI.frame,

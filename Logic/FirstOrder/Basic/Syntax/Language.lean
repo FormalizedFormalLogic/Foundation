@@ -18,8 +18,8 @@ open Primrec
 namespace FirstOrder
 
 structure Language where
-  Func : Nat → Type*
-  Rel  : Nat → Type*
+  Func : Nat → Type u
+  Rel  : Nat → Type u
 
 namespace Language
 
