@@ -5,11 +5,11 @@ import Logic.Modal.Normal.Semantics
 namespace LO.Modal.Normal
 
 class Frame.pMorphism (F₁ : Frame α₁) (F₂ : Frame α₂) (f : α₁ → α₂) where
-  morphism : ∀ {w v : α₁}, F₁ w v → F₂ (f w) (f v)
-  existance : ∀ {w : α₁}, ∀ {v : α₂}, F₂ (f w) v → ∃ u : α₁, F₁ w u ∧ f u = v
+  forth : ∀ {w v : α₁}, F₁ w v → F₂ (f w) (f v)
+  back : ∀ {w : α₁}, ∀ {v : α₂}, F₂ (f w) v → ∃ u : α₁, F₁ w u ∧ f u = v
 
 class Model.pMorphism (M₁ : Model α₁ β) (M₂ : Model α₂ β) (f : α₁ → α₂) extends Frame.pMorphism M₁.frame M₂.frame f where
-  valuation : ∀ {w : α₁}, ∀ {p : β}, (M₁.val w p) ↔ (M₂.val (f w) p)
+  atomic : ∀ {w : α₁}, ∀ {p : β}, (M₁.val w p) ↔ (M₂.val (f w) p)
 
 variable {α₁ α₂ : Type} {β : Type} {f : α₁ → α₂}
 
@@ -19,18 +19,18 @@ lemma Formula.Satisfies.morphism
   induction p using Formula.rec' generalizing w with
   | hatom p =>
     constructor;
-    . apply hMor.valuation |>.mp;
-    . apply hMor.valuation |>.mpr
+    . apply hMor.atomic |>.mp;
+    . apply hMor.atomic |>.mpr
   | hbox p ih =>
     simp;
     constructor;
     . intro h w₂ hw₂;
-      obtain ⟨w₁, ⟨hww₁, e⟩⟩ := hMor.existance hw₂;
+      obtain ⟨w₁, ⟨hww₁, e⟩⟩ := hMor.back hw₂;
       have := ih.mp $ h w₁ hww₁;
       subst e;
       assumption;
     . intro h w' hww';
-      exact ih.mpr $ h (f w') $ hMor.morphism hww';
+      exact ih.mpr $ h (f w') $ hMor.forth hww';
   | _ => simp_all;
 
 lemma Formula.Frames.morphism
@@ -46,9 +46,9 @@ lemma Formula.Frames.morphism
     val := λ w a => V₂ (f w) a
   }
   have hMor : Model.pMorphism M₁ ⟨F₂, V₂⟩ f := {
-    morphism := by intro w v hwv; apply hMorF.morphism hwv,
-    existance := by intro w v h; apply hMorF.existance h,
-    valuation := by simp_all;
+    forth := by intro w v hwv; apply hMorF.forth hwv,
+    back := by intro w v h; apply hMorF.back h,
+    atomic := by simp_all;
   }
   simp [Formula.Frames, Formula.Models];
   obtain ⟨w₁, e⟩ : ∃ w₁ : α₁, f w₁ = w₂ := by apply hSur;
@@ -75,8 +75,8 @@ theorem undefinabilityIrreflexive : ¬∃ (Ax : AxiomSet β), (∀ {α} {F : Fra
   let f : Fin 2 → Fin 1 := λ _ => 0;
   have hSur : Function.Surjective f := by trivial;
   have hMorF : Frame.pMorphism F₁ F₂ f := {
-    morphism := by intros; simp [F₂],
-    existance := by
+    forth := by intros; simp [F₂],
+    back := by
       simp [F₂, F₁];
       intro w;
       match w with
