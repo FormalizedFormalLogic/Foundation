@@ -18,8 +18,8 @@ open Primrec
 namespace FirstOrder
 
 structure Language where
-  Func : Nat → Type u
-  Rel  : Nat → Type u
+  Func : Nat → Type*
+  Rel  : Nat → Type*
 
 namespace Language
 
@@ -235,6 +235,53 @@ instance : UniformlyPrimcodable oRing.Rel := UniformlyPrimcodable.ofEncodeDecode
 
 end ORing
 
+namespace ORingExp
+
+inductive Func : ℕ → Type
+  | zero : Func 0
+  | one : Func 0
+  | exp : Func 1
+  | add : Func 2
+  | mul : Func 2
+
+inductive Rel : ℕ → Type
+  | eq : Rel 2
+  | lt : Rel 2
+
+end ORingExp
+
+@[reducible]
+def oRingExp : Language where
+  Func := ORingExp.Func
+  Rel := ORingExp.Rel
+
+notation "ℒₒᵣ(Exp)" => oRingExp
+
+namespace ORingExp
+
+instance (k) : ToString (oRingExp.Func k) :=
+⟨ fun s =>
+  match s with
+  | Func.zero => "0"
+  | Func.one  => "1"
+  | Func.exp  => "(^)"
+  | Func.add  => "(+)"
+  | Func.mul  => "(\\cdot)"⟩
+
+instance (k) : ToString (oRingExp.Rel k) :=
+⟨ fun s =>
+  match s with
+  | Rel.eq => "\\mathrm{Eq}"
+  | Rel.lt    => "\\mathrm{LT}"⟩
+
+instance (k) : DecidableEq (oRingExp.Func k) := fun a b =>
+  by rcases a <;> rcases b <;> simp <;> try {exact instDecidableTrue} <;> try {exact instDecidableFalse}
+
+instance (k) : DecidableEq (oRingExp.Rel k) := fun a b =>
+  by rcases a <;> rcases b <;> simp <;> try {exact instDecidableTrue} <;> try {exact instDecidableFalse}
+
+end ORingExp
+
 namespace Constant
 
 variable (C : Type*)
@@ -261,30 +308,6 @@ instance : IsConstant (constant C) where
 abbrev unit : Language := constant PUnit
 
 end Constant
-
-def relational (α : ℕ → Type u) : Language where
-  Func := fun _ => PEmpty
-  Rel := α
-
-section relational
-variable {α : ℕ → Type u} [e : ∀ n, Encodable (α n)] [d : ∀ n, DecidableEq (α n)] [s : ∀ n, ToString (α n)]
-
-instance (k) : Encodable ((relational α).Func k) := IsEmpty.toEncodable (α := PEmpty)
-
-instance (k) : Encodable ((relational α).Rel k) := e k
-
-instance (k) : DecidableEq ((relational α).Func k) := fun a => by cases a
-
-instance (k) : DecidableEq ((relational α).Rel k) := d k
-
-instance : ToString ((relational α).Rel k) :=
-  ⟨fun a => "R^{" ++ toString k ++ "}_{" ++ toString (α := α k) a ++ "}"⟩
-
-def toRelational (a : α k) : (relational α).Rel k := a
-
-instance : ToString ((relational α).Func k) := ⟨fun a => by cases a⟩
-
-end relational
 
 def ofFunc (F : ℕ → Type v) : Language := ⟨F, fun _ => PEmpty⟩
 
@@ -329,11 +352,22 @@ attribute [match_pattern] Zero.zero One.one Add.add Mul.mul Eq.eq LT.lt Star.sta
 
 class ORing (L : Language) extends L.Eq, L.LT, L.Zero, L.One, L.Add, L.Mul
 
+class ORingExp (L : Language) extends L.Eq, L.LT, L.Zero, L.One, L.Add, L.Mul, L.Exp
+
 instance : ORing oRing where
   eq := .eq
   lt := .lt
   zero := .zero
   one := .one
+  add := .add
+  mul := .mul
+
+instance : ORingExp oRingExp where
+  eq := .eq
+  lt := .lt
+  zero := .zero
+  one := .one
+  exp := .exp
   add := .add
   mul := .mul
 
@@ -467,6 +501,17 @@ lemma rel_sigma (L : ι → Language) (i : ι) (r : (L i).Rel k) : (sigma L i).r
 
 end Hom
 
+def ORing.embedding (L : Language) [ORing L] : ℒₒᵣ →ᵥ L where
+  func := fun {n} f ↦
+    match n, f with
+    | 0, Zero.zero => Zero.zero
+    | 0, One.one   => One.one
+    | 2, Add.add   => Add.add
+    | 2, Mul.mul   => Mul.mul
+  rel := fun {n} r ↦
+    match n, r with
+    | 2, Eq.eq => Eq.eq
+    | 2, LT.lt => LT.lt
 end Language
 
 end FirstOrder
