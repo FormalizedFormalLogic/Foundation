@@ -1,5 +1,7 @@
 import Logic.Modal.Normal.Formula
 
+section
+
 @[simp]
 lemma _root_.Set.subset_triunion₁ (s₁ s₂ s₃ : Set F) : s₁ ⊆ (s₁ ∪ s₂ ∪ s₃) := Set.Subset.trans
   (Set.subset_union_left _ _) (Set.subset_union_left _ _)
@@ -9,7 +11,27 @@ lemma _root_.Set.subset_triunion₂  (s₁ s₂ s₃ : Set F) : s₂ ⊆ (s₁ �
   (Set.subset_union_right _ _) (Set.subset_union_left _ _)
 
 @[simp]
-lemma _root_.Set.subset_triunion₃ (s₁ s₂ s₃ : Set F) : s₃ ⊆ (s₁ ∪ s₂ ∪ s₃) := Set.subset_union_right _ _
+lemma _root_.Set.subset_triunion₃ (s₁ s₂ s₃ : Set F) : s₃ ⊆ (s₁ ∪ s₂ ∪ s₃) := by simp only [Set.subset_union_right]
+
+@[simp]
+lemma Set.subset_tetraunion₁ (s₁ s₂ s₃ s₄ : Set F) : s₁ ⊆ (s₁ ∪ s₂ ∪ s₃ ∪ s₄) :=
+  Set.Subset.trans
+    (Set.subset_union_left _ _)
+    $ Set.Subset.trans (Set.subset_union_left _ _) (Set.subset_union_left _ _)
+
+@[simp]
+lemma Set.subset_tetraunion₂ (s₁ s₂ s₃ s₄ : Set F) : s₂ ⊆ (s₁ ∪ s₂ ∪ s₃ ∪ s₄) :=
+  Set.Subset.trans
+    (Set.subset_union_right _ _)
+    $ Set.Subset.trans (Set.subset_union_left _ _) (Set.subset_union_left _ _)
+
+@[simp]
+lemma Set.subset_tetraunion₃ (s₁ s₂ s₃ s₄ : Set F) : s₃ ⊆ (s₁ ∪ s₂ ∪ s₃ ∪ s₄) := by simp_all only [subset_triunion₂];
+
+@[simp]
+lemma Set.subset_tetraunion₄ (s₁ s₂ s₃ s₄ : Set F) : s₄ ⊆ (s₁ ∪ s₂ ∪ s₃ ∪ s₄) := by simp_all only [subset_triunion₃];
+
+end
 
 namespace LO.Modal.Normal
 
@@ -116,8 +138,25 @@ namespace LogicK
 
 end LogicK
 
+def LogicKT : AxiomSet α := 𝐊 ∪ 𝐓
+notation "𝐊𝐓" => LogicKT
+
+namespace LogicKT
+
+@[simp] lemma subset_K : 𝐊 ⊆ (𝐊𝐓 : AxiomSet α) := by simp [LogicKT]
+@[simp] lemma subset_T : 𝐓 ⊆ (𝐊𝐓 : AxiomSet α) := by simp [LogicKT]
+
+end LogicKT
+
 def LogicKD : AxiomSet α := 𝐊 ∪ 𝐃
 notation "𝐊𝐃" => LogicKD
+
+namespace LogicKD
+
+@[simp] lemma subset_K : 𝐊 ⊆ (𝐊𝐃 : AxiomSet α) := by apply Set.subset_union_left
+@[simp] lemma subset_D : 𝐃 ⊆ (𝐊𝐃 : AxiomSet α) := by apply Set.subset_union_right
+
+end LogicKD
 
 def LogicK4 : AxiomSet α := 𝐊 ∪ 𝟒
 notation "𝐊𝟒" => LogicK4
@@ -191,12 +230,23 @@ namespace LogicS5
 @[simp] lemma include_AxiomK : AxiomK p q ∈ 𝐒𝟓 := by simp [LogicKT5]
 @[simp] lemma include_AxiomT : AxiomT p ∈ 𝐒𝟓 := by simp [LogicKT5]
 @[simp] lemma include_Axiom5 : Axiom5 p ∈ 𝐒𝟓 := by simp [LogicKT5]
-@[simp] lemma subset_K : 𝐊 ⊆ (𝐒𝟓 : AxiomSet α) := by apply Set.subset_triunion₁
-@[simp] lemma subset_T : 𝐓 ⊆ (𝐒𝟓 : AxiomSet α) := by apply Set.subset_triunion₂
-@[simp] lemma subset_5 : 𝟓 ⊆ (𝐒𝟓 : AxiomSet α) := by apply Set.subset_triunion₃
+@[simp] lemma subset_K : 𝐊 ⊆ (𝐒𝟓 : AxiomSet α) := by simp [LogicKT5];
+@[simp] lemma subset_T : 𝐓 ⊆ (𝐒𝟓 : AxiomSet α) := by simp [LogicKT5];
+@[simp] lemma subset_5 : 𝟓 ⊆ (𝐒𝟓 : AxiomSet α) := by simp [LogicKT5];
 
 end LogicS5
 
+def LogicKT4B : AxiomSet α := 𝐊 ∪ 𝐓 ∪ 𝟒 ∪ 𝐁
+notation "𝐊𝐓𝟒𝐁" => LogicKT4B
+
+namespace LogicKT4B
+
+@[simp] lemma subset_K : 𝐊 ⊆ (𝐊𝐓𝟒𝐁 : AxiomSet α) := by simp [LogicKT4B];
+@[simp] lemma subset_T : 𝐓 ⊆ (𝐊𝐓𝟒𝐁 : AxiomSet α) := by simp [LogicKT4B];
+@[simp] lemma subset_4 : 𝟒 ⊆ (𝐊𝐓𝟒𝐁 : AxiomSet α) := by simp [LogicKT4B];
+@[simp] lemma subset_B : 𝐁 ⊆ (𝐊𝐓𝟒𝐁 : AxiomSet α) := by simp [LogicKT4B];
+
+end LogicKT4B
 
 def LogicGL : AxiomSet α := 𝐊 ∪ 𝐋
 notation "𝐆𝐋" => LogicGL
