@@ -9,7 +9,7 @@ def LEMCounterExampleModel : Kripke.Model (Fin 2) β where
   val w _ := w = 1;
   refl := by simp [Reflexive];
   trans := by simp [Transitive]; trivial;
-  herditary := by simp; aesop;
+  hereditary := by simp; aesop;
 
 lemma noLEM_atom {a : β} : ¬(⊧ (atom a) ⋎ ~(atom a)) := by
   simp [KripkeValid, KripkeModels, NegDefinition.neg];

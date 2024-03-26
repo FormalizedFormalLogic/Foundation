@@ -346,7 +346,7 @@ def CanonicalModel (β) : Kripke.Model (PrimeTheory β) β where
   val Ω p := atom p ∈ Ω
   trans Ω₁ Ω₂ Ω₃ := Set.Subset.trans
   refl Ω := by simpa using Set.Subset.rfl;
-  herditary h p hp := by apply h; exact hp;
+  hereditary h p hp := by apply h; exact hp;
 
 @[simp]
 lemma CanonicalModel.frame_def {Ω₁ Ω₂ : PrimeTheory β} : (CanonicalModel β).frame Ω₁ Ω₂ ↔ Ω₁ ⊆ Ω₂ := by rfl
@@ -356,27 +356,27 @@ lemma CanonicalModel.val_def {a : β} : (CanonicalModel β).val Ω a ↔ (atom a
 
 variable [DecidableEq β] [Encodable β]
 
-lemma truthlemma {Ω : PrimeTheory β} {p : Formula β} : (Ω ⊩[(CanonicalModel β)] p) ↔ (Ω.theory ⊢ⁱ! p) := by
+lemma truthlemma {Ω : PrimeTheory β} {p : Formula β} : (Ω ⊩ⁱ[(CanonicalModel β)] p) ↔ (Ω.theory ⊢ⁱ! p) := by
   induction p using rec' generalizing Ω with
   | hatom a =>
+    simp_all;
     constructor;
     . intro h;
-      exact ⟨Deduction.axm (CanonicalModel.val_def.mpr h)⟩;
+      exact ⟨Deduction.axm (CanonicalModel.val_def.mpr (by simpa using h))⟩;
     . apply PrimeTheory.closed;
   | hverum => simp; apply verum!;
   | hfalsum => simp [←System.unprovable_iff_not_provable]
   | hand p q ihp ihq =>
+    simp_all;
     constructor;
     . intro h;
-      obtain ⟨hp, hq⟩ := h;
-      have dp : Ω.theory ⊢ⁱ! p := ihp.mp hp;
-      have dq : Ω.theory ⊢ⁱ! q := ihq.mp hq;
-      exact conj₃'! dp dq;
+      exact conj₃'! h.1 h.2;
     . intro h;
       constructor;
-      . apply ihp.mpr; exact conj₁'! h;
-      . apply ihq.mpr; exact conj₂'! h;
+      . exact conj₁'! h;
+      . exact conj₂'! h;
   | hor p q ihp ihq =>
+    simp_all;
     constructor;
     . intro h; simp at h;
       cases h with
@@ -384,8 +384,8 @@ lemma truthlemma {Ω : PrimeTheory β} {p : Formula β} : (Ω ⊩[(CanonicalMode
       | inr h => simp [ihq] at h; exact disj₂'! h;
     . intro h;
       cases Ω.disjunctive' (Ω.closed' h) with
-      | inl h => left; exact ihp.mpr ⟨Deduction.axm h⟩;
-      | inr h => right; exact ihq.mpr ⟨Deduction.axm h⟩;
+      | inl h => left; exact ⟨Deduction.axm h⟩;
+      | inr h => right; exact ⟨Deduction.axm h⟩;
   | himp p q ihp ihq =>
     constructor;
     . contrapose;
@@ -395,11 +395,11 @@ lemma truthlemma {Ω : PrimeTheory β} {p : Formula β} : (Ω ⊩[(CanonicalMode
       obtain ⟨Ω', hΩ'₁, hΩ'₂⟩ := prime_expansion h₁;
       existsi Ω';
       exact ⟨
-        ihp.mpr $ axm! (by apply hΩ'₁; simp_all;),
+        by simpa using ihp.mpr $ axm! (by apply hΩ'₁; simp_all;),
         Set.Subset.trans
           (show Ω.theory ⊆ insert p Ω.theory by simp_all)
           (show insert p Ω.theory ⊆ Ω'.theory by simp_all),
-        ihq.not.mpr hΩ'₂
+        by simpa using ihq.not.mpr (hΩ'₂);
       ⟩;
     . intro h;
       simp [KripkeSatisfies.imp_def'];
@@ -407,7 +407,7 @@ lemma truthlemma {Ω : PrimeTheory β} {p : Formula β} : (Ω ⊩[(CanonicalMode
       obtain ⟨Ω', ⟨hp, hΩΩ', hq⟩⟩ := hC;
       have hp : Ω'.theory ⊢ⁱ! p := ihp.mp hp;
       have hq : Ω'.theory ⊬ⁱ! q := ihq.not.mp hq;
-      have := modus_ponens₂'! (weakening! hΩΩ' h) hp;
+      have : Ω'.theory ⊢ⁱ! q := (weakening! hΩΩ' h) ⨀ hp;
       contradiction;
 
 theorem Kripke.completes {Γ : Theory β} {p : Formula β} : (Γ ⊨ⁱ p) → (Γ ⊢ⁱ! p) := by
@@ -452,40 +452,16 @@ def DPCounterModel (M₁ : Kripke.Model γ₁ β) (M₂ : Kripke.Model γ₂ β)
     . constructor;
       . intros; apply M₁.trans (by assumption) (by assumption);
       . intros; apply M₂.trans (by assumption) (by assumption);
-  herditary := by
+  hereditary := by
     simp only [Sum.forall, imp_false, not_false_eq_true, implies_true, forall_true_left, forall_const, IsEmpty.forall_iff, and_self, true_and, and_true];
     constructor;
-    . intro _ _; apply M₁.herditary;
-    . intro _ _; apply M₂.herditary;
+    . intro _ _; apply M₁.hereditary;
+    . intro _ _; apply M₂.hereditary;
 
 variable {M₁ : Kripke.Model γ₁ β} {M₂ : Kripke.Model γ₂ β}
 
-lemma DPCounterModel_left {p : Formula β} : (w ⊩[M₁] p) ↔ (Sum.inr $ Sum.inl w) ⊩[DPCounterModel M₁ M₂ w₁ w₂] p := by
+lemma DPCounterModel_left {p : Formula β} : (w ⊩ⁱ[M₁] p) ↔ (Sum.inr $ Sum.inl w) ⊩ⁱ[DPCounterModel M₁ M₂ w₁ w₂] p := by
   induction p using rec' generalizing w with
-  | hfalsum => simp;
-  | hverum => simp;
-  | hatom a => simp [DPCounterModel];
-  | hor p₁ p₂ ih₁ ih₂ =>
-    constructor;
-    . intro h;
-      cases h with
-      | inl h => left; apply ih₁.mp h;
-      | inr h => right; apply ih₂.mp h;
-    . intro h;
-      cases h with
-      | inl h => left; apply ih₁.mpr h;
-      | inr h => right; apply ih₂.mpr h;
-  | hand p₁ p₂ ih₁ ih₂ =>
-    simp only [KripkeSatisfies.and_def, not_and_or]
-    constructor;
-    . intro h;
-      constructor;
-      . exact ih₁.mp h.1;
-      . exact ih₂.mp h.2;
-    . intro h;
-      constructor;
-      . exact ih₁.mpr h.1;
-      . exact ih₂.mpr h.2;
   | himp p₁ p₂ ih₁ ih₂ =>
     constructor;
     . simp only [KripkeSatisfies.imp_def'];
@@ -495,41 +471,20 @@ lemma DPCounterModel_left {p : Formula β} : (w ⊩[M₁] p) ↔ (Sum.inr $ Sum.
         split at hv;
         all_goals simp_all;
       subst hv';
-      have := ih₁.mpr (by simpa using hp₁);
+      have := ih₁.mpr hp₁;
       have := h v hv this;
-      exact ih₂.mp this;
+      have := ih₂.mp this;
+      simpa;
     . simp only [KripkeSatisfies.imp_def'];
       intro h v hv hp₁;
       have := ih₁.mp hp₁;
       have := h (Sum.inr $ Sum.inl v) (by simpa [DPCounterModel]) this;
-      exact ih₂.mpr this;
+      have := ih₂.mpr this;
+      simpa;
+  | _ => simp_all [DPCounterModel];
 
-lemma DPCounterModel_right {p : Formula β} : (w ⊩[M₂] p) ↔ (Sum.inr $ Sum.inr w) ⊩[DPCounterModel M₁ M₂ w₁ w₂] p := by
+lemma DPCounterModel_right {p : Formula β} : (w ⊩ⁱ[M₂] p) ↔ (Sum.inr $ Sum.inr w) ⊩ⁱ[DPCounterModel M₁ M₂ w₁ w₂] p := by
   induction p using rec' generalizing w with
-  | hfalsum => simp;
-  | hverum => simp;
-  | hatom a => simp [DPCounterModel];
-  | hor p₁ p₂ ih₁ ih₂ =>
-    constructor;
-    . intro h;
-      cases h with
-      | inl h => left; apply ih₁.mp h;
-      | inr h => right; apply ih₂.mp h;
-    . intro h;
-      cases h with
-      | inl h => left; apply ih₁.mpr h;
-      | inr h => right; apply ih₂.mpr h;
-  | hand p₁ p₂ ih₁ ih₂ =>
-    simp only [KripkeSatisfies.and_def, not_and_or]
-    constructor;
-    . intro h;
-      constructor;
-      . exact ih₁.mp h.1;
-      . exact ih₂.mp h.2;
-    . intro h;
-      constructor;
-      . exact ih₁.mpr h.1;
-      . exact ih₂.mpr h.2;
   | himp p₁ p₂ ih₁ ih₂ =>
     constructor;
     . simp only [KripkeSatisfies.imp_def'];
@@ -539,14 +494,17 @@ lemma DPCounterModel_right {p : Formula β} : (w ⊩[M₂] p) ↔ (Sum.inr $ Sum
         split at hv;
         all_goals simp_all;
       subst hv';
-      have := ih₁.mpr (by simpa using hp₂);
+      have := ih₁.mpr hp₂;
       have := h v hv this;
-      exact ih₂.mp this;
+      have := ih₂.mp this;
+      simpa;
     . simp only [KripkeSatisfies.imp_def'];
       intro h v hv hp₁;
       have := ih₁.mp hp₁;
       have := h (Sum.inr $ Sum.inr v) (by simpa [DPCounterModel]) this;
-      exact ih₂.mpr this;
+      have := ih₂.mpr this;
+      simpa;
+  | _ => simp_all [DPCounterModel];
 
 theorem Deduction.disjunctive {p q : Formula β} : ∅ ⊢ⁱ! p ⋎ q → ∅ ⊢ⁱ! p ∨ ∅ ⊢ⁱ! q := by
   contrapose;
@@ -561,10 +519,10 @@ theorem Deduction.disjunctive {p q : Formula β} : ∅ ⊢ⁱ! p ⋎ q → ∅ �
   simp [Formula.KripkeConsequence, Theory.KripkeSatisfies];
   existsi _, M, Sum.inl ();
 
-  have : ¬Sum.inl () ⊩[M] p := not_imp_not.mpr (Kripke.herditary_formula (by simp [M]; rfl)) (DPCounterModel_left.not.mp hp)
-  have : ¬Sum.inl () ⊩[M] q := not_imp_not.mpr (Kripke.herditary_formula (by simp [M]; rfl)) (DPCounterModel_right.not.mp hq)
+  have : ¬Sum.inl () ⊩ⁱ[M] p := not_imp_not.mpr (Kripke.hereditary_formula (by simp [M]; rfl)) (DPCounterModel_left.not.mp hp)
+  have : ¬Sum.inl () ⊩ⁱ[M] q := not_imp_not.mpr (Kripke.hereditary_formula (by simp [M]; rfl)) (DPCounterModel_right.not.mp hq)
 
-  simp_all only [or_self, not_false_eq_true]
+  simp_all;
 
 end DisjProp
 
