@@ -117,4 +117,6 @@ infix:50 " ⊨ᴵ " => Formula.KripkeConsequence
 abbrev Formula.KripkeInconsequence (Γ : Theory β) (p : Formula β) := ¬(Γ ⊨ᴵ p)
 infix:50 " ⊭ᴵ " => Formula.KripkeInconsequence
 
+@[simp] lemma Theory.KripkeSatisfies_empty (M : Kripke.Model α β) (w : α) : w ⊩[M] ∅ := fun _ ↦ by simp
+
 end LO.Propositional.Intuitionistic

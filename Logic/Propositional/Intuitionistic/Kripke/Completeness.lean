@@ -408,6 +408,9 @@ theorem Kripke.completes {Γ : Theory β} {p : Formula β} : (Γ ⊨ᴵ p) → (
   );
   contradiction;
 
+theorem Kripke.complete_iff {Γ : Theory β} {p : Formula β} : Γ ⊨ᴵ p ↔ Γ ⊢! p:=
+  ⟨Kripke.completes, Kripke.sounds⟩
+
 section DisjProp
 
 def DPCounterModel (M₁ : Kripke.Model γ₁ β) (M₂ : Kripke.Model γ₂ β) (w₁ : γ₁) (w₂ : γ₂) : Kripke.Model (Unit ⊕ γ₁ ⊕ γ₂) β where
@@ -536,8 +539,8 @@ theorem Deduction.disjunctive {p q : Formula β} : ∅ ⊢! p ⋎ q → ∅ ⊢!
   apply not_imp_not.mpr Kripke.sounds;
 
   have ⟨(hp : ∅ ⊬ p), (hq : ∅ ⊬ q)⟩ := not_or.mp h;
-  obtain ⟨γ₁, M₁, w₁, ⟨_, hp⟩⟩ := by simpa [Formula.KripkeConsequence] using not_imp_not.mpr Kripke.completes hp;
-  obtain ⟨γ₂, M₂, w₂, ⟨_, hq⟩⟩ := by simpa [Formula.KripkeConsequence] using not_imp_not.mpr Kripke.completes hq;
+  obtain ⟨γ₁, M₁, w₁, hp⟩ := by simpa [Formula.KripkeConsequence] using not_imp_not.mpr Kripke.completes hp;
+  obtain ⟨γ₂, M₂, w₂, hq⟩ := by simpa [Formula.KripkeConsequence] using not_imp_not.mpr Kripke.completes hq;
   let M : Kripke.Model (Unit ⊕ γ₁ ⊕ γ₂) β := DPCounterModel M₁ M₂ w₁ w₂;
 
   simp [Formula.KripkeConsequence, Theory.KripkeSatisfies];
