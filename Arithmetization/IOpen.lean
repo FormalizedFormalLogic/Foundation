@@ -625,7 +625,7 @@ end pair
 end IOpen
 
 @[elab_as_elim]
-lemma hierarchy_polynomial_induction (b : Polarity) (s : ℕ) [(𝐈𝚪 b s).Mod M] {P : M → Prop} (hP : DefinablePred b s P)
+lemma hierarchy_polynomial_induction (b : Polarity) (s : ℕ) [(𝐈H b s).Mod M] {P : M → Prop} (hP : DefinablePred b s P)
     (zero : P 0) (even : ∀ x > 0, P x → P (2 * x)) (odd : ∀ x, P x → P (2 * x + 1)) : ∀ x, P x := by
   haveI : 𝐈open.Mod M := mod_IOpen_of_mod_IHierarchy b s
   intro x; induction x using hierarchy_order_induction

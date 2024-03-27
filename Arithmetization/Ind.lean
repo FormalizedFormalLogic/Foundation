@@ -23,7 +23,7 @@ variable (L)
 
 abbrev IHierarchy (Γ : Polarity) (k : ℕ) : Theory L := IndScheme (Arith.Hierarchy Γ k)
 
-notation "𝐈𝚪" => IHierarchy ℒₒᵣ
+notation "𝐈H" => IHierarchy ℒₒᵣ
 
 abbrev IPi (k : ℕ) : Theory L := IndScheme (Arith.Hierarchy Π k)
 
@@ -83,8 +83,8 @@ section Theory
 lemma iSigma_subset_mono {s₁ s₂} (h : s₁ ≤ s₂) : 𝐈𝚺 s₁ ⊆ 𝐈𝚺 s₂ :=
   Theory.IndScheme_subset (fun H ↦ H.mono h)
 
-def mod_IOpen_of_mod_IHierarchy (b s) [(𝐈𝚪 b s).Mod M] : 𝐈open.Mod M :=
-  Theory.Mod.of_ss M (show 𝐈open ⊆ 𝐈𝚪 b s from Theory.IndScheme_subset Hierarchy.of_open)
+def mod_IOpen_of_mod_IHierarchy (Γ s) [(𝐈H Γ s).Mod M] : 𝐈open.Mod M :=
+  Theory.Mod.of_ss M (show 𝐈open ⊆ 𝐈H Γ s from Theory.IndScheme_subset Hierarchy.of_open)
 
 def mod_ISigma_of_le {s₁ s₂} (h : s₁ ≤ s₂) [(𝐈𝚺 s₂).Mod M] : (𝐈𝚺 s₁).Mod M :=
   Theory.Mod.of_ss M (iSigma_subset_mono h)
@@ -95,12 +95,12 @@ instance [𝐈𝚺₁.Mod M] : 𝐈open.Mod M := mod_IOpen_of_mod_IHierarchy Σ 
 
 instance [𝐈𝚺₁.Mod M] : 𝐈𝚺₀.Mod M := mod_ISigma_of_le (show 0 ≤ 1 from by simp)
 
-variable (b : Polarity) (s : ℕ) [(𝐈𝚪 b s).Mod M]
+variable (Γ : Polarity) (s : ℕ) [(𝐈H Γ s).Mod M]
 
 @[elab_as_elim]
-lemma hierarchy_induction {P : M → Prop} (hP : DefinablePred b s P)
+lemma hierarchy_induction {P : M → Prop} (hP : DefinablePred Γ s P)
     (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x :=
-  induction (P := P) (C := Hierarchy b s) (by
+  induction (P := P) (C := Hierarchy Γ s) (by
     rcases hP with ⟨p, hp⟩
     haveI : Inhabited M := Classical.inhabited_of_nonempty'
     exact ⟨p.val.fvEnumInv, (Rew.rewriteMap p.val.fvEnum).hom p.val, by simp [hp],
@@ -117,12 +117,12 @@ lemma hierarchy_induction {P : M → Prop} (hP : DefinablePred b s P)
     (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x := hierarchy_induction Σ 1 hP zero succ
 
 @[elab_as_elim]
-lemma hierarchy_order_induction {P : M → Prop} (hP : DefinablePred b s P)
+lemma hierarchy_order_induction {P : M → Prop} (hP : DefinablePred Γ s P)
     (ind : ∀ x, (∀ y < x, P y) → P x) : ∀ x, P x := by
   suffices ∀ x, ∀ y < x, P y by
     intro x; exact this (x + 1) x (by simp)
   intro x; induction x using hierarchy_induction
-  · exact b
+  · exact Γ
   · exact s
   · definability
   case zero => simp
@@ -139,14 +139,14 @@ lemma hierarchy_order_induction {P : M → Prop} (hP : DefinablePred b s P)
 @[elab_as_elim] lemma hierarchy_order_induction_sigma₁ [𝐈𝚺₁.Mod M] {P : M → Prop} (hP : DefinablePred Σ 1 P)
     (ind : ∀ x, (∀ y < x, P y) → P x) : ∀ x, P x := hierarchy_order_induction Σ 1 hP ind
 
-lemma hierarchy_neg_induction {P : M → Prop} (hP : DefinablePred b s P)
+lemma hierarchy_neg_induction {P : M → Prop} (hP : DefinablePred Γ s P)
     (nzero : ¬P 0) (nsucc : ∀ x, ¬P x → ¬P (x + 1)) : ∀ x, ¬P x := by
   by_contra A
   have : ∃ x, P x := by simpa using A
   rcases this with ⟨a, ha⟩
   have : ∀ x ≤ a, P (a - x) := by
     intro x; induction x using hierarchy_induction
-    · exact b
+    · exact Γ
     · exact s
     · definability
     case zero =>
@@ -162,7 +162,7 @@ lemma hierarchy_neg_induction {P : M → Prop} (hP : DefinablePred b s P)
   have : P 0 := by simpa using this a (by rfl)
   contradiction
 
-lemma models_IHierarchy_alt : M ⊧ₘ* 𝐈𝚪 b.alt s := by
+lemma models_IHierarchy_alt : M ⊧ₘ* 𝐈H Γ.alt s := by
   intro p
   simp [Theory.IHierarchy, Theory.IndScheme]
   rintro p hp rfl
@@ -173,14 +173,40 @@ lemma models_IHierarchy_alt : M ⊧ₘ* 𝐈𝚪 b.alt s := by
     (∀ x, Semiformula.Eval! M ![x] v p → Semiformula.Eval! M ![x + 1] v p) →
       ∀ x, Semiformula.Eval! M ![x] v p := by
     simpa using
-      hierarchy_neg_induction b s (P := λ x ↦ ¬Semiformula.Eval! M ![x] v p)
+      hierarchy_neg_induction Γ s (P := λ x ↦ ¬Semiformula.Eval! M ![x] v p)
         ⟨⟨~(Rew.rewriteMap v).hom p, by simpa using hp⟩,
           by intro x; simp [←Matrix.constant_eq_singleton', Semiformula.eval_rewriteMap]⟩
   exact this H0 Hsucc x
 
-def hierarchy_mod_alt : (𝐈𝚪 b.alt s).Mod M := ⟨models_IHierarchy_alt b s⟩
+def hierarchy_mod_alt : (𝐈H Γ.alt s).Mod M := ⟨models_IHierarchy_alt Γ s⟩
 
-variable {b s}
+lemma hierarchy_least_number {P : M → Prop} (hP : DefinablePred Γ s P)
+    {x} (h : P x) : ∃ y, P y ∧ ∀ z < y, ¬P z := by
+  by_contra A
+  have A : ∀ z, P z → ∃ w < z, P w := by simpa using A
+  have : ∀ z, ∀ w < z, ¬P w := by
+    intro z
+    induction z using hierarchy_induction
+    · exact Γ.alt
+    · exact s
+    · definability
+    case zero => simp
+    case succ x IH =>
+      intro w hx hw
+      rcases le_iff_lt_or_eq.mp (lt_succ_iff_le.mp hx) with (hx | rfl)
+      · exact IH w hx hw
+      · have : ∃ v < w, P v := A w hw
+        rcases this with ⟨v, hvw, hv⟩
+        exact IH v hvw hv
+    case inst =>
+      exact hierarchy_mod_alt (M := M) Γ s
+  exact this (x + 1) x (by simp) h
+
+
+lemma least_number_sigma₀ [𝐈𝚺₀.Mod M] {P : M → Prop} (hP : DefinablePred Σ 0 P)
+    {x} (h : P x) : ∃ y, P y ∧ ∀ z < y, ¬P z := hierarchy_least_number Σ 0 hP h
+
+variable {Γ s}
 
 instance [𝐈𝚺₀.Mod M] : 𝐈𝚷₀.Mod M := hierarchy_mod_alt Σ 0
 
@@ -189,6 +215,13 @@ instance [𝐈𝚷₀.Mod M] : 𝐈𝚺₀.Mod M := hierarchy_mod_alt Π 0
 instance [𝐈𝚺₁.Mod M] : 𝐈𝚷₁.Mod M := hierarchy_mod_alt Σ 1
 
 instance [𝐈𝚷₁.Mod M] : 𝐈𝚺₁.Mod M := hierarchy_mod_alt Π 1
+
+lemma least_number' [(𝐈H Σ s).Mod M] {P : M → Prop} {Γ} (hP : DefinablePred Γ s P)
+    {x} (h : P x) : ∃ y, P y ∧ ∀ z < y, ¬P z := by
+  rcases Γ
+  · exact hierarchy_least_number Σ s hP h
+  · haveI : (𝐈H Π s).Mod M := hierarchy_mod_alt Σ s
+    exact hierarchy_least_number Π s hP h
 
 end Theory
 

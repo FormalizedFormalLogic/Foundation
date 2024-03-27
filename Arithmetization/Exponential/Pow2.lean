@@ -177,6 +177,16 @@ lemma LenBit.add_self_of_not_lenbit {a i : M} (pos : 0 < i) (h : ¬LenBit i a) :
   simp [LenBit.iff_rem, div_add_self_right, pos]
   rw [mod_add] <;> simp [this, one_lt_two]
 
+lemma LenBit.add_self_of_lenbit {a i : M} (pos : 0 < i) (h : LenBit i a) : ¬LenBit i (a + i) := by
+  have : a / i % 2 = 1 := by simpa [LenBit.iff_rem] using h
+  simp [LenBit.iff_rem, div_add_self_right, pos]
+  rw [mod_add] <;> simp [this, one_add_one_eq_two]
+
+lemma LenBit.sub_self_of_lenbit {a i : M} (pos : 0 < i) (h : LenBit i a) : ¬LenBit i (a - i) := by
+  intro h'
+  have : ¬LenBit i a := by simpa [sub_add_self_of_le h.le] using LenBit.add_self_of_lenbit pos h'
+  contradiction
+
 end LenBit
 
 end IOpen
@@ -384,6 +394,15 @@ lemma lenbit_add_pow2_iff_of_not_lenbit {a i j : M} (pi : Pow2 i) (pj : Pow2 j) 
         Iff.symm <| lenbit_mul_add pi' (by simpa using pj') (lt_of_lt_of_le hr $ by simp)
       _                                        ↔ LenBit (2 * j * i) (a * (2 * j) + r)         := by
         simp [mul_comm]
+
+lemma lenbit_sub_pow2_iff_of_lenbit {a i j : M} (pi : Pow2 i) (pj : Pow2 j) (h : LenBit j a) :
+    LenBit i (a - j) ↔ i ≠ j ∧ LenBit i a := by
+  generalize ha' : a - j = a'
+  have h' : ¬LenBit j a' := by simpa [←ha'] using LenBit.sub_self_of_lenbit pj.pos h
+  have : a = a' + j := by simp [←ha', sub_add_self_of_le h.le]
+  rcases this with rfl
+  have : LenBit i (a' + j) ↔ i = j ∨ LenBit i a' := lenbit_add_pow2_iff_of_not_lenbit pi pj h'
+  simp [this, and_or_left]; rintro _ rfl; contradiction
 
 end ISigma₀
 

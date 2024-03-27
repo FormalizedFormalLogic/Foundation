@@ -380,6 +380,9 @@ lemma imp {P₁ P₂ : (Fin k → M) → Prop} (h₁ : Definable Γ.alt s P₁) 
   rcases h₁ with ⟨p₁, h₁⟩; rcases h₂ with ⟨p₂, h₂⟩
   exact ⟨⟨p₁ ⟶ p₂, by simp⟩, by intro x; simp [h₁, h₂, h₁.eval, h₂.eval]⟩
 
+lemma imp₁ {P₁ P₂ : (Fin k → M) → Prop} (h₁ : Definable Γ.alt (s + 1) P₁) (h₂ : Definable Γ (s + 1) P₂) :
+    Definable Γ (s + 1) (fun v ↦ P₁ v → P₂ v) := imp h₁ h₂
+
 lemma iff {P₁ P₂ : (Fin k → M) → Prop} (h₁ : Definable Γ s P₁) (h₁' : Definable Γ.alt s P₁) (h₂ : Definable Γ s P₂) (h₂' : Definable Γ.alt s P₂) :
     Definable Γ s (fun v ↦ P₁ v ↔ P₂ v) := by
   simp [iff_iff_implies_and_implies]

@@ -11,6 +11,8 @@ variable {M : Type} [Zero M] [One M] [Add M] [Mul M] [LT M] [𝐏𝐀⁻.Mod M]
 
 namespace Model
 
+section ISigma₁
+
 variable [𝐈𝚺₁.Mod M]
 
 def Bit (i a : M) : Prop := LenBit (exp i) a
@@ -25,10 +27,13 @@ lemma bit_defined : Δ₀-Relation ((· ∈ ·) : M → M → Prop) via bitdef :
   · intro h; exact ⟨exp (v 0), by simp [h.le], rfl, h⟩
   · rintro ⟨_, _, rfl, h⟩; exact h
 
-instance {b s} : DefinableRel b s ((· ∈ ·) : M → M → Prop) := defined_to_with_param₀ _ bit_defined
+instance mem_definableRel (b s) : DefinableRel b s ((· ∈ ·) : M → M → Prop) := defined_to_with_param₀ _ bit_defined
 
 open Classical in
 noncomputable def bitInsert (i a : M) : M := if i ∈ a then a else a + exp i
+
+open Classical in
+noncomputable def bitRemove (i a : M) : M := if i ∈ a then a - exp i else a
 
 instance : Insert M M := ⟨bitInsert⟩
 
@@ -80,6 +85,16 @@ lemma not_mem_iff_mul_exp_add {i a : M} : i ∉ a ↔ ∃ k, ∃ r < exp i, a = 
   · by_cases e : i = j <;> simp [h, e]
   · simpa [exponential_inj.eq_iff] using
       lenbit_add_pow2_iff_of_not_lenbit (exp_pow2 i) (exp_pow2 j) h
+
+@[simp] lemma mem_bitRemove_iff {i j a : M} :
+    i ∈ bitRemove j a ↔ i ≠ j ∧ i ∈ a := by
+  by_cases h : j ∈ a <;> simp [h, bitRemove]
+  · simpa [exponential_inj.eq_iff] using
+      lenbit_sub_pow2_iff_of_lenbit (exp_pow2 i) (exp_pow2 j) h
+  · rintro _ rfl; contradiction
+
+lemma bitRemove_lt_of_mem {i a : M} (h : i ∈ a) : bitRemove i a < a := by
+  simp [h, bitRemove, tsub_lt_iff_left (exp_le_of_mem h)]
 
 lemma pos_of_nonempty {i a : M} (h : i ∈ a) : 0 < a := by
   by_contra A; simp at A; rcases A; simp_all
@@ -138,7 +153,7 @@ lemma mem_under_iff {i j : M} : i ∈ under j ↔ i < j := by
     have := lt_iff_succ_le.mp lt
     let k := j - (i + 1)
     have : j = i + k + 1 := by
-      simp [add_assoc, ←sub_sub]; rw [sub_add_self_of_le, add_tsub_self_of_le]
+      simp [add_assoc, ←sub_sub, k]; rw [sub_add_self_of_le, add_tsub_self_of_le]
       · exact le_of_lt lt
       · exact le_tsub_of_add_le_left this
     rw [this]; exact mem_exp_add_succ_sub_one i k
@@ -158,27 +173,114 @@ lemma zero_mem_iff {a : M} : 0 ∉ a ↔ 2 ∣ a := by simp [mem_iff_bit, Bit, L
 @[simp] lemma zero_not_mem (a : M) : 0 ∉ 2 * a := by simp [mem_iff_bit, Bit, LenBit]
 
 lemma le_of_subset {a b : M} (h : a ⊆ b) : a ≤ b := by
-  revert a
-  induction b using hierarchy_polynomial_induction_pi₁
+  induction b using hierarchy_polynomial_induction_pi₁ generalizing a
   · definability
   case zero =>
-    intro a h
     simp [eq_zero_of_subset_zero h]
-  case even b IH =>
-    intro a ha
-    have IH : a / 2 ≤ b := IH (by simpa using subset_div_two ha)
+  case even b _ IH =>
+    have IH : a / 2 ≤ b := IH (by simpa using subset_div_two h)
     have : 2 * (a / 2) = a :=
-      mul_div_self_of_dvd.mpr (zero_mem_iff.mp $ by intro h; have : 0 ∈ 2 * b := ha h; simp_all)
+      mul_div_self_of_dvd.mpr (zero_mem_iff.mp $ by intro ha; have : 0 ∈ 2 * b := h ha; simp_all)
     simpa [this] using mul_le_mul_left (a := 2) IH
   case odd b IH =>
-    intro a ha
-    have IH : a / 2 ≤ b := IH (by simpa [div_mul_add' b 2 one_lt_two] using subset_div_two ha)
+    have IH : a / 2 ≤ b := IH (by simpa [div_mul_add' b 2 one_lt_two] using subset_div_two h)
     exact le_trans (le_two_mul_div_two_add_one a) (by simpa using IH)
 
 lemma mem_ext {a b : M} (h : ∀ i, i ∈ a ↔ i ∈ b) : a = b :=
-  le_antisymm (le_of_subset $ fun i hi ↦ (h i).mp hi) (le_of_subset $ fun i hi ↦ (h i).mpr hi)
+  le_antisymm (le_of_subset fun i hi ↦ (h i).mp hi) (le_of_subset fun i hi ↦ (h i).mpr hi)
 
-theorem finset_comprehension (P : M → Prop) (n : M) : ∃ s < exp n, ∀ i < n, i ∈ s ↔ P i := by {  }
+end ISigma₁
+
+section
+
+variable {ν : ℕ} [Fact (1 ≤ ν)] [(𝐈H Σ ν).Mod M]
+
+theorem finset_comprehension {P : M → Prop} (hP : Γ(ν)-Predicate P) (n : M) :
+    haveI : 𝐈𝚺₁.Mod M := mod_ISigma_of_le (show 1 ≤ ν from Fact.out)
+    ∃ s < exp n, ∀ i < n, i ∈ s ↔ P i := by
+  haveI : 𝐈𝚺₁.Mod M := mod_ISigma_of_le (show 1 ≤ ν from Fact.out)
+  have : ∃ s < exp n, ∀ i < n, P i → i ∈ s :=
+    ⟨under n, pred_lt_self_of_pos (by simp), fun i hi _ ↦ by simpa [mem_under_iff] using hi⟩
+  rcases this with ⟨s, hsn, hs⟩
+  have : (Γ.alt)(ν)-Predicate (fun s ↦ ∀ i < n, P i → i ∈ s) := by
+    apply Definable.ball_lt; simp; apply Definable.imp
+    definability
+    simp [mem_definableRel]
+  have : ∃ t, (∀ i < n, P i → i ∈ t) ∧ ∀ t' < t, ∃ x, P x ∧ x < n ∧ x ∉ t' := by
+    simpa using least_number' this hs
+  rcases this with ⟨t, ht, t_minimal⟩
+  have t_le_s : t ≤ s := not_lt.mp (by
+    intro lt
+    rcases t_minimal s lt with ⟨i, hi, hin, his⟩
+    exact his (hs i hin hi))
+  have : ∀ i < n, i ∈ t → P i := by
+    intro i _ hit
+    by_contra Hi
+    have : ∃ j, P j ∧ j < n ∧ (j ∈ t → j = i) := by
+      simpa [not_imp_not] using t_minimal (bitRemove i t) (bitRemove_lt_of_mem hit)
+    rcases this with ⟨j, Hj, hjn, hm⟩
+    rcases hm (ht j hjn Hj); contradiction
+  exact ⟨t, lt_of_le_of_lt t_le_s hsn, fun i hi ↦ ⟨this i hi, ht i hi⟩⟩
+
+theorem finset_comprehension_exists_unique {P : M → Prop} (hP : Γ(ν)-Predicate P) (n : M) :
+    haveI : 𝐈𝚺₁.Mod M := mod_ISigma_of_le (show 1 ≤ ν from Fact.out)
+    ∃! s, s < exp n ∧ ∀ i < n, i ∈ s ↔ P i := by
+  haveI : 𝐈𝚺₁.Mod M := mod_ISigma_of_le (show 1 ≤ ν from Fact.out)
+  rcases finset_comprehension hP n with ⟨s, hs, Hs⟩
+  exact ExistsUnique.intro s ⟨hs, Hs⟩ (by
+    intro t ⟨ht, Ht⟩
+    apply mem_ext
+    intro i
+    constructor
+    · intro hi
+      have hin : i < n := exponential_monotone.mp (lt_of_le_of_lt (exp_le_of_mem hi) ht)
+      exact (Hs i hin).mpr ((Ht i hin).mp hi)
+    · intro hi
+      have hin : i < n := exponential_monotone.mp (lt_of_le_of_lt (exp_le_of_mem hi) hs)
+      exact (Ht i hin).mpr ((Hs i hin).mp hi))
+
+end
+
+section ISigma₁
+
+variable [𝐈𝚺₁.Mod M]
+
+instance : Fact (1 ≤ 1) := ⟨by rfl⟩
+
+theorem finset_comprehension₁ {P : M → Prop} (hP : Γ(1)-Predicate P) (n : M) :
+    ∃ s < exp n, ∀ i < n, i ∈ s ↔ P i :=
+  finset_comprehension hP n
+
+/-
+lemma domain_exists_unique (s : M) :
+    ∃! d : M, ∀ x, x ∈ d ↔ ∃ y, ⟪x, y⟫ ∈ s := by { }
+-/
+
+namespace ArithmetizedTerm
+
+variable (L : Language) [(k : ℕ) → Encodable (L.Func k)] [(k : ℕ) → Encodable (L.Rel k)]
+
+variable (M)
+
+class ArithmetizedLanguage where
+  isFunc : Δ₀Sentence 2
+  isFunc_spec : Δ₀-Relation (fun (k' f' : M) ↦ ∃ (k : ℕ) (f : L.Func k), k' = k ∧ f' = Encodable.encode f) via isFunc
+  isRel : Δ₀Sentence 2
+  isRel_spec : Δ₀-Relation (fun (k' r' : M) ↦ ∃ (k : ℕ) (r : L.Rel k), k' = k ∧ r' = Encodable.encode r) via isRel
+
+variable {M L}
+
+def bvar (x : M) : M := ⟪0, ⟪0, x⟫⟫
+
+def fvar (x : M) : M := ⟪0, ⟪1, x⟫⟫
+
+def func : {k : ℕ} → (f : L.Func k) → M
+  | 0,     c => ⟪0, ⟪2, Encodable.encode c⟫⟫
+  | k + 1, f => ⟪k + 1, Encodable.encode f⟫
+
+end ArithmetizedTerm
+
+end ISigma₁
 
 end Model
 
