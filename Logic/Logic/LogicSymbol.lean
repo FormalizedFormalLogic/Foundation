@@ -449,3 +449,19 @@ lemma map_disj [FunLike F α Prop] [LogicalConnective.HomClass F α Prop] (f : F
 end
 
 end Finset
+
+class Exp (α : Type*) where
+  exp : α → α
+export Exp (exp)
+
+instance : Exp ℕ := ⟨(2 ^ ·)⟩
+
+namespace Nat
+
+lemma exp_def (n : ℕ) : exp n = 2 ^ n := rfl
+
+lemma exp_zero : exp 0 = 1 := rfl
+
+lemma exp_succ (n : ℕ) : exp (n + 1) = 2 * exp n := by simp [exp_def, pow_succ]
+
+end Nat

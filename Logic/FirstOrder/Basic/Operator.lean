@@ -89,6 +89,9 @@ protected class Add (L : Language) where
 protected class Mul (L : Language) where
   mul : Semiterm.Operator L 2
 
+protected class Exp (L : Language) where
+  exp : Semiterm.Operator L 1
+
 protected class Sub (L : Language) where
   sub : Semiterm.Operator L 2
 
@@ -106,6 +109,8 @@ instance [L.Add] : Operator.Add L := ⟨⟨Semiterm.func Language.Add.add Semite
 
 instance [L.Mul] : Operator.Mul L := ⟨⟨Semiterm.func Language.Mul.mul Semiterm.bvar⟩⟩
 
+instance [L.Exp] : Operator.Exp L := ⟨⟨Semiterm.func Language.Exp.exp Semiterm.bvar⟩⟩
+
 instance [L.Star] : Operator.Star L := ⟨⟨Semiterm.func Language.Star.star ![]⟩⟩
 
 lemma Zero.term_eq [L.Zero] : (@Zero.zero L _).term = Semiterm.func Language.Zero.zero ![] := rfl
@@ -115,6 +120,8 @@ lemma One.term_eq [L.One] : (@One.one L _).term = Semiterm.func Language.One.one
 lemma Add.term_eq [L.Add] : (@Add.add L _).term = Semiterm.func Language.Add.add Semiterm.bvar := rfl
 
 lemma Mul.term_eq [L.Mul] : (@Mul.mul L _).term = Semiterm.func Language.Mul.mul Semiterm.bvar := rfl
+
+lemma Exp.term_eq [L.Exp] : (@Exp.exp L _).term = Semiterm.func Language.Exp.exp Semiterm.bvar := rfl
 
 lemma Star.term_eq [L.Star] : (@Star.star L _).term = Semiterm.func Language.Star.star ![] := rfl
 
@@ -156,6 +163,10 @@ end numeral
   simp [positive_operator_iff, Mul.term_eq, bv_func]
   exact ⟨by intro h; exact ⟨h 0, h 1⟩,
     by intro h i; cases i using Fin.cases <;> simp [Fin.eq_zero, *]⟩
+
+@[simp] lemma Exp.positive_iff [L.Exp] (t : Semiterm L μ (n + 1)) :
+    (Operator.Exp.exp.operator ![t]).Positive ↔ t.Positive := by
+  simp [positive_operator_iff, Exp.term_eq, bv_func]
 
 section npow
 
@@ -457,6 +468,9 @@ protected class Add [Operator.Add L] [Add M] : Prop where
 protected class Mul [Operator.Mul L] [Mul M] : Prop where
   mul : ∀ a b : M, (@Operator.Mul.mul L _).val ![a, b] = a * b
 
+protected class Exp [Operator.Exp L] [Exp M] : Prop where
+  exp : ∀ a : M, (@Operator.Exp.exp L _).val ![a] = exp a
+
 protected class Eq [Operator.Eq L] : Prop where
   eq : ∀ a b : M, (@Operator.Eq.eq L _).val ![a, b] ↔ a = b
 
@@ -495,6 +509,11 @@ variable {L}
     Structure.func (L := L) Language.Mul.mul v = v 0 * v 1 := by
   simpa[val_func, ←Matrix.fun_eq_vec₂] using
     Structure.Mul.mul (L := L) (v 0) (v 1)
+
+@[simp] lemma exp_eq_of_lang [L.Exp] [Exp M] [Structure.Exp L M] {v : Fin 1 → M} :
+    Structure.func (L := L) Language.Exp.exp v = exp (v 0) := by
+  simpa[val_func, ←Matrix.constant_eq_singleton'] using
+    Structure.Exp.exp (L := L) (v 0)
 
 lemma le_iff_of_eq_of_lt [Operator.Eq L] [Operator.LT L] [LT M] [Structure.Eq L M] [Structure.LT L M] {a b : M} :
     (@Operator.LE.le L _).val ![a, b] ↔ a = b ∨ a < b := by

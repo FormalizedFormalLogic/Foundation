@@ -50,6 +50,11 @@ instance [Operator.Mul L] : Mul (Model L M) :=
 
 instance [Operator.Mul L] : Structure.Mul L (Model L M) := ⟨fun _ _ => rfl⟩
 
+instance [Operator.Exp L] : Exp (Model L M) :=
+  ⟨fun x => (@Operator.Exp.exp L _).val ![x]⟩
+
+instance [Operator.Exp L] : Structure.Exp L (Model L M) := ⟨fun _ => rfl⟩
+
 instance [Operator.Eq L] [Structure.Eq L M] : Structure.Eq L (Model L M) :=
   ⟨fun x y => by simp[operator_val_ofEquiv_iff]⟩
 
