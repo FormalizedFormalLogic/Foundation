@@ -467,6 +467,30 @@ theorem LogicK.Hilbert.completes : Completeness (𝐊 : AxiomSet β) (𝔽((𝐊
     apply truthlemma' (by simp) |>.mpr;
     assumption;
 
+abbrev LogicKT.CanonicalModel {β} := Normal.CanonicalModel (𝐊𝐓 : AxiomSet β)
+theorem LogicKT.Hilbert.completes : Completeness (𝐊𝐓 : AxiomSet β) (𝔽((𝐊𝐓 : AxiomSet β)) : FrameClass (MaximalConsistentTheory (𝐊𝐓 : AxiomSet β))) := by
+  apply completeness_def.mpr;
+  intro Γ hConsisΓ;
+  let ⟨Ω, hΩ⟩ := exists_maximal_consistent_theory hConsisΓ;
+  existsi CanonicalModel.frame;
+  constructor;
+  . apply FrameClassDefinability.mp; simp_all;
+  . existsi CanonicalModel.val, Ω;
+    apply truthlemma' (by simp) |>.mpr;
+    assumption;
+
+abbrev LogicKD.CanonicalModel {β} := Normal.CanonicalModel (𝐊𝐃 : AxiomSet β)
+theorem LogicKD.Hilbert.completes : Completeness (𝐊𝐃 : AxiomSet β) (𝔽((𝐊𝐃 : AxiomSet β)) : FrameClass (MaximalConsistentTheory (𝐊𝐃 : AxiomSet β))) := by
+  apply completeness_def.mpr;
+  intro Γ hConsisΓ;
+  let ⟨Ω, hΩ⟩ := exists_maximal_consistent_theory hConsisΓ;
+  existsi CanonicalModel.frame;
+  constructor;
+  . apply FrameClassDefinability.mp; simp_all;
+  . existsi CanonicalModel.val, Ω;
+    apply truthlemma' (by simp) |>.mpr;
+    assumption;
+
 abbrev LogicS4.CanonicalModel {β} := Normal.CanonicalModel (𝐒𝟒 : AxiomSet β)
 theorem LogicS4.Hilbert.completes : Completeness (𝐒𝟒 : AxiomSet β) (𝔽((𝐒𝟒 : AxiomSet β)) : FrameClass (MaximalConsistentTheory (𝐒𝟒 : AxiomSet β))) := by
   apply completeness_def.mpr;
@@ -481,6 +505,18 @@ theorem LogicS4.Hilbert.completes : Completeness (𝐒𝟒 : AxiomSet β) (𝔽(
 
 abbrev LogicS5.CanonicalModel {β} := Normal.CanonicalModel (𝐒𝟓 : AxiomSet β)
 theorem LogicS5.Hilbert.completes : Completeness (𝐒𝟓 : AxiomSet β) (𝔽((𝐒𝟓 : AxiomSet β)) : FrameClass (MaximalConsistentTheory (𝐒𝟓 : AxiomSet β))) := by
+  apply completeness_def.mpr;
+  intro Γ hConsisΓ;
+  let ⟨Ω, hΩ⟩ := exists_maximal_consistent_theory hConsisΓ;
+  existsi CanonicalModel.frame;
+  constructor;
+  . apply FrameClassDefinability.mp; simp_all;
+  . existsi CanonicalModel.val, Ω;
+    apply truthlemma' (by simp) |>.mpr;
+    assumption;
+
+abbrev LogicKT4B.CanonicalModel {β} := Normal.CanonicalModel (𝐊𝐓𝟒𝐁 : AxiomSet β)
+theorem LogicKT4B.Hilbert.completes : @Completeness (MaximalConsistentTheory (𝐊𝐓𝟒𝐁 : AxiomSet β)) β 𝐊𝐓𝟒𝐁 (𝔽((𝐊𝐓𝟒𝐁 : AxiomSet β)) : FrameClass (MaximalConsistentTheory (𝐊𝐓𝟒𝐁 : AxiomSet β))) := by
   apply completeness_def.mpr;
   intro Γ hConsisΓ;
   let ⟨Ω, hΩ⟩ := exists_maximal_consistent_theory hConsisΓ;
