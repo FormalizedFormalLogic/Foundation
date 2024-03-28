@@ -558,6 +558,9 @@ lemma lMap_models_lMap {L₁ L₂ : Language.{u}} {Φ : L₁ →ᵥ L₂}  {T : 
 lemma ModelsTheory.of_ss [Nonempty M] [Structure L M] {T U : Theory L} (h : M ⊧ₘ* U) (ss : T ⊆ U) : M ⊧ₘ* T :=
   fun _ hσ => h (ss hσ)
 
+@[simp] lemma ModelsTheory.add_iff [Nonempty M] [Structure L M] {T U : Theory L} :
+    M ⊧ₘ* T + U ↔ M ⊧ₘ* T ∧ M ⊧ₘ* U := by simp [Theory.add_def]
+
 namespace Theory
 
 section

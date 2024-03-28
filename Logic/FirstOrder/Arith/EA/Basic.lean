@@ -24,21 +24,19 @@ lemma consequence_of_exp (σ : Sentence L)
 
 namespace Theory
 
-variable (L)
-
-notation "𝐈open(exp)" => iOpen ℒₒᵣ(exp)
-
-notation "𝐈𝚫₀(exp)" => iSigma ℒₒᵣ(exp) 0
-
-inductive Exponential : Theory L
+inductive Exponential : Theory ℒₒᵣ(exp)
   | zero : Exponential “exp 0 = 1”
   | succ : Exponential “∀ exp (#0 + 1) = 2 * exp #0”
 
-notation "𝐄𝐗𝐏" => Exponential ℒₒᵣ(exp)
+notation "𝐄𝐗𝐏" => Exponential
 
-abbrev ElementaryArithmetic : Theory L := Semiformula.lMap Language.oringEmb '' 𝐏𝐀⁻ + Exponential L + iSigma L 0
+abbrev elementaryArithmetic : Theory ℒₒᵣ(exp) := Semiformula.lMap Language.oringEmb '' 𝐏𝐀⁻ + Exponential + indScheme ℒₒᵣ(exp) (Arith.Hierarchy Σ 0)
 
-notation "𝐄𝐀" => ElementaryArithmetic ℒₒᵣ(exp)
+notation "𝐄𝐀" => elementaryArithmetic
+
+lemma iSigma₀_subset_EA : (𝐈𝚺₀ : Theory ℒₒᵣ(exp)) ⊆ 𝐄𝐀 := by
+  simp only [Theory.iSigma, Theory.indH, Theory.add_def, Set.image_union, Set.union_assoc]
+  exact Set.union_subset_union_right _ (Set.subset_union_of_subset_right Theory.coe_indH_subset_indH _)
 
 end Theory
 
@@ -112,7 +110,7 @@ lemma modelsSuccInd_exp (p : Semiformula ℒₒᵣ(exp) ℕ 1) : ℕ ⊧ₘ (∀
   · exact hsucc x ih
 
 lemma modelsTheoryElementaryArithmetic : ℕ ⊧ₘ* 𝐄𝐀 := by
-  simp [Theory.ElementaryArithmetic, Theory.add_def, Theory.iSigma, Theory.indScheme]
+  simp [Theory.elementaryArithmetic, Theory.indScheme]
   exact ⟨⟨by intro σ hσ; simpa [models_iff] using modelsTheoryPeanoMinus hσ, modelsTheoryExponential⟩,
     by rintro σ p _ rfl; exact modelsSuccInd_exp p⟩
 
@@ -130,23 +128,20 @@ namespace Model
 
 instance : 𝐏𝐀⁻.Mod M :=
   haveI : Theory.Mod M (Semiformula.lMap Language.oringEmb '' 𝐏𝐀⁻ : Theory ℒₒᵣ(exp)) :=
-    Theory.Mod.of_add_left_left M (Semiformula.lMap Language.oringEmb '' 𝐏𝐀⁻) 𝐄𝐗𝐏 𝐈𝚫₀(exp)
+    Theory.Mod.of_add_left_left M (Semiformula.lMap Language.oringEmb '' 𝐏𝐀⁻) 𝐄𝐗𝐏 (Theory.indScheme ℒₒᵣ(exp) (Arith.Hierarchy Σ 0))
   ⟨by intro σ hσ;
       simpa [models_iff] using
         @Theory.Mod.models ℒₒᵣ(exp) M _ _ _ this _ (Set.mem_image_of_mem (Semiformula.lMap Language.oringEmb) hσ)⟩
 
-instance : 𝐄𝐗𝐏.Mod M := Theory.Mod.of_add_left_right M (Semiformula.lMap Language.oringEmb '' 𝐏𝐀⁻) 𝐄𝐗𝐏 𝐈𝚫₀(exp)
+instance : 𝐄𝐗𝐏.Mod M := Theory.Mod.of_add_left_right M (Semiformula.lMap Language.oringEmb '' 𝐏𝐀⁻) 𝐄𝐗𝐏 (Theory.indScheme ℒₒᵣ(exp) (Arith.Hierarchy Σ 0))
 
-instance : 𝐈𝚫₀(exp).Mod M := Theory.Mod.of_add_right M (Semiformula.lMap Language.oringEmb '' 𝐏𝐀⁻ + 𝐄𝐗𝐏) 𝐈𝚫₀(exp)
-
-lemma iSigma₀_subset_IDelta₀Exp : (𝐈𝚺₀ : Theory ℒₒᵣ(exp)) ⊆ 𝐈𝚫₀(exp) :=
-  Theory.coe_iHierarchy_subset_iHierarchy
+instance : (Theory.indScheme ℒₒᵣ(exp) (Arith.Hierarchy Σ 0)).Mod M :=
+  Theory.Mod.of_add_right M (Semiformula.lMap Language.oringEmb '' 𝐏𝐀⁻ + 𝐄𝐗𝐏) _
 
 instance : 𝐈𝚺₀.Mod M := ⟨by
   intro σ hσ
-  have : (𝐈𝚺₀ : Theory ℒₒᵣ(exp)) ⊆ 𝐈𝚫₀(exp) := Theory.coe_iHierarchy_subset_iHierarchy
   have : M ⊧ₘ (σ : Sentence ℒₒᵣ(exp)) :=
-    Theory.Mod.models M (show (σ : Sentence ℒₒᵣ(exp)) ∈ 𝐈𝚫₀(exp) from this (Set.mem_image_of_mem _ hσ))
+    Theory.Mod.models M (show (σ : Sentence ℒₒᵣ(exp)) ∈ 𝐄𝐀 from Theory.iSigma₀_subset_EA (Set.mem_image_of_mem _ hσ))
   simpa [models_iff] using this⟩
 
 end Model

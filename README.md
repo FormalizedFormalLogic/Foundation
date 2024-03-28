@@ -121,8 +121,6 @@ The key results are summarised in `Logic/Summary.lean`.
 
 ## First-Order Logic
 
-$\mathbf{PA^-}$ is not to be included in $\mathbf{I\Sigma}_n$ or $\mathbf{PA}$ for simplicity in this formalization.
-
 ### Definition
 |                                     |                                                | Definition                 | Notation |
 | :----:                              | ----                                           | ----                       | :----:   |
@@ -132,7 +130,8 @@ $\mathbf{PA^-}$ is not to be included in $\mathbf{I\Sigma}_n$ or $\mathbf{PA}$ f
 | $\mathbf{PA^-}$                     | Finitely axiomatized fragment of $\mathbf{PA}$ | [LO.FirstOrder.Arith.Theory.peanoMinus](https://iehality.github.io/lean4-logic/Logic/FirstOrder/Arith/Theory.html#LO.FirstOrder.Arith.Theory.peanoMinus) | `𝐏𝐀⁻` |
 | $\mathbf{I}_\mathrm{open}$          | Induction of open formula                      | [LO.FirstOrder.Arith.Theory.iOpen](https://iehality.github.io/lean4-logic/Logic/FirstOrder/Arith/Theory.html#LO.FirstOrder.Arith.Theory.iOpen) | `𝐈open` |
 | $\mathbf{I\Sigma}_n$                | Induction of $\Sigma_n$ formula                | [LO.FirstOrder.Arith.Theory.iSigma](https://iehality.github.io/lean4-logic/Logic/FirstOrder/Arith/Theory.html#LO.FirstOrder.Arith.Theory.iSigma) | `𝐈𝚺` |
-| $\mathbf{PA}$                       | peano arithmetic                               | [LO.FirstOrder.Arith.Theory.peano](https://iehality.github.io/lean4-logic/Logic/FirstOrder/Arith/Theory.html#LO.FirstOrder.Arith.Theory.peano) | `𝐏𝐀` |
+| $\mathbf{PA}$                       | Peano arithmetic                               | [LO.FirstOrder.Arith.Theory.peano](https://iehality.github.io/lean4-logic/Logic/FirstOrder/Arith/Theory.html#LO.FirstOrder.Arith.Theory.peano) | `𝐏𝐀` |
+| $\mathbf{EA}$                       | elementary arithmetic                               | [LO.FirstOrder.Arith.Theory.elementaryArithmetic](https://iehality.github.io/lean4-logic/Logic/FirstOrder/Arith/EA/Basic.html#LO.FirstOrder.Arith.Theory.elementaryArithmetic) | `𝐄𝐀` |
 
 ### Theorem
 
@@ -264,7 +263,7 @@ In this formalization, _(Modal) Logic_ means set of axioms.
 - J. Han, F. van Doorn, A formalization of forcing and the unprovability of the continuum hypothesis
 - W. Pohlers, Proof Theory: The First Step into Impredicativity
 - P. Hájek, P. Pudlák, Metamathematics of First-Order Arithmetic
-- R. Kaye, Models of peano arithmetic
+- R. Kaye, Models of Peano arithmetic
 - 田中 一之, ゲーデルと20世紀の論理学
 - 菊池 誠 (編者), 『数学における証明と真理 ─ 様相論理と数学基礎論』
 - P. Blackburn, M. de Rijke, Y. Venema, "Modal Logic"

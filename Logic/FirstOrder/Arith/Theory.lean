@@ -41,44 +41,43 @@ inductive peanoMinus : Theory ℒₒᵣ
 
 notation "𝐏𝐀⁻" => peanoMinus
 
-variable {L}
-
 def indScheme (Γ : Semiformula L ℕ 1 → Prop) : Theory L :=
   { q | ∃ p : Semiformula L ℕ 1, Γ p ∧ q = ∀ᶠ* succInd p }
 
-variable (L)
 
-abbrev iOpen : Theory L := indScheme Semiformula.Open
+abbrev iOpen : Theory ℒₒᵣ := 𝐏𝐀⁻ + indScheme ℒₒᵣ Semiformula.Open
 
-notation "𝐈open" => iOpen ℒₒᵣ
+notation "𝐈open" => iOpen
 
-abbrev iHierarchy (Γ : Polarity) (k : ℕ) : Theory L := indScheme (Arith.Hierarchy Γ k)
+abbrev indH (Γ : Polarity) (k : ℕ) : Theory ℒₒᵣ := 𝐏𝐀⁻ + indScheme ℒₒᵣ (Arith.Hierarchy Γ k)
 
-notation "𝐈𝐍𝐃" => iHierarchy ℒₒᵣ
+prefix:max "𝐈𝐍𝐃" => indH
 
-abbrev iSigma (k : ℕ) : Theory L := indScheme (Arith.Hierarchy Σ k)
+abbrev iSigma (k : ℕ) : Theory ℒₒᵣ := 𝐈𝐍𝐃Σ k
 
-prefix:max "𝐈𝚺" => iSigma ℒₒᵣ
+prefix:max "𝐈𝚺" => iSigma
 
-notation "𝐈𝚺₀" => iSigma ℒₒᵣ 0
+notation "𝐈𝚺₀" => iSigma 0
 
-abbrev iPi (k : ℕ) : Theory L := indScheme (Arith.Hierarchy Π k)
+abbrev iPi (k : ℕ) : Theory ℒₒᵣ := 𝐈𝐍𝐃Π k
 
-prefix:max "𝐈𝚷" => iPi ℒₒᵣ
+prefix:max "𝐈𝚷" => iPi
 
-notation "𝐈𝚷₀" => iPi ℒₒᵣ 0
+notation "𝐈𝚷₀" => iPi 0
 
-abbrev peano : Theory L := indScheme Set.univ
+abbrev peano : Theory ℒₒᵣ := 𝐏𝐀⁻ + indScheme ℒₒᵣ Set.univ
 
-notation "𝐏𝐀" => peano ℒₒᵣ
+notation "𝐏𝐀" => peano
 
 variable {L}
 
-lemma coe_iHierarchy_subset_iHierarchy : (𝐈𝐍𝐃 Γ ν : Theory L) ⊆ iHierarchy L Γ ν := by
-  simp [Theory.iHierarchy, Theory.indScheme]
+lemma coe_indH_subset_indH : (indScheme ℒₒᵣ (Arith.Hierarchy Γ ν) : Theory L) ⊆ indScheme L (Arith.Hierarchy Γ ν) := by
+  simp [Theory.indH, Theory.indScheme]
   rintro _ p Hp rfl
   exact ⟨Semiformula.lMap (Language.oringEmb : ℒₒᵣ →ᵥ L) p, Hierarchy.oringEmb Hp,
     by simp [Formula.lMap_fvUnivClosure, succInd, Semiformula.lMap_substs]⟩
+
+instance : 𝐏𝐀⁻ ≾ 𝐈𝐍𝐃Γ ν := System.Subtheory.ofSubset (by simp [indH, Theory.add_def])
 
 end Theory
 

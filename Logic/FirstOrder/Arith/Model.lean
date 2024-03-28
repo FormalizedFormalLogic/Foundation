@@ -40,6 +40,8 @@ end
 
 section model
 
+section
+
 variable (M : Type*) [Zero M] [One M] [Add M] [Mul M] [LT M]
 
 instance standardModel : Structure ℒₒᵣ M where
@@ -114,8 +116,11 @@ variable {M} {e : Fin n → M} {ε : ξ → M}
     Semiformula.Eval! M e ε (.lMap Language.oringEmb p : Semiformula L ξ n) ↔ Semiformula.Eval! M e ε p := by
   simp [Semiformula.eval_lMap, standardModel_lMap_oringEmb_eq_standardModel]
 
+end
+
 section
 
+variable {L : Language} [L.ORing]
 variable {M : Type} [Zero M] [One M] [Add M] [Mul M] [LT M] [s : Structure L M]
   [Structure.Zero L M] [Structure.One L M] [Structure.Add L M] [Structure.Mul L M] [Structure.Eq L M] [Structure.LT L M]
 
@@ -130,6 +135,17 @@ variable {M : Type} [Zero M] [One M] [Add M] [Mul M] [LT M] [s : Structure L M]
 
 lemma mod_lMap_oringEmb (T : Theory ℒₒᵣ) :
     (T.lMap oringEmb : Theory L).Mod M ↔ T.Mod M := by simp [Theory.Mod.iff]
+
+instance [(𝐈open).Mod M] : 𝐏𝐀⁻.Mod M := Theory.Mod.of_add_left M 𝐏𝐀⁻ (Theory.indScheme _ Semiformula.Open)
+
+instance [(𝐈open).Mod M] : (Theory.indScheme (L := ℒₒᵣ) Semiformula.Open).Mod M := Theory.Mod.of_add_right M 𝐏𝐀⁻ (Theory.indScheme _ Semiformula.Open)
+
+def mod_peanoMinus_of_mod_indH [(𝐈𝐍𝐃 Γ ν).Mod M] : 𝐏𝐀⁻.Mod M := Theory.Mod.of_add_left M 𝐏𝐀⁻ (Theory.indScheme _ (Arith.Hierarchy Γ ν))
+
+def mod_indScheme_of_mod_indH [(𝐈𝐍𝐃 Γ ν).Mod M] : (Theory.indScheme (L := ℒₒᵣ) (Arith.Hierarchy Γ ν)).Mod M :=
+  Theory.Mod.of_add_right M 𝐏𝐀⁻ (Theory.indScheme _ (Arith.Hierarchy Γ ν))
+
+instance [𝐏𝐀.Mod M] : 𝐏𝐀⁻.Mod M := Theory.Mod.of_add_left M 𝐏𝐀⁻ (Theory.indScheme _ Set.univ)
 
 end
 
@@ -160,12 +176,12 @@ lemma modelsSuccInd (p : Semiformula ℒₒᵣ ℕ 1) : ℕ ⊧ₘ (∀ᶠ* succ
   · exact hzero
   · exact hsucc x ih
 
-lemma modelsPeano : ℕ ⊧ₘ* 𝐏𝐀 ∪ 𝐏𝐀⁻ ∪ 𝐄𝐪 := by
+lemma modelsPeano : ℕ ⊧ₘ* 𝐏𝐀 := by
   simp [Theory.peano, Theory.indScheme, modelsTheoryPeanoMinus]; rintro _ p _ rfl; simp [modelsSuccInd]
 
 end Standard
 
-theorem peano_consistent : System.Consistent (𝐏𝐀 ∪ 𝐏𝐀⁻ ∪ 𝐄𝐪) :=
+theorem peano_consistent : System.Consistent 𝐏𝐀 :=
   Sound.consistent_of_model Standard.modelsPeano
 
 section
