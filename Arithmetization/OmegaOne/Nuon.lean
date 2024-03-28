@@ -672,6 +672,8 @@ def nuonDef : Δ₀Sentence 2 :=
   ⟨“∃[#0 < #2 + 1](!lengthDef [#0, #2] ∧
     !Nuon.nuonAuxDef [#2, #0, #1])”, by simp⟩
 
+-- #eval nuonDef.val
+
 lemma nuon_defined : Δ₀-Function₁ (nuon : M → M) via nuonDef := by
   intro v; simp [Nuon.nuon_eq_iff, Nuon, nuonDef,
     length_defined.pval, Nuon.nuonAux_defined.pval, lt_succ_iff_le]

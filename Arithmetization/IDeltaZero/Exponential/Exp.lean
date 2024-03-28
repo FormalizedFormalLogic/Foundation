@@ -712,6 +712,8 @@ lemma exponential_graph {a b : M} : a = exp b ↔ Exp b a := Classical.choose!_e
 
 def expdef : Δ₀Sentence 2 := ⟨“!Exp.def [#1, #0]”, by simp⟩
 
+-- #eval expdef.val
+
 lemma exp_defined : Δ₀-Function₁ (exponential : M → M) via expdef := by
   intro v; simp [expdef, exponential_graph, Exp.defined.pval]
 
