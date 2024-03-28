@@ -1,28 +1,28 @@
-import Arithmetization.ISigmaZero.Exponential.Log
+import Arithmetization.IDeltaZero.Exponential.Log
 
 namespace LO.FirstOrder
 
 namespace Arith
 
 /-- ∀ x, ∃ y, 2^{|x|^2} = y-/
-def omega₁ : Sentence ℒₒᵣ := “∀ ∃ ∃[#0 < #2 + 1] (!Model.lengthDef [#0, #2] ∧ !Model.Exp.def [#0*#0, #1])”
+def omegaSentence₁ : Sentence ℒₒᵣ := “∀ ∃ ∃[#0 < #2 + 1] (!Model.lengthDef [#0, #2] ∧ !Model.Exp.def [#0*#0, #1])”
 
-inductive Theory.Omega₁ : Theory ℒₒᵣ where
-  | omega : Theory.Omega₁ omega₁
+inductive Theory.omega₁ : Theory ℒₒᵣ where
+  | omega : Theory.omega₁ omegaSentence₁
 
-notation "𝛀₁" => Theory.Omega₁
+notation "𝛀₁" => Theory.omega₁
 
-@[simp] lemma Omega₁.mem_iff {σ} : σ ∈ 𝛀₁ ↔ σ = omega₁ :=
-  ⟨by rintro ⟨⟩; rfl, by rintro rfl; exact Theory.Omega₁.omega⟩
+@[simp] lemma omega₁.mem_iff {σ} : σ ∈ 𝛀₁ ↔ σ = omegaSentence₁ :=
+  ⟨by rintro ⟨⟩; rfl, by rintro rfl; exact Theory.omega₁.omega⟩
 
 noncomputable section
 
 namespace Model
 
-variable {M : Type} [Zero M] [One M] [Add M] [Mul M] [LT M] [𝐏𝐀⁻.Mod M]
+variable {M : Type} [Zero M] [One M] [Add M] [Mul M] [LT M]
 
-lemma models_Omega₁_iff [𝐈𝚺₀.Mod M] : M ⊧ₘ omega₁ ↔ ∀ x : M, ∃ y, Exp (‖x‖^2) y := by
-  simp [models_def, omega₁, length_defined.pval, Exp.defined.pval, sq, ←le_iff_lt_succ]
+lemma models_Omega₁_iff [𝐈𝚫₀.Mod M] : M ⊧ₘ omegaSentence₁ ↔ ∀ x : M, ∃ y, Exp (‖x‖^2) y := by
+  simp [models_def, omegaSentence₁, length_defined.pval, Exp.defined.pval, sq, ←le_iff_lt_succ]
   constructor
   · intro h x
     rcases h x with ⟨y, _, _, rfl, h⟩; exact ⟨y, h⟩
@@ -30,14 +30,14 @@ lemma models_Omega₁_iff [𝐈𝚺₀.Mod M] : M ⊧ₘ omega₁ ↔ ∀ x : M,
     rcases h x with ⟨y, h⟩
     exact ⟨y, ‖x‖, by simp, rfl, h⟩
 
-lemma sigma₁_omega₁ [𝐈𝚺₁.Mod M] : M ⊧ₘ omega₁ := models_Omega₁_iff.mpr (fun x ↦ Exp.range_exists (‖x‖^2))
+lemma sigma₁_omega₁ [𝐈𝚺₁.Mod M] : M ⊧ₘ omegaSentence₁ := models_Omega₁_iff.mpr (fun x ↦ Exp.range_exists (‖x‖^2))
 
 instance [𝐈𝚺₁.Mod M] : 𝛀₁.Mod M := ⟨by intro _; simp; rintro rfl; exact sigma₁_omega₁⟩
 
-variable [𝐈𝚺₀.Mod M] [𝛀₁.Mod M]
+variable [𝐈𝚫₀.Mod M] [𝛀₁.Mod M]
 
 lemma exists_exp_sq_length (x : M) : ∃ y, Exp (‖x‖^2) y :=
-  models_Omega₁_iff.mp (Theory.Mod.models M Theory.Omega₁.omega) x
+  models_Omega₁_iff.mp (Theory.Mod.models M Theory.omega₁.omega) x
 
 lemma exists_unique_exp_sq_length (x : M) : ∃! y, Exp (‖x‖^2) y := by
   rcases exists_exp_sq_length x with ⟨y, h⟩

@@ -6,13 +6,13 @@ namespace Arith
 
 noncomputable section
 
-variable {M : Type} [Zero M] [One M] [Add M] [Mul M] [LT M] [𝐏𝐀⁻.Mod M]
+variable {M : Type} [Zero M] [One M] [Add M] [Mul M] [LT M]
 
 namespace Model
 
 section ISigma₀
 
-variable [𝐈𝚺₀.Mod M]
+variable [𝐈𝚫₀.Mod M]
 
 def SPPow2 (m : M) : Prop := ¬LenBit 1 m ∧ LenBit 2 m ∧ ∀ i ≤ m, Pow2 i → 2 < i → (LenBit i m ↔ (√i)^2 = i ∧ LenBit (√i) m)
 

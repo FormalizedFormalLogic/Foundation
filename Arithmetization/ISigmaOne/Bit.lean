@@ -1,5 +1,5 @@
-import Arithmetization.ISigmaZero.Exponential.Exp
-import Arithmetization.ISigmaZero.Exponential.Log
+import Arithmetization.IDeltaZero.Exponential.Exp
+import Arithmetization.IDeltaZero.Exponential.Log
 
 namespace LO.FirstOrder
 
@@ -7,7 +7,7 @@ namespace Arith
 
 noncomputable section
 
-variable {M : Type} [Zero M] [One M] [Add M] [Mul M] [LT M] [𝐏𝐀⁻.Mod M]
+variable {M : Type} [Zero M] [One M] [Add M] [Mul M] [LT M]
 
 namespace Model
 

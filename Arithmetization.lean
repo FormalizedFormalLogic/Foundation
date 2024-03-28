@@ -9,10 +9,10 @@ import Arithmetization.Basic.PeanoMinus
 import Arithmetization.Basic.Ind
 import Arithmetization.Basic.IOpen
 
-import Arithmetization.ISigmaZero.Exponential.Pow2
-import Arithmetization.ISigmaZero.Exponential.PPow2
-import Arithmetization.ISigmaZero.Exponential.Exp
-import Arithmetization.ISigmaZero.Exponential.Log
+import Arithmetization.IDeltaZero.Exponential.Pow2
+import Arithmetization.IDeltaZero.Exponential.PPow2
+import Arithmetization.IDeltaZero.Exponential.Exp
+import Arithmetization.IDeltaZero.Exponential.Log
 
 import Arithmetization.OmegaOne.Basic
 import Arithmetization.OmegaOne.Nuon
