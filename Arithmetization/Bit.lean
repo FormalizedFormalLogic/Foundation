@@ -19,7 +19,7 @@ def Bit (i a : M) : Prop := LenBit (exp i) a
 
 instance : Membership M M := ⟨Bit⟩
 
-def bitdef : Δ₀Sentence 2 := ⟨“∃[#0 < #2 + 1] (!expdef [#0, #1] ∧ !lenbitdef [#0, #2])”, by simp⟩
+def bitdef : Δ₀Sentence 2 := ⟨“∃[#0 < #2 + 1] (!expdef [#0, #1] ∧ !lenbitDef [#0, #2])”, by simp⟩
 
 lemma bit_defined : Δ₀-Relation ((· ∈ ·) : M → M → Prop) via bitdef := by
   intro v; simp [bitdef, lenbit_defined.pval, exp_defined.pval, ←le_iff_lt_succ]

@@ -16,15 +16,15 @@ variable [𝐈open.Mod M]
 
 def Pow2 (a : M) : Prop := 0 < a ∧ ∀ r ≤ a, 1 < r → r ∣ a → 2 ∣ r
 
-def pow2def : Δ₀Sentence 1 :=
+def pow2Def : Δ₀Sentence 1 :=
   ⟨“0 < #0 ∧ ∀[#0 < #1 + 1] (1 < #0 →  !dvdDef [#0, #1] → !dvdDef [2, #0])”, by simp [Hierarchy.pi_zero_iff_sigma_zero]⟩
 
-lemma pow2_defined : Δ₀-Predicate (Pow2 : M → Prop) via pow2def := by
+lemma pow2_defined : Δ₀-Predicate (Pow2 : M → Prop) via pow2Def := by
   intro v
   simp [Semiformula.eval_substs, Matrix.comp_vecCons', Matrix.vecHead, Matrix.constant_eq_singleton,
-    Pow2, pow2def, le_iff_lt_succ, dvd_defined.pval]
+    Pow2, pow2Def, le_iff_lt_succ, dvd_defined.pval]
 
-instance {b s} : DefinablePred b s (Pow2 : M → Prop) := defined_to_with_param₀ _ pow2_defined
+instance pow2_definable (Γ ν) : DefinablePred ℒₒᵣ Γ ν (Pow2 : M → Prop) := defined_to_with_param₀ _ pow2_defined
 
 lemma Pow2.pos {a : M} (h : Pow2 a) : 0 < a := h.1
 
@@ -110,16 +110,16 @@ section LenBit
 /-- $\mathrm{LenBit} (2^i, a) \iff \text{$i$th-bit of $a$ is $1$}$. -/
 def LenBit (i a : M) : Prop := ¬2 ∣ (a / i)
 
-def lenbitdef : Δ₀Sentence 2 :=
-  ⟨“∃[#0 < #2 + 1] (!divdef [#0, #2, #1] ∧ ¬!dvdDef [2, #0])”, by simp⟩
+def lenbitDef : Δ₀Sentence 2 :=
+  ⟨“∃[#0 < #2 + 1] (!divDef [#0, #2, #1] ∧ ¬!dvdDef [2, #0])”, by simp⟩
 
-lemma lenbit_defined : Δ₀-Relation (LenBit : M → M → Prop) via lenbitdef := by
-  intro v; simp[sqrt_graph, lenbitdef, Matrix.vecHead, Matrix.vecTail, div_defined.pval, dvd_defined.pval, LenBit, ←le_iff_lt_succ]
+lemma lenbit_defined : Δ₀-Relation (LenBit : M → M → Prop) via lenbitDef := by
+  intro v; simp[sqrt_graph, lenbitDef, Matrix.vecHead, Matrix.vecTail, div_defined.pval, dvd_defined.pval, LenBit, ←le_iff_lt_succ]
   constructor
   · intro h; exact ⟨v 1 / v 0, by simp, rfl, h⟩
   · rintro ⟨z, hz, rfl, h⟩; exact h
 
-instance {b s} : DefinableRel b s (LenBit : M → M → Prop) := defined_to_with_param₀ _ lenbit_defined
+instance lenbit_definable (Γ ν) : DefinableRel ℒₒᵣ Γ ν (LenBit : M → M → Prop) := defined_to_with_param₀ _ lenbit_defined
 
 lemma LenBit.le {i a : M} (h : LenBit i a) : i ≤ a := by
   by_contra A; simp [LenBit, show a < i from by simpa using A] at h
@@ -203,7 +203,7 @@ lemma mul {a b : M} (ha : Pow2 a) (hb : Pow2 b) : Pow2 (a * b) := by
   suffices ∀ b : M, ∀ a ≤ b, Pow2 a → Pow2 b → Pow2 (a * b) by
     exact this b a hab ha hb
   intro b
-  induction b using hierarchy_order_induction_sigma₀
+  induction b using hierarchy_order_induction_oRing_sigma₀
   · definability
   case ind IH a b IH =>
     intro a hab ha hb
@@ -233,7 +233,7 @@ lemma sq {a : M} : Pow2 a → Pow2 (a^2) := by
 lemma dvd_of_le {a b : M} (ha : Pow2 a) (hb : Pow2 b) : a ≤ b → a ∣ b := by
   suffices  ∀ b : M, ∀ a ≤ b, Pow2 a → Pow2 b → a ∣ b by
     intro hab; exact this b a hab ha hb
-  intro b; induction b using hierarchy_order_induction_sigma₀
+  intro b; induction b using hierarchy_order_induction_oRing_sigma₀
   · definability
   case ind b IH =>
     intro a hab ha hb
@@ -281,7 +281,7 @@ lemma sq_or_dsq {a : M} (pa : Pow2 a) : ∃ b, a = b^2 ∨ a = 2 * b^2 := by
   suffices ∃ b ≤ a, a = b^2 ∨ a = 2 * b^2 by
     rcases this with ⟨b, _, h⟩
     exact ⟨b, h⟩
-  induction a using hierarchy_order_induction_sigma₀
+  induction a using hierarchy_order_induction_oRing_sigma₀
   · definability
   case ind a IH =>
     rcases Pow2.elim'.mp pa with (rfl | ⟨ha, a, rfl, pa'⟩)

@@ -16,7 +16,7 @@ variable [𝐈𝚺₀.Mod M]
 
 lemma log_exists_unique_pos {y : M} (hy : 0 < y) : ∃! x, x < y ∧ ∃ y' ≤ y, Exp x y' ∧ y < 2 * y' := by
   have : ∃ x < y, ∃ y' ≤ y, Exp x y' ∧ y < 2 * y' := by
-    induction y using hierarchy_polynomial_induction_sigma₀
+    induction y using hierarchy_polynomial_induction_oRing_sigma₀
     · definability
     case zero => simp at hy
     case even y _ IH =>
@@ -67,14 +67,14 @@ lemma log_lt_self_of_pos {y : M} (pos : 0 < y) : log y < y :=
 
 lemma log_graph {x y : M} : x = log y ↔ (y = 0 → x = 0) ∧ (0 < y → x < y ∧ ∃ y' ≤ y, Exp x y' ∧ y < 2 * y') := Classical.choose!_eq_iff _
 
-def logdef : Δ₀Sentence 2 := ⟨“(#1 = 0 → #0 = 0) ∧ (0 < #1 → #0 < #1 ∧ ∃[#0 < #2 + 1] (!Exp.def [#1, #0] ∧ #2 < 2 * #0))”, by simp⟩
+def logDef : Δ₀Sentence 2 := ⟨“(#1 = 0 → #0 = 0) ∧ (0 < #1 → #0 < #1 ∧ ∃[#0 < #2 + 1] (!Exp.def [#1, #0] ∧ #2 < 2 * #0))”, by simp⟩
 
-lemma log_defined : Δ₀-Function₁ (log : M → M) via logdef := by
-  intro v; simp [logdef, log_graph, Exp.defined.pval, ←le_iff_lt_succ]
+lemma log_defined : Δ₀-Function₁ (log : M → M) via logDef := by
+  intro v; simp [logDef, log_graph, Exp.defined.pval, ←le_iff_lt_succ]
 
-instance {b s} : DefinableFunction₁ b s (log : M → M) := defined_to_with_param₀ _ log_defined
+instance log_definable (Γ ν) : DefinableFunction₁ ℒₒᵣ Γ ν (log : M → M) := defined_to_with_param₀ _ log_defined
 
-instance : PolyBounded₁ (log : M → M) := ⟨#0, λ _ ↦ by simp⟩
+instance : PolyBounded₁ ℒₒᵣ (log : M → M) := ⟨#0, λ _ ↦ by simp⟩
 
 lemma log_eq_of_pos {x y : M} (pos : 0 < y) {y'} (H : Exp x y') (hy' : y' ≤ y) (hy : y < 2 * y') : log y = x :=
   (log_exists_unique_pos pos).unique ⟨log_lt_self_of_pos pos, log_pos pos⟩ ⟨lt_of_lt_of_le H.dom_lt_range hy', y', hy', H, hy⟩
@@ -158,14 +158,14 @@ lemma length_graph {i a : M} : i = ‖a‖ ↔ (0 < a → ∃ k ≤ a, k = log a
     · rintro rfl; exact ⟨log a, by simp⟩
     · rintro ⟨_, _, rfl, rfl⟩; rfl
 
-def binarylengthdef : Δ₀Sentence 2 := ⟨“(0 < #1 → ∃[#0 < #2 + 1] (!logdef [#0, #2] ∧ #1 = #0 + 1)) ∧ (#1 = 0 → #0 = 0)”, by simp⟩
+def lengthDef : Δ₀Sentence 2 := ⟨“(0 < #1 → ∃[#0 < #2 + 1] (!logDef [#0, #2] ∧ #1 = #0 + 1)) ∧ (#1 = 0 → #0 = 0)”, by simp⟩
 
-lemma length_defined : Δ₀-Function₁ (‖·‖ : M → M) via binarylengthdef := by
-  intro v; simp [binarylengthdef, length_graph, log_defined.pval, ←le_iff_lt_succ]
+lemma length_defined : Δ₀-Function₁ (‖·‖ : M → M) via lengthDef := by
+  intro v; simp [lengthDef, length_graph, log_defined.pval, ←le_iff_lt_succ]
 
-instance {b s} : DefinableFunction₁ b s (‖·‖ : M → M) := defined_to_with_param₀ _ length_defined
+instance length_definable (Γ ν) : DefinableFunction₁ ℒₒᵣ Γ ν (‖·‖ : M → M) := defined_to_with_param₀ _ length_defined
 
-instance : PolyBounded₁ (‖·‖ : M → M) := ⟨#0, λ _ ↦ by simp⟩
+instance : PolyBounded₁ ℒₒᵣ (‖·‖ : M → M) := ⟨#0, λ _ ↦ by simp⟩
 
 @[simp] lemma length_one : ‖(1 : M)‖ = 1 := by simp [length_eq_binaryLength]
 
@@ -251,7 +251,7 @@ lemma lt_exp_length {a b : M} (h : Exp ‖a‖ b) : a < b := by
   exact lt_exp_log_self H
 
 lemma sq_len_le_three_mul (a : M) : ‖a‖ ^ 2 ≤ 3 * a := by
-  induction a using hierarchy_polynomial_induction_sigma₀
+  induction a using hierarchy_polynomial_induction_oRing_sigma₀
   · definability
   case zero => simp
   case even a pos IH =>
@@ -279,7 +279,7 @@ lemma brange_exists_unique (a : M) : ∀ x < ‖a‖, ∃! y, Exp x y := by
     intro x hx; rcases this x hx with ⟨_, _, H⟩
     exact ExistsUnique.intro _ H (fun y' H' ↦ H'.uniq H)
   intro x
-  induction x using hierarchy_induction_sigma₀
+  induction x using hierarchy_induction_oRing_sigma₀
   · definability
   case zero =>
     intro ha
@@ -329,14 +329,14 @@ lemma bexp_graph {y a x : M} : y = bexp a x ↔ ∃ l ≤ a, l = ‖a‖ ∧ (x 
     · exact (hlt lt).uniq (exp_bexp_of_lt lt)
     · rcases hle le; simp [bexp_eq_zero_of_le le]⟩
 
-def bexpdef : Δ₀Sentence 3 := ⟨“∃[#0 < #2 + 1] (!binarylengthdef [#0, #2] ∧ (#3 < #0 → !Exp.def [#3, #1]) ∧ (#0 ≤ #3 → #1 = 0))”, by simp⟩
+def bexpDef : Δ₀Sentence 3 := ⟨“∃[#0 < #2 + 1] (!lengthDef [#0, #2] ∧ (#3 < #0 → !Exp.def [#3, #1]) ∧ (#0 ≤ #3 → #1 = 0))”, by simp⟩
 
-lemma bexp_defined : Δ₀-Function₂ (bexp : M → M → M) via bexpdef := by
-  intro v; simp [bexpdef, bexp_graph, Exp.defined.pval, length_defined.pval, ←le_iff_lt_succ]
+lemma bexp_defined : Δ₀-Function₂ (bexp : M → M → M) via bexpDef := by
+  intro v; simp [bexpDef, bexp_graph, Exp.defined.pval, length_defined.pval, ←le_iff_lt_succ]
 
-instance {b s} : DefinableFunction₂ b s (bexp : M → M → M) := defined_to_with_param₀ _ bexp_defined
+instance bexp_definable (Γ ν) : DefinableFunction₂ ℒₒᵣ Γ ν (bexp : M → M → M) := defined_to_with_param₀ _ bexp_defined
 
-instance : PolyBounded₂ (bexp : M → M → M) := ⟨#0, λ _ ↦ by simp⟩
+instance : PolyBounded₂ ℒₒᵣ (bexp : M → M → M) := ⟨#0, λ _ ↦ by simp⟩
 
 lemma bexp_monotone_iff {a i j : M} (hi : i < ‖a‖) (hj : j < ‖a‖) : bexp a i < bexp a j ↔ i < j :=
   Iff.symm <| Exp.monotone_iff (by simp [hi]) (by simp [hj])
@@ -405,17 +405,17 @@ lemma fbit_eq_zero_iff {a i : M} : fbit a i = 0 ↔ ¬LenBit (bexp a i) a := by 
 
 lemma fbit_eq_zero_of_le {a i : M} (hi : ‖a‖ ≤ i) : fbit a i = 0 := by simp [fbit, bexp_eq_zero_of_le hi]
 
-def fbitdef : Δ₀Sentence 3 := ⟨“∃[#0 < #2 + 1] (!bexpdef [#0, #2, #3] ∧ ∃[#0 < #3 + 1] (!divdef [#0, #3, #1] ∧ !remdef [#2, #0, 2]))”, by simp⟩
+def fbitDef : Δ₀Sentence 3 := ⟨“∃[#0 < #2 + 1] (!bexpDef [#0, #2, #3] ∧ ∃[#0 < #3 + 1] (!divDef [#0, #3, #1] ∧ !remDef [#2, #0, 2]))”, by simp⟩
 
-lemma fbit_defined : Δ₀-Function₂ (fbit : M → M → M) via fbitdef := by
-  intro v; simp [fbitdef, bexp_defined.pval, div_defined.pval, rem_defined.pval, ←le_iff_lt_succ, fbit]
+lemma fbit_defined : Δ₀-Function₂ (fbit : M → M → M) via fbitDef := by
+  intro v; simp [fbitDef, bexp_defined.pval, div_defined.pval, rem_defined.pval, ←le_iff_lt_succ, fbit]
   constructor
   · intro h; exact ⟨bexp (v 1) (v 2), by simp, rfl, _, by simp, rfl, h⟩
   · rintro ⟨_, _, rfl, _, _, rfl, h⟩; exact h
 
-instance {b s} : DefinableFunction₂ b s (fbit : M → M → M) := defined_to_with_param₀ _ fbit_defined
+instance fbit_definable (Γ ν) : DefinableFunction₂ ℒₒᵣ Γ ν (fbit : M → M → M) := defined_to_with_param₀ _ fbit_defined
 
-instance : PolyBounded₂ (fbit : M → M → M) := ⟨ᵀ“1”, λ _ ↦ by simp⟩
+instance : PolyBounded₂ ℒₒᵣ (fbit : M → M → M) := ⟨ᵀ“1”, λ _ ↦ by simp⟩
 
 @[simp] lemma fbit_zero (i : M) : fbit 0 i = 0 := by simp [fbit]
 

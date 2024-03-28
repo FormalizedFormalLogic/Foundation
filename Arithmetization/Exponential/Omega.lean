@@ -5,7 +5,7 @@ namespace LO.FirstOrder
 namespace Arith
 
 /-- ∀ x, ∃ y, 2^{|x|^2} = y-/
-def omega₁ : Sentence ℒₒᵣ := “∀ ∃ ∃[#0 < #2 + 1] (!Model.binarylengthdef [#0, #2] ∧ !Model.Exp.def [#0*#0, #1])”
+def omega₁ : Sentence ℒₒᵣ := “∀ ∃ ∃[#0 < #2 + 1] (!Model.lengthDef [#0, #2] ∧ !Model.Exp.def [#0*#0, #1])”
 
 inductive Theory.Omega₁ : Theory ℒₒᵣ where
   | omega : Theory.Omega₁ omega₁
@@ -58,16 +58,16 @@ lemma exp_hash (a b : M) : Exp (‖a‖ * ‖b‖) (a # b) := Classical.choose!_
 
 lemma exp_hash_one (a : M) : Exp ‖a‖ (a # 1) := by simpa using exp_hash a 1
 
-def hashdef : Δ₀Sentence 3 :=
-  ⟨“∃[#0 < #2 + 1] ∃[#0 < #4 + 1] (!binarylengthdef [#1, #3] ∧ !binarylengthdef [#0, #4] ∧ !Exp.def [#1 * #0, #2])”, by simp⟩
+def hashDef : Δ₀Sentence 3 :=
+  ⟨“∃[#0 < #2 + 1] ∃[#0 < #4 + 1] (!lengthDef [#1, #3] ∧ !lengthDef [#0, #4] ∧ !Exp.def [#1 * #0, #2])”, by simp⟩
 
-lemma hash_defined : Δ₀-Function₂ (Hash.hash : M → M → M) via hashdef := by
-  intro v; simp[hashdef, length_defined.pval, Exp.defined.pval, ←le_iff_lt_succ]
+lemma hash_defined : Δ₀-Function₂ (Hash.hash : M → M → M) via hashDef := by
+  intro v; simp[hashDef, length_defined.pval, Exp.defined.pval, ←le_iff_lt_succ]
   constructor
   · intro h; exact ⟨‖v 1‖, by simp, ‖v 2‖, by simp, rfl, rfl, by rw [h]; exact exp_hash _ _⟩
   · rintro ⟨_, _, _, _, rfl, rfl, h⟩; exact h.uniq (exp_hash (v 1) (v 2))
 
-instance : DefinableFunction₂ b s (Hash.hash : M → M → M) := defined_to_with_param₀ _ hash_defined
+instance hash_definable (Γ ν) : DefinableFunction₂ ℒₒᵣ Γ ν (Hash.hash : M → M → M) := defined_to_with_param₀ _ hash_defined
 
 @[simp] lemma hash_pow2 (a b : M) : Pow2 (a # b) := (exp_hash a b).range_pow2
 
