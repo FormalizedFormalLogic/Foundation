@@ -1,5 +1,5 @@
-import Arithmetization.Exponential.Exp
-import Arithmetization.Exponential.Log
+import Arithmetization.ISigmaZero.Exponential.Exp
+import Arithmetization.ISigmaZero.Exponential.Log
 
 namespace LO.FirstOrder
 
@@ -19,15 +19,15 @@ def Bit (i a : M) : Prop := LenBit (exp i) a
 
 instance : Membership M M := ⟨Bit⟩
 
-def bitdef : Δ₀Sentence 2 := ⟨“∃[#0 < #2 + 1] (!expdef [#0, #1] ∧ !lenbitDef [#0, #2])”, by simp⟩
+def bitDef : Δ₀Sentence 2 := ⟨“∃[#0 < #2 + 1] (!expdef [#0, #1] ∧ !lenbitDef [#0, #2])”, by simp⟩
 
-lemma bit_defined : Δ₀-Relation ((· ∈ ·) : M → M → Prop) via bitdef := by
-  intro v; simp [bitdef, lenbit_defined.pval, exp_defined.pval, ←le_iff_lt_succ]
+lemma bit_defined : Δ₀-Relation ((· ∈ ·) : M → M → Prop) via bitDef := by
+  intro v; simp [bitDef, lenbit_defined.pval, exp_defined.pval, ←le_iff_lt_succ]
   constructor
   · intro h; exact ⟨exp (v 0), by simp [h.le], rfl, h⟩
   · rintro ⟨_, _, rfl, h⟩; exact h
 
-instance mem_definableRel (b s) : DefinableRel b s ((· ∈ ·) : M → M → Prop) := defined_to_with_param₀ _ bit_defined
+instance mem_definable (Γ ν) : DefinableRel ℒₒᵣ Γ ν ((· ∈ ·) : M → M → Prop) := defined_to_with_param₀ _ bit_defined
 
 open Classical in
 noncomputable def bitInsert (i a : M) : M := if i ∈ a then a else a + exp i
@@ -45,29 +45,39 @@ lemma exp_le_of_mem {i a : M} (h : i ∈ a) : exp i ≤ a := LenBit.le h
 
 lemma lt_of_mem {i a : M} (h : i ∈ a) : i < a := lt_of_lt_of_le (lt_exp i) (exp_le_of_mem h)
 
+section
+
+variable {L : Language} [L.ORing] [Structure L M] [Structure.ORing L M] [Structure.Monotone L M]
+
+variable (Γ : Polarity) (ν : ℕ)
+
 @[definability] lemma Definable.ball_mem {P : (Fin k → M) → M → Prop} {f : (Fin k → M) → M}
-    (hf : Semipolynomial b s f) (h : Definable b s (fun w ↦ P (w ·.succ) (w 0))) :
-    Definable b s (fun v ↦ ∀ x ∈ f v, P v x) := by
+    (hf : Semipolynomial L Γ ν f) (h : Definable L Γ ν (fun w ↦ P (w ·.succ) (w 0))) :
+    Definable L Γ ν (fun v ↦ ∀ x ∈ f v, P v x) := by
   rcases hf.bounded with ⟨bf, hbf⟩
   rcases hf.definable with ⟨f_graph, hf_graph⟩
   rcases h with ⟨p, hp⟩
-  exact ⟨⟨“∃[#0 < !!(Rew.bShift bf) + 1] (!f_graph ∧ ∀[#0 < #1] (!bitdef .[#0, #1] → !((Rew.substs (#0 :> (#·.succ.succ))).hom p)))”, by simp⟩,
+  exact ⟨⟨“∃[#0 < !!(Rew.bShift bf) + 1] (!f_graph ∧ ∀[#0 < #1] (!bitDef .[#0, #1] → !((Rew.substs (#0 :> (#·.succ.succ))).hom p)))”,
+    by simp; apply Hierarchy.oringEmb; simp⟩,
     by  intro v; simp [hf_graph.eval, hp.eval, bit_defined.pval, ←le_iff_lt_succ]
         constructor
         · rintro h; exact ⟨f v, hbf v, rfl, fun x _ hx ↦ h x hx⟩
         · rintro ⟨_, _, rfl, h⟩ x hx; exact h x (lt_of_mem hx) hx⟩
 
 @[definability] lemma Definable.bex_mem {P : (Fin k → M) → M → Prop} {f : (Fin k → M) → M}
-    (hf : Semipolynomial b s f) (h : Definable b s (fun w ↦ P (w ·.succ) (w 0))) :
-    Definable b s (fun v ↦ ∃ x ∈ f v, P v x) := by
+    (hf : Semipolynomial L Γ ν f) (h : Definable L Γ ν (fun w ↦ P (w ·.succ) (w 0))) :
+    Definable L Γ ν (fun v ↦ ∃ x ∈ f v, P v x) := by
   rcases hf.bounded with ⟨bf, hbf⟩
   rcases hf.definable with ⟨f_graph, hf_graph⟩
   rcases h with ⟨p, hp⟩
-  exact ⟨⟨“∃[#0 < !!(Rew.bShift bf) + 1] (!f_graph ∧ ∃[#0 < #1] (!bitdef .[#0, #1] ∧ !((Rew.substs (#0 :> (#·.succ.succ))).hom p)))”, by simp⟩,
+  exact ⟨⟨“∃[#0 < !!(Rew.bShift bf) + 1] (!f_graph ∧ ∃[#0 < #1] (!bitDef .[#0, #1] ∧ !((Rew.substs (#0 :> (#·.succ.succ))).hom p)))”,
+    by simp; apply Hierarchy.oringEmb; simp⟩,
     by  intro v; simp [hf_graph.eval, hp.eval, bit_defined.pval, ←le_iff_lt_succ]
         constructor
         · rintro ⟨x, hx, h⟩; exact ⟨f v, hbf v, rfl, x, lt_of_mem hx, hx, h⟩
         · rintro ⟨_, _, rfl, x, _, hx, h⟩; exact ⟨x, hx, h⟩⟩
+
+end
 
 lemma mem_iff_mul_exp_add_exp_add {i a : M} : i ∈ a ↔ ∃ k, ∃ r < exp i, a = k * exp (i + 1) + exp i + r := by
   simp [mem_iff_bit, exp_succ]
@@ -121,13 +131,13 @@ lemma lt_exp_iff {a i : M} : a < exp i ↔ ∀ j ∈ a, j < i :=
 
 instance : HasSubset M := ⟨fun a b ↦ ∀ ⦃i⦄, i ∈ a → i ∈ b⟩
 
-def bitSubsetdef : Δ₀Sentence 2 := ⟨“∀[#0 < #1] (!bitdef [#0, #1] → !bitdef [#0, #2])”, by simp⟩
+def bitSubsetDef : Δ₀Sentence 2 := ⟨“∀[#0 < #1] (!bitDef [#0, #1] → !bitDef [#0, #2])”, by simp⟩
 
-lemma bitSubset_defined : Δ₀-Relation ((· ⊆ ·) : M → M → Prop) via bitSubsetdef := by
-  intro v; simp [bitSubsetdef, bit_defined.pval]
+lemma bitSubset_defined : Δ₀-Relation ((· ⊆ ·) : M → M → Prop) via bitSubsetDef := by
+  intro v; simp [bitSubsetDef, bit_defined.pval]
   exact ⟨by intro h x _ hx; exact h hx, by intro h x hx; exact h x (lt_of_mem hx) hx⟩
 
-instance {b s} : DefinableRel b s ((· ⊆ ·) : M → M → Prop) := defined_to_with_param₀ _ bitSubset_defined
+instance bitSubset_definable (Γ ν) : DefinableRel ℒₒᵣ Γ ν ((· ⊆ ·) : M → M → Prop) := defined_to_with_param₀ _ bitSubset_defined
 
 lemma mem_exp_add_succ_sub_one (i j : M) : i ∈ exp (i + j + 1) - 1 := by
   have : exp (i + j + 1) - 1 = (exp j - 1) * exp (i + 1) + exp i + (exp i - 1) := calc
@@ -173,7 +183,7 @@ lemma zero_mem_iff {a : M} : 0 ∉ a ↔ 2 ∣ a := by simp [mem_iff_bit, Bit, L
 @[simp] lemma zero_not_mem (a : M) : 0 ∉ 2 * a := by simp [mem_iff_bit, Bit, LenBit]
 
 lemma le_of_subset {a b : M} (h : a ⊆ b) : a ≤ b := by
-  induction b using hierarchy_polynomial_induction_pi₁ generalizing a
+  induction b using hierarchy_polynomial_induction_oRing_pi₁ generalizing a
   · definability
   case zero =>
     simp [eq_zero_of_subset_zero h]
@@ -193,7 +203,7 @@ end ISigma₁
 
 section
 
-variable {ν : ℕ} [Fact (1 ≤ ν)] [(𝐈H Σ ν).Mod M]
+variable {ν : ℕ} [Fact (1 ≤ ν)] [(𝐈𝐍𝐃Σ ν).Mod M]
 
 theorem finset_comprehension {P : M → Prop} (hP : Γ(ν)-Predicate P) (n : M) :
     haveI : 𝐈𝚺₁.Mod M := mod_iSigma_of_le (show 1 ≤ ν from Fact.out)
@@ -205,9 +215,9 @@ theorem finset_comprehension {P : M → Prop} (hP : Γ(ν)-Predicate P) (n : M) 
   have : (Γ.alt)(ν)-Predicate (fun s ↦ ∀ i < n, P i → i ∈ s) := by
     apply Definable.ball_lt; simp; apply Definable.imp
     definability
-    simp [mem_definableRel]
+    simp [mem_definable]
   have : ∃ t, (∀ i < n, P i → i ∈ t) ∧ ∀ t' < t, ∃ x, P x ∧ x < n ∧ x ∉ t' := by
-    simpa using least_number' this hs
+    simpa using hierarchy_least_number (L := ℒₒᵣ) Γ.alt ν this hs
   rcases this with ⟨t, ht, t_minimal⟩
   have t_le_s : t ≤ s := not_lt.mp (by
     intro lt

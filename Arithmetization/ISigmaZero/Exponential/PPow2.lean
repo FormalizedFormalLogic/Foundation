@@ -1,5 +1,4 @@
-import Arithmetization.Exponential.Pow2
-import Mathlib.Tactic.Linarith
+import Arithmetization.ISigmaZero.Exponential.Pow2
 
 namespace LO.FirstOrder
 

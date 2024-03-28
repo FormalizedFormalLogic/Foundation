@@ -1,4 +1,4 @@
-import Arithmetization.IOpen
+import Arithmetization.Basic.IOpen
 
 namespace LO.FirstOrder
 

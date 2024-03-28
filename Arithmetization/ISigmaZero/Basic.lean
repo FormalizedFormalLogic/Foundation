@@ -1,4 +1,4 @@
-import Arithmetization.IOpen
+import Arithmetization.Basic.IOpen
 import Mathlib.Tactic.Linarith
 
 namespace LO.FirstOrder

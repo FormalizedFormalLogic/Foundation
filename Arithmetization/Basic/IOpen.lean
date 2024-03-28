@@ -1,4 +1,4 @@
-import Arithmetization.Ind
+import Arithmetization.Basic.Ind
 import Mathlib.Logic.Nonempty
 
 namespace LO.FirstOrder

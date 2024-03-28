@@ -1,6 +1,5 @@
-import Arithmetization.Lemmata
+import Arithmetization.Vorspiel.Lemmata
 import Arithmetization.Definability.Init
---import Arithmetization.Definability.BoundedTheory
 import Arithmetization.Vorspiel.Graph
 import Aesop
 

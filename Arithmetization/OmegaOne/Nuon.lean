@@ -1,4 +1,4 @@
-import Arithmetization.Exponential.Omega
+import Arithmetization.OmegaOne.Basic
 
 namespace LO.FirstOrder
 

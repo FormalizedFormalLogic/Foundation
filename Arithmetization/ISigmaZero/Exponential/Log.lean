@@ -1,4 +1,4 @@
-import Arithmetization.Exponential.Exp
+import Arithmetization.ISigmaZero.Exponential.Exp
 
 namespace LO.FirstOrder
 

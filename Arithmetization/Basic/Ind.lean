@@ -1,4 +1,4 @@
-import Arithmetization.PeanoMinus
+import Arithmetization.Basic.PeanoMinus
 
 namespace LO.FirstOrder
 
