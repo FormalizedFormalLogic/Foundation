@@ -1,4 +1,4 @@
-import Logic.FirstOrder.Arith.PAminus
+import Logic.FirstOrder.Arith.PeanoMinus
 import Logic.Vorspiel.Arith
 import Logic.FirstOrder.Computability.Calculus
 

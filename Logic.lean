@@ -55,11 +55,15 @@ import Logic.FirstOrder.Completeness.Completeness
 
 import Logic.FirstOrder.Order.Le
 
+import Logic.FirstOrder.Arith.Basic
 import Logic.FirstOrder.Arith.Hierarchy
 import Logic.FirstOrder.Arith.StrictHierarchy
 import Logic.FirstOrder.Arith.Theory
 import Logic.FirstOrder.Arith.Model
+import Logic.FirstOrder.Arith.PeanoMinus
+import Logic.FirstOrder.Arith.Representation
 import Logic.FirstOrder.Arith.Nonstandard
+
 import Logic.FirstOrder.Arith.EA.Basic
 
 import Logic.FirstOrder.Incompleteness.FirstIncompleteness

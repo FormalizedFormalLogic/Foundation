@@ -139,7 +139,7 @@ namespace Standard
 
 variable {μ : Type v} (e : Fin n → ℕ) (ε : μ → ℕ)
 
-lemma modelsTheoryPAminus : ℕ ⊧ₘ* 𝐏𝐀⁻ := by
+lemma modelsTheoryPeanoMinus : ℕ ⊧ₘ* 𝐏𝐀⁻ := by
   intro σ h
   rcases h <;> simp [models_def, ←le_iff_eq_or_lt]
   case addAssoc => intro l m n; exact add_assoc l m n
@@ -161,11 +161,11 @@ lemma modelsSuccInd (p : Semiformula ℒₒᵣ ℕ 1) : ℕ ⊧ₘ (∀ᶠ* succ
   · exact hsucc x ih
 
 lemma modelsPeano : ℕ ⊧ₘ* 𝐏𝐀 ∪ 𝐏𝐀⁻ ∪ 𝐄𝐪 := by
-  simp [Theory.Peano, Theory.IndScheme, modelsTheoryPAminus]; rintro _ p _ rfl; simp [modelsSuccInd]
+  simp [Theory.peano, Theory.indScheme, modelsTheoryPeanoMinus]; rintro _ p _ rfl; simp [modelsSuccInd]
 
 end Standard
 
-theorem Peano.Consistent : System.Consistent (𝐏𝐀 ∪ 𝐏𝐀⁻ ∪ 𝐄𝐪) :=
+theorem peano_consistent : System.Consistent (𝐏𝐀 ∪ 𝐏𝐀⁻ ∪ 𝐄𝐪) :=
   Sound.consistent_of_model Standard.modelsPeano
 
 section

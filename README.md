@@ -129,10 +129,10 @@ $\mathbf{PA^-}$ is not to be included in $\mathbf{I\Sigma}_n$ or $\mathbf{PA}$ f
 | $(\rm Cut)\vdash_\mathrm{T} \Gamma$ | Derivation in Tait-Calculus + Cut              | [LO.FirstOrder.Derivation](https://iehality.github.io/lean4-logic/Logic/FirstOrder/Basic/Calculus.html#LO.FirstOrder.Derivation) | `⊢¹ Γ`   |
 | $M \models \sigma$                  | Tarski's truth definition condition            | [LO.FirstOrder.Models](https://iehality.github.io/lean4-logic/Logic/FirstOrder/Basic/Semantics/Semantics.html#LO.FirstOrder.Models) | `M ⊧ₘ σ` |
 | $\mathbf{Eq}$                       | Axiom of equality                              | [LO.FirstOrder.Theory.Eq](https://iehality.github.io/lean4-logic/Logic/FirstOrder/Basic/Eq.html#LO.FirstOrder.Theory.Eq) | `𝐄𝐪` |
-| $\mathbf{PA^-}$                     | Finitely axiomatized fragment of $\mathbf{PA}$ | [LO.FirstOrder.Arith.Theory.PAminus](https://iehality.github.io/lean4-logic/Logic/FirstOrder/Arith/Theory.html#LO.FirstOrder.Arith.Theory.PAminus) | `𝐏𝐀⁻` |
-| $\mathbf{I}_\mathrm{open}$          | Induction of open formula                      | [LO.FirstOrder.Arith.Theory.IOpen](https://iehality.github.io/lean4-logic/Logic/FirstOrder/Arith/Theory.html#LO.FirstOrder.Arith.Theory.IOpen) | `𝐈open` |
-| $\mathbf{I\Sigma}_n$                | Induction of $\Sigma_n$ formula                | [LO.FirstOrder.Arith.Theory.ISigma](https://iehality.github.io/lean4-logic/Logic/FirstOrder/Arith/Theory.html#LO.FirstOrder.Arith.Theory.ISigma) | `𝐈𝚺` |
-| $\mathbf{PA}$                       | Peano arithmetic                               | [LO.FirstOrder.Arith.Theory.Peano](https://iehality.github.io/lean4-logic/Logic/FirstOrder/Arith/Theory.html#LO.FirstOrder.Arith.Theory.Peano) | `𝐏𝐀` |
+| $\mathbf{PA^-}$                     | Finitely axiomatized fragment of $\mathbf{PA}$ | [LO.FirstOrder.Arith.Theory.peanoMinus](https://iehality.github.io/lean4-logic/Logic/FirstOrder/Arith/Theory.html#LO.FirstOrder.Arith.Theory.peanoMinus) | `𝐏𝐀⁻` |
+| $\mathbf{I}_\mathrm{open}$          | Induction of open formula                      | [LO.FirstOrder.Arith.Theory.iOpen](https://iehality.github.io/lean4-logic/Logic/FirstOrder/Arith/Theory.html#LO.FirstOrder.Arith.Theory.iOpen) | `𝐈open` |
+| $\mathbf{I\Sigma}_n$                | Induction of $\Sigma_n$ formula                | [LO.FirstOrder.Arith.Theory.iSigma](https://iehality.github.io/lean4-logic/Logic/FirstOrder/Arith/Theory.html#LO.FirstOrder.Arith.Theory.iSigma) | `𝐈𝚺` |
+| $\mathbf{PA}$                       | peano arithmetic                               | [LO.FirstOrder.Arith.Theory.peano](https://iehality.github.io/lean4-logic/Logic/FirstOrder/Arith/Theory.html#LO.FirstOrder.Arith.Theory.peano) | `𝐏𝐀` |
 
 ### Theorem
 
@@ -264,7 +264,7 @@ In this formalization, _(Modal) Logic_ means set of axioms.
 - J. Han, F. van Doorn, A formalization of forcing and the unprovability of the continuum hypothesis
 - W. Pohlers, Proof Theory: The First Step into Impredicativity
 - P. Hájek, P. Pudlák, Metamathematics of First-Order Arithmetic
-- R. Kaye, Models of Peano arithmetic
+- R. Kaye, Models of peano arithmetic
 - 田中 一之, ゲーデルと20世紀の論理学
 - 菊池 誠 (編者), 『数学における証明と真理 ─ 様相論理と数学基礎論』
 - P. Blackburn, M. de Rijke, Y. Venema, "Modal Logic"

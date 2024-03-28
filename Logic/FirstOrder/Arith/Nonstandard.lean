@@ -1,5 +1,5 @@
 import Logic.FirstOrder.Arith.Model
-import Logic.FirstOrder.Arith.PAminus
+import Logic.FirstOrder.Arith.PeanoMinus
 
 namespace LO
 
@@ -83,7 +83,7 @@ lemma trueArith : ℕ⋆ ⊧ₘ* 𝐓𝐀 := by
 instance : Theory.Mod ℕ⋆ 𝐓𝐀 := ⟨trueArith⟩
 
 instance : Theory.Mod ℕ⋆ 𝐏𝐀⁻ :=
-  Theory.Mod.of_ss (T₁ := 𝐓𝐀) _ (Structure.subset_of_models.mpr $ Arith.Standard.modelsTheoryPAminus)
+  Theory.Mod.of_ss (T₁ := 𝐓𝐀) _ (Structure.subset_of_models.mpr $ Arith.Standard.modelsTheoryPeanoMinus)
 
 lemma star_unbounded (n : ℕ) : n < ⋆ := by
   have : ℕ⋆ ⊧ₘ (“!!(Semiterm.Operator.numeral ℒₒᵣ⋆ n) < ⋆” : Sentence ℒₒᵣ⋆) :=

@@ -26,9 +26,9 @@ namespace Theory
 
 variable (L)
 
-notation "𝐈open(exp)" => IOpen ℒₒᵣ(exp)
+notation "𝐈open(exp)" => iOpen ℒₒᵣ(exp)
 
-notation "𝐈𝚫₀(exp)" => ISigma ℒₒᵣ(exp) 0
+notation "𝐈𝚫₀(exp)" => iSigma ℒₒᵣ(exp) 0
 
 inductive Exponential : Theory L
   | zero : Exponential “exp 0 = 1”
@@ -36,7 +36,7 @@ inductive Exponential : Theory L
 
 notation "𝐄𝐗𝐏" => Exponential ℒₒᵣ(exp)
 
-abbrev ElementaryArithmetic : Theory L := Semiformula.lMap Language.oringEmb '' 𝐏𝐀⁻ + Exponential L + ISigma L 0
+abbrev ElementaryArithmetic : Theory L := Semiformula.lMap Language.oringEmb '' 𝐏𝐀⁻ + Exponential L + iSigma L 0
 
 notation "𝐄𝐀" => ElementaryArithmetic ℒₒᵣ(exp)
 
@@ -112,8 +112,8 @@ lemma modelsSuccInd_exp (p : Semiformula ℒₒᵣ(exp) ℕ 1) : ℕ ⊧ₘ (∀
   · exact hsucc x ih
 
 lemma modelsTheoryElementaryArithmetic : ℕ ⊧ₘ* 𝐄𝐀 := by
-  simp [Theory.ElementaryArithmetic, Theory.add_def, Theory.ISigma, Theory.IndScheme]
-  exact ⟨⟨by intro σ hσ; simpa [models_iff] using modelsTheoryPAminus hσ, modelsTheoryExponential⟩,
+  simp [Theory.ElementaryArithmetic, Theory.add_def, Theory.iSigma, Theory.indScheme]
+  exact ⟨⟨by intro σ hσ; simpa [models_iff] using modelsTheoryPeanoMinus hσ, modelsTheoryExponential⟩,
     by rintro σ p _ rfl; exact modelsSuccInd_exp p⟩
 
 end Standard
@@ -139,12 +139,12 @@ instance : 𝐄𝐗𝐏.Mod M := Theory.Mod.of_add_left_right M (Semiformula.lMa
 
 instance : 𝐈𝚫₀(exp).Mod M := Theory.Mod.of_add_right M (Semiformula.lMap Language.oringEmb '' 𝐏𝐀⁻ + 𝐄𝐗𝐏) 𝐈𝚫₀(exp)
 
-lemma ISigma₀_subset_IDelta₀Exp : (𝐈𝚺₀ : Theory ℒₒᵣ(exp)) ⊆ 𝐈𝚫₀(exp) :=
-  Theory.coe_IHierarchy_subset_IHierarchy
+lemma iSigma₀_subset_IDelta₀Exp : (𝐈𝚺₀ : Theory ℒₒᵣ(exp)) ⊆ 𝐈𝚫₀(exp) :=
+  Theory.coe_iHierarchy_subset_iHierarchy
 
 instance : 𝐈𝚺₀.Mod M := ⟨by
   intro σ hσ
-  have : (𝐈𝚺₀ : Theory ℒₒᵣ(exp)) ⊆ 𝐈𝚫₀(exp) := Theory.coe_IHierarchy_subset_IHierarchy
+  have : (𝐈𝚺₀ : Theory ℒₒᵣ(exp)) ⊆ 𝐈𝚫₀(exp) := Theory.coe_iHierarchy_subset_iHierarchy
   have : M ⊧ₘ (σ : Sentence ℒₒᵣ(exp)) :=
     Theory.Mod.models M (show (σ : Sentence ℒₒᵣ(exp)) ∈ 𝐈𝚫₀(exp) from this (Set.mem_image_of_mem _ hσ))
   simpa [models_iff] using this⟩
