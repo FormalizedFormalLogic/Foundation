@@ -56,6 +56,65 @@ def oringEmb : ℒₒᵣ →ᵥ L where
 
 end Language
 
+section
+
+variable {L : Language} [L.ORing]
+
+namespace Semiterm
+
+instance : Coe (Semiterm ℒₒᵣ ξ n) (Semiterm L ξ n) := ⟨lMap Language.oringEmb⟩
+
+@[simp] lemma oringEmb_zero :
+    Semiterm.lMap (Language.oringEmb : ℒₒᵣ →ᵥ L) (Operator.Zero.zero.const : Semiterm ℒₒᵣ ξ n) = Operator.Zero.zero.const := by
+  simp [Operator.const, lMap_func, Operator.operator, Operator.Zero.term_eq, Matrix.empty_eq]
+
+@[simp] lemma oringEmb_one :
+    Semiterm.lMap (Language.oringEmb : ℒₒᵣ →ᵥ L) (Operator.One.one.const : Semiterm ℒₒᵣ ξ n) = Operator.One.one.const := by
+  simp [Operator.const, lMap_func, Operator.operator, Operator.One.term_eq, Matrix.empty_eq]
+
+@[simp] lemma oringEmb_add (v : Fin 2 → Semiterm ℒₒᵣ ξ n) :
+    Semiterm.lMap (Language.oringEmb : ℒₒᵣ →ᵥ L) (Operator.Add.add.operator v) = Operator.Add.add.operator ![(v 0 : Semiterm L ξ n), (v 1 : Semiterm L ξ n)] := by
+  simp [lMap_func, Rew.func, Operator.operator, Operator.Add.term_eq, Matrix.empty_eq]
+  funext i; cases i using Fin.cases <;> simp [Fin.eq_zero]
+
+@[simp] lemma oringEmb_mul (v : Fin 2 → Semiterm ℒₒᵣ ξ n) :
+    Semiterm.lMap (Language.oringEmb : ℒₒᵣ →ᵥ L) (Operator.Mul.mul.operator v) = Operator.Mul.mul.operator ![(v 0 : Semiterm L ξ n), (v 1 : Semiterm L ξ n)] := by
+  simp [lMap_func, Rew.func, Operator.operator, Operator.Mul.term_eq, Matrix.empty_eq]
+  funext i; cases i using Fin.cases <;> simp [Fin.eq_zero]
+
+@[simp] lemma oringEmb_numeral (z : ℕ) :
+    Semiterm.lMap (Language.oringEmb : ℒₒᵣ →ᵥ L) ((Operator.numeral ℒₒᵣ z).const : Semiterm ℒₒᵣ ξ n) = (Operator.numeral L z).const := by
+  match z with
+  | 0     => exact oringEmb_zero
+  | 1     => exact oringEmb_one
+  | z + 2 =>
+    simp [Operator.numeral_add_two]
+    congr; funext i; cases i using Fin.cases
+    · exact oringEmb_numeral (z + 1)
+    · simp
+
+end Semiterm
+
+namespace Semiformula
+
+instance : Coe (Semiformula ℒₒᵣ ξ n) (Semiformula L ξ n) := ⟨Semiformula.lMap Language.oringEmb⟩
+
+instance : Coe (Theory ℒₒᵣ) (Theory L) := ⟨(Semiformula.lMap Language.oringEmb '' ·)⟩
+
+@[simp] lemma oringEmb_eq (v : Fin 2 → Semiterm ℒₒᵣ ξ n) :
+    Semiformula.lMap (Language.oringEmb : ℒₒᵣ →ᵥ L) (op(=).operator v) = op(=).operator ![(v 0 : Semiterm L ξ n), (v 1 : Semiterm L ξ n)] := by
+  simp [lMap_rel, Rew.rel, Operator.operator, Operator.Eq.sentence_eq]
+  funext i; cases i using Fin.cases <;> simp [Fin.eq_zero]
+
+@[simp] lemma oringEmb_lt (v : Fin 2 → Semiterm ℒₒᵣ ξ n) :
+    Semiformula.lMap (Language.oringEmb : ℒₒᵣ →ᵥ L) (op(<).operator v) = op(<).operator ![(v 0 : Semiterm L ξ n), (v 1 : Semiterm L ξ n)] := by
+  simp [lMap_rel, Rew.rel, Operator.operator, Operator.LT.sentence_eq]
+  funext i; cases i using Fin.cases <;> simp [Fin.eq_zero]
+
+end Semiformula
+
+end
+
 open Semiterm Semiformula
 
 abbrev Polynomial (n : ℕ) : Type := Semiterm ℒₒᵣ Empty n

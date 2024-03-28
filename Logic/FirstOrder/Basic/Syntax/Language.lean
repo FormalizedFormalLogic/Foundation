@@ -255,7 +255,7 @@ def oRingExp : Language where
   Func := ORingExp.Func
   Rel := ORingExp.Rel
 
-notation "ℒₒᵣ(Exp)" => oRingExp
+notation "ℒₒᵣ(exp)" => oRingExp
 
 namespace ORingExp
 
@@ -348,11 +348,9 @@ class Pairing (L : Language) where
 class Star (L : Language) where
   star : L.Func 0
 
-attribute [match_pattern] Zero.zero One.one Add.add Mul.mul Eq.eq LT.lt Star.star
+attribute [match_pattern] Zero.zero One.one Add.add Mul.mul Exp.exp Eq.eq LT.lt Star.star
 
 class ORing (L : Language) extends L.Eq, L.LT, L.Zero, L.One, L.Add, L.Mul
-
-class ORingExp (L : Language) extends L.Eq, L.LT, L.Zero, L.One, L.Add, L.Mul, L.Exp
 
 instance : ORing oRing where
   eq := .eq
@@ -362,14 +360,16 @@ instance : ORing oRing where
   add := .add
   mul := .mul
 
-instance : ORingExp oRingExp where
+instance : ORing oRingExp where
   eq := .eq
   lt := .lt
   zero := .zero
   one := .one
-  exp := .exp
   add := .add
   mul := .mul
+
+instance : Language.Exp oRingExp where
+  exp := .exp
 
 instance : Star unit where
   star := ()

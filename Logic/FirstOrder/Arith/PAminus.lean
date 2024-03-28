@@ -23,55 +23,55 @@ instance : LE M := ⟨fun x y => x = y ∨ x < y⟩
 lemma le_def {x y : M} : x ≤ y ↔ x = y ∨ x < y := iff_of_eq rfl
 
 protected lemma add_zero : ∀ x : M, x + 0 = x := by
-  simpa[models_iff] using Theory.Mod.models M (@Theory.PAminus.addZero oRing _)
+  simpa[models_iff] using Theory.Mod.models M Theory.PAminus.addZero
 
 protected lemma add_assoc : ∀ x y z : M, (x + y) + z = x + (y + z) := by
-  simpa[models_iff] using Theory.Mod.models M (@Theory.PAminus.addAssoc oRing _)
+  simpa[models_iff] using Theory.Mod.models M Theory.PAminus.addAssoc
 
 protected lemma add_comm : ∀ x y : M, x + y = y + x := by
-  simpa[models_iff] using Theory.Mod.models M (@Theory.PAminus.addComm oRing _)
+  simpa[models_iff] using Theory.Mod.models M Theory.PAminus.addComm
 
 lemma add_eq_of_lt : ∀ x y : M, x < y → ∃ z, x + z = y := by
-  simpa[models_iff] using Theory.Mod.models M (@Theory.PAminus.addEqOfLt oRing _)
+  simpa[models_iff] using Theory.Mod.models M Theory.PAminus.addEqOfLt
 
 @[simp] lemma zero_le : ∀ x : M, 0 ≤ x := by
-  simpa[models_iff, Structure.le_iff_of_eq_of_lt] using Theory.Mod.models M (@Theory.PAminus.zeroLe oRing _)
+  simpa[models_iff, Structure.le_iff_of_eq_of_lt] using Theory.Mod.models M Theory.PAminus.zeroLe
 
 lemma zero_lt_one : (0 : M) < 1 := by
-  simpa[models_iff] using Theory.Mod.models M (@Theory.PAminus.zeroLtOne oRing _)
+  simpa[models_iff] using Theory.Mod.models M Theory.PAminus.zeroLtOne
 
 lemma one_le_of_zero_lt : ∀ x : M, 0 < x → 1 ≤ x := by
-  simpa[models_iff, Structure.le_iff_of_eq_of_lt] using Theory.Mod.models M (@Theory.PAminus.oneLeOfZeroLt oRing _)
+  simpa[models_iff, Structure.le_iff_of_eq_of_lt] using Theory.Mod.models M Theory.PAminus.oneLeOfZeroLt
 
 lemma add_lt_add : ∀ x y z : M, x < y → x + z < y + z := by
-  simpa[models_iff] using Theory.Mod.models M (@Theory.PAminus.addLtAdd oRing _)
+  simpa[models_iff] using Theory.Mod.models M Theory.PAminus.addLtAdd
 
 protected lemma mul_zero : ∀ x : M, x * 0 = 0 := by
-  simpa[models_iff] using Theory.Mod.models M (@Theory.PAminus.mulZero oRing _)
+  simpa[models_iff] using Theory.Mod.models M Theory.PAminus.mulZero
 
 protected lemma mul_one : ∀ x : M, x * 1 = x := by
-  simpa[models_iff] using Theory.Mod.models M (@Theory.PAminus.mulOne oRing _)
+  simpa[models_iff] using Theory.Mod.models M Theory.PAminus.mulOne
 
 protected lemma mul_assoc : ∀ x y z : M, (x * y) * z = x * (y * z) := by
-  simpa[models_iff] using Theory.Mod.models M (@Theory.PAminus.mulAssoc oRing _)
+  simpa[models_iff] using Theory.Mod.models M Theory.PAminus.mulAssoc
 
 protected lemma mul_comm : ∀ x y : M, x * y = y * x := by
-  simpa[models_iff] using Theory.Mod.models M (@Theory.PAminus.mulComm oRing _)
+  simpa[models_iff] using Theory.Mod.models M Theory.PAminus.mulComm
 
 lemma mul_lt_mul : ∀ x y z : M, x < y → 0 < z → x * z < y * z := by
-  simpa[models_iff] using Theory.Mod.models M (@Theory.PAminus.mulLtMul oRing _)
+  simpa[models_iff] using Theory.Mod.models M Theory.PAminus.mulLtMul
 
 lemma distr : ∀ x y z : M, x * (y + z) = x * y + x * z := by
-  simpa[models_iff] using Theory.Mod.models M (@Theory.PAminus.distr oRing _)
+  simpa[models_iff] using Theory.Mod.models M Theory.PAminus.distr
 
 lemma lt_irrefl : ∀ x : M, ¬x < x := by
-  simpa[models_iff] using Theory.Mod.models M (@Theory.PAminus.ltIrrefl oRing _)
+  simpa[models_iff] using Theory.Mod.models M Theory.PAminus.ltIrrefl
 
 lemma lt_trans : ∀ x y z : M, x < y → y < z → x < z := by
-  simpa[models_iff] using Theory.Mod.models M (@Theory.PAminus.ltTrans oRing _)
+  simpa[models_iff] using Theory.Mod.models M Theory.PAminus.ltTrans
 
 lemma lt_tri : ∀ x y : M, x < y ∨ x = y ∨ y < x := by
-  simpa[models_iff] using Theory.Mod.models M (@Theory.PAminus.ltTri oRing _)
+  simpa[models_iff] using Theory.Mod.models M Theory.PAminus.ltTri
 
 instance : AddCommMonoid M where
   add_assoc := Model.add_assoc

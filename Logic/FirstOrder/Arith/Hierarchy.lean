@@ -295,6 +295,16 @@ lemma of_open {p : Semiformula L μ n} : p.Open → Hierarchy Γ s p := by
   case hand ihp ihq => intro hp hq; exact ⟨ihp hp, ihq hq⟩
   case hor ihp ihq => intro hp hq; exact ⟨ihp hp, ihq hq⟩
 
+variable {L : Language} [L.ORing]
+
+lemma oringEmb {p : Semiformula ℒₒᵣ μ n} : Hierarchy Γ s p → Hierarchy Γ s (Semiformula.lMap (Language.oringEmb : ℒₒᵣ →ᵥ L) p) := by
+  intro h; induction h <;> try simp [*, Semiformula.lMap_rel, Semiformula.lMap_nrel]
+  case sigma ih => exact ih.accum _
+  case pi ih => exact ih.accum _
+  case dummy_pi ih => exact ih.dummy_pi
+  case dummy_sigma ih => exact ih.dummy_sigma
+
+
 end Hierarchy
 
 section

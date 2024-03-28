@@ -397,8 +397,8 @@ def Open (p : Semiformula L ξ n) : Prop := p.qr = 0
 def fvarList : {n : ℕ} → Semiformula L ξ n → List ξ
   | _, ⊤        => []
   | _, ⊥        => []
-  | _, rel _ v  => List.join $ Matrix.toList (fun i => (v i).fvarList)
-  | _, nrel _ v => List.join $ Matrix.toList (fun i => (v i).fvarList)
+  | _, rel _ v  => List.join <| Matrix.toList fun i ↦ (v i).fvarList
+  | _, nrel _ v => List.join <| Matrix.toList fun i ↦ (v i).fvarList
   | _, p ⋏ q    => p.fvarList ++ q.fvarList
   | _, p ⋎ q    => p.fvarList ++ q.fvarList
   | _, ∀' p     => p.fvarList
@@ -409,6 +409,10 @@ abbrev fvar? (p : Semiformula L ξ n) (x : ξ) : Prop := x ∈ p.fvarList
 @[simp] lemma fvarList_top : fvarList (⊤ : Semiformula L ξ n) = [] := rfl
 
 @[simp] lemma fvarList_bot : fvarList (⊥ : Semiformula L ξ n) = [] := rfl
+
+@[simp] lemma fvarList_and (p q : Semiformula L ξ n) : fvarList (p ⋏ q) = p.fvarList ++ q.fvarList := rfl
+
+@[simp] lemma fvarList_or (p q : Semiformula L ξ n) : fvarList (p ⋎ q) = p.fvarList ++ q.fvarList := rfl
 
 @[simp] lemma fvarList_all (p : Semiformula L ξ (n + 1)) : fvarList (∀' p) = fvarList p := rfl
 
@@ -496,6 +500,23 @@ lemma lMap_nrel {k} (r : L₁.Rel k) (v : Fin k → Semiterm L₁ ξ n) :
 @[simp] lemma lMap_ex (p : Semiformula L₁ ξ (n + 1)) :
     lMap Φ (∃' p) = ∃' lMap Φ p := rfl
 
+@[simp] lemma lMap_ball (p q : Semiformula L₁ ξ (n + 1)) :
+    lMap Φ (∀[p] q) = ∀[lMap Φ p] lMap Φ q := by simp [LogicalConnective.ball]
+
+@[simp] lemma lMap_bex (p q : Semiformula L₁ ξ (n + 1)) :
+    lMap Φ (∃[p] q) = ∃[lMap Φ p] lMap Φ q := by simp [LogicalConnective.bex]
+
+@[simp] lemma lMap_univClosure (p : Semiformula L₁ ξ n) :
+    lMap Φ (∀* p) = ∀* lMap Φ p := by induction n <;> simp [*, univClosure_succ]
+
+@[simp] lemma lMap_exClosure (p : Semiformula L₁ ξ n) :
+    lMap Φ (∃* p) = ∃* lMap Φ p := by induction n <;> simp [*, exClosure_succ]
+
+@[simp] lemma fvarList_lMap (Φ : L₁ →ᵥ L₂) (p : Semiformula L₁ ξ n) : fvarList (Semiformula.lMap Φ p) = fvarList p := by
+  induction p using Semiformula.rec' <;> try simp [lMap_rel, lMap_nrel, *]
+  case hrel n k r v => simp [fvarList]
+  case hnrel n k r v => simp [fvarList]
+
 section fvListing
 
 variable [DecidableEq ξ] [Inhabited ξ]
@@ -519,7 +540,7 @@ def fvListingInv (p : Semiformula L ξ n) : Fin (p.fvarList.length + 1) → ξ :
 lemma fvListingInv_fvListing {p : Semiformula L ξ n} {x : ξ} (hx : x ∈ p.fvarList) :
     fvListingInv p (fvListing p x) = x := by
   simp [fvListingInv, fvListing]; intro h
-  exact False.elim <| not_le.mpr (List.indexOf_lt_length.mpr $ hx) h
+  exact False.elim <| not_le.mpr (List.indexOf_lt_length.mpr hx) h
 
 end fvListing
 

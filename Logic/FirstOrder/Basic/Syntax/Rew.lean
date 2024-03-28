@@ -940,7 +940,7 @@ lemma lMap_bind (b : Fin n₁ → Semiterm L₁ ξ₂ n₂) (e : ξ₁ → Semit
 lemma lMap_map (b : Fin n₁ → Fin n₂) (e : ξ₁ → ξ₂) (p) :
     lMap Φ ((Rew.map b e).hom p) = (Rew.map b e).hom (lMap Φ p) := lMap_bind _ _ _
 
-lemma lMap_rewrite (f : ξ → Semiterm L₁ ξ n) (p : Semiformula L₁ ξ n) :
+lemma lMap_rewrite (f : ξ₁ → Semiterm L₁ ξ₂ n) (p : Semiformula L₁ ξ₁ n) :
     lMap Φ ((Rew.rewrite f).hom p) = (Rew.rewrite (Semiterm.lMap Φ ∘ f)).hom (lMap Φ p) :=
   by simp[Rew.rewrite, lMap_bind, Function.comp]
 
@@ -958,6 +958,15 @@ lemma lMap_fix (p : SyntacticSemiformula L₁ n) : lMap Φ (Rew.fix.hom p) = Rew
 lemma lMap_emb {o : Type*} [IsEmpty o] (p : Semiformula L₁ o n) :
     (lMap Φ (Rew.emb.hom p) : Semiformula L₂ ξ n) = Rew.emb.hom (lMap Φ p) := lMap_bind _ _ _
 
+lemma lMap_toS (p : Semiformula L₁ (Fin n) 0) :
+    lMap Φ (Rew.toS.hom p) = Rew.toS.hom (lMap Φ p) := by
+  rw [Rew.eq_bind Rew.toS, lMap_bind]
+  simp [Function.comp, Matrix.empty_eq]; congr
+
+lemma lMap_rewriteMap (p : Semiformula L₁ ξ₁ n) (f : ξ₁ → ξ₂) :
+    lMap Φ ((Rew.rewriteMap f).hom p) = (Rew.rewriteMap f).hom (lMap Φ p) := by
+  simp [Rew.rewriteMap, lMap_rewrite, Function.comp]
+
 end lMap
 
 end Semiformula
@@ -967,11 +976,27 @@ def Formula.fvUnivClosure [DecidableEq ξ] (p : Formula L ξ) : Sentence L :=
 
 prefix:64 "∀ᶠ* " => Formula.fvUnivClosure
 
-@[simp] lemma Formula.fv_univ_closure_sentence [h : IsEmpty ξ] [DecidableEq ξ] (σ : Formula L ξ) :
-  Formula.fvUnivClosure σ = ∀' Rew.empty.hom σ := by
+@[simp] lemma Formula.fvUnivClosure_sentence [h : IsEmpty ξ] [DecidableEq ξ] (σ : Formula L ξ) :
+    ∀ᶠ* σ = ∀' Rew.empty.hom σ := by
   simp [fvUnivClosure, ←Rew.hom_comp_app, Rew.eq_empty]
   have : σ.fvarList.length = 0 := by simp
   rw [this]; rfl
+
+lemma Formula.univClosure_rew_eq_of_eq (p : Semiformula L ξ₁ n₁) (ω : Rew L ξ₁ n₁ ξ₂ n₂) (ω' : Rew L ξ₁ n₁ ξ₂ n₂')
+    (eq : n₂ = n₂')
+    (H : ω = (Rew.castLE (by simp [eq])).comp ω') : ∀* ω.hom p = ∀* ω'.hom p := by
+  rcases eq with rfl
+  rcases H with rfl
+  simp
+
+lemma Formula.lMap_fvUnivClosure (Φ : L₁ →ᵥ L₂) [DecidableEq ξ] (σ : Formula L₁ ξ) :
+    Semiformula.lMap Φ (∀ᶠ* σ) = ∀ᶠ* (Semiformula.lMap Φ σ) := by
+  simp [Formula.fvUnivClosure, Semiformula.lMap_toS, Semiformula.lMap_rewriteMap]
+  simp [←Rew.hom_comp_app]
+  exact Formula.univClosure_rew_eq_of_eq _ _ _ (by simp) (by
+    ext x <;> simp [Rew.comp_app]
+    · apply finZeroElim x
+    · ext; simp [Semiformula.fvListing])
 
 namespace Rew
 

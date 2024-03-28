@@ -172,6 +172,12 @@ def lMap (Φ : L₁ →ᵥ L₂) : Semiterm L₁ ξ n → Semiterm L₂ ξ n
 lemma lMap_func {k} (f : L₁.Func k) (v : Fin k → Semiterm L₁ ξ n) :
     (func f v).lMap Φ = func (Φ.func f) (fun i => lMap Φ (v i)) := rfl
 
+@[simp] lemma lMap_positive (t : Semiterm L₁ ξ (n + 1)) : (t.lMap Φ).Positive ↔ t.Positive := by
+  induction t <;> simp [lMap_func, *]
+
+@[simp] lemma fvarList_lMap (Φ : L₁ →ᵥ L₂) (t : Semiterm L₁ ξ n) : fvarList (Semiterm.lMap Φ t) = fvarList t := by
+  induction t <;> simp [fvarList, *]
+
 end lMap
 
 section fvEnum

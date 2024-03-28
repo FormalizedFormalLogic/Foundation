@@ -141,7 +141,7 @@ variable {μ : Type v} (e : Fin n → ℕ) (ε : μ → ℕ)
 
 lemma modelsTheoryPAminus : ℕ ⊧ₘ* 𝐏𝐀⁻ := by
   intro σ h
-  rcases h <;> simp[models_def, ←le_iff_eq_or_lt]
+  rcases h <;> simp [models_def, ←le_iff_eq_or_lt]
   case addAssoc => intro l m n; exact add_assoc l m n
   case addComm  => intro m n; exact add_comm m n
   case mulAssoc => intro l m n; exact mul_assoc l m n

@@ -82,7 +82,7 @@ lemma trueArith : ℕ⋆ ⊧ₘ* 𝐓𝐀 := by
 
 instance : Theory.Mod ℕ⋆ 𝐓𝐀 := ⟨trueArith⟩
 
-instance : Theory.Mod ℕ⋆ (Theory.PAminus ℒₒᵣ) :=
+instance : Theory.Mod ℕ⋆ 𝐏𝐀⁻ :=
   Theory.Mod.of_ss (T₁ := 𝐓𝐀) _ (Structure.subset_of_models.mpr $ Arith.Standard.modelsTheoryPAminus)
 
 lemma star_unbounded (n : ℕ) : n < ⋆ := by

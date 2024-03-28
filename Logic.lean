@@ -60,7 +60,7 @@ import Logic.FirstOrder.Arith.StrictHierarchy
 import Logic.FirstOrder.Arith.Theory
 import Logic.FirstOrder.Arith.Model
 import Logic.FirstOrder.Arith.Nonstandard
-import Logic.FirstOrder.Arith.PAminus
+import Logic.FirstOrder.Arith.EA.Basic
 
 import Logic.FirstOrder.Incompleteness.FirstIncompleteness
 import Logic.FirstOrder.Incompleteness.SelfReference

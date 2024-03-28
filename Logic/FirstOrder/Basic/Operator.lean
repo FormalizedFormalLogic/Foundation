@@ -26,14 +26,14 @@ def equiv : Operator L n ≃ Semiterm L Empty n where
 def operator {arity : ℕ} (o : Operator L arity) (v : Fin arity → Semiterm L μ n) : Semiterm L μ n :=
   Rew.substs v (Rew.emb o.term)
 
-def const (c : Const L) : Semiterm L μ n := c.operator ![]
+abbrev const (c : Const L) : Semiterm L μ n := c.operator ![]
 
 instance : Coe (Const L) (Semiterm L μ n) := ⟨Operator.const⟩
 
 def comp (o : Operator L k) (w : Fin k → Operator L l) : Operator L l :=
   ⟨o.operator (fun x => (w x).term)⟩
 
-lemma operator_comp (o : Operator L k) (w : Fin k → Operator L l) (v : Fin l → Semiterm L μ n) :
+@[simp] lemma operator_comp (o : Operator L k) (w : Fin k → Operator L l) (v : Fin l → Semiterm L μ n) :
   (o.comp w).operator v = o.operator (fun x => (w x).operator v) := by
     simp[operator, comp, ←Rew.comp_app]; congr 1
     ext <;> simp[Rew.comp_app]; contradiction
@@ -483,7 +483,7 @@ protected class LE [Operator.LE L] [LE M] : Prop where
 class Mem [Operator.Mem L] [Membership M M] : Prop where
   mem : ∀ a b : M, (@Operator.Mem.mem L _).val ![a, b] ↔ a ∈ b
 
-attribute [simp] Zero.zero One.one Add.add Mul.mul Eq.eq LT.lt LE.le Mem.mem
+attribute [simp] Zero.zero One.one Add.add Mul.mul Exp.exp Eq.eq LT.lt LE.le Mem.mem
 
 instance [L.Eq] [L.LT] [Structure.Eq L M] [PartialOrder M] [Structure.LT L M] :
   Structure.LE L M := ⟨by intro a b; simp [Operator.LE.def_of_Eq_of_LT]; exact le_iff_eq_or_lt.symm⟩

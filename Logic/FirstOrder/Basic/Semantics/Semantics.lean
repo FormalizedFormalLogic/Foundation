@@ -408,7 +408,7 @@ lemma val_fvUnivClosure_inhabited [h : Nonempty μ] [DecidableEq μ] {p : Formul
   by_cases hμ : Nonempty μ
   · exact val_fvUnivClosure_inhabited
   · haveI hμ : IsEmpty μ := not_nonempty_iff.mp hμ
-    simp [Formula.fv_univ_closure_sentence p, IsEmpty.eq_elim]
+    simp [Formula.fvUnivClosure_sentence p, IsEmpty.eq_elim]
     simp [Matrix.empty_eq]
 
 end Semiformula
