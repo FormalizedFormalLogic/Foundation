@@ -196,9 +196,9 @@ section
 variable {ν : ℕ} [Fact (1 ≤ ν)] [(𝐈H Σ ν).Mod M]
 
 theorem finset_comprehension {P : M → Prop} (hP : Γ(ν)-Predicate P) (n : M) :
-    haveI : 𝐈𝚺₁.Mod M := mod_ISigma_of_le (show 1 ≤ ν from Fact.out)
+    haveI : 𝐈𝚺₁.Mod M := mod_iSigma_of_le (show 1 ≤ ν from Fact.out)
     ∃ s < exp n, ∀ i < n, i ∈ s ↔ P i := by
-  haveI : 𝐈𝚺₁.Mod M := mod_ISigma_of_le (show 1 ≤ ν from Fact.out)
+  haveI : 𝐈𝚺₁.Mod M := mod_iSigma_of_le (show 1 ≤ ν from Fact.out)
   have : ∃ s < exp n, ∀ i < n, P i → i ∈ s :=
     ⟨under n, pred_lt_self_of_pos (by simp), fun i hi _ ↦ by simpa [mem_under_iff] using hi⟩
   rcases this with ⟨s, hsn, hs⟩
@@ -223,9 +223,9 @@ theorem finset_comprehension {P : M → Prop} (hP : Γ(ν)-Predicate P) (n : M) 
   exact ⟨t, lt_of_le_of_lt t_le_s hsn, fun i hi ↦ ⟨this i hi, ht i hi⟩⟩
 
 theorem finset_comprehension_exists_unique {P : M → Prop} (hP : Γ(ν)-Predicate P) (n : M) :
-    haveI : 𝐈𝚺₁.Mod M := mod_ISigma_of_le (show 1 ≤ ν from Fact.out)
+    haveI : 𝐈𝚺₁.Mod M := mod_iSigma_of_le (show 1 ≤ ν from Fact.out)
     ∃! s, s < exp n ∧ ∀ i < n, i ∈ s ↔ P i := by
-  haveI : 𝐈𝚺₁.Mod M := mod_ISigma_of_le (show 1 ≤ ν from Fact.out)
+  haveI : 𝐈𝚺₁.Mod M := mod_iSigma_of_le (show 1 ≤ ν from Fact.out)
   rcases finset_comprehension hP n with ⟨s, hs, Hs⟩
   exact ExistsUnique.intro s ⟨hs, Hs⟩ (by
     intro t ⟨ht, Ht⟩

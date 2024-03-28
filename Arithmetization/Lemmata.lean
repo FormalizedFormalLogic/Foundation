@@ -3,6 +3,26 @@ import Mathlib.Algebra.GCDMonoid.Basic
 
 namespace LO.FirstOrder
 
+namespace Structure
+
+class Monotone (L : Language) (M : Type*) [LE M] [Structure L M] where
+  monotone : ∀ {k} (f : L.Func k) (v₁ v₂ : Fin k → M), (∀ i, v₁ i ≤ v₂ i) → Structure.func f v₁ ≤ Structure.func f v₂
+
+namespace Monotone
+
+variable {L : Language} {M : Type*} [LE M] [Structure L M] [Monotone L M]
+
+lemma term_monotone (t : Semiterm L ξ n) {e₁ e₂ : Fin n → M} {ε₁ ε₂ : ξ → M}
+    (he : ∀ i, e₁ i ≤ e₂ i) (hε : ∀ i, ε₁ i ≤ ε₂ i) :
+    t.val! M e₁ ε₁ ≤ t.val! M e₂ ε₂ := by
+  induction t <;> simp [*, Semiterm.val_func]
+  case func k f v ih =>
+    exact Monotone.monotone f _ _ ih
+
+end Monotone
+
+end Structure
+
 namespace Semiterm
 
 @[elab_as_elim]
@@ -196,13 +216,6 @@ lemma two_mul_add_one_lt_two_mul_of_lt (h : a < b) : 2 * a + 1 < 2 * b := calc
 
 lemma add_le_cancel (a : M) : AddLECancellable a := by intro b c; simp
 
-lemma polynomial_mono (t : Semiterm ℒₒᵣ ξ n) {e₁ e₂ : Fin n → M} {ε₁ ε₂ : ξ → M}
-    (he : ∀ i, e₁ i ≤ e₂ i) (hε : ∀ i, ε₁ i ≤ ε₂ i) :
-    t.val! M e₁ ε₁ ≤ t.val! M e₂ ε₂ := by
-  induction t using Semiterm.arithRec <;> try simp [he, hε, Semiterm.val_func, *]
-  case hadd iht ihu => exact add_le_add iht ihu
-  case hmul iht ihu => exact mul_le_mul iht ihu (by simp) (by simp)
-
 open Semiterm
 
 @[simp] lemma val_npow (k : ℕ) (a : M) :
@@ -211,6 +224,14 @@ open Semiterm
   case succ k IH =>
     rw [Matrix.fun_eq_vec₂ (v := fun i => Operator.val ((Operator.npow ℒₒᵣ k :> ![Operator.bvar 0]) i) ![a]), pow_succ]
     simp [npowRec, mul_comm a, IH]
+
+instance : Structure.Monotone ℒₒᵣ M := ⟨
+  fun {k} f v₁ v₂ h ↦
+  match k, f with
+  | 0, Language.Zero.zero => by rfl
+  | 0, Language.One.one   => by rfl
+  | 2, Language.Add.add   => add_le_add (h 0) (h 1)
+  | 2, Language.Mul.mul   => mul_le_mul (h 0) (h 1) (by simp) (by simp)⟩
 
 end Model
 

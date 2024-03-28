@@ -1,4 +1,5 @@
-import Logic.FirstOrder.Arith.PAminus
+import Logic.FirstOrder.Arith.PeanoMinus
+import Logic.FirstOrder.Arith.EA.Basic
 
 instance [Zero α] : Nonempty α := ⟨0⟩
 
@@ -221,28 +222,11 @@ variable (M : Type) [Zero M] [One M] [Add M] [Mul M] [LT M] [T.Mod M]
 
 lemma oring_sound {σ : Sentence ℒₒᵣ} (h : T ⊢! σ) : M ⊧ₘ σ := consequence_iff'.mp (LO.Sound.sound! h) M
 
+instance (Γ s) [(𝐈𝐍𝐃Γ s).Mod M] : (Theory.indScheme ℒₒᵣ (Arith.Hierarchy Γ s)).Mod M := mod_indScheme_of_mod_indH (Γ := Γ) (ν := s)
+
 end model
 
 end Arith
-
-namespace Theory.Mod
-
-variable (M : Type _) [Nonempty M] [Structure L M] (T U V : Theory L)
-
-lemma of_provably_subtheory (_ : T ≾ U) [U.Mod M] : T.Mod M :=
-  of_subtheory M (Semantics.ofSystemSubtheory T U)
-
-lemma of_provably_subtheory' [T ≾ U] [U.Mod M] : T.Mod M := of_provably_subtheory M T U inferInstance
-
-lemma of_add_left [(T + U).Mod M] : T.Mod M := of_ss M (show T ⊆ T + U from by simp [Theory.add_def])
-
-lemma of_add_right [(T + U).Mod M] : U.Mod M := of_ss M (show U ⊆ T + U from by simp [Theory.add_def])
-
-lemma of_add_left_left [(T + U + V).Mod M] : T.Mod M := @of_add_left _ M _ _ T U (of_add_left M (T + U) V)
-
-lemma of_add_left_right [(T + U + V).Mod M] : U.Mod M := @of_add_right _ M _ _ T U (of_add_left M (T + U) V)
-
-end Theory.Mod
 
 section
 
