@@ -91,7 +91,7 @@ lemma sq_le_of_lt {i j : M} (pi : Pow2 i) (pj : Pow2 j) (hi : LenBit i m) (hj : 
   intro hij
   suffices ∀ i < j, Pow2 i → Pow2 j → LenBit i m → LenBit j m → i^2 ≤ j from this i hij pi pj hi hj
   clear i pi hi hij pj hj
-  induction j using hierarchy_order_induction_oRing_sigma₀
+  induction j using order_induction_iSigmaZero
   · definability
   case ind j IH =>
     intro i hij pi pj  hi hj
@@ -262,7 +262,7 @@ lemma sq_le_of_lt {i j : M} (hi : PPow2 i) (hj : PPow2 j) : i < j → i^2 ≤ j 
   intro hij
   suffices ∀ i < j, PPow2 i → PPow2 j → i^2 ≤ j from this i hij hi hj
   clear hi hij hj
-  induction j using hierarchy_order_induction_oRing_sigma₀
+  induction j using order_induction_iSigmaZero
   · definability
   case ind j IH =>
     intro i hij hi hj

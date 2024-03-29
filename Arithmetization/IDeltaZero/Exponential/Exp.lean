@@ -197,7 +197,7 @@ lemma Seqₛ.append {z x y X Y i : M} (h : Seqₛ z X Y) (ppi : PPow2 i) (hz : z
 
 lemma pow2_ext_of_seq₀_of_seqₛ {y X Y : M} (h₀ : Exp.Seq₀ X Y) (hₛ : Exp.Seqₛ y X Y)
     {i} (ne2 : i ≠ 2) (hi : i ≤ y^2) (ppi : PPow2 i) : Pow2 (ext i Y) := by
-  induction i using hierarchy_order_induction_oRing_sigma₀
+  induction i using order_induction_iSigmaZero
   · definability
   case ind i IH =>
     by_cases ei : i = 4
@@ -218,7 +218,7 @@ lemma range_pow2 {x y : M} (h : Exp x y) : Pow2 y := by
 
 lemma le_sq_ext_of_seq₀_of_seqₛ {y X Y : M} (h₀ : Exp.Seq₀ X Y) (hₛ : Exp.Seqₛ y X Y)
     {i} (ne2 : i ≠ 2) (hi : i ≤ y^2) (ppi : PPow2 i) : i ≤ (ext i Y)^2 := by
-  induction i using hierarchy_order_induction_oRing_sigma₀
+  induction i using order_induction_iSigmaZero
   · definability
   case ind i IH =>
     by_cases ei : i = 4
@@ -239,7 +239,7 @@ example {a b c : ℕ} : a * (b * c) = b * (a * c) := by exact Nat.mul_left_comm 
 
 lemma two_mul_ext_le_of_seq₀_of_seqₛ {y X Y : M} (h₀ : Exp.Seq₀ X Y) (hₛ : Exp.Seqₛ y X Y)
     {i} (ne2 : i ≠ 2) (hi : i ≤ y^2) (ppi : PPow2 i) : 2 * ext i Y ≤ i := by
-  induction i using hierarchy_order_induction_oRing_sigma₀
+  induction i using order_induction_iSigmaZero
   · definability
   case ind i IH =>
     by_cases ei : i = 4
@@ -421,7 +421,7 @@ lemma exp_odd_two_mul_sq {x y : M} : Exp (2 * x + 1) (2 * y ^ 2) ↔ Exp x y :=
 
 lemma two_le_ext_of_seq₀_of_seqₛ {y X Y : M} (h₀ : Exp.Seq₀ X Y) (hₛ : Exp.Seqₛ y X Y)
     {i} (ne2 : i ≠ 2) (hi : i ≤ y^2) (ppi : PPow2 i) : 2 ≤ ext i Y := by
-  induction i using hierarchy_order_induction_oRing_sigma₀
+  induction i using order_induction_iSigmaZero
   · definability
   case ind i IH =>
     by_cases ei : i = 4
@@ -442,7 +442,7 @@ lemma two_le_ext_of_seq₀_of_seqₛ {y X Y : M} (h₀ : Exp.Seq₀ X Y) (hₛ :
 
 lemma ext_le_ext_of_seq₀_of_seqₛ {y X Y : M} (h₀ : Exp.Seq₀ X Y) (hₛ : Exp.Seqₛ y X Y)
     {i} (ne2 : i ≠ 2) (hi : i ≤ y^2) (ppi : PPow2 i) : ext i X < ext i Y := by
-  induction i using hierarchy_order_induction_oRing_sigma₀
+  induction i using order_induction_iSigmaZero
   · definability
   case ind i IH =>
     by_cases ne4 : i = 4
@@ -497,7 +497,7 @@ lemma exp_succ {x y : M} : Exp (x + 1) y ↔ ∃ z, y = 2 * z ∧ Exp x z := by
       rintro z rfl
       exact not_exp_of_le (le_trans le_two_mul_left $  by simpa using hxy)
   · revert x
-    induction y using hierarchy_order_induction_oRing_sigma₀
+    induction y using order_induction_iSigmaZero
     · definability
     case ind y IH =>
       intro x hxy
@@ -541,7 +541,7 @@ alias ⟨of_succ_two_mul, succ⟩ := exp_succ_mul_two
 
 lemma one_le_ext_of_seq₀_of_seqₛ {y X Y : M} (h₀ : Exp.Seq₀ X Y) (hₛ : Exp.Seqₛ y X Y)
     {i} (ne2 : i ≠ 2) (hi : i ≤ y^2) (ppi : PPow2 i) : 1 ≤ ext i X := by
-  induction i using hierarchy_order_induction_oRing_sigma₀
+  induction i using order_induction_iSigmaZero
   · definability
   case ind i IH =>
     by_cases ne4 : i = 4
@@ -576,7 +576,7 @@ protected lemma uniq {x y₁ y₂ : M} : Exp x y₁ → Exp x y₂ → y₁ = y�
   revert x h y₁
   suffices ∀ x < y₂, ∀ y₁ ≤ y₂, Exp x y₁ → Exp x y₂ → y₁ = y₂ by
     intro x y₁ h₁ h₂ hy; exact this x h₂.dom_lt_range y₁ hy h₁ h₂
-  induction y₂ using hierarchy_order_induction_oRing_sigma₀
+  induction y₂ using order_induction_iSigmaZero
   · definability
   case ind y₂ IH =>
     intro x _ y₁ h h₁ h₂
@@ -593,7 +593,7 @@ protected lemma inj {x₁ x₂ y : M} : Exp x₁ y → Exp x₂ y → x₁ = x�
   revert x₁ x₂ h₁ h₂
   suffices ∀ x₁ < y, ∀ x₂ < y, Exp x₁ y → Exp x₂ y → x₁ = x₂ by
     intro x₁ x₂ h₁ h₂; exact this x₁ h₁.dom_lt_range x₂ h₂.dom_lt_range h₁ h₂
-  induction y using hierarchy_order_induction_oRing_sigma₀
+  induction y using order_induction_iSigmaZero
   · definability
   case ind y IH =>
     intro x₁ _ x₂ _ h₁ h₂
@@ -627,7 +627,7 @@ lemma monotone {x₁ x₂ y₁ y₂ : M} : Exp x₁ y₁ → Exp x₂ y₂ → x
     intro h₁ h₂; contrapose; simp
     intro hy
     exact this x₁ h₁.dom_lt_range y₂ hy x₂ h₂.dom_lt_range h₁ h₂
-  induction y₁ using hierarchy_order_induction_oRing_sigma₀
+  induction y₁ using order_induction_iSigmaZero
   · definability
   case ind y₁ IH =>
     intro x₁ _ y₂ hy x₂ _ h₁ h₂
@@ -665,7 +665,7 @@ lemma add_mul {x₁ x₂ y₁ y₂ : M} (h₁ : Exp x₁ y₁) (h₂ : Exp x₂ 
   revert y₂
   suffices ∀ y₂ ≤ y₁, Exp x₂ y₂ → Exp (x₁ + x₂) (y₁ * y₂) by
     intro y₂ h₂ hy; exact this y₂ hy h₂
-  induction x₂ using hierarchy_induction_oRing_sigma₀
+  induction x₂ using induction_iSigmaZero
   · definability
   case zero =>
     intro y₂ _ h₂
@@ -687,7 +687,7 @@ variable [𝐈𝚺₁.Mod M]
 namespace Exp
 
 lemma range_exists (x : M) : ∃ y, Exp x y := by
-  induction x using hierarchy_induction_oRing_sigma₁
+  induction x using induction_iSigmaOne
   · definability
   case zero => exact ⟨1, by simp⟩
   case succ x IH =>

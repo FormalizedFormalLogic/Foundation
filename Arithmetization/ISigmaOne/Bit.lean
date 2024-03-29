@@ -217,7 +217,7 @@ theorem finset_comprehension {P : M → Prop} (hP : Γ(ν)-Predicate P) (n : M) 
     definability
     simp [mem_definable]
   have : ∃ t, (∀ i < n, P i → i ∈ t) ∧ ∀ t' < t, ∃ x, P x ∧ x < n ∧ x ∉ t' := by
-    simpa using hierarchy_least_number (L := ℒₒᵣ) Γ.alt ν this hs
+    simpa using least_number_h (L := ℒₒᵣ) Γ.alt ν this hs
   rcases this with ⟨t, ht, t_minimal⟩
   have t_le_s : t ≤ s := not_lt.mp (by
     intro lt

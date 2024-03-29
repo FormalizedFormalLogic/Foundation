@@ -139,6 +139,9 @@ def DefinedRel.le : Γ(s)-Relation ((· ≤ ·) : M → M → Prop) via Sentence
 class Definable {k} (P : (Fin k → M) → Prop) : Prop where
   definable : ∃ p : HSemiformula Γ s L M k, DefinedWithParam P p.val
 
+instance Definable.of_sigma_zero {k} (P : (Fin k → M) → Prop) [h : Definable L Σ 0 P] (Γ ν) : Definable L Γ ν P :=
+  ⟨by rcases h with ⟨p, hp⟩; exact ⟨⟨p, Hierarchy.of_zero p.prop⟩, hp⟩⟩
+
 abbrev DefinablePred (P : M → Prop) : Prop := Definable L Γ s (k := 1) (fun v ↦ P (v 0))
 
 abbrev DefinableRel (P : M → M → Prop) : Prop := Definable L Γ s (k := 2) (fun v ↦ P (v 0) (v 1))

@@ -215,7 +215,7 @@ lemma SeriesSegment.series {U I L A k n : M} (H : SeriesSegment U I L A k n) :
 
 lemma IsSegment.le_add {L A start intv S : M} (H : IsSegment L A start intv S) : ∀ i ≤ intv, S{L}[i] ≤ S{L}[0] + i := by
   intro i
-  induction i using hierarchy_induction_oRing_sigma₀
+  induction i using induction_iSigmaZero
   · definability
   case zero => simp
   case succ i IH =>
@@ -240,7 +240,7 @@ lemma Segment.uniq {U L A start intv nₛ nₑ₁ nₑ₂ : M}
   rcases H₁ with ⟨S₁, _, HS₁, Hₛ, rfl⟩
   rcases H₂ with ⟨S₂, _, HS₂, rfl, rfl⟩
   suffices ∀ i ≤ intv, S₁{L}[i] = S₂{L}[i] from this intv (by rfl)
-  intro i; induction i using hierarchy_induction_oRing_sigma₀
+  intro i; induction i using induction_iSigmaZero
   · definability
   case zero => intro _; exact Hₛ
   case succ i IH =>
@@ -251,7 +251,7 @@ lemma Segment.uniq {U L A start intv nₛ nₑ₁ nₑ₂ : M}
 
 lemma IsSeries.le_add {U I L A iter T : M} (H : IsSeries U I L A iter T) : ∀ l ≤ iter, T{L}[l] ≤ T{L}[0] + ‖I‖ * l := by
   intro l
-  induction l using hierarchy_induction_oRing_sigma₀
+  induction l using induction_iSigmaZero
   · definability
   case zero => simp
   case succ l IH =>
@@ -268,7 +268,7 @@ lemma Series.uniq {U I L A iter n₁ n₂ : M} (H₁ : Series U I L A iter n₁)
   rcases H₁ with ⟨T₁, _, HT₁, Hₛ₁, rfl⟩
   rcases H₂ with ⟨T₂, _, HT₂, Hₛ₂, rfl⟩
   suffices ∀ i ≤ iter, T₁{L}[i] = T₂{L}[i] from this iter (by rfl)
-  intro i; induction i using hierarchy_induction_oRing_sigma₀
+  intro i; induction i using induction_iSigmaZero
   · definability
   case zero => intro _; simp [Hₛ₁, Hₛ₂]
   case succ i IH =>
@@ -588,7 +588,7 @@ lemma NuonAux.exists {k : M} (hk : k ≤ ‖A‖) : ∃ n, NuonAux A k n := by
   suffices ∃ n ≤ k, NuonAux A k n by
     rcases this with ⟨n, _, h⟩; exact ⟨n, h⟩
   revert hk
-  induction k using hierarchy_induction_oRing_sigma₀
+  induction k using induction_iSigmaZero
   · definability
   case zero =>
     intro _; exact ⟨0, by simp⟩
@@ -615,7 +615,7 @@ lemma NuonAux.two_mul {k n : M} (hk : k ≤ ‖A‖) : NuonAux A k n → NuonAux
   suffices ∀ n ≤ k, k ≤ ‖A‖ → NuonAux A k n → NuonAux (2 * A) (k + 1) n by
     intro n hk H
     exact this n H.le hk H
-  induction k using hierarchy_induction_oRing_sigma₀
+  induction k using induction_iSigmaZero
   · definability
   case zero =>
     simp; simpa using (NuonAux.initial (2 * A)).succ (by simp)
@@ -630,7 +630,7 @@ lemma NuonAux.two_mul_add_one {k n : M} (hk : k ≤ ‖A‖) : NuonAux A k n →
   suffices ∀ n ≤ k, k ≤ ‖A‖ → NuonAux A k n → NuonAux (2 * A + 1) (k + 1) (n + 1) by
     intro n hk H
     exact this n H.le hk H
-  induction k using hierarchy_induction_oRing_sigma₀
+  induction k using induction_iSigmaZero
   · definability
   case zero =>
     simpa using (NuonAux.initial (2 * A + 1)).succ (by simp)

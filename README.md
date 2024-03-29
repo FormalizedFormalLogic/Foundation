@@ -32,6 +32,6 @@ https://iehality.github.io/Arithmetization/
 
 - Exponential is definable in $\mathbf{I\Delta_0}$ by $\mathbf{\Delta_0}$ formula
   - [LO.FirstOrder.Arith.Model.Exp.defined](https://iehality.github.io/Arithmetization/Arithmetization/IDeltaZero/Exponential/Exp.html#LO.FirstOrder.Arith.Model.Exp.defined)
-  - ![Representation of $\mathbf{\Delta_0}$ definition of exponential](https://github.com/iehality/Arithmetization/blob/master/Arithmetization/IDeltaZero/Exponential/exp.pdf)
+  - [Representation of $\mathbf{\Delta_0}$ definition of exponential](https://github.com/iehality/Arithmetization/blob/master/Arithmetization/IDeltaZero/Exponential/exp.pdf)
 - Nuon (number of ones) is definable in $\mathbf{I\Delta_0 + \Omega_1}$ by $\mathbf{\Delta_0}$ formula
   - [LO.FirstOrder.Arith.Model.nuon_defined](https://iehality.github.io/Arithmetization/Arithmetization/OmegaOne/Nuon.html#LO.FirstOrder.Arith.Model.nuon_defined)

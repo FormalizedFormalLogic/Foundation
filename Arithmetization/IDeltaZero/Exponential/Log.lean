@@ -279,7 +279,7 @@ lemma brange_exists_unique (a : M) : ∀ x < ‖a‖, ∃! y, Exp x y := by
     intro x hx; rcases this x hx with ⟨_, _, H⟩
     exact ExistsUnique.intro _ H (fun y' H' ↦ H'.uniq H)
   intro x
-  induction x using hierarchy_induction_oRing_sigma₀
+  induction x using induction_iSigmaZero
   · definability
   case zero =>
     intro ha

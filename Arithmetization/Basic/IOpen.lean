@@ -633,7 +633,7 @@ variable {L : Language} [L.ORing] [Structure L M] [Structure.ORing L M] [Structu
 lemma hierarchy_polynomial_induction (Γ ν) [(Theory.indScheme L (Arith.Hierarchy Γ ν)).Mod M]
     {P : M → Prop} (hP : DefinablePred L Γ ν P)
     (zero : P 0) (even : ∀ x > 0, P x → P (2 * x)) (odd : ∀ x, P x → P (2 * x + 1)) : ∀ x, P x := by
-  intro x; induction x using hierarchy_order_induction
+  intro x; induction x using order_induction_h
   · exact Γ
   · exact ν
   · exact hP
