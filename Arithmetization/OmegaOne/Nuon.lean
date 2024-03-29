@@ -8,7 +8,7 @@ noncomputable section
 
 namespace Model
 
-variable {M : Type} [Zero M] [One M] [Add M] [Mul M] [LT M] [𝐏𝐀⁻.Mod M] [𝐈𝚺₀.Mod M] [𝛀₁.Mod M]
+variable {M : Type} [Zero M] [One M] [Add M] [Mul M] [LT M] [𝐈𝚺₀.Mod M] [𝛀₁.Mod M]
 
 namespace Nuon
 
