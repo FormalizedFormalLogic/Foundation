@@ -82,7 +82,7 @@ def extDef : Δ₀Sentence 4 :=
 lemma ext_defined : Δ₀-Function₃ (ext : M → M → M → M) via extDef := by
   intro v; simp [extDef, length_defined.pval, Exp.defined.pval, div_defined.pval, rem_defined.pval, lt_succ_iff_le, ext_graph]
 
-instance ext_Definable (Γ ν) : DefinableFunction₃ ℒₒᵣ Γ ν (ext : M → M → M → M) := defined_to_with_param₀ _ ext_defined
+instance ext_Definable : DefinableFunction₃ ℒₒᵣ Σ 0 (ext : M → M → M → M) := defined_to_with_param₀ _ ext_defined
 
 instance : PolyBounded₃ ℒₒᵣ (ext : M → M → M → M) := ⟨#1, λ _ ↦ by simp⟩
 
@@ -565,7 +565,7 @@ lemma nuonAux_defined : Δ₀-Relation₃ (NuonAux : M → M → M → Prop) via
     length_defined.pval, sqrt_defined.pval, bexp_defined.pval, seriesSegmentDef_defined.pval, lt_succ_iff_le]
   rw [bex_eq_le_iff, bex_eq_le_iff, bex_eq_le_iff, bex_eq_le_iff]; simp
 
-instance nuonAux_definable (Γ ν) : DefinableRel₃ ℒₒᵣ Γ ν (NuonAux : M → M → M → Prop) := defined_to_with_param₀ _ nuonAux_defined
+instance nuonAux_definable : DefinableRel₃ ℒₒᵣ Σ 0 (NuonAux : M → M → M → Prop) := defined_to_with_param _ nuonAux_defined
 
 instance : PolyBounded₃ ℒₒᵣ (ext : M → M → M → M) := ⟨#1, λ _ ↦ by simp⟩
 
@@ -679,7 +679,7 @@ lemma nuon_defined : Δ₀-Function₁ (nuon : M → M) via nuonDef := by
     length_defined.pval, Nuon.nuonAux_defined.pval, lt_succ_iff_le]
   rw [Nuon.bex_eq_le_iff]; simp
 
-instance nuon_definable (Γ ν) : DefinableFunction₁ ℒₒᵣ Γ ν (nuon : M → M) := defined_to_with_param₀ _ nuon_defined
+instance nuon_definable : DefinableFunction₁ ℒₒᵣ Σ 0 (nuon : M → M) := defined_to_with_param _ nuon_defined
 
 end Model
 

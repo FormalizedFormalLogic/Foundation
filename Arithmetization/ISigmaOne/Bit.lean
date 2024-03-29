@@ -27,7 +27,7 @@ lemma bit_defined : Δ₀-Relation ((· ∈ ·) : M → M → Prop) via bitDef :
   · intro h; exact ⟨exp (v 0), by simp [h.le], rfl, h⟩
   · rintro ⟨_, _, rfl, h⟩; exact h
 
-instance mem_definable (Γ ν) : DefinableRel ℒₒᵣ Γ ν ((· ∈ ·) : M → M → Prop) := defined_to_with_param₀ _ bit_defined
+instance mem_definable : DefinableRel ℒₒᵣ Σ 0 ((· ∈ ·) : M → M → Prop) := defined_to_with_param _ bit_defined
 
 open Classical in
 noncomputable def bitInsert (i a : M) : M := if i ∈ a then a else a + exp i
@@ -137,7 +137,7 @@ lemma bitSubset_defined : Δ₀-Relation ((· ⊆ ·) : M → M → Prop) via bi
   intro v; simp [bitSubsetDef, bit_defined.pval]
   exact ⟨by intro h x _ hx; exact h hx, by intro h x hx; exact h x (lt_of_mem hx) hx⟩
 
-instance bitSubset_definable (Γ ν) : DefinableRel ℒₒᵣ Γ ν ((· ⊆ ·) : M → M → Prop) := defined_to_with_param₀ _ bitSubset_defined
+instance bitSubset_definable : DefinableRel ℒₒᵣ Σ 0 ((· ⊆ ·) : M → M → Prop) := defined_to_with_param₀ _ bitSubset_defined
 
 lemma mem_exp_add_succ_sub_one (i j : M) : i ∈ exp (i + j + 1) - 1 := by
   have : exp (i + j + 1) - 1 = (exp j - 1) * exp (i + 1) + exp i + (exp i - 1) := calc
@@ -215,7 +215,7 @@ theorem finset_comprehension {P : M → Prop} (hP : Γ(ν)-Predicate P) (n : M) 
   have : (Γ.alt)(ν)-Predicate (fun s ↦ ∀ i < n, P i → i ∈ s) := by
     apply Definable.ball_lt; simp; apply Definable.imp
     definability
-    simp [mem_definable]
+    apply @Definable.of_sigma_zero M ℒₒᵣ _ _ _ _ mem_definable
   have : ∃ t, (∀ i < n, P i → i ∈ t) ∧ ∀ t' < t, ∃ x, P x ∧ x < n ∧ x ∉ t' := by
     simpa using least_number_h (L := ℒₒᵣ) Γ.alt ν this hs
   rcases this with ⟨t, ht, t_minimal⟩

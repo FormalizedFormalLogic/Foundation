@@ -24,7 +24,7 @@ lemma pow2_defined : Δ₀-Predicate (Pow2 : M → Prop) via pow2Def := by
   simp [Semiformula.eval_substs, Matrix.comp_vecCons', Matrix.vecHead, Matrix.constant_eq_singleton,
     Pow2, pow2Def, le_iff_lt_succ, dvd_defined.pval]
 
-instance pow2_definable (Γ ν) : DefinablePred ℒₒᵣ Γ ν (Pow2 : M → Prop) := defined_to_with_param₀ _ pow2_defined
+instance pow2_definable : DefinablePred ℒₒᵣ Σ 0 (Pow2 : M → Prop) := defined_to_with_param _ pow2_defined
 
 lemma Pow2.pos {a : M} (h : Pow2 a) : 0 < a := h.1
 
@@ -119,7 +119,7 @@ lemma lenbit_defined : Δ₀-Relation (LenBit : M → M → Prop) via lenbitDef 
   · intro h; exact ⟨v 1 / v 0, by simp, rfl, h⟩
   · rintro ⟨z, hz, rfl, h⟩; exact h
 
-instance lenbit_definable (Γ ν) : DefinableRel ℒₒᵣ Γ ν (LenBit : M → M → Prop) := defined_to_with_param₀ _ lenbit_defined
+instance lenbit_definable : DefinableRel ℒₒᵣ Σ 0 (LenBit : M → M → Prop) := defined_to_with_param _ lenbit_defined
 
 lemma LenBit.le {i a : M} (h : LenBit i a) : i ≤ a := by
   by_contra A; simp [LenBit, show a < i from by simpa using A] at h

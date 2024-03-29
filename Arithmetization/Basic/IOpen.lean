@@ -184,7 +184,7 @@ lemma div_mul (a b c : M) : a / (b * c) = a / b / c := by
 
 instance div_polybounded : PolyBounded₂ ℒₒᵣ ((· / ·) : M → M → M) := ⟨#0, λ _ ↦ by simp⟩
 
-instance div_definable (Γ ν) : DefinableFunction₂ ℒₒᵣ Γ ν ((· / ·) : M → M → M) := defined_to_with_param₀ _ div_defined
+instance div_definable : DefinableFunction₂ ℒₒᵣ Σ 0 ((· / ·) : M → M → M) := defined_to_with_param _ div_defined
 
 @[simp] lemma div_mul_le (a b : M) : a / b * b ≤ a := by rw [mul_comm]; exact mul_div_le _ _
 
@@ -299,7 +299,7 @@ lemma rem_defined : Δ₀-Function₂ ((· % ·) : M → M → M) via remDef := 
   intro v; simp [Matrix.vecHead, Matrix.vecTail, remDef,
     rem_graph, Semiformula.eval_substs, div_defined.pval, sub_defined.pval, le_iff_lt_succ]
 
-instance rem_definable (Γ ν) : DefinableFunction₂ ℒₒᵣ Γ ν ((· % ·) : M → M → M) := defined_to_with_param₀ _ rem_defined
+instance rem_definable : DefinableFunction₂ ℒₒᵣ Σ 0 ((· % ·) : M → M → M) := defined_to_with_param _ rem_defined
 
 lemma div_add_mod (a b : M) : b * (a / b) + (a % b) = a :=
   add_tsub_self_of_le (mul_div_le a b)
@@ -459,7 +459,7 @@ def sqrtdef : Δ₀Sentence 2 :=
 lemma sqrt_defined : Δ₀-Function₁ (λ a : M ↦ √a) via sqrtdef := by
   intro v; simp[sqrt_graph, sqrtdef, Matrix.vecHead, Matrix.vecTail]
 
-instance sqrt_definable (Γ ν) : DefinableFunction₁ ℒₒᵣ Γ ν ((√·) : M → M) := defined_to_with_param₀ _ sqrt_defined
+instance sqrt_definable : DefinableFunction₁ ℒₒᵣ Σ 0 ((√·) : M → M) := defined_to_with_param₀ _ sqrt_defined
 
 lemma eq_sqrt (x a : M) : x * x ≤ a ∧ a < (x + 1) * (x + 1) → x = √a := Classical.choose_uniq (sqrt_exists_unique a)
 
@@ -550,7 +550,7 @@ def pairDef : Δ₀Sentence 3 := ⟨“(#1 < #2 ∧ #0 = #2 * #2 + #1) ∨ (#2 �
 lemma pair_defined : Δ₀-Function₂ (λ a b : M ↦ ⟪a, b⟫) via pairDef := by
   intro v; simp [pair_graph, pairDef]
 
-instance pair_definable (Γ ν) : DefinableFunction₂ ℒₒᵣ Γ ν (pair : M → M → M) := defined_to_with_param₀ _ pair_defined
+instance pair_definable : DefinableFunction₂ ℒₒᵣ Σ 0 (pair : M → M → M) := defined_to_with_param₀ _ pair_defined
 
 instance : PolyBounded₂ ℒₒᵣ (pair : M → M → M) :=
   ⟨ᵀ“(#1 * #1 + #0) + (#0 * #0 + #0 + #1)”, by intro v; simp [pair]; split_ifs <;> try simp [pair, *]⟩
@@ -610,7 +610,7 @@ lemma pi₁_defined : Δ₀-Function₁ (pi₁ : M → M) via pi₁Def := by
   · intro h; exact ⟨π₂ v 1, by simp [←le_iff_lt_succ],  by simp [h]⟩
   · rintro ⟨a, _, e⟩; simp [e]
 
-instance pi₁_definable (Γ ν) : DefinableFunction₁ ℒₒᵣ Γ ν (pi₁ : M → M) := defined_to_with_param₀ _ pi₁_defined
+instance pi₁_definable : DefinableFunction₁ ℒₒᵣ Σ 0 (pi₁ : M → M) := defined_to_with_param₀ _ pi₁_defined
 
 lemma pi₂_defined : Δ₀-Function₁ (pi₂ : M → M) via pi₂Def := by
   intro v; simp [pi₂Def, pair_defined.pval]
@@ -618,7 +618,7 @@ lemma pi₂_defined : Δ₀-Function₁ (pi₂ : M → M) via pi₂Def := by
   · intro h; exact ⟨π₁ v 1, by simp [←le_iff_lt_succ], by simp [h]⟩
   · rintro ⟨a, _, e⟩; simp [e]
 
-instance pi₂_definable (Γ ν) : DefinableFunction₁ ℒₒᵣ Γ ν (pi₂ : M → M) := defined_to_with_param₀ _ pi₂_defined
+instance pi₂_definable : DefinableFunction₁ ℒₒᵣ Σ 0 (pi₂ : M → M) := defined_to_with_param₀ _ pi₂_defined
 
 end pair
 

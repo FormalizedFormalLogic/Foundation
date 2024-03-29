@@ -67,7 +67,7 @@ lemma hash_defined : Δ₀-Function₂ (Hash.hash : M → M → M) via hashDef :
   · intro h; exact ⟨‖v 1‖, by simp, ‖v 2‖, by simp, rfl, rfl, by rw [h]; exact exp_hash _ _⟩
   · rintro ⟨_, _, _, _, rfl, rfl, h⟩; exact h.uniq (exp_hash (v 1) (v 2))
 
-instance hash_definable (Γ ν) : DefinableFunction₂ ℒₒᵣ Γ ν (Hash.hash : M → M → M) := defined_to_with_param₀ _ hash_defined
+instance hash_definable : DefinableFunction₂ ℒₒᵣ Σ 0 (Hash.hash : M → M → M) := defined_to_with_param _ hash_defined
 
 @[simp] lemma hash_pow2 (a b : M) : Pow2 (a # b) := (exp_hash a b).range_pow2
 

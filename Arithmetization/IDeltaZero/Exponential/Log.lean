@@ -72,7 +72,7 @@ def logDef : Δ₀Sentence 2 := ⟨“(#1 = 0 → #0 = 0) ∧ (0 < #1 → #0 < #
 lemma log_defined : Δ₀-Function₁ (log : M → M) via logDef := by
   intro v; simp [logDef, log_graph, Exp.defined.pval, ←le_iff_lt_succ]
 
-instance log_definable (Γ ν) : DefinableFunction₁ ℒₒᵣ Γ ν (log : M → M) := defined_to_with_param₀ _ log_defined
+instance log_definable : DefinableFunction₁ ℒₒᵣ Σ 0 (log : M → M) := defined_to_with_param _ log_defined
 
 instance : PolyBounded₁ ℒₒᵣ (log : M → M) := ⟨#0, λ _ ↦ by simp⟩
 
@@ -163,7 +163,7 @@ def lengthDef : Δ₀Sentence 2 := ⟨“(0 < #1 → ∃[#0 < #2 + 1] (!logDef [
 lemma length_defined : Δ₀-Function₁ (‖·‖ : M → M) via lengthDef := by
   intro v; simp [lengthDef, length_graph, log_defined.pval, ←le_iff_lt_succ]
 
-instance length_definable (Γ ν) : DefinableFunction₁ ℒₒᵣ Γ ν (‖·‖ : M → M) := defined_to_with_param₀ _ length_defined
+instance length_definable : DefinableFunction₁ ℒₒᵣ Σ 0 (‖·‖ : M → M) := defined_to_with_param _ length_defined
 
 instance : PolyBounded₁ ℒₒᵣ (‖·‖ : M → M) := ⟨#0, λ _ ↦ by simp⟩
 
@@ -334,7 +334,7 @@ def bexpDef : Δ₀Sentence 3 := ⟨“∃[#0 < #2 + 1] (!lengthDef [#0, #2] ∧
 lemma bexp_defined : Δ₀-Function₂ (bexp : M → M → M) via bexpDef := by
   intro v; simp [bexpDef, bexp_graph, Exp.defined.pval, length_defined.pval, ←le_iff_lt_succ]
 
-instance bexp_definable (Γ ν) : DefinableFunction₂ ℒₒᵣ Γ ν (bexp : M → M → M) := defined_to_with_param₀ _ bexp_defined
+instance bexp_definable : DefinableFunction₂ ℒₒᵣ Σ 0 (bexp : M → M → M) := defined_to_with_param _ bexp_defined
 
 instance : PolyBounded₂ ℒₒᵣ (bexp : M → M → M) := ⟨#0, λ _ ↦ by simp⟩
 
@@ -413,7 +413,7 @@ lemma fbit_defined : Δ₀-Function₂ (fbit : M → M → M) via fbitDef := by
   · intro h; exact ⟨bexp (v 1) (v 2), by simp, rfl, _, by simp, rfl, h⟩
   · rintro ⟨_, _, rfl, _, _, rfl, h⟩; exact h
 
-instance fbit_definable (Γ ν) : DefinableFunction₂ ℒₒᵣ Γ ν (fbit : M → M → M) := defined_to_with_param₀ _ fbit_defined
+instance fbit_definable : DefinableFunction₂ ℒₒᵣ Σ 0 (fbit : M → M → M) := defined_to_with_param _ fbit_defined
 
 instance : PolyBounded₂ ℒₒᵣ (fbit : M → M → M) := ⟨ᵀ“1”, λ _ ↦ by simp⟩
 

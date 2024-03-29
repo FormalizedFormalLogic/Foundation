@@ -28,7 +28,7 @@ lemma ext_defined : Δ₀-Function₂ (λ a b : M ↦ ext a b) via extDef := by
   intro v; simp [Matrix.vecHead, Matrix.vecTail, extDef,
     ext_graph, Semiformula.eval_substs, div_defined.pval, rem_defined.pval, le_iff_lt_succ]
 
-instance ext_definable (Γ ν) : DefinableFunction₂ ℒₒᵣ Γ ν (ext : M → M → M) := defined_to_with_param₀ _ ext_defined
+instance ext_definable : DefinableFunction₂ ℒₒᵣ Σ 0 (ext : M → M → M) := defined_to_with_param _ ext_defined
 
 @[simp] lemma ext_le_add (u z : M) : ext u z ≤ z :=
   le_trans (mod_le (z / u) u) (by simp [add_comm])
@@ -112,7 +112,7 @@ def Exp.def : Δ₀Sentence 2 := ⟨
 lemma Exp.defined : Δ₀-Relation (Exp : M → M → Prop) via Exp.def := by
   intro v; simp [Exp.graph_iff, Exp.def, ppow2_defined.pval, ext_defined.pval, Exp.Seqₛ.defined.pval, ←le_iff_lt_succ, pow_four, sq]
 
-instance exp_definable (Γ ν) : DefinableRel ℒₒᵣ Γ ν (Exp : M → M → Prop) := defined_to_with_param₀ _ Exp.defined
+instance exp_definable : DefinableRel ℒₒᵣ Σ 0 (Exp : M → M → Prop) := defined_to_with_param _ Exp.defined
 
 namespace Exp
 
@@ -717,7 +717,7 @@ def expdef : Δ₀Sentence 2 := ⟨“!Exp.def [#1, #0]”, by simp⟩
 lemma exp_defined : Δ₀-Function₁ (exponential : M → M) via expdef := by
   intro v; simp [expdef, exponential_graph, Exp.defined.pval]
 
-instance exponential_definable (Γ ν) : DefinableFunction₁ ℒₒᵣ Γ ν (exponential : M → M) := defined_to_with_param₀ _ exp_defined
+instance exponential_definable : DefinableFunction₁ ℒₒᵣ Σ 0 (exponential : M → M) := defined_to_with_param _ exp_defined
 
 lemma exponential_of_exp {a b : M} (h : Exp a b) : exp a = b :=
   Eq.symm <| exponential_graph.mpr h

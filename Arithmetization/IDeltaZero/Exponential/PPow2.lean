@@ -38,7 +38,7 @@ def ppow2Def : Δ₀Sentence 1 :=
 lemma ppow2_defined : Δ₀-Predicate (PPow2 : M → Prop) via ppow2Def := by
   intro v; simp[PPow2, ppow2Def, Matrix.vecHead, Matrix.vecTail, lenbit_defined.pval, pow2_defined.pval, sppow2_defined.pval]
 
-instance ppow2_definable (Γ ν) : DefinablePred ℒₒᵣ Γ ν (PPow2 : M → Prop) := defined_to_with_param₀ _ ppow2_defined
+instance ppow2_definable : DefinablePred ℒₒᵣ Σ 0 (PPow2 : M → Prop) := defined_to_with_param₀ _ ppow2_defined
 
 namespace SPPow2
 
