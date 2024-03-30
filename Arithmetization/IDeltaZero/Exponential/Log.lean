@@ -67,7 +67,7 @@ lemma log_lt_self_of_pos {y : M} (pos : 0 < y) : log y < y :=
 
 lemma log_graph {x y : M} : x = log y ↔ (y = 0 → x = 0) ∧ (0 < y → x < y ∧ ∃ y' ≤ y, Exp x y' ∧ y < 2 * y') := Classical.choose!_eq_iff _
 
-def logDef : Δ₀Sentence 2 := ⟨“(#1 = 0 → #0 = 0) ∧ (0 < #1 → #0 < #1 ∧ ∃[#0 < #2 + 1] (!Exp.def [#1, #0] ∧ #2 < 2 * #0))”, by simp⟩
+def logDef : Δ₀-Sentence 2 := ⟨“(#1 = 0 → #0 = 0) ∧ (0 < #1 → #0 < #1 ∧ ∃[#0 < #2 + 1] (!Exp.def [#1, #0] ∧ #2 < 2 * #0))”, by simp⟩
 
 lemma log_defined : Δ₀-Function₁ (log : M → M) via logDef := by
   intro v; simp [logDef, log_graph, Exp.defined.pval, ←le_iff_lt_succ]
@@ -158,7 +158,7 @@ lemma length_graph {i a : M} : i = ‖a‖ ↔ (0 < a → ∃ k ≤ a, k = log a
     · rintro rfl; exact ⟨log a, by simp⟩
     · rintro ⟨_, _, rfl, rfl⟩; rfl
 
-def lengthDef : Δ₀Sentence 2 := ⟨“(0 < #1 → ∃[#0 < #2 + 1] (!logDef [#0, #2] ∧ #1 = #0 + 1)) ∧ (#1 = 0 → #0 = 0)”, by simp⟩
+def lengthDef : Δ₀-Sentence 2 := ⟨“(0 < #1 → ∃[#0 < #2 + 1] (!logDef [#0, #2] ∧ #1 = #0 + 1)) ∧ (#1 = 0 → #0 = 0)”, by simp⟩
 
 lemma length_defined : Δ₀-Function₁ (‖·‖ : M → M) via lengthDef := by
   intro v; simp [lengthDef, length_graph, log_defined.pval, ←le_iff_lt_succ]
@@ -329,7 +329,7 @@ lemma bexp_graph {y a x : M} : y = bexp a x ↔ ∃ l ≤ a, l = ‖a‖ ∧ (x 
     · exact (hlt lt).uniq (exp_bexp_of_lt lt)
     · rcases hle le; simp [bexp_eq_zero_of_le le]⟩
 
-def bexpDef : Δ₀Sentence 3 := ⟨“∃[#0 < #2 + 1] (!lengthDef [#0, #2] ∧ (#3 < #0 → !Exp.def [#3, #1]) ∧ (#0 ≤ #3 → #1 = 0))”, by simp⟩
+def bexpDef : Δ₀-Sentence 3 := ⟨“∃[#0 < #2 + 1] (!lengthDef [#0, #2] ∧ (#3 < #0 → !Exp.def [#3, #1]) ∧ (#0 ≤ #3 → #1 = 0))”, by simp⟩
 
 lemma bexp_defined : Δ₀-Function₂ (bexp : M → M → M) via bexpDef := by
   intro v; simp [bexpDef, bexp_graph, Exp.defined.pval, length_defined.pval, ←le_iff_lt_succ]
@@ -405,7 +405,7 @@ lemma fbit_eq_zero_iff {a i : M} : fbit a i = 0 ↔ ¬LenBit (bexp a i) a := by 
 
 lemma fbit_eq_zero_of_le {a i : M} (hi : ‖a‖ ≤ i) : fbit a i = 0 := by simp [fbit, bexp_eq_zero_of_le hi]
 
-def fbitDef : Δ₀Sentence 3 := ⟨“∃[#0 < #2 + 1] (!bexpDef [#0, #2, #3] ∧ ∃[#0 < #3 + 1] (!divDef [#0, #3, #1] ∧ !remDef [#2, #0, 2]))”, by simp⟩
+def fbitDef : Δ₀-Sentence 3 := ⟨“∃[#0 < #2 + 1] (!bexpDef [#0, #2, #3] ∧ ∃[#0 < #3 + 1] (!divDef [#0, #3, #1] ∧ !remDef [#2, #0, 2]))”, by simp⟩
 
 lemma fbit_defined : Δ₀-Function₂ (fbit : M → M → M) via fbitDef := by
   intro v; simp [fbitDef, bexp_defined.pval, div_defined.pval, rem_defined.pval, ←le_iff_lt_succ, fbit]

@@ -19,7 +19,7 @@ def Bit (i a : M) : Prop := LenBit (exp i) a
 
 instance : Membership M M := ⟨Bit⟩
 
-def bitDef : Δ₀Sentence 2 := ⟨“∃[#0 < #2 + 1] (!expdef [#0, #1] ∧ !lenbitDef [#0, #2])”, by simp⟩
+def bitDef : Δ₀-Sentence 2 := ⟨“∃[#0 < #2 + 1] (!expdef [#0, #1] ∧ !lenbitDef [#0, #2])”, by simp⟩
 
 lemma bit_defined : Δ₀-Relation ((· ∈ ·) : M → M → Prop) via bitDef := by
   intro v; simp [bitDef, lenbit_defined.pval, exp_defined.pval, ←le_iff_lt_succ]
@@ -131,7 +131,7 @@ lemma lt_exp_iff {a i : M} : a < exp i ↔ ∀ j ∈ a, j < i :=
 
 instance : HasSubset M := ⟨fun a b ↦ ∀ ⦃i⦄, i ∈ a → i ∈ b⟩
 
-def bitSubsetDef : Δ₀Sentence 2 := ⟨“∀[#0 < #1] (!bitDef [#0, #1] → !bitDef [#0, #2])”, by simp⟩
+def bitSubsetDef : Δ₀-Sentence 2 := ⟨“∀[#0 < #1] (!bitDef [#0, #1] → !bitDef [#0, #2])”, by simp⟩
 
 lemma bitSubset_defined : Δ₀-Relation ((· ⊆ ·) : M → M → Prop) via bitSubsetDef := by
   intro v; simp [bitSubsetDef, bit_defined.pval]
@@ -273,9 +273,9 @@ variable (L : Language) [(k : ℕ) → Encodable (L.Func k)] [(k : ℕ) → Enco
 variable (M)
 
 class ArithmetizedLanguage where
-  isFunc : Δ₀Sentence 2
+  isFunc : Δ₀-Sentence 2
   isFunc_spec : Δ₀-Relation (fun (k' f' : M) ↦ ∃ (k : ℕ) (f : L.Func k), k' = k ∧ f' = Encodable.encode f) via isFunc
-  isRel : Δ₀Sentence 2
+  isRel : Δ₀-Sentence 2
   isRel_spec : Δ₀-Relation (fun (k' r' : M) ↦ ∃ (k : ℕ) (r : L.Rel k), k' = k ∧ r' = Encodable.encode r) via isRel
 
 variable {M L}

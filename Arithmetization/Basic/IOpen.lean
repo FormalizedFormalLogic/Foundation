@@ -134,7 +134,7 @@ lemma eq_mul_div_add_of_pos (a : M) {b} (hb : 0 < b) : ∃ r < b, a = b * (a / b
 lemma div_graph {a b c : M} : c = a / b ↔ ((0 < b → b * c ≤ a ∧ a < b * (c + 1)) ∧ (b = 0 → c = 0)) :=
   Classical.choose!_eq_iff _
 
-def divDef : Δ₀Sentence 3 :=
+def divDef : Δ₀-Sentence 3 :=
   ⟨“(0 < #2 → #2 * #0 ≤ #1 ∧ #1 < #2 * (#0 + 1)) ∧ (#2 = 0 → #0 = 0)”, by simp[Hierarchy.pi_zero_iff_sigma_zero]⟩
 
 lemma div_defined : Δ₀-Function₂ ((· / ·) : M → M → M) via divDef := by
@@ -287,7 +287,7 @@ instance : Mod M := ⟨rem⟩
 
 lemma mod_def (a b : M) : a % b = a - b * (a / b) := rfl
 
-def remDef : Δ₀Sentence 3 :=
+def remDef : Δ₀-Sentence 3 :=
   ⟨“∃[#0 < #2 + 1] (!divDef [#0, #2, #3] ∧ !subDef [#1, #2, #3 * #0])”, by simp⟩
 
 lemma rem_graph (a b c : M) : a = b % c ↔ ∃ x ≤ b, (x = b / c ∧ a = b - c * x) := by
@@ -453,7 +453,7 @@ prefix:75 "√" => sqrt
 
 lemma sqrt_graph {a b : M} : b = √a ↔ b * b ≤ a ∧ a < (b + 1) * (b + 1) := Classical.choose!_eq_iff _
 
-def sqrtdef : Δ₀Sentence 2 :=
+def sqrtdef : Δ₀-Sentence 2 :=
   ⟨“#0 * #0 ≤ #1 ∧ #1 < (#0 + 1) * (#0 + 1)”, by simp[Hierarchy.pi_zero_iff_sigma_zero]⟩
 
 lemma sqrt_defined : Δ₀-Function₁ (λ a : M ↦ √a) via sqrtdef := by
@@ -545,7 +545,7 @@ lemma pair_graph {a b c : M} :
   · simp [h, show ¬b ≤ a from by simpa using h]
   · simp [h, show b ≤ a from by simpa using h]
 
-def pairDef : Δ₀Sentence 3 := ⟨“(#1 < #2 ∧ #0 = #2 * #2 + #1) ∨ (#2 ≤ #1 ∧ #0 = #1 * #1 + #1 + #2)”, by simp⟩
+def pairDef : Δ₀-Sentence 3 := ⟨“(#1 < #2 ∧ #0 = #2 * #2 + #1) ∨ (#2 ≤ #1 ∧ #0 = #1 * #1 + #1 + #2)”, by simp⟩
 
 lemma pair_defined : Δ₀-Function₂ (λ a b : M ↦ ⟪a, b⟫) via pairDef := by
   intro v; simp [pair_graph, pairDef]
@@ -600,9 +600,9 @@ instance : PolyBounded₁ ℒₒᵣ (pi₁ : M → M) := ⟨ᵀ“#0”, by intr
 
 instance : PolyBounded₁ ℒₒᵣ (pi₂ : M → M) := ⟨ᵀ“#0”, by intro v; simp⟩
 
-def pi₁Def : Δ₀Sentence 2 := ⟨“∃[#0 < #2 + 1] !pairDef [#2, #1, #0]”, by simp⟩
+def pi₁Def : Δ₀-Sentence 2 := ⟨“∃[#0 < #2 + 1] !pairDef [#2, #1, #0]”, by simp⟩
 
-def pi₂Def : Δ₀Sentence 2 := ⟨“∃[#0 < #2 + 1] !pairDef [#2, #0, #1]”, by simp⟩
+def pi₂Def : Δ₀-Sentence 2 := ⟨“∃[#0 < #2 + 1] !pairDef [#2, #0, #1]”, by simp⟩
 
 lemma pi₁_defined : Δ₀-Function₁ (pi₁ : M → M) via pi₁Def := by
   intro v; simp [pi₁Def, pair_defined.pval]

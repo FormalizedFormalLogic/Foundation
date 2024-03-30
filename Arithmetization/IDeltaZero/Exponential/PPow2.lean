@@ -16,7 +16,7 @@ variable [𝐈𝚫₀.Mod M]
 
 def SPPow2 (m : M) : Prop := ¬LenBit 1 m ∧ LenBit 2 m ∧ ∀ i ≤ m, Pow2 i → 2 < i → (LenBit i m ↔ (√i)^2 = i ∧ LenBit (√i) m)
 
-def sppow2Def : Δ₀Sentence 1 :=
+def sppow2Def : Δ₀-Sentence 1 :=
   ⟨“¬!lenbitDef [1, #0] ∧ !lenbitDef [2, #0] ∧
       ∀[#0 < #1 + 1] (!pow2Def [#0] → 2 < #0 →
         (!lenbitDef [#0, #1] ↔ ∃[#0 < #1 + 1] (!sqrtdef [#0, #1] ∧ #0 * #0 = #1 ∧ !lenbitDef [#0, #2])))”, by simp⟩
@@ -32,7 +32,7 @@ lemma sppow2_defined : Δ₀-Predicate (SPPow2 : M → Prop) via sppow2Def := by
 
 def PPow2 (i : M) : Prop := Pow2 i ∧ ∃ m < 2 * i, SPPow2 m ∧ LenBit i m
 
-def ppow2Def : Δ₀Sentence 1 :=
+def ppow2Def : Δ₀-Sentence 1 :=
   ⟨“!pow2Def [#0] ∧ ∃[#0 < 2 * #1] (!sppow2Def [#0] ∧ !lenbitDef [#1, #0])”, by simp⟩
 
 lemma ppow2_defined : Δ₀-Predicate (PPow2 : M → Prop) via ppow2Def := by

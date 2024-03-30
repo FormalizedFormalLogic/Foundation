@@ -21,7 +21,7 @@ lemma ext_graph (a b c : M) : a = ext b c ↔ ∃ x ≤ c, x = c / b ∧ a = x %
   · rintro rfl; exact ⟨c / b, by simp, rfl, by rfl⟩
   · rintro ⟨_, _, rfl, rfl⟩; simp
 
-def extDef : Δ₀Sentence 3 :=
+def extDef : Δ₀-Sentence 3 :=
   ⟨“∃[#0 < #3 + 1] (!divDef [#0, #3, #2] ∧ !remDef [#1, #0, #2])”, by simp⟩
 
 lemma ext_defined : Δ₀-Function₂ (λ a b : M ↦ ext a b) via extDef := by
@@ -79,7 +79,7 @@ lemma Exp.Seqₛ.iff (y X Y : M) :
       · exact Or.inl ⟨by simp [hx, hy], by simp [hx, hy]⟩
       · exact Or.inr ⟨by simp [hx, hy], by simp [hx, hy]⟩⟩
 
-def Exp.Seqₛ.def : Δ₀Sentence 3 := ⟨
+def Exp.Seqₛ.def : Δ₀-Sentence 3 := ⟨
   “∀[#0 < #1 + 1](#0 ≠ 2 → !ppow2Def [#0] →
     ( ∃[#0 < #3 + 1] (!extDef [#0, #1, #3] ∧ !extDef [2 * #0, #1 * #1, #3]) ∧
       ∃[#0 < #4 + 1] (!extDef [#0, #1, #4] ∧ !extDef [#0 * #0, #1 * #1, #4]) ) ∨
@@ -102,7 +102,7 @@ lemma Exp.graph_iff (x y : M) :
       · exact Or.inl H
       · exact Or.inr ⟨X, bX, Y, bY, ⟨H₀.1.symm, H₀.2.symm⟩, Hₛ, ⟨u, hu, ne2, ppu, hX.symm, hY.symm⟩⟩⟩
 
-def Exp.def : Δ₀Sentence 2 := ⟨
+def Exp.def : Δ₀-Sentence 2 := ⟨
   “(#0 = 0 ∧ #1 = 1) ∨ (
     ∃[#0 < #2 * #2 * #2 * #2 + 1] ∃[#0 < #3 * #3 * #3 * #3 + 1] (
       (!extDef [1, 4, #1] ∧ !extDef [2, 4, #0]) ∧
@@ -710,7 +710,7 @@ lemma exp_exponential (a : M) : Exp a (exp a) := Classical.choose!_spec (Exp.ran
 
 lemma exponential_graph {a b : M} : a = exp b ↔ Exp b a := Classical.choose!_eq_iff _
 
-def expdef : Δ₀Sentence 2 := ⟨“!Exp.def [#1, #0]”, by simp⟩
+def expdef : Δ₀-Sentence 2 := ⟨“!Exp.def [#1, #0]”, by simp⟩
 
 -- #eval expdef.val
 

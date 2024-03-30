@@ -39,7 +39,7 @@ lemma sub_eq_iff : c = a - b ↔ ((a ≥ b → a = b + c) ∧ (a < b → c = 0))
 
 open Definability
 
-def subDef : Δ₀Sentence 3 :=
+def subDef : Δ₀-Sentence 3 :=
   ⟨“(#2 ≤ #1 → #1 = #2 + #0) ∧ (#1 < #2 → #0 = 0)”, by simp[Hierarchy.pi_zero_iff_sigma_zero]⟩
 
 lemma sub_defined : Δ₀-Function₂ ((· - ·) : M → M → M) via subDef := by
@@ -147,7 +147,7 @@ lemma dvd_iff_bounded {a b : M} : a ∣ b ↔ ∃ c ≤ b, b = a * c := by
     · rintro ⟨c, rfl⟩; exact ⟨c, le_mul_self_of_pos_left (pos_iff_ne_zero.mpr hx), rfl⟩
     · rintro ⟨c, hz, rfl⟩; exact dvd_mul_right a c
 
-def dvdDef : Δ₀Sentence 2 := ⟨“∃[#0 < #2 + 1] #2 = #1 * #0”, by simp⟩
+def dvdDef : Δ₀-Sentence 2 := ⟨“∃[#0 < #2 + 1] #2 = #1 * #0”, by simp⟩
 
 lemma dvd_defined : Δ₀-Relation (λ a b : M ↦ a ∣ b) via dvdDef :=
   λ v ↦ by simp[dvd_iff_bounded, Matrix.vecHead, Matrix.vecTail, le_iff_lt_succ, dvdDef]
@@ -216,7 +216,7 @@ lemma prime_iff_bounded {a : M} : Prime a ↔ 1 < a ∧ ∀ b ≤ a, (b ∣ a �
 def IsPrime (a : M) : Prop := 1 < a ∧ ∀ b ≤ a, (b ∣ a → b = 1 ∨ b = a)
 -- TODO: prove IsPrime a ↔ Prime a
 
-def isPrimedef : Δ₀Sentence 1 :=
+def isPrimedef : Δ₀-Sentence 1 :=
   ⟨“1 < #0” ⋏ (∀[“#0 < #1 + 1”] dvdDef/[#0, #1] ⟶ “#0 = 1 ∨ #0 = #1”), by simp [Hierarchy.pi_zero_iff_sigma_zero]⟩
 
 lemma isPrime_defined : Δ₀-Predicate (λ a : M ↦ IsPrime a) via isPrimedef := by

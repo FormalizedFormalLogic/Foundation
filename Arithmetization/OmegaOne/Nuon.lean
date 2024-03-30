@@ -62,7 +62,7 @@ lemma ext_graph (z S L i : M) : z = S{L}[i] ↔
       rcases h lt with ⟨b, hb, Hb, hL, _, HhL, _, _, rfl, rfl⟩
       exact ⟨b, hb, Hb, by rw [HhL.uniq (exp_hash_one L)]⟩
 
-def extDef : Δ₀Sentence 4 :=
+def extDef : Δ₀-Sentence 4 :=
   ⟨“∃[#0 < #3 + 1] (!lengthDef [#0, #3] ∧
     ∃[#0 < #3 + 1] (!lengthDef [#0, #3] ∧
       (#1 ≤ #5 * #0 → #2 = 0) ∧
@@ -485,7 +485,7 @@ lemma sq_polyI_hash_polyL_polybounded {A : M} (pos : 0 < A) : ((polyI A) # (poly
 
 def NuonAux (A k n : M) : Prop := SeriesSegment (polyU A) (polyI A) (polyL A) A k n
 
-def isSegmentDef : Δ₀Sentence 5 :=
+def isSegmentDef : Δ₀-Sentence 5 :=
   ⟨“∀[#0 < #4]
       ∃[#0 < #6 + 1](!extDef [#0, #2, #6, #1 + 1] ∧
       ∃[#0 < #7 + 1](!extDef [#0, #3, #7, #2] ∧
@@ -499,7 +499,7 @@ lemma isSegmentDef_defined : Defined (M := M) (λ v ↦ IsSegment (v 0) (v 1) (v
   · intro h; exact ⟨_, by simp, rfl, _, by simp, rfl, _, by simp, rfl, h⟩
   · rintro ⟨_, _, rfl, _, _, rfl, _, _, rfl, h⟩; exact h
 
-def segmentDef : Δ₀Sentence 7 :=
+def segmentDef : Δ₀-Sentence 7 :=
   ⟨“∃[#0 < #1](!isSegmentDef [#2, #3, #4, #5, #0] ∧
       !extDef [#6, #2, #0, 0] ∧ !extDef [#7, #2, #0, #5])”, by simp⟩
 
@@ -507,7 +507,7 @@ lemma segmentDef_defined : Defined (M := M) (λ v ↦ Segment (v 0) (v 1) (v 2) 
   intro v; simp [Segment, segmentDef, ext_defined.pval, isSegmentDef_defined.pval, @Eq.comm _ (v 5), @Eq.comm _ (v 6)]
   rfl
 
-def isSeriesDef : Δ₀Sentence 6 :=
+def isSeriesDef : Δ₀-Sentence 6 :=
   ⟨“∀[#0 < #5]
       ∃[#0 < #3 + 1](!lengthDef [#0, #3] ∧
       ∃[#0 < #8 + 1](!extDef [#0, #5, #8, #2] ∧
@@ -528,7 +528,7 @@ lemma isSerieDef_defined : Defined (M := M) (λ v ↦ IsSeries (v 0) (v 1) (v 2)
   rw [bex_eq_le_iff, bex_eq_le_iff, bex_eq_le_iff]
   simp; rfl
 
-def seriesDef : Δ₀Sentence 6 :=
+def seriesDef : Δ₀-Sentence 6 :=
   ⟨“∃[#0 < #1](!isSeriesDef [#1, #2, #3, #4, #5, #0] ∧ !extDef [0, #3, #0, 0] ∧ !extDef [#6, #3, #0, #5])”, by simp⟩
 
 lemma seriesDef_defined : Defined (M := M) (λ v ↦ Series (v 0) (v 1) (v 2) (v 3) (v 4) (v 5)) seriesDef.val := by
@@ -538,7 +538,7 @@ lemma seriesDef_defined : Defined (M := M) (λ v ↦ Series (v 0) (v 1) (v 2) (v
   apply and_congr_right; intros
   simp [Eq.comm]
 
-def seriesSegmentDef : Δ₀Sentence 6 :=
+def seriesSegmentDef : Δ₀-Sentence 6 :=
   ⟨“∃[#0 < #6 + 1]
       ∃[#0 < #3 + 1](!lengthDef [#0, #3] ∧
       ∃[#0 < #7 + 1](!divDef [#0, #7, #1] ∧
@@ -553,7 +553,7 @@ lemma seriesSegmentDef_defined : Defined (M := M) (λ v ↦ SeriesSegment (v 0) 
   apply and_congr_right; intros
   rw [bex_eq_le_iff, bex_eq_le_iff, bex_eq_le_iff]; simp; rfl
 
-def nuonAuxDef : Δ₀Sentence 3 :=
+def nuonAuxDef : Δ₀-Sentence 3 :=
   ⟨“∃[#0 < #1 + 1](!lengthDef [#0, #1] ∧
     ∃[#0 < #1 + 1](!sqrtdef [#0, #1] ∧
     ∃[#0 < 2 * #3 + 1](!bexpDef [#0, 2 * #3, #1] ∧
@@ -668,7 +668,7 @@ lemma nuon_bit1 (a : M) : nuon (2 * a + 1) = nuon a + 1 := by
   have : Nuon (2 * a + 1) (nuon a + 1) := by simpa [Nuon, length_two_mul_add_one] using (nuon_nuon a).two_mul_add_one (by simp)
   exact this.nuon_eq
 
-def nuonDef : Δ₀Sentence 2 :=
+def nuonDef : Δ₀-Sentence 2 :=
   ⟨“∃[#0 < #2 + 1](!lengthDef [#0, #2] ∧
     !Nuon.nuonAuxDef [#2, #0, #1])”, by simp⟩
 

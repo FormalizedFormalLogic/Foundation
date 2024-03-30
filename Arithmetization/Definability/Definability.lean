@@ -1,6 +1,7 @@
 import Arithmetization.Vorspiel.Lemmata
 import Arithmetization.Definability.Init
 import Arithmetization.Vorspiel.Graph
+import Logic.FirstOrder.Arith.StrictHierarchy
 import Aesop
 
 namespace LO.FirstOrder
@@ -39,13 +40,18 @@ variable {L : Language} [L.ORing] [Structure L M] [Structure.ORing L M] [Structu
 namespace Definability
 
 abbrev HSemiformula (Γ : Polarity) (s : ℕ) (L : Language) [L.LT] (μ : Type*) (n) :=
-  { p : Semiformula L μ  n // Hierarchy Γ s p }
+  { p : Semiformula L μ n // Hierarchy Γ s p }
+
+structure DeltaSemiformula (L : Language) [L.LT] (T : Theory L) (ν : ℕ) (ξ : Type*) [DecidableEq ξ] (n) :=
+  sigma : HSemiformula Σ ν L ξ n
+  pi : HSemiformula Π ν L ξ n
+  equiv : T ⊨ ∀ᶠ* ∀* (sigma.val ⟷ pi.val)
 
 abbrev SentenceHierarchy (Γ : Polarity) (s : ℕ) (L : Language) [L.LT] (n) := HSemiformula Γ s L Empty n
 
-scoped[LO.FirstOrder.Arith] notation "Δ₀Sentence " n => Definability.SentenceHierarchy Σ 0 ℒₒᵣ n
+scoped[LO.FirstOrder.Arith] notation "Δ₀-Sentence " n => Definability.SentenceHierarchy Σ 0 ℒₒᵣ n
 
-scoped[LO.FirstOrder.Arith] notation "Δ₀(exp)Sentence " n => Definability.SentenceHierarchy Σ 0 ℒₒᵣ(exp) n
+scoped[LO.FirstOrder.Arith] notation "Δ₀(exp)-Sentence " n => Definability.SentenceHierarchy Σ 0 ℒₒᵣ(exp) n
 
 namespace HSemiformula
 

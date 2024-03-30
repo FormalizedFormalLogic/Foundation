@@ -58,7 +58,7 @@ lemma exp_hash (a b : M) : Exp (‖a‖ * ‖b‖) (a # b) := Classical.choose!_
 
 lemma exp_hash_one (a : M) : Exp ‖a‖ (a # 1) := by simpa using exp_hash a 1
 
-def hashDef : Δ₀Sentence 3 :=
+def hashDef : Δ₀-Sentence 3 :=
   ⟨“∃[#0 < #2 + 1] ∃[#0 < #4 + 1] (!lengthDef [#1, #3] ∧ !lengthDef [#0, #4] ∧ !Exp.def [#1 * #0, #2])”, by simp⟩
 
 lemma hash_defined : Δ₀-Function₂ (Hash.hash : M → M → M) via hashDef := by

@@ -16,7 +16,7 @@ variable [𝐈open.Mod M]
 
 def Pow2 (a : M) : Prop := 0 < a ∧ ∀ r ≤ a, 1 < r → r ∣ a → 2 ∣ r
 
-def pow2Def : Δ₀Sentence 1 :=
+def pow2Def : Δ₀-Sentence 1 :=
   ⟨“0 < #0 ∧ ∀[#0 < #1 + 1] (1 < #0 →  !dvdDef [#0, #1] → !dvdDef [2, #0])”, by simp [Hierarchy.pi_zero_iff_sigma_zero]⟩
 
 lemma pow2_defined : Δ₀-Predicate (Pow2 : M → Prop) via pow2Def := by
@@ -110,7 +110,7 @@ section LenBit
 /-- $\mathrm{LenBit} (2^i, a) \iff \text{$i$th-bit of $a$ is $1$}$. -/
 def LenBit (i a : M) : Prop := ¬2 ∣ (a / i)
 
-def lenbitDef : Δ₀Sentence 2 :=
+def lenbitDef : Δ₀-Sentence 2 :=
   ⟨“∃[#0 < #2 + 1] (!divDef [#0, #2, #1] ∧ ¬!dvdDef [2, #0])”, by simp⟩
 
 lemma lenbit_defined : Δ₀-Relation (LenBit : M → M → Prop) via lenbitDef := by
