@@ -159,13 +159,12 @@ lemma consequence_of (σ : Sentence L)
          [Zero M] [One M] [Add M] [Mul M] [LT M]
          [Structure L M]
          [Structure.ORing L M]
-         [Theory.Mod M T],
+         [M ⊧ₘ* T],
          M ⊧ₘ σ) :
     T ⊨ σ := consequence_iff_eq.mpr fun M _ _ _ hT =>
-  letI : Theory.Mod (Structure.Model L M) T :=
-    ⟨((Structure.ElementaryEquiv.modelsTheory (Structure.Model.elementaryEquiv L M)).mp hT)⟩
-  (Structure.ElementaryEquiv.models (Structure.Model.elementaryEquiv L M)).mpr
-    (H (Structure.Model L M))
+  letI : Structure.Model L M ⊧ₘ* T :=
+    ((Structure.ElementaryEquiv.modelsTheory (Structure.Model.elementaryEquiv L M)).mp hT)
+  (Structure.ElementaryEquiv.models (Structure.Model.elementaryEquiv L M)).mpr (H (Structure.Model L M))
 
 end Arith
 

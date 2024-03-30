@@ -170,14 +170,14 @@ lemma consistent_of_model {T : Set F}
 lemma consistent_of_satisfiable {T : Set F} : Semantics.SatisfiableTheory T → System.Consistent T := by
   rintro ⟨_, h⟩; exact consistent_of_model h
 
-lemma models_of_proof {T : Set F} {f} (h : a ⊧* T) (b : T ⊢ f) : a ⊧ f :=
+lemma realize_of_proof {T : Set F} {f} (h : a ⊧* T) (b : T ⊢ f) : a ⊧ f :=
   Sound.sound b h
 
-lemma modelsTheory_of_proofTheory {T U : Set F} (h : s ⊧* T) (b : T ⊢* U) : s ⊧* U :=
-  fun _ hf => models_of_proof h (b hf)
+lemma realizeTheory_of_proofTheory {T U : Set F} (h : a ⊧* T) (b : T ⊢* U) : a ⊧* U :=
+  ⟨fun _ hf => realize_of_proof h (b hf)⟩
 
-lemma modelsTheory_of_subtheory {T U : Set F} [U ≾ T] (h : s ⊧* T) : s ⊧* U :=
-  modelsTheory_of_proofTheory h System.Subtheory.bewTheory
+lemma modelsTheory_of_subtheory {T U : Set F} [U ≾ T] (h : a ⊧* T) : a ⊧* U :=
+  realizeTheory_of_proofTheory h System.Subtheory.bewTheory
 
 end Sound
 

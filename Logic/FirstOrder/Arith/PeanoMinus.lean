@@ -11,7 +11,7 @@ namespace Arith
 
 noncomputable section
 
-variable {M : Type} [Zero M] [One M] [Add M] [Mul M] [LT M] [𝐏𝐀⁻.Mod M]
+variable {M : Type} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐏𝐀⁻]
 
 open Language
 
@@ -22,55 +22,55 @@ instance : LE M := ⟨fun x y => x = y ∨ x < y⟩
 lemma le_def {x y : M} : x ≤ y ↔ x = y ∨ x < y := iff_of_eq rfl
 
 protected lemma add_zero : ∀ x : M, x + 0 = x := by
-  simpa[models_iff] using Theory.Mod.models M Theory.peanoMinus.addZero
+  simpa[models_iff] using ModelsTheory.models M Theory.peanoMinus.addZero
 
 protected lemma add_assoc : ∀ x y z : M, (x + y) + z = x + (y + z) := by
-  simpa[models_iff] using Theory.Mod.models M Theory.peanoMinus.addAssoc
+  simpa[models_iff] using ModelsTheory.models M Theory.peanoMinus.addAssoc
 
 protected lemma add_comm : ∀ x y : M, x + y = y + x := by
-  simpa[models_iff] using Theory.Mod.models M Theory.peanoMinus.addComm
+  simpa[models_iff] using ModelsTheory.models M Theory.peanoMinus.addComm
 
 lemma add_eq_of_lt : ∀ x y : M, x < y → ∃ z, x + z = y := by
-  simpa[models_iff] using Theory.Mod.models M Theory.peanoMinus.addEqOfLt
+  simpa[models_iff] using ModelsTheory.models M Theory.peanoMinus.addEqOfLt
 
 @[simp] lemma zero_le : ∀ x : M, 0 ≤ x := by
-  simpa[models_iff, Structure.le_iff_of_eq_of_lt] using Theory.Mod.models M Theory.peanoMinus.zeroLe
+  simpa[models_iff, Structure.le_iff_of_eq_of_lt] using ModelsTheory.models M Theory.peanoMinus.zeroLe
 
 lemma zero_lt_one : (0 : M) < 1 := by
-  simpa[models_iff] using Theory.Mod.models M Theory.peanoMinus.zeroLtOne
+  simpa[models_iff] using ModelsTheory.models M Theory.peanoMinus.zeroLtOne
 
 lemma one_le_of_zero_lt : ∀ x : M, 0 < x → 1 ≤ x := by
-  simpa[models_iff, Structure.le_iff_of_eq_of_lt] using Theory.Mod.models M Theory.peanoMinus.oneLeOfZeroLt
+  simpa[models_iff, Structure.le_iff_of_eq_of_lt] using ModelsTheory.models M Theory.peanoMinus.oneLeOfZeroLt
 
 lemma add_lt_add : ∀ x y z : M, x < y → x + z < y + z := by
-  simpa[models_iff] using Theory.Mod.models M Theory.peanoMinus.addLtAdd
+  simpa[models_iff] using ModelsTheory.models M Theory.peanoMinus.addLtAdd
 
 protected lemma mul_zero : ∀ x : M, x * 0 = 0 := by
-  simpa[models_iff] using Theory.Mod.models M Theory.peanoMinus.mulZero
+  simpa[models_iff] using ModelsTheory.models M Theory.peanoMinus.mulZero
 
 protected lemma mul_one : ∀ x : M, x * 1 = x := by
-  simpa[models_iff] using Theory.Mod.models M Theory.peanoMinus.mulOne
+  simpa[models_iff] using ModelsTheory.models M Theory.peanoMinus.mulOne
 
 protected lemma mul_assoc : ∀ x y z : M, (x * y) * z = x * (y * z) := by
-  simpa[models_iff] using Theory.Mod.models M Theory.peanoMinus.mulAssoc
+  simpa[models_iff] using ModelsTheory.models M Theory.peanoMinus.mulAssoc
 
 protected lemma mul_comm : ∀ x y : M, x * y = y * x := by
-  simpa[models_iff] using Theory.Mod.models M Theory.peanoMinus.mulComm
+  simpa[models_iff] using ModelsTheory.models M Theory.peanoMinus.mulComm
 
 lemma mul_lt_mul : ∀ x y z : M, x < y → 0 < z → x * z < y * z := by
-  simpa[models_iff] using Theory.Mod.models M Theory.peanoMinus.mulLtMul
+  simpa[models_iff] using ModelsTheory.models M Theory.peanoMinus.mulLtMul
 
 lemma distr : ∀ x y z : M, x * (y + z) = x * y + x * z := by
-  simpa[models_iff] using Theory.Mod.models M Theory.peanoMinus.distr
+  simpa[models_iff] using ModelsTheory.models M Theory.peanoMinus.distr
 
 lemma lt_irrefl : ∀ x : M, ¬x < x := by
-  simpa[models_iff] using Theory.Mod.models M Theory.peanoMinus.ltIrrefl
+  simpa[models_iff] using ModelsTheory.models M Theory.peanoMinus.ltIrrefl
 
 lemma lt_trans : ∀ x y z : M, x < y → y < z → x < z := by
-  simpa[models_iff] using Theory.Mod.models M Theory.peanoMinus.ltTrans
+  simpa[models_iff] using ModelsTheory.models M Theory.peanoMinus.ltTrans
 
 lemma lt_tri : ∀ x y : M, x < y ∨ x = y ∨ y < x := by
-  simpa[models_iff] using Theory.Mod.models M Theory.peanoMinus.ltTri
+  simpa[models_iff] using ModelsTheory.models M Theory.peanoMinus.ltTri
 
 instance : AddCommMonoid M where
   add_assoc := Model.add_assoc
@@ -140,7 +140,7 @@ instance : CanonicallyOrderedAddCommMonoid M where
     · simpa[eq_comm] using add_eq_of_lt x y h
   le_self_add := by intro x y; simp
 
-@[simp] lemma numeral_eq_natCast : (n : ℕ) → (ORingSymbol.numeral n : M) = n
+lemma numeral_eq_natCast : (n : ℕ) → (ORingSymbol.numeral n : M) = n
   | 0     => rfl
   | 1     => by simp
   | n + 2 => by simp[ORingSymbol.numeral, numeral_eq_natCast (n + 1), add_assoc, one_add_one_eq_two]
@@ -214,7 +214,7 @@ variable {T : Theory ℒₒᵣ} [𝐄𝐪 ≾ T] [𝐏𝐀⁻ ≾ T]
 theorem sigma_one_completeness {σ : Sentence ℒₒᵣ} (hσ : Hierarchy Σ 1 σ) :
     ℕ ⊧ₘ σ → T ⊢ σ := fun H =>
   Complete.complete (oRing_consequence_of _ _ (fun M _ _ _ _ _ _ => by
-    haveI : 𝐏𝐀⁻.Mod M := Theory.Mod.of_subtheory (T₁ := T) M (Semantics.ofSystemSubtheory _ _)
+    haveI : M ⊧ₘ* 𝐏𝐀⁻ := ModelsTheory.of_subtheory (T₁ := T) inferInstance (Semantics.ofSystemSubtheory _ _)
     simpa [Matrix.empty_eq] using Model.pval_of_pval_nat_of_sigma_one (M := M) hσ H))
 
 end

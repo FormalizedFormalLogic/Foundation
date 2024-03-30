@@ -131,7 +131,7 @@ lemma ultrafilter_exists [(t : FinSubtheory T) → Nonempty (A t)]
     intro t ht
     use t; use ht
     intro σ hσ
-    exact H ⟨t, ht⟩ hσ)
+    exact (H ⟨t, ht⟩).realizeTheory hσ)
 
 lemma compactnessAux :
     Semantics.SatisfiableTheory T ↔ ∀ i : FinSubtheory T, Semantics.SatisfiableTheory (i.val : Theory L) := by
@@ -143,7 +143,7 @@ lemma compactnessAux :
     choose A si s hA using this
     have : ∃ 𝓤 : Ultrafilter (FinSubtheory T), Set.image (Semiformula.domain A) T ⊆ 𝓤.sets := ultrafilter_exists A hA
     rcases this with ⟨𝓤, h𝓤⟩
-    have : Structure.Uprod A 𝓤 ⊧ₘ* T := by intro σ hσ; exact models_Uprod.mpr (h𝓤 $ Set.mem_image_of_mem (Semiformula.domain A) hσ)
+    have : Structure.Uprod A 𝓤 ⊧ₘ* T := ⟨by intro σ hσ; exact models_Uprod.mpr (h𝓤 $ Set.mem_image_of_mem (Semiformula.domain A) hσ)⟩
     exact satisfiableTheory_intro (Structure.Uprod A 𝓤) this
 
 theorem compactness :

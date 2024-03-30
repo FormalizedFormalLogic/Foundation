@@ -44,7 +44,6 @@ theorem sound : ⊢¹ Δ → Semantics.Valid Δ.disj := by
 
 end Derivation
 
-
 lemma soundness {T : Theory α} {p} : T ⊢ p → T ⊨ p := by
   rintro ⟨Γ, hΓ, d⟩ v hT
   by_contra hv
@@ -52,7 +51,7 @@ lemma soundness {T : Theory α} {p} : T ⊢ p → T ⊨ p := by
     simpa [Semantics.Valid, List.map_disj] using Derivation.sound (Tait.ofConsRight d)
   have : ∃ q ∈ Γ, ¬v ⊧ q := by simpa [hv] using this v
   rcases this with ⟨q, hqΓ, hq⟩
-  have : v ⊧ q := hT (hΓ q hqΓ)
+  have : v ⊧ q := hT.realize (hΓ q hqΓ)
   contradiction
 
 instance : Sound (Formula α) := ⟨soundness⟩
@@ -148,7 +147,7 @@ lemma mem_maximalConsistentTheory_or {p q} (h : p ⋎ q ∈ maximalConsistentThe
   simp_all
 
 lemma maximalConsistentTheory_satisfiable :
-    (Formula.atom · ∈ maximalConsistentTheory consisT) ⊧* maximalConsistentTheory consisT := by
+    (Formula.atom · ∈ maximalConsistentTheory consisT) ⊧* maximalConsistentTheory consisT := ⟨by
   intro p hp
   induction p using Formula.rec' <;> simp
   case hatom => simpa
@@ -162,11 +161,11 @@ lemma maximalConsistentTheory_satisfiable :
   case hor p q ihp ihq =>
     rcases mem_maximalConsistentTheory_or hp with (hp | hq)
     · left; exact ihp hp
-    · right; exact ihq hq
+    · right; exact ihq hq⟩
 
 lemma satisfiableTheory_of_consistent (consisT : Consistent T) : Semantics.SatisfiableTheory T :=
   ⟨(Formula.atom · ∈ maximalConsistentTheory consisT),
-    Semantics.realizeTheory_of_subset maximalConsistentTheory_satisfiable (by simp)⟩
+    Semantics.RealizeTheory.of_subset maximalConsistentTheory_satisfiable (by simp)⟩
 
 theorem completeness! : T ⊨ p → T ⊢! p := by
   suffices Consistent (insert (~p) T) → Semantics.SatisfiableTheory (insert (~p) T) by
@@ -175,9 +174,9 @@ theorem completeness! : T ⊨ p → T ⊢! p := by
     have : Semantics.SatisfiableTheory (insert (~p) T) :=
       this (consistent_insert_iff_not_refutable.mpr $ by simpa)
     rcases this with ⟨v, hv⟩
-    have : v ⊧* T := Semantics.realizeTheory_of_subset hv (by simp)
+    have : v ⊧* T := Semantics.RealizeTheory.of_subset hv (by simp)
     have : v ⊧ p := hs this
-    have : ¬v ⊧ p := by simpa using hv (Set.mem_insert (~p) T)
+    have : ¬v ⊧ p := by simpa using hv.realize (Set.mem_insert (~p) T)
     contradiction
   intro consis
   exact satisfiableTheory_of_consistent consis

@@ -42,19 +42,20 @@ variable (T)
 theorem main (θ : Semisentence ℒₒᵣ 1) :
     T ⊢! fixpoint θ ⟷ θ/[⸢fixpoint θ⸣] :=
   Complete.consequence_iff_provable.mp (oRing_consequence_of _ _ (fun M _ _ _ _ _ _ => by
-    haveI : 𝐏𝐀⁻.Mod M := Theory.Mod.of_subtheory (T₁ := T) M (Semantics.ofSystemSubtheory _ _)
+    haveI : M ⊧ₘ* 𝐏𝐀⁻ := ModelsTheory.of_subtheory (T₁ := T) inferInstance (Semantics.ofSystemSubtheory _ _)
     have hssbs : ∀ σ π : Semisentence ℒₒᵣ 1, ∀ z,
         PVal! M ![z, encode σ, encode π] ssbs ↔ z = encode (σ/[(⸢π⸣ : Semiterm ℒₒᵣ Empty 0)]) := by
-      simpa[models_iff, Semiformula.eval_substs, Matrix.comp_vecCons', Matrix.constant_eq_singleton] using
+      simpa [Model.numeral_eq_natCast, models_iff, Semiformula.eval_substs, Matrix.comp_vecCons', Matrix.constant_eq_singleton] using
       fun σ π => consequence_iff'.mp (Sound.sound! (ssbs_spec (T := T) σ π)) M
     simp[models_iff, Semiformula.eval_substs, Matrix.comp_vecCons']
     suffices PVal! M ![] (fixpoint θ) ↔ PVal! M ![encode (fixpoint θ)] θ by
-      simpa[Matrix.constant_eq_singleton] using this
+      simpa [Model.numeral_eq_natCast, Matrix.constant_eq_singleton] using this
     calc
       PVal! M ![] (fixpoint θ)
       ↔ ∀ z, PVal! M ![z, encode (diag θ), encode (diag θ)] ssbs → PVal! M ![z] θ := by simp[fixpoint, Semiformula.eval_rew,
                                                                                             Function.comp, Matrix.comp_vecCons',
                                                                                             Matrix.constant_eq_vec₂,
+                                                                                            Model.numeral_eq_natCast,
                                                                                             Matrix.constant_eq_singleton]
     _ ↔ PVal! M ![encode $ (diag θ)/[(⸢diag θ⸣ : Semiterm ℒₒᵣ Empty 0)]] θ         := by simp[hssbs]
     _ ↔ PVal! M ![encode $ ∀' (ssbs/[#0, ⸢diag θ⸣, ⸢diag θ⸣] ⟶ θ/[#0])] θ         := by rw[substs_diag]

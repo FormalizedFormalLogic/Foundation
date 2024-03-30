@@ -212,17 +212,17 @@ lemma lMap_models_lMap_iff {T : Theory L₁} {σ : Sentence L₁} :
   constructor
   · intro h s₁ hs₁
     exact (Structure.extendStructure.models_lMap Φ injf injr s₁.struc σ).mp $ h
-      (by simp[Semantics.realizeTheory, Theory.lMap];
-          intro σ hσ; exact (Structure.extendStructure.models_lMap (Φ := Φ) injf injr s₁.struc σ).mpr (hs₁ hσ))
+      (by simp[Semantics.realizeTheory_iff, Theory.lMap];
+          intro σ hσ; exact (Structure.extendStructure.models_lMap (Φ := Φ) injf injr s₁.struc σ).mpr (hs₁.realize hσ))
   · exact lMap_models_lMap
 
 lemma satisfiableTheory_lMap {T : Theory L₁} (s : Semantics.SatisfiableTheory T) :
     Semantics.SatisfiableTheory (Semiformula.lMap Φ '' T) := by
   rcases s with ⟨⟨M, i, s⟩, hM⟩
   exact ⟨⟨M, i, s.extendStructure Φ⟩, by
-    simp[Semantics.realizeTheory]
+    simp[Semantics.realizeTheory_iff]
     intro σ hσ
-    exact (Structure.extendStructure.models_lMap Φ injf injr s σ).mpr (hM hσ)⟩
+    exact (Structure.extendStructure.models_lMap Φ injf injr s σ).mpr (hM.realize hσ)⟩
 
 end lMap
 

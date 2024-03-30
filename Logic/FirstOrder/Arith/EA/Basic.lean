@@ -111,7 +111,7 @@ lemma modelsSuccInd_exp (p : Semiformula ℒₒᵣ(exp) ℕ 1) : ℕ ⊧ₘ (∀
 
 lemma modelsTheoryElementaryArithmetic : ℕ ⊧ₘ* 𝐄𝐀 := by
   simp [Theory.elementaryArithmetic, Theory.indScheme]
-  exact ⟨⟨by intro σ hσ; simpa [models_iff] using modelsTheoryPeanoMinus hσ, modelsTheoryExponential⟩,
+  exact ⟨⟨by intro σ hσ; simpa [models_iff] using models_peanoMinus hσ, modelsTheoryExponential⟩,
     by rintro σ p _ rfl; exact modelsSuccInd_exp p⟩
 
 end Standard

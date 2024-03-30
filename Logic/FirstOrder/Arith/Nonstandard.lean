@@ -60,9 +60,9 @@ local notation "⋆" => star
 
 lemma models_union_trueArithWithStarUnbounded : ℕ⋆ ⊧ₘ* ⋃ c, trueArithWithStarUnbounded c := ModelOfSatEq.models _
 
-lemma trueArith : ℕ⋆ ⊧ₘ* 𝐓𝐀 := by
+instance trueArith : ℕ⋆ ⊧ₘ* 𝐓𝐀 := ⟨by
   have : ℕ⋆ ⊧ₘ* Semiformula.lMap (Language.Hom.add₁ _ _) '' 𝐓𝐀 :=
-    Semantics.realizeTheory_of_subset models_union_trueArithWithStarUnbounded
+    Semantics.RealizeTheory.of_subset models_union_trueArithWithStarUnbounded
       (Set.subset_iUnion_of_subset 0 $ Set.subset_union_of_subset_left (Set.subset_union_right _ _ ) _)
   intro σ hσ
   let s : Structure ℒₒᵣ ℕ⋆ := (ModelOfSatEq.struc satisfiable_union_trueArithWithStarUnbounded).lMap
@@ -77,19 +77,17 @@ lemma trueArith : ℕ⋆ ⊧ₘ* 𝐓𝐀 := by
         ←Semiformula.eval_lMap, Matrix.fun_eq_vec₂]⟩
     haveI : Structure.LT ℒₒᵣ ℕ⋆ := ⟨fun _ _ => iff_of_eq rfl⟩
     exact standardModel_unique _ _
-  have : s.toStruc ⊧ σ := Semiformula.models_lMap.mp (this (Set.mem_image_of_mem _ hσ))
-  exact e ▸ this
+  have : s.toStruc ⊧ σ := Semiformula.models_lMap.mp (this.realize (Set.mem_image_of_mem _ hσ))
+  exact e ▸ this⟩
 
-instance : Theory.Mod ℕ⋆ 𝐓𝐀 := ⟨trueArith⟩
-
-instance : Theory.Mod ℕ⋆ 𝐏𝐀⁻ :=
-  Theory.Mod.of_ss (T₁ := 𝐓𝐀) _ (Structure.subset_of_models.mpr $ Arith.Standard.modelsTheoryPeanoMinus)
+instance : ℕ⋆ ⊧ₘ* 𝐏𝐀⁻ :=
+  ModelsTheory.of_ss (U := 𝐓𝐀) inferInstance (Structure.subset_of_models.mpr $ Arith.Standard.models_peanoMinus)
 
 lemma star_unbounded (n : ℕ) : n < ⋆ := by
   have : ℕ⋆ ⊧ₘ (“!!(Semiterm.Operator.numeral ℒₒᵣ⋆ n) < ⋆” : Sentence ℒₒᵣ⋆) :=
-    models_union_trueArithWithStarUnbounded
+    models_union_trueArithWithStarUnbounded.realize
       (Set.mem_iUnion_of_mem (n + 1) (Set.mem_union_right _ $ Set.mem_range_self $ Fin.last n))
-  simpa [models_iff] using this
+  simpa [models_iff, Model.numeral_eq_natCast] using this
 
 end Nonstandard
 

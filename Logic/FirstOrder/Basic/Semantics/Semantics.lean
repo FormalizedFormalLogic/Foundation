@@ -456,13 +456,9 @@ abbrev Models : Sentence L →ˡᶜ Prop := Semantics.realize s.toStruc
 postfix:max " ⊧ₘ " => Models
 
 abbrev ModelsTheory (T : Theory L) : Prop :=
-  Semantics.realizeTheory s.toStruc T
+  Semantics.RealizeTheory s.toStruc T
 
 infix:55 " ⊧ₘ* " => ModelsTheory
-
-abbrev Theory.Mod (T : Theory L) := Semantics.Mod s.toStruc T
-
-lemma Theory.Mod.iff {T : Theory L} : T.Mod M ↔ M ⊧ₘ* T := iff_of_eq <| by simp [Mod, Semantics.Mod.iff]
 
 abbrev Realize (M : Type u) [s : Structure L M] : Formula L M →ˡᶜ Prop := Semiformula.Val s id
 
@@ -478,19 +474,19 @@ lemma models_iff {σ : Sentence L} : M ⊧ₘ σ ↔ Semiformula.Val s Empty.eli
 
 lemma models_def' : Semantics.realize s.toStruc = Semiformula.Val s Empty.elim := rfl
 
-lemma modelsTheory_iff : M ⊧ₘ* T ↔ (∀ ⦃p⦄, p ∈ T → M ⊧ₘ p) := of_eq rfl
+lemma modelsTheory_iff : M ⊧ₘ* T ↔ (∀ ⦃p⦄, p ∈ T → M ⊧ₘ p) := Semantics.realizeTheory_iff
 
 lemma models_iff_models {σ : Sentence L} :
-    M ⊧ₘ σ ↔ Semantics.realize s.toStruc σ := of_eq rfl
+    M ⊧ₘ σ ↔ s.toStruc ⊧ σ := of_eq rfl
 
 lemma consequence_iff {σ : Sentence L} :
     T ⊨ σ ↔ (∀ (M : Type u) [Nonempty M] [Structure L M], M ⊧ₘ* T → M ⊧ₘ σ) :=
   ⟨fun h _ _ _ hT ↦ h hT, fun h s hT ↦ h s.Dom hT⟩
 
 lemma consequence_iff' {σ : Sentence L} :
-    T ⊨ σ ↔ (∀ (M : Type u) [Nonempty M] [Structure L M] [Theory.Mod M T], M ⊧ₘ σ) :=
+    T ⊨ σ ↔ (∀ (M : Type u) [Nonempty M] [Structure L M] [M ⊧ₘ* T], M ⊧ₘ σ) :=
   ⟨fun h _ _ s _ => Semantics.consequence_iff'.mp h s.toStruc,
-   fun h s hs => @h s.Dom s.nonempty s.struc ⟨hs⟩⟩
+   fun h s hs => @h s.Dom s.nonempty s.struc hs⟩
 
 lemma valid_iff {σ : Sentence L} :
     Semantics.Valid σ ↔ ∀ (M : Type u) [Nonempty M] [Structure L M], M ⊧ₘ σ :=
@@ -550,20 +546,32 @@ lemma lMap_models_lMap {L₁ L₂ : Language.{u}} {Φ : L₁ →ᵥ L₂}  {T : 
     T.lMap Φ ⊨ Semiformula.lMap Φ σ := by
   intro s hM
   have : Semantics.realize (s.struc.lMap Φ).toStruc σ :=
-    h (fun q hq => Semiformula.models_lMap.mp $ hM (Set.mem_image_of_mem _ hq))
+    h ⟨fun q hq => Semiformula.models_lMap.mp <| hM.realize (Set.mem_image_of_mem _ hq)⟩
   exact Semiformula.models_lMap.mpr this
 
-@[simp] lemma ModelsTheory.empty [Nonempty M] [Structure L M] : M ⊧ₘ* (∅ : Theory L) := by intro _; simp
+namespace ModelsTheory
 
-lemma ModelsTheory.of_ss [Nonempty M] [Structure L M] {T U : Theory L} (h : M ⊧ₘ* U) (ss : T ⊆ U) : M ⊧ₘ* T :=
-  fun _ hσ => h (ss hσ)
+variable (M) [Nonempty M] [Structure L M]
 
-@[simp] lemma ModelsTheory.add_iff [Nonempty M] [Structure L M] {T U : Theory L} :
+lemma models {T : Theory L} [M ⊧ₘ* T] {p} (h : p ∈ T) : M ⊧ₘ p := Semantics.RealizeTheory.realize _ h
+
+variable {M}
+
+lemma of_ss {T U : Theory L} (h : M ⊧ₘ* U) (ss : T ⊆ U) : M ⊧ₘ* T :=
+  Semantics.RealizeTheory.of_subset h ss
+
+@[simp] lemma add_iff {T U : Theory L} :
     M ⊧ₘ* T + U ↔ M ⊧ₘ* T ∧ M ⊧ₘ* U := by simp [Theory.add_def]
 
-namespace Theory
+instance add (T U : Theory L) [M ⊧ₘ* T] [M ⊧ₘ* U] : M ⊧ₘ* T + U :=
+  ModelsTheory.add_iff.mpr ⟨inferInstance, inferInstance⟩
 
-section
+lemma of_subtheory {T₁ T₂ : Theory L} (h : M ⊧ₘ* T₁) (hS : Semantics.Subtheory T₂ T₁) :
+    M ⊧ₘ* T₂ := Semantics.RealizeTheory.of_subtheory h hS
+
+end ModelsTheory
+
+namespace Theory
 
 variable {L₁ L₂ : Language.{u}} {Φ : L₁ →ᵥ L₂}
 
@@ -572,32 +580,6 @@ variable {M : Type u} [Nonempty M] [s₂ : Structure L₂ M]
 lemma modelsTheory_onTheory₁ {T₁ : Theory L₁} :
     ModelsTheory (s := s₂) (T₁.lMap Φ) ↔ ModelsTheory (s := s₂.lMap Φ) T₁ :=
   by simp[Semiformula.models_lMap, Theory.lMap, modelsTheory_iff, @modelsTheory_iff (T := T₁)]
-
-end
-
-namespace Mod
-
-variable (M : Type u) [Nonempty M] [s : Structure L M] (T U : Theory L) [Theory.Mod M T]
-
-lemma modelsTheory : M ⊧ₘ* T := Semantics.Mod.realizeTheory
-
-variable {T U}
-
-lemma models {σ : Sentence L} (hσ : σ ∈ T) : M ⊧ₘ σ := Semantics.Mod.models s.toStruc hσ
-
-lemma of_ss {T₁ T₂ : Theory L} [Theory.Mod M T₁] (ss : T₂ ⊆ T₁) : Theory.Mod M T₂ :=
-  Semantics.Mod.of_ss s.toStruc ss
-
-lemma of_subtheory [Nonempty M] {T₁ T₂ : Theory L} [Theory.Mod M T₁] (h : Semantics.Subtheory T₂ T₁) : Theory.Mod M T₂ :=
-  Semantics.Mod.of_subtheory _ h
-
-variable {M}
-
-lemma of_models (h : M ⊧ₘ* T) : Theory.Mod (L := L) M T := ⟨fun _ hp ↦ h hp⟩
-
-instance [T.Mod M] [U.Mod M] : (T + U).Mod M := of_models (by simp [add_def]; exact ⟨modelsTheory M T, modelsTheory M U⟩)
-
-end Mod
 
 end Theory
 
@@ -611,7 +593,7 @@ variable {L} {M : Type u} [Nonempty M] [Structure L M]
 
 @[simp] lemma mem_theory_iff {σ} : σ ∈ theory L M ↔ M ⊧ₘ σ := by rfl
 
-lemma subset_of_models : T ⊆ theory L M ↔ M ⊧ₘ* T := ⟨fun h _ hσ ↦ h hσ, fun h _ hσ ↦ h hσ⟩
+lemma subset_of_models : T ⊆ theory L M ↔ M ⊧ₘ* T := ⟨fun h  ↦ ⟨fun _ hσ ↦ h hσ⟩, fun h _ hσ ↦ h.realizeTheory hσ⟩
 
 end Structure
 

@@ -31,16 +31,20 @@ class Vocabulary (F : Type*) [LogicalConnective F] (V : outParam (Type*)) where
 namespace Semantics
 variable {α : Type*} [𝓢 : Semantics F α]
 
-def realizeTheory (a : α) (T : Set F) : Prop := ∀ ⦃f⦄, f ∈ T → realize a f
-
 postfix:max " ⊧ " => realize
 
-infix:60 " ⊧* " => realizeTheory
+class RealizeTheory (a : α) (T : Set F) : Prop where
+  realizeTheory : ∀ ⦃f⦄, f ∈ T → realize a f
 
-def consequence (T : Set F) (f : F) : Prop := ∀ ⦃a : α⦄, a ⊧* T → a ⊧ f
+infix:60 " ⊧* " => RealizeTheory
+
+lemma realizeTheory_iff {a : α} {T : Set F} : a ⊧* T ↔ ∀ ⦃f⦄, f ∈ T → realize a f :=
+  ⟨by rintro ⟨h⟩; exact h, by intro h; exact ⟨h⟩⟩
+
+def Consequence (T : Set F) (f : F) : Prop := ∀ ⦃a : α⦄, a ⊧* T → a ⊧ f
 
 -- note that ⊨ (\vDash) is *NOT* ⊧ (\models)
-infix:55 " ⊨ " => consequence
+infix:55 " ⊨ " => Consequence
 
 def Valid (f : F) : Prop := ∀ ⦃a : α⦄, a ⊧ f
 
@@ -54,53 +58,65 @@ lemma valid_neg_iff (f : F) : Valid (~f) ↔ ¬Satisfiable f := by simp[Valid, S
 
 lemma not_satisfiable_finset [DecidableEq F] (t : Finset F) :
     ¬SatisfiableTheory (t : Set F) ↔ Valid (t.image (~·)).disj :=
-  by simp[SatisfiableTheory, realizeTheory, Valid, Finset.map_disj]
+  by simp[SatisfiableTheory, realizeTheory_iff, Valid, Finset.map_disj]
 
-lemma realizeTheory_of_subset {T U : Set F} {a : α} (h : a ⊧* U) (ss : T ⊆ U) : a ⊧* T :=
-  fun _ hf => h (ss hf)
+namespace RealizeTheory
 
-@[simp] lemma realizeTheoryEmpty {a : α} : a ⊧* (∅ : Set F) := fun p => by simp
+lemma realize {T : Set F} (a : α) [a ⊧* T] (hf : f ∈ T) : a ⊧ f :=
+  realizeTheory hf
 
-@[simp] lemma realizeTheory_insert {T : Set F} {f : F} {a : α} :
+lemma of_subset {T U : Set F} {a : α} (h : a ⊧* U) (ss : T ⊆ U) : a ⊧* T :=
+  ⟨fun _ hf => h.realizeTheory (ss hf)⟩
+
+lemma of_subset' {T U : Set F} {a : α} [a ⊧* U] (ss : T ⊆ U) : a ⊧* T :=
+  of_subset inferInstance ss
+
+instance empty' (a : α) : a ⊧* (∅ : Set F) := ⟨fun p => by simp⟩
+
+@[simp] lemma empty (a : α) : a ⊧* (∅ : Set F) := ⟨fun p => by simp⟩
+
+@[simp] lemma insert_iff {T : Set F} {f : F} {a : α} :
     a ⊧* insert f T ↔ a ⊧ f ∧ a ⊧* T := by
-  simp[realizeTheory]
+  simp [realizeTheory_iff]
 
-@[simp] lemma realizeTheory_union {T U : Set F} {a : α} :
+@[simp] lemma union_iff {T U : Set F} {a : α} :
     a ⊧* T ∪ U ↔ a ⊧* T ∧ a ⊧* U := by
-  simp[realizeTheory]
+  simp [realizeTheory_iff]
   exact
   ⟨fun h => ⟨fun f hf => h (Or.inl hf), fun f hf => h (Or.inr hf)⟩,
    by rintro ⟨h₁, h₂⟩ f (h | h); exact h₁ h; exact h₂ h⟩
 
-@[simp] lemma realizeTheory_image {ι} {f : ι → F} {A : Set ι} {a : α} :
-    a ⊧* f '' A ↔ ∀ i ∈ A, a ⊧ (f i) := by simp[realizeTheory]
+@[simp] lemma image_iff {ι} {f : ι → F} {A : Set ι} {a : α} :
+    a ⊧* f '' A ↔ ∀ i ∈ A, a ⊧ (f i) := by simp [realizeTheory_iff]
 
-@[simp] lemma realizeTheory_range {ι} {f : ι → F} {a : α} :
-    a ⊧* Set.range f ↔ ∀ i, a ⊧ (f i) := by simp[realizeTheory]
+@[simp] lemma range_iff {ι} {f : ι → F} {a : α} :
+    a ⊧* Set.range f ↔ ∀ i, a ⊧ (f i) := by simp [realizeTheory_iff]
 
-@[simp] lemma realizeTheory_setOf {P : F → Prop} :
-    a ⊧* setOf P ↔ ∀ f, P f → a ⊧ f := by rfl
+@[simp] lemma setOf_iff {P : F → Prop} :
+    a ⊧* setOf P ↔ ∀ f, P f → a ⊧ f := by simp [realizeTheory_iff]
+
+end RealizeTheory
 
 lemma SatisfiableTheory.of_subset {T U : Set F} (h : SatisfiableTheory U) (ss : T ⊆ U) : SatisfiableTheory T :=
-  by rcases h with ⟨a, h⟩; exact ⟨a, realizeTheory_of_subset h ss⟩
+  by rcases h with ⟨a, h⟩; exact ⟨a, RealizeTheory.of_subset h ss⟩
 
 lemma consequence_iff_not_satisfiable {f : F} :
     T ⊨ f ↔ ¬SatisfiableTheory (insert (~f) T) :=
   ⟨by rintro hT ⟨a, ha⟩
-      have : a ⊧ f := hT (realizeTheory_of_subset ha (Set.subset_insert (~f) T))
-      have : ¬a ⊧ f := by simpa using ha (Set.mem_insert (~f) T)
+      have : a ⊧ f := hT (RealizeTheory.of_subset ha (Set.subset_insert (~f) T))
+      have : ¬a ⊧ f := by simpa using ha.realizeTheory (Set.mem_insert (~f) T)
       contradiction,
    by intro h a ha; by_contra hn
       have : SatisfiableTheory (insert (~f) T) := ⟨a, by simp[*]⟩
       contradiction⟩
 
 lemma weakening {T U : Set F} {f} (h : T ⊨ f) (ss : T ⊆ U) : U ⊨ f :=
-  fun _ hs => h (realizeTheory_of_subset hs ss)
+  fun _ hs => h (RealizeTheory.of_subset hs ss)
 
-lemma of_mem {T : Set F} {f} (h : f ∈ T) : T ⊨ f := fun _ hs => hs h
+lemma of_mem {T : Set F} {f} (h : f ∈ T) : T ⊨ f := fun _ hs => hs.realizeTheory h
 
 lemma consequence_iff {T : Set F} {f : F} : T ⊨ f ↔ ¬SatisfiableTheory (insert (~f) T) := by
-  simp[consequence, SatisfiableTheory]; constructor
+  simp[Consequence, SatisfiableTheory]; constructor
   · intro h a hf hT; have : a ⊧ f := h hT; contradiction
   · intro h a; contrapose; exact h a
 
@@ -123,8 +139,8 @@ def ofSubset (h : T ⊆ U) : Subtheory T U := fun b => weakening b h
 
 end Subtheory
 
-lemma realizeTheory_of_subtheory {a : α} {T U : Set F} (h : a ⊧* U) (ss : Subtheory T U) :
-    a ⊧* T := fun _ hf => (ss (of_mem hf)) h
+lemma RealizeTheory.of_subtheory {a : α} {T U : Set F} (h : a ⊧* U) (ss : Subtheory T U) :
+    a ⊧* T := ⟨fun _ hf => ss (of_mem hf) h⟩
 
 namespace Equivalent
 
@@ -139,28 +155,9 @@ variable (T U T₁ T₂ T₃ : Set F)
 
 end Equivalent
 
-class Mod (a : α) (T : Set F) : Prop where
-  realizeTheory : a ⊧* T
-
-namespace Mod
-
-variable (a : α) {T : Set F} [Mod a T]
-
-lemma models {f : F} (hf : f ∈ T) : a ⊧ f := realizeTheory hf
-
-lemma iff : Mod a T ↔ a ⊧* T := ⟨by rintro ⟨h⟩; exact h, fun h ↦ ⟨h⟩⟩
-
-def of_ss {T₁ T₂ : Set F} [Mod a T₁] (ss : T₂ ⊆ T₁) : Mod a T₂ :=
-  ⟨realizeTheory_of_subset realizeTheory ss⟩
-
-def of_subtheory {T₁ T₂ : Set F} [Mod a T₁] (h : Subtheory T₂ T₁) : Mod a T₂ :=
-  ⟨realizeTheory_of_subtheory realizeTheory h⟩
-
-end Mod
-
 lemma consequence_iff' {T : Set F} {σ : F} :
-    T ⊨ σ ↔ (∀ (a : α) [Mod a T], a ⊧ σ) :=
-  ⟨fun h _ hM => h hM.realizeTheory, fun H a hs => @H a ⟨hs⟩⟩
+    T ⊨ σ ↔ (∀ (a : α) [a ⊧* T], a ⊧ σ) :=
+  ⟨fun h _ _ => h inferInstance, fun H a hs => @H a hs⟩
 
 end Semantics
 

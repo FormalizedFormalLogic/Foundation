@@ -133,19 +133,17 @@ variable {M : Type} [Zero M] [One M] [Add M] [Mul M] [LT M] [s : Structure L M]
   · simp [Theory.lMap]
     intro H p hp; exact eval_lMap_oringEmb.mpr (H hp)
 
-lemma mod_lMap_oringEmb (T : Theory ℒₒᵣ) :
-    (T.lMap oringEmb : Theory L).Mod M ↔ T.Mod M := by simp [Theory.Mod.iff]
+instance [M ⊧ₘ* 𝐈open] : M ⊧ₘ* 𝐏𝐀⁻ := ModelsTheory.of_add_left M 𝐏𝐀⁻ (Theory.indScheme _ Semiformula.Open)
 
-instance [(𝐈open).Mod M] : 𝐏𝐀⁻.Mod M := Theory.Mod.of_add_left M 𝐏𝐀⁻ (Theory.indScheme _ Semiformula.Open)
+instance [M ⊧ₘ* 𝐈open] : M ⊧ₘ* Theory.indScheme ℒₒᵣ Semiformula.Open :=
+  ModelsTheory.of_add_right M 𝐏𝐀⁻ (Theory.indScheme _ Semiformula.Open)
 
-instance [(𝐈open).Mod M] : (Theory.indScheme (L := ℒₒᵣ) Semiformula.Open).Mod M := Theory.Mod.of_add_right M 𝐏𝐀⁻ (Theory.indScheme _ Semiformula.Open)
+def mod_peanoMinus_of_mod_indH [M ⊧ₘ* 𝐈𝐍𝐃 Γ n] : M ⊧ₘ* 𝐏𝐀⁻ := ModelsTheory.of_add_left M 𝐏𝐀⁻ (Theory.indScheme _ (Arith.Hierarchy Γ n))
 
-def mod_peanoMinus_of_mod_indH [(𝐈𝐍𝐃 Γ ν).Mod M] : 𝐏𝐀⁻.Mod M := Theory.Mod.of_add_left M 𝐏𝐀⁻ (Theory.indScheme _ (Arith.Hierarchy Γ ν))
+def mod_indScheme_of_mod_indH [M ⊧ₘ* 𝐈𝐍𝐃 Γ n] : M ⊧ₘ* Theory.indScheme ℒₒᵣ (Arith.Hierarchy Γ n) :=
+  ModelsTheory.of_add_right M 𝐏𝐀⁻ (Theory.indScheme _ (Arith.Hierarchy Γ n))
 
-def mod_indScheme_of_mod_indH [(𝐈𝐍𝐃 Γ ν).Mod M] : (Theory.indScheme (L := ℒₒᵣ) (Arith.Hierarchy Γ ν)).Mod M :=
-  Theory.Mod.of_add_right M 𝐏𝐀⁻ (Theory.indScheme _ (Arith.Hierarchy Γ ν))
-
-instance [𝐏𝐀.Mod M] : 𝐏𝐀⁻.Mod M := Theory.Mod.of_add_left M 𝐏𝐀⁻ (Theory.indScheme _ Set.univ)
+instance [M ⊧ₘ* 𝐏𝐀] : M ⊧ₘ* 𝐏𝐀⁻ := ModelsTheory.of_add_left M 𝐏𝐀⁻ (Theory.indScheme _ Set.univ)
 
 end
 
@@ -155,7 +153,7 @@ namespace Standard
 
 variable {μ : Type v} (e : Fin n → ℕ) (ε : μ → ℕ)
 
-lemma modelsTheoryPeanoMinus : ℕ ⊧ₘ* 𝐏𝐀⁻ := by
+instance models_peanoMinus : ℕ ⊧ₘ* 𝐏𝐀⁻ := ⟨by
   intro σ h
   rcases h <;> simp [models_def, ←le_iff_eq_or_lt]
   case addAssoc => intro l m n; exact add_assoc l m n
@@ -167,22 +165,22 @@ lemma modelsTheoryPeanoMinus : ℕ ⊧ₘ* 𝐏𝐀⁻ := by
   case mulLtMul => rintro l m n h hl; exact (mul_lt_mul_right hl).mpr h
   case distr => intro l m n; exact Nat.mul_add l m n
   case ltTrans => intro l m n; exact Nat.lt_trans
-  case ltTri => intro n m; exact Nat.lt_trichotomy n m
+  case ltTri => intro n m; exact Nat.lt_trichotomy n m⟩
 
-lemma modelsSuccInd (p : Semiformula ℒₒᵣ ℕ 1) : ℕ ⊧ₘ (∀ᶠ* succInd p) := by
+lemma models_succInd (p : Semiformula ℒₒᵣ ℕ 1) : ℕ ⊧ₘ (∀ᶠ* succInd p) := by
   simp[Empty.eq_elim, succInd, models_iff, Matrix.constant_eq_singleton, Matrix.comp_vecCons',
     Semiformula.eval_substs, Semiformula.eval_rew_q Rew.toS, Function.comp]
   intro e hzero hsucc x; induction' x with x ih
   · exact hzero
   · exact hsucc x ih
 
-lemma modelsPeano : ℕ ⊧ₘ* 𝐏𝐀 := by
-  simp [Theory.peano, Theory.indScheme, modelsTheoryPeanoMinus]; rintro _ p _ rfl; simp [modelsSuccInd]
+instance models_peano : ℕ ⊧ₘ* 𝐏𝐀 := by
+  simp [Theory.peano, Theory.indScheme, models_peanoMinus]; rintro _ p _ rfl; simp [models_succInd]
 
 end Standard
 
 theorem peano_consistent : System.Consistent 𝐏𝐀 :=
-  Sound.consistent_of_model Standard.modelsPeano
+  Sound.consistent_of_model Standard.models_peano
 
 section
 
@@ -207,7 +205,7 @@ variable (T : Theory ℒₒᵣ) [𝐄𝐪 ≾ T]
 lemma oRing_consequence_of (σ : Sentence ℒₒᵣ)
   (H : ∀ (M : Type)
          [Zero M] [One M] [Add M] [Mul M] [LT M]
-         [Theory.Mod M T],
+         [M ⊧ₘ* T],
          M ⊧ₘ σ) :
     T ⊨ σ := consequence_of T σ fun M _ _ _ _ _ s _ _ ↦ by
   rcases standardModel_unique M s

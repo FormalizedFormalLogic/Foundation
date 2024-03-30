@@ -36,7 +36,7 @@ def code (c : Code k) : Semisentence ℒₒᵣ (k + 1) := (Rew.bind ![] (#0 :> (
 
 section model
 
-variable {M : Type} [Zero M] [One M] [Add M] [Mul M] [LT M] [𝐏𝐀⁻.Mod M]
+variable {M : Type} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐏𝐀⁻]
 
 lemma codeAux_uniq {k} {c : Code k} {v : Fin k → M} {z z' : M} :
     Semiformula.Val! M (z :> v) (codeAux c) → Semiformula.Val! M (z' :> v) (codeAux c) → z = z' := by
@@ -88,9 +88,11 @@ lemma codeAux_sigma_one {k} (c : Nat.ArithPart₁.Code k) : Hierarchy Σ 1 (code
 lemma code_sigma_one {k} (c : Nat.ArithPart₁.Code k) : Hierarchy Σ 1 (code c) :=
   Hierarchy.rew _ (codeAux_sigma_one c)
 
+@[simp] lemma natCast_nat (n : ℕ) : Nat.cast n = n := by rfl
+
 lemma models_codeAux {c : Code k} {f : Vector ℕ k →. ℕ} (hc : c.eval f) (y : ℕ) (v : Fin k → ℕ) :
     Semiformula.Val! ℕ (y :> v) (codeAux c) ↔ f (Vector.ofFn v) = Part.some y := by
-  induction hc generalizing y <;> simp[code, codeAux, models_iff]
+  induction hc generalizing y <;> simp [code, codeAux, models_iff]
   case zero =>
     have : (0 : Part ℕ) = Part.some 0 := rfl
     simp[this, eq_comm]
@@ -172,12 +174,12 @@ lemma provable_computable_code_uniq {k} {f : Vector ℕ k → ℕ}
     T ⊢! ∀' ((Rew.substs $ #0 :> (⸢v ·⸣)).hom (code $ codeOfPartrec f)
       ⟷ “#0 = !!(⸢f (Vector.ofFn v)⸣)”) :=
   Complete.consequence_iff_provable.mp (oRing_consequence_of _ _ (fun M _ _ _ _ _ _ => by
-    haveI : 𝐏𝐀⁻.Mod M :=
-      Theory.Mod.of_subtheory (T₁ := T) M (Semantics.ofSystemSubtheory _ _)
+    haveI : M ⊧ₘ* 𝐏𝐀⁻ :=
+      ModelsTheory.of_subtheory (T₁ := T) inferInstance (Semantics.ofSystemSubtheory _ _)
     have Hfv : Semiformula.PVal! M (f (Vector.ofFn v) :> (v ·)) (code (codeOfPartrec f)) := by
-      simpa[models_iff, Semiformula.eval_substs, Matrix.comp_vecCons'] using
+      simpa [Model.numeral_eq_natCast, models_iff, Semiformula.eval_substs, Matrix.comp_vecCons'] using
         consequence_iff'.mp (Sound.sound! (provable_iff_computable T hf v)) M
-    simp[models_iff, Semiformula.eval_substs, Matrix.comp_vecCons']
+    simp [Model.numeral_eq_natCast, models_iff, Semiformula.eval_substs, Matrix.comp_vecCons']
     intro x; constructor
     · intro H; exact code_uniq H Hfv
     · rintro rfl; simpa))
@@ -240,7 +242,7 @@ noncomputable def pred (p : α → Prop) : Semisentence ℒₒᵣ 1 :=
 
 theorem pred_representation {p : α → Prop} (hp : RePred p) {x} :
     T ⊢! (pred p)/[⸢x⸣] ↔ p x := by
-  simpa[pred, ←Rew.hom_comp_app, Rew.substs_comp_substs] using
+  simpa [pred, ←Rew.hom_comp_app, Rew.substs_comp_substs] using
     representation hp (T := T) (x := x) (y := ())
 
 end representation

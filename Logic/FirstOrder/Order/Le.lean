@@ -14,7 +14,7 @@ open Semiformula
 def LT.le : Operator L 2 := Semiformula.Operator.Eq.eq.or Semiformula.Operator.LT.lt
 
 lemma le_eq (t₁ t₂ : Semiterm L μ n) : LT.le.operator ![t₁, t₂] = “!!t₁ = !!t₂ ∨ !!t₁ < !!t₂” := by
-  simp[Operator.operator, Operator.or, LT.le, ←Rew.hom_comp_app, ←Matrix.fun_eq_vec₂]
+  simp [Operator.operator, Operator.or, LT.le, ←Rew.hom_comp_app, ←Matrix.fun_eq_vec₂]
 
 namespace Semiformula
 
@@ -74,17 +74,14 @@ noncomputable def leIffEqOrLt : T ⊢ “∀ ∀ (#0 ≤ #1 ↔ #0 = #1 ∨ #0 <
 
 lemma provOf (σ : Sentence L)
   (H : ∀ (M : Type u)
-         [Nonempty M]
-         [_root_.LT M]
-         [Structure L M]
-         [Structure.Eq L M]
-         [Structure.LT L M]
-         [Theory.Mod M T],
+         [Nonempty M] [LT M]
+         [Structure L M] [Structure.Eq L M] [Structure.LT L M]
+         [M ⊧ₘ* T],
          M ⊧ₘ σ) :
     T ⊨ σ := consequence_iff_eq.mpr fun M _ _ _ hT =>
-  letI : Theory.Mod (Structure.Model L M) T := ⟨((Structure.ElementaryEquiv.modelsTheory (Structure.Model.elementaryEquiv L M)).mp hT)⟩
-  (Structure.ElementaryEquiv.models (Structure.Model.elementaryEquiv L M)).mpr
-    (H (Structure.Model L M))
+  letI : (Structure.Model L M) ⊧ₘ* T :=
+    ((Structure.ElementaryEquiv.modelsTheory (Structure.Model.elementaryEquiv L M)).mp hT)
+  (Structure.ElementaryEquiv.models (Structure.Model.elementaryEquiv L M)).mpr (H (Structure.Model L M))
 
 end Order
 
