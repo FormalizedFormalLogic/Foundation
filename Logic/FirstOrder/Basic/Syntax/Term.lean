@@ -103,6 +103,9 @@ namespace Positive
 
 end Positive
 
+lemma bv_eq_empty_of_positive {t : Semiterm L ξ 1} (ht : t.Positive) : t.bv = ∅ :=
+  Finset.eq_empty_of_forall_not_mem <| by simp [Positive, Fin.eq_zero] at ht ⊢; assumption
+
 variable [DecidableEq ξ]
 
 def fv : Semiterm L ξ n → Finset ξ

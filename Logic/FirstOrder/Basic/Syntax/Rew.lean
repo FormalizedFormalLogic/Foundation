@@ -527,6 +527,28 @@ end q
 
 end Syntactic
 
+lemma substs_bv (t : Semiterm L ξ n) (v : Fin n → Semiterm L ξ m) :
+    (Rew.substs v t).bv = t.bv.biUnion (fun i ↦ (v i).bv) := by
+  induction t <;> simp [Rew.func, Semiterm.bv_func, Finset.biUnion_biUnion, *]
+
+@[simp] lemma substs_positive (t : Semiterm L ξ n) (v : Fin n → Semiterm L ξ (m + 1)) :
+    (Rew.substs v t).Positive ↔ ∀ i ∈ t.bv, (v i).Positive := by
+  simp [Semiterm.Positive, substs_bv]
+  exact ⟨fun H i hi x hx ↦ H x i hi hx, fun H x i hi hx ↦ H i hi x hx⟩
+
+lemma embSubsts_bv (t : Semiterm L Empty n) (v : Fin n → Semiterm L ξ m) :
+    (Rew.embSubsts v t).bv = t.bv.biUnion (fun i ↦ (v i).bv) := by
+  induction t <;> simp [Rew.func, Semiterm.bv_func, Finset.biUnion_biUnion, *]
+  · contradiction
+
+@[simp] lemma embSubsts_positive (t : Semiterm L Empty n) (v : Fin n → Semiterm L ξ (m + 1)) :
+    (Rew.embSubsts v t).Positive ↔ ∀ i ∈ t.bv, (v i).Positive := by
+  simp [Semiterm.Positive, embSubsts_bv]
+  exact ⟨fun H i hi x hx ↦ H x i hi hx, fun H x i hi hx ↦ H i hi x hx⟩
+
+@[simp] lemma bshift_positive (t : Semiterm L ξ n) : Positive (Rew.bShift t) := by
+  induction t <;> simp
+
 end Rew
 
 scoped syntax (name := substsNotation) "[→ " term,* "]" : term

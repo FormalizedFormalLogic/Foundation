@@ -132,6 +132,15 @@ lemma val_embSubsts (w : Fin k → Semiterm L μ n) (t : Semiterm L Empty k) :
     (Rew.embSubsts w t).val s e ε = t.bVal s (fun x ↦ (w x).val s e ε) := by
   simp [val_rew, Empty.eq_elim]; congr
 
+@[simp] lemma val_toS {e : Fin n → M} (t : Semiterm L (Fin n) 0) :
+    bVal s e (Rew.toS t) = val s ![] e t := by
+  simp[val_rew, Matrix.empty_eq]; congr
+
+@[simp] lemma val_toF {e : Fin n → M} (t : Semiterm L Empty n) :
+    val s ![] e (Rew.toF t) = bVal s e t := by
+  simp[val_rew, Matrix.empty_eq]; congr
+  funext i; simp; contradiction
+
 section Language
 
 variable (φ : L₁ →ᵥ L₂) (e : Fin n → M) (ε : μ → M)

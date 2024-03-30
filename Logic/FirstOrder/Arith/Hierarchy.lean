@@ -123,6 +123,11 @@ lemma mono {Γ} {s s' : ℕ} {p : Semiformula L μ n} (hp : Hierarchy Γ s p) (h
   · exact hp.strict_mono Γ lt
   · assumption
 
+lemma of_zero {b b'} {s : ℕ} {p : Semiformula L μ n} (hp : Hierarchy b 0 p) : Hierarchy b' s p := by
+  rcases Nat.eq_or_lt_of_le (Nat.zero_le s) with (rfl | pos)
+  · exact zero_iff.mp hp
+  · exact strict_mono hp b' pos
+
 section
 
 variable {L : Language} [L.Eq] [L.LT]
@@ -304,6 +309,31 @@ lemma oringEmb {p : Semiformula ℒₒᵣ μ n} : Hierarchy Γ s p → Hierarchy
   case dummy_pi ih => exact ih.dummy_pi
   case dummy_sigma ih => exact ih.dummy_sigma
 
+lemma iff_iff {p q : Semiformula L μ n} :
+    Hierarchy b s (p ⟷ q) ↔ (Hierarchy b s p ∧ Hierarchy b.alt s p ∧ Hierarchy b s q ∧ Hierarchy b.alt s q) := by
+  simp[Semiformula.iff_eq]; tauto
+
+@[simp] lemma iff_iff₀ {p q : Semiformula L μ n} :
+    Hierarchy b 0 (p ⟷ q) ↔ (Hierarchy b 0 p ∧ Hierarchy b 0 q) := by
+  simp[Semiformula.iff_eq]; tauto
+
+@[simp] lemma matrix_conj_iff {b s n} {p : Fin m → Semiformula L ξ n} :
+    Hierarchy b s (Matrix.conj fun j ↦ p j) ↔ ∀ j, Hierarchy b s (p j) := by
+  cases m <;> simp
+
+lemma remove_forall {p : Semiformula L ξ (n + 1)} : Hierarchy b s (∀' p) → Hierarchy b s p := by
+  intro h; rcases h
+  case ball => simpa
+  case all => assumption
+  case pi h => exact h.accum _
+  case dummy_sigma h => exact h.accum _
+
+lemma remove_exists {p : Semiformula L ξ (n + 1)} : Hierarchy b s (∃' p) → Hierarchy b s p := by
+  intro h; rcases h
+  case bex => simpa
+  case ex => assumption
+  case sigma h => exact h.accum _
+  case dummy_pi h => exact h.accum _
 
 end Hierarchy
 

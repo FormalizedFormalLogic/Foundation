@@ -138,12 +138,12 @@ instance [M ⊧ₘ* 𝐈open] : M ⊧ₘ* 𝐏𝐀⁻ := ModelsTheory.of_add_lef
 instance [M ⊧ₘ* 𝐈open] : M ⊧ₘ* Theory.indScheme ℒₒᵣ Semiformula.Open :=
   ModelsTheory.of_add_right M 𝐏𝐀⁻ (Theory.indScheme _ Semiformula.Open)
 
-def mod_peanoMinus_of_mod_indH [M ⊧ₘ* 𝐈𝐍𝐃 Γ n] : M ⊧ₘ* 𝐏𝐀⁻ := ModelsTheory.of_add_left M 𝐏𝐀⁻ (Theory.indScheme _ (Arith.Hierarchy Γ n))
+def models_peanoMinus_of_models_indH (Γ n) [M ⊧ₘ* 𝐈𝐍𝐃 Γ n] : M ⊧ₘ* 𝐏𝐀⁻ := ModelsTheory.of_add_left M 𝐏𝐀⁻ (Theory.indScheme _ (Arith.Hierarchy Γ n))
 
-def mod_indScheme_of_mod_indH [M ⊧ₘ* 𝐈𝐍𝐃 Γ n] : M ⊧ₘ* Theory.indScheme ℒₒᵣ (Arith.Hierarchy Γ n) :=
+def models_indScheme_of_models_indH (Γ n) [M ⊧ₘ* 𝐈𝐍𝐃 Γ n] : M ⊧ₘ* Theory.indScheme ℒₒᵣ (Arith.Hierarchy Γ n) :=
   ModelsTheory.of_add_right M 𝐏𝐀⁻ (Theory.indScheme _ (Arith.Hierarchy Γ n))
 
-instance [M ⊧ₘ* 𝐏𝐀] : M ⊧ₘ* 𝐏𝐀⁻ := ModelsTheory.of_add_left M 𝐏𝐀⁻ (Theory.indScheme _ Set.univ)
+instance models_peanoMinus_of_models_peano [M ⊧ₘ* 𝐏𝐀] : M ⊧ₘ* 𝐏𝐀⁻ := ModelsTheory.of_add_left M 𝐏𝐀⁻ (Theory.indScheme _ Set.univ)
 
 end
 
