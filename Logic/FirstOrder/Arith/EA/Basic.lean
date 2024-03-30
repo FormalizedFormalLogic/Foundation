@@ -14,13 +14,12 @@ lemma consequence_of_exp (σ : Sentence L)
          [Structure L M]
          [Structure.ORing L M]
          [Structure.Exp L M]
-         [Theory.Mod M T],
+         [M ⊧ₘ* T],
          M ⊧ₘ σ) :
     T ⊨ σ := consequence_iff_eq.mpr fun M _ _ _ hT =>
-  letI : Theory.Mod (Structure.Model L M) T :=
-    ⟨((Structure.ElementaryEquiv.modelsTheory (Structure.Model.elementaryEquiv L M)).mp hT)⟩
-  (Structure.ElementaryEquiv.models (Structure.Model.elementaryEquiv L M)).mpr
-    (H (Structure.Model L M))
+  letI : Structure.Model L M ⊧ₘ* T :=
+    (Structure.ElementaryEquiv.modelsTheory (Structure.Model.elementaryEquiv L M)).mp hT
+  (Structure.ElementaryEquiv.models (Structure.Model.elementaryEquiv L M)).mpr (H (Structure.Model L M))
 
 namespace Theory
 
@@ -98,9 +97,8 @@ lemma standardModelExp_unique (s : Structure ℒₒᵣ(exp) M)
 
 namespace Standard
 
-lemma modelsTheoryExponential : ℕ ⊧ₘ* 𝐄𝐗𝐏 := by
-  intro σ h
-  rcases h <;> simp[models_def, Structure.Exp.exp, Nat.exp_succ]
+instance models_exponential : ℕ ⊧ₘ* 𝐄𝐗𝐏 := ⟨by
+  intro σ h; rcases h <;> simp[models_def, Structure.Exp.exp, Nat.exp_succ]⟩
 
 lemma modelsSuccInd_exp (p : Semiformula ℒₒᵣ(exp) ℕ 1) : ℕ ⊧ₘ (∀ᶠ* succInd p) := by
   simp [Empty.eq_elim, succInd, models_iff, Matrix.constant_eq_singleton, Matrix.comp_vecCons',
@@ -109,9 +107,9 @@ lemma modelsSuccInd_exp (p : Semiformula ℒₒᵣ(exp) ℕ 1) : ℕ ⊧ₘ (∀
   · exact hzero
   · exact hsucc x ih
 
-lemma modelsTheoryElementaryArithmetic : ℕ ⊧ₘ* 𝐄𝐀 := by
+lemma modelsTheory_elementaryArithmetic : ℕ ⊧ₘ* 𝐄𝐀 := by
   simp [Theory.elementaryArithmetic, Theory.indScheme]
-  exact ⟨⟨by intro σ hσ; simpa [models_iff] using models_peanoMinus hσ, modelsTheoryExponential⟩,
+  exact ⟨⟨by intro σ hσ; simpa [models_iff] using models_peanoMinus.realize hσ, models_exponential⟩,
     by rintro σ p _ rfl; exact modelsSuccInd_exp p⟩
 
 end Standard
@@ -120,28 +118,30 @@ end model
 
 noncomputable section
 
-variable {M : Type} [Zero M] [One M] [Add M] [Mul M] [Exp M] [LT M] [𝐄𝐀.Mod M]
+variable (M : Type) [Zero M] [One M] [Add M] [Mul M] [Exp M] [LT M] [M ⊧ₘ* 𝐄𝐀]
 
 open Language
 
 namespace Model
 
-instance : 𝐏𝐀⁻.Mod M :=
-  haveI : Theory.Mod M (Semiformula.lMap Language.oringEmb '' 𝐏𝐀⁻ : Theory ℒₒᵣ(exp)) :=
-    Theory.Mod.of_add_left_left M (Semiformula.lMap Language.oringEmb '' 𝐏𝐀⁻) 𝐄𝐗𝐏 (Theory.indScheme ℒₒᵣ(exp) (Arith.Hierarchy Σ 0))
+instance models_peanoMinus_of_models_elementaryArithmetic : M ⊧ₘ* 𝐏𝐀⁻ :=
+  haveI : M ⊧ₘ* (Semiformula.lMap Language.oringEmb '' 𝐏𝐀⁻ : Theory ℒₒᵣ(exp)) :=
+    ModelsTheory.of_add_left_left M (Semiformula.lMap Language.oringEmb '' 𝐏𝐀⁻) 𝐄𝐗𝐏 (Theory.indScheme ℒₒᵣ(exp) (Arith.Hierarchy Σ 0))
   ⟨by intro σ hσ;
       simpa [models_iff] using
-        @Theory.Mod.models ℒₒᵣ(exp) M _ _ _ this _ (Set.mem_image_of_mem (Semiformula.lMap Language.oringEmb) hσ)⟩
+        @ModelsTheory.models ℒₒᵣ(exp) M _ _ _ this _ (Set.mem_image_of_mem (Semiformula.lMap Language.oringEmb) hσ)⟩
 
-instance : 𝐄𝐗𝐏.Mod M := Theory.Mod.of_add_left_right M (Semiformula.lMap Language.oringEmb '' 𝐏𝐀⁻) 𝐄𝐗𝐏 (Theory.indScheme ℒₒᵣ(exp) (Arith.Hierarchy Σ 0))
+instance models_exponential_of_models_elementaryArithmetic :
+    M ⊧ₘ* 𝐄𝐗𝐏 := ModelsTheory.of_add_left_right M (Semiformula.lMap Language.oringEmb '' 𝐏𝐀⁻) 𝐄𝐗𝐏 (Theory.indScheme ℒₒᵣ(exp) (Arith.Hierarchy Σ 0))
 
-instance : (Theory.indScheme ℒₒᵣ(exp) (Arith.Hierarchy Σ 0)).Mod M :=
-  Theory.Mod.of_add_right M (Semiformula.lMap Language.oringEmb '' 𝐏𝐀⁻ + 𝐄𝐗𝐏) _
+instance models_indScheme_of_models_elementaryArithmetic :
+    M ⊧ₘ* Theory.indScheme ℒₒᵣ(exp) (Arith.Hierarchy Σ 0) :=
+  ModelsTheory.of_add_right M (Semiformula.lMap Language.oringEmb '' 𝐏𝐀⁻ + 𝐄𝐗𝐏) _
 
-instance : 𝐈𝚺₀.Mod M := ⟨by
+instance models_iSigmaZero_of_models_elementaryArithmetic : M ⊧ₘ* 𝐈𝚺₀ := ⟨by
   intro σ hσ
   have : M ⊧ₘ (σ : Sentence ℒₒᵣ(exp)) :=
-    Theory.Mod.models M (show (σ : Sentence ℒₒᵣ(exp)) ∈ 𝐄𝐀 from Theory.iSigma₀_subset_EA (Set.mem_image_of_mem _ hσ))
+    ModelsTheory.models M (show (σ : Sentence ℒₒᵣ(exp)) ∈ 𝐄𝐀 from Theory.iSigma₀_subset_EA (Set.mem_image_of_mem _ hσ))
   simpa [models_iff] using this⟩
 
 end Model

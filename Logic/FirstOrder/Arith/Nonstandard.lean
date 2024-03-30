@@ -32,7 +32,7 @@ lemma satisfiable_trueArithWithStarUnbounded (c : ℕ) : Semantics.SatisfiableTh
   haveI : Structure.Eq ℒₒᵣ⋆ ℕ := ⟨fun _ _ => iff_of_eq rfl⟩
   haveI : Structure.LT ℒₒᵣ⋆ ℕ := ⟨fun _ _ => iff_of_eq rfl⟩
   have : ℕ ⊧ₘ* starUnbounded c := by
-    simp[starUnbounded, models_iff]; exact Fin.prop
+    simp [starUnbounded, models_iff]; exact Fin.prop
   have : ℕ ⊧ₘ* trueArithWithStarUnbounded c := by
     simp[trueArithWithStarUnbounded, models_iff]; exact this
   exact satisfiableTheory_intro ℕ this
