@@ -12,7 +12,7 @@ namespace Model
 
 section ISigma₀
 
-variable [𝐈𝚫₀.Mod M]
+variable [M ⊧ₘ* 𝐈𝚫₀]
 
 def SPPow2 (m : M) : Prop := ¬LenBit 1 m ∧ LenBit 2 m ∧ ∀ i ≤ m, Pow2 i → 2 < i → (LenBit i m ↔ (√i)^2 = i ∧ LenBit (√i) m)
 
@@ -23,7 +23,8 @@ def sppow2Def : Δ₀-Sentence 1 :=
 
 lemma sppow2_defined : Δ₀-Predicate (SPPow2 : M → Prop) via sppow2Def := by
   intro v
-  simp [SPPow2, sppow2Def, Matrix.vecHead, Matrix.vecTail, lenbit_defined.pval, pow2_defined.pval, sqrt_defined.pval, ←le_iff_lt_succ, sq]
+  simp [SPPow2, sppow2Def, Matrix.vecHead, Matrix.vecTail, lenbit_defined.pval,
+    pow2_defined.pval, sqrt_defined.pval, ←le_iff_lt_succ, sq, numeral_eq_natCast]
   intro _ _; apply ball_congr; intro x _; apply imp_congr_right; intro _; apply imp_congr_right; intro _; apply iff_congr
   · simp
   · constructor
@@ -36,7 +37,8 @@ def ppow2Def : Δ₀-Sentence 1 :=
   ⟨“!pow2Def [#0] ∧ ∃[#0 < 2 * #1] (!sppow2Def [#0] ∧ !lenbitDef [#1, #0])”, by simp⟩
 
 lemma ppow2_defined : Δ₀-Predicate (PPow2 : M → Prop) via ppow2Def := by
-  intro v; simp[PPow2, ppow2Def, Matrix.vecHead, Matrix.vecTail, lenbit_defined.pval, pow2_defined.pval, sppow2_defined.pval]
+  intro v; simp[PPow2, ppow2Def, Matrix.vecHead, Matrix.vecTail,
+    lenbit_defined.pval, pow2_defined.pval, sppow2_defined.pval, numeral_eq_natCast]
 
 instance ppow2_definable : DefinablePred ℒₒᵣ Σ 0 (PPow2 : M → Prop) := defined_to_with_param₀ _ ppow2_defined
 

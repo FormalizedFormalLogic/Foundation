@@ -12,7 +12,7 @@ namespace Model
 
 section ISigma₀
 
-variable [𝐈𝚫₀.Mod M]
+variable [M ⊧ₘ* 𝐈𝚫₀]
 
 lemma log_exists_unique_pos {y : M} (hy : 0 < y) : ∃! x, x < y ∧ ∃ y' ≤ y, Exp x y' ∧ y < 2 * y' := by
   have : ∃ x < y, ∃ y' ≤ y, Exp x y' ∧ y < 2 * y' := by
@@ -70,7 +70,7 @@ lemma log_graph {x y : M} : x = log y ↔ (y = 0 → x = 0) ∧ (0 < y → x < y
 def logDef : Δ₀-Sentence 2 := ⟨“(#1 = 0 → #0 = 0) ∧ (0 < #1 → #0 < #1 ∧ ∃[#0 < #2 + 1] (!Exp.def [#1, #0] ∧ #2 < 2 * #0))”, by simp⟩
 
 lemma log_defined : Δ₀-Function₁ (log : M → M) via logDef := by
-  intro v; simp [logDef, log_graph, Exp.defined.pval, ←le_iff_lt_succ]
+  intro v; simp [logDef, log_graph, Exp.defined.pval, ←le_iff_lt_succ, numeral_eq_natCast]
 
 instance log_definable : DefinableFunction₁ ℒₒᵣ Σ 0 (log : M → M) := defined_to_with_param _ log_defined
 
@@ -408,7 +408,7 @@ lemma fbit_eq_zero_of_le {a i : M} (hi : ‖a‖ ≤ i) : fbit a i = 0 := by sim
 def fbitDef : Δ₀-Sentence 3 := ⟨“∃[#0 < #2 + 1] (!bexpDef [#0, #2, #3] ∧ ∃[#0 < #3 + 1] (!divDef [#0, #3, #1] ∧ !remDef [#2, #0, 2]))”, by simp⟩
 
 lemma fbit_defined : Δ₀-Function₂ (fbit : M → M → M) via fbitDef := by
-  intro v; simp [fbitDef, bexp_defined.pval, div_defined.pval, rem_defined.pval, ←le_iff_lt_succ, fbit]
+  intro v; simp [fbitDef, bexp_defined.pval, div_defined.pval, rem_defined.pval, ←le_iff_lt_succ, fbit, numeral_eq_natCast]
   constructor
   · intro h; exact ⟨bexp (v 1) (v 2), by simp, rfl, _, by simp, rfl, h⟩
   · rintro ⟨_, _, rfl, _, _, rfl, h⟩; exact h
@@ -437,7 +437,7 @@ end ISigma₀
 
 section ISigma₁
 
-variable [𝐈𝚺₁.Mod M]
+variable [M ⊧ₘ* 𝐈𝚺₁]
 
 @[simp] lemma log_exponential (a : M) : log (exp a) = a := (exp_exponential a).log_eq_of_exp
 

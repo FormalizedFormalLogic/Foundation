@@ -12,7 +12,7 @@ namespace Model
 
 section ISigma₀
 
-variable [𝐈𝚫₀.Mod M]
+variable [M ⊧ₘ* 𝐈𝚫₀]
 
 def ext (u z : M) : M := z / u % u
 
@@ -87,7 +87,8 @@ def Exp.Seqₛ.def : Δ₀-Sentence 3 := ⟨
       ∃[#0 < #4 + 1] (!extDef [#0, #1, #4] ∧ !extDef [2 * (#0 * #0), #1 * #1, #4])))”, by simp⟩
 
 lemma Exp.Seqₛ.defined : Δ₀-Relation₃ (Exp.Seqₛ : M → M → M → Prop) via Exp.Seqₛ.def := by
-  intro v; simp [Exp.Seqₛ.iff, Exp.Seqₛ.def, ppow2_defined.pval, ext_defined.pval, ←le_iff_lt_succ, sq]
+  intro v; simp [Exp.Seqₛ.iff, Exp.Seqₛ.def, ppow2_defined.pval,
+    ext_defined.pval, ←le_iff_lt_succ, sq, numeral_eq_natCast]
 
 lemma Exp.graph_iff (x y : M) :
     Exp x y ↔
@@ -110,7 +111,8 @@ def Exp.def : Δ₀-Sentence 2 := ⟨
       ∃[#0 < #4 * #4 + 1] (#0 ≠ 2 ∧ !ppow2Def [#0] ∧ !extDef [#3, #0, #2] ∧!extDef [#4, #0, #1])))”, by simp⟩
 
 lemma Exp.defined : Δ₀-Relation (Exp : M → M → Prop) via Exp.def := by
-  intro v; simp [Exp.graph_iff, Exp.def, ppow2_defined.pval, ext_defined.pval, Exp.Seqₛ.defined.pval, ←le_iff_lt_succ, pow_four, sq]
+  intro v; simp [Exp.graph_iff, Exp.def, ppow2_defined.pval, ext_defined.pval,
+    Exp.Seqₛ.defined.pval, ←le_iff_lt_succ, pow_four, sq, numeral_eq_natCast]
 
 instance exp_definable : DefinableRel ℒₒᵣ Σ 0 (Exp : M → M → Prop) := defined_to_with_param _ Exp.defined
 
@@ -682,7 +684,7 @@ end ISigma₀
 
 section ISigma₁
 
-variable [𝐈𝚺₁.Mod M]
+variable [M ⊧ₘ* 𝐈𝚺₁]
 
 namespace Exp
 
@@ -700,9 +702,7 @@ lemma range_exists_unique (x : M) : ∃! y, Exp x y := by
 
 end Exp
 
-def exponential (a : M) : M := Classical.choose! (Exp.range_exists_unique a)
-
-prefix:80 "exp " => exponential
+instance : _root_.Exp M := ⟨fun a ↦ Classical.choose! (Exp.range_exists_unique a)⟩
 
 section exponential
 
@@ -714,15 +714,15 @@ def expdef : Δ₀-Sentence 2 := ⟨“!Exp.def [#1, #0]”, by simp⟩
 
 -- #eval expdef.val
 
-lemma exp_defined : Δ₀-Function₁ (exponential : M → M) via expdef := by
+lemma exp_defined : Δ₀-Function₁ (Exp.exp : M → M) via expdef := by
   intro v; simp [expdef, exponential_graph, Exp.defined.pval]
 
-instance exponential_definable : DefinableFunction₁ ℒₒᵣ Σ 0 (exponential : M → M) := defined_to_with_param _ exp_defined
+instance exponential_definable : DefinableFunction₁ ℒₒᵣ Σ 0 (Exp.exp : M → M) := defined_to_with_param _ exp_defined
 
 lemma exponential_of_exp {a b : M} (h : Exp a b) : exp a = b :=
   Eq.symm <| exponential_graph.mpr h
 
-lemma exponential_inj : Function.Injective (exponential : M → M) := λ a _ H ↦
+lemma exponential_inj : Function.Injective (Exp.exp : M → M) := λ a _ H ↦
   (exp_exponential a).inj (exponential_graph.mp H)
 
 @[simp] lemma exp_zero : exp (0 : M) = 1 := exponential_of_exp (by simp)

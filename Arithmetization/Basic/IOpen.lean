@@ -7,13 +7,13 @@ namespace Arith
 
 noncomputable section
 
-variable {M : Type} [Zero M] [One M] [Add M] [Mul M] [LT M] [𝐏𝐀⁻.Mod M]
+variable {M : Type} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐏𝐀⁻]
 
 namespace Model
 
 section IOpen
 
-variable [𝐈open.Mod M]
+variable [M ⊧ₘ* 𝐈open]
 
 @[elab_as_elim]
 lemma open_induction {P : M → Prop}
@@ -626,16 +626,16 @@ end IOpen
 
 section polynomial_induction
 
-variable [𝐈open.Mod M]
+variable [M ⊧ₘ* 𝐈open]
 variable {L : Language} [L.ORing] [Structure L M] [Structure.ORing L M] [Structure.Monotone L M]
 
 @[elab_as_elim]
-lemma hierarchy_polynomial_induction (Γ ν) [(Theory.indScheme L (Arith.Hierarchy Γ ν)).Mod M]
-    {P : M → Prop} (hP : DefinablePred L Γ ν P)
+lemma hierarchy_polynomial_induction (Γ n) [M ⊧ₘ* Theory.indScheme L (Arith.Hierarchy Γ n)]
+    {P : M → Prop} (hP : DefinablePred L Γ n P)
     (zero : P 0) (even : ∀ x > 0, P x → P (2 * x)) (odd : ∀ x, P x → P (2 * x + 1)) : ∀ x, P x := by
   intro x; induction x using order_induction_h
   · exact Γ
-  · exact ν
+  · exact n
   · exact hP
   case inst => exact inferInstance
   case inst => exact inferInstance
@@ -649,15 +649,15 @@ lemma hierarchy_polynomial_induction (Γ ν) [(Theory.indScheme L (Arith.Hierarc
 
 end polynomial_induction
 
-@[elab_as_elim] lemma hierarchy_polynomial_induction_oRing_sigma₀ [𝐈𝚺₀.Mod M] {P : M → Prop} (hP : DefinablePred ℒₒᵣ Σ 0 P)
+@[elab_as_elim] lemma hierarchy_polynomial_induction_oRing_sigma₀ [M ⊧ₘ* 𝐈𝚺₀] {P : M → Prop} (hP : DefinablePred ℒₒᵣ Σ 0 P)
     (zero : P 0) (even : ∀ x > 0, P x → P (2 * x)) (odd : ∀ x, P x → P (2 * x + 1)) : ∀ x, P x :=
   hierarchy_polynomial_induction Σ 0 hP zero even odd
 
-@[elab_as_elim] lemma hierarchy_polynomial_induction_oRing_sigma₁ [𝐈𝚺₁.Mod M] {P : M → Prop} (hP : DefinablePred ℒₒᵣ Σ 1 P)
+@[elab_as_elim] lemma hierarchy_polynomial_induction_oRing_sigma₁ [M ⊧ₘ* 𝐈𝚺₁] {P : M → Prop} (hP : DefinablePred ℒₒᵣ Σ 1 P)
     (zero : P 0) (even : ∀ x > 0, P x → P (2 * x)) (odd : ∀ x, P x → P (2 * x + 1)) : ∀ x, P x :=
   hierarchy_polynomial_induction Σ 1 hP zero even odd
 
-@[elab_as_elim] lemma hierarchy_polynomial_induction_oRing_pi₁ [𝐈𝚷₁.Mod M] {P : M → Prop} (hP : DefinablePred ℒₒᵣ Π 1 P)
+@[elab_as_elim] lemma hierarchy_polynomial_induction_oRing_pi₁ [M ⊧ₘ* 𝐈𝚷₁] {P : M → Prop} (hP : DefinablePred ℒₒᵣ Π 1 P)
     (zero : P 0) (even : ∀ x > 0, P x → P (2 * x)) (odd : ∀ x, P x → P (2 * x + 1)) : ∀ x, P x :=
   hierarchy_polynomial_induction Π 1 hP zero even odd
 

@@ -9,13 +9,13 @@ namespace Arith
 
 noncomputable section
 
-variable {M : Type} [Nonempty M] [Zero M] [One M] [Add M] [Mul M] [LT M] [𝐏𝐀⁻.Mod M]
+variable {M : Type} [Nonempty M] [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐏𝐀⁻]
 
 namespace Model
 
 section ISigma₀
 
-variable [𝐈𝚺₀.Mod M]
+variable [M ⊧ₘ* 𝐈𝚺₀]
 
 
 end ISigma₀

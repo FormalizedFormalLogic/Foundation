@@ -12,7 +12,7 @@ namespace Model
 
 section IOpen
 
-variable [𝐈open.Mod M]
+variable [M ⊧ₘ* 𝐈open]
 
 def Pow2 (a : M) : Prop := 0 < a ∧ ∀ r ≤ a, 1 < r → r ∣ a → 2 ∣ r
 
@@ -22,7 +22,7 @@ def pow2Def : Δ₀-Sentence 1 :=
 lemma pow2_defined : Δ₀-Predicate (Pow2 : M → Prop) via pow2Def := by
   intro v
   simp [Semiformula.eval_substs, Matrix.comp_vecCons', Matrix.vecHead, Matrix.constant_eq_singleton,
-    Pow2, pow2Def, le_iff_lt_succ, dvd_defined.pval]
+    Pow2, pow2Def, le_iff_lt_succ, dvd_defined.pval, numeral_eq_natCast]
 
 instance pow2_definable : DefinablePred ℒₒᵣ Σ 0 (Pow2 : M → Prop) := defined_to_with_param _ pow2_defined
 
@@ -114,7 +114,8 @@ def lenbitDef : Δ₀-Sentence 2 :=
   ⟨“∃[#0 < #2 + 1] (!divDef [#0, #2, #1] ∧ ¬!dvdDef [2, #0])”, by simp⟩
 
 lemma lenbit_defined : Δ₀-Relation (LenBit : M → M → Prop) via lenbitDef := by
-  intro v; simp[sqrt_graph, lenbitDef, Matrix.vecHead, Matrix.vecTail, div_defined.pval, dvd_defined.pval, LenBit, ←le_iff_lt_succ]
+  intro v; simp[sqrt_graph, lenbitDef, Matrix.vecHead, Matrix.vecTail,
+    div_defined.pval, dvd_defined.pval, LenBit, ←le_iff_lt_succ, numeral_eq_natCast]
   constructor
   · intro h; exact ⟨v 1 / v 0, by simp, rfl, h⟩
   · rintro ⟨z, hz, rfl, h⟩; exact h
@@ -193,7 +194,7 @@ end IOpen
 
 section ISigma₀
 
-variable [𝐈𝚫₀.Mod M]
+variable [M ⊧ₘ* 𝐈𝚫₀]
 
 namespace Pow2
 

@@ -2,8 +2,6 @@ import Arithmetization.Basic.PeanoMinus
 
 namespace LO.FirstOrder
 
-attribute [simp] Theory.Mod.modelsTheory
-
 namespace Arith
 
 namespace Theory
@@ -40,18 +38,18 @@ variable {M : Type} [Zero M] [One M] [Add M] [Mul M] [LT M]
 
 section
 
-variable [𝐏𝐀⁻.Mod M] {L : Language} [L.ORing] [Structure L M] [Structure.ORing L M] [Structure.Monotone L M]
+variable [M ⊧ₘ* 𝐏𝐀⁻] {L : Language} [L.ORing] [Structure L M] [Structure.ORing L M] [Structure.Monotone L M]
 
 section IndScheme
 
-variable {C : Semiformula L ℕ 1 → Prop} [(Theory.indScheme L C).Mod M]
+variable {C : Semiformula L ℕ 1 → Prop} [M ⊧ₘ* Theory.indScheme L C]
 
 private lemma induction_eval {p : Semiformula L ℕ 1} (hp : C p) (v) :
     Semiformula.Eval! M ![0] v p →
     (∀ x, Semiformula.Eval! M ![x] v p → Semiformula.Eval! M ![x + 1] v p) →
     ∀ x, Semiformula.Eval! M ![x] v p := by
   have : M ⊧ₘ (∀ᶠ* succInd p) :=
-    Theory.Mod.models (T := Theory.indScheme _ C) M (by simpa using Theory.mem_indScheme_of_mem hp)
+    ModelsTheory.models (T := Theory.indScheme _ C) M (by simpa using Theory.mem_indScheme_of_mem hp)
   simp [models_iff, succInd, Semiformula.eval_substs,
     Semiformula.eval_rew_q Rew.toS, Function.comp, Matrix.constant_eq_singleton] at this
   exact this v
@@ -68,7 +66,7 @@ end IndScheme
 
 section neg
 
-variable (Γ : Polarity) (s : ℕ) [(Theory.indScheme L (Arith.Hierarchy Γ s)).Mod M]
+variable (Γ : Polarity) (s : ℕ) [M ⊧ₘ* Theory.indScheme L (Arith.Hierarchy Γ s)]
 
 @[elab_as_elim]
 lemma induction_h {P : M → Prop} (hP : DefinablePred L Γ s P)
@@ -142,7 +140,7 @@ lemma models_indScheme_alt : M ⊧ₘ* Theory.indScheme L (Arith.Hierarchy Γ.al
           by intro x; simp [←Matrix.constant_eq_singleton', Semiformula.eval_rewriteMap]⟩
   exact this H0 Hsucc x
 
-instance : (Theory.indScheme L (Arith.Hierarchy Γ.alt s)).Mod M := ⟨models_indScheme_alt Γ s⟩
+instance : M ⊧ₘ* Theory.indScheme L (Arith.Hierarchy Γ.alt s) := models_indScheme_alt Γ s
 
 lemma least_number_h {P : M → Prop} (hP : DefinablePred L Γ s P)
     {x} (h : P x) : ∃ y, P y ∧ ∀ z < y, ¬P z := by
@@ -169,59 +167,59 @@ lemma least_number_h {P : M → Prop} (hP : DefinablePred L Γ s P)
 
 end neg
 
-instance [(Theory.indScheme L (Arith.Hierarchy Σ s)).Mod M] :
-    (Theory.indScheme L (Arith.Hierarchy Γ s)).Mod M := by
+instance [M ⊧ₘ* Theory.indScheme L (Arith.Hierarchy Σ s)] :
+    M ⊧ₘ* Theory.indScheme L (Arith.Hierarchy Γ s) := by
   rcases Γ
   · exact inferInstance
-  · exact ⟨models_indScheme_alt Σ s⟩
+  · exact models_indScheme_alt Σ s
 
 end
 
-def mod_iOpen_of_mod_indH (Γ s) [(𝐈𝐍𝐃Γ s).Mod M] : 𝐈open.Mod M :=
-  Theory.Mod.of_ss (T₁ := 𝐈𝐍𝐃Γ s) M (Set.union_subset_union_right _ (Theory.indScheme_subset Hierarchy.of_open))
+def mod_iOpen_of_mod_indH (Γ n) [M ⊧ₘ* 𝐈𝐍𝐃Γ n] : M ⊧ₘ* 𝐈open :=
+  ModelsTheory.of_ss (U := 𝐈𝐍𝐃Γ n) inferInstance
+    (Set.union_subset_union_right _ (Theory.indScheme_subset Hierarchy.of_open))
 
-def mod_iSigma_of_le {s₁ s₂} (h : s₁ ≤ s₂) [(𝐈𝚺 s₂).Mod M] : (𝐈𝚺 s₁).Mod M :=
-  Theory.Mod.of_ss M (Theory.iSigma_subset_mono h)
+def mod_iSigma_of_le {n₁ n₂} (h : n₁ ≤ n₂) [M ⊧ₘ* 𝐈𝚺 n₂] : M ⊧ₘ* 𝐈𝚺 n₁ :=
+  ModelsTheory.of_ss inferInstance (Theory.iSigma_subset_mono h)
 
-instance [𝐈open.Mod M] : 𝐏𝐀⁻.Mod M := Theory.Mod.of_add_left M 𝐏𝐀⁻ (Theory.indScheme _ Semiformula.Open)
+instance [M ⊧ₘ* 𝐈open] : M ⊧ₘ* 𝐏𝐀⁻ := ModelsTheory.of_add_left M 𝐏𝐀⁻ (Theory.indScheme _ Semiformula.Open)
 
-instance [𝐈𝚺₀.Mod M] : 𝐈open.Mod M := mod_iOpen_of_mod_indH Σ 0
+instance [M ⊧ₘ* 𝐈𝚺₀] : M ⊧ₘ* 𝐈open := mod_iOpen_of_mod_indH Σ 0
 
-instance [𝐈𝚺₁.Mod M] : 𝐈𝚺₀.Mod M := mod_iSigma_of_le (show 0 ≤ 1 from by simp)
+instance [M ⊧ₘ* 𝐈𝚺₁] : M ⊧ₘ* 𝐈𝚺₀ := mod_iSigma_of_le (show 0 ≤ 1 from by simp)
 
-instance [(𝐈𝚺 ν).Mod M] : (𝐈𝐍𝐃 Γ ν).Mod M := by
-  rcases Γ
-  · exact inferInstance
-  · haveI : 𝐏𝐀⁻.Mod M := Arith.mod_peanoMinus_of_mod_indH (Γ := Σ) (ν := ν)
-    exact inferInstance
+instance [M ⊧ₘ* 𝐈𝚺 n] : M ⊧ₘ* 𝐈𝚷 n :=
+  haveI : M ⊧ₘ* 𝐏𝐀⁻ := Arith.models_peanoMinus_of_models_indH Σ n
+  inferInstance
 
-instance [(𝐈𝚷 ν).Mod M] : (𝐈𝚺 ν).Mod M :=
-  haveI : 𝐏𝐀⁻.Mod M := Arith.mod_peanoMinus_of_mod_indH (Γ := Π) (ν := ν)
-  Theory.Mod.of_models (by simpa [Theory.iPi] using models_indScheme_alt (M := M) Π ν)
+instance [M ⊧ₘ* 𝐈𝚷 n] : M ⊧ₘ* 𝐈𝚺 n :=
+  haveI : M ⊧ₘ* 𝐏𝐀⁻ := Arith.models_peanoMinus_of_models_indH Π n
+  by simp [*]; simpa [Theory.iPi] using models_indScheme_alt (L := ℒₒᵣ) (M := M) Π n
 
-lemma models_iSigma_iff_models_iPi : M ⊧ₘ* 𝐈𝚺 ν ↔ M ⊧ₘ* 𝐈𝚷 ν :=
-  ⟨fun h ↦ by haveI : (𝐈𝚺 ν).Mod M := ⟨h⟩; exact Theory.Mod.modelsTheory M _,
-   fun h ↦ by haveI : (𝐈𝚷 ν).Mod M := ⟨h⟩; exact Theory.Mod.modelsTheory M _⟩
+lemma models_iSigma_iff_models_iPi {n} : M ⊧ₘ* 𝐈𝚺 n ↔ M ⊧ₘ* 𝐈𝚷 n :=
+  ⟨fun _ ↦ inferInstance, fun _ ↦ inferInstance⟩
 
-@[elab_as_elim] lemma induction_iSigmaZero [𝐈𝚺₀.Mod M]
+instance [M ⊧ₘ* 𝐈𝚺 n] : M ⊧ₘ* 𝐈𝐍𝐃Γ n := by rcases Γ <;> exact inferInstance
+
+@[elab_as_elim] lemma induction_iSigmaZero [M ⊧ₘ* 𝐈𝚺₀]
     {P : M → Prop} (hP : DefinablePred ℒₒᵣ Σ 0 P)
     (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x := induction_h Σ 0 hP zero succ
 
-@[elab_as_elim] lemma induction_iSigmaOne [𝐈𝚺₁.Mod M]
+@[elab_as_elim] lemma induction_iSigmaOne [M ⊧ₘ* 𝐈𝚺₁]
     {P : M → Prop} (hP : DefinablePred ℒₒᵣ Σ 1 P)
     (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x := induction_h Σ 1 hP zero succ
 
-@[elab_as_elim] lemma order_induction_iSigmaZero [𝐈𝚺₀.Mod M]
+@[elab_as_elim] lemma order_induction_iSigmaZero [M ⊧ₘ* 𝐈𝚺₀]
     {P : M → Prop} (hP : DefinablePred ℒₒᵣ Σ 0 P)
     (ind : ∀ x, (∀ y < x, P y) → P x) : ∀ x, P x :=
   order_induction_h Σ 0 hP ind
 
-@[elab_as_elim] lemma order_induction_iSigmaOne [𝐈𝚺₁.Mod M]
+@[elab_as_elim] lemma order_induction_iSigmaOne [M ⊧ₘ* 𝐈𝚺₁]
     {P : M → Prop} (hP : DefinablePred ℒₒᵣ Σ 1 P)
     (ind : ∀ x, (∀ y < x, P y) → P x) : ∀ x, P x :=
   order_induction_h Σ 1 hP ind
 
-lemma least_number_iSigmaZero [𝐈𝚺₀.Mod M] {P : M → Prop} (hP : DefinablePred ℒₒᵣ Σ 0 P)
+lemma least_number_iSigmaZero [M ⊧ₘ* 𝐈𝚺₀] {P : M → Prop} (hP : DefinablePred ℒₒᵣ Σ 0 P)
     {x} (h : P x) : ∃ y, P y ∧ ∀ z < y, ¬P z :=
   least_number_h Σ 0 hP h
 

@@ -8,7 +8,7 @@ noncomputable section
 
 namespace Model
 
-variable {M : Type} [Zero M] [One M] [Add M] [Mul M] [LT M] [𝐈𝚺₀.Mod M] [𝛀₁.Mod M]
+variable {M : Type} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐈𝚺₀] [M ⊧ₘ* 𝛀₁]
 
 namespace Nuon
 
@@ -80,7 +80,7 @@ def extDef : Δ₀-Sentence 4 :=
 @[simp] lemma cons_app_nine {n : ℕ} (a : α) (s : Fin n.succ.succ.succ.succ.succ.succ.succ.succ.succ → α) : (a :> s) 9 = s 8 := rfl
 
 lemma ext_defined : Δ₀-Function₃ (ext : M → M → M → M) via extDef := by
-  intro v; simp [extDef, length_defined.pval, Exp.defined.pval, div_defined.pval, rem_defined.pval, lt_succ_iff_le, ext_graph]
+  intro v; simp [extDef, length_defined.pval, Exp.defined.pval, div_defined.pval, rem_defined.pval, lt_succ_iff_le, ext_graph, numeral_eq_natCast]
 
 instance ext_Definable : DefinableFunction₃ ℒₒᵣ Σ 0 (ext : M → M → M → M) := defined_to_with_param₀ _ ext_defined
 
@@ -493,7 +493,7 @@ def isSegmentDef : Δ₀-Sentence 5 :=
         #2 = #1 + #0)))”, by simp⟩
 
 lemma isSegmentDef_defined : Defined (M := M) (λ v ↦ IsSegment (v 0) (v 1) (v 2) (v 3) (v 4)) isSegmentDef.val := by
-  intro v; simp [IsSegment, isSegmentDef, ext_defined.pval, fbit_defined.pval, lt_succ_iff_le]
+  intro v; simp [IsSegment, isSegmentDef, ext_defined.pval, fbit_defined.pval, lt_succ_iff_le, numeral_eq_natCast]
   apply ball_congr; intro x _
   constructor
   · intro h; exact ⟨_, by simp, rfl, _, by simp, rfl, _, by simp, rfl, h⟩
@@ -562,7 +562,7 @@ def nuonAuxDef : Δ₀-Sentence 3 :=
 
 lemma nuonAux_defined : Δ₀-Relation₃ (NuonAux : M → M → M → Prop) via nuonAuxDef := by
   intro v; simp [NuonAux, polyU, polyI, polyL, nuonAuxDef,
-    length_defined.pval, sqrt_defined.pval, bexp_defined.pval, seriesSegmentDef_defined.pval, lt_succ_iff_le]
+    length_defined.pval, sqrt_defined.pval, bexp_defined.pval, seriesSegmentDef_defined.pval, lt_succ_iff_le, numeral_eq_natCast]
   rw [bex_eq_le_iff, bex_eq_le_iff, bex_eq_le_iff, bex_eq_le_iff]; simp
 
 instance nuonAux_definable : DefinableRel₃ ℒₒᵣ Σ 0 (NuonAux : M → M → M → Prop) := defined_to_with_param _ nuonAux_defined

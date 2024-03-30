@@ -13,7 +13,7 @@ namespace Model
 
 section ISigma₁
 
-variable [𝐈𝚺₁.Mod M]
+variable [M ⊧ₘ* 𝐈𝚺₁]
 
 def Bit (i a : M) : Prop := LenBit (exp i) a
 
@@ -49,11 +49,11 @@ section
 
 variable {L : Language} [L.ORing] [Structure L M] [Structure.ORing L M] [Structure.Monotone L M]
 
-variable (Γ : Polarity) (ν : ℕ)
+variable (Γ : Polarity) (n : ℕ)
 
 @[definability] lemma Definable.ball_mem {P : (Fin k → M) → M → Prop} {f : (Fin k → M) → M}
-    (hf : Semipolynomial L Γ ν f) (h : Definable L Γ ν (fun w ↦ P (w ·.succ) (w 0))) :
-    Definable L Γ ν (fun v ↦ ∀ x ∈ f v, P v x) := by
+    (hf : Semipolynomial L Γ n f) (h : Definable L Γ n (fun w ↦ P (w ·.succ) (w 0))) :
+    Definable L Γ n (fun v ↦ ∀ x ∈ f v, P v x) := by
   rcases hf.bounded with ⟨bf, hbf⟩
   rcases hf.definable with ⟨f_graph, hf_graph⟩
   rcases h with ⟨p, hp⟩
@@ -65,8 +65,8 @@ variable (Γ : Polarity) (ν : ℕ)
         · rintro ⟨_, _, rfl, h⟩ x hx; exact h x (lt_of_mem hx) hx⟩
 
 @[definability] lemma Definable.bex_mem {P : (Fin k → M) → M → Prop} {f : (Fin k → M) → M}
-    (hf : Semipolynomial L Γ ν f) (h : Definable L Γ ν (fun w ↦ P (w ·.succ) (w 0))) :
-    Definable L Γ ν (fun v ↦ ∃ x ∈ f v, P v x) := by
+    (hf : Semipolynomial L Γ n f) (h : Definable L Γ n (fun w ↦ P (w ·.succ) (w 0))) :
+    Definable L Γ n (fun v ↦ ∃ x ∈ f v, P v x) := by
   rcases hf.bounded with ⟨bf, hbf⟩
   rcases hf.definable with ⟨f_graph, hf_graph⟩
   rcases h with ⟨p, hp⟩
@@ -203,63 +203,63 @@ end ISigma₁
 
 section
 
-variable {ν : ℕ} [Fact (1 ≤ ν)] [(𝐈𝐍𝐃Σ ν).Mod M]
+variable {n : ℕ} [Fact (1 ≤ n)] [M ⊧ₘ* 𝐈𝐍𝐃Σ n]
 
-theorem finset_comprehension {P : M → Prop} (hP : Γ(ν)-Predicate P) (n : M) :
-    haveI : 𝐈𝚺₁.Mod M := mod_iSigma_of_le (show 1 ≤ ν from Fact.out)
-    ∃ s < exp n, ∀ i < n, i ∈ s ↔ P i := by
-  haveI : 𝐈𝚺₁.Mod M := mod_iSigma_of_le (show 1 ≤ ν from Fact.out)
-  have : ∃ s < exp n, ∀ i < n, P i → i ∈ s :=
-    ⟨under n, pred_lt_self_of_pos (by simp), fun i hi _ ↦ by simpa [mem_under_iff] using hi⟩
+theorem finset_comprehension {P : M → Prop} (hP : Γ(n)-Predicate P) (a : M) :
+    haveI : M ⊧ₘ* 𝐈𝚺₁ := mod_iSigma_of_le (show 1 ≤ n from Fact.out)
+    ∃ s < exp a, ∀ i < a, i ∈ s ↔ P i := by
+  haveI : M ⊧ₘ* 𝐈𝚺₁ := mod_iSigma_of_le (show 1 ≤ n from Fact.out)
+  have : ∃ s < exp a, ∀ i < a, P i → i ∈ s :=
+    ⟨under a, pred_lt_self_of_pos (by simp), fun i hi _ ↦ by simpa [mem_under_iff] using hi⟩
   rcases this with ⟨s, hsn, hs⟩
-  have : (Γ.alt)(ν)-Predicate (fun s ↦ ∀ i < n, P i → i ∈ s) := by
+  have : (Γ.alt)(n)-Predicate (fun s ↦ ∀ i < a, P i → i ∈ s) := by
     apply Definable.ball_lt; simp; apply Definable.imp
     definability
     apply @Definable.of_sigma_zero M ℒₒᵣ _ _ _ _ mem_definable
-  have : ∃ t, (∀ i < n, P i → i ∈ t) ∧ ∀ t' < t, ∃ x, P x ∧ x < n ∧ x ∉ t' := by
-    simpa using least_number_h (L := ℒₒᵣ) Γ.alt ν this hs
+  have : ∃ t, (∀ i < a, P i → i ∈ t) ∧ ∀ t' < t, ∃ x, P x ∧ x < a ∧ x ∉ t' := by
+    simpa using least_number_h (L := ℒₒᵣ) Γ.alt n this hs
   rcases this with ⟨t, ht, t_minimal⟩
   have t_le_s : t ≤ s := not_lt.mp (by
     intro lt
     rcases t_minimal s lt with ⟨i, hi, hin, his⟩
     exact his (hs i hin hi))
-  have : ∀ i < n, i ∈ t → P i := by
+  have : ∀ i < a, i ∈ t → P i := by
     intro i _ hit
     by_contra Hi
-    have : ∃ j, P j ∧ j < n ∧ (j ∈ t → j = i) := by
+    have : ∃ j, P j ∧ j < a ∧ (j ∈ t → j = i) := by
       simpa [not_imp_not] using t_minimal (bitRemove i t) (bitRemove_lt_of_mem hit)
     rcases this with ⟨j, Hj, hjn, hm⟩
     rcases hm (ht j hjn Hj); contradiction
   exact ⟨t, lt_of_le_of_lt t_le_s hsn, fun i hi ↦ ⟨this i hi, ht i hi⟩⟩
 
-theorem finset_comprehension_exists_unique {P : M → Prop} (hP : Γ(ν)-Predicate P) (n : M) :
-    haveI : 𝐈𝚺₁.Mod M := mod_iSigma_of_le (show 1 ≤ ν from Fact.out)
-    ∃! s, s < exp n ∧ ∀ i < n, i ∈ s ↔ P i := by
-  haveI : 𝐈𝚺₁.Mod M := mod_iSigma_of_le (show 1 ≤ ν from Fact.out)
-  rcases finset_comprehension hP n with ⟨s, hs, Hs⟩
+theorem finset_comprehension_exists_unique {P : M → Prop} (hP : Γ(n)-Predicate P) (a : M) :
+    haveI : M ⊧ₘ* 𝐈𝚺₁ := mod_iSigma_of_le (show 1 ≤ n from Fact.out)
+    ∃! s, s < exp a ∧ ∀ i < a, i ∈ s ↔ P i := by
+  haveI : M ⊧ₘ* 𝐈𝚺₁ := mod_iSigma_of_le (show 1 ≤ n from Fact.out)
+  rcases finset_comprehension hP a with ⟨s, hs, Hs⟩
   exact ExistsUnique.intro s ⟨hs, Hs⟩ (by
     intro t ⟨ht, Ht⟩
     apply mem_ext
     intro i
     constructor
     · intro hi
-      have hin : i < n := exponential_monotone.mp (lt_of_le_of_lt (exp_le_of_mem hi) ht)
+      have hin : i < a := exponential_monotone.mp (lt_of_le_of_lt (exp_le_of_mem hi) ht)
       exact (Hs i hin).mpr ((Ht i hin).mp hi)
     · intro hi
-      have hin : i < n := exponential_monotone.mp (lt_of_le_of_lt (exp_le_of_mem hi) hs)
+      have hin : i < a := exponential_monotone.mp (lt_of_le_of_lt (exp_le_of_mem hi) hs)
       exact (Ht i hin).mpr ((Hs i hin).mp hi))
 
 end
 
 section ISigma₁
 
-variable [𝐈𝚺₁.Mod M]
+variable [M ⊧ₘ* 𝐈𝚺₁]
 
 instance : Fact (1 ≤ 1) := ⟨by rfl⟩
 
-theorem finset_comprehension₁ {P : M → Prop} (hP : Γ(1)-Predicate P) (n : M) :
-    ∃ s < exp n, ∀ i < n, i ∈ s ↔ P i :=
-  finset_comprehension hP n
+theorem finset_comprehension₁ {P : M → Prop} (hP : Γ(1)-Predicate P) (a : M) :
+    ∃ s < exp a, ∀ i < a, i ∈ s ↔ P i :=
+  finset_comprehension hP a
 
 /-
 lemma domain_exists_unique (s : M) :

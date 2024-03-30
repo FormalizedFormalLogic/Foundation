@@ -3,6 +3,8 @@ import Logic.FirstOrder.Arith.EA.Basic
 
 instance [Zero α] : Nonempty α := ⟨0⟩
 
+notation "exp " x:90 => Exp.exp x
+
 namespace Matrix
 
 lemma forall_iff {n : ℕ} (p : (Fin (n + 1) → α) → Prop) :
@@ -99,58 +101,14 @@ variable [𝓑 : System F] {α : Type*} [𝓢 : Semantics F α] [Complete F]
 lemma provableTheory_iff : T ⊢*! U ↔ (∀ s, s ⊧* T → s ⊧* U) := by
   simp [System.provableTheory_iff, ←consequence_iff_provable]
   constructor
-  · intro h s hs f hf; exact h f hf hs
-  · intro h f hf s hs; exact h s hs hf
+  · intro h s hs; exact ⟨fun f hf ↦ h f hf hs⟩
+  · intro h f hf s hs; exact (h s hs).realize hf
 
 end Complete
 
 end
 
 namespace FirstOrder
-
-namespace Semiterm
-
-@[simp] lemma bshift_positive (t : Semiterm L ξ n) : Positive (Rew.bShift t) := by
-  induction t <;> simp
-
-lemma bv_eq_empty_of_positive {t : Semiterm L ξ 1} (ht : t.Positive) : t.bv = ∅ :=
-  Finset.eq_empty_of_forall_not_mem <| by simp [Positive, Fin.eq_zero] at ht ⊢; assumption
-
-variable {M : Type*} {s : Structure L M}
-
-@[simp] lemma val_toS {e : Fin n → M} (t : Semiterm L (Fin n) 0) :
-    bVal s e (Rew.toS t) = val s ![] e t := by
-  simp[val_rew, Matrix.empty_eq]; congr
-
-@[simp] lemma val_toF {e : Fin n → M} (t : Semiterm L Empty n) :
-    val s ![] e (Rew.toF t) = bVal s e t := by
-  simp[val_rew, Matrix.empty_eq]; congr
-  funext i; simp; contradiction
-
-end Semiterm
-
-namespace Rew
-
-lemma substs_bv (t : Semiterm L ξ n) (v : Fin n → Semiterm L ξ m) :
-    (Rew.substs v t).bv = t.bv.biUnion (fun i ↦ (v i).bv) := by
-  induction t <;> simp [Rew.func, Semiterm.bv_func, Finset.biUnion_biUnion, *]
-
-@[simp] lemma substs_positive (t : Semiterm L ξ n) (v : Fin n → Semiterm L ξ (m + 1)) :
-    (Rew.substs v t).Positive ↔ ∀ i ∈ t.bv, (v i).Positive := by
-  simp [Semiterm.Positive, substs_bv]
-  exact ⟨fun H i hi x hx ↦ H x i hi hx, fun H x i hi hx ↦ H i hi x hx⟩
-
-lemma embSubsts_bv (t : Semiterm L Empty n) (v : Fin n → Semiterm L ξ m) :
-    (Rew.embSubsts v t).bv = t.bv.biUnion (fun i ↦ (v i).bv) := by
-  induction t <;> simp [Rew.func, Semiterm.bv_func, Finset.biUnion_biUnion, *]
-  · contradiction
-
-@[simp] lemma embSubsts_positive (t : Semiterm L Empty n) (v : Fin n → Semiterm L ξ (m + 1)) :
-    (Rew.embSubsts v t).Positive ↔ ∀ i ∈ t.bv, (v i).Positive := by
-  simp [Semiterm.Positive, embSubsts_bv]
-  exact ⟨fun H i hi x hx ↦ H x i hi hx, fun H x i hi hx ↦ H i hi x hx⟩
-
-end Rew
 
 namespace Arith
 
@@ -195,34 +153,16 @@ instance : ToString (Semiformula ℒₒᵣ μ n) := ⟨formulaToStr⟩
 
 end ToString
 
-namespace Hierarchy
-
-variable {L : Language} [L.LT]
-
-lemma of_zero {b b'} {s : ℕ} {p : Semiformula L μ n} (hp : Hierarchy b 0 p) : Hierarchy b' s p := by
-  rcases Nat.eq_or_lt_of_le (Nat.zero_le s) with (rfl | pos)
-  · exact zero_iff.mp hp
-  · exact strict_mono hp b' pos
-
-lemma iff_iff {p q : Semiformula L μ n} :
-    Hierarchy b s (p ⟷ q) ↔ (Hierarchy b s p ∧ Hierarchy b.alt s p ∧ Hierarchy b s q ∧ Hierarchy b.alt s q) := by
-  simp[Semiformula.iff_eq]; tauto
-
-@[simp] lemma iff_iff₀ {p q : Semiformula L μ n} :
-    Hierarchy b 0 (p ⟷ q) ↔ (Hierarchy b 0 p ∧ Hierarchy b 0 q) := by
-  simp[Semiformula.iff_eq]; tauto
-
-end Hierarchy
-
 section model
 
 variable {T : Theory ℒₒᵣ} [𝐄𝐪 ≾ T]
 
-variable (M : Type) [Zero M] [One M] [Add M] [Mul M] [LT M] [T.Mod M]
+variable (M : Type) [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* T]
 
 lemma oring_sound {σ : Sentence ℒₒᵣ} (h : T ⊢! σ) : M ⊧ₘ σ := consequence_iff'.mp (LO.Sound.sound! h) M
 
-instance (Γ s) [(𝐈𝐍𝐃Γ s).Mod M] : (Theory.indScheme ℒₒᵣ (Arith.Hierarchy Γ s)).Mod M := mod_indScheme_of_mod_indH (Γ := Γ) (ν := s)
+instance (Γ n) [M ⊧ₘ* 𝐈𝐍𝐃Γ n] :
+    M ⊧ₘ* Theory.indScheme ℒₒᵣ (Arith.Hierarchy Γ n) := models_indScheme_of_models_indH Γ n
 
 end model
 
@@ -295,24 +235,6 @@ lemma bexClosure_iff {b s n} {p : Semiformula L ξ n} {v : Fin n → Semiterm L 
   induction' n with n IH <;> simp [bexClosure, ←Rew.comp_app]
   refine Iff.trans (IH (p := “∃[#0 < !!([→ #0] (v 0))] !p”) (v := (v ·.succ)) (by intro; simp [hv])) ?_
   rw [bex_iff]; simp [Semiterm.bv_eq_empty_of_positive (hv 0)]
-
-@[simp] lemma matrix_conj_iff {b s n} {p : Fin m → Semiformula L ξ n} :
-    Hierarchy b s (Matrix.conj fun j ↦ p j) ↔ ∀ j, Hierarchy b s (p j) := by
-  cases m <;> simp
-
-lemma remove_forall {p : Semiformula L ξ (n + 1)} : Hierarchy b s (∀' p) → Hierarchy b s p := by
-  intro h; rcases h
-  case ball => simpa
-  case all => assumption
-  case pi h => exact h.accum _
-  case dummy_sigma h => exact h.accum _
-
-lemma remove_exists {p : Semiformula L ξ (n + 1)} : Hierarchy b s (∃' p) → Hierarchy b s p := by
-  intro h; rcases h
-  case bex => simpa
-  case ex => assumption
-  case sigma h => exact h.accum _
-  case dummy_pi h => exact h.accum _
 
 end Arith.Hierarchy
 
