@@ -32,9 +32,14 @@ lemma models_Omega₁_iff [M ⊧ₘ* 𝐈𝚫₀] : M ⊧ₘ omegaOneAxiom ↔ �
 
 lemma sigma₁_omega₁ [M ⊧ₘ* 𝐈𝚺₁] : M ⊧ₘ omegaOneAxiom := models_Omega₁_iff.mpr (fun x ↦ Exp.range_exists (‖x‖^2))
 
-instance [M ⊧ₘ* 𝐈𝚺₁] : M ⊧ₘ* 𝛀₁ := ⟨by intro _; simp; rintro rfl; exact sigma₁_omega₁⟩
+instance [M ⊧ₘ* 𝐈𝚺₁] : M ⊧ₘ* 𝐈𝚫₀ + 𝛀₁ :=
+  ModelsTheory.add_iff.mpr ⟨inferInstance, ⟨by intro _; simp; rintro rfl; exact sigma₁_omega₁⟩⟩
 
-variable [M ⊧ₘ* 𝐈𝚫₀] [M ⊧ₘ* 𝛀₁]
+variable [M ⊧ₘ* 𝐈𝚫₀ + 𝛀₁]
+
+instance : M ⊧ₘ* 𝐈𝚫₀ := ModelsTheory.of_add_left M 𝐈𝚫₀ 𝛀₁
+
+instance : M ⊧ₘ* 𝛀₁ := ModelsTheory.of_add_right M 𝐈𝚫₀ 𝛀₁
 
 lemma exists_exp_sq_length (x : M) : ∃ y, Exp (‖x‖^2) y :=
   models_Omega₁_iff.mp (ModelsTheory.models M Theory.omega₁.omega) x

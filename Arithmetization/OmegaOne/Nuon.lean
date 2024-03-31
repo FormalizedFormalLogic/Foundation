@@ -8,7 +8,7 @@ noncomputable section
 
 namespace Model
 
-variable {M : Type} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐈𝚺₀] [M ⊧ₘ* 𝛀₁]
+variable {M : Type} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐈𝚫₀ + 𝛀₁]
 
 namespace Nuon
 
