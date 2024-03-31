@@ -1,6 +1,6 @@
 # Arithmetization
 
-Formalization of Arithmetization of Metamathematics. This project depends on [lean4-logic](https://github.com/iehality/lean4-logic/tree/master).
+Formalization of weak arithmetic and arithmetization of metamathematics. This project depends on [lean4-logic](https://github.com/iehality/lean4-logic/tree/master).
 
 https://iehality.github.io/Arithmetization/
 
@@ -11,6 +11,7 @@ https://iehality.github.io/Arithmetization/
   - [Structure](#structure)
   - [Definions](#definions)
   - [Theorems](#theorems)
+  - [References](#references)
 
 ## Usage
   Add following to `lakefile.lean`.
@@ -32,7 +33,7 @@ https://iehality.github.io/Arithmetization/
 
 |                           | Definition                                 |   Notation   |
 | ------------------------- | :----------------------------------------- | :----------: |
-| $\mathbf{\Omega_1}$ axiom | [LO.FirstOrder.Arith.Theory.omega₁](https://iehality.github.io/Arithmetization/Arithmetization/OmegaOne/Basic.html#LO.FirstOrder.Arith.Theory.omega%E2%82%81) | `𝛀₁` |
+| $\mathbf{\Omega_1}$ axiom | [LO.FirstOrder.Arith.Theory.omegaOne](https://iehality.github.io/Arithmetization/Arithmetization/OmegaOne/Basic.html#LO.FirstOrder.Arith.Theory.omegaOne) | `𝛀₁` |
 
 ## Theorems
 - [Order induction](https://iehality.github.io/Arithmetization/Arithmetization/Basic/Ind.html#LO.FirstOrder.Arith.Model.order_induction_h)
@@ -89,3 +90,7 @@ https://iehality.github.io/Arithmetization/
         [M ⊧ₘ* 𝐈𝚫₀ + 𝛀₁]  :
         Δ₀-Function₁ LO.FirstOrder.Arith.Model.nuon via LO.FirstOrder.Arith.Model.nuonDef
     ```
+
+## References
+- P. Hájek, P. Pudlák, Metamathematics of First-Order Arithmetic
+- S. Cook, P. Nguyen, Logical Foundations of Proof Complexity

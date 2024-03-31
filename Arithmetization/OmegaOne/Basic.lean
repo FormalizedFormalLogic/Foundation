@@ -7,13 +7,13 @@ namespace Arith
 /-- ∀ x, ∃ y, 2^{|x|^2} = y-/
 def omegaOneAxiom : Sentence ℒₒᵣ := “∀ ∃ ∃[#0 < #2 + 1] (!Model.lengthDef [#0, #2] ∧ !Model.Exp.def [#0*#0, #1])”
 
-inductive Theory.omega₁ : Theory ℒₒᵣ where
-  | omega : Theory.omega₁ omegaOneAxiom
+inductive Theory.omegaOne : Theory ℒₒᵣ where
+  | omega : Theory.omegaOne omegaOneAxiom
 
-notation "𝛀₁" => Theory.omega₁
+notation "𝛀₁" => Theory.omegaOne
 
-@[simp] lemma omega₁.mem_iff {σ} : σ ∈ 𝛀₁ ↔ σ = omegaOneAxiom :=
-  ⟨by rintro ⟨⟩; rfl, by rintro rfl; exact Theory.omega₁.omega⟩
+@[simp] lemma omegaOne.mem_iff {σ} : σ ∈ 𝛀₁ ↔ σ = omegaOneAxiom :=
+  ⟨by rintro ⟨⟩; rfl, by rintro rfl; exact Theory.omegaOne.omega⟩
 
 noncomputable section
 
@@ -42,7 +42,7 @@ instance : M ⊧ₘ* 𝐈𝚫₀ := ModelsTheory.of_add_left M 𝐈𝚫₀ 𝛀�
 instance : M ⊧ₘ* 𝛀₁ := ModelsTheory.of_add_right M 𝐈𝚫₀ 𝛀₁
 
 lemma exists_exp_sq_length (x : M) : ∃ y, Exp (‖x‖^2) y :=
-  models_Omega₁_iff.mp (ModelsTheory.models M Theory.omega₁.omega) x
+  models_Omega₁_iff.mp (ModelsTheory.models M Theory.omegaOne.omega) x
 
 lemma exists_unique_exp_sq_length (x : M) : ∃! y, Exp (‖x‖^2) y := by
   rcases exists_exp_sq_length x with ⟨y, h⟩
