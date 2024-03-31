@@ -73,12 +73,12 @@ https://iehality.github.io/Arithmetization/
   ```
 
 - Exponential is definable in $\mathbf{I\Delta_0}$ by $\mathbf{\Delta_0}$ formula
-  - [LO.FirstOrder.Arith.Model.Exp.defined](https://iehality.github.io/Arithmetization/Arithmetization/IDeltaZero/Exponential/Exp.html#LO.FirstOrder.Arith.Model.Exp.defined)
+  - [LO.FirstOrder.Arith.Model.Exponential.defined](https://iehality.github.io/Arithmetization/Arithmetization/IDeltaZero/Exponential/Exp.html#LO.FirstOrder.Arith.Model.Exponential.defined)
     ```lean
-    theorem LO.FirstOrder.Arith.Model.Exp.defined
+    theorem LO.FirstOrder.Arith.Model.Exponential.defined
         {M : Type} [Zero M] [One M] [Add M] [Mul M] [LT M]
         [M ⊧ₘ* 𝐈𝚫₀] :
-        Δ₀-Relation LO.FirstOrder.Arith.Model.Exp via LO.FirstOrder.Arith.Model.Exp.def
+        Δ₀-Relation (LO.FirstOrder.Arith.Model.Exponential : M → M → Prop) via LO.FirstOrder.Arith.Model.Exponential.def
     ```
 
   - [Representation of $\mathbf{\Delta_0}$ definition of exponential](https://github.com/iehality/Arithmetization/blob/master/Arithmetization/IDeltaZero/Exponential/exp.pdf)

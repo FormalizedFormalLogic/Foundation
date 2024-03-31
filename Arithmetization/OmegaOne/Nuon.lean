@@ -32,7 +32,7 @@ lemma ext_eq_zero_of_lt {L S i : M} (h : ‖S‖ ≤ i * ‖L‖) : S{L}[i] = 0 
 
 @[simp] lemma ext_le_self (L S i : M) : S{L}[i] ≤ S := le_trans (mod_le _ _) (by simp [ext])
 
-lemma ext_graph_aux (z S L i : M) : z = S{L}[i] ↔ (‖S‖ ≤ i * ‖L‖ → z = 0) ∧ (i * ‖L‖ < ‖S‖ → ∃ b ≤ S, Exp (i * ‖L‖) b ∧ z = S / b % (L # 1)) := by
+lemma ext_graph_aux (z S L i : M) : z = S{L}[i] ↔ (‖S‖ ≤ i * ‖L‖ → z = 0) ∧ (i * ‖L‖ < ‖S‖ → ∃ b ≤ S, Exponential (i * ‖L‖) b ∧ z = S / b % (L # 1)) := by
   rcases show ‖S‖ ≤ i * ‖L‖ ∨ i * ‖L‖ < ‖S‖ from le_or_lt _ _ with (le | lt)
   · simp [ext_eq_zero_of_lt le, le, not_lt.mpr le]
   · simp [lt, not_le.mpr lt, ext]
@@ -46,7 +46,7 @@ lemma ext_graph (z S L i : M) : z = S{L}[i] ↔
     ∃ lS ≤ S, lS = ‖S‖ ∧ ∃ lL ≤ L, lL = ‖L‖ ∧
       (lS ≤ i * lL → z = 0) ∧
       (i * lL < lS →
-        ∃ b ≤ S, Exp (i * lL) b ∧ ∃ hL ≤ 2 * L + 1, Exp lL hL ∧ ∃ divS ≤ S, divS = S / b ∧ z = divS % hL) := by
+        ∃ b ≤ S, Exponential (i * lL) b ∧ ∃ hL ≤ 2 * L + 1, Exponential lL hL ∧ ∃ divS ≤ S, divS = S / b ∧ z = divS % hL) := by
   rw [ext_graph_aux]
   rcases show ‖S‖ ≤ i * ‖L‖ ∨ i * ‖L‖ < ‖S‖ from le_or_lt _ _ with (le | lt)
   · simp [ext_eq_zero_of_lt le, le, not_lt.mpr le]
@@ -57,18 +57,18 @@ lemma ext_graph (z S L i : M) : z = S{L}[i] ↔
     constructor
     · rintro ⟨b, hb, Hb, rfl⟩; refine ⟨‖S‖, by simp, rfl, ‖L‖, by simp, rfl, ?_⟩
       simp [not_le.mpr lt, lt]
-      exact ⟨b, hb, Hb, L # 1, by simp, exp_hash_one L, S / b, by simp, rfl, rfl⟩
+      exact ⟨b, hb, Hb, L # 1, by simp, exponential_hash_one L, S / b, by simp, rfl, rfl⟩
     · rintro ⟨_, _, rfl, _, _, rfl, _, h⟩
       rcases h lt with ⟨b, hb, Hb, hL, _, HhL, _, _, rfl, rfl⟩
-      exact ⟨b, hb, Hb, by rw [HhL.uniq (exp_hash_one L)]⟩
+      exact ⟨b, hb, Hb, by rw [HhL.uniq (exponential_hash_one L)]⟩
 
 def extDef : Δ₀-Sentence 4 :=
   ⟨“∃[#0 < #3 + 1] (!lengthDef [#0, #3] ∧
     ∃[#0 < #3 + 1] (!lengthDef [#0, #3] ∧
       (#1 ≤ #5 * #0 → #2 = 0) ∧
       (#5 * #0 < #1 →
-        ∃[#0 < #5 + 1] (!Exp.def [#6 * #1, #0] ∧
-          ∃[#0 < 2 * #5 + 1 + 1] (!Exp.def [#2, #0] ∧
+        ∃[#0 < #5 + 1] (!Exponential.def [#6 * #1, #0] ∧
+          ∃[#0 < 2 * #5 + 1 + 1] (!Exponential.def [#2, #0] ∧
             ∃[#0 < #7 + 1] (!divDef [#0, #7, #2] ∧ !remDef [#5, #0, #1]))))))”, by
     simp⟩
 
@@ -80,7 +80,7 @@ def extDef : Δ₀-Sentence 4 :=
 @[simp] lemma cons_app_nine {n : ℕ} (a : α) (s : Fin n.succ.succ.succ.succ.succ.succ.succ.succ.succ → α) : (a :> s) 9 = s 8 := rfl
 
 lemma ext_defined : Δ₀-Function₃ (ext : M → M → M → M) via extDef := by
-  intro v; simp [extDef, length_defined.pval, Exp.defined.pval, div_defined.pval, rem_defined.pval, lt_succ_iff_le, ext_graph, numeral_eq_natCast]
+  intro v; simp [extDef, length_defined.pval, Exponential.defined.pval, div_defined.pval, rem_defined.pval, lt_succ_iff_le, ext_graph, numeral_eq_natCast]
 
 instance ext_Definable : DefinableFunction₃ ℒₒᵣ Σ 0 (ext : M → M → M → M) := defined_to_with_param₀ _ ext_defined
 
@@ -122,11 +122,11 @@ lemma ext_add₁_pow2 {L i S₁ S₂ p : M} (pp : Pow2 p) (h : (i + 1) * ‖L‖
         i * ‖L‖ ≤ (i + 1) * ‖L‖ := mul_le_mul_right (by simp)
         _       < ‖p‖           := h
         _       ≤ ‖S₁ + S₂ * p‖ := length_monotone (le_add_left (le_mul_of_pos_left pos₂))
-  have : Exp ((i + 1) * ‖L‖) (bexp (S₁ + S₂ * p) (i * ‖L‖) * L # 1) := by
+  have : Exponential ((i + 1) * ‖L‖) (bexp (S₁ + S₂ * p) (i * ‖L‖) * L # 1) := by
     simp [add_mul]
-    exact Exp.add_mul (by simp [lt_len]) (by simpa using exp_hash L 1)
+    exact Exponential.add_mul (by simp [lt_len]) (by simpa using exponential_hash L 1)
   have : bexp (S₁ + S₂ * p) (i * ‖L‖) * L # 1 ∣ p :=
-    Pow2.dvd_of_le (by simp; apply bexp_pow2 lt_len) pp (this.monotone_le (exp_of_pow2 pp) (le_log_of_lt_length h))
+    Pow2.dvd_of_le (by simp; apply bexp_pow2 lt_len) pp (this.monotone_le (exponential_of_pow2 pp) (le_log_of_lt_length h))
   rcases this with ⟨q, hq⟩
   calc
     (S₁ + S₂ * p){L}[i] = (S₁ + p * S₂) / bexp (S₁ + S₂ * p) (i * ‖L‖) % L # 1         := by simp [ext, mul_comm S₂]
@@ -142,7 +142,7 @@ lemma ext_add₁_bexp {L i j S₁ S₂ : M} (hi : i ≤ ‖I‖) (hij : j < i) :
 
 lemma ext_add₂_bexp {I i j S₁ S₂ : M} (hij : i + j ≤ ‖I‖) (hS₁ : ‖S₁‖ ≤ i * ‖L‖) :
     (S₁ + S₂ * bexp (I # L) (i * ‖L‖)){L}[i + j] = S₂{L}[j] := by
-  have hie : Exp (i * ‖L‖) (bexp (I # L) (i * ‖L‖)) := exp_bexp_of_lt (mul_len_lt_len_hash $ le_trans le_self_add hij)
+  have hie : Exponential (i * ‖L‖) (bexp (I # L) (i * ‖L‖)) := exp_bexp_of_lt (mul_len_lt_len_hash $ le_trans le_self_add hij)
   calc  (S₁ + S₂ * bexp (I # L) (i * ‖L‖)){L}[i + j]
       = (S₁ + S₂ * bexp (I # L) (i * ‖L‖)) / bexp (I # L) ((i + j) * ‖L‖) % (L # 1)                    := by rw [ext_eq_hash_of_le hij]
     _ = (S₁ + S₂ * bexp (I # L) (i * ‖L‖)) / bexp (I # L) (i * ‖L‖) / bexp (I # L) (j * ‖L‖) % (L # 1) := by

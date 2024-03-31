@@ -22,7 +22,7 @@ instance : Membership M M := ⟨Bit⟩
 def bitDef : Δ₀-Sentence 2 := ⟨“∃[#0 < #2 + 1] (!expDef [#0, #1] ∧ !lenbitDef [#0, #2])”, by simp⟩
 
 lemma bit_defined : Δ₀-Relation ((· ∈ ·) : M → M → Prop) via bitDef := by
-  intro v; simp [bitDef, lenbit_defined.pval, exp_defined.pval, ←le_iff_lt_succ]
+  intro v; simp [bitDef, lenbit_defined.pval, exp_defined_deltaZero.pval, ←le_iff_lt_succ]
   constructor
   · intro h; exact ⟨exp (v 0), by simp [h.le], rfl, h⟩
   · rintro ⟨_, _, rfl, h⟩; exact h
@@ -93,13 +93,13 @@ lemma not_mem_iff_mul_exp_add {i a : M} : i ∉ a ↔ ∃ k, ∃ r < exp i, a = 
     i ∈ insert j a ↔ i = j ∨ i ∈ a := by
   by_cases h : j ∈ a <;> simp [h, insert_eq, bitInsert]
   · by_cases e : i = j <;> simp [h, e]
-  · simpa [exponential_inj.eq_iff] using
+  · simpa [exp_inj.eq_iff] using
       lenbit_add_pow2_iff_of_not_lenbit (exp_pow2 i) (exp_pow2 j) h
 
 @[simp] lemma mem_bitRemove_iff {i j a : M} :
     i ∈ bitRemove j a ↔ i ≠ j ∧ i ∈ a := by
   by_cases h : j ∈ a <;> simp [h, bitRemove]
-  · simpa [exponential_inj.eq_iff] using
+  · simpa [exp_inj.eq_iff] using
       lenbit_sub_pow2_iff_of_lenbit (exp_pow2 i) (exp_pow2 j) h
   · rintro _ rfl; contradiction
 
@@ -112,8 +112,8 @@ lemma pos_of_nonempty {i a : M} (h : i ∈ a) : 0 < a := by
 lemma log_mem_of_pos {a : M} (h : 0 < a) : log a ∈ a :=
   mem_iff_mul_exp_add_exp_add.mpr
     ⟨0, a - exp log a,
-      (tsub_lt_iff_left (exponential_log_le_self h)).mpr (by rw [←two_mul]; exact lt_two_mul_exponential_log h),
-      by simp; exact Eq.symm <| add_tsub_self_of_le (exponential_log_le_self h)⟩
+      (tsub_lt_iff_left (exp_log_le_self h)).mpr (by rw [←two_mul]; exact lt_two_mul_exponential_log h),
+      by simp; exact Eq.symm <| add_tsub_self_of_le (exp_log_le_self h)⟩
 
 lemma le_log_of_mem {i a : M} (h : i ∈ a) : i ≤ log a := (exp_le_iff_le_log (pos_of_nonempty h)).mp (exp_le_of_mem h)
 
@@ -123,7 +123,7 @@ lemma lt_length_of_mem {i a : M} (h : i ∈ a) : i < ‖a‖ := by
   simpa [length_of_pos (pos_of_nonempty h), ←le_iff_lt_succ] using le_log_of_mem h
 
 lemma lt_exp_iff {a i : M} : a < exp i ↔ ∀ j ∈ a, j < i :=
-  ⟨fun h j hj ↦ exponential_monotone.mp <| lt_of_le_of_lt (exp_le_of_mem hj) h,
+  ⟨fun h j hj ↦ exp_monotone.mp <| lt_of_le_of_lt (exp_le_of_mem hj) h,
    by contrapose; simp
       intro (h : exp i ≤ a)
       have pos : 0 < a := lt_of_lt_of_le (by simp) h
@@ -158,7 +158,7 @@ lemma mem_under_iff {i j : M} : i ∈ under j ↔ i < j := by
     have : exp i < exp j := calc
       exp i ≤ exp j - 1 := exp_le_of_mem h
       _     < exp j     := pred_lt_self_of_pos (exp_pos j)
-    exact exponential_monotone.mp this
+    exact exp_monotone.mp this
   · intro lt
     have := lt_iff_succ_le.mp lt
     let k := j - (i + 1)
@@ -243,10 +243,10 @@ theorem finset_comprehension_exists_unique {P : M → Prop} (hP : Γ(n)-Predicat
     intro i
     constructor
     · intro hi
-      have hin : i < a := exponential_monotone.mp (lt_of_le_of_lt (exp_le_of_mem hi) ht)
+      have hin : i < a := exp_monotone.mp (lt_of_le_of_lt (exp_le_of_mem hi) ht)
       exact (Hs i hin).mpr ((Ht i hin).mp hi)
     · intro hi
-      have hin : i < a := exponential_monotone.mp (lt_of_le_of_lt (exp_le_of_mem hi) hs)
+      have hin : i < a := exp_monotone.mp (lt_of_le_of_lt (exp_le_of_mem hi) hs)
       exact (Ht i hin).mpr ((Hs i hin).mp hi))
 
 end
