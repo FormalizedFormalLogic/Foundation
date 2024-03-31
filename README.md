@@ -37,16 +37,25 @@ https://iehality.github.io/Arithmetization/
 ## Theorems
 - [Order induction](https://iehality.github.io/Arithmetization/Arithmetization/Basic/Ind.html#LO.FirstOrder.Arith.Model.order_induction_h)
   ```lean
-  theorem LO.FirstOrder.Arith.Model.induction_h
-      {M : Type} [Zero M] [One M] [Add M] [Mul M] [LT M] [LO.FirstOrder.ModelsTheory M 𝐏𝐀⁻]
+  theorem LO.FirstOrder.Arith.Model.order_induction_h
+      {M : Type} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐏𝐀⁻]
       {L : LO.FirstOrder.Language} [LO.FirstOrder.Language.ORing L]
       [LO.FirstOrder.Structure L M] [LO.FirstOrder.Structure.ORing L M]
       (Γ : LO.Polarity) (s : ℕ)
-      [LO.FirstOrder.ModelsTheory M (LO.FirstOrder.Arith.Theory.indScheme L (LO.FirstOrder.Arith.Hierarchy Γ s))]
+      [M ⊧ₘ* LO.FirstOrder.Arith.Theory.indScheme L (LO.FirstOrder.Arith.Hierarchy Γ s)]
       {P : M → Prop} (hP : LO.FirstOrder.Arith.Model.DefinablePred L Γ s P)
       (ind : ∀ (x : M), (∀ y < x, P y) → P x) (x : M) :
       P x
   ```
+
+  ```lean
+  noncomputable def LO.FirstOrder.completeness
+      {L : LO.FirstOrder.Language}
+      {T : LO.FirstOrder.Theory L}
+      {σ : LO.FirstOrder.Sentence L} :
+      T ⊨ σ → T ⊢ σ
+  ```
+
 
 - [Least number principle](https://iehality.github.io/Arithmetization/Arithmetization/Basic/Ind.html#LO.FirstOrder.Arith.Model.least_number_h)
   ```lean
@@ -56,7 +65,7 @@ https://iehality.github.io/Arithmetization/
       [LO.FirstOrder.Structure L M] [LO.FirstOrder.Structure.ORing L M]
       [LO.FirstOrder.Structure.Monotone L M]
       (Γ : LO.Polarity) (s : ℕ)
-      [LO.FirstOrder.ModelsTheory M (LO.FirstOrder.Arith.Theory.indScheme L (LO.FirstOrder.Arith.Hierarchy Γ s))]
+      [M ⊧ₘ* LO.FirstOrder.Arith.Theory.indScheme L (LO.FirstOrder.Arith.Hierarchy Γ s)]
       {P : M → Prop} (hP : LO.FirstOrder.Arith.Model.DefinablePred L Γ s P)
       {x : M} (h : P x) :
       ∃ (y : M), P y ∧ ∀ z < y, ¬P z
@@ -65,8 +74,8 @@ https://iehality.github.io/Arithmetization/
 - [$\mathbf{I\Sigma_n} = \mathbf{I\Pi_n}$](https://iehality.github.io/Arithmetization/Arithmetization/Basic/Ind.html#LO.FirstOrder.Arith.Model.models_iSigma_iff_models_iPi)
   ```lean
   theorem LO.FirstOrder.Arith.Model.models_iSigma_iff_models_iPi
-      {M : Type} [Zero M] [One M] [Add M] [Mul M] [LT M] {ν : ℕ} :
-      M ⊧ₘ* 𝐈𝚺ν ↔ M ⊧ₘ* 𝐈𝚷ν
+      {M : Type} [Zero M] [One M] [Add M] [Mul M] [LT M] {n : ℕ} :
+      M ⊧ₘ* 𝐈𝚺n ↔ M ⊧ₘ* 𝐈𝚷n
   ```
 
 - Exponential is definable in $\mathbf{I\Delta_0}$ by $\mathbf{\Delta_0}$ formula

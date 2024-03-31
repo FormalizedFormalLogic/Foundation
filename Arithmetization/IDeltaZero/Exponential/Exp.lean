@@ -710,12 +710,12 @@ lemma exp_exponential (a : M) : Exp a (exp a) := Classical.choose!_spec (Exp.ran
 
 lemma exponential_graph {a b : M} : a = exp b ↔ Exp b a := Classical.choose!_eq_iff _
 
-def expdef : Δ₀-Sentence 2 := ⟨“!Exp.def [#1, #0]”, by simp⟩
+def expDef : Δ₀-Sentence 2 := ⟨“!Exp.def [#1, #0]”, by simp⟩
 
--- #eval expdef.val
+-- #eval expDef.val
 
-lemma exp_defined : Δ₀-Function₁ (Exp.exp : M → M) via expdef := by
-  intro v; simp [expdef, exponential_graph, Exp.defined.pval]
+lemma exp_defined : Δ₀-Function₁ (Exp.exp : M → M) via expDef := by
+  intro v; simp [expDef, exponential_graph, Exp.defined.pval]
 
 instance exponential_definable : DefinableFunction₁ ℒₒᵣ Σ 0 (Exp.exp : M → M) := defined_to_with_param _ exp_defined
 
@@ -731,6 +731,15 @@ lemma exponential_inj : Function.Injective (Exp.exp : M → M) := λ a _ H ↦
 
 lemma exp_succ (a : M) : exp (a + 1) = 2 * exp a :=
   exponential_of_exp <| Exp.exp_succ_mul_two.mpr <| exp_exponential a
+
+@[simp] lemma numeral_two_eq_two : (ORingSymbol.numeral 2 : M) = 2 := by simp [numeral_eq_natCast]
+
+@[simp] lemma numeral_three_eq_three : (ORingSymbol.numeral 3 : M) = 3 := by simp [numeral_eq_natCast]
+
+@[simp] lemma numeral_four_eq_four : (ORingSymbol.numeral 4 : M) = 4 := by simp [numeral_eq_natCast]
+
+instance models_exponential_of_models_iSigmaOne : M ⊧ₘ* 𝐄𝐗𝐏 :=
+  ⟨by intro f hf; rcases hf <;> simp [models_iff, exp_succ]⟩
 
 lemma exp_even (a : M) : exp (2 * a) = (exp a)^2 :=
   exponential_of_exp <| Exp.exp_even_sq.mpr <| exp_exponential a
