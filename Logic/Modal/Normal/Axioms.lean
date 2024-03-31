@@ -66,6 +66,7 @@ def AxiomC4 := □□p ⟶ □p
 
 def AxiomL := □(□p ⟶ p) ⟶ □p
 
+
 end Axioms
 
 abbrev AxiomSet (α) := Set (Formula α)
