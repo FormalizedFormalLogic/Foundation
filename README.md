@@ -38,7 +38,8 @@ https://iehality.github.io/Arithmetization/
 - [Order induction](https://iehality.github.io/Arithmetization/Arithmetization/Basic/Ind.html#LO.FirstOrder.Arith.Model.order_induction_h)
   ```lean
   theorem LO.FirstOrder.Arith.Model.order_induction_h
-      {M : Type} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐏𝐀⁻]
+      {M : Type} [Zero M] [One M] [Add M] [Mul M] [LT M]
+      [M ⊧ₘ* 𝐏𝐀⁻]
       {L : LO.FirstOrder.Language} [LO.FirstOrder.Language.ORing L]
       [LO.FirstOrder.Structure L M] [LO.FirstOrder.Structure.ORing L M]
       (Γ : LO.Polarity) (s : ℕ)
@@ -48,19 +49,11 @@ https://iehality.github.io/Arithmetization/
       P x
   ```
 
-  ```lean
-  noncomputable def LO.FirstOrder.completeness
-      {L : LO.FirstOrder.Language}
-      {T : LO.FirstOrder.Theory L}
-      {σ : LO.FirstOrder.Sentence L} :
-      T ⊨ σ → T ⊢ σ
-  ```
-
-
 - [Least number principle](https://iehality.github.io/Arithmetization/Arithmetization/Basic/Ind.html#LO.FirstOrder.Arith.Model.least_number_h)
   ```lean
   theorem LO.FirstOrder.Arith.Model.least_number_h
-      {M : Type} [Zero M] [One M] [Add M] [Mul M] [LT M] [LO.FirstOrder.ModelsTheory M 𝐏𝐀⁻]
+      {M : Type} [Zero M] [One M] [Add M] [Mul M] [LT M]
+      [M ⊧ₘ* 𝐏𝐀⁻]
       {L : LO.FirstOrder.Language} [LO.FirstOrder.Language.ORing L]
       [LO.FirstOrder.Structure L M] [LO.FirstOrder.Structure.ORing L M]
       [LO.FirstOrder.Structure.Monotone L M]
@@ -82,7 +75,8 @@ https://iehality.github.io/Arithmetization/
   - [LO.FirstOrder.Arith.Model.Exp.defined](https://iehality.github.io/Arithmetization/Arithmetization/IDeltaZero/Exponential/Exp.html#LO.FirstOrder.Arith.Model.Exp.defined)
     ```lean
     theorem LO.FirstOrder.Arith.Model.Exp.defined
-        {M : Type} [Zero M] [One M] [Add M] [Mul M] [LT M] [LO.FirstOrder.ModelsTheory M 𝐈𝚫₀] :
+        {M : Type} [Zero M] [One M] [Add M] [Mul M] [LT M]
+        [M ⊧ₘ* 𝐈𝚫₀] :
         Δ₀-Relation LO.FirstOrder.Arith.Model.Exp via LO.FirstOrder.Arith.Model.Exp.def
     ```
 
@@ -92,6 +86,6 @@ https://iehality.github.io/Arithmetization/
     ```lean
     theorem LO.FirstOrder.Arith.Model.nuon_defined
         {M : Type} [Zero M] [One M] [Add M] [Mul M] [LT M]
-        [LO.FirstOrder.ModelsTheory M 𝐈𝚫₀] [LO.FirstOrder.ModelsTheory M 𝛀₁] :
+        [M ⊧ₘ* 𝐈𝚫₀ + 𝛀₁]  :
         Δ₀-Function₁ LO.FirstOrder.Arith.Model.nuon via LO.FirstOrder.Arith.Model.nuonDef
     ```
