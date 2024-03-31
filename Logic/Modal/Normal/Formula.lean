@@ -188,13 +188,13 @@ def multibox (p : Formula α) : ℕ → Formula α
   | 0     => p
   | n + 1 => □(multibox p n)
 
-notation "□^" n:90 p => multibox p n
+notation "□[" n:90 "]" p => multibox p n
 
 def multidia (p : Formula α) : ℕ → Formula α
   | 0     => p
   | n + 1 => ◇(multidia p n)
 
-notation "◇^" n:90 p => multidia p n
+notation "◇[" n:90 "]" p => multidia p n
 
 def isBox : Formula α → Bool
   | □_ => true
