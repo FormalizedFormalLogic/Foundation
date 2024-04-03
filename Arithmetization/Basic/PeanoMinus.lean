@@ -47,7 +47,7 @@ lemma sub_defined : Δ₀-Function₂ ((· - ·) : M → M → M) via subDef := 
 
 instance sub_definable (Γ s) : DefinableFunction₂ ℒₒᵣ Γ s ((· - ·) : M → M → M) := defined_to_with_param₀ subDef sub_defined
 
-instance sub_polybounded : PolyBounded₂ ℒₒᵣ ((· - ·) : M → M → M) := ⟨#0, λ _ ↦ by simp⟩
+instance sub_polybounded : Bounded₂ ℒₒᵣ ((· - ·) : M → M → M) := ⟨#0, λ _ ↦ by simp⟩
 
 @[simp] lemma sub_self (a : M) : a - a = 0 :=
   add_right_eq_self.mp (sub_spec_of_ge (a := a) (b := a) (by rfl)).symm

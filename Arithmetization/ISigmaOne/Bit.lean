@@ -266,30 +266,6 @@ lemma domain_exists_unique (s : M) :
     ∃! d : M, ∀ x, x ∈ d ↔ ∃ y, ⟪x, y⟫ ∈ s := by { }
 -/
 
-namespace ArithmetizedTerm
-
-variable (L : Language) [(k : ℕ) → Encodable (L.Func k)] [(k : ℕ) → Encodable (L.Rel k)]
-
-variable (M)
-
-class ArithmetizedLanguage where
-  isFunc : Δ₀-Sentence 2
-  isFunc_spec : Δ₀-Relation (fun (k' f' : M) ↦ ∃ (k : ℕ) (f : L.Func k), k' = k ∧ f' = Encodable.encode f) via isFunc
-  isRel : Δ₀-Sentence 2
-  isRel_spec : Δ₀-Relation (fun (k' r' : M) ↦ ∃ (k : ℕ) (r : L.Rel k), k' = k ∧ r' = Encodable.encode r) via isRel
-
-variable {M L}
-
-def bvar (x : M) : M := ⟪0, ⟪0, x⟫⟫
-
-def fvar (x : M) : M := ⟪0, ⟪1, x⟫⟫
-
-def func : {k : ℕ} → (f : L.Func k) → M
-  | 0,     c => ⟪0, ⟪2, Encodable.encode c⟫⟫
-  | k + 1, f => ⟪k + 1, Encodable.encode f⟫
-
-end ArithmetizedTerm
-
 end ISigma₁
 
 end Model

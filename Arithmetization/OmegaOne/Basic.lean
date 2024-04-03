@@ -78,7 +78,7 @@ instance hash_definable : DefinableFunction₂ ℒₒᵣ Σ 0 (Hash.hash : M →
 
 @[simp] lemma hash_pos (a b : M) : 0 < a # b := (exponential_hash a b).range_pos
 
-@[simp] lemma hash_lt (a b : M) : ‖a‖ * ‖b‖ < a # b := (exponential_hash a b).dom_lt_range
+@[simp] lemma hash_lt (a b : M) : ‖a‖ * ‖b‖ < a # b := (exponential_hash a b).lt
 
 lemma length_hash (a b : M) : ‖a # b‖ = ‖a‖ * ‖b‖ + 1 := (exponential_hash a b).length_eq
 

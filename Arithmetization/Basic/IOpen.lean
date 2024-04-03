@@ -182,7 +182,7 @@ lemma div_mul (a b c : M) : a / (b * c) = a / b / c := by
   have : 1 * (a / b) ≤ b * (a / b) := mul_le_mul_of_nonneg_right (le_iff_lt_succ.mpr (by simp[pos])) (by simp)
   simpa using le_trans this (mul_div_le a b)
 
-instance div_polybounded : PolyBounded₂ ℒₒᵣ ((· / ·) : M → M → M) := ⟨#0, λ _ ↦ by simp⟩
+instance div_polybounded : Bounded₂ ℒₒᵣ ((· / ·) : M → M → M) := ⟨#0, λ _ ↦ by simp⟩
 
 instance div_definable : DefinableFunction₂ ℒₒᵣ Σ 0 ((· / ·) : M → M → M) := defined_to_with_param _ div_defined
 
@@ -348,7 +348,7 @@ lemma mod_mul_add_of_lt (a b : M) {r} (hr : r < b) : (a * b + r) % b = r := by
 @[simp] lemma mod_le (a b : M) : a % b ≤ a := by
   simp [mod_def]
 
-instance mod_polybounded : PolyBounded₂ ℒₒᵣ ((· % ·) : M → M → M) := ⟨#0, by intro v; simp⟩
+instance mod_polybounded : Bounded₂ ℒₒᵣ ((· % ·) : M → M → M) := ⟨#0, by intro v; simp⟩
 
 lemma mod_eq_zero_iff_dvd {a b : M} : b % a = 0 ↔ a ∣ b := by
   simp [mod_def]
@@ -507,7 +507,7 @@ lemma sqrt_three : √(3 : M) = 1 :=
     _ ≤ a      := sq_sqrt_le a
   simp_all
 
-instance : PolyBounded₁ ℒₒᵣ ((√·) : M → M) := ⟨#0, by intro v; simp⟩
+instance : Bounded₁ ℒₒᵣ ((√·) : M → M) := ⟨#0, by intro v; simp⟩
 
 lemma sqrt_lt_self_of_one_lt {a : M} (h : 1 < a) : √a < a := by
   by_contra A
@@ -552,7 +552,7 @@ lemma pair_defined : Δ₀-Function₂ (λ a b : M ↦ ⟪a, b⟫) via pairDef :
 
 instance pair_definable : DefinableFunction₂ ℒₒᵣ Σ 0 (pair : M → M → M) := defined_to_with_param₀ _ pair_defined
 
-instance : PolyBounded₂ ℒₒᵣ (pair : M → M → M) :=
+instance : Bounded₂ ℒₒᵣ (pair : M → M → M) :=
   ⟨ᵀ“(#1 * #1 + #0) + (#0 * #0 + #0 + #1)”, by intro v; simp [pair]; split_ifs <;> try simp [pair, *]⟩
 
 def unpair (a : M) : M × M := if a - √a * √a < √a then (a - √a * √a, √a) else (√a, a - √a * √a - √a)
@@ -596,9 +596,9 @@ def pairEquiv : M × M ≃ M := ⟨Function.uncurry pair, unpair, fun ⟨a, b⟩
 
 @[simp] lemma pi₂_le_self (a : M) : π₂ a ≤ a := by simp [pi₂, unpair]; split_ifs <;> simp [add_assoc]
 
-instance : PolyBounded₁ ℒₒᵣ (pi₁ : M → M) := ⟨ᵀ“#0”, by intro v; simp⟩
+instance : Bounded₁ ℒₒᵣ (pi₁ : M → M) := ⟨ᵀ“#0”, by intro v; simp⟩
 
-instance : PolyBounded₁ ℒₒᵣ (pi₂ : M → M) := ⟨ᵀ“#0”, by intro v; simp⟩
+instance : Bounded₁ ℒₒᵣ (pi₂ : M → M) := ⟨ᵀ“#0”, by intro v; simp⟩
 
 def pi₁Def : Δ₀-Sentence 2 := ⟨“∃[#0 < #2 + 1] !pairDef [#2, #1, #0]”, by simp⟩
 

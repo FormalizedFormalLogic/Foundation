@@ -33,7 +33,7 @@ instance ext_definable : DefinableFunction₂ ℒₒᵣ Σ 0 (ext : M → M → 
 @[simp] lemma ext_le_add (u z : M) : ext u z ≤ z :=
   le_trans (mod_le (z / u) u) (by simp [add_comm])
 
-instance : PolyBounded₂ ℒₒᵣ (ext : M → M → M) := ⟨#1, by intro v; simp⟩
+instance : Bounded₂ ℒₒᵣ (ext : M → M → M) := ⟨#1, by intro v; simp⟩
 
 @[simp] lemma ext_lt {u} (z : M) (pos : 0 < u) : ext u z < u := by simp [ext, pos]
 
@@ -472,13 +472,13 @@ lemma range_pos {x y : M} (h : Exponential x y) : 0 < y := by
   · have : 2 ≤ ext u Y := two_le_ext_of_seq₀_of_seqₛ H₀ Hₛ ne2 hu ppu
     exact lt_of_lt_of_le (by simp) this
 
-lemma dom_lt_range {x y : M} (h : Exponential x y) : x < y := by
+lemma lt {x y : M} (h : Exponential x y) : x < y := by
   rcases h with (⟨rfl, rfl⟩ | ⟨X, bX, Y, bY, H₀, Hₛ, ⟨u, hu, ne2, ppu, rfl, rfl⟩⟩)
   · simp
   · exact ext_le_ext_of_seq₀_of_seqₛ H₀ Hₛ ne2 hu ppu
 
 lemma not_exponential_of_le {x y : M} (h : x ≤ y) : ¬Exponential y x := by
-  intro hxy; exact not_le.mpr (dom_lt_range hxy) h
+  intro hxy; exact not_le.mpr (lt hxy) h
 
 @[simp] lemma one_not_even (a : M) : 1 ≠ 2 * a := by
   intro h
@@ -518,7 +518,7 @@ lemma exponential_succ {x y : M} : Exponential (x + 1) y ↔ ∃ z, y = 2 * z �
           have : 1 < y := by
             simpa using (show 1 < y^2 from lt_of_le_of_lt (by simp) hxy)
           have : Exponential (x + 1) y ↔ ∃ z ≤ y, y = 2 * z ∧ Exponential x z :=
-            IH y (lt_square_of_lt $ this) (lt_trans _ _ _ (by simp) H'.dom_lt_range)
+            IH y (lt_square_of_lt $ this) (lt_trans _ _ _ (by simp) H'.lt)
           rcases this.mp H' with ⟨y, _, rfl, H''⟩
           exact ⟨2 * y ^ 2, by simp [sq, mul_assoc, mul_left_comm y 2],
             by simp [sq, mul_assoc, mul_left_comm y 2], H''.bit_one⟩
@@ -526,12 +526,12 @@ lemma exponential_succ {x y : M} : Exponential (x + 1) y ↔ ∃ z, y = 2 * z �
           rcases exponential_odd.mp H with ⟨y, rfl, H'⟩
           by_cases ne1 : y = 1
           · rcases ne1 with rfl
-            rcases (show x = 0 from by simpa using H'.dom_lt_range)
+            rcases (show x = 0 from by simpa using H'.lt)
             simp [one_add_one_eq_two, two_mul_two_eq_four]
           have : y < y^2 := lt_square_of_lt $ one_lt_iff_two_le.mpr $ H'.range_pow2.two_le ne1
           have : Exponential (x + 1) (2 * y) ↔ ∃ z ≤ 2 * y, 2 * y = 2 * z ∧ Exponential x z :=
             IH (2 * y) (by simp; exact lt_of_lt_of_le this le_two_mul_left)
-              (lt_of_lt_of_le H'.dom_lt_range $ by simp)
+              (lt_of_lt_of_le H'.lt $ by simp)
           have : Exponential (x + 1) (2 * y) := this.mpr ⟨y, by simp, rfl, H'⟩
           simpa [sq, mul_add, add_assoc, mul_assoc, one_add_one_eq_two, mul_left_comm y 2] using this.bit_zero
 
@@ -577,7 +577,7 @@ protected lemma uniq {x y₁ y₂ : M} : Exponential x y₁ → Exponential x y�
   · exact Eq.symm <| this h₂ h₁ (show y₂ ≤ y₁ from le_of_not_ge h)
   revert x h y₁
   suffices ∀ x < y₂, ∀ y₁ ≤ y₂, Exponential x y₁ → Exponential x y₂ → y₁ = y₂ by
-    intro x y₁ h₁ h₂ hy; exact this x h₂.dom_lt_range y₁ hy h₁ h₂
+    intro x y₁ h₁ h₂ hy; exact this x h₂.lt y₁ hy h₁ h₂
   induction y₂ using order_induction_iSigmaZero
   · definability
   case ind y₂ IH =>
@@ -587,14 +587,14 @@ protected lemma uniq {x y₁ y₂ : M} : Exponential x y₁ → Exponential x y�
     · rcases exponential_succ.mp h₁ with ⟨y₁, rfl, h₁'⟩
       rcases exponential_succ.mp h₂ with ⟨y₂, rfl, h₂'⟩
       have : y₁ = y₂ := IH y₂ (lt_mul_of_pos_of_one_lt_left h₂'.range_pos one_lt_two)
-        x h₂'.dom_lt_range y₁ (by simpa using h) h₁' h₂'
+        x h₂'.lt y₁ (by simpa using h) h₁' h₂'
       simp [this]
 
 protected lemma inj {x₁ x₂ y : M} : Exponential x₁ y → Exponential x₂ y → x₁ = x₂ := by
   intro h₁ h₂
   revert x₁ x₂ h₁ h₂
   suffices ∀ x₁ < y, ∀ x₂ < y, Exponential x₁ y → Exponential x₂ y → x₁ = x₂ by
-    intro x₁ x₂ h₁ h₂; exact this x₁ h₁.dom_lt_range x₂ h₂.dom_lt_range h₁ h₂
+    intro x₁ x₂ h₁ h₂; exact this x₁ h₁.lt x₂ h₂.lt h₁ h₂
   induction y using order_induction_iSigmaZero
   · definability
   case ind y IH =>
@@ -611,7 +611,7 @@ protected lemma inj {x₁ x₂ y : M} : Exponential x₁ y → Exponential x₂ 
       have hy₂ : Exponential x₂ y := h₂.of_succ_two_mul
       have : x₁ = x₂ :=
         IH y (lt_mul_of_pos_of_one_lt_left hy₁.range_pos one_lt_two)
-          x₁ hy₁.dom_lt_range x₂ hy₂.dom_lt_range hy₁ hy₂
+          x₁ hy₁.lt x₂ hy₂.lt hy₁ hy₂
       simp [this]
 
 lemma exponential_elim {x y : M} : Exponential x y ↔ (x = 0 ∧ y = 1) ∨ ∃ x', ∃ y', x = x' + 1 ∧ y = 2 * y' ∧ Exponential x' y' :=
@@ -628,7 +628,7 @@ lemma monotone {x₁ x₂ y₁ y₂ : M} : Exponential x₁ y₁ → Exponential
   suffices ∀ x₁ < y₁, ∀ y₂ ≤ y₁, ∀ x₂ < y₂, Exponential x₁ y₁ → Exponential x₂ y₂ → x₂ ≤ x₁ by
     intro h₁ h₂; contrapose; simp
     intro hy
-    exact this x₁ h₁.dom_lt_range y₂ hy x₂ h₂.dom_lt_range h₁ h₂
+    exact this x₁ h₁.lt y₂ hy x₂ h₂.lt h₁ h₂
   induction y₁ using order_induction_iSigmaZero
   · definability
   case ind y₁ IH =>
@@ -643,7 +643,7 @@ lemma monotone {x₁ x₂ y₁ y₂ : M} : Exponential x₁ y₁ → Exponential
     · rcases exponential_succ.mp h₁ with ⟨y₁, rfl, h₁'⟩
       rcases exponential_succ.mp h₂ with ⟨y₂, rfl, h₂'⟩
       have : x₂ ≤ x₁ := IH y₁ (lt_mul_of_pos_of_one_lt_left h₁'.range_pos one_lt_two)
-        x₁ h₁'.dom_lt_range y₂ (le_of_mul_le_mul_left hy (by simp)) x₂ h₂'.dom_lt_range h₁' h₂'
+        x₁ h₁'.lt y₂ (le_of_mul_le_mul_left hy (by simp)) x₂ h₂'.lt h₁' h₂'
       simpa using this
 
 lemma monotone_le {x₁ x₂ y₁ y₂ : M} (h₁ : Exponential x₁ y₁) (h₂ : Exponential x₂ y₂) : x₁ ≤ x₂ → y₁ ≤ y₂ := by
@@ -732,19 +732,13 @@ lemma exp_inj : Function.Injective (Exp.exp : M → M) := λ a _ H ↦
 lemma exp_succ (a : M) : exp (a + 1) = 2 * exp a :=
   exp_of_exponential <| Exponential.exponential_succ_mul_two.mpr <| exp_exponential a
 
-@[simp] lemma numeral_two_eq_two : (ORingSymbol.numeral 2 : M) = 2 := by simp [numeral_eq_natCast]
-
-@[simp] lemma numeral_three_eq_three : (ORingSymbol.numeral 3 : M) = 3 := by simp [numeral_eq_natCast]
-
-@[simp] lemma numeral_four_eq_four : (ORingSymbol.numeral 4 : M) = 4 := by simp [numeral_eq_natCast]
-
 instance models_exponential_of_models_iSigmaOne : M ⊧ₘ* 𝐄𝐗𝐏 :=
   ⟨by intro f hf; rcases hf <;> simp [models_iff, exp_succ]⟩
 
 lemma exp_even (a : M) : exp (2 * a) = (exp a)^2 :=
   exp_of_exponential <| Exponential.exponential_even_sq.mpr <| exp_exponential a
 
-@[simp] lemma lt_exp (a : M) : a < exp a := (exp_exponential a).dom_lt_range
+@[simp] lemma lt_exp (a : M) : a < exp a := (exp_exponential a).lt
 
 @[simp] lemma exp_pos (a : M) : 0 < exp a := (exp_exponential a).range_pos
 

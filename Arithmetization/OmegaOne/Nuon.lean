@@ -84,7 +84,7 @@ lemma ext_defined : Δ₀-Function₃ (ext : M → M → M → M) via extDef := 
 
 instance ext_Definable : DefinableFunction₃ ℒₒᵣ Σ 0 (ext : M → M → M → M) := defined_to_with_param₀ _ ext_defined
 
-instance : PolyBounded₃ ℒₒᵣ (ext : M → M → M → M) := ⟨#1, λ _ ↦ by simp⟩
+instance : Bounded₃ ℒₒᵣ (ext : M → M → M → M) := ⟨#1, λ _ ↦ by simp⟩
 
 @[simp] lemma ext_zero (L i : M) : 0{L}[i] = 0 := by simp [ext]
 
@@ -567,7 +567,7 @@ lemma nuonAux_defined : Δ₀-Relation₃ (NuonAux : M → M → M → Prop) via
 
 instance nuonAux_definable : DefinableRel₃ ℒₒᵣ Σ 0 (NuonAux : M → M → M → Prop) := defined_to_with_param _ nuonAux_defined
 
-instance : PolyBounded₃ ℒₒᵣ (ext : M → M → M → M) := ⟨#1, λ _ ↦ by simp⟩
+instance : Bounded₃ ℒₒᵣ (ext : M → M → M → M) := ⟨#1, λ _ ↦ by simp⟩
 
 @[simp] lemma NuonAux.initial (A : M) : NuonAux A 0 0 := SeriesSegment.initial (by simp [polyU])
 

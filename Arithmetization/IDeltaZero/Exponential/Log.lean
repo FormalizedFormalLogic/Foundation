@@ -74,10 +74,10 @@ lemma log_defined : Δ₀-Function₁ (log : M → M) via logDef := by
 
 instance log_definable : DefinableFunction₁ ℒₒᵣ Σ 0 (log : M → M) := defined_to_with_param _ log_defined
 
-instance : PolyBounded₁ ℒₒᵣ (log : M → M) := ⟨#0, λ _ ↦ by simp⟩
+instance : Bounded₁ ℒₒᵣ (log : M → M) := ⟨#0, λ _ ↦ by simp⟩
 
 lemma log_eq_of_pos {x y : M} (pos : 0 < y) {y'} (H : Exponential x y') (hy' : y' ≤ y) (hy : y < 2 * y') : log y = x :=
-  (log_exists_unique_pos pos).unique ⟨log_lt_self_of_pos pos, log_pos pos⟩ ⟨lt_of_lt_of_le H.dom_lt_range hy', y', hy', H, hy⟩
+  (log_exists_unique_pos pos).unique ⟨log_lt_self_of_pos pos, log_pos pos⟩ ⟨lt_of_lt_of_le H.lt hy', y', hy', H, hy⟩
 
 @[simp] lemma log_one : log (1 : M) = 0 := log_eq_of_pos (by simp) (y' := 1) (by simp) (by rfl) (by simp [one_lt_two])
 
@@ -165,7 +165,7 @@ lemma length_defined : Δ₀-Function₁ (‖·‖ : M → M) via lengthDef := b
 
 instance length_definable : DefinableFunction₁ ℒₒᵣ Σ 0 (‖·‖ : M → M) := defined_to_with_param _ length_defined
 
-instance : PolyBounded₁ ℒₒᵣ (‖·‖ : M → M) := ⟨#0, λ _ ↦ by simp⟩
+instance : Bounded₁ ℒₒᵣ (‖·‖ : M → M) := ⟨#0, λ _ ↦ by simp⟩
 
 @[simp] lemma length_one : ‖(1 : M)‖ = 1 := by simp [length_eq_binaryLength]
 
@@ -336,7 +336,7 @@ lemma bexp_defined : Δ₀-Function₂ (bexp : M → M → M) via bexpDef := by
 
 instance bexp_definable : DefinableFunction₂ ℒₒᵣ Σ 0 (bexp : M → M → M) := defined_to_with_param _ bexp_defined
 
-instance : PolyBounded₂ ℒₒᵣ (bexp : M → M → M) := ⟨#0, λ _ ↦ by simp⟩
+instance : Bounded₂ ℒₒᵣ (bexp : M → M → M) := ⟨#0, λ _ ↦ by simp⟩
 
 lemma bexp_monotone_iff {a i j : M} (hi : i < ‖a‖) (hj : j < ‖a‖) : bexp a i < bexp a j ↔ i < j :=
   Iff.symm <| Exponential.monotone_iff (by simp [hi]) (by simp [hj])
@@ -351,7 +351,7 @@ lemma bexp_eq_of_lt_length {i a a' : M} (ha : i < ‖a‖) (ha' : i < ‖a'‖) 
 
 @[simp] lemma bexp_pow2 {a x : M} (h : x < ‖a‖) : Pow2 (bexp a x) := (exp_bexp_of_lt h).range_pow2
 
-@[simp] lemma lt_bexp {a x : M} (h : x < ‖a‖) : x < bexp a x := (exp_bexp_of_lt h).dom_lt_range
+@[simp] lemma lt_bexp {a x : M} (h : x < ‖a‖) : x < bexp a x := (exp_bexp_of_lt h).lt
 
 @[simp] lemma bexp_pos {a x : M} (h : x < ‖a‖) : 0 < bexp a x := (exp_bexp_of_lt h).range_pos
 
@@ -415,7 +415,7 @@ lemma fbit_defined : Δ₀-Function₂ (fbit : M → M → M) via fbitDef := by
 
 instance fbit_definable : DefinableFunction₂ ℒₒᵣ Σ 0 (fbit : M → M → M) := defined_to_with_param _ fbit_defined
 
-instance : PolyBounded₂ ℒₒᵣ (fbit : M → M → M) := ⟨ᵀ“1”, λ _ ↦ by simp⟩
+instance : Bounded₂ ℒₒᵣ (fbit : M → M → M) := ⟨ᵀ“1”, λ _ ↦ by simp⟩
 
 @[simp] lemma fbit_zero (i : M) : fbit 0 i = 0 := by simp [fbit]
 
