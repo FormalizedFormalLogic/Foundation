@@ -54,18 +54,19 @@ def Axiom5 := ◇p ⟶ □◇p
 
 def AxiomDot2 := ◇□p ⟶ □◇p
 
+def AxiomC4 := □□p ⟶ □p
+
+def AxiomCD := ◇p ⟶ □p
+
+def AxiomTc := p ⟶ □p
+
 def AxiomDot3 := □(□p ⟶ □q) ⋎ □(□q ⟶ □p)
 
 def AxiomGrz := □(□(p ⟶ □p) ⟶ p) ⟶ p
 
 def AxiomM := (□◇p ⟶ ◇□p)
 
-def AxiomCD := ◇p ⟶ □p
-
-def AxiomC4 := □□p ⟶ □p
-
 def AxiomL := □(□p ⟶ p) ⟶ □p
-
 
 end Axioms
 
@@ -185,7 +186,6 @@ namespace LogicS4
 @[simp] lemma subset_4 : 𝟒 ⊆ (𝐒𝟒 : AxiomSet α) := by apply Set.subset_triunion₃
 
 end LogicS4
-
 
 def LogicS4Dot2 : AxiomSet α := 𝐒𝟒 ∪ .𝟐
 notation "𝐒𝟒.𝟐" => LogicS4Dot2

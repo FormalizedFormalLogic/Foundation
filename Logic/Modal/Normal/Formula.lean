@@ -184,21 +184,52 @@ instance : DecidableEq (Formula α) := hasDecEq
 
 end Decidable
 
-def multibox (p : Formula α) : ℕ → Formula α
+section Multibox
+
+variable {p : Formula α}
+
+@[simp]
+def multibox (n : ℕ) (p : Formula α) : Formula α :=
+  match n with
   | 0     => p
-  | n + 1 => □(multibox p n)
+  | n + 1 => □(multibox n p)
 
-notation "□[" n:90 "]" p => multibox p n
+instance : Multibox (Formula α) where
+  multibox := multibox
+  multibox_zero := by simp
+  multibox_succ := by simp;
 
-def multidia (p : Formula α) : ℕ → Formula α
+@[simp] lemma multibox_zero : □[0]p = p := by simp [Multibox.multibox, multibox];
+@[simp] lemma multibox_succ : □[(n + 1)]p = □□[n]p := by simp [Multibox.multibox, multibox];
+
+lemma multibox_prepost {n : ℕ} {p : Formula α} : □□[n]p = □[n](□p) := by induction n <;> simp_all;
+
+lemma multibox_prepost' {n : ℕ} {p : Formula α} : □[(n + 1)]p = □[n](□p) := by induction n <;> simp_all;
+
+@[simp]
+def multidia (n : ℕ) (p : Formula α) : Formula α :=
+  match n with
   | 0     => p
-  | n + 1 => ◇(multidia p n)
+  | n + 1 => ◇(multidia n p)
 
-notation "◇[" n:90 "]" p => multidia p n
+instance : Multidia (Formula α) where
+  multidia := multidia
+  multidia_zero := by simp
+  multidia_succ := by simp;
+
+@[simp] lemma multidia_zero : ◇[0]p = p := by simp [Multidia.multidia, multidia];
+@[simp] lemma multidia_succ : ◇[(n + 1)]p = ◇◇[n]p := by simp [Multidia.multidia, multidia];
+
+lemma multidia_prepost {n : ℕ} {p : Formula α} : ◇◇[n]p = ◇[n](◇p) := by induction n <;> simp_all;
+
+lemma multidia_prepost' {n : ℕ} {p : Formula α} : ◇[(n + 1)]p = ◇[n](◇p) := by induction n <;> simp_all;
+
+end Multibox
 
 def isBox : Formula α → Bool
   | □_ => true
   | _  => false
+
 
 end Formula
 
@@ -206,19 +237,31 @@ abbrev Theory (α : Type u) := Set (Formula α)
 
 namespace Theory
 
-variable (Γ : Theory α)
+variable (n : ℕ) (Γ : Theory α)
 
-@[simp] abbrev box : Theory α := Set.box Γ
+@[simp] def box : Theory α := Set.box Γ
 prefix:74 "□" => Theory.box
 
-@[simp] abbrev dia : Theory α := Set.dia Γ
+@[simp] def dia : Theory α := Set.dia Γ
 prefix:74 "◇" => Theory.dia
 
-def prebox : Theory α := .box ⁻¹' Γ
+@[simp] def prebox : Theory α := Set.prebox Γ
 prefix:73 "□⁻¹" => Theory.prebox
 
-def predia : Theory α := .dia ⁻¹' Γ
+@[simp] def predia : Theory α := Set.predia Γ
 prefix:73 "◇⁻¹" => Theory.predia
+
+@[simp] def multibox : Theory α := Set.multibox n Γ
+notation:73 "□[" n:90 "]" Γ:80 => Theory.multibox n Γ
+
+@[simp] def multidia : Theory α := Set.multidia n Γ
+notation:73 "◇[" n:90 "]" Γ:80 => Theory.multidia n Γ
+
+@[simp] def multiprebox : Theory α := Set.multiprebox n Γ
+notation:73 "□⁻¹[" n:90 "]" Γ:80 => Theory.multiprebox n Γ
+
+@[simp] def multipredia : Theory α := Set.multipredia n Γ
+notation:73 "◇⁻¹[" n:90 "]" Γ:80 => Theory.multipredia n Γ
 
 end Theory
 

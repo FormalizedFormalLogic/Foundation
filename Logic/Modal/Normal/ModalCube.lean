@@ -1,15 +1,21 @@
-/-
- ## References
-
- * <https://plato.stanford.edu/entries/logic-modal/#MapRelBetModLog>
--/
-
 import Logic.Modal.Normal.Soundness
 import Logic.Modal.Normal.Completeness
+import Logic.Modal.Normal.Geach
+
+/-!
+  Strength of modal logics
+-/
+
+class _root_.Distinct₃ (α : Type*) : Prop where
+  existance : ∃ x₁ x₂ x₃ : α, x₁ ≠ x₂ ∧ x₁ ≠ x₃ ∧ x₂ ≠ x₃
 
 namespace LO.Modal.Normal
 
 variable {α β : Type u}
+
+variable {Λ₁ Λ₂ : AxiomSet β}
+variable [Inhabited α]
+variable [Inhabited β] [DecidableEq β]
 
 def LogicalStrong (Λ₁ Λ₂ : AxiomSet β) := ∀ {p : Formula β}, (∅ ⊢ᴹ[Λ₁]! p) → (∅ ⊢ᴹ[Λ₂]! p)
 infix:20 " ≤ᴸ " => LogicalStrong
@@ -28,11 +34,19 @@ instance : IsPreorder (AxiomSet β) (· ≤ᴸ ·) where
 
 lemma deducible (hS : Λ₁ ≤ᴸ Λ₂) : (∅ ⊢ᴹ[Λ₁]! p) → (∅ ⊢ᴹ[Λ₂]! p) := by apply hS;
 
-lemma of_frameclass (h : (𝔽(Λ₂) : FrameClass β) ⊆ (𝔽(Λ₁) : FrameClass β)) (hComp₂ : Completeness Λ₂ (𝔽(Λ₂) : FrameClass β)) : (Λ₁ ≤ᴸ Λ₂) := by
+lemma of_frameclass (hComp₂ : Completeness Λ₂ (𝔽(Λ₂) : FrameClass γ)) (h : (𝔽(Λ₂) : FrameClass γ) ⊆ (𝔽(Λ₁) : FrameClass γ)) : (Λ₁ ≤ᴸ Λ₂) := by
   intro p h₁;
   apply hComp₂;
   intro F hF₂;
-  exact AxiomSet.sounds h₁ _ $ h hF₂;
+  apply AxiomSet.sounds h₁;
+  exact h hF₂;
+
+lemma of_frameclass_geach [IsGeachLogic Λ₂] (h : (𝔽(Λ₂) : FrameClass (MaximalConsistentTheory Λ₂)) ⊆ (𝔽(Λ₁) : FrameClass (MaximalConsistentTheory Λ₂))) : (Λ₁ ≤ᴸ Λ₂) := by
+  apply of_frameclass;
+  case hComp₂ => apply GeachLogic.kripkeCompletes;
+  case h => exact h;
+
+variable (hS : Λ₁ ≤ᴸ Λ₂) {Γ : Theory β} {p : Formula β}
 
 end LogicalStrong
 
@@ -94,24 +108,42 @@ lemma deducible (hE : Λ₁ =ᴸ Λ₂) : (∅ ⊢ᴹ[Λ₁]! p) ↔ (∅ ⊢ᴹ
   . apply h₁.deducible;
   . apply h₂.deducible;
 
+lemma of_frameclass
+  (hComp₁ : Completeness Λ₁ (𝔽(Λ₁) : FrameClass γ₁))
+  (hComp₂ : Completeness Λ₂ (𝔽(Λ₂) : FrameClass γ₂))
+  (h₁ : (𝔽(Λ₁) : FrameClass γ₁) ⊆ (𝔽(Λ₂) : FrameClass γ₁))
+  (h₂ : (𝔽(Λ₂) : FrameClass γ₂) ⊆ (𝔽(Λ₁) : FrameClass γ₂))
+  : (Λ₁ =ᴸ Λ₂) := by
+  constructor;
+  . apply LogicalStrong.of_frameclass hComp₂; simpa;
+  . apply LogicalStrong.of_frameclass hComp₁; simpa;
+
+lemma of_frameclass_geach [IsGeachLogic Λ₁] [IsGeachLogic Λ₂]
+  (h₁ : (𝔽(Λ₁) : FrameClass (MaximalConsistentTheory Λ₁)) ⊆ (𝔽(Λ₂) : FrameClass (MaximalConsistentTheory Λ₁)))
+  (h₂ : (𝔽(Λ₂) : FrameClass (MaximalConsistentTheory Λ₂)) ⊆ (𝔽(Λ₁) : FrameClass (MaximalConsistentTheory Λ₂)))
+  : (Λ₁ =ᴸ Λ₂) :=
+  of_frameclass GeachLogic.kripkeCompletes GeachLogic.kripkeCompletes h₁ h₂
+
 end LogicalEquivalence
 
-variable {α β : Type u} [Inhabited β] [DecidableEq β]
+section
+
+variable {p : Formula β}
 
 lemma strong_K4_S4 : (𝐊𝟒 : AxiomSet β) ≤ᴸ 𝐒𝟒 := by
   simp only [LogicalStrong];
-  apply LogicalStrong.of_frameclass;
-  case h =>
-    intro F hF;
-    obtain ⟨_, hTrans⟩ := LogicS4.FrameClassDefinability.mpr hF;
-    exact LogicK4.FrameClassDefinability.mp hTrans;
-  case hComp₂ => exact LogicS4.Hilbert.completes;
+  apply LogicalStrong.of_frameclass_geach;
+  simp only [AxiomSetFrameClass.geach];
+  intro F hF;
+  obtain ⟨_, hTrans⟩ := by simpa using GeachLogic.FrameClassDefinability.mpr hF;
+  apply GeachLogic.FrameClassDefinability.mp;
+  simp;
+  apply hTrans;
 
-theorem sstrong_K4_S4 [Nontrivial β] : (𝐊𝟒 : AxiomSet β) <ᴸ 𝐒𝟒 := by
-  simp only [LogicalStrictStrong];
+theorem sstrong_K4_S4 [hβ : Nontrivial β] : (𝐊𝟒 : AxiomSet β) <ᴸ 𝐒𝟒 := by
   constructor;
   . apply strong_K4_S4;
-  . obtain ⟨x, y, hxy⟩ := @Nontrivial.exists_pair_ne β _;
+  . obtain ⟨x, y, hxy⟩ := hβ.exists_pair_ne;
     simp only [LogicalStrong, not_forall];
     use (□(Formula.atom default) ⟶ (Formula.atom default));
     use ⟨Deduction.maxm (by simp [LogicKT4, AxiomT.set, AxiomT])⟩
@@ -119,26 +151,32 @@ theorem sstrong_K4_S4 [Nontrivial β] : (𝐊𝟒 : AxiomSet β) <ᴸ 𝐒𝟒 :
     simp [Formula.FrameClassConsequence];
     existsi (λ _ w₂ => w₂ = y);
     constructor;
-    . apply LogicK4.FrameClassDefinability.mp;
-      simp [Transitive];
+    . simp only [AxiomSetFrameClass.geach];
+      apply GeachLogic.FrameClassDefinability.mp;
+      simp;
     . simp [Formula.FrameConsequence];
       use (λ w _ => w = y);
       simp;
       use x;
 
 lemma strong_KD_KT : (𝐊𝐃 : AxiomSet β) ≤ᴸ 𝐊𝐓 := by
-  apply LogicalStrong.of_frameclass;
-  case h =>
-    intro F hF;
-    obtain hRefl := LogicKT.FrameClassDefinability.mpr hF;
-    have hSerial := serial_of_refl hRefl;
-    exact LogicKD.FrameClassDefinability.mp hSerial;
-  case hComp₂ => exact LogicKT.Hilbert.completes;
+  simp only [LogicalStrong];
+  apply LogicalStrong.of_frameclass_geach;
+  simp only [AxiomSetFrameClass.geach];
+  intro F hF;
+  have hRefl : Reflexive F := by
+    simp [Reflexive];
+    intros;
+    simpa using GeachLogic.FrameClassDefinability.mpr hF;
+  have hSerial : Serial F := serial_of_refl hRefl;
+  apply GeachLogic.FrameClassDefinability.mp;
+  simp;
+  apply hSerial;
 
-theorem sstrong_KD_KT [Nontrivial β] : (𝐊𝐃 : AxiomSet β) <ᴸ 𝐊𝐓 := by
+theorem sstrong_KD_KT [hβ : Nontrivial β] : (𝐊𝐃 : AxiomSet β) <ᴸ 𝐊𝐓 := by
   constructor;
   . apply strong_KD_KT;
-  . obtain ⟨x, y, hxy⟩ := @Nontrivial.exists_pair_ne β _;
+  . obtain ⟨x, y, hxy⟩ := hβ.exists_pair_ne
     simp only [LogicalStrong, not_forall];
     use (□(Formula.atom default) ⟶ (Formula.atom default));
     use ⟨Deduction.maxm (by simp [LogicKT, AxiomT.set, AxiomT])⟩
@@ -146,22 +184,27 @@ theorem sstrong_KD_KT [Nontrivial β] : (𝐊𝐃 : AxiomSet β) <ᴸ 𝐊𝐓 :
     simp [Formula.FrameClassConsequence];
     existsi (λ _ w₂ => w₂ = y);
     constructor;
-    . apply LogicKD.FrameClassDefinability.mp;
-      simp [Serial];
+    . simp only [AxiomSetFrameClass.geach];
+      apply GeachLogic.FrameClassDefinability.mp;
+      simp;
     . simp [Formula.FrameConsequence];
       use (λ w _ => w = y);
       simp;
       use x;
 
 lemma strong_S4_S5 : (𝐒𝟒 : AxiomSet β) ≤ᴸ 𝐒𝟓 := by
-  apply LogicalStrong.of_frameclass;
-  case h =>
-    intro F hF;
-    obtain ⟨hRefl, hEucl⟩ := LogicS5.FrameClassDefinability.mpr hF;
-    have hTrans := trans_of_refl_eucl hRefl hEucl;
-    exact LogicS4.FrameClassDefinability.mp ⟨hRefl, hTrans⟩;
-  case hComp₂ => exact LogicS5.Hilbert.completes;
+  simp only [LogicalStrong];
+  apply LogicalStrong.of_frameclass_geach;
+  simp only [AxiomSetFrameClass.geach];
+  intro F hF;
+  obtain ⟨hRefl, hTrans⟩ := by simpa using GeachLogic.FrameClassDefinability.mpr hF;
+  replace hRefl : Reflexive F := by simp [Reflexive]; aesop;
+  replace hEucl : Euclidean F := by simp [Euclidean]; aesop;
+  apply GeachLogic.FrameClassDefinability.mp;
+  simp;
+  aesop;
 
+-- TODO: migrate `Distinct₃ β`
 theorem sstrong_S4_S5 : (𝐒𝟒 : AxiomSet (Fin 3)) <ᴸ 𝐒𝟓 := by
   constructor;
   . apply strong_S4_S5;
@@ -172,29 +215,36 @@ theorem sstrong_S4_S5 : (𝐒𝟒 : AxiomSet (Fin 3)) <ᴸ 𝐒𝟓 := by
     simp [Formula.FrameClassConsequence];
     existsi (λ w₁ w₂ => (w₁ = w₂) ∨ (w₁ = 0 ∧ w₂ = 1) ∨ (w₁ = 0 ∧ w₂ = 2));
     constructor;
-    . apply LogicS4.FrameClassDefinability.mp;
-      simp [Reflexive, Transitive];
+    . simp only [AxiomSetFrameClass.geach];
+      apply GeachLogic.FrameClassDefinability.mp;
       aesop;
     . simp [Formula.FrameConsequence];
       use (λ w₁ w₂ => (w₁ = w₂) ∨ (w₁ = 0 ∧ w₂ = 1) ∨ (w₁ = 0 ∧ w₂ = 2));
       aesop;
 
 theorem equivalent_S5_KT4B : (𝐒𝟓 : AxiomSet β) =ᴸ 𝐊𝐓𝟒𝐁 := by
-  constructor;
-  . apply LogicalStrong.of_frameclass;
-    case h =>
-      intro F hF;
-      obtain ⟨hRefl, hTrans, hSymm⟩ := LogicKT4B.FrameClassDefinability.mpr hF;
-      have hEucl := eucl_of_symm_trans hSymm hTrans;
-      exact LogicS5.FrameClassDefinability.mp ⟨hRefl, hEucl⟩;
-    case hComp₂ => exact LogicKT4B.Hilbert.completes;
-  . apply LogicalStrong.of_frameclass;
-    case h =>
-      intro F hF;
-      obtain ⟨hRefl, hEucl⟩ := LogicS5.FrameClassDefinability.mpr hF;
-      have hTrans := trans_of_refl_eucl hRefl hEucl;
-      have hSymm := symm_of_refl_eucl hRefl hEucl;
-      exact LogicKT4B.FrameClassDefinability.mp ⟨hRefl, hTrans, hSymm⟩;
-    case hComp₂ => exact LogicS5.Hilbert.completes;
+  apply LogicalEquivalence.of_frameclass_geach;
+  case h₁ =>
+    simp only [AxiomSetFrameClass.geach];
+    intro F hF;
+    obtain ⟨hRefl, hEucl⟩ := by simpa using GeachLogic.FrameClassDefinability.mpr hF;
+    replace hRefl : Reflexive F := by simp [Reflexive]; aesop;
+    replace hEucl : Euclidean F := by simp [Euclidean]; aesop;
+    have hTrans : Transitive F := trans_of_refl_eucl hRefl hEucl;
+    have hSymm : Symmetric F := symm_of_refl_eucl hRefl hEucl;
+    apply GeachLogic.FrameClassDefinability.mp;
+    aesop;
+  case h₂ =>
+    simp only [AxiomSetFrameClass.geach];
+    intro F hF;
+    obtain ⟨hRefl, hTrans, hSymm⟩ := by simpa using GeachLogic.FrameClassDefinability.mpr hF;
+    replace hRefl : Reflexive F := by simp [Reflexive]; aesop;
+    replace hTrans : Transitive F := by simp [Transitive]; aesop;
+    replace hSymm : Symmetric F := by simp [Symmetric]; aesop;
+    have hEucl : Euclidean F := by simp [Euclidean]; aesop;
+    apply GeachLogic.FrameClassDefinability.mp;
+    aesop;
+
+end
 
 end LO.Modal.Normal

@@ -9,7 +9,7 @@ local infix:50 " ≺ " => rel
 
 def Euclidean := ∀ ⦃w₁ w₂ w₃⦄, w₁ ≺ w₂ → w₁ ≺ w₃ → (w₂ ≺ w₃)
 
-def Serial := ∀w₁, ∃w₂, w₁ ≺ w₂
+def Serial := ∀ w₁, ∃ w₂, w₁ ≺ w₂
 
 def Confluent := ∀ ⦃w₁ w₂ w₃⦄, ((w₁ ≺ w₂ ∧ w₁ ≺ w₃) → ∃ w₄, w₂ ≺ w₄ ∧ w₃ ≺ w₄)
 
@@ -18,6 +18,8 @@ def Dense := ∀ ⦃w₁ w₂⦄, w₁ ≺ w₂ → ∃w₃, w₁ ≺ w₃ ∧ w
 def Functional := ∀ ⦃w₁ w₂ w₃⦄, w₁ ≺ w₂ ∧ w₁ ≺ w₃ → w₂ = w₃
 
 def RightConvergent := ∀ ⦃w₁ w₂ w₃⦄, w₁ ≺ w₂ ∧ w₁ ≺ w₃ → w₂ ≺ w₃ ∨ w₃ ≺ w₂ ∨ w₂ = w₃
+
+def Extensive := ∀ ⦃x y⦄, x ≺ y → x = y
 
 abbrev ConverseWellFounded := WellFounded $ flip (· ≺ ·)
 

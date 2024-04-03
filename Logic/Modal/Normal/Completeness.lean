@@ -1,6 +1,9 @@
 import Logic.Modal.Normal.Deduction
 import Logic.Modal.Normal.Semantics
-import Logic.Modal.Normal.Soundness
+
+/-!
+  Some definitions and lemmata to prove Kripke completeness.
+-/
 
 namespace LO.Modal.Normal
 
@@ -215,23 +218,51 @@ instance : Membership (Formula β) (MaximalConsistentTheory Λ) := ⟨membership
 @[simp] def subset := Ω₁.theory ⊆ Ω₂.theory
 instance : HasSubset (MaximalConsistentTheory Λ) := ⟨subset⟩
 
+lemma equality_def {Ω₁ Ω₂ : MaximalConsistentTheory Λ} : Ω₁ = Ω₂ ↔ Ω₁.theory = Ω₂.theory := by
+  constructor;
+  . intro h; cases h; rfl;
+  . intro h; cases Ω₁; cases Ω₂; simp_all;
+
+lemma intro_equality {Ω₁ Ω₂ : MaximalConsistentTheory Λ} {h : ∀ p, p ∈ Ω₁ → p ∈ Ω₂} : Ω₁ = Ω₂ := by
+  have h₁₂ : Ω₁ ⊆ Ω₂ := by intro p hp; exact h p hp;
+  have h₂₁ : Ω₂ ⊆ Ω₁ := by
+    intro p;
+    contrapose;
+    intro hp;
+    apply maximal_consistent_neg_membership_iff Ω₂.mc |>.mp;
+    apply h;
+    apply maximal_consistent_neg_membership_iff Ω₁.mc |>.mpr hp;
+  simpa [equality_def] using Set.eq_of_subset_of_subset h₁₂ h₂₁
+
 lemma consitent : Consistent Λ Ω.theory := Ω.mc.1
 
 lemma maximal : Maximal Ω.theory := Ω.mc.2
 
-abbrev box := □Ω.theory
+def box := □Ω.theory
 prefix:73  "□" => box
 
-abbrev dia := ◇Ω.theory
+def dia := ◇Ω.theory
 prefix:73  "◇" => dia
 
-abbrev prebox := □⁻¹Ω.theory
+def prebox := □⁻¹Ω.theory
 prefix:73  "□⁻¹" => prebox
 
-abbrev predia := ◇⁻¹Ω.theory
+def predia := ◇⁻¹Ω.theory
 prefix:73  "◇⁻¹" => predia
 
-variable  {Ω : MaximalConsistentTheory Λ}
+def multibox (n : ℕ) (Ω : MaximalConsistentTheory Λ) := □[n]Ω.theory
+notation:73 "□[" n:90 "]" Ω:80 => multibox n Ω
+
+def multidia (n : ℕ) (Ω : MaximalConsistentTheory Λ) := ◇[n]Ω.theory
+notation:73 "◇[" n:90 "]" Ω:80 => multidia n Ω
+
+def multiprebox (n : ℕ) (Ω : MaximalConsistentTheory Λ) := □⁻¹[n]Ω.theory
+notation:73 "□⁻¹[" n:90 "]" Ω:80 => multiprebox n Ω
+
+def multipredia (n : ℕ) (Ω : MaximalConsistentTheory Λ) := ◇⁻¹[n]Ω.theory
+notation:73 "◇⁻¹[" n:90 "]" Ω:80 => multipredia n Ω
+
+variable {Ω : MaximalConsistentTheory Λ}
 
 lemma modus_ponens' {p q : Formula β} : ((p ⟶ q) ∈ Ω) → (p ∈ Ω) → (q ∈ Ω) := by
   apply maximal_consistent_modus_ponens' (Ω.mc);
@@ -258,6 +289,40 @@ lemma and_membership_iff : (p ⋏ q ∈ Ω) ↔ (p ∈ Ω) ∧ (q ∈ Ω) := max
 
 lemma or_membership_iff : (p ⋎ q ∈ Ω) ↔ (p ∈ Ω) ∨ (q ∈ Ω) := maximal_consistent_or_membership_iff (Ω.mc)
 
+lemma box_dn {p : Formula β} : (□p ∈ Ω) ↔ (□(~~p) ∈ Ω) := by
+  constructor;
+  . intro h;
+    have := membership_iff.mp h;
+    simp at this;
+    sorry;
+  . sorry;
+  -- sorry;
+
+lemma box_membership_dual {p : Formula β} : (□p ∈ Ω) ↔ (~(◇(~p)) ∈ Ω) := by
+  simp [-NegDefinition.neg];
+  constructor;
+  . intro h;
+    apply dn_membership_iff.mp;
+    apply box_dn.mp h;
+  . intro h;
+    have := dn_membership_iff.mpr h;
+    sorry;
+
+lemma dia_membership_dual {p : Formula β} : (◇p ∈ Ω) ↔ (~(□(~p)) ∈ Ω) := by simp;
+
+lemma multidia_membership_prepost {n : ℕ} {p : Formula β} : (◇◇[n]p ∈ Ω) ↔ (◇[n](◇p) ∈ Ω) := by simp only [multidia_prepost];
+
+lemma mutlidia_membership_prepost' {n : ℕ} {p : Formula β} : (◇[(n + 1)]p ∈ Ω) ↔ (◇[n](◇p) ∈ Ω) := by simp [multidia_prepost, -ModalDuality.dia, -NegDefinition.neg];
+
+lemma multidia_dual {n : ℕ} {p : Formula β} : (◇[n]p ∈ Ω) ↔ (~(□[n](~p)) ∈ Ω) := by
+  induction n generalizing p with
+  | zero => simp [-NegDefinition.neg]; exact dn_membership_iff;
+  | succ n ih =>
+    simp [-NegDefinition.neg, -ModalDuality.dia, multidia_prepost];
+    rw [@ih (◇p)];
+    simp only [ModalDuality.dia];
+    sorry;
+
 @[simp]
 lemma no_falsum : ⊥ ∉ Ω := consistent_no_falsum Ω.consitent
 
@@ -265,6 +330,33 @@ lemma no_falsum : ⊥ ∉ Ω := consistent_no_falsum Ω.consitent
 lemma neither_mem : ¬((p ∈ Ω) ∧ (~p ∈ Ω)) := by
   by_contra hC;
   exact Ω.no_falsum $ Ω.modus_ponens' hC.2 hC.1;
+
+@[simp] lemma multibox_zero : (□[0]Ω) = Ω.theory := by sorry; -- simp [Theory.multibox, Set.multibox]
+
+@[simp] lemma multidia_zero : (◇[0]Ω) = Ω.theory := by sorry; -- simp [Theory.multidia, Set.multidia]
+
+@[simp] lemma multiprebox_zero : (□⁻¹[0]Ω) = Ω.theory := by sorry; -- simp [Theory.multiprebox]
+
+@[simp] lemma multipredia_zero : (◇⁻¹[0]Ω) = Ω.theory := by sorry; -- simp [Theory.multipredia, Set.multipredia]
+
+lemma multibox_multidia {Ω₁ Ω₂ : MaximalConsistentTheory Λ} : (∀ {p : Formula β}, (□[n]p ∈ Ω₁ → p ∈ Ω₂)) ↔ (∀ {p : Formula β}, (p ∈ Ω₂ → ◇[n]p ∈ Ω₁)) := by
+  constructor;
+  . intro h p;
+    contrapose;
+    intro hp;
+    have : ~(◇[n]p) ∈ Ω₁ := neg_membership_iff.mpr hp;
+    have : ~~(□[n](~p)) ∈ Ω₁ := by sorry;
+    have : □[n](~p) ∈ Ω₁ := dn_membership_iff.mpr this;
+    have : ~p ∈ Ω₂ := h this;
+    exact neg_membership_iff.mp this;
+  . intro h p;
+    contrapose;
+    intro hp;
+    have : ~p ∈ Ω₂ := neg_membership_iff.mpr hp;
+    have : ◇[n](~p) ∈ Ω₁ := h this;
+    have : ~(□[n](~~p)) ∈ Ω₁ := by sorry;
+    have : □[n](~~p) ∉ Ω₁ := neg_membership_iff.mp this;
+    sorry;
 
 end MaximalConsistentTheory
 
@@ -330,12 +422,11 @@ def CanonicalModel (Λ : AxiomSet β) : Model (MaximalConsistentTheory Λ) β wh
   frame (Ω₁ Ω₂) := (□⁻¹Ω₁) ⊆ Ω₂.theory
   val (Ω a) := (atom a) ∈ Ω
 
-
 namespace CanonicalModel
 
 variable {Λ : AxiomSet β} (hK : 𝐊 ⊆ Λ) {Ω Ω₁ Ω₂ : MaximalConsistentTheory Λ}
 
-lemma frame_def: (CanonicalModel Λ).frame Ω₁ Ω₂ ↔ (□⁻¹Ω₁) ⊆ Ω₂.theory := by rfl
+lemma frame_def: (CanonicalModel Λ).frame Ω₁ Ω₂ ↔ (∀ {p : Formula β}, □p ∈ Ω₁ → p ∈ Ω₂) := by rfl
 
 lemma frame_def': (CanonicalModel Λ).frame Ω₁ Ω₂ ↔ (◇Ω₂ ⊆ Ω₁.theory) := by
   have := Deduction.instBoxedNecessitation hK;
@@ -359,6 +450,33 @@ lemma frame_def': (CanonicalModel Λ).frame Ω₁ Ω₂ ↔ (◇Ω₂ ⊆ Ω₁.
       apply equiv_dianeg_negbox!;
     have := neg_membership_iff.mp this;
     aesop;
+
+lemma multiframe_box : (CanonicalModel Λ).frame[n] Ω₁ Ω₂ ↔ (∀ {p : Formula β}, (□[n]p ∈ Ω₁ → p ∈ Ω₂)) := by
+  induction n generalizing Ω₁ Ω₂ with
+  | zero =>
+    constructor;
+    . intro h; subst h; simp;
+    . intro h; apply intro_equality; simpa;
+  | succ n ih =>
+    constructor;
+    . simp;
+      intro Ω₃ h₁₃ h₃₂ p h;
+      exact ih.mp h₃₂ $ h₁₃ h;
+    . intro h;
+      obtain ⟨Ω, hΩ⟩ := exists_maximal_consistent_theory (show Consistent Λ (□⁻¹Ω₁ ∪ ◇[n]Ω₂) by sorry)
+      existsi Ω;
+      constructor;
+      . intro p hp;
+        apply hΩ;
+        simp_all;
+      . apply ih.mpr;
+        apply multibox_multidia.mpr;
+        intro p hp;
+        apply hΩ;
+        right;
+        sorry;
+
+lemma multiframe_dia : (CanonicalModel Λ).frame[n] Ω₁ Ω₂ ↔ (∀ {p : Formula β}, (p ∈ Ω₂ → ◇[n]p ∈ Ω₁)) := Iff.trans multiframe_box multibox_multidia
 
 @[simp]
 lemma val_def {a : β} : (CanonicalModel Λ).val Ω a ↔ (atom a) ∈ Ω := by rfl
@@ -424,7 +542,7 @@ end CanonicalModel
 
 lemma truthlemma {p : Formula β} : ∀ {Ω}, (Ω ⊩ᴹ[CanonicalModel Λ] p) ↔ (p ∈ Ω) := by
   induction p using rec' with
-  | hatom => aesop;
+  | hatom => simp;
   | hfalsum => simp;
   | himp => simp_all [imp_membership_iff'];
   | hor => simp_all [or_membership_iff];
@@ -441,7 +559,7 @@ lemma truthlemma {p : Formula β} : ∀ {Ω}, (Ω ⊩ᴹ[CanonicalModel Λ] p) �
     . intro h Ω' hΩ';
       apply ih.mpr;
       simp [Set.subset_def, CanonicalModel.frame_def] at hΩ';
-      exact hΩ' p h;
+      exact hΩ' h;
 
 lemma truthlemma' {Γ : Theory β} : ∀ {Ω}, (Ω ⊩ᴹ[CanonicalModel Λ] Γ) ↔ (Γ ⊆ Ω.theory) := by
   intro Ω;
@@ -452,79 +570,5 @@ lemma truthlemma' {Γ : Theory β} : ∀ {Ω}, (Ω ⊩ᴹ[CanonicalModel Λ] Γ)
   . intro h p hp;
     apply truthlemma hK |>.mpr;
     apply h hp;
-
--- TODO: ほとんど同じ記述なのでどうにかして共通化したい．
-
-abbrev LogicK.CanonicalModel {β} := Normal.CanonicalModel (𝐊 : AxiomSet β)
-theorem LogicK.Hilbert.completes : Completeness (𝐊 : AxiomSet β) (𝔽((𝐊 : AxiomSet β)) : FrameClass (MaximalConsistentTheory (𝐊 : AxiomSet β))) := by
-  apply completeness_def.mpr;
-  intro Γ hConsisΓ;
-  let ⟨Ω, hΩ⟩ := exists_maximal_consistent_theory hConsisΓ;
-  existsi CanonicalModel.frame;
-  constructor;
-  . apply FrameClassDefinability.mp; simp_all;
-  . existsi CanonicalModel.val, Ω;
-    apply truthlemma' (by simp) |>.mpr;
-    assumption;
-
-abbrev LogicKT.CanonicalModel {β} := Normal.CanonicalModel (𝐊𝐓 : AxiomSet β)
-theorem LogicKT.Hilbert.completes : Completeness (𝐊𝐓 : AxiomSet β) (𝔽((𝐊𝐓 : AxiomSet β)) : FrameClass (MaximalConsistentTheory (𝐊𝐓 : AxiomSet β))) := by
-  apply completeness_def.mpr;
-  intro Γ hConsisΓ;
-  let ⟨Ω, hΩ⟩ := exists_maximal_consistent_theory hConsisΓ;
-  existsi CanonicalModel.frame;
-  constructor;
-  . apply FrameClassDefinability.mp; simp_all;
-  . existsi CanonicalModel.val, Ω;
-    apply truthlemma' (by simp) |>.mpr;
-    assumption;
-
-abbrev LogicKD.CanonicalModel {β} := Normal.CanonicalModel (𝐊𝐃 : AxiomSet β)
-theorem LogicKD.Hilbert.completes : Completeness (𝐊𝐃 : AxiomSet β) (𝔽((𝐊𝐃 : AxiomSet β)) : FrameClass (MaximalConsistentTheory (𝐊𝐃 : AxiomSet β))) := by
-  apply completeness_def.mpr;
-  intro Γ hConsisΓ;
-  let ⟨Ω, hΩ⟩ := exists_maximal_consistent_theory hConsisΓ;
-  existsi CanonicalModel.frame;
-  constructor;
-  . apply FrameClassDefinability.mp; simp_all;
-  . existsi CanonicalModel.val, Ω;
-    apply truthlemma' (by simp) |>.mpr;
-    assumption;
-
-abbrev LogicS4.CanonicalModel {β} := Normal.CanonicalModel (𝐒𝟒 : AxiomSet β)
-theorem LogicS4.Hilbert.completes : Completeness (𝐒𝟒 : AxiomSet β) (𝔽((𝐒𝟒 : AxiomSet β)) : FrameClass (MaximalConsistentTheory (𝐒𝟒 : AxiomSet β))) := by
-  apply completeness_def.mpr;
-  intro Γ hConsisΓ;
-  let ⟨Ω, hΩ⟩ := exists_maximal_consistent_theory hConsisΓ;
-  existsi CanonicalModel.frame;
-  constructor;
-  . apply FrameClassDefinability.mp; simp_all;
-  . existsi CanonicalModel.val, Ω;
-    apply truthlemma' (by simp) |>.mpr;
-    assumption;
-
-abbrev LogicS5.CanonicalModel {β} := Normal.CanonicalModel (𝐒𝟓 : AxiomSet β)
-theorem LogicS5.Hilbert.completes : Completeness (𝐒𝟓 : AxiomSet β) (𝔽((𝐒𝟓 : AxiomSet β)) : FrameClass (MaximalConsistentTheory (𝐒𝟓 : AxiomSet β))) := by
-  apply completeness_def.mpr;
-  intro Γ hConsisΓ;
-  let ⟨Ω, hΩ⟩ := exists_maximal_consistent_theory hConsisΓ;
-  existsi CanonicalModel.frame;
-  constructor;
-  . apply FrameClassDefinability.mp; simp_all;
-  . existsi CanonicalModel.val, Ω;
-    apply truthlemma' (by simp) |>.mpr;
-    assumption;
-
-abbrev LogicKT4B.CanonicalModel {β} := Normal.CanonicalModel (𝐊𝐓𝟒𝐁 : AxiomSet β)
-theorem LogicKT4B.Hilbert.completes : @Completeness (MaximalConsistentTheory (𝐊𝐓𝟒𝐁 : AxiomSet β)) β 𝐊𝐓𝟒𝐁 (𝔽((𝐊𝐓𝟒𝐁 : AxiomSet β)) : FrameClass (MaximalConsistentTheory (𝐊𝐓𝟒𝐁 : AxiomSet β))) := by
-  apply completeness_def.mpr;
-  intro Γ hConsisΓ;
-  let ⟨Ω, hΩ⟩ := exists_maximal_consistent_theory hConsisΓ;
-  existsi CanonicalModel.frame;
-  constructor;
-  . apply FrameClassDefinability.mp; simp_all;
-  . existsi CanonicalModel.val, Ω;
-    apply truthlemma' (by simp) |>.mpr;
-    assumption;
 
 end LO.Modal.Normal
