@@ -26,37 +26,28 @@ syntax:75 "⟨" foterm ", " foterm "⟩" : foterm
 syntax "(" foterm ")" : foterm
 
 syntax foterm "ᵀ[" foterm,* "]" : foterm
-syntax:80 "⤒" foterm:80 : foterm
-syntax:80 "ᵀ⇑" foterm:80 : foterm
-syntax:80 "ᵀᶠ" foterm:80 : foterm
-syntax:80 "ᵀᵇ" foterm:80 : foterm
-
 syntax "ᵀ“" foterm:0 "”" : term
 
 macro_rules
-  | `(ᵀ“ # $n:term”)                               => `(#$n)
-  | `(ᵀ“ & $n:term ”)                              => `(&$n)
-  | `(ᵀ“ ⋆ ”)                                      => `(Operator.Star.star.const)
-  | `(ᵀ“ $name:ident ”)                            => `(& $(quote name.getId.getString!))
-  | `(ᵀ“ !! $t:term ”)                             => `($t)
-  | `(ᵀ“ $n:num ”)                                 => `(Semiterm.Operator.const (Operator.numeral _ $n))
-  | `(ᵀ“ ᵀ⟨ $d:term ⟩( $t:foterm,* ) ”)            => do
+  | `(ᵀ“ # $n:term ”)                   => `(#$n)
+  | `(ᵀ“ & $n:term ”)                   => `(&$n)
+  | `(ᵀ“ ⋆ ”)                           => `(Operator.Star.star.const)
+  | `(ᵀ“ $name:ident ”)                 => `(& $(quote name.getId.getString!))
+  | `(ᵀ“ !! $t:term ”)                  => `($t)
+  | `(ᵀ“ $n:num ”)                      => `(Semiterm.Operator.const (Operator.numeral _ $n))
+  | `(ᵀ“ ᵀ⟨ $d:term ⟩( $t:foterm,* ) ”) => do
     let v ← t.getElems.foldrM (β := Lean.TSyntax _) (init := ← `(![])) (fun a s => `(ᵀ“$a” :> $s))
     `(Operator.operator $d $v)
-  | `(ᵀ“ $t:foterm + $u:foterm ”)                  => `(Operator.Add.add.operator ![ᵀ“$t”, ᵀ“$u”])
-  | `(ᵀ“ $t:foterm * $u:foterm ”)                  => `(Operator.Mul.mul.operator ![ᵀ“$t”, ᵀ“$u”])
-  | `(ᵀ“ $t:foterm ^ $u:foterm ”)                  => `(Operator.Pow.pow.operator ![ᵀ“$t”, ᵀ“$u”])
-  | `(ᵀ“ $t:foterm ^' $n:num ”)                    => `((Operator.npow _ $n).operator ![ᵀ“$t”])
-  | `(ᵀ“ exp $t:foterm ”)                          => `(Operator.Exp.exp.operator ![ᵀ“$t”])
-  | `(ᵀ“ ⟨ $t:foterm, $u:foterm ⟩ ”)               => `(Operator.Pairing.pair.operator ![ᵀ“$t”, ᵀ“$u”])
-  | `(ᵀ“ ᵀ⇑$t:foterm ”)                           => `(Rew.shift ᵀ“$t”)
-  | `(ᵀ“ $t:foterm ᵀ[$u:foterm,*] ”)               => do
+  | `(ᵀ“ $t:foterm + $u:foterm ”)       => `(Operator.Add.add.operator ![ᵀ“$t”, ᵀ“$u”])
+  | `(ᵀ“ $t:foterm * $u:foterm ”)       => `(Operator.Mul.mul.operator ![ᵀ“$t”, ᵀ“$u”])
+  | `(ᵀ“ $t:foterm ^ $u:foterm ”)       => `(Operator.Pow.pow.operator ![ᵀ“$t”, ᵀ“$u”])
+  | `(ᵀ“ $t:foterm ^' $n:num ”)         => `((Operator.npow _ $n).operator ![ᵀ“$t”])
+  | `(ᵀ“ exp $t:foterm ”)               => `(Operator.Exp.exp.operator ![ᵀ“$t”])
+  | `(ᵀ“ ⟨ $t:foterm, $u:foterm ⟩ ”)    => `(Operator.Pairing.pair.operator ![ᵀ“$t”, ᵀ“$u”])
+  | `(ᵀ“ $t:foterm ᵀ[$u:foterm,*] ”)    => do
     let v ← u.getElems.foldrM (β := Lean.TSyntax _) (init := ← `(![])) (fun a s => `(ᵀ“$a” :> $s))
     `(Rew.substs $v ᵀ“$t”)
-  | `(ᵀ“ ⤒$t:foterm ”)                            => `(Rew.bShift ᵀ“$t”)
-  | `(ᵀ“ ᵀᶠ $t:foterm ”)                           => `(Rew.free ᵀ“$t”)
-  | `(ᵀ“ ᵀᵇ $t:foterm ”)                           => `(Rew.fix ᵀ“$t”)
-  | `(ᵀ“ ( $x ) ”)                                 => `(ᵀ“$x”)
+  | `(ᵀ“ ( $x ) ”)                      => `(ᵀ“$x”)
 
 #check (ᵀ“ ᵀ⟨Operator.Add.add⟩(&2 + &0, ᵀ⟨Operator.Zero.zero⟩())” : Semiterm Language.oRing ℕ 8)
 #check (ᵀ“ ᵀ⟨Operator.Add.add⟩(&2 + &0, ᵀ⟨Operator.Zero.zero⟩())” : Semiterm Language.oRing ℕ 8)
@@ -98,7 +89,6 @@ def unexpsnderMul : Unexpander
 
 @[app_unexpander DFunLike.coe]
 def unexpandShift : Unexpander
-  | `($_ ⇑                          ᵀ“$t”) => `(ᵀ“ ᵀ⇑$t ”)
   | `($_ [→ ]                       ᵀ“$t”) => `(ᵀ“ $t ᵀ[] ”)
   | `($_ [→ ᵀ“$t₁”]                 ᵀ“$t”) => `(ᵀ“ $t ᵀ[$t₁] ”)
   | `($_ [→ ᵀ“$t₁”, ᵀ“$t₂”]         ᵀ“$t”) => `(ᵀ“ $t ᵀ[$t₁, $t₂] ”)
@@ -184,33 +174,33 @@ syntax:max "!" term:max : foformula
 syntax "“" foformula "”" : term
 
 macro_rules
-  | `(“ ⊤ ”)                                       => `(⊤)
-  | `(“ ⊥ ”)                                       => `(⊥)
-  | `(“ ! $t:term ”)                               => `($t)
-  | `(“ ⟨ $d:term ⟩( $t:foterm,* ) ”)             => do
+  | `(“ ⊤ ”)                             => `(⊤)
+  | `(“ ⊥ ”)                             => `(⊥)
+  | `(“ ! $t:term ”)                     => `($t)
+  | `(“ ⟨ $d:term ⟩( $t:foterm,* ) ”)    => do
     let v ← t.getElems.foldrM (β := Lean.TSyntax _) (init := ← `(![])) (fun a s => `(ᵀ“$a” :> $s))
     `(Operaator.operator $d $v)
-  | `(“ ¬ $p:foformula ”)                         => `(~“$p”)
-  | `(“ $t:foterm = $u:foterm ”)                 => `(Operator.operator Operator.Eq.eq ![ᵀ“$t”, ᵀ“$u”])
-  | `(“ $t:foterm ≠ $u:foterm ”)                 => `(~(Operator.operator Operator.Eq.eq ![ᵀ“$t”, ᵀ“$u”]))
-  | `(“ $t:foterm < $u:foterm ”)                 => `(Operator.operator Operator.LT.lt ![ᵀ“$t”, ᵀ“$u”])
-  | `(“ $t:foterm ≮ $u:foterm ”)                 => `(~(Operator.operator Operator.LT.lt ![ᵀ“$t”, ᵀ“$u”]))
-  | `(“ $p:foformula ∧ $q:foformula ”)           => `(“$p” ⋏ “$q”)
-  | `(“ ⋀ $i, $p:foformula ”)                    => `(Matrix.conj fun $i => “$p”)
-  | `(“ $p:foformula ∨ $q:foformula ”)           => `(“$p” ⋎ “$q”)
-  | `(“ ∀ $p:foformula ”)                         => `(∀' “$p”)
-  | `(“ ∃ $p:foformula ”)                         => `(∃' “$p”)
-  | `(“ ∀[$p:foformula] $q:foformula ”)          => `(∀[“$p”] “$q”)
-  | `(“ ∃[$p:foformula] $q:foformula ”)          => `(∃[“$p”] “$q”)
-  | `(“ ∀* $p:foformula ”)                        => `(univClosure “$p”)
-  | `(“ $p:foformula [ $t:foterm,* ] ”)            => do
+  | `(“ ¬ $p:foformula ”)                => `(~“$p”)
+  | `(“ $t:foterm = $u:foterm ”)         => `(Operator.operator Operator.Eq.eq ![ᵀ“$t”, ᵀ“$u”])
+  | `(“ $t:foterm ≠ $u:foterm ”)         => `(~(Operator.operator Operator.Eq.eq ![ᵀ“$t”, ᵀ“$u”]))
+  | `(“ $t:foterm < $u:foterm ”)         => `(Operator.operator Operator.LT.lt ![ᵀ“$t”, ᵀ“$u”])
+  | `(“ $t:foterm ≮ $u:foterm ”)         => `(~(Operator.operator Operator.LT.lt ![ᵀ“$t”, ᵀ“$u”]))
+  | `(“ $p:foformula ∧ $q:foformula ”)   => `(“$p” ⋏ “$q”)
+  | `(“ ⋀ $i, $p:foformula ”)           => `(Matrix.conj fun $i => “$p”)
+  | `(“ $p:foformula ∨ $q:foformula ”)   => `(“$p” ⋎ “$q”)
+  | `(“ ∀ $p:foformula ”)                => `(∀' “$p”)
+  | `(“ ∃ $p:foformula ”)                => `(∃' “$p”)
+  | `(“ ∀[$p:foformula] $q:foformula ”)  => `(∀[“$p”] “$q”)
+  | `(“ ∃[$p:foformula] $q:foformula ”)  => `(∃[“$p”] “$q”)
+  | `(“ ∀* $p:foformula ”)               => `(univClosure “$p”)
+  | `(“ $p:foformula [ $t:foterm,* ] ”)  => do
     let v ← t.getElems.foldrM (β := Lean.TSyntax _) (init := ← `(![])) (fun a s => `(ᵀ“$a” :> $s))
     `((Rew.substs $v).hom “$p”)
   | `(“ $p:foformula .[ $t:foterm,* ] ”) => do
     let v ← t.getElems.foldrM (β := Lean.TSyntax _) (init := ← `(![])) (fun a s => `(ᵀ“$a” :> $s))
     `((Rew.embSubsts $v).hom “$p”)
-  | `(“ ⇑$p:foformula ”)                         => `(Rew.shift.hom “$p”)
-  | `(“ ( $x ) ”)                                  => `(“$x”)
+  | `(“ ⇑$p:foformula ”)                => `(Rew.shift.hom “$p”)
+  | `(“ ( $x ) ”)                        => `(“$x”)
 
 #check “ ¬(∀ ∀ (#0 + 1) * #1 < #0 + #1 ∨ 0 < 5) ”
 #check “⋀ i, #i < #i + 9”

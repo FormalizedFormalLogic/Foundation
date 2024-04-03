@@ -209,6 +209,10 @@ lemma consequence_iff_eq' {T : Theory L} [𝐄𝐪 ≾ T] {σ : Sentence L} :
     T ⊨ σ ↔ (∀ (M : Type u) [Nonempty M] [Structure L M] [Structure.Eq L M] [M ⊧ₘ* T], M ⊧ₘ σ) := by
   rw [consequence_iff_eq]
 
+lemma consequence_iff_add_eq {T : Theory L} {σ : Sentence L} :
+    T + 𝐄𝐪 ⊨ σ ↔ (∀ (M : Type u) [Nonempty M] [Structure L M] [Structure.Eq L M], M ⊧ₘ* T → M ⊧ₘ σ) :=
+  Iff.trans consequence_iff_eq (forall₄_congr <| fun M _ _ _ ↦ by simp)
+
 lemma satisfiableTheory_iff_eq {T : Theory L} [𝐄𝐪 ≾ T] :
     Semantics.SatisfiableTheory T ↔ (∃ (M : Type u) (_ : Nonempty M) (_ : Structure L M) (_ : Structure.Eq L M), M ⊧ₘ* T) := by
   simp[satisfiableTheory_iff]; constructor

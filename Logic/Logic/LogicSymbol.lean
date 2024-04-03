@@ -337,7 +337,8 @@ def comp (g : β →ˡᶜ γ) (f : α →ˡᶜ β) : α →ˡᶜ γ where
 end Hom
 
 section quantifier
-variable {α : ℕ → Type u} [∀ i, LogicalConnective (α i)] [UnivQuantifier α] [ExQuantifier α]
+
+variable {α : ℕ → Type*} [(i : ℕ) → LogicalConnective (α i)] [UnivQuantifier α] [ExQuantifier α]
 
 def ball (p : α (n + 1)) (q : α (n + 1)) : α n := ∀' (p ⟶ q)
 
