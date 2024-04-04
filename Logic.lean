@@ -54,6 +54,7 @@ import Logic.FirstOrder.Completeness.SearchTree
 import Logic.FirstOrder.Completeness.Completeness
 
 import Logic.FirstOrder.Order.Le
+import Logic.FirstOrder.Interpretation
 
 import Logic.FirstOrder.Arith.Basic
 import Logic.FirstOrder.Arith.Hierarchy

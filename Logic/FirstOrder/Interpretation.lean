@@ -63,13 +63,6 @@ def translation {n : ℕ} : Semisentence L' n →ˡᶜ Semisentence L n where
 
 @[simp] lemma translation_ex (p : Semisentence L' (n + 1)) : ι.translation (∃' p) = ∃[ι.domain/[#0]] ι.translation p := rfl
 
-protected def id : Interpretation T L where
-  domain := ⊤
-  rel (r) := Semiformula.rel r (#·)
-  func (f) := “#0 = !!(Semiterm.func f (#·.succ))”
-  domain_nonempty := consequence_iff.mpr (by intro M ⟨x⟩ _ _; simp [models_iff]; exact ⟨x, by simp⟩)
-  func_defined {k} (f) := consequence_iff_add_eq.mpr fun M _ _ _ _ ↦ by simp [models_iff, Semiterm.val_func]
-
 section semantics
 
 open Semiformula
@@ -111,7 +104,7 @@ lemma sub_rel_iff {k} (r : L'.Rel k) (v : Fin k → ι.Sub M) :
 lemma sub_func_iff {k} (f : L'.Func k) (y : ι.Sub M) (v : Fin k → ι.Sub M) :
     y = Structure.func f v ↔ PVal! M (y :> fun i ↦ v i) (ι.func f) := Classical.choose!_eq_iff _
 
-lemma eval_varEquals {t : Semiterm L' Empty n} {y : ι.Sub M} {x : Fin n → ι.Sub M} :
+lemma eval_varEquals_iff {t : Semiterm L' Empty n} {y : ι.Sub M} {x : Fin n → ι.Sub M} :
     PVal! M (y :> fun i ↦ x i) (ι.varEquals t) ↔ y = Semiterm.bVal! (ι.Sub M) x t := by
   induction t generalizing x y
   case bvar => simp [varEquals, Subtype.coe_inj]
@@ -125,33 +118,63 @@ lemma eval_varEquals {t : Semiterm L' Empty n} {y : ι.Sub M} {x : Fin n → ι.
         funext fun i ↦ by simpa using congr_arg Subtype.val ((@ih i ⟨v i, (hv i).1⟩ x).mp (hv i).2)
       rcases this; exact h
 
-/-
-lemma eval_translationRel {n k} (e : Fin n → ι.Sub M) (r : L'.Rel k) (v : Fin k → Semiterm L' Empty n) :
-    PVal! M (fun i ↦ e i) (ι.translationRel r v) ↔ Structure.rel r fun i ↦ Semiterm.bVal! (ι.Sub M) e (v i) := by {
-  simp [translationRel, Matrix.comp_vecCons', sub_rel_iff, eval_embSubsts]; constructor
-  · intro h; exact h (fun i ↦ (Semiterm.bVal! (ι.Sub M) e (v i))) (fun i ↦ by simp [eval_varEquals, Matrix.constant_eq_singleton])
+lemma eval_translationRel_iff {n k} (e : Fin n → ι.Sub M) (r : L'.Rel k) (v : Fin k → Semiterm L' Empty n) :
+    PVal! M (fun i ↦ e i) (ι.translationRel r v) ↔ Structure.rel r fun i ↦ Semiterm.bVal! (ι.Sub M) e (v i) := by
+  simp [translationRel, Matrix.comp_vecCons', sub_rel_iff, eval_embSubsts, Matrix.constant_eq_singleton]; constructor
+  · intro h; exact h (fun i ↦ (Semiterm.bVal! (ι.Sub M) e (v i))) (fun i ↦ by simp [eval_varEquals_iff, Matrix.constant_eq_singleton])
   · intro h; intro l H
-    have : l = fun i ↦ (Semiterm.bVal! (ι.Sub M) e (v i)).val := funext fun i ↦ by {
-      have := eval_varEquals.mp (H i)
-     }
+    have : l = fun i ↦ (Semiterm.bVal! (ι.Sub M) e (v i)).val := funext fun i ↦ by
+      let z : ι.Sub M := ⟨l i, (H i).1⟩
+      have : PVal! M (z :> fun i ↦ e i) (ι.varEquals (v i)) := (H i).2
+      exact congr_arg Subtype.val (eval_varEquals_iff.mp this)
+    rcases this
+    exact h
 
-    }
-
-lemma eval_translation (p : Semisentence L' n) (e : Fin n → ι.Sub M) :
+lemma eval_translation_iff {p : Semisentence L' n} {e : Fin n → ι.Sub M} :
     PVal! M (fun i ↦ e i) (ι.translation p) ↔ PVal! (ι.Sub M) e p := by
   induction p using Semiformula.rec'
-    <;> simp [*, Matrix.constant_eq_singleton, eval_substs]
-  case hrel r v =>
+    <;> simp [*, Matrix.constant_eq_singleton, eval_substs, eval_translationRel_iff, eval_rel, eval_nrel]
+  case hall n p ih =>
+    constructor
+    · intro h x hx
+      exact ih.mp (by simpa [Matrix.comp_vecCons'] using h x hx)
+    · intro h x hx
+      simpa [Matrix.comp_vecCons'] using ih.mpr (h x hx)
+  case hex n p ih =>
+    constructor
+    · rintro ⟨x, hx, h⟩
+      refine ⟨x, hx, ih.mp (by simpa [Matrix.comp_vecCons'] using h)⟩
+    · intro ⟨x, hx, h⟩
+      refine ⟨x, hx, by simpa [Matrix.comp_vecCons'] using ih.mpr h⟩
+
+lemma models_translation_iff {σ : Sentence L'} :
+    M ⊧ₘ (ι.translation σ) ↔ (ι.Sub M) ⊧ₘ σ := by simp [models_iff, ←eval_translation_iff, Matrix.empty_eq]
 
 end semantics
 
+protected def id : Interpretation T L where
+  domain := ⊤
+  rel (r) := Semiformula.rel r (#·)
+  func (f) := “#0 = !!(Semiterm.func f (#·.succ))”
+  domain_nonempty := consequence_iff.mpr (by intro M ⟨x⟩ _ _; simp [models_iff]; exact ⟨x, by simp⟩)
+  func_defined {k} (f) := consequence_iff_add_eq.mpr fun M _ _ _ _ ↦ by simp [models_iff, Semiterm.val_func]
+
 end Interpretation
 
-class Theory.Interpretation {L L' : Language} [L.Eq] (T : Theory L) (U : Theory L') where
-  ι : Interpretation T L'
-  interpret : ∀ σ ∈ U, T ⊨ ι.translation σ
+class TheoryInterpretation {L L' : Language} [L.Eq] (T : Theory L) (U : Theory L') where
+  interpretation : Interpretation T L'
+  interpret_theory : ∀ σ ∈ U, T ⊨ interpretation.translation σ
 
-infix:50 " ⊳ " => Theory.Interpretation
+infix:50 " ⊳ " => TheoryInterpretation
+
+namespace TheoryInterpretation
+
+variable {L L' : Language} [L.Eq] {T : Theory L} {U : Theory L'} (ι : T ⊳ U)
+
+abbrev translation (p : Semisentence L' n) : Semisentence L n := ι.interpretation.translation p
+
+open Interpretation
+
+end TheoryInterpretation
 
 end LO.FirstOrder
--/
