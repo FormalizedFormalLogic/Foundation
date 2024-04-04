@@ -11,9 +11,9 @@ structure Interpretation {L : Language} [L.Eq] (T : Theory L) (L' : Language) wh
   rel {k} : L'.Rel k → Semisentence L k
   func {k} : L'.Func k → Semisentence L (k + 1)
   domain_nonempty :
-    T + 𝐄𝐪 ⊨ ∃' domain
+    T + 𝐄𝐐 ⊨ ∃' domain
   func_defined {k} (f : L'.Func k) :
-    T + 𝐄𝐪 ⊨ ∀* ((Matrix.conj fun i ↦ domain/[#i]) ⟶ ∃'! (domain/[#0] ⋏ func f))
+    T + 𝐄𝐐 ⊨ ∀* ((Matrix.conj fun i ↦ domain/[#i]) ⟶ ∃'! (domain/[#0] ⋏ func f))
 
 namespace Interpretation
 

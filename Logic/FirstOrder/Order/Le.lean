@@ -66,7 +66,7 @@ end
 end Semiformula
 
 namespace Order
-variable {T : Theory L} [𝐄𝐪 ≾ T]
+variable {T : Theory L} [𝐄𝐐 ≾ T]
 
 noncomputable def leIffEqOrLt : T ⊢ “∀ ∀ (#0 ≤ #1 ↔ #0 = #1 ∨ #0 < #1)” :=
   Complete.complete

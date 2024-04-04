@@ -126,7 +126,8 @@ The key results are summarised in `Logic/Summary.lean`.
 | :----:                              | ----                                           | ----                       | :----:   |
 | $(\rm Cut)\vdash_\mathrm{T} \Gamma$ | Derivation in Tait-Calculus + Cut              | [LO.FirstOrder.Derivation](https://iehality.github.io/lean4-logic/Logic/FirstOrder/Basic/Calculus.html#LO.FirstOrder.Derivation) | `⊢¹ Γ`   |
 | $M \models \sigma$                  | Tarski's truth definition condition            | [LO.FirstOrder.Models](https://iehality.github.io/lean4-logic/Logic/FirstOrder/Basic/Semantics/Semantics.html#LO.FirstOrder.Models) | `M ⊧ₘ σ` |
-| $\mathbf{Eq}$                       | Axiom of equality                              | [LO.FirstOrder.Theory.Eq](https://iehality.github.io/lean4-logic/Logic/FirstOrder/Basic/Eq.html#LO.FirstOrder.Theory.Eq) | `𝐄𝐪` |
+| $T \triangleright U$                | Theory interpretation                          | [LO.FirstOrder.TheoryInterpretation](https://iehality.github.io/lean4-logic/Logic/FirstOrder/Interpretation.html#LO.FirstOrder.TheoryInterpretation) | `T ⊳ U` |
+| $\mathbf{EQ}$                       | Axiom of equality                              | [LO.FirstOrder.Theory.eqAxiom](https://iehality.github.io/lean4-logic/Logic/FirstOrder/Basic/Eq.html#LO.FirstOrder.Theory.eqAxiom) | `𝐄𝐐` |
 | $\mathbf{PA^-}$                     | Finitely axiomatized fragment of $\mathbf{PA}$ | [LO.FirstOrder.Arith.Theory.peanoMinus](https://iehality.github.io/lean4-logic/Logic/FirstOrder/Arith/Theory.html#LO.FirstOrder.Arith.Theory.peanoMinus) | `𝐏𝐀⁻` |
 | $\mathbf{I}_\mathrm{open}$          | Induction of open formula                      | [LO.FirstOrder.Arith.Theory.iOpen](https://iehality.github.io/lean4-logic/Logic/FirstOrder/Arith/Theory.html#LO.FirstOrder.Arith.Theory.iOpen) | `𝐈open` |
 | $\mathbf{I\Sigma}_n$                | Induction of $\Sigma_n$ formula                | [LO.FirstOrder.Arith.Theory.iSigma](https://iehality.github.io/lean4-logic/Logic/FirstOrder/Arith/Theory.html#LO.FirstOrder.Arith.Theory.iSigma) | `𝐈𝚺` |
@@ -168,7 +169,7 @@ The key results are summarised in `Logic/Summary.lean`.
   theorem LO.FirstOrder.Arith.first_incompleteness
       (T : LO.FirstOrder.Theory ℒₒᵣ)
       [DecidablePred T]
-      [𝐄𝐪 ≾ T]
+      [𝐄𝐐 ≾ T]
       [𝐏𝐀⁻ ≾ T]
       [LO.FirstOrder.Arith.SigmaOneSound T]
       [LO.FirstOrder.Theory.Computable T] :
@@ -179,7 +180,7 @@ The key results are summarised in `Logic/Summary.lean`.
     theorem LO.FirstOrder.Arith.undecidable
         (T : LO.FirstOrder.Theory ℒₒᵣ)
         [DecidablePred T]
-        [𝐄𝐪 ≾ T]
+        [𝐄𝐐 ≾ T]
         [𝐏𝐀⁻ ≾ T]
         [LO.FirstOrder.Arith.SigmaOneSound T]
         [LO.FirstOrder.Theory.Computable T] :

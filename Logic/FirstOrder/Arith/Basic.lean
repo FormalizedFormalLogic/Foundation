@@ -152,7 +152,7 @@ lemma consistent_of_sound [SoundOn T F] (hF : F ⊥) : System.Consistent T :=
 
 end
 
-variable {L : Language} [L.ORing] (T : Theory L) [𝐄𝐪 ≾ T]
+variable {L : Language} [L.ORing] (T : Theory L) [𝐄𝐐 ≾ T]
 
 lemma consequence_of (σ : Sentence L)
   (H : ∀ (M : Type u)

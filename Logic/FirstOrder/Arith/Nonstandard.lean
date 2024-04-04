@@ -14,7 +14,7 @@ local notation "ℒₒᵣ⋆" => withStar
 def starUnbounded (c : ℕ) : Theory ℒₒᵣ⋆ := Set.range fun n : Fin c ↦ “!!(Semiterm.Operator.numeral ℒₒᵣ⋆ n) < ⋆”
 
 def trueArithWithStarUnbounded (n : ℕ) : Theory ℒₒᵣ⋆ :=
-  𝐄𝐪 ∪ (Semiformula.lMap (Language.Hom.add₁ _ _) '' 𝐓𝐀) ∪ starUnbounded n
+  𝐄𝐐 ∪ (Semiformula.lMap (Language.Hom.add₁ _ _) '' 𝐓𝐀) ∪ starUnbounded n
 
 lemma trueArithWithStarUnbounded.cumulative : Cumulative trueArithWithStarUnbounded := fun c =>
   Set.union_subset_union_right _ <|
@@ -42,7 +42,7 @@ lemma satisfiable_union_trueArithWithStarUnbounded :
   (Compact.compact_cumulative trueArithWithStarUnbounded.cumulative).mpr
     satisfiable_trueArithWithStarUnbounded
 
-instance trueArithWithStarUnbounded.eqTheory : 𝐄𝐪 ≾ (⋃ c, trueArithWithStarUnbounded c) :=
+instance trueArithWithStarUnbounded.eqTheory : 𝐄𝐐 ≾ (⋃ c, trueArithWithStarUnbounded c) :=
   System.Subtheory.ofSubset <|
     Set.subset_iUnion_of_subset 0 (Set.subset_union_of_subset_left (Set.subset_union_left _ _) _)
 
