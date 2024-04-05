@@ -1,5 +1,3 @@
-import Logic.Modal.Normal.Formula
-import Logic.Modal.Normal.Deduction
 import Logic.Modal.Normal.Semantics
 
 namespace LO.Modal.Normal
