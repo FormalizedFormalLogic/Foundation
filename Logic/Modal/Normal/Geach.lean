@@ -272,6 +272,8 @@ lemma LogicS4.FrameClassDefinability : FrameClassDefinability α β 𝐒𝟒 (λ
 
 end FrameClassDefinability
 
+lemma AxiomSetFrameClass.geach {Λ : AxiomSet β} [hG : IsGeachLogic Λ] : (𝔽(Λ) : FrameClass α) = (𝔽((GeachLogic hG.taples : AxiomSet β))) := by rw [←hG.char];
+
 namespace CanonicalModel
 
 variable [DecidableEq β]
