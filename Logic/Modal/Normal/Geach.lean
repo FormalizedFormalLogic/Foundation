@@ -36,70 +36,36 @@ def AxiomGeach (l : GeachTaple) (p : F) := (◇[l.i](□[l.m]p)) ⟶ (□[l.j](�
 
 def AxiomGeach.set (l : GeachTaple) : AxiomSet α := { AxiomGeach l p | (p) }
 
-class IsGeachAxiom (ax : F → F) where
-  taple : GeachTaple
-  char : ∀ p, ax p = AxiomGeach taple p
+namespace AxiomGeach
 
-@[simp]
-instance : IsGeachAxiom (AxiomT : (Formula α) → (Formula α)) where
-  taple := (0, 0, 1, 0);
-  char := by simp [AxiomT];
+@[simp] lemma def_axiomT : (𝐓 : AxiomSet α) = AxiomGeach.set (0, 0, 1, 0) := by aesop;
 
-@[simp]
-instance : IsGeachAxiom (AxiomB : (Formula α) → (Formula α)) where
-  taple := (0, 1, 0, 1);
-  char := by simp [AxiomB]
+@[simp] lemma def_axiomB : (𝐁 : AxiomSet α) = AxiomGeach.set (0, 1, 0, 1) := by aesop;
 
-@[simp]
-instance : IsGeachAxiom (AxiomD : (Formula α) → (Formula α)) where
-  taple := (0, 0, 1, 1);
-  char := by simp [AxiomD]
+@[simp] lemma def_axiomD : (𝐃 : AxiomSet α) = AxiomGeach.set (0, 0, 1, 1) := by aesop;
 
-@[simp]
-instance : IsGeachAxiom (Axiom4 : (Formula α) → (Formula α)) where
-  taple := (0, 2, 1, 0);
-  char := by simp [Axiom4]
+@[simp] lemma def_axiom4 : (𝟒 : AxiomSet α) = AxiomGeach.set (0, 2, 1, 0) := by aesop;
 
-@[simp]
-instance : IsGeachAxiom (Axiom5 : (Formula α) → (Formula α)) where
-  taple := (1, 1, 0, 1);
-  char := by simp [Axiom5];
+@[simp] lemma def_axiom5 : (𝟓 : AxiomSet α) = AxiomGeach.set (1, 1, 0, 1) := by aesop;
 
-@[simp]
-instance : IsGeachAxiom (AxiomDot2 : (Formula α) → (Formula α)) where
-  taple := (1, 1, 1, 1)
-  char := by simp [AxiomDot2]
+@[simp] lemma def_axiomDot2 : (.𝟐 : AxiomSet α) = AxiomGeach.set (1, 1, 1, 1) := by aesop;
 
-@[simp]
-instance : IsGeachAxiom (AxiomC4 : (Formula α) → (Formula α)) where
-  taple := (0, 1, 2, 0);
-  char := by simp [AxiomC4]
+@[simp] lemma def_axiomC4 : (𝐂𝟒 : AxiomSet α) = AxiomGeach.set (0, 1, 2, 0) := by aesop;
 
-@[simp]
-instance : IsGeachAxiom (AxiomTc : (Formula α) → (Formula α)) where
-  taple := (0, 1, 0, 0)
-  char := by simp [AxiomTc]
+@[simp] lemma def_axiomCD : (𝐂𝐃 : AxiomSet α) = AxiomGeach.set (1, 1, 0, 0) := by aesop;
 
-@[simp]
-instance : IsGeachAxiom (AxiomCD : (Formula α) → (Formula α)) where
-  taple := (1, 1, 0, 0);
-  char := by simp [AxiomCD]
-
-@[simp]
-lemma eq_IsGeachAxiom [hG : IsGeachAxiom ax] : ({ ax p | p } : AxiomSet α) = (AxiomGeach.set hG.taple) := by
-  simp [hG.char];
-  aesop;
+end AxiomGeach
 
 @[simp]
 def GeachLogic : List (GeachTaple) → AxiomSet β
   | [] => 𝐊
-  | x :: xs => (GeachLogic xs) ∪ (AxiomGeach.set x)
+  | x :: xs => (AxiomGeach.set x) ∪ (GeachLogic xs)
 
 @[simp]
 lemma GeachLogic.subsetK {l : List (GeachTaple)} : (𝐊 : AxiomSet β) ⊆ (GeachLogic l) := by
   induction l with
   | nil => simp;
-  | cons => simp; apply Set.subset_union_of_subset_left (by assumption);
+  | cons => simp; apply Set.subset_union_of_subset_right (by assumption);
 
 lemma GeachLogic.subsetK' (h : (GeachLogic l) ⊆ Λ): (𝐊 : AxiomSet β) ⊆ Λ := Set.Subset.trans GeachLogic.subsetK h
 
@@ -120,12 +86,12 @@ instance : IsGeachLogic (𝐊𝐃 : AxiomSet β) where
 @[simp]
 instance : IsGeachLogic (𝐊𝐓 : AxiomSet β) where
   taples := [(0, 0, 1, 0)];
-  char := by simp [LogicKD]; aesop;
+  char := by simp [LogicKT]; aesop;
 
 @[simp]
 instance : IsGeachLogic (𝐊𝟒 : AxiomSet β) where
   taples := [(0, 2, 1, 0)];
-  char := by aesop;
+  char := by simp [LogicK4]; aesop;
 
 @[simp]
 instance : IsGeachLogic (LogicKT4 : AxiomSet β) where
@@ -138,7 +104,7 @@ instance : IsGeachLogic (𝐒𝟒 : AxiomSet β) := inferInstance
 @[simp]
 instance : IsGeachLogic (𝐒𝟒.𝟐 : AxiomSet β) where
   taples := [(0, 0, 1, 0), (0, 2, 1, 0), (1, 1, 1, 1)];
-  char := by simp [LogicS4Dot2]; sorry; -- aesop;
+  char := by simp [LogicS4Dot2, LogicKT4]; aesop;
 
 @[simp]
 instance : IsGeachLogic (LogicKT5 : AxiomSet β) where
@@ -257,9 +223,9 @@ lemma GeachLogic.FrameClassDefinabilityAux {ts : List (GeachTaple)} : FrameClass
     intro F;
     constructor;
     . intro h;
-      exact Set.mem_inter (ih.mp h.2) (AxiomGeach.FrameClassDefinability t |>.mp h.1)
+      exact Set.mem_inter (AxiomGeach.FrameClassDefinability t |>.mp h.1) (ih.mp h.2)
     . intro h;
-      exact ⟨AxiomGeach.FrameClassDefinability t |>.mpr h.2, ih.mpr h.1⟩;
+      exact ⟨AxiomGeach.FrameClassDefinability t |>.mpr h.1, ih.mpr h.2⟩;
 
 lemma GeachLogic.FrameClassDefinability [hG : IsGeachLogic Λ] : FrameClassDefinability α β Λ (GeachConfluency.list hG.taples) := by
   have := @GeachLogic.FrameClassDefinabilityAux α β _ hG.taples;
