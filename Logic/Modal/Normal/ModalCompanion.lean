@@ -1,7 +1,4 @@
 import Logic.Propositional.Intuitionistic
-import Logic.Modal.Normal.Formula
-import Logic.Modal.Normal.Deduction
-import Logic.Modal.Normal.Completeness
 import Logic.Modal.Normal.ModalCube
 
 namespace LO.Modal.Normal
@@ -69,7 +66,7 @@ private lemma embed_Int_S4.case_imply₁ : ∅ ⊢ᴹ[(𝐒𝟒 : AxiomSet α)]!
 /-- TODO: prove syntactically -/
 private lemma embed_Int_S4.case_imply₂ : ∅ ⊢ᴹ[(𝐒𝟒 : AxiomSet α)]! ((p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r)ᵍ := by
   simp only [GTranslation];
-  apply LogicS4.Hilbert.completes;
+  apply LogicS4.kripkeCompletes;
   simp [GTranslation, Formula.FrameClassConsequence, Formula.FrameConsequence];
   intro F hF _ w₁ w₂ _ hpqr w₃ hw₂w₃ hpq w₄ hw₃w₄ hp;
   replace hF := by simpa using LogicS4.FrameClassDefinability.mpr (by assumption);
@@ -85,7 +82,7 @@ private lemma embed_Int_S4.case_conj₃ : ∅ ⊢ᴹ[(𝐒𝟒 : AxiomSet α)]! 
 
 /-- TODO: prove syntactically -/
 private lemma embed_Int_S4.case_disj₃ : ∅ ⊢ᴹ[(𝐒𝟒 : AxiomSet α)]! (((p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r)))ᵍ := by
-  apply LogicS4.Hilbert.completes;
+  apply LogicS4.kripkeCompletes;
   simp [GTranslation, Formula.FrameClassConsequence, Formula.FrameConsequence];
   intro F hF _ w₁ w₂ _ hp w₃ hw₂₃ hq w₄ hw₃₄ h;
   replace hF := by simpa using LogicS4.FrameClassDefinability.mpr hF;

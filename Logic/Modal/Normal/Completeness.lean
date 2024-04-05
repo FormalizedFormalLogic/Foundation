@@ -24,7 +24,7 @@ def Theory.Maximal := ∀ p, (p ∈ Γ) ∨ (~p ∈ Γ)
 
 -- def WeakCompleteness := ∀ (p : Formula β), (⊧ᴹ[(𝔽(Λ) : FrameClass α)] p) → (∅ ⊢ᴹ[Λ]! p)
 
-def Completeness (𝔽 : FrameClass α) := ∀ (Γ : Theory β) (p : Formula β), (Γ ⊨ᴹ[𝔽] p) → (Γ ⊢ᴹ[Λ]! p)
+def KripkeCompleteness (𝔽 : FrameClass α) := ∀ (Γ : Theory β) (p : Formula β), (Γ ⊨ᴹ[𝔽] p) → (Γ ⊢ᴹ[Λ]! p)
 
 end
 
@@ -75,10 +75,10 @@ lemma frameclass_unsatisfiable_insert_neg {𝔽 : FrameClass α} {Γ : Theory β
 
 lemma frameclass_satisfiable_insert_neg {𝔽 : FrameClass α} {Γ : Theory β} : (Γ ⊨ᴹ[𝔽] p) ↔ ¬(Theory.FrameClassSatisfiable 𝔽 (insert (~p) Γ)) := by simpa using frameclass_unsatisfiable_insert_neg.not
 
-lemma completeness_def {𝔽 : FrameClass α} : (Completeness Λ 𝔽) ↔ (∀ Γ, Consistent Λ Γ → FrameClassSatisfiable 𝔽 Γ) := by
+lemma completeness_def {𝔽 : FrameClass α} : (KripkeCompleteness Λ 𝔽) ↔ (∀ Γ, Consistent Λ Γ → FrameClassSatisfiable 𝔽 Γ) := by
   constructor;
   . contrapose;
-    simp [Completeness];
+    simp [KripkeCompleteness];
     intro Δ h₁ h₂;
     existsi Δ, ⊥;
     constructor;
@@ -89,7 +89,7 @@ lemma completeness_def {𝔽 : FrameClass α} : (Completeness Λ 𝔽) ↔ (∀ 
       contradiction;
     . simpa [Theory.Consistent, Theory.Inconsistent, Deduction.Consistent, Deduction.Undeducible, Deduction.Deducible] using h₁;
   . contrapose;
-    simp [Completeness];
+    simp [KripkeCompleteness];
     intro Δ p h₁ h₂;
     existsi (insert (~p) Δ);
     constructor;

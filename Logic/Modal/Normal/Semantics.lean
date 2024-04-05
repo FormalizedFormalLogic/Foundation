@@ -6,9 +6,9 @@ namespace LO.Modal.Normal
 
 open Formula
 
-variable {α β : Type u}
+variable {α : Type u} {β : Type v}
 
-abbrev Frame (α : Type u) := α → α → Prop
+abbrev Frame (α) := α → α → Prop
 
 @[simp]
 def Multiframe (rel : Frame α) : ℕ → α → α → Prop
@@ -17,9 +17,9 @@ def Multiframe (rel : Frame α) : ℕ → α → α → Prop
 
 notation:max F "[" n "]" => Multiframe F n
 
-abbrev Valuation (α β : Type u) := α → β → Prop
+abbrev Valuation (α β) := α → β → Prop
 
-structure Model (α β : Type u) where
+structure Model (α β) where
   frame : Frame α
   val : Valuation α β
 
@@ -310,9 +310,9 @@ section LogicDefinabilities
 
 variable [Inhabited α] [Inhabited β] {F: Frame α}
 
-def FrameClassDefinability (Λ : AxiomSet β) (P : Frame α → Prop) := ∀ {F : Frame α}, (P F) ↔ (F ∈ 𝔽(Λ))
+def FrameClassDefinability (α β : Type*) (Λ : AxiomSet β) (P : Frame α → Prop) := ∀ {F : Frame α}, (P F) ↔ (F ∈ 𝔽(Λ))
 
-instance LogicK.FrameClassDefinability : @FrameClassDefinability α β 𝐊 (λ _ => True) := by
+instance LogicK.FrameClassDefinability : FrameClassDefinability α β 𝐊 (λ _ => True) := by
   intro F;
   have := AxiomK.defines β F;
   aesop;

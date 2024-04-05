@@ -11,6 +11,8 @@ class _root_.Distinct₃ (α : Type*) : Prop where
 
 namespace LO.Modal.Normal
 
+open GeachConfluency
+
 variable {α β : Type u}
 
 variable {Λ₁ Λ₂ : AxiomSet β}
@@ -34,7 +36,7 @@ instance : IsPreorder (AxiomSet β) (· ≤ᴸ ·) where
 
 lemma deducible (hS : Λ₁ ≤ᴸ Λ₂) : (∅ ⊢ᴹ[Λ₁]! p) → (∅ ⊢ᴹ[Λ₂]! p) := by apply hS;
 
-lemma of_frameclass (hComp₂ : Completeness Λ₂ (𝔽(Λ₂) : FrameClass γ)) (h : (𝔽(Λ₂) : FrameClass γ) ⊆ (𝔽(Λ₁) : FrameClass γ)) : (Λ₁ ≤ᴸ Λ₂) := by
+lemma of_frameclass (hComp₂ : KripkeCompleteness Λ₂ (𝔽(Λ₂) : FrameClass γ)) (h : (𝔽(Λ₂) : FrameClass γ) ⊆ (𝔽(Λ₁) : FrameClass γ)) : (Λ₁ ≤ᴸ Λ₂) := by
   intro p h₁;
   apply hComp₂;
   intro F hF₂;
@@ -109,8 +111,8 @@ lemma deducible (hE : Λ₁ =ᴸ Λ₂) : (∅ ⊢ᴹ[Λ₁]! p) ↔ (∅ ⊢ᴹ
   . apply h₂.deducible;
 
 lemma of_frameclass
-  (hComp₁ : Completeness Λ₁ (𝔽(Λ₁) : FrameClass γ₁))
-  (hComp₂ : Completeness Λ₂ (𝔽(Λ₂) : FrameClass γ₂))
+  (hComp₁ : KripkeCompleteness Λ₁ (𝔽(Λ₁) : FrameClass γ₁))
+  (hComp₂ : KripkeCompleteness Λ₂ (𝔽(Λ₂) : FrameClass γ₂))
   (h₁ : (𝔽(Λ₁) : FrameClass γ₁) ⊆ (𝔽(Λ₂) : FrameClass γ₁))
   (h₂ : (𝔽(Λ₂) : FrameClass γ₂) ⊆ (𝔽(Λ₁) : FrameClass γ₂))
   : (Λ₁ =ᴸ Λ₂) := by
@@ -135,10 +137,10 @@ lemma strong_K4_S4 : (𝐊𝟒 : AxiomSet β) ≤ᴸ 𝐒𝟒 := by
   apply LogicalStrong.of_frameclass_geach;
   simp only [AxiomSetFrameClass.geach];
   intro F hF;
-  obtain ⟨_, hTrans⟩ := by simpa using GeachLogic.FrameClassDefinability.mpr hF;
-  apply GeachLogic.FrameClassDefinability.mp;
-  simp;
-  apply hTrans;
+  obtain ⟨_, hTrans⟩ := by simpa [-GeachConfluency] using GeachLogic.FrameClassDefinabilityAux.mpr hF;
+  apply GeachLogic.FrameClassDefinabilityAux.mp;
+  simp [GeachConfluency, -GeachConfluency];
+  assumption;
 
 theorem sstrong_K4_S4 [hβ : Nontrivial β] : (𝐊𝟒 : AxiomSet β) <ᴸ 𝐒𝟒 := by
   constructor;
@@ -152,7 +154,7 @@ theorem sstrong_K4_S4 [hβ : Nontrivial β] : (𝐊𝟒 : AxiomSet β) <ᴸ 𝐒
     existsi (λ _ w₂ => w₂ = y);
     constructor;
     . simp only [AxiomSetFrameClass.geach];
-      apply GeachLogic.FrameClassDefinability.mp;
+      apply GeachLogic.FrameClassDefinabilityAux.mp;
       simp;
     . simp [Formula.FrameConsequence];
       use (λ w _ => w = y);
@@ -167,9 +169,9 @@ lemma strong_KD_KT : (𝐊𝐃 : AxiomSet β) ≤ᴸ 𝐊𝐓 := by
   have hRefl : Reflexive F := by
     simp [Reflexive];
     intros;
-    simpa using GeachLogic.FrameClassDefinability.mpr hF;
+    simpa using GeachLogic.FrameClassDefinabilityAux.mpr hF;
   have hSerial : Serial F := serial_of_refl hRefl;
-  apply GeachLogic.FrameClassDefinability.mp;
+  apply GeachLogic.FrameClassDefinabilityAux.mp;
   simp;
   apply hSerial;
 
@@ -185,7 +187,7 @@ theorem sstrong_KD_KT [hβ : Nontrivial β] : (𝐊𝐃 : AxiomSet β) <ᴸ 𝐊
     existsi (λ _ w₂ => w₂ = y);
     constructor;
     . simp only [AxiomSetFrameClass.geach];
-      apply GeachLogic.FrameClassDefinability.mp;
+      apply GeachLogic.FrameClassDefinabilityAux.mp;
       simp;
     . simp [Formula.FrameConsequence];
       use (λ w _ => w = y);
@@ -197,12 +199,15 @@ lemma strong_S4_S5 : (𝐒𝟒 : AxiomSet β) ≤ᴸ 𝐒𝟓 := by
   apply LogicalStrong.of_frameclass_geach;
   simp only [AxiomSetFrameClass.geach];
   intro F hF;
-  obtain ⟨hRefl, hTrans⟩ := by simpa using GeachLogic.FrameClassDefinability.mpr hF;
-  replace hRefl : Reflexive F := by simp [Reflexive]; aesop;
-  replace hEucl : Euclidean F := by simp [Euclidean]; aesop;
-  apply GeachLogic.FrameClassDefinability.mp;
-  simp;
-  aesop;
+  obtain ⟨hRefl, hEucl⟩ := by simpa [-GeachConfluency] using GeachLogic.FrameClassDefinabilityAux.mpr hF;
+  replace hRefl : Reflexive F := reflexive_def.mpr hRefl;
+  replace hEucl : Euclidean F := euclidean_def.mpr hEucl;
+  apply GeachLogic.FrameClassDefinabilityAux.mp;
+  simp [-GeachConfluency];
+  exact ⟨
+    by apply reflexive_def.mp; simpa,
+    by apply transitive_def.mp; exact trans_of_refl_eucl hRefl hEucl,
+  ⟩;
 
 -- TODO: migrate `Distinct₃ β`
 theorem sstrong_S4_S5 : (𝐒𝟒 : AxiomSet (Fin 3)) <ᴸ 𝐒𝟓 := by
@@ -216,7 +221,7 @@ theorem sstrong_S4_S5 : (𝐒𝟒 : AxiomSet (Fin 3)) <ᴸ 𝐒𝟓 := by
     existsi (λ w₁ w₂ => (w₁ = w₂) ∨ (w₁ = 0 ∧ w₂ = 1) ∨ (w₁ = 0 ∧ w₂ = 2));
     constructor;
     . simp only [AxiomSetFrameClass.geach];
-      apply GeachLogic.FrameClassDefinability.mp;
+      apply GeachLogic.FrameClassDefinabilityAux.mp;
       aesop;
     . simp [Formula.FrameConsequence];
       use (λ w₁ w₂ => (w₁ = w₂) ∨ (w₁ = 0 ∧ w₂ = 1) ∨ (w₁ = 0 ∧ w₂ = 2));
@@ -227,23 +232,29 @@ theorem equivalent_S5_KT4B : (𝐒𝟓 : AxiomSet β) =ᴸ 𝐊𝐓𝟒𝐁 := b
   case h₁ =>
     simp only [AxiomSetFrameClass.geach];
     intro F hF;
-    obtain ⟨hRefl, hEucl⟩ := by simpa using GeachLogic.FrameClassDefinability.mpr hF;
-    replace hRefl : Reflexive F := by simp [Reflexive]; aesop;
-    replace hEucl : Euclidean F := by simp [Euclidean]; aesop;
-    have hTrans : Transitive F := trans_of_refl_eucl hRefl hEucl;
-    have hSymm : Symmetric F := symm_of_refl_eucl hRefl hEucl;
-    apply GeachLogic.FrameClassDefinability.mp;
-    aesop;
+    obtain ⟨hRefl, hEucl⟩ := by simpa [-GeachConfluency] using GeachLogic.FrameClassDefinabilityAux.mpr hF;
+    replace hRefl : Reflexive F := reflexive_def.mpr hRefl;
+    replace hEucl : Euclidean F := euclidean_def.mpr hEucl;
+    apply GeachLogic.FrameClassDefinabilityAux.mp;
+    simp [-GeachConfluency];
+    exact ⟨
+      by apply reflexive_def.mp; assumption,
+      by apply transitive_def.mp; exact trans_of_refl_eucl hRefl hEucl,
+      by apply symmetric_def.mp; exact symm_of_refl_eucl hRefl hEucl,
+    ⟩
   case h₂ =>
     simp only [AxiomSetFrameClass.geach];
     intro F hF;
-    obtain ⟨hRefl, hTrans, hSymm⟩ := by simpa using GeachLogic.FrameClassDefinability.mpr hF;
-    replace hRefl : Reflexive F := by simp [Reflexive]; aesop;
-    replace hTrans : Transitive F := by simp [Transitive]; aesop;
-    replace hSymm : Symmetric F := by simp [Symmetric]; aesop;
-    have hEucl : Euclidean F := by simp [Euclidean]; aesop;
-    apply GeachLogic.FrameClassDefinability.mp;
-    aesop;
+    obtain ⟨hRefl, hTrans, hSymm⟩ := by simpa [-GeachConfluency] using GeachLogic.FrameClassDefinabilityAux.mpr hF;
+    replace hRefl : Reflexive F := reflexive_def.mpr hRefl;
+    replace hTrans : Transitive F := transitive_def.mpr hTrans;
+    replace hSymm : Symmetric F := symmetric_def.mpr hSymm;
+    apply GeachLogic.FrameClassDefinabilityAux.mp;
+    simp [-GeachConfluency];
+    exact ⟨
+      by apply reflexive_def.mp; assumption,
+      by apply euclidean_def.mp; exact eucl_of_symm_trans hSymm hTrans,
+    ⟩
 
 end
 
