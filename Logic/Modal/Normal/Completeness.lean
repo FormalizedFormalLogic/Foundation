@@ -211,6 +211,7 @@ structure MaximalConsistentTheory (Λ : AxiomSet β) where
 namespace MaximalConsistentTheory
 
 variable (Ω Ω₁ Ω₂ : MaximalConsistentTheory Λ)
+variable (hK : 𝐊 ⊆ Λ)
 
 @[simp] def membership (p : Formula β) (Ω : MaximalConsistentTheory Λ) := p ∈ Ω.theory
 instance : Membership (Formula β) (MaximalConsistentTheory Λ) := ⟨membership⟩
@@ -289,38 +290,72 @@ lemma and_membership_iff : (p ⋏ q ∈ Ω) ↔ (p ∈ Ω) ∧ (q ∈ Ω) := max
 
 lemma or_membership_iff : (p ⋎ q ∈ Ω) ↔ (p ∈ Ω) ∨ (q ∈ Ω) := maximal_consistent_or_membership_iff (Ω.mc)
 
-lemma box_dn {p : Formula β} : (□p ∈ Ω) ↔ (□(~~p) ∈ Ω) := by
+lemma box_dn_membership_iff {p : Formula β} : (□p ∈ Ω) ↔ (□(~~p) ∈ Ω) := by
+  have := Deduction.ofKSubset hK;
+
   constructor;
   . intro h;
-    have := membership_iff.mp h;
-    simp at this;
+    apply membership_iff.mpr;
+    have : Ω.theory ⊢ᴹ[Λ]! □(p ⟶ ~~p) := weakening! (show ∅ ⊆ Ω.theory by simp) $ necessitation! $ dni! ∅ _;
+    have : Ω.theory ⊢ᴹ[Λ]! □p := membership_iff.mp h;
+    have : Ω.theory ⊢ᴹ[Λ]! □~~p := axiomK'! (by assumption) (by assumption);
+    assumption;
+  . intro h;
+    apply membership_iff.mpr;
+    have : Ω.theory ⊢ᴹ[Λ]! □(~~p ⟶ p) := weakening! (show ∅ ⊆ Ω.theory by simp) $ necessitation! $ dne! ∅ _;
+    have : Ω.theory ⊢ᴹ[Λ]! □~~p := membership_iff.mp h;
+    have : Ω.theory ⊢ᴹ[Λ]! □p := axiomK'! (by assumption) (by assumption);
+    assumption;
+
+lemma multibox_dn_membership_iff {n : ℕ} {p : Formula β} : (□[n]p ∈ Ω) ↔ (□[n](~~p) ∈ Ω) := by
+  induction n generalizing p with
+  | zero => simp [-NegDefinition.neg]; exact dn_membership_iff;
+  | succ n ih =>
+    simp [-NegDefinition.neg];
+    have h₁ := @ih (□p);
+    rw [←Box.multibox_prepost] at h₁;
     sorry;
-  . sorry;
-  -- sorry;
 
 lemma box_membership_dual {p : Formula β} : (□p ∈ Ω) ↔ (~(◇(~p)) ∈ Ω) := by
   simp [-NegDefinition.neg];
   constructor;
   . intro h;
     apply dn_membership_iff.mp;
-    apply box_dn.mp h;
+    exact box_dn_membership_iff hK |>.mp h;
   . intro h;
-    have := dn_membership_iff.mpr h;
+    exact box_dn_membership_iff hK |>.mpr $ dn_membership_iff.mpr h
+
+lemma multidox_membership_dual {n : ℕ} {p : Formula β} : (□[n]p ∈ Ω) ↔ (~(◇[n](~p)) ∈ Ω) := by
+  induction n generalizing p with
+  | zero => simp [-NegDefinition.neg]; exact dn_membership_iff;
+  | succ n ih =>
+    simp [-NegDefinition.neg];
+
+    have d₁ : □[n](□p) ∈ Ω ↔ ~(◇[n](~(□p))) ∈ Ω := @ih (□p);
+    rw [←Box.multibox_prepost] at d₁;
+
+    have d₂ : (□~(◇[n](~p))) ∈ Ω ↔ ~~(□~(◇[n](~p))) ∈ Ω := dn_membership_iff;
+
+
     sorry;
+    -- rw [Box.multibox_prepost];
+    -- rw [Dia.multidia_prepost];
+    -- rw [ih];
+    -- simp [-ModalDuality.dia_to_box, -NegDefinition.neg];
 
 lemma dia_membership_dual {p : Formula β} : (◇p ∈ Ω) ↔ (~(□(~p)) ∈ Ω) := by simp;
 
-lemma multidia_membership_prepost {n : ℕ} {p : Formula β} : (◇◇[n]p ∈ Ω) ↔ (◇[n](◇p) ∈ Ω) := by simp only [multidia_prepost];
+lemma multidia_membership_prepost {n : ℕ} {p : Formula β} : (◇◇[n]p ∈ Ω) ↔ (◇[n](◇p) ∈ Ω) := by simp only [Dia.multidia_prepost];
 
-lemma mutlidia_membership_prepost' {n : ℕ} {p : Formula β} : (◇[(n + 1)]p ∈ Ω) ↔ (◇[n](◇p) ∈ Ω) := by simp [multidia_prepost, -ModalDuality.dia, -NegDefinition.neg];
+lemma mutlidia_membership_prepost' {n : ℕ} {p : Formula β} : (◇[(n + 1)]p ∈ Ω) ↔ (◇[n](◇p) ∈ Ω) := by simp [Dia.multidia_prepost, -ModalDuality.dia_to_box, -NegDefinition.neg];
 
 lemma multidia_dual {n : ℕ} {p : Formula β} : (◇[n]p ∈ Ω) ↔ (~(□[n](~p)) ∈ Ω) := by
   induction n generalizing p with
   | zero => simp [-NegDefinition.neg]; exact dn_membership_iff;
   | succ n ih =>
-    simp [-NegDefinition.neg, -ModalDuality.dia, multidia_prepost];
+    simp [-NegDefinition.neg, -ModalDuality.dia_to_box, Dia.multidia_prepost];
     rw [@ih (◇p)];
-    simp only [ModalDuality.dia];
+    simp only [ModalDuality.dia_to_box];
     sorry;
 
 @[simp]
@@ -331,6 +366,7 @@ lemma neither_mem : ¬((p ∈ Ω) ∧ (~p ∈ Ω)) := by
   by_contra hC;
   exact Ω.no_falsum $ Ω.modus_ponens' hC.2 hC.1;
 
+/-
 @[simp] lemma multibox_zero : (□[0]Ω) = Ω.theory := by sorry; -- simp [Theory.multibox, Set.multibox]
 
 @[simp] lemma multidia_zero : (◇[0]Ω) = Ω.theory := by sorry; -- simp [Theory.multidia, Set.multidia]
@@ -338,6 +374,7 @@ lemma neither_mem : ¬((p ∈ Ω) ∧ (~p ∈ Ω)) := by
 @[simp] lemma multiprebox_zero : (□⁻¹[0]Ω) = Ω.theory := by sorry; -- simp [Theory.multiprebox]
 
 @[simp] lemma multipredia_zero : (◇⁻¹[0]Ω) = Ω.theory := by sorry; -- simp [Theory.multipredia, Set.multipredia]
+-/
 
 lemma multibox_multidia {Ω₁ Ω₂ : MaximalConsistentTheory Λ} : (∀ {p : Formula β}, (□[n]p ∈ Ω₁ → p ∈ Ω₂)) ↔ (∀ {p : Formula β}, (p ∈ Ω₂ → ◇[n]p ∈ Ω₁)) := by
   constructor;
@@ -436,7 +473,7 @@ lemma frame_def': (CanonicalModel Λ).frame Ω₁ Ω₂ ↔ (◇Ω₂ ⊆ Ω₁.
   constructor;
   . intro h p hp;
     have ⟨q, hq₁, hq₂⟩ := Set.dia_mem_iff.mp hp;
-    rw [←hq₂, ModalDuality.dia];
+    rw [←hq₂, ModalDuality.dia_to_box];
     apply (Ω₁.neg_membership_iff).mpr;
     by_contra hC;
     have : ~q ∈ Ω₂ := by aesop;

@@ -280,6 +280,11 @@ def iff_left_top {Γ p} (d : Bew Γ (⊤ ⟷ p)) : Bew Γ p := imp_top (iff_mp' 
 
 def iff_right_top {Γ p} (d : Bew Γ (p ⟷ ⊤)) : Bew Γ p := imp_top (iff_mpr' d)
 
+def iff_trans' {Γ p q r} (h₁ : Bew Γ (p ⟷ q)) (h₂ : Bew Γ (q ⟷ r)) : Bew Γ (p ⟷ r) := by
+  apply iff_intro;
+  . exact imp_trans' (iff_mp' h₁) (iff_mp' h₂);
+  . exact imp_trans' (iff_mpr' h₂) (iff_mpr' h₁);
+
 end Minimal
 
 section Classical
@@ -289,6 +294,20 @@ variable [c : Classical Bew] [HasDT Bew]
 def dne : Bew Γ (~~p ⟶ p) := c.dne Γ p
 
 def dne' {Γ p} : (Bew Γ (~~p)) → (Bew Γ p) := modus_ponens' (dne _ _)
+
+def dn : Bew Γ (p ⟷ ~~p) := by
+  apply iff_intro;
+  . apply dni;
+  . apply dne
+
+def dn_iff' {Γ p q} (d : Bew Γ (p ⟷ q)) : Bew Γ (~~p ⟷ ~~q) := by
+  apply iff_intro;
+  . apply contra₀';
+    apply contra₀';
+    exact iff_mp' d;
+  . apply contra₀';
+    apply contra₀';
+    exact iff_mpr' d;
 
 def equiv_dn : Bew Γ (p ⟷ ~~p) := by
   simp only [LogicalConnective.iff];
@@ -368,6 +387,9 @@ lemma dni'! {Γ : Set F} {p} (d : Γ ⊢! p) : Γ ⊢! (~~p) := ⟨dni' d.some�
 lemma dne! [HasDNE Bew] (Γ : Set F) (p : F) : Γ ⊢! (~~p ⟶ p) := ⟨dne Γ p⟩
 lemma dne'! [HasDNE Bew] {Γ : Set F} {p} (d : Γ ⊢! (~~p)) : Γ ⊢! p := ⟨dne' d.some⟩
 
+lemma dn! (Γ : Set F) (p : F) : Γ ⊢! (p ⟷ ~~p) := ⟨dn Γ p⟩
+lemma dn_iff'! {Γ : Set F} {p q : F} (d : Γ ⊢! (p ⟷ q)) : Γ ⊢! (~~p ⟷ ~~q) := ⟨dn_iff' d.some⟩
+
 lemma equiv_dn! (Γ : Set F) (p : F) : Γ ⊢! (p ⟷ ~~p) := ⟨equiv_dn Γ p⟩
 
 lemma iff_intro! {Γ : Set F} {p q : F} (dpq : Γ ⊢! (p ⟶ q)) (dqp : Γ ⊢! (q ⟶ p)) : Γ ⊢! (p ⟷ q) := ⟨iff_intro dpq.some dqp.some⟩
@@ -411,6 +433,8 @@ lemma iff_left_top! {Γ : Set F} {p : F} (d : Γ ⊢! (⊤ ⟷ p)) : Γ ⊢! p :
 lemma iff_right_top! {Γ : Set F} {p : F} (d : Γ ⊢! (p ⟷ ⊤)) : Γ ⊢! p := ⟨iff_right_top d.some⟩
 
 lemma imp_trans'! {Γ : Set F} {p q r : F} (h₁ : Γ ⊢! (p ⟶ q)) (h₂ : Γ ⊢! (q ⟶ r)) : Γ ⊢! (p ⟶ r) := ⟨imp_trans' h₁.some h₂.some⟩
+
+lemma iff_trans'! {Γ : Set F} {p q r : F} (h₁ : Γ ⊢! (p ⟷ q)) (h₂ : Γ ⊢! (q ⟷ r)) : Γ ⊢! (p ⟷ r) := ⟨iff_trans' h₁.some h₂.some⟩
 
 end Deducible
 

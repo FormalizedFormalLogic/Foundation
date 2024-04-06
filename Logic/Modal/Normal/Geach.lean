@@ -29,7 +29,7 @@ end GeachTaple
 
 section Axioms
 
-variable {F : Type u} [ModalLogicSymbol F] [Multibox F] [Multidia F]
+variable {F : Type u} [ModalLogicSymbol F]
 
 @[simp]
 def AxiomGeach (l : GeachTaple) (p : F) := (◇[l.i](□[l.m]p)) ⟶ (□[l.j](◇[l.n]p))

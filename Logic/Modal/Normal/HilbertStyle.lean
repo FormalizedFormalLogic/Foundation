@@ -70,6 +70,13 @@ def necessitation {Γ : Set F} {p} (d : (∅ : Set F) ⊢ p) : Γ ⊢ □p := Ha
 
 def necessitation! {Γ : Set F} {p} (d : (∅ : Set F) ⊢! p) : Γ ⊢! □p := ⟨necessitation d.some⟩
 
+def multi_necessitation {p} {n : ℕ} (d : (∅ : Set F) ⊢ p) : Γ ⊢ □[n]p := by
+  induction n generalizing Γ with
+  | zero => simp [-NegDefinition.neg]; exact weakening' (by simp) d;
+  | succ n ih => exact necessitation ih;
+
+def multi_necessitation! {p} {n : ℕ} (d : (∅ : Set F) ⊢! p) : Γ ⊢! □[n]p := ⟨multi_necessitation d.some⟩
+
 open HasBoxedNecessitation
 
 variable [HasBoxedNecessitation Bew]
@@ -87,32 +94,103 @@ open HasAxiomK
 
 def axiomK (Γ : Set F) (p q) :  Γ ⊢ (AxiomK p q) := HasAxiomK.K Γ p q
 
+def axiomK_distribute {Γ : Set F} {p q} (d₁ : Γ ⊢ (□(p ⟶ q))) : Γ ⊢ □p ⟶ □q := ((Hilbert.axiomK Γ p q) ⨀ d₁)
+
 def axiomK' {Γ : Set F} {p q} (d₁ : Γ ⊢ (□(p ⟶ q))) (d₂ : Γ ⊢ □p) : Γ ⊢ □q := ((Hilbert.axiomK Γ p q) ⨀ d₁) ⨀ d₂
 
 lemma axiomK! (Γ : Set F) (p q) : Γ ⊢! (AxiomK p q) := ⟨Hilbert.axiomK Γ p q⟩
 
 lemma axiomK'! {Γ : Set F} {p q} (d₁ : Γ ⊢! (□(p ⟶ q))) (d₂ : Γ ⊢! □p) : Γ ⊢! □q := ⟨axiomK' d₁.some d₂.some⟩
 
+def axiomK_distribute_iff (Γ : Set F) (p q : F) : Γ ⊢ □(p ⟷ q) ⟶ (□p ⟷ □q) := by
+  have : Bew (Set.box {p ⟷ q}) (□p ⟶ □q) := axiomK_distribute $ boxed_necessitation $ iff_mp' $ axm (by simp);
+  have : Bew (Set.box {p ⟷ q}) (□q ⟶ □p) := axiomK_distribute $ boxed_necessitation $ iff_mpr' $ axm (by simp);
+  have : Bew (Set.box {p ⟷ q}) (□p ⟷ □q) := iff_intro (by assumption) (by assumption);
+  have : Bew ({□(p ⟷ q)}) (□p ⟷ □q) := by simpa [Set.box] using this;
+  have : Bew ∅ (□(p ⟷ q) ⟶ (□p ⟷ □q)) := dtr (by simpa);
+  exact weakening' (by simp) this
+
+def axiomK_distribute_iff' {Γ : Set F} {p q : F} (h : Γ ⊢ □(p ⟷ q)) : Γ ⊢ (□p ⟷ □q) := by
+  exact (axiomK_distribute_iff Γ p q) ⨀ h
+
+def box_iff' {Γ : Set F} {p q : F} (h : ∅ ⊢ p ⟷ q) : Γ ⊢ (□p ⟷ □q) := axiomK_distribute_iff' $ necessitation h
+
+lemma box_iff'! {Γ : Set F} {p q : F} (d : ∅ ⊢! p ⟷ q) : Γ ⊢! (□p ⟷ □q) := ⟨box_iff' d.some⟩
+
+def dia_iff' {Γ : Set F} {p q : F} (h : ∅ ⊢ p ⟷ q) : Γ ⊢ (◇p ⟷ ◇q) := by
+  simp only [ModalDuality.dia_to_box];
+  apply neg_iff';
+  apply box_iff';
+  apply neg_iff';
+  assumption
+
+lemma dia_iff'! {Γ : Set F} {p q : F} (d : ∅ ⊢! p ⟷ q) : Γ ⊢! (◇p ⟷ ◇q) := ⟨dia_iff' d.some⟩
+
+def multibox_iff' {Γ : Set F} {p q : F} (h : ∅ ⊢ p ⟷ q) : Γ ⊢ □[n]p ⟷ □[n]q := by
+  induction n  generalizing Γ with
+  | zero => exact weakening' (by simp) h;
+  | succ n ih => exact box_iff' $ ih;
+
+lemma multibox_iff'! {Γ : Set F} {p q : F} (d : ∅ ⊢! p ⟷ q) : Γ ⊢! □[n]p ⟷ □[n]q := ⟨multibox_iff' d.some⟩
+
+def multidia_iff' {Γ : Set F} {p q : F} (h : ∅ ⊢ p ⟷ q) : Γ ⊢ ◇[n]p ⟷ ◇[n]q := by
+  induction n  generalizing Γ with
+  | zero => exact weakening' (by simp) h;
+  | succ n ih => exact dia_iff' $ ih;
+
+lemma multidia_iff'! {Γ : Set F} {p q : F} (d : ∅ ⊢! p ⟷ q) : Γ ⊢! ◇[n]p ⟷ ◇[n]q := ⟨multidia_iff' d.some⟩
+
+def box_duality (Γ : Set F) (p) : Γ ⊢ □p ⟷ ~(◇~p) := by
+  simp [-NegDefinition.neg];
+  have : Γ ⊢ □p ⟷ (□~~p) := box_iff' $ dn _ _;
+  have : Γ ⊢ ((□~~p) ⟷ ~~(□~~p)) := dn _ _;
+  exact iff_trans' (by assumption) (by assumption);
+
+lemma box_duality! (Γ : Set F) (p) : Γ ⊢! □p ⟷ ~(◇~p) := ⟨box_duality Γ p⟩
+
+def dia_duality (Γ : Set F) (p) : Γ ⊢ ◇p ⟷ ~(□~p) := by
+  simp only [ModalDuality.dia_to_box];
+  apply neg_iff';
+  apply iff_id;
+
+lemma dia_duality! (Γ : Set F) (p) : Γ ⊢! ◇p ⟷ ~(□~p) := ⟨dia_duality Γ p⟩
+
+def multibox_duality (n : ℕ) (Γ : Set F) (p) : Γ ⊢ □[n]p ⟷ ~(◇[n](~p)) := by
+  induction n generalizing Γ with
+  | zero => simp [-NegDefinition.neg]; apply dn;
+  | succ n ih =>
+    simp [-NegDefinition.neg];
+    exact iff_trans'
+      (show Γ ⊢ □□[n]p ⟷ ~~(□~~(□[n]p)) by simpa [ModalDuality.dia_to_box] using box_duality Γ (□[n]p))
+      (by
+        have : ∅ ⊢ ~~(□[n]p) ⟷ □[n]p := iff_symm' $ dn _ _;
+        have : ∅ ⊢ (□[n]p ⟷ ~(◇[n](~p))) := @ih ∅;
+        have : ∅ ⊢ ~~(□[n]p) ⟷ ~(◇[n](~p)) := iff_trans' (by assumption) (by assumption);
+        have : ∅ ⊢ □~~(□[n]p) ⟷ □~(◇[n](~p)) := box_iff' (by assumption);
+        exact weakening' (by simp) $ dn_iff' this;
+      )
+
+lemma multibox_duality! (n : ℕ) (Γ : Set F) (p) : Γ ⊢! □[n]p ⟷ ~(◇[n](~p)) := ⟨multibox_duality n Γ p⟩
+
+def multidia_duality (n : ℕ) (Γ : Set F) (p) : Γ ⊢ ◇[n]p ⟷ ~(□[n](~p)) := by
+  induction n generalizing Γ with
+  | zero => simp [-NegDefinition.neg]; apply dn;
+  | succ n ih =>
+    simp [-NegDefinition.neg];
+    apply neg_iff';
+    apply box_iff';
+    have : ∅ ⊢ (~(◇[n]p) ⟷ ~~(□[n](~p))):= neg_iff' $ ih _;
+    have : ∅ ⊢ (~~(□[n](~p)) ⟷ □[n](~p)) := iff_symm' $ dn _ _
+    exact iff_trans' (by assumption) (by assumption);
+
+lemma multidia_duality! (n : ℕ) (Γ : Set F) (p) : Γ ⊢! ◇[n]p ⟷ ~(□[n](~p)) := ⟨multidia_duality n Γ p⟩
 
 def boxverum (Γ : Set F) : Γ ⊢ □⊤ := necessitation (verum _)
 
 lemma boxverum! (Γ : Set F) : Γ ⊢! □⊤ := ⟨boxverum Γ⟩
 
-def box_iff' {Γ : Set F} {p q : F} (d : ∅ ⊢ p ⟷ q) : Γ ⊢ (□p ⟷ □q) := by
-  have dp₁ : ∅ ⊢ (□(p ⟶ q) ⟶ (□p ⟶ □q)) := Hilbert.axiomK ∅ p q;
-  have dp₂ : ∅ ⊢ (□(p ⟶ q)) := necessitation $ iff_mp' d;
-
-  have dq₁ : ∅ ⊢ (□(q ⟶ p) ⟶ (□q ⟶ □p)) := Hilbert.axiomK ∅ q p;
-  have dq₂ : ∅ ⊢ (□(q ⟶ p)) := necessitation $ iff_mpr' d;
-
-  exact iff_intro
-    (Deduction.weakening' (by simp) (modus_ponens' dp₁ dp₂))
-    (Deduction.weakening' (by simp) (modus_ponens' dq₁ dq₂))
-
-lemma box_iff'! {Γ : Set F} {p q : F} (d : ∅ ⊢! p ⟷ q) : Γ ⊢! (□p ⟷ □q) := ⟨box_iff' d.some⟩
-
 def equiv_dianeg_negbox (Γ p) : Γ ⊢ ◇~p ⟷ ~(□p) := by
-  simp only [ModalDuality.dia]
+  simp only [ModalDuality.dia_to_box];
   apply Hilbert.neg_iff';
   apply box_iff';
   apply iff_symm';

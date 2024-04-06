@@ -17,35 +17,43 @@ attribute [match_pattern]
   Box.box
   Dia.dia
 
-/-- Diamond(`◇`) defined by Box(`□`) -/
 class ModalDuality (F : Type*) [ModalLogicSymbol F] where
-  dia {p : F} : ◇p = ~(□(~p))
+  /-- Diamond(`◇`) defined by Box(`□`) -/
+  dia_to_box {p : F} : ◇p = ~(□(~p))
 
-attribute [simp] ModalDuality.dia
+attribute [simp] ModalDuality.dia_to_box
 
-/-- Box(`□`) defined by Diamond(`◇`) -/
-class ModalDuality' (F : Type*) [ModalLogicSymbol F] where
-  box {p : F} : □p = ~(◇(~p))
+@[simp]
+def Box.multibox [Box F] (n : ℕ) (p : F) : F :=
+  match n with
+  | 0 => p
+  | n + 1 => □(multibox n p)
 
-attribute [simp] ModalDuality'.box
+notation:74 "□[" n:90 "]" p:80 => Box.multibox n p
 
-class Multibox (α : Sort _) extends Box α where
-  multibox : ℕ → α → α
-  multibox_zero : ∀ p, multibox 0 p = p
-  multibox_succ : ∀ n p, multibox (n + 1) p = □(multibox n p)
+@[simp]
+lemma Box.multibox_zero [Box F] (p : F) : □[0]p = p := rfl
 
-notation:74 "□[" n:90 "]" p:80 => Multibox.multibox n p
+@[simp]
+lemma Box.multibox_succ [Box F] (n : ℕ) (p : F) : □[(n + 1)]p = □(□[n]p) := rfl
 
-attribute [simp] Multibox.multibox_zero Multibox.multibox_succ
+lemma Box.multibox_prepost [Box F] (n : ℕ) (p : F) : □□[n]p = □[n](□p) := by induction n <;> simp_all
 
-class Multidia (α : Sort _) extends Dia α where
-  multidia : ℕ → α → α
-  multidia_zero : ∀ p, multidia 0 p = p
-  multidia_succ : ∀ n p, multidia (n + 1) p = ◇(multidia n p)
+@[simp]
+def Dia.multidia [Dia F] (n : ℕ) (p : F) : F :=
+  match n with
+  | 0 => p
+  | n + 1 => ◇(multidia n p)
 
-notation:74 "◇[" n:90 "]" p:80 => Multidia.multidia n p
+notation:74 "◇[" n:90 "]" p:80 => Dia.multidia n p
 
-attribute [simp] Multidia.multidia_zero Multidia.multidia_succ
+@[simp]
+lemma Dia.multidia_zero [Dia F] (p : F) : ◇[0]p = p := rfl
+
+@[simp]
+lemma Dia.multidia_succ [Dia F] (n : ℕ) (p : F) : ◇[(n + 1)]p = ◇(◇[n]p) := rfl
+
+lemma Dia.multidia_prepost [Dia F] (n : ℕ) (p : F) : ◇◇[n]p = ◇[n](◇p) := by induction n <;> simp_all
 
 end LO.Modal.Normal
 
@@ -106,9 +114,7 @@ lemma predia_dia_subset {s : Set α} : s.predia.dia ⊆ s := by simp [Set.subset
 
 lemma predia_subset {s t : Set α} (h : s ⊆ t) : s.predia ⊆ t.predia := by simp_all [Set.subset_def, predia];
 
-variable [Multibox α] [Multidia α]
-
-def multibox (n : ℕ) (s : Set α) : Set α := (Multibox.multibox n) '' s
+def multibox (n : ℕ) (s : Set α) : Set α := (Box.multibox n) '' s
 
 @[simp] lemma multibox_zero (s : Set α) : s.multibox 0 = s := by simp [Set.multibox]
 
@@ -117,7 +123,7 @@ lemma multibox_mem_intro {s : Set α} {a : α} {n : ℕ} : a ∈ s → □[n]a �
   simp_all [Set.multibox];
   aesop;
 
-def multidia (n : ℕ) (s : Set α) : Set α := (Multidia.multidia n) '' s
+def multidia (n : ℕ) (s : Set α) : Set α := (Dia.multidia n) '' s
 
 lemma multidia_zero (s : Set α) : s.multidia 0 = s := by simp [Set.multidia]
 
@@ -126,9 +132,9 @@ lemma multidia_mem_intro {s : Set α} {a : α} {n : ℕ} : a ∈ s → ◇[n]a �
   simp_all [Set.multidia];
   aesop;
 
-def multiprebox (n : ℕ) (s : Set α) := Multibox.multibox n ⁻¹' s
+def multiprebox (n : ℕ) (s : Set α) := Box.multibox n ⁻¹' s
 
-def multipredia (n : ℕ) (s : Set α) := Multidia.multidia n ⁻¹' s
+def multipredia (n : ℕ) (s : Set α) := Dia.multidia n ⁻¹' s
 
 end Set
 

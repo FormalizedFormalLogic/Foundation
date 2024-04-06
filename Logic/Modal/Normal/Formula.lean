@@ -35,7 +35,7 @@ instance : NegDefinition (Formula α) where
   neg := rfl
 
 instance : ModalDuality (Formula α) where
-  dia := rfl
+  dia_to_box := rfl
 
 section ToString
 
@@ -184,52 +184,9 @@ instance : DecidableEq (Formula α) := hasDecEq
 
 end Decidable
 
-section Multibox
-
-variable {p : Formula α}
-
-@[simp]
-def multibox (n : ℕ) (p : Formula α) : Formula α :=
-  match n with
-  | 0     => p
-  | n + 1 => □(multibox n p)
-
-instance : Multibox (Formula α) where
-  multibox := multibox
-  multibox_zero := by simp
-  multibox_succ := by simp;
-
-@[simp] lemma multibox_zero : □[0]p = p := by simp [Multibox.multibox, multibox];
-@[simp] lemma multibox_succ : □[(n + 1)]p = □□[n]p := by simp [Multibox.multibox, multibox];
-
-lemma multibox_prepost {n : ℕ} {p : Formula α} : □□[n]p = □[n](□p) := by induction n <;> simp_all;
-
-lemma multibox_prepost' {n : ℕ} {p : Formula α} : □[(n + 1)]p = □[n](□p) := by induction n <;> simp_all;
-
-@[simp]
-def multidia (n : ℕ) (p : Formula α) : Formula α :=
-  match n with
-  | 0     => p
-  | n + 1 => ◇(multidia n p)
-
-instance : Multidia (Formula α) where
-  multidia := multidia
-  multidia_zero := by simp
-  multidia_succ := by simp;
-
-@[simp] lemma multidia_zero : ◇[0]p = p := by simp [Multidia.multidia, multidia];
-@[simp] lemma multidia_succ : ◇[(n + 1)]p = ◇◇[n]p := by simp [Multidia.multidia, multidia];
-
-lemma multidia_prepost {n : ℕ} {p : Formula α} : ◇◇[n]p = ◇[n](◇p) := by induction n <;> simp_all;
-
-lemma multidia_prepost' {n : ℕ} {p : Formula α} : ◇[(n + 1)]p = ◇[n](◇p) := by induction n <;> simp_all;
-
-end Multibox
-
 def isBox : Formula α → Bool
   | □_ => true
   | _  => false
-
 
 end Formula
 
