@@ -64,6 +64,14 @@ abbrev ConsequenceWithEq (T : Theory L) (σ : Sentence L) : Prop := T⁼ ⊨ σ
 
 infix:55 " ⊨₌ " => ConsequenceWithEq
 
+abbrev ProofWithEq (T : Theory L) (σ : Sentence L) : Type _ := T⁼ ⊢ σ
+
+abbrev ProvableWithEq (T : Theory L) (σ : Sentence L) : Prop := T⁼ ⊢! σ
+
+infix:45 " ⊢₌ " => ProofWithEq
+
+infix:45 " ⊢₌! " => ProvableWithEq
+
 namespace Structure
 
 namespace Eq
