@@ -56,6 +56,14 @@ end Eq
 
 end Theory
 
+abbrev Theory.addEqAxiom (T : Theory L) : Theory L := T + 𝐄𝐐
+
+postfix:max "⁼" => Theory.addEqAxiom
+
+abbrev ConsequenceWithEq (T : Theory L) (σ : Sentence L) : Prop := T⁼ ⊨ σ
+
+infix:55 " ⊨₌ " => ConsequenceWithEq
+
 namespace Structure
 
 namespace Eq
@@ -208,7 +216,7 @@ lemma consequence_iff_eq' {T : Theory L} [𝐄𝐐 ≾ T] {σ : Sentence L} :
   rw [consequence_iff_eq]
 
 lemma consequence_iff_add_eq {T : Theory L} {σ : Sentence L} :
-    T + 𝐄𝐐 ⊨ σ ↔ (∀ (M : Type u) [Nonempty M] [Structure L M] [Structure.Eq L M], M ⊧ₘ* T → M ⊧ₘ σ) :=
+    T ⊨₌ σ ↔ (∀ (M : Type u) [Nonempty M] [Structure L M] [Structure.Eq L M], M ⊧ₘ* T → M ⊧ₘ σ) :=
   Iff.trans consequence_iff_eq (forall₄_congr <| fun M _ _ _ ↦ by simp)
 
 lemma satisfiableTheory_iff_eq {T : Theory L} [𝐄𝐐 ≾ T] :

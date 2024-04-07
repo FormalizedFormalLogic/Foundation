@@ -11,9 +11,9 @@ structure Interpretation {L : Language} [L.Eq] (T : Theory L) (L' : Language) wh
   rel {k} : L'.Rel k → Semisentence L k
   func {k} : L'.Func k → Semisentence L (k + 1)
   domain_nonempty :
-    T + 𝐄𝐐 ⊨ ∃' domain
+    T ⊨₌ ∃' domain
   func_defined {k} (f : L'.Func k) :
-    T + 𝐄𝐐 ⊨ ∀* ((Matrix.conj fun i ↦ domain/[#i]) ⟶ ∃'! (domain/[#0] ⋏ func f))
+    T ⊨₌ ∀* ((Matrix.conj fun i ↦ domain/[#i]) ⟶ ∃'! (domain/[#0] ⋏ func f))
 
 namespace Interpretation
 
@@ -92,9 +92,9 @@ lemma func_existsUnique {k} (f : L'.Func k) (v : Fin k → ι.Sub M) : ∃! y : 
 
 variable {ι M}
 
-instance : Nonempty (ι.Sub M) := by simpa using ι.sub_exists M
+instance sub_nonempty : Nonempty (ι.Sub M) := by simpa using ι.sub_exists M
 
-noncomputable instance : Structure L' (ι.Sub M) where
+noncomputable instance subStructure : Structure L' (ι.Sub M) where
   rel _ r v := Semiformula.PVal! M (fun i ↦ (v i)) (ι.rel r)
   func _ f v := Classical.choose! (ι.func_existsUnique M f v)
 
@@ -169,9 +169,18 @@ infix:50 " ⊳ " => TheoryInterpretation
 
 namespace TheoryInterpretation
 
-variable {L L' : Language} [L.Eq] {T : Theory L} {U : Theory L'} (ι : T ⊳ U)
+open Interpretation
+
+variable {L L' : Language.{u}} [L.Eq] {T : Theory L} {U : Theory L'} (ι : T ⊳ U)
 
 abbrev translation (p : Semisentence L' n) : Semisentence L n := ι.interpretation.translation p
+
+lemma sub_models_theory {M : Type u} [Nonempty M] [Structure L M] [Structure.Eq L M] (hT : M ⊧ₘ* T) :
+    (ι.interpretation.Sub M) ⊧ₘ* U := modelsTheory_iff.mpr fun σ hσ ↦ models_translation_iff.mp (ι.interpret_theory σ hσ hT)
+
+lemma theorem_translation {σ : Sentence L'} (h : U ⊨ σ) : T ⊨₌ ι.translation σ :=
+  consequence_iff_add_eq.mpr fun M _ _ _ hT ↦
+    (@models_translation_iff L L' _ T ι.interpretation M _ _ _ hT σ).mpr <| h <| ι.sub_models_theory hT
 
 open Interpretation
 
