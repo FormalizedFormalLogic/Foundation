@@ -27,7 +27,7 @@ variable {Γ : Theory β} (hConsisΓ : System.Consistent Γ)
 -- @[simp] lemma consistent_iff_undeducible_falsum : System.Consistent Γ ↔ (Γ ⊬ ⊥) := Hilbert.consistent_iff_undeducible_falsum (· ⊢ ·) Γ
 -- @[simp] lemma consistent_undeducible_falsum : Γ ⊬ ⊥ := consistent_iff_undeducible_falsum.mp hConsisΓ
 
-lemma consistent_neither_undeducible : Γ ⊬ p ∨ Γ ⊬ ~p := Hilbert.consistent_neither_undeducible (· ⊢ ·) hConsisΓ p
+lemma consistent_neither_undeducible : Γ ⊬ p ∨ Γ ⊬ ~p := Hilbert.consistent_neither_undeducible hConsisΓ p
 
 lemma consistent_of_undeducible : Γ ⊬ p → System.Consistent Γ := by
   intros;

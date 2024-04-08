@@ -43,12 +43,12 @@ lemma intAxiom4 {p : Intuitionistic.Formula α} : ∅ ⊢ᴹ[𝐊𝟒]! pᵍ ⟶
     have : {pᵍ ⋏ qᵍ} ⊢ᴹ[𝐊𝟒]! □pᵍ := by simpa using modus_ponens! ihp $ conj₁'! (by assumption);
     have : {pᵍ ⋏ qᵍ} ⊢ᴹ[𝐊𝟒]! □qᵍ := by simpa using modus_ponens! ihq $ conj₂'! (by assumption);
     have : {pᵍ ⋏ qᵍ} ⊢ᴹ[𝐊𝟒]! □pᵍ ⋏  □qᵍ := conj₃'! (by assumption) (by assumption);
-    have : {pᵍ ⋏ qᵍ} ⊢ᴹ[𝐊𝟒]! □(pᵍ ⋏  qᵍ) := collect_box_and'! (by assumption);
+    have : {pᵍ ⋏ qᵍ} ⊢ᴹ[𝐊𝟒]! □(pᵍ ⋏  qᵍ) := collect_box_conj'! (by assumption);
     simpa;
   | hor p q ihp ihq =>
     apply dtr!;
-    have hp : ∅ ⊢ᴹ[𝐊𝟒]! pᵍ ⟶ □(pᵍ ⋎ qᵍ) := dtr! $ collect_box_or'! $ disj₁'! $ by simpa using dtl! ihp;
-    have hq : ∅ ⊢ᴹ[𝐊𝟒]! qᵍ ⟶ □(pᵍ ⋎ qᵍ) := dtr! $ collect_box_or'! $ disj₂'! $ by simpa using dtl! ihq;
+    have hp : ∅ ⊢ᴹ[𝐊𝟒]! pᵍ ⟶ □(pᵍ ⋎ qᵍ) := dtr! $ collect_box_disj'! $ disj₁'! $ by simpa using dtl! ihp;
+    have hq : ∅ ⊢ᴹ[𝐊𝟒]! qᵍ ⟶ □(pᵍ ⋎ qᵍ) := dtr! $ collect_box_disj'! $ disj₂'! $ by simpa using dtl! ihq;
     have h : {pᵍ ⋎ qᵍ} ⊢ᴹ[𝐊𝟒]! pᵍ ⋎ qᵍ := axm! (by simp);
     simpa using disj₃'! (weakening! (by simp) hp) (weakening! (by simp) hq) h;
 

@@ -199,6 +199,9 @@ lemma compact {Γ p} (d : Γ ⊢ᴹ[Λ]! p) : ∃ (Δ : Context α), ↑Δ ⊆ �
   . simpa using hΔ;
   . exact ⟨dΔ⟩
 
+def conj_finset_union {Γ} {Δ₁ Δ₂ : Context α} : (Γ ⊢ᴹ[Λ]! (Δ₁ ∪ Δ₂).conj) ↔ (Γ ⊢ᴹ[Λ]! (Δ₁.conj ⋏ Δ₂.conj)) := by
+  sorry;
+
 end Deducible
 
 variable [DecidableEq α]
@@ -246,6 +249,7 @@ def boxedNecessitation {Γ p} : (Γ ⊢ᴹ[Λ] p) → (□Γ ⊢ᴹ[Λ] □p)
       simpa [Set.box_union] using d.modus_ponens' d₁ |>.modus_ponens' d₂;
 
 instance instBoxedNecessitation : HasBoxedNecessitation (Deduction Λ) := ⟨by apply boxedNecessitation; simpa;⟩
+
 
 end Deduction
 

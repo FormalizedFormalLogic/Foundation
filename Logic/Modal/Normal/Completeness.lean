@@ -32,32 +32,46 @@ variable {Λ : AxiomSet β}
 variable {Γ : Theory β} (hConsisΓ : Consistent Λ Γ)
 
 @[simp]
-lemma inconsistent_insert_falsum : Inconsistent Λ (insert ⊥ Γ) := Hilbert.inconsistent_insert_falsum (· ⊢ᴹ[Λ] ·) Γ
+lemma inconsistent_insert_falsum : Inconsistent Λ (insert ⊥ Γ) := Hilbert.inconsistent_insert_falsum
 
-lemma consistent_iff_undeducible_falsum : Consistent Λ Γ ↔ (Γ ⊬ᴹ[Λ]! ⊥) := Hilbert.consistent_iff_undeducible_falsum (· ⊢ᴹ[Λ] ·) Γ
+lemma consistent_iff_undeducible_falsum : Consistent Λ Γ ↔ (Γ ⊬ᴹ[Λ]! ⊥) := Hilbert.consistent_iff_undeducible_falsum
 
 @[simp]
 lemma consistent_undeducible_falsum : Γ ⊬ᴹ[Λ]! ⊥ := consistent_iff_undeducible_falsum.mp hConsisΓ
 
-lemma consistent_subset_undeducible_falsum (Δ) (hΔ : Δ ⊆ Γ) : (Δ ⊬ᴹ[Λ]! ⊥) := Hilbert.consistent_subset_undeducible_falsum (· ⊢ᴹ[Λ] ·) hConsisΓ hΔ
+lemma consistent_subset_undeducible_falsum (Δ) (hΔ : Δ ⊆ Γ) : (Δ ⊬ᴹ[Λ]! ⊥) := Hilbert.consistent_subset_undeducible_falsum hConsisΓ hΔ
 
-lemma consistent_no_falsum : ⊥ ∉ Γ := Hilbert.consistent_no_falsum (· ⊢ᴹ[Λ] ·) hConsisΓ
+lemma consistent_no_falsum : ⊥ ∉ Γ := Hilbert.consistent_no_falsum hConsisΓ
 
-lemma consistent_no_falsum_subset (hΔ : Δ ⊆ Γ) : ⊥ ∉ Δ := Hilbert.consistent_no_falsum_subset (· ⊢ᴹ[Λ] ·) hConsisΓ hΔ
+lemma consistent_no_falsum_subset (hΔ : Δ ⊆ Γ) : ⊥ ∉ Δ := Hilbert.consistent_no_falsum_subset hConsisΓ hΔ
 
-lemma consistent_neither_undeducible (p) : (Γ ⊬ᴹ[Λ]! p) ∨ (Γ ⊬ᴹ[Λ]! ~p) := Hilbert.consistent_neither_undeducible (· ⊢ᴹ[Λ] ·) hConsisΓ p
+lemma consistent_neither_undeducible (p) : (Γ ⊬ᴹ[Λ]! p) ∨ (Γ ⊬ᴹ[Λ]! ~p) := Hilbert.consistent_neither_undeducible hConsisΓ p
 
-lemma consistent_of_subset (h : Γ₁ ⊆ Γ₂) : (Consistent Λ Γ₂) → (Consistent Λ Γ₁) := Hilbert.consistent_of_subset (· ⊢ᴹ[Λ] ·) h
+lemma consistent_of_subset (h : Γ₁ ⊆ Γ₂) : (Consistent Λ Γ₂) → (Consistent Λ Γ₁) := Hilbert.consistent_of_subset h
 
 lemma consistent_insert {Γ : Theory β} {p : Formula β} : (Consistent Λ (insert p Γ)) → (Consistent Λ Γ) := consistent_of_subset (by simp)
 
 lemma consistent_empty (hConsisΛ : Theory.Consistent Λ Λ) : Theory.Consistent Λ ∅ := consistent_of_subset (by simp) hConsisΛ
 
-lemma inconsistent_insert (h : Inconsistent Λ (insert p Γ)) : (∃ Δ, (Δ ⊆ Γ) ∧ ((insert p Δ) ⊢ᴹ[Λ]! ⊥)) := Hilbert.inconsistent_insert (· ⊢ᴹ[Λ] ·) h
+lemma inconsistent_insert (h : Inconsistent Λ (insert p Γ)) : (∃ Δ, (Δ ⊆ Γ) ∧ ((insert p Δ) ⊢ᴹ[Λ]! ⊥)) := Hilbert.inconsistent_insert h
 
-lemma consistent_iff_insert_neg  : (Consistent Λ (insert (~p) Γ)) ↔ (Γ ⊬ᴹ[Λ]! p)  := Hilbert.consistent_iff_insert_neg (· ⊢ᴹ[Λ] ·)
+lemma consistent_iff_insert_neg  : (Consistent Λ (insert (~p) Γ)) ↔ (Γ ⊬ᴹ[Λ]! p)  := Hilbert.consistent_iff_insert_neg
 
-lemma consistent_either (hConsisΓ : Consistent Λ Γ) : ∀ p, (Consistent Λ (insert p Γ)) ∨ (Consistent Λ (insert (~p) Γ)) := Hilbert.consistent_either (· ⊢ᴹ[Λ] ·) hConsisΓ
+lemma consistent_either (hConsisΓ : Consistent Λ Γ) : ∀ p, (Consistent Λ (insert p Γ)) ∨ (Consistent Λ (insert (~p) Γ)) := Hilbert.consistent_either hConsisΓ
+
+-- TODO: move to Deduction
+lemma inconsistent_union {Γ₁ Γ₂} (h : Inconsistent Λ (Γ₁ ∪ Γ₂)) : (∃ (Δ₁ Δ₂ : Context β), (↑Δ₁ ⊆ Γ₁) ∧ (↑Δ₂ ⊆ Γ₂) ∧ (Δ₁ ∪ Δ₂ ⊢ᴹ[Λ]! ⊥)) := by
+  have ⟨⟨Δ, hΔ⟩, hd⟩ := h.some.compact;
+  obtain ⟨Δ₁, Δ₂, hΔeq, hΔ₁, hΔ₂⟩ := Finset.subset_union_elim hΔ;
+  replace ⟨hΔ₂, _⟩ := Set.subset_diff.mp hΔ₂;
+  subst hΔeq;
+  simp at hd;
+  use Δ₁, Δ₂;
+  exact ⟨hΔ₁, hΔ₂, ⟨hd⟩⟩;
+
+-- TODO: move
+lemma Theory.Inconsistent_iff : Inconsistent Λ Γ ↔ ¬(Consistent Λ Γ) := by
+  simp [Theory.Inconsistent, Theory.Consistent, Deduction.Inconsistent, Deduction.Consistent, Deduction.Undeducible, Deduction.Deducible]
 
 lemma frameclass_unsatisfiable_insert_neg {𝔽 : FrameClass α} {Γ : Theory β} : (Γ ⊭ᴹ[𝔽] p) ↔ (Theory.FrameClassSatisfiable 𝔽 (insert (~p) Γ)) := by
   constructor;
@@ -219,6 +233,8 @@ instance : Membership (Formula β) (MaximalConsistentTheory Λ) := ⟨membership
 @[simp] def subset := Ω₁.theory ⊆ Ω₂.theory
 instance : HasSubset (MaximalConsistentTheory Λ) := ⟨subset⟩
 
+instance : CoeSort (MaximalConsistentTheory Λ) (Theory β) := ⟨λ Ω => Ω.theory⟩
+
 lemma equality_def {Ω₁ Ω₂ : MaximalConsistentTheory Λ} : Ω₁ = Ω₂ ↔ Ω₁.theory = Ω₂.theory := by
   constructor;
   . intro h; cases h; rfl;
@@ -238,36 +254,6 @@ lemma intro_equality {Ω₁ Ω₂ : MaximalConsistentTheory Λ} {h : ∀ p, p �
 lemma consitent : Consistent Λ Ω.theory := Ω.mc.1
 
 lemma maximal : Maximal Ω.theory := Ω.mc.2
-
-@[simp]
-def box := □Ω.theory
-prefix:73  "□" => box
-
-@[simp]
-def dia := ◇Ω.theory
-prefix:73  "◇" => dia
-
-@[simp]
-def prebox := □⁻¹Ω.theory
-prefix:73  "□⁻¹" => prebox
-
-@[simp]
-def predia := ◇⁻¹Ω.theory
-prefix:73  "◇⁻¹" => predia
-
-@[simp]
-def multibox (n : ℕ) (Ω : MaximalConsistentTheory Λ) := □[n]Ω.theory
-notation:73 "□[" n:90 "]" Ω:80 => multibox n Ω
-
-@[simp]
-def multidia (n : ℕ) (Ω : MaximalConsistentTheory Λ) := ◇[n]Ω.theory
-notation:73 "◇[" n:90 "]" Ω:80 => multidia n Ω
-
-def multiprebox (n : ℕ) (Ω : MaximalConsistentTheory Λ) := □⁻¹[n]Ω.theory
-notation:73 "□⁻¹[" n:90 "]" Ω:80 => multiprebox n Ω
-
-def multipredia (n : ℕ) (Ω : MaximalConsistentTheory Λ) := ◇⁻¹[n]Ω.theory
-notation:73 "◇⁻¹[" n:90 "]" Ω:80 => multipredia n Ω
 
 variable {Ω Ω₁ Ω₂ : MaximalConsistentTheory Λ}
 
@@ -353,7 +339,7 @@ lemma multibox_dual {n : ℕ} {p : Formula β} : (□[n]p ∈ Ω) ↔ (~(◇[n](
   have := Deduction.ofKSubset hK;
   have := Deduction.instBoxedNecessitation hK;
 
-  have d : Ω.theory ⊢ᴹ[Λ]! □[n]p ⟷ ~(◇[n](~p)) := multibox_duality! _ _ _
+  have d : Ω.theory ⊢ᴹ[Λ]! □[n]p ⟷ ~(◇[n](~p)) := multibox_duality!
 
   constructor;
   . intro h;
@@ -371,7 +357,7 @@ lemma multidia_dual {n : ℕ} {p : Formula β} : (◇[n]p ∈ Ω) ↔ (~(□[n](
   have := Deduction.ofKSubset hK;
   have := Deduction.instBoxedNecessitation hK;
 
-  have d : Ω.theory ⊢ᴹ[Λ]! ◇[n]p ⟷ ~(□[n](~p)) := multidia_duality! _ _ _
+  have d : Ω.theory ⊢ᴹ[Λ]! ◇[n]p ⟷ ~(□[n](~p)) := multidia_duality!
 
   constructor;
   . intro h;
@@ -414,6 +400,26 @@ lemma multibox_multidia {Ω₁ Ω₂ : MaximalConsistentTheory Λ} : (∀ {p : F
     apply H;
     apply neg_membership_iff.mpr;
     assumption
+
+lemma context_conj_membership_iff {Δ : Context β} : ⋀Δ ∈ Ω ↔ (∀ p ∈ Δ, p ∈ Ω) := by
+  simp only [membership_iff];
+  constructor;
+  . intro h p hp;
+    exact pick_finset_conj'! h p hp;
+  . intro h;
+    exact collect_finset_conj'! h;
+
+lemma context_box_conj_membership_iff {Δ : Context β} : □(⋀Δ) ∈ Ω ↔ (∀ p ∈ Δ, □p ∈ Ω) := by
+  simp only [membership_iff];
+  constructor;
+  . intro h p hp;
+    exact pick_box_finset_conj! h p hp;
+  . intro h;
+    exact collect_box_finset_conj! h;
+
+lemma context_box_conj_membership_iff' {Δ : Context β} : □(⋀Δ) ∈ Ω ↔ (∀ p ∈ (□Δ : Context β), p ∈ Ω) := by
+  simp [Context.box, Finset.box];
+  apply context_box_conj_membership_iff;
 
 end MaximalConsistentTheory
 
@@ -503,32 +509,65 @@ lemma frame_def': (CanonicalModel Λ).frame Ω₁ Ω₂ ↔ (◇Ω₂ ⊆ Ω₁.
     aesop;
 
 lemma multiframe_box : (CanonicalModel Λ).frame[n] Ω₁ Ω₂ ↔ (∀ {p : Formula β}, (□[n]p ∈ Ω₁ → p ∈ Ω₂)) := by
-  induction n generalizing Ω₁ Ω₂ with
-  | zero =>
-    constructor;
-    . intro h; subst h; simp;
-    . intro h; apply intro_equality; simpa;
-  | succ n ih =>
-    constructor;
-    . simp;
+  have := Deduction.instBoxedNecessitation hK;
+  have := Deduction.ofKSubset hK;
+
+  constructor;
+  . induction n generalizing Ω₁ Ω₂ with
+    | zero => intro h; subst h; simp;
+    | succ n ih =>
+      simp;
       intro Ω₃ h₁₃ h₃₂ p h;
-      exact ih.mp h₃₂ $ h₁₃ h;
-    . intro h;
-      obtain ⟨Ω, hΩ⟩ := exists_maximal_consistent_theory (show Consistent Λ (□⁻¹Ω₁ ∪ ◇[n]Ω₂) by
+      exact ih h₃₂ $ h₁₃ h;
+  . induction n generalizing Ω₁ Ω₂ with
+    | zero => intro h; apply intro_equality; simpa;
+    | succ n ih =>
+      intro h;
+      let mΩ : Theory β := □⁻¹Ω₁ ∪ ◇[n]Ω₂;
+      obtain ⟨Ω, hΩ⟩ := exists_maximal_consistent_theory (show Consistent Λ mΩ by
         by_contra hInc;
-        sorry;
+        replace hInc : Inconsistent Λ mΩ := Inconsistent_iff.mpr hInc;
+        obtain ⟨Δ₁, Δ₂, hΔ₁, hΔ₂, hUd⟩ := inconsistent_union hInc;
+
+        have h₁ : □⋀Δ₁ ∈ Ω₁ := by
+          apply context_box_conj_membership_iff'.mpr;
+          simpa using subset_prebox_iff_box_subset hΔ₁;
+
+        have h₂ : ⋀(◇⁻¹[n]Δ₂) ∈ Ω₂ := by
+          apply context_conj_membership_iff.mpr;
+          simpa using subset_multidia_iff_premulitidia_subset hΔ₂;
+
+        have e : (◇[n](◇⁻¹[n]Δ₂) : Context β) = Δ₂ := by simpa using premultidia_multidia_eq_of_subset_multidia hΔ₂;
+
+        have : ⋀(◇⁻¹[n]Δ₂) ∉ Ω₂ := by
+          have : ∅ ⊢ᴹ[Λ]! ~⋀(Δ₁ ∪ Δ₂) := by simpa using finset_dt!.mp (by simpa using hUd);
+          have : ∅ ⊢ᴹ[Λ]! ~⋀(Δ₁ ∪ Δ₂) ⟶ ~(⋀Δ₁ ⋏ ⋀Δ₂) := contra₀'! $ iff_mp'! $ finset_union_conj!;
+          have : ∅ ⊢ᴹ[Λ]! ~(⋀Δ₁ ⋏ ⋀Δ₂) := modus_ponens'! (by assumption) (by assumption);
+          have : ∅ ⊢ᴹ[Λ]! ◇[n](⋀◇⁻¹[n]Δ₂) ⟶ ⋀(◇[n](◇⁻¹[n]Δ₂)) := by apply multidia_finset_conj!;
+          have : ∅ ⊢ᴹ[Λ]! ◇[n](⋀◇⁻¹[n]Δ₂) ⟶ ⋀Δ₂ := by simpa only [e];
+          have : ∅ ⊢ᴹ[Λ]! ~⋀Δ₂ ⟶ ~(◇[n](⋀(◇⁻¹[n]Δ₂))) := contra₀'! (by assumption)
+          have : ∅ ⊢ᴹ[Λ]! ~(⋀Δ₁ ⋏ ◇[n](⋀(◇⁻¹[n]Δ₂))) := neg_conj_replace_right! (by assumption) (by assumption);
+          have : ∅ ⊢ᴹ[Λ]! ⋀Δ₁ ⟶ ~(◇[n](⋀(◇⁻¹[n]Δ₂))) := imp_eq_mpr'! $ neg_conj'! (by assumption);
+          have : ∅ ⊢ᴹ[Λ]! ~(◇[n](⋀(◇⁻¹[n]Δ₂))) ⟶ (□[n](~(⋀◇⁻¹[n]Δ₂))) := contra₂'! $ iff_mpr'! $ multidia_duality!;
+          have : ∅ ⊢ᴹ[Λ]! ⋀Δ₁ ⟶ □[n](~⋀◇⁻¹[n]Δ₂) := imp_trans'! (by assumption) (by assumption);
+          have : Ω₁ ⊢ᴹ[Λ]! □⋀Δ₁ ⟶ □[(n + 1)](~(⋀◇⁻¹[n]Δ₂)) := box_distribute_nec'! (by assumption);
+          have : Ω₁ ⊢ᴹ[Λ]! □[(n + 1)](~⋀◇⁻¹[n]Δ₂) := modus_ponens'! (by assumption) (membership_iff.mp h₁);
+          have : □[(n + 1)](~⋀◇⁻¹[n]Δ₂) ∈ Ω₁ := membership_iff.mpr (by assumption);
+          exact neg_membership_iff.mp $ h (by assumption);
+
+        contradiction;
       )
       existsi Ω;
       constructor;
       . intro p hp;
         apply hΩ;
-        simp_all;
-      . apply ih.mpr;
+        simp_all [mΩ];
+      . apply ih;
         apply (multibox_multidia hK).mpr;
         intro p hp;
         have : ◇[n]p ∈ ◇[n]Ω₂ := Set.multidia_mem_intro hp;
         apply hΩ;
-        simp_all;
+        simp_all [mΩ];
 
 lemma multiframe_dia : (CanonicalModel Λ).frame[n] Ω₁ Ω₂ ↔ (∀ {p : Formula β}, (p ∈ Ω₂ → ◇[n]p ∈ Ω₁)) := Iff.trans (multiframe_box hK) (multibox_multidia hK)
 

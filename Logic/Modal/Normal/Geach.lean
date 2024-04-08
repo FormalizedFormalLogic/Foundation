@@ -248,21 +248,15 @@ variable {Λ : AxiomSet β} (hK : 𝐊 ⊆ Λ)
 lemma defAxiomGeach (hG : (AxiomGeach.set l) ⊆ Λ) : (GeachConfluency l) (CanonicalModel Λ).frame := by
   intro Ω₁ Ω₂ Ω₃ h;
   replace ⟨h₁₂, h₂₃⟩ := h;
-  replace h₁₂ : ∀ {p : Formula β}, p ∈ Ω₂ → ◇[GeachTaple.i l]p ∈ Ω₁ := multiframe_dia.mp h₁₂;
-  replace h₂₃ : ∀ {p : Formula β}, p ∈ Ω₃ → ◇[GeachTaple.j l]p ∈ Ω₁ := multiframe_dia.mp h₂₃;
-  let U := (□[l.m]Ω₂) ∪ (□[l.n]Ω₃);
+  replace h₁₂ : ∀ {p : Formula β}, p ∈ Ω₂ → ◇[GeachTaple.i l]p ∈ Ω₁ := multiframe_dia hK |>.mp h₁₂;
+  replace h₂₃ : ∀ {p : Formula β}, p ∈ Ω₃ → ◇[GeachTaple.j l]p ∈ Ω₁ := multiframe_dia hK |>.mp h₂₃;
+  let U := (□[l.m]Ω₂.theory) ∪ (□[l.n]Ω₃.theory);
   have ⟨Ω, hΩ⟩ := exists_maximal_consistent_theory (show Theory.Consistent Λ U by sorry);
   existsi Ω;
   simp [multiframe_box];
   constructor;
-  . intro p hp;
-    apply hΩ;
-    left;
-    sorry;
-  . intro p hp;
-    apply hΩ;
-    right;
-    sorry;
+  . sorry;
+  . sorry;
 
 lemma defLogicGeach {l : List (GeachTaple)} (hG : (GeachLogic l) ⊆ Λ) : (GeachConfluency.list l) (CanonicalModel Λ).frame := by
   induction l with
@@ -270,7 +264,7 @@ lemma defLogicGeach {l : List (GeachTaple)} (hG : (GeachLogic l) ⊆ Λ) : (Geac
   | cons head tail ih =>
     simp only [GeachLogic, GeachConfluency.list];
     constructor;
-    . apply CanonicalModel.defAxiomGeach; aesop;
+    . exact CanonicalModel.defAxiomGeach hK (by aesop);
     . exact ih (by aesop);
 
 end CanonicalModel
@@ -286,8 +280,8 @@ lemma GeachLogic.membership_frameclass : (CanonicalModel l).frame ∈ (𝔽((Gea
   | cons head tail =>
     simp only [GeachConfluency, GeachLogic.CanonicalModel];
     constructor;
-    . exact CanonicalModel.defAxiomGeach (by simp);
-    . exact CanonicalModel.defLogicGeach (by simp);
+    . exact CanonicalModel.defAxiomGeach (by simp) (by simp);
+    . exact CanonicalModel.defLogicGeach (by simp) (by simp);
 
 theorem GeachLogic.kripkeCompletesAux (l : List (GeachTaple)) : KripkeCompleteness (GeachLogic l : AxiomSet β) (𝔽((GeachLogic l : AxiomSet β)) : FrameClass (MaximalConsistentTheory (GeachLogic l : AxiomSet β))) := by
   apply completeness_def.mpr;
