@@ -20,10 +20,13 @@ namespace GeachTaple
 
 variable (l : GeachTaple)
 
-@[simp] def i := l.1
-@[simp] def j := l.2.1
-@[simp] def m := l.2.2.1
-@[simp] def n := l.2.2.2
+abbrev i := l.1
+
+abbrev j := l.2.1
+
+abbrev m := l.2.2.1
+
+abbrev n := l.2.2.2
 
 end GeachTaple
 
@@ -243,20 +246,59 @@ lemma AxiomSetFrameClass.geach {Λ : AxiomSet β} [hG : IsGeachLogic Λ] : (𝔽
 namespace CanonicalModel
 
 variable [DecidableEq β]
-variable {Λ : AxiomSet β} (hK : 𝐊 ⊆ Λ)
+variable {Λ : AxiomSet β}
 
-lemma defAxiomGeach (hG : (AxiomGeach.set l) ⊆ Λ) : (GeachConfluency l) (CanonicalModel Λ).frame := by
+open Hilbert Set MaximalConsistentTheory
+
+lemma defAxiomGeach (hK : 𝐊 ⊆ Λ) (hG : (AxiomGeach.set l) ⊆ Λ) : (GeachConfluency l) (CanonicalModel Λ).frame := by
+  have := Deduction.instBoxedNecessitation hK;
+  have := Deduction.ofKSubset hK;
+
   intro Ω₁ Ω₂ Ω₃ h;
   replace ⟨h₁₂, h₂₃⟩ := h;
-  replace h₁₂ : ∀ {p : Formula β}, p ∈ Ω₂ → ◇[GeachTaple.i l]p ∈ Ω₁ := multiframe_dia hK |>.mp h₁₂;
-  replace h₂₃ : ∀ {p : Formula β}, p ∈ Ω₃ → ◇[GeachTaple.j l]p ∈ Ω₁ := multiframe_dia hK |>.mp h₂₃;
-  let U := (□[l.m]Ω₂.theory) ∪ (□[l.n]Ω₃.theory);
-  have ⟨Ω, hΩ⟩ := exists_maximal_consistent_theory (show Theory.Consistent Λ U by sorry);
+  have ⟨Ω, hΩ⟩ := exists_maximal_consistent_theory (show Theory.Consistent Λ ((□⁻¹[l.m]Ω₂.theory) ∪ (□⁻¹[l.n]Ω₃.theory)) by
+    by_contra hInc;
+    obtain ⟨Δ₂, Δ₃, hΔ₂, hΔ₃, hUd⟩ := inconsistent_union (by simpa only [Theory.Inconsistent_iff] using hInc);
+
+    have h₂ : □[l.m](⋀Δ₂) ∈ Ω₂ := by
+      apply context_multibox_conj_membership_iff'.mpr;
+      simpa using subset_premulitibox_iff_multibox_subset hΔ₂;
+
+    have h₃ : □[l.n](⋀Δ₃) ∈ Ω₃ := by
+      apply context_multibox_conj_membership_iff'.mpr;
+      simpa using subset_premulitibox_iff_multibox_subset hΔ₃;
+
+    have : (□[l.n](⋀Δ₃)) ∉ Ω₃ := by
+      have : Ω₁ ⊢ᴹ[Λ]! ◇[l.i](□[l.m](⋀Δ₂)) ⟶ □[l.j](◇[l.n](⋀Δ₂)) := Deducible.maxm! (by apply hG; simp [AxiomGeach.set]);
+      have : Ω₁ ⊢ᴹ[Λ]! ◇[l.i](□[l.m](⋀Δ₂)) := membership_iff.mp $ (multiframe_dia hK |>.mp h₁₂) h₂;
+      have : Ω₁ ⊢ᴹ[Λ]! □[l.j](◇[l.n](⋀Δ₂)) := modus_ponens'! (by assumption) (by assumption);
+      have : □[l.j](◇[l.n](⋀Δ₂)) ∈ Ω₁ := membership_iff.mpr this;
+      have : ◇[l.n](⋀Δ₂) ∈ Ω₃ := multiframe_box hK |>.mp h₂₃ (by assumption);
+      have : Ω₃ ⊢ᴹ[Λ]! ◇[l.n](⋀Δ₂) := membership_iff.mp (by assumption);
+      have : Ω₃ ⊢ᴹ[Λ]! ~(□[l.n](~(⋀Δ₂))) := modus_ponens'! (iff_mp'! multidia_duality!) (by assumption);
+      have : ∅ ⊢ᴹ[Λ]! ~⋀(Δ₂ ∪ Δ₃) := by simpa using finset_dt!.mp (by simpa using hUd);
+      have : ∅ ⊢ᴹ[Λ]! ~⋀(Δ₂ ∪ Δ₃) ⟶ ~(⋀Δ₂ ⋏ ⋀Δ₃) := contra₀'! $ iff_mp'! $ finset_union_conj!;
+      have : ∅ ⊢ᴹ[Λ]! (⋀Δ₂ ⋏ ⋀Δ₃) ⟶ ⊥ := modus_ponens'! (by assumption) (by assumption);
+      have : ∅ ⊢ᴹ[Λ]! ~(⋀Δ₂ ⋏ ⋀Δ₃) := modus_ponens'! (contra₀'! (by assumption)) (by apply verum!);
+      have : ∅ ⊢ᴹ[Λ]! ⋀Δ₃ ⟶ ~⋀Δ₂ := imp_eq!.mpr $ disj_symm'! $ neg_conj'! (by assumption);
+      have : ∅ ⊢ᴹ[Λ]! □[l.n](⋀Δ₃) ⟶ □[l.n](~⋀Δ₂) := multibox_distribute_nec'! (by assumption);
+      have : Ω₃ ⊢ᴹ[Λ]! ~(□[l.n](~⋀Δ₂)) ⟶ ~(□[l.n](⋀Δ₃)) := weakening! (show ∅ ⊆ Ω₃.theory by simp) $ contra₀'! (by assumption);
+      have : Ω₃ ⊢ᴹ[Λ]! ~(□[l.n](⋀Δ₃)) := modus_ponens'! (by assumption) (by assumption);
+      exact neg_membership_iff.mp $ membership_iff.mpr (by assumption);
+
+    contradiction;
+  );
   existsi Ω;
-  simp [multiframe_box];
+  simp [(multiframe_box hK)];
   constructor;
-  . sorry;
-  . sorry;
+  . intro p hp;
+    apply hΩ;
+    have : p ∈ □⁻¹[l.m]Ω₂ := by simpa [Set.premultibox] using hp;
+    simp_all;
+  . intro p hp;
+    apply hΩ;
+    have : p ∈ □⁻¹[l.n]Ω₃ := by simpa [Set.premultibox] using hp;
+    simp_all;
 
 lemma defLogicGeach {l : List (GeachTaple)} (hG : (GeachLogic l) ⊆ Λ) : (GeachConfluency.list l) (CanonicalModel Λ).frame := by
   induction l with
@@ -264,7 +306,7 @@ lemma defLogicGeach {l : List (GeachTaple)} (hG : (GeachLogic l) ⊆ Λ) : (Geac
   | cons head tail ih =>
     simp only [GeachLogic, GeachConfluency.list];
     constructor;
-    . exact CanonicalModel.defAxiomGeach hK (by aesop);
+    . exact CanonicalModel.defAxiomGeach (GeachLogic.subsetK' hG) (by aesop);
     . exact ih (by aesop);
 
 end CanonicalModel
@@ -281,7 +323,7 @@ lemma GeachLogic.membership_frameclass : (CanonicalModel l).frame ∈ (𝔽((Gea
     simp only [GeachConfluency, GeachLogic.CanonicalModel];
     constructor;
     . exact CanonicalModel.defAxiomGeach (by simp) (by simp);
-    . exact CanonicalModel.defLogicGeach (by simp) (by simp);
+    . exact CanonicalModel.defLogicGeach (by simp);
 
 theorem GeachLogic.kripkeCompletesAux (l : List (GeachTaple)) : KripkeCompleteness (GeachLogic l : AxiomSet β) (𝔽((GeachLogic l : AxiomSet β)) : FrameClass (MaximalConsistentTheory (GeachLogic l : AxiomSet β))) := by
   apply completeness_def.mpr;

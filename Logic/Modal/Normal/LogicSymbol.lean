@@ -314,8 +314,6 @@ noncomputable def prebox (s : Finset α) := s.preimage Box.box Set.box_injOn
 @[simp]
 lemma prebox_coe {s : Finset α} : (↑s : Set α).prebox = ↑(s.prebox) := by simp_all [Set.prebox, Finset.prebox, Finset.coe_preimage];
 
-lemma prebox_box_eq_of_subset_box {s t : Finset α} (hs : s ⊆ t.box) : s.prebox.box = s := by sorry;
-
 def multibox (n : ℕ) (s : Finset α) : Finset α := s.image (Box.multibox n)
 
 def dia (s : Finset α) : Finset α := s.image Dia.dia

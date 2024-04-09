@@ -102,6 +102,20 @@ def box_distribute_nec' {Γ : Set F} {p q} (d₁ : ∅ ⊢ p ⟶ q) : Γ ⊢ □
 
 lemma box_distribute_nec'! {Γ : Set F} {p q : F} (d : ∅ ⊢! p ⟶ q) : Γ ⊢! □p ⟶ □q := ⟨box_distribute_nec' d.some⟩
 
+def multibox_distribute' {Γ : Set F} {p q} (d : Γ ⊢ □[n](p ⟶ q)) :  Γ ⊢ □[n]p ⟶ □[n]q := by
+  induction n generalizing p q with
+  | zero => tauto;
+  | succ n ih =>
+    have : Γ ⊢ (□[n](□p ⟶ □q)) → Γ ⊢ (□□[n]p ⟶ □□[n]q) := by simpa [←Box.multibox_prepost] using @ih (□p) (□q);
+    apply this;
+    sorry;
+
+lemma multibox_distribute'! {Γ : Set F} {p q : F} (d : Γ ⊢! □[n](p ⟶ q)) : Γ ⊢! □[n]p ⟶ □[n]q := ⟨multibox_distribute' d.some⟩
+
+def multibox_distribute_nec' {Γ : Set F} {p q} (d : ∅ ⊢ p ⟶ q) : Γ ⊢ □[n]p ⟶ □[n]q := multibox_distribute' $ multi_necessitation d
+
+lemma multibox_distribute_nec'! {Γ : Set F} {p q : F} (d : ∅ ⊢! p ⟶ q) : Γ ⊢! □[n]p ⟶ □[n]q := ⟨multibox_distribute_nec' d.some⟩
+
 def axiomK' {Γ : Set F} {p q} (d₁ : Γ ⊢ (□(p ⟶ q))) (d₂ : Γ ⊢ □p) : Γ ⊢ □q := ((Hilbert.axiomK Γ p q) ⨀ d₁) ⨀ d₂
 
 lemma axiomK! (Γ : Set F) (p q) : Γ ⊢! (AxiomK p q) := ⟨Hilbert.axiomK Γ p q⟩
@@ -109,11 +123,11 @@ lemma axiomK! (Γ : Set F) (p q) : Γ ⊢! (AxiomK p q) := ⟨Hilbert.axiomK Γ 
 lemma axiomK'! {Γ : Set F} {p q} (d₁ : Γ ⊢! (□(p ⟶ q))) (d₂ : Γ ⊢! □p) : Γ ⊢! □q := ⟨axiomK' d₁.some d₂.some⟩
 
 def box_distribute_iff (Γ : Set F) (p q : F) : Γ ⊢ □(p ⟷ q) ⟶ (□p ⟷ □q) := by
-  have : Bew (Set.box {p ⟷ q}) (□p ⟶ □q) := box_distribute' $ boxed_necessitation $ iff_mp' $ axm (by simp);
-  have : Bew (Set.box {p ⟷ q}) (□q ⟶ □p) := box_distribute' $ boxed_necessitation $ iff_mpr' $ axm (by simp);
-  have : Bew (Set.box {p ⟷ q}) (□p ⟷ □q) := iff_intro (by assumption) (by assumption);
-  have : Bew ({□(p ⟷ q)}) (□p ⟷ □q) := by simpa [Set.box] using this;
-  have : Bew ∅ (□(p ⟷ q) ⟶ (□p ⟷ □q)) := dtr (by simpa);
+  have : (Set.box {p ⟷ q}) ⊢ (□p ⟶ □q) := box_distribute' $ boxed_necessitation $ iff_mp' $ axm (by simp);
+  have : (Set.box {p ⟷ q}) ⊢ (□q ⟶ □p) := box_distribute' $ boxed_necessitation $ iff_mpr' $ axm (by simp);
+  have : (Set.box {p ⟷ q}) ⊢ (□p ⟷ □q) := iff_intro (by assumption) (by assumption);
+  have : ({□(p ⟷ q)}) ⊢ (□p ⟷ □q) := by simpa [Set.box] using this;
+  have : ∅ ⊢ (□(p ⟷ q) ⟶ (□p ⟷ □q)) := dtr (by simpa);
   exact weakening' (by simp) this
 
 def box_distribute_iff' {Γ : Set F} {p q : F} (h : Γ ⊢ □(p ⟷ q)) : Γ ⊢ (□p ⟷ □q) := by

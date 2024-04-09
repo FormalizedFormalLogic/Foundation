@@ -70,6 +70,7 @@ lemma inconsistent_union {Γ₁ Γ₂} (h : Inconsistent Λ (Γ₁ ∪ Γ₂)) :
   exact ⟨hΔ₁, hΔ₂, ⟨hd⟩⟩;
 
 -- TODO: move
+@[simp]
 lemma Theory.Inconsistent_iff : Inconsistent Λ Γ ↔ ¬(Consistent Λ Γ) := by
   simp [Theory.Inconsistent, Theory.Consistent, Deduction.Inconsistent, Deduction.Consistent, Deduction.Undeducible, Deduction.Deducible]
 
@@ -421,6 +422,15 @@ lemma context_box_conj_membership_iff' {Δ : Context β} : □(⋀Δ) ∈ Ω ↔
   simp [Context.box, Finset.box];
   apply context_box_conj_membership_iff;
 
+lemma context_multibox_conj_membership_iff {Δ : Context β} {n : ℕ} : □[n](⋀Δ) ∈ Ω ↔ (∀ p ∈ Δ, □[n]p ∈ Ω) := by
+  induction n generalizing Ω with
+  | zero => apply context_conj_membership_iff;
+  | succ n ih => sorry;
+
+lemma context_multibox_conj_membership_iff' {Δ : Context β} : □[n](⋀Δ) ∈ Ω ↔ (∀ p ∈ (□[n]Δ : Context β), p ∈ Ω):= by
+  simp [Context.multibox, Finset.multibox];
+  apply context_multibox_conj_membership_iff;
+
 end MaximalConsistentTheory
 
 section Lindenbaum
@@ -523,11 +533,9 @@ lemma multiframe_box : (CanonicalModel Λ).frame[n] Ω₁ Ω₂ ↔ (∀ {p : Fo
     | zero => intro h; apply intro_equality; simpa;
     | succ n ih =>
       intro h;
-      let mΩ : Theory β := □⁻¹Ω₁ ∪ ◇[n]Ω₂;
-      obtain ⟨Ω, hΩ⟩ := exists_maximal_consistent_theory (show Consistent Λ mΩ by
+      obtain ⟨Ω, hΩ⟩ := exists_maximal_consistent_theory (show Consistent Λ (□⁻¹Ω₁ ∪ ◇[n]Ω₂) by
         by_contra hInc;
-        replace hInc : Inconsistent Λ mΩ := Inconsistent_iff.mpr hInc;
-        obtain ⟨Δ₁, Δ₂, hΔ₁, hΔ₂, hUd⟩ := inconsistent_union hInc;
+        obtain ⟨Δ₁, Δ₂, hΔ₁, hΔ₂, hUd⟩ := inconsistent_union (by simpa only [Theory.Inconsistent_iff] using hInc);
 
         have h₁ : □⋀Δ₁ ∈ Ω₁ := by
           apply context_box_conj_membership_iff'.mpr;
@@ -561,13 +569,13 @@ lemma multiframe_box : (CanonicalModel Λ).frame[n] Ω₁ Ω₂ ↔ (∀ {p : Fo
       constructor;
       . intro p hp;
         apply hΩ;
-        simp_all [mΩ];
+        simp_all;
       . apply ih;
         apply (multibox_multidia hK).mpr;
         intro p hp;
         have : ◇[n]p ∈ ◇[n]Ω₂ := Set.multidia_mem_intro hp;
         apply hΩ;
-        simp_all [mΩ];
+        simp_all;
 
 lemma multiframe_dia : (CanonicalModel Λ).frame[n] Ω₁ Ω₂ ↔ (∀ {p : Formula β}, (p ∈ Ω₂ → ◇[n]p ∈ Ω₁)) := Iff.trans (multiframe_box hK) (multibox_multidia hK)
 
