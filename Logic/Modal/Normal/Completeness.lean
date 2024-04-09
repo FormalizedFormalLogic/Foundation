@@ -406,9 +406,9 @@ lemma context_conj_membership_iff {Δ : Context β} : ⋀Δ ∈ Ω ↔ (∀ p �
   simp only [membership_iff];
   constructor;
   . intro h p hp;
-    exact pick_finset_conj'! h p hp;
+    exact finset_conj_iff!.mp h p hp;
   . intro h;
-    exact collect_finset_conj'! h;
+    exact finset_conj_iff!.mpr h;
 
 lemma context_box_conj_membership_iff {Δ : Context β} : □(⋀Δ) ∈ Ω ↔ (∀ p ∈ Δ, □p ∈ Ω) := by
   simp only [membership_iff];
@@ -423,9 +423,12 @@ lemma context_box_conj_membership_iff' {Δ : Context β} : □(⋀Δ) ∈ Ω ↔
   apply context_box_conj_membership_iff;
 
 lemma context_multibox_conj_membership_iff {Δ : Context β} {n : ℕ} : □[n](⋀Δ) ∈ Ω ↔ (∀ p ∈ Δ, □[n]p ∈ Ω) := by
-  induction n generalizing Ω with
-  | zero => apply context_conj_membership_iff;
-  | succ n ih => sorry;
+  simp only [membership_iff];
+  constructor;
+  . intro h p hp;
+    exact pick_multibox_finset_conj! h p hp;
+  . intro h;
+    exact collect_multibox_finset_conj! h;
 
 lemma context_multibox_conj_membership_iff' {Δ : Context β} : □[n](⋀Δ) ∈ Ω ↔ (∀ p ∈ (□[n]Δ : Context β), p ∈ Ω):= by
   simp [Context.multibox, Finset.multibox];
@@ -549,9 +552,9 @@ lemma multiframe_box : (CanonicalModel Λ).frame[n] Ω₁ Ω₂ ↔ (∀ {p : Fo
 
         have : ⋀(◇⁻¹[n]Δ₂) ∉ Ω₂ := by
           have : ∅ ⊢ᴹ[Λ]! ~⋀(Δ₁ ∪ Δ₂) := by simpa using finset_dt!.mp (by simpa using hUd);
-          have : ∅ ⊢ᴹ[Λ]! ~⋀(Δ₁ ∪ Δ₂) ⟶ ~(⋀Δ₁ ⋏ ⋀Δ₂) := contra₀'! $ iff_mp'! $ finset_union_conj!;
+          have : ∅ ⊢ᴹ[Λ]! ~⋀(Δ₁ ∪ Δ₂) ⟶ ~(⋀Δ₁ ⋏ ⋀Δ₂) := contra₀'! $ iff_mpr'! $ finset_union_conj!;
           have : ∅ ⊢ᴹ[Λ]! ~(⋀Δ₁ ⋏ ⋀Δ₂) := modus_ponens'! (by assumption) (by assumption);
-          have : ∅ ⊢ᴹ[Λ]! ◇[n](⋀◇⁻¹[n]Δ₂) ⟶ ⋀(◇[n](◇⁻¹[n]Δ₂)) := by apply multidia_finset_conj!;
+          have : ∅ ⊢ᴹ[Λ]! ◇[n](⋀◇⁻¹[n]Δ₂) ⟶ ⋀(◇[n](◇⁻¹[n]Δ₂)) := by apply distribute_multidia_finset_conj!;
           have : ∅ ⊢ᴹ[Λ]! ◇[n](⋀◇⁻¹[n]Δ₂) ⟶ ⋀Δ₂ := by simpa only [e];
           have : ∅ ⊢ᴹ[Λ]! ~⋀Δ₂ ⟶ ~(◇[n](⋀(◇⁻¹[n]Δ₂))) := contra₀'! (by assumption)
           have : ∅ ⊢ᴹ[Λ]! ~(⋀Δ₁ ⋏ ◇[n](⋀(◇⁻¹[n]Δ₂))) := neg_conj_replace_right! (by assumption) (by assumption);

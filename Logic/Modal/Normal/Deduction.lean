@@ -138,7 +138,7 @@ private def dtrAux (Γ) (p q : Formula α) : (Γ ⊢ᴹ[Λ] q) → ((Γ \ {p}) �
   | @axm _ _ Γ q ih => by
     by_cases h : p = q
     case pos =>
-      simpa [h] using Hilbert.imp_id (Γ \ {p}) p;
+      simpa [h] using Hilbert.imp_id
     case neg =>
       have d₁ : (Γ \ {p}) ⊢ᴹ[Λ] (q ⟶ p ⟶ q) := imply₁ _ q p
       have d₂ : (Γ \ {p}) ⊢ᴹ[Λ] q := axm (Set.mem_diff_singleton.mpr ⟨ih, Ne.symm h⟩)
@@ -198,9 +198,6 @@ lemma compact {Γ p} (d : Γ ⊢ᴹ[Λ]! p) : ∃ (Δ : Context α), ↑Δ ⊆ �
   constructor;
   . simpa using hΔ;
   . exact ⟨dΔ⟩
-
-def conj_finset_union {Γ} {Δ₁ Δ₂ : Context α} : (Γ ⊢ᴹ[Λ]! (Δ₁ ∪ Δ₂).conj) ↔ (Γ ⊢ᴹ[Λ]! (Δ₁.conj ⋏ Δ₂.conj)) := by
-  sorry;
 
 end Deducible
 

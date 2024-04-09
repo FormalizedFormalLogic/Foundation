@@ -134,11 +134,13 @@ variable {Bew : Set F → F → Type*} (Γ : Set F) (p q r : F)
 -- TODO: replacement
 local infix:20 " ⊢ " => Bew
 
-section Minimal
+section
 
-variable [hM : Minimal Bew] [hDT : HasDT Bew] [hEFQ : HasEFQ Bew]
+variable [hM : Minimal Bew] [HasDT Bew]
+variable [hEFQ : HasEFQ Bew]
+variable [hC : Classical Bew]
 
-abbrev efq := hEFQ.efq
+def efq := hEFQ.efq
 
 def efq' {Γ p} : (Bew Γ ⊥) → (Bew Γ p) := modus_ponens' (efq _ _)
 
@@ -202,11 +204,18 @@ def iff_symm' {Γ p q} (d : Bew Γ (p ⟷ q)) : Bew Γ (q ⟷ p) := iff_intro (i
 
 def dtl {Γ p q} (d : Bew Γ (p ⟶ q)) : Bew (insert p Γ) q := modus_ponens' (weakening' (by simp) d) (axm (by simp))
 
-def imp_id : Bew Γ (p ⟶ p) := ((imply₂ Γ p (p ⟶ p) p) ⨀ (imply₁ _ _ _)) ⨀ (imply₁ _ _ _)
+def imp_id {Γ p} : Bew Γ (p ⟶ p) := ((imply₂ Γ p (p ⟶ p) p) ⨀ (imply₁ _ _ _)) ⨀ (imply₁ _ _ _)
 
 def id_insert (Γ p) : Bew (insert p Γ) p := axm (by simp)
 
 def id_singleton (p) : Bew {p} p := by simpa using id_insert ∅ p
+
+def imp_trans' {Γ p q r} (h₁ : Bew Γ (p ⟶ q)) (h₂ : Bew Γ (q ⟶ r)) : Bew Γ (p ⟶ r) := by
+  apply dtr;
+  have : Bew (insert p Γ) p := axm (by simp);
+  have : Bew (insert p Γ) q := modus_ponens' (weakening' (by simp) h₁) this;
+  have : Bew (insert p Γ) r := modus_ponens' (weakening' (by simp) h₂) this;
+  exact this
 
 def dni : Bew Γ (p ⟶ ~~p) := by
   simp [NegDefinition.neg]
@@ -218,6 +227,10 @@ def dni : Bew Γ (p ⟶ ~~p) := by
 
 def dni' {Γ p} : Bew Γ p → Bew Γ (~~p) := modus_ponens' (dni _ _)
 
+def dne : Bew Γ (~~p ⟶ p) := hC.dne Γ p
+
+def dne' {Γ p} : (Bew Γ (~~p)) → (Bew Γ p) := modus_ponens' (dne _ _)
+
 def contra₀' {Γ p q} : Bew Γ (p ⟶ q) → Bew Γ (~q ⟶ ~p) := by
   intro h;
   simp [NegDefinition.neg];
@@ -227,6 +240,20 @@ def contra₀' {Γ p q} : Bew Γ (p ⟶ q) → Bew Γ (~q ⟶ ~p) := by
   have d₂ : Bew (insert p $ insert (q ⟶ ⊥) Γ) p := axm (by simp);
   simpa using d₁ ⨀ h ⨀ d₂;
 
+def contra₀ {Γ p q} : Bew Γ ((p ⟶ q) ⟶ (~q ⟶ ~p)) := by
+  apply dtr;
+  exact contra₀' (axm (by simp))
+
+def contra₁' {Γ p q} : Bew Γ (p ⟶ ~q) → Bew Γ (q ⟶ ~p) := by
+  intro h;
+  have : Bew Γ (q ⟶ ~~q) := dni _ _;
+  have : Bew Γ (~~q ⟶ ~p) := contra₀' h;
+  exact imp_trans' (by assumption) (by assumption)
+
+def contra₁ {Γ p q} : Bew Γ ((p ⟶ ~q) ⟶ (q ⟶ ~p)) := by
+  apply dtr;
+  exact contra₁' (axm (by simp))
+
 def neg_iff' {Γ p q} (d : Bew Γ (p ⟷ q)) : Bew Γ (~p ⟷ ~q) := by
   simp only [LogicalConnective.iff];
   apply conj₃';
@@ -235,18 +262,39 @@ def neg_iff' {Γ p q} (d : Bew Γ (p ⟷ q)) : Bew Γ (~p ⟷ ~q) := by
   . apply contra₀';
     apply iff_mp' d
 
-def imp_trans' {Γ p q r} (h₁ : Bew Γ (p ⟶ q)) (h₂ : Bew Γ (q ⟶ r)) : Bew Γ (p ⟶ r) := by
-  apply dtr;
-  have : Bew (insert p Γ) p := axm (by simp);
-  have : Bew (insert p Γ) q := modus_ponens' (weakening' (by simp) h₁) this;
-  have : Bew (insert p Γ) r := modus_ponens' (weakening' (by simp) h₂) this;
-  exact this
-
-def contra₁' {Γ p q} : Bew Γ (p ⟶ ~q) → Bew Γ (q ⟶ ~p) := by
+def contra₂' {Γ p q} : Bew Γ (~p ⟶ q) → Bew Γ (~q ⟶ p) := by
   intro h;
-  have : Bew Γ (q ⟶ ~~q) := dni _ _;
-  have : Bew Γ (~~q ⟶ ~p) := contra₀' h;
+  have : Bew Γ (~q ⟶ ~~p) := contra₀' h;
+  have : Bew Γ (~~p ⟶ p) := dne _ _;
   exact imp_trans' (by assumption) (by assumption)
+
+def contra₂ {Γ p q} : Bew Γ ((~p ⟶ q) ⟶ (~q ⟶ p)) := by
+  apply dtr;
+  exact contra₂' (axm (by simp))
+
+def contra₃' {Γ p q} : Bew Γ (~p ⟶ ~q) → Bew Γ (q ⟶ p) := by
+  intro h;
+  have : Bew Γ (~~q ⟶ p) := contra₂' h;
+  have : Bew Γ (q ⟶ ~~q) := dni _ _;
+  exact imp_trans' (by assumption) (by assumption)
+
+def contra₃ {Γ p q} : Bew Γ ((~p ⟶ ~q) ⟶ (q ⟶ p)) := by
+  apply dtr;
+  exact contra₃' (axm (by simp))
+
+def dn : Bew Γ (p ⟷ ~~p) := by
+  apply iff_intro;
+  . apply dni;
+  . apply dne
+
+def dn_iff' {Γ p q} (d : Bew Γ (p ⟷ q)) : Bew Γ (~~p ⟷ ~~q) := by
+  apply iff_intro;
+  . apply contra₀';
+    apply contra₀';
+    exact iff_mp' d;
+  . apply contra₀';
+    apply contra₀';
+    exact iff_mpr' d;
 
 def assoc_left' {Γ p q r} (h : Bew Γ ((p ⋏ q) ⋏ r)) : Bew Γ (p ⋏ (q ⋏ r)) := by
   have dpq := conj₁' h;
@@ -282,19 +330,73 @@ def conj_symm (Γ p q) : Bew Γ ((p ⋏ q) ⟶ (q ⋏ p)) := by
 
 def conj_symm_iff (Γ p q) : Bew Γ ((p ⋏ q) ⟷ (q ⋏ p)) := iff_intro (by apply conj_symm) (by apply conj_symm)
 
-def neg_conj' {Γ p q} (h : Bew Γ (~(p ⋏ q))) :Bew Γ (~p ⋎ ~q) := by sorry
+def disj_dn_elim' {Γ : Set F} {p q : F} (d : Γ ⊢ ~~p ⋎ ~~q) : Γ ⊢ (p ⋎ q) := disj₃'
+  (by apply dtr; apply disj₁'; apply dne'; exact axm (by simp))
+  (by apply dtr; apply disj₂'; apply dne'; exact axm (by simp))
+  d
 
-def disj_neg' {Γ p q} (h : Bew Γ (~p ⋎ ~q)) : Bew Γ (~(p ⋏ q)) := by sorry
+def disj_neg' {Γ p q} (h : Bew Γ (~p ⋎ ~q)) : Bew Γ (~(p ⋏ q)) := by
+  have dp : Γ ⊢ ~p ⟶ (~(p ⋏ q)) := by apply contra₀'; apply conj₁;
+  have dq : Γ ⊢ ~q ⟶ (~(p ⋏ q)) := by apply contra₀'; apply conj₂;
+  exact disj₃' dp dq h;
 
-def neg_disj' {Γ p q} (h : Bew Γ (~(p ⋎ q))) :Bew Γ (~p ⋏ ~q) := by sorry
+def disj_neg {Γ p q} : Γ ⊢ (~p ⋎ ~q) ⟶ (~(p ⋏ q)) := by
+  apply dtr;
+  exact disj_neg' (axm (by simp));
 
-def conj_neg' {Γ p q} (h : Bew Γ (~p ⋏ ~q)) :Bew Γ (~(p ⋎ q)) := by sorry
+def conj_neg' {Γ p q} (h : Γ ⊢ (~p ⋏ ~q)) : Γ ⊢ (~(p ⋎ q)) := by
+  have dnp : (insert (p ⋎ q) Γ) ⊢ p ⟶ ⊥ := by simpa using weakening' (show Γ ⊆ insert (p ⋎ q) Γ by simp) $ conj₁' h;
+  have dnq : (insert (p ⋎ q) Γ) ⊢ q ⟶ ⊥ := by simpa using weakening' (show Γ ⊆ insert (p ⋎ q) Γ by simp) $ conj₂' h;
+  simp; apply dtr;
+  exact disj₃' dnp dnq (axm (by simp));
 
-def imp_eq_mp' {Γ p q} : Bew Γ (p ⟶ q) → Bew Γ (~p ⋎ q) := by
+def conj_neg {Γ p q} : Γ ⊢ (~p ⋏ ~q) ⟶ (~(p ⋎ q)) := by
+  apply dtr;
+  exact conj_neg' (axm (by simp));
+
+def neg_conj {Γ p q} : Γ ⊢ (~(p ⋏ q)) ⟶ (~p ⋎ ~q) := by
+  apply contra₃';
+  apply dtr;
+  apply dni';
+  exact conj₃' (by sorry) (by sorry);
+  -- apply contra₂';
+  -- apply dtr;
+  -- have : (insert (~(~p ⋎ ~q)) Γ) ⊢ (~~p ⋏ ~~q) := neg_disj' $ axm (by simp);
+  -- exact conj₃' (dne' $ conj₁' (by assumption)) (dne' $ conj₂' (by assumption));
+
+def neg_conj' {Γ p q} (h : Bew Γ (~(p ⋏ q))) :Bew Γ (~p ⋎ ~q) := neg_conj ⨀ h
+
+def neg_disj {Γ p q} : Γ ⊢ (~(p ⋎ q)) ⟶ (~p ⋏ ~q) := by
+  apply contra₃';
+  apply dtr;
+  apply dni';
+  exact disj_dn_elim' $ neg_conj' $ axm (by simp)
+
+def neg_disj' {Γ p q} (h : Γ ⊢ (~(p ⋎ q))) :Γ ⊢ (~p ⋏ ~q) := neg_disj ⨀ h
+
+def imp_eq_mpr' {Γ p q} (h : Γ ⊢ (~p ⋎ q)) : Γ ⊢ (p ⟶ q) := by
+  apply dtr;
+  exact disj₃' (by
+    apply dtr;
+    have hp : (insert (~p) (insert p Γ)) ⊢ p := axm (by simp);
+    have hnp : (insert (~p) (insert p Γ)) ⊢ p ⟶ ⊥ := by simpa using axm (by simp);
+    exact efq' $ hnp ⨀ hp;
+  ) imp_id $ weakening' (by simp) h;
+
+def imp_eq_mpr {Γ p q} : Γ ⊢ (~p ⋎ q) ⟶ (p ⟶ q) := by
+  apply dtr;
+  exact imp_eq_mpr' (axm (by simp));
+
+def imp_eq_mp {Γ p q} : Γ ⊢ ((p ⟶ q) ⟶ (~p ⋎ q)) := by
+  apply contra₃';
+  apply dtr;
+  have : (insert (~(~p ⋎ q)) Γ) ⊢ ~(~p ⋎ q) := axm (by simp)
+  have : (insert (~(~p ⋎ q)) Γ) ⊢ ~~p ⋏ ~q := neg_disj' this;
+  have : (insert (~(~p ⋎ q)) Γ) ⊢ p := dne' $ conj₁' (by assumption)
+  have : (insert (~(~p ⋎ q)) Γ) ⊢ ~q := conj₂' (by assumption)
   sorry;
 
-def imp_eq_mpr' {Γ p q} : Bew Γ (~p ⋎ q) → Bew Γ (p ⟶ q) := by
-  sorry;
+def imp_eq_mp' {Γ p q} (h : Γ ⊢ p ⟶ q) : Γ ⊢ (~p ⋎ q) := imp_eq_mp ⨀ h
 
 def conj_replace_left {Γ p q r} (h₁ : Γ ⊢ p ⋏ q) (h₂ : Γ ⊢ p ⟶ r) : Γ ⊢ r ⋏ q := by
   have dr : Bew Γ r := h₂ ⨀ conj₁' h₁;
@@ -342,45 +444,9 @@ def iff_trans' {Γ p q r} (h₁ : Bew Γ (p ⟷ q)) (h₂ : Bew Γ (q ⟷ r)) : 
   . exact imp_trans' (iff_mp' h₁) (iff_mp' h₂);
   . exact imp_trans' (iff_mpr' h₂) (iff_mpr' h₁);
 
-end Minimal
-
-section Classical
-
-variable [c : Classical Bew] [HasDT Bew]
-
-def dne : Bew Γ (~~p ⟶ p) := c.dne Γ p
-
-def dne' {Γ p} : (Bew Γ (~~p)) → (Bew Γ p) := modus_ponens' (dne _ _)
-
-def dn : Bew Γ (p ⟷ ~~p) := by
-  apply iff_intro;
-  . apply dni;
-  . apply dne
-
-def dn_iff' {Γ p q} (d : Bew Γ (p ⟷ q)) : Bew Γ (~~p ⟷ ~~q) := by
-  apply iff_intro;
-  . apply contra₀';
-    apply contra₀';
-    exact iff_mp' d;
-  . apply contra₀';
-    apply contra₀';
-    exact iff_mpr' d;
-
 def equiv_dn : Bew Γ (p ⟷ ~~p) := by
   simp only [LogicalConnective.iff];
   exact (conj₃ _ _ _ ⨀ (dni _ _)) ⨀ (dne _ _);
-
-def contra₂' {Γ p q} : Bew Γ (~p ⟶ q) → Bew Γ (~q ⟶ p) := by
-  intro h;
-  have : Bew Γ (~q ⟶ ~~p) := contra₀' h;
-  have : Bew Γ (~~p ⟶ p) := dne _ _;
-  exact imp_trans' (by assumption) (by assumption)
-
-def contra₃' {Γ p q} : Bew Γ (~p ⟶ ~q) → Bew Γ (q ⟶ p) := by
-  intro h;
-  have : Bew Γ (~~q ⟶ p) := contra₂' h;
-  have : Bew Γ (q ⟶ ~~q) := dni _ _;
-  exact imp_trans' (by assumption) (by assumption)
 
 instance : HasEFQ Bew where
   efq Γ p := by
@@ -393,7 +459,7 @@ instance : Intuitionistic Bew where
 instance : HasLEM Bew where
   lem Γ p := by sorry;
 
-end Classical
+end
 
 end Deduction
 
@@ -413,7 +479,7 @@ lemma weakening! {Γ Δ : Set F} {p : F} (h : Γ ⊆ Δ) (d : Γ ⊢! p) : Δ �
 lemma modus_ponens! {Γ₁ Γ₂ : Set F} {p q : F} (d₁ : Γ₁ ⊢! (p ⟶ q)) (d₂ : Γ₂ ⊢! p) : Deducible Bew (Γ₁ ∪ Γ₂) q := ⟨d₁.some ⨀ d₂.some⟩
 lemma modus_ponens'! {Γ : Set F} {p q : F} (d₁ : Γ ⊢! (p ⟶ q)) (d₂ : Γ ⊢! p) : Γ ⊢! q := by simpa using modus_ponens! d₁ d₂
 
-lemma verum! (Γ : Set F) : Γ ⊢! ⊤ := ⟨verum Γ⟩
+lemma verum! {Γ : Set F} : Γ ⊢! ⊤ := ⟨verum Γ⟩
 
 lemma imply₁! (Γ : Set F) (p q : F) : Γ ⊢! (p ⟶ q ⟶ p) := ⟨imply₁ Γ p q⟩
 lemma imply₁'! {Γ : Set F} {p q : F} (d : Γ ⊢! p) : Γ ⊢! (q ⟶ p) := ⟨imply₁' d.some⟩
@@ -494,7 +560,7 @@ lemma dtl_not! {Γ : Set F} {p q : F} : ((insert p Γ) ⊬! q) → (Γ ⊬! (p �
   intro d;
   exact ⟨dtl d⟩
 
-lemma imp_id! (Γ : Set F) (p : F) : Γ ⊢! (p ⟶ p) := ⟨imp_id Γ p⟩
+lemma imp_id! : Γ ⊢! (p ⟶ p) := ⟨imp_id⟩
 
 lemma imp_top! {Γ : Set F} {p : F} (d : Γ ⊢! (⊤ ⟶ p)) : Γ ⊢! p := ⟨imp_top d.some⟩
 
@@ -533,12 +599,18 @@ lemma neg_disj_replace_left! (h₁ : Γ ⊢! ~(p ⋎ q)) (h₂ : Γ ⊢! ~p ⟶ 
 lemma neg_disj_replace_right! (h₁ : Γ ⊢! ~(p ⋎ q)) (h₂ : Γ ⊢! ~q ⟶ ~r) : Γ ⊢! ~(p ⋎ r) := ⟨neg_disj_replace_right h₁.some h₂.some⟩
 
 lemma finset_dt! {Γ} {Δ : Finset F} {p} : (Γ ∪ Δ ⊢! p) ↔ (Γ ⊢! (Δ.conj ⟶ p)) := by
-  sorry;
+  induction Δ using Finset.cons_induction generalizing Γ with
+  | empty =>
+    simp [Finset.conj];
+    constructor;
+    . intro h; exact imply₁'! h;
+    . intro h; exact imp_top! h;
+  | @cons p Δ h IH => sorry;
 
-lemma finset_union_conj'! {Γ} {Δ₁ Δ₂ : Finset F} : (Γ ⊢! (Δ₁.conj ⋏ Δ₂.conj)) ↔ (Γ ⊢! (Δ₁ ∪ Δ₂).conj) := by
+lemma finset_union_conj'! {Γ} {Δ₁ Δ₂ : Finset F} : (Γ ⊢! (Δ₁ ∪ Δ₂).conj) ↔ (Γ ⊢! (Δ₁.conj ⋏ Δ₂.conj)) := by
   sorry
 
-lemma finset_union_conj! {Γ} {Δ₁ Δ₂ : Finset F} : Γ ⊢! (Δ₁.conj ⋏ Δ₂.conj ⟷ (Δ₁ ∪ Δ₂).conj) := by
+lemma finset_union_conj! {Γ} {Δ₁ Δ₂ : Finset F} : Γ ⊢! ((Δ₁ ∪ Δ₂).conj ⟷ Δ₁.conj ⋏ Δ₂.conj) := by
   apply iff_intro!;
   . apply dtr!;
     apply finset_union_conj'!.mp
@@ -547,12 +619,19 @@ lemma finset_union_conj! {Γ} {Δ₁ Δ₂ : Finset F} : Γ ⊢! (Δ₁.conj ⋏
     apply finset_union_conj'!.mpr
     exact axm! (by simp)
 
-lemma finset_union_disj'! {Γ} {Δ₁ Δ₂ : Finset F} : (Γ ⊢! (Δ₁.disj ⋎ Δ₂.disj)) ↔ (Γ ⊢! (Δ₁ ∪ Δ₂).disj) := by
+lemma finset_union_disj'! {Γ} {Δ₁ Δ₂ : Finset F} : (Γ ⊢! (Δ₁ ∪ Δ₂).disj) ↔ (Γ ⊢! (Δ₁.disj ⋎ Δ₂.disj)) := by
   sorry;
 
-lemma pick_finset_conj'! {Γ : Set F} {Δ : Finset F} (h : Γ ⊢! (Δ.conj)) : ∀ p ∈ Δ, Γ ⊢! p := by sorry
+lemma finset_union_disj! {Γ} {Δ₁ Δ₂ : Finset F} : Γ ⊢! ((Δ₁ ∪ Δ₂).disj ⟷ Δ₁.disj ⋎ Δ₂.disj) := by
+  apply iff_intro!;
+  . apply dtr!;
+    apply finset_union_disj'!.mp
+    exact axm! (by simp)
+  . apply dtr!;
+    apply finset_union_disj'!.mpr
+    exact axm! (by simp)
 
-lemma collect_finset_conj'! {Γ : Set F} {Δ : Finset F} (h : ∀ p ∈ Δ, Γ ⊢! p) : Γ ⊢! (Δ.conj) := by sorry
+lemma finset_conj_iff! {Γ} {Δ : Finset F} : (Γ ⊢! Δ.conj) ↔ (∀ p ∈ Δ, Γ ⊢! p) := by sorry;
 
 end Deducible
 

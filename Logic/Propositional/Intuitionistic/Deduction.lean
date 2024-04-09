@@ -95,7 +95,7 @@ private def dtrAux (Γ : Theory α) (p q) : Γ ⊢ q → (Γ \ {p}) ⊢ p ⟶ q
   | @axm _ Γ q ih => by
     by_cases h : p = q
     case pos =>
-      simpa [h] using Hilbert.imp_id (Γ \ {p}) p;
+      simpa [h] using Hilbert.imp_id;
     case neg =>
       have d₁ : (Γ \ {p}) ⊢ (q ⟶ p ⟶ q) := imply₁ _ q p
       have d₂ : (Γ \ {p}) ⊢ q := axm (Set.mem_diff_singleton.mpr ⟨ih, Ne.symm h⟩)

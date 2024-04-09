@@ -277,7 +277,7 @@ lemma defAxiomGeach (hK : 𝐊 ⊆ Λ) (hG : (AxiomGeach.set l) ⊆ Λ) : (Geach
       have : Ω₃ ⊢ᴹ[Λ]! ◇[l.n](⋀Δ₂) := membership_iff.mp (by assumption);
       have : Ω₃ ⊢ᴹ[Λ]! ~(□[l.n](~(⋀Δ₂))) := modus_ponens'! (iff_mp'! multidia_duality!) (by assumption);
       have : ∅ ⊢ᴹ[Λ]! ~⋀(Δ₂ ∪ Δ₃) := by simpa using finset_dt!.mp (by simpa using hUd);
-      have : ∅ ⊢ᴹ[Λ]! ~⋀(Δ₂ ∪ Δ₃) ⟶ ~(⋀Δ₂ ⋏ ⋀Δ₃) := contra₀'! $ iff_mp'! $ finset_union_conj!;
+      have : ∅ ⊢ᴹ[Λ]! ~⋀(Δ₂ ∪ Δ₃) ⟶ ~(⋀Δ₂ ⋏ ⋀Δ₃) := contra₀'! $ iff_mpr'! $ finset_union_conj!;
       have : ∅ ⊢ᴹ[Λ]! (⋀Δ₂ ⋏ ⋀Δ₃) ⟶ ⊥ := modus_ponens'! (by assumption) (by assumption);
       have : ∅ ⊢ᴹ[Λ]! ~(⋀Δ₂ ⋏ ⋀Δ₃) := modus_ponens'! (contra₀'! (by assumption)) (by apply verum!);
       have : ∅ ⊢ᴹ[Λ]! ⋀Δ₃ ⟶ ~⋀Δ₂ := imp_eq!.mpr $ disj_symm'! $ neg_conj'! (by assumption);

@@ -92,9 +92,9 @@ def preboxed_necessitation! {Γ : Set F} {p} (d : Γ.prebox ⊢! p) : Γ ⊢! �
 
 open HasAxiomK
 
-def axiomK (Γ : Set F) (p q) :  Γ ⊢ (AxiomK p q) := HasAxiomK.K Γ p q
+def axiomK {Γ p q} : Γ ⊢ (AxiomK p q) := HasAxiomK.K Γ p q
 
-def box_distribute' {Γ : Set F} {p q} (d₁ : Γ ⊢ (□(p ⟶ q))) : Γ ⊢ □p ⟶ □q := ((Hilbert.axiomK Γ p q) ⨀ d₁)
+def box_distribute' {Γ : Set F} {p q} (d₁ : Γ ⊢ (□(p ⟶ q))) : Γ ⊢ □p ⟶ □q := Hilbert.axiomK ⨀ d₁
 
 lemma box_distribute'! {Γ : Set F} {p q : F} (d : Γ ⊢! □(p ⟶ q)) : Γ ⊢! □p ⟶ □q := ⟨box_distribute' d.some⟩
 
@@ -102,13 +102,15 @@ def box_distribute_nec' {Γ : Set F} {p q} (d₁ : ∅ ⊢ p ⟶ q) : Γ ⊢ □
 
 lemma box_distribute_nec'! {Γ : Set F} {p q : F} (d : ∅ ⊢! p ⟶ q) : Γ ⊢! □p ⟶ □q := ⟨box_distribute_nec' d.some⟩
 
-def multibox_distribute' {Γ : Set F} {p q} (d : Γ ⊢ □[n](p ⟶ q)) :  Γ ⊢ □[n]p ⟶ □[n]q := by
-  induction n generalizing p q with
-  | zero => tauto;
+def multiaxiomK {Γ : Set F} {p q} : Γ ⊢ □[n](p ⟶ q) ⟶ (□[n]p ⟶ □[n]q) := by
+  induction n generalizing Γ with
+  | zero => simp; apply imp_id;
   | succ n ih =>
-    have : Γ ⊢ (□[n](□p ⟶ □q)) → Γ ⊢ (□□[n]p ⟶ □□[n]q) := by simpa [←Box.multibox_prepost] using @ih (□p) (□q);
-    apply this;
-    sorry;
+    have : Γ ⊢ □□[n](p ⟶ q) ⟶ □(□[n]p ⟶ □[n]q) := box_distribute' $ necessitation ih;
+    have : Γ ⊢ □(□[n]p ⟶ □[n]q) ⟶ □□[n]p ⟶ □□[n]q := axiomK;
+    exact imp_trans' (by assumption) (by assumption);
+
+def multibox_distribute' {Γ : Set F} {p q} (d : Γ ⊢ □[n](p ⟶ q)) :  Γ ⊢ □[n]p ⟶ □[n]q := multiaxiomK ⨀ d
 
 lemma multibox_distribute'! {Γ : Set F} {p q : F} (d : Γ ⊢! □[n](p ⟶ q)) : Γ ⊢! □[n]p ⟶ □[n]q := ⟨multibox_distribute' d.some⟩
 
@@ -116,9 +118,9 @@ def multibox_distribute_nec' {Γ : Set F} {p q} (d : ∅ ⊢ p ⟶ q) : Γ ⊢ �
 
 lemma multibox_distribute_nec'! {Γ : Set F} {p q : F} (d : ∅ ⊢! p ⟶ q) : Γ ⊢! □[n]p ⟶ □[n]q := ⟨multibox_distribute_nec' d.some⟩
 
-def axiomK' {Γ : Set F} {p q} (d₁ : Γ ⊢ (□(p ⟶ q))) (d₂ : Γ ⊢ □p) : Γ ⊢ □q := ((Hilbert.axiomK Γ p q) ⨀ d₁) ⨀ d₂
+def axiomK' {Γ : Set F} {p q} (d₁ : Γ ⊢ (□(p ⟶ q))) (d₂ : Γ ⊢ □p) : Γ ⊢ □q := (Hilbert.axiomK ⨀ d₁) ⨀ d₂
 
-lemma axiomK! (Γ : Set F) (p q) : Γ ⊢! (AxiomK p q) := ⟨Hilbert.axiomK Γ p q⟩
+lemma axiomK! (Γ : Set F) (p q) : Γ ⊢! (AxiomK p q) := ⟨Hilbert.axiomK⟩
 
 lemma axiomK'! {Γ : Set F} {p q} (d₁ : Γ ⊢! (□(p ⟶ q))) (d₂ : Γ ⊢! □p) : Γ ⊢! □q := ⟨axiomK' d₁.some d₂.some⟩
 
@@ -257,13 +259,6 @@ def box_conj_iff {Γ : Set F} {p q : F} : Γ ⊢ □(p ⋏ q) ⟷ □p ⋏ □q 
   . apply distribute_box_conj;
   . apply collect_box_conj;
 
-def collect_box_disj' {Γ : Set F} {p q : F} (d : Γ ⊢ □p ⋎ □q) : Γ ⊢ □(p ⋎ q) := by
-  have : Γ ⊢ □p ⟶ □(p ⋎ q) := box_imp' (by apply disj₁);
-  have : Γ ⊢ □q ⟶ □(p ⋎ q) := box_imp' (by apply disj₂);
-  exact disj₃' (by assumption) (by assumption) d;
-
-lemma collect_box_disj'! {Γ : Set F} {p q : F} (d : Γ ⊢! □p ⋎ □q) : Γ ⊢! □(p ⋎ q) := ⟨collect_box_disj' d.some⟩
-
 def pick_box_finset_conj {Γ : Set F} {Δ : Finset F} (h : Γ ⊢ □(Δ.conj)) : ∀ p ∈ Δ, Γ ⊢ □p := by sorry;
 
 lemma pick_box_finset_conj! {Γ : Set F} {Δ : Finset F} (h : Γ ⊢! □(Δ.conj)) : ∀ p ∈ Δ, Γ ⊢! □p := by
@@ -271,43 +266,82 @@ lemma pick_box_finset_conj! {Γ : Set F} {Δ : Finset F} (h : Γ ⊢! □(Δ.con
   have : Γ ⊢ □p := pick_box_finset_conj h.some p hp;
   exact ⟨this⟩
 
+def pick_multibox_finset_conj {Γ : Set F} {Δ : Finset F} (h : Γ ⊢ □[n]Δ.conj) : ∀ p ∈ Δ, Γ ⊢ □[n]p := by sorry;
+
+lemma pick_multibox_finset_conj! {Γ : Set F} {Δ : Finset F} (h : Γ ⊢! □[n]Δ.conj) : ∀ p ∈ Δ, Γ ⊢! □[n]p := by
+  intros p hp;
+  have : Γ ⊢ □[n]p := pick_multibox_finset_conj h.some p hp;
+  exact ⟨this⟩
+
 def collect_box_finset_conj {Γ : Set F} {Δ : Finset F} (h : ∀ p ∈ Δ, Γ ⊢ □p) : Γ ⊢ □(Δ.conj) := by sorry;
 
 lemma collect_box_finset_conj! {Γ : Set F} {Δ : Finset F} (h : ∀ p ∈ Δ, Γ ⊢! □p) : Γ ⊢! □(Δ.conj) := by
   exact ⟨collect_box_finset_conj (by intro p hp; exact h p hp |>.some)⟩
 
-def collect_dia_disj' {Γ : Set F} {p q : F} (d : Γ ⊢ ◇p ⋎ ◇q) : Γ ⊢ ◇(p ⋎ q) := by
+def collect_multibox_finset_conj {Γ : Set F} {Δ : Finset F} (h : ∀ p ∈ Δ, Γ ⊢ □[n]p) : Γ ⊢ □[n]Δ.conj := by sorry;
+
+lemma collect_multibox_finset_conj! {Γ : Set F} {Δ : Finset F} (h : ∀ p ∈ Δ, Γ ⊢! □[n]p) : Γ ⊢! □[n]Δ.conj := by
+  exact ⟨collect_multibox_finset_conj (by intro p hp; exact h p hp |>.some)⟩
+
+def collect_box_disj' {Γ : Set F} {p q : F} (d : Γ ⊢ □p ⋎ □q) : Γ ⊢ □(p ⋎ q) := by
+  have : Γ ⊢ □p ⟶ □(p ⋎ q) := box_imp' (by apply disj₁);
+  have : Γ ⊢ □q ⟶ □(p ⋎ q) := box_imp' (by apply disj₂);
+  exact disj₃' (by assumption) (by assumption) d;
+
+lemma collect_box_disj'! {Γ : Set F} {p q : F} (d : Γ ⊢! □p ⋎ □q) : Γ ⊢! □(p ⋎ q) := ⟨collect_box_disj' d.some⟩
+
+def distribute_dia_conj {Γ : Set F} {p q : F} : Γ ⊢ ◇(p ⋏ q) ⟶ (◇p ⋏ ◇q) := by
+  simp [-NegDefinition.neg];
+  apply contra₂';
+  apply dtr;
+  have : (insert (~(~(□~p) ⋏ ~(□~q))) Γ) ⊢ ~(~(□~p) ⋏ ~(□~q)) := axm (by simp)
+  have : (insert (~(~(□~p) ⋏ ~(□~q))) Γ) ⊢ □~p ⋎ □~q := disj_dn_elim' $ neg_conj' (by assumption);
+  have : (insert (~(~(□~p) ⋏ ~(□~q))) Γ) ⊢ □(~p ⋎ ~q) := collect_box_disj' (by assumption);
+  have : (insert (~(~(□~p) ⋏ ~(□~q))) Γ) ⊢ □(~p ⋎ ~q) ⟶ □(~(p ⋏ q)) := box_distribute_nec' disj_neg;
+  exact modus_ponens' (by assumption) (by assumption);
+
+def distribute_dia_conj' {Γ : Set F} {p q : F} (d : Γ ⊢ ◇(p ⋏ q)) : Γ ⊢ ◇p ⋏ ◇q := by
+  exact distribute_dia_conj ⨀ d
+
+def distribute_multidia_conj' (d : Γ ⊢ ◇[n](p ⋏ q)) : Γ ⊢ ◇[n]p ⋏ ◇[n]q := by
+  induction n with
+  | zero => trivial;
+  | succ n ih => sorry; -- simp_all only [Dia.multidia];
+
+lemma distribute_multidia_finset_conj'! {Γ : Set F} {Δ : Finset F} (d : Γ ⊢! ◇[n]Δ.conj) : Γ ⊢! (Δ.multidia n).conj := by
   sorry;
 
-def multidia_conj' (d : Γ ⊢! ◇[n](p ⋏ q)) : Γ ⊢! ◇[n]p ⋏ ◇[n]q := by
-  sorry;
-
-lemma multidia_finset_conj'! {Γ : Set F} {Δ : Finset F} (d : Γ ⊢! ◇[n]Δ.conj) : Γ ⊢! (Δ.multidia n).conj := by
-  sorry;
-
-lemma multidia_finset_conj! {n : ℕ} {Γ : Set F} {Δ : Finset F} : Γ ⊢! ◇[n]Δ.conj ⟶ (Δ.multidia n).conj := by
+lemma distribute_multidia_finset_conj! {n : ℕ} {Γ : Set F} {Δ : Finset F} : Γ ⊢! ◇[n]Δ.conj ⟶ (Δ.multidia n).conj := by
   apply dtr!;
-  apply multidia_finset_conj'!;
+  apply distribute_multidia_finset_conj'!;
   apply axm! (by simp);
+
+def collect_dia_disj {Γ : Set F} {p q : F} : Γ ⊢ ◇p ⋎ ◇q ⟶ ◇(p ⋎ q) := by
+  simp [-NegDefinition.neg];
+  apply contra₁';
+  apply dtr;
+  sorry;
+
+def collect_dia_disj' {Γ : Set F} {p q : F} (d : Γ ⊢ ◇p ⋎ ◇q) : Γ ⊢ ◇(p ⋎ q) := collect_dia_disj ⨀ d
 
 variable [HasAxiom4 Bew]
 
-def axiom4 (Γ : Set F) (p) :  Γ ⊢ (Axiom4 p) := HasAxiom4.A4 Γ p
+def axiom4 {Γ : Set F} {p} :  Γ ⊢ (Axiom4 p) := HasAxiom4.A4 Γ p
 
-def axiom4' {Γ : Set F} {p} (d₁ : Γ ⊢ □p) : Γ ⊢ □□p := (Hilbert.axiom4 Γ p) ⨀ d₁
+def axiom4' {Γ : Set F} {p} (d₁ : Γ ⊢ □p) : Γ ⊢ □□p := (Hilbert.axiom4) ⨀ d₁
 
-lemma axiom4! (Γ : Set F) (p) : Γ ⊢! (Axiom4 p) := ⟨Hilbert.axiom4 Γ p⟩
+lemma axiom4! (Γ : Set F) (p) : Γ ⊢! (Axiom4 p) := ⟨Hilbert.axiom4⟩
 
 lemma axiom4'! {Γ : Set F} {p} (d : Γ ⊢! □p) : Γ ⊢! □□p := ⟨axiom4' d.some⟩
 
 
 variable [HasAxiomT Bew]
 
-def axiomT (Γ : Set F) (p) :  Γ ⊢ (AxiomT p) := HasAxiomT.T Γ p
+def axiomT {Γ : Set F} {p} :  Γ ⊢ (AxiomT p) := HasAxiomT.T Γ p
 
-def axiomT' {Γ : Set F} {p} (d₁ : Γ ⊢ □p) : Γ ⊢ p := (Hilbert.axiomT Γ p) ⨀ d₁
+def axiomT' {Γ : Set F} {p} (d₁ : Γ ⊢ □p) : Γ ⊢ p := (Hilbert.axiomT) ⨀ d₁
 
-lemma axiomT! (Γ : Set F) (p) : Γ ⊢! (AxiomT p) := ⟨Hilbert.axiomT Γ p⟩
+lemma axiomT! (Γ : Set F) (p) : Γ ⊢! (AxiomT p) := ⟨Hilbert.axiomT⟩
 
 lemma axiomT'! {Γ : Set F} {p} (d : Γ ⊢! □p) : Γ ⊢! p := ⟨axiomT' d.some⟩
 
