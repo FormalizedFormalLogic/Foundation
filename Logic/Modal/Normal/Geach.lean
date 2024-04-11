@@ -271,19 +271,19 @@ lemma defAxiomGeach (hK : 𝐊 ⊆ Λ) (hG : (AxiomGeach.set l) ⊆ Λ) : (Geach
     have : (□[l.n](⋀Δ₃)) ∉ Ω₃ := by
       have : Ω₁ ⊢ᴹ[Λ]! ◇[l.i](□[l.m](⋀Δ₂)) ⟶ □[l.j](◇[l.n](⋀Δ₂)) := Deducible.maxm! (by apply hG; simp [AxiomGeach.set]);
       have : Ω₁ ⊢ᴹ[Λ]! ◇[l.i](□[l.m](⋀Δ₂)) := membership_iff.mp $ (multiframe_dia hK |>.mp h₁₂) h₂;
-      have : Ω₁ ⊢ᴹ[Λ]! □[l.j](◇[l.n](⋀Δ₂)) := modus_ponens'! (by assumption) (by assumption);
+      have : Ω₁ ⊢ᴹ[Λ]! □[l.j](◇[l.n](⋀Δ₂)) := (by assumption) ⨀ (by assumption);
       have : □[l.j](◇[l.n](⋀Δ₂)) ∈ Ω₁ := membership_iff.mpr this;
       have : ◇[l.n](⋀Δ₂) ∈ Ω₃ := multiframe_box hK |>.mp h₂₃ (by assumption);
       have : Ω₃ ⊢ᴹ[Λ]! ◇[l.n](⋀Δ₂) := membership_iff.mp (by assumption);
-      have : Ω₃ ⊢ᴹ[Λ]! ~(□[l.n](~(⋀Δ₂))) := modus_ponens'! (iff_mp'! multidia_duality!) (by assumption);
-      have : ∅ ⊢ᴹ[Λ]! ~⋀(Δ₂ ∪ Δ₃) := by simpa using finset_dt!.mp (by simpa using hUd);
+      have : Ω₃ ⊢ᴹ[Λ]! ~(□[l.n](~(⋀Δ₂))) := (iff_mp'! multidia_duality!) ⨀ (by assumption);
+      have : ∅ ⊢ᴹ[Λ]! ~⋀(Δ₂ ∪ Δ₃) := by simpa [NegDefinition.neg] using finset_dt!.mp (by simpa using hUd);
       have : ∅ ⊢ᴹ[Λ]! ~⋀(Δ₂ ∪ Δ₃) ⟶ ~(⋀Δ₂ ⋏ ⋀Δ₃) := contra₀'! $ iff_mpr'! $ finset_union_conj!;
-      have : ∅ ⊢ᴹ[Λ]! (⋀Δ₂ ⋏ ⋀Δ₃) ⟶ ⊥ := modus_ponens'! (by assumption) (by assumption);
-      have : ∅ ⊢ᴹ[Λ]! ~(⋀Δ₂ ⋏ ⋀Δ₃) := modus_ponens'! (contra₀'! (by assumption)) (by apply verum!);
+      have : ∅ ⊢ᴹ[Λ]! (⋀Δ₂ ⋏ ⋀Δ₃) ⟶ ⊥ := (by assumption) ⨀ (by assumption);
+      have : ∅ ⊢ᴹ[Λ]! ~(⋀Δ₂ ⋏ ⋀Δ₃) := (contra₀'! (by assumption)) ⨀ (by deduct);
       have : ∅ ⊢ᴹ[Λ]! ⋀Δ₃ ⟶ ~⋀Δ₂ := imp_eq!.mpr $ disj_symm'! $ neg_conj'! (by assumption);
       have : ∅ ⊢ᴹ[Λ]! □[l.n](⋀Δ₃) ⟶ □[l.n](~⋀Δ₂) := multibox_distribute_nec'! (by assumption);
       have : Ω₃ ⊢ᴹ[Λ]! ~(□[l.n](~⋀Δ₂)) ⟶ ~(□[l.n](⋀Δ₃)) := weakening! (show ∅ ⊆ Ω₃.theory by simp) $ contra₀'! (by assumption);
-      have : Ω₃ ⊢ᴹ[Λ]! ~(□[l.n](⋀Δ₃)) := modus_ponens'! (by assumption) (by assumption);
+      have : Ω₃ ⊢ᴹ[Λ]! ~(□[l.n](⋀Δ₃)) := (by assumption) ⨀ (by assumption);
       exact neg_membership_iff.mp $ membership_iff.mpr (by assumption);
 
     contradiction;

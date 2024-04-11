@@ -26,7 +26,7 @@ theorem Deducible.toClassical {T : Theory α} {p} : T ⊢ p → (T : Classical.T
   | @modusPonens _ _ p q b₁ b₂ => by
       let b₁' : (T : Classical.Theory α) ⊢! p ⟶ q := Deducible.toClassical b₁
       let b₂' : (T : Classical.Theory α) ⊢! p := Deducible.toClassical b₂
-      exact Hilbert.modus_ponens'! b₁' b₂'
+      exact Hilbert.modus_ponens₂! b₁' b₂'
   | verum _                    => by simp; prover
   | efq _ _                    => by simp; prover
   | imply₁ _ _ _               => by simp; prover

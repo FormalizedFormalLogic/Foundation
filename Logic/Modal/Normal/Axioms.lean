@@ -40,33 +40,33 @@ section Axioms
 variable {F : Type u} [ModalLogicSymbol F] (p q : F)
 
 /-- a.k.a. Distribution Axiom -/
-def AxiomK := □(p ⟶ q) ⟶ □p ⟶ □q
+abbrev AxiomK := □(p ⟶ q) ⟶ □p ⟶ □q
 
-def AxiomT := □p ⟶ p
+abbrev AxiomT := □p ⟶ p
 
-def AxiomB := p ⟶ □◇p
+abbrev AxiomB := p ⟶ □◇p
 
-def AxiomD := □p ⟶ ◇p
+abbrev AxiomD := □p ⟶ ◇p
 
-def Axiom4 := □p ⟶ □□p
+abbrev Axiom4 := □p ⟶ □□p
 
-def Axiom5 := ◇p ⟶ □◇p
+abbrev Axiom5 := ◇p ⟶ □◇p
 
-def AxiomDot2 := ◇□p ⟶ □◇p
+abbrev AxiomDot2 := ◇□p ⟶ □◇p
 
-def AxiomC4 := □□p ⟶ □p
+abbrev AxiomC4 := □□p ⟶ □p
 
-def AxiomCD := ◇p ⟶ □p
+abbrev AxiomCD := ◇p ⟶ □p
 
-def AxiomTc := p ⟶ □p
+abbrev AxiomTc := p ⟶ □p
 
-def AxiomDot3 := □(□p ⟶ □q) ⋎ □(□q ⟶ □p)
+abbrev AxiomDot3 := □(□p ⟶ □q) ⋎ □(□q ⟶ □p)
 
-def AxiomGrz := □(□(p ⟶ □p) ⟶ p) ⟶ p
+abbrev AxiomGrz := □(□(p ⟶ □p) ⟶ p) ⟶ p
 
-def AxiomM := (□◇p ⟶ ◇□p)
+abbrev AxiomM := (□◇p ⟶ ◇□p)
 
-def AxiomL := □(□p ⟶ p) ⟶ □p
+abbrev AxiomL := □(□p ⟶ p) ⟶ □p
 
 end Axioms
 

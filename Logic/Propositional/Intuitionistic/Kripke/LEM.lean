@@ -12,7 +12,7 @@ def LEMCounterExampleModel : Kripke.Model (Fin 2) β where
   herditary := by simp; aesop;
 
 lemma noLEM_atom {a : β} : ¬(⊧ (atom a) ⋎ ~(atom a)) := by
-  simp [KripkeValid, KripkeModels];
+  simp [KripkeValid, KripkeModels, NegDefinition.neg];
   existsi _, LEMCounterExampleModel, 0;
   simp_all [LEMCounterExampleModel];
 

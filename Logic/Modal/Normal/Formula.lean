@@ -76,7 +76,7 @@ lemma dia_eq (p : Formula α) : ◇p = ~(□(~p)) := rfl
 
 @[simp] lemma imp_inj (p₁ q₁ p₂ q₂ : Formula α) : p₁ ⟶ p₂ = q₁ ⟶ q₂ ↔ p₁ = q₁ ∧ p₂ = q₂ := by simp[Arrow.arrow]
 
-@[simp] lemma neg_inj (p q : Formula α) : ~p = ~q ↔ p = q := by simp[*]
+@[simp] lemma neg_inj (p q : Formula α) : ~p = ~q ↔ p = q := by simp [NegDefinition.neg]
 
 instance : ModalInj (Formula α) where
   box_inj := by simp [Box.box]

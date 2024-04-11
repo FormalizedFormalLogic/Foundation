@@ -21,8 +21,6 @@ class ModalDuality (F : Type*) [ModalLogicSymbol F] where
   /-- Diamond(`◇`) defined by Box(`□`) -/
   dia_to_box {p : F} : ◇p = ~(□(~p))
 
-attribute [simp] ModalDuality.dia_to_box
-
 @[simp]
 def Box.multibox [Box F] (n : ℕ) (p : F) : F :=
   match n with

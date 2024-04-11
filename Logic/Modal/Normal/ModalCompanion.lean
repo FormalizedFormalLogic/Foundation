@@ -28,7 +28,7 @@ variable {p q : Intuitionistic.Formula α}
 @[simp] lemma and_def : (p ⋏ q)ᵍ = pᵍ ⋏ qᵍ := by simp [GTranslation];
 @[simp] lemma or_def : (p ⋎ q)ᵍ = pᵍ ⋎ qᵍ := by simp [GTranslation];
 @[simp] lemma imp_def : (p ⟶ q)ᵍ = □(pᵍ ⟶ qᵍ) := by simp [GTranslation];
-@[simp] lemma neg_def' : (~p)ᵍ = □~(p)ᵍ := by simp [GTranslation];
+@[simp] lemma neg_def' : (~p)ᵍ = □~(p)ᵍ := by simp [GTranslation, NegDefinition.neg];
 
 end GTranslation
 
@@ -52,19 +52,19 @@ lemma intAxiom4 {p : Intuitionistic.Formula α} : ∅ ⊢ᴹ[𝐊𝟒]! pᵍ ⟶
     have h : {pᵍ ⋎ qᵍ} ⊢ᴹ[𝐊𝟒]! pᵍ ⋎ qᵍ := axm! (by simp);
     simpa using disj₃'! (weakening! (by simp) hp) (weakening! (by simp) hq) h;
 
-variable [Inhabited α]
+variable [Inhabited α] {p q r : Intuitionistic.Formula α}
 
-private lemma embed_Int_S4.case_imply₁ : ∅ ⊢ᴹ[(𝐒𝟒 : AxiomSet α)]! (p ⟶ q ⟶ p)ᵍ := by
+private lemma embed_Int_S4.case_imply₁ : ∅ ⊢ᴹ[𝐒𝟒]! (p ⟶ q ⟶ p)ᵍ := by
   simp only [GTranslation];
   have : ∅ ⊢ᴹ[𝐊𝟒]! pᵍ ⟶ □pᵍ := by apply intAxiom4;
   have : ∅ ⊢ᴹ[𝐊𝟒]! □(pᵍ ⟶ qᵍ ⟶ pᵍ) := necessitation! $ by apply imply₁!;
-  have : ∅ ⊢ᴹ[𝐊𝟒]! □pᵍ ⟶ □(qᵍ ⟶ pᵍ) := modus_ponens'! (by apply axiomK!) (by assumption);
+  have : ∅ ⊢ᴹ[𝐊𝟒]! □pᵍ ⟶ □(qᵍ ⟶ pᵍ) := modus_ponens₂! (by deduct) (by assumption);
   have : ∅ ⊢ᴹ[𝐊𝟒]! pᵍ ⟶ □(qᵍ ⟶ pᵍ) := imp_trans'! (by assumption) (by assumption);
   have : ∅ ⊢ᴹ[𝐊𝟒]! □(pᵍ ⟶ □(qᵍ ⟶ pᵍ)) := necessitation! (by assumption);
   exact strong_K4_S4 (by assumption)
 
 /-- TODO: prove syntactically -/
-private lemma embed_Int_S4.case_imply₂ : ∅ ⊢ᴹ[(𝐒𝟒 : AxiomSet α)]! ((p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r)ᵍ := by
+private lemma embed_Int_S4.case_imply₂ : ∅ ⊢ᴹ[𝐒𝟒]! ((p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r)ᵍ := by
   simp only [GTranslation];
   apply LogicS4.kripkeCompletes;
   simp [GTranslation, Formula.FrameClassConsequence, Formula.FrameConsequence];
@@ -72,16 +72,16 @@ private lemma embed_Int_S4.case_imply₂ : ∅ ⊢ᴹ[(𝐒𝟒 : AxiomSet α)]!
   replace hF := by simpa using LogicS4.FrameClassDefinability.mpr (by assumption);
   exact hpqr w₄ (hF.right hw₂w₃ hw₃w₄) hp w₄ (hF.left _) (hpq w₄ (by assumption) hp);
 
-private lemma embed_Int_S4.case_conj₃ : ∅ ⊢ᴹ[(𝐒𝟒 : AxiomSet α)]! ((p ⟶ q ⟶ p ⋏ q))ᵍ := by
+private lemma embed_Int_S4.case_conj₃ : ∅ ⊢ᴹ[𝐒𝟒]! ((p ⟶ q ⟶ p ⋏ q))ᵍ := by
   simp only [GTranslation];
-  have : ∅ ⊢ᴹ[𝐊𝟒]! □(pᵍ ⟶ qᵍ ⟶ pᵍ ⋏ qᵍ) := necessitation! $ by apply conj₃!;
-  have : ∅ ⊢ᴹ[𝐊𝟒]! □pᵍ ⟶ □(qᵍ ⟶ pᵍ ⋏ qᵍ) := modus_ponens'! (by apply axiomK!) (by assumption);
+  have : ∅ ⊢ᴹ[𝐊𝟒]! □(pᵍ ⟶ qᵍ ⟶ pᵍ ⋏ qᵍ) := necessitation! $ by deduct;
+  have : ∅ ⊢ᴹ[𝐊𝟒]! □pᵍ ⟶ □(qᵍ ⟶ pᵍ ⋏ qᵍ) := (by deduct) ⨀ (by assumption);
   have : ∅ ⊢ᴹ[𝐊𝟒]! pᵍ ⟶ □(qᵍ ⟶ pᵍ ⋏ qᵍ) := imp_trans'! (by apply intAxiom4) (by assumption)
   have : ∅ ⊢ᴹ[𝐊𝟒]! □(pᵍ ⟶ □(qᵍ ⟶ pᵍ ⋏ qᵍ)) := necessitation! (by assumption)
   exact strong_K4_S4 (by assumption)
 
 /-- TODO: prove syntactically -/
-private lemma embed_Int_S4.case_disj₃ : ∅ ⊢ᴹ[(𝐒𝟒 : AxiomSet α)]! (((p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r)))ᵍ := by
+private lemma embed_Int_S4.case_disj₃ : ∅ ⊢ᴹ[𝐒𝟒]! (((p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r)))ᵍ := by
   apply LogicS4.kripkeCompletes;
   simp [GTranslation, Formula.FrameClassConsequence, Formula.FrameConsequence];
   intro F hF _ w₁ w₂ _ hp w₃ hw₂₃ hq w₄ hw₃₄ h;

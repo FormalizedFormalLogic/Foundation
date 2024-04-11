@@ -120,7 +120,7 @@ lemma maxm_subset {Λ Λ'} (dΛ : Γ ⊢ᴹ[Λ] p) : (Λ ⊆ Λ') → (Γ ⊢ᴹ
   | disj₃ => apply disj₃
   | dne => apply dne
 
-def modus_ponens' {Γ p q} : (Γ ⊢ᴹ[Λ] (p ⟶ q)) → (Γ ⊢ᴹ[Λ] p) → (Γ ⊢ᴹ[Λ] q) := Hilbert.modus_ponens'
+def modus_ponens' {Γ p q} : (Γ ⊢ᴹ[Λ] (p ⟶ q)) → (Γ ⊢ᴹ[Λ] p) → (Γ ⊢ᴹ[Λ] q) := Hilbert.modus_ponens₂
 
 private def dtrAux (Γ) (p q : Formula α) : (Γ ⊢ᴹ[Λ] q) → ((Γ \ {p}) ⊢ᴹ[Λ] (p ⟶ q))
   | maxm h          => modus_ponens' (imply₁ _ _ _) (maxm h)
@@ -137,12 +137,11 @@ private def dtrAux (Γ) (p q : Formula α) : (Γ ⊢ᴹ[Λ] q) → ((Γ \ {p}) �
   | dne _ _         => modus_ponens' (imply₁ _ _ _) (dne _ _)
   | @axm _ _ Γ q ih => by
     by_cases h : p = q
-    case pos =>
-      simpa [h] using Hilbert.imp_id
+    case pos => deduct;
     case neg =>
-      have d₁ : (Γ \ {p}) ⊢ᴹ[Λ] (q ⟶ p ⟶ q) := imply₁ _ q p
-      have d₂ : (Γ \ {p}) ⊢ᴹ[Λ] q := axm (Set.mem_diff_singleton.mpr ⟨ih, Ne.symm h⟩)
-      exact d₁.modus_ponens' d₂;
+      have : (Γ \ {p}) ⊢ᴹ[Λ] q ⟶ p ⟶ q := by deduct
+      have : (Γ \ {p}) ⊢ᴹ[Λ] q := by deduct
+      deduct
   | @modus_ponens _ _ Γ₁ Γ₂ a b h₁ h₂ =>
       have ih₁ : Γ₁ \ {p} ⊢ᴹ[Λ] p ⟶ a ⟶ b := dtrAux Γ₁ p (a ⟶ b) h₁
       have ih₂ : Γ₂ \ {p} ⊢ᴹ[Λ] p ⟶ a := dtrAux Γ₂ p a h₂
@@ -341,13 +340,13 @@ lemma or (hp : p₁ ⟷[Λ, Γ] p₂) (hq : q₁ ⟷[Λ, Γ] q₂) : ((p₁ ⋎ 
         apply dtr!;
         have d₁ : (insert p₁ (insert (p₁ ⋎ q₁) Γ)) ⊢ᴹ[Λ]! p₁ := axm! (by simp);
         have d₂ : (insert p₁ (insert (p₁ ⋎ q₁) Γ)) ⊢ᴹ[Λ]! p₁ ⟶ p₂ := weakening! Set.subset_insert_insert (iff_mp'! hp);
-        exact disj₁'! $ modus_ponens'! d₂ d₁;
+        exact disj₁'! $ modus_ponens₂! d₂ d₁;
       )
       (by
         apply dtr!;
         have d₁ : (insert q₁ (insert (p₁ ⋎ q₁) Γ)) ⊢ᴹ[Λ]! q₁ := axm! (by simp);
         have d₂ : (insert q₁ (insert (p₁ ⋎ q₁) Γ)) ⊢ᴹ[Λ]! q₁ ⟶ q₂ := weakening! Set.subset_insert_insert (iff_mp'! hq);
-        exact disj₂'! $ modus_ponens'! d₂ d₁;
+        exact disj₂'! $ modus_ponens₂! d₂ d₁;
       )
       (show insert (p₁ ⋎ q₁) Γ ⊢ᴹ[Λ]! (p₁ ⋎ q₁) by exact axm! (by simp));
   . apply dtr!;
@@ -356,13 +355,13 @@ lemma or (hp : p₁ ⟷[Λ, Γ] p₂) (hq : q₁ ⟷[Λ, Γ] q₂) : ((p₁ ⋎ 
         apply dtr!;
         have d₁ : (insert p₂ (insert (p₂ ⋎ q₂) Γ)) ⊢ᴹ[Λ]! p₂ := axm! (by simp);
         have d₂ : (insert p₂ (insert (p₂ ⋎ q₂) Γ)) ⊢ᴹ[Λ]! p₂ ⟶ p₁ := weakening! Set.subset_insert_insert (iff_mpr'! hp);
-        exact disj₁'! $ modus_ponens'! d₂ d₁;
+        exact disj₁'! $ modus_ponens₂! d₂ d₁;
       )
       (by
         apply dtr!;
         have d₁ : (insert q₂ (insert (p₂ ⋎ q₂) Γ)) ⊢ᴹ[Λ]! q₂ := axm! (by simp);
         have d₂ : (insert q₂ (insert (p₂ ⋎ q₂) Γ)) ⊢ᴹ[Λ]! q₂ ⟶ q₁ := weakening! Set.subset_insert_insert (iff_mpr'! hq);
-        exact disj₂'! $ modus_ponens'! d₂ d₁;
+        exact disj₂'! $ modus_ponens₂! d₂ d₁;
       )
       (show insert (p₂ ⋎ q₂) Γ ⊢ᴹ[Λ]! (p₂ ⋎ q₂) by exact axm! (by simp));
 
@@ -372,13 +371,13 @@ lemma and (hp : p₁ ⟷[Λ, Γ] p₂) (hq : q₁ ⟷[Λ, Γ] q₂) : ((p₁ ⋏
   . apply dtr!;
     have d : insert (p₁ ⋏ q₁) Γ ⊢ᴹ[Λ]!(p₁ ⋏ q₁) := axm! (by simp)
     exact conj₃'!
-      (modus_ponens'! (weakening! (by simp) $ iff_mp'! hp) (conj₁'! d))
-      (modus_ponens'! (weakening! (by simp) $ iff_mp'! hq) (conj₂'! d));
+      (modus_ponens₂! (weakening! (by simp) $ iff_mp'! hp) (conj₁'! d))
+      (modus_ponens₂! (weakening! (by simp) $ iff_mp'! hq) (conj₂'! d));
   . apply dtr!;
     have d : insert (p₂ ⋏ q₂) Γ ⊢ᴹ[Λ]!(p₂ ⋏ q₂) := axm! (by simp)
     exact conj₃'!
-      (modus_ponens'! (weakening! (by simp) $ iff_mpr'! hp) (conj₁'! d))
-      (modus_ponens'! (weakening! (by simp) $ iff_mpr'! hq) (conj₂'! d));
+      (modus_ponens₂! (weakening! (by simp) $ iff_mpr'! hp) (conj₁'! d))
+      (modus_ponens₂! (weakening! (by simp) $ iff_mpr'! hq) (conj₂'! d));
 
 lemma and_comm (p q : Formula α) : ((p ⋏ q) ⟷[Λ, Γ] (q ⋏ p)) := by
   simp_all only [DeducibleEquivalent];
@@ -397,14 +396,14 @@ lemma imp (hp : p₁ ⟷[Λ, Γ] p₂) (hq : q₁ ⟷[Λ, Γ] q₂) : ((p₁ ⟶
     apply dtr!;
     have d₁ : insert p₂ (insert (p₁ ⟶ q₁) Γ) ⊢ᴹ[Λ]! (p₁ ⟶ q₁) := axm! (by simp)
     have d₂ : insert p₂ (insert (p₁ ⟶ q₁) Γ) ⊢ᴹ[Λ]! p₂ := axm! (by simp)
-    have d₃ : insert p₂ (insert (p₁ ⟶ q₁) Γ) ⊢ᴹ[Λ]! q₁ := modus_ponens'! d₁ $ modus_ponens'! (weakening! Set.subset_insert_insert (iff_mpr'! hp)) d₂;
-    exact modus_ponens'! (weakening! Set.subset_insert_insert (iff_mp'! hq)) d₃;
+    have d₃ : insert p₂ (insert (p₁ ⟶ q₁) Γ) ⊢ᴹ[Λ]! q₁ := modus_ponens₂! d₁ $ modus_ponens₂! (weakening! Set.subset_insert_insert (iff_mpr'! hp)) d₂;
+    exact modus_ponens₂! (weakening! Set.subset_insert_insert (iff_mp'! hq)) d₃;
   . apply dtr!;
     apply dtr!;
     have d₁ : insert p₁ (insert (p₂ ⟶ q₂) Γ) ⊢ᴹ[Λ]! (p₂ ⟶ q₂) := axm! (by simp)
     have d₂ : insert p₁ (insert (p₂ ⟶ q₂) Γ) ⊢ᴹ[Λ]! p₁ := axm! (by simp)
-    have d₃ : insert p₁ (insert (p₂ ⟶ q₂) Γ) ⊢ᴹ[Λ]! q₂ := modus_ponens'! d₁ $ modus_ponens'! (weakening! Set.subset_insert_insert (iff_mp'! hp)) d₂;
-    exact modus_ponens'! (weakening! Set.subset_insert_insert (iff_mpr'! hq)) d₃;
+    have d₃ : insert p₁ (insert (p₂ ⟶ q₂) Γ) ⊢ᴹ[Λ]! q₂ := modus_ponens₂! d₁ $ modus_ponens₂! (weakening! Set.subset_insert_insert (iff_mp'! hp)) d₂;
+    exact modus_ponens₂! (weakening! Set.subset_insert_insert (iff_mpr'! hq)) d₃;
 
 lemma neg (h : p ⟷[Λ, Γ] q) : ((~p) ⟷[Λ, Γ] (~q)) := by
   simp [DeducibleEquivalent];
@@ -416,11 +415,11 @@ lemma box (h : p ⟷[Λ, ∅] q) : ((□p) ⟷[Λ, Γ] (□q)) := by
   simp_all only [DeducibleEquivalent];
   apply iff_intro!;
   . have d₁ : Γ ⊢ᴹ[Λ]! □(p ⟶ q) := necessitation! (iff_mp'! h);
-    have d₂ : Γ ⊢ᴹ[Λ]! □(p ⟶ q) ⟶ (□p ⟶ □q) := Hilbert.axiomK! Γ p q;
-    exact modus_ponens'! d₂ d₁;
+    have d₂ : Γ ⊢ᴹ[Λ]! □(p ⟶ q) ⟶ (□p ⟶ □q) := Hilbert.axiomK!
+    exact modus_ponens₂! d₂ d₁;
   . have d₁ : Γ ⊢ᴹ[Λ]! □(q ⟶ p) := necessitation! (iff_mpr'! h);
-    have d₂ : Γ ⊢ᴹ[Λ]! □(q ⟶ p) ⟶ (□q ⟶ □p) := Hilbert.axiomK! Γ q p;
-    exact modus_ponens'! d₂ d₁;
+    have d₂ : Γ ⊢ᴹ[Λ]! □(q ⟶ p) ⟶ (□q ⟶ □p) := Hilbert.axiomK!
+    exact modus_ponens₂! d₂ d₁;
 
 end DeducibleEquivalent
 

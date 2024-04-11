@@ -134,7 +134,7 @@ lemma maximal_consistent_iff_membership_deducible : (p ∈ Γ) ↔ (Γ ⊢ᴹ[Λ
     suffices ~p ∉ Γ by have := hMCΓ.2 p; aesop;
     by_contra hC;
     have h₂ : Γ ⊢ᴹ[Λ]! ~p := Hilbert.axm! hC;
-    exact consistent_subset_undeducible_falsum hMCΓ.1 Γ (by simp) (modus_ponens'! h₂ h);
+    exact consistent_subset_undeducible_falsum hMCΓ.1 Γ (by simp) (modus_ponens₂! h₂ h);
 
 lemma maximal_consistent_iff_not_membership_undeducible : (p ∉ Γ) ↔ (Γ ⊬ᴹ[Λ]! p) := by
   simpa using (maximal_consistent_iff_membership_deducible hMCΓ).not;
@@ -143,7 +143,7 @@ lemma maximal_consistent_modus_ponens' {p q : Formula β} : ((p ⟶ q) ∈ Γ) �
   intro hp hpq;
   have dp  := (maximal_consistent_iff_membership_deducible hMCΓ).mp hp;
   have dpq := (maximal_consistent_iff_membership_deducible hMCΓ).mp hpq;
-  exact (maximal_consistent_iff_membership_deducible hMCΓ).mpr $ modus_ponens'! dp dpq;
+  exact (maximal_consistent_iff_membership_deducible hMCΓ).mpr $ modus_ponens₂! dp dpq;
 
 lemma maximal_consistent_neg_membership_iff : (~p ∈ Γ) ↔ (p ∉ Γ) := by
   constructor;
@@ -151,7 +151,7 @@ lemma maximal_consistent_neg_membership_iff : (~p ∈ Γ) ↔ (p ∉ Γ) := by
     by_contra hC;
     have hp : ({p, ~p}) ⊢ᴹ[Λ]! p := axm! (by simp);
     have hnp : ({p, ~p}) ⊢ᴹ[Λ]! ~p := axm! (by simp);
-    apply consistent_subset_undeducible_falsum hMCΓ.1 {p, ~p} (by aesop;) (modus_ponens'! hnp hp);
+    apply consistent_subset_undeducible_falsum hMCΓ.1 {p, ~p} (by aesop;) (hnp ⨀ hp);
   . have := hMCΓ.2 p; aesop;
 
 lemma maximal_consistent_imp_membership_iff : (p ⟶ q ∈ Γ) ↔ (p ∉ Γ) ∨ (q ∈ Γ) := by
@@ -161,7 +161,7 @@ lemma maximal_consistent_imp_membership_iff : (p ⟶ q ∈ Γ) ↔ (p ∉ Γ) �
     apply (maximal_consistent_iff_membership_deducible hMCΓ).mpr;
     have hp : ({p, p ⟶ q}) ⊢ᴹ[Λ]! p := axm! (by simp);
     have hpq : ({p, p ⟶ q}) ⊢ᴹ[Λ]! p ⟶ q := axm! (by simp);
-    exact weakening! (by aesop) $ modus_ponens'! hpq hp;
+    exact weakening! (by aesop) $ modus_ponens₂! hpq hp;
   . intros h;
     cases h;
     case inl h =>
@@ -169,17 +169,17 @@ lemma maximal_consistent_imp_membership_iff : (p ⟶ q ∈ Γ) ↔ (p ∉ Γ) �
       have d₁ : Γ ⊢ᴹ[Λ]! (~p ⟶ (p ⟶ q)) := by
         have dp : ({p, ~p}) ⊢ᴹ[Λ]! p := axm! (by simp);
         have dnp : ({p, ~p}) ⊢ᴹ[Λ]! (~p) := axm! (by simp);
-        have h₂ : ({p, ~p}) ⊢ᴹ[Λ]! q := efq'! $ modus_ponens'! (by simpa using dnp) dp;
+        have h₂ : ({p, ~p}) ⊢ᴹ[Λ]! q := efq'! $ dnp ⨀ dp;
         have h₃ : ∅ ⊢ᴹ[Λ]! ~p ⟶ (p ⟶ q) := dtr! (by simpa using dtr! h₂);
         exact weakening! (by simp) h₃;
       have d₂ : Γ ⊢ᴹ[Λ]! ~p := axm! (by simpa)
       apply (maximal_consistent_iff_membership_deducible hMCΓ).mpr;
-      exact modus_ponens'! d₁ d₂;
+      exact d₁ ⨀ d₂;
     case inr h =>
-      have d₁ : Γ ⊢ᴹ[Λ]! (q ⟶ (p ⟶ q)) := imply₁! _ _ _;
+      have d₁ : Γ ⊢ᴹ[Λ]! (q ⟶ (p ⟶ q)) := imply₁!;
       have d₂ : Γ ⊢ᴹ[Λ]! q := axm! h;
       apply (maximal_consistent_iff_membership_deducible hMCΓ).mpr;
-      exact modus_ponens'! d₁ d₂;
+      exact d₁ ⨀ d₂;
 
 lemma maximal_consistent_imp_membership_iff' : (p ⟶ q ∈ Γ) ↔ ((p ∈ Γ) → (q ∈ Γ)) := by
   constructor;
@@ -269,11 +269,11 @@ lemma iff_congr : (Ω.theory ⊢ᴹ[Λ]! (p ⟷ q)) → ((p ∈ Ω) ↔ (q ∈ �
   simp only [LogicalConnective.iff] at hpq;
   constructor;
   . intro hp;
-    exact membership_iff.mpr $ modus_ponens'! (conj₁'! hpq) (membership_iff.mp hp)
+    exact membership_iff.mpr $ (conj₁'! hpq) ⨀ (membership_iff.mp hp)
   . intro hq;
-    exact membership_iff.mpr $ modus_ponens'! (conj₂'! hpq) (membership_iff.mp hq)
+    exact membership_iff.mpr $ (conj₂'! hpq) ⨀ (membership_iff.mp hq)
 
-lemma dn_membership_iff : (p ∈ Ω) ↔ (~~p ∈ Ω) := iff_congr (equiv_dn! Ω.theory p)
+lemma dn_membership_iff : (p ∈ Ω) ↔ (~~p ∈ Ω) := iff_congr $ equiv_dn!
 
 lemma neg_membership_iff : (~p ∈ Ω) ↔ (p ∉ Ω) := maximal_consistent_neg_membership_iff (Ω.mc)
 
@@ -309,26 +309,23 @@ lemma box_dn_iff {p : Formula β} : (□p ∈ Ω) ↔ (□(~~p) ∈ Ω) := by
   constructor;
   . intro h;
     apply membership_iff.mpr;
-    have : Ω.theory ⊢ᴹ[Λ]! □(p ⟶ ~~p) := weakening! (show ∅ ⊆ Ω.theory by simp) $ necessitation! $ dni! ∅ _;
+    have : Ω.theory ⊢ᴹ[Λ]! □(p ⟶ ~~p) := weakening! (show ∅ ⊆ Ω.theory by simp) $ necessitation! $ dni!;
     have : Ω.theory ⊢ᴹ[Λ]! □p := membership_iff.mp h;
     have : Ω.theory ⊢ᴹ[Λ]! □~~p := axiomK'! (by assumption) (by assumption);
     assumption;
   . intro h;
     apply membership_iff.mpr;
-    have : Ω.theory ⊢ᴹ[Λ]! □(~~p ⟶ p) := weakening! (show ∅ ⊆ Ω.theory by simp) $ necessitation! $ dne! ∅ _;
+    have : Ω.theory ⊢ᴹ[Λ]! □(~~p ⟶ p) := weakening! (show ∅ ⊆ Ω.theory by simp) $ necessitation! $ dne!;
     have : Ω.theory ⊢ᴹ[Λ]! □~~p := membership_iff.mp h;
     have : Ω.theory ⊢ᴹ[Λ]! □p := axiomK'! (by assumption) (by assumption);
     assumption;
 
 lemma dia_dn_iff {p : Formula β} : (◇p ∈ Ω) ↔ (◇(~(~p)) ∈ Ω) := by
-  have := Deduction.ofKSubset hK;
-  simp [-NegDefinition.neg];
   apply neg_iff;
   apply box_dn_iff;
   assumption;
 
 lemma box_dual {p : Formula β} : (□p ∈ Ω) ↔ (~(◇(~p)) ∈ Ω) := by
-  simp [-NegDefinition.neg];
   constructor;
   . intro h;
     apply dn_membership_iff.mp;
@@ -344,15 +341,15 @@ lemma multibox_dual {n : ℕ} {p : Formula β} : (□[n]p ∈ Ω) ↔ (~(◇[n](
 
   constructor;
   . intro h;
-    have : Ω.theory ⊢ᴹ[Λ]! ~(◇[n](~p)) := modus_ponens'! (iff_mp'! d) $ membership_iff.mp h;
+    have : Ω.theory ⊢ᴹ[Λ]! ~(◇[n](~p)) := (iff_mp'! d) ⨀ (membership_iff.mp h);
     apply membership_iff.mpr;
     assumption;
   . intro h;
-    have : Ω.theory ⊢ᴹ[Λ]! □[n]p := modus_ponens'! (iff_mpr'! d) $ membership_iff.mp h;
+    have : Ω.theory ⊢ᴹ[Λ]! □[n]p := (iff_mpr'! d) ⨀ (membership_iff.mp h);
     apply membership_iff.mpr;
     assumption;
 
-lemma dia_dual {p : Formula β} : (◇p ∈ Ω) ↔ (~(□(~p)) ∈ Ω) := by simp;
+lemma dia_dual {p : Formula β} : (◇p ∈ Ω) ↔ (~(□(~p)) ∈ Ω) := by simp [ModalDuality.dia_to_box];
 
 lemma multidia_dual {n : ℕ} {p : Formula β} : (◇[n]p ∈ Ω) ↔ (~(□[n](~p)) ∈ Ω) := by
   have := Deduction.ofKSubset hK;
@@ -362,17 +359,17 @@ lemma multidia_dual {n : ℕ} {p : Formula β} : (◇[n]p ∈ Ω) ↔ (~(□[n](
 
   constructor;
   . intro h;
-    have : Ω.theory ⊢ᴹ[Λ]! ~(□[n](~p)) := modus_ponens'! (iff_mp'! d) $ membership_iff.mp h;
+    have : Ω.theory ⊢ᴹ[Λ]! ~(□[n](~p)) := (iff_mp'! d) ⨀ membership_iff.mp h;
     apply membership_iff.mpr;
     assumption;
   . intro h;
-    have : Ω.theory ⊢ᴹ[Λ]! ◇[n]p := modus_ponens'! (iff_mpr'! d) $ membership_iff.mp h;
+    have : Ω.theory ⊢ᴹ[Λ]! ◇[n]p := (iff_mpr'! d) ⨀ membership_iff.mp h;
     apply membership_iff.mpr;
     assumption;
 
 lemma multidia_prepost {n : ℕ} {p : Formula β} : (◇◇[n]p ∈ Ω) ↔ (◇[n](◇p) ∈ Ω) := by simp only [Dia.multidia_prepost];
 
-lemma mutlidia_prepost' {n : ℕ} {p : Formula β} : (◇[(n + 1)]p ∈ Ω) ↔ (◇[n](◇p) ∈ Ω) := by simp [Dia.multidia_prepost, -ModalDuality.dia_to_box, -NegDefinition.neg];
+lemma mutlidia_prepost' {n : ℕ} {p : Formula β} : (◇[(n + 1)]p ∈ Ω) ↔ (◇[n](◇p) ∈ Ω) := by simp [Dia.multidia_prepost];
 
 @[simp]
 lemma no_falsum : ⊥ ∉ Ω := consistent_no_falsum Ω.consitent
@@ -551,9 +548,9 @@ lemma multiframe_box : (CanonicalModel Λ).frame[n] Ω₁ Ω₂ ↔ (∀ {p : Fo
         have e : (◇[n](◇⁻¹[n]Δ₂) : Context β) = Δ₂ := by simpa using premultidia_multidia_eq_of_subset_multidia hΔ₂;
 
         have : ⋀(◇⁻¹[n]Δ₂) ∉ Ω₂ := by
-          have : ∅ ⊢ᴹ[Λ]! ~⋀(Δ₁ ∪ Δ₂) := by simpa using finset_dt!.mp (by simpa using hUd);
+          have : ∅ ⊢ᴹ[Λ]! ~⋀(Δ₁ ∪ Δ₂) := by simpa [NegDefinition.neg] using finset_dt!.mp (by simpa using hUd);
           have : ∅ ⊢ᴹ[Λ]! ~⋀(Δ₁ ∪ Δ₂) ⟶ ~(⋀Δ₁ ⋏ ⋀Δ₂) := contra₀'! $ iff_mpr'! $ finset_union_conj!;
-          have : ∅ ⊢ᴹ[Λ]! ~(⋀Δ₁ ⋏ ⋀Δ₂) := modus_ponens'! (by assumption) (by assumption);
+          have : ∅ ⊢ᴹ[Λ]! ~(⋀Δ₁ ⋏ ⋀Δ₂) := (by assumption) ⨀ (by assumption);
           have : ∅ ⊢ᴹ[Λ]! ◇[n](⋀◇⁻¹[n]Δ₂) ⟶ ⋀(◇[n](◇⁻¹[n]Δ₂)) := by apply distribute_multidia_finset_conj!;
           have : ∅ ⊢ᴹ[Λ]! ◇[n](⋀◇⁻¹[n]Δ₂) ⟶ ⋀Δ₂ := by simpa only [e];
           have : ∅ ⊢ᴹ[Λ]! ~⋀Δ₂ ⟶ ~(◇[n](⋀(◇⁻¹[n]Δ₂))) := contra₀'! (by assumption)
@@ -562,7 +559,7 @@ lemma multiframe_box : (CanonicalModel Λ).frame[n] Ω₁ Ω₂ ↔ (∀ {p : Fo
           have : ∅ ⊢ᴹ[Λ]! ~(◇[n](⋀(◇⁻¹[n]Δ₂))) ⟶ (□[n](~(⋀◇⁻¹[n]Δ₂))) := contra₂'! $ iff_mpr'! $ multidia_duality!;
           have : ∅ ⊢ᴹ[Λ]! ⋀Δ₁ ⟶ □[n](~⋀◇⁻¹[n]Δ₂) := imp_trans'! (by assumption) (by assumption);
           have : Ω₁ ⊢ᴹ[Λ]! □⋀Δ₁ ⟶ □[(n + 1)](~(⋀◇⁻¹[n]Δ₂)) := box_distribute_nec'! (by assumption);
-          have : Ω₁ ⊢ᴹ[Λ]! □[(n + 1)](~⋀◇⁻¹[n]Δ₂) := modus_ponens'! (by assumption) (membership_iff.mp h₁);
+          have : Ω₁ ⊢ᴹ[Λ]! □[(n + 1)](~⋀◇⁻¹[n]Δ₂) := (by assumption) ⨀ (membership_iff.mp h₁);
           have : □[(n + 1)](~⋀◇⁻¹[n]Δ₂) ∈ Ω₁ := membership_iff.mpr (by assumption);
           exact neg_membership_iff.mp $ h (by assumption);
 
@@ -584,63 +581,6 @@ lemma multiframe_dia : (CanonicalModel Λ).frame[n] Ω₁ Ω₂ ↔ (∀ {p : Fo
 
 @[simp]
 lemma val_def {a : β} : (CanonicalModel Λ).val Ω a ↔ (atom a) ∈ Ω := by rfl
-
-@[simp]
-lemma axiomT (hT : 𝐓 ⊆ Λ) : Reflexive (CanonicalModel Λ).frame := by
-  intro Ω p hp;
-  have d₁ : Ω.theory ⊢ᴹ[Λ]! (□p ⟶ p) := Deducible.maxm! (hT $ (by apply AxiomT.set.include));
-  apply Ω.modus_ponens' (membership_iff.mpr d₁) hp;
-
-@[simp]
-lemma axiomD (hD : 𝐃 ⊆ Λ) : Serial (CanonicalModel Λ).frame := by
-  have := Deduction.instBoxedNecessitation hK; -- TODO: it can be removed?
-
-  intro Ω;
-  simp [frame_def];
-  suffices h : Consistent Λ (□⁻¹Ω.theory) by exact exists_maximal_consistent_theory h;
-  by_contra hC;
-  simp [Theory.Consistent, Theory.Inconsistent] at hC;
-  have d₁ : Ω.theory ⊢ᴹ[Λ]! □⊥ := preboxed_necessitation! (Deduction.not_consistent.mp hC);
-  have d₂ : Ω.theory ⊢ᴹ[Λ]! (□⊥ ⟶ ◇⊥) := Deducible.maxm! (hD $ (by apply AxiomD.set.include));
-  have d₃ : Ω.theory ⊢ᴹ[Λ]! ~(◇⊥) := dni'! $ boxverum! Ω.theory;
-  have d₄ : Ω.theory ⊢ᴹ[Λ]! ◇⊥ := modus_ponens'! d₂ d₁;
-  have d₅ : Ω.theory ⊢ᴹ[Λ]! ⊥ := modus_ponens'! d₃ d₄;
-  exact consistent_undeducible_falsum Ω.consitent d₅;
-
-@[simp]
-lemma axiomB (hB : 𝐁 ⊆ Λ) : Symmetric (CanonicalModel Λ).frame := by
-  intro Ω₁ Ω₂ h;
-  simp [frame_def] at h;
-  simp [(frame_def' hK)];
-  intro p hp;
-  have ⟨q, hq, _⟩ := Set.dia_mem_iff.mp hp;
-  have d₁ : Ω₁.theory ⊢ᴹ[Λ]! q := membership_iff.mp hq;
-  have d₂ : Ω₁.theory ⊢ᴹ[Λ]! (q ⟶ □◇q) := Deducible.maxm! (hB $ (by apply AxiomB.set.include));
-  have d₃ : Ω₁.theory ⊢ᴹ[Λ]! □◇q := modus_ponens'! d₂ d₁;
-  have := membership_iff.mpr d₃;
-  aesop
-
-@[simp]
-lemma axiom4 (h4 : 𝟒 ⊆ Λ) : Transitive (CanonicalModel Λ).frame := by
-  intro Ω₁ Ω₂ Ω₃ h₁₂ h₂₃ p hp;
-  apply h₂₃;
-  apply h₁₂;
-  have d₁ : Ω₁.theory ⊢ᴹ[Λ]! (□p ⟶ □□p) := Deducible.maxm! (h4 $ (by apply Axiom4.set.include));
-  exact Ω₁.modus_ponens' (membership_iff.mpr d₁) hp;
-
-@[simp]
-lemma axiom5 (h5 : 𝟓 ⊆ Λ) : Euclidean (CanonicalModel Λ).frame := by
-  intro Ω₁ Ω₂ Ω₃ h₁₂ h₁₃;
-  simp [frame_def] at h₁₂;
-  simp [(frame_def' hK)] at h₁₃;
-  simp [(frame_def' hK)];
-  intro p hp;
-  have ⟨q, _, _⟩ := Set.dia_mem_iff.mp hp;
-  have d₁ : Ω₁.theory ⊢ᴹ[Λ]! ◇q := axm! (by aesop)
-  have d₂ : Ω₁.theory ⊢ᴹ[Λ]! ◇q ⟶ □◇q := Deducible.maxm! (h5 $ (by apply Axiom5.set.include));
-  have d₃ : Ω₁.theory ⊢ᴹ[Λ]! □◇q := modus_ponens'! d₂ d₁;
-  have := membership_iff.mpr d₃;
-  aesop;
 
 end CanonicalModel
 

@@ -211,8 +211,6 @@ attribute [simp] DeMorgan.verum DeMorgan.falsum DeMorgan.and DeMorgan.or DeMorga
 class NegDefinition (F : Type*) [LogicalConnective F] where
   neg {p : F} : ~p = p ⟶ ⊥
 
-attribute [simp] NegDefinition.neg
-
 namespace LogicalConnective
 
 section

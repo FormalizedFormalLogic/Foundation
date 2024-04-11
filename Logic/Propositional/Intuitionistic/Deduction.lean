@@ -82,31 +82,29 @@ instance : Hilbert.Intuitionistic (· ⊢ · : Theory α → Formula α → Type
   efq          := efq
 
 private def dtrAux (Γ : Theory α) (p q) : Γ ⊢ q → (Γ \ {p}) ⊢ p ⟶ q
-  | verum _         => modus_ponens' (imply₁ _ _ _) (verum _)
-  | imply₁ _ _ _    => modus_ponens' (imply₁ _ _ _) (imply₁ _ _ _)
-  | imply₂ _ _ _ _  => modus_ponens' (imply₁ _ _ _) (imply₂ _ _ _ _)
-  | conj₁ _ _ _     => modus_ponens' (imply₁ _ _ _) (conj₁ _ _ _)
-  | conj₂ _ _ _     => modus_ponens' (imply₁ _ _ _) (conj₂ _ _ _)
-  | conj₃ _ _ _     => modus_ponens' (imply₁ _ _ _) (conj₃ _ _ _)
-  | disj₁ _ _ _     => modus_ponens' (imply₁ _ _ _) (disj₁ _ _ _)
-  | disj₂ _ _ _     => modus_ponens' (imply₁ _ _ _) (disj₂ _ _ _)
-  | disj₃ _ _ _ _   => modus_ponens' (imply₁ _ _ _) (disj₃ _ _ _ _)
-  | efq _ _         => modus_ponens' (imply₁ _ _ _) (efq _ _)
+  | verum _         => modus_ponens₂ (imply₁ _ _ _) (verum _)
+  | imply₁ _ _ _    => modus_ponens₂ (imply₁ _ _ _) (imply₁ _ _ _)
+  | imply₂ _ _ _ _  => modus_ponens₂ (imply₁ _ _ _) (imply₂ _ _ _ _)
+  | conj₁ _ _ _     => modus_ponens₂ (imply₁ _ _ _) (conj₁ _ _ _)
+  | conj₂ _ _ _     => modus_ponens₂ (imply₁ _ _ _) (conj₂ _ _ _)
+  | conj₃ _ _ _     => modus_ponens₂ (imply₁ _ _ _) (conj₃ _ _ _)
+  | disj₁ _ _ _     => modus_ponens₂ (imply₁ _ _ _) (disj₁ _ _ _)
+  | disj₂ _ _ _     => modus_ponens₂ (imply₁ _ _ _) (disj₂ _ _ _)
+  | disj₃ _ _ _ _   => modus_ponens₂ (imply₁ _ _ _) (disj₃ _ _ _ _)
+  | efq _ _         => modus_ponens₂ (imply₁ _ _ _) (efq _ _)
   | @axm _ Γ q ih => by
     by_cases h : p = q
-    case pos =>
-      simpa [h] using Hilbert.imp_id;
+    case pos => deduct
     case neg =>
-      have d₁ : (Γ \ {p}) ⊢ (q ⟶ p ⟶ q) := imply₁ _ q p
-      have d₂ : (Γ \ {p}) ⊢ q := axm (Set.mem_diff_singleton.mpr ⟨ih, Ne.symm h⟩)
-      exact modus_ponens' d₁ d₂;
+      have d₁ : (Γ \ {p}) ⊢ (q ⟶ p ⟶ q) := by deduct
+      have d₂ : (Γ \ {p}) ⊢ q := by deduct
+      deduct
   | @modusPonens _ Γ a b h₁ h₂ =>
-      have ih₁ : Γ \ {p} ⊢ p ⟶ a ⟶ b := dtrAux Γ p (a ⟶ b) h₁
-      have ih₂ : Γ \ {p} ⊢ p ⟶ a := dtrAux Γ p a h₂
-      have := modus_ponens' (Hilbert.imply₂ _ p a b) ih₁
-      have d₁ : ((Γ) \ {p}) ⊢ (p ⟶ a) ⟶ p ⟶ b := modus_ponens' (Hilbert.imply₂ _ p a b) ih₁ |> LO.Deduction.weakening' (by simp)
-      have d₂ : ((Γ) \ {p}) ⊢ (p ⟶ a) := ih₂.weakening' (by simp)
-      modus_ponens' d₁ d₂
+      have ih₁ : Γ \ {p} ⊢ p ⟶ a ⟶ b := dtrAux Γ p (a ⟶ b) h₁;
+      have ih₂ : Γ \ {p} ⊢ p ⟶ a := dtrAux Γ p a h₂;
+      have d₁ : Γ \ {p} ⊢ (p ⟶ a) ⟶ p ⟶ b := (by deduct) ⨀ ih₁;
+      have d₂ : Γ \ {p} ⊢ (p ⟶ a) := ih₂.weakening' (by simp);
+      d₁ ⨀ d₂
 
 def dtr {Γ : Theory α} {p q} (d : (insert p Γ) ⊢ q) : (Γ ⊢ (p ⟶ q)) := by
   exact dtrAux (insert p Γ) p q d |> LO.Deduction.weakening' (by simp)
@@ -121,7 +119,7 @@ def compact {Γ : Theory α} {p} : Γ ⊢ p → (Δ : { Δ : Context α | ↑Δ 
       simp at hs₁ d₁ hs₂ d₂;
       exact ⟨
         ⟨Δ₁ ∪ Δ₂, by simp [hs₁, hs₂, Set.subset_union_of_subset_left, Set.subset_union_of_subset_right];⟩,
-        by simpa using modus_ponens' (LO.Deduction.weakening' (by simp) d₁) (LO.Deduction.weakening' (by simp) d₂)
+        by simpa using modus_ponens₂ (LO.Deduction.weakening' (by simp) d₁) (LO.Deduction.weakening' (by simp) d₂)
       ⟩
   | verum _         => ⟨⟨∅, by simp⟩, verum _⟩
   | imply₁ _ _ _    => ⟨⟨∅, by simp⟩, imply₁ _ _ _⟩
