@@ -131,7 +131,7 @@ open Deduction
 
 section Deductions
 
-variable [hM : Minimal Bew] [HasDT Bew]
+variable [HasModusPonens Bew] [Minimal Bew] [HasDT Bew]
 -- variable [HasEFQ Bew] [HasDNE Bew] [HasLEM Bew]
 variable {Γ Γ₁ Γ₂ : Set F} {p q r : F}
 
