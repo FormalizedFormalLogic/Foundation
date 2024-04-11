@@ -60,7 +60,7 @@ variable {Bew : Set F → F → Type u}
 local infixr:50 " ⊢ " => Bew
 local infixr:50 " ⊢! " => Deducible Bew
 
-variable [ModalDuality F] [ModalInj F]
+variable [ModalDuality F] [ModalInjective F]
 variable [HasDT Bew] [Minimal Bew] [Classical Bew]
 variable [HasNecessitation Bew] [HasBoxedNecessitation Bew]
 variable [HasAxiomK Bew]
@@ -291,29 +291,19 @@ lemma collect_box_conj! : Γ ⊢! □p ⋏ □q ⟶ □(p ⋏ q) := ⟨collect_b
 @[tautology]
 def box_conj_iff : Γ ⊢ □(p ⋏ q) ⟷ □p ⋏ □q := by deduct
 
-def pick_box_finset_conj {Γ : Set F} {Δ : Finset F} (h : Γ ⊢ □(Δ.conj)) : ∀ p ∈ Δ, Γ ⊢ □p := by sorry;
+lemma box_finset_conj_iff! {Γ : Set F} {Δ : Finset F} : Γ ⊢! □(Δ.conj) ↔ ∀ p ∈ Δ, Γ ⊢! □p := by sorry
 
-lemma pick_box_finset_conj! {Γ : Set F} {Δ : Finset F} (h : Γ ⊢! □(Δ.conj)) : ∀ p ∈ Δ, Γ ⊢! □p := by
-  intros p hp;
-  have : Γ ⊢ □p := pick_box_finset_conj h.some p hp;
-  exact ⟨this⟩
-
-def pick_multibox_finset_conj {Γ : Set F} {Δ : Finset F} (h : Γ ⊢ □[n]Δ.conj) : ∀ p ∈ Δ, Γ ⊢ □[n]p := by sorry;
-
-lemma pick_multibox_finset_conj! {Γ : Set F} {Δ : Finset F} (h : Γ ⊢! □[n]Δ.conj) : ∀ p ∈ Δ, Γ ⊢! □[n]p := by
-  intros p hp;
-  have : Γ ⊢ □[n]p := pick_multibox_finset_conj h.some p hp;
-  exact ⟨this⟩
-
-def collect_box_finset_conj {Γ : Set F} {Δ : Finset F} (h : ∀ p ∈ Δ, Γ ⊢ □p) : Γ ⊢ □(Δ.conj) := by sorry;
-
-lemma collect_box_finset_conj! {Γ : Set F} {Δ : Finset F} (h : ∀ p ∈ Δ, Γ ⊢! □p) : Γ ⊢! □(Δ.conj) := by
-  exact ⟨collect_box_finset_conj (by intro p hp; exact h p hp |>.some)⟩
-
-def collect_multibox_finset_conj {Γ : Set F} {Δ : Finset F} (h : ∀ p ∈ Δ, Γ ⊢ □[n]p) : Γ ⊢ □[n]Δ.conj := by sorry;
-
-lemma collect_multibox_finset_conj! {Γ : Set F} {Δ : Finset F} (h : ∀ p ∈ Δ, Γ ⊢! □[n]p) : Γ ⊢! □[n]Δ.conj := by
-  exact ⟨collect_multibox_finset_conj (by intro p hp; exact h p hp |>.some)⟩
+lemma multibox_finset_conj_iff! {Γ : Set F} {Δ : Finset F} : Γ ⊢! □[n](Δ.conj) ↔ ∀ p ∈ Δ, Γ ⊢! □[n]p := by
+  induction n generalizing Δ with
+  | zero => apply finset_conj_iff!;
+  | succ n ih =>
+    constructor;
+    . intro h p hp;
+      simpa [Box.multibox_prepost] using @ih (Δ.box) |>.mp (by
+        sorry
+      ) (□p) (by simpa [Finset.box] using hp)
+    . intro h;
+      sorry;
 
 @[inference]
 def collect_box_disj' (d : Γ ⊢ □p ⋎ □q) : Γ ⊢ □(p ⋎ q) := by
@@ -333,15 +323,15 @@ def distribute_dia_conj : Γ ⊢ ◇(p ⋏ q) ⟶ (◇p ⋏ ◇q) := by
   have : (insert (~(~(□~p) ⋏ ~(□~q))) Γ) ⊢ □~p ⋎ □~q := disj_dn_elim' $ neg_conj' (by assumption);
   have : (insert (~(~(□~p) ⋏ ~(□~q))) Γ) ⊢ □(~p ⋎ ~q) := collect_box_disj' (by assumption);
   have : (insert (~(~(□~p) ⋏ ~(□~q))) Γ) ⊢ □(~p ⋎ ~q) ⟶ □(~(p ⋏ q)) := box_distribute_nec' disj_neg;
-  exact modus_ponens₂ (by assumption) (by assumption);
+  exact modus_ponens₂' (by assumption) (by assumption);
 
 @[inference]
 def distribute_dia_conj' (d : Γ ⊢ ◇(p ⋏ q)) : Γ ⊢ ◇p ⋏ ◇q := distribute_dia_conj ⨀ d
 
 def distribute_multidia_conj' (d : Γ ⊢ ◇[n](p ⋏ q)) : Γ ⊢ ◇[n]p ⋏ ◇[n]q := by
-  induction n generalizing Γ with
+  induction n with
   | zero => deduct
-  | succ n ih => sorry; -- simp_all only [Dia.multidia];
+  | succ n ih => sorry; -- apply distribute_dia_conj';
 
 lemma distribute_multidia_finset_conj'! {Γ : Set F} {Δ : Finset F} (d : Γ ⊢! ◇[n]Δ.conj) : Γ ⊢! (Δ.multidia n).conj := by
   sorry;
@@ -351,12 +341,19 @@ lemma distribute_multidia_finset_conj! {n : ℕ} {Γ : Set F} {Δ : Finset F} : 
   apply distribute_multidia_finset_conj'!;
   apply axm! (by simp);
 
+@[tautology]
 def collect_dia_disj : Γ ⊢ ◇p ⋎ ◇q ⟶ ◇(p ⋎ q) := by
   simp [ModalDuality.dia_to_box];
   apply contra₁';
   apply dtr;
-  sorry;
+  apply conj_neg';
+  apply conj_dn_intro';
+  have : (insert (□~(p ⋎ q)) Γ) ⊢ □~(p ⋎ q) ⟶ □(~p ⋏ ~q) := by deduct
+  have : (insert (□~(p ⋎ q)) Γ) ⊢ □(~p ⋏ ~q) := this ⨀ (by deduct)
+  have : (insert (□~(p ⋎ q)) Γ) ⊢ □~p ⋏ □~q := by deduct
+  exact conj₃' (conj₁' (by deduct)) (conj₂' (by deduct));
 
+@[inference]
 def collect_dia_disj' (d : Γ ⊢ ◇p ⋎ ◇q) : Γ ⊢ ◇(p ⋎ q) := collect_dia_disj ⨀ d
 
 variable [HasAxiom4 Bew]

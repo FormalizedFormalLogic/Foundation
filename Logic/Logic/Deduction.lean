@@ -142,28 +142,28 @@ macro "inference" : attr =>
   `(attr|aesop unsafe (rule_sets := [$(Lean.mkIdent `Deduction):ident]))
 
 @[inference]
-def modus_ponens (d₁ : Γ₁ ⊢ p ⟶ q) (d₂ : Γ₂ ⊢ p) : (Γ₁ ∪ Γ₂) ⊢ q := HasModusPonens.modus_ponens d₁ d₂
-infixl:90 "⨀" => modus_ponens
+def modus_ponens' (d₁ : Γ₁ ⊢ p ⟶ q) (d₂ : Γ₂ ⊢ p) : (Γ₁ ∪ Γ₂) ⊢ q := HasModusPonens.modus_ponens d₁ d₂
+infixl:90 "⨀" => modus_ponens'
 
  @[inference]
-lemma modus_ponens! (d₁ : Γ₁ ⊢! p ⟶ q) (d₂ : Γ₂ ⊢! p) : Γ₁ ∪ Γ₂ ⊢! q := ⟨d₁.some ⨀ d₂.some⟩
-infixl:90 "⨀" => modus_ponens!
+lemma modus_ponens'! (d₁ : Γ₁ ⊢! p ⟶ q) (d₂ : Γ₂ ⊢! p) : Γ₁ ∪ Γ₂ ⊢! q := ⟨d₁.some ⨀ d₂.some⟩
+infixl:90 "⨀" => modus_ponens'!
 
 @[inference, aesop 4 safe forward (rule_sets := [Deduction])]
-def modus_ponens₂ (d₁ : Γ ⊢ p ⟶ q) (d₂ : Γ ⊢ p) : Γ ⊢ q := by simpa using d₁ ⨀ d₂
-infixl:90 "⨀" => modus_ponens₂
+def modus_ponens₂' (d₁ : Γ ⊢ p ⟶ q) (d₂ : Γ ⊢ p) : Γ ⊢ q := by simpa using d₁ ⨀ d₂
+infixl:90 "⨀" => modus_ponens₂'
 
 @[inference, aesop 4 safe forward (rule_sets := [Deduction])]
-lemma modus_ponens₂! (d₁ : Γ ⊢! (p ⟶ q)) (d₂ : Γ ⊢! p) : Γ ⊢! q := by simpa using modus_ponens! d₁ d₂
-infixl:90 "⨀" => modus_ponens₂!
+lemma modus_ponens₂'! (d₁ : Γ ⊢! (p ⟶ q)) (d₂ : Γ ⊢! p) : Γ ⊢! q := ⟨d₁.some ⨀ d₂.some⟩
+infixl:90 "⨀" => modus_ponens₂'!
 
 open Lean.Parser.Tactic (config)
 
 macro "deduct" (config)? : tactic =>
-  `(tactic| aesop (rule_sets := [$(Lean.mkIdent `Deduction):ident]) (config := { terminal := false }))
+  `(tactic| aesop (rule_sets := [$(Lean.mkIdent `Deduction):ident]) (config := { terminal := false, maxRuleApplications := 500 }))
 
 macro "deduct?" (config)? : tactic =>
-  `(tactic| aesop? (rule_sets := [$(Lean.mkIdent `Deduction):ident]) (config := { terminal := false }))
+  `(tactic| aesop? (rule_sets := [$(Lean.mkIdent `Deduction):ident]) (config := { terminal := false, maxRuleApplications := 500 }))
 
 -- set_option trace.aesop true
 
@@ -255,7 +255,7 @@ lemma disj₂'! (d : Γ ⊢! q) : Γ ⊢! (p ⋎ q) := ⟨disj₂' d.some⟩
 def disj₃' (d₁ : Γ ⊢ (p ⟶ r)) (d₂ : Γ ⊢ (q ⟶ r)) (d₃ : Γ ⊢ (p ⋎ q)) : Γ ⊢ r := disj₃ ⨀ d₁ ⨀ d₂ ⨀ d₃
 lemma disj₃'! {Γ : Set F} {p q r : F} (d₁ : Γ ⊢! (p ⟶ r)) (d₂ : Γ ⊢! (q ⟶ r)) (d₃ : Γ ⊢! (p ⋎ q)) : Γ ⊢! r := ⟨disj₃' d₁.some d₂.some d₃.some⟩
 
-def dtl (h : Γ ⊢ p ⟶ q) : (insert p Γ) ⊢ q := modus_ponens₂ (weakening' (by simp) h) (by deduct)
+def dtl (h : Γ ⊢ p ⟶ q) : (insert p Γ) ⊢ q := (show (insert p Γ) ⊢ (p ⟶ q) by deduct) ⨀ (by deduct)
 lemma dtl! (d : Γ ⊢! (p ⟶ q)) : (insert p Γ) ⊢! q := ⟨dtl d.some⟩
 
 lemma dtl_not! : ((insert p Γ) ⊬! q) → (Γ ⊬! (p ⟶ q)) := by
@@ -350,8 +350,8 @@ def imp_trans' (h₁ : Γ ⊢ p ⟶ q) (h₂ : Γ ⊢ q ⟶ r) : Γ ⊢ p ⟶ r 
   apply dtr;
   have : (insert p Γ) ⊢ p := by deduct;
   have : (insert p Γ) ⊢ q := by deduct;
-  have : (insert p Γ) ⊢ r := modus_ponens₂ (weakening' (by simp) h₂) (by assumption);
-  assumption
+  have : (insert p Γ) ⊢ q ⟶ r := by deduct;
+  deduct;
 
 lemma imp_trans'! {Γ : Set F} {p q r : F} (h₁ : Γ ⊢! (p ⟶ q)) (h₂ : Γ ⊢! (q ⟶ r)) : Γ ⊢! (p ⟶ r) := ⟨imp_trans' h₁.some h₂.some⟩
 
@@ -474,6 +474,10 @@ def imp_assoc_right' (h : Γ ⊢ (p ⟶ q) ⟶ r) : Γ ⊢ p ⟶ q ⟶ r := by
   apply dtr;
   have d : (insert q (insert p Γ)) ⊢ p ⟶ q := by deduct;
   simpa using h ⨀ d;
+
+@[inference]
+def conj_dn_intro' (d : Γ ⊢ p ⋏ q) : Γ ⊢ ~~p ⋏ ~~q := by
+  apply conj₃' (by apply dni'; deduct) (by apply dni'; deduct);
 
 @[inference]
 def disj_dn_elim' [HasDNE Bew] (d : Γ ⊢ ~~p ⋎ ~~q) : Γ ⊢ (p ⋎ q) := disj₃'
@@ -646,54 +650,12 @@ instance [HasDNE Bew] : Intuitionistic Bew where
 instance [HasDNE Bew] : HasLEM Bew where
   lem Γ p := by apply disj_dn_elim'; deduct;
 
-section Finset
+def impimp_to_conj' (h : Γ ⊢ p ⟶ q ⟶ r) : Γ ⊢ (p ⋏ q) ⟶ r := by
+  apply dtr;
+  have : (insert (p ⋏ q) Γ) ⊢ p ⟶ q ⟶ r := weakening' (by simp) h
+  exact this ⨀ (by deduct) ⨀ (by deduct)
 
-variable {Δ Δ₁ Δ₂ : Finset F}
-
-lemma finset_dt! : (Γ ∪ Δ ⊢! p) ↔ (Γ ⊢! (Δ.conj ⟶ p)) := by
-  induction Δ using Finset.cons_induction generalizing Γ with
-  | empty =>
-    simp [Finset.conj];
-    constructor;
-    . intro h; exact imply₁'! h;
-    . intro h; exact imp_top! h;
-  | @cons p Δ h IH => sorry;
-
-lemma finset_union_conj'! : (Γ ⊢! (Δ₁ ∪ Δ₂).conj) ↔ (Γ ⊢! (Δ₁.conj ⋏ Δ₂.conj)) := by
-  sorry
-
-lemma finset_union_conj! : Γ ⊢! ((Δ₁ ∪ Δ₂).conj ⟷ Δ₁.conj ⋏ Δ₂.conj) := by
-  apply iff_intro!;
-  . apply dtr!;
-    apply finset_union_conj'!.mp
-    exact axm! (by simp)
-  . apply dtr!;
-    apply finset_union_conj'!.mpr
-    exact axm! (by simp)
-
-@[inference]
-lemma finset_union_disj'! : (Γ ⊢! (Δ₁ ∪ Δ₂).disj) ↔ (Γ ⊢! (Δ₁.disj ⋎ Δ₂.disj)) := by
-  sorry;
-
-lemma finset_union_disj! : Γ ⊢! ((Δ₁ ∪ Δ₂).disj ⟷ Δ₁.disj ⋎ Δ₂.disj) := by
-  apply iff_intro!;
-  . apply dtr!;
-    apply finset_union_disj'!.mp
-    deduct;
-  . apply dtr!;
-    apply finset_union_disj'!.mpr
-    deduct;
-
-lemma finset_conj_iff! : (Γ ⊢! Δ.conj) ↔ (∀ p ∈ Δ, Γ ⊢! p) := by
-  induction Δ using Finset.cons_induction generalizing Γ with
-  | empty => simp [Finset.conj]; deduct;
-  | @cons p Δ hp IH =>
-    have := @IH (insert p Γ);
-    constructor;
-    . sorry;
-    . sorry;
-
-end Finset
+lemma impimp_to_conj'! (h : Γ ⊢! (p ⟶ q ⟶ r)) : Γ ⊢! (p ⋏ q) ⟶ r := ⟨impimp_to_conj' h.some⟩
 
 end Deductions
 
@@ -721,7 +683,7 @@ lemma consistent_neither_undeducible {Γ : Set F} (hConsis : Consistent Bew Γ) 
   by_contra hC; simp only [Undeducible, not_or] at hC;
   have h₁ : Γ ⊢! p  := by simpa using hC.1;
   have h₂ : Γ ⊢! p ⟶ ⊥ := by simpa [NegDefinition.neg] using hC.2;
-  exact hConsis $ modus_ponens₂! h₂ h₁;
+  exact hConsis $ (h₂ ⨀ h₁);
 
 lemma inconsistent_of_deduction {Γ : Set F} (d : Γ ⊢ ⊥) : Inconsistent Bew Γ := ⟨d⟩
 
@@ -753,6 +715,150 @@ lemma consistent_either {Γ : Set F} (hConsis : Consistent Bew Γ) (p) : (Consis
   exact consistent_subset_undeducible_falsum hConsis (by aesop) ⟨(dtr dΔ₂) ⨀ (dtr dΔ₁)⟩;
 
 end Consistency
+
+section Finset
+
+variable [hd : Deduction Bew] [HasModusPonens Bew] [HasDT Bew] [Minimal Bew]
+variable {Δ Δ₁ Δ₂ : Finset F}
+
+lemma finset_conj_iff! : (Γ ⊢! Δ.conj) ↔ (∀ p ∈ Δ, Γ ⊢! p) := by
+  induction Δ using Finset.cons_induction generalizing Γ with
+  | empty => simp [Finset.conj]; deduct;
+  | @cons p Δ hp IH =>
+    have := @IH (insert p Γ);
+    constructor;
+    . sorry;
+    . sorry;
+
+/-
+lemma finset_disj_iff! (hCon : Consistent Bew Γ) : (Γ ⊢! Δ.disj) ↔ (∃ p ∈ Δ, Γ ⊢! p) := by
+  induction Δ using Finset.cons_induction generalizing Γ with
+  | empty => simp [Finset.disj];
+  | @cons p Δ hp IH =>
+    have := @IH (insert p Γ);
+    constructor;
+    . sorry;
+    . sorry;
+-/
+
+@[inference]
+lemma insert_finset_conj'! : Γ ⊢! (insert p Δ).conj ↔ Γ ⊢! p ⋏ Δ.conj := by
+  constructor;
+  . intro h;
+    have h₁ := finset_conj_iff!.mp h;
+    exact conj₃'! (h₁ p (by simp)) (by apply finset_conj_iff!.mpr; intro p hp; exact h₁ p (by simp [hp]));
+  . intro h;
+    have : Γ ⊢! p := conj₁'! h;
+    have :  (∀ p ∈ Δ, Γ ⊢! p) := finset_conj_iff!.mp $ conj₂'! h;
+    apply finset_conj_iff!.mpr;
+    intro q hq;
+    cases Finset.mem_insert.mp hq <;> simp_all
+
+@[tautology]
+lemma insert_finset_conj! : Γ ⊢! (insert p Δ).conj ⟷ (p ⋏ Δ.conj) := by
+  apply iff_intro!;
+  . apply dtr!;
+    apply insert_finset_conj'!.mp;
+    deduct;
+  . apply dtr!;
+    apply insert_finset_conj'!.mpr;
+    deduct;
+
+lemma finset_dt! : (Γ ∪ Δ ⊢! p) ↔ (Γ ⊢! (Δ.conj ⟶ p)) := by sorry
+  -- induction Δ using Finset.induction generalizing Γ with
+  -- | empty =>
+  --   simp [Finset.conj];
+  --   constructor;
+  --   . intro h; exact imply₁'! h;
+  --   . intro h; exact imp_top! h;
+  -- | @insert q Δ h ih =>
+  --   have h := @ih (insert q Γ);
+  --   have e : (insert q Γ) ∪ ↑Δ = insert q (Γ ∪ ↑Δ) := by aesop;
+  --   rw [e] at h;
+  --   constructor;
+  --   . intro d₁;
+  --     have d₂ : (insert q Γ) ⊢! (Finset.conj Δ ⟶ p) := h.mp (by simpa using d₁);
+  --     have d₃ : Γ ⊢! q ⟶ (Finset.conj Δ ⟶ p) := dtr! d₂;
+  --     have d₄ : Γ ⊢! q ⋏ Finset.conj Δ ⟶ p := impimp_to_conj'! d₃;
+  --     have d₅ : Γ ⊢! (insert q Δ).conj ⟶ (q ⋏ Δ.conj) := by deduct;
+  --     exact imp_trans'! d₅ d₄;
+  --   . intro d₁;
+  --     have : (insert (Finset.conj (insert q Δ)) Γ) ⊢! p := dtl! d₁;
+  --     sorry;
+
+lemma finset_union_conj'! : (Γ ⊢! (Δ₁ ∪ Δ₂).conj) ↔ (Γ ⊢! (Δ₁.conj ⋏ Δ₂.conj)) := by
+  constructor;
+  . intro h;
+    have hu := finset_conj_iff!.mp h;
+    have : Γ ⊢! Δ₁.conj := by
+      apply finset_conj_iff!.mpr;
+      intro p hp; exact hu p (by simp_all);
+    have : Γ ⊢! Δ₂.conj := by
+      apply finset_conj_iff!.mpr;
+      intro p hp; exact hu p (by aesop);
+    exact conj₃'! (by assumption) (by assumption);
+  . intro h;
+    have : ∀ p ∈ Δ₁, Γ ⊢! p := finset_conj_iff!.mp $ conj₁'! h;
+    have : ∀ p ∈ Δ₂, Γ ⊢! p := finset_conj_iff!.mp $ conj₂'! h;
+    apply finset_conj_iff!.mpr;
+    intro p hp;
+    cases Finset.mem_union.mp hp <;> simp_all;
+
+lemma finset_union_conj! : Γ ⊢! ((Δ₁ ∪ Δ₂).conj ⟷ Δ₁.conj ⋏ Δ₂.conj) := by
+  apply iff_intro!;
+  . apply dtr!;
+    apply finset_union_conj'!.mp
+    exact axm! (by simp)
+  . apply dtr!;
+    apply finset_union_conj'!.mpr
+    exact axm! (by simp)
+
+/-
+@[inference]
+lemma finset_union_disj'! (hCon : Consistent Bew Γ) : (Γ ⊢! (Δ₁ ∪ Δ₂).disj) ↔ (Γ ⊢! (Δ₁.disj ⋎ Δ₂.disj)) := by
+  constructor;
+  . intro h;
+    have ⟨p, hpu, hp⟩ := finset_disj_iff! hCon |>.mp h;
+    cases Finset.mem_union.mp hpu with
+    | inl hΔ₁ =>
+      apply disj₁'!;
+      apply finset_disj_iff! hCon |>.mpr;
+      use p, hΔ₁;
+    | inr hΔ₂ =>
+      apply disj₂'!;
+      apply finset_disj_iff! hCon |>.mpr;
+      use p, hΔ₂;
+  . intro h;
+    exact disj₃'!
+      (by
+        apply dtr!;
+        apply finset_disj_iff! hCon.mpr;
+        have : (insert Δ₁.disj Γ) ⊢! Δ₁.disj := by deduct;
+        obtain ⟨p, hΔ₁, hd⟩ := finset_disj_iff!.mp this;
+        use p;
+        simp_all;
+      )
+      (by
+        apply dtr!;
+        apply finset_disj_iff!.mpr;
+        have : (insert Δ₂.disj Γ) ⊢! Δ₂.disj := by deduct;
+        obtain ⟨p, hΔ₂, hd⟩ := finset_disj_iff!.mp this;
+        use p;
+        simp_all;
+      )
+      h;
+
+lemma finset_union_disj! : Γ ⊢! ((Δ₁ ∪ Δ₂).disj ⟷ Δ₁.disj ⋎ Δ₂.disj) := by
+  apply iff_intro!;
+  . apply dtr!;
+    apply finset_union_disj'!.mp
+    deduct;
+  . apply dtr!;
+    apply finset_union_disj'!.mpr
+    deduct;
+-/
+
+end Finset
 
 end Hilbert
 

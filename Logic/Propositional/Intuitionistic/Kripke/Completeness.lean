@@ -173,11 +173,11 @@ lemma exists_insertFamily_deducible_of_iUnionInsertFamily_deducible : Γ[p]ᴵ �
     by_cases hm : m₁ ≤ m₂;
     case pos =>
       existsi m₂;
-      exact modus_ponens₂! (weakening! (insertFamily_mono hm) hm₁) hm₂;
+      exact (weakening! (insertFamily_mono hm) hm₁) ⨀ hm₂;
     case neg =>
       replace hm : m₂ ≤ m₁ := le_of_not_le hm;
       existsi m₁;
-      exact modus_ponens₂! hm₁ (weakening! (insertFamily_mono hm) hm₂);
+      exact hm₁ ⨀ (weakening! (insertFamily_mono hm) hm₂);
   | _ =>
     existsi 0;
     try first
@@ -266,11 +266,11 @@ lemma exists_primeFamily_deducible_of_iUnionPrimeFamily_deducible : Γ[p]ᴾ ⊢
     by_cases hm : m₁ ≤ m₂;
     case pos =>
       existsi m₂;
-      exact modus_ponens₂! (weakening! (primeFamily_mono hm) hm₁) hm₂;
+      exact (weakening! (primeFamily_mono hm) hm₁) ⨀ hm₂;
     case neg =>
       replace hm : m₂ ≤ m₁ := le_of_not_le hm;
       existsi m₁;
-      exact modus_ponens₂! hm₁ (weakening! (primeFamily_mono hm) hm₂);
+      exact hm₁ ⨀ (weakening! (primeFamily_mono hm) hm₂);
   | _ =>
     existsi 0;
     try first
@@ -394,7 +394,7 @@ lemma truthlemma {Ω : PrimeTheory β} {p : Formula β} : (Ω ⊩[(CanonicalMode
       obtain ⟨Ω', ⟨hp, hΩΩ', hq⟩⟩ := hC;
       have hp : Ω'.theory ⊢! p := ihp.mp hp;
       have hq : Ω'.theory ⊬ q := ihq.not.mp hq;
-      have := modus_ponens₂! (weakening! hΩΩ' h) hp;
+      have := modus_ponens₂'! (weakening! hΩΩ' h) hp;
       contradiction;
 
 theorem Kripke.completes {Γ : Theory β} {p : Formula β} : (Γ ⊨ᴵ p) → (Γ ⊢! p) := by

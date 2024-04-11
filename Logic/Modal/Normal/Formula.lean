@@ -78,25 +78,9 @@ lemma dia_eq (p : Formula α) : ◇p = ~(□(~p)) := rfl
 
 @[simp] lemma neg_inj (p q : Formula α) : ~p = ~q ↔ p = q := by simp [NegDefinition.neg]
 
-instance : ModalInj (Formula α) where
-  box_inj := by simp [Box.box]
-  dia_inj := by simp [Dia.dia]
-
-lemma box_injective : Function.Injective (λ (p : Formula α) => □p) := by
-  intro p q h
-  simp_all;
-
-lemma dia_injective : Function.Injective (λ (p : Formula α) => ◇p) := by
-  intro p q h
-  simp_all;
-
-lemma multibox_injective  : Function.Injective (λ (p : Formula α) => □[n]p) := by
-  intro p q h;
-  simp_all;
-
-lemma multidia_injective : Function.Injective (λ (p : Formula α) => ◇[n]p) := by
-  intro p q h;
-  simp_all;
+instance : ModalInjective (Formula α) where
+  box_injective := by simp [Function.Injective, Box.box]
+  dia_injective := by simp [Function.Injective, Dia.dia]
 
 def complexity : Formula α → ℕ
 | atom _  => 0
@@ -236,19 +220,21 @@ notation:72 "□⁻¹[" n:90 "]" Γ:80 => Theory.premultibox n Γ
 @[simp] def premultidia (n : ℕ) (Γ : Theory α) : Theory α := Set.premultidia n Γ
 notation:72 "◇⁻¹[" n:90 "]" Γ:80 => Theory.premultidia n Γ
 
+/-
 variable {Γ}
 
 @[simp]
-lemma prebox_box_eq : □⁻¹□Γ = Γ := Set.box_prebox_eq_of_injective Formula.box_injective
+lemma prebox_box_eq : □⁻¹□Γ = Γ := Set.box_prebox_eq_of_injective
 
 @[simp]
-lemma predia_dia_eq : ◇⁻¹◇Γ = Γ := Set.dia_predia_eq_of_injectve Formula.dia_injective
+lemma predia_dia_eq : ◇⁻¹◇Γ = Γ := Set.dia_predia_eq_of_injectve
 
 @[simp]
-lemma premultibox_multibox_eq : □⁻¹[n](□[n]Γ) = Γ := Set.multibox_premultibox_eq_of_injective Formula.multibox_injective
+lemma premultibox_multibox_eq : □⁻¹[n](□[n]Γ) = Γ := Set.multibox_premultibox_eq_of_injective
 
 @[simp]
-lemma premultidia_multidia_eq : ◇⁻¹[n](◇[n]Γ) = Γ := Set.multidia_premultidia_eq_of_injective Formula.multidia_injective
+lemma premultidia_multidia_eq : ◇⁻¹[n](◇[n]Γ) = Γ := Set.multidia_premultidia_eq_of_injective
+-/
 
 end Theory
 

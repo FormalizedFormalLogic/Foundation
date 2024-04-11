@@ -134,7 +134,7 @@ lemma maximal_consistent_iff_membership_deducible : (p ∈ Γ) ↔ (Γ ⊢ᴹ[Λ
     suffices ~p ∉ Γ by have := hMCΓ.2 p; aesop;
     by_contra hC;
     have h₂ : Γ ⊢ᴹ[Λ]! ~p := Hilbert.axm! hC;
-    exact consistent_subset_undeducible_falsum hMCΓ.1 Γ (by simp) (modus_ponens₂! h₂ h);
+    exact consistent_subset_undeducible_falsum hMCΓ.1 Γ (by simp) (h₂ ⨀ h);
 
 lemma maximal_consistent_iff_not_membership_undeducible : (p ∉ Γ) ↔ (Γ ⊬ᴹ[Λ]! p) := by
   simpa using (maximal_consistent_iff_membership_deducible hMCΓ).not;
@@ -143,7 +143,7 @@ lemma maximal_consistent_modus_ponens' {p q : Formula β} : ((p ⟶ q) ∈ Γ) �
   intro hp hpq;
   have dp  := (maximal_consistent_iff_membership_deducible hMCΓ).mp hp;
   have dpq := (maximal_consistent_iff_membership_deducible hMCΓ).mp hpq;
-  exact (maximal_consistent_iff_membership_deducible hMCΓ).mpr $ modus_ponens₂! dp dpq;
+  exact (maximal_consistent_iff_membership_deducible hMCΓ).mpr $ dp ⨀ dpq;
 
 lemma maximal_consistent_neg_membership_iff : (~p ∈ Γ) ↔ (p ∉ Γ) := by
   constructor;
@@ -161,7 +161,8 @@ lemma maximal_consistent_imp_membership_iff : (p ⟶ q ∈ Γ) ↔ (p ∉ Γ) �
     apply (maximal_consistent_iff_membership_deducible hMCΓ).mpr;
     have hp : ({p, p ⟶ q}) ⊢ᴹ[Λ]! p := axm! (by simp);
     have hpq : ({p, p ⟶ q}) ⊢ᴹ[Λ]! p ⟶ q := axm! (by simp);
-    exact weakening! (by aesop) $ modus_ponens₂! hpq hp;
+    have : ({p, p ⟶ q}) ⊢ᴹ[Λ]! q := hpq ⨀ hp
+    exact weakening! (by aesop) this;
   . intros h;
     cases h;
     case inl h =>
@@ -411,9 +412,9 @@ lemma context_box_conj_membership_iff {Δ : Context β} : □(⋀Δ) ∈ Ω ↔ 
   simp only [membership_iff];
   constructor;
   . intro h p hp;
-    exact pick_box_finset_conj! h p hp;
+    exact box_finset_conj_iff!.mp h p hp;
   . intro h;
-    exact collect_box_finset_conj! h;
+    exact box_finset_conj_iff!.mpr h;
 
 lemma context_box_conj_membership_iff' {Δ : Context β} : □(⋀Δ) ∈ Ω ↔ (∀ p ∈ (□Δ : Context β), p ∈ Ω) := by
   simp [Context.box, Finset.box];
@@ -423,9 +424,9 @@ lemma context_multibox_conj_membership_iff {Δ : Context β} {n : ℕ} : □[n](
   simp only [membership_iff];
   constructor;
   . intro h p hp;
-    exact pick_multibox_finset_conj! h p hp;
+    exact multibox_finset_conj_iff!.mp h p hp;
   . intro h;
-    exact collect_multibox_finset_conj! h;
+    exact multibox_finset_conj_iff!.mpr h;
 
 lemma context_multibox_conj_membership_iff' {Δ : Context β} : □[n](⋀Δ) ∈ Ω ↔ (∀ p ∈ (□[n]Δ : Context β), p ∈ Ω):= by
   simp [Context.multibox, Finset.multibox];

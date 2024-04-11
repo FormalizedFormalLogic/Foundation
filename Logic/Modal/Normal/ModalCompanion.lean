@@ -40,8 +40,8 @@ lemma intAxiom4 {p : Intuitionistic.Formula α} : ∅ ⊢ᴹ[𝐊𝟒]! pᵍ ⟶
   | hand p q ihp ihq =>
     apply dtr!;
     have : {pᵍ ⋏ qᵍ} ⊢ᴹ[𝐊𝟒]! pᵍ ⋏ qᵍ := axm! (by simp);
-    have : {pᵍ ⋏ qᵍ} ⊢ᴹ[𝐊𝟒]! □pᵍ := by simpa using modus_ponens! ihp $ conj₁'! (by assumption);
-    have : {pᵍ ⋏ qᵍ} ⊢ᴹ[𝐊𝟒]! □qᵍ := by simpa using modus_ponens! ihq $ conj₂'! (by assumption);
+    have : {pᵍ ⋏ qᵍ} ⊢ᴹ[𝐊𝟒]! □pᵍ := by simpa using modus_ponens'! ihp $ conj₁'! (by assumption);
+    have : {pᵍ ⋏ qᵍ} ⊢ᴹ[𝐊𝟒]! □qᵍ := by simpa using modus_ponens'! ihq $ conj₂'! (by assumption);
     have : {pᵍ ⋏ qᵍ} ⊢ᴹ[𝐊𝟒]! □pᵍ ⋏  □qᵍ := conj₃'! (by assumption) (by assumption);
     have : {pᵍ ⋏ qᵍ} ⊢ᴹ[𝐊𝟒]! □(pᵍ ⋏  qᵍ) := collect_box_conj'! (by assumption);
     simpa;
@@ -58,7 +58,7 @@ private lemma embed_Int_S4.case_imply₁ : ∅ ⊢ᴹ[𝐒𝟒]! (p ⟶ q ⟶ p)
   simp only [GTranslation];
   have : ∅ ⊢ᴹ[𝐊𝟒]! pᵍ ⟶ □pᵍ := by apply intAxiom4;
   have : ∅ ⊢ᴹ[𝐊𝟒]! □(pᵍ ⟶ qᵍ ⟶ pᵍ) := necessitation! $ by apply imply₁!;
-  have : ∅ ⊢ᴹ[𝐊𝟒]! □pᵍ ⟶ □(qᵍ ⟶ pᵍ) := modus_ponens₂! (by deduct) (by assumption);
+  have : ∅ ⊢ᴹ[𝐊𝟒]! □pᵍ ⟶ □(qᵍ ⟶ pᵍ) := modus_ponens₂'! (by deduct) (by assumption);
   have : ∅ ⊢ᴹ[𝐊𝟒]! pᵍ ⟶ □(qᵍ ⟶ pᵍ) := imp_trans'! (by assumption) (by assumption);
   have : ∅ ⊢ᴹ[𝐊𝟒]! □(pᵍ ⟶ □(qᵍ ⟶ pᵍ)) := necessitation! (by assumption);
   exact strong_K4_S4 (by assumption)

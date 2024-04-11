@@ -2,10 +2,12 @@
 
 namespace LO.Modal.Normal
 
-@[notation_class] class Box (α : Sort _) where
+@[notation_class]
+class Box (α : Sort _) where
   box : α → α
 
-@[notation_class] class Dia (α : Sort _) where
+@[notation_class]
+class Dia (α : Sort _) where
   dia : α → α
 
 class ModalLogicSymbol (α : Sort _) extends LogicalConnective α, Box α, Dia α
@@ -53,17 +55,34 @@ lemma Dia.multidia_succ [Dia F] (n : ℕ) (p : F) : ◇[(n + 1)]p = ◇(◇[n]p)
 
 lemma Dia.multidia_prepost [Dia F] (n : ℕ) (p : F) : ◇◇[n]p = ◇[n](◇p) := by induction n <;> simp_all
 
-class ModalInj (F) [Box F] [Dia F] where
-  box_inj : ∀ {p q : F}, (□p = □q) ↔ (p = q)
-  dia_inj : ∀ {p q : F}, (◇p = ◇q) ↔ (p = q)
+class ModalInjective (F) [Box F] [Dia F] where
+  box_injective : Function.Injective (Box.box : F → F)
+  dia_injective : Function.Injective (Dia.dia : F → F)
 
-attribute [simp] ModalInj.box_inj ModalInj.dia_inj
-
-@[simp]
-lemma ModalInj.multibox_inj [Box F] [Dia F] [ModalInj F] {n} {p q : F} : (□[n]p = □[n]q) ↔ (p = q) := by induction n <;> simp [*]
+variable [Box F] [Dia F] [ModalInjective F]
 
 @[simp]
-lemma ModalInj.multidia_inj [Box F] [Dia F] [ModalInj F] {n} {p q : F} : (◇[n]p = ◇[n]q) ↔ (p = q) := by induction n <;> simp [*]
+lemma ModalInjective.box_injective' {p q : F} : □p = □q ↔ p = q := by
+  constructor;
+  . intro h; exact box_injective h;
+  . simp_all;
+
+@[simp]
+lemma ModalInjective.dia_injective' {p q : F} : ◇p = ◇q ↔ p = q := by
+  constructor;
+  . intro h; exact dia_injective h;
+  . simp_all;
+
+@[simp]
+lemma ModalInjective.multibox_injective' {n} {p q : F} : (□[n]p = □[n]q) ↔ (p = q) := by induction n <;> simp [*]
+
+@[simp]
+lemma ModalInjective.multibox_injective : Function.Injective (Box.multibox n : F → F) := by simp [Function.Injective];
+
+@[simp]
+lemma ModalInjective.multidia_injective' {n} {p q : F} : (◇[n]p = ◇[n]q) ↔ (p = q) := by induction n <;> simp [*]
+
+lemma ModalInjective.multidia_injective : Function.Injective (Dia.multidia n : F → F) := by simp [Function.Injective];
 
 end LO.Modal.Normal
 
@@ -72,7 +91,7 @@ namespace Set
 
 open LO.Modal.Normal
 
-variable [ModalLogicSymbol α] [ModalInj α]
+variable [ModalLogicSymbol α] [ModalInjective α]
 
 def box (s : Set α) : Set α := Box.box '' s
 
@@ -88,7 +107,7 @@ lemma box_mem_intro {s : Set α} {a : α} : a ∈ s → □a ∈ s.box := by sim
 
 lemma box_mem_iff {s : Set α} {p : α} : p ∈ s.box ↔ (∃ q ∈ s, □q = p) := by simp_all [Set.mem_image, box]
 
-lemma box_injective (h : Function.Injective (λ {p : α} => Box.box p)) : Function.Injective (λ {s : Set α} => Set.box s) := Function.Injective.image_injective h
+lemma box_injective : Function.Injective (λ {s : Set α} => Set.box s) := Function.Injective.image_injective ModalInjective.box_injective
 
 lemma box_injOn {s : Set α} : Set.InjOn Box.box s := by simp [Set.InjOn]
 
@@ -100,13 +119,9 @@ lemma forall_box_of_subset_box {s t : Set α} (h : s ⊆ t.box) : ∀ p ∈ s, �
 
 def prebox (s : Set α) := Box.box ⁻¹' s
 
-lemma prebox_box_eq_of_surjective (h : Function.Surjective (λ {p : α} => Box.box p)) {s : Set α} : s.prebox.box = s := by
-  apply Set.image_preimage_eq;
-  simpa;
-
-lemma box_prebox_eq_of_injective (h : Function.Injective (λ {p : α} => Box.box p)) {s : Set α} : s.box.prebox = s := by
-  apply Set.preimage_image_eq ;
-  simpa;
+lemma box_prebox_eq_of_injective {s : Set α} : s.box.prebox = s := by
+  apply Set.preimage_image_eq;
+  exact ModalInjective.box_injective;
 
 @[simp]
 lemma prebox_box_eq {s : Set α} : s.prebox.box = { □p | (p : α) (_ : □p ∈ s) } := by simp_all; rfl;
@@ -178,9 +193,10 @@ lemma subset_multibox_iff_premulitibox_subset {s t : Set α} (h : s ⊆ t.multib
   obtain ⟨_, h₁, h₂⟩ := premultibox_subset h hp;
   simp_all;
 
-lemma multibox_premultibox_eq_of_injective (h : Function.Injective (λ {p : α} => Box.multibox n p)) {s : Set α} : (s.multibox n).premultibox n = s := by
+@[simp]
+lemma multibox_premultibox_eq_of_injective {s : Set α} : (s.multibox n).premultibox n = s := by
   apply Set.preimage_image_eq;
-  simpa;
+  exact ModalInjective.multibox_injective;
 
 def dia (s : Set α) : Set α := Dia.dia '' s
 
@@ -196,7 +212,7 @@ lemma dia_mem_intro {s : Set α} {a : α} : a ∈ s → ◇a ∈ s.dia := by sim
 
 lemma dia_mem_iff {s : Set α} {p : α} : p ∈ s.dia ↔ (∃ q ∈ s, ◇q = p) := by simp_all [Set.mem_image, dia]
 
-lemma dia_injective (h : Function.Injective (λ {p : α} => Dia.dia p)) : Function.Injective (λ {s : Set α} => Set.dia s) := Function.Injective.image_injective h
+lemma dia_injective : Function.Injective (λ {s : Set α} => Set.dia s) := Function.Injective.image_injective ModalInjective.dia_injective
 
 lemma dia_injOn {s : Set α} : Set.InjOn Dia.dia s := by simp [Set.InjOn]
 
@@ -221,9 +237,9 @@ lemma predia_dia_eq_of_subset_dia {s t : Set α} (hs : s ⊆ t.dia) : s.predia.d
     obtain ⟨q, _, hq₂⟩ := forall_dia_of_subset_dia hs p hp;
     simp_all;
 
-lemma dia_predia_eq_of_injectve (h : Function.Injective (λ {p : α} => Dia.dia p)) {s : Set α} : s.dia.predia = s := by
+lemma dia_predia_eq_of_injectve {s : Set α} : s.dia.predia = s := by
   apply Function.Injective.preimage_image;
-  exact h;
+  exact ModalInjective.dia_injective;
 
 @[simp]
 lemma predia_dia_subset {s : Set α} : s.predia.dia ⊆ s := by simp [Set.subset_def];
@@ -287,9 +303,10 @@ lemma subset_multidia_iff_premulitidia_subset {s t : Set α} (h : s ⊆ t.multid
   obtain ⟨_, h₁, h₂⟩ := premultidia_subset h hp;
   simp_all;
 
-lemma multidia_premultidia_eq_of_injective (h : Function.Injective (λ {p : α} => Dia.multidia n p)) {s : Set α} : (s.multidia n).premultidia n = s := by
+@[simp]
+lemma multidia_premultidia_eq_of_injective {s : Set α} : (s.multidia n).premultidia n = s := by
   apply Set.preimage_image_eq;
-  simpa;
+  exact ModalInjective.multidia_injective;
 
 end Set
 
@@ -298,7 +315,7 @@ namespace Finset
 
 open LO.Modal.Normal
 
-variable [ModalLogicSymbol α] [DecidableEq α] [ModalInj α]
+variable [ModalLogicSymbol α] [DecidableEq α] [ModalInjective α]
 
 def box (s : Finset α) : Finset α := s.image Box.box
 
