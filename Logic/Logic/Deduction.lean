@@ -655,7 +655,27 @@ def impimp_to_conj' (h : Γ ⊢ p ⟶ q ⟶ r) : Γ ⊢ (p ⋏ q) ⟶ r := by
   have : (insert (p ⋏ q) Γ) ⊢ p ⟶ q ⟶ r := weakening' (by simp) h
   exact this ⨀ (by deduct) ⨀ (by deduct)
 
-lemma impimp_to_conj'! (h : Γ ⊢! (p ⟶ q ⟶ r)) : Γ ⊢! (p ⋏ q) ⟶ r := ⟨impimp_to_conj' h.some⟩
+lemma impimp_to_conj'! (h : Γ ⊢! p ⟶ q ⟶ r) : Γ ⊢! (p ⋏ q) ⟶ r := ⟨impimp_to_conj' h.some⟩
+
+lemma _root_.Set.subset_insert_insert (x y : α) (s : Set α) : s ⊆ (insert x $ insert y s) := by
+  have := Set.subset_insert x (insert y s);
+  have := Set.subset_insert y s;
+  exact Set.Subset.trans (by assumption) (by assumption)
+
+def conj_to_impimp' (h : Γ ⊢ (p ⋏ q) ⟶ r) : Γ ⊢ p ⟶ q ⟶ r := by
+  apply dtr;
+  apply dtr;
+  have d₁ : (insert q $ insert p Γ) ⊢ p ⋏ q := conj₃' (by deduct) (by deduct);
+  have d₂ : (insert q $ insert p Γ) ⊢ p ⋏ q ⟶ r := weakening' (by apply Set.subset_insert_insert) h;
+  exact d₂ ⨀ d₁;
+
+lemma conj_to_impimp'! (h : Γ ⊢! (p ⋏ q) ⟶ r) : Γ ⊢! p ⟶ q ⟶ r := ⟨conj_to_impimp' h.some⟩
+
+@[inference]
+def imp_left_conj_comm' (h : Γ ⊢ (p ⋏ q) ⟶ r) : Γ ⊢ (q ⋏ p) ⟶ r := by deduct;
+
+@[inference]
+lemma imp_left_conj_comm'! (h : Γ ⊢! (p ⋏ q) ⟶ r) : Γ ⊢! (q ⋏ p) ⟶ r := ⟨imp_left_conj_comm' h.some⟩
 
 end Deductions
 
@@ -766,27 +786,30 @@ lemma insert_finset_conj! : Γ ⊢! (insert p Δ).conj ⟷ (p ⋏ Δ.conj) := by
     apply insert_finset_conj'!.mpr;
     deduct;
 
-lemma finset_dt! : (Γ ∪ Δ ⊢! p) ↔ (Γ ⊢! (Δ.conj ⟶ p)) := by sorry
-  -- induction Δ using Finset.induction generalizing Γ with
-  -- | empty =>
-  --   simp [Finset.conj];
-  --   constructor;
-  --   . intro h; exact imply₁'! h;
-  --   . intro h; exact imp_top! h;
-  -- | @insert q Δ h ih =>
-  --   have h := @ih (insert q Γ);
-  --   have e : (insert q Γ) ∪ ↑Δ = insert q (Γ ∪ ↑Δ) := by aesop;
-  --   rw [e] at h;
-  --   constructor;
-  --   . intro d₁;
-  --     have d₂ : (insert q Γ) ⊢! (Finset.conj Δ ⟶ p) := h.mp (by simpa using d₁);
-  --     have d₃ : Γ ⊢! q ⟶ (Finset.conj Δ ⟶ p) := dtr! d₂;
-  --     have d₄ : Γ ⊢! q ⋏ Finset.conj Δ ⟶ p := impimp_to_conj'! d₃;
-  --     have d₅ : Γ ⊢! (insert q Δ).conj ⟶ (q ⋏ Δ.conj) := by deduct;
-  --     exact imp_trans'! d₅ d₄;
-  --   . intro d₁;
-  --     have : (insert (Finset.conj (insert q Δ)) Γ) ⊢! p := dtl! d₁;
-  --     sorry;
+lemma list_dt! {Δ : List F} : (Γ ∪ Δ.toFinset ⊢! p) ↔ (Γ ⊢! (Δ.conj ⟶ p)) := by
+  induction Δ generalizing Γ p with
+  | nil =>
+    simp [Finset.conj];
+    constructor;
+    . apply imply₁'!;
+    . apply imp_top!;
+  | cons q Δ ih =>
+    simp;
+    constructor;
+    . intro h;
+      have : Γ ⊢! List.conj Δ ⟶ q ⟶ p := ih.mp (by simpa using dtr! h);
+      have : Γ ⊢! List.conj Δ ⋏ q ⟶ p := impimp_to_conj'! (by assumption);
+      exact imp_left_conj_comm'! this;
+    . intro h;
+      have : (insert q Γ) ⊢! ((List.conj Δ) ⟶ p) := dtl! $ conj_to_impimp'! h;
+      have : (insert q Γ ∪ ↑(List.toFinset Δ)) ⊢! p := ih.mpr (by simpa using this);
+      have e : (insert q Γ ∪ ↑(List.toFinset Δ) = insert q (Γ ∪ {a | a ∈ Δ})) := by aesop;
+      rw [e] at this;
+      assumption;
+
+lemma finset_dt! : (Γ ∪ Δ ⊢! p) ↔ (Γ ⊢! (Δ.conj ⟶ p)) := by
+  have : (Γ ∪ Δ.toList.toFinset ⊢! p) ↔ (Γ ⊢! (Δ.toList.conj ⟶ p)) := list_dt!;
+  simpa [Finset.toList_toFinset];
 
 lemma finset_union_conj'! : (Γ ⊢! (Δ₁ ∪ Δ₂).conj) ↔ (Γ ⊢! (Δ₁.conj ⋏ Δ₂.conj)) := by
   constructor;
