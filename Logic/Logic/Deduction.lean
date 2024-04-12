@@ -721,14 +721,16 @@ section Finset
 variable [hd : Deduction Bew] [HasModusPonens Bew] [HasDT Bew] [Minimal Bew]
 variable {Δ Δ₁ Δ₂ : Finset F}
 
+lemma list_conj_iff! {Δ : List F} : (Γ ⊢! Δ.conj) ↔ (∀ p ∈ Δ, Γ ⊢! p) := by
+  induction Δ
+  case nil => simp [verum!]
+  case cons p Δ ih =>
+    simp; constructor
+    · intro h; exact ⟨conj₁'! h, ih.mp (conj₂'! h)⟩
+    · intro h; exact conj₃'! h.1 (ih.mpr h.2)
+
 lemma finset_conj_iff! : (Γ ⊢! Δ.conj) ↔ (∀ p ∈ Δ, Γ ⊢! p) := by
-  induction Δ using Finset.cons_induction generalizing Γ with
-  | empty => simp [Finset.conj]; deduct;
-  | @cons p Δ hp IH =>
-    have := @IH (insert p Γ);
-    constructor;
-    . sorry;
-    . sorry;
+  simp [Finset.conj, list_conj_iff!]
 
 /-
 lemma finset_disj_iff! (hCon : Consistent Bew Γ) : (Γ ⊢! Δ.disj) ↔ (∃ p ∈ Δ, Γ ⊢! p) := by
