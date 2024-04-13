@@ -1,6 +1,23 @@
 import Logic.Propositional.Intuitionistic
 import Logic.Modal.Normal.Strength
 
+/-!
+  # Modal Companions
+
+  This file formalizes about modal companions.
+
+  ## Glossary
+
+  Intuitionistic propositional logic can be embedded into `𝐒𝟒` through an operation called the Gödel translation (`ᵍ`).
+  More precisely, if `p` is a provable formula in intuitionistic propositional logic, then `pᵍ` (modal logic formula) is a provable formula in `𝐒𝟒`, and vice versa.
+  This fact is known as **Gödel-McKinsey-Tarski theorem**.
+
+  Such correspondence, called **Modal Companion**, is also known to hold in **intermediate logic** between intuitionistic logic and classical logic (**hyperintuitionistic logic**).
+
+  ## Main Theorems
+  - `LO.Modal.Normal.companion_Int_S4`: Gödel-McKinsey-Tarski Theorem.
+-/
+
 namespace LO.Modal.Normal
 
 open LO.Hilbert
