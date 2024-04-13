@@ -3,7 +3,14 @@ import Logic.Modal.Normal.Completeness
 import Logic.Modal.Normal.Geach
 
 /-!
-  Strength of modal logics
+  # Strength of Normal Modal Logics
+
+  This file defines the strength of normal modal logics.
+
+  ## Definitions
+  - `≤ᴸ`: Logical Strong. `Λ₁ ≤ᴸ Λ₂` means that every provable formulae in `Λ₁` are provable in `Λ₂`.
+  - `<ᴸ`: Logical Strict Strong. `Λ₁ <ᴸ Λ₂` means that `Λ₁ ≤ᴸ Λ₂` and not `Λ₂ ≤ᴸ Λ₁`, i.e. some formula exists provable in `Λ₂` but not in `Λ₁`.
+  - `=ᴸ`: Logical Equivalence. `Λ₁ =ᴸ Λ₂` means that `Λ₁ ≤ᴸ Λ₂` and `Λ₂ ≤ᴸ Λ₁`.
 -/
 
 class _root_.Distinct₃ (α : Type*) : Prop where
