@@ -106,10 +106,10 @@ private def dtrAux (Γ : Theory α) (p q) : Γ ⊢ q → (Γ \ {p}) ⊢ p ⟶ q
       have d₂ : Γ \ {p} ⊢ (p ⟶ a) := ih₂.weakening' (by simp);
       d₁ ⨀ d₂
 
-def dtr {Γ : Theory α} {p q} (d : (insert p Γ) ⊢ q) : (Γ ⊢ (p ⟶ q)) := by
+def dtr' {Γ : Theory α} {p q} (d : (insert p Γ) ⊢ q) : (Γ ⊢ (p ⟶ q)) := by
   exact dtrAux (insert p Γ) p q d |> LO.Deduction.weakening' (by simp)
 
-instance : Hilbert.HasDT (· ⊢ · : Theory α → Formula α → Type _) := ⟨dtr⟩
+instance : Hilbert.HasDT (· ⊢ · : Theory α → Formula α → Type _) := ⟨dtr'⟩
 
 def compact {Γ : Theory α} {p} : Γ ⊢ p → (Δ : { Δ : Context α | ↑Δ ⊆ Γ}) × Δ ⊢ p
   | @axm _ Γ p h  => ⟨⟨{p}, by simpa⟩, axm (by simp)⟩

@@ -149,10 +149,10 @@ private def dtrAux (Γ) (p q : Formula α) : (Γ ⊢ᴹ[Λ] q) → ((Γ \ {p}) �
         ih₂.weakening' (Set.diff_subset_diff (Set.subset_union_right Γ₁ Γ₂) (by simp))
       d₁ ⨀ d₂
 
-def dtr {Γ p q} (d : (insert p Γ) ⊢ᴹ[Λ] q) : (Γ ⊢ᴹ[Λ] (p ⟶ q)) := by
+def dtr' {Γ p q} (d : (insert p Γ) ⊢ᴹ[Λ] q) : (Γ ⊢ᴹ[Λ] (p ⟶ q)) := by
   exact dtrAux (insert p Γ) p q d |>.weakening' (by simp;);
 
-instance : HasDT (Deduction Λ) := ⟨dtr⟩
+instance : HasDT (Deduction Λ) := ⟨dtr'⟩
 
 def compact {Γ p} : (Γ ⊢ᴹ[Λ] p) → (Δ : { Δ : Context α | ↑Δ ⊆ Γ}) × (Δ ⊢ᴹ[Λ] p)
   | @axm _ _ Γ p h  => ⟨⟨{p}, by simpa⟩, axm (by simp)⟩
@@ -329,31 +329,31 @@ lemma tauto : p ⟷[Λ, Γ] p := by simp [DeducibleEquivalent]; apply iff_intro!
 lemma or (hp : p₁ ⟷[Λ, Γ] p₂) (hq : q₁ ⟷[Λ, Γ] q₂) : ((p₁ ⋎ q₁) ⟷[Λ, Γ] (p₂ ⋎ q₂)) := by
   simp_all only [DeducibleEquivalent];
   apply iff_intro!
-  . apply dtr!;
+  . apply dtr'!;
     exact disj₃'!
       (by
-        apply dtr!;
+        apply dtr'!;
         have d₁ : (insert p₁ (insert (p₁ ⋎ q₁) Γ)) ⊢ᴹ[Λ]! p₁ := axm! (by simp);
         have d₂ : (insert p₁ (insert (p₁ ⋎ q₁) Γ)) ⊢ᴹ[Λ]! p₁ ⟶ p₂ := weakening! Set.subset_insert_insert (iff_mp'! hp);
         exact disj₁'! $ d₂ ⨀ d₁;
       )
       (by
-        apply dtr!;
+        apply dtr'!;
         have d₁ : (insert q₁ (insert (p₁ ⋎ q₁) Γ)) ⊢ᴹ[Λ]! q₁ := axm! (by simp);
         have d₂ : (insert q₁ (insert (p₁ ⋎ q₁) Γ)) ⊢ᴹ[Λ]! q₁ ⟶ q₂ := weakening! Set.subset_insert_insert (iff_mp'! hq);
         exact disj₂'! $ d₂ ⨀ d₁;
       )
       (show insert (p₁ ⋎ q₁) Γ ⊢ᴹ[Λ]! (p₁ ⋎ q₁) by exact axm! (by simp));
-  . apply dtr!;
+  . apply dtr'!;
     exact disj₃'!
       (by
-        apply dtr!;
+        apply dtr'!;
         have d₁ : (insert p₂ (insert (p₂ ⋎ q₂) Γ)) ⊢ᴹ[Λ]! p₂ := axm! (by simp);
         have d₂ : (insert p₂ (insert (p₂ ⋎ q₂) Γ)) ⊢ᴹ[Λ]! p₂ ⟶ p₁ := weakening! Set.subset_insert_insert (iff_mpr'! hp);
         exact disj₁'! $ d₂ ⨀ d₁;
       )
       (by
-        apply dtr!;
+        apply dtr'!;
         have d₁ : (insert q₂ (insert (p₂ ⋎ q₂) Γ)) ⊢ᴹ[Λ]! q₂ := axm! (by simp);
         have d₂ : (insert q₂ (insert (p₂ ⋎ q₂) Γ)) ⊢ᴹ[Λ]! q₂ ⟶ q₁ := weakening! Set.subset_insert_insert (iff_mpr'! hq);
         exact disj₂'! $ d₂ ⨀ d₁;
@@ -363,12 +363,12 @@ lemma or (hp : p₁ ⟷[Λ, Γ] p₂) (hq : q₁ ⟷[Λ, Γ] q₂) : ((p₁ ⋎ 
 lemma and (hp : p₁ ⟷[Λ, Γ] p₂) (hq : q₁ ⟷[Λ, Γ] q₂) : ((p₁ ⋏ q₁) ⟷[Λ, Γ] (p₂ ⋏ q₂)) := by
   simp_all only [DeducibleEquivalent];
   apply iff_intro!;
-  . apply dtr!;
+  . apply dtr'!;
     have d : insert (p₁ ⋏ q₁) Γ ⊢ᴹ[Λ]!(p₁ ⋏ q₁) := axm! (by simp)
     exact conj₃'!
       ((weakening! (by simp) $ iff_mp'! hp) ⨀ (conj₁'! d))
       ((weakening! (by simp) $ iff_mp'! hq) ⨀ (conj₂'! d));
-  . apply dtr!;
+  . apply dtr'!;
     have d : insert (p₂ ⋏ q₂) Γ ⊢ᴹ[Λ]!(p₂ ⋏ q₂) := axm! (by simp)
     exact conj₃'!
       ((weakening! (by simp) $ iff_mpr'! hp) ⨀ (conj₁'! d))
@@ -377,24 +377,24 @@ lemma and (hp : p₁ ⟷[Λ, Γ] p₂) (hq : q₁ ⟷[Λ, Γ] q₂) : ((p₁ ⋏
 lemma and_comm (p q : Formula α) : ((p ⋏ q) ⟷[Λ, Γ] (q ⋏ p)) := by
   simp_all only [DeducibleEquivalent];
   apply iff_intro!;
-  . apply dtr!;
+  . apply dtr'!;
     have d₁ : insert (p ⋏ q) Γ ⊢ᴹ[Λ]! (p ⋏ q) := axm! (by simp);
     exact conj₃'! (conj₂'! d₁) (conj₁'! d₁);
-  . apply dtr!;
+  . apply dtr'!;
     have d₁ : insert (q ⋏ p) Γ ⊢ᴹ[Λ]! (q ⋏ p) := axm! (by simp);
     exact conj₃'! (conj₂'! d₁) (conj₁'! d₁);
 
 lemma imp (hp : p₁ ⟷[Λ, Γ] p₂) (hq : q₁ ⟷[Λ, Γ] q₂) : ((p₁ ⟶ q₁) ⟷[Λ, Γ] (p₂ ⟶ q₂)) := by
   simp_all only [DeducibleEquivalent];
   apply iff_intro!;
-  . apply dtr!;
-    apply dtr!;
+  . apply dtr'!;
+    apply dtr'!;
     have d₁ : insert p₂ (insert (p₁ ⟶ q₁) Γ) ⊢ᴹ[Λ]! (p₁ ⟶ q₁) := axm! (by simp)
     have d₂ : insert p₂ (insert (p₁ ⟶ q₁) Γ) ⊢ᴹ[Λ]! p₂ := axm! (by simp)
     have d₃ : insert p₂ (insert (p₁ ⟶ q₁) Γ) ⊢ᴹ[Λ]! q₁ := modus_ponens₂'! d₁ $ modus_ponens₂'! (weakening! Set.subset_insert_insert (iff_mpr'! hp)) d₂;
     exact (weakening! Set.subset_insert_insert (iff_mp'! hq)) ⨀ d₃;
-  . apply dtr!;
-    apply dtr!;
+  . apply dtr'!;
+    apply dtr'!;
     have d₁ : insert p₁ (insert (p₂ ⟶ q₂) Γ) ⊢ᴹ[Λ]! (p₂ ⟶ q₂) := axm! (by simp)
     have d₂ : insert p₁ (insert (p₂ ⟶ q₂) Γ) ⊢ᴹ[Λ]! p₁ := axm! (by simp)
     have d₃ : insert p₁ (insert (p₂ ⟶ q₂) Γ) ⊢ᴹ[Λ]! q₂ := modus_ponens₂'! d₁ $ modus_ponens₂'! (weakening! Set.subset_insert_insert (iff_mp'! hp)) d₂;

@@ -141,8 +141,8 @@ lemma insertFamily_undeducible (h : Γ ⊬ p) : ∀ {i}, Γ[p, i]ᴵ ⊬ p := by
         . split;
           . rename_i q₁ q₂ hq₁₂ hq₁;
             by_contra hq₂;
-            replace hq₁ : Γ[p,i]ᴵ ⊢! q₁ ⟶ p := dtr! (by simpa using hq₁);
-            replace hq₂ : Γ[p,i]ᴵ ⊢! q₂ ⟶ p := dtr! (by simpa [System.not_unprovable_iff_provable] using hq₂);
+            replace hq₁ : Γ[p,i]ᴵ ⊢! q₁ ⟶ p := dtr'! (by simpa using hq₁);
+            replace hq₂ : Γ[p,i]ᴵ ⊢! q₂ ⟶ p := dtr'! (by simpa [System.not_unprovable_iff_provable] using hq₂);
             have : Γ[p,i]ᴵ ⊢! p := disj₃'! hq₁ hq₂ hq₁₂;
             contradiction;
           . simp at*; assumption
@@ -378,7 +378,7 @@ lemma truthlemma {Ω : PrimeTheory β} {p : Formula β} : (Ω ⊩[(CanonicalMode
     . contrapose;
       intro h;
       simp [KripkeSatisfies.imp_def'];
-      have h₁ : insert p Ω.theory ⊬ q := dtr_not! h;
+      have h₁ : insert p Ω.theory ⊬ q := dtr_not'! h;
       obtain ⟨Ω', hΩ'₁, hΩ'₂⟩ := prime_expansion h₁;
       existsi Ω';
       exact ⟨

@@ -124,7 +124,7 @@ lemma maximal_consistent_include_axiomset : Λ ⊆ Γ := by
   intro p hp;
   by_contra hC;
   have h₁ : {~p} ⊬ᴹ[Λ]! ⊥ := consistent_subset_undeducible_falsum hMCΓ.1 {~p} (by have := hMCΓ.2 p; aesop)
-  have h₂ : {~p} ⊢ᴹ[Λ]! ⊥ := by simpa using dtl! $ dni'! (show ∅ ⊢ᴹ[Λ]! p by exact Deducible.maxm! hp);
+  have h₂ : {~p} ⊢ᴹ[Λ]! ⊥ := by simpa using dtl'! $ dni'! (show ∅ ⊢ᴹ[Λ]! p by exact Deducible.maxm! hp);
   contradiction;
 
 lemma maximal_consistent_iff_membership_deducible : (p ∈ Γ) ↔ (Γ ⊢ᴹ[Λ]! p) := by
@@ -171,7 +171,7 @@ lemma maximal_consistent_imp_membership_iff : (p ⟶ q ∈ Γ) ↔ (p ∉ Γ) �
         have dp : ({p, ~p}) ⊢ᴹ[Λ]! p := axm! (by simp);
         have dnp : ({p, ~p}) ⊢ᴹ[Λ]! (~p) := axm! (by simp);
         have h₂ : ({p, ~p}) ⊢ᴹ[Λ]! q := efq'! $ dnp ⨀ dp;
-        have h₃ : ∅ ⊢ᴹ[Λ]! ~p ⟶ (p ⟶ q) := dtr! (by simpa using dtr! h₂);
+        have h₃ : ∅ ⊢ᴹ[Λ]! ~p ⟶ (p ⟶ q) := dtr'! (by simpa using dtr'! h₂);
         exact weakening! (by simp) h₃;
       have d₂ : Γ ⊢ᴹ[Λ]! ~p := axm! (by simpa)
       apply (maximal_consistent_iff_membership_deducible hMCΓ).mpr;
