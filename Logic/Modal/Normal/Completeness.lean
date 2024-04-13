@@ -2,7 +2,22 @@ import Logic.Modal.Normal.Deduction
 import Logic.Modal.Normal.Semantics
 
 /-!
-  Some definitions and lemmata to prove Kripke completeness.
+  # Definitions and Lemmata for Kripke Completeness
+
+  This files contains some definitions and lemmata to prove Kripke Completeness.
+
+  Refer to specific files for the formalization of Kripke Completeness.
+  - `Geach.lean`: Geach logics, such as `𝐊`, `𝐒𝟒`, `𝐒𝟓`, etc.
+
+  ## Definitions
+  - `KripkeCompleteness`: Strong kripke completeness, i.e. `Γ ⊨ᴹ[𝔽] p → Γ ⊢ᴹ[Λ]! p`.
+  - `Theory.Maximal`: If `T` is maximal, every formula `p`, either `p` or `~p` is in `T`.
+  - `MaximalConsistentTheory`: Maximal and Consistent theory.
+  - `CanonicalModel`: Canonical model.
+
+  ## Lemmata
+  - `exists_maximal_consistent_theory`: Consistent theory can be extended to maximal consistent theory that includes original theory. (a.k.a. Lindenbaum Lemma)
+  - `truthlemma`: Formula `p` is valid on canonical models `Ω` iff `p ∈ Ω`
 -/
 
 namespace LO.Modal.Normal
