@@ -64,53 +64,53 @@ lemma GeachLogic.subsetK {l : GeachTapleList} : (𝐊 : AxiomSet β) ⊆ (GeachL
 
 lemma GeachLogic.subsetK' (h : (GeachLogic l) ⊆ Λ): (𝐊 : AxiomSet β) ⊆ Λ := Set.Subset.trans GeachLogic.subsetK h
 
-class IsGeachLogic (Λ : AxiomSet β) where
+class Geach (Λ : AxiomSet β) where
   taples : GeachTapleList
   char : Λ = GeachLogic taples
 
 @[simp]
-instance : IsGeachLogic (𝐊 : AxiomSet β) where
+instance : Geach (𝐊 : AxiomSet β) where
   taples := [];
   char := rfl
 
 @[simp]
-instance : IsGeachLogic (𝐊𝐃 : AxiomSet β) where
+instance : Geach (𝐊𝐃 : AxiomSet β) where
   taples := [⟨0, 0, 1, 1⟩];
   char := by simp [LogicKD]; aesop;
 
 @[simp]
-instance : IsGeachLogic (𝐊𝐓 : AxiomSet β) where
+instance : Geach (𝐊𝐓 : AxiomSet β) where
   taples := [⟨0, 0, 1, 0⟩];
   char := by simp [LogicKT]; aesop;
 
 @[simp]
-instance : IsGeachLogic (𝐊𝟒 : AxiomSet β) where
+instance : Geach (𝐊𝟒 : AxiomSet β) where
   taples := [⟨0, 2, 1, 0⟩];
   char := by simp [LogicK4]; aesop;
 
 @[simp]
-instance : IsGeachLogic (LogicKT4 : AxiomSet β) where
+instance : Geach (LogicKT4 : AxiomSet β) where
   taples := [⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩];
   char := by simp [LogicKT4]; aesop;
 
 @[simp]
-instance : IsGeachLogic (𝐒𝟒 : AxiomSet β) := inferInstance
+instance : Geach (𝐒𝟒 : AxiomSet β) := inferInstance
 
 @[simp]
-instance : IsGeachLogic (𝐒𝟒.𝟐 : AxiomSet β) where
+instance : Geach (𝐒𝟒.𝟐 : AxiomSet β) where
   taples := [⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩, ⟨1, 1, 1, 1⟩];
   char := by simp [LogicS4Dot2, LogicKT4]; aesop;
 
 @[simp]
-instance : IsGeachLogic (LogicKT5 : AxiomSet β) where
+instance : Geach (LogicKT5 : AxiomSet β) where
   taples := [⟨0, 0, 1, 0⟩, ⟨1, 1, 0, 1⟩];
   char := by simp [LogicKT5]; aesop;
 
 @[simp]
-instance : IsGeachLogic (𝐒𝟓 : AxiomSet β) := inferInstance
+instance : Geach (𝐒𝟓 : AxiomSet β) := inferInstance
 
 @[simp]
-instance : IsGeachLogic (𝐊𝐓𝟒𝐁 : AxiomSet β) where
+instance : Geach (𝐊𝐓𝟒𝐁 : AxiomSet β) where
   taples := [⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩, ⟨0, 1, 0, 1⟩];
   char := by simp [LogicKT4B]; aesop;
 
@@ -210,7 +210,7 @@ lemma AxiomGeach.frameClassDefinability (t : GeachTaple) : FrameClassDefinabilit
   . intro h p hp; exact this.mp h p hp;
   . aesop;
 
-lemma GeachLogic.frameClassDefinabilityAux {ts : GeachTapleList} : FrameClassDefinability α β (GeachLogic ts) (GeachConfluencyList ts) := by
+lemma GeachLogic.frameClassDefinability_aux {ts : GeachTapleList} : FrameClassDefinability α β (GeachLogic ts) (GeachConfluencyList ts) := by
   induction ts with
   | nil => apply LogicK.frameClassDefinability;
   | cons t ts ih =>
@@ -222,18 +222,18 @@ lemma GeachLogic.frameClassDefinabilityAux {ts : GeachTapleList} : FrameClassDef
     . intro h;
       exact ⟨AxiomGeach.frameClassDefinability t |>.mpr h.1, ih.mpr h.2⟩;
 
-lemma GeachLogic.frameClassDefinability [hG : IsGeachLogic Λ] : FrameClassDefinability α β Λ (GeachConfluencyList hG.taples) := by
-  have := @GeachLogic.frameClassDefinabilityAux α β _ hG.taples;
+lemma GeachLogic.frameClassDefinability [hG : Geach Λ] : FrameClassDefinability α β Λ (GeachConfluencyList hG.taples) := by
+  have := @GeachLogic.frameClassDefinability_aux α β _ hG.taples;
   rw [←hG.char] at this;
   simpa;
 
 lemma LogicS4.frameClassDefinability : FrameClassDefinability α β 𝐒𝟒 (λ F => Reflexive F ∧ Transitive F) := by
-  have : Normal.FrameClassDefinability α β 𝐒𝟒 (GeachConfluencyList (IsGeachLogic.taples 𝐒𝟒)) := by apply GeachLogic.frameClassDefinability;
+  have : Normal.FrameClassDefinability α β 𝐒𝟒 (GeachConfluencyList (Geach.taples 𝐒𝟒)) := by apply GeachLogic.frameClassDefinability;
   simp_all [GeachConfluency.reflexive_def, GeachConfluency.transitive_def];
 
 end FrameClassDefinability
 
-lemma AxiomSetFrameClass.geach {Λ : AxiomSet β} [hG : IsGeachLogic Λ] : (𝔽(Λ) : FrameClass α) = (𝔽((GeachLogic hG.taples : AxiomSet β))) := by rw [←hG.char];
+lemma AxiomSetFrameClass.geach {Λ : AxiomSet β} [hG : Geach Λ] : (𝔽(Λ) : FrameClass α) = (𝔽((GeachLogic hG.taples : AxiomSet β))) := by rw [←hG.char];
 
 namespace CanonicalModel
 
@@ -314,7 +314,7 @@ variable [DecidableEq β]
 def GeachLogic.CanonicalModel (l : GeachTapleList) := Normal.CanonicalModel (GeachLogic l : AxiomSet β)
 
 lemma GeachLogic.membership_frameclass : (CanonicalModel l).frame ∈ (𝔽((GeachLogic l : AxiomSet β)) : FrameClass (MaximalConsistentTheory (GeachLogic l : AxiomSet β))) := by
-  apply frameClassDefinabilityAux |>.mp;
+  apply frameClassDefinability_aux |>.mp;
   cases l with
   | nil => simp;
   | cons head tail =>
@@ -334,7 +334,7 @@ theorem GeachLogic.kripkeCompletesAux (l : GeachTapleList) : KripkeCompleteness 
     apply truthlemma' (by simp) |>.mpr;
     assumption;
 
-lemma GeachLogic.kripkeCompletes {Λ : AxiomSet β} [hG : IsGeachLogic Λ] : KripkeCompleteness Λ (𝔽(Λ) : FrameClass (MaximalConsistentTheory Λ)) := by
+lemma GeachLogic.kripkeCompletes {Λ : AxiomSet β} [hG : Geach Λ] : KripkeCompleteness Λ (𝔽(Λ) : FrameClass (MaximalConsistentTheory Λ)) := by
   rw [hG.char];
   apply GeachLogic.kripkeCompletesAux hG.taples;
 
