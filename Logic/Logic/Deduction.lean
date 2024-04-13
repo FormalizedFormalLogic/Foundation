@@ -516,14 +516,26 @@ def imp_eq_mpr' [HasEFQ Bew] (h : Γ ⊢ ~p ⋎ q) : Γ ⊢ p ⟶ q := by
 @[tautology] def imp_eq_mpr [HasEFQ Bew] : Γ ⊢ (~p ⋎ q) ⟶ (p ⟶ q) := by apply dtr'; deduct;
 @[tautology] lemma imp_eq_mpr! [HasEFQ Bew] : Γ ⊢! (~p ⋎ q) ⟶ (p ⟶ q) := ⟨imp_eq_mpr⟩
 
-@[inference] def imp_eq_mp' (h : Γ ⊢ p ⟶ q) : Γ ⊢ (~p ⋎ q) := by
-  sorry;
+@[inference]
+def imp_eq_mp' [HasDNE Bew] (h : Γ ⊢ p ⟶ q) : Γ ⊢ (~p ⋎ q) := by
+  apply dne';
+  rw [NegDefinition.neg];
+  apply dtr';
+  have : (insert (~(~p ⋎ q)) Γ) ⊢ ~(~p ⋎ q) := by deduct;
+  have : (insert (~(~p ⋎ q)) Γ) ⊢ ~~p ⋏ ~q := by deduct;
+  have : (insert (~(~p ⋎ q)) Γ) ⊢ ~~p := by deduct;
+  have : (insert (~(~p ⋎ q)) Γ) ⊢ ~q := by deduct;
+  have : (insert (~(~p ⋎ q)) Γ) ⊢ q ⟶ ⊥ := by simpa [NegDefinition.neg] using this;
+  have : (insert (~(~p ⋎ q)) Γ) ⊢ p := by deduct;
+  have : (insert (~(~p ⋎ q)) Γ) ⊢ p ⟶ q := weakening' (by simp) h;
+  have : (insert (~(~p ⋎ q)) Γ) ⊢ q := this ⨀ (by assumption);
+  exact (by assumption) ⨀ this;
 
-@[inference] lemma imp_eq_mp'! (h : Γ ⊢! (p ⟶ q) ) : Γ ⊢! (~p ⋎ q) := ⟨imp_eq_mp' h.some⟩
+@[inference] lemma imp_eq_mp'! [HasDNE Bew] (h : Γ ⊢! (p ⟶ q) ) : Γ ⊢! (~p ⋎ q) := ⟨imp_eq_mp' h.some⟩
 
-@[tautology] def imp_eq_mp : Γ ⊢ ((p ⟶ q) ⟶ (~p ⋎ q)) := by deduct
+@[tautology] def imp_eq_mp [HasDNE Bew] : Γ ⊢ ((p ⟶ q) ⟶ (~p ⋎ q)) := by deduct
 
-@[tautology] lemma imp_eq_mp! : Γ ⊢! ((p ⟶ q) ⟶ (~p ⋎ q)) := ⟨imp_eq_mp⟩
+@[tautology] lemma imp_eq_mp! [HasDNE Bew] : Γ ⊢! ((p ⟶ q) ⟶ (~p ⋎ q)) := ⟨imp_eq_mp⟩
 
 @[inference] lemma imp_eq! [HasEFQ Bew] [HasDNE Bew] : (Γ ⊢! (p ⟶ q)) ↔ (Γ ⊢! (~p ⋎ q)) := by deduct;
 
@@ -616,7 +628,10 @@ instance [HasDNE Bew] : HasEFQ Bew where
 instance [HasDNE Bew] : Intuitionistic Bew where
 
 instance [HasDNE Bew] : HasLEM Bew where
-  lem Γ p := by apply disj_dn_elim'; deduct;
+  lem Γ p := by
+    apply disj_dn_elim';
+    apply imp_eq_mp';
+    apply dni;
 
 def impimp_to_conj' (h : Γ ⊢ p ⟶ q ⟶ r) : Γ ⊢ (p ⋏ q) ⟶ r := by
   apply dtr';
