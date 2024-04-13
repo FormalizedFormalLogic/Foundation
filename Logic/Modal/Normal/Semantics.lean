@@ -312,14 +312,14 @@ variable [Inhabited α] [Inhabited β] {F: Frame α}
 
 def FrameClassDefinability (α β : Type*) (Λ : AxiomSet β) (P : Frame α → Prop) := ∀ {F : Frame α}, (P F) ↔ (F ∈ 𝔽(Λ))
 
-instance LogicK.FrameClassDefinability : FrameClassDefinability α β 𝐊 (λ _ => True) := by
+lemma LogicK.frameClassDefinability : FrameClassDefinability α β 𝐊 (λ _ => True) := by
   intro F;
   have := AxiomK.defines β F;
   aesop;
 
 instance : Nonempty (𝔽((𝐊 : AxiomSet β)) : FrameClass α) := by
   existsi (λ _ _ => True);
-  apply LogicK.FrameClassDefinability.mp;
+  apply LogicK.frameClassDefinability.mp;
   trivial;
 
 end LogicDefinabilities

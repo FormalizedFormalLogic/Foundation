@@ -69,7 +69,7 @@ private lemma embed_Int_S4.case_imply₂ : ∅ ⊢ᴹ[𝐒𝟒]! ((p ⟶ q ⟶ r
   apply LogicS4.kripkeCompletes;
   simp [GTranslation, Formula.FrameClassConsequence, Formula.FrameConsequence];
   intro F hF _ w₁ w₂ _ hpqr w₃ hw₂w₃ hpq w₄ hw₃w₄ hp;
-  replace hF := by simpa using LogicS4.FrameClassDefinability.mpr (by assumption);
+  replace hF := by simpa using LogicS4.frameClassDefinability.mpr (by assumption);
   exact hpqr w₄ (hF.right hw₂w₃ hw₃w₄) hp w₄ (hF.left _) (hpq w₄ (by assumption) hp);
 
 private lemma embed_Int_S4.case_conj₃ : ∅ ⊢ᴹ[𝐒𝟒]! ((p ⟶ q ⟶ p ⋏ q))ᵍ := by
@@ -85,7 +85,7 @@ private lemma embed_Int_S4.case_disj₃ : ∅ ⊢ᴹ[𝐒𝟒]! (((p ⟶ r) ⟶ 
   apply LogicS4.kripkeCompletes;
   simp [GTranslation, Formula.FrameClassConsequence, Formula.FrameConsequence];
   intro F hF _ w₁ w₂ _ hp w₃ hw₂₃ hq w₄ hw₃₄ h;
-  replace hF := by simpa using LogicS4.FrameClassDefinability.mpr hF;
+  replace hF := by simpa using LogicS4.frameClassDefinability.mpr hF;
   cases h with
   | inl h => exact hp _ (hF.right hw₂₃ hw₃₄) h;
   | inr h => exact hq _ (by assumption) h;
@@ -143,7 +143,7 @@ lemma embed_S4_Int : (∅ ⊢ᴹ[(𝐒𝟒 : AxiomSet α)]! pᵍ) → (∅ ⊢! 
   have : ∅ ⊨ᴹ[(𝔽(𝐒𝟒) : FrameClass γ)] pᵍ := AxiomSet.sounds hC;
   simp [Formula.FrameConsequence, Formula.FrameClassConsequence] at this;
   have : w ⊩ᴹ[M] pᵍ := this M.frame (by
-    apply LogicS4.FrameClassDefinability.mp;
+    apply LogicS4.frameClassDefinability.mp;
     constructor <;> assumption;
   ) M.val w;
 

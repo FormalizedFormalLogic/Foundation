@@ -414,7 +414,7 @@ def conj : List α → α
 lemma map_conj [FunLike F α Prop] [LogicalConnective.HomClass F α Prop] (f : F) (l : List α) : f l.conj ↔ ∀ a ∈ l, f a := by
   induction l <;> simp[*]
 
-lemma map_conj_concat [FunLike F α Prop] [LogicalConnective.HomClass F α Prop] (f : F) (l₁ l₂ : List α) : f (l₁ ++ l₂).conj ↔ f (l₁.conj ⋏ l₂.conj) := by
+lemma map_conj_append [FunLike F α Prop] [LogicalConnective.HomClass F α Prop] (f : F) (l₁ l₂ : List α) : f (l₁ ++ l₂).conj ↔ f (l₁.conj ⋏ l₂.conj) := by
   induction l₁ <;> induction l₂ <;> aesop;
 
 def disj : List α → α
@@ -428,7 +428,7 @@ def disj : List α → α
 lemma map_disj [FunLike F α Prop] [LogicalConnective.HomClass F α Prop] (f : F) (l : List α) : f l.disj ↔ ∃ a ∈ l, f a := by
   induction l <;> simp[*]
 
-lemma map_disj_concat [FunLike F α Prop] [LogicalConnective.HomClass F α Prop] (f : F) (l₁ l₂ : List α) : f (l₁ ++ l₂).disj ↔ f (l₁.disj ⋎ l₂.disj) := by
+lemma map_disj_append [FunLike F α Prop] [LogicalConnective.HomClass F α Prop] (f : F) (l₁ l₂ : List α) : f (l₁ ++ l₂).disj ↔ f (l₁.disj ⋎ l₂.disj) := by
   induction l₁ <;> induction l₂ <;> aesop;
 
 end
@@ -446,7 +446,7 @@ noncomputable def conj (s : Finset α) : α := s.toList.conj
 lemma map_conj [FunLike F α Prop] [LogicalConnective.HomClass F α Prop] (f : F) (s : Finset α) : f s.conj ↔ ∀ a ∈ s, f a := by
   simpa using List.map_conj f s.toList
 
-lemma map_conj_concat [FunLike F α Prop] [LogicalConnective.HomClass F α Prop] (f : F) (s₁ s₂ : Finset α) : f (s₁ ∪ s₂).conj ↔ f (s₁.conj ⋏ s₂.conj) := by
+lemma map_conj_union [FunLike F α Prop] [LogicalConnective.HomClass F α Prop] (f : F) (s₁ s₂ : Finset α) : f (s₁ ∪ s₂).conj ↔ f (s₁.conj ⋏ s₂.conj) := by
   simp [map_conj];
   constructor;
   . intro h;
@@ -463,7 +463,7 @@ noncomputable def disj (s : Finset α) : α := s.toList.disj
 lemma map_disj [FunLike F α Prop] [LogicalConnective.HomClass F α Prop] (f : F) (s : Finset α) : f s.disj ↔ ∃ a ∈ s, f a := by
   simpa using List.map_disj f s.toList
 
-lemma map_disj_concat [FunLike F α Prop] [LogicalConnective.HomClass F α Prop] (f : F) (s₁ s₂ : Finset α) : f (s₁ ∪ s₂).disj ↔ f (s₁.disj ⋎ s₂.disj) := by
+lemma map_disj_union [FunLike F α Prop] [LogicalConnective.HomClass F α Prop] (f : F) (s₁ s₂ : Finset α) : f (s₁ ∪ s₂).disj ↔ f (s₁.disj ⋎ s₂.disj) := by
   simp [map_disj];
   constructor;
   . rintro ⟨a, h₁ | h₂, hb⟩;
