@@ -1,5 +1,15 @@
 import Logic.Modal.Normal.Formula
 
+/-!
+  # Common Axioms of normal modal logics
+
+  Definitions of axioms (axiom schemes) and logics for normal modal logics.
+  In this formalization, _"logic"_ refers to the sets of formulas that satisfy the axiom schemes.
+
+  ## Remarks
+  - Some axioms `AxiomT`, `Axiom4`, `Axiom5`, etc. are characterlized by Geach Axiom. See `Geach.lean`.
+-/
+
 section
 
 namespace Set
