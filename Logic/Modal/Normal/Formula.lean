@@ -35,7 +35,7 @@ instance : NegDefinition (Formula α) where
   neg := rfl
 
 instance : ModalDuality (Formula α) where
-  dia := rfl
+  dia_to_box := rfl
 
 section ToString
 
@@ -76,11 +76,11 @@ lemma dia_eq (p : Formula α) : ◇p = ~(□(~p)) := rfl
 
 @[simp] lemma imp_inj (p₁ q₁ p₂ q₂ : Formula α) : p₁ ⟶ p₂ = q₁ ⟶ q₂ ↔ p₁ = q₁ ∧ p₂ = q₂ := by simp[Arrow.arrow]
 
-@[simp] lemma neg_inj (p q : Formula α) : ~p = ~q ↔ p = q := by simp[*]
+@[simp] lemma neg_inj (p q : Formula α) : ~p = ~q ↔ p = q := by simp [NegDefinition.neg]
 
-@[simp] lemma box_inj (p q : Formula α) : □p = □q ↔ p = q := by simp[Box.box]
-
-@[simp] lemma dia_inj (p q : Formula α) : ◇p = ◇q ↔ p = q := by simp[Dia.dia]
+instance : ModalInjective (Formula α) where
+  box_injective := by simp [Function.Injective, Box.box]
+  dia_injective := by simp [Function.Injective, Dia.dia]
 
 def complexity : Formula α → ℕ
 | atom _  => 0
@@ -184,18 +184,6 @@ instance : DecidableEq (Formula α) := hasDecEq
 
 end Decidable
 
-def multibox (p : Formula α) : ℕ → Formula α
-  | 0     => p
-  | n + 1 => □(multibox p n)
-
-notation "□^" n:90 p => multibox p n
-
-def multidia (p : Formula α) : ℕ → Formula α
-  | 0     => p
-  | n + 1 => ◇(multidia p n)
-
-notation "◇^" n:90 p => multidia p n
-
 def isBox : Formula α → Bool
   | □_ => true
   | _  => false
@@ -208,17 +196,39 @@ namespace Theory
 
 variable (Γ : Theory α)
 
-@[simp] abbrev box : Theory α := Set.box Γ
-prefix:74 "□" => Theory.box
+@[simp] def box : Theory α := Set.box Γ
+prefix:73 "□" => Theory.box
 
-@[simp] abbrev dia : Theory α := Set.dia Γ
-prefix:74 "◇" => Theory.dia
+@[simp] def dia : Theory α := Set.dia Γ
+prefix:73 "◇" => Theory.dia
 
-def prebox : Theory α := .box ⁻¹' Γ
+@[simp] def prebox : Theory α := Set.prebox Γ
 prefix:73 "□⁻¹" => Theory.prebox
 
-def predia : Theory α := .dia ⁻¹' Γ
+@[simp] def predia : Theory α := Set.predia Γ
 prefix:73 "◇⁻¹" => Theory.predia
+
+@[simp] def multibox (n : ℕ) (Γ : Theory α) : Theory α := Set.multibox n Γ
+notation:72 "□[" n:90 "]" Γ:80 => Theory.multibox n Γ
+
+@[simp] def multidia (n : ℕ) (Γ : Theory α) : Theory α := Set.multidia n Γ
+notation:72 "◇[" n:90 "]" Γ:80 => Theory.multidia n Γ
+
+@[simp] def premultibox (n : ℕ) (Γ : Theory α) : Theory α := Set.premultibox n Γ
+notation:72 "□⁻¹[" n:90 "]" Γ:80 => Theory.premultibox n Γ
+
+@[simp] def premultidia (n : ℕ) (Γ : Theory α) : Theory α := Set.premultidia n Γ
+notation:72 "◇⁻¹[" n:90 "]" Γ:80 => Theory.premultidia n Γ
+
+variable {Γ}
+
+@[simp] lemma prebox_box_eq : □⁻¹□Γ = Γ := by simp;
+
+@[simp] lemma predia_dia_eq : ◇⁻¹◇Γ = Γ := by simp;
+
+@[simp] lemma premultibox_multibox_eq : □⁻¹[n](□[n]Γ) = Γ := by simp;
+
+@[simp] lemma premultidia_multidia_eq : ◇⁻¹[n](◇[n]Γ) = Γ := by simp;
 
 end Theory
 
@@ -230,11 +240,53 @@ namespace Context
 variable [DecidableEq α]
 variable (Γ : Context α)
 
-abbrev box : Context α := Finset.box Γ
-prefix:73 "□" => box
+@[simp] noncomputable def conj : Formula α := Finset.conj Γ
+prefix:75 "⋀" => conj
 
-def dia : Context α := Finset.dia Γ
-prefix:73 "◇" => dia
+@[simp] noncomputable def disj : Formula α := Finset.disj Γ
+prefix:75 "⋁" => disj
+
+@[simp] noncomputable abbrev box : Context α := Finset.box Γ
+prefix:75 "□" => box
+
+@[simp] noncomputable def dia : Context α := Finset.dia Γ
+prefix:75 "◇" => dia
+
+@[simp] noncomputable def multibox (n : ℕ) (Γ : Context α) : Context α := Finset.multibox n Γ
+notation:75 "□[" n:90 "]" Γ:80 => Context.multibox n Γ
+
+@[simp] noncomputable def multidia (n : ℕ)  (Γ : Context α) : Context α := Finset.multidia n Γ
+notation:75 "◇[" n:90 "]" Γ:80 => Context.multidia n Γ
+
+@[simp] noncomputable def prebox (Γ : Context α) : Context α := Finset.prebox Γ
+prefix:75 "□⁻¹" => Context.prebox
+
+@[simp] noncomputable def predia (Γ : Context α) : Context α := Finset.predia Γ
+prefix:75 "◇⁻¹" => Context.predia
+
+@[simp] noncomputable def premultibox (n : ℕ) (Γ : Context α) : Context α := Finset.premultibox n Γ
+notation:75 "□⁻¹[" n:90 "]" Γ:80 => Context.premultibox n Γ
+
+@[simp] noncomputable def premultidia (n : ℕ) (Γ : Context α) : Context α := Finset.premultidia n Γ
+notation:75 "◇⁻¹[" n:90 "]" Γ:80 => Context.premultidia n Γ
+
+variable {Γ : Context α}
+
+@[simp] lemma box_coe_eq : ↑(□Γ : Context α) = □(↑Γ : Theory α) := by apply Finset.multibox_coe
+
+@[simp] lemma dia_coe_eq  : ↑(◇Γ : Context α) = ◇(↑Γ : Theory α) := by apply Finset.multidia_coe
+
+@[simp] lemma multibox_coe_eq : ↑(□[n]Γ : Context α) = □[n](↑Γ : Theory α) := by apply Finset.multibox_coe
+
+@[simp] lemma multidia_coe_eq : ↑(◇[n]Γ : Context α) = ◇[n](↑Γ : Theory α) := by apply Finset.multidia_coe
+
+@[simp] lemma prebox_coe_eq : ↑(□⁻¹Γ : Context α) = (□⁻¹(↑Γ : Theory α)) := by apply Finset.premultibox_coe
+
+@[simp] lemma predia_coe_eq : ↑(◇⁻¹Γ : Context α) = (◇⁻¹(↑Γ : Theory α)) := by apply Finset.premultidia_coe
+
+@[simp] lemma premultibox_coe_eq : ↑(□⁻¹[n]Γ : Context α) = (□⁻¹[n](↑Γ : Theory α)) := by apply Finset.premultibox_coe
+
+@[simp] lemma premultidia_coe_eq : ↑(◇⁻¹[n]Γ : Context α) = (◇⁻¹[n](↑Γ : Theory α)) := by apply Finset.premultidia_coe
 
 end Context
 

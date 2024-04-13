@@ -1,3 +1,5 @@
+import Aesop
+import Logic.Logic.Init
 import Logic.Logic.LogicSymbol
 
 namespace LO
@@ -48,12 +50,6 @@ def HasModusPonens.of' [Deduction Bew] (b : {Γ : Set F} → {p q : F} → Bew �
 
 variable [HasModusPonens Bew]
 
-abbrev modus_ponens {Γ₁ Γ₂ p q} (d₁ : Bew Γ₁ (p ⟶ q)) (d₂ : Bew Γ₂ p) : Bew (Γ₁ ∪ Γ₂) q := HasModusPonens.modus_ponens d₁ d₂
-infixr:90 "⨀" => modus_ponens
-
-def modus_ponens' {Γ p q} (d₁ : Bew Γ (p ⟶ q)) (d₂ : Bew Γ p) : Bew Γ q := by simpa using d₁ ⨀ d₂
-infixr:90 "⨀" => modus_ponens'
-
 end
 
 /--
@@ -72,7 +68,7 @@ class Minimal [NegDefinition F] extends Deduction Bew, HasModusPonens Bew where
 
 /-- Supplymental -/
 class HasDT where
-  dtr {Γ : Set F} {p q : F} : Bew (insert p Γ) q → Bew Γ (p ⟶ q)
+  dtr' : Bew (insert p Γ) q → Bew Γ (p ⟶ q)
 
 class HasEFQ where
   efq (Γ : Set F) (p : F) : Bew Γ (⊥ ⟶ p)
@@ -126,298 +122,553 @@ class Classical extends Minimal Bew, HasDNE Bew
 
 end
 
-open Deduction Minimal HasDT Intuitionistic Classical HasDNE
+variable {Bew : Set F → F → Type*}
+local infix:50 " ⊢ " => Bew
+local infix:50 " ⊢! " => Deduction.Deducible Bew
+local infix:50 " ⊬! " => Deduction.Undeducible Bew
 
-variable {Bew : Set F → F → Type*} (Γ : Set F) (p q r : F)
+open Deduction
 
-section Minimal
+section Deductions
 
-variable [hM : Minimal Bew] [hDT : HasDT Bew] [hEFQ : HasEFQ Bew]
+variable [HasModusPonens Bew] [Minimal Bew] [HasDT Bew]
+-- variable [HasEFQ Bew] [HasDNE Bew] [HasLEM Bew]
+variable {Γ Γ₁ Γ₂ : Set F} {p q r : F}
 
-abbrev efq := hEFQ.efq
+macro "tautology" : attr =>
+  `(attr|aesop 8 safe (rule_sets := [$(Lean.mkIdent `Deduction):ident]))
 
-def efq' {Γ p} : (Bew Γ ⊥) → (Bew Γ p) := modus_ponens' (efq _ _)
+macro "inference" : attr =>
+  `(attr|aesop [unsafe 75% (rule_sets := [$(Lean.mkIdent `Deduction):ident])])
 
-abbrev dtr {Γ p q} (d : Bew (insert p Γ) q) := HasDT.dtr d
+@[inference]
+def modus_ponens' (d₁ : Γ₁ ⊢ p ⟶ q) (d₂ : Γ₂ ⊢ p) : (Γ₁ ∪ Γ₂) ⊢ q := HasModusPonens.modus_ponens d₁ d₂
+infixl:90 "⨀" => modus_ponens'
 
-def verum (Γ : Set F) : Bew Γ ⊤ := hM.verum Γ
+ @[inference]
+lemma modus_ponens'! (d₁ : Γ₁ ⊢! p ⟶ q) (d₂ : Γ₂ ⊢! p) : Γ₁ ∪ Γ₂ ⊢! q := ⟨d₁.some ⨀ d₂.some⟩
+infixl:90 "⨀" => modus_ponens'!
 
-abbrev imply₁ := hM.imply₁
+@[inference]
+def modus_ponens₂' (d₁ : Γ ⊢ p ⟶ q) (d₂ : Γ ⊢ p) : Γ ⊢ q := by simpa using d₁ ⨀ d₂
+infixl:90 "⨀" => modus_ponens₂'
 
-def imply₁' {Γ p q} : Bew Γ p → Bew Γ (q ⟶ p) := modus_ponens' (imply₁ _ _ _)
+@[inference]
+lemma modus_ponens₂'! (d₁ : Γ ⊢! (p ⟶ q)) (d₂ : Γ ⊢! p) : Γ ⊢! q := ⟨d₁.some ⨀ d₂.some⟩
+infixl:90 "⨀" => modus_ponens₂'!
 
-abbrev imply₂ := hM.imply₂
+open Lean.Parser.Tactic (config)
 
-def imply₂' {Γ p q r} (d₁ : Bew Γ (p ⟶ q ⟶ r)) (d₂ : Bew Γ (p ⟶ q)) (d₃ : Bew Γ p) : Bew Γ r := (((imply₂ _ _ _ _) ⨀ d₁) ⨀ d₂) ⨀ d₃
+macro "deduct" (config)? : tactic =>
+  `(tactic| aesop (rule_sets := [$(Lean.mkIdent `Deduction):ident]) (config := { terminal := true }))
 
-abbrev conj₁ := hM.conj₁
+macro "deduct?" (config)? : tactic =>
+  `(tactic| aesop? (rule_sets := [$(Lean.mkIdent `Deduction):ident]) (config := { terminal := true }))
 
-def conj₁' {Γ p q} : Bew Γ (p ⋏ q) → Bew Γ p := modus_ponens' (conj₁ _ _ _)
+-- set_option trace.aesop true
 
-abbrev conj₂ := hM.conj₂
+attribute [aesop 1 (rule_sets := [Deduction]) safe]
+  LogicalConnective.iff
+  NegDefinition.neg
 
-def conj₂' {Γ p q} : Bew Γ (p ⋏ q) → Bew Γ q := modus_ponens' (conj₂ _ _ _)
+@[tautology] def verum : Γ ⊢ ⊤ := by apply Minimal.verum
+@[tautology] lemma verum! {Γ : Set F} : Γ ⊢! ⊤ := ⟨verum⟩
 
-abbrev conj₃ := hM.conj₃
+@[tautology] def imply₁ : Γ ⊢ p ⟶ q ⟶ p := by apply Minimal.imply₁
+@[tautology] lemma imply₁! : Γ ⊢! (p ⟶ q ⟶ p) := ⟨imply₁⟩
 
-def conj₃' {Γ p q} (d₁ : Bew Γ p) (d₂: Bew Γ q) : Bew Γ (p ⋏ q) := (conj₃ _ _ _ ⨀ d₁) ⨀ d₂
+@[tautology] def imply₂ : Γ ⊢ (p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r := by apply Minimal.imply₂
+@[tautology] lemma imply₂! : Γ ⊢! ((p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r) := ⟨imply₂⟩
 
-abbrev disj₁ := hM.disj₁
+@[tautology] def conj₁ : Γ ⊢ p ⋏ q ⟶ p := by apply Minimal.conj₁
+@[tautology] lemma conj₁! : Γ ⊢! (p ⋏ q ⟶ p) := ⟨conj₁⟩
 
-def disj₁' {Γ p q} (d : Bew Γ p) : Bew Γ (p ⋎ q) := (disj₁ _ _ _ ⨀ d)
+@[tautology] def conj₂ : Γ ⊢ p ⋏ q ⟶ q := by apply Minimal.conj₂
+@[tautology] lemma conj₂! : Γ ⊢! (p ⋏ q ⟶ q) := ⟨conj₂⟩
 
-abbrev disj₂ := hM.disj₂
+@[tautology] def conj₃ : Γ ⊢ p ⟶ q ⟶ p ⋏ q := by apply Minimal.conj₃
+@[tautology] lemma conj₃! : Γ ⊢! (p ⟶ q ⟶ p ⋏ q) := ⟨conj₃⟩
 
-def disj₂' {Γ p q} (d : Bew Γ q) : Bew Γ (p ⋎ q) := (disj₂ _ _ _ ⨀ d)
+@[tautology] def disj₁ : Γ ⊢ p ⟶ p ⋎ q := by apply Minimal.disj₁
+@[tautology] lemma disj₁! : Γ ⊢! (p ⟶ p ⋎ q) := ⟨disj₁⟩
 
-abbrev disj₃ := hM.disj₃
+@[tautology] def disj₂ : Γ ⊢ q ⟶ p ⋎ q := by apply Minimal.disj₂
+@[tautology] lemma disj₂! : Γ ⊢! (q ⟶ p ⋎ q) := ⟨disj₂⟩
 
-def disj₃' {Γ p q r} (d₁ : Bew Γ (p ⟶ r)) (d₂ : Bew Γ (q ⟶ r)) (d₃ : Bew Γ (p ⋎ q)) : Bew Γ r := (((disj₃ _ _ _ _) ⨀ d₁) ⨀ d₂) ⨀ d₃
+@[tautology] def disj₃ : Γ ⊢ (p ⟶ r) ⟶ (q ⟶ r) ⟶ p ⋎ q ⟶ r := by apply Minimal.disj₃
+@[tautology] lemma disj₃! (Γ : Set F) (p q r : F) : Γ ⊢! ((p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q) ⟶ r) := ⟨disj₃⟩
 
-def disj_symm' {Γ p q} : Bew Γ (p ⋎ q) → Bew Γ (q ⋎ p) := by
-  intro h;
-  exact disj₃' (disj₂ _ _ _) (disj₁ _ _ _) h;
+@[tautology] def efq [HasEFQ Bew] : Γ ⊢ ⊥ ⟶ p := by apply HasEFQ.efq
+@[tautology] lemma efq! [HasEFQ Bew] : Γ ⊢! (⊥ ⟶ p) := ⟨efq⟩
 
-def iff_mp' {Γ p q} (d : Bew Γ (p ⟷ q)) : Bew Γ (p ⟶ q) := by
-  simp [LogicalConnective.iff] at d;
-  exact conj₁' d
+@[inference]
+def efq' [HasEFQ Bew] (h : Γ ⊢ ⊥) : Γ ⊢ p := by deduct
 
-def iff_right' {Γ p q} (dpq : Bew Γ (p ⟷ q)) (dp : Bew Γ p) : Bew Γ q := (iff_mp' dpq) ⨀ dp
+@[inference]
+lemma efq'! [HasEFQ Bew] (h : Γ ⊢! ⊥) : Γ ⊢! p := ⟨efq' h.some⟩
 
-def iff_mpr' {Γ p q} (d : Bew Γ (p ⟷ q)) : Bew Γ (q ⟶ p) := by
-  simp [LogicalConnective.iff] at d;
-  exact conj₂' d
+@[tautology]
+def lem [HasLEM Bew] : Γ ⊢ p ⋎ ~p := by apply HasLEM.lem
 
-def iff_left' {Γ p q} (dpq : Bew Γ (p ⟷ q)) (dq : Bew Γ q) : Bew Γ p := (iff_mpr' dpq) ⨀ dq
+@[inference]
+def axm' (h : p ∈ Γ) : Γ ⊢ p := Deduction.axm h
 
-def iff_intro {Γ p q} (dpq : Bew Γ (p ⟶ q)) (dqp : Bew Γ (q ⟶ p)) : Bew Γ (p ⟷ q) := by
-  simp [LogicalConnective.iff];
-  exact conj₃' dpq dqp
+@[inference]
+lemma axm! {Γ : Set F} {f : F} (h : f ∈ Γ) : Γ ⊢! f := ⟨axm' h⟩
 
-def iff_symm' {Γ p q} (d : Bew Γ (p ⟷ q)) : Bew Γ (q ⟷ p) := iff_intro (iff_mpr' d) (iff_mp' d)
+@[inference]
+def weakening' (h : Γ₁ ⊆ Γ₂) (d : Γ₁ ⊢ p) : Γ₂ ⊢ p := Deduction.weakening' h d
 
-def dtl {Γ p q} (d : Bew Γ (p ⟶ q)) : Bew (insert p Γ) q := modus_ponens' (weakening' (by simp) d) (axm (by simp))
+@[inference]
+lemma weakening! (h : Γ₁ ⊆ Γ₂) (d : Γ₁ ⊢! p) : Γ₂ ⊢! p := ⟨weakening' h d.some⟩
 
-def imp_id : Bew Γ (p ⟶ p) := ((imply₂ Γ p (p ⟶ p) p) ⨀ (imply₁ _ _ _)) ⨀ (imply₁ _ _ _)
+@[inference]
+def weakening'_empty (d : ∅ ⊢ p) : Γ ⊢ p := by deduct
 
-def id_insert (Γ p) : Bew (insert p Γ) p := axm (by simp)
+@[inference]
+lemma weakening'_empty! (d : ∅ ⊢! p) : Γ ⊢! p := ⟨weakening'_empty d.some⟩
 
-def id_singleton (p) : Bew {p} p := by simpa using id_insert ∅ p
+@[inference] def imply₁' (h : Γ ⊢ p) : Γ ⊢ (q ⟶ p) := imply₁ ⨀ h
+@[inference] lemma imply₁'! (d : Γ ⊢! p) : Γ ⊢! (q ⟶ p) := ⟨imply₁' d.some⟩
 
-def dni : Bew Γ (p ⟶ ~~p) := by
+@[inference] def imply₂' (d₁ : Γ ⊢ (p ⟶ q ⟶ r)) (d₂ : Γ ⊢ (p ⟶ q)) (d₃ : Γ ⊢ p) : Γ ⊢ r := imply₂ ⨀ d₁ ⨀ d₂ ⨀ d₃
+@[inference] lemma imply₂'! {Γ : Set F} {p q r : F} (d₁ : Γ ⊢! (p ⟶ q ⟶ r)) (d₂ : Γ ⊢! (p ⟶ q)) (d₃ : Γ ⊢! p) : Γ ⊢! r := ⟨imply₂' d₁.some d₂.some d₃.some⟩
+
+@[inference] def conj₁' (d : Γ ⊢ p ⋏ q) : Γ ⊢ p := conj₁ ⨀ d
+lemma conj₁'! (d : Γ ⊢! (p ⋏ q)) : Γ ⊢! p := ⟨conj₁' d.some⟩
+
+@[inference] def conj₂' (d : Γ ⊢ p ⋏ q) : Γ ⊢ q := conj₂ ⨀ d
+lemma conj₂'! (d : Γ ⊢! (p ⋏ q)) : Γ ⊢! q := ⟨conj₂' d.some⟩
+
+@[inference] def conj₃' (d₁ : Γ ⊢ p) (d₂: Γ ⊢ q) : Γ ⊢ (p ⋏ q) := conj₃ ⨀ d₁ ⨀ d₂
+lemma conj₃'! (d₁ : Γ ⊢! p) (d₂: Γ ⊢! q) : Γ ⊢! (p ⋏ q) := ⟨conj₃' d₁.some d₂.some⟩
+
+@[inference]
+def disj₁' (d : Γ ⊢ p) : Γ ⊢ (p ⋎ q) := disj₁ ⨀ d
+lemma disj₁'! (d : Γ ⊢! p) : Γ ⊢! (p ⋎ q) := ⟨disj₁' d.some⟩
+
+@[inference]
+def disj₂' (d : Γ ⊢ q) : Γ ⊢ (p ⋎ q) := disj₂ ⨀ d
+lemma disj₂'! (d : Γ ⊢! q) : Γ ⊢! (p ⋎ q) := ⟨disj₂' d.some⟩
+
+@[inference]
+def disj₃' (d₁ : Γ ⊢ (p ⟶ r)) (d₂ : Γ ⊢ (q ⟶ r)) (d₃ : Γ ⊢ (p ⋎ q)) : Γ ⊢ r := disj₃ ⨀ d₁ ⨀ d₂ ⨀ d₃
+lemma disj₃'! {Γ : Set F} {p q r : F} (d₁ : Γ ⊢! (p ⟶ r)) (d₂ : Γ ⊢! (q ⟶ r)) (d₃ : Γ ⊢! (p ⋎ q)) : Γ ⊢! r := ⟨disj₃' d₁.some d₂.some d₃.some⟩
+
+@[inference] def dtl' (h : Γ ⊢ p ⟶ q) : (insert p Γ) ⊢ q := (show (insert p Γ) ⊢ (p ⟶ q) by deduct) ⨀ (by deduct)
+@[inference] lemma dtl'! (d : Γ ⊢! (p ⟶ q)) : (insert p Γ) ⊢! q := ⟨dtl' d.some⟩
+
+@[inference]
+lemma dtl_not'! : ((insert p Γ) ⊬! q) → (Γ ⊬! (p ⟶ q)) := by
+  contrapose;
+  simp [Undeducible, Deducible];
+  intro d;
+  exact ⟨dtl' d⟩
+
+@[inference] def dtr' (h : (insert p Γ) ⊢ q) : Γ ⊢ p ⟶ q := HasDT.dtr' h
+@[inference] lemma dtr'! (d : (insert p Γ) ⊢! q) : Γ ⊢! (p ⟶ q) := ⟨dtr' d.some⟩
+
+@[inference]
+lemma dtr_not'! : (Γ ⊬! (p ⟶ q)) → ((insert p Γ) ⊬! q) := by
+  contrapose;
+  simp [Undeducible, Deducible];
+  intro d;
+  exact ⟨dtr' d⟩
+
+@[tautology]
+def imp_id : Γ ⊢ p ⟶ p := by
+  have : Γ ⊢ (p ⟶ (p ⟶ p) ⟶ p) ⟶ (p ⟶ (p ⟶ p)) ⟶ p ⟶ p := imply₂;
+  exact (by assumption) ⨀ imply₁ ⨀ imply₁;
+
+@[tautology] lemma imp_id! : Γ ⊢! p ⟶ p := ⟨imp_id⟩
+
+@[aesop 4 safe (rule_sets := [Deduction])]
+def id_insert : (insert p Γ) ⊢ p := by deduct
+
+@[aesop 4 safe (rule_sets := [Deduction])]
+def id_singleton : {p} ⊢ p := by deduct
+
+@[aesop unsafe 90% (rule_sets := [Deduction])]
+def liftup (h : ∀ {Γ}, Γ ⊢ p → Γ ⊢ q) : Γ ⊢ p ⟶ q := by
+  apply dtr';
+  deduct;
+
+@[inference] def iff_mp' (d : Γ ⊢ p ⟷ q) : Γ ⊢ (p ⟶ q) := by deduct
+@[inference] lemma iff_mp'! (d : Γ ⊢! (p ⟷ q)) : Γ ⊢! (p ⟶ q) := ⟨iff_mp' d.some⟩
+
+@[inference] def iff_mpr' (d : Γ ⊢ p ⟷ q) : Γ ⊢ (q ⟶ p) := by deduct
+@[inference] lemma iff_mpr'! (d : Γ ⊢! (p ⟷ q)) : Γ ⊢! (q ⟶ p) := ⟨iff_mpr' d.some⟩
+
+@[inference] def iff_right' (dpq : Γ ⊢ (p ⟷ q)) (dp : Γ ⊢ p) : Γ ⊢ q := iff_mp' dpq ⨀ dp
+@[inference] lemma iff_right'! (dpq : Γ ⊢! (p ⟷ q)) (dp : Γ ⊢! p) : Γ ⊢! q := ⟨iff_right' dpq.some dp.some⟩
+
+@[inference] def iff_left' (dpq : Γ ⊢ (p ⟷ q)) (dq : Γ ⊢ q) : Γ ⊢ p := iff_mpr' dpq ⨀ dq
+@[inference] lemma iff_left'! (dpq : Γ ⊢! (p ⟷ q)) (dq : Γ ⊢! q) : Γ ⊢! p := ⟨iff_left' dpq.some dq.some⟩
+
+@[inference] def iff_intro' (dpq : Γ ⊢ p ⟶ q) (dqp : Γ ⊢ q ⟶ p) : Γ ⊢ p ⟷ q := by deduct
+@[inference] lemma iff_intro! (dpq : Γ ⊢! (p ⟶ q)) (dqp : Γ ⊢! (q ⟶ p)) : Γ ⊢! (p ⟷ q) := ⟨iff_intro' dpq.some dqp.some⟩
+
+@[inference] def conj_symm' (h : Γ ⊢ p ⋏ q) : Γ ⊢ q ⋏ p := conj₃' (conj₂' h) (conj₁' h)
+@[inference] lemma conj_symm'! (d : Γ ⊢! (p ⋏ q)) : Γ ⊢! (q ⋏ p) := ⟨conj_symm' d.some⟩
+
+@[tautology] def conj_symm : Γ ⊢ p ⋏ q ⟶ q ⋏ p := by deduct
+@[tautology] lemma conj_symm! : Γ ⊢! (p ⋏ q) ⟶ (q ⋏ p) := ⟨conj_symm⟩
+
+@[tautology] def conj_symm_iff : Γ ⊢ p ⋏ q ⟷ q ⋏ p := by deduct;
+@[tautology] lemma conj_symm_iff! : Γ ⊢! (p ⋏ q) ⟷ (q ⋏ p) := ⟨conj_symm_iff⟩
+
+@[inference] def disj_symm' (h : Γ ⊢ p ⋎ q) : Γ ⊢ q ⋎ p := disj₃' disj₂ disj₁ h
+@[inference] lemma disj_symm'! (d : Γ ⊢! (p ⋎ q)) : Γ ⊢! (q ⋎ p) := ⟨disj_symm' d.some⟩
+
+@[tautology] def disj_symm : Γ ⊢ (p ⋎ q) ⟶ (q ⋎ p) := by deduct
+@[tautology] lemma disj_symm! : Γ ⊢! (p ⋎ q) ⟶ (q ⋎ p) := ⟨disj_symm⟩
+
+@[inference] def iff_symm' (d : Γ ⊢ (p ⟷ q)) : Γ ⊢ (q ⟷ p) := by apply conj_symm'; deduct;
+@[inference] lemma iff_symm'! (d : Γ ⊢! (p ⟷ q)) : Γ ⊢! (q ⟷ p) := ⟨iff_symm' d.some⟩
+
+@[inference] lemma iff_def! : (Γ ⊢! (p ⟷ q)) ↔ (Γ ⊢! (p ⟶ q)) ∧ (Γ ⊢! (q ⟶ p)) := by constructor <;> deduct
+
+@[inference]
+def imp_trans' (h₁ : Γ ⊢ p ⟶ q) (h₂ : Γ ⊢ q ⟶ r) : Γ ⊢ p ⟶ r := by
+  apply dtr';
+  have : (insert p Γ) ⊢ p := by deduct;
+  have : (insert p Γ) ⊢ q := by deduct;
+  have : (insert p Γ) ⊢ q ⟶ r := weakening' (by simp) h₂;
+  deduct;
+
+@[inference]
+lemma imp_trans'! {Γ : Set F} {p q r : F} (h₁ : Γ ⊢! (p ⟶ q)) (h₂ : Γ ⊢! (q ⟶ r)) : Γ ⊢! (p ⟶ r) := ⟨imp_trans' h₁.some h₂.some⟩
+
+@[tautology]
+def dni : Γ ⊢ (p ⟶ ~~p) := by
   simp [NegDefinition.neg]
-  have h₁ : Bew (insert (p ⟶ ⊥) (insert p Γ)) (p ⟶ ⊥) := axm (by simp);
-  have h₂ : Bew (insert (p ⟶ ⊥) (insert p Γ)) p := axm (by simp);
-  apply dtr;
-  apply dtr;
-  exact h₁ ⨀ h₂;
+  apply dtr';
+  apply dtr';
+  deduct;
 
-def dni' {Γ p} : Bew Γ p → Bew Γ (~~p) := modus_ponens' (dni _ _)
+@[tautology] lemma dni! : Γ ⊢! (p ⟶ ~~p) := ⟨dni⟩
 
-def contra₀' {Γ p q} : Bew Γ (p ⟶ q) → Bew Γ (~q ⟶ ~p) := by
-  intro h;
+@[inference] def dni' (h : Γ ⊢ p) : Γ ⊢ (~~p) := by deduct
+@[inference] lemma dni'! {Γ : Set F} {p} (d : Γ ⊢! p) : Γ ⊢! (~~p) := ⟨dni' d.some⟩
+
+@[tautology] def dne [HasDNE Bew] : Γ ⊢ ~~p ⟶ p := by apply HasDNE.dne
+@[tautology] lemma dne! [HasDNE Bew] : Γ ⊢! (~~p ⟶ p) := ⟨dne⟩
+
+@[inference] def dne' [HasDNE Bew] (h : Γ ⊢ (~~p)) : (Γ ⊢ p) := by deduct
+@[inference] lemma dne'! [HasDNE Bew] (d : Γ ⊢! (~~p)) : Γ ⊢! p := ⟨dne' d.some⟩
+
+@[inference]
+def contra₀' (h : Γ ⊢ (p ⟶ q)) : Γ ⊢ (~q ⟶ ~p) := by
   simp [NegDefinition.neg];
-  apply dtr;
-  apply dtr;
-  have d₁ : Bew (insert p $ insert (q ⟶ ⊥) Γ) (q ⟶ ⊥) := axm (by simp);
-  have d₂ : Bew (insert p $ insert (q ⟶ ⊥) Γ) p := axm (by simp);
-  simpa using d₁ ⨀ h ⨀ d₂;
+  apply dtr';
+  apply dtr';
+  have d₁ : (insert p $ insert (q ⟶ ⊥) Γ) ⊢ (q ⟶ ⊥) := by deduct
+  have d₂ : (insert p $ insert (q ⟶ ⊥) Γ) ⊢ p := by deduct
+  simpa using d₁ ⨀ (h ⨀ d₂);
 
-def neg_iff' {Γ p q} (d : Bew Γ (p ⟷ q)) : Bew Γ (~p ⟷ ~q) := by
-  simp only [LogicalConnective.iff];
-  apply conj₃';
+@[inference]
+lemma contra₀'! (d : Γ ⊢! (p ⟶ q)) : Γ ⊢! (~q ⟶ ~p) := ⟨contra₀' d.some⟩
+
+@[tautology] def contra₀ : Γ ⊢ ((p ⟶ q) ⟶ (~q ⟶ ~p)) := by deduct;
+@[tautology] lemma contra₀! : Γ ⊢! ((p ⟶ q) ⟶ (~q ⟶ ~p)) := ⟨contra₀⟩
+
+@[inference]
+def contra₁' (h : Γ ⊢ p ⟶ ~q) : Γ ⊢ (q ⟶ ~p) := by
+  have : Γ ⊢ q ⟶ ~~q := by deduct;
+  have : Γ ⊢ ~~q ⟶ ~p := by deduct;
+  exact imp_trans' (by assumption) (by assumption);
+
+@[inference]
+lemma contra₁'! (d : Γ ⊢! (p ⟶ ~q)) : Γ ⊢! (q ⟶ ~p) := ⟨contra₁' d.some⟩
+
+@[tautology] def contra₁ : Γ ⊢ ((p ⟶ ~q) ⟶ (q ⟶ ~p)) := by deduct;
+@[tautology] lemma contra₁! : Γ ⊢! ((p ⟶ ~q) ⟶ (q ⟶ ~p)) := ⟨contra₁⟩
+
+@[inference] def neg_iff' (d : Γ ⊢ (p ⟷ q)) : Γ ⊢ (~p ⟷ ~q) := iff_intro' (by apply contra₀'; deduct) (by apply contra₀'; deduct)
+@[inference] lemma neg_iff'! (d : Γ ⊢! (p ⟷ q)) : Γ ⊢! (~p ⟷ ~q) := ⟨neg_iff' d.some⟩
+
+@[inference]
+def contra₂' [HasDNE Bew] (h : Γ ⊢ (~p ⟶ q)) : Γ ⊢ (~q ⟶ p) := by
+  have : Γ ⊢ (~q ⟶ ~~p) := by deduct;
+  have : Γ ⊢ (~~p ⟶ p) := by deduct;
+  exact imp_trans' (by assumption) (by assumption);
+
+@[inference]
+lemma contra₂'! [HasDNE Bew] (d : Γ ⊢! (~p ⟶ q)) : Γ ⊢! (~q ⟶ p) := ⟨contra₂' d.some⟩
+
+@[tautology] def contra₂ [HasDNE Bew] : Γ ⊢ ((~p ⟶ q) ⟶ (~q ⟶ p)) := by deduct;
+@[tautology] lemma contra₂! [HasDNE Bew] : Γ ⊢! ((~p ⟶ q) ⟶ (~q ⟶ p)) := ⟨contra₂⟩
+
+@[inference]
+def contra₃' [HasDNE Bew] (h : Γ ⊢ (~p ⟶ ~q)) : Γ ⊢ (q ⟶ p) := by
+  have : Γ ⊢ ~~q ⟶ p := by deduct
+  have : Γ ⊢ q ⟶ ~~q := by deduct
+  exact imp_trans' (by assumption) (by assumption);
+
+@[inference]
+lemma contra₃'! [HasDNE Bew] (d : Γ ⊢! (~p ⟶ ~q)) : Γ ⊢! (q ⟶ p) := ⟨contra₃' d.some⟩
+
+@[tautology] def contra₃ [HasDNE Bew] : Γ ⊢ ((~p ⟶ ~q) ⟶ (q ⟶ p)) := by deduct;
+@[tautology] lemma contra₃! [HasDNE Bew] : Γ ⊢! ((~p ⟶ ~q) ⟶ (q ⟶ p)) := ⟨contra₃⟩
+
+@[tautology] def dn [HasDNE Bew] : Γ ⊢ (p ⟷ ~~p) := by deduct
+@[tautology] lemma dn! [HasDNE Bew] : Γ ⊢! (p ⟷ ~~p) := ⟨dn⟩
+
+@[inference]
+def dn_iff' (d : Γ ⊢ (p ⟷ q)) : Γ ⊢ (~~p ⟷ ~~q) := by
+  apply iff_intro';
   . apply contra₀';
-    apply iff_mpr' d;
+    apply contra₀';
+    exact iff_mp' d;
   . apply contra₀';
-    apply iff_mp' d
+    apply contra₀';
+    exact iff_mpr' d;
 
-def imp_trans' {Γ p q r} (h₁ : Bew Γ (p ⟶ q)) (h₂ : Bew Γ (q ⟶ r)) : Bew Γ (p ⟶ r) := by
-  apply dtr;
-  have : Bew (insert p Γ) p := axm (by simp);
-  have : Bew (insert p Γ) q := modus_ponens' (weakening' (by simp) h₁) this;
-  have : Bew (insert p Γ) r := modus_ponens' (weakening' (by simp) h₂) this;
-  exact this
+@[inference] lemma dn_iff'! (d : Γ ⊢! (p ⟷ q)) : Γ ⊢! (~~p ⟷ ~~q) := ⟨dn_iff' d.some⟩
 
-def assoc_left' {Γ p q r} (h : Bew Γ ((p ⋏ q) ⋏ r)) : Bew Γ (p ⋏ (q ⋏ r)) := by
+@[inference]
+def assoc_conj_left' (h : Γ ⊢ ((p ⋏ q) ⋏ r)) : Γ ⊢ (p ⋏ (q ⋏ r)) := by
   have dpq := conj₁' h;
   have dp := conj₁' dpq;
   have dq := conj₂' dpq;
   have dr := conj₂' h;
   exact conj₃' dp (conj₃' dq dr)
 
-def assoc_left (Γ p q r) : Bew Γ ((p ⋏ q) ⋏ r ⟶ p ⋏ (q ⋏ r)) := by
-  apply dtr;
-  exact assoc_left' (axm (by simp))
+@[tautology] def assoc_conj_left : Γ ⊢ ((p ⋏ q) ⋏ r ⟶ p ⋏ (q ⋏ r)) := by deduct
 
-def assoc_right' {Γ p q r} (h : Bew Γ (p ⋏ (q ⋏ r))) : Bew Γ ((p ⋏ q) ⋏ r) := by
+@[tautology]
+def assoc_conj_right' (h : Γ ⊢ (p ⋏ (q ⋏ r))) : Γ ⊢ ((p ⋏ q) ⋏ r) := by
   have dp := conj₁' h;
   have dqr := conj₂' h;
   have dq := conj₁' dqr;
   have dr := conj₂' dqr;
   exact conj₃' (conj₃' dp dq) dr
 
-def assoc_right (Γ p q r) : Bew Γ (p ⋏ (q ⋏ r) ⟶ (p ⋏ q) ⋏ r) := by
-  apply dtr;
-  exact assoc_right' (axm (by simp))
+@[tautology] def assoc_conj_right : Γ ⊢ (p ⋏ (q ⋏ r) ⟶ (p ⋏ q) ⋏ r) := by deduct
 
-def assoc (Γ p q r) : Bew Γ ((p ⋏ q) ⋏ r ⟷ p ⋏ (q ⋏ r)) := iff_intro (by apply assoc_left) (by apply assoc_right)
+@[tautology] def assoc_conj : Γ ⊢ (p ⋏ q) ⋏ r ⟷ p ⋏ (q ⋏ r) := by deduct
 
-def conj_symm' {Γ p q} : Bew Γ (p ⋏ q) → Bew Γ (q ⋏ p) := by
-  intro h;
-  exact conj₃' (conj₂' h) (conj₁' h);
+@[inference]
+def imp_assoc_right' (h : Γ ⊢ (p ⟶ q) ⟶ r) : Γ ⊢ p ⟶ q ⟶ r := by
+  apply dtr';
+  apply dtr';
+  have d : (insert q (insert p Γ)) ⊢ p ⟶ q := by deduct;
+  simpa using h ⨀ d;
 
-def conj_symm (Γ p q) : Bew Γ ((p ⋏ q) ⟶ (q ⋏ p)) := by
-  apply dtr;
-  exact conj_symm' (axm (by simp))
+@[inference]
+def conj_dn_intro' (d : Γ ⊢ p ⋏ q) : Γ ⊢ ~~p ⋏ ~~q := by
+  apply conj₃' (by apply dni'; deduct) (by apply dni'; deduct);
 
-def conj_symm_iff (Γ p q) : Bew Γ ((p ⋏ q) ⟷ (q ⋏ p)) := iff_intro (by apply conj_symm) (by apply conj_symm)
+@[inference]
+def disj_dn_elim' [HasDNE Bew] (d : Γ ⊢ ~~p ⋎ ~~q) : Γ ⊢ (p ⋎ q) := disj₃'
+  (by apply dtr'; apply disj₁'; deduct)
+  (by apply dtr'; apply disj₂'; deduct)
+  d
 
-def iff_id (Γ p) : Bew Γ (p ⟷ p) := iff_intro (by apply imp_id) (by apply imp_id)
+@[inference] def disj_neg' (h : Γ ⊢ (~p ⋎ ~q)) : Γ ⊢ (~(p ⋏ q)) := disj₃' (by deduct) (by deduct) h
 
-def imp_top {Γ p} (d : Bew Γ (⊤ ⟶ p)) : Bew Γ p := d ⨀ (verum Γ)
+@[tautology] def disj_neg : Γ ⊢ (~p ⋎ ~q) ⟶ (~(p ⋏ q)) := by deduct;
 
-def iff_left_top {Γ p} (d : Bew Γ (⊤ ⟷ p)) : Bew Γ p := imp_top (iff_mp' d)
+@[tautology] def conj_to_disj_neg : Γ ⊢ (p ⋏ q) ⟶ (~(~p ⋎ ~q)) := by deduct;
 
-def iff_right_top {Γ p} (d : Bew Γ (p ⟷ ⊤)) : Bew Γ p := imp_top (iff_mpr' d)
+@[inference] def conj_to_disj_neg' (h : Γ ⊢ p ⋏ q) : Γ ⊢ ~(~p ⋎ ~q) := by deduct;
 
-end Minimal
+@[inference]
+def conj_neg' (h : Γ ⊢ ~p ⋏ ~q) : Γ ⊢ ~(p ⋎ q) := by
+  simp [NegDefinition.neg];
+  have dnp : (insert (p ⋎ q) Γ) ⊢ p ⟶ ⊥ := by simpa [NegDefinition.neg] using weakening' (show Γ ⊆ insert (p ⋎ q) Γ by simp) $ conj₁' h;
+  have dnq : (insert (p ⋎ q) Γ) ⊢ q ⟶ ⊥ := by simpa [NegDefinition.neg] using weakening' (show Γ ⊆ insert (p ⋎ q) Γ by simp) $ conj₂' h;
+  apply dtr';
+  exact disj₃' dnp dnq (by deduct);
 
-section Classical
+@[tautology] def conj_neg : Γ ⊢ (~p ⋏ ~q) ⟶ (~(p ⋎ q)) := by deduct;
 
-variable [c : Classical Bew] [HasDT Bew]
+@[tautology]
+def neg_conj [HasDNE Bew] : Γ ⊢ (~(p ⋏ q)) ⟶ (~p ⋎ ~q) := by
+  apply contra₂';
+  apply dtr';
+  exact conj₃' (by apply dtl'; deduct) (by apply dtl'; deduct);
 
-def dne : Bew Γ (~~p ⟶ p) := c.dne Γ p
+@[inference] def neg_conj' [HasDNE Bew] (h : Γ ⊢ ~(p ⋏ q)) : Γ ⊢ ~p ⋎ ~q := neg_conj ⨀ h
+@[inference] lemma neg_conj'! [HasDNE Bew] (h : Γ ⊢! (~(p ⋏ q))) : Γ ⊢! (~p ⋎ ~q) := ⟨neg_conj' h.some⟩
 
-def dne' {Γ p} : (Bew Γ (~~p)) → (Bew Γ p) := modus_ponens' (dne _ _)
+@[tautology]
+def neg_disj [HasDNE Bew] : Γ ⊢ ~(p ⋎ q) ⟶ (~p ⋏ ~q) := by
+  apply contra₃';
+  apply dtr';
+  apply dni';
+  exact disj_dn_elim' $ neg_conj' $ (by deduct)
 
-def equiv_dn : Bew Γ (p ⟷ ~~p) := by
-  simp only [LogicalConnective.iff];
-  exact (conj₃ _ _ _ ⨀ (dni _ _)) ⨀ (dne _ _);
+@[inference] def neg_disj' [HasDNE Bew] (h : Γ ⊢ ~(p ⋎ q)) : Γ ⊢ ~p ⋏ ~q := neg_disj ⨀ h
 
-instance : HasEFQ Bew where
+@[inference]
+def imp_eq_mpr' [HasEFQ Bew] (h : Γ ⊢ ~p ⋎ q) : Γ ⊢ p ⟶ q := by
+  apply dtr';
+  have d : (insert p Γ) ⊢ (~p ⟶ q) := by
+    apply dtr';
+    have hp : (insert (~p) $ insert p Γ) ⊢ p := by deduct
+    have hnp : (insert (~p) $ insert p Γ) ⊢ p ⟶ ⊥ := by simpa using axm' (by simp [NegDefinition.neg]);
+    exact efq' $ hnp ⨀ hp;
+  exact disj₃' d (by deduct) (weakening' (by deduct) h);
+
+@[inference] lemma imp_eq_mpr'! [HasEFQ Bew] (h : Γ ⊢! (~p ⋎ q)) : Γ ⊢! (p ⟶ q) := ⟨imp_eq_mpr' h.some⟩
+
+@[tautology] def imp_eq_mpr [HasEFQ Bew] : Γ ⊢ (~p ⋎ q) ⟶ (p ⟶ q) := by apply dtr'; deduct;
+@[tautology] lemma imp_eq_mpr! [HasEFQ Bew] : Γ ⊢! (~p ⋎ q) ⟶ (p ⟶ q) := ⟨imp_eq_mpr⟩
+
+@[inference]
+def imp_eq_mp' [HasDNE Bew] (h : Γ ⊢ p ⟶ q) : Γ ⊢ (~p ⋎ q) := by
+  apply dne';
+  rw [NegDefinition.neg];
+  apply dtr';
+  have : (insert (~(~p ⋎ q)) Γ) ⊢ ~(~p ⋎ q) := by deduct;
+  have : (insert (~(~p ⋎ q)) Γ) ⊢ ~~p ⋏ ~q := by deduct;
+  have : (insert (~(~p ⋎ q)) Γ) ⊢ ~~p := by deduct;
+  have : (insert (~(~p ⋎ q)) Γ) ⊢ ~q := by deduct;
+  have : (insert (~(~p ⋎ q)) Γ) ⊢ q ⟶ ⊥ := by simpa [NegDefinition.neg] using this;
+  have : (insert (~(~p ⋎ q)) Γ) ⊢ p := by deduct;
+  have : (insert (~(~p ⋎ q)) Γ) ⊢ p ⟶ q := weakening' (by simp) h;
+  have : (insert (~(~p ⋎ q)) Γ) ⊢ q := this ⨀ (by assumption);
+  exact (by assumption) ⨀ this;
+
+@[inference] lemma imp_eq_mp'! [HasDNE Bew] (h : Γ ⊢! (p ⟶ q) ) : Γ ⊢! (~p ⋎ q) := ⟨imp_eq_mp' h.some⟩
+
+@[tautology] def imp_eq_mp [HasDNE Bew] : Γ ⊢ ((p ⟶ q) ⟶ (~p ⋎ q)) := by deduct
+
+@[tautology] lemma imp_eq_mp! [HasDNE Bew] : Γ ⊢! ((p ⟶ q) ⟶ (~p ⋎ q)) := ⟨imp_eq_mp⟩
+
+@[inference] lemma imp_eq! [HasEFQ Bew] [HasDNE Bew] : (Γ ⊢! (p ⟶ q)) ↔ (Γ ⊢! (~p ⋎ q)) := by deduct;
+
+@[inference]
+def conj_replace_left' (h₁ : Γ ⊢ p ⋏ q) (h₂ : Γ ⊢ p ⟶ r) : Γ ⊢ r ⋏ q := by
+  have dr : Γ ⊢ r := h₂ ⨀ conj₁' h₁;
+  have dq : Γ ⊢ q := conj₂' h₁;
+  exact conj₃' dr dq;
+
+@[inference] lemma conj_replace_left'! (h₁ : Γ ⊢! (p ⋏ q)) (h₂ : Γ ⊢! (p ⟶ r)) : Γ ⊢! (r ⋏ q) := ⟨conj_replace_left' h₁.some h₂.some⟩
+
+@[inference] def conj_replace_right' (h₁ : Γ ⊢ p ⋏ q) (h₂ : Γ ⊢ q ⟶ r) : Γ ⊢ p ⋏ r := conj_symm' $ conj_replace_left' (conj_symm' h₁) h₂
+
+@[inference] lemma conj_replace_right'! (h₁ : Γ ⊢! (p ⋏ q)) (h₂ : Γ ⊢! (q ⟶ r)) : Γ ⊢! (p ⋏ r) := ⟨conj_replace_right' h₁.some h₂.some⟩
+
+@[inference]
+def disj_replace_left' (h₁ : Γ ⊢ p ⋎ q) (h₂ : Γ ⊢ p ⟶ r) : Γ ⊢ r ⋎ q := by
+  have dp : Γ ⊢ (p ⟶ (r ⋎ q)) := by
+    have : (insert p Γ) ⊢ p := by deduct
+    have : (insert p Γ) ⊢ r := (weakening' (by simp) h₂) ⨀ this;
+    exact dtr' $ disj₁' this;
+  have dq : Γ ⊢ (q ⟶ (r ⋎ q)) := by apply disj₂;
+  exact disj₃' dp dq h₁
+
+@[inference] lemma disj_replace_left'! (h₁ : Γ ⊢! (p ⋎ q)) (h₂ : Γ ⊢! (p ⟶ r)) : Γ ⊢! (r ⋎ q) := ⟨disj_replace_left' h₁.some h₂.some⟩
+
+@[inference] def disj_replace_right' (h₁ : Γ ⊢ p ⋎ q) (h₂ : Γ ⊢ q ⟶ r) : Γ ⊢ p ⋎ r := disj_symm' $ disj_replace_left' (disj_symm' h₁) h₂
+
+@[inference] lemma disj_replace_right'! (h₁ : Γ ⊢! (p ⋎ q)) (h₂ : Γ ⊢! (q ⟶ r)) : Γ ⊢! (p ⋎ r) := ⟨disj_replace_right' h₁.some h₂.some⟩
+
+@[inference]
+def neg_conj_replace_left [HasDNE Bew] (h₁ : Γ ⊢ ~(p ⋏ q)) (h₂ : Γ ⊢ ~p ⟶ ~r) : Γ ⊢ ~(r ⋏ q) := by
+  apply disj_neg';
+  exact disj_replace_left' (neg_conj' h₁) h₂
+
+@[inference] lemma neg_conj_replace_left! [HasDNE Bew] (h₁ : Γ ⊢! ~(p ⋏ q)) (h₂ : Γ ⊢! ~p ⟶ ~r) : Γ ⊢! ~(r ⋏ q) := ⟨neg_conj_replace_left h₁.some h₂.some⟩
+
+@[inference]
+def neg_conj_replace_right [HasDNE Bew] (h₁ : Γ ⊢ ~(p ⋏ q)) (h₂ : Γ ⊢ ~q ⟶ ~r) : Γ ⊢ ~(p ⋏ r) := by
+  apply disj_neg';
+  exact disj_replace_right' (neg_conj' h₁) h₂
+
+@[inference] lemma neg_conj_replace_right! [HasDNE Bew] (h₁ : Γ ⊢! ~(p ⋏ q)) (h₂ : Γ ⊢! ~q ⟶ ~r) : Γ ⊢! ~(p ⋏ r) := ⟨neg_conj_replace_right h₁.some h₂.some⟩
+
+@[inference]
+def neg_disj_replace_left [HasDNE Bew] (h₁ : Γ ⊢ ~(p ⋎ q)) (h₂ : Γ ⊢ ~p ⟶ ~r) : Γ ⊢ ~(r ⋎ q) := by
+  apply conj_neg';
+  exact conj_replace_left' (neg_disj' h₁) h₂
+
+@[inference] lemma neg_disj_replace_left! [HasDNE Bew] (h₁ : Γ ⊢! ~(p ⋎ q)) (h₂ : Γ ⊢! ~p ⟶ ~r) : Γ ⊢! ~(r ⋎ q) := ⟨neg_disj_replace_left h₁.some h₂.some⟩
+
+@[inference]
+def neg_disj_replace_right [HasDNE Bew] (h₁ : Γ ⊢ ~(p ⋎ q)) (h₂ : Γ ⊢ ~q ⟶ ~r) : Γ ⊢ ~(p ⋎ r) := by
+  apply conj_neg';
+  exact conj_replace_right' (neg_disj' h₁) h₂
+
+@[inference] lemma neg_disj_replace_right! [HasDNE Bew] (h₁ : Γ ⊢! ~(p ⋎ q)) (h₂ : Γ ⊢! ~q ⟶ ~r) : Γ ⊢! ~(p ⋎ r) := ⟨neg_disj_replace_right h₁.some h₂.some⟩
+
+@[tautology] def iff_id : Γ ⊢ p ⟷ p := by deduct;
+@[tautology] lemma iff_id! : Γ ⊢! p ⟷ p := ⟨iff_id⟩
+
+@[inference] def imp_top' (d : Γ ⊢ ⊤ ⟶ p) : Γ ⊢ p := d ⨀ verum
+@[inference] lemma imp_top! (d : Γ ⊢! (⊤ ⟶ p)) : Γ ⊢! p := ⟨imp_top' d.some⟩
+
+@[inference] def iff_left_top' (d : Γ ⊢ (⊤ ⟷ p)) : Γ ⊢ p := by deduct;
+@[inference] lemma iff_left_top! (d : Γ ⊢! (⊤ ⟷ p)) : Γ ⊢! p := ⟨iff_left_top' d.some⟩
+
+@[inference] def iff_right_top' (d : Γ ⊢ (p ⟷ ⊤)) : Γ ⊢ p := by deduct;
+@[inference] lemma iff_right_top! (d : Γ ⊢! (p ⟷ ⊤)) : Γ ⊢! p := ⟨iff_right_top' d.some⟩
+
+@[inference]
+def iff_trans' (h₁ : Γ ⊢ (p ⟷ q)) (h₂ : Γ ⊢ (q ⟷ r)) : Γ ⊢ (p ⟷ r) := by
+  apply iff_intro';
+  . exact imp_trans' (iff_mp' h₁) (iff_mp' h₂);
+  . exact imp_trans' (iff_mpr' h₂) (iff_mpr' h₁);
+
+@[inference]  lemma iff_trans'! (h₁ : Γ ⊢! (p ⟷ q)) (h₂ : Γ ⊢! (q ⟷ r)) : Γ ⊢! (p ⟷ r) := ⟨iff_trans' h₁.some h₂.some⟩
+
+@[tautology] def equiv_dn [HasDNE Bew] : Γ ⊢ p ⟷ ~~p := by deduct
+@[tautology] lemma equiv_dn! [HasDNE Bew] : Γ ⊢! p ⟷ ~~p := ⟨equiv_dn⟩
+
+instance [HasDNE Bew] : HasEFQ Bew where
   efq Γ p := by
-    have h₁ : Bew (insert ⊥ Γ) (⊥ ⟶ (p ⟶ ⊥) ⟶ ⊥) := imply₁ (insert ⊥ Γ) ⊥ (p ⟶ ⊥);
-    have h₂ : Bew (insert ⊥ Γ) (((p ⟶ ⊥) ⟶ ⊥) ⟶ p) := by simpa using dne (insert ⊥ Γ) p;
-    exact dtr $ h₂ ⨀ h₁ ⨀ (axm (by simp));
+    have h₁ : (insert ⊥ Γ) ⊢ (⊥ ⟶ (p ⟶ ⊥) ⟶ ⊥) := imply₁
+    have h₂ : (insert ⊥ Γ) ⊢ (((p ⟶ ⊥) ⟶ ⊥) ⟶ p) := by
+      have : (insert ⊥ Γ) ⊢ (~~p ⟶ p) := dne
+      simpa [NegDefinition.neg]
+    exact dtr' $ h₂ ⨀ (h₁ ⨀ (axm (by simp)));
 
-instance : Intuitionistic Bew where
+instance [HasDNE Bew] : Intuitionistic Bew where
 
-instance : HasLEM Bew where
-  lem Γ p := by sorry;
+instance [HasDNE Bew] : HasLEM Bew where
+  lem Γ p := by
+    apply disj_dn_elim';
+    apply imp_eq_mp';
+    apply dni;
 
-end Classical
+def impimp_to_conj' (h : Γ ⊢ p ⟶ q ⟶ r) : Γ ⊢ (p ⋏ q) ⟶ r := by
+  apply dtr';
+  have : (insert (p ⋏ q) Γ) ⊢ p ⟶ q ⟶ r := weakening' (by simp) h
+  exact this ⨀ (by deduct) ⨀ (by deduct)
 
-section
+lemma impimp_to_conj'! (h : Γ ⊢! p ⟶ q ⟶ r) : Γ ⊢! (p ⋏ q) ⟶ r := ⟨impimp_to_conj' h.some⟩
 
-variable [LogicalConnective F] [NegDefinition F]
-variable (Bew : Set F → F → Type u) [hd : Deduction Bew] [HasModusPonens Bew] [HasDT Bew] [Minimal Bew] [Classical Bew]
+lemma _root_.Set.subset_insert_insert (x y : α) (s : Set α) : s ⊆ (insert x $ insert y s) := by
+  have := Set.subset_insert x (insert y s);
+  have := Set.subset_insert y s;
+  exact Set.Subset.trans (by assumption) (by assumption)
 
-local infix:20 " ⊢ " => Bew
+def conj_to_impimp' (h : Γ ⊢ (p ⋏ q) ⟶ r) : Γ ⊢ p ⟶ q ⟶ r := by
+  apply dtr';
+  apply dtr';
+  have d₁ : (insert q $ insert p Γ) ⊢ p ⋏ q := conj₃' (by deduct) (by deduct);
+  have d₂ : (insert q $ insert p Γ) ⊢ p ⋏ q ⟶ r := weakening' (by apply Set.subset_insert_insert) h;
+  exact d₂ ⨀ d₁;
 
-variable (Γ : Set F) (p : F)
+lemma conj_to_impimp'! (h : Γ ⊢! (p ⋏ q) ⟶ r) : Γ ⊢! p ⟶ q ⟶ r := ⟨conj_to_impimp' h.some⟩
 
-section Deducible
+@[inference]
+def imp_left_conj_comm' (h : Γ ⊢ (p ⋏ q) ⟶ r) : Γ ⊢ (q ⋏ p) ⟶ r := by
+  apply dtr';
+  have : (insert (q ⋏ p) Γ) ⊢ (p ⋏ q) ⟶ r := weakening' (by simp) h;
+  have : (insert (q ⋏ p) Γ) ⊢ p ⋏ q := conj_symm' (by deduct);
+  exact (by assumption) ⨀ this;
 
-variable {Bew : Set F → F → Type u} [Deduction Bew]
-variable [HasDT Bew] [HasModusPonens Bew] [Minimal Bew] [Classical Bew]
+@[inference]
+lemma imp_left_conj_comm'! (h : Γ ⊢! (p ⋏ q) ⟶ r) : Γ ⊢! (q ⋏ p) ⟶ r := ⟨imp_left_conj_comm' h.some⟩
 
-local infix:20 "⊢!" => Deducible Bew
-local infix:20 "⊬!" => Undeducible Bew
-
-lemma axm! {Γ : Set F} {f : F} (h : f ∈ Γ) : Γ ⊢! f := ⟨axm h⟩
-
-lemma weakening! {Γ Δ : Set F} {p : F} (h : Γ ⊆ Δ) (d : Γ ⊢! p) : Δ ⊢! p := ⟨weakening' h d.some⟩
-
-lemma modus_ponens! {Γ₁ Γ₂ : Set F} {p q : F} (d₁ : Γ₁ ⊢! (p ⟶ q)) (d₂ : Γ₂ ⊢! p) : Deducible Bew (Γ₁ ∪ Γ₂) q := ⟨d₁.some ⨀ d₂.some⟩
-lemma modus_ponens'! {Γ : Set F} {p q : F} (d₁ : Γ ⊢! (p ⟶ q)) (d₂ : Γ ⊢! p) : Γ ⊢! q := by simpa using modus_ponens! d₁ d₂
-
-lemma verum! (Γ : Set F) : Γ ⊢! ⊤ := ⟨verum Γ⟩
-
-lemma imply₁! (Γ : Set F) (p q : F) : Γ ⊢! (p ⟶ q ⟶ p) := ⟨imply₁ Γ p q⟩
-lemma imply₁'! {Γ : Set F} {p q : F} (d : Γ ⊢! p) : Γ ⊢! (q ⟶ p) := ⟨imply₁' d.some⟩
-
-lemma imply₂! (Γ : Set F) (p q r : F) : Γ ⊢! ((p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r) := ⟨imply₂ Γ p q r⟩
-lemma imply₂'! {Γ : Set F} {p q r : F} (d₁ : Γ ⊢! (p ⟶ q ⟶ r)) (d₂ : Γ ⊢! (p ⟶ q)) (d₃ : Γ ⊢! p) : Γ ⊢! r := ⟨imply₂' d₁.some d₂.some d₃.some⟩
-
-lemma conj₁! (Γ : Set F) (p q : F) : Γ ⊢! (p ⋏ q ⟶ p) := ⟨conj₁ Γ p q⟩
-lemma conj₁'! {Γ : Set F} {p q : F} (d : Γ ⊢! (p ⋏ q)) : Γ ⊢! p := ⟨conj₁' d.some⟩
-
-lemma conj₂! (Γ : Set F) (p q : F) : Γ ⊢! (p ⋏ q ⟶ q) := ⟨conj₂ Γ p q⟩
-lemma conj₂'! {Γ : Set F} {p q : F} (d : Γ ⊢! (p ⋏ q)) : Γ ⊢! q := ⟨conj₂' d.some⟩
-
-lemma conj₃! (Γ : Set F) (p q : F) : Γ ⊢! (p ⟶ q ⟶ p ⋏ q) := ⟨conj₃ Γ p q⟩
-lemma conj₃'! {Γ : Set F} {p q : F} (d₁ : Γ ⊢! p) (d₂: Γ ⊢! q) : Γ ⊢! (p ⋏ q) := ⟨conj₃' d₁.some d₂.some⟩
-
-lemma disj₁! (Γ : Set F) (p q : F) : Γ ⊢! (p ⟶ p ⋎ q) := ⟨disj₁ Γ p q⟩
-lemma disj₁'! {Γ : Set F} {p q : F} (d : Γ ⊢! p) : Γ ⊢! (p ⋎ q) := ⟨disj₁' d.some⟩
-
-lemma disj₂! (Γ : Set F) (p q : F) : Γ ⊢! (q ⟶ p ⋎ q) := ⟨disj₂ Γ p q⟩
-lemma disj₂'! {Γ : Set F} {p q : F} (d : Γ ⊢! q) : Γ ⊢! (p ⋎ q) := ⟨disj₂' d.some⟩
-
-lemma disj₃! (Γ : Set F) (p q r : F) : Γ ⊢! ((p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q) ⟶ r) := ⟨disj₃ Γ p q r⟩
-lemma disj₃'! {Γ : Set F} {p q r : F} (d₁ : Γ ⊢! (p ⟶ r)) (d₂ : Γ ⊢! (q ⟶ r)) (d₃ : Γ ⊢! (p ⋎ q)) : Γ ⊢! r := ⟨disj₃' d₁.some d₂.some d₃.some⟩
-
-lemma disj_symm'! {Γ : Set F} {p q : F} (d : Γ ⊢! (p ⋎ q)) : Γ ⊢! (q ⋎ p) := ⟨disj_symm' d.some⟩
-
-lemma efq! [HasEFQ Bew] (Γ : Set F) (p : F) : Γ ⊢! (⊥ ⟶ p) := ⟨efq Γ p⟩
-lemma efq'! [HasEFQ Bew] {Γ : Set F} {p} (d : Γ ⊢! ⊥) : Γ ⊢! p := ⟨efq' d.some⟩
-
-lemma dni! (Γ : Set F) (p : F) : Γ ⊢! (p ⟶ ~~p) := ⟨dni Γ p⟩
-lemma dni'! {Γ : Set F} {p} (d : Γ ⊢! p) : Γ ⊢! (~~p) := ⟨dni' d.some⟩
-
-lemma dne! [HasDNE Bew] (Γ : Set F) (p : F) : Γ ⊢! (~~p ⟶ p) := ⟨dne Γ p⟩
-lemma dne'! [HasDNE Bew] {Γ : Set F} {p} (d : Γ ⊢! (~~p)) : Γ ⊢! p := ⟨dne' d.some⟩
-
-lemma equiv_dn! (Γ : Set F) (p : F) : Γ ⊢! (p ⟷ ~~p) := ⟨equiv_dn Γ p⟩
-
-lemma iff_intro! {Γ : Set F} {p q : F} (dpq : Γ ⊢! (p ⟶ q)) (dqp : Γ ⊢! (q ⟶ p)) : Γ ⊢! (p ⟷ q) := ⟨iff_intro dpq.some dqp.some⟩
-
-lemma iff_symm'! {Γ : Set F} {p q : F} (d : Γ ⊢! (p ⟷ q)) : Γ ⊢! (q ⟷ p) := ⟨iff_symm' d.some⟩
-
-lemma iff_mp'! {Γ : Set F} {p q : F} (d : Γ ⊢! (p ⟷ q)) : Γ ⊢! (p ⟶ q) := ⟨iff_mp' d.some⟩
-lemma iff_mpr'! {Γ : Set F} {p q : F} (d : Γ ⊢! (p ⟷ q)) : Γ ⊢! (q ⟶ p) := ⟨iff_mpr' d.some⟩
-
-lemma iff_left'! {Γ : Set F} {p q : F} (dpq : Γ ⊢! (p ⟷ q)) (dq : Γ ⊢! q) : Γ ⊢! p := ⟨iff_left' dpq.some dq.some⟩
-lemma iff_right'! {Γ : Set F} {p q : F} (dpq : Γ ⊢! (p ⟷ q)) (dp : Γ ⊢! p) : Γ ⊢! q := ⟨iff_right' dpq.some dp.some⟩
-
-lemma iff_def! {Γ : Set F} {p q : F} : (Γ ⊢! (p ⟷ q)) ↔ (Γ ⊢! (p ⟶ q)) ∧ (Γ ⊢! (q ⟶ p)) := by
-  constructor;
-  . intro h; exact ⟨iff_mp'! h, iff_mpr'! h⟩
-  . intro h; exact iff_intro! h.1 h.2
-
-lemma neg_iff'! {Γ : Set F} {p q : F} (d : Γ ⊢! (p ⟷ q)) : Γ ⊢! (~p ⟷ ~q) := ⟨neg_iff' d.some⟩
-
-lemma contra₀'! {Γ : Set F} {p q : F} (d : Γ ⊢! (p ⟶ q)) : Γ ⊢! (~q ⟶ ~p) := ⟨contra₀' d.some⟩
-
-lemma dtr! {Γ : Set F} {p q : F} (d : (insert p Γ) ⊢! q) : Γ ⊢! (p ⟶ q) := ⟨dtr d.some⟩
-lemma dtr_not! {Γ : Set F} {p q : F} : (Γ ⊬! (p ⟶ q)) → ((insert p Γ) ⊬! q) := by
-  contrapose;
-  simp [Undeducible, Deducible];
-  intro d;
-  exact ⟨dtr d⟩
-
-lemma dtl! {Γ : Set F} {p q : F} (d : Γ ⊢! (p ⟶ q)) : (insert p Γ) ⊢! q := ⟨dtl d.some⟩
-lemma dtl_not! {Γ : Set F} {p q : F} : ((insert p Γ) ⊬! q) → (Γ ⊬! (p ⟶ q)) := by
-  contrapose;
-  simp [Undeducible, Deducible];
-  intro d;
-  exact ⟨dtl d⟩
-
-lemma imp_id! (Γ : Set F) (p : F) : Γ ⊢! (p ⟶ p) := ⟨imp_id Γ p⟩
-
-lemma imp_top! {Γ : Set F} {p : F} (d : Γ ⊢! (⊤ ⟶ p)) : Γ ⊢! p := ⟨imp_top d.some⟩
-
-lemma iff_left_top! {Γ : Set F} {p : F} (d : Γ ⊢! (⊤ ⟷ p)) : Γ ⊢! p := ⟨iff_left_top d.some⟩
-lemma iff_right_top! {Γ : Set F} {p : F} (d : Γ ⊢! (p ⟷ ⊤)) : Γ ⊢! p := ⟨iff_right_top d.some⟩
-
-lemma imp_trans'! {Γ : Set F} {p q r : F} (h₁ : Γ ⊢! (p ⟶ q)) (h₂ : Γ ⊢! (q ⟶ r)) : Γ ⊢! (p ⟶ r) := ⟨imp_trans' h₁.some h₂.some⟩
-
-end Deducible
+end Deductions
 
 section Consistency
 
-local infix:20 "⊢!" => Deducible Bew
-local infix:20 "⊬!" => Undeducible Bew
+variable [hd : Deduction Bew] [HasModusPonens Bew] [HasDT Bew] [Minimal Bew]
 
 lemma consistent_iff_undeducible_falsum : Consistent Bew Γ ↔ (Γ ⊬! ⊥) := Iff.rfl
 
@@ -426,9 +677,9 @@ lemma consistent_no_falsum {Γ} (h : Consistent Bew Γ) : ⊥ ∉ Γ := fun hC �
 lemma consistent_of_subset {Γ Δ : Set F} (h : Γ ⊆ Δ) (hConsis : Consistent Bew Δ) : Consistent Bew Γ :=
   fun hD ↦ hConsis ⟨hd.weakening' h hD.some⟩
 
-lemma consistent_of_insert {p} (hConsis : Consistent Bew (insert p Γ)) : Consistent Bew Γ := consistent_of_subset Bew (by simp) hConsis
+lemma consistent_of_insert {p} (hConsis : Consistent Bew (insert p Γ)) : Consistent Bew Γ := consistent_of_subset (by simp) hConsis
 
-lemma consistent_no_falsum_subset {Γ Δ} (hConsis : Consistent Bew Γ) (hΔ : Δ ⊆ Γ) : ⊥ ∉ Δ := consistent_no_falsum Bew $ consistent_of_subset Bew hΔ hConsis
+lemma consistent_no_falsum_subset {Γ Δ} (hConsis : Consistent Bew Γ) (hΔ : Δ ⊆ Γ) : ⊥ ∉ Δ := consistent_no_falsum $ consistent_of_subset hΔ hConsis
 
 lemma consistent_subset_undeducible_falsum {Γ Δ} (hConsis : Consistent Bew Γ) (hΔ : Δ ⊆ Γ) : (Δ ⊬! ⊥) := by
   by_contra hC;
@@ -438,44 +689,132 @@ lemma consistent_subset_undeducible_falsum {Γ Δ} (hConsis : Consistent Bew Γ)
 lemma consistent_neither_undeducible {Γ : Set F} (hConsis : Consistent Bew Γ) (p) : (Γ ⊬! p) ∨ (Γ ⊬! ~p) := by
   by_contra hC; simp only [Undeducible, not_or] at hC;
   have h₁ : Γ ⊢! p  := by simpa using hC.1;
-  have h₂ : Γ ⊢! p ⟶ ⊥ := by simpa using hC.2;
-  exact hConsis $ modus_ponens'! h₂ h₁;
+  have h₂ : Γ ⊢! p ⟶ ⊥ := by simpa [NegDefinition.neg] using hC.2;
+  exact hConsis $ (h₂ ⨀ h₁);
 
 lemma inconsistent_of_deduction {Γ : Set F} (d : Γ ⊢ ⊥) : Inconsistent Bew Γ := ⟨d⟩
 
 lemma inconsistent_of_deducible {Γ : Set F} (d : Γ ⊢! ⊥) : Inconsistent Bew Γ := by simpa [Inconsistent];
 
-lemma inconsistent_insert_falsum : Inconsistent Bew (insert ⊥ Γ) := ⟨hd.axm (by simp)⟩
+lemma inconsistent_insert_falsum  : Inconsistent Bew (insert ⊥ Γ) := ⟨hd.axm (by simp)⟩
 
-lemma inconsistent_insert {Γ p} (h : Inconsistent Bew (insert p Γ)) : (∃ Δ, (Δ ⊆ Γ) ∧ ((insert p Δ) ⊢! ⊥)) := by
+lemma inconsistent_insert (h : Inconsistent Bew (insert p Γ)) : (∃ Δ, (Δ ⊆ Γ) ∧ ((insert p Δ) ⊢! ⊥)) := by
   existsi Γ;
   constructor;
   . rfl;
   . exact h;
 
-/--
-  **This lemma require classical logic.**
--/
-lemma inconsistent_iff_insert_neg {Γ p} : Inconsistent Bew (insert (~p) Γ) ↔ (Γ ⊢! p) := by
+lemma inconsistent_iff_insert_neg [HasDNE Bew] : Inconsistent Bew (insert (~p) Γ) ↔ (Γ ⊢! p) := by
   constructor;
   . intro h;
-    have : Γ ⊢ ~~p := by simpa using (dtr h.some);
+    have : Γ ⊢ ~~p := by simpa [NegDefinition.neg] using (dtr' h.some);
     exact ⟨(dne' this)⟩
   . intro h;
-    have : Γ ⊢ ((p ⟶ ⊥) ⟶ ⊥) := by simpa using dni' h.some
-    exact ⟨by simpa using (dtl this)⟩;
+    have : Γ ⊢ ((p ⟶ ⊥) ⟶ ⊥) := by simpa [NegDefinition.neg]  using dni' h.some
+    exact ⟨by simpa [NegDefinition.neg] using (dtl' this)⟩;
 
-lemma consistent_iff_insert_neg {Γ p} : Consistent Bew (insert (~p) Γ) ↔ (Γ ⊬! p) := (inconsistent_iff_insert_neg Bew).not
+lemma consistent_iff_insert_neg [HasDNE Bew] : Consistent Bew (insert (~p) Γ) ↔ (Γ ⊬! p) := (inconsistent_iff_insert_neg).not
 
 lemma consistent_either {Γ : Set F} (hConsis : Consistent Bew Γ) (p) : (Consistent Bew (insert p Γ)) ∨ (Consistent Bew (insert (~p) Γ)) := by
-  by_contra hC; simp [Undeducible, not_or, Consistent] at hC;
-  have ⟨Δ₁, hΔ₁, ⟨dΔ₁⟩⟩ := inconsistent_insert Bew hC.1;
-  have ⟨Δ₂, hΔ₂, ⟨dΔ₂⟩⟩ := inconsistent_insert Bew hC.2;
-  exact consistent_subset_undeducible_falsum _ hConsis (by aesop) ⟨(dtr dΔ₂) ⨀ (dtr dΔ₁)⟩;
+  by_contra hC; simp [Undeducible, not_or, Consistent, NegDefinition.neg] at hC;
+  have ⟨Δ₁, hΔ₁, ⟨dΔ₁⟩⟩ := inconsistent_insert hC.1;
+  have ⟨Δ₂, hΔ₂, ⟨dΔ₂⟩⟩ := inconsistent_insert hC.2;
+  exact consistent_subset_undeducible_falsum hConsis (by aesop) ⟨(dtr' dΔ₂) ⨀ (dtr' dΔ₁)⟩;
 
 end Consistency
 
-end
+section Finset
+
+variable [hd : Deduction Bew] [HasModusPonens Bew] [HasDT Bew] [Minimal Bew]
+variable {Δ Δ₁ Δ₂ : Finset F}
+
+lemma list_conj_iff! {Δ : List F} : (Γ ⊢! Δ.conj) ↔ (∀ p ∈ Δ, Γ ⊢! p) := by
+  induction Δ
+  case nil => simp [verum!]
+  case cons p Δ ih =>
+    simp; constructor
+    · intro h; exact ⟨conj₁'! h, ih.mp (conj₂'! h)⟩
+    · intro h; exact conj₃'! h.1 (ih.mpr h.2)
+
+lemma finset_conj_iff! : (Γ ⊢! Δ.conj) ↔ (∀ p ∈ Δ, Γ ⊢! p) := by
+  simp [Finset.conj, list_conj_iff!]
+
+@[inference]
+lemma insert_finset_conj'! : Γ ⊢! (insert p Δ).conj ↔ Γ ⊢! p ⋏ Δ.conj := by
+  constructor;
+  . intro h;
+    have h₁ := finset_conj_iff!.mp h;
+    exact conj₃'! (h₁ p (by simp)) (by apply finset_conj_iff!.mpr; intro p hp; exact h₁ p (by simp [hp]));
+  . intro h;
+    have : Γ ⊢! p := conj₁'! h;
+    have :  (∀ p ∈ Δ, Γ ⊢! p) := finset_conj_iff!.mp $ conj₂'! h;
+    apply finset_conj_iff!.mpr;
+    intro q hq;
+    cases Finset.mem_insert.mp hq <;> simp_all
+
+@[tautology]
+lemma insert_finset_conj! : Γ ⊢! (insert p Δ).conj ⟷ (p ⋏ Δ.conj) := by
+  apply iff_intro!;
+  . apply dtr'!;
+    apply insert_finset_conj'!.mp;
+    deduct;
+  . apply dtr'!;
+    apply insert_finset_conj'!.mpr;
+    deduct;
+
+lemma list_dt! {Δ : List F} : (Γ ∪ Δ.toFinset ⊢! p) ↔ (Γ ⊢! (Δ.conj ⟶ p)) := by
+  induction Δ generalizing Γ p with
+  | nil =>
+    simp [Finset.conj];
+    constructor;
+    . apply imply₁'!;
+    . apply imp_top!;
+  | cons q Δ ih =>
+    simp;
+    constructor;
+    . intro h;
+      have : Γ ⊢! List.conj Δ ⟶ q ⟶ p := ih.mp (by simpa using dtr'! h);
+      have : Γ ⊢! List.conj Δ ⋏ q ⟶ p := impimp_to_conj'! (by assumption);
+      exact imp_left_conj_comm'! this;
+    . intro h;
+      have : (insert q Γ) ⊢! ((List.conj Δ) ⟶ p) := dtl'! $ conj_to_impimp'! h;
+      have : (insert q Γ ∪ ↑(List.toFinset Δ)) ⊢! p := ih.mpr (by simpa using this);
+      have e : (insert q Γ ∪ ↑(List.toFinset Δ) = insert q (Γ ∪ {a | a ∈ Δ})) := by aesop;
+      rw [e] at this;
+      assumption;
+
+lemma finset_dt! : (Γ ∪ Δ ⊢! p) ↔ (Γ ⊢! (Δ.conj ⟶ p)) := by
+  have : (Γ ∪ Δ.toList.toFinset ⊢! p) ↔ (Γ ⊢! (Δ.toList.conj ⟶ p)) := list_dt!;
+  simpa [Finset.toList_toFinset];
+
+lemma finset_union_conj'! : (Γ ⊢! (Δ₁ ∪ Δ₂).conj) ↔ (Γ ⊢! (Δ₁.conj ⋏ Δ₂.conj)) := by
+  constructor;
+  . intro h;
+    have hu := finset_conj_iff!.mp h;
+    have : Γ ⊢! Δ₁.conj := by
+      apply finset_conj_iff!.mpr;
+      intro p hp; exact hu p (by simp_all);
+    have : Γ ⊢! Δ₂.conj := by
+      apply finset_conj_iff!.mpr;
+      intro p hp; exact hu p (by aesop);
+    exact conj₃'! (by assumption) (by assumption);
+  . intro h;
+    have : ∀ p ∈ Δ₁, Γ ⊢! p := finset_conj_iff!.mp $ conj₁'! h;
+    have : ∀ p ∈ Δ₂, Γ ⊢! p := finset_conj_iff!.mp $ conj₂'! h;
+    apply finset_conj_iff!.mpr;
+    intro p hp;
+    cases Finset.mem_union.mp hp <;> simp_all;
+
+lemma finset_union_conj! : Γ ⊢! ((Δ₁ ∪ Δ₂).conj ⟷ Δ₁.conj ⋏ Δ₂.conj) := by
+  apply iff_intro!;
+  . apply dtr'!;
+    apply finset_union_conj'!.mp
+    exact axm! (by simp)
+  . apply dtr'!;
+    apply finset_union_conj'!.mpr
+    exact axm! (by simp)
+
+end Finset
 
 end Hilbert
 

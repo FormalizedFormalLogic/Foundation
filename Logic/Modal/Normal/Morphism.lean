@@ -63,7 +63,7 @@ lemma Theory.Frames.morphism
   intro h p hp;
   exact (Formula.Frames.morphism hSur hMorF) $ h p hp;
 
-theorem undefinabilityIrreflexive : ¬∃ (Ax : AxiomSet β), (∀ {α} {F : Frame α}, (Irreflexive F) ↔ ⊧ᴹ[F] Ax) := by
+theorem undefinabilityIrreflexive : ¬∃ (Ax : AxiomSet β), (∀ {α : Type} {F : Frame α}, (Irreflexive F) ↔ ⊧ᴹ[F] Ax) := by
   let F₁ : Frame (Fin 2) := λ w v => w ≠ v;
   have hIF₁ : Irreflexive F₁ := by simp [Irreflexive, F₁];
 

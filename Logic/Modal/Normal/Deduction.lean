@@ -120,42 +120,39 @@ lemma maxm_subset {Λ Λ'} (dΛ : Γ ⊢ᴹ[Λ] p) : (Λ ⊆ Λ') → (Γ ⊢ᴹ
   | disj₃ => apply disj₃
   | dne => apply dne
 
-def modus_ponens' {Γ p q} : (Γ ⊢ᴹ[Λ] (p ⟶ q)) → (Γ ⊢ᴹ[Λ] p) → (Γ ⊢ᴹ[Λ] q) := Hilbert.modus_ponens'
-
 private def dtrAux (Γ) (p q : Formula α) : (Γ ⊢ᴹ[Λ] q) → ((Γ \ {p}) ⊢ᴹ[Λ] (p ⟶ q))
-  | maxm h          => modus_ponens' (imply₁ _ _ _) (maxm h)
-  | necessitation h => modus_ponens' (imply₁ _ _ _) (necessitation h)
-  | verum _         => modus_ponens' (imply₁ _ _ _) (verum _)
-  | imply₁ _ _ _    => modus_ponens' (imply₁ _ _ _) (imply₁ _ _ _)
-  | imply₂ _ _ _ _  => modus_ponens' (imply₁ _ _ _) (imply₂ _ _ _ _)
-  | conj₁ _ _ _     => modus_ponens' (imply₁ _ _ _) (conj₁ _ _ _)
-  | conj₂ _ _ _     => modus_ponens' (imply₁ _ _ _) (conj₂ _ _ _)
-  | conj₃ _ _ _     => modus_ponens' (imply₁ _ _ _) (conj₃ _ _ _)
-  | disj₁ _ _ _     => modus_ponens' (imply₁ _ _ _) (disj₁ _ _ _)
-  | disj₂ _ _ _     => modus_ponens' (imply₁ _ _ _) (disj₂ _ _ _)
-  | disj₃ _ _ _ _   => modus_ponens' (imply₁ _ _ _) (disj₃ _ _ _ _)
-  | dne _ _         => modus_ponens' (imply₁ _ _ _) (dne _ _)
+  | maxm h          => (imply₁ _ _ _) ⨀ (maxm h)
+  | necessitation h => (imply₁ _ _ _) ⨀ (necessitation h)
+  | verum _         => (imply₁ _ _ _) ⨀ (verum _)
+  | imply₁ _ _ _    => (imply₁ _ _ _) ⨀ (imply₁ _ _ _)
+  | imply₂ _ _ _ _  => (imply₁ _ _ _) ⨀ (imply₂ _ _ _ _)
+  | conj₁ _ _ _     => (imply₁ _ _ _) ⨀ (conj₁ _ _ _)
+  | conj₂ _ _ _     => (imply₁ _ _ _) ⨀ (conj₂ _ _ _)
+  | conj₃ _ _ _     => (imply₁ _ _ _) ⨀ (conj₃ _ _ _)
+  | disj₁ _ _ _     => (imply₁ _ _ _) ⨀ (disj₁ _ _ _)
+  | disj₂ _ _ _     => (imply₁ _ _ _) ⨀ (disj₂ _ _ _)
+  | disj₃ _ _ _ _   => (imply₁ _ _ _) ⨀ (disj₃ _ _ _ _)
+  | dne _ _         => (imply₁ _ _ _) ⨀ (dne _ _)
   | @axm _ _ Γ q ih => by
     by_cases h : p = q
-    case pos =>
-      simpa [h] using Hilbert.imp_id (Γ \ {p}) p;
+    case pos => deduct;
     case neg =>
-      have d₁ : (Γ \ {p}) ⊢ᴹ[Λ] (q ⟶ p ⟶ q) := imply₁ _ q p
-      have d₂ : (Γ \ {p}) ⊢ᴹ[Λ] q := axm (Set.mem_diff_singleton.mpr ⟨ih, Ne.symm h⟩)
-      exact d₁.modus_ponens' d₂;
+      have : (Γ \ {p}) ⊢ᴹ[Λ] q ⟶ p ⟶ q := by deduct
+      have : (Γ \ {p}) ⊢ᴹ[Λ] q := by deduct
+      deduct
   | @modus_ponens _ _ Γ₁ Γ₂ a b h₁ h₂ =>
       have ih₁ : Γ₁ \ {p} ⊢ᴹ[Λ] p ⟶ a ⟶ b := dtrAux Γ₁ p (a ⟶ b) h₁
       have ih₂ : Γ₂ \ {p} ⊢ᴹ[Λ] p ⟶ a := dtrAux Γ₂ p a h₂
       have d₁ : ((Γ₁ ∪ Γ₂) \ {p}) ⊢ᴹ[Λ] (p ⟶ a) ⟶ p ⟶ b :=
-        (imply₂ _ p a b).modus_ponens' ih₁ |>.weakening' (Set.diff_subset_diff (by { exact Set.subset_union_left Γ₁ Γ₂ }) (by simp))
+        (imply₂ _ p a b) ⨀ ih₁ |>.weakening' (Set.diff_subset_diff (by { exact Set.subset_union_left Γ₁ Γ₂ }) (by simp))
       have d₂ : ((Γ₁ ∪ Γ₂) \ {p}) ⊢ᴹ[Λ] (p ⟶ a) :=
         ih₂.weakening' (Set.diff_subset_diff (Set.subset_union_right Γ₁ Γ₂) (by simp))
-      d₁.modus_ponens' d₂
+      d₁ ⨀ d₂
 
-def dtr {Γ p q} (d : (insert p Γ) ⊢ᴹ[Λ] q) : (Γ ⊢ᴹ[Λ] (p ⟶ q)) := by
+def dtr' {Γ p q} (d : (insert p Γ) ⊢ᴹ[Λ] q) : (Γ ⊢ᴹ[Λ] (p ⟶ q)) := by
   exact dtrAux (insert p Γ) p q d |>.weakening' (by simp;);
 
-instance : HasDT (Deduction Λ) := ⟨dtr⟩
+instance : HasDT (Deduction Λ) := ⟨dtr'⟩
 
 def compact {Γ p} : (Γ ⊢ᴹ[Λ] p) → (Δ : { Δ : Context α | ↑Δ ⊆ Γ}) × (Δ ⊢ᴹ[Λ] p)
   | @axm _ _ Γ p h  => ⟨⟨{p}, by simpa⟩, axm (by simp)⟩
@@ -238,14 +235,16 @@ def boxedNecessitation {Γ p} : (Γ ⊢ᴹ[Λ] p) → (□Γ ⊢ᴹ[Λ] □p)
   | disj₃ _ _ _ _ => .necessitation $ .disj₃ _ _ _ _
   | dne _ _ => .necessitation $ .dne _ _
   | necessitation h => .necessitation $ .necessitation h
-  | axm h => by exact axm (by simp_all)
+  | axm h => by exact axm (by simp_all [Set.multibox])
   | @modus_ponens _ _ Γ₁ Γ₂ a b h₁ h₂ => by
       have d : □Γ₁ ∪ □Γ₂ ⊢ᴹ[Λ] (□(a ⟶ b) ⟶ (□a ⟶ □b)) := .maxm (by apply hK; simp_all [AxiomK.set, AxiomK]);
       have d₁ : (□Γ₁ ∪ □Γ₂) ⊢ᴹ[Λ] □(a ⟶ b) := boxedNecessitation h₁ |>.weakening' (by simp);
       have d₂ : (□Γ₁ ∪ □Γ₂) ⊢ᴹ[Λ] □a := boxedNecessitation h₂ |>.weakening' (by simp);
-      simpa [Set.box_union] using d.modus_ponens' d₁ |>.modus_ponens' d₂;
+      have : (□Γ₁ ∪ □Γ₂) ⊢ᴹ[Λ] □b := d ⨀ d₁ ⨀ d₂;
+      simpa;
 
 instance instBoxedNecessitation : HasBoxedNecessitation (Deduction Λ) := ⟨by apply boxedNecessitation; simpa;⟩
+
 
 end Deduction
 
@@ -291,6 +290,7 @@ namespace Formula
 
 open LO.Hilbert
 
+/-
 def DeducibleEquivalent (Λ : AxiomSet α) (Γ : Theory α) (p q : Formula α) : Prop := Γ ⊢ᴹ[Λ]! (p ⟷ q)
 notation p:80 " ⟷[" Λ "," Γ "] " q:80 => DeducibleEquivalent Λ Γ p q
 
@@ -326,84 +326,79 @@ instance : IsEquiv (Formula α) (· ⟷[Λ, Γ] ·) where
 @[simp]
 lemma tauto : p ⟷[Λ, Γ] p := by simp [DeducibleEquivalent]; apply iff_intro!; all_goals apply imp_id!
 
-lemma _root_.Set.subset_insert_insert {α} {s : Set α} {a b} : s ⊆ insert a (insert b s) := by
-  have h₁ := Set.subset_insert a s;
-  have h₂ : (insert a s) ⊆ (insert a (insert b s)) := Set.insert_subset_insert (by simp);
-  exact subset_trans h₁ h₂
-
 lemma or (hp : p₁ ⟷[Λ, Γ] p₂) (hq : q₁ ⟷[Λ, Γ] q₂) : ((p₁ ⋎ q₁) ⟷[Λ, Γ] (p₂ ⋎ q₂)) := by
   simp_all only [DeducibleEquivalent];
   apply iff_intro!
-  . apply dtr!;
+  . apply dtr'!;
     exact disj₃'!
       (by
-        apply dtr!;
+        apply dtr'!;
         have d₁ : (insert p₁ (insert (p₁ ⋎ q₁) Γ)) ⊢ᴹ[Λ]! p₁ := axm! (by simp);
         have d₂ : (insert p₁ (insert (p₁ ⋎ q₁) Γ)) ⊢ᴹ[Λ]! p₁ ⟶ p₂ := weakening! Set.subset_insert_insert (iff_mp'! hp);
-        exact disj₁'! $ modus_ponens'! d₂ d₁;
+        exact disj₁'! $ d₂ ⨀ d₁;
       )
       (by
-        apply dtr!;
+        apply dtr'!;
         have d₁ : (insert q₁ (insert (p₁ ⋎ q₁) Γ)) ⊢ᴹ[Λ]! q₁ := axm! (by simp);
         have d₂ : (insert q₁ (insert (p₁ ⋎ q₁) Γ)) ⊢ᴹ[Λ]! q₁ ⟶ q₂ := weakening! Set.subset_insert_insert (iff_mp'! hq);
-        exact disj₂'! $ modus_ponens'! d₂ d₁;
+        exact disj₂'! $ d₂ ⨀ d₁;
       )
       (show insert (p₁ ⋎ q₁) Γ ⊢ᴹ[Λ]! (p₁ ⋎ q₁) by exact axm! (by simp));
-  . apply dtr!;
+  . apply dtr'!;
     exact disj₃'!
       (by
-        apply dtr!;
+        apply dtr'!;
         have d₁ : (insert p₂ (insert (p₂ ⋎ q₂) Γ)) ⊢ᴹ[Λ]! p₂ := axm! (by simp);
         have d₂ : (insert p₂ (insert (p₂ ⋎ q₂) Γ)) ⊢ᴹ[Λ]! p₂ ⟶ p₁ := weakening! Set.subset_insert_insert (iff_mpr'! hp);
-        exact disj₁'! $ modus_ponens'! d₂ d₁;
+        exact disj₁'! $ d₂ ⨀ d₁;
       )
       (by
-        apply dtr!;
+        apply dtr'!;
         have d₁ : (insert q₂ (insert (p₂ ⋎ q₂) Γ)) ⊢ᴹ[Λ]! q₂ := axm! (by simp);
         have d₂ : (insert q₂ (insert (p₂ ⋎ q₂) Γ)) ⊢ᴹ[Λ]! q₂ ⟶ q₁ := weakening! Set.subset_insert_insert (iff_mpr'! hq);
-        exact disj₂'! $ modus_ponens'! d₂ d₁;
+        exact disj₂'! $ d₂ ⨀ d₁;
       )
       (show insert (p₂ ⋎ q₂) Γ ⊢ᴹ[Λ]! (p₂ ⋎ q₂) by exact axm! (by simp));
 
 lemma and (hp : p₁ ⟷[Λ, Γ] p₂) (hq : q₁ ⟷[Λ, Γ] q₂) : ((p₁ ⋏ q₁) ⟷[Λ, Γ] (p₂ ⋏ q₂)) := by
   simp_all only [DeducibleEquivalent];
   apply iff_intro!;
-  . apply dtr!;
+  . apply dtr'!;
     have d : insert (p₁ ⋏ q₁) Γ ⊢ᴹ[Λ]!(p₁ ⋏ q₁) := axm! (by simp)
     exact conj₃'!
-      (modus_ponens'! (weakening! (by simp) $ iff_mp'! hp) (conj₁'! d))
-      (modus_ponens'! (weakening! (by simp) $ iff_mp'! hq) (conj₂'! d));
-  . apply dtr!;
+      ((weakening! (by simp) $ iff_mp'! hp) ⨀ (conj₁'! d))
+      ((weakening! (by simp) $ iff_mp'! hq) ⨀ (conj₂'! d));
+  . apply dtr'!;
     have d : insert (p₂ ⋏ q₂) Γ ⊢ᴹ[Λ]!(p₂ ⋏ q₂) := axm! (by simp)
     exact conj₃'!
-      (modus_ponens'! (weakening! (by simp) $ iff_mpr'! hp) (conj₁'! d))
-      (modus_ponens'! (weakening! (by simp) $ iff_mpr'! hq) (conj₂'! d));
+      ((weakening! (by simp) $ iff_mpr'! hp) ⨀ (conj₁'! d))
+      ((weakening! (by simp) $ iff_mpr'! hq) ⨀ (conj₂'! d));
 
 lemma and_comm (p q : Formula α) : ((p ⋏ q) ⟷[Λ, Γ] (q ⋏ p)) := by
   simp_all only [DeducibleEquivalent];
   apply iff_intro!;
-  . apply dtr!;
+  . apply dtr'!;
     have d₁ : insert (p ⋏ q) Γ ⊢ᴹ[Λ]! (p ⋏ q) := axm! (by simp);
     exact conj₃'! (conj₂'! d₁) (conj₁'! d₁);
-  . apply dtr!;
+  . apply dtr'!;
     have d₁ : insert (q ⋏ p) Γ ⊢ᴹ[Λ]! (q ⋏ p) := axm! (by simp);
     exact conj₃'! (conj₂'! d₁) (conj₁'! d₁);
 
 lemma imp (hp : p₁ ⟷[Λ, Γ] p₂) (hq : q₁ ⟷[Λ, Γ] q₂) : ((p₁ ⟶ q₁) ⟷[Λ, Γ] (p₂ ⟶ q₂)) := by
   simp_all only [DeducibleEquivalent];
   apply iff_intro!;
-  . apply dtr!;
-    apply dtr!;
+  . apply dtr'!;
+    apply dtr'!;
     have d₁ : insert p₂ (insert (p₁ ⟶ q₁) Γ) ⊢ᴹ[Λ]! (p₁ ⟶ q₁) := axm! (by simp)
     have d₂ : insert p₂ (insert (p₁ ⟶ q₁) Γ) ⊢ᴹ[Λ]! p₂ := axm! (by simp)
-    have d₃ : insert p₂ (insert (p₁ ⟶ q₁) Γ) ⊢ᴹ[Λ]! q₁ := modus_ponens'! d₁ $ modus_ponens'! (weakening! Set.subset_insert_insert (iff_mpr'! hp)) d₂;
-    exact modus_ponens'! (weakening! Set.subset_insert_insert (iff_mp'! hq)) d₃;
-  . apply dtr!;
-    apply dtr!;
+    have d₃ : insert p₂ (insert (p₁ ⟶ q₁) Γ) ⊢ᴹ[Λ]! q₁ := modus_ponens₂'! d₁ $ modus_ponens₂'! (weakening! Set.subset_insert_insert (iff_mpr'! hp)) d₂;
+    exact (weakening! Set.subset_insert_insert (iff_mp'! hq)) ⨀ d₃;
+  . apply dtr'!;
+    apply dtr'!;
     have d₁ : insert p₁ (insert (p₂ ⟶ q₂) Γ) ⊢ᴹ[Λ]! (p₂ ⟶ q₂) := axm! (by simp)
     have d₂ : insert p₁ (insert (p₂ ⟶ q₂) Γ) ⊢ᴹ[Λ]! p₁ := axm! (by simp)
-    have d₃ : insert p₁ (insert (p₂ ⟶ q₂) Γ) ⊢ᴹ[Λ]! q₂ := modus_ponens'! d₁ $ modus_ponens'! (weakening! Set.subset_insert_insert (iff_mp'! hp)) d₂;
-    exact modus_ponens'! (weakening! Set.subset_insert_insert (iff_mpr'! hq)) d₃;
+    have d₃ : insert p₁ (insert (p₂ ⟶ q₂) Γ) ⊢ᴹ[Λ]! q₂ := modus_ponens₂'! d₁ $ modus_ponens₂'! (weakening! Set.subset_insert_insert (iff_mp'! hp)) d₂;
+    exact (weakening! Set.subset_insert_insert (iff_mpr'! hq)) ⨀ d₃;
 
 lemma neg (h : p ⟷[Λ, Γ] q) : ((~p) ⟷[Λ, Γ] (~q)) := by
   simp [DeducibleEquivalent];
@@ -415,13 +410,14 @@ lemma box (h : p ⟷[Λ, ∅] q) : ((□p) ⟷[Λ, Γ] (□q)) := by
   simp_all only [DeducibleEquivalent];
   apply iff_intro!;
   . have d₁ : Γ ⊢ᴹ[Λ]! □(p ⟶ q) := necessitation! (iff_mp'! h);
-    have d₂ : Γ ⊢ᴹ[Λ]! □(p ⟶ q) ⟶ (□p ⟶ □q) := Hilbert.axiomK! Γ p q;
-    exact modus_ponens'! d₂ d₁;
+    have d₂ : Γ ⊢ᴹ[Λ]! □(p ⟶ q) ⟶ (□p ⟶ □q) := Hilbert.axiomK!
+    exact d₂ ⨀ d₁;
   . have d₁ : Γ ⊢ᴹ[Λ]! □(q ⟶ p) := necessitation! (iff_mpr'! h);
-    have d₂ : Γ ⊢ᴹ[Λ]! □(q ⟶ p) ⟶ (□q ⟶ □p) := Hilbert.axiomK! Γ q p;
-    exact modus_ponens'! d₂ d₁;
+    have d₂ : Γ ⊢ᴹ[Λ]! □(q ⟶ p) ⟶ (□q ⟶ □p) := Hilbert.axiomK!
+    exact d₂ ⨀ d₁;
 
 end DeducibleEquivalent
+-/
 
 end Formula
 
