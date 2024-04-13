@@ -260,13 +260,19 @@ lemma defAxiomGeach (hK : 𝐊 ⊆ Λ) (hG : (AxiomGeach.set l) ⊆ Λ) : (Geach
     by_contra hInc;
     obtain ⟨Δ₂, Δ₃, hΔ₂, hΔ₃, hUd⟩ := inconsistent_union (by simpa only [Theory.Inconsistent_iff] using hInc);
 
-    have h₂ : □[l.m](⋀Δ₂) ∈ Ω₂ := by
-      apply context_multibox_conj_membership_iff'.mpr;
-      simpa using subset_premulitibox_iff_multibox_subset hΔ₂;
+    have h₂ : □[l.m](⋀Δ₂) ∈ Ω₂ := by -- TODO: refactor
+      apply context_multibox_conj_membership_iff' hK |>.mpr;
+      have : □[l.m](↑Δ₂ : Theory β) ⊆ Ω₂ := subset_premulitibox_iff_multibox_subset hΔ₂;
+      simp only [←Context.multibox_coe_eq] at this;
+      intro p hp;
+      exact this hp;
 
-    have h₃ : □[l.n](⋀Δ₃) ∈ Ω₃ := by
-      apply context_multibox_conj_membership_iff'.mpr;
-      simpa using subset_premulitibox_iff_multibox_subset hΔ₃;
+    have h₃ : □[l.n](⋀Δ₃) ∈ Ω₃ := by -- TODO: refactor
+      apply context_multibox_conj_membership_iff' hK |>.mpr;
+      have : □[l.n](↑Δ₃ : Theory β) ⊆ Ω₃ := subset_premulitibox_iff_multibox_subset hΔ₃;
+      simp only [←Context.multibox_coe_eq] at this;
+      intro p hp;
+      exact this hp;
 
     have : (□[l.n](⋀Δ₃)) ∉ Ω₃ := by
       have : Ω₁ ⊢ᴹ[Λ]! ◇[l.i](□[l.m](⋀Δ₂)) ⟶ □[l.j](◇[l.n](⋀Δ₂)) := Deducible.maxm! (by apply hG; simp [AxiomGeach.set]);

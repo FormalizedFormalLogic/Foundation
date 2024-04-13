@@ -235,12 +235,13 @@ def boxedNecessitation {Γ p} : (Γ ⊢ᴹ[Λ] p) → (□Γ ⊢ᴹ[Λ] □p)
   | disj₃ _ _ _ _ => .necessitation $ .disj₃ _ _ _ _
   | dne _ _ => .necessitation $ .dne _ _
   | necessitation h => .necessitation $ .necessitation h
-  | axm h => by exact axm (by simp_all)
+  | axm h => by exact axm (by simp_all [Set.multibox])
   | @modus_ponens _ _ Γ₁ Γ₂ a b h₁ h₂ => by
       have d : □Γ₁ ∪ □Γ₂ ⊢ᴹ[Λ] (□(a ⟶ b) ⟶ (□a ⟶ □b)) := .maxm (by apply hK; simp_all [AxiomK.set, AxiomK]);
       have d₁ : (□Γ₁ ∪ □Γ₂) ⊢ᴹ[Λ] □(a ⟶ b) := boxedNecessitation h₁ |>.weakening' (by simp);
       have d₂ : (□Γ₁ ∪ □Γ₂) ⊢ᴹ[Λ] □a := boxedNecessitation h₂ |>.weakening' (by simp);
-      simpa [Set.box_union] using (modus_ponens' d d₁) ⨀ d₂;
+      have : (□Γ₁ ∪ □Γ₂) ⊢ᴹ[Λ] □b := d ⨀ d₁ ⨀ d₂;
+      simpa;
 
 instance instBoxedNecessitation : HasBoxedNecessitation (Deduction Λ) := ⟨by apply boxedNecessitation; simpa;⟩
 
@@ -289,6 +290,7 @@ namespace Formula
 
 open LO.Hilbert
 
+/-
 def DeducibleEquivalent (Λ : AxiomSet α) (Γ : Theory α) (p q : Formula α) : Prop := Γ ⊢ᴹ[Λ]! (p ⟷ q)
 notation p:80 " ⟷[" Λ "," Γ "] " q:80 => DeducibleEquivalent Λ Γ p q
 
@@ -323,11 +325,6 @@ instance : IsEquiv (Formula α) (· ⟷[Λ, Γ] ·) where
 
 @[simp]
 lemma tauto : p ⟷[Λ, Γ] p := by simp [DeducibleEquivalent]; apply iff_intro!; all_goals apply imp_id!
-
-lemma _root_.Set.subset_insert_insert {α} {s : Set α} {a b} : s ⊆ insert a (insert b s) := by
-  have h₁ := Set.subset_insert a s;
-  have h₂ : (insert a s) ⊆ (insert a (insert b s)) := Set.insert_subset_insert (by simp);
-  exact subset_trans h₁ h₂
 
 lemma or (hp : p₁ ⟷[Λ, Γ] p₂) (hq : q₁ ⟷[Λ, Γ] q₂) : ((p₁ ⋎ q₁) ⟷[Λ, Γ] (p₂ ⋎ q₂)) := by
   simp_all only [DeducibleEquivalent];
@@ -420,6 +417,7 @@ lemma box (h : p ⟷[Λ, ∅] q) : ((□p) ⟷[Λ, Γ] (□q)) := by
     exact d₂ ⨀ d₁;
 
 end DeducibleEquivalent
+-/
 
 end Formula
 

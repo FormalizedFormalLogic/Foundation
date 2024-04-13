@@ -119,9 +119,9 @@ def multiaxiomK : Γ ⊢ □[n](p ⟶ q) ⟶ (□[n]p ⟶ □[n]q) := by
   induction n generalizing Γ with
   | zero => deduct
   | succ n ih =>
-    have : Γ ⊢ □□[n](p ⟶ q) ⟶ □(□[n]p ⟶ □[n]q) := by deduct;
-    have : Γ ⊢ □(□[n]p ⟶ □[n]q) ⟶ □□[n]p ⟶ □□[n]q := by deduct;
-    deduct;
+    have d₁ : Γ ⊢ □□[n](p ⟶ q) ⟶ □(□[n]p ⟶ □[n]q) := box_distribute_nec' ih;
+    have d₂ : Γ ⊢ □(□[n]p ⟶ □[n]q) ⟶ □□[n]p ⟶ □□[n]q := by deduct;
+    exact imp_trans' d₁ d₂;
 
 @[inference]
 def multibox_distribute' (d : Γ ⊢ □[n](p ⟶ q)) :  Γ ⊢ □[n]p ⟶ □[n]q := multiaxiomK ⨀ d
@@ -146,7 +146,7 @@ def box_distribute_iff : Γ ⊢ □(p ⟷ q) ⟶ (□p ⟷ □q) := by
   have : (Set.box {p ⟷ q}) ⊢ (□p ⟶ □q) := box_distribute' $ boxed_necessitation $ iff_mp' $ axm (by simp);
   have : (Set.box {p ⟷ q}) ⊢ (□q ⟶ □p) := box_distribute' $ boxed_necessitation $ iff_mpr' $ axm (by simp);
   have : (Set.box {p ⟷ q}) ⊢ (□p ⟷ □q) := by deduct;
-  have : ({□(p ⟷ q)}) ⊢ (□p ⟷ □q) := by simpa [Set.box] using this;
+  have : ({□(p ⟷ q)}) ⊢ (□p ⟷ □q) := by simpa [Set.multibox] using this;
   have : ∅ ⊢ (□(p ⟷ q) ⟶ (□p ⟷ □q)) := dtr (by deduct);
   deduct;
 
@@ -171,13 +171,24 @@ def dia_iff' (h : ∅ ⊢ p ⟷ q) : Γ ⊢ (◇p ⟷ ◇q) := by
 lemma dia_iff'! (d : ∅ ⊢! p ⟷ q) : Γ ⊢! (◇p ⟷ ◇q) := ⟨dia_iff' d.some⟩
 
 @[inference]
-def multibox_iff' (h : ∅ ⊢ p ⟷ q) : Γ ⊢ □[n]p ⟷ □[n]q := by induction n generalizing Γ <;> deduct
+def multibox_iff' (h : ∅ ⊢ p ⟷ q) : Γ ⊢ □[n]p ⟷ □[n]q := by
+  induction n generalizing Γ with
+  | zero => deduct;
+  | succ => apply iff_intro'; all_goals { apply box_distribute_nec'; deduct; }
 
 @[inference]
 lemma multibox_iff'! (d : ∅ ⊢! p ⟷ q) : Γ ⊢! □[n]p ⟷ □[n]q := ⟨multibox_iff' d.some⟩
 
 @[inference]
-def multidia_iff' (h : ∅ ⊢ p ⟷ q) : Γ ⊢ ◇[n]p ⟷ ◇[n]q := by induction n generalizing Γ <;> deduct
+def multidia_iff' (h : ∅ ⊢ p ⟷ q) : Γ ⊢ ◇[n]p ⟷ ◇[n]q := by
+  induction n generalizing Γ with
+  | zero => deduct;
+  | succ n ih =>
+    simp [ModalDuality.dia_to_box];
+    apply neg_iff';
+    apply box_iff';
+    apply neg_iff';
+    apply ih;
 
 @[inference]
 lemma multidia_iff'! (d : ∅ ⊢! p ⟷ q) : Γ ⊢! ◇[n]p ⟷ ◇[n]q := ⟨multidia_iff' d.some⟩
@@ -185,9 +196,9 @@ lemma multidia_iff'! (d : ∅ ⊢! p ⟷ q) : Γ ⊢! ◇[n]p ⟷ ◇[n]q := ⟨
 @[tautology]
 def box_duality : Γ ⊢ □p ⟷ ~(◇~p) := by
   simp [ModalDuality.dia_to_box];
-  have : Γ ⊢ □p ⟷ (□~~p) := by deduct;
-  have : Γ ⊢ ((□~~p) ⟷ ~~(□~~p)) := by deduct;
-  deduct;
+  have d₁ : Γ ⊢ □p ⟷ (□~~p) := by deduct;
+  have d₂ : Γ ⊢ (□~~p) ⟷ ~~(□~~p) := by deduct;
+  simpa [ModalDuality.dia_to_box] using iff_trans' d₁ d₂
 
 @[tautology]
 lemma box_duality! : Γ ⊢! □p ⟷ ~(◇~p) := ⟨box_duality⟩
@@ -200,6 +211,8 @@ def dia_duality : Γ ⊢ ◇p ⟷ ~(□~p) := by
 
 @[tautology]
 lemma dia_duality! : Γ ⊢! ◇p ⟷ ~(□~p) := ⟨dia_duality⟩
+
+lemma dia_duality_mp' (h : Γ ⊢ ◇p) : Γ ⊢ ~(□~p) := by deduct;
 
 @[tautology]
 def multibox_duality : Γ ⊢ □[n]p ⟷ ~(◇[n](~p)) := by
@@ -236,11 +249,13 @@ def multidia_duality : Γ ⊢ ◇[n]p ⟷ ~(□[n](~p)) := by
 @[tautology]
 lemma multidia_duality! : Γ ⊢! ◇[n]p ⟷ ~(□[n](~p)) := ⟨multidia_duality⟩
 
-@[tautology]
-def boxverum : Γ ⊢ □⊤ := by deduct;
+@[tautology] def boxverum : Γ ⊢ □⊤ := by deduct;
 
-@[tautology]
-lemma boxverum! : Γ ⊢! □⊤ := ⟨boxverum⟩
+@[tautology] lemma boxverum! : Γ ⊢! □⊤ := ⟨boxverum⟩
+
+@[tautology] def multiboxverum : Γ ⊢ □[n]⊤ := by deduct;
+
+@[tautology] lemma multiboxverum! : Γ ⊢! □[n]⊤ := ⟨multiboxverum⟩
 
 @[tautology]
 def equiv_dianeg_negbox : Γ ⊢ ◇~p ⟷ ~(□p) := by
@@ -253,8 +268,9 @@ def equiv_dianeg_negbox : Γ ⊢ ◇~p ⟷ ~(□p) := by
 @[tautology]
 lemma equiv_dianeg_negbox! : Γ ⊢! ◇~p ⟷ ~(□p) := ⟨equiv_dianeg_negbox⟩
 
-@[inference]
-def box_imp' (d : ∅ ⊢ p ⟶ q) : Γ ⊢ □p ⟶ □q := by deduct
+@[inference] def box_imp' (d : ∅ ⊢ p ⟶ q) : Γ ⊢ □p ⟶ □q := by deduct
+
+@[inference] def multibox_imp' (d : ∅ ⊢ p ⟶ q) : Γ ⊢ □[n]p ⟶ □[n]q := by deduct
 
 @[inference]
 def distribute_box_conj' (d : Γ ⊢ □(p ⋏ q)) : Γ ⊢ □p ⋏ □q := by
@@ -262,7 +278,7 @@ def distribute_box_conj' (d : Γ ⊢ □(p ⋏ q)) : Γ ⊢ □p ⋏ □q := by
   have dq : ∅ ⊢ □(p ⋏ q) ⟶ □q := by deduct;
   have : Γ ⊢ □p := by simpa using dp ⨀ d;
   have : Γ ⊢ □q := by simpa using dq ⨀ d;
-  deduct;
+  exact conj₃' (by assumption) (by assumption);
 
 @[inference]
 lemma distribute_box_conj'! (d : Γ ⊢! □(p ⋏ q)) : Γ ⊢! □p ⋏ □q := ⟨distribute_box_conj' d.some⟩
@@ -273,6 +289,15 @@ def distribute_box_conj : Γ ⊢ □(p ⋏ q) ⟶ □p ⋏ □q := by apply dtr;
 @[tautology]
 lemma distribute_box_conj! : Γ ⊢! □(p ⋏ q) ⟶ □p ⋏ □q := ⟨distribute_box_conj⟩
 
+def distribute_multibox_conj' (d : Γ ⊢ □[n](p ⋏ q)) : Γ ⊢ □[n]p ⋏ □[n]q := by
+  have dp : ∅ ⊢ □[n](p ⋏ q) ⟶ □[n]p := multibox_imp' (conj₁);
+  have dq : ∅ ⊢ □[n](p ⋏ q) ⟶ □[n]q := multibox_imp' (conj₂);
+  have : Γ ⊢ □[n]p := by simpa using dp ⨀ d;
+  have : Γ ⊢ □[n]q := by simpa using dq ⨀ d;
+  exact conj₃' (by assumption) (by assumption);
+
+lemma distribute_multibox_conj'! (d : Γ ⊢! □[n](p ⋏ q)) : Γ ⊢! □[n]p ⋏ □[n]q := ⟨distribute_multibox_conj' d.some⟩
+
 @[inference]
 def collect_box_conj' (d : Γ ⊢ □p ⋏ □q) : Γ ⊢ □(p ⋏ q) := by
   have : ∅ ⊢ □p ⟶ □(q ⟶ (p ⋏ q)) := by deduct
@@ -281,6 +306,13 @@ def collect_box_conj' (d : Γ ⊢ □p ⋏ □q) : Γ ⊢ □(p ⋏ q) := by
 
 @[inference]
 lemma collect_box_conj'! (d : Γ ⊢! □p ⋏ □q) : Γ ⊢! □(p ⋏ q) := ⟨collect_box_conj' d.some⟩
+
+def collect_multibox_conj' (d : Γ ⊢ □[n]p ⋏ □[n]q) : Γ ⊢ □[n](p ⋏ q) := by
+  have : ∅ ⊢ □[n]p ⟶ □[n](q ⟶ (p ⋏ q)) := by deduct
+  have : ∅ ⊢ □[n]p ⟶ □[n]q ⟶ □[n](p ⋏ q) := imp_trans' (by assumption) (by deduct);
+  simpa using this ⨀ (conj₁' d) ⨀ (conj₂' d)
+
+lemma collect_multibox_conj'! (d : Γ ⊢! □[n]p ⋏ □[n]q) : Γ ⊢! □[n](p ⋏ q) := ⟨collect_multibox_conj' d.some⟩
 
 @[tautology]
 def collect_box_conj : Γ ⊢ □p ⋏ □q ⟶ □(p ⋏ q) := by apply dtr; deduct;
@@ -291,19 +323,42 @@ lemma collect_box_conj! : Γ ⊢! □p ⋏ □q ⟶ □(p ⋏ q) := ⟨collect_b
 @[tautology]
 def box_conj_iff : Γ ⊢ □(p ⋏ q) ⟷ □p ⋏ □q := by deduct
 
-lemma box_finset_conj_iff! {Γ : Set F} {Δ : Finset F} : Γ ⊢! □(Δ.conj) ↔ ∀ p ∈ Δ, Γ ⊢! □p := by sorry
+lemma box_conj_iff! : Γ ⊢! □(p ⋏ q) ⟷ □p ⋏ □q := ⟨box_conj_iff⟩
+
+lemma box_list_conj_iff! {Γ : Set F} {Δ : List F} : Γ ⊢! □(Δ.conj) ↔ ∀ p ∈ Δ, Γ ⊢! □p := by
+  induction Δ with
+  | nil => simp [boxverum!];
+  | cons p Δ ih =>
+    simp [List.conj];
+    constructor;
+    . intro h;
+      have d := distribute_box_conj'! h;
+      constructor;
+      . exact conj₁'! d
+      . exact ih.mp (conj₂'! d)
+    . rintro ⟨h₁, h₂⟩;
+      exact collect_box_conj'! $ conj₃'! h₁ (ih.mpr h₂);
+
+lemma box_finset_conj_iff! {Γ : Set F} {Δ : Finset F} : Γ ⊢! □(Δ.conj) ↔ ∀ p ∈ Δ, Γ ⊢! □p := by
+  simp [Finset.conj, box_list_conj_iff!];
+
+lemma multibox_list_conj_iff! {Γ : Set F} {Δ : List F} : Γ ⊢! □[n](Δ.conj) ↔ ∀ p ∈ Δ, Γ ⊢! □[n]p := by
+  induction Δ with
+  | nil => simp [multiboxverum!];
+  | cons p Δ ih =>
+    simp [List.conj];
+    constructor;
+    . intro h;
+      have d := distribute_multibox_conj'! h;
+      constructor;
+      . exact conj₁'! d
+      . exact ih.mp (conj₂'! d)
+    . rintro ⟨h₁, h₂⟩;
+      exact collect_multibox_conj'! $ conj₃'! h₁ (ih.mpr h₂);
 
 lemma multibox_finset_conj_iff! {Γ : Set F} {Δ : Finset F} : Γ ⊢! □[n](Δ.conj) ↔ ∀ p ∈ Δ, Γ ⊢! □[n]p := by
-  induction n generalizing Δ with
-  | zero => apply finset_conj_iff!;
-  | succ n ih =>
-    constructor;
-    . intro h p hp;
-      simpa [Box.multibox_prepost] using @ih (Δ.box) |>.mp (by
-        sorry
-      ) (□p) (by simpa [Finset.box] using hp)
-    . intro h;
-      sorry;
+  have : (Γ ⊢! □[n]Δ.toList.conj) ↔ ∀ p ∈ Δ.toList, Γ ⊢! □[n]p := multibox_list_conj_iff!;
+  simpa [Finset.toList_toFinset];
 
 @[inference]
 def collect_box_disj' (d : Γ ⊢ □p ⋎ □q) : Γ ⊢ □(p ⋎ q) := by
@@ -331,10 +386,29 @@ def distribute_dia_conj' (d : Γ ⊢ ◇(p ⋏ q)) : Γ ⊢ ◇p ⋏ ◇q := dis
 def distribute_multidia_conj' (d : Γ ⊢ ◇[n](p ⋏ q)) : Γ ⊢ ◇[n]p ⋏ ◇[n]q := by
   induction n with
   | zero => deduct
-  | succ n ih => sorry; -- apply distribute_dia_conj';
+  | succ n ih =>
+    simp;
+    apply distribute_dia_conj';
+    sorry;
+
+lemma distribute_multidia_conj'! (d : Γ ⊢! ◇[n](p ⋏ q)) : Γ ⊢! ◇[n]p ⋏ ◇[n]q := ⟨distribute_multidia_conj' d.some⟩
+
+lemma distribute_multidia_list_conj'! {Γ : Set F} {Δ : List F} (d : Γ ⊢! ◇[n]Δ.conj) : Γ ⊢! (Δ.multidia n).conj := by
+  induction Δ with
+  | nil => simp_all [verum!];
+  | cons p Δ ih =>
+    simp_all [List.conj];
+    have d := distribute_multidia_conj'! d;
+    exact conj₃'! (conj₁'! d) (by apply ih; apply conj₂'! d);
 
 lemma distribute_multidia_finset_conj'! {Γ : Set F} {Δ : Finset F} (d : Γ ⊢! ◇[n]Δ.conj) : Γ ⊢! (Δ.multidia n).conj := by
-  sorry;
+  apply finset_conj_iff!.mpr;
+  intro p hp;
+  exact list_conj_iff!.mp (distribute_multidia_list_conj'! d) p (by simpa using hp);
+
+lemma distribute_dia_finset_conj'! {Δ : Finset F} (d : Γ ⊢! ◇(Δ.conj)) : Γ ⊢! Δ.dia.conj := by
+  have : (Γ ⊢! ◇[1]Δ.conj) → (Γ ⊢! (Δ.multidia 1).conj) := distribute_multidia_finset_conj'!;
+  simp_all;
 
 lemma distribute_multidia_finset_conj! {n : ℕ} {Γ : Set F} {Δ : Finset F} : Γ ⊢! ◇[n]Δ.conj ⟶ (Δ.multidia n).conj := by
   apply dtr!;

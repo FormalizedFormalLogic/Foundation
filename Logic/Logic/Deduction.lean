@@ -139,7 +139,7 @@ macro "tautology" : attr =>
   `(attr|aesop 8 safe (rule_sets := [$(Lean.mkIdent `Deduction):ident]))
 
 macro "inference" : attr =>
-  `(attr|aesop unsafe (rule_sets := [$(Lean.mkIdent `Deduction):ident]))
+  `(attr|aesop [unsafe 75% (rule_sets := [$(Lean.mkIdent `Deduction):ident])])
 
 @[inference]
 def modus_ponens' (d₁ : Γ₁ ⊢ p ⟶ q) (d₂ : Γ₂ ⊢ p) : (Γ₁ ∪ Γ₂) ⊢ q := HasModusPonens.modus_ponens d₁ d₂
@@ -149,21 +149,21 @@ infixl:90 "⨀" => modus_ponens'
 lemma modus_ponens'! (d₁ : Γ₁ ⊢! p ⟶ q) (d₂ : Γ₂ ⊢! p) : Γ₁ ∪ Γ₂ ⊢! q := ⟨d₁.some ⨀ d₂.some⟩
 infixl:90 "⨀" => modus_ponens'!
 
-@[inference, aesop 4 safe forward (rule_sets := [Deduction])]
+@[inference]
 def modus_ponens₂' (d₁ : Γ ⊢ p ⟶ q) (d₂ : Γ ⊢ p) : Γ ⊢ q := by simpa using d₁ ⨀ d₂
 infixl:90 "⨀" => modus_ponens₂'
 
-@[inference, aesop 4 safe forward (rule_sets := [Deduction])]
+@[inference]
 lemma modus_ponens₂'! (d₁ : Γ ⊢! (p ⟶ q)) (d₂ : Γ ⊢! p) : Γ ⊢! q := ⟨d₁.some ⨀ d₂.some⟩
 infixl:90 "⨀" => modus_ponens₂'!
 
 open Lean.Parser.Tactic (config)
 
 macro "deduct" (config)? : tactic =>
-  `(tactic| aesop (rule_sets := [$(Lean.mkIdent `Deduction):ident]) (config := { terminal := false, maxRuleApplications := 500 }))
+  `(tactic| aesop (rule_sets := [$(Lean.mkIdent `Deduction):ident]) (config := { terminal := true }))
 
 macro "deduct?" (config)? : tactic =>
-  `(tactic| aesop? (rule_sets := [$(Lean.mkIdent `Deduction):ident]) (config := { terminal := false, maxRuleApplications := 500 }))
+  `(tactic| aesop? (rule_sets := [$(Lean.mkIdent `Deduction):ident]) (config := { terminal := true }))
 
 -- set_option trace.aesop true
 
@@ -201,87 +201,79 @@ attribute [aesop 1 (rule_sets := [Deduction]) safe]
 @[tautology] def efq [HasEFQ Bew] : Γ ⊢ ⊥ ⟶ p := by apply HasEFQ.efq
 @[tautology] lemma efq! [HasEFQ Bew] : Γ ⊢! (⊥ ⟶ p) := ⟨efq⟩
 
-@[inference, aesop 2 safe forward (rule_sets := [Deduction])]
+@[inference]
 def efq' [HasEFQ Bew] (h : Γ ⊢ ⊥) : Γ ⊢ p := by deduct
 
-@[inference, aesop 2 safe forward (rule_sets := [Deduction])]
+@[inference]
 lemma efq'! [HasEFQ Bew] (h : Γ ⊢! ⊥) : Γ ⊢! p := ⟨efq' h.some⟩
 
 @[tautology]
 def lem [HasLEM Bew] : Γ ⊢ p ⋎ ~p := by apply HasLEM.lem
 
-@[inference, aesop 2 safe forward (rule_sets := [Deduction])]
+@[inference]
 def axm' (h : p ∈ Γ) : Γ ⊢ p := Deduction.axm h
 
-@[inference, aesop 2 safe forward (rule_sets := [Deduction])]
+@[inference]
 lemma axm! {Γ : Set F} {f : F} (h : f ∈ Γ) : Γ ⊢! f := ⟨axm' h⟩
 
-@[inference, aesop 2 safe forward (rule_sets := [Deduction])]
+@[inference]
 def weakening' (h : Γ₁ ⊆ Γ₂) (d : Γ₁ ⊢ p) : Γ₂ ⊢ p := Deduction.weakening' h d
 
-@[inference, aesop 2 safe forward (rule_sets := [Deduction])]
+@[inference]
 lemma weakening! (h : Γ₁ ⊆ Γ₂) (d : Γ₁ ⊢! p) : Γ₂ ⊢! p := ⟨weakening' h d.some⟩
 
-@[inference, aesop 2 safe forward (rule_sets := [Deduction])]
+@[inference]
 def weakening'_empty (d : ∅ ⊢ p) : Γ ⊢ p := by deduct
 
-@[inference, aesop 2 safe forward (rule_sets := [Deduction])]
+@[inference]
 lemma weakening'_empty! (d : ∅ ⊢! p) : Γ ⊢! p := ⟨weakening'_empty d.some⟩
 
-@[inference] def imply₁' (h : Γ ⊢ p) : Γ ⊢ (q ⟶ p) := by deduct
+@[inference] def imply₁' (h : Γ ⊢ p) : Γ ⊢ (q ⟶ p) := imply₁ ⨀ h
 @[inference] lemma imply₁'! (d : Γ ⊢! p) : Γ ⊢! (q ⟶ p) := ⟨imply₁' d.some⟩
 
-@[inference] def imply₂' (d₁ : Γ ⊢ (p ⟶ q ⟶ r)) (d₂ : Γ ⊢ (p ⟶ q)) (d₃ : Γ ⊢ p) : Γ ⊢ r := by deduct
+@[inference] def imply₂' (d₁ : Γ ⊢ (p ⟶ q ⟶ r)) (d₂ : Γ ⊢ (p ⟶ q)) (d₃ : Γ ⊢ p) : Γ ⊢ r := imply₂ ⨀ d₁ ⨀ d₂ ⨀ d₃
 @[inference] lemma imply₂'! {Γ : Set F} {p q r : F} (d₁ : Γ ⊢! (p ⟶ q ⟶ r)) (d₂ : Γ ⊢! (p ⟶ q)) (d₃ : Γ ⊢! p) : Γ ⊢! r := ⟨imply₂' d₁.some d₂.some d₃.some⟩
 
-@[inference] def conj₁' (d : Γ ⊢ p ⋏ q) : Γ ⊢ p := by deduct
+@[inference] def conj₁' (d : Γ ⊢ p ⋏ q) : Γ ⊢ p := conj₁ ⨀ d
 lemma conj₁'! (d : Γ ⊢! (p ⋏ q)) : Γ ⊢! p := ⟨conj₁' d.some⟩
 
-@[inference] def conj₂' (d : Γ ⊢ p ⋏ q) : Γ ⊢ q := by deduct
+@[inference] def conj₂' (d : Γ ⊢ p ⋏ q) : Γ ⊢ q := conj₂ ⨀ d
 lemma conj₂'! (d : Γ ⊢! (p ⋏ q)) : Γ ⊢! q := ⟨conj₂' d.some⟩
 
 @[inference] def conj₃' (d₁ : Γ ⊢ p) (d₂: Γ ⊢ q) : Γ ⊢ (p ⋏ q) := conj₃ ⨀ d₁ ⨀ d₂
 lemma conj₃'! (d₁ : Γ ⊢! p) (d₂: Γ ⊢! q) : Γ ⊢! (p ⋏ q) := ⟨conj₃' d₁.some d₂.some⟩
 
 @[inference]
-def disj₁' (d : Γ ⊢ p) : Γ ⊢ (p ⋎ q) := by deduct
+def disj₁' (d : Γ ⊢ p) : Γ ⊢ (p ⋎ q) := disj₁ ⨀ d
 lemma disj₁'! (d : Γ ⊢! p) : Γ ⊢! (p ⋎ q) := ⟨disj₁' d.some⟩
 
 @[inference]
-def disj₂' (d : Γ ⊢ q) : Γ ⊢ (p ⋎ q) := by deduct
+def disj₂' (d : Γ ⊢ q) : Γ ⊢ (p ⋎ q) := disj₂ ⨀ d
 lemma disj₂'! (d : Γ ⊢! q) : Γ ⊢! (p ⋎ q) := ⟨disj₂' d.some⟩
 
 @[inference]
 def disj₃' (d₁ : Γ ⊢ (p ⟶ r)) (d₂ : Γ ⊢ (q ⟶ r)) (d₃ : Γ ⊢ (p ⋎ q)) : Γ ⊢ r := disj₃ ⨀ d₁ ⨀ d₂ ⨀ d₃
 lemma disj₃'! {Γ : Set F} {p q r : F} (d₁ : Γ ⊢! (p ⟶ r)) (d₂ : Γ ⊢! (q ⟶ r)) (d₃ : Γ ⊢! (p ⋎ q)) : Γ ⊢! r := ⟨disj₃' d₁.some d₂.some d₃.some⟩
 
-def dtl (h : Γ ⊢ p ⟶ q) : (insert p Γ) ⊢ q := (show (insert p Γ) ⊢ (p ⟶ q) by deduct) ⨀ (by deduct)
-lemma dtl! (d : Γ ⊢! (p ⟶ q)) : (insert p Γ) ⊢! q := ⟨dtl d.some⟩
+@[inference] def dtl (h : Γ ⊢ p ⟶ q) : (insert p Γ) ⊢ q := (show (insert p Γ) ⊢ (p ⟶ q) by deduct) ⨀ (by deduct)
+@[inference] lemma dtl! (d : Γ ⊢! (p ⟶ q)) : (insert p Γ) ⊢! q := ⟨dtl d.some⟩
 
+@[inference]
 lemma dtl_not! : ((insert p Γ) ⊬! q) → (Γ ⊬! (p ⟶ q)) := by
   contrapose;
   simp [Undeducible, Deducible];
   intro d;
   exact ⟨dtl d⟩
 
-attribute [aesop [unsafe forward (rule_sets := [Deduction])]]
-  dtl
-  dtl!
-  dtl_not!
+@[inference] def dtr (h : (insert p Γ) ⊢ q) : Γ ⊢ p ⟶ q := HasDT.dtr h
+@[inference] lemma dtr! (d : (insert p Γ) ⊢! q) : Γ ⊢! (p ⟶ q) := ⟨dtr d.some⟩
 
-def dtr (h : (insert p Γ) ⊢ q) : Γ ⊢ p ⟶ q := HasDT.dtr h
-lemma dtr! (d : (insert p Γ) ⊢! q) : Γ ⊢! (p ⟶ q) := ⟨dtr d.some⟩
-
+@[inference]
 lemma dtr_not! : (Γ ⊬! (p ⟶ q)) → ((insert p Γ) ⊬! q) := by
   contrapose;
   simp [Undeducible, Deducible];
   intro d;
   exact ⟨dtr d⟩
-
-attribute [aesop [unsafe forward (rule_sets := [Deduction])]]
-  dtr
-  dtr!
-  dtr_not!
 
 @[tautology]
 def imp_id : Γ ⊢ p ⟶ p := by
@@ -301,27 +293,17 @@ def liftup (h : ∀ {Γ}, Γ ⊢ p → Γ ⊢ q) : Γ ⊢ p ⟶ q := by
   apply dtr;
   deduct;
 
-def iff_mp' (d : Γ ⊢ p ⟷ q) : Γ ⊢ (p ⟶ q) := by deduct
-lemma iff_mp'! (d : Γ ⊢! (p ⟷ q)) : Γ ⊢! (p ⟶ q) := ⟨iff_mp' d.some⟩
+@[inference] def iff_mp' (d : Γ ⊢ p ⟷ q) : Γ ⊢ (p ⟶ q) := by deduct
+@[inference] lemma iff_mp'! (d : Γ ⊢! (p ⟷ q)) : Γ ⊢! (p ⟶ q) := ⟨iff_mp' d.some⟩
 
-def iff_mpr' (d : Γ ⊢ p ⟷ q) : Γ ⊢ (q ⟶ p) := by deduct
-lemma iff_mpr'! (d : Γ ⊢! (p ⟷ q)) : Γ ⊢! (q ⟶ p) := ⟨iff_mpr' d.some⟩
+@[inference] def iff_mpr' (d : Γ ⊢ p ⟷ q) : Γ ⊢ (q ⟶ p) := by deduct
+@[inference] lemma iff_mpr'! (d : Γ ⊢! (p ⟷ q)) : Γ ⊢! (q ⟶ p) := ⟨iff_mpr' d.some⟩
 
-def iff_right' (dpq : Γ ⊢ (p ⟷ q)) (dp : Γ ⊢ p) : Γ ⊢ q := iff_mp' dpq ⨀ dp
-lemma iff_right'! (dpq : Γ ⊢! (p ⟷ q)) (dp : Γ ⊢! p) : Γ ⊢! q := ⟨iff_right' dpq.some dp.some⟩
+@[inference] def iff_right' (dpq : Γ ⊢ (p ⟷ q)) (dp : Γ ⊢ p) : Γ ⊢ q := iff_mp' dpq ⨀ dp
+@[inference] lemma iff_right'! (dpq : Γ ⊢! (p ⟷ q)) (dp : Γ ⊢! p) : Γ ⊢! q := ⟨iff_right' dpq.some dp.some⟩
 
-def iff_left' (dpq : Γ ⊢ (p ⟷ q)) (dq : Γ ⊢ q) : Γ ⊢ p := iff_mpr' dpq ⨀ dq
-lemma iff_left'! (dpq : Γ ⊢! (p ⟷ q)) (dq : Γ ⊢! q) : Γ ⊢! p := ⟨iff_left' dpq.some dq.some⟩
-
-attribute [inference, aesop [safe forward (rule_sets := [Deduction])]]
-  iff_mp'
-  iff_mp'!
-  iff_mpr'
-  iff_mpr'!
-  iff_right'
-  iff_right'!
-  iff_left'
-  iff_left'!
+@[inference] def iff_left' (dpq : Γ ⊢ (p ⟷ q)) (dq : Γ ⊢ q) : Γ ⊢ p := iff_mpr' dpq ⨀ dq
+@[inference] lemma iff_left'! (dpq : Γ ⊢! (p ⟷ q)) (dq : Γ ⊢! q) : Γ ⊢! p := ⟨iff_left' dpq.some dq.some⟩
 
 @[inference] def iff_intro' (dpq : Γ ⊢ p ⟶ q) (dqp : Γ ⊢ q ⟶ p) : Γ ⊢ p ⟷ q := by deduct
 @[inference] lemma iff_intro! (dpq : Γ ⊢! (p ⟶ q)) (dqp : Γ ⊢! (q ⟶ p)) : Γ ⊢! (p ⟷ q) := ⟨iff_intro' dpq.some dqp.some⟩
@@ -346,18 +328,16 @@ attribute [inference, aesop [safe forward (rule_sets := [Deduction])]]
 
 @[inference] lemma iff_def! : (Γ ⊢! (p ⟷ q)) ↔ (Γ ⊢! (p ⟶ q)) ∧ (Γ ⊢! (q ⟶ p)) := by constructor <;> deduct
 
+@[inference]
 def imp_trans' (h₁ : Γ ⊢ p ⟶ q) (h₂ : Γ ⊢ q ⟶ r) : Γ ⊢ p ⟶ r := by
   apply dtr;
   have : (insert p Γ) ⊢ p := by deduct;
   have : (insert p Γ) ⊢ q := by deduct;
-  have : (insert p Γ) ⊢ q ⟶ r := by deduct;
+  have : (insert p Γ) ⊢ q ⟶ r := weakening' (by simp) h₂;
   deduct;
 
+@[inference]
 lemma imp_trans'! {Γ : Set F} {p q r : F} (h₁ : Γ ⊢! (p ⟶ q)) (h₂ : Γ ⊢! (q ⟶ r)) : Γ ⊢! (p ⟶ r) := ⟨imp_trans' h₁.some h₂.some⟩
-
-attribute [inference, aesop [safe forward (rule_sets := [Deduction])]]
-  imp_trans'
-  imp_trans'!
 
 @[tautology]
 def dni : Γ ⊢ (p ⟶ ~~p) := by
@@ -396,7 +376,7 @@ lemma contra₀'! (d : Γ ⊢! (p ⟶ q)) : Γ ⊢! (~q ⟶ ~p) := ⟨contra₀'
 def contra₁' (h : Γ ⊢ p ⟶ ~q) : Γ ⊢ (q ⟶ ~p) := by
   have : Γ ⊢ q ⟶ ~~q := by deduct;
   have : Γ ⊢ ~~q ⟶ ~p := by deduct;
-  deduct;
+  exact imp_trans' (by assumption) (by assumption);
 
 @[inference]
 lemma contra₁'! (d : Γ ⊢! (p ⟶ ~q)) : Γ ⊢! (q ⟶ ~p) := ⟨contra₁' d.some⟩
@@ -404,14 +384,14 @@ lemma contra₁'! (d : Γ ⊢! (p ⟶ ~q)) : Γ ⊢! (q ⟶ ~p) := ⟨contra₁'
 @[tautology] def contra₁ : Γ ⊢ ((p ⟶ ~q) ⟶ (q ⟶ ~p)) := by deduct;
 @[tautology] lemma contra₁! : Γ ⊢! ((p ⟶ ~q) ⟶ (q ⟶ ~p)) := ⟨contra₁⟩
 
-@[inference] def neg_iff' (d : Γ ⊢ (p ⟷ q)) : Γ ⊢ (~p ⟷ ~q) := iff_intro' (by deduct) (by deduct)
+@[inference] def neg_iff' (d : Γ ⊢ (p ⟷ q)) : Γ ⊢ (~p ⟷ ~q) := iff_intro' (by apply contra₀'; deduct) (by apply contra₀'; deduct)
 @[inference] lemma neg_iff'! (d : Γ ⊢! (p ⟷ q)) : Γ ⊢! (~p ⟷ ~q) := ⟨neg_iff' d.some⟩
 
 @[inference]
 def contra₂' [HasDNE Bew] (h : Γ ⊢ (~p ⟶ q)) : Γ ⊢ (~q ⟶ p) := by
   have : Γ ⊢ (~q ⟶ ~~p) := by deduct;
   have : Γ ⊢ (~~p ⟶ p) := by deduct;
-  deduct;
+  exact imp_trans' (by assumption) (by assumption);
 
 @[inference]
 lemma contra₂'! [HasDNE Bew] (d : Γ ⊢! (~p ⟶ q)) : Γ ⊢! (~q ⟶ p) := ⟨contra₂' d.some⟩
@@ -423,7 +403,7 @@ lemma contra₂'! [HasDNE Bew] (d : Γ ⊢! (~p ⟶ q)) : Γ ⊢! (~q ⟶ p) := 
 def contra₃' [HasDNE Bew] (h : Γ ⊢ (~p ⟶ ~q)) : Γ ⊢ (q ⟶ p) := by
   have : Γ ⊢ ~~q ⟶ p := by deduct
   have : Γ ⊢ q ⟶ ~~q := by deduct
-  deduct;
+  exact imp_trans' (by assumption) (by assumption);
 
 @[inference]
 lemma contra₃'! [HasDNE Bew] (d : Γ ⊢! (~p ⟶ ~q)) : Γ ⊢! (q ⟶ p) := ⟨contra₃' d.some⟩
@@ -613,26 +593,19 @@ def neg_disj_replace_right [HasDNE Bew] (h₁ : Γ ⊢ ~(p ⋎ q)) (h₂ : Γ �
 @[inference] def imp_top' (d : Γ ⊢ ⊤ ⟶ p) : Γ ⊢ p := d ⨀ verum
 @[inference] lemma imp_top! (d : Γ ⊢! (⊤ ⟶ p)) : Γ ⊢! p := ⟨imp_top' d.some⟩
 
-def iff_left_top' (d : Γ ⊢ (⊤ ⟷ p)) : Γ ⊢ p := by deduct;
-lemma iff_left_top! (d : Γ ⊢! (⊤ ⟷ p)) : Γ ⊢! p := ⟨iff_left_top' d.some⟩
+@[inference] def iff_left_top' (d : Γ ⊢ (⊤ ⟷ p)) : Γ ⊢ p := by deduct;
+@[inference] lemma iff_left_top! (d : Γ ⊢! (⊤ ⟷ p)) : Γ ⊢! p := ⟨iff_left_top' d.some⟩
 
-def iff_right_top' (d : Γ ⊢ (p ⟷ ⊤)) : Γ ⊢ p := by deduct;
-lemma iff_right_top! (d : Γ ⊢! (p ⟷ ⊤)) : Γ ⊢! p := ⟨iff_right_top' d.some⟩
+@[inference] def iff_right_top' (d : Γ ⊢ (p ⟷ ⊤)) : Γ ⊢ p := by deduct;
+@[inference] lemma iff_right_top! (d : Γ ⊢! (p ⟷ ⊤)) : Γ ⊢! p := ⟨iff_right_top' d.some⟩
 
+@[inference]
 def iff_trans' (h₁ : Γ ⊢ (p ⟷ q)) (h₂ : Γ ⊢ (q ⟷ r)) : Γ ⊢ (p ⟷ r) := by
   apply iff_intro';
   . exact imp_trans' (iff_mp' h₁) (iff_mp' h₂);
   . exact imp_trans' (iff_mpr' h₂) (iff_mpr' h₁);
 
-lemma iff_trans'! (h₁ : Γ ⊢! (p ⟷ q)) (h₂ : Γ ⊢! (q ⟷ r)) : Γ ⊢! (p ⟷ r) := ⟨iff_trans' h₁.some h₂.some⟩
-
-attribute [inference, aesop safe forward (rule_sets := [Deduction])]
-  iff_left_top'
-  iff_left_top!
-  iff_right_top'
-  iff_right_top!
-  iff_trans'
-  iff_trans'!
+@[inference]  lemma iff_trans'! (h₁ : Γ ⊢! (p ⟷ q)) (h₂ : Γ ⊢! (q ⟷ r)) : Γ ⊢! (p ⟷ r) := ⟨iff_trans' h₁.some h₂.some⟩
 
 @[tautology] def equiv_dn [HasDNE Bew] : Γ ⊢ p ⟷ ~~p := by deduct
 @[tautology] lemma equiv_dn! [HasDNE Bew] : Γ ⊢! p ⟷ ~~p := ⟨equiv_dn⟩
@@ -672,7 +645,11 @@ def conj_to_impimp' (h : Γ ⊢ (p ⋏ q) ⟶ r) : Γ ⊢ p ⟶ q ⟶ r := by
 lemma conj_to_impimp'! (h : Γ ⊢! (p ⋏ q) ⟶ r) : Γ ⊢! p ⟶ q ⟶ r := ⟨conj_to_impimp' h.some⟩
 
 @[inference]
-def imp_left_conj_comm' (h : Γ ⊢ (p ⋏ q) ⟶ r) : Γ ⊢ (q ⋏ p) ⟶ r := by deduct;
+def imp_left_conj_comm' (h : Γ ⊢ (p ⋏ q) ⟶ r) : Γ ⊢ (q ⋏ p) ⟶ r := by
+  apply dtr;
+  have : (insert (q ⋏ p) Γ) ⊢ (p ⋏ q) ⟶ r := weakening' (by simp) h;
+  have : (insert (q ⋏ p) Γ) ⊢ p ⋏ q := conj_symm' (by deduct);
+  exact (by assumption) ⨀ this;
 
 @[inference]
 lemma imp_left_conj_comm'! (h : Γ ⊢! (p ⋏ q) ⟶ r) : Γ ⊢! (q ⋏ p) ⟶ r := ⟨imp_left_conj_comm' h.some⟩
@@ -752,17 +729,6 @@ lemma list_conj_iff! {Δ : List F} : (Γ ⊢! Δ.conj) ↔ (∀ p ∈ Δ, Γ ⊢
 lemma finset_conj_iff! : (Γ ⊢! Δ.conj) ↔ (∀ p ∈ Δ, Γ ⊢! p) := by
   simp [Finset.conj, list_conj_iff!]
 
-/-
-lemma finset_disj_iff! (hCon : Consistent Bew Γ) : (Γ ⊢! Δ.disj) ↔ (∃ p ∈ Δ, Γ ⊢! p) := by
-  induction Δ using Finset.cons_induction generalizing Γ with
-  | empty => simp [Finset.disj];
-  | @cons p Δ hp IH =>
-    have := @IH (insert p Γ);
-    constructor;
-    . sorry;
-    . sorry;
--/
-
 @[inference]
 lemma insert_finset_conj'! : Γ ⊢! (insert p Δ).conj ↔ Γ ⊢! p ⋏ Δ.conj := by
   constructor;
@@ -837,51 +803,6 @@ lemma finset_union_conj! : Γ ⊢! ((Δ₁ ∪ Δ₂).conj ⟷ Δ₁.conj ⋏ Δ
   . apply dtr!;
     apply finset_union_conj'!.mpr
     exact axm! (by simp)
-
-/-
-@[inference]
-lemma finset_union_disj'! (hCon : Consistent Bew Γ) : (Γ ⊢! (Δ₁ ∪ Δ₂).disj) ↔ (Γ ⊢! (Δ₁.disj ⋎ Δ₂.disj)) := by
-  constructor;
-  . intro h;
-    have ⟨p, hpu, hp⟩ := finset_disj_iff! hCon |>.mp h;
-    cases Finset.mem_union.mp hpu with
-    | inl hΔ₁ =>
-      apply disj₁'!;
-      apply finset_disj_iff! hCon |>.mpr;
-      use p, hΔ₁;
-    | inr hΔ₂ =>
-      apply disj₂'!;
-      apply finset_disj_iff! hCon |>.mpr;
-      use p, hΔ₂;
-  . intro h;
-    exact disj₃'!
-      (by
-        apply dtr!;
-        apply finset_disj_iff! hCon.mpr;
-        have : (insert Δ₁.disj Γ) ⊢! Δ₁.disj := by deduct;
-        obtain ⟨p, hΔ₁, hd⟩ := finset_disj_iff!.mp this;
-        use p;
-        simp_all;
-      )
-      (by
-        apply dtr!;
-        apply finset_disj_iff!.mpr;
-        have : (insert Δ₂.disj Γ) ⊢! Δ₂.disj := by deduct;
-        obtain ⟨p, hΔ₂, hd⟩ := finset_disj_iff!.mp this;
-        use p;
-        simp_all;
-      )
-      h;
-
-lemma finset_union_disj! : Γ ⊢! ((Δ₁ ∪ Δ₂).disj ⟷ Δ₁.disj ⋎ Δ₂.disj) := by
-  apply iff_intro!;
-  . apply dtr!;
-    apply finset_union_disj'!.mp
-    deduct;
-  . apply dtr!;
-    apply finset_union_disj'!.mpr
-    deduct;
--/
 
 end Finset
 

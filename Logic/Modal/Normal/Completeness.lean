@@ -409,6 +409,9 @@ lemma context_conj_membership_iff {Δ : Context β} : ⋀Δ ∈ Ω ↔ (∀ p �
     exact finset_conj_iff!.mpr h;
 
 lemma context_box_conj_membership_iff {Δ : Context β} : □(⋀Δ) ∈ Ω ↔ (∀ p ∈ Δ, □p ∈ Ω) := by
+  have := Deduction.ofKSubset hK;
+  have := Deduction.instBoxedNecessitation hK;
+
   simp only [membership_iff];
   constructor;
   . intro h p hp;
@@ -417,10 +420,13 @@ lemma context_box_conj_membership_iff {Δ : Context β} : □(⋀Δ) ∈ Ω ↔ 
     exact box_finset_conj_iff!.mpr h;
 
 lemma context_box_conj_membership_iff' {Δ : Context β} : □(⋀Δ) ∈ Ω ↔ (∀ p ∈ (□Δ : Context β), p ∈ Ω) := by
-  simp [Context.box, Finset.box];
-  apply context_box_conj_membership_iff;
+  simp [Context.box, Finset.box, List.multibox];
+  apply context_box_conj_membership_iff hK;
 
 lemma context_multibox_conj_membership_iff {Δ : Context β} {n : ℕ} : □[n](⋀Δ) ∈ Ω ↔ (∀ p ∈ Δ, □[n]p ∈ Ω) := by
+  have := Deduction.ofKSubset hK;
+  have := Deduction.instBoxedNecessitation hK;
+
   simp only [membership_iff];
   constructor;
   . intro h p hp;
@@ -429,8 +435,8 @@ lemma context_multibox_conj_membership_iff {Δ : Context β} {n : ℕ} : □[n](
     exact multibox_finset_conj_iff!.mpr h;
 
 lemma context_multibox_conj_membership_iff' {Δ : Context β} : □[n](⋀Δ) ∈ Ω ↔ (∀ p ∈ (□[n]Δ : Context β), p ∈ Ω):= by
-  simp [Context.multibox, Finset.multibox];
-  apply context_multibox_conj_membership_iff;
+  simp [Context.multibox, Finset.multibox, List.multibox];
+  apply context_multibox_conj_membership_iff hK;
 
 end MaximalConsistentTheory
 
@@ -538,13 +544,19 @@ lemma multiframe_box : (CanonicalModel Λ).frame[n] Ω₁ Ω₂ ↔ (∀ {p : Fo
         by_contra hInc;
         obtain ⟨Δ₁, Δ₂, hΔ₁, hΔ₂, hUd⟩ := inconsistent_union (by simpa only [Theory.Inconsistent_iff] using hInc);
 
-        have h₁ : □⋀Δ₁ ∈ Ω₁ := by
-          apply context_box_conj_membership_iff'.mpr;
-          simpa using subset_prebox_iff_box_subset hΔ₁;
+        have h₁ : □⋀Δ₁ ∈ Ω₁ := by -- TODO: refactor
+          apply context_box_conj_membership_iff' hK |>.mpr;
+          have : □(↑Δ₁ : Theory β) ⊆ Ω₁ := subset_prebox_iff_box_subset hΔ₁;
+          simp only [←Context.box_coe_eq] at this;
+          intro p hp;
+          exact this hp;
 
-        have h₂ : ⋀(◇⁻¹[n]Δ₂) ∈ Ω₂ := by
+        have h₂ : ⋀(◇⁻¹[n]Δ₂) ∈ Ω₂ := by -- TODO: refactor
           apply context_conj_membership_iff.mpr;
-          simpa using subset_multidia_iff_premulitidia_subset hΔ₂;
+          have : ◇⁻¹[n](↑Δ₂ : Theory β) ⊆ Ω₂.theory := subset_multidia_iff_premulitidia_subset hΔ₂;
+          simp only [←Context.premultidia_coe_eq] at this;
+          intro p hp;
+          exact this hp;
 
         have e : (◇[n](◇⁻¹[n]Δ₂) : Context β) = Δ₂ := by simpa using premultidia_multidia_eq_of_subset_multidia hΔ₂;
 
