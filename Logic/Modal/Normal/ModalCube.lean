@@ -43,7 +43,7 @@ lemma of_frameclass (hComp₂ : KripkeCompleteness Λ₂ (𝔽(Λ₂) : FrameCla
   apply AxiomSet.sounds h₁;
   exact h hF₂;
 
-lemma of_frameclass_geach [IsGeachLogic Λ₂] (h : (𝔽(Λ₂) : FrameClass (MaximalConsistentTheory Λ₂)) ⊆ (𝔽(Λ₁) : FrameClass (MaximalConsistentTheory Λ₂))) : (Λ₁ ≤ᴸ Λ₂) := by
+lemma of_frameclass_geach [Geach Λ₂] (h : (𝔽(Λ₂) : FrameClass (MaximalConsistentTheory Λ₂)) ⊆ (𝔽(Λ₁) : FrameClass (MaximalConsistentTheory Λ₂))) : (Λ₁ ≤ᴸ Λ₂) := by
   apply of_frameclass;
   case hComp₂ => apply GeachLogic.kripkeCompletes;
   case h => exact h;
@@ -120,7 +120,7 @@ lemma of_frameclass
   . apply LogicalStrong.of_frameclass hComp₂; simpa;
   . apply LogicalStrong.of_frameclass hComp₁; simpa;
 
-lemma of_frameclass_geach [IsGeachLogic Λ₁] [IsGeachLogic Λ₂]
+lemma of_frameclass_geach [Geach Λ₁] [Geach Λ₂]
   (h₁ : (𝔽(Λ₁) : FrameClass (MaximalConsistentTheory Λ₁)) ⊆ (𝔽(Λ₂) : FrameClass (MaximalConsistentTheory Λ₁)))
   (h₂ : (𝔽(Λ₂) : FrameClass (MaximalConsistentTheory Λ₂)) ⊆ (𝔽(Λ₁) : FrameClass (MaximalConsistentTheory Λ₂)))
   : (Λ₁ =ᴸ Λ₂) :=
