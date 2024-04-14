@@ -439,6 +439,32 @@ def collect_dia_disj : Γ ⊢ ◇p ⋎ ◇q ⟶ ◇(p ⋎ q) := by
 @[inference]
 def collect_dia_disj' (d : Γ ⊢ ◇p ⋎ ◇q) : Γ ⊢ ◇(p ⋎ q) := collect_dia_disj ⨀ d
 
+def boxdotAxiomK : Γ ⊢ ⊡(p ⟶ q) ⟶ (⊡p ⟶ ⊡q) := by
+  simp [ModalLogicSymbol.boxdot];
+  apply dtr';
+  apply dtr';
+  have : (insert (p ⋏ □p) $ insert ((p ⟶ q) ⋏ □(p ⟶ q)) Γ) ⊢ p ⋏ □p := by deduct;
+  have : (insert (p ⋏ □p) $ insert ((p ⟶ q) ⋏ □(p ⟶ q)) Γ) ⊢ (p ⟶ q) ⋏ □(p ⟶ q) := by deduct;
+
+  have dp : (insert (p ⋏ □p) $ insert ((p ⟶ q) ⋏ □(p ⟶ q)) Γ) ⊢ p := conj₁' (by assumption);
+  have dpq : (insert (p ⋏ □p) $ insert ((p ⟶ q) ⋏ □(p ⟶ q)) Γ) ⊢ p ⟶ q := conj₁' (by assumption);
+  have dq : (insert (p ⋏ □p) $ insert ((p ⟶ q) ⋏ □(p ⟶ q)) Γ) ⊢ q := dpq ⨀ dp;
+
+  have dbp : (insert (p ⋏ □p) $ insert ((p ⟶ q) ⋏ □(p ⟶ q)) Γ) ⊢ □p := conj₂' (by assumption);
+  have : (insert (p ⋏ □p) $ insert ((p ⟶ q) ⋏ □(p ⟶ q)) Γ) ⊢ □(p ⟶ q) := conj₂' (by assumption)
+  have dbpq : (insert (p ⋏ □p) $ insert ((p ⟶ q) ⋏ □(p ⟶ q)) Γ) ⊢ □p ⟶ □q := box_distribute' (by assumption);
+  have dbq : (insert (p ⋏ □p) $ insert ((p ⟶ q) ⋏ □(p ⟶ q)) Γ) ⊢ □q := dbpq ⨀ dbp;
+
+  exact conj₃' dq dbq;
+
+def boxdotAxiomT : Γ ⊢ ⊡p ⟶ p := by
+  apply dtr';
+  have : (insert (p ⋏ □p) Γ) ⊢ p ⋏ □p := by deduct;
+  exact conj₁' (by assumption);
+
+def boxdotNecessitation (d : ∅ ⊢ p) : Γ ⊢ ⊡p := by
+  exact conj₃' (weakening' (by simp) d) (necessitation d);
+
 variable [HasAxiom4 Bew]
 
 @[tautology]

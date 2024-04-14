@@ -15,6 +15,12 @@ class ModalLogicSymbol (α : Sort _) extends LogicalConnective α, Box α, Dia �
 prefix:74 "□" => Box.box
 prefix:74 "◇" => Dia.dia
 
+def ModalLogicSymbol.boxdot {α : Sort _} [ModalLogicSymbol α] (p : α) : α := p ⋏ □p
+def ModalLogicSymbol.diadot {α : Sort _} [ModalLogicSymbol α] (p : α) : α := p ⋏ ◇p
+
+prefix:74 "⊡" => ModalLogicSymbol.boxdot
+prefix:74 "⟐" => ModalLogicSymbol.diadot
+
 attribute [match_pattern]
   Box.box
   Dia.dia
