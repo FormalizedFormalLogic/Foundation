@@ -97,7 +97,7 @@
    "rev": "780bbec107cba79d18ec55ac2be3907a77f27f98",
    "name": "«doc-gen4»",
    "manifestFile": "lake-manifest.json",
-   "inputRev": "main",
+   "inputRev": "780bbec1",
    "inherited": false,
    "configFile": "lakefile.lean"}],
  "name": "logic",
