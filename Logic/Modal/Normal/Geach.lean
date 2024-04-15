@@ -330,7 +330,7 @@ lemma GeachLogic.membership_frameclass : (CanonicalModel l).frame ∈ (𝔽((Gea
     . exact CanonicalModel.def_axiomGeach (by simp) (by simp);
     . exact CanonicalModel.def_logicGeach (by simp);
 
-lemma GeachLogic.kripkeCompletesAux (l : GeachTapleList) : KripkeCompleteness (GeachLogic l : AxiomSet β) (𝔽((GeachLogic l : AxiomSet β)) : FrameClass (MaximalConsistentTheory (GeachLogic l : AxiomSet β))) := by
+lemma GeachLogic.kripkeCompletes_aux (l : GeachTapleList) : KripkeCompleteness (GeachLogic l : AxiomSet β) (𝔽((GeachLogic l : AxiomSet β)) : FrameClass (MaximalConsistentTheory (GeachLogic l : AxiomSet β))) := by
   apply completeness_def.mpr;
   intro Γ hConsisΓ;
   let ⟨Ω, hΩ⟩ := exists_maximal_consistent_theory hConsisΓ;
@@ -341,9 +341,9 @@ lemma GeachLogic.kripkeCompletesAux (l : GeachTapleList) : KripkeCompleteness (G
     apply truthlemma' (by simp) |>.mpr;
     assumption;
 
-theorem GeachLoic.krgipkeCompletes {Λ : AxiomSet β} [hG : Geach Λ] : KripkeCompleteness Λ (𝔽(Λ) : FrameClass (MaximalConsistentTheory Λ)) := by
+theorem GeachLogic.kripkeCompletes {Λ : AxiomSet β} [hG : Geach Λ] : KripkeCompleteness Λ (𝔽(Λ) : FrameClass (MaximalConsistentTheory Λ)) := by
   rw [hG.char];
-  apply GeachLogic.kripkeCompletesAux hG.taples;
+  apply GeachLogic.kripkeCompletes_aux hG.taples;
 
 theorem LogicK.kripkeCompletes : KripkeCompleteness (𝐊 : AxiomSet β) (𝔽((𝐊 : AxiomSet β)) : FrameClass (MaximalConsistentTheory (𝐊 : AxiomSet β))) := GeachLogic.kripkeCompletes
 
