@@ -45,9 +45,9 @@ abbrev axiomB := p ⟶ □◇p
 
 abbrev axiomD := □p ⟶ ◇p
 
-abbrev axiom4 := □p ⟶ □□p
+abbrev axiomFour := □p ⟶ □□p
 
-abbrev axiom5 := ◇p ⟶ □◇p
+abbrev axiomFive := ◇p ⟶ □◇p
 
 abbrev axiomDot2 := ◇□p ⟶ □◇p
 
