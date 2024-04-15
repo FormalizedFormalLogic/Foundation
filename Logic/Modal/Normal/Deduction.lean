@@ -209,14 +209,14 @@ instance Deduction.ofKSubset : Hilbert.K (Deduction Λ) where
 
 def Deduction.ofK4Subset (_ : 𝐊𝟒 ⊆ Λ) : (Hilbert.K4 (Deduction (Λ : AxiomSet α))) where
   K _ _ _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by assumption) (by simp);
-  A4 _ _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by assumption) (by simp);
+  Four _ _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by assumption) (by simp);
 
 instance : Hilbert.K4 (Deduction (𝐊𝟒 : AxiomSet α)) := Deduction.ofK4Subset (by rfl)
 
 def Deduction.ofS4Subset (_ : 𝐒𝟒 ⊆ Λ) : (Hilbert.S4 (Deduction (Λ : AxiomSet α))) where
   K _ _ _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by assumption) (by simp);
   T _ _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by assumption) (by simp);
-  A4 _ _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by assumption) (by simp);
+  Four _ _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by assumption) (by simp);
 
 instance : Hilbert.S4 (Deduction (𝐒𝟒 : AxiomSet α)) := Deduction.ofS4Subset (by rfl)
 

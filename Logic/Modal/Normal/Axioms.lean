@@ -87,10 +87,10 @@ notation "𝐁" => AxiomSet.B
 abbrev AxiomSet.D : AxiomSet α := { axiomD p | p }
 notation "𝐃" => AxiomSet.D
 
-abbrev AxiomSet.Four : AxiomSet α := { axiom4 p | p }
+abbrev AxiomSet.Four : AxiomSet α := { axiomFour p | p }
 notation "𝟒" => AxiomSet.Four
 
-abbrev AxiomSet.Five : AxiomSet α := { axiom5 p | p }
+abbrev AxiomSet.Five : AxiomSet α := { axiomFive p | p }
 notation "𝟓" => AxiomSet.Five
 
 abbrev AxiomSet.L : AxiomSet α := { axiomL p | p }

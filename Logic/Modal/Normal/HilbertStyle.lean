@@ -26,11 +26,11 @@ class HasAxiomD where
 class HasAxiomB where
   B (Γ : Set F) (p q : F) : Bew Γ $ axiomB p
 
-class HasAxiom4 where
-  A4 (Γ : Set F) (p : F) : Bew Γ $ axiom4 p
+class HasAxiomFour where
+  Four (Γ : Set F) (p : F) : Bew Γ $ axiomFour p
 
-class HasAxiom5 where
-  A5 (Γ : Set F) (p : F) : Bew Γ $ axiom5 p
+class HasAxiomFive where
+  Five (Γ : Set F) (p : F) : Bew Γ $ axiomFive p
 
 class HasAxiomL where
   L (Γ : Set F) (p : F) : Bew Γ $ axiomL p
@@ -439,19 +439,19 @@ def collect_dia_disj : Γ ⊢ ◇p ⋎ ◇q ⟶ ◇(p ⋎ q) := by
 @[inference]
 def collect_dia_disj' (d : Γ ⊢ ◇p ⋎ ◇q) : Γ ⊢ ◇(p ⋎ q) := collect_dia_disj ⨀ d
 
-variable [HasAxiom4 Bew]
+variable [HasAxiomFour Bew]
 
 @[tautology]
-def axiom4 : Γ ⊢  □p ⟶ □□p := HasAxiom4.A4 Γ p
+def axiomFour : Γ ⊢  □p ⟶ □□p := HasAxiomFour.Four Γ p
 
 @[tautology]
-lemma axiom4! : Γ ⊢! □p ⟶ □□p := ⟨Hilbert.axiom4⟩
+lemma axiomFour! : Γ ⊢! □p ⟶ □□p := ⟨Hilbert.axiomFour⟩
 
 @[inference]
-def axiom4' (d₁ : Γ ⊢ □p) : Γ ⊢ □□p := (Hilbert.axiom4) ⨀ d₁
+def axiomFour' (d₁ : Γ ⊢ □p) : Γ ⊢ □□p := (Hilbert.axiomFour) ⨀ d₁
 
 @[inference]
-lemma axiom4'! (d : Γ ⊢! □p) : Γ ⊢! □□p := ⟨axiom4' d.some⟩
+lemma axiomFour'! (d : Γ ⊢! □p) : Γ ⊢! □□p := ⟨axiomFour' d.some⟩
 
 
 variable [HasAxiomT Bew]
@@ -478,11 +478,11 @@ class K [ModalDuality F] extends Hilbert.Classical Bew, HasNecessitation Bew, Ha
 
 class KD extends Hilbert.K Bew, HasAxiomD Bew
 
-class K4 extends Hilbert.K Bew, HasAxiom4 Bew
+class K4 extends Hilbert.K Bew, HasAxiomFour Bew
 
-class S4 extends Hilbert.K Bew, HasAxiomT Bew, HasAxiom4 Bew
+class S4 extends Hilbert.K Bew, HasAxiomT Bew, HasAxiomFour Bew
 
-class S5 extends Hilbert.K Bew, HasAxiomT Bew, HasAxiom5 Bew
+class S5 extends Hilbert.K Bew, HasAxiomT Bew, HasAxiomFive Bew
 
 class S4Dot2 extends Hilbert.S4 Bew, HasAxiomDot2 Bew
 

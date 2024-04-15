@@ -34,9 +34,9 @@ end GTranslation
 
 lemma intAxiom4 {p : Intuitionistic.Formula α} : ∅ ⊢ᴹ[𝐊𝟒]! pᵍ ⟶ □pᵍ := by
   induction p using Intuitionistic.Formula.rec' with
-  | hatom => simp; apply axiom4!;
+  | hatom => simp; apply axiomFour!;
   | hfalsum => apply dtr'!; apply efq'!; apply axm!; simp;
-  | himp => simp; apply axiom4!;
+  | himp => simp; apply axiomFour!;
   | hand p q ihp ihq =>
     apply dtr'!;
     have : {pᵍ ⋏ qᵍ} ⊢ᴹ[𝐊𝟒]! pᵍ ⋏ qᵍ := axm! (by simp);

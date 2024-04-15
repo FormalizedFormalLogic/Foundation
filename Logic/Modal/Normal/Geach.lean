@@ -38,7 +38,7 @@ namespace AxiomGeach
 
 @[simp] lemma def_axiomD : (𝐃 : AxiomSet α) = AxiomSet.Geach ⟨0, 0, 1, 1⟩ := by aesop;
 
-@[simp] lemma def_axiom4 : (𝟒 : AxiomSet α) = AxiomSet.Geach ⟨0, 2, 1, 0⟩ := by aesop;
+@[simp] lemma def_axiomFour : (𝟒 : AxiomSet α) = AxiomSet.Geach ⟨0, 2, 1, 0⟩ := by aesop;
 
 @[simp] lemma def_axiom5 : (𝟓 : AxiomSet α) = AxiomSet.Geach ⟨1, 1, 0, 1⟩ := by aesop;
 
