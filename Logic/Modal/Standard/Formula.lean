@@ -1,6 +1,5 @@
-import Logic.Vorspiel.Collection
-import Logic.Modal.LogicSymbol
-import Logic.Modal.Standard.System
+import Logic.Modal.Normal.LogicSymbol
+import Logic.Propositional.Intuitionistic.Formula
 
 namespace LO.Modal.Standard
 
@@ -97,6 +96,28 @@ def complexity : Formula α → ℕ
 
 @[simp] lemma complexity_box (p : Formula α) : complexity (□p) = p.complexity + 1 := rfl
 @[simp] lemma complexity_box' (p : Formula α) : complexity (box p) = p.complexity + 1 := rfl
+
+def degree : Formula α → Nat
+  | atom _ => 0
+  | ⊥ => 0
+  | box p => p.degree + 1
+  | p ⟶ q => max p.degree q.degree
+  | p ⋏ q => max p.degree q.degree
+  | p ⋎ q => max p.degree q.degree
+
+def toPropFormula (p : Formula α) (_ : p.degree = 0) : LO.Propositional.Intuitionistic.Formula α :=
+  match p with
+  | atom a => LO.Propositional.Intuitionistic.Formula.atom a
+  | ⊥ => LO.Propositional.Intuitionistic.Formula.falsum
+  | p ⋏ q => LO.Propositional.Intuitionistic.Formula.and
+    (p.toPropFormula (by simp_all [degree]))
+    (q.toPropFormula (by simp_all [degree]))
+  | p ⋎ q => LO.Propositional.Intuitionistic.Formula.or
+    (p.toPropFormula (by simp_all [degree]))
+    (q.toPropFormula (by simp_all [degree]))
+  | p ⟶ q => LO.Propositional.Intuitionistic.Formula.imp
+    (p.toPropFormula (by simp_all [degree]))
+    (q.toPropFormula (by simp_all [degree]))
 
 @[elab_as_elim]
 def cases' {C : Formula α → Sort w}
