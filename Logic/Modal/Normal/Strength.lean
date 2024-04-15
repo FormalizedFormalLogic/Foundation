@@ -148,7 +148,7 @@ theorem sstrong_K4_S4 [hβ : Nontrivial β] : (𝐊𝟒 : AxiomSet β) <ᴸ 𝐒
   . obtain ⟨x, y, hxy⟩ := hβ.exists_pair_ne;
     simp only [LogicalStrong, not_forall];
     use (□(Formula.atom default) ⟶ (Formula.atom default));
-    use ⟨Deduction.maxm (by simp [LogicKT4, AxiomT.set, AxiomT])⟩
+    use ⟨Deduction.maxm (by simp)⟩
     apply not_imp_not.mpr $ AxiomSet.sounds;
     simp [Formula.FrameClassConsequence];
     existsi (λ _ w₂ => w₂ = y);
@@ -181,7 +181,7 @@ theorem sstrong_KD_KT [hβ : Nontrivial β] : (𝐊𝐃 : AxiomSet β) <ᴸ 𝐊
   . obtain ⟨x, y, hxy⟩ := hβ.exists_pair_ne
     simp only [LogicalStrong, not_forall];
     use (□(Formula.atom default) ⟶ (Formula.atom default));
-    use ⟨Deduction.maxm (by simp [LogicKT, AxiomT.set, AxiomT])⟩
+    use ⟨Deduction.maxm (by simp)⟩
     apply not_imp_not.mpr $ AxiomSet.sounds;
     simp [Formula.FrameClassConsequence];
     existsi (λ _ w₂ => w₂ = y);
@@ -215,7 +215,7 @@ theorem sstrong_S4_S5 : (𝐒𝟒 : AxiomSet (Fin 3)) <ᴸ 𝐒𝟓 := by
   . apply strong_S4_S5;
   . simp only [LogicalStrong, not_forall];
     existsi (◇(Formula.atom default) ⟶ □◇(Formula.atom default));
-    use ⟨Deduction.maxm (by simp [LogicKT5, Axiom5.set, Axiom5])⟩;
+    use ⟨Deduction.maxm (by simp)⟩;
     apply not_imp_not.mpr $ AxiomSet.sounds;
     simp [Formula.FrameClassConsequence];
     existsi (λ w₁ w₂ => (w₁ = w₂) ∨ (w₁ = 0 ∧ w₂ = 1) ∨ (w₁ = 0 ∧ w₂ = 2));

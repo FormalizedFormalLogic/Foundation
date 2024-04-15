@@ -209,14 +209,14 @@ instance Deduction.ofKSubset : Hilbert.K (Deduction Λ) where
 
 def Deduction.ofK4Subset (_ : 𝐊𝟒 ⊆ Λ) : (Hilbert.K4 (Deduction (Λ : AxiomSet α))) where
   K _ _ _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by assumption) (by simp);
-  A4 _ _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by assumption) (by simp);
+  Four _ _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by assumption) (by simp);
 
 instance : Hilbert.K4 (Deduction (𝐊𝟒 : AxiomSet α)) := Deduction.ofK4Subset (by rfl)
 
 def Deduction.ofS4Subset (_ : 𝐒𝟒 ⊆ Λ) : (Hilbert.S4 (Deduction (Λ : AxiomSet α))) where
   K _ _ _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by assumption) (by simp);
   T _ _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by assumption) (by simp);
-  A4 _ _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by assumption) (by simp);
+  Four _ _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by assumption) (by simp);
 
 instance : Hilbert.S4 (Deduction (𝐒𝟒 : AxiomSet α)) := Deduction.ofS4Subset (by rfl)
 
@@ -237,7 +237,7 @@ def boxedNecessitation {Γ p} : (Γ ⊢ᴹ[Λ] p) → (□Γ ⊢ᴹ[Λ] □p)
   | necessitation h => .necessitation $ .necessitation h
   | axm h => by exact axm (by simp_all [Set.multibox])
   | @modus_ponens _ _ Γ₁ Γ₂ a b h₁ h₂ => by
-      have d : □Γ₁ ∪ □Γ₂ ⊢ᴹ[Λ] (□(a ⟶ b) ⟶ (□a ⟶ □b)) := .maxm (by apply hK; simp_all [AxiomK.set, AxiomK]);
+      have d : □Γ₁ ∪ □Γ₂ ⊢ᴹ[Λ] (□(a ⟶ b) ⟶ (□a ⟶ □b)) := .maxm (by apply hK; simp_all);
       have d₁ : (□Γ₁ ∪ □Γ₂) ⊢ᴹ[Λ] □(a ⟶ b) := boxedNecessitation h₁ |>.weakening' (by simp);
       have d₂ : (□Γ₁ ∪ □Γ₂) ⊢ᴹ[Λ] □a := boxedNecessitation h₂ |>.weakening' (by simp);
       have : (□Γ₁ ∪ □Γ₂) ⊢ᴹ[Λ] □b := d ⨀ d₁ ⨀ d₂;

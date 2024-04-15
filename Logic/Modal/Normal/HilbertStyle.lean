@@ -15,43 +15,43 @@ class HasBoxedNecessitation where
   boxed_necessitation {Γ p} : (Bew Γ p) → (Bew (Γ.box) (□p))
 
 class HasAxiomK where
-  K (Γ : Set F) (p q : F) : Bew Γ $ AxiomK p q
+  K (Γ : Set F) (p q : F) : Bew Γ $ axiomK p q
 
 class HasAxiomT where
-  T (Γ : Set F) (p : F) : Bew Γ $ AxiomT p
+  T (Γ : Set F) (p : F) : Bew Γ $ axiomT p
 
 class HasAxiomD where
-  D (Γ : Set F) (p : F) : Bew Γ $ AxiomD p
+  D (Γ : Set F) (p : F) : Bew Γ $ axiomD p
 
 class HasAxiomB where
-  B (Γ : Set F) (p q : F) : Bew Γ $ AxiomB p
+  B (Γ : Set F) (p q : F) : Bew Γ $ axiomB p
 
-class HasAxiom4 where
-  A4 (Γ : Set F) (p : F) : Bew Γ $ Axiom4 p
+class HasAxiomFour where
+  Four (Γ : Set F) (p : F) : Bew Γ $ axiomFour p
 
-class HasAxiom5 where
-  A5 (Γ : Set F) (p : F) : Bew Γ $ Axiom5 p
+class HasAxiomFive where
+  Five (Γ : Set F) (p : F) : Bew Γ $ axiomFive p
 
 class HasAxiomL where
-  L (Γ : Set F) (p : F) : Bew Γ $ AxiomL p
+  L (Γ : Set F) (p : F) : Bew Γ $ axiomL p
 
 class HasAxiomDot2 where
-  Dot2 (Γ : Set F) (p : F) : Bew Γ $ AxiomDot2 p
+  Dot2 (Γ : Set F) (p : F) : Bew Γ $ axiomDot2 p
 
 class HasAxiomDot3 where
-  Dot3 (Γ : Set F) (p q : F) : Bew Γ $ AxiomDot3 p q
+  Dot3 (Γ : Set F) (p q : F) : Bew Γ $ axiomDot3 p q
 
 class HasAxiomGrz where
-  Grz (Γ : Set F) (p : F) : Bew Γ $ AxiomGrz p
+  Grz (Γ : Set F) (p : F) : Bew Γ $ axiomGrz p
 
 class HasAxiomM where
-  M (Γ : Set F) (p : F) : Bew Γ $ AxiomM p
+  M (Γ : Set F) (p : F) : Bew Γ $ axiomM p
 
 class HasAxiomCD where
-  CD (Γ : Set F) (p : F) : Bew Γ $ AxiomCD p
+  CD (Γ : Set F) (p : F) : Bew Γ $ axiomCD p
 
 class HasAxiomC4 where
-  C4 (Γ : Set F) (p : F) : Bew Γ $ AxiomC4 p
+  C4 (Γ : Set F) (p : F) : Bew Γ $ axiomC4 p
 
 section
 
@@ -97,10 +97,10 @@ def preboxed_necessitation (d : Γ.prebox ⊢ p) : Γ ⊢ □p := weakening' Set
 def preboxed_necessitation! (d : Γ.prebox ⊢! p) : Γ ⊢! □p := ⟨preboxed_necessitation d.some⟩
 
 @[tautology]
-def axiomK : Γ ⊢ (AxiomK p q) := by apply HasAxiomK.K
+def axiomK : Γ ⊢ □(p ⟶ q) ⟶ □p ⟶ □q := by apply HasAxiomK.K
 
 @[tautology]
-lemma axiomK! : Γ ⊢! (AxiomK p q) := ⟨Hilbert.axiomK⟩
+lemma axiomK! : Γ ⊢! □(p ⟶ q) ⟶ □p ⟶ □q := ⟨Hilbert.axiomK⟩
 
 @[inference]
 def box_distribute' (d₁ : Γ ⊢ (□(p ⟶ q))) : Γ ⊢ □p ⟶ □q := axiomK ⨀ d₁
@@ -439,28 +439,28 @@ def collect_dia_disj : Γ ⊢ ◇p ⋎ ◇q ⟶ ◇(p ⋎ q) := by
 @[inference]
 def collect_dia_disj' (d : Γ ⊢ ◇p ⋎ ◇q) : Γ ⊢ ◇(p ⋎ q) := collect_dia_disj ⨀ d
 
-variable [HasAxiom4 Bew]
+variable [HasAxiomFour Bew]
 
 @[tautology]
-def axiom4 : Γ ⊢ (Axiom4 p) := HasAxiom4.A4 Γ p
+def axiomFour : Γ ⊢  □p ⟶ □□p := HasAxiomFour.Four Γ p
 
 @[tautology]
-lemma axiom4! : Γ ⊢! (Axiom4 p) := ⟨Hilbert.axiom4⟩
+lemma axiomFour! : Γ ⊢! □p ⟶ □□p := ⟨Hilbert.axiomFour⟩
 
 @[inference]
-def axiom4' (d₁ : Γ ⊢ □p) : Γ ⊢ □□p := (Hilbert.axiom4) ⨀ d₁
+def axiomFour' (d₁ : Γ ⊢ □p) : Γ ⊢ □□p := (Hilbert.axiomFour) ⨀ d₁
 
 @[inference]
-lemma axiom4'! (d : Γ ⊢! □p) : Γ ⊢! □□p := ⟨axiom4' d.some⟩
+lemma axiomFour'! (d : Γ ⊢! □p) : Γ ⊢! □□p := ⟨axiomFour' d.some⟩
 
 
 variable [HasAxiomT Bew]
 
 @[tautology]
-def axiomT :  Γ ⊢ (AxiomT p) := HasAxiomT.T Γ p
+def axiomT :  Γ ⊢ □p ⟶ p := HasAxiomT.T Γ p
 
 @[tautology]
-lemma axiomT! : Γ ⊢! (AxiomT p) := ⟨Hilbert.axiomT⟩
+lemma axiomT! : Γ ⊢! □p ⟶ p := ⟨Hilbert.axiomT⟩
 
 @[inference]
 def axiomT' (d₁ : Γ ⊢ □p) : Γ ⊢ p := (Hilbert.axiomT) ⨀ d₁
@@ -478,11 +478,11 @@ class K [ModalDuality F] extends Hilbert.Classical Bew, HasNecessitation Bew, Ha
 
 class KD extends Hilbert.K Bew, HasAxiomD Bew
 
-class K4 extends Hilbert.K Bew, HasAxiom4 Bew
+class K4 extends Hilbert.K Bew, HasAxiomFour Bew
 
-class S4 extends Hilbert.K Bew, HasAxiomT Bew, HasAxiom4 Bew
+class S4 extends Hilbert.K Bew, HasAxiomT Bew, HasAxiomFour Bew
 
-class S5 extends Hilbert.K Bew, HasAxiomT Bew, HasAxiom5 Bew
+class S5 extends Hilbert.K Bew, HasAxiomT Bew, HasAxiomFive Bew
 
 class S4Dot2 extends Hilbert.S4 Bew, HasAxiomDot2 Bew
 

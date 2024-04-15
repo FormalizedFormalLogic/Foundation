@@ -1,5 +1,5 @@
 import Logic.Propositional.Intuitionistic
-import Logic.Modal.Normal.ModalCube
+import Logic.Modal.Normal.Strength
 
 namespace LO.Modal.Normal
 
@@ -34,9 +34,9 @@ end GTranslation
 
 lemma intAxiom4 {p : Intuitionistic.Formula α} : ∅ ⊢ᴹ[𝐊𝟒]! pᵍ ⟶ □pᵍ := by
   induction p using Intuitionistic.Formula.rec' with
-  | hatom => simp; apply axiom4!;
+  | hatom => simp; apply axiomFour!;
   | hfalsum => apply dtr'!; apply efq'!; apply axm!; simp;
-  | himp => simp; apply axiom4!;
+  | himp => simp; apply axiomFour!;
   | hand p q ihp ihq =>
     apply dtr'!;
     have : {pᵍ ⋏ qᵍ} ⊢ᴹ[𝐊𝟒]! pᵍ ⋏ qᵍ := axm! (by simp);
@@ -66,10 +66,10 @@ private lemma embed_Int_S4.case_imply₁ : ∅ ⊢ᴹ[𝐒𝟒]! (p ⟶ q ⟶ p)
 /-- TODO: prove syntactically -/
 private lemma embed_Int_S4.case_imply₂ : ∅ ⊢ᴹ[𝐒𝟒]! ((p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r)ᵍ := by
   simp only [GTranslation];
-  apply LogicS4.kripkeCompletes;
+  apply AxiomSet.S4.kripkeCompletes;
   simp [GTranslation, Formula.FrameClassConsequence, Formula.FrameConsequence];
   intro F hF _ w₁ w₂ _ hpqr w₃ hw₂w₃ hpq w₄ hw₃w₄ hp;
-  replace hF := by simpa using LogicS4.frameClassDefinability.mpr (by assumption);
+  replace hF := by simpa using AxiomSet.S4.frameClassDefinability.mpr (by assumption);
   exact hpqr w₄ (hF.right hw₂w₃ hw₃w₄) hp w₄ (hF.left _) (hpq w₄ (by assumption) hp);
 
 private lemma embed_Int_S4.case_conj₃ : ∅ ⊢ᴹ[𝐒𝟒]! ((p ⟶ q ⟶ p ⋏ q))ᵍ := by
@@ -82,10 +82,10 @@ private lemma embed_Int_S4.case_conj₃ : ∅ ⊢ᴹ[𝐒𝟒]! ((p ⟶ q ⟶ p 
 
 /-- TODO: prove syntactically -/
 private lemma embed_Int_S4.case_disj₃ : ∅ ⊢ᴹ[𝐒𝟒]! (((p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r)))ᵍ := by
-  apply LogicS4.kripkeCompletes;
+  apply AxiomSet.S4.kripkeCompletes;
   simp [GTranslation, Formula.FrameClassConsequence, Formula.FrameConsequence];
   intro F hF _ w₁ w₂ _ hp w₃ hw₂₃ hq w₄ hw₃₄ h;
-  replace hF := by simpa using LogicS4.frameClassDefinability.mpr hF;
+  replace hF := by simpa using AxiomSet.S4.frameClassDefinability.mpr hF;
   cases h with
   | inl h => exact hp _ (hF.right hw₂₃ hw₃₄) h;
   | inr h => exact hq _ (by assumption) h;
@@ -143,7 +143,7 @@ lemma embed_S4_Int : (∅ ⊢ᴹ[(𝐒𝟒 : AxiomSet α)]! pᵍ) → (∅ ⊢! 
   have : ∅ ⊨ᴹ[(𝔽(𝐒𝟒) : FrameClass γ)] pᵍ := AxiomSet.sounds hC;
   simp [Formula.FrameConsequence, Formula.FrameClassConsequence] at this;
   have : w ⊩ᴹ[M] pᵍ := this M.frame (by
-    apply LogicS4.frameClassDefinability.mp;
+    apply AxiomSet.S4.frameClassDefinability.mp;
     constructor <;> assumption;
   ) M.val w;
 
