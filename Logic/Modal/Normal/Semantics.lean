@@ -18,17 +18,17 @@ import Logic.Modal.Normal.Axioms
 
   ### Truth Relations
 
-  - `Formula.Satisfies M w p`, `w ⊩[M] p`: Satisfication of formula `p` at world `w` in model `M`.
-  - `Formula.Models M p`, `⊧[M] p`: Formula `p` is satisfied in every worlds of model `M`.
-  - `Formula.Frames F p`, `⊧[F] p`: Formula `p` is satisfied in every models of `F` (arbitary valuations).
-  - `Formula.Frameclasses 𝔽 p`, `⊧[𝔽] p`: Formula `p` is satisfied in every frames in frameclass `𝔽`.
+  - `Formula.Satisfies M w p`, `w ⊩ᴹ[M] p`: Satisfication of formula `p` at world `w` in model `M`.
+  - `Formula.Models M p`, `⊧ᴹ[M] p`: Formula `p` is satisfied in every worlds of model `M`.
+  - `Formula.Frames F p`, `⊧ᴹ[F] p`: Formula `p` is satisfied in every models of `F` (arbitary valuations).
+  - `Formula.Frameclasses 𝔽 p`, `⊧ᴹ[𝔽] p`: Formula `p` is satisfied in every frames in frameclass `𝔽`.
 
   These relations can be extended to theory `Γ`.
 
   ### Consequence Relations
 
-  - `Formula.FrameConsequence F Γ p`, `Γ ⊨[F] p`: If `F` frames theory `Γ`, then `p` does.
-  - `Formula.FrameClassConsequence 𝔽 Γ p`, `Γ ⊨[𝔽] p`: `p` is consequenced by `Γ` in every frame `F` in `𝔽`.
+  - `Formula.FrameConsequence F Γ p`, `Γ ⊨ᴹ[F] p`: If `F` frames theory `Γ`, then `p` does.
+  - `Formula.FrameClassConsequence 𝔽 Γ p`, `Γ ⊨ᴹ[𝔽] p`: `p` is consequenced by `Γ` in every frame `F` in `𝔽`.
 
   ### Frame Definability
 
