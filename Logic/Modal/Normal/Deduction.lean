@@ -237,7 +237,7 @@ def boxedNecessitation {Γ p} : (Γ ⊢ᴹ[Λ] p) → (□Γ ⊢ᴹ[Λ] □p)
   | necessitation h => .necessitation $ .necessitation h
   | axm h => by exact axm (by simp_all [Set.multibox])
   | @modus_ponens _ _ Γ₁ Γ₂ a b h₁ h₂ => by
-      have d : □Γ₁ ∪ □Γ₂ ⊢ᴹ[Λ] (□(a ⟶ b) ⟶ (□a ⟶ □b)) := .maxm (by apply hK; simp_all [AxiomK.set, AxiomK]);
+      have d : □Γ₁ ∪ □Γ₂ ⊢ᴹ[Λ] (□(a ⟶ b) ⟶ (□a ⟶ □b)) := .maxm (by apply hK; simp_all);
       have d₁ : (□Γ₁ ∪ □Γ₂) ⊢ᴹ[Λ] □(a ⟶ b) := boxedNecessitation h₁ |>.weakening' (by simp);
       have d₂ : (□Γ₁ ∪ □Γ₂) ⊢ᴹ[Λ] □a := boxedNecessitation h₂ |>.weakening' (by simp);
       have : (□Γ₁ ∪ □Γ₂) ⊢ᴹ[Λ] □b := d ⨀ d₁ ⨀ d₂;

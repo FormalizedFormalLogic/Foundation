@@ -50,9 +50,9 @@ lemma AxiomSet.consistent (β) [Inhabited β] [h : Nonempty (𝔽(Λ) : FrameCla
 variable [Inhabited β]
 
 theorem LogicK.consistent : Consistent (𝐊 : AxiomSet α) := AxiomSet.consistent β
-theorem LogicKD.consistent : Consistent (𝐊𝐃 : AxiomSet α) := AxiomSet.consistent β
-theorem LogicS4.consistent : Consistent (𝐒𝟒 : AxiomSet α) := AxiomSet.consistent β
-theorem LogicS5.consistent : Consistent (𝐒𝟓 : AxiomSet α) := AxiomSet.consistent β
+theorem AxiomSet.KD.consistent : Consistent (𝐊𝐃 : AxiomSet α) := AxiomSet.consistent β
+theorem AxiomSet.S4.consistent : Consistent (𝐒𝟒 : AxiomSet α) := AxiomSet.consistent β
+theorem AxiomSet.S5.consistent : Consistent (𝐒𝟓 : AxiomSet α) := AxiomSet.consistent β
 -/
 
 end LO.Modal.Normal

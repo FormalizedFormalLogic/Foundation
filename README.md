@@ -197,13 +197,13 @@ In this formalization, _(Modal) Logic_ means set of axioms.
 | Logic            | Definition                    | Notation | Remarks         |
 | :--------------: | ----------------------------- | :------- | --------------- |
 | $\mathbf{K}$     | [LO.Modal.Normal.LogicK](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Logics.html#LO.Modal.Normal.LogicK) | `𝐊`      |                 |
-| $\mathbf{KD}$     | [LO.Modal.Normal.LogicKD](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Logics.html#LO.Modal.Normal.LogicKD) | `𝐊𝐃`      |                 |
-| $\mathbf{S4}$    | [LO.Modal.Normal.LogicS4](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Logics.html#LO.Modal.Normal.LogicS4) | `𝐒𝟒`     | Alias of `𝐊𝐓𝟒`. |
-| $\mathbf{S4.2}$  | [LO.Modal.Normal.LogicS4Dot2](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Logics.html#LO.Modal.Normal.LogicS4Dot2) | `𝐒𝟒.𝟐`   |                 |
-| $\mathbf{S4.3}$  | [LO.Modal.Normal.LogicS4Dot3](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Logics.html#LO.Modal.Normal.LogicS4Dot3) | `𝐒𝟒.𝟑`   |                 |
-| $\mathbf{S4Grz}$ | [LO.Modal.Normal.LogicS4Grz](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Logics.html#LO.Modal.Normal.LogicS4Grz) | `𝐒𝟒𝐆𝐫𝐳`  |                 |
-| $\mathbf{S5}$    | [LO.Modal.Normal.LogicS5](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Logics.html#LO.Modal.Normal.LogicS5) | `𝐒𝟓`     | Alias of `𝐊𝐓𝟓`. |
-| $\mathbf{GL}$    | [LO.Modal.Normal.LogicGL](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Logics.html#LO.Modal.Normal.LogicGL) | `𝐆𝐋`     |                 |
+| $\mathbf{KD}$     | [LO.Modal.Normal.AxiomSet.KD](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Logics.html#LO.Modal.Normal.AxiomSet.KD) | `𝐊𝐃`      |                 |
+| $\mathbf{S4}$    | [LO.Modal.Normal.AxiomSet.S4](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Logics.html#LO.Modal.Normal.AxiomSet.S4) | `𝐒𝟒`     | Alias of `𝐊𝐓𝟒`. |
+| $\mathbf{S4.2}$  | [LO.Modal.Normal.AxiomSet.S4Dot2](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Logics.html#LO.Modal.Normal.AxiomSet.S4Dot2) | `𝐒𝟒.𝟐`   |                 |
+| $\mathbf{S4.3}$  | [LO.Modal.Normal.AxiomSet.S4Dot3](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Logics.html#LO.Modal.Normal.AxiomSet.S4Dot3) | `𝐒𝟒.𝟑`   |                 |
+| $\mathbf{S4Grz}$ | [LO.Modal.Normal.AxiomSet.S4Grz](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Logics.html#LO.Modal.Normal.AxiomSet.S4Grz) | `𝐒𝟒𝐆𝐫𝐳`  |                 |
+| $\mathbf{S5}$    | [LO.Modal.Normal.AxiomSet.S5](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Logics.html#LO.Modal.Normal.AxiomSet.S5) | `𝐒𝟓`     | Alias of `𝐊𝐓𝟓`. |
+| $\mathbf{GL}$    | [LO.Modal.Normal.AxiomSet.GL](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Logics.html#LO.Modal.Normal.AxiomSet.GL) | `𝐆𝐋`     |                 |
 
 |                                   |                                            | Definition                                 |   Notation   |
 | :-------------------------------: | ------------------------------------------ | :----------------------------------------- | :----------: |

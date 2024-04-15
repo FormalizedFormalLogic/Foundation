@@ -6,17 +6,16 @@ variable {α β : Type u} [Inhabited β]
 
 open Formula
 
-namespace AxiomL
+namespace AxiomSet.L
 
-variable (β) [Inhabited β]
-variable (F: Frame α)
+variable {F: Frame α}
 
 private lemma implies_transitive : (⊧ᴹ[F] (𝐋 : AxiomSet β)) → Transitive F := by
   contrapose;
   intro hT; simp [Transitive] at hT;
   obtain ⟨w₁, w₂, w₃, r₂₃, r₁₂, nr₁₃⟩ := hT;
   apply Theory.not_Frames;
-  simp [AxiomL, AxiomL.set];
+  simp [axiomL, AxiomSet.L];
   existsi (λ w' _ => (w' ≠ w₂ ∧ w' ≠ w₃)), w₁, (atom default);
   constructor;
   . intro x hx h;
@@ -34,7 +33,7 @@ private lemma implies_cwf  : (⊧ᴹ[F] (𝐋 : AxiomSet β)) → ConverseWellFo
   let w := hX₁.some;
   let a : Formula β := atom default;
   apply Theory.not_Frames;
-  simp [Theory.Satisfies, AxiomL.set, AxiomL, -Satisfies.box_def];
+  simp [Theory.Satisfies, -Satisfies.box_def];
   existsi V, w, a;
   constructor;
   . simp only [Formula.Satisfies.box_def];
@@ -58,7 +57,7 @@ private lemma implies_cwf  : (⊧ᴹ[F] (𝐋 : AxiomSet β)) → ConverseWellFo
 
 private lemma impliedby : (Transitive F ∧ ConverseWellFounded F) → (⊧ᴹ[F] (𝐋 : AxiomSet β)) := by
   rintro ⟨hTrans, hWF⟩;
-  simp [AxiomL, AxiomL.set];
+  simp [axiomL, AxiomSet.L];
   intro p V w;
   simp only [Formula.Satisfies.imp_def'];
   suffices (w ⊮ᴹ[⟨F, V⟩] □p) → (w ⊮ᴹ[⟨F, V⟩] □(□p ⟶ p)) by exact not_imp_not.mp this;
@@ -87,26 +86,23 @@ private lemma impliedby : (Transitive F ∧ ConverseWellFounded F) → (⊧ᴹ[F
     . exact h₂;
   exact h₃;
 
-lemma defines : (Transitive F ∧ ConverseWellFounded F) ↔ (⊧ᴹ[F] (𝐋 : AxiomSet β)) := ⟨
+lemma defines : AxiomSetDefinability α β (𝐋 : AxiomSet β) (λ F => Transitive F ∧ ConverseWellFounded F) := ⟨
     by apply impliedby,
-    by intro h; exact ⟨implies_transitive β F h, implies_cwf β F h⟩
+    by intro h; exact ⟨implies_transitive h, implies_cwf h⟩
   ⟩
 
-end AxiomL
+end AxiomSet.L
 
 
-namespace LogicGL
+namespace AxiomSet.GL
 
 variable [Inhabited α]
 
-lemma defines_trans_converseWellFounded : @FrameClassDefinability α β 𝐆𝐋 (λ F => (Transitive F ∧ ConverseWellFounded F)) := by
-  intro F;
-  simp [LogicGL, AxiomSetFrameClass.union];
-  have := AxiomK.defines β F;
-  have := AxiomL.defines β F;
-  aesop;
+lemma defines_trans_converseWellFounded : AxiomSetDefinability α β 𝐆𝐋 (λ F => (Transitive F ∧ ConverseWellFounded F)) := by
+  apply AxiomSetDefinability.union_with_K;
+  exact AxiomSet.L.defines;
 
-lemma defines_finite_trans_irreflexive [Finite α] : @FrameClassDefinability α β 𝐆𝐋 (λ F => (Transitive F ∧ Irreflexive F)) := by
+lemma defines_finite_trans_irreflexive [Finite α] : AxiomSetDefinability α β 𝐆𝐋 (λ F => (Transitive F ∧ Irreflexive F)) := by
   intro F;
   simp;
   have hd := @defines_trans_converseWellFounded α β _;
@@ -137,6 +133,6 @@ instance existsTrivialFiniteFrame [Finite α] : Nonempty (𝔽((𝐆𝐋 : Axiom
   )
 ⟩
 
-end LogicGL
+end AxiomSet.GL
 
 end LO.Modal.Normal

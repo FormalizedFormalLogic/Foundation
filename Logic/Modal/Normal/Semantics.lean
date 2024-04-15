@@ -291,39 +291,31 @@ def Theory.FrameSatisfiable (F : Frame α) (Γ : Theory β) := ∃ V w, w ⊩ᴹ
 
 def Theory.FrameClassSatisfiable (𝔽 : FrameClass α) (Γ : Theory β) := ∃ F ∈ 𝔽, Γ.FrameSatisfiable F
 
-section Definabilities
+def AxiomSetDefinability (α β) (Λ : AxiomSet β)  (P : Frame α → Prop) := ∀ {F : Frame α}, P F ↔ ⊧ᴹ[F] Λ
 
-section AxiomDefinabilities
-
-variable (β) [Inhabited β] (F: Frame α)
-
-lemma AxiomK.defines : (⊧ᴹ[F] (𝐊 : AxiomSet β)) := by
-  simp [AxiomK.set, AxiomK, Frames, Models];
-  aesop;
-
--- TODO: move
-lemma AxiomDot3.defines : (Functional F) ↔ (⊧ᴹ[F] (.𝟑 : AxiomSet β)) := by sorry
-
-end AxiomDefinabilities
-
-section LogicDefinabilities
-
-variable [Inhabited α] [Inhabited β] {F: Frame α}
-
-def FrameClassDefinability (α β : Type*) (Λ : AxiomSet β) (P : Frame α → Prop) := ∀ {F : Frame α}, (P F) ↔ (F ∈ 𝔽(Λ))
-
-lemma LogicK.frameClassDefinability : FrameClassDefinability α β 𝐊 (λ _ => True) := by
+def AxiomSetDefinability.toFrameClass (h : AxiomSetDefinability α β Λ P) : ∀ {F : Frame α}, P F ↔ F ∈ 𝔽(Λ) := by
   intro F;
-  have := AxiomK.defines β F;
+  exact h;
+
+lemma AxiomSetDefinability.union
+  (h₁ : AxiomSetDefinability α β Λ₁ P₁)
+  (h₂ : AxiomSetDefinability α β Λ₂ P₂) : AxiomSetDefinability α β (Λ₁ ∪ Λ₂) (λ F => P₁ F ∧ P₂ F) := by
+  simp_all [AxiomSetDefinability, AxiomSetFrameClass.union];
   aesop;
+
+lemma AxiomSet.K.defines : AxiomSetDefinability α β (𝐊 : AxiomSet β) (λ _ => True) := by
+  simp_all [AxiomSetDefinability, Frames, Models];
+  aesop;
+
+lemma AxiomSetDefinability.union_with_K (h : AxiomSetDefinability α β Λ P) : AxiomSetDefinability α β (𝐊 ∪ Λ) P := by simpa using @AxiomSetDefinability.union α β 𝐊 (λ _ => True) Λ P AxiomSet.K.defines h
 
 instance : Nonempty (𝔽((𝐊 : AxiomSet β)) : FrameClass α) := by
   existsi (λ _ _ => True);
-  apply LogicK.frameClassDefinability.mp;
+  apply AxiomSet.K.defines.mp;
   trivial;
 
-end LogicDefinabilities
+-- TODO: move
+lemma AxiomSet.Dot3.defines : AxiomSetDefinability α β .𝟑 (Functional) := by sorry
 
-end Definabilities
 
 end LO.Modal.Normal
