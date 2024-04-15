@@ -301,7 +301,7 @@ variable {Λ : AxiomSet α} {Γ : Theory α} {p q r : Formula α}
 @[refl]
 protected lemma refl : p ⟷[Λ, Γ] p := by
   simp [DeducibleEquivalent];
-  apply iff_intro!;
+  apply iff_intro'!;
   all_goals apply imp_id!
 
 @[symm]
@@ -314,7 +314,7 @@ protected lemma symm : (p ⟷[Λ, Γ] q) → (q ⟷[Λ, Γ] p) := by
 protected lemma trans : (p ⟷[Λ, Γ] q) → (q ⟷[Λ, Γ] r) → (p ⟷[Λ, Γ] r) := by
   simp only [DeducibleEquivalent];
   intro dpq dqr;
-  apply iff_intro!;
+  apply iff_intro'!;
   . exact imp_trans'! (iff_mp'! dpq) (iff_mp'! dqr);
   . exact imp_trans'! (iff_mpr'! dqr) (iff_mpr'! dpq);
 
@@ -324,11 +324,11 @@ instance : IsEquiv (Formula α) (· ⟷[Λ, Γ] ·) where
   trans := by apply DeducibleEquivalent.trans
 
 @[simp]
-lemma tauto : p ⟷[Λ, Γ] p := by simp [DeducibleEquivalent]; apply iff_intro!; all_goals apply imp_id!
+lemma tauto : p ⟷[Λ, Γ] p := by simp [DeducibleEquivalent]; apply iff_intro'!; all_goals apply imp_id!
 
 lemma or (hp : p₁ ⟷[Λ, Γ] p₂) (hq : q₁ ⟷[Λ, Γ] q₂) : ((p₁ ⋎ q₁) ⟷[Λ, Γ] (p₂ ⋎ q₂)) := by
   simp_all only [DeducibleEquivalent];
-  apply iff_intro!
+  apply iff_intro'!
   . apply dtr'!;
     exact disj₃'!
       (by
@@ -362,7 +362,7 @@ lemma or (hp : p₁ ⟷[Λ, Γ] p₂) (hq : q₁ ⟷[Λ, Γ] q₂) : ((p₁ ⋎ 
 
 lemma and (hp : p₁ ⟷[Λ, Γ] p₂) (hq : q₁ ⟷[Λ, Γ] q₂) : ((p₁ ⋏ q₁) ⟷[Λ, Γ] (p₂ ⋏ q₂)) := by
   simp_all only [DeducibleEquivalent];
-  apply iff_intro!;
+  apply iff_intro'!;
   . apply dtr'!;
     have d : insert (p₁ ⋏ q₁) Γ ⊢ᴹ[Λ]!(p₁ ⋏ q₁) := axm! (by simp)
     exact conj₃'!
@@ -376,7 +376,7 @@ lemma and (hp : p₁ ⟷[Λ, Γ] p₂) (hq : q₁ ⟷[Λ, Γ] q₂) : ((p₁ ⋏
 
 lemma and_comm (p q : Formula α) : ((p ⋏ q) ⟷[Λ, Γ] (q ⋏ p)) := by
   simp_all only [DeducibleEquivalent];
-  apply iff_intro!;
+  apply iff_intro'!;
   . apply dtr'!;
     have d₁ : insert (p ⋏ q) Γ ⊢ᴹ[Λ]! (p ⋏ q) := axm! (by simp);
     exact conj₃'! (conj₂'! d₁) (conj₁'! d₁);
@@ -386,7 +386,7 @@ lemma and_comm (p q : Formula α) : ((p ⋏ q) ⟷[Λ, Γ] (q ⋏ p)) := by
 
 lemma imp (hp : p₁ ⟷[Λ, Γ] p₂) (hq : q₁ ⟷[Λ, Γ] q₂) : ((p₁ ⟶ q₁) ⟷[Λ, Γ] (p₂ ⟶ q₂)) := by
   simp_all only [DeducibleEquivalent];
-  apply iff_intro!;
+  apply iff_intro'!;
   . apply dtr'!;
     apply dtr'!;
     have d₁ : insert p₂ (insert (p₁ ⟶ q₁) Γ) ⊢ᴹ[Λ]! (p₁ ⟶ q₁) := axm! (by simp)
@@ -408,7 +408,7 @@ variable [Hilbert.K (Deduction Λ)]
 
 lemma box (h : p ⟷[Λ, ∅] q) : ((□p) ⟷[Λ, Γ] (□q)) := by
   simp_all only [DeducibleEquivalent];
-  apply iff_intro!;
+  apply iff_intro'!;
   . have d₁ : Γ ⊢ᴹ[Λ]! □(p ⟶ q) := necessitation! (iff_mp'! h);
     have d₂ : Γ ⊢ᴹ[Λ]! □(p ⟶ q) ⟶ (□p ⟶ □q) := Hilbert.axiomK!
     exact d₂ ⨀ d₁;

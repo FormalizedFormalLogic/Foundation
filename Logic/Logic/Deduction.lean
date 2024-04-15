@@ -306,7 +306,7 @@ def liftup (h : ∀ {Γ}, Γ ⊢ p → Γ ⊢ q) : Γ ⊢ p ⟶ q := by
 @[inference] lemma iff_left'! (dpq : Γ ⊢! (p ⟷ q)) (dq : Γ ⊢! q) : Γ ⊢! p := ⟨iff_left' dpq.some dq.some⟩
 
 @[inference] def iff_intro' (dpq : Γ ⊢ p ⟶ q) (dqp : Γ ⊢ q ⟶ p) : Γ ⊢ p ⟷ q := by deduct
-@[inference] lemma iff_intro! (dpq : Γ ⊢! (p ⟶ q)) (dqp : Γ ⊢! (q ⟶ p)) : Γ ⊢! (p ⟷ q) := ⟨iff_intro' dpq.some dqp.some⟩
+@[inference] lemma iff_intro'! (dpq : Γ ⊢! (p ⟶ q)) (dqp : Γ ⊢! (q ⟶ p)) : Γ ⊢! (p ⟷ q) := ⟨iff_intro' dpq.some dqp.some⟩
 
 @[inference] def conj_symm' (h : Γ ⊢ p ⋏ q) : Γ ⊢ q ⋏ p := conj₃' (conj₂' h) (conj₁' h)
 @[inference] lemma conj_symm'! (d : Γ ⊢! (p ⋏ q)) : Γ ⊢! (q ⋏ p) := ⟨conj_symm' d.some⟩
@@ -767,6 +767,57 @@ def imp_left_conj_comm' (h : Γ ⊢ (p ⋏ q) ⟶ r) : Γ ⊢ (q ⋏ p) ⟶ r :=
 @[inference]
 lemma imp_left_conj_comm'! (h : Γ ⊢! (p ⋏ q) ⟶ r) : Γ ⊢! (q ⋏ p) ⟶ r := ⟨imp_left_conj_comm' h.some⟩
 
+def conj_iff' (h₁ : Γ ⊢ p₁ ⟷ q₁) (h₂ : Γ ⊢ p₂ ⟷ q₂) : (Γ ⊢ (p₁ ⋏ p₂) ⟷ (q₁ ⋏ q₂)) := by
+  apply iff_intro';
+  . apply dtr';
+    have dp₁q₁ : (insert (p₁ ⋏ p₂) Γ) ⊢ p₁ ⟶ q₁ := weakening' (by simp) $ iff_mp' h₁;
+    have dp₂q₂ : (insert (p₁ ⋏ p₂) Γ) ⊢ p₂ ⟶ q₂ := weakening' (by simp) $ iff_mp' h₂;
+    exact conj₃' (dp₁q₁ ⨀ (by deduct)) (dp₂q₂ ⨀ (by deduct))
+  . apply dtr';
+    have dq₁p₁ : (insert (q₁ ⋏ q₂) Γ) ⊢ q₁ ⟶ p₁ := weakening' (by simp) $ iff_mpr' h₁;
+    have dq₂p₂ : (insert (q₁ ⋏ q₂) Γ) ⊢ q₂ ⟶ p₂ := weakening' (by simp) $ iff_mpr' h₂;
+    exact conj₃' (dq₁p₁ ⨀ (by deduct)) (dq₂p₂ ⨀ (by deduct))
+
+lemma conj_iff'! (h₁ : Γ ⊢! p₁ ⟷ q₁) (h₂ : Γ ⊢! p₂ ⟷ q₂) : Γ ⊢! (p₁ ⋏ p₂) ⟷ (q₁ ⋏ q₂) := ⟨conj_iff' h₁.some h₂.some⟩
+
+def disj_iff' (h₁ : Γ ⊢ p₁ ⟷ q₁) (h₂ : Γ ⊢ p₂ ⟷ q₂) : (Γ ⊢ (p₁ ⋎ p₂) ⟷ (q₁ ⋎ q₂)) := by
+  apply iff_intro';
+  . apply dtr';
+    have dp₁q₁ : (insert p₁ $ insert (p₁ ⋎ p₂) Γ) ⊢ p₁ ⟶ q₁ := weakening' (by apply Set.subset_insert_insert) $ iff_mp' h₁;
+    have dp₁ : (insert p₁ $ insert (p₁ ⋎ p₂) Γ) ⊢ p₁ := by deduct;
+    have dp₂q₂ : (insert p₂ $ insert (p₁ ⋎ p₂) Γ) ⊢ p₂ ⟶ q₂ := weakening' (by apply Set.subset_insert_insert) $ iff_mp' h₂;
+    have dp₂ : (insert p₂ $ insert (p₁ ⋎ p₂) Γ) ⊢ p₂ := by deduct;
+    have dp₁p₂ : (insert (p₁ ⋎ p₂) Γ) ⊢ (p₁ ⋎ p₂) := by deduct;
+    exact disj₃' (by apply dtr'; apply disj₁'; exact dp₁q₁ ⨀ dp₁) (by apply dtr'; apply disj₂'; exact dp₂q₂ ⨀ dp₂) dp₁p₂;
+  . apply dtr';
+    have dq₁p₁ : (insert q₁ $ insert (q₁ ⋎ q₂) Γ) ⊢ q₁ ⟶ p₁ := weakening' (by apply Set.subset_insert_insert) $ iff_mpr' h₁;
+    have dq₁ : (insert q₁ $ insert (q₁ ⋎ q₂) Γ) ⊢ q₁ := by deduct;
+    have dq₂p₂ : (insert q₂ $ insert (q₁ ⋎ q₂) Γ) ⊢ q₂ ⟶ p₂ := weakening' (by apply Set.subset_insert_insert) $ iff_mpr' h₂;
+    have dq₂ : (insert q₂ $ insert (q₁ ⋎ q₂) Γ) ⊢ q₂ := by deduct;
+    have dq₁q₂ : (insert (q₁ ⋎ q₂) Γ) ⊢ (q₁ ⋎ q₂) := by deduct;
+    exact disj₃' (by apply dtr'; apply disj₁'; exact dq₁p₁ ⨀ dq₁) (by apply dtr'; apply disj₂'; exact dq₂p₂ ⨀ dq₂) dq₁q₂;
+
+lemma disj_iff'! (h₁ : Γ ⊢! p₁ ⟷ q₁) (h₂ : Γ ⊢! p₂ ⟷ q₂) : Γ ⊢! (p₁ ⋎ p₂) ⟷ (q₁ ⋎ q₂) := ⟨disj_iff' h₁.some h₂.some⟩
+
+def imp_iff' (h₁ : Γ ⊢ p₁ ⟷ q₁) (h₂ : Γ ⊢ p₂ ⟷ q₂) : (Γ ⊢ (p₁ ⟶ p₂) ⟷ (q₁ ⟶ q₂)) := by
+  apply iff_intro';
+  . apply dtr';
+    apply dtr';
+    have hq₁ : (insert q₁ $ insert (p₁ ⟶ p₂) Γ) ⊢ q₁ := by deduct;
+    have hq₁p₁ : (insert q₁ $ insert (p₁ ⟶ p₂) Γ) ⊢ q₁ ⟶ p₁ := weakening' (by apply Set.subset_insert_insert) $ iff_mpr' h₁;
+    have hp₁p₂ : (insert q₁ $ insert (p₁ ⟶ p₂) Γ) ⊢ p₁ ⟶ p₂ := by deduct;
+    have hp₂q₂ : (insert q₁ $ insert (p₁ ⟶ p₂) Γ) ⊢ p₂ ⟶ q₂ := weakening' (by apply Set.subset_insert_insert) $ iff_mp' h₂;
+    exact hp₂q₂ ⨀ (hp₁p₂ ⨀ (hq₁p₁ ⨀ hq₁))
+  . apply dtr';
+    apply dtr';
+    have hp₁ : (insert p₁ $ insert (q₁ ⟶ q₂) Γ) ⊢ p₁ := by deduct;
+    have hp₁q₁ : (insert p₁ $ insert (q₁ ⟶ q₂) Γ) ⊢ p₁ ⟶ q₁ := weakening' (by apply Set.subset_insert_insert) $ iff_mp' h₁;
+    have hq₁q₂ : (insert p₁ $ insert (q₁ ⟶ q₂) Γ) ⊢ q₁ ⟶ q₂ := by deduct;
+    have hq₂p₂ : (insert p₁ $ insert (q₁ ⟶ q₂) Γ) ⊢ q₂ ⟶ p₂ := weakening' (by apply Set.subset_insert_insert) $ iff_mpr' h₂;
+    exact hq₂p₂ ⨀ (hq₁q₂ ⨀ (hp₁q₁ ⨀ hp₁));
+
+lemma imp_iff'! (h₁ : Γ ⊢! p₁ ⟷ q₁) (h₂ : Γ ⊢! p₂ ⟷ q₂) : Γ ⊢! (p₁ ⟶ p₂) ⟷ (q₁ ⟶ q₂) := ⟨imp_iff' h₁.some h₂.some⟩
+
 end Deductions
 
 section Consistency
@@ -857,7 +908,7 @@ lemma insert_finset_conj'! : Γ ⊢! (insert p Δ).conj ↔ Γ ⊢! p ⋏ Δ.con
 
 @[tautology]
 lemma insert_finset_conj! : Γ ⊢! (insert p Δ).conj ⟷ (p ⋏ Δ.conj) := by
-  apply iff_intro!;
+  apply iff_intro'!;
   . apply dtr'!;
     apply insert_finset_conj'!.mp;
     deduct;
@@ -909,7 +960,7 @@ lemma finset_union_conj'! : (Γ ⊢! (Δ₁ ∪ Δ₂).conj) ↔ (Γ ⊢! (Δ₁
     cases Finset.mem_union.mp hp <;> simp_all;
 
 lemma finset_union_conj! : Γ ⊢! ((Δ₁ ∪ Δ₂).conj ⟷ Δ₁.conj ⋏ Δ₂.conj) := by
-  apply iff_intro!;
+  apply iff_intro'!;
   . apply dtr'!;
     apply finset_union_conj'!.mp
     exact axm! (by simp)

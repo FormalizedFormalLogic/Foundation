@@ -53,6 +53,12 @@ class HasAxiomCD where
 class HasAxiomC4 where
   C4 (Γ : Set F) (p : F) : Bew Γ $ axiomC4 p
 
+class HasAxiomTc where
+  Tc (Γ : Set F) (p : F) : Bew Γ $ axiomTc p
+
+class HasAxiomVerum where
+  Verum (Γ : Set F) (p : F) : Bew Γ $ axiomVerum p
+
 section
 
 variable {Bew : Set F → F → Type u}
@@ -145,9 +151,9 @@ lemma axiomK'! (d₁ : Γ ⊢! (□(p ⟶ q))) (d₂ : Γ ⊢! □p) : Γ ⊢! �
 def box_distribute_iff : Γ ⊢ □(p ⟷ q) ⟶ (□p ⟷ □q) := by
   have : (Set.box {p ⟷ q}) ⊢ (□p ⟶ □q) := box_distribute' $ boxed_necessitation $ iff_mp' $ axm (by simp);
   have : (Set.box {p ⟷ q}) ⊢ (□q ⟶ □p) := box_distribute' $ boxed_necessitation $ iff_mpr' $ axm (by simp);
-  have : (Set.box {p ⟷ q}) ⊢ (□p ⟷ □q) := by deduct;
+  have : (Set.box {p ⟷ q}) ⊢ (□p ⟷ □q) := iff_intro' (by assumption) (by assumption);
   have : ({□(p ⟷ q)}) ⊢ (□p ⟷ □q) := by simpa [Set.multibox] using this;
-  have : ∅ ⊢ (□(p ⟷ q) ⟶ (□p ⟷ □q)) := dtr' (by deduct);
+  have : ∅ ⊢ (□(p ⟷ q) ⟶ (□p ⟷ □q)) := dtr' (by simpa);
   deduct;
 
 @[inference]
@@ -226,8 +232,8 @@ def multibox_duality : Γ ⊢ □[n]p ⟷ ~(◇[n](~p)) := by
         simpa [ModalDuality.dia_to_box];
       )
       (by
-        have : ∅ ⊢ ~~(□[n]p) ⟷ □[n]p := by deduct;
-        have : ∅ ⊢ (□[n]p ⟷ ~(◇[n](~p))) := by deduct;
+        have : ∅ ⊢ ~~(□[n]p) ⟷ □[n]p := iff_symm' dn;
+        have : ∅ ⊢ (□[n]p ⟷ ~(◇[n](~p))) := ih;
         have : ∅ ⊢ ~~(□[n]p) ⟷ ~(◇[n](~p)) := iff_trans' (by assumption) (by assumption);
         have : ∅ ⊢ □~~(□[n]p) ⟷ □~(◇[n](~p)) := box_iff' (by assumption);
         exact weakening' (by simp) $ dn_iff' this;
@@ -468,6 +474,27 @@ def axiomT' (d₁ : Γ ⊢ □p) : Γ ⊢ p := (Hilbert.axiomT) ⨀ d₁
 @[inference]
 lemma axiomT'! (d : Γ ⊢! □p) : Γ ⊢! p := ⟨axiomT' d.some⟩
 
+variable [HasAxiomTc Bew]
+
+def axiomTc : Γ ⊢ p ⟶ □p := HasAxiomTc.Tc Γ p
+
+lemma axiomTc! : Γ ⊢! p ⟶ □p := ⟨axiomTc⟩
+
+def boxtriv : Γ ⊢ p ⟷ □p := by
+  apply iff_intro';
+  . apply axiomTc;
+  . apply axiomT;
+
+def boxtriv! : Γ ⊢! p ⟷ □p := ⟨boxtriv⟩
+
+variable [HasAxiomVerum Bew]
+
+@[tautology]
+def boxarbitary : Γ ⊢ □p := HasAxiomVerum.Verum Γ p
+
+@[tautology]
+lemma boxarbitary! : Γ ⊢! □p := ⟨boxarbitary⟩
+
 end
 
 section Logics
@@ -491,6 +518,10 @@ class S4Dot3 extends Hilbert.S4 Bew, HasAxiomDot3 Bew
 class S4Grz extends Hilbert.S4 Bew, HasAxiomGrz Bew
 
 class GL extends Hilbert.K Bew, HasAxiomL Bew
+
+class Triv extends Hilbert.K Bew, HasAxiomT Bew, HasAxiomTc Bew
+
+class Ver extends Hilbert.K Bew, HasAxiomVerum Bew
 
 end Logics
 

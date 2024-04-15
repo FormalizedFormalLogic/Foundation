@@ -57,7 +57,7 @@ abbrev axiomCD := ◇p ⟶ □p
 
 abbrev axiomTc := p ⟶ □p
 
-abbrev axiomVer := □p
+abbrev axiomVerum := □p
 
 abbrev axiomDot3 := □(□p ⟶ □q) ⋎ □(□q ⟶ □p)
 
@@ -114,6 +114,11 @@ notation "𝐂𝐃" => AxiomSet.CD
 abbrev AxiomSet.C4 : AxiomSet α := { axiomC4 p | p }
 notation "𝐂𝟒" => AxiomSet.C4
 
+abbrev AxiomSet.Tc : AxiomSet α := { axiomTc p | p }
+notation "𝐓𝐜" => AxiomSet.Tc
+
+abbrev AxiomSet.Verum : AxiomSet α := { axiomVerum p | p }
+
 end AxiomSet
 
 section Logics
@@ -155,6 +160,15 @@ notation "𝐊𝐓𝟒𝐁" => AxiomSet.KT4B
 
 abbrev AxiomSet.GL : AxiomSet α := 𝐊 ∪ 𝐋
 notation "𝐆𝐋" => AxiomSet.GL
+
+abbrev AxiomSet.Triv : AxiomSet α := 𝐊 ∪ 𝐓 ∪ 𝐓𝐜
+notation "𝐓𝐫𝐢𝐯" => AxiomSet.Triv
+
+abbrev AxiomSet.Ver : AxiomSet α := 𝐊 ∪ Verum
+notation "𝐕𝐞𝐫" => AxiomSet.Ver
+
+abbrev AxiomSet.KTc : AxiomSet α := 𝐊 ∪ 𝐓𝐜
+notation "𝐊𝐓𝐜" => AxiomSet.KTc
 
 end Logics
 
