@@ -196,7 +196,7 @@ In this formalization, _(Modal) Logic_ means set of axioms.
 
 | Logic            | Definition                    | Notation | Remarks         |
 | :--------------: | ----------------------------- | :------- | --------------- |
-| $\mathbf{K}$     | [LO.Modal.Normal.LogicK](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Logics.html#LO.Modal.Normal.LogicK) | `𝐊`      |                 |
+| $\mathbf{K}$     | [LO.Modal.Normal.AxiomSet.K](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Logics.html#LO.Modal.Normal.AxiomSet.K) | `𝐊`      |                 |
 | $\mathbf{KD}$     | [LO.Modal.Normal.AxiomSet.KD](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Logics.html#LO.Modal.Normal.AxiomSet.KD) | `𝐊𝐃`      |                 |
 | $\mathbf{S4}$    | [LO.Modal.Normal.AxiomSet.S4](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Logics.html#LO.Modal.Normal.AxiomSet.S4) | `𝐒𝟒`     | Alias of `𝐊𝐓𝟒`. |
 | $\mathbf{S4.2}$  | [LO.Modal.Normal.AxiomSet.S4Dot2](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Logics.html#LO.Modal.Normal.AxiomSet.S4Dot2) | `𝐒𝟒.𝟐`   |                 |
