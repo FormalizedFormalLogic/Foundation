@@ -3,6 +3,8 @@ import Logic.Modal.Normal.Formula
 import Logic.Modal.Normal.Axioms
 import Logic.Modal.Normal.HilbertStyle
 
+
+
 attribute [simp] Set.subset_union_of_subset_left Set.subset_union_of_subset_right -- Finset.subset_insert
 
 namespace LO

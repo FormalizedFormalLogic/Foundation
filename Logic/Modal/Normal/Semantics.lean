@@ -2,6 +2,50 @@ import Logic.Vorspiel.BinaryRelations
 import Logic.Modal.Normal.Formula
 import Logic.Modal.Normal.Axioms
 
+/-!
+  # Kripke Semantics for Modal Logic
+
+  This file defines Kripke semantics for modal logic and proves some basic properties.
+
+  ## Main Definitions
+
+  ### Preliminaries
+
+  - `Frame α`: Binary relation on `α` (world), representing the accessibility relation.
+  - `Valuation α β`: Truth assignment of atoms `β` in world `α`.
+  - `Model α β`: Pair of a frame and a valuation.
+  - `Frameclass α`: Set of frames.
+
+  ### Truth Relations
+
+  - `Formula.Satisfies M w p`, `w ⊩[M] p`: Satisfication of formula `p` at world `w` in model `M`.
+  - `Formula.Models M p`, `⊧[M] p`: Formula `p` is satisfied in every worlds of model `M`.
+  - `Formula.Frames F p`, `⊧[F] p`: Formula `p` is satisfied in every models of `F` (arbitary valuations).
+  - `Formula.Frameclasses 𝔽 p`, `⊧[𝔽] p`: Formula `p` is satisfied in every frames in frameclass `𝔽`.
+
+  These relations can be extended to theory `Γ`.
+
+  ### Consequence Relations
+
+  - `Formula.FrameConsequence F Γ p`, `Γ ⊨[F] p`: If `F` frames theory `Γ`, then `p` does.
+  - `Formula.FrameClassConsequence 𝔽 Γ p`, `Γ ⊨[𝔽] p`: `p` is consequenced by `Γ` in every frame `F` in `𝔽`.
+
+  ### Frame Definability
+
+  - `AxiomSetFrameClass Λ`, `𝔽(Λ)`: Sets of frame that frames axiom sets `Λ`
+  - `FrameClassDefinability Λ P`: Frame `F` satisfies frame property `P` iff `F` in frame class of `Λ`. (`Λ` is defined `P`.)
+
+  ## Theorems
+
+  - `LogicK.frameClassDefinability`: Axiom sets `𝐊` is defined nothing.
+
+  ## Remarks
+
+  Refer to specific files for the formalization of frame class definability.
+  - `Geach.lean`: Geach logics, such as `𝐊`, `𝐒𝟒`, `𝐒𝟓`, etc.
+
+-/
+
 namespace LO.Modal.Normal
 
 open Formula

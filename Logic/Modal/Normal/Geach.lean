@@ -6,7 +6,18 @@ import Logic.Modal.Normal.Soundness
 import Logic.Modal.Normal.Completeness
 
 /-!
+  # Frame Class Definability and Completeness of Geach Logic
+
   The soundness and (Kripke) completeness of Geach Logic (general term for normal modal logics by characterized by Geach axioms).
+
+  ## Defines
+  - `AxiomGeach` is axiom schema that the form is `◇ⁱ□ᵐp ⟶ □ʲ◇ⁿp`.
+  - `GeachLogic` is axiom set of extensions of `𝐊` by Geach axioms.
+  - `GeachConfluency` is confluency by defined Geach axiom, and generalization of some common frame properties (reflexive, transivitiy, etc.).
+
+  ## Theorems
+  `AxiomGeach.frameClassDefinability`: Geach axiom defines corresponding Geach confluency.
+  `GeachLogic.kripkeCompletes`: If `Λ` is Geach logic, then `Λ` is Kripke complete.
 -/
 
 namespace LO.Modal.Normal
@@ -319,7 +330,7 @@ lemma GeachLogic.membership_frameclass : (CanonicalModel l).frame ∈ (𝔽((Gea
     . exact CanonicalModel.def_axiomGeach (by simp) (by simp);
     . exact CanonicalModel.def_logicGeach (by simp);
 
-theorem GeachLogic.kripkeCompletesAux (l : GeachTapleList) : KripkeCompleteness (GeachLogic l : AxiomSet β) (𝔽((GeachLogic l : AxiomSet β)) : FrameClass (MaximalConsistentTheory (GeachLogic l : AxiomSet β))) := by
+lemma GeachLogic.kripkeCompletesAux (l : GeachTapleList) : KripkeCompleteness (GeachLogic l : AxiomSet β) (𝔽((GeachLogic l : AxiomSet β)) : FrameClass (MaximalConsistentTheory (GeachLogic l : AxiomSet β))) := by
   apply completeness_def.mpr;
   intro Γ hConsisΓ;
   let ⟨Ω, hΩ⟩ := exists_maximal_consistent_theory hConsisΓ;
@@ -330,7 +341,7 @@ theorem GeachLogic.kripkeCompletesAux (l : GeachTapleList) : KripkeCompleteness 
     apply truthlemma' (by simp) |>.mpr;
     assumption;
 
-lemma GeachLogic.kripkeCompletes {Λ : AxiomSet β} [hG : Geach Λ] : KripkeCompleteness Λ (𝔽(Λ) : FrameClass (MaximalConsistentTheory Λ)) := by
+theorem GeachLoic.krgipkeCompletes {Λ : AxiomSet β} [hG : Geach Λ] : KripkeCompleteness Λ (𝔽(Λ) : FrameClass (MaximalConsistentTheory Λ)) := by
   rw [hG.char];
   apply GeachLogic.kripkeCompletesAux hG.taples;
 

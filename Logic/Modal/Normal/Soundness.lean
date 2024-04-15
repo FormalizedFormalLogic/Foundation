@@ -1,7 +1,13 @@
 import Logic.Modal.Normal.Semantics
 import Logic.Modal.Normal.Deduction
 
-attribute [simp] Finset.union_eq_empty
+/-!
+  # The Soundness of Deduction and Kripke Semantics
+
+  ## Theorems
+  - `AxiomSet.sounds`: Soundness of deduction
+  - `AxiomSet.consistent`: Consistency of an axioms set
+-/
 
 namespace LO.Modal.Normal
 
@@ -41,7 +47,7 @@ theorem AxiomSet.sounds (d : Γ ⊢ᴹ[Λ]! p) : (Γ ⊨ᴹ[(𝔽(Λ) : FrameCla
     | apply Models.disj₃;
     | apply Models.dne;
 
-lemma AxiomSet.consistent (β) [Inhabited β] [h : Nonempty (𝔽(Λ) : FrameClass β)] : Consistent Λ := by
+theorem AxiomSet.consistent (β) [Inhabited β] [h : Nonempty (𝔽(Λ) : FrameClass β)] : Consistent Λ := by
   intro h;
   have : ∅ ⊨ᴹ[(𝔽(Λ) : FrameClass β)] ⊥ := AxiomSet.sounds h;
   simp_all [FrameClassConsequence, FrameConsequence]
