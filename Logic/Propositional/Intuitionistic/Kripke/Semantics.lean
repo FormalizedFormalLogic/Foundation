@@ -7,8 +7,7 @@ namespace LO.Propositional.Intuitionistic
 
 namespace Kripke
 
-variable (α : Type u)
-variable (β : Type v)
+variable (α : Type) (β : Type u)
 
 abbrev Frame := α → α → Prop
 
@@ -45,7 +44,7 @@ end Kripke
 
 namespace Formula
 
-variable {α β : Type _}
+variable {α β}
 variable {M : Kripke.Model α β}
 local infix:20 "≺" => M.frame
 
@@ -73,6 +72,9 @@ lemma imp_def : (w ⊩ⁱ p ⟶ q) ↔ ∀ w', (w ≺ w') → (¬(w' ⊩ⁱ p) �
 @[simp]
 lemma imp_def' : (w ⊩ⁱ p ⟶ q) ↔ ∀ w', (w ≺ w') → (w' ⊩ⁱ p) → (w' ⊩ⁱ q) := by simp [KripkeSatisfies, imp_iff_not_or];
 
+@[simp]
+lemma neg_def : (w ⊩ⁱ ~p) ↔ ∀ w', (w ≺ w') → ¬(w' ⊩ⁱ p) := by simp [NegDefinition.neg, imp_def']
+
 lemma modus_ponens {p q} (hpq : w ⊩ⁱ p ⟶ q) (hp : w ⊩ⁱ p) : w ⊩ⁱ q := by
   have := hpq w M.frame_refl;
   tauto;
@@ -80,22 +82,22 @@ lemma modus_ponens {p q} (hpq : w ⊩ⁱ p ⟶ q) (hp : w ⊩ⁱ p) : w ⊩ⁱ q
 end KripkeSatisfies
 
 def KripkeModels (M : Kripke.Model α β) (p : Formula β) := ∀ w, (w ⊩ⁱ[M] p)
-infix:50 " ⊧ " => KripkeModels
+infix:50 " ⊧ⁱ " => KripkeModels
 
-lemma KripkeModels.modus_ponens {p q} (hpq : M ⊧ p ⟶ q) (hp : M ⊧ p) : M ⊧ q := by
+lemma KripkeModels.modus_ponens {p q} (hpq : M ⊧ⁱ p ⟶ q) (hp : M ⊧ⁱ p) : M ⊧ⁱ q := by
   intro w;
   exact KripkeSatisfies.modus_ponens (hpq w) (hp w);
 
-def KripkeValid (p : Formula β) := ∀ {α : Type}, ∀ (M : Kripke.Model α β), (M ⊧ p)
-prefix:50 "⊧ " => KripkeValid
+def KripkeValid (p : Formula β) := ∀ {α}, ∀ (M : Kripke.Model α β), (M ⊧ⁱ p)
+prefix:50 "⊧ⁱ " => KripkeValid
 
-lemma KripkeValid.modus_ponens {p q : Formula β} (hpq : ⊧ p ⟶ q) (hp : ⊧ p) : ⊧ q := by
+lemma KripkeValid.modus_ponens {p q : Formula β} (hpq : ⊧ⁱ p ⟶ q) (hp : ⊧ⁱ p) : ⊧ⁱ q := by
   intro α M;
   exact KripkeModels.modus_ponens (hpq M) (hp M);
 
 end Formula
 
-variable {α β : Type _}
+variable {α β}
 
 theorem Kripke.hereditary_formula
   {M : Kripke.Model α β} {p : Formula β} {w w' : α}
@@ -109,15 +111,15 @@ theorem Kripke.hereditary_formula
 def Theory.KripkeSatisfies (M : Kripke.Model α β) (w : α) (Γ : Theory β) := ∀ p ∈ Γ, (w ⊩ⁱ[M] p)
 notation w " ⊩ⁱ[" M "] " Γ => Theory.KripkeSatisfies M w Γ
 
-def Formula.KripkeConsequence (Γ : Theory β) (p : Formula β) := ∀ {α : Type*}, ∀ (M : Kripke.Model α β) w, (w ⊩ⁱ[M] Γ) → (w ⊩ⁱ[M] p)
+def Formula.KripkeConsequence (Γ : Theory β) (p : Formula β) := ∀ {α}, ∀ (M : Kripke.Model α β) {w : α}, (w ⊩ⁱ[M] Γ) → (w ⊩ⁱ[M] p)
 infix:50 " ⊨ⁱ " => Formula.KripkeConsequence
 
-abbrev Formula.KripkeInconsequence (Γ : Theory β) (p : Formula β) := ¬(Γ ⊨ⁱ p)
-infix:50 " ⊭ⁱ " => Formula.KripkeInconsequence
+-- abbrev Formula.KripkeInconsequence (Γ : Theory β) (p : Formula β) := ¬(Γ ⊨ⁱ p)
+-- infix:50 " ⊭ⁱ " => Formula.KripkeInconsequence
 
 namespace Formula.KripkeConsequence
 
-variable {Γ : Theory α} {p q r : Formula α}
+variable {Γ : Theory β} {p q r : Formula β}
 
 lemma verum : Γ ⊨ⁱ ⊤ := by simp [KripkeConsequence];
 
