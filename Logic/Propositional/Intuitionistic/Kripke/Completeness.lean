@@ -1,14 +1,15 @@
-/-
-  Rewrite of the Kripke completeness for intuitionistic propositional logic.
+import Logic.Propositional.Intuitionistic.Deduction
+import Logic.Propositional.Intuitionistic.Kripke.Semantics
+import Logic.Propositional.Intuitionistic.Kripke.Soundness
+
+/-!
+  # Completeness for Kripke Semantics of Intuitionistic Propositional Logic
 
   ## References
   - Huayu Guo, Dongheng Chen, Bruno Bentzen, "Verified completeness in Henkin-style for intuitionistic propositional logic"
     - paper: https://arxiv.org/abs/2310.01916
     - inplements: https://github.com/bbentzen/ipl
 -/
-import Logic.Propositional.Intuitionistic.Deduction
-import Logic.Propositional.Intuitionistic.Kripke.Semantics
-import Logic.Propositional.Intuitionistic.Kripke.Soundness
 
 namespace LO.Propositional.Intuitionistic
 
@@ -183,7 +184,7 @@ lemma exists_insertFamily_deducible_of_iUnionInsertFamily_deducible : (Γ[p]ⁱ 
       exact hm₁ ⨀ (weakening! (insertFamily_mono hm) hm₂);
   | eaxm ih =>
     existsi 0;
-    obtain ⟨q, hq⟩ := by simpa [AxiomEFQ.set, AxiomEFQ] using ih;
+    obtain ⟨q, hq⟩ := ih;
     subst hq;
     apply efq!;
   | _ =>
@@ -280,7 +281,7 @@ lemma exists_primeFamily_deducible_of_iUnionPrimeFamily_deducible : (Γ[p]ᴾ �
       exact hm₁ ⨀ (weakening! (primeFamily_mono hm) hm₂);
   | eaxm ih =>
     existsi 0;
-    obtain ⟨q, hq⟩ := by simpa [AxiomEFQ.set, AxiomEFQ] using ih;
+    obtain ⟨q, hq⟩ := ih;
     subst hq;
     apply efq!;
   | _ =>

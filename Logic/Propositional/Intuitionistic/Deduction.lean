@@ -157,7 +157,7 @@ instance : Hilbert.Intuitionistic (· ⊢ⁱ · : Theory α → Formula α → T
   disj₁        := disj₁;
   disj₂        := disj₂;
   disj₃        := disj₃;
-  efq Γ p      := eaxm (by simp [AxiomEFQ.set, AxiomEFQ]);
+  efq Γ p      := eaxm (by simp);
 
 infix:45 " ⊢ᶜ " => Deduction 𝐃𝐍𝐄
 infix:45 " ⊢ᶜ! " => Deducible 𝐃𝐍𝐄
@@ -180,13 +180,13 @@ instance : Hilbert.Classical (· ⊢ᶜ · : Theory α → Formula α → Type _
   disj₁        := disj₁;
   disj₂        := disj₂;
   disj₃        := disj₃;
-  dne Γ p      := eaxm (by simp [AxiomDNE.set, AxiomDNE]);
+  dne Γ p      := eaxm (by simp);
 
 theorem deducible_Classical_of_Int (d : Γ ⊢ⁱ! p) : (Γ ⊢ᶜ! p) := by
   induction d.some with
   | axm => apply axm! (by assumption)
   | eaxm ih =>
-    obtain ⟨q, hq⟩ := by simpa only [AxiomEFQ.set, AxiomEFQ] using ih;
+    obtain ⟨q, hq⟩ := ih;
     subst hq;
     apply efq!;
   | modusPonens h₁ h₂ ih₁ ih₂ => exact (ih₁ ⟨h₁⟩) ⨀ (ih₂ ⟨h₂⟩)
@@ -216,7 +216,7 @@ theorem negnegEquivalence_Int_Classical : (Γ ⊢ⁱ! ~~p) ↔ (Γ ⊢ᶜ! p) :=
       have : Γ ⊢ⁱ! ~~p ⟶ ~~q := dn_distribute_imp_left'! $ ih₁ ⟨h₁⟩;
       exact (by assumption) ⨀ ih₂ ⟨h₂⟩;
     | eaxm ih =>
-      obtain ⟨q, hq⟩ := by simpa only [AxiomDNE.set, AxiomDNE] using ih;
+      obtain ⟨q, hq⟩ := ih;
       subst hq;
       exact dn_disctribute_imp_right'! $ contra₀'! $ dni!;
     | _ =>

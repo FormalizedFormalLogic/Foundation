@@ -17,7 +17,7 @@ lemma Kripke.soundsAux (Γ : Theory α) (p : Formula α) (h : Γ ⊢ⁱ! p) : Γ
     have sp := ihp ⟨hp⟩ M w a;
     simpa using spq.modus_ponens sp;
   | eaxm ih =>
-    obtain ⟨q, hq⟩ := by simpa [AxiomEFQ.set, AxiomEFQ] using ih;
+    obtain ⟨q, hq⟩ := ih;
     subst hq;
     apply KripkeConsequence.efq;
   | _ =>

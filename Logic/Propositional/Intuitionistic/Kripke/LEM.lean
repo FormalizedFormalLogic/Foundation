@@ -1,5 +1,12 @@
 import Logic.Propositional.Intuitionistic.Kripke.Semantics
 
+/-!
+  # Counterexamples to the Law of Excluded Middle in Intuitionistic Logic
+
+  ## Theorems
+  - `noLEM`: LEM is not always valid in intuitionistic logic.
+-/
+
 namespace LO.Propositional.Intuitionistic.Kripke
 
 open Formula

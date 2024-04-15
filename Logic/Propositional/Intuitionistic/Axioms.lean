@@ -8,15 +8,15 @@ variable {F : Type u} [LogicalConnective F] (p q : F)
 
 abbrev AxiomSet (α) := Set (Formula α)
 
-def AxiomEFQ := ⊥ ⟶ p
+abbrev axiomEFQ := ⊥ ⟶ p
 
-def AxiomLEM := p ⋎ ~p
+abbrev axiomLEM := p ⋎ ~p
 
-def AxiomWeakLEM := ~p ⋎ ~~p
+abbrev axiomWeakLEM := ~p ⋎ ~~p
 
-def AxiomDummett := (p ⟶ q) ⋎ (q ⟶ p)
+abbrev axiomDummett := (p ⟶ q) ⋎ (q ⟶ p)
 
-def AxiomDNE := ~~p ⟶ p
+abbrev axiomDNE := ~~p ⟶ p
 
 end Axioms
 
@@ -25,39 +25,39 @@ section AxiomSet
 variable {p q : Formula F}
 
 
-def AxiomEFQ.set : AxiomSet α := { AxiomEFQ p | p }
+abbrev AxiomSet.EFQ : AxiomSet α := { axiomEFQ p | p }
 
-notation "𝐄𝐅𝐐" => AxiomEFQ.set
+notation "𝐄𝐅𝐐" => AxiomSet.EFQ
 
-@[simp] lemma AxiomEFQ.set.include : AxiomEFQ p ∈ 𝐄𝐅𝐐 := by simp [set, AxiomEFQ]
-
-
-def AxiomLEM.set : AxiomSet α := { AxiomLEM p | p }
-
-notation "𝐋𝐄𝐌" => AxiomLEM.set
-
-@[simp] lemma AxiomLEM.set.include : AxiomLEM p ∈ 𝐋𝐄𝐌 := by simp [set, AxiomLEM]
+@[simp] lemma AxiomSet.EFQ.include : axiomEFQ p ∈ 𝐄𝐅𝐐 := by simp
 
 
-def AxiomWeakLEM.set : AxiomSet α := { AxiomWeakLEM p | p }
+abbrev AxiomSet.LEM : AxiomSet α := { axiomLEM p | p }
 
-notation "𝐰𝐋𝐄𝐌" => AxiomWeakLEM.set
+notation "𝐋𝐄𝐌" => AxiomSet.LEM
 
-@[simp] lemma AxiomWeakLEM.set.include : AxiomWeakLEM p ∈ 𝐰𝐋𝐄𝐌 := by simp [set, AxiomWeakLEM]
-
-
-def AxiomDummett.set : AxiomSet α := { AxiomDummett p q | (p) (q) }
-
-notation "𝐆𝐃" => AxiomDummett.set
-
-@[simp] lemma AxiomDummett.set.include : AxiomDummett p q ∈ 𝐆𝐃 := by simp [set, AxiomDummett]; aesop;
+@[simp] lemma AxiomSet.LEM.include : axiomLEM p ∈ 𝐋𝐄𝐌 := by simp
 
 
-def AxiomDNE.set : AxiomSet α := { AxiomDNE p | p }
+abbrev AxiomSet.WeakLEM : AxiomSet α := { axiomWeakLEM p | p }
 
-notation "𝐃𝐍𝐄" => AxiomDNE.set
+notation "𝐰𝐋𝐄𝐌" => AxiomSet.WeakLEM
 
-@[simp] lemma AxiomDNE.set.include : AxiomDNE p ∈ 𝐃𝐍𝐄 := by simp [set, AxiomDNE]
+@[simp] lemma AxiomSet.WeakLEM.include : axiomWeakLEM p ∈ 𝐰𝐋𝐄𝐌 := by simp
+
+
+abbrev AxiomSet.Dummett : AxiomSet α := { axiomDummett p q | (p) (q) }
+
+notation "𝐆𝐃" => AxiomSet.Dummett
+
+@[simp] lemma AxiomSet.Dummett.include : axiomDummett p q ∈ 𝐆𝐃 := by aesop
+
+
+abbrev AxiomSet.DNE : AxiomSet α := { axiomDNE p | p }
+
+notation "𝐃𝐍𝐄" => AxiomSet.DNE
+
+@[simp] lemma AxiomSet.DNE.include : axiomDNE p ∈ 𝐃𝐍𝐄 := by simp
 
 end AxiomSet
 

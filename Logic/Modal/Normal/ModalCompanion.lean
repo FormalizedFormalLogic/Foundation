@@ -98,7 +98,7 @@ lemma embed_Int_S4 (h : ∅ ⊢ⁱ! p) : ∅ ⊢ᴹ[(𝐒𝟒 : AxiomSet α)]! p
   induction h.some with
   | axm => contradiction;
   | eaxm ih =>
-    obtain ⟨q, hq⟩ := by simpa [Intuitionistic.AxiomEFQ.set, Intuitionistic.AxiomEFQ] using ih;
+    obtain ⟨q, hq⟩ := ih;
     subst hq;
     apply necessitation!;
     apply efq!;
