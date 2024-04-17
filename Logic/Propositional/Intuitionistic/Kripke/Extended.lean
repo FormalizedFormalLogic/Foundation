@@ -27,18 +27,18 @@ notation M " ⊧ᴾ[" P "] " p => Formula.ExtendedKripkeModels P M p
 
 
 @[simp]
-def Formula.ExtendedKripkeValid (P : ∀ {α : Type}, Kripke.Frame α → Prop) (p : Formula β) : Prop := ∀ {α}, ∀ (M : Kripke.Model α β), (M ⊧ᴾ[P] p)
+def Formula.ExtendedKripkeValid.{u} (P : ∀ {α : Type u}, Kripke.Frame α → Prop) (p : Formula β) : Prop := ∀ {α : Type u}, ∀ (M : Kripke.Model α β), (M ⊧ᴾ[P] p)
 notation "⊧ᴾ[" P "] " p => Formula.ExtendedKripkeValid P p
 
-@[simp] lemma Formula.ExtendedKripkeValid.iff_int {p : Formula β} : (⊧ᴾ[λ _ => True] p) ↔ (⊧ⁱ p) := by simp; rfl;
-
+@[simp] lemma Formula.ExtendedKripkeValid.iff_int {p : Formula β} : (Formula.ExtendedKripkeValid.{u} (λ _ => True) p) ↔ (KripkeValid.{u} p) := by
+  simp [KripkeValid];
+  rfl;
 
 @[simp]
-def Formula.ExtendedKripkeConsequence (P : ∀ {α : Type}, Kripke.Frame α → Prop) (Γ : Theory β) (p : Formula β) : Prop := ∀ {α : Type}, ∀ (M : Kripke.Model α β) w, (w ⊩ᴾ[(@P α), M] Γ) → (w ⊩ᴾ[(@P α), M] p)
+def Formula.ExtendedKripkeConsequence.{u} (P : ∀ {α : Type u}, Kripke.Frame α → Prop) (Γ : Theory β) (p : Formula β) : Prop := ∀ {α : Type u}, ∀ (M : Kripke.Model α β) w, (w ⊩ᴾ[(@P α), M] Γ) → (w ⊩ᴾ[(@P α), M] p)
 notation:50 Γ " ⊨ᴾ[" P "] " p => Formula.ExtendedKripkeConsequence P Γ p
 
-@[simp] lemma Formula.ExtendedKripkeConsequence.iff_int : (Γ ⊨ᴾ[(λ _ => True)] p) ↔ (Formula.KripkeConsequence Γ p) := by simp; rfl;
-
+@[simp] lemma Formula.ExtendedKripkeConsequence.iff_int : (Formula.ExtendedKripkeConsequence.{u} (λ _ => True) Γ p) ↔ (Formula.KripkeConsequence.{u} Γ p) := by simp; rfl;
 
 section LEM
 

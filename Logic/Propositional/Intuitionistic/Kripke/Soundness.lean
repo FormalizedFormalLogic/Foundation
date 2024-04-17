@@ -13,8 +13,8 @@ lemma Kripke.soundsAux (Γ : Theory α) (p : Formula α) (h : Γ ⊢ⁱ! p) : Γ
   | @modusPonens p q hpq hp ihpq ihp =>
     simp [KripkeConsequence];
     intro _ M w a;
-    have spq := ihpq ⟨hpq⟩ M w a;
-    have sp := ihp ⟨hp⟩ M w a;
+    have spq := ihpq ⟨hpq⟩ M a;
+    have sp := ihp ⟨hp⟩ M a;
     simpa using spq.modus_ponens sp;
   | eaxm ih =>
     obtain ⟨q, hq⟩ := ih;

@@ -54,7 +54,7 @@ class Prime (T : Theory β) where
 
 end Theory
 
-structure PrimeTheory (β) where
+structure PrimeTheory (β : Type*) where
   theory : Theory β
   prime : Prime theory
 
@@ -355,7 +355,7 @@ lemma CanonicalModel.frame_def {Ω₁ Ω₂ : PrimeTheory β} : (CanonicalModel 
 @[simp]
 lemma CanonicalModel.val_def {a : β} : (CanonicalModel β).val Ω a ↔ (atom a) ∈ Ω := by rfl
 
-variable [DecidableEq β] [Encodable β]
+variable {β : Type u} [DecidableEq β] [Encodable β]
 
 lemma truthlemma {Ω : PrimeTheory β} {p : Formula β} : (Ω ⊩ⁱ[(CanonicalModel β)] p) ↔ (Ω.theory ⊢ⁱ! p) := by
   induction p using rec' generalizing Ω with
@@ -411,18 +411,19 @@ lemma truthlemma {Ω : PrimeTheory β} {p : Formula β} : (Ω ⊩ⁱ[(CanonicalM
       have : Ω'.theory ⊢ⁱ! q := (weakening! hΩΩ' h) ⨀ hp;
       contradiction;
 
-theorem Kripke.completes {Γ : Theory β} {p : Formula β} : (Γ ⊨ⁱ p) → (Γ ⊢ⁱ! p) := by
+theorem Kripke.completes {Γ : Theory β} {p : Formula β} : (Formula.KripkeConsequence.{u} Γ p) → (Γ ⊢ⁱ! p) := by
   contrapose;
   intro hnp hp;
   have ⟨Ω, ⟨hsΩ, hnpΩ⟩⟩ := prime_expansion hnp;
+  replace : ¬Ω.theory ⊢ᴾ[𝐄𝐅𝐐]! p := hnpΩ;
   have := truthlemma.not.mpr hnpΩ;
-  have := hp (CanonicalModel β) Ω (by
+  have := hp (CanonicalModel β) (by
     intro q hq;
     exact truthlemma.mpr ⟨(Deduction.axm (hsΩ hq))⟩;
   );
   contradiction;
 
-theorem Kripke.complete_iff {Γ : Theory β} {p : Formula β} : Γ ⊨ⁱ p ↔ Γ ⊢ⁱ! p:=
+theorem Kripke.complete_iff {Γ : Theory β} {p : Formula β} : (Formula.KripkeConsequence.{u} Γ p) ↔ Γ ⊢ⁱ! p:=
   ⟨Kripke.completes, Kripke.sounds⟩
 
 section DisjProp

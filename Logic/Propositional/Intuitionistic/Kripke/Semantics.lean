@@ -1,13 +1,13 @@
 import Logic.Logic.LogicSymbol
 import Logic.Propositional.Intuitionistic.Formula
 
-universe u v
-
 namespace LO.Propositional.Intuitionistic
 
 namespace Kripke
 
-variable (α : Type) (β : Type u)
+universe u v
+
+variable (α : Type u) (β : Type v)
 
 abbrev Frame := α → α → Prop
 
@@ -88,10 +88,10 @@ lemma KripkeModels.modus_ponens {p q} (hpq : M ⊧ⁱ p ⟶ q) (hp : M ⊧ⁱ p)
   intro w;
   exact KripkeSatisfies.modus_ponens (hpq w) (hp w);
 
-def KripkeValid (p : Formula β) := ∀ {α}, ∀ (M : Kripke.Model α β), (M ⊧ⁱ p)
+def KripkeValid.{u} (p : Formula β) := ∀ {α : Type u}, ∀ (M : Kripke.Model α β), (M ⊧ⁱ p)
 prefix:50 "⊧ⁱ " => KripkeValid
 
-lemma KripkeValid.modus_ponens {p q : Formula β} (hpq : ⊧ⁱ p ⟶ q) (hp : ⊧ⁱ p) : ⊧ⁱ q := by
+lemma KripkeValid.modus_ponens {p q : Formula β} (hpq : KripkeValid.{u} (p ⟶ q)) (hp : KripkeValid.{u} p) : KripkeValid.{u} q := by
   intro α M;
   exact KripkeModels.modus_ponens (hpq M) (hp M);
 
@@ -111,7 +111,7 @@ theorem Kripke.hereditary_formula
 def Theory.KripkeSatisfies (M : Kripke.Model α β) (w : α) (Γ : Theory β) := ∀ p ∈ Γ, (w ⊩ⁱ[M] p)
 notation w " ⊩ⁱ[" M "] " Γ => Theory.KripkeSatisfies M w Γ
 
-def Formula.KripkeConsequence (Γ : Theory β) (p : Formula β) := ∀ {α}, ∀ (M : Kripke.Model α β) {w : α}, (w ⊩ⁱ[M] Γ) → (w ⊩ⁱ[M] p)
+def Formula.KripkeConsequence.{u} (Γ : Theory β) (p : Formula β) := ∀ {α : Type u}, ∀ (M : Kripke.Model α β) {w : α}, (w ⊩ⁱ[M] Γ) → (w ⊩ⁱ[M] p)
 infix:50 " ⊨ⁱ " => Formula.KripkeConsequence
 
 -- abbrev Formula.KripkeInconsequence (Γ : Theory β) (p : Formula β) := ¬(Γ ⊨ⁱ p)

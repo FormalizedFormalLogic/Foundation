@@ -18,7 +18,7 @@ def LEMCounterExampleModel : Kripke.Model (Fin 2) β where
   trans := by simp [Transitive]; trivial;
   hereditary := by simp; aesop;
 
-lemma noLEM_atom {a : β} : ¬(⊧ (atom a) ⋎ ~(atom a)) := by
+lemma noLEM_atom {a : β} : ¬(⊧ⁱ (atom a) ⋎ ~(atom a)) := by
   simp [KripkeValid, KripkeModels, NegDefinition.neg];
   existsi _, LEMCounterExampleModel, 0;
   simp_all [LEMCounterExampleModel];
@@ -26,7 +26,7 @@ lemma noLEM_atom {a : β} : ¬(⊧ (atom a) ⋎ ~(atom a)) := by
 variable [Inhabited β]
 
 /-- LEM is not always valid in intuitionistic logic. -/
-theorem noLEM : ¬(∀ {p : Formula β}, ⊧ p ⋎ ~p) := by
+theorem noLEM : ¬(∀ {p : Formula β}, ⊧ⁱ p ⋎ ~p) := by
   simp;
   existsi (atom default);
   apply noLEM_atom
