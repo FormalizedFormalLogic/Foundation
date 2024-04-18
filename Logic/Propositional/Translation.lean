@@ -5,10 +5,10 @@ namespace LO.Propositional
 
 variable {α : Type*}
 
-namespace Basic
+namespace Superintuitionistic
 
 @[simp]
-def Formula.toClassical : Basic.Formula α → Classical.Formula α
+def Formula.toClassical : Superintuitionistic.Formula α → Classical.Formula α
   | .atom a => Classical.Formula.atom a
   | ⊤              => ⊤
   | ⊥              => ⊥
@@ -39,12 +39,12 @@ def Deduction.toClassical {T : Theory α} {p} : T ⊢ p → (T : Classical.Theor
   | disj₃ _ _ _ _              => by simp; prover
 -/
 
-end Basic
+end Superintuitionistic
 
 namespace Classical
 
 @[simp]
-def Formula.toSuperintuitionistic : Formula α → Basic.Formula α
+def Formula.toSuperintuitionistic : Formula α → Superintuitionistic.Formula α
   | Formula.atom a  => Superintuitionistic.Formula.atom a
   | Formula.natom a => ~Superintuitionistic.Formula.atom a
   | ⊤               => ⊤
