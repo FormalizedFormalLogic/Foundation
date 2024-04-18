@@ -1,15 +1,15 @@
 import Logic.Propositional.Classical.Basic
-import Logic.Propositional.Intuitionistic
+import Logic.Propositional.Basic
 
 namespace LO.Propositional
 
 variable {α : Type*}
 
-namespace Intuitionistic
+namespace Basic
 
 @[simp]
-def Formula.toClassical : Formula α → Classical.Formula α
-  | Formula.atom a => Classical.Formula.atom a
+def Formula.toClassical : Basic.Formula α → Classical.Formula α
+  | .atom a => Classical.Formula.atom a
   | ⊤              => ⊤
   | ⊥              => ⊥
   | p ⋏ q          => p.toClassical ⋏ q.toClassical
@@ -39,22 +39,22 @@ def Deduction.toClassical {T : Theory α} {p} : T ⊢ p → (T : Classical.Theor
   | disj₃ _ _ _ _              => by simp; prover
 -/
 
-end Intuitionistic
+end Basic
 
 namespace Classical
 
 @[simp]
-def Formula.toIntiotionistic : Formula α → Intuitionistic.Formula α
-  | Formula.atom a  => Intuitionistic.Formula.atom a
-  | Formula.natom a => ~Intuitionistic.Formula.atom a
+def Formula.toBasic : Formula α → Basic.Formula α
+  | Formula.atom a  => Basic.Formula.atom a
+  | Formula.natom a => ~Basic.Formula.atom a
   | ⊤               => ⊤
   | ⊥               => ⊥
-  | p ⋏ q           => p.toIntiotionistic ⋏ q.toIntiotionistic
-  | p ⋎ q           => p.toIntiotionistic ⋎ q.toIntiotionistic
+  | p ⋏ q           => p.toBasic ⋏ q.toBasic
+  | p ⋎ q           => p.toBasic ⋎ q.toBasic
 
-instance : Coe (Formula α) (Intuitionistic.Formula α) := ⟨Formula.toIntiotionistic⟩
+instance : Coe (Formula α) (Basic.Formula α) := ⟨Formula.toBasic⟩
 
-instance : Coe (Theory α) (Intuitionistic.Theory α) := ⟨(Formula.toIntiotionistic '' ·)⟩
+instance : Coe (Theory α) (Basic.Theory α) := ⟨(Formula.toBasic '' ·)⟩
 
 variable [DecidableEq α] [Encodable α]
 
