@@ -5,9 +5,7 @@ namespace LO.Propositional.Intuitionistic
 
 namespace Kripke
 
-universe u v
-
-variable (α : Type u) (β : Type v)
+variable (α β : Type u)
 
 abbrev Frame := α → α → Prop
 
@@ -88,11 +86,11 @@ lemma KripkeModels.modus_ponens {p q} (hpq : M ⊧ⁱ p ⟶ q) (hp : M ⊧ⁱ p)
   intro w;
   exact KripkeSatisfies.modus_ponens (hpq w) (hp w);
 
-def KripkeValid.{u} (p : Formula β) := ∀ {α : Type u}, ∀ (M : Kripke.Model α β), (M ⊧ⁱ p)
+def KripkeValid (p : Formula β) := ∀ {α}, ∀ (M : Kripke.Model α β), (M ⊧ⁱ p)
 prefix:50 "⊧ⁱ " => KripkeValid
 
-lemma KripkeValid.modus_ponens {p q : Formula β} (hpq : KripkeValid.{u} (p ⟶ q)) (hp : KripkeValid.{u} p) : KripkeValid.{u} q := by
-  intro α M;
+lemma KripkeValid.modus_ponens {p q : Formula β} (hpq : ⊧ⁱ (p ⟶ q)) (hp : ⊧ⁱ p) : ⊧ⁱ q := by
+  intro _ M;
   exact KripkeModels.modus_ponens (hpq M) (hp M);
 
 end Formula

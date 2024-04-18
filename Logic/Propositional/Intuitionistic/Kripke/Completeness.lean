@@ -411,7 +411,7 @@ lemma truthlemma {Ω : PrimeTheory β} {p : Formula β} : (Ω ⊩ⁱ[(CanonicalM
       have : Ω'.theory ⊢ⁱ! q := (weakening! hΩΩ' h) ⨀ hp;
       contradiction;
 
-theorem Kripke.completes {Γ : Theory β} {p : Formula β} : (Formula.KripkeConsequence.{u} Γ p) → (Γ ⊢ⁱ! p) := by
+theorem Kripke.completes {Γ : Theory β} {p : Formula β} : (Γ ⊨ⁱ p) → (Γ ⊢ⁱ! p) := by
   contrapose;
   intro hnp hp;
   have ⟨Ω, ⟨hsΩ, hnpΩ⟩⟩ := prime_expansion hnp;
@@ -423,7 +423,7 @@ theorem Kripke.completes {Γ : Theory β} {p : Formula β} : (Formula.KripkeCons
   );
   contradiction;
 
-theorem Kripke.complete_iff {Γ : Theory β} {p : Formula β} : (Formula.KripkeConsequence.{u} Γ p) ↔ Γ ⊢ⁱ! p:=
+theorem Kripke.complete_iff {Γ : Theory β} {p : Formula β} : (Γ ⊨ⁱ p) ↔ Γ ⊢ⁱ! p:=
   ⟨Kripke.completes, Kripke.sounds⟩
 
 section DisjProp

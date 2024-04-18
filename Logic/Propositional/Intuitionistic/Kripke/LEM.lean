@@ -11,6 +11,8 @@ namespace LO.Propositional.Intuitionistic.Kripke
 
 open Formula
 
+variable {β : Type}
+
 def LEMCounterExampleModel : Kripke.Model (Fin 2) β where
   frame := λ w₁ w₂ => (w₁ = w₂) ∨ (w₁ = 0)
   val w _ := w = 1;
