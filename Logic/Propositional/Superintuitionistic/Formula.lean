@@ -1,6 +1,6 @@
 import Logic.Logic.LogicSymbol
 
-namespace LO.Propositional.Basic
+namespace LO.Propositional.Superintuitionistic
 
 inductive Formula (α : Type u) : Type u
   | atom   : α → Formula α
@@ -220,4 +220,4 @@ abbrev Theory (α : Type u) := Set (Formula α)
 
 abbrev Context (α : Type u) := Finset (Formula α)
 
-end LO.Propositional.Basic
+end LO.Propositional.Superintuitionistic

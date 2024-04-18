@@ -1,5 +1,5 @@
 import Logic.Propositional.Classical.Basic
-import Logic.Propositional.Basic
+import Logic.Propositional.Superintuitionistic
 
 namespace LO.Propositional
 
@@ -44,17 +44,17 @@ end Basic
 namespace Classical
 
 @[simp]
-def Formula.toBasic : Formula α → Basic.Formula α
-  | Formula.atom a  => Basic.Formula.atom a
-  | Formula.natom a => ~Basic.Formula.atom a
+def Formula.toSuperintuitionistic : Formula α → Basic.Formula α
+  | Formula.atom a  => Superintuitionistic.Formula.atom a
+  | Formula.natom a => ~Superintuitionistic.Formula.atom a
   | ⊤               => ⊤
   | ⊥               => ⊥
-  | p ⋏ q           => p.toBasic ⋏ q.toBasic
-  | p ⋎ q           => p.toBasic ⋎ q.toBasic
+  | p ⋏ q           => p.toSuperintuitionistic ⋏ q.toSuperintuitionistic
+  | p ⋎ q           => p.toSuperintuitionistic ⋎ q.toSuperintuitionistic
 
-instance : Coe (Formula α) (Basic.Formula α) := ⟨Formula.toBasic⟩
+instance : Coe (Formula α) (Superintuitionistic.Formula α) := ⟨Formula.toSuperintuitionistic⟩
 
-instance : Coe (Theory α) (Basic.Theory α) := ⟨(Formula.toBasic '' ·)⟩
+instance : Coe (Theory α) (Superintuitionistic.Theory α) := ⟨(Formula.toSuperintuitionistic '' ·)⟩
 
 variable [DecidableEq α] [Encodable α]
 

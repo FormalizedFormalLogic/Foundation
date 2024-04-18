@@ -1,6 +1,6 @@
-import Logic.Propositional.Basic.Deduction
+import Logic.Propositional.Superintuitionistic.Deduction
 
-namespace LO.Propositional.Basic
+namespace LO.Propositional.Superintuitionistic
 
 open Hilbert Deduction
 
@@ -27,4 +27,4 @@ instance : Hilbert.Classical (· ⊢ᶜ · : Theory α → Formula α → Type _
   disj₃        := disj₃;
   dne Γ p      := eaxm (by simp);
 
-end LO.Propositional.Basic
+end LO.Propositional.Superintuitionistic

@@ -1,7 +1,7 @@
 import Logic.Logic.LogicSymbol
-import Logic.Propositional.Basic.Formula
+import Logic.Propositional.Superintuitionistic.Formula
 
-namespace LO.Propositional.Basic
+namespace LO.Propositional.Superintuitionistic
 
 namespace Intuitionistic.Kripke
 
@@ -168,4 +168,4 @@ lemma efq : (Γ ⊨ⁱ (⊥ ⟶ p)) := by simp [Consequence];
 
 end Formula.Intuitionistic.Kripke.Consequence
 
-end LO.Propositional.Basic
+end LO.Propositional.Superintuitionistic

@@ -1,6 +1,6 @@
-import Logic.Propositional.Basic.Intuitionistic.Deduction
-import Logic.Propositional.Basic.Intuitionistic.Kripke.Semantics
-import Logic.Propositional.Basic.Intuitionistic.Kripke.Soundness
+import Logic.Propositional.Superintuitionistic.Intuitionistic.Deduction
+import Logic.Propositional.Superintuitionistic.Intuitionistic.Kripke.Semantics
+import Logic.Propositional.Superintuitionistic.Intuitionistic.Kripke.Soundness
 
 /-!
   # Completeness for Kripke Semantics of Intuitionistic Propositional Logic
@@ -15,7 +15,7 @@ import Logic.Propositional.Basic.Intuitionistic.Kripke.Soundness
   - `disjunctive`: Deduction is disjunctive (via Kripke completeness).
 -/
 
-namespace LO.Propositional.Basic
+namespace LO.Propositional.Superintuitionistic
 
 open Formula Theory
 open Hilbert
@@ -508,4 +508,4 @@ theorem disjunctive {p q : Formula β} : ∅ ⊢ⁱ! p ⋎ q → ∅ ⊢ⁱ! p �
 
 end DisjProp
 
-end LO.Propositional.Basic.Intuitionistic.Kripke
+end LO.Propositional.Superintuitionistic.Intuitionistic.Kripke

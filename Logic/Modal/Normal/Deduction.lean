@@ -102,22 +102,21 @@ instance : Hilbert.Classical (Deduction Λ) where
 
 instance : HasNecessitation (Deduction Λ) := ⟨necessitation⟩
 
-lemma maxm_subset {Λ Λ'} (h : Λ ⊆ Λ') (dΛ : Γ ⊢ᴹ[Λ] p) : (Γ ⊢ᴹ[Λ'] p) := by
-  induction dΛ with
-  | axm ih => exact axm ih
-  | maxm ih => exact maxm (h ih)
-  | modus_ponens _ _ ih₁ ih₂ => exact modus_ponens ih₁ ih₂
-  | necessitation _ ih => exact necessitation ih
-  | verum => apply verum
-  | imply₁ => apply imply₁
-  | imply₂ => apply imply₂
-  | conj₁ => apply conj₁
-  | conj₂ => apply conj₂
-  | conj₃ => apply conj₃
-  | disj₁ => apply disj₁
-  | disj₂ => apply disj₂
-  | disj₃ => apply disj₃
-  | dne => apply dne
+lemma maxm_subset {Λ Λ'} {Γ} {p : Formula α} (hs : Λ ⊆ Λ') : (Γ ⊢ᴹ[Λ] p) → (Γ ⊢ᴹ[Λ'] p)
+  | axm h => axm h
+  | maxm h => maxm (hs h)
+  | modus_ponens h₁ h₂ => modus_ponens (h₁.maxm_subset hs) (h₂.maxm_subset hs)
+  | necessitation h => necessitation $ h.maxm_subset hs
+  | verum _        => verum _
+  | imply₁ _ _ _   => imply₁ _ _ _
+  | imply₂ _ _ _ _ => imply₂ _ _ _ _
+  | conj₁ _ _ _    => conj₁ _ _ _
+  | conj₂ _ _ _    => conj₂ _ _ _
+  | conj₃ _ _ _    => conj₃ _ _ _
+  | disj₁ _ _ _    => disj₁ _ _ _
+  | disj₂ _ _ _    => disj₂ _ _ _
+  | disj₃ _ _ _ _  => disj₃ _ _ _ _
+  | dne _ _        => dne _ _
 
 lemma maxm_subset! {Λ Λ'} (h : Λ ⊆ Λ') (dΛ : Γ ⊢ᴹ[Λ]! p) : (Γ ⊢ᴹ[Λ']! p) := ⟨maxm_subset h dΛ.some⟩
 

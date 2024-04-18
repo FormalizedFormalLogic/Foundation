@@ -1,8 +1,8 @@
 import Logic.Logic.System
-import Logic.Propositional.Basic.Formula
-import Logic.Propositional.Basic.Axioms
+import Logic.Propositional.Superintuitionistic.Formula
+import Logic.Propositional.Superintuitionistic.Axioms
 
-namespace LO.Propositional.Basic
+namespace LO.Propositional.Superintuitionistic
 
 variable {α : Type u} [DecidableEq α]
 
@@ -140,4 +140,4 @@ end Deduction
 
 def AxiomSet.Disjunctive (Λ : AxiomSet α) := ∀ {p q}, (∅ ⊢ᴾ[Λ]! p ⋎ q) → (∅ ⊢ᴾ[Λ]! p) ∨ (∅ ⊢ᴾ[Λ]! q)
 
-end LO.Propositional.Basic
+end LO.Propositional.Superintuitionistic

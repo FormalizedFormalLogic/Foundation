@@ -1,2 +1,2 @@
-import Logic.Propositional.Basic.Classical
-import Logic.Propositional.Basic.Intuitionistic
+import Logic.Propositional.Superintuitionistic.Classical
+import Logic.Propositional.Superintuitionistic.Intuitionistic

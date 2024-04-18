@@ -1,7 +1,7 @@
 import Logic.Vorspiel.BinaryRelations
-import Logic.Propositional.Basic.Intuitionistic.Kripke.Semantics
+import Logic.Propositional.Superintuitionistic.Intuitionistic.Kripke.Semantics
 
-namespace LO.Propositional.Basic
+namespace LO.Propositional.Superintuitionistic
 
 open Intuitionistic Kripke
 
@@ -68,4 +68,4 @@ example : ⊧ᴾ[Full] (p ⋎ ~p) := by
 
 end LEM
 
-end LO.Propositional.Basic
+end LO.Propositional.Superintuitionistic

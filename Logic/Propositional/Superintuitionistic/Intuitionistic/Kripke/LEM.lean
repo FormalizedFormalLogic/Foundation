@@ -1,4 +1,4 @@
-import Logic.Propositional.Basic.Intuitionistic.Kripke.Semantics
+import Logic.Propositional.Superintuitionistic.Intuitionistic.Kripke.Semantics
 
 /-!
   # Counterexamples to the Law of Excluded Middle in Intuitionistic Logic
@@ -7,13 +7,13 @@ import Logic.Propositional.Basic.Intuitionistic.Kripke.Semantics
   - `noLEM`: LEM is not always valid in intuitionistic logic.
 -/
 
-namespace LO.Propositional.Basic.Intuitionistic.Kripke
+namespace LO.Propositional.Superintuitionistic.Intuitionistic.Kripke
 
 open Formula
 
 variable {β : Type}
 
-def LEMCounterExampleModel : Model (Fin 2) β where
+def exampleLEMCounterModel : Model (Fin 2) β where
   frame := λ w₁ w₂ => (w₁ = w₂) ∨ (w₁ = 0)
   val w _ := w = 1;
   refl := by simp [Reflexive];
@@ -22,8 +22,8 @@ def LEMCounterExampleModel : Model (Fin 2) β where
 
 lemma noLEM_atom {a : β} : ¬(⊧ⁱ (atom a) ⋎ ~(atom a)) := by
   simp [Formula.Intuitionistic.Kripke.Valid, Formula.Intuitionistic.Kripke.Models, NegDefinition.neg];
-  existsi _, LEMCounterExampleModel, 0;
-  simp_all [LEMCounterExampleModel];
+  existsi _, exampleLEMCounterModel, 0;
+  simp_all [exampleLEMCounterModel];
 
 variable [Inhabited β]
 
@@ -33,4 +33,4 @@ theorem noLEM : ¬(∀ {p : Formula β}, ⊧ⁱ p ⋎ ~p) := by
   existsi (atom default);
   apply noLEM_atom
 
-end LO.Propositional.Basic.Intuitionistic.Kripke
+end LO.Propositional.Superintuitionistic.Intuitionistic.Kripke

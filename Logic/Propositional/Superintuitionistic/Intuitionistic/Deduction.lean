@@ -1,7 +1,7 @@
-import Logic.Propositional.Basic.Deduction
-import Logic.Propositional.Basic.Classical.Deduction
+import Logic.Propositional.Superintuitionistic.Deduction
+import Logic.Propositional.Superintuitionistic.Classical.Deduction
 
-namespace LO.Propositional.Basic
+namespace LO.Propositional.Superintuitionistic
 
 open Hilbert Deduction
 
@@ -82,7 +82,7 @@ theorem deducible_dn_iff_Int_Classical : (Γ ⊢ⁱ! ~~p) ↔ (Γ ⊢ᶜ! p) := 
       | apply disj₂!
       | apply disj₃!
 
-abbrev glivenko : (Γ ⊢ⁱ! ~~p) ↔ Γ ⊢ᶜ! p := deducible_dn_iff_Int_Classical
+alias glivenko := deducible_dn_iff_Int_Classical
 
 theorem deducible_neg_iff_Int_Classical : (Γ ⊢ⁱ! ~p) ↔ (Γ ⊢ᶜ! ~p) := by
   constructor;
@@ -91,4 +91,4 @@ theorem deducible_neg_iff_Int_Classical : (Γ ⊢ⁱ! ~p) ↔ (Γ ⊢ᶜ! ~p) :=
 
 end Deduction
 
-end LO.Propositional.Basic
+end LO.Propositional.Superintuitionistic

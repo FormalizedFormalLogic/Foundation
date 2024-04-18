@@ -1,6 +1,6 @@
-import Logic.Propositional.Basic.Formula
+import Logic.Propositional.Superintuitionistic.Formula
 
-namespace LO.Propositional.Basic
+namespace LO.Propositional.Superintuitionistic
 
 section Axioms
 
@@ -61,4 +61,4 @@ notation "𝐃𝐍𝐄" => AxiomSet.DNE
 
 end AxiomSet
 
-end LO.Propositional.Basic
+end LO.Propositional.Superintuitionistic

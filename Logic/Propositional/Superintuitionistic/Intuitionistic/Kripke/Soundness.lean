@@ -1,7 +1,7 @@
-import Logic.Propositional.Basic.Intuitionistic.Deduction
-import Logic.Propositional.Basic.Intuitionistic.Kripke.Semantics
+import Logic.Propositional.Superintuitionistic.Intuitionistic.Deduction
+import Logic.Propositional.Superintuitionistic.Intuitionistic.Kripke.Semantics
 
-namespace LO.Propositional.Basic.Intuitionistic
+namespace LO.Propositional.Superintuitionistic.Intuitionistic
 
 variable {α : Type u} [Inhabited α]
 
@@ -42,4 +42,4 @@ theorem Deduction.consistent : ∅ ⊬ⁱ! (⊥ : Formula α) := by
     trivial;
   contradiction
 
-end LO.Propositional.Basic.Intuitionistic
+end LO.Propositional.Superintuitionistic.Intuitionistic
