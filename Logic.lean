@@ -20,8 +20,7 @@ import Logic.Propositional.Classical.Basic.Completeness
 import Logic.Propositional.Classical.Basic
 
 -- Propositional Intuitionistic
-import Logic.Propositional.Intuitionistic
-
+import Logic.Propositional.Superintuitionistic
 import Logic.Propositional.Translation
 
 -- FirstOrder

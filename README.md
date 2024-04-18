@@ -88,8 +88,8 @@ The key results are summarised in `Logic/Summary.lean`.
 
 |                                   |                                            | Definition                                 |   Notation   |
 | :-------------------------------: | ------------------------------------------ | :----------------------------------------- | :----------: |
-| $\Gamma \vdash \varphi$       | Deduction　 | LO.Propositional.Intuitionistic.Deduction | `Γ ⊢ᴵ p` |
-| | Deductive (Exists deduction) | LO.Propositional.Intuitionistic.Deductive | `Γ ⊢ᴵ! p` |
+| $\Gamma \vdash \varphi$       | Deduction　 | LO.Propositional.Intuitionistic.Deduction | `Γ ⊢ⁱ p` |
+| | Deductive (Exists deduction) | LO.Propositional.Intuitionistic.Deductive | `Γ ⊢ⁱ! p` |
 
 ### Kripkean Semantics
 
@@ -99,24 +99,24 @@ The key results are summarised in `Logic/Summary.lean`.
 | :-------------------------------: | ------------------------------------------ | :----------------------------------------- | :----------: |
 | $w \Vdash^M \varphi$       | Satisfy on Kripkean Model $M$ and its world $w$　 | LO.Propositional.Intuitionistic.Formula.KripkeSatisfies | `w ⊩[M] p` |
 | $M \vDash \varphi$        | Models                    | LO.Propositional.Intuitionistic.Formula.KripkeModels |  `M ⊧ p`  |
-| $\Gamma \models \varphi$        | Conequences                    | LO.Propositional.Intuitionistic.Formula.KripkeConsequence |  `Γ ⊨ᴵ p`  |
+| $\Gamma \models \varphi$        | Conequences                    | LO.Propositional.Intuitionistic.Formula.KripkeConsequence |  `Γ ⊨ⁱ p`  |
 
 #### Theorems
 - [Soundness](https://iehality.github.io/lean4-logic/Logic/Propositional/Intuitionistic/Kripke/Soundness.html#LO.Propositional.Intuitionistic.Kripke.sounds)
   ```lean
-  theorem Kripke.sounds {Γ : Theory β} {p : Formula β} : (Γ ⊢ᴵ! p) → (Γ ⊨ᴵ p)
+  theorem Kripke.sounds {Γ : Theory β} {p : Formula β} : (Γ ⊢ⁱ! p) → (Γ ⊨ⁱ p)
   ```
 - [Completeness](https://iehality.github.io/lean4-logic/Logic/Propositional/Intuitionistic/Kripke/Completeness.html#LO.Propositional.Intuitionistic.Kripke.completes)
   ```lean
   theorem Kripke.completes
     [DecidableEq β] [Encodable β]
-    {Γ : Theory β} {p : Formula β} : (Γ ⊨ᴵ p) → (Γ ⊢ᴵ! p)
+    {Γ : Theory β} {p : Formula β} : (Γ ⊨ⁱ p) → (Γ ⊢ⁱ! p)
   ```
 - [Disjunction Property](https://iehality.github.io/lean4-logic/Logic/Propositional/Intuitionistic/Kripke/Completeness.html#LO.Propositional.Intuitionistic.Deduction.disjunctive)
   ```lean
   theorem Deduction.disjunctive
     [DecidableEq β] [Encodable β]
-    {p q : Formula β} : (∅ ⊢ᴵ! p ⋎ q) → (∅ ⊢ᴵ! p) ∨ (∅ ⊢ᴵ! q)
+    {p q : Formula β} : (∅ ⊢ⁱ! p ⋎ q) → (∅ ⊢ⁱ! p) ∨ (∅ ⊢ⁱ! q)
   ```
 
 ## First-Order Logic

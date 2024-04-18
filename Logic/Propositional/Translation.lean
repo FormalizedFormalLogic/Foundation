@@ -1,15 +1,16 @@
 import Logic.Propositional.Classical.Basic
-import Logic.Propositional.Intuitionistic
+import Logic.Propositional.Superintuitionistic
 
 namespace LO.Propositional
 
 variable {α : Type*}
 
-namespace Intuitionistic
+namespace Superintuitionistic
 
 @[simp]
-def Formula.toClassical : Formula α → Classical.Formula α
-  | Formula.atom a => Classical.Formula.atom a
+def Formula.toClassical : Superintuitionistic.Formula α → Classical.Formula α
+  | .atom a => Classical.Formula.atom a
+  | ⊤              => ⊤
   | ⊥              => ⊥
   | p ⋏ q          => p.toClassical ⋏ q.toClassical
   | p ⋎ q          => p.toClassical ⋎ q.toClassical
@@ -19,9 +20,8 @@ instance : Coe (Formula α) (Classical.Formula α) := ⟨Formula.toClassical⟩
 
 instance : Coe (Theory α) (Classical.Theory α) := ⟨(Formula.toClassical '' ·)⟩
 
-open Deduction
-
-theorem Deducible.toClassical {T : Theory α} {p} : T ⊢ p → (T : Classical.Theory α) ⊢! p
+/-
+def Deduction.toClassical {T : Theory α} {p} : T ⊢ p → (T : Classical.Theory α) ⊢! p
   | axm h                      => Deduction.axm! (Set.mem_image_of_mem _ h)
   | @modusPonens _ _ p q b₁ b₂ => by
       let b₁' : (T : Classical.Theory α) ⊢! p ⟶ q := Deducible.toClassical b₁
@@ -37,23 +37,24 @@ theorem Deducible.toClassical {T : Theory α} {p} : T ⊢ p → (T : Classical.T
   | disj₁ _ _ _                => by simp; prover
   | disj₂ _ _ _                => by simp; prover
   | disj₃ _ _ _ _              => by simp; prover
+-/
 
-end Intuitionistic
+end Superintuitionistic
 
 namespace Classical
 
 @[simp]
-def Formula.toIntiotionistic : Formula α → Intuitionistic.Formula α
-  | Formula.atom a  => Intuitionistic.Formula.atom a
-  | Formula.natom a => ~Intuitionistic.Formula.atom a
+def Formula.toSuperintuitionistic : Formula α → Superintuitionistic.Formula α
+  | Formula.atom a  => Superintuitionistic.Formula.atom a
+  | Formula.natom a => ~Superintuitionistic.Formula.atom a
   | ⊤               => ⊤
   | ⊥               => ⊥
-  | p ⋏ q           => p.toIntiotionistic ⋏ q.toIntiotionistic
-  | p ⋎ q           => p.toIntiotionistic ⋎ q.toIntiotionistic
+  | p ⋏ q           => p.toSuperintuitionistic ⋏ q.toSuperintuitionistic
+  | p ⋎ q           => p.toSuperintuitionistic ⋎ q.toSuperintuitionistic
 
-instance : Coe (Formula α) (Intuitionistic.Formula α) := ⟨Formula.toIntiotionistic⟩
+instance : Coe (Formula α) (Superintuitionistic.Formula α) := ⟨Formula.toSuperintuitionistic⟩
 
-instance : Coe (Theory α) (Intuitionistic.Theory α) := ⟨(Formula.toIntiotionistic '' ·)⟩
+instance : Coe (Theory α) (Superintuitionistic.Theory α) := ⟨(Formula.toSuperintuitionistic '' ·)⟩
 
 variable [DecidableEq α] [Encodable α]
 

@@ -1,0 +1,2 @@
+import Logic.Propositional.Superintuitionistic.Classical
+import Logic.Propositional.Superintuitionistic.Intuitionistic
