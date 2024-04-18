@@ -1,4 +1,4 @@
-import Logic.Propositional.Intuitionistic
+import Logic.Propositional.Basic.Intuitionistic
 import Logic.Modal.Normal.Strength
 
 namespace LO.Modal.Normal
@@ -10,23 +10,23 @@ open LO.Modal.Normal
 variable {α} [DecidableEq α]
 
 /-- Gödel Translation -/
-def GTranslation : Intuitionistic.Formula α → Formula α
-  | Intuitionistic.Formula.atom a  => □(Formula.atom a)
-  | Intuitionistic.Formula.verum   => ⊤
-  | Intuitionistic.Formula.falsum  => ⊥
-  | Intuitionistic.Formula.and p q => (GTranslation p) ⋏ (GTranslation q)
-  | Intuitionistic.Formula.or p q  => (GTranslation p) ⋎ (GTranslation q)
-  | Intuitionistic.Formula.imp p q => □((GTranslation p) ⟶ (GTranslation q))
+def GTranslation : Propositional.Basic.Formula α → Formula α
+  | .atom a  => □(Formula.atom a)
+  | .verum   => ⊤
+  | .falsum  => ⊥
+  | .and p q => (GTranslation p) ⋏ (GTranslation q)
+  | .or p q  => (GTranslation p) ⋎ (GTranslation q)
+  | .imp p q => □((GTranslation p) ⟶ (GTranslation q))
 
 postfix:75 "ᵍ" => GTranslation
 
 namespace GTranslation
 
-variable {p q : Intuitionistic.Formula α}
+variable {p q : Basic.Formula α}
 
-@[simp] lemma atom_def : (Intuitionistic.Formula.atom a)ᵍ = □(Formula.atom a) := by simp [GTranslation];
-@[simp] lemma falsum_def : (⊥ : Intuitionistic.Formula α)ᵍ = ⊥ := by simp [GTranslation];
-@[simp] lemma verum_def : (⊤ : Intuitionistic.Formula α)ᵍ = ⊤ := by simp [GTranslation];
+@[simp] lemma atom_def : (Basic.Formula.atom a)ᵍ = □(Formula.atom a) := by simp [GTranslation];
+@[simp] lemma falsum_def : (⊥ : Basic.Formula α)ᵍ = ⊥ := by simp [GTranslation];
+@[simp] lemma verum_def : (⊤ : Basic.Formula α)ᵍ = ⊤ := by simp [GTranslation];
 @[simp] lemma and_def : (p ⋏ q)ᵍ = pᵍ ⋏ qᵍ := by simp [GTranslation];
 @[simp] lemma or_def : (p ⋎ q)ᵍ = pᵍ ⋎ qᵍ := by simp [GTranslation];
 @[simp] lemma imp_def : (p ⟶ q)ᵍ = □(pᵍ ⟶ qᵍ) := by simp [GTranslation];
@@ -34,8 +34,8 @@ variable {p q : Intuitionistic.Formula α}
 
 end GTranslation
 
-lemma intAxiom4 {p : Intuitionistic.Formula α} : ∅ ⊢ᴹ[𝐊𝟒]! pᵍ ⟶ □pᵍ := by
-  induction p using Intuitionistic.Formula.rec' with
+lemma intAxiom4 {p : Basic.Formula α} : ∅ ⊢ᴹ[𝐊𝟒]! pᵍ ⟶ □pᵍ := by
+  induction p using Basic.Formula.rec' with
   | hatom => simp; apply axiomFour!;
   | hverum => apply dtr'!; apply necessitation!; apply verum!;
   | hfalsum => apply dtr'!; apply efq'!; apply axm!; simp;
@@ -55,7 +55,7 @@ lemma intAxiom4 {p : Intuitionistic.Formula α} : ∅ ⊢ᴹ[𝐊𝟒]! pᵍ ⟶
     have h : {pᵍ ⋎ qᵍ} ⊢ᴹ[𝐊𝟒]! pᵍ ⋎ qᵍ := axm! (by simp);
     simpa using disj₃'! (weakening! (by simp) hp) (weakening! (by simp) hq) h;
 
-variable [Inhabited α] {p q r : Intuitionistic.Formula α}
+variable [Inhabited α] {p q r : Basic.Formula α}
 
 private lemma embed_Int_S4.case_imply₁ : ∅ ⊢ᴹ[𝐒𝟒]! (p ⟶ q ⟶ p)ᵍ := by
   simp only [GTranslation];
@@ -125,7 +125,7 @@ variable [Encodable α]
 lemma embed_S4_Int : (∅ ⊢ᴹ[(𝐒𝟒 : AxiomSet α)]! pᵍ) → (∅ ⊢ⁱ! p) := by
   contrapose;
   intro h;
-  obtain ⟨γ, MI, w, h⟩ := by simpa [Intuitionistic.Formula.KripkeConsequence] using not_imp_not.mpr Intuitionistic.Kripke.completes h;
+  obtain ⟨γ, MI, w, h⟩ := by simpa [Basic.Formula.Intuitionistic.Kripke.Consequence] using not_imp_not.mpr Basic.Intuitionistic.Kripke.completes h;
   have : Inhabited γ := ⟨w⟩;
   let M : Modal.Normal.Model γ α := {
     frame := MI.frame,
@@ -133,9 +133,9 @@ lemma embed_S4_Int : (∅ ⊢ᴹ[(𝐒𝟒 : AxiomSet α)]! pᵍ) → (∅ ⊢�
   };
   have MRefl : Reflexive M.frame := by apply MI.refl;
   have MTrans : Transitive M.frame := by apply MI.trans;
-  have h₁ : ∀ (q : Intuitionistic.Formula α) (v), (v ⊩ⁱ[MI] q) ↔ (v ⊩ᴹ[M] qᵍ) := by
+  have h₁ : ∀ (q : Basic.Formula α) (v), (v ⊩ⁱ[MI] q) ↔ (v ⊩ᴹ[M] qᵍ) := by
     intro q v;
-    induction q using Intuitionistic.Formula.rec' generalizing v with
+    induction q using Basic.Formula.rec' generalizing v with
     | hatom a =>
       constructor;
       . intro _ _ h;
@@ -157,7 +157,7 @@ lemma embed_S4_Int : (∅ ⊢ᴹ[(𝐒𝟒 : AxiomSet α)]! pᵍ) → (∅ ⊢�
 
   contradiction;
 
-def ModalCompanion {α} (iΛ : Intuitionistic.AxiomSet α) (mΛ : AxiomSet α) : Prop := ∀ {p : Intuitionistic.Formula α}, (∅ ⊢ᴾ[iΛ]! p) ↔ (∅ ⊢ᴹ[mΛ]! pᵍ)
+def ModalCompanion {α} (pΛ : Propositional.Basic.AxiomSet α) (mΛ : AxiomSet α) : Prop := ∀ {p : Basic.Formula α}, (∅ ⊢ᴾ[pΛ]! p) ↔ (∅ ⊢ᴹ[mΛ]! pᵍ)
 
 theorem ModalCompanion_EFQ_S4 : @ModalCompanion α 𝐄𝐅𝐐 𝐒𝟒 := by
   intro p;
@@ -167,9 +167,9 @@ theorem ModalCompanion_EFQ_S4 : @ModalCompanion α 𝐄𝐅𝐐 𝐒𝟒 := by
 
 lemma ModalCompanion_Int_S4 : (∅ ⊢ⁱ! p) ↔ (∅ ⊢ᴹ[(𝐒𝟒 : AxiomSet α)]! pᵍ) := ModalCompanion_EFQ_S4
 
-open Intuitionistic.Deduction (glivenko)
+open LO.Propositional.Basic.Deduction (glivenko)
 
-lemma embed_Classical_S4 {p : Intuitionistic.Formula α} : (∅ ⊢ᶜ! p) ↔ (∅ ⊢ᴹ[(𝐒𝟒 : AxiomSet α)]! ◇pᵍ) := by
+lemma embed_Classical_S4 {p : Basic.Formula α} : (∅ ⊢ᶜ! p) ↔ (∅ ⊢ᴹ[(𝐒𝟒 : AxiomSet α)]! ◇pᵍ) := by
   constructor;
   . intro h;
     have := glivenko.mpr h;
@@ -186,11 +186,11 @@ lemma embed_Classical_S4 {p : Intuitionistic.Formula α} : (∅ ⊢ᶜ! p) ↔ (
 def AxiomSet.ModalDisjunctive (Λ : AxiomSet α) : Prop := ∀ {p q : Formula α}, (∅ ⊢ᴹ[Λ]! □p ⋎ □q) → (∅ ⊢ᴹ[Λ]! p) ∨ (∅ ⊢ᴹ[Λ]! q)
 
 lemma disjunctive_of_modalDisjunctive
-  (iΛ : Intuitionistic.AxiomSet α) (mΛ : AxiomSet α) (hK4 : 𝐊𝟒 ⊆ mΛ)
-  (hComp : ModalCompanion iΛ mΛ)
+  (pΛ : Propositional.Basic.AxiomSet α) (mΛ : AxiomSet α) (hK4 : 𝐊𝟒 ⊆ mΛ)
+  (hComp : ModalCompanion pΛ mΛ)
   (hMDisj : mΛ.ModalDisjunctive)
-  : iΛ.Disjunctive := by
-  simp only [AxiomSet.ModalDisjunctive, Intuitionistic.AxiomSet.Disjunctive];
+  : pΛ.Disjunctive := by
+  simp only [AxiomSet.ModalDisjunctive, Propositional.Basic.AxiomSet.Disjunctive];
   intro p q hpq;
   have : ∅ ⊢ᴹ[mΛ]! pᵍ ⋎ qᵍ := by simpa [GTranslation] using hComp.mp hpq;
   have : ∅ ⊢ᴹ[mΛ]! □pᵍ ⋎ □qᵍ := by

@@ -1,6 +1,6 @@
-import Logic.Propositional.Intuitionistic.Formula
+import Logic.Propositional.Basic.Formula
 
-namespace LO.Propositional.Intuitionistic
+namespace LO.Propositional.Basic
 
 section Axioms
 
@@ -61,4 +61,4 @@ notation "𝐃𝐍𝐄" => AxiomSet.DNE
 
 end AxiomSet
 
-end LO.Propositional.Intuitionistic
+end LO.Propositional.Basic

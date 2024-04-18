@@ -1,6 +1,6 @@
-import Logic.Propositional.Intuitionistic.Deduction
-import Logic.Propositional.Intuitionistic.Kripke.Semantics
-import Logic.Propositional.Intuitionistic.Kripke.Soundness
+import Logic.Propositional.Basic.Intuitionistic.Deduction
+import Logic.Propositional.Basic.Intuitionistic.Kripke.Semantics
+import Logic.Propositional.Basic.Intuitionistic.Kripke.Soundness
 
 /-!
   # Completeness for Kripke Semantics of Intuitionistic Propositional Logic
@@ -9,37 +9,17 @@ import Logic.Propositional.Intuitionistic.Kripke.Soundness
   - Huayu Guo, Dongheng Chen, Bruno Bentzen, "Verified completeness in Henkin-style for intuitionistic propositional logic"
     - paper: https://arxiv.org/abs/2310.01916
     - inplements: https://github.com/bbentzen/ipl
+
+  ## Theorems
+  - `completes`: Deduction is complete to Kripke Semantics.
+  - `disjunctive`: Deduction is disjunctive (via Kripke completeness).
 -/
 
-namespace LO.Propositional.Intuitionistic
+namespace LO.Propositional.Basic
 
-open Formula Theory Kripke
+open Formula Theory
 open Hilbert
 open Set
-
-/-
-section Consistency
-
-variable {Γ : Theory β} (hConsisΓ : Γ.Consistent 𝐄𝐅𝐐)
-
--- lemma consistent_subset_undeducible_falsum (hΔ : Δ ⊆ Γ) : Δ ⊬ ⊥ := Hilbert.consistent_subset_undeducible_falsum (· ⊢ ·) hConsisΓ hΔ
-
-@[simp] lemma consistent_no_falsum : ⊥ ∉ Γ := hConsisΓ.falsum_not_mem
--- @[simp] lemma consistent_iff_undeducible_falsum : System.Consistent Γ ↔ (Γ ⊬ ⊥) := Hilbert.consistent_iff_undeducible_falsum (· ⊢ ·) Γ
--- @[simp] lemma consistent_undeducible_falsum : Γ ⊬ ⊥ := consistent_iff_undeducible_falsum.mp hConsisΓ
-
-lemma consistent_neither_undeducible : Γ ⊬ p ∨ Γ ⊬ ~p := Hilbert.consistent_neither_undeducible hConsisΓ p
-
-lemma consistent_of_undeducible : Γ ⊬ p → System.Consistent Γ := by
-  intros;
-  simp [consistent_iff_undeducible_falsum];
-  by_contra hC;
-  have : Γ ⊢! p := efq'! (by simpa [Deduction.Undeducible] using hC);
-  contradiction;
-
-end Consistency
--/
-
 
 namespace Theory
 
@@ -66,6 +46,8 @@ instance : Membership (Formula β) (PrimeTheory β) := ⟨membership⟩
 @[simp] def subset (Ω₁ Ω₂ : PrimeTheory β) := Ω₁.theory ⊆ Ω₂.theory
 instance : HasSubset (PrimeTheory β) := ⟨subset⟩
 
+instance : CoeSort (PrimeTheory β) (Theory β) := ⟨λ Ω => Ω.theory⟩
+
 variable (Ω : PrimeTheory β)
 
 def consistent : Ω.theory.Consistent 𝐄𝐅𝐐 := Ω.prime.consistent
@@ -74,19 +56,17 @@ def closed : Closed Ω.theory := Ω.prime.closed
 
 def closed' {p : Formula β} : (Ω.theory ⊢ⁱ! p) → p ∈ Ω := Ω.closed
 
-def disjunctive : Disjunctive Ω.theory := Ω.prime.disjunctive
+def disjunctive : Theory.Disjunctive Ω.theory := Ω.prime.disjunctive
 
 def disjunctive' {p q : Formula β} : (p ⋎ q ∈ Ω) → (p ∈ Ω) ∨ (q ∈ Ω) := Ω.disjunctive
 
 variable {Ω}
 
 @[simp] lemma undeducible_falsum : Ω.theory ⊬ⁱ! ⊥ := Ω.consistent
-  -- simp [Undeducible, Deducible];
-  -- simpa using Ω.consistent
-
--- @[simp] lemma no_falsum : ⊥ ∉ Ω := consistent_no_falsum Ω.consistent
 
 end PrimeTheory
+
+namespace Intuitionistic.Kripke
 
 section
 
@@ -391,7 +371,7 @@ lemma truthlemma {Ω : PrimeTheory β} {p : Formula β} : (Ω ⊩ⁱ[(CanonicalM
     constructor;
     . contrapose;
       intro h;
-      simp [KripkeSatisfies.imp_def'];
+      simp;
       have h₁ : insert p Ω.theory ⊬ⁱ! q := dtr_not'! h;
       obtain ⟨Ω', hΩ'₁, hΩ'₂⟩ := prime_expansion h₁;
       existsi Ω';
@@ -403,7 +383,7 @@ lemma truthlemma {Ω : PrimeTheory β} {p : Formula β} : (Ω ⊩ⁱ[(CanonicalM
         by simpa using ihq.not.mpr (hΩ'₂);
       ⟩;
     . intro h;
-      simp [KripkeSatisfies.imp_def'];
+      simp;
       by_contra hC; simp at hC;
       obtain ⟨Ω', ⟨hp, hΩΩ', hq⟩⟩ := hC;
       have hp : Ω'.theory ⊢ⁱ! p := ihp.mp hp;
@@ -411,7 +391,7 @@ lemma truthlemma {Ω : PrimeTheory β} {p : Formula β} : (Ω ⊩ⁱ[(CanonicalM
       have : Ω'.theory ⊢ⁱ! q := (weakening! hΩΩ' h) ⨀ hp;
       contradiction;
 
-theorem Kripke.completes {Γ : Theory β} {p : Formula β} : (Γ ⊨ⁱ p) → (Γ ⊢ⁱ! p) := by
+theorem completes {Γ : Theory β} {p : Formula β} : (Γ ⊨ⁱ p) → (Γ ⊢ⁱ! p) := by
   contrapose;
   intro hnp hp;
   have ⟨Ω, ⟨hsΩ, hnpΩ⟩⟩ := prime_expansion hnp;
@@ -423,7 +403,7 @@ theorem Kripke.completes {Γ : Theory β} {p : Formula β} : (Γ ⊨ⁱ p) → (
   );
   contradiction;
 
-theorem Kripke.complete_iff {Γ : Theory β} {p : Formula β} : (Γ ⊨ⁱ p) ↔ Γ ⊢ⁱ! p:=
+theorem complete_iff {Γ : Theory β} {p : Formula β} : (Γ ⊨ⁱ p) ↔ Γ ⊢ⁱ! p:=
   ⟨Kripke.completes, Kripke.sounds⟩
 
 section DisjProp
@@ -466,7 +446,7 @@ private lemma DPCounterModel_left {p : Formula β} : (w ⊩ⁱ[M₁] p) ↔ (Sum
   induction p using rec' generalizing w with
   | himp p₁ p₂ ih₁ ih₂ =>
     constructor;
-    . simp only [KripkeSatisfies.imp_def'];
+    . simp only [Formula.Intuitionistic.Kripke.Satisfies.imp_def'];
       intro h v hv hp₁;
       replace ⟨v, hv, hv'⟩ : ∃ v', M₁.frame w v' ∧ v = (Sum.inr (Sum.inl v')) := by
         simp [DPCounterModel] at hv;
@@ -477,7 +457,7 @@ private lemma DPCounterModel_left {p : Formula β} : (w ⊩ⁱ[M₁] p) ↔ (Sum
       have := h v hv this;
       have := ih₂.mp this;
       simpa;
-    . simp only [KripkeSatisfies.imp_def'];
+    . simp only [Formula.Intuitionistic.Kripke.Satisfies.imp_def'];
       intro h v hv hp₁;
       have := ih₁.mp hp₁;
       have := h (Sum.inr $ Sum.inl v) (by simpa [DPCounterModel]) this;
@@ -489,7 +469,7 @@ private lemma DPCounterModel_right {p : Formula β} : (w ⊩ⁱ[M₂] p) ↔ (Su
   induction p using rec' generalizing w with
   | himp p₁ p₂ ih₁ ih₂ =>
     constructor;
-    . simp only [KripkeSatisfies.imp_def'];
+    . simp only [Formula.Intuitionistic.Kripke.Satisfies.imp_def'];
       intro h v hv hp₂;
       replace ⟨v, hv, hv'⟩ : ∃ v', M₂.frame w v' ∧ v = (Sum.inr (Sum.inr v')) := by
         simp [DPCounterModel] at hv;
@@ -500,7 +480,7 @@ private lemma DPCounterModel_right {p : Formula β} : (w ⊩ⁱ[M₂] p) ↔ (Su
       have := h v hv this;
       have := ih₂.mp this;
       simpa;
-    . simp only [KripkeSatisfies.imp_def'];
+    . simp only [Formula.Intuitionistic.Kripke.Satisfies.imp_def'];
       intro h v hv hp₁;
       have := ih₁.mp hp₁;
       have := h (Sum.inr $ Sum.inr v) (by simpa [DPCounterModel]) this;
@@ -508,17 +488,17 @@ private lemma DPCounterModel_right {p : Formula β} : (w ⊩ⁱ[M₂] p) ↔ (Su
       simpa;
   | _ => simp_all [DPCounterModel];
 
-theorem Intuitionistic.Disjunctive {p q : Formula β} : ∅ ⊢ⁱ! p ⋎ q → ∅ ⊢ⁱ! p ∨ ∅ ⊢ⁱ! q := by
+theorem disjunctive {p q : Formula β} : ∅ ⊢ⁱ! p ⋎ q → ∅ ⊢ⁱ! p ∨ ∅ ⊢ⁱ! q := by
   contrapose;
   intro h;
   apply not_imp_not.mpr Kripke.sounds;
 
   have ⟨(hp : ∅ ⊬ⁱ! p), (hq : ∅ ⊬ⁱ! q)⟩ := not_or.mp h;
-  obtain ⟨γ₁, M₁, w₁, hp⟩ := by simpa [Formula.KripkeConsequence] using not_imp_not.mpr Kripke.completes hp;
-  obtain ⟨γ₂, M₂, w₂, hq⟩ := by simpa [Formula.KripkeConsequence] using not_imp_not.mpr Kripke.completes hq;
+  obtain ⟨γ₁, M₁, w₁, hp⟩ := by simpa [Formula.Intuitionistic.Kripke.Consequence] using not_imp_not.mpr Kripke.completes hp;
+  obtain ⟨γ₂, M₂, w₂, hq⟩ := by simpa [Formula.Intuitionistic.Kripke.Consequence] using not_imp_not.mpr Kripke.completes hq;
   let M : Kripke.Model (Unit ⊕ γ₁ ⊕ γ₂) β := DPCounterModel M₁ M₂ w₁ w₂;
 
-  simp [Formula.KripkeConsequence, Theory.KripkeSatisfies];
+  simp [Formula.Intuitionistic.Kripke.Consequence, Theory.Intuitionistic.Kripke.Satisfies];
   existsi _, M, Sum.inl ();
 
   have : ¬Sum.inl () ⊩ⁱ[M] p := not_imp_not.mpr (Kripke.hereditary_formula (by simp [M]; rfl)) (DPCounterModel_left.not.mp hp)
@@ -526,8 +506,6 @@ theorem Intuitionistic.Disjunctive {p q : Formula β} : ∅ ⊢ⁱ! p ⋎ q → 
 
   simp_all;
 
-lemma AxiomEFQ.Disjunctive : AxiomSet.Disjunctive (𝐄𝐅𝐐 : AxiomSet β) := by apply Intuitionistic.Disjunctive;
-
 end DisjProp
 
-end LO.Propositional.Intuitionistic
+end LO.Propositional.Basic.Intuitionistic.Kripke
