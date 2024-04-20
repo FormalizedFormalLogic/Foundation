@@ -18,17 +18,17 @@ variable {Λ₁ Λ₂ : AxiomSet β}
 namespace LogicalStrong
 
 lemma of_subset_frameClass
-  (hComp₂ : KripkeCompleteness Λ₂ (𝔽(Λ₂) : FrameClass γ))
+  (hComp₂ : WeakKripkeCompleteness Λ₂ (𝔽(Λ₂) : FrameClass γ))
   (h : (𝔽(Λ₂) : FrameClass γ) ⊆ (𝔽(Λ₁) : FrameClass γ))
   : (Λ₁ ≤ᴸ Λ₂) := by
   intro p h₁;
   apply hComp₂;
   intro F hF₂;
-  apply AxiomSet.sounds h₁;
+  apply (show ⊧ᴹ[𝔽(Λ₁)] p from by simpa using AxiomSet.sounds h₁);
   exact h hF₂;
 
 lemma of_axiomset_definability
-  (hComp₂ : KripkeCompleteness Λ₂ (𝔽(Λ₂) : FrameClass γ))
+  (hComp₂ : WeakKripkeCompleteness Λ₂ (𝔽(Λ₂) : FrameClass γ))
   (hDef₁ : AxiomSetDefinability γ β Λ₁ P₁)
   (hDef₂ : AxiomSetDefinability γ β Λ₂ P₂)
   (hFrame₂₁ : ∀ {F : Frame γ}, P₂ F → P₁ F)
@@ -47,8 +47,8 @@ end LogicalStrictStrong
 namespace LogicalEquivalence
 
 lemma of_frameclass
-  (hComp₁ : KripkeCompleteness Λ₁ (𝔽(Λ₁) : FrameClass γ₁))
-  (hComp₂ : KripkeCompleteness Λ₂ (𝔽(Λ₂) : FrameClass γ₂))
+  (hComp₁ : WeakKripkeCompleteness Λ₁ (𝔽(Λ₁) : FrameClass γ₁))
+  (hComp₂ : WeakKripkeCompleteness Λ₂ (𝔽(Λ₂) : FrameClass γ₂))
   (h₁ : (𝔽(Λ₁) : FrameClass γ₁) ⊆ 𝔽(Λ₂))
   (h₂ : (𝔽(Λ₂) : FrameClass γ₂) ⊆ 𝔽(Λ₁))
   : (Λ₁ =ᴸ Λ₂) := by
@@ -57,8 +57,8 @@ lemma of_frameclass
   . apply LogicalStrong.of_subset_frameClass hComp₁; simpa;
 
 lemma of_axiomset_definability
-  (hComp₁ : KripkeCompleteness Λ₁ (𝔽(Λ₁) : FrameClass γ₁))
-  (hComp₂ : KripkeCompleteness Λ₂ (𝔽(Λ₂) : FrameClass γ₂))
+  (hComp₁ : WeakKripkeCompleteness Λ₁ (𝔽(Λ₁) : FrameClass γ₁))
+  (hComp₂ : WeakKripkeCompleteness Λ₂ (𝔽(Λ₂) : FrameClass γ₂))
   (hDef₁₁ : AxiomSetDefinability γ₁ β Λ₁ P₁₁)
   (hDef₁₂ : AxiomSetDefinability γ₂ β Λ₁ P₁₂)
   (hDef₂₁ : AxiomSetDefinability γ₁ β Λ₂ P₂₁)
