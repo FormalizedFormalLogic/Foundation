@@ -293,7 +293,7 @@ def Theory.FrameClassSatisfiable (𝔽 : FrameClass α) (Γ : Theory β) := ∃ 
 
 def AxiomSetDefinability (α β) (Λ : AxiomSet β)  (P : Frame α → Prop) := ∀ {F : Frame α}, P F ↔ ⊧ᴹ[F] Λ
 
-def AxiomSetDefinability.toFrameClass (h : AxiomSetDefinability α β Λ P) : ∀ {F : Frame α}, P F ↔ F ∈ 𝔽(Λ) := by
+lemma AxiomSetDefinability.iff_subset_frameClass (h : AxiomSetDefinability α β Λ P) : ∀ {F : Frame α}, P F ↔ F ∈ 𝔽(Λ) := by
   intro F;
   exact h;
 

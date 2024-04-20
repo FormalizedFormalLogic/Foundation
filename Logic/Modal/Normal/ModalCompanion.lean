@@ -1,5 +1,6 @@
 import Logic.Propositional.Superintuitionistic.Intuitionistic
-import Logic.Modal.Normal.Strength
+import Logic.Modal.Normal.Geach
+import Logic.Modal.Normal.Strength.Init
 
 namespace LO.Modal.Normal
 
@@ -70,7 +71,7 @@ private lemma embed_int_S4.case_imply₁ : ∅ ⊢ᴹ[𝐒𝟒]! (p ⟶ q ⟶ p)
   have : ∅ ⊢ᴹ[𝐊𝟒]! □pᵍ ⟶ □(qᵍ ⟶ pᵍ) := modus_ponens₂'! (by deduct) (by assumption);
   have : ∅ ⊢ᴹ[𝐊𝟒]! pᵍ ⟶ □(qᵍ ⟶ pᵍ) := imp_trans'! (by assumption) (by assumption);
   have : ∅ ⊢ᴹ[𝐊𝟒]! □(pᵍ ⟶ □(qᵍ ⟶ pᵍ)) := necessitation! (by assumption);
-  exact strong_K4_S4 (by assumption)
+  exact LogicalStrong.K4_S4 (by assumption)
 
 /-- TODO: prove syntactically -/
 private lemma embed_int_S4.case_imply₂ : ∅ ⊢ᴹ[𝐒𝟒]! ((p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r)ᵍ := by
@@ -87,7 +88,7 @@ private lemma embed_int_S4.case_conj₃ : ∅ ⊢ᴹ[𝐒𝟒]! ((p ⟶ q ⟶ p 
   have : ∅ ⊢ᴹ[𝐊𝟒]! □pᵍ ⟶ □(qᵍ ⟶ pᵍ ⋏ qᵍ) := (by deduct) ⨀ (by assumption);
   have : ∅ ⊢ᴹ[𝐊𝟒]! pᵍ ⟶ □(qᵍ ⟶ pᵍ ⋏ qᵍ) := imp_trans'! (by apply int_axiomFour) (by assumption)
   have : ∅ ⊢ᴹ[𝐊𝟒]! □(pᵍ ⟶ □(qᵍ ⟶ pᵍ ⋏ qᵍ)) := necessitation! (by assumption)
-  exact strong_K4_S4 (by assumption)
+  exact LogicalStrong.K4_S4 (by assumption)
 
 /-- TODO: prove syntactically -/
 private lemma embed_int_S4.case_disj₃ : ∅ ⊢ᴹ[𝐒𝟒]! (((p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r)))ᵍ := by
@@ -188,7 +189,7 @@ lemma embed_Classical_S4 {p : Superintuitionistic.Formula α} : (∅ ⊢ᶜ! p) 
 lemma disjunctive_of_modalDisjunctive
   {pΛ : Propositional.Superintuitionistic.AxiomSet α}
   {mΛ : AxiomSet α}
-  (hK4 : 𝐊𝟒 ⊆ mΛ)
+  (hK4 : 𝐊𝟒 ≤ᴸ mΛ)
   (hComp : ModalCompanion pΛ mΛ)
   (hMDisj : mΛ.ModalDisjunctive)
   : pΛ.Disjunctive := by
@@ -196,8 +197,8 @@ lemma disjunctive_of_modalDisjunctive
   intro p q hpq;
   have : ∅ ⊢ᴹ[mΛ]! pᵍ ⋎ qᵍ := by simpa [GTranslation] using hComp.mp hpq;
   have : ∅ ⊢ᴹ[mΛ]! □pᵍ ⋎ □qᵍ := by
-    have dp : ∅ ⊢ᴹ[mΛ]! pᵍ ⟶ (□pᵍ ⋎ □qᵍ) := Deduction.maxm_subset! hK4 $ imp_trans'! (by apply int_axiomFour) (by apply disj₁!);
-    have dq : ∅ ⊢ᴹ[mΛ]! qᵍ ⟶ (□pᵍ ⋎ □qᵍ) := Deduction.maxm_subset! hK4 $ imp_trans'! (by apply int_axiomFour) (by apply disj₂!);
+    have dp : ∅ ⊢ᴹ[mΛ]! pᵍ ⟶ (□pᵍ ⋎ □qᵍ) := LogicalStrong.deducible hK4 $ imp_trans'! (by apply int_axiomFour) (by apply disj₁!);
+    have dq : ∅ ⊢ᴹ[mΛ]! qᵍ ⟶ (□pᵍ ⋎ □qᵍ) := LogicalStrong.deducible hK4 $ imp_trans'! (by apply int_axiomFour) (by apply disj₂!);
     exact disj₃'! dp dq (by assumption);
   cases hMDisj this with
   | inl h => left; exact hComp.mpr h;
