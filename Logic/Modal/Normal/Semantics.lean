@@ -269,6 +269,10 @@ namespace Formula.FrameClassConsequence
 
 variable  {𝔽 : FrameClass α} {Γ Δ : Theory β} {p : Formula β}
 
+@[simp]
+lemma empty_consequence_iff : (∅ ⊨ᴹ[𝔽] p) ↔ (⊧ᴹ[𝔽] p) := by
+  simp [FrameClassConsequence, FrameConsequence, Formula.FrameClasses, Formula.Frames, Formula.Models];
+
 lemma modus_ponens' : (Γ ⊨ᴹ[𝔽] p ⟶ q) → (Γ ⊨ᴹ[𝔽] p) → (Γ ⊨ᴹ[𝔽] q) := by
   simp [Formula.FrameClassConsequence];
   intro hpq hp F hF;

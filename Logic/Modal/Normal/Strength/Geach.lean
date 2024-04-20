@@ -18,7 +18,7 @@ lemma LogicalStrong.of_geach [hG₁ : Geach Λ₁] [hG₂ : Geach Λ₂]
   (hFrame : ∀ {F : Frame (MaximalConsistentTheory Λ₂)}, GeachConfluencyList hG₂.taples F → GeachConfluencyList hG₁.taples F)
   : (Λ₁ ≤ᴸ Λ₂) := by
   apply of_axiomset_definability
-    GeachLogic.kripkeCompletes
+    (weakenKripkeCompleteness GeachLogic.kripkeCompletes)
     GeachLogic.frameClassDefinability
     GeachLogic.frameClassDefinability;
   assumption;
@@ -28,14 +28,9 @@ lemma LogicalEquivalence.of_geach [hG₁ : Geach Λ₁] [hG₂ : Geach Λ₂]
   (hFrame₁₂ : ∀ {F : Frame (MaximalConsistentTheory Λ₁)}, GeachConfluencyList hG₁.taples F → GeachConfluencyList hG₂.taples F)
   : (Λ₁ =ᴸ Λ₂) := by
   apply of_axiomset_definability;
-  case hComp₁ => exact GeachLogic.kripkeCompletes;
-  case hComp₂ => exact GeachLogic.kripkeCompletes;
-  case hDef₁₂ => exact GeachLogic.frameClassDefinability;
-  case hDef₁₁ => exact GeachLogic.frameClassDefinability;
-  case hDef₂₂ => exact GeachLogic.frameClassDefinability;
-  case hDef₂₁ => exact GeachLogic.frameClassDefinability;
-  case hFrame₂₁ => assumption;
-  case hFrame₁₂ => assumption;
+  any_goals exact (weakenKripkeCompleteness GeachLogic.kripkeCompletes);
+  any_goals exact GeachLogic.frameClassDefinability;
+  any_goals assumption;
 
 @[simp]
 theorem LogicalStrong.KD_KT : (𝐊𝐃 : AxiomSet β) ≤ᴸ 𝐊𝐓 := by

@@ -22,9 +22,13 @@ variable (Λ : AxiomSet β) (Γ : Theory β)
 
 def Theory.Maximal := ∀ p, (p ∈ Γ) ∨ (~p ∈ Γ)
 
--- def WeakCompleteness := ∀ (p : Formula β), (⊧ᴹ[(𝔽(Λ) : FrameClass α)] p) → (∅ ⊢ᴹ[Λ]! p)
-
 def KripkeCompleteness (𝔽 : FrameClass α) := ∀ (Γ : Theory β) (p : Formula β), (Γ ⊨ᴹ[𝔽] p) → (Γ ⊢ᴹ[Λ]! p)
+
+def WeakKripkeCompleteness (𝔽 : FrameClass α) := ∀ (p : Formula β), (⊧ᴹ[𝔽] p) → (∅ ⊢ᴹ[Λ]! p)
+
+lemma weakenKripkeCompleteness {Λ : AxiomSet β} (H : KripkeCompleteness Λ 𝔽) : WeakKripkeCompleteness Λ 𝔽 := by
+  intro p h;
+  exact H _ p (by simpa);
 
 end
 
