@@ -465,7 +465,7 @@ abbrev Models : Sentence L →ˡᶜ Prop := Semantics.realize s.toStruc
 postfix:max " ⊧ₘ " => Models
 
 abbrev ModelsTheory (T : Theory L) : Prop :=
-  Semantics.RealizeTheory s.toStruc T
+  Semantics.RealizeSet s.toStruc T
 
 infix:55 " ⊧ₘ* " => ModelsTheory
 
@@ -483,7 +483,7 @@ lemma models_iff {σ : Sentence L} : M ⊧ₘ σ ↔ Semiformula.Val s Empty.eli
 
 lemma models_def' : Semantics.realize s.toStruc = Semiformula.Val s Empty.elim := rfl
 
-lemma modelsTheory_iff : M ⊧ₘ* T ↔ (∀ ⦃p⦄, p ∈ T → M ⊧ₘ p) := Semantics.realizeTheory_iff
+lemma modelsTheory_iff : M ⊧ₘ* T ↔ (∀ ⦃p⦄, p ∈ T → M ⊧ₘ p) := Semantics.realizeSet_iff
 
 lemma models_iff_models {σ : Sentence L} :
     M ⊧ₘ σ ↔ s.toStruc ⊧ σ := of_eq rfl
@@ -502,32 +502,32 @@ lemma valid_iff {σ : Sentence L} :
   ⟨fun hσ _ _ s ↦ @hσ s.toStruc, fun h s ↦ h s.Dom⟩
 
 lemma validₛ_iff {T : Theory L} :
-    Semantics.ValidTheory T ↔ ∀ (M : Type u) [Nonempty M] [Structure L M], M ⊧ₘ* T :=
+    Semantics.VaridSet T ↔ ∀ (M : Type u) [Nonempty M] [Structure L M], M ⊧ₘ* T :=
   ⟨fun hT _ _ s ↦ @hT s.toStruc, fun h s ↦ h s.Dom⟩
 
 lemma satisfiableTheory_iff :
-    Semantics.SatisfiableTheory T ↔ ∃ (M : Type u) (_ : Nonempty M) (_ : Structure L M), M ⊧ₘ* T :=
+    Semantics.SatisfiableSet T ↔ ∃ (M : Type u) (_ : Nonempty M) (_ : Structure L M), M ⊧ₘ* T :=
   ⟨by rintro ⟨s, hs⟩; exact ⟨s.Dom, s.nonempty, s.struc, hs⟩, by rintro ⟨M, i, s, hT⟩; exact ⟨s.toStruc, hT⟩⟩
 
 lemma satisfiableTheory_intro (M : Type u) [Nonempty M] [s : Structure L M] (h : M ⊧ₘ* T) :
-    Semantics.SatisfiableTheory T := ⟨s.toStruc, h⟩
+    Semantics.SatisfiableSet T := ⟨s.toStruc, h⟩
 
-noncomputable def ModelOfSat (h : Semantics.SatisfiableTheory T) : Type u :=
+noncomputable def ModelOfSat (h : Semantics.SatisfiableSet T) : Type u :=
   Classical.choose (satisfiableTheory_iff.mp h)
 
-noncomputable instance nonemptyModelOfSat (h : Semantics.SatisfiableTheory T) :
+noncomputable instance nonemptyModelOfSat (h : Semantics.SatisfiableSet T) :
     Nonempty (ModelOfSat h) := by
   choose i _ _ using Classical.choose_spec (satisfiableTheory_iff.mp h); exact i
 
-noncomputable def StructureModelOfSatAux (h : Semantics.SatisfiableTheory T) :
+noncomputable def StructureModelOfSatAux (h : Semantics.SatisfiableSet T) :
     { s : Structure L (ModelOfSat h) // ModelOfSat h ⊧ₘ* T } := by
   choose _ s h using Classical.choose_spec (satisfiableTheory_iff.mp h)
   exact ⟨s, h⟩
 
-noncomputable instance StructureModelOfSat (h : Semantics.SatisfiableTheory T) :
+noncomputable instance StructureModelOfSat (h : Semantics.SatisfiableSet T) :
     Structure L (ModelOfSat h) := StructureModelOfSatAux h
 
-lemma ModelOfSat.models (h : Semantics.SatisfiableTheory T) : ModelOfSat h ⊧ₘ* T := (StructureModelOfSatAux h).prop
+lemma ModelOfSat.models (h : Semantics.SatisfiableSet T) : ModelOfSat h ⊧ₘ* T := (StructureModelOfSatAux h).prop
 
 end
 
@@ -562,12 +562,12 @@ namespace ModelsTheory
 
 variable (M) [Nonempty M] [Structure L M]
 
-lemma models {T : Theory L} [M ⊧ₘ* T] {p} (h : p ∈ T) : M ⊧ₘ p := Semantics.RealizeTheory.realize _ h
+lemma models {T : Theory L} [M ⊧ₘ* T] {p} (h : p ∈ T) : M ⊧ₘ p := Semantics.RealizeSet.realize _ h
 
 variable {M}
 
 lemma of_ss {T U : Theory L} (h : M ⊧ₘ* U) (ss : T ⊆ U) : M ⊧ₘ* T :=
-  Semantics.RealizeTheory.of_subset h ss
+  Semantics.RealizeSet.of_subset h ss
 
 @[simp] lemma add_iff {T U : Theory L} :
     M ⊧ₘ* T + U ↔ M ⊧ₘ* T ∧ M ⊧ₘ* U := by simp [Theory.add_def]
@@ -576,7 +576,7 @@ instance add (T U : Theory L) [M ⊧ₘ* T] [M ⊧ₘ* U] : M ⊧ₘ* T + U :=
   ModelsTheory.add_iff.mpr ⟨inferInstance, inferInstance⟩
 
 lemma of_subtheory {T₁ T₂ : Theory L} (h : M ⊧ₘ* T₁) (hS : Semantics.Subtheory T₂ T₁) :
-    M ⊧ₘ* T₂ := Semantics.RealizeTheory.of_subtheory h hS
+    M ⊧ₘ* T₂ := Semantics.RealizeSet.of_subtheory h hS
 
 end ModelsTheory
 
@@ -602,7 +602,7 @@ variable {L} {M : Type u} [Nonempty M] [Structure L M]
 
 @[simp] lemma mem_theory_iff {σ} : σ ∈ theory L M ↔ M ⊧ₘ σ := by rfl
 
-lemma subset_of_models : T ⊆ theory L M ↔ M ⊧ₘ* T := ⟨fun h  ↦ ⟨fun _ hσ ↦ h hσ⟩, fun h _ hσ ↦ h.realizeTheory hσ⟩
+lemma subset_of_models : T ⊆ theory L M ↔ M ⊧ₘ* T := ⟨fun h  ↦ ⟨fun _ hσ ↦ h hσ⟩, fun h _ hσ ↦ h.RealizeSet hσ⟩
 
 end Structure
 

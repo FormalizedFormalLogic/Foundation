@@ -163,18 +163,18 @@ lemma maximalConsistentTheory_satisfiable :
     · left; exact ihp hp
     · right; exact ihq hq⟩
 
-lemma satisfiableTheory_of_consistent (consisT : Consistent T) : Semantics.SatisfiableTheory T :=
+lemma satisfiableTheory_of_consistent (consisT : Consistent T) : Semantics.SatisfiableSet T :=
   ⟨(Formula.atom · ∈ maximalConsistentTheory consisT),
-    Semantics.RealizeTheory.of_subset maximalConsistentTheory_satisfiable (by simp)⟩
+    Semantics.RealizeSet.of_subset maximalConsistentTheory_satisfiable (by simp)⟩
 
 theorem completeness! : T ⊨ p → T ⊢! p := by
-  suffices Consistent (insert (~p) T) → Semantics.SatisfiableTheory (insert (~p) T) by
+  suffices Consistent (insert (~p) T) → Semantics.SatisfiableSet (insert (~p) T) by
     contrapose
     intro hp hs
-    have : Semantics.SatisfiableTheory (insert (~p) T) :=
+    have : Semantics.SatisfiableSet (insert (~p) T) :=
       this (consistent_insert_iff_not_refutable.mpr $ by simpa)
     rcases this with ⟨v, hv⟩
-    have : v ⊧* T := Semantics.RealizeTheory.of_subset hv (by simp)
+    have : v ⊧* T := Semantics.RealizeSet.of_subset hv (by simp)
     have : v ⊧ p := hs this
     have : ¬v ⊧ p := by simpa using hv.realize (Set.mem_insert (~p) T)
     contradiction

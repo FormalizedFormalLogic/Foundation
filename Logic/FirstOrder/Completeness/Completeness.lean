@@ -39,7 +39,7 @@ end Encodable
 noncomputable def completeness {σ : Sentence L} :
     T ⊨ σ → T ⊢ σ := fun h ↦ by
   letI := Classical.typeDecidableEq
-  have : ∃ u : Finset (Sentence L), ↑u ⊆ insert (~σ) T ∧ ¬Semantics.SatisfiableTheory (u : Theory L) := by
+  have : ∃ u : Finset (Sentence L), ↑u ⊆ insert (~σ) T ∧ ¬Semantics.SatisfiableSet (u : Theory L) := by
     simpa[Compact.compact (T := insert (~σ) T)] using Semantics.consequence_iff.mp h
   choose u hu using this; rcases hu with ⟨ssu, hu⟩
   haveI : ∀ k, Encodable ((languageFinset u).Func k) := fun _ ↦ Fintype.toEncodable _
@@ -49,9 +49,9 @@ noncomputable def completeness {σ : Sentence L} :
     ext τ; simp [u', Finset.mem_imageOfFinset_iff]
     exact ⟨by rintro ⟨a, ⟨τ, hτ, rfl⟩, rfl⟩; simp[hτ],
       by intro hτ; exact ⟨toSubLanguageFinsetSelf hτ, ⟨τ, hτ, rfl⟩, Semiformula.lMap_toSubLanguageFinsetSelf hτ⟩⟩
-  have : ¬Semantics.SatisfiableTheory (u' : Theory (languageFinset u)) := by
+  have : ¬Semantics.SatisfiableSet (u' : Theory (languageFinset u)) := by
     intro h
-    have : Semantics.SatisfiableTheory (u : Theory L) := by
+    have : Semantics.SatisfiableSet (u : Theory L) := by
       rw[←image_u']; simpa using (satisfiableTheory_lMap L.ofSubLanguage (fun k ↦ Subtype.val_injective) (fun _ ↦ Subtype.val_injective) h)
     contradiction
   have : ¬System.Consistent (u' : Theory (languageFinset u)) := fun h ↦ this (Complete.satisfiableTheory_iff_consistent.mpr h)

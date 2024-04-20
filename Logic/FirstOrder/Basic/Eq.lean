@@ -228,7 +228,7 @@ lemma consequence_iff_add_eq {T : Theory L} {σ : Sentence L} :
   Iff.trans consequence_iff_eq (forall₄_congr <| fun M _ _ _ ↦ by simp)
 
 lemma satisfiableTheory_iff_eq {T : Theory L} [𝐄𝐐 ≾ T] :
-    Semantics.SatisfiableTheory T ↔ (∃ (M : Type u) (_ : Nonempty M) (_ : Structure L M) (_ : Structure.Eq L M), M ⊧ₘ* T) := by
+    Semantics.SatisfiableSet T ↔ (∃ (M : Type u) (_ : Nonempty M) (_ : Structure L M) (_ : Structure.Eq L M), M ⊧ₘ* T) := by
   simp[satisfiableTheory_iff]; constructor
   · intro ⟨M, x, s, hM⟩;
     haveI : Nonempty M := ⟨x⟩
@@ -237,13 +237,13 @@ lemma satisfiableTheory_iff_eq {T : Theory L} [𝐄𝐐 ≾ T] :
     exact ⟨Structure.Eq.QuotEq H, ⟦x⟧, inferInstance, inferInstance, e.modelsTheory.mpr hM⟩
   · intro ⟨M, i, s, _, hM⟩; exact ⟨M, i, s, hM⟩
 
-def ModelOfSatEq {T : Theory L} [𝐄𝐐 ≾ T] (sat : Semantics.SatisfiableTheory T) : Type _ :=
+def ModelOfSatEq {T : Theory L} [𝐄𝐐 ≾ T] (sat : Semantics.SatisfiableSet T) : Type _ :=
   have H : ModelOfSat sat ⊧ₘ* (𝐄𝐐 : Theory L) := Sound.modelsTheory_of_subtheory (ModelOfSat.models sat)
   Structure.Eq.QuotEq H
 
 namespace ModelOfSatEq
 
-variable {T : Theory L} [𝐄𝐐 ≾ T] (sat : Semantics.SatisfiableTheory T)
+variable {T : Theory L} [𝐄𝐐 ≾ T] (sat : Semantics.SatisfiableSet T)
 
 noncomputable instance : Nonempty (ModelOfSatEq sat) := Structure.Eq.QuotEq.inhabited _
 

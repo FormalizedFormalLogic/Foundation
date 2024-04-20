@@ -65,7 +65,7 @@ theorem soundness {T} {σ : Sentence L} : T ⊢ σ → T ⊨ σ := fun b s hT =>
   rcases s.nonempty with ⟨x⟩
   rcases Derivation.sound b.derivation s.Dom (fun _ ↦ x) with ⟨p, hp, h⟩
   simp at hp; rcases hp with (⟨π, hπ, rfl⟩ | rfl)
-  · have : s ⊧ π := hT.realizeTheory (b.antecedent_ss π hπ)
+  · have : s ⊧ π := hT.RealizeSet (b.antecedent_ss π hπ)
     have : ¬s ⊧ π := by simpa using h
     contradiction
   · simpa using h

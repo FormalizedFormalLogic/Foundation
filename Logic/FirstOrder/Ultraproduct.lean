@@ -131,12 +131,12 @@ lemma ultrafilter_exists [(t : FinSubtheory T) → Nonempty (A t)]
     intro t ht
     use t; use ht
     intro σ hσ
-    exact (H ⟨t, ht⟩).realizeTheory hσ)
+    exact (H ⟨t, ht⟩).RealizeSet hσ)
 
 lemma compactnessAux :
-    Semantics.SatisfiableTheory T ↔ ∀ i : FinSubtheory T, Semantics.SatisfiableTheory (i.val : Theory L) := by
+    Semantics.SatisfiableSet T ↔ ∀ i : FinSubtheory T, Semantics.SatisfiableSet (i.val : Theory L) := by
   constructor
-  · rintro h ⟨t, ht⟩; exact Semantics.SatisfiableTheory.of_subset h ht
+  · rintro h ⟨t, ht⟩; exact Semantics.SatisfiableSet.of_subset h ht
   · intro h
     have : ∀ i : FinSubtheory T, ∃ (M : Type u) (_ : Nonempty M) (_ : Structure L M), M ⊧ₘ* (i.val : Theory L) :=
       by intro i; exact satisfiableTheory_iff.mp (h i)
@@ -147,7 +147,7 @@ lemma compactnessAux :
     exact satisfiableTheory_intro (Structure.Uprod A 𝓤) this
 
 theorem compactness :
-    Semantics.SatisfiableTheory T ↔ ∀ T' : Finset (Sentence L), ↑T' ⊆ T → Semantics.SatisfiableTheory (T' : Theory L) := by
+    Semantics.SatisfiableSet T ↔ ∀ T' : Finset (Sentence L), ↑T' ⊆ T → Semantics.SatisfiableSet (T' : Theory L) := by
   rw[compactnessAux]; simp
 
 instance : Compact (Sentence L) := ⟨compactness⟩
