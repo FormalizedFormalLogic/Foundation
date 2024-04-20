@@ -1,19 +1,32 @@
 import Logic.Logic.LogicSymbol
+import Logic.Logic.Semantics
+/-!
+# Basic definitions and properties of proof system related notions
+
+This file defines a characterization of the system/proof/provability/calculus of formulas.
+Also defines soundness and completeness.
+
+## Main Definitions
+* `LO.System`: Proof system of logic.
+* `LO.Sound`: Soundness of the proof system.
+* `LO.Complete`: Completeness of the proof system.
+
+-/
 
 namespace LO
 
-structure System (F : Type*) where
-  Prf : F → Type*
+class System (S : Type*) (F : outParam Type*) where
+  Prf : S → F → Type*
+
+infix:45 " ⊫ " => System.Prf
 
 namespace System
 
-variable {F : Type*}
+variable {S : Type*} {F : Type*} [System S F]
 
 section
 
-variable (𝓢 : System F)
-
-infix:45 " ⊫ " => System.Prf
+variable (𝓢 : S)
 
 def Provable (f : F) : Prop := Nonempty (𝓢 ⊫ f)
 
@@ -35,88 +48,88 @@ def theory : Set F := {f | 𝓢 ⊫! f}
 
 end
 
-lemma not_provable_iff_unprovable {𝓢 : System F} {f : F} :
+lemma not_provable_iff_unprovable {𝓢 : S} {f : F} :
     ¬𝓢 ⊫! f ↔ 𝓢 ⊯! f := by simp [Provable, Unprovable]
 
-lemma not_unprovable_iff_provable {𝓢 : System F} {f : F} :
+lemma not_unprovable_iff_provable {𝓢 : S} {f : F} :
     ¬𝓢 ⊯! f ↔ 𝓢 ⊫! f := by simp [Provable, Unprovable]
 
-instance : Preorder (System F) where
-  le := fun 𝓢 𝓢' ↦ 𝓢.theory ⊆ 𝓢'.theory
+instance : Preorder S where
+  le := fun 𝓢 𝓢' ↦ theory 𝓢 ⊆ theory 𝓢'
   le_refl := fun 𝓢 ↦ Set.Subset.refl _
   le_trans := fun _ _ _ h₁ h₂ ↦ Set.Subset.trans h₁ h₂
 
-lemma le_iff {𝓢 𝓢' : System F} : 𝓢 ≤ 𝓢' ↔ (∀ {f}, 𝓢 ⊫! f → 𝓢' ⊫! f) :=
+lemma le_iff {𝓢 𝓢' : S} : 𝓢 ≤ 𝓢' ↔ (∀ {f}, 𝓢 ⊫! f → 𝓢' ⊫! f) :=
   ⟨fun h _ hf ↦ h hf, fun h _ hf ↦ h hf⟩
 
-lemma lt_iff {𝓢 𝓢' : System F} : 𝓢 < 𝓢' ↔ (∀ {f}, 𝓢 ⊫! f → 𝓢' ⊫! f) ∧ (∃ f, 𝓢 ⊯! f ∧ 𝓢' ⊫! f) := by
+lemma lt_iff {𝓢 𝓢' : S} : 𝓢 < 𝓢' ↔ (∀ {f}, 𝓢 ⊫! f → 𝓢' ⊫! f) ∧ (∃ f, 𝓢 ⊯! f ∧ 𝓢' ⊫! f) := by
   simp [lt_iff_le_not_le, le_iff]; intro _
   exact exists_congr (fun _ ↦ by simp [and_comm, not_provable_iff_unprovable])
 
-lemma weakening {𝓢 𝓢' : System F} (h : 𝓢 ≤ 𝓢') {f} : 𝓢 ⊫! f → 𝓢' ⊫! f := le_iff.mp h
+lemma weakening {𝓢 𝓢' : S} (h : 𝓢 ≤ 𝓢') {f} : 𝓢 ⊫! f → 𝓢' ⊫! f := le_iff.mp h
 
-def Equiv (𝓢 𝓢' : System F) : Prop := 𝓢.theory = 𝓢'.theory
+def Equiv (𝓢 𝓢' : S) : Prop := theory 𝓢 = theory 𝓢'
 
-@[simp, refl] protected lemma Equiv.refl (𝓢 : System F) : Equiv 𝓢 𝓢 := rfl
+@[simp, refl] protected lemma Equiv.refl (𝓢 : S) : Equiv 𝓢 𝓢 := rfl
 
-@[symm] lemma Equiv.symm {𝓢 𝓢' : System F} : Equiv 𝓢 𝓢' → Equiv 𝓢' 𝓢 := Eq.symm
+@[symm] lemma Equiv.symm {𝓢 𝓢' : S} : Equiv 𝓢 𝓢' → Equiv 𝓢' 𝓢 := Eq.symm
 
-@[trans] lemma Equiv.trans {𝓢 𝓢' 𝓢'' : System F} : Equiv 𝓢 𝓢' → Equiv 𝓢' 𝓢'' → Equiv 𝓢 𝓢'' := Eq.trans
+@[trans] lemma Equiv.trans {𝓢 𝓢' 𝓢'' : S} : Equiv 𝓢 𝓢' → Equiv 𝓢' 𝓢'' → Equiv 𝓢 𝓢'' := Eq.trans
 
-lemma equiv_iff {𝓢 𝓢' : System F} : Equiv 𝓢 𝓢' ↔ (∀ f, 𝓢 ⊫! f ↔ 𝓢' ⊫! f) := by simp [Equiv, Set.ext_iff, theory]
+lemma equiv_iff {𝓢 𝓢' : S} : Equiv 𝓢 𝓢' ↔ (∀ f, 𝓢 ⊫! f ↔ 𝓢' ⊫! f) := by simp [Equiv, Set.ext_iff, theory]
 
-lemma le_antisymm {𝓢 𝓢' : System F} (h : 𝓢 ≤ 𝓢') (h' : 𝓢' ≤ 𝓢) : Equiv 𝓢 𝓢' :=
+lemma le_antisymm {𝓢 𝓢' : S} (h : 𝓢 ≤ 𝓢') (h' : 𝓢' ≤ 𝓢) : Equiv 𝓢 𝓢' :=
   equiv_iff.mpr (fun _ ↦ ⟨fun hf ↦ le_iff.mp h hf, fun hf ↦ le_iff.mp h' hf⟩)
 
-instance : BoundedOrder (System F) where
-  top := ⟨fun _ ↦ PUnit⟩
-  bot := ⟨fun _ ↦ PEmpty⟩
-  le_top := fun _ _ _ ↦ ⟨PUnit.unit⟩
-  bot_le := fun _ _ ↦ by rintro ⟨⟨⟩⟩
+def Inconsistent (𝓢 : S) : Prop := ∀ f, 𝓢 ⊫! f
 
-def topSys {f : F} : ⊤ ⊫ f := PUnit.unit
+class Consistent (𝓢 : S) : Prop where
+  lt_top : ¬Inconsistent 𝓢
 
-@[simp] lemma top_provable {f : F} : ⊤ ⊫! f := ⟨PUnit.unit⟩
+lemma inconsistent_def {𝓢 : S} :
+    Inconsistent 𝓢 ↔ ∀ f, 𝓢 ⊫! f := by simp [Inconsistent]
 
-class Inconsistent (𝓢 : System F) : Prop where
-  top_le : ⊤ ≤ 𝓢
+lemma not_Inconsistent_iff_Consistent {𝓢 : S} :
+    ¬Inconsistent 𝓢 ↔ Consistent 𝓢 :=
+  ⟨fun h ↦ ⟨h⟩, by rintro ⟨h⟩; exact h⟩
 
-class Consistent (𝓢 : System F) : Prop where
-  lt_top : 𝓢 < ⊤
+lemma not_Consistent_iff_Inconsistent {𝓢 : S} :
+    ¬Consistent 𝓢 ↔ Inconsistent 𝓢 := by simp [←not_Inconsistent_iff_Consistent]
 
-lemma inconsistent_iff_top_le {𝓢 : System F} :
-    𝓢.Inconsistent ↔ ⊤ ≤ 𝓢 := ⟨by rintro ⟨h⟩; exact h, fun h ↦ ⟨h⟩⟩
-
-lemma inconsistent_iff {𝓢 : System F} :
-    𝓢.Inconsistent ↔ ∀ f, 𝓢 ⊫! f := by simp [inconsistent_iff_top_le, le_iff]
-
-lemma consistent_iff_lt_top {𝓢 : System F} :
-    𝓢.Consistent ↔ 𝓢 < ⊤ := ⟨by rintro ⟨h⟩; exact h, fun h ↦ ⟨h⟩⟩
-
-lemma not_Inconsistent_iff_Consistent {𝓢 : System F} :
-    ¬𝓢.Inconsistent ↔ 𝓢.Consistent := by simp [inconsistent_iff_top_le, consistent_iff_lt_top, lt_iff_le_not_le]
-
-lemma not_Consistent_iff_Inconsistent {𝓢 : System F} :
-    ¬𝓢.Consistent ↔ 𝓢.Inconsistent := by simp [←not_Inconsistent_iff_Consistent]
-
-structure Translation {F F'} (𝓢 : System F) (𝓢' : System F') where
+structure Translation {S S' F F'} [System S F] [System S' F'] (𝓢 : S) (𝓢' : S') where
   toFun : F → F'
   prf {f} : 𝓢 ⊫ f → 𝓢' ⊫ toFun f
 
+infix:40 " ↝ " => Translation
+
+namespace Translation
+
+protected def id (𝓢 : S) : 𝓢 ↝ 𝓢 where
+  toFun := id
+  prf := id
+
+variable {S S' S'' : Type*} {F F' F'' : Type*} [System S F] [System S' F'] [System S'' F'']
+
+def comp {𝓢 : S} {𝓢' : S'} {𝓢'' : S''} (t' : 𝓢' ↝ 𝓢'') (t : 𝓢 ↝ 𝓢') : 𝓢 ↝ 𝓢'' where
+  toFun := t'.toFun ∘ t.toFun
+  prf := t'.prf ∘ t.prf
+
+end Translation
+
 variable [LogicalConnective F]
 
-variable (𝓢 : System F)
+variable (𝓢 : S)
 
 def Complete : Prop := ∀ f, 𝓢 ⊫! f ∨ 𝓢 ⊫! ~f
 
 def Undecidable (f : F) : Prop := 𝓢 ⊯! f ∧ 𝓢 ⊯! ~f
 
-class ModusPonens (𝓢 : System F) where
-  mdp {p q : F} : 𝓢 ⊫ (p ⟶ q) → 𝓢 ⊫ p → 𝓢 ⊫ q
+class ModusPonens (𝓢 : S) where
+  mdp {p q : F} : 𝓢 ⊫ p ⟶ q → 𝓢 ⊫ p → 𝓢 ⊫ q
 
-class Minimal (𝓢 : System F) extends 𝓢.ModusPonens where
+class Minimal (𝓢 : S) extends ModusPonens 𝓢 where
   verum              : 𝓢 ⊫ ⊤
-  imply₁ (p q : F)   : 𝓢 ⊫ p ⟶ (q ⟶ p)
+  imply₁ (p q : F)   : 𝓢 ⊫ p ⟶ q ⟶ p
   imply₂ (p q r : F) : 𝓢 ⊫ (p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r
   conj₁  (p q : F)   : 𝓢 ⊫ p ⋏ q ⟶ p
   conj₂  (p q : F)   : 𝓢 ⊫ p ⋏ q ⟶ q
@@ -126,22 +139,22 @@ class Minimal (𝓢 : System F) extends 𝓢.ModusPonens where
   disj₃  (p q r : F) : 𝓢 ⊫ (p ⟶ r) ⟶ (q ⟶ r) ⟶ p ⋎ q ⟶ r
 
 /-- Supplymental -/
-class HasEFQ (𝓢 : System F) where
+class HasEFQ (𝓢 : S) where
   efq (p : F) : 𝓢 ⊫ ⊥ ⟶ p
 
-class HasWeakLEM (𝓢 : System F) where
+class HasWeakLEM (𝓢 : S) where
   wlem (p : F) : 𝓢 ⊫ ~p ⋎ ~~p
 
-class HasLEM (𝓢 : System F) where
+class HasLEM (𝓢 : S) where
   lem (p : F) : 𝓢 ⊫ p ⋎ ~p
 
-class DNE (𝓢 : System F) where
+class DNE (𝓢 : S) where
   dne (p : F) : 𝓢 ⊫ ~~p ⟶ p
 
-class Dummett (𝓢 : System F) where
+class Dummett (𝓢 : S) where
   dummett (p q : F) : 𝓢 ⊫ (p ⟶ q) ⋎ (q ⟶ p)
 
-class Peirce (𝓢 : System F) where
+class Peirce (𝓢 : S) where
   peirce (p q : F) : 𝓢 ⊫ ((p ⟶ q) ⟶ p) ⟶ p
 
 /--
@@ -149,28 +162,28 @@ class Peirce (𝓢 : System F) where
 
   Modal companion of `𝐒𝟒`
 -/
-class Intuitionistic (𝓢 : System F) extends 𝓢.Minimal, 𝓢.HasEFQ
+class Intuitionistic (𝓢 : S) extends Minimal 𝓢, HasEFQ 𝓢
 
 /--
   Propositional Logic for Weak Law of Excluded Middle.
 
   Modal companion of `𝐒𝟒.𝟐`
 -/
-class WeakLEM (𝓢 : System F) extends 𝓢.Intuitionistic, 𝓢.HasWeakLEM
+class WeakLEM (𝓢 : S) extends Intuitionistic 𝓢, HasWeakLEM 𝓢
 
 /--
   Gödel-Dummett Propositional Logic.
 
   Modal companion of `𝐒𝟒.𝟑`
 -/
-class GD (𝓢 : System F) extends 𝓢.Intuitionistic, 𝓢.Dummett
+class GD (𝓢 : S) extends Intuitionistic 𝓢, Dummett 𝓢
 
 /--
   Classical Propositional Logic.
 
   Modal companion of `𝐒𝟓`
 -/
-class Classical (𝓢 : System F) extends 𝓢.Minimal, 𝓢.DNE
+class Classical (𝓢 : S) extends Minimal 𝓢, DNE 𝓢
 
 end System
 
