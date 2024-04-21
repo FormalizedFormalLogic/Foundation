@@ -18,7 +18,7 @@ namespace LO
 class System (S : Type*) (F : outParam Type*) where
   Prf : S → F → Type*
 
-infix:45 " ⊫ " => System.Prf
+infix:45 " ⊢ " => System.Prf
 
 namespace System
 
@@ -28,66 +28,64 @@ section
 
 variable (𝓢 : S)
 
-def Provable (f : F) : Prop := Nonempty (𝓢 ⊫ f)
+def Provable (f : F) : Prop := Nonempty (𝓢 ⊢ f)
 
-def Unprovable (f : F) : Prop := IsEmpty (𝓢 ⊫ f)
+def Unprovable (f : F) : Prop := IsEmpty (𝓢 ⊢ f)
 
-infix:45 " ⊫! " => Provable
+infix:45 " ⊢! " => Provable
 
-infix:45 " ⊯! " => Unprovable
+infix:45 " ⊬! " => Unprovable
 
-def PrfSet (s : Set F) : Type _ := {f : F} → f ∈ s → 𝓢 ⊫ f
+def PrfSet (s : Set F) : Type _ := {f : F} → f ∈ s → 𝓢 ⊢ f
 
-def ProvableSet (s : Set F) : Prop := ∀ f ∈ s, 𝓢 ⊫! f
+def ProvableSet (s : Set F) : Prop := ∀ f ∈ s, 𝓢 ⊢! f
 
-infix:45 " ⊫* " => PrfSet
+infix:45 " ⊢* " => PrfSet
 
-infix:45 " ⊫*! " => ProvableSet
+infix:45 " ⊢*! " => ProvableSet
 
-def theory : Set F := {f | 𝓢 ⊫! f}
+def theory : Set F := {f | 𝓢 ⊢! f}
 
 end
 
 lemma not_provable_iff_unprovable {𝓢 : S} {f : F} :
-    ¬𝓢 ⊫! f ↔ 𝓢 ⊯! f := by simp [Provable, Unprovable]
+    ¬𝓢 ⊢! f ↔ 𝓢 ⊬! f := by simp [Provable, Unprovable]
 
 lemma not_unprovable_iff_provable {𝓢 : S} {f : F} :
-    ¬𝓢 ⊯! f ↔ 𝓢 ⊫! f := by simp [Provable, Unprovable]
+    ¬𝓢 ⊬! f ↔ 𝓢 ⊢! f := by simp [Provable, Unprovable]
 
 instance : Preorder S where
   le := fun 𝓢 𝓢' ↦ theory 𝓢 ⊆ theory 𝓢'
   le_refl := fun 𝓢 ↦ Set.Subset.refl _
   le_trans := fun _ _ _ h₁ h₂ ↦ Set.Subset.trans h₁ h₂
 
-lemma le_iff {𝓢 𝓢' : S} : 𝓢 ≤ 𝓢' ↔ (∀ {f}, 𝓢 ⊫! f → 𝓢' ⊫! f) :=
+lemma le_iff {𝓢 𝓢' : S} : 𝓢 ≤ 𝓢' ↔ (∀ {f}, 𝓢 ⊢! f → 𝓢' ⊢! f) :=
   ⟨fun h _ hf ↦ h hf, fun h _ hf ↦ h hf⟩
 
-lemma lt_iff {𝓢 𝓢' : S} : 𝓢 < 𝓢' ↔ (∀ {f}, 𝓢 ⊫! f → 𝓢' ⊫! f) ∧ (∃ f, 𝓢 ⊯! f ∧ 𝓢' ⊫! f) := by
+lemma lt_iff {𝓢 𝓢' : S} : 𝓢 < 𝓢' ↔ (∀ {f}, 𝓢 ⊢! f → 𝓢' ⊢! f) ∧ (∃ f, 𝓢 ⊬! f ∧ 𝓢' ⊢! f) := by
   simp [lt_iff_le_not_le, le_iff]; intro _
   exact exists_congr (fun _ ↦ by simp [and_comm, not_provable_iff_unprovable])
 
-lemma weakening {𝓢 𝓢' : S} (h : 𝓢 ≤ 𝓢') {f} : 𝓢 ⊫! f → 𝓢' ⊫! f := le_iff.mp h
+lemma weakening {𝓢 𝓢' : S} (h : 𝓢 ≤ 𝓢') {f} : 𝓢 ⊢! f → 𝓢' ⊢! f := le_iff.mp h
 
-def Equiv (𝓢 𝓢' : S) : Prop := theory 𝓢 = theory 𝓢'
+instance : Setoid S where
+  r := fun 𝓢 𝓢' ↦ theory 𝓢 = theory 𝓢'
+  iseqv := { refl := fun _ ↦ rfl, symm := Eq.symm, trans := Eq.trans }
 
-@[simp, refl] protected lemma Equiv.refl (𝓢 : S) : Equiv 𝓢 𝓢 := rfl
+lemma equiv_def {𝓢 𝓢' : S} : 𝓢 ≈ 𝓢' ↔ theory 𝓢 = theory 𝓢' := iff_of_eq rfl
 
-@[symm] lemma Equiv.symm {𝓢 𝓢' : S} : Equiv 𝓢 𝓢' → Equiv 𝓢' 𝓢 := Eq.symm
+lemma equiv_iff {𝓢 𝓢' : S} : 𝓢 ≈ 𝓢' ↔ (∀ f, 𝓢 ⊢! f ↔ 𝓢' ⊢! f) := by simp [equiv_def, Set.ext_iff, theory]
 
-@[trans] lemma Equiv.trans {𝓢 𝓢' 𝓢'' : S} : Equiv 𝓢 𝓢' → Equiv 𝓢' 𝓢'' → Equiv 𝓢 𝓢'' := Eq.trans
-
-lemma equiv_iff {𝓢 𝓢' : S} : Equiv 𝓢 𝓢' ↔ (∀ f, 𝓢 ⊫! f ↔ 𝓢' ⊫! f) := by simp [Equiv, Set.ext_iff, theory]
-
-lemma le_antisymm {𝓢 𝓢' : S} (h : 𝓢 ≤ 𝓢') (h' : 𝓢' ≤ 𝓢) : Equiv 𝓢 𝓢' :=
+lemma le_antisymm {𝓢 𝓢' : S} (h : 𝓢 ≤ 𝓢') (h' : 𝓢' ≤ 𝓢) : 𝓢 ≈ 𝓢' :=
   equiv_iff.mpr (fun _ ↦ ⟨fun hf ↦ le_iff.mp h hf, fun hf ↦ le_iff.mp h' hf⟩)
 
-def Inconsistent (𝓢 : S) : Prop := ∀ f, 𝓢 ⊫! f
+def Inconsistent (𝓢 : S) : Prop := ∀ f, 𝓢 ⊢! f
 
 class Consistent (𝓢 : S) : Prop where
   lt_top : ¬Inconsistent 𝓢
 
 lemma inconsistent_def {𝓢 : S} :
-    Inconsistent 𝓢 ↔ ∀ f, 𝓢 ⊫! f := by simp [Inconsistent]
+    Inconsistent 𝓢 ↔ ∀ f, 𝓢 ⊢! f := by simp [Inconsistent]
 
 lemma not_Inconsistent_iff_Consistent {𝓢 : S} :
     ¬Inconsistent 𝓢 ↔ Consistent 𝓢 :=
@@ -98,7 +96,7 @@ lemma not_Consistent_iff_Inconsistent {𝓢 : S} :
 
 structure Translation {S S' F F'} [System S F] [System S' F'] (𝓢 : S) (𝓢' : S') where
   toFun : F → F'
-  prf {f} : 𝓢 ⊫ f → 𝓢' ⊫ toFun f
+  prf {f} : 𝓢 ⊢ f → 𝓢' ⊢ toFun f
 
 infix:40 " ↝ " => Translation
 
@@ -120,42 +118,106 @@ variable [LogicalConnective F]
 
 variable (𝓢 : S)
 
-def Complete : Prop := ∀ f, 𝓢 ⊫! f ∨ 𝓢 ⊫! ~f
+def Complete : Prop := ∀ f, 𝓢 ⊢! f ∨ 𝓢 ⊢! ~f
 
-def Undecidable (f : F) : Prop := 𝓢 ⊯! f ∧ 𝓢 ⊯! ~f
+def Undecidable (f : F) : Prop := 𝓢 ⊬! f ∧ 𝓢 ⊬! ~f
+
+class Axiom where
+  axm : Set F → S
+  ofAxm (T : Set F) : axm T ⊢* T
+  weakening' {T U : Set F} : T ⊆ U → axm T ≤ axm U
+
+end System
+
+section
+
+variable {S : Type*} {F : Type*} [LogicalConnective F] [System S F] {M : Type*} [Semantics M F]
+
+class Sound (𝓢 : S) (𝓜 : M) : Prop where
+  sound : ∀ {f : F}, 𝓢 ⊢! f → 𝓜 ⊧ f
+
+class Complete (𝓢 : S) (𝓜 : M) : Prop where
+  complete : ∀ {f : F}, 𝓜 ⊧ f → 𝓢 ⊢! f
+
+namespace Sound
+
+variable {𝓢 : S} {𝓜 : M} [Sound 𝓢 𝓜]
+
+lemma not_provable_of_countermodel {p : F} (hp : ¬𝓜 ⊧ p) : 𝓢 ⊬! p :=
+  System.not_provable_iff_unprovable.mp fun b ↦ hp (Sound.sound b)
+
+lemma consistent_of_model [Semantics.Bot M F] : System.Consistent 𝓢 :=
+  ⟨fun h ↦ by
+    have : 𝓜 ⊧ ⊥ := Sound.sound (h ⊥)
+    simpa ⟩
+
+lemma RealizeSet_of_prfSet {T : Set F} (b : 𝓢 ⊢*! T) : 𝓜 ⊧* T :=
+  ⟨fun _ hf => Sound.sound (b _ hf)⟩
+
+end Sound
+
+namespace Complete
+
+variable {𝓢 : S} {𝓜 : M} [Complete 𝓢 𝓜]
+
+/-
+lemma satisfiableTheory_iff_consistent {T : Set F} : Semantics.SatisfiableSet M T ↔ System.Consistent 𝓢 :=
+  ⟨Sound.consistent_of_satisfiable,
+   by contrapose; intro h
+      have : T ⊨ ⊥ := by intro a hM; have : Semantics.SatisfiableSet T := ⟨a, hM⟩; contradiction
+      have : T ⊢ ⊥ := complete this
+      exact System.inconsistent_of_proof this⟩
+
+lemma not_satisfiable_iff_inconsistent {T : Set F} : ¬Semantics.SatisfiableSet T ↔ T ⊢! ⊥ := by
+  simp [satisfiableTheory_iff_consistent, System.Consistent, Deduction.Consistent, Deduction.Undeducible]
+
+lemma consequence_iff_provable {T : Set F} {f : F} : T ⊨ f ↔ T ⊢! f :=
+⟨fun h => ⟨complete h⟩, by rintro ⟨b⟩; exact Sound.sound b⟩
+
+alias ⟨complete!, _⟩ := consequence_iff_provable
+
+-/
+
+end Complete
+
+end
+
+namespace System
+
+variable {S : Type*} {F : Type*} [System S F] [LogicalConnective F]
 
 class ModusPonens (𝓢 : S) where
-  mdp {p q : F} : 𝓢 ⊫ p ⟶ q → 𝓢 ⊫ p → 𝓢 ⊫ q
+  mdp {p q : F} : 𝓢 ⊢ p ⟶ q → 𝓢 ⊢ p → 𝓢 ⊢ q
 
 class Minimal (𝓢 : S) extends ModusPonens 𝓢 where
-  verum              : 𝓢 ⊫ ⊤
-  imply₁ (p q : F)   : 𝓢 ⊫ p ⟶ q ⟶ p
-  imply₂ (p q r : F) : 𝓢 ⊫ (p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r
-  conj₁  (p q : F)   : 𝓢 ⊫ p ⋏ q ⟶ p
-  conj₂  (p q : F)   : 𝓢 ⊫ p ⋏ q ⟶ q
-  conj₃  (p q : F)   : 𝓢 ⊫ p ⟶ q ⟶ p ⋏ q
-  disj₁  (p q : F)   : 𝓢 ⊫ p ⟶ p ⋎ q
-  disj₂  (p q : F)   : 𝓢 ⊫ q ⟶ p ⋎ q
-  disj₃  (p q r : F) : 𝓢 ⊫ (p ⟶ r) ⟶ (q ⟶ r) ⟶ p ⋎ q ⟶ r
+  verum              : 𝓢 ⊢ ⊤
+  imply₁ (p q : F)   : 𝓢 ⊢ p ⟶ q ⟶ p
+  imply₂ (p q r : F) : 𝓢 ⊢ (p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r
+  conj₁  (p q : F)   : 𝓢 ⊢ p ⋏ q ⟶ p
+  conj₂  (p q : F)   : 𝓢 ⊢ p ⋏ q ⟶ q
+  conj₃  (p q : F)   : 𝓢 ⊢ p ⟶ q ⟶ p ⋏ q
+  disj₁  (p q : F)   : 𝓢 ⊢ p ⟶ p ⋎ q
+  disj₂  (p q : F)   : 𝓢 ⊢ q ⟶ p ⋎ q
+  disj₃  (p q r : F) : 𝓢 ⊢ (p ⟶ r) ⟶ (q ⟶ r) ⟶ p ⋎ q ⟶ r
 
 /-- Supplymental -/
 class HasEFQ (𝓢 : S) where
-  efq (p : F) : 𝓢 ⊫ ⊥ ⟶ p
+  efq (p : F) : 𝓢 ⊢ ⊥ ⟶ p
 
 class HasWeakLEM (𝓢 : S) where
-  wlem (p : F) : 𝓢 ⊫ ~p ⋎ ~~p
+  wlem (p : F) : 𝓢 ⊢ ~p ⋎ ~~p
 
 class HasLEM (𝓢 : S) where
-  lem (p : F) : 𝓢 ⊫ p ⋎ ~p
+  lem (p : F) : 𝓢 ⊢ p ⋎ ~p
 
 class DNE (𝓢 : S) where
-  dne (p : F) : 𝓢 ⊫ ~~p ⟶ p
+  dne (p : F) : 𝓢 ⊢ ~~p ⟶ p
 
 class Dummett (𝓢 : S) where
-  dummett (p q : F) : 𝓢 ⊫ (p ⟶ q) ⋎ (q ⟶ p)
+  dummett (p q : F) : 𝓢 ⊢ (p ⟶ q) ⋎ (q ⟶ p)
 
 class Peirce (𝓢 : S) where
-  peirce (p q : F) : 𝓢 ⊫ ((p ⟶ q) ⟶ p) ⟶ p
+  peirce (p q : F) : 𝓢 ⊢ ((p ⟶ q) ⟶ p) ⟶ p
 
 /--
   Intuitionistic Propositional Logic.

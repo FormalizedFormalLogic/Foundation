@@ -74,14 +74,9 @@ end
 class RealizeSet (𝓜 : M) (T : Set F) : Prop where
   RealizeSet : ∀ ⦃f⦄, f ∈ T → Realize 𝓜 f
 
-variable (M)
-
-def Consequence (T : Set F) (f : F) : Prop := ∀ ⦃𝓜 : M⦄, RealizeSet 𝓜 T → Realize 𝓜 f
-
 infix:45 " ⊧* " => RealizeSet
 
--- note that ⊨ (\vDash) is *NOT* ⊧ (\models)
-notation T:45 " ⊨[" M "]" p:46 => Consequence M T p
+variable (M)
 
 def Valid (f : F) : Prop := ∀ 𝓜 : M, 𝓜 ⊧ f
 
@@ -90,6 +85,8 @@ def VaridSet (T : Set F) : Prop := ∀ 𝓜 : M, 𝓜 ⊧* T
 def Satisfiable (f : F) : Prop := ∃ 𝓜 : M, 𝓜 ⊧ f
 
 def SatisfiableSet (T : Set F) : Prop := ∃ 𝓜 : M, 𝓜 ⊧* T
+
+def modelOf (T : Set F) : Set M := {𝓜 | 𝓜 ⊧* T}
 
 variable {M}
 
@@ -142,68 +139,40 @@ end RealizeSet
 lemma SatisfiableSet.of_subset {T U : Set F} (h : SatisfiableSet M U) (ss : T ⊆ U) : SatisfiableSet M T :=
   by rcases h with ⟨𝓜, h⟩; exact ⟨𝓜, RealizeSet.of_subset h ss⟩
 
-lemma consequence_iff_not_satisfiable [Tarski M F] {f : F} :
-    T ⊨[M] f ↔ ¬SatisfiableSet M (insert (~f) T) :=
-  ⟨by rintro hT ⟨𝓜, ha⟩
-      have : 𝓜 ⊧ f := hT (RealizeSet.of_subset ha (Set.subset_insert (~f) T))
-      have : ¬𝓜 ⊧ f := by simpa using ha.RealizeSet (Set.mem_insert (~f) T)
-      contradiction,
-   by intro h 𝓜 ha; by_contra hn
-      have : SatisfiableSet M (insert (~f) T) := ⟨𝓜, by simp[*]⟩
-      contradiction⟩
-
-lemma weakening {T U : Set F} {f} (h : T ⊨[M] f) (ss : T ⊆ U) : U ⊨[M] f :=
-  fun _ hs => h (RealizeSet.of_subset hs ss)
-
-lemma of_mem {T : Set F} {f} (h : f ∈ T) : T ⊨[M] f := fun _ hs => hs.RealizeSet h
-
-lemma consequence_iff [Tarski M F] {T : Set F} {f : F} : T ⊨[M] f ↔ ¬SatisfiableSet M (insert (~f) T) := by
-  simp[Consequence, SatisfiableSet]; constructor
-  · intro h 𝓜 hf hT; have : 𝓜 ⊧ f := h hT; contradiction
-  · intro h 𝓜; contrapose; exact h 𝓜
-
-def theory (𝓜 : M) : Set F := {p | 𝓜 ⊧ p}
-
 variable (M)
 
-def Subtheory (T U : Set F) : Prop := ∀ {f}, T ⊨[M] f → U ⊨[M] f
+instance [Semantics M F] : Semantics (Set M) F := ⟨fun s f ↦ ∀ 𝓜 ∈ s, 𝓜 ⊧ f⟩
 
-def Equivalent (T U : Set F) : Prop := {f : F} → T ⊨[M] f ↔ U ⊨[M] f
+@[simp] lemma empty_models (f : F) : (∅ : Set M) ⊧ f := by rintro h; simp
+
+abbrev Consequence (T : Set F) (f : F) : Prop := modelOf M T ⊧ f
+
+-- note that ⊨ (\vDash) is *NOT* ⊧ (\models)
+notation T:45 " ⊨[" M "] " p:46 => Consequence M T p
 
 variable {M}
 
-namespace Subtheory
+lemma set_models_iff {s : Set M} : s ⊧ f ↔ ∀ 𝓜 ∈ s, 𝓜 ⊧ f := iff_of_eq rfl
 
-variable (T U T₁ T₂ T₃ : Set F)
+instance [Semantics.Top M F] : Semantics.Top (Set M) F := ⟨fun s ↦ by simp [set_models_iff]⟩
 
-@[refl] lemma refl : Subtheory M T T := id
+lemma consequence_iff {T : Set F} {f} : T ⊨[M] f ↔ ∀ {𝓜 : M}, 𝓜 ⊧* T → 𝓜 ⊧ f := iff_of_eq rfl
 
-@[trans] protected lemma trans (h₁ : Subtheory M T₁ T₂) (h₂ : Subtheory M T₂ T₃) : Subtheory M T₁ T₃ :=
-  fun b => h₂ (h₁ b)
+lemma consequence_iff' {T : Set F} {f : F} : T ⊨[M] f ↔ (∀ (𝓜 : M) [𝓜 ⊧* T], 𝓜 ⊧ f) :=
+  ⟨fun h _ _ => consequence_iff.mp h inferInstance, fun H 𝓜 hs => @H 𝓜 hs⟩
 
-def ofSubset (h : T ⊆ U) : Subtheory M T U := fun b => weakening b h
+lemma consequence_iff_not_satisfiable [Tarski M F] {f : F} :
+    T ⊨[M] f ↔ ¬SatisfiableSet M (insert (~f) T) := by
+  simp [consequence_iff, SatisfiableSet]; constructor
+  · intro h 𝓜 hf hT; have : 𝓜 ⊧ f := h hT; contradiction
+  · intro h 𝓜; contrapose; exact h 𝓜
 
-end Subtheory
+lemma weakening {T U : Set F} {f} (h : T ⊨[M] f) (ss : T ⊆ U) : U ⊨[M] f :=
+  consequence_iff.mpr fun hs => consequence_iff.mp h (RealizeSet.of_subset hs ss)
 
-lemma RealizeSet.of_subtheory {𝓜 : M} {T U : Set F} (h : 𝓜 ⊧* U) (ss : Subtheory M T U) :
-    𝓜 ⊧* T := ⟨fun _ hf => ss (of_mem hf) h⟩
+lemma of_mem {T : Set F} {f} (h : f ∈ T) : T ⊨[M] f := fun _ hs => hs.RealizeSet h
 
-namespace Equivalent
-
-variable (T U T₁ T₂ T₃ : Set F)
-
-@[refl] protected lemma refl : Equivalent M T T := ⟨id, id⟩
-
-@[symm] protected lemma symm (h : Equivalent M T U) : Equivalent M U T := Iff.symm h
-
-@[trans] protected lemma trans (h₁ : Equivalent M T₁ T₂) (h₂ : Equivalent M T₂ T₃) : Equivalent M T₁ T₃ :=
-  Iff.trans h₁ h₂
-
-end Equivalent
-
-lemma consequence_iff' {T : Set F} {σ : F} :
-    T ⊨[M] σ ↔ (∀ (𝓜 : M) [𝓜 ⊧* T], 𝓜 ⊧ σ) :=
-  ⟨fun h _ _ => h inferInstance, fun H 𝓜 hs => @H 𝓜 hs⟩
+def theory (𝓜 : M) : Set F := {p | 𝓜 ⊧ p}
 
 end Semantics
 
@@ -254,10 +223,10 @@ variable {𝓜 : M}
 
 lemma conseq_compact [Semantics.Tarski M F] [DecidableEq F] {f : F} :
     T ⊨[M] f ↔ ∃ u : Finset F, ↑u ⊆ T ∧ u ⊨[M] f := by
-  simp[Semantics.consequence_iff, compact (T := insert (~f) T)]
+  simp [Semantics.consequence_iff_not_satisfiable, compact (T := insert (~f) T)]
   constructor
   · intro ⟨u, ss, hu⟩
-    exact ⟨Finset.erase u (~f), by simp[ss],
+    exact ⟨Finset.erase u (~f), by simp [ss],
       by simp; intro h; exact hu (Semantics.SatisfiableSet.of_subset h (by simp))⟩
   · intro ⟨u, ss, hu⟩
     exact ⟨insert (~f) u,
