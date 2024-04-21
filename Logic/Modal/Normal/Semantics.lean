@@ -269,6 +269,10 @@ namespace Formula.FrameClassConsequence
 
 variable  {𝔽 : FrameClass α} {Γ Δ : Theory β} {p : Formula β}
 
+@[simp]
+lemma empty_consequence_iff : (∅ ⊨ᴹ[𝔽] p) ↔ (⊧ᴹ[𝔽] p) := by
+  simp [FrameClassConsequence, FrameConsequence, Formula.FrameClasses, Formula.Frames, Formula.Models];
+
 lemma modus_ponens' : (Γ ⊨ᴹ[𝔽] p ⟶ q) → (Γ ⊨ᴹ[𝔽] p) → (Γ ⊨ᴹ[𝔽] q) := by
   simp [Formula.FrameClassConsequence];
   intro hpq hp F hF;
@@ -293,7 +297,7 @@ def Theory.FrameClassSatisfiable (𝔽 : FrameClass α) (Γ : Theory β) := ∃ 
 
 def AxiomSetDefinability (α β) (Λ : AxiomSet β)  (P : Frame α → Prop) := ∀ {F : Frame α}, P F ↔ ⊧ᴹ[F] Λ
 
-def AxiomSetDefinability.toFrameClass (h : AxiomSetDefinability α β Λ P) : ∀ {F : Frame α}, P F ↔ F ∈ 𝔽(Λ) := by
+lemma AxiomSetDefinability.iff_subset_frameClass (h : AxiomSetDefinability α β Λ P) : ∀ {F : Frame α}, P F ↔ F ∈ 𝔽(Λ) := by
   intro F;
   exact h;
 
