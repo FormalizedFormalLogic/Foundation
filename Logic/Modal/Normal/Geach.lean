@@ -117,7 +117,6 @@ instance : Geach (𝐊𝐓𝟒𝐁 : AxiomSet β) where
 
 end Axioms
 
-@[simp]
 def GeachConfluency (l : GeachTaple) (F : Frame α) := ∀ {x y z}, (F[l.i] x y) ∧ (F[l.j] x z) → ∃ u, (F[l.m] y u) ∧ (F[l.n] z u)
 
 @[simp]
@@ -130,47 +129,56 @@ namespace GeachConfluency
 
 lemma list_single_iff : (GeachConfluencyList [l] F) ↔ GeachConfluency l F := by simp;
 
-lemma serial_def : Serial F ↔ (GeachConfluency ⟨0, 0, 1, 1⟩ F) := by
-  simp [Symmetric];
+@[simp]
+lemma serial_def : (GeachConfluency ⟨0, 0, 1, 1⟩ F) ↔ Serial F := by
+  simp [GeachConfluency, Symmetric];
   aesop;
 
-lemma reflexive_def : Reflexive F ↔ (GeachConfluency ⟨0, 0, 1, 0⟩ F) := by
-  simp [Reflexive];
+@[simp]
+lemma reflexive_def : (GeachConfluency ⟨0, 0, 1, 0⟩ F) ↔ Reflexive F := by
+  simp [GeachConfluency, Reflexive];
 
-lemma symmetric_def : Symmetric F ↔ (GeachConfluency ⟨0, 1, 0, 1⟩ F) := by
-  simp [Symmetric];
+@[simp]
+lemma symmetric_def : (GeachConfluency ⟨0, 1, 0, 1⟩ F) ↔ Symmetric F := by
+  simp [GeachConfluency, Symmetric];
   aesop;
 
-lemma transitive_def : Transitive F ↔ (GeachConfluency ⟨0, 2, 1, 0⟩ F) := by
-  simp [Transitive];
+@[simp]
+lemma transitive_def : (GeachConfluency ⟨0, 2, 1, 0⟩ F) ↔ Transitive F := by
+  simp [GeachConfluency, Transitive];
   aesop;
 
-lemma euclidean_def : Euclidean F ↔ (GeachConfluency ⟨1, 1, 0, 1⟩ F) := by
-  simp [Euclidean];
+@[simp]
+lemma euclidean_def : (GeachConfluency ⟨1, 1, 0, 1⟩ F) ↔ Euclidean F := by
+  simp [GeachConfluency, Euclidean];
   aesop;
 
-lemma confluent_def : Confluent F ↔ (GeachConfluency ⟨1, 1, 1, 1⟩ F) := by
-  simp [Confluent];
+@[simp]
+lemma confluent_def : (GeachConfluency ⟨1, 1, 1, 1⟩ F) ↔ Confluent F := by
+  simp [GeachConfluency, Confluent];
 
-lemma extensive_def : Extensive F ↔ (GeachConfluency ⟨0, 1, 0, 0⟩ F) := by
+@[simp]
+lemma extensive_def : (GeachConfluency ⟨0, 1, 0, 0⟩ F) ↔ Extensive F := by
   intros;
-  simp [Extensive];
+  simp [GeachConfluency, Extensive];
   constructor;
-  . intro h x y z hxy hxz;
-    have := h hxz;
-    subst hxy this;
-    trivial;
   . intro h x y hyz;
     have := h rfl hyz;
     subst this;
     trivial;
+  . intro h x y z hxy hxz;
+    have := h hxz;
+    subst hxy this;
+    trivial;
 
+@[simp]
 lemma functional_def : Functional F ↔ (GeachConfluency ⟨1, 1, 0, 0⟩ F) := by
-  simp [Functional];
+  simp [GeachConfluency, Functional];
   aesop
 
+@[simp]
 lemma dense_def : Dense F  ↔ (GeachConfluency ⟨0, 1, 2, 0⟩ F) := by
-  simp [Dense];
+  simp [GeachConfluency, Dense];
   aesop;
 
 end GeachConfluency
@@ -178,7 +186,7 @@ end GeachConfluency
 section FrameClassDefinability
 
 theorem AxiomGeach.defines (t : GeachTaple) (F : Frame α) : (GeachConfluency t F) ↔ (⊧ᴹ[F] (AxiomSet.Geach t : AxiomSet β)) := by
-  simp [AxiomSet.Geach];
+  simp [AxiomSet.Geach, GeachConfluency];
   constructor;
   . intro h p V x;
     simp only [Formula.Satisfies.imp_def'];
@@ -227,7 +235,7 @@ lemma GeachLogic.frameClassDefinability [hG : Geach Λ] : AxiomSetDefinability �
 
 lemma AxiomSet.S4.frameClassDefinability : AxiomSetDefinability α β 𝐒𝟒 (λ F => Reflexive F ∧ Transitive F) := by
   have : AxiomSetDefinability α β 𝐒𝟒 (GeachConfluencyList (Geach.taples 𝐒𝟒)) := by apply GeachLogic.frameClassDefinability;
-  simp_all [GeachConfluency.reflexive_def, GeachConfluency.transitive_def];
+  simp_all;
 
 end FrameClassDefinability
 

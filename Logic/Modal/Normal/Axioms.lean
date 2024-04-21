@@ -121,11 +121,17 @@ section Logics
 abbrev AxiomSet.KT : AxiomSet α := 𝐊 ∪ 𝐓
 notation "𝐊𝐓" => AxiomSet.KT
 
+abbrev AxiomSet.KB : AxiomSet α := 𝐊 ∪ 𝐁
+notation "𝐊𝐁" => AxiomSet.KB
+
 abbrev AxiomSet.KD : AxiomSet α := 𝐊 ∪ 𝐃
 notation "𝐊𝐃" => AxiomSet.KD
 
 abbrev AxiomSet.K4 : AxiomSet α := 𝐊 ∪ 𝟒
 notation "𝐊𝟒" => AxiomSet.K4
+
+abbrev AxiomSet.K5 : AxiomSet α := 𝐊 ∪ 𝟓
+notation "𝐊𝟓" => AxiomSet.K5
 
 abbrev AxiomSet.KT4 : AxiomSet α := 𝐊 ∪ 𝐓 ∪ 𝟒
 abbrev AxiomSet.S4 : AxiomSet α := AxiomSet.KT4
