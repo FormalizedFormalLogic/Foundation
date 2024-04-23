@@ -82,17 +82,26 @@ lemma le_antisymm {𝓢 𝓢' : S} (h : 𝓢 ≤ 𝓢') (h' : 𝓢' ≤ 𝓢) : 
 def Inconsistent (𝓢 : S) : Prop := ∀ f, 𝓢 ⊢! f
 
 class Consistent (𝓢 : S) : Prop where
-  lt_top : ¬Inconsistent 𝓢
+  not_inconsistent : ¬Inconsistent 𝓢
 
 lemma inconsistent_def {𝓢 : S} :
     Inconsistent 𝓢 ↔ ∀ f, 𝓢 ⊢! f := by simp [Inconsistent]
 
-lemma not_Inconsistent_iff_Consistent {𝓢 : S} :
+lemma not_inconsistent_iff_consistent {𝓢 : S} :
     ¬Inconsistent 𝓢 ↔ Consistent 𝓢 :=
   ⟨fun h ↦ ⟨h⟩, by rintro ⟨h⟩; exact h⟩
 
-lemma not_Consistent_iff_Inconsistent {𝓢 : S} :
-    ¬Consistent 𝓢 ↔ Inconsistent 𝓢 := by simp [←not_Inconsistent_iff_Consistent]
+lemma not_consistent_iff_inconsistent {𝓢 : S} :
+    ¬Consistent 𝓢 ↔ Inconsistent 𝓢 := by simp [←not_inconsistent_iff_consistent]
+
+lemma consistent_iff_exists_unprovable {𝓢 : S} :
+    Consistent 𝓢 ↔ ∃ f, 𝓢 ⊬! f := by
+  simp [←not_inconsistent_iff_consistent, inconsistent_def, not_provable_iff_unprovable]
+
+alias ⟨Consistent.exists_unprovable, _⟩ := consistent_iff_exists_unprovable
+
+lemma Consistent.of_unprovable {𝓢 : S} {f} (h : 𝓢 ⊬! f) : Consistent 𝓢 :=
+  ⟨fun hp ↦ not_provable_iff_unprovable.mpr h (hp f)⟩
 
 structure Translation {S S' F F'} [System S F] [System S' F'] (𝓢 : S) (𝓢' : S') where
   toFun : F → F'
@@ -141,42 +150,60 @@ class Complete (𝓢 : S) (𝓜 : M) : Prop where
 
 namespace Sound
 
+section
+
 variable {𝓢 : S} {𝓜 : M} [Sound 𝓢 𝓜]
 
 lemma not_provable_of_countermodel {p : F} (hp : ¬𝓜 ⊧ p) : 𝓢 ⊬! p :=
   System.not_provable_iff_unprovable.mp fun b ↦ hp (Sound.sound b)
 
-lemma consistent_of_model [Semantics.Bot M F] : System.Consistent 𝓢 :=
-  ⟨fun h ↦ by
-    have : 𝓜 ⊧ ⊥ := Sound.sound (h ⊥)
-    simpa ⟩
+lemma consistent_of_meaningful : Semantics.Meaningful 𝓜 → System.Consistent 𝓢 :=
+  fun H ↦ ⟨fun h ↦ by rcases H with ⟨f, hf⟩; exact hf (Sound.sound (h f))⟩
 
-lemma RealizeSet_of_prfSet {T : Set F} (b : 𝓢 ⊢*! T) : 𝓜 ⊧* T :=
-  ⟨fun _ hf => Sound.sound (b _ hf)⟩
+lemma consistent_of_model [Semantics.Bot M] : System.Consistent 𝓢 :=
+  consistent_of_meaningful (𝓜 := 𝓜) inferInstance
+
+lemma realizeSet_of_prfSet {T : Set F} (b : 𝓢 ⊢*! T) : 𝓜 ⊧* T :=
+  ⟨fun _ hf => sound (b _ hf)⟩
+
+end
+
+section
+
+variable [∀ 𝓜 : M, Semantics.Meaningful 𝓜] {𝓢 : S} {T : Set F} [Sound 𝓢 (Semantics.models M T)]
+
+lemma consequence {f : F} : 𝓢 ⊢! f → T ⊨[M] f := sound
+
+lemma consistent_of_satisfiable : Semantics.Satisfiable M T → System.Consistent 𝓢 :=
+  fun H ↦ consistent_of_meaningful (Semantics.meaningful_iff_satisfiableSet.mp H)
+
+end
 
 end Sound
 
 namespace Complete
 
+section
+
 variable {𝓢 : S} {𝓜 : M} [Complete 𝓢 𝓜]
 
-/-
-lemma satisfiableTheory_iff_consistent {T : Set F} : Semantics.SatisfiableSet M T ↔ System.Consistent 𝓢 :=
-  ⟨Sound.consistent_of_satisfiable,
-   by contrapose; intro h
-      have : T ⊨ ⊥ := by intro a hM; have : Semantics.SatisfiableSet T := ⟨a, hM⟩; contradiction
-      have : T ⊢ ⊥ := complete this
-      exact System.inconsistent_of_proof this⟩
+lemma meaningful_of_consistent : System.Consistent 𝓢 → Semantics.Meaningful 𝓜 := by
+  contrapose; intro h
+  simp [Semantics.not_meaningful_iff, System.not_consistent_iff_inconsistent] at h ⊢
+  intro f; exact Complete.complete (h f)
 
-lemma not_satisfiable_iff_inconsistent {T : Set F} : ¬Semantics.SatisfiableSet T ↔ T ⊢! ⊥ := by
-  simp [satisfiableTheory_iff_consistent, System.Consistent, Deduction.Consistent, Deduction.Undeducible]
+end
 
-lemma consequence_iff_provable {T : Set F} {f : F} : T ⊨ f ↔ T ⊢! f :=
-⟨fun h => ⟨complete h⟩, by rintro ⟨b⟩; exact Sound.sound b⟩
+section
 
-alias ⟨complete!, _⟩ := consequence_iff_provable
+variable [∀ 𝓜 : M, Semantics.Meaningful 𝓜] {𝓢 : S} {T : Set F} [Complete 𝓢 (Semantics.models M T)]
 
--/
+lemma consequence {f : F} : T ⊨[M] f → 𝓢 ⊢! f := complete
+
+lemma consistent_of_satisfiable : System.Consistent 𝓢 → Semantics.Satisfiable M T :=
+  fun H ↦ Semantics.meaningful_iff_satisfiableSet.mpr (meaningful_of_consistent H)
+
+end
 
 end Complete
 
