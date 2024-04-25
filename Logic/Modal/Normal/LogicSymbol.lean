@@ -1,375 +1,275 @@
  import Logic.Logic.LogicSymbol
 
-namespace LO.Modal.Normal
+namespace LO
 
-@[notation_class]
-class Box (α : Sort _) where
-  box : α → α
+class UnaryModalOperator (m : ℕ) (F : Sort _) where
+  mop (i : Fin m) : F → F
+  mop_injective {i} : Function.Injective (mop i)
 
-@[notation_class]
-class Dia (α : Sort _) where
-  dia : α → α
+notation:76 "△[" i "]" p => UnaryModalOperator.mop i p
 
-class ModalLogicSymbol (α : Sort _) extends LogicalConnective α, Box α, Dia α
+namespace UnaryModalOperator
 
-prefix:74 "□" => Box.box
-prefix:74 "◇" => Dia.dia
+variable [UnaryModalOperator m F]
+variable {i : Fin m} {p q : F}
 
-attribute [match_pattern]
-  Box.box
-  Dia.dia
+@[simp] lemma mop_injective' : (△[i]p) = (△[i]q) ↔ p = q := by constructor; intro h; exact mop_injective h; simp_all;
 
-class ModalDuality (F : Type*) [ModalLogicSymbol F] where
-  /-- Diamond(`◇`) defined by Box(`□`) -/
-  dia_to_box {p : F} : ◇p = ~(□(~p))
-
-@[simp]
-def Box.multibox [Box F] (n : ℕ) (p : F) : F :=
+def multimop (i : Fin m) (n : ℕ) (p : F) : F :=
   match n with
   | 0 => p
-  | n + 1 => □(multibox n p)
+  | n + 1 => △[i]((multimop i n p))
 
-notation:74 "□[" n:90 "]" p:80 => Box.multibox n p
+notation:76 "△[" i:90 "]" "[" n:90 "]" p:max => multimop i n p
 
-@[simp]
-lemma Box.multibox_zero [Box F] (p : F) : □[0]p = p := rfl
+@[simp] lemma multimop_zero : △[i][0]p = p := rfl
 
-@[simp]
-lemma Box.multibox_succ [Box F] (n : ℕ) (p : F) : □[(n + 1)]p = □(□[n]p) := rfl
+@[simp] lemma multimop_succ : △[i][(n + 1)]p = △[i](△[i][n]p) := rfl
 
-lemma Box.multibox_prepost [Box F] (n : ℕ) (p : F) : □□[n]p = □[n](□p) := by induction n <;> simp_all
+lemma multimop_prepost : (△[i]△[i][n]p) = (△[i][n](△[i]p)) := by induction n <;> simp_all
 
-@[simp]
-def Dia.multidia [Dia F] (n : ℕ) (p : F) : F :=
-  match n with
-  | 0 => p
-  | n + 1 => ◇(multidia n p)
+@[simp] lemma multimop_injective' : (△[i][n]p = △[i][n]q) ↔ (p = q) := by induction n <;> simp [*]
 
-notation:74 "◇[" n:90 "]" p:80 => Dia.multidia n p
+@[simp] lemma multimop_injective : Function.Injective ((△[i][n]·) : F → F) := by simp [Function.Injective];
 
-@[simp]
-lemma Dia.multidia_zero [Dia F] (p : F) : ◇[0]p = p := rfl
-
-@[simp]
-lemma Dia.multidia_succ [Dia F] (n : ℕ) (p : F) : ◇[(n + 1)]p = ◇(◇[n]p) := rfl
-
-lemma Dia.multidia_prepost [Dia F] (n : ℕ) (p : F) : ◇◇[n]p = ◇[n](◇p) := by induction n <;> simp_all
-
-class ModalInjective (F) [Box F] [Dia F] where
-  box_injective : Function.Injective (Box.box : F → F)
-  dia_injective : Function.Injective (Dia.dia : F → F)
-
-variable [Box F] [Dia F] [ModalInjective F]
-
-@[simp]
-lemma ModalInjective.box_injective' {p q : F} : □p = □q ↔ p = q := by
-  constructor;
-  . intro h; exact box_injective h;
-  . simp_all;
-
-@[simp]
-lemma ModalInjective.dia_injective' {p q : F} : ◇p = ◇q ↔ p = q := by
-  constructor;
-  . intro h; exact dia_injective h;
-  . simp_all;
-
-@[simp]
-lemma ModalInjective.multibox_injective' {n} {p q : F} : (□[n]p = □[n]q) ↔ (p = q) := by induction n <;> simp [*]
-
-@[simp]
-lemma ModalInjective.multibox_injective : Function.Injective (Box.multibox n : F → F) := by simp [Function.Injective];
-
-@[simp]
-lemma ModalInjective.multidia_injective' {n} {p q : F} : (◇[n]p = ◇[n]q) ↔ (p = q) := by induction n <;> simp [*]
-
-lemma ModalInjective.multidia_injective : Function.Injective (Dia.multidia n : F → F) := by simp [Function.Injective];
-
-end LO.Modal.Normal
+end UnaryModalOperator
 
 namespace Set
 
-open LO.Modal.Normal
+open LO
+open UnaryModalOperator
 
-variable [ModalLogicSymbol α] [ModalInjective α]
+variable [UnaryModalOperator m F]
+variable {i : Fin m} {s t : Set F} {n : ℕ} {a : F}
 
-variable {s t : Set α} {n : ℕ} {a : α}
+protected def multimop (i : Fin m) (n : ℕ) (s : Set F) : Set F := (multimop i n) '' s
+notation:76 "△[" i:90 "]" "[" n:90 "]" s:max => Set.multimop i n s
 
-def multibox (n : ℕ) (s : Set α) : Set α := (Box.multibox n) '' s
+@[simp] lemma multimop_empty : △[i][n](∅ : Set F) = ∅ := by simp [Set.multimop]
 
-@[simp] lemma multibox_empty : (∅ : Set α).multibox n = ∅ := by simp [multibox]
+@[simp] lemma multimop_zero : △[i][0]s = s := by simp [Set.multimop]
 
-@[simp] lemma multibox_zero : s.multibox 0 = s := by simp [multibox]
+@[simp] lemma multimop_mem_intro : a ∈ s → △[i][n]a ∈ (△[i][n]s) := by tauto;
 
-@[simp] lemma multibox_mem_intro : a ∈ s → □[n]a ∈ s.multibox n := by simp_all [multibox];
+@[simp] lemma multimop_injOn : Set.InjOn (multimop i n) (multimop i n ⁻¹' s) := by simp [Set.InjOn];
 
-@[simp] lemma multibox_injOn : Set.InjOn (Box.multibox n) (Box.multibox n ⁻¹' s) := by simp [InjOn];
+@[simp] lemma multimop_subset (h : s ⊆ t) : (△[i][n]s) ⊆ (△[i][n]t) := by simp_all [Set.subset_def, Set.multimop];
 
-lemma multibox_subset (h : s ⊆ t) : s.multibox n ⊆ t.multibox n := by simp_all [subset_def, multibox];
+@[simp] lemma multimop_union : (△[i][n](s ∪ t)) = (△[i][n]s) ∪ (△[i][n]t) := by simp_all [Set.image_union, Set.multimop];
 
-@[simp] lemma multibox_union : (s ∪ t).multibox n = (s.multibox n) ∪ (t.multibox n) := by simp_all [image_union, multibox];
+lemma multimop_mem_iff : a ∈ (△[i][n]s) ↔ (∃ b ∈ s, △[i][n]b = a) := by simp_all [Set.mem_image, Set.multimop];
 
-lemma multibox_mem_iff : a ∈ s.multibox n ↔ (∃ b ∈ s, □[n]b = a) := by simp_all [Set.mem_image, multibox]
-
-lemma forall_multibox_of_subset_multibox (h : s ⊆ t.multibox n) : ∀ p ∈ s, ∃ q ∈ t, p = □[n]q := by
+lemma forall_multimop_of_subset_multimop (h : s ⊆ △[i][n]t) : ∀ p ∈ s, ∃ q ∈ t, p = △[i][n]q := by
   intro p hp;
   obtain ⟨q, hq₁, hq₂⟩ := h hp;
   use q;
   simp_all;
 
+protected def mop (i : Fin m) (s : Set F) : Set F := Set.multimop i 1 s
+notation:76 "△[" i "]" s => Set.mop i s
 
-@[simp] def box (s : Set α) : Set α := s.multibox 1
+@[simp] lemma mop_empty : (△[i](∅ : Set F)) = ∅ := by simp [Set.mop]
 
-@[simp] lemma box_empty : (∅ : Set α).box = ∅ := by simp
+@[simp] lemma mop_mem_intro : a ∈ s → (△[i]a) ∈ (△[i]s) := by apply multimop_mem_intro;
 
-@[simp] lemma box_mem_intro {a : α} : a ∈ s → □a ∈ s.box := by apply multibox_mem_intro;
+@[simp] lemma mop_injOn : Set.InjOn (multimop i n) s := by simp [Set.InjOn]
 
-@[simp] lemma box_injOn : Set.InjOn Box.box s := by simp [Set.InjOn]
+lemma mop_subset (h : s ⊆ t) : (△[i]s) ⊆ (△[i]t) := by apply multimop_subset; assumption;
 
-lemma box_subset (h : s ⊆ t) : s.box ⊆ t.box := by apply multibox_subset; assumption;
+@[simp] lemma mop_union : (△[i](s ∪ t)) = (△[i]s) ∪ (△[i]t) := by apply multimop_union;
 
-@[simp] lemma box_union : (s ∪ t).box = s.box ∪ t.box := by simp;
+lemma mop_mem_iff : p ∈ (△[i]s) ↔ (∃ q ∈ s, (△[i]q) = p) := by apply multimop_mem_iff;
 
-lemma box_mem_iff {p : α} : p ∈ s.box ↔ (∃ q ∈ s, □q = p) := by apply multibox_mem_iff;
+protected lemma mop_injective : Function.Injective (λ {s : Set F} => Set.mop i s) := Function.Injective.image_injective mop_injective
 
-lemma box_injective : Function.Injective (λ {s : Set α} => Set.box s) := Function.Injective.image_injective ModalInjective.box_injective
-
-lemma forall_box_of_subset_box (h : s ⊆ t.box) : ∀ p ∈ s, ∃ q ∈ t, p = □q := forall_multibox_of_subset_multibox h
+lemma forall_mop_of_subset_mop (h : s ⊆ (Set.mop i t)) : ∀ p ∈ s, ∃ q ∈ t, p = △[i]q := forall_multimop_of_subset_multimop h
 
 
-def premultibox (n : ℕ) (s : Set α) := Box.multibox n ⁻¹' s
+@[simp] protected def premultimop (i : Fin m) (n : ℕ) (s : Set F) := (multimop i n) ⁻¹' s
+notation:76 "△⁻¹[" i:90 "]" "[" n:90 "]" s:max => Set.premultimop i n s
 
-@[simp]
-lemma multibox_premultibox_eq : (s.multibox n).premultibox n = s := by
+lemma multimop_premultimop_eq : △⁻¹[i][n](△[i][n]s) = s := by
   apply Set.preimage_image_eq;
-  exact ModalInjective.multibox_injective;
+  exact multimop_injective;
 
-lemma premultibox_multibox_eq_of_subset_premultibox (hs : s ⊆ t.multibox n) : (s.premultibox n).multibox n = s := by
+lemma premultimop_multimop_eq_of_subset_premultimop (hs : s ⊆ △[i][n]t) : △[i][n](△⁻¹[i][n]s) = s := by
   apply Set.eq_of_subset_of_subset;
   . intro p hp;
     obtain ⟨q, hq₁, hq₂⟩ := hp;
-    simp_all [premultibox];
+    simp_all [Set.premultimop];
   . intro p hp;
-    obtain ⟨q, _, hq₂⟩ := forall_multibox_of_subset_multibox hs p hp;
-    simp_all [multibox, premultibox];
+    obtain ⟨q, _, hq₂⟩ := forall_multimop_of_subset_multimop hs p hp;
+    simp_all [multimop, Set.premultimop];
 
-@[simp] lemma premultibox_multibox_subset : (s.premultibox n).multibox n ⊆ s := by simp [Set.subset_def, multibox, premultibox];
+@[simp] lemma premultimop_multimop_subset : △[i][n](△⁻¹[i][n]s) ⊆ s := by simp [Set.subset_def, Set.multimop, Set.premultimop];
 
-lemma premultibox_subset (h : s ⊆ t) : s.premultibox n ⊆ t.premultibox n := by simp_all [Set.subset_def, premultibox];
+lemma premultimop_subset (h : s ⊆ t) : (△⁻¹[i][n]s) ⊆ (△⁻¹[i][n]t) := by simp_all [Set.subset_def, Set.premultimop];
 
-lemma subset_premulitibox_iff_multibox_subset (h : s ⊆ t.premultibox n) : s.multibox n ⊆ t := by
+lemma subset_premulitimop_iff_multimop_subset (h : s ⊆ △⁻¹[i][n]t) : △[i][n]s ⊆ t := by
   intro p hp;
-  obtain ⟨_, h₁, h₂⟩ := multibox_subset h hp;
+  obtain ⟨_, h₁, h₂⟩ := multimop_subset h hp;
   subst h₂;
   assumption;
 
-lemma subset_multibox_iff_premulitibox_subset (h : s ⊆ t.multibox n) : s.premultibox n ⊆ t := by
+lemma subset_multimop_iff_premulitimop_subset (h : s ⊆ (△[i][n]t)) : (△⁻¹[i][n]s) ⊆ t := by
   intro p hp;
-  obtain ⟨_, h₁, h₂⟩ := premultibox_subset h hp;
+  obtain ⟨_, h₁, h₂⟩ := premultimop_subset h hp;
   simp_all;
 
 
-@[simp] def prebox (s : Set α) := s.premultibox 1
+protected def premop (i : Fin m) (s : Set F) := Set.premultimop i 1 s
+notation:76 "△⁻¹[" i "]" s => Set.premop i s
 
-@[simp] lemma box_prebox_eq : s.box.prebox = s := by simp;
+@[simp] lemma mop_premop_eq : (△⁻¹[i]△[i]s) = s := by apply multimop_premultimop_eq;
 
-lemma prebox_box_eq_of_subset_box (hs : s ⊆ t.box) : s.prebox.box = s := premultibox_multibox_eq_of_subset_premultibox hs
+lemma premop_mop_eq_of_subset_mop (hs : s ⊆ △[i]t) : (△[i]△⁻¹[i]s) = s := premultimop_multimop_eq_of_subset_premultimop hs
 
-@[simp] lemma prebox_box_subset : s.prebox.box ⊆ s := by simp;
+@[simp] lemma premop_mop_subset : (△[i]△⁻¹[i]s) ⊆ s := by apply premultimop_multimop_subset;
 
-lemma prebox_subset (h : s ⊆ t) : s.prebox ⊆ t.prebox := premultibox_subset h
+lemma premop_subset (h : s ⊆ t) : (△⁻¹[i]s) ⊆ (△⁻¹[i]t) := premultimop_subset h
 
-lemma subset_prebox_iff_box_subset (h : s ⊆ t.prebox) : s.box ⊆ t := subset_premulitibox_iff_multibox_subset h
+lemma subset_premop_iff_mop_subset (h : s ⊆ △⁻¹[i]t) : (△[i]s) ⊆ t := subset_premulitimop_iff_multimop_subset h
 
-lemma subset_box_iff_prebox_subset (h : s ⊆ t.box) : s.prebox ⊆ t := subset_multibox_iff_premulitibox_subset h
-
-
-def multidia (n : ℕ) (s : Set α) : Set α := (Dia.multidia n) '' s
-
-@[simp] lemma multidia_empty : (∅ : Set α).multidia n = ∅ := by simp [multidia]
-
-@[simp] lemma multidia_zero : s.multidia 0 = s := by simp [multidia]
-
-@[simp] lemma multidia_mem_intro : a ∈ s → ◇[n]a ∈ s.multidia n := by simp_all [multidia];
-
-lemma multidia_subset (h : s ⊆ t) : s.multidia n ⊆ t.multidia n := by simp_all [subset_def, multidia];
-
-@[simp] lemma multidia_union : (s ∪ t).multidia n = (s.multidia n) ∪ (t.multidia n) := by simp_all [image_union, multidia];
-
-@[simp] lemma multidia_injOn : Set.InjOn (Dia.multidia n) (Dia.multidia n ⁻¹' s) := by simp [InjOn];
-
-lemma multidia_mem_iff : a ∈ s.multidia n ↔ (∃ b ∈ s, ◇[n]b = a) := by simp_all [Set.mem_image, multidia]
-
-lemma forall_multidia_of_subset_multidia (h : s ⊆ t.multidia n) : ∀ p ∈ s, ∃ q ∈ t, p = ◇[n]q := by
-  intro p hp;
-  obtain ⟨q, hq₁, hq₂⟩ := h hp;
-  use q;
-  simp_all;
-
-@[simp] def dia (s : Set α) : Set α := s.multidia 1
-
-@[simp] lemma dia_empty : (∅ : Set α).dia = ∅ := by simp
-
-@[simp] lemma dia_mem_intro {a : α} : a ∈ s → ◇a ∈ s.dia := by apply multidia_mem_intro;
-
-lemma dia_subset (h : s ⊆ t) : s.dia ⊆ t.dia := by apply multidia_subset; assumption;
-
-@[simp] lemma dia_union : (s ∪ t).dia = s.dia ∪ t.dia := by apply multidia_union;
-
-@[simp] lemma dia_injOn : Set.InjOn Dia.dia s := by simp [Set.InjOn]
-
-lemma dia_mem_iff {p : α} : p ∈ s.dia ↔ (∃ q ∈ s, ◇q = p) := by apply multidia_mem_iff;
-
-lemma dia_injective : Function.Injective (λ {s : Set α} => Set.dia s) := Function.Injective.image_injective ModalInjective.dia_injective
-
-lemma forall_dia_of_subset_dia (h : s ⊆ t.dia) : ∀ p ∈ s, ∃ q ∈ t, p = ◇q := forall_multidia_of_subset_multidia h
-
-
-def premultidia (n : ℕ) (s : Set α) := Dia.multidia n ⁻¹' s
-
-@[simp]
-lemma multidia_premultidia_eq : (s.multidia n).premultidia n = s := by
-  apply Set.preimage_image_eq;
-  exact ModalInjective.multidia_injective;
-
-lemma premultidia_multidia_eq_of_subset_premultidia (hs : s ⊆ t.multidia n) : (s.premultidia n).multidia n = s := by
-  apply Set.eq_of_subset_of_subset;
-  . intro p hp;
-    obtain ⟨q, hq₁, hq₂⟩ := hp;
-    simp_all [premultidia];
-  . intro p hp;
-    obtain ⟨q, _, hq₂⟩ := forall_multidia_of_subset_multidia hs p hp;
-    simp_all [multidia, premultidia];
-
-@[simp] lemma premultidia_multidia_subset : (s.premultidia n).multidia n ⊆ s := by simp [Set.subset_def, multidia, premultidia];
-
-lemma premultidia_subset (h : s ⊆ t) : s.premultidia n ⊆ t.premultidia n := by simp_all [Set.subset_def, premultidia];
-
-lemma subset_premulitidia_iff_multidia_subset (h : s ⊆ t.premultidia n) : s.multidia n ⊆ t := by
-  intro p hp;
-  obtain ⟨_, h₁, h₂⟩ := multidia_subset h hp;
-  subst h₂;
-  assumption;
-
-lemma subset_multidia_iff_premulitidia_subset (h : s ⊆ t.multidia n) : s.premultidia n ⊆ t := by
-  intro p hp;
-  obtain ⟨_, h₁, h₂⟩ := premultidia_subset h hp;
-  simp_all;
-
-
-@[simp] def predia (s : Set α) := s.premultidia 1
-
-@[simp] lemma dia_predia_eq : s.dia.predia = s := by simp;
-
-lemma predia_dia_eq_of_subset_dia (hs : s ⊆ t.dia) : s.predia.dia = s := premultidia_multidia_eq_of_subset_premultidia hs
-
-@[simp] lemma predia_dia_subset : s.predia.dia ⊆ s := by simp;
-
-lemma predia_subset (h : s ⊆ t) : s.predia ⊆ t.predia := premultidia_subset h
-
-lemma subset_predia_iff_dia_subset (h : s ⊆ t.predia) : s.dia ⊆ t := subset_premulitidia_iff_multidia_subset h
-
-lemma subset_dia_iff_predia_subset (h : s ⊆ t.dia) : s.predia ⊆ t := subset_multidia_iff_premulitidia_subset h
+lemma subset_mop_iff_premop_subset (h : s ⊆ △[i]t) : (△⁻¹[i]s) ⊆ t := subset_multimop_iff_premulitimop_subset h
 
 end Set
 
 
 namespace List
 
-open LO.Modal.Normal
+open LO
+open UnaryModalOperator
 
-variable [ModalLogicSymbol α] [DecidableEq α] [ModalInjective α]
+variable [UnaryModalOperator m F] [DecidableEq F]
+variable {i : Fin m} {n : ℕ} {l : List F}
 
-variable {n : ℕ} {l : List α}
+protected def multimop (i : Fin m) (n : ℕ) (l : List F) : List F := l.map (multimop i n)
+notation "△[" i:90 "]" "[" n:90 "]" l:max => List.multimop i n l
 
-def multibox (n : ℕ) (l : List α) : List α := l.map (Box.multibox n)
+@[simp] protected def mop (i : Fin m) (l : List F) : List F := △[i][1]l
+notation "△[" n:90 "]" l:max => List.mop n l
 
-@[simp] def box (l : List α) : List α := l.multibox 1
+@[simp] lemma multimop_empty : △[i][n]([] : List F) = [] := by simp [List.multimop]
 
-@[simp] lemma multibox_empty : ([] : List α).multibox n = [] := by simp [List.multibox]
+@[simp] lemma multimop_zero : △[i][0]l = l := by simp [List.multimop, multimop]
 
-@[simp] lemma multibox_zero : l.multibox 0 = l := by simp [List.multibox]
+def premultimop (i : Fin m) (n : ℕ) (l : List F) := l.filter (λ (p : F) => △[i][n]p ∈ l)
+notation "△⁻¹[" i:90 "]" "[" n:90 "]" l:max => List.premultimop i n l
 
-
-def premultibox (n : ℕ) (l : List α) := l.filter (λ p => □[n]p ∈ l)
-
-@[simp] def prebox (l : List α) := premultibox 1 l
-
-
-def multidia (n : ℕ) (l : List α) : List α := l.map (Dia.multidia n)
-
-@[simp] def dia (l : List α) : List α := l.multidia 1
-
-@[simp] lemma multidia_empty : ([] : List α).multidia n = [] := by simp [List.multidia]
-
-@[simp] lemma multidia_zero : l.multidia 0 = l := by simp [List.multidia]
-
-
-def premultidia (n : ℕ) (l : List α) := l.filter (λ p => ◇[n]p ∈ l)
-
-@[simp] def predia (l : List α) := premultidia 1 l
+@[simp] def premop (i : Fin m) (l : List F) := △[i][1]l
+notation "△⁻¹[" i:90 "]" l:max => List.premop i l
 
 end List
 
 
 namespace Finset
 
-open LO.Modal.Normal
+open LO
+open UnaryModalOperator
 
-variable [ModalLogicSymbol α] [DecidableEq α] [ModalInjective α]
+variable [UnaryModalOperator m F] [DecidableEq F]
+variable {i : Fin m} {n : ℕ} {s t : Finset F}
 
-variable {n : ℕ} {s t : Finset α}
+@[simp] protected noncomputable def multimop (i : Fin m) (n : ℕ) (s : Finset F) : Finset F := (△[i][n](s.toList)).toFinset
+notation "△[" i:90 "]" "[" n:90 "]" s:max => Finset.multimop i n s
 
-@[simp] noncomputable def multibox (n : ℕ) (s : Finset α) : Finset α := s.toList.multibox n |>.toFinset
+@[simp] protected noncomputable def mop (i : Fin m) (s : Finset F) : Finset F := △[i][1]s
+notation "△[" i:90 "]" s:max => Finset.mop i s
 
-@[simp] noncomputable def box (s : Finset α) : Finset α := s.multibox 1
+lemma multimop_def : (△[i][n]s : Finset F) = s.image (multimop i n) := by simp [List.multimop, List.toFinset_map];
 
-lemma multibox_def : s.multibox n = s.image (Box.multibox n) := by simp [List.multibox, List.toFinset_map];
+@[simp] lemma multimop_coe : ↑(△[i][n]s : Finset F) = △[i][n](↑s : Set F) := by simp_all [Set.multimop, List.multimop]; rfl;
 
-@[simp] lemma multibox_coe : ↑(s.multibox n) = (↑s : Set α).multibox n := by simp_all [Set.multibox, List.multibox]; rfl;
-
-@[simp] lemma multibox_zero : s.multibox 0 = s := by simp
-
-@[simp]
-lemma multibox_union : ((s ∪ t).multibox n : Finset α) = (s.multibox n ∪ t.multibox n : Finset α) := by
-  simp [List.toFinset_map, List.multibox];
-  aesop;
-
-@[simp] noncomputable def premultibox (n : ℕ) (s : Finset α) := s.preimage (Box.multibox n) (by simp)
-
-@[simp] noncomputable def prebox (s : Finset α) := s.premultibox 1
-
-@[simp] lemma premultibox_coe : ↑(s.premultibox n) = (↑s : Set α).premultibox n := by apply Finset.coe_preimage;
-
-lemma premultibox_multibox_eq_of_subset_multibox {s : Finset α} {t : Set α} (hs : ↑s ⊆ t.multibox n) : (s.premultibox n).multibox n = s := by
-  have := Set.premultibox_multibox_eq_of_subset_premultibox hs;
-  rw [←premultibox_coe, ←multibox_coe] at this;
-  exact coe_inj.mp this;
-
-
-@[simp] noncomputable def multidia (n : ℕ) (s : Finset α) : Finset α := s.toList.multidia n |>.toFinset
-
-@[simp] noncomputable def dia (s : Finset α) : Finset α := s.multidia 1
-
-@[simp] lemma multidia_coe : ↑(s.multidia n) = (↑s : Set α).multidia n := by simp_all [Set.multidia, List.multidia]; rfl;
-
-@[simp] lemma multidia_zero : s.multidia 0 = s := by simp
+@[simp] lemma multimop_zero : (△[i][0]s : Finset F) = s := by simp
 
 @[simp]
-lemma multidia_union : ((s ∪ t).multidia n : Finset α) = (s.multidia n ∪ t.multidia n : Finset α) := by
-  simp [List.toFinset_map, List.multidia];
+lemma multimop_union : (△[i][n](s ∪ t) : Finset F) = (△[i][n]s ∪ △[i][n]t : Finset F) := by
+  simp [List.toFinset_map, List.multimop];
   aesop;
 
-@[simp] noncomputable def premultidia (n : ℕ) (s : Finset α) := s.preimage (Dia.multidia n) (by simp)
+@[simp] noncomputable def premultimop (i : Fin m) (n : ℕ) (s : Finset F) : Finset F := s.preimage (multimop i n) (by simp)
+notation "△⁻¹[" i:90 "]" "[" n:90 "]" s:max => Finset.premultimop i n s
 
-@[simp] noncomputable def predia (s : Finset α) := s.premultidia 1
+@[simp] noncomputable def premop (i : Fin m) (s : Finset F) : Finset F := △⁻¹[i][1]s
+notation "△⁻¹[" i:90 "]" s:max => Finset.premop i s
 
-@[simp] lemma premultidia_coe : ↑(s.premultidia n) = (↑s : Set α).premultidia n := by apply Finset.coe_preimage;
+@[simp] lemma premultimop_coe : ↑(△⁻¹[i][n]s : Finset F) = △⁻¹[i][n](↑s : Set F) := by apply Finset.coe_preimage;
 
-@[simp] lemma predia_coe : ↑(s.predia) = (↑s : Set α).predia := by apply premultidia_coe;
-
-lemma premultidia_multidia_eq_of_subset_multidia {s : Finset α} {t : Set α} (hs : ↑s ⊆ t.multidia n) : (s.premultidia n).multidia n = s := by
-  have := Set.premultidia_multidia_eq_of_subset_premultidia hs;
-  rw [←premultidia_coe, ←multidia_coe] at this;
-  exact coe_inj.mp this;
+lemma premultimop_multimop_eq_of_subset_multimop {s : Finset F} {t : Set F} (hs : ↑s ⊆ △[i][n]t) : (△[i][n](△⁻¹[i][n]s : Finset F) : Finset F) = s := by
+  have := Set.premultimop_multimop_eq_of_subset_premultimop hs;
+  rw [←premultimop_coe, ←multimop_coe] at this;
+  exact Finset.coe_inj.mp this;
 
 end Finset
+
+class StandardModalLogicalConnective (F : Sort _) extends LogicalConnective F, UnaryModalOperator 2 F where
+  duality {p : F} : (mop 1) p = ~((mop 0) (~p))
+
+namespace StandardModalLogicalConnective
+
+variable [hS : StandardModalLogicalConnective F] [DecidableEq F]
+
+@[match_pattern]
+abbrev box : F → F := hS.mop 0
+prefix:74 "□" => StandardModalLogicalConnective.box
+
+@[match_pattern]
+abbrev dia : F → F := hS.mop 1
+prefix:74 "◇" => StandardModalLogicalConnective.dia
+
+abbrev multibox (n : ℕ) : F → F := hS.multimop 0 n
+notation:74 "□[" n:90 "]" p:80 => multibox n p
+
+abbrev multidia (n : ℕ) : F → F := hS.multimop 1 n
+notation:74 "◇[" n:90 "]" p:80 => multidia n p
+
+
+abbrev _root_.Set.multibox (n : ℕ) (s : Set F) : Set F := @Set.multimop _ _ hS.toUnaryModalOperator 0 n s
+notation "□[" n:90 "]" s:80 => Set.multibox n s
+
+abbrev _root_.Set.box (s : Set F) : Set F := @Set.mop _ _ hS.toUnaryModalOperator 0 s
+notation "□" s:80 => Set.box s
+
+abbrev _root_.Set.premultibox (n : ℕ) (s : Set F) : Set F := @Set.premultimop _ _ hS.toUnaryModalOperator 0 n s
+notation "□⁻¹[" n:90 "]" s:80 => Set.premultibox n s
+
+abbrev _root_.Set.prebox (s : Set F) : Set F := @Set.premop _ _ hS.toUnaryModalOperator 0 s
+notation "□⁻¹" s:80 => Set.prebox s
+
+abbrev _root_.Set.multidia (n : ℕ) (s : Set F) : Set F := @Set.multimop _ _ hS.toUnaryModalOperator 1 n s
+notation "◇[" n:90 "]" s:80 => Set.multidia n s
+
+abbrev _root_.Set.dia (s : Set F) : Set F := @Set.mop _ _ hS.toUnaryModalOperator 1 s
+notation "◇" s:80 => Set.dia s
+
+abbrev _root_.Set.premultidia (n : ℕ) (s : Set F) : Set F := @Set.premultimop _ _ hS.toUnaryModalOperator 1 n s
+notation "◇⁻¹[" n:90 "]" s:80 => Set.premultidia n s
+
+abbrev _root_.Set.predia (s : Set F) : Set F := @Set.premop _ _ hS.toUnaryModalOperator 1 s
+notation "◇⁻¹" s:80 => Set.predia s
+
+
+abbrev _root_.List.multibox (n : ℕ) (l : List F) : List F := @List.multimop _ _ hS.toUnaryModalOperator 0 n l
+
+abbrev _root_.List.box (l : List F) : List F := @List.mop _ _ hS.toUnaryModalOperator 0 l
+
+abbrev _root_.List.multidia (n : ℕ) (l : List F) : List F := @List.multimop _ _ hS.toUnaryModalOperator 1 n l
+
+abbrev _root_.List.dia (l : List F) : List F := @List.mop _ _ hS.toUnaryModalOperator 1 l
+
+
+noncomputable abbrev _root_.Finset.multibox (n : ℕ) (s : Finset F) : Finset F := @Finset.multimop _ _ hS.toUnaryModalOperator _ 0 n s
+notation "□[" n:90 "]" s:80 => Finset.multibox n s
+
+noncomputable abbrev _root_.Finset.box (s : Finset F) : Finset F := @Finset.mop _ _ hS.toUnaryModalOperator _ 0 s
+notation "□" s:80 => Finset.box s
+
+noncomputable abbrev _root_.Finset.multidia (n : ℕ) (s : Finset F) : Finset F := @Finset.multimop _ _ hS.toUnaryModalOperator _ 1 n s
+notation "◇[" n:90 "]" s:80 => Finset.multidia n s
+
+noncomputable abbrev _root_.Finset.dia (s : Finset F) : Finset F := @Finset.mop _ _ hS.toUnaryModalOperator _ 1 s
+notation "◇" s:80 => Finset.dia s
+
+end StandardModalLogicalConnective
+
+end LO

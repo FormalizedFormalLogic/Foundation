@@ -350,7 +350,7 @@ lemma multibox_dual {n : ℕ} {p : Formula β} : (□[n]p ∈ Ω) ↔ (~(◇[n](
     apply membership_iff.mpr;
     assumption;
 
-lemma dia_dual {p : Formula β} : (◇p ∈ Ω) ↔ (~(□(~p)) ∈ Ω) := by simp [ModalDuality.dia_to_box];
+lemma dia_dual {p : Formula β} : (◇p ∈ Ω) ↔ (~(□(~p)) ∈ Ω) := by simp [StandardModalLogicalConnective.duality];
 
 lemma multidia_dual {n : ℕ} {p : Formula β} : (◇[n]p ∈ Ω) ↔ (~(□[n](~p)) ∈ Ω) := by
   have := Deduction.ofKSubset hK;
@@ -368,9 +368,9 @@ lemma multidia_dual {n : ℕ} {p : Formula β} : (◇[n]p ∈ Ω) ↔ (~(□[n](
     apply membership_iff.mpr;
     assumption;
 
-lemma multidia_prepost {n : ℕ} {p : Formula β} : (◇◇[n]p ∈ Ω) ↔ (◇[n](◇p) ∈ Ω) := by simp only [Dia.multidia_prepost];
+lemma multidia_prepost {n : ℕ} {p : Formula β} : (◇◇[n]p ∈ Ω) ↔ (◇[n](◇p) ∈ Ω) := by simp only [UnaryModalOperator.multimop_prepost];
 
-lemma mutlidia_prepost' {n : ℕ} {p : Formula β} : (◇[(n + 1)]p ∈ Ω) ↔ (◇[n](◇p) ∈ Ω) := by simp [Dia.multidia_prepost];
+lemma mutlidia_prepost' {n : ℕ} {p : Formula β} : (◇[(n + 1)]p ∈ Ω) ↔ (◇[n](◇p) ∈ Ω) := by simp [UnaryModalOperator.multimop_prepost];
 
 @[simp]
 lemma no_falsum : ⊥ ∉ Ω := consistent_no_falsum Ω.consitent
