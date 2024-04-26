@@ -189,14 +189,15 @@ lemma multimop_def : (△[i][n]s : Finset F) = s.image (multimop i n) := by simp
 
 lemma multimop_coe : ↑(△[i][n]s : Finset F) = △[i][n](↑s : Set F) := by simp_all [Set.multimop, List.multimop]; rfl;
 
-lemma mop_coe : ↑(△[i]s : Finset F) = △[i](↑s : Set F) := by apply multimop_coe;
-
 @[simp] lemma multimop_zero : (△[i][0]s : Finset F) = s := by simp [-List.multimop]
 
 @[simp]
 lemma multimop_union : (△[i][n](s ∪ t) : Finset F) = (△[i][n]s ∪ △[i][n]t : Finset F) := by
   simp [List.toFinset_map, List.multimop];
   aesop;
+
+lemma multimop_mem_coe {s : Finset F} : a ∈ Finset.multimop i n s ↔ a ∈ Set.multimop i n (↑s : Set F) := by
+  constructor <;> simp_all [Set.multimop];
 
 @[simp] noncomputable def premultimop (i : Fin m) (n : ℕ) (s : Finset F) : Finset F := s.preimage (multimop i n) (by simp)
 notation "△⁻¹[" i:90 "]" "[" n:90 "]" s:max => Finset.premultimop i n s
@@ -285,6 +286,9 @@ notation "□" s:80 => Finset.box s
 noncomputable abbrev _root_.Finset.premultibox (n : ℕ) (s : Finset F) : Finset F := Finset.premultimop (0 : Fin 2) n s
 notation "□⁻¹[" n:90 "]" s:80 => Finset.premultibox n s
 
+noncomputable abbrev _root_.Finset.prebox (s : Finset F) : Finset F := Finset.premop (0 : Fin 2) s
+notation "□⁻¹" s:80 => Finset.prebox s
+
 noncomputable abbrev _root_.Finset.multidia (n : ℕ) (s : Finset F) : Finset F := Finset.multimop (1 : Fin 2) n s
 notation "◇[" n:90 "]" s:80 => Finset.multidia n s
 
@@ -293,6 +297,9 @@ notation "◇" s:80 => Finset.dia s
 
 noncomputable abbrev _root_.Finset.premultidia (n : ℕ) (s : Finset F) : Finset F := Finset.premultimop (1 : Fin 2) n s
 notation "◇⁻¹[" n:90 "]" s:80 => Finset.premultidia n s
+
+noncomputable abbrev _root_.Finset.predia (s : Finset F) : Finset F := Finset.premop (1 : Fin 2) s
+notation "◇⁻¹" s:80 => Finset.predia s
 
 end StandardModalLogicalConnective
 
