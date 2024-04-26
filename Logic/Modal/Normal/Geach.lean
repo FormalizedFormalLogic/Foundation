@@ -11,6 +11,8 @@ import Logic.Modal.Normal.Completeness
 
 namespace LO.Modal.Normal
 
+open Finset
+
 variable {α : Type u} {β : Type u}
 variable [Inhabited β]
 
@@ -253,16 +255,14 @@ lemma def_axiomGeach (hK : 𝐊 ⊆ Λ) (hG : (AxiomSet.Geach l) ⊆ Λ) : (Geac
       have : □[l.m](↑Δ₂ : Theory β) ⊆ Ω₂ := subset_premulitimop_iff_multimop_subset hΔ₂;
       simp only [←Finset.premultimop_coe] at this;
       intro p hp;
-      apply this;
-      sorry;
+      exact this $ multimop_mem_coe.mp hp;
 
     have h₃ : □[l.n](⋀Δ₃) ∈ Ω₃ := by -- TODO: refactor
       apply context_multibox_conj_membership_iff' hK |>.mpr;
       have : □[l.n](↑Δ₃ : Theory β) ⊆ Ω₃ := subset_premulitimop_iff_multimop_subset hΔ₃;
       simp only [←Finset.premultimop_coe] at this;
       intro p hp;
-      apply this;
-      sorry;
+      exact this $ multimop_mem_coe.mp hp;
 
     have : (□[l.n](⋀Δ₃)) ∉ Ω₃ := by
       have : Ω₁ ⊢ᴹ[Λ]! ◇[l.i](□[l.m](⋀Δ₂)) ⟶ □[l.j](◇[l.n](⋀Δ₂)) := Deducible.maxm! (by apply hG; simp [AxiomSet.Geach]);

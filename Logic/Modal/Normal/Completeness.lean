@@ -548,8 +548,7 @@ lemma multiframe_box : (CanonicalModel Λ).frame[n] Ω₁ Ω₂ ↔ (∀ {p : Fo
           apply context_box_conj_membership_iff' hK |>.mpr;
           have : □(Δ₁ : Theory β) ⊆ Ω₁ := subset_premop_iff_mop_subset hΔ₁;
           intro p hp;
-          apply this;
-          sorry;
+          exact this $ multimop_mem_coe.mp hp;
         have h₂ : ⋀(◇⁻¹[n]Δ₂) ∈ Ω₂ := by -- TODO: refactor
           apply context_conj_membership_iff.mpr;
           have : ◇⁻¹[n](↑Δ₂ : Theory β) ⊆ Ω₂.theory := subset_multimop_iff_premulitimop_subset hΔ₂;
