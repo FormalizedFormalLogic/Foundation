@@ -420,7 +420,7 @@ lemma context_box_conj_membership_iff {Δ : Context β} : □(⋀Δ) ∈ Ω ↔ 
     exact box_finset_conj_iff!.mpr h;
 
 lemma context_box_conj_membership_iff' {Δ : Context β} : □(⋀Δ) ∈ Ω ↔ (∀ p ∈ (□Δ : Context β), p ∈ Ω) := by
-  simp [Context.box, Finset.box, List.multibox];
+  simp [Finset.box, List.multibox];
   apply context_box_conj_membership_iff hK;
 
 lemma context_multibox_conj_membership_iff {Δ : Context β} {n : ℕ} : □[n](⋀Δ) ∈ Ω ↔ (∀ p ∈ Δ, □[n]p ∈ Ω) := by
@@ -435,7 +435,7 @@ lemma context_multibox_conj_membership_iff {Δ : Context β} {n : ℕ} : □[n](
     exact multibox_finset_conj_iff!.mpr h;
 
 lemma context_multibox_conj_membership_iff' {Δ : Context β} : □[n](⋀Δ) ∈ Ω ↔ (∀ p ∈ (□[n]Δ : Context β), p ∈ Ω):= by
-  simp [Context.multibox, Finset.multibox, List.multibox];
+  simp [Finset.multibox, List.multibox];
   apply context_multibox_conj_membership_iff hK;
 
 end MaximalConsistentTheory
@@ -509,8 +509,8 @@ lemma frame_def': (CanonicalModel Λ).frame Ω₁ Ω₂ ↔ (◇Ω₂ ⊆ Ω₁.
   simp only [frame_def];
   constructor;
   . intro h p hp;
-    have ⟨q, hq₁, hq₂⟩ := Set.dia_mem_iff.mp hp;
-    rw [←hq₂, ModalDuality.dia_to_box];
+    have ⟨q, hq₁, hq₂⟩ := mop_mem_iff.mp hp;
+    rw [←hq₂];
     apply (Ω₁.neg_membership_iff).mpr;
     by_contra hC;
     have : ~q ∈ Ω₂ := by aesop;
@@ -518,7 +518,7 @@ lemma frame_def': (CanonicalModel Λ).frame Ω₁ Ω₂ ↔ (◇Ω₂ ⊆ Ω₁.
   . intro h p;
     contrapose;
     intro hnp;
-    have : ◇(~p) ∈ Ω₁ := by simpa using h $ dia_mem_intro $ neg_membership_iff.mpr hnp;
+    have : ◇(~p) ∈ Ω₁ := by simpa using h $ mop_mem_intro $ neg_membership_iff.mpr hnp;
     have : ~(□p) ∈ Ω₁ := by
       suffices h : Ω₁.theory ⊢ᴹ[Λ]! ((◇~p) ⟷ ~(□p)) by exact MaximalConsistentTheory.iff_congr h |>.mp this;
       apply equiv_dianeg_negbox!;
@@ -544,21 +544,20 @@ lemma multiframe_box : (CanonicalModel Λ).frame[n] Ω₁ Ω₂ ↔ (∀ {p : Fo
         by_contra hInc;
         obtain ⟨Δ₁, Δ₂, hΔ₁, hΔ₂, hUd⟩ := inconsistent_union (by simpa only [Theory.Inconsistent_iff] using hInc);
 
-        have h₁ : □⋀Δ₁ ∈ Ω₁ := by -- TODO: refactor
+        have h₁ : □⋀Δ₁ ∈ Ω₁ := by
           apply context_box_conj_membership_iff' hK |>.mpr;
-          have : □(↑Δ₁ : Theory β) ⊆ Ω₁ := subset_prebox_iff_box_subset hΔ₁;
-          simp only [←Context.box_coe_eq] at this;
+          have : □(Δ₁ : Theory β) ⊆ Ω₁ := subset_premop_iff_mop_subset hΔ₁;
           intro p hp;
-          exact this hp;
-
+          apply this;
+          sorry;
         have h₂ : ⋀(◇⁻¹[n]Δ₂) ∈ Ω₂ := by -- TODO: refactor
           apply context_conj_membership_iff.mpr;
-          have : ◇⁻¹[n](↑Δ₂ : Theory β) ⊆ Ω₂.theory := subset_multidia_iff_premulitidia_subset hΔ₂;
-          simp only [←Context.premultidia_coe_eq] at this;
+          have : ◇⁻¹[n](↑Δ₂ : Theory β) ⊆ Ω₂.theory := subset_multimop_iff_premulitimop_subset hΔ₂;
+          simp only [←premultimop_coe] at this;
           intro p hp;
           exact this hp;
 
-        have e : (◇[n](◇⁻¹[n]Δ₂) : Context β) = Δ₂ := by simpa using premultidia_multidia_eq_of_subset_multidia hΔ₂;
+        have e : (◇[n](◇⁻¹[n]Δ₂) : Context β) = Δ₂ := by simpa using premultimop_multimop_eq_of_subset_multimop hΔ₂;
 
         have : ⋀(◇⁻¹[n]Δ₂) ∉ Ω₂ := by
           have : ∅ ⊢ᴹ[Λ]! ~⋀(Δ₁ ∪ Δ₂) := by simpa [NegDefinition.neg] using finset_dt!.mp (by simpa using hUd);
@@ -586,7 +585,7 @@ lemma multiframe_box : (CanonicalModel Λ).frame[n] Ω₁ Ω₂ ↔ (∀ {p : Fo
       . apply ih;
         apply (multibox_multidia hK).mpr;
         intro p hp;
-        have : ◇[n]p ∈ ◇[n]Ω₂ := Set.multidia_mem_intro hp;
+        have : ◇[n]p ∈ ◇[n]Ω₂ := multimop_mem_intro hp;
         apply hΩ;
         simp_all;
 

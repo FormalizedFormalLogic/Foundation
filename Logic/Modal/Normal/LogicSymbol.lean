@@ -2,7 +2,10 @@
 
 namespace LO
 
-class UnaryModalOperator (m : ℕ) (F : Sort _) where
+/--
+  Finite many unary modal operators
+-/
+class UnaryModalOperator (m : ℕ) (F : Sort*) where
   mop (i : Fin m) : F → F
   mop_injective {i} : Function.Injective (mop i)
 
@@ -33,6 +36,12 @@ lemma multimop_prepost : (△[i]△[i][n]p) = (△[i][n](△[i]p)) := by inducti
 @[simp] lemma multimop_injective : Function.Injective ((△[i][n]·) : F → F) := by simp [Function.Injective];
 
 end UnaryModalOperator
+
+/-
+class InfiniteUnaryModalOperator (F : Sort _) where
+  mop (i : ℕ) : F → F
+  mop_injective {i} : Function.Injective (mop i)
+-/
 
 namespace Set
 
@@ -143,7 +152,7 @@ open UnaryModalOperator
 variable [UnaryModalOperator m F] [DecidableEq F]
 variable {i : Fin m} {n : ℕ} {l : List F}
 
-protected def multimop (i : Fin m) (n : ℕ) (l : List F) : List F := l.map (multimop i n)
+@[simp] protected def multimop (i : Fin m) (n : ℕ) (l : List F) : List F := l.map (multimop i n)
 notation "△[" i:90 "]" "[" n:90 "]" l:max => List.multimop i n l
 
 @[simp] protected def mop (i : Fin m) (l : List F) : List F := △[i][1]l
@@ -178,9 +187,11 @@ notation "△[" i:90 "]" s:max => Finset.mop i s
 
 lemma multimop_def : (△[i][n]s : Finset F) = s.image (multimop i n) := by simp [List.multimop, List.toFinset_map];
 
-@[simp] lemma multimop_coe : ↑(△[i][n]s : Finset F) = △[i][n](↑s : Set F) := by simp_all [Set.multimop, List.multimop]; rfl;
+lemma multimop_coe : ↑(△[i][n]s : Finset F) = △[i][n](↑s : Set F) := by simp_all [Set.multimop, List.multimop]; rfl;
 
-@[simp] lemma multimop_zero : (△[i][0]s : Finset F) = s := by simp
+lemma mop_coe : ↑(△[i]s : Finset F) = △[i](↑s : Set F) := by apply multimop_coe;
+
+@[simp] lemma multimop_zero : (△[i][0]s : Finset F) = s := by simp [-List.multimop]
 
 @[simp]
 lemma multimop_union : (△[i][n](s ∪ t) : Finset F) = (△[i][n]s ∪ △[i][n]t : Finset F) := by
@@ -193,7 +204,9 @@ notation "△⁻¹[" i:90 "]" "[" n:90 "]" s:max => Finset.premultimop i n s
 @[simp] noncomputable def premop (i : Fin m) (s : Finset F) : Finset F := △⁻¹[i][1]s
 notation "△⁻¹[" i:90 "]" s:max => Finset.premop i s
 
-@[simp] lemma premultimop_coe : ↑(△⁻¹[i][n]s : Finset F) = △⁻¹[i][n](↑s : Set F) := by apply Finset.coe_preimage;
+lemma premultimop_coe : ↑(△⁻¹[i][n]s : Finset F) = △⁻¹[i][n](↑s : Set F) := by apply Finset.coe_preimage;
+
+lemma premop_coe : ↑(△⁻¹[i]s : Finset F) = △⁻¹[i](↑s : Set F) := by apply premultimop_coe;
 
 lemma premultimop_multimop_eq_of_subset_multimop {s : Finset F} {t : Set F} (hs : ↑s ⊆ △[i][n]t) : (△[i][n](△⁻¹[i][n]s : Finset F) : Finset F) = s := by
   have := Set.premultimop_multimop_eq_of_subset_premultimop hs;
@@ -202,6 +215,9 @@ lemma premultimop_multimop_eq_of_subset_multimop {s : Finset F} {t : Set F} (hs 
 
 end Finset
 
+/--
+  Standard modal logic, which has 2 modal unary operators `□`, `◇`, and `◇` is defined as dual of `□`
+-/
 class StandardModalLogicalConnective (F : Sort _) extends LogicalConnective F, UnaryModalOperator 2 F where
   duality {p : F} : (mop 1) p = ~((mop 0) (~p))
 
@@ -217,6 +233,8 @@ prefix:74 "□" => StandardModalLogicalConnective.box
 abbrev dia : F → F := hS.mop 1
 prefix:74 "◇" => StandardModalLogicalConnective.dia
 
+lemma duality' {p : F} : (◇p) = ~(□(~p)) := by apply hS.duality
+
 abbrev multibox (n : ℕ) : F → F := hS.multimop 0 n
 notation:74 "□[" n:90 "]" p:80 => multibox n p
 
@@ -224,51 +242,57 @@ abbrev multidia (n : ℕ) : F → F := hS.multimop 1 n
 notation:74 "◇[" n:90 "]" p:80 => multidia n p
 
 
-abbrev _root_.Set.multibox (n : ℕ) (s : Set F) : Set F := @Set.multimop _ _ hS.toUnaryModalOperator 0 n s
+abbrev _root_.Set.multibox (n : ℕ) (s : Set F) : Set F := Set.multimop (0 : Fin 2) n s
 notation "□[" n:90 "]" s:80 => Set.multibox n s
 
-abbrev _root_.Set.box (s : Set F) : Set F := @Set.mop _ _ hS.toUnaryModalOperator 0 s
+abbrev _root_.Set.box (s : Set F) : Set F := Set.mop (0 : Fin 2) s
 notation "□" s:80 => Set.box s
 
-abbrev _root_.Set.premultibox (n : ℕ) (s : Set F) : Set F := @Set.premultimop _ _ hS.toUnaryModalOperator 0 n s
+abbrev _root_.Set.premultibox (n : ℕ) (s : Set F) : Set F := Set.premultimop (0 : Fin 2) n s
 notation "□⁻¹[" n:90 "]" s:80 => Set.premultibox n s
 
-abbrev _root_.Set.prebox (s : Set F) : Set F := @Set.premop _ _ hS.toUnaryModalOperator 0 s
+abbrev _root_.Set.prebox (s : Set F) : Set F := Set.premop (0 : Fin 2) s
 notation "□⁻¹" s:80 => Set.prebox s
 
-abbrev _root_.Set.multidia (n : ℕ) (s : Set F) : Set F := @Set.multimop _ _ hS.toUnaryModalOperator 1 n s
+abbrev _root_.Set.multidia (n : ℕ) (s : Set F) : Set F := Set.multimop (1 : Fin 2) n s
 notation "◇[" n:90 "]" s:80 => Set.multidia n s
 
-abbrev _root_.Set.dia (s : Set F) : Set F := @Set.mop _ _ hS.toUnaryModalOperator 1 s
+abbrev _root_.Set.dia (s : Set F) : Set F := Set.mop (1 : Fin 2) s
 notation "◇" s:80 => Set.dia s
 
-abbrev _root_.Set.premultidia (n : ℕ) (s : Set F) : Set F := @Set.premultimop _ _ hS.toUnaryModalOperator 1 n s
+abbrev _root_.Set.premultidia (n : ℕ) (s : Set F) : Set F := Set.premultimop (1 : Fin 2) n s
 notation "◇⁻¹[" n:90 "]" s:80 => Set.premultidia n s
 
-abbrev _root_.Set.predia (s : Set F) : Set F := @Set.premop _ _ hS.toUnaryModalOperator 1 s
+abbrev _root_.Set.predia (s : Set F) : Set F := Set.premop (1 : Fin 2) s
 notation "◇⁻¹" s:80 => Set.predia s
 
 
-abbrev _root_.List.multibox (n : ℕ) (l : List F) : List F := @List.multimop _ _ hS.toUnaryModalOperator 0 n l
+abbrev _root_.List.multibox (n : ℕ) (l : List F) : List F := List.multimop (0 : Fin 2) n l
 
-abbrev _root_.List.box (l : List F) : List F := @List.mop _ _ hS.toUnaryModalOperator 0 l
+abbrev _root_.List.box (l : List F) : List F := List.mop (0 : Fin 2) l
 
-abbrev _root_.List.multidia (n : ℕ) (l : List F) : List F := @List.multimop _ _ hS.toUnaryModalOperator 1 n l
+abbrev _root_.List.multidia (n : ℕ) (l : List F) : List F := List.multimop (1 : Fin 2) n l
 
-abbrev _root_.List.dia (l : List F) : List F := @List.mop _ _ hS.toUnaryModalOperator 1 l
+abbrev _root_.List.dia (l : List F) : List F := List.mop (1 : Fin 2) l
 
 
-noncomputable abbrev _root_.Finset.multibox (n : ℕ) (s : Finset F) : Finset F := @Finset.multimop _ _ hS.toUnaryModalOperator _ 0 n s
+noncomputable abbrev _root_.Finset.multibox (n : ℕ) (s : Finset F) : Finset F := Finset.multimop (0 : Fin 2) n s
 notation "□[" n:90 "]" s:80 => Finset.multibox n s
 
-noncomputable abbrev _root_.Finset.box (s : Finset F) : Finset F := @Finset.mop _ _ hS.toUnaryModalOperator _ 0 s
+noncomputable abbrev _root_.Finset.box (s : Finset F) : Finset F := Finset.mop (0 : Fin 2) s
 notation "□" s:80 => Finset.box s
 
-noncomputable abbrev _root_.Finset.multidia (n : ℕ) (s : Finset F) : Finset F := @Finset.multimop _ _ hS.toUnaryModalOperator _ 1 n s
+noncomputable abbrev _root_.Finset.premultibox (n : ℕ) (s : Finset F) : Finset F := Finset.premultimop (0 : Fin 2) n s
+notation "□⁻¹[" n:90 "]" s:80 => Finset.premultibox n s
+
+noncomputable abbrev _root_.Finset.multidia (n : ℕ) (s : Finset F) : Finset F := Finset.multimop (1 : Fin 2) n s
 notation "◇[" n:90 "]" s:80 => Finset.multidia n s
 
-noncomputable abbrev _root_.Finset.dia (s : Finset F) : Finset F := @Finset.mop _ _ hS.toUnaryModalOperator _ 1 s
+noncomputable abbrev _root_.Finset.dia (s : Finset F) : Finset F := Finset.mop (1 : Fin 2) s
 notation "◇" s:80 => Finset.dia s
+
+noncomputable abbrev _root_.Finset.premultidia (n : ℕ) (s : Finset F) : Finset F := Finset.premultimop (1 : Fin 2) n s
+notation "◇⁻¹[" n:90 "]" s:80 => Finset.premultidia n s
 
 end StandardModalLogicalConnective
 

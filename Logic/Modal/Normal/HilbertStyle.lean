@@ -159,7 +159,7 @@ lemma box_iff'! (d : ∅ ⊢! p ⟷ q) : Γ ⊢! (□p ⟷ □q) := ⟨box_iff' 
 
 @[inference]
 def dia_iff' (h : ∅ ⊢ p ⟷ q) : Γ ⊢ (◇p ⟷ ◇q) := by
-  simp only [duality];
+  simp only [duality'];
   apply neg_iff';
   apply box_iff';
   apply neg_iff';
@@ -193,7 +193,7 @@ lemma multidia_iff'! (d : ∅ ⊢! p ⟷ q) : Γ ⊢! ◇[n]p ⟷ ◇[n]q := ⟨
 
 @[tautology]
 def box_duality : Γ ⊢ □p ⟷ ~(◇~p) := by
-  simp [duality];
+  simp [duality'];
   have d₁ : Γ ⊢ □p ⟷ (□~~p) := by deduct;
   have d₂ : Γ ⊢ (□~~p) ⟷ ~~(□~~p) := by deduct;
   simpa [duality] using iff_trans' d₁ d₂
@@ -203,7 +203,7 @@ lemma box_duality! : Γ ⊢! □p ⟷ ~(◇~p) := ⟨box_duality⟩
 
 @[tautology]
 def dia_duality : Γ ⊢ ◇p ⟷ ~(□~p) := by
-  simp only [duality];
+  simp only [duality'];
   apply neg_iff';
   apply iff_id;
 
@@ -217,11 +217,11 @@ def multibox_duality : Γ ⊢ □[n]p ⟷ ~(◇[n](~p)) := by
   induction n generalizing Γ with
   | zero => deduct
   | succ n ih =>
-    simp [duality];
+    simp [duality'];
     exact iff_trans'
       (show Γ ⊢ □□[n]p ⟷ ~~(□~~(□[n]p)) by
         have : Γ ⊢ □(□[n]p) ⟷ ~(◇~(□[n]p)) := box_duality
-        simpa [duality];
+        simpa [duality'];
       )
       (by
         have : ∅ ⊢ ~~(□[n]p) ⟷ □[n]p := by deduct;
@@ -239,7 +239,7 @@ def multidia_duality : Γ ⊢ ◇[n]p ⟷ ~(□[n](~p)) := by
   induction n generalizing Γ with
   | zero => apply dn;
   | succ n ih =>
-    simp [duality];
+    simp [duality'];
     apply neg_iff';
     apply box_iff';
     exact iff_trans' (neg_iff' $ ih) (by deduct);
@@ -411,7 +411,7 @@ lemma distribute_multidia_list_conj'! {Γ : Set F} {Δ : List F} (d : Γ ⊢! �
 lemma distribute_multidia_finset_conj'! {Γ : Set F} {Δ : Finset F} (d : Γ ⊢! ◇[n]Δ.conj) : Γ ⊢! (Δ.multidia n).conj := by
   apply finset_conj_iff!.mpr;
   intro p hp;
-  exact list_conj_iff!.mp (distribute_multidia_list_conj'! d) p (by simpa [Finset.multidia] using hp);
+  exact list_conj_iff!.mp (distribute_multidia_list_conj'! d) p (by simp [Finset.multidia] at hp; sorry;);
 
 lemma distribute_dia_finset_conj'! {Δ : Finset F} (d : Γ ⊢! ◇(Δ.conj)) : Γ ⊢! Δ.dia.conj := by
   have : (Γ ⊢! ◇[1]Δ.conj) → (Γ ⊢! (Δ.multidia 1).conj) := distribute_multidia_finset_conj'!;
@@ -424,7 +424,7 @@ lemma distribute_multidia_finset_conj! {n : ℕ} {Γ : Set F} {Δ : Finset F} : 
 
 @[tautology]
 def collect_dia_disj : Γ ⊢ ◇p ⋎ ◇q ⟶ ◇(p ⋎ q) := by
-  simp [duality];
+  simp [duality'];
   apply contra₁';
   apply dtr';
   apply conj_neg';
