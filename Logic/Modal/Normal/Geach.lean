@@ -24,7 +24,7 @@ abbrev GeachTapleList := List GeachTaple
 
 section Axioms
 
-variable {F : Type u} [ModalLogicSymbol F]
+variable {F : Type u} [StandardModalLogicalConnective F]
 
 abbrev axiomGeach (l : GeachTaple) (p : F) := (◇[l.i](□[l.m]p)) ⟶ (□[l.j](◇[l.n]p))
 
@@ -250,17 +250,19 @@ lemma def_axiomGeach (hK : 𝐊 ⊆ Λ) (hG : (AxiomSet.Geach l) ⊆ Λ) : (Geac
 
     have h₂ : □[l.m](⋀Δ₂) ∈ Ω₂ := by -- TODO: refactor
       apply context_multibox_conj_membership_iff' hK |>.mpr;
-      have : □[l.m](↑Δ₂ : Theory β) ⊆ Ω₂ := subset_premulitibox_iff_multibox_subset hΔ₂;
-      simp only [←Context.multibox_coe_eq] at this;
+      have : □[l.m](↑Δ₂ : Theory β) ⊆ Ω₂ := subset_premulitimop_iff_multimop_subset hΔ₂;
+      simp only [←Finset.premultimop_coe] at this;
       intro p hp;
-      exact this hp;
+      apply this;
+      sorry;
 
     have h₃ : □[l.n](⋀Δ₃) ∈ Ω₃ := by -- TODO: refactor
       apply context_multibox_conj_membership_iff' hK |>.mpr;
-      have : □[l.n](↑Δ₃ : Theory β) ⊆ Ω₃ := subset_premulitibox_iff_multibox_subset hΔ₃;
-      simp only [←Context.multibox_coe_eq] at this;
+      have : □[l.n](↑Δ₃ : Theory β) ⊆ Ω₃ := subset_premulitimop_iff_multimop_subset hΔ₃;
+      simp only [←Finset.premultimop_coe] at this;
       intro p hp;
-      exact this hp;
+      apply this;
+      sorry;
 
     have : (□[l.n](⋀Δ₃)) ∉ Ω₃ := by
       have : Ω₁ ⊢ᴹ[Λ]! ◇[l.i](□[l.m](⋀Δ₂)) ⟶ □[l.j](◇[l.n](⋀Δ₂)) := Deducible.maxm! (by apply hG; simp [AxiomSet.Geach]);
