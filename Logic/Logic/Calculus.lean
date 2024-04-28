@@ -1,4 +1,5 @@
 import Logic.Logic.System
+import Logic.Logic.HilbertStyle
 
 /-!
 # Sequent calculus and variants
@@ -394,7 +395,7 @@ lemma inconsistent_of_provable_and_refutable! {p}
 
 @[simp] lemma consistent_theory_iff_consistent :
     System.Consistent (System.theory T).theory ↔ System.Consistent T :=
-  ⟨fun h ↦ h.of_subset System.Axiomatized.provable_axm,
+  ⟨fun h ↦ h.of_subset (System.Axiomatized.provable_axm _),
    fun consis ↦ System.consistent_iff_unprovable_bot.mpr <| by
       rintro h
       have : System.Inconsistent T := System.inconsistent_iff_provable_bot.mpr <| System.StrongCut.cut! (by simp) h

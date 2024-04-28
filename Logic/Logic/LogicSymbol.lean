@@ -542,7 +542,11 @@ lemma subset_iff {T U : Theory F} : T ⊆ U ↔ ∀ {x}, x ∈ T → x ∈ U := 
 
 @[simp] lemma sub_subset (T U : Theory F) : T - U ⊆ T := by simp [subset_def, Set.diff_subset]
 
+@[simp] lemma subset_insert (T : Theory F) (f : F) : T ⊆ insert f T := by simp [subset_def]
+
 @[ext] lemma setext {T U : Theory F} (h : T.set = U.set) : T = U := by rcases T; rcases U; simpa
+
+lemma setext_iff {T U : Theory F} : T = U ↔ T.set = U.set := by rcases T; rcases U; simp
 
 @[simp] lemma add_self (T : Theory F) : T + T = T := by ext; simp [or_comm]
 

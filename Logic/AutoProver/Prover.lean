@@ -1,5 +1,6 @@
 import Logic.AutoProver.Litform
 import Logic.Vorspiel.Meta
+import Logic.Propositional.Classical.Basic.Calculus
 
 namespace LO
 
@@ -224,34 +225,36 @@ def derive {F : Q(Type u)} (instLS : Q(LogicalConnective $F)) (instGz : Q(Gentze
 
 end DerivationQ
 
-def isExprProvable? (ty : Q(Prop)) : MetaM ((u : Level) × (F : Q(Type u)) × Q(Set $F) × Q($F)) := do
-  let ~q(@System.Provable $F $instSys $T $p) := ty | throwError "error: not a prop _ ⊢! _"
-  return ⟨_, F, T, p⟩
+#check @System.Provable
+
+def isExprProvable? (ty : Q(Prop)) : MetaM ((u : Level) × (v : Level) × (_ : Level) × (S : Q(Type u)) × (F : Q(Type v)) × Q($S) × Q($F)) := do
+  let ~q(@System.Provable $S $F $instSys $T $p) := ty | throwError m!"error: {ty} not a prop _ ⊢! _"
+  return ⟨_, _, u_3, S, F, T, p⟩
 
 section
 
 open Litform.Meta Denotation
 
-variable {F : Q(Type u)} (instLS : Q(LogicalConnective $F)) (instSys : Q(System.{u,u} $F))
-  (instGz : Q(Gentzen $F)) (instLTS : Q(LawfulTwoSided $F))
+variable {S : Q(Type u)} {F : Q(Type v)} (instLS : Q(LogicalConnective $F)) (instSys : Q(System.{v, u, w} $S $F))
+  (instGz : Q(Gentzen $F)) (instLTS : Q(LawfulTwoSided $S))
 
 
-def prove! (s : ℕ) (T : Q(Set $F)) (p : Q($F)) : MetaM Q($T ⊢! $p) :=
+def prove! (s : ℕ) (𝓢 : Q($S)) (p : Q($F)) : MetaM Q($𝓢 ⊢! $p) :=
   letI := Litform.Meta.denotation F instLS; do
   let lp : Litform.Meta.Lit F ← Denotation.denote F p
   let d' : Q([] ⊢² [$p]) ← DerivationQ.derive instLS instGz s [] [lp]
-  let b : Q($T ⊢! $p) := q(⟨LawfulTwoSided.toProofOfNil $d' $T⟩)
+  let b : Q($𝓢 ⊢! $p) := q(⟨LawfulTwoSided.toProofOfNil $d' $𝓢⟩)
   return b
 
 syntax termSeq := "[" (term,*) "]"
 
-def proofOfProvable? (T : Q(Set $F)) (e : Expr) : MetaM ((p : Q($F)) × Q($T ⊢! $p)) := do
+def proofOfProvable? (T : Q($S)) (e : Expr) : MetaM ((p : Q($F)) × Q($T ⊢! $p)) := do
   let ⟨ty, h⟩ ← inferPropQ' e
-  let ⟨_, _, T', p⟩ ← isExprProvable? ty
+  let ⟨_, _, _, _, _, T', p⟩ ← isExprProvable? ty
   if ← isDefEq T T' then return ⟨p, h⟩
   else throwError m! "failed to find q such that {ty} == {T} ⊢! q"
 
-def proverL₀ (T : Q(Set $F)) (seq : Option (TSyntax `LO.AutoProver.termSeq)) :
+def proverL₀ (T : Q($S)) (seq : Option (TSyntax `LO.AutoProver.termSeq)) :
     letI := denotation F instLS
     TermElabM ((L₀ : List (Lit F)) × Q(∀ q ∈ $(toExprₗ (denotation F instLS) L₀), $T ⊢! q)) :=
   letI := denotation F instLS; do
@@ -271,7 +274,7 @@ def proverL₀ (T : Q(Set $F)) (seq : Option (TSyntax `LO.AutoProver.termSeq)) :
     ← listSigmaImpliment (denotation F instLS) (p := q(($T ⊢! ·))) E
   return ⟨L₀, H⟩
 
-def proveL₀! (s : ℕ) (T : Q(Set $F)) (p : Q($F))
+def proveL₀! (s : ℕ) (T : Q($S)) (p : Q($F))
     (L₀ : List (Lit F)) (H₀ : Q(∀ q ∈ $(toExprₗ (denotation F instLS) L₀), $T ⊢! q)) : MetaM Q($T ⊢! $p) :=
   letI := denotation F instLS; do
   let lp : Lit F ← Denotation.denote F p
@@ -289,14 +292,14 @@ elab "tautology" n:(num)? : tactic => do
     | none   => 32
   let goalType ← Elab.Tactic.getMainTarget
   let ty ← inferPropQ goalType
-  let ⟨u, F, T, p⟩ ← isExprProvable? ty
-  let .some instLS ← trySynthInstanceQ (q(LogicalConnective.{u} $F) : Q(Type u))
+  let ⟨u, v, w, S, F, T, p⟩ ← isExprProvable? ty
+  let .some instLS ← trySynthInstanceQ q(LogicalConnective $F)
     | throwError m! "error: failed to find instance LogicalConnective {F}"
-  let .some instSys ← trySynthInstanceQ q(System.{u,u} $F)
+  let .some instSys ← trySynthInstanceQ q(System.{v,u,w} $S $F)
     | throwError m! "error: failed to find instance System {F}"
   let .some instGz ← trySynthInstanceQ q(Gentzen $F)
     | throwError m! "error: failed to find instance Gentzen {F}"
-  let .some instLTS ← trySynthInstanceQ q(LawfulTwoSided $F)
+  let .some instLTS ← trySynthInstanceQ q(LawfulTwoSided $S)
     | throwError m! "error: failed to find instance LawfulTwoSided {F}"
   --logInfo m! "start"
   let b ← prove! instLS instSys instGz instLTS s T p
@@ -309,14 +312,14 @@ elab "prover" n:(num)? seq:(termSeq)? : tactic => do
     | none   => 32
   let goalType ← Elab.Tactic.getMainTarget
   let ty ← inferPropQ goalType
-  let ⟨u, F, T, p⟩ ← isExprProvable? ty
-  let .some instLS ← trySynthInstanceQ (q(LogicalConnective.{u} $F) : Q(Type u))
+  let ⟨u, v, w, S, F, T, p⟩ ← isExprProvable? ty
+  let .some instLS ← trySynthInstanceQ q(LogicalConnective $F)
     | throwError m! "error: failed to find instance LogicalConnective {F}"
-  let .some instSys ← trySynthInstanceQ q(System.{u,u} $F)
+  let .some instSys ← trySynthInstanceQ q(System.{v,u,w} $S $F)
     | throwError m! "error: failed to find instance System {F}"
   let .some instGz ← trySynthInstanceQ q(Gentzen $F)
     | throwError m! "error: failed to find instance Gentzen {F}"
-  let .some instLTS ← trySynthInstanceQ q(LawfulTwoSided $F)
+  let .some instLTS ← trySynthInstanceQ q(LawfulTwoSided $S)
     | throwError m! "error: failed to find instance LawfulTwoSided {F}"
   let ⟨L₀, H₀⟩ ← proverL₀ instLS instSys T seq
   let b ← proveL₀! instLS instSys instGz instLTS s T p L₀ H₀

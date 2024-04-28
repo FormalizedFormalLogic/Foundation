@@ -191,8 +191,6 @@ lemma ne_of_ne_complexity {p q : Formula α} (h : p.complexity ≠ q.complexity)
 
 end Formula
 
-abbrev Theory (α : Type*) := Set (Formula α)
-
 end Propositional.Classical
 
 end LO
