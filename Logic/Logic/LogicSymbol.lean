@@ -186,16 +186,6 @@ lemma exClosure₂₂_succ {m n} (a : α m (n + 1)) : exClosure₂₂ a = exClos
 
 end ExQuantifier₂
 
-@[notation_class] class HasTurnstile (α : Sort _) (β : Sort _) where
-  turnstile : Set α → α → β
-
-infix:45 " ⊢ " => HasTurnstile.turnstile
-
-@[notation_class] class HasVdash (α : Sort _) (β : outParam (Sort _)) where
-  vdash : α → β
-
-prefix:45 "⊩ " => HasVdash.vdash
-
 end logicNotation
 
 class DeMorgan (F : Type*) [LogicalConnective F] where

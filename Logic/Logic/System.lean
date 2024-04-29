@@ -96,7 +96,7 @@ lemma strictReducible_iff : 𝓢 <ₛ 𝓣 ↔ (∀ {f}, 𝓢 ⊢! f → 𝓣 �
 
 lemma weakening (h : 𝓢 ≤ₛ 𝓣) {f} : 𝓢 ⊢! f → 𝓣 ⊢! f := reducible_iff.mp h
 
-lemma Equiv.iff {𝓢 𝓣 : S} : 𝓢 =ₛ 𝓣 ↔ (∀ f, 𝓢 ⊢! f ↔ 𝓣 ⊢! f) := by simp [Equiv, Set.ext_iff, theory]
+lemma Equiv.iff : 𝓢 =ₛ 𝓣 ↔ (∀ f, 𝓢 ⊢! f ↔ 𝓣 ⊢! f) := by simp [Equiv, Set.ext_iff, theory]
 
 @[simp, refl] protected lemma Equiv.refl (𝓢 : S) : 𝓢 =ₛ 𝓢 := rfl
 

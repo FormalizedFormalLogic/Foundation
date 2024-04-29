@@ -22,7 +22,7 @@ class Minimal extends ModusPonens 𝓢 where
   disj₃  (p q r : F) : 𝓢 ⊢ (p ⟶ r) ⟶ (q ⟶ r) ⟶ p ⋎ q ⟶ r
 
 /-- Supplymental -/
-class EFQ where
+class HasEFQ where
   efq (p : F) : 𝓢 ⊢ ⊥ ⟶ p
 
 class HasWeakLEM where
@@ -31,7 +31,7 @@ class HasWeakLEM where
 class HasLEM where
   lem (p : F) : 𝓢 ⊢ p ⋎ ~p
 
-class DNE where
+class HasDNE where
   dne (p : F) : 𝓢 ⊢ ~~p ⟶ p
 
 class Dummett where
@@ -45,7 +45,7 @@ class Peirce where
 
   Modal companion of `𝐒𝟒`
 -/
-class Intuitionistic extends Minimal 𝓢, EFQ 𝓢
+class Intuitionistic extends Minimal 𝓢, HasEFQ 𝓢
 
 /--
   Propositional Logic for Weak Law of Excluded Middle.
@@ -66,29 +66,112 @@ class GD extends Intuitionistic 𝓢, Dummett 𝓢
 
   Modal companion of `𝐒𝟓`
 -/
-class Classical extends Minimal 𝓢, DNE 𝓢
+class Classical extends Minimal 𝓢, HasDNE 𝓢
 
 variable {𝓢}
-
-variable [ModusPonens 𝓢]
 
 infixl:90 "⨀" => ModusPonens.mdp
 
 infixl:90 "⨀" => ModusPonens.mdp!
 
-lemma EFQ.efq! {p q} (hp : 𝓢 ⊢! p ⟶ q) (hq : 𝓢 ⊢! p) : 𝓢 ⊢! q := by
-  rcases hp with ⟨bp⟩; rcases hq with ⟨bq⟩
-  exact ⟨bp ⨀ bq⟩
+variable [Minimal 𝓢]
 
-section EFQ
+def cast {p q : F} (e : p = q) (b : 𝓢 ⊢ p) : 𝓢 ⊢ q := e ▸ b
 
-variable [EFQ 𝓢]
+alias verum := Minimal.verum
+@[simp] lemma verum! : 𝓢 ⊢! ⊤ := ⟨verum⟩
 
-lemma efq' (b : 𝓢 ⊢ ⊥) (f : F) : 𝓢 ⊢ f := EFQ.efq f ⨀ b
+def imply₁ : 𝓢 ⊢ p ⟶ q ⟶ p := Minimal.imply₁ _ _
+@[simp] lemma imply₁! : 𝓢 ⊢! p ⟶ q ⟶ p := ⟨imply₁⟩
 
-lemma efq'! (h : 𝓢 ⊢! ⊥) (f : F) : 𝓢 ⊢! f := by
-  rcases h with ⟨b⟩; exact ⟨efq' b f⟩
+def imply₂ : 𝓢 ⊢ (p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r := Minimal.imply₂ _ _ _
+@[simp] lemma imply₂! : 𝓢 ⊢! (p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r := ⟨imply₂⟩
 
-end EFQ
+def conj₁ : 𝓢 ⊢ p ⋏ q ⟶ p := Minimal.conj₁ _ _
+@[simp] lemma conj₁! : 𝓢 ⊢! p ⋏ q ⟶ p := ⟨conj₁⟩
+
+def conj₂ : 𝓢 ⊢ p ⋏ q ⟶ q := Minimal.conj₂ _ _
+@[simp] lemma conj₂! : 𝓢 ⊢! p ⋏ q ⟶ q := ⟨conj₂⟩
+
+def conj₃ : 𝓢 ⊢ p ⟶ q ⟶ p ⋏ q := Minimal.conj₃ _ _
+@[simp] lemma conj₃! : 𝓢 ⊢! p ⟶ q ⟶ p ⋏ q := ⟨conj₃⟩
+
+def disj₁ : 𝓢 ⊢ p ⟶ p ⋎ q := Minimal.disj₁ _ _
+@[simp] lemma disj₁! : 𝓢 ⊢! p ⟶ p ⋎ q := ⟨disj₁⟩
+
+def disj₂ : 𝓢 ⊢ q ⟶ p ⋎ q := Minimal.disj₂ _ _
+@[simp] lemma disj₂! : 𝓢 ⊢! q ⟶ p ⋎ q := ⟨disj₂⟩
+
+def disj₃ : 𝓢 ⊢ (p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q) ⟶ r := Minimal.disj₃ _ _ _
+@[simp] lemma disj₃! : 𝓢 ⊢! (p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q) ⟶ r := ⟨disj₃⟩
+
+def efq [HasEFQ 𝓢] : 𝓢 ⊢ ⊥ ⟶ p := HasEFQ.efq _
+@[simp] lemma efq! [HasEFQ 𝓢] : 𝓢 ⊢! ⊥ ⟶ p := ⟨efq⟩
+
+def efq' [HasEFQ 𝓢] (b : 𝓢 ⊢ ⊥) : 𝓢 ⊢ p := efq ⨀ b
+@[simp] lemma efq'! [HasEFQ 𝓢] (h : 𝓢 ⊢! ⊥) : 𝓢 ⊢! p := ⟨efq' h.some⟩
+
+def lem [HasLEM 𝓢] : 𝓢 ⊢ p ⋎ ~p := HasLEM.lem p
+@[simp] lemma lem! [HasLEM 𝓢] : 𝓢 ⊢! p ⋎ ~p := ⟨lem⟩
+
+def imply₁' (h : 𝓢 ⊢ p) : 𝓢 ⊢ q ⟶ p := imply₁ ⨀ h
+lemma imply₁'! (d : 𝓢 ⊢! p) : 𝓢 ⊢! q ⟶ p := ⟨imply₁' d.some⟩
+
+def dhyp (q : F) (b : 𝓢 ⊢ p) : 𝓢 ⊢ q ⟶ p := imply₁' b
+
+def imply₂' (d₁ : 𝓢 ⊢ p ⟶ q ⟶ r) (d₂ : 𝓢 ⊢ p ⟶ q) (d₃ : 𝓢 ⊢ p) : 𝓢 ⊢ r := imply₂ ⨀ d₁ ⨀ d₂ ⨀ d₃
+lemma imply₂'! (d₁ : 𝓢 ⊢! p ⟶ q ⟶ r) (d₂ : 𝓢 ⊢! p ⟶ q) (d₃ : 𝓢 ⊢! p) : 𝓢 ⊢! r := ⟨imply₂' d₁.some d₂.some d₃.some⟩
+
+def conj₁' (d : 𝓢 ⊢ p ⋏ q) : 𝓢 ⊢ p := conj₁ ⨀ d
+lemma conj₁'! (d : 𝓢 ⊢! (p ⋏ q)) : 𝓢 ⊢! p := ⟨conj₁' d.some⟩
+
+def conj₂' (d : 𝓢 ⊢ p ⋏ q) : 𝓢 ⊢ q := conj₂ ⨀ d
+lemma conj₂'! (d : 𝓢 ⊢! (p ⋏ q)) : 𝓢 ⊢! q := ⟨conj₂' d.some⟩
+
+def conj₃' (d₁ : 𝓢 ⊢ p) (d₂: 𝓢 ⊢ q) : 𝓢 ⊢ p ⋏ q := conj₃ ⨀ d₁ ⨀ d₂
+lemma conj₃'! (d₁ : 𝓢 ⊢! p) (d₂: 𝓢 ⊢! q) : 𝓢 ⊢! p ⋏ q := ⟨conj₃' d₁.some d₂.some⟩
+
+def disj₁' (d : 𝓢 ⊢ p) : 𝓢 ⊢ p ⋎ q := disj₁ ⨀ d
+lemma disj₁'! (d : 𝓢 ⊢! p) : 𝓢 ⊢! p ⋎ q := ⟨disj₁' d.some⟩
+
+def disj₂' (d : 𝓢 ⊢ q) : 𝓢 ⊢ p ⋎ q := disj₂ ⨀ d
+lemma disj₂'! (d : 𝓢 ⊢! q) : 𝓢 ⊢! p ⋎ q := ⟨disj₂' d.some⟩
+
+def disj₃' (d₁ : 𝓢 ⊢ p ⟶ r) (d₂ : 𝓢 ⊢ q ⟶ r) (d₃ : 𝓢 ⊢ p ⋎ q) : 𝓢 ⊢ r := disj₃ ⨀ d₁ ⨀ d₂ ⨀ d₃
+lemma disj₃'! (d₁ : 𝓢 ⊢! p ⟶ r) (d₂ : 𝓢 ⊢! q ⟶ r) (d₃ : 𝓢 ⊢! p ⋎ q) : 𝓢 ⊢! r := ⟨disj₃' d₁.some d₂.some d₃.some⟩
+
+def impId (p : F) : 𝓢 ⊢ p ⟶ p := Minimal.imply₂ p (p ⟶ p) p ⨀ imply₁ ⨀ imply₁
+@[simp] def imp_id! : 𝓢 ⊢! p ⟶ p := ⟨impId p⟩
+
+def mdp₁ (bqr : 𝓢 ⊢ p ⟶ q ⟶ r) (bq : 𝓢 ⊢ p ⟶ q) : 𝓢 ⊢ p ⟶ r := Minimal.imply₂ p q r ⨀ bqr ⨀ bq
+lemma mdp₁! (hqr : 𝓢 ⊢! p ⟶ q ⟶ r) (hq : 𝓢 ⊢! p ⟶ q) : 𝓢 ⊢! p ⟶ r := ⟨mdp₁ hqr.some hq.some⟩
+
+infixl:90 "⨀₁" => mdp₁
+
+infixl:90 "⨀₁" => mdp₁!
+
+def impTrans (bpq : 𝓢 ⊢ p ⟶ q) (bqr : 𝓢 ⊢ q ⟶ r) : 𝓢 ⊢ p ⟶ r := imply₂ ⨀ dhyp p bqr ⨀ bpq
+lemma imp_trans! (hpq : 𝓢 ⊢! p ⟶ q) (hqr : 𝓢 ⊢! q ⟶ r) : 𝓢 ⊢! p ⟶ r := ⟨impTrans hpq.some hqr.some⟩
+
+def generalConj [DecidableEq F] {Γ : List F} {p : F} (h : p ∈ Γ) : 𝓢 ⊢ Γ.conj ⟶ p :=
+  match Γ with
+  | []     => by simp at h
+  | q :: Γ =>
+    if e : p = q then cast (by simp [e]) (Minimal.conj₁ p Γ.conj) else
+      have : p ∈ Γ := by simpa [e] using h
+      impTrans (Minimal.conj₂ q Γ.conj) (generalConj this)
+
+lemma generalConj! [DecidableEq F] {Γ : List F} {p : F} (h : p ∈ Γ) : 𝓢 ⊢! Γ.conj ⟶ p := ⟨generalConj h⟩
+
+def implyAnd (bq : 𝓢 ⊢ p ⟶ q) (br : 𝓢 ⊢ p ⟶ r) : 𝓢 ⊢ p ⟶ q ⋏ r :=
+  dhyp p (Minimal.conj₃ q r) ⨀₁ bq ⨀₁ br
+
+def implyConj [DecidableEq F] (p : F) (Γ : List F) (b : (q : F) → q ∈ Γ → 𝓢 ⊢ p ⟶ q) : 𝓢 ⊢ p ⟶ Γ.conj :=
+  match Γ with
+  | []     => dhyp p verum
+  | q :: Γ => implyAnd (b q (by simp)) (implyConj p Γ (fun q hq ↦ b q (by simp [hq])))
+
+def conjImplyConj [DecidableEq F] {Γ Δ : List F} (h : Δ ⊆ Γ) : 𝓢 ⊢ Γ.conj ⟶ Δ.conj :=
+  implyConj _ _ (fun _ hq ↦ generalConj (h hq))
 
 end LO.System
