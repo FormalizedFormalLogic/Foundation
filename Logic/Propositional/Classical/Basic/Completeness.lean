@@ -38,7 +38,7 @@ theorem sound : ⊢¹ Δ → Semantics.Valid (Valuation α) Δ.disj := by
 
 end Derivation
 
-lemma soundness {T : Theory (Formula α)} {p} : T ⊢! p → T ⊨[Valuation α] p := by
+lemma soundness {T : Theory α} {p} : T ⊢! p → T ⊨[Valuation α] p := by
   rintro ⟨Γ, hΓ, d⟩ v hT
   by_contra hv
   have : ∀ v, v ⊧ p ∨ ∃ q ∈ Γ, ¬v ⊧ q := by
@@ -48,32 +48,32 @@ lemma soundness {T : Theory (Formula α)} {p} : T ⊢! p → T ⊨[Valuation α]
   have : v ⊧ q := hT.realize (hΓ q hqΓ)
   contradiction
 
-instance (T : Theory (Formula α)) : Sound T (Semantics.models (Valuation α) T.set)  := ⟨soundness⟩
+instance (T : Theory α) : Sound T (Semantics.models (Valuation α) T)  := ⟨soundness⟩
 
 section complete
 
-def consistentTheory : Set (Theory (Formula α)) := { U : Theory (Formula α) | System.Consistent U }
+def consistentTheory : Set (Theory α) := { U : Theory α | System.Consistent U }
 
-variable {T : Theory (Formula α)} (consisT : Consistent T)
+variable {T : Theory α} (consisT : Consistent T)
 open System Gentzen
 
 lemma exists_maximal_consistent_theory :
     ∃ Z, Consistent Z ∧ T ⊆ Z ∧ ∀ U, Consistent U → Z ⊆ U → U = Z :=
-  have : ∃ Z : Set (Formula α), Consistent Z.theory ∧ T.set ⊆ Z ∧ ∀ U : Set (Formula α), Consistent U.theory → Z ⊆ U → U = Z :=
-    zorn_subset_nonempty { U : Set (Formula α) | Consistent U.theory }
+  have : ∃ Z : Theory α, Consistent Z ∧ T ⊆ Z ∧ ∀ U : Theory α, Consistent U → Z ⊆ U → U = Z :=
+    zorn_subset_nonempty { U : Theory α | Consistent U }
       (fun c hc chain hnc ↦ ⟨⋃₀ c,
        by simp
           by_contra A
           rcases System.inconsistent_compact.mp (System.not_consistent_iff_inconsistent.mp A) with ⟨𝓕, h𝓕, fin, 𝓕_consis⟩
           rcases Set.subset_mem_chain_of_finite c hnc chain (s := 𝓕) fin h𝓕 with ⟨U, hUc, hsU⟩
-          have : Consistent U.theory := hc hUc
-          have : ¬Consistent U.theory := (𝓕_consis.of_supset hsU).not_con
+          have : Consistent U := hc hUc
+          have : ¬Consistent U := (𝓕_consis.of_supset hsU).not_con
           contradiction,
        fun s a => Set.subset_sUnion_of_mem a⟩) T consisT
   by rcases this with ⟨Z, con, ss, hZ⟩
-     exact ⟨Z, con, ss, by intro U conU ssU; apply Theory.setext; simpa using hZ U conU ssU⟩
+     exact ⟨Z, con, ss, by intro U conU ssU; simpa using hZ U conU ssU⟩
 
-noncomputable def maximalConsistentTheory : Theory (Formula α) :=
+noncomputable def maximalConsistentTheory : Theory α :=
   Classical.choose (exists_maximal_consistent_theory consisT)
 
 variable {consisT}
@@ -89,13 +89,9 @@ lemma maximalConsistentTheory_maximal :
   (Classical.choose_spec (exists_maximal_consistent_theory consisT)).2.2
 
 @[simp] lemma theory_maximalConsistentTheory_eq :
-    Set.theory (theory (maximalConsistentTheory consisT)) = maximalConsistentTheory consisT :=
-  maximalConsistentTheory_maximal (U := Set.theory <| theory (maximalConsistentTheory consisT)) (by simp)
-    (by simpa [Theory.subset_def] using System.Axiomatized.axm_subset (maximalConsistentTheory consisT))
-
-@[simp] lemma theory_maximalConsistentTheory_eq' :
     theory (maximalConsistentTheory consisT) = maximalConsistentTheory consisT :=
-  congr_arg Theory.set <| theory_maximalConsistentTheory_eq (consisT := consisT)
+  maximalConsistentTheory_maximal (U := theory (maximalConsistentTheory consisT)) (by simp)
+    (by simpa using System.Axiomatized.axm_subset (maximalConsistentTheory consisT))
 
 lemma mem_or_neg_mem_maximalConsistentTheory (p) :
     p ∈ maximalConsistentTheory consisT ∨ ~p ∈ maximalConsistentTheory consisT := by
@@ -105,7 +101,7 @@ lemma mem_or_neg_mem_maximalConsistentTheory (p) :
     consistent_insert_iff_not_refutable.mpr
       (show ~p ∉ theory (maximalConsistentTheory consisT) from by simpa using hp.2)
   have : insert p (maximalConsistentTheory consisT) ≠ maximalConsistentTheory consisT := by
-    simp [hp, Theory.setext_iff]
+    simp [hp]
   have : insert p (maximalConsistentTheory consisT) = maximalConsistentTheory consisT :=
     maximalConsistentTheory_maximal _ (by assumption) (by simp)
   contradiction
@@ -151,7 +147,7 @@ lemma mem_maximalConsistentTheory_or {p q} (h : p ⋎ q ∈ maximalConsistentThe
   simp_all
 
 lemma maximalConsistentTheory_satisfiable :
-    (⟨(Formula.atom · ∈ maximalConsistentTheory consisT)⟩ : Valuation α) ⊧* maximalConsistentTheory consisT := ⟨by
+    Valuation.mk (Formula.atom · ∈ maximalConsistentTheory consisT) ⊧* maximalConsistentTheory consisT := ⟨by
   intro p hp
   induction p using Formula.rec' <;> simp
   case hatom => simpa
@@ -170,7 +166,7 @@ lemma maximalConsistentTheory_satisfiable :
 
 lemma satisfiableTheory_of_consistent (consisT : Consistent T) : Semantics.Satisfiable (Valuation α) T :=
   ⟨⟨(Formula.atom · ∈ maximalConsistentTheory consisT)⟩,
-    Semantics.RealizeSet.of_subset maximalConsistentTheory_satisfiable (by simp [←Theory.subset_def])⟩
+    Semantics.RealizeSet.of_subset maximalConsistentTheory_satisfiable (by simp)⟩
 
 theorem completeness! : T ⊨[Valuation α] p → T ⊢! p := by
   suffices Consistent (insert (~p) T) → Semantics.Satisfiable (Valuation α) (insert (~p) T) by
@@ -189,7 +185,7 @@ theorem completeness! : T ⊨[Valuation α] p → T ⊢! p := by
 noncomputable def completeness : T ⊨[Valuation α] p → T ⊢ p :=
   λ h ↦ (completeness! h).prf
 
-instance (T : Theory (Formula α)) : Complete T (Semantics.models (Valuation α) T.set)  where
+instance (T : Theory α) : Complete T (Semantics.models (Valuation α) T)  where
   complete := completeness!
 
 end complete

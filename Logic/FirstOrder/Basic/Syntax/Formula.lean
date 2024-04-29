@@ -546,19 +546,14 @@ end fvListing
 
 end Semiformula
 
-abbrev Theory (L : Language) := Set (Sentence L)
-
 abbrev SyntacticTheory (L : Language) := Set (SyntacticFormula L)
 
-def Theory.lMap (Φ : L₁ →ᵥ L₂) (T : Theory L₁) : Theory L₂ := Semiformula.lMap Φ '' T
+def theorylMap (Φ : L₁ →ᵥ L₂) (T : Theory (Sentence L₁)) : Theory (Sentence L₂) := Semiformula.lMap Φ '' T.set
 
 namespace Theory
 
-variable (T U : Theory L)
 
-instance {L : Language} : Add (Theory L) := ⟨(· ∪ ·)⟩
 
-lemma add_def : T + U = T ∪ U := rfl
 
 end Theory
 

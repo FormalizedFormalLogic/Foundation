@@ -1,4 +1,5 @@
 import Logic.Logic.LogicSymbol
+import Logic.Vorspiel.Collection
 
 namespace LO
 
@@ -190,6 +191,10 @@ lemma ne_of_ne_complexity {p q : Formula α} (h : p.complexity ≠ q.complexity)
   by rintro rfl; contradiction
 
 end Formula
+
+abbrev Theory (α : Type*) := Set (Formula α)
+
+instance : Collection (Formula α) (Theory α) := inferInstance
 
 end Propositional.Classical
 

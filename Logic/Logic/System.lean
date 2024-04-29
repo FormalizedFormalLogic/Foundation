@@ -1,5 +1,7 @@
 import Logic.Logic.LogicSymbol
 import Logic.Logic.Semantics
+import Logic.Vorspiel.Collection
+
 /-!
 # Basic definitions and properties of proof system related notions
 
@@ -26,7 +28,7 @@ infix:45 " ⊢ " => System.Prf
 
 namespace System
 
-variable {S : Type*} {F : Type*} [System S F]
+variable {S T U : Type*} {F : Type*} [System S F] [System T F] [System U F]
 
 section
 
@@ -65,30 +67,87 @@ lemma provableSet_iff {𝓢 : S} {s : Set F} :
 noncomputable def ProvableSet.prfSet {𝓢 : S} {s : Set F} (h : 𝓢 ⊢*! s) : 𝓢 ⊢* s :=
   Classical.choice (α := 𝓢 ⊢* s) (provableSet_iff.mp h : Nonempty (𝓢 ⊢* s))
 
-instance : Preorder S where
-  le := fun 𝓢 𝓢' ↦ theory 𝓢 ⊆ theory 𝓢'
-  le_refl := fun 𝓢 ↦ Set.Subset.refl _
-  le_trans := fun _ _ _ h₁ h₂ ↦ Set.Subset.trans h₁ h₂
+def Reducible (𝓢 : S) (𝓣 : T) : Prop := theory 𝓢 ⊆ theory 𝓣
 
-lemma le_iff {𝓢 𝓢' : S} : 𝓢 ≤ 𝓢' ↔ (∀ {f}, 𝓢 ⊢! f → 𝓢' ⊢! f) :=
+infix:40 " ≤ₛ " => Reducible
+
+def StrictReducible (𝓢 : S) (𝓣 : T) : Prop := 𝓢 ≤ₛ 𝓣 ∧ ¬𝓣 ≤ₛ 𝓢
+
+infix:40 " <ₛ " => StrictReducible
+
+def Equiv (𝓢 : S) (𝓣 : T) : Prop := theory 𝓢 = theory 𝓣
+
+infix:40 " =ₛ " => Equiv
+
+section
+
+variable {𝓢 : S} {𝓣 : T} {𝓤 : U}
+
+@[simp, refl] protected lemma Reducible.refl (𝓢 : S) : 𝓢 ≤ₛ 𝓢 := Set.Subset.refl _
+
+@[trans] lemma Reducible.trans : 𝓢 ≤ₛ 𝓣 → 𝓣 ≤ₛ 𝓤 → 𝓢 ≤ₛ 𝓤 := Set.Subset.trans
+
+lemma reducible_iff : 𝓢 ≤ₛ 𝓣 ↔ (∀ {f}, 𝓢 ⊢! f → 𝓣 ⊢! f) :=
   ⟨fun h _ hf ↦ h hf, fun h _ hf ↦ h hf⟩
 
-lemma lt_iff {𝓢 𝓢' : S} : 𝓢 < 𝓢' ↔ (∀ {f}, 𝓢 ⊢! f → 𝓢' ⊢! f) ∧ (∃ f, 𝓢 ⊬! f ∧ 𝓢' ⊢! f) := by
-  simp [lt_iff_le_not_le, le_iff]; intro _
+lemma strictReducible_iff : 𝓢 <ₛ 𝓣 ↔ (∀ {f}, 𝓢 ⊢! f → 𝓣 ⊢! f) ∧ (∃ f, 𝓢 ⊬! f ∧ 𝓣 ⊢! f) := by
+  simp [StrictReducible, reducible_iff]; intro _
   exact exists_congr (fun _ ↦ by simp [and_comm])
 
-lemma weakening {𝓢 𝓢' : S} (h : 𝓢 ≤ 𝓢') {f} : 𝓢 ⊢! f → 𝓢' ⊢! f := le_iff.mp h
+lemma weakening (h : 𝓢 ≤ₛ 𝓣) {f} : 𝓢 ⊢! f → 𝓣 ⊢! f := reducible_iff.mp h
 
-instance : Setoid S where
-  r := fun 𝓢 𝓢' ↦ theory 𝓢 = theory 𝓢'
+lemma Equiv.iff {𝓢 𝓣 : S} : 𝓢 =ₛ 𝓣 ↔ (∀ f, 𝓢 ⊢! f ↔ 𝓣 ⊢! f) := by simp [Equiv, Set.ext_iff, theory]
+
+@[simp, refl] protected lemma Equiv.refl (𝓢 : S) : 𝓢 =ₛ 𝓢 := rfl
+
+@[symm] lemma Equiv.symm : 𝓢 =ₛ 𝓣 → 𝓣 =ₛ 𝓢 := Eq.symm
+
+@[trans] lemma Equiv.trans : 𝓢 =ₛ 𝓣 → 𝓣 =ₛ 𝓤 → 𝓢 =ₛ 𝓤 := Eq.trans
+
+lemma Equiv.antisymm_iff : 𝓢 =ₛ 𝓣 ↔ 𝓢 ≤ₛ 𝓣 ∧ 𝓣 ≤ₛ 𝓢 := Set.Subset.antisymm_iff
+
+alias ⟨_, Equiv.antisymm⟩ := Equiv.antisymm_iff
+
+lemma Equiv.le : 𝓢 =ₛ 𝓣 → 𝓢 ≤ₛ 𝓣 := by simp [Equiv, Reducible]; intro e; rw [e]
+
+end
+
+variable (S)
+
+instance equiv : Setoid S where
+  r := (· =ₛ ·)
   iseqv := { refl := fun _ ↦ rfl, symm := Eq.symm, trans := Eq.trans }
 
-lemma equiv_def {𝓢 𝓢' : S} : 𝓢 ≈ 𝓢' ↔ theory 𝓢 = theory 𝓢' := iff_of_eq rfl
+abbrev Logic := Quotient (equiv S)
 
-lemma equiv_iff {𝓢 𝓢' : S} : 𝓢 ≈ 𝓢' ↔ (∀ f, 𝓢 ⊢! f ↔ 𝓢' ⊢! f) := by simp [equiv_def, Set.ext_iff, theory]
+variable {S}
 
-lemma le_antisymm {𝓢 𝓢' : S} (h : 𝓢 ≤ 𝓢') (h' : 𝓢' ≤ 𝓢) : 𝓢 ≈ 𝓢' :=
-  equiv_iff.mpr (fun _ ↦ ⟨fun hf ↦ le_iff.mp h hf, fun hf ↦ le_iff.mp h' hf⟩)
+lemma equiv_def {𝓢 𝓣 : S} : 𝓢 ≈ 𝓣 ↔ theory 𝓢 = theory 𝓣 := iff_of_eq rfl
+
+namespace Logic
+
+@[simp] lemma of_eq_of {𝓢 𝓣 : S} : (⟦𝓢⟧ : Logic S) = ⟦𝓣⟧ ↔ 𝓢 ≈ 𝓣 := Quotient.eq
+
+instance : LE (Logic S) :=
+  ⟨Quotient.lift₂ (· ≤ₛ ·) (fun 𝓢₁ 𝓣₁ 𝓢₂ 𝓣₂ h𝓢 h𝓣 ↦ by simp [Reducible, equiv_def.mp h𝓢, equiv_def.mp h𝓣])⟩
+
+@[simp] lemma le_iff {𝓢 𝓣 : S} : (⟦𝓢⟧ : Logic S) ≤ ⟦𝓣⟧ ↔ 𝓢 ≤ₛ 𝓣 := iff_of_eq rfl
+
+instance : PartialOrder (Logic S) where
+  le_refl := fun Λ ↦ by induction Λ using Quotient.ind; simp
+  le_trans := fun Λ₁ Λ₂ Λ₃ ↦ by
+    induction Λ₁ using Quotient.ind
+    induction Λ₂ using Quotient.ind
+    induction Λ₃ using Quotient.ind
+    simp; exact Reducible.trans
+  le_antisymm := fun Λ₁ Λ₂ ↦ by
+    induction Λ₁ using Quotient.ind
+    induction Λ₂ using Quotient.ind
+    simp; exact le_antisymm
+
+@[simp] lemma lt_iff {𝓢 𝓣 : S} : (⟦𝓢⟧ : Logic S) < ⟦𝓣⟧ ↔ 𝓢 <ₛ 𝓣 := iff_of_eq rfl
+
+end Logic
 
 @[simp] lemma provableSet_theory (𝓢 : S) : 𝓢 ⊢*! theory 𝓢 := fun _ hf ↦ hf
 
@@ -99,6 +158,10 @@ class Consistent (𝓢 : S) : Prop where
 
 lemma inconsistent_def {𝓢 : S} :
     Inconsistent 𝓢 ↔ ∀ f, 𝓢 ⊢! f := by simp [Inconsistent]
+
+lemma inconsistent_iff_theory_eq {𝓢 : S} :
+    Inconsistent 𝓢 ↔ theory 𝓢 = Set.univ := by
+  simp [Inconsistent, Set.ext_iff, theory]
 
 lemma not_inconsistent_iff_consistent {𝓢 : S} :
     ¬Inconsistent 𝓢 ↔ Consistent 𝓢 :=
@@ -125,18 +188,32 @@ lemma inconsistent_iff_theory_eq_univ {𝓢 : S} :
 
 alias ⟨Inconsistent.theory_eq, _⟩ := inconsistent_iff_theory_eq_univ
 
-lemma Inconsistent.equiv {𝓢 𝓢' : S} (h : Inconsistent 𝓢) (h' : Inconsistent 𝓢') : 𝓢 ≈ 𝓢' :=
+lemma Inconsistent.equiv {𝓢 𝓣 : S} (h : Inconsistent 𝓢) (h' : Inconsistent 𝓣) : 𝓢 ≈ 𝓣 :=
   Set.ext fun f ↦ by simp [h.theory_eq, h'.theory_eq]
 
-lemma Inconsistent.of_ge {𝓢 𝓢' : S} (h𝓢 : Inconsistent 𝓢) (h : 𝓢 ≤ 𝓢') : Inconsistent 𝓢' :=
+lemma Inconsistent.of_ge {𝓢 : S} {𝓣 : T} (h𝓢 : Inconsistent 𝓢) (h : 𝓢 ≤ₛ 𝓣) : Inconsistent 𝓣 :=
   fun f ↦ h (h𝓢 f)
 
-lemma Consistent.of_le {𝓢 𝓢' : S} (h𝓢 : Consistent 𝓢) (h : 𝓢' ≤ 𝓢) : Consistent 𝓢' :=
+lemma Consistent.of_le {𝓢 : S} {𝓣 : T} (h𝓢 : Consistent 𝓢) (h : 𝓣 ≤ₛ 𝓢) : Consistent 𝓣 :=
   ⟨fun H ↦ not_consistent_iff_inconsistent.mpr (H.of_ge h) h𝓢⟩
 
-structure Translation {S S' F F'} [System S F] [System S' F'] (𝓢 : S) (𝓢' : S') where
+namespace Logic
+
+protected def Inconsistent (Λ : Logic S) : Prop :=
+  Quotient.lift Inconsistent (fun 𝓢 𝓣 h ↦ by simp [inconsistent_iff_theory_eq, equiv_def.mp h]) Λ
+
+@[simp] lemma inconsistent_mk (𝓢 : S) : Logic.Inconsistent (⟦𝓢⟧ : Logic S) ↔ Inconsistent 𝓢 := iff_of_eq rfl
+
+protected def Consistent (Λ : Logic S) : Prop :=
+  Quotient.lift Consistent (fun 𝓢 𝓣 h ↦ by simp [←not_inconsistent_iff_consistent, inconsistent_iff_theory_eq, equiv_def.mp h]) Λ
+
+@[simp] lemma consistent_mk (𝓢 : S) : Logic.Consistent (⟦𝓢⟧ : Logic S) ↔ Consistent 𝓢 := iff_of_eq rfl
+
+end Logic
+
+structure Translation {S S' F F'} [System S F] [System S' F'] (𝓢 : S) (𝓣 : S') where
   toFun : F → F'
-  prf {f} : 𝓢 ⊢ f → 𝓢' ⊢ toFun f
+  prf {f} : 𝓢 ⊢ f → 𝓣 ⊢ toFun f
 
 infix:40 " ↝ " => Translation
 
@@ -144,7 +221,7 @@ namespace Translation
 
 variable {S S' S'' : Type*} {F F' F'' : Type*} [System S F] [System S' F'] [System S'' F'']
 
-instance (𝓢 : S) (𝓢' : S') : CoeFun (Translation 𝓢 𝓢') (fun _ ↦ F → F') := ⟨Translation.toFun⟩
+instance (𝓢 : S) (𝓣 : S') : CoeFun (Translation 𝓢 𝓣) (fun _ ↦ F → F') := ⟨Translation.toFun⟩
 
 protected def id (𝓢 : S) : 𝓢 ↝ 𝓢 where
   toFun := id
@@ -152,11 +229,11 @@ protected def id (𝓢 : S) : 𝓢 ↝ 𝓢 where
 
 @[simp] lemma id_app (𝓢 : S) (f : F) : Translation.id 𝓢 f = f := rfl
 
-def comp {𝓢 : S} {𝓢' : S'} {𝓢'' : S''} (φ : 𝓢' ↝ 𝓢'') (ψ : 𝓢 ↝ 𝓢') : 𝓢 ↝ 𝓢'' where
+def comp {𝓢 : S} {𝓣 : S'} {𝓢'' : S''} (φ : 𝓣 ↝ 𝓢'') (ψ : 𝓢 ↝ 𝓣) : 𝓢 ↝ 𝓢'' where
   toFun := φ.toFun ∘ ψ.toFun
   prf := φ.prf ∘ ψ.prf
 
-@[simp] lemma comp_app {𝓢 : S} {𝓢' : S'} {𝓢'' : S''} (φ : 𝓢' ↝ 𝓢'') (ψ : 𝓢 ↝ 𝓢') (f : F) :
+@[simp] lemma comp_app {𝓢 : S} {𝓣 : S'} {𝓢'' : S''} (φ : 𝓣 ↝ 𝓢'') (ψ : 𝓢 ↝ 𝓣) (f : F) :
     φ.comp ψ f = φ (ψ f) := rfl
 
 end Translation
@@ -173,56 +250,49 @@ def Undecidable (f : F) : Prop := 𝓢 ⊬! f ∧ 𝓢 ⊬! ~f
 
 end
 
-variable (S)
+variable (S T)
 
-class Axiomatized where
-  axm : S → Set F
-  prfAxm (𝓢 : S) : 𝓢 ⊢* axm 𝓢
-  weakening {𝓢 𝓢' : S} : axm 𝓢 ⊆ axm 𝓢' → 𝓢 ⊢ f → 𝓢' ⊢ f
+class Axiomatized [Collection F S] where
+  prfAxm (𝓢 : S) : 𝓢 ⊢* Collection.set 𝓢
+  weakening {𝓢 𝓣 : S} : 𝓢 ⊆ 𝓣 → 𝓢 ⊢ f → 𝓣 ⊢ f
 
-class StrongCut [Axiomatized S] where
-  cut {𝓢 𝓣 : S} {p} : 𝓢 ⊢* Axiomatized.axm 𝓣 → 𝓣 ⊢ p → 𝓢 ⊢ p
+class StrongCut [Collection F S] [Collection F T] [Axiomatized S] where
+  cut {𝓢 : S} {𝓣 : T} {p} : 𝓢 ⊢* Collection.set 𝓣 → 𝓣 ⊢ p → 𝓢 ⊢ p
 
-variable {S}
+variable {S T}
 
 section Axiomatized
 
 namespace Axiomatized
 
-variable [Axiomatized S] {𝓢 𝓢' : S}
+variable [Collection F S] [Axiomatized S] {𝓢 𝓣 : S}
 
-@[simp] lemma provable_axm (𝓢 : S) : 𝓢 ⊢*! axm 𝓢 := fun _ hf ↦ ⟨prfAxm 𝓢 hf⟩
+@[simp] lemma provable_axm (𝓢 : S) : 𝓢 ⊢*! Collection.set 𝓢 := fun _ hf ↦ ⟨prfAxm 𝓢 hf⟩
 
-lemma axm_subset (𝓢 : S) : axm 𝓢 ⊆ theory 𝓢 := fun p hp ↦ provable_axm 𝓢 p hp
+lemma axm_subset (𝓢 : S) : Collection.set 𝓢 ⊆ theory 𝓢 := fun p hp ↦ provable_axm 𝓢 p hp
 
-abbrev AxmSubset (𝓢 𝓢' : S) : Prop := axm 𝓢 ⊆ axm 𝓢'
-
-infix:45 " ⊆ₐₓ " => AxmSubset
-
-lemma le_of_subset_axm (h : 𝓢 ⊆ₐₓ 𝓢') : 𝓢 ≤ 𝓢' := by rintro f ⟨b⟩; exact ⟨weakening h b⟩
+lemma le_of_subset_axm (h : 𝓢 ⊆ 𝓣) : 𝓢 ≤ₛ 𝓣 := by rintro f ⟨b⟩; exact ⟨weakening h b⟩
 
 end Axiomatized
 
-variable [Axiomatized S]
+variable [Collection F S] [Collection F T] [Axiomatized S]
 
-abbrev Finite (𝓢 : S) : Prop := (Axiomatized.axm 𝓢).Finite
+def FiniteAxiomatizable (𝓢 : S) : Prop := ∃ 𝓕 : S, Collection.Finite 𝓕 ∧ 𝓕 ≈ 𝓢
 
-def FiniteAxiomatizable (𝓢 : S) : Prop := ∃ 𝓕 : S, Finite 𝓕 ∧ 𝓕 ≈ 𝓢
-
-lemma Consistent.of_subset {𝓢 𝓢' : S} (h𝓢 : Consistent 𝓢) (h : 𝓢' ⊆ₐₓ 𝓢) : Consistent 𝓢' :=
+lemma Consistent.of_subset {𝓢 𝓣 : S} (h𝓢 : Consistent 𝓢) (h : 𝓣 ⊆ 𝓢) : Consistent 𝓣 :=
   h𝓢.of_le (Axiomatized.le_of_subset_axm h)
 
-lemma Inconsistent.of_supset {𝓢 𝓢' : S} (h𝓢 : Inconsistent 𝓢) (h : 𝓢 ⊆ₐₓ 𝓢') : Inconsistent 𝓢' :=
+lemma Inconsistent.of_supset {𝓢 𝓣 : S} (h𝓢 : Inconsistent 𝓢) (h : 𝓢 ⊆ 𝓣) : Inconsistent 𝓣 :=
   h𝓢.of_ge (Axiomatized.le_of_subset_axm h)
 
 namespace StrongCut
 
-variable [StrongCut S]
+variable [StrongCut S T]
 
-lemma cut! {𝓢 𝓣 : S} {p : F} (H : 𝓢 ⊢*! Axiomatized.axm 𝓣) (hp : 𝓣 ⊢! p) : 𝓢 ⊢! p := by
+lemma cut! {𝓢 : S} {𝓣 : T} {p : F} (H : 𝓢 ⊢*! Collection.set 𝓣) (hp : 𝓣 ⊢! p) : 𝓢 ⊢! p := by
   rcases hp with ⟨b⟩; exact ⟨StrongCut.cut H.prfSet b⟩
 
-def translation {𝓢 𝓣 : S} (B : 𝓢 ⊢* Axiomatized.axm 𝓣) : 𝓣 ↝ 𝓢 where
+def translation {𝓢 : S} {𝓣 : T} (B : 𝓢 ⊢* Collection.set 𝓣) : 𝓣 ↝ 𝓢 where
   toFun := id
   prf := StrongCut.cut B
 
@@ -233,8 +303,8 @@ variable (S)
 class Compact where
   φ {𝓢 : S} {f : F} : 𝓢 ⊢ f → S
   φPrf {𝓢 : S} {f : F} (b : 𝓢 ⊢ f) : φ b ⊢ f
-  φ_subset {𝓢 : S} {f : F} (b : 𝓢 ⊢ f) : φ b ⊆ₐₓ 𝓢
-  φ_finite {𝓢 : S} {f : F} (b : 𝓢 ⊢ f) : Finite (φ b)
+  φ_subset {𝓢 : S} {f : F} (b : 𝓢 ⊢ f) : φ b ⊆ 𝓢
+  φ_finite {𝓢 : S} {f : F} (b : 𝓢 ⊢ f) : Collection.Finite (φ b)
 
 variable {S}
 
@@ -242,13 +312,85 @@ namespace Compact
 
 variable [Compact S]
 
-lemma finite_provable {𝓢 : S} (h : 𝓢 ⊢! f) : ∃ 𝓕 : S, 𝓕 ⊆ₐₓ 𝓢 ∧ Finite 𝓕 ∧ 𝓕 ⊢! f := by
+lemma finite_provable {𝓢 : S} (h : 𝓢 ⊢! f) : ∃ 𝓕 : S, 𝓕 ⊆ 𝓢 ∧ Collection.Finite 𝓕 ∧ 𝓕 ⊢! f := by
   rcases h with ⟨b⟩
   exact ⟨φ b, φ_subset b, φ_finite b, ⟨φPrf b⟩⟩
 
 end Compact
 
 end Axiomatized
+
+end System
+
+namespace System
+
+variable {S : Type*} {F : Type*} [LogicalConnective F] [System S F]
+
+variable (S)
+
+class DeductiveExplosion where
+  dexp {𝓢 : S} : 𝓢 ⊢ ⊥ → (p : F) → 𝓢 ⊢ p
+
+variable {S}
+
+section
+
+variable [DeductiveExplosion S]
+
+def DeductiveExplosion.dexp! {𝓢 : S} (h : 𝓢 ⊢! ⊥) (f : F) : 𝓢 ⊢! f := by
+  rcases h with ⟨b⟩; exact ⟨dexp b f⟩
+
+lemma inconsistent_iff_provable_bot {𝓢 : S} :
+    Inconsistent 𝓢 ↔ 𝓢 ⊢! ⊥ := ⟨fun h ↦ h ⊥, fun h f ↦ DeductiveExplosion.dexp! h f⟩
+
+alias ⟨_, inconsistent_of_provable⟩ := inconsistent_iff_provable_bot
+
+lemma consistent_iff_unprovable_bot {𝓢 : S} :
+    Consistent 𝓢 ↔ 𝓢 ⊬! ⊥ := by
+  simp [inconsistent_iff_provable_bot, ←not_inconsistent_iff_consistent]
+
+alias ⟨Consistent.not_bot, _⟩ := consistent_iff_unprovable_bot
+
+variable [Collection F S] [Axiomatized S] [Compact S]
+
+lemma inconsistent_compact {𝓢 : S} :
+    Inconsistent 𝓢 ↔ ∃ 𝓕 : S, 𝓕 ⊆ 𝓢 ∧ Collection.Finite 𝓕 ∧ Inconsistent 𝓕 :=
+  ⟨fun H ↦ by rcases Compact.finite_provable (H ⊥) with ⟨𝓕, h𝓕, fin, h⟩; exact ⟨𝓕, h𝓕, fin, inconsistent_of_provable h⟩, by
+    rintro ⟨𝓕, h𝓕, _, H⟩; exact H.of_supset h𝓕⟩
+
+lemma consistent_compact {𝓢 : S} :
+    Consistent 𝓢 ↔ ∀ 𝓕 : S, 𝓕 ⊆ 𝓢 → Collection.Finite 𝓕 → Consistent 𝓕 := by
+  simp [←not_inconsistent_iff_consistent, inconsistent_compact (𝓢 := 𝓢)]
+
+end
+
+variable (S)
+
+class Deduction [Cons F S] where
+  ofInsert {p q : F} {𝓢 : S} : cons p 𝓢 ⊢ q → 𝓢 ⊢ p ⟶ q
+  inv {p q : F} {𝓢 : S} : 𝓢 ⊢ p ⟶ q → cons p 𝓢 ⊢ q
+
+variable {S}
+
+section
+
+variable [Cons F S] [Deduction S]
+
+alias deduction := Deduction.ofInsert
+
+lemma Deduction.of_insert! {p q : F} {𝓢 : S} (h : cons p 𝓢 ⊢! q) : 𝓢 ⊢! p ⟶ q := by
+  rcases h with ⟨b⟩; exact ⟨Deduction.ofInsert b⟩
+
+alias deduction! := Deduction.of_insert!
+
+lemma Deduction.inv! {p q : F} {𝓢 : S} (h : 𝓢 ⊢! p ⟶ q) : cons p 𝓢 ⊢! q := by
+  rcases h with ⟨b⟩; exact ⟨Deduction.inv b⟩
+
+def Deduction.translation (p : F) (𝓢 : S) : cons p 𝓢 ↝ 𝓢 where
+  toFun := fun q ↦ p ⟶ q
+  prf := deduction
+
+end
 
 end System
 
@@ -329,76 +471,5 @@ end
 end Complete
 
 end
-
-namespace System
-
-variable {S : Type*} {F : Type*} [LogicalConnective F] [System S F]
-
-variable (S)
-
-class DeductiveExplosion where
-  dexp {𝓢 : S} : 𝓢 ⊢ ⊥ → (p : F) → 𝓢 ⊢ p
-
-variable {S}
-
-section
-
-variable [DeductiveExplosion S]
-
-def DeductiveExplosion.dexp! {𝓢 : S} (h : 𝓢 ⊢! ⊥) (f : F) : 𝓢 ⊢! f := by
-  rcases h with ⟨b⟩; exact ⟨dexp b f⟩
-
-lemma inconsistent_iff_provable_bot {𝓢 : S} :
-    Inconsistent 𝓢 ↔ 𝓢 ⊢! ⊥ := ⟨fun h ↦ h ⊥, fun h f ↦ DeductiveExplosion.dexp! h f⟩
-
-alias ⟨_, inconsistent_of_provable⟩ := inconsistent_iff_provable_bot
-
-lemma consistent_iff_unprovable_bot {𝓢 : S} :
-    Consistent 𝓢 ↔ 𝓢 ⊬! ⊥ := by
-  simp [inconsistent_iff_provable_bot, ←not_inconsistent_iff_consistent]
-
-alias ⟨Consistent.not_bot, _⟩ := consistent_iff_unprovable_bot
-
-variable [Axiomatized S] [Compact S]
-
-lemma consistent_compact {𝓢 : S} :
-    Consistent 𝓢 ↔ ∀ 𝓕 : S, 𝓕 ⊆ₐₓ 𝓢 → Finite 𝓕 → Consistent 𝓕 :=
-  ⟨fun H 𝓕 h𝓕 _ ↦ H.of_subset h𝓕,
-   fun H ↦ consistent_iff_unprovable_bot.mpr <| fun b ↦ by
-      rcases Compact.finite_provable b with ⟨𝓕, fin, h𝓕, h⟩
-      exact (H 𝓕 fin h𝓕).not_bot h⟩
-
-lemma inconsistent_compact {𝓢 : S} :
-    Inconsistent 𝓢 ↔ ∃ 𝓕 : S, 𝓕 ⊆ₐₓ 𝓢 ∧ Finite 𝓕 ∧ Inconsistent 𝓕 := by
-  simp [←not_consistent_iff_inconsistent, consistent_compact (𝓢 := 𝓢)]
-  tauto
-
-end
-
-variable (S)
-
-class Deduction [Insert F S] where
-  ofInsert {p q : F} {𝓢 : S} : insert p 𝓢 ⊢ q → 𝓢 ⊢ p ⟶ q
-  inv {p q : F} {𝓢 : S} : 𝓢 ⊢ p ⟶ q → insert p 𝓢 ⊢ q
-
-variable {S}
-
-section
-
-variable [Insert F S] [Deduction S]
-
-alias deduction := Deduction.ofInsert
-
-lemma Deduction.of_insert! {p q : F} {𝓢 : S} (h : insert p 𝓢 ⊢! q) : 𝓢 ⊢! p ⟶ q := by
-  rcases h with ⟨b⟩; exact ⟨Deduction.ofInsert b⟩
-
-alias deduction! := Deduction.of_insert!
-
-lemma Deduction.inv! {p q : F} {𝓢 : S} (h : 𝓢 ⊢! p ⟶ q) : insert p 𝓢 ⊢! q := by
-  rcases h with ⟨b⟩; exact ⟨Deduction.inv b⟩
-
-end
-
-end System
 
 end LO
