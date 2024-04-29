@@ -6,7 +6,7 @@ namespace LO
 
 namespace Propositional.Classical
 
-variable (T : Theory (Formula ℕ)) {p q r : Formula ℕ}
+variable (T : Theory ℕ) {p q r : Formula ℕ}
 
 example : T ⊢! p ⋎ q ⋎ r ⋎ s ⟷ r ⋎ p ⋎ s ⋎ q ⋎ p := by tautology
 

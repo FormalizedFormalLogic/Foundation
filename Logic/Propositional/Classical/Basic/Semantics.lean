@@ -47,7 +47,7 @@ structure Valuation (α : Type*) where
 
 instance : CoeFun (Valuation α) (fun _ ↦ α → Prop) := ⟨Valuation.val⟩
 
-instance semantics : Semantics (Valuation α) (Formula α) := ⟨fun v ↦ Formula.val v⟩
+instance semantics : Semantics (Formula α) (Valuation α) := ⟨fun v ↦ Formula.val v⟩
 
 lemma models_iff_val {v : Valuation α} {f : Formula α} : v ⊧ f ↔ Formula.val v f := iff_of_eq rfl
 

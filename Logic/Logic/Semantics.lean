@@ -14,10 +14,10 @@ Also provides 𝓜 characterization of compactness.
 
 namespace LO
 
-class Semantics (M : Type*) (F : outParam Type*) where
+class Semantics (F : outParam Type*) (M : Type*) where
   Realize : M → F → Prop
 
-variable {M : Type*} {F : Type*} [LogicalConnective F] [𝓢 : Semantics M F]
+variable {M : Type*} {F : Type*} [LogicalConnective F] [𝓢 : Semantics F M]
 
 namespace Semantics
 
@@ -156,7 +156,7 @@ lemma Satisfiable.of_subset {T U : Set F} (h : Satisfiable M U) (ss : T ⊆ U) :
 
 variable (M)
 
-instance [Semantics M F] : Semantics (Set M) F := ⟨fun s f ↦ ∀ 𝓜 ∈ s, 𝓜 ⊧ f⟩
+instance [Semantics F M] : Semantics F (Set M) := ⟨fun s f ↦ ∀ 𝓜 ∈ s, 𝓜 ⊧ f⟩
 
 @[simp] lemma empty_models (f : F) : (∅ : Set M) ⊧ f := by rintro h; simp
 

@@ -225,19 +225,16 @@ def derive {F : Q(Type u)} (instLS : Q(LogicalConnective $F)) (instGz : Q(Gentze
 
 end DerivationQ
 
-#check @System.Provable
-
-def isExprProvable? (ty : Q(Prop)) : MetaM ((u : Level) × (v : Level) × (_ : Level) × (S : Q(Type u)) × (F : Q(Type v)) × Q($S) × Q($F)) := do
-  let ~q(@System.Provable $S $F $instSys $T $p) := ty | throwError m!"error: {ty} not a prop _ ⊢! _"
-  return ⟨_, _, u_3, S, F, T, p⟩
+def isExprProvable? (ty : Q(Prop)) : MetaM ((u : Level) × (v : Level) × (_ : Level) × (F : Q(Type u)) × (S : Q(Type v)) × Q($S) × Q($F)) := do
+  let ~q(@System.Provable $F $S $instSys $T $p) := ty | throwError m!"error: {ty} not a prop _ ⊢! _"
+  return ⟨_, _, u_3, F, S, T, p⟩
 
 section
 
 open Litform.Meta Denotation
 
-variable {S : Q(Type u)} {F : Q(Type v)} (instLS : Q(LogicalConnective $F)) (instSys : Q(System.{v, u, w} $S $F))
+variable {F : Q(Type v)} {S : Q(Type u)} (instLS : Q(LogicalConnective $F)) (instSys : Q(System.{u, v, w} $F $S))
   (instGz : Q(Gentzen $F)) (instLTS : Q(LawfulTwoSided $S))
-
 
 def prove! (s : ℕ) (𝓢 : Q($S)) (p : Q($F)) : MetaM Q($𝓢 ⊢! $p) :=
   letI := Litform.Meta.denotation F instLS; do
@@ -292,10 +289,10 @@ elab "tautology" n:(num)? : tactic => do
     | none   => 32
   let goalType ← Elab.Tactic.getMainTarget
   let ty ← inferPropQ goalType
-  let ⟨u, v, w, S, F, T, p⟩ ← isExprProvable? ty
+  let ⟨u, v, w, F, S, T, p⟩ ← isExprProvable? ty
   let .some instLS ← trySynthInstanceQ q(LogicalConnective $F)
     | throwError m! "error: failed to find instance LogicalConnective {F}"
-  let .some instSys ← trySynthInstanceQ q(System.{v,u,w} $S $F)
+  let .some instSys ← trySynthInstanceQ q(System.{v,u,w} $F $S)
     | throwError m! "error: failed to find instance System {F}"
   let .some instGz ← trySynthInstanceQ q(Gentzen $F)
     | throwError m! "error: failed to find instance Gentzen {F}"
@@ -312,10 +309,10 @@ elab "prover" n:(num)? seq:(termSeq)? : tactic => do
     | none   => 32
   let goalType ← Elab.Tactic.getMainTarget
   let ty ← inferPropQ goalType
-  let ⟨u, v, w, S, F, T, p⟩ ← isExprProvable? ty
+  let ⟨u, v, w, F, S, T, p⟩ ← isExprProvable? ty
   let .some instLS ← trySynthInstanceQ q(LogicalConnective $F)
     | throwError m! "error: failed to find instance LogicalConnective {F}"
-  let .some instSys ← trySynthInstanceQ q(System.{v,u,w} $S $F)
+  let .some instSys ← trySynthInstanceQ q(System.{v,u,w} $F $S)
     | throwError m! "error: failed to find instance System {F}"
   let .some instGz ← trySynthInstanceQ q(Gentzen $F)
     | throwError m! "error: failed to find instance Gentzen {F}"

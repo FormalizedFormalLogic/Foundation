@@ -3,7 +3,7 @@ import Logic.Logic.Init
 
 namespace LO.System
 
-variable {S F : Type*} [LogicalConnective F] [System S F]
+variable {S F : Type*} [LogicalConnective F] [System F S]
 
 variable (𝓢 : S)
 

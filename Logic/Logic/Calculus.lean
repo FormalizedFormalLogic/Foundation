@@ -59,14 +59,14 @@ class Gentzen (F : Type u) [LogicalConnective F] extends TwoSided F where
 class Gentzen.Cut (F : Type u) [LogicalConnective F] [Gentzen F] where
   cut {Γ Δ : List F} {p} : Γ ⊢² p :: Δ → p :: Γ ⊢² Δ → Γ ⊢² Δ
 
-class LawfulTwoSided (S : Type*) {F : Type*} [LogicalConnective F] [System S F] [TwoSided F] where
+class LawfulTwoSided (S : Type*) {F : Type*} [LogicalConnective F] [System F S] [TwoSided F] where
   toProof₁ {Γ} {𝓢 : S} {p : F} : Γ ⊢² [p] → (∀ q ∈ Γ, 𝓢 ⊢ q) → 𝓢 ⊢ p
 
 variable {F : Type*} [LogicalConnective F]
 
 namespace LawfulTwoSided
 
-variable [System S F] [TwoSided F] [LawfulTwoSided S]
+variable [System F S] [TwoSided F] [LawfulTwoSided S]
 
 def toProofOfNil {p : F} (b : [] ⊢² [p]) (𝓢 : S) : 𝓢 ⊢ p :=
   toProof₁ b (by intro q h; exact False.elim ((List.mem_nil_iff q).mp h))
@@ -305,7 +305,7 @@ end Disjconseq
 
 variable (F S)
 
-instance : System S F := ⟨(· ⊢' [·])⟩
+instance : System F S := ⟨(· ⊢' [·])⟩
 
 variable {F S}
 

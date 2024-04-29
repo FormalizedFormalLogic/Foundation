@@ -21,14 +21,14 @@ Also defines soundness and completeness.
 
 namespace LO
 
-class System (S : Type*) (F : outParam Type*) where
+class System (F : outParam Type*) (S : Type*) where
   Prf : S → F → Type*
 
 infix:45 " ⊢ " => System.Prf
 
 namespace System
 
-variable {S T U : Type*} {F : Type*} [System S F] [System T F] [System U F]
+variable {F : Type*} {S T U : Type*} [System F S] [System F T] [System F U]
 
 section
 
@@ -211,7 +211,7 @@ protected def Consistent (Λ : Logic S) : Prop :=
 
 end Logic
 
-structure Translation {S S' F F'} [System S F] [System S' F'] (𝓢 : S) (𝓣 : S') where
+structure Translation {S S' F F'} [System F S] [System F' S'] (𝓢 : S) (𝓣 : S') where
   toFun : F → F'
   prf {f} : 𝓢 ⊢ f → 𝓣 ⊢ toFun f
 
@@ -219,7 +219,7 @@ infix:40 " ↝ " => Translation
 
 namespace Translation
 
-variable {S S' S'' : Type*} {F F' F'' : Type*} [System S F] [System S' F'] [System S'' F'']
+variable {S S' S'' : Type*} {F F' F'' : Type*} [System F S] [System F' S'] [System F'' S'']
 
 instance (𝓢 : S) (𝓣 : S') : CoeFun (Translation 𝓢 𝓣) (fun _ ↦ F → F') := ⟨Translation.toFun⟩
 
@@ -324,7 +324,7 @@ end System
 
 namespace System
 
-variable {S : Type*} {F : Type*} [LogicalConnective F] [System S F]
+variable {S : Type*} {F : Type*} [LogicalConnective F] [System F S]
 
 variable (S)
 
@@ -396,7 +396,7 @@ end System
 
 section
 
-variable {S : Type*} {F : Type*} [LogicalConnective F] [System S F] {M : Type*} [Semantics M F]
+variable {S : Type*} {F : Type*} [LogicalConnective F] [System F S] {M : Type*} [Semantics F M]
 
 class Sound (𝓢 : S) (𝓜 : M) : Prop where
   sound : ∀ {f : F}, 𝓢 ⊢! f → 𝓜 ⊧ f
