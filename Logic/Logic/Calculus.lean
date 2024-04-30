@@ -341,9 +341,9 @@ instance (𝓣 : S) : System.ModusPonens 𝓣 := ⟨
     let d₃ : Γ₁ ++ Γ₂ ⊢² [q] := modusPonens (wkLeft d₁ (by simp)) (wkLeft d₂ (by simp))
     exact ⟨Γ₁ ++ Γ₂, by simp; rintro p (hp | hp); { exact h₁ p hp }; { exact h₂ p hp }, d₃⟩⟩
 
-instance (𝓣 : S) : System.EFQ 𝓣 := ⟨fun p ↦ ⟨[], by simp, implyRight (falsum _ _)⟩⟩
+instance (𝓣 : S) : System.HasEFQ 𝓣 := ⟨fun p ↦ ⟨[], by simp, implyRight (falsum _ _)⟩⟩
 
-instance deductiveExplosion : System.DeductiveExplosion (S) := ⟨fun b p ↦ System.EFQ.efq p ⨀ b⟩
+instance deductiveExplosion : System.DeductiveExplosion (S) := ⟨fun b p ↦ System.HasEFQ.efq p ⨀ b⟩
 
 instance compact : System.Compact S where
   φ := fun b ↦ b.antecedent.toCollection
@@ -416,7 +416,7 @@ end
 
 @[simp] lemma consistent_theory_iff_consistent :
     System.Consistent (System.theory 𝓣) ↔ System.Consistent 𝓣 :=
-  ⟨fun h ↦ h.of_le (le_of_subset <| by simp [Set.subset_def]; intro p hp; exact System.Axiomatized.provable_axm  𝓣 _ hp),
+  ⟨fun h ↦ h.of_le (le_of_subset <| by simp [Set.subset_def]; intro p hp; exact System.Axiomatized.provable_axm  𝓣 hp),
    fun consis ↦ System.consistent_iff_unprovable_bot.mpr <| by
       rintro h
       have : System.Inconsistent 𝓣 := System.inconsistent_iff_provable_bot.mpr <| System.StrongCut.cut! (by simp) h

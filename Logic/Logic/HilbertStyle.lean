@@ -125,11 +125,27 @@ lemma imply₂'! (d₁ : 𝓢 ⊢! p ⟶ q ⟶ r) (d₂ : 𝓢 ⊢! p ⟶ q) (d�
 def conj₁' (d : 𝓢 ⊢ p ⋏ q) : 𝓢 ⊢ p := conj₁ ⨀ d
 lemma conj₁'! (d : 𝓢 ⊢! (p ⋏ q)) : 𝓢 ⊢! p := ⟨conj₁' d.some⟩
 
+alias andLeft := conj₁'
+alias and_left! := conj₁'!
+
 def conj₂' (d : 𝓢 ⊢ p ⋏ q) : 𝓢 ⊢ q := conj₂ ⨀ d
 lemma conj₂'! (d : 𝓢 ⊢! (p ⋏ q)) : 𝓢 ⊢! q := ⟨conj₂' d.some⟩
 
+alias andRight := conj₂'
+alias and_right! := conj₂'!
+
 def conj₃' (d₁ : 𝓢 ⊢ p) (d₂: 𝓢 ⊢ q) : 𝓢 ⊢ p ⋏ q := conj₃ ⨀ d₁ ⨀ d₂
 lemma conj₃'! (d₁ : 𝓢 ⊢! p) (d₂: 𝓢 ⊢! q) : 𝓢 ⊢! p ⋏ q := ⟨conj₃' d₁.some d₂.some⟩
+
+alias andIntro := conj₃'
+alias and_intro! := conj₃'!
+
+def iffIntro (b₁ : 𝓢 ⊢ p ⟶ q) (b₂ : 𝓢 ⊢ q ⟶ p) : 𝓢 ⊢ p ⟷ q := andIntro b₁ b₂
+def iff_intro! (h₁ : 𝓢 ⊢! p ⟶ q) (h₂ : 𝓢 ⊢! q ⟶ p) : 𝓢 ⊢! p ⟷ q := ⟨andIntro h₁.some h₂.some⟩
+
+lemma and_intro_iff : 𝓢 ⊢! p ⋏ q ↔ 𝓢 ⊢! p ∧ 𝓢 ⊢! q := ⟨fun h ↦ ⟨and_left! h, and_right! h⟩, fun h ↦ and_intro! h.1 h.2⟩
+
+lemma iff_intro_iff : 𝓢 ⊢! p ⟷ q ↔ 𝓢 ⊢! p ⟶ q ∧ 𝓢 ⊢! q ⟶ p := ⟨fun h ↦ ⟨and_left! h, and_right! h⟩, fun h ↦ and_intro! h.1 h.2⟩
 
 def disj₁' (d : 𝓢 ⊢ p) : 𝓢 ⊢ p ⋎ q := disj₁ ⨀ d
 lemma disj₁'! (d : 𝓢 ⊢! p) : 𝓢 ⊢! p ⋎ q := ⟨disj₁' d.some⟩
@@ -147,11 +163,25 @@ def mdp₁ (bqr : 𝓢 ⊢ p ⟶ q ⟶ r) (bq : 𝓢 ⊢ p ⟶ q) : 𝓢 ⊢ p �
 lemma mdp₁! (hqr : 𝓢 ⊢! p ⟶ q ⟶ r) (hq : 𝓢 ⊢! p ⟶ q) : 𝓢 ⊢! p ⟶ r := ⟨mdp₁ hqr.some hq.some⟩
 
 infixl:90 "⨀₁" => mdp₁
-
 infixl:90 "⨀₁" => mdp₁!
+
+def mdp₂ (bqr : 𝓢 ⊢ p ⟶ q ⟶ r ⟶ s) (bq : 𝓢 ⊢ p ⟶ q ⟶ r) : 𝓢 ⊢ p ⟶ q ⟶ s := dhyp p (Minimal.imply₂ q r s) ⨀₁ bqr ⨀₁ bq
+lemma mdp₂! (hqr : 𝓢 ⊢! p ⟶ q ⟶ r ⟶ s) (hq : 𝓢 ⊢! p ⟶ q ⟶ r) : 𝓢 ⊢! p ⟶ q ⟶ s := ⟨mdp₂ hqr.some hq.some⟩
+
+infixl:90 "⨀₂" => mdp₂
+infixl:90 "⨀₂" => mdp₂!
+
+def mdp₃ (bqr : 𝓢 ⊢ p ⟶ q ⟶ r ⟶ s ⟶ t) (bq : 𝓢 ⊢ p ⟶ q ⟶ r ⟶ s) : 𝓢 ⊢ p ⟶ q ⟶ r ⟶ t := (dhyp p <| dhyp q <| Minimal.imply₂ r s t) ⨀₂ bqr ⨀₂ bq
+lemma mdp₃! (hqr : 𝓢 ⊢! p ⟶ q ⟶ r ⟶ s ⟶ t) (hq : 𝓢 ⊢! p ⟶ q ⟶ r ⟶ s) : 𝓢 ⊢! p ⟶ q ⟶ r ⟶ t := ⟨mdp₃ hqr.some hq.some⟩
+
+infixl:90 "⨀₃" => mdp₃
+infixl:90 "⨀₃" => mdp₃!
 
 def impTrans (bpq : 𝓢 ⊢ p ⟶ q) (bqr : 𝓢 ⊢ q ⟶ r) : 𝓢 ⊢ p ⟶ r := imply₂ ⨀ dhyp p bqr ⨀ bpq
 lemma imp_trans! (hpq : 𝓢 ⊢! p ⟶ q) (hqr : 𝓢 ⊢! q ⟶ r) : 𝓢 ⊢! p ⟶ r := ⟨impTrans hpq.some hqr.some⟩
+
+def imply₁₁ (p q r : F) : 𝓢 ⊢ p ⟶ q ⟶ r ⟶ p := impTrans (Minimal.imply₁ p r) (Minimal.imply₁ (r ⟶ p) q)
+@[simp] lemma imply₁₁! (p q r : F) : 𝓢 ⊢! p ⟶ q ⟶ r ⟶ p := ⟨imply₁₁ p q r⟩
 
 def generalConj [DecidableEq F] {Γ : List F} {p : F} (h : p ∈ Γ) : 𝓢 ⊢ Γ.conj ⟶ p :=
   match Γ with
@@ -165,6 +195,17 @@ lemma generalConj! [DecidableEq F] {Γ : List F} {p : F} (h : p ∈ Γ) : 𝓢 �
 
 def implyAnd (bq : 𝓢 ⊢ p ⟶ q) (br : 𝓢 ⊢ p ⟶ r) : 𝓢 ⊢ p ⟶ q ⋏ r :=
   dhyp p (Minimal.conj₃ q r) ⨀₁ bq ⨀₁ br
+
+def andComm (p q : F) : 𝓢 ⊢ p ⋏ q ⟶ q ⋏ p := implyAnd conj₂ conj₁
+
+def iffComm (p q : F) : 𝓢 ⊢ (p ⟷ q) ⟶ (q ⟷ p) := andComm _ _
+
+def andImplyIffImplyImply (p q r : F) : 𝓢 ⊢ (p ⋏ q ⟶ r) ⟷ (p ⟶ q ⟶ r) :=
+  let b₁ : 𝓢 ⊢ (p ⋏ q ⟶ r) ⟶ p ⟶ q ⟶ r :=
+    imply₁₁ (p ⋏ q ⟶ r) p q ⨀₃ dhyp (p ⋏ q ⟶ r) (Minimal.conj₃ p q)
+  let b₂ : 𝓢 ⊢ (p ⟶ q ⟶ r) ⟶ p ⋏ q ⟶ r :=
+    Minimal.imply₁ (p ⟶ q ⟶ r) (p ⋏ q) ⨀₂ dhyp (p ⟶ q ⟶ r) (Minimal.conj₁ p q) ⨀₂ dhyp (p ⟶ q ⟶ r) (Minimal.conj₂ p q)
+  iffIntro b₁ b₂
 
 def implyConj [DecidableEq F] (p : F) (Γ : List F) (b : (q : F) → q ∈ Γ → 𝓢 ⊢ p ⟶ q) : 𝓢 ⊢ p ⟶ Γ.conj :=
   match Γ with

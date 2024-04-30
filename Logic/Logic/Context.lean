@@ -5,7 +5,7 @@ namespace LO
 
 namespace System
 
-variable (F : Type*) [LogicalConnective F] {S : Type*} [System F S]
+variable (F : Type*) [LogicalConnective F] [DecidableEq F] {S : Type*} [System F S]
 
 structure Context (𝓢 : S) where
   ctx : List F
@@ -32,7 +32,9 @@ instance : Cons F (Context F 𝓢) := ⟨(· :: ·.ctx)⟩
 
 lemma mem_def {p : F} {Γ : Context F 𝓢} : p ∈ Γ ↔ p ∈ Γ.ctx := iff_of_eq rfl
 
-@[simp] lemma mem_coe_iff {p : F} {l : List F} : p ∈ (l : Context F 𝓢) ↔ p ∈ l := iff_of_eq rfl
+@[simp] lemma coe_subset_coe_iff {Γ Δ : List F} : (Γ : Context F 𝓢) ⊆ Δ ↔ Γ ⊆ Δ := iff_of_eq rfl
+
+@[simp] lemma mem_coe_iff {p : F} {Γ : List F} : p ∈ (Γ : Context F 𝓢) ↔ p ∈ Γ := iff_of_eq rfl
 
 @[simp] lemma not_mem_empty (p : F) : ¬p ∈ (∅ : Context F 𝓢) := by simp [EmptyCollection.emptyCollection]
 
@@ -47,42 +49,63 @@ abbrev Prf (𝓢 : S) (Γ : List F) (p : F) := (Γ : Context F 𝓢) ⊢ p
 
 abbrev Provable (𝓢 : S) (Γ : List F) (p : F) := (Γ : Context F 𝓢) ⊢! p
 
-local notation Γ:45 " ⊢⟨" 𝓢 "⟩ " p:46 => Prf 𝓢 Γ p
+local notation Γ:45 " ⊢[" 𝓢 "] " p:46 => Prf 𝓢 Γ p
 
-local notation Γ:45 " ⊢⟨" 𝓢 "⟩! " p:46 => Provable 𝓢 Γ p
+local notation Γ:45 " ⊢[" 𝓢 "]! " p:46 => Provable 𝓢 Γ p
 
 lemma system_def (Γ : Context F 𝓢) (p : F) : (Γ ⊢ p) = (𝓢 ⊢ Γ.conj ⟶ p) := rfl
 
-variable {Γ Δ E : List F}
+def of {Γ : List F} {p : F} (b : 𝓢 ⊢ Γ.conj ⟶ p) : Γ ⊢[𝓢] p := b
 
-def prfOf {Γ : List F} {p : F} (b : 𝓢 ⊢ Γ.conj ⟶ p) : Γ ⊢⟨𝓢⟩ p := b
+def toₛ {Γ : List F} {p : F} (b : Γ ⊢[𝓢] p) : 𝓢 ⊢ Γ.conj ⟶ p := b
 
-lemma provable_iff {p : F} : Γ ⊢⟨𝓢⟩! p ↔ 𝓢 ⊢! Γ.conj ⟶ p := iff_of_eq rfl
+lemma provable_iff {p : F} : Γ ⊢[𝓢]! p ↔ 𝓢 ⊢! Γ.conj ⟶ p := iff_of_eq rfl
 
-variable [DecidableEq F] [Minimal 𝓢]
+variable [Minimal 𝓢] {Γ Δ E : List F}
 
 instance : Axiomatized (Context F 𝓢) where
   prfAxm := fun _ _ hp ↦ generalConj hp
   weakening := fun H b ↦ impTrans (conjImplyConj H) b
 
-def toContextPrf {p : F} {Γ} : 𝓢 ⊢ p → Γ ⊢⟨𝓢⟩ p := dhyp Γ.conj
+def byAxm {p} (h : p ∈ Γ) : Γ ⊢[𝓢] p := Axiomatized.prfAxm _ (by simpa)
 
-def ofContextPrf {p : F} : [] ⊢⟨𝓢⟩ p → 𝓢 ⊢ p := fun b ↦ b ⨀ verum
+lemma by_axm! {p} (h : p ∈ Γ) : Γ ⊢[𝓢]! p := Axiomatized.provable_axm _ (by simpa)
 
-def provable_iff_provable {p : F} : 𝓢 ⊢! p ↔ [] ⊢⟨𝓢⟩! p :=
-  ⟨fun b ↦ ⟨toContextPrf b.some⟩, fun b ↦ ⟨ofContextPrf b.some⟩⟩
+def weakening (h : Γ ⊆ Δ) {p} : Γ ⊢[𝓢] p → Δ ⊢[𝓢] p := Axiomatized.weakening (by simpa)
+
+lemma weakening! (h : Γ ⊆ Δ) {p} : Γ ⊢[𝓢]! p → Δ ⊢[𝓢]! p := fun h ↦ Axiomatized.le_of_subset_axm (by simpa) h
+
+def of' {p : F} (b : 𝓢 ⊢ p) (Γ : List F) : Γ ⊢[𝓢] p := dhyp Γ.conj b
+
+def emptyPrf {p : F} : [] ⊢[𝓢] p → 𝓢 ⊢ p := fun b ↦ b ⨀ verum
+
+def provable_iff_provable {p : F} : 𝓢 ⊢! p ↔ [] ⊢[𝓢]! p :=
+  ⟨fun b ↦ ⟨of' b.some _⟩, fun b ↦ ⟨emptyPrf b.some⟩⟩
 
 instance minimal (Γ : Context F 𝓢) : Minimal Γ where
   mdp := mdp₁
-  verum := toContextPrf verum
-  imply₁ := fun _ _ ↦ toContextPrf imply₁
-  imply₂ := fun _ _ _ ↦ toContextPrf imply₂
-  conj₁ := fun _ _ ↦ toContextPrf conj₁
-  conj₂ := fun _ _ ↦ toContextPrf conj₂
-  conj₃ := fun _ _ ↦ toContextPrf conj₃
-  disj₁ := fun _ _ ↦ toContextPrf disj₁
-  disj₂ := fun _ _ ↦ toContextPrf disj₂
-  disj₃ := fun _ _ _ ↦ toContextPrf disj₃
+  verum := of' verum _
+  imply₁ := fun _ _ ↦ of' imply₁ _
+  imply₂ := fun _ _ _ ↦ of' imply₂ _
+  conj₁ := fun _ _ ↦ of' conj₁ _
+  conj₂ := fun _ _ ↦ of' conj₂ _
+  conj₃ := fun _ _ ↦ of' conj₃ _
+  disj₁ := fun _ _ ↦ of' disj₁ _
+  disj₂ := fun _ _ ↦ of' disj₂ _
+  disj₃ := fun _ _ _ ↦ of' disj₃ _
+
+def deduct {p q : F} {Γ : List F} : (p :: Γ) ⊢[𝓢] q → Γ ⊢[𝓢] p ⟶ q := fun b ↦
+  of <| andLeft (andImplyIffImplyImply Γ.conj p q) ⨀ impTrans (andComm Γ.conj p) (toₛ b)
+
+def deductInv {p q : F} {Γ : List F} : Γ ⊢[𝓢] p ⟶ q → (p :: Γ) ⊢[𝓢] q := fun b ↦
+  of <| impTrans (andComm p Γ.conj) <| andRight (andImplyIffImplyImply Γ.conj p q) ⨀ toₛ b
+
+lemma deduct_iff {p q : F} {Γ : List F} : Γ ⊢[𝓢]! p ⟶ q ↔ (p :: Γ) ⊢[𝓢]! q :=
+  ⟨fun h ↦ ⟨deductInv h.some⟩, fun h ↦ ⟨deduct h.some⟩⟩
+
+instance deduction : Deduction (Context F 𝓢) where
+  ofInsert := deduct
+  inv := deductInv
 
 end Context
 

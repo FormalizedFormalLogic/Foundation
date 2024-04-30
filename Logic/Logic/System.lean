@@ -44,7 +44,7 @@ infix:45 " ⊬! " => Unprovable
 
 def PrfSet (s : Set F) : Type _ := {f : F} → f ∈ s → 𝓢 ⊢ f
 
-def ProvableSet (s : Set F) : Prop := ∀ f ∈ s, 𝓢 ⊢! f
+def ProvableSet (s : Set F) : Prop := ∀ {f}, f ∈ s → 𝓢 ⊢! f
 
 infix:45 " ⊢* " => PrfSet
 
@@ -149,7 +149,7 @@ instance : PartialOrder (Logic S) where
 
 end Logic
 
-@[simp] lemma provableSet_theory (𝓢 : S) : 𝓢 ⊢*! theory 𝓢 := fun _ hf ↦ hf
+@[simp] lemma provableSet_theory (𝓢 : S) : 𝓢 ⊢*! theory 𝓢 := fun hf ↦ hf
 
 def Inconsistent (𝓢 : S) : Prop := ∀ f, 𝓢 ⊢! f
 
@@ -267,9 +267,9 @@ namespace Axiomatized
 
 variable [Collection F S] [Axiomatized S] {𝓢 𝓣 : S}
 
-@[simp] lemma provable_axm (𝓢 : S) : 𝓢 ⊢*! Collection.set 𝓢 := fun _ hf ↦ ⟨prfAxm 𝓢 hf⟩
+@[simp] lemma provable_axm (𝓢 : S) : 𝓢 ⊢*! Collection.set 𝓢 := fun hf ↦ ⟨prfAxm 𝓢 hf⟩
 
-lemma axm_subset (𝓢 : S) : Collection.set 𝓢 ⊆ theory 𝓢 := fun p hp ↦ provable_axm 𝓢 p hp
+lemma axm_subset (𝓢 : S) : Collection.set 𝓢 ⊆ theory 𝓢 := fun _ hp ↦ provable_axm 𝓢 hp
 
 lemma le_of_subset_axm (h : 𝓢 ⊆ 𝓣) : 𝓢 ≤ₛ 𝓣 := by rintro f ⟨b⟩; exact ⟨weakening h b⟩
 
@@ -420,7 +420,7 @@ lemma consistent_of_model [Semantics.Bot M] : System.Consistent 𝓢 :=
   consistent_of_meaningful (𝓜 := 𝓜) inferInstance
 
 lemma realizeSet_of_prfSet {T : Set F} (b : 𝓢 ⊢*! T) : 𝓜 ⊧* T :=
-  ⟨fun _ hf => sound (b _ hf)⟩
+  ⟨fun _ hf => sound (b hf)⟩
 
 end
 
