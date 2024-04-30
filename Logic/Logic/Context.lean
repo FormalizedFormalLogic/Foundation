@@ -61,6 +61,8 @@ def toₛ {Γ : List F} {p : F} (b : Γ ⊢[𝓢] p) : 𝓢 ⊢ Γ.conj ⟶ p :=
 
 lemma provable_iff {p : F} : Γ ⊢[𝓢]! p ↔ 𝓢 ⊢! Γ.conj ⟶ p := iff_of_eq rfl
 
+section minimal
+
 variable [Minimal 𝓢] {Γ Δ E : List F}
 
 instance : Axiomatized (Context F 𝓢) where
@@ -106,6 +108,24 @@ lemma deduct_iff {p q : F} {Γ : List F} : Γ ⊢[𝓢]! p ⟶ q ↔ (p :: Γ) �
 instance deduction : Deduction (Context F 𝓢) where
   ofInsert := deduct
   inv := deductInv
+
+instance hasEFQ [HasEFQ 𝓢] (Γ : Context F 𝓢) : HasEFQ Γ := ⟨fun _ ↦ of <| dhyp Γ.conj efq⟩
+
+instance hasWeakLEM [HasWeakLEM 𝓢] (Γ : Context F 𝓢) : HasWeakLEM Γ := ⟨fun p ↦ of <| dhyp Γ.conj (HasWeakLEM.wlem p)⟩
+
+instance dummett [Dummett 𝓢] (Γ : Context F 𝓢) : Dummett Γ := ⟨fun p q ↦ of <| dhyp Γ.conj (Dummett.dummett p q)⟩
+
+instance hasDNE [HasDNE 𝓢] (Γ : Context F 𝓢) : HasDNE Γ := ⟨fun p ↦ of <| dhyp Γ.conj (HasDNE.dne p)⟩
+
+end minimal
+
+instance intuitionistic [Intuitionistic 𝓢] (Γ : Context F 𝓢) : Intuitionistic Γ where
+
+instance weakLEM [WeakLEM 𝓢] (Γ : Context F 𝓢) : WeakLEM Γ where
+
+instance gd [GD 𝓢] (Γ : Context F 𝓢) : GD Γ where
+
+instance classical [Classical 𝓢] (Γ : Context F 𝓢) : Classical Γ where
 
 end Context
 
