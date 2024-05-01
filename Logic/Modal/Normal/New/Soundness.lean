@@ -5,24 +5,28 @@ namespace LO.Modal.Normal.Kripkean
 
 variable {W α : Type*}
 
-open Semantics.HilbertMinimal Semantics.HilbertClassical Semantics.Necessitation
+open Formula.Kripkean
 
 instance {Λ : AxiomSet α} : Sound Λ (𝔽(Λ) : FrameClass W α) where
   sound d := by
     induction d.some with
-    | maxm h => exact validOnAxiomSetFrameClass_axiom h;
-    | mdp hpq hp ihpq ihp => exact realize_mdp (ihpq ⟨hpq⟩) (ihp ⟨hp⟩)
-    | nec h ih => exact realize_nec (ih ⟨h⟩);
-    | verum => apply realize_verum;
-    | conj₁ => apply realize_conj₁;
-    | conj₂ => apply realize_conj₂;
-    | conj₃ => apply realize_conj₃;
-    | disj₁ => apply realize_disj₁;
-    | disj₂ => apply realize_disj₂;
-    | disj₃ => apply realize_disj₃;
-    | imply₁ => apply realize_imply₁;
-    | imply₂ => apply realize_imply₂;
-    | dne => apply realize_dne;
+    | maxm h => intro F hF; exact hF.realize h;
+    | mdp hpq hp ihpq ihp =>
+      intro F hF V w;
+      have := (ihpq ⟨hpq⟩) F hF V w;
+      have := (ihp ⟨hp⟩) F hF V w;
+      simp_all;
+    | nec h ih =>
+      intro F hF V w w' _;
+      have := (ih ⟨h⟩) F hF V w';
+      simp_all;
+    | disj₃ =>
+      simp_all [ValidOnFrameClass, ValidOnFrame, ValidOnModel];
+      intros; rename_i hpr hqr hpq;
+      cases hpq with
+      | inl hp => exact hpr hp;
+      | inr hq => exact hqr hq;
+    | _ => simp_all [ValidOnFrameClass, ValidOnFrame, ValidOnModel];
 
 instance : Sound 𝐊 (𝔽(𝐊) : FrameClass W α) := inferInstance
 
