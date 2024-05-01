@@ -34,7 +34,7 @@ protected class Bot where
   realize_bot (𝓜 : M) : ¬𝓜 ⊧ (⊥ : F)
 
 class Tarski extends Semantics.Top M, Semantics.Bot M where
-  realize_not (𝓜 : M) (p : F) : 𝓜 ⊧ ~p ↔ ¬𝓜 ⊧ p
+  realize_not {𝓜 : M} {p : F} : 𝓜 ⊧ ~p ↔ ¬𝓜 ⊧ p
   realize_imp {𝓜 : M} {p q : F} : 𝓜 ⊧ p ⟶ q ↔ (𝓜 ⊧ p → 𝓜 ⊧ q)
   realize_and {𝓜 : M} {p q : F} : 𝓜 ⊧ p ⋏ q ↔ 𝓜 ⊧ p ∧ 𝓜 ⊧ q
   realize_or {𝓜 : M} {p q : F} : 𝓜 ⊧ p ⋎ q ↔ 𝓜 ⊧ p ∨ 𝓜 ⊧ q
