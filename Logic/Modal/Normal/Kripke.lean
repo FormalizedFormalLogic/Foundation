@@ -58,15 +58,17 @@ namespace Kripkean
 
 variable (W α : Type*)
 
-structure Frame (α : Type*) where
-  rel : W → W → Prop
+set_option linter.unusedVariables false in
+abbrev Frame (α : Type*) := W → W → Prop
 
-instance : CoeFun (Frame W α) (fun _ => W → W → Prop) := ⟨Frame.rel⟩
+@[simp]
+def Multiframe (R : Frame W α) : ℕ → W → W → Prop
+| 0 => (· = ·)
+| n + 1 => λ x y => ∃ z, (R x z ∧ Multiframe R n z y)
 
-structure Valuation where
-  val : W → α → Prop
+notation:max F "[" n "]" => Multiframe F n
 
-instance : CoeFun (Valuation W α) (fun _ => W → α → Prop) := ⟨Valuation.val⟩
+abbrev Valuation := W → α → Prop
 
 structure Model where
   frame : Frame W α
