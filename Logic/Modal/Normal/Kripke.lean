@@ -1,89 +1,158 @@
 import Logic.Logic.System
 import Logic.Modal.Normal.Formula
 
+namespace LO.Semantics
+
+variable {M F : Type*} [LogicalConnective F] [𝓢 : Semantics F M]
+
+variable (𝓜 : M) (p q : F)
+
+variable (M)
+
+/--
+  Modeling `LO.System.Minimal`
+-/
+class HilbertMinimal where
+  modusPonens {𝓜 : M} {p q : F} : 𝓜 ⊧ p ⟶ q → 𝓜 ⊧ p → 𝓜 ⊧ q
+  verum {𝓜 : M} : 𝓜 ⊧ ⊤
+  imply₁ {𝓜 : M} {p q : F} : 𝓜 ⊧ p ⟶ q ⟶ p
+  imply₂ {𝓜 : M} {p q r : F} : 𝓜 ⊧ (p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r
+  conj₁ {𝓜 : M} {p q : F} : 𝓜 ⊧ p ⋏ q ⟶ p
+  conj₂ {𝓜 : M} {p q : F} : 𝓜 ⊧ p ⋏ q ⟶ q
+  conj₃ {𝓜 : M} {p q : F} : 𝓜 ⊧ p ⟶ q ⟶ p ⋏ q
+  disj₁ {𝓜 : M} {p q : F} : 𝓜 ⊧ p ⟶ p ⋎ q
+  disj₂ {𝓜 : M} {p q : F} : 𝓜 ⊧ q ⟶ p ⋎ q
+  disj₃ {𝓜 : M} {p q r : F} : 𝓜 ⊧ (p ⟶ r) ⟶ (q ⟶ r) ⟶ p ⋎ q ⟶ r
+
+/--
+  Modeling `LO.System.Classical`
+-/
+class HilbertClassical extends HilbertMinimal M where
+  dne {𝓜 : M} {p : F} : 𝓜 ⊧ ~~p ⟶ p
+
+instance [Tarski M] : HilbertClassical M where
+  modusPonens := by simp_all;
+  verum := by simp_all;
+  dne := by simp_all
+  imply₁ := by simp_all;
+  imply₂ := by simp_all;
+  conj₁ := by simp_all;
+  conj₂ := by simp_all;
+  conj₃ := by simp_all;
+  disj₁ := by simp_all;
+  disj₂ := by simp_all;
+  disj₃ := by
+    intros;
+    simp;
+    intro hpr hqr hpq;
+    cases hpq;
+    . apply hpr; assumption;
+    . apply hqr; assumption;
+
+end LO.Semantics
+
+
 namespace LO.Modal.Normal
 
 namespace Kripkean
 
-variable (W P : Type*)
+variable (W α : Type*)
 
-abbrev Frame := W → W → Prop
+structure Frame (α : Type*) where
+  rel : W → W → Prop
 
-abbrev Valuation := W → P → Prop
+instance : CoeFun (Frame W α) (fun _ => W → W → Prop) := ⟨Frame.rel⟩
+
+structure Valuation where
+  val : W → α → Prop
+
+instance : CoeFun (Valuation W α) (fun _ => W → α → Prop) := ⟨Valuation.val⟩
 
 structure Model where
-  frame : Frame W
-  val : Valuation W P
+  frame : Frame W α
+  valuation : Valuation W α
+
+abbrev FrameClass := Set (Frame W α)
 
 end Kripkean
 
-variable {W P : Type*}
-
-namespace Formula.Kripkean
+variable {W : Type*} {α : Type u}
 
 open Normal.Kripkean
 
-def Satisfies (𝓜 : Kripkean.Model W P) (w : W) : Formula P → Prop
-  | atom a  => 𝓜.val w a
+def Formula.Kripkean.Satisfies (M : Kripkean.Model W α) (w : W) : Formula α → Prop
+  | atom a  => M.valuation w a
   | falsum  => False
-  | and p q => (Satisfies 𝓜 w p) ∧ (Satisfies 𝓜 w q)
-  | or p q  => (Satisfies 𝓜 w p) ∨ (Satisfies 𝓜 w q)
-  | imp p q => ¬(Satisfies 𝓜 w p) ∨ (Satisfies 𝓜 w q)
-  | box p   => ∀ w', 𝓜.frame w w' → (Satisfies 𝓜 w' p)
+  | and p q => (Satisfies M w p) ∧ (Satisfies M w q)
+  | or p q  => (Satisfies M w p) ∨ (Satisfies M w q)
+  | imp p q => ¬(Satisfies M w p) ∨ (Satisfies M w q)
+  | box p   => ∀ w', M.frame w w' → (Satisfies M w' p)
 
-namespace Satisfies
+instance : Semantics (Formula α) ((Model W α) × W) := ⟨fun ⟨M, w⟩ ↦ Formula.Kripkean.Satisfies M w⟩
 
-variable {𝓜 : Model W P} {w : W} {p q : Formula P}
+open Formula.Kripkean
 
-@[simp]
-instance : LO.Semantics ((Model W P) × W) (Formula P) where
-  Realize Mw p := Satisfies (Mw.1) (Mw.2) p
+lemma models_iff_satisfies {M : Model W α} {w : W} {f : Formula α} : (M, w) ⊧ f ↔ Formula.Kripkean.Satisfies M w f := iff_of_eq rfl
 
-@[simp]
-instance : LO.Semantics.Tarski (Model W P × W) where
-  realize_top := by simp [Satisfies]
-  realize_bot := by simp [Satisfies]
-  realize_not := by simp [Satisfies]
-  realize_and := by simp [Satisfies]
-  realize_or := by simp [Satisfies]
-  realize_imp := by simp [Satisfies, imp_iff_not_or]
+instance : Semantics.Tarski ((Model W α) × W) where
+  realize_top := by simp [models_iff_satisfies, Satisfies]
+  realize_bot := by simp [models_iff_satisfies, Satisfies]
+  realize_not := by simp [models_iff_satisfies, Satisfies]
+  realize_and := by simp [models_iff_satisfies, Satisfies]
+  realize_or := by simp [models_iff_satisfies, Satisfies]
+  realize_imp := by simp [models_iff_satisfies, Satisfies, imp_iff_not_or]
 
-end Satisfies
+def Formula.Kripkean.Models (M : Model W α) (f : Formula α) := ∀ w : W, (M, w) ⊧ f
 
-def Models (𝓜 : Model W P) (p : Formula P) := ∀ w : W, (𝓜, w) ⊧ p
+instance : Semantics (Formula α) (Model W α) := ⟨fun M ↦ Formula.Kripkean.Models M⟩
 
-namespace Models
+open Semantics.HilbertMinimal Semantics.HilbertClassical
 
-variable {𝓜 : Model W P} {p q : Formula P}
+instance : Semantics.HilbertClassical (Model W α) where
+  modusPonens := by intro M p q hpq hp w; have := hpq w; have := hp w; simp_all [models_iff_satisfies, Satisfies];
+  verum _  := by apply verum;
+  imply₁ _ := by apply imply₁;
+  imply₂ _ := by apply imply₂;
+  conj₁ _  := by apply conj₁;
+  conj₂ _  := by apply conj₂;
+  conj₃ _  := by apply conj₃;
+  disj₁ _  := by apply disj₁;
+  disj₂ _  := by apply disj₂;
+  disj₃ _  := by apply disj₃;
+  dne _    := by apply dne;
 
-@[simp]
-instance : LO.Semantics (Model W P) (Formula P) where
-  Realize 𝓜 p := Models 𝓜 p
+def Formula.Kripkean.Frames (F : Frame W α) (f : Formula α) := ∀ V, (Model.mk F V) ⊧ f
 
-end Models
+instance : Semantics (Formula α) (Frame W α) := ⟨fun F ↦ Formula.Kripkean.Frames F⟩
 
+instance : Semantics.HilbertClassical (Frame W α) where
+  modusPonens hpq hp := by intro w; exact modusPonens (hpq w) (hp w);
+  verum _ _  := by apply verum;
+  imply₁ _ _ := by apply imply₁;
+  imply₂ _ _ := by apply imply₂;
+  conj₁ _ _  := by apply conj₁;
+  conj₂ _ _  := by apply conj₂;
+  conj₃ _ _  := by apply conj₃;
+  disj₁ _ _  := by apply disj₁;
+  disj₂ _ _  := by apply disj₂;
+  disj₃ _ _  := by apply disj₃;
+  dne _ _    := by apply dne;
 
-def Frames (𝓕 : Frame W) (p : Formula P) := ∀ V, (Model.mk 𝓕 V) ⊧ p
+def Formula.Kripkean.FramesClasses (𝔽 : FrameClass W α) (f : Formula α) := ∀ F ∈ 𝔽, F ⊧ f
 
-namespace Frames
+instance : Semantics (Formula α) (FrameClass W α) := ⟨fun 𝔽 ↦ Formula.Kripkean.FramesClasses 𝔽⟩
 
-instance : LO.Semantics (Frame W) (Formula (outParam Type*)) where
-  Realize 𝓕 p := Frames 𝓕 p
-
-end Frames
-
-abbrev FrameClass (W : Type*) := Set (Frame W)
-
-def FrameClasses (𝔽 : FrameClass W) (p : Formula P) := ∀ 𝓕 ∈ 𝔽, Frames 𝓕 p
-
-namespace FrameClasses
-
-instance : LO.Semantics (FrameClass W) (Formula (outParam Type*)) where
-  Realize 𝔽 p := FrameClasses 𝔽 p
-
-end FrameClasses
-
-
-end Formula.Kripkean
+instance : Semantics.HilbertClassical (FrameClass W α) where
+  modusPonens hpq hp := by intro F hF; exact modusPonens (hpq F hF) (hp F hF);
+  verum _ _  := by apply verum;
+  imply₁ _ _ := by apply imply₁;
+  imply₂ _ _ := by apply imply₂;
+  conj₁ _ _  := by apply conj₁;
+  conj₂ _ _  := by apply conj₂;
+  conj₃ _ _  := by apply conj₃;
+  disj₁ _ _  := by apply disj₁;
+  disj₂ _ _  := by apply disj₂;
+  disj₃ _ _  := by apply disj₃;
+  dne _ _    := by apply dne;
 
 end LO.Modal.Normal
