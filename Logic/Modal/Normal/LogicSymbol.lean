@@ -37,7 +37,11 @@ lemma multimop_prepost : (△[i]△[i][n]p) = (△[i][n](△[i]p)) := by inducti
 
 end UnaryModalOperator
 
+end LO
+
 /-
+TODO: 可算無限個の様相演算子を考えたいのならば以下の定義を用意すればよいと思うが，現状では考えていないので保留
+
 class InfiniteUnaryModalOperator (F : Sort _) where
   mop (i : ℕ) : F → F
   mop_injective {i} : Function.Injective (mop i)
@@ -55,6 +59,8 @@ protected def multimop (i : Fin m) (n : ℕ) (s : Set F) : Set F := (multimop i 
 notation:76 "△[" i:90 "]" "[" n:90 "]" s:max => Set.multimop i n s
 
 @[simp] lemma multimop_empty : △[i][n](∅ : Set F) = ∅ := by simp [Set.multimop]
+
+@[simp] lemma multimop_singleton : △[i][n]({a} : Set F) = {△[i][n]a} := by simp [Set.multimop]
 
 @[simp] lemma multimop_zero : △[i][0]s = s := by simp [Set.multimop]
 
@@ -78,6 +84,8 @@ protected def mop (i : Fin m) (s : Set F) : Set F := Set.multimop i 1 s
 notation:76 "△[" i "]" s => Set.mop i s
 
 @[simp] lemma mop_empty : (△[i](∅ : Set F)) = ∅ := by simp [Set.mop]
+
+@[simp] lemma mop_singleton : (△[i]({a} : Set F)) = {△[i]a} := by simp [Set.mop]
 
 @[simp] lemma mop_mem_intro : a ∈ s → (△[i]a) ∈ (△[i]s) := by apply multimop_mem_intro;
 
@@ -215,6 +223,8 @@ lemma premultimop_multimop_eq_of_subset_multimop {s : Finset F} {t : Set F} (hs 
   exact Finset.coe_inj.mp this;
 
 end Finset
+
+namespace LO
 
 /--
   Standard modal logic, which has 2 modal unary operators `□`, `◇`, and `◇` is defined as dual of `□`

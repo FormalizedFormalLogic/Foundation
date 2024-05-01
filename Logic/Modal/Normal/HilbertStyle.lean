@@ -141,11 +141,10 @@ lemma axiomK'! (d₁ : Γ ⊢! (□(p ⟶ q))) (d₂ : Γ ⊢! □p) : Γ ⊢! �
 
 @[tautology]
 def box_distribute_iff : Γ ⊢ □(p ⟷ q) ⟶ (□p ⟷ □q) := by
-  have : (Set.box {p ⟷ q}) ⊢ (□p ⟶ □q) := box_distribute' $ boxed_necessitation $ iff_mp' $ axm (by simp);
-  have : (Set.box {p ⟷ q}) ⊢ (□q ⟶ □p) := box_distribute' $ boxed_necessitation $ iff_mpr' $ axm (by simp);
-  have : (Set.box {p ⟷ q}) ⊢ (□p ⟷ □q) := by deduct;
-  have : ({□(p ⟷ q)}) ⊢ (□p ⟷ □q) := by sorry; -- simpa [Set.multibox] using this;
-  have : ∅ ⊢ (□(p ⟷ q) ⟶ (□p ⟷ □q)) := dtr' (by deduct);
+  have : (□({p ⟷ q} : Set F)) ⊢ (□p ⟶ □q) := box_distribute' $ boxed_necessitation $ iff_mp' $ axm (by simp);
+  have : (□({p ⟷ q} : Set F)) ⊢ (□q ⟶ □p) := box_distribute' $ boxed_necessitation $ iff_mpr' $ axm (by simp);
+  have : (□({p ⟷ q} : Set F)) ⊢ (□p ⟷ □q) := iff_intro' (by assumption) (by assumption)
+  have : ∅ ⊢ (□(p ⟷ q) ⟶ (□p ⟷ □q)) := dtr' (by simpa using this);
   deduct;
 
 @[inference]
@@ -411,7 +410,7 @@ lemma distribute_multidia_list_conj'! {Γ : Set F} {Δ : List F} (d : Γ ⊢! �
 lemma distribute_multidia_finset_conj'! {Γ : Set F} {Δ : Finset F} (d : Γ ⊢! ◇[n]Δ.conj) : Γ ⊢! (Δ.multidia n).conj := by
   apply finset_conj_iff!.mpr;
   intro p hp;
-  exact list_conj_iff!.mp (distribute_multidia_list_conj'! d) p (by simp [Finset.multidia] at hp; sorry;);
+  exact list_conj_iff!.mp (distribute_multidia_list_conj'! d) p (by simpa [Finset.multidia, List.multidia] using hp);
 
 lemma distribute_dia_finset_conj'! {Δ : Finset F} (d : Γ ⊢! ◇(Δ.conj)) : Γ ⊢! Δ.dia.conj := by
   have : (Γ ⊢! ◇[1]Δ.conj) → (Γ ⊢! (Δ.multidia 1).conj) := distribute_multidia_finset_conj'!;
