@@ -28,12 +28,10 @@ instance : StandardModalLogicalConnective (Formula α) where
   vee := or
   top := verum
   bot := falsum
-  mop i := match i with
-    | 0 => box
-    | 1 => dia
-  mop_injective := by
-    simp_all [Function.Injective]
-    aesop;
+  mop b := match b with
+    | true => box
+    | false => dia
+  mop_injective := by simp_all [Function.Injective]
   duality := by simp;
 
 instance : NegDefinition (Formula α) where
