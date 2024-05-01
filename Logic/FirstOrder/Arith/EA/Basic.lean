@@ -4,7 +4,7 @@ namespace LO.FirstOrder
 
 namespace Arith
 
-variable {L : Language} [L.ORing] (T : Theory L) [𝐄𝐐 ≾ T] [L.Exp]
+variable {L : Language} [L.ORing] (T : Theory L) [𝐄𝐐 ≼ T] [L.Exp]
 
 instance : Language.ORing ℒₒᵣ(exp) := Language.ORing.mk
 

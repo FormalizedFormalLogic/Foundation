@@ -21,7 +21,7 @@ namespace Arith
 
 namespace FirstIncompleteness
 
-variable {T : Theory ℒₒᵣ} [𝐄𝐐 ≾ T] [𝐏𝐀⁻ ≾ T] [DecidablePred T] [SigmaOneSound T] [Theory.Computable T]
+variable {T : Theory ℒₒᵣ} [𝐄𝐐 ≼ T] [𝐏𝐀⁻ ≼ T] [DecidablePred T] [SigmaOneSound T] [Theory.Computable T]
 
 variable (T)
 
@@ -65,7 +65,7 @@ theorem main : ¬System.Complete T := System.incomplete_iff_exists_independent.m
 
 end FirstIncompleteness
 
-variable (T : Theory ℒₒᵣ) [DecidablePred T] [𝐄𝐐 ≾ T] [𝐏𝐀⁻ ≾ T] [SigmaOneSound T] [Theory.Computable T]
+variable (T : Theory ℒₒᵣ) [DecidablePred T] [𝐄𝐐 ≼ T] [𝐏𝐀⁻ ≼ T] [SigmaOneSound T] [Theory.Computable T]
 open FirstIncompleteness
 
 /- Gödel's First incompleteness theorem -/

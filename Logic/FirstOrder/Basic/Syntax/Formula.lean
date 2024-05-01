@@ -529,7 +529,7 @@ def fvEnumInv (p : Semiformula L ξ n) : ℕ → ξ :=
 lemma fvEnumInv_fvEnum {p : Semiformula L ξ n} {x : ξ} (hx : x ∈ p.fvarList) :
     fvEnumInv p (fvEnum p x) = x := by
   simp [fvEnumInv, fvEnum]; intro h
-  exact False.elim <| not_le.mpr (List.indexOf_lt_length.mpr $ hx) h
+  exact False.elim <| not_le.mpr (List.indexOf_lt_length.mpr hx) h
 
 def fvListing (p : Semiformula L ξ n) : ξ → Fin (p.fvarList.length + 1) :=
   fun x ↦ ⟨p.fvarList.indexOf x, by simp [Nat.lt_succ, List.indexOf_le_length]⟩
@@ -546,14 +546,23 @@ end fvListing
 
 end Semiformula
 
+abbrev Theory (L : Language) := Set (Sentence L)
+
 abbrev SyntacticTheory (L : Language) := Set (SyntacticFormula L)
 
-def theorylMap (Φ : L₁ →ᵥ L₂) (T : Theory (Sentence L₁)) : Theory (Sentence L₂) := Semiformula.lMap Φ '' T.set
+instance : Collection (SyntacticFormula L) (SyntacticTheory L) := inferInstance
+
+instance : Collection (Sentence L) (Theory L) := inferInstance
+
+def Theory.lMap (Φ : L₁ →ᵥ L₂) (T : Theory L₁) : Theory L₂ := Semiformula.lMap Φ '' T
 
 namespace Theory
 
+variable (T U : Theory L)
 
+instance {L : Language} : Add (Theory L) := ⟨(· ∪ ·)⟩
 
+lemma add_def : T + U = T ∪ U := rfl
 
 end Theory
 

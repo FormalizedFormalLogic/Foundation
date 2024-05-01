@@ -6,10 +6,10 @@ namespace ModelsTheory
 
 variable {L : Language} (M : Type _) [Nonempty M] [Structure L M] (T U V : Theory L)
 
-lemma of_provably_subtheory (_ : T ≾ U) (h : M ⊧ₘ* U) : M ⊧ₘ* T :=
+lemma of_provably_subtheory (_ : T ≼ U) (h : M ⊧ₘ* U) : M ⊧ₘ* T :=
   of_subtheory h (Semantics.ofSystemSubtheory T U)
 
-lemma of_provably_subtheory' [T ≾ U] [M ⊧ₘ* U] : M ⊧ₘ* T := of_provably_subtheory M T U inferInstance inferInstance
+lemma of_provably_subtheory' [T ≼ U] [M ⊧ₘ* U] : M ⊧ₘ* T := of_provably_subtheory M T U inferInstance inferInstance
 
 lemma of_add_left [M ⊧ₘ* T + U] : M ⊧ₘ* T := of_ss inferInstance (show T ⊆ T + U from by simp [Theory.add_def])
 

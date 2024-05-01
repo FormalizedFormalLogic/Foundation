@@ -238,6 +238,27 @@ def comp {𝓢 : S} {𝓣 : S'} {𝓢'' : S''} (φ : 𝓣 ↝ 𝓢'') (ψ : 𝓢
 
 end Translation
 
+class Subtheory (𝓢 𝓣 : S) where
+  prf {f} : 𝓢 ⊢ f → 𝓣 ⊢ f
+
+infix:40 " ≼ " => Subtheory
+
+namespace Subtheory
+
+variable {𝓢 𝓣 𝓤 : S}
+
+protected instance id : 𝓢 ≼ 𝓢 := ⟨id⟩
+
+def comp (t' : 𝓣 ≼ 𝓤) (t : 𝓢 ≼ 𝓣) : 𝓢 ≼ 𝓤 := ⟨t'.prf ∘ t.prf⟩
+
+def translation [𝓢 ≼ 𝓣] : 𝓢 ↝ 𝓣 where
+  toFun := id
+  prf := prf
+
+def ofTranslation (t : 𝓢 ↝ 𝓣) (h : ∀ p, t p = p) : 𝓢 ≼ 𝓣 := ⟨fun {p} b ↦ h p ▸ (t.prf b)⟩
+
+end Subtheory
+
 section
 
 variable [LogicalConnective F]
@@ -272,6 +293,14 @@ variable [Collection F S] [Axiomatized S] {𝓢 𝓣 : S}
 lemma axm_subset (𝓢 : S) : Collection.set 𝓢 ⊆ theory 𝓢 := fun _ hp ↦ provable_axm 𝓢 hp
 
 lemma le_of_subset_axm (h : 𝓢 ⊆ 𝓣) : 𝓢 ≤ₛ 𝓣 := by rintro f ⟨b⟩; exact ⟨weakening h b⟩
+
+lemma weakening! (h : 𝓢 ⊆ 𝓣) {f} : 𝓢 ⊢! f → 𝓣 ⊢! f := by rintro ⟨b⟩; exact ⟨weakening h b⟩
+
+def subtheoryOfSubset (h : 𝓢 ⊆ 𝓣) : 𝓢 ≼ 𝓣 := ⟨weakening h⟩
+
+def translation (h : 𝓢 ⊆ 𝓣) : 𝓢 ↝ 𝓣 where
+  toFun := id
+  prf := weakening h
 
 end Axiomatized
 
@@ -408,7 +437,7 @@ namespace Sound
 
 section
 
-variable {𝓢 : S} {𝓜 : M} [Sound 𝓢 𝓜]
+variable {𝓢 𝓣 : S} {𝓜 𝓝 : M} [Sound 𝓢 𝓜] [Sound 𝓣 𝓝]
 
 lemma not_provable_of_countermodel {p : F} (hp : ¬𝓜 ⊧ p) : 𝓢 ⊬! p :=
   fun b ↦ hp (Sound.sound b)

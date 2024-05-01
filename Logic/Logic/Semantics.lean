@@ -151,12 +151,12 @@ end RealizeSet
 
 lemma valid_neg_iff [Tarski M] (f : F) : Valid M (~f) ↔ ¬Satisfiable M {f} := by simp [Valid, Satisfiable]
 
-lemma Satisfiable.of_subset {T U : Set F} (h : Satisfiable M U) (ss : T ⊆ U) : Satisfiable M T :=
-  by rcases h with ⟨𝓜, h⟩; exact ⟨𝓜, RealizeSet.of_subset h ss⟩
+lemma Satisfiable.of_subset {T U : Set F} (h : Satisfiable M U) (ss : T ⊆ U) : Satisfiable M T := by
+  rcases h with ⟨𝓜, h⟩; exact ⟨𝓜, RealizeSet.of_subset h ss⟩
 
 variable (M)
 
-instance [Semantics F M] : Semantics F (Set M) := ⟨fun s f ↦ ∀ 𝓜 ∈ s, 𝓜 ⊧ f⟩
+instance [Semantics F M] : Semantics F (Set M) := ⟨fun s f ↦ ∀ {𝓜}, 𝓜 ∈ s → 𝓜 ⊧ f⟩
 
 @[simp] lemma empty_models (f : F) : (∅ : Set M) ⊧ f := by rintro h; simp
 
@@ -194,7 +194,7 @@ lemma consequence_iff_not_satisfiable [Tarski M] {f : F} :
 lemma weakening {T U : Set F} {f} (h : T ⊨[M] f) (ss : T ⊆ U) : U ⊨[M] f :=
   consequence_iff.mpr fun hs => consequence_iff.mp h (RealizeSet.of_subset hs ss)
 
-lemma of_mem {T : Set F} {f} (h : f ∈ T) : T ⊨[M] f := fun _ hs => hs.RealizeSet h
+lemma of_mem {T : Set F} {f} (h : f ∈ T) : T ⊨[M] f := fun hs => hs.RealizeSet h
 
 end Semantics
 

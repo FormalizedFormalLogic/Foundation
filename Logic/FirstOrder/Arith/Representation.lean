@@ -142,7 +142,7 @@ lemma codeOfPartrec_spec {k} {f : Vector ℕ k →. ℕ} (hf : Nat.Partrec' f) {
     exact ⟨c, models_code hc⟩
   exact Classical.epsilon_spec this y v
 
-variable {T : Theory ℒₒᵣ} [𝐄𝐐 ≾ T] [𝐏𝐀⁻ ≾ T] [DecidablePred T] [SigmaOneSound T] [Theory.Computable T]
+variable {T : Theory ℒₒᵣ} [𝐄𝐐 ≼ T] [𝐏𝐀⁻ ≼ T] [DecidablePred T] [SigmaOneSound T] [Theory.Computable T]
 
 section representation
 

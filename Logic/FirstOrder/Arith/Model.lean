@@ -200,7 +200,7 @@ abbrev Theory.trueArith : Theory ℒₒᵣ := Structure.theory ℒₒᵣ ℕ
 
 notation "𝐓𝐀" => Theory.trueArith
 
-variable (T : Theory ℒₒᵣ) [𝐄𝐐 ≾ T]
+variable (T : Theory ℒₒᵣ) [𝐄𝐐 ≼ T]
 
 lemma oRing_consequence_of (σ : Sentence ℒₒᵣ)
   (H : ∀ (M : Type)
