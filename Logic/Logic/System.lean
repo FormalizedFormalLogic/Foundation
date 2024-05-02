@@ -274,8 +274,11 @@ end
 variable (S T)
 
 class Axiomatized [Collection F S] where
-  prfAxm (𝓢 : S) : 𝓢 ⊢* Collection.set 𝓢
+  prfAxm {𝓢 : S} : 𝓢 ⊢* Collection.set 𝓢
   weakening {𝓢 𝓣 : S} : 𝓢 ⊆ 𝓣 → 𝓢 ⊢ f → 𝓣 ⊢ f
+
+alias byAxm := Axiomatized.prfAxm
+alias wk := Axiomatized.weakening
 
 class StrongCut [Collection F S] [Collection F T] [Axiomatized S] where
   cut {𝓢 : S} {𝓣 : T} {p} : 𝓢 ⊢* Collection.set 𝓣 → 𝓣 ⊢ p → 𝓢 ⊢ p
@@ -288,7 +291,7 @@ namespace Axiomatized
 
 variable [Collection F S] [Axiomatized S] {𝓢 𝓣 : S}
 
-@[simp] lemma provable_axm (𝓢 : S) : 𝓢 ⊢*! Collection.set 𝓢 := fun hf ↦ ⟨prfAxm 𝓢 hf⟩
+@[simp] lemma provable_axm (𝓢 : S) : 𝓢 ⊢*! Collection.set 𝓢 := fun hf ↦ ⟨prfAxm hf⟩
 
 lemma axm_subset (𝓢 : S) : Collection.set 𝓢 ⊆ theory 𝓢 := fun _ hp ↦ provable_axm 𝓢 hp
 
@@ -303,6 +306,9 @@ def translation (h : 𝓢 ⊆ 𝓣) : 𝓢 ↝ 𝓣 where
   prf := weakening h
 
 end Axiomatized
+
+alias by_axm := Axiomatized.provable_axm
+alias wk! := Axiomatized.weakening!
 
 variable [Collection F S] [Collection F T] [Axiomatized S]
 
