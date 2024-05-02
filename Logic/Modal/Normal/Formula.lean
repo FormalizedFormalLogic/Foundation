@@ -1,4 +1,5 @@
 import Logic.Modal.Normal.LogicSymbol
+import Logic.Vorspiel.Collection
 
 namespace LO.Modal.Normal
 
@@ -190,7 +191,11 @@ end Formula
 
 abbrev Theory (α : Type u) := Set (Formula α)
 
+instance : Collection (Formula α) (Theory α) := inferInstance
+
 abbrev Context (α : Type u) := Finset (Formula α)
+
+instance [DecidableEq α] : Collection (Formula α) (Context α) := inferInstance
 
 namespace Context
 

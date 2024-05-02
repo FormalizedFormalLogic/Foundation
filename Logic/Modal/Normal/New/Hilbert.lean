@@ -1,4 +1,5 @@
 import Logic.Logic.HilbertStyle
+import Logic.Logic.Context
 import Logic.Modal.Normal.LogicSymbol
 import Logic.Modal.Normal.Formula
 import Logic.Modal.Normal.Axioms
@@ -70,25 +71,25 @@ namespace LO.Modal.Normal
 variable {α : Type*} [DecidableEq α]
 
 inductive Deduction (Λ : AxiomSet α) : (Formula α) → Type _
-  | maxm {p}       : p ∈ Λ → Deduction Λ p
-  | mdp {p q}      : Deduction Λ (p ⟶ q) → Deduction Λ p → Deduction Λ q
-  | nec {p}        : Deduction Λ p → Deduction Λ (□p)
-  | verum          : Deduction Λ ⊤
-  | imply₁ (p q)   : Deduction Λ (p ⟶ q ⟶ p)
-  | imply₂ (p q r) : Deduction Λ ((p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r)
-  | conj₁ (p q)    : Deduction Λ (p ⋏ q ⟶ p)
-  | conj₂ (p q)    : Deduction Λ (p ⋏ q ⟶ q)
-  | conj₃ (p q)    : Deduction Λ (p ⟶ q ⟶ p ⋏ q)
-  | disj₁ (p q)    : Deduction Λ (p ⟶ p ⋎ q)
-  | disj₂ (p q)    : Deduction Λ (q ⟶ p ⋎ q)
-  | disj₃ (p q r)  : Deduction Λ ((p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r))
-  | dne (p)        : Deduction Λ (~~p ⟶ p)
+  | maxm {p}     : p ∈ Λ → Deduction Λ p
+  | mdp {p q}    : Deduction Λ (p ⟶ q) → Deduction Λ p → Deduction Λ q
+  | nec {p}      : Deduction Λ p → Deduction Λ (□p)
+  | verum        : Deduction Λ ⊤
+  | imply₁ p q   : Deduction Λ (p ⟶ q ⟶ p)
+  | imply₂ p q r : Deduction Λ ((p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r)
+  | conj₁ p q    : Deduction Λ (p ⋏ q ⟶ p)
+  | conj₂ p q    : Deduction Λ (p ⋏ q ⟶ q)
+  | conj₃ p q    : Deduction Λ (p ⟶ q ⟶ p ⋏ q)
+  | disj₁ p q    : Deduction Λ (p ⟶ p ⋎ q)
+  | disj₂ p q    : Deduction Λ (q ⟶ p ⋎ q)
+  | disj₃ p q r  : Deduction Λ ((p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r))
+  | dne p        : Deduction Λ (~~p ⟶ p)
 
-instance : LO.System (Formula α) (AxiomSet α) := ⟨Deduction⟩
+instance : System (Formula α) (AxiomSet α) := ⟨Deduction⟩
 
 open Deduction
 
-instance : LO.System.Classical (Λ : AxiomSet α) where
+instance : System.Classical (Λ : AxiomSet α) where
   mdp := mdp
   verum := verum
   imply₁ := imply₁
@@ -101,10 +102,52 @@ instance : LO.System.Classical (Λ : AxiomSet α) where
   disj₃ := disj₃
   dne := dne
 
-instance : LO.System.Necessitation (Λ : AxiomSet α) where
+instance : System.Necessitation (Λ : AxiomSet α) where
   nec := nec
 
-instance (hK : 𝐊 ⊆ Λ := by simp) : LO.System.K (Λ : AxiomSet α) where
+instance (hK : 𝐊 ⊆ Λ := by simp) : System.K (Λ : AxiomSet α) where
   K _ _ := maxm $ Set.mem_of_subset_of_mem hK (by simp);
+
+end LO.Modal.Normal
+
+
+namespace LO.System
+
+variable {S : Type*}
+variable [LogicalConnective F]
+variable [System F S]
+
+structure Derivation (𝓢 : S) (T : Set F) (p : F) where
+  ctx : List F
+  subset : ∀ p ∈ ctx, p ∈ T
+  derivation : System.Context.Prf 𝓢 ctx p
+
+notation:45 T:80 " ⊢[" 𝓢 "] " p:80 => Derivation 𝓢 T p
+
+section
+
+variable (𝓢 : S) (T : Set F) (p : F)
+
+def Derivable := Nonempty (T ⊢[𝓢] p)
+
+abbrev Underivable := ¬Derivable 𝓢 T p
+
+notation:45 T:80 " ⊢[" 𝓢 "]! " p:80 => Derivable 𝓢 T p
+
+notation:45 T:80 " ⊬[" 𝓢 "]! " p:80 => Underivable 𝓢 T p
+
+end
+
+end LO.System
+
+
+namespace LO.Modal.Normal
+
+structure Derivation (Λ : AxiomSet α) (T : Theory α) (p : Formula α) where
+  context : List (Formula α)
+  subset : ∀ p ∈ context, p ∈ T
+  derivation : System.Context.Prf Λ context p
+
+instance (Λ : AxiomSet α) : System (Formula α) (Theory α) := ⟨(· ⊢[Λ] ·)⟩
 
 end LO.Modal.Normal

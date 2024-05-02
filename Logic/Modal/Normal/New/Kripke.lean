@@ -91,18 +91,28 @@ instance : Semantics (Formula α) (FrameClass W α) := ⟨fun 𝔽 ↦ Formula.K
 @[simp] lemma models_iff_validOnFrameClass : 𝔽 ⊧ f ↔ Formula.Kripkean.ValidOnFrameClass 𝔽 f := iff_of_eq rfl
 
 
-def AxiomSetFrameClass (Λ : AxiomSet α) : FrameClass W α := { F | F ⊧* Λ }
-notation "𝔽(" Λ ")" => AxiomSetFrameClass Λ
+structure AxiomSetFrameClass (W) {α} (Λ : AxiomSet α) where
+  frameclass : FrameClass W α
+  spec : F ∈ frameclass ↔ F ⊧* Λ
 
-lemma union_AxiomSetFrameClass : (𝔽(Λ₁ ∪ Λ₂) : FrameClass W α) = 𝔽(Λ₁) ∩ 𝔽(Λ₂) := by simp [AxiomSetFrameClass]; rfl;
+variable {Λ : AxiomSet α}
 
-lemma validOnAxiomSetFrameClass_axiom (hp : p ∈ Λ) : (𝔽(Λ) : FrameClass W α) ⊧ p := by intro F hF; exact hF.realize hp;
+def Formula.Kripkean.ValidOnAxiomSetFrameClass (𝔽 : AxiomSetFrameClass W Λ) (f : Formula α) := Formula.Kripkean.ValidOnFrameClass 𝔽.frameclass f
+
+instance : Semantics (Formula α) (AxiomSetFrameClass W Λ) := ⟨fun 𝔽 ↦ Formula.Kripkean.ValidOnAxiomSetFrameClass 𝔽⟩
+
+@[simp] lemma models_iff_validOnAxiomSetFrameClass : 𝔽 ⊧ p ↔ Formula.Kripkean.ValidOnAxiomSetFrameClass 𝔽 p := iff_of_eq rfl
+
+lemma validOnAxiomSetFrameClass_axiom {𝔽 : AxiomSetFrameClass W Λ} (h : p ∈ Λ) : 𝔽 ⊧ p := by
+  intro F hF;
+  exact 𝔽.spec.mp hF |>.realize h;
 
 class AxiomSetDefinability (W) (Λ : AxiomSet α) where
   property : Frame W α → Prop
-  spec : ∀ {F}, property F ↔ F ⊧* Λ
+  spec : ∀ F, property F ↔ F ⊧* Λ
 
-lemma AxiomSetDefinability.spec' [h : AxiomSetDefinability W Λ] : ∀ {F}, h.property F ↔ F ∈ 𝔽(Λ) := h.spec
+lemma iff_definability_memAxiomSetFrameClass [AxiomSetDefinability W Λ] {𝔽 : AxiomSetFrameClass W Λ} : ∀ {F}, AxiomSetDefinability.property Λ F ↔ F ∈ 𝔽.frameclass := by
+  simp [AxiomSetDefinability.spec, AxiomSetFrameClass.spec];
 
 instance [h₁ : AxiomSetDefinability W Λ₁] [h₂ : AxiomSetDefinability W Λ₂] : AxiomSetDefinability W (Λ₁ ∪ Λ₂) where
   property := λ F => h₁.property F ∧ h₂.property F
@@ -116,21 +126,9 @@ instance : AxiomSetDefinability W (𝐊 : AxiomSet α) where
     simp [ValidOnFrame, ValidOnModel, Satisfies];
     intros; simp_all;
 
-@[simp]
-instance : Set.Nonempty (𝔽(𝐊) : FrameClass W α) := by
+instance {𝔽 : AxiomSetFrameClass W (𝐊 : AxiomSet α)} : Set.Nonempty 𝔽.frameclass := by
   existsi (λ _ _ => True);
-  apply AxiomSetDefinability.spec'.mp;
+  apply iff_definability_memAxiomSetFrameClass.mp;
   trivial;
-
-variable [Inhabited W]
-
-lemma meaningful_of_nonempty_frameclass {𝔽 : FrameClass W α} (h : Set.Nonempty 𝔽 := by simp) : Semantics.Meaningful 𝔽 where
-  exists_unrealize := by
-    simp [ValidOnFrameClass, ValidOnFrame, ValidOnModel];
-    obtain ⟨F, hF⟩ := h;
-    existsi ⊥, F;
-    constructor;
-    . simp_all;
-    . simp [Satisfies];
 
 end LO.Modal.Normal
