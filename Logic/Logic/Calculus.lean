@@ -310,7 +310,7 @@ instance : System F S := ⟨(· ⊢' [·])⟩
 variable {F S}
 
 instance : System.Axiomatized S where
-  prfAxm := fun 𝓣 f hf ↦
+  prfAxm := fun {𝓣 f} hf ↦
     ⟨[f], by simpa, closed _ (List.mem_singleton.mpr rfl) (List.mem_singleton.mpr rfl)⟩
   weakening := fun ss b => b.weakening ss
 

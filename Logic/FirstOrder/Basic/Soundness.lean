@@ -79,7 +79,7 @@ theorem soundness₀! {T} {σ : Sentence L} : T ⊢! σ → T ⊨ σ := soundnes
 instance (T : Theory L) : Sound T (Semantics.models (Struc.{v, u} L) T) := ⟨soundness!⟩
 
 lemma models_of_subtheory {T U : Theory L} [U ≼ T] {M : Type*} [Structure L M] [Nonempty M] (hM : M ⊧ₘ* T) : M ⊧ₘ* U := ⟨fun p hp ↦ by
-  have : T ⊢ p := System.Subtheory.prf (System.Axiomatized.prfAxm U hp)
+  have : T ⊢ p := System.Subtheory.prf (System.byAxm hp)
   exact soundness this hM⟩
 
 end soundness
