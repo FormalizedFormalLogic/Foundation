@@ -15,13 +15,13 @@ jobs:
       pages: write
       id-token: write
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Install elan
         run: |
           curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain none
           echo "$HOME/.elan/bin" >> $GITHUB_PATH
       - name: Cache outputs
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ./.lake
           key: deps-${{ runner.os }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}-${{ github.sha }}
@@ -31,9 +31,9 @@ jobs:
       - run: |
           lake -R -Kenv=dev exe cache get && lake -R -Kenv=dev build && lake -R -Kenv=dev build Logic:docs
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v1
+        uses: actions/upload-pages-artifact@v3
         with:
           path: ./.lake/build/doc/
       - name: Deploy to GitHub Pages
-        uses: actions/deploy-pages@v1
+        uses: actions/deploy-pages@v4
         id: deployment
