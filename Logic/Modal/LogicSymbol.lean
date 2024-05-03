@@ -17,11 +17,7 @@ variable {i : ι} {p q : F}
 
 @[simp] lemma mop_injective' : ((mop i) p) = ((mop i) q) ↔ p = q := by constructor; intro h; exact mop_injective h; simp_all;
 
-@[simp] def multimop (i : ι) (n : ℕ) (p : F) : F := Nat.iterate (mop i) n p
-
 @[simp] lemma multimop_zero : (mop i)^[0] p = p := rfl
-
-@[simp] lemma mzero : multimop i 0 = (id : F → F) := rfl
 
 lemma multimop_succ : (mop i)^[(n + 1)] p = (mop i)^[n] ((mop i) p) := by apply iterate_succ_apply
 
@@ -49,100 +45,73 @@ namespace Set
 
 variable {s t : Set F}
 
-protected def multimop (i : ι) (n : ℕ) (s : Set F) : Set F := (multimop i n) '' s
-notation:76 "△[" i:90 "]" "[" n:90 "]" s:max => Set.multimop i n s
+protected abbrev mop (i : ι) : Set F → Set F := image (mop i)
 
-@[simp] lemma multimop_empty : △[i][n](∅ : Set F) = ∅ := by simp [Set.multimop]
+protected abbrev multimop (i : ι) (n : ℕ) : Set F → Set F := image (mop i)^[n]
 
-@[simp] lemma multimop_singleton : △[i][n]({a} : Set F) = {(mop i)^[n] a} := by simp [Set.multimop]
+@[simp] lemma mop_iff_multimop_one : (Set.mop i s) = (Set.multimop i 1 s) := by rfl
 
-@[simp] lemma multimop_zero : △[i][0]s = s := by simp [Set.multimop]
 
-@[simp] lemma multimop_mem_intro : a ∈ s → (mop i)^[n] a ∈ (△[i][n]s) := by tauto;
+protected abbrev premultimop (i : ι) (n : ℕ) : Set F → Set F := Set.preimage ((mop i)^[n])
 
-@[simp] lemma multimop_injOn : Set.InjOn (multimop i n) (multimop i n ⁻¹' s) := by simp [Set.InjOn];
+protected abbrev premop (i : ι) : Set F → Set F := Set.premultimop i 1
 
-@[simp] lemma multimop_subset (h : s ⊆ t) : (△[i][n]s) ⊆ (△[i][n]t) := by simp_all [Set.subset_def, Set.multimop];
+@[simp] lemma premop_iff_premultimop_one : (Set.premop i s) = (Set.premultimop i 1 s) := by rfl
 
-@[simp] lemma multimop_union : (△[i][n](s ∪ t)) = (△[i][n]s) ∪ (△[i][n]t) := by simp_all [Set.image_union, Set.multimop];
 
-lemma multimop_mem_iff : a ∈ (△[i][n]s) ↔ (∃ b ∈ s, (mop i)^[n] b = a) := by simp_all [Set.mem_image, Set.multimop];
+@[simp] lemma multimop_subset (h : s ⊆ t) : (Set.multimop i n s) ⊆ (Set.multimop i n t) := by simp_all [Set.subset_def];
 
-lemma forall_multimop_of_subset_multimop (h : s ⊆ △[i][n]t) : ∀ p ∈ s, ∃ q ∈ t, p = (mop i)^[n] q := by
+lemma multimop_mem_iff : a ∈ (Set.multimop i n s) ↔ (∃ b ∈ s, (mop i)^[n] b = a) := by simp_all [Set.mem_image, Set.multimop];
+
+lemma forall_multimop_of_subset_multimop (h : s ⊆ Set.multimop i n t) : ∀ p ∈ s, ∃ q ∈ t, p = (mop i)^[n] q := by
   intro p hp;
   obtain ⟨q, hq₁, hq₂⟩ := h hp;
   use q;
   simp_all;
 
-protected def mop (i : ι) (s : Set F) : Set F := Set.multimop i 1 s
-notation:76 "△[" i "]" s => Set.mop i s
-
-@[simp] lemma mop_empty : (△[i](∅ : Set F)) = ∅ := by simp [Set.mop]
-
-@[simp] lemma mop_singleton : (△[i]({a} : Set F)) = {(mop i a)} := by simp [Set.mop]
-
-@[simp] lemma mop_mem_intro : a ∈ s → (mop i a) ∈ (△[i]s) := by apply multimop_mem_intro;
-
-@[simp] lemma mop_injOn : Set.InjOn (multimop i n) s := by simp [Set.InjOn]
-
-lemma mop_subset (h : s ⊆ t) : (△[i]s) ⊆ (△[i]t) := by apply multimop_subset; assumption;
-
-@[simp] lemma mop_union : (△[i](s ∪ t)) = (△[i]s) ∪ (△[i]t) := by apply multimop_union;
-
-lemma mop_mem_iff : p ∈ (△[i]s) ↔ (∃ q ∈ s, (mop i q) = p) := by apply multimop_mem_iff;
-
 protected lemma mop_injective : Function.Injective (λ {s : Set F} => Set.mop i s) := Function.Injective.image_injective mop_injective
 
-lemma forall_mop_of_subset_mop (h : s ⊆ (Set.mop i t)) : ∀ p ∈ s, ∃ q ∈ t, p = mop i q := forall_multimop_of_subset_multimop h
+lemma forall_mop_of_subset_mop (h : s ⊆ (Set.mop i t)) : ∀ p ∈ s, ∃ q ∈ t, p = mop i q := forall_multimop_of_subset_multimop (by simpa using h)
 
 
-@[simp] protected def premultimop (i : ι) (n : ℕ) (s : Set F) := (multimop i n) ⁻¹' s
-notation:76 "△⁻¹[" i:90 "]" "[" n:90 "]" s:max => Set.premultimop i n s
 
-lemma multimop_premultimop_eq : △⁻¹[i][n](△[i][n]s) = s := by
+lemma multimop_premultimop_eq : (Set.premultimop i n) (Set.multimop i n s) = s := by
   apply Set.preimage_image_eq;
   exact multimop_injective;
 
-lemma premultimop_multimop_eq_of_subset_premultimop (hs : s ⊆ △[i][n]t) : △[i][n](△⁻¹[i][n]s) = s := by
+lemma premultimop_multimop_eq_of_subset_premultimop (hs : s ⊆ Set.multimop i n t) : Set.multimop i n ((Set.premultimop i n) s) = s := by
   apply Set.eq_of_subset_of_subset;
   . intro p hp;
     obtain ⟨q, hq₁, hq₂⟩ := hp;
     simp_all [Set.premultimop];
   . intro p hp;
     obtain ⟨q, _, hq₂⟩ := forall_multimop_of_subset_multimop hs p hp;
-    simp_all [multimop, Set.premultimop];
+    simp_all [Set.premultimop];
 
 
-@[simp] lemma premultimop_multimop_subset : △[i][n](△⁻¹[i][n]s) ⊆ s := by simp [Set.subset_def, Set.multimop, Set.premultimop];
 
-lemma premultimop_subset (h : s ⊆ t) : (△⁻¹[i][n]s) ⊆ (△⁻¹[i][n]t) := by simp_all [Set.subset_def, Set.premultimop];
+lemma premultimop_subset (h : s ⊆ t) : ((Set.premultimop i n) s) ⊆ ((Set.premultimop i n) t) := by simp_all [Set.subset_def];
 
-lemma subset_premulitimop_iff_multimop_subset (h : s ⊆ △⁻¹[i][n]t) : △[i][n]s ⊆ t := by
+lemma subset_premulitimop_iff_multimop_subset (h : s ⊆ (Set.premultimop i n) t) : Set.multimop i n s ⊆ t := by
   intro p hp;
   obtain ⟨_, h₁, h₂⟩ := multimop_subset h hp;
   subst h₂;
   assumption;
 
-lemma subset_multimop_iff_premulitimop_subset (h : s ⊆ (△[i][n]t)) : (△⁻¹[i][n]s) ⊆ t := by
+lemma subset_multimop_iff_premulitimop_subset (h : s ⊆ (Set.multimop i n t)) : ((Set.premultimop i n) s) ⊆ t := by
   intro p hp;
   obtain ⟨_, h₁, h₂⟩ := premultimop_subset h hp;
   simp_all;
 
+@[simp] lemma mop_premop_eq : (Set.premop i $ Set.mop i s) = s := by apply multimop_premultimop_eq;
 
-protected def premop (i : ι) (s : Set F) := Set.premultimop i 1 s
-notation:76 "△⁻¹[" i "]" s => Set.premop i s
+lemma premop_mop_eq_of_subset_mop (hs : s ⊆ (Set.mop i t)) : (Set.mop i $ Set.premop i s) = s := premultimop_multimop_eq_of_subset_premultimop hs
 
-@[simp] lemma mop_premop_eq : (△⁻¹[i]△[i]s) = s := by apply multimop_premultimop_eq;
+lemma premop_subset (h : s ⊆ t) : (Set.premop i s) ⊆ (Set.premop i t) := premultimop_subset h
 
-lemma premop_mop_eq_of_subset_mop (hs : s ⊆ △[i]t) : (△[i]△⁻¹[i]s) = s := premultimop_multimop_eq_of_subset_premultimop hs
+lemma subset_premop_iff_mop_subset (h : s ⊆ Set.premop i t) : (Set.mop i s) ⊆ t := subset_premulitimop_iff_multimop_subset h
 
-@[simp] lemma premop_mop_subset : (△[i]△⁻¹[i]s) ⊆ s := by apply premultimop_multimop_subset;
-
-lemma premop_subset (h : s ⊆ t) : (△⁻¹[i]s) ⊆ (△⁻¹[i]t) := premultimop_subset h
-
-lemma subset_premop_iff_mop_subset (h : s ⊆ △⁻¹[i]t) : (△[i]s) ⊆ t := subset_premulitimop_iff_multimop_subset h
-
-lemma subset_mop_iff_premop_subset (h : s ⊆ △[i]t) : (△⁻¹[i]s) ⊆ t := subset_multimop_iff_premulitimop_subset h
+lemma subset_mop_iff_premop_subset (h : s ⊆ Set.mop i t) : (Set.premop i s) ⊆ t := subset_multimop_iff_premulitimop_subset h
 
 end Set
 
@@ -154,21 +123,13 @@ open UnaryModalOperator
 
 variable {l : List F}
 
-protected abbrev multimop (i : ι) (n : ℕ) (l : List F) : List F := l.map (multimop i n)
-notation "△[" i:90 "]" "[" n:90 "]" l:max => List.multimop i n l
+protected abbrev mop (i : ι) : List F → List F := List.map (mop i)
 
-@[simp] protected def mop (i : ι) (l : List F) : List F := △[i][1]l
-notation "△[" n:90 "]" l:max => List.mop n l
+protected abbrev multimop (i : ι) (n : ℕ) : List F → List F := List.map ((mop i)^[n])
 
-@[simp] lemma multimop_empty : △[i][n]([] : List F) = [] := by simp [List.multimop]
+protected abbrev premultimop (i : ι) (n : ℕ) := List.filter (λ (p : F) => (mop i)^[n] p ∈ l)
 
-@[simp] protected lemma multimop_zero : △[i][0]l = l := by simp [List.multimop, multimop, multimop_zero]
-
-def premultimop (i : ι) (n : ℕ) (l : List F) := l.filter (λ (p : F) => (mop i)^[n] p ∈ l)
-notation "△⁻¹[" i:90 "]" "[" n:90 "]" l:max => List.premultimop i n l
-
-@[simp] def premop (i : ι) (l : List F) := △[i][1]l
-notation "△⁻¹[" i:90 "]" l:max => List.premop i l
+protected abbrev premop (i : ι) (l : List F) := l.filter (λ (p : F) => (mop i) p ∈ l)
 
 end List
 
@@ -177,37 +138,29 @@ namespace Finset
 
 variable {s t : Finset F}
 
-@[simp] protected noncomputable def multimop (i : ι) (n : ℕ) (s : Finset F) : Finset F := (△[i][n](s.toList)).toFinset
-notation "△[" i:90 "]" "[" n:90 "]" s:max => Finset.multimop i n s
+protected noncomputable abbrev multimop (i : ι) (n : ℕ) (s : Finset F) : Finset F := (s.toList).multimop i n |>.toFinset
 
-@[simp] protected noncomputable def mop (i : ι) (s : Finset F) : Finset F := △[i][1]s
-notation "△[" i:90 "]" s:max => Finset.mop i s
+protected noncomputable abbrev mop (i : ι) (s : Finset F) : Finset F := (s.toList).multimop i 1 |>.toFinset
 
-lemma multimop_def : (△[i][n]s : Finset F) = s.image (multimop i n) := by simp [List.multimop, List.toFinset_map];
+protected noncomputable abbrev premultimop (i : ι) (n : ℕ) (s : Finset F) : Finset F := s.preimage ((mop i)^[n]) (by simp [Set.InjOn])
 
-lemma multimop_coe : ↑(△[i][n]s : Finset F) = △[i][n](↑s : Set F) := by simp_all [Set.multimop, List.multimop]; rfl;
+protected noncomputable abbrev premop (i : ι) (s : Finset F) : Finset F := s.premultimop i 1
 
-@[simp] lemma multimop_zero : (△[i][0]s : Finset F) = s := by simp
+lemma multimop_coe : ↑(Finset.multimop i n s : Finset F) = Set.multimop i n (↑s : Set F) := by simp_all [Set.multimop, List.multimop]; rfl;
 
 @[simp]
-lemma multimop_union : (△[i][n](s ∪ t) : Finset F) = (△[i][n]s ∪ △[i][n]t : Finset F) := by
-  simp [List.toFinset_map, List.multimop];
+lemma multimop_union : (Finset.multimop i n (s ∪ t) : Finset F) = (Finset.multimop i n s ∪ Finset.multimop i n t) := by
+  simp [List.toFinset_map];
   aesop;
 
 lemma multimop_mem_coe {s : Finset F} : a ∈ Finset.multimop i n s ↔ a ∈ Set.multimop i n (↑s : Set F) := by
   constructor <;> simp_all [Set.multimop];
 
-@[simp] noncomputable def premultimop (i : ι) (n : ℕ) (s : Finset F) : Finset F := s.preimage (multimop i n) (by simp)
-notation "△⁻¹[" i:90 "]" "[" n:90 "]" s:max => Finset.premultimop i n s
+lemma premultimop_coe : ↑(s.premultimop i n) = (↑s : Set F).premultimop i n := by apply Finset.coe_preimage;
 
-@[simp] noncomputable def premop (i : ι) (s : Finset F) : Finset F := △⁻¹[i][1]s
-notation "△⁻¹[" i:90 "]" s:max => Finset.premop i s
+lemma premop_coe : ↑(s.premop i) = (↑s : Set F).premop i := by apply premultimop_coe;
 
-lemma premultimop_coe : ↑(△⁻¹[i][n]s : Finset F) = △⁻¹[i][n](↑s : Set F) := by apply Finset.coe_preimage;
-
-lemma premop_coe : ↑(△⁻¹[i]s : Finset F) = △⁻¹[i](↑s : Set F) := by apply premultimop_coe;
-
-lemma premultimop_multimop_eq_of_subset_multimop {s : Finset F} {t : Set F} (hs : ↑s ⊆ △[i][n]t) : (△[i][n](△⁻¹[i][n]s : Finset F) : Finset F) = s := by
+lemma premultimop_multimop_eq_of_subset_multimop {s : Finset F} {t : Set F} (hs : ↑s ⊆ Set.multimop i n t) : (s.premultimop i n).multimop i n = s := by
   have := Set.premultimop_multimop_eq_of_subset_premultimop hs;
   rw [←premultimop_coe, ←multimop_coe] at this;
   exact Finset.coe_inj.mp this;

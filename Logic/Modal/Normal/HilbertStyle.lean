@@ -88,7 +88,7 @@ def boxed_necessitation (d : Γ ⊢ p) : Γ.box ⊢ □p := HasBoxedNecessitatio
 def boxed_necessitation! (d : Γ ⊢! p) : Γ.box ⊢! □p := ⟨boxed_necessitation d.some⟩
 
 @[inference]
-def preboxed_necessitation (d : □⁻¹Γ ⊢ p) : Γ ⊢ □p := weakening' (by simp) $ boxed_necessitation d
+def preboxed_necessitation (d : □⁻¹Γ ⊢ p) : Γ ⊢ □p := weakening' (by simp; rfl) $ boxed_necessitation d
 
 @[inference]
 def preboxed_necessitation! (d : □⁻¹Γ ⊢! p) : Γ ⊢! □p := ⟨preboxed_necessitation d.some⟩

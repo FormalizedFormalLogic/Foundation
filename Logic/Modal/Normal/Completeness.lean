@@ -509,7 +509,7 @@ lemma frame_def': (CanonicalModel Λ).frame Ω₁ Ω₂ ↔ (◇Ω₂ ⊆ Ω₁.
   simp only [frame_def];
   constructor;
   . intro h p hp;
-    have ⟨q, hq₁, hq₂⟩ := mop_mem_iff.mp hp;
+    have ⟨q, hq₁, hq₂⟩ := Set.mem_image _ _ _ |>.mp hp;
     rw [←hq₂];
     apply (Ω₁.neg_membership_iff).mpr;
     by_contra hC;
@@ -518,7 +518,7 @@ lemma frame_def': (CanonicalModel Λ).frame Ω₁ Ω₂ ↔ (◇Ω₂ ⊆ Ω₁.
   . intro h p;
     contrapose;
     intro hnp;
-    have : ◇(~p) ∈ Ω₁ := by simpa using h $ mop_mem_intro $ neg_membership_iff.mpr hnp;
+    have : ◇(~p) ∈ Ω₁ := by apply h; simpa using neg_membership_iff.mpr hnp;
     have : ~(□p) ∈ Ω₁ := by
       suffices h : Ω₁.theory ⊢ᴹ[Λ]! ((◇~p) ⟷ ~(□p)) by exact MaximalConsistentTheory.iff_congr h |>.mp this;
       apply equiv_dianeg_negbox!;
@@ -584,7 +584,7 @@ lemma multiframe_box : (CanonicalModel Λ).frame[n] Ω₁ Ω₂ ↔ (∀ {p : Fo
       . apply ih;
         apply (multibox_multidia hK).mpr;
         intro p hp;
-        have : ◇[n]p ∈ ◇[n]Ω₂ := multimop_mem_intro hp;
+        have : ◇[n]p ∈ ◇[n]Ω₂ := by aesop;
         apply hΩ;
         simp_all;
 
