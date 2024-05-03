@@ -368,10 +368,6 @@ lemma multidia_dual {n : ℕ} {p : Formula β} : (◇[n]p ∈ Ω) ↔ (~(□[n](
     apply membership_iff.mpr;
     assumption;
 
-lemma multidia_prepost {n : ℕ} {p : Formula β} : (◇◇[n]p ∈ Ω) ↔ (◇[n](◇p) ∈ Ω) := by simp only [UnaryModalOperator.multimop_prepost];
-
-lemma mutlidia_prepost' {n : ℕ} {p : Formula β} : (◇[(n + 1)]p ∈ Ω) ↔ (◇[n](◇p) ∈ Ω) := by simp [UnaryModalOperator.multimop_prepost];
-
 @[simp]
 lemma no_falsum : ⊥ ∉ Ω := consistent_no_falsum Ω.consitent
 
@@ -546,7 +542,7 @@ lemma multiframe_box : (CanonicalModel Λ).frame[n] Ω₁ Ω₂ ↔ (∀ {p : Fo
 
         have h₁ : □⋀Δ₁ ∈ Ω₁ := by
           apply context_box_conj_membership_iff' hK |>.mpr;
-          have : □(Δ₁ : Theory β) ⊆ Ω₁ := subset_premop_iff_mop_subset hΔ₁;
+          have : □(Δ₁ : Theory β) ⊆ Ω₁ := by simpa using subset_premulitimop_iff_multimop_subset (by simpa using hΔ₁);
           intro p hp;
           exact this $ multimop_mem_coe.mp hp;
         have h₂ : ⋀(◇⁻¹[n]Δ₂) ∈ Ω₂ := by -- TODO: refactor
@@ -556,7 +552,7 @@ lemma multiframe_box : (CanonicalModel Λ).frame[n] Ω₁ Ω₂ ↔ (∀ {p : Fo
           intro p hp;
           exact this hp;
 
-        have e : (◇[n](◇⁻¹[n]Δ₂) : Context β) = Δ₂ := by simpa using premultimop_multimop_eq_of_subset_multimop hΔ₂;
+        have e : (◇[n](◇⁻¹[n]Δ₂) : Context β) = Δ₂ := premultimop_multimop_eq_of_subset_multimop hΔ₂;
 
         have : ⋀(◇⁻¹[n]Δ₂) ∉ Ω₂ := by
           have : ∅ ⊢ᴹ[Λ]! ~⋀(Δ₁ ∪ Δ₂) := by simpa [NegDefinition.neg] using finset_dt!.mp (by simpa using hUd);

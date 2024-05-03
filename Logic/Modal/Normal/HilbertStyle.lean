@@ -393,7 +393,7 @@ def distribute_multidia_conj : Γ ⊢ ◇[n](p ⋏ q) ⟶ (◇[n]p ⋏ ◇[n]q) 
     have : ∅ ⊢ ◇(◇[n](p ⋏ q)) ⟶ ◇(◇[n]p ⋏ ◇[n]q) := by simpa [duality] using this;
     have : ∅ ⊢ ◇(◇[n]p ⋏ ◇[n]q) ⟶ (◇◇[n]p ⋏ ◇◇[n]q) := distribute_dia_conj
     have : ∅ ⊢ ◇(◇[n](p ⋏ q)) ⟶ (◇[(n + 1)]p ⋏ ◇[(n + 1)]q) := imp_trans' (by assumption) (by simpa using this);
-    sorry; -- simpa using this;
+    simpa using weakening' (by simp) this;
 
 @[inference]
 def distribute_multidia_conj' (d : Γ ⊢ ◇[n](p ⋏ q)) : Γ ⊢ ◇[n]p ⋏ ◇[n]q := distribute_multidia_conj ⨀ d
