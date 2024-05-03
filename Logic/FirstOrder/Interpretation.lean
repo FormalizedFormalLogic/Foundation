@@ -17,7 +17,7 @@ structure Interpretation {L : Language} [L.Eq] (T : Theory L) (L' : Language) wh
 
 namespace Interpretation
 
-variable {L L' : Language} [L.Eq] {T : Theory L}
+variable {L L' : Language.{u}} [L.Eq] {T : Theory L}
 
 variable (ι : Interpretation T L')
 
@@ -67,7 +67,7 @@ section semantics
 
 open Semiformula
 
-variable {M : Type _} [Nonempty M] [s : Structure L M] [Structure.Eq L M] [M ⊧ₘ* T]
+variable {M : Type u} [Nonempty M] [s : Structure L M] [Structure.Eq L M] [M ⊧ₘ* T]
 
 def Dom (x : M) : Prop := PVal! M ![x] ι.domain
 
@@ -176,7 +176,7 @@ variable {L L' : Language.{u}} [L.Eq] {T : Theory L} {U : Theory L'} (ι : T ⊳
 abbrev translation (p : Semisentence L' n) : Semisentence L n := ι.interpretation.translation p
 
 lemma sub_models_theory {M : Type u} [Nonempty M] [Structure L M] [Structure.Eq L M] (hT : M ⊧ₘ* T) :
-    (ι.interpretation.Sub M) ⊧ₘ* U := modelsTheory_iff.mpr fun σ hσ ↦ models_translation_iff.mp (ι.interpret_theory σ hσ hT)
+    (ι.interpretation.Sub M) ⊧ₘ* U := modelsTheory_iff.mpr fun {σ} hσ ↦ models_translation_iff.mp (ι.interpret_theory σ hσ hT)
 
 lemma theorem_translation {σ : Sentence L'} (h : U ⊨ σ) : T ⊨₌ ι.translation σ :=
   consequence_iff_add_eq.mpr fun M _ _ _ hT ↦

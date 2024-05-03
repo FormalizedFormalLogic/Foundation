@@ -23,6 +23,8 @@ structure Struc (L : Language) where
   nonempty : Nonempty Dom
   struc : Structure L Dom
 
+abbrev SmallStruc (L : Language.{u}) := Struc.{u, u} L
+
 namespace Structure
 
 instance [n : Nonempty M] : Nonempty (Structure L M) := by
@@ -481,9 +483,11 @@ abbrev Realize (M : Type*) [s : Structure L M] : Formula L M → Prop := Semifor
 
 infix:45 " ⊧ₘᵣ " => Realize
 
-abbrev Consequence (T : Theory L) (σ : Sentence L) : Prop := T ⊨[Struc.{u, u} L] σ
+abbrev Consequence (T : Theory L) (σ : Sentence L) : Prop := T ⊨[SmallStruc L] σ
 
 infix:45 " ⊨ " => Consequence
+
+abbrev Satisfiable (T : Theory L) : Prop := Semantics.Satisfiable (SmallStruc L) T
 
 variable {M}
 
@@ -513,23 +517,23 @@ lemma valid_iff {σ : Sentence L} :
     Semantics.Valid (Struc.{v, u} L) σ ↔ ∀ (M : Type v) [Nonempty M] [Structure L M], M ⊧ₘ σ :=
   ⟨fun hσ _ _ s ↦ @hσ s.toStruc, fun h s ↦ h s.Dom⟩
 
-lemma satisfiableTheory_iff :
+lemma satisfiable_iff :
     Semantics.Satisfiable (Struc.{v, u} L) T ↔ ∃ (M : Type v) (_ : Nonempty M) (_ : Structure L M), M ⊧ₘ* T :=
   ⟨by rintro ⟨s, hs⟩; exact ⟨s.Dom, s.nonempty, s.struc, hs⟩, by rintro ⟨M, i, s, hT⟩; exact ⟨s.toStruc, hT⟩⟩
 
-lemma satisfiableTheory_intro (M : Type v) [Nonempty M] [s : Structure L M] (h : M ⊧ₘ* T) :
+lemma satisfiable_intro (M : Type v) [Nonempty M] [s : Structure L M] (h : M ⊧ₘ* T) :
     Semantics.Satisfiable (Struc.{v, u} L) T := ⟨s.toStruc, h⟩
 
 noncomputable def ModelOfSat (h : Semantics.Satisfiable (Struc.{v, u} L) T) : Type v :=
-  Classical.choose (satisfiableTheory_iff.mp h)
+  Classical.choose (satisfiable_iff.mp h)
 
 noncomputable instance nonemptyModelOfSat (h : Semantics.Satisfiable (Struc.{v, u} L) T) :
     Nonempty (ModelOfSat h) := by
-  choose i _ _ using Classical.choose_spec (satisfiableTheory_iff.mp h); exact i
+  choose i _ _ using Classical.choose_spec (satisfiable_iff.mp h); exact i
 
 noncomputable def StructureModelOfSatAux (h : Semantics.Satisfiable (Struc.{v, u} L) T) :
     { s : Structure L (ModelOfSat h) // ModelOfSat h ⊧ₘ* T } := by
-  choose _ s h using Classical.choose_spec (satisfiableTheory_iff.mp h)
+  choose _ s h using Classical.choose_spec (satisfiable_iff.mp h)
   exact ⟨s, h⟩
 
 noncomputable instance StructureModelOfSat (h : Semantics.Satisfiable (Struc.{v, u} L) T) :
@@ -563,7 +567,7 @@ lemma lMap_models_lMap {L₁ L₂ : Language.{u}} {Φ : L₁ →ᵥ L₂}  {T : 
     T.lMap Φ ⊨[Struc.{v, u} L₂] Semiformula.lMap Φ σ := by
   intro s hM
   have : (s.struc.lMap Φ).toStruc ⊧ σ :=
-    h ⟨fun q hq => Semiformula.models_lMap.mp <| hM.realize (Set.mem_image_of_mem _ hq)⟩
+    h ⟨fun hq => Semiformula.models_lMap.mp <| hM.realize (Set.mem_image_of_mem _ hq)⟩
   exact Semiformula.models_lMap.mpr this
 
 namespace ModelsTheory
@@ -607,7 +611,7 @@ variable {L} {M : Type u} [Nonempty M] [Structure L M]
 
 @[simp] lemma mem_theory_iff {σ} : σ ∈ theory L M ↔ M ⊧ₘ σ := by rfl
 
-lemma subset_of_models : T ⊆ theory L M ↔ M ⊧ₘ* T := ⟨fun h  ↦ ⟨fun _ hσ ↦ h hσ⟩, fun h _ hσ ↦ h.RealizeSet hσ⟩
+lemma subset_of_models : T ⊆ theory L M ↔ M ⊧ₘ* T := ⟨fun h  ↦ ⟨fun hσ ↦ h hσ⟩, fun h _ hσ ↦ h.RealizeSet hσ⟩
 
 end Structure
 

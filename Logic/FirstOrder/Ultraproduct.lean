@@ -18,7 +18,7 @@ namespace Structure
 structure Uprod (𝓤 : Ultrafilter I) where
   val : (i : I) → A i
 
-instance UprodStruc : Structure.{u,u} L (Uprod A 𝓤) where
+instance UprodStruc : Structure L (Uprod A 𝓤) where
   func := fun _ f v => ⟨fun i ↦ (s i).func f (fun x ↦ (v x).val i)⟩
   rel  := fun _ r v => {i | (s i).rel r (fun x ↦ (v x).val i)} ∈ 𝓤
 
@@ -133,24 +133,24 @@ lemma ultrafilter_exists [(t : FinSubtheory T) → Nonempty (A t)]
     intro σ hσ
     exact (H ⟨t, ht⟩).RealizeSet hσ)
 
-lemma compactnessAux :
-    Semantics.SatisfiableSet T ↔ ∀ i : FinSubtheory T, Semantics.SatisfiableSet (i.val : Theory L) := by
+lemma compactness_aux :
+    Satisfiable T ↔ ∀ i : FinSubtheory T, Satisfiable (i.val : Theory L) := by
   constructor
-  · rintro h ⟨t, ht⟩; exact Semantics.SatisfiableSet.of_subset h ht
+  · rintro h ⟨t, ht⟩; exact Semantics.Satisfiable.of_subset h ht
   · intro h
     have : ∀ i : FinSubtheory T, ∃ (M : Type u) (_ : Nonempty M) (_ : Structure L M), M ⊧ₘ* (i.val : Theory L) :=
-      by intro i; exact satisfiableTheory_iff.mp (h i)
+      by intro i; exact satisfiable_iff.mp (h i)
     choose A si s hA using this
     have : ∃ 𝓤 : Ultrafilter (FinSubtheory T), Set.image (Semiformula.domain A) T ⊆ 𝓤.sets := ultrafilter_exists A hA
     rcases this with ⟨𝓤, h𝓤⟩
     have : Structure.Uprod A 𝓤 ⊧ₘ* T := ⟨by intro σ hσ; exact models_Uprod.mpr (h𝓤 $ Set.mem_image_of_mem (Semiformula.domain A) hσ)⟩
-    exact satisfiableTheory_intro (Structure.Uprod A 𝓤) this
+    exact satisfiable_intro (Structure.Uprod A 𝓤) this
 
-theorem compactness :
-    Semantics.SatisfiableSet T ↔ ∀ T' : Finset (Sentence L), ↑T' ⊆ T → Semantics.SatisfiableSet (T' : Theory L) := by
-  rw[compactnessAux]; simp
+theorem compact :
+    Satisfiable T ↔ ∀ u : Finset (Sentence L), ↑u ⊆ T → Satisfiable (u : Theory L) := by
+  rw[compactness_aux]; simp
 
-instance : Compact (Sentence L) := ⟨compactness⟩
+instance : Compact (SmallStruc L) := ⟨compact⟩
 
 end
 

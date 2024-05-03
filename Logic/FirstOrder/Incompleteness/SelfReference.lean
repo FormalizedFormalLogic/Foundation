@@ -41,12 +41,12 @@ variable (T)
 /-- Fixpoint Lemma -/
 theorem main (θ : Semisentence ℒₒᵣ 1) :
     T ⊢! fixpoint θ ⟷ θ/[⸢fixpoint θ⸣] :=
-  Complete.consequence_iff_provable.mp (oRing_consequence_of _ _ (fun M _ _ _ _ _ _ => by
-    haveI : M ⊧ₘ* 𝐏𝐀⁻ := ModelsTheory.of_subtheory (T₁ := T) inferInstance (Semantics.ofSystemSubtheory _ _)
+  complete (oRing_consequence_of _ _ (fun M _ _ _ _ _ _ => by
+    haveI : M ⊧ₘ* 𝐏𝐀⁻ := ModelsTheory.of_provably_subtheory M 𝐏𝐀⁻ T inferInstance (by assumption)
     have hssbs : ∀ σ π : Semisentence ℒₒᵣ 1, ∀ z,
         PVal! M ![z, encode σ, encode π] ssbs ↔ z = encode (σ/[(⸢π⸣ : Semiterm ℒₒᵣ Empty 0)]) := by
       simpa [Model.numeral_eq_natCast, models_iff, Semiformula.eval_substs, Matrix.comp_vecCons', Matrix.constant_eq_singleton] using
-      fun σ π => consequence_iff'.mp (Sound.sound! (ssbs_spec (T := T) σ π)) M
+      fun σ π => consequence_iff'.mp (sound₀! (ssbs_spec (T := T) σ π)) M
     simp[models_iff, Semiformula.eval_substs, Matrix.comp_vecCons']
     suffices PVal! M ![] (fixpoint θ) ↔ PVal! M ![encode (fixpoint θ)] θ by
       simpa [Model.numeral_eq_natCast, Matrix.constant_eq_singleton] using this
@@ -95,19 +95,19 @@ lemma goedel_spec : T ⊢! G ⟷ ~(provableSentence T)/[⸢G⸣] := by
 
 variable [DecidablePred T] [Theory.Computable T]
 
-theorem godel_independent : System.Independent T G := by
+theorem godel_independent : System.Undecidable T G := by
   suffices ¬(T ⊢! G ∨ T ⊢! ~G) by
-    simpa[System.Independent, not_or] using this
+    simpa[System.Undecidable, not_or] using this
   rintro (H | H)
   · have h₁ : T ⊢! ~(provableSentence T)/[⸢G⸣] := by prover [goedel_spec T, H]
     have h₂ : T ⊢! (provableSentence T)/[⸢G⸣]  := by simpa using (provableSentence_representation (L := ℒₒᵣ)).mpr H
-    exact Gentzen.inconsistent_of_provable_and_refutable' h₂ h₁ (consistent_of_sigmaOneSound T)
+    exact (Gentzen.inconsistent_of_provable_and_refutable! h₂ h₁).not_con (consistent_of_sigmaOneSound T)
   · have : T ⊢! ~G ⟷ (provableSentence T)/[⸢G⸣] := by prover [goedel_spec T]
     have : T ⊢! (provableSentence T)/[⸢G⸣] := by prover [this, H]
     have : T ⊢! G := (provableSentence_representation (L := ℒₒᵣ)).mp this
-    exact Gentzen.inconsistent_of_provable_and_refutable' this H (consistent_of_sigmaOneSound T)
+    exact (Gentzen.inconsistent_of_provable_and_refutable! this H).not_con (consistent_of_sigmaOneSound T)
 
-theorem main : ¬System.Complete T := System.incomplete_iff_exists_independent.mpr ⟨G, godel_independent T⟩
+theorem not_complete : ¬System.Complete T := System.incomplete_iff_exists_undecidable.mpr ⟨G, godel_independent T⟩
 
 end FirstIncompletenessBySelfReference
 

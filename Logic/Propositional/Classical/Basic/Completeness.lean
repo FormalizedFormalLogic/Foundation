@@ -164,7 +164,7 @@ lemma maximalConsistentTheory_satisfiable :
     · left; exact ihp hp
     · right; exact ihq hq⟩
 
-lemma satisfiableTheory_of_consistent (consisT : Consistent T) : Semantics.Satisfiable (Valuation α) T :=
+lemma satisfiable_of_consistent (consisT : Consistent T) : Semantics.Satisfiable (Valuation α) T :=
   ⟨⟨(Formula.atom · ∈ maximalConsistentTheory consisT)⟩,
     Semantics.RealizeSet.of_subset maximalConsistentTheory_satisfiable (by simp)⟩
 
@@ -180,7 +180,7 @@ theorem completeness! : T ⊨[Valuation α] p → T ⊢! p := by
     have : ¬v ⊧ p := by simpa using hv.realize (Set.mem_insert (~p) T)
     contradiction
   intro consis
-  exact satisfiableTheory_of_consistent consis
+  exact satisfiable_of_consistent consis
 
 noncomputable def completeness : T ⊨[Valuation α] p → T ⊢ p :=
   λ h ↦ (completeness! h).prf
