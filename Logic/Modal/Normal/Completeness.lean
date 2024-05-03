@@ -569,7 +569,7 @@ lemma multiframe_box : (CanonicalModel Λ).frame[n] Ω₁ Ω₂ ↔ (∀ {p : Fo
           have : ∅ ⊢ᴹ[Λ]! ⋀Δ₁ ⟶ ~(◇[n](⋀(◇⁻¹[n]Δ₂))) := imp_eq_mpr'! $ neg_conj'! (by assumption);
           have : ∅ ⊢ᴹ[Λ]! ~(◇[n](⋀(◇⁻¹[n]Δ₂))) ⟶ (□[n](~(⋀◇⁻¹[n]Δ₂))) := contra₂'! $ iff_mpr'! $ multidia_duality!;
           have : ∅ ⊢ᴹ[Λ]! ⋀Δ₁ ⟶ □[n](~⋀◇⁻¹[n]Δ₂) := imp_trans'! (by assumption) (by assumption);
-          have : Ω₁ ⊢ᴹ[Λ]! □⋀Δ₁ ⟶ □[(n + 1)](~(⋀◇⁻¹[n]Δ₂)) := box_distribute_nec'! (by assumption);
+          have : Ω₁ ⊢ᴹ[Λ]! □⋀Δ₁ ⟶ □[(n + 1)](~(⋀◇⁻¹[n]Δ₂)) := by simpa using box_distribute_nec'! this;
           have : Ω₁ ⊢ᴹ[Λ]! □[(n + 1)](~⋀◇⁻¹[n]Δ₂) := (by assumption) ⨀ (membership_iff.mp h₁);
           have : □[(n + 1)](~⋀◇⁻¹[n]Δ₂) ∈ Ω₁ := membership_iff.mpr (by assumption);
           exact neg_membership_iff.mp $ h (by assumption);

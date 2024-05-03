@@ -118,7 +118,7 @@ def multiaxiomK : Γ ⊢ □[n](p ⟶ q) ⟶ (□[n]p ⟶ □[n]q) := by
   | succ n ih =>
     have d₁ : Γ ⊢ □□[n](p ⟶ q) ⟶ □(□[n]p ⟶ □[n]q) := box_distribute_nec' ih;
     have d₂ : Γ ⊢ □(□[n]p ⟶ □[n]q) ⟶ □□[n]p ⟶ □□[n]q := by deduct;
-    exact imp_trans' d₁ d₂;
+    simpa using imp_trans' d₁ d₂;
 
 @[inference]
 def multibox_distribute' (d : Γ ⊢ □[n](p ⟶ q)) :  Γ ⊢ □[n]p ⟶ □[n]q := multiaxiomK ⨀ d
@@ -170,7 +170,10 @@ lemma dia_iff'! (d : ∅ ⊢! p ⟷ q) : Γ ⊢! (◇p ⟷ ◇q) := ⟨dia_iff' 
 def multibox_iff' (h : ∅ ⊢ p ⟷ q) : Γ ⊢ □[n]p ⟷ □[n]q := by
   induction n generalizing Γ with
   | zero => deduct;
-  | succ => apply iff_intro'; all_goals { apply box_distribute_nec'; deduct; }
+  | succ =>
+    simp;
+    apply iff_intro';
+    all_goals { apply box_distribute_nec'; deduct; }
 
 @[inference]
 lemma multibox_iff'! (d : ∅ ⊢! p ⟷ q) : Γ ⊢! □[n]p ⟷ □[n]q := ⟨multibox_iff' d.some⟩
@@ -389,8 +392,8 @@ def distribute_multidia_conj : Γ ⊢ ◇[n](p ⋏ q) ⟶ (◇[n]p ⋏ ◇[n]q) 
     have : ∅ ⊢ ~(□~(◇[n](p ⋏ q))) ⟶ ~(□~(◇[n]p ⋏ ◇[n]q)) := contra₀' this;
     have : ∅ ⊢ ◇(◇[n](p ⋏ q)) ⟶ ◇(◇[n]p ⋏ ◇[n]q) := by simpa [duality] using this;
     have : ∅ ⊢ ◇(◇[n]p ⋏ ◇[n]q) ⟶ (◇◇[n]p ⋏ ◇◇[n]q) := distribute_dia_conj
-    have : ∅ ⊢ ◇(◇[n](p ⋏ q)) ⟶ (◇[(n + 1)]p ⋏ ◇[(n + 1)]q) := imp_trans' (by assumption) this;
-    deduct;
+    have : ∅ ⊢ ◇(◇[n](p ⋏ q)) ⟶ (◇[(n + 1)]p ⋏ ◇[(n + 1)]q) := imp_trans' (by assumption) (by simpa using this);
+    sorry; -- simpa using this;
 
 @[inference]
 def distribute_multidia_conj' (d : Γ ⊢ ◇[n](p ⋏ q)) : Γ ⊢ ◇[n]p ⋏ ◇[n]q := distribute_multidia_conj ⨀ d

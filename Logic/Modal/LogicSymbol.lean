@@ -1,37 +1,37 @@
 import Logic.Logic.LogicSymbol
 
+open Function
+
 namespace LO
 
-class UnaryModalOperator (ι : Type*) (F : Sort*) where
+class UnaryModalOperator (ι : Type*) (F : Type*) where
   mop (i : ι) : F → F
   mop_injective {i} : Function.Injective (mop i)
 
-notation:76 "△[" i "]" p => UnaryModalOperator.mop i p
-
+attribute [simp] UnaryModalOperator.mop_injective
 
 namespace UnaryModalOperator
 
 variable [UnaryModalOperator ι F]
 variable {i : ι} {p q : F}
 
-@[simp] lemma mop_injective' : (△[i]p) = (△[i]q) ↔ p = q := by constructor; intro h; exact mop_injective h; simp_all;
+@[simp] lemma mop_injective' : ((mop i) p) = ((mop i) q) ↔ p = q := by constructor; intro h; exact mop_injective h; simp_all;
 
-def multimop (i : ι) (n : ℕ) (p : F) : F :=
-  match n with
-  | 0 => p
-  | n + 1 => △[i]((multimop i n p))
+@[simp] def multimop (i : ι) (n : ℕ) (p : F) : F := Nat.iterate (mop i) n p
 
-notation:76 "△[" i:90 "]" "[" n:90 "]" p:max => multimop i n p
+@[simp] lemma multimop_zero : (mop i)^[0] p = p := rfl
 
-@[simp] lemma multimop_zero : △[i][0]p = p := rfl
+@[simp] lemma mzero : multimop i 0 = (id : F → F) := rfl
 
-@[simp] lemma multimop_succ : △[i][(n + 1)]p = △[i](△[i][n]p) := rfl
+lemma multimop_succ : (mop i)^[(n + 1)] p = (mop i)^[n] ((mop i) p) := by apply iterate_succ_apply
 
-lemma multimop_prepost : (△[i]△[i][n]p) = (△[i][n](△[i]p)) := by induction n <;> simp_all
+@[simp] lemma multimop_succ' : (mop i)^[(n + 1)] p = (mop i) ((mop i)^[n] p) := by apply iterate_succ_apply'
 
-@[simp] lemma multimop_injective' : (△[i][n]p = △[i][n]q) ↔ (p = q) := by induction n <;> simp [*]
+lemma multimop_prepost : ((mop i) ((mop i)^[n] p)) = ((mop i)^[n] ((mop i) p)) := by induction n <;> simp_all
 
-@[simp] lemma multimop_injective : Function.Injective ((△[i][n]·) : F → F) := by simp [Function.Injective];
+@[simp] lemma multimop_injective' : ((mop i)^[n] p = (mop i)^[n] q) ↔ (p = q) := by induction n <;> simp [*]
+
+@[simp] lemma multimop_injective : Function.Injective (((mop i)^[n]) : F → F) := by apply Function.Injective.iterate (by simp);
 
 end UnaryModalOperator
 
@@ -54,11 +54,11 @@ notation:76 "△[" i:90 "]" "[" n:90 "]" s:max => Set.multimop i n s
 
 @[simp] lemma multimop_empty : △[i][n](∅ : Set F) = ∅ := by simp [Set.multimop]
 
-@[simp] lemma multimop_singleton : △[i][n]({a} : Set F) = {△[i][n]a} := by simp [Set.multimop]
+@[simp] lemma multimop_singleton : △[i][n]({a} : Set F) = {(mop i)^[n] a} := by simp [Set.multimop]
 
 @[simp] lemma multimop_zero : △[i][0]s = s := by simp [Set.multimop]
 
-@[simp] lemma multimop_mem_intro : a ∈ s → △[i][n]a ∈ (△[i][n]s) := by tauto;
+@[simp] lemma multimop_mem_intro : a ∈ s → (mop i)^[n] a ∈ (△[i][n]s) := by tauto;
 
 @[simp] lemma multimop_injOn : Set.InjOn (multimop i n) (multimop i n ⁻¹' s) := by simp [Set.InjOn];
 
@@ -66,9 +66,9 @@ notation:76 "△[" i:90 "]" "[" n:90 "]" s:max => Set.multimop i n s
 
 @[simp] lemma multimop_union : (△[i][n](s ∪ t)) = (△[i][n]s) ∪ (△[i][n]t) := by simp_all [Set.image_union, Set.multimop];
 
-lemma multimop_mem_iff : a ∈ (△[i][n]s) ↔ (∃ b ∈ s, △[i][n]b = a) := by simp_all [Set.mem_image, Set.multimop];
+lemma multimop_mem_iff : a ∈ (△[i][n]s) ↔ (∃ b ∈ s, (mop i)^[n] b = a) := by simp_all [Set.mem_image, Set.multimop];
 
-lemma forall_multimop_of_subset_multimop (h : s ⊆ △[i][n]t) : ∀ p ∈ s, ∃ q ∈ t, p = △[i][n]q := by
+lemma forall_multimop_of_subset_multimop (h : s ⊆ △[i][n]t) : ∀ p ∈ s, ∃ q ∈ t, p = (mop i)^[n] q := by
   intro p hp;
   obtain ⟨q, hq₁, hq₂⟩ := h hp;
   use q;
@@ -79,9 +79,9 @@ notation:76 "△[" i "]" s => Set.mop i s
 
 @[simp] lemma mop_empty : (△[i](∅ : Set F)) = ∅ := by simp [Set.mop]
 
-@[simp] lemma mop_singleton : (△[i]({a} : Set F)) = {△[i]a} := by simp [Set.mop]
+@[simp] lemma mop_singleton : (△[i]({a} : Set F)) = {(mop i a)} := by simp [Set.mop]
 
-@[simp] lemma mop_mem_intro : a ∈ s → (△[i]a) ∈ (△[i]s) := by apply multimop_mem_intro;
+@[simp] lemma mop_mem_intro : a ∈ s → (mop i a) ∈ (△[i]s) := by apply multimop_mem_intro;
 
 @[simp] lemma mop_injOn : Set.InjOn (multimop i n) s := by simp [Set.InjOn]
 
@@ -89,11 +89,11 @@ lemma mop_subset (h : s ⊆ t) : (△[i]s) ⊆ (△[i]t) := by apply multimop_su
 
 @[simp] lemma mop_union : (△[i](s ∪ t)) = (△[i]s) ∪ (△[i]t) := by apply multimop_union;
 
-lemma mop_mem_iff : p ∈ (△[i]s) ↔ (∃ q ∈ s, (△[i]q) = p) := by apply multimop_mem_iff;
+lemma mop_mem_iff : p ∈ (△[i]s) ↔ (∃ q ∈ s, (mop i q) = p) := by apply multimop_mem_iff;
 
 protected lemma mop_injective : Function.Injective (λ {s : Set F} => Set.mop i s) := Function.Injective.image_injective mop_injective
 
-lemma forall_mop_of_subset_mop (h : s ⊆ (Set.mop i t)) : ∀ p ∈ s, ∃ q ∈ t, p = △[i]q := forall_multimop_of_subset_multimop h
+lemma forall_mop_of_subset_mop (h : s ⊆ (Set.mop i t)) : ∀ p ∈ s, ∃ q ∈ t, p = mop i q := forall_multimop_of_subset_multimop h
 
 
 @[simp] protected def premultimop (i : ι) (n : ℕ) (s : Set F) := (multimop i n) ⁻¹' s
@@ -111,6 +111,7 @@ lemma premultimop_multimop_eq_of_subset_premultimop (hs : s ⊆ △[i][n]t) : �
   . intro p hp;
     obtain ⟨q, _, hq₂⟩ := forall_multimop_of_subset_multimop hs p hp;
     simp_all [multimop, Set.premultimop];
+
 
 @[simp] lemma premultimop_multimop_subset : △[i][n](△⁻¹[i][n]s) ⊆ s := by simp [Set.subset_def, Set.multimop, Set.premultimop];
 
@@ -153,7 +154,7 @@ open UnaryModalOperator
 
 variable {l : List F}
 
-@[simp] protected def multimop (i : ι) (n : ℕ) (l : List F) : List F := l.map (multimop i n)
+protected abbrev multimop (i : ι) (n : ℕ) (l : List F) : List F := l.map (multimop i n)
 notation "△[" i:90 "]" "[" n:90 "]" l:max => List.multimop i n l
 
 @[simp] protected def mop (i : ι) (l : List F) : List F := △[i][1]l
@@ -161,9 +162,9 @@ notation "△[" n:90 "]" l:max => List.mop n l
 
 @[simp] lemma multimop_empty : △[i][n]([] : List F) = [] := by simp [List.multimop]
 
-@[simp] lemma multimop_zero : △[i][0]l = l := by simp [List.multimop, multimop]
+@[simp] protected lemma multimop_zero : △[i][0]l = l := by simp [List.multimop, multimop, multimop_zero]
 
-def premultimop (i : ι) (n : ℕ) (l : List F) := l.filter (λ (p : F) => △[i][n]p ∈ l)
+def premultimop (i : ι) (n : ℕ) (l : List F) := l.filter (λ (p : F) => (mop i)^[n] p ∈ l)
 notation "△⁻¹[" i:90 "]" "[" n:90 "]" l:max => List.premultimop i n l
 
 @[simp] def premop (i : ι) (l : List F) := △[i][1]l
@@ -186,7 +187,7 @@ lemma multimop_def : (△[i][n]s : Finset F) = s.image (multimop i n) := by simp
 
 lemma multimop_coe : ↑(△[i][n]s : Finset F) = △[i][n](↑s : Set F) := by simp_all [Set.multimop, List.multimop]; rfl;
 
-@[simp] lemma multimop_zero : (△[i][0]s : Finset F) = s := by simp [-List.multimop]
+@[simp] lemma multimop_zero : (△[i][0]s : Finset F) = s := by simp
 
 @[simp]
 lemma multimop_union : (△[i][n](s ∪ t) : Finset F) = (△[i][n]s ∪ △[i][n]t : Finset F) := by
@@ -218,6 +219,8 @@ end
 
 namespace LO
 
+open UnaryModalOperator
+
 /--
   Standard modal logic, which has 2 modal unary operators `□`, `◇`, and `◇` is defined as dual of `□`
 -/
@@ -229,19 +232,19 @@ namespace StandardModalLogicalConnective
 variable [StandardModalLogicalConnective F] [DecidableEq F]
 
 @[match_pattern]
-abbrev box : F → F := UnaryModalOperator.mop true
+abbrev box : F → F := mop true
 prefix:74 "□" => StandardModalLogicalConnective.box
 
 @[match_pattern]
-abbrev dia : F → F := UnaryModalOperator.mop false
+abbrev dia : F → F := mop false
 prefix:74 "◇" => StandardModalLogicalConnective.dia
 
 lemma duality' {p : F} : (◇p) = ~(□(~p)) := by apply StandardModalLogicalConnective.duality
 
-abbrev multibox (n : ℕ) : F → F := UnaryModalOperator.multimop true n
+abbrev multibox (n : ℕ) : F → F := (mop true)^[n]
 notation:74 "□[" n:90 "]" p:80 => StandardModalLogicalConnective.multibox n p
 
-abbrev multidia (n : ℕ) : F → F := UnaryModalOperator.multimop false n
+abbrev multidia (n : ℕ) : F → F := (mop false)^[n]
 notation:74 "◇[" n:90 "]" p:80 => StandardModalLogicalConnective.multidia n p
 
 end LO.StandardModalLogicalConnective
