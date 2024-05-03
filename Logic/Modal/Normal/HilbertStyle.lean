@@ -1,5 +1,4 @@
 import Logic.Logic.Deduction
-import Logic.Modal.Normal.LogicSymbol
 import Logic.Modal.Normal.Axioms
 
 namespace LO.Hilbert

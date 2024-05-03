@@ -1,4 +1,4 @@
-import Logic.Modal.Normal.LogicSymbol
+import Logic.Modal.LogicSymbol
 
 namespace LO.Modal.Normal
 

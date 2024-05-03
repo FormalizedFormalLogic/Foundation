@@ -1,15 +1,13 @@
- import Logic.Logic.LogicSymbol
+import Logic.Logic.LogicSymbol
 
 namespace LO
 
-/--
-  Finite many unary modal operators
--/
 class UnaryModalOperator (ι : Type*) (F : Sort*) where
   mop (i : ι) : F → F
   mop_injective {i} : Function.Injective (mop i)
 
 notation:76 "△[" i "]" p => UnaryModalOperator.mop i p
+
 
 namespace UnaryModalOperator
 
@@ -39,21 +37,17 @@ end UnaryModalOperator
 
 end LO
 
-/-
-TODO: 可算無限個の様相演算子を考えたいのならば以下の定義を用意すればよいと思うが，現状では考えていないので保留
 
-class InfiniteUnaryModalOperator (F : Sort _) where
-  mop (i : ℕ) : F → F
-  mop_injective {i} : Function.Injective (mop i)
--/
+section
+
+open LO UnaryModalOperator
+
+variable [UnaryModalOperator ι F] [DecidableEq F]
+variable {i : ι} {n : ℕ} {a : F}
 
 namespace Set
 
-open LO
-open UnaryModalOperator
-
-variable [UnaryModalOperator ι F]
-variable {i : ι} {s t : Set F} {n : ℕ} {a : F}
+variable {s t : Set F}
 
 protected def multimop (i : ι) (n : ℕ) (s : Set F) : Set F := (multimop i n) '' s
 notation:76 "△[" i:90 "]" "[" n:90 "]" s:max => Set.multimop i n s
@@ -157,8 +151,7 @@ namespace List
 open LO
 open UnaryModalOperator
 
-variable [UnaryModalOperator ι F] [DecidableEq F]
-variable {i : ι} {n : ℕ} {l : List F}
+variable {l : List F}
 
 @[simp] protected def multimop (i : ι) (n : ℕ) (l : List F) : List F := l.map (multimop i n)
 notation "△[" i:90 "]" "[" n:90 "]" l:max => List.multimop i n l
@@ -181,11 +174,7 @@ end List
 
 namespace Finset
 
-open LO
-open UnaryModalOperator
-
-variable [UnaryModalOperator ι F] [DecidableEq F]
-variable {i : ι} {n : ℕ} {s t : Finset F}
+variable {s t : Finset F}
 
 @[simp] protected noncomputable def multimop (i : ι) (n : ℕ) (s : Finset F) : Finset F := (△[i][n](s.toList)).toFinset
 notation "△[" i:90 "]" "[" n:90 "]" s:max => Finset.multimop i n s
@@ -224,6 +213,9 @@ lemma premultimop_multimop_eq_of_subset_multimop {s : Finset F} {t : Set F} (hs 
 
 end Finset
 
+end
+
+
 namespace LO
 
 /--
@@ -234,7 +226,7 @@ class StandardModalLogicalConnective (F : Sort _) extends LogicalConnective F, U
 
 namespace StandardModalLogicalConnective
 
-variable [hS : StandardModalLogicalConnective F] [DecidableEq F]
+variable [StandardModalLogicalConnective F] [DecidableEq F]
 
 @[match_pattern]
 abbrev box : F → F := UnaryModalOperator.mop true
@@ -244,7 +236,7 @@ prefix:74 "□" => StandardModalLogicalConnective.box
 abbrev dia : F → F := UnaryModalOperator.mop false
 prefix:74 "◇" => StandardModalLogicalConnective.dia
 
-lemma duality' {p : F} : (◇p) = ~(□(~p)) := by apply hS.duality
+lemma duality' {p : F} : (◇p) = ~(□(~p)) := by apply StandardModalLogicalConnective.duality
 
 abbrev multibox (n : ℕ) : F → F := UnaryModalOperator.multimop true n
 notation:74 "□[" n:90 "]" p:80 => StandardModalLogicalConnective.multibox n p
