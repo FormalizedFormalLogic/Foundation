@@ -62,13 +62,13 @@ lemma imp_def : (w ⊩ᴹ[M] p ⟶ q) ↔ (w ⊮ᴹ[M] p) ∨ (w ⊩ᴹ[M] q) :=
 @[simp] lemma neg_def' : (w ⊩ᴹ[M] ~p) ↔ (w ⊮ᴹ[M] p) := by simp [Satisfies];
 
 @[simp]
-lemma multibox_def : (w ⊩ᴹ[M] □[n]p) ↔ (∀ v, M.frame[n] w v → (v ⊩ᴹ[M] p)) := by
+lemma multibox_def : (w ⊩ᴹ[M] □^[n]p) ↔ (∀ v, M.frame[n] w v → (v ⊩ᴹ[M] p)) := by
   induction n generalizing w with
   | zero => simp;
   | succ n ih => aesop;
 
 @[simp]
-lemma multidia_def : (w ⊩ᴹ[M] ◇[n]p) ↔ (∃ v, M.frame[n] w v ∧ (v ⊩ᴹ[M] p)) := by
+lemma multidia_def : (w ⊩ᴹ[M] ◇^[n]p) ↔ (∃ v, M.frame[n] w v ∧ (v ⊩ᴹ[M] p)) := by
   induction n generalizing w with
   | zero => simp;
   | succ n ih => aesop;

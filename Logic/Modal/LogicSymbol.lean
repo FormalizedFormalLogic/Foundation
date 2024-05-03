@@ -169,10 +169,10 @@ prefix:74 "◇" => dia
 lemma duality' {p : F} : (◇p) = ~(□(~p)) := by apply duality
 
 abbrev multibox (n : ℕ) : F → F := (mop true)^[n]
-notation:74 "□[" n:90 "]" p:80 => multibox n p
+notation:74 "□^[" n:90 "]" p:80 => multibox n p
 
 abbrev multidia (n : ℕ) : F → F := (mop false)^[n]
-notation:74 "◇[" n:90 "]" p:80 => multidia n p
+notation:74 "◇^[" n:90 "]" p:80 => multidia n p
 
 end LO.StandardModalLogicalConnective
 
@@ -185,25 +185,25 @@ variable [LO.StandardModalLogicalConnective F] [DecidableEq F]
 namespace Set
 
 abbrev multibox (n : ℕ) (s : Set F) : Set F := Set.multimop true n s
-notation "□[" n:90 "]" s:80 => Set.multibox n s
+notation "□^[" n:90 "]" s:80 => Set.multibox n s
 
 abbrev box (s : Set F) : Set F := Set.mop true s
 notation "□" s:80 => Set.box s
 
 abbrev premultibox (n : ℕ) (s : Set F) : Set F := Set.premultimop true n s
-notation "□⁻¹[" n:90 "]" s:80 => Set.premultibox n s
+notation "□⁻¹^[" n:90 "]" s:80 => Set.premultibox n s
 
 abbrev prebox (s : Set F) : Set F := Set.premop true s
 notation "□⁻¹" s:80 => Set.prebox s
 
 abbrev multidia (n : ℕ) (s : Set F) : Set F := Set.multimop false n s
-notation "◇[" n:90 "]" s:80 => Set.multidia n s
+notation "◇^[" n:90 "]" s:80 => Set.multidia n s
 
 abbrev dia (s : Set F) : Set F := Set.mop false s
 notation "◇" s:80 => Set.dia s
 
 abbrev premultidia (n : ℕ) (s : Set F) : Set F := Set.premultimop false n s
-notation "◇⁻¹[" n:90 "]" s:80 => Set.premultidia n s
+notation "◇⁻¹^[" n:90 "]" s:80 => Set.premultidia n s
 
 abbrev predia (s : Set F) : Set F := Set.premop false s
 notation "◇⁻¹" s:80 => Set.predia s
@@ -227,25 +227,25 @@ end List
 namespace Finset
 
 noncomputable abbrev multibox (n : ℕ) (s : Finset F) : Finset F := Finset.multimop true n s
-notation "□[" n:90 "]" s:80 => Finset.multibox n s
+notation "□^[" n:90 "]" s:80 => Finset.multibox n s
 
 noncomputable abbrev box (s : Finset F) : Finset F := Finset.mop true s
 notation "□" s:80 => Finset.box s
 
 noncomputable abbrev premultibox (n : ℕ) (s : Finset F) : Finset F := Finset.premultimop true n s
-notation "□⁻¹[" n:90 "]" s:80 => Finset.premultibox n s
+notation "□⁻¹^[" n:90 "]" s:80 => Finset.premultibox n s
 
 noncomputable abbrev prebox (s : Finset F) : Finset F := Finset.premop true s
 notation "□⁻¹" s:80 => Finset.prebox s
 
 noncomputable abbrev multidia (n : ℕ) (s : Finset F) : Finset F := Finset.multimop false n s
-notation "◇[" n:90 "]" s:80 => Finset.multidia n s
+notation "◇^[" n:90 "]" s:80 => Finset.multidia n s
 
 noncomputable abbrev dia (s : Finset F) : Finset F := Finset.mop false s
 notation "◇" s:80 => Finset.dia s
 
 noncomputable abbrev premultidia (n : ℕ) (s : Finset F) : Finset F := Finset.premultimop false n s
-notation "◇⁻¹[" n:90 "]" s:80 => Finset.premultidia n s
+notation "◇⁻¹^[" n:90 "]" s:80 => Finset.premultidia n s
 
 noncomputable abbrev predia (s : Finset F) : Finset F := Finset.premop false s
 notation "◇⁻¹" s:80 => Finset.predia s
