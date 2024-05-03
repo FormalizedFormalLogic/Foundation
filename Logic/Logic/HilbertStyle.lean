@@ -215,4 +215,6 @@ def implyConj [DecidableEq F] (p : F) (Γ : List F) (b : (q : F) → q ∈ Γ �
 def conjImplyConj [DecidableEq F] {Γ Δ : List F} (h : Δ ⊆ Γ) : 𝓢 ⊢ Γ.conj ⟶ Δ.conj :=
   implyConj _ _ (fun _ hq ↦ generalConj (h hq))
 
+instance [(𝓢 : S) → ModusPonens 𝓢] [(𝓢 : S) → HasEFQ 𝓢] : DeductiveExplosion S := ⟨fun b _ ↦ efq ⨀ b⟩
+
 end LO.System

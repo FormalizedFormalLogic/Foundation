@@ -45,13 +45,25 @@ instance : Collection F (FiniteContext F 𝓢) where
 
 instance (𝓢 : S) : System F (FiniteContext F 𝓢) := ⟨(𝓢 ⊢ ·.conj ⟶ ·)⟩
 
-abbrev Prf (𝓢 : S) (Γ : List F) (p : F) := (Γ : FiniteContext F 𝓢) ⊢ p
+abbrev Prf (𝓢 : S) (Γ : List F) (p : F) : Type _ := (Γ : FiniteContext F 𝓢) ⊢ p
 
-abbrev Provable (𝓢 : S) (Γ : List F) (p : F) := (Γ : FiniteContext F 𝓢) ⊢! p
+abbrev Provable (𝓢 : S) (Γ : List F) (p : F) : Prop := (Γ : FiniteContext F 𝓢) ⊢! p
+
+abbrev Unprovable (𝓢 : S) (Γ : List F) (p : F) : Prop := (Γ : FiniteContext F 𝓢) ⊬! p
+
+abbrev PrfSet (𝓢 : S) (Γ : List F) (s : Set F) : Type _ := (Γ : FiniteContext F 𝓢) ⊢* s
+
+abbrev ProvableSet (𝓢 : S) (Γ : List F) (s : Set F) : Prop := (Γ : FiniteContext F 𝓢) ⊢!* s
 
 notation Γ:45 " ⊢[" 𝓢 "] " p:46 => Prf 𝓢 Γ p
 
 notation Γ:45 " ⊢[" 𝓢 "]! " p:46 => Provable 𝓢 Γ p
+
+notation Γ:45 " ⊬[" 𝓢 "]! " p:46 => Unprovable 𝓢 Γ p
+
+notation Γ:45 " ⊢[" 𝓢 "]* " s:46 => PrfSet 𝓢 Γ s
+
+notation Γ:45 " ⊢[" 𝓢 "]*! " s:46 => ProvableSet 𝓢 Γ s
 
 lemma system_def (Γ : FiniteContext F 𝓢) (p : F) : (Γ ⊢ p) = (𝓢 ⊢ Γ.conj ⟶ p) := rfl
 
@@ -68,6 +80,12 @@ variable [Minimal 𝓢] {Γ Δ E : List F}
 instance : Axiomatized (FiniteContext F 𝓢) where
   prfAxm := fun hp ↦ generalConj hp
   weakening := fun H b ↦ impTrans (conjImplyConj H) b
+
+instance : Compact (FiniteContext F 𝓢) where
+  φ := fun {Γ} _ _ ↦ Γ
+  φPrf := id
+  φ_subset := by simp
+  φ_finite := by rintro ⟨Γ⟩; simp [Collection.Finite, Collection.set]
 
 def byAxm {p} (h : p ∈ Γ) : Γ ⊢[𝓢] p := Axiomatized.prfAxm (by simpa)
 
@@ -118,6 +136,8 @@ instance [HasWeakLEM 𝓢] (Γ : FiniteContext F 𝓢) : HasWeakLEM Γ := ⟨fun
 instance [Dummett 𝓢] (Γ : FiniteContext F 𝓢) : Dummett Γ := ⟨fun p q ↦ of' (Dummett.dummett p q)⟩
 
 instance [HasDNE 𝓢] (Γ : FiniteContext F 𝓢) : HasDNE Γ := ⟨fun p ↦ of' (HasDNE.dne p)⟩
+
+instance [HasEFQ 𝓢] : DeductiveExplosion (FiniteContext F 𝓢) := inferInstance
 
 end minimal
 
@@ -178,9 +198,22 @@ abbrev Prf (Γ : Set F) (p : F) : Type _ := (Γ : Context F 𝓢) ⊢ p
 
 abbrev Provable (Γ : Set F) (p : F) : Prop := (Γ : Context F 𝓢) ⊢! p
 
+abbrev Unprovable (Γ : Set F) (p : F) : Prop := (Γ : Context F 𝓢) ⊬! p
+
+abbrev PrfSet (Γ : Set F) (s : Set F) : Type _ := (Γ : Context F 𝓢) ⊢* s
+
+abbrev ProvableSet (Γ : Set F) (s : Set F) : Prop := (Γ : Context F 𝓢) ⊢!* s
+
 notation Γ:45 " *⊢[" 𝓢 "] " p:46 => Prf 𝓢 Γ p
 
 notation Γ:45 " *⊢[" 𝓢 "]! " p:46 => Provable 𝓢 Γ p
+
+notation Γ:45 " *⊬[" 𝓢 "]! " p:46 => Unprovable 𝓢 Γ p
+
+notation Γ:45 " *⊢[" 𝓢 "]* " s:46 => PrfSet 𝓢 Γ s
+
+notation Γ:45 " *⊢[" 𝓢 "]*! " s:46 => ProvableSet 𝓢 Γ s
+
 
 variable {𝓢}
 
@@ -194,6 +227,12 @@ variable [Minimal 𝓢]
 instance : Axiomatized (Context F 𝓢) where
   prfAxm := fun {Γ p} hp ↦ ⟨[p], by simpa using hp, byAxm (by simp [Collection.set])⟩
   weakening := fun h b ↦ ⟨b.ctx, fun p hp ↦ Collection.subset_iff.mp h p (b.subset p hp), b.prf⟩
+
+instance : Compact (Context F 𝓢) where
+  φ := fun b ↦ Collection.set b.ctx
+  φPrf := fun b ↦ ⟨b.ctx, by simp [Collection.set], b.prf⟩
+  φ_subset := by rintro ⟨Γ⟩ p b; exact b.subset
+  φ_finite := by rintro ⟨Γ⟩; simp [Collection.Finite, Collection.set]
 
 def deduct [DecidableEq F] {p q : F} {Γ : Set F} : (insert p Γ) *⊢[𝓢] q → Γ *⊢[𝓢] p ⟶ q
   | ⟨Δ, h, b⟩ =>
@@ -245,6 +284,8 @@ instance [HasWeakLEM 𝓢] (Γ : Context F 𝓢) : HasWeakLEM Γ := ⟨fun p ↦
 instance [Dummett 𝓢] (Γ : Context F 𝓢) : Dummett Γ := ⟨fun p q ↦ of (Dummett.dummett p q)⟩
 
 instance [HasDNE 𝓢] (Γ : Context F 𝓢) : HasDNE Γ := ⟨fun p ↦ of (HasDNE.dne p)⟩
+
+instance [HasEFQ 𝓢] : DeductiveExplosion (FiniteContext F 𝓢) := inferInstance
 
 end minimal
 

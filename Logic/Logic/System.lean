@@ -48,7 +48,7 @@ def ProvableSet (s : Set F) : Prop := ∀ {f}, f ∈ s → 𝓢 ⊢! f
 
 infix:45 " ⊢* " => PrfSet
 
-infix:45 " ⊢*! " => ProvableSet
+infix:45 " ⊢!* " => ProvableSet
 
 def theory : Set F := {f | 𝓢 ⊢! f}
 
@@ -61,10 +61,10 @@ noncomputable def Provable.prf {𝓢 : S} {f : F} (h : 𝓢 ⊢! f) : 𝓢 ⊢ f
   Classical.choice h
 
 lemma provableSet_iff {𝓢 : S} {s : Set F} :
-    𝓢 ⊢*! s ↔ Nonempty (𝓢 ⊢* s) := by
+    𝓢 ⊢!* s ↔ Nonempty (𝓢 ⊢* s) := by
   simp [ProvableSet, PrfSet, Provable, Classical.nonempty_pi, ←imp_iff_not_or]
 
-noncomputable def ProvableSet.prfSet {𝓢 : S} {s : Set F} (h : 𝓢 ⊢*! s) : 𝓢 ⊢* s :=
+noncomputable def ProvableSet.prfSet {𝓢 : S} {s : Set F} (h : 𝓢 ⊢!* s) : 𝓢 ⊢* s :=
   Classical.choice (α := 𝓢 ⊢* s) (provableSet_iff.mp h : Nonempty (𝓢 ⊢* s))
 
 def Reducible (𝓢 : S) (𝓣 : T) : Prop := theory 𝓢 ⊆ theory 𝓣
@@ -149,7 +149,7 @@ instance : PartialOrder (Logic S) where
 
 end Logic
 
-@[simp] lemma provableSet_theory (𝓢 : S) : 𝓢 ⊢*! theory 𝓢 := fun hf ↦ hf
+@[simp] lemma provableSet_theory (𝓢 : S) : 𝓢 ⊢!* theory 𝓢 := fun hf ↦ hf
 
 def Inconsistent (𝓢 : S) : Prop := ∀ f, 𝓢 ⊢! f
 
@@ -291,7 +291,7 @@ namespace Axiomatized
 
 variable [Collection F S] [Axiomatized S] {𝓢 𝓣 : S}
 
-@[simp] lemma provable_axm (𝓢 : S) : 𝓢 ⊢*! Collection.set 𝓢 := fun hf ↦ ⟨prfAxm hf⟩
+@[simp] lemma provable_axm (𝓢 : S) : 𝓢 ⊢!* Collection.set 𝓢 := fun hf ↦ ⟨prfAxm hf⟩
 
 lemma axm_subset (𝓢 : S) : Collection.set 𝓢 ⊆ theory 𝓢 := fun _ hp ↦ provable_axm 𝓢 hp
 
@@ -324,7 +324,7 @@ namespace StrongCut
 
 variable [StrongCut S T]
 
-lemma cut! {𝓢 : S} {𝓣 : T} {p : F} (H : 𝓢 ⊢*! Collection.set 𝓣) (hp : 𝓣 ⊢! p) : 𝓢 ⊢! p := by
+lemma cut! {𝓢 : S} {𝓣 : T} {p : F} (H : 𝓢 ⊢!* Collection.set 𝓣) (hp : 𝓣 ⊢! p) : 𝓢 ⊢! p := by
   rcases hp with ⟨b⟩; exact ⟨StrongCut.cut H.prfSet b⟩
 
 def translation {𝓢 : S} {𝓣 : T} (B : 𝓢 ⊢* Collection.set 𝓣) : 𝓣 ↝ 𝓢 where
@@ -454,7 +454,7 @@ lemma consistent_of_meaningful : Semantics.Meaningful 𝓜 → System.Consistent
 lemma consistent_of_model [Semantics.Bot M] : System.Consistent 𝓢 :=
   consistent_of_meaningful (𝓜 := 𝓜) inferInstance
 
-lemma realizeSet_of_prfSet {T : Set F} (b : 𝓢 ⊢*! T) : 𝓜 ⊧* T :=
+lemma realizeSet_of_prfSet {T : Set F} (b : 𝓢 ⊢!* T) : 𝓜 ⊧* T :=
   ⟨fun _ hf => sound (b hf)⟩
 
 end
