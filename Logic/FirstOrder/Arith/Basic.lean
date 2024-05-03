@@ -1,7 +1,5 @@
 import Logic.FirstOrder.Order.Le
 
-
-
 namespace LO
 
 namespace ORingSymbol
@@ -147,12 +145,12 @@ section
 
 variable {L : Language} [Structure L ℕ] (T : Theory L) (F : Set (Sentence L))
 
-lemma consistent_of_sound [SoundOn T F] (hF : F ⊥) : System.Consistent T :=
-  fun b => by simpa using SoundOn.sound hF b
+lemma consistent_of_sound [SoundOn T F] (hF : ⊥ ∈ F) : System.Consistent T :=
+  System.consistent_iff_unprovable_bot.mpr <| fun b => by simpa using SoundOn.sound hF b
 
 end
 
-variable {L : Language} [L.ORing] (T : Theory L) [𝐄𝐐 ≼ T]
+variable {L : Language.{u}} [L.ORing] (T : Theory L) [𝐄𝐐 ≼ T]
 
 lemma consequence_of (σ : Sentence L)
   (H : ∀ (M : Type u)

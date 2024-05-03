@@ -62,7 +62,11 @@ postfix:max "⁼" => Theory.addEqAxiom
 
 abbrev ConsequenceWithEq (M : Type*) [Semantics (Sentence L) M] (T : Theory L) (σ : Sentence L) : Prop := T⁼ ⊨[M] σ
 
+abbrev Consequence₀WithEq (T : Theory L) (σ : Sentence L) : Prop := T⁼ ⊨ σ
+
 notation T:45 " ⊨₌[" M "] " σ:46 => ConsequenceWithEq M T σ
+
+notation T:45 " ⊨₌ " σ:46 => Consequence₀WithEq T σ
 
 abbrev ProofWithEq (T : Theory L) (σ : Sentence L) : Type _ := T⁼ ⊢ σ
 
@@ -117,14 +121,14 @@ lemma eqv_funcExt {k} (f : L.Func k) {v w : Fin k → M} (h : ∀ i, eqv L (v i)
   have : M ⊧ₘ “∀* (!(vecEq varSumInL varSumInR) → !!(Semiterm.func f varSumInL) = !!(Semiterm.func f varSumInR))” :=
     H.realize (eqAxiom.funcExt f (L := L))
   simp [varSumInL, varSumInR, models_def, vecEq, Semiterm.val_func] at this
-  simpa[Matrix.vecAppend_eq_ite] using this (Matrix.vecAppend rfl v w) (fun i => by simpa[Matrix.vecAppend_eq_ite] using h i)
+  simpa [Matrix.vecAppend_eq_ite] using this (Matrix.vecAppend rfl v w) (fun i => by simpa [Matrix.vecAppend_eq_ite] using h i)
 
 lemma eqv_relExt_aux {k} (r : L.Rel k) {v w : Fin k → M} (h : ∀ i, eqv L (v i) (w i)) :
     rel r v → rel r w := by
   have : M ⊧ₘ “∀* (!(vecEq varSumInL varSumInR) → !(Semiformula.rel r varSumInL) → !(Semiformula.rel r varSumInR))” :=
     H.realize (eqAxiom.relExt r (L := L))
   simp [varSumInL, varSumInR, models_def, vecEq, Semiterm.val_func, eval_rel (r := r)] at this
-  simpa[eval_rel, Matrix.vecAppend_eq_ite] using this (Matrix.vecAppend rfl v w) (fun i => by simpa[Matrix.vecAppend_eq_ite] using h i)
+  simpa [eval_rel, Matrix.vecAppend_eq_ite] using this (Matrix.vecAppend rfl v w) (fun i => by simpa [Matrix.vecAppend_eq_ite] using h i)
 
 lemma eqv_relExt {k} (r : L.Rel k) {v w : Fin k → M} (h : ∀ i, eqv L (v i) (w i)) :
     rel r v = rel r w := by
@@ -163,7 +167,7 @@ lemma funk_mk {k} (f : L.Func k) (v : Fin k → M) : Structure.func (M := QuotEq
   Quotient.liftVec_mk (s := eqvSetoid H) _ _ _
 
 lemma rel_mk {k} (r : L.Rel k) (v : Fin k → M) : Structure.rel (M := QuotEq H) r (fun i => ⟦v i⟧) ↔ Structure.rel r v :=
-  of_eq $ Quotient.liftVec_mk (s := eqvSetoid H) _ _ _
+  of_eq <| Quotient.liftVec_mk (s := eqvSetoid H) _ _ _
 
 lemma val_mk {e} {ε} (t : Semiterm L μ n) : Semiterm.val! (QuotEq H) (fun i => ⟦e i⟧) (fun i => ⟦ε i⟧) t = ⟦Semiterm.val! M e ε t⟧ :=
   by induction t <;> simp [*, funk_mk, Semiterm.val_func]
@@ -173,19 +177,19 @@ lemma eval_mk {e} {ε} {p : Semiformula L μ n} :
   induction p using Semiformula.rec' <;> simp [*, Semiformula.eval_rel, Semiformula.eval_nrel, val_mk, rel_mk]
   case hall n p ih =>
     constructor
-    · intro h a; exact (ih (e := a :> e)).mp (by simpa[Matrix.comp_vecCons] using h ⟦a⟧)
+    · intro h a; exact (ih (e := a :> e)).mp (by simpa [Matrix.comp_vecCons] using h ⟦a⟧)
     · intro h a;
       induction' a using Quotient.ind with a
-      simpa[Matrix.comp_vecCons] using ih.mpr (h a)
+      simpa [Matrix.comp_vecCons] using ih.mpr (h a)
   case hex n p ih =>
     constructor
     · intro ⟨a, h⟩
       induction' a using Quotient.ind with a
-      exact ⟨a, (ih (e := a :> e)).mp (by simpa[Matrix.comp_vecCons] using h)⟩
-    · intro ⟨a, h⟩; exact ⟨⟦a⟧, by simpa[Matrix.comp_vecCons] using ih.mpr h⟩
+      exact ⟨a, (ih (e := a :> e)).mp (by simpa [Matrix.comp_vecCons] using h)⟩
+    · intro ⟨a, h⟩; exact ⟨⟦a⟧, by simpa [Matrix.comp_vecCons] using ih.mpr h⟩
 
 lemma models_iff {σ : Sentence L} : (QuotEq H) ⊧ₘ σ ↔ M ⊧ₘ σ := by
-  simpa[models_def, Semiformula.Val, eq_finZeroElim, Empty.eq_elim] using
+  simpa [models_def, Semiformula.Val, eq_finZeroElim, Empty.eq_elim] using
     eval_mk (H := H) (e := finZeroElim) (ε := Empty.elim) (p := σ)
 
 variable (H)
@@ -198,7 +202,7 @@ lemma rel_eq (a b : QuotEq H) : (@Semiformula.Operator.Eq.eq L _).val (M := Quot
   induction' a using Quotient.ind with a
   induction' b using Quotient.ind with b
   rw[of_eq_of]; simp [eqv, Semiformula.Operator.val];
-  simpa[Eval!, Matrix.fun_eq_vec₂, Empty.eq_elim] using
+  simpa [Eval!, Matrix.fun_eq_vec₂, Empty.eq_elim] using
     eval_mk (H := H) (e := ![a, b]) (ε := Empty.elim) (p := Semiformula.Operator.Eq.eq.sentence)
 
 instance structureEq : Structure.Eq L (QuotEq H) := ⟨rel_eq⟩
@@ -227,9 +231,9 @@ lemma consequence_iff_add_eq {T : Theory L} {σ : Sentence L} :
     T ⊨₌[Struc.{v, u} L] σ ↔ (∀ (M : Type v) [Nonempty M] [Structure L M] [Structure.Eq L M], M ⊧ₘ* T → M ⊧ₘ σ) :=
   Iff.trans consequence_iff_eq (forall₄_congr <| fun M _ _ _ ↦ by simp)
 
-lemma satisfiableTheory_iff_eq {T : Theory L} [𝐄𝐐 ≼ T] :
+lemma satisfiable_iff_eq {T : Theory L} [𝐄𝐐 ≼ T] :
     Semantics.Satisfiable (Struc.{v, u} L) T ↔ (∃ (M : Type v) (_ : Nonempty M) (_ : Structure L M) (_ : Structure.Eq L M), M ⊧ₘ* T) := by
-  simp [satisfiableTheory_iff]; constructor
+  simp [satisfiable_iff]; constructor
   · intro ⟨M, x, s, hM⟩;
     haveI : Nonempty M := ⟨x⟩
     have H : M ⊧ₘ* (𝐄𝐐 : Theory L) := models_of_subtheory hM

@@ -271,6 +271,9 @@ def Undecidable (f : F) : Prop := 𝓢 ⊬! f ∧ 𝓢 ⊬! ~f
 
 end
 
+lemma incomplete_iff_exists_undecidable [LogicalConnective F] {𝓢 : S} :
+    ¬System.Complete 𝓢 ↔ ∃ f, Undecidable 𝓢 f := by simp [Complete, Undecidable, not_or]
+
 variable (S T)
 
 class Axiomatized [Collection F S] where
@@ -332,6 +335,8 @@ def translation {𝓢 : S} {𝓣 : T} (B : 𝓢 ⊢* Collection.set 𝓣) : 𝓣
   prf := StrongCut.cut B
 
 end StrongCut
+
+def Subtheory.ofSubset {𝓢 𝓣 : S} (h : 𝓢 ⊆ 𝓣) : 𝓢 ≼ 𝓣 := ⟨wk h⟩
 
 variable (S)
 
@@ -455,7 +460,7 @@ lemma consistent_of_model [Semantics.Bot M] : System.Consistent 𝓢 :=
   consistent_of_meaningful (𝓜 := 𝓜) inferInstance
 
 lemma realizeSet_of_prfSet {T : Set F} (b : 𝓢 ⊢!* T) : 𝓜 ⊧* T :=
-  ⟨fun _ hf => sound (b hf)⟩
+  ⟨fun hf => sound (b hf)⟩
 
 end
 
@@ -493,6 +498,9 @@ lemma provable_of_consequence {f : F} : T ⊨[M] f → 𝓢 ⊢! f := complete
 
 lemma satisfiable_of_consistent : System.Consistent 𝓢 → Semantics.Satisfiable M T :=
   fun H ↦ Semantics.meaningful_iff_satisfiableSet.mpr (meaningful_of_consistent H)
+
+lemma inconsistent_of_unsatisfiable : ¬Semantics.Satisfiable M T → System.Inconsistent 𝓢 := by
+  contrapose; simpa [←System.not_consistent_iff_inconsistent] using satisfiable_of_consistent
 
 variable [Sound 𝓢 (Semantics.models M T)]
 

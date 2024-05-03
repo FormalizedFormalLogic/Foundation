@@ -5,7 +5,7 @@ namespace LO
 
 namespace FirstOrder
 
-section soundness
+section sound
 open Semiformula
 
 variable {L : Language}
@@ -61,7 +61,7 @@ lemma sound : ∀ {Γ : Sequent L}, ⊢¹ Γ →
 
 end Derivation
 
-theorem soundness {T} {σ : Sentence L} : T ⊢ σ → T ⊨[Struc.{v, u} L] σ := fun b s hT => by
+theorem sound {T} {σ : Sentence L} : T ⊢ σ → T ⊨[Struc.{v, u} L] σ := fun b s hT => by
   rcases s.nonempty with ⟨x⟩
   rcases Derivation.sound b.derivation s.Dom (fun _ ↦ x) with ⟨p, hp, h⟩
   simp at hp; rcases hp with (⟨π, hπ, rfl⟩ | rfl)
@@ -70,19 +70,20 @@ theorem soundness {T} {σ : Sentence L} : T ⊢ σ → T ⊨[Struc.{v, u} L] σ 
     contradiction
   · simpa using h
 
-theorem soundness! {T} {σ : Sentence L} : T ⊢! σ → T ⊨[Struc.{v, u} L] σ := fun ⟨b⟩ ↦ soundness b
+theorem sound! {T} {σ : Sentence L} : T ⊢! σ → T ⊨[Struc.{v, u} L] σ := fun ⟨b⟩ ↦ sound b
 
-theorem soundness₀ {T} {σ : Sentence L} : T ⊢ σ → T ⊨ σ := soundness
+theorem sound₀ {T} {σ : Sentence L} : T ⊢ σ → T ⊨ σ := sound
 
-theorem soundness₀! {T} {σ : Sentence L} : T ⊢! σ → T ⊨ σ := soundness!
+theorem sound₀! {T} {σ : Sentence L} : T ⊢! σ → T ⊨ σ := sound!
 
-instance (T : Theory L) : Sound T (Semantics.models (Struc.{v, u} L) T) := ⟨soundness!⟩
+instance (T : Theory L) : Sound T (Semantics.models (Struc.{v, u} L) T) := ⟨sound!⟩
 
-lemma models_of_subtheory {T U : Theory L} [U ≼ T] {M : Type*} [Structure L M] [Nonempty M] (hM : M ⊧ₘ* T) : M ⊧ₘ* U := ⟨fun p hp ↦ by
-  have : T ⊢ p := System.Subtheory.prf (System.byAxm hp)
-  exact soundness this hM⟩
+lemma models_of_subtheory {T U : Theory L} [U ≼ T] {M : Type*} [Structure L M] [Nonempty M] (hM : M ⊧ₘ* T) : M ⊧ₘ* U :=
+  ⟨ fun {p} hp ↦ by
+    have : T ⊢ p := System.Subtheory.prf (System.byAxm hp)
+    exact sound this hM ⟩
 
-end soundness
+end sound
 
 end FirstOrder
 

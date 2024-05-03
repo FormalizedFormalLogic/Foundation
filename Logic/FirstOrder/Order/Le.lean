@@ -7,7 +7,7 @@ namespace LO
 
 namespace FirstOrder
 
-variable {L : Language} [Semiformula.Operator.Eq L] [Semiformula.Operator.LT L]
+variable {L : Language.{u}} [Semiformula.Operator.Eq L] [Semiformula.Operator.LT L]
 
 open Semiformula
 
@@ -68,8 +68,8 @@ end Semiformula
 namespace Order
 variable {T : Theory L} [𝐄𝐐 ≼ T]
 
-noncomputable def leIffEqOrLt : T ⊢ “∀ ∀ (#0 ≤ #1 ↔ #0 = #1 ∨ #0 < #1)” :=
-  Complete.complete
+noncomputable def leIffEqOrLt : T ⊢! “∀ ∀ (#0 ≤ #1 ↔ #0 = #1 ∨ #0 < #1)” :=
+  complete
     (consequence_iff.mpr $ fun _ _ _ _ => by simp[models_def, Semiformula.Operator.LE.def_of_Eq_of_LT])
 
 lemma provOf (σ : Sentence L)

@@ -24,7 +24,7 @@ def modelStar (c : ℕ) : Structure Language.unit ℕ where
   func := fun _ ⟨⟨⟩⟩ _ => c
   rel  := fun _ r _ => PEmpty.elim r
 
-lemma satisfiable_trueArithWithStarUnbounded (c : ℕ) : Semantics.SatisfiableSet (trueArithWithStarUnbounded c) := by
+lemma satisfiable_trueArithWithStarUnbounded (c : ℕ) : Satisfiable (trueArithWithStarUnbounded c) := by
   letI : Structure Language.unit ℕ := modelStar c
   haveI : Structure.Zero ℒₒᵣ⋆ ℕ := ⟨rfl⟩
   haveI : Structure.One ℒₒᵣ⋆ ℕ := ⟨rfl⟩
@@ -35,10 +35,10 @@ lemma satisfiable_trueArithWithStarUnbounded (c : ℕ) : Semantics.SatisfiableSe
     simp [starUnbounded, models_iff]; exact Fin.prop
   have : ℕ ⊧ₘ* trueArithWithStarUnbounded c := by
     simp[trueArithWithStarUnbounded, models_iff]; exact this
-  exact satisfiableTheory_intro ℕ this
+  exact satisfiable_intro ℕ this
 
 lemma satisfiable_union_trueArithWithStarUnbounded :
-    Semantics.SatisfiableSet (⋃ c, trueArithWithStarUnbounded c) :=
+    Satisfiable (⋃ c, trueArithWithStarUnbounded c) :=
   (Compact.compact_cumulative trueArithWithStarUnbounded.cumulative).mpr
     satisfiable_trueArithWithStarUnbounded
 

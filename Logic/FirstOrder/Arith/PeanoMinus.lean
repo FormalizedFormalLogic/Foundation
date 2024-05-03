@@ -1,3 +1,4 @@
+import Logic.FirstOrder.Completeness.Lemmata
 import Logic.FirstOrder.Arith.Model
 import Logic.Vorspiel.ExistsUnique
 import Mathlib.Algebra.Order.Monoid.Canonical.Defs
@@ -212,9 +213,9 @@ end Model
 variable {T : Theory ℒₒᵣ} [𝐄𝐐 ≼ T] [𝐏𝐀⁻ ≼ T]
 
 theorem sigma_one_completeness {σ : Sentence ℒₒᵣ} (hσ : Hierarchy Σ 1 σ) :
-    ℕ ⊧ₘ σ → T ⊢ σ := fun H =>
-  Complete.complete (oRing_consequence_of _ _ (fun M _ _ _ _ _ _ => by
-    haveI : M ⊧ₘ* 𝐏𝐀⁻ := ModelsTheory.of_subtheory (T₁ := T) inferInstance (Semantics.ofSystemSubtheory _ _)
+    ℕ ⊧ₘ σ → T ⊢! σ := fun H =>
+  complete (oRing_consequence_of _ _ (fun M _ _ _ _ _ _ => by
+    haveI : M ⊧ₘ* 𝐏𝐀⁻ := ModelsTheory.of_provably_subtheory M 𝐏𝐀⁻ T inferInstance (by assumption)
     simpa [Matrix.empty_eq] using Model.pval_of_pval_nat_of_sigma_one (M := M) hσ H))
 
 end

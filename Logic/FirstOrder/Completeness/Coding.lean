@@ -32,7 +32,7 @@ protected def id {σ} (hσ : σ ∈ T) :
   exact Gentzen.toDisjconseq this
     (by simp only [List.mem_cons, DeMorgan.neg]; rintro p (rfl | hp)
         · exact Set.mem_image_of_mem _ hσ
-        · exact b.antecedent_ss p hp )
+        · exact b.subset p hp )
 
 end System
 
