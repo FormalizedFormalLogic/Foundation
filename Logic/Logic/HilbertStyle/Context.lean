@@ -1,5 +1,5 @@
 import Logic.Logic.System
-import Logic.Logic.HilbertStyle
+import Logic.Logic.HilbertStyle.Basic
 
 namespace LO
 
