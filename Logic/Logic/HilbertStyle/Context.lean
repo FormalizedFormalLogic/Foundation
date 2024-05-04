@@ -93,7 +93,7 @@ lemma by_axm! {p} (h : p ∈ Γ) : Γ ⊢[𝓢]! p := Axiomatized.provable_axm _
 
 def weakening (h : Γ ⊆ Δ) {p} : Γ ⊢[𝓢] p → Δ ⊢[𝓢] p := Axiomatized.weakening (by simpa)
 
-lemma weakening! (h : Γ ⊆ Δ) {p} : Γ ⊢[𝓢]! p → Δ ⊢[𝓢]! p := fun h ↦ Axiomatized.le_of_subset_axm (by simpa) h
+lemma weakening! (h : Γ ⊆ Δ) {p} : Γ ⊢[𝓢]! p → Δ ⊢[𝓢]! p := fun h ↦ Axiomatized.le_of_subset (by simpa) h
 
 def of' {p : F} (b : 𝓢 ⊢ p) : Γ ⊢[𝓢] p := dhyp Γ.conj b
 

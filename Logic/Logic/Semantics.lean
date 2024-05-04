@@ -10,6 +10,10 @@ Also provides 𝓜 characterization of compactness.
 * `LO.Semantics`: The realization of 𝓜 formula.
 * `LO.Compact`: The semantic compactness of logic.
 
+## Notation
+* `𝓜 ⊧ p`: a proposition that states `𝓜` satisfies `p`.
+* `𝓜 ⊧* T`: a proposition that states that `𝓜` satisfies each formulae in a set `T`.
+
 -/
 
 namespace LO

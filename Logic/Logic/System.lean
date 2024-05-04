@@ -5,17 +5,22 @@ import Logic.Vorspiel.Collection
 /-!
 # Basic definitions and properties of proof system related notions
 
-This file defines a characterization of the system/proof/provability/calculus of formulas.
+This file defines a characterization of the system/proof/provability/calculus of formulae.
 Also defines soundness and completeness.
 
 ## Main Definitions
-* `LO.System`: Proof system of logic.
-* `LO.System.Inconsistent`
-* `LO.System.Consistent`
-* `LO.System.Translation`
-* `LO.System.Compact`
-* `LO.Sound`: Soundness of the proof system.
-* `LO.Complete`: Completeness of the proof system.
+* `LO.System F S`: a general framework of deductive system `S` for formulae `F`.
+* `LO.System.Inconsistent 𝓢`: a proposition that states that all formulae in `F` is provable from `𝓢`.
+* `LO.System.Consistent 𝓢`: a proposition that states that `𝓢` is not inconsistent.
+* `LO.System.Sound 𝓢 𝓜`: provability from `𝓢` implies satisfiability on `𝓜`.
+* `LO.System.Complete 𝓢 𝓜`: satisfiability on `𝓜` implies provability from `𝓢`.
+
+## Notation
+* `𝓢 ⊢ p`: a type of formalized proofs of `p : F` from deductive system `𝓢 : S`.
+* `𝓢 ⊢! p`: a proposition that states there is a proof of `p` from `𝓢`, i.e. `p` is provable from `𝓢`.
+* `𝓢 ⊬! p`: a proposition that states `p` is not provable from `𝓢`.
+* `𝓢 ⊢* T`: a type of formalized proofs for each formulae in a set `T` from `𝓢`.
+* `𝓢 ⊢!* T`: a proposition that states each formulae in `T` is provable from `𝓢`.
 
 -/
 
@@ -298,7 +303,7 @@ variable [Collection F S] [Axiomatized S] {𝓢 𝓣 : S}
 
 lemma axm_subset (𝓢 : S) : Collection.set 𝓢 ⊆ theory 𝓢 := fun _ hp ↦ provable_axm 𝓢 hp
 
-lemma le_of_subset_axm (h : 𝓢 ⊆ 𝓣) : 𝓢 ≤ₛ 𝓣 := by rintro f ⟨b⟩; exact ⟨weakening h b⟩
+lemma le_of_subset (h : 𝓢 ⊆ 𝓣) : 𝓢 ≤ₛ 𝓣 := by rintro f ⟨b⟩; exact ⟨weakening h b⟩
 
 lemma weakening! (h : 𝓢 ⊆ 𝓣) {f} : 𝓢 ⊢! f → 𝓣 ⊢! f := by rintro ⟨b⟩; exact ⟨weakening h b⟩
 
@@ -318,10 +323,10 @@ variable [Collection F S] [Collection F T] [Axiomatized S]
 def FiniteAxiomatizable (𝓢 : S) : Prop := ∃ 𝓕 : S, Collection.Finite 𝓕 ∧ 𝓕 ≈ 𝓢
 
 lemma Consistent.of_subset {𝓢 𝓣 : S} (h𝓢 : Consistent 𝓢) (h : 𝓣 ⊆ 𝓢) : Consistent 𝓣 :=
-  h𝓢.of_le (Axiomatized.le_of_subset_axm h)
+  h𝓢.of_le (Axiomatized.le_of_subset h)
 
 lemma Inconsistent.of_supset {𝓢 𝓣 : S} (h𝓢 : Inconsistent 𝓢) (h : 𝓢 ⊆ 𝓣) : Inconsistent 𝓣 :=
-  h𝓢.of_ge (Axiomatized.le_of_subset_axm h)
+  h𝓢.of_ge (Axiomatized.le_of_subset h)
 
 namespace StrongCut
 
