@@ -567,7 +567,7 @@ lemma lMap_models_lMap {L₁ L₂ : Language.{u}} {Φ : L₁ →ᵥ L₂}  {T : 
     T.lMap Φ ⊨[Struc.{v, u} L₂] Semiformula.lMap Φ σ := by
   intro s hM
   have : (s.struc.lMap Φ).toStruc ⊧ σ :=
-    h ⟨fun hq => Semiformula.models_lMap.mp <| hM.realize (Set.mem_image_of_mem _ hq)⟩
+    h ⟨fun _ hq => Semiformula.models_lMap.mp <| hM.realize (Set.mem_image_of_mem _ hq)⟩
   exact Semiformula.models_lMap.mpr this
 
 namespace ModelsTheory
@@ -611,7 +611,7 @@ variable {L} {M : Type u} [Nonempty M] [Structure L M]
 
 @[simp] lemma mem_theory_iff {σ} : σ ∈ theory L M ↔ M ⊧ₘ σ := by rfl
 
-lemma subset_of_models : T ⊆ theory L M ↔ M ⊧ₘ* T := ⟨fun h  ↦ ⟨fun hσ ↦ h hσ⟩, fun h _ hσ ↦ h.RealizeSet hσ⟩
+lemma subset_of_models : T ⊆ theory L M ↔ M ⊧ₘ* T := ⟨fun h  ↦ ⟨fun _ hσ ↦ h hσ⟩, fun h _ hσ ↦ h.RealizeSet hσ⟩
 
 end Structure
 

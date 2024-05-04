@@ -72,7 +72,7 @@ variable {𝓜 : M}
 end
 
 class RealizeSet (𝓜 : M) (T : Set F) : Prop where
-  RealizeSet : ∀ {f}, f ∈ T → Realize 𝓜 f
+  RealizeSet : ∀ ⦃f⦄, f ∈ T → Realize 𝓜 f
 
 infix:45 " ⊧* " => RealizeSet
 
@@ -98,8 +98,8 @@ lemma meaningful_iff {𝓜 : M} : Meaningful 𝓜 ↔ ∃ f, ¬𝓜 ⊧ f :=
 
 lemma not_meaningful_iff (𝓜 : M) : ¬Meaningful 𝓜 ↔ ∀ f, 𝓜 ⊧ f := by simp [meaningful_iff]
 
-lemma realizeSet_iff {𝓜 : M} {T : Set F} : 𝓜 ⊧* T ↔ ∀ {f}, f ∈ T → Realize 𝓜 f :=
-  ⟨by rintro ⟨h⟩; exact h, by intro h; exact ⟨h⟩⟩
+lemma realizeSet_iff {𝓜 : M} {T : Set F} : 𝓜 ⊧* T ↔ ∀ ⦃f⦄, f ∈ T → Realize 𝓜 f :=
+  ⟨by rintro ⟨h⟩ f hf; exact h hf, by intro h; exact ⟨h⟩⟩
 
 lemma not_satisfiable_finset [Tarski M] [DecidableEq F] (t : Finset F) :
     ¬Satisfiable M (t : Set F) ↔ Valid M (t.image (~·)).disj := by
@@ -115,7 +115,7 @@ lemma realize {T : Set F} (𝓜 : M) [𝓜 ⊧* T] (hf : f ∈ T) : 𝓜 ⊧ f :
   RealizeSet hf
 
 lemma of_subset {T U : Set F} {𝓜 : M} (h : 𝓜 ⊧* U) (ss : T ⊆ U) : 𝓜 ⊧* T :=
-  ⟨fun hf => h.RealizeSet (ss hf)⟩
+  ⟨fun _ hf => h.RealizeSet (ss hf)⟩
 
 lemma of_subset' {T U : Set F} {𝓜 : M} [𝓜 ⊧* U] (ss : T ⊆ U) : 𝓜 ⊧* T :=
   of_subset (𝓜 := 𝓜) inferInstance ss
@@ -135,7 +135,7 @@ instance empty' (𝓜 : M) : 𝓜 ⊧* (∅ : Set F) := ⟨by simp⟩
     𝓜 ⊧* T ∪ U ↔ 𝓜 ⊧* T ∧ 𝓜 ⊧* U := by
   simp [realizeSet_iff]
   exact
-    ⟨ fun h => ⟨fun hf => h (Or.inl hf), fun hf => h (Or.inr hf)⟩,
+    ⟨ fun h => ⟨fun _ hf => h (Or.inl hf), fun _ hf => h (Or.inr hf)⟩,
       by rintro ⟨h₁, h₂⟩ f (h | h); exact h₁ h; exact h₂ h ⟩
 
 @[simp] lemma image_iff {ι} {f : ι → F} {A : Set ι} {𝓜 : M} :

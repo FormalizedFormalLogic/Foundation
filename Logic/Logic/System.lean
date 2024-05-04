@@ -460,7 +460,7 @@ lemma consistent_of_model [Semantics.Bot M] : System.Consistent 𝓢 :=
   consistent_of_meaningful (𝓜 := 𝓜) inferInstance
 
 lemma realizeSet_of_prfSet {T : Set F} (b : 𝓢 ⊢!* T) : 𝓜 ⊧* T :=
-  ⟨fun hf => sound (b hf)⟩
+  ⟨fun _ hf => sound (b hf)⟩
 
 end
 
