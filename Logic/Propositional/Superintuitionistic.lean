@@ -1,2 +1,4 @@
-import Logic.Propositional.Superintuitionistic.Classical
-import Logic.Propositional.Superintuitionistic.Intuitionistic
+import Logic.Propositional.Superintuitionistic.Deduction
+
+import Logic.Propositional.Superintuitionistic.Kripke.Soundness
+import Logic.Propositional.Superintuitionistic.Kripke.LEM

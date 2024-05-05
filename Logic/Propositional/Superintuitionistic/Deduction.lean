@@ -1,3 +1,4 @@
+/-
 import Logic.Logic.System
 import Logic.Propositional.Superintuitionistic.Formula
 import Logic.Propositional.Superintuitionistic.Axioms
@@ -9,7 +10,7 @@ variable {α : Type u} [DecidableEq α]
 inductive Deduction (Λ : AxiomSet α) : Theory α → Formula α → Type _
   | axm {Γ p}        : p ∈ Γ → Deduction Λ Γ p
   | eaxm {Γ p}       : p ∈ Λ → Deduction Λ Γ p
-  | modusPonens {Γ p q} : Deduction Λ Γ (p ⟶ q) → Deduction Λ Γ p → Deduction Λ Γ q
+  | mdp {Γ p q} : Deduction Λ Γ (p ⟶ q) → Deduction Λ Γ p → Deduction Λ Γ q
   | verum Γ          : Deduction Λ Γ ⊤
   | imply₁ Γ p q     : Deduction Λ Γ (p ⟶ q ⟶ p)
   | imply₂ Γ p q r   : Deduction Λ Γ ((p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r)
@@ -54,9 +55,9 @@ variable {Λ : AxiomSet α} {Γ : Theory α} {p q : Formula α}
 def weakening' {Γ Δ} {p : Formula α} (hs : Γ ⊆ Δ) : Deduction Λ Γ p → Deduction Λ Δ p
   | axm h => axm (hs h)
   | eaxm h => eaxm h
-  | modusPonens h₁ h₂ => by
+  | mdp h₁ h₂ => by
       -- simp [Finset.union_subset_iff] at hs;
-      simpa using (h₁.weakening' hs).modusPonens (h₂.weakening' hs);
+      simpa using (h₁.weakening' hs).mdp (h₂.weakening' hs);
   | verum _ => by apply verum
   | imply₁ _ _ _ => by apply imply₁
   | imply₂ _ _ _ _ => by apply imply₂
@@ -118,7 +119,7 @@ instance : Hilbert.HasDT (· ⊢ᴾ[Λ] · : Theory α → Formula α → Type _
 def compact {Γ : Theory α} {p : Formula α} : (Γ ⊢ᴾ[Λ] p) → (Δ : { Δ : Context α | ↑Δ ⊆ Γ}) × Δ ⊢ᴾ[Λ] p
   | @axm _ _ Γ p h  => ⟨⟨{p}, by simpa⟩, axm (by simp)⟩
   | @eaxm _ _ Γ q ih => ⟨⟨∅, by simp⟩, eaxm (by assumption)⟩
-  | @modusPonens _ _ Γ p q h₁ h₂ => by
+  | @mdp _ _ Γ p q h₁ h₂ => by
       have ⟨⟨Δ₁, hs₁⟩, d₁⟩ := compact h₁
       have ⟨⟨Δ₂, hs₂⟩, d₂⟩ := compact h₂
       simp at hs₁ d₁ hs₂ d₂;
@@ -139,5 +140,191 @@ def compact {Γ : Theory α} {p : Formula α} : (Γ ⊢ᴾ[Λ] p) → (Δ : { Δ
 end Deduction
 
 def AxiomSet.Disjunctive (Λ : AxiomSet α) := ∀ {p q}, (∅ ⊢ᴾ[Λ]! p ⋎ q) → (∅ ⊢ᴾ[Λ]! p) ∨ (∅ ⊢ᴾ[Λ]! q)
+
+end LO.Propositional.Superintuitionistic
+-/
+
+/-
+import Logic.Propositional.Superintuitionistic.Deduction
+import Logic.Propositional.Superintuitionistic.Classical.Deduction
+
+namespace LO.Propositional.Superintuitionistic
+
+open Hilbert Deduction
+
+variable {α} [DecidableEq α]
+
+infix:45 " ⊢ⁱ " => Deduction 𝐄𝐅𝐐
+infix:45 " ⊢ⁱ! " => Deducible 𝐄𝐅𝐐
+infix:45 " ⊬ⁱ! " => Undeducible 𝐄𝐅𝐐
+
+instance : Hilbert.Intuitionistic (· ⊢ⁱ · : Theory α → Formula α → Type _) where
+  axm          := axm;
+  weakening'   := Deduction.weakening';
+  modus_ponens h₁ h₂ := by
+    rename_i Γ₁ Γ₂ p q
+    replace h₁ : (Γ₁ ∪ Γ₂) ⊢ⁱ p ⟶ q := h₁.weakening' (by simp);
+    replace h₂ : (Γ₁ ∪ Γ₂) ⊢ⁱ p := h₂.weakening' (by simp);
+    exact modusPonens h₁ h₂;
+  verum        := verum;
+  imply₁       := imply₁;
+  imply₂       := imply₂;
+  conj₁        := conj₁;
+  conj₂        := conj₂;
+  conj₃        := conj₃;
+  disj₁        := disj₁;
+  disj₂        := disj₂;
+  disj₃        := disj₃;
+  efq Γ p      := eaxm (by simp);
+
+namespace Deduction
+
+variable {Γ : Theory α} {p : Formula α}
+
+theorem deducible_Classical_of_Int (d : Γ ⊢ⁱ! p) : (Γ ⊢ᶜ! p) := by
+  induction d.some with
+  | axm => apply axm! (by assumption)
+  | eaxm ih =>
+    obtain ⟨q, hq⟩ := ih;
+    subst hq;
+    apply efq!;
+  | modusPonens h₁ h₂ ih₁ ih₂ => exact (ih₁ ⟨h₁⟩) ⨀ (ih₂ ⟨h₂⟩)
+  | _ =>
+    try first
+    | apply verum!
+    | apply imply₁!
+    | apply imply₂!
+    | apply conj₁!
+    | apply conj₂!
+    | apply conj₃!
+    | apply disj₁!
+    | apply disj₂!
+    | apply disj₃!
+
+/-- a.k.a. Glivenko's Theorem -/
+theorem deducible_dn_iff_Int_Classical : (Γ ⊢ⁱ! ~~p) ↔ (Γ ⊢ᶜ! p) := by
+  constructor;
+  . intro d;
+    exact dne'! $ deducible_Classical_of_Int d;
+  . intro d;
+    induction d.some with
+    | axm h => exact dni'! $ axm! h;
+    | @modusPonens p q h₁ h₂ ih₁ ih₂ =>
+      have : Γ ⊢ⁱ! ~~p ⟶ ~~q := dn_distribute_imp_left'! $ ih₁ ⟨h₁⟩;
+      exact (by assumption) ⨀ ih₂ ⟨h₂⟩;
+    | eaxm ih =>
+      obtain ⟨q, hq⟩ := ih;
+      subst hq;
+      exact dn_disctribute_imp_right'! $ contra₀'! $ dni!;
+    | _ =>
+      apply dni'!;
+      try first
+      | apply verum!
+      | apply imply₁!
+      | apply imply₂!
+      | apply conj₁!
+      | apply conj₂!
+      | apply conj₃!
+      | apply disj₁!
+      | apply disj₂!
+      | apply disj₃!
+
+alias glivenko := deducible_dn_iff_Int_Classical
+
+theorem deducible_neg_iff_Int_Classical : (Γ ⊢ⁱ! ~p) ↔ (Γ ⊢ᶜ! ~p) := by
+  constructor;
+  . intro d; exact glivenko.mp $ dni'! d;
+  . intro d; exact tne'! $ glivenko.mpr d;
+
+end Deduction
+
+end LO.Propositional.Superintuitionistic
+-/
+
+import Logic.Logic.HilbertStyle.Basic
+import Logic.Logic.HilbertStyle.Supplemental
+import Logic.Propositional.Superintuitionistic.Formula
+import Logic.Propositional.Superintuitionistic.Axioms
+
+namespace LO.Propositional.Superintuitionistic
+
+variable {α : Type u} [DecidableEq α]
+
+inductive Deduction (Λ : AxiomSet α) : Formula α → Type _
+  | eaxm {p}       : p ∈ Λ → Deduction Λ p
+  | mdp {p q} : Deduction Λ (p ⟶ q) → Deduction Λ p → Deduction Λ q
+  | verum          : Deduction Λ $ ⊤
+  | imply₁ p q     : Deduction Λ $ p ⟶ q ⟶ p
+  | imply₂ p q r   : Deduction Λ $ (p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r
+  | conj₁ p q      : Deduction Λ $ p ⋏ q ⟶ p
+  | conj₂ p q      : Deduction Λ $ p ⋏ q ⟶ q
+  | conj₃ p q      : Deduction Λ $ p ⟶ q ⟶ p ⋏ q
+  | disj₁ p q      : Deduction Λ $ p ⟶ p ⋎ q
+  | disj₂ p q      : Deduction Λ $ q ⟶ p ⋎ q
+  | disj₃ p q r    : Deduction Λ $ (p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r)
+
+instance : System (Formula α) (AxiomSet α) := ⟨Deduction⟩
+
+open Deduction
+
+instance : System.Minimal (Λ : AxiomSet α) where
+  mdp := mdp
+  verum := verum
+  imply₁ := imply₁
+  imply₂ := imply₂
+  conj₁ := conj₁
+  conj₂ := conj₂
+  conj₃ := conj₃
+  disj₁ := disj₁
+  disj₂ := disj₂
+  disj₃ := disj₃
+
+instance intuitionistic_of_subset_efq (hEFQ : 𝐄𝐅𝐐 ⊆ Λ := by simp) : System.Intuitionistic (Λ : AxiomSet α) where
+  efq _ := eaxm $ Set.mem_of_subset_of_mem hEFQ (by simp);
+
+instance : System.Intuitionistic (𝐄𝐅𝐐 : AxiomSet α) := intuitionistic_of_subset_efq
+
+
+instance classical_of_subset_dne (hDNE : 𝐃𝐍𝐄 ⊆ Λ := by simp) : System.Classical (Λ : AxiomSet α) where
+  dne _ := eaxm $ Set.mem_of_subset_of_mem hDNE (by simp);
+
+instance : System.Classical (𝐃𝐍𝐄 : AxiomSet α) := classical_of_subset_dne
+
+
+open System
+
+lemma reducible_efq_dne : (𝐄𝐅𝐐 : AxiomSet α) ≤ₛ 𝐃𝐍𝐄 := by
+  rintro p hp;
+  simp [System.theory];
+  induction hp.some with
+  | eaxm h =>
+    obtain ⟨q, hq⟩ := by simpa [axiomEFQ] using h;
+    subst hq;
+    apply efq!;
+  | mdp h₁ h₂ ih₁ ih₂ => exact (ih₁ ⟨h₁⟩) ⨀ (ih₂ ⟨h₂⟩);
+  | _ => simp;
+
+variable {p : Formula α}
+
+theorem iff_provable_dn_efq_dne_provable: (𝐄𝐅𝐐 ⊢! ~~p) ↔ (𝐃𝐍𝐄 ⊢! p) := by
+  constructor;
+  . intro d; exact dne'! $ reducible_efq_dne d;
+  . intro d;
+    induction d.some with
+    | eaxm h =>
+      obtain ⟨q, hq⟩ := by simpa [axiomDNE] using h;
+      subst hq;
+      sorry;
+    | @mdp p q h₁ h₂ ih₁ ih₂ =>
+      have : 𝐄𝐅𝐐 ⊢! ~~p ⟶ ~~q := by sorry;
+      exact (by assumption) ⨀ ih₂ ⟨h₂⟩;
+    | _ => apply dni'!; simp;
+
+alias glivenko := iff_provable_dn_efq_dne_provable
+
+theorem iff_provable_neg_efq_provable_neg_efq : (𝐄𝐅𝐐 ⊢! ~p) ↔ (𝐃𝐍𝐄 ⊢! ~p) := by
+  constructor;
+  . intro d; exact glivenko.mp $ dni'! d;
+  . intro d; exact tne'! $ glivenko.mpr d;
 
 end LO.Propositional.Superintuitionistic

@@ -151,7 +151,7 @@ lemma exists_insertFamily_deducible_of_iUnionInsertFamily_deducible : (Γ[p]ⁱ 
     obtain ⟨m, hm⟩ := by simpa using h₁;
     existsi m;
     exact axm! hm;
-  | modusPonens h₁ h₂ ih₁ ih₂ =>
+  | mdp h₁ h₂ ih₁ ih₂ =>
     obtain ⟨m₁, hm₁⟩ := ih₁ ⟨h₁⟩;
     obtain ⟨m₂, hm₂⟩ := ih₂ ⟨h₂⟩;
     by_cases hm : m₁ ≤ m₂;
@@ -248,7 +248,7 @@ lemma exists_primeFamily_deducible_of_iUnionPrimeFamily_deducible : (Γ[p]ᴾ �
     obtain ⟨m, hm⟩ := by simpa using h₁;
     existsi m;
     exact axm! hm;
-  | modusPonens h₁ h₂ ih₁ ih₂ =>
+  | mdp h₁ h₂ ih₁ ih₂ =>
     obtain ⟨m₁, hm₁⟩ := ih₁ ⟨h₁⟩;
     obtain ⟨m₂, hm₂⟩ := ih₂ ⟨h₂⟩;
     by_cases hm : m₁ ≤ m₂;
