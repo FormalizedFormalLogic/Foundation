@@ -62,14 +62,14 @@ end
 lemma unprovable_iff_isEmpty {𝓢 : S} {f : F} :
     𝓢 ⊬! f ↔ IsEmpty (𝓢 ⊢ f) := by simp [Provable, Unprovable]
 
-noncomputable def Provable.prf {𝓢 : S} {f : F} (h : 𝓢 ⊢! f) : 𝓢 ⊢ f :=
+noncomputable def Provable.get {𝓢 : S} {f : F} (h : 𝓢 ⊢! f) : 𝓢 ⊢ f :=
   Classical.choice h
 
 lemma provableSet_iff {𝓢 : S} {s : Set F} :
     𝓢 ⊢!* s ↔ Nonempty (𝓢 ⊢* s) := by
   simp [ProvableSet, PrfSet, Provable, Classical.nonempty_pi, ←imp_iff_not_or]
 
-noncomputable def ProvableSet.prfSet {𝓢 : S} {s : Set F} (h : 𝓢 ⊢!* s) : 𝓢 ⊢* s :=
+noncomputable def ProvableSet.get {𝓢 : S} {s : Set F} (h : 𝓢 ⊢!* s) : 𝓢 ⊢* s :=
   Classical.choice (α := 𝓢 ⊢* s) (provableSet_iff.mp h : Nonempty (𝓢 ⊢* s))
 
 def Reducible (𝓢 : S) (𝓣 : T) : Prop := theory 𝓢 ⊆ theory 𝓣
@@ -216,17 +216,30 @@ protected def Consistent (Λ : Logic S) : Prop :=
 
 end Logic
 
-structure Translation {S S' F F'} [System F S] [System F' S'] (𝓢 : S) (𝓣 : S') where
+@[ext] structure Translation {S S' F F'} [System F S] [System F' S'] (𝓢 : S) (𝓣 : S') where
   toFun : F → F'
   prf {f} : 𝓢 ⊢ f → 𝓣 ⊢ toFun f
 
 infix:40 " ↝ " => Translation
 
+@[ext] structure Bitranslation {S S' F F'} [System F S] [System F' S'] (𝓢 : S) (𝓣 : S') where
+  r : 𝓢 ↝ 𝓣
+  l : 𝓣 ↝ 𝓢
+  r_l : r.toFun ∘ l.toFun = id
+  l_r : l.toFun ∘ r.toFun = id
+
+infix:40 " ↭ " => Bitranslation
+
+@[ext] structure FaithfulTranslation {S S' F F'} [System F S] [System F' S'] (𝓢 : S) (𝓣 : S') extends 𝓢 ↝ 𝓣 where
+  prfInv {f} : 𝓣 ⊢ toFun f → 𝓢 ⊢ f
+
+infix:40 " ↝¹ " => FaithfulTranslation
+
 namespace Translation
 
 variable {S S' S'' : Type*} {F F' F'' : Type*} [System F S] [System F' S'] [System F'' S'']
 
-instance (𝓢 : S) (𝓣 : S') : CoeFun (Translation 𝓢 𝓣) (fun _ ↦ F → F') := ⟨Translation.toFun⟩
+instance (𝓢 : S) (𝓣 : S') : CoeFun (𝓢 ↝ 𝓣) (fun _ ↦ F → F') := ⟨Translation.toFun⟩
 
 protected def id (𝓢 : S) : 𝓢 ↝ 𝓢 where
   toFun := id
@@ -234,14 +247,72 @@ protected def id (𝓢 : S) : 𝓢 ↝ 𝓢 where
 
 @[simp] lemma id_app (𝓢 : S) (f : F) : Translation.id 𝓢 f = f := rfl
 
-def comp {𝓢 : S} {𝓣 : S'} {𝓢'' : S''} (φ : 𝓣 ↝ 𝓢'') (ψ : 𝓢 ↝ 𝓣) : 𝓢 ↝ 𝓢'' where
+def comp {𝓢 : S} {𝓣 : S'} {𝓤 : S''} (φ : 𝓣 ↝ 𝓤) (ψ : 𝓢 ↝ 𝓣) : 𝓢 ↝ 𝓤 where
   toFun := φ.toFun ∘ ψ.toFun
   prf := φ.prf ∘ ψ.prf
 
-@[simp] lemma comp_app {𝓢 : S} {𝓣 : S'} {𝓢'' : S''} (φ : 𝓣 ↝ 𝓢'') (ψ : 𝓢 ↝ 𝓣) (f : F) :
+@[simp] lemma comp_app {𝓢 : S} {𝓣 : S'} {𝓤 : S''} (φ : 𝓣 ↝ 𝓤) (ψ : 𝓢 ↝ 𝓣) (f : F) :
     φ.comp ψ f = φ (ψ f) := rfl
 
+lemma provable {𝓢 : S} {𝓣 : S'} (φ : 𝓢 ↝ 𝓣) {p} (h : 𝓢 ⊢! p) : 𝓣 ⊢! φ p := ⟨φ.prf h.get⟩
+
 end Translation
+
+namespace Bitranslation
+
+variable {S S' S'' : Type*} {F F' F'' : Type*} [System F S] [System F' S'] [System F'' S'']
+
+@[simp] lemma r_l_app {𝓢 : S} {𝓣 : S'} (φ : 𝓢 ↭ 𝓣) (p : F') : φ.r (φ.l p) = p := congr_fun φ.r_l p
+
+@[simp] lemma l_r_app {𝓢 : S} {𝓣 : S'} (φ : 𝓢 ↭ 𝓣) (p : F) : φ.l (φ.r p) = p := congr_fun φ.l_r p
+
+protected def id (𝓢 : S) : 𝓢 ↭ 𝓢 where
+  r := Translation.id 𝓢
+  l := Translation.id 𝓢
+  r_l := by ext; simp
+  l_r := by ext; simp
+
+protected def symm {𝓢 : S} {𝓣 : S'} (φ : 𝓢 ↭ 𝓣) : 𝓣 ↭ 𝓢 where
+  r := φ.l
+  l := φ.r
+  r_l := φ.l_r
+  l_r := φ.r_l
+
+def comp {𝓢 : S} {𝓣 : S'} {𝓤 : S''} (φ : 𝓣 ↭ 𝓤) (ψ : 𝓢 ↭ 𝓣) : 𝓢 ↭ 𝓤 where
+  r := φ.r.comp ψ.r
+  l := ψ.l.comp φ.l
+  r_l := by ext; simp
+  l_r := by ext; simp
+
+end Bitranslation
+
+namespace FaithfulTranslation
+
+variable {S S' S'' : Type*} {F F' F'' : Type*} [System F S] [System F' S'] [System F'' S'']
+
+instance (𝓢 : S) (𝓣 : S') : CoeFun (𝓢 ↝¹ 𝓣) (fun _ ↦ F → F') := ⟨fun t ↦ t.toFun⟩
+
+protected def id (𝓢 : S) : 𝓢 ↝¹ 𝓢 where
+  toFun := id
+  prf := id
+  prfInv := id
+
+@[simp] lemma id_app (𝓢 : S) (f : F) : FaithfulTranslation.id 𝓢 f = f := rfl
+
+def comp {𝓢 : S} {𝓣 : S'} {𝓤 : S''} (φ : 𝓣 ↝¹ 𝓤) (ψ : 𝓢 ↝¹ 𝓣) : 𝓢 ↝¹ 𝓤 where
+  toFun := φ.toFun ∘ ψ.toFun
+  prf := φ.prf ∘ ψ.prf
+  prfInv := ψ.prfInv ∘ φ.prfInv
+
+@[simp] lemma comp_app {𝓢 : S} {𝓣 : S'} {𝓤 : S''} (φ : 𝓣 ↝¹ 𝓤) (ψ : 𝓢 ↝¹ 𝓣) (f : F) :
+    φ.comp ψ f = φ (ψ f) := rfl
+
+lemma provable {𝓢 : S} {𝓣 : S'} (φ : 𝓢 ↝¹ 𝓣) {p} (h : 𝓢 ⊢! p) : 𝓣 ⊢! φ p := ⟨φ.prf h.get⟩
+
+lemma provable_iff {𝓢 : S} {𝓣 : S'} (φ : 𝓢 ↝¹ 𝓣) {p} : 𝓣 ⊢! φ p ↔ 𝓢 ⊢! p :=
+  ⟨fun h ↦ ⟨φ.prfInv h.get⟩, fun h ↦ ⟨φ.prf h.get⟩⟩
+
+end FaithfulTranslation
 
 class Subtheory (𝓢 𝓣 : S) where
   prf {f} : 𝓢 ⊢ f → 𝓣 ⊢ f
@@ -333,7 +404,7 @@ namespace StrongCut
 variable [StrongCut S T]
 
 lemma cut! {𝓢 : S} {𝓣 : T} {p : F} (H : 𝓢 ⊢!* Collection.set 𝓣) (hp : 𝓣 ⊢! p) : 𝓢 ⊢! p := by
-  rcases hp with ⟨b⟩; exact ⟨StrongCut.cut H.prfSet b⟩
+  rcases hp with ⟨b⟩; exact ⟨StrongCut.cut H.get b⟩
 
 def translation {𝓢 : S} {𝓣 : T} (B : 𝓢 ⊢* Collection.set 𝓣) : 𝓣 ↝ 𝓢 where
   toFun := id

@@ -71,7 +71,7 @@ def toProofOfNil {p : F} (b : [] ⊢² [p]) (𝓢 : S) : 𝓢 ⊢ p :=
   toProof₁ b (by intro q h; exact False.elim ((List.mem_nil_iff q).mp h))
 
 lemma toProof₁! {Γ} {𝓢 : S} {p : F} (b : Γ ⊢² [p]) (H : ∀ q ∈ Γ, 𝓢 ⊢! q) : 𝓢 ⊢! p :=
-  ⟨toProof₁ b (fun q hq => (H q hq).prf)⟩
+  ⟨toProof₁ b (fun q hq => (H q hq).get)⟩
 
 end LawfulTwoSided
 
