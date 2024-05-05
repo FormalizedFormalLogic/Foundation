@@ -241,7 +241,7 @@ def boxedNecessitation {Γ p} : (Γ ⊢ᴹ[Λ] p) → (□Γ ⊢ᴹ[Λ] □p)
       have d₁ : (□Γ₁ ∪ □Γ₂) ⊢ᴹ[Λ] □(a ⟶ b) := boxedNecessitation h₁ |>.weakening' (by simp);
       have d₂ : (□Γ₁ ∪ □Γ₂) ⊢ᴹ[Λ] □a := boxedNecessitation h₂ |>.weakening' (by simp);
       have : (□Γ₁ ∪ □Γ₂) ⊢ᴹ[Λ] □b := d ⨀ d₁ ⨀ d₂;
-      simpa;
+      simpa [Set.image_union];
 
 instance instBoxedNecessitation : HasBoxedNecessitation (Deduction Λ) := ⟨by apply boxedNecessitation; simpa;⟩
 
