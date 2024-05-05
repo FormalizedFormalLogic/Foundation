@@ -34,7 +34,7 @@ namespace LO.Modal.Normal
 
 section Axioms
 
-variable {F : Type u} [ModalLogicSymbol F] (p q : F)
+variable {F : Type u} [StandardModalLogicalConnective F] (p q : F)
 
 /-- a.k.a. Distribution Axiom -/
 abbrev axiomK := □(p ⟶ q) ⟶ □p ⟶ □q
