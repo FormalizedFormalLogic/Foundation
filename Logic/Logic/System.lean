@@ -5,17 +5,22 @@ import Logic.Vorspiel.Collection
 /-!
 # Basic definitions and properties of proof system related notions
 
-This file defines a characterization of the system/proof/provability/calculus of formulas.
+This file defines a characterization of the system/proof/provability/calculus of formulae.
 Also defines soundness and completeness.
 
 ## Main Definitions
-* `LO.System`: Proof system of logic.
-* `LO.System.Inconsistent`
-* `LO.System.Consistent`
-* `LO.System.Translation`
-* `LO.System.Compact`
-* `LO.Sound`: Soundness of the proof system.
-* `LO.Complete`: Completeness of the proof system.
+* `LO.System F S`: a general framework of deductive system `S` for formulae `F`.
+* `LO.System.Inconsistent 𝓢`: a proposition that states that all formulae in `F` is provable from `𝓢`.
+* `LO.System.Consistent 𝓢`: a proposition that states that `𝓢` is not inconsistent.
+* `LO.System.Sound 𝓢 𝓜`: provability from `𝓢` implies satisfiability on `𝓜`.
+* `LO.System.Complete 𝓢 𝓜`: satisfiability on `𝓜` implies provability from `𝓢`.
+
+## Notation
+* `𝓢 ⊢ p`: a type of formalized proofs of `p : F` from deductive system `𝓢 : S`.
+* `𝓢 ⊢! p`: a proposition that states there is a proof of `p` from `𝓢`, i.e. `p` is provable from `𝓢`.
+* `𝓢 ⊬! p`: a proposition that states `p` is not provable from `𝓢`.
+* `𝓢 ⊢* T`: a type of formalized proofs for each formulae in a set `T` from `𝓢`.
+* `𝓢 ⊢!* T`: a proposition that states each formulae in `T` is provable from `𝓢`.
 
 -/
 
@@ -48,7 +53,7 @@ def ProvableSet (s : Set F) : Prop := ∀ {f}, f ∈ s → 𝓢 ⊢! f
 
 infix:45 " ⊢* " => PrfSet
 
-infix:45 " ⊢*! " => ProvableSet
+infix:45 " ⊢!* " => ProvableSet
 
 def theory : Set F := {f | 𝓢 ⊢! f}
 
@@ -61,10 +66,10 @@ noncomputable def Provable.prf {𝓢 : S} {f : F} (h : 𝓢 ⊢! f) : 𝓢 ⊢ f
   Classical.choice h
 
 lemma provableSet_iff {𝓢 : S} {s : Set F} :
-    𝓢 ⊢*! s ↔ Nonempty (𝓢 ⊢* s) := by
+    𝓢 ⊢!* s ↔ Nonempty (𝓢 ⊢* s) := by
   simp [ProvableSet, PrfSet, Provable, Classical.nonempty_pi, ←imp_iff_not_or]
 
-noncomputable def ProvableSet.prfSet {𝓢 : S} {s : Set F} (h : 𝓢 ⊢*! s) : 𝓢 ⊢* s :=
+noncomputable def ProvableSet.prfSet {𝓢 : S} {s : Set F} (h : 𝓢 ⊢!* s) : 𝓢 ⊢* s :=
   Classical.choice (α := 𝓢 ⊢* s) (provableSet_iff.mp h : Nonempty (𝓢 ⊢* s))
 
 def Reducible (𝓢 : S) (𝓣 : T) : Prop := theory 𝓢 ⊆ theory 𝓣
@@ -149,7 +154,7 @@ instance : PartialOrder (Logic S) where
 
 end Logic
 
-@[simp] lemma provableSet_theory (𝓢 : S) : 𝓢 ⊢*! theory 𝓢 := fun hf ↦ hf
+@[simp] lemma provableSet_theory (𝓢 : S) : 𝓢 ⊢!* theory 𝓢 := fun hf ↦ hf
 
 def Inconsistent (𝓢 : S) : Prop := ∀ f, 𝓢 ⊢! f
 
@@ -271,11 +276,17 @@ def Undecidable (f : F) : Prop := 𝓢 ⊬! f ∧ 𝓢 ⊬! ~f
 
 end
 
+lemma incomplete_iff_exists_undecidable [LogicalConnective F] {𝓢 : S} :
+    ¬System.Complete 𝓢 ↔ ∃ f, Undecidable 𝓢 f := by simp [Complete, Undecidable, not_or]
+
 variable (S T)
 
 class Axiomatized [Collection F S] where
-  prfAxm (𝓢 : S) : 𝓢 ⊢* Collection.set 𝓢
+  prfAxm {𝓢 : S} : 𝓢 ⊢* Collection.set 𝓢
   weakening {𝓢 𝓣 : S} : 𝓢 ⊆ 𝓣 → 𝓢 ⊢ f → 𝓣 ⊢ f
+
+alias byAxm := Axiomatized.prfAxm
+alias wk := Axiomatized.weakening
 
 class StrongCut [Collection F S] [Collection F T] [Axiomatized S] where
   cut {𝓢 : S} {𝓣 : T} {p} : 𝓢 ⊢* Collection.set 𝓣 → 𝓣 ⊢ p → 𝓢 ⊢ p
@@ -288,11 +299,11 @@ namespace Axiomatized
 
 variable [Collection F S] [Axiomatized S] {𝓢 𝓣 : S}
 
-@[simp] lemma provable_axm (𝓢 : S) : 𝓢 ⊢*! Collection.set 𝓢 := fun hf ↦ ⟨prfAxm 𝓢 hf⟩
+@[simp] lemma provable_axm (𝓢 : S) : 𝓢 ⊢!* Collection.set 𝓢 := fun hf ↦ ⟨prfAxm hf⟩
 
 lemma axm_subset (𝓢 : S) : Collection.set 𝓢 ⊆ theory 𝓢 := fun _ hp ↦ provable_axm 𝓢 hp
 
-lemma le_of_subset_axm (h : 𝓢 ⊆ 𝓣) : 𝓢 ≤ₛ 𝓣 := by rintro f ⟨b⟩; exact ⟨weakening h b⟩
+lemma le_of_subset (h : 𝓢 ⊆ 𝓣) : 𝓢 ≤ₛ 𝓣 := by rintro f ⟨b⟩; exact ⟨weakening h b⟩
 
 lemma weakening! (h : 𝓢 ⊆ 𝓣) {f} : 𝓢 ⊢! f → 𝓣 ⊢! f := by rintro ⟨b⟩; exact ⟨weakening h b⟩
 
@@ -304,21 +315,24 @@ def translation (h : 𝓢 ⊆ 𝓣) : 𝓢 ↝ 𝓣 where
 
 end Axiomatized
 
+alias by_axm := Axiomatized.provable_axm
+alias wk! := Axiomatized.weakening!
+
 variable [Collection F S] [Collection F T] [Axiomatized S]
 
 def FiniteAxiomatizable (𝓢 : S) : Prop := ∃ 𝓕 : S, Collection.Finite 𝓕 ∧ 𝓕 ≈ 𝓢
 
 lemma Consistent.of_subset {𝓢 𝓣 : S} (h𝓢 : Consistent 𝓢) (h : 𝓣 ⊆ 𝓢) : Consistent 𝓣 :=
-  h𝓢.of_le (Axiomatized.le_of_subset_axm h)
+  h𝓢.of_le (Axiomatized.le_of_subset h)
 
 lemma Inconsistent.of_supset {𝓢 𝓣 : S} (h𝓢 : Inconsistent 𝓢) (h : 𝓢 ⊆ 𝓣) : Inconsistent 𝓣 :=
-  h𝓢.of_ge (Axiomatized.le_of_subset_axm h)
+  h𝓢.of_ge (Axiomatized.le_of_subset h)
 
 namespace StrongCut
 
 variable [StrongCut S T]
 
-lemma cut! {𝓢 : S} {𝓣 : T} {p : F} (H : 𝓢 ⊢*! Collection.set 𝓣) (hp : 𝓣 ⊢! p) : 𝓢 ⊢! p := by
+lemma cut! {𝓢 : S} {𝓣 : T} {p : F} (H : 𝓢 ⊢!* Collection.set 𝓣) (hp : 𝓣 ⊢! p) : 𝓢 ⊢! p := by
   rcases hp with ⟨b⟩; exact ⟨StrongCut.cut H.prfSet b⟩
 
 def translation {𝓢 : S} {𝓣 : T} (B : 𝓢 ⊢* Collection.set 𝓣) : 𝓣 ↝ 𝓢 where
@@ -326,6 +340,8 @@ def translation {𝓢 : S} {𝓣 : T} (B : 𝓢 ⊢* Collection.set 𝓣) : 𝓣
   prf := StrongCut.cut B
 
 end StrongCut
+
+def Subtheory.ofSubset {𝓢 𝓣 : S} (h : 𝓢 ⊆ 𝓣) : 𝓢 ≼ 𝓣 := ⟨wk h⟩
 
 variable (S)
 
@@ -448,7 +464,7 @@ lemma consistent_of_meaningful : Semantics.Meaningful 𝓜 → System.Consistent
 lemma consistent_of_model [Semantics.Bot M] : System.Consistent 𝓢 :=
   consistent_of_meaningful (𝓜 := 𝓜) inferInstance
 
-lemma realizeSet_of_prfSet {T : Set F} (b : 𝓢 ⊢*! T) : 𝓜 ⊧* T :=
+lemma realizeSet_of_prfSet {T : Set F} (b : 𝓢 ⊢!* T) : 𝓜 ⊧* T :=
   ⟨fun _ hf => sound (b hf)⟩
 
 end
@@ -487,6 +503,9 @@ lemma provable_of_consequence {f : F} : T ⊨[M] f → 𝓢 ⊢! f := complete
 
 lemma satisfiable_of_consistent : System.Consistent 𝓢 → Semantics.Satisfiable M T :=
   fun H ↦ Semantics.meaningful_iff_satisfiableSet.mpr (meaningful_of_consistent H)
+
+lemma inconsistent_of_unsatisfiable : ¬Semantics.Satisfiable M T → System.Inconsistent 𝓢 := by
+  contrapose; simpa [←System.not_consistent_iff_inconsistent] using satisfiable_of_consistent
 
 variable [Sound 𝓢 (Semantics.models M T)]
 

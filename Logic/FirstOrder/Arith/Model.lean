@@ -180,7 +180,7 @@ instance models_peano : ℕ ⊧ₘ* 𝐏𝐀 := by
 end Standard
 
 theorem peano_consistent : System.Consistent 𝐏𝐀 :=
-  Sound.consistent_of_model Standard.models_peano
+  Sound.consistent_of_satisfiable ⟨_, Standard.models_peano⟩
 
 section
 

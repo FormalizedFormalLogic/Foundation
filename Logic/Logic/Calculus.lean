@@ -1,5 +1,4 @@
 import Logic.Logic.System
-import Logic.Logic.HilbertStyle
 
 /-!
 # Sequent calculus and variants
@@ -169,6 +168,10 @@ def wkLeft {Γ Γ' Δ : List F} (d : Γ ⊢² Δ) (ss : Γ ⊆ Γ') : Γ' ⊢² 
 
 def wkRight {Γ Δ Δ' : List F} (d : Γ ⊢² Δ) (ss : Δ ⊆ Δ') : Γ ⊢² Δ' := wk d (by simp) ss
 
+def wkL {Γ' Δ : List F} (Γ) (ss : Γ ⊆ Γ') (d : Γ ⊢² Δ) : Γ' ⊢² Δ := wk d ss (by simp)
+
+def wkR {Γ Δ' : List F} (Δ) (ss : Δ ⊆ Δ') (d : Γ ⊢² Δ) : Γ ⊢² Δ' := wk d (by simp) ss
+
 def verum' (h : ⊤ ∈ Δ) : Γ ⊢² Δ := wkRight (verum Γ Δ) (by simp[h])
 
 def Cut.cut' {Γ₁ Γ₂ Δ₁ Δ₂ : List F} (d₁ : Γ₁ ⊢² p :: Δ₁) (d₂ : p :: Γ₂ ⊢² Δ₂) : Γ₁ ++ Γ₂ ⊢² Δ₁ ++ Δ₂ :=
@@ -310,7 +313,7 @@ instance : System F S := ⟨(· ⊢' [·])⟩
 variable {F S}
 
 instance : System.Axiomatized S where
-  prfAxm := fun 𝓣 f hf ↦
+  prfAxm := fun {𝓣 f} hf ↦
     ⟨[f], by simpa, closed _ (List.mem_singleton.mpr rfl) (List.mem_singleton.mpr rfl)⟩
   weakening := fun ss b => b.weakening ss
 
@@ -322,6 +325,8 @@ def toProof {𝓣 : S} : {Γ Δ : List F} → Γ ⊢² Δ → (∀ q ∈ Γ, �
     b.cut' bn
 
 instance : LawfulTwoSided S := ⟨toProof⟩
+
+def of {p : F} (b : [] ⊢² [p]) {𝓣 : S} : 𝓣 ⊢ p := ⟨[], by simp, b⟩
 
 instance strongCut (S T) [Collection F S] [Collection F T] :
     System.StrongCut S T := ⟨fun dU dp ↦ toProof dp.derivation (fun q hq => dU <| dp.subset q hq)⟩
@@ -335,15 +340,10 @@ lemma provable_iff {𝓣 : S} {p : F} :
   ⟨by rintro ⟨b⟩; rcases proofEquivDerivation b with ⟨Δ, d⟩; exact ⟨Δ, Δ.prop, ⟨d⟩⟩,
    by rintro ⟨Δ, h, ⟨d⟩⟩; exact ⟨proofEquivDerivation.symm ⟨⟨Δ, h⟩, d⟩⟩⟩
 
-instance (𝓣 : S) : System.ModusPonens 𝓣 := ⟨
-  fun {p q} ↦ by
-    rintro ⟨Γ₁, h₁, d₁⟩ ⟨Γ₂, h₂, d₂⟩
-    let d₃ : Γ₁ ++ Γ₂ ⊢² [q] := modusPonens (wkLeft d₁ (by simp)) (wkLeft d₂ (by simp))
-    exact ⟨Γ₁ ++ Γ₂, by simp; rintro p (hp | hp); { exact h₁ p hp }; { exact h₂ p hp }, d₃⟩⟩
-
-instance (𝓣 : S) : System.HasEFQ 𝓣 := ⟨fun p ↦ ⟨[], by simp, implyRight (falsum _ _)⟩⟩
-
-instance deductiveExplosion : System.DeductiveExplosion (S) := ⟨fun b p ↦ System.HasEFQ.efq p ⨀ b⟩
+instance deductiveExplosion : System.DeductiveExplosion S := ⟨fun {𝓢} b p ↦
+  let t : 𝓢 ⊢ ~⊥ := ⟨[], by simp, Gentzen.negRight (Gentzen.falsum _ _)⟩
+  let b : 𝓢 ⊢' [] := Disjconseq.cut' b t
+  Disjconseq.wk b (by simp)⟩
 
 instance compact : System.Compact S where
   φ := fun b ↦ b.antecedent.toCollection

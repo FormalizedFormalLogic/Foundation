@@ -108,7 +108,7 @@ lemma mem_or_neg_mem_maximalConsistentTheory (p) :
 
 lemma mem_maximalConsistentTheory_iff :
     p ∈ maximalConsistentTheory consisT ↔ maximalConsistentTheory consisT ⊢! p :=
-  ⟨fun h ↦ ⟨System.Axiomatized.prfAxm _ h⟩, fun h ↦ by have : p ∈ theory (maximalConsistentTheory consisT) := h; simpa using this⟩
+  ⟨fun h ↦ ⟨System.byAxm h⟩, fun h ↦ by have : p ∈ theory (maximalConsistentTheory consisT) := h; simpa using this⟩
 
 lemma maximalConsistentTheory_consistent' {p} :
     p ∈ maximalConsistentTheory consisT → ~p ∉ maximalConsistentTheory consisT := by
@@ -154,7 +154,7 @@ lemma maximalConsistentTheory_satisfiable :
   case hnatom =>
     simpa using maximalConsistentTheory_consistent' hp
   case hfalsum =>
-    have : Inconsistent (maximalConsistentTheory consisT) := System.inconsistent_of_provable ⟨System.Axiomatized.prfAxm _ hp⟩
+    have : Inconsistent (maximalConsistentTheory consisT) := System.inconsistent_of_provable ⟨System.byAxm hp⟩
     have := this.not_con
     simp_all
   case hand p q ihp ihq =>
@@ -164,7 +164,7 @@ lemma maximalConsistentTheory_satisfiable :
     · left; exact ihp hp
     · right; exact ihq hq⟩
 
-lemma satisfiableTheory_of_consistent (consisT : Consistent T) : Semantics.Satisfiable (Valuation α) T :=
+lemma satisfiable_of_consistent (consisT : Consistent T) : Semantics.Satisfiable (Valuation α) T :=
   ⟨⟨(Formula.atom · ∈ maximalConsistentTheory consisT)⟩,
     Semantics.RealizeSet.of_subset maximalConsistentTheory_satisfiable (by simp)⟩
 
@@ -176,11 +176,11 @@ theorem completeness! : T ⊨[Valuation α] p → T ⊢! p := by
       this (consistent_insert_iff_not_refutable.mpr $ by simpa)
     rcases this with ⟨v, hv⟩
     have : v ⊧* T := Semantics.RealizeSet.of_subset hv (by simp)
-    have : v ⊧ p := hs _ this
+    have : v ⊧ p := hs this
     have : ¬v ⊧ p := by simpa using hv.realize (Set.mem_insert (~p) T)
     contradiction
   intro consis
-  exact satisfiableTheory_of_consistent consis
+  exact satisfiable_of_consistent consis
 
 noncomputable def completeness : T ⊨[Valuation α] p → T ⊢ p :=
   λ h ↦ (completeness! h).prf

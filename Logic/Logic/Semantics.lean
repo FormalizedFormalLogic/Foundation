@@ -10,6 +10,10 @@ Also provides 𝓜 characterization of compactness.
 * `LO.Semantics`: The realization of 𝓜 formula.
 * `LO.Compact`: The semantic compactness of logic.
 
+## Notation
+* `𝓜 ⊧ p`: a proposition that states `𝓜` satisfies `p`.
+* `𝓜 ⊧* T`: a proposition that states that `𝓜` satisfies each formulae in a set `T`.
+
 -/
 
 namespace LO
@@ -99,7 +103,7 @@ lemma meaningful_iff {𝓜 : M} : Meaningful 𝓜 ↔ ∃ f, ¬𝓜 ⊧ f :=
 lemma not_meaningful_iff (𝓜 : M) : ¬Meaningful 𝓜 ↔ ∀ f, 𝓜 ⊧ f := by simp [meaningful_iff]
 
 lemma realizeSet_iff {𝓜 : M} {T : Set F} : 𝓜 ⊧* T ↔ ∀ ⦃f⦄, f ∈ T → Realize 𝓜 f :=
-  ⟨by rintro ⟨h⟩; exact h, by intro h; exact ⟨h⟩⟩
+  ⟨by rintro ⟨h⟩ f hf; exact h hf, by intro h; exact ⟨h⟩⟩
 
 lemma not_satisfiable_finset [Tarski M] [DecidableEq F] (t : Finset F) :
     ¬Satisfiable M (t : Set F) ↔ Valid M (t.image (~·)).disj := by
@@ -120,9 +124,9 @@ lemma of_subset {T U : Set F} {𝓜 : M} (h : 𝓜 ⊧* U) (ss : T ⊆ U) : 𝓜
 lemma of_subset' {T U : Set F} {𝓜 : M} [𝓜 ⊧* U] (ss : T ⊆ U) : 𝓜 ⊧* T :=
   of_subset (𝓜 := 𝓜) inferInstance ss
 
-instance empty' (𝓜 : M) : 𝓜 ⊧* (∅ : Set F) := ⟨fun p => by simp⟩
+instance empty' (𝓜 : M) : 𝓜 ⊧* (∅ : Set F) := ⟨by simp⟩
 
-@[simp] lemma empty (𝓜 : M) : 𝓜 ⊧* (∅ : Set F) := ⟨fun p => by simp⟩
+@[simp] lemma empty (𝓜 : M) : 𝓜 ⊧* (∅ : Set F) := ⟨by simp⟩
 
 @[simp] lemma singleton_iff {f : F} {𝓜 : M} :
     𝓜 ⊧* {f} ↔ 𝓜 ⊧ f := by simp [realizeSet_iff]
@@ -135,8 +139,8 @@ instance empty' (𝓜 : M) : 𝓜 ⊧* (∅ : Set F) := ⟨fun p => by simp⟩
     𝓜 ⊧* T ∪ U ↔ 𝓜 ⊧* T ∧ 𝓜 ⊧* U := by
   simp [realizeSet_iff]
   exact
-  ⟨fun h => ⟨fun f hf => h (Or.inl hf), fun f hf => h (Or.inr hf)⟩,
-   by rintro ⟨h₁, h₂⟩ f (h | h); exact h₁ h; exact h₂ h⟩
+    ⟨ fun h => ⟨fun _ hf => h (Or.inl hf), fun _ hf => h (Or.inr hf)⟩,
+      by rintro ⟨h₁, h₂⟩ f (h | h); exact h₁ h; exact h₂ h ⟩
 
 @[simp] lemma image_iff {ι} {f : ι → F} {A : Set ι} {𝓜 : M} :
     𝓜 ⊧* f '' A ↔ ∀ i ∈ A, 𝓜 ⊧ (f i) := by simp [realizeSet_iff]
@@ -156,11 +160,11 @@ lemma Satisfiable.of_subset {T U : Set F} (h : Satisfiable M U) (ss : T ⊆ U) :
 
 variable (M)
 
-instance [Semantics F M] : Semantics F (Set M) := ⟨fun s f ↦ ∀ {𝓜}, 𝓜 ∈ s → 𝓜 ⊧ f⟩
+instance [Semantics F M] : Semantics F (Set M) := ⟨fun s f ↦ ∀ ⦃𝓜⦄, 𝓜 ∈ s → 𝓜 ⊧ f⟩
 
 @[simp] lemma empty_models (f : F) : (∅ : Set M) ⊧ f := by rintro h; simp
 
-abbrev Consequence (T : Set F) (f : F) : Prop := models M T ⊧ f
+def Consequence (T : Set F) (f : F) : Prop := models M T ⊧ f
 
 -- note that ⊨ (\vDash) is *NOT* ⊧ (\models)
 notation T:45 " ⊨[" M "] " p:46 => Consequence M T p
@@ -194,7 +198,7 @@ lemma consequence_iff_not_satisfiable [Tarski M] {f : F} :
 lemma weakening {T U : Set F} {f} (h : T ⊨[M] f) (ss : T ⊆ U) : U ⊨[M] f :=
   consequence_iff.mpr fun hs => consequence_iff.mp h (RealizeSet.of_subset hs ss)
 
-lemma of_mem {T : Set F} {f} (h : f ∈ T) : T ⊨[M] f := fun hs => hs.RealizeSet h
+lemma of_mem {T : Set F} {f} (h : f ∈ T) : T ⊨[M] f := fun _ hs => hs.RealizeSet h
 
 end Semantics
 
@@ -229,17 +233,17 @@ lemma finset_mem {T : ℕ → Set F}
 
 end Cumulative
 
-variable (M F)
+variable (M)
 
 class Compact : Prop where
   compact {T : Set F} :
     Semantics.Satisfiable M T ↔ (∀ u : Finset F, ↑u ⊆ T → Semantics.Satisfiable M (u : Set F))
 
-variable {F}
+variable {M}
 
 namespace Compact
 
-variable [Compact M F]
+variable [Compact M]
 
 variable {𝓜 : M}
 

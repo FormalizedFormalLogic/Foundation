@@ -345,7 +345,7 @@ variable {L : Language} [(k : ℕ) → DecidableEq (L.Func k)] [(k : ℕ) → De
 abbrev SigmaOneSound (T : Theory L) := SoundOn T (Hierarchy Σ 1)
 
 lemma consistent_of_sigmaOneSound (T : Theory L) [SigmaOneSound T] :
-    System.Consistent T := consistent_of_sound T (Hierarchy Σ 1) (by simp)
+    System.Consistent T := consistent_of_sound T (Hierarchy Σ 1) (by simp [Set.mem_def])
 
 end
 

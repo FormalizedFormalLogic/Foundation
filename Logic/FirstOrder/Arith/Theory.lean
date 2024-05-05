@@ -44,7 +44,6 @@ notation "𝐏𝐀⁻" => peanoMinus
 def indScheme (Γ : Semiformula L ℕ 1 → Prop) : Theory L :=
   { q | ∃ p : Semiformula L ℕ 1, Γ p ∧ q = ∀ᶠ* succInd p }
 
-
 abbrev iOpen : Theory ℒₒᵣ := 𝐏𝐀⁻ + indScheme ℒₒᵣ Semiformula.Open
 
 notation "𝐈open" => iOpen

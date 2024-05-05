@@ -158,9 +158,9 @@ lemma provable_iff_mem_partrec {k} {f : Vector ℕ k →. ℕ} (hf : Nat.Partrec
         Arith.SoundOn.sound sigma ⟨b⟩
     exact (codeOfPartrec_spec hf).mp this
   · intro h
-    exact ⟨Arith.sigma_one_completeness sigma (by
+    exact Arith.sigma_one_completeness sigma (by
       simp[models_iff, Semiformula.eval_rew, Matrix.empty_eq,
-        Function.comp, Matrix.comp_vecCons', codeOfPartrec_spec hf, h])⟩
+        Function.comp, Matrix.comp_vecCons', codeOfPartrec_spec hf, h])
 
 variable (T)
 
@@ -173,12 +173,12 @@ lemma provable_computable_code_uniq {k} {f : Vector ℕ k → ℕ}
     (hf : Nat.Partrec' (f : Vector ℕ k →. ℕ)) (v : Fin k → ℕ) :
     T ⊢! ∀' ((Rew.substs $ #0 :> (⸢v ·⸣)).hom (code $ codeOfPartrec f)
       ⟷ “#0 = !!(⸢f (Vector.ofFn v)⸣)”) :=
-  Complete.consequence_iff_provable.mp (oRing_consequence_of _ _ (fun M _ _ _ _ _ _ => by
+  complete (oRing_consequence_of _ _ (fun M _ _ _ _ _ _ => by
     haveI : M ⊧ₘ* 𝐏𝐀⁻ :=
-      ModelsTheory.of_subtheory (T₁ := T) inferInstance (Semantics.ofSystemSubtheory _ _)
+      ModelsTheory.of_provably_subtheory M 𝐏𝐀⁻ T inferInstance (by assumption)
     have Hfv : Semiformula.PVal! M (f (Vector.ofFn v) :> (v ·)) (code (codeOfPartrec f)) := by
       simpa [Model.numeral_eq_natCast, models_iff, Semiformula.eval_substs, Matrix.comp_vecCons'] using
-        consequence_iff'.mp (Sound.sound! (provable_iff_computable T hf v)) M
+        consequence_iff'.mp (sound₀! (provable_iff_computable T hf v)) M
     simp [Model.numeral_eq_natCast, models_iff, Semiformula.eval_substs, Matrix.comp_vecCons']
     intro x; constructor
     · intro H; exact code_uniq H Hfv
