@@ -72,6 +72,10 @@ variable {𝓢}
 
 infixl:90 "⨀" => ModusPonens.mdp
 
+lemma ModusPonens.mdp! [ModusPonens 𝓢] : 𝓢 ⊢! p ⟶ q → 𝓢 ⊢! p → 𝓢 ⊢! q := by
+  rintro ⟨hpq⟩ ⟨hp⟩;
+  exact ⟨hpq ⨀ hp⟩
+
 infixl:90 "⨀" => ModusPonens.mdp!
 
 variable [Minimal 𝓢]
@@ -113,6 +117,12 @@ def efq' [HasEFQ 𝓢] (b : 𝓢 ⊢ ⊥) : 𝓢 ⊢ p := efq ⨀ b
 
 def lem [HasLEM 𝓢] : 𝓢 ⊢ p ⋎ ~p := HasLEM.lem p
 @[simp] lemma lem! [HasLEM 𝓢] : 𝓢 ⊢! p ⋎ ~p := ⟨lem⟩
+
+def dne [HasDNE 𝓢] : 𝓢 ⊢ ~~p ⟶ p := HasDNE.dne _
+@[simp] lemma dne! [HasDNE 𝓢] : 𝓢 ⊢! ~~p ⟶ p := ⟨dne⟩
+
+def dne' [HasDNE 𝓢] (b : 𝓢 ⊢ ~~p) : 𝓢 ⊢ p := dne ⨀ b
+@[simp] lemma dne'! [HasDNE 𝓢] (h : 𝓢 ⊢! ~~p) : 𝓢 ⊢! p := ⟨dne' h.some⟩
 
 def imply₁' (h : 𝓢 ⊢ p) : 𝓢 ⊢ q ⟶ p := imply₁ ⨀ h
 lemma imply₁'! (d : 𝓢 ⊢! p) : 𝓢 ⊢! q ⟶ p := ⟨imply₁' d.some⟩
