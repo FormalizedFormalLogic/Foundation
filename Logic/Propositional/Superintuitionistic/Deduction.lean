@@ -279,16 +279,16 @@ instance : System.Minimal (Λ : AxiomSet α) where
   disj₂ := disj₂
   disj₃ := disj₃
 
-instance intuitionistic_of_subset_efq (hEFQ : 𝐄𝐅𝐐 ⊆ Λ := by simp) : System.Intuitionistic (Λ : AxiomSet α) where
+instance intuitionistic_of_subset_efq (hEFQ : 𝐄𝐅𝐐 ⊆ Λ := by assumption) : System.Intuitionistic (Λ : AxiomSet α) where
   efq _ := eaxm $ Set.mem_of_subset_of_mem hEFQ (by simp);
 
-instance : System.Intuitionistic (𝐄𝐅𝐐 : AxiomSet α) := intuitionistic_of_subset_efq
+instance : System.Intuitionistic (𝐄𝐅𝐐 : AxiomSet α) := intuitionistic_of_subset_efq (by rfl)
 
 
-instance classical_of_subset_dne (hDNE : 𝐃𝐍𝐄 ⊆ Λ := by simp) : System.Classical (Λ : AxiomSet α) where
+instance classical_of_subset_dne (hDNE : 𝐃𝐍𝐄 ⊆ Λ := by assumption) : System.Classical (Λ : AxiomSet α) where
   dne _ := eaxm $ Set.mem_of_subset_of_mem hDNE (by simp);
 
-instance : System.Classical (𝐃𝐍𝐄 : AxiomSet α) := classical_of_subset_dne
+instance : System.Classical (𝐃𝐍𝐄 : AxiomSet α) := classical_of_subset_dne (by rfl)
 
 
 open System
