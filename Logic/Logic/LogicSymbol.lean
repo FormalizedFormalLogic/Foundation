@@ -432,6 +432,7 @@ section
 variable [LogicalConnective α] [DecidableEq α]
 
 noncomputable def conj (s : Finset α) : α := s.toList.conj
+prefix:80 "⋀" => Finset.conj
 
 lemma map_conj [FunLike F α Prop] [LogicalConnective.HomClass F α Prop] (f : F) (s : Finset α) : f s.conj ↔ ∀ a ∈ s, f a := by
   simpa using List.map_conj f s.toList
@@ -449,6 +450,7 @@ lemma map_conj_union [FunLike F α Prop] [LogicalConnective.HomClass F α Prop] 
     cases ha <;> simp_all;
 
 noncomputable def disj (s : Finset α) : α := s.toList.disj
+prefix:80 "⋁" => Finset.disj
 
 lemma map_disj [FunLike F α Prop] [LogicalConnective.HomClass F α Prop] (f : F) (s : Finset α) : f s.disj ↔ ∃ a ∈ s, f a := by
   simpa using List.map_disj f s.toList
