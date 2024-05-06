@@ -48,11 +48,24 @@ lemma exponential_exp (a : M) : Exponential a (exp a) := by
 lemma exponential_graph {a b : M} : a = exp b ↔ Exponential b a :=
   ⟨by rintro rfl; exact exponential_exp b, fun h ↦ Exponential.uniq h (exponential_exp b)⟩
 
+alias ⟨_, exp_of_exponential⟩ := exponential_graph
+
+@[simp] lemma exp_pow2 (a : M) : Pow2 (exp a) := (exponential_exp a).range_pow2
+
 @[simp] lemma exp_monotone {a b : M} : exp a < exp b ↔ a < b :=
   Iff.symm <| Exponential.monotone_iff (exponential_exp a) (exponential_exp b)
 
 @[simp] lemma exp_monotone_le {a b : M} : exp a ≤ exp b ↔ a ≤ b :=
   Iff.symm <| Exponential.monotone_le_iff (exponential_exp a) (exponential_exp b)
+
+@[simp] lemma lt_exp (a : M) : a < exp a := (exponential_exp a).lt
+
+@[simp] lemma exp_pos (a : M) : 0 < exp a := (exponential_exp a).range_pos
+
+@[simp] lemma one_le_exp (a : M) : 1 ≤ exp a := pos_iff_one_le.mp (by simp)
+
+lemma exp_inj : Function.Injective (Exp.exp : M → M) := λ a _ H ↦
+  (exponential_exp a).inj (exponential_graph.mp H)
 
 instance : Structure.Monotone ℒₒᵣ(exp) M := ⟨
   fun {k} f v₁ v₂ h ↦
@@ -72,32 +85,46 @@ lemma least_number {P : M → Prop} (hP : DefinablePred ℒₒᵣ Σ 0 P)
     {x} (h : P x) : ∃ y, P y ∧ ∀ z < y, ¬P z :=
   least_number_h Σ 0 hP h
 
-example : 4 + 5 * 9 = 49 := by simp
+@[elab_as_elim] lemma hierarchy_polynomial_induction_oRing_pi₁ [M ⊧ₘ* 𝐈𝚷₁] {P : M → Prop} (hP : DefinablePred ℒₒᵣ Π 1 P)
+    (zero : P 0) (even : ∀ x > 0, P x → P (2 * x)) (odd : ∀ x, P x → P (2 * x + 1)) : ∀ x, P x :=
+  hierarchy_polynomial_induction Π 1 hP zero even odd
 
-/-
-namespace ArithmetizedTerm
+@[simp] lemma log_exponential (a : M) : log (exp a) = a := (exponential_exp a).log_eq_of_exp
 
-variable (L : Language) [(k : ℕ) → Encodable (L.Func k)] [(k : ℕ) → Encodable (L.Rel k)]
+lemma exp_log_le_self {a : M} (pos : 0 < a) : exp (log a) ≤ a := by
+  rcases log_pos pos with ⟨_, _, H, _⟩
+  rcases H.uniq (exponential_exp (log a))
+  assumption
 
-variable (M)
+lemma lt_two_mul_exponential_log {a : M} (pos : 0 < a) : a < 2 * exp (log a) := by
+  rcases log_pos pos with ⟨_, _, H, _⟩
+  rcases H.uniq (exponential_exp (log a))
+  assumption
 
-class ArithmetizedLanguage where
-  isFunc : Δ₀(exp)-Sentence 2
-  isFunc_spec : DefinedRel ℒₒᵣ(exp) Σ 0 (fun (k' f' : M) ↦ ∃ (k : ℕ) (f : L.Func k), k' = k ∧ f' = Encodable.encode f) isFunc
-  isRel : Δ₀(exp)-Sentence 2
-  isRel_spec : DefinedRel ℒₒᵣ(exp) Σ 0 (fun (k' r' : M) ↦ ∃ (k : ℕ) (r : L.Rel k), k' = k ∧ r' = Encodable.encode r) isRel
+@[simp] lemma length_exponential (a : M) : ‖exp a‖ = a + 1 := by
+  simp [length_of_pos (exp_pos a)]
 
-variable {M L}
+lemma exp_add (a b : M) : exp (a + b) = exp a * exp b :=
+  Eq.symm <| exp_of_exponential (Exponential.add_mul (exponential_exp a) (exponential_exp b))
 
-def bvar (x : M) : M := ⟪0, ⟪0, x⟫⟫
+lemma log_mul_exp_add_of_lt {a b : M} (pos : 0 < a) (i : M) (hb : b < exp i) : log (a * exp i + b) = log a + i := by
+  simp [log_mul_pow2_add_of_lt pos (exp_pow2 i) hb]
 
-def fvar (x : M) : M := ⟪0, ⟪1, x⟫⟫
+lemma log_mul_exp {a : M} (pos : 0 < a) (i : M) : log (a * exp i) = log a + i := by
+  simp [log_mul_pow2 pos (exp_pow2 i)]
 
-def func : {k : ℕ} → (f : L.Func k) → M
-  | k, f => ⟪k, ⟪2, Encodable.encode f⟫⟫
+lemma length_mul_exp_add_of_lt {a b : M} (pos : 0 < a) (i : M) (hb : b < exp i) : ‖a * exp i + b‖ = ‖a‖ + i := by
+  simp [length_mul_pow2_add_of_lt pos (exp_pow2 i) hb]
 
-end ArithmetizedTerm
--/
+lemma length_mul_exp {a : M} (pos : 0 < a) (i : M) : ‖a * exp i‖ = ‖a‖ + i := by
+  simp [length_mul_pow2 pos (exp_pow2 i)]
+
+lemma exp_le_iff_le_log {i a : M} (pos : 0 < a) : exp i ≤ a ↔ i ≤ log a :=
+  ⟨by intro h; simpa using log_monotone h, fun h ↦ le_trans (exp_monotone_le.mpr h) (exp_log_le_self pos)⟩
+
+@[elab_as_elim] lemma polynomial_induction {P : M → Prop} (hP : DefinablePred ℒₒᵣ(exp) Σ 0 P)
+    (zero : P 0) (even : ∀ x > 0, P x → P (2 * x)) (odd : ∀ x, P x → P (2 * x + 1)) : ∀ x, P x :=
+  hierarchy_polynomial_induction Σ 0 hP zero even odd
 
 end Model.EA
 

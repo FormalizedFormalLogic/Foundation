@@ -41,37 +41,33 @@ lemma mem_iff_bit_lenbitL {i a : M} : i ∈ a ↔ LenBit (exp i) a :=
 
 lemma exp_le_of_mem {i a : M} (h : i ∈ a) : exp i ≤ a := LenBit.le (mem_iff_bit_lenbitL.mp h)
 
-@[simp] lemma lt_exp (a : M) : a < exp a := (exponential_exp a).lt
-
 lemma lt_of_mem {i a : M} (h : i ∈ a) : i < a := lt_of_lt_of_le (lt_exp i) (exp_le_of_mem h)
 
 section
 
-variable {L : Language} [L.ORing] [Structure L M] [Structure.ORing L M] [Structure.Monotone L M]
-
 variable (Γ : Polarity) (n : ℕ)
-/--/
+
 @[definability] lemma Definable.ball_mem {P : (Fin k → M) → M → Prop} {f : (Fin k → M) → M}
-    (hf : Semipolynomial L Γ n f) (h : Definable L Γ n (fun w ↦ P (w ·.succ) (w 0))) :
-    Definable L Γ n (fun v ↦ ∀ x ∈ f v, P v x) := by
+    (hf : Semipolynomial ℒₒᵣ(exp) Γ n f) (h : Definable ℒₒᵣ(exp) Γ n (fun w ↦ P (w ·.succ) (w 0))) :
+    Definable ℒₒᵣ(exp) Γ n (fun v ↦ ∀ x ∈ f v, P v x) := by
   rcases hf.bounded with ⟨bf, hbf⟩
   rcases hf.definable with ⟨f_graph, hf_graph⟩
   rcases h with ⟨p, hp⟩
-  exact ⟨⟨“∃[#0 < !!(Rew.bShift bf) + 1] (!f_graph ∧ ∀[#0 < #1] (!bitDef .[#0, #1] → !((Rew.substs (#0 :> (#·.succ.succ))).hom p)))”,
-    by simp; apply Hierarchy.oringEmb; simp⟩,
+  exact ⟨⟨“∃[#0 < !!(Rew.bShift bf) + 1] (!f_graph ∧ ∀[#0 < #1] (!bitDef.[#0, #1] → !((Rew.substs (#0 :> (#·.succ.succ))).hom p)))”,
+    by simp⟩,
     by  intro v; simp [hf_graph.eval, hp.eval, bit_defined.pval, ←le_iff_lt_succ]
         constructor
         · rintro h; exact ⟨f v, hbf v, rfl, fun x _ hx ↦ h x hx⟩
         · rintro ⟨_, _, rfl, h⟩ x hx; exact h x (lt_of_mem hx) hx⟩
 
 @[definability] lemma Definable.bex_mem {P : (Fin k → M) → M → Prop} {f : (Fin k → M) → M}
-    (hf : Semipolynomial L Γ n f) (h : Definable L Γ n (fun w ↦ P (w ·.succ) (w 0))) :
-    Definable L Γ n (fun v ↦ ∃ x ∈ f v, P v x) := by
+    (hf : Semipolynomial ℒₒᵣ(exp) Γ n f) (h : Definable ℒₒᵣ(exp) Γ n (fun w ↦ P (w ·.succ) (w 0))) :
+    Definable ℒₒᵣ(exp) Γ n (fun v ↦ ∃ x ∈ f v, P v x) := by
   rcases hf.bounded with ⟨bf, hbf⟩
   rcases hf.definable with ⟨f_graph, hf_graph⟩
   rcases h with ⟨p, hp⟩
   exact ⟨⟨“∃[#0 < !!(Rew.bShift bf) + 1] (!f_graph ∧ ∃[#0 < #1] (!bitDef .[#0, #1] ∧ !((Rew.substs (#0 :> (#·.succ.succ))).hom p)))”,
-    by simp; apply Hierarchy.oringEmb; simp⟩,
+    by simp⟩,
     by  intro v; simp [hf_graph.eval, hp.eval, bit_defined.pval, ←le_iff_lt_succ]
         constructor
         · rintro ⟨x, hx, h⟩; exact ⟨f v, hbf v, rfl, x, lt_of_mem hx, hx, h⟩
@@ -80,11 +76,11 @@ variable (Γ : Polarity) (n : ℕ)
 end
 
 lemma mem_iff_mul_exp_add_exp_add {i a : M} : i ∈ a ↔ ∃ k, ∃ r < exp i, a = k * exp (i + 1) + exp i + r := by
-  simp [mem_iff_bit, exp_succ]
+  simp [mem_iff_lenBit_exp, exp_succ]
   exact lenbit_iff_add_mul (exp_pow2 i) (a := a)
 
 lemma not_mem_iff_mul_exp_add {i a : M} : i ∉ a ↔ ∃ k, ∃ r < exp i, a = k * exp (i + 1) + r := by
-  simp [mem_iff_bit, exp_succ]
+  simp [mem_iff_lenBit_exp, exp_succ]
   exact not_lenbit_iff_add_mul (exp_pow2 i) (a := a)
 
 @[simp] lemma not_mem_zero (i : M) : i ∉ (0 : M) := by simp [mem_iff_bit, Bit]
@@ -93,14 +89,14 @@ lemma not_mem_iff_mul_exp_add {i a : M} : i ∉ a ↔ ∃ k, ∃ r < exp i, a = 
     i ∈ insert j a ↔ i = j ∨ i ∈ a := by
   by_cases h : j ∈ a <;> simp [h, insert_eq, bitInsert]
   · by_cases e : i = j <;> simp [h, e]
-  · simpa [exp_inj.eq_iff] using
-      lenbit_add_pow2_iff_of_not_lenbit (exp_pow2 i) (exp_pow2 j) h
+  · simpa [mem_iff_lenBit_exp, exp_inj.eq_iff] using
+      lenbit_add_pow2_iff_of_not_lenbit (a := a) (exp_pow2 i) (exp_pow2 j) (by simpa [←mem_iff_lenBit_exp] using h)
 
 @[simp] lemma mem_bitRemove_iff {i j a : M} :
     i ∈ bitRemove j a ↔ i ≠ j ∧ i ∈ a := by
   by_cases h : j ∈ a <;> simp [h, bitRemove]
-  · simpa [exp_inj.eq_iff] using
-      lenbit_sub_pow2_iff_of_lenbit (exp_pow2 i) (exp_pow2 j) h
+  · simpa [mem_iff_lenBit_exp, exp_inj.eq_iff] using
+      lenbit_sub_pow2_iff_of_lenbit (exp_pow2 i) (exp_pow2 j) (by simpa [←mem_iff_lenBit_exp] using h)
   · rintro _ rfl; contradiction
 
 lemma bitRemove_lt_of_mem {i a : M} (h : i ∈ a) : bitRemove i a < a := by
@@ -117,7 +113,8 @@ lemma log_mem_of_pos {a : M} (h : 0 < a) : log a ∈ a :=
 
 lemma le_log_of_mem {i a : M} (h : i ∈ a) : i ≤ log a := (exp_le_iff_le_log (pos_of_nonempty h)).mp (exp_le_of_mem h)
 
-lemma succ_mem_iff_mem_div_two {i a : M} : i + 1 ∈ a ↔ i ∈ a / 2 := by simp [mem_iff_bit, Bit, LenBit.iff_rem, exp_succ, div_mul]
+lemma succ_mem_iff_mem_div_two {i a : M} : i + 1 ∈ a ↔ i ∈ a / 2 := by
+  simp [mem_iff_lenBit_exp, LenBit.iff_rem, exp_succ, div_mul]
 
 lemma lt_length_of_mem {i a : M} (h : i ∈ a) : i < ‖a‖ := by
   simpa [length_of_pos (pos_of_nonempty h), ←le_iff_lt_succ] using le_log_of_mem h
@@ -131,13 +128,13 @@ lemma lt_exp_iff {a i : M} : a < exp i ↔ ∀ j ∈ a, j < i :=
 
 instance : HasSubset M := ⟨fun a b ↦ ∀ ⦃i⦄, i ∈ a → i ∈ b⟩
 
-def bitSubsetDef : Δ₀-Sentence 2 := ⟨“∀[#0 < #1] (!bitDef [#0, #1] → !bitDef [#0, #2])”, by simp⟩
+def bitSubsetDef : Δ₀(exp)-Sentence 2 := ⟨“∀[#0 < #1] (!bitDef [#0, #1] → !bitDef [#0, #2])”, by simp⟩
 
-lemma bitSubset_defined : Δ₀-Relation ((· ⊆ ·) : M → M → Prop) via bitSubsetDef := by
+lemma bitSubset_defined : DefinedRel ℒₒᵣ(exp) Σ 0 ((· ⊆ ·) : M → M → Prop) bitSubsetDef := by
   intro v; simp [bitSubsetDef, bit_defined.pval]
   exact ⟨by intro h x _ hx; exact h hx, by intro h x hx; exact h x (lt_of_mem hx) hx⟩
 
-instance bitSubset_definable : DefinableRel ℒₒᵣ Σ 0 ((· ⊆ ·) : M → M → Prop) := defined_to_with_param₀ _ bitSubset_defined
+instance bitSubset_definable : DefinableRel ℒₒᵣ(exp) Σ 0 ((· ⊆ ·) : M → M → Prop) := defined_to_with_param₀ _ bitSubset_defined
 
 lemma mem_exp_add_succ_sub_one (i j : M) : i ∈ exp (i + j + 1) - 1 := by
   have : exp (i + j + 1) - 1 = (exp j - 1) * exp (i + 1) + exp i + (exp i - 1) := calc
@@ -178,13 +175,29 @@ lemma subset_div_two {a b : M} : a ⊆ b → a / 2 ⊆ b / 2 := by
   have : i + 1 ∈ a := succ_mem_iff_mem_div_two.mpr hi
   exact succ_mem_iff_mem_div_two.mp <| ss this
 
-lemma zero_mem_iff {a : M} : 0 ∉ a ↔ 2 ∣ a := by simp [mem_iff_bit, Bit, LenBit]
+lemma zero_mem_iff {a : M} : 0 ∉ a ↔ 2 ∣ a := by simp [mem_iff_lenBit_exp, LenBit]
 
-@[simp] lemma zero_not_mem (a : M) : 0 ∉ 2 * a := by simp [mem_iff_bit, Bit, LenBit]
+@[simp] lemma zero_not_mem (a : M) : 0 ∉ 2 * a := by simp [mem_iff_lenBit_exp, LenBit]
+
+private lemma le_of_subset_aux {a b : M} (h : a ⊆ b) : a ≤ 2 * b := by
+  rcases zero_le a with (rfl | pos)
+  · simp
+  · have bpos : 0 < b := by
+      rcases zero_le b with (rfl | bpos)
+      · simp [eq_zero_of_subset_zero h] at pos
+      · exact bpos
+    have : 2 * exp log a ≤ 2 * exp log b :=
+      mul_le_mul_left <| exp_monotone_le.mpr <| le_log_of_mem <| h <| log_mem_of_pos pos
+    calc
+      a ≤ 2 * exp log a := le_of_lt <| lt_two_mul_exponential_log pos
+      _ ≤ 2 * exp log b := this
+      _ ≤ 2 * b         := by simpa using exp_log_le_self bpos
 
 lemma le_of_subset {a b : M} (h : a ⊆ b) : a ≤ b := by
-  induction b using hierarchy_polynomial_induction_oRing_pi₁ generalizing a
-  · definability
+  induction b using polynomial_induction generalizing a
+  · exact Definable.of_iff (fun v ↦ ∀ a ≤ 2 * v 0,  a ⊆ v 0 → a ≤ v 0)
+      (fun x ↦ ⟨fun H a _ h ↦ H h, fun H b h ↦ H b (le_of_subset_aux h) h⟩)
+      (by definability)
   case zero =>
     simp [eq_zero_of_subset_zero h]
   case even b _ IH =>
@@ -199,74 +212,7 @@ lemma le_of_subset {a b : M} (h : a ⊆ b) : a ≤ b := by
 lemma mem_ext {a b : M} (h : ∀ i, i ∈ a ↔ i ∈ b) : a = b :=
   le_antisymm (le_of_subset fun i hi ↦ (h i).mp hi) (le_of_subset fun i hi ↦ (h i).mpr hi)
 
-end ISigma₁
-
-section
-
-variable {n : ℕ} [Fact (1 ≤ n)] [M ⊧ₘ* 𝐈𝐍𝐃Σ n]
-
-theorem finset_comprehension {P : M → Prop} (hP : Γ(n)-Predicate P) (a : M) :
-    haveI : M ⊧ₘ* 𝐈𝚺₁ := mod_iSigma_of_le (show 1 ≤ n from Fact.out)
-    ∃ s < exp a, ∀ i < a, i ∈ s ↔ P i := by
-  haveI : M ⊧ₘ* 𝐈𝚺₁ := mod_iSigma_of_le (show 1 ≤ n from Fact.out)
-  have : ∃ s < exp a, ∀ i < a, P i → i ∈ s :=
-    ⟨under a, pred_lt_self_of_pos (by simp), fun i hi _ ↦ by simpa [mem_under_iff] using hi⟩
-  rcases this with ⟨s, hsn, hs⟩
-  have : (Γ.alt)(n)-Predicate (fun s ↦ ∀ i < a, P i → i ∈ s) := by
-    apply Definable.ball_lt; simp; apply Definable.imp
-    definability
-    apply @Definable.of_sigma_zero M ℒₒᵣ _ _ _ _ mem_definable
-  have : ∃ t, (∀ i < a, P i → i ∈ t) ∧ ∀ t' < t, ∃ x, P x ∧ x < a ∧ x ∉ t' := by
-    simpa using least_number_h (L := ℒₒᵣ) Γ.alt n this hs
-  rcases this with ⟨t, ht, t_minimal⟩
-  have t_le_s : t ≤ s := not_lt.mp (by
-    intro lt
-    rcases t_minimal s lt with ⟨i, hi, hin, his⟩
-    exact his (hs i hin hi))
-  have : ∀ i < a, i ∈ t → P i := by
-    intro i _ hit
-    by_contra Hi
-    have : ∃ j, P j ∧ j < a ∧ (j ∈ t → j = i) := by
-      simpa [not_imp_not] using t_minimal (bitRemove i t) (bitRemove_lt_of_mem hit)
-    rcases this with ⟨j, Hj, hjn, hm⟩
-    rcases hm (ht j hjn Hj); contradiction
-  exact ⟨t, lt_of_le_of_lt t_le_s hsn, fun i hi ↦ ⟨this i hi, ht i hi⟩⟩
-
-theorem finset_comprehension_exists_unique {P : M → Prop} (hP : Γ(n)-Predicate P) (a : M) :
-    haveI : M ⊧ₘ* 𝐈𝚺₁ := mod_iSigma_of_le (show 1 ≤ n from Fact.out)
-    ∃! s, s < exp a ∧ ∀ i < a, i ∈ s ↔ P i := by
-  haveI : M ⊧ₘ* 𝐈𝚺₁ := mod_iSigma_of_le (show 1 ≤ n from Fact.out)
-  rcases finset_comprehension hP a with ⟨s, hs, Hs⟩
-  exact ExistsUnique.intro s ⟨hs, Hs⟩ (by
-    intro t ⟨ht, Ht⟩
-    apply mem_ext
-    intro i
-    constructor
-    · intro hi
-      have hin : i < a := exp_monotone.mp (lt_of_le_of_lt (exp_le_of_mem hi) ht)
-      exact (Hs i hin).mpr ((Ht i hin).mp hi)
-    · intro hi
-      have hin : i < a := exp_monotone.mp (lt_of_le_of_lt (exp_le_of_mem hi) hs)
-      exact (Ht i hin).mpr ((Hs i hin).mp hi))
-
-end
-
-section ISigma₁
-
-variable [M ⊧ₘ* 𝐈𝚺₁]
-
-instance : Fact (1 ≤ 1) := ⟨by rfl⟩
-
-theorem finset_comprehension₁ {P : M → Prop} (hP : Γ(1)-Predicate P) (a : M) :
-    ∃ s < exp a, ∀ i < a, i ∈ s ↔ P i :=
-  finset_comprehension hP a
-
-/-
-lemma domain_exists_unique (s : M) :
-    ∃! d : M, ∀ x, x ∈ d ↔ ∃ y, ⟪x, y⟫ ∈ s := by { }
--/
-
-end ISigma₁
+end EA
 
 end Model
 

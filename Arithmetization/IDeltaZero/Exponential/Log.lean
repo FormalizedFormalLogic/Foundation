@@ -439,23 +439,23 @@ section ISigma₁
 
 variable [M ⊧ₘ* 𝐈𝚺₁]
 
-@[simp] lemma log_exponential (a : M) : log (exp a) = a := (exp_exponential a).log_eq_of_exp
+@[simp] lemma log_exponential (a : M) : log (exp a) = a := (exponential_exp a).log_eq_of_exp
 
 lemma exp_log_le_self {a : M} (pos : 0 < a) : exp (log a) ≤ a := by
   rcases log_pos pos with ⟨_, _, H, _⟩
-  rcases H.uniq (exp_exponential (log a))
+  rcases H.uniq (exponential_exp (log a))
   assumption
 
 lemma lt_two_mul_exponential_log {a : M} (pos : 0 < a) : a < 2 * exp (log a) := by
   rcases log_pos pos with ⟨_, _, H, _⟩
-  rcases H.uniq (exp_exponential (log a))
+  rcases H.uniq (exponential_exp (log a))
   assumption
 
 @[simp] lemma length_exponential (a : M) : ‖exp a‖ = a + 1 := by
   simp [length_of_pos (exp_pos a)]
 
 lemma exp_add (a b : M) : exp (a + b) = exp a * exp b :=
-  exp_of_exponential (Exponential.add_mul (exp_exponential a) (exp_exponential b))
+  exp_of_exponential (Exponential.add_mul (exponential_exp a) (exponential_exp b))
 
 lemma log_mul_exp_add_of_lt {a b : M} (pos : 0 < a) (i : M) (hb : b < exp i) : log (a * exp i + b) = log a + i := by
   simp [log_mul_pow2_add_of_lt pos (exp_pow2 i) hb]

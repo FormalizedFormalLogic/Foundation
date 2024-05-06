@@ -706,7 +706,7 @@ instance : _root_.Exp M := ⟨fun a ↦ Classical.choose! (Exponential.range_exi
 
 section exponential
 
-lemma exp_exponential (a : M) : Exponential a (exp a) := Classical.choose!_spec (Exponential.range_exists_unique a)
+lemma exponential_exp (a : M) : Exponential a (exp a) := Classical.choose!_spec (Exponential.range_exists_unique a)
 
 lemma exponential_graph {a b : M} : a = exp b ↔ Exponential b a := Classical.choose!_eq_iff _
 
@@ -723,34 +723,34 @@ lemma exp_of_exponential {a b : M} (h : Exponential a b) : exp a = b :=
   Eq.symm <| exponential_graph.mpr h
 
 lemma exp_inj : Function.Injective (Exp.exp : M → M) := λ a _ H ↦
-  (exp_exponential a).inj (exponential_graph.mp H)
+  (exponential_exp a).inj (exponential_graph.mp H)
 
 @[simp] lemma exp_zero : exp (0 : M) = 1 := exp_of_exponential (by simp)
 
 @[simp] lemma exp_one : exp (1 : M) = 2 := exp_of_exponential (by simp)
 
 lemma exp_succ (a : M) : exp (a + 1) = 2 * exp a :=
-  exp_of_exponential <| Exponential.exponential_succ_mul_two.mpr <| exp_exponential a
+  exp_of_exponential <| Exponential.exponential_succ_mul_two.mpr <| exponential_exp a
 
 instance models_exponential_of_models_iSigmaOne : M ⊧ₘ* 𝐄𝐗𝐏 :=
   ⟨by intro f hf; rcases hf <;> simp [models_iff, exp_succ]⟩
 
 lemma exp_even (a : M) : exp (2 * a) = (exp a)^2 :=
-  exp_of_exponential <| Exponential.exponential_even_sq.mpr <| exp_exponential a
+  exp_of_exponential <| Exponential.exponential_even_sq.mpr <| exponential_exp a
 
-@[simp] lemma lt_exp (a : M) : a < exp a := (exp_exponential a).lt
+@[simp] lemma lt_exp (a : M) : a < exp a := (exponential_exp a).lt
 
-@[simp] lemma exp_pos (a : M) : 0 < exp a := (exp_exponential a).range_pos
+@[simp] lemma exp_pos (a : M) : 0 < exp a := (exponential_exp a).range_pos
 
 @[simp] lemma one_le_exp (a : M) : 1 ≤ exp a := pos_iff_one_le.mp (by simp)
 
-@[simp] lemma exp_pow2 (a : M) : Pow2 (exp a) := (exp_exponential a).range_pow2
+@[simp] lemma exp_pow2 (a : M) : Pow2 (exp a) := (exponential_exp a).range_pow2
 
 @[simp] lemma exp_monotone {a b : M} : exp a < exp b ↔ a < b :=
-  Iff.symm <| Exponential.monotone_iff (exp_exponential a) (exp_exponential b)
+  Iff.symm <| Exponential.monotone_iff (exponential_exp a) (exponential_exp b)
 
 @[simp] lemma exp_monotone_le {a b : M} : exp a ≤ exp b ↔ a ≤ b :=
-  Iff.symm <| Exponential.monotone_le_iff (exp_exponential a) (exp_exponential b)
+  Iff.symm <| Exponential.monotone_le_iff (exponential_exp a) (exponential_exp b)
 
 end exponential
 
