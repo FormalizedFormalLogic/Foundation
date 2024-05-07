@@ -27,7 +27,7 @@ lemma bit_defined : Δ₀-Relation ((· ∈ ·) : M → M → Prop) via bitDef :
   · intro h; exact ⟨exp (v 0), by simp [h.le], rfl, h⟩
   · rintro ⟨_, _, rfl, h⟩; exact h
 
-instance mem_definable : DefinableRel ℒₒᵣ Σ 0 ((· ∈ ·) : M → M → Prop) := defined_to_with_param _ bit_defined
+@[instance, definability] def mem_definable : DefinableRel ℒₒᵣ Σ 0 ((· ∈ ·) : M → M → Prop) := defined_to_with_param _ bit_defined
 
 open Classical in
 noncomputable def bitInsert (i a : M) : M := if i ∈ a then a else a + exp i
@@ -44,6 +44,8 @@ lemma mem_iff_bit {i a : M} : i ∈ a ↔ Bit i a := iff_of_eq rfl
 lemma exp_le_of_mem {i a : M} (h : i ∈ a) : exp i ≤ a := LenBit.le h
 
 lemma lt_of_mem {i a : M} (h : i ∈ a) : i < a := lt_of_lt_of_le (lt_exp i) (exp_le_of_mem h)
+
+lemma not_mem_of_lt_exp {i a : M} (h : a < exp i) : i ∉ a := fun H ↦ by have := lt_of_le_of_lt (exp_le_of_mem H) h; simp at this
 
 section
 
@@ -261,10 +263,63 @@ theorem finset_comprehension₁ {P : M → Prop} (hP : Γ(1)-Predicate P) (a : M
     ∃ s < exp a, ∀ i < a, i ∈ s ↔ P i :=
   finset_comprehension hP a
 
-/-
+theorem finset_comprehension₁! {P : M → Prop} (hP : Γ(1)-Predicate P) (a : M) :
+    ∃! s, s < exp a ∧ (∀ i < a, i ∈ s ↔ P i) := by
+  rcases finset_comprehension₁ hP a with ⟨s, hs, Ha⟩
+  exact ExistsUnique.intro s ⟨hs, Ha⟩
+    (by
+      rintro b ⟨hb, Hb⟩
+      apply mem_ext
+      intro x
+      constructor
+      · intro hx
+        have : x < a := exp_monotone.mp <| LE.le.trans_lt (exp_le_of_mem hx) hb
+        exact (Ha x this).mpr <| (Hb x this).mp hx
+      · intro hx
+        have : x < a := exp_monotone.mp <| LE.le.trans_lt (exp_le_of_mem hx) hs
+        exact (Hb x this).mpr <| (Ha x this).mp hx)
+
+theorem finite_comprehension₁! {P : M → Prop} (hP : Γ(1)-Predicate P) (fin : ∃ m, ∀ i, P i → i < m)  :
+    ∃! s : M, ∀ i, i ∈ s ↔ P i := by
+  rcases fin with ⟨m, mh⟩
+  rcases finset_comprehension₁ hP m with ⟨s, hs, Hs⟩
+  have H : ∀ i, i ∈ s ↔ P i :=
+    fun i ↦ ⟨
+      fun h ↦ (Hs i (exp_monotone.mp (lt_of_le_of_lt (exp_le_of_mem h) hs))).mp h,
+      fun h ↦ (Hs i (mh i h)).mpr h⟩
+  exact ExistsUnique.intro s H (fun s' H' ↦ mem_ext <| fun i ↦ by simp [H, H'])
+
 lemma domain_exists_unique (s : M) :
-    ∃! d : M, ∀ x, x ∈ d ↔ ∃ y, ⟪x, y⟫ ∈ s := by { }
--/
+    ∃! d : M, ∀ x, x ∈ d ↔ ∃ y, ⟪x, y⟫ ∈ s := by
+  have : (Π)(1)-Predicate fun x ↦ ∃ y, ⟪x, y⟫ ∈ s :=
+    DefinablePred.of_iff (fun x ↦ ∃ y < s, ⟪x, y⟫ ∈ s)
+      (fun x ↦ ⟨by rintro ⟨y, hy⟩; exact ⟨y, lt_of_le_of_lt (le_pair_right x y) (lt_of_mem hy), hy⟩,
+                by rintro ⟨y, _, hy⟩; exact ⟨y, hy⟩⟩)
+      (by definability)
+  exact finite_comprehension₁!
+    this
+    (⟨s, fun x ↦ by rintro ⟨y, hy⟩; exact lt_of_le_of_lt (le_pair_left x y) (lt_of_mem hy)⟩)
+
+lemma range_exists_unique (s : M) :
+    ∃! r : M, ∀ y, y ∈ r ↔ ∃ x, ⟪x, y⟫ ∈ s := by
+  have : (Π)(1)-Predicate fun y ↦ ∃ x, ⟪x, y⟫ ∈ s :=
+    DefinablePred.of_iff (fun y ↦ ∃ x < s, ⟪x, y⟫ ∈ s)
+      (fun y ↦ ⟨by rintro ⟨x, hy⟩; exact ⟨x, lt_of_le_of_lt (le_pair_left x y) (lt_of_mem hy), hy⟩,
+                by rintro ⟨y, _, hy⟩; exact ⟨y, hy⟩⟩)
+      (by definability)
+  exact finite_comprehension₁!
+    this
+    (⟨s, fun y ↦ by rintro ⟨x, hx⟩; exact lt_of_le_of_lt (le_pair_right x y) (lt_of_mem hx)⟩)
+
+lemma union_exists_unique (s t : M) :
+    ∃! u : M, ∀ x, (x ∈ u ↔ x ∈ s ∨ x ∈ t) := by
+  have : (Π)(1)-Predicate fun x ↦ x ∈ s ∨ x ∈ t := by definability
+  exact finite_comprehension₁! this
+    ⟨s + t, fun i ↦ by
+      rintro (H | H)
+      · exact lt_of_lt_of_le (lt_of_mem H) (by simp)
+      · exact lt_of_lt_of_le (lt_of_mem H) (by simp)⟩
+
 
 end ISigma₁
 

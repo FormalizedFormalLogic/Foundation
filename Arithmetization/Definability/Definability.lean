@@ -210,10 +210,13 @@ lemma defined_to_with_param_oRing₀ {k} {P : (Fin k → M) → Prop} (p : HSemi
       by simp; apply Hierarchy.oringEmb (Hierarchy.of_zero p.prop)⟩,
       by intro; simp [hP.pval]⟩
 
-namespace Definable
-
-lemma of_iff {p : (Fin k → M) → Prop} (q) (h : ∀ x, p x ↔ q x) (H : Definable L Γ s q) : Definable L Γ s p := by
+lemma Definable.of_iff {p : (Fin k → M) → Prop} (q) (h : ∀ x, p x ↔ q x) (H : Definable L Γ s q) : Definable L Γ s p := by
   rwa [show p = q from by funext v; simp [h]]
+
+lemma DefinablePred.of_iff {p : M → Prop} (q) (h : ∀ x, p x ↔ q x) (H : DefinablePred L Γ s q) : DefinablePred L Γ s p := by
+  rwa [show p = q from by funext v; simp [h]]
+
+namespace Definable
 
 lemma finmap {P : (Fin k → M) → Prop} (h : Definable L Γ s P) (f : Fin k → Fin n) :
     Definable L Γ s fun v ↦ P (fun i ↦ v (f i)) := by

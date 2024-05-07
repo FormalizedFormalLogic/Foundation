@@ -702,7 +702,7 @@ lemma range_exists_unique (x : M) : ∃! y, Exponential x y := by
 
 end Exponential
 
-instance : _root_.Exp M := ⟨fun a ↦ Classical.choose! (Exponential.range_exists_unique a)⟩
+instance : Exp M := ⟨fun a ↦ Classical.choose! (Exponential.range_exists_unique a)⟩
 
 section exponential
 

@@ -596,6 +596,10 @@ def pairEquiv : M × M ≃ M := ⟨Function.uncurry pair, unpair, fun ⟨a, b⟩
 
 @[simp] lemma pi₂_le_self (a : M) : π₂ a ≤ a := by simp [pi₂, unpair]; split_ifs <;> simp [add_assoc]
 
+@[simp] lemma le_pair_left (a b : M) : a ≤ ⟪a, b⟫ := by simpa using pi₁_le_self ⟪a, b⟫
+
+@[simp] lemma le_pair_right (a b : M) : b ≤ ⟪a, b⟫ := by simpa using pi₂_le_self ⟪a, b⟫
+
 instance : Bounded₁ ℒₒᵣ (pi₁ : M → M) := ⟨ᵀ“#0”, by intro v; simp⟩
 
 instance : Bounded₁ ℒₒᵣ (pi₂ : M → M) := ⟨ᵀ“#0”, by intro v; simp⟩
