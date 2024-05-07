@@ -183,7 +183,7 @@ theorem completeness! : T ⊨[Valuation α] p → T ⊢! p := by
   exact satisfiable_of_consistent consis
 
 noncomputable def completeness : T ⊨[Valuation α] p → T ⊢ p :=
-  λ h ↦ (completeness! h).prf
+  fun h ↦ (completeness! h).get
 
 instance (T : Theory α) : Complete T (Semantics.models (Valuation α) T)  where
   complete := completeness!
