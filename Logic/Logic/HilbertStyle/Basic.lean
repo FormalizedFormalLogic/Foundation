@@ -203,10 +203,16 @@ def generalConj [DecidableEq F] {Γ : List F} {p : F} (h : p ∈ Γ) : 𝓢 ⊢ 
 
 lemma generalConj! [DecidableEq F] {Γ : List F} {p : F} (h : p ∈ Γ) : 𝓢 ⊢! Γ.conj ⟶ p := ⟨generalConj h⟩
 
+lemma generalConjFinset! [DecidableEq F] {Γ : Finset F} (h : p ∈ Γ) : 𝓢 ⊢! ⋀Γ ⟶ p := by simp [Finset.conj, (generalConj! (Finset.mem_toList.mpr h))];
+
 def implyAnd (bq : 𝓢 ⊢ p ⟶ q) (br : 𝓢 ⊢ p ⟶ r) : 𝓢 ⊢ p ⟶ q ⋏ r :=
   dhyp p (Minimal.conj₃ q r) ⨀₁ bq ⨀₁ br
 
 def andComm (p q : F) : 𝓢 ⊢ p ⋏ q ⟶ q ⋏ p := implyAnd conj₂ conj₁
+lemma andComm! : 𝓢 ⊢! p ⋏ q ⟶ q ⋏ p := ⟨andComm p q⟩
+
+def andComm' (h : 𝓢 ⊢ p ⋏ q) : 𝓢 ⊢ q ⋏ p := andComm _ _ ⨀ h
+lemma andComm'! (h : 𝓢 ⊢! p ⋏ q) : 𝓢 ⊢! q ⋏ p := ⟨andComm' h.some⟩
 
 def iffComm (p q : F) : 𝓢 ⊢ (p ⟷ q) ⟶ (q ⟷ p) := andComm _ _
 
@@ -216,6 +222,13 @@ def andImplyIffImplyImply (p q r : F) : 𝓢 ⊢ (p ⋏ q ⟶ r) ⟷ (p ⟶ q �
   let b₂ : 𝓢 ⊢ (p ⟶ q ⟶ r) ⟶ p ⋏ q ⟶ r :=
     Minimal.imply₁ (p ⟶ q ⟶ r) (p ⋏ q) ⨀₂ dhyp (p ⟶ q ⟶ r) (Minimal.conj₁ p q) ⨀₂ dhyp (p ⟶ q ⟶ r) (Minimal.conj₂ p q)
   iffIntro b₁ b₂
+lemma andImplyIffImplyImply! : 𝓢 ⊢! (p ⋏ q ⟶ r) ⟷ (p ⟶ q ⟶ r) := ⟨andImplyIffImplyImply p q r⟩
+
+lemma andImplyIffImplyImply'! : (𝓢 ⊢! p ⋏ q ⟶ r) ↔ (𝓢 ⊢! p ⟶ q ⟶ r) := by
+  have H : 𝓢 ⊢! (p ⋏ q ⟶ r) ⟷ (p ⟶ q ⟶ r) := andImplyIffImplyImply!;
+  constructor;
+  . intro h; exact (conj₁'! H) ⨀ h;
+  . intro h; exact (conj₂'! H) ⨀ h;
 
 def implyConj [DecidableEq F] (p : F) (Γ : List F) (b : (q : F) → q ∈ Γ → 𝓢 ⊢ p ⟶ q) : 𝓢 ⊢ p ⟶ Γ.conj :=
   match Γ with

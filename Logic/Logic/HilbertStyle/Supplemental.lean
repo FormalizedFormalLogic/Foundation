@@ -12,6 +12,16 @@ variable [Minimal 𝓢]
 
 open FiniteContext
 
+lemma orComm : 𝓢 ⊢ p ⋎ q ⟶ q ⋎ p := by
+  apply emptyPrf;
+  apply deduct;
+  have : [p ⋎ q] ⊢[𝓢] p ⋎ q := FiniteContext.byAxm (by simp);
+  exact disj₃' disj₂ disj₁ this;
+lemma orComm! : 𝓢 ⊢! p ⋎ q ⟶ q ⋎ p := ⟨orComm⟩
+
+lemma orComm' (h : 𝓢 ⊢ p ⋎ q) : 𝓢 ⊢ q ⋎ p := orComm ⨀ h
+lemma orComm'! (h : 𝓢 ⊢! p ⋎ q) : 𝓢 ⊢! q ⋎ p := ⟨orComm' h.some⟩
+
 def dni : 𝓢 ⊢ p ⟶ ~~p := by
   simp [NegDefinition.neg];
   apply emptyPrf;
