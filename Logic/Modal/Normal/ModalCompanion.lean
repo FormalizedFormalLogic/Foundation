@@ -1,4 +1,4 @@
-import Logic.Propositional.Superintuitionistic.Intuitionistic
+import Logic.Propositional.Superintuitionistic
 import Logic.Modal.Normal.Geach
 import Logic.Modal.Normal.Strength.Init
 

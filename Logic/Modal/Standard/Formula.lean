@@ -1,7 +1,8 @@
 import Logic.Vorspiel.Collection
 import Logic.Modal.LogicSymbol
+import Logic.Modal.Standard.System
 
-namespace LO.Modal.Normal
+namespace LO.Modal.Standard
 
 inductive Formula (α : Type u) : Type u where
   | atom   : α → Formula α
@@ -208,4 +209,89 @@ prefix:75 "⋁" => disj
 
 end Context
 
-end LO.Modal.Normal
+abbrev AxiomSet (α) := Set (Formula α)
+
+namespace AxiomSet
+
+open System
+
+variable {p q : Formula α}
+
+protected abbrev K : AxiomSet α := { Axioms.K p q | (p) (q) }
+notation "𝐊" => AxiomSet.K
+
+protected abbrev T : AxiomSet α := { Axioms.T p | p }
+notation "𝐓" => AxiomSet.T
+
+protected abbrev B : AxiomSet α := { Axioms.B p | p }
+notation "𝐁" => AxiomSet.B
+
+protected abbrev D : AxiomSet α := { Axioms.D p | p }
+notation "𝐃" => AxiomSet.D
+
+protected abbrev Four : AxiomSet α := { Axioms.Four p | p }
+notation "𝟒" => AxiomSet.Four
+
+protected abbrev Five : AxiomSet α := { Axioms.Five p | p }
+notation "𝟓" => AxiomSet.Five
+
+protected abbrev L : AxiomSet α := { Axioms.L p | p }
+notation "𝐋" => AxiomSet.L
+
+protected abbrev Dot2 : AxiomSet α := { Axioms.Dot2 p | p }
+notation ".𝟐" => AxiomSet.Dot2
+
+protected abbrev Dot3 : AxiomSet α := { Axioms.Dot3 p q | (p) (q) }
+notation ".𝟑" => AxiomSet.Dot3
+
+protected abbrev Grz : AxiomSet α := { Axioms.Grz p | p }
+notation "𝐆𝐫𝐳" => AxiomSet.Grz
+
+protected abbrev M : AxiomSet α := { Axioms.M p | p }
+notation "𝐌" => AxiomSet.M
+
+protected abbrev CD : AxiomSet α := { Axioms.CD p | p }
+notation "𝐂𝐃" => AxiomSet.CD
+
+protected abbrev C4 : AxiomSet α := { Axioms.C4 p | p }
+notation "𝐂𝟒" => AxiomSet.C4
+
+protected abbrev KT : AxiomSet α := 𝐊 ∪ 𝐓
+notation "𝐊𝐓" => AxiomSet.KT
+
+protected abbrev KB : AxiomSet α := 𝐊 ∪ 𝐁
+notation "𝐊𝐁" => AxiomSet.KB
+
+protected abbrev KD : AxiomSet α := 𝐊 ∪ 𝐃
+notation "𝐊𝐃" => AxiomSet.KD
+
+protected abbrev K4 : AxiomSet α := 𝐊 ∪ 𝟒
+notation "𝐊𝟒" => AxiomSet.K4
+
+protected abbrev K5 : AxiomSet α := 𝐊 ∪ 𝟓
+notation "𝐊𝟓" => AxiomSet.K5
+
+protected abbrev S4 : AxiomSet α := 𝐊 ∪ 𝐓 ∪ 𝟒
+notation "𝐒𝟒" => AxiomSet.S4
+
+protected abbrev S4Dot2 : AxiomSet α := 𝐊 ∪ 𝐓 ∪ 𝟒 ∪ .𝟐
+notation "𝐒𝟒.𝟐" => AxiomSet.S4Dot2
+
+protected abbrev S4Dot3 : AxiomSet α := 𝐊 ∪ 𝐓 ∪ 𝟒 ∪ .𝟑
+notation "𝐒𝟒.𝟑" => AxiomSet.S4Dot3
+
+protected abbrev S4Grz : AxiomSet α := 𝐊 ∪ 𝐓 ∪ 𝟒 ∪ 𝐆𝐫𝐳
+notation "𝐒𝟒𝐆𝐫𝐳" => AxiomSet.S4Grz
+
+protected abbrev S5 : AxiomSet α := 𝐊 ∪ 𝐓 ∪ 𝟓
+notation "𝐒𝟓" => AxiomSet.S5
+
+protected abbrev KT4B : AxiomSet α := 𝐊 ∪ 𝐓 ∪ 𝟒 ∪ 𝐁
+notation "𝐊𝐓𝟒𝐁" => AxiomSet.KT4B
+
+protected abbrev GL : AxiomSet α := 𝐊 ∪ 𝐋
+notation "𝐆𝐋" => AxiomSet.GL
+
+end AxiomSet
+
+end LO.Modal.Standard

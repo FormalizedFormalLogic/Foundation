@@ -1,13 +1,13 @@
-import Logic.Modal.Normal.New.Kripke
-import Logic.Modal.Normal.New.Hilbert
+import Logic.Modal.Standard.Deduction
+import Logic.Modal.Standard.Kripke.Semantics
 
-namespace LO.Modal.Normal.Kripkean
+namespace LO.Modal.Standard.Kripke
 
 variable {W α : Type*}
 variable {Λ : AxiomSet α}
 
 open Deduction
-open Formula.Kripkean
+open Formula Formula.Kripke
 
 lemma sound (d : Λ ⊢ p) : (𝔽 : AxiomSetFrameClass W Λ) ⊧ p := by
   induction d with
@@ -19,8 +19,7 @@ lemma sound (d : Λ ⊢ p) : (𝔽 : AxiomSetFrameClass W Λ) ⊧ p := by
     simp_all;
   | nec _ ih =>
     intro F hF V w w' _;
-    have := ih F hF V w';
-    simp_all;
+    exact ih F hF V w';
   | disj₃ =>
     simp_all [ValidOnAxiomSetFrameClass, ValidOnFrameClass, ValidOnFrame, ValidOnModel];
     intros; rename_i hpr hqr hpq;
@@ -46,4 +45,4 @@ theorem soundness {T : Theory α} {p : Formula α} : T ⊢[Λ] p → T ⊨[Axiom
 theorem soundness! {T : Theory α} {p} : T ⊢! p → T ⊨[AxiomSetFrameClass W Λ] p := λ ⟨d⟩ => soundness d
 -/
 
-end LO.Modal.Normal.Kripkean
+end LO.Modal.Standard.Kripke
