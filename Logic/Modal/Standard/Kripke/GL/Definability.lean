@@ -15,42 +15,37 @@ private lemma AxiomSet.L.definability.implies_transitive : F ⊧* 𝐋 → Trans
   contrapose;
   intro hT; simp [Transitive] at hT;
   obtain ⟨w₁, w₂, w₃, r₂₃, r₁₂, nr₁₃⟩ := hT;
-  -- simp [AxiomSet.L, Axioms.L, ValidOnFrame, ValidOnModel];
-  -- existsi (atom default);
-  -- existsi (λ w' _ => (w' ≠ w₂ ∧ w' ≠ w₃)), w₁;
-  sorry;
-  -- constructor;
-  -- . intro x hx h;
-  --   by_cases hx₂ : x = w₂;
-  --   . simp_all [hx₂]; simpa using h w₃ r₂₃;
-  --   . by_cases hx₃ : x = w₃ <;> simp_all [hx₃];
-  -- . existsi w₂;
-  --   aesop;
+  simp only [AxiomSet.L, Axioms.L, Semantics.RealizeSet.setOf_iff, ValidOnFrame.models_iff,
+    ValidOnFrame, ValidOnModel.iff_models, ValidOnModel, forall_exists_index,
+    forall_apply_eq_imp_iff, Semantics.Tarski.realize_imp, Satisfies.box_def, not_forall,
+    exists_prop]; -- TODO: cleanup
+  existsi (atom default), (λ w' _ => (w' ≠ w₂ ∧ w' ≠ w₃)), w₁;
+  constructor;
+  . intro x hx h;
+    by_cases hx₂ : x = w₂;
+    . subst hx₂; simpa using h w₃ r₂₃;
+    . by_cases hx₃ : x = w₃ <;> simp_all [hx₃];
+  . existsi w₂;
+    simpa;
 
 private lemma AxiomSet.L.definability.implies_cwf  : F ⊧* 𝐋 → ConverseWellFounded F := by
-  sorry;
-  /-
   contrapose;
   intro hCF;
   obtain ⟨X, hX₁, hX₂⟩ := by simpa using ConverseWellFounded.iff_has_max.not.mp hCF;
-  let V : Valuation α β := λ w _ => w ∉ X;
+  let V : Valuation W α := λ w _ => w ∉ X;
   let w := hX₁.some;
-  let a : Formula β := atom default;
-  apply Theory.not_Frames;
-  simp [Theory.Satisfies, -Satisfies.box_def];
-  existsi V, w, a;
+  let a : Formula α := atom default;
+  simp only [AxiomSet.L, Axioms.L, Semantics.RealizeSet.setOf_iff, ValidOnFrame.models_iff,
+    ValidOnFrame, ValidOnModel.iff_models, ValidOnModel, forall_exists_index,
+    forall_apply_eq_imp_iff, Semantics.Tarski.realize_imp, Satisfies.box_def, not_forall,
+    exists_prop]; -- TODO: cleanup
+  existsi (atom default), V, w;
   constructor;
-  . simp only [Formula.Satisfies.box_def];
-    intro x _;
+  . intro x _;
     by_cases hxs : x ∈ X
     . obtain ⟨y, hy₁, hy₂⟩ := hX₂ x hxs;
-      simp only [Formula.Satisfies.imp_def];
-      left;
-      simp;
-      existsi y;
-      constructor;
-      . simpa [flip] using hy₂;
-      . simpa [V, w, a];
+      intro h;
+      exact h x (by aesop);
     . aesop;
   . obtain ⟨w', hw'₁, hw'₂⟩ := hX₂ w (by apply Set.Nonempty.some_mem);
     simp;
@@ -58,41 +53,27 @@ private lemma AxiomSet.L.definability.implies_cwf  : F ⊧* 𝐋 → ConverseWel
     constructor;
     . simpa [flip] using hw'₂;
     . simp_all [V, w, a];
-  -/
 
 private lemma AxiomSet.L.definability.impliedby : (Transitive F ∧ ConverseWellFounded F) → F ⊧* 𝐋 := by
-  sorry;
-  /-
   rintro ⟨hTrans, hWF⟩;
-  simp [axiomL, AxiomSet.L];
+  simp [AxiomSet.L, Axioms.L]; -- TODO: cleanup
   intro p V w;
-  simp only [Formula.Satisfies.imp_def'];
-  suffices (w ⊮ᴹ[⟨F, V⟩] □p) → (w ⊮ᴹ[⟨F, V⟩] □(□p ⟶ p)) by exact not_imp_not.mp this;
+  let M := Model.mk F V;
+  simp only [Semantics.Tarski.realize_imp];
+  contrapose;
 
-  intro h; simp [Unsatisfies] at h;
-  obtain ⟨z, rwz, hz⟩ := h;
-  obtain ⟨xm, ⟨hxm₁, hxm₂⟩⟩ := hWF.has_min ({ x | (F w x) ∧ (x ⊮ᴹ[⟨F, V⟩] p) }) (by existsi z; simp [rwz, hz];)
+  intro h;
+  obtain ⟨z, rwz, hz⟩ := by simpa using h;
+  obtain ⟨xm, ⟨hxm₁, hxm₂⟩⟩ := hWF.has_min ({ x | (F w x) ∧ ¬((M, x) ⊧ p) }) (by existsi z; simp_all)
+  simp [Satisfies.box_def];
 
-  have h₁ : (xm ⊩ᴹ[⟨F, V⟩] □p) := by
-    simp [Satisfies.box_def];
-    intro y hy;
-    have : F w y := hTrans (by simp_all) hy;
+  have : ((M, xm) ⊧ □p) := by
     by_contra hC;
-    have := hxm₂ y ⟨(hTrans (by simp_all) hy), hC⟩;
+    obtain ⟨y, hy₁, hy₂⟩ := by simpa using hC;
+    have : ¬(F xm y) := hxm₂ y ⟨(hTrans (by simp_all) hy₁), hy₂⟩;
     contradiction;
-  have h₂ : (xm ⊮ᴹ[⟨F, V⟩] (□p ⟶ p)) := by
-    simp only [Unsatisfies, Formula.Satisfies.imp_def', not_imp];
-    constructor;
-    . exact h₁
-    . simp_all;
-  have h₃ : w ⊮ᴹ[⟨F, V⟩] □(□p ⟶ p) := by
-    simp [Unsatisfies, Satisfies.box_def, -Satisfies.imp_def'];
-    existsi xm;
-    constructor;
-    . simp_all;
-    . exact h₂;
-  exact h₃;
-  -/
+  existsi xm;
+  simp_all;
 
 open AxiomSet.L.definability in
 instance AxiomSet.L.definability : Kripke.AxiomSetDefinability W (𝐋 : AxiomSet α) (λ F => Transitive F ∧ ConverseWellFounded F) where

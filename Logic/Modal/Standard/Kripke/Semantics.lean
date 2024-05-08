@@ -58,6 +58,8 @@ instance : Semantics.Tarski ((Model W α) × W) where
 
 variable {M : Model W α} {w : W} {p q : Formula α}
 
+@[simp] lemma atom_def : (M, w) ⊧ atom a ↔ M.valuation w a := by simp [iff_models, Satisfies];
+
 @[simp] lemma box_def : (M, w) ⊧ □p ↔ ∀ w', M.frame w w' → (M, w') ⊧ p := by simp [iff_models, Satisfies];
 @[simp] lemma dia_def : (M, w) ⊧ ◇p ↔ ∃ w', M.frame w w' ∧ (M, w') ⊧ p := by simp [iff_models, Satisfies];
 
