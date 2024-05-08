@@ -145,6 +145,8 @@ structure Kripke.AxiomSetFrameClass (W) {α} (Λ : AxiomSet α) where
   frameclass : FrameClass W α
   spec : F ∈ frameclass ↔ F ⊧* Λ
 
+instance : Inhabited (Kripke.AxiomSetFrameClass W Λ) := ⟨⟨{ F | F ⊧* Λ }, by simp;⟩⟩
+
 variable {Λ : AxiomSet α}
 
 

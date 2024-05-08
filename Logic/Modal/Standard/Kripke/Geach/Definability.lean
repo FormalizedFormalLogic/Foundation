@@ -112,13 +112,6 @@ instance AxiomSet.Geach.definability (t) : AxiomSetDefinability W (AxiomSet.Geac
       existsi u;
       exact ⟨hyu, hzu⟩;
 
-/-
-lemma AxiomSet.GeachLogic.definabilityAux : AxiomSetDefinability W (AxiomSet.GeachLogic l : AxiomSet α) := by
-  induction l with
-  | nil => simp; apply inferInstance;
-  | cons t ts ih => apply Kripke.AxiomSetDefinability.union;
--/
-
 instance AxiomSet.GeachLogic.definability (l) : AxiomSetDefinability W (AxiomSet.GeachLogic l : AxiomSet α) (Kripke.MultiGeachConfluent l) where
   defines F := by
     induction l with
@@ -146,17 +139,5 @@ instance {𝔽Λ : AxiomSetFrameClass W (𝐒𝟒 : AxiomSet α)} : Inhabited �
   existsi (λ _ _ => True);
   apply iff_definability_memAxiomSetFrameClass (AxiomSet.S4.definability) |>.mp;
   simp [Reflexive, Transitive];
-
-instance : Inhabited (AxiomSetFrameClass W (𝐒𝟒 : AxiomSet α)) := ⟨⟨
-    { λ _ _ => True },
-    by
-      simp only [Set.mem_singleton_iff];
-      intro F;
-      refine Iff.trans ?h (AxiomSet.S4.definability.defines F);
-      constructor;
-      . intro e; subst e; simp [Reflexive, Transitive];
-      . rintro ⟨hRefl, hTrans⟩;
-        sorry;
-  ⟩⟩
 
 end LO.Modal.Standard
