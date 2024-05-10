@@ -142,7 +142,11 @@ namespace Formula.Kripke.ValidOnFrameClass
 
 end Formula.Kripke.ValidOnFrameClass
 
+abbrev Kripke.AxiomSetFrameClass (W) (Λ : AxiomSet α) : FrameClass W α := Semantics.models (Frame W α) Λ
 
+notation "𝔽(" Λ "," W ")"  => Kripke.AxiomSetFrameClass W Λ
+
+/-
 structure Kripke.AxiomSetFrameClass (W) {α} (Λ : AxiomSet α) where
   frameclass : FrameClass W α
   spec : F ∈ frameclass ↔ F ⊧* Λ
@@ -150,7 +154,6 @@ structure Kripke.AxiomSetFrameClass (W) {α} (Λ : AxiomSet α) where
 instance : Inhabited (Kripke.AxiomSetFrameClass W Λ) := ⟨⟨{ F | F ⊧* Λ }, by simp;⟩⟩
 
 variable {Λ : AxiomSet α}
-
 
 def Formula.Kripke.ValidOnAxiomSetFrameClass (𝔽 : AxiomSetFrameClass W Λ) (f : Formula α) := Formula.Kripke.ValidOnFrameClass 𝔽.frameclass f
 
@@ -161,21 +164,19 @@ namespace Formula.Kripke.ValidOnAxiomSetFrameClass
 @[simp] lemma models_iff : 𝔽 ⊧ p ↔ Formula.Kripke.ValidOnAxiomSetFrameClass 𝔽 p := iff_of_eq rfl
 
 end Formula.Kripke.ValidOnAxiomSetFrameClass
-
+-/
 
 namespace Kripke
 
-lemma validOnAxiomSetFrameClass_axiom {𝔽 : AxiomSetFrameClass W Λ} (h : p ∈ Λ) : 𝔽 ⊧ p := by
+lemma validOnAxiomSetFrameClass_axiom (h : p ∈ Λ) : 𝔽(Λ, W) ⊧ p := by
   intro F hF;
-  exact 𝔽.spec.mp hF |>.realize h;
+  exact hF.realize h;
 
 class AxiomSetDefinability (W) (Λ : AxiomSet α) (P : Frame W α → Prop) where
   defines : ∀ F, P F ↔ F ⊧* Λ
 
-lemma iff_definability_memAxiomSetFrameClass (definability : AxiomSetDefinability W Λ P) {𝔽 : AxiomSetFrameClass W Λ} : ∀ {F}, P F ↔ F ∈ 𝔽.frameclass := by
-  simp [AxiomSetFrameClass.spec];
+lemma iff_definability_memAxiomSetFrameClass (definability : AxiomSetDefinability W Λ P) : ∀ {F}, P F ↔ F ∈ 𝔽(Λ, W) := by
   apply definability.defines;
-
 
 @[simp]
 instance AxiomSet.K.definability : AxiomSetDefinability W (𝐊 : AxiomSet α) (λ _ => True) where
@@ -185,10 +186,10 @@ instance AxiomSet.K.definability : AxiomSetDefinability W (𝐊 : AxiomSet α) (
     simp [ValidOnFrame, ValidOnModel, Satisfies];
     intros; simp_all;
 
-instance {𝔽 : AxiomSetFrameClass W (𝐊 : AxiomSet α)} : Set.Nonempty 𝔽.frameclass := by
+instance : Set.Nonempty (𝔽((𝐊 : AxiomSet α), W)) := by
   existsi (λ _ _ => True);
   apply iff_definability_memAxiomSetFrameClass AxiomSet.K.definability |>.mp;
-  simp;
+  trivial;
 
 /-
 instance AxiomSetDefinability.union [def₁ : AxiomSetDefinability W Λ₁] [def₂ : AxiomSetDefinability W Λ₂] : AxiomSetDefinability W (Λ₁ ∪ Λ₂) where

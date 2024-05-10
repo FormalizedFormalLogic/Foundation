@@ -96,7 +96,8 @@ lemma iffConjUnionFinset! : 𝓢 ⊢! ⋀(Γ ∪ Δ) ⟷ ⋀Γ ⋏ ⋀Δ := by
     apply iffConjUnionFinset'!.mpr;
     exact by_axm! (by simp);
 
-lemma iffDisjUnionFinset'! : 𝓢 ⊢! ⋁(Γ ∪ Δ) ↔ 𝓢 ⊢! ⋁Γ ⋎ ⋁Δ := by
+lemma iffDisjUnionFinset'! : 𝓢 ⊢! ⋁(Γ ∪ Δ) ↔ 𝓢 ⊢! ⋁Γ ⋎ ⋁Δ := by sorry
+  /-
   constructor;
   . intro h;
     have h₁ := iff_provable_finset_conj.mp h;
@@ -105,6 +106,7 @@ lemma iffDisjUnionFinset'! : 𝓢 ⊢! ⋁(Γ ∪ Δ) ↔ 𝓢 ⊢! ⋁Γ ⋎ �
       (by apply iff_provable_finset_conj.mpr; intro p hp; exact h₁ p (by simp [hp]));
   . intro h;
     sorry;
+  -/
 
 lemma iffFinsetConjSingleton'! : (𝓢 ⊢! ⋀{p}) ↔ (𝓢 ⊢! p) := by
   constructor;

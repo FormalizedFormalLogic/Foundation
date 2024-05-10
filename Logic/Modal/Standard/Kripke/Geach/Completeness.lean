@@ -11,11 +11,11 @@ namespace Kripke
 variable {W α : Type*}
 variable {Λ : AxiomSet α}
 
-instance [Λ.IsGeach] {𝔽Λ : AxiomSetFrameClass W Λ} : Complete Λ 𝔽Λ := by sorry
+instance [Λ.IsGeach] : Complete Λ 𝔽(Λ, W) := by sorry
 
-instance : Complete (𝐒𝟒 : AxiomSet α) (𝔽Λ : AxiomSetFrameClass W 𝐒𝟒) := inferInstance
+instance : Complete (𝐒𝟒 : AxiomSet α) 𝔽(𝐒𝟒, W) := inferInstance
 
-instance : Complete (𝐒𝟓 : AxiomSet α) (𝔽Λ : AxiomSetFrameClass W 𝐒𝟓) := inferInstance
+instance : Complete (𝐒𝟓 : AxiomSet α) 𝔽(𝐒𝟓, W) := inferInstance
 
 end Kripke
 

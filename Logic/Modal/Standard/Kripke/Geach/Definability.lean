@@ -135,7 +135,7 @@ instance AxiomSet.S4.definability : AxiomSetDefinability W (𝐒𝟒 : AxiomSet 
 
 instance AxiomSet.S5.definability : AxiomSetDefinability W (𝐒𝟓 : AxiomSet α) (λ F => Reflexive F ∧ Euclidean F) := by simpa using AxiomSet.IsGeach.definability W 𝐒𝟓
 
-instance {𝔽Λ : AxiomSetFrameClass W (𝐒𝟒 : AxiomSet α)} : Inhabited 𝔽Λ.frameclass := by
+instance : Set.Nonempty 𝔽((𝐒𝟒 : AxiomSet α), W) := by
   existsi (λ _ _ => True);
   apply iff_definability_memAxiomSetFrameClass (AxiomSet.S4.definability) |>.mp;
   simp [Reflexive, Transitive];

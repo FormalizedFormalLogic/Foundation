@@ -9,7 +9,7 @@ variable {Λ : AxiomSet α}
 open Deduction
 open Formula Formula.Kripke
 
-lemma sound (d : Λ ⊢ p) : (𝔽 : AxiomSetFrameClass W Λ) ⊧ p := by
+lemma sound (d : Λ ⊢ p) : 𝔽(Λ, W) ⊧ p := by
   induction d with
   | maxm h => exact validOnAxiomSetFrameClass_axiom h;
   | mdp _ _ ihpq ihp =>
@@ -21,16 +21,19 @@ lemma sound (d : Λ ⊢ p) : (𝔽 : AxiomSetFrameClass W Λ) ⊧ p := by
     intro F hF V w w' _;
     exact ih F hF V w';
   | disj₃ =>
-    simp_all [ValidOnAxiomSetFrameClass, ValidOnFrameClass, ValidOnFrame, ValidOnModel];
+    intro _ _;
+    simp_all [ValidOnFrameClass, ValidOnFrame, ValidOnModel];
     intros; rename_i hpr hqr hpq;
     cases hpq with
     | inl hp => exact hpr hp;
     | inr hq => exact hqr hq;
-  | _ => simp_all [ValidOnAxiomSetFrameClass, ValidOnFrameClass, ValidOnFrame, ValidOnModel];
+  | _ =>
+    intro _ _;
+    simp_all [ValidOnFrameClass, ValidOnFrame, ValidOnModel];
 
-lemma sound! : Λ ⊢! p → (𝔽Λ : AxiomSetFrameClass W Λ) ⊧ p := λ ⟨d⟩ => sound d
+lemma sound! : Λ ⊢! p → 𝔽(Λ, W) ⊧ p := λ ⟨d⟩ => sound d
 
-instance : Sound Λ (𝔽Λ : AxiomSetFrameClass W Λ) := ⟨sound!⟩
+instance : Sound Λ 𝔽(Λ, W) := ⟨sound!⟩
 
 /-
 theorem soundness {T : Theory α} {p : Formula α} : T ⊢[Λ] p → T ⊨[AxiomSetFrameClass W Λ] p := by

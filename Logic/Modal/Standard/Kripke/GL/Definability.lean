@@ -18,7 +18,7 @@ private lemma AxiomSet.L.definability.implies_transitive : F ⊧* 𝐋 → Trans
   simp only [AxiomSet.L, Axioms.L, Semantics.RealizeSet.setOf_iff, ValidOnFrame.models_iff,
     ValidOnFrame, ValidOnModel.iff_models, ValidOnModel, forall_exists_index,
     forall_apply_eq_imp_iff, Semantics.Tarski.realize_imp, Satisfies.box_def, not_forall,
-    exists_prop]; -- TODO: cleanup
+    exists_prop];
   existsi (atom default), (λ w' _ => (w' ≠ w₂ ∧ w' ≠ w₃)), w₁;
   constructor;
   . intro x hx h;
@@ -38,7 +38,7 @@ private lemma AxiomSet.L.definability.implies_cwf  : F ⊧* 𝐋 → ConverseWel
   simp only [AxiomSet.L, Axioms.L, Semantics.RealizeSet.setOf_iff, ValidOnFrame.models_iff,
     ValidOnFrame, ValidOnModel.iff_models, ValidOnModel, forall_exists_index,
     forall_apply_eq_imp_iff, Semantics.Tarski.realize_imp, Satisfies.box_def, not_forall,
-    exists_prop]; -- TODO: cleanup
+    exists_prop];
   existsi (atom default), V, w;
   constructor;
   . intro x _;
@@ -56,7 +56,7 @@ private lemma AxiomSet.L.definability.implies_cwf  : F ⊧* 𝐋 → ConverseWel
 
 private lemma AxiomSet.L.definability.impliedby : (Transitive F ∧ ConverseWellFounded F) → F ⊧* 𝐋 := by
   rintro ⟨hTrans, hWF⟩;
-  simp [AxiomSet.L, Axioms.L]; -- TODO: cleanup
+  simp [AxiomSet.L, Axioms.L];
   intro p V w;
   let M := Model.mk F V;
   simp only [Semantics.Tarski.realize_imp];
@@ -105,12 +105,10 @@ instance AxiomSet.L.finiteDefinability [Finite W] : Kripke.AxiomSetDefinability 
         have := this {w} (by simp);
         simp_all;
 
-instance [Finite W] {𝔽 : AxiomSetFrameClass W (𝐋 : AxiomSet α)} : Set.Nonempty 𝔽.frameclass := by
+instance [Finite W] : Set.Nonempty 𝔽((𝐋 : AxiomSet α), W) := by
   existsi (λ _ _ => False);
-  apply iff_definability_memAxiomSetFrameClass AxiomSet.L.finiteDefinability |>.mp;
-  constructor;
-  . simp [Transitive];
-  . simp [Irreflexive];
+  apply iff_definability_memAxiomSetFrameClass (AxiomSet.L.finiteDefinability) |>.mp;
+  simp [Transitive, Irreflexive];
 
 instance AxiomSet.GL.definability : Kripke.AxiomSetDefinability W (𝐆𝐋 : AxiomSet α) (λ F => Transitive F ∧ ConverseWellFounded F) := inferInstance
 

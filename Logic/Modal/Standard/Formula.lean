@@ -188,26 +188,10 @@ def isBox : Formula α → Bool
 
 end Formula
 
-abbrev Theory (α : Type u) := Set (Formula α)
+abbrev Theory (α) := Set (Formula α)
 
 instance : Collection (Formula α) (Theory α) := inferInstance
 
-abbrev Context (α : Type u) := Finset (Formula α)
-
-instance [DecidableEq α] : Collection (Formula α) (Context α) := inferInstance
-
-namespace Context
-
-variable [DecidableEq α]
-variable (Γ : Context α)
-
-@[simp] noncomputable def conj : Formula α := Finset.conj Γ
-prefix:75 "⋀" => conj
-
-@[simp] noncomputable def disj : Formula α := Finset.disj Γ
-prefix:75 "⋁" => disj
-
-end Context
 
 abbrev AxiomSet (α) := Set (Formula α)
 

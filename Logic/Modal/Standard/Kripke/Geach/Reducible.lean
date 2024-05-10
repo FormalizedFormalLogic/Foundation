@@ -8,16 +8,12 @@ open Kripke
 
 variable (W) {α : Type*} [DecidableEq α] [Inhabited α]
 variable {Λ₁ Λ₂ : AxiomSet α}
-variable [hG₁ : Λ₁.IsGeach] [hG₂ : Λ₂.IsGeach]
+variable [Λ₁.IsGeach] [Λ₂.IsGeach]
 
 lemma reducible_of_geach_defnability
   (hs : ∀ {F : Frame W α}, MultiGeachConfluent (AxiomSet.IsGeach.taples Λ₂) F → MultiGeachConfluent (AxiomSet.IsGeach.taples Λ₁) F)
   : (Λ₁ ≤ₛ Λ₂) := by
-  apply reducible_of_definability
-    (default : AxiomSetFrameClass W Λ₁)
-    (default : AxiomSetFrameClass W Λ₂)
-    (AxiomSet.IsGeach.definability W Λ₁)
-    (AxiomSet.IsGeach.definability W Λ₂);
+  apply reducible_of_definability (AxiomSet.IsGeach.definability W Λ₁) (AxiomSet.IsGeach.definability W Λ₂);
   intro F hF;
   exact hs hF;
 
@@ -28,6 +24,8 @@ lemma equiv_of_geach_defnability
   constructor;
   . apply reducible_of_geach_defnability W; intro F hF; exact hs.mpr hF;
   . apply reducible_of_geach_defnability W; intro F hF; exact hs.mp hF
+
+variable {W}
 
 @[simp]
 theorem reducible_KD_KT : (𝐊𝐃 : AxiomSet α) ≤ₛ 𝐊𝐓 := by
