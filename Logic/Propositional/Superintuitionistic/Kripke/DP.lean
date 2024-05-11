@@ -113,8 +113,8 @@ theorem disjunctive_int : 𝐄𝐅𝐐 ⊢! p ⋎ q → (𝐄𝐅𝐐 ⊢! p ∨
     simp [M, IntDPCounterexampleModel];
     apply Mq.frame_prop.2;
 
-  have : ¬(M, Sum.inl ()) ⊧ p := not_imp_not.mpr (Satisfies.hereditary (by simp_all) hup) $ satisfies_left_on_IntDPCounterexampleModel.not.mp hp;
-  have : ¬(M, Sum.inl ()) ⊧ q := not_imp_not.mpr (Satisfies.hereditary (by simp_all) huq) $ satisfies_right_on_IntDPCounterexampleModel.not.mp hq;
+  have : ¬(M, Sum.inl ()) ⊧ p := not_imp_not.mpr (Satisfies.hereditary (by simp_all [FrameClass.Intuitionistic]) hup) $ satisfies_left_on_IntDPCounterexampleModel.not.mp hp;
+  have : ¬(M, Sum.inl ()) ⊧ q := not_imp_not.mpr (Satisfies.hereditary (by simp_all [FrameClass.Intuitionistic]) huq) $ satisfies_right_on_IntDPCounterexampleModel.not.mp hq;
 
   simp_all;
 
