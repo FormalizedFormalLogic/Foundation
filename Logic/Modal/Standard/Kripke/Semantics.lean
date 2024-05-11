@@ -144,7 +144,7 @@ end Formula.Kripke.ValidOnFrameClass
 
 abbrev Kripke.AxiomSetFrameClass (W) (Λ : AxiomSet α) : FrameClass W α := Semantics.models (Frame W α) Λ
 
-notation "𝔽(" Λ "," W ")"  => Kripke.AxiomSetFrameClass W Λ
+notation "𝔽(" Λ ", " W ")"  => Kripke.AxiomSetFrameClass W Λ
 
 /-
 structure Kripke.AxiomSetFrameClass (W) {α} (Λ : AxiomSet α) where
