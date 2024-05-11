@@ -1,199 +1,14 @@
 import Logic.Propositional.Superintuitionistic.Deduction
 import Logic.Propositional.Superintuitionistic.Kripke.Semantics
 
-namespace Set
-
-@[simp]
-lemma subset_doubleton {s : Set α} {a b : α} : {a, b} ⊆ s ↔ a ∈ s ∧ b ∈ s := by
-  constructor;
-  . aesop;
-  . rintro ⟨ha, hb⟩;
-    apply Set.insert_subset; exact ha;
-    simp_all;
-
-end Set
-
-
-namespace List
-
-open LO
-
-variable {F : Type u} [LogicalConnective F]
-variable {p q : F}
-
-def conj' : List F → F
-| [] => ⊤
-| [p] => p
-| p :: q :: rs => p ⋏ (q :: rs).conj'
-
-@[simp] lemma conj'_nil : conj' (F := F) [] = ⊤ := rfl
-
-@[simp] lemma conj'_singleton : [p].conj' = p := rfl
-
-@[simp] lemma conj'_doubleton : [p, q].conj' = p ⋏ q := rfl
-
-@[simp] lemma conj'_cons_nonempty {a : F} {as : List F} (h : as ≠ []) : (a :: as).conj' = a ⋏ as.conj' := by
-  cases as with
-  | nil => contradiction;
-  | cons q rs => simp [List.conj']
-
-def disj' : List F → F
-| [] => ⊥
-| [p] => p
-| p :: q :: rs => p ⋎ (q :: rs).disj'
-
-@[simp] lemma disj'_nil : disj' (F := F) [] = ⊥ := rfl
-
-@[simp] lemma disj'_singleton : [p].disj' = p := rfl
-
-@[simp] lemma disj'_doubleton : [p, q].disj' = p ⋎ q := rfl
-
-@[simp] lemma disj'_cons_nonempty {a : F} {as : List F} (h : as ≠ []) : (a :: as).disj' = a ⋎ as.disj' := by
-  cases as with
-  | nil => contradiction;
-  | cons q rs => simp [List.disj']
-
-lemma induction₂
-  {motive : List F → Prop}
-  (hnil : motive [])
-  (hsingle : ∀ a, motive [a])
-  (hcons : ∀ a as, as ≠ [] → motive as → motive (a :: as)) : ∀ as, motive as := by
-  intro as;
-  induction as with
-  | nil => exact hnil;
-  | cons a as ih => cases as with
-    | nil => exact hsingle a;
-    | cons b bs => exact hcons a (b :: bs) (by simp) ih;
-
-end List
-
-
-namespace LO.System
-
-variable {F : Type*} [LogicalConnective F] [NegDefinition F] [DecidableEq F]
-variable {S : Type*} [System F S]
-variable {p q r : F} {Γ Δ : Finset F}
-
-variable {𝓢 : S}
-variable [Minimal 𝓢]
-
-open FiniteContext
-
-variable {Γ Δ : List F}
-
-lemma dhyp! (b : 𝓢 ⊢! p) : 𝓢 ⊢! q ⟶ p := ⟨dhyp _ b.some⟩
-
-lemma iff_provable_list_conj {Γ : List F} : (𝓢 ⊢! Γ.conj') ↔ (∀ p ∈ Γ, 𝓢 ⊢! p) := by
-  induction Γ using List.induction₂ with
-  | hnil => simp;
-  | hsingle => simp;
-  | hcons p Γ hΓ ih =>
-    simp_all;
-    constructor;
-    . intro h;
-      constructor;
-      . exact conj₁'! h;
-      . exact ih.mp (conj₂'! h);
-    . rintro ⟨h₁, h₂⟩;
-      exact conj₃'! h₁ (ih.mpr h₂);
-
-lemma implyLeftReplaceIff'! (h : 𝓢 ⊢! p ⟷ q) : 𝓢 ⊢! p ⟶ r ↔ 𝓢 ⊢! q ⟶ r := by
-  constructor;
-  . exact imp_trans! $ conj₂'! h;
-  . exact imp_trans! $ conj₁'! h;
-
-lemma implyRightReplaceIff'! (h : 𝓢 ⊢! p ⟷ q) : 𝓢 ⊢! r ⟶ p ↔ 𝓢 ⊢! r ⟶ q := by
-  constructor;
-  . intro hrp; exact imp_trans! hrp $ conj₁'! h;
-  . intro hrq; exact imp_trans! hrq $ conj₂'! h;
-
-def implyOrLeft' (h : 𝓢 ⊢ p ⟶ r) : 𝓢 ⊢ p ⟶ (r ⋎ q) := by
-  apply emptyPrf;
-  apply deduct;
-  apply disj₁';
-  apply deductInv;
-  exact of' h;
-
-lemma implyOrLeft'! (h : 𝓢 ⊢! p ⟶ r) : 𝓢 ⊢! p ⟶ (r ⋎ q) := ⟨implyOrLeft' h.some⟩
-
-def implyOrRight' (h : 𝓢 ⊢ q ⟶ r) : 𝓢 ⊢ q ⟶ (p ⋎ r) := by
-  apply emptyPrf;
-  apply deduct;
-  apply disj₂';
-  apply deductInv;
-  exact of' h;
-
-lemma implyOrRight'! (h : 𝓢 ⊢! q ⟶ r) : 𝓢 ⊢! q ⟶ (p ⋎ r) := ⟨implyOrRight' h.some⟩
-
-lemma or_assoc'! : 𝓢 ⊢! p ⋎ (q ⋎ r) ↔ 𝓢 ⊢! (p ⋎ q) ⋎ r := by
-  constructor;
-  . intro h;
-    exact disj₃'!
-      (by apply implyOrLeft'!; apply implyOrLeft'!; simp;)
-      (by
-        apply provable_iff_provable.mpr;
-        apply deduct_iff.mpr;
-        have : [q ⋎ r] ⊢[𝓢]! q ⋎ r := by_axm! (by simp);
-        exact disj₃'! (by apply implyOrLeft'!; apply implyOrRight'!; simp) (by apply implyOrRight'!; simp) this;
-      )
-      h;
-  . intro h;
-    exact disj₃'!
-      (by
-        apply provable_iff_provable.mpr;
-        apply deduct_iff.mpr;
-        have : [p ⋎ q] ⊢[𝓢]! p ⋎ q := by_axm! (by simp);
-        exact disj₃'! (by apply implyOrLeft'!; simp) (by apply implyOrRight'!; apply implyOrLeft'!; simp) this;
-      )
-      (by apply implyOrRight'!; apply implyOrRight'!; simp;)
-      h;
-
-def iffId (p : F) : 𝓢 ⊢ p ⟷ p := conj₃' (impId p) (impId p)
-@[simp] def iff_id! : 𝓢 ⊢! p ⟷ p := ⟨iffId p⟩
-
-
-@[simp]
-lemma forthbackConjRemove : 𝓢 ⊢! (Γ.remove p).conj' ⋏ p ⟶ Γ.conj' := by
-  apply provable_iff_provable.mpr;
-  apply deduct_iff.mpr;
-  have d : [(Γ.remove p).conj' ⋏ p] ⊢[𝓢]! (Γ.remove p).conj' ⋏ p := by_axm! (by simp);
-  apply iff_provable_list_conj.mpr;
-  intro q hq;
-  by_cases e : q = p;
-  . subst e; exact conj₂'! d;
-  . exact iff_provable_list_conj.mp (conj₁'! d) q (by apply List.mem_remove_iff.mpr; simp_all);
-
-lemma implyLeftRemoveConj (b : 𝓢 ⊢! Γ.conj' ⟶ q) : 𝓢 ⊢! (Γ.remove p).conj' ⋏ p ⟶ q := imp_trans! (by simp) b
-
-lemma disj_allsame! [HasEFQ 𝓢] (hd : ∀ q ∈ Γ, q = p) : 𝓢 ⊢! Γ.disj' ⟶ p := by
-  induction Γ using List.induction₂ with
-  | hnil => simp_all [List.disj'_nil, efq!];
-  | hsingle => simp_all [List.mem_singleton, List.disj'_singleton, imp_id!];
-  | hcons q Δ hΔ ih =>
-    simp [List.disj'_cons_nonempty hΔ];
-    simp at hd;
-    have ⟨hd₁, hd₂⟩ := hd;
-    subst hd₁;
-    apply provable_iff_provable.mpr;
-    apply deduct_iff.mpr;
-    exact disj₃'!
-      (by simp)
-      (weakening! (by simp) $ provable_iff_provable.mp $ ih hd₂)
-      (show [q ⋎ List.disj' Δ] ⊢[𝓢]! q ⋎ List.disj' Δ by exact by_axm! (by simp));
-
-lemma disj_allsame'! [HasEFQ 𝓢] (hd : ∀ q ∈ Γ, q = p) (h : 𝓢 ⊢! Γ.disj') : 𝓢 ⊢! p := (disj_allsame! hd) ⨀ h
-
-end LO.System
+lemma _root_.List.empty_def {Γ : List α} : Γ = [] ↔ ∀ p, p ∉ Γ := by induction Γ <;> simp_all;
 
 namespace LO.Propositional.Superintuitionistic
-
-variable [DecidableEq α]
-
--- instance : Coe (List (Formula α)) (Theory α) := ⟨λ Γ => ↑Γ.toFinset⟩
 
 open System FiniteContext
 open Formula Formula.Kripke
 
+variable [DecidableEq α]
 variable {Λ : AxiomSet α} [HasEFQ Λ]
 
 def Tableau (α) := Theory α × Theory α
@@ -404,9 +219,6 @@ lemma truthlemma : ((CanonicalModel Λ), t) ⊧ p ↔ p ∈ t.tableau.1 := by
           exact (conj₂'! this) ⨀ (conj₁'! this);
         );
   | _ => simp [Satisfies.iff_models, Satisfies, *];
-
-lemma _root_.List.empty_def {Γ : List α} : Γ = [] ↔ ∀ p, p ∉ Γ := by induction Γ <;> simp_all;
-
 
 lemma deducible_of_validOnCanonicelModel : (CanonicalModel Λ) ⊧ p → Λ ⊢! p := by
   contrapose;
