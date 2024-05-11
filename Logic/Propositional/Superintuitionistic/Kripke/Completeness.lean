@@ -1,13 +1,72 @@
 import Logic.Propositional.Superintuitionistic.Deduction
 import Logic.Propositional.Superintuitionistic.Kripke.Semantics
 
+namespace Set
+
 @[simp]
-lemma _root_.Set.subset_doubleton {s : Set α} {a b : α} : {a, b} ⊆ s ↔ a ∈ s ∧ b ∈ s := by
+lemma subset_doubleton {s : Set α} {a b : α} : {a, b} ⊆ s ↔ a ∈ s ∧ b ∈ s := by
   constructor;
   . aesop;
   . rintro ⟨ha, hb⟩;
     apply Set.insert_subset; exact ha;
     simp_all;
+
+end Set
+
+
+namespace List
+
+open LO
+
+variable {F : Type u} [LogicalConnective F]
+variable {p q : F}
+
+def conj' : List F → F
+| [] => ⊤
+| [p] => p
+| p :: q :: rs => p ⋏ (q :: rs).conj'
+
+@[simp] lemma conj'_nil : conj' (F := F) [] = ⊤ := rfl
+
+@[simp] lemma conj'_singleton : [p].conj' = p := rfl
+
+@[simp] lemma conj'_doubleton : [p, q].conj' = p ⋏ q := rfl
+
+@[simp] lemma conj'_cons_nonempty {a : F} {as : List F} (h : as ≠ []) : (a :: as).conj' = a ⋏ as.conj' := by
+  cases as with
+  | nil => contradiction;
+  | cons q rs => simp [List.conj']
+
+def disj' : List F → F
+| [] => ⊥
+| [p] => p
+| p :: q :: rs => p ⋎ (q :: rs).disj'
+
+@[simp] lemma disj'_nil : disj' (F := F) [] = ⊥ := rfl
+
+@[simp] lemma disj'_singleton : [p].disj' = p := rfl
+
+@[simp] lemma disj'_doubleton : [p, q].disj' = p ⋎ q := rfl
+
+@[simp] lemma disj'_cons_nonempty {a : F} {as : List F} (h : as ≠ []) : (a :: as).disj' = a ⋎ as.disj' := by
+  cases as with
+  | nil => contradiction;
+  | cons q rs => simp [List.disj']
+
+lemma induction₂
+  {motive : List F → Prop}
+  (hnil : motive [])
+  (hsingle : ∀ a, motive [a])
+  (hcons : ∀ a as, as ≠ [] → motive as → motive (a :: as)) : ∀ as, motive as := by
+  intro as;
+  induction as with
+  | nil => exact hnil;
+  | cons a as ih => cases as with
+    | nil => exact hsingle a;
+    | cons b bs => exact hcons a (b :: bs) (by simp) ih;
+
+end List
+
 
 namespace LO.System
 
@@ -24,14 +83,19 @@ variable {Γ Δ : List F}
 
 lemma dhyp! (b : 𝓢 ⊢! p) : 𝓢 ⊢! q ⟶ p := ⟨dhyp _ b.some⟩
 
-lemma iff_provable_list_conj {Γ : List F} : (𝓢 ⊢! Γ.conj) ↔ (∀ p ∈ Γ, 𝓢 ⊢! p) := by
-  induction Γ
-  case nil => simp;
-  case cons p Δ ih =>
-    simp;
-    constructor
-    · intro h; exact ⟨conj₁'! h, ih.mp (conj₂'! h)⟩
-    · intro h; exact conj₃'! h.1 (ih.mpr h.2)
+lemma iff_provable_list_conj {Γ : List F} : (𝓢 ⊢! Γ.conj') ↔ (∀ p ∈ Γ, 𝓢 ⊢! p) := by
+  induction Γ using List.induction₂ with
+  | hnil => simp;
+  | hsingle => simp;
+  | hcons p Γ hΓ ih =>
+    simp_all;
+    constructor;
+    . intro h;
+      constructor;
+      . exact conj₁'! h;
+      . exact ih.mp (conj₂'! h);
+    . rintro ⟨h₁, h₂⟩;
+      exact conj₃'! h₁ (ih.mpr h₂);
 
 lemma implyLeftReplaceIff'! (h : 𝓢 ⊢! p ⟷ q) : 𝓢 ⊢! p ⟶ r ↔ 𝓢 ⊢! q ⟶ r := by
   constructor;
@@ -42,23 +106,6 @@ lemma implyRightReplaceIff'! (h : 𝓢 ⊢! p ⟷ q) : 𝓢 ⊢! r ⟶ p ↔ �
   constructor;
   . intro hrp; exact imp_trans! hrp $ conj₁'! h;
   . intro hrq; exact imp_trans! hrq $ conj₂'! h;
-
-lemma iffDisjSingleton'! [HasEFQ 𝓢] : (𝓢 ⊢! [p].disj) ↔ (𝓢 ⊢! p) := by
-  simp [List.disj]
-  constructor;
-  . intro h; exact disj₃'! (by simp) efq! h;
-  . intro h; exact disj₁'! h;
-
-lemma iffDisjSingleton! [HasEFQ 𝓢] : 𝓢 ⊢! [p].disj ⟷ p := by
-  apply iff_intro!;
-  . apply provable_iff_provable.mpr;
-    apply deduct_iff.mpr;
-    apply iffDisjSingleton'!.mp;
-    exact by_axm! (by simp);
-  . apply provable_iff_provable.mpr;
-    apply deduct_iff.mpr;
-    apply iffDisjSingleton'!.mpr;
-    exact by_axm! (by simp);
 
 def implyOrLeft' (h : 𝓢 ⊢ p ⟶ r) : 𝓢 ⊢ p ⟶ (r ⋎ q) := by
   apply emptyPrf;
@@ -101,111 +148,40 @@ lemma or_assoc'! : 𝓢 ⊢! p ⋎ (q ⋎ r) ↔ 𝓢 ⊢! (p ⋎ q) ⋎ r := by
       (by apply implyOrRight'!; apply implyOrRight'!; simp;)
       h;
 
-lemma iffDisjDoubleton'! [HasEFQ 𝓢] : (𝓢 ⊢! [p, q].disj) ↔ (𝓢 ⊢! p ⋎ q) := by
-  simp [List.disj];
-  constructor;
-  . intro h; exact disj₃'! imp_id! efq! (or_assoc'!.mp h);
-  . intro h; exact disj₃'! (by simp) (imp_trans! (show 𝓢 ⊢! q ⟶ q ⋎ ⊥ by simp) (by simp)) h;
-
-lemma iffDisjDoubleton! [HasEFQ 𝓢] : 𝓢 ⊢! [p, q].disj ⟷ p ⋎ q := by
-  apply iff_intro!;
-  . apply provable_iff_provable.mpr;
-    apply deduct_iff.mpr;
-    apply iffDisjDoubleton'!.mp;
-    exact by_axm! (by simp);
-  . apply provable_iff_provable.mpr;
-    apply deduct_iff.mpr;
-    apply iffDisjDoubleton'!.mpr;
-    exact by_axm! (by simp);
-
-lemma implyRightDisjSingleton'! [HasEFQ 𝓢] : (𝓢 ⊢! p ⟶ [q].disj) ↔ (𝓢 ⊢! p ⟶ q) := implyRightReplaceIff'! iffDisjSingleton!
-
-lemma implyLeftDisjSingleton'! [HasEFQ 𝓢] : (𝓢 ⊢! ([p].disj) ⟶ q) ↔ (𝓢 ⊢! p ⟶ q) := implyLeftReplaceIff'! iffDisjSingleton!
-
-lemma implyRightDisjDoubleton'! [HasEFQ 𝓢] : (𝓢 ⊢! p ⟶ [q, r].disj) ↔ (𝓢 ⊢! p ⟶ q ⋎ r) := implyRightReplaceIff'! iffDisjDoubleton!
-
-lemma implyLeftDisjDoubleton'! [HasEFQ 𝓢] : (𝓢 ⊢! ([p, q].disj) ⟶ r) ↔ (𝓢 ⊢! (p ⋎ q) ⟶ r) := implyLeftReplaceIff'! iffDisjDoubleton!
-
-lemma iffConjSingleton'! : (𝓢 ⊢! [p].conj) ↔ (𝓢 ⊢! p) := by
-  simp [List.conj];
-  constructor;
-  . intro h; exact conj₁'! h;
-  . intro h; exact conj₃'! h (by simp)
-
-lemma iffConjSingleton! : 𝓢 ⊢! [p].conj ⟷ p := by
-  apply iff_intro!;
-  . apply provable_iff_provable.mpr;
-    apply deduct_iff.mpr;
-    apply iffConjSingleton'!.mp;
-    exact by_axm! (by simp);
-  . apply provable_iff_provable.mpr;
-    apply deduct_iff.mpr;
-    apply iffConjSingleton'!.mpr;
-    exact by_axm! (by simp);
-
-lemma iffConjDoubleton'! : 𝓢 ⊢! [p, q].conj ↔ 𝓢 ⊢! p ⋏ q := by
-  simp [List.conj];
-  constructor;
-  . intro h; exact conj₃'! (conj₁'! h) (conj₁'! $ conj₂'! h);
-  . intro h; exact conj₃'! (conj₁'! h) (conj₃'! (conj₂'! h) (by simp));
-
-lemma iffConjDoubleton! : 𝓢 ⊢! [p, q].conj ⟷ p ⋏ q := by
-  apply iff_intro!;
-  . apply provable_iff_provable.mpr;
-    apply deduct_iff.mpr;
-    apply iffConjDoubleton'!.mp;
-    exact by_axm! (by simp);
-  . apply provable_iff_provable.mpr;
-    apply deduct_iff.mpr;
-    apply iffConjDoubleton'!.mpr;
-    exact by_axm! (by simp);
-
 def iffId (p : F) : 𝓢 ⊢ p ⟷ p := conj₃' (impId p) (impId p)
 @[simp] def iff_id! : 𝓢 ⊢! p ⟷ p := ⟨iffId p⟩
 
-lemma implyLeftConjEmpty'! : (𝓢 ⊢! ([].conj) ⟶ p) ↔ (𝓢 ⊢! p) := by
-  simp;
-  constructor;
-  . intro h; exact h ⨀ (by simp);
-  . intro h; exact dhyp! h;
-
-lemma implyRightConjSingleton'! : (𝓢 ⊢! p ⟶ [q].conj) ↔ (𝓢 ⊢! p ⟶ q) := implyRightReplaceIff'! iffConjSingleton!
-
-lemma implyLeftConjSingleton'! : (𝓢 ⊢! ([p].conj) ⟶ q) ↔ (𝓢 ⊢! p ⟶ q) := implyLeftReplaceIff'! iffConjSingleton!
-
-lemma implyRightConjDoubleton'! : (𝓢 ⊢! p ⟶ [q, r].conj) ↔ (𝓢 ⊢! p ⟶ q ⋏ r) := implyRightReplaceIff'! iffConjDoubleton!
-
-lemma implyLeftConjDoubleton'! : (𝓢 ⊢! ([p, q].conj) ⟶ r) ↔ (𝓢 ⊢! (p ⋏ q) ⟶ r) := implyLeftReplaceIff'! iffConjDoubleton!
 
 @[simp]
-lemma forthbackConjRemove : 𝓢 ⊢! (Γ.remove p).conj ⋏ p ⟶ Γ.conj := by
+lemma forthbackConjRemove : 𝓢 ⊢! (Γ.remove p).conj' ⋏ p ⟶ Γ.conj' := by
   apply provable_iff_provable.mpr;
   apply deduct_iff.mpr;
-  have d : [(Γ.remove p).conj ⋏ p] ⊢[𝓢]! (Γ.remove p).conj ⋏ p := by_axm! (by simp);
+  have d : [(Γ.remove p).conj' ⋏ p] ⊢[𝓢]! (Γ.remove p).conj' ⋏ p := by_axm! (by simp);
   apply iff_provable_list_conj.mpr;
   intro q hq;
   by_cases e : q = p;
   . subst e; exact conj₂'! d;
   . exact iff_provable_list_conj.mp (conj₁'! d) q (by apply List.mem_remove_iff.mpr; simp_all);
 
-lemma implyLeftRemoveConj (hC : 𝓢 ⊢! Γ.conj ⟶ q) : 𝓢 ⊢! (Γ.remove p).conj ⋏ p ⟶ q := by
-  exact imp_trans! (by simp) hC;
+lemma implyLeftRemoveConj (b : 𝓢 ⊢! Γ.conj' ⟶ q) : 𝓢 ⊢! (Γ.remove p).conj' ⋏ p ⟶ q := imp_trans! (by simp) b
 
-lemma orRightImplyRight'! (hpr : 𝓢 ⊢! p ⟶ r) : 𝓢 ⊢! p ⟶ (r ⋎ q) := by
-  apply provable_iff_provable.mpr;
-  apply deduct_iff.mpr;
-  replace hpr : [p] ⊢[𝓢]! p ⟶ r := weakening! (by simp) $ provable_iff_provable.mp hpr;
-  have hp : [p] ⊢[𝓢]! p := by_axm! (by simp);
-  exact disj₁'! (hpr ⨀ hp);
-
-lemma what [HasEFQ 𝓢] (hd : ∀ q ∈ Γ, q = p) (h : 𝓢 ⊢! Γ.disj) : 𝓢 ⊢! p := by
-  induction Γ with
-  | nil => exact efq! ⨀ h;
-  | cons x xs ih =>
-    simp at h;
+lemma disj_allsame! [HasEFQ 𝓢] (hd : ∀ q ∈ Γ, q = p) : 𝓢 ⊢! Γ.disj' ⟶ p := by
+  induction Γ using List.induction₂ with
+  | hnil => simp_all [List.disj'_nil, efq!];
+  | hsingle => simp_all [List.mem_singleton, List.disj'_singleton, imp_id!];
+  | hcons q Δ hΔ ih =>
+    simp [List.disj'_cons_nonempty hΔ];
     simp at hd;
     have ⟨hd₁, hd₂⟩ := hd;
-    exact disj₃'! (by subst hd₁; simp;) (by sorry) h;
+    subst hd₁;
+    apply provable_iff_provable.mpr;
+    apply deduct_iff.mpr;
+    exact disj₃'!
+      (by simp)
+      (weakening! (by simp) $ provable_iff_provable.mp $ ih hd₂)
+      (show [q ⋎ List.disj' Δ] ⊢[𝓢]! q ⋎ List.disj' Δ by exact by_axm! (by simp));
+
+lemma disj_allsame'! [HasEFQ 𝓢] (hd : ∀ q ∈ Γ, q = p) (h : 𝓢 ⊢! Γ.disj') : 𝓢 ⊢! p := (disj_allsame! hd) ⨀ h
 
 end LO.System
 
@@ -228,7 +204,7 @@ instance : HasSubset (Tableau α) := ⟨λ t₁ t₂ => t₁.1 ⊆ t₂.1 ∧ t�
 
 @[simp] lemma subset_def {t₁ t₂ : Tableau α} : t₁ ⊆ t₂ ↔ t₁.1 ⊆ t₂.1 ∧ t₁.2 ⊆ t₂.2 := by rfl
 
-def Consistent (Λ : AxiomSet α) (t : Tableau α) := ∀ {Γ Δ : List (Formula α)}, (∀ p ∈ Γ, p ∈ t.1) → (∀ p ∈ Δ, p ∈ t.2) → Λ ⊬! Γ.conj ⟶ Δ.disj
+def Consistent (Λ : AxiomSet α) (t : Tableau α) := ∀ {Γ Δ : List (Formula α)}, (∀ p ∈ Γ, p ∈ t.1) → (∀ p ∈ Δ, p ∈ t.2) → Λ ⊬! Γ.conj' ⟶ Δ.disj'
 
 variable (hCon : Consistent Λ t)
 
@@ -248,19 +224,16 @@ lemma disjoint_of_consistent : Disjoint t.1 t.2 := by
   obtain ⟨T, hp₂, hp₁, hp⟩ := by simpa [Disjoint] using h;
   obtain ⟨p, hp, _⟩ := Set.not_subset.mp hp;
   simp [Consistent] at hCon;
-  have : Λ ⊬! [p].conj ⟶ [p].disj := hCon
+  have : Λ ⊬! [p].conj' ⟶ [p].disj' := hCon
     (by simp_all; apply hp₁; assumption)
     (by simp_all; apply hp₂; assumption);
-  have : Λ ⊢! [p].conj ⟶ [p].disj := by
-    apply implyLeftConjSingleton'!.mpr;
-    apply implyRightDisjSingleton'!.mpr;
-    simp;
+  have : Λ ⊢! [p].conj' ⟶ [p].disj' := by simp;
   contradiction;
 
-lemma not_mem₂ {Γ : List (Formula α)} (hΓ : ∀ p ∈ Γ, p ∈ t.1) (h : Λ ⊢! Γ.conj ⟶ q) : q ∉ t.2 := by
+lemma not_mem₂ {Γ : List (Formula α)} (hΓ : ∀ p ∈ Γ, p ∈ t.1) (h : Λ ⊢! Γ.conj' ⟶ q) : q ∉ t.2 := by
   by_contra hC;
-  have : Λ ⊢! Γ.conj ⟶ [q].disj := implyRightDisjSingleton'!.mpr h;
-  have : Λ ⊬! Γ.conj ⟶ [q].disj := hCon (by aesop) (by aesop);
+  have : Λ ⊢! Γ.conj' ⟶ [q].disj' := by simpa;
+  have : Λ ⊬! Γ.conj' ⟶ [q].disj' := hCon (by aesop) (by aesop);
   contradiction;
 
 def Saturated (t : Tableau α) := ∀ p : Formula α, p ∈ t.1 ∨ p ∈ t.2
@@ -318,51 +291,45 @@ lemma not_mem₂_iff_mem₁ : p ∉ t.tableau.2 ↔ p ∈ t.tableau.1 := Tableau
 
 variable {t : SaturatedConsistentTableau Λ}
 
-lemma not_mem₂ {Γ : List (Formula α)} (hΓ : ∀ p ∈ Γ, p ∈ t.tableau.1) (h : Λ ⊢! Γ.conj ⟶ q) : q ∉ t.tableau.2 := t.tableau.not_mem₂ t.consistent hΓ h
+lemma not_mem₂ {Γ : List (Formula α)} (hΓ : ∀ p ∈ Γ, p ∈ t.tableau.1) (h : Λ ⊢! Γ.conj' ⟶ q) : q ∉ t.tableau.2 := t.tableau.not_mem₂ t.consistent hΓ h
 
 lemma mdp (hp : p ∈ t.tableau.1) (h : Λ ⊢! p ⟶ q) : q ∈ t.tableau.1 := by
-  exact t.not_mem₂_iff_mem₁.mp $ not_mem₂ (by simpa) (show Λ ⊢! List.conj [p] ⟶ q by apply implyLeftConjSingleton'!.mpr; assumption)
+  exact t.not_mem₂_iff_mem₁.mp $ not_mem₂ (by simpa) (show Λ ⊢! List.conj' [p] ⟶ q by simpa;)
 
 @[simp]
-lemma verum : ⊤ ∈ t.tableau.1 := by
+lemma mem_verum : ⊤ ∈ t.tableau.1 := by
   apply t.not_mem₂_iff_mem₁.mp;
   by_contra hC;
-  have : Λ ⊬! [].conj ⟶ [⊤].disj := t.consistent (by simp) (by simpa);
-  have : Λ ⊢! [].conj ⟶ [⊤].disj := by simp;
+  have : Λ ⊬! [].conj' ⟶ [⊤].disj' := t.consistent (by simp) (by simpa);
+  have : Λ ⊢! [].conj' ⟶ [⊤].disj' := by simp;
   contradiction;
 
 @[simp]
-lemma falsum : ⊥ ∉ t.tableau.1 := by
+lemma not_mem_falsum : ⊥ ∉ t.tableau.1 := by
   by_contra hC;
-  have : Λ ⊬! [⊥].conj ⟶ [].disj := t.consistent (by simpa) (by simp);
-  have : Λ ⊢! [⊥].conj ⟶ [].disj := by simp;
+  have : Λ ⊬! [⊥].conj' ⟶ [].disj' := t.consistent (by simpa) (by simp);
+  have : Λ ⊢! [⊥].conj' ⟶ [].disj' := by simp;
   contradiction;
 
 @[simp]
-lemma conj : p ⋏ q ∈ t.tableau.1 ↔ p ∈ t.tableau.1 ∧ q ∈ t.tableau.1 := by
+lemma iff_mem_conj : p ⋏ q ∈ t.tableau.1 ↔ p ∈ t.tableau.1 ∧ q ∈ t.tableau.1 := by
   constructor;
   . intro h; constructor <;> exact mdp h (by simp)
   . rintro ⟨hp, hq⟩;
     by_contra hC;
-    have : Λ ⊢! [p, q].conj ⟶ [p ⋏ q].disj := by
-      apply implyRightDisjSingleton'!.mpr;
-      apply implyLeftConjDoubleton'!.mpr;
-      apply imp_id!;
-    have : Λ ⊬! [p, q].conj ⟶ [p ⋏ q].disj := t.consistent (by aesop) (by simpa using t.mem_either₁.mp hC);
+    have : Λ ⊢! [p, q].conj' ⟶ [p ⋏ q].disj' := by simp;
+    have : Λ ⊬! [p, q].conj' ⟶ [p ⋏ q].disj' := t.consistent (by aesop) (by simpa using t.not_mem₁_iff_mem₂.mp hC);
     contradiction;
 
 @[simp]
-lemma disj : p ⋎ q ∈ t.tableau.1 ↔ p ∈ t.tableau.1 ∨ q ∈ t.tableau.1 := by
+lemma iff_mem_disj : p ⋎ q ∈ t.tableau.1 ↔ p ∈ t.tableau.1 ∨ q ∈ t.tableau.1 := by
   constructor;
   . intro h;
     by_contra hC; simp [not_or] at hC;
     have : p ∈ t.tableau.2 := t.not_mem₁_iff_mem₂.mp hC.1;
     have : q ∈ t.tableau.2 := t.not_mem₁_iff_mem₂.mp hC.2;
-    have : Λ ⊢! [p ⋎ q].conj ⟶ [p, q].disj := by
-      apply implyRightDisjDoubleton'!.mpr;
-      apply implyLeftConjSingleton'!.mpr;
-      apply imp_id!;
-    have : Λ ⊬! [p ⋎ q].conj ⟶ [p, q].disj := t.consistent (by simp_all) (by simp_all);
+    have : Λ ⊢! [p ⋎ q].conj' ⟶ [p, q].disj' := by simp;
+    have : Λ ⊬! [p ⋎ q].conj' ⟶ [p, q].disj' := t.consistent (by simp_all) (by simp_all);
     contradiction;
   . intro h;
     cases h with
@@ -403,46 +370,19 @@ lemma truthlemma : ((CanonicalModel Λ), t) ⊧ p ↔ p ∈ t.tableau.1 := by
         replace hΓ : ∀ r, r ∈ Γ.remove p → r ∈ t.tableau.1 := by
           intro r hr;
           have ⟨hr₁, hr₂⟩ := List.mem_remove_iff.mp hr;
-          have := hΓ r hr₁;
+          have := by simpa using hΓ r hr₁;
           simp_all;
-        -- replace hΔ : Δ = [] ∨ Δ = [q] := by sorry;
         by_contra hC;
-        have : Λ ⊢! (Γ.remove p).conj ⟶ (p ⟶ Δ.disj) := andImplyIffImplyImply'!.mp $ implyLeftRemoveConj hC;
-        have : Λ ⊢! (Γ.remove p).conj ⟶ (p ⟶ q) :=  imp_trans! this (by
+        have : Λ ⊢! (Γ.remove p).conj' ⟶ (p ⟶ q) := imp_trans! (andImplyIffImplyImply'!.mp $ implyLeftRemoveConj hC) (by
           apply provable_iff_provable.mpr;
           apply deduct_iff.mpr;
           apply deduct_iff.mpr;
-          have d₁ : [p, p ⟶ Δ.disj] ⊢[Λ]! p := by_axm! (by simp);
-          have d₂ : [p, p ⟶ Δ.disj] ⊢[Λ]! p ⟶ Δ.disj := by_axm! (by simp);
-          have d₃ : [p, p ⟶ Δ.disj] ⊢[Λ]! Δ.disj := d₂ ⨀ d₁;
-          -- have : Λ ⊢! q := what (by sorry) d₃;
-          -- exact efq'! $ d₂ ⨀ d₁;
-          sorry;
-        );
-        have : Λ ⊢! (Γ.remove p).conj ⟶ [p ⟶ q].disj := implyRightDisjSingleton'!.mpr this;
-        have : Λ ⊬! (Γ.remove p).conj ⟶ [p ⟶ q].disj := t.consistent (by simp_all) (by simpa using h);
+          have : [p, p ⟶ Δ.disj'] ⊢[Λ]! p := by_axm! (by simp);
+          have : [p, p ⟶ Δ.disj'] ⊢[Λ]! Δ.disj' := (by_axm! (by simp)) ⨀ this;
+          exact disj_allsame'! (by simpa using hΔ) this;
+        )
+        have : Λ ⊬! (Γ.remove p).conj' ⟶ (p ⟶ q) := by simpa only [List.disj'_singleton] using (t.consistent hΓ (show ∀ r ∈ [p ⟶ q], r ∈ t.tableau.2 by simp_all));
         contradiction;
-        /-
-        have : Λ ⊢! (Γ.remove p).conj ⟶ (p ⟶ q) := by
-          cases hΔ with
-          | inl h =>
-            subst h;
-            simp [Finset.disj] at hC;
-            have : Λ ⊢! ((Γ.remove p).conj ⋏ p) ⟶ ⊥ := implyLeftRemoveConj hC;
-            have : Λ ⊢! (Γ.remove p).conj ⟶ (p ⟶ ⊥) := andImplyIffImplyImply'!.mp this;
-            exact imp_trans! this (by
-              apply provable_iff_provable.mpr;
-              apply deduct_iff.mpr;
-              apply deduct_iff.mpr;
-              have d₁ : [p, p ⟶ ⊥] ⊢[Λ]! p := by_axm! (by simp);
-              have d₂ : [p, p ⟶ ⊥] ⊢[Λ]! p ⟶ ⊥ := by_axm! (by simp);
-              exact efq'! $ d₂ ⨀ d₁;
-            );
-          | inr h =>
-            subst h;
-            have : Λ ⊢! ((Γ.remove p).conj ⋏ p) ⟶ q := implyLeftRemoveConj $ implyRightDisjSingleton'!.mp hC;
-            exact andImplyIffImplyImply'!.mp this;
-        -/
       obtain ⟨t', ⟨⟨_, _⟩, _⟩⟩ := by simpa [Set.insert_subset_iff] using SaturatedConsistentTableau.lindenbaum this;
       existsi t';
       simp_all;
@@ -455,9 +395,9 @@ lemma truthlemma : ((CanonicalModel Λ), t) ⊧ p ↔ p ∈ t.tableau.1 := by
       apply ihq.mpr;
       apply t'.not_mem₂_iff_mem₁.mp;
       exact SaturatedConsistentTableau.not_mem₂
-        (by simp_all;)
-        (show Λ ⊢! [p, p ⟶ q].conj ⟶ q by
-          apply implyLeftConjDoubleton'!.mpr;
+        (by simp_all)
+        (show Λ ⊢! [p, p ⟶ q].conj' ⟶ q by
+          simp;
           apply provable_iff_provable.mpr;
           apply deduct_iff.mpr;
           have : [p ⋏ (p ⟶ q)] ⊢[Λ]! p ⋏ (p ⟶ q) := by_axm! (by simp);
@@ -477,7 +417,7 @@ lemma deducible_of_validOnCanonicelModel : (CanonicalModel Λ) ⊧ p → Λ ⊢!
     by_contra hC;
     replace hΓ : Γ = [] := List.empty_def.mpr hΓ;
     subst hΓ;
-    have : Λ ⊢! p := what hΔ $ implyLeftConjEmpty'!.mp hC;
+    have : Λ ⊢! p := disj_allsame'! hΔ (hC ⨀ verum!);
     contradiction;
   obtain ⟨t', ht'⟩ := SaturatedConsistentTableau.lindenbaum this;
   simp [ValidOnModel.iff_models, ValidOnModel]

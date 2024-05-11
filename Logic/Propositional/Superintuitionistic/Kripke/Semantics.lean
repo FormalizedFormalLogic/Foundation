@@ -23,11 +23,11 @@ section
 
 variable (W α : Type*)
 
-@[simp] def FrameClass.Intuitionistic := { F : Frame W α | Transitive F ∧ Reflexive F }
+def FrameClass.Intuitionistic := { F : Frame W α | Transitive F ∧ Reflexive F }
 notation "𝐈𝐧𝐭" => FrameClass.Intuitionistic
 
 -- @[simp] def FrameClass.Classical := { F : Frame W α | Euclidean F ∧ Reflexive F }
-@[simp] def FrameClass.Classical := { F : Frame W α | Extensive F }
+def FrameClass.Classical := { F : Frame W α | Extensive F }
 notation "𝐂𝐥" => FrameClass.Classical
 
 open FrameClass
@@ -95,7 +95,7 @@ lemma hereditary (hTrans : 𝔽 ⊆ { F : Frame W α | Transitive F }) (hw : M.f
   | _ => simp_all [Satisfies];
 
 lemma hereditary_int {M : Model (𝐈𝐧𝐭 W α)} {w w' : W} {p : Formula α} (hw : M.frame w w') : (M, w) ⊧ p → (M, w') ⊧ p := by
-  apply hereditary (by simp_all) hw;
+  apply hereditary (by simp [FrameClass.Intuitionistic]; tauto) hw;
 
 end Formula.Kripke.Satisfies
 
