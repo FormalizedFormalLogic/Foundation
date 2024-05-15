@@ -59,6 +59,29 @@ def tne : 𝓢 ⊢ ~(~~p) ⟶ ~p := contra₀' dni
 def tne' (b : 𝓢 ⊢ ~(~~p)) : 𝓢 ⊢ ~p := tne ⨀ b
 @[simp] lemma tne'! (b : 𝓢 ⊢! ~(~~p)) : 𝓢 ⊢! ~p := ⟨tne' b.some⟩
 
+def andImplyAndOfImply {p q p' q' : F} (bp : 𝓢 ⊢ p ⟶ p') (bq : 𝓢 ⊢ q ⟶ q') : 𝓢 ⊢ p ⋏ q ⟶ p' ⋏ q' :=
+  deduct' <| andIntro
+    (deductInv' <| impTrans conj₁ bp)
+    (deductInv' <| impTrans conj₂ bq)
+
+def andIffAndOfIff {p q p' q' : F} (bp : 𝓢 ⊢ p ⟷ p') (bq : 𝓢 ⊢ q ⟷ q') : 𝓢 ⊢ p ⋏ q ⟷ p' ⋏ q' :=
+  iffIntro (andImplyAndOfImply (andLeft bp) (andLeft bq)) (andImplyAndOfImply (andRight bp) (andRight bq))
+
+def conj'IffConj : (Γ : List F) → 𝓢 ⊢ Γ.conj' ⟷ Γ.conj
+  | []          => iffId ⊤
+  | [p]         => iffIntro (deduct' <| andIntro (FiniteContext.byAxm (by simp)) verum) conj₁
+  | p :: q :: Γ => andIffAndOfIff (iffId p) (conj'IffConj (q :: Γ))
+
+namespace FiniteContext
+
+def ofDef' {Γ : List F} {p : F} (b : 𝓢 ⊢ Γ.conj' ⟶ p) : Γ ⊢[𝓢] p := ofDef <| impTrans (andRight <| conj'IffConj Γ) b
+
+def toDef' {Γ : List F} {p : F} (b : Γ ⊢[𝓢] p) : 𝓢 ⊢ Γ.conj' ⟶ p := impTrans (andLeft <| conj'IffConj Γ) (toDef b)
+
+lemma provable_iff' {p : F} : Γ ⊢[𝓢]! p ↔ 𝓢 ⊢! Γ.conj' ⟶ p := ⟨fun h ↦ ⟨toDef' h.get⟩, fun h ↦ ⟨ofDef' h.get⟩⟩
+
+end FiniteContext
+
 lemma iff_provable_list_conj {Γ : List F} : (𝓢 ⊢! Γ.conj') ↔ (∀ p ∈ Γ, 𝓢 ⊢! p) := by
   induction Γ using List.induction_with_singleton with
   | hnil => simp;
@@ -88,7 +111,7 @@ def implyOrLeft' (h : 𝓢 ⊢ p ⟶ r) : 𝓢 ⊢ p ⟶ (r ⋎ q) := by
   apply deduct;
   apply disj₁';
   apply deductInv;
-  exact of' h;
+  exact of h;
 
 lemma implyOrLeft'! (h : 𝓢 ⊢! p ⟶ r) : 𝓢 ⊢! p ⟶ (r ⋎ q) := ⟨implyOrLeft' h.some⟩
 
@@ -97,7 +120,7 @@ def implyOrRight' (h : 𝓢 ⊢ q ⟶ r) : 𝓢 ⊢ q ⟶ (p ⋎ r) := by
   apply deduct;
   apply disj₂';
   apply deductInv;
-  exact of' h;
+  exact of h;
 
 lemma implyOrRight'! (h : 𝓢 ⊢! q ⟶ r) : 𝓢 ⊢! q ⟶ (p ⋎ r) := ⟨implyOrRight' h.some⟩
 

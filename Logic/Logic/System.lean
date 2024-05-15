@@ -359,7 +359,7 @@ class Axiomatized [Collection F S] where
 alias byAxm := Axiomatized.prfAxm
 alias wk := Axiomatized.weakening
 
-class StrongCut [Collection F S] [Collection F T] [Axiomatized S] where
+class StrongCut [Collection F T] where
   cut {𝓢 : S} {𝓣 : T} {p} : 𝓢 ⊢* Collection.set 𝓣 → 𝓣 ⊢ p → 𝓢 ⊢ p
 
 variable {S T}

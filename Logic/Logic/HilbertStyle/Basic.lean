@@ -234,6 +234,11 @@ lemma andImplyIffImplyImply'! : (𝓢 ⊢! p ⋏ q ⟶ r) ↔ (𝓢 ⊢! p ⟶ q
   . intro h; exact (conj₁'! H) ⨀ h;
   . intro h; exact (conj₂'! H) ⨀ h;
 
+def conjIntro [DecidableEq F] (Γ : List F) (b : (p : F) → p ∈ Γ → 𝓢 ⊢ p) : 𝓢 ⊢ Γ.conj :=
+  match Γ with
+  | []     => verum
+  | q :: Γ => andIntro (b q (by simp)) (conjIntro Γ (fun q hq ↦ b q (by simp [hq])))
+
 def implyConj [DecidableEq F] (p : F) (Γ : List F) (b : (q : F) → q ∈ Γ → 𝓢 ⊢ p ⟶ q) : 𝓢 ⊢ p ⟶ Γ.conj :=
   match Γ with
   | []     => dhyp p verum
