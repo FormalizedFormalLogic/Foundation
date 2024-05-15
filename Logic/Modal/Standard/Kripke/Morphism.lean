@@ -110,7 +110,7 @@ class Model.pMorphism (M₁ : Model W₁ α) (M₂ : Model W₂ α) (f : W₁ �
 
 end Kripke
 
-variable {f : W₁ → W₂} {p : Formula α}
+variable {f : W₁ → W₂} {p : Formula α} {T : Theory α}
 variable {M₁ : Model W₁ α} {M₂ : Model W₂ α}
 variable {F₁ : Frame W₁ α} {F₂ : Frame W₂ α}
 
@@ -151,18 +151,12 @@ lemma Formula.Kripke.ValidOnFrame.morphism (hSur : Function.Surjective f) (hMorF
   subst e;
   exact Satisfies.morphism hMor |>.not.mpr h;
 
-/-
-lemma Theory.Frames.morphism
-  {F₁ : Frame α₁} {F₂ : Frame α₂}
-  (hSur : Function.Surjective f)
-  (hMorF : Frame.pMorphism F₁ F₂ f)
-  {Γ : Theory β} : (⊧ᴹ[F₁] Γ) → (⊧ᴹ[F₂] Γ) := by
-  simp [Theory.Frames];
+lemma Theory.Kripke.ValidOnFrame.morphism (hSur : Function.Surjective f) (hMorF : Frame.pMorphism F₁ F₂ f) : (F₁ ⊧* T) → (F₂ ⊧* T) := by
+  simp only [Semantics.realizeSet_iff];
   intro h p hp;
-  exact (Formula.Frames.morphism hSur hMorF) $ h p hp;
--/
+  exact Formula.Kripke.ValidOnFrame.morphism hSur hMorF (h hp);
 
-theorem Kripke.undefinabilityIrreflexive : ¬∃ (Ax : AxiomSet α), (∀ {W : Type} {F : Frame W α}, (Irreflexive F) ↔ F ⊧* Ax) := by
+theorem Kripke.undefinability_irreflexive : ¬∃ (Ax : AxiomSet α), (∀ {W : Type} {F : Frame W α}, (Irreflexive F) ↔ F ⊧* Ax) := by
   let F₁ : Frame (Fin 2) α := λ w v => w ≠ v;
   have hIF₁ : Irreflexive F₁ := by simp [Irreflexive, F₁];
 
@@ -184,9 +178,8 @@ theorem Kripke.undefinabilityIrreflexive : ¬∃ (Ax : AxiomSet α), (∀ {W : T
   by_contra hC;
   obtain ⟨Ax, h⟩ := hC;
   have : F₁ ⊧* Ax := h.mp hIF₁;
-  sorry;
-  -- have : ⊧ᴹ[F₂] Ax := Theory.Frames.morphism hSur hMorF this;
-  -- have : Irreflexive F₂ := h.mpr this;
-  -- contradiction;
+  have : F₂ ⊧* Ax := Theory.Kripke.ValidOnFrame.morphism hSur hMorF this;
+  have : Irreflexive F₂ := h.mpr this;
+  contradiction;
 
 end LO.Modal.Standard

@@ -191,15 +191,6 @@ instance : Set.Nonempty (𝔽((𝐊 : AxiomSet α), W)) := by
   apply iff_definability_memAxiomSetFrameClass AxiomSet.K.definability |>.mp;
   trivial;
 
-/-
-instance AxiomSetDefinability.union [def₁ : AxiomSetDefinability W Λ₁] [def₂ : AxiomSetDefinability W Λ₂] : AxiomSetDefinability W (Λ₁ ∪ Λ₂) where
-  property F :=def₁.property F ∧ def₂.property F
-  defines F := by
-    constructor;
-    . sorry;
-    . simp_all [AxiomSetDefinability.spec];
--/
-
 instance [dΛ : AxiomSetDefinability W Λ P] : AxiomSetDefinability W (𝐊 ∪ Λ) P where
   defines F := by
     constructor;

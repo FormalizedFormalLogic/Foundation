@@ -135,14 +135,14 @@ lemma exists_maximal_Λconsistent_theory
 
 end Theory
 
-structure MaximalConsistentByTheory (Λ : AxiomSet α) where
+structure MaximalΛConsistentTheory (Λ : AxiomSet α) where
   theory : Theory α
   consistent : (Λ)-Consistent theory
   maximal : ∀ {U}, theory ⊂ U → ¬(Λ)-Consistent U
 
-alias MCT := MaximalConsistentByTheory
+alias MCT := MaximalΛConsistentTheory
 
-namespace MaximalConsistentByTheory
+namespace MaximalΛConsistentTheory
 
 variable {Ω Ω₁ Ω₂ : MCT Λ}
 variable {p : Formula α}
@@ -278,11 +278,11 @@ lemma iff_congr : (Ω.theory *⊢[Λ]! (p ⟷ q)) → ((p ∈ Ω.theory) ↔ (q 
 
 lemma mem_dn_iff : (p ∈ Ω.theory) ↔ (~~p ∈ Ω.theory) := iff_congr $ (by simp)
 
-end MaximalConsistentByTheory
+end MaximalΛConsistentTheory
 
 
 open Formula
-open MaximalConsistentByTheory
+open MaximalΛConsistentTheory
 
 namespace Kripke
 
