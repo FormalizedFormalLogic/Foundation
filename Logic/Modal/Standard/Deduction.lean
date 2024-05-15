@@ -42,11 +42,6 @@ instance : System.Classical (Λ : AxiomSet α) where
 instance : System.Necessitation (Λ : AxiomSet α) where
   nec := nec
 
-instance K_of_subset_K (hK : 𝐊 ⊆ Λ := by simp) : System.K (Λ : AxiomSet α) where
-  K _ _ := maxm $ Set.mem_of_subset_of_mem hK (by simp);
-
-instance : System.K (𝐊 : AxiomSet α) := K_of_subset_K (by rfl)
-
 variable {Λ₁ Λ₂ : AxiomSet α}
 
 def maxm_subset (hs : Λ₁ ⊆ Λ₂) : (Λ₁ ⊢ p) → (Λ₂ ⊢ p)
@@ -66,5 +61,17 @@ def maxm_subset (hs : Λ₁ ⊆ Λ₂) : (Λ₁ ⊢ p) → (Λ₂ ⊢ p)
 
 lemma maxm_subset! (hs : Λ₁ ⊆ Λ₂) (h : Λ₁ ⊢! p) : Λ₂ ⊢! p := ⟨maxm_subset hs h.some⟩
 
+instance K_of_subset_K (hK : 𝐊 ⊆ Λ := by simp) : System.K (Λ : AxiomSet α) where
+  K _ _ := maxm $ Set.mem_of_subset_of_mem hK (by simp);
+
+instance : System.K (𝐊 : AxiomSet α) := K_of_subset_K (by rfl)
+
+
+instance S4_of_subset_S4 (hS4 : 𝐒𝟒 ⊆ Λ := by simp) : System.S4 (Λ : AxiomSet α) where
+  K _ _   := Deduction.maxm $ Set.mem_of_subset_of_mem hS4 (by simp);
+  T _     := Deduction.maxm $ Set.mem_of_subset_of_mem hS4 (by simp);
+  Four _  := Deduction.maxm $ Set.mem_of_subset_of_mem hS4 (by simp);
+
+instance : System.S4 (𝐒𝟒 : AxiomSet α) := S4_of_subset_S4 (by rfl)
 
 end LO.Modal.Standard

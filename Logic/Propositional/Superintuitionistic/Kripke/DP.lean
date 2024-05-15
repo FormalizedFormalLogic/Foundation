@@ -3,7 +3,7 @@ import Logic.Propositional.Superintuitionistic.Kripke.Completeness
 
 namespace LO.System
 
-variable {F : Type*} [Vee F]
+variable {F : Type*} [LogicalConnective F]
 variable {S : Type*} [System F S]
 
 class Disjunctive (𝓢 : S) : Prop where

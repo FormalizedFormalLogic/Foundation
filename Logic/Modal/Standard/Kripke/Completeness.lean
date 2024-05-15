@@ -11,9 +11,6 @@ variable [Minimal 𝓢] [NegDefinition F]
 
 open FiniteContext
 
-lemma FiniteContext.of'! (h : 𝓢 ⊢! p) : Γ ⊢[𝓢]! p := weakening! (by simp) $ provable_iff_provable.mp h
-lemma FiniteContext.toₛ! (b : Γ ⊢[𝓢]! p) : 𝓢 ⊢! Γ.conj ⟶ p := b
-
 lemma implyLeft_conj_eq_conj' : 𝓢 ⊢! Γ.conj ⟶ p ↔ 𝓢 ⊢! Γ.conj' ⟶ p := implyLeftReplaceIff'! (by
   induction Γ using List.induction_with_singleton with
   | hnil => simp;

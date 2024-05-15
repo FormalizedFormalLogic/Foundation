@@ -1,5 +1,6 @@
 import Logic.Logic.System
 import Logic.Logic.HilbertStyle.Basic
+import Logic.Logic.HilbertStyle.Context
 import Logic.Modal.LogicSymbol
 
 namespace LO.System
@@ -45,7 +46,7 @@ end Axioms
 
 
 class Necessitation where
-  nec {p q : F} : 𝓢 ⊢ p → 𝓢 ⊢ □p
+  nec {p : F} : 𝓢 ⊢ p → 𝓢 ⊢ □p
 
 class HasAxiomK where
   K (p q : F) : 𝓢 ⊢ Axioms.K p q

@@ -21,7 +21,6 @@ class Minimal extends ModusPonens 𝓢 where
   disj₂  (p q : F)   : 𝓢 ⊢ q ⟶ p ⋎ q
   disj₃  (p q r : F) : 𝓢 ⊢ (p ⟶ r) ⟶ (q ⟶ r) ⟶ p ⋎ q ⟶ r
 
-/-- Supplymental -/
 class HasEFQ where
   efq (p : F) : 𝓢 ⊢ ⊥ ⟶ p
 
@@ -40,32 +39,16 @@ class Dummett where
 class Peirce where
   peirce (p q : F) : 𝓢 ⊢ ((p ⟶ q) ⟶ p) ⟶ p
 
-/--
-  Intuitionistic Propositional Logic.
-
-  Modal companion of `𝐒𝟒`
--/
+/-- Intuitionistic Propositional Logic -/
 class Intuitionistic extends Minimal 𝓢, HasEFQ 𝓢
 
-/--
-  Propositional Logic for Weak Law of Excluded Middle.
-
-  Modal companion of `𝐒𝟒.𝟐`
--/
+/-- Propositional Logic for Weak Law of Excluded Middle -/
 class WeakLEM extends Intuitionistic 𝓢, HasWeakLEM 𝓢
 
-/--
-  Gödel-Dummett Propositional Logic.
-
-  Modal companion of `𝐒𝟒.𝟑`
--/
+/-- Gödel-Dummett Propositional Logic -/
 class GD extends Intuitionistic 𝓢, Dummett 𝓢
 
-/--
-  Classical Propositional Logic.
-
-  Modal companion of `𝐒𝟓`
--/
+/-- Classical Propositional Logic -/
 class Classical extends Minimal 𝓢, HasDNE 𝓢
 
 variable {𝓢}
@@ -166,6 +149,10 @@ lemma disj₂'! (d : 𝓢 ⊢! q) : 𝓢 ⊢! p ⋎ q := ⟨disj₂' d.some⟩
 
 def disj₃' (d₁ : 𝓢 ⊢ p ⟶ r) (d₂ : 𝓢 ⊢ q ⟶ r) (d₃ : 𝓢 ⊢ p ⋎ q) : 𝓢 ⊢ r := disj₃ ⨀ d₁ ⨀ d₂ ⨀ d₃
 lemma disj₃'! (d₁ : 𝓢 ⊢! p ⟶ r) (d₂ : 𝓢 ⊢! q ⟶ r) (d₃ : 𝓢 ⊢! p ⋎ q) : 𝓢 ⊢! r := ⟨disj₃' d₁.some d₂.some d₃.some⟩
+
+-- TODO: rename `disj₃''` to `disj₃'`, and `disj₃'` to `disj₃''`
+def disj₃'' (d₁ : 𝓢 ⊢ p ⟶ r) (d₂ : 𝓢 ⊢ q ⟶ r) : 𝓢 ⊢ p ⋎ q ⟶ r := disj₃ ⨀ d₁ ⨀ d₂
+lemma disj₃''! (d₁ : 𝓢 ⊢! p ⟶ r) (d₂ : 𝓢 ⊢! q ⟶ r) : 𝓢 ⊢! p ⋎ q ⟶ r := ⟨disj₃'' d₁.some d₂.some⟩
 
 def impId (p : F) : 𝓢 ⊢ p ⟶ p := Minimal.imply₂ p (p ⟶ p) p ⨀ imply₁ ⨀ imply₁
 @[simp] def imp_id! : 𝓢 ⊢! p ⟶ p := ⟨impId p⟩

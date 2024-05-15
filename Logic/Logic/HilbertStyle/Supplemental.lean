@@ -124,6 +124,17 @@ def implyOrRight' (h : 𝓢 ⊢ q ⟶ r) : 𝓢 ⊢ q ⟶ (p ⋎ r) := by
 
 lemma implyOrRight'! (h : 𝓢 ⊢! q ⟶ r) : 𝓢 ⊢! q ⟶ (p ⋎ r) := ⟨implyOrRight' h.some⟩
 
+lemma conjReplaceLeft'! (hc : 𝓢 ⊢! p ⋏ q) (h : 𝓢 ⊢! p ⟶ r) : 𝓢 ⊢! r ⋏ q := conj₃'! (h ⨀ conj₁'! hc) (conj₂'! hc)
+
+lemma conjReplaceRight'! (hc : 𝓢 ⊢! p ⋏ q) (h : 𝓢 ⊢! q ⟶ r) : 𝓢 ⊢! p ⋏ r := andComm'! (conjReplaceLeft'! (andComm'! hc) h)
+
+lemma conjReplace'! (hc : 𝓢 ⊢! p ⋏ q) (h₁ : 𝓢 ⊢! p ⟶ r) (h₂ : 𝓢 ⊢! q ⟶ s) : 𝓢 ⊢! r ⋏ s := conjReplaceRight'! (conjReplaceLeft'! hc h₁) h₂
+
+lemma conjReplace! (h₁ : 𝓢 ⊢! p ⟶ r) (h₂ : 𝓢 ⊢! q ⟶ s) : 𝓢 ⊢! p ⋏ q ⟶ r ⋏ s := by
+  apply provable_iff_provable.mpr;
+  apply deduct_iff.mpr;
+  exact conjReplace'! (by_axm! (by simp)) (of'! h₁) (of'! h₂)
+
 lemma or_assoc'! : 𝓢 ⊢! p ⋎ (q ⋎ r) ↔ 𝓢 ⊢! (p ⋎ q) ⋎ r := by
   constructor;
   . intro h;
