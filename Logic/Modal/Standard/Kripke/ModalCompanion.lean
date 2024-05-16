@@ -75,16 +75,23 @@ private lemma provable_efq_of_provable_S4.case_imply₁ [System.K4 mΛ] : mΛ �
   exact nec! $ imp_trans! axiomTc_GTranslate! $ axiomK'! $ nec! $ imply₁!;
 
 private lemma provable_efq_of_provable_S4.case_imply₂ [System.S4 mΛ] : mΛ ⊢! ((p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r)ᵍ := by
-  simp only [GTranslation.imp_def, GTranslation.and_def];
-  sorry;
+  simp only [GTranslation.imp_def];
+  refine nec! $ imp_trans! (imp_trans! (axiomK'! $ nec! ?b) axiomFour!) $ axiomK'! $ nec! $ imp_trans! (axiomK'! $ nec! imply₂!) axiomK!;
+  apply provable_iff_provable.mpr;
+  apply deduct_iff.mpr;
+  apply deduct_iff.mpr;
+  have : [pᵍ, pᵍ ⟶ □(qᵍ ⟶ rᵍ)] ⊢[mΛ]! pᵍ := by_axm! (by simp);
+  have : [pᵍ, pᵍ ⟶ □(qᵍ ⟶ rᵍ)] ⊢[mΛ]! (pᵍ ⟶ □(qᵍ ⟶ rᵍ)) := by_axm! (by simp);
+  have : [pᵍ, pᵍ ⟶ □(qᵍ ⟶ rᵍ)] ⊢[mΛ]! □(qᵍ ⟶ rᵍ) := (by assumption) ⨀ (by assumption);
+  exact axiomT'! this;
 
 private lemma provable_efq_of_provable_S4.case_conj₃ [System.K4 mΛ] : mΛ ⊢! (p ⟶ q ⟶ p ⋏ q)ᵍ := by
   simp only [GTranslation.imp_def, GTranslation.and_def];
   exact nec! $ imp_trans! axiomTc_GTranslate! $ axiomK'! $ nec! $ conj₃!
 
-private lemma provable_efq_of_provable_S4.case_disj₃ [System.S4 mΛ] : mΛ ⊢! (((p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r)))ᵍ := by
+private lemma provable_efq_of_provable_S4.case_disj₃ [System.K4 mΛ] : mΛ ⊢! (((p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r)))ᵍ := by
   simp only [GTranslation.imp_def, GTranslation.or_def];
-  sorry;
+  exact nec! $ imp_trans! axiomFour! $ axiomK'! $ nec! $ imp_trans! (axiomK'! $ nec! $ disj₃!) axiomK!;
 
 open provable_efq_of_provable_S4 in
 lemma provable_efq_of_provable_S4 (h : 𝐄𝐅𝐐 ⊢! p) : 𝐒𝟒 ⊢! pᵍ := by
