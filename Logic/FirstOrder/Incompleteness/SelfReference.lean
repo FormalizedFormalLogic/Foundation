@@ -38,6 +38,7 @@ lemma substs_diag (θ σ : Semisentence ℒₒᵣ 1) :
 
 variable (T)
 
+open Model
 /-- Fixpoint Lemma -/
 theorem main (θ : Semisentence ℒₒᵣ 1) :
     T ⊢! fixpoint θ ⟷ θ/[⸢fixpoint θ⸣] :=

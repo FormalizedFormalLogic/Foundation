@@ -83,7 +83,9 @@ lemma satidfiable_iff_satisfiable : Semantics.Satisfiable (Struc.{max u w} L) T 
 lemma consequence_iff_consequence : T ⊨[Struc.{max u w} L] σ ↔ T ⊨ σ := by
   simp [Semantics.consequence_iff_not_satisfiable, satidfiable_iff_satisfiable.{u, w}]
 
-instance (T : Theory L) : Complete T (Semantics.models (Struc.{max u w} L) T) :=
-  ⟨fun h ↦ complete <| consequence_iff_consequence.{u, w}.mp h⟩
+theorem complete' {σ : Sentence L} :
+    T ⊨[Struc.{max u w} L] σ → T ⊢! σ := fun h ↦ complete <| consequence_iff_consequence.{u, w}.mp h
+
+instance (T : Theory L) : Complete T (Semantics.models (Struc.{max u w} L) T) := ⟨complete'.{u, w}⟩
 
 end FirstOrder

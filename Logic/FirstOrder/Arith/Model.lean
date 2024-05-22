@@ -121,7 +121,7 @@ end
 section
 
 variable {L : Language} [L.ORing]
-variable {M : Type} [Zero M] [One M] [Add M] [Mul M] [LT M] [s : Structure L M]
+variable {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M] [s : Structure L M]
   [Structure.Zero L M] [Structure.One L M] [Structure.Add L M] [Structure.Mul L M] [Structure.Eq L M] [Structure.LT L M]
 
 @[simp] lemma modelsTheory_lMap_oringEmb (T : Theory ℒₒᵣ) :
@@ -203,7 +203,7 @@ notation "𝐓𝐀" => Theory.trueArith
 variable (T : Theory ℒₒᵣ) [𝐄𝐐 ≼ T]
 
 lemma oRing_consequence_of (σ : Sentence ℒₒᵣ)
-  (H : ∀ (M : Type)
+  (H : ∀ (M : Type w)
          [Zero M] [One M] [Add M] [Mul M] [LT M]
          [M ⊧ₘ* T],
          M ⊧ₘ σ) :
