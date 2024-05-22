@@ -265,6 +265,8 @@ def Model (T : Theory L) (Γ : Sequent L) := SyntacticTerm L
 
 instance : Inhabited (Model T Γ) := ⟨(default : SyntacticTerm L)⟩
 
+def Model.equiv : Model T Γ ≃ SyntacticTerm L := Equiv.refl _
+
 instance Model.structure (T : Theory L) (Γ : Sequent L) : Structure L (Model T Γ) where
   func := fun _ f v => Semiterm.func f v
   rel  := fun _ r v => nrel r v ∈ chainSet T Γ
@@ -279,7 +281,7 @@ instance Model.structure (T : Theory L) (Γ : Sequent L) : Structure L (Model T 
 lemma semanticMainLemma_val : (p : SyntacticFormula L) → p ∈ ⛓️ → ¬Val (Model.structure T Γ) Semiterm.fvar p
   | ⊤,        h => by by_contra; exact chainSet_verum nwf h
   | ⊥,        _ => by simp
-  | rel r v,  h => by { rcases chainSet_axL nwf r v with (hr | hr); { contradiction }; { simpa[eval_rel] using hr } }
+  | rel r v,  h => by rcases chainSet_axL nwf r v with (hr | hr); { contradiction }; { simpa[eval_rel] using hr }
   | nrel r v, h => by simpa[eval_nrel] using h
   | p ⋏ q,    h => by
       simp; intro _ _

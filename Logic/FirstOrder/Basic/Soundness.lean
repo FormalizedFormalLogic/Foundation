@@ -83,6 +83,9 @@ lemma models_of_subtheory {T U : Theory L} [U ≼ T] {M : Type*} [Structure L M]
     have : T ⊢ p := System.Subtheory.prf (System.byAxm hp)
     exact sound this hM ⟩
 
+lemma consistent_of_satidfiable (h : Semantics.Satisfiable (Struc.{v, u} L) T) : System.Consistent T :=
+  Sound.consistent_of_satisfiable h
+
 end sound
 
 end FirstOrder

@@ -8,7 +8,7 @@ namespace FirstOrder
 
 open Semiformula Completeness
 
-variable {L : Language} {T : Theory L}
+variable {L : Language.{u}} {T : Theory L}
 
 section Encodable
 
@@ -32,7 +32,7 @@ lemma completeness_of_encodable {σ : Sentence L} :
     Disjconseq.completeness_of_encodable (T := T) (Γ := {σ}) (fun M i s hM ↦ ⟨σ, List.mem_of_mem_head? rfl, h hM⟩)
   exact ⟨toProof this⟩
 
-noncomputable instance : Complete T (Semantics.models (SmallStruc L) T):= ⟨completeness_of_encodable⟩
+instance : Complete T (Semantics.models (SmallStruc L) T):= ⟨completeness_of_encodable⟩
 
 end Encodable
 
@@ -63,6 +63,27 @@ theorem complete {σ : Sentence L} :
 theorem complete_iff : T ⊨ σ ↔ T ⊢! σ :=
   ⟨fun h ↦ complete h, sound!⟩
 
-noncomputable instance completeness.sentence (T : Theory L) : Complete T (Semantics.models (SmallStruc L) T) := ⟨complete⟩
+instance (T : Theory L) : Complete T (Semantics.models (SmallStruc L) T) := ⟨complete⟩
+
+lemma satisfiable_of_consistent' (h : System.Consistent T) : Semantics.Satisfiable (SmallStruc L) T :=
+  Complete.satisfiable_of_consistent h
+
+lemma satisfiable_of_consistent (h : System.Consistent T) : Semantics.Satisfiable (Struc.{max u w} L) T := by
+  let ⟨M, _, _, h⟩ := satisfiable_iff.mp (satisfiable_of_consistent' h)
+  exact satisfiable_iff.mpr ⟨ULift.{w} M, inferInstance, inferInstance, ((uLift_elementaryEquiv L M).modelsTheory).mpr h⟩
+
+lemma satisfiable_iff_consistent' : Semantics.Satisfiable (Struc.{max u w} L) T ↔ System.Consistent T :=
+  ⟨consistent_of_satidfiable, satisfiable_of_consistent.{u, w}⟩
+
+lemma satisfiable_iff_consistent : Satisfiable T ↔ System.Consistent T := satisfiable_iff_consistent'.{u, u}
+
+lemma satidfiable_iff_satisfiable : Semantics.Satisfiable (Struc.{max u w} L) T ↔ Satisfiable T := by
+  simp [satisfiable_iff_consistent'.{u, w}, satisfiable_iff_consistent]
+
+lemma consequence_iff_consequence : T ⊨[Struc.{max u w} L] σ ↔ T ⊨ σ := by
+  simp [Semantics.consequence_iff_not_satisfiable, satidfiable_iff_satisfiable.{u, w}]
+
+instance (T : Theory L) : Complete T (Semantics.models (Struc.{max u w} L) T) :=
+  ⟨fun h ↦ complete <| consequence_iff_consequence.{u, w}.mp h⟩
 
 end FirstOrder
