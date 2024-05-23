@@ -15,13 +15,13 @@ a function that preserves logical connectives.
 
 namespace LO
 
-@[notation_class] class SigmaSymbol (α : Sort*) where
+@[notation_class] class SigmaSymbol (α : Type*) where
   sigma : α
 
-@[notation_class] class PiSymbol (α : Sort*) where
+@[notation_class] class PiSymbol (α : Type*) where
   pi : α
 
-@[notation_class] class DeltaSymbol (α : Sort*) where
+@[notation_class] class DeltaSymbol (α : Type*) where
   delta : α
 
 notation "𝚺" => SigmaSymbol.sigma
@@ -89,32 +89,32 @@ end SigmaPiDelta
 
 section logicNotation
 
-@[notation_class] class Tilde (α : Sort _) where
+@[notation_class] class Tilde (α : Type*) where
   tilde : α → α
 
-@[notation_class] class Arrow (α : Sort _) where
+@[notation_class] class Arrow (α : Type*) where
   arrow : α → α → α
 
-@[notation_class] class Wedge (α : Sort _) where
+@[notation_class] class Wedge (α : Type*) where
   wedge : α → α → α
 
-@[notation_class] class Vee (α : Sort _) where
+@[notation_class] class Vee (α : Type*) where
   vee : α → α → α
 
-class LogicalConnective (α : Sort _)
+class LogicalConnective (α : Type*)
   extends Top α, Bot α, Tilde α, Arrow α, Wedge α, Vee α
 
-@[notation_class] class UnivQuantifier (α : ℕ → Sort _) where
+@[notation_class] class UnivQuantifier (α : ℕ → Type*) where
   univ : ∀ {n}, α (n + 1) → α n
 
-@[notation_class] class ExQuantifier (α : ℕ → Sort _) where
+@[notation_class] class ExQuantifier (α : ℕ → Type*) where
   ex : ∀ {n}, α (n + 1) → α n
 
-@[notation_class] class UnivQuantifier₂ (α : ℕ → ℕ → Sort _) where
+@[notation_class] class UnivQuantifier₂ (α : ℕ → ℕ → Type*) where
   univ₂₁ : ∀ {m n}, α (m + 1) n → α m n
   univ₂₂ : ∀ {m n}, α m (n + 1) → α m n
 
-@[notation_class] class ExQuantifier₂ (α : ℕ → ℕ → Sort _) where
+@[notation_class] class ExQuantifier₂ (α : ℕ → ℕ → Type*) where
   ex₂₁ : ∀ {m n}, α (m + 1) n → α m n
   ex₂₂ : ∀ {m n}, α m (n + 1) → α m n
 
@@ -150,7 +150,7 @@ attribute [match_pattern]
 
 section UnivQuantifier
 
-variable {α : ℕ → Sort u} [UnivQuantifier α]
+variable {α : ℕ → Type*} [UnivQuantifier α]
 
 def univClosure : {n : ℕ} → α n → α 0
   | 0,     a => a
@@ -166,7 +166,7 @@ end UnivQuantifier
 
 section ExQuantifier
 
-variable {α : ℕ → Sort u} [ExQuantifier α]
+variable {α : ℕ → Type*} [ExQuantifier α]
 
 def exClosure : {n : ℕ} → α n → α 0
   | 0,     a => a
@@ -184,7 +184,7 @@ section UnivQuantifier₂
 
 section
 
-variable {α : ℕ → Sort u} [UnivQuantifier α] [ExQuantifier α]
+variable {α : ℕ → Type*} [UnivQuantifier α] [ExQuantifier α]
 
 def quant : Polarity → α (n + 1) → α n
   | 𝚺, p => ∃' p
@@ -196,7 +196,7 @@ def quant : Polarity → α (n + 1) → α n
 
 end
 
-variable {α : ℕ → ℕ → Sort u} [UnivQuantifier₂ α]
+variable {α : ℕ → ℕ → Type*} [UnivQuantifier₂ α]
 
 def univClosure₂₁ : {m n : ℕ} → α m n → α 0 n
   | 0,     _, a => a
@@ -218,7 +218,7 @@ end UnivQuantifier₂
 
 section ExQuantifier₂
 
-variable {α : ℕ → ℕ → Sort u} [ExQuantifier₂ α]
+variable {α : ℕ → ℕ → Type*} [ExQuantifier₂ α]
 
 def exClosure₂₁ : {m n : ℕ} → α m n → α 0 n
   | 0,     _, a => a
@@ -256,7 +256,7 @@ class NegDefinition (F : Type*) [LogicalConnective F] where
 namespace LogicalConnective
 
 section
-variable {α : Sort _} [LogicalConnective α]
+variable {α : Type*} [LogicalConnective α]
 
 @[match_pattern] def iff (a b : α) := (a ⟶ b) ⋏ (b ⟶ a)
 
@@ -295,7 +295,7 @@ instance : DeMorgan Prop where
   or := fun _ _ => by simp[not_or]
   neg := fun _ => by simp
 
-class HomClass (F : Type _) (α β : outParam (Type _)) [LogicalConnective α] [LogicalConnective β] [FunLike F α β] where
+class HomClass (F : Type*) (α β : outParam Type*) [LogicalConnective α] [LogicalConnective β] [FunLike F α β] where
   map_top : ∀ (f : F), f ⊤ = ⊤
   map_bot : ∀ (f : F), f ⊥ = ⊥
   map_neg : ∀ (f : F) (p : α), f (~ p) = ~f p
@@ -307,7 +307,7 @@ attribute [simp] HomClass.map_top HomClass.map_bot HomClass.map_neg HomClass.map
 
 namespace HomClass
 
-variable (F : Type _) (α β : outParam (Type _)) [LogicalConnective α] [LogicalConnective β] [FunLike F α β]
+variable (F : Type*) (α β : outParam Type*) [LogicalConnective α] [LogicalConnective β] [FunLike F α β]
 variable [HomClass F α β]
 variable (f : F) (a b : α)
 
@@ -317,7 +317,7 @@ instance : CoeFun F (fun _ => α → β) := ⟨DFunLike.coe⟩
 
 end HomClass
 
-variable (α β γ : Type _) [LogicalConnective α] [LogicalConnective β] [LogicalConnective γ]
+variable (α β γ : Type*) [LogicalConnective α] [LogicalConnective β] [LogicalConnective γ]
 
 structure Hom where
   toTr : α → β
@@ -412,7 +412,7 @@ namespace Matrix
 
 section And
 
-variable {α : Type _}
+variable {α : Type*}
 variable [LogicalConnective α] [LogicalConnective β]
 
 def conj : {n : ℕ} → (Fin n → α) → α
@@ -443,7 +443,7 @@ namespace List
 
 section
 
-variable {α : Type u} [LogicalConnective α]
+variable {α : Type*} [LogicalConnective α]
 
 def conj : List α → α
   | []      => ⊤
