@@ -179,7 +179,7 @@ lemma val_numeral {n} : ∀ (t : Semiterm ℒₒᵣ Empty n),
   | Semiterm.func Language.Mul.mul v,   e => by simp[Semiterm.val_func, val_numeral (v 0), val_numeral (v 1)]
 
 lemma pval_of_pval_nat_of_sigma_one : ∀ {n} {σ : Semisentence ℒₒᵣ n},
-    Hierarchy Σ 1 σ → ∀ {e}, Semiformula.PVal! ℕ e σ → Semiformula.PVal! M (e ·) σ
+    Hierarchy 𝚺 1 σ → ∀ {e}, Semiformula.PVal! ℕ e σ → Semiformula.PVal! M (e ·) σ
   | _, _, Hierarchy.verum _ _ _,               _ => by simp
   | _, _, Hierarchy.falsum _ _ _,              _ => by simp
   | _, _, Hierarchy.rel _ _ Language.Eq.eq v,  e => by simp[Semiformula.eval_rel, Matrix.comp_vecCons', val_numeral]
@@ -203,7 +203,7 @@ lemma pval_of_pval_nat_of_sigma_one : ∀ {n} {σ : Semisentence ℒₒᵣ n},
     exact ⟨x, by simpa using hx, by simpa[Matrix.comp_vecCons'] using pval_of_pval_nat_of_sigma_one hp h⟩
   | _, _, Hierarchy.sigma (p := p) hp,         e => by
     simp; intro x h
-    have : Hierarchy Σ 1 p := hp.accum _
+    have : Hierarchy 𝚺 1 p := hp.accum _
     exact ⟨x, by simpa[Matrix.comp_vecCons'] using pval_of_pval_nat_of_sigma_one this h⟩
   | _, _, Hierarchy.ex hp,                     e => by
     simp; intro x hx; exact ⟨x, by simpa[Matrix.comp_vecCons'] using pval_of_pval_nat_of_sigma_one hp hx⟩
@@ -212,7 +212,7 @@ end Model
 
 variable {T : Theory ℒₒᵣ} [𝐄𝐐 ≼ T] [𝐏𝐀⁻ ≼ T]
 
-theorem sigma_one_completeness {σ : Sentence ℒₒᵣ} (hσ : Hierarchy Σ 1 σ) :
+theorem sigma_one_completeness {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
     ℕ ⊧ₘ σ → T ⊢! σ := fun H =>
   complete (oRing_consequence_of.{0} _ _ (fun M _ _ _ _ _ _ => by
     haveI : M ⊧ₘ* 𝐏𝐀⁻ := ModelsTheory.of_provably_subtheory M 𝐏𝐀⁻ T inferInstance (by assumption)

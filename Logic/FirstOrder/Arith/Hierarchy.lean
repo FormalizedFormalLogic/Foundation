@@ -19,14 +19,14 @@ inductive Hierarchy : Polarity → ℕ → {n : ℕ} → Semiformula L μ n → 
     t.Positive → Hierarchy Γ s p → Hierarchy Γ s (∀[“#0 < !!t”] p)
   | bex {Γ s n} {p : Semiformula L μ (n + 1)} {t : Semiterm L μ (n + 1)} :
     t.Positive → Hierarchy Γ s p → Hierarchy Γ s (∃[“#0 < !!t”] p)
-  | ex {s n} {p : Semiformula L μ (n + 1)}           : Hierarchy Σ (s + 1) p → Hierarchy Σ (s + 1) (∃' p)
-  | all {s n} {p : Semiformula L μ (n + 1)}          : Hierarchy Π (s + 1) p → Hierarchy Π (s + 1) (∀' p)
-  | sigma {s n} {p : Semiformula L μ (n + 1)}        : Hierarchy Π s p → Hierarchy Σ (s + 1) (∃' p)
-  | pi {s n} {p : Semiformula L μ (n + 1)}           : Hierarchy Σ s p → Hierarchy Π (s + 1) (∀' p)
-  | dummy_sigma {s n} {p : Semiformula L μ (n + 1)}  : Hierarchy Π (s + 1) p → Hierarchy Σ (s + 1 + 1) (∀' p)
-  | dummy_pi {s n} {p : Semiformula L μ (n + 1)}     : Hierarchy Σ (s + 1) p → Hierarchy Π (s + 1 + 1) (∃' p)
+  | ex {s n} {p : Semiformula L μ (n + 1)}           : Hierarchy 𝚺 (s + 1) p → Hierarchy 𝚺 (s + 1) (∃' p)
+  | all {s n} {p : Semiformula L μ (n + 1)}          : Hierarchy 𝚷 (s + 1) p → Hierarchy 𝚷 (s + 1) (∀' p)
+  | sigma {s n} {p : Semiformula L μ (n + 1)}        : Hierarchy 𝚷 s p → Hierarchy 𝚺 (s + 1) (∃' p)
+  | pi {s n} {p : Semiformula L μ (n + 1)}           : Hierarchy 𝚺 s p → Hierarchy 𝚷 (s + 1) (∀' p)
+  | dummy_sigma {s n} {p : Semiformula L μ (n + 1)}  : Hierarchy 𝚷 (s + 1) p → Hierarchy 𝚺 (s + 1 + 1) (∀' p)
+  | dummy_pi {s n} {p : Semiformula L μ (n + 1)}     : Hierarchy 𝚺 (s + 1) p → Hierarchy 𝚷 (s + 1 + 1) (∃' p)
 
-def DeltaZero (p : Semiformula L μ n) : Prop := Hierarchy Σ 0 p
+def DeltaZero (p : Semiformula L μ n) : Prop := Hierarchy 𝚺 0 p
 
 attribute [simp] Hierarchy.verum Hierarchy.falsum Hierarchy.rel Hierarchy.nrel
 
@@ -67,7 +67,7 @@ lemma zero_eq_alt {p : Semiformula L μ n} : Hierarchy Γ 0 p → Hierarchy Γ.a
   case ball pos _ ih => exact ball pos (ih hz)
   case bex pos _ ih => exact bex pos (ih hz)
 
-lemma pi_zero_iff_sigma_zero {p : Semiformula L μ n} : Hierarchy Π 0 p ↔ Hierarchy Σ 0 p := ⟨zero_eq_alt, zero_eq_alt⟩
+lemma pi_zero_iff_sigma_zero {p : Semiformula L μ n} : Hierarchy 𝚷 0 p ↔ Hierarchy 𝚺 0 p := ⟨zero_eq_alt, zero_eq_alt⟩
 
 lemma zero_iff {Γ Γ'} {p : Semiformula L μ n} : Hierarchy Γ 0 p ↔ Hierarchy Γ' 0 p := by rcases Γ <;> rcases Γ' <;> simp[pi_zero_iff_sigma_zero]
 
@@ -88,27 +88,27 @@ lemma accum : ∀ {Γ} {s : ℕ} {p : Semiformula L μ n}, Hierarchy Γ s p → 
   | _, _, _, all hp,         Γ => by
     cases Γ
     · exact hp.dummy_sigma
-    · exact (hp.accum Π).all
+    · exact (hp.accum 𝚷).all
   | _, _, _, ex hp,          Γ => by
     cases Γ
-    · exact (hp.accum Σ).ex
+    · exact (hp.accum 𝚺).ex
     · exact hp.dummy_pi
   | _, _, _, sigma hp,       Γ => by
     cases Γ
-    · exact ((hp.accum Σ).accum Σ).ex
-    · exact (hp.accum Σ).dummy_pi
+    · exact ((hp.accum 𝚺).accum 𝚺).ex
+    · exact (hp.accum 𝚺).dummy_pi
   | _, _, _, pi hp,          Γ => by
     cases Γ
-    · exact (hp.accum Π).dummy_sigma
-    · exact ((hp.accum Π).accum Π).all
+    · exact (hp.accum 𝚷).dummy_sigma
+    · exact ((hp.accum 𝚷).accum 𝚷).all
   | _, _, _, dummy_sigma hp, Γ => by
     cases Γ
-    · exact (hp.accum Π).dummy_sigma
-    · exact ((hp.accum Π).accum Π).all
+    · exact (hp.accum 𝚷).dummy_sigma
+    · exact ((hp.accum 𝚷).accum 𝚷).all
   | _, _, _, dummy_pi hp,    Γ => by
     cases Γ
-    · exact ((hp.accum Σ).accum Σ).ex
-    · exact (hp.accum Σ).dummy_pi
+    · exact ((hp.accum 𝚺).accum 𝚺).ex
+    · exact (hp.accum 𝚺).dummy_pi
 
 lemma strict_mono {Γ s} {p : Semiformula L μ n} (hp : Hierarchy Γ s p) (Γ') {s'} (h : s < s') : Hierarchy Γ' s' p := by
   have : ∀ d, Hierarchy Γ' (s + d + 1) p := by
@@ -176,7 +176,7 @@ lemma neg {p : Semiformula L μ n} : Hierarchy Γ s p → Hierarchy Γ.alt s (~p
         simpa using hp
       case pi s _ _ hp ih =>
         rcases hq with rfl
-        exact (show Hierarchy Σ s p from by simpa using hp).accum _
+        exact (show Hierarchy 𝚺 s p from by simpa using hp).accum _
       case dummy_sigma hp _ =>
         rcases hq with rfl
         simp at hp
@@ -196,16 +196,16 @@ lemma neg {p : Semiformula L μ n} : Hierarchy Γ s p → Hierarchy Γ.alt s (~p
         simpa using hp
       case sigma s _ _ hp ih =>
         rcases hq with rfl
-        exact (show Hierarchy Π s p from by simpa using hp).accum _
+        exact (show Hierarchy 𝚷 s p from by simpa using hp).accum _
       case dummy_pi hp _ =>
         rcases hq with rfl
         simp at hp
         exact hp.accum _,
    by intro hp; exact hp.bex ht⟩
 
-lemma pi_of_pi_all {p : Semiformula L μ (n + 1)} : Hierarchy Π s (∀' p) → Hierarchy Π s p := by
+lemma pi_of_pi_all {p : Semiformula L μ (n + 1)} : Hierarchy 𝚷 s (∀' p) → Hierarchy 𝚷 s p := by
   generalize hr : ∀' p = r
-  generalize hb : Π = Γ
+  generalize hb : (𝚷 : Polarity) = Γ
   intro H
   cases H <;> try simp [LogicalConnective.ball, LogicalConnective.bex] at hr
   case ball => rcases hr with rfl; simpa
@@ -213,12 +213,12 @@ lemma pi_of_pi_all {p : Semiformula L μ (n + 1)} : Hierarchy Π s (∀' p) → 
   case pi hp => rcases hr with rfl; exact hp.accum _
   case dummy_sigma hp => rcases hr with rfl; exact hp.accum _
 
-@[simp] lemma all_iff {p : Semiformula L μ (n + 1)} : Hierarchy Π (s + 1) (∀' p) ↔ Hierarchy Π (s + 1) p :=
+@[simp] lemma all_iff {p : Semiformula L μ (n + 1)} : Hierarchy 𝚷 (s + 1) (∀' p) ↔ Hierarchy 𝚷 (s + 1) p :=
   ⟨pi_of_pi_all, all⟩
 
-lemma sigma_of_sigma_ex {p : Semiformula L μ (n + 1)} : Hierarchy Σ s (∃' p) → Hierarchy Σ s p := by
+lemma sigma_of_sigma_ex {p : Semiformula L μ (n + 1)} : Hierarchy 𝚺 s (∃' p) → Hierarchy 𝚺 s p := by
   generalize hr : ∃' p = r
-  generalize hb : Σ = Γ
+  generalize hb : (𝚺 : Polarity) = Γ
   intro H
   cases H <;> try simp [LogicalConnective.ball, LogicalConnective.bex] at hr
   case bex => rcases hr with rfl; simpa
@@ -226,7 +226,7 @@ lemma sigma_of_sigma_ex {p : Semiformula L μ (n + 1)} : Hierarchy Σ s (∃' p)
   case sigma hp => rcases hr with rfl; exact hp.accum _
   case dummy_pi hp => rcases hr with rfl; exact hp.accum _
 
-@[simp] lemma sigma_iff {p : Semiformula L μ (n + 1)} : Hierarchy Σ (s + 1) (∃' p) ↔ Hierarchy Σ (s + 1) p :=
+@[simp] lemma sigma_iff {p : Semiformula L μ (n + 1)} : Hierarchy 𝚺 (s + 1) (∃' p) ↔ Hierarchy 𝚺 (s + 1) p :=
   ⟨sigma_of_sigma_ex, ex⟩
 
 lemma rew (ω : Rew L μ₁ n₁ μ₂ n₂) {p : Semiformula L μ₁ n₁} : Hierarchy Γ s p → Hierarchy Γ s (ω.hom p) := by
@@ -281,7 +281,7 @@ lemma rew (ω : Rew L μ₁ n₁ μ₂ n₂) {p : Semiformula L μ₁ n₁} : Hi
       exact (ih rfl).dummy_pi
   · exact rew _
 
-lemma exClosure : {n : ℕ} → {p : Semiformula L μ n} → Hierarchy Σ (s + 1) p → Hierarchy Σ (s + 1) (exClosure p)
+lemma exClosure : {n : ℕ} → {p : Semiformula L μ n} → Hierarchy 𝚺 (s + 1) p → Hierarchy 𝚺 (s + 1) (exClosure p)
   | 0,     _, hp => hp
   | n + 1, p, hp => by simpa using exClosure (hp.ex)
 
@@ -342,10 +342,10 @@ section
 variable {L : Language} [(k : ℕ) → DecidableEq (L.Func k)] [(k : ℕ) → DecidableEq (L.Rel k)]
   [L.LT] [Structure L ℕ]
 
-abbrev SigmaOneSound (T : Theory L) := SoundOn T (Hierarchy Σ 1)
+abbrev SigmaOneSound (T : Theory L) := SoundOn T (Hierarchy 𝚺 1)
 
 lemma consistent_of_sigmaOneSound (T : Theory L) [SigmaOneSound T] :
-    System.Consistent T := consistent_of_sound T (Hierarchy Σ 1) (by simp [Set.mem_def])
+    System.Consistent T := consistent_of_sound T (Hierarchy 𝚺 1) (by simp [Set.mem_def])
 
 end
 

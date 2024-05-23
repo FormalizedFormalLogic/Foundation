@@ -129,7 +129,7 @@ lemma elimDecode_eq_induction (f : α → List γ → γ) (s e) :
   · simp
   · simp[SubWType.decode_succ, Option.map_bind', decode_list, Function.comp, List.mapM'_option_map]; congr
     funext a
-    rcases hw : List.mapM' (decode : ℕ → Option (SubWType β s)) (Denumerable.ofNat (List ℕ) e.unpair.2) with (_ | w) <;> simp
+    rcases List.mapM' (decode : ℕ → Option (SubWType β s)) (Denumerable.ofNat (List ℕ) e.unpair.2) with (_ | w) <;> simp
     { simp[List.toVector]
       by_cases hlw : w.length = Fintype.card (β a) <;> simp[hlw, elim, elim']
       { simp[Vector.get_mk_eq_get, List.ofFn_get_eq_map]; congr

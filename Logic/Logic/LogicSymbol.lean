@@ -15,25 +15,77 @@ a function that preserves logical connectives.
 
 namespace LO
 
+@[notation_class] class SigmaSymbol (α : Sort*) where
+  sigma : α
+
+@[notation_class] class PiSymbol (α : Sort*) where
+  pi : α
+
+@[notation_class] class DeltaSymbol (α : Sort*) where
+  delta : α
+
+notation "𝚺" => SigmaSymbol.sigma
+
+notation "𝚷" => PiSymbol.pi
+
+notation "𝚫" => DeltaSymbol.delta
+
+attribute [match_pattern] SigmaSymbol.sigma PiSymbol.pi DeltaSymbol.delta
 
 inductive Polarity := | sigma | pi
 
 namespace Polarity
 
-notation "Σ" => sigma
-notation "Π" => pi
+instance : SigmaSymbol Polarity := ⟨sigma⟩
+
+instance : PiSymbol Polarity := ⟨pi⟩
 
 def alt : Polarity → Polarity
-  | Σ => Π
-  | Π => Σ
+  | 𝚺 => 𝚷
+  | 𝚷 => 𝚺
 
-@[simp] lemma alt_sigma : Σ.alt = Π := rfl
+@[simp] lemma eq_sigma : sigma = 𝚺 := rfl
 
-@[simp] lemma alt_pi : Π.alt = Σ := rfl
+@[simp] lemma eq_pi : pi = 𝚷 := rfl
 
-@[simp] lemma alt_alt (b : Polarity) : b.alt.alt = b := by rcases b <;> simp
+@[simp] lemma alt_sigma : alt 𝚺 = 𝚷 := rfl
+
+@[simp] lemma alt_pi : alt 𝚷 = 𝚺 := rfl
+
+@[simp] lemma alt_alt (Γ : Polarity) : Γ.alt.alt = Γ := by rcases Γ <;> simp
 
 end Polarity
+
+inductive SigmaPiDelta := | sigma | pi | delta
+
+namespace SigmaPiDelta
+
+instance : SigmaSymbol SigmaPiDelta := ⟨sigma⟩
+
+instance : PiSymbol SigmaPiDelta := ⟨pi⟩
+
+instance : DeltaSymbol SigmaPiDelta := ⟨delta⟩
+
+def alt : SigmaPiDelta → SigmaPiDelta
+  | 𝚺 => 𝚷
+  | 𝚷 => 𝚺
+  | 𝚫 => 𝚫
+
+@[simp] lemma eq_sigma : sigma = 𝚺 := rfl
+
+@[simp] lemma eq_pi : pi = 𝚷 := rfl
+
+@[simp] lemma eq_delta : delta = 𝚫 := rfl
+
+@[simp] lemma alt_sigma : alt 𝚺 = 𝚷 := rfl
+
+@[simp] lemma alt_pi : alt 𝚷 = 𝚺 := rfl
+
+@[simp] lemma alt_delta : alt 𝚫 = 𝚫 := rfl
+
+@[simp] lemma alt_alt (Γ : SigmaPiDelta) : Γ.alt.alt = Γ := by rcases Γ <;> simp
+
+end SigmaPiDelta
 
 section logicNotation
 
@@ -135,12 +187,12 @@ section
 variable {α : ℕ → Sort u} [UnivQuantifier α] [ExQuantifier α]
 
 def quant : Polarity → α (n + 1) → α n
-  | Σ, p => ∃' p
-  | Π, p => ∀' p
+  | 𝚺, p => ∃' p
+  | 𝚷, p => ∀' p
 
-@[simp] lemma quant_sigma (p : α (n + 1)) : quant Σ p = ∃' p := rfl
+@[simp] lemma quant_sigma (p : α (n + 1)) : quant 𝚺 p = ∃' p := rfl
 
-@[simp] lemma quant_pi (p : α (n + 1)) : quant Π p = ∀' p := rfl
+@[simp] lemma quant_pi (p : α (n + 1)) : quant 𝚷 p = ∀' p := rfl
 
 end
 

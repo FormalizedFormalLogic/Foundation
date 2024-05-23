@@ -81,13 +81,13 @@ lemma code_uniq {k} {c : Code k} {v : Fin k → M} {z z' : M} :
 
 end model
 
-lemma codeAux_sigma_one {k} (c : Nat.ArithPart₁.Code k) : Hierarchy Σ 1 (codeAux c) := by
+lemma codeAux_sigma_one {k} (c : Nat.ArithPart₁.Code k) : Hierarchy 𝚺 1 (codeAux c) := by
   induction c <;> simp[codeAux, Matrix.fun_eq_vec₂]
   case comp c d ihc ihg =>
     exact Hierarchy.exClosure (by simp [ihc, ihg])
   case rfind k c ih => simp [ih]
 
-lemma code_sigma_one {k} (c : Nat.ArithPart₁.Code k) : Hierarchy Σ 1 (code c) :=
+lemma code_sigma_one {k} (c : Nat.ArithPart₁.Code k) : Hierarchy 𝚺 1 (code c) :=
   Hierarchy.rew _ (codeAux_sigma_one c)
 
 @[simp] lemma natCast_nat (n : ℕ) : Nat.cast n = n := by rfl
@@ -153,7 +153,7 @@ open Model
 lemma provable_iff_mem_partrec {k} {f : Vector ℕ k →. ℕ} (hf : Nat.Partrec' f) {y : ℕ} {v : Fin k → ℕ} :
     (T ⊢! (Rew.substs $ ⸢y⸣ :> fun i => ⸢v i⸣).hom (code $ codeOfPartrec f)) ↔ y ∈ f (Vector.ofFn v) := by
   let σ : Sentence ℒₒᵣ := (Rew.substs $ ⸢y⸣ :> fun i => ⸢v i⸣).hom (code $ codeOfPartrec f)
-  have sigma : Hierarchy Σ 1 σ :=
+  have sigma : Hierarchy 𝚺 1 σ :=
     (Hierarchy.rew (Rew.substs $ ⸢y⸣ :> fun i => ⸢v i⸣) (code_sigma_one (codeOfPartrec f)))
   constructor
   · rintro ⟨b⟩
