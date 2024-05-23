@@ -215,11 +215,13 @@ def andImplyIffImplyImply (p q r : F) : 𝓢 ⊢ (p ⋏ q ⟶ r) ⟷ (p ⟶ q �
   iffIntro b₁ b₂
 lemma andImplyIffImplyImply! : 𝓢 ⊢! (p ⋏ q ⟶ r) ⟷ (p ⟶ q ⟶ r) := ⟨andImplyIffImplyImply p q r⟩
 
+def andImplyIffImplyImply'.mp (d : 𝓢 ⊢ p ⋏ q ⟶ r) : 𝓢 ⊢ p ⟶ q ⟶ r := (conj₁' $ andImplyIffImplyImply p q r) ⨀ d
+def andImplyIffImplyImply'.mpr (d : 𝓢 ⊢ p ⟶ q ⟶ r) : 𝓢 ⊢ p ⋏ q ⟶ r := (conj₂' $ andImplyIffImplyImply p q r) ⨀ d
+
 lemma andImplyIffImplyImply'! : (𝓢 ⊢! p ⋏ q ⟶ r) ↔ (𝓢 ⊢! p ⟶ q ⟶ r) := by
-  have H : 𝓢 ⊢! (p ⋏ q ⟶ r) ⟷ (p ⟶ q ⟶ r) := andImplyIffImplyImply!;
-  constructor;
-  . intro h; exact (conj₁'! H) ⨀ h;
-  . intro h; exact (conj₂'! H) ⨀ h;
+  apply Iff.intro;
+  . intro ⟨h⟩; exact ⟨andImplyIffImplyImply'.mp h⟩
+  . intro ⟨h⟩; exact ⟨andImplyIffImplyImply'.mpr h⟩
 
 def conjIntro [DecidableEq F] (Γ : List F) (b : (p : F) → p ∈ Γ → 𝓢 ⊢ p) : 𝓢 ⊢ Γ.conj :=
   match Γ with

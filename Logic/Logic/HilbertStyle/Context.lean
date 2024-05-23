@@ -278,6 +278,13 @@ def mdp {Γ : Set F} (bpq : Γ *⊢[𝓢] p ⟶ q) (bp : Γ *⊢[𝓢] p) : Γ *
     · exact bp.subset r hr,
     FiniteContext.mdp' bpq.prf bp.prf ⟩
 
+lemma by_axm! (h : p ∈ Γ) : Γ *⊢[𝓢]! p := by
+  apply provable_iff.mpr;
+  existsi {p};
+  constructor;
+  . intro q hq; have := Finset.mem_singleton.mp hq; subst_vars; simpa;
+  . exact FiniteContext.by_axm! (by tauto)
+
 instance minimal (Γ : Context F 𝓢) : Minimal Γ where
   mdp := mdp
   verum := of verum
