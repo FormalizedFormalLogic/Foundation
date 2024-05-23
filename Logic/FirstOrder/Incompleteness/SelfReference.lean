@@ -1,4 +1,3 @@
---import Logic.Logic.HilbertStyle
 import Logic.FirstOrder.Arith.Representation
 import Logic.FirstOrder.Computability.Calculus
 import Logic.AutoProver.Prover

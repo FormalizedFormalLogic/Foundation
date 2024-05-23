@@ -171,7 +171,7 @@ lemma eval_hom_iff_of_open : ∀ {n} {e₁ : Fin n → M₁} {ε₁ : μ → M�
   | _, e₁, ε₁, p ⋎ q,    h => by simp at h ⊢; simp [eval_hom_iff_of_open h.1, eval_hom_iff_of_open h.2]
 
 lemma eval_hom_univClosure {n} {ε₁ : μ → M₁} {p : Semiformula L μ n} (hp : p.Open) :
-    Val s₂ (φ ∘ ε₁) (∀* p) → Val s₁ ε₁ (∀* p) := by
+    Evalf s₂ (φ ∘ ε₁) (∀* p) → Evalf s₁ ε₁ (∀* p) := by
   simp; intro h e₁; exact (eval_hom_iff_of_open φ hp).mpr (h (φ ∘ e₁))
 
 end Semiformula

@@ -231,7 +231,7 @@ abbrev Evalf (s : Structure L M) (ε : μ → M) : Formula L μ →ˡᶜ Prop :=
 
 abbrev Evalb (s : Structure L M) (e : Fin n → M) : Semisentence L n →ˡᶜ Prop := Eval s e Empty.elim
 
-abbrev Evalm (M : Type w) [s : Structure L M] (ε : μ → M) :
+abbrev Evalfm (M : Type w) [s : Structure L M] (ε : μ → M) :
     Formula L μ →ˡᶜ Prop := Evalf s ε
 
 abbrev Evalbm (M : Type w) [s : Structure L M] (e : Fin n → M) :
@@ -514,7 +514,7 @@ lemma consequence_iff' {σ : Sentence L} :
    fun h s hs => @h s.Dom s.nonempty s.struc hs⟩
 
 lemma valid_iff {σ : Sentence L} :
-    Semantics.Evalfid (Struc.{v, u} L) σ ↔ ∀ (M : Type v) [Nonempty M] [Structure L M], M ⊧ₘ σ :=
+    Semantics.Valid (Struc.{v, u} L) σ ↔ ∀ (M : Type v) [Nonempty M] [Structure L M], M ⊧ₘ σ :=
   ⟨fun hσ _ _ s ↦ @hσ s.toStruc, fun h s ↦ h s.Dom⟩
 
 lemma satisfiable_iff :

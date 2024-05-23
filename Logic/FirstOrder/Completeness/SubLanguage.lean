@@ -194,7 +194,7 @@ lemma eval_lMap {p : Semiformula L₁ μ n} :
 
 lemma models_lMap (σ : Sentence L₁) :
     Semantics.Realize (s₁.extendStructure Φ).toStruc (Semiformula.lMap Φ σ) ↔ Semantics.Realize s₁.toStruc σ := by
-  simp[Semantics.Realize, Val, eval_lMap Φ injf injr]
+  simp[Semantics.Realize, Evalf, eval_lMap Φ injf injr]
 
 end extendStructure
 

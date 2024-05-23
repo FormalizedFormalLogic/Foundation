@@ -278,7 +278,7 @@ instance Model.structure (T : Theory L) (Γ : Sequent L) : Structure L (Model T 
 @[simp] lemma Model.rel {k} (r : L.Rel k) (v : Fin k → SyntacticTerm L) :
     (Model.structure T Γ).rel r v ↔ nrel r v ∈ ⛓️ := of_eq rfl
 
-lemma semanticMainLemma_val : (p : SyntacticFormula L) → p ∈ ⛓️ → ¬Val (Model.structure T Γ) Semiterm.fvar p
+lemma semanticMainLemma_val : (p : SyntacticFormula L) → p ∈ ⛓️ → ¬Evalf (Model.structure T Γ) Semiterm.fvar p
   | ⊤,        h => by by_contra; exact chainSet_verum nwf h
   | ⊥,        _ => by simp
   | rel r v,  h => by rcases chainSet_axL nwf r v with (hr | hr); { contradiction }; { simpa[eval_rel] using hr }
@@ -287,9 +287,9 @@ lemma semanticMainLemma_val : (p : SyntacticFormula L) → p ∈ ⛓️ → ¬Va
       simp; intro _ _
       have : p ∈ ⛓️ ∨ q ∈ ⛓️ := chainSet_and nwf h
       rcases this with (h | h)
-      · have : ¬Val (Model.structure T Γ) Semiterm.fvar p := semanticMainLemma_val p h
+      · have : ¬Evalf (Model.structure T Γ) Semiterm.fvar p := semanticMainLemma_val p h
         contradiction
-      · have : ¬Val (Model.structure T Γ) Semiterm.fvar q := semanticMainLemma_val q h
+      · have : ¬Evalf (Model.structure T Γ) Semiterm.fvar q := semanticMainLemma_val q h
         contradiction
   | p ⋎ q,    h => by
       have hpq : p ∈ ⛓️ ∧ q ∈ ⛓️ := chainSet_or nwf h
@@ -313,7 +313,7 @@ lemma semanticMainLemma_val : (p : SyntacticFormula L) → p ∈ ⛓️ → ¬Va
 lemma Model.models : Model T Γ ⊧ₘ* T :=
   ⟨by intro σ hσ; simpa using semanticMainLemma_val nwf _ (chainSet_id nwf hσ)⟩
 
-lemma semanticMainLemmaTop {p : SyntacticFormula L} (h : p ∈ Γ) : ¬Val (Model.structure T Γ) Semiterm.fvar p :=
+lemma semanticMainLemmaTop {p : SyntacticFormula L} (h : p ∈ Γ) : ¬Evalf (Model.structure T Γ) Semiterm.fvar p :=
   semanticMainLemma_val nwf p (Set.mem_iUnion.mpr ⟨0, by simp[chain, chainU, h]⟩)
 
 end NotWellFounded

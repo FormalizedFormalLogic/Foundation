@@ -97,7 +97,7 @@ lemma eval_Uprod {p : Semiformula L μ n} :
         rw[val_vecCons_val_eq] at this; exact this)
 
 lemma val_Uprod {p : Formula L μ} :
-    Evalm (Uprod A 𝓤) ε p ↔ {i | Evalf (s i) (fun x ↦ (ε x).val i) p} ∈ 𝓤 :=
+    Evalfm (Uprod A 𝓤) ε p ↔ {i | Evalf (s i) (fun x ↦ (ε x).val i) p} ∈ 𝓤 :=
   by simp[Evalf, eval_Uprod, Matrix.empty_eq]
 
 end Semiformula
