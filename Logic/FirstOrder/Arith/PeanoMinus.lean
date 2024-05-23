@@ -171,7 +171,7 @@ lemma eq_nat_of_lt_nat : ∀ {n : ℕ} {x : M}, x < n → ∃ m : ℕ, x = m
 open Hierarchy
 
 lemma val_numeral {n} : ∀ (t : Semiterm ℒₒᵣ Empty n),
-    ∀ v, Semiterm.val! M (v ·) Empty.elim t = (Semiterm.val! ℕ v Empty.elim t)
+    ∀ v, Semiterm.valm M (v ·) Empty.elim t = (Semiterm.valm ℕ v Empty.elim t)
   | #_,                                _ => by simp
   | Semiterm.func Language.Zero.zero _, e => by simp
   | Semiterm.func Language.One.one _,   e => by simp
@@ -179,7 +179,7 @@ lemma val_numeral {n} : ∀ (t : Semiterm ℒₒᵣ Empty n),
   | Semiterm.func Language.Mul.mul v,   e => by simp[Semiterm.val_func, val_numeral (v 0), val_numeral (v 1)]
 
 lemma pval_of_pval_nat_of_sigma_one : ∀ {n} {σ : Semisentence ℒₒᵣ n},
-    Hierarchy 𝚺 1 σ → ∀ {e}, Semiformula.PVal! ℕ e σ → Semiformula.PVal! M (e ·) σ
+    Hierarchy 𝚺 1 σ → ∀ {e}, Semiformula.Evalbm ℕ e σ → Semiformula.Evalbm M (e ·) σ
   | _, _, Hierarchy.verum _ _ _,               _ => by simp
   | _, _, Hierarchy.falsum _ _ _,              _ => by simp
   | _, _, Hierarchy.rel _ _ Language.Eq.eq v,  e => by simp[Semiformula.eval_rel, Matrix.comp_vecCons', val_numeral]

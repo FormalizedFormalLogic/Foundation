@@ -41,7 +41,7 @@ open Model
 variable {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐏𝐀⁻]
 
 lemma codeAux_uniq {k} {c : Code k} {v : Fin k → M} {z z' : M} :
-    Semiformula.Val! M (z :> v) (codeAux c) → Semiformula.Val! M (z' :> v) (codeAux c) → z = z' := by
+    Semiformula.Evalm M (z :> v) (codeAux c) → Semiformula.Evalm M (z' :> v) (codeAux c) → z = z' := by
   induction c generalizing z z' <;> simp[code, codeAux]
   case zero => rintro rfl rfl; rfl
   case one  => rintro rfl rfl; rfl
@@ -70,12 +70,12 @@ lemma codeAux_uniq {k} {c : Code k} {v : Fin k → M} {z z' : M} :
     case inr =>
       have : z' < z := lt_of_le_of_ne (not_lt.mp h) (Ne.symm hz)
       exact Hz (k := k) c ih h₂ hm₂ h₁ hm₁ (Ne.symm hz) this
-    have : ∃ x, x ≠ 0 ∧ (Semiformula.Val! M (x :> z :> fun i => v i)) (codeAux c) := hm₂ z h
+    have : ∃ x, x ≠ 0 ∧ (Semiformula.Evalm M (x :> z :> fun i => v i)) (codeAux c) := hm₂ z h
     rcases this with ⟨x, xz, hx⟩
     exact xz (ih hx h₁)
 
 lemma code_uniq {k} {c : Code k} {v : Fin k → M} {z z' : M} :
-    Semiformula.PVal! M (z :> v) (code c) → Semiformula.PVal! M (z' :> v) (code c) → z = z' := by
+    Semiformula.Evalbm M (z :> v) (code c) → Semiformula.Evalbm M (z' :> v) (code c) → z = z' := by
   simp[code, Semiformula.eval_rew, Matrix.empty_eq, Function.comp, Matrix.comp_vecCons']
   exact codeAux_uniq
 
@@ -93,7 +93,7 @@ lemma code_sigma_one {k} (c : Nat.ArithPart₁.Code k) : Hierarchy 𝚺 1 (code 
 @[simp] lemma natCast_nat (n : ℕ) : Nat.cast n = n := by rfl
 
 lemma models_codeAux {c : Code k} {f : Vector ℕ k →. ℕ} (hc : c.eval f) (y : ℕ) (v : Fin k → ℕ) :
-    Semiformula.Val! ℕ (y :> v) (codeAux c) ↔ f (Vector.ofFn v) = Part.some y := by
+    Semiformula.Evalm ℕ (y :> v) (codeAux c) ↔ f (Vector.ofFn v) = Part.some y := by
   induction hc generalizing y <;> simp [code, codeAux, models_iff]
   case zero =>
     have : (0 : Part ℕ) = Part.some 0 := rfl
@@ -130,16 +130,16 @@ lemma models_codeAux {c : Code k} {f : Vector ℕ k →. ℕ} (hc : c.eval f) (y
     · intro h; simpa using Nat.mem_rfind.mp (Part.eq_some_iff.mp h)
 
 lemma models_code {c : Code k} {f : Vector ℕ k →. ℕ} (hc : c.eval f) (y : ℕ) (v : Fin k → ℕ) :
-    Semiformula.PVal! ℕ (y :> v) (code c) ↔ y ∈ f (Vector.ofFn v) := by
+    Semiformula.Evalbm ℕ (y :> v) (code c) ↔ y ∈ f (Vector.ofFn v) := by
   simpa[code, models_iff, Semiformula.eval_rew, Matrix.empty_eq, Function.comp,
     Matrix.comp_vecCons', ←Part.eq_some_iff] using models_codeAux hc y v
 
 noncomputable def codeOfPartrec {k} (f : Vector ℕ k →. ℕ) : Code k :=
-  Classical.epsilon (fun c => ∀ y v, Semiformula.PVal! ℕ (y :> v) (code c) ↔ y ∈ f (Vector.ofFn v))
+  Classical.epsilon (fun c => ∀ y v, Semiformula.Evalbm ℕ (y :> v) (code c) ↔ y ∈ f (Vector.ofFn v))
 
 lemma codeOfPartrec_spec {k} {f : Vector ℕ k →. ℕ} (hf : Nat.Partrec' f) {y : ℕ} {v : Fin k → ℕ} :
-    Semiformula.PVal! ℕ (y :> v) (code $ codeOfPartrec f) ↔ y ∈ f (Vector.ofFn v) := by
-  have : ∃ c, ∀ y v, Semiformula.PVal! ℕ (y :> v) (code c) ↔ y ∈ f (Vector.ofFn v) := by
+    Semiformula.Evalbm ℕ (y :> v) (code $ codeOfPartrec f) ↔ y ∈ f (Vector.ofFn v) := by
+  have : ∃ c, ∀ y v, Semiformula.Evalbm ℕ (y :> v) (code c) ↔ y ∈ f (Vector.ofFn v) := by
     rcases Nat.ArithPart₁.exists_code (of_partrec hf) with ⟨c, hc⟩
     exact ⟨c, models_code hc⟩
   exact Classical.epsilon_spec this y v
@@ -157,7 +157,7 @@ lemma provable_iff_mem_partrec {k} {f : Vector ℕ k →. ℕ} (hf : Nat.Partrec
     (Hierarchy.rew (Rew.substs $ ⸢y⸣ :> fun i => ⸢v i⸣) (code_sigma_one (codeOfPartrec f)))
   constructor
   · rintro ⟨b⟩
-    have : Semiformula.PVal! ℕ (y :> v) (code $ codeOfPartrec f) := by
+    have : Semiformula.Evalbm ℕ (y :> v) (code $ codeOfPartrec f) := by
       simpa [σ, models_iff, Semiformula.eval_rew, Matrix.empty_eq, Function.comp, Matrix.comp_vecCons'] using
         Arith.SoundOn.sound sigma ⟨b⟩
     exact (codeOfPartrec_spec hf).mp this
@@ -180,7 +180,7 @@ lemma provable_computable_code_uniq {k} {f : Vector ℕ k → ℕ}
   complete (oRing_consequence_of _ _ (fun M _ _ _ _ _ _ => by
     haveI : M ⊧ₘ* 𝐏𝐀⁻ :=
       ModelsTheory.of_provably_subtheory M 𝐏𝐀⁻ T inferInstance (by assumption)
-    have Hfv : Semiformula.PVal! M (f (Vector.ofFn v) :> (v ·)) (code (codeOfPartrec f)) := by
+    have Hfv : Semiformula.Evalbm M (f (Vector.ofFn v) :> (v ·)) (code (codeOfPartrec f)) := by
       simpa [Model.numeral_eq_natCast, models_iff, Semiformula.eval_substs, Matrix.comp_vecCons'] using
         consequence_iff'.mp (sound₀! (provable_iff_computable T hf v)) M
     simp [Model.numeral_eq_natCast, models_iff, Semiformula.eval_substs, Matrix.comp_vecCons']

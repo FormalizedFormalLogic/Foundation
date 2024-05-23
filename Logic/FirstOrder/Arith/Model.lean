@@ -109,11 +109,11 @@ lemma standardModel_lMap_oringEmb_eq_standardModel : s.lMap (Language.oringEmb :
 variable {M} {e : Fin n → M} {ε : ξ → M}
 
 @[simp] lemma val_lMap_oringEmb {t : Semiterm ℒₒᵣ ξ n} :
-    (t.lMap Language.oringEmb : Semiterm L ξ n).val! M e ε = t.val! M e ε := by
+    (t.lMap Language.oringEmb : Semiterm L ξ n).valm M e ε = t.valm M e ε := by
   simp [Semiterm.val_lMap, standardModel_lMap_oringEmb_eq_standardModel]
 
 @[simp] lemma eval_lMap_oringEmb {p : Semiformula ℒₒᵣ ξ n} :
-    Semiformula.Eval! M e ε (.lMap Language.oringEmb p : Semiformula L ξ n) ↔ Semiformula.Eval! M e ε p := by
+    Semiformula.Evalm M e ε (.lMap Language.oringEmb p : Semiformula L ξ n) ↔ Semiformula.Evalm M e ε p := by
   simp [Semiformula.eval_lMap, standardModel_lMap_oringEmb_eq_standardModel]
 
 end
@@ -188,11 +188,11 @@ variable (L : Language.{u}) [ORing L]
 
 structure Cut (M : Type w) [s : Structure L M] where
   domain : Set M
-  closedSucc : ∀ x ∈ domain, (ᵀ“#0 + 1”).bVal s ![x] ∈ domain
-  closedLt : ∀ x y : M, Semiformula.PVal s ![x, y] “#0 < #1” → y ∈ domain → x ∈ domain
+  closedSucc : ∀ x ∈ domain, (ᵀ“#0 + 1”).valb s ![x] ∈ domain
+  closedLt : ∀ x y : M, Semiformula.Evalb s ![x, y] “#0 < #1” → y ∈ domain → x ∈ domain
 
 structure ClosedCut (M : Type w) [s : Structure L M] extends Structure.ClosedSubset L M where
-  closedLt : ∀ x y : M, Semiformula.PVal s ![x, y] “#0 < #1” → y ∈ domain → x ∈ domain
+  closedLt : ∀ x y : M, Semiformula.Evalb s ![x, y] “#0 < #1” → y ∈ domain → x ∈ domain
 
 end
 

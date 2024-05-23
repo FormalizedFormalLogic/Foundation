@@ -39,7 +39,7 @@ open Structure
 variable (e : Fin n → Uprod A 𝓤) (ε : μ → Uprod A 𝓤)
 
 lemma val_Uprod (t : Semiterm L μ n) :
-    t.val! (Uprod A 𝓤) e ε = ⟨fun i ↦ t.val (s i) (fun x ↦ (e x).val i) (fun x ↦ (ε x).val i)⟩ :=
+    t.valm (Uprod A 𝓤) e ε = ⟨fun i ↦ t.val (s i) (fun x ↦ (e x).val i) (fun x ↦ (ε x).val i)⟩ :=
   by induction t <;> simp[*, val_func]
 
 end Semiterm
@@ -57,7 +57,7 @@ lemma val_vecCons_val_eq {z : Uprod A 𝓤} {i : I} :
   by simp[Matrix.comp_vecCons (Uprod.val · i), Function.comp]
 
 lemma eval_Uprod {p : Semiformula L μ n} :
-    Eval! (Uprod A 𝓤) e ε p ↔ {i | Eval (s i) (fun x ↦ (e x).val i) (fun x ↦ (ε x).val i) p} ∈ 𝓤 := by
+    Evalm (Uprod A 𝓤) e ε p ↔ {i | Eval (s i) (fun x ↦ (e x).val i) (fun x ↦ (ε x).val i) p} ∈ 𝓤 := by
   induction p using rec' <;>
   simp[*, Prop.top_eq_true, Prop.bot_eq_false, eval_rel, eval_nrel, Semiterm.val_Uprod]
   case hverum => exact Filter.univ_mem
@@ -77,7 +77,7 @@ lemma eval_Uprod {p : Semiformula L μ n} :
         have : Eval (s i) (z.val i :> fun x ↦ (e x).val i) (fun x ↦ (ε x).val i) p :=
           by rw [val_vecCons_val_eq]; exact hι
         by_contra hc
-        have : ¬Eval! (A i) (z.val i :> fun x ↦ (e x).val i) (fun x ↦ (ε x).val i) p :=
+        have : ¬Evalm (A i) (z.val i :> fun x ↦ (e x).val i) (fun x ↦ (ε x).val i) p :=
           Classical.epsilon_spec (p := fun z => ¬(Eval (s i) (z :> fun x ↦ (e x).val i) _ p)) ⟨a, hc⟩
         contradiction)
     · intro h x
@@ -97,8 +97,8 @@ lemma eval_Uprod {p : Semiformula L μ n} :
         rw[val_vecCons_val_eq] at this; exact this)
 
 lemma val_Uprod {p : Formula L μ} :
-    Val! (Uprod A 𝓤) ε p ↔ {i | Val (s i) (fun x ↦ (ε x).val i) p} ∈ 𝓤 :=
-  by simp[Val, eval_Uprod, Matrix.empty_eq]
+    Evalm (Uprod A 𝓤) ε p ↔ {i | Evalf (s i) (fun x ↦ (ε x).val i) p} ∈ 𝓤 :=
+  by simp[Evalf, eval_Uprod, Matrix.empty_eq]
 
 end Semiformula
 

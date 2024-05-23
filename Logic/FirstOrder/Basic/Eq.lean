@@ -169,11 +169,11 @@ lemma funk_mk {k} (f : L.Func k) (v : Fin k → M) : Structure.func (M := QuotEq
 lemma rel_mk {k} (r : L.Rel k) (v : Fin k → M) : Structure.rel (M := QuotEq H) r (fun i => ⟦v i⟧) ↔ Structure.rel r v :=
   of_eq <| Quotient.liftVec_mk (s := eqvSetoid H) _ _ _
 
-lemma val_mk {e} {ε} (t : Semiterm L μ n) : Semiterm.val! (QuotEq H) (fun i => ⟦e i⟧) (fun i => ⟦ε i⟧) t = ⟦Semiterm.val! M e ε t⟧ :=
+lemma val_mk {e} {ε} (t : Semiterm L μ n) : Semiterm.valm (QuotEq H) (fun i => ⟦e i⟧) (fun i => ⟦ε i⟧) t = ⟦Semiterm.valm M e ε t⟧ :=
   by induction t <;> simp [*, funk_mk, Semiterm.val_func]
 
 lemma eval_mk {e} {ε} {p : Semiformula L μ n} :
-    Semiformula.Eval! (QuotEq H) (fun i => ⟦e i⟧) (fun i => ⟦ε i⟧) p ↔ Semiformula.Eval! M e ε p := by
+    Semiformula.Evalm (QuotEq H) (fun i => ⟦e i⟧) (fun i => ⟦ε i⟧) p ↔ Semiformula.Evalm M e ε p := by
   induction p using Semiformula.rec' <;> simp [*, Semiformula.eval_rel, Semiformula.eval_nrel, val_mk, rel_mk]
   case hall n p ih =>
     constructor
@@ -189,7 +189,7 @@ lemma eval_mk {e} {ε} {p : Semiformula L μ n} :
     · intro ⟨a, h⟩; exact ⟨⟦a⟧, by simpa [Matrix.comp_vecCons] using ih.mpr h⟩
 
 lemma models_iff {σ : Sentence L} : (QuotEq H) ⊧ₘ σ ↔ M ⊧ₘ σ := by
-  simpa [models_def, Semiformula.Val, eq_finZeroElim, Empty.eq_elim] using
+  simpa [models_def, Semiformula.Evalf, eq_finZeroElim, Empty.eq_elim] using
     eval_mk (H := H) (e := finZeroElim) (ε := Empty.elim) (p := σ)
 
 variable (H)
@@ -202,7 +202,7 @@ lemma rel_eq (a b : QuotEq H) : (@Semiformula.Operator.Eq.eq L _).val (M := Quot
   induction' a using Quotient.ind with a
   induction' b using Quotient.ind with b
   rw[of_eq_of]; simp [eqv, Semiformula.Operator.val];
-  simpa [Eval!, Matrix.fun_eq_vec₂, Empty.eq_elim] using
+  simpa [Evalm, Matrix.fun_eq_vec₂, Empty.eq_elim] using
     eval_mk (H := H) (e := ![a, b]) (ε := Empty.elim) (p := Semiformula.Operator.Eq.eq.sentence)
 
 instance structureEq : Structure.Eq L (QuotEq H) := ⟨rel_eq⟩

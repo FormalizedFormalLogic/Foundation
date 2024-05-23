@@ -74,11 +74,11 @@ def val (s : Structure L M) (e : Fin n → M) (ε : μ → M) : Semiterm L μ n 
   | &x       => ε x
   | func f v => s.func f (fun i => (v i).val s e ε)
 
-abbrev bVal (s : Structure L M) (e : Fin n → M) (t : Semiterm L Empty n) : M := t.val s e Empty.elim
+abbrev valb (s : Structure L M) (e : Fin n → M) (t : Semiterm L Empty n) : M := t.val s e Empty.elim
 
-abbrev val! (M : Type w) [s : Structure L M] {n} (e : Fin n → M) (ε : μ → M) : Semiterm L μ n → M := val s e ε
+abbrev valm (M : Type w) [s : Structure L M] {n} (e : Fin n → M) (ε : μ → M) : Semiterm L μ n → M := val s e ε
 
-abbrev bVal! (M : Type w) [s : Structure L M] {n} (e : Fin n → M) : Semiterm L Empty n → M := bVal s e
+abbrev valbm (M : Type w) [s : Structure L M] {n} (e : Fin n → M) : Semiterm L Empty n → M := valb s e
 
 abbrev realize (s : Structure L M) (t : Term L M) : M := t.val s ![] id
 
@@ -131,15 +131,15 @@ lemma val_bShift' (e : Fin (n + 1) → M) (t : Semiterm L μ n) :
   simp [val_rew]; congr
 
 lemma val_embSubsts (w : Fin k → Semiterm L μ n) (t : Semiterm L Empty k) :
-    (Rew.embSubsts w t).val s e ε = t.bVal s (fun x ↦ (w x).val s e ε) := by
+    (Rew.embSubsts w t).val s e ε = t.valb s (fun x ↦ (w x).val s e ε) := by
   simp [val_rew, Empty.eq_elim]; congr
 
 @[simp] lemma val_toS {e : Fin n → M} (t : Semiterm L (Fin n) 0) :
-    bVal s e (Rew.toS t) = val s ![] e t := by
+    valb s e (Rew.toS t) = val s ![] e t := by
   simp [val_rew, Matrix.empty_eq]; congr
 
 @[simp] lemma val_toF {e : Fin n → M} (t : Semiterm L Empty n) :
-    val s ![] e (Rew.toF t) = bVal s e t := by
+    val s ![] e (Rew.toF t) = valb s e t := by
   simp [val_rew, Matrix.empty_eq]; congr
   funext i; simp; contradiction
 
@@ -149,7 +149,7 @@ variable (φ : L₁ →ᵥ L₂) (e : Fin n → M) (ε : μ → M)
 
 lemma val_lMap (φ : L₁ →ᵥ L₂) (s₂ : Structure L₂ M) (e : Fin n → M) (ε : μ → M) {t : Semiterm L₁ μ n} :
     (t.lMap φ).val s₂ e ε = t.val (s₂.lMap φ) e ε :=
-  by induction t <;> simp [*, val!, Function.comp, val_func, Semiterm.lMap_func]
+  by induction t <;> simp [*, valm, Function.comp, val_func, Semiterm.lMap_func]
 
 end Language
 
@@ -201,41 +201,41 @@ namespace Semiformula
 variable {M : Type w} {s : Structure L M}
 variable {n : ℕ} {e : Fin n → M} {e₂ : Fin n₂ → M} {ε : μ → M} {ε₂ : μ₂ → M}
 
-def Eval' (s : Structure L M) (ε : μ → M) : ∀ {n}, (Fin n → M) → Semiformula L μ n → Prop
+def EvalAux (s : Structure L M) (ε : μ → M) : ∀ {n}, (Fin n → M) → Semiformula L μ n → Prop
   | _, _, ⊤        => True
   | _, _, ⊥        => False
   | _, e, rel p v  => s.rel p (fun i => Semiterm.val s e ε (v i))
   | _, e, nrel p v => ¬s.rel p (fun i => Semiterm.val s e ε (v i))
-  | _, e, p ⋏ q    => p.Eval' s ε e ∧ q.Eval' s ε e
-  | _, e, p ⋎ q    => p.Eval' s ε e ∨ q.Eval' s ε e
-  | _, e, ∀' p     => ∀ x : M, (p.Eval' s ε (x :> e))
-  | _, e, ∃' p     => ∃ x : M, (p.Eval' s ε (x :> e))
+  | _, e, p ⋏ q    => p.EvalAux s ε e ∧ q.EvalAux s ε e
+  | _, e, p ⋎ q    => p.EvalAux s ε e ∨ q.EvalAux s ε e
+  | _, e, ∀' p     => ∀ x : M, (p.EvalAux s ε (x :> e))
+  | _, e, ∃' p     => ∃ x : M, (p.EvalAux s ε (x :> e))
 
-@[simp] lemma Eval'_neg (p : Semiformula L μ n) :
-    Eval' s ε e (~p) = ¬Eval' s ε e p :=
-  by induction p using rec' <;> simp [*, Eval', ←neg_eq, or_iff_not_imp_left]
+@[simp] lemma EvalAux_neg (p : Semiformula L μ n) :
+    EvalAux s ε e (~p) = ¬EvalAux s ε e p :=
+  by induction p using rec' <;> simp [*, EvalAux, ←neg_eq, or_iff_not_imp_left]
 
 def Eval (s : Structure L M) (e : Fin n → M) (ε : μ → M) : Semiformula L μ n →ˡᶜ Prop where
-  toTr := Eval' s ε e
+  toTr := EvalAux s ε e
   map_top' := rfl
   map_bot' := rfl
-  map_and' := by simp [Eval']
-  map_or' := by simp [Eval']
-  map_neg' := by simp [Eval'_neg]
-  map_imply' := by simp [imp_eq, Eval'_neg, ←neg_eq, Eval', imp_iff_not_or]
+  map_and' := by simp [EvalAux]
+  map_or' := by simp [EvalAux]
+  map_neg' := by simp [EvalAux_neg]
+  map_imply' := by simp [imp_eq, EvalAux_neg, ←neg_eq, EvalAux, imp_iff_not_or]
 
-abbrev Eval! (M : Type w) [s : Structure L M] {n} (e : Fin n → M) (ε : μ → M) :
+abbrev Evalm (M : Type w) [s : Structure L M] {n} (e : Fin n → M) (ε : μ → M) :
     Semiformula L μ n →ˡᶜ Prop := Eval s e ε
 
-abbrev Val (s : Structure L M) (ε : μ → M) : Formula L μ →ˡᶜ Prop := Eval s ![] ε
+abbrev Evalf (s : Structure L M) (ε : μ → M) : Formula L μ →ˡᶜ Prop := Eval s ![] ε
 
-abbrev PVal (s : Structure L M) (e : Fin n → M) : Semisentence L n →ˡᶜ Prop := Eval s e Empty.elim
+abbrev Evalb (s : Structure L M) (e : Fin n → M) : Semisentence L n →ˡᶜ Prop := Eval s e Empty.elim
 
-abbrev Val! (M : Type w) [s : Structure L M] (ε : μ → M) :
-    Formula L μ →ˡᶜ Prop := Val s ε
+abbrev Evalm (M : Type w) [s : Structure L M] (ε : μ → M) :
+    Formula L μ →ˡᶜ Prop := Evalf s ε
 
-abbrev PVal! (M : Type w) [s : Structure L M] (e : Fin n → M) :
-    Semiformula L Empty n →ˡᶜ Prop := PVal s e
+abbrev Evalbm (M : Type w) [s : Structure L M] (e : Fin n → M) :
+    Semiformula L Empty n →ˡᶜ Prop := Evalb s e
 
 abbrev Realize (s : Structure L M) : Formula L M →ˡᶜ Prop := Eval s ![] id
 
@@ -357,7 +357,7 @@ lemma eval_substs {k} (w : Fin k → Semiterm L μ n) (p : Semiformula L μ k) :
   simp [Rew.toS, eval_rew, Function.comp, Matrix.empty_eq]
 
 lemma eval_embSubsts {k} (w : Fin k → Semiterm L μ n) (σ : Semisentence L k) :
-    Eval s e ε ((Rew.embSubsts w).hom σ) ↔ PVal s (fun x ↦ (w x).val s e ε) σ := by
+    Eval s e ε ((Rew.embSubsts w).hom σ) ↔ Evalb s (fun x ↦ (w x).val s e ε) σ := by
   simp [eval_rew, Function.comp, Empty.eq_elim]
 
 section Syntactic
@@ -404,7 +404,7 @@ lemma eval_iff_of_funEqOn (p : Semiformula L μ n) (h : Function.funEqOn (fvar? 
     exact ih (fun x hx ↦ h _ $ by simp [fvar?]; exact hx)
 
 lemma val_fvUnivClosure_inhabited [h : Nonempty μ] [DecidableEq μ] {p : Formula L μ} :
-    Val s Empty.elim (∀ᶠ* p) ↔ ∀ ε, Val s ε p := by
+    Evalf s Empty.elim (∀ᶠ* p) ↔ ∀ ε, Evalf s ε p := by
   simp [Formula.fvUnivClosure, eval_rewriteMap]
   haveI : Inhabited μ := ⟨Classical.ofNonempty⟩
   constructor
@@ -415,7 +415,7 @@ lemma val_fvUnivClosure_inhabited [h : Nonempty μ] [DecidableEq μ] {p : Formul
     exact h (fun x ↦ e $ Semiformula.fvListing p x)
 
 @[simp] lemma val_fvUnivClosure [Nonempty M] [DecidableEq μ] {p : Formula L μ} :
-    Val s Empty.elim (∀ᶠ* p) ↔ ∀ ε, Val s ε p := by
+    Evalf s Empty.elim (∀ᶠ* p) ↔ ∀ ε, Evalf s ε p := by
   by_cases hμ : Nonempty μ
   · exact val_fvUnivClosure_inhabited
   · haveI hμ : IsEmpty μ := not_nonempty_iff.mp hμ
@@ -456,7 +456,7 @@ end
 end Structure
 
 instance semantics : Semantics (Sentence L) (Struc L) where
-  Realize := fun str ↦ Semiformula.Val str.struc Empty.elim
+  Realize := fun str ↦ Semiformula.Evalf str.struc Empty.elim
 
 instance : Semantics.Tarski (Struc L) where
   realize_top := by simp [Semantics.Realize]
@@ -479,7 +479,7 @@ abbrev ModelsTheory (T : Theory L) : Prop :=
 
 infix:45 " ⊧ₘ* " => ModelsTheory
 
-abbrev Realize (M : Type*) [s : Structure L M] : Formula L M → Prop := Semiformula.Val s id
+abbrev Realize (M : Type*) [s : Structure L M] : Formula L M → Prop := Semiformula.Evalf s id
 
 infix:45 " ⊧ₘᵣ " => Realize
 
@@ -493,11 +493,11 @@ variable {M}
 
 def modelsTheory_iff_modelsTheory_s : M ⊧ₘ* T ↔ s.toStruc ⊧* T := by rfl
 
-lemma models_def {f} : (M ⊧ₘ f) = Semiformula.Val s Empty.elim f := rfl
+lemma models_def {f} : (M ⊧ₘ f) = Semiformula.Evalf s Empty.elim f := rfl
 
-lemma models_iff {σ : Sentence L} : M ⊧ₘ σ ↔ Semiformula.Val s Empty.elim σ := by simp [models_def]
+lemma models_iff {σ : Sentence L} : M ⊧ₘ σ ↔ Semiformula.Evalf s Empty.elim σ := by simp [models_def]
 
-lemma models_def' : Semantics.Realize s.toStruc = Semiformula.Val s Empty.elim := rfl
+lemma models_def' : Semantics.Realize s.toStruc = Semiformula.Evalf s Empty.elim := rfl
 
 lemma modelsTheory_iff : M ⊧ₘ* T ↔ (∀ {p}, p ∈ T → M ⊧ₘ p) := Semantics.realizeSet_iff
 
@@ -514,7 +514,7 @@ lemma consequence_iff' {σ : Sentence L} :
    fun h s hs => @h s.Dom s.nonempty s.struc hs⟩
 
 lemma valid_iff {σ : Sentence L} :
-    Semantics.Valid (Struc.{v, u} L) σ ↔ ∀ (M : Type v) [Nonempty M] [Structure L M], M ⊧ₘ σ :=
+    Semantics.Evalfid (Struc.{v, u} L) σ ↔ ∀ (M : Type v) [Nonempty M] [Structure L M], M ⊧ₘ σ :=
   ⟨fun hσ _ _ s ↦ @hσ s.toStruc, fun h s ↦ h s.Dom⟩
 
 lemma satisfiable_iff :
@@ -557,7 +557,7 @@ lemma eval_lMap {p : Semiformula L₁ μ n} :
 
 lemma models_lMap {σ : Sentence L₁} :
     s₂.toStruc ⊧ lMap Φ σ ↔ (s₂.lMap Φ).toStruc ⊧ σ :=
-  by simp [Semantics.Realize, Val, eval_lMap]
+  by simp [Semantics.Realize, Evalf, eval_lMap]
 
 end lMap
 
