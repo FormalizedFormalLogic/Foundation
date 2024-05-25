@@ -80,7 +80,7 @@ end Kripke.GeachConfluent
 open Kripke
 open Formula Formula.Kripke
 
-instance AxiomSet.Geach.definability (t) : AxiomSetDefinability W (AxiomSet.Geach t : AxiomSet α) (GeachConfluent t) where
+instance AxiomSet.Geach.definability (t) : AxiomSetDefinability W (𝐠𝐞(t) : AxiomSet α) (GeachConfluent t) where
   defines F := by
     simp [AxiomSet.Geach, GeachConfluent, Geach];
     constructor;
@@ -112,7 +112,7 @@ instance AxiomSet.Geach.definability (t) : AxiomSetDefinability W (AxiomSet.Geac
       existsi u;
       exact ⟨hyu, hzu⟩;
 
-instance AxiomSet.GeachLogic.definability (l) : AxiomSetDefinability W (AxiomSet.GeachLogic l : AxiomSet α) (Kripke.MultiGeachConfluent l) where
+instance AxiomSet.GeachLogic.definability (l) : AxiomSetDefinability W (𝐆𝐞(l) : AxiomSet α) (Kripke.MultiGeachConfluent l) where
   defines F := by
     induction l with
     | nil => apply AxiomSet.K.definability.defines;
@@ -125,15 +125,15 @@ instance AxiomSet.GeachLogic.definability (l) : AxiomSetDefinability W (AxiomSet
         . apply ih.mp hts;
       . rintro ⟨ht, hts⟩;
         constructor;
-        . exact @AxiomSet.Geach.definability W α _ t |>.defines F |>.mpr ht;
+        . exact AxiomSet.Geach.definability t |>.defines F |>.mpr ht;
         . apply ih.mpr hts;
 
-instance AxiomSet.IsGeach.definability (W) (Λ : AxiomSet α) [hG : Λ.IsGeach] : AxiomSetDefinability W Λ (Kripke.MultiGeachConfluent hG.taples) where
-  defines F := by convert (AxiomSet.GeachLogic.definability hG.taples |>.defines F); exact hG.char;
+instance AxiomSet.IsGeach.definability  [hG : Λ.IsGeach] : AxiomSetDefinability W Λ (Kripke.MultiGeachConfluent hG.taples) where
+  defines F := by convert (AxiomSet.GeachLogic.definability _ |>.defines F); exact hG.char;
 
-instance AxiomSet.S4.definability : AxiomSetDefinability W (𝐒𝟒 : AxiomSet α) (λ F => Reflexive F ∧ Transitive F) := by simpa using AxiomSet.IsGeach.definability W 𝐒𝟒
+instance AxiomSet.S4.definability : AxiomSetDefinability (α := α) W 𝐒𝟒 (λ F => Reflexive F ∧ Transitive F) := by simpa using AxiomSet.IsGeach.definability (Λ := 𝐒𝟒)
 
-instance AxiomSet.S5.definability : AxiomSetDefinability W (𝐒𝟓 : AxiomSet α) (λ F => Reflexive F ∧ Euclidean F) := by simpa using AxiomSet.IsGeach.definability W 𝐒𝟓
+instance AxiomSet.S5.definability : AxiomSetDefinability (α := α) W 𝐒𝟓 (λ F => Reflexive F ∧ Euclidean F) := by simpa using AxiomSet.IsGeach.definability (Λ := 𝐒𝟓)
 
 instance : Set.Nonempty 𝔽((𝐒𝟒 : AxiomSet α), W) := by
   existsi (λ _ _ => True);

@@ -28,7 +28,7 @@ def consistent_either (p : Formula α) : Consistent Λ (insert p t.1, t.2) ∨ C
   obtain ⟨⟨Γ₁, hΓ₁, Δ₁, hΔ₁, hC₁⟩, ⟨Γ₂, hΓ₂, Δ₂, hΔ₂, hC₂⟩⟩ := by simpa only [Consistent, not_or, not_forall, not_not, exists_prop, exists_and_left] using hC;
   simp_all;
   sorry;
-  -- replace hC₁ : Λ ⊢! ⋀(Γ₁.remove p) ⋏ p ⟶ ⋁Δ₁ := implyLeftRemoveConj hC₁;
+  -- replace hC₁ : Λ ⊢! ⋀(Γ₁.remove p) ⋏ p ⟶ ⋁Δ₁ := implyLeftRemoveConj' hC₁;
   -- replace hC₂ : Λ ⊢! ⋀Γ₂ ⟶ ⋁(Δ₂.remove p) ⋎ p := implyRightRemoveDisj hC₂;
   -- have : Λ ⊢! ⋀(Γ₁.remove p) ⋏ p ⟶ (⋁Δ₁ ⋎ ⋁Δ₂) := imp_trans! hC₁ (by simp)
   -- have : Λ ⊢! ⋀(Γ₁.remove p) ⟶ (p ⟶ (⋁Δ₁ ⋎ ⋁Δ₂)) := andImplyIffImplyImply'!.mp this;
@@ -188,7 +188,7 @@ lemma truthlemma : ((CanonicalModel Λ), t) ⊧ p ↔ p ∈ t.tableau.1 := by
           have := by simpa using hΓ r hr₁;
           simp_all;
         by_contra hC;
-        have : Λ ⊢! (Γ.remove p).conj' ⟶ (p ⟶ q) := imp_trans! (andImplyIffImplyImply'!.mp $ implyLeftRemoveConj hC) (by
+        have : Λ ⊢! (Γ.remove p).conj' ⟶ (p ⟶ q) := imp_trans! (andImplyIffImplyImply'!.mp $ implyLeftRemoveConj' hC) (by
           apply provable_iff_provable.mpr;
           apply deduct_iff.mpr;
           apply deduct_iff.mpr;

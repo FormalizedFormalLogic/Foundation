@@ -1,5 +1,6 @@
 import Logic.Modal.Standard.System
 import Logic.Modal.Standard.Formula
+import Logic.Modal.Standard.Deduction
 
 namespace LO.System.Axioms
 
@@ -13,6 +14,7 @@ structure Geach.Taple where
 
 abbrev Geach (l : Geach.Taple) (p : F) := ◇^[l.i](□^[l.m]p) ⟶ □^[l.j](◇^[l.n]p)
 
+
 end LO.System.Axioms
 
 namespace LO.Modal.Standard
@@ -24,6 +26,7 @@ open System
 namespace AxiomSet
 
 def Geach (l : Axioms.Geach.Taple) : AxiomSet α := { Axioms.Geach l p | (p) }
+notation:max "𝐠𝐞(" t ")" => AxiomSet.Geach t
 
 namespace Geach
 
@@ -50,6 +53,7 @@ end Geach
 def GeachLogic : List Axioms.Geach.Taple → AxiomSet α
   | [] => 𝐊
   | x :: xs => (AxiomSet.Geach x) ∪ (AxiomSet.GeachLogic xs)
+notation:max "𝐆𝐞(" l ")" => AxiomSet.GeachLogic l
 
 @[simp]
 lemma GeachLogic.subsetK {l : List Axioms.Geach.Taple} : (𝐊 : AxiomSet α) ⊆ (AxiomSet.GeachLogic l) := by
@@ -59,10 +63,13 @@ lemma GeachLogic.subsetK {l : List Axioms.Geach.Taple} : (𝐊 : AxiomSet α) �
 
 lemma GeachLogic.subsetK' (h : (AxiomSet.GeachLogic l) ⊆ Λ): (𝐊 : AxiomSet α) ⊆ Λ := Set.Subset.trans GeachLogic.subsetK h
 
+instance instKofGeachLogic : System.K (𝐆𝐞(l) : AxiomSet α) := K_of_subset_K (by simp)
 
 class IsGeach (Λ : AxiomSet α) where
   taples : List Axioms.Geach.Taple
   char : Λ = AxiomSet.GeachLogic taples
+
+instance [Λ.IsGeach] : System.K Λ := by rw [IsGeach.char (Λ := Λ)]; exact instKofGeachLogic;
 
 @[simp]
 instance : IsGeach (𝐊 : AxiomSet α) where

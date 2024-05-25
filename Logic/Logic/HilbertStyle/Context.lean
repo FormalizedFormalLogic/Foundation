@@ -123,15 +123,28 @@ def mdp' (bΓ : Γ ⊢[𝓢] p ⟶ q) (bΔ : Δ ⊢[𝓢] p) : (Γ ++ Δ) ⊢[�
 def deduct {p q : F} {Γ : List F} : (p :: Γ) ⊢[𝓢] q → Γ ⊢[𝓢] p ⟶ q := fun b ↦
   ofDef <| andLeft (andImplyIffImplyImply Γ.conj p q) ⨀ impTrans (andComm Γ.conj p) (toDef b)
 
+lemma deduct! (h : (p :: Γ) ⊢[𝓢]! q) :  Γ ⊢[𝓢]! p ⟶ q  := ⟨FiniteContext.deduct h.some⟩
+
+
 def deductInv {p q : F} {Γ : List F} : Γ ⊢[𝓢] p ⟶ q → (p :: Γ) ⊢[𝓢] q := fun b ↦
   ofDef <| impTrans (andComm p Γ.conj) <| andRight (andImplyIffImplyImply Γ.conj p q) ⨀ toDef b
+
+lemma deductInv! (h : Γ ⊢[𝓢]! p ⟶ q) : (p :: Γ) ⊢[𝓢]! q := ⟨FiniteContext.deductInv h.some⟩
+
 
 lemma deduct_iff {p q : F} {Γ : List F} : Γ ⊢[𝓢]! p ⟶ q ↔ (p :: Γ) ⊢[𝓢]! q :=
   ⟨fun h ↦ ⟨deductInv h.some⟩, fun h ↦ ⟨deduct h.some⟩⟩
 
+
 def deduct' : [p] ⊢[𝓢] q → 𝓢 ⊢ p ⟶ q := fun b ↦ emptyPrf <| deduct b
 
+lemma deduct'! (h : [p] ⊢[𝓢]! q) : 𝓢 ⊢! p ⟶ q := ⟨FiniteContext.deduct' h.some⟩
+
+
 def deductInv' : 𝓢 ⊢ p ⟶ q → [p] ⊢[𝓢] q := fun b ↦ deductInv <| of b
+
+lemma deductInv'! (h : 𝓢 ⊢! p ⟶ q) : [p] ⊢[𝓢]! q := ⟨FiniteContext.deductInv' h.some⟩
+
 
 instance deduction : Deduction (FiniteContext F 𝓢) where
   ofInsert := deduct
@@ -270,6 +283,8 @@ instance deduction : Deduction (Context F 𝓢) where
   inv := deductInv
 
 def of {p : F} (b : 𝓢 ⊢ p) : Γ *⊢[𝓢] p := ⟨[], by simp, FiniteContext.of b⟩
+
+lemma of! (b : 𝓢 ⊢! p) : Γ *⊢[𝓢]! p := ⟨Context.of b.some⟩
 
 def mdp {Γ : Set F} (bpq : Γ *⊢[𝓢] p ⟶ q) (bp : Γ *⊢[𝓢] p) : Γ *⊢[𝓢] q :=
   ⟨ bpq.ctx ++ bp.ctx, by

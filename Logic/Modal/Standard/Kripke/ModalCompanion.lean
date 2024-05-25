@@ -63,7 +63,7 @@ lemma axiomTc_GTranslate! [System.K4 mΛ] : mΛ ⊢! pᵍ ⟶ □pᵍ := by
   | hverum => exact dhyp! (nec! verum!);
   | hand p q ihp ihq =>
     simp only [GTranslation.and_def];
-    exact imp_trans! (conjReplace! ihp ihq) collect_box_conj!
+    exact imp_trans! (andReplace! ihp ihq) collect_box_and!
   | hor p q ihp ihq =>
     simp only [GTranslation.or_def];
     exact imp_trans! (disj₃''! (implyOrLeft'! ihp) (implyOrRight'! ihq)) collect_box_or!

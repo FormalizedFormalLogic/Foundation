@@ -2,6 +2,7 @@ import Logic.Logic.HilbertStyle.Basic
 import Logic.Logic.HilbertStyle.Supplemental
 import Logic.Modal.Standard.System
 import Logic.Modal.Standard.Formula
+import Logic.Modal.Standard.HilbertStyle
 
 namespace LO.Modal.Standard
 
@@ -66,6 +67,7 @@ instance K_of_subset_K (hK : 𝐊 ⊆ Λ := by simp) : System.K (Λ : AxiomSet �
 
 instance : System.K (𝐊 : AxiomSet α) := K_of_subset_K (by rfl)
 
+instance : System.K (𝐊 ∪ Λ : AxiomSet α) := K_of_subset_K
 
 instance S4_of_subset_S4 (hS4 : 𝐒𝟒 ⊆ Λ := by simp) : System.S4 (Λ : AxiomSet α) where
   K _ _   := Deduction.maxm $ Set.mem_of_subset_of_mem hS4 (by simp);

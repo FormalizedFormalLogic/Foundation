@@ -213,13 +213,31 @@ end Set
 
 namespace List
 
-abbrev multibox (n : ℕ) (l : List F) : List F := List.multimop true n l
+variable (n : ℕ) (l : List F)
 
-abbrev box (l : List F) : List F := List.mop true l
+abbrev multibox : List F := List.multimop true n l
+notation "□^[" n:90 "]" l:80 => List.multibox n l
 
-abbrev multidia (n : ℕ) (l : List F) : List F := List.multimop false n l
+abbrev box : List F := List.mop true l
+notation "□" l:80 => List.box l
 
-abbrev dia (l : List F) : List F := List.mop false l
+abbrev multidia : List F := List.multimop false n l
+notation "◇^[" n:90 "]" l:80 => List.multidia n l
+
+abbrev dia : List F := List.mop false l
+notation "◇" l:80 => List.dia l
+
+abbrev premultibox : List F := List.premultimop true n l
+notation "□⁻¹^[" n:90 "]" l:80 => List.premultibox n l
+
+abbrev prebox : List F := List.premop true l
+notation "□⁻¹" l:80 => List.prebox l
+
+abbrev premultidia : List F := List.premultimop false n l
+notation "◇⁻¹^[" n:90 "]" l:80 => List.premultidia n l
+
+abbrev predia : List F := List.premop false l
+notation "◇⁻¹" l:80 => List.predia l
 
 end List
 

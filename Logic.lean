@@ -70,6 +70,4 @@ import Logic.FirstOrder.Incompleteness.FirstIncompleteness
 import Logic.FirstOrder.Incompleteness.SelfReference
 
 -- Modal Logic
-
--- TODO: Uncomment when merged to master
--- import Logic.Modal.Normal
+import Logic.Modal.Standard

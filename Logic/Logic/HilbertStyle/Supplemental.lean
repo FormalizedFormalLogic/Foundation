@@ -13,6 +13,15 @@ variable [Minimal 𝓢]
 
 open FiniteContext
 
+def bot_of_mem_either (h₁ : p ∈ Γ) (h₂ : ~p ∈ Γ) : Γ ⊢[𝓢] ⊥ := by
+  exact (by simpa [NegDefinition.neg] using FiniteContext.byAxm h₂) ⨀ (FiniteContext.byAxm h₁);
+@[simp] lemma bot_of_mem_either! (h₁ : p ∈ Γ) (h₂ : ~p ∈ Γ) : Γ ⊢[𝓢]! ⊥ := ⟨bot_of_mem_either h₁ h₂⟩
+
+
+def efq_of_mem_either [HasEFQ 𝓢] (h₁ : p ∈ Γ) (h₂ : ~p ∈ Γ) : Γ ⊢[𝓢] q := efq' $ bot_of_mem_either h₁ h₂
+@[simp] lemma efq_of_mem_either! [HasEFQ 𝓢] (h₁ : p ∈ Γ) (h₂ : ~p ∈ Γ) : Γ ⊢[𝓢]! q := ⟨efq_of_mem_either h₁ h₂⟩
+
+
 lemma orComm : 𝓢 ⊢ p ⋎ q ⟶ q ⋎ p := by
   apply emptyPrf;
   apply deduct;
@@ -22,19 +31,63 @@ lemma orComm! : 𝓢 ⊢! p ⋎ q ⟶ q ⋎ p := ⟨orComm⟩
 lemma orComm' (h : 𝓢 ⊢ p ⋎ q) : 𝓢 ⊢ q ⋎ p := orComm ⨀ h
 lemma orComm'! (h : 𝓢 ⊢! p ⋎ q) : 𝓢 ⊢! q ⋎ p := ⟨orComm' h.some⟩
 
+def implyRightAnd (hq : 𝓢 ⊢ p ⟶ q) (hr : 𝓢 ⊢ p ⟶ r) : 𝓢 ⊢ p ⟶ q ⋏ r := by
+  apply emptyPrf;
+  apply deduct;
+  replace hq : [] ⊢[𝓢] p ⟶ q := of hq;
+  replace hr : [] ⊢[𝓢] p ⟶ r := of hr;
+  exact conj₃' (mdp' hq (FiniteContext.byAxm (by simp))) (mdp' hr (FiniteContext.byAxm (by simp)))
+@[simp] lemma implyRightAnd! (hq : 𝓢 ⊢! p ⟶ q) (hr : 𝓢 ⊢! p ⟶ r) : 𝓢 ⊢! p ⟶ q ⋏ r := ⟨implyRightAnd hq.some hr.some⟩
+
+
+def andReplaceLeft' (hc : 𝓢 ⊢ p ⋏ q) (h : 𝓢 ⊢ p ⟶ r) : 𝓢 ⊢ r ⋏ q := conj₃' (h ⨀ conj₁' hc) (conj₂' hc)
+lemma andReplaceLeft'! (hc : 𝓢 ⊢! p ⋏ q) (h : 𝓢 ⊢! p ⟶ r) : 𝓢 ⊢! r ⋏ q := ⟨andReplaceLeft' hc.some h.some⟩
+
+def andReplaceLeft (h : 𝓢 ⊢ p ⟶ r) : 𝓢 ⊢ p ⋏ q ⟶ r ⋏ q := by
+  apply deduct';
+  exact andReplaceLeft' (FiniteContext.byAxm (by simp)) (of h)
+lemma andReplaceLeft! (h : 𝓢 ⊢! p ⟶ r) : 𝓢 ⊢! p ⋏ q ⟶ r ⋏ q := ⟨andReplaceLeft h.some⟩
+
+
+def andReplaceRight' (hc : 𝓢 ⊢ p ⋏ q) (h : 𝓢 ⊢ q ⟶ r) : 𝓢 ⊢ p ⋏ r := conj₃' (conj₁' hc) (h ⨀ conj₂' hc)
+lemma andReplaceRight'! (hc : 𝓢 ⊢! p ⋏ q) (h : 𝓢 ⊢! q ⟶ r) : 𝓢 ⊢! p ⋏ r := ⟨andReplaceRight' hc.some h.some⟩
+
+def andReplaceRight (h : 𝓢 ⊢ q ⟶ r) : 𝓢 ⊢ p ⋏ q ⟶ p ⋏ r := by
+  apply deduct';
+  exact andReplaceRight' (FiniteContext.byAxm (by simp)) (of h)
+lemma andReplaceRight! (h : 𝓢 ⊢! q ⟶ r) : 𝓢 ⊢! p ⋏ q ⟶ p ⋏ r := ⟨andReplaceRight h.some⟩
+
+
+def andReplace' (hc : 𝓢 ⊢ p ⋏ q) (h₁ : 𝓢 ⊢ p ⟶ r) (h₂ : 𝓢 ⊢ q ⟶ s) : 𝓢 ⊢ r ⋏ s := andReplaceRight' (andReplaceLeft' hc h₁) h₂
+lemma andReplace'! (hc : 𝓢 ⊢! p ⋏ q) (h₁ : 𝓢 ⊢! p ⟶ r) (h₂ : 𝓢 ⊢! q ⟶ s) : 𝓢 ⊢! r ⋏ s := ⟨andReplace' hc.some h₁.some h₂.some⟩
+
+def andReplace (h₁ : 𝓢 ⊢ p ⟶ r) (h₂ : 𝓢 ⊢ q ⟶ s) : 𝓢 ⊢ p ⋏ q ⟶ r ⋏ s := by
+  apply deduct';
+  exact andReplace' (FiniteContext.byAxm (by simp)) (of h₁) (of h₂)
+lemma andReplace! (h₁ : 𝓢 ⊢! p ⟶ r) (h₂ : 𝓢 ⊢! q ⟶ s) : 𝓢 ⊢! p ⋏ q ⟶ r ⋏ s := ⟨andReplace h₁.some h₂.some⟩
+
 
 def dni : 𝓢 ⊢ p ⟶ ~~p := by
-  simp [NegDefinition.neg];
+  rw [NegDefinition.neg];
   apply emptyPrf;
   apply deduct;
   apply deduct;
-  have d₁ : [p ⟶ ⊥, p] ⊢[𝓢] p ⟶ ⊥ := FiniteContext.byAxm (by simp);
-  have d₂ : [p ⟶ ⊥, p] ⊢[𝓢] p := FiniteContext.byAxm (by simp);
-  exact d₁ ⨀ d₂
+  exact bot_of_mem_either (p := p) (by simp) (by simp);
 @[simp] lemma dni! : 𝓢 ⊢! p ⟶ ~~p := ⟨dni⟩
 
 def dni' (b : 𝓢 ⊢ p) : 𝓢 ⊢ ~~p := dni ⨀ b
 lemma dni'! (b : 𝓢 ⊢! p) : 𝓢 ⊢! ~~p := ⟨dni' b.some⟩
+
+
+def dniOr' (d : 𝓢 ⊢ p ⋎ q) : 𝓢 ⊢ ~~p ⋎ ~~q := disj₃' (impTrans dni disj₁) (impTrans dni disj₂) d
+@[simp] lemma dniOr'! (d : 𝓢 ⊢! p ⋎ q) : 𝓢 ⊢! ~~p ⋎ ~~q := ⟨dniOr' d.some⟩
+
+def dniAnd' (d : 𝓢 ⊢ p ⋏ q) : 𝓢 ⊢ ~~p ⋏ ~~q := conj₃' (dni' $ conj₁' d) (dni' $ conj₂' d)
+@[simp] lemma dniAnd'! (d : 𝓢 ⊢! p ⋏ q) : 𝓢 ⊢! ~~p ⋏ ~~q := ⟨dniAnd' d.some⟩
+
+
+def dn [HasDNE 𝓢] : 𝓢 ⊢ p ⟷ ~~p := iffIntro dni dne
+@[simp] lemma dn! [HasDNE 𝓢] : 𝓢 ⊢! p ⟷ ~~p := ⟨dn⟩
 
 
 def contra₀ : 𝓢 ⊢ (p ⟶ q) ⟶ (~q ⟶ ~p) := by
@@ -63,8 +116,8 @@ def contra₀x2 : 𝓢 ⊢ (p ⟶ q) ⟶ (~~p ⟶ ~~q) := by
 @[simp] lemma contra₀x2! : 𝓢 ⊢! (p ⟶ q) ⟶ (~~p ⟶ ~~q) := ⟨contra₀x2⟩
 
 
-def contra₁'(b : 𝓢 ⊢ p ⟶ ~q) : 𝓢 ⊢ q ⟶ ~p := impTrans dni (contra₀' b)
-@[simp] lemma contra₁'!(b : 𝓢 ⊢! p ⟶ ~q) : 𝓢 ⊢! q ⟶ ~p := ⟨contra₁' b.some⟩
+def contra₁' (b : 𝓢 ⊢ p ⟶ ~q) : 𝓢 ⊢ q ⟶ ~p := impTrans dni (contra₀' b)
+@[simp] lemma contra₁'! (b : 𝓢 ⊢! p ⟶ ~q) : 𝓢 ⊢! q ⟶ ~p := ⟨contra₁' b.some⟩
 
 def contra₁ : 𝓢 ⊢ (p ⟶ ~q) ⟶ (q ⟶ ~p) := by
   apply emptyPrf;
@@ -104,12 +157,23 @@ def tne' (b : 𝓢 ⊢ ~(~~p)) : 𝓢 ⊢ ~p := tne ⨀ b
 @[simp] lemma tne'! (b : 𝓢 ⊢! ~(~~p)) : 𝓢 ⊢! ~p := ⟨tne' b.some⟩
 
 
-def impSwap' (h : 𝓢 ⊢ (p ⟶ q ⟶ r)) : 𝓢 ⊢ (q ⟶ p ⟶ r) := by
+lemma implyLeftReplaceIff'! (h : 𝓢 ⊢! p ⟷ q) : 𝓢 ⊢! p ⟶ r ↔ 𝓢 ⊢! q ⟶ r := by
+  constructor;
+  . exact imp_trans! $ conj₂'! h;
+  . exact imp_trans! $ conj₁'! h;
+
+
+lemma implyRightReplaceIff'! (h : 𝓢 ⊢! p ⟷ q) : 𝓢 ⊢! r ⟶ p ↔ 𝓢 ⊢! r ⟶ q := by
+  constructor;
+  . intro hrp; exact imp_trans! hrp $ conj₁'! h;
+  . intro hrq; exact imp_trans! hrq $ conj₂'! h;
+
+
+def impSwap' (h : 𝓢 ⊢ p ⟶ q ⟶ r) : 𝓢 ⊢ q ⟶ p ⟶ r := by
   apply emptyPrf;
   apply deduct;
   apply deduct;
-  have := of (Γ := [p, q]) h;
-  exact this ⨀ FiniteContext.byAxm (by simp) ⨀ FiniteContext.byAxm (by simp);
+  exact (of (Γ := [p, q]) h) ⨀ FiniteContext.byAxm (by simp) ⨀ FiniteContext.byAxm (by simp);
 @[simp] lemma imp_swap'! (h : 𝓢 ⊢! (p ⟶ q ⟶ r)) : 𝓢 ⊢! (q ⟶ p ⟶ r) := ⟨impSwap' h.some⟩
 
 def impSwap : 𝓢 ⊢ (p ⟶ q ⟶ r) ⟶ (q ⟶ p ⟶ r) := by
@@ -142,14 +206,6 @@ def introFalsumOfAnd : 𝓢 ⊢ p ⋏ ~p ⟶ ⊥ := by
 @[simp] lemma introFalsumOfAnd! : 𝓢 ⊢! p ⋏ ~p ⟶ ⊥ := ⟨introFalsumOfAnd⟩
 
 
-def bot_of_mem_either (h₁ : p ∈ Γ) (h₂ : ~p ∈ Γ) : Γ ⊢[𝓢] ⊥ := by
-  exact (by simpa [NegDefinition.neg] using FiniteContext.byAxm h₂) ⨀ (FiniteContext.byAxm h₁);
-@[simp] lemma bot_of_mem_either! (h₁ : p ∈ Γ) (h₂ : ~p ∈ Γ) : Γ ⊢[𝓢]! ⊥ := ⟨bot_of_mem_either h₁ h₂⟩
-
-
-def efq_of_mem_either [HasEFQ 𝓢] (h₁ : p ∈ Γ) (h₂ : ~p ∈ Γ) : Γ ⊢[𝓢] q := efq' $ bot_of_mem_either h₁ h₂
-@[simp] lemma efq_of_mem_either! [HasEFQ 𝓢] (h₁ : p ∈ Γ) (h₂ : ~p ∈ Γ) : Γ ⊢[𝓢]! q := ⟨efq_of_mem_either h₁ h₂⟩
-
 
 def implyOfNotOr [HasEFQ 𝓢] : 𝓢 ⊢ (~p ⋎ q) ⟶ (p ⟶ q) := disj₃'' (by
     apply emptyPrf;
@@ -166,6 +222,9 @@ def implyOfNotOr' [HasEFQ 𝓢] (b : 𝓢 ⊢ ~p ⋎ q) : 𝓢 ⊢ p ⟶ q := im
 def demorgan₁ : 𝓢 ⊢ (~p ⋎ ~q) ⟶ ~(p ⋏ q) := disj₃'' (contra₀' conj₁) (contra₀' conj₂)
 @[simp] lemma demorgan₁! : 𝓢 ⊢! (~p ⋎ ~q) ⟶ ~(p ⋏ q) := ⟨demorgan₁⟩
 
+def demorgan₁' (d : 𝓢 ⊢ ~p ⋎ ~q) : 𝓢 ⊢ ~(p ⋏ q)  := demorgan₁ ⨀ d
+@[simp] lemma demorgan₁'! (d : 𝓢 ⊢! ~p ⋎ ~q) : 𝓢 ⊢! ~(p ⋏ q) := ⟨demorgan₁' d.some⟩
+
 
 def demorgan₂ : 𝓢 ⊢ (~p ⋏ ~q) ⟶ ~(p ⋎ q) := by
   simp [NegDefinition.neg];
@@ -173,6 +232,9 @@ def demorgan₂ : 𝓢 ⊢ (~p ⋏ ~q) ⟶ ~(p ⋎ q) := by
   apply deduct;
   exact disj₃'' (conj₁' (q := q ⟶ ⊥) $ FiniteContext.byAxm (by simp)) (conj₂' (p := p ⟶ ⊥) $ FiniteContext.byAxm (by simp))
 @[simp] lemma demorgan₂! : 𝓢 ⊢! ~p ⋏ ~q ⟶ ~(p ⋎ q) := ⟨demorgan₂⟩
+
+def demorgan₂' (d : 𝓢 ⊢ ~p ⋏ ~q) : 𝓢 ⊢ ~(p ⋎ q) := demorgan₂ ⨀ d
+@[simp] lemma demorgan₂'! (d : 𝓢 ⊢! ~p ⋏ ~q) : 𝓢 ⊢! ~(p ⋎ q) := ⟨demorgan₂' d.some⟩
 
 
 def demorgan₃ : 𝓢 ⊢ ~(p ⋎ q) ⟶ (~p ⋏ ~q) := by
@@ -183,6 +245,17 @@ def demorgan₃ : 𝓢 ⊢ ~(p ⋎ q) ⟶ (~p ⋏ ~q) := by
 
 def demorgan₃' (b : 𝓢 ⊢ ~(p ⋎ q)) : 𝓢 ⊢ ~p ⋏ ~q := demorgan₃ ⨀ b
 @[simp] lemma demorgan₃'! (b : 𝓢 ⊢! ~(p ⋎ q)) : 𝓢 ⊢! ~p ⋏ ~q := ⟨demorgan₃' b.some⟩
+
+
+def demorgan₄ [HasDNE 𝓢] : 𝓢 ⊢ ~(p ⋏ q) ⟶ (~p ⋎ ~q) := by
+  apply contra₂';
+  apply deduct';
+  have : [~(~p ⋎ ~q)] ⊢[𝓢] ~~p ⋏ ~~q := demorgan₃' $ FiniteContext.byAxm (by simp);
+  exact andReplace' this dne dne;
+@[simp] lemma demorgan₄! [HasDNE 𝓢] : 𝓢 ⊢! ~(p ⋏ q) ⟶ (~p ⋎ ~q) := ⟨demorgan₄⟩
+
+def demorgan₄' [HasDNE 𝓢] (b : 𝓢 ⊢ ~(p ⋏ q)) : 𝓢 ⊢ ~p ⋎ ~q := demorgan₄ ⨀ b
+@[simp] lemma demorgan₄'! [HasDNE 𝓢] (b : 𝓢 ⊢! ~(p ⋏ q)) : 𝓢 ⊢! ~p ⋎ ~q := ⟨demorgan₄' b.some⟩
 
 
 def NotOrOfImply' [HasDNE 𝓢] (d : 𝓢 ⊢ p ⟶ q) : 𝓢 ⊢ ~p ⋎ q := by
@@ -235,16 +308,28 @@ def conj'IffConj : (Γ : List F) → 𝓢 ⊢ Γ.conj' ⟷ Γ.conj
   | []          => iffId ⊤
   | [p]         => iffIntro (deduct' <| andIntro (FiniteContext.byAxm (by simp)) verum) conj₁
   | p :: q :: Γ => andIffAndOfIff (iffId p) (conj'IffConj (q :: Γ))
+@[simp] lemma conj'IffConj! : 𝓢 ⊢! Γ.conj' ⟷ Γ.conj := ⟨conj'IffConj Γ⟩
+
+
+lemma implyLeft_conj_eq_conj'! : 𝓢 ⊢! Γ.conj ⟶ p ↔ 𝓢 ⊢! Γ.conj' ⟶ p := implyLeftReplaceIff'! $ iffComm'! conj'IffConj!
+
+
+lemma generalConj'! (h : p ∈ Γ) : 𝓢 ⊢! Γ.conj' ⟶ p := implyLeftReplaceIff'! conj'IffConj! |>.mpr (generalConj! h)
+
 
 namespace FiniteContext
 
 def ofDef' {Γ : List F} {p : F} (b : 𝓢 ⊢ Γ.conj' ⟶ p) : Γ ⊢[𝓢] p := ofDef <| impTrans (andRight <| conj'IffConj Γ) b
+def ofDef'! (b : 𝓢 ⊢! Γ.conj' ⟶ p) : Γ ⊢[𝓢]! p := ⟨ofDef' b.some⟩
 
 def toDef' {Γ : List F} {p : F} (b : Γ ⊢[𝓢] p) : 𝓢 ⊢ Γ.conj' ⟶ p := impTrans (andLeft <| conj'IffConj Γ) (toDef b)
+def toDef'! (b : Γ ⊢[𝓢]! p) : 𝓢 ⊢! Γ.conj' ⟶ p := ⟨toDef' b.some⟩
 
 lemma provable_iff' {p : F} : Γ ⊢[𝓢]! p ↔ 𝓢 ⊢! Γ.conj' ⟶ p := ⟨fun h ↦ ⟨toDef' h.get⟩, fun h ↦ ⟨ofDef' h.get⟩⟩
 
 end FiniteContext
+
+
 
 lemma iff_provable_list_conj {Γ : List F} : (𝓢 ⊢! Γ.conj') ↔ (∀ p ∈ Γ, 𝓢 ⊢! p) := by
   induction Γ using List.induction_with_singleton with
@@ -260,15 +345,6 @@ lemma iff_provable_list_conj {Γ : List F} : (𝓢 ⊢! Γ.conj') ↔ (∀ p ∈
     . rintro ⟨h₁, h₂⟩;
       exact conj₃'! h₁ (ih.mpr h₂);
 
-lemma implyLeftReplaceIff'! (h : 𝓢 ⊢! p ⟷ q) : 𝓢 ⊢! p ⟶ r ↔ 𝓢 ⊢! q ⟶ r := by
-  constructor;
-  . exact imp_trans! $ conj₂'! h;
-  . exact imp_trans! $ conj₁'! h;
-
-lemma implyRightReplaceIff'! (h : 𝓢 ⊢! p ⟷ q) : 𝓢 ⊢! r ⟶ p ↔ 𝓢 ⊢! r ⟶ q := by
-  constructor;
-  . intro hrp; exact imp_trans! hrp $ conj₁'! h;
-  . intro hrq; exact imp_trans! hrq $ conj₂'! h;
 
 def implyOrLeft' (h : 𝓢 ⊢ p ⟶ r) : 𝓢 ⊢ p ⟶ (r ⋎ q) := by
   apply emptyPrf;
@@ -287,17 +363,6 @@ def implyOrRight' (h : 𝓢 ⊢ q ⟶ r) : 𝓢 ⊢ q ⟶ (p ⋎ r) := by
   exact of h;
 
 lemma implyOrRight'! (h : 𝓢 ⊢! q ⟶ r) : 𝓢 ⊢! q ⟶ (p ⋎ r) := ⟨implyOrRight' h.some⟩
-
-lemma conjReplaceLeft'! (hc : 𝓢 ⊢! p ⋏ q) (h : 𝓢 ⊢! p ⟶ r) : 𝓢 ⊢! r ⋏ q := conj₃'! (h ⨀ conj₁'! hc) (conj₂'! hc)
-
-lemma conjReplaceRight'! (hc : 𝓢 ⊢! p ⋏ q) (h : 𝓢 ⊢! q ⟶ r) : 𝓢 ⊢! p ⋏ r := andComm'! (conjReplaceLeft'! (andComm'! hc) h)
-
-lemma conjReplace'! (hc : 𝓢 ⊢! p ⋏ q) (h₁ : 𝓢 ⊢! p ⟶ r) (h₂ : 𝓢 ⊢! q ⟶ s) : 𝓢 ⊢! r ⋏ s := conjReplaceRight'! (conjReplaceLeft'! hc h₁) h₂
-
-lemma conjReplace! (h₁ : 𝓢 ⊢! p ⟶ r) (h₂ : 𝓢 ⊢! q ⟶ s) : 𝓢 ⊢! p ⋏ q ⟶ r ⋏ s := by
-  apply provable_iff_provable.mpr;
-  apply deduct_iff.mpr;
-  exact conjReplace'! (by_axm! (by simp)) (of'! h₁) (of'! h₂)
 
 lemma or_assoc'! : 𝓢 ⊢! p ⋎ (q ⋎ r) ↔ 𝓢 ⊢! (p ⋎ q) ⋎ r := by
   constructor;
@@ -333,7 +398,7 @@ lemma forthbackConjRemove : 𝓢 ⊢! (Γ.remove p).conj' ⋏ p ⟶ Γ.conj' := 
   . subst e; exact conj₂'! d;
   . exact iff_provable_list_conj.mp (conj₁'! d) q (by apply List.mem_remove_iff.mpr; simp_all);
 
-lemma implyLeftRemoveConj (b : 𝓢 ⊢! Γ.conj' ⟶ q) : 𝓢 ⊢! (Γ.remove p).conj' ⋏ p ⟶ q := imp_trans! (by simp) b
+lemma implyLeftRemoveConj' (b : 𝓢 ⊢! Γ.conj' ⟶ q) : 𝓢 ⊢! (Γ.remove p).conj' ⋏ p ⟶ q := imp_trans! (by simp) b
 
 lemma disj_allsame! [HasEFQ 𝓢] (hd : ∀ q ∈ Γ, q = p) : 𝓢 ⊢! Γ.disj' ⟶ p := by
   induction Γ using List.induction_with_singleton with
@@ -353,16 +418,18 @@ lemma disj_allsame! [HasEFQ 𝓢] (hd : ∀ q ∈ Γ, q = p) : 𝓢 ⊢! Γ.disj
 
 lemma disj_allsame'! [HasEFQ 𝓢] (hd : ∀ q ∈ Γ, q = p) (h : 𝓢 ⊢! Γ.disj') : 𝓢 ⊢! p := (disj_allsame! hd) ⨀ h
 
+
 instance [HasDNE 𝓢] : HasEFQ 𝓢 where
   efq p := by
     apply contra₃';
     simp [NegDefinition.neg];
     exact impSwap' imply₁;
 
-def elimNegnegOr' [HasDNE 𝓢] (d : 𝓢 ⊢ ~~p ⋎ ~~q) : 𝓢 ⊢ p ⋎ q := disj₃' (impTrans dne disj₁) (impTrans dne disj₂) d
+
+def dneOr [HasDNE 𝓢] (d : 𝓢 ⊢ ~~p ⋎ ~~q) : 𝓢 ⊢ p ⋎ q := disj₃' (impTrans dne disj₁) (impTrans dne disj₂) d
 
 instance [HasDNE 𝓢] : HasLEM 𝓢 where
-  lem _ := elimNegnegOr' $ NotOrOfImply' dni
+  lem _ := dneOr $ NotOrOfImply' dni
 
 /-
 instance [HasLEM 𝓢] [HasEFQ 𝓢] : HasDNE 𝓢 where
