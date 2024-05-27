@@ -97,14 +97,7 @@ lemma union_not_Λconsistent : ¬(Λ)-Consistent T₁ ∨ ¬(Λ)-Consistent T₂
   push_neg;
   exact union_ΛConsistent;
 
-/-
-lemma _root_.List.mem_insert {a : α} {l : List α} : a ∈ insert b l ↔ a = b ∨ a ∈ l := by
-  induction l with
-  | nil => simp;
-  | cons c l ih =>
-    simp_all [List.insert];
--/
-
+-- TODO: move
 lemma implyLeft_cons_conj' {Γ : List (Formula α)} : Λ ⊢! (p :: Γ).conj' ⟶ q ↔ Λ ⊢! p ⋏ Γ.conj' ⟶ q := by
   induction Γ with
   | nil =>
@@ -118,7 +111,7 @@ lemma iff_insert_ΛConsistent : (Λ)-Consistent (insert p T) ↔ ∀ {Γ : List 
   constructor;
   . intro h Γ hΓ;
     by_contra hC;
-    have := implyLeft_cons_conj'.not.mp $ @h (p :: Γ) (by
+    have : Λ ⊬! p ⋏ List.conj' Γ ⟶ ⊥ := implyLeft_cons_conj'.not.mp $ @h (p :: Γ) (by
       rintro q hq;
       simp at hq;
       cases hq with
@@ -127,8 +120,16 @@ lemma iff_insert_ΛConsistent : (Λ)-Consistent (insert p T) ↔ ∀ {Γ : List 
     );
     contradiction;
   . intro h Γ hΓ;
-    sorry
-    -- by_contra hC;
+    have := @h (Γ.remove p) (by
+      intro q hq;
+      have := by simpa using hΓ q $ List.mem_of_mem_remove hq;
+      cases this with
+      | inl h => simpa [h] using List.mem_remove_iff.mp hq;
+      | inr h => assumption;
+    );
+    by_contra hC;
+    have := imp_trans! andComm! $ implyLeftRemoveConj' (p := p) hC;
+    contradiction;
 
 lemma iff_insert_notΛConsistent : ¬(Λ)-Consistent (insert p T) ↔ ∃ Γ : List (Formula α), (∀ p ∈ Γ, p ∈ T) ∧ Λ ⊢! p ⋏ Γ.conj' ⟶ ⊥ := by
   constructor;
@@ -207,40 +208,18 @@ lemma not_mem_falsum_of_Λconsistent : ⊥ ∉ T := by
   have : Λ ⊢! ⊥ ⟶ ⊥ := efq!;
   contradiction;
 
-@[simp]
-lemma append_singleton_eq {Γ : List (Formula α)} {p} (hΓ : Γ ≠ []) : (Γ ++ [p]).conj' = Γ.conj' ⋏ p := by
-  induction Γ using List.induction_with_singleton with
-  | hnil => contradiction;
-  | hsingle q => simp;
-  | hcons q Γ hΓ ih => simp; sorry;
-
-lemma conj'pl {Γ Δ : List (Formula α)} : Λ ⊢! (Γ ++ Δ).conj' ⟶ Γ.conj' ⋏ Δ.conj' := by
-  induction Γ using List.induction_with_singleton generalizing Δ <;> induction Δ using List.induction_with_singleton;
-  case hnil.hnil => simp only [List.append_nil, List.conj'_nil, imp_id!, implyRightAnd!];
-  case hsingle.hsingle p q => simp only [List.singleton_append, ne_eq, not_false_eq_true, List.conj'_cons_nonempty, List.conj'_singleton, imp_id!];
-
-  case hnil.hsingle q => simp only [List.nil_append, List.conj'_singleton, List.conj'_nil]; exact implyRightAnd! (dhyp! verum!) imp_id!;
-  case hsingle.hnil p => simp only [List.nil_append, List.conj'_singleton, List.conj'_nil]; exact implyRightAnd! imp_id! (dhyp! verum!);
-
-  case hcons.hnil p Γ hΓ ihΓ => simp only [(List.conj'_cons_nonempty hΓ), List.append_nil, List.conj'_nil]; exact implyRightAnd! imp_id! (dhyp! verum!);
-  case hnil.hcons p Δ hΔ ihΔ => simp only [(List.conj'_cons_nonempty hΔ), List.nil_append, List.conj'_nil]; exact implyRightAnd! (dhyp! verum!) imp_id!;
-
-  case hsingle.hcons p q Δ hΔ ihΔ => simp [(List.conj'_cons_nonempty hΔ)];
-  case hcons.hsingle p Γ hΓ ihΓ q =>
-    simp only [(List.conj'_cons_nonempty hΓ), List.cons_append, ne_eq, List.append_eq_nil, and_false, not_false_eq_true, List.conj'_cons_nonempty, List.conj'_singleton];
-    exact imp_trans! (andReplaceRight! $ @ihΓ [q]) (conj₂'! and_assoc!);
-
-    /-
-    simp only [List.conj'_singleton] at ihΓ;
-    exact imp_trans! (andReplaceRight! ihΓ) (conj₂'! andAssoc!);
-    -/
-
-  case hcons.hcons p Γ hΓ ihΓ q Δ hΔ ihΔ =>
-    simp [(List.conj'_cons_nonempty hΓ)] at ihΔ;
-    -- simp_all [(List.conj'_cons_nonempty hΓ), (List.conj'_cons_nonempty hΔ)];
-    -- simp_all [(List.conj'_cons_nonempty hΓ), (List.conj'_cons_nonempty hΔ)];
-    sorry;
-
+-- TODO: move
+lemma imply_left_concat_conj'  {Γ Δ : List (Formula α)} : Λ ⊢! (Γ ++ Δ).conj' ⟶ Γ.conj' ⋏ Δ.conj' := by
+  apply FiniteContext.deduct'!;
+  have : [(Γ ++ Δ).conj'] ⊢[Λ]! (Γ ++ Δ).conj' := FiniteContext.by_axm! (by simp);
+  have d := iff_provable_list_conj.mp this;
+  apply conj₃'!;
+  . apply iff_provable_list_conj.mpr;
+    intro p hp;
+    exact d p (by simp; left; exact hp);
+  . apply iff_provable_list_conj.mpr;
+    intro p hp;
+    exact d p (by simp; right; exact hp);
 
 lemma unprovable_imp_trans! (hpq : Λ ⊢! p ⟶ q) : Λ ⊬! p ⟶ r → Λ ⊬! q ⟶ r := by
   contrapose; simp [neg_neg];
@@ -260,7 +239,7 @@ lemma either_consistent (p) : (Λ)-Consistent (insert p T) ∨ (Λ)-Consistent (
     . exact hΓ₁ _ hΓ;
     . exact hΔ₁ _ hΔ;
   );
-  have : Λ ⊬! Γ.conj' ⋏ Δ.conj' ⟶ ⊥ := unprovable_imp_trans! conj'pl (consisT (by
+  have : Λ ⊬! Γ.conj' ⋏ Δ.conj' ⟶ ⊥ := unprovable_imp_trans! imply_left_concat_conj' (consisT (by
     simp;
     intro q hq;
     rcases hq with hΓ | hΔ
@@ -381,8 +360,6 @@ lemma iff_mem_negneg : (~~p ∈ Ω.theory) ↔ (p ∈ Ω.theory) := by
   constructor;
   . intro h; exact dne'! h;
   . intro h; exact dni'! h;
-
-#print axioms iff_mem_negneg
 
 @[simp]
 lemma iff_mem_imp : ((p ⟶ q) ∈ Ω.theory) ↔ (p ∈ Ω.theory) → (q ∈ Ω.theory) := by
@@ -744,10 +721,24 @@ class Canonical (Λ : AxiomSet α) where
 
 lemma complete! : (∀ {W : Type u} (M : Model W α), M ⊧ p) → Λ ⊢! p := by
   contrapose;
-  intro h₁;
   push_neg;
+  intro h₁;
   existsi (MCT Λ), (CanonicalModel Λ);
   exact iff_validOnCanonicalModel_deducible.not.mpr h₁;
+
+lemma complete!_on_frame : (∀ {W : Type u} (F : Frame W α), F ⊧ p) → Λ ⊢! p := by
+  contrapose;
+  push_neg;
+  intro h₁;
+  have := not_imp_not.mpr complete! h₁;
+  simp [Kripke.ValidOnModel] at this;
+  obtain ⟨W, M, x, h⟩ := this;
+  simp [Kripke.ValidOnFrame, Kripke.ValidOnModel];
+  existsi W, M.frame, M.valuation, x;
+  assumption;
+  -- exact iff_validOnCanonicalModel_deducible.not.mpr h₁;
+
+#print axioms complete!_on_frame
 
 lemma complete!_of_canonical [canonical : Canonical Λ] : (𝔽((Λ : AxiomSet α), (MCT Λ)) ⊧ p) → (Λ ⊢! p) := by
   contrapose;
