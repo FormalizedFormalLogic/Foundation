@@ -134,6 +134,7 @@ def multiboxverum : 𝓢 ⊢ (□^[n]⊤ : F) := multinec verum
 def boxverum : 𝓢 ⊢ (□⊤ : F) := multiboxverum (n := 1)
 @[simp] lemma boxverum! : 𝓢 ⊢! (□⊤ : F) := ⟨boxverum⟩
 
+
 def implyMultiboxDistribute' (h : 𝓢 ⊢ p ⟶ q) : 𝓢 ⊢ □^[n]p ⟶ □^[n]q := multibox_axiomK' $ multinec h
 @[simp] lemma imply_multibox_distribute'! (h : 𝓢 ⊢! p ⟶ q) : 𝓢 ⊢! □^[n]p ⟶ □^[n]q := ⟨implyMultiboxDistribute' h.some⟩
 
@@ -228,25 +229,28 @@ def collect_multidia_or : 𝓢 ⊢ ◇^[n]p ⋎ ◇^[n]q ⟶ ◇^[n](p ⋎ q) :=
 @[simp] lemma collect_dia_or! : 𝓢 ⊢! ◇p ⋎ ◇q ⟶ ◇(p ⋎ q) := ⟨collect_dia_or⟩
 -/
 
-def distribute_dia_and : 𝓢 ⊢ ◇(p ⋏ q) ⟶ ◇p ⋏ ◇q := by
-  simp [StandardModalLogicalConnective.duality'];
-  apply contra₂';
-  apply deduct';
-  sorry;
-@[simp] lemma distribute_dia_and! : 𝓢 ⊢! ◇(p ⋏ q) ⟶ ◇p ⋏ ◇q := ⟨distribute_dia_and⟩
 
-def distribute_dia_and' (h : 𝓢 ⊢ ◇(p ⋏ q)) : 𝓢 ⊢ ◇p ⋏ ◇q := distribute_dia_and ⨀ h
-@[simp] lemma distribute_dia_and'! (h : 𝓢 ⊢! ◇(p ⋏ q)) : 𝓢 ⊢! ◇p ⋏ ◇q := ⟨distribute_dia_and' h.some⟩
+/-　TODO: 証明済みだが，妙に時間がかかって原因が分からないため一旦コメントアウトしている．
+def distributeDiaAnd : 𝓢 ⊢ ◇(p ⋏ q) ⟶ ◇p ⋏ ◇q := by
+  simp only [StandardModalLogicalConnective.duality'];
+  have : 𝓢 ⊢ ~(~(□~p) ⋏ ~(□~q)) ⟶ □~p ⋎ □~q := FiniteContext.deduct' $ orReplace' (demorgan₄' $ FiniteContext.byAxm (by simp)) dne dne;
+  exact contra₂' $ impTrans (impTrans this collect_box_or) (implyBoxDistribute' demorgan₁);
+@[simp] lemma distribute_dia_and! : 𝓢 ⊢! ◇(p ⋏ q) ⟶ ◇p ⋏ ◇q := ⟨distributeDiaAnd⟩
+
+def distributeDiaAnd' (h : 𝓢 ⊢ ◇(p ⋏ q)) : 𝓢 ⊢ ◇p ⋏ ◇q := distributeDiaAnd ⨀ h
+lemma distribute_dia_and'! (h : 𝓢 ⊢! ◇(p ⋏ q)) : 𝓢 ⊢! ◇p ⋏ ◇q := ⟨distributeDiaAnd' h.some⟩
+-/
 
 
-
-lemma distribute_multidia_conj'! (d : 𝓢 ⊢! ◇^[n](Γ.conj')) : 𝓢 ⊢! (Γ.multidia n).conj' := by
+/-
+lemma distribute_multidia_conj'! (d : 𝓢 ⊢! ◇^[n](Γ.conj')) : 𝓢 ⊢! (◇^[n]Γ).conj' := by
   induction Γ using List.induction_with_singleton with
   | hnil => simp;
   | hsingle => simp_all;
   | hcons p Γ h ih => sorry;
 
-lemma distribute_dia_conj'! (d : 𝓢 ⊢! ◇(Γ.conj')) : 𝓢 ⊢! (Γ.dia).conj' := distribute_multidia_conj'! (n := 1) d
+lemma distribute_dia_conj'! (d : 𝓢 ⊢! ◇(Γ.conj')) : 𝓢 ⊢! (◇Γ).conj' := distribute_multidia_conj'! (n := 1) d
+-/
 
 lemma iff_conj'multibox_multiboxconj'! : 𝓢 ⊢! □^[n](Γ.conj') ↔ 𝓢 ⊢! (□^[n]Γ).conj' := by
   induction Γ using List.induction_with_singleton with

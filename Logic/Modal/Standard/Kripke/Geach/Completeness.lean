@@ -36,15 +36,28 @@ instance AxiomSet.Geach.Canonical_with_K (t) : Canonical (𝐊 ∪ 𝐠𝐞(t) :
         apply hΩ;
         simp_all;
 
-instance AxiomSet.GeachLogic.Canonical (l) : Canonical (𝐆𝐞(l) : AxiomSet α) where
+lemma subset_Canonical₂ (hΛ : Λ ⊆ Λ') (h : CanonicalFrame Λ ⊧ p) : CanonicalFrame Λ' ⊧ p := by
+  intro V w;
+  have := h (CanonicalModel Λ).valuation;
+
+
+
+lemma subset_Canonical (hΛ : Λ ⊆ Λ') (h : CanonicalFrame Λ ⊧* P) : CanonicalFrame Λ' ⊧* P := by
+  simp_all only [Semantics.realizeSet_iff];
+  intro p hp;
+  exact subset_Canonical₂ hΛ $ h hp;
+
+
+instance AxiomSet.GeachLogic.Canonical (ts) : Canonical (𝐆𝐞(ts) : AxiomSet α) where
   valid := by
-    induction l with
+    induction ts with
     | nil => apply AxiomSet.K.definability.defines _ |>.mp; trivial;
     | cons t ts ih =>
       simp;
       constructor;
-      . sorry;
-      . sorry;
+      . have := by simpa only [Semantics.RealizeSet.union_iff] using AxiomSet.Geach.Canonical_with_K (α := α) t |>.valid;
+        exact subset_Canonical (by simp; apply Set.subset_union_of_subset_right AxiomSet.GeachLogic.subsetK;) this.2 ;
+      . exact subset_Canonical (by simp) ih;
     /-
     apply AxiomSet.GeachLogic.definability l |>.defines _ |>.mp;
     | cons t ts ih =>

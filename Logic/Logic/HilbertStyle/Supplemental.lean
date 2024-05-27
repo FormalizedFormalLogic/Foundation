@@ -67,6 +67,33 @@ def andReplace (h₁ : 𝓢 ⊢ p ⟶ r) (h₂ : 𝓢 ⊢ q ⟶ s) : 𝓢 ⊢ p 
 lemma andReplace! (h₁ : 𝓢 ⊢! p ⟶ r) (h₂ : 𝓢 ⊢! q ⟶ s) : 𝓢 ⊢! p ⋏ q ⟶ r ⋏ s := ⟨andReplace h₁.some h₂.some⟩
 
 
+def orReplaceLeft' (hc : 𝓢 ⊢ p ⋎ q) (hp : 𝓢 ⊢ p ⟶ r) : 𝓢 ⊢ r ⋎ q := disj₃' (impTrans hp disj₁) (disj₂) hc
+lemma or_replace_left'! (hc : 𝓢 ⊢! p ⋎ q) (hp : 𝓢 ⊢! p ⟶ r) : 𝓢 ⊢! r ⋎ q := ⟨orReplaceLeft' hc.some hp.some⟩
+
+def orReplaceLeft (hp : 𝓢 ⊢ p ⟶ r) : 𝓢 ⊢ p ⋎ q ⟶ r ⋎ q := by
+  apply deduct';
+  exact orReplaceLeft' (FiniteContext.byAxm (by simp)) (of hp)
+lemma or_replace_left! (hp : 𝓢 ⊢! p ⟶ r) : 𝓢 ⊢! p ⋎ q ⟶ r ⋎ q := ⟨orReplaceLeft hp.some⟩
+
+
+def orReplaceRight' (hc : 𝓢 ⊢ p ⋎ q) (hq : 𝓢 ⊢ q ⟶ r) : 𝓢 ⊢ p ⋎ r := disj₃' (disj₁) (impTrans hq disj₂) hc
+lemma or_replace_right'! (hc : 𝓢 ⊢! p ⋎ q) (hq : 𝓢 ⊢! q ⟶ r) : 𝓢 ⊢! p ⋎ r := ⟨orReplaceRight' hc.some hq.some⟩
+
+def orReplaceRight (hq : 𝓢 ⊢ q ⟶ r) : 𝓢 ⊢ p ⋎ q ⟶ p ⋎ r := by
+  apply deduct';
+  exact orReplaceRight' (FiniteContext.byAxm (by simp)) (of hq)
+lemma or_replace_right! (hq : 𝓢 ⊢! q ⟶ r) : 𝓢 ⊢! p ⋎ q ⟶ p ⋎ r := ⟨orReplaceRight hq.some⟩
+
+
+def orReplace' (h : 𝓢 ⊢ p₁ ⋎ q₁) (hp : 𝓢 ⊢ p₁ ⟶ p₂) (hq : 𝓢 ⊢ q₁ ⟶ q₂) : 𝓢 ⊢ p₂ ⋎ q₂ := orReplaceRight' (orReplaceLeft' h hp) hq
+lemma or_replace'! (h : 𝓢 ⊢! p₁ ⋎ q₁) (hp : 𝓢 ⊢! p₁ ⟶ p₂) (hq : 𝓢 ⊢! q₁ ⟶ q₂) : 𝓢 ⊢! p₂ ⋎ q₂ := ⟨orReplace' h.some hp.some hq.some⟩
+
+def orReplace (hp : 𝓢 ⊢ p₁ ⟶ p₂) (hq : 𝓢 ⊢ q₁ ⟶ q₂) : 𝓢 ⊢ p₁ ⋎ q₁ ⟶ p₂ ⋎ q₂ := by
+  apply deduct';
+  exact orReplace' (FiniteContext.byAxm (by simp)) (of hp) (of hq) ;
+lemma or_replace! (hp : 𝓢 ⊢! p₁ ⟶ p₂) (hq : 𝓢 ⊢! q₁ ⟶ q₂) : 𝓢 ⊢! p₁ ⋎ q₁ ⟶ p₂ ⋎ q₂ := ⟨orReplace hp.some hq.some⟩
+
+
 def dni : 𝓢 ⊢ p ⟶ ~~p := by
   rw [NegDefinition.neg];
   apply emptyPrf;
@@ -269,10 +296,6 @@ def NotOrOfImply' [HasDNE 𝓢] (d : 𝓢 ⊢ p ⟶ q) : 𝓢 ⊢ ~p ⋎ q := by
   exact d₂ ⨀ d₃;
 @[simp] lemma NotOrOfImply'! [HasDNE 𝓢] (d : 𝓢 ⊢! p ⟶ q) : 𝓢 ⊢! ~p ⋎ q := ⟨NotOrOfImply' d.some⟩
 
-/-
-def demorgan₄ : 𝓢 ⊢ ~(p ⋏ q) ⟶ (~p ⋎ ~q) := by
-  sorry
--/
 
 def dnCollectImply [HasEFQ 𝓢] : 𝓢 ⊢ (~~p ⟶ ~~q) ⟶ ~~(p ⟶ q) := by
   apply emptyPrf;
@@ -386,6 +409,23 @@ lemma or_assoc'! : 𝓢 ⊢! p ⋎ (q ⋎ r) ↔ 𝓢 ⊢! (p ⋎ q) ⋎ r := by
       )
       (by apply implyOrRight'!; apply implyOrRight'!; simp;)
       h;
+
+lemma and_assoc! : 𝓢 ⊢! (p ⋏ q) ⋏ r ⟷ p ⋏ (q ⋏ r) := by
+  apply iff_intro!;
+  . apply FiniteContext.deduct'!;
+    have hpqr : [(p ⋏ q) ⋏ r] ⊢[𝓢]! (p ⋏ q) ⋏ r := FiniteContext.by_axm! (by simp);
+    have hp : [(p ⋏ q) ⋏ r] ⊢[𝓢]! p := conj₁'! $ conj₁'! hpqr;
+    have hq : [(p ⋏ q) ⋏ r] ⊢[𝓢]! q := conj₂'! $ conj₁'! hpqr;
+    have hr : [(p ⋏ q) ⋏ r] ⊢[𝓢]! r := conj₂'! hpqr;
+    exact conj₃'! hp (conj₃'! hq hr);
+  . apply FiniteContext.deduct'!;
+    have hpqr : [p ⋏ (q ⋏ r)] ⊢[𝓢]! p ⋏ q ⋏ r := FiniteContext.by_axm! (by simp);
+    have hp : [p ⋏ (q ⋏ r)] ⊢[𝓢]! p := conj₁'! hpqr;
+    have hq : [p ⋏ (q ⋏ r)] ⊢[𝓢]! q := conj₁'! $ conj₂'! hpqr;
+    have hr : [p ⋏ (q ⋏ r)] ⊢[𝓢]! r := conj₂'! $ conj₂'! hpqr;
+    apply conj₃'!;
+    . exact conj₃'! hp hq;
+    . exact hr;
 
 @[simp]
 lemma forthbackConjRemove : 𝓢 ⊢! (Γ.remove p).conj' ⋏ p ⟶ Γ.conj' := by

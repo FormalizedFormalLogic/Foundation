@@ -110,7 +110,7 @@ instance : Semantics (Formula α) (Model W α) := ⟨fun M ↦ Formula.Kripke.Va
 
 namespace Formula.Kripke.ValidOnModel
 
-@[simp] lemma iff_models : M ⊧ f ↔ Formula.Kripke.ValidOnModel M f := iff_of_eq rfl
+@[simp] protected lemma iff_models : M ⊧ f ↔ Formula.Kripke.ValidOnModel M f := iff_of_eq rfl
 
 instance [Inhabited W] : Semantics.Bot (Model W α) where
   realize_bot _ := by simp [ValidOnModel];
@@ -124,7 +124,7 @@ instance : Semantics (Formula α) (Frame W α) := ⟨fun F ↦ Formula.Kripke.Va
 
 namespace Formula.Kripke.ValidOnFrame
 
-@[simp] lemma models_iff : F ⊧ f ↔ Formula.Kripke.ValidOnFrame F f := iff_of_eq rfl
+@[simp] protected lemma models_iff : F ⊧ f ↔ Formula.Kripke.ValidOnFrame F f := iff_of_eq rfl
 
 instance [Inhabited W] : Semantics.Bot (Frame W α) where
   realize_bot _ := by simp [ValidOnFrame];
@@ -138,7 +138,7 @@ instance : Semantics (Formula α) (FrameClass W α) := ⟨fun 𝔽 ↦ Formula.K
 
 namespace Formula.Kripke.ValidOnFrameClass
 
-@[simp] lemma models_iff : 𝔽 ⊧ f ↔ Formula.Kripke.ValidOnFrameClass 𝔽 f := iff_of_eq rfl
+@[simp] protected lemma models_iff : 𝔽 ⊧ f ↔ Formula.Kripke.ValidOnFrameClass 𝔽 f := iff_of_eq rfl
 
 end Formula.Kripke.ValidOnFrameClass
 
@@ -161,7 +161,7 @@ instance : Semantics (Formula α) (AxiomSetFrameClass W Λ) := ⟨fun 𝔽 ↦ F
 
 namespace Formula.Kripke.ValidOnAxiomSetFrameClass
 
-@[simp] lemma models_iff : 𝔽 ⊧ p ↔ Formula.Kripke.ValidOnAxiomSetFrameClass 𝔽 p := iff_of_eq rfl
+@[simp] protected lemma models_iff : 𝔽 ⊧ p ↔ Formula.Kripke.ValidOnAxiomSetFrameClass 𝔽 p := iff_of_eq rfl
 
 end Formula.Kripke.ValidOnAxiomSetFrameClass
 -/
@@ -172,14 +172,14 @@ lemma validOnAxiomSetFrameClass_axiom (h : p ∈ Λ) : 𝔽(Λ, W) ⊧ p := by
   intro F hF;
   exact hF.realize h;
 
-class AxiomSetDefinability (W) (Λ : AxiomSet α) (P : Frame W α → Prop) where
-  defines : ∀ F, P F ↔ F ⊧* Λ
+class AxiomSetDefinability (Λ : AxiomSet α) (P : ∀ W, Frame W α → Prop) where
+  defines : ∀ W F, P W F ↔ F ⊧* Λ
 
-lemma iff_definability_memAxiomSetFrameClass (definability : AxiomSetDefinability W Λ P) : ∀ {F}, P F ↔ F ∈ 𝔽(Λ, W) := by
+lemma iff_definability_memAxiomSetFrameClass (definability : AxiomSetDefinability Λ P) : ∀ {W F}, P W F ↔ F ∈ 𝔽(Λ, W) := by
   apply definability.defines;
 
 @[simp]
-instance AxiomSet.K.definability : AxiomSetDefinability W (𝐊 : AxiomSet α) (λ _ => True) where
+instance AxiomSet.K.definability : AxiomSetDefinability (𝐊 : AxiomSet α) (λ _ _ => True) where
   defines := by
     simp_all;
     intros; subst_vars;
@@ -191,16 +191,16 @@ instance : Set.Nonempty (𝔽((𝐊 : AxiomSet α), W)) := by
   apply iff_definability_memAxiomSetFrameClass AxiomSet.K.definability |>.mp;
   trivial;
 
-instance [dΛ : AxiomSetDefinability W Λ P] : AxiomSetDefinability W (𝐊 ∪ Λ) P where
-  defines F := by
+instance [dΛ : AxiomSetDefinability Λ P] : AxiomSetDefinability (𝐊 ∪ Λ) P where
+  defines W F := by
     constructor;
     . intro h;
       simp only [Semantics.RealizeSet.union_iff];
       constructor;
-      . apply AxiomSet.K.definability.defines F |>.mp; simp_all;
-      . exact dΛ.defines F |>.mp h;
+      . apply AxiomSet.K.definability.defines W F |>.mp; trivial;
+      . exact dΛ.defines W F |>.mp h;
     . intro h;
       simp only [Semantics.RealizeSet.union_iff] at h;
-      exact dΛ.defines F |>.mpr h.2;
+      exact dΛ.defines W F |>.mpr h.2;
 
 end LO.Modal.Standard.Kripke

@@ -35,17 +35,48 @@ lemma sound! : Λ ⊢! p → 𝔽(Λ, W) ⊧ p := λ ⟨d⟩ => sound d
 
 instance : Sound Λ 𝔽(Λ, W) := ⟨sound!⟩
 
-/-
-theorem soundness {T : Theory α} {p : Formula α} : T ⊢[Λ] p → T ⊨[AxiomSetFrameClass W Λ] p := by
-  intro ⟨Γ, hΓ, d⟩ 𝔽 h𝔽;
-  by_contra hC;
-  simp [ValidOnAxiomSetFrameClass, ValidOnFrameClass] at hC;
-  obtain ⟨F, ⟨hF, V⟩⟩ := hC;
-  simp [Semantics.models] at h𝔽;
-  intro F hF V w;
-  have := 𝔽.spec.mp hF;
 
-theorem soundness! {T : Theory α} {p} : T ⊢! p → T ⊨[AxiomSetFrameClass W Λ] p := λ ⟨d⟩ => soundness d
--/
+lemma sound_on_model {M : Model W α} [M ⊧* Λ] (d : Λ ⊢ p) : M ⊧ p := by
+  induction d with
+  | maxm h => exact Semantics.RealizeSet.realize _ h
+  | mdp _ _ ihpq ihp =>
+    intro w;
+    exact (Semantics.Tarski.realize_imp.mp $ ihpq w) (ihp w);
+  | nec _ ih =>
+    intro w w' _;
+    exact ih w';
+  | disj₃ =>
+    simp_all [ValidOnFrameClass, ValidOnFrame, ValidOnModel];
+    intros; rename_i hpr hqr hpq;
+    cases hpq with
+    | inl hp => exact hpr hp;
+    | inr hq => exact hqr hq;
+  | _ => simp_all [ValidOnFrameClass, ValidOnFrame, ValidOnModel];
+
+lemma sound_on_model! {M : Model W α} [M ⊧* Λ] : Λ ⊢! p → M ⊧ p := λ ⟨d⟩ => sound_on_model d
+
+instance {M : Model W α} [M ⊧* Λ] : Sound Λ M := ⟨sound_on_model!⟩
+
+
+lemma sound_on_frame {F : Frame W α} [F ⊧* Λ] (d : Λ ⊢ p) : F ⊧ p := by
+  induction d with
+  | maxm h => exact Semantics.realizeSet_iff.mp (by assumption) h;
+  | mdp _ _ ihpq ihp =>
+    intro V w;
+    exact (Semantics.Tarski.realize_imp.mp $ ihpq V w) (ihp V w);
+  | nec _ ih =>
+    intro V w w' _;
+    exact ih V w';
+  | disj₃ =>
+    simp_all [ValidOnFrameClass, ValidOnFrame, ValidOnModel];
+    intros; rename_i hpr hqr hpq;
+    cases hpq with
+    | inl hp => exact hpr hp;
+    | inr hq => exact hqr hq;
+  | _ => simp_all [ValidOnFrameClass, ValidOnFrame, ValidOnModel];
+
+lemma sound_on_frame! {F : Frame W α} [F ⊧* Λ] : Λ ⊢! p → F ⊧ p := λ ⟨d⟩ => sound_on_frame d
+
+instance {F : Frame W α} [F ⊧* Λ] : Sound Λ F := ⟨sound_on_frame!⟩
 
 end LO.Modal.Standard.Kripke

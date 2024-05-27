@@ -56,12 +56,12 @@ def GeachLogic : List Axioms.Geach.Taple → AxiomSet α
 notation:max "𝐆𝐞(" l ")" => AxiomSet.GeachLogic l
 
 @[simp]
-lemma GeachLogic.subsetK {l : List Axioms.Geach.Taple} : (𝐊 : AxiomSet α) ⊆ (AxiomSet.GeachLogic l) := by
+lemma GeachLogic.subsetK : (𝐊 : AxiomSet α) ⊆ 𝐆𝐞(l) := by
   induction l with
   | nil => simp;
   | cons => simp; apply Set.subset_union_of_subset_right (by assumption);
 
-lemma GeachLogic.subsetK' (h : (AxiomSet.GeachLogic l) ⊆ Λ): (𝐊 : AxiomSet α) ⊆ Λ := Set.Subset.trans GeachLogic.subsetK h
+lemma GeachLogic.subsetK' (h : 𝐆𝐞(l) ⊆ Λ): 𝐊 ⊆ Λ := Set.Subset.trans GeachLogic.subsetK h
 
 instance instKofGeachLogic : System.K (𝐆𝐞(l) : AxiomSet α) := K_of_subset_K (by simp)
 

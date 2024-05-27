@@ -34,9 +34,11 @@ lemma replace_imply_left_conj'! (he : ∀ g ∈ Γ, g = p) (hd : 𝓢 ⊢! Γ.co
 
 end LO.System
 
+universe u
 
 namespace LO.Modal.Standard
 
+variable {α : Type u}
 variable [DecidableEq α]
 
 def Theory.ΛConsistent (Λ : AxiomSet α) (T : Theory α) := ∀ {Γ : List (Formula α)}, (∀ p ∈ Γ, p ∈ T) → Λ ⊬! Γ.conj' ⟶ ⊥
@@ -212,23 +214,6 @@ lemma append_singleton_eq {Γ : List (Formula α)} {p} (hΓ : Γ ≠ []) : (Γ +
   | hsingle q => simp;
   | hcons q Γ hΓ ih => simp; sorry;
 
-lemma andAssoc! {p q r} : Λ ⊢! (p ⋏ q) ⋏ r ⟷ p ⋏ (q ⋏ r) := by
-  apply iff_intro!;
-  . apply FiniteContext.deduct'!;
-    have hpqr : [(p ⋏ q) ⋏ r] ⊢[Λ]! (p ⋏ q) ⋏ r := FiniteContext.by_axm! (by simp);
-    have hp : [(p ⋏ q) ⋏ r] ⊢[Λ]! p := conj₁'! $ conj₁'! hpqr;
-    have hq : [(p ⋏ q) ⋏ r] ⊢[Λ]! q := conj₂'! $ conj₁'! hpqr;
-    have hr : [(p ⋏ q) ⋏ r] ⊢[Λ]! r := conj₂'! hpqr;
-    exact conj₃'! hp (conj₃'! hq hr);
-  . apply FiniteContext.deduct'!;
-    have hpqr : [p ⋏ (q ⋏ r)] ⊢[Λ]! p ⋏ q ⋏ r := FiniteContext.by_axm! (by simp);
-    have hp : [p ⋏ (q ⋏ r)] ⊢[Λ]! p := conj₁'! hpqr;
-    have hq : [p ⋏ (q ⋏ r)] ⊢[Λ]! q := conj₁'! $ conj₂'! hpqr;
-    have hr : [p ⋏ (q ⋏ r)] ⊢[Λ]! r := conj₂'! $ conj₂'! hpqr;
-    apply conj₃'!;
-    . exact conj₃'! hp hq;
-    . exact hr;
-
 lemma conj'pl {Γ Δ : List (Formula α)} : Λ ⊢! (Γ ++ Δ).conj' ⟶ Γ.conj' ⋏ Δ.conj' := by
   induction Γ using List.induction_with_singleton generalizing Δ <;> induction Δ using List.induction_with_singleton;
   case hnil.hnil => simp only [List.append_nil, List.conj'_nil, imp_id!, implyRightAnd!];
@@ -243,7 +228,7 @@ lemma conj'pl {Γ Δ : List (Formula α)} : Λ ⊢! (Γ ++ Δ).conj' ⟶ Γ.conj
   case hsingle.hcons p q Δ hΔ ihΔ => simp [(List.conj'_cons_nonempty hΔ)];
   case hcons.hsingle p Γ hΓ ihΓ q =>
     simp only [(List.conj'_cons_nonempty hΓ), List.cons_append, ne_eq, List.append_eq_nil, and_false, not_false_eq_true, List.conj'_cons_nonempty, List.conj'_singleton];
-    exact imp_trans! (andReplaceRight! $ @ihΓ [q]) (conj₂'! andAssoc!);
+    exact imp_trans! (andReplaceRight! $ @ihΓ [q]) (conj₂'! and_assoc!);
 
     /-
     simp only [List.conj'_singleton] at ihΓ;
@@ -721,44 +706,54 @@ lemma truthlemma {p : Formula α} : ∀ {Ω : MCT Λ}, (CanonicalModel Λ, Ω) �
       exact CanonicalModel.frame_def_box.mp hΩ' h;
   | _ => simp_all
 
-lemma deducible_of_validOnCanonicelModel : (CanonicalModel Λ) ⊧ p → (Λ ⊢! p) := by
-  contrapose;
-  intro h;
-  have : (Λ)-Consistent ({~p}) := by
-    simp [ΛConsistent];
-    intro Γ hΓ;
+lemma iff_validOnCanonicalModel_deducible : (CanonicalModel Λ) ⊧ p ↔ (Λ ⊢! p) := by
+  constructor;
+  . contrapose;
+    intro h;
+    have : (Λ)-Consistent ({~p}) := by
+      simp [ΛConsistent];
+      intro Γ hΓ;
+      by_contra hC;
+      have : Λ ⊢! p := dne'! $ replace_imply_left_conj'! hΓ hC;
+      contradiction;
+    obtain ⟨Ω, hΩ⟩ := lindenbaum this;
+    simp [Kripke.ValidOnModel];
+    existsi Ω;
+    exact truthlemma.not.mpr $ iff_mem_neg.mp (show ~p ∈ Ω.theory by simp_all);
+  . intro h Ω;
+    suffices p ∈ Ω.theory by exact truthlemma.mpr this;
     by_contra hC;
-    have : Λ ⊢! p := dne'! $ replace_imply_left_conj'! hΓ hC;
-    contradiction;
-  obtain ⟨Ω, hΩ⟩ := lindenbaum this;
-  simp [Kripke.ValidOnModel];
-  existsi Ω;
-  exact truthlemma.not.mpr $ iff_mem_neg.mp (show ~p ∈ Ω.theory by simp_all);
+    have := MaximalΛConsistentTheory.maximal' hC;
+    obtain ⟨Γ, hΓ₁, hΓ₂⟩ := Theory.iff_insert_notΛConsistent.mp this;
+    exact Ω.consistent hΓ₁ $ andImplyIffImplyImply'!.mp hΓ₂ ⨀ h;
+
+-- instance [HasAxiomK Λ] (hΛ : Λ ⊆ Λ') : HasAxiomK Λ' := ⟨by intros; apply maxm_subset hΛ; apply HasAxiomK.K⟩
+
+lemma validOnCanonicalModel_of_subset [HasAxiomK Λ] [HasAxiomK Λ'] (hΛ : Λ ⊆ Λ') (h : CanonicalModel Λ ⊧ p) : CanonicalModel Λ' ⊧ p := by
+  apply iff_validOnCanonicalModel_deducible.mpr;
+  exact maxm_subset! hΛ $ iff_validOnCanonicalModel_deducible.mp h;
 
 /-
-class Canonical (Λ : AxiomSet α) where
-  property : Frame (MCT Λ) α → Prop
-  definability : AxiomSetDefinability (MCT Λ) Λ property
-  satisfy : property (CanonicalFrame Λ)
-
-lemma complete!_of_canonically [c : Canonical Λ] : 𝔽((Λ : AxiomSet α), MCT (Λ : AxiomSet α)) ⊧ p → (Λ ⊢! p) := by
-  contrapose;
-  intro h₁ h₂;
-  simp [Kripke.ValidOnFrameClass, Kripke.ValidOnFrame] at h₂;
-  have : Λ ⊢! p := deducible_of_validOnCanonicelModel $ h₂ (CanonicalModel Λ).frame
-    (by apply iff_definability_memAxiomSetFrameClass c.definability |>.mp; exact c.satisfy)
-    (CanonicalModel Λ).valuation;
-  contradiction;
+lemma validOnCanonicalFrame_of_subset [HasAxiomK Λ] [HasAxiomK Λ'] (hΛ : Λ ⊆ Λ') (h : CanonicalFrame Λ ⊧ p) : CanonicalFrame Λ' ⊧ p := by
+  intro V Ω;
+  have := (validOnCanonicalModel_of_subset hΛ $ h (CanonicalModel Λ).valuation) Ω;
 -/
 
 class Canonical (Λ : AxiomSet α) where
   valid : (CanonicalFrame Λ) ⊧* Λ
 
-lemma complete!_of_canonical [canonical : Canonical Λ] : 𝔽((Λ : AxiomSet α), MCT (Λ : AxiomSet α)) ⊧ p → (Λ ⊢! p) := by
+lemma complete! : (∀ {W : Type u} (M : Model W α), M ⊧ p) → Λ ⊢! p := by
+  contrapose;
+  intro h₁;
+  push_neg;
+  existsi (MCT Λ), (CanonicalModel Λ);
+  exact iff_validOnCanonicalModel_deducible.not.mpr h₁;
+
+lemma complete!_of_canonical [canonical : Canonical Λ] : (𝔽((Λ : AxiomSet α), (MCT Λ)) ⊧ p) → (Λ ⊢! p) := by
   contrapose;
   intro h₁ h₂;
   simp [Kripke.ValidOnFrameClass, Kripke.ValidOnFrame] at h₂;
-  have : Λ ⊢! p := deducible_of_validOnCanonicelModel $ h₂ (CanonicalModel Λ).frame canonical.valid (CanonicalModel Λ).valuation;
+  have : Λ ⊢! p := iff_validOnCanonicalModel_deducible.mp $ h₂ (CanonicalModel Λ).frame canonical.valid (CanonicalModel Λ).valuation;
   contradiction;
 
 instance [Canonical Λ]: Complete Λ 𝔽(Λ, MCT Λ) := ⟨complete!_of_canonical⟩
