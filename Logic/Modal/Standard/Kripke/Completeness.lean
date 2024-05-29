@@ -1,5 +1,6 @@
 import Logic.Modal.Standard.Deduction
 import Logic.Modal.Standard.Kripke.Semantics
+import Logic.Modal.Standard.Kripke.Soundness
 
 namespace LO.System
 
@@ -38,7 +39,7 @@ universe u
 namespace LO.Modal.Standard
 
 variable {α : Type u}
-variable [DecidableEq α]
+variable [DecidableEq α] [Inhabited α]
 
 def Theory.ΛConsistent (Λ : AxiomSet α) (T : Theory α) := ∀ {Γ : List (Formula α)}, (∀ p ∈ Γ, p ∈ T) → Λ ⊬! Γ.conj' ⟶ ⊥
 notation:max "(" Λ ")-Consistent " T:90 => Theory.ΛConsistent Λ T
@@ -49,6 +50,13 @@ open System
 open Theory
 
 namespace Theory
+
+lemma self_ΛConsistent [h : System.Consistent Λ] : (Λ)-Consistent Λ := by
+  intro Γ hΓ;
+  obtain ⟨q, hq⟩ := h.exists_unprovable;
+  by_contra hC;
+  have : Λ ⊢! q := imp_trans! hC efq! ⨀ (iff_provable_list_conj.mpr $ λ _ h => ⟨Deduction.maxm $ hΓ _ h⟩);
+  contradiction;
 
 variable {T : Theory α}
 
@@ -311,6 +319,8 @@ lemma exists_maximal_Λconsistented_theory (consisT : (Λ)-Consistent T) : ∃ (
   exact hΩ₂;
 
 alias lindenbaum := exists_maximal_Λconsistented_theory
+
+noncomputable instance inhabited_of_consistent [System.Consistent Λ] : Inhabited (MCT Λ) := ⟨lindenbaum self_ΛConsistent |>.choose⟩
 
 lemma either_mem (Ω : MCT Λ) (p) : p ∈ Ω.theory ∨ ~p ∈ Ω.theory := by
   by_contra hC; push_neg at hC;
@@ -723,23 +733,23 @@ lemma validOnCanonicalModel_of_subset [HasAxiomK Λ] [HasAxiomK Λ'] (hΛ : Λ �
 class Canonical (Λ : AxiomSet α) where
   realize : (CanonicalFrame Λ) ⊧* Λ
 
-lemma complete!_on_frameclass_of_canonical [Canonical Λ] : 𝔽(Λ) ⊧ p → Λ ⊢! p := by
+lemma complete!_on_frameclass_of_canonical [System.Consistent Λ] [Canonical Λ] : 𝔽(Λ) ⊧ p → Λ ⊢! p := by
   simp [Kripke.ValidOnFrameClass, Kripke.ValidOnFrame];
   contrapose;
   intro h;
   push_neg;
-  existsi _, (CanonicalFrame Λ);
+  existsi (MCT Λ), inhabited_of_consistent, (CanonicalFrame Λ);
   constructor;
   . apply Canonical.realize;
   . existsi (CanonicalModel Λ).valuation;
     exact iff_valid_on_canonicalModel_deducible.not.mpr h;
 
-instance [Canonical Λ] : Complete Λ 𝔽(Λ) := ⟨complete!_on_frameclass_of_canonical⟩
+instance [System.Consistent Λ] [Canonical Λ] : Complete Λ 𝔽(Λ) := ⟨complete!_on_frameclass_of_canonical⟩
 
-instance AxiomSet.K.Canonical : Canonical (𝐊 : AxiomSet α) where
+instance : Canonical (𝐊 : AxiomSet α) where
   realize := by apply AxiomSet.K.definability.defines _ _ |>.mpr; trivial;
 
-instance AxiomSet.K.Complete : Complete (𝐊 : AxiomSet α) 𝔽(𝐊) := inferInstance
+instance : Complete (𝐊 : AxiomSet α) 𝔽(𝐊) := inferInstance
 
 end Kripke
 

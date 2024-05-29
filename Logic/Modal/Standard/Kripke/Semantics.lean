@@ -157,9 +157,9 @@ lemma validOnAxiomSetFrameClass_axiom (h : p ∈ Λ) : 𝔽(Λ) ⊧ p := by
   exact hF.realize h;
 
 class AxiomSetDefinability (Λ : AxiomSet α) (P : ∀ {W}, [Inhabited W] → Frame W α → Prop) where
-  defines : ∀ W F, [Inhabited W] → F ⊧* Λ ↔ @P W _ F
+  defines : ∀ W, [Inhabited W] → ∀ F, F ⊧* Λ ↔ @P W _ F
 
-lemma iff_definability_memAxiomSetFrameClass (definability : AxiomSetDefinability Λ P) : ∀ {W F}, [hi : Inhabited W] → 𝔽(Λ) W hi F ↔ P F := by
+lemma iff_definability_memAxiomSetFrameClass (definability : AxiomSetDefinability Λ P) : ∀ {W}, [hi : Inhabited W] → ∀ {F}, 𝔽(Λ) W hi F ↔ P F := by
   apply definability.defines;
 
 @[simp]
