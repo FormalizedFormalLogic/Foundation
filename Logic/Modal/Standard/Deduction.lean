@@ -2,7 +2,6 @@ import Logic.Logic.HilbertStyle.Basic
 import Logic.Logic.HilbertStyle.Supplemental
 import Logic.Modal.Standard.System
 import Logic.Modal.Standard.Formula
-import Logic.Modal.Standard.HilbertStyle
 
 namespace LO.Modal.Standard
 

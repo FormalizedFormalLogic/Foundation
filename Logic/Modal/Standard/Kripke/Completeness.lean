@@ -1,4 +1,5 @@
 import Logic.Modal.Standard.Deduction
+import Logic.Modal.Standard.HilbertStyle
 import Logic.Modal.Standard.Kripke.Semantics
 import Logic.Modal.Standard.Kripke.Soundness
 
@@ -38,8 +39,7 @@ universe u
 
 namespace LO.Modal.Standard
 
-variable {α : Type u}
-variable [DecidableEq α] [Inhabited α]
+variable {α : Type u} [DecidableEq α] [Inhabited α]
 
 def Theory.ΛConsistent (Λ : AxiomSet α) (T : Theory α) := ∀ {Γ : List (Formula α)}, (∀ p ∈ Γ, p ∈ T) → Λ ⊬! Γ.conj' ⟶ ⊥
 notation:max "(" Λ ")-Consistent " T:90 => Theory.ΛConsistent Λ T
@@ -733,12 +733,12 @@ lemma validOnCanonicalModel_of_subset [HasAxiomK Λ] [HasAxiomK Λ'] (hΛ : Λ �
 class Canonical (Λ : AxiomSet α) where
   realize : (CanonicalFrame Λ) ⊧* Λ
 
-lemma complete!_on_frameclass_of_canonical [System.Consistent Λ] [Canonical Λ] : 𝔽(Λ) ⊧ p → Λ ⊢! p := by
+lemma complete!_on_frameclass_of_canonical [System.Consistent Λ] [Canonical Λ] : (𝔽(Λ) : FrameClass.{u,u} α) ⊧ p → Λ ⊢! p := by
   simp [Kripke.ValidOnFrameClass, Kripke.ValidOnFrame];
   contrapose;
-  intro h;
   push_neg;
-  existsi (MCT Λ), inhabited_of_consistent, (CanonicalFrame Λ);
+  intro h;
+  existsi MCT Λ, inhabited_of_consistent, CanonicalFrame Λ;
   constructor;
   . apply Canonical.realize;
   . existsi (CanonicalModel Λ).valuation;

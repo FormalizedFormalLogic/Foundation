@@ -7,7 +7,7 @@ namespace LO.Modal.Standard
 
 namespace Kripke
 
-variable (W : Type*) (α : Type u)
+variable (W α : Type*)
 
 set_option linter.unusedVariables false in
 abbrev Frame (α : Type*) := W → W → Prop
@@ -25,9 +25,9 @@ structure Model where
   frame : Frame W α
   valuation : Valuation W α
 
-abbrev FrameClass := ∀ (W : Type u), Inhabited W → Frame W α → Prop
+abbrev FrameClass := ∀ (W : Type*), Inhabited W → Frame W α → Prop
 
-class FrameClass.Nonempty {α} (𝔽 : FrameClass α) where
+class FrameClass.Nonempty {α : Type*} (𝔽 : FrameClass α) where
   existsi : ∃ W _ F, 𝔽 W (by assumption) F
 
 end Kripke
@@ -170,11 +170,11 @@ instance AxiomSet.K.definability : AxiomSetDefinability (𝐊 : AxiomSet α) (λ
     simp [ValidOnFrame, ValidOnModel, Satisfies];
     intros; simp_all;
 
-instance [hi : Inhabited α] : FrameClass.Nonempty (α := α) 𝔽(𝐊) where
+instance : FrameClass.Nonempty (α := α) 𝔽(𝐊) where
   existsi := by
-    existsi α, hi, (λ _ _ => True);
+    existsi _, ⟨()⟩, (λ _ _ => True);
     apply iff_definability_memAxiomSetFrameClass AxiomSet.K.definability |>.mpr;
-    simp [validOnAxiomSetFrameClass_axiom, AxiomSet.K.definability.defines];
+    trivial;
 
 /-
 instance [dΛ : AxiomSetDefinability Λ P] : AxiomSetDefinability (𝐊 ∪ Λ) P where
