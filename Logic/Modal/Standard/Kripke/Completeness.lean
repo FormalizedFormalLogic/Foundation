@@ -1,6 +1,5 @@
 import Logic.Modal.Standard.Deduction
 import Logic.Modal.Standard.Kripke.Semantics
-import Logic.Propositional.Superintuitionistic.Kripke.Completeness
 
 namespace LO.System
 
@@ -683,7 +682,7 @@ lemma truthlemma {p : Formula α} : ∀ {Ω : MCT Λ}, (CanonicalModel Λ, Ω) �
       exact CanonicalModel.frame_def_box.mp hΩ' h;
   | _ => simp_all
 
-lemma iff_validOnCanonicalModel_deducible : (CanonicalModel Λ) ⊧ p ↔ (Λ ⊢! p) := by
+lemma iff_valid_on_canonicalModel_deducible : (CanonicalModel Λ) ⊧ p ↔ (Λ ⊢! p) := by
   constructor;
   . contrapose;
     intro h;
@@ -704,55 +703,43 @@ lemma iff_validOnCanonicalModel_deducible : (CanonicalModel Λ) ⊧ p ↔ (Λ �
     obtain ⟨Γ, hΓ₁, hΓ₂⟩ := Theory.iff_insert_notΛConsistent.mp this;
     exact Ω.consistent hΓ₁ $ andImplyIffImplyImply'!.mp hΓ₂ ⨀ h;
 
--- instance [HasAxiomK Λ] (hΛ : Λ ⊆ Λ') : HasAxiomK Λ' := ⟨by intros; apply maxm_subset hΛ; apply HasAxiomK.K⟩
+lemma realize_axiomset_of_self_canonicalModel : CanonicalModel Λ ⊧* Λ := by
+  apply Semantics.realizeSet_iff.mpr;
+  intro p hp;
+  apply iff_valid_on_canonicalModel_deducible.mpr;
+  exact ⟨Deduction.maxm hp⟩;
+
+@[simp]
+lemma realize_theory_of_self_canonicalModel : CanonicalModel Λ ⊧* (System.theory Λ) := by
+  apply Semantics.realizeSet_iff.mpr;
+  intro p hp;
+  apply iff_valid_on_canonicalModel_deducible.mpr;
+  simpa [System.theory] using hp;
 
 lemma validOnCanonicalModel_of_subset [HasAxiomK Λ] [HasAxiomK Λ'] (hΛ : Λ ⊆ Λ') (h : CanonicalModel Λ ⊧ p) : CanonicalModel Λ' ⊧ p := by
-  apply iff_validOnCanonicalModel_deducible.mpr;
-  exact maxm_subset! hΛ $ iff_validOnCanonicalModel_deducible.mp h;
-
-/-
-lemma validOnCanonicalFrame_of_subset [HasAxiomK Λ] [HasAxiomK Λ'] (hΛ : Λ ⊆ Λ') (h : CanonicalFrame Λ ⊧ p) : CanonicalFrame Λ' ⊧ p := by
-  intro V Ω;
-  have := (validOnCanonicalModel_of_subset hΛ $ h (CanonicalModel Λ).valuation) Ω;
--/
+  apply iff_valid_on_canonicalModel_deducible.mpr;
+  exact maxm_subset! hΛ $ iff_valid_on_canonicalModel_deducible.mp h;
 
 class Canonical (Λ : AxiomSet α) where
-  valid : (CanonicalFrame Λ) ⊧* Λ
+  realize : (CanonicalFrame Λ) ⊧* Λ
 
-lemma complete! : (∀ {W : Type u} (M : Model W α), M ⊧ p) → Λ ⊢! p := by
+lemma complete!_on_frameclass_of_canonical [Canonical Λ] : 𝔽(Λ) ⊧ p → Λ ⊢! p := by
+  simp [Kripke.ValidOnFrameClass, Kripke.ValidOnFrame];
   contrapose;
+  intro h;
   push_neg;
-  intro h₁;
-  existsi (MCT Λ), (CanonicalModel Λ);
-  exact iff_validOnCanonicalModel_deducible.not.mpr h₁;
+  existsi _, (CanonicalFrame Λ);
+  constructor;
+  . apply Canonical.realize;
+  . existsi (CanonicalModel Λ).valuation;
+    exact iff_valid_on_canonicalModel_deducible.not.mpr h;
 
-lemma complete!_on_frame : (∀ {W : Type u} (F : Frame W α), F ⊧ p) → Λ ⊢! p := by
-  contrapose;
-  push_neg;
-  intro h₁;
-  have := not_imp_not.mpr complete! h₁;
-  simp [Kripke.ValidOnModel] at this;
-  obtain ⟨W, M, x, h⟩ := this;
-  simp [Kripke.ValidOnFrame, Kripke.ValidOnModel];
-  existsi W, M.frame, M.valuation, x;
-  assumption;
-  -- exact iff_validOnCanonicalModel_deducible.not.mpr h₁;
-
-#print axioms complete!_on_frame
-
-lemma complete!_of_canonical [canonical : Canonical Λ] : (𝔽((Λ : AxiomSet α), (MCT Λ)) ⊧ p) → (Λ ⊢! p) := by
-  contrapose;
-  intro h₁ h₂;
-  simp [Kripke.ValidOnFrameClass, Kripke.ValidOnFrame] at h₂;
-  have : Λ ⊢! p := iff_validOnCanonicalModel_deducible.mp $ h₂ (CanonicalModel Λ).frame canonical.valid (CanonicalModel Λ).valuation;
-  contradiction;
-
-instance [Canonical Λ]: Complete Λ 𝔽(Λ, MCT Λ) := ⟨complete!_of_canonical⟩
+instance [Canonical Λ] : Complete Λ 𝔽(Λ) := ⟨complete!_on_frameclass_of_canonical⟩
 
 instance AxiomSet.K.Canonical : Canonical (𝐊 : AxiomSet α) where
-  valid := by apply AxiomSet.K.definability.defines _ |>.mp; trivial;
+  realize := by apply AxiomSet.K.definability.defines _ _ |>.mpr; trivial;
 
-instance : Complete (𝐊 : AxiomSet α) 𝔽((𝐊 : AxiomSet α), MCT (𝐊 : AxiomSet α)) := inferInstance
+instance AxiomSet.K.Complete : Complete (𝐊 : AxiomSet α) 𝔽(𝐊) := inferInstance
 
 end Kripke
 
