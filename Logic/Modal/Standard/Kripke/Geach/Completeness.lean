@@ -8,7 +8,6 @@ namespace Kripke
 open System
 open Formula
 
-variable {W α : Type*}
 variable {Λ : AxiomSet α} [Inhabited α] [DecidableEq α]
 
 /-
@@ -55,6 +54,7 @@ lemma str {P : ∀ {W}, (Frame W α) → Prop} (hs : Λ ⊆ Λ') : P (CanonicalF
   sorry;
 -/
 
+/-
 instance AxiomSet.GeachLogic.Canonical (ts) : Canonical (𝐆𝐞(ts) : AxiomSet α) where
   realize := by
     apply AxiomSet.GeachLogic.definability ts |>.defines _ _ |>.mpr;
@@ -85,16 +85,22 @@ instance AxiomSet.GeachLogic.Canonical (ts) : Canonical (𝐆𝐞(ts) : AxiomSet
         exact subset_Canonical (by simp; apply Set.subset_union_of_subset_right AxiomSet.GeachLogic.subsetK;) this.2 ;
       . exact subset_Canonical (by simp) ih;
     -/
+-/
 
-instance [hG : Λ.IsGeachLogic] : Canonical Λ := by
-  convert AxiomSet.GeachLogic.Canonical (α := α) hG.taples;
-  exact hG.char;
 
-instance [Λ.IsGeachLogic] : Complete Λ 𝔽(Λ) := inferInstance
+instance geach_canonical : Canonical (𝐆𝐞(l) : DeductionParameter α) := canonical_of_definability (AxiomSet.MultiGeach.definability l) (by sorry)
 
-instance : Complete (𝐒𝟒 : AxiomSet α) 𝔽(𝐒𝟒) := inferInstance
+variable {L : DeductionParameter α}
 
-instance : Complete (𝐒𝟓 : AxiomSet α) 𝔽(𝐒𝟓) := inferInstance
+instance [geach : L.IsGeach] : Canonical L := by
+  convert geach_canonical (α := α) (l := geach.taples);
+  exact geach.char
+
+instance [L.IsGeach] : Complete L 𝔽(Ax(L)) := instComplete
+
+instance : Complete (𝐒𝟒 : DeductionParameter α) 𝔽(Ax(𝐒𝟒)) := instComplete
+
+instance : Complete (𝐒𝟓 : DeductionParameter α) 𝔽(Ax(𝐒𝟓)) := instComplete
 
 end Kripke
 

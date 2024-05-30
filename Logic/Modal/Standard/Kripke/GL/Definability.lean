@@ -4,7 +4,7 @@ import Logic.Modal.Standard.Kripke.Soundness
 
 namespace LO.Modal.Standard
 
-variable {W α : Type*}  [Inhabited W] [Inhabited α]
+variable {W α : Type*} [Inhabited W] [Inhabited α]
 
 open System
 open Kripke
@@ -12,7 +12,7 @@ open Formula Formula.Kripke
 
 variable {F: Kripke.Frame W α}
 
-private lemma AxiomSet.L.definability.implies_transitive : F ⊧* 𝐋 → Transitive F := by
+private lemma AxiomSet.L.definability.implies_transitive : F ⊧* 𝗟 → Transitive F := by
   contrapose;
   intro hT; simp [Transitive] at hT;
   obtain ⟨w₁, w₂, w₃, r₂₃, r₁₂, nr₁₃⟩ := hT;
@@ -29,7 +29,7 @@ private lemma AxiomSet.L.definability.implies_transitive : F ⊧* 𝐋 → Trans
   . existsi w₂;
     simpa;
 
-private lemma AxiomSet.L.definability.implies_cwf  : F ⊧* 𝐋 → ConverseWellFounded F := by
+private lemma AxiomSet.L.definability.implies_cwf  : F ⊧* 𝗟 → ConverseWellFounded F := by
   contrapose;
   intro hCF;
   obtain ⟨X, hX₁, hX₂⟩ := by simpa using ConverseWellFounded.iff_has_max.not.mp hCF;
@@ -55,7 +55,7 @@ private lemma AxiomSet.L.definability.implies_cwf  : F ⊧* 𝐋 → ConverseWel
     . simpa [flip] using hw'₂;
     . simp_all [V, w, a];
 
-private lemma AxiomSet.L.definability.impliedby : (Transitive F ∧ ConverseWellFounded F) → F ⊧* 𝐋 := by
+private lemma AxiomSet.L.definability.impliedby : (Transitive F ∧ ConverseWellFounded F) → F ⊧* 𝗟 := by
   rintro ⟨hTrans, hWF⟩;
   simp [AxiomSet.L, Axioms.L];
   intro p V w;
@@ -77,7 +77,7 @@ private lemma AxiomSet.L.definability.impliedby : (Transitive F ∧ ConverseWell
   simp_all;
 
 open AxiomSet.L.definability in
-instance AxiomSet.L.definability : Definability (α := α) 𝐋 (λ F => Transitive F ∧ ConverseWellFounded F) where
+instance AxiomSet.L.definability : Definability (α := α) 𝗟 (λ F => Transitive F ∧ ConverseWellFounded F) where
   defines W _ F := by
     constructor;
     . intro h;
@@ -88,7 +88,7 @@ instance AxiomSet.L.definability : Definability (α := α) 𝐋 (λ F => Transit
       apply impliedby;
       simp_all;
 
-instance AxiomSet.L.finiteDefinability : FiniteDefinability (α := α) 𝐋 (λ F => Transitive F ∧ Irreflexive F) where
+instance AxiomSet.L.finiteDefinability : FiniteDefinability (α := α) 𝗟 (λ F => Transitive F ∧ Irreflexive F) where
   fin_defines W _ _ F := by
     constructor;
     . intro h;
@@ -105,24 +105,22 @@ instance AxiomSet.L.finiteDefinability : FiniteDefinability (α := α) 𝐋 (λ 
       apply AxiomSet.L.definability.defines W F |>.mpr;
       exact ⟨hTrans, @Finite.converseWellFounded_of_trans_irrefl _ F _ ⟨hTrans⟩ ⟨hIrrefl⟩⟩;
 
-instance : FiniteFrameClass.Nonempty (α := α) 𝔽ꟳ(𝐋) where
+instance : FiniteFrameClass.Nonempty (α := α) 𝔽ꟳ(𝗟) where
   W := PUnit;
   existsi := by
     existsi (λ _ _ => False);
     apply iff_finiteDefinability_memFiniteFrameClass (AxiomSet.L.finiteDefinability) |>.mpr;
     simp [Transitive, Irreflexive];
 
-instance AxiomSet.GL.definability : Definability (α := α) 𝐆𝐋 (λ F => Transitive F ∧ ConverseWellFounded F) := inferInstance
-
-instance AxiomSet.GL.finiteDefinability : FiniteDefinability (α := α) 𝐆𝐋 (λ F => Transitive F ∧ Irreflexive F) := inferInstance
-
-instance : FiniteFrameClass.Nonempty (α := α) 𝔽ꟳ(𝐆𝐋) where
+instance : FiniteFrameClass.Nonempty (α := α) 𝔽ꟳ(Ax(𝐆𝐋)) where
   W := PUnit;
   existsi := by
     existsi (λ _ _ => False);
-    apply iff_finiteDefinability_memFiniteFrameClass (AxiomSet.GL.finiteDefinability) |>.mpr;
+    apply iff_finiteDefinability_memFiniteFrameClass
+      (show FiniteDefinability (α := α) (𝗞 ∪ 𝗟) (λ F => Transitive F ∧ Irreflexive F) by infer_instance)
+      |>.mpr;
     simp [Transitive, Irreflexive];
 
-instance : System.Consistent (𝐆𝐋 : AxiomSet α) := inferInstance
+instance : System.Consistent (𝐆𝐋 : DeductionParameter α) := inferInstance
 
 end LO.Modal.Standard

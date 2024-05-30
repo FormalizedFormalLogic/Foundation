@@ -11,26 +11,33 @@ variable {α : Type u} [DecidableEq α] [Inhabited α]
 
 section
 
-variable {Λ₁ Λ₂ : AxiomSet α} [hG₁ : Λ₁.IsGeachLogic] [hG₂ : Λ₂.IsGeachLogic]
+variable {L₁ L₂ : DeductionParameter α} [geach₁ : L₁.IsGeach] [geach₂ : L₂.IsGeach]
 
 lemma reducible_of_geach_defnability
-  (hs : ∀ {W : Type u}, [Inhabited W] → ∀ {F : Frame W α}, MultiGeachConfluent hG₂.taples F → MultiGeachConfluent hG₁.taples F)
-  : (Λ₁ ≤ₛ Λ₂) := reducible_of_definability (definability₁ := IsGeachLogic.definability) (definability₂ := IsGeachLogic.definability) hs
+  (hs : ∀ {W : Type u}, [Inhabited W] → ∀ {F : Frame W α}, MultiGeachConfluent geach₂.taples F → MultiGeachConfluent geach₁.taples F)
+  : (L₁ ≤ₛ L₂) :=
+    reducible_of_definability
+      (definability₁ := by convert AxiomSet.MultiGeach.definability (α := α) geach₁.taples; simp)
+      (definability₂ := by convert AxiomSet.MultiGeach.definability (α := α) geach₂.taples; simp)
+      hs
 
 lemma equiv_of_geach_defnability
-  (hs : ∀ {W : Type u}, [Inhabited W] → ∀ {F : Frame W α}, MultiGeachConfluent hG₁.taples F ↔ MultiGeachConfluent hG₂.taples F)
-  : (Λ₁ =ₛ Λ₂) := equiv_of_iff_definability (definability₁ := IsGeachLogic.definability) (definability₂ := IsGeachLogic.definability) hs
+  (hs : ∀ {W : Type u}, [Inhabited W] → ∀ {F : Frame W α}, MultiGeachConfluent geach₁.taples F ↔ MultiGeachConfluent geach₂.taples F)
+  : (L₁ =ₛ L₂) := equiv_of_iff_definability
+    (definability₁ := by convert AxiomSet.MultiGeach.definability (α := α) geach₁.taples; simp)
+    (definability₂ := by convert AxiomSet.MultiGeach.definability (α := α) geach₂.taples; simp)
+    hs
 
 end
 
 @[simp]
-theorem reducible_KD_KT : (𝐊𝐃 : AxiomSet α) ≤ₛ 𝐊𝐓 := by apply reducible_of_geach_defnability; simp_all [serial_of_refl];
+theorem reducible_KD_KT : (𝐊𝐃 : DeductionParameter α) ≤ₛ 𝐊𝐓 := by apply reducible_of_geach_defnability; simp_all [serial_of_refl];
 
 @[simp]
-theorem reducible_S4_S5 : (𝐒𝟒 : AxiomSet α) ≤ₛ 𝐒𝟓 := by apply reducible_of_geach_defnability; simp_all [trans_of_refl_eucl];
+theorem reducible_S4_S5 : (𝐒𝟒 : DeductionParameter α) ≤ₛ 𝐒𝟓 := by apply reducible_of_geach_defnability; simp_all [trans_of_refl_eucl];
 
 @[simp]
-theorem equiv_S5_KT4B : (𝐒𝟓 : AxiomSet α) =ₛ 𝐊𝐓𝟒𝐁 := by apply equiv_of_geach_defnability; intros; constructor <;> simp_all [symm_of_refl_eucl, trans_of_refl_eucl, eucl_of_symm_trans];
+theorem equiv_S5_KT4B : (𝐒𝟓 : DeductionParameter α) =ₛ 𝐊𝐓𝟒𝐁 := by apply equiv_of_geach_defnability; intros; constructor <;> simp_all [symm_of_refl_eucl, trans_of_refl_eucl, eucl_of_symm_trans];
 
 /- TODO: strict reducible
 theorem LogicalStrictStrong.KD_KT [hβ : Nontrivial β] : (𝐊𝐃 : AxiomSet β) <ᴸ 𝐊𝐓 := by

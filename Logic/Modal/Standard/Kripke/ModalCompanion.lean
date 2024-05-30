@@ -49,13 +49,13 @@ variable {p q : Superintuitionistic.Formula α}
 
 end GTranslation
 
-class ModalCompanion (iΛ : Superintuitionistic.AxiomSet α) (mΛ : AxiomSet α) where
-  companion : ∀ {p : Superintuitionistic.Formula α}, iΛ ⊢! p ↔ mΛ ⊢! pᵍ
+class ModalCompanion (iΛ : Superintuitionistic.AxiomSet α) (mL : DeductionParameter α) where
+  companion : ∀ {p : Superintuitionistic.Formula α}, iΛ ⊢! p ↔ mL ⊢! pᵍ
 
-variable {iΛ : Superintuitionistic.AxiomSet α} {mΛ : AxiomSet α}
+variable {iΛ : Superintuitionistic.AxiomSet α} {mL : DeductionParameter α}
 variable {p q r : Superintuitionistic.Formula α}
 
-lemma axiomTc_GTranslate! [System.K4 mΛ] : mΛ ⊢! pᵍ ⟶ □pᵍ := by
+lemma axiomTc_GTranslate! [System.K4 mL] : mL ⊢! pᵍ ⟶ □pᵍ := by
   induction p using Superintuitionistic.Formula.rec' with
   | hatom => simp only [GTranslation.atom_def, axiomFour!];
   | himp => simp only [GTranslation.imp_def, axiomFour!];
@@ -68,28 +68,28 @@ lemma axiomTc_GTranslate! [System.K4 mΛ] : mΛ ⊢! pᵍ ⟶ □pᵍ := by
     simp only [GTranslation.or_def];
     exact imp_trans! (disj₃''! (implyOrLeft'! ihp) (implyOrRight'! ihq)) collect_box_or!
 
-instance [System.S4 mΛ] : System.K4 mΛ where
+instance [System.S4 mL] : System.K4 mL where
 
-private lemma provable_efq_of_provable_S4.case_imply₁ [System.K4 mΛ] : mΛ ⊢! (p ⟶ q ⟶ p)ᵍ := by
+private lemma provable_efq_of_provable_S4.case_imply₁ [System.K4 mL] : mL ⊢! (p ⟶ q ⟶ p)ᵍ := by
   simp only [GTranslation.imp_def];
   exact nec! $ imp_trans! axiomTc_GTranslate! $ axiomK'! $ nec! $ imply₁!;
 
-private lemma provable_efq_of_provable_S4.case_imply₂ [System.S4 mΛ] : mΛ ⊢! ((p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r)ᵍ := by
+private lemma provable_efq_of_provable_S4.case_imply₂ [System.S4 mL] : mL ⊢! ((p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r)ᵍ := by
   simp only [GTranslation.imp_def];
   refine nec! $ imp_trans! (imp_trans! (axiomK'! $ nec! ?b) axiomFour!) $ axiomK'! $ nec! $ imp_trans! (axiomK'! $ nec! imply₂!) axiomK!;
   apply provable_iff_provable.mpr;
   apply deduct_iff.mpr;
   apply deduct_iff.mpr;
-  have : [pᵍ, pᵍ ⟶ □(qᵍ ⟶ rᵍ)] ⊢[mΛ]! pᵍ := by_axm! (by simp);
-  have : [pᵍ, pᵍ ⟶ □(qᵍ ⟶ rᵍ)] ⊢[mΛ]! (pᵍ ⟶ □(qᵍ ⟶ rᵍ)) := by_axm! (by simp);
-  have : [pᵍ, pᵍ ⟶ □(qᵍ ⟶ rᵍ)] ⊢[mΛ]! □(qᵍ ⟶ rᵍ) := (by assumption) ⨀ (by assumption);
+  have : [pᵍ, pᵍ ⟶ □(qᵍ ⟶ rᵍ)] ⊢[mL]! pᵍ := by_axm! (by simp);
+  have : [pᵍ, pᵍ ⟶ □(qᵍ ⟶ rᵍ)] ⊢[mL]! (pᵍ ⟶ □(qᵍ ⟶ rᵍ)) := by_axm! (by simp);
+  have : [pᵍ, pᵍ ⟶ □(qᵍ ⟶ rᵍ)] ⊢[mL]! □(qᵍ ⟶ rᵍ) := (by assumption) ⨀ (by assumption);
   exact axiomT'! this;
 
-private lemma provable_efq_of_provable_S4.case_conj₃ [System.K4 mΛ] : mΛ ⊢! (p ⟶ q ⟶ p ⋏ q)ᵍ := by
+private lemma provable_efq_of_provable_S4.case_conj₃ [System.K4 mL] : mL ⊢! (p ⟶ q ⟶ p ⋏ q)ᵍ := by
   simp only [GTranslation.imp_def, GTranslation.and_def];
   exact nec! $ imp_trans! axiomTc_GTranslate! $ axiomK'! $ nec! $ conj₃!
 
-private lemma provable_efq_of_provable_S4.case_disj₃ [System.K4 mΛ] : mΛ ⊢! (((p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r)))ᵍ := by
+private lemma provable_efq_of_provable_S4.case_disj₃ [System.K4 mL] : mL ⊢! (((p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r)))ᵍ := by
   simp only [GTranslation.imp_def, GTranslation.or_def];
   exact nec! $ imp_trans! axiomFour! $ axiomK'! $ nec! $ imp_trans! (axiomK'! $ nec! $ disj₃!) axiomK!;
 
@@ -116,6 +116,8 @@ open Superintuitionistic.Kripke
 open Superintuitionistic.Formula.Kripke
 
 variable [Inhabited (Superintuitionistic.SaturatedConsistentTableau (α := α) 𝐄𝐅𝐐)] --TODO: remove
+
+open Kripke
 
 lemma provable_S4_of_provable_efq : (𝐒𝟒 ⊢! pᵍ) → (𝐄𝐅𝐐 ⊢! p) := by
   contrapose;
@@ -144,11 +146,12 @@ lemma provable_S4_of_provable_efq : (𝐒𝟒 ⊢! pᵍ) → (𝐄𝐅𝐐 ⊢! 
   have : ¬((M, w) ⊧ pᵍ) := (h₁ p w).not.mp h;
 
   by_contra hC;
-
   have := by simpa using Modal.Standard.Kripke.sound!_on_frameclass hC;
-  have : (M, w) ⊧ pᵍ := this _ M.frame (by
-    apply Modal.Standard.Kripke.iff_definability_memAxiomSetFrameClass AxiomSet.S4.definability |>.mpr ⟨MRefl, MTrans⟩;
-  ) M.valuation w;
+  have : (M, w) ⊧ pᵍ := this _ M.frame (
+      iff_definability_memAxiomSetFrameClass
+      (show Kripke.Definability _ (λ F => Reflexive F ∧ Transitive F) by simpa using instGeachDefinability (L := 𝐒𝟒))
+      |>.mpr ⟨MRefl, MTrans⟩
+    ) M.valuation w;
   contradiction;
 
 /-- a.k.a. _Gödel-McKinsey-Tarski Theorem_ -/
@@ -156,13 +159,13 @@ theorem provable_efq_iff_provable_S4 : 𝐄𝐅𝐐 ⊢! p ↔ 𝐒𝟒 ⊢! p�
 instance : ModalCompanion (α := α) 𝐄𝐅𝐐 𝐒𝟒 := ⟨provable_efq_iff_provable_S4⟩
 
 
-lemma dp_of_mdp [ModalDisjunctive mΛ] [ModalCompanion iΛ mΛ] [S4 mΛ] : iΛ ⊢! p ⋎ q → iΛ ⊢! p ∨ iΛ ⊢! q := by
+lemma dp_of_mdp [ModalDisjunctive mL] [ModalCompanion iΛ mL] [S4 mL] : iΛ ⊢! p ⋎ q → iΛ ⊢! p ∨ iΛ ⊢! q := by
     intro hpq;
-    have : mΛ ⊢! □pᵍ ⋎ □qᵍ := disj₃'! (implyOrLeft'! axiomTc_GTranslate!) (implyOrRight'! axiomTc_GTranslate!) (by simpa using ModalCompanion.companion.mp hpq);
+    have : mL ⊢! □pᵍ ⋎ □qᵍ := disj₃'! (implyOrLeft'! axiomTc_GTranslate!) (implyOrRight'! axiomTc_GTranslate!) (by simpa using ModalCompanion.companion.mp hpq);
     cases ModalDisjunctive.modal_disjunctive this with
     | inl h => left; exact ModalCompanion.companion.mpr h;
     | inr h => right; exact ModalCompanion.companion.mpr h;
 
-theorem disjunctive_of_modalDisjunctive [ModalDisjunctive mΛ] [ModalCompanion iΛ mΛ] [S4 mΛ] : Disjunctive iΛ := ⟨dp_of_mdp (iΛ := iΛ) (mΛ := mΛ)⟩
+theorem disjunctive_of_modalDisjunctive [ModalDisjunctive mL] [ModalCompanion iΛ mL] [S4 mL] : Disjunctive iΛ := ⟨dp_of_mdp (iΛ := iΛ) (mL := mL)⟩
 
 end LO.Modal.Standard

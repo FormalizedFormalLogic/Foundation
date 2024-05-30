@@ -8,16 +8,15 @@ namespace LO.Modal.Standard
 open System
 open System.Axioms (Geach)
 
-variable {W α : Type*} [Inhabited W] [Inhabited α]
-variable {Λ : AxiomSet α}
+variable [Inhabited W] [Inhabited α]
 
-def Kripke.GeachConfluent (l : Geach.Taple) (F : Kripke.Frame W α) := ∀ {x y z}, (F^[l.i] x y) ∧ (F^[l.j] x z) → ∃ u, (F^[l.m] y u) ∧ (F^[l.n] z u)
+def Kripke.GeachConfluent (l : Geach.Taple) : Kripke.FrameProperty α := λ F => ∀ {x y z}, (F^[l.i] x y) ∧ (F^[l.j] x z) → ∃ u, (F^[l.m] y u) ∧ (F^[l.n] z u)
 
 @[simp]
-def Kripke.MultiGeachConfluent (l : List Geach.Taple) (F : Kripke.Frame W α) : Prop :=
+def Kripke.MultiGeachConfluent (l : List Geach.Taple) : Kripke.FrameProperty α :=
   match l with
-  | [] => True
-  | x :: xs => (GeachConfluent x F) ∧ (MultiGeachConfluent xs F)
+  | [] => λ _ => True
+  | x :: xs => λ F => (GeachConfluent x F) ∧ (MultiGeachConfluent xs F)
 
 namespace Kripke.GeachConfluent
 
@@ -89,11 +88,14 @@ lemma trivial_frame : MultiGeachConfluent (W := PUnit) (α := α) l (λ _ _ => T
 
 end Kripke.MultiGeachConfluent
 
+
 open Kripke
 open Formula Formula.Kripke
 open AxiomSet
 
-instance AxiomSet.Geach.definability (t) : Definability (α := α) 𝐠𝐞(t) (GeachConfluent t) where
+variable {Ax : AxiomSet α}
+
+instance AxiomSet.Geach.definability (t) : Definability (α := α) 𝗴𝗲(t) (GeachConfluent t) where
   defines W _ F := by
     simp [AxiomSet.Geach, GeachConfluent, Geach];
     constructor;
@@ -125,15 +127,15 @@ instance AxiomSet.Geach.definability (t) : Definability (α := α) 𝐠𝐞(t) (
       . assumption;
       . exact Satisfies.multibox_def.mp hpy u hyu;
 
-instance AxiomSet.IsGeachAxiom.definability [hG : Λ.IsGeach] : Definability Λ (Kripke.GeachConfluent hG.taple) where
-  defines W _ F := by convert (AxiomSet.Geach.definability _ |>.defines W F); exact hG.char
+instance AxiomSet.IsGeach.definability [Ax.IsGeach] : Definability Ax (Kripke.GeachConfluent (IsGeach.taple Ax)) where
+  defines W _ F := by convert (AxiomSet.Geach.definability _ |>.defines W F); exact IsGeach.char;
 
-instance AxiomSet.GeachLogic.definability (l) : Definability (α := α) 𝐆𝐞(l) (Kripke.MultiGeachConfluent l) where
+instance AxiomSet.MultiGeach.definability (l) : Definability (α := α) 𝗚𝗲(l) (Kripke.MultiGeachConfluent l) where
   defines W _ F := by
     induction l with
     | nil => apply AxiomSet.K.definability.defines;
     | cons t ts ih =>
-      simp only [GeachLogic.iff_cons, Semantics.RealizeSet.union_iff, MultiGeachConfluent];
+      simp only [MultiGeach.iff_cons, Semantics.RealizeSet.union_iff, MultiGeachConfluent];
       constructor;
       . rintro ⟨ht, hts⟩;
         constructor;
@@ -144,35 +146,43 @@ instance AxiomSet.GeachLogic.definability (l) : Definability (α := α) 𝐆𝐞
         . exact AxiomSet.Geach.definability t |>.defines W F |>.mpr ht;
         . apply ih.mpr hts;
 
-instance AxiomSet.IsGeachLogic.definability [hG : Λ.IsGeachLogic] : Definability Λ (Kripke.MultiGeachConfluent hG.taples) where
-  defines W _ F := by convert (AxiomSet.GeachLogic.definability _ |>.defines W F); exact hG.char
+namespace Kripke
 
-instance : FiniteFrameClass.Nonempty (α := α) 𝔽(𝐆𝐞(l))ꟳ where
+variable {L : DeductionParameter α} [L.HasNec]
+
+instance instGeachDefinability [geach : L.IsGeach] : Definability Ax(L) (Kripke.MultiGeachConfluent geach.taples) := by
+  convert AxiomSet.MultiGeach.definability (α := α) geach.taples;
+  simp;
+
+instance : FiniteFrameClass.Nonempty (α := α) 𝔽(𝗚𝗲(l))ꟳ where
   W := PUnit;
   W_inhabited := inferInstance;
   W_finite := inferInstance;
   existsi := by
     existsi (λ _ _ => True);
-    apply iff_definability_memAxiomSetFrameClass (AxiomSet.GeachLogic.definability l) |>.mpr;
+    apply iff_definability_memAxiomSetFrameClass (AxiomSet.MultiGeach.definability l) |>.mpr;
     simp only [MultiGeachConfluent.trivial_frame];
 
-instance : FrameClass.Nonempty (α := α) 𝔽(𝐆𝐞(l)) := inferInstance
+instance : FrameClass.Nonempty (α := α) 𝔽(𝗚𝗲(l)) := inferInstance
 
-instance : System.Consistent (𝐆𝐞(l) : AxiomSet α) := inferInstance
+instance : System.Consistent (𝐆𝐞(l) : DeductionParameter α) := inferInstance
 
-instance [hG : Λ.IsGeachLogic] : FrameClass.Nonempty 𝔽(Λ) := by rw [hG.char]; infer_instance
+instance [geach : L.IsGeach] : FrameClass.Nonempty 𝔽(Ax(L)) := by rw [geach.char]; infer_instance
 
-instance [Λ.IsGeachLogic] : System.Consistent Λ := inferInstance
+instance [L.IsGeach] : System.Consistent L := inferInstance
 
+instance : System.Consistent (𝐒𝟒 : DeductionParameter α) := inferInstance
 
-instance AxiomSet.S4.definability : Definability (α := α) 𝐒𝟒 (λ F => Reflexive F ∧ Transitive F) := by
-  simpa using AxiomSet.IsGeachLogic.definability (Λ := 𝐒𝟒);
+instance : System.Consistent (𝐒𝟓 : DeductionParameter α) := inferInstance
+
+instance : Definability (α := α) Ax(𝐒𝟒) (λ F => Reflexive F ∧ Transitive F) := by simpa using instGeachDefinability (L := 𝐒𝟒)
+
+/-
 
 instance AxiomSet.S5.definability : Definability (α := α) 𝐒𝟓 (λ F => Reflexive F ∧ Euclidean F) := by
-  simpa using AxiomSet.IsGeachLogic.definability (Λ := 𝐒𝟓);
+  simpa using AxiomSet.IsGeachLogic.definability (Ax := 𝐒𝟓);
+-/
 
-instance : System.Consistent (𝐒𝟒 : AxiomSet α) := inferInstance
-
-instance : System.Consistent (𝐒𝟓 : AxiomSet α) := inferInstance
+end Kripke
 
 end LO.Modal.Standard
