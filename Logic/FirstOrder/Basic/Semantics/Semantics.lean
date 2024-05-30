@@ -242,6 +242,8 @@ abbrev Realize (s : Structure L M) : Formula L M →ˡᶜ Prop := Eval s ![] id
 lemma eval_rel {k} {r : L.Rel k} {v} :
     Eval s e ε (rel r v) ↔ s.rel r (fun i => Semiterm.val s e ε (v i)) := of_eq rfl
 
+lemma Eval.of_eq {e e' : Fin n → M} {ε ε' : μ → M} {p} (h : Eval s e ε p) (he : e = e') (hε : ε = ε') : Eval s e' ε' p := he ▸ hε ▸ h
+
 @[simp] lemma eval_rel₀ {r : L.Rel 0} :
     Eval s e ε (rel r ![]) ↔ s.rel r ![] := by simp [eval_rel, Matrix.empty_eq]
 
@@ -274,6 +276,17 @@ lemma eval_nrel {k} {r : L.Rel k} {v} :
 @[simp] lemma eval_all {p : Semiformula L μ (n + 1)} :
     Eval s e ε (∀' p) ↔ ∀ x : M, Eval s (x :> e) ε p := of_eq rfl
 
+@[simp] lemma eval_ex {p : Semiformula L μ (n + 1)} :
+    Eval s e ε (∃' p) ↔ ∃ x : M, Eval s (x :> e) ε p := of_eq rfl
+
+@[simp] lemma eval_ball {p q : Semiformula L μ (n + 1)} :
+    Eval s e ε (∀[p] q) ↔ ∀ x : M, Eval s (x :> e) ε p → Eval s (x :> e) ε q := by
+  simp [LogicalConnective.ball]
+
+@[simp] lemma eval_bex {p q : Semiformula L μ (n + 1)} :
+    Eval s e ε (∃[p] q) ↔ ∃ x : M, Eval s (x :> e) ε p ⋏ Eval s (x :> e) ε q := by
+  simp [LogicalConnective.bex]
+
 @[simp] lemma eval_univClosure {e'} {p : Semiformula L μ n'} :
     Eval s e' ε (∀* p) ↔ ∀ e, Eval s e ε p := by
   induction' n' with n' ih generalizing e' <;> simp [*, eq_finZeroElim, univClosure_succ]
@@ -281,23 +294,31 @@ lemma eval_nrel {k} {r : L.Rel k} {v} :
   · intro h e; simpa using h (Matrix.vecTail e) (Matrix.vecHead e)
   · intro h e x; exact h (x :> e)
 
-@[simp] lemma eval_ball {p q : Semiformula L μ (n + 1)} :
-    Eval s e ε (∀[p] q) ↔ ∀ x : M, Eval s (x :> e) ε p → Eval s (x :> e) ε q := by
-  simp [LogicalConnective.ball]
-
-@[simp] lemma eval_ex {p : Semiformula L μ (n + 1)} :
-    Eval s e ε (∃' p) ↔ ∃ x : M, Eval s (x :> e) ε p := of_eq rfl
-
 @[simp] lemma eval_exClosure {e'} {p : Semiformula L μ n'} :
-    Eval s e' ε (exClosure p) ↔ ∃ e, Eval s e ε p := by
+    Eval s e' ε (∃* p) ↔ ∃ e, Eval s e ε p := by
   induction' n' with n' ih generalizing e' <;> simp [*, eq_finZeroElim, exClosure_succ]
   constructor
   · rintro ⟨e, x, h⟩; exact ⟨x :> e, h⟩
   · rintro ⟨e, h⟩; exact ⟨Matrix.vecTail e, Matrix.vecHead e, by simpa using h⟩
 
-@[simp] lemma eval_bex {p q : Semiformula L μ (n + 1)} :
-    Eval s e ε (∃[p] q) ↔ ∃ x : M, Eval s (x :> e) ε p ⋏ Eval s (x :> e) ε q := by
-  simp [LogicalConnective.bex]
+@[simp] lemma eval_univItr {k} {e} {p : Semiformula L μ (n + k)} :
+    Eval s e ε (∀^[k] p) ↔ ∀ e', Eval s (Matrix.appendr e' e) ε p := by
+  induction' k with k ih generalizing e <;> simp [*, Matrix.empty_eq, univItr_succ]
+  constructor
+  · intro h e'
+    exact Eval.of_eq (h (Matrix.vecTail e') (Matrix.vecHead e'))
+      (by rw [←Matrix.appendr_cons, Matrix.cons_head_tail]) rfl
+  · intro h e' x; simpa using h (x :> e')
+
+@[simp] lemma eval_exItr {k} {e} {p : Semiformula L μ (n + k)} :
+    Eval s e ε (∃^[k] p) ↔ ∃ e', Eval s (Matrix.appendr e' e) ε p := by
+  induction' k with k ih generalizing e <;> simp [*, Matrix.empty_eq, exItr_succ]
+  constructor
+  · rintro ⟨e', x, h⟩
+    exact ⟨x :> e', by simpa using h⟩
+  · rintro ⟨e, h⟩
+    exact ⟨Matrix.vecTail e, Matrix.vecHead e,
+      by rw [←Matrix.appendr_cons, Matrix.cons_head_tail]; exact h⟩
 
 lemma eval_rew (ω : Rew L μ₁ n₁ μ₂ n₂) (p : Semiformula L μ₁ n₁) :
     Eval s e₂ ε₂ (ω.hom p) ↔ Eval s (Semiterm.val s e₂ ε₂ ∘ ω ∘ Semiterm.bvar) (Semiterm.val s e₂ ε₂ ∘ ω ∘ Semiterm.fvar) p := by

@@ -162,6 +162,18 @@ prefix:64 "∀* " => univClosure
 
 lemma univClosure_succ {n} (a : α (n + 1)) : ∀* a = ∀* ∀' a := rfl
 
+def univItr : (k : ℕ) → α (n + k) → α n
+  | 0,     a => a
+  | k + 1, a => univItr k (∀' a)
+
+notation "∀^[" k "] " p:64 => univItr k p
+
+@[simp] lemma univItr_zero (a : α n) : ∀^[0] a = a := rfl
+
+@[simp] lemma univItr_one (a : α (n + 1)) : ∀^[1] a = ∀' a := rfl
+
+lemma univItr_succ {k} (a : α (n + (k + 1))) : ∀^[k + 1] a = ∀^[k] (∀' a) := rfl
+
 end UnivQuantifier
 
 section ExQuantifier
@@ -177,6 +189,18 @@ prefix:64 "∃* " => exClosure
 @[simp] lemma exClosure_zero (a : α 0) : ∃* a = a := rfl
 
 lemma exClosure_succ {n} (a : α (n + 1)) : ∃* a = ∃* ∃' a := rfl
+
+def exItr : (k : ℕ) → α (n + k) → α n
+  | 0,     a => a
+  | k + 1, a => exItr k (∃' a)
+
+notation "∃^[" k "] " p:64 => exItr k p
+
+@[simp] lemma exItr_zero (a : α n) : ∃^[0] a = a := rfl
+
+@[simp] lemma exItr_one (a : α (n + 1)) : ∃^[1] a = ∃' a := rfl
+
+lemma exItr_succ {k} (a : α (n + (k + 1))) : ∃^[k + 1] a = ∃^[k] (∃' a) := rfl
 
 end ExQuantifier
 
@@ -265,7 +289,7 @@ infix:61 " ⟷ " => LogicalConnective.iff
 end
 
 @[reducible]
-instance Prop_HasLogicSymbols : LogicalConnective Prop where
+instance PropLogicSymbols : LogicalConnective Prop where
   top := True
   bot := False
   tilde := Not
@@ -273,19 +297,19 @@ instance Prop_HasLogicSymbols : LogicalConnective Prop where
   wedge := And
   vee := Or
 
-@[simp] lemma Prop_top_eq : ⊤ = True := rfl
+@[simp] lemma Prop.top_eq : ⊤ = True := rfl
 
-@[simp] lemma Prop_bot_eq : ⊥ = False := rfl
+@[simp] lemma Prop.bot_eq : ⊥ = False := rfl
 
-@[simp] lemma Prop_neg_eq (p : Prop) : ~ p = ¬p := rfl
+@[simp] lemma Prop.neg_eq (p : Prop) : ~ p = ¬p := rfl
 
-@[simp] lemma Prop_arrow_eq (p q : Prop) : (p ⟶ q) = (p → q) := rfl
+@[simp] lemma Prop.arrow_eq (p q : Prop) : (p ⟶ q) = (p → q) := rfl
 
-@[simp] lemma Prop_and_eq (p q : Prop) : (p ⋏ q) = (p ∧ q) := rfl
+@[simp] lemma Prop.and_eq (p q : Prop) : (p ⋏ q) = (p ∧ q) := rfl
 
-@[simp] lemma Prop_or_eq (p q : Prop) : (p ⋎ q) = (p ∨ q) := rfl
+@[simp] lemma Prop.or_eq (p q : Prop) : (p ⋎ q) = (p ∨ q) := rfl
 
-@[simp] lemma Prop_iff_eq (p q : Prop) : (p ⟷ q) = (p ↔ q) := by simp[LogicalConnective.iff, iff_iff_implies_and_implies]
+@[simp] lemma Prop.iff_eq (p q : Prop) : (p ⟷ q) = (p ↔ q) := by simp[LogicalConnective.iff, iff_iff_implies_and_implies]
 
 instance : DeMorgan Prop where
   verum := by simp
