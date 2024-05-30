@@ -29,34 +29,45 @@ section
 
 variable {α : Type u}
 variable {rel : α → α → Prop}
+variable (hRefl : Reflexive rel) -- T
+         (hSymm : Symmetric rel) -- B
+         (hSerial : Serial rel) -- D
+         (hTrans : Transitive rel) -- 4
+         (hEucl : Euclidean rel) -- 5
 
-lemma serial_of_refl (hRefl : Reflexive rel) : Serial rel := by
+-- T → D
+lemma serial_of_refl : Serial rel := by
   rintro w;
   existsi w;
   exact hRefl w;
 
-lemma trans_of_symm_eucl (hSymm : Symmetric rel) (hEucl : Euclidean rel) : Transitive rel := by
-  rintro w₁ w₂ w₃ r₁₂ r₂₃;
-  exact hEucl (hSymm r₁₂) r₂₃;
-
-lemma symm_of_refl_eucl (hRefl : Reflexive rel) (hEucl : Euclidean rel) : Symmetric rel := by
-  intro w₁ w₂ r₁₂;
-  exact hEucl r₁₂ (hRefl w₁);
-
-lemma trans_of_refl_eucl (hRefl : Reflexive rel) (hEucl : Euclidean rel) : Transitive rel := by
-  have hSymm := symm_of_refl_eucl hRefl hEucl;
-  exact trans_of_symm_eucl hSymm hEucl;
-
-lemma refl_of_serial_symm_eucl (hSer : Serial rel) (hSymm : Symmetric rel) (hEucl : Euclidean rel) : Reflexive rel := by
-  rintro w₁;
-  obtain ⟨w₂, r₁₂⟩ := hSer w₁;
-  have r₂₁ := hSymm r₁₂;
-  exact trans_of_symm_eucl hSymm hEucl r₁₂ r₂₁;
-
-lemma eucl_of_symm_trans (hSymm : Symmetric rel) (hTrans : Transitive rel) : Euclidean rel := by
+-- B + 4 → 5
+lemma eucl_of_symm_trans : Euclidean rel := by
   intro w₁ w₂ w₃ r₁₂ r₁₃;
   have r₂₁ := hSymm r₁₂;
   exact hTrans r₂₁ r₁₃;
+
+-- B + 5 → 4
+lemma trans_of_symm_eucl : Transitive rel := by
+  rintro w₁ w₂ w₃ r₁₂ r₂₃;
+  exact hEucl (hSymm r₁₂) r₂₃;
+
+-- T + 5 → B
+lemma symm_of_refl_eucl : Symmetric rel := by
+  intro w₁ w₂ r₁₂;
+  exact hEucl r₁₂ (hRefl w₁);
+
+-- T + 5 → 4
+lemma trans_of_refl_eucl : Transitive rel := by
+  have hSymm := symm_of_refl_eucl hRefl hEucl;
+  exact trans_of_symm_eucl hSymm hEucl;
+
+-- B + D + 5 → T
+lemma refl_of_symm_serial_eucl : Reflexive rel := by
+  rintro w₁;
+  obtain ⟨w₂, r₁₂⟩ := hSerial w₁;
+  have r₂₁ := hSymm r₁₂;
+  exact trans_of_symm_eucl hSymm hEucl r₁₂ r₂₁;
 
 section ConverseWellFounded
 

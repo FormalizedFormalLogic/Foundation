@@ -240,9 +240,7 @@ notation "𝐂𝐃" => AxiomSet.CD
 protected abbrev C4 : AxiomSet α := { Axioms.C4 p | p }
 notation "𝐂𝟒" => AxiomSet.C4
 
-protected abbrev KT : AxiomSet α := 𝐊 ∪ 𝐓
-notation "𝐊𝐓" => AxiomSet.KT
-
+-- Lv.2
 protected abbrev KB : AxiomSet α := 𝐊 ∪ 𝐁
 notation "𝐊𝐁" => AxiomSet.KB
 
@@ -255,8 +253,45 @@ notation "𝐊𝟒" => AxiomSet.K4
 protected abbrev K5 : AxiomSet α := 𝐊 ∪ 𝟓
 notation "𝐊𝟓" => AxiomSet.K5
 
+-- Lv.3
+protected abbrev KT : AxiomSet α := 𝐊 ∪ 𝐓
+notation "𝐊𝐓" => AxiomSet.KT
+
+protected abbrev KDB : AxiomSet α := 𝐊 ∪ 𝐃 ∪ 𝐁
+notation "𝐊𝐃𝐁" => AxiomSet.KDB
+
+protected abbrev KD4 : AxiomSet α := 𝐊 ∪ 𝐃 ∪ 𝟒
+notation "𝐊𝐃𝟒" => AxiomSet.KD4
+
+protected abbrev KD5 : AxiomSet α := 𝐊 ∪ 𝐃 ∪ 𝟓
+notation "𝐊𝐃𝟓" => AxiomSet.KD5
+
+protected abbrev K45 : AxiomSet α := 𝐊 ∪ 𝟒 ∪ 𝟓
+notation "𝐊𝟒𝟓" => AxiomSet.K45
+
+-- Lv.4
+protected abbrev KTB : AxiomSet α := 𝐊 ∪ 𝐓 ∪ 𝐁
+notation "𝐊𝐓𝐁" => AxiomSet.KTB
+
+/-- alias of `𝐊𝐓𝟒` by historical reason -/
 protected abbrev S4 : AxiomSet α := 𝐊 ∪ 𝐓 ∪ 𝟒
 notation "𝐒𝟒" => AxiomSet.S4
+
+protected abbrev KT45 : AxiomSet α := 𝐊 ∪ 𝐓 ∪ 𝟒 ∪ 𝟓
+notation "𝐊𝐓𝟒𝟓" => AxiomSet.T45
+
+protected abbrev KB4 : AxiomSet α := 𝐊 ∪ 𝐁 ∪ 𝟒
+notation "𝐊𝐁𝟒" => AxiomSet.KB4
+
+-- Lv.5
+/-- alias of `𝐊𝐓𝟓` by historical reason -/
+protected abbrev S5 : AxiomSet α := 𝐊 ∪ 𝐓 ∪ 𝟓
+notation "𝐒𝟓" => AxiomSet.S5
+
+
+protected abbrev KT4B : AxiomSet α := 𝐊 ∪ 𝐓 ∪ 𝟒 ∪ 𝐁
+notation "𝐊𝐓𝟒𝐁" => AxiomSet.KT4B
+
 
 protected abbrev S4Dot2 : AxiomSet α := 𝐊 ∪ 𝐓 ∪ 𝟒 ∪ .𝟐
 notation "𝐒𝟒.𝟐" => AxiomSet.S4Dot2
@@ -266,12 +301,6 @@ notation "𝐒𝟒.𝟑" => AxiomSet.S4Dot3
 
 protected abbrev S4Grz : AxiomSet α := 𝐊 ∪ 𝐓 ∪ 𝟒 ∪ 𝐆𝐫𝐳
 notation "𝐒𝟒𝐆𝐫𝐳" => AxiomSet.S4Grz
-
-protected abbrev S5 : AxiomSet α := 𝐊 ∪ 𝐓 ∪ 𝟓
-notation "𝐒𝟓" => AxiomSet.S5
-
-protected abbrev KT4B : AxiomSet α := 𝐊 ∪ 𝐓 ∪ 𝟒 ∪ 𝐁
-notation "𝐊𝐓𝟒𝐁" => AxiomSet.KT4B
 
 protected abbrev GL : AxiomSet α := 𝐊 ∪ 𝐋
 notation "𝐆𝐋" => AxiomSet.GL
