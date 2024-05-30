@@ -8,45 +8,29 @@ open Kripke
 open AxiomSet
 
 variable {α : Type u} [DecidableEq α] [Inhabited α]
-variable {Λ₁ Λ₂ : AxiomSet α}
-variable [System.Consistent Λ₁] [System.Consistent Λ₂]
-variable [hG₁ : Λ₁.IsGeachLogic] [hG₂ : Λ₂.IsGeachLogic]
+
+section
+
+variable {Λ₁ Λ₂ : AxiomSet α} [hG₁ : Λ₁.IsGeachLogic] [hG₂ : Λ₂.IsGeachLogic]
 
 lemma reducible_of_geach_defnability
   (hs : ∀ {W : Type u}, [Inhabited W] → ∀ {F : Frame W α}, MultiGeachConfluent hG₂.taples F → MultiGeachConfluent hG₁.taples F)
-  : (Λ₁ ≤ₛ Λ₂) := by
-  apply reducible_of_definability (IsGeachLogic.definability (Λ := Λ₁)) (IsGeachLogic.definability (Λ := Λ₂));
-  intro W _ F hF;
-  exact @hs W _ F hF;
+  : (Λ₁ ≤ₛ Λ₂) := reducible_of_definability (definability₁ := IsGeachLogic.definability) (definability₂ := IsGeachLogic.definability) hs
 
 lemma equiv_of_geach_defnability
   (hs : ∀ {W : Type u}, [Inhabited W] → ∀ {F : Frame W α}, MultiGeachConfluent hG₁.taples F ↔ MultiGeachConfluent hG₂.taples F)
-  : (Λ₁ =ₛ Λ₂) := by
-  apply System.Equiv.antisymm_iff.mpr;
-  constructor;
-  . apply reducible_of_geach_defnability; intros; apply hs.mpr; assumption;
-  . apply reducible_of_geach_defnability; intros; apply hs.mp; assumption;
+  : (Λ₁ =ₛ Λ₂) := equiv_of_iff_definability (definability₁ := IsGeachLogic.definability) (definability₂ := IsGeachLogic.definability) hs
+
+end
 
 @[simp]
-theorem reducible_KD_KT : (𝐊𝐃 : AxiomSet α) ≤ₛ 𝐊𝐓 := by
-  apply reducible_of_geach_defnability;
-  simp; intros;
-  exact serial_of_refl (by assumption);
+theorem reducible_KD_KT : (𝐊𝐃 : AxiomSet α) ≤ₛ 𝐊𝐓 := by apply reducible_of_geach_defnability; simp_all [serial_of_refl];
 
 @[simp]
-theorem reducible_S4_S5 : (𝐒𝟒 : AxiomSet α) ≤ₛ 𝐒𝟓 := by
-  apply reducible_of_geach_defnability;
-  simp; intros;
-  refine ⟨(trans_of_refl_eucl (by assumption) (by assumption)), (by assumption)⟩;
+theorem reducible_S4_S5 : (𝐒𝟒 : AxiomSet α) ≤ₛ 𝐒𝟓 := by apply reducible_of_geach_defnability; simp_all [trans_of_refl_eucl];
 
 @[simp]
-theorem equiv_S5_KT4B : (𝐒𝟓 : AxiomSet α) =ₛ 𝐊𝐓𝟒𝐁 := by
-  apply equiv_of_geach_defnability; simp; intros;
-  constructor;
-  . rintro ⟨hEucl, hRefl⟩;
-    exact ⟨symm_of_refl_eucl hRefl hEucl, trans_of_refl_eucl hRefl hEucl, hRefl⟩
-  . rintro ⟨hSymm, hTrans, hRefl⟩;
-    exact ⟨eucl_of_symm_trans hSymm hTrans, hRefl⟩;
+theorem equiv_S5_KT4B : (𝐒𝟓 : AxiomSet α) =ₛ 𝐊𝐓𝟒𝐁 := by apply equiv_of_geach_defnability; intros; constructor <;> simp_all [symm_of_refl_eucl, trans_of_refl_eucl, eucl_of_symm_trans];
 
 /- TODO: strict reducible
 theorem LogicalStrictStrong.KD_KT [hβ : Nontrivial β] : (𝐊𝐃 : AxiomSet β) <ᴸ 𝐊𝐓 := by

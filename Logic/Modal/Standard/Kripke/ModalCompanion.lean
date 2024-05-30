@@ -115,6 +115,8 @@ lemma provable_efq_of_provable_S4 (h : 𝐄𝐅𝐐 ⊢! p) : 𝐒𝟒 ⊢! pᵍ
 open Superintuitionistic.Kripke
 open Superintuitionistic.Formula.Kripke
 
+variable [Inhabited (Superintuitionistic.SaturatedConsistentTableau (α := α) 𝐄𝐅𝐐)] --TODO: remove
+
 lemma provable_S4_of_provable_efq : (𝐒𝟒 ⊢! pᵍ) → (𝐄𝐅𝐐 ⊢! p) := by
   contrapose;
   intro h;
@@ -124,14 +126,11 @@ lemma provable_S4_of_provable_efq : (𝐒𝟒 ⊢! pᵍ) → (𝐄𝐅𝐐 ⊢! 
       ValidOnModel.iff_models, ValidOnModel
     ] using not_imp_not.mpr Superintuitionistic.Kripke.complete! h;
 
-  let M : Modal.Standard.Kripke.Model _ α := {
-    frame := MI.frame,
-    valuation := MI.valuation
-  };
   have MTrans := MI.frame_prop.1;
   have MRefl := MI.frame_prop.2;
 
-  have h₁ : ∀ q (v : Superintuitionistic.SaturatedConsistentTableau (𝐄𝐅𝐐 : Superintuitionistic.AxiomSet α)), (MI, v) ⊧ q ↔ (M, v) ⊧ qᵍ := by
+  let M : Modal.Standard.Kripke.Model _ α := ⟨MI.frame, MI.valuation⟩;
+  have h₁ : ∀ q (v : Superintuitionistic.SaturatedConsistentTableau (α := α) 𝐄𝐅𝐐), (MI, v) ⊧ q ↔ (M, v) ⊧ qᵍ := by
     intro q v;
     induction q using Superintuitionistic.Formula.rec' generalizing v with
     | hatom a =>
@@ -145,14 +144,16 @@ lemma provable_S4_of_provable_efq : (𝐒𝟒 ⊢! pᵍ) → (𝐄𝐅𝐐 ⊢! 
   have : ¬((M, w) ⊧ pᵍ) := (h₁ p w).not.mp h;
 
   by_contra hC;
-  have := Modal.Standard.Kripke.sound! hC
-    M.frame (Modal.Standard.Kripke.iff_definability_memAxiomSetFrameClass (AxiomSet.S4.definability) |>.mp ⟨MRefl, MTrans⟩)
-    M.valuation w;
+
+  have := by simpa using Modal.Standard.Kripke.sound!_on_frameclass hC;
+  have : (M, w) ⊧ pᵍ := this _ M.frame (by
+    apply Modal.Standard.Kripke.iff_definability_memAxiomSetFrameClass AxiomSet.S4.definability |>.mpr ⟨MRefl, MTrans⟩;
+  ) M.valuation w;
   contradiction;
 
 /-- a.k.a. _Gödel-McKinsey-Tarski Theorem_ -/
 theorem provable_efq_iff_provable_S4 : 𝐄𝐅𝐐 ⊢! p ↔ 𝐒𝟒 ⊢! pᵍ := ⟨provable_efq_of_provable_S4, provable_S4_of_provable_efq⟩
-instance : ModalCompanion 𝐄𝐅𝐐 (𝐒𝟒 : AxiomSet α) := ⟨provable_efq_iff_provable_S4⟩
+instance : ModalCompanion (α := α) 𝐄𝐅𝐐 𝐒𝟒 := ⟨provable_efq_iff_provable_S4⟩
 
 
 lemma dp_of_mdp [ModalDisjunctive mΛ] [ModalCompanion iΛ mΛ] [S4 mΛ] : iΛ ⊢! p ⋎ q → iΛ ⊢! p ∨ iΛ ⊢! q := by

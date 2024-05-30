@@ -7,33 +7,51 @@ namespace LO.Modal.Standard
 
 namespace Kripke
 
-variable (W α : Type*)
+-- variable (W α : Type*) [Inhabited W]
 
 set_option linter.unusedVariables false in
-abbrev Frame (α : Type*) := W → W → Prop
+abbrev Frame (W : Sort*) (α : Type*) [Inhabited W] := W → W → Prop
 
 @[simp]
-def Multiframe {W α} (F : Frame W α) : ℕ → W → W → Prop
+def Multiframe {W α} [Inhabited W] (F : Frame W α) : ℕ → W → W → Prop
 | 0 => (· = ·)
 | n + 1 => λ x y => ∃ z, (F x z ∧ Multiframe F n z y)
 
 notation:max F "^[" n "]" => Multiframe F n
 
-abbrev Valuation := W → α → Prop
+abbrev Valuation (W α) := W → α → Prop
 
-structure Model where
+structure Model (W α) [Inhabited W] where
   frame : Frame W α
   valuation : Valuation W α
 
-abbrev FrameClass := ∀ (W : Type*), Inhabited W → Frame W α → Prop
+abbrev FrameClass (α) := ∀ (W : Type*), [Inhabited W] → Frame W α → Prop
 
-class FrameClass.Nonempty {α : Type*} (𝔽 : FrameClass α) where
-  existsi : ∃ W _ F, 𝔽 W (by assumption) F
+abbrev FiniteFrameClass (α) := ∀ (W : Type*), [Inhabited W] → [Finite W] → Frame W α → Prop
+
+def FrameClass.toFinite (𝔽 : FrameClass α) : FiniteFrameClass α := λ _ _ _ F => 𝔽 _ F
+postfix:max "ꟳ" => FrameClass.toFinite
+instance : Coe (FrameClass α) (FiniteFrameClass α) := ⟨λ 𝔽 ↦ 𝔽ꟳ⟩
+
+class FrameClass.Nonempty (𝔽 : FrameClass α) where
+  W : Type*
+  W_inhabited : Inhabited W
+  existsi : ∃ F, 𝔽 W F
+
+class FiniteFrameClass.Nonempty (𝔽 : FiniteFrameClass α) where
+  W : Type*
+  W_inhabited : Inhabited W := by infer_instance
+  W_finite : Finite W := by infer_instance
+  existsi : ∃ F, 𝔽 W F
+
+abbrev FrameProperty (α : Type u) := ∀ {W : Type u}, [Inhabited W] → Frame W α → Prop
+
+abbrev FiniteFrameProperty (α : Type u) := ∀ {W : Type u}, [Inhabited W] → [Finite W] → Frame W α → Prop
 
 end Kripke
 
 
-variable {W α : Type*}
+variable {W α : Type*} [Inhabited W]
 
 open Standard.Kripke
 
@@ -51,7 +69,7 @@ open Formula.Kripke
 
 namespace Formula.Kripke.Satisfies
 
-lemma iff_models : (M, w) ⊧ f ↔ Formula.Kripke.Satisfies M w f := iff_of_eq rfl
+lemma iff_models {M : Model W α} : (M, w) ⊧ f ↔ Formula.Kripke.Satisfies M w f := iff_of_eq rfl
 
 instance : Semantics.Tarski ((Model W α) × W) where
   realize_top := by simp [iff_models, Satisfies]
@@ -115,7 +133,7 @@ instance : Semantics (Formula α) (Model W α) := ⟨fun M ↦ Formula.Kripke.Va
 
 namespace Formula.Kripke.ValidOnModel
 
-@[simp] protected lemma iff_models : M ⊧ f ↔ Formula.Kripke.ValidOnModel M f := iff_of_eq rfl
+@[simp] protected lemma iff_models {M : Model W α} : M ⊧ f ↔ Formula.Kripke.ValidOnModel M f := iff_of_eq rfl
 
 instance [Inhabited W] : Semantics.Bot (Model W α) where
   realize_bot _ := by simp [ValidOnModel];
@@ -129,7 +147,7 @@ instance : Semantics (Formula α) (Frame W α) := ⟨fun F ↦ Formula.Kripke.Va
 
 namespace Formula.Kripke.ValidOnFrame
 
-@[simp] protected lemma models_iff : F ⊧ f ↔ Formula.Kripke.ValidOnFrame F f := iff_of_eq rfl
+@[simp] protected lemma models_iff {F : Frame W α} : F ⊧ f ↔ Formula.Kripke.ValidOnFrame F f := iff_of_eq rfl
 
 instance [Inhabited W] : Semantics.Bot (Frame W α) where
   realize_bot _ := by simp [ValidOnFrame];
@@ -137,57 +155,131 @@ instance [Inhabited W] : Semantics.Bot (Frame W α) where
 end Formula.Kripke.ValidOnFrame
 
 
-@[simp] def Formula.Kripke.ValidOnFrameClass (𝔽 : FrameClass α) (f : Formula α) := ∀ W, [Inhabited W] → ∀ F, 𝔽 W (by assumption) F → F ⊧ f
+@[simp] def Formula.Kripke.ValidOnFrameClass (𝔽 : FrameClass α) (f : Formula α) := ∀ W, [Inhabited W] → ∀ F, 𝔽 W F → F ⊧ f
 
 instance : Semantics (Formula α) (FrameClass α) := ⟨fun 𝔽 ↦ Formula.Kripke.ValidOnFrameClass 𝔽⟩
 
 namespace Formula.Kripke.ValidOnFrameClass
 
-@[simp] protected lemma models_iff : 𝔽 ⊧ f ↔ Formula.Kripke.ValidOnFrameClass 𝔽 f := iff_of_eq rfl
+@[simp] protected lemma models_iff {𝔽 : FrameClass α} : 𝔽 ⊧ f ↔ Formula.Kripke.ValidOnFrameClass 𝔽 f := iff_of_eq rfl
 
 end Formula.Kripke.ValidOnFrameClass
 
 def Kripke.AxiomSetFrameClass (Λ : AxiomSet α) : FrameClass α := λ _ _ F => F ⊧* Λ
 notation "𝔽(" Λ ")" => Kripke.AxiomSetFrameClass Λ
 
+
+@[simp] def Formula.Kripke.ValidOnFiniteFrameClass (𝔽 : FiniteFrameClass α) (f : Formula α) := ∀ W, [Inhabited W] → [Finite W] → ∀ F, 𝔽 W F → F ⊧ f
+
+instance : Semantics (Formula α) (FiniteFrameClass α) := ⟨fun 𝔽 ↦ Formula.Kripke.ValidOnFiniteFrameClass 𝔽⟩
+
+namespace Formula.Kripke.ValidOnFiniteFrameClass
+
+@[simp] protected lemma models_iff {𝔽 : FiniteFrameClass α} : 𝔽 ⊧ f ↔ Formula.Kripke.ValidOnFiniteFrameClass 𝔽 f := iff_of_eq rfl
+
+end Formula.Kripke.ValidOnFiniteFrameClass
+
+def Kripke.AxiomSetFiniteFrameClass (Λ : AxiomSet α) : FiniteFrameClass α := λ _ _ _ F => F ⊧* Λ
+notation "𝔽ꟳ(" Λ ")" => Kripke.AxiomSetFiniteFrameClass Λ
+
+
 namespace Kripke
+
+variable {Λ : AxiomSet α}
 
 lemma validOnAxiomSetFrameClass_axiom (h : p ∈ Λ) : 𝔽(Λ) ⊧ p := by
   intro _ _ _ hF;
   exact hF.realize h;
 
-class AxiomSetDefinability (Λ : AxiomSet α) (P : ∀ {W}, [Inhabited W] → Frame W α → Prop) where
+
+/-- Every frame that valid all axioms in `Λ` satisfy frame property `P` -/
+class Definability (Λ : AxiomSet α) (P : FrameProperty α) where
   defines : ∀ W, [Inhabited W] → ∀ F, F ⊧* Λ ↔ @P W _ F
 
-lemma iff_definability_memAxiomSetFrameClass (definability : AxiomSetDefinability Λ P) : ∀ {W}, [hi : Inhabited W] → ∀ {F}, 𝔽(Λ) W hi F ↔ P F := by
+instance Definability.union [definability₁ : Definability Λ₁ P₁] [definability₂ : Definability Λ₂ P₂] : Definability (Λ₁ ∪ Λ₂) (λ F => P₁ F ∧ P₂ F) where
+  defines W _ F := by
+    constructor;
+    . intro h;
+      simp only [Semantics.RealizeSet.union_iff] at h;
+      constructor;
+      . exact Definability.defines W F |>.mp h.1;
+      . exact Definability.defines W F |>.mp h.2;
+    . intro h;
+      simp only [Semantics.RealizeSet.union_iff];
+      constructor;
+      . apply Definability.defines W F |>.mpr h.1;
+      . apply Definability.defines W F |>.mpr h.2;
+
+lemma iff_definability_memAxiomSetFrameClass (definability : Definability Λ P) : ∀ {W}, [Inhabited W] → ∀ {F}, 𝔽(Λ) W F ↔ P F := by
   apply definability.defines;
 
-@[simp]
-instance AxiomSet.K.definability : AxiomSetDefinability (𝐊 : AxiomSet α) (λ _ => True) where
+
+/-- Every **finite** frame that valid all axioms in `Λ` satisfy **finite** frame property `P` -/
+class FiniteDefinability (Λ : AxiomSet α) (P : FiniteFrameProperty α) where
+  fin_defines : ∀ W, [Inhabited W] → [Finite W] → ∀ F, F ⊧* Λ ↔ @P W _ _ F
+
+instance FiniteDefinability.union [definability₁ : FiniteDefinability Λ₁ P₁] [definability₂ : FiniteDefinability Λ₂ P₂] : FiniteDefinability (Λ₁ ∪ Λ₂) (λ F => P₁ F ∧ P₂ F) where
+  fin_defines W _ _ F := by
+    constructor;
+    . intro h;
+      simp only [Semantics.RealizeSet.union_iff] at h;
+      constructor;
+      . exact FiniteDefinability.fin_defines W F |>.mp h.1;
+      . exact FiniteDefinability.fin_defines W F |>.mp h.2;
+    . intro h;
+      simp only [Semantics.RealizeSet.union_iff];
+      constructor;
+      . apply FiniteDefinability.fin_defines W F |>.mpr h.1;
+      . apply FiniteDefinability.fin_defines W F |>.mpr h.2;
+
+lemma iff_finiteDefinability_memFiniteFrameClass (definability : FiniteDefinability Λ P) : ∀ {W}, [Inhabited W] → [Finite W] → ∀ {F}, 𝔽ꟳ(Λ) W F ↔ P F := by
+  apply definability.fin_defines;
+
+instance [definability : Definability Λ P] : FiniteDefinability Λ (λ F => @P _ _ F) where
+  fin_defines W _ _ F := by
+    constructor;
+    . exact iff_definability_memAxiomSetFrameClass definability |>.mp;
+    . exact iff_definability_memAxiomSetFrameClass definability |>.mpr;
+
+/-- Nonemptiness of frame class from finite frame class -/
+instance {𝔽 : FrameClass α} [ne : FiniteFrameClass.Nonempty (α := α) 𝔽] : FrameClass.Nonempty (α := α) 𝔽 where
+  W := ne.W
+  W_inhabited := ne.W_inhabited
+  existsi := by
+    obtain ⟨F, hF⟩ := ne.existsi;
+    existsi F;
+    assumption;
+
+
+instance AxiomSet.K.definability : Definability (𝐊 : AxiomSet α) (λ _ => True) where
   defines := by
     simp_all;
     intros; subst_vars;
     simp [ValidOnFrame, ValidOnModel, Satisfies];
     intros; simp_all;
 
-instance : FrameClass.Nonempty (α := α) 𝔽(𝐊) where
+instance AxiomSet.K.finiteDefinability : FiniteDefinability (𝐊 : AxiomSet α) (λ _ => True) := inferInstance
+
+instance [definability : Definability Λ P] : Definability (𝐊 ∪ Λ) P := by simpa using Definability.union (definability₁ := AxiomSet.K.definability);
+
+instance [definability : FiniteDefinability Λ P] : FiniteDefinability (𝐊 ∪ Λ) P := by simpa using FiniteDefinability.union (definability₁ := AxiomSet.K.finiteDefinability);
+
+instance : FiniteFrameClass.Nonempty (α := α) 𝔽(𝐊)ꟳ where
+  W := PUnit
   existsi := by
-    existsi _, ⟨()⟩, (λ _ _ => True);
-    apply iff_definability_memAxiomSetFrameClass AxiomSet.K.definability |>.mpr;
+    existsi (λ _ _ => True);
+    apply iff_finiteDefinability_memFiniteFrameClass AxiomSet.K.finiteDefinability |>.mpr;
     trivial;
 
-/-
-instance [dΛ : AxiomSetDefinability Λ P] : AxiomSetDefinability (𝐊 ∪ Λ) P where
-  defines W F := by
-    constructor;
-    . intro h;
-      simp only [Semantics.RealizeSet.union_iff] at h;
-      exact dΛ.defines W F |>.mpr h.1;
-    . intro h;
-      simp only [Semantics.RealizeSet.union_iff];
-      constructor;
-      . apply AxiomSet.K.definability.defines W F |>.mp; trivial;
-      . exact dΛ.defines W F |>.mp h;
+instance : FrameClass.Nonempty (α := α) 𝔽(𝐊) := inferInstance
+
+
+/- TODO:
+instance [definability : FiniteDefinability Λ P] [nonempty : FiniteFrameClass.Nonempty (α := α) 𝔽(Λ)ꟳ] : FiniteFrameClass.Nonempty 𝔽((𝐊 ∪ Λ))ꟳ where
+  W := nonempty.W
+  W_inhabited := nonempty.W_inhabited
+  W_finite := nonempty.W_finite
+  existsi := by sorry;
 -/
 
 end LO.Modal.Standard.Kripke

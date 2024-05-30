@@ -11,7 +11,8 @@ open Formula
 variable {W α : Type*}
 variable {Λ : AxiomSet α} [Inhabited α] [DecidableEq α]
 
-instance AxiomSet.Geach.Canonical_with_K (t) : Canonical (α := α) 𝐠𝐞(t) where
+/-
+instance AxiomSet.Geach.Canonical_with_K [Inhabited (MCT (α := α) 𝐠𝐞(t))] (t) : Canonical (α := α) 𝐠𝐞(t) where
   realize := by
     sorry;
     /-
@@ -39,7 +40,9 @@ instance AxiomSet.Geach.Canonical_with_K (t) : Canonical (α := α) 𝐠𝐞(t) 
         apply hΩ;
         simp_all;
     -/
+-/
 
+/-
 lemma subset_Canonical₂ [HasAxiomK Λ] (hΛ : Λ ⊆ Λ') (h : CanonicalFrame Λ ⊧ p) : CanonicalFrame Λ' ⊧ p := by
   sorry;
 
@@ -50,6 +53,7 @@ lemma subset_Canonical [HasAxiomK Λ] (hΛ : Λ ⊆ Λ') (h : CanonicalFrame Λ 
 
 lemma str {P : ∀ {W}, (Frame W α) → Prop} (hs : Λ ⊆ Λ') : P (CanonicalFrame Λ) → P (CanonicalFrame Λ') := by
   sorry;
+-/
 
 instance AxiomSet.GeachLogic.Canonical (ts) : Canonical (𝐆𝐞(ts) : AxiomSet α) where
   realize := by
@@ -83,8 +87,8 @@ instance AxiomSet.GeachLogic.Canonical (ts) : Canonical (𝐆𝐞(ts) : AxiomSet
     -/
 
 instance [hG : Λ.IsGeachLogic] : Canonical Λ := by
-  rw [hG.char];
-  apply AxiomSet.GeachLogic.Canonical;
+  convert AxiomSet.GeachLogic.Canonical (α := α) hG.taples;
+  exact hG.char;
 
 instance [Λ.IsGeachLogic] : Complete Λ 𝔽(Λ) := inferInstance
 

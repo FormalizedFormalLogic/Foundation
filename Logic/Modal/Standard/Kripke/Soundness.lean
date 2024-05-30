@@ -3,9 +3,8 @@ import Logic.Modal.Standard.Kripke.Semantics
 
 namespace LO.Modal.Standard.Kripke
 
-variable {W α : Type*}
-variable {Λ : AxiomSet α}
-variable [Inhabited α]
+variable {W α : Type*} {Λ : AxiomSet α}
+variable [Inhabited W] [Inhabited α]
 
 open Deduction
 open Formula Formula.Kripke
@@ -33,11 +32,24 @@ instance : Sound Λ (𝔽(Λ)) := ⟨sound!_on_frameclass⟩
 
 lemma unprovable_bot [ne : FrameClass.Nonempty 𝔽(Λ)] : Λ ⊬! ⊥ := by
   intro h;
-  obtain ⟨W, _, F, hf⟩ := ne.existsi;
-  simpa [ValidOnFrame ,ValidOnModel] using sound!_on_frameclass h _ F hf;
+  obtain ⟨F, hF⟩ := ne.existsi;
+  have := sound!_on_frameclass h;
+  simp [ValidOnFrameClass, ValidOnFrame, ValidOnModel] at this;
+  have := @this ne.W ne.W_inhabited F;
+  contradiction;
 
 instance [FrameClass.Nonempty 𝔽(Λ)] : System.Consistent Λ := System.Consistent.of_unprovable unprovable_bot
 
 instance : System.Consistent (𝐊 : AxiomSet α) := inferInstance
+
+lemma unprovable_bot_finite [ne : FiniteFrameClass.Nonempty 𝔽ꟳ(Λ)] : Λ ⊬! ⊥ := by
+  intro h;
+  obtain ⟨F, hF⟩ := ne.existsi;
+  have := sound!_on_frameclass h;
+  simp [ValidOnFrameClass, ValidOnFrame, ValidOnModel] at this;
+  have := @this ne.W ne.W_inhabited F;
+  contradiction;
+
+instance [FiniteFrameClass.Nonempty 𝔽ꟳ(Λ)] : System.Consistent Λ := System.Consistent.of_unprovable unprovable_bot_finite
 
 end LO.Modal.Standard.Kripke

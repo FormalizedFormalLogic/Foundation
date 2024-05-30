@@ -7,6 +7,10 @@ open Formula Formula.Kripke
 
 namespace Kripke
 
+variable {W₁ W₂} [Inhabited W₁] [Inhabited W₂]
+
+abbrev Morphism (W₁ W₂ : Type*) [Inhabited W₁] [Inhabited W₂] := W₁ → W₂
+
 class Frame.pMorphism (F₁ : Frame W₁ α) (F₂ : Frame W₂ α) (f : W₁ → W₂) where
   forth : ∀ {w v : W₁}, F₁ w v → F₂ (f w) (f v)
   back : ∀ {w : W₁}, ∀ {v : W₂}, F₂ (f w) v → ∃ u, F₁ w u ∧ f u = v
@@ -16,9 +20,10 @@ class Model.pMorphism (M₁ : Model W₁ α) (M₂ : Model W₂ α) (f : W₁ �
 
 end Kripke
 
-variable {f : W₁ → W₂} {p : Formula α} {T : Theory α}
-variable {M₁ : Model W₁ α} {M₂ : Model W₂ α}
-variable {F₁ : Frame W₁ α} {F₂ : Frame W₂ α}
+variable {W₁ W₂ : Type*} [Inhabited W₁] [Inhabited W₂] {α : Type u}
+         {f : W₁ → W₂} {p : Formula α} {T : Theory α}
+         {M₁ : Model W₁ α} {M₂ : Model W₂ α}
+         {F₁ : Frame W₁ α} {F₂ : Frame W₂ α}
 
 lemma Formula.Kripke.Satisfies.morphism (hMor : Model.pMorphism M₁ M₂ f) {w : W₁} : ((M₁, w) ⊧ p) ↔ ((M₂, (f w)) ⊧ p) := by
   induction p using Formula.rec' generalizing w with
@@ -62,23 +67,19 @@ lemma Theory.Kripke.ValidOnFrame.morphism (hSur : Function.Surjective f) (hMorF 
   intro h p hp;
   exact Formula.Kripke.ValidOnFrame.morphism hSur hMorF (h hp);
 
-theorem Kripke.undefinability_irreflexive : ¬∃ (Ax : AxiomSet α), (∀ {W : Type} {F : Frame W α}, (Irreflexive F) ↔ F ⊧* Ax) := by
-  let F₁ : Frame (Fin 2) α := λ w v => w ≠ v;
+-- TODO: `W` should be `Type*`, not `Type`
+theorem Kripke.undefinability_irreflexive : ¬∃ (Ax : AxiomSet α), (∀ {W : Type}, [Inhabited W] → ∀ {F : Frame W α}, (Irreflexive F) ↔ F ⊧* Ax) := by
+  let F₁ : Frame Bool α := λ w v => w ≠ v;
   have hIF₁ : Irreflexive F₁ := by simp [Irreflexive, F₁];
 
-  let F₂ : Frame (Fin 1) α := λ w v => w = v;
+  let F₂ : Frame Unit α := λ w v => w = v;
   have hIF₂ : ¬Irreflexive F₂ := by simp [Irreflexive, F₂];
 
-  let f : Fin 2 → Fin 1 := λ _ => 0;
-  have hSur : Function.Surjective f := by trivial;
+  let f : Morphism Bool Unit := λ _ => ();
+  have hSur : Function.Surjective f := by simp [Function.Surjective];
   have hMorF : Frame.pMorphism F₁ F₂ f := {
     forth := by intros; simp [F₂],
-    back := by
-      simp [F₂, F₁];
-      intro w;
-      match w with
-      | 0 => use 1; trivial;
-      | 1 => use 0; trivial;
+    back := by simp [F₂, F₁];
   }
 
   by_contra hC;
