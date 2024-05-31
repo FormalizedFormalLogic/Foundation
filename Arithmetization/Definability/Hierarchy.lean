@@ -162,6 +162,12 @@ def pi : HSemiformula L ξ n (𝚫, m) → HSemiformula L ξ n (𝚷, m)
 
 lemma val_sigma (p : HSemiformula L ξ n (𝚫, m)) : p.sigma.val = p.val := by rcases p; simp
 
+def mkPolarity (p : Semiformula L ξ n) : (Γ : Polarity) → Hierarchy Γ m p → HSemiformula L ξ n (Γ, m)
+  | 𝚺, h => mkSigma p h
+  | 𝚷, h => mkPi p h
+
+@[simp] lemma val_mkPolarity (p : Semiformula L ξ n) {Γ} (h : Hierarchy Γ m p) : (mkPolarity p Γ h).val = p := by cases Γ <;> rfl
+
 variable (M)
 
 def ProperOn (p : HSemisentence L n (𝚫, m)) : Prop :=
@@ -815,7 +821,7 @@ instance [Definable ℒₒᵣ Γ P] : Definable L Γ P := Definable.of_oRing inf
 lemma of_zero (h : Definable L (Γ', 0) P) (Γ) : Definable L Γ P := by
   rcases h with ⟨⟨p, hp⟩⟩; exact hp.to_definable₀
 
-instance [Definable L (𝚺, 0) P] (Γ) : Definable L Γ P := Definable.of_zero (Γ' := 𝚺) inferInstance Γ
+instance [Definable L 𝚺₀ P] (Γ) : Definable L Γ P := Definable.of_zero (Γ' := 𝚺) inferInstance Γ
 
 lemma retraction (h : Definable L Γ P) (f : Fin k → Fin n) :
     Definable L Γ fun v ↦ P (fun i ↦ v (f i)) := by
@@ -1032,6 +1038,8 @@ lemma graph_delta {k} {f : (Fin k → M) → M}
 
 instance {k} {f : (Fin k → M) → M} [h : DefinableFunction L (𝚺, m) f] : DefinableFunction L (𝚫, m) f :=
   DefinableFunction.graph_delta h
+
+instance {k} {f : (Fin k → M) → M} [DefinableFunction L 𝚺₀ f] (Γ) : DefinableFunction L Γ f := inferInstance
 
 @[simp] lemma var {k} (i : Fin k) : DefinableFunction L Γ (fun v : Fin k → M ↦ v i) :=
   .of_zero (Γ' := 𝚺) ⟨.mkSigma “#0 = !!#i.succ” (by simp), by intro _; simp⟩ _

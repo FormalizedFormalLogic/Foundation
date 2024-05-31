@@ -205,7 +205,7 @@ notation Γ "(" s ")-Function₃ " f => DefinableFunction₃ ℒₒᵣ Γ s f
 
 variable {L Γ s}
 
-lemma defined_to_with_param {k} {P : (Fin k → M) → Prop} (p : HSemisentence Γ s L k) (hP : Defined P p.val) :
+lemma .to_definable {k} {P : (Fin k → M) → Prop} (p : HSemisentence Γ s L k) (hP : Defined P p.val) :
     Definable L Γ s P := ⟨⟨Rew.emb.hom p.val, by simp⟩, by intro; simp [hP.df.iff]⟩
 
 lemma Defined.to_definable₀ {k} {P : (Fin k → M) → Prop} (p : HSemisentence b' 0 L k) (hP : Defined P p.val) :

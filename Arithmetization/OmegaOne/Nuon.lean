@@ -8,7 +8,7 @@ noncomputable section
 
 namespace Model
 
-variable {M : Type} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐈𝚫₀ + 𝛀₁]
+variable {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐈𝚫₀ + 𝛀₁]
 
 namespace Nuon
 
@@ -62,15 +62,14 @@ lemma ext_graph (z S L i : M) : z = S{L}[i] ↔
       rcases h lt with ⟨b, hb, Hb, hL, _, HhL, _, _, rfl, rfl⟩
       exact ⟨b, hb, Hb, by rw [HhL.uniq (exponential_hash_one L)]⟩
 
-def extDef : 𝚺₀-Semisentence 4 :=
-  ⟨“∃[#0 < #3 + 1] (!lengthDef [#0, #3] ∧
-    ∃[#0 < #3 + 1] (!lengthDef [#0, #3] ∧
+def extDef : 𝚺₀-Semisentence 4 := .mkSigma
+  “∃[#0 < #3 + 1] (!lengthDef.val [#0, #3] ∧
+    ∃[#0 < #3 + 1] (!lengthDef.val [#0, #3] ∧
       (#1 ≤ #5 * #0 → #2 = 0) ∧
       (#5 * #0 < #1 →
-        ∃[#0 < #5 + 1] (!Exponential.def [#6 * #1, #0] ∧
-          ∃[#0 < 2 * #5 + 1 + 1] (!Exponential.def [#2, #0] ∧
-            ∃[#0 < #7 + 1] (!divDef [#0, #7, #2] ∧ !remDef [#5, #0, #1]))))))”, by
-    simp⟩
+        ∃[#0 < #5 + 1] (!exponentialDef.val [#6 * #1, #0] ∧
+          ∃[#0 < 2 * #5 + 1 + 1] (!exponentialDef.val [#2, #0] ∧
+            ∃[#0 < #7 + 1] (!divDef.val [#0, #7, #2] ∧ !remDef.val [#5, #0, #1]))))))” (by simp)
 
 -- TODO: move to Vorspiel
 @[simp] lemma cons_app_seven {n : ℕ} (a : α) (s : Fin n.succ.succ.succ.succ.succ.succ.succ → α) : (a :> s) 7 = s 6 := rfl
@@ -80,9 +79,10 @@ def extDef : 𝚺₀-Semisentence 4 :=
 @[simp] lemma cons_app_nine {n : ℕ} (a : α) (s : Fin n.succ.succ.succ.succ.succ.succ.succ.succ.succ → α) : (a :> s) 9 = s 8 := rfl
 
 lemma ext_defined : 𝚺₀-Function₃ (ext : M → M → M → M) via extDef := by
-  intro v; simp [extDef, length_defined.df.iff, Exponential.defined.df.iff, div_defined.df.iff, rem_defined.df.iff, lt_succ_iff_le, ext_graph, numeral_eq_natCast]
+  intro v; simp [extDef, length_defined.df.iff, Exponential.defined.df.iff,
+    div_defined.df.iff, rem_defined.df.iff, lt_succ_iff_le, ext_graph, numeral_eq_natCast]
 
-instance ext_Definable : DefinableFunction₃ ℒₒᵣ 𝚺 0 (ext : M → M → M → M) := Defined.to_definable₀ _ ext_defined
+instance ext_Definable : DefinableFunction₃ ℒₒᵣ 𝚺₀ (ext : M → M → M → M) := Defined.to_definable₀ _ ext_defined
 
 instance : Bounded₃ ℒₒᵣ (ext : M → M → M → M) := ⟨#1, λ _ ↦ by simp⟩
 
@@ -485,34 +485,34 @@ lemma sq_polyI_hash_polyL_polybounded {A : M} (pos : 0 < A) : ((polyI A) # (poly
 
 def NuonAux (A k n : M) : Prop := SeriesSegment (polyU A) (polyI A) (polyL A) A k n
 
-def isSegmentDef : 𝚺₀-Semisentence 5 :=
-  ⟨“∀[#0 < #4]
-      ∃[#0 < #6 + 1](!extDef [#0, #2, #6, #1 + 1] ∧
-      ∃[#0 < #7 + 1](!extDef [#0, #3, #7, #2] ∧
-      ∃[#0 < 2](!fbitDef [#0, #5, #6 + #3] ∧
-        #2 = #1 + #0)))”, by simp⟩
+def isSegmentDef : 𝚺₀-Semisentence 5 := .mkSigma
+  “∀[#0 < #4]
+      ∃[#0 < #6 + 1](!extDef.val [#0, #2, #6, #1 + 1] ∧
+      ∃[#0 < #7 + 1](!extDef.val [#0, #3, #7, #2] ∧
+      ∃[#0 < 2](!fbitDef.val [#0, #5, #6 + #3] ∧
+        #2 = #1 + #0)))” (by simp)
 
-lemma isSegmentDef_defined : Defined (M := M) (λ v ↦ IsSegment (v 0) (v 1) (v 2) (v 3) (v 4)) isSegmentDef.val := by
+lemma isSegmentDef_defined : Defined (M := M) (λ v ↦ IsSegment (v 0) (v 1) (v 2) (v 3) (v 4)) isSegmentDef := by
   intro v; simp [IsSegment, isSegmentDef, ext_defined.df.iff, fbit_defined.df.iff, lt_succ_iff_le, numeral_eq_natCast]
   apply ball_congr; intro x _
   constructor
   · intro h; exact ⟨_, by simp, rfl, _, by simp, rfl, _, by simp, rfl, h⟩
   · rintro ⟨_, _, rfl, _, _, rfl, _, _, rfl, h⟩; exact h
 
-def segmentDef : 𝚺₀-Semisentence 7 :=
-  ⟨“∃[#0 < #1](!isSegmentDef [#2, #3, #4, #5, #0] ∧
-      !extDef [#6, #2, #0, 0] ∧ !extDef [#7, #2, #0, #5])”, by simp⟩
+def segmentDef : 𝚺₀-Semisentence 7 := .mkSigma
+  “∃[#0 < #1](!isSegmentDef.val [#2, #3, #4, #5, #0] ∧
+      !extDef.val [#6, #2, #0, 0] ∧ !extDef.val [#7, #2, #0, #5])” (by simp)
 
-lemma segmentDef_defined : Defined (M := M) (λ v ↦ Segment (v 0) (v 1) (v 2) (v 3) (v 4) (v 5) (v 6)) segmentDef.val := by
+lemma segmentDef_defined : Defined (M := M) (λ v ↦ Segment (v 0) (v 1) (v 2) (v 3) (v 4) (v 5) (v 6)) segmentDef := by
   intro v; simp [Segment, segmentDef, ext_defined.df.iff, isSegmentDef_defined.df.iff, @Eq.comm _ (v 5), @Eq.comm _ (v 6)]
   rfl
 
-def isSeriesDef : 𝚺₀-Semisentence 6 :=
-  ⟨“∀[#0 < #5]
-      ∃[#0 < #3 + 1](!lengthDef [#0, #3] ∧
-      ∃[#0 < #8 + 1](!extDef [#0, #5, #8, #2] ∧
-      ∃[#0 < #9 + 1](!extDef [#0, #6, #9, #3 + 1] ∧
-        !segmentDef [#4, #6, #7, #2 * #3, #2, #1, #0])))”, by simp⟩
+def isSeriesDef : 𝚺₀-Semisentence 6 := .mkSigma
+  “∀[#0 < #5]
+      ∃[#0 < #3 + 1](!lengthDef.val [#0, #3] ∧
+      ∃[#0 < #8 + 1](!extDef.val [#0, #5, #8, #2] ∧
+      ∃[#0 < #9 + 1](!extDef.val [#0, #6, #9, #3 + 1] ∧
+        !segmentDef.val [#4, #6, #7, #2 * #3, #2, #1, #0])))” (by simp)
 
 lemma bex_eq_le_iff {p : M → Prop} {b : M} :
     (∃ a ≤ z, a = b ∧ p a) ↔ (b ≤ z ∧ p b) :=
@@ -522,50 +522,50 @@ lemma bex_eq_lt_iff {p : M → Prop} {b : M} :
     (∃ a < z, a = b ∧ p a) ↔ (b < z ∧ p b) :=
   ⟨by rintro ⟨a, hp, rfl, hr⟩; exact ⟨hp, hr⟩, by rintro ⟨hp, hr⟩; exact ⟨b, hp, rfl, hr⟩⟩
 
-lemma isSerieDef_defined : Defined (M := M) (λ v ↦ IsSeries (v 0) (v 1) (v 2) (v 3) (v 4) (v 5)) isSeriesDef.val := by
+lemma isSerieDef_defined : Defined (M := M) (λ v ↦ IsSeries (v 0) (v 1) (v 2) (v 3) (v 4) (v 5)) isSeriesDef := by
   intro v; simp [IsSeries, isSeriesDef, length_defined.df.iff, ext_defined.df.iff, segmentDef_defined.df.iff, lt_succ_iff_le]
   apply ball_congr; intro x _
   rw [bex_eq_le_iff, bex_eq_le_iff, bex_eq_le_iff]
   simp; rfl
 
-def seriesDef : 𝚺₀-Semisentence 6 :=
-  ⟨“∃[#0 < #1](!isSeriesDef [#1, #2, #3, #4, #5, #0] ∧ !extDef [0, #3, #0, 0] ∧ !extDef [#6, #3, #0, #5])”, by simp⟩
+def seriesDef : 𝚺₀-Semisentence 6 := .mkSigma
+  “∃[#0 < #1](!isSeriesDef.val [#1, #2, #3, #4, #5, #0] ∧ !extDef.val [0, #3, #0, 0] ∧ !extDef.val [#6, #3, #0, #5])” (by simp)
 
-lemma seriesDef_defined : Defined (M := M) (λ v ↦ Series (v 0) (v 1) (v 2) (v 3) (v 4) (v 5)) seriesDef.val := by
+lemma seriesDef_defined : Defined (M := M) (λ v ↦ Series (v 0) (v 1) (v 2) (v 3) (v 4) (v 5)) seriesDef := by
   intro v; simp [Series, seriesDef, isSerieDef_defined.df.iff, ext_defined.df.iff]
   apply exists_congr; intro T
   apply and_congr_right; intros
   apply and_congr_right; intros
   simp [Eq.comm]
 
-def seriesSegmentDef : 𝚺₀-Semisentence 6 :=
-  ⟨“∃[#0 < #6 + 1]
-      ∃[#0 < #3 + 1](!lengthDef [#0, #3] ∧
-      ∃[#0 < #7 + 1](!divDef [#0, #7, #1] ∧
-      ∃[#0 < #8 + 1](!remDef [#0, #8, #2] ∧
-        !seriesDef [#4, #5, #6, #7, #1, #3] ∧
-        !segmentDef [#4, #6, #7, #2 * #1, #0, #3, #9])))”, by simp⟩
+def seriesSegmentDef : 𝚺₀-Semisentence 6 := .mkSigma
+  “∃[#0 < #6 + 1]
+      ∃[#0 < #3 + 1](!lengthDef.val [#0, #3] ∧
+      ∃[#0 < #7 + 1](!divDef.val [#0, #7, #1] ∧
+      ∃[#0 < #8 + 1](!remDef.val [#0, #8, #2] ∧
+        !seriesDef.val [#4, #5, #6, #7, #1, #3] ∧
+        !segmentDef.val [#4, #6, #7, #2 * #1, #0, #3, #9])))” (by simp)
 
-lemma seriesSegmentDef_defined : Defined (M := M) (λ v ↦ SeriesSegment (v 0) (v 1) (v 2) (v 3) (v 4) (v 5)) seriesSegmentDef.val := by
+lemma seriesSegmentDef_defined : Defined (M := M) (λ v ↦ SeriesSegment (v 0) (v 1) (v 2) (v 3) (v 4) (v 5)) seriesSegmentDef := by
   intro v; simp [SeriesSegment, seriesSegmentDef,
     length_defined.df.iff, div_defined.df.iff, rem_defined.df.iff, seriesDef_defined.df.iff, segmentDef_defined.df.iff, lt_succ_iff_le]
   apply exists_congr; intro nₖ
   apply and_congr_right; intros
   rw [bex_eq_le_iff, bex_eq_le_iff, bex_eq_le_iff]; simp; rfl
 
-def nuonAuxDef : 𝚺₀-Semisentence 3 :=
-  ⟨“∃[#0 < #1 + 1](!lengthDef [#0, #1] ∧
-    ∃[#0 < #1 + 1](!sqrtdef [#0, #1] ∧
-    ∃[#0 < 2 * #3 + 1](!bexpDef [#0, 2 * #3, #1] ∧
-    ∃[#0 < #1 + 1](!lengthDef [#0, #1] ∧
-      !seriesSegmentDef [(2 * #4 + 1) ^' 128, #1, #0 ^' 2, #4, #5, #6]))))”, by simp⟩
+def nuonAuxDef : 𝚺₀-Semisentence 3 := .mkSigma
+  “∃[#0 < #1 + 1](!lengthDef.val [#0, #1] ∧
+    ∃[#0 < #1 + 1](!sqrtdef.val [#0, #1] ∧
+    ∃[#0 < 2 * #3 + 1](!bexpDef.val [#0, 2 * #3, #1] ∧
+    ∃[#0 < #1 + 1](!lengthDef.val [#0, #1] ∧
+      !seriesSegmentDef.val [(2 * #4 + 1) ^' 128, #1, #0 ^' 2, #4, #5, #6]))))” (by simp)
 
 lemma nuonAux_defined : 𝚺₀-Relation₃ (NuonAux : M → M → M → Prop) via nuonAuxDef := by
   intro v; simp [NuonAux, polyU, polyI, polyL, nuonAuxDef,
     length_defined.df.iff, sqrt_defined.df.iff, bexp_defined.df.iff, seriesSegmentDef_defined.df.iff, lt_succ_iff_le, numeral_eq_natCast]
   rw [bex_eq_le_iff, bex_eq_le_iff, bex_eq_le_iff, bex_eq_le_iff]; simp
 
-instance nuonAux_definable : DefinableRel₃ ℒₒᵣ 𝚺 0 (NuonAux : M → M → M → Prop) := defined_to_with_param _ nuonAux_defined
+instance nuonAux_definable : DefinableRel₃ ℒₒᵣ 𝚺₀ (NuonAux : M → M → M → Prop) := Defined.to_definable _ nuonAux_defined
 
 instance : Bounded₃ ℒₒᵣ (ext : M → M → M → M) := ⟨#1, λ _ ↦ by simp⟩
 
@@ -668,9 +668,8 @@ lemma nuon_bit1 (a : M) : nuon (2 * a + 1) = nuon a + 1 := by
   have : Nuon (2 * a + 1) (nuon a + 1) := by simpa [Nuon, length_two_mul_add_one] using (nuon_nuon a).two_mul_add_one (by simp)
   exact this.nuon_eq
 
-def nuonDef : 𝚺₀-Semisentence 2 :=
-  ⟨“∃[#0 < #2 + 1](!lengthDef [#0, #2] ∧
-    !Nuon.nuonAuxDef [#2, #0, #1])”, by simp⟩
+def _root_.LO.FirstOrder.Arith.nuonDef : 𝚺₀-Semisentence 2 := .mkSigma
+  “∃[#0 < #2 + 1](!lengthDef.val [#0, #2] ∧ !Nuon.nuonAuxDef.val [#2, #0, #1])” (by simp)
 
 -- #eval nuonDef.val
 
@@ -679,7 +678,7 @@ lemma nuon_defined : 𝚺₀-Function₁ (nuon : M → M) via nuonDef := by
     length_defined.df.iff, Nuon.nuonAux_defined.df.iff, lt_succ_iff_le]
   rw [Nuon.bex_eq_le_iff]; simp
 
-instance nuon_definable : DefinableFunction₁ ℒₒᵣ 𝚺 0 (nuon : M → M) := defined_to_with_param _ nuon_defined
+instance nuon_definable : DefinableFunction₁ ℒₒᵣ 𝚺₀ (nuon : M → M) := Defined.to_definable _ nuon_defined
 
 end Model
 

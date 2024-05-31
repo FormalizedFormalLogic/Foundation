@@ -147,7 +147,7 @@ lemma dvd_iff_bounded {a b : M} : a ∣ b ↔ ∃ c ≤ b, b = a * c := by
     · rintro ⟨c, rfl⟩; exact ⟨c, le_mul_self_of_pos_left (pos_iff_ne_zero.mpr hx), rfl⟩
     · rintro ⟨c, hz, rfl⟩; exact dvd_mul_right a c
 
-def dvdDef : 𝚺₀-Semisentence 2 := .mkSigma “∃[#0 < #2 + 1] #2 = #1 * #0” (by simp)
+def _root_.LO.FirstOrder.Arith.dvdDef : 𝚺₀-Semisentence 2 := .mkSigma “∃[#0 < #2 + 1] #2 = #1 * #0” (by simp)
 
 lemma dvd_defined : 𝚺₀-Relation (λ a b : M ↦ a ∣ b) via dvdDef :=
   λ v ↦ by simp[dvd_iff_bounded, Matrix.vecHead, Matrix.vecTail, le_iff_lt_succ, dvdDef]
@@ -216,7 +216,7 @@ lemma prime_iff_bounded {a : M} : Prime a ↔ 1 < a ∧ ∀ b ≤ a, (b ∣ a �
 def IsPrime (a : M) : Prop := 1 < a ∧ ∀ b ≤ a, (b ∣ a → b = 1 ∨ b = a)
 -- TODO: prove IsPrime a ↔ Prime a
 
-def isPrimedef : 𝚺₀-Semisentence 1 :=
+def _root_.LO.FirstOrder.Arith.isPrimedef : 𝚺₀-Semisentence 1 :=
   .mkSigma (“1 < #0” ⋏ (∀[“#0 < #1 + 1”] dvdDef.val/[#0, #1] ⟶ “#0 = 1 ∨ #0 = #1”)) (by simp [Hierarchy.pi_zero_iff_sigma_zero])
 
 lemma isPrime_defined : 𝚺₀-Predicate (λ a : M ↦ IsPrime a) via isPrimedef := by

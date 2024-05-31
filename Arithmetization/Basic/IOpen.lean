@@ -134,8 +134,8 @@ lemma eq_mul_div_add_of_pos (a : M) {b} (hb : 0 < b) : ∃ r < b, a = b * (a / b
 lemma div_graph {a b c : M} : c = a / b ↔ ((0 < b → b * c ≤ a ∧ a < b * (c + 1)) ∧ (b = 0 → c = 0)) :=
   Classical.choose!_eq_iff _
 
-def divDef : 𝚺₀-Semisentence 3 :=
-  ⟨“(0 < #2 → #2 * #0 ≤ #1 ∧ #1 < #2 * (#0 + 1)) ∧ (#2 = 0 → #0 = 0)”, by simp[Hierarchy.pi_zero_iff_sigma_zero]⟩
+def _root_.LO.FirstOrder.Arith.divDef : 𝚺₀-Semisentence 3 :=
+  .mkSigma “(0 < #2 → #2 * #0 ≤ #1 ∧ #1 < #2 * (#0 + 1)) ∧ (#2 = 0 → #0 = 0)” (by simp[Hierarchy.pi_zero_iff_sigma_zero])
 
 lemma div_defined : 𝚺₀-Function₂ ((· / ·) : M → M → M) via divDef := by
   intro v; simp[div_graph, divDef, Matrix.vecHead, Matrix.vecTail]
@@ -184,7 +184,7 @@ lemma div_mul (a b c : M) : a / (b * c) = a / b / c := by
 
 instance div_polybounded : Bounded₂ ℒₒᵣ ((· / ·) : M → M → M) := ⟨#0, λ _ ↦ by simp⟩
 
-instance div_definable : DefinableFunction₂ ℒₒᵣ 𝚺 0 ((· / ·) : M → M → M) := defined_to_with_param _ div_defined
+instance div_definable : DefinableFunction₂ ℒₒᵣ 𝚺₀ ((· / ·) : M → M → M) := div_defined.to_definable _
 
 @[simp] lemma div_mul_le (a b : M) : a / b * b ≤ a := by rw [mul_comm]; exact mul_div_le _ _
 
@@ -287,8 +287,8 @@ instance : Mod M := ⟨rem⟩
 
 lemma mod_def (a b : M) : a % b = a - b * (a / b) := rfl
 
-def remDef : 𝚺₀-Semisentence 3 :=
-  ⟨“∃[#0 < #2 + 1] (!divDef [#0, #2, #3] ∧ !subDef [#1, #2, #3 * #0])”, by simp⟩
+def _root_.LO.FirstOrder.Arith.remDef : 𝚺₀-Semisentence 3 :=
+  .mkSigma “∃[#0 < #2 + 1] (!divDef.val [#0, #2, #3] ∧ !subDef.val [#1, #2, #3 * #0])” (by simp)
 
 lemma rem_graph (a b c : M) : a = b % c ↔ ∃ x ≤ b, (x = b / c ∧ a = b - c * x) := by
   simp [mod_def]; constructor
@@ -299,7 +299,7 @@ lemma rem_defined : 𝚺₀-Function₂ ((· % ·) : M → M → M) via remDef :
   intro v; simp [Matrix.vecHead, Matrix.vecTail, remDef,
     rem_graph, Semiformula.eval_substs, div_defined.df.iff, sub_defined.df.iff, le_iff_lt_succ]
 
-instance rem_definable : DefinableFunction₂ ℒₒᵣ 𝚺 0 ((· % ·) : M → M → M) := defined_to_with_param _ rem_defined
+instance rem_definable : DefinableFunction₂ ℒₒᵣ 𝚺₀ ((· % ·) : M → M → M) := rem_defined.to_definable _
 
 lemma div_add_mod (a b : M) : b * (a / b) + (a % b) = a :=
   add_tsub_self_of_le (mul_div_le a b)
@@ -453,13 +453,13 @@ prefix:75 "√" => sqrt
 
 lemma sqrt_graph {a b : M} : b = √a ↔ b * b ≤ a ∧ a < (b + 1) * (b + 1) := Classical.choose!_eq_iff _
 
-def sqrtdef : 𝚺₀-Semisentence 2 :=
-  ⟨“#0 * #0 ≤ #1 ∧ #1 < (#0 + 1) * (#0 + 1)”, by simp[Hierarchy.pi_zero_iff_sigma_zero]⟩
+def _root_.LO.FirstOrder.Arith.sqrtdef : 𝚺₀-Semisentence 2 :=
+  .mkSigma “#0 * #0 ≤ #1 ∧ #1 < (#0 + 1) * (#0 + 1)” (by simp[Hierarchy.pi_zero_iff_sigma_zero])
 
 lemma sqrt_defined : 𝚺₀-Function₁ (λ a : M ↦ √a) via sqrtdef := by
   intro v; simp[sqrt_graph, sqrtdef, Matrix.vecHead, Matrix.vecTail]
 
-instance sqrt_definable : DefinableFunction₁ ℒₒᵣ 𝚺 0 ((√·) : M → M) := Defined.to_definable₀ _ sqrt_defined
+instance sqrt_definable : DefinableFunction₁ ℒₒᵣ 𝚺₀ ((√·) : M → M) := Defined.to_definable _ sqrt_defined
 
 lemma eq_sqrt (x a : M) : x * x ≤ a ∧ a < (x + 1) * (x + 1) → x = √a := Classical.choose_uniq (sqrt_exists_unique a)
 
@@ -545,12 +545,13 @@ lemma pair_graph {a b c : M} :
   · simp [h, show ¬b ≤ a from by simpa using h]
   · simp [h, show b ≤ a from by simpa using h]
 
-def pairDef : 𝚺₀-Semisentence 3 := ⟨“(#1 < #2 ∧ #0 = #2 * #2 + #1) ∨ (#2 ≤ #1 ∧ #0 = #1 * #1 + #1 + #2)”, by simp⟩
+def _root_.LO.FirstOrder.Arith.pairDef : 𝚺₀-Semisentence 3 :=
+  .mkSigma “(#1 < #2 ∧ #0 = #2 * #2 + #1) ∨ (#2 ≤ #1 ∧ #0 = #1 * #1 + #1 + #2)” (by simp)
 
 lemma pair_defined : 𝚺₀-Function₂ (λ a b : M ↦ ⟪a, b⟫) via pairDef := by
   intro v; simp [pair_graph, pairDef]
 
-instance pair_definable : DefinableFunction₂ ℒₒᵣ 𝚺 0 (pair : M → M → M) := Defined.to_definable₀ _ pair_defined
+instance pair_definable : DefinableFunction₂ ℒₒᵣ 𝚺₀ (pair : M → M → M) := Defined.to_definable _ pair_defined
 
 instance : Bounded₂ ℒₒᵣ (pair : M → M → M) :=
   ⟨ᵀ“(#1 * #1 + #0) + (#0 * #0 + #0 + #1)”, by intro v; simp [pair]; split_ifs <;> try simp [pair, *]⟩
@@ -604,9 +605,11 @@ instance : Bounded₁ ℒₒᵣ (pi₁ : M → M) := ⟨ᵀ“#0”, by intro v;
 
 instance : Bounded₁ ℒₒᵣ (pi₂ : M → M) := ⟨ᵀ“#0”, by intro v; simp⟩
 
-def pi₁Def : 𝚺₀-Semisentence 2 := ⟨“∃[#0 < #2 + 1] !pairDef [#2, #1, #0]”, by simp⟩
+def _root_.LO.FirstOrder.Arith.pi₁Def : 𝚺₀-Semisentence 2 :=
+  .mkSigma “∃[#0 < #2 + 1] !pairDef.val [#2, #1, #0]” (by simp)
 
-def pi₂Def : 𝚺₀-Semisentence 2 := ⟨“∃[#0 < #2 + 1] !pairDef [#2, #0, #1]”, by simp⟩
+def _root_.LO.FirstOrder.Arith.pi₂Def : 𝚺₀-Semisentence 2 :=
+  .mkSigma “∃[#0 < #2 + 1] !pairDef.val [#2, #0, #1]” (by simp)
 
 lemma pi₁_defined : 𝚺₀-Function₁ (pi₁ : M → M) via pi₁Def := by
   intro v; simp [pi₁Def, pair_defined.df.iff]
@@ -614,7 +617,7 @@ lemma pi₁_defined : 𝚺₀-Function₁ (pi₁ : M → M) via pi₁Def := by
   · intro h; exact ⟨π₂ v 1, by simp [←le_iff_lt_succ],  by simp [h]⟩
   · rintro ⟨a, _, e⟩; simp [e]
 
-instance pi₁_definable : DefinableFunction₁ ℒₒᵣ 𝚺 0 (pi₁ : M → M) := Defined.to_definable₀ _ pi₁_defined
+instance pi₁_definable : DefinableFunction₁ ℒₒᵣ 𝚺₀ (pi₁ : M → M) := Defined.to_definable₀ _ pi₁_defined
 
 lemma pi₂_defined : 𝚺₀-Function₁ (pi₂ : M → M) via pi₂Def := by
   intro v; simp [pi₂Def, pair_defined.df.iff]
@@ -622,7 +625,7 @@ lemma pi₂_defined : 𝚺₀-Function₁ (pi₂ : M → M) via pi₂Def := by
   · intro h; exact ⟨π₁ v 1, by simp [←le_iff_lt_succ], by simp [h]⟩
   · rintro ⟨a, _, e⟩; simp [e]
 
-instance pi₂_definable : DefinableFunction₁ ℒₒᵣ 𝚺 0 (pi₂ : M → M) := Defined.to_definable₀ _ pi₂_defined
+instance pi₂_definable : DefinableFunction₁ ℒₒᵣ 𝚺₀ (pi₂ : M → M) := Defined.to_definable₀ _ pi₂_defined
 
 end pair
 
@@ -634,12 +637,12 @@ variable [M ⊧ₘ* 𝐈open]
 variable {L : Language} [L.ORing] [Structure L M] [Structure.ORing L M] [Structure.Monotone L M]
 
 @[elab_as_elim]
-lemma hierarchy_polynomial_induction (Γ n) [M ⊧ₘ* Theory.indScheme L (Arith.Hierarchy Γ n)]
-    {P : M → Prop} (hP : DefinablePred L Γ n P)
+lemma hierarchy_polynomial_induction (Γ m) [M ⊧ₘ* Theory.indScheme L (Arith.Hierarchy Γ m)]
+    {P : M → Prop} (hP : DefinablePred L (Γ, m) P)
     (zero : P 0) (even : ∀ x > 0, P x → P (2 * x)) (odd : ∀ x, P x → P (2 * x + 1)) : ∀ x, P x := by
   intro x; induction x using order_induction_h
   · exact Γ
-  · exact n
+  · exact m
   · exact hP
   case inst => exact inferInstance
   case inst => exact inferInstance
@@ -653,15 +656,15 @@ lemma hierarchy_polynomial_induction (Γ n) [M ⊧ₘ* Theory.indScheme L (Arith
 
 end polynomial_induction
 
-@[elab_as_elim] lemma hierarchy_polynomial_induction_oRing_sigma₀ [M ⊧ₘ* 𝐈𝚺₀] {P : M → Prop} (hP : DefinablePred ℒₒᵣ 𝚺 0 P)
+@[elab_as_elim] lemma hierarchy_polynomial_induction_oRing_sigma₀ [M ⊧ₘ* 𝐈𝚺₀] {P : M → Prop} (hP : DefinablePred ℒₒᵣ 𝚺₀ P)
     (zero : P 0) (even : ∀ x > 0, P x → P (2 * x)) (odd : ∀ x, P x → P (2 * x + 1)) : ∀ x, P x :=
   hierarchy_polynomial_induction 𝚺 0 hP zero even odd
 
-@[elab_as_elim] lemma hierarchy_polynomial_induction_oRing_sigma₁ [M ⊧ₘ* 𝐈𝚺₁] {P : M → Prop} (hP : DefinablePred ℒₒᵣ 𝚺 1 P)
+@[elab_as_elim] lemma hierarchy_polynomial_induction_oRing_sigma₁ [M ⊧ₘ* 𝐈𝚺₁] {P : M → Prop} (hP : DefinablePred ℒₒᵣ 𝚺₁ P)
     (zero : P 0) (even : ∀ x > 0, P x → P (2 * x)) (odd : ∀ x, P x → P (2 * x + 1)) : ∀ x, P x :=
   hierarchy_polynomial_induction 𝚺 1 hP zero even odd
 
-@[elab_as_elim] lemma hierarchy_polynomial_induction_oRing_pi₁ [M ⊧ₘ* 𝐈𝚷₁] {P : M → Prop} (hP : DefinablePred ℒₒᵣ 𝚷 1 P)
+@[elab_as_elim] lemma hierarchy_polynomial_induction_oRing_pi₁ [M ⊧ₘ* 𝐈𝚷₁] {P : M → Prop} (hP : DefinablePred ℒₒᵣ 𝚷₁ P)
     (zero : P 0) (even : ∀ x > 0, P x → P (2 * x)) (odd : ∀ x, P x → P (2 * x + 1)) : ∀ x, P x :=
   hierarchy_polynomial_induction 𝚷 1 hP zero even odd
 

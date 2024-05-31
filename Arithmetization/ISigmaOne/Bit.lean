@@ -19,7 +19,8 @@ def Bit (i a : M) : Prop := LenBit (exp i) a
 
 instance : Membership M M := ⟨Bit⟩
 
-def bitDef : 𝚺₀-Semisentence 2 := ⟨“∃[#0 < #2 + 1] (!expDef [#0, #1] ∧ !lenbitDef [#0, #2])”, by simp⟩
+def _root_.LO.FirstOrder.Arith.bitDef : 𝚺₀-Semisentence 2 := .mkSigma
+  “∃[#0 < #2 + 1] (!expDef.val [#0, #1] ∧ !lenbitDef.val [#0, #2])” (by simp)
 
 lemma bit_defined : 𝚺₀-Relation ((· ∈ ·) : M → M → Prop) via bitDef := by
   intro v; simp [bitDef, lenbit_defined.df.iff, exp_defined_deltaZero.df.iff, ←le_iff_lt_succ]
@@ -27,7 +28,9 @@ lemma bit_defined : 𝚺₀-Relation ((· ∈ ·) : M → M → Prop) via bitDef
   · intro h; exact ⟨exp (v 0), by simp [h.le], rfl, h⟩
   · rintro ⟨_, _, rfl, h⟩; exact h
 
-@[instance, definability] def mem_definable : DefinableRel ℒₒᵣ 𝚺 0 ((· ∈ ·) : M → M → Prop) := defined_to_with_param _ bit_defined
+@[instance, definability] def mem_definable : DefinableRel ℒₒᵣ 𝚺₀ ((· ∈ ·) : M → M → Prop) := Defined.to_definable _ bit_defined
+
+@[simp, instance, definability] def mem_definable' : DefinableRel ℒₒᵣ Γ ((· ∈ ·) : M → M → Prop) := .of_zero mem_definable _
 
 open Classical in
 noncomputable def bitInsert (i a : M) : M := if i ∈ a then a else a + exp i
@@ -54,30 +57,32 @@ variable {L : Language} [L.ORing] [Structure L M] [Structure.ORing L M] [Structu
 variable (Γ : Polarity) (n : ℕ)
 
 @[definability] lemma Definable.ball_mem {P : (Fin k → M) → M → Prop} {f : (Fin k → M) → M}
-    (hf : Semipolynomial L Γ n f) (h : Definable L Γ n (fun w ↦ P (w ·.succ) (w 0))) :
-    Definable L Γ n (fun v ↦ ∀ x ∈ f v, P v x) := by
+    (hf : DefinableBoundedFunction L (Γ, n) f) (h : Definable L (Γ, n) (fun w ↦ P (w ·.succ) (w 0))) :
+    Definable L (Γ, n) (fun v ↦ ∀ x ∈ f v, P v x) := by
   rcases hf.bounded with ⟨bf, hbf⟩
   rcases hf.definable with ⟨f_graph, hf_graph⟩
   rcases h with ⟨p, hp⟩
-  exact ⟨⟨“∃[#0 < !!(Rew.bShift bf) + 1] (!f_graph ∧ ∀[#0 < #1] (!bitDef .[#0, #1] → !((Rew.substs (#0 :> (#·.succ.succ))).hom p)))”,
-    by simp; apply Hierarchy.oringEmb; simp⟩,
-    by  intro v; simp [hf_graph.eval, hp.eval, bit_defined.df.iff, ←le_iff_lt_succ]
+  exact .mkPolarity
+    “∃[#0 < !!(Rew.bShift bf) + 1] (!f_graph.val ∧ ∀[#0 < #1] (!bitDef.val .[#0, #1] → !((Rew.substs (#0 :> (#·.succ.succ))).hom p.val)))”
+    (by simp; apply Hierarchy.oringEmb; simp)
+    (by intro v; simp [hf_graph.df.iff, hp.df.iff, bit_defined.df.iff, ←le_iff_lt_succ]
         constructor
         · rintro h; exact ⟨f v, hbf v, rfl, fun x _ hx ↦ h x hx⟩
-        · rintro ⟨_, _, rfl, h⟩ x hx; exact h x (lt_of_mem hx) hx⟩
+        · rintro ⟨_, _, rfl, h⟩ x hx; exact h x (lt_of_mem hx) hx)
 
 @[definability] lemma Definable.bex_mem {P : (Fin k → M) → M → Prop} {f : (Fin k → M) → M}
-    (hf : Semipolynomial L Γ n f) (h : Definable L Γ n (fun w ↦ P (w ·.succ) (w 0))) :
-    Definable L Γ n (fun v ↦ ∃ x ∈ f v, P v x) := by
+    (hf : DefinableBoundedFunction L (Γ, n) f) (h : Definable L (Γ, n) (fun w ↦ P (w ·.succ) (w 0))) :
+    Definable L (Γ, n) (fun v ↦ ∃ x ∈ f v, P v x) := by
   rcases hf.bounded with ⟨bf, hbf⟩
   rcases hf.definable with ⟨f_graph, hf_graph⟩
   rcases h with ⟨p, hp⟩
-  exact ⟨⟨“∃[#0 < !!(Rew.bShift bf) + 1] (!f_graph ∧ ∃[#0 < #1] (!bitDef .[#0, #1] ∧ !((Rew.substs (#0 :> (#·.succ.succ))).hom p)))”,
-    by simp; apply Hierarchy.oringEmb; simp⟩,
-    by  intro v; simp [hf_graph.eval, hp.eval, bit_defined.df.iff, ←le_iff_lt_succ]
+  exact .mkPolarity
+    “∃[#0 < !!(Rew.bShift bf) + 1] (!f_graph.val ∧ ∃[#0 < #1] (!bitDef.val .[#0, #1] ∧ !((Rew.substs (#0 :> (#·.succ.succ))).hom p.val)))”
+    (by simp; apply Hierarchy.oringEmb; simp)
+    (by intro v; simp [hf_graph.df.iff, hp.df.iff, bit_defined.df.iff, ←le_iff_lt_succ]
         constructor
         · rintro ⟨x, hx, h⟩; exact ⟨f v, hbf v, rfl, x, lt_of_mem hx, hx, h⟩
-        · rintro ⟨_, _, rfl, x, _, hx, h⟩; exact ⟨x, hx, h⟩⟩
+        · rintro ⟨_, _, rfl, x, _, hx, h⟩; exact ⟨x, hx, h⟩)
 
 end
 
@@ -133,13 +138,16 @@ lemma lt_exp_iff {a i : M} : a < exp i ↔ ∀ j ∈ a, j < i :=
 
 instance : HasSubset M := ⟨fun a b ↦ ∀ ⦃i⦄, i ∈ a → i ∈ b⟩
 
-def bitSubsetDef : 𝚺₀-Semisentence 2 := ⟨“∀[#0 < #1] (!bitDef [#0, #1] → !bitDef [#0, #2])”, by simp⟩
+def _root_.LO.FirstOrder.Arith.bitSubsetDef : 𝚺₀-Semisentence 2 := .mkSigma
+  “∀[#0 < #1] (!bitDef.val [#0, #1] → !bitDef.val [#0, #2])” (by simp)
 
 lemma bitSubset_defined : 𝚺₀-Relation ((· ⊆ ·) : M → M → Prop) via bitSubsetDef := by
   intro v; simp [bitSubsetDef, bit_defined.df.iff]
   exact ⟨by intro h x _ hx; exact h hx, by intro h x hx; exact h x (lt_of_mem hx) hx⟩
 
-instance bitSubset_definable : DefinableRel ℒₒᵣ 𝚺 0 ((· ⊆ ·) : M → M → Prop) := Defined.to_definable₀ _ bitSubset_defined
+instance bitSubset_definable : DefinableRel ℒₒᵣ 𝚺₀ ((· ⊆ ·) : M → M → Prop) := Defined.to_definable₀ _ bitSubset_defined
+
+@[simp] instance bitSubset_definable' : DefinableRel ℒₒᵣ Γ ((· ⊆ ·) : M → M → Prop) := Defined.to_definable₀ _ bitSubset_defined
 
 lemma mem_exp_add_succ_sub_one (i j : M) : i ∈ exp (i + j + 1) - 1 := by
   have : exp (i + j + 1) - 1 = (exp j - 1) * exp (i + 1) + exp i + (exp i - 1) := calc
@@ -205,21 +213,19 @@ end ISigma₁
 
 section
 
-variable {n : ℕ} [Fact (1 ≤ n)] [M ⊧ₘ* 𝐈𝐍𝐃𝚺 n]
+variable {m : ℕ} [Fact (1 ≤ m)] [M ⊧ₘ* 𝐈𝐍𝐃𝚺 m]
 
-theorem finset_comprehension {P : M → Prop} (hP : Γ(n)-Predicate P) (a : M) :
-    haveI : M ⊧ₘ* 𝐈𝚺₁ := mod_iSigma_of_le (show 1 ≤ n from Fact.out)
+theorem finset_comprehension_aux (Γ : Polarity) {P : M → Prop} (hP : (Γ, m)-Predicate P) (a : M) :
+    haveI : M ⊧ₘ* 𝐈𝚺₁ := mod_iSigma_of_le (show 1 ≤ m from Fact.out)
     ∃ s < exp a, ∀ i < a, i ∈ s ↔ P i := by
-  haveI : M ⊧ₘ* 𝐈𝚺₁ := mod_iSigma_of_le (show 1 ≤ n from Fact.out)
+  haveI : M ⊧ₘ* 𝐈𝚺₁ := mod_iSigma_of_le (show 1 ≤ m from Fact.out)
   have : ∃ s < exp a, ∀ i < a, P i → i ∈ s :=
     ⟨under a, pred_lt_self_of_pos (by simp), fun i hi _ ↦ by simpa [mem_under_iff] using hi⟩
   rcases this with ⟨s, hsn, hs⟩
-  have : (Γ.alt)(n)-Predicate (fun s ↦ ∀ i < a, P i → i ∈ s) := by
-    apply Definable.ball_lt; simp; apply Definable.imp
-    definability
-    apply @Definable.of_sigma_zero M ℒₒᵣ _ _ _ _ mem_definable
+  have : (Γ.alt, m)-Predicate (fun s ↦ ∀ i < a, P i → i ∈ s) := by
+    apply Definable.ball_lt; simp; apply Definable.imp <;> definability
   have : ∃ t, (∀ i < a, P i → i ∈ t) ∧ ∀ t' < t, ∃ x, P x ∧ x < a ∧ x ∉ t' := by
-    simpa using least_number_h (L := ℒₒᵣ) Γ.alt n this hs
+    simpa using least_number_h (L := ℒₒᵣ) Γ.alt m this hs
   rcases this with ⟨t, ht, t_minimal⟩
   have t_le_s : t ≤ s := not_lt.mp (by
     intro lt
@@ -234,10 +240,18 @@ theorem finset_comprehension {P : M → Prop} (hP : Γ(n)-Predicate P) (a : M) :
     rcases hm (ht j hjn Hj); contradiction
   exact ⟨t, lt_of_le_of_lt t_le_s hsn, fun i hi ↦ ⟨this i hi, ht i hi⟩⟩
 
-theorem finset_comprehension_exists_unique {P : M → Prop} (hP : Γ(n)-Predicate P) (a : M) :
-    haveI : M ⊧ₘ* 𝐈𝚺₁ := mod_iSigma_of_le (show 1 ≤ n from Fact.out)
+theorem finset_comprehension {Γ} {P : M → Prop} (hP : (Γ, m)-Predicate P) (a : M) :
+    haveI : M ⊧ₘ* 𝐈𝚺₁ := mod_iSigma_of_le (show 1 ≤ m from Fact.out)
+    ∃ s < exp a, ∀ i < a, i ∈ s ↔ P i :=
+  match Γ with
+  | 𝚺 => finset_comprehension_aux 𝚺 hP a
+  | 𝚷 => finset_comprehension_aux 𝚷 hP a
+  | 𝚫 => finset_comprehension_aux 𝚺 (hP.of_delta _) a
+
+theorem finset_comprehension_exists_unique {P : M → Prop} (hP : (Γ, m)-Predicate P) (a : M) :
+    haveI : M ⊧ₘ* 𝐈𝚺₁ := mod_iSigma_of_le (show 1 ≤ m from Fact.out)
     ∃! s, s < exp a ∧ ∀ i < a, i ∈ s ↔ P i := by
-  haveI : M ⊧ₘ* 𝐈𝚺₁ := mod_iSigma_of_le (show 1 ≤ n from Fact.out)
+  haveI : M ⊧ₘ* 𝐈𝚺₁ := mod_iSigma_of_le (show 1 ≤ m from Fact.out)
   rcases finset_comprehension hP a with ⟨s, hs, Hs⟩
   exact ExistsUnique.intro s ⟨hs, Hs⟩ (by
     intro t ⟨ht, Ht⟩
@@ -259,11 +273,11 @@ variable [M ⊧ₘ* 𝐈𝚺₁]
 
 instance : Fact (1 ≤ 1) := ⟨by rfl⟩
 
-theorem finset_comprehension₁ {P : M → Prop} (hP : Γ(1)-Predicate P) (a : M) :
+theorem finset_comprehension₁ {P : M → Prop} (hP : (Γ, 1)-Predicate P) (a : M) :
     ∃ s < exp a, ∀ i < a, i ∈ s ↔ P i :=
   finset_comprehension hP a
 
-theorem finset_comprehension₁! {P : M → Prop} (hP : Γ(1)-Predicate P) (a : M) :
+theorem finset_comprehension₁! {P : M → Prop} (hP : (Γ, 1)-Predicate P) (a : M) :
     ∃! s, s < exp a ∧ (∀ i < a, i ∈ s ↔ P i) := by
   rcases finset_comprehension₁ hP a with ⟨s, hs, Ha⟩
   exact ExistsUnique.intro s ⟨hs, Ha⟩
@@ -279,7 +293,7 @@ theorem finset_comprehension₁! {P : M → Prop} (hP : Γ(1)-Predicate P) (a : 
         have : x < a := exp_monotone.mp <| LE.le.trans_lt (exp_le_of_mem hx) hs
         exact (Hb x this).mpr <| (Ha x this).mp hx)
 
-theorem finite_comprehension₁! {P : M → Prop} (hP : Γ(1)-Predicate P) (fin : ∃ m, ∀ i, P i → i < m)  :
+theorem finite_comprehension₁! {P : M → Prop} (hP : (Γ, 1)-Predicate P) (fin : ∃ m, ∀ i, P i → i < m)  :
     ∃! s : M, ∀ i, i ∈ s ↔ P i := by
   rcases fin with ⟨m, mh⟩
   rcases finset_comprehension₁ hP m with ⟨s, hs, Hs⟩
@@ -291,7 +305,7 @@ theorem finite_comprehension₁! {P : M → Prop} (hP : Γ(1)-Predicate P) (fin 
 
 lemma domain_exists_unique (s : M) :
     ∃! d : M, ∀ x, x ∈ d ↔ ∃ y, ⟪x, y⟫ ∈ s := by
-  have : (𝚷)(1)-Predicate fun x ↦ ∃ y, ⟪x, y⟫ ∈ s :=
+  have : 𝚺₁-Predicate fun x ↦ ∃ y, ⟪x, y⟫ ∈ s :=
     DefinablePred.of_iff (fun x ↦ ∃ y < s, ⟪x, y⟫ ∈ s)
       (fun x ↦ ⟨by rintro ⟨y, hy⟩; exact ⟨y, lt_of_le_of_lt (le_pair_right x y) (lt_of_mem hy), hy⟩,
                 by rintro ⟨y, _, hy⟩; exact ⟨y, hy⟩⟩)
@@ -302,7 +316,7 @@ lemma domain_exists_unique (s : M) :
 
 lemma range_exists_unique (s : M) :
     ∃! r : M, ∀ y, y ∈ r ↔ ∃ x, ⟪x, y⟫ ∈ s := by
-  have : (𝚷)(1)-Predicate fun y ↦ ∃ x, ⟪x, y⟫ ∈ s :=
+  have : 𝚺₁-Predicate fun y ↦ ∃ x, ⟪x, y⟫ ∈ s :=
     DefinablePred.of_iff (fun y ↦ ∃ x < s, ⟪x, y⟫ ∈ s)
       (fun y ↦ ⟨by rintro ⟨x, hy⟩; exact ⟨x, lt_of_le_of_lt (le_pair_left x y) (lt_of_mem hy), hy⟩,
                 by rintro ⟨y, _, hy⟩; exact ⟨y, hy⟩⟩)
@@ -313,13 +327,12 @@ lemma range_exists_unique (s : M) :
 
 lemma union_exists_unique (s t : M) :
     ∃! u : M, ∀ x, (x ∈ u ↔ x ∈ s ∨ x ∈ t) := by
-  have : (𝚷)(1)-Predicate fun x ↦ x ∈ s ∨ x ∈ t := by definability
+  have : 𝚺₁-Predicate fun x ↦ x ∈ s ∨ x ∈ t := by definability
   exact finite_comprehension₁! this
     ⟨s + t, fun i ↦ by
       rintro (H | H)
       · exact lt_of_lt_of_le (lt_of_mem H) (by simp)
       · exact lt_of_lt_of_le (lt_of_mem H) (by simp)⟩
-
 
 end ISigma₁
 

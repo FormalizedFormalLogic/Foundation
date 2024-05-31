@@ -6,7 +6,7 @@ namespace Arith
 
 noncomputable section
 
-variable {M : Type} [Zero M] [One M] [Add M] [Mul M] [LT M]
+variable {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M]
 
 namespace Model
 
@@ -16,10 +16,10 @@ variable [M ⊧ₘ* 𝐈𝚫₀]
 
 def SPPow2 (m : M) : Prop := ¬LenBit 1 m ∧ LenBit 2 m ∧ ∀ i ≤ m, Pow2 i → 2 < i → (LenBit i m ↔ (√i)^2 = i ∧ LenBit (√i) m)
 
-def sppow2Def : 𝚺₀-Semisentence 1 :=
-  ⟨“¬!lenbitDef [1, #0] ∧ !lenbitDef [2, #0] ∧
-      ∀[#0 < #1 + 1] (!pow2Def [#0] → 2 < #0 →
-        (!lenbitDef [#0, #1] ↔ ∃[#0 < #1 + 1] (!sqrtdef [#0, #1] ∧ #0 * #0 = #1 ∧ !lenbitDef [#0, #2])))”, by simp⟩
+def _root_.LO.FirstOrder.Arith.sppow2Def : 𝚺₀-Semisentence 1 :=
+  .mkSigma “¬!lenbitDef.val [1, #0] ∧ !lenbitDef.val [2, #0] ∧
+      ∀[#0 < #1 + 1] (!pow2Def.val [#0] → 2 < #0 →
+        (!lenbitDef.val [#0, #1] ↔ ∃[#0 < #1 + 1] (!sqrtdef.val [#0, #1] ∧ #0 * #0 = #1 ∧ !lenbitDef.val [#0, #2])))” (by simp)
 
 lemma sppow2_defined : 𝚺₀-Predicate (SPPow2 : M → Prop) via sppow2Def := by
   intro v
@@ -33,14 +33,14 @@ lemma sppow2_defined : 𝚺₀-Predicate (SPPow2 : M → Prop) via sppow2Def := 
 
 def PPow2 (i : M) : Prop := Pow2 i ∧ ∃ m < 2 * i, SPPow2 m ∧ LenBit i m
 
-def ppow2Def : 𝚺₀-Semisentence 1 :=
-  ⟨“!pow2Def [#0] ∧ ∃[#0 < 2 * #1] (!sppow2Def [#0] ∧ !lenbitDef [#1, #0])”, by simp⟩
+def _root_.LO.FirstOrder.Arith.ppow2Def : 𝚺₀-Semisentence 1 :=
+  .mkSigma “!pow2Def.val [#0] ∧ ∃[#0 < 2 * #1] (!sppow2Def.val [#0] ∧ !lenbitDef.val [#1, #0])” (by simp)
 
 lemma ppow2_defined : 𝚺₀-Predicate (PPow2 : M → Prop) via ppow2Def := by
   intro v; simp[PPow2, ppow2Def, Matrix.vecHead, Matrix.vecTail,
     lenbit_defined.df.iff, pow2_defined.df.iff, sppow2_defined.df.iff, numeral_eq_natCast]
 
-instance ppow2_definable : DefinablePred ℒₒᵣ 𝚺 0 (PPow2 : M → Prop) := Defined.to_definable₀ _ ppow2_defined
+instance ppow2_definable : DefinablePred ℒₒᵣ 𝚺₀ (PPow2 : M → Prop) := Defined.to_definable₀ _ ppow2_defined
 
 namespace SPPow2
 

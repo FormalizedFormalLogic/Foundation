@@ -22,7 +22,7 @@ lemma bit_defined : DefinedRel ℒₒᵣ(exp) 𝚺 0 ((· ∈ ·) : M → M → 
   intro v; simp [bitDef, lenbit_defined.df.iff, exp_defined_deltaZero.df.iff, ←le_iff_lt_succ, mem_iff_lenBit_exp]
 
 -- no longer needed
-instance mem_definable : DefinableRel ℒₒᵣ(exp) 𝚺 0 ((· ∈ ·) : M → M → Prop) := defined_to_with_param _ bit_defined
+instance mem_definable : DefinableRel ℒₒᵣ(exp) 𝚺 0 ((· ∈ ·) : M → M → Prop) := .to_definable _ bit_defined
 
 open Classical in
 noncomputable def bitInsert (i a : M) : M := if i ∈ a then a else a + exp i

@@ -6,7 +6,7 @@ namespace Arith
 
 noncomputable section
 
-variable {M : Type} [Zero M] [One M] [Add M] [Mul M] [LT M]
+variable {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M]
 
 namespace Model
 
@@ -16,15 +16,15 @@ variable [M ⊧ₘ* 𝐈open]
 
 def Pow2 (a : M) : Prop := 0 < a ∧ ∀ r ≤ a, 1 < r → r ∣ a → 2 ∣ r
 
-def pow2Def : 𝚺₀-Semisentence 1 :=
-  ⟨“0 < #0 ∧ ∀[#0 < #1 + 1] (1 < #0 →  !dvdDef [#0, #1] → !dvdDef [2, #0])”, by simp [Hierarchy.pi_zero_iff_sigma_zero]⟩
+def _root_.LO.FirstOrder.Arith.pow2Def : 𝚺₀-Semisentence 1 :=
+  .mkSigma “0 < #0 ∧ ∀[#0 < #1 + 1] (1 < #0 →  !dvdDef.val [#0, #1] → !dvdDef.val [2, #0])” (by simp [Hierarchy.pi_zero_iff_sigma_zero])
 
 lemma pow2_defined : 𝚺₀-Predicate (Pow2 : M → Prop) via pow2Def := by
   intro v
   simp [Semiformula.eval_substs, Matrix.comp_vecCons', Matrix.vecHead, Matrix.constant_eq_singleton,
     Pow2, pow2Def, le_iff_lt_succ, dvd_defined.df.iff, numeral_eq_natCast]
 
-instance pow2_definable : DefinablePred ℒₒᵣ 𝚺 0 (Pow2 : M → Prop) := defined_to_with_param _ pow2_defined
+instance pow2_definable : DefinablePred ℒₒᵣ 𝚺₀ (Pow2 : M → Prop) := Defined.to_definable _ pow2_defined
 
 lemma Pow2.pos {a : M} (h : Pow2 a) : 0 < a := h.1
 
@@ -110,8 +110,8 @@ section LenBit
 /-- $\mathrm{LenBit} (2^i, a) \iff \text{$i$th-bit of $a$ is $1$}$. -/
 def LenBit (i a : M) : Prop := ¬2 ∣ (a / i)
 
-def lenbitDef : 𝚺₀-Semisentence 2 :=
-  ⟨“∃[#0 < #2 + 1] (!divDef [#0, #2, #1] ∧ ¬!dvdDef [2, #0])”, by simp⟩
+def _root_.LO.FirstOrder.Arith.lenbitDef : 𝚺₀-Semisentence 2 :=
+  .mkSigma “∃[#0 < #2 + 1] (!divDef.val [#0, #2, #1] ∧ ¬!dvdDef.val [2, #0])” (by simp)
 
 lemma lenbit_defined : 𝚺₀-Relation (LenBit : M → M → Prop) via lenbitDef := by
   intro v; simp[sqrt_graph, lenbitDef, Matrix.vecHead, Matrix.vecTail,
@@ -120,7 +120,7 @@ lemma lenbit_defined : 𝚺₀-Relation (LenBit : M → M → Prop) via lenbitDe
   · intro h; exact ⟨v 1 / v 0, by simp, rfl, h⟩
   · rintro ⟨z, hz, rfl, h⟩; exact h
 
-instance lenbit_definable : DefinableRel ℒₒᵣ 𝚺 0 (LenBit : M → M → Prop) := defined_to_with_param _ lenbit_defined
+instance lenbit_definable : DefinableRel ℒₒᵣ 𝚺₀ (LenBit : M → M → Prop) := Defined.to_definable _ lenbit_defined
 
 lemma LenBit.le {i a : M} (h : LenBit i a) : i ≤ a := by
   by_contra A; simp [LenBit, show a < i from by simpa using A] at h

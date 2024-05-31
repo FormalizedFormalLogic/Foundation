@@ -9,7 +9,7 @@ namespace Arith
 
 noncomputable section
 
-variable {M : Type} [Nonempty M] [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐏𝐀⁻]
+variable {M : Type*} [Nonempty M] [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐏𝐀⁻]
 
 namespace Model
 

@@ -22,7 +22,7 @@ def bitDef : 𝚺₀-Semisentence 2 := ⟨“∃[#0 < #2 + 1] (!Exponential.def 
 lemma bit_defined : 𝚺₀-Relation ((· ∈ ·) : M → M → Prop) via bitDef := by
   intro v; simp [bitDef, lenbit_defined.df.iff, Exponential.defined.df.iff, ←le_iff_lt_succ]; rfl
 
-instance mem_definable : DefinableRel ℒₒᵣ 𝚺 0 ((· ∈ ·) : M → M → Prop) := defined_to_with_param _ bit_defined
+instance mem_definable : DefinableRel ℒₒᵣ 𝚺 0 ((· ∈ ·) : M → M → Prop) := .to_definable _ bit_defined
 
 lemma lt_of_mem {i a : M} (h : i ∈ a) : i < a := by
   rcases h with ⟨p, _, hep, hp⟩
