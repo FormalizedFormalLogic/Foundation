@@ -19,10 +19,10 @@ def Bit (i a : M) : Prop := LenBit (exp i) a
 
 instance : Membership M M := ⟨Bit⟩
 
-def bitDef : 𝚺₀-Sentence 2 := ⟨“∃[#0 < #2 + 1] (!expDef [#0, #1] ∧ !lenbitDef [#0, #2])”, by simp⟩
+def bitDef : 𝚺₀-Semisentence 2 := ⟨“∃[#0 < #2 + 1] (!expDef [#0, #1] ∧ !lenbitDef [#0, #2])”, by simp⟩
 
 lemma bit_defined : 𝚺₀-Relation ((· ∈ ·) : M → M → Prop) via bitDef := by
-  intro v; simp [bitDef, lenbit_defined.pval, exp_defined_deltaZero.pval, ←le_iff_lt_succ]
+  intro v; simp [bitDef, lenbit_defined.df.iff, exp_defined_deltaZero.df.iff, ←le_iff_lt_succ]
   constructor
   · intro h; exact ⟨exp (v 0), by simp [h.le], rfl, h⟩
   · rintro ⟨_, _, rfl, h⟩; exact h
@@ -61,7 +61,7 @@ variable (Γ : Polarity) (n : ℕ)
   rcases h with ⟨p, hp⟩
   exact ⟨⟨“∃[#0 < !!(Rew.bShift bf) + 1] (!f_graph ∧ ∀[#0 < #1] (!bitDef .[#0, #1] → !((Rew.substs (#0 :> (#·.succ.succ))).hom p)))”,
     by simp; apply Hierarchy.oringEmb; simp⟩,
-    by  intro v; simp [hf_graph.eval, hp.eval, bit_defined.pval, ←le_iff_lt_succ]
+    by  intro v; simp [hf_graph.eval, hp.eval, bit_defined.df.iff, ←le_iff_lt_succ]
         constructor
         · rintro h; exact ⟨f v, hbf v, rfl, fun x _ hx ↦ h x hx⟩
         · rintro ⟨_, _, rfl, h⟩ x hx; exact h x (lt_of_mem hx) hx⟩
@@ -74,7 +74,7 @@ variable (Γ : Polarity) (n : ℕ)
   rcases h with ⟨p, hp⟩
   exact ⟨⟨“∃[#0 < !!(Rew.bShift bf) + 1] (!f_graph ∧ ∃[#0 < #1] (!bitDef .[#0, #1] ∧ !((Rew.substs (#0 :> (#·.succ.succ))).hom p)))”,
     by simp; apply Hierarchy.oringEmb; simp⟩,
-    by  intro v; simp [hf_graph.eval, hp.eval, bit_defined.pval, ←le_iff_lt_succ]
+    by  intro v; simp [hf_graph.eval, hp.eval, bit_defined.df.iff, ←le_iff_lt_succ]
         constructor
         · rintro ⟨x, hx, h⟩; exact ⟨f v, hbf v, rfl, x, lt_of_mem hx, hx, h⟩
         · rintro ⟨_, _, rfl, x, _, hx, h⟩; exact ⟨x, hx, h⟩⟩
@@ -133,10 +133,10 @@ lemma lt_exp_iff {a i : M} : a < exp i ↔ ∀ j ∈ a, j < i :=
 
 instance : HasSubset M := ⟨fun a b ↦ ∀ ⦃i⦄, i ∈ a → i ∈ b⟩
 
-def bitSubsetDef : 𝚺₀-Sentence 2 := ⟨“∀[#0 < #1] (!bitDef [#0, #1] → !bitDef [#0, #2])”, by simp⟩
+def bitSubsetDef : 𝚺₀-Semisentence 2 := ⟨“∀[#0 < #1] (!bitDef [#0, #1] → !bitDef [#0, #2])”, by simp⟩
 
 lemma bitSubset_defined : 𝚺₀-Relation ((· ⊆ ·) : M → M → Prop) via bitSubsetDef := by
-  intro v; simp [bitSubsetDef, bit_defined.pval]
+  intro v; simp [bitSubsetDef, bit_defined.df.iff]
   exact ⟨by intro h x _ hx; exact h hx, by intro h x hx; exact h x (lt_of_mem hx) hx⟩
 
 instance bitSubset_definable : DefinableRel ℒₒᵣ 𝚺 0 ((· ⊆ ·) : M → M → Prop) := Defined.to_definable₀ _ bitSubset_defined

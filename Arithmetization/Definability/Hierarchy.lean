@@ -115,7 +115,7 @@ inductive HSemiformula : HierarchySymbol → Type _ where
 
 abbrev HSemisentence (Γ : HierarchySymbol) := HSemiformula L Empty n Γ
 
-scoped[LO.FirstOrder.Arith] notation "𝚺₀-Sentence " => HSemisentence ℒₒᵣ 0 (𝚺, 0)
+scoped[LO.FirstOrder.Arith] notation "𝚺₀-Semisentence " => HSemisentence ℒₒᵣ 0 (𝚺, 0)
 
 scoped[LO.FirstOrder.Arith] notation "𝚺₀-Semisentence " n => HSemisentence ℒₒᵣ n (𝚺, 0)
 
@@ -133,8 +133,11 @@ def val : HSemiformula L ξ n Γ → Semiformula L ξ n
   | mkSigma p _ => p
   | mkPi    p _ => p
   | mkDelta p _ => p.val
+
 @[simp] lemma val_mkSigma (p : Semiformula L ξ n) (hp : Hierarchy 𝚺 m p) : (mkSigma p hp).val = p := rfl
+
 @[simp] lemma val_mkPi (p : Semiformula L ξ n) (hp : Hierarchy 𝚷 m p) : (mkPi p hp).val = p := rfl
+
 @[simp] lemma val_mkDelta (p : HSemiformula L ξ n (𝚺, m)) (q : HSemiformula L ξ n (𝚷, m)) : (mkDelta p q).val = p.val := rfl
 
 @[simp] lemma sigma_prop : (p : HSemiformula L ξ n (𝚺, m)) → Hierarchy 𝚺 m p.val
@@ -142,6 +145,10 @@ def val : HSemiformula L ξ n Γ → Semiformula L ξ n
 
 @[simp] lemma pi_prop : (p : HSemiformula L ξ n (𝚷, m)) → Hierarchy 𝚷 m p.val
   | mkPi _ h => h
+
+@[simp] lemma polarity_prop : {Γ : Polarity} → (p : HSemiformula L ξ n (Γ, m)) → Hierarchy Γ m p.val
+  | 𝚺, p => p.sigma_prop
+  | 𝚷, p => p.pi_prop
 
 def sigma : HSemiformula L ξ n (𝚫, m) → HSemiformula L ξ n (𝚺, m)
   | mkDelta p _ => p
@@ -515,7 +522,6 @@ variable (L Γ)
 class Definable {k} (P : (Fin k → M) → Prop) : Prop where
   definable : ∃ p : HSemiformula L M k Γ, DefinedWithParam P p
 
-
 abbrev DefinedPred (P : M → Prop) (p : HSemisentence L 1 Γ) : Prop :=
   Defined (λ v ↦ P (v 0)) p
 
@@ -778,6 +784,12 @@ lemma all {P : (Fin (k + 1) → M) → Prop} {p : HSemiformula L M (k + 1) (𝚷
 end DefinedWithParam
 
 namespace Definable
+
+lemma mkPolarity {P : (Fin k → M) → Prop} {Γ : Polarity}
+    (p : Semiformula L M k) (hp : Hierarchy Γ m p) (hP : ∀ v, P v ↔ Semiformula.Evalm M v id p) : Definable L (Γ, m) P :=
+  match Γ with
+  | 𝚺 => ⟨.mkSigma p hp, by intro v; simp [hP]⟩
+  | 𝚷 => ⟨.mkPi p hp, by intro v; simp [hP]⟩
 
 lemma of_iff (Q : (Fin k → M) → Prop) (h : ∀ x, P x ↔ Q x) (H : Definable L Γ Q) : Definable L Γ P := by
   rwa [show P = Q from by funext v; simp [h]]
@@ -1464,13 +1476,15 @@ attribute [aesop 2 (rule_sets := [Definability]) safe]
   Definable.comp₃
   Definable.comp₄
 
-  Definable.bcomp₁_sigmaZero
-  Definable.bcomp₂_sigmaZero
-  Definable.bcomp₃_sigmaZero
-  Definable.bcomp₄_sigmaZero
   Definable.const
 
 attribute [aesop 3 (rule_sets := [Definability]) safe]
+  Definable.bcomp₁
+  Definable.bcomp₂
+  Definable.bcomp₃
+  Definable.bcomp₄
+
+attribute [aesop 4 (rule_sets := [Definability]) safe]
   Definable.not
   Definable.imp
   Definable.iff

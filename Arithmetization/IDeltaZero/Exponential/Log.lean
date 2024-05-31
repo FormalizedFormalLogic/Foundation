@@ -67,10 +67,10 @@ lemma log_lt_self_of_pos {y : M} (pos : 0 < y) : log y < y :=
 
 lemma log_graph {x y : M} : x = log y ↔ (y = 0 → x = 0) ∧ (0 < y → x < y ∧ ∃ y' ≤ y, Exponential x y' ∧ y < 2 * y') := Classical.choose!_eq_iff _
 
-def logDef : 𝚺₀-Sentence 2 := ⟨“(#1 = 0 → #0 = 0) ∧ (0 < #1 → #0 < #1 ∧ ∃[#0 < #2 + 1] (!Exponential.def [#1, #0] ∧ #2 < 2 * #0))”, by simp⟩
+def logDef : 𝚺₀-Semisentence 2 := ⟨“(#1 = 0 → #0 = 0) ∧ (0 < #1 → #0 < #1 ∧ ∃[#0 < #2 + 1] (!Exponential.def [#1, #0] ∧ #2 < 2 * #0))”, by simp⟩
 
 lemma log_defined : 𝚺₀-Function₁ (log : M → M) via logDef := by
-  intro v; simp [logDef, log_graph, Exponential.defined.pval, ←le_iff_lt_succ, numeral_eq_natCast]
+  intro v; simp [logDef, log_graph, Exponential.defined.df.iff, ←le_iff_lt_succ, numeral_eq_natCast]
 
 instance log_definable : DefinableFunction₁ ℒₒᵣ 𝚺 0 (log : M → M) := defined_to_with_param _ log_defined
 
@@ -158,10 +158,10 @@ lemma length_graph {i a : M} : i = ‖a‖ ↔ (0 < a → ∃ k ≤ a, k = log a
     · rintro rfl; exact ⟨log a, by simp⟩
     · rintro ⟨_, _, rfl, rfl⟩; rfl
 
-def lengthDef : 𝚺₀-Sentence 2 := ⟨“(0 < #1 → ∃[#0 < #2 + 1] (!logDef [#0, #2] ∧ #1 = #0 + 1)) ∧ (#1 = 0 → #0 = 0)”, by simp⟩
+def lengthDef : 𝚺₀-Semisentence 2 := ⟨“(0 < #1 → ∃[#0 < #2 + 1] (!logDef [#0, #2] ∧ #1 = #0 + 1)) ∧ (#1 = 0 → #0 = 0)”, by simp⟩
 
 lemma length_defined : 𝚺₀-Function₁ (‖·‖ : M → M) via lengthDef := by
-  intro v; simp [lengthDef, length_graph, log_defined.pval, ←le_iff_lt_succ]
+  intro v; simp [lengthDef, length_graph, log_defined.df.iff, ←le_iff_lt_succ]
 
 instance length_definable : DefinableFunction₁ ℒₒᵣ 𝚺 0 (‖·‖ : M → M) := defined_to_with_param _ length_defined
 
@@ -329,10 +329,10 @@ lemma bexp_graph {y a x : M} : y = bexp a x ↔ ∃ l ≤ a, l = ‖a‖ ∧ (x 
     · exact (hlt lt).uniq (exp_bexp_of_lt lt)
     · rcases hle le; simp [bexp_eq_zero_of_le le]⟩
 
-def bexpDef : 𝚺₀-Sentence 3 := ⟨“∃[#0 < #2 + 1] (!lengthDef [#0, #2] ∧ (#3 < #0 → !Exponential.def [#3, #1]) ∧ (#0 ≤ #3 → #1 = 0))”, by simp⟩
+def bexpDef : 𝚺₀-Semisentence 3 := ⟨“∃[#0 < #2 + 1] (!lengthDef [#0, #2] ∧ (#3 < #0 → !Exponential.def [#3, #1]) ∧ (#0 ≤ #3 → #1 = 0))”, by simp⟩
 
 lemma bexp_defined : 𝚺₀-Function₂ (bexp : M → M → M) via bexpDef := by
-  intro v; simp [bexpDef, bexp_graph, Exponential.defined.pval, length_defined.pval, ←le_iff_lt_succ]
+  intro v; simp [bexpDef, bexp_graph, Exponential.defined.df.iff, length_defined.df.iff, ←le_iff_lt_succ]
 
 instance bexp_definable : DefinableFunction₂ ℒₒᵣ 𝚺 0 (bexp : M → M → M) := defined_to_with_param _ bexp_defined
 
@@ -405,10 +405,10 @@ lemma fbit_eq_zero_iff {a i : M} : fbit a i = 0 ↔ ¬LenBit (bexp a i) a := by 
 
 lemma fbit_eq_zero_of_le {a i : M} (hi : ‖a‖ ≤ i) : fbit a i = 0 := by simp [fbit, bexp_eq_zero_of_le hi]
 
-def fbitDef : 𝚺₀-Sentence 3 := ⟨“∃[#0 < #2 + 1] (!bexpDef [#0, #2, #3] ∧ ∃[#0 < #3 + 1] (!divDef [#0, #3, #1] ∧ !remDef [#2, #0, 2]))”, by simp⟩
+def fbitDef : 𝚺₀-Semisentence 3 := ⟨“∃[#0 < #2 + 1] (!bexpDef [#0, #2, #3] ∧ ∃[#0 < #3 + 1] (!divDef [#0, #3, #1] ∧ !remDef [#2, #0, 2]))”, by simp⟩
 
 lemma fbit_defined : 𝚺₀-Function₂ (fbit : M → M → M) via fbitDef := by
-  intro v; simp [fbitDef, bexp_defined.pval, div_defined.pval, rem_defined.pval, ←le_iff_lt_succ, fbit, numeral_eq_natCast]
+  intro v; simp [fbitDef, bexp_defined.df.iff, div_defined.df.iff, rem_defined.df.iff, ←le_iff_lt_succ, fbit, numeral_eq_natCast]
   constructor
   · intro h; exact ⟨bexp (v 1) (v 2), by simp, rfl, _, by simp, rfl, h⟩
   · rintro ⟨_, _, rfl, _, _, rfl, h⟩; exact h

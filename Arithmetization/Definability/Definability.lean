@@ -7,17 +7,17 @@ import Aesop
 namespace LO.FirstOrder
 
 def Defined {k} (R : (Fin k → M) → Prop) [Structure L M] (p : Semisentence L k) : Prop :=
-  ∀ v, R v ↔ Semiformula.PVal! M v p
+  ∀ v, R v ↔ Semiformula.Evalbm M v p
 
 def DefinedWithParam {k} (R : (Fin k → M) → Prop) [Structure L M] (p : Semiformula L M k) : Prop :=
-  ∀ v, R v ↔ Semiformula.Eval! M v id p
+  ∀ v, R v ↔ Semiformula.Evalm M v id p
 
 namespace Defined
 
 variable [Structure L M]
 
 lemma pval {k} {R : (Fin k → M) → Prop} {p : Semisentence L k} (h : Defined R p) (v) :
-    Semiformula.PVal! M v p ↔ R v := (h v).symm
+    Semiformula.Evalbm M v p ↔ R v := (h v).symm
 
 end Defined
 
@@ -26,7 +26,7 @@ namespace DefinedWithParam
 variable [Structure L M]
 
 lemma eval {k} {R : (Fin k → M) → Prop} {p : Semiformula L M k} (h : DefinedWithParam R p) (v) :
-    Semiformula.Eval! M v id p ↔ R v := (h v).symm
+    Semiformula.Evalm M v id p ↔ R v := (h v).symm
 
 end DefinedWithParam
 
@@ -34,7 +34,9 @@ namespace Arith
 
 section definability
 
-variable {M : Type} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐏𝐀⁻]
+open Model
+
+variable {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐏𝐀⁻]
 variable {L : Language} [L.ORing] [Structure L M] [Structure.ORing L M] [Structure.Monotone L M]
 
 namespace Definability
@@ -42,12 +44,21 @@ namespace Definability
 abbrev HSemiformula (Γ : Polarity) (s : ℕ) (L : Language) [L.LT] (μ : Type*) (n) :=
   { p : Semiformula L μ n // Hierarchy Γ s p }
 
-structure DeltaSemiformula (L : Language) [L.LT] (T : Theory L) (ν : ℕ) (ξ : Type*) [DecidableEq ξ] (n) :=
-  sigma : HSemiformula Σ ν L ξ n
-  pi : HSemiformula Π ν L ξ n
+abbrev HSemisentence (Γ : Polarity) (s : ℕ) (L : Language) [L.LT] (n) := HSemiformula Γ s L Empty n
+
+structure DeltaSemiformula (ν : ℕ) (L : Language) [L.LT] (T : Theory L) (ξ : Type*) [DecidableEq ξ] (n) :=
+  sigma : HSemiformula 𝚺 ν L ξ n
+  pi : HSemiformula 𝚷 ν L ξ n
   equiv : T ⊨ ∀ᶠ* ∀* (sigma.val ⟷ pi.val)
 
-abbrev HSemisentence (Γ : Polarity) (s : ℕ) (L : Language) [L.LT] (n) := HSemiformula Γ s L Empty n
+lemma DeltaSemiformula.eval_iff [M ⊧ₘ* T] [DecidableEq ξ] {p : DeltaSemiformula ν L T ξ n} :
+    Semiformula.Evalm M e ε p.sigma.val ↔ Semiformula.Evalm M e ε p.pi.val := by
+  simpa using
+    Semiformula.eval_univClosure.mp
+      (Semiformula.val_fvUnivClosure.mp
+        (models_iff.mp <| LO.FirstOrder.consequence_iff'.mp p.equiv M) ε) e
+
+abbrev DeltaSemisentence (ν : ℕ) (L : Language) [L.LT] (T) (n) := DeltaSemiformula ν L T Empty n
 
 variable (L)
 
@@ -57,15 +68,15 @@ def HSemiformula.extd (p : HSemiformula Γ m ℒₒᵣ ξ n) : HSemiformula Γ m
 variable {L}
 
 @[simp] lemma HSemiformula.pval_extd_iff {p : HSemisentence Γ m ℒₒᵣ n} :
-    Semiformula.PVal! M e (p.extd L).val ↔ Semiformula.PVal! M e p.val := by
+    Semiformula.Evalbm M e (p.extd L).val ↔ Semiformula.Evalbm M e p.val := by
   simp [HSemiformula.extd]
 
 lemma HSemiformula.extd_val (p : HSemiformula Γ m ℒₒᵣ ξ n) :
     (p.extd L).val = Semiformula.lMap Language.oringEmb p := rfl
 
-scoped[LO.FirstOrder.Arith] notation "Δ₀-Sentence " n => Definability.HSemisentence Σ 0 ℒₒᵣ n
+scoped[LO.FirstOrder.Arith] notation "𝚺₀-Semisentence " n => Definability.HSemisentence 𝚺 0 ℒₒᵣ n
 
-scoped[LO.FirstOrder.Arith] notation "Δ₀(exp)-Sentence " n => Definability.HSemisentence Σ 0 ℒₒᵣ(exp) n
+scoped[LO.FirstOrder.Arith] notation "𝚺₀(exp)-Sentence " n => Definability.HSemisentence 𝚺 0 ℒₒᵣ(exp) n
 
 namespace HSemiformula
 
@@ -124,31 +135,31 @@ abbrev DefinedFunction₃ (f : M → M → M → M) (p : HSemisentence Γ s L 4)
 
 notation Γ "(" s ")-Predicate " P " via " p => DefinedPred ℒₒᵣ Γ s P p
 
-notation "Δ₀-Predicate " P " via " p => DefinedPred ℒₒᵣ Σ 0 P p
+notation "𝚺₀-Predicate " P " via " p => DefinedPred ℒₒᵣ 𝚺 0 P p
 
 notation Γ "(" s ")-Relation " P " via " p => DefinedRel ℒₒᵣ Γ s P p
 
-notation "Δ₀-Relation " P " via " p => DefinedRel ℒₒᵣ Σ 0 P p
+notation "𝚺₀-Relation " P " via " p => DefinedRel ℒₒᵣ 𝚺 0 P p
 
 notation Γ "(" s ")-Relation₃ " P " via " p => DefinedRel₃ ℒₒᵣ Γ s P p
 
-notation "Δ₀-Relation₃ " P " via " p => DefinedRel₃ ℒₒᵣ Σ 0 P p
+notation "𝚺₀-Relation₃ " P " via " p => DefinedRel₃ ℒₒᵣ 𝚺 0 P p
 
 notation Γ "(" s ")-Relation₄ " P " via " p => DefinedRel₄ ℒₒᵣ Γ s P p
 
-notation "Δ₀-Relation₄ " P " via " p => DefinedRel₄ ℒₒᵣ Σ 0 P p
+notation "𝚺₀-Relation₄ " P " via " p => DefinedRel₄ ℒₒᵣ 𝚺 0 P p
 
 notation Γ "(" s ")-Function₁ " f " via " p => DefinedFunction₁ ℒₒᵣ Γ s f p
 
-notation "Δ₀-Function₁ " f " via " p => DefinedFunction₁ ℒₒᵣ Σ 0 f p
+notation "𝚺₀-Function₁ " f " via " p => DefinedFunction₁ ℒₒᵣ 𝚺 0 f p
 
 notation Γ "(" s ")-Function₂ " f " via " p => DefinedFunction₂ ℒₒᵣ Γ s f p
 
-notation "Δ₀-Function₂ " f " via " p => DefinedFunction₂ ℒₒᵣ Σ 0 f p
+notation "𝚺₀-Function₂ " f " via " p => DefinedFunction₂ ℒₒᵣ 𝚺 0 f p
 
 notation Γ "(" s ")-Function₃ " f " via " p => DefinedFunction₃ ℒₒᵣ Γ s f p
 
-notation "Δ₀-Function₃ " f " via " p => DefinedFunction₃ ℒₒᵣ Σ 0 f p
+notation "𝚺₀-Function₃ " f " via " p => DefinedFunction₃ ℒₒᵣ 𝚺 0 f p
 
 def DefinedRel.eq : Γ(s)-Relation ((· = ·) : M → M → Prop) via HSemisentence.eq := by intro v; simp [HSemisentence.eq]
 
@@ -159,7 +170,7 @@ def DefinedRel.le : Γ(s)-Relation ((· ≤ ·) : M → M → Prop) via HSemisen
 class Definable {k} (P : (Fin k → M) → Prop) : Prop where
   definable : ∃ p : HSemiformula Γ s L M k, DefinedWithParam P p.val
 
-instance Definable.of_sigma_zero {k} (P : (Fin k → M) → Prop) [h : Definable L Σ 0 P] (Γ ν) : Definable L Γ ν P :=
+instance Definable.of_sigma_zero {k} (P : (Fin k → M) → Prop) [h : Definable L 𝚺 0 P] (Γ ν) : Definable L Γ ν P :=
   ⟨by rcases h with ⟨p, hp⟩; exact ⟨⟨p, Hierarchy.of_zero p.prop⟩, hp⟩⟩
 
 abbrev DefinablePred (P : M → Prop) : Prop := Definable L Γ s (k := 1) (fun v ↦ P (v 0))
@@ -195,20 +206,20 @@ notation Γ "(" s ")-Function₃ " f => DefinableFunction₃ ℒₒᵣ Γ s f
 variable {L Γ s}
 
 lemma defined_to_with_param {k} {P : (Fin k → M) → Prop} (p : HSemisentence Γ s L k) (hP : Defined P p.val) :
-    Definable L Γ s P := ⟨⟨Rew.emb.hom p.val, by simp⟩, by intro; simp [hP.pval]⟩
+    Definable L Γ s P := ⟨⟨Rew.emb.hom p.val, by simp⟩, by intro; simp [hP.df.iff]⟩
 
-lemma defined_to_with_param₀ {k} {P : (Fin k → M) → Prop} (p : HSemisentence b' 0 L k) (hP : Defined P p.val) :
-    Definable L Γ s P := ⟨⟨Rew.emb.hom p.val, by simp⟩, by intro; simp [hP.pval]⟩
+lemma Defined.to_definable₀ {k} {P : (Fin k → M) → Prop} (p : HSemisentence b' 0 L k) (hP : Defined P p.val) :
+    Definable L Γ s P := ⟨⟨Rew.emb.hom p.val, by simp⟩, by intro; simp [hP.df.iff]⟩
 
 instance {k} (P : (Fin k → M) → Prop) [d : Definable ℒₒᵣ Γ s P] : Definable L Γ s P := by
   rcases d with ⟨p, hp⟩
   exact ⟨⟨Semiformula.lMap Language.oringEmb p.val, Hierarchy.oringEmb p.prop⟩, by simp; intro v; simpa using hp v⟩
 
-lemma defined_to_with_param_oRing₀ {k} {P : (Fin k → M) → Prop} (p : HSemisentence Γ' 0 ℒₒᵣ k) (hP : Defined P p.val) :
+lemma Defined.to_definable_oRing₀ {k} {P : (Fin k → M) → Prop} (p : HSemisentence Γ' 0 ℒₒᵣ k) (hP : Defined P p.val) :
     Definable L Γ s P :=
   ⟨⟨Rew.emb.hom (Semiformula.lMap Language.oringEmb p.val),
       by simp; apply Hierarchy.oringEmb (Hierarchy.of_zero p.prop)⟩,
-      by intro; simp [hP.pval]⟩
+      by intro; simp [hP.df.iff]⟩
 
 lemma Definable.of_iff {p : (Fin k → M) → Prop} (q) (h : ∀ x, p x ↔ q x) (H : Definable L Γ s q) : Definable L Γ s p := by
   rwa [show p = q from by funext v; simp [h]]
@@ -272,7 +283,7 @@ end DefinableFunction₂
 variable (L Γ s)
 
 class Bounded (f : (Fin k → M) → M) : Prop where
-  bounded : ∃ t : Semiterm L M k, ∀ v : Fin k → M, f v ≤ t.val! M v id
+  bounded : ∃ t : Semiterm L M k, ∀ v : Fin k → M, f v ≤ t.valm M v id
 
 abbrev Bounded₁ (f : M → M) : Prop := Bounded L (k := 1) (fun v => f (v 0))
 
@@ -293,10 +304,10 @@ namespace Bounded
 @[simp] lemma const {k} (c : M) : Bounded L (fun _ : Fin k → M ↦ c) := ⟨&c, by intro _; simp⟩
 
 @[simp] lemma val_id' (t : Semiterm L M n) (e : Fin n → Fin k) :
-    Bounded L fun v : Fin k → M => Semiterm.val! M (fun x ↦ v (e x)) id t :=
+    Bounded L fun v : Fin k → M => Semiterm.valm M (fun x ↦ v (e x)) id t :=
   ⟨Rew.substs (fun x ↦ #(e x)) t, by intro _; simp [Semiterm.val_substs]⟩
 
-@[simp] lemma val_id (t : Semiterm L M k) : Bounded L fun v : Fin k → M => Semiterm.val! M v id t :=
+@[simp] lemma val_id (t : Semiterm L M k) : Bounded L fun v : Fin k → M => Semiterm.valm M v id t :=
   ⟨t, by intro _; simp⟩
 
 lemma finmap {f : (Fin k → M) → M} (hf : Bounded L f) (e : Fin k → Fin n) :
@@ -481,22 +492,22 @@ lemma bex_le {P : (Fin k → M) → M → Prop} {f : (Fin k → M) → M}
         · intro h; exact ⟨f v, hbf v, rfl, h⟩
         · rintro ⟨_, _, rfl, h⟩; exact h⟩
 
-lemma all {P : (Fin k → M) → M → Prop} (h : Definable L Π (s + 1) (fun w ↦ P (w ·.succ) (w 0))) :
-    Definable L Π (s + 1) (fun v ↦ ∀ x, P v x) := by
+lemma all {P : (Fin k → M) → M → Prop} (h : Definable L 𝚷 (s + 1) (fun w ↦ P (w ·.succ) (w 0))) :
+    Definable L 𝚷 (s + 1) (fun v ↦ ∀ x, P v x) := by
   rcases h with ⟨p, hp⟩
   exact ⟨⟨∀' p, by simp⟩, by intro v; simp [hp.eval]⟩
 
-lemma ex {P : (Fin k → M) → M → Prop} (h : Definable L Σ (s + 1) (fun w ↦ P (w ·.succ) (w 0))) :
-    Definable L Σ (s + 1) (fun v ↦ ∃ x, P v x) := by
+lemma ex {P : (Fin k → M) → M → Prop} (h : Definable L 𝚺 (s + 1) (fun w ↦ P (w ·.succ) (w 0))) :
+    Definable L 𝚺 (s + 1) (fun v ↦ ∃ x, P v x) := by
   rcases h with ⟨p, hp⟩
   exact ⟨⟨∃' p, by simp⟩, by intro v; simp [hp.eval]⟩
 
 @[simp] lemma val_id' (t : Semiterm L M n) (e : Fin n → Fin k) :
-    DefinableFunction L Γ s fun v : Fin k → M => Semiterm.val! M (fun x ↦ v (e x)) id t :=
+    DefinableFunction L Γ s fun v : Fin k → M => Semiterm.valm M (fun x ↦ v (e x)) id t :=
   ⟨⟨“#0 = !!(Rew.substs (fun x ↦ #(e x).succ) t)”, by simp⟩, by intro v; simp [Semiterm.val_substs]⟩
 
 @[simp] lemma val_id (t : Semiterm L M k) :
-    DefinableFunction L Γ s fun v : Fin k → M => Semiterm.val! M v id t :=
+    DefinableFunction L Γ s fun v : Fin k → M => Semiterm.valm M v id t :=
   ⟨⟨“#0 = !!(Rew.bShift t)”, by simp⟩, by intro v; simp [Semiterm.val_bShift']⟩
 
 end Definable
@@ -522,9 +533,9 @@ lemma of_iff {g : (Fin k → M) → M} (f) (h : ∀ v, f v = g v) (H : Semipolyn
 @[simp] lemma const {k} (c : M) : Semipolynomial L Γ s (fun _ : Fin k → M ↦ c) := ⟨by simp, by simp⟩
 
 @[simp] lemma val_id' (t : Semiterm L M n) (e : Fin n → Fin k) :
-    Semipolynomial L Γ s fun v : Fin k → M => Semiterm.val! M (fun x ↦ v (e x)) id t := ⟨by simp, by simp⟩
+    Semipolynomial L Γ s fun v : Fin k → M => Semiterm.valm M (fun x ↦ v (e x)) id t := ⟨by simp, by simp⟩
 
-@[simp] lemma val_id (t : Semiterm L M k) : Semipolynomial L Γ s fun v : Fin k → M => Semiterm.val! M v id t := ⟨by simp, by simp⟩
+@[simp] lemma val_id (t : Semiterm L M k) : Semipolynomial L Γ s fun v : Fin k → M => Semiterm.valm M v id t := ⟨by simp, by simp⟩
 
 end Semipolynomial
 
@@ -533,7 +544,7 @@ namespace Definable
 lemma comp₁ {k} {P : M → Prop} {f : (Fin k → M) → M} [hP : DefinablePred L Γ s P] (hf : Semipolynomial L Γ s f) :
     Definable L Γ s (fun v ↦ P (f v)) := by
   rcases hf.bounded with ⟨bf, hbf⟩
-  have : Definable L Γ s (fun v ↦ ∃ z ≤ Semiterm.val! M v id bf, z = f v ∧ P z) :=
+  have : Definable L Γ s (fun v ↦ ∃ z ≤ Semiterm.valm M v id bf, z = f v ∧ P z) :=
     bex_le (by simp) (and hf.definable $ by rcases hP with ⟨p, hp⟩; exact ⟨⟨p /[#0], by simp⟩, by intro _; simp [hp.eval]⟩)
   exact this.of_iff _ (by
     intro v; constructor
@@ -546,7 +557,7 @@ lemma comp₂ {k} {R : M → M → Prop} {f₁ f₂ : (Fin k → M) → M}
   rcases hf₁.bounded with ⟨bf₁, hbf₁⟩
   rcases hf₂.bounded with ⟨bf₂, hbf₂⟩
   have : Definable L Γ s (fun v ↦
-      ∃ z₁ ≤ Semiterm.val! M v id bf₁, ∃ z₂ ≤ Semiterm.val! M v id bf₂, z₁ = f₁ v ∧ z₂ = f₂ v ∧ R z₁ z₂) :=
+      ∃ z₁ ≤ Semiterm.valm M v id bf₁, ∃ z₂ ≤ Semiterm.valm M v id bf₂, z₁ = f₁ v ∧ z₂ = f₂ v ∧ R z₁ z₂) :=
     bex_le (Semipolynomial.val_id _) <| bex_le (Semipolynomial.val_id' _ _)
       <| and (hf₁.definable.rel.finmap _)
         <| and (by simpa using hf₂.definable.rel.finmap (0 :> (·.succ.succ)))
@@ -563,7 +574,7 @@ lemma comp₃ {k} {R : M → M → M → Prop} {f₁ f₂ f₃ : (Fin k → M) �
   rcases hf₂.bounded with ⟨bf₂, hbf₂⟩
   rcases hf₃.bounded with ⟨bf₃, hbf₃⟩
   have : Definable L Γ s (fun v ↦
-      ∃ z₁ ≤ Semiterm.val! M v id bf₁, ∃ z₂ ≤ Semiterm.val! M v id bf₂, ∃ z₃ ≤ Semiterm.val! M v id bf₃,
+      ∃ z₁ ≤ Semiterm.valm M v id bf₁, ∃ z₂ ≤ Semiterm.valm M v id bf₂, ∃ z₃ ≤ Semiterm.valm M v id bf₃,
         z₁ = f₁ v ∧ z₂ = f₂ v ∧ z₃ = f₃ v ∧ R z₁ z₂ z₃) :=
     bex_le (Semipolynomial.val_id _) <| bex_le (Semipolynomial.val_id' _ _)
       <| bex_le (Semipolynomial.val_id' _ _)
@@ -584,7 +595,7 @@ lemma comp₄ {k} {R : M → M → M → M → Prop} {f₁ f₂ f₃ f₄ : (Fin
   rcases hf₃.bounded with ⟨bf₃, hbf₃⟩
   rcases hf₄.bounded with ⟨bf₄, hbf₄⟩
   have : Definable L Γ s (fun v ↦
-      ∃ z₁ ≤ Semiterm.val! M v id bf₁, ∃ z₂ ≤ Semiterm.val! M v id bf₂, ∃ z₃ ≤ Semiterm.val! M v id bf₃, ∃ z₄ ≤ Semiterm.val! M v id bf₄,
+      ∃ z₁ ≤ Semiterm.valm M v id bf₁, ∃ z₂ ≤ Semiterm.valm M v id bf₂, ∃ z₃ ≤ Semiterm.valm M v id bf₃, ∃ z₄ ≤ Semiterm.valm M v id bf₄,
         z₁ = f₁ v ∧ z₂ = f₂ v ∧ z₃ = f₃ v ∧ z₄ = f₄ v ∧ R z₁ z₂ z₃ z₄) :=
     bex_le (Semipolynomial.val_id _) <| bex_le (Semipolynomial.val_id' _ _) <| bex_le (Semipolynomial.val_id' _ _) <| bex_le (Semipolynomial.val_id' _ _)
         <| and (by simpa using hf₁.definable.rel.finmap (n := k + 4) (3 :> (·.succ.succ.succ.succ)))
@@ -687,12 +698,12 @@ macro "definability" (config)? : tactic =>
 macro "definability?" (config)? : tactic =>
   `(tactic| aesop? (config := { terminal := true }) (rule_sets := [$(Lean.mkIdent `Definability):ident]))
 
-example (c : M) : Semipolynomial₂ L Σ 0 (fun x y : M ↦ c + 2 * x^2) := by definability
+example (c : M) : Semipolynomial₂ L 𝚺 0 (fun x y : M ↦ c + 2 * x^2) := by definability?
 
 example {ex : M → M} [h : ∀ Γ s, DefinableFunction₁ L Γ s ex] (c : M) :
-  DefinableRel L Σ 0 (fun x y : M ↦ ∃ z < x + c * y, ex x = z ∧ ex (x + 1) = 2 * z) := by
+  DefinableRel L 𝚺 0 (fun x y : M ↦ ∃ z < x + c * y, ex x = z ∧ ex (x + 1) = 2 * z) := by
     simp [Function.Graph.iff_left ex]
-    definability
+    definability?
 
 end
 

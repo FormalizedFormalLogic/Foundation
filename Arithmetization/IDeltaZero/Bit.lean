@@ -17,10 +17,10 @@ def Bit (i a : M) : Prop := ∃ p ≤ a, Exponential i p ∧ LenBit p a
 
 instance : Membership M M := ⟨Bit⟩
 
-def bitDef : 𝚺₀-Sentence 2 := ⟨“∃[#0 < #2 + 1] (!Exponential.def [#1, #0] ∧ !lenbitDef [#0, #2])”, by simp⟩
+def bitDef : 𝚺₀-Semisentence 2 := ⟨“∃[#0 < #2 + 1] (!Exponential.def [#1, #0] ∧ !lenbitDef [#0, #2])”, by simp⟩
 
 lemma bit_defined : 𝚺₀-Relation ((· ∈ ·) : M → M → Prop) via bitDef := by
-  intro v; simp [bitDef, lenbit_defined.pval, Exponential.defined.pval, ←le_iff_lt_succ]; rfl
+  intro v; simp [bitDef, lenbit_defined.df.iff, Exponential.defined.df.iff, ←le_iff_lt_succ]; rfl
 
 instance mem_definable : DefinableRel ℒₒᵣ 𝚺 0 ((· ∈ ·) : M → M → Prop) := defined_to_with_param _ bit_defined
 
@@ -44,7 +44,7 @@ variable (Γ : Polarity) (n : ℕ)
   rcases h with ⟨p, hp⟩
   exact ⟨⟨“∃[#0 < !!(Rew.bShift bf) + 1] (!f_graph ∧ ∀[#0 < #1] (!bitDef .[#0, #1] → !((Rew.substs (#0 :> (#·.succ.succ))).hom p)))”,
     by simp; apply Hierarchy.oringEmb; simp⟩,
-    by  intro v; simp [hf_graph.eval, hp.eval, bit_defined.pval, ←le_iff_lt_succ]
+    by  intro v; simp [hf_graph.eval, hp.eval, bit_defined.df.iff, ←le_iff_lt_succ]
         constructor
         · rintro h; exact ⟨f v, hbf v, rfl, fun x _ hx ↦ h x hx⟩
         · rintro ⟨_, _, rfl, h⟩ x hx; exact h x (lt_of_mem hx) hx⟩
@@ -57,7 +57,7 @@ variable (Γ : Polarity) (n : ℕ)
   rcases h with ⟨p, hp⟩
   exact ⟨⟨“∃[#0 < !!(Rew.bShift bf) + 1] (!f_graph ∧ ∃[#0 < #1] (!bitDef .[#0, #1] ∧ !((Rew.substs (#0 :> (#·.succ.succ))).hom p)))”,
     by simp; apply Hierarchy.oringEmb; simp⟩,
-    by  intro v; simp [hf_graph.eval, hp.eval, bit_defined.pval, ←le_iff_lt_succ]
+    by  intro v; simp [hf_graph.eval, hp.eval, bit_defined.df.iff, ←le_iff_lt_succ]
         constructor
         · rintro ⟨x, hx, h⟩; exact ⟨f v, hbf v, rfl, x, lt_of_mem hx, hx, h⟩
         · rintro ⟨_, _, rfl, x, _, hx, h⟩; exact ⟨x, hx, h⟩⟩

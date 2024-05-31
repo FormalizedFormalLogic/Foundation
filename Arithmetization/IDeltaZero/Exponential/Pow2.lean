@@ -16,13 +16,13 @@ variable [M ⊧ₘ* 𝐈open]
 
 def Pow2 (a : M) : Prop := 0 < a ∧ ∀ r ≤ a, 1 < r → r ∣ a → 2 ∣ r
 
-def pow2Def : 𝚺₀-Sentence 1 :=
+def pow2Def : 𝚺₀-Semisentence 1 :=
   ⟨“0 < #0 ∧ ∀[#0 < #1 + 1] (1 < #0 →  !dvdDef [#0, #1] → !dvdDef [2, #0])”, by simp [Hierarchy.pi_zero_iff_sigma_zero]⟩
 
 lemma pow2_defined : 𝚺₀-Predicate (Pow2 : M → Prop) via pow2Def := by
   intro v
   simp [Semiformula.eval_substs, Matrix.comp_vecCons', Matrix.vecHead, Matrix.constant_eq_singleton,
-    Pow2, pow2Def, le_iff_lt_succ, dvd_defined.pval, numeral_eq_natCast]
+    Pow2, pow2Def, le_iff_lt_succ, dvd_defined.df.iff, numeral_eq_natCast]
 
 instance pow2_definable : DefinablePred ℒₒᵣ 𝚺 0 (Pow2 : M → Prop) := defined_to_with_param _ pow2_defined
 
@@ -110,12 +110,12 @@ section LenBit
 /-- $\mathrm{LenBit} (2^i, a) \iff \text{$i$th-bit of $a$ is $1$}$. -/
 def LenBit (i a : M) : Prop := ¬2 ∣ (a / i)
 
-def lenbitDef : 𝚺₀-Sentence 2 :=
+def lenbitDef : 𝚺₀-Semisentence 2 :=
   ⟨“∃[#0 < #2 + 1] (!divDef [#0, #2, #1] ∧ ¬!dvdDef [2, #0])”, by simp⟩
 
 lemma lenbit_defined : 𝚺₀-Relation (LenBit : M → M → Prop) via lenbitDef := by
   intro v; simp[sqrt_graph, lenbitDef, Matrix.vecHead, Matrix.vecTail,
-    div_defined.pval, dvd_defined.pval, LenBit, ←le_iff_lt_succ, numeral_eq_natCast]
+    div_defined.df.iff, dvd_defined.df.iff, LenBit, ←le_iff_lt_succ, numeral_eq_natCast]
   constructor
   · intro h; exact ⟨v 1 / v 0, by simp, rfl, h⟩
   · rintro ⟨z, hz, rfl, h⟩; exact h

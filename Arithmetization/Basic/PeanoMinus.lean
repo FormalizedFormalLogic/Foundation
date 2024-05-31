@@ -1,4 +1,4 @@
-import Arithmetization.Definability.Definability
+import Arithmetization.Definability.Hierarchy
 
 namespace LO.FirstOrder
 
@@ -39,13 +39,13 @@ lemma sub_eq_iff : c = a - b ↔ ((a ≥ b → a = b + c) ∧ (a < b → c = 0))
 
 open Definability
 
-def subDef : 𝚺₀-Sentence 3 :=
-  ⟨“(#2 ≤ #1 → #1 = #2 + #0) ∧ (#1 < #2 → #0 = 0)”, by simp[Hierarchy.pi_zero_iff_sigma_zero]⟩
+def _root_.LO.FirstOrder.Arith.subDef : 𝚺₀-Semisentence 3 :=
+  .mkSigma “(#2 ≤ #1 → #1 = #2 + #0) ∧ (#1 < #2 → #0 = 0)” (by simp[Hierarchy.pi_zero_iff_sigma_zero])
 
 lemma sub_defined : 𝚺₀-Function₂ ((· - ·) : M → M → M) via subDef := by
   intro v; simp [subDef, sub_eq_iff]
 
-instance sub_definable (Γ s) : DefinableFunction₂ ℒₒᵣ Γ s ((· - ·) : M → M → M) := Defined.to_definable₀ subDef sub_defined
+instance sub_definable (Γ) : DefinableFunction₂ ℒₒᵣ Γ ((· - ·) : M → M → M) := Defined.to_definable₀ subDef sub_defined
 
 instance sub_polybounded : Bounded₂ ℒₒᵣ ((· - ·) : M → M → M) := ⟨#0, λ _ ↦ by simp⟩
 
@@ -109,7 +109,7 @@ instance : OrderedSub M where
 lemma zero_or_succ (a : M) : a = 0 ∨ ∃ a', a = a' + 1 := by
   rcases zero_le a with (rfl | pos)
   · simp
-  · right; exact ⟨a - 1, by rw [sub_add_self_of_le]; simp [pos_iff_one_le.mp pos]⟩
+  · right; exact ⟨a - 1, by rw [sub_add_self_of_le]; exact pos_iff_one_le.mp pos⟩
 
 lemma pred_lt_self_of_pos (h : 0 < a) : a - 1 < a := by
   rcases zero_or_succ a with (rfl | ⟨a, rfl⟩)
@@ -147,12 +147,12 @@ lemma dvd_iff_bounded {a b : M} : a ∣ b ↔ ∃ c ≤ b, b = a * c := by
     · rintro ⟨c, rfl⟩; exact ⟨c, le_mul_self_of_pos_left (pos_iff_ne_zero.mpr hx), rfl⟩
     · rintro ⟨c, hz, rfl⟩; exact dvd_mul_right a c
 
-def dvdDef : 𝚺₀-Sentence 2 := ⟨“∃[#0 < #2 + 1] #2 = #1 * #0”, by simp⟩
+def dvdDef : 𝚺₀-Semisentence 2 := .mkSigma “∃[#0 < #2 + 1] #2 = #1 * #0” (by simp)
 
 lemma dvd_defined : 𝚺₀-Relation (λ a b : M ↦ a ∣ b) via dvdDef :=
   λ v ↦ by simp[dvd_iff_bounded, Matrix.vecHead, Matrix.vecTail, le_iff_lt_succ, dvdDef]
 
-instance dvd_definable (Γ s) : DefinableRel ℒₒᵣ Γ s ((· ∣ ·) : M → M → Prop) := Defined.to_definable₀ _ dvd_defined
+instance dvd_definable (Γ) : DefinableRel ℒₒᵣ Γ ((· ∣ ·) : M → M → Prop) := Defined.to_definable₀ _ dvd_defined
 
 end Dvd
 
@@ -216,13 +216,13 @@ lemma prime_iff_bounded {a : M} : Prime a ↔ 1 < a ∧ ∀ b ≤ a, (b ∣ a �
 def IsPrime (a : M) : Prop := 1 < a ∧ ∀ b ≤ a, (b ∣ a → b = 1 ∨ b = a)
 -- TODO: prove IsPrime a ↔ Prime a
 
-def isPrimedef : 𝚺₀-Sentence 1 :=
-  ⟨“1 < #0” ⋏ (∀[“#0 < #1 + 1”] dvdDef/[#0, #1] ⟶ “#0 = 1 ∨ #0 = #1”), by simp [Hierarchy.pi_zero_iff_sigma_zero]⟩
+def isPrimedef : 𝚺₀-Semisentence 1 :=
+  .mkSigma (“1 < #0” ⋏ (∀[“#0 < #1 + 1”] dvdDef.val/[#0, #1] ⟶ “#0 = 1 ∨ #0 = #1”)) (by simp [Hierarchy.pi_zero_iff_sigma_zero])
 
 lemma isPrime_defined : 𝚺₀-Predicate (λ a : M ↦ IsPrime a) via isPrimedef := by
   intro v
   simp [Semiformula.eval_substs, Matrix.comp_vecCons', Matrix.vecHead, Matrix.constant_eq_singleton,
-    IsPrime, isPrimedef, le_iff_lt_succ, dvd_defined.pval]
+    IsPrime, isPrimedef, le_iff_lt_succ, dvd_defined.df.iff]
 
 end Prime
 

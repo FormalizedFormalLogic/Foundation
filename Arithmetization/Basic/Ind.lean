@@ -34,7 +34,7 @@ noncomputable section
 
 namespace Model
 
-variable {M : Type} [Zero M] [One M] [Add M] [Mul M] [LT M]
+variable {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M]
 
 section
 
@@ -66,31 +66,31 @@ end IndScheme
 
 section neg
 
-variable (Γ : Polarity) (s : ℕ) [M ⊧ₘ* Theory.indScheme L (Arith.Hierarchy Γ s)]
+variable (Γ : Polarity) (m : ℕ) [M ⊧ₘ* Theory.indScheme L (Arith.Hierarchy Γ m)]
 
 @[elab_as_elim]
-lemma induction_h {P : M → Prop} (hP : DefinablePred L Γ s P)
+lemma induction_h {P : M → Prop} (hP : DefinablePred L (Γ, m) P)
     (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x :=
-  induction (P := P) (C := Hierarchy Γ s) (L := L) (by
+  induction (P := P) (C := Hierarchy Γ m) (L := L) (by
     rcases hP with ⟨p, hp⟩
     haveI : Inhabited M := Classical.inhabited_of_nonempty'
     exact ⟨p.val.fvEnumInv, (Rew.rewriteMap p.val.fvEnum).hom p.val, by simp [hp],
       by  intro x; simp [Semiformula.eval_rewriteMap]
           have : (Semiformula.Evalm M ![x] fun x => p.val.fvEnumInv (p.val.fvEnum x)) p.val ↔ (Semiformula.Evalm M ![x] id) p.val :=
             Semiformula.eval_iff_of_funEqOn _ (by intro x hx; simp [Semiformula.fvEnumInv_fvEnum hx])
-          simp [this, hp.eval]⟩)
+          simp [this, hp.df.iff]⟩)
     zero succ
 
 @[elab_as_elim]
-lemma order_induction_h {P : M → Prop} (hP : DefinablePred L Γ s P)
+lemma order_induction_h {P : M → Prop} (hP : DefinablePred L (Γ, m) P)
     (ind : ∀ x, (∀ y < x, P y) → P x) : ∀ x, P x := by
   suffices ∀ x, ∀ y < x, P y by
     intro x; exact this (x + 1) x (by simp only [lt_add_iff_pos_right, lt_one_iff_eq_zero])
   intro x; induction x using induction_h
   · exact Γ
-  · exact s
-  · suffices DefinablePred L Γ s fun x => ∀ y < x, P y by exact this
-    exact Definable.ball_lt (L := L) (by simp) (Definable.comp₁ (by simp))
+  · exact m
+  · suffices DefinablePred L (Γ, m) fun x => ∀ y < x, P y by exact this
+    exact Definable.ball_lt (L := L) (by simp) (hP.retraction ![0])
   case zero => simp
   case succ x IH =>
     intro y hxy
@@ -100,7 +100,7 @@ lemma order_induction_h {P : M → Prop} (hP : DefinablePred L Γ s P)
   case inst => exact inferInstance
   case inst => exact inferInstance
 
-private lemma neg_induction_h {P : M → Prop} (hP : DefinablePred L Γ s P)
+private lemma neg_induction_h {P : M → Prop} (hP : DefinablePred L (Γ, m) P)
     (nzero : ¬P 0) (nsucc : ∀ x, ¬P x → ¬P (x + 1)) : ∀ x, ¬P x := by
   by_contra A
   have : ∃ x, P x := by simpa using A
@@ -108,8 +108,8 @@ private lemma neg_induction_h {P : M → Prop} (hP : DefinablePred L Γ s P)
   have : ∀ x ≤ a, P (a - x) := by
     intro x; induction x using induction_h
     · exact Γ
-    · exact s
-    · suffices DefinablePred L Γ s fun x => x ≤ a → P (a - x) by exact this
+    · exact m
+    · suffices DefinablePred L (Γ, m) fun x => x ≤ a → P (a - x) by exact this
       definability
     case zero =>
       intro _; simpa using ha
@@ -125,7 +125,7 @@ private lemma neg_induction_h {P : M → Prop} (hP : DefinablePred L Γ s P)
   have : P 0 := by simpa using this a (by rfl)
   contradiction
 
-lemma models_indScheme_alt : M ⊧ₘ* Theory.indScheme L (Arith.Hierarchy Γ.alt s) := by
+lemma models_indScheme_alt : M ⊧ₘ* Theory.indScheme L (Arith.Hierarchy Γ.alt m) := by
   simp [Theory.indH, Theory.indScheme]
   rintro _ p hp rfl
   simp [models_iff, succInd, Semiformula.eval_rew_q,
@@ -135,14 +135,14 @@ lemma models_indScheme_alt : M ⊧ₘ* Theory.indScheme L (Arith.Hierarchy Γ.al
     (∀ x, Semiformula.Evalm M ![x] v p → Semiformula.Evalm M ![x + 1] v p) →
       ∀ x, Semiformula.Evalm M ![x] v p := by
     simpa using
-      neg_induction_h Γ s (P := λ x ↦ ¬Semiformula.Evalm M ![x] v p)
-        ⟨⟨~(Rew.rewriteMap v).hom p, by simpa using hp⟩,
-          by intro x; simp [←Matrix.constant_eq_singleton', Semiformula.eval_rewriteMap]⟩
+      neg_induction_h (L := L) Γ m (P := λ x ↦ ¬Semiformula.Evalm M ![x] v p)
+        (.mkPolarity (~(Rew.rewriteMap v).hom p) (by simpa using hp)
+        (by intro x; simp [←Matrix.constant_eq_singleton', Semiformula.eval_rewriteMap]))
   exact this H0 Hsucc x
 
-instance : M ⊧ₘ* Theory.indScheme L (Arith.Hierarchy Γ.alt s) := models_indScheme_alt Γ s
+instance : M ⊧ₘ* Theory.indScheme L (Arith.Hierarchy Γ.alt m) := models_indScheme_alt Γ m
 
-lemma least_number_h {P : M → Prop} (hP : DefinablePred L Γ s P)
+lemma least_number_h {P : M → Prop} (hP : DefinablePred L (Γ, m) P)
     {x} (h : P x) : ∃ y, P y ∧ ∀ z < y, ¬P z := by
   by_contra A
   have A : ∀ z, P z → ∃ w < z, P w := by simpa using A
@@ -150,8 +150,8 @@ lemma least_number_h {P : M → Prop} (hP : DefinablePred L Γ s P)
     intro z
     induction z using induction_h
     · exact Γ.alt
-    · exact s
-    · suffices DefinablePred L (Polarity.alt Γ) s fun z => ∀ w < z, ¬P w by exact this
+    · exact m
+    · suffices DefinablePred L (Γ.alt, m) fun z ↦ ∀ w < z, ¬P w by exact this
       definability
     case zero => simp
     case succ x IH =>
@@ -167,11 +167,11 @@ lemma least_number_h {P : M → Prop} (hP : DefinablePred L Γ s P)
 
 end neg
 
-instance [M ⊧ₘ* Theory.indScheme L (Arith.Hierarchy 𝚺 s)] :
-    M ⊧ₘ* Theory.indScheme L (Arith.Hierarchy Γ s) := by
+instance [M ⊧ₘ* Theory.indScheme L (Arith.Hierarchy 𝚺 m)] :
+    M ⊧ₘ* Theory.indScheme L (Arith.Hierarchy Γ m) := by
   rcases Γ
   · exact inferInstance
-  · exact models_indScheme_alt 𝚺 s
+  · exact models_indScheme_alt 𝚺 m
 
 end
 
@@ -199,27 +199,30 @@ instance [M ⊧ₘ* 𝐈𝚷 n] : M ⊧ₘ* 𝐈𝚺 n :=
 lemma models_iSigma_iff_models_iPi {n} : M ⊧ₘ* 𝐈𝚺 n ↔ M ⊧ₘ* 𝐈𝚷 n :=
   ⟨fun _ ↦ inferInstance, fun _ ↦ inferInstance⟩
 
-instance [M ⊧ₘ* 𝐈𝚺 n] : M ⊧ₘ* 𝐈𝐍𝐃Γ n := by rcases Γ <;> exact inferInstance
+instance [M ⊧ₘ* 𝐈𝚺 n] : M ⊧ₘ* 𝐈𝐍𝐃Γ n :=
+  match Γ with
+  | 𝚺 => inferInstance
+  | 𝚷 => inferInstance
 
 @[elab_as_elim] lemma induction_iSigmaZero [M ⊧ₘ* 𝐈𝚺₀]
-    {P : M → Prop} (hP : DefinablePred ℒₒᵣ 𝚺 0 P)
+    {P : M → Prop} (hP : DefinablePred ℒₒᵣ 𝚺₀ P)
     (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x := induction_h 𝚺 0 hP zero succ
 
 @[elab_as_elim] lemma induction_iSigmaOne [M ⊧ₘ* 𝐈𝚺₁]
-    {P : M → Prop} (hP : DefinablePred ℒₒᵣ 𝚺 1 P)
+    {P : M → Prop} (hP : DefinablePred ℒₒᵣ 𝚺₁ P)
     (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x := induction_h 𝚺 1 hP zero succ
 
 @[elab_as_elim] lemma order_induction_iSigmaZero [M ⊧ₘ* 𝐈𝚺₀]
-    {P : M → Prop} (hP : DefinablePred ℒₒᵣ 𝚺 0 P)
+    {P : M → Prop} (hP : DefinablePred ℒₒᵣ 𝚺₀ P)
     (ind : ∀ x, (∀ y < x, P y) → P x) : ∀ x, P x :=
   order_induction_h 𝚺 0 hP ind
 
 @[elab_as_elim] lemma order_induction_iSigmaOne [M ⊧ₘ* 𝐈𝚺₁]
-    {P : M → Prop} (hP : DefinablePred ℒₒᵣ 𝚺 1 P)
+    {P : M → Prop} (hP : DefinablePred ℒₒᵣ 𝚺₁ P)
     (ind : ∀ x, (∀ y < x, P y) → P x) : ∀ x, P x :=
   order_induction_h 𝚺 1 hP ind
 
-lemma least_number_iSigmaZero [M ⊧ₘ* 𝐈𝚺₀] {P : M → Prop} (hP : DefinablePred ℒₒᵣ 𝚺 0 P)
+lemma least_number_iSigmaZero [M ⊧ₘ* 𝐈𝚺₀] {P : M → Prop} (hP : DefinablePred ℒₒᵣ 𝚺₀ P)
     {x} (h : P x) : ∃ y, P y ∧ ∀ z < y, ¬P z :=
   least_number_h 𝚺 0 hP h
 

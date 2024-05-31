@@ -22,7 +22,7 @@ namespace Model
 variable {M : Type} [Zero M] [One M] [Add M] [Mul M] [LT M]
 
 lemma models_Omega₁_iff [M ⊧ₘ* 𝐈𝚫₀] : M ⊧ₘ omegaOneAxiom ↔ ∀ x : M, ∃ y, Exponential (‖x‖^2) y := by
-  simp [models_def, omegaOneAxiom, length_defined.pval, Exponential.defined.pval, sq, ←le_iff_lt_succ]
+  simp [models_def, omegaOneAxiom, length_defined.df.iff, Exponential.defined.df.iff, sq, ←le_iff_lt_succ]
   constructor
   · intro h x
     rcases h x with ⟨y, _, _, rfl, h⟩; exact ⟨y, h⟩
@@ -63,11 +63,11 @@ lemma exponential_hash (a b : M) : Exponential (‖a‖ * ‖b‖) (a # b) := Cl
 
 lemma exponential_hash_one (a : M) : Exponential ‖a‖ (a # 1) := by simpa using exponential_hash a 1
 
-def hashDef : 𝚺₀-Sentence 3 :=
+def hashDef : 𝚺₀-Semisentence 3 :=
   ⟨“∃[#0 < #2 + 1] ∃[#0 < #4 + 1] (!lengthDef [#1, #3] ∧ !lengthDef [#0, #4] ∧ !Exponential.def [#1 * #0, #2])”, by simp⟩
 
 lemma hash_defined : 𝚺₀-Function₂ (Hash.hash : M → M → M) via hashDef := by
-  intro v; simp[hashDef, length_defined.pval, Exponential.defined.pval, ←le_iff_lt_succ]
+  intro v; simp[hashDef, length_defined.df.iff, Exponential.defined.df.iff, ←le_iff_lt_succ]
   constructor
   · intro h; exact ⟨‖v 1‖, by simp, ‖v 2‖, by simp, rfl, rfl, by rw [h]; exact exponential_hash _ _⟩
   · rintro ⟨_, _, _, _, rfl, rfl, h⟩; exact h.uniq (exponential_hash (v 1) (v 2))

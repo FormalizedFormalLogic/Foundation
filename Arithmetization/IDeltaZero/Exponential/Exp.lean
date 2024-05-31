@@ -21,12 +21,12 @@ lemma ext_graph (a b c : M) : a = ext b c ↔ ∃ x ≤ c, x = c / b ∧ a = x %
   · rintro rfl; exact ⟨c / b, by simp, rfl, by rfl⟩
   · rintro ⟨_, _, rfl, rfl⟩; simp
 
-def extDef : 𝚺₀-Sentence 3 :=
+def extDef : 𝚺₀-Semisentence 3 :=
   ⟨“∃[#0 < #3 + 1] (!divDef [#0, #3, #2] ∧ !remDef [#1, #0, #2])”, by simp⟩
 
 lemma ext_defined : 𝚺₀-Function₂ (λ a b : M ↦ ext a b) via extDef := by
   intro v; simp [Matrix.vecHead, Matrix.vecTail, extDef,
-    ext_graph, Semiformula.eval_substs, div_defined.pval, rem_defined.pval, le_iff_lt_succ]
+    ext_graph, Semiformula.eval_substs, div_defined.df.iff, rem_defined.df.iff, le_iff_lt_succ]
 
 instance ext_definable : DefinableFunction₂ ℒₒᵣ 𝚺 0 (ext : M → M → M) := defined_to_with_param _ ext_defined
 
@@ -79,7 +79,7 @@ lemma Exponential.Seqₛ.iff (y X Y : M) :
       · exact Or.inl ⟨by simp [hx, hy], by simp [hx, hy]⟩
       · exact Or.inr ⟨by simp [hx, hy], by simp [hx, hy]⟩⟩
 
-def Exponential.Seqₛ.def : 𝚺₀-Sentence 3 := ⟨
+def Exponential.Seqₛ.def : 𝚺₀-Semisentence 3 := ⟨
   “∀[#0 < #1 + 1](#0 ≠ 2 → !ppow2Def [#0] →
     ( ∃[#0 < #3 + 1] (!extDef [#0, #1, #3] ∧ !extDef [2 * #0, #1 * #1, #3]) ∧
       ∃[#0 < #4 + 1] (!extDef [#0, #1, #4] ∧ !extDef [#0 * #0, #1 * #1, #4]) ) ∨
@@ -87,8 +87,8 @@ def Exponential.Seqₛ.def : 𝚺₀-Sentence 3 := ⟨
       ∃[#0 < #4 + 1] (!extDef [#0, #1, #4] ∧ !extDef [2 * (#0 * #0), #1 * #1, #4])))”, by simp⟩
 
 lemma Exponential.Seqₛ.defined : 𝚺₀-Relation₃ (Exponential.Seqₛ : M → M → M → Prop) via Exponential.Seqₛ.def := by
-  intro v; simp [Exponential.Seqₛ.iff, Exponential.Seqₛ.def, ppow2_defined.pval,
-    ext_defined.pval, ←le_iff_lt_succ, sq, numeral_eq_natCast]
+  intro v; simp [Exponential.Seqₛ.iff, Exponential.Seqₛ.def, ppow2_defined.df.iff,
+    ext_defined.df.iff, ←le_iff_lt_succ, sq, numeral_eq_natCast]
 
 lemma Exponential.graph_iff (x y : M) :
     Exponential x y ↔
@@ -103,7 +103,7 @@ lemma Exponential.graph_iff (x y : M) :
       · exact Or.inl H
       · exact Or.inr ⟨X, bX, Y, bY, ⟨H₀.1.symm, H₀.2.symm⟩, Hₛ, ⟨u, hu, ne2, ppu, hX.symm, hY.symm⟩⟩⟩
 
-def Exponential.def : 𝚺₀-Sentence 2 := ⟨
+def Exponential.def : 𝚺₀-Semisentence 2 := ⟨
   “(#0 = 0 ∧ #1 = 1) ∨ (
     ∃[#0 < #2 * #2 * #2 * #2 + 1] ∃[#0 < #3 * #3 * #3 * #3 + 1] (
       (!extDef [1, 4, #1] ∧ !extDef [2, 4, #0]) ∧
@@ -111,8 +111,8 @@ def Exponential.def : 𝚺₀-Sentence 2 := ⟨
       ∃[#0 < #4 * #4 + 1] (#0 ≠ 2 ∧ !ppow2Def [#0] ∧ !extDef [#3, #0, #2] ∧!extDef [#4, #0, #1])))”, by simp⟩
 
 lemma Exponential.defined : 𝚺₀-Relation (Exponential : M → M → Prop) via Exponential.def := by
-  intro v; simp [Exponential.graph_iff, Exponential.def, ppow2_defined.pval, ext_defined.pval,
-    Exponential.Seqₛ.defined.pval, ←le_iff_lt_succ, pow_four, sq, numeral_eq_natCast]
+  intro v; simp [Exponential.graph_iff, Exponential.def, ppow2_defined.df.iff, ext_defined.df.iff,
+    Exponential.Seqₛ.defined.df.iff, ←le_iff_lt_succ, pow_four, sq, numeral_eq_natCast]
 
 instance exponential_definable : DefinableRel ℒₒᵣ 𝚺 0 (Exponential : M → M → Prop) := defined_to_with_param _ Exponential.defined
 
@@ -710,12 +710,12 @@ lemma exponential_exp (a : M) : Exponential a (exp a) := Classical.choose!_spec 
 
 lemma exponential_graph {a b : M} : a = exp b ↔ Exponential b a := Classical.choose!_eq_iff _
 
-def expDef : 𝚺₀-Sentence 2 := ⟨“!Exponential.def [#1, #0]”, by simp⟩
+def expDef : 𝚺₀-Semisentence 2 := ⟨“!Exponential.def [#1, #0]”, by simp⟩
 
 -- #eval expDef.val
 
 lemma exp_defined_deltaZero : 𝚺₀-Function₁ (Exp.exp : M → M) via expDef := by
-  intro v; simp [expDef, exponential_graph, Exponential.defined.pval]
+  intro v; simp [expDef, exponential_graph, Exponential.defined.df.iff]
 
 instance exp_definable_deltaZero : DefinableFunction₁ ℒₒᵣ 𝚺 0 (Exp.exp : M → M) := defined_to_with_param _ exp_defined_deltaZero
 

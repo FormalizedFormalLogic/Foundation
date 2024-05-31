@@ -19,7 +19,7 @@ lemma mem_iff_lenBit_exp (i a : M) : i ∈ a ↔ LenBit (exp i) a :=
 def bitDef : 𝚺₀(exp)-Sentence 2 := ⟨“!(lenbitDef.extd ℒₒᵣ(exp)) [exp #0, #1]”, by simp⟩
 
 lemma bit_defined : DefinedRel ℒₒᵣ(exp) 𝚺 0 ((· ∈ ·) : M → M → Prop) bitDef := by
-  intro v; simp [bitDef, lenbit_defined.pval, exp_defined_deltaZero.pval, ←le_iff_lt_succ, mem_iff_lenBit_exp]
+  intro v; simp [bitDef, lenbit_defined.df.iff, exp_defined_deltaZero.df.iff, ←le_iff_lt_succ, mem_iff_lenBit_exp]
 
 -- no longer needed
 instance mem_definable : DefinableRel ℒₒᵣ(exp) 𝚺 0 ((· ∈ ·) : M → M → Prop) := defined_to_with_param _ bit_defined
@@ -55,7 +55,7 @@ variable (Γ : Polarity) (n : ℕ)
   rcases h with ⟨p, hp⟩
   exact ⟨⟨“∃[#0 < !!(Rew.bShift bf) + 1] (!f_graph ∧ ∀[#0 < #1] (!bitDef.[#0, #1] → !((Rew.substs (#0 :> (#·.succ.succ))).hom p)))”,
     by simp⟩,
-    by  intro v; simp [hf_graph.eval, hp.eval, bit_defined.pval, ←le_iff_lt_succ]
+    by  intro v; simp [hf_graph.eval, hp.eval, bit_defined.df.iff, ←le_iff_lt_succ]
         constructor
         · rintro h; exact ⟨f v, hbf v, rfl, fun x _ hx ↦ h x hx⟩
         · rintro ⟨_, _, rfl, h⟩ x hx; exact h x (lt_of_mem hx) hx⟩
@@ -68,7 +68,7 @@ variable (Γ : Polarity) (n : ℕ)
   rcases h with ⟨p, hp⟩
   exact ⟨⟨“∃[#0 < !!(Rew.bShift bf) + 1] (!f_graph ∧ ∃[#0 < #1] (!bitDef .[#0, #1] ∧ !((Rew.substs (#0 :> (#·.succ.succ))).hom p)))”,
     by simp⟩,
-    by  intro v; simp [hf_graph.eval, hp.eval, bit_defined.pval, ←le_iff_lt_succ]
+    by  intro v; simp [hf_graph.eval, hp.eval, bit_defined.df.iff, ←le_iff_lt_succ]
         constructor
         · rintro ⟨x, hx, h⟩; exact ⟨f v, hbf v, rfl, x, lt_of_mem hx, hx, h⟩
         · rintro ⟨_, _, rfl, x, _, hx, h⟩; exact ⟨x, hx, h⟩⟩
@@ -131,7 +131,7 @@ instance : HasSubset M := ⟨fun a b ↦ ∀ ⦃i⦄, i ∈ a → i ∈ b⟩
 def bitSubsetDef : 𝚺₀(exp)-Sentence 2 := ⟨“∀[#0 < #1] (!bitDef [#0, #1] → !bitDef [#0, #2])”, by simp⟩
 
 lemma bitSubset_defined : DefinedRel ℒₒᵣ(exp) 𝚺 0 ((· ⊆ ·) : M → M → Prop) bitSubsetDef := by
-  intro v; simp [bitSubsetDef, bit_defined.pval]
+  intro v; simp [bitSubsetDef, bit_defined.df.iff]
   exact ⟨by intro h x _ hx; exact h hx, by intro h x hx; exact h x (lt_of_mem hx) hx⟩
 
 instance bitSubset_definable : DefinableRel ℒₒᵣ(exp) 𝚺 0 ((· ⊆ ·) : M → M → Prop) := Defined.to_definable₀ _ bitSubset_defined

@@ -62,6 +62,28 @@ notation "‖" x "‖" => Length.length x
 
 namespace LO
 
+namespace Polarity
+
+variable {α : Type*} [SigmaSymbol α] [PiSymbol α]
+
+protected def coe : Polarity → α
+ | 𝚺 => 𝚺
+ | 𝚷 => 𝚷
+
+instance : Coe Polarity α := ⟨Polarity.coe⟩
+
+@[simp] lemma coe_sigma : ((𝚺 : Polarity) : α) = 𝚺 := rfl
+
+@[simp] lemma coe_pi : ((𝚷 : Polarity) : α) = 𝚷 := rfl
+
+end Polarity
+
+namespace SigmaPiDelta
+
+@[simp] lemma alt_coe (Γ : Polarity) : SigmaPiDelta.alt Γ = (Γ.alt : SigmaPiDelta) := by cases Γ <;> simp
+
+end SigmaPiDelta
+
 namespace FirstOrder
 
 namespace Arith
@@ -111,11 +133,11 @@ section model
 
 variable {T : Theory ℒₒᵣ} [𝐄𝐐 ≼ T]
 
-variable (M : Type) [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* T]
+variable (M : Type*) [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* T]
 
 lemma oring_sound {σ : Sentence ℒₒᵣ} (h : T ⊢! σ) : M ⊧ₘ σ := (consequence_iff' (T := T)).mp (LO.Sound.sound h) M
 
-instance (Γ n) [M ⊧ₘ* 𝐈𝐍𝐃Γ n] :
+instance indScheme_of_indH (Γ n) [M ⊧ₘ* 𝐈𝐍𝐃Γ n] :
     M ⊧ₘ* Theory.indScheme ℒₒᵣ (Arith.Hierarchy Γ n) := models_indScheme_of_models_indH Γ n
 
 end model
@@ -146,7 +168,7 @@ lemma bex_closure_succ (p : Fin (n + 1) → Semiformula L ξ 1) (q : Semiformula
 
 namespace Semiformula
 
-variable {M : Type _} [Nonempty M] {s : Structure L M}
+variable {M : Type*} [Nonempty M] {s : Structure L M}
 
 variable {n : ℕ} {ε : ξ → M}
 
