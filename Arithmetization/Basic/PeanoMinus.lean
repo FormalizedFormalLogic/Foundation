@@ -1,4 +1,4 @@
-import Arithmetization.Definability.Hierarchy
+import Arithmetization.Definability.Definability
 
 namespace LO.FirstOrder
 
