@@ -78,7 +78,7 @@ https://iehality.github.io/Arithmetization/
     theorem LO.FirstOrder.Arith.Model.Exponential.defined
         {M : Type} [Zero M] [One M] [Add M] [Mul M] [LT M]
         [M ⊧ₘ* 𝐈𝚫₀] :
-        Δ₀-Relation (LO.FirstOrder.Arith.Model.Exponential : M → M → Prop) via LO.FirstOrder.Arith.Model.Exponential.def
+        𝚺₀-Relation (LO.FirstOrder.Arith.Model.Exponential : M → M → Prop) via LO.FirstOrder.Arith.Model.Exponential.def
     ```
 
   - [Representation of $\mathbf{\Delta_0}$ definition of exponential](https://github.com/iehality/Arithmetization/blob/master/Arithmetization/IDeltaZero/Exponential/exp.pdf)
@@ -88,7 +88,7 @@ https://iehality.github.io/Arithmetization/
     theorem LO.FirstOrder.Arith.Model.nuon_defined
         {M : Type} [Zero M] [One M] [Add M] [Mul M] [LT M]
         [M ⊧ₘ* 𝐈𝚫₀ + 𝛀₁]  :
-        Δ₀-Function₁ LO.FirstOrder.Arith.Model.nuon via LO.FirstOrder.Arith.Model.nuonDef
+        𝚺₀-Function₁ LO.FirstOrder.Arith.Model.nuon via LO.FirstOrder.Arith.Model.nuonDef
     ```
 
 ## References
