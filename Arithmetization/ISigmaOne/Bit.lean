@@ -19,15 +19,15 @@ def Bit (i a : M) : Prop := LenBit (exp i) a
 
 instance : Membership M M := ⟨Bit⟩
 
-def bitDef : Δ₀-Sentence 2 := ⟨“∃[#0 < #2 + 1] (!expDef [#0, #1] ∧ !lenbitDef [#0, #2])”, by simp⟩
+def bitDef : 𝚺₀-Sentence 2 := ⟨“∃[#0 < #2 + 1] (!expDef [#0, #1] ∧ !lenbitDef [#0, #2])”, by simp⟩
 
-lemma bit_defined : Δ₀-Relation ((· ∈ ·) : M → M → Prop) via bitDef := by
+lemma bit_defined : 𝚺₀-Relation ((· ∈ ·) : M → M → Prop) via bitDef := by
   intro v; simp [bitDef, lenbit_defined.pval, exp_defined_deltaZero.pval, ←le_iff_lt_succ]
   constructor
   · intro h; exact ⟨exp (v 0), by simp [h.le], rfl, h⟩
   · rintro ⟨_, _, rfl, h⟩; exact h
 
-@[instance, definability] def mem_definable : DefinableRel ℒₒᵣ Σ 0 ((· ∈ ·) : M → M → Prop) := defined_to_with_param _ bit_defined
+@[instance, definability] def mem_definable : DefinableRel ℒₒᵣ 𝚺 0 ((· ∈ ·) : M → M → Prop) := defined_to_with_param _ bit_defined
 
 open Classical in
 noncomputable def bitInsert (i a : M) : M := if i ∈ a then a else a + exp i
@@ -133,13 +133,13 @@ lemma lt_exp_iff {a i : M} : a < exp i ↔ ∀ j ∈ a, j < i :=
 
 instance : HasSubset M := ⟨fun a b ↦ ∀ ⦃i⦄, i ∈ a → i ∈ b⟩
 
-def bitSubsetDef : Δ₀-Sentence 2 := ⟨“∀[#0 < #1] (!bitDef [#0, #1] → !bitDef [#0, #2])”, by simp⟩
+def bitSubsetDef : 𝚺₀-Sentence 2 := ⟨“∀[#0 < #1] (!bitDef [#0, #1] → !bitDef [#0, #2])”, by simp⟩
 
-lemma bitSubset_defined : Δ₀-Relation ((· ⊆ ·) : M → M → Prop) via bitSubsetDef := by
+lemma bitSubset_defined : 𝚺₀-Relation ((· ⊆ ·) : M → M → Prop) via bitSubsetDef := by
   intro v; simp [bitSubsetDef, bit_defined.pval]
   exact ⟨by intro h x _ hx; exact h hx, by intro h x hx; exact h x (lt_of_mem hx) hx⟩
 
-instance bitSubset_definable : DefinableRel ℒₒᵣ Σ 0 ((· ⊆ ·) : M → M → Prop) := defined_to_with_param₀ _ bitSubset_defined
+instance bitSubset_definable : DefinableRel ℒₒᵣ 𝚺 0 ((· ⊆ ·) : M → M → Prop) := Defined.to_definable₀ _ bitSubset_defined
 
 lemma mem_exp_add_succ_sub_one (i j : M) : i ∈ exp (i + j + 1) - 1 := by
   have : exp (i + j + 1) - 1 = (exp j - 1) * exp (i + 1) + exp i + (exp i - 1) := calc
@@ -205,7 +205,7 @@ end ISigma₁
 
 section
 
-variable {n : ℕ} [Fact (1 ≤ n)] [M ⊧ₘ* 𝐈𝐍𝐃Σ n]
+variable {n : ℕ} [Fact (1 ≤ n)] [M ⊧ₘ* 𝐈𝐍𝐃𝚺 n]
 
 theorem finset_comprehension {P : M → Prop} (hP : Γ(n)-Predicate P) (a : M) :
     haveI : M ⊧ₘ* 𝐈𝚺₁ := mod_iSigma_of_le (show 1 ≤ n from Fact.out)
@@ -291,7 +291,7 @@ theorem finite_comprehension₁! {P : M → Prop} (hP : Γ(1)-Predicate P) (fin 
 
 lemma domain_exists_unique (s : M) :
     ∃! d : M, ∀ x, x ∈ d ↔ ∃ y, ⟪x, y⟫ ∈ s := by
-  have : (Π)(1)-Predicate fun x ↦ ∃ y, ⟪x, y⟫ ∈ s :=
+  have : (𝚷)(1)-Predicate fun x ↦ ∃ y, ⟪x, y⟫ ∈ s :=
     DefinablePred.of_iff (fun x ↦ ∃ y < s, ⟪x, y⟫ ∈ s)
       (fun x ↦ ⟨by rintro ⟨y, hy⟩; exact ⟨y, lt_of_le_of_lt (le_pair_right x y) (lt_of_mem hy), hy⟩,
                 by rintro ⟨y, _, hy⟩; exact ⟨y, hy⟩⟩)
@@ -302,7 +302,7 @@ lemma domain_exists_unique (s : M) :
 
 lemma range_exists_unique (s : M) :
     ∃! r : M, ∀ y, y ∈ r ↔ ∃ x, ⟪x, y⟫ ∈ s := by
-  have : (Π)(1)-Predicate fun y ↦ ∃ x, ⟪x, y⟫ ∈ s :=
+  have : (𝚷)(1)-Predicate fun y ↦ ∃ x, ⟪x, y⟫ ∈ s :=
     DefinablePred.of_iff (fun y ↦ ∃ x < s, ⟪x, y⟫ ∈ s)
       (fun y ↦ ⟨by rintro ⟨x, hy⟩; exact ⟨x, lt_of_le_of_lt (le_pair_left x y) (lt_of_mem hy), hy⟩,
                 by rintro ⟨y, _, hy⟩; exact ⟨y, hy⟩⟩)
@@ -313,7 +313,7 @@ lemma range_exists_unique (s : M) :
 
 lemma union_exists_unique (s t : M) :
     ∃! u : M, ∀ x, (x ∈ u ↔ x ∈ s ∨ x ∈ t) := by
-  have : (Π)(1)-Predicate fun x ↦ x ∈ s ∨ x ∈ t := by definability
+  have : (𝚷)(1)-Predicate fun x ↦ x ∈ s ∨ x ∈ t := by definability
   exact finite_comprehension₁! this
     ⟨s + t, fun i ↦ by
       rintro (H | H)

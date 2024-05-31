@@ -28,15 +28,15 @@ variable [M ⊧ₘ* 𝐄𝐀]
 
 instance : M ⊧ₘ* 𝐈𝚺₀ := models_iSigmaZero_of_models_elementaryArithmetic M
 
-instance exp_definable_oRingExp : DefinableFunction₁ ℒₒᵣ(exp) Σ 0 (Exp.exp : M → M) where
+instance exp_definable_oRingExp : DefinableFunction₁ ℒₒᵣ(exp) 𝚺 0 (Exp.exp : M → M) where
   definable := ⟨⟨“#0 = exp #1”, by simp⟩, by intro _; simp⟩
 
 instance exp_bounded_oRingExp : Bounded₁ ℒₒᵣ(exp) (Exp.exp : M → M) where
   bounded := ⟨ᵀ“exp #0”, by intro _; simp⟩
 
 @[elab_as_elim] lemma induction_EA
-    {P : M → Prop} (hP : DefinablePred ℒₒᵣ(exp) Σ 0 P)
-    (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x := induction_h Σ 0 hP zero succ
+    {P : M → Prop} (hP : DefinablePred ℒₒᵣ(exp) 𝚺 0 P)
+    (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x := induction_h 𝚺 0 hP zero succ
 
 lemma exponential_exp (a : M) : Exponential a (exp a) := by
   induction a using induction_EA
@@ -77,17 +77,17 @@ instance : Structure.Monotone ℒₒᵣ(exp) M := ⟨
   | 1, Language.Exp.exp   => by simpa using h 0⟩
 
 @[elab_as_elim] lemma order_induction
-    {P : M → Prop} (hP : DefinablePred ℒₒᵣ(exp) Σ 0 P)
+    {P : M → Prop} (hP : DefinablePred ℒₒᵣ(exp) 𝚺 0 P)
     (ind : ∀ x, (∀ y < x, P y) → P x) : ∀ x, P x :=
-  order_induction_h Σ 0 hP ind
+  order_induction_h 𝚺 0 hP ind
 
-lemma least_number {P : M → Prop} (hP : DefinablePred ℒₒᵣ Σ 0 P)
+lemma least_number {P : M → Prop} (hP : DefinablePred ℒₒᵣ 𝚺 0 P)
     {x} (h : P x) : ∃ y, P y ∧ ∀ z < y, ¬P z :=
-  least_number_h Σ 0 hP h
+  least_number_h 𝚺 0 hP h
 
-@[elab_as_elim] lemma hierarchy_polynomial_induction_oRing_pi₁ [M ⊧ₘ* 𝐈𝚷₁] {P : M → Prop} (hP : DefinablePred ℒₒᵣ Π 1 P)
+@[elab_as_elim] lemma hierarchy_polynomial_induction_oRing_pi₁ [M ⊧ₘ* 𝐈𝚷₁] {P : M → Prop} (hP : DefinablePred ℒₒᵣ 𝚷 1 P)
     (zero : P 0) (even : ∀ x > 0, P x → P (2 * x)) (odd : ∀ x, P x → P (2 * x + 1)) : ∀ x, P x :=
-  hierarchy_polynomial_induction Π 1 hP zero even odd
+  hierarchy_polynomial_induction 𝚷 1 hP zero even odd
 
 @[simp] lemma log_exponential (a : M) : log (exp a) = a := (exponential_exp a).log_eq_of_exp
 
@@ -122,9 +122,9 @@ lemma length_mul_exp {a : M} (pos : 0 < a) (i : M) : ‖a * exp i‖ = ‖a‖ +
 lemma exp_le_iff_le_log {i a : M} (pos : 0 < a) : exp i ≤ a ↔ i ≤ log a :=
   ⟨by intro h; simpa using log_monotone h, fun h ↦ le_trans (exp_monotone_le.mpr h) (exp_log_le_self pos)⟩
 
-@[elab_as_elim] lemma polynomial_induction {P : M → Prop} (hP : DefinablePred ℒₒᵣ(exp) Σ 0 P)
+@[elab_as_elim] lemma polynomial_induction {P : M → Prop} (hP : DefinablePred ℒₒᵣ(exp) 𝚺 0 P)
     (zero : P 0) (even : ∀ x > 0, P x → P (2 * x)) (odd : ∀ x, P x → P (2 * x + 1)) : ∀ x, P x :=
-  hierarchy_polynomial_induction Σ 0 hP zero even odd
+  hierarchy_polynomial_induction 𝚺 0 hP zero even odd
 
 end Model.EA
 

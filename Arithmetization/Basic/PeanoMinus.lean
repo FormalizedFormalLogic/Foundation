@@ -6,7 +6,7 @@ namespace Arith
 
 noncomputable section
 
-variable {M : Type} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐏𝐀⁻]
+variable {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐏𝐀⁻]
 
 namespace Model
 
@@ -39,13 +39,13 @@ lemma sub_eq_iff : c = a - b ↔ ((a ≥ b → a = b + c) ∧ (a < b → c = 0))
 
 open Definability
 
-def subDef : Δ₀-Sentence 3 :=
+def subDef : 𝚺₀-Sentence 3 :=
   ⟨“(#2 ≤ #1 → #1 = #2 + #0) ∧ (#1 < #2 → #0 = 0)”, by simp[Hierarchy.pi_zero_iff_sigma_zero]⟩
 
-lemma sub_defined : Δ₀-Function₂ ((· - ·) : M → M → M) via subDef := by
+lemma sub_defined : 𝚺₀-Function₂ ((· - ·) : M → M → M) via subDef := by
   intro v; simp [subDef, sub_eq_iff]
 
-instance sub_definable (Γ s) : DefinableFunction₂ ℒₒᵣ Γ s ((· - ·) : M → M → M) := defined_to_with_param₀ subDef sub_defined
+instance sub_definable (Γ s) : DefinableFunction₂ ℒₒᵣ Γ s ((· - ·) : M → M → M) := Defined.to_definable₀ subDef sub_defined
 
 instance sub_polybounded : Bounded₂ ℒₒᵣ ((· - ·) : M → M → M) := ⟨#0, λ _ ↦ by simp⟩
 
@@ -147,12 +147,12 @@ lemma dvd_iff_bounded {a b : M} : a ∣ b ↔ ∃ c ≤ b, b = a * c := by
     · rintro ⟨c, rfl⟩; exact ⟨c, le_mul_self_of_pos_left (pos_iff_ne_zero.mpr hx), rfl⟩
     · rintro ⟨c, hz, rfl⟩; exact dvd_mul_right a c
 
-def dvdDef : Δ₀-Sentence 2 := ⟨“∃[#0 < #2 + 1] #2 = #1 * #0”, by simp⟩
+def dvdDef : 𝚺₀-Sentence 2 := ⟨“∃[#0 < #2 + 1] #2 = #1 * #0”, by simp⟩
 
-lemma dvd_defined : Δ₀-Relation (λ a b : M ↦ a ∣ b) via dvdDef :=
+lemma dvd_defined : 𝚺₀-Relation (λ a b : M ↦ a ∣ b) via dvdDef :=
   λ v ↦ by simp[dvd_iff_bounded, Matrix.vecHead, Matrix.vecTail, le_iff_lt_succ, dvdDef]
 
-instance dvd_definable (Γ s) : DefinableRel ℒₒᵣ Γ s ((· ∣ ·) : M → M → Prop) := defined_to_with_param₀ _ dvd_defined
+instance dvd_definable (Γ s) : DefinableRel ℒₒᵣ Γ s ((· ∣ ·) : M → M → Prop) := Defined.to_definable₀ _ dvd_defined
 
 end Dvd
 
@@ -216,10 +216,10 @@ lemma prime_iff_bounded {a : M} : Prime a ↔ 1 < a ∧ ∀ b ≤ a, (b ∣ a �
 def IsPrime (a : M) : Prop := 1 < a ∧ ∀ b ≤ a, (b ∣ a → b = 1 ∨ b = a)
 -- TODO: prove IsPrime a ↔ Prime a
 
-def isPrimedef : Δ₀-Sentence 1 :=
+def isPrimedef : 𝚺₀-Sentence 1 :=
   ⟨“1 < #0” ⋏ (∀[“#0 < #1 + 1”] dvdDef/[#0, #1] ⟶ “#0 = 1 ∨ #0 = #1”), by simp [Hierarchy.pi_zero_iff_sigma_zero]⟩
 
-lemma isPrime_defined : Δ₀-Predicate (λ a : M ↦ IsPrime a) via isPrimedef := by
+lemma isPrime_defined : 𝚺₀-Predicate (λ a : M ↦ IsPrime a) via isPrimedef := by
   intro v
   simp [Semiformula.eval_substs, Matrix.comp_vecCons', Matrix.vecHead, Matrix.constant_eq_singleton,
     IsPrime, isPrimedef, le_iff_lt_succ, dvd_defined.pval]

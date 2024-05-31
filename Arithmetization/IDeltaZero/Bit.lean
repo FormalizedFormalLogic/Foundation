@@ -17,12 +17,12 @@ def Bit (i a : M) : Prop := ∃ p ≤ a, Exponential i p ∧ LenBit p a
 
 instance : Membership M M := ⟨Bit⟩
 
-def bitDef : Δ₀-Sentence 2 := ⟨“∃[#0 < #2 + 1] (!Exponential.def [#1, #0] ∧ !lenbitDef [#0, #2])”, by simp⟩
+def bitDef : 𝚺₀-Sentence 2 := ⟨“∃[#0 < #2 + 1] (!Exponential.def [#1, #0] ∧ !lenbitDef [#0, #2])”, by simp⟩
 
-lemma bit_defined : Δ₀-Relation ((· ∈ ·) : M → M → Prop) via bitDef := by
+lemma bit_defined : 𝚺₀-Relation ((· ∈ ·) : M → M → Prop) via bitDef := by
   intro v; simp [bitDef, lenbit_defined.pval, Exponential.defined.pval, ←le_iff_lt_succ]; rfl
 
-instance mem_definable : DefinableRel ℒₒᵣ Σ 0 ((· ∈ ·) : M → M → Prop) := defined_to_with_param _ bit_defined
+instance mem_definable : DefinableRel ℒₒᵣ 𝚺 0 ((· ∈ ·) : M → M → Prop) := defined_to_with_param _ bit_defined
 
 lemma lt_of_mem {i a : M} (h : i ∈ a) : i < a := by
   rcases h with ⟨p, _, hep, hp⟩

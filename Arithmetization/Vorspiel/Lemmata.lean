@@ -14,7 +14,7 @@ variable {L : Language} {M : Type*} [LE M] [Structure L M] [Monotone L M]
 
 lemma term_monotone (t : Semiterm L ξ n) {e₁ e₂ : Fin n → M} {ε₁ ε₂ : ξ → M}
     (he : ∀ i, e₁ i ≤ e₂ i) (hε : ∀ i, ε₁ i ≤ ε₂ i) :
-    t.val! M e₁ ε₁ ≤ t.val! M e₂ ε₂ := by
+    t.valm M e₁ ε₁ ≤ t.valm M e₂ ε₂ := by
   induction t <;> simp [*, Semiterm.val_func]
   case func k f v ih =>
     exact Monotone.monotone f _ _ ih
@@ -181,11 +181,11 @@ lemma pow_four (x : M) : x^4 = x * x * x * x := by rw [← three_add_one_eq_four
 
 lemma pow_four_eq_sq_sq (x : M) : x^4 = (x^2)^2 := by simp [pow_four, sq, mul_assoc]
 
-instance : CovariantClass M M (· * ·) (· ≤ ·) := ⟨by intro; exact mul_le_mul_left⟩
+scoped instance : CovariantClass M M (· * ·) (· ≤ ·) := ⟨by intro; exact mul_le_mul_left⟩
 
-instance : CovariantClass M M (· + ·) (· ≤ ·) := ⟨by intro; simp⟩
+scoped instance : CovariantClass M M (· + ·) (· ≤ ·) := ⟨by intro; simp⟩
 
-instance : CovariantClass M M (Function.swap (· * ·)) (· ≤ ·) := ⟨by intro; exact mul_le_mul_right⟩
+scoped instance : CovariantClass M M (Function.swap (· * ·)) (· ≤ ·) := ⟨by intro; exact mul_le_mul_right⟩
 
 @[simp] lemma one_lt_mul_self_iff {a : M} : 1 < a * a ↔ 1 < a :=
   ⟨(fun h ↦ by push_neg at h ⊢; exact mul_le_one' h h).mtr, fun h ↦ one_lt_mul'' h h⟩

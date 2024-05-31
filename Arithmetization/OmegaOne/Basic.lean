@@ -63,16 +63,16 @@ lemma exponential_hash (a b : M) : Exponential (‖a‖ * ‖b‖) (a # b) := Cl
 
 lemma exponential_hash_one (a : M) : Exponential ‖a‖ (a # 1) := by simpa using exponential_hash a 1
 
-def hashDef : Δ₀-Sentence 3 :=
+def hashDef : 𝚺₀-Sentence 3 :=
   ⟨“∃[#0 < #2 + 1] ∃[#0 < #4 + 1] (!lengthDef [#1, #3] ∧ !lengthDef [#0, #4] ∧ !Exponential.def [#1 * #0, #2])”, by simp⟩
 
-lemma hash_defined : Δ₀-Function₂ (Hash.hash : M → M → M) via hashDef := by
+lemma hash_defined : 𝚺₀-Function₂ (Hash.hash : M → M → M) via hashDef := by
   intro v; simp[hashDef, length_defined.pval, Exponential.defined.pval, ←le_iff_lt_succ]
   constructor
   · intro h; exact ⟨‖v 1‖, by simp, ‖v 2‖, by simp, rfl, rfl, by rw [h]; exact exponential_hash _ _⟩
   · rintro ⟨_, _, _, _, rfl, rfl, h⟩; exact h.uniq (exponential_hash (v 1) (v 2))
 
-instance hash_definable : DefinableFunction₂ ℒₒᵣ Σ 0 (Hash.hash : M → M → M) := defined_to_with_param _ hash_defined
+instance hash_definable : DefinableFunction₂ ℒₒᵣ 𝚺 0 (Hash.hash : M → M → M) := defined_to_with_param _ hash_defined
 
 @[simp] lemma hash_pow2 (a b : M) : Pow2 (a # b) := (exponential_hash a b).range_pow2
 

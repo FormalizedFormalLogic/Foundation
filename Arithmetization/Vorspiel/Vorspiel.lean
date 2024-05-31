@@ -62,52 +62,6 @@ notation "‖" x "‖" => Length.length x
 
 namespace LO
 
-section
-
-variable (F : Type*) [LogicalConnective F] {T U : Set F}
-
-class TheoryCut [System F] where
-  theoryCut {T : Set F} {U : Set F} {p : F} : T ⊢* U → U ⊢ p → T ⊢ p
-
-variable {F}
-
-namespace System
-
-variable [System F]
-
-namespace Subtheory
-
-lemma of_theoryCut [TheoryCut F] (h : U ⊢* T) : T ≾ U := ⟨fun hf ↦ TheoryCut.theoryCut h hf⟩
-
-end Subtheory
-
-lemma provableTheory_iff : T ⊢*! U ↔ ∀ f ∈ U, T ⊢! f :=
-  ⟨by rintro ⟨h⟩ f hf; exact ⟨h hf⟩, fun h ↦ ⟨fun hf ↦ (h _ hf).toProof⟩⟩
-
-end System
-
-namespace Gentzen
-
-variable [Gentzen F] [Gentzen.Cut F]
-
-instance : TheoryCut F := ⟨Gentzen.proofCut⟩
-
-end Gentzen
-
-namespace Complete
-
-variable [𝓑 : System F] {α : Type*} [𝓢 : Semantics F α] [Complete F]
-
-lemma provableTheory_iff : T ⊢*! U ↔ (∀ s, s ⊧* T → s ⊧* U) := by
-  simp [System.provableTheory_iff, ←consequence_iff_provable]
-  constructor
-  · intro h s hs; exact ⟨fun f hf ↦ h f hf hs⟩
-  · intro h f hf s hs; exact (h s hs).realize hf
-
-end Complete
-
-end
-
 namespace FirstOrder
 
 namespace Arith
@@ -155,11 +109,11 @@ end ToString
 
 section model
 
-variable {T : Theory ℒₒᵣ} [𝐄𝐪 ≾ T]
+variable {T : Theory ℒₒᵣ} [𝐄𝐐 ≼ T]
 
 variable (M : Type) [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* T]
 
-lemma oring_sound {σ : Sentence ℒₒᵣ} (h : T ⊢! σ) : M ⊧ₘ σ := consequence_iff'.mp (LO.Sound.sound! h) M
+lemma oring_sound {σ : Sentence ℒₒᵣ} (h : T ⊢! σ) : M ⊧ₘ σ := (consequence_iff' (T := T)).mp (LO.Sound.sound h) M
 
 instance (Γ n) [M ⊧ₘ* 𝐈𝐍𝐃Γ n] :
     M ⊧ₘ* Theory.indScheme ℒₒᵣ (Arith.Hierarchy Γ n) := models_indScheme_of_models_indH Γ n
@@ -197,7 +151,7 @@ variable {M : Type _} [Nonempty M] {s : Structure L M}
 variable {n : ℕ} {ε : ξ → M}
 
 @[simp] lemma eval_ballClosure {p : Fin n → Semiformula L ξ 1} {q : Semiformula L ξ n} :
-    Val s ε (ballClosure p q) ↔ ∀ e : Fin n → M, (∀ i, Eval s ![e i] ε (p i)) → Eval s e ε q := by
+    Evalf s ε (ballClosure p q) ↔ ∀ e : Fin n → M, (∀ i, Eval s ![e i] ε (p i)) → Eval s e ε q := by
   induction' n with n IH
   · simp [Matrix.empty_eq]
   · simp [ball_closure_succ, IH]
@@ -208,7 +162,7 @@ variable {n : ℕ} {ε : ξ → M}
       exact H (x :> e) (Fin.cases (by simpa [Matrix.empty_eq] using hx) (fun i ↦ by simpa using h i))
 
 @[simp] lemma eval_bexClosure {p : Fin n → Semiformula L ξ 1} {q : Semiformula L ξ n} :
-    Val s ε (bexClosure p q) ↔ ∃ e : Fin n → M, (∀ i, Eval s ![e i] ε (p i)) ∧ Eval s e ε q := by
+    Evalf s ε (bexClosure p q) ↔ ∃ e : Fin n → M, (∀ i, Eval s ![e i] ε (p i)) ∧ Eval s e ε q := by
   induction' n with n IH
   · simp [Matrix.empty_eq]
   · simp [bex_closure_succ, IH]

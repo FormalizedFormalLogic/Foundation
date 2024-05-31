@@ -16,13 +16,13 @@ lemma mem_iff_lenBit_exp (i a : M) : i ∈ a ↔ LenBit (exp i) a :=
   ⟨by rintro ⟨p, _, Hp, hpa⟩; simpa [exponential_graph.mpr Hp] using hpa,
    by intro h; exact ⟨exp i, h.le, exponential_exp i, h⟩⟩
 
-def bitDef : Δ₀(exp)-Sentence 2 := ⟨“!(lenbitDef.extd ℒₒᵣ(exp)) [exp #0, #1]”, by simp⟩
+def bitDef : 𝚺₀(exp)-Sentence 2 := ⟨“!(lenbitDef.extd ℒₒᵣ(exp)) [exp #0, #1]”, by simp⟩
 
-lemma bit_defined : DefinedRel ℒₒᵣ(exp) Σ 0 ((· ∈ ·) : M → M → Prop) bitDef := by
+lemma bit_defined : DefinedRel ℒₒᵣ(exp) 𝚺 0 ((· ∈ ·) : M → M → Prop) bitDef := by
   intro v; simp [bitDef, lenbit_defined.pval, exp_defined_deltaZero.pval, ←le_iff_lt_succ, mem_iff_lenBit_exp]
 
 -- no longer needed
-instance mem_definable : DefinableRel ℒₒᵣ(exp) Σ 0 ((· ∈ ·) : M → M → Prop) := defined_to_with_param _ bit_defined
+instance mem_definable : DefinableRel ℒₒᵣ(exp) 𝚺 0 ((· ∈ ·) : M → M → Prop) := defined_to_with_param _ bit_defined
 
 open Classical in
 noncomputable def bitInsert (i a : M) : M := if i ∈ a then a else a + exp i
@@ -128,13 +128,13 @@ lemma lt_exp_iff {a i : M} : a < exp i ↔ ∀ j ∈ a, j < i :=
 
 instance : HasSubset M := ⟨fun a b ↦ ∀ ⦃i⦄, i ∈ a → i ∈ b⟩
 
-def bitSubsetDef : Δ₀(exp)-Sentence 2 := ⟨“∀[#0 < #1] (!bitDef [#0, #1] → !bitDef [#0, #2])”, by simp⟩
+def bitSubsetDef : 𝚺₀(exp)-Sentence 2 := ⟨“∀[#0 < #1] (!bitDef [#0, #1] → !bitDef [#0, #2])”, by simp⟩
 
-lemma bitSubset_defined : DefinedRel ℒₒᵣ(exp) Σ 0 ((· ⊆ ·) : M → M → Prop) bitSubsetDef := by
+lemma bitSubset_defined : DefinedRel ℒₒᵣ(exp) 𝚺 0 ((· ⊆ ·) : M → M → Prop) bitSubsetDef := by
   intro v; simp [bitSubsetDef, bit_defined.pval]
   exact ⟨by intro h x _ hx; exact h hx, by intro h x hx; exact h x (lt_of_mem hx) hx⟩
 
-instance bitSubset_definable : DefinableRel ℒₒᵣ(exp) Σ 0 ((· ⊆ ·) : M → M → Prop) := defined_to_with_param₀ _ bitSubset_defined
+instance bitSubset_definable : DefinableRel ℒₒᵣ(exp) 𝚺 0 ((· ⊆ ·) : M → M → Prop) := Defined.to_definable₀ _ bitSubset_defined
 
 lemma mem_exp_add_succ_sub_one (i j : M) : i ∈ exp (i + j + 1) - 1 := by
   have : exp (i + j + 1) - 1 = (exp j - 1) * exp (i + 1) + exp i + (exp i - 1) := calc
