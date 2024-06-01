@@ -18,3 +18,4 @@ import Arithmetization.OmegaOne.Basic
 import Arithmetization.OmegaOne.Nuon
 
 import Arithmetization.ISigmaOne.Bit
+import Arithmetization.ISigmaOne.HFS

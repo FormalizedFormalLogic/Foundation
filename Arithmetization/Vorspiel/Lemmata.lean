@@ -220,6 +220,10 @@ lemma two_mul_add_one_lt_two_mul_of_lt (h : a < b) : 2 * a + 1 < 2 * b := calc
   2 * a + 1 < 2 * (a + 1) := by simp [mul_add, one_lt_two]
   _         ≤ 2 * b       := by simp [←lt_iff_succ_le, h]
 
+@[simp] lemma le_add_add_left (a b c : M) : a ≤ a + b + c := by simp [add_assoc]
+
+@[simp] lemma le_add_add_right (a b c : M) : b ≤ a + b + c := by simp [add_right_comm a b c]
+
 lemma add_le_cancel (a : M) : AddLECancellable a := by intro b c; simp
 
 open Semiterm

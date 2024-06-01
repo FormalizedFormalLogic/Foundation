@@ -771,14 +771,14 @@ lemma of_iff (Q : (Fin k → M) → Prop) (h : ∀ x, P x ↔ Q x) (H : Definabl
 lemma of_oRing (h : Definable ℒₒᵣ Γ P) : Definable L Γ P := by
   rcases h with ⟨p, hP⟩; exact ⟨p.emb L, hP.emb⟩
 
-lemma of_delta (h : Definable L (𝚫, m) P) (Γ) : Definable L (Γ, m) P := by
+lemma of_delta (h : Definable L (𝚫, m) P) {Γ} : Definable L (Γ, m) P := by
   rcases h with ⟨p, h⟩
   match Γ with
   | 𝚺 => exact ⟨p.sigma, by intro v; simp [HSemiformula.val_sigma, h.df.iff]⟩
   | 𝚷 => exact ⟨p.pi, by intro v; simp [←h.proper v, HSemiformula.val_sigma, h.df.iff]⟩
   | 𝚫 => exact ⟨p, h⟩
 
-instance [Definable L (𝚫, m) P] (Γ) : Definable L (Γ, m) P := of_delta inferInstance _
+instance [Definable L (𝚫, m) P] (Γ) : Definable L (Γ, m) P := of_delta inferInstance
 
 lemma of_sigma_of_pi (hσ : Definable L (𝚺, m) P) (hπ : Definable L (𝚷, m) P) : Definable L (𝚫, m) P := by
   rcases hσ with ⟨p, hp⟩; rcases hπ with ⟨q, hq⟩
@@ -836,7 +836,7 @@ lemma imp {Γ} (h₁ : Definable L (SigmaPiDelta.alt Γ, m) P) (h₂ : Definable
 
 lemma iff (h₁ : Definable L (𝚫, m) P) (h₂ : Definable L (𝚫, m) Q) {Γ} :
     Definable L (Γ, m) (fun v ↦ P v ↔ Q v) :=
-  .of_delta (by rcases h₁ with ⟨p, hp⟩; rcases h₂ with ⟨q, hq⟩; exact ⟨p ⟷ q, hp.iff hq⟩) _
+  .of_delta (by rcases h₁ with ⟨p, hp⟩; rcases h₂ with ⟨q, hq⟩; exact ⟨p ⟷ q, hp.iff hq⟩)
 
 lemma all {P : (Fin k → M) → M → Prop} (h : Definable L (𝚷, s + 1) (fun w ↦ P (w ·.succ) (w 0))) :
     Definable L (𝚷, s + 1) (fun v ↦ ∀ x, P v x) := by
@@ -1101,10 +1101,6 @@ instance hMul : DefinableFunction₂ L Γ (HMul.hMul : M → M → M) :=
 end DefinableFunction₂
 
 end
-
-
-
-
 
 end Model
 

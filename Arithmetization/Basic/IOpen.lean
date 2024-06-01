@@ -601,6 +601,13 @@ def pairEquiv : M × M ≃ M := ⟨Function.uncurry pair, unpair, fun ⟨a, b⟩
 
 @[simp] lemma le_pair_right (a b : M) : b ≤ ⟪a, b⟫ := by simpa using pi₂_le_self ⟪a, b⟫
 
+@[simp] lemma lt_pair_left_of_pos {a} (pos : 0 < a) (b : M) : a < ⟪a, b⟫ := by
+  simp [pair]; split_ifs
+  · simp; exact pos_iff_ne_zero.mp <| pos_of_gt (by assumption)
+  · calc
+      a < a * a + a     := lt_add_of_pos_left a (by simpa using (pos_iff_ne_zero.mp pos))
+      _ ≤ a * a + a + b := by simp
+
 instance : Bounded₁ ℒₒᵣ (pi₁ : M → M) := ⟨ᵀ“#0”, by intro v; simp⟩
 
 instance : Bounded₁ ℒₒᵣ (pi₂ : M → M) := ⟨ᵀ“#0”, by intro v; simp⟩
@@ -626,6 +633,53 @@ lemma pi₂_defined : 𝚺₀-Function₁ (pi₂ : M → M) via pi₂Def := by
   · rintro ⟨a, _, e⟩; simp [e]
 
 instance pi₂_definable : DefinableFunction₁ ℒₒᵣ 𝚺₀ (pi₂ : M → M) := Defined.to_definable₀ _ pi₂_defined
+
+lemma pair_lt_pair_left {a₁ a₂ : M} (h : a₁ < a₂) (b) : ⟪a₁, b⟫ < ⟪a₂, b⟫ := by
+  by_cases h₁ : a₁ < b <;> simp [pair, h₁]
+  · by_cases h₂ : a₂ < b <;> simp [pair, h₂, h]
+    calc
+      b * b + a₁ < b * b + b        := by simpa using h₁
+      _          ≤ a₂ * a₂ + a₂     := add_le_add (mul_le_mul (by simpa using h₂) (by simpa using h₂) (by simp) (by simp)) (by simpa using h₂)
+      _          ≤ a₂ * a₂ + a₂ + b := by simp
+  · simp[show ¬a₂ < b from by simp; exact le_trans (by simpa using h₁) (le_of_lt h)]
+    apply _root_.add_lt_add (by simpa [←sq] using h) h
+
+lemma pair_le_pair_left {a₁ a₂ : M} (h : a₁ ≤ a₂) (b) : ⟪a₁, b⟫ ≤ ⟪a₂, b⟫ := by
+  rcases h with (rfl | lt)
+  · simp
+  · exact le_of_lt (pair_lt_pair_left lt b)
+
+lemma pair_lt_pair_right (a : M) {b₁ b₂} (h : b₁ < b₂) : ⟪a, b₁⟫ < ⟪a, b₂⟫ := by
+  by_cases h₁ : a < b₁ <;> simp [pair, h₁]
+  · simpa [lt_trans _ _ _ h₁ h, ←sq] using h
+  · by_cases h₂ : a < b₂ <;> simp [h₂, h]
+    calc
+      a * a + a + b₁ < (a + 1) * (a + 1) + b₁ := by simp [add_mul_self_eq]; apply lt_succ_iff_le.mpr; simp
+      _              ≤ b₂ * b₂ + b₁           := by simpa [←sq, succ_le_iff_lt] using h₂
+      _              ≤ b₂ * b₂ + a            := by simpa using h₁
+
+lemma pair_le_pair_right (a : M) {b₁ b₂} (h : b₁ ≤ b₂) : ⟪a, b₁⟫ ≤ ⟪a, b₂⟫ := by
+  rcases h with (rfl | lt)
+  · simp
+  · exact le_of_lt (pair_lt_pair_right a lt)
+
+lemma pair_le_pair {a₁ a₂ b₁ b₂ : M} (ha : a₁ ≤ a₂) (hb : b₁ ≤ b₂) : ⟪a₁, b₁⟫ ≤ ⟪a₂, b₂⟫ :=
+  calc
+    ⟪a₁, b₁⟫ ≤ ⟪a₂, b₁⟫ := pair_le_pair_left ha b₁
+    _        ≤ ⟪a₂, b₂⟫ := pair_le_pair_right a₂ hb
+
+lemma pair_lt_pair {a₁ a₂ b₁ b₂ : M} (ha : a₁ < a₂) (hb : b₁ < b₂) : ⟪a₁, b₁⟫ < ⟪a₂, b₂⟫ :=
+  calc
+    ⟪a₁, b₁⟫ < ⟪a₂, b₁⟫ := pair_lt_pair_left ha b₁
+    _        < ⟪a₂, b₂⟫ := pair_lt_pair_right a₂ hb
+
+lemma pair_polybound (a b : M) : ⟪a, b⟫ ≤ (a + b + 1)^2 := by
+  by_cases h : a < b <;> simp [pair, h, sq, add_mul_self_eq, two_mul]
+  · simp [←add_assoc, add_right_comm _ a]; simp [add_right_comm _ (b * b)]
+  · simp [←add_assoc, add_right_comm _ b]; simp [add_right_comm _ a]; simp [add_assoc]
+
+@[simp] lemma pair_ext_iff {a₁ a₂ b₁ b₂ : M} : ⟪a₁, b₁⟫ = ⟪a₂, b₂⟫ ↔ a₁ = a₂ ∧ b₁ = b₂ :=
+  ⟨fun e ↦ ⟨by simpa using congr_arg (π₁ ·) e, by simpa using congr_arg (π₂ ·) e⟩, by rintro ⟨rfl, rfl⟩; simp⟩
 
 end pair
 

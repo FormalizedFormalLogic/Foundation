@@ -134,6 +134,8 @@ lemma of_zero {Γ' Γ} {f : (Fin k → M) → M} (h : DefinableBoundedFunction L
   rcases h with ⟨hb, h⟩
   exact ⟨hb, .of_zero h _⟩
 
+lemma of_delta {f : (Fin k → M) → M} (h : DefinableBoundedFunction L (𝚫, m) f) {Γ} : DefinableBoundedFunction L (Γ, m) f :=
+  ⟨h.bounded, h.definable.of_delta⟩
 
 end DefinableBoundedFunction
 
