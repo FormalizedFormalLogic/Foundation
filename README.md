@@ -23,11 +23,11 @@ https://iehality.github.io/Arithmetization/
 
 - **Vorspiel**: Supplementary definitions and theorems for Mathlib
 - **Definability**: Definability of relations and functions
-- **Basic**: Basic theories such as $\mathbf{PA}^-$, $\mathbf{I}_\mathrm{open}$
-- **IDeltaZero**: Theory $\mathbf{I\Delta_0}$
+- **Basic**: Basic theories such as $\mathsf{PA}^-$, $\mathsf{I_{open}}$
+- **ISigmaZero**: Theory $\mathsf{I}\Sigma_0$
   - **Exponential**
-- **OmegaOne**: Theory $\mathbf{I\Delta_0 + \Omega_1}$
-- **ISigmaOne**: Theory $\mathbf{I\Sigma_1}$
+- **OmegaOne**: Theory $\mathsf{I} \Sigma_0 + \mathsf{\Omega_1}$
+- **ISigmaOne**: Theory $\mathsf{I}\Sigma_1$
 
 ## Definions
 
@@ -65,29 +65,30 @@ https://iehality.github.io/Arithmetization/
       ∃ (y : M), P y ∧ ∀ z < y, ¬P z
   ```
 
-- [$\mathbf{I\Sigma_n} = \mathbf{I\Pi_n}$](https://iehality.github.io/Arithmetization/Arithmetization/Basic/Ind.html#LO.FirstOrder.Arith.Model.models_iSigma_iff_models_iPi)
+- [$\mathsf{I} \Sigma_n = \mathsf{I} \Pi_n$](https://iehality.github.io/Arithmetization/Arithmetization/Basic/Ind.html#LO.FirstOrder.Arith.Model.models_iSigma_iff_models_iPi)
   ```lean
   theorem LO.FirstOrder.Arith.Model.models_iSigma_iff_models_iPi
       {M : Type} [Zero M] [One M] [Add M] [Mul M] [LT M] {n : ℕ} :
       M ⊧ₘ* 𝐈𝚺n ↔ M ⊧ₘ* 𝐈𝚷n
   ```
 
-- Exponential is definable in $\mathbf{I\Delta_0}$ by $\mathbf{\Delta_0}$ formula
-  - [LO.FirstOrder.Arith.Model.Exponential.defined](https://iehality.github.io/Arithmetization/Arithmetization/IDeltaZero/Exponential/Exp.html#LO.FirstOrder.Arith.Model.Exponential.defined)
+- Exponential is definable in $\mathsf{I} \Sigma_0$ by $\Sigma_0$ formula
+  - [LO.FirstOrder.Arith.Model.Exponential.defined](https://iehality.github.io/Arithmetization/Arithmetization/ISigmaZero/Exponential/Exp.html#LO.FirstOrder.Arith.Model.Exponential.defined)
     ```lean
     theorem LO.FirstOrder.Arith.Model.Exponential.defined
         {M : Type} [Zero M] [One M] [Add M] [Mul M] [LT M]
-        [M ⊧ₘ* 𝐈𝚫₀] :
+        [M ⊧ₘ* 𝐈𝚺₀] :
         𝚺₀-Relation (LO.FirstOrder.Arith.Model.Exponential : M → M → Prop) via LO.FirstOrder.Arith.Model.Exponential.def
     ```
 
-  - [Representation of $\mathbf{\Delta_0}$ definition of exponential](https://github.com/iehality/Arithmetization/blob/master/Arithmetization/IDeltaZero/Exponential/exp.pdf)
-- Nuon (number of ones) is definable in $\mathbf{I\Delta_0 + \Omega_1}$ by $\mathbf{\Delta_0}$ formula
+  - [Representation of $\Sigma_0$ definition of exponential](https://github.com/iehality/Arithmetization/blob/master/Arithmetization/ISigmaZero/Exponential/exp.pdf)
+
+- Nuon (number of ones) is definable in $\mathsf{I} \Sigma_0 + \mathsf{\Omega_1}$ by $\Sigma_0$ formula
   - [LO.FirstOrder.Arith.Model.nuon_defined](https://iehality.github.io/Arithmetization/Arithmetization/OmegaOne/Nuon.html#LO.FirstOrder.Arith.Model.nuon_defined)
     ```lean
     theorem LO.FirstOrder.Arith.Model.nuon_defined
         {M : Type} [Zero M] [One M] [Add M] [Mul M] [LT M]
-        [M ⊧ₘ* 𝐈𝚫₀ + 𝛀₁]  :
+        [M ⊧ₘ* 𝐈𝚺₀ + 𝛀₁]  :
         𝚺₀-Function₁ LO.FirstOrder.Arith.Model.nuon via LO.FirstOrder.Arith.Model.nuonDef
     ```
 

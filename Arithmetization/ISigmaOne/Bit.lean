@@ -1,5 +1,5 @@
-import Arithmetization.IDeltaZero.Exponential.Exp
-import Arithmetization.IDeltaZero.Exponential.Log
+import Arithmetization.ISigmaZero.Exponential.Exp
+import Arithmetization.ISigmaZero.Exponential.Log
 
 namespace LO.FirstOrder.Arith
 

@@ -1,4 +1,4 @@
-import Arithmetization.IDeltaZero.Exponential.PPow2
+import Arithmetization.ISigmaZero.Exponential.PPow2
 
 namespace LO.FirstOrder
 
