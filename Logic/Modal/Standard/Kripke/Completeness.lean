@@ -141,11 +141,6 @@ lemma not_mem_falsum_of_Lconsistent : ⊥ ∉ T := by
   have : L ⊢! ⊥ ⟶ ⊥ := efq!;
   contradiction;
 
--- TODO: move
-lemma unprovable_imp_trans! (hpq : L ⊢! p ⟶ q) : L ⊬! p ⟶ r → L ⊬! q ⟶ r := by
-  contrapose; simp [neg_neg];
-  exact imp_trans! hpq;
-
 lemma either_consistent (p) : (L)-Consistent (insert p T) ∨ (L)-Consistent (insert (~p) T) := by
   by_contra hC; push_neg at hC;
   obtain ⟨Γ, hΓ₁, hΓ₂⟩ := iff_insert_notParametricConsistent.mp hC.1;
