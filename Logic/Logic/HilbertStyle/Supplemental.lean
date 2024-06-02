@@ -313,7 +313,7 @@ def andIffAndOfIff {p q p' q' : F} (bp : 𝓢 ⊢ p ⟷ p') (bq : 𝓢 ⊢ q ⟷
 
 def conj'IffConj : (Γ : List F) → 𝓢 ⊢ Γ.conj' ⟷ Γ.conj
   | []          => iffId ⊤
-  | [p]         => iffIntro (deduct' <| andIntro FiniteContext.id verum) conj₁
+  | [_]         => iffIntro (deduct' <| andIntro FiniteContext.id verum) conj₁
   | p :: q :: Γ => andIffAndOfIff (iffId p) (conj'IffConj (q :: Γ))
 @[simp] lemma conj'IffConj! : 𝓢 ⊢! Γ.conj' ⟷ Γ.conj := ⟨conj'IffConj Γ⟩
 
@@ -352,6 +352,11 @@ lemma iff_provable_list_conj {Γ : List F} : (𝓢 ⊢! Γ.conj') ↔ (∀ p ∈
     . rintro ⟨h₁, h₂⟩;
       exact conj₃'! h₁ (ih.mpr h₂);
 
+lemma conj'conj'_subset (h : ∀ p, p ∈ Γ → p ∈ Δ) : 𝓢 ⊢! Δ.conj' ⟶ Γ.conj' := by
+  induction Γ using List.induction_with_singleton with
+  | hnil => simpa using dhyp! verum!;
+  | hsingle => simp_all; exact generalConj'! h;
+  | hcons p Γ hne ih => simp_all; exact implyRightAnd! (generalConj'! h.1) ih;
 
 def implyOrLeft' (h : 𝓢 ⊢ p ⟶ r) : 𝓢 ⊢ p ⟶ (r ⋎ q) := by
   apply deduct';

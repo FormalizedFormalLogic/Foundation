@@ -13,7 +13,7 @@ variable {α : Type*} [DecidableEq α]
 structure DeductionParameter (α) where
   axiomSet : AxiomSet α
   nec : Bool
-notation:max "Ax(" L ")" => DeductionParameter.axiomSet L
+notation "Ax(" L ")" => DeductionParameter.axiomSet L
 
 namespace DeductionParameter
 

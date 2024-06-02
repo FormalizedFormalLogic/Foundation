@@ -43,8 +43,8 @@ open LO UnaryModalOperator
 variable [UnaryModalOperator ι F] [DecidableEq F]
 variable {i : ι} {n : ℕ} {p q : F}
 
-namespace Set
 
+namespace Set
 
 protected abbrev mop (i : ι) : Set F → Set F := image (mop i)
 
@@ -94,47 +94,11 @@ lemma eq_premultimop_multimop_of_subset_premultimop (h : s ⊆ t.multimop i n) :
 end Set
 
 
-namespace List
-
-protected abbrev mop (i : ι) : List F → List F := List.map (mop i)
-
-protected abbrev multimop (i : ι) (n : ℕ) : List F → List F := List.map ((mop i)^[n])
-
-protected abbrev premultimop (i : ι) (n : ℕ) (l : List F) := l.filter (λ (p : F) => (mop i)^[n] p ∈ l)
-
-protected abbrev premop (i : ι) (l : List F) := l.filter (λ (p : F) => (mop i) p ∈ l)
-
-variable {l : List F} {s : Set F}
-
-@[simp] lemma mop_iff_multimop_one : l.mop i = l.multimop i 1 := by rfl
-
-@[simp] lemma iff_premop_premultimop_one : l.premop i = l.premultimop i 1 := by rfl
-
-@[simp] lemma multimop_nil : (([] :List F).multimop i n) = [] := by simp;
-
-@[simp] lemma multimop_cons {f : F} : ((f :: fs).multimop i n) = (((mop i)^[n] f) :: (fs.multimop i n)) := by simp;
-
-@[simp] lemma premultimop_nil : (([] :List F).premultimop i n) = [] := by simp;
-
-lemma forall_multimop_of_subset_multimop (h : ∀ p ∈ l, p ∈ s.multimop i n) : ∀ p ∈ l, ∃ q ∈ s, p = (mop i)^[n] q := by
-  intro p hp;
-  obtain ⟨q, _, _⟩ := by simpa only [Set.mem_image] using h p hp;
-  use q; subst_vars; simpa;
-
-lemma eq_premultimop_multimop_of_subset_multimop (h : ∀ p ∈ l, p ∈ s.multimop i n) : l = (l.premultimop i n).multimop i n := by
-  ext n q;
-  constructor;
-  . sorry;
-  . sorry;
-
-end List
-
-
 namespace Finset
 
-protected noncomputable abbrev multimop (i : ι) (n : ℕ) (s : Finset F) : Finset F := (s.toList).multimop i n |>.toFinset
+protected noncomputable abbrev multimop (i : ι) (n : ℕ) (s : Finset F) : Finset F := s.image ((mop i)^[n])
 
-protected noncomputable abbrev mop (i : ι) (s : Finset F) : Finset F := (s.toList).multimop i 1 |>.toFinset
+protected noncomputable abbrev mop (i : ι) (s : Finset F) : Finset F := s.multimop i 1
 
 protected noncomputable abbrev premultimop (i : ι) (n : ℕ) (s : Finset F) : Finset F := s.preimage ((mop i)^[n]) (by simp [Set.InjOn])
 
@@ -147,7 +111,7 @@ variable {s t : Finset F}
 @[simp] lemma iff_premop_premultimop_one : s.premop i = s.premultimop i 1 := by rfl;
 
 
-lemma multimop_coe : ↑(s.multimop i n) = (↑s : Set F).multimop i n := by simp_all; rfl;
+lemma multimop_coe : ↑(s.multimop i n) = (↑s : Set F).multimop i n := by simp_all;
 
 lemma multimop_mem_coe : p ∈ s.multimop i n ↔ p ∈ (↑s : Set F).multimop i n := by constructor <;> simp_all
 
@@ -159,6 +123,43 @@ lemma premultimop_multimop_eq_of_subset_multimop {s : Finset F} {t : Set F} (hs 
   exact Finset.coe_inj.mp this;
 
 end Finset
+
+
+namespace List
+
+variable [LO.UnaryModalOperator ι F] [DecidableEq F]
+
+protected noncomputable abbrev multimop (i : ι) (n : ℕ) (l : List F) : List F := l.toFinset.multimop i n |>.toList
+
+protected noncomputable abbrev mop (i : ι) (l : List F) : List F := l.toFinset.mop i |>.toList
+
+protected noncomputable abbrev premultimop (i : ι) (n : ℕ) (l : List F) := l.toFinset.premultimop i n |>.toList
+
+protected noncomputable abbrev premop (i : ι) (l : List F) := l.toFinset.premop i |>.toList
+
+variable {l : List F} {s : Set F}
+
+@[simp] lemma mop_iff_multimop_one : l.mop i = l.multimop i 1 := by rfl
+
+@[simp] lemma iff_premop_premultimop_one : l.premop i = l.premultimop i 1 := by rfl
+
+@[simp] lemma multimop_nil : (([] :List F).multimop i n) = [] := by simp;
+
+@[simp] lemma multimop_single : (([p] :List F).multimop i n) = [((mop i)^[n] p)] := by simp;
+
+lemma multimop_cons (hl : p ∉ l) : ((p :: l).multimop i n) ~ ((mop i)^[n] p :: l.multimop i n) := by
+  simp [List.multimop];
+  apply Finset.toList_insert;
+  simp_all;
+
+@[simp] lemma premultimop_nil : (([] :List F).premultimop i n) = [] := by simp;
+
+lemma forall_multimop_of_subset_multimop (h : ∀ p ∈ l, p ∈ s.multimop i n) : ∀ p ∈ l, ∃ q ∈ s, p = (mop i)^[n] q := by
+  intro p hp;
+  obtain ⟨q, _, _⟩ := by simpa only [Set.mem_image] using h p hp;
+  use q; subst_vars; simpa;
+
+end List
 
 end
 
@@ -228,37 +229,6 @@ notation "◇⁻¹" s:80 => Set.predia s
 end Set
 
 
-namespace List
-
-variable (n : ℕ) (l : List F)
-
-abbrev multibox : List F := List.multimop true n l
-notation "□^[" n:90 "]" l:80 => List.multibox n l
-
-abbrev box : List F := List.mop true l
-notation "□" l:80 => List.box l
-
-abbrev multidia : List F := List.multimop false n l
-notation "◇^[" n:90 "]" l:80 => List.multidia n l
-
-abbrev dia : List F := List.mop false l
-notation "◇" l:80 => List.dia l
-
-abbrev premultibox : List F := List.premultimop true n l
-notation "□⁻¹^[" n:90 "]" l:80 => List.premultibox n l
-
-abbrev prebox : List F := List.premop true l
-notation "□⁻¹" l:80 => List.prebox l
-
-abbrev premultidia : List F := List.premultimop false n l
-notation "◇⁻¹^[" n:90 "]" l:80 => List.premultidia n l
-
-abbrev predia : List F := List.premop false l
-notation "◇⁻¹" l:80 => List.predia l
-
-end List
-
-
 namespace Finset
 
 noncomputable abbrev multibox (n : ℕ) (s : Finset F) : Finset F := Finset.multimop true n s
@@ -286,5 +256,36 @@ noncomputable abbrev predia (s : Finset F) : Finset F := Finset.premop false s
 notation "◇⁻¹" s:80 => Finset.predia s
 
 end Finset
+
+
+namespace List
+
+variable (n : ℕ) (l : List F)
+
+noncomputable abbrev multibox : List F := List.multimop true n l
+notation "□^[" n:90 "]" l:80 => List.multibox n l
+
+noncomputable abbrev box : List F := List.mop true l
+notation "□" l:80 => List.box l
+
+noncomputable abbrev multidia : List F := List.multimop false n l
+notation "◇^[" n:90 "]" l:80 => List.multidia n l
+
+noncomputable abbrev dia : List F := List.mop false l
+notation "◇" l:80 => List.dia l
+
+noncomputable abbrev premultibox : List F := List.premultimop true n l
+notation "□⁻¹^[" n:90 "]" l:80 => List.premultibox n l
+
+noncomputable abbrev prebox : List F := List.premop true l
+notation "□⁻¹" l:80 => List.prebox l
+
+noncomputable abbrev premultidia : List F := List.premultimop false n l
+notation "◇⁻¹^[" n:90 "]" l:80 => List.premultidia n l
+
+noncomputable abbrev predia : List F := List.premop false l
+notation "◇⁻¹" l:80 => List.predia l
+
+end List
 
 end
