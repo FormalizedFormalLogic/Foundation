@@ -194,6 +194,14 @@ variable {n : ℕ} {ε : ξ → M}
     · rintro ⟨e, h, H⟩
       exact ⟨(e ·.succ), fun i ↦ h i.succ, e 0, h 0, by simpa [Matrix.eq_vecCons'] using H⟩
 
+@[simp] lemma eval_operator₃ {o : Operator L 3} {t₁ t₂ t₃ : Semiterm L ξ n} :
+    Eval s e ε (o.operator ![t₁, t₂, t₃]) ↔ o.val ![t₁.val s e ε, t₂.val s e ε, t₃.val s e ε] := by
+  simp [eval_operator]
+
+@[simp] lemma eval_operator₄ {o : Operator L 4} {t₁ t₂ t₃ t₄ : Semiterm L ξ n} :
+    Eval s e ε (o.operator ![t₁, t₂, t₃, t₄]) ↔ o.val ![t₁.val s e ε, t₂.val s e ε, t₃.val s e ε, t₄.val s e ε] := by
+  simp [eval_operator]
+
 end Semiformula
 
 namespace Arith.Hierarchy

@@ -167,6 +167,43 @@ lemma least_number_h {P : M → Prop} (hP : DefinablePred L (Γ, m) P)
 
 end neg
 
+section
+
+variable (L)
+
+variable (Γ : SigmaPiDelta) (m : ℕ) [M ⊧ₘ* Theory.indScheme L (Arith.Hierarchy 𝚺 m)]
+
+@[elab_as_elim]
+lemma induction_hh {P : M → Prop} (hP : DefinablePred L (Γ, m) P)
+    (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x :=
+  match Γ with
+  | 𝚺 => induction_h 𝚺 m hP zero succ
+  | 𝚷 =>
+    haveI : M ⊧ₘ* Theory.indScheme L (Arith.Hierarchy 𝚷 m) := models_indScheme_alt 𝚺 m
+    induction_h 𝚷 m hP zero succ
+  | 𝚫 => induction_h 𝚺 m hP.of_delta zero succ
+
+@[elab_as_elim]
+lemma order_induction_hh {P : M → Prop} (hP : DefinablePred L (Γ, m) P)
+    (ind : ∀ x, (∀ y < x, P y) → P x) : ∀ x, P x :=
+  match Γ with
+  | 𝚺 => order_induction_h 𝚺 m hP ind
+  | 𝚷 =>
+    haveI : M ⊧ₘ* Theory.indScheme L (Arith.Hierarchy 𝚷 m) := models_indScheme_alt 𝚺 m
+    order_induction_h 𝚷 m hP ind
+  | 𝚫 => order_induction_h 𝚺 m hP.of_delta ind
+
+lemma least_number_hh {P : M → Prop} (hP : DefinablePred L (Γ, m) P)
+    {x} (h : P x) : ∃ y, P y ∧ ∀ z < y, ¬P z :=
+  match Γ with
+  | 𝚺 => least_number_h 𝚺 m hP h
+  | 𝚷 =>
+    haveI : M ⊧ₘ* Theory.indScheme L (Arith.Hierarchy 𝚷 m) := models_indScheme_alt 𝚺 m
+    least_number_h 𝚷 m hP h
+  | 𝚫 => least_number_h 𝚺 m hP.of_delta h
+
+end
+
 instance [M ⊧ₘ* Theory.indScheme L (Arith.Hierarchy 𝚺 m)] :
     M ⊧ₘ* Theory.indScheme L (Arith.Hierarchy Γ m) := by
   rcases Γ

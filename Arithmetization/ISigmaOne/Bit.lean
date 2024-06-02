@@ -247,6 +247,8 @@ lemma bitRemove_lt_of_mem {i a : M} (h : i ∈ a) : bitRemove i a < a := by
 lemma pos_of_nonempty {i a : M} (h : i ∈ a) : 0 < a := by
   by_contra A; simp at A; rcases A; simp_all
 
+@[simp] lemma mem_insert (i a : M) : i ∈ insert i a := by simp
+
 lemma log_mem_of_pos {a : M} (h : 0 < a) : log a ∈ a :=
   mem_iff_mul_exp_add_exp_add.mpr
     ⟨0, a - exp log a,
@@ -298,6 +300,9 @@ lemma mem_exp_add_succ_sub_one (i j : M) : i ∈ exp (i + j + 1) - 1 := by
 /-- under a = {0, 1, 2, ..., a - 1} -/
 def under (a : M) : M := exp a - 1
 
+@[simp] lemma le_under (a : M) : a ≤ under a :=
+  le_iff_lt_succ.mpr (by simp [under, show exp a - 1 + 1 = exp a from sub_add_self_of_le (by simp)])
+
 @[simp] lemma mem_under_iff {i j : M} : i ∈ under j ↔ i < j := by
   constructor
   · intro h
@@ -315,6 +320,22 @@ def under (a : M) : M := exp a - 1
     rw [this]; exact mem_exp_add_succ_sub_one i k
 
 @[simp] lemma not_mem_under_self (i : M) : i ∉ under i := by simp
+
+private lemma under_graph (x y : M) : y = under x ↔ y + 1 = exp x :=
+  ⟨by rintro rfl; simp [under, sub_add_self_of_le], by intro h; have := congr_arg (· - 1) h; simp [under] at this ⊢; exact this⟩
+
+def _root_.LO.FirstOrder.Arith.underDef : 𝚺₀-Semisentence 2 := .mkSigma
+  “!expDef.val [#0 + 1, #1]” (by simp)
+
+lemma under_defined : 𝚺₀-Function₁ (under : M → M) via underDef := by
+  intro v; simp [underDef, under_graph]
+
+@[simp] lemma under_defined_iff (v) :
+    Semiformula.Evalbm M v underDef.val ↔ v 0 = under (v 1) := under_defined.df.iff v
+
+instance under_definable : 𝚺₀-Function₁ (under : M → M) := Defined.to_definable _ under_defined
+
+instance under_definable' (Γ) : Γ-Function₁ (under : M → M) := .of_zero under_definable _
 
 lemma eq_zero_of_subset_zero {a : M} : a ⊆ 0 → a = 0 := by
   intro h; by_contra A
@@ -372,13 +393,13 @@ lemma lt_of_lt_log {a b : M} (pos : 0 < b) (h : ∀ i ∈ a, i < log b) : a < b 
   by_contra A
   exact not_lt_of_le (log_monotone <| show b ≤ a by simpa using A) (h (log a) (log_mem_of_pos apos))
 
-lemma under_inj {i j : M} (h : under i = under j) : i = j := by
+@[simp] lemma under_inj {i j : M} : under i = under j ↔ i = j := ⟨fun h ↦ by
   by_contra ne
   wlog lt : i < j
   · exact this (Eq.symm h) (Ne.symm ne) (lt_of_le_of_ne (by simpa using lt) (Ne.symm ne))
   have : i ∉ under i := by simp
   have : i ∈ under i := by rw [h]; simp [mem_under_iff, lt]
-  contradiction
+  contradiction, by rintro rfl; simp⟩
 
 @[simp] lemma under_zero : under (0 : M) = ∅ := mem_ext (by simp [mem_under_iff])
 

@@ -16,6 +16,8 @@ variable [M ⊧ₘ* 𝐈𝚺₁]
 
 @[simp] lemma susbset_insert (x a : M) : a ⊆ insert x a := by intro z hz; simp [hz]
 
+@[simp] lemma bitRemove_susbset (x a : M) : bitRemove x a ⊆ a := by intro z; simp
+
 lemma lt_of_mem_dom {x y m : M} (h : ⟪x, y⟫ ∈ m) : x < m := lt_of_le_of_lt (by simp) (lt_of_mem h)
 
 lemma lt_of_mem_rng {x y m : M} (h : ⟪x, y⟫ ∈ m) : y < m := lt_of_le_of_lt (by simp) (lt_of_mem h)
@@ -284,6 +286,11 @@ lemma domain_subset_domain_of_subset {s t : M} (h : s ⊆ t) : domain s ⊆ doma
   rcases mem_domain_iff.mp hx with ⟨y, hy⟩
   exact mem_domain_iff.mpr ⟨y, h hy⟩
 
+@[simp] lemma domain_eq_empty_iff_eq_empty {s : M} : domain s = ∅ ↔ s = ∅ :=
+  ⟨by simp [isempty_iff, mem_domain_iff]
+      intro h x hx
+      exact h (π₁ x) (π₂ x) (by simpa using hx), by rintro rfl; simp⟩
+
 /-
 @[simp] lemma domain_le_self {P : M → Prop}
     (hempty : P ∅) (hinsert : ∀ s x, x ∉ s → P s → P (insert x s)) : ∀ x, P x := by {  }
@@ -369,6 +376,9 @@ lemma IsMapping.of_subset {m m' : M} (h : IsMapping m) (ss : m' ⊆ m) : IsMappi
   have : ∃! y, ⟪x, y⟫ ∈ m := h x (domain_subset_domain_of_subset ss hx)
   exact ExistsUnique.intro y hy (fun y' hy' ↦ this.unique (ss hy') (ss hy))
 
+lemma IsMapping.uniq {m x y₁ y₂ : M} (h : IsMapping m) : ⟪x, y₁⟫ ∈ m → ⟪x, y₂⟫ ∈ m → y₁ = y₂ := fun h₁ h₂ ↦
+  h x (mem_domain_iff.mpr ⟨y₁, h₁⟩) |>.unique h₁ h₂
+
 private lemma isMapping_iff {m : M} : IsMapping m ↔ ∃ d ≤ 2 * m, d = domain m ∧ ∀ x ∈ d, ∃ y < m, ⟪x, y⟫ ∈ m ∧ ∀ y' < m, ⟪x, y'⟫ ∈ m → y' = y :=
   ⟨by intro hm
       exact ⟨domain m, by simp, rfl, fun x hx ↦ by
@@ -378,20 +388,18 @@ private lemma isMapping_iff {m : M} : IsMapping m ↔ ∃ d ≤ 2 * m, d = domai
       rcases h x hx with ⟨y, _, hxy, h⟩
       exact ExistsUnique.intro y hxy (fun y' hxy' ↦ h y' (lt_of_mem_rng hxy') hxy')⟩
 
-/-
 def _root_.LO.FirstOrder.Arith.isMappingDef : 𝚺₀-Semisentence 1 := .mkSigma
   “∃[#0 < 2 * #1 + 1](!domainDef.val [#0, #1] ∧ [∀∈ #0] ∃[#0 < #3](#1 ~[#3] #0 ∧ ∀[#0 < #4](#2 ~[#4] #0 → #0 = #1)))” (by simp)
 
-lemma domain_defindded : 𝚺₀-Function₁ (domain : M → M) via domainDef := by
-  intro v; simp [domainDef, domain_graph]
+lemma isMapping_defined : 𝚺₀-Predicate (IsMapping : M → Prop) via isMappingDef := by
+  intro v; simp [isMappingDef, isMapping_iff, lt_succ_iff_le]
 
-@[simp] lemma length_defined_iff (v) :
-    Semiformula.Evalbm M v lengthDef.val ↔ v 0 = ‖v 1‖ := length_defined.df.iff v
+@[simp] lemma isMapping_defined_iff (v) :
+    Semiformula.Evalbm M v isMappingDef.val ↔ IsMapping (v 0) := isMapping_defined.df.iff v
 
-instance domain_definable : DefinableFunction₁ ℒₒᵣ 𝚺₀ (domain : M → M) := Defined.to_definable _ domain_defined
+instance isMapping_definable : 𝚺₀-Predicate (IsMapping : M → Prop) := Defined.to_definable _ isMapping_defined
 
-instance domain_definable' (Γ) : DefinableFunction₁ ℒₒᵣ Γ (domain : M → M) := .of_zero domain_definable _
--/
+instance isMapping_definable' (Γ) : Γ-Predicate (IsMapping : M → Prop) := .of_zero isMapping_definable _
 
 end mapping
 
@@ -401,75 +409,173 @@ def Seq (s : M) : Prop := IsMapping s ∧ ∃ l, domain s = under l
 
 def Seq.isMapping {s : M} (h : Seq s) : IsMapping s := h.1
 
+private lemma seq_iff (s : M) : Seq s ↔ IsMapping s ∧ ∃ l < 2 * s + 1, ∃ d < 2 * s + 1, d = domain s ∧ d = under l :=
+  ⟨by rintro ⟨hs, l, h⟩
+      exact ⟨hs, l, lt_succ_iff_le.mpr (by
+      calc
+        l ≤ domain s := by simp [h]
+        _ ≤ 2 * s    := by simp), ⟨domain s , by simp [lt_succ_iff_le], rfl, h⟩⟩,
+   by rintro ⟨hs, l, _, _, _, rfl, h⟩; exact ⟨hs, l, h⟩⟩
+
+def _root_.LO.FirstOrder.Arith.seqDef : 𝚺₀-Semisentence 1 := .mkSigma
+  “!isMappingDef.val [#0] ∧ ∃[#0 < 2 * #1 + 1] ∃[#0 < 2 * #2 + 1] (!domainDef.val [#0, #2] ∧ !underDef.val [#0, #1])” (by simp)
+
+lemma seq_defined : 𝚺₀-Predicate (Seq : M → Prop) via seqDef := by
+  intro v; simp [seqDef, seq_iff]
+
+@[simp] lemma seq_defined_iff (v) :
+    Semiformula.Evalbm M v seqDef.val ↔ Seq (v 0) := seq_defined.df.iff v
+
+instance seq_definable : 𝚺₀-Predicate (Seq : M → Prop) := Defined.to_definable _ seq_defined
+
+@[simp, definability] instance seq_definable' (Γ) : Γ-Predicate (Seq : M → Prop) := .of_zero seq_definable _
+
 lemma lh_exists_uniq (s : M) : ∃! l, (Seq s → domain s = under l) ∧ (¬Seq s → l = 0) := by
   by_cases h : Seq s
   · rcases h with ⟨h, l, hl⟩
     exact ExistsUnique.intro l
       (by simp [show Seq s from ⟨h, l, hl⟩, hl])
-      (by simp [show Seq s from ⟨h, l, hl⟩, hl]; intro y hy; exact Eq.symm <| under_inj hy)
+      (by simp [show Seq s from ⟨h, l, hl⟩, hl])
   · simp [h]
 
 def lh (s : M) : M := Classical.choose! (lh_exists_uniq s)
 
 lemma lh_prop (s : M) : (Seq s → domain s = under (lh s)) ∧ (¬Seq s → lh s = 0) := Classical.choose!_spec (lh_exists_uniq s)
 
-lemma Seq.domain_eq {s : M} (h : Seq s) : domain s = under (lh s) := (Model.lh_prop s).1 h
-
 lemma lh_prop_of_not_seq {s : M} (h : ¬Seq s) : lh s = 0 := (lh_prop s).2 h
 
-def seqcons (x s : M) : M := insert ⟪lh s, x⟫ s
+lemma Seq.domain_eq {s : M} (h : Seq s) : domain s = under (lh s) := (Model.lh_prop s).1 h
+
+lemma Seq.get_exists_uniq {s : M} (h : Seq s) {x : M} (hx : x < lh s) : ∃! y, ⟪x, y⟫ ∈ s := h.isMapping x (by simpa [h.domain_eq] using hx)
+
+def Seq.get {s : M} (h : Seq s) {x : M} (hx : x < lh s) : M := Classical.choose! (h.get_exists_uniq hx)
+
+@[simp] lemma Seq.get_mem {s : M} (h : Seq s) {x : M} (hx : x < lh s) :
+    ⟪x, h.get hx⟫ ∈ s := Classical.choose!_spec (h.get_exists_uniq hx)
+
+lemma Seq.get_uniq {s : M} (h : Seq s) {x : M} (hx : x < lh s) (hy : ⟪x, y⟫ ∈ s) : y = h.get hx :=
+    (h.get_exists_uniq hx).unique hy (by simp)
+
+lemma Seq.lt_lh_iff {s : M} (h : Seq s) {i} : i < lh s ↔ i ∈ domain s := by simp [h.domain_eq]
+
+lemma Seq.lt_lh_of_mem {s : M} (h : Seq s) {i x} (hix : ⟪i, x⟫ ∈ s) : i < lh s := by simp [h.lt_lh_iff, mem_domain_iff]; exact ⟨x, hix⟩
+
+def seqCons (x s : M) : M := insert ⟪lh s, x⟫ s
 
 @[simp] lemma seq_empty : Seq (∅ : M) := ⟨by simp, 0, by simp⟩
 
 @[simp] lemma lh_empty : lh (∅ : M) = 0 := by
   have : under (lh ∅ : M) = under 0 := by simpa using Eq.symm <| Seq.domain_eq (M := M) (s := ∅) (by simp)
-  exact under_inj this
+  exact under_inj.mp this
 
-scoped infixr:67 " ::ˢ " => seqcons
+infixr:67 " ::ˢ " => seqCons
 
-@[simp] lemma Seq.subset_seqcons (s x : M) : s ⊆ x ::ˢ s := by simp [seqcons]
+@[simp] lemma Seq.subset_seqCons (s x : M) : s ⊆ x ::ˢ s := by simp [seqCons]
 
-@[simp] lemma Seq.mem_seqcons (s x : M) : ⟪lh s, x⟫ ∈ x ::ˢ s := by simp [seqcons]
+lemma Seq.lt_seqCons {s} (hs : Seq s) (x : M) : s < x ::ˢ s :=
+  lt_iff_le_and_ne.mpr <| ⟨le_of_subset <| by simp, by
+    simp [seqCons]; intro A
+    have : ⟪lh s, x⟫ ∈ s := by simpa [←A] using mem_insert ⟪lh s, x⟫ s
+    simpa using hs.lt_lh_of_mem this⟩
 
-lemma Seq.seq_seqcons {s : M} (h : Seq s) (x : M) : Seq (x ::ˢ s) :=
-  ⟨h.isMapping.insert (by simp [h.domain_eq]), lh s + 1, by simp [seqcons, h.domain_eq]⟩
+@[simp] lemma Seq.mem_seqCons (s x : M) : ⟪lh s, x⟫ ∈ x ::ˢ s := by simp [seqCons]
 
--- lemma seq_seqcons_iff (x s : M) : Seq (x ::ˢ s) ↔ Seq s := ⟨by { intro h; exact ⟨by {  },by { have := h.domain_eq; simp at this }⟩ }, by {  }⟩
+lemma Seq.seq_seqCons {s : M} (h : Seq s) (x : M) : Seq (x ::ˢ s) :=
+  ⟨h.isMapping.insert (by simp [h.domain_eq]), lh s + 1, by simp [seqCons, h.domain_eq]⟩
 
-@[simp] lemma Seq.lh_seqcons (x : M) {s} (h : Seq s) : lh (x ::ˢ s) = lh s + 1 := by
+@[simp] lemma Seq.lh_seqCons (x : M) {s} (h : Seq s) : lh (x ::ˢ s) = lh s + 1 := by
   have : under (lh s + 1) = under (lh (x ::ˢ s)) := by
-    simpa [seqcons, h.domain_eq] using (h.seq_seqcons x).domain_eq
-  exact Eq.symm <| under_inj this
+    simpa [seqCons, h.domain_eq] using (h.seq_seqCons x).domain_eq
+  exact Eq.symm <| under_inj.mp this
 
+lemma domain_bitRemove_of_isMapping_of_mem {x y s : M} (hs : IsMapping s) (hxy : ⟪x, y⟫ ∈ s) :
+    domain (bitRemove ⟪x, y⟫ s) = bitRemove x (domain s) := by
+  apply mem_ext; simp [mem_domain_iff]; intro x₁
+  constructor
+  · rintro ⟨y₁, hy₁, hx₁y₁⟩; exact ⟨by rintro rfl; exact hy₁ rfl (hs.uniq hx₁y₁ hxy), y₁, hx₁y₁⟩
+  · intro ⟨hx, y₁, hx₁y₁⟩
+    exact ⟨y₁, by intro _; contradiction, hx₁y₁⟩
 
+/-- TODO: move to Lemmata.lean-/
+lemma ne_zero_iff_one_le {a : M} : a ≠ 0 ↔ 1 ≤ a := Iff.trans pos_iff_ne_zero.symm (pos_iff_one_le (a := a))
+
+lemma Seq.cases_iff {s : M} : Seq s ↔ s = ∅ ∨ ∃ x s', Seq s' ∧ s = x ::ˢ s' := ⟨fun h ↦ by
+  by_cases hs : lh s = 0
+  · left
+    simpa [hs] using h.domain_eq
+  · right
+    let i := lh s - 1
+    have hi : i < lh s := pred_lt_self_of_pos (pos_iff_ne_zero.mpr hs)
+    have lhs_eq : lh s = i + 1 := Eq.symm <| tsub_add_cancel_of_le <| ne_zero_iff_one_le.mp hs
+    let s' := bitRemove ⟪i, h.get hi⟫ s
+    have his : ⟪i, h.get hi⟫ ∈ s := h.get_mem hi
+    have hdoms' : domain s' = under i := by
+      simp only [domain_bitRemove_of_isMapping_of_mem h.isMapping his, h.domain_eq, s']
+      apply mem_ext
+      simp [lhs_eq, and_or_left]
+      intro j hj; exact ne_of_lt hj
+    have hs' : Seq s' := ⟨ h.isMapping.of_subset (by simp [s']), i, hdoms' ⟩
+    have hs'i : lh s' = i := by simpa [hs'.domain_eq] using hdoms'
+    exact ⟨h.get hi, s', hs', mem_ext <| fun v ↦ by
+      simp only [seqCons, hs'i, mem_bitInsert_iff]
+      simp [s']
+      by_cases hv : v = ⟪i, h.get hi⟫ <;> simp [hv]⟩,
+  by  rintro (rfl | ⟨x, s', hs', rfl⟩)
+      · simp
+      · exact hs'.seq_seqCons x⟩
+
+alias ⟨Seq.cases, _⟩ := Seq.cases_iff
+
+/-- `!⟨x, y, z, ...⟩` notation for `Seq` -/
+syntax (name := vecNotation) "!⟨" term,* "⟩" : term
+
+macro_rules
+  | `(!⟨$term:term, $terms:term,*⟩) => `(seqCons $term !⟨$terms,*⟩)
+  | `(!⟨$term:term⟩) => `(seqCons $term ∅)
+  | `(!⟨⟩) => `(∅)
+
+@[app_unexpander seqCons]
+def vecConsUnexpander : Lean.PrettyPrinter.Unexpander
+  | `($_ $term !⟨$term2, $terms,*⟩) => `(!⟨$term, $term2, $terms,*⟩)
+  | `($_ $term !⟨$term2⟩) => `(!⟨$term, $term2⟩)
+  | `($_ $term ∅) => `(!⟨$term⟩)
+  | _ => throw ()
+
+/-- TODO: move to Ind.lean -/
+@[elab_as_elim] lemma order_induction_h_iSigmaOne (Γ)
+    {P : M → Prop} (hP : DefinablePred ℒₒᵣ (Γ, 1) P)
+    (ind : ∀ x, (∀ y < x, P y) → P x) : ∀ x, P x := order_induction_hh ℒₒᵣ Γ 1 hP ind
+
+theorem seq_induction {P : M → Prop} (hP : DefinablePred ℒₒᵣ (Γ, 1) P)
+  (hnil : P ∅) (hcons : ∀ s x, Seq s → P s → P (x ::ˢ s)) :
+    ∀ {s : M}, Seq s → P s := by
+  intro s sseq
+  induction s using order_induction_h_iSigmaOne
+  · exact Γ
+  · definability
+  case ind s ih =>
+    have : s = ∅ ∨ ∃ x s', Seq s' ∧ s = x ::ˢ s' := sseq.cases
+    rcases this with (rfl | ⟨x, s, hs, rfl⟩)
+    · exact hnil
+    · exact hcons s x hs (ih s (hs.lt_seqCons x) hs)
 
 end seq
 
-/-
-@[simp] lemma empty_seq : Seq (∅ : M) := ⟨0, by simp, by simp⟩
+namespace PR
+
+structure Construction (Γ : HierarchySymbol) {k : ℕ} (f : (Fin k → M) → M) (g : (Fin (k + 2) → M) → M) where
+  zero : HSemisentence ℒₒᵣ (k + 1) Γ
+  succ : HSemisentence ℒₒᵣ (k + 3) Γ
+  zero_defined : DefinedFunction ℒₒᵣ Γ f zero
+  succ_defined : DefinedFunction ℒₒᵣ Γ g succ
+
+variable {k : ℕ} {f : (Fin k → M) → M} {g : (Fin (k + 2) → M) → M}
+
+def ConstSeq (v : Fin k → M) (s : M) : Prop := Seq s ∧ ⟪0, f v⟫ ∈ s ∧ ∀ i < lh s, ∀ z, ⟪i, z⟫ ∈ s → ⟪i + 1, g (z :> i :> v)⟫ ∈ s
 
 
 
-def IsMapping (m a b : M) : Prop := m ⊆ a ×ʰᶠ b ∧ ∀ x ∈ a, ∃! y, ⟪x, y⟫ ∈ m
-
-scoped notation m:50 " :mapping " a " to " b:51 => IsMapping m a b
-
-private lemma isMapping_graph (m a b : M) :
-    m :mapping a to b ↔ (∀ x ∈ m, (∃ p₁ ≤ x, p₁ = π₁ x ∧ p₁ ∈ a) ∧ (∃ p₂ ≤ x, p₂ = π₂ x ∧ p₂ ∈ b)) ∧ ∀ x ∈ a, ∃! y, ⟪x, y⟫ ∈ m := by
-  simp [IsMapping, subset_iff, mem_product_iff']; intro _
-  constructor
-  · intro hm x hx; exact ⟨⟨π₁ x, by simp, rfl, (hm x hx).1⟩, ⟨π₂ x, by simp, rfl, (hm x hx).2⟩⟩
-  · intro h x hx; rcases h x hx with ⟨⟨_, _, rfl, h₁⟩, ⟨_, _, rfl, h₂⟩⟩; exact ⟨h₁, h₂⟩
-
-def _root_.LO.FirstOrder.Arith.isMappingDef : 𝚺₀-Semisentence 3 := .mkSigma
-  “∀[#0 < #1 + (#2 + #3 + 1) ^' 2](#0 ∈ #1 ↔ [∃∈ #2][∃∈ #4](!pairDef.val [#2, #1, #0]))” (by simp)
-
-private lemma isMapping_iff (s t m : M) :
-  IsMapping s t m ↔ ∀ x ∈ s, ∀ y
-
-end mapping
-
--/
+end PR
 
 end LO.FirstOrder.Arith.Model
 
