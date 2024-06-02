@@ -3,18 +3,6 @@ import Logic.Modal.Standard.HilbertStyle
 import Logic.Modal.Standard.Kripke.Semantics
 import Logic.Modal.Standard.Kripke.Soundness
 
-namespace LO.System
-
-variable {F : Type*} [LogicalConnective F] [DecidableEq F]
-variable {S : Type*} [System F S]
-variable {𝓢 : S} {p q r : F} {Γ Δ : List F} {T : Set F}
-variable [Minimal 𝓢] [NegDefinition F]
-
-open FiniteContext
-
-end LO.System
-
-
 namespace LO.Modal.Standard
 
 variable {α : Type u} [DecidableEq α] [Inhabited α]
@@ -47,41 +35,10 @@ lemma union_ParametricConsistent : (L)-Consistent (T₁ ∪ T₂) → (L)-Consis
   . intro Γ hΓ; exact h (by intro p hp; simp; left; exact hΓ p hp);
   . intro Γ hΓ; exact h (by intro p hp; simp; right; exact hΓ p hp);
 
-/-
-lemma union_ParametricConsistent' : (L)-Consistent (T₁ ∪ T₂) ↔ (L)-Consistent T₁ ∧ (L)-Consistent T₂ := by
-  constructor;
-  . simp only [ParametricConsistent];
-    intro h;
-    constructor;
-    . intro Γ hΓ; exact h (by intro p hp; simp; left; exact hΓ p hp);
-    . intro Γ hΓ; exact h (by intro p hp; simp; right; exact hΓ p hp);
-  . rintro ⟨h₁, h₂⟩;
-    intro Γ hΓ;
-    induction Γ using List.induction_with_singleton with
-    | hnil => exact h₁ (Γ := []) (by simp);
-    | hsingle p =>
-      simp at hΓ;
-      cases hΓ with
-      | inl h => exact h₁ (Γ := [p]) (by simp; exact h);
-      | inr h => exact h₂ (Γ := [p]) (by simp; exact h);
-    | hcons p Γ h ih =>
-      by_contra hC;
-      simp [List.conj'_cons_nonempty h, ←NegDefinition.neg] at hC;
-      have : L ⊬! List.conj' Γ ⟶ ⊥ := ih (by intro q hq; exact hΓ q (by right; assumption));
-      have : L ⊢! List.conj' Γ ⟶ ⊥ := disj₃'! (by
-        apply contra₀'!;
-        apply generalConj'!;
-        have := hΓ p (by simp);
-        sorry;
-      ) imp_id! $ demorgan₄'! hC;
-      contradiction;
--/
-
 lemma union_not_Lconsistent : ¬(L)-Consistent T₁ ∨ ¬(L)-Consistent T₂ → ¬(L)-Consistent (T₁ ∪ T₂) := by
   contrapose;
   push_neg;
   exact union_ParametricConsistent;
-
 
 lemma iff_insert_ParametricConsistent : (L)-Consistent (insert p T) ↔ ∀ {Γ : List (Formula α)}, (∀ q ∈ Γ, q ∈ T) → L ⊬! p ⋏ Γ.conj' ⟶ ⊥ := by
   constructor;
@@ -184,6 +141,7 @@ lemma not_mem_falsum_of_Lconsistent : ⊥ ∉ T := by
   have : L ⊢! ⊥ ⟶ ⊥ := efq!;
   contradiction;
 
+-- TODO: move
 lemma unprovable_imp_trans! (hpq : L ⊢! p ⟶ q) : L ⊬! p ⟶ r → L ⊬! q ⟶ r := by
   contrapose; simp [neg_neg];
   exact imp_trans! hpq;
@@ -238,11 +196,22 @@ lemma exists_maximal_Lconsistent_theory
       exact Set.subset_sUnion_of_mem a;
   ) T consisT
 
+
 lemma intro_union_ParametricConsistent (h : ∀ {Γ₁ Γ₂ : List (Formula α)}, (∀ p ∈ Γ₁, p ∈ T₁) → (∀ p ∈ Γ₂, p ∈ T₂) → L ⊬! Γ₁.conj' ⋏ Γ₂.conj' ⟶ ⊥) : (L)-Consistent (T₁ ∪ T₂) := by
+  classical!;
   intro Δ hΔ;
-  let Δ₁ := Δ
-  have := @h Δ Δ;
-  sorry;
+  simp at hΔ;
+  let Δ₁ := (Δ.filter (· ∈ T₁));
+  let Δ₂ := (Δ.filter (· ∈ T₂));
+  have := @h Δ₁ Δ₂ (by intro _ h; simpa using List.of_mem_filter h;) (by intro _ h; simpa using List.of_mem_filter h;)
+  exact unprovable_imp_trans! (by
+    apply FiniteContext.deduct'!;
+    apply iff_provable_list_conj.mpr;
+    intro q hq;
+    cases (hΔ q hq);
+    . exact iff_provable_list_conj.mp (conj₁'! FiniteContext.id!) q $ List.mem_filter_of_mem hq (by simpa);
+    . exact iff_provable_list_conj.mp (conj₂'! FiniteContext.id!) q $ List.mem_filter_of_mem hq (by simpa);
+  ) this;
 
 
 end Theory
@@ -550,12 +519,12 @@ abbrev CanonicalFrame (L : DeductionParameter α) [Inhabited (MCT L)] : Frame (M
 
 namespace CanonicalFrame
 
-variable [Inhabited (MCT L)]
+variable [Minimal L] [Inhabited (MCT L)]
 
 @[simp]
 lemma frame_def_box: (CanonicalFrame L) Ω₁ Ω₂ ↔ (∀ {p : Formula α}, □p ∈ Ω₁.theory → p ∈ Ω₂.theory) := by rfl
 
-lemma multiframe_def_multibox : (CanonicalFrame L)^[n] Ω₁ Ω₂ ↔ ∀ {p : Formula α}, □^[n]p ∈ Ω₁.theory → p ∈ Ω₂.theory := by
+lemma multiframe_def_multibox : ((CanonicalFrame L)^[n] Ω₁ Ω₂) ↔ ∀ {p : Formula α}, □^[n]p ∈ Ω₁.theory → p ∈ Ω₂.theory := by
   induction n generalizing Ω₁ Ω₂ with
   | zero =>
     simp_all;
@@ -568,49 +537,27 @@ lemma multiframe_def_multibox : (CanonicalFrame L)^[n] Ω₁ Ω₂ ↔ ∀ {p : 
       intro Ω₃ h₁₃ h₃₂ p h;
       exact ih.mp h₃₂ $ h₁₃ h;
     . intro h;
-      obtain ⟨Ω, hΩ⟩ := lindenbaum (L := L) (T := (□⁻¹Ω₁.theory ∪ ◇^[n]Ω₂.theory)) (by
-        intro Γ hΓ hC;
-        sorry;
+      obtain ⟨Ω, hΩ⟩ := lindenbaum (L := L) (T := (□⁻¹Ω₁.theory ∪ ◇^[n]Ω₂.theory)) $ by
+        apply intro_union_ParametricConsistent;
+        intro Γ Δ hΓ hΔ hC;
 
-        /-
+        replace hΓ : ∀ p ∈ Γ, □p ∈ Ω₁.theory := by simpa using hΓ;
+        have dΓconj : Ω₁.theory *⊢[L]! □Γ.conj' := membership_iff.mp $ iff_mem_box_conj'.mpr hΓ;
 
-        have h₁ : □(Γ₁.conj') ∈ Ω₁.theory := iff_mem_box_conj'.mpr hΓ₁;
-        have h₂ : (◇⁻¹^[n]Γ₂).conj' ∈ Ω₂.theory := by sorry;
+        have hΔ₂ : ∀ p ∈ ◇⁻¹^[n]Δ, p ∈ Ω₂.theory := by
+          intro p hp;
+          simpa using hΔ (◇^[n]p) (by simpa using List.of_mem_filter hp);
+        have hΔconj : (◇⁻¹^[n]Δ).conj' ∈ Ω₂.theory := iff_mem_conj'.mpr hΔ₂;
 
-        by_contra hC;
-        have d₁ := imply_box_distribute'! $ andImplyIffImplyImply'!.mp hC;
-        have d₂ : Ω₁.theory *⊢[L]! □(Γ₁.conj') := membership_iff.mp h₁;
-        have : □~(Γ₂.conj') ∈ Ω₁.theory := membership_iff.mpr $ (Context.of! (Γ := Ω₁.theory) d₁) ⨀ d₂;
+        have : L ⊢! Γ.conj' ⟶ □^[n](~(◇⁻¹^[n]Δ).conj') := imp_trans! (andImplyIffImplyImply'!.mp hC)
+          $ contra₂'! $ imp_trans! (conj₂'! multidiaDuality!)
+          $ imp_trans! iff_conj'multidia_multidiaconj'! $ by
+            rw [←(show Δ = ◇^[n]◇⁻¹^[n]Δ by exact List.eq_premultimop_multimop_of_subset_multimop hΔ)];
+            exact imp_id!;
+        have : L ⊢! □Γ.conj' ⟶ □^[(n + 1)](~(◇⁻¹^[n]Δ).conj') := by simpa only [UnaryModalOperator.multimop_succ] using imply_box_distribute'! this;
+        have : (◇⁻¹^[n]Δ).conj' ∉ Ω₂.theory := iff_mem_neg.mp $ h $ membership_iff.mpr $ (Context.of! this) ⨀ dΓconj;
 
-        -- have e : Γ₂.conj' = ◇^[n](◇⁻¹^[n]Γ₂).conj' := by sorry;
-        -- rw [e];
-
-
-
-
-        /-
-        have d₁ : Ω₁.theory *⊢[L]! □(Γ₁.conj') ⟶ ~(◇Γ₂.conj') := Context.of! $ imp_trans! (imply_box_distribute'! $ andImplyIffImplyImply'!.mp hC) (contra₁'! $ conj₁'! $ diaDuality!);
-        have d₂ : Ω₁.theory *⊢[L]! □(Γ₁.conj') := membership_iff.mp h₁;
-        have d₃ : Ω₁.theory *⊢[L]! ~(◇Γ₂.conj') := d₁ ⨀ d₂;
-        -/
-
-        have d₁ : L ⊢! □Γ₁.conj' ⟶ □(~(◇^[n](◇⁻¹^[n]Γ₂).conj')) := imply_box_distribute'! $ andImplyIffImplyImply'!.mp hC;
-        have d₂ : Ω₁.theory *⊢[L]! □(Γ₁.conj') := membership_iff.mp h₁;
-
-        have := membership_iff.mpr $ (Context.of! (Γ := Ω₁.theory) d₁) ⨀ d₂;
-
-        -- have := ih.mp (by sorry) this;
-
-        -- have : Ω₁.theory *⊢[L]! ◇(Γ₂.conj') ⟷ ~(□~(Γ₂.conj')) := diaDuality
-
-        sorry;
-        /-
-        have : (◇⁻¹^[n]Γ₂).conj' ∉ Ω₂.theory := by
-          apply iff_mem_neg.mp;
-        -/
         contradiction;
-        -/
-      )
       existsi Ω;
       constructor;
       . intro p hp;
@@ -621,6 +568,16 @@ lemma multiframe_def_multibox : (CanonicalFrame L)^[n] Ω₁ Ω₂ ↔ ∀ {p : 
         intro p hp;
         apply hΩ;
         simp_all;
+
+lemma multiframe_def_multibox' : ((CanonicalFrame L)^[n] Ω₁ Ω₂) ↔ ∀ {p : Formula α}, p ∈ (□⁻¹^[n]Ω₁.theory) → p ∈ Ω₂.theory := by
+  constructor;
+  . intro h p hp; exact multiframe_def_multibox.mp h hp;
+  . intro h; apply multiframe_def_multibox.mpr; assumption;
+
+lemma multiframe_def_multibox'' : ((CanonicalFrame L)^[n] Ω₁ Ω₂) ↔ ∀ {p : Formula α}, p ∈ (□⁻¹^[n]Ω₁.theory) → p ∈ Ω₂.theory := by
+  constructor;
+  . intro h p hp; exact multiframe_def_multibox.mp h hp;
+  . intro h; apply multiframe_def_multibox.mpr; assumption;
 
 lemma multiframe_def_multidia : (CanonicalFrame L)^[n] Ω₁ Ω₂ ↔ ∀ {p : Formula α}, (p ∈ Ω₂.theory → ◇^[n]p ∈ Ω₁.theory) := Iff.trans multiframe_def_multibox multibox_multidia
 

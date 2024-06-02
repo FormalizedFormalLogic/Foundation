@@ -67,9 +67,31 @@ lemma subsetK : (𝗞 : AxiomSet α) ⊆ 𝗚𝗲(l) := by
   | nil => simp;
   | cons => simp; apply Set.subset_union_of_subset_right (by assumption);
 
-lemma subsetK' (h : 𝗚𝗲(l) ⊆ Ax): 𝗞 ⊆ Ax := Set.Subset.trans subsetK h
+lemma subsetK' (h : 𝗚𝗲(l) ⊆ Ax) : 𝗞 ⊆ Ax := Set.Subset.trans subsetK h
 
 -- instance instK : System.K (𝐆𝐞(l) : AxiomSet α) := K_of_subset_K (by simp)
+
+lemma mem (h : x ∈ l) : (𝗴𝗲(x) : AxiomSet α) ⊆ 𝗚𝗲(l) := by
+  induction l with
+  | nil => contradiction;
+  | cons a as ih =>
+    simp_all;
+    cases h;
+    . subst_vars; tauto;
+    . apply Set.subset_union_of_subset_right $ ih (by assumption);
+
+@[simp]
+lemma subset (h : l₁ ⊆ l₂) : (𝗚𝗲(l₁) : AxiomSet α) ⊆ 𝗚𝗲(l₂) := by
+  induction l₁ generalizing l₂ <;> induction l₂;
+  case nil.nil | cons.nil => simp_all;
+  case nil.cons => simp_all; apply Set.subset_union_of_subset_right (by simp);
+  case cons.cons a as iha b bs ihb =>
+    simp_all;
+    constructor;
+    . cases h.1;
+      . subst_vars; tauto;
+      . apply Set.subset_union_of_subset_right $ mem (by assumption);
+    . simpa using (iha h.2);
 
 end MultiGeach
 
@@ -84,6 +106,16 @@ protected abbrev Geach (l : List Axioms.Geach.Taple) : DeductionParameter α whe
 notation "𝐆𝐞(" l ")" => DeductionParameter.Geach l
 instance instNormal : Normal (α := α) 𝐆𝐞(l) where
   include_K := by simp [AxiomSet.MultiGeach.subsetK]
+
+namespace Geach
+
+@[simp]
+lemma subset_axm (h : l₁ ⊆ l₂ := by simp_all) : (Ax(𝐆𝐞(l₁)) : AxiomSet α) ⊆ (Ax(𝐆𝐞(l₂)) : AxiomSet α) := by simp_all;
+
+@[simp]
+lemma reducible (h : l₁ ⊆ l₂ := by simp_all) : (𝐆𝐞(l₁) : DeductionParameter α) ≤ₛ 𝐆𝐞(l₂) := by simp_all;
+
+end Geach
 
 protected class IsGeach (L : DeductionParameter α) where
   taples : List Axioms.Geach.Taple

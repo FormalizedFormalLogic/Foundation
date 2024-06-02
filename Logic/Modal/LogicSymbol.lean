@@ -82,7 +82,7 @@ lemma forall_multimop_of_subset_multimop (h : s ⊆ t.multimop i n) : ∀ p ∈ 
   use q;
   simp_all;
 
-lemma premultimop_multimop_eq_of_subset_premultimop (h : s ⊆ t.multimop i n) : (s.premultimop i n |>.multimop i n) = s := by
+lemma eq_premultimop_multimop_of_subset_premultimop (h : s ⊆ t.multimop i n) : (s.premultimop i n |>.multimop i n) = s := by
   apply Set.eq_of_subset_of_subset;
   . intro p hp;
     obtain ⟨q, hq₁, hq₂⟩ := hp;
@@ -104,11 +104,28 @@ protected abbrev premultimop (i : ι) (n : ℕ) (l : List F) := l.filter (λ (p 
 
 protected abbrev premop (i : ι) (l : List F) := l.filter (λ (p : F) => (mop i) p ∈ l)
 
-variable {l : List F}
+variable {l : List F} {s : Set F}
 
 @[simp] lemma mop_iff_multimop_one : l.mop i = l.multimop i 1 := by rfl
 
 @[simp] lemma iff_premop_premultimop_one : l.premop i = l.premultimop i 1 := by rfl
+
+@[simp] lemma multimop_nil : (([] :List F).multimop i n) = [] := by simp;
+
+@[simp] lemma multimop_cons {f : F} : ((f :: fs).multimop i n) = (((mop i)^[n] f) :: (fs.multimop i n)) := by simp;
+
+@[simp] lemma premultimop_nil : (([] :List F).premultimop i n) = [] := by simp;
+
+lemma forall_multimop_of_subset_multimop (h : ∀ p ∈ l, p ∈ s.multimop i n) : ∀ p ∈ l, ∃ q ∈ s, p = (mop i)^[n] q := by
+  intro p hp;
+  obtain ⟨q, _, _⟩ := by simpa only [Set.mem_image] using h p hp;
+  use q; subst_vars; simpa;
+
+lemma eq_premultimop_multimop_of_subset_multimop (h : ∀ p ∈ l, p ∈ s.multimop i n) : l = (l.premultimop i n).multimop i n := by
+  ext n q;
+  constructor;
+  . sorry;
+  . sorry;
 
 end List
 
@@ -137,7 +154,7 @@ lemma multimop_mem_coe : p ∈ s.multimop i n ↔ p ∈ (↑s : Set F).multimop 
 lemma premultimop_coe : ↑(s.premultimop i n) = (↑s : Set F).premultimop i n := by apply Finset.coe_preimage;
 
 lemma premultimop_multimop_eq_of_subset_multimop {s : Finset F} {t : Set F} (hs : ↑s ⊆ t.multimop i n) : (s.premultimop i n).multimop i n = s := by
-  have := Set.premultimop_multimop_eq_of_subset_premultimop hs;
+  have := Set.eq_premultimop_multimop_of_subset_premultimop hs;
   rw [←premultimop_coe, ←multimop_coe] at this;
   exact Finset.coe_inj.mp this;
 

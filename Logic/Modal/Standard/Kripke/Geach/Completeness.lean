@@ -10,85 +10,49 @@ open Formula
 
 variable {Λ : AxiomSet α} [Inhabited α] [DecidableEq α]
 
-/-
-instance AxiomSet.Geach.Canonical_with_K [Inhabited (MCT (α := α) 𝐠𝐞(t))] (t) : Canonical (α := α) 𝐠𝐞(t) where
-  realize := by
-    sorry;
-    /-
-    -- simp only [Semantics.RealizeSet.union_iff];
-    apply AxiomSet.Geach.definability t |>.defines _ |>.mp;
+open Theory MaximalParametricConsistentTheory CanonicalFrame in
+lemma definability_canonicalFrame_GeachAxiom {L : DeductionParameter α} [L.HasNec] [includeK : L.IncludeK] [Inhabited (MCT L)] (hAx : 𝗴𝗲(t) ⊆ Ax(L)) : GeachConfluent (α := α) t (CanonicalFrame L) := by
+  have : L.Normal := ⟨⟩;
+
+  intro Ω₁ Ω₂ Ω₃ h;
+  have ⟨r₁₂, r₁₃⟩ := h; clear h;
+  have ⟨Ω, hΩ⟩ := MaximalParametricConsistentTheory.lindenbaum (L := L) (T := ((□⁻¹^[t.m]Ω₂.theory) ∪ (□⁻¹^[t.n]Ω₃.theory))) $ by
+    apply intro_union_ParametricConsistent;
+    intro Γ Δ hΓ hΔ hC;
+    replace hΓ : ∀ p ∈ Γ, □^[t.m]p ∈ Ω₂.theory := by simpa using hΓ;
+    have hΓconj : □^[t.m](Γ.conj') ∈ Ω₂.theory := iff_mem_multibox_conj'.mpr hΓ;
+
+    replace hΔ : ∀ p ∈ Δ, □^[t.n]p ∈ Ω₃.theory := by simpa using hΔ;
+    have : □^[t.n](Δ.conj') ∈ Ω₃.theory := iff_mem_multibox_conj'.mpr hΔ;
+
+    have : □^[t.j](◇^[t.n](Γ.conj')) ∈ Ω₁.theory := iff_mem_imp.mp
+      (membership_iff.mpr $ Context.of! ⟨Deduction.maxm (by apply hAx; simp_all)⟩)
+      (multiframe_def_multidia.mp r₁₂ hΓconj)
+    have : ◇^[t.n]Γ.conj' ∈ Ω₃.theory := multiframe_def_multibox.mp r₁₃ this;
+
+    have : L ⊢! □^[t.n](Δ.conj') ⋏ ◇^[t.n](Γ.conj') ⟶ ⊥ := by
+      apply andImplyIffImplyImply'!.mpr;
+      exact imp_trans!
+        (show L ⊢! □^[t.n](Δ.conj') ⟶ □^[t.n](~Γ.conj') by exact imply_multibox_distribute'! $ contra₁'! $ andImplyIffImplyImply'!.mp hC)
+        (show L ⊢! □^[t.n](~Γ.conj') ⟶ ~(◇^[t.n]Γ.conj') by exact contra₁'! $ conj₁'! $ multidiaDuality!);
+    have : L ⊬! □^[t.n](Δ.conj') ⋏ ◇^[t.n](Γ.conj') ⟶ ⊥ := by simpa using Ω₃.consistent (Γ := [□^[t.n](Δ.conj'), ◇^[t.n](Γ.conj')]) (by simp_all)
+
+    contradiction;
+  existsi Ω;
+  simp [multiframe_def_multibox];
+  constructor <;> { intros; apply hΩ; simp_all; }
+
+lemma definability_canonicalFrame_multiGeachAxiom {L : DeductionParameter α} [L.HasNec] [Inhabited (MCT L)] (hAx : 𝗚𝗲(l) ⊆ Ax(L)) : MultiGeachConfluent (α := α) l (CanonicalFrame L) := by
+  induction l with
+  | nil => simp [MultiGeachConfluent];
+  | cons t ts ih =>
+    simp;
     constructor;
-    . apply AxiomSet.K.definability.defines _ _ |>.mp; trivial;
-    . apply AxiomSet.Geach.definability t |>.defines _ |>.mp;
-      rintro Ω₁ Ω₂ Ω₃ ⟨hi, hj⟩;
-      let ⟨Ω, hΩ⟩ := MaximalΛConsistentTheory.lindenbaum (Λ := 𝐊 ∪ 𝐠𝐞(t)) (T := (□⁻¹^[t.m]Ω₂.theory) ∪ (□⁻¹^[t.n]Ω₃.theory)) (by
-        intro Γ hΓ;
-        sorry;
+    . exact definability_canonicalFrame_GeachAxiom (includeK := ⟨(Set.Subset.trans AxiomSet.MultiGeach.subsetK hAx)⟩) (by aesop)
+    . apply ih;
+      simp_all;
 
-        -- have h₂ : □^[l.m](⋀Δ₂) ∈ Ω₂ := by sorry;
-        -- have h₃ : □^[l.n](⋀Δ₃) ∈ Ω₃ := by sorry;
-      );
-      existsi Ω;
-      constructor;
-      . apply Kripke.CanonicalModel.multiframe_def_multibox.mpr;
-        intro p hp;
-        apply hΩ;
-        simp_all;
-      . apply Kripke.CanonicalModel.multiframe_def_multibox.mpr;
-        intro p hp;
-        apply hΩ;
-        simp_all;
-    -/
--/
-
-/-
-lemma subset_Canonical₂ [HasAxiomK Λ] (hΛ : Λ ⊆ Λ') (h : CanonicalFrame Λ ⊧ p) : CanonicalFrame Λ' ⊧ p := by
-  sorry;
-
-lemma subset_Canonical [HasAxiomK Λ] (hΛ : Λ ⊆ Λ') (h : CanonicalFrame Λ ⊧* P) : CanonicalFrame Λ' ⊧* P := by
-  simp_all only [Semantics.realizeSet_iff];
-  intro p hp;
-  exact subset_Canonical₂ hΛ $ h hp;
-
-lemma str {P : ∀ {W}, (Frame W α) → Prop} (hs : Λ ⊆ Λ') : P (CanonicalFrame Λ) → P (CanonicalFrame Λ') := by
-  sorry;
--/
-
-/-
-instance AxiomSet.GeachLogic.Canonical (ts) : Canonical (𝐆𝐞(ts) : AxiomSet α) where
-  realize := by
-    apply AxiomSet.GeachLogic.definability ts |>.defines _ _ |>.mpr;
-    induction ts with
-    | nil => simp [MultiGeachConfluent];
-    | cons t ts ih =>
-      simp;
-      sorry;
-      /-
-      constructor;
-      . exact str (P := GeachConfluent t) (Λ := 𝐠𝐞(t)) (by simp) (by
-          apply AxiomSet.Geach.definability t |>.defines _ _ |>.mp;
-
-          sorry
-        );
-        apply str (P := GeachConfluent t) (α := α) (Λ := 𝐠𝐞(t)) (Λ' := 𝐆𝐞(ts) ∪ 𝐠𝐞(t)) (by simp);
-        exact AxiomSet.Geach.Canonical_with_K t |>.realize;
-      . exact str (P := MultiGeachConfluent ts) (by simp) ih;
-      -/
-
-    /-
-    induction ts with
-    | nil => apply AxiomSet.K.definability.defines _ |>.mp; trivial;
-    | cons t ts ih =>
-      simp;
-      constructor;
-      . have := by simpa only [Semantics.RealizeSet.union_iff] using AxiomSet.Geach.Canonical_with_K (α := α) t |>.valid;
-        exact subset_Canonical (by simp; apply Set.subset_union_of_subset_right AxiomSet.GeachLogic.subsetK;) this.2 ;
-      . exact subset_Canonical (by simp) ih;
-    -/
--/
-
-
-instance geach_canonical : Canonical (𝐆𝐞(l) : DeductionParameter α) := canonical_of_definability (AxiomSet.MultiGeach.definability l) (by sorry)
+instance geach_canonical : Canonical (𝐆𝐞(l) : DeductionParameter α) := canonical_of_definability (AxiomSet.MultiGeach.definability l) $ definability_canonicalFrame_multiGeachAxiom (by simp)
 
 variable {L : DeductionParameter α}
 

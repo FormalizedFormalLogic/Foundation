@@ -136,10 +136,10 @@ def boxverum : 𝓢 ⊢ (□⊤ : F) := multiboxverum (n := 1)
 
 
 def implyMultiboxDistribute' (h : 𝓢 ⊢ p ⟶ q) : 𝓢 ⊢ □^[n]p ⟶ □^[n]q := multibox_axiomK' $ multinec h
-@[simp] lemma imply_multibox_distribute'! (h : 𝓢 ⊢! p ⟶ q) : 𝓢 ⊢! □^[n]p ⟶ □^[n]q := ⟨implyMultiboxDistribute' h.some⟩
+lemma imply_multibox_distribute'! (h : 𝓢 ⊢! p ⟶ q) : 𝓢 ⊢! □^[n]p ⟶ □^[n]q := ⟨implyMultiboxDistribute' h.some⟩
 
 def implyBoxDistribute' (h : 𝓢 ⊢ p ⟶ q) : 𝓢 ⊢ □p ⟶ □q := implyMultiboxDistribute' (n := 1) h
-@[simp] lemma imply_box_distribute'! (h : 𝓢 ⊢! p ⟶ q) : 𝓢 ⊢! □p ⟶ □q := ⟨implyBoxDistribute' h.some⟩
+lemma imply_box_distribute'! (h : 𝓢 ⊢! p ⟶ q) : 𝓢 ⊢! □p ⟶ □q := ⟨implyBoxDistribute' h.some⟩
 
 
 def distribute_multibox_and : 𝓢 ⊢ □^[n](p ⋏ q) ⟶ □^[n]p ⋏ □^[n]q := implyRightAnd (implyMultiboxDistribute' conj₁) (implyMultiboxDistribute' conj₂)
@@ -149,10 +149,10 @@ def distribute_box_and : 𝓢 ⊢ □(p ⋏ q) ⟶ □p ⋏ □q := distribute_m
 @[simp] lemma distribute_box_and! : 𝓢 ⊢! □(p ⋏ q) ⟶ □p ⋏ □q := ⟨distribute_box_and⟩
 
 def distribute_multibox_and' (h : 𝓢 ⊢ □^[n](p ⋏ q)) : 𝓢 ⊢ □^[n]p ⋏ □^[n]q := distribute_multibox_and ⨀ h
-@[simp] lemma distribute_multibox_and'! (d : 𝓢 ⊢! □^[n](p ⋏ q)) : 𝓢 ⊢! □^[n]p ⋏ □^[n]q := ⟨distribute_multibox_and' d.some⟩
+lemma distribute_multibox_and'! (d : 𝓢 ⊢! □^[n](p ⋏ q)) : 𝓢 ⊢! □^[n]p ⋏ □^[n]q := ⟨distribute_multibox_and' d.some⟩
 
 def distribute_box_and' (h : 𝓢 ⊢ □(p ⋏ q)) : 𝓢 ⊢ □p ⋏ □q := distribute_multibox_and' (n := 1) h
-@[simp] lemma distribute_box_and'! (d : 𝓢 ⊢! □(p ⋏ q)) : 𝓢 ⊢! □p ⋏ □q := ⟨distribute_box_and' d.some⟩
+lemma distribute_box_and'! (d : 𝓢 ⊢! □(p ⋏ q)) : 𝓢 ⊢! □p ⋏ □q := ⟨distribute_box_and' d.some⟩
 
 
 def collect_multibox_and : 𝓢 ⊢ □^[n]p ⋏ □^[n]q ⟶ □^[n](p ⋏ q) := by
@@ -165,92 +165,11 @@ def collect_box_and : 𝓢 ⊢ □p ⋏ □q ⟶ □(p ⋏ q) := collect_multibo
 @[simp] lemma collect_box_and! : 𝓢 ⊢! □p ⋏ □q ⟶ □(p ⋏ q) := ⟨collect_box_and⟩
 
 def collect_multibox_and' (h : 𝓢 ⊢ □^[n]p ⋏ □^[n]q) : 𝓢 ⊢ □^[n](p ⋏ q) := collect_multibox_and ⨀ h
-@[simp] lemma collect_multibox_and'! (h : 𝓢 ⊢! □^[n]p ⋏ □^[n]q) : 𝓢 ⊢! □^[n](p ⋏ q) := ⟨collect_multibox_and' h.some⟩
+lemma collect_multibox_and'! (h : 𝓢 ⊢! □^[n]p ⋏ □^[n]q) : 𝓢 ⊢! □^[n](p ⋏ q) := ⟨collect_multibox_and' h.some⟩
 
 def collect_box_and' (h : 𝓢 ⊢ □p ⋏ □q) : 𝓢 ⊢ □(p ⋏ q) := collect_multibox_and' (n := 1) h
-@[simp] lemma collect_box_and'! (h : 𝓢 ⊢! □p ⋏ □q) : 𝓢 ⊢! □(p ⋏ q) := ⟨collect_box_and' h.some⟩
+lemma collect_box_and'! (h : 𝓢 ⊢! □p ⋏ □q) : 𝓢 ⊢! □(p ⋏ q) := ⟨collect_box_and' h.some⟩
 
-
-lemma multibox_conj'_iff! : 𝓢 ⊢! □^[n](Γ.conj') ↔ ∀ p ∈ Γ, 𝓢 ⊢! □^[n]p := by
-  induction Γ using List.induction_with_singleton with
-  | hnil => simp;
-  | hsingle => simp;
-  | hcons p Γ h ih =>
-    simp_all;
-    constructor;
-    . intro h;
-      have := distribute_multibox_and'! h;
-      constructor;
-      . exact conj₁'! this;
-      . exact ih.mp (conj₂'! this);
-    . rintro ⟨h₁, h₂⟩;
-      exact collect_multibox_and'! $ conj₃'! h₁ (ih.mpr h₂);
-lemma box_conj'_iff! : 𝓢 ⊢! □(Γ.conj') ↔ ∀ p ∈ Γ, 𝓢 ⊢! □p := multibox_conj'_iff! (n := 1)
-
-
-def collect_multibox_or : 𝓢 ⊢ □^[n]p ⋎ □^[n]q ⟶ □^[n](p ⋎ q) := disj₃'' (multibox_axiomK' $ multinec disj₁) (multibox_axiomK' $ multinec disj₂)
-@[simp] lemma collect_multibox_or! : 𝓢 ⊢! □^[n]p ⋎ □^[n]q ⟶ □^[n](p ⋎ q) := ⟨collect_multibox_or⟩
-
-def collect_box_or : 𝓢 ⊢ □p ⋎ □q ⟶ □(p ⋎ q) := collect_multibox_or (n := 1)
-@[simp] lemma collect_box_or! : 𝓢 ⊢! □p ⋎ □q ⟶ □(p ⋎ q) := ⟨collect_box_or⟩
-
-def collect_multibox_or' (h : 𝓢 ⊢ □^[n]p ⋎ □^[n]q) : 𝓢 ⊢ □^[n](p ⋎ q) := collect_multibox_or ⨀ h
-@[simp] lemma collect_multibox_or'! (h : 𝓢 ⊢! □^[n]p ⋎ □^[n]q) : 𝓢 ⊢! □^[n](p ⋎ q) := ⟨collect_multibox_or' h.some⟩
-
-def collect_box_or' (h : 𝓢 ⊢ □p ⋎ □q) : 𝓢 ⊢ □(p ⋎ q) := collect_multibox_or' (n := 1) h
-@[simp] lemma collect_box_or'! (h : 𝓢 ⊢! □p ⋎ □q) : 𝓢 ⊢! □(p ⋎ q) := ⟨collect_box_or' h.some⟩
-
-
-def collect_dia_or : 𝓢 ⊢ ◇p ⋎ ◇q ⟶ ◇(p ⋎ q) := by
-  simp [StandardModalLogicalConnective.duality'];
-  apply contra₁';
-  apply deduct';
-  apply demorgan₂';
-  apply dniAnd';
-  apply deductInv';
-  exact impTrans (implyBoxDistribute' demorgan₃) distribute_box_and;
-@[simp] lemma collect_dia_or! : 𝓢 ⊢! ◇p ⋎ ◇q ⟶ ◇(p ⋎ q) := ⟨collect_dia_or⟩
-
-def collect_dia_or' (h : 𝓢 ⊢ ◇p ⋎ ◇q) : 𝓢 ⊢ ◇(p ⋎ q) := collect_dia_or ⨀ h
-@[simp] lemma collect_dia_or'! (h : 𝓢 ⊢! ◇p ⋎ ◇q) : 𝓢 ⊢! ◇(p ⋎ q) := ⟨collect_dia_or' h.some⟩
-
-/-
-def collect_multidia_or : 𝓢 ⊢ ◇^[n]p ⋎ ◇^[n]q ⟶ ◇^[n](p ⋎ q) := by
-  induction n with
-  | zero => simp; apply impId;
-  | succ n ih =>
-    simp [StandardModalLogicalConnective.duality'];
-    apply contra₁';
-    apply deduct';
-    apply demorgan₂';
-    apply dniAnd';
-    apply deductInv';
-    exact impTrans (by apply demorgan₃;) distribute_box_and;
-@[simp] lemma collect_dia_or! : 𝓢 ⊢! ◇p ⋎ ◇q ⟶ ◇(p ⋎ q) := ⟨collect_dia_or⟩
--/
-
-
-/-　TODO: 証明済みだが，妙に時間がかかって原因が分からないため一旦コメントアウトしている．
-def distributeDiaAnd : 𝓢 ⊢ ◇(p ⋏ q) ⟶ ◇p ⋏ ◇q := by
-  simp only [StandardModalLogicalConnective.duality'];
-  have : 𝓢 ⊢ ~(~(□~p) ⋏ ~(□~q)) ⟶ □~p ⋎ □~q := FiniteContext.deduct' $ orReplace' (demorgan₄' $ FiniteContext.byAxm (by simp)) dne dne;
-  exact contra₂' $ impTrans (impTrans this collect_box_or) (implyBoxDistribute' demorgan₁);
-@[simp] lemma distribute_dia_and! : 𝓢 ⊢! ◇(p ⋏ q) ⟶ ◇p ⋏ ◇q := ⟨distributeDiaAnd⟩
-
-def distributeDiaAnd' (h : 𝓢 ⊢ ◇(p ⋏ q)) : 𝓢 ⊢ ◇p ⋏ ◇q := distributeDiaAnd ⨀ h
-lemma distribute_dia_and'! (h : 𝓢 ⊢! ◇(p ⋏ q)) : 𝓢 ⊢! ◇p ⋏ ◇q := ⟨distributeDiaAnd' h.some⟩
--/
-
-
-/-
-lemma distribute_multidia_conj'! (d : 𝓢 ⊢! ◇^[n](Γ.conj')) : 𝓢 ⊢! (◇^[n]Γ).conj' := by
-  induction Γ using List.induction_with_singleton with
-  | hnil => simp;
-  | hsingle => simp_all;
-  | hcons p Γ h ih => sorry;
-
-lemma distribute_dia_conj'! (d : 𝓢 ⊢! ◇(Γ.conj')) : 𝓢 ⊢! (◇Γ).conj' := distribute_multidia_conj'! (n := 1) d
--/
 
 lemma iff_conj'multibox_multiboxconj'! : 𝓢 ⊢! □^[n](Γ.conj') ↔ 𝓢 ⊢! (□^[n]Γ).conj' := by
   induction Γ using List.induction_with_singleton with
@@ -267,8 +186,9 @@ lemma iff_conj'multibox_multiboxconj'! : 𝓢 ⊢! □^[n](Γ.conj') ↔ 𝓢 �
     . intro h;
       simp [e] at h;
       exact collect_multibox_and'! $ conj₃'! (conj₁'! h) (ih.mpr $ conj₂'! h);
+lemma iff_conj'box_boxconj'! : 𝓢 ⊢! □(Γ.conj') ↔ 𝓢 ⊢! (□Γ).conj' := iff_conj'multibox_multiboxconj'! (n := 1)
 
-lemma imply_multiboxconj'_conj'multibox! : 𝓢 ⊢! List.conj' (□^[n]Γ) ⟶ □^[n]List.conj' Γ := by
+lemma imply_multiboxconj'_conj'multibox! : 𝓢 ⊢! (□^[n]Γ).conj' ⟶ □^[n]Γ.conj' := by
   induction Γ using List.induction_with_singleton with
   | hnil => simp only [List.map_nil, List.conj'_nil]; exact dhyp! multiboxverum!;
   | hsingle => simp only [List.map_cons, List.map_nil, List.conj'_singleton, imp_id!, dn_collect_imply'!, dne'!];
@@ -278,6 +198,83 @@ lemma imply_multiboxconj'_conj'multibox! : 𝓢 ⊢! List.conj' (□^[n]Γ) ⟶ 
       (List.conj'_cons_nonempty (a := □^[n]p) (as := □^[n]Γ) (by simpa)),
     ];
     exact imp_trans! (andReplaceRight! ih) collect_multibox_and!;
+lemma imply_boxconj'_conj'box! : 𝓢 ⊢! (□Γ).conj' ⟶ □Γ.conj' := imply_multiboxconj'_conj'multibox! (n := 1)
+
+lemma multiboxConj'_iff! : 𝓢 ⊢! □^[n](Γ.conj') ↔ ∀ p ∈ Γ, 𝓢 ⊢! □^[n]p := by
+  induction Γ using List.induction_with_singleton with
+  | hnil => simp;
+  | hsingle => simp;
+  | hcons p Γ h ih =>
+    simp_all;
+    constructor;
+    . intro h;
+      have := distribute_multibox_and'! h;
+      constructor;
+      . exact conj₁'! this;
+      . exact ih.mp (conj₂'! this);
+    . rintro ⟨h₁, h₂⟩;
+      exact collect_multibox_and'! $ conj₃'! h₁ (ih.mpr h₂);
+lemma boxConj'_iff! : 𝓢 ⊢! □(Γ.conj') ↔ ∀ p ∈ Γ, 𝓢 ⊢! □p := multiboxConj'_iff! (n := 1)
+
+
+
+def collect_multibox_or : 𝓢 ⊢ □^[n]p ⋎ □^[n]q ⟶ □^[n](p ⋎ q) := disj₃'' (multibox_axiomK' $ multinec disj₁) (multibox_axiomK' $ multinec disj₂)
+@[simp] lemma collect_multibox_or! : 𝓢 ⊢! □^[n]p ⋎ □^[n]q ⟶ □^[n](p ⋎ q) := ⟨collect_multibox_or⟩
+
+def collect_box_or : 𝓢 ⊢ □p ⋎ □q ⟶ □(p ⋎ q) := collect_multibox_or (n := 1)
+@[simp] lemma collect_box_or! : 𝓢 ⊢! □p ⋎ □q ⟶ □(p ⋎ q) := ⟨collect_box_or⟩
+
+def collect_multibox_or' (h : 𝓢 ⊢ □^[n]p ⋎ □^[n]q) : 𝓢 ⊢ □^[n](p ⋎ q) := collect_multibox_or ⨀ h
+lemma collect_multibox_or'! (h : 𝓢 ⊢! □^[n]p ⋎ □^[n]q) : 𝓢 ⊢! □^[n](p ⋎ q) := ⟨collect_multibox_or' h.some⟩
+
+def collect_box_or' (h : 𝓢 ⊢ □p ⋎ □q) : 𝓢 ⊢ □(p ⋎ q) := collect_multibox_or' (n := 1) h
+lemma collect_box_or'! (h : 𝓢 ⊢! □p ⋎ □q) : 𝓢 ⊢! □(p ⋎ q) := ⟨collect_box_or' h.some⟩
+
+
+def collect_dia_or : 𝓢 ⊢ ◇p ⋎ ◇q ⟶ ◇(p ⋎ q) := by
+  simp [StandardModalLogicalConnective.duality'];
+  apply contra₁';
+  apply deduct';
+  apply demorgan₂';
+  apply dniAnd';
+  apply deductInv';
+  exact impTrans (implyBoxDistribute' demorgan₃) distribute_box_and;
+@[simp] lemma collect_dia_or! : 𝓢 ⊢! ◇p ⋎ ◇q ⟶ ◇(p ⋎ q) := ⟨collect_dia_or⟩
+
+def collect_dia_or' (h : 𝓢 ⊢ ◇p ⋎ ◇q) : 𝓢 ⊢ ◇(p ⋎ q) := collect_dia_or ⨀ h
+@[simp] lemma collect_dia_or'! (h : 𝓢 ⊢! ◇p ⋎ ◇q) : 𝓢 ⊢! ◇(p ⋎ q) := ⟨collect_dia_or' h.some⟩
+
+-- TODO: おそらく同様に証明可能だが，非常に遅いので一旦保留
+-- @[simp] def distributeMultidiaAnd!: 𝓢 ⊢! ◇^[n](p ⋏ q) ⟶ ◇^[n]p ⋏ ◇^[n]q := by sorry;
+
+@[simp] lemma distribute_multidia_and!: 𝓢 ⊢! ◇^[n](p ⋏ q) ⟶ ◇^[n]p ⋏ ◇^[n]q := by
+  suffices h : 𝓢 ⊢! ~(□^[n](~(p ⋏ q))) ⟶ ~(□^[n](~p)) ⋏ ~(□^[n](~q)) by
+    exact imp_trans! (imp_trans! (conj₁'! multidiaDuality!) h) $ andReplace! (conj₂'! multidiaDuality!) (conj₂'! multidiaDuality!);
+  apply FiniteContext.deduct'!;
+  apply demorgan₃'!;
+  apply FiniteContext.deductInv'!;
+  apply contra₀'!;
+  apply imp_trans! collect_multibox_or! (imply_multibox_distribute'! demorgan₁!)
+
+@[simp] lemma distribute_dia_and! : 𝓢 ⊢! ◇(p ⋏ q) ⟶ ◇p ⋏ ◇q := distribute_multidia_and! (n := 1)
+
+
+-- TODO: おそらく定義可能だが同様に非常に遅い
+-- def iffConj'multidiaMultidiaconj'! : 𝓢 ⊢ ◇^[n](Γ.conj') ⟶ (◇^[n]Γ).conj' := by sorry
+
+@[simp] lemma iff_conj'multidia_multidiaconj'! : 𝓢 ⊢! ◇^[n](Γ.conj') ⟶ (◇^[n]Γ).conj' := by
+  induction Γ using List.induction_with_singleton with
+  | hnil => exact dhyp! verum!;
+  | hsingle p => simp;
+  | hcons p Γ h ih =>
+    simp [
+      (List.conj'_cons_nonempty h),
+      (List.conj'_cons_nonempty (a := ◇^[n]p) (as := ◇^[n]Γ) (by simpa)),
+    ];
+    exact imp_trans! distribute_multidia_and! $ andReplaceRight! (p := ◇^[n]p) ih;
+
+-- def distributeDiaAnd' (h : 𝓢 ⊢ ◇(p ⋏ q)) : 𝓢 ⊢ ◇p ⋏ ◇q := distributeDiaAnd ⨀ h
+lemma distribute_dia_and'! (h : 𝓢 ⊢! ◇(p ⋏ q)) : 𝓢 ⊢! ◇p ⋏ ◇q := distribute_dia_and! ⨀ h
 
 
 def axiomT [HasAxiomT 𝓢] : 𝓢 ⊢ □p ⟶ p := HasAxiomT.T _

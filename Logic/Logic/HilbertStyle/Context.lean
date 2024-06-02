@@ -89,9 +89,9 @@ instance : Compact (FiniteContext F 𝓢) where
   φ_subset := by simp
   φ_finite := by rintro ⟨Γ⟩; simp [Collection.Finite, Collection.set]
 
-def byAxm {p} (h : p ∈ Γ) : Γ ⊢[𝓢] p := Axiomatized.prfAxm (by simpa)
+def byAxm {p} (h : p ∈ Γ := by simp) : Γ ⊢[𝓢] p := Axiomatized.prfAxm (by simpa)
 
-lemma by_axm! {p} (h : p ∈ Γ) : Γ ⊢[𝓢]! p := Axiomatized.provable_axm _ (by simpa)
+lemma by_axm! {p} (h : p ∈ Γ := by simp) : Γ ⊢[𝓢]! p := Axiomatized.provable_axm _ (by simpa)
 
 def weakening (h : Γ ⊆ Δ) {p} : Γ ⊢[𝓢] p → Δ ⊢[𝓢] p := Axiomatized.weakening (by simpa)
 
@@ -105,6 +105,10 @@ def provable_iff_provable {p : F} : 𝓢 ⊢! p ↔ [] ⊢[𝓢]! p :=
   ⟨fun b ↦ ⟨of b.some⟩, fun b ↦ ⟨emptyPrf b.some⟩⟩
 
 lemma of'! (h : 𝓢 ⊢! p) : Γ ⊢[𝓢]! p := weakening! (by simp) $ provable_iff_provable.mp h
+
+def id : [p] ⊢[𝓢] p := byAxm
+
+@[simp] lemma id! : [p] ⊢[𝓢]! p := by_axm!
 
 instance minimal (Γ : FiniteContext F 𝓢) : Minimal Γ where
   mdp := mdp₁
