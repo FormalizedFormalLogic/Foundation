@@ -555,7 +555,7 @@ lemma seriesSegmentDef_defined : Defined (M := M) (λ v ↦ SeriesSegment (v 0) 
 
 def nuonAuxDef : 𝚺₀-Semisentence 3 := .mkSigma
   “∃[#0 < #1 + 1](!lengthDef.val [#0, #1] ∧
-    ∃[#0 < #1 + 1](!sqrtdef.val [#0, #1] ∧
+    ∃[#0 < #1 + 1](!sqrtDef.val [#0, #1] ∧
     ∃[#0 < 2 * #3 + 1](!bexpDef.val [#0, 2 * #3, #1] ∧
     ∃[#0 < #1 + 1](!lengthDef.val [#0, #1] ∧
       !seriesSegmentDef.val [(2 * #4 + 1) ^' 128, #1, #0 ^' 2, #4, #5, #6]))))” (by simp)

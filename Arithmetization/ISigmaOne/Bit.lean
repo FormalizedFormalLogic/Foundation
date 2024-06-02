@@ -19,10 +19,13 @@ def _root_.LO.FirstOrder.Arith.bitDef : 𝚺₀-Semisentence 2 := .mkSigma
   “∃[#0 < #2 + 1] (!expDef.val [#0, #1] ∧ !lenbitDef.val [#0, #2])” (by simp)
 
 lemma bit_defined : 𝚺₀-Relation ((· ∈ ·) : M → M → Prop) via bitDef := by
-  intro v; simp [bitDef, lenbit_defined.df.iff, exp_defined_deltaZero.df.iff, ←le_iff_lt_succ]
+  intro v; simp [bitDef, ←le_iff_lt_succ]
   constructor
   · intro h; exact ⟨exp (v 0), by simp [h.le], rfl, h⟩
   · rintro ⟨_, _, rfl, h⟩; exact h
+
+@[simp] lemma bit_defined_iff (v) :
+    Semiformula.Evalbm M v bitDef.val ↔ v 0 ∈ v 1 := bit_defined.df.iff v
 
 @[instance, definability] def mem_definable : DefinableRel ℒₒᵣ 𝚺₀ ((· ∈ ·) : M → M → Prop) := Defined.to_definable _ bit_defined
 
@@ -170,7 +173,7 @@ macro_rules
 
 variable {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐈𝚺₁]
 
-instance : Structure.Mem ℒₒᵣ M := ⟨by intro a b; simp [Semiformula.Operator.val, operator_mem_def, Model.bit_defined.df.iff]⟩
+scoped instance : Structure.Mem ℒₒᵣ M := ⟨by intro a b; simp [Semiformula.Operator.val, operator_mem_def, Model.bit_defined.df.iff]⟩
 
 @[simp] lemma eval_ballIn {t : Semiterm ℒₒᵣ ξ n} {p : Semiformula ℒₒᵣ ξ (n + 1)} {e ε} :
     Semiformula.Evalm M e ε (ballIn t p) ↔ ∀ x ∈ t.valm M e ε, Semiformula.Evalm M (x :> e) ε p := by
@@ -270,8 +273,11 @@ def _root_.LO.FirstOrder.Arith.bitSubsetDef : 𝚺₀-Semisentence 2 := .mkSigma
   “∀[#0 < #1] (!bitDef.val [#0, #1] → !bitDef.val [#0, #2])” (by simp)
 
 lemma bitSubset_defined : 𝚺₀-Relation ((· ⊆ ·) : M → M → Prop) via bitSubsetDef := by
-  intro v; simp [bitSubsetDef, bit_defined.df.iff]
+  intro v; simp [bitSubsetDef]
   exact ⟨by intro h x _ hx; exact h hx, by intro h x hx; exact h x (lt_of_mem hx) hx⟩
+
+@[simp] lemma bitSubset_defined_iff (v) :
+    Semiformula.Evalbm M v bitSubsetDef.val ↔ v 0 ⊆ v 1 := bitSubset_defined.df.iff v
 
 instance bitSubset_definable : DefinableRel ℒₒᵣ 𝚺₀ ((· ⊆ ·) : M → M → Prop) := Defined.to_definable₀ _ bitSubset_defined
 

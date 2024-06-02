@@ -114,11 +114,13 @@ def _root_.LO.FirstOrder.Arith.lenbitDef : 𝚺₀-Semisentence 2 :=
   .mkSigma “∃[#0 < #2 + 1] (!divDef.val [#0, #2, #1] ∧ ¬!dvdDef.val [2, #0])” (by simp)
 
 lemma lenbit_defined : 𝚺₀-Relation (LenBit : M → M → Prop) via lenbitDef := by
-  intro v; simp[sqrt_graph, lenbitDef, Matrix.vecHead, Matrix.vecTail,
-    div_defined.df.iff, dvd_defined.df.iff, LenBit, ←le_iff_lt_succ, numeral_eq_natCast]
+  intro v; simp[sqrt_graph, lenbitDef, Matrix.vecHead, Matrix.vecTail, LenBit, ←le_iff_lt_succ, numeral_eq_natCast]
   constructor
   · intro h; exact ⟨v 1 / v 0, by simp, rfl, h⟩
   · rintro ⟨z, hz, rfl, h⟩; exact h
+
+@[simp] lemma lenbit_defined_iff (v) :
+    Semiformula.Evalbm M v lenbitDef.val ↔ LenBit (v 0) (v 1) := lenbit_defined.df.iff v
 
 instance lenbit_definable : DefinableRel ℒₒᵣ 𝚺₀ (LenBit : M → M → Prop) := Defined.to_definable _ lenbit_defined
 

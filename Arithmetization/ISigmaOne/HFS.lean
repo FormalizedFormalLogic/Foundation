@@ -59,7 +59,10 @@ def _root_.LO.FirstOrder.Arith.sUnionDef : 𝚺₀-Semisentence 2 := .mkSigma
   “∀[#0 < #1 + #2](#0 ∈ #1 ↔ [∃∈ #2](#1 ∈ #0))” (by simp)
 
 lemma sUnion_defined : 𝚺₀-Function₁ ((⋃ʰᶠ ·) : M → M) via sUnionDef := by
-  intro v; simp [sUnionDef, bit_defined, bit_defined.df.iff, sUnion_graph]
+  intro v; simp [sUnionDef, sUnion_graph]
+
+@[simp] lemma sUnion_defined_iff (v) :
+    Semiformula.Evalbm M v sUnionDef.val ↔ v 0 = ⋃ʰᶠ v 1 := sUnion_defined.df.iff v
 
 instance sUnion_definable : DefinableFunction₁ ℒₒᵣ 𝚺₀ ((⋃ʰᶠ ·) : M → M) := Defined.to_definable _ sUnion_defined
 
@@ -89,7 +92,10 @@ def _root_.LO.FirstOrder.Arith.unionDef : 𝚺₀-Semisentence 3 := .mkSigma
   “∀[#0 < #1 + #2 + #3](#0 ∈ #1 ↔ #0 ∈ #2 ∨ #0 ∈ #3)” (by simp)
 
 lemma union_defined : 𝚺₀-Function₂ ((· ∪ ·) : M → M → M) via unionDef := by
-  intro v; simp [unionDef, bit_defined, bit_defined.df.iff, union_graph]
+  intro v; simp [unionDef, union_graph]
+
+@[simp] lemma union_defined_iff (v) :
+    Semiformula.Evalbm M v unionDef.val ↔ v 0 = v 1 ∪ v 2 := union_defined.df.iff v
 
 instance union_definable : DefinableFunction₂ ℒₒᵣ 𝚺₀ ((· ∪ ·) : M → M → M) := Defined.to_definable _ union_defined
 
@@ -193,7 +199,10 @@ def _root_.LO.FirstOrder.Arith.productDef : 𝚺₀-Semisentence 3 := .mkSigma
   “∀[#0 < #1 + (#2 + #3 + 1) ^' 2](#0 ∈ #1 ↔ [∃∈ #2][∃∈ #4](!pairDef.val [#2, #1, #0]))” (by simp)
 
 lemma product_defined : 𝚺₀-Function₂ ((· ×ʰᶠ ·) : M → M → M) via productDef := by
-  intro v; simp [productDef, pair_defined.df.iff, product_graph]
+  intro v; simp [productDef, product_graph]
+
+@[simp] lemma product_defined_iff (v) :
+    Semiformula.Evalbm M v productDef.val ↔ v 0 = v 1 ×ʰᶠ v 2 := product_defined.df.iff v
 
 instance product_definable : DefinableFunction₂ ℒₒᵣ 𝚺₀ ((· ×ʰᶠ ·) : M → M → M) := Defined.to_definable _ product_defined
 
@@ -234,7 +243,10 @@ def _root_.LO.FirstOrder.Arith.domainDef : 𝚺₀-Semisentence 2 := .mkSigma
   “∀[#0 < #1 + #2](#0 ∈ #1 ↔ ∃[#0 < #3] [∃∈ #3](!pairDef.val [#0, #2, #1]))” (by simp)
 
 lemma domain_defined : 𝚺₀-Function₁ (domain : M → M) via domainDef := by
-  intro v; simp [domainDef, pair_defined.df.iff, domain_graph]
+  intro v; simp [domainDef, domain_graph]
+
+@[simp] lemma domain_defined_iff (v) :
+    Semiformula.Evalbm M v domainDef.val ↔ v 0 = domain (v 1) := domain_defined.df.iff v
 
 instance domain_definable : DefinableFunction₁ ℒₒᵣ 𝚺₀ (domain : M → M) := Defined.to_definable _ domain_defined
 
@@ -370,8 +382,11 @@ private lemma isMapping_iff {m : M} : IsMapping m ↔ ∃ d ≤ 2 * m, d = domai
 def _root_.LO.FirstOrder.Arith.isMappingDef : 𝚺₀-Semisentence 1 := .mkSigma
   “∃[#0 < 2 * #1 + 1](!domainDef.val [#0, #1] ∧ [∀∈ #0] ∃[#0 < #3](#1 ~[#3] #0 ∧ ∀[#0 < #4](#2 ~[#4] #0 → #0 = #1)))” (by simp)
 
-lemma domain_defined : 𝚺₀-Function₁ (domain : M → M) via domainDef := by
-  intro v; simp [domainDef, pair_defined.df.iff, domain_graph]
+lemma domain_defindded : 𝚺₀-Function₁ (domain : M → M) via domainDef := by
+  intro v; simp [domainDef, domain_graph]
+
+@[simp] lemma length_defined_iff (v) :
+    Semiformula.Evalbm M v lengthDef.val ↔ v 0 = ‖v 1‖ := length_defined.df.iff v
 
 instance domain_definable : DefinableFunction₁ ℒₒᵣ 𝚺₀ (domain : M → M) := Defined.to_definable _ domain_defined
 

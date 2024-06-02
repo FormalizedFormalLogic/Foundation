@@ -45,6 +45,9 @@ def _root_.LO.FirstOrder.Arith.subDef : 𝚺₀-Semisentence 3 :=
 lemma sub_defined : 𝚺₀-Function₂ ((· - ·) : M → M → M) via subDef := by
   intro v; simp [subDef, sub_eq_iff]
 
+@[simp] lemma sub_defined_iff (v) :
+    Semiformula.Evalbm M v subDef.val ↔ v 0 = v 1 - v 2 := sub_defined.df.iff v
+
 instance sub_definable (Γ) : DefinableFunction₂ ℒₒᵣ Γ ((· - ·) : M → M → M) := Defined.to_definable₀ subDef sub_defined
 
 instance sub_polybounded : Bounded₂ ℒₒᵣ ((· - ·) : M → M → M) := ⟨#0, λ _ ↦ by simp⟩
@@ -151,6 +154,9 @@ def _root_.LO.FirstOrder.Arith.dvdDef : 𝚺₀-Semisentence 2 := .mkSigma “�
 
 lemma dvd_defined : 𝚺₀-Relation (λ a b : M ↦ a ∣ b) via dvdDef :=
   λ v ↦ by simp[dvd_iff_bounded, Matrix.vecHead, Matrix.vecTail, le_iff_lt_succ, dvdDef]
+
+@[simp] lemma dvd_defined_iff (v) :
+    Semiformula.Evalbm M v dvdDef.val ↔ v 0 ∣ v 1 := dvd_defined.df.iff v
 
 instance dvd_definable (Γ) : DefinableRel ℒₒᵣ Γ ((· ∣ ·) : M → M → Prop) := Defined.to_definable₀ _ dvd_defined
 

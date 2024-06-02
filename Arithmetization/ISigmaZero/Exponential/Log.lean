@@ -71,7 +71,10 @@ def _root_.LO.FirstOrder.Arith.logDef : 𝚺₀-Semisentence 2 := .mkSigma
   “(#1 = 0 → #0 = 0) ∧ (0 < #1 → #0 < #1 ∧ ∃[#0 < #2 + 1] (!exponentialDef.val [#1, #0] ∧ #2 < 2 * #0))” (by simp)
 
 lemma log_defined : 𝚺₀-Function₁ (log : M → M) via logDef := by
-  intro v; simp [logDef, log_graph, Exponential.defined.df.iff, ←le_iff_lt_succ, numeral_eq_natCast]
+  intro v; simp [logDef, log_graph, ←le_iff_lt_succ, numeral_eq_natCast]
+
+@[simp] lemma log_defined_iff (v) :
+    Semiformula.Evalbm M v logDef.val ↔ v 0 = log (v 1) := log_defined.df.iff v
 
 instance log_definable : DefinableFunction₁ ℒₒᵣ 𝚺₀ (log : M → M) := Defined.to_definable _ log_defined
 
@@ -138,7 +141,7 @@ lemma log_monotone {a b : M} (h : a ≤ b) : log a ≤ log b := by
 
 def binaryLength (a : M) : M := if 0 < a then log a + 1 else 0
 
-instance : Length M := ⟨binaryLength⟩
+scoped instance : Length M := ⟨binaryLength⟩
 
 lemma length_eq_binaryLength (a : M) : ‖a‖ = if 0 < a then log a + 1 else 0 := rfl
 
@@ -163,7 +166,10 @@ def _root_.LO.FirstOrder.Arith.lengthDef : 𝚺₀-Semisentence 2 := .mkSigma
   “(0 < #1 → ∃[#0 < #2 + 1] (!logDef.val [#0, #2] ∧ #1 = #0 + 1)) ∧ (#1 = 0 → #0 = 0)” (by simp)
 
 lemma length_defined : 𝚺₀-Function₁ (‖·‖ : M → M) via lengthDef := by
-  intro v; simp [lengthDef, length_graph, log_defined.df.iff, ←le_iff_lt_succ]
+  intro v; simp [lengthDef, length_graph, ←le_iff_lt_succ]
+
+@[simp] lemma length_defined_iff (v) :
+    Semiformula.Evalbm M v lengthDef.val ↔ v 0 = ‖v 1‖ := length_defined.df.iff v
 
 instance length_definable : DefinableFunction₁ ℒₒᵣ 𝚺₀ (‖·‖ : M → M) := Defined.to_definable _ length_defined
 
@@ -335,7 +341,10 @@ def _root_.LO.FirstOrder.Arith.bexpDef : 𝚺₀-Semisentence 3 := .mkSigma
   “∃[#0 < #2 + 1] (!lengthDef.val [#0, #2] ∧ (#3 < #0 → !exponentialDef.val [#3, #1]) ∧ (#0 ≤ #3 → #1 = 0))” (by simp)
 
 lemma bexp_defined : 𝚺₀-Function₂ (bexp : M → M → M) via bexpDef := by
-  intro v; simp [bexpDef, bexp_graph, Exponential.defined.df.iff, length_defined.df.iff, ←le_iff_lt_succ]
+  intro v; simp [bexpDef, bexp_graph, ←le_iff_lt_succ]
+
+@[simp] lemma bexp_defined_iff (v) :
+    Semiformula.Evalbm M v bexpDef.val ↔ v 0 = bexp (v 1) (v 2) := bexp_defined.df.iff v
 
 instance bexp_definable : DefinableFunction₂ ℒₒᵣ 𝚺₀ (bexp : M → M → M) := Defined.to_definable _ bexp_defined
 
@@ -412,10 +421,13 @@ def _root_.LO.FirstOrder.Arith.fbitDef : 𝚺₀-Semisentence 3 := .mkSigma
   “∃[#0 < #2 + 1] (!bexpDef.val [#0, #2, #3] ∧ ∃[#0 < #3 + 1] (!divDef.val [#0, #3, #1] ∧ !remDef.val [#2, #0, 2]))” (by simp)
 
 lemma fbit_defined : 𝚺₀-Function₂ (fbit : M → M → M) via fbitDef := by
-  intro v; simp [fbitDef, bexp_defined.df.iff, div_defined.df.iff, rem_defined.df.iff, ←le_iff_lt_succ, fbit, numeral_eq_natCast]
+  intro v; simp [fbitDef, ←le_iff_lt_succ, fbit, numeral_eq_natCast]
   constructor
   · intro h; exact ⟨bexp (v 1) (v 2), by simp, rfl, _, by simp, rfl, h⟩
   · rintro ⟨_, _, rfl, _, _, rfl, h⟩; exact h
+
+@[simp] lemma fbit_defined_iff (v) :
+    Semiformula.Evalbm M v fbitDef.val ↔ v 0 = fbit (v 1) (v 2) := fbit_defined.df.iff v
 
 instance fbit_definable : DefinableFunction₂ ℒₒᵣ 𝚺₀ (fbit : M → M → M) := Defined.to_definable _ fbit_defined
 

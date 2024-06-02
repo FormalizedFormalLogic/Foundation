@@ -111,7 +111,7 @@ lemma div_exists_unique (a b : M) : ∃! u, (0 < b → b * u ≤ a ∧ a < b * (
   rcases this with (rfl | pos) <;> simp [*]
   · simpa [pos_iff_ne_zero.mp pos] using div_exists_unique_pos a pos
 
-instance : Div M := ⟨fun a b ↦ Classical.choose! (div_exists_unique a b)⟩
+scoped instance : Div M := ⟨fun a b ↦ Classical.choose! (div_exists_unique a b)⟩
 
 lemma mul_div_le_pos (a : M) (h : 0 < b) : b * (a / b) ≤ a := ((Classical.choose!_spec (div_exists_unique a b)).1 h).1
 
@@ -139,6 +139,9 @@ def _root_.LO.FirstOrder.Arith.divDef : 𝚺₀-Semisentence 3 :=
 
 lemma div_defined : 𝚺₀-Function₂ ((· / ·) : M → M → M) via divDef := by
   intro v; simp[div_graph, divDef, Matrix.vecHead, Matrix.vecTail]
+
+@[simp] lemma div_defined_iff (v) :
+    Semiformula.Evalbm M v divDef.val ↔ v 0 = v 1 / v 2 := div_defined.df.iff v
 
 lemma div_spec_of_pos' (a : M) (h : 0 < b) : ∃ v < b, a = (a / b) * b + v := by
   simpa [mul_comm] using eq_mul_div_add_of_pos a h
@@ -283,7 +286,7 @@ section mod
 
 def rem (a b : M) : M := a - b * (a / b)
 
-instance : Mod M := ⟨rem⟩
+scoped instance : Mod M := ⟨rem⟩
 
 lemma mod_def (a b : M) : a % b = a - b * (a / b) := rfl
 
@@ -296,8 +299,10 @@ lemma rem_graph (a b c : M) : a = b % c ↔ ∃ x ≤ b, (x = b / c ∧ a = b - 
   · rintro ⟨_, _, rfl, rfl⟩; simp
 
 lemma rem_defined : 𝚺₀-Function₂ ((· % ·) : M → M → M) via remDef := by
-  intro v; simp [Matrix.vecHead, Matrix.vecTail, remDef,
-    rem_graph, Semiformula.eval_substs, div_defined.df.iff, sub_defined.df.iff, le_iff_lt_succ]
+  intro v; simp [Matrix.vecHead, Matrix.vecTail, remDef, rem_graph, Semiformula.eval_substs, le_iff_lt_succ]
+
+@[simp] lemma rem_defined_iff (v) :
+    Semiformula.Evalbm M v remDef.val ↔ v 0 = v 1 % v 2 := rem_defined.df.iff v
 
 instance rem_definable : DefinableFunction₂ ℒₒᵣ 𝚺₀ ((· % ·) : M → M → M) := rem_defined.to_definable _
 
@@ -453,11 +458,14 @@ prefix:75 "√" => sqrt
 
 lemma sqrt_graph {a b : M} : b = √a ↔ b * b ≤ a ∧ a < (b + 1) * (b + 1) := Classical.choose!_eq_iff _
 
-def _root_.LO.FirstOrder.Arith.sqrtdef : 𝚺₀-Semisentence 2 :=
+def _root_.LO.FirstOrder.Arith.sqrtDef : 𝚺₀-Semisentence 2 :=
   .mkSigma “#0 * #0 ≤ #1 ∧ #1 < (#0 + 1) * (#0 + 1)” (by simp[Hierarchy.pi_zero_iff_sigma_zero])
 
-lemma sqrt_defined : 𝚺₀-Function₁ (λ a : M ↦ √a) via sqrtdef := by
-  intro v; simp[sqrt_graph, sqrtdef, Matrix.vecHead, Matrix.vecTail]
+lemma sqrt_defined : 𝚺₀-Function₁ (λ a : M ↦ √a) via sqrtDef := by
+  intro v; simp[sqrt_graph, sqrtDef, Matrix.vecHead, Matrix.vecTail]
+
+@[simp] lemma sqrt_defined_iff (v) :
+    Semiformula.Evalbm M v sqrtDef.val ↔ v 0 = √(v 1) := sqrt_defined.df.iff v
 
 instance sqrt_definable : DefinableFunction₁ ℒₒᵣ 𝚺₀ ((√·) : M → M) := Defined.to_definable _ sqrt_defined
 
@@ -551,6 +559,9 @@ def _root_.LO.FirstOrder.Arith.pairDef : 𝚺₀-Semisentence 3 :=
 lemma pair_defined : 𝚺₀-Function₂ (λ a b : M ↦ ⟪a, b⟫) via pairDef := by
   intro v; simp [pair_graph, pairDef]
 
+@[simp] lemma pair_defined_iff (v) :
+    Semiformula.Evalbm M v pairDef.val ↔ v 0 = ⟪v 1, v 2⟫ := pair_defined.df.iff v
+
 instance pair_definable : DefinableFunction₂ ℒₒᵣ 𝚺₀ (pair : M → M → M) := Defined.to_definable _ pair_defined
 
 instance : Bounded₂ ℒₒᵣ (pair : M → M → M) :=
@@ -619,18 +630,24 @@ def _root_.LO.FirstOrder.Arith.pi₂Def : 𝚺₀-Semisentence 2 :=
   .mkSigma “∃[#0 < #2 + 1] !pairDef.val [#2, #0, #1]” (by simp)
 
 lemma pi₁_defined : 𝚺₀-Function₁ (pi₁ : M → M) via pi₁Def := by
-  intro v; simp [pi₁Def, pair_defined.df.iff]
+  intro v; simp [pi₁Def]
   constructor
   · intro h; exact ⟨π₂ v 1, by simp [←le_iff_lt_succ],  by simp [h]⟩
   · rintro ⟨a, _, e⟩; simp [e]
 
+@[simp] lemma pi₁_defined_iff (v) :
+    Semiformula.Evalbm M v pi₁Def.val ↔ v 0 = π₁ (v 1) := pi₁_defined.df.iff v
+
 instance pi₁_definable : DefinableFunction₁ ℒₒᵣ 𝚺₀ (pi₁ : M → M) := Defined.to_definable₀ _ pi₁_defined
 
 lemma pi₂_defined : 𝚺₀-Function₁ (pi₂ : M → M) via pi₂Def := by
-  intro v; simp [pi₂Def, pair_defined.df.iff]
+  intro v; simp [pi₂Def]
   constructor
   · intro h; exact ⟨π₁ v 1, by simp [←le_iff_lt_succ], by simp [h]⟩
   · rintro ⟨a, _, e⟩; simp [e]
+
+@[simp] lemma pi₂_defined_iff (v) :
+    Semiformula.Evalbm M v pi₂Def.val ↔ v 0 = π₂ (v 1) := pi₂_defined.df.iff v
 
 instance pi₂_definable : DefinableFunction₁ ℒₒᵣ 𝚺₀ (pi₂ : M → M) := Defined.to_definable₀ _ pi₂_defined
 

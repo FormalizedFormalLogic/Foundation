@@ -114,6 +114,9 @@ lemma Exponential.defined : 𝚺₀-Relation (Exponential : M → M → Prop) vi
   intro v; simp [Exponential.graph_iff, exponentialDef, ppow2_defined.df.iff, ext_defined.df.iff,
     Exponential.Seqₛ.defined.df.iff, ←le_iff_lt_succ, pow_four, sq, numeral_eq_natCast]
 
+@[simp] lemma exponential_defined_iff (v) :
+    Semiformula.Evalbm M v exponentialDef.val ↔ Exponential (v 0) (v 1) := Exponential.defined.df.iff v
+
 instance exponential_definable : 𝚺₀-Relation (Exponential : M → M → Prop) := Defined.to_definable _ Exponential.defined
 
 @[simp] instance exponential_definable' (Γ) : Γ-Relation (Exponential : M → M → Prop) := Definable.of_zero exponential_definable _
@@ -715,10 +718,11 @@ lemma exponential_graph {a b : M} : a = exp b ↔ Exponential b a := Classical.c
 
 def _root_.LO.FirstOrder.Arith.expDef : 𝚺₀-Semisentence 2 := .mkSigma “!exponentialDef.val [#1, #0]” (by simp)
 
--- #eval expDef.val
-
 lemma exp_defined_deltaZero : 𝚺₀-Function₁ (Exp.exp : M → M) via expDef := by
-  intro v; simp [expDef, exponential_graph, Exponential.defined.df.iff]
+  intro v; simp [expDef, exponential_graph]
+
+@[simp] lemma exp_defined_iff (v) :
+    Semiformula.Evalbm M v expDef.val ↔ v 0 = Exp.exp (v 1) := exp_defined_deltaZero.df.iff v
 
 instance exp_definable_deltaZero : DefinableFunction₁ ℒₒᵣ 𝚺₀ (Exp.exp : M → M) := Defined.to_definable _ exp_defined_deltaZero
 

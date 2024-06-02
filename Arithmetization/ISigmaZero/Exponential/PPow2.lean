@@ -19,7 +19,7 @@ def SPPow2 (m : M) : Prop := ¬LenBit 1 m ∧ LenBit 2 m ∧ ∀ i ≤ m, Pow2 i
 def _root_.LO.FirstOrder.Arith.sppow2Def : 𝚺₀-Semisentence 1 :=
   .mkSigma “¬!lenbitDef.val [1, #0] ∧ !lenbitDef.val [2, #0] ∧
       ∀[#0 < #1 + 1] (!pow2Def.val [#0] → 2 < #0 →
-        (!lenbitDef.val [#0, #1] ↔ ∃[#0 < #1 + 1] (!sqrtdef.val [#0, #1] ∧ #0 * #0 = #1 ∧ !lenbitDef.val [#0, #2])))” (by simp)
+        (!lenbitDef.val [#0, #1] ↔ ∃[#0 < #1 + 1] (!sqrtDef.val [#0, #1] ∧ #0 * #0 = #1 ∧ !lenbitDef.val [#0, #2])))” (by simp)
 
 lemma sppow2_defined : 𝚺₀-Predicate (SPPow2 : M → Prop) via sppow2Def := by
   intro v
