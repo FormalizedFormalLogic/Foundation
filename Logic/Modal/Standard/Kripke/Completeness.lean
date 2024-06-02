@@ -411,13 +411,13 @@ lemma neg_imp (h : q ∈ Ω₂.theory → p ∈ Ω₁.theory) : (~p ∈ Ω₁.th
 
 lemma neg_iff (h : p ∈ Ω₁.theory ↔ q ∈ Ω₂.theory) : (~p ∈ Ω₁.theory) ↔ (~q ∈ Ω₂.theory) := ⟨neg_imp $ h.mpr, neg_imp $ h.mp⟩
 
-lemma box_dn_iff : (□~~p ∈ Ω.theory) ↔ (□p ∈ Ω.theory) := by
-  simp only [iff_mem_box];
+lemma multibox_dn_iff : (□^[n](~~p) ∈ Ω.theory) ↔ (□^[n]p ∈ Ω.theory) := by
+  simp only [iff_mem_multibox];
   constructor;
   . intro h Ω hΩ; exact iff_mem_negneg.mp $ h hΩ;
   . intro h Ω hΩ; exact iff_mem_negneg.mpr $ h hΩ;
 
-lemma dia_dn_iff : (◇~~p ∈ Ω.theory) ↔ (◇p) ∈ Ω.theory := neg_iff box_dn_iff
+lemma box_dn_iff : (□~~p ∈ Ω.theory) ↔ (□p ∈ Ω.theory) := multibox_dn_iff (n := 1)
 
 lemma mem_multibox_dual : □^[n]p ∈ Ω.theory ↔ ~(◇^[n](~p)) ∈ Ω.theory := by
   simp [membership_iff];
@@ -437,6 +437,10 @@ lemma mem_multibox_dual : □^[n]p ∈ Ω.theory ↔ ~(◇^[n](~p)) ∈ Ω.theor
     . assumption;
     . exact FiniteContext.provable_iff.mpr $ imp_trans! (FiniteContext.provable_iff.mp hΓ₂) (conj₂'! multiboxDuality!);
 lemma mem_box_dual : □p ∈ Ω.theory ↔ (~(◇(~p)) ∈ Ω.theory) := mem_multibox_dual (n := 1)
+
+-- lemma multidia_dn_iff : (◇^[n](~~p) ∈ Ω.theory) ↔ (◇^[n]p ∈ Ω.theory) := by sorry
+
+lemma dia_dn_iff : (◇~~p ∈ Ω.theory) ↔ (◇p) ∈ Ω.theory := neg_iff box_dn_iff -- TODO: multidia_dn_iff (n := 1)
 
 lemma mem_multidia_dual : ◇^[n]p ∈ Ω.theory ↔ ~(□^[n](~p)) ∈ Ω.theory := by
   simp [membership_iff];
@@ -490,21 +494,9 @@ lemma iff_mem_multibox_conj' : (□^[n]Γ.conj' ∈ Ω.theory) ↔ (∀ p ∈ Γ
 
 lemma iff_mem_box_conj' : (□Γ.conj' ∈ Ω.theory) ↔ (∀ p ∈ Γ, □p ∈ Ω.theory) := iff_mem_multibox_conj' (n := 1)
 
-lemma iff_mem_multibox_conj'₂ : (□^[n]Γ.conj' ∈ Ω.theory) ↔ (∀ p ∈ Γ.multibox n, p ∈ Ω.theory) := by simp [iff_mem_multibox_conj']
+-- lemma iff_mem_multidia_conj' : (◇^[n]Γ.conj' ∈ Ω.theory) ↔ (∀ p ∈ Γ, ◇^[n]p ∈ Ω.theory) := by sorry
 
-lemma iff_mem_box_conj'₂ : (□Γ.conj' ∈ Ω.theory) ↔ (∀ p ∈ Γ.box, p ∈ Ω.theory) := iff_mem_multibox_conj'₂ (n := 1)
-
-lemma iff_mem_multidia_conj' : (◇^[n]Γ.conj' ∈ Ω.theory) ↔ (∀ p ∈ Γ, ◇^[n]p ∈ Ω.theory) := by sorry
-  /-
-  simp [iff_mem_multibox, iff_mem_neg, mem_multidia_dual]
-  constructor;
-  . rintro ⟨Ω', hΩ'₁, hΩ'₂⟩ p hp;
-    existsi Ω';
-    constructor;
-    . exact hΩ'₁;
-    . simp_all;
-  -/
-lemma iff_mem_dia_conj' : (◇Γ.conj' ∈ Ω.theory) ↔ (∀ p ∈ Γ, ◇p ∈ Ω.theory) := iff_mem_multidia_conj' (n := 1)
+-- lemma iff_mem_dia_conj' : (◇Γ.conj' ∈ Ω.theory) ↔ (∀ p ∈ Γ, ◇p ∈ Ω.theory) := iff_mem_multidia_conj' (n := 1)
 
 end MaximalParametricConsistentTheory
 
