@@ -307,6 +307,11 @@ variable {M : Type*} [s : Structure L M] [Structure.Eq L M]
     Eval s e ε (∃'! p) ↔ ∃! x, Eval s (x :> e) ε p := by
   simp [existsUnique, Semiformula.eval_substs, Matrix.comp_vecCons', ExistsUnique]
 
+syntax:max "∃! " foformula:35 : foformula
+
+macro_rules
+  | `(“ ∃! $p:foformula ”) => `(∃'! “$p”)
+
 end Semiformula
 
 end FirstOrder
