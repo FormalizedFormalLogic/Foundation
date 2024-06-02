@@ -5,7 +5,7 @@ import Logic.Modal.Standard.Kripke.Soundness
 
 namespace LO.Modal.Standard
 
-variable {α : Type u} [DecidableEq α] [Inhabited α]
+variable {α : Type*} [DecidableEq α] [Inhabited α]
 
 def Theory.ParametricConsistent (L : DeductionParameter α) (T : Theory α) := ∀ {Γ : List (Formula α)}, (∀ p ∈ Γ, p ∈ T) → L ⊬! Γ.conj' ⟶ ⊥
 notation:max "(" L ")-Consistent " T:90 => Theory.ParametricConsistent L T
@@ -342,13 +342,13 @@ lemma iff_mem_or : ((p ⋎ q) ∈ Ω.theory) ↔ (p ∈ Ω.theory) ∨ (q ∈ Ω
     . apply membership_iff.mpr;
       exact disj₂'! (membership_iff.mp hq);
 
-lemma iff_mem_multibox : (□^[n]p ∈ Ω.theory) ↔ (∀ {Ω' : MCT L}, (□⁻¹^[n]Ω.theory ⊆ Ω'.theory) → (p ∈ Ω'.theory)) := by
+lemma iff_mem_multibox : (□^[n]p ∈ Ω.theory) ↔ (∀ {Ω' : MCT L}, (□''⁻¹^[n]Ω.theory ⊆ Ω'.theory) → (p ∈ Ω'.theory)) := by
   constructor;
   . intro hp Ω' hΩ'; apply hΩ'; simpa;
   . contrapose;
     push_neg;
     intro hp;
-    obtain ⟨Ω', hΩ'⟩ := lindenbaum (L := L) (T := insert (~p) (□⁻¹^[n]Ω.theory)) (by
+    obtain ⟨Ω', hΩ'⟩ := lindenbaum (L := L) (T := insert (~p) (□''⁻¹^[n]Ω.theory)) (by
       apply unprovable_iff_insert_neg_ParametricConsistent.mp;
       by_contra hC;
       obtain ⟨Γ, hΓ₁, hΓ₂⟩ := Context.provable_iff.mp hC;
@@ -356,7 +356,7 @@ lemma iff_mem_multibox : (□^[n]p ∈ Ω.theory) ↔ (∀ {Ω' : MCT L}, (□�
       have : L ⊬! □^[n]Γ.conj' ⟶ □^[n]p := by
         have := Context.provable_iff.not.mp $ membership_iff.not.mp hp;
         push_neg at this;
-        have : L ⊬! (□^[n]Γ).conj' ⟶ □^[n]p := implyLeft_conj_eq_conj'!.not.mp $ FiniteContext.provable_iff.not.mp $ this (□^[n]Γ) (by
+        have : L ⊬! (□'^[n]Γ : List (Formula α)).conj' ⟶ □^[n]p := implyLeft_conj_eq_conj'!.not.mp $ FiniteContext.provable_iff.not.mp $ this (□'^[n]Γ) (by
           intro q hq;
           obtain ⟨r, hr₁, hr₂⟩ := by simpa using hq;
           subst hr₂;
@@ -374,7 +374,7 @@ lemma iff_mem_multibox : (□^[n]p ∈ Ω.theory) ↔ (∀ {Ω' : MCT L}, (□�
     . apply iff_mem_neg.mp;
       apply hΩ';
       simp only [Set.mem_insert_iff, true_or]
-lemma iff_mem_box : (□p ∈ Ω.theory) ↔ (∀ {Ω' : MCT L}, (□⁻¹Ω.theory ⊆ Ω'.theory) → (p ∈ Ω'.theory)) := iff_mem_multibox (n := 1)
+lemma iff_mem_box : (□p ∈ Ω.theory) ↔ (∀ {Ω' : MCT L}, (□''⁻¹Ω.theory ⊆ Ω'.theory) → (p ∈ Ω'.theory)) := iff_mem_multibox (n := 1)
 
 lemma iff_congr : (Ω.theory *⊢[L]! (p ⟷ q)) → ((p ∈ Ω.theory) ↔ (q ∈ Ω.theory)) := by
   intro hpq;
@@ -507,16 +507,18 @@ open MaximalParametricConsistentTheory
 
 namespace Kripke
 
-abbrev CanonicalFrame (L : DeductionParameter α) [Inhabited (MCT L)] : Frame (MCT L) α := λ Ω₁ Ω₂ => □⁻¹Ω₁.theory ⊆ Ω₂.theory
+abbrev CanonicalFrame (L : DeductionParameter α) [Inhabited (MCT L)] : Frame' α where
+  World := MCT L
+  Rel :=  λ Ω₁ Ω₂ => (□''⁻¹Ω₁.theory : Theory α) ⊆ Ω₂.theory
 
 namespace CanonicalFrame
 
 variable [Minimal L] [Inhabited (MCT L)]
 
 @[simp]
-lemma frame_def_box: (CanonicalFrame L) Ω₁ Ω₂ ↔ (∀ {p : Formula α}, □p ∈ Ω₁.theory → p ∈ Ω₂.theory) := by rfl
+lemma frame_def_box: (CanonicalFrame L).Rel Ω₁ Ω₂ ↔ (∀ {p : Formula α}, □p ∈ Ω₁.theory → p ∈ Ω₂.theory) := by rfl
 
-lemma multiframe_def_multibox : ((CanonicalFrame L)^[n] Ω₁ Ω₂) ↔ ∀ {p : Formula α}, □^[n]p ∈ Ω₁.theory → p ∈ Ω₂.theory := by
+lemma multiframe_def_multibox : ((CanonicalFrame L).RelItr n Ω₁ Ω₂) ↔ ∀ {p : Formula α}, □^[n]p ∈ Ω₁.theory → p ∈ Ω₂.theory := by
   induction n generalizing Ω₁ Ω₂ with
   | zero =>
     simp_all;
@@ -529,20 +531,20 @@ lemma multiframe_def_multibox : ((CanonicalFrame L)^[n] Ω₁ Ω₂) ↔ ∀ {p 
       intro Ω₃ h₁₃ h₃₂ p h;
       exact ih.mp h₃₂ $ h₁₃ h;
     . intro h;
-      obtain ⟨Ω, hΩ⟩ := lindenbaum (L := L) (T := (□⁻¹Ω₁.theory ∪ ◇^[n]Ω₂.theory)) $ by
+      obtain ⟨Ω, hΩ⟩ := lindenbaum (L := L) (T := (□''⁻¹Ω₁.theory ∪ ◇''^[n]Ω₂.theory)) $ by
         apply intro_union_ParametricConsistent;
         intro Γ Δ hΓ hΔ hC;
 
         replace hΓ : ∀ p ∈ Γ, □p ∈ Ω₁.theory := by simpa using hΓ;
         have dΓconj : Ω₁.theory *⊢[L]! □Γ.conj' := membership_iff.mp $ iff_mem_box_conj'.mpr hΓ;
 
-        have hΔ₂ : ∀ p ∈ ◇⁻¹^[n]Δ, p ∈ Ω₂.theory := by
+        have hΔ₂ : ∀ p ∈ ◇'⁻¹^[n]Δ, p ∈ Ω₂.theory := by
           intro p hp;
           simpa using hΔ (◇^[n]p) (by simp_all);
 
-        have hΔconj : (◇⁻¹^[n]Δ).conj' ∈ Ω₂.theory := iff_mem_conj'.mpr hΔ₂;
+        have hΔconj : (◇'⁻¹^[n]Δ).conj' ∈ Ω₂.theory := iff_mem_conj'.mpr hΔ₂;
 
-        have : L ⊢! Γ.conj' ⟶ □^[n](~(◇⁻¹^[n]Δ).conj') := imp_trans! (andImplyIffImplyImply'!.mp hC)
+        have : L ⊢! Γ.conj' ⟶ □^[n](~(◇'⁻¹^[n]Δ).conj') := imp_trans! (andImplyIffImplyImply'!.mp hC)
           $ contra₂'! $ imp_trans! (conj₂'! multidiaDuality!)
           $ imp_trans! iff_conj'multidia_multidiaconj'! $ by
             apply conj'conj'_subset;
@@ -550,8 +552,8 @@ lemma multiframe_def_multibox : ((CanonicalFrame L)^[n] Ω₁ Ω₂) ↔ ∀ {p 
             obtain ⟨r, _, _⟩ := by simpa using hΔ q hq;
             subst_vars;
             simpa;
-        have : L ⊢! □Γ.conj' ⟶ □^[(n + 1)](~(◇⁻¹^[n]Δ).conj') := by simpa only [UnaryModalOperator.multimop_succ] using imply_box_distribute'! this;
-        have : (◇⁻¹^[n]Δ).conj' ∉ Ω₂.theory := iff_mem_neg.mp $ h $ membership_iff.mpr $ (Context.of! this) ⨀ dΓconj;
+        have : L ⊢! □Γ.conj' ⟶ □^[(n + 1)](~(◇'⁻¹^[n]Δ).conj') := by simpa only [UnaryModalOperator.multimop_succ] using imply_box_distribute'! this;
+        have : (◇'⁻¹^[n]Δ).conj' ∉ Ω₂.theory := iff_mem_neg.mp $ h $ membership_iff.mpr $ (Context.of! this) ⨀ dΓconj;
 
         contradiction;
       existsi Ω;
@@ -565,29 +567,29 @@ lemma multiframe_def_multibox : ((CanonicalFrame L)^[n] Ω₁ Ω₂) ↔ ∀ {p 
         apply hΩ;
         simp_all;
 
-lemma multiframe_def_multibox' : ((CanonicalFrame L)^[n] Ω₁ Ω₂) ↔ ∀ {p : Formula α}, p ∈ (□⁻¹^[n]Ω₁.theory) → p ∈ Ω₂.theory := by
+lemma multiframe_def_multibox' : ((CanonicalFrame L).RelItr n Ω₁ Ω₂) ↔ ∀ {p : Formula α}, p ∈ (□''⁻¹^[n]Ω₁.theory) → p ∈ Ω₂.theory := by
   constructor;
   . intro h p hp; exact multiframe_def_multibox.mp h hp;
   . intro h; apply multiframe_def_multibox.mpr; assumption;
 
-lemma multiframe_def_multibox'' : ((CanonicalFrame L)^[n] Ω₁ Ω₂) ↔ ∀ {p : Formula α}, p ∈ (□⁻¹^[n]Ω₁.theory) → p ∈ Ω₂.theory := by
+lemma multiframe_def_multibox'' : ((CanonicalFrame L).RelItr n Ω₁ Ω₂) ↔ ∀ {p : Formula α}, p ∈ (□''⁻¹^[n]Ω₁.theory) → p ∈ Ω₂.theory := by
   constructor;
   . intro h p hp; exact multiframe_def_multibox.mp h hp;
   . intro h; apply multiframe_def_multibox.mpr; assumption;
 
-lemma multiframe_def_multidia : (CanonicalFrame L)^[n] Ω₁ Ω₂ ↔ ∀ {p : Formula α}, (p ∈ Ω₂.theory → ◇^[n]p ∈ Ω₁.theory) := Iff.trans multiframe_def_multibox multibox_multidia
+lemma multiframe_def_multidia : (CanonicalFrame L).RelItr n Ω₁ Ω₂ ↔ ∀ {p : Formula α}, (p ∈ Ω₂.theory → ◇^[n]p ∈ Ω₁.theory) := Iff.trans multiframe_def_multibox multibox_multidia
 
 end CanonicalFrame
 
 
-abbrev CanonicalModel (L : DeductionParameter α) [Inhabited (MCT L)] : Model (MCT L) α where
-  frame := CanonicalFrame L
-  valuation Ω a := (atom a) ∈ Ω.theory
+abbrev CanonicalModel (L : DeductionParameter α) [Inhabited (MCT L)] : Model α where
+  Frame := CanonicalFrame L
+  Valuation Ω a := (atom a) ∈ Ω.theory
 
 namespace CanonicalModel
 
 @[simp]
-lemma val_def [Inhabited (MCT L)] : (CanonicalModel L).valuation Ω a ↔ (atom a) ∈ Ω.theory := by rfl
+lemma val_def [Inhabited (MCT L)] : (CanonicalModel L).Valuation Ω a ↔ (atom a) ∈ Ω.theory := by rfl
 
 end CanonicalModel
 
@@ -595,7 +597,7 @@ section
 
 variable [Inhabited (MCT L)]
 
-lemma truthlemma : ∀ {Ω : MCT L}, (CanonicalModel L, Ω) ⊧ p ↔ (p ∈ Ω.theory) := by
+lemma truthlemma : ∀ {Ω : MCT L}, Kripke.Satisfies (CanonicalModel L) Ω p ↔ (p ∈ Ω.theory) := by
   induction p using Formula.rec' with
   | hbox p ih =>
     intro Ω;
@@ -608,6 +610,7 @@ lemma truthlemma : ∀ {Ω : MCT L}, (CanonicalModel L, Ω) ⊧ p ↔ (p ∈ Ω.
     . intro h Ω' hΩ';
       apply ih.mpr;
       exact CanonicalFrame.frame_def_box.mp hΩ' h;
+  | hfalsum => simp [Formula.Kripke.Satisfies.bot_def (M := (CanonicalModel L))];
   | _ => simp_all
 
 lemma iff_valid_on_canonicalModel_deducible : (CanonicalModel L) ⊧ p ↔ (L ⊢! p) := by
@@ -659,16 +662,16 @@ lemma complete!_on_frameclass_of_canonical [System.Consistent L] [Canonical L] :
   contrapose;
   push_neg;
   intro h;
-  existsi MCT L, _, CanonicalFrame L;
+  use (CanonicalFrame L);
   constructor;
   . apply Canonical.realize;
-  . existsi (CanonicalModel L).valuation;
+  . existsi (CanonicalModel L).Valuation;
     exact iff_valid_on_canonicalModel_deducible.not.mpr h;
 
 instance instComplete [System.Consistent L] [Canonical L] : Complete L 𝔽(Ax(L)) := ⟨complete!_on_frameclass_of_canonical⟩
 
 def canonical_of_definability [Inhabited (MCT L)] (definability : Definability Ax(L) P) (h : P (CanonicalFrame L)) : Canonical L where
-  realize := definability.defines _ _ |>.mpr h;
+  realize := definability.defines _ |>.mpr h;
 
 instance : Canonical (𝐊 : DeductionParameter α) := canonical_of_definability AxiomSet.K.definability trivial
 

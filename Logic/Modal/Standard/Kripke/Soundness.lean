@@ -3,8 +3,8 @@ import Logic.Modal.Standard.Deduction
 
 namespace LO.Modal.Standard.Kripke
 
-variable {W α : Type*} [Inhabited W] [Inhabited α]
-variable {L : DeductionParameter α} [L.HasNec]
+variable {α : Type u}
+         {L : DeductionParameter α} [L.HasNec]
 
 open Deduction
 open Formula Formula.Kripke
@@ -13,11 +13,11 @@ lemma sound_on_frameclass (d : L ⊢ p) : 𝔽(Ax(L)) ⊧ p := by
   induction d using Deduction.inducition_with_nec with
   | hMaxm h => exact validOnAxiomSetFrameClass_axiom h;
   | hMdp _ _ ihpq ihp =>
-    intro W _ F hF V w;
-    exact (Semantics.Tarski.realize_imp.mp $ ihpq W F hF V w) (ihp W F hF V w);
+    intro F hF V w;
+    exact Satisfies.mdp (ihpq F hF V w) (ihp F hF V w);
   | hNec _ ih =>
-    intro W _ F hF V w w' _;
-    exact ih W F hF V w';
+    intro F hF V w w' _;
+    exact ih F hF V w';
   | hDisj₃ =>
     simp_all [ValidOnFrameClass, ValidOnFrame, ValidOnModel];
     intros; rename_i hpr hqr hpq;
@@ -30,26 +30,20 @@ lemma sound!_on_frameclass : L ⊢! p → 𝔽(Ax(L)) ⊧ p := λ ⟨d⟩ => sou
 
 instance : Sound L 𝔽(L.axiomSet) := ⟨sound!_on_frameclass⟩
 
-lemma unprovable_bot [ne : FrameClass.Nonempty 𝔽(Ax(L))] : L ⊬! ⊥ := by
+lemma unprovable_bot [ne : FrameClass.IsNonempty 𝔽(Ax(L))] : L ⊬! ⊥ := by
   intro h;
-  obtain ⟨F, hF⟩ := ne.existsi;
-  have := sound!_on_frameclass h;
-  simp [ValidOnFrameClass, ValidOnFrame, ValidOnModel] at this;
-  have := @this ne.W ne.W_inhabited F;
-  contradiction;
+  obtain ⟨F, hF⟩ := ne;
+  simpa using sound!_on_frameclass h F hF;
 
-instance [FrameClass.Nonempty 𝔽(Ax(L))] : System.Consistent L := System.Consistent.of_unprovable unprovable_bot
+instance Consistent_of_nonemptyFrameClass [FrameClass.IsNonempty.{u} 𝔽(Ax(L))] : System.Consistent L := System.Consistent.of_unprovable $ unprovable_bot
+
+lemma unprovable_bot_finite [ne : FiniteFrameClass.IsNonempty 𝔽ꟳ(Ax(L))] : L ⊬! ⊥ := by
+  intro h;
+  obtain ⟨F, hF⟩ := ne;
+  simpa using sound!_on_frameclass h F.toFrame hF;
+
+instance Consistent_of_nonemptyFiniteFrameClass [FiniteFrameClass.IsNonempty.{u} 𝔽ꟳ(Ax(L))] : System.Consistent L := System.Consistent.of_unprovable $ unprovable_bot_finite
 
 instance : System.Consistent (𝐊 : DeductionParameter α) := inferInstance
-
-lemma unprovable_bot_finite [ne : FiniteFrameClass.Nonempty 𝔽ꟳ(Ax(L))] : L ⊬! ⊥ := by
-  intro h;
-  obtain ⟨F, hF⟩ := ne.existsi;
-  have := sound!_on_frameclass h;
-  simp [ValidOnFrameClass, ValidOnFrame, ValidOnModel] at this;
-  have := @this ne.W ne.W_inhabited F;
-  contradiction;
-
-instance [FiniteFrameClass.Nonempty 𝔽ꟳ(Ax(L))] : System.Consistent L := System.Consistent.of_unprovable unprovable_bot_finite
 
 end LO.Modal.Standard.Kripke

@@ -14,19 +14,13 @@ section
 variable {L₁ L₂ : DeductionParameter α} [geach₁ : L₁.IsGeach] [geach₂ : L₂.IsGeach]
 
 lemma reducible_of_geach_defnability
-  (hs : ∀ {W : Type u}, [Inhabited W] → ∀ {F : Frame W α}, MultiGeachConfluent geach₂.taples F → MultiGeachConfluent geach₁.taples F)
-  : (L₁ ≤ₛ L₂) :=
-    reducible_of_definability
-      (definability₁ := by convert AxiomSet.MultiGeach.definability (α := α) geach₁.taples; simp)
-      (definability₂ := by convert AxiomSet.MultiGeach.definability (α := α) geach₂.taples; simp)
-      hs
+  (hs : ∀ {F : Frame.{u}}, MultiGeachConfluent geach₂.taples F → MultiGeachConfluent geach₁.taples F)
+  : (L₁ ≤ₛ L₂) := reducible_of_definability (definability₁ := instGeachDefinability) (definability₂ := instGeachDefinability) hs
+
 
 lemma equiv_of_geach_defnability
-  (hs : ∀ {W : Type u}, [Inhabited W] → ∀ {F : Frame W α}, MultiGeachConfluent geach₁.taples F ↔ MultiGeachConfluent geach₂.taples F)
-  : (L₁ =ₛ L₂) := equiv_of_iff_definability
-    (definability₁ := by convert AxiomSet.MultiGeach.definability (α := α) geach₁.taples; simp)
-    (definability₂ := by convert AxiomSet.MultiGeach.definability (α := α) geach₂.taples; simp)
-    hs
+  (hs : ∀ {F : Frame.{u}}, MultiGeachConfluent geach₁.taples F ↔ MultiGeachConfluent geach₂.taples F)
+  : (L₁ =ₛ L₂) := equiv_of_iff_definability (definability₁ := instGeachDefinability) (definability₂ := instGeachDefinability) hs
 
 end
 

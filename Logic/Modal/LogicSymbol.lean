@@ -199,63 +199,66 @@ section
 
 variable [LO.StandardModalLogicalConnective F] [DecidableEq F]
 
+-- TODO: Remove `'` of `□'`
 
 namespace Set
 
 abbrev multibox (n : ℕ) (s : Set F) : Set F := Set.multimop true n s
-notation "□^[" n:90 "]" s:80 => Set.multibox n s
+notation "□''^[" n:90 "]" s:80 => Set.multibox n s
 
 abbrev box (s : Set F) : Set F := Set.mop true s
-notation "□" s:80 => Set.box s
+notation "□''" s:80 => Set.box s
 
 abbrev premultibox (n : ℕ) (s : Set F) : Set F := Set.premultimop true n s
-notation "□⁻¹^[" n:90 "]" s:80 => Set.premultibox n s
+notation "□''⁻¹^[" n:90 "]" s:80 => Set.premultibox n s
 
 abbrev prebox (s : Set F) : Set F := Set.premop true s
-notation "□⁻¹" s:80 => Set.prebox s
+notation "□''⁻¹" s:80 => Set.prebox s
 
 abbrev multidia (n : ℕ) (s : Set F) : Set F := Set.multimop false n s
-notation "◇^[" n:90 "]" s:80 => Set.multidia n s
+notation "◇''^[" n:90 "]" s:80 => Set.multidia n s
 
 abbrev dia (s : Set F) : Set F := Set.mop false s
-notation "◇" s:80 => Set.dia s
+notation "◇''" s:80 => Set.dia s
 
 abbrev premultidia (n : ℕ) (s : Set F) : Set F := Set.premultimop false n s
-notation "◇⁻¹^[" n:90 "]" s:80 => Set.premultidia n s
+notation "◇''⁻¹^[" n:90 "]" s:80 => Set.premultidia n s
 
 abbrev predia (s : Set F) : Set F := Set.premop false s
-notation "◇⁻¹" s:80 => Set.predia s
+notation "◇''⁻¹" s:80 => Set.predia s
 
 end Set
 
 
+/-
 namespace Finset
 
 noncomputable abbrev multibox (n : ℕ) (s : Finset F) : Finset F := Finset.multimop true n s
-notation "□^[" n:90 "]" s:80 => Finset.multibox n s
+notation "□'^[" n:90 "]" s:80 => Finset.multibox n s
 
 noncomputable abbrev box (s : Finset F) : Finset F := Finset.mop true s
-notation "□" s:80 => Finset.box s
+notation "□'" s:80 => Finset.box s
 
 noncomputable abbrev premultibox (n : ℕ) (s : Finset F) : Finset F := Finset.premultimop true n s
-notation "□⁻¹^[" n:90 "]" s:80 => Finset.premultibox n s
+notation "□'⁻¹^[" n:90 "]" s:80 => Finset.premultibox n s
 
 noncomputable abbrev prebox (s : Finset F) : Finset F := Finset.premop true s
-notation "□⁻¹" s:80 => Finset.prebox s
+notation "□'⁻¹" s:80 => Finset.prebox s
 
 noncomputable abbrev multidia (n : ℕ) (s : Finset F) : Finset F := Finset.multimop false n s
-notation "◇^[" n:90 "]" s:80 => Finset.multidia n s
+notation "◇'^[" n:90 "]" s:80 => Finset.multidia n s
 
 noncomputable abbrev dia (s : Finset F) : Finset F := Finset.mop false s
-notation "◇" s:80 => Finset.dia s
+notation "◇'" s:80 => Finset.dia s
 
 noncomputable abbrev premultidia (n : ℕ) (s : Finset F) : Finset F := Finset.premultimop false n s
-notation "◇⁻¹^[" n:90 "]" s:80 => Finset.premultidia n s
+notation "◇'⁻¹^[" n:90 "]" s:80 => Finset.premultidia n s
 
 noncomputable abbrev predia (s : Finset F) : Finset F := Finset.premop false s
-notation "◇⁻¹" s:80 => Finset.predia s
+notation "◇'⁻¹" s:80 => Finset.predia s
 
 end Finset
+-/
 
 
 namespace List
@@ -263,28 +266,28 @@ namespace List
 variable (n : ℕ) (l : List F)
 
 noncomputable abbrev multibox : List F := List.multimop true n l
-notation "□^[" n:90 "]" l:80 => List.multibox n l
+notation "□'^[" n:90 "]" l:80 => List.multibox n l
 
 noncomputable abbrev box : List F := List.mop true l
-notation "□" l:80 => List.box l
+notation "□'" l:80 => List.box l
 
 noncomputable abbrev multidia : List F := List.multimop false n l
-notation "◇^[" n:90 "]" l:80 => List.multidia n l
+notation "◇'^[" n:90 "]" l:80 => List.multidia n l
 
 noncomputable abbrev dia : List F := List.mop false l
-notation "◇" l:80 => List.dia l
+notation "◇'" l:80 => List.dia l
 
 noncomputable abbrev premultibox : List F := List.premultimop true n l
-notation "□⁻¹^[" n:90 "]" l:80 => List.premultibox n l
+notation "□'⁻¹^[" n:90 "]" l:80 => List.premultibox n l
 
 noncomputable abbrev prebox : List F := List.premop true l
-notation "□⁻¹" l:80 => List.prebox l
+notation "□'⁻¹" l:80 => List.prebox l
 
 noncomputable abbrev premultidia : List F := List.premultimop false n l
-notation "◇⁻¹^[" n:90 "]" l:80 => List.premultidia n l
+notation "◇'⁻¹^[" n:90 "]" l:80 => List.premultidia n l
 
 noncomputable abbrev predia : List F := List.premop false l
-notation "◇⁻¹" l:80 => List.predia l
+notation "◇'⁻¹" l:80 => List.predia l
 
 end List
 

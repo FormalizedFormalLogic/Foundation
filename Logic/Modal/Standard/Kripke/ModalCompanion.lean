@@ -131,8 +131,8 @@ lemma provable_S4_of_provable_efq : (𝐒𝟒 ⊢! pᵍ) → (𝐄𝐅𝐐 ⊢! 
   have MTrans := MI.frame_prop.1;
   have MRefl := MI.frame_prop.2;
 
-  let M : Modal.Standard.Kripke.Model _ α := ⟨MI.frame, MI.valuation⟩;
-  have h₁ : ∀ q (v : Superintuitionistic.SaturatedConsistentTableau (α := α) 𝐄𝐅𝐐), (MI, v) ⊧ q ↔ (M, v) ⊧ qᵍ := by
+  let M : Modal.Standard.Kripke.Model α := { Frame := { Rel := MI.frame }, Valuation := MI.valuation};
+  have h₁ : ∀ q (v : Superintuitionistic.SaturatedConsistentTableau (α := α) 𝐄𝐅𝐐), (MI, v) ⊧ q ↔ (Modal.Standard.Formula.Kripke.Satisfies M v (qᵍ)) := by
     intro q v;
     induction q using Superintuitionistic.Formula.rec' generalizing v with
     | hatom a =>
@@ -143,15 +143,15 @@ lemma provable_S4_of_provable_efq : (𝐒𝟒 ⊢! pᵍ) → (𝐄𝐅𝐐 ⊢! 
       . intro h;
         simpa only [Satisfies.iff_models, Satisfies, Formula.Kripke.Satisfies] using h v (MRefl v);
     | _ => simp_all;
-  have : ¬((M, w) ⊧ pᵍ) := (h₁ p w).not.mp h;
+  have : ¬(Modal.Standard.Formula.Kripke.Satisfies M w (pᵍ)) := (h₁ p w).not.mp h;
 
   by_contra hC;
   have := by simpa using Modal.Standard.Kripke.sound!_on_frameclass hC;
-  have : (M, w) ⊧ pᵍ := this _ M.frame (
+  have : (Modal.Standard.Formula.Kripke.Satisfies M w (pᵍ)) := this M.Frame (
       iff_definability_memAxiomSetFrameClass
-      (show Kripke.Definability _ (λ F => Reflexive F ∧ Transitive F) by simpa using instGeachDefinability (L := 𝐒𝟒))
+      (show Kripke.Definability _ (λ F => Reflexive F.Rel ∧ Transitive F.Rel) by simpa using instGeachDefinability (L := 𝐒𝟒))
       |>.mpr ⟨MRefl, MTrans⟩
-    ) M.valuation w;
+    ) M.Valuation w;
   contradiction;
 
 /-- a.k.a. _Gödel-McKinsey-Tarski Theorem_ -/

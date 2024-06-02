@@ -7,25 +7,20 @@ open Formula Formula.Kripke
 
 namespace Kripke
 
-variable {W₁ W₂} [Inhabited W₁] [Inhabited W₂]
+class Frame.pMorphism (F₁ : Frame) (F₂ : Frame) (f : F₁.World → F₂.World) where
+  forth : ∀ {w v : F₁.World}, w ≺ v → (f w) ≺ (f v)
+  back : ∀ {w : F₁.World}, ∀ {v : F₂.World}, (f w) ≺ v → ∃ u, w ≺ u ∧ f u = v
 
-abbrev Morphism (W₁ W₂ : Type*) [Inhabited W₁] [Inhabited W₂] := W₁ → W₂
-
-class Frame.pMorphism (F₁ : Frame W₁ α) (F₂ : Frame W₂ α) (f : W₁ → W₂) where
-  forth : ∀ {w v : W₁}, F₁ w v → F₂ (f w) (f v)
-  back : ∀ {w : W₁}, ∀ {v : W₂}, F₂ (f w) v → ∃ u, F₁ w u ∧ f u = v
-
-class Model.pMorphism (M₁ : Model W₁ α) (M₂ : Model W₂ α) (f : W₁ → W₂) extends Frame.pMorphism M₁.frame M₂.frame f where
-  atomic : ∀ {w : W₁}, ∀ {a : α}, (M₁.valuation w a) ↔ (M₂.valuation (f w) a)
+class Model.pMorphism (M₁ : Model α) (M₂ : Model α) (f : M₁.World → M₂.World) extends Frame.pMorphism M₁.Frame M₂.Frame f where
+  atomic : ∀ {w : M₁.World}, ∀ {a : α}, (M₁.Valuation w a) ↔ (M₂.Valuation (f w) a)
 
 end Kripke
 
-variable {W₁ W₂ : Type*} [Inhabited W₁] [Inhabited W₂] {α : Type u}
-         {f : W₁ → W₂} {p : Formula α} {T : Theory α}
-         {M₁ : Model W₁ α} {M₂ : Model W₂ α}
-         {F₁ : Frame W₁ α} {F₂ : Frame W₂ α}
+variable {M₁ : Model α} {M₂ : Model α}
+         {F₁ : Frame' α} {F₂ : Frame' α}
+         {f} {p : Formula α} {T : Theory α}
 
-lemma Formula.Kripke.Satisfies.morphism (hMor : Model.pMorphism M₁ M₂ f) {w : W₁} : ((M₁, w) ⊧ p) ↔ ((M₂, (f w)) ⊧ p) := by
+lemma Formula.Kripke.Satisfies.morphism (hMor : Model.pMorphism M₁ M₂ f) {w} : (w ⊧ p) ↔ ((f w) ⊧ p) := by
   induction p using Formula.rec' generalizing w with
   | hatom p =>
     constructor;
@@ -47,46 +42,45 @@ lemma Formula.Kripke.ValidOnFrame.morphism (hSur : Function.Surjective f) (hMorF
   contrapose;
   intro h;
   obtain ⟨V₂, w₂, h⟩ := by simpa [ValidOnFrame, ValidOnModel] using h;
-  let M₁ : Model W₁ α := {
-    frame := F₁,
-    valuation := λ w a => V₂ (f w) a
-  }
-  have hMor : Model.pMorphism M₁ ⟨F₂, V₂⟩ f := {
+
+  simp [ValidOnFrame, ValidOnModel];
+  obtain ⟨w₁, e⟩ : ∃ w₁, f w₁ = w₂ := by apply hSur;
+  existsi λ w a => V₂ (f w) a, w₁;
+  subst e;
+  exact Satisfies.morphism ({
     forth := by intro w v hwv; apply hMorF.forth hwv,
     back := by intro w v h; apply hMorF.back h,
     atomic := by simp_all;
-  }
-  simp [ValidOnFrame, ValidOnModel];
-  obtain ⟨w₁, e⟩ : ∃ w₁ : W₁, f w₁ = w₂ := by apply hSur;
-  existsi M₁.valuation, w₁;
-  subst e;
-  exact Satisfies.morphism hMor |>.not.mpr h;
+  }) |>.not.mpr h;
 
 lemma Theory.Kripke.ValidOnFrame.morphism (hSur : Function.Surjective f) (hMorF : Frame.pMorphism F₁ F₂ f) : (F₁ ⊧* T) → (F₂ ⊧* T) := by
   simp only [Semantics.realizeSet_iff];
   intro h p hp;
   exact Formula.Kripke.ValidOnFrame.morphism hSur hMorF (h hp);
 
--- TODO: `W` should be `Type*`, not `Type`
-theorem Kripke.undefinability_irreflexive : ¬∃ (Ax : AxiomSet α), (∀ {W : Type}, [Inhabited W] → ∀ {F : Frame W α}, (Irreflexive F) ↔ F ⊧* Ax) := by
-  let F₁ : Frame Bool α := λ w v => w ≠ v;
-  have hIF₁ : Irreflexive F₁ := by simp [Irreflexive, F₁];
-
-  let F₂ : Frame Unit α := λ w v => w = v;
-  have hIF₂ : ¬Irreflexive F₂ := by simp [Irreflexive, F₂];
-
-  let f : Morphism Bool Unit := λ _ => ();
-  have hSur : Function.Surjective f := by simp [Function.Surjective];
-  have hMorF : Frame.pMorphism F₁ F₂ f := {
-    forth := by intros; simp [F₂],
-    back := by simp [F₂, F₁];
-  }
-
+-- TODO: Fix type `α`
+theorem Kripke.undefinability_irreflexive : ¬∃ (Ax : AxiomSet α), (∀ {F : Frame'.{0} α}, (Irreflexive F.Rel) ↔ F ⊧* Ax) := by
   by_contra hC;
   obtain ⟨Ax, h⟩ := hC;
-  have : F₁ ⊧* Ax := h.mp hIF₁;
-  have : F₂ ⊧* Ax := Theory.Kripke.ValidOnFrame.morphism hSur hMorF this;
-  have : Irreflexive F₂ := h.mpr this;
+
+  let F₁ : Frame' α := { World := Unit ⊕ Unit, Rel := λ w v => w ≠ v };
+  have hIF₁ : Irreflexive F₁.Rel' := by exact f;
+
+  let F₂ : Frame' α := { World := Unit, Rel := λ w v => w = v };
+  have hIF₂ : ¬Irreflexive F₂.Rel' := by simp [Irreflexive]; existsi (); trivial;
+
+  let f : F₁.World → F₂.World := λ _ => ();
+  have hSur : Function.Surjective f := by simp [Function.Surjective];
+  have hMorF : Frame.pMorphism F₁ F₂ f := {
+    forth := by aesop;
+    back := by
+      simp [F₁, F₂];
+      constructor;
+      . intro a; right; exists (); intro; contradiction;
+      . intro a; left; use (); intro; contradiction;
+  }
+
+  have : Irreflexive F₂.Rel := h.mpr $ Theory.Kripke.ValidOnFrame.morphism hSur hMorF (h.mp hIF₁);
   contradiction;
 
 end LO.Modal.Standard

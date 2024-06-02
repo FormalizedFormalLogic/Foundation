@@ -11,12 +11,12 @@ open Formula
 variable {Λ : AxiomSet α} [Inhabited α] [DecidableEq α]
 
 open Theory MaximalParametricConsistentTheory CanonicalFrame in
-lemma definability_canonicalFrame_GeachAxiom {L : DeductionParameter α} [L.HasNec] [includeK : L.IncludeK] [Inhabited (MCT L)] (hAx : 𝗴𝗲(t) ⊆ Ax(L)) : GeachConfluent (α := α) t (CanonicalFrame L) := by
+lemma definability_canonicalFrame_GeachAxiom {L : DeductionParameter α} [L.HasNec] [includeK : L.IncludeK] [Inhabited (MCT L)] (hAx : 𝗴𝗲(t) ⊆ Ax(L)) : GeachConfluent t (CanonicalFrame L) := by
   have : L.Normal := ⟨⟩;
 
   intro Ω₁ Ω₂ Ω₃ h;
   have ⟨r₁₂, r₁₃⟩ := h; clear h;
-  have ⟨Ω, hΩ⟩ := MaximalParametricConsistentTheory.lindenbaum (L := L) (T := ((□⁻¹^[t.m]Ω₂.theory) ∪ (□⁻¹^[t.n]Ω₃.theory))) $ by
+  have ⟨Ω, hΩ⟩ := MaximalParametricConsistentTheory.lindenbaum (L := L) (T := ((□''⁻¹^[t.m]Ω₂.theory) ∪ (□''⁻¹^[t.n]Ω₃.theory))) $ by
     apply intro_union_ParametricConsistent;
     intro Γ Δ hΓ hΔ hC;
     replace hΓ : ∀ p ∈ Γ, □^[t.m]p ∈ Ω₂.theory := by simpa using hΓ;
@@ -42,8 +42,8 @@ lemma definability_canonicalFrame_GeachAxiom {L : DeductionParameter α} [L.HasN
   simp [multiframe_def_multibox];
   constructor <;> { intros; apply hΩ; simp_all; }
 
-lemma definability_canonicalFrame_multiGeachAxiom {L : DeductionParameter α} [L.HasNec] [Inhabited (MCT L)] (hAx : 𝗚𝗲(l) ⊆ Ax(L)) : MultiGeachConfluent (α := α) l (CanonicalFrame L) := by
-  induction l with
+lemma definability_canonicalFrame_multiGeachAxiom {L : DeductionParameter α} [L.HasNec] [Inhabited (MCT L)] (hAx : 𝗚𝗲(ts) ⊆ Ax(L)) : MultiGeachConfluent ts (CanonicalFrame L) := by
+  induction ts with
   | nil => simp [MultiGeachConfluent];
   | cons t ts ih =>
     simp;

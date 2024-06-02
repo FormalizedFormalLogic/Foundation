@@ -4,23 +4,22 @@ import Logic.Modal.Standard.Kripke.Soundness
 
 namespace LO.Modal.Standard
 
-variable {W α : Type*} [Inhabited W] [Inhabited α]
+variable {W α : Type u} [Inhabited W] [Inhabited α]
 
 open System
 open Kripke
 open Formula Formula.Kripke
 
-variable {F: Kripke.Frame W α}
+variable {F : Kripke.Frame' α}
 
-private lemma AxiomSet.L.definability.implies_transitive : F ⊧* 𝗟 → Transitive F := by
+private lemma AxiomSet.L.definability.implies_transitive : F ⊧* 𝗟 → Transitive F.Rel := by
   contrapose;
   intro hT; simp [Transitive] at hT;
   obtain ⟨w₁, w₂, w₃, r₂₃, r₁₂, nr₁₃⟩ := hT;
-  simp only [AxiomSet.L, Axioms.L, Semantics.RealizeSet.setOf_iff, ValidOnFrame.models_iff,
-    ValidOnFrame, ValidOnModel.iff_models, ValidOnModel, forall_exists_index,
-    forall_apply_eq_imp_iff, Semantics.Tarski.realize_imp, Satisfies.box_def, not_forall,
-    exists_prop];
-  existsi (atom default), (λ w' _ => (w' ≠ w₂ ∧ w' ≠ w₃)), w₁;
+  simp only [Semantics.RealizeSet.setOf_iff, ValidOnFrame.models_iff, ValidOnFrame,
+    ValidOnModel.iff_models, ValidOnModel, Satisfies.iff_models, forall_exists_index,
+    forall_apply_eq_imp_iff, Satisfies.imp_def, Satisfies.box_def, not_forall, exists_prop];
+  existsi (atom default), (λ w' _ => w' ≠ w₂ ∧ w' ≠ w₃), w₁;
   constructor;
   . intro x hx h;
     by_cases hx₂ : x = w₂;
@@ -29,18 +28,14 @@ private lemma AxiomSet.L.definability.implies_transitive : F ⊧* 𝗟 → Trans
   . existsi w₂;
     simpa;
 
-private lemma AxiomSet.L.definability.implies_cwf  : F ⊧* 𝗟 → ConverseWellFounded F := by
+private lemma AxiomSet.L.definability.implies_cwf  : F ⊧* 𝗟 → ConverseWellFounded F.Rel := by
   contrapose;
   intro hCF;
   obtain ⟨X, hX₁, hX₂⟩ := by simpa using ConverseWellFounded.iff_has_max.not.mp hCF;
-  let V : Valuation W α := λ w _ => w ∉ X;
-  let w := hX₁.some;
-  let a : Formula α := atom default;
-  simp only [AxiomSet.L, Axioms.L, Semantics.RealizeSet.setOf_iff, ValidOnFrame.models_iff,
-    ValidOnFrame, ValidOnModel.iff_models, ValidOnModel, forall_exists_index,
-    forall_apply_eq_imp_iff, Semantics.Tarski.realize_imp, Satisfies.box_def, not_forall,
-    exists_prop];
-  existsi (atom default), V, w;
+  simp only [Semantics.RealizeSet.setOf_iff, ValidOnFrame.models_iff, ValidOnFrame,
+    ValidOnModel.iff_models, ValidOnModel, Satisfies.iff_models, forall_exists_index,
+    forall_apply_eq_imp_iff, Satisfies.imp_def, Satisfies.box_def, not_forall, exists_prop];
+  existsi (atom default), (λ w _ => w ∉ X), hX₁.some;
   constructor;
   . intro x _;
     by_cases hxs : x ∈ X
@@ -48,37 +43,33 @@ private lemma AxiomSet.L.definability.implies_cwf  : F ⊧* 𝗟 → ConverseWel
       intro h;
       exact h x (by aesop);
     . aesop;
-  . obtain ⟨w', hw'₁, hw'₂⟩ := hX₂ w (by apply Set.Nonempty.some_mem);
-    simp;
+  . obtain ⟨w', hw'₁, hw'₂⟩ := hX₂ hX₁.some (by apply Set.Nonempty.some_mem);
     existsi w';
     constructor;
-    . simpa [flip] using hw'₂;
-    . simp_all [V, w, a];
+    . simpa using hw'₂;
+    . simpa;
 
-private lemma AxiomSet.L.definability.impliedby : (Transitive F ∧ ConverseWellFounded F) → F ⊧* 𝗟 := by
+private lemma AxiomSet.L.definability.impliedby : (Transitive F.Rel ∧ ConverseWellFounded F.Rel) → F ⊧* 𝗟 := by
   rintro ⟨hTrans, hWF⟩;
   simp [AxiomSet.L, Axioms.L];
   intro p V w;
-  let M := Model.mk F V;
-  simp only [Semantics.Tarski.realize_imp];
+  simp only [Satisfies.iff_models, Satisfies.imp_def];
   contrapose;
-
   intro h;
   obtain ⟨z, rwz, hz⟩ := by simpa using h;
-  obtain ⟨xm, ⟨hxm₁, hxm₂⟩⟩ := hWF.has_min ({ x | (F w x) ∧ ¬((M, x) ⊧ p) }) (by existsi z; simp_all)
+  obtain ⟨xm, ⟨hxm₁, hxm₂⟩⟩ := hWF.has_min ({ x | (F.Rel w x) ∧ ¬(Satisfies ⟨F, V⟩ x p) }) (by existsi z; simp_all)
   simp [Satisfies.box_def];
-
-  have : ((M, xm) ⊧ □p) := by
+  existsi xm;
+  have : Satisfies ⟨F, V⟩ xm (□p) := by
     by_contra hC;
     obtain ⟨y, hy₁, hy₂⟩ := by simpa using hC;
-    have : ¬(F xm y) := hxm₂ y ⟨(hTrans (by simp_all) hy₁), hy₂⟩;
+    have : ¬(xm ≺ y) := hxm₂ y ⟨(hTrans (by simp_all) hy₁), hy₂⟩;
     contradiction;
-  existsi xm;
   simp_all;
 
 open AxiomSet.L.definability in
-instance AxiomSet.L.definability : Definability (α := α) 𝗟 (λ F => Transitive F ∧ ConverseWellFounded F) where
-  defines W _ F := by
+instance AxiomSet.L.definability : Definability (α := α) 𝗟 (λ F => Transitive F.Rel ∧ ConverseWellFounded F.Rel) where
+  defines F := by
     constructor;
     . intro h;
       constructor;
@@ -88,11 +79,11 @@ instance AxiomSet.L.definability : Definability (α := α) 𝗟 (λ F => Transit
       apply impliedby;
       simp_all;
 
-instance AxiomSet.L.finiteDefinability : FiniteDefinability (α := α) 𝗟 (λ F => Transitive F ∧ Irreflexive F) where
-  fin_defines W _ _ F := by
+instance AxiomSet.L.finiteDefinability : FiniteDefinability (α := α) 𝗟 (λ F => Transitive F.Rel ∧ Irreflexive F.Rel) where
+  fin_defines F := by
     constructor;
     . intro h;
-      obtain ⟨hTrans, hCWF⟩ := L.definability.defines W F |>.mp h;
+      obtain ⟨hTrans, hCWF⟩ := L.definability.defines F.toFrame |>.mp h;
       constructor;
       . simpa;
       . by_contra hIrrefl;
@@ -102,22 +93,20 @@ instance AxiomSet.L.finiteDefinability : FiniteDefinability (α := α) 𝗟 (λ 
         have := this {w} (by simp);
         simp_all;
     . rintro ⟨hTrans, hIrrefl⟩;
-      apply AxiomSet.L.definability.defines W F |>.mpr;
-      exact ⟨hTrans, @Finite.converseWellFounded_of_trans_irrefl _ F _ ⟨hTrans⟩ ⟨hIrrefl⟩⟩;
+      apply AxiomSet.L.definability.defines F.toFrame |>.mpr;
+      exact ⟨hTrans, @Finite.converseWellFounded_of_trans_irrefl _ F.Rel F.World_finite ⟨hTrans⟩ ⟨hIrrefl⟩⟩;
 
-instance : FiniteFrameClass.Nonempty (α := α) 𝔽ꟳ(𝗟) where
-  W := PUnit;
-  existsi := by
-    existsi (λ _ _ => False);
+instance : FiniteFrameClass.IsNonempty (𝔽ꟳ(𝗟) : FiniteFrameClass' α) where
+  nonempty := by
+    existsi { World := PUnit, Rel := λ _ _ => False };
     apply iff_finiteDefinability_memFiniteFrameClass (AxiomSet.L.finiteDefinability) |>.mpr;
     simp [Transitive, Irreflexive];
 
-instance : FiniteFrameClass.Nonempty (α := α) 𝔽ꟳ(Ax(𝐆𝐋)) where
-  W := PUnit;
-  existsi := by
-    existsi (λ _ _ => False);
+instance : FiniteFrameClass.IsNonempty (𝔽ꟳ(Ax(𝐆𝐋)) : FiniteFrameClass' α) where
+  nonempty := by
+    existsi { World := PUnit, Rel := λ _ _ => False };
     apply iff_finiteDefinability_memFiniteFrameClass
-      (show FiniteDefinability (α := α) (𝗞 ∪ 𝗟) (λ F => Transitive F ∧ Irreflexive F) by infer_instance)
+      (show FiniteDefinability (α := α) (𝗞 ∪ 𝗟) (λ F => Transitive F.Rel ∧ Irreflexive F.Rel) by infer_instance)
       |>.mpr;
     simp [Transitive, Irreflexive];
 

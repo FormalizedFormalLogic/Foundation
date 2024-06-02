@@ -187,18 +187,18 @@ lemma multiboxConj'_iff! : 𝓢 ⊢! □^[n](Γ.conj') ↔ ∀ p ∈ Γ, 𝓢 �
       exact collect_multibox_and'! $ conj₃'! h₁ (ih.mpr h₂);
 lemma boxConj'_iff! : 𝓢 ⊢! □(Γ.conj') ↔ ∀ p ∈ Γ, 𝓢 ⊢! □p := multiboxConj'_iff! (n := 1)
 
-lemma multiboxconj'_of_conj'multibox! (d : 𝓢 ⊢! (□^[n]Γ).conj') : 𝓢 ⊢! □^[n](Γ.conj') := by
+lemma multiboxconj'_of_conj'multibox! (d : 𝓢 ⊢! (□'^[n]Γ).conj') : 𝓢 ⊢! □^[n](Γ.conj') := by
   apply multiboxConj'_iff!.mpr;
   intro p hp;
   exact iff_provable_list_conj.mp d (□^[n]p) (by aesop);
 
 @[simp]
-lemma multibox_cons_conj'! :  𝓢 ⊢! (□^[n](p :: Γ)).conj' ⟶ (□^[n]Γ).conj' := by
+lemma multibox_cons_conj'! :  𝓢 ⊢! (□'^[n](p :: Γ)).conj' ⟶ (□'^[n]Γ).conj' := by
   apply conj'conj'_subset;
   simp_all;
 
 @[simp]
-lemma collect_multibox_conj'! : 𝓢 ⊢! (□^[n]Γ).conj' ⟶ □^[n](Γ.conj') := by
+lemma collect_multibox_conj'! : 𝓢 ⊢! (□'^[n]Γ).conj' ⟶ □^[n](Γ.conj') := by
   induction Γ using List.induction_with_singleton with
   | hnil => simpa using dhyp! multiboxverum!;
   | hsingle => simp;
@@ -207,7 +207,7 @@ lemma collect_multibox_conj'! : 𝓢 ⊢! (□^[n]Γ).conj' ⟶ □^[n](Γ.conj'
     exact imp_trans! (implyRightAnd! (generalConj'! (by simp)) (imp_trans! (by simp) ih)) collect_multibox_and!;
 
 @[simp]
-lemma collect_box_conj'! : 𝓢 ⊢! (□Γ).conj' ⟶ □(Γ.conj') := collect_multibox_conj'! (n := 1)
+lemma collect_box_conj'! : 𝓢 ⊢! (□'Γ).conj' ⟶ □(Γ.conj') := collect_multibox_conj'! (n := 1)
 
 
 def collect_multibox_or : 𝓢 ⊢ □^[n]p ⋎ □^[n]q ⟶ □^[n](p ⋎ q) := disj₃'' (multibox_axiomK' $ multinec disj₁) (multibox_axiomK' $ multinec disj₂)
@@ -256,7 +256,7 @@ def collect_dia_or' (h : 𝓢 ⊢ ◇p ⋎ ◇q) : 𝓢 ⊢ ◇(p ⋎ q) := coll
 
 lemma generalConj'₂! (h : p ∈ Γ) (d : 𝓢 ⊢! Γ.conj') : 𝓢 ⊢! p := (generalConj'! h) ⨀ d
 
-@[simp] lemma iff_conj'multidia_multidiaconj'! : 𝓢 ⊢! ◇^[n](Γ.conj') ⟶ (◇^[n]Γ).conj' := by
+@[simp] lemma iff_conj'multidia_multidiaconj'! : 𝓢 ⊢! ◇^[n](Γ.conj') ⟶ (◇'^[n]Γ).conj' := by
   induction Γ using List.induction_with_singleton with
   | hnil => simpa using dhyp! verum!;
   | hsingle p => simp;
