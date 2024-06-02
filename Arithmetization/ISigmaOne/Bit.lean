@@ -154,6 +154,20 @@ macro_rules
   intros
   simp [Semiformula.Operator.operator, operator_mem_def]
 
+def memRel : 𝚺₀-Semisentence 3 := .mkSigma “∃[#0 < (#2 + #3 + 1) ^' 2 + 1] (!pairDef.val .[#0, #2, #3] ∧ #0 ∈ #1)” (by simp)
+
+def memRelOpr : Semiformula.Operator ℒₒᵣ 3 := ⟨memRel.val⟩
+
+syntax:45 foterm:45 " ~[" foterm "]" foterm:0 : foformula
+syntax:45 foterm:45 " ≁[" foterm "]" foterm:0 : foformula
+
+macro_rules
+  | `(“ $t₁:foterm ~[ $u:foterm ] $t₂:foterm ”) => `(memRelOpr.operator ![ᵀ“$u”, ᵀ“$t₁”, ᵀ“$t₂”])
+  | `(“ $t₁:foterm ≁[ $u:foterm ] $t₂:foterm ”) => `(~memRelOpr.operator ![ᵀ“$u”, ᵀ“$t₁”, ᵀ“$t₂”])
+
+@[simp] lemma Hierarchy.memRel {t₁ t₂ u : Semiterm ℒₒᵣ μ n} : Hierarchy Γ s “!!t₁ ~[ !!u ] !!t₂” := by
+  simp[Semiformula.Operator.operator, Matrix.fun_eq_vec₂, operator_mem_def, memRelOpr]
+
 variable {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐈𝚺₁]
 
 instance : Structure.Mem ℒₒᵣ M := ⟨by intro a b; simp [Semiformula.Operator.val, operator_mem_def, Model.bit_defined.df.iff]⟩
@@ -171,6 +185,17 @@ instance : Structure.Mem ℒₒᵣ M := ⟨by intro a b; simp [Semiformula.Opera
   constructor
   · rintro ⟨x, _, hx, h⟩; exact ⟨x, hx, h⟩
   · rintro ⟨x, hx, h⟩; exact ⟨x, lt_of_mem hx, hx, h⟩
+
+lemma Model.memRel_defined : 𝚺₀-Relation₃ ((fun r x y ↦ ⟪x, y⟫ ∈ r) : M → M → M → Prop) via memRel := by
+  intro v; simp [memRel, pair_defined.df.iff, lt_succ_iff_le]
+  constructor
+  · intro h; exact ⟨⟪v 1, v 2⟫, by simp, rfl, h⟩
+  · rintro ⟨_, _, rfl, h⟩; exact h
+
+@[simp] lemma eval_memRel {x y r : M} :
+    memRelOpr.val ![r, x, y] ↔ ⟪x, y⟫ ∈ r := by
+  unfold Semiformula.Operator.val
+  simp [memRelOpr, pair_defined.df.iff, memRel_defined.df.iff]
 
 end
 
@@ -267,7 +292,7 @@ lemma mem_exp_add_succ_sub_one (i j : M) : i ∈ exp (i + j + 1) - 1 := by
 /-- under a = {0, 1, 2, ..., a - 1} -/
 def under (a : M) : M := exp a - 1
 
-lemma mem_under_iff {i j : M} : i ∈ under j ↔ i < j := by
+@[simp] lemma mem_under_iff {i j : M} : i ∈ under j ↔ i < j := by
   constructor
   · intro h
     have : exp i < exp j := calc
@@ -283,7 +308,7 @@ lemma mem_under_iff {i j : M} : i ∈ under j ↔ i < j := by
       · exact le_tsub_of_add_le_left this
     rw [this]; exact mem_exp_add_succ_sub_one i k
 
-@[simp] lemma not_mem_under_self (i : M) : i ∉ under i := by simp [mem_under_iff]
+@[simp] lemma not_mem_under_self (i : M) : i ∉ under i := by simp
 
 lemma eq_zero_of_subset_zero {a : M} : a ⊆ 0 → a = 0 := by
   intro h; by_contra A

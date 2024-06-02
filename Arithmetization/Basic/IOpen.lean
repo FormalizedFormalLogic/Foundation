@@ -673,7 +673,7 @@ lemma pair_lt_pair {a₁ a₂ b₁ b₂ : M} (ha : a₁ < a₂) (hb : b₁ < b�
     ⟪a₁, b₁⟫ < ⟪a₂, b₁⟫ := pair_lt_pair_left ha b₁
     _        < ⟪a₂, b₂⟫ := pair_lt_pair_right a₂ hb
 
-lemma pair_polybound (a b : M) : ⟪a, b⟫ ≤ (a + b + 1)^2 := by
+@[simp] lemma pair_polybound (a b : M) : ⟪a, b⟫ ≤ (a + b + 1)^2 := by
   by_cases h : a < b <;> simp [pair, h, sq, add_mul_self_eq, two_mul]
   · simp [←add_assoc, add_right_comm _ a]; simp [add_right_comm _ (b * b)]
   · simp [←add_assoc, add_right_comm _ b]; simp [add_right_comm _ a]; simp [add_assoc]
