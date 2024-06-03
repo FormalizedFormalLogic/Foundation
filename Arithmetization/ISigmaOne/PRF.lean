@@ -29,6 +29,8 @@ def Formulae.cseqDef (p : Formulae k) : HSemisentence ℒₒᵣ (k + 1) 𝚺₁ 
 def Formulae.resultDef (p : Formulae k) : HSemisentence ℒₒᵣ (k + 2) 𝚺₁ := .mkSigma
   (∃' ((Rew.substs (#0 :> (#·.succ.succ.succ)) |>.hom p.cseqDef.val) ⋏ “#2 ~[#0] #1”)) (by simp)
 
+def Formulae.resultDeltaDef (p : Formulae k) : HSemisentence ℒₒᵣ (k + 2) 𝚫₁ := p.resultDef.graphDelta
+
 variable (M)
 
 structure Construction {k : ℕ} (p : Formulae k) where
@@ -184,8 +186,17 @@ lemma result_defined : Model.DefinedFunction ℒₒᵣ 𝚺₁ (fun v ↦ c.resu
   apply exists_congr; intro x
   simp [c.cseq_defined_iff]
 
+lemma result_defined_delta : Model.DefinedFunction ℒₒᵣ 𝚫₁ (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → M) → M) p.resultDeltaDef :=
+  c.result_defined.graph_delta
+
 @[simp] lemma result_defined_iff (v) :
     Semiformula.Evalbm M v p.resultDef.val ↔ v 0 = c.result (v ·.succ.succ) (v 1) := c.result_defined.df.iff v
+
+instance result_definable : DefinableFunction ℒₒᵣ 𝚺₁ (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → M) → M) :=
+  Defined.to_definable _ c.result_defined
+
+instance result_definable_delta₁ : DefinableFunction ℒₒᵣ 𝚫₁ (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → M) → M) :=
+  Defined.to_definable _ c.result_defined_delta
 
 end Construction
 

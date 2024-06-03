@@ -18,6 +18,8 @@ abbrev HierarchySymbol.sigmaOne : HierarchySymbol := (𝚺, 1)
 
 abbrev HierarchySymbol.piOne : HierarchySymbol := (𝚷, 1)
 
+abbrev HierarchySymbol.deltaOne : HierarchySymbol := (𝚫, 1)
+
 notation "𝚺₀" => HierarchySymbol.sigmaZero
 
 notation "𝚷₀" => HierarchySymbol.piZero
@@ -27,6 +29,8 @@ notation "𝚫₀" => HierarchySymbol.deltaZero
 notation "𝚺₁" => HierarchySymbol.sigmaOne
 
 notation "𝚷₁" => HierarchySymbol.piOne
+
+notation "𝚫₁" => HierarchySymbol.deltaOne
 
 namespace HierarchySymbol
 
