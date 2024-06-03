@@ -446,15 +446,19 @@ lemma lh_prop_of_not_seq {s : M} (h : ¬Seq s) : lh s = 0 := (lh_prop s).2 h
 
 lemma Seq.domain_eq {s : M} (h : Seq s) : domain s = under (lh s) := (Model.lh_prop s).1 h
 
-lemma Seq.get_exists_uniq {s : M} (h : Seq s) {x : M} (hx : x < lh s) : ∃! y, ⟪x, y⟫ ∈ s := h.isMapping x (by simpa [h.domain_eq] using hx)
+lemma Seq.exists {s : M} (h : Seq s) {x : M} (hx : x < lh s) : ∃ y, ⟪x, y⟫ ∈ s := h.isMapping x (by simpa [h.domain_eq] using hx) |>.exists
 
-def Seq.get {s : M} (h : Seq s) {x : M} (hx : x < lh s) : M := Classical.choose! (h.get_exists_uniq hx)
+lemma Seq.nth_exists_uniq {s : M} (h : Seq s) {x : M} (hx : x < lh s) : ∃! y, ⟪x, y⟫ ∈ s := h.isMapping x (by simpa [h.domain_eq] using hx)
 
-@[simp] lemma Seq.get_mem {s : M} (h : Seq s) {x : M} (hx : x < lh s) :
-    ⟪x, h.get hx⟫ ∈ s := Classical.choose!_spec (h.get_exists_uniq hx)
+def Seq.nth {s : M} (h : Seq s) {x : M} (hx : x < lh s) : M := Classical.choose! (h.nth_exists_uniq hx)
 
-lemma Seq.get_uniq {s : M} (h : Seq s) {x : M} (hx : x < lh s) (hy : ⟪x, y⟫ ∈ s) : y = h.get hx :=
-    (h.get_exists_uniq hx).unique hy (by simp)
+@[simp] lemma Seq.nth_mem {s : M} (h : Seq s) {x : M} (hx : x < lh s) :
+    ⟪x, h.nth hx⟫ ∈ s := Classical.choose!_spec (h.nth_exists_uniq hx)
+
+lemma Seq.nth_uniq {s : M} (h : Seq s) {x y : M} (hx : x < lh s) (hy : ⟪x, y⟫ ∈ s) : y = h.nth hx :=
+    (h.nth_exists_uniq hx).unique hy (by simp)
+
+@[simp] lemma Seq.nth_lt {s : M} (h : Seq s) {x} (hx : x < lh s) : h.nth hx < s := lt_of_mem_rng (h.nth_mem hx)
 
 lemma Seq.lt_lh_iff {s : M} (h : Seq s) {i} : i < lh s ↔ i ∈ domain s := by simp [h.domain_eq]
 
@@ -480,13 +484,17 @@ lemma Seq.lt_seqCons {s} (hs : Seq s) (x : M) : s < x ::ˢ s :=
 
 @[simp] lemma Seq.mem_seqCons (s x : M) : ⟪lh s, x⟫ ∈ x ::ˢ s := by simp [seqCons]
 
-lemma Seq.seq_seqCons {s : M} (h : Seq s) (x : M) : Seq (x ::ˢ s) :=
+protected lemma Seq.seqCons {s : M} (h : Seq s) (x : M) : Seq (x ::ˢ s) :=
   ⟨h.isMapping.insert (by simp [h.domain_eq]), lh s + 1, by simp [seqCons, h.domain_eq]⟩
 
 @[simp] lemma Seq.lh_seqCons (x : M) {s} (h : Seq s) : lh (x ::ˢ s) = lh s + 1 := by
   have : under (lh s + 1) = under (lh (x ::ˢ s)) := by
-    simpa [seqCons, h.domain_eq] using (h.seq_seqCons x).domain_eq
+    simpa [seqCons, h.domain_eq] using (h.seqCons x).domain_eq
   exact Eq.symm <| under_inj.mp this
+
+lemma mem_seqCons_iff {i x z s : M} : ⟪i, x⟫ ∈ z ::ˢ s ↔ (i = lh s ∧ x = z) ∨ ⟪i, x⟫ ∈ s := by simp [seqCons]
+
+@[simp] lemma lh_mem_seqCons (s z : M) : ⟪lh s, z⟫ ∈ z ::ˢ s := by simp [seqCons]
 
 lemma domain_bitRemove_of_isMapping_of_mem {x y s : M} (hs : IsMapping s) (hxy : ⟪x, y⟫ ∈ s) :
     domain (bitRemove ⟪x, y⟫ s) = bitRemove x (domain s) := by
@@ -507,8 +515,8 @@ lemma Seq.cases_iff {s : M} : Seq s ↔ s = ∅ ∨ ∃ x s', Seq s' ∧ s = x :
     let i := lh s - 1
     have hi : i < lh s := pred_lt_self_of_pos (pos_iff_ne_zero.mpr hs)
     have lhs_eq : lh s = i + 1 := Eq.symm <| tsub_add_cancel_of_le <| ne_zero_iff_one_le.mp hs
-    let s' := bitRemove ⟪i, h.get hi⟫ s
-    have his : ⟪i, h.get hi⟫ ∈ s := h.get_mem hi
+    let s' := bitRemove ⟪i, h.nth hi⟫ s
+    have his : ⟪i, h.nth hi⟫ ∈ s := h.nth_mem hi
     have hdoms' : domain s' = under i := by
       simp only [domain_bitRemove_of_isMapping_of_mem h.isMapping his, h.domain_eq, s']
       apply mem_ext
@@ -516,30 +524,15 @@ lemma Seq.cases_iff {s : M} : Seq s ↔ s = ∅ ∨ ∃ x s', Seq s' ∧ s = x :
       intro j hj; exact ne_of_lt hj
     have hs' : Seq s' := ⟨ h.isMapping.of_subset (by simp [s']), i, hdoms' ⟩
     have hs'i : lh s' = i := by simpa [hs'.domain_eq] using hdoms'
-    exact ⟨h.get hi, s', hs', mem_ext <| fun v ↦ by
+    exact ⟨h.nth hi, s', hs', mem_ext <| fun v ↦ by
       simp only [seqCons, hs'i, mem_bitInsert_iff]
       simp [s']
-      by_cases hv : v = ⟪i, h.get hi⟫ <;> simp [hv]⟩,
+      by_cases hv : v = ⟪i, h.nth hi⟫ <;> simp [hv]⟩,
   by  rintro (rfl | ⟨x, s', hs', rfl⟩)
       · simp
-      · exact hs'.seq_seqCons x⟩
+      · exact hs'.seqCons x⟩
 
 alias ⟨Seq.cases, _⟩ := Seq.cases_iff
-
-/-- `!⟨x, y, z, ...⟩` notation for `Seq` -/
-syntax (name := vecNotation) "!⟨" term,* "⟩" : term
-
-macro_rules
-  | `(!⟨$term:term, $terms:term,*⟩) => `(seqCons $term !⟨$terms,*⟩)
-  | `(!⟨$term:term⟩) => `(seqCons $term ∅)
-  | `(!⟨⟩) => `(∅)
-
-@[app_unexpander seqCons]
-def vecConsUnexpander : Lean.PrettyPrinter.Unexpander
-  | `($_ $term !⟨$term2, $terms,*⟩) => `(!⟨$term, $term2, $terms,*⟩)
-  | `($_ $term !⟨$term2⟩) => `(!⟨$term, $term2⟩)
-  | `($_ $term ∅) => `(!⟨$term⟩)
-  | _ => throw ()
 
 /-- TODO: move to Ind.lean -/
 @[elab_as_elim] lemma order_induction_h_iSigmaOne (Γ)
@@ -559,21 +552,150 @@ theorem seq_induction {P : M → Prop} (hP : DefinablePred ℒₒᵣ (Γ, 1) P)
     · exact hnil
     · exact hcons s x hs (ih s (hs.lt_seqCons x) hs)
 
+/-- `!⟨x, y, z, ...⟩` notation for `Seq` -/
+syntax (name := vecNotation) "!⟨" term,* "⟩" : term
+
+macro_rules
+  | `(!⟨$term:term, $terms:term,*⟩) => `(seqCons $term !⟨$terms,*⟩)
+  | `(!⟨$term:term⟩) => `(seqCons $term ∅)
+  | `(!⟨⟩) => `(∅)
+
+@[app_unexpander seqCons]
+def vecConsUnexpander : Lean.PrettyPrinter.Unexpander
+  | `($_ $term !⟨$term2, $terms,*⟩) => `(!⟨$term, $term2, $terms,*⟩)
+  | `($_ $term !⟨$term2⟩) => `(!⟨$term, $term2⟩)
+  | `($_ $term ∅) => `(!⟨$term⟩)
+  | _ => throw ()
+
+@[simp] lemma singleton_seq (x : M) : Seq !⟨x⟩ := by apply Seq.seqCons; simp
+
 end seq
 
 namespace PR
 
-structure Construction (Γ : HierarchySymbol) {k : ℕ} (f : (Fin k → M) → M) (g : (Fin (k + 2) → M) → M) where
-  zero : HSemisentence ℒₒᵣ (k + 1) Γ
-  succ : HSemisentence ℒₒᵣ (k + 3) Γ
-  zero_defined : DefinedFunction ℒₒᵣ Γ f zero
-  succ_defined : DefinedFunction ℒₒᵣ Γ g succ
+structure Formulae (k : ℕ) where
+  zero : HSemisentence ℒₒᵣ (k + 1) 𝚺₁
+  succ : HSemisentence ℒₒᵣ (k + 3) 𝚺₁
 
-variable {k : ℕ} {f : (Fin k → M) → M} {g : (Fin (k + 2) → M) → M}
+variable (M)
 
-def ConstSeq (v : Fin k → M) (s : M) : Prop := Seq s ∧ ⟪0, f v⟫ ∈ s ∧ ∀ i < lh s, ∀ z, ⟪i, z⟫ ∈ s → ⟪i + 1, g (z :> i :> v)⟫ ∈ s
+structure Construction {k : ℕ} (p : Formulae k) where
+  zero : (Fin k → M) → M
+  succ : (Fin k → M) → M → M → M
+  zero_defined : DefinedFunction ℒₒᵣ 𝚺₁ zero p.zero
+  succ_defined : DefinedFunction ℒₒᵣ 𝚺₁ (fun v ↦ succ (v ·.succ.succ) (v 1) (v 0)) p.succ
 
+variable {M}
 
+namespace Construction
+
+variable {k : ℕ} {p : Formulae k} (c : Construction M p) (v : Fin k → M)
+
+def CSeq (s : M) : Prop := Seq s ∧ ⟪0, c.zero v⟫ ∈ s ∧ ∀ i < lh s - 1, ∀ z, ⟪i, z⟫ ∈ s → ⟪i + 1, c.succ v i z⟫ ∈ s
+
+variable {c v}
+
+section
+
+variable {s : M} (h : c.CSeq v s)
+
+lemma CSeq.seq : Seq s := h.1
+
+lemma CSeq.zero : ⟪0, c.zero v⟫ ∈ s := h.2.1
+
+lemma CSeq.succ : ∀ i < lh s - 1, ∀ z, ⟪i, z⟫ ∈ s → ⟪i + 1, c.succ v i z⟫ ∈ s := h.2.2
+
+lemma CSeq.unique {s₁ s₂ : M} (H₁ : c.CSeq v s₁) (H₂ : c.CSeq v s₂) (h₁₂ : lh s₁ ≤ lh s₂) {i} (hi : i < lh s₁) {z₁ z₂} :
+    ⟪i, z₁⟫ ∈ s₁ → ⟪i, z₂⟫ ∈ s₂ → z₁ = z₂ := by
+  revert z₁ z₂
+  suffices ∀ z₁ < s₁, ∀ z₂ < s₂, ⟪i, z₁⟫ ∈ s₁ → ⟪i, z₂⟫ ∈ s₂ → z₁ = z₂
+  by intro z₁ z₂ hz₁ hz₂; exact this z₁ (lt_of_mem_rng hz₁) z₂ (lt_of_mem_rng hz₂) hz₁ hz₂
+  intro z₁ hz₁ z₂ hz₂ h₁ h₂
+  induction i using induction_iSigmaOne generalizing z₁ z₂
+  · definability
+  case zero =>
+    have : z₁ = c.zero v := H₁.seq.isMapping.uniq h₁ H₁.zero
+    have : z₂ = c.zero v := H₂.seq.isMapping.uniq h₂ H₂.zero
+    simp_all
+  case succ i ih =>
+    have hi' : i < lh s₁ := lt_of_le_of_lt (by simp) hi
+    let z' := H₁.seq.nth hi'
+    have ih₁ : ⟪i, z'⟫ ∈ s₁ := H₁.seq.nth_mem hi'
+    have ih₂ : ⟪i, z'⟫ ∈ s₂ := by
+      have : z' = H₂.seq.nth (lt_of_lt_of_le hi' h₁₂) :=
+        ih hi' z' (by simp [z']) (H₂.seq.nth (lt_of_lt_of_le hi' h₁₂)) (by simp [z']) (by simp [z']) (by simp)
+      simp [this]
+    have h₁' : ⟪i + 1, c.succ v i z'⟫ ∈ s₁ := H₁.succ i (by simp [lt_tsub_iff_right, hi]) z' ih₁
+    have h₂' : ⟪i + 1, c.succ v i z'⟫ ∈ s₂ := H₂.succ i (by simp [lt_tsub_iff_right]; exact lt_of_lt_of_le hi h₁₂) z' ih₂
+    have e₁ : z₁ = c.succ v i z' := H₁.seq.isMapping.uniq h₁ h₁'
+    have e₂ : z₂ = c.succ v i z' := H₂.seq.isMapping.uniq h₂ h₂'
+    simp [e₁, e₂]
+
+end
+
+variable (c v)
+
+def initial : M := !⟨c.zero v⟩
+
+variable {c v}
+
+@[simp] lemma CSeq.initial : c.CSeq v (c.initial v) :=
+  ⟨by simp [Construction.initial], by simp [Construction.initial, seqCons], by simp [Construction.initial]⟩
+
+lemma CSeq.successor {s l z : M} (Hs : c.CSeq v s) (hl : l + 1 = lh s) (hz : ⟪l, z⟫ ∈ s) :
+    c.CSeq v (c.succ v l z ::ˢ s) :=
+  ⟨ Hs.seq.seqCons _, by simp [seqCons, Hs.zero], by
+    simp [Hs.seq.lh_seqCons]
+    intro i hi w hiw
+    have hiws : ⟪i, w⟫ ∈ s := by
+      simp [mem_seqCons_iff] at hiw; rcases hiw with (⟨rfl, rfl⟩ | h)
+      · simp at hi
+      · assumption
+    have : i ≤ l := by simpa [←hl, lt_succ_iff_le] using hi
+    rcases this with (rfl | hil)
+    · have : w = z := Hs.seq.isMapping.uniq hiws hz
+      simp [this, hl]
+    · simp [mem_seqCons_iff]; right
+      exact Hs.succ i (by simp [←hl, hil]) w hiws ⟩
+
+variable (c v)
+
+lemma CSeq.exists (l : M) : ∃ s, c.CSeq v s ∧ l + 1 = lh s := by
+  induction l using induction_iSigmaOne
+  · sorry
+  case zero =>
+    exact ⟨c.initial v, by simp, by simp [Construction.initial]⟩
+  case succ l ih =>
+    rcases ih with ⟨s, Hs, hls⟩
+    have hl : l < lh s := by simp [←hls]
+    have : ∃ z, ⟪l, z⟫ ∈ s := Hs.seq.exists hl
+    rcases this with ⟨z, hz⟩
+    exact ⟨c.succ v l z ::ˢ s, Hs.successor hls hz, by simp [Hs.seq, hls]⟩
+
+lemma cSeq_result_existsUnique (l : M) : ∃! z, ∃ s, c.CSeq v s ∧ l + 1 = lh s ∧ ⟪l, z⟫ ∈ s := by
+  rcases CSeq.exists c v l with ⟨s, Hs, h⟩
+  have : ∃ z, ⟪l, z⟫ ∈ s := Hs.seq.exists (show l < lh s from by simp [←h])
+  rcases this with ⟨z, hz⟩
+  exact ExistsUnique.intro z ⟨s, Hs, h, hz⟩ (by
+    rintro z' ⟨s', Hs', h', hz'⟩
+    exact Eq.symm <| Hs.unique Hs' (by simp [←h, ←h']) (show l < lh s from by simp [←h]) hz hz')
+
+def result (k : M) : M := Classical.choose! (c.cSeq_result_existsUnique v k)
+
+lemma result_spec (k : M) : ∃ s, c.CSeq v s ∧ k + 1 = lh s ∧ ⟪k, c.result v k⟫ ∈ s := Classical.choose!_spec (c.cSeq_result_existsUnique v k)
+
+@[simp] theorem result_zero : c.result v 0 = c.zero v := by
+  rcases c.result_spec v 0 with ⟨s, Hs, _, h0⟩
+  exact Hs.seq.isMapping.uniq h0 Hs.zero
+
+theorem result_succ (k : M) : c.result v (k + 1) = c.succ v k (c.result v k) := by
+  rcases c.result_spec v k with ⟨s, Hs, hk, h⟩
+  have : CSeq c v (c.succ v k (result c v k) ::ˢ s) := Hs.successor hk h
+  exact Eq.symm
+    <| Classical.choose_uniq (c.cSeq_result_existsUnique v (k + 1))
+    ⟨_, this, by simp [Hs.seq, hk], by simp [hk]⟩
+
+end Construction
 
 end PR
 
