@@ -263,6 +263,10 @@ lemma least_number_iSigmaZero [M ⊧ₘ* 𝐈𝚺₀] {P : M → Prop} (hP : Def
     {x} (h : P x) : ∃ y, P y ∧ ∀ z < y, ¬P z :=
   least_number_h 𝚺 0 hP h
 
+@[elab_as_elim] lemma induction_h_iSigmaOne [M ⊧ₘ* 𝐈𝚺₁] (Γ)
+    {P : M → Prop} (hP : DefinablePred ℒₒᵣ (Γ, 1) P)
+    (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x := induction_hh ℒₒᵣ Γ 1 hP zero succ
+
 @[elab_as_elim] lemma order_induction_h_iSigmaOne [M ⊧ₘ* 𝐈𝚺₁] (Γ)
     {P : M → Prop} (hP : DefinablePred ℒₒᵣ (Γ, 1) P)
     (ind : ∀ x, (∀ y < x, P y) → P x) : ∀ x, P x := order_induction_hh ℒₒᵣ Γ 1 hP ind

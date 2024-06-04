@@ -632,11 +632,6 @@ lemma Seq.cases_iff {s : M} : Seq s ↔ s = ∅ ∨ ∃ x s', Seq s' ∧ s = s' 
 
 alias ⟨Seq.cases, _⟩ := Seq.cases_iff
 
-/-- TODO: move to Ind.lean -/
-@[elab_as_elim] lemma order_induction_h_iSigmaOne (Γ)
-    {P : M → Prop} (hP : DefinablePred ℒₒᵣ (Γ, 1) P)
-    (ind : ∀ x, (∀ y < x, P y) → P x) : ∀ x, P x := order_induction_hh ℒₒᵣ Γ 1 hP ind
-
 @[elab_as_elim]
 theorem seq_induction (Γ) {P : M → Prop} (hP : DefinablePred ℒₒᵣ (Γ, 1) P)
   (hnil : P ∅) (hcons : ∀ s x, Seq s → P s → P (s ⁀' x)) :
