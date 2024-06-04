@@ -1,7 +1,7 @@
-import Logic.Propositional.Superintuitionistic.Kripke.Semantics
+import Logic.Propositional.Superintuitionistic.Kripke.Soundness
 
 /-!
-  # Counterexamples to the Law of Excluded Middle in Intuitionistic Logic
+  # Counterexample to the Law of Excluded Middle in Intuitionistic Logic
 
   ## Theorems
   - `noLEM`: LEM is not always valid in intuitionistic logic.
@@ -9,28 +9,42 @@ import Logic.Propositional.Superintuitionistic.Kripke.Semantics
 
 namespace LO.Propositional.Superintuitionistic.Kripke
 
-def LEMCounterexampleModel : Model (𝐈𝐧𝐭 (Fin 2) α) where
-  frame := λ w₁ w₂ => (w₁ = w₂) ∨ (w₁ = 0)
-  valuation w _ := w = 1;
-  hereditary := by simp; aesop;
-  frame_prop := by
-    simp [FrameClass.Intuitionistic];
-    constructor;
-    . simp [Transitive]; aesop;
-    . simp [Reflexive];
+
+def LEMCounterexampleModel {α : Type} : Model α where
+  Frame := {
+    World := Fin 2,
+    Rel := λ w₁ w₂ => (w₁ = w₂) ∨ (w₁ = 0)
+  };
+  Valuation w _ := w = 1;
+  hereditary := by aesop;
+
+def LEMCounterexampleFrame : Frame' α := (LEMCounterexampleModel).Frame
 
 open Formula Formula.Kripke
 
 lemma noLEM_atom {a : α} : ¬(LEMCounterexampleModel ⊧ (atom a) ⋎ ~(atom a)) := by
   simp [ValidOnModel.iff_models, Satisfies.iff_models, ValidOnModel, Satisfies, LEMCounterexampleModel];
-  existsi 0;
-  simp_all;
+  use 0;
+  aesop;
 
+variable {α : Type}
 variable [Inhabited α]
 
-theorem noLEM : ¬(∀ p, (𝐈𝐧𝐭 (Fin 2) α) ⊧ p ⋎ ~p) := by
+lemma noLEM_on_frameclass : ∃ (p : Formula α), ¬(𝔽(Ax(𝐈𝐧𝐭))) ⊧ p ⋎ ~p := by
   simp [ValidOnFrameClass.iff_models, ValidOnFrameClass];
-  existsi (atom default), LEMCounterexampleModel;
-  apply noLEM_atom
+  existsi (atom default), (LEMCounterexampleModel).Frame;
+  constructor;
+  . apply iff_definability_memAxiomSetFrameClass AxiomSet.EFQ.definability |>.mpr;
+    trivial;
+  . simp [ValidOnFrame];
+    existsi (LEMCounterexampleModel).Valuation, LEMCounterexampleModel.hereditary;
+    apply noLEM_atom;
+
+theorem noLEM : ∃ (p : Formula α), 𝐈𝐧𝐭 ⊬! p ⋎ ~p := by
+  obtain ⟨p, _⟩ : ∃ (p : Formula α), ¬(𝔽(Ax(𝐈𝐧𝐭))) ⊧ p ⋎ ~p := noLEM_on_frameclass;
+  existsi p;
+  by_contra hC;
+  have : 𝔽(Ax(𝐈𝐧𝐭)) ⊧ p ⋎ ~p := sound! hC;
+  contradiction;
 
 end LO.Propositional.Superintuitionistic.Kripke

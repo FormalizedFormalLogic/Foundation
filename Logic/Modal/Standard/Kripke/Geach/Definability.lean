@@ -32,7 +32,7 @@ variable {F : Frame}
 
 @[simp] lemma transitive_def : (GeachConfluent ⟨0, 2, 1, 0⟩ F) ↔ Transitive F.Rel := by simp [GeachConfluent, Transitive]; aesop;
 
-@[simp] lemma euclidean_def : (GeachConfluent ⟨1, 1, 0, 1⟩ F) ↔ Euclidean F.Rel := by simp [GeachConfluent, Euclidean]; aesop;
+@[simp] lemma euclidean_def : (GeachConfluent ⟨1, 1, 0, 1⟩ F) ↔ Euclidean F.Rel := by simp [GeachConfluent, Euclidean];
 
 @[simp] lemma confluent_def : (GeachConfluent ⟨1, 1, 1, 1⟩ F) ↔ Confluent F.Rel := by simp [GeachConfluent, Confluent];
 

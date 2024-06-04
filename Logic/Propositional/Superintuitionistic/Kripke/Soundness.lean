@@ -3,27 +3,46 @@ import Logic.Propositional.Superintuitionistic.Kripke.Semantics
 
 namespace LO.Propositional.Superintuitionistic.Kripke
 
-variable {W α : Type*}
+variable {α : Type*} [Inhabited α]
 
-open Formula.Kripke.ValidOnFrameClass
+variable {𝓓 : DeductionParameter α}
+
+open Formula Formula.Kripke
+open Formula.Kripke.ValidOnFrame
 open FrameClass
 
--- TODO: Expand 𝐄𝐅𝐐-𝐈𝐧𝐭
-lemma sound (d : 𝐄𝐅𝐐 ⊢ p) : (𝐈𝐧𝐭 W α) ⊧ p := by
+lemma sound (d : 𝓓 ⊢ p) : 𝔽(Ax(𝓓)) ⊧ p := by
+  simp [-ValidOnFrame.models_iff];
+  intro F hF;
   induction d with
-  | eaxm h =>
-    obtain ⟨q, hq⟩ := by simpa [axiomEFQ] using h;
-    subst hq;
-    simp;
-  | mdp _ _ ihpq ihp => exact mdp (by simp_all [Intuitionistic]) ihpq ihp;
-  | conj₃ => apply conj₃; simp_all [Intuitionistic];
-  | disj₃ => apply disj₃; simp_all [Intuitionistic];
-  | imply₁ => apply imply₁; simp_all [Intuitionistic];
-  | imply₂ => apply imply₂ <;> simp_all [Intuitionistic];
-  | _ => simp_all;
+  | eaxm h => exact validOnAxiomSetFrameClass_axiom h hF;
+  | mdp _ _ ihpq ihp => exact ValidOnFrame.mdp ihpq ihp;
+  | _ =>
+    intros;
+    first
+    | apply ValidOnFrame.verum
+    | apply ValidOnFrame.imply₁
+    | apply ValidOnFrame.imply₂
+    | apply ValidOnFrame.disj₁
+    | apply ValidOnFrame.disj₂
+    | apply ValidOnFrame.disj₃
+    | apply ValidOnFrame.conj₁
+    | apply ValidOnFrame.conj₂
+    | apply ValidOnFrame.conj₃
 
-lemma sound! : (𝐄𝐅𝐐 ⊢! p) → (𝐈𝐧𝐭 W α) ⊧ p := λ ⟨d⟩ => sound d
+lemma sound! : (𝓓 ⊢! p) → 𝔽(Ax(𝓓)) ⊧ p := λ ⟨d⟩ => sound d
 
-instance : Sound (𝐄𝐅𝐐 : AxiomSet α) (𝐈𝐧𝐭 W α) := ⟨sound!⟩
+instance : Sound 𝓓 𝔽(Ax(𝓓)) := ⟨sound!⟩
+
+lemma unprovable_bot [ne : FrameClass.IsNonempty 𝔽(Ax(𝓓))] : 𝓓 ⊬! ⊥ := by
+  intro h;
+  obtain ⟨F, hF⟩ := ne;
+  simpa using sound! h hF;
+
+instance [FrameClass.IsNonempty 𝔽(Ax(𝓓))] : System.Consistent 𝓓 := System.Consistent.of_unprovable $ unprovable_bot
+
+instance : System.Consistent (𝐈𝐧𝐭 : DeductionParameter α) := inferInstance
+
+-- instance : System.Consistent (𝐂𝐥 : DeductionParameter α) := inferInstance
 
 end LO.Propositional.Superintuitionistic.Kripke

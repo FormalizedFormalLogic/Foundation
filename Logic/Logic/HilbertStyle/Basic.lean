@@ -7,6 +7,24 @@ variable {S F : Type*} [LogicalConnective F] [System F S]
 
 variable (𝓢 : S)
 
+namespace Axioms
+
+variable (p q : F)
+
+protected abbrev EFQ := ⊥ ⟶ p
+
+protected abbrev LEM := p ⋎ ~p
+
+protected abbrev WeakLEM := ~p ⋎ ~~p
+
+protected abbrev GD := (p ⟶ q) ⋎ (q ⟶ p)
+
+protected abbrev DNE := ~~p ⟶ p
+
+protected abbrev Peirce := ((p ⟶ q) ⟶ p) ⟶ p
+
+end Axioms
+
 class ModusPonens where
   mdp {p q : F} : 𝓢 ⊢ p ⟶ q → 𝓢 ⊢ p → 𝓢 ⊢ q
 
@@ -22,22 +40,22 @@ class Minimal extends ModusPonens 𝓢 where
   disj₃  (p q r : F) : 𝓢 ⊢ (p ⟶ r) ⟶ (q ⟶ r) ⟶ p ⋎ q ⟶ r
 
 class HasEFQ where
-  efq (p : F) : 𝓢 ⊢ ⊥ ⟶ p
+  efq (p : F) : 𝓢 ⊢ Axioms.EFQ p
 
 class HasWeakLEM where
-  wlem (p : F) : 𝓢 ⊢ ~p ⋎ ~~p
+  wlem (p : F) : 𝓢 ⊢ Axioms.WeakLEM p
 
 class HasLEM where
-  lem (p : F) : 𝓢 ⊢ p ⋎ ~p
+  lem (p : F) : 𝓢 ⊢ Axioms.LEM p
 
 class HasDNE where
-  dne (p : F) : 𝓢 ⊢ ~~p ⟶ p
+  dne (p : F) : 𝓢 ⊢ Axioms.DNE p
 
-class Dummett where
-  dummett (p q : F) : 𝓢 ⊢ (p ⟶ q) ⋎ (q ⟶ p)
+class HasGD where
+  GD (p q : F) : 𝓢 ⊢ Axioms.GD p q
 
 class Peirce where
-  peirce (p q : F) : 𝓢 ⊢ ((p ⟶ q) ⟶ p) ⟶ p
+  peirce (p q : F) : 𝓢 ⊢ Axioms.Peirce p q
 
 /-- Intuitionistic Propositional Logic -/
 class Intuitionistic extends Minimal 𝓢, HasEFQ 𝓢
@@ -46,7 +64,7 @@ class Intuitionistic extends Minimal 𝓢, HasEFQ 𝓢
 class WeakLEM extends Intuitionistic 𝓢, HasWeakLEM 𝓢
 
 /-- Gödel-Dummett Propositional Logic -/
-class GD extends Intuitionistic 𝓢, Dummett 𝓢
+class GD extends Intuitionistic 𝓢, HasGD 𝓢
 
 /-- Classical Propositional Logic -/
 class Classical extends Minimal 𝓢, HasDNE 𝓢

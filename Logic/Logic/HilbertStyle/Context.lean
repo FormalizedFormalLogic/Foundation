@@ -163,7 +163,7 @@ instance [HasEFQ 𝓢] (Γ : FiniteContext F 𝓢) : HasEFQ Γ := ⟨fun _ ↦ o
 
 instance [HasWeakLEM 𝓢] (Γ : FiniteContext F 𝓢) : HasWeakLEM Γ := ⟨fun p ↦ of (HasWeakLEM.wlem p)⟩
 
-instance [Dummett 𝓢] (Γ : FiniteContext F 𝓢) : Dummett Γ := ⟨fun p q ↦ of (Dummett.dummett p q)⟩
+instance [HasGD 𝓢] (Γ : FiniteContext F 𝓢) : HasGD Γ := ⟨fun p q ↦ of (HasGD.GD p q)⟩
 
 instance [HasDNE 𝓢] (Γ : FiniteContext F 𝓢) : HasDNE Γ := ⟨fun p ↦ of (HasDNE.dne p)⟩
 
@@ -320,7 +320,7 @@ instance [HasEFQ 𝓢] (Γ : Context F 𝓢) : HasEFQ Γ := ⟨fun _ ↦ of efq�
 
 instance [HasWeakLEM 𝓢] (Γ : Context F 𝓢) : HasWeakLEM Γ := ⟨fun p ↦ of (HasWeakLEM.wlem p)⟩
 
-instance [Dummett 𝓢] (Γ : Context F 𝓢) : Dummett Γ := ⟨fun p q ↦ of (Dummett.dummett p q)⟩
+instance [HasGD 𝓢] (Γ : Context F 𝓢) : HasGD Γ := ⟨fun p q ↦ of (HasGD.GD p q)⟩
 
 instance [HasDNE 𝓢] (Γ : Context F 𝓢) : HasDNE Γ := ⟨fun p ↦ of (HasDNE.dne p)⟩
 

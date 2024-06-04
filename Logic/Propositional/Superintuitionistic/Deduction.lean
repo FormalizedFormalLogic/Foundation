@@ -1,30 +1,49 @@
 import Logic.Logic.HilbertStyle.Basic
 import Logic.Logic.HilbertStyle.Supplemental
 import Logic.Propositional.Superintuitionistic.Formula
-import Logic.Propositional.Superintuitionistic.Axioms
 
 namespace LO.Propositional.Superintuitionistic
 
 variable {α : Type u} [DecidableEq α]
 
-inductive Deduction (Λ : AxiomSet α) : Formula α → Type _
-  | eaxm {p}       : p ∈ Λ → Deduction Λ p
-  | mdp {p q} : Deduction Λ (p ⟶ q) → Deduction Λ p → Deduction Λ q
-  | verum          : Deduction Λ $ ⊤
-  | imply₁ p q     : Deduction Λ $ p ⟶ q ⟶ p
-  | imply₂ p q r   : Deduction Λ $ (p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r
-  | conj₁ p q      : Deduction Λ $ p ⋏ q ⟶ p
-  | conj₂ p q      : Deduction Λ $ p ⋏ q ⟶ q
-  | conj₃ p q      : Deduction Λ $ p ⟶ q ⟶ p ⋏ q
-  | disj₁ p q      : Deduction Λ $ p ⟶ p ⋎ q
-  | disj₂ p q      : Deduction Λ $ q ⟶ p ⋎ q
-  | disj₃ p q r    : Deduction Λ $ (p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r)
+structure DeductionParameter (α) where
+  axiomSet : AxiomSet α
+notation "Ax(" 𝓓 ")" => DeductionParameter.axiomSet 𝓓
 
-instance : System (Formula α) (AxiomSet α) := ⟨Deduction⟩
+namespace DeductionParameter
+
+class IncludeEFQ (𝓓 : DeductionParameter α) where
+  include_EFQ : 𝗘𝗙𝗤 ⊆ Ax(𝓓) := by simp
+
+class IncludeLEM (𝓓 : DeductionParameter α) where
+  include_LEM : 𝗟𝗘𝗠 ⊆ Ax(𝓓) := by simp
+
+class IncludeDNE (𝓓 : DeductionParameter α) where
+  include_DNE : 𝗗𝗡𝗘 ⊆ Ax(𝓓) := by simp
+
+end DeductionParameter
+
+inductive Deduction (𝓓 : DeductionParameter α) : Formula α → Type _
+  | eaxm {p}       : p ∈ Ax(𝓓) → Deduction 𝓓 p
+  | mdp {p q}      : Deduction 𝓓 (p ⟶ q) → Deduction 𝓓 p → Deduction 𝓓 q
+  | verum          : Deduction 𝓓 $ ⊤
+  | imply₁ p q     : Deduction 𝓓 $ p ⟶ q ⟶ p
+  | imply₂ p q r   : Deduction 𝓓 $ (p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r
+  | conj₁ p q      : Deduction 𝓓 $ p ⋏ q ⟶ p
+  | conj₂ p q      : Deduction 𝓓 $ p ⋏ q ⟶ q
+  | conj₃ p q      : Deduction 𝓓 $ p ⟶ q ⟶ p ⋏ q
+  | disj₁ p q      : Deduction 𝓓 $ p ⟶ p ⋎ q
+  | disj₂ p q      : Deduction 𝓓 $ q ⟶ p ⋎ q
+  | disj₃ p q r    : Deduction 𝓓 $ (p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r)
+
+instance : System (Formula α) (DeductionParameter α) := ⟨Deduction⟩
 
 open Deduction
+open DeductionParameter
 
-instance : System.Minimal (Λ : AxiomSet α) where
+variable {𝓓 : DeductionParameter α}
+
+instance : System.Minimal 𝓓 where
   mdp := mdp
   verum := verum
   imply₁ := imply₁
@@ -36,26 +55,57 @@ instance : System.Minimal (Λ : AxiomSet α) where
   disj₂ := disj₂
   disj₃ := disj₃
 
-instance intuitionistic_of_subset_efq (hEFQ : 𝐄𝐅𝐐 ⊆ Λ := by assumption) : System.Intuitionistic (Λ : AxiomSet α) where
-  efq _ := eaxm $ Set.mem_of_subset_of_mem hEFQ (by simp);
+instance [𝓓.IncludeEFQ] : System.HasEFQ 𝓓 where
+  efq _ := eaxm $ Set.mem_of_subset_of_mem IncludeEFQ.include_EFQ (by simp);
 
-instance : System.Intuitionistic (𝐄𝐅𝐐 : AxiomSet α) := intuitionistic_of_subset_efq (by rfl)
+instance [𝓓.IncludeLEM] : System.HasLEM 𝓓 where
+  lem _ := eaxm $ Set.mem_of_subset_of_mem IncludeLEM.include_LEM (by simp);
+
+instance [𝓓.IncludeDNE] : System.HasDNE 𝓓 where
+  dne _ := eaxm $ Set.mem_of_subset_of_mem IncludeDNE.include_DNE (by simp);
+
+instance [𝓓.IncludeEFQ] : System.Intuitionistic 𝓓 where
+
+instance [𝓓.IncludeDNE] : System.Classical 𝓓 where
+
+instance [𝓓.IncludeEFQ] [𝓓.IncludeLEM] : System.Classical 𝓓 where
 
 
-instance classical_of_subset_dne (hDNE : 𝐃𝐍𝐄 ⊆ Λ := by assumption) : System.Classical (Λ : AxiomSet α) where
-  dne _ := eaxm $ Set.mem_of_subset_of_mem hDNE (by simp);
+namespace DeductionParameter
 
-instance : System.Classical (𝐃𝐍𝐄 : AxiomSet α) := classical_of_subset_dne (by rfl)
+protected abbrev Minimal : DeductionParameter α := { axiomSet := ∅ }
+
+protected abbrev Intuitionistic : DeductionParameter α := { axiomSet := 𝗘𝗙𝗤 }
+notation "𝐈𝐧𝐭" => DeductionParameter.Intuitionistic
+instance : IncludeEFQ (α := α) 𝐈𝐧𝐭 where
+instance : System.Intuitionistic (𝐈𝐧𝐭 : DeductionParameter α) where
+
+protected abbrev Classical : DeductionParameter α := { axiomSet := 𝗘𝗙𝗤 ∪ 𝗟𝗘𝗠 }
+notation "𝐂𝐥" => DeductionParameter.Classical
+instance : IncludeLEM (α := α) 𝐂𝐥 where
+instance : IncludeEFQ (α := α) 𝐂𝐥 where
+
+/- MEMO:
+  Term `WeakMinimal` and `WeakClassical` are from Ariola (2007)
+  Minimal <ₛ WeakMinimal <ₛ WeakClassical <ₛ Classical
+-/
+
+protected abbrev WeakMinimal : DeductionParameter α := { axiomSet := 𝗟𝗘𝗠 }
+
+protected abbrev WeakClassical : DeductionParameter α := { axiomSet := 𝗣𝗲 }
+
+
+end DeductionParameter
 
 
 open System
 
-lemma reducible_efq_dne : (𝐄𝐅𝐐 : AxiomSet α) ≤ₛ 𝐃𝐍𝐄 := by
+lemma reducible_efq_dne : (𝐈𝐧𝐭 : DeductionParameter α) ≤ₛ 𝐂𝐥 := by
   rintro p hp;
   simp [System.theory];
   induction hp.some with
   | eaxm h =>
-    obtain ⟨q, hq⟩ := by simpa [axiomEFQ] using h;
+    obtain ⟨q, hq⟩ := by simpa using h;
     subst hq;
     apply efq!;
   | mdp h₁ h₂ ih₁ ih₂ => exact (ih₁ ⟨h₁⟩) ⨀ (ih₂ ⟨h₂⟩);
@@ -63,22 +113,29 @@ lemma reducible_efq_dne : (𝐄𝐅𝐐 : AxiomSet α) ≤ₛ 𝐃𝐍𝐄 := by
 
 variable {p : Formula α}
 
-theorem iff_provable_dn_efq_dne_provable: (𝐄𝐅𝐐 ⊢! ~~p) ↔ (𝐃𝐍𝐄 ⊢! p) := by
+theorem iff_provable_dn_efq_dne_provable: 𝐈𝐧𝐭 ⊢! ~~p ↔ 𝐂𝐥 ⊢! p := by
   constructor;
   . intro d; exact dne'! $ reducible_efq_dne d;
   . intro d;
     induction d.some with
     | eaxm h =>
-      obtain ⟨q, hq⟩ := by simpa [axiomDNE] using h;
-      subst hq;
-      exact dn_collect_imply'! $ contra₀'! $ dni!;
+      simp at h;
+      rcases h with (hEFQ | hLEM);
+      . obtain ⟨q, hq⟩ := by simpa using hEFQ;
+        subst hq;
+        exact dni'! efq!;
+      . obtain ⟨q, hq⟩ := by simpa using hLEM;
+        subst hq;
+        apply FiniteContext.deduct'!;
+        have : [~(q ⋎ ~q)] ⊢[𝐈𝐧𝐭]! ~q ⋏ ~~q := demorgan₃'! $ FiniteContext.id!;
+        exact (conj₂'! this) ⨀ (conj₁'! this);
     | @mdp p q h₁ h₂ ih₁ ih₂ =>
       exact (dn_distribute_imply'! $ ih₁ ⟨h₁⟩) ⨀ ih₂ ⟨h₂⟩;
     | _ => apply dni'!; simp;
 
 alias glivenko := iff_provable_dn_efq_dne_provable
 
-theorem iff_provable_neg_efq_provable_neg_efq : (𝐄𝐅𝐐 ⊢! ~p) ↔ (𝐃𝐍𝐄 ⊢! ~p) := by
+theorem iff_provable_neg_efq_provable_neg_efq : 𝐈𝐧𝐭 ⊢! ~p ↔ 𝐂𝐥 ⊢! ~p := by
   constructor;
   . intro d; exact glivenko.mp $ dni'! d;
   . intro d; exact tne'! $ glivenko.mpr d;

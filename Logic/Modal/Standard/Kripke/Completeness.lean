@@ -670,7 +670,7 @@ def canonical_of_definability [Inhabited (MCT L)] (definability : Definability A
 
 instance : Canonical (𝐊 : DeductionParameter α) := canonical_of_definability AxiomSet.K.definability trivial
 
--- TODO: inferInstanceで行けてほしいのだがなぜか通らないので明示的に指定している
+-- MEMO: inferInstanceで行けてほしいのだがなぜか通らないので明示的に指定している
 instance : Complete (𝐊 : DeductionParameter α) 𝔽(Ax(𝐊)) := instComplete
 
 

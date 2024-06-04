@@ -73,7 +73,7 @@ abbrev FrameProperty := Frame → Prop
 
 abbrev FiniteFrameProperty := FiniteFrame → Prop
 
--- TODO: 型を上手く合わせられず両方とも`u`に属しているが別にする必要があるだろう
+-- MEMO: 型を上手く合わせられず両方とも`u`に属しているが別にする必要があるだろう
 abbrev Valuation (W : Type u) (α : Type u) := W → α → Prop
 
 structure Model (α) where

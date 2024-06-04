@@ -12,7 +12,6 @@ variable {F : Type*} [LogicalConnective F] [NegDefinition F] [DecidableEq F]
 
 open FiniteContext
 
-
 def bot_of_mem_either (h₁ : p ∈ Γ) (h₂ : ~p ∈ Γ) : Γ ⊢[𝓢] ⊥ := by
   exact (by simpa [NegDefinition.neg] using FiniteContext.byAxm h₂) ⨀ (FiniteContext.byAxm h₁);
 @[simp] lemma bot_of_mem_either! (h₁ : p ∈ Γ) (h₂ : ~p ∈ Γ) : Γ ⊢[𝓢]! ⊥ := ⟨bot_of_mem_either h₁ h₂⟩
@@ -196,8 +195,8 @@ def impSwap : 𝓢 ⊢ (p ⟶ q ⟶ r) ⟶ (q ⟶ p ⟶ r) := deduct' $ impSwap'
 @[simp] lemma imp_swap! : 𝓢 ⊢! (p ⟶ q ⟶ r) ⟶ (q ⟶ p ⟶ r) := ⟨impSwap⟩
 
 
--- NEED_REFACTOR: Too slow
-set_option trace.profiler true in
+-- TODO: Need refactor because too slow
+-- set_option trace.profiler true in
 def dnDistributeImply : 𝓢 ⊢ ~~(p ⟶ q) ⟶ (~~p ⟶ ~~q) := by
   apply impSwap';
   apply deduct';
@@ -257,8 +256,8 @@ def demorgan₃' (b : 𝓢 ⊢ ~(p ⋎ q)) : 𝓢 ⊢ ~p ⋏ ~q := demorgan₃ �
 lemma demorgan₃'! (b : 𝓢 ⊢! ~(p ⋎ q)) : 𝓢 ⊢! ~p ⋏ ~q := ⟨demorgan₃' b.some⟩
 
 
--- NEED_REFACTOR: Too slow
-set_option trace.profiler true in
+-- TODO: Need refactor because too slow
+-- set_option trace.profiler true in
 def demorgan₄ [HasDNE 𝓢] : 𝓢 ⊢ ~(p ⋏ q) ⟶ (~p ⋎ ~q) := by
   apply contra₂';
   apply deduct';
@@ -268,8 +267,8 @@ def demorgan₄ [HasDNE 𝓢] : 𝓢 ⊢ ~(p ⋏ q) ⟶ (~p ⋎ ~q) := by
 def demorgan₄' [HasDNE 𝓢] (b : 𝓢 ⊢ ~(p ⋏ q)) : 𝓢 ⊢ ~p ⋎ ~q := demorgan₄ ⨀ b
 lemma demorgan₄'! [HasDNE 𝓢] (b : 𝓢 ⊢! ~(p ⋏ q)) : 𝓢 ⊢! ~p ⋎ ~q := ⟨demorgan₄' b.some⟩
 
--- NEED_REFACTOR: Too slow
-set_option trace.profiler true in
+-- TODO: Need refactor because too slow
+-- set_option trace.profiler true in
 def NotOrOfImply' [HasDNE 𝓢] (d : 𝓢 ⊢ p ⟶ q) : 𝓢 ⊢ ~p ⋎ q := by
   apply dne';
   rw [NegDefinition.neg];
@@ -280,8 +279,8 @@ def NotOrOfImply' [HasDNE 𝓢] (d : 𝓢 ⊢ p ⟶ q) : 𝓢 ⊢ ~p ⋎ q := by
   exact d₂ ⨀ d₃;
 lemma NotOrOfImply'! [HasDNE 𝓢] (d : 𝓢 ⊢! p ⟶ q) : 𝓢 ⊢! ~p ⋎ q := ⟨NotOrOfImply' d.some⟩
 
--- NEED_REFACTOR: Too slow
-set_option trace.profiler true in
+-- TODO: Need refactor because too slow
+-- set_option trace.profiler true in
 def dnCollectImply [HasEFQ 𝓢] : 𝓢 ⊢ (~~p ⟶ ~~q) ⟶ ~~(p ⟶ q) := by
   apply deduct';
   nth_rw 5 [NegDefinition.neg];
@@ -322,7 +321,7 @@ lemma implyLeft_conj_eq_conj'! : 𝓢 ⊢! Γ.conj ⟶ p ↔ 𝓢 ⊢! Γ.conj' 
 
 
 lemma generalConj'! (h : p ∈ Γ) : 𝓢 ⊢! Γ.conj' ⟶ p := implyLeftReplaceIff'! conj'IffConj! |>.mpr (generalConj! h)
-
+lemma generalConj'₂! (h : p ∈ Γ) (d : 𝓢 ⊢! Γ.conj') : 𝓢 ⊢! p := (generalConj'! h) ⨀ d
 
 namespace FiniteContext
 
@@ -410,6 +409,12 @@ lemma and_assoc! : 𝓢 ⊢! (p ⋏ q) ⋏ r ⟷ p ⋏ (q ⋏ r) := by
     . exact conj₃'! hp hq;
     . exact hr;
 
+lemma cut! (d₁ : 𝓢 ⊢! p₁ ⋏ c ⟶ q₁) (d₂ : 𝓢 ⊢! p₂ ⟶ c ⋎ q₂) : 𝓢 ⊢! p₁ ⋏ p₂ ⟶ q₁ ⋎ q₂ := by
+  apply deduct'!;
+  exact disj₃'! (implyOrLeft'! $ of'! (andImplyIffImplyImply'!.mp d₁) ⨀ (conj₁'! id!)) disj₂! (of'! d₂ ⨀ conj₂'! id!);
+
+lemma imply_left_and_comm'! (d : 𝓢 ⊢! p ⋏ q ⟶ r) : 𝓢 ⊢! q ⋏ p ⟶ r := imp_trans! andComm! d
+
 lemma id_conj'! (he : ∀ g ∈ Γ, g = p) : 𝓢 ⊢! p ⟶ Γ.conj' := by
   induction Γ using List.induction_with_singleton with
   | hnil => simp_all only [List.conj'_nil, IsEmpty.forall_iff, forall_const]; exact dhyp! $ verum!;
@@ -456,6 +461,78 @@ lemma forthbackConjRemove : 𝓢 ⊢! (Γ.remove p).conj' ⋏ p ⟶ Γ.conj' := 
 
 lemma implyLeftRemoveConj' (b : 𝓢 ⊢! Γ.conj' ⟶ q) : 𝓢 ⊢! (Γ.remove p).conj' ⋏ p ⟶ q := imp_trans! (by simp) b
 
+lemma iff_concat_conj'! : 𝓢 ⊢! (Γ ++ Δ).conj' ↔ 𝓢 ⊢! Γ.conj' ⋏ Δ.conj' := by
+  constructor;
+  . intro h;
+    replace h := iff_provable_list_conj.mp h;
+    apply conj₃'!;
+    . apply iff_provable_list_conj.mpr;
+      intro p hp; exact h p (by simp only [List.mem_append]; left; simpa);
+    . apply iff_provable_list_conj.mpr;
+      intro p hp; exact h p (by simp only [List.mem_append]; right; simpa);
+  . intro h;
+    apply iff_provable_list_conj.mpr;
+    simp only [List.mem_append];
+    rintro p (hp₁ | hp₂);
+    . exact (iff_provable_list_conj.mp $ conj₁'! h) p hp₁;
+    . exact (iff_provable_list_conj.mp $ conj₂'! h) p hp₂;
+
+lemma iff_concat_conj! : 𝓢 ⊢! (Γ ++ Δ).conj' ⟷ Γ.conj' ⋏ Δ.conj' := by
+  apply iff_intro!;
+  . apply deduct'!; apply iff_concat_conj'!.mp; exact id!;
+  . apply deduct'!; apply iff_concat_conj'!.mpr; exact id!;
+
+lemma or_assoc! : 𝓢 ⊢! p ⋎ (q ⋎ r) ⟷ (p ⋎ q) ⋎ r := by
+  apply iff_intro!;
+  . exact deduct'! $ or_assoc'!.mp id!;
+  . exact deduct'! $ or_assoc'!.mpr id!;
+
+lemma iff_concact_disj! [HasEFQ 𝓢] : 𝓢 ⊢! (Γ ++ Δ).disj' ⟷ Γ.disj' ⋎ Δ.disj' := by
+  induction Γ using List.induction_with_singleton generalizing Δ <;> induction Δ using List.induction_with_singleton;
+  case hnil.hnil =>
+    simp only [List.append_nil, List.disj'_nil];
+    apply iff_intro!;
+    . simp;
+    . exact disj₃''! efq! efq!;
+  case hnil.hsingle =>
+    simp only [List.nil_append, List.disj'_singleton, List.disj'_nil];
+    apply iff_intro!;
+    . simp;
+    . exact disj₃''! efq! imp_id!;
+  case hsingle.hnil =>
+    simp only [List.singleton_append, List.disj'_singleton, List.disj'_nil];
+    apply iff_intro!;
+    . simp;
+    . exact disj₃''! imp_id! efq!;
+  case hcons.hnil =>
+    simp only [List.append_nil, List.disj'_nil];
+    apply iff_intro!;
+    . simp;
+    . exact disj₃''! imp_id! efq!;
+  case hnil.hcons =>
+    simp only [List.nil_append, List.disj'_nil];
+    apply iff_intro!;
+    . simp;
+    . exact disj₃''! efq! imp_id!;
+  case hsingle.hsingle => simp only [List.singleton_append, ne_eq, not_false_eq_true, List.disj'_cons_nonempty, List.disj'_singleton, iff_id!];
+  case hsingle.hcons => simp only [List.singleton_append, ne_eq, not_false_eq_true, List.disj'_cons_nonempty, List.disj'_singleton, iff_id!];
+  case hcons.hsingle p ps hps ihp q =>
+    simp_all;
+    have := @ihp [q];
+    simp at this;
+    sorry;
+  case hcons.hcons p ps hps ihp q qs hqs ihq =>
+    simp_all only [ne_eq, List.cons_append, List.append_eq_nil, and_self, not_false_eq_true, List.disj'_cons_nonempty];
+    apply iff_intro!;
+    . sorry;
+    . sorry;
+
+lemma iff_concact_disj'! [HasEFQ 𝓢] : 𝓢 ⊢! (Γ ++ Δ).disj' ↔ 𝓢 ⊢! Γ.disj' ⋎ Δ.disj' := by
+  constructor;
+  . intro h; exact (conj₁'! iff_concact_disj!) ⨀ h;
+  . intro h; exact (conj₂'! iff_concact_disj!) ⨀ h;
+
+
 lemma disj_allsame! [HasEFQ 𝓢] (hd : ∀ q ∈ Γ, q = p) : 𝓢 ⊢! Γ.disj' ⟶ p := by
   induction Γ using List.induction_with_singleton with
   | hnil => simp_all [List.disj'_nil, efq!];
@@ -485,9 +562,14 @@ def dneOr [HasDNE 𝓢] (d : 𝓢 ⊢ ~~p ⋎ ~~q) : 𝓢 ⊢ p ⋎ q := disj₃
 instance [HasDNE 𝓢] : HasLEM 𝓢 where
   lem _ := dneOr $ NotOrOfImply' dni
 
-/-
-instance [HasLEM 𝓢] [HasEFQ 𝓢] : HasDNE 𝓢 where
-  dne p := by sorry;
--/
+instance [HasEFQ 𝓢] [HasLEM 𝓢] : HasDNE 𝓢 where
+  dne p := by
+    apply deduct';
+    exact disj₃' (impId _) (by
+      apply deduct;
+      have nnp : [~p, ~~p] ⊢[𝓢] ~p ⟶ ⊥ := by simpa [NegDefinition.neg] using FiniteContext.byAxm;
+      have np : [~p, ~~p] ⊢[𝓢] ~p := FiniteContext.byAxm;
+      exact efq' $ nnp ⨀ np;
+    ) $ of lem;;
 
 end LO.System
