@@ -269,7 +269,6 @@ instance domain_definable' (Γ) : DefinableFunction₁ ℒₒᵣ Γ (domain : M 
 
 @[simp] lemma domain_insert (x y s : M) : domain (insert ⟪x, y⟫ s) = insert x (domain s) := by simp [insert_eq_union_singleton]
 
-/-- TODO: prove `domain s ≤ s` -/
 @[simp] lemma domain_bound (s : M) : domain s ≤ 2 * s := le_iff_lt_succ.mpr
   <| lt_of_lt_log (by simp) (by
     simp [mem_domain_iff]; intro i x hix
@@ -494,7 +493,11 @@ lemma Seq.lt_lh_iff {s : M} (h : Seq s) {i} : i < lh s ↔ i ∈ domain s := by 
 
 lemma Seq.lt_lh_of_mem {s : M} (h : Seq s) {i x} (hix : ⟪i, x⟫ ∈ s) : i < lh s := by simp [h.lt_lh_iff, mem_domain_iff]; exact ⟨x, hix⟩
 
-def seqCons (x s : M) : M := insert ⟪lh s, x⟫ s
+def seqCons (s x : M) : M := insert ⟪lh s, x⟫ s
+
+-- infixr:67 " ::ˢ " => seqCons
+
+infixr:67 " ⁀' " => seqCons
 
 @[simp] lemma seq_empty : Seq (∅ : M) := ⟨by simp, 0, by simp⟩
 
@@ -502,37 +505,61 @@ def seqCons (x s : M) : M := insert ⟪lh s, x⟫ s
   have : under (lh ∅ : M) = under 0 := by simpa using Eq.symm <| Seq.domain_eq (M := M) (s := ∅) (by simp)
   exact under_inj.mp this
 
-infixr:67 " ::ˢ " => seqCons
+@[simp] lemma Seq.subset_seqCons (s x : M) : s ⊆ s ⁀' x := by simp [seqCons]
 
-@[simp] lemma Seq.subset_seqCons (s x : M) : s ⊆ x ::ˢ s := by simp [seqCons]
-
-lemma Seq.lt_seqCons {s} (hs : Seq s) (x : M) : s < x ::ˢ s :=
+lemma Seq.lt_seqCons {s} (hs : Seq s) (x : M) : s < s ⁀' x :=
   lt_iff_le_and_ne.mpr <| ⟨le_of_subset <| by simp, by
     simp [seqCons]; intro A
     have : ⟪lh s, x⟫ ∈ s := by simpa [←A] using mem_insert ⟪lh s, x⟫ s
     simpa using hs.lt_lh_of_mem this⟩
 
-@[simp] lemma Seq.mem_seqCons (s x : M) : ⟪lh s, x⟫ ∈ x ::ˢ s := by simp [seqCons]
+@[simp] lemma Seq.mem_seqCons (s x : M) : ⟪lh s, x⟫ ∈ s ⁀' x := by simp [seqCons]
 
-protected lemma Seq.seqCons {s : M} (h : Seq s) (x : M) : Seq (x ::ˢ s) :=
+protected lemma Seq.seqCons {s : M} (h : Seq s) (x : M) : Seq (s ⁀' x) :=
   ⟨h.isMapping.insert (by simp [h.domain_eq]), lh s + 1, by simp [seqCons, h.domain_eq]⟩
 
-@[simp] lemma Seq.lh_seqCons (x : M) {s} (h : Seq s) : lh (x ::ˢ s) = lh s + 1 := by
-  have : under (lh s + 1) = under (lh (x ::ˢ s)) := by
+@[simp] lemma Seq.lh_seqCons (x : M) {s} (h : Seq s) : lh (s ⁀' x) = lh s + 1 := by
+  have : under (lh s + 1) = under (lh (s ⁀' x)) := by
     simpa [seqCons, h.domain_eq] using (h.seqCons x).domain_eq
   exact Eq.symm <| under_inj.mp this
 
-lemma mem_seqCons_iff {i x z s : M} : ⟪i, x⟫ ∈ z ::ˢ s ↔ (i = lh s ∧ x = z) ∨ ⟪i, x⟫ ∈ s := by simp [seqCons]
+lemma mem_seqCons_iff {i x z s : M} : ⟪i, x⟫ ∈ s ⁀' z ↔ (i = lh s ∧ x = z) ∨ ⟪i, x⟫ ∈ s := by simp [seqCons]
 
-@[simp] lemma lh_mem_seqCons (s z : M) : ⟪lh s, z⟫ ∈ z ::ˢ s := by simp [seqCons]
+@[simp] lemma lh_mem_seqCons (s z : M) : ⟪lh s, z⟫ ∈ s ⁀' z := by simp [seqCons]
 
-@[simp] lemma lh_mem_seqCons_iff {s x z : M} (H : Seq s) : ⟪lh s, x⟫ ∈ z ::ˢ s ↔ x = z := by
+@[simp] lemma lh_mem_seqCons_iff {s x z : M} (H : Seq s) : ⟪lh s, x⟫ ∈ s ⁀' z ↔ x = z := by
   simp [seqCons]
   intro h; have := H.lt_lh_of_mem h; simp at this
 
-lemma Seq.mem_seqCons_iff_of_lt {s x z : M} (H : Seq s) (hi : i < lh s) : ⟪i, x⟫ ∈ z ::ˢ s ↔ ⟪i, x⟫ ∈ s := by
+lemma Seq.mem_seqCons_iff_of_lt {s x z : M} (H : Seq s) (hi : i < lh s) : ⟪i, x⟫ ∈ s ⁀' z ↔ ⟪i, x⟫ ∈ s := by
   simp [seqCons, hi]
   rintro rfl; simp at hi
+
+section
+
+lemma seqCons_graph (t x s : M) :
+    t = s ⁀' x ↔ ∃ l < 2 * s + 1, l = lh s ∧ ∃ p < (2 * s + x + 1)^2 + 1, p = ⟪l, x⟫ ∧ t = insert p s :=
+  ⟨by rintro rfl
+      exact ⟨lh s, by simp[lt_succ_iff_le], rfl, ⟪lh s, x⟫,
+        lt_succ_iff_le.mpr <| le_trans (pair_le_pair_left (by simp) x) (pair_polybound (2 * s) x), rfl, by rfl⟩,
+   by rintro ⟨l, _, rfl, p, _, rfl, rfl⟩; rfl⟩
+
+def _root_.LO.FirstOrder.Arith.seqConsDef : 𝚺₀-Semisentence 3 := .mkSigma
+  “ ∃[#0 < 2 * #2 + 1] (
+      !lhDef.val [#0, #2] ∧
+      ∃[#0 < (2 * #3 + #4 + 1) ^' 2 + 1] ( !pairDef.val [#0, #1, #4] ∧ !insertDef.val [#2, #0, #3] ) ) ” (by simp)
+
+lemma seqCons_defined : 𝚺₀-Function₂ (seqCons : M → M → M) via seqConsDef := by
+  intro v; simp [seqConsDef, seqCons_graph]
+
+@[simp] lemma seqCons_defined_iff (v) :
+    Semiformula.Evalbm M v seqConsDef.val ↔ v 0 = v 1 ⁀' v 2 := seqCons_defined.df.iff v
+
+instance seqCons_definable : 𝚺₀-Function₂ (seqCons : M → M → M) := Defined.to_definable _ seqCons_defined
+
+instance seqCons_definable' (Γ) : Γ-Function₂ (seqCons : M → M → M) := .of_zero seqCons_definable _
+
+end
 
 lemma domain_bitRemove_of_isMapping_of_mem {x y s : M} (hs : IsMapping s) (hxy : ⟪x, y⟫ ∈ s) :
     domain (bitRemove ⟪x, y⟫ s) = bitRemove x (domain s) := by
@@ -555,10 +582,30 @@ lemma Seq.eq_of_eq_of_subset {s₁ s₂ : M} (H₁ : Seq s₁) (H₂ : Seq s₂)
     rcases this with rfl
     simpa using hy
 
+lemma subset_pair {s t : M} (h : ∀ i x, ⟪i, x⟫ ∈ s → ⟪i, x⟫ ∈ t) : s ⊆ t := by
+  intro u hu
+  simpa using h (π₁ u) (π₂ u) (by simpa using hu)
+
+@[simp] lemma Seq.seqCons_ext {a₁ a₂ s₁ s₂ : M} (H₁ : Seq s₁) (H₂ : Seq s₂) :
+    s₁ ⁀' a₁ = s₂ ⁀' a₂ ↔ a₁ = a₂ ∧ s₁ = s₂ :=
+  ⟨by intro h
+      have hs₁s₂ : lh s₁ = lh s₂ := by simpa [H₁, H₂] using congr_arg lh h
+      have hs₁ : ⟪lh s₁, a₁⟫ ∈ s₂ ⁀' a₂ := by simpa [h] using lh_mem_seqCons s₁ a₁
+      have hs₂ : ⟪lh s₁, a₂⟫ ∈ s₂ ⁀' a₂ := by simp [hs₁s₂]
+      have ha₁a₂ : a₁ = a₂ := (H₂.seqCons a₂).isMapping.uniq hs₁ hs₂
+      have : s₁ ⊆ s₂ := subset_pair <| by
+        intro i x hix
+        have : i = lh s₂ ∧ x = a₂ ∨ ⟪i, x⟫ ∈ s₂ := by simpa [mem_seqCons_iff, h] using Seq.subset_seqCons s₁ a₁ hix
+        rcases this with (⟨rfl, rfl⟩ | hix₂)
+        · have := H₁.lt_lh_of_mem hix; simp [hs₁s₂] at this
+        · assumption
+      exact ⟨ha₁a₂, H₁.eq_of_eq_of_subset H₂ hs₁s₂ this⟩,
+   by rintro ⟨rfl, rfl⟩; rfl⟩
+
 /-- TODO: move to Lemmata.lean-/
 lemma ne_zero_iff_one_le {a : M} : a ≠ 0 ↔ 1 ≤ a := Iff.trans pos_iff_ne_zero.symm (pos_iff_one_le (a := a))
 
-lemma Seq.cases_iff {s : M} : Seq s ↔ s = ∅ ∨ ∃ x s', Seq s' ∧ s = x ::ˢ s' := ⟨fun h ↦ by
+lemma Seq.cases_iff {s : M} : Seq s ↔ s = ∅ ∨ ∃ x s', Seq s' ∧ s = s' ⁀' x := ⟨fun h ↦ by
   by_cases hs : lh s = 0
   · left
     simpa [hs] using h.domain_eq
@@ -592,14 +639,14 @@ alias ⟨Seq.cases, _⟩ := Seq.cases_iff
 
 @[elab_as_elim]
 theorem seq_induction (Γ) {P : M → Prop} (hP : DefinablePred ℒₒᵣ (Γ, 1) P)
-  (hnil : P ∅) (hcons : ∀ s x, Seq s → P s → P (x ::ˢ s)) :
+  (hnil : P ∅) (hcons : ∀ s x, Seq s → P s → P (s ⁀' x)) :
     ∀ {s : M}, Seq s → P s := by
   intro s sseq
   induction s using order_induction_h_iSigmaOne
   · exact Γ
   · definability
   case ind s ih =>
-    have : s = ∅ ∨ ∃ x s', Seq s' ∧ s = x ::ˢ s' := sseq.cases
+    have : s = ∅ ∨ ∃ x s', Seq s' ∧ s = s' ⁀' x := sseq.cases
     rcases this with (rfl | ⟨x, s, hs, rfl⟩)
     · exact hnil
     · exact hcons s x hs (ih s (hs.lt_seqCons x) hs)
@@ -608,8 +655,8 @@ theorem seq_induction (Γ) {P : M → Prop} (hP : DefinablePred ℒₒᵣ (Γ, 1
 syntax (name := vecNotation) "!⟨" term,* "⟩" : term
 
 macro_rules
-  | `(!⟨$term:term, $terms:term,*⟩) => `(seqCons $term !⟨$terms,*⟩)
-  | `(!⟨$term:term⟩) => `(seqCons $term ∅)
+  | `(!⟨$term:term, $terms:term,*⟩) => `(seqCons !⟨$terms,*⟩ $term)
+  | `(!⟨$term:term⟩) => `(seqCons ∅ $term)
   | `(!⟨⟩) => `(∅)
 
 @[app_unexpander seqCons]
@@ -637,7 +684,7 @@ lemma Seq.seqMap_exists {s : M} (Hs : Seq s) :
     exact ⟨∅, by simp⟩
   case hcons =>
     intro s x Hs ⟨t, Ht, hts, ih⟩
-    exact ⟨f x ::ˢ t, Ht.seqCons (f x), by simp [Hs, Ht, hts], by
+    exact ⟨t ⁀' f x, Ht.seqCons (f x), by simp [Hs, Ht, hts], by
       simp [Hs, Ht]
       intro i hi z _ hz
       have : i ≤ lh s := lt_succ_iff_le.mp hi

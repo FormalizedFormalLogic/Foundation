@@ -39,24 +39,6 @@ lemma lt_of_mem {i a : M} (h : i ∈ a) : i < a := lt_of_lt_of_le (lt_exp i) (ex
 
 lemma not_mem_of_lt_exp {i a : M} (h : a < exp i) : i ∉ a := fun H ↦ by have := lt_of_le_of_lt (exp_le_of_mem H) h; simp at this
 
-open Classical in
-noncomputable def bitInsert (i a : M) : M := if i ∈ a then a else a + exp i
-
-open Classical in
-noncomputable def bitRemove (i a : M) : M := if i ∈ a then a - exp i else a
-
-scoped instance : Insert M M := ⟨bitInsert⟩
-
-lemma insert_eq {i a : M} : insert i a = bitInsert i a := rfl
-
-scoped instance : EmptyCollection M := ⟨0⟩
-
-scoped instance : Singleton M M := ⟨fun a ↦ exp a⟩
-
-lemma emptyset_def : (∅ : M) = 0 := rfl
-
-lemma singleton_def (a : M) : {a} = exp a := rfl
-
 section
 
 variable {L : Language} [L.ORing] [Structure L M] [Structure.ORing L M] [Structure.Monotone L M]
@@ -218,9 +200,38 @@ lemma not_mem_iff_mul_exp_add {i a : M} : i ∉ a ↔ ∃ k, ∃ r < exp i, a = 
   simp [mem_iff_bit, exp_succ]
   exact not_lenbit_iff_add_mul (exp_pow2 i) (a := a)
 
+section empty
+
+scoped instance : EmptyCollection M := ⟨0⟩
+
+lemma emptyset_def : (∅ : M) = 0 := rfl
+
 @[simp] lemma not_mem_empty (i : M) : i ∉ (∅ : M) := by simp [emptyset_def, mem_iff_bit, Bit]
 
 @[simp] lemma not_mem_zero (i : M) : i ∉ (0 : M) := by simp [mem_iff_bit, Bit]
+
+end empty
+
+section singleton
+
+scoped instance : Singleton M M := ⟨fun a ↦ exp a⟩
+
+lemma singleton_def (a : M) : {a} = exp a := rfl
+
+end singleton
+
+section insert
+
+open Classical in
+noncomputable def bitInsert (i a : M) : M := if i ∈ a then a else a + exp i
+
+open Classical in
+noncomputable def bitRemove (i a : M) : M := if i ∈ a then a - exp i else a
+
+scoped instance : Insert M M := ⟨bitInsert⟩
+
+lemma insert_eq {i a : M} : insert i a = bitInsert i a := rfl
+
 
 lemma singleton_eq_insert (i : M) : ({i} : M) = insert i ∅ := by simp [singleton_def, insert, bitInsert, emptyset_def]
 
@@ -237,6 +248,37 @@ lemma singleton_eq_insert (i : M) : ({i} : M) = insert i ∅ := by simp [singlet
   · simpa [exp_inj.eq_iff] using
       lenbit_sub_pow2_iff_of_lenbit (exp_pow2 i) (exp_pow2 j) h
   · rintro _ rfl; contradiction
+
+lemma insert_graph (b i a : M) :
+    b = insert i a ↔ (i ∈ a ∧ b = a) ∨ (i ∉ a ∧ ∃ e < b + 1, e = exp i ∧ b = a + e) :=
+  ⟨by rintro rfl; by_cases hi : i ∈ a <;> simp [hi, insert, bitInsert, lt_succ_iff_le],
+   by by_cases hi : i ∈ a <;> simp only [hi, true_and, not_true_eq_false, lt_succ_iff_le, false_and,
+        or_false, insert, bitInsert, ↓reduceIte, imp_self,
+        not_false_eq_true, true_and, false_or, forall_exists_index, and_imp]
+      rintro x _ rfl rfl; rfl ⟩
+
+def _root_.LO.FirstOrder.Arith.insertDef : 𝚺₀-Semisentence 3 := .mkSigma
+  “ ( #1 ∈ #2 ∧ #0 = #2 ) ∨ ( #1 ∉ #2 ∧ ∃[#0 < #1 + 1] ( !expDef.val [#0, #2] ∧ #1 = #3 + #0 ) ) ” (by simp)
+
+lemma insert_defined : 𝚺₀-Function₂ (insert : M → M → M) via insertDef := by
+  intro v; simp [insertDef, insert_graph]
+
+@[simp] lemma insert_defined_iff (v) :
+    Semiformula.Evalbm M v insertDef.val ↔ v 0 = insert (v 1) (v 2) := insert_defined.df.iff v
+
+instance insert_definable : 𝚺₀-Function₂ (insert : M → M → M) := Defined.to_definable _ insert_defined
+
+instance insert_definable' (Γ) : Γ-Function₂ (insert : M → M → M) := .of_zero insert_definable _
+
+lemma insert_le_of_le_of_le {i j a b : M} (hij : i ≤ j) (hab : a ≤ b) : insert i a ≤ b + exp j := by
+  simp [insert, bitInsert]
+  by_cases hi : i ∈ a <;> simp [hi]
+  · exact le_trans hab (by simp)
+  · exact add_le_add hab (exp_monotone_le.mpr hij)
+
+end insert
+
+lemma one_eq_singleton : (1 : M) = {∅} := by simp [singleton_eq_insert, insert, bitInsert, emptyset_def]
 
 @[simp] lemma mem_singleton_iff {i j : M} :
     i ∈ ({j} : M) ↔ i = j := by simp [singleton_eq_insert]

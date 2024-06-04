@@ -119,13 +119,7 @@ inductive HSemiformula : HierarchySymbol → Type _ where
 
 abbrev HSemisentence (Γ : HierarchySymbol) := HSemiformula L Empty n Γ
 
-scoped[LO.FirstOrder.Arith] notation "𝚺₀-Semisentence " => HSemisentence ℒₒᵣ 0 (𝚺, 0)
-
-scoped[LO.FirstOrder.Arith] notation "𝚺₀-Semisentence " n => HSemisentence ℒₒᵣ n (𝚺, 0)
-
-scoped[LO.FirstOrder.Arith] notation "𝚺₀(exp)-Sentence " => HSemisentence ℒₒᵣ(exp) 0 (𝚺, 0)
-
-scoped[LO.FirstOrder.Arith] notation "𝚺₀(exp)-Semisentence " n => HSemisentence ℒₒᵣ(exp) n (𝚺, 0)
+scoped[LO.FirstOrder.Arith] notation Γ "-Semisentence " n => HSemisentence ℒₒᵣ n Γ
 
 variable {L ξ n}
 
@@ -642,6 +636,10 @@ lemma to_definable_oRing₀ (p : 𝚺₀-Semisentence k) (hP : Defined P p) :
 end Defined
 
 namespace DefinedFunction
+
+lemma of_eq {f g : (Fin k → M) → M} (h : ∀ x, f x = g x)
+    {p : HSemisentence L (k + 1) Γ} (H : DefinedFunction L Γ f p) : DefinedFunction L Γ g p :=
+  Defined.of_iff (by intro; simp [h]) H
 
 lemma graph_delta {f : (Fin k → M) → M} {p : HSemisentence L (k + 1) (𝚺, m)}
     (h : DefinedFunction L (𝚺, m) f p) : DefinedFunction L (𝚫, m) f p.graphDelta :=
