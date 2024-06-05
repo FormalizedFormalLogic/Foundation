@@ -11,6 +11,8 @@ import Logic.Modal.Normal.Completeness
 
 namespace LO.Modal.Normal
 
+open Finset
+
 variable {α : Type u} {β : Type u}
 variable [Inhabited β]
 
@@ -24,9 +26,9 @@ abbrev GeachTapleList := List GeachTaple
 
 section Axioms
 
-variable {F : Type u} [ModalLogicSymbol F]
+variable {F : Type u} [StandardModalLogicalConnective F]
 
-abbrev axiomGeach (l : GeachTaple) (p : F) := (◇[l.i](□[l.m]p)) ⟶ (□[l.j](◇[l.n]p))
+abbrev axiomGeach (l : GeachTaple) (p : F) := (◇^[l.i](□^[l.m]p)) ⟶ (□^[l.j](◇^[l.n]p))
 
 abbrev AxiomSet.Geach (l : GeachTaple) : AxiomSet α := { axiomGeach l p | (p) }
 
@@ -115,7 +117,6 @@ instance : Geach (𝐊𝐓𝟒𝐁 : AxiomSet β) where
 
 end Axioms
 
-@[simp]
 def GeachConfluency (l : GeachTaple) (F : Frame α) := ∀ {x y z}, (F[l.i] x y) ∧ (F[l.j] x z) → ∃ u, (F[l.m] y u) ∧ (F[l.n] z u)
 
 @[simp]
@@ -128,47 +129,56 @@ namespace GeachConfluency
 
 lemma list_single_iff : (GeachConfluencyList [l] F) ↔ GeachConfluency l F := by simp;
 
-lemma serial_def : Serial F ↔ (GeachConfluency ⟨0, 0, 1, 1⟩ F) := by
-  simp [Symmetric];
+@[simp]
+lemma serial_def : (GeachConfluency ⟨0, 0, 1, 1⟩ F) ↔ Serial F := by
+  simp [GeachConfluency, Symmetric];
   aesop;
 
-lemma reflexive_def : Reflexive F ↔ (GeachConfluency ⟨0, 0, 1, 0⟩ F) := by
-  simp [Reflexive];
+@[simp]
+lemma reflexive_def : (GeachConfluency ⟨0, 0, 1, 0⟩ F) ↔ Reflexive F := by
+  simp [GeachConfluency, Reflexive];
 
-lemma symmetric_def : Symmetric F ↔ (GeachConfluency ⟨0, 1, 0, 1⟩ F) := by
-  simp [Symmetric];
+@[simp]
+lemma symmetric_def : (GeachConfluency ⟨0, 1, 0, 1⟩ F) ↔ Symmetric F := by
+  simp [GeachConfluency, Symmetric];
   aesop;
 
-lemma transitive_def : Transitive F ↔ (GeachConfluency ⟨0, 2, 1, 0⟩ F) := by
-  simp [Transitive];
+@[simp]
+lemma transitive_def : (GeachConfluency ⟨0, 2, 1, 0⟩ F) ↔ Transitive F := by
+  simp [GeachConfluency, Transitive];
   aesop;
 
-lemma euclidean_def : Euclidean F ↔ (GeachConfluency ⟨1, 1, 0, 1⟩ F) := by
-  simp [Euclidean];
+@[simp]
+lemma euclidean_def : (GeachConfluency ⟨1, 1, 0, 1⟩ F) ↔ Euclidean F := by
+  simp [GeachConfluency, Euclidean];
   aesop;
 
-lemma confluent_def : Confluent F ↔ (GeachConfluency ⟨1, 1, 1, 1⟩ F) := by
-  simp [Confluent];
+@[simp]
+lemma confluent_def : (GeachConfluency ⟨1, 1, 1, 1⟩ F) ↔ Confluent F := by
+  simp [GeachConfluency, Confluent];
 
-lemma extensive_def : Extensive F ↔ (GeachConfluency ⟨0, 1, 0, 0⟩ F) := by
+@[simp]
+lemma extensive_def : (GeachConfluency ⟨0, 1, 0, 0⟩ F) ↔ Extensive F := by
   intros;
-  simp [Extensive];
+  simp [GeachConfluency, Extensive];
   constructor;
-  . intro h x y z hxy hxz;
-    have := h hxz;
-    subst hxy this;
-    trivial;
   . intro h x y hyz;
     have := h rfl hyz;
     subst this;
     trivial;
+  . intro h x y z hxy hxz;
+    have := h hxz;
+    subst hxy this;
+    trivial;
 
+@[simp]
 lemma functional_def : Functional F ↔ (GeachConfluency ⟨1, 1, 0, 0⟩ F) := by
-  simp [Functional];
+  simp [GeachConfluency, Functional];
   aesop
 
+@[simp]
 lemma dense_def : Dense F  ↔ (GeachConfluency ⟨0, 1, 2, 0⟩ F) := by
-  simp [Dense];
+  simp [GeachConfluency, Dense];
   aesop;
 
 end GeachConfluency
@@ -176,7 +186,7 @@ end GeachConfluency
 section FrameClassDefinability
 
 theorem AxiomGeach.defines (t : GeachTaple) (F : Frame α) : (GeachConfluency t F) ↔ (⊧ᴹ[F] (AxiomSet.Geach t : AxiomSet β)) := by
-  simp [AxiomSet.Geach];
+  simp [AxiomSet.Geach, GeachConfluency];
   constructor;
   . intro h p V x;
     simp only [Formula.Satisfies.imp_def'];
@@ -195,7 +205,7 @@ theorem AxiomGeach.defines (t : GeachTaple) (F : Frame α) : (GeachConfluency t 
       frame := F,
       val := λ v _ => F[t.m] y v
     }
-    have him : x ⊩ᴹ[M] ◇[t.i](□[t.m](Formula.atom default)) := by aesop;
+    have him : x ⊩ᴹ[M] ◇^[t.i](□^[t.m](Formula.atom default)) := by aesop;
     have := h (Formula.atom default) M.val x |>.modus_ponens him;
     simp only [Formula.Satisfies.multibox_def] at this;
     obtain ⟨u, hzu, hyu⟩ := by simpa using this z hj;
@@ -225,7 +235,7 @@ lemma GeachLogic.frameClassDefinability [hG : Geach Λ] : AxiomSetDefinability �
 
 lemma AxiomSet.S4.frameClassDefinability : AxiomSetDefinability α β 𝐒𝟒 (λ F => Reflexive F ∧ Transitive F) := by
   have : AxiomSetDefinability α β 𝐒𝟒 (GeachConfluencyList (Geach.taples 𝐒𝟒)) := by apply GeachLogic.frameClassDefinability;
-  simp_all [GeachConfluency.reflexive_def, GeachConfluency.transitive_def];
+  simp_all;
 
 end FrameClassDefinability
 
@@ -244,40 +254,40 @@ lemma def_axiomGeach (hK : 𝐊 ⊆ Λ) (hG : (AxiomSet.Geach l) ⊆ Λ) : (Geac
 
   intro Ω₁ Ω₂ Ω₃ h;
   replace ⟨h₁₂, h₂₃⟩ := h;
-  have ⟨Ω, hΩ⟩ := exists_maximal_consistent_theory (show Theory.Consistent Λ ((□⁻¹[l.m]Ω₂.theory) ∪ (□⁻¹[l.n]Ω₃.theory)) by
+  have ⟨Ω, hΩ⟩ := exists_maximal_consistent_theory (show Theory.Consistent Λ ((□⁻¹^[l.m]Ω₂.theory) ∪ (□⁻¹^[l.n]Ω₃.theory)) by
     by_contra hInc;
     obtain ⟨Δ₂, Δ₃, hΔ₂, hΔ₃, hUd⟩ := inconsistent_union (by simpa only [Theory.Inconsistent_iff] using hInc);
 
-    have h₂ : □[l.m](⋀Δ₂) ∈ Ω₂ := by -- TODO: refactor
+    have h₂ : □^[l.m](⋀Δ₂) ∈ Ω₂ := by -- TODO: refactor
       apply context_multibox_conj_membership_iff' hK |>.mpr;
-      have : □[l.m](↑Δ₂ : Theory β) ⊆ Ω₂ := subset_premulitibox_iff_multibox_subset hΔ₂;
-      simp only [←Context.multibox_coe_eq] at this;
+      have : □^[l.m](↑Δ₂ : Theory β) ⊆ Ω₂ := subset_premulitimop_iff_multimop_subset hΔ₂;
+      simp only [←Finset.premultimop_coe] at this;
       intro p hp;
-      exact this hp;
+      exact this $ multimop_mem_coe.mp hp;
 
-    have h₃ : □[l.n](⋀Δ₃) ∈ Ω₃ := by -- TODO: refactor
+    have h₃ : □^[l.n](⋀Δ₃) ∈ Ω₃ := by -- TODO: refactor
       apply context_multibox_conj_membership_iff' hK |>.mpr;
-      have : □[l.n](↑Δ₃ : Theory β) ⊆ Ω₃ := subset_premulitibox_iff_multibox_subset hΔ₃;
-      simp only [←Context.multibox_coe_eq] at this;
+      have : □^[l.n](↑Δ₃ : Theory β) ⊆ Ω₃ := subset_premulitimop_iff_multimop_subset hΔ₃;
+      simp only [←Finset.premultimop_coe] at this;
       intro p hp;
-      exact this hp;
+      exact this $ multimop_mem_coe.mp hp;
 
-    have : (□[l.n](⋀Δ₃)) ∉ Ω₃ := by
-      have : Ω₁ ⊢ᴹ[Λ]! ◇[l.i](□[l.m](⋀Δ₂)) ⟶ □[l.j](◇[l.n](⋀Δ₂)) := Deducible.maxm! (by apply hG; simp [AxiomSet.Geach]);
-      have : Ω₁ ⊢ᴹ[Λ]! ◇[l.i](□[l.m](⋀Δ₂)) := membership_iff.mp $ (multiframe_dia hK |>.mp h₁₂) h₂;
-      have : Ω₁ ⊢ᴹ[Λ]! □[l.j](◇[l.n](⋀Δ₂)) := (by assumption) ⨀ (by assumption);
-      have : □[l.j](◇[l.n](⋀Δ₂)) ∈ Ω₁ := membership_iff.mpr this;
-      have : ◇[l.n](⋀Δ₂) ∈ Ω₃ := multiframe_box hK |>.mp h₂₃ (by assumption);
-      have : Ω₃ ⊢ᴹ[Λ]! ◇[l.n](⋀Δ₂) := membership_iff.mp (by assumption);
-      have : Ω₃ ⊢ᴹ[Λ]! ~(□[l.n](~(⋀Δ₂))) := (iff_mp'! multidia_duality!) ⨀ (by assumption);
+    have : (□^[l.n](⋀Δ₃)) ∉ Ω₃ := by
+      have : Ω₁ ⊢ᴹ[Λ]! ◇^[l.i](□^[l.m](⋀Δ₂)) ⟶ □^[l.j](◇^[l.n](⋀Δ₂)) := Deducible.maxm! (by apply hG; simp [AxiomSet.Geach]);
+      have : Ω₁ ⊢ᴹ[Λ]! ◇^[l.i](□^[l.m](⋀Δ₂)) := membership_iff.mp $ (multiframe_dia hK |>.mp h₁₂) h₂;
+      have : Ω₁ ⊢ᴹ[Λ]! □^[l.j](◇^[l.n](⋀Δ₂)) := (by assumption) ⨀ (by assumption);
+      have : □^[l.j](◇^[l.n](⋀Δ₂)) ∈ Ω₁ := membership_iff.mpr this;
+      have : ◇^[l.n](⋀Δ₂) ∈ Ω₃ := multiframe_box hK |>.mp h₂₃ (by assumption);
+      have : Ω₃ ⊢ᴹ[Λ]! ◇^[l.n](⋀Δ₂) := membership_iff.mp (by assumption);
+      have : Ω₃ ⊢ᴹ[Λ]! ~(□^[l.n](~(⋀Δ₂))) := (iff_mp'! multidia_duality!) ⨀ (by assumption);
       have : ∅ ⊢ᴹ[Λ]! ~⋀(Δ₂ ∪ Δ₃) := by simpa [NegDefinition.neg] using finset_dt!.mp (by simpa using hUd);
       have : ∅ ⊢ᴹ[Λ]! ~⋀(Δ₂ ∪ Δ₃) ⟶ ~(⋀Δ₂ ⋏ ⋀Δ₃) := contra₀'! $ iff_mpr'! $ finset_union_conj!;
       have : ∅ ⊢ᴹ[Λ]! (⋀Δ₂ ⋏ ⋀Δ₃) ⟶ ⊥ := (by assumption) ⨀ (by assumption);
       have : ∅ ⊢ᴹ[Λ]! ~(⋀Δ₂ ⋏ ⋀Δ₃) := (contra₀'! (by assumption)) ⨀ (by deduct);
       have : ∅ ⊢ᴹ[Λ]! ⋀Δ₃ ⟶ ~⋀Δ₂ := imp_eq!.mpr $ disj_symm'! $ neg_conj'! (by assumption);
-      have : ∅ ⊢ᴹ[Λ]! □[l.n](⋀Δ₃) ⟶ □[l.n](~⋀Δ₂) := multibox_distribute_nec'! (by assumption);
-      have : Ω₃ ⊢ᴹ[Λ]! ~(□[l.n](~⋀Δ₂)) ⟶ ~(□[l.n](⋀Δ₃)) := weakening! (show ∅ ⊆ Ω₃.theory by simp) $ contra₀'! (by assumption);
-      have : Ω₃ ⊢ᴹ[Λ]! ~(□[l.n](⋀Δ₃)) := (by assumption) ⨀ (by assumption);
+      have : ∅ ⊢ᴹ[Λ]! □^[l.n](⋀Δ₃) ⟶ □^[l.n](~⋀Δ₂) := multibox_distribute_nec'! (by assumption);
+      have : Ω₃ ⊢ᴹ[Λ]! ~(□^[l.n](~⋀Δ₂)) ⟶ ~(□^[l.n](⋀Δ₃)) := weakening! (show ∅ ⊆ Ω₃.theory by simp) $ contra₀'! (by assumption);
+      have : Ω₃ ⊢ᴹ[Λ]! ~(□^[l.n](⋀Δ₃)) := (by assumption) ⨀ (by assumption);
       exact neg_membership_iff.mp $ membership_iff.mpr (by assumption);
 
     contradiction;
@@ -287,11 +297,11 @@ lemma def_axiomGeach (hK : 𝐊 ⊆ Λ) (hG : (AxiomSet.Geach l) ⊆ Λ) : (Geac
   constructor;
   . intro p hp;
     apply hΩ;
-    have : p ∈ □⁻¹[l.m]Ω₂ := by simpa [Set.premultibox] using hp;
+    have : p ∈ □⁻¹^[l.m]Ω₂ := by simpa [Set.premultibox] using hp;
     simp_all;
   . intro p hp;
     apply hΩ;
-    have : p ∈ □⁻¹[l.n]Ω₃ := by simpa [Set.premultibox] using hp;
+    have : p ∈ □⁻¹^[l.n]Ω₃ := by simpa [Set.premultibox] using hp;
     simp_all;
 
 lemma def_logicGeach {l : GeachTapleList} (hG : (GeachLogic l) ⊆ Λ) : (GeachConfluencyList l) (CanonicalModel Λ).frame := by

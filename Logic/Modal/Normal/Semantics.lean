@@ -62,13 +62,13 @@ lemma imp_def : (w ⊩ᴹ[M] p ⟶ q) ↔ (w ⊮ᴹ[M] p) ∨ (w ⊩ᴹ[M] q) :=
 @[simp] lemma neg_def' : (w ⊩ᴹ[M] ~p) ↔ (w ⊮ᴹ[M] p) := by simp [Satisfies];
 
 @[simp]
-lemma multibox_def : (w ⊩ᴹ[M] □[n]p) ↔ (∀ v, M.frame[n] w v → (v ⊩ᴹ[M] p)) := by
+lemma multibox_def : (w ⊩ᴹ[M] □^[n]p) ↔ (∀ v, M.frame[n] w v → (v ⊩ᴹ[M] p)) := by
   induction n generalizing w with
   | zero => simp;
   | succ n ih => aesop;
 
 @[simp]
-lemma multidia_def : (w ⊩ᴹ[M] ◇[n]p) ↔ (∃ v, M.frame[n] w v ∧ (v ⊩ᴹ[M] p)) := by
+lemma multidia_def : (w ⊩ᴹ[M] ◇^[n]p) ↔ (∃ v, M.frame[n] w v ∧ (v ⊩ᴹ[M] p)) := by
   induction n generalizing w with
   | zero => simp;
   | succ n ih => aesop;
@@ -269,6 +269,10 @@ namespace Formula.FrameClassConsequence
 
 variable  {𝔽 : FrameClass α} {Γ Δ : Theory β} {p : Formula β}
 
+@[simp]
+lemma empty_consequence_iff : (∅ ⊨ᴹ[𝔽] p) ↔ (⊧ᴹ[𝔽] p) := by
+  simp [FrameClassConsequence, FrameConsequence, Formula.FrameClasses, Formula.Frames, Formula.Models];
+
 lemma modus_ponens' : (Γ ⊨ᴹ[𝔽] p ⟶ q) → (Γ ⊨ᴹ[𝔽] p) → (Γ ⊨ᴹ[𝔽] q) := by
   simp [Formula.FrameClassConsequence];
   intro hpq hp F hF;
@@ -293,7 +297,7 @@ def Theory.FrameClassSatisfiable (𝔽 : FrameClass α) (Γ : Theory β) := ∃ 
 
 def AxiomSetDefinability (α β) (Λ : AxiomSet β)  (P : Frame α → Prop) := ∀ {F : Frame α}, P F ↔ ⊧ᴹ[F] Λ
 
-def AxiomSetDefinability.toFrameClass (h : AxiomSetDefinability α β Λ P) : ∀ {F : Frame α}, P F ↔ F ∈ 𝔽(Λ) := by
+lemma AxiomSetDefinability.iff_subset_frameClass (h : AxiomSetDefinability α β Λ P) : ∀ {F : Frame α}, P F ↔ F ∈ 𝔽(Λ) := by
   intro F;
   exact h;
 
