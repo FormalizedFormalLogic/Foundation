@@ -163,6 +163,36 @@ end sigma
 
 end Structure
 
+section ULift
+
+variable {L : Language.{u}} {M : Type v} [Structure L M]
+
+instance : Structure L (ULift.{v'} M) where
+  func := fun _ f v ↦ ⟨Structure.func f fun i ↦ (v i).down⟩
+  rel := fun _ r v ↦ Structure.rel r fun i ↦ (v i).down
+
+@[simp] lemma Structure.func_uLift {k} (f : L.Func k) (v : Fin k → ULift.{v'} M) :
+    Structure.func f v = ⟨Structure.func f fun i ↦ (v i).down⟩ := rfl
+
+@[simp] lemma Structure.rel_uLift {k} (r : L.Rel k) (v : Fin k → ULift.{v'} M) :
+    Structure.rel r v = Structure.rel r fun i ↦ (v i).down := rfl
+
+lemma Semiterm.valm_uLift {e : Fin n → ULift.{v'} M} {ε : ξ → ULift.{v'} M} {t : Semiterm L ξ n} :
+    Semiterm.valm (ULift.{v'} M) e ε t = ⟨Semiterm.valm M (fun i ↦ (e i).down) (fun i ↦ (ε i).down) t⟩ := by
+  induction t <;> simp [*, Semiterm.val_func]
+
+lemma Semiformula.evalm_uLift {e : Fin n → ULift.{v'} M} {ε : ξ → ULift.{v'} M} {p : Semiformula L ξ n} :
+    Semiformula.Evalm (ULift.{v'} M) e ε p ↔ Semiformula.Evalm M (fun i ↦ (e i).down) (fun i ↦ (ε i).down) p := by
+  induction p using Semiformula.rec' <;>
+    simp [*, Semiformula.eval_rel, Semiformula.eval_nrel, Semiterm.valm_uLift, Matrix.comp_vecCons']
+
+variable (L M)
+
+lemma uLift_elementaryEquiv [Nonempty M] : ULift.{v'} M ≡ₑ[L] M := by
+  intro σ; simp [models_iff, Semiformula.evalm_uLift, Matrix.empty_eq, Empty.eq_elim]
+
+end ULift
+
 end FirstOrder
 
 end LO

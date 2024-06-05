@@ -83,6 +83,8 @@ instance trueArith : ℕ⋆ ⊧ₘ* 𝐓𝐀 := ⟨by
 instance : ℕ⋆ ⊧ₘ* 𝐏𝐀⁻ :=
   ModelsTheory.of_ss (U := 𝐓𝐀) inferInstance (Structure.subset_of_models.mpr $ Arith.Standard.models_peanoMinus)
 
+open Arith.Model
+
 lemma star_unbounded (n : ℕ) : n < ⋆ := by
   have : ℕ⋆ ⊧ₘ (“!!(Semiterm.Operator.numeral ℒₒᵣ⋆ n) < ⋆” : Sentence ℒₒᵣ⋆) :=
     models_union_trueArithWithStarUnbounded.realize

@@ -4,13 +4,12 @@ namespace LO.FirstOrder
 
 namespace ModelsTheory
 
-variable {L : Language.{u}} (M : Type u) [Nonempty M] [Structure L M] (T U V : Theory L)
-
+variable {L : Language.{u}} (M : Type w) [Nonempty M] [Structure L M] (T U V : Theory L)
 
 lemma of_provably_subtheory (_ : T ≼ U) (h : M ⊧ₘ* U) : M ⊧ₘ* T := ⟨by
   intro p hp
   have : U ⊢ p := System.Subtheory.prf (System.byAxm hp)
-  exact consequence_iff.mp (sound₀! ⟨this⟩) M h⟩
+  exact consequence_iff'.{u, w}.mp (sound! ⟨this⟩) M⟩
 
 lemma of_provably_subtheory' [T ≼ U] [M ⊧ₘ* U] : M ⊧ₘ* T := of_provably_subtheory M T U inferInstance inferInstance
 

@@ -73,12 +73,12 @@ noncomputable def leIffEqOrLt : T ⊢! “∀ ∀ (#0 ≤ #1 ↔ #0 = #1 ∨ #0 
     (consequence_iff.mpr $ fun _ _ _ _ => by simp[models_def, Semiformula.Operator.LE.def_of_Eq_of_LT])
 
 lemma provOf (σ : Sentence L)
-  (H : ∀ (M : Type u)
+  (H : ∀ (M : Type (max u w))
          [Nonempty M] [LT M]
          [Structure L M] [Structure.Eq L M] [Structure.LT L M]
          [M ⊧ₘ* T],
          M ⊧ₘ σ) :
-    T ⊨ σ := consequence_iff_eq.mpr fun M _ _ _ hT =>
+    T ⊨ σ := consequence_iff_consequence.{u, w}.mp <| consequence_iff_eq.mpr fun M _ _ _ hT =>
   letI : (Structure.Model L M) ⊧ₘ* T :=
     ((Structure.ElementaryEquiv.modelsTheory (Structure.Model.elementaryEquiv L M)).mp hT)
   (Structure.ElementaryEquiv.models (Structure.Model.elementaryEquiv L M)).mpr (H (Structure.Model L M))

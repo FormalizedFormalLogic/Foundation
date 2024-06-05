@@ -153,6 +153,12 @@ by simp[Vee.vee]
 @[simp] lemma exClosure_inj (p q : Semiformula L ξ n) : ∃* p = ∃* q ↔ p = q := by
   induction n <;> simp [*, exClosure_succ]
 
+@[simp] lemma univItr_inj {k} (p q : Semiformula L ξ (n + k)) : ∀^[k] p = ∀^[k] q ↔ p = q := by
+  induction k <;> simp [*, univItr_succ]
+
+@[simp] lemma exItr_inj {k} (p q : Semiformula L ξ (n + k)) : ∃^[k] p = ∃^[k] q ↔ p = q := by
+  induction k <;> simp [*, exItr_succ]
+
 @[simp] lemma imp_inj {p₁ p₂ q₁ q₂ : Semiformula L ξ n} :
     p₁ ⟶ p₂ = q₁ ⟶ q₂ ↔ p₁ = q₁ ∧ p₂ = q₂ := by simp [imp_eq]
 
@@ -511,6 +517,12 @@ lemma lMap_nrel {k} (r : L₁.Rel k) (v : Fin k → Semiterm L₁ ξ n) :
 
 @[simp] lemma lMap_exClosure (p : Semiformula L₁ ξ n) :
     lMap Φ (∃* p) = ∃* lMap Φ p := by induction n <;> simp [*, exClosure_succ]
+
+@[simp] lemma lMap_univItr {k} (p : Semiformula L₁ ξ (n + k)) :
+    lMap Φ (∀^[k] p) = ∀^[k] lMap Φ p := by induction k <;> simp [*, univItr_succ]; rfl
+
+@[simp] lemma lMap_exItr {k} (p : Semiformula L₁ ξ (n + k)) :
+    lMap Φ (∃^[k] p) = ∃^[k] lMap Φ p := by induction k <;> simp [*, exItr_succ]; rfl
 
 @[simp] lemma fvarList_lMap (Φ : L₁ →ᵥ L₂) (p : Semiformula L₁ ξ n) : fvarList (Semiformula.lMap Φ p) = fvarList p := by
   induction p using Semiformula.rec' <;> try simp [lMap_rel, lMap_nrel, *]

@@ -52,13 +52,13 @@ abbrev indH (Γ : Polarity) (k : ℕ) : Theory ℒₒᵣ := 𝐏𝐀⁻ + indSch
 
 prefix:max "𝐈𝐍𝐃" => indH
 
-abbrev iSigma (k : ℕ) : Theory ℒₒᵣ := 𝐈𝐍𝐃Σ k
+abbrev iSigma (k : ℕ) : Theory ℒₒᵣ := 𝐈𝐍𝐃𝚺 k
 
 prefix:max "𝐈𝚺" => iSigma
 
 notation "𝐈𝚺₀" => iSigma 0
 
-abbrev iPi (k : ℕ) : Theory ℒₒᵣ := 𝐈𝐍𝐃Π k
+abbrev iPi (k : ℕ) : Theory ℒₒᵣ := 𝐈𝐍𝐃𝚷 k
 
 prefix:max "𝐈𝚷" => iPi
 

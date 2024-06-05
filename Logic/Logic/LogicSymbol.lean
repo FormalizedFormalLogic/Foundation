@@ -15,54 +15,106 @@ a function that preserves logical connectives.
 
 namespace LO
 
+@[notation_class] class SigmaSymbol (α : Type*) where
+  sigma : α
+
+@[notation_class] class PiSymbol (α : Type*) where
+  pi : α
+
+@[notation_class] class DeltaSymbol (α : Type*) where
+  delta : α
+
+notation "𝚺" => SigmaSymbol.sigma
+
+notation "𝚷" => PiSymbol.pi
+
+notation "𝚫" => DeltaSymbol.delta
+
+attribute [match_pattern] SigmaSymbol.sigma PiSymbol.pi DeltaSymbol.delta
 
 inductive Polarity := | sigma | pi
 
 namespace Polarity
 
-notation "Σ" => sigma
-notation "Π" => pi
+instance : SigmaSymbol Polarity := ⟨sigma⟩
+
+instance : PiSymbol Polarity := ⟨pi⟩
 
 def alt : Polarity → Polarity
-  | Σ => Π
-  | Π => Σ
+  | 𝚺 => 𝚷
+  | 𝚷 => 𝚺
 
-@[simp] lemma alt_sigma : Σ.alt = Π := rfl
+@[simp] lemma eq_sigma : sigma = 𝚺 := rfl
 
-@[simp] lemma alt_pi : Π.alt = Σ := rfl
+@[simp] lemma eq_pi : pi = 𝚷 := rfl
 
-@[simp] lemma alt_alt (b : Polarity) : b.alt.alt = b := by rcases b <;> simp
+@[simp] lemma alt_sigma : alt 𝚺 = 𝚷 := rfl
+
+@[simp] lemma alt_pi : alt 𝚷 = 𝚺 := rfl
+
+@[simp] lemma alt_alt (Γ : Polarity) : Γ.alt.alt = Γ := by rcases Γ <;> simp
 
 end Polarity
 
+inductive SigmaPiDelta := | sigma | pi | delta
+
+namespace SigmaPiDelta
+
+instance : SigmaSymbol SigmaPiDelta := ⟨sigma⟩
+
+instance : PiSymbol SigmaPiDelta := ⟨pi⟩
+
+instance : DeltaSymbol SigmaPiDelta := ⟨delta⟩
+
+def alt : SigmaPiDelta → SigmaPiDelta
+  | 𝚺 => 𝚷
+  | 𝚷 => 𝚺
+  | 𝚫 => 𝚫
+
+@[simp] lemma eq_sigma : sigma = 𝚺 := rfl
+
+@[simp] lemma eq_pi : pi = 𝚷 := rfl
+
+@[simp] lemma eq_delta : delta = 𝚫 := rfl
+
+@[simp] lemma alt_sigma : alt 𝚺 = 𝚷 := rfl
+
+@[simp] lemma alt_pi : alt 𝚷 = 𝚺 := rfl
+
+@[simp] lemma alt_delta : alt 𝚫 = 𝚫 := rfl
+
+@[simp] lemma alt_alt (Γ : SigmaPiDelta) : Γ.alt.alt = Γ := by rcases Γ <;> simp
+
+end SigmaPiDelta
+
 section logicNotation
 
-@[notation_class] class Tilde (α : Sort _) where
+@[notation_class] class Tilde (α : Type*) where
   tilde : α → α
 
-@[notation_class] class Arrow (α : Sort _) where
+@[notation_class] class Arrow (α : Type*) where
   arrow : α → α → α
 
-@[notation_class] class Wedge (α : Sort _) where
+@[notation_class] class Wedge (α : Type*) where
   wedge : α → α → α
 
-@[notation_class] class Vee (α : Sort _) where
+@[notation_class] class Vee (α : Type*) where
   vee : α → α → α
 
-class LogicalConnective (α : Sort _)
+class LogicalConnective (α : Type*)
   extends Top α, Bot α, Tilde α, Arrow α, Wedge α, Vee α
 
-@[notation_class] class UnivQuantifier (α : ℕ → Sort _) where
+@[notation_class] class UnivQuantifier (α : ℕ → Type*) where
   univ : ∀ {n}, α (n + 1) → α n
 
-@[notation_class] class ExQuantifier (α : ℕ → Sort _) where
+@[notation_class] class ExQuantifier (α : ℕ → Type*) where
   ex : ∀ {n}, α (n + 1) → α n
 
-@[notation_class] class UnivQuantifier₂ (α : ℕ → ℕ → Sort _) where
+@[notation_class] class UnivQuantifier₂ (α : ℕ → ℕ → Type*) where
   univ₂₁ : ∀ {m n}, α (m + 1) n → α m n
   univ₂₂ : ∀ {m n}, α m (n + 1) → α m n
 
-@[notation_class] class ExQuantifier₂ (α : ℕ → ℕ → Sort _) where
+@[notation_class] class ExQuantifier₂ (α : ℕ → ℕ → Type*) where
   ex₂₁ : ∀ {m n}, α (m + 1) n → α m n
   ex₂₂ : ∀ {m n}, α m (n + 1) → α m n
 
@@ -98,7 +150,7 @@ attribute [match_pattern]
 
 section UnivQuantifier
 
-variable {α : ℕ → Sort u} [UnivQuantifier α]
+variable {α : ℕ → Type*} [UnivQuantifier α]
 
 def univClosure : {n : ℕ} → α n → α 0
   | 0,     a => a
@@ -110,11 +162,23 @@ prefix:64 "∀* " => univClosure
 
 lemma univClosure_succ {n} (a : α (n + 1)) : ∀* a = ∀* ∀' a := rfl
 
+def univItr : (k : ℕ) → α (n + k) → α n
+  | 0,     a => a
+  | k + 1, a => univItr k (∀' a)
+
+notation "∀^[" k "] " p:64 => univItr k p
+
+@[simp] lemma univItr_zero (a : α n) : ∀^[0] a = a := rfl
+
+@[simp] lemma univItr_one (a : α (n + 1)) : ∀^[1] a = ∀' a := rfl
+
+lemma univItr_succ {k} (a : α (n + (k + 1))) : ∀^[k + 1] a = ∀^[k] (∀' a) := rfl
+
 end UnivQuantifier
 
 section ExQuantifier
 
-variable {α : ℕ → Sort u} [ExQuantifier α]
+variable {α : ℕ → Type*} [ExQuantifier α]
 
 def exClosure : {n : ℕ} → α n → α 0
   | 0,     a => a
@@ -126,25 +190,37 @@ prefix:64 "∃* " => exClosure
 
 lemma exClosure_succ {n} (a : α (n + 1)) : ∃* a = ∃* ∃' a := rfl
 
+def exItr : (k : ℕ) → α (n + k) → α n
+  | 0,     a => a
+  | k + 1, a => exItr k (∃' a)
+
+notation "∃^[" k "] " p:64 => exItr k p
+
+@[simp] lemma exItr_zero (a : α n) : ∃^[0] a = a := rfl
+
+@[simp] lemma exItr_one (a : α (n + 1)) : ∃^[1] a = ∃' a := rfl
+
+lemma exItr_succ {k} (a : α (n + (k + 1))) : ∃^[k + 1] a = ∃^[k] (∃' a) := rfl
+
 end ExQuantifier
 
 section UnivQuantifier₂
 
 section
 
-variable {α : ℕ → Sort u} [UnivQuantifier α] [ExQuantifier α]
+variable {α : ℕ → Type*} [UnivQuantifier α] [ExQuantifier α]
 
 def quant : Polarity → α (n + 1) → α n
-  | Σ, p => ∃' p
-  | Π, p => ∀' p
+  | 𝚺, p => ∃' p
+  | 𝚷, p => ∀' p
 
-@[simp] lemma quant_sigma (p : α (n + 1)) : quant Σ p = ∃' p := rfl
+@[simp] lemma quant_sigma (p : α (n + 1)) : quant 𝚺 p = ∃' p := rfl
 
-@[simp] lemma quant_pi (p : α (n + 1)) : quant Π p = ∀' p := rfl
+@[simp] lemma quant_pi (p : α (n + 1)) : quant 𝚷 p = ∀' p := rfl
 
 end
 
-variable {α : ℕ → ℕ → Sort u} [UnivQuantifier₂ α]
+variable {α : ℕ → ℕ → Type*} [UnivQuantifier₂ α]
 
 def univClosure₂₁ : {m n : ℕ} → α m n → α 0 n
   | 0,     _, a => a
@@ -166,7 +242,7 @@ end UnivQuantifier₂
 
 section ExQuantifier₂
 
-variable {α : ℕ → ℕ → Sort u} [ExQuantifier₂ α]
+variable {α : ℕ → ℕ → Type*} [ExQuantifier₂ α]
 
 def exClosure₂₁ : {m n : ℕ} → α m n → α 0 n
   | 0,     _, a => a
@@ -204,7 +280,7 @@ class NegDefinition (F : Type*) [LogicalConnective F] where
 namespace LogicalConnective
 
 section
-variable {α : Sort _} [LogicalConnective α]
+variable {α : Type*} [LogicalConnective α]
 
 @[match_pattern] def iff (a b : α) := (a ⟶ b) ⋏ (b ⟶ a)
 
@@ -213,7 +289,7 @@ infix:61 " ⟷ " => LogicalConnective.iff
 end
 
 @[reducible]
-instance Prop_HasLogicSymbols : LogicalConnective Prop where
+instance PropLogicSymbols : LogicalConnective Prop where
   top := True
   bot := False
   tilde := Not
@@ -221,19 +297,19 @@ instance Prop_HasLogicSymbols : LogicalConnective Prop where
   wedge := And
   vee := Or
 
-@[simp] lemma Prop_top_eq : ⊤ = True := rfl
+@[simp] lemma Prop.top_eq : ⊤ = True := rfl
 
-@[simp] lemma Prop_bot_eq : ⊥ = False := rfl
+@[simp] lemma Prop.bot_eq : ⊥ = False := rfl
 
-@[simp] lemma Prop_neg_eq (p : Prop) : ~ p = ¬p := rfl
+@[simp] lemma Prop.neg_eq (p : Prop) : ~ p = ¬p := rfl
 
-@[simp] lemma Prop_arrow_eq (p q : Prop) : (p ⟶ q) = (p → q) := rfl
+@[simp] lemma Prop.arrow_eq (p q : Prop) : (p ⟶ q) = (p → q) := rfl
 
-@[simp] lemma Prop_and_eq (p q : Prop) : (p ⋏ q) = (p ∧ q) := rfl
+@[simp] lemma Prop.and_eq (p q : Prop) : (p ⋏ q) = (p ∧ q) := rfl
 
-@[simp] lemma Prop_or_eq (p q : Prop) : (p ⋎ q) = (p ∨ q) := rfl
+@[simp] lemma Prop.or_eq (p q : Prop) : (p ⋎ q) = (p ∨ q) := rfl
 
-@[simp] lemma Prop_iff_eq (p q : Prop) : (p ⟷ q) = (p ↔ q) := by simp[LogicalConnective.iff, iff_iff_implies_and_implies]
+@[simp] lemma Prop.iff_eq (p q : Prop) : (p ⟷ q) = (p ↔ q) := by simp[LogicalConnective.iff, iff_iff_implies_and_implies]
 
 instance : DeMorgan Prop where
   verum := by simp
@@ -243,7 +319,7 @@ instance : DeMorgan Prop where
   or := fun _ _ => by simp[not_or]
   neg := fun _ => by simp
 
-class HomClass (F : Type _) (α β : outParam (Type _)) [LogicalConnective α] [LogicalConnective β] [FunLike F α β] where
+class HomClass (F : Type*) (α β : outParam Type*) [LogicalConnective α] [LogicalConnective β] [FunLike F α β] where
   map_top : ∀ (f : F), f ⊤ = ⊤
   map_bot : ∀ (f : F), f ⊥ = ⊥
   map_neg : ∀ (f : F) (p : α), f (~ p) = ~f p
@@ -255,7 +331,7 @@ attribute [simp] HomClass.map_top HomClass.map_bot HomClass.map_neg HomClass.map
 
 namespace HomClass
 
-variable (F : Type _) (α β : outParam (Type _)) [LogicalConnective α] [LogicalConnective β] [FunLike F α β]
+variable (F : Type*) (α β : outParam Type*) [LogicalConnective α] [LogicalConnective β] [FunLike F α β]
 variable [HomClass F α β]
 variable (f : F) (a b : α)
 
@@ -265,7 +341,7 @@ instance : CoeFun F (fun _ => α → β) := ⟨DFunLike.coe⟩
 
 end HomClass
 
-variable (α β γ : Type _) [LogicalConnective α] [LogicalConnective β] [LogicalConnective γ]
+variable (α β γ : Type*) [LogicalConnective α] [LogicalConnective β] [LogicalConnective γ]
 
 structure Hom where
   toTr : α → β
@@ -360,7 +436,7 @@ namespace Matrix
 
 section And
 
-variable {α : Type _}
+variable {α : Type*}
 variable [LogicalConnective α] [LogicalConnective β]
 
 def conj : {n : ℕ} → (Fin n → α) → α
@@ -391,7 +467,7 @@ namespace List
 
 section
 
-variable {α : Type u} [LogicalConnective α]
+variable {α : Type*} [LogicalConnective α]
 
 def conj : List α → α
   | []      => ⊤

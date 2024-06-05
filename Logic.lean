@@ -19,7 +19,7 @@ import Logic.Propositional.Classical.Basic.Semantics
 import Logic.Propositional.Classical.Basic.Completeness
 import Logic.Propositional.Classical.Basic
 
--- Propositional Intuitionistic
+Propositional Intuitionistic
 import Logic.Propositional.Superintuitionistic
 import Logic.Propositional.Translation
 
