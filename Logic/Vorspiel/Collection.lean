@@ -46,6 +46,8 @@ variable {β α : Type*} [Collection β α]
 
 def set : α → Set β := fun a ↦ {x | x ∈ a}
 
+@[simp] lemma mem_set_iff {x : β} {a : α} : x ∈ (set a : Set β) ↔ x ∈ a := by simp [set]
+
 lemma subset_iff_set_subset_set {a b : α} : a ⊆ b ↔ set a ⊆ set b := by simp [subset_iff, set]
 
 @[simp, refl] lemma subset_refl (a : α) : a ⊆ a := subset_iff_set_subset_set.mpr (Set.Subset.refl _)
