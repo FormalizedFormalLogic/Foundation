@@ -1,6 +1,24 @@
 import Logic.Logic.System
 import Logic.Logic.HilbertStyle.Context
 
+-- TODO: Move to Vorspiel?
+namespace List
+
+variable [DecidableEq α]
+variable  {l : List α} {p q : α}
+
+lemma empty_def {Γ : List α} : Γ = [] ↔ ∀ p, p ∉ Γ := by induction Γ <;> simp_all;
+
+@[simp]
+lemma eq_remove_cons : (q :: l).remove q = l.remove q := by aesop;
+
+@[simp]
+lemma remove_singleton_of_ne (h : p ≠ q) : [p].remove q = [p] := by simpa using List.remove_cons_of_ne _ h;
+
+end List
+
+
+
 namespace LO.System
 
 variable {F : Type*} [LogicalConnective F] [NegDefinition F] [DecidableEq F]
@@ -451,15 +469,14 @@ lemma imply_left_concat_conj'! : 𝓢 ⊢! (Γ ++ Δ).conj' ⟶ Γ.conj' ⋏ Δ.
 
 @[simp]
 lemma forthbackConjRemove : 𝓢 ⊢! (Γ.remove p).conj' ⋏ p ⟶ Γ.conj' := by
-  apply provable_iff_provable.mpr;
-  apply deduct_iff.mpr;
+  apply deduct'!;
   apply iff_provable_list_conj.mpr;
   intro q hq;
   by_cases e : q = p;
   . subst e; exact conj₂'! id!;
   . exact iff_provable_list_conj.mp (conj₁'! id!) q (by apply List.mem_remove_iff.mpr; simp_all);
 
-lemma implyLeftRemoveConj' (b : 𝓢 ⊢! Γ.conj' ⟶ q) : 𝓢 ⊢! (Γ.remove p).conj' ⋏ p ⟶ q := imp_trans! (by simp) b
+lemma implyLeftRemoveConj' (b : 𝓢 ⊢! Γ.conj' ⟶ q) : 𝓢 ⊢! (Γ.remove p).conj' ⋏ p ⟶ q := imp_trans! forthbackConjRemove b
 
 lemma iff_concat_conj'! : 𝓢 ⊢! (Γ ++ Δ).conj' ↔ 𝓢 ⊢! Γ.conj' ⋏ Δ.conj' := by
   constructor;
@@ -486,6 +503,16 @@ lemma or_assoc! : 𝓢 ⊢! p ⋎ (q ⋎ r) ⟷ (p ⋎ q) ⋎ r := by
   apply iff_intro!;
   . exact deduct'! $ or_assoc'!.mp id!;
   . exact deduct'! $ or_assoc'!.mpr id!;
+
+lemma or_replace_right_iff! (d : 𝓢 ⊢! q ⟷ r) : 𝓢 ⊢! p ⋎ q ⟷ p ⋎ r := by
+  apply iff_intro!;
+  . apply or_replace_right!; exact conj₁'! d;
+  . apply or_replace_right!; exact conj₂'! d;
+
+lemma or_replace_left_iff! (d : 𝓢 ⊢! p ⟷ r) : 𝓢 ⊢! p ⋎ q ⟷ r ⋎ q := by
+  apply iff_intro!;
+  . apply or_replace_left!; exact conj₁'! d;
+  . apply or_replace_left!; exact conj₂'! d;
 
 lemma iff_concact_disj! [HasEFQ 𝓢] : 𝓢 ⊢! (Γ ++ Δ).disj' ⟷ Γ.disj' ⋎ Δ.disj' := by
   induction Γ using List.induction_with_singleton generalizing Δ <;> induction Δ using List.induction_with_singleton;
@@ -518,20 +545,53 @@ lemma iff_concact_disj! [HasEFQ 𝓢] : 𝓢 ⊢! (Γ ++ Δ).disj' ⟷ Γ.disj' 
   case hsingle.hcons => simp only [List.singleton_append, ne_eq, not_false_eq_true, List.disj'_cons_nonempty, List.disj'_singleton, iff_id!];
   case hcons.hsingle p ps hps ihp q =>
     simp_all;
-    have := @ihp [q];
-    simp at this;
-    sorry;
+    apply iff_trans! (by
+      apply or_replace_right_iff!;
+      simpa using @ihp [q];
+    ) or_assoc!;
   case hcons.hcons p ps hps ihp q qs hqs ihq =>
     simp_all only [ne_eq, List.cons_append, List.append_eq_nil, and_self, not_false_eq_true, List.disj'_cons_nonempty];
-    apply iff_intro!;
-    . sorry;
-    . sorry;
+    apply iff_trans! (by
+      apply or_replace_right_iff!;
+      exact iff_trans! (@ihp (q :: qs)) (by
+        apply or_replace_right_iff!;
+        simp [List.disj'_cons_nonempty hqs];
+      )
+    ) or_assoc!;
 
 lemma iff_concact_disj'! [HasEFQ 𝓢] : 𝓢 ⊢! (Γ ++ Δ).disj' ↔ 𝓢 ⊢! Γ.disj' ⋎ Δ.disj' := by
   constructor;
   . intro h; exact (conj₁'! iff_concact_disj!) ⨀ h;
   . intro h; exact (conj₂'! iff_concact_disj!) ⨀ h;
 
+lemma implyRight_cons_disj'! [HasEFQ 𝓢] : 𝓢 ⊢! p ⟶ (q :: Γ).disj' ↔ 𝓢 ⊢! p ⟶ q ⋎ Γ.disj' := by
+  induction Γ with
+  | nil =>
+    simp;
+    constructor;
+    . intro h; exact imp_trans! h disj₁!;
+    . intro h; exact imp_trans! h $ disj₃''! imp_id! efq!;
+  | cons q ih => simp;
+
+@[simp]
+lemma forthback_disj'_remove [HasEFQ 𝓢] : 𝓢 ⊢! Γ.disj' ⟶ p ⋎ (Γ.remove p).disj' := by
+  induction Γ using List.induction_with_singleton with
+  | hnil => simp;
+  | hsingle q =>
+    simp;
+    by_cases h: q = p;
+    . subst_vars; simp;
+    . simp [(List.remove_singleton_of_ne h)];
+  | hcons q Γ h ih =>
+    simp [(List.disj'_cons_nonempty h)];
+    by_cases hpq : q = p;
+    . simp_all only [ne_eq, List.remove_cons_self]; exact disj₃''! disj₁! ih;
+    . simp_all [(List.remove_cons_of_ne Γ hpq)];
+      by_cases hqΓ : Γ.remove p = [];
+      . simp_all;
+        exact disj₃''! disj₂! (imp_trans! ih $ or_replace_right! efq!);
+      . simp [(List.disj'_cons_nonempty hqΓ)];
+        exact disj₃''! (imp_trans! disj₁! disj₂!) (imp_trans! ih (or_replace_right! disj₂!));
 
 lemma disj_allsame! [HasEFQ 𝓢] (hd : ∀ q ∈ Γ, q = p) : 𝓢 ⊢! Γ.disj' ⟶ p := by
   induction Γ using List.induction_with_singleton with
@@ -546,9 +606,7 @@ lemma disj_allsame! [HasEFQ 𝓢] (hd : ∀ q ∈ Γ, q = p) : 𝓢 ⊢! Γ.disj
     apply deduct_iff.mpr;
     exact disj₃'! (by simp) (weakening! (by simp) $ provable_iff_provable.mp $ ih hd₂) id!
 
-
 lemma disj_allsame'! [HasEFQ 𝓢] (hd : ∀ q ∈ Γ, q = p) (h : 𝓢 ⊢! Γ.disj') : 𝓢 ⊢! p := (disj_allsame! hd) ⨀ h
-
 
 instance [HasDNE 𝓢] : HasEFQ 𝓢 where
   efq p := by

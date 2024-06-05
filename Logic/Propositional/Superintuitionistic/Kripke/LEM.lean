@@ -9,6 +9,7 @@ import Logic.Propositional.Superintuitionistic.Kripke.Soundness
 
 namespace LO.Propositional.Superintuitionistic.Kripke
 
+open System
 
 def LEMCounterexampleModel {α : Type} : Model α where
   Frame := {
@@ -27,7 +28,7 @@ lemma noLEM_atom {a : α} : ¬(LEMCounterexampleModel ⊧ (atom a) ⋎ ~(atom a)
   use 0;
   aesop;
 
-variable {α : Type}
+variable {α : Type} -- TODO: fix type `α`?
 variable [Inhabited α]
 
 lemma noLEM_on_frameclass : ∃ (p : Formula α), ¬(𝔽(Ax(𝐈𝐧𝐭))) ⊧ p ⋎ ~p := by
@@ -40,11 +41,28 @@ lemma noLEM_on_frameclass : ∃ (p : Formula α), ¬(𝔽(Ax(𝐈𝐧𝐭))) ⊧
     existsi (LEMCounterexampleModel).Valuation, LEMCounterexampleModel.hereditary;
     apply noLEM_atom;
 
+/--
+  Law of Excluded Middle is not always provable in intuitionistic logic.
+-/
 theorem noLEM : ∃ (p : Formula α), 𝐈𝐧𝐭 ⊬! p ⋎ ~p := by
   obtain ⟨p, _⟩ : ∃ (p : Formula α), ¬(𝔽(Ax(𝐈𝐧𝐭))) ⊧ p ⋎ ~p := noLEM_on_frameclass;
   existsi p;
   by_contra hC;
   have : 𝔽(Ax(𝐈𝐧𝐭)) ⊧ p ⋎ ~p := sound! hC;
   contradiction;
+
+/--
+  Intuitionistic logic is proper weaker than classical logic.
+-/
+theorem strictReducible_intuitionistic_classical : (𝐈𝐧𝐭 : DeductionParameter α) <ₛ 𝐂𝐥 := by
+  constructor;
+  . exact reducible_efq_dne;
+  . apply reducible_iff.not.mpr;
+    push_neg;
+    obtain ⟨p, hp⟩ := noLEM (α := α);
+    existsi (p ⋎ ~p);
+    constructor;
+    . exact lem!;
+    . assumption;
 
 end LO.Propositional.Superintuitionistic.Kripke

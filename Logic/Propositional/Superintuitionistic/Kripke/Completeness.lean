@@ -1,8 +1,6 @@
 import Logic.Propositional.Superintuitionistic.Deduction
 import Logic.Propositional.Superintuitionistic.Kripke.Soundness
 
--- TODO: Move to Vorspiel?
-lemma _root_.List.empty_def {Γ : List α} : Γ = [] ↔ ∀ p, p ∉ Γ := by induction Γ <;> simp_all;
 
 namespace LO.Propositional.Superintuitionistic
 
@@ -38,7 +36,7 @@ lemma iff_ParametricConsistent_insert₁ : (𝓓)-Consistent ((insert p T), U) �
     contradiction;
   . intro h Γ Δ hΓ hΔ;
     simp_all only [Set.mem_insert_iff];
-    have := @h (Γ.remove p) Δ (by
+    have : 𝓓 ⊬! p ⋏ (Γ.remove p).conj' ⟶ Δ.disj' := h (by
       intro q hq;
       have := by simpa using hΓ q $ List.mem_of_mem_remove hq;
       cases this with
@@ -46,7 +44,7 @@ lemma iff_ParametricConsistent_insert₁ : (𝓓)-Consistent ((insert p T), U) �
       | inr h => assumption;
     ) hΔ;
     by_contra hC;
-    have := imp_trans! andComm! $ implyLeftRemoveConj' (p := p) hC;
+    have : 𝓓 ⊢! p ⋏ (Γ.remove p).conj' ⟶ Δ.disj' := imp_trans! andComm! $ implyLeftRemoveConj' (p := p) hC;
     contradiction;
 
 lemma iff_not_ParametricConsistent_insert₁ : ¬(𝓓)-Consistent ((insert p T), U) ↔ ∃ Γ Δ : List (Formula α), (∀ p ∈ Γ, p ∈ T) ∧ (∀ p ∈ Δ, p ∈ U) ∧ 𝓓 ⊢! p ⋏ Γ.conj' ⟶ Δ.disj' := by
@@ -59,9 +57,21 @@ lemma iff_ParametricConsistent_insert₂ : (𝓓)-Consistent (T, (insert p U)) �
   . intro h Γ Δ hΓ hΔ;
     by_contra hC;
     have : 𝓓 ⊬! Γ.conj' ⟶ (p :: Δ).disj' := h hΓ (by simp; intro q hq; right; exact hΔ q hq);
-    have : 𝓓 ⊢! Γ.conj' ⟶ (p :: Δ).disj' := by sorry;
+    have : 𝓓 ⊢! Γ.conj' ⟶ (p :: Δ).disj' := implyRight_cons_disj'!.mpr hC;
     contradiction;
-  . sorry
+  . intro h Γ Δ hΓ hΔ;
+    simp_all;
+    have : 𝓓 ⊬! Γ.conj' ⟶ p ⋎ (Δ.remove p).disj' := h hΓ (by
+      intro q hq;
+      have := by simpa using hΔ q $ List.mem_of_mem_remove hq;
+      cases this with
+      | inl h => simpa [h] using List.mem_remove_iff.mp hq;
+      | inr h => assumption;
+    );
+    by_contra hC;
+    have : 𝓓 ⊢! Γ.conj' ⟶ p ⋎ (Δ.remove p).disj' := imp_trans! hC $ forthback_disj'_remove;
+    contradiction;
+
 
 lemma iff_not_ParametricConsistent_insert₂ : ¬(𝓓)-Consistent (T, (insert p U)) ↔ ∃ Γ Δ : List (Formula α), (∀ p ∈ Γ, p ∈ T) ∧ (∀ p ∈ Δ, p ∈ U) ∧ 𝓓 ⊢! Γ.conj' ⟶ p ⋎ Δ.disj' := by
   constructor;
