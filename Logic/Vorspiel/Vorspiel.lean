@@ -12,7 +12,6 @@ import Mathlib.Logic.Encodable.Basic
 import Mathlib.Computability.Primrec
 import Mathlib.Computability.Partrec
 import Mathlib.Data.Finset.Sort
-import Mathlib.Data.List.Card
 
 namespace Nat
 variable {α : ℕ → Sort u}
@@ -525,7 +524,7 @@ lemma sup_ofFn (f : Fin n → α) : (ofFn f).sup = Finset.sup Finset.univ f := b
 
 end
 
-lemma ofFn_get_eq_map {n} (g : α → β) (as : List α) {h} : ofFn (fun i => g (as.get (i.cast h)) : Fin n → β) = as.map g := by
+lemma ofFn_get_eq_map_cast {n} (g : α → β) (as : List α) {h} : ofFn (fun i => g (as.get (i.cast h)) : Fin n → β) = as.map g := by
   ext i b; simp
   by_cases hi : i < n
   { simp[hi, List.ofFnNthVal, List.get?_eq_get (h ▸ hi)] }
@@ -544,9 +543,9 @@ lemma take_map_range (f : ℕ → α) : ((range n).map f).take m = (range (min n
 
 lemma bind_toList_some {f : β → Option α} {g : β → α} {bs : List β} (h : ∀ x ∈ bs, f x = some (g x)) :
   bs.bind (fun i => (f i).toList) = bs.map g := by
-  have : bs.bind (fun i => (f i).toList) = bs.bind (List.ret ∘ g) :=
-    List.bind_congr (by simp; intro m hm; simp[h _ hm]; rfl)
-  rw[this, List.bind_ret_eq_map]
+  have : bs.bind (fun i => (f i).toList) = bs.bind (pure ∘ g) :=
+    List.bind_congr (by simp; intro m hm; simp[h _ hm])
+  rw[this, List.bind_pure_eq_map]
 
 variable {m : Type _ → Type _} {α : Type _} {β : Type _} [Monad m]
 
@@ -610,6 +609,8 @@ lemma append_subset_append {l₁ l₂ l : List α} (h : l₁ ⊆ l₂) : l₁ ++
 
 lemma subset_of_eq {l₁ l₂ : List α} (e : l₁ = l₂) : l₁ ⊆ l₂ := by simp[e]
 
+/-
+
 @[simp] lemma remove_cons_self [DecidableEq α] (l : List α) (a) :
   (a :: l).remove a = l.remove a := by simp[remove]
 
@@ -636,11 +637,13 @@ lemma remove_map_substet_map_remove [DecidableEq α] [DecidableEq β] (f : α �
   intro b hb neb;
   exact ⟨b, ⟨hb, by rintro rfl; exact neb rfl⟩, rfl⟩
 
+-/
+
 end List
 
 namespace Vector
 
-variable {α : Type _}
+variable {α : Type*}
 
 lemma get_mk_eq_get {n} (l : List α) (h : l.length = n) (i : Fin n) : get (⟨l, h⟩ : Vector α n) i = l.get (i.cast h.symm) := rfl
 
@@ -753,6 +756,6 @@ lemma exp_def (n : ℕ) : exp n = 2 ^ n := rfl
 
 @[simp] lemma exp_zero : exp 0 = 1 := rfl
 
-lemma exp_succ (n : ℕ) : exp (n + 1) = 2 * exp n := by simp [exp_def, pow_succ]
+lemma exp_succ (n : ℕ) : exp (n + 1) = 2 * exp n := by simp [exp_def, pow_succ, mul_comm]
 
 end Nat

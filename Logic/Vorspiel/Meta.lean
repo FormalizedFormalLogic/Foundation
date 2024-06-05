@@ -1,7 +1,6 @@
-import Mathlib.Data.Nat.Basic
+
 import Lean.Elab.Tactic.Basic
 import Mathlib.Tactic.NormNum
-import Mathlib.Tactic.Clear!
 import Mathlib.Util.AtomM
 import Logic.Vorspiel.Vorspiel
 import Mathlib.Data.Fin.Fin2
@@ -29,12 +28,12 @@ def decideTQ (p : Q(Prop)) : MetaM Q($p) := do
 
 def finQVal {n : Q(ℕ)} (e : Q(Fin $n)) : MetaM (Option ℕ) := do
   let val : Q(ℕ) ← whnf q(Fin.val $e)
-  val.natLit?
+  Expr.rawNatLit? val
 
 -- Returns literal f e when e is literal
 def natAppFunQ (f : ℕ → ℕ) (e : Q(ℕ)) : MetaM Q(ℕ) := do
   let e : Q(ℕ) ← whnf e
-  let some n := Lean.Expr.natLit? e | throwError "not ℕ"
+  let some n := Lean.Expr.rawNatLit? e | throwError "not ℕ"
   Lean.Expr.ofNat q(ℕ) (f n)
 
 -- https://leanprover-community.github.io/mathlib4_docs//Mathlib/Tactic/Linarith/Verification.html#Qq.inferTypeQ'
@@ -431,7 +430,7 @@ abbrev toExpr (σ : Q(Type*)) {α} [Denotation σ α] : α → Q($σ) := toExpr'
 
 instance nat : Denotation q(ℕ) ℕ where
   denote' := fun e => do
-    let some n := Lean.Expr.natLit? (←whnf e) | throwError "error in denotationNat: {e}"
+    let some n := Lean.Expr.rawNatLit? (←whnf e) | throwError "error in denotationNat: {e}"
     return n
   toExpr' := fun n : ℕ => q($n)
 

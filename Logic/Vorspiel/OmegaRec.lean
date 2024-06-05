@@ -1,6 +1,6 @@
 import Logic.Vorspiel.Computability
 import Mathlib.Data.List.Sigma
-attribute [-instance] WType.instEncodableWType Encodable.finPi Encodable.fintypeArrowOfEncodable
+attribute [-instance] Encodable.finPi Encodable.fintypeArrowOfEncodable
 
 open Encodable
 variable {α β γ σ : Type*} [Primcodable α] [Primcodable β] [Primcodable γ] [Primcodable σ]
@@ -100,7 +100,7 @@ private lemma bindItr_m_lt (m : α → ℕ) (l : α → List α) (a : α) (Ord :
     have : m a₁ ≤ m a - k := by
       have : 0 < m a + 1 - k := by exact Nat.zero_lt_of_lt (ih a₁ ha₁)
       have : k ≤ m a := Nat.lt_succ.mp (by simpa using Nat.add_lt_of_lt_sub this)
-      apply Nat.lt_succ.mp (by simp[←Nat.succ_sub this]; exact ih a₁ ha₁)
+      apply Nat.lt_succ.mp (by simpa only [← Nat.succ_sub this] using ih a₁ ha₁)
     exact lt_of_lt_of_le (Ord a₁ a₂ ha₂) this }
 
 private lemma bindItr_eq_nil (m : α → ℕ) (l : α → List α) (a : α) (Ord : ∀ a, ∀ a' ∈ l a, m a' < m a) :
