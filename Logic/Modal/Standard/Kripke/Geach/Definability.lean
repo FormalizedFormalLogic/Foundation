@@ -54,16 +54,8 @@ lemma extensive_def : (GeachConfluent ⟨0, 1, 0, 0⟩ F) ↔ Extensive F.Rel :=
 
 @[simp] lemma dense_def : (GeachConfluent ⟨0, 1, 2, 0⟩ F)  ↔ Dense F.Rel := by simp [GeachConfluent, Dense]; aesop;
 
-@[simp] def TrivialFrame : FiniteFrame := { World := PUnit, Rel := λ _ _ => True }
-
 @[simp]
-private lemma trivial_frame_relItr : Frame.RelItr n (F := { World := PUnit, Rel := λ _ _ => True }) x y ↔ x = y := by
-  induction n with
-  | zero => simp;
-  | succ n ih => simp; use PUnit.unit; simp_all;
-
-@[simp]
-lemma trivial_frame : GeachConfluent t { World := PUnit, Rel := λ _ _ => True } := by simp [GeachConfluent, trivial_frame_relItr.mpr];
+lemma terminal_frame : GeachConfluent t Frame.terminal.toFrame := by simp [GeachConfluent, Frame.terminal.relItr.mpr];
 
 end GeachConfluent
 
@@ -71,12 +63,12 @@ end GeachConfluent
 namespace MultiGeachConfluent
 
 @[simp]
-lemma trivial_frame : MultiGeachConfluent ts { World := PUnit, Rel := λ _ _ => True } := by
+lemma terminal_frame : MultiGeachConfluent ts Frame.terminal.toFrame := by
   induction ts with
   | nil => simp;
   | cons t ts ih =>
     constructor;
-    . exact Kripke.GeachConfluent.trivial_frame;
+    . exact Kripke.GeachConfluent.terminal_frame;
     . exact ih;
 
 end MultiGeachConfluent
@@ -137,9 +129,9 @@ instance instGeachDefinability [geach : L.IsGeach] : Definability Ax(L) (Kripke.
   simp;
 
 instance : FiniteFrameClass.IsNonempty (𝔽ꟳ(𝗚𝗲(l)) : FiniteFrameClass' α) := by
-  existsi { World := PUnit, Rel := λ _ _ => True };
+  existsi Frame.terminal;
   apply iff_definability_memAxiomSetFrameClass (AxiomSet.MultiGeach.definability l) |>.mpr;
-  exact MultiGeachConfluent.trivial_frame;
+  exact MultiGeachConfluent.terminal_frame;
 
 instance : FrameClass.IsNonempty (𝔽(𝗚𝗲(l)) : FrameClass' α) := inferInstance
 

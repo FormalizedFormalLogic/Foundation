@@ -581,19 +581,27 @@ abbrev CanonicalModel (L : DeductionParameter α) [Inhabited (MCT L)] : Model α
   Frame := CanonicalFrame L
   Valuation Ω a := (atom a) ∈ Ω.theory
 
+
 namespace CanonicalModel
 
-@[simp]
-lemma val_def [Inhabited (MCT L)] : (CanonicalModel L).Valuation Ω a ↔ (atom a) ∈ Ω.theory := by rfl
+variable [Inhabited (MCT L)]
+
+@[reducible]
+instance : Semantics (Formula α) (CanonicalModel L).World := instKripkeSemanticsFormulaWorld (CanonicalModel L)
+
+@[simp] lemma frame_def : (CanonicalModel L).Frame.Rel Ω₁ Ω₂ ↔ (□''⁻¹Ω₁.theory : Theory α) ⊆ Ω₂.theory := by rfl
+@[simp] lemma val_def : (CanonicalModel L).Valuation Ω a ↔ (atom a) ∈ Ω.theory := by rfl
 
 end CanonicalModel
+
 
 section
 
 variable [Inhabited (MCT L)]
 
-lemma truthlemma : ∀ {Ω : MCT L}, Kripke.Satisfies (CanonicalModel L) Ω p ↔ (p ∈ Ω.theory) := by
+lemma truthlemma : ∀ {Ω : (CanonicalModel L).World}, Ω ⊧ p ↔ (p ∈ Ω.theory) := by
   induction p using Formula.rec' with
+  | hatom a => simp [Kripke.Satisfies];
   | hbox p ih =>
     intro Ω;
     constructor;

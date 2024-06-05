@@ -236,9 +236,7 @@ def collect_dia_or : 𝓢 ⊢ ◇p ⋎ ◇q ⟶ ◇(p ⋎ q) := by
 def collect_dia_or' (h : 𝓢 ⊢ ◇p ⋎ ◇q) : 𝓢 ⊢ ◇(p ⋎ q) := collect_dia_or ⨀ h
 @[simp] lemma collect_dia_or'! (h : 𝓢 ⊢! ◇p ⋎ ◇q) : 𝓢 ⊢! ◇(p ⋎ q) := ⟨collect_dia_or' h.some⟩
 
--- TODO: おそらく`distribute_multidia_and!`と同様に証明可能だが，非常に遅いので一旦保留
--- @[simp] def distributeMultidiaAnd!: 𝓢 ⊢! ◇^[n](p ⋏ q) ⟶ ◇^[n]p ⋏ ◇^[n]q := by sorry;
-
+-- TODO: `distributeMultidiaAnd!` is computable but it's too slow, so leave it.
 @[simp] lemma distribute_multidia_and!: 𝓢 ⊢! ◇^[n](p ⋏ q) ⟶ ◇^[n]p ⋏ ◇^[n]q := by
   suffices h : 𝓢 ⊢! ~(□^[n](~(p ⋏ q))) ⟶ ~(□^[n](~p)) ⋏ ~(□^[n](~q)) by
     exact imp_trans! (imp_trans! (conj₁'! multidiaDuality!) h) $ andReplace! (conj₂'! multidiaDuality!) (conj₂'! multidiaDuality!);
@@ -251,9 +249,7 @@ def collect_dia_or' (h : 𝓢 ⊢ ◇p ⋎ ◇q) : 𝓢 ⊢ ◇(p ⋎ q) := coll
 @[simp] lemma distribute_dia_and! : 𝓢 ⊢! ◇(p ⋏ q) ⟶ ◇p ⋏ ◇q := distribute_multidia_and! (n := 1)
 
 
--- TODO: 同様に非常に遅い
--- def iffConj'multidiaMultidiaconj'! : 𝓢 ⊢ ◇^[n](Γ.conj') ⟶ (◇^[n]Γ).conj' := by sorry
-
+-- TODO: `iffConjMultidiaMultidiaconj'` is computable but it's too slow, so leave it.
 @[simp] lemma iff_conj'multidia_multidiaconj'! : 𝓢 ⊢! ◇^[n](Γ.conj') ⟶ (◇'^[n]Γ).conj' := by
   induction Γ using List.induction_with_singleton with
   | hnil => simpa using dhyp! verum!;

@@ -416,6 +416,9 @@ namespace CanonicalModel
 
 variable [Inhabited (SCT 𝓓)]
 
+@[reducible]
+instance : Semantics (Formula α) (CanonicalModel 𝓓).World := instKripkeSemanticsFormulaWorld (CanonicalModel 𝓓)
+
 @[simp] lemma frame_def {t₁ t₂ : SCT 𝓓} : (CanonicalModel 𝓓).Rel t₁ t₂ ↔ t₁.tableau.1 ⊆ t₂.tableau.1 := by rfl
 @[simp] lemma valuation_def {t : SCT 𝓓} {a : α} : (CanonicalModel 𝓓).Valuation t a ↔ (atom a) ∈ t.tableau.1 := by rfl
 
@@ -427,7 +430,7 @@ variable [Inhabited (SCT 𝓓)]
 
 variable {t : SCT 𝓓}
 
-lemma truthlemma : Kripke.Satisfies (CanonicalModel 𝓓) t p ↔ p ∈ t.tableau.1 := by
+lemma truthlemma {t : (CanonicalModel 𝓓).World} : t ⊧ p ↔ p ∈ t.tableau.1 := by
   induction p using rec' generalizing t with
   | himp p q ihp ihq =>
     constructor;

@@ -17,6 +17,8 @@ structure FiniteFrame extends Frame where
 
 instance (F : Frame) : Nonempty F.World := F.World_nonempty
 
+instance : CoeSort Frame (Type _) where coe := Frame.World
+
 set_option linter.unusedVariables false in
 abbrev Frame' (α : Type*) := Frame
 
@@ -42,6 +44,14 @@ protected abbrev Frame.RelItr (n : ℕ) {F : Frame} (w w' : F.World) : Prop := R
 
 scoped notation w:45 " ≺^[" n "] " w':46 => Frame.RelItr n w w'
 
+/-- Frame with single world and identiy relation -/
+abbrev Frame.terminal : FiniteFrame := { World := PUnit, Rel := λ _ _ => True }
+
+@[simp]
+lemma Frame.terminal.relItr : Frame.RelItr n (F := Frame.terminal.toFrame) x y ↔ x = y := by
+  induction n with
+  | zero => simp;
+  | succ n ih => simp; use x; simp [ih];
 
 abbrev FrameClass := Set Frame
 
@@ -81,7 +91,7 @@ structure Model (α) where
   Valuation : Valuation Frame.World α
 
 abbrev Model.World (M : Model α) := M.Frame.World
-
+instance : CoeSort (Model α) (Type _) where coe := Model.World
 
 end Kripke
 
@@ -98,9 +108,9 @@ def Formula.Kripke.Satisfies (M : Kripke.Model α) (w : M.World) : Formula α �
   | imp p q => ¬(Kripke.Satisfies M w p) ∨ (Kripke.Satisfies M w q)
   | box p   => ∀ w', w ≺ w' → (Kripke.Satisfies M w' p)
 
-namespace Formula.Kripke.Satisfies
+instance instKripkeSemanticsFormulaWorld (M : Model α) : Semantics (Formula α) (M.World) := ⟨fun w ↦ Formula.Kripke.Satisfies M w⟩
 
-instance (M : Model α) : Semantics (Formula α) (M.World) := ⟨fun w ↦ Formula.Kripke.Satisfies M w⟩
+namespace Formula.Kripke.Satisfies
 
 variable {M : Model α} {w : M.World} {p q : Formula α}
 
@@ -108,7 +118,7 @@ variable {M : Model α} {w : M.World} {p q : Formula α}
 
 local infix:45 " ⊩ " => Formula.Kripke.Satisfies M
 
-@[simp] lemma atom_def : w ⊩ atom a ↔ M.Valuation w a := by simp [Satisfies];
+@[simp] lemma atom_def : w ⊧ atom a ↔ M.Valuation w a := by simp [Satisfies];
 @[simp] lemma top_def  : w ⊩ ⊤ ↔ True := by simp [Satisfies];
 @[simp] lemma bot_def  : w ⊩ ⊥ ↔ False := by simp [Satisfies];
 @[simp] lemma and_def  : w ⊩ p ⋏ q ↔ w ⊩ p ∧ w ⊩ q := by simp [Satisfies];
@@ -313,7 +323,7 @@ instance [definability : FiniteDefinability Ax P] : FiniteDefinability (𝗞 ∪
 
 instance : FiniteFrameClass.IsNonempty (𝔽ꟳ(𝗞) : FiniteFrameClass' α) where
   nonempty := by
-    existsi { World := PUnit, Rel := λ _ _ => True };
+    existsi Frame.terminal;
     apply iff_finiteDefinability_memFiniteFrameClass AxiomSet.K.finiteDefinability |>.mpr;
     trivial;
 

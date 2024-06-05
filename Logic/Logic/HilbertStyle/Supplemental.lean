@@ -213,15 +213,14 @@ def impSwap : 𝓢 ⊢ (p ⟶ q ⟶ r) ⟶ (q ⟶ p ⟶ r) := deduct' $ impSwap'
 @[simp] lemma imp_swap! : 𝓢 ⊢! (p ⟶ q ⟶ r) ⟶ (q ⟶ p ⟶ r) := ⟨impSwap⟩
 
 
--- TODO: Need refactor because too slow
--- set_option trace.profiler true in
-def dnDistributeImply : 𝓢 ⊢ ~~(p ⟶ q) ⟶ (~~p ⟶ ~~q) := by
+-- TODO: Actually this can be computable but it's too slow.
+noncomputable def dnDistributeImply : 𝓢 ⊢ ~~(p ⟶ q) ⟶ (~~p ⟶ ~~q) := by
   apply impSwap';
   apply deduct';
   exact impTrans (contra₀x2' $ deductInv $ of $ impSwap' $ contra₀x2) tne;
 @[simp] lemma dn_distribute_imply! : 𝓢 ⊢! ~~(p ⟶ q) ⟶ (~~p ⟶ ~~q) := ⟨dnDistributeImply⟩
 
-def dnDistributeImply' (b : 𝓢 ⊢ ~~(p ⟶ q)) : 𝓢 ⊢ ~~p ⟶ ~~q := dnDistributeImply ⨀ b
+noncomputable def dnDistributeImply' (b : 𝓢 ⊢ ~~(p ⟶ q)) : 𝓢 ⊢ ~~p ⟶ ~~q := dnDistributeImply ⨀ b
 lemma dn_distribute_imply'! (b : 𝓢 ⊢! ~~(p ⟶ q)) : 𝓢 ⊢! ~~p ⟶ ~~q := ⟨dnDistributeImply' b.some⟩
 
 
@@ -274,20 +273,18 @@ def demorgan₃' (b : 𝓢 ⊢ ~(p ⋎ q)) : 𝓢 ⊢ ~p ⋏ ~q := demorgan₃ �
 lemma demorgan₃'! (b : 𝓢 ⊢! ~(p ⋎ q)) : 𝓢 ⊢! ~p ⋏ ~q := ⟨demorgan₃' b.some⟩
 
 
--- TODO: Need refactor because too slow
--- set_option trace.profiler true in
-def demorgan₄ [HasDNE 𝓢] : 𝓢 ⊢ ~(p ⋏ q) ⟶ (~p ⋎ ~q) := by
+-- TODO: Actually this can be computable but it's too slow.
+noncomputable def demorgan₄ [HasDNE 𝓢] : 𝓢 ⊢ ~(p ⋏ q) ⟶ (~p ⋎ ~q) := by
   apply contra₂';
   apply deduct';
   exact andReplace' (demorgan₃' $ FiniteContext.id) dne dne;
 @[simp] lemma demorgan₄! [HasDNE 𝓢] : 𝓢 ⊢! ~(p ⋏ q) ⟶ (~p ⋎ ~q) := ⟨demorgan₄⟩
 
-def demorgan₄' [HasDNE 𝓢] (b : 𝓢 ⊢ ~(p ⋏ q)) : 𝓢 ⊢ ~p ⋎ ~q := demorgan₄ ⨀ b
+noncomputable def demorgan₄' [HasDNE 𝓢] (b : 𝓢 ⊢ ~(p ⋏ q)) : 𝓢 ⊢ ~p ⋎ ~q := demorgan₄ ⨀ b
 lemma demorgan₄'! [HasDNE 𝓢] (b : 𝓢 ⊢! ~(p ⋏ q)) : 𝓢 ⊢! ~p ⋎ ~q := ⟨demorgan₄' b.some⟩
 
--- TODO: Need refactor because too slow
--- set_option trace.profiler true in
-def NotOrOfImply' [HasDNE 𝓢] (d : 𝓢 ⊢ p ⟶ q) : 𝓢 ⊢ ~p ⋎ q := by
+-- TODO: Actually this can be computable but it's too slow.
+noncomputable def NotOrOfImply' [HasDNE 𝓢] (d : 𝓢 ⊢ p ⟶ q) : 𝓢 ⊢ ~p ⋎ q := by
   apply dne';
   rw [NegDefinition.neg];
   apply deduct';
@@ -297,9 +294,8 @@ def NotOrOfImply' [HasDNE 𝓢] (d : 𝓢 ⊢ p ⟶ q) : 𝓢 ⊢ ~p ⋎ q := by
   exact d₂ ⨀ d₃;
 lemma NotOrOfImply'! [HasDNE 𝓢] (d : 𝓢 ⊢! p ⟶ q) : 𝓢 ⊢! ~p ⋎ q := ⟨NotOrOfImply' d.some⟩
 
--- TODO: Need refactor because too slow
--- set_option trace.profiler true in
-def dnCollectImply [HasEFQ 𝓢] : 𝓢 ⊢ (~~p ⟶ ~~q) ⟶ ~~(p ⟶ q) := by
+-- TODO: Actually this can be computable but it's too slow.
+noncomputable def dnCollectImply [HasEFQ 𝓢] : 𝓢 ⊢ (~~p ⟶ ~~q) ⟶ ~~(p ⟶ q) := by
   apply deduct';
   nth_rw 5 [NegDefinition.neg];
   exact impTrans
@@ -316,7 +312,8 @@ def dnCollectImply [HasEFQ 𝓢] : 𝓢 ⊢ (~~p ⟶ ~~q) ⟶ ~~(p ⟶ q) := by
 
 @[simp] lemma dn_collect_imply! [HasEFQ 𝓢] : 𝓢 ⊢! (~~p ⟶ ~~q) ⟶ ~~(p ⟶ q) := ⟨dnCollectImply⟩
 
-def dnCollectImply' [HasEFQ 𝓢] (b : 𝓢 ⊢ ~~p ⟶ ~~q) : 𝓢 ⊢ ~~(p ⟶ q) := dnCollectImply ⨀ b
+-- TODO: Actually this can be computable but it's too slow.
+noncomputable def dnCollectImply' [HasEFQ 𝓢] (b : 𝓢 ⊢ ~~p ⟶ ~~q) : 𝓢 ⊢ ~~(p ⟶ q) := dnCollectImply ⨀ b
 lemma dn_collect_imply'! [HasEFQ 𝓢] (b : 𝓢 ⊢! ~~p ⟶ ~~q) : 𝓢 ⊢! ~~(p ⟶ q) := ⟨dnCollectImply' b.some⟩
 
 
@@ -617,7 +614,8 @@ instance [HasDNE 𝓢] : HasEFQ 𝓢 where
 
 def dneOr [HasDNE 𝓢] (d : 𝓢 ⊢ ~~p ⋎ ~~q) : 𝓢 ⊢ p ⋎ q := disj₃' (impTrans dne disj₁) (impTrans dne disj₂) d
 
-instance [HasDNE 𝓢] : HasLEM 𝓢 where
+-- TODO: Actually this can be computable but it's too slow.
+noncomputable instance [HasDNE 𝓢] : HasLEM 𝓢 where
   lem _ := dneOr $ NotOrOfImply' dni
 
 instance [HasEFQ 𝓢] [HasLEM 𝓢] : HasDNE 𝓢 where

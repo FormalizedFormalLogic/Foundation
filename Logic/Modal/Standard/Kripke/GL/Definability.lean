@@ -23,10 +23,9 @@ private lemma AxiomSet.L.definability.implies_transitive : F ⊧* 𝗟 → Trans
   constructor;
   . intro x hx h;
     by_cases hx₂ : x = w₂;
-    . subst hx₂; simpa using h w₃ r₂₃;
-    . by_cases hx₃ : x = w₃ <;> simp_all [hx₃];
-  . existsi w₂;
-    simpa;
+    . subst hx₂; simpa [Satisfies] using h w₃ r₂₃;
+    . by_cases hx₃ : x = w₃ <;> simp_all [Satisfies, hx₃];
+  . existsi w₂; simpa [Satisfies];
 
 private lemma AxiomSet.L.definability.implies_cwf  : F ⊧* 𝗟 → ConverseWellFounded F.Rel := by
   contrapose;
@@ -41,13 +40,13 @@ private lemma AxiomSet.L.definability.implies_cwf  : F ⊧* 𝗟 → ConverseWel
     by_cases hxs : x ∈ X
     . obtain ⟨y, hy₁, hy₂⟩ := hX₂ x hxs;
       intro h;
-      exact h x (by aesop);
+      exact h x (by simp_all only [Satisfies]);
     . aesop;
   . obtain ⟨w', hw'₁, hw'₂⟩ := hX₂ hX₁.some (by apply Set.Nonempty.some_mem);
     existsi w';
     constructor;
     . simpa using hw'₂;
-    . simpa;
+    . simpa [Satisfies];
 
 private lemma AxiomSet.L.definability.impliedby : (Transitive F.Rel ∧ ConverseWellFounded F.Rel) → F ⊧* 𝗟 := by
   rintro ⟨hTrans, hWF⟩;

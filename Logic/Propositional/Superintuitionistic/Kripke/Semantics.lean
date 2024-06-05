@@ -42,6 +42,7 @@ structure Model (α) where
   hereditary : ∀ {w₁ w₂}, (w₁ ≺ w₂) → ∀ {a}, (Valuation w₁ a) → (Valuation w₂ a)
 
 abbrev Model.World (M : Model α) := M.Frame.World
+instance : CoeSort (Model α) (Type u) where coe := Model.World
 
 abbrev Model.Rel (M : Model α) := M.Frame.Rel
 
@@ -88,7 +89,7 @@ def Formula.Kripke.Satisfies (M : Kripke.Model α) (w : M.World) : Formula α �
   | p ⋎ q  => Satisfies M w p ∨ Satisfies M w q
   | p ⟶ q => ∀ {w'}, (w ≺ w') → (¬Satisfies M w' p ∨ Satisfies M w' q)
 
-instance (M : Model α) : Semantics (Formula α) (M.World) := ⟨fun w ↦ Formula.Kripke.Satisfies M w⟩
+instance instKripkeSemanticsFormulaWorld (M : Model α) : Semantics (Formula α) (M.World) := ⟨fun w ↦ Formula.Kripke.Satisfies M w⟩
 
 open Formula.Kripke
 
