@@ -199,8 +199,8 @@ As a general term for various modal logics commonly known as $\bf K$, $\bf S4$, 
 > [!NOTE]
 > Be cautious similar notations for different concepts.
 > We use $\TeX$ notation for concept that unrelated to our formalization, and code block \`\` for related our formalization.
-> - $\sf K$ (\`\sf K`\) is axiom schema unrelated to formalization.
-> - $\bf K$ (\`\bf K\`) is logic urelated to formalization.
+> - $\sf K$ (`\sf K`) is axiom schema unrelated to formalization.
+> - $\bf K$ (`\bf K`) is logic urelated to formalization.
 > - `𝗞` (Mathematical Sans-Serif Bold) is `AxiomSet` in formalization.
 > - `𝐊` (Mathematical Bold Capital) is `DeductionParameter` in formalization.
 
