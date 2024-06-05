@@ -1,6 +1,8 @@
+import Logic.Vorspiel.Collection
 import Logic.Modal.LogicSymbol
+import Logic.Modal.Standard.System
 
-namespace LO.Modal.Normal
+namespace LO.Modal.Standard
 
 inductive Formula (α : Type u) : Type u where
   | atom   : α → Formula α
@@ -186,21 +188,58 @@ def isBox : Formula α → Bool
 
 end Formula
 
-abbrev Theory (α : Type u) := Set (Formula α)
+abbrev Theory (α) := Set (Formula α)
 
-abbrev Context (α : Type u) := Finset (Formula α)
+instance : Collection (Formula α) (Theory α) := inferInstance
 
-namespace Context
 
-variable [DecidableEq α]
-variable (Γ : Context α)
+abbrev AxiomSet (α) := Set (Formula α)
 
-@[simp] noncomputable def conj : Formula α := Finset.conj Γ
-prefix:75 "⋀" => conj
+namespace AxiomSet
 
-@[simp] noncomputable def disj : Formula α := Finset.disj Γ
-prefix:75 "⋁" => disj
+open System
 
-end Context
+variable {p q : Formula α}
 
-end LO.Modal.Normal
+protected abbrev K : AxiomSet α := { Axioms.K p q | (p) (q) }
+notation "𝗞" => AxiomSet.K
+
+protected abbrev T : AxiomSet α := { Axioms.T p | p }
+notation "𝗧" => AxiomSet.T
+
+protected abbrev B : AxiomSet α := { Axioms.B p | p }
+notation "𝗕" => AxiomSet.B
+
+protected abbrev D : AxiomSet α := { Axioms.D p | p }
+notation "𝗗" => AxiomSet.D
+
+protected abbrev Four : AxiomSet α := { Axioms.Four p | p }
+notation "𝟰" => AxiomSet.Four
+
+protected abbrev Five : AxiomSet α := { Axioms.Five p | p }
+notation "𝟱" => AxiomSet.Five
+
+protected abbrev L : AxiomSet α := { Axioms.L p | p }
+notation "𝗟" => AxiomSet.L
+
+protected abbrev Dot2 : AxiomSet α := { Axioms.Dot2 p | p }
+notation ".𝟮" => AxiomSet.Dot2
+
+protected abbrev Dot3 : AxiomSet α := { Axioms.Dot3 p q | (p) (q) }
+notation ".𝟯" => AxiomSet.Dot3
+
+protected abbrev Grz : AxiomSet α := { Axioms.Grz p | p }
+notation "𝗚𝗿𝘇" => AxiomSet.Grz
+
+protected abbrev M : AxiomSet α := { Axioms.M p | p }
+notation "𝗠" => AxiomSet.M
+
+protected abbrev CD : AxiomSet α := { Axioms.CD p | p }
+notation "𝗖𝗗" => AxiomSet.CD
+
+protected abbrev C4 : AxiomSet α := { Axioms.C4 p | p }
+notation "𝗖𝟰" => AxiomSet.C4
+
+end AxiomSet
+
+end LO.Modal.Standard

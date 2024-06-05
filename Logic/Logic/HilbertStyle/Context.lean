@@ -67,9 +67,11 @@ notation Γ:45 " ⊢[" 𝓢 "]*! " s:46 => ProvableSet 𝓢 Γ s
 
 lemma system_def (Γ : FiniteContext F 𝓢) (p : F) : (Γ ⊢ p) = (𝓢 ⊢ Γ.conj ⟶ p) := rfl
 
-def of {Γ : List F} {p : F} (b : 𝓢 ⊢ Γ.conj ⟶ p) : Γ ⊢[𝓢] p := b
+def ofDef {Γ : List F} {p : F} (b : 𝓢 ⊢ Γ.conj ⟶ p) : Γ ⊢[𝓢] p := b
 
-def toₛ {Γ : List F} {p : F} (b : Γ ⊢[𝓢] p) : 𝓢 ⊢ Γ.conj ⟶ p := b
+def toDef {Γ : List F} {p : F} (b : Γ ⊢[𝓢] p) : 𝓢 ⊢ Γ.conj ⟶ p := b
+
+lemma toₛ! (b : Γ ⊢[𝓢]! p) : 𝓢 ⊢! Γ.conj ⟶ p := b
 
 lemma provable_iff {p : F} : Γ ⊢[𝓢]! p ↔ 𝓢 ⊢! Γ.conj ⟶ p := iff_of_eq rfl
 
@@ -87,55 +89,83 @@ instance : Compact (FiniteContext F 𝓢) where
   φ_subset := by simp
   φ_finite := by rintro ⟨Γ⟩; simp [Collection.Finite, Collection.set]
 
-def byAxm {p} (h : p ∈ Γ) : Γ ⊢[𝓢] p := Axiomatized.prfAxm (by simpa)
+def byAxm {p} (h : p ∈ Γ := by simp) : Γ ⊢[𝓢] p := Axiomatized.prfAxm (by simpa)
 
-lemma by_axm! {p} (h : p ∈ Γ) : Γ ⊢[𝓢]! p := Axiomatized.provable_axm _ (by simpa)
+lemma by_axm! {p} (h : p ∈ Γ := by simp) : Γ ⊢[𝓢]! p := Axiomatized.provable_axm _ (by simpa)
 
 def weakening (h : Γ ⊆ Δ) {p} : Γ ⊢[𝓢] p → Δ ⊢[𝓢] p := Axiomatized.weakening (by simpa)
 
 lemma weakening! (h : Γ ⊆ Δ) {p} : Γ ⊢[𝓢]! p → Δ ⊢[𝓢]! p := fun h ↦ Axiomatized.le_of_subset (by simpa) h
 
-def of' {p : F} (b : 𝓢 ⊢ p) : Γ ⊢[𝓢] p := dhyp Γ.conj b
+def of {p : F} (b : 𝓢 ⊢ p) : Γ ⊢[𝓢] p := dhyp Γ.conj b
 
 def emptyPrf {p : F} : [] ⊢[𝓢] p → 𝓢 ⊢ p := fun b ↦ b ⨀ verum
 
 def provable_iff_provable {p : F} : 𝓢 ⊢! p ↔ [] ⊢[𝓢]! p :=
-  ⟨fun b ↦ ⟨of' b.some⟩, fun b ↦ ⟨emptyPrf b.some⟩⟩
+  ⟨fun b ↦ ⟨of b.some⟩, fun b ↦ ⟨emptyPrf b.some⟩⟩
+
+lemma of'! (h : 𝓢 ⊢! p) : Γ ⊢[𝓢]! p := weakening! (by simp) $ provable_iff_provable.mp h
+
+def id : [p] ⊢[𝓢] p := byAxm
+
+@[simp] lemma id! : [p] ⊢[𝓢]! p := by_axm!
 
 instance minimal (Γ : FiniteContext F 𝓢) : Minimal Γ where
   mdp := mdp₁
-  verum := of' verum
-  imply₁ := fun _ _ ↦ of' imply₁
-  imply₂ := fun _ _ _ ↦ of' imply₂
-  conj₁ := fun _ _ ↦ of' conj₁
-  conj₂ := fun _ _ ↦ of' conj₂
-  conj₃ := fun _ _ ↦ of' conj₃
-  disj₁ := fun _ _ ↦ of' disj₁
-  disj₂ := fun _ _ ↦ of' disj₂
-  disj₃ := fun _ _ _ ↦ of' disj₃
+  verum := of verum
+  imply₁ := fun _ _ ↦ of imply₁
+  imply₂ := fun _ _ _ ↦ of imply₂
+  conj₁ := fun _ _ ↦ of conj₁
+  conj₂ := fun _ _ ↦ of conj₂
+  conj₃ := fun _ _ ↦ of conj₃
+  disj₁ := fun _ _ ↦ of disj₁
+  disj₂ := fun _ _ ↦ of disj₂
+  disj₃ := fun _ _ _ ↦ of disj₃
 
 def mdp' (bΓ : Γ ⊢[𝓢] p ⟶ q) (bΔ : Δ ⊢[𝓢] p) : (Γ ++ Δ) ⊢[𝓢] q := wk (by simp) bΓ ⨀ wk (by simp) bΔ
 
 def deduct {p q : F} {Γ : List F} : (p :: Γ) ⊢[𝓢] q → Γ ⊢[𝓢] p ⟶ q := fun b ↦
-  of <| andLeft (andImplyIffImplyImply Γ.conj p q) ⨀ impTrans (andComm Γ.conj p) (toₛ b)
+  ofDef <| andLeft (andImplyIffImplyImply Γ.conj p q) ⨀ impTrans (andComm Γ.conj p) (toDef b)
+
+lemma deduct! (h : (p :: Γ) ⊢[𝓢]! q) :  Γ ⊢[𝓢]! p ⟶ q  := ⟨FiniteContext.deduct h.some⟩
+
 
 def deductInv {p q : F} {Γ : List F} : Γ ⊢[𝓢] p ⟶ q → (p :: Γ) ⊢[𝓢] q := fun b ↦
-  of <| impTrans (andComm p Γ.conj) <| andRight (andImplyIffImplyImply Γ.conj p q) ⨀ toₛ b
+  ofDef <| impTrans (andComm p Γ.conj) <| andRight (andImplyIffImplyImply Γ.conj p q) ⨀ toDef b
+
+lemma deductInv! (h : Γ ⊢[𝓢]! p ⟶ q) : (p :: Γ) ⊢[𝓢]! q := ⟨FiniteContext.deductInv h.some⟩
+
 
 lemma deduct_iff {p q : F} {Γ : List F} : Γ ⊢[𝓢]! p ⟶ q ↔ (p :: Γ) ⊢[𝓢]! q :=
   ⟨fun h ↦ ⟨deductInv h.some⟩, fun h ↦ ⟨deduct h.some⟩⟩
+
+
+def deduct' : [p] ⊢[𝓢] q → 𝓢 ⊢ p ⟶ q := fun b ↦ emptyPrf <| deduct b
+
+lemma deduct'! (h : [p] ⊢[𝓢]! q) : 𝓢 ⊢! p ⟶ q := ⟨FiniteContext.deduct' h.some⟩
+
+
+def deductInv' : 𝓢 ⊢ p ⟶ q → [p] ⊢[𝓢] q := fun b ↦ deductInv <| of b
+
+lemma deductInv'! (h : 𝓢 ⊢! p ⟶ q) : [p] ⊢[𝓢]! q := ⟨FiniteContext.deductInv' h.some⟩
+
 
 instance deduction : Deduction (FiniteContext F 𝓢) where
   ofInsert := deduct
   inv := deductInv
 
-instance [HasEFQ 𝓢] (Γ : FiniteContext F 𝓢) : HasEFQ Γ := ⟨fun _ ↦ of' efq⟩
+instance : StrongCut (FiniteContext F 𝓢) (FiniteContext F 𝓢) :=
+  ⟨fun {Γ Δ _} bΓ bΔ ↦
+    have : Γ ⊢ Δ.conj := conjIntro _ (fun _ hp ↦ bΓ hp)
+    ofDef <| impTrans (toDef this) (toDef bΔ)⟩
 
-instance [HasWeakLEM 𝓢] (Γ : FiniteContext F 𝓢) : HasWeakLEM Γ := ⟨fun p ↦ of' (HasWeakLEM.wlem p)⟩
+instance [HasEFQ 𝓢] (Γ : FiniteContext F 𝓢) : HasEFQ Γ := ⟨fun _ ↦ of efq⟩
 
-instance [Dummett 𝓢] (Γ : FiniteContext F 𝓢) : Dummett Γ := ⟨fun p q ↦ of' (Dummett.dummett p q)⟩
+instance [HasWeakLEM 𝓢] (Γ : FiniteContext F 𝓢) : HasWeakLEM Γ := ⟨fun p ↦ of (HasWeakLEM.wlem p)⟩
 
-instance [HasDNE 𝓢] (Γ : FiniteContext F 𝓢) : HasDNE Γ := ⟨fun p ↦ of' (HasDNE.dne p)⟩
+instance [HasGD 𝓢] (Γ : FiniteContext F 𝓢) : HasGD Γ := ⟨fun p q ↦ of (HasGD.GD p q)⟩
+
+instance [HasDNE 𝓢] (Γ : FiniteContext F 𝓢) : HasDNE Γ := ⟨fun p ↦ of (HasDNE.dne p)⟩
 
 instance [HasEFQ 𝓢] : DeductiveExplosion (FiniteContext F 𝓢) := inferInstance
 
@@ -256,7 +286,9 @@ instance deduction : Deduction (Context F 𝓢) where
   ofInsert := deduct
   inv := deductInv
 
-def of {p : F} (b : 𝓢 ⊢ p) : Γ *⊢[𝓢] p := ⟨[], by simp, FiniteContext.of' b⟩
+def of {p : F} (b : 𝓢 ⊢ p) : Γ *⊢[𝓢] p := ⟨[], by simp, FiniteContext.of b⟩
+
+lemma of! (b : 𝓢 ⊢! p) : Γ *⊢[𝓢]! p := ⟨Context.of b.some⟩
 
 def mdp {Γ : Set F} (bpq : Γ *⊢[𝓢] p ⟶ q) (bp : Γ *⊢[𝓢] p) : Γ *⊢[𝓢] q :=
   ⟨ bpq.ctx ++ bp.ctx, by
@@ -264,6 +296,8 @@ def mdp {Γ : Set F} (bpq : Γ *⊢[𝓢] p ⟶ q) (bp : Γ *⊢[𝓢] p) : Γ *
     · exact bpq.subset r hr
     · exact bp.subset r hr,
     FiniteContext.mdp' bpq.prf bp.prf ⟩
+
+lemma by_axm! (h : p ∈ Γ) : Γ *⊢[𝓢]! p := System.by_axm _ (by simpa)
 
 instance minimal (Γ : Context F 𝓢) : Minimal Γ where
   mdp := mdp
@@ -281,7 +315,7 @@ instance [HasEFQ 𝓢] (Γ : Context F 𝓢) : HasEFQ Γ := ⟨fun _ ↦ of efq�
 
 instance [HasWeakLEM 𝓢] (Γ : Context F 𝓢) : HasWeakLEM Γ := ⟨fun p ↦ of (HasWeakLEM.wlem p)⟩
 
-instance [Dummett 𝓢] (Γ : Context F 𝓢) : Dummett Γ := ⟨fun p q ↦ of (Dummett.dummett p q)⟩
+instance [HasGD 𝓢] (Γ : Context F 𝓢) : HasGD Γ := ⟨fun p q ↦ of (HasGD.GD p q)⟩
 
 instance [HasDNE 𝓢] (Γ : Context F 𝓢) : HasDNE Γ := ⟨fun p ↦ of (HasDNE.dne p)⟩
 
