@@ -98,7 +98,7 @@ lemma consistent_either (p : Formula α) : (𝓓)-Consistent ((insert p t.1), t.
 
 lemma disjoint_of_consistent : Disjoint t.1 t.2 := by
   by_contra h;
-  obtain ⟨T, hp₂, hp₁, hp⟩ := by simpa [Disjoint] using h;
+  obtain ⟨T, hp₁, hp₂, hp⟩ := by simpa [Disjoint] using h;
   obtain ⟨p, hp, _⟩ := Set.not_subset.mp hp;
   simp [ParametricConsistent] at hCon;
   have : 𝓓 ⊬! [p].conj' ⟶ [p].disj' := hCon

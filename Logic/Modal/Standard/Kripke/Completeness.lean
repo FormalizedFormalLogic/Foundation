@@ -192,8 +192,8 @@ lemma exists_maximal_Lconsistent_theory
   ) T consisT
 
 
+open Classical in
 lemma intro_union_ParametricConsistent (h : ∀ {Γ₁ Γ₂ : List (Formula α)}, (∀ p ∈ Γ₁, p ∈ T₁) → (∀ p ∈ Γ₂, p ∈ T₂) → L ⊬! Γ₁.conj' ⋏ Γ₂.conj' ⟶ ⊥) : (L)-Consistent (T₁ ∪ T₂) := by
-  classical!;
   intro Δ hΔ;
   simp at hΔ;
   let Δ₁ := (Δ.filter (· ∈ T₁));

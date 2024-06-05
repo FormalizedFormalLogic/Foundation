@@ -99,7 +99,7 @@ instance [IncludeK L] : System.HasAxiomK L where
 
 instance [Normal L] : System.K L where
 
-lemma inducition_with_nec [HasNec L]
+noncomputable def inducition_with_nec [HasNec L]
   {motive  : (p : Formula α) → Deduction L p → Sort*}
   (hMaxm   : ∀ {p}, (h : p ∈ Ax(L)) → motive p (maxm h))
   (hMdp    : ∀ {p q}, (hpq : L ⊢ p ⟶ q) → (hp : L ⊢ p) → motive (p ⟶ q) hpq → motive p hp → motive q (hpq ⨀ hp))

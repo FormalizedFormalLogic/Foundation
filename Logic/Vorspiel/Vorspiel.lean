@@ -609,7 +609,27 @@ lemma append_subset_append {l₁ l₂ l : List α} (h : l₁ ⊆ l₂) : l₁ ++
 
 lemma subset_of_eq {l₁ l₂ : List α} (e : l₁ = l₂) : l₁ ⊆ l₂ := by simp[e]
 
-/-
+lemma empty_def {Γ : List α} : Γ = [] ↔ ∀ p, p ∉ Γ := by sorry; -- induction Γ <;> simp_all;
+
+-- port from https://github.com/leanprover-community/mathlib4/pull/11846/files#diff-5ae50e1b506c7ca8eacfd46f04e0d246916c48ce462d44b5512cfba169525bfe
+
+def remove [DecidableEq α] (a : α) : List α → List α
+  | [] => []
+  | (b :: bs) => if a = b then remove a bs else b :: remove a bs
+
+@[simp]
+lemma eq_remove_cons [DecidableEq α] {l : List α} : (q :: l).remove q = l.remove q := by induction l <;> simp_all [List.remove];
+
+@[simp]
+lemma remove_singleton_of_ne [DecidableEq α] {p q : α} (h : p ≠ q) : [p].remove q = [p] := by simp [List.remove]; aesop;
+
+lemma mem_remove_iff [DecidableEq α] {a b : α} {as : List α} : b ∈ as.remove a ↔ b ∈ as ∧ b ≠ a := by
+  induction as with
+  | nil => simp [List.remove];
+  | cons h t ih => sorry;
+
+lemma mem_of_mem_remove [DecidableEq α] {a b : α} {as : List α} (h : b ∈ remove a as) : b ∈ as := by
+  rw [mem_remove_iff] at h; exact h.1
 
 @[simp] lemma remove_cons_self [DecidableEq α] (l : List α) (a) :
   (a :: l).remove a = l.remove a := by simp[remove]
@@ -636,8 +656,6 @@ lemma remove_map_substet_map_remove [DecidableEq α] [DecidableEq β] (f : α �
   simp[List.subset_def, List.mem_remove_iff]
   intro b hb neb;
   exact ⟨b, ⟨hb, by rintro rfl; exact neb rfl⟩, rfl⟩
-
--/
 
 end List
 
