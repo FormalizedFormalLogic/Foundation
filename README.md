@@ -12,17 +12,11 @@ https://iehality.github.io/lean4-logic/
   - [Classical Propositional Logic](#classical-propositional-logic)
     - [Definition](#definition)
     - [Theorem](#theorem)
-  - [Intuitionistic Propositional Logic](#intuitionistic-propositional-logic)
-    - [Definitions](#definitions)
-    - [Kripkean Semantics](#kripkean-semantics)
-      - [Defininitions](#defininitions)
-      - [Theorems](#theorems)
   - [First-Order Logic](#first-order-logic)
     - [Definition](#definition-1)
     - [Theorem](#theorem-1)
-  - [Normal Modal Logic](#normal-modal-logic)
-    - [Definition](#definition-2)
-    - [Theorem](#theorem-2)
+  - [Superintuitionistic Propositional Logic](#superintuitionistic-propositional-logic): Intuitionistic propositional logic and some variants.
+  - [Standard Modal Logic](#standard-modal-logic): Propositional logic extended modal operators $\Box$ and $\Diamond$ .
   - [References](#references)
 
 ## Usage
@@ -80,43 +74,6 @@ The key results are summarised in `Logic/Summary.lean`.
       {T : LO.Propositional.Theory α}
       {p : LO.Propositional.Formula α} :
       T ⊨ p → T ⊢ p
-  ```
-
-## Intuitionistic Propositional Logic
-
-### Definitions
-
-|                                   |                                            | Definition                                 |   Notation   |
-| :-------------------------------: | ------------------------------------------ | :----------------------------------------- | :----------: |
-| $\Gamma \vdash \varphi$       | Deduction　 | LO.Propositional.Intuitionistic.Deduction | `Γ ⊢ⁱ p` |
-| | Deductive (Exists deduction) | LO.Propositional.Intuitionistic.Deductive | `Γ ⊢ⁱ! p` |
-
-### Kripkean Semantics
-
-#### Defininitions
-
-|                                   |                                            | Definition                                 |   Notation   |
-| :-------------------------------: | ------------------------------------------ | :----------------------------------------- | :----------: |
-| $w \Vdash^M \varphi$       | Satisfy on Kripkean Model $M$ and its world $w$　 | LO.Propositional.Intuitionistic.Formula.KripkeSatisfies | `w ⊩[M] p` |
-| $M \vDash \varphi$        | Models                    | LO.Propositional.Intuitionistic.Formula.KripkeModels |  `M ⊧ p`  |
-| $\Gamma \models \varphi$        | Conequences                    | LO.Propositional.Intuitionistic.Formula.KripkeConsequence |  `Γ ⊨ⁱ p`  |
-
-#### Theorems
-- [Soundness](https://iehality.github.io/lean4-logic/Logic/Propositional/Intuitionistic/Kripke/Soundness.html#LO.Propositional.Intuitionistic.Kripke.sounds)
-  ```lean
-  theorem Kripke.sounds {Γ : Theory β} {p : Formula β} : (Γ ⊢ⁱ! p) → (Γ ⊨ⁱ p)
-  ```
-- [Completeness](https://iehality.github.io/lean4-logic/Logic/Propositional/Intuitionistic/Kripke/Completeness.html#LO.Propositional.Intuitionistic.Kripke.completes)
-  ```lean
-  theorem Kripke.completes
-    [DecidableEq β] [Encodable β]
-    {Γ : Theory β} {p : Formula β} : (Γ ⊨ⁱ p) → (Γ ⊢ⁱ! p)
-  ```
-- [Disjunction Property](https://iehality.github.io/lean4-logic/Logic/Propositional/Intuitionistic/Kripke/Completeness.html#LO.Propositional.Intuitionistic.Deduction.disjunctive)
-  ```lean
-  theorem Deduction.disjunctive
-    [DecidableEq β] [Encodable β]
-    {p q : Formula β} : (∅ ⊢ⁱ! p ⋎ q) → (∅ ⊢ⁱ! p) ∨ (∅ ⊢ⁱ! q)
   ```
 
 ## First-Order Logic
@@ -188,6 +145,31 @@ The key results are summarised in `Logic/Summary.lean`.
         T ⊬ ~LO.FirstOrder.Arith.FirstIncompleteness.undecidable T
     ```
 
+## Superintuitionistic Propositional Logic
+
+Assigned to: [@SnO2WMaN](https://github.com/SnO2WMaN)
+
+### Axioms
+
+### Deduction System
+
+Our Hilbert-style deduction system for propositional logic is designed to take parameters.
+These parameters are as follows.
+
+```lean
+structure DeductionParameter (α) where
+  axiomSet : AxiomSet α
+```
+
+- `axiomSet` is set of formula (aximos), For example, `𝗘𝗙𝗤`, `𝗘𝗙𝗤 ∪ 𝗟𝗘𝗠`.
+
+In this formalization, logics that we usually refer to as $\bf Int$ (Intuitionistic Propositional Logic), $\bf Cl$ (Classical Propositional Logic), etc. is characterized by deduction parameter.
+
+| Notation | Name | Axioms |
+| :-: | :-: | :-- |
+| `𝐈𝐧𝐭` | Intuitionistic | `𝗘𝗙𝗤`|
+| `𝐂𝐥` | Classical | `𝗘𝗙𝗤 ∪ 𝗟𝗘𝗠` |
+
 ## Standard Modal Logic
 
 Assigned to: [@SnO2WMaN](https://github.com/SnO2WMaN)
@@ -218,6 +200,24 @@ abbrev Modal.Standard.AxiomSet.K : AxiomSet α := { System.Axioms.K p q | (p) (q
 
 notation "𝗞" => Modal.Standard.AxiomSet.K
 ```
+
+| Notation | Name | Schema | Geach |
+| :-: | :- | :-- | :-: |
+| `𝗞` | K    | `□(p ⟶ q) ⟶ □p ⟶ □q` | |
+| `𝗧` | T    | `□p ⟶ p`     | ✅ |
+| `𝗕` | B    | `p ⟶ □◇p`   | ✅ |
+| `𝗗` | D    | `□p ⟶ ◇p`   | ✅ |
+| `𝟰` | Four | `□p ⟶ □□p`  | ✅ |
+| `𝟱` | Five | `◇p ⟶ □◇p`  | ✅ |
+| `.𝟮` | Dot2 | `◇□p ⟶ □◇p` | ✅ |
+| `.𝟯` | Dot3 | `□(□p ⟶ □q) ⋎ □(□q ⟶ □p)` |
+| `𝗟` | L    | `□(□p ⟶ p) ⟶ □p` |
+| `𝗚𝗿𝘇` | Grz  | `□(□(p ⟶ □p) ⟶ p) ⟶ p` |
+| | Tc   | `p ⟶ □p`    | ✅ |
+| | Ver  | `□p`         |
+| `𝗖𝟰` | C4   | `□□p ⟶ □p`  | ✅ |
+| `𝗖𝗗` | CD   | `◇p ⟶ □p`   | ✅ |
+| | M    | `□◇p ⟶ ◇□p` | |
 
 ### Deduction System
 
