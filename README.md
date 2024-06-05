@@ -169,8 +169,8 @@ The key results are summarised in `Logic/Summary.lean`.
   theorem LO.FirstOrder.Arith.first_incompleteness
       (T : LO.FirstOrder.Theory ℒₒᵣ)
       [DecidablePred T]
-      [𝐄𝐐 ≾ T]
-      [𝐏𝐀⁻ ≾ T]
+      [𝐄𝐐 ≼ T]
+      [𝐏𝐀⁻ ≼ T]
       [LO.FirstOrder.Arith.SigmaOneSound T]
       [LO.FirstOrder.Theory.Computable T] :
       ¬LO.System.Complete T
@@ -180,8 +180,8 @@ The key results are summarised in `Logic/Summary.lean`.
     theorem LO.FirstOrder.Arith.undecidable
         (T : LO.FirstOrder.Theory ℒₒᵣ)
         [DecidablePred T]
-        [𝐄𝐐 ≾ T]
-        [𝐏𝐀⁻ ≾ T]
+        [𝐄𝐐 ≼ T]
+        [𝐏𝐀⁻ ≼ T]
         [LO.FirstOrder.Arith.SigmaOneSound T]
         [LO.FirstOrder.Theory.Computable T] :
         T ⊬ LO.FirstOrder.Arith.FirstIncompleteness.undecidable T ∧

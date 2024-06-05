@@ -43,8 +43,8 @@ example [(k : ℕ) → DecidableEq (L.Func k)] [(k : ℕ) → DecidableEq (L.Rel
 
 /-- Compactness theorem -/
 example (T : Theory L) :
-    Semantics.SatisfiableTheory T ↔
-    ∀ T' : Finset (Sentence L), ↑T' ⊆ T → Semantics.SatisfiableTheory (T' : Theory L) :=
+    Semantics.SatisfiableSet T ↔
+    ∀ T' : Finset (Sentence L), ↑T' ⊆ T → Semantics.SatisfiableSet (T' : Theory L) :=
   FirstOrder.compactness
 
 #print axioms FirstOrder.compactness
@@ -62,7 +62,7 @@ noncomputable example {σ : Sentence L} : T ⊨ σ → T ⊢ σ := FirstOrder.co
 open Arith FirstIncompleteness
 
 variable (T : Theory ℒₒᵣ) [DecidablePred T]
-  [𝐄𝐐 ≾ T] [𝐏𝐀⁻ ≾ T] [SigmaOneSound T] [Theory.Computable T]
+  [𝐄𝐐 ≼ T] [𝐏𝐀⁻ ≼ T] [SigmaOneSound T] [Theory.Computable T]
 
 /-- Gödel's first incompleteness theorem -/
 example : ¬System.Complete T :=

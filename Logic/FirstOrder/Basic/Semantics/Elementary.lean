@@ -79,7 +79,7 @@ protected lemma rel {k} (r : L.Rel k) (v : Fin k → M₁) :
 
 lemma val_term (e : Fin n → M₁) (ε : μ → M₁) (t : Semiterm L μ n) :
     φ (t.val s₁ e ε) = t.val s₂ (φ ∘ e) (φ ∘ ε) := by
-  induction t <;> simp[*, Semiterm.val_func, HomClass.func, Function.comp]
+  induction t <;> simp [*, Semiterm.val_func, HomClass.func, Function.comp]
 
 end HomClass
 
@@ -137,18 +137,18 @@ instance : SetLike (ClosedSubset L M) M := ⟨ClosedSubset.domain, ClosedSubset.
 lemma closed {k} (f : L.Func k) {v : Fin k → M} (hv : ∀ i, v i ∈ u) : s.func f v ∈ u := u.domain_closed f hv
 
 instance toStructure [s : Structure L M] (u : ClosedSubset L M) : Structure L u where
-  func := fun k f v => ⟨s.func f (fun i => ↑(v i)), u.closed f (by simp)⟩
-  rel := fun k r v => s.rel r (fun i => v i)
+  func := fun k f v => ⟨s.func f (fun i ↦ ↑(v i)), u.closed f (by simp)⟩
+  rel := fun k r v => s.rel r (fun i ↦ v i)
 
-protected lemma func {k} (f : L.Func k) (v : Fin k → u) : u.toStructure.func f v = s.func f (fun i => v i) := rfl
+protected lemma func {k} (f : L.Func k) (v : Fin k → u) : u.toStructure.func f v = s.func f (fun i ↦ v i) := rfl
 
-protected lemma rel {k} (r : L.Rel k) (v : Fin k → u) : u.toStructure.rel r v ↔ s.rel r (fun i => v i) := of_eq rfl
+protected lemma rel {k} (r : L.Rel k) (v : Fin k → u) : u.toStructure.rel r v ↔ s.rel r (fun i ↦ v i) := of_eq rfl
 
 def inclusion : u ↪ₛ[L] M where
   toFun := Subtype.val
-  func' := by simp[ClosedSubset.func, Function.comp]
-  rel' := by simp[ClosedSubset.rel, Function.comp]
-  rel_inv' := by simp[ClosedSubset.rel, Function.comp]
+  func' := by simp [ClosedSubset.func, Function.comp]
+  rel' := by simp [ClosedSubset.rel, Function.comp]
+  rel_inv' := by simp [ClosedSubset.rel, Function.comp]
   toFun_inj := Subtype.val_injective
 
 end ClosedSubset
@@ -165,13 +165,13 @@ lemma eval_hom_iff_of_open : ∀ {n} {e₁ : Fin n → M₁} {ε₁ : μ → M�
     (Eval s₁ e₁ ε₁ p ↔ Eval s₂ (φ ∘ e₁) (φ ∘ ε₁) p)
   | _, e₁, ε₁, ⊤,        _ => by simp
   | _, e₁, ε₁, ⊥,        _ => by simp
-  | _, e₁, ε₁, rel r v,  _ => by simp[Function.comp, eval_rel, ←EmbeddingClass.rel φ, HomClass.val_term]
-  | _, e₁, ε₁, nrel r v, _ => by simp[Function.comp, eval_nrel, ←EmbeddingClass.rel φ, HomClass.val_term]
-  | _, e₁, ε₁, p ⋏ q,    h => by simp at h ⊢; simp[eval_hom_iff_of_open h.1, eval_hom_iff_of_open h.2]
-  | _, e₁, ε₁, p ⋎ q,    h => by simp at h ⊢; simp[eval_hom_iff_of_open h.1, eval_hom_iff_of_open h.2]
+  | _, e₁, ε₁, rel r v,  _ => by simp [Function.comp, eval_rel, ←EmbeddingClass.rel φ, HomClass.val_term]
+  | _, e₁, ε₁, nrel r v, _ => by simp [Function.comp, eval_nrel, ←EmbeddingClass.rel φ, HomClass.val_term]
+  | _, e₁, ε₁, p ⋏ q,    h => by simp at h ⊢; simp [eval_hom_iff_of_open h.1, eval_hom_iff_of_open h.2]
+  | _, e₁, ε₁, p ⋎ q,    h => by simp at h ⊢; simp [eval_hom_iff_of_open h.1, eval_hom_iff_of_open h.2]
 
 lemma eval_hom_univClosure {n} {ε₁ : μ → M₁} {p : Semiformula L μ n} (hp : p.Open) :
-    Val s₂ (φ ∘ ε₁) (univClosure p) → Val s₁ ε₁ (univClosure p) := by
+    Evalf s₂ (φ ∘ ε₁) (∀* p) → Evalf s₁ ε₁ (∀* p) := by
   simp; intro h e₁; exact (eval_hom_iff_of_open φ hp).mpr (h (φ ∘ e₁))
 
 end Semiformula
@@ -180,7 +180,7 @@ end
 
 section
 
-variable {L : Language} {M : Type u} {M₁ : Type u} {M₂ : Type u} {M₃ : Type u}
+variable {L : Language} {M : Type*} {M₁ : Type*} {M₂ : Type*} {M₃ : Type*}
 variable [Nonempty M] [Nonempty M₁] [Nonempty M₂] [Nonempty M₃]
   [s : Structure L M] [s₁ : Structure L M₁] [s₂ : Structure L M₂] [s₃ : Structure L M₃]
 
@@ -212,13 +212,13 @@ lemma models (h : M₁ ≡ₑ[L] M₂) :
     ∀ {σ : Sentence L}, M₁ ⊧ₘ σ ↔ M₂ ⊧ₘ σ := @h
 
 lemma modelsTheory (h : M₁ ≡ₑ[L] M₂) {T : Theory L} :
-    M₁ ⊧ₘ* T ↔ M₂ ⊧ₘ* T := by simp[modelsTheory_iff, h.models]
+    M₁ ⊧ₘ* T ↔ M₂ ⊧ₘ* T := by simp [modelsTheory_iff, h.models]
 
 lemma ofEquiv [Nonempty N] (φ : M ≃ N) :
     letI : Structure L N := Structure.ofEquiv φ
     M ≡ₑ[L] N := fun σ => by
   letI : Structure L N := Structure.ofEquiv φ
-  simp[models_iff, Empty.eq_elim, Structure.eval_ofEquiv_iff]
+  simp [models_iff, Empty.eq_elim, Structure.eval_ofEquiv_iff]
 
 end ElementaryEquiv
 
@@ -234,12 +234,12 @@ lemma models_hom_iff_of_open {σ : Sentence L} (hσ : σ.Open) : M₁ ⊧ₘ σ 
     Semiformula.eval_hom_iff_of_open (e₁ := finZeroElim) (ε₁ := Empty.elim) φ hσ
 
 lemma models_hom_univClosure {n} {σ : Semisentence L n} (hσ : σ.Open) :
-    M₂ ⊧ₘ (univClosure σ) → M₁ ⊧ₘ (univClosure σ) := by
+    M₂ ⊧ₘ (∀* σ) → M₁ ⊧ₘ (∀* σ) := by
   simpa[Matrix.empty_eq, Empty.eq_elim, models_iff] using
     Semiformula.eval_hom_univClosure (ε₁ := Empty.elim) φ hσ
 
 lemma models_hom_univClosure_of_submodels (H : M₁ ↪ₛ[L] M₂) {n} {σ : Semisentence L n} (hσ : σ.Open) :
-    M₂ ⊧ₘ (univClosure σ) → M₁ ⊧ₘ (univClosure σ) := models_hom_univClosure H hσ
+    M₂ ⊧ₘ (∀* σ) → M₁ ⊧ₘ (∀* σ) := models_hom_univClosure H hσ
 
 section
 
@@ -250,7 +250,7 @@ lemma ElementaryEquiv.ofEquiv [Nonempty N] :
     letI : Structure L N := Structure.ofEquiv φ
     M ≡ₑ[L] N := fun σ => by
   letI : Structure L N := Structure.ofEquiv φ
-  simp[models_iff, Empty.eq_elim, Structure.eval_ofEquiv_iff]
+  simp [models_iff, Empty.eq_elim, Structure.eval_ofEquiv_iff]
 
 end
 

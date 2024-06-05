@@ -31,7 +31,7 @@ def length : {Δ : Sequent α} → ⊢¹ Δ → ℕ
   | _, wk d _      => d.length.succ
   | _, cut dp dn => (max (length dp) (length dn)).succ
 
-protected def cast (d : ⊢¹ Δ) (e : Δ = Γ) : ⊢¹ Γ := cast (by simp[HasVdash.vdash, e]) d
+protected def cast (d : ⊢¹ Δ) (e : Δ = Γ) : ⊢¹ Γ := cast (by simp[e]) d
 
 @[simp] lemma length_cast (d : ⊢¹ Δ) (e : Δ = Γ) : length (Derivation.cast d e) = length d := by
   rcases e with rfl; simp[Derivation.cast]

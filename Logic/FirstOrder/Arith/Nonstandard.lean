@@ -24,7 +24,7 @@ def modelStar (c : ℕ) : Structure Language.unit ℕ where
   func := fun _ ⟨⟨⟩⟩ _ => c
   rel  := fun _ r _ => PEmpty.elim r
 
-lemma satisfiable_trueArithWithStarUnbounded (c : ℕ) : Semantics.SatisfiableTheory (trueArithWithStarUnbounded c) := by
+lemma satisfiable_trueArithWithStarUnbounded (c : ℕ) : Satisfiable (trueArithWithStarUnbounded c) := by
   letI : Structure Language.unit ℕ := modelStar c
   haveI : Structure.Zero ℒₒᵣ⋆ ℕ := ⟨rfl⟩
   haveI : Structure.One ℒₒᵣ⋆ ℕ := ⟨rfl⟩
@@ -35,14 +35,14 @@ lemma satisfiable_trueArithWithStarUnbounded (c : ℕ) : Semantics.SatisfiableTh
     simp [starUnbounded, models_iff]; exact Fin.prop
   have : ℕ ⊧ₘ* trueArithWithStarUnbounded c := by
     simp[trueArithWithStarUnbounded, models_iff]; exact this
-  exact satisfiableTheory_intro ℕ this
+  exact satisfiable_intro ℕ this
 
 lemma satisfiable_union_trueArithWithStarUnbounded :
-    Semantics.SatisfiableTheory (⋃ c, trueArithWithStarUnbounded c) :=
+    Satisfiable (⋃ c, trueArithWithStarUnbounded c) :=
   (Compact.compact_cumulative trueArithWithStarUnbounded.cumulative).mpr
     satisfiable_trueArithWithStarUnbounded
 
-instance trueArithWithStarUnbounded.eqTheory : 𝐄𝐐 ≾ (⋃ c, trueArithWithStarUnbounded c) :=
+instance trueArithWithStarUnbounded.eqTheory : 𝐄𝐐 ≼ (⋃ c, trueArithWithStarUnbounded c) :=
   System.Subtheory.ofSubset <|
     Set.subset_iUnion_of_subset 0 (Set.subset_union_of_subset_left (Set.subset_union_left _ _) _)
 
@@ -62,7 +62,7 @@ lemma models_union_trueArithWithStarUnbounded : ℕ⋆ ⊧ₘ* ⋃ c, trueArithW
 
 instance trueArith : ℕ⋆ ⊧ₘ* 𝐓𝐀 := ⟨by
   have : ℕ⋆ ⊧ₘ* Semiformula.lMap (Language.Hom.add₁ _ _) '' 𝐓𝐀 :=
-    Semantics.RealizeTheory.of_subset models_union_trueArithWithStarUnbounded
+    Semantics.RealizeSet.of_subset models_union_trueArithWithStarUnbounded
       (Set.subset_iUnion_of_subset 0 $ Set.subset_union_of_subset_left (Set.subset_union_right _ _ ) _)
   intro σ hσ
   let s : Structure ℒₒᵣ ℕ⋆ := (ModelOfSatEq.struc satisfiable_union_trueArithWithStarUnbounded).lMap
@@ -82,6 +82,8 @@ instance trueArith : ℕ⋆ ⊧ₘ* 𝐓𝐀 := ⟨by
 
 instance : ℕ⋆ ⊧ₘ* 𝐏𝐀⁻ :=
   ModelsTheory.of_ss (U := 𝐓𝐀) inferInstance (Structure.subset_of_models.mpr $ Arith.Standard.models_peanoMinus)
+
+open Arith.Model
 
 lemma star_unbounded (n : ℕ) : n < ⋆ := by
   have : ℕ⋆ ⊧ₘ (“!!(Semiterm.Operator.numeral ℒₒᵣ⋆ n) < ⋆” : Sentence ℒₒᵣ⋆) :=

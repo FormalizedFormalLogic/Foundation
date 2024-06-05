@@ -262,6 +262,12 @@ lemma getM_pure [LawfulMonad m] {n} {β : Fin n → Type u} (v : (i : Fin n) →
   · simp[vecHead, vecTail, Function.comp, seq_eq_bind, ih]
     exact congr_arg _ (funext $ Fin.cases rfl (fun i => rfl))
 
+def appendr {n m} (v : Fin n → α) (w : Fin m → α) : Fin (m + n) → α := Matrix.vecAppend (add_comm m n) v w
+
+@[simp] lemma appendr_nil {m} (w : Fin m → α) : appendr ![] w = w := by funext i; simp [appendr]
+
+@[simp] lemma appendr_cons {m n} (x : α) (v : Fin n → α) (w : Fin m → α) : appendr (x :> v) w = x :> appendr v w := by funext i; simp [appendr]
+
 end Matrix
 
 namespace DMatrix

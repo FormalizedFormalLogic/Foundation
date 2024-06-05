@@ -1,6 +1,0 @@
-import Logic.Propositional.Superintuitionistic.Intuitionistic.Deduction
-
-import Logic.Propositional.Superintuitionistic.Intuitionistic.Kripke.Semantics
-import Logic.Propositional.Superintuitionistic.Intuitionistic.Kripke.LEM
-import Logic.Propositional.Superintuitionistic.Intuitionistic.Kripke.Soundness
-import Logic.Propositional.Superintuitionistic.Intuitionistic.Kripke.Completeness

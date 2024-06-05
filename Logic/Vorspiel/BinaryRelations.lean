@@ -7,7 +7,8 @@ section
 variable {α : Type u} (rel : α → α → Prop)
 local infix:50 " ≺ " => rel
 
-def Euclidean := ∀ ⦃w₁ w₂ w₃⦄, w₁ ≺ w₂ → w₁ ≺ w₃ → (w₂ ≺ w₃)
+-- NOTE: `w₁ ≺ w₂ → w₁ ≺ w₃ → w₂ ≺ w₃`とする流儀もある
+def Euclidean := ∀ ⦃w₁ w₂ w₃⦄, w₁ ≺ w₂ → w₁ ≺ w₃ → w₃ ≺ w₂
 
 def Serial := ∀ w₁, ∃ w₂, w₁ ≺ w₂
 
@@ -21,6 +22,8 @@ def RightConvergent := ∀ ⦃w₁ w₂ w₃⦄, w₁ ≺ w₂ ∧ w₁ ≺ w₃
 
 def Extensive := ∀ ⦃x y⦄, x ≺ y → x = y
 
+def Antisymmetric := ∀ ⦃w₁ w₂⦄, w₁ ≺ w₂ → w₂ ≺ w₁ → w₁ = w₂
+
 abbrev ConverseWellFounded := WellFounded $ flip (· ≺ ·)
 
 end
@@ -29,34 +32,45 @@ section
 
 variable {α : Type u}
 variable {rel : α → α → Prop}
+variable (hRefl : Reflexive rel) -- T
+         (hSymm : Symmetric rel) -- B
+         (hSerial : Serial rel) -- D
+         (hTrans : Transitive rel) -- 4
+         (hEucl : Euclidean rel) -- 5
 
-lemma serial_of_refl (hRefl : Reflexive rel) : Serial rel := by
+-- T → D
+lemma serial_of_refl : Serial rel := by
   rintro w;
   existsi w;
   exact hRefl w;
 
-lemma trans_of_symm_eucl (hSymm : Symmetric rel) (hEucl : Euclidean rel) : Transitive rel := by
+-- B + 4 → 5
+lemma eucl_of_symm_trans : Euclidean rel := by
+  intro w₁ w₂ w₃ r₁₂ r₁₃;
+  have r₂₁ := hSymm r₁₂;
+  exact hSymm $ hTrans r₂₁ r₁₃;
+
+-- B + 5 → 4
+lemma trans_of_symm_eucl : Transitive rel := by
   rintro w₁ w₂ w₃ r₁₂ r₂₃;
-  exact hEucl (hSymm r₁₂) r₂₃;
+  exact hSymm $ hEucl (hSymm r₁₂) r₂₃;
 
-lemma symm_of_refl_eucl (hRefl : Reflexive rel) (hEucl : Euclidean rel) : Symmetric rel := by
+-- T + 5 → B
+lemma symm_of_refl_eucl : Symmetric rel := by
   intro w₁ w₂ r₁₂;
-  exact hEucl r₁₂ (hRefl w₁);
+  exact hEucl (hRefl w₁) r₁₂;
 
-lemma trans_of_refl_eucl (hRefl : Reflexive rel) (hEucl : Euclidean rel) : Transitive rel := by
+-- T + 5 → 4
+lemma trans_of_refl_eucl : Transitive rel := by
   have hSymm := symm_of_refl_eucl hRefl hEucl;
   exact trans_of_symm_eucl hSymm hEucl;
 
-lemma refl_of_serial_symm_eucl (hSer : Serial rel) (hSymm : Symmetric rel) (hEucl : Euclidean rel) : Reflexive rel := by
+-- B + D + 5 → T
+lemma refl_of_symm_serial_eucl : Reflexive rel := by
   rintro w₁;
-  obtain ⟨w₂, r₁₂⟩ := hSer w₁;
+  obtain ⟨w₂, r₁₂⟩ := hSerial w₁;
   have r₂₁ := hSymm r₁₂;
   exact trans_of_symm_eucl hSymm hEucl r₁₂ r₂₁;
-
-lemma eucl_of_symm_trans (hSymm : Symmetric rel) (hTrans : Transitive rel) : Euclidean rel := by
-  intro w₁ w₂ w₃ r₁₂ r₁₃;
-  have r₂₁ := hSymm r₁₂;
-  exact hTrans r₂₁ r₁₃;
 
 section ConverseWellFounded
 
