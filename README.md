@@ -166,9 +166,56 @@ structure DeductionParameter (α) where
 In this formalization, logics that we usually refer to as $\bf Int$ (Intuitionistic Propositional Logic), $\bf Cl$ (Classical Propositional Logic), etc. is characterized by deduction parameter.
 
 | Notation | Name | Axioms |
-| :-: | :-: | :-- |
+| :-: | :-: | :-: |
 | `𝐈𝐧𝐭` | Intuitionistic | `𝗘𝗙𝗤`|
 | `𝐂𝐥` | Classical | `𝗘𝗙𝗤 ∪ 𝗟𝗘𝗠` |
+
+### Theorems
+
+#### Glivenko's Theorem
+
+```
+theorem iff_provable_dn_efq_dne_provable: 𝐈𝐧𝐭 ⊢! ~~p ↔ 𝐂𝐥 ⊢! p
+```
+
+#### Soundness
+
+```
+instance : Sound 𝓓 𝔽(Ax(𝓓))
+```
+
+#### Law of Excluded Middle
+
+Law of Excluded Middle (LEM) is not always provable in intuitionistic logic.
+
+```
+theorem noLEM : ∃ (p : Formula α), 𝐈𝐧𝐭 ⊬! p ⋎ ~p := by
+```
+
+Thus, intuitionistic logic is proper weaker than classical logic, since LEM is always provable in classical logic
+
+```
+theorem strictReducible_intuitionistic_classical : (𝐈𝐧𝐭 : DeductionParameter α) <ₛ 𝐂𝐥
+```
+
+#### Completeness
+
+Standard completeness proof using canonical models, etc.
+
+```
+instance : Complete 𝐈𝐧𝐭 𝔽(Ax(𝐈𝐧𝐭))
+```
+
+#### Disjunctive Property
+
+Intuitionistic Logic have Disjunctive Property (DP).
+
+```
+class Disjunctive (𝓢 : S) : Prop where
+  disjunctive : ∀ {p q}, 𝓢 ⊢! p ⋎ q → 𝓢 ⊢! p ∨ 𝓢 ⊢! q
+
+instance : Disjunctive 𝐈𝐧𝐭
+```
 
 ## Standard Modal Logic
 
@@ -202,7 +249,7 @@ notation "𝗞" => Modal.Standard.AxiomSet.K
 ```
 
 | Notation | Name | Schema | Geach |
-| :-: | :- | :-- | :-: |
+| :-: | :-: | :-: | :-: |
 | `𝗞` | K    | `□(p ⟶ q) ⟶ □p ⟶ □q` | |
 | `𝗧` | T    | `□p ⟶ p`     | ✅ |
 | `𝗕` | B    | `p ⟶ □◇p`   | ✅ |
@@ -256,7 +303,7 @@ instance {𝓓 : DeductionParameter α} [HasNec 𝓓] : Sound 𝓓 𝔽(Ax(𝓓)
 From soundness theorem, if `𝔽(Ax(𝓓))` is nonempty, deduction system of `𝓓` is consistent (i.e. not every formula is provable in `𝓓`).
 
 ```lean
-instance [FrameClass.IsNonempty 𝔽(Ax(L))] : System.Consistent L
+instance [FrameClass.IsNonempty 𝔽(Ax(𝓓))] : System.Consistent 𝓓
 ```
 
 It is immediately apparent, frameclass of `𝔽(Ax(𝐊))` is nonempty, thus `𝐊` is consistent.
@@ -266,6 +313,7 @@ instance : FrameClass.IsNonempty 𝔽(Ax(𝐊))
 
 instance : System.Consistent 𝐊
 ```
+- [`LO.System.Consistent 𝐊`](https://iehality.github.io/lean4-logic/Logic/Modal/Standard/Kripke/Soundness.html#LO.Modal.Standard.Kripke.instConsistentFormulaDeductionParameterInstSystemFormulaDeductionParameterK)
 
 Futhermore, if `𝓓` is Geach logic, then its frameclass is nonempty, thus it is consistent.
 
@@ -319,6 +367,8 @@ lemma reducible_of_subset (hNec : L₁.nec ≤ L₂.nec) (hAx : Ax(L₁) ⊆ Ax(
 
 lemma reducible_K_KT : 𝐊 ≤ₛ 𝐊𝐓
 ```
+- [LO.Modal.Standard.Deduction.reducible_of_subset](https://iehality.github.io/lean4-logic/Logic/Modal/Standard/Deduction.html#LO.Modal.Standard.Deduction.reducible_of_subset)
+- [LO.Modal.Standard.reducible_K_KT](https://iehality.github.io/lean4-logic/Logic/Modal/Standard/Deduction.html#LO.Modal.Standard.reducible_K_KT)
 
 However, even without the subset of axiomset, it is possible to analyze the strength of logic via Kripke semantics, specifically by analyzing the properties of frames defined by the axioms. For example, since seriality follows from reflexivity, $\bf KT$ is stronger than $\bf KD$ ($\sf K \cup D \not\sube K \cup T$).
 
@@ -331,6 +381,8 @@ lemma reducible_of_definability
 
 theorem reducible_KD_KT : 𝐊𝐃 ≤ₛ 𝐊𝐓
 ```
+- [LO.Modal.Standard.Kripke.reducible_of_definability](https://iehality.github.io/lean4-logic/Logic/Modal/Standard/Kripke/Reducible.html#LO.Modal.Standard.Kripke.reducible_of_definability)
+- [LO.Modal.Standard.reducible_KD_KT](https://iehality.github.io/lean4-logic/Logic/Modal/Standard/Kripke/Geach/Reducible.html#LO.Modal.Standard.reducible_KD_KT)
 
 By same argument, the equivalence of provability between logics can be analyzed. $\bf S5$ is equivalent to $\bf KT4B$ ($\sf K \cup T \cup 5 \neq K \cup T \cup 4 \cup B$).
 
@@ -343,6 +395,8 @@ lemma equiv_of_iff_definability
 
 theorem equiv_S5_KT4B : 𝐒𝟓 =ₛ 𝐊𝐓𝟒𝐁
 ```
+- [LO.Modal.Standard.Kripke.equiv_of_iff_definability](https://iehality.github.io/lean4-logic/Logic/Modal/Standard/Kripke/Reducible.html#LO.Modal.Standard.Kripke.equiv_of_iff_definability)
+- [LO.Modal.Standard.equiv_S5_KT4B](https://iehality.github.io/lean4-logic/Logic/Modal/Standard/Kripke/Geach/Reducible.html#LO.Modal.Standard.equiv_S5_KT4B)
 
 #### Modal Companion
 
@@ -357,6 +411,7 @@ theorem provable_efq_iff_provable_S4
   {p : Superintuitionistic.Formula α}
   : 𝐈𝐧𝐭 ⊢! p ↔ 𝐒𝟒 ⊢! pᵍ
 ```
+- [LO.Modal.Standard.provable_efq_iff_provable_S4](https://iehality.github.io/lean4-logic/Logic/Modal/Standard/Kripke/ModalCompanion.html#LO.Modal.Standard.provable_efq_iff_provable_S4)
 
 The generalized version of this relationship is called _Modal Companion_. $(\bf Int,S4)$ has modal companion.
 
@@ -366,14 +421,16 @@ class ModalCompanion (i𝓓 : Superintuitionistic.DeductionParameter α) (m𝓓 
 
 instance : ModalCompanion 𝐈𝐧𝐭 𝐒𝟒
 ```
+- [LO.Modal.Standard.instModalCompanionIntuitionisticS4](https://iehality.github.io/lean4-logic/Logic/Modal/Standard/Kripke/ModalCompanion.html#LO.Modal.Standard.instModalCompanionIntuitionisticS4)
 
 #### Undefinability of Frame Property
 
 There is no axiom set that irreflexivity of frame defines. In other words, as long as the inference rule of `𝓓` is only necessitation, no matter what axiom sets of `𝓓` has, deduction system of `𝓓` cannot be represent irreflexive Kripke frame.
 
-```
+```lean
 theorem Kripke.undefinability_irreflexive : ¬∃ (Ax : AxiomSet α), (∀ {F : Frame}, (Irreflexive F.Rel) ↔ F ⊧* Ax)
 ```
+- [LO.Modal.Standard.Kripke.undefinability_irreflexive](https://iehality.github.io/lean4-logic/Logic/Modal/Standard/Kripke/Morphism.html#LO.Modal.Standard.Kripke.undefinability_irreflexive)
 
 ## References
 - J. Han, F. van Doorn, A formalization of forcing and the unprovability of the continuum hypothesis
