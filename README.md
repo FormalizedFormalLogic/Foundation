@@ -286,7 +286,42 @@ In this formalization, logics that we usually refer to as $\bf K$, $\bf S4$, etc
 
 ### Kripke Semantics
 
-### Geach Axioms
+### Geach Axiom
+
+Geach Axiom is defined as $\mathsf{ga}_{i,j,m,n} \equiv \Diamond^i \Box^m p \to \Box^j \Diamond^n p$.
+
+```lean
+structure Geach.Taple where
+  i : ℕ
+  j : ℕ
+  m : ℕ
+  n : ℕ
+
+abbrev Geach (l : Geach.Taple) (p : F) := ◇^[l.i](□^[l.m]p) ⟶ □^[l.j](◇^[l.n]p)
+notation "𝗴𝗲(" t ")" => AxiomSet.Geach t
+```
+
+Some axioms is generalized as Geach axioms (Above table, Geach: ✅), for example $\mathsf{T} \equiv \mathsf{ga}_{0,0,1,0}$, $\mathsf{4} \equiv \mathsf{ga}_{0,2,1,0}$.
+
+```lean
+def AxiomSet.MultiGeach : List Axioms.Geach.Taple → AxiomSet α
+  | [] => 𝗞
+  | x :: xs => (AxiomSet.Geach x) ∪ (AxiomSet.MultiGeach xs)
+notation "𝗚𝗲(" l ")" => AxiomSet.MultiGeach l
+
+def DeductionParameter.Geach (l : List Axioms.Geach.Taple) : DeductionParameter α where
+  axiomSet := 𝗚𝗲(l)
+  nec := true
+notation "𝐆𝐞(" l ")" => DeductionParameter.Geach l
+```
+
+If `𝓓` is some `𝐆𝐞(l)`, `𝓓` is called *Geach*.
+
+```
+class IsGeach (𝓓 : DeductionParameter α) where
+  taples : List Axioms.Geach.Taple
+  char : 𝓓 = 𝐆𝐞(taples)
+```
 
 ### Theorems
 
@@ -315,7 +350,7 @@ instance : System.Consistent 𝐊
 ```
 - [`LO.System.Consistent 𝐊`](https://iehality.github.io/lean4-logic/Logic/Modal/Standard/Kripke/Soundness.html#LO.Modal.Standard.Kripke.instConsistentFormulaDeductionParameterInstSystemFormulaDeductionParameterK)
 
-Futhermore, if `𝓓` is Geach logic, then its frameclass is nonempty, thus it is consistent.
+Futhermore, if `𝓓` is Geach, then its frameclass is nonempty, thus it is consistent.
 
 ```lean
 instance [𝓓.IsGeach] : FrameClass.IsNonempty 𝔽(Ax(𝓓))
@@ -348,7 +383,7 @@ instance : Canonical 𝐊
 instance : Complete 𝐊 𝔽(Ax(𝐊))
 ```
 
-Futhermore, if `𝓓` is Geach logic, then `𝓓` is canonical, thus it is complete.
+Futhermore, if `𝓓` is Geach, then `𝓓` is canonical, thus it is complete.
 
 ```lean
 instance [𝓓.IsGeach] : Canonical 𝓓
