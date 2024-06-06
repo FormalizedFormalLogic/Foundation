@@ -8,13 +8,13 @@ namespace FirstOrder
 
 open Semiformula Completeness
 
-variable {L : Language} {T : Theory L}
+variable {L : Language.{u}} {T : Theory L}
 
 section Encodable
 
 variable [(k : ℕ) → DecidableEq (L.Func k)] [(k : ℕ) → DecidableEq (L.Rel k)]  [(k : ℕ) → Encodable (L.Func k)] [(k : ℕ) → Encodable (L.Rel k)]
 
-noncomputable def DerivationWA.completeness_of_encodable
+noncomputable def Disjconseq.completeness_of_encodable
   {Γ : List (Sentence L)} (h : ∀ M [Nonempty M] [Structure L M], M ⊧ₘ* T → ∃ σ ∈ Γ, M ⊧ₘ σ) :
     T ⊢'' (Γ.map Rew.emb.hom : Sequent L) := by
   have : WellFounded (SearchTree.Lt T (Γ.map Rew.emb.hom : Sequent L)) := by
@@ -26,21 +26,21 @@ noncomputable def DerivationWA.completeness_of_encodable
     contradiction
   exact syntacticMainLemmaTop this
 
-noncomputable def completeness_of_encodable {σ : Sentence L} :
-    T ⊨ σ → T ⊢ σ := fun h ↦ by
+lemma completeness_of_encodable {σ : Sentence L} :
+    T ⊨ σ → T ⊢! σ := fun h ↦ by
   have : T ⊢'' [Rew.emb.hom σ] :=
-    DerivationWA.completeness_of_encodable (T := T) (Γ := {σ}) (fun M i s hM ↦ ⟨σ, List.mem_of_mem_head? rfl, h hM⟩)
-  exact toProof this
+    Disjconseq.completeness_of_encodable (T := T) (Γ := {σ}) (fun M i s hM ↦ ⟨σ, List.mem_of_mem_head? rfl, h hM⟩)
+  exact ⟨toProof this⟩
 
-noncomputable instance : Complete (Sentence L) := ⟨completeness_of_encodable⟩
+instance : Complete T (Semantics.models (SmallStruc L) T):= ⟨completeness_of_encodable⟩
 
 end Encodable
 
-noncomputable def completeness {σ : Sentence L} :
-    T ⊨ σ → T ⊢ σ := fun h ↦ by
+theorem complete {σ : Sentence L} :
+    T ⊨ σ → T ⊢! σ := fun h ↦ by
   letI := Classical.typeDecidableEq
-  have : ∃ u : Finset (Sentence L), ↑u ⊆ insert (~σ) T ∧ ¬Semantics.SatisfiableTheory (u : Theory L) := by
-    simpa[Compact.compact (T := insert (~σ) T)] using Semantics.consequence_iff.mp h
+  have : ∃ u : Finset (Sentence L), ↑u ⊆ insert (~σ) T ∧ ¬Satisfiable (u : Theory L) := by
+    simpa using (compact (T := insert (~σ) T)).not.mp (Semantics.consequence_iff_not_satisfiable.mp h)
   choose u hu using this; rcases hu with ⟨ssu, hu⟩
   haveI : ∀ k, Encodable ((languageFinset u).Func k) := fun _ ↦ Fintype.toEncodable _
   haveI : ∀ k, Encodable ((languageFinset u).Rel k) := fun _ ↦ Fintype.toEncodable _
@@ -49,21 +49,43 @@ noncomputable def completeness {σ : Sentence L} :
     ext τ; simp [u', Finset.mem_imageOfFinset_iff]
     exact ⟨by rintro ⟨a, ⟨τ, hτ, rfl⟩, rfl⟩; simp[hτ],
       by intro hτ; exact ⟨toSubLanguageFinsetSelf hτ, ⟨τ, hτ, rfl⟩, Semiformula.lMap_toSubLanguageFinsetSelf hτ⟩⟩
-  have : ¬Semantics.SatisfiableTheory (u' : Theory (languageFinset u)) := by
+  have : ¬Satisfiable (u' : Theory (languageFinset u)) := by
     intro h
-    have : Semantics.SatisfiableTheory (u : Theory L) := by
-      rw[←image_u']; simpa using (satisfiableTheory_lMap L.ofSubLanguage (fun k ↦ Subtype.val_injective) (fun _ ↦ Subtype.val_injective) h)
+    have : Satisfiable (u : Theory L) := by
+      rw[←image_u']
+      simpa using (satisfiable_lMap L.ofSubLanguage (fun k ↦ Subtype.val_injective) (fun _ ↦ Subtype.val_injective) h)
     contradiction
-  have : ¬System.Consistent (u' : Theory (languageFinset u)) := fun h ↦ this (Complete.satisfiableTheory_iff_consistent.mpr h)
-  have : ¬System.Consistent (u : Theory L) := by rw[←image_u']; simpa using System.inconsistent_lMap L.ofSubLanguage this
-  have : ¬System.Consistent (insert (~σ) T) := fun h ↦ this (h.of_subset ssu)
-  have : Nonempty (T ⊢ σ) := Gentzen.provable_iff_inconsistent.mpr this
-  choose b _ using exists_true_iff_nonempty.mpr this
-  exact b
+  have : System.Inconsistent (u' : Theory (languageFinset u)) := Complete.inconsistent_of_unsatisfiable this
+  have : System.Inconsistent (u : Theory L) := by rw[←image_u']; simpa using System.inconsistent_lMap L.ofSubLanguage this
+  have : System.Inconsistent (insert (~σ) T) := this.of_supset ssu
+  exact Gentzen.provable_iff_inconsistent.mpr this
 
-theorem completeness_iff : T ⊨ σ ↔ T ⊢! σ :=
-  ⟨fun h ↦ ⟨completeness h⟩, soundness'⟩
+theorem complete_iff : T ⊨ σ ↔ T ⊢! σ :=
+  ⟨fun h ↦ complete h, sound!⟩
 
-noncomputable instance completeness.sentence : Complete (Sentence L) := ⟨completeness⟩
+instance (T : Theory L) : Complete T (Semantics.models (SmallStruc L) T) := ⟨complete⟩
+
+lemma satisfiable_of_consistent' (h : System.Consistent T) : Semantics.Satisfiable (SmallStruc L) T :=
+  Complete.satisfiable_of_consistent h
+
+lemma satisfiable_of_consistent (h : System.Consistent T) : Semantics.Satisfiable (Struc.{max u w} L) T := by
+  let ⟨M, _, _, h⟩ := satisfiable_iff.mp (satisfiable_of_consistent' h)
+  exact satisfiable_iff.mpr ⟨ULift.{w} M, inferInstance, inferInstance, ((uLift_elementaryEquiv L M).modelsTheory).mpr h⟩
+
+lemma satisfiable_iff_consistent' : Semantics.Satisfiable (Struc.{max u w} L) T ↔ System.Consistent T :=
+  ⟨consistent_of_satidfiable, satisfiable_of_consistent.{u, w}⟩
+
+lemma satisfiable_iff_consistent : Satisfiable T ↔ System.Consistent T := satisfiable_iff_consistent'.{u, u}
+
+lemma satidfiable_iff_satisfiable : Semantics.Satisfiable (Struc.{max u w} L) T ↔ Satisfiable T := by
+  simp [satisfiable_iff_consistent'.{u, w}, satisfiable_iff_consistent]
+
+lemma consequence_iff_consequence : T ⊨[Struc.{max u w} L] σ ↔ T ⊨ σ := by
+  simp [Semantics.consequence_iff_not_satisfiable, satidfiable_iff_satisfiable.{u, w}]
+
+theorem complete' {σ : Sentence L} :
+    T ⊨[Struc.{max u w} L] σ → T ⊢! σ := fun h ↦ complete <| consequence_iff_consequence.{u, w}.mp h
+
+instance (T : Theory L) : Complete T (Semantics.models (Struc.{max u w} L) T) := ⟨complete'.{u, w}⟩
 
 end FirstOrder

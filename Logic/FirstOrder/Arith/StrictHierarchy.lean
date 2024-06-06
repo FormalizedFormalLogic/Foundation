@@ -12,10 +12,10 @@ variable {L : Language} [L.LT]
 
 inductive StrictHierarchy : Polarity → ℕ → {n : ℕ} → Semiformula L μ n → Prop
   | zero {Γ p}                                : DeltaZero p → StrictHierarchy Γ s p
-  | sigma {s n} {p : Semiformula L μ (n + 1)} : StrictHierarchy Π s p → StrictHierarchy Σ (s + 1) (∃' p)
-  | pi {s n} {p : Semiformula L μ (n + 1)}    : StrictHierarchy Σ s p → StrictHierarchy Π (s + 1) (∀' p)
-  | ex {s n} {p : Semiformula L μ (n + 1)}    : StrictHierarchy Σ (s + 1) p → StrictHierarchy Σ (s + 1) (∃' p)
-  | all {s n} {p : Semiformula L μ (n + 1)}   : StrictHierarchy Π (s + 1) p → StrictHierarchy Π (s + 1) (∀' p)
+  | sigma {s n} {p : Semiformula L μ (n + 1)} : StrictHierarchy 𝚷 s p → StrictHierarchy 𝚺 (s + 1) (∃' p)
+  | pi {s n} {p : Semiformula L μ (n + 1)}    : StrictHierarchy 𝚺 s p → StrictHierarchy 𝚷 (s + 1) (∀' p)
+  | ex {s n} {p : Semiformula L μ (n + 1)}    : StrictHierarchy 𝚺 (s + 1) p → StrictHierarchy 𝚺 (s + 1) (∃' p)
+  | all {s n} {p : Semiformula L μ (n + 1)}   : StrictHierarchy 𝚷 (s + 1) p → StrictHierarchy 𝚷 (s + 1) (∀' p)
 
 lemma DeltaZero.of_open {p : Semiformula L μ n} : p.Open → DeltaZero p := Hierarchy.of_open
 
@@ -77,7 +77,7 @@ def HClass (L : Language) [L.LT] (ξ : Type*) (Γ : Polarity) (s : ℕ) : Class 
 
 abbrev HClassIn (ξ : Type*) [DecidableEq ξ] (Γ s) (T : Theory L) := (HClass L ξ Γ s).eqvClosure T
 
-abbrev DeltaZeroIn (ξ : Type*) [DecidableEq ξ] (T : Theory L) := HClassIn ξ Σ 0 T
+abbrev DeltaZeroIn (ξ : Type*) [DecidableEq ξ] (T : Theory L) := HClassIn ξ 𝚺 0 T
 
 namespace HClass
 
@@ -172,7 +172,7 @@ lemma accumlative (Γ Γ') {s s'} (h : s < s') : SHClassIn ξ Γ s T ≤ SHClass
   · rw [←SHClassIn.eqDeltaZero T Γ]; exact accumlative T Γ Γ (by simp)
 -/
 
-lemma openClass_le : openClass L ξ ≤ SHClass L ξ Σ 0 := by
+lemma openClass_le : openClass L ξ ≤ SHClass L ξ 𝚺 0 := by
   intro _ p hp
   simp [SHClass, Set.mem_def, zero_iff_delta_zero]
   exact Hierarchy.of_open hp
@@ -198,13 +198,13 @@ variable (Γ : Polarity) (s : ℕ) (T : Theory L)
 
 open Hierarchy SHClassIn StrictHierarchy Semiformula
 
-instance atom : (DeltaZeroIn ξ T).Atom := SHClassIn.atom Σ 0 T
+instance atom : (DeltaZeroIn ξ T).Atom := SHClassIn.atom 𝚺 0 T
 
 instance not : (DeltaZeroIn ξ T).Not := ⟨by
   rintro _ p ⟨p', hp', Hp⟩
   exact ⟨~p',
     zero_iff_delta_zero.mpr
-      (by simp [←Hierarchy.zero_iff_delta_zero (Γ := Σ), pi_zero_iff_sigma_zero]; exact zero_iff_delta_zero.mp hp'),
+      (by simp [←Hierarchy.zero_iff_delta_zero (Γ := 𝚺), pi_zero_iff_sigma_zero]; exact zero_iff_delta_zero.mp hp'),
     Hp.not⟩⟩
 
 instance and : (DeltaZeroIn ξ T).And := ⟨by

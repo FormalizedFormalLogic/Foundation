@@ -12,7 +12,7 @@ variable {L : Language}
 lemma provable_iff_of_consistent_of_complete {T : Theory L}
   (consis : System.Consistent T) (comp : System.Complete T) :
     T ⊢! σ ↔ ¬T ⊢! ~σ :=
-  ⟨by rintro ⟨b₁⟩ ⟨b₂⟩; exact Gentzen.inconsistent_of_provable_and_refutable b₁ b₂ consis,
+  ⟨by rintro ⟨b₁⟩ ⟨b₂⟩; exact (Gentzen.inconsistent_of_provable_and_refutable b₁ b₂).not_con consis,
    by intro h; exact or_iff_not_imp_right.mp (comp σ) h⟩
 
 end
@@ -21,7 +21,7 @@ namespace Arith
 
 namespace FirstIncompleteness
 
-variable {T : Theory ℒₒᵣ} [𝐄𝐐 ≾ T] [𝐏𝐀⁻ ≾ T] [DecidablePred T] [SigmaOneSound T] [Theory.Computable T]
+variable {T : Theory ℒₒᵣ} [𝐄𝐐 ≼ T] [𝐏𝐀⁻ ≼ T] [DecidablePred T] [SigmaOneSound T] [Theory.Computable T]
 
 variable (T)
 
@@ -42,9 +42,9 @@ noncomputable def diagRefutation : Semisentence ℒₒᵣ 1 := pred (fun σ => T
 local notation "ρ" => diagRefutation T
 
 /-- Define sentence $\gamma := \rho(\ulcorner \rho \urcorner)$ -/
-noncomputable def undecidable : Sentence ℒₒᵣ := ρ/[⸢ρ⸣]
+noncomputable def γ : Sentence ℒₒᵣ := ρ/[⸢ρ⸣]
 
-local notation "γ" => undecidable T
+local notation "γ" => γ T
 
 /-- ρ is a sentence that represents $D$ -/
 lemma diagRefutation_spec (σ : Semisentence ℒₒᵣ 1) :
@@ -52,27 +52,25 @@ lemma diagRefutation_spec (σ : Semisentence ℒₒᵣ 1) :
   simpa[diagRefutation] using pred_representation T (diagRefutation_re T) (x := σ)
 
 /-- It is obvious that $T \vdash \gamma \iff T \vdash \lnot \gamma$. Since
- $T$ is consistent, $\gamma$ is independent from $T$ -/
-lemma independent : System.Independent T γ := by
+ $T$ is consistent, $\gamma$ is undecidable from $T$ -/
+lemma undecidable : System.Undecidable T γ := by
   have h : T ⊢! γ ↔ T ⊢! ~γ := by simpa using diagRefutation_spec T ρ
   exact
-    ⟨System.unprovable_iff_not_provable.mpr
-       (fun b => Gentzen.inconsistent_of_provable_and_refutable' b (h.mp b) (consistent_of_sigmaOneSound T)),
-     System.unprovable_iff_not_provable.mpr
-       (fun b => Gentzen.inconsistent_of_provable_and_refutable' (h.mpr b) b (consistent_of_sigmaOneSound T))⟩
+    ⟨fun b ↦ (Gentzen.inconsistent_of_provable_and_refutable! b (h.mp b)).not_con (consistent_of_sigmaOneSound T),
+     fun b ↦ (Gentzen.inconsistent_of_provable_and_refutable! (h.mpr b) b).not_con (consistent_of_sigmaOneSound T)⟩
 
-theorem main : ¬System.Complete T := System.incomplete_iff_exists_independent.mpr ⟨γ, independent T⟩
+theorem not_complete : ¬System.Complete T := System.incomplete_iff_exists_undecidable.mpr ⟨γ, undecidable T⟩
 
 end FirstIncompleteness
 
-variable (T : Theory ℒₒᵣ) [DecidablePred T] [𝐄𝐐 ≾ T] [𝐏𝐀⁻ ≾ T] [SigmaOneSound T] [Theory.Computable T]
+variable (T : Theory ℒₒᵣ) [DecidablePred T] [𝐄𝐐 ≼ T] [𝐏𝐀⁻ ≼ T] [SigmaOneSound T] [Theory.Computable T]
 open FirstIncompleteness
 
 /- Gödel's First incompleteness theorem -/
-theorem first_incompleteness : ¬System.Complete T := FirstIncompleteness.main T
+theorem first_incompleteness : ¬System.Complete T := FirstIncompleteness.not_complete T
 
-lemma undecidable : T ⊬ undecidable T ∧ T ⊬ ~undecidable T :=
-  FirstIncompleteness.independent T
+lemma γ_undecidable : T ⊬! γ T ∧ T ⊬! ~γ T :=
+  FirstIncompleteness.undecidable T
 
 end Arith
 

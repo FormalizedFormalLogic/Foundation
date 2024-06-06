@@ -44,7 +44,6 @@ notation "𝐏𝐀⁻" => peanoMinus
 def indScheme (Γ : Semiformula L ℕ 1 → Prop) : Theory L :=
   { q | ∃ p : Semiformula L ℕ 1, Γ p ∧ q = ∀ᶠ* succInd p }
 
-
 abbrev iOpen : Theory ℒₒᵣ := 𝐏𝐀⁻ + indScheme ℒₒᵣ Semiformula.Open
 
 notation "𝐈open" => iOpen
@@ -53,13 +52,13 @@ abbrev indH (Γ : Polarity) (k : ℕ) : Theory ℒₒᵣ := 𝐏𝐀⁻ + indSch
 
 prefix:max "𝐈𝐍𝐃" => indH
 
-abbrev iSigma (k : ℕ) : Theory ℒₒᵣ := 𝐈𝐍𝐃Σ k
+abbrev iSigma (k : ℕ) : Theory ℒₒᵣ := 𝐈𝐍𝐃𝚺 k
 
 prefix:max "𝐈𝚺" => iSigma
 
 notation "𝐈𝚺₀" => iSigma 0
 
-abbrev iPi (k : ℕ) : Theory ℒₒᵣ := 𝐈𝐍𝐃Π k
+abbrev iPi (k : ℕ) : Theory ℒₒᵣ := 𝐈𝐍𝐃𝚷 k
 
 prefix:max "𝐈𝚷" => iPi
 
@@ -77,7 +76,7 @@ lemma coe_indH_subset_indH : (indScheme ℒₒᵣ (Arith.Hierarchy Γ ν) : Theo
   exact ⟨Semiformula.lMap (Language.oringEmb : ℒₒᵣ →ᵥ L) p, Hierarchy.oringEmb Hp,
     by simp [Formula.lMap_fvUnivClosure, succInd, Semiformula.lMap_substs]⟩
 
-instance : 𝐏𝐀⁻ ≾ 𝐈𝐍𝐃Γ ν := System.Subtheory.ofSubset (by simp [indH, Theory.add_def])
+instance : 𝐏𝐀⁻ ≼ 𝐈𝐍𝐃Γ ν := System.Subtheory.ofSubset (by simp [indH, Theory.add_def])
 
 end Theory
 

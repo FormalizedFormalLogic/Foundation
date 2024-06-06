@@ -1,143 +1,143 @@
-import Logic.Logic.System
+import Logic.Logic.HilbertStyle.Basic
+import Logic.Logic.HilbertStyle.Supplemental
 import Logic.Propositional.Superintuitionistic.Formula
-import Logic.Propositional.Superintuitionistic.Axioms
 
 namespace LO.Propositional.Superintuitionistic
 
 variable {α : Type u} [DecidableEq α]
 
-inductive Deduction (Λ : AxiomSet α) : Theory α → Formula α → Type _
-  | axm {Γ p}        : p ∈ Γ → Deduction Λ Γ p
-  | eaxm {Γ p}       : p ∈ Λ → Deduction Λ Γ p
-  | modusPonens {Γ p q} : Deduction Λ Γ (p ⟶ q) → Deduction Λ Γ p → Deduction Λ Γ q
-  | verum Γ          : Deduction Λ Γ ⊤
-  | imply₁ Γ p q     : Deduction Λ Γ (p ⟶ q ⟶ p)
-  | imply₂ Γ p q r   : Deduction Λ Γ ((p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r)
-  | conj₁ Γ p q      : Deduction Λ Γ (p ⋏ q ⟶ p)
-  | conj₂ Γ p q      : Deduction Λ Γ (p ⋏ q ⟶ q)
-  | conj₃ Γ p q      : Deduction Λ Γ (p ⟶ q ⟶ p ⋏ q)
-  | disj₁ Γ p q      : Deduction Λ Γ (p ⟶ p ⋎ q)
-  | disj₂ Γ p q      : Deduction Λ Γ (q ⟶ p ⋎ q)
-  | disj₃ Γ p q r    : Deduction Λ Γ ((p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r))
-  -- | efq Γ p          : Deduction Λ Γ (⊥ ⟶ p)
+structure DeductionParameter (α) where
+  axiomSet : AxiomSet α
+notation "Ax(" 𝓓 ")" => DeductionParameter.axiomSet 𝓓
 
-notation:45 Γ " ⊢ᴾ[" Λ "] " p => Deduction Λ Γ p
+namespace DeductionParameter
 
-variable (Λ : AxiomSet α) (Γ : Theory α) (p : Formula α)
+class IncludeEFQ (𝓓 : DeductionParameter α) where
+  include_EFQ : 𝗘𝗙𝗤 ⊆ Ax(𝓓) := by simp
 
-abbrev Deducible := Nonempty (Γ ⊢ᴾ[Λ] p)
-notation:45 Γ " ⊢ᴾ[" Λ "]! " p => Deducible Λ Γ p
+class IncludeLEM (𝓓 : DeductionParameter α) where
+  include_LEM : 𝗟𝗘𝗠 ⊆ Ax(𝓓) := by simp
 
-abbrev Undeducible := ¬(Γ ⊢ᴾ[Λ]! p)
-notation:45 Γ " ⊬ᴾ[" Λ "]! " p => Undeducible Λ Γ p
+class IncludeDNE (𝓓 : DeductionParameter α) where
+  include_DNE : 𝗗𝗡𝗘 ⊆ Ax(𝓓) := by simp
 
-abbrev Theory.Consistent := Γ ⊬ᴾ[Λ]! ⊥
+end DeductionParameter
 
-abbrev Theory.Inconsistent := Γ ⊢ᴾ[Λ]! ⊥
+inductive Deduction (𝓓 : DeductionParameter α) : Formula α → Type _
+  | eaxm {p}       : p ∈ Ax(𝓓) → Deduction 𝓓 p
+  | mdp {p q}      : Deduction 𝓓 (p ⟶ q) → Deduction 𝓓 p → Deduction 𝓓 q
+  | verum          : Deduction 𝓓 $ ⊤
+  | imply₁ p q     : Deduction 𝓓 $ p ⟶ q ⟶ p
+  | imply₂ p q r   : Deduction 𝓓 $ (p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r
+  | conj₁ p q      : Deduction 𝓓 $ p ⋏ q ⟶ p
+  | conj₂ p q      : Deduction 𝓓 $ p ⋏ q ⟶ q
+  | conj₃ p q      : Deduction 𝓓 $ p ⟶ q ⟶ p ⋏ q
+  | disj₁ p q      : Deduction 𝓓 $ p ⟶ p ⋎ q
+  | disj₂ p q      : Deduction 𝓓 $ q ⟶ p ⋎ q
+  | disj₃ p q r    : Deduction 𝓓 $ (p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r)
 
-/-
-infix:45 " ⊢ⁱ! " => Deducible
+instance : System (Formula α) (DeductionParameter α) := ⟨Deduction⟩
 
-abbrev Undeducible := Hilbert.Undeducible (@Deduction α)
-infix:45 " ⊬ⁱ! " => Undeducible
+open Deduction
+open DeductionParameter
 
-abbrev Theory.Consistent := Hilbert.Consistent (@Deduction α) Γ
-abbrev Theory.Inconsistent := Hilbert.Inconsistent (@Deduction α) Γ
+variable {𝓓 : DeductionParameter α}
+
+instance : System.Minimal 𝓓 where
+  mdp := mdp
+  verum := verum
+  imply₁ := imply₁
+  imply₂ := imply₂
+  conj₁ := conj₁
+  conj₂ := conj₂
+  conj₃ := conj₃
+  disj₁ := disj₁
+  disj₂ := disj₂
+  disj₃ := disj₃
+
+instance [𝓓.IncludeEFQ] : System.HasEFQ 𝓓 where
+  efq _ := eaxm $ Set.mem_of_subset_of_mem IncludeEFQ.include_EFQ (by simp);
+
+instance [𝓓.IncludeLEM] : System.HasLEM 𝓓 where
+  lem _ := eaxm $ Set.mem_of_subset_of_mem IncludeLEM.include_LEM (by simp);
+
+instance [𝓓.IncludeDNE] : System.HasDNE 𝓓 where
+  dne _ := eaxm $ Set.mem_of_subset_of_mem IncludeDNE.include_DNE (by simp);
+
+instance [𝓓.IncludeEFQ] : System.Intuitionistic 𝓓 where
+
+instance [𝓓.IncludeDNE] : System.Classical 𝓓 where
+
+instance [𝓓.IncludeEFQ] [𝓓.IncludeLEM] : System.Classical 𝓓 where
+
+
+namespace DeductionParameter
+
+protected abbrev Minimal : DeductionParameter α := { axiomSet := ∅ }
+
+protected abbrev Intuitionistic : DeductionParameter α := { axiomSet := 𝗘𝗙𝗤 }
+notation "𝐈𝐧𝐭" => DeductionParameter.Intuitionistic
+instance : IncludeEFQ (α := α) 𝐈𝐧𝐭 where
+instance : System.Intuitionistic (𝐈𝐧𝐭 : DeductionParameter α) where
+
+protected abbrev Classical : DeductionParameter α := { axiomSet := 𝗘𝗙𝗤 ∪ 𝗟𝗘𝗠 }
+notation "𝐂𝐥" => DeductionParameter.Classical
+instance : IncludeLEM (α := α) 𝐂𝐥 where
+instance : IncludeEFQ (α := α) 𝐂𝐥 where
+
+/- MEMO:
+  Term `WeakMinimal` and `WeakClassical` are from Ariola (2007)
+  Minimal <ₛ WeakMinimal <ₛ WeakClassical <ₛ Classical
 -/
 
-namespace Deduction
+protected abbrev WeakMinimal : DeductionParameter α := { axiomSet := 𝗟𝗘𝗠 }
 
-open Hilbert
+protected abbrev WeakClassical : DeductionParameter α := { axiomSet := 𝗣𝗲 }
 
-variable {Λ : AxiomSet α} {Γ : Theory α} {p q : Formula α}
 
-def weakening' {Γ Δ} {p : Formula α} (hs : Γ ⊆ Δ) : Deduction Λ Γ p → Deduction Λ Δ p
-  | axm h => axm (hs h)
-  | eaxm h => eaxm h
-  | modusPonens h₁ h₂ => by
-      -- simp [Finset.union_subset_iff] at hs;
-      simpa using (h₁.weakening' hs).modusPonens (h₂.weakening' hs);
-  | verum _ => by apply verum
-  | imply₁ _ _ _ => by apply imply₁
-  | imply₂ _ _ _ _ => by apply imply₂
-  | conj₁ _ _ _ => by apply conj₁
-  | conj₂ _ _ _ => by apply conj₂
-  | conj₃ _ _ _ => by apply conj₃
-  | disj₁ _ _ _ => by apply disj₁
-  | disj₂ _ _ _ => by apply disj₂
-  | disj₃ _ _ _ _ => by apply disj₃
+end DeductionParameter
 
-instance : Hilbert.Minimal (· ⊢ᴾ[Λ] · : Theory α → Formula α → Type _) where
-  axm          := axm;
-  weakening'   := weakening';
-  modus_ponens h₁ h₂ := by
-    rename_i Γ₁ Γ₂ p q
-    replace h₁ : (Γ₁ ∪ Γ₂) ⊢ᴾ[Λ] p ⟶ q := h₁.weakening' (by simp);
-    replace h₂ : (Γ₁ ∪ Γ₂) ⊢ᴾ[Λ] p := h₂.weakening' (by simp);
-    exact modusPonens h₁ h₂;
-  verum        := verum;
-  imply₁       := imply₁;
-  imply₂       := imply₂;
-  conj₁        := conj₁;
-  conj₂        := conj₂;
-  conj₃        := conj₃;
-  disj₁        := disj₁;
-  disj₂        := disj₂;
-  disj₃        := disj₃;
 
-private def dtrAux (Γ : Theory α) (p q : Formula α) : (Γ ⊢ᴾ[Λ] q) → (Γ \ {p} ⊢ᴾ[Λ] p ⟶ q)
-  | verum _         => (imply₁ _ _ _) ⨀ (verum _)
-  | imply₁ _ _ _    => (imply₁ _ _ _) ⨀ (imply₁ _ _ _)
-  | imply₂ _ _ _ _  => (imply₁ _ _ _) ⨀ (imply₂ _ _ _ _)
-  | conj₁ _ _ _     => (imply₁ _ _ _) ⨀ (conj₁ _ _ _)
-  | conj₂ _ _ _     => (imply₁ _ _ _) ⨀ (conj₂ _ _ _)
-  | conj₃ _ _ _     => (imply₁ _ _ _) ⨀ (conj₃ _ _ _)
-  | disj₁ _ _ _     => (imply₁ _ _ _) ⨀ (disj₁ _ _ _)
-  | disj₂ _ _ _     => (imply₁ _ _ _) ⨀ (disj₂ _ _ _)
-  | disj₃ _ _ _ _   => (imply₁ _ _ _) ⨀ (disj₃ _ _ _ _)
-  | @eaxm _ _ Γ q ih => (imply₁ _ _ _) ⨀ (eaxm (by assumption))
-  | @axm _ _ Γ q ih => by
-    by_cases h : p = q
-    case pos => deduct
-    case neg =>
-      have d₁ : (Γ \ {p}) ⊢ᴾ[Λ] (q ⟶ p ⟶ q) := imply₁ _ q p
-      have d₂ : (Γ \ {p}) ⊢ᴾ[Λ] q := axm (Set.mem_diff_singleton.mpr ⟨ih, Ne.symm h⟩)
-      exact d₁ ⨀ d₂;
-  | @modusPonens _ _ Γ a b h₁ h₂ =>
-      have ih₁ : Γ \ {p} ⊢ᴾ[Λ] p ⟶ a ⟶ b := dtrAux Γ p (a ⟶ b) h₁
-      have ih₂ : Γ \ {p} ⊢ᴾ[Λ] p ⟶ a := dtrAux Γ p a h₂
-      have d₁ : Γ \ {p} ⊢ᴾ[Λ] (p ⟶ a) ⟶ p ⟶ b := Hilbert.imply₂ ⨀ ih₁;
-      have d₂ : (Γ) \ {p} ⊢ᴾ[Λ] (p ⟶ a) := ih₂.weakening' (by simp)
-      d₁ ⨀ d₂
+open System
 
-def dtr {Γ : Theory α} {p q} (d : (insert p Γ) ⊢ᴾ[Λ] q) : (Γ ⊢ᴾ[Λ](p ⟶ q)) := by
-  exact dtrAux (insert p Γ) p q d |> LO.Deduction.weakening' (by simp)
+lemma reducible_efq_dne : (𝐈𝐧𝐭 : DeductionParameter α) ≤ₛ 𝐂𝐥 := by
+  rintro p hp;
+  simp [System.theory];
+  induction hp.some with
+  | eaxm h =>
+    obtain ⟨q, hq⟩ := by simpa using h;
+    subst hq;
+    apply efq!;
+  | mdp h₁ h₂ ih₁ ih₂ => exact (ih₁ ⟨h₁⟩) ⨀ (ih₂ ⟨h₂⟩);
+  | _ => simp;
 
-instance : Hilbert.HasDT (· ⊢ᴾ[Λ] · : Theory α → Formula α → Type _) := ⟨dtr⟩
+variable {p : Formula α}
 
-def compact {Γ : Theory α} {p : Formula α} : (Γ ⊢ᴾ[Λ] p) → (Δ : { Δ : Context α | ↑Δ ⊆ Γ}) × Δ ⊢ᴾ[Λ] p
-  | @axm _ _ Γ p h  => ⟨⟨{p}, by simpa⟩, axm (by simp)⟩
-  | @eaxm _ _ Γ q ih => ⟨⟨∅, by simp⟩, eaxm (by assumption)⟩
-  | @modusPonens _ _ Γ p q h₁ h₂ => by
-      have ⟨⟨Δ₁, hs₁⟩, d₁⟩ := compact h₁
-      have ⟨⟨Δ₂, hs₂⟩, d₂⟩ := compact h₂
-      simp at hs₁ d₁ hs₂ d₂;
-      exact ⟨
-        ⟨Δ₁ ∪ Δ₂, by simp [hs₁, hs₂, Set.subset_union_of_subset_left, Set.subset_union_of_subset_right];⟩,
-        by simpa using modus_ponens₂' (LO.Deduction.weakening' (by simp) d₁) (LO.Deduction.weakening' (by simp) d₂)
-      ⟩
-  | verum _         => ⟨⟨∅, by simp⟩, verum _⟩
-  | imply₁ _ _ _    => ⟨⟨∅, by simp⟩, imply₁ _ _ _⟩
-  | imply₂ _ _ _ _  => ⟨⟨∅, by simp⟩, imply₂ _ _ _ _⟩
-  | conj₁ _ _ _     => ⟨⟨∅, by simp⟩, conj₁ _ _ _⟩
-  | conj₂ _ _ _     => ⟨⟨∅, by simp⟩, conj₂ _ _ _⟩
-  | conj₃ _ _ _     => ⟨⟨∅, by simp⟩, conj₃ _ _ _⟩
-  | disj₁ _ _ _     => ⟨⟨∅, by simp⟩, disj₁ _ _ _⟩
-  | disj₂ _ _ _     => ⟨⟨∅, by simp⟩, disj₂ _ _ _⟩
-  | disj₃ _ _ _ _   => ⟨⟨∅, by simp⟩, disj₃ _ _ _ _⟩
+theorem iff_provable_dn_efq_dne_provable: 𝐈𝐧𝐭 ⊢! ~~p ↔ 𝐂𝐥 ⊢! p := by
+  constructor;
+  . intro d; exact dne'! $ reducible_efq_dne d;
+  . intro d;
+    induction d.some with
+    | eaxm h =>
+      simp at h;
+      rcases h with (hEFQ | hLEM);
+      . obtain ⟨q, hq⟩ := by simpa using hEFQ;
+        subst hq;
+        exact dni'! efq!;
+      . obtain ⟨q, hq⟩ := by simpa using hLEM;
+        subst hq;
+        apply FiniteContext.deduct'!;
+        have : [~(q ⋎ ~q)] ⊢[𝐈𝐧𝐭]! ~q ⋏ ~~q := demorgan₃'! $ FiniteContext.id!;
+        exact (conj₂'! this) ⨀ (conj₁'! this);
+    | @mdp p q h₁ h₂ ih₁ ih₂ =>
+      exact (dn_distribute_imply'! $ ih₁ ⟨h₁⟩) ⨀ ih₂ ⟨h₂⟩;
+    | _ => apply dni'!; simp;
 
-end Deduction
+alias glivenko := iff_provable_dn_efq_dne_provable
 
-def AxiomSet.Disjunctive (Λ : AxiomSet α) := ∀ {p q}, (∅ ⊢ᴾ[Λ]! p ⋎ q) → (∅ ⊢ᴾ[Λ]! p) ∨ (∅ ⊢ᴾ[Λ]! q)
+theorem iff_provable_neg_efq_provable_neg_efq : 𝐈𝐧𝐭 ⊢! ~p ↔ 𝐂𝐥 ⊢! ~p := by
+  constructor;
+  . intro d; exact glivenko.mp $ dni'! d;
+  . intro d; exact tne'! $ glivenko.mpr d;
 
 end LO.Propositional.Superintuitionistic

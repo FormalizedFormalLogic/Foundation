@@ -109,11 +109,11 @@ lemma standardModel_lMap_oringEmb_eq_standardModel : s.lMap (Language.oringEmb :
 variable {M} {e : Fin n → M} {ε : ξ → M}
 
 @[simp] lemma val_lMap_oringEmb {t : Semiterm ℒₒᵣ ξ n} :
-    (t.lMap Language.oringEmb : Semiterm L ξ n).val! M e ε = t.val! M e ε := by
+    (t.lMap Language.oringEmb : Semiterm L ξ n).valm M e ε = t.valm M e ε := by
   simp [Semiterm.val_lMap, standardModel_lMap_oringEmb_eq_standardModel]
 
 @[simp] lemma eval_lMap_oringEmb {p : Semiformula ℒₒᵣ ξ n} :
-    Semiformula.Eval! M e ε (.lMap Language.oringEmb p : Semiformula L ξ n) ↔ Semiformula.Eval! M e ε p := by
+    Semiformula.Evalm M e ε (.lMap Language.oringEmb p : Semiformula L ξ n) ↔ Semiformula.Evalm M e ε p := by
   simp [Semiformula.eval_lMap, standardModel_lMap_oringEmb_eq_standardModel]
 
 end
@@ -121,7 +121,7 @@ end
 section
 
 variable {L : Language} [L.ORing]
-variable {M : Type} [Zero M] [One M] [Add M] [Mul M] [LT M] [s : Structure L M]
+variable {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M] [s : Structure L M]
   [Structure.Zero L M] [Structure.One L M] [Structure.Add L M] [Structure.Mul L M] [Structure.Eq L M] [Structure.LT L M]
 
 @[simp] lemma modelsTheory_lMap_oringEmb (T : Theory ℒₒᵣ) :
@@ -180,7 +180,7 @@ instance models_peano : ℕ ⊧ₘ* 𝐏𝐀 := by
 end Standard
 
 theorem peano_consistent : System.Consistent 𝐏𝐀 :=
-  Sound.consistent_of_model Standard.models_peano
+  Sound.consistent_of_satisfiable ⟨_, Standard.models_peano⟩
 
 section
 
@@ -188,11 +188,11 @@ variable (L : Language.{u}) [ORing L]
 
 structure Cut (M : Type w) [s : Structure L M] where
   domain : Set M
-  closedSucc : ∀ x ∈ domain, (ᵀ“#0 + 1”).bVal s ![x] ∈ domain
-  closedLt : ∀ x y : M, Semiformula.PVal s ![x, y] “#0 < #1” → y ∈ domain → x ∈ domain
+  closedSucc : ∀ x ∈ domain, (ᵀ“#0 + 1”).valb s ![x] ∈ domain
+  closedLt : ∀ x y : M, Semiformula.Evalb s ![x, y] “#0 < #1” → y ∈ domain → x ∈ domain
 
 structure ClosedCut (M : Type w) [s : Structure L M] extends Structure.ClosedSubset L M where
-  closedLt : ∀ x y : M, Semiformula.PVal s ![x, y] “#0 < #1” → y ∈ domain → x ∈ domain
+  closedLt : ∀ x y : M, Semiformula.Evalb s ![x, y] “#0 < #1” → y ∈ domain → x ∈ domain
 
 end
 
@@ -200,10 +200,10 @@ abbrev Theory.trueArith : Theory ℒₒᵣ := Structure.theory ℒₒᵣ ℕ
 
 notation "𝐓𝐀" => Theory.trueArith
 
-variable (T : Theory ℒₒᵣ) [𝐄𝐐 ≾ T]
+variable (T : Theory ℒₒᵣ) [𝐄𝐐 ≼ T]
 
 lemma oRing_consequence_of (σ : Sentence ℒₒᵣ)
-  (H : ∀ (M : Type)
+  (H : ∀ (M : Type w)
          [Zero M] [One M] [Add M] [Mul M] [LT M]
          [M ⊧ₘ* T],
          M ⊧ₘ σ) :
