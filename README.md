@@ -151,6 +151,15 @@ Assigned to: [@SnO2WMaN](https://github.com/SnO2WMaN)
 
 ### Axioms
 
+| Notation | Schema | Name |
+| :-: | :-: | :- |
+| `𝗘𝗙𝗤` | `⊥ ⟶ p` | _Ex Falso Quodlibet_ or _Law of Explosion_   |
+| `𝗗𝗡𝗘`| `~~p ⟶ p` | _Double Negation Elimination_   |
+| `𝗟𝗘𝗠`   | `p ⋎ ~p`| _Law of Excluded Middle_       |
+| `𝘄𝗟𝗘𝗠` | `~p ⋎ ~~p`  | _Weak Law of Excluded Middle_     |
+| `𝗣𝗲`| `((p ⟶ q) ⟶ p) ⟶ p` | _Peirce's Law_   |
+| `𝗚𝗗` |`(p ⟶ q) ⋎ (q ⟶ p)`   | _Gödel-Dummett Axiom_    |
+
 ### Deduction System
 
 Our Hilbert-style deduction system for propositional logic is designed to take parameters.
@@ -165,44 +174,45 @@ structure DeductionParameter (α) where
 
 In this formalization, logics that we usually refer to as $\bf Int$ (Intuitionistic Propositional Logic), $\bf Cl$ (Classical Propositional Logic), etc. is characterized by deduction parameter.
 
-| Notation | Name | Axioms |
-| :-: | :-: | :-: |
-| `𝐈𝐧𝐭` | Intuitionistic | `𝗘𝗙𝗤`|
-| `𝐂𝐥` | Classical | `𝗘𝗙𝗤 ∪ 𝗟𝗘𝗠` |
+| Notation | Axioms | Name |
+| :-:   | :-- | :-- |
+|       | `∅`| Minimal |
+| `𝐈𝐧𝐭` | `𝗘𝗙𝗤`| Intuitionistic |
+| `𝐂𝐥`  | `𝗘𝗙𝗤 ∪ 𝗟𝗘𝗠` | Classical |
 
 ### Theorems
 
 #### Glivenko's Theorem
 
-```
+```lean
 theorem iff_provable_dn_efq_dne_provable: 𝐈𝐧𝐭 ⊢! ~~p ↔ 𝐂𝐥 ⊢! p
 ```
 
 #### Soundness
 
-```
+```lean
 instance : Sound 𝓓 𝔽(Ax(𝓓))
 ```
 
 #### Law of Excluded Middle
 
-Law of Excluded Middle (LEM) is not always provable in intuitionistic logic.
+Law of Excluded Middle is not always provable in intuitionistic logic.
 
-```
+```lean
 theorem noLEM : ∃ (p : Formula α), 𝐈𝐧𝐭 ⊬! p ⋎ ~p := by
 ```
 
 Thus, intuitionistic logic is proper weaker than classical logic, since LEM is always provable in classical logic
 
-```
-theorem strictReducible_intuitionistic_classical : (𝐈𝐧𝐭 : DeductionParameter α) <ₛ 𝐂𝐥
+```lean
+theorem strictReducible_intuitionistic_classical : 𝐈𝐧𝐭 <ₛ 𝐂𝐥
 ```
 
 #### Completeness
 
 Standard completeness proof using canonical models, etc.
 
-```
+```lean
 instance : Complete 𝐈𝐧𝐭 𝔽(Ax(𝐈𝐧𝐭))
 ```
 
@@ -210,7 +220,7 @@ instance : Complete 𝐈𝐧𝐭 𝔽(Ax(𝐈𝐧𝐭))
 
 Intuitionistic Logic have Disjunctive Property (DP).
 
-```
+```lean
 class Disjunctive (𝓢 : S) : Prop where
   disjunctive : ∀ {p q}, 𝓢 ⊢! p ⋎ q → 𝓢 ⊢! p ∨ 𝓢 ⊢! q
 
@@ -250,7 +260,7 @@ notation "𝗞" => Modal.Standard.AxiomSet.K
 
 | Notation | Name | Schema | Geach |
 | :-: | :-: | :-: | :-: |
-| `𝗞` | K    | `□(p ⟶ q) ⟶ □p ⟶ □q` | |
+| `𝗞` | K   | `□(p ⟶ q) ⟶ □p ⟶ □q` | |
 | `𝗧` | T    | `□p ⟶ p`     | ✅ |
 | `𝗕` | B    | `p ⟶ □◇p`   | ✅ |
 | `𝗗` | D    | `□p ⟶ ◇p`   | ✅ |
