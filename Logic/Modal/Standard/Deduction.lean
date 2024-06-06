@@ -100,7 +100,7 @@ instance [IncludeK L] : System.HasAxiomK L where
 instance [Normal L] : System.K L where
 
 lemma inducition_with_nec [HasNec L]
-  {motive  : (p : Formula α) → Deduction L p → Sort*}
+  {motive  : (p : Formula α) → L ⊢ p → Sort*}
   (hMaxm   : ∀ {p}, (h : p ∈ Ax(L)) → motive p (maxm h))
   (hMdp    : ∀ {p q}, (hpq : L ⊢ p ⟶ q) → (hp : L ⊢ p) → motive (p ⟶ q) hpq → motive p hp → motive q (hpq ⨀ hp))
   (hNec    : ∀ {p}, (hp : L ⊢ p) → motive p hp → motive (□p) (nec HasNec.has_nec hp))
@@ -164,6 +164,8 @@ instance : Normal (α := α) 𝐊𝐃 where
 protected abbrev K4 : DeductionParameter α := NecOnly (𝗞 ∪ 𝟰)
 notation "𝐊𝟒" => DeductionParameter.K4
 instance : Normal (α := α) 𝐊𝟒 where
+instance : System.K4 (𝐊𝟒 : DeductionParameter α) where
+  Four _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
 
 
 protected abbrev K5 : DeductionParameter α := NecOnly (𝗞 ∪ 𝟱)
@@ -174,7 +176,6 @@ instance : Normal (α := α) 𝐊𝟓 where
 protected abbrev S4 : DeductionParameter α := NecOnly (𝗞 ∪ 𝗧 ∪ 𝟰)
 notation "𝐒𝟒" => DeductionParameter.S4
 instance : Normal (α := α) 𝐒𝟒 where
-
 instance : System.S4 (𝐒𝟒 : DeductionParameter α) where
   T _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
   Four _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
@@ -221,6 +222,8 @@ end DeductionParameter
 @[simp] lemma reducible_K_KD : (𝐊 : DeductionParameter α) ≤ₛ 𝐊𝐃 := by simp
 
 @[simp] lemma reducible_KT_S4 : (𝐊𝐓 : DeductionParameter α) ≤ₛ 𝐒𝟒 := by simp
+
+@[simp] lemma reducible_K4_S4 : (𝐊𝟒 : DeductionParameter α) ≤ₛ 𝐒𝟒 := by apply Deduction.reducible_of_subset (by simp);
 
 @[simp] lemma reducible_S4_S4Dot2 : (𝐒𝟒 : DeductionParameter α) ≤ₛ 𝐒𝟒.𝟐 := by simp
 
