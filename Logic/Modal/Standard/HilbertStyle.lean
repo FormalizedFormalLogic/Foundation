@@ -270,6 +270,23 @@ def collect_dia_or' (h : 𝓢 ⊢ ◇p ⋎ ◇q) : 𝓢 ⊢ ◇(p ⋎ q) := coll
 -- def distributeDiaAnd' (h : 𝓢 ⊢ ◇(p ⋏ q)) : 𝓢 ⊢ ◇p ⋏ ◇q := distributeDiaAnd ⨀ h
 lemma distribute_dia_and'! (h : 𝓢 ⊢! ◇(p ⋏ q)) : 𝓢 ⊢! ◇p ⋏ ◇q := distribute_dia_and! ⨀ h
 
+def boxdotAxiomK : 𝓢 ⊢ ⊡(p ⟶ q) ⟶ (⊡p ⟶ ⊡q) := by
+  simp [StandardModalLogicalConnective.boxdot]
+  apply deduct';
+  apply deduct;
+  have d : [p ⋏ □p, (p ⟶ q) ⋏ □(p ⟶ q)] ⊢[𝓢] (p ⟶ q) ⋏ □(p ⟶ q) := FiniteContext.byAxm;
+  exact conj₃' ((conj₁' d) ⨀ (conj₁' (q := □p) (FiniteContext.byAxm))) <|
+    (axiomK' $ conj₂' d) ⨀ (conj₂' (p := p) (FiniteContext.byAxm));
+@[simp] lemma boxdot_axiomK! : 𝓢 ⊢! ⊡(p ⟶ q) ⟶ (⊡p ⟶ ⊡q) := ⟨boxdotAxiomK⟩
+
+def boxdotAxiomT : 𝓢 ⊢ ⊡p ⟶ p := by
+  apply deduct';
+  have : [⊡p] ⊢[𝓢] p ⋏ □p := FiniteContext.byAxm;
+  exact conj₁' (by assumption);
+@[simp] lemma boxdot_axiomT! : 𝓢 ⊢! ⊡p ⟶ p := ⟨boxdotAxiomT⟩
+
+def boxdotNec (d : 𝓢 ⊢ p) : 𝓢 ⊢ ⊡p := conj₃' d (nec d)
+lemma boxdot_nec! (d : 𝓢 ⊢! p) : 𝓢 ⊢! ⊡p := ⟨boxdotNec d.some⟩
 
 def axiomT [HasAxiomT 𝓢] : 𝓢 ⊢ □p ⟶ p := HasAxiomT.T _
 @[simp] lemma axiomT! [HasAxiomT 𝓢] : 𝓢 ⊢! □p ⟶ p := ⟨axiomT⟩
