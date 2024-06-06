@@ -1,3 +1,5 @@
+import Logic.Modal.Standard.Makinson
+
 import Logic.Modal.Standard.Kripke.Morphism
 import Logic.Modal.Standard.Kripke.Soundness
 import Logic.Modal.Standard.Kripke.Completeness
