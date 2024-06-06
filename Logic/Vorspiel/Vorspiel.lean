@@ -619,13 +619,12 @@ lemma nil_iff {l : List α} : l = [] ↔ ∀ a, a ∉ l := by
 
 section remove
 
--- port from https://github.com/leanprover-community/mathlib4/pull/11846/files#diff-5ae50e1b506c7ca8eacfd46f04e0d246916c48ce462d44b5512cfba169525bfe
-
-def remove [DecidableEq α] (a : α) : List α → List α
-  | [] => []
-  | (b :: bs) => if a = b then remove a bs else b :: remove a bs
+def remove [DecidableEq α] (a : α) : List α → List α := List.filter (· ≠ a)
 
 variable [DecidableEq α]
+
+@[simp]
+lemma remove_nil (a : α) : [].remove a = [] := by simp [List.remove]
 
 @[simp]
 lemma eq_remove_cons {l : List α} : (q :: l).remove q = l.remove q := by induction l <;> simp_all [List.remove];
@@ -634,20 +633,12 @@ lemma eq_remove_cons {l : List α} : (q :: l).remove q = l.remove q := by induct
 lemma remove_singleton_of_ne {p q : α} (h : p ≠ q) : [p].remove q = [p] := by simp_all [List.remove, Ne.symm];
 
 lemma mem_remove_iff {l : List α} : b ∈ l.remove a ↔ b ∈ l ∧ b ≠ a := by
-  induction l with
-  | nil => simp only [remove, not_mem_nil, ne_eq, false_and];
-  | cons a' l ih =>
-    simp only [remove, Bool.not_eq_true, mem_cons, ne_eq]
-    cases Decidable.em (a = a') with
-    | inl h => simp_all only [ne_eq, ↓reduceIte, and_congr_left_iff, false_or, implies_true];
-    | inr h =>
-      simp_all only [ne_eq, ite_false, mem_cons];
-      constructor;
-      . intro h;
-        rcases h with (hl | hr);
-        . simp_all [Ne.symm];
-        . simp_all only [not_false_eq_true, and_self, iff_true, or_true];
-      . simp_all only [not_false_eq_true, and_true, and_imp, implies_true];
+  simp [List.remove, List.of_mem_filter];
+  constructor;
+  . intro h;
+    exact ⟨mem_of_mem_filter h, by simpa using of_mem_filter h⟩;
+  . rintro ⟨h₁, h₂⟩;
+    exact mem_filter_of_mem h₁ (by simpa using h₂);
 
 lemma mem_of_mem_remove {a b : α} {l : List α} (h : b ∈ l.remove a) : b ∈ l := by
   rw [mem_remove_iff] at h; exact h.1
@@ -656,7 +647,7 @@ lemma mem_of_mem_remove {a b : α} {l : List α} (h : b ∈ l.remove a) : b ∈ 
   (a :: l).remove a = l.remove a := by simp[remove]
 
 lemma remove_cons_of_ne (l : List α) {a b} (ne : a ≠ b) :
-  (a :: l).remove b = a :: l.remove b := by simp[remove, Ne.symm ne]
+  (a :: l).remove b = a :: l.remove b := by simp_all [remove];
 
 lemma remove_subset (a) (l : List α) :
     l.remove a ⊆ l := by
