@@ -1,5 +1,6 @@
-import Logic.Modal.Normal.LogicSymbol
-import Logic.Propositional.Superintuitionistic.Formula
+import Logic.Vorspiel.Collection
+import Logic.Modal.LogicSymbol
+import Logic.Modal.Standard.System
 
 namespace LO.Modal.Standard
 
@@ -264,6 +265,12 @@ notation "𝗖𝗗" => AxiomSet.CD
 
 protected abbrev C4 : AxiomSet α := { Axioms.C4 p | p }
 notation "𝗖𝟰" => AxiomSet.C4
+
+protected abbrev Ver : AxiomSet α := { Axioms.Ver p | p }
+notation "𝗩𝗲𝗿" => AxiomSet.Ver
+
+protected abbrev Tc : AxiomSet α := { Axioms.Tc p | p }
+notation "𝗧𝗰" => AxiomSet.Tc
 
 end AxiomSet
 

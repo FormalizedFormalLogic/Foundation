@@ -1,5 +1,5 @@
 import Logic.Modal.Standard.Boxdot
-import Logic.Modal.Standard.Makinson
+import Logic.Modal.Standard.Maximal
 
 import Logic.Modal.Standard.Kripke.Morphism
 import Logic.Modal.Standard.Kripke.Soundness

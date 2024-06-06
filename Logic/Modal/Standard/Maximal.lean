@@ -204,16 +204,15 @@ lemma iff_Ver_classical : 𝐕𝐞𝐫 ⊢! p ↔ 𝐂𝐥 ⊢! pⱽᴾ := by
 example : 𝐓𝐫𝐢𝐯 ⊬! Axioms.L p := by
   apply iff_Triv_classical.not.mpr;
   apply not_imp_not.mpr $ Superintuitionistic.Kripke.sound!;
-  simp [Axioms.L, TrivTranslation, toPropFormula];
+  dsimp [Axioms.L, TrivTranslation, toPropFormula];
+  -- TODO: Obviously this is not tautology in classical
   sorry;
 
 example : 𝐕𝐞𝐫 ⊬! (~(□⊥) : Formula α) := by
   apply iff_Ver_classical.not.mpr;
   apply not_imp_not.mpr $ Superintuitionistic.Kripke.sound!;
-  simp [Axioms.L, TrivTranslation, toPropFormula];
+  dsimp [VerTranslation, toPropFormula];
+  -- TODO: Obviously this is not tautology in classical
   sorry;
-  -- simp;
-  -- by_contra hC;
-  -- have := hC ⨀ (imp_id!);
 
 end LO.Modal.Standard
