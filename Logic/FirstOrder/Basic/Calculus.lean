@@ -443,11 +443,11 @@ abbrev DisjconseqTr (T : Theory L) (Γ : Sequent L) : Type _ := (Rew.emb.hom '' 
 
 scoped infix: 45 " ⊢'' " => DisjconseqTr
 
-lemma proofToSyntactic {T : Theory L} {σ} (b : T ⊢ σ) :
+def proofToSyntactic {T : Theory L} {σ} (b : T ⊢ σ) :
     (Rew.emb.hom '' T : SyntacticTheory L) ⊢ (Rew.emb.hom σ : SyntacticFormula L) :=
   ⟨_, by simp; intro σ hσ; exact ⟨σ, Gentzen.Disjconseq.subset b σ hσ, rfl⟩, twoSidedEquiv b.derivation⟩
 
-lemma toProof {T : Theory L} {σ} (b : (Rew.emb.hom '' T : SyntacticTheory L) ⊢ (Rew.emb.hom σ : SyntacticFormula L)) :
+noncomputable def toProof {T : Theory L} {σ} (b : (Rew.emb.hom '' T : SyntacticTheory L) ⊢ (Rew.emb.hom σ : SyntacticFormula L)) :
     T ⊢ σ := by
   rcases Gentzen.proofEquivDerivation b with ⟨⟨Δ, hΔ⟩, d⟩
   have : ∀ p ∈ Δ, ∃ σ ∈ T, Rew.emb.hom σ = p := by simpa using hΔ

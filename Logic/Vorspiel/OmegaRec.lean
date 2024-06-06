@@ -1,6 +1,7 @@
 import Logic.Vorspiel.Computability
 import Mathlib.Data.List.Sigma
-attribute [-instance] Encodable.finPi Encodable.fintypeArrowOfEncodable
+
+attribute [-instance] WType.instEncodable Encodable.finPi Encodable.fintypeArrowOfEncodable
 
 open Encodable
 variable {α β γ σ : Type*} [Primcodable α] [Primcodable β] [Primcodable γ] [Primcodable σ]
