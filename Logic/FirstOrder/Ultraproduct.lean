@@ -18,7 +18,7 @@ namespace Structure
 structure Uprod (𝓤 : Ultrafilter I) where
   val : (i : I) → A i
 
-instance UprodStruc : Structure.{u,u} L (Uprod A 𝓤) where
+instance UprodStruc : Structure L (Uprod A 𝓤) where
   func := fun _ f v => ⟨fun i ↦ (s i).func f (fun x ↦ (v x).val i)⟩
   rel  := fun _ r v => {i | (s i).rel r (fun x ↦ (v x).val i)} ∈ 𝓤
 
@@ -39,7 +39,7 @@ open Structure
 variable (e : Fin n → Uprod A 𝓤) (ε : μ → Uprod A 𝓤)
 
 lemma val_Uprod (t : Semiterm L μ n) :
-    t.val! (Uprod A 𝓤) e ε = ⟨fun i ↦ t.val (s i) (fun x ↦ (e x).val i) (fun x ↦ (ε x).val i)⟩ :=
+    t.valm (Uprod A 𝓤) e ε = ⟨fun i ↦ t.val (s i) (fun x ↦ (e x).val i) (fun x ↦ (ε x).val i)⟩ :=
   by induction t <;> simp[*, val_func]
 
 end Semiterm
@@ -57,7 +57,7 @@ lemma val_vecCons_val_eq {z : Uprod A 𝓤} {i : I} :
   by simp[Matrix.comp_vecCons (Uprod.val · i), Function.comp]
 
 lemma eval_Uprod {p : Semiformula L μ n} :
-    Eval! (Uprod A 𝓤) e ε p ↔ {i | Eval (s i) (fun x ↦ (e x).val i) (fun x ↦ (ε x).val i) p} ∈ 𝓤 := by
+    Evalm (Uprod A 𝓤) e ε p ↔ {i | Eval (s i) (fun x ↦ (e x).val i) (fun x ↦ (ε x).val i) p} ∈ 𝓤 := by
   induction p using rec' <;>
   simp[*, Prop.top_eq_true, Prop.bot_eq_false, eval_rel, eval_nrel, Semiterm.val_Uprod]
   case hverum => exact Filter.univ_mem
@@ -77,7 +77,7 @@ lemma eval_Uprod {p : Semiformula L μ n} :
         have : Eval (s i) (z.val i :> fun x ↦ (e x).val i) (fun x ↦ (ε x).val i) p :=
           by rw [val_vecCons_val_eq]; exact hι
         by_contra hc
-        have : ¬Eval! (A i) (z.val i :> fun x ↦ (e x).val i) (fun x ↦ (ε x).val i) p :=
+        have : ¬Evalm (A i) (z.val i :> fun x ↦ (e x).val i) (fun x ↦ (ε x).val i) p :=
           Classical.epsilon_spec (p := fun z => ¬(Eval (s i) (z :> fun x ↦ (e x).val i) _ p)) ⟨a, hc⟩
         contradiction)
     · intro h x
@@ -97,8 +97,8 @@ lemma eval_Uprod {p : Semiformula L μ n} :
         rw[val_vecCons_val_eq] at this; exact this)
 
 lemma val_Uprod {p : Formula L μ} :
-    Val! (Uprod A 𝓤) ε p ↔ {i | Val (s i) (fun x ↦ (ε x).val i) p} ∈ 𝓤 :=
-  by simp[Val, eval_Uprod, Matrix.empty_eq]
+    Evalfm (Uprod A 𝓤) ε p ↔ {i | Evalf (s i) (fun x ↦ (ε x).val i) p} ∈ 𝓤 :=
+  by simp[Evalf, eval_Uprod, Matrix.empty_eq]
 
 end Semiformula
 
@@ -131,26 +131,26 @@ lemma ultrafilter_exists [(t : FinSubtheory T) → Nonempty (A t)]
     intro t ht
     use t; use ht
     intro σ hσ
-    exact (H ⟨t, ht⟩).realizeTheory hσ)
+    exact (H ⟨t, ht⟩).RealizeSet hσ)
 
-lemma compactnessAux :
-    Semantics.SatisfiableTheory T ↔ ∀ i : FinSubtheory T, Semantics.SatisfiableTheory (i.val : Theory L) := by
+lemma compactness_aux :
+    Satisfiable T ↔ ∀ i : FinSubtheory T, Satisfiable (i.val : Theory L) := by
   constructor
-  · rintro h ⟨t, ht⟩; exact Semantics.SatisfiableTheory.of_subset h ht
+  · rintro h ⟨t, ht⟩; exact Semantics.Satisfiable.of_subset h ht
   · intro h
     have : ∀ i : FinSubtheory T, ∃ (M : Type u) (_ : Nonempty M) (_ : Structure L M), M ⊧ₘ* (i.val : Theory L) :=
-      by intro i; exact satisfiableTheory_iff.mp (h i)
+      by intro i; exact satisfiable_iff.mp (h i)
     choose A si s hA using this
     have : ∃ 𝓤 : Ultrafilter (FinSubtheory T), Set.image (Semiformula.domain A) T ⊆ 𝓤.sets := ultrafilter_exists A hA
     rcases this with ⟨𝓤, h𝓤⟩
     have : Structure.Uprod A 𝓤 ⊧ₘ* T := ⟨by intro σ hσ; exact models_Uprod.mpr (h𝓤 $ Set.mem_image_of_mem (Semiformula.domain A) hσ)⟩
-    exact satisfiableTheory_intro (Structure.Uprod A 𝓤) this
+    exact satisfiable_intro (Structure.Uprod A 𝓤) this
 
-theorem compactness :
-    Semantics.SatisfiableTheory T ↔ ∀ T' : Finset (Sentence L), ↑T' ⊆ T → Semantics.SatisfiableTheory (T' : Theory L) := by
-  rw[compactnessAux]; simp
+theorem compact :
+    Satisfiable T ↔ ∀ u : Finset (Sentence L), ↑u ⊆ T → Satisfiable (u : Theory L) := by
+  rw[compactness_aux]; simp
 
-instance : Compact (Sentence L) := ⟨compactness⟩
+instance : Compact (SmallStruc L) := ⟨compact⟩
 
 end
 

@@ -20,8 +20,7 @@ import Logic.Propositional.Classical.Basic.Completeness
 import Logic.Propositional.Classical.Basic
 
 -- Propositional Intuitionistic
-import Logic.Propositional.Intuitionistic
-
+import Logic.Propositional.Superintuitionistic
 import Logic.Propositional.Translation
 
 -- FirstOrder
@@ -71,5 +70,4 @@ import Logic.FirstOrder.Incompleteness.FirstIncompleteness
 import Logic.FirstOrder.Incompleteness.SelfReference
 
 -- Modal Logic
-
-import Logic.Modal.Normal
+import Logic.Modal.Standard

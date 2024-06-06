@@ -153,6 +153,12 @@ by simp[Vee.vee]
 @[simp] lemma exClosure_inj (p q : Semiformula L ξ n) : ∃* p = ∃* q ↔ p = q := by
   induction n <;> simp [*, exClosure_succ]
 
+@[simp] lemma univItr_inj {k} (p q : Semiformula L ξ (n + k)) : ∀^[k] p = ∀^[k] q ↔ p = q := by
+  induction k <;> simp [*, univItr_succ]
+
+@[simp] lemma exItr_inj {k} (p q : Semiformula L ξ (n + k)) : ∃^[k] p = ∃^[k] q ↔ p = q := by
+  induction k <;> simp [*, exItr_succ]
+
 @[simp] lemma imp_inj {p₁ p₂ q₁ q₂ : Semiformula L ξ n} :
     p₁ ⟶ p₂ = q₁ ⟶ q₂ ↔ p₁ = q₁ ∧ p₂ = q₂ := by simp [imp_eq]
 
@@ -512,6 +518,12 @@ lemma lMap_nrel {k} (r : L₁.Rel k) (v : Fin k → Semiterm L₁ ξ n) :
 @[simp] lemma lMap_exClosure (p : Semiformula L₁ ξ n) :
     lMap Φ (∃* p) = ∃* lMap Φ p := by induction n <;> simp [*, exClosure_succ]
 
+@[simp] lemma lMap_univItr {k} (p : Semiformula L₁ ξ (n + k)) :
+    lMap Φ (∀^[k] p) = ∀^[k] lMap Φ p := by induction k <;> simp [*, univItr_succ]; rfl
+
+@[simp] lemma lMap_exItr {k} (p : Semiformula L₁ ξ (n + k)) :
+    lMap Φ (∃^[k] p) = ∃^[k] lMap Φ p := by induction k <;> simp [*, exItr_succ]; rfl
+
 @[simp] lemma fvarList_lMap (Φ : L₁ →ᵥ L₂) (p : Semiformula L₁ ξ n) : fvarList (Semiformula.lMap Φ p) = fvarList p := by
   induction p using Semiformula.rec' <;> try simp [lMap_rel, lMap_nrel, *]
   case hrel n k r v => simp [fvarList]
@@ -529,7 +541,7 @@ def fvEnumInv (p : Semiformula L ξ n) : ℕ → ξ :=
 lemma fvEnumInv_fvEnum {p : Semiformula L ξ n} {x : ξ} (hx : x ∈ p.fvarList) :
     fvEnumInv p (fvEnum p x) = x := by
   simp [fvEnumInv, fvEnum]; intro h
-  exact False.elim <| not_le.mpr (List.indexOf_lt_length.mpr $ hx) h
+  exact False.elim <| not_le.mpr (List.indexOf_lt_length.mpr hx) h
 
 def fvListing (p : Semiformula L ξ n) : ξ → Fin (p.fvarList.length + 1) :=
   fun x ↦ ⟨p.fvarList.indexOf x, by simp [Nat.lt_succ, List.indexOf_le_length]⟩
@@ -549,6 +561,10 @@ end Semiformula
 abbrev Theory (L : Language) := Set (Sentence L)
 
 abbrev SyntacticTheory (L : Language) := Set (SyntacticFormula L)
+
+instance : Collection (SyntacticFormula L) (SyntacticTheory L) := inferInstance
+
+instance : Collection (Sentence L) (Theory L) := inferInstance
 
 def Theory.lMap (Φ : L₁ →ᵥ L₂) (T : Theory L₁) : Theory L₂ := Semiformula.lMap Φ '' T
 

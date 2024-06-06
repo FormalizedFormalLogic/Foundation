@@ -439,15 +439,15 @@ def twoSidedEquiv {Γ Δ : List (Sentence L)} :
     Γ ⊢² Δ ≃ (Γ.map Rew.emb.hom : Sequent L) ⊢² Δ.map Rew.emb.hom :=
   Tait.equiv.trans <| oneSidedEquiv.trans <| Equiv.trans (by simp[Function.comp]; exact Equiv.refl _) Tait.equiv.symm
 
-abbrev DisjconseqTr (T : Theory L) (Γ : Sequent L) : Type _ := Rew.emb.hom '' T ⊢' Γ
+abbrev DisjconseqTr (T : Theory L) (Γ : Sequent L) : Type _ := (Rew.emb.hom '' T : SyntacticTheory L) ⊢' Γ
 
 scoped infix: 45 " ⊢'' " => DisjconseqTr
 
 lemma proofToSyntactic {T : Theory L} {σ} (b : T ⊢ σ) :
-    Rew.emb.hom '' T ⊢ (Rew.emb.hom σ : SyntacticFormula L) :=
-  ⟨_, by simp; intro σ hσ; exact ⟨σ, b.antecedent_ss σ hσ, rfl⟩, twoSidedEquiv b.derivation⟩
+    (Rew.emb.hom '' T : SyntacticTheory L) ⊢ (Rew.emb.hom σ : SyntacticFormula L) :=
+  ⟨_, by simp; intro σ hσ; exact ⟨σ, Gentzen.Disjconseq.subset b σ hσ, rfl⟩, twoSidedEquiv b.derivation⟩
 
-lemma toProof {T : Theory L} {σ} (b : Rew.emb.hom '' T ⊢ (Rew.emb.hom σ : SyntacticFormula L)) :
+lemma toProof {T : Theory L} {σ} (b : (Rew.emb.hom '' T : SyntacticTheory L) ⊢ (Rew.emb.hom σ : SyntacticFormula L)) :
     T ⊢ σ := by
   rcases Gentzen.proofEquivDerivation b with ⟨⟨Δ, hΔ⟩, d⟩
   have : ∀ p ∈ Δ, ∃ σ ∈ T, Rew.emb.hom σ = p := by simpa using hΔ
@@ -508,18 +508,18 @@ variable (Φ : L₁ →ᵥ L₂) {T : Theory L₁}
 def lMap {σ : Sentence L₁} (b : T ⊢ σ) :
     Theory.lMap Φ T ⊢ Semiformula.lMap Φ σ :=
   Gentzen.toDisjconseq (by simpa using Gentzen.lMap' Φ b.derivation)
-    (by simp; intro σ hσ; exact Set.mem_image_of_mem _ (b.antecedent_ss σ hσ) )
+    (by simp; intro σ hσ; exact Set.mem_image_of_mem _ (Gentzen.Disjconseq.subset b σ hσ) )
 
-lemma inconsistent_lMap : ¬System.Consistent T → ¬System.Consistent (T.lMap Φ) := by
-  simp [System.inconsistent_iff_provable_falsum]; intro ⟨b⟩; exact ⟨by simpa using lMap Φ b⟩
+lemma inconsistent_lMap : System.Inconsistent T → System.Inconsistent (T.lMap Φ) := by
+  simp [System.inconsistent_iff_provable_bot]; intro ⟨b⟩; exact ⟨by simpa using lMap Φ b⟩
 
 end System
 
 namespace Theory
 
-instance {T U : Theory L} : T ≾ T + U := ⟨fun {f} hf ↦ System.weakening hf (by simp [add_def])⟩
+instance {T U : Theory L} : T ≼ T + U := System.Axiomatized.subtheoryOfSubset (by simp [add_def])
 
-instance {T U : Theory L} : U ≾ T + U := ⟨fun {f} hf ↦ System.weakening hf (by simp [add_def])⟩
+instance {T U : Theory L} : U ≼ T + U := System.Axiomatized.subtheoryOfSubset (by simp [add_def])
 
 end Theory
 

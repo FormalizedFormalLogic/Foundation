@@ -4,7 +4,7 @@ namespace LO.FirstOrder
 
 namespace Arith
 
-variable {L : Language} [L.ORing] (T : Theory L) [𝐄𝐐 ≾ T] [L.Exp]
+variable {L : Language.{u}} [L.ORing] (T : Theory L) [𝐄𝐐 ≼ T] [L.Exp]
 
 instance : Language.ORing ℒₒᵣ(exp) := Language.ORing.mk
 
@@ -29,7 +29,7 @@ inductive Exponential : Theory ℒₒᵣ(exp)
 
 notation "𝐄𝐗𝐏" => Exponential
 
-abbrev elementaryArithmetic : Theory ℒₒᵣ(exp) := Semiformula.lMap Language.oringEmb '' 𝐏𝐀⁻ + Exponential + indScheme ℒₒᵣ(exp) (Arith.Hierarchy Σ 0)
+abbrev elementaryArithmetic : Theory ℒₒᵣ(exp) := Semiformula.lMap Language.oringEmb '' 𝐏𝐀⁻ + Exponential + indScheme ℒₒᵣ(exp) (Arith.Hierarchy 𝚺 0)
 
 notation "𝐄𝐀" => elementaryArithmetic
 
@@ -126,16 +126,16 @@ namespace Model
 
 instance models_peanoMinus_of_models_elementaryArithmetic : M ⊧ₘ* 𝐏𝐀⁻ :=
   haveI : M ⊧ₘ* (Semiformula.lMap Language.oringEmb '' 𝐏𝐀⁻ : Theory ℒₒᵣ(exp)) :=
-    ModelsTheory.of_add_left_left M (Semiformula.lMap Language.oringEmb '' 𝐏𝐀⁻) 𝐄𝐗𝐏 (Theory.indScheme ℒₒᵣ(exp) (Arith.Hierarchy Σ 0))
+    ModelsTheory.of_add_left_left M (Semiformula.lMap Language.oringEmb '' 𝐏𝐀⁻) 𝐄𝐗𝐏 (Theory.indScheme ℒₒᵣ(exp) (Arith.Hierarchy 𝚺 0))
   ⟨by intro σ hσ;
       simpa [models_iff] using
         @ModelsTheory.models ℒₒᵣ(exp) M _ _ _ this _ (Set.mem_image_of_mem (Semiformula.lMap Language.oringEmb) hσ)⟩
 
 instance models_exponential_of_models_elementaryArithmetic :
-    M ⊧ₘ* 𝐄𝐗𝐏 := ModelsTheory.of_add_left_right M (Semiformula.lMap Language.oringEmb '' 𝐏𝐀⁻) 𝐄𝐗𝐏 (Theory.indScheme ℒₒᵣ(exp) (Arith.Hierarchy Σ 0))
+    M ⊧ₘ* 𝐄𝐗𝐏 := ModelsTheory.of_add_left_right M (Semiformula.lMap Language.oringEmb '' 𝐏𝐀⁻) 𝐄𝐗𝐏 (Theory.indScheme ℒₒᵣ(exp) (Arith.Hierarchy 𝚺 0))
 
 instance models_indScheme_of_models_elementaryArithmetic :
-    M ⊧ₘ* Theory.indScheme ℒₒᵣ(exp) (Arith.Hierarchy Σ 0) :=
+    M ⊧ₘ* Theory.indScheme ℒₒᵣ(exp) (Arith.Hierarchy 𝚺 0) :=
   ModelsTheory.of_add_right M (Semiformula.lMap Language.oringEmb '' 𝐏𝐀⁻ + 𝐄𝐗𝐏) _
 
 instance models_iSigmaZero_of_models_elementaryArithmetic : M ⊧ₘ* 𝐈𝚺₀ := ⟨by

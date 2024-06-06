@@ -88,8 +88,8 @@ The key results are summarised in `Logic/Summary.lean`.
 
 |                                   |                                            | Definition                                 |   Notation   |
 | :-------------------------------: | ------------------------------------------ | :----------------------------------------- | :----------: |
-| $\Gamma \vdash \varphi$       | Deduction　 | LO.Propositional.Intuitionistic.Deduction | `Γ ⊢ᴵ p` |
-| | Deductive (Exists deduction) | LO.Propositional.Intuitionistic.Deductive | `Γ ⊢ᴵ! p` |
+| $\Gamma \vdash \varphi$       | Deduction　 | LO.Propositional.Intuitionistic.Deduction | `Γ ⊢ⁱ p` |
+| | Deductive (Exists deduction) | LO.Propositional.Intuitionistic.Deductive | `Γ ⊢ⁱ! p` |
 
 ### Kripkean Semantics
 
@@ -99,24 +99,24 @@ The key results are summarised in `Logic/Summary.lean`.
 | :-------------------------------: | ------------------------------------------ | :----------------------------------------- | :----------: |
 | $w \Vdash^M \varphi$       | Satisfy on Kripkean Model $M$ and its world $w$　 | LO.Propositional.Intuitionistic.Formula.KripkeSatisfies | `w ⊩[M] p` |
 | $M \vDash \varphi$        | Models                    | LO.Propositional.Intuitionistic.Formula.KripkeModels |  `M ⊧ p`  |
-| $\Gamma \models \varphi$        | Conequences                    | LO.Propositional.Intuitionistic.Formula.KripkeConsequence |  `Γ ⊨ᴵ p`  |
+| $\Gamma \models \varphi$        | Conequences                    | LO.Propositional.Intuitionistic.Formula.KripkeConsequence |  `Γ ⊨ⁱ p`  |
 
 #### Theorems
 - [Soundness](https://iehality.github.io/lean4-logic/Logic/Propositional/Intuitionistic/Kripke/Soundness.html#LO.Propositional.Intuitionistic.Kripke.sounds)
   ```lean
-  theorem Kripke.sounds {Γ : Theory β} {p : Formula β} : (Γ ⊢ᴵ! p) → (Γ ⊨ᴵ p)
+  theorem Kripke.sounds {Γ : Theory β} {p : Formula β} : (Γ ⊢ⁱ! p) → (Γ ⊨ⁱ p)
   ```
 - [Completeness](https://iehality.github.io/lean4-logic/Logic/Propositional/Intuitionistic/Kripke/Completeness.html#LO.Propositional.Intuitionistic.Kripke.completes)
   ```lean
   theorem Kripke.completes
     [DecidableEq β] [Encodable β]
-    {Γ : Theory β} {p : Formula β} : (Γ ⊨ᴵ p) → (Γ ⊢ᴵ! p)
+    {Γ : Theory β} {p : Formula β} : (Γ ⊨ⁱ p) → (Γ ⊢ⁱ! p)
   ```
 - [Disjunction Property](https://iehality.github.io/lean4-logic/Logic/Propositional/Intuitionistic/Kripke/Completeness.html#LO.Propositional.Intuitionistic.Deduction.disjunctive)
   ```lean
   theorem Deduction.disjunctive
     [DecidableEq β] [Encodable β]
-    {p q : Formula β} : (∅ ⊢ᴵ! p ⋎ q) → (∅ ⊢ᴵ! p) ∨ (∅ ⊢ᴵ! q)
+    {p q : Formula β} : (∅ ⊢ⁱ! p ⋎ q) → (∅ ⊢ⁱ! p) ∨ (∅ ⊢ⁱ! q)
   ```
 
 ## First-Order Logic
@@ -169,8 +169,8 @@ The key results are summarised in `Logic/Summary.lean`.
   theorem LO.FirstOrder.Arith.first_incompleteness
       (T : LO.FirstOrder.Theory ℒₒᵣ)
       [DecidablePred T]
-      [𝐄𝐐 ≾ T]
-      [𝐏𝐀⁻ ≾ T]
+      [𝐄𝐐 ≼ T]
+      [𝐏𝐀⁻ ≼ T]
       [LO.FirstOrder.Arith.SigmaOneSound T]
       [LO.FirstOrder.Theory.Computable T] :
       ¬LO.System.Complete T
@@ -180,8 +180,8 @@ The key results are summarised in `Logic/Summary.lean`.
     theorem LO.FirstOrder.Arith.undecidable
         (T : LO.FirstOrder.Theory ℒₒᵣ)
         [DecidablePred T]
-        [𝐄𝐐 ≾ T]
-        [𝐏𝐀⁻ ≾ T]
+        [𝐄𝐐 ≼ T]
+        [𝐏𝐀⁻ ≼ T]
         [LO.FirstOrder.Arith.SigmaOneSound T]
         [LO.FirstOrder.Theory.Computable T] :
         T ⊬ LO.FirstOrder.Arith.FirstIncompleteness.undecidable T ∧
@@ -196,14 +196,14 @@ In this formalization, _(Modal) Logic_ means set of axioms.
 
 | Logic            | Definition                    | Notation | Remarks         |
 | :--------------: | ----------------------------- | :------- | --------------- |
-| $\mathbf{K}$     | [LO.Modal.Normal.LogicK](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Logics.html#LO.Modal.Normal.LogicK) | `𝐊`      |                 |
-| $\mathbf{KD}$     | [LO.Modal.Normal.LogicKD](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Logics.html#LO.Modal.Normal.LogicKD) | `𝐊𝐃`      |                 |
-| $\mathbf{S4}$    | [LO.Modal.Normal.LogicS4](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Logics.html#LO.Modal.Normal.LogicS4) | `𝐒𝟒`     | Alias of `𝐊𝐓𝟒`. |
-| $\mathbf{S4.2}$  | [LO.Modal.Normal.LogicS4Dot2](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Logics.html#LO.Modal.Normal.LogicS4Dot2) | `𝐒𝟒.𝟐`   |                 |
-| $\mathbf{S4.3}$  | [LO.Modal.Normal.LogicS4Dot3](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Logics.html#LO.Modal.Normal.LogicS4Dot3) | `𝐒𝟒.𝟑`   |                 |
-| $\mathbf{S4Grz}$ | [LO.Modal.Normal.LogicS4Grz](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Logics.html#LO.Modal.Normal.LogicS4Grz) | `𝐒𝟒𝐆𝐫𝐳`  |                 |
-| $\mathbf{S5}$    | [LO.Modal.Normal.LogicS5](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Logics.html#LO.Modal.Normal.LogicS5) | `𝐒𝟓`     | Alias of `𝐊𝐓𝟓`. |
-| $\mathbf{GL}$    | [LO.Modal.Normal.LogicGL](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Logics.html#LO.Modal.Normal.LogicGL) | `𝐆𝐋`     |                 |
+| $\mathbf{K}$     | [LO.Modal.Normal.AxiomSet.K](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Axioms.html#LO.Modal.Normal.AxiomSet.K) | `𝐊`      |                 |
+| $\mathbf{KD}$     | [LO.Modal.Normal.AxiomSet.KD](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Axioms.html#LO.Modal.Normal.AxiomSet.KD) | `𝐊𝐃`      |                 |
+| $\mathbf{S4}$    | [LO.Modal.Normal.AxiomSet.S4](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Axioms.html#LO.Modal.Normal.AxiomSet.S4) | `𝐒𝟒`     | Alias of `𝐊𝐓𝟒`. |
+| $\mathbf{S4.2}$  | [LO.Modal.Normal.AxiomSet.S4Dot2](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Axioms.html#LO.Modal.Normal.AxiomSet.S4Dot2) | `𝐒𝟒.𝟐`   |                 |
+| $\mathbf{S4.3}$  | [LO.Modal.Normal.AxiomSet.S4Dot3](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Axioms.html#LO.Modal.Normal.AxiomSet.S4Dot3) | `𝐒𝟒.𝟑`   |                 |
+| $\mathbf{S4Grz}$ | [LO.Modal.Normal.AxiomSet.S4Grz](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Axioms.html#LO.Modal.Normal.AxiomSet.S4Grz) | `𝐒𝟒𝐆𝐫𝐳`  |                 |
+| $\mathbf{S5}$    | [LO.Modal.Normal.AxiomSet.S5](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Axioms.html#LO.Modal.Normal.AxiomSet.S5) | `𝐒𝟓`     | Alias of `𝐊𝐓𝟓`. |
+| $\mathbf{GL}$    | [LO.Modal.Normal.AxiomSet.GL](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Axioms.html#LO.Modal.Normal.AxiomSet.GL) | `𝐆𝐋`     |                 |
 
 |                                   |                                            | Definition                                 |   Notation   |
 | :-------------------------------: | ------------------------------------------ | :----------------------------------------- | :----------: |
@@ -237,7 +237,7 @@ In this formalization, _(Modal) Logic_ means set of axioms.
     ```
   -  **WIP:** Currently, these theorems was proved where only `Λ` is `𝐊`, `𝐊𝐃`, `𝐒𝟒`, `𝐒𝟓`.
 - Strong Completeness of Hilbert-style deduction for `𝐊` extend `𝐓`, `𝐁`, `𝐃`, `𝟒`, `𝟓` Extensions
-  ```
+  ```lean
   def Completeness
     {α β : Type u}
     (Λ : AxiomSet β)

@@ -1,3 +1,4 @@
+import Logic.FirstOrder.Completeness.Lemmata
 import Logic.FirstOrder.Arith.Model
 import Logic.Vorspiel.ExistsUnique
 import Mathlib.Algebra.Order.Monoid.Canonical.Defs
@@ -11,13 +12,13 @@ namespace Arith
 
 noncomputable section
 
-variable {M : Type} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐏𝐀⁻]
+variable {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐏𝐀⁻]
 
 open Language
 
 namespace Model
 
-instance : LE M := ⟨fun x y => x = y ∨ x < y⟩
+scoped instance : LE M := ⟨fun x y => x = y ∨ x < y⟩
 
 lemma le_def {x y : M} : x ≤ y ↔ x = y ∨ x < y := iff_of_eq rfl
 
@@ -72,20 +73,20 @@ lemma lt_trans : ∀ x y z : M, x < y → y < z → x < z := by
 lemma lt_tri : ∀ x y : M, x < y ∨ x = y ∨ y < x := by
   simpa[models_iff] using ModelsTheory.models M Theory.peanoMinus.ltTri
 
-instance : AddCommMonoid M where
+scoped instance : AddCommMonoid M where
   add_assoc := Model.add_assoc
   zero_add  := fun x => Model.add_comm x 0 ▸ Model.add_zero x
   add_zero  := Model.add_zero
   add_comm  := Model.add_comm
   nsmul := nsmulRec
 
-instance : CommMonoid M where
+scoped instance : CommMonoid M where
   mul_assoc := Model.mul_assoc
   one_mul   := fun x => Model.mul_comm x 1 ▸ Model.mul_one x
   mul_one   :=  Model.mul_one
   mul_comm  := Model.mul_comm
 
-instance : LinearOrder M where
+scoped instance : LinearOrder M where
   le_refl := fun x => Or.inl (by simp)
   le_trans := by
     rintro x y z (rfl | hx) (rfl | hy) <;> simp[*, le_def]
@@ -105,7 +106,7 @@ instance : LinearOrder M where
 
 protected lemma zero_mul : ∀ x : M, 0 * x = 0 := fun x => by simpa[mul_comm] using Model.mul_zero x
 
-instance : LinearOrderedCommSemiring M where
+scoped instance : LinearOrderedCommSemiring M where
   left_distrib := distr
   right_distrib := fun x y z => by simp[mul_comm _ z]; exact distr z x y
   zero_mul := Model.zero_mul
@@ -131,7 +132,7 @@ instance : LinearOrderedCommSemiring M where
   le_total := le_total
   decidableLE := fun _ _ => Classical.dec _
 
-instance : CanonicallyOrderedAddCommMonoid M where
+scoped instance : CanonicallyOrderedAddCommMonoid M where
   bot := 0
   bot_le := by simp
   exists_add_of_le := by
@@ -170,7 +171,7 @@ lemma eq_nat_of_lt_nat : ∀ {n : ℕ} {x : M}, x < n → ∃ m : ℕ, x = m
 open Hierarchy
 
 lemma val_numeral {n} : ∀ (t : Semiterm ℒₒᵣ Empty n),
-    ∀ v, Semiterm.val! M (v ·) Empty.elim t = (Semiterm.val! ℕ v Empty.elim t)
+    ∀ v, Semiterm.valm M (v ·) Empty.elim t = (Semiterm.valm ℕ v Empty.elim t)
   | #_,                                _ => by simp
   | Semiterm.func Language.Zero.zero _, e => by simp
   | Semiterm.func Language.One.one _,   e => by simp
@@ -178,7 +179,7 @@ lemma val_numeral {n} : ∀ (t : Semiterm ℒₒᵣ Empty n),
   | Semiterm.func Language.Mul.mul v,   e => by simp[Semiterm.val_func, val_numeral (v 0), val_numeral (v 1)]
 
 lemma pval_of_pval_nat_of_sigma_one : ∀ {n} {σ : Semisentence ℒₒᵣ n},
-    Hierarchy Σ 1 σ → ∀ {e}, Semiformula.PVal! ℕ e σ → Semiformula.PVal! M (e ·) σ
+    Hierarchy 𝚺 1 σ → ∀ {e}, Semiformula.Evalbm ℕ e σ → Semiformula.Evalbm M (e ·) σ
   | _, _, Hierarchy.verum _ _ _,               _ => by simp
   | _, _, Hierarchy.falsum _ _ _,              _ => by simp
   | _, _, Hierarchy.rel _ _ Language.Eq.eq v,  e => by simp[Semiformula.eval_rel, Matrix.comp_vecCons', val_numeral]
@@ -202,19 +203,19 @@ lemma pval_of_pval_nat_of_sigma_one : ∀ {n} {σ : Semisentence ℒₒᵣ n},
     exact ⟨x, by simpa using hx, by simpa[Matrix.comp_vecCons'] using pval_of_pval_nat_of_sigma_one hp h⟩
   | _, _, Hierarchy.sigma (p := p) hp,         e => by
     simp; intro x h
-    have : Hierarchy Σ 1 p := hp.accum _
+    have : Hierarchy 𝚺 1 p := hp.accum _
     exact ⟨x, by simpa[Matrix.comp_vecCons'] using pval_of_pval_nat_of_sigma_one this h⟩
   | _, _, Hierarchy.ex hp,                     e => by
     simp; intro x hx; exact ⟨x, by simpa[Matrix.comp_vecCons'] using pval_of_pval_nat_of_sigma_one hp hx⟩
 
 end Model
 
-variable {T : Theory ℒₒᵣ} [𝐄𝐐 ≾ T] [𝐏𝐀⁻ ≾ T]
+variable {T : Theory ℒₒᵣ} [𝐄𝐐 ≼ T] [𝐏𝐀⁻ ≼ T]
 
-theorem sigma_one_completeness {σ : Sentence ℒₒᵣ} (hσ : Hierarchy Σ 1 σ) :
-    ℕ ⊧ₘ σ → T ⊢ σ := fun H =>
-  Complete.complete (oRing_consequence_of _ _ (fun M _ _ _ _ _ _ => by
-    haveI : M ⊧ₘ* 𝐏𝐀⁻ := ModelsTheory.of_subtheory (T₁ := T) inferInstance (Semantics.ofSystemSubtheory _ _)
+theorem sigma_one_completeness {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
+    ℕ ⊧ₘ σ → T ⊢! σ := fun H =>
+  complete (oRing_consequence_of.{0} _ _ (fun M _ _ _ _ _ _ => by
+    haveI : M ⊧ₘ* 𝐏𝐀⁻ := ModelsTheory.of_provably_subtheory M 𝐏𝐀⁻ T inferInstance (by assumption)
     simpa [Matrix.empty_eq] using Model.pval_of_pval_nat_of_sigma_one (M := M) hσ H))
 
 end

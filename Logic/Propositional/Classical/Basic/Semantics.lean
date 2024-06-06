@@ -42,14 +42,29 @@ end val
 
 end Formula
 
-instance semantics : Semantics (Formula α) (α → Prop) := ⟨Formula.val⟩
+structure Valuation (α : Type*) where
+  val : α → Prop
+
+instance : CoeFun (Valuation α) (fun _ ↦ α → Prop) := ⟨Valuation.val⟩
+
+instance semantics : Semantics (Formula α) (Valuation α) := ⟨fun v ↦ Formula.val v⟩
+
+lemma models_iff_val {v : Valuation α} {f : Formula α} : v ⊧ f ↔ Formula.val v f := iff_of_eq rfl
+
+instance : Semantics.Tarski (Valuation α) where
+  realize_top := by simp [models_iff_val]
+  realize_bot := by simp [models_iff_val]
+  realize_and := by simp [models_iff_val]
+  realize_or := by simp [models_iff_val]
+  realize_not := by simp [models_iff_val]
+  realize_imp := by simp [models_iff_val]
 
 namespace Formula
-variable {v : α → Prop}
+variable {v : Valuation α}
 
-@[simp] protected lemma realize_atom : v ⊧ (Formula.atom a) ↔ v a := iff_of_eq rfl
+@[simp] protected lemma realize_atom : v ⊧ Formula.atom a ↔ v a := iff_of_eq rfl
 
-@[simp] protected lemma realize_natom : v ⊧ (Formula.natom a) ↔ ¬v a := iff_of_eq rfl
+@[simp] protected lemma realize_natom : v ⊧ Formula.natom a ↔ ¬v a := iff_of_eq rfl
 
 end Formula
 

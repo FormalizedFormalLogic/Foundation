@@ -56,7 +56,7 @@ instance [Operator.Exp L] : Exp (Model L M) :=
 instance [Operator.Exp L] : Structure.Exp L (Model L M) := ⟨fun _ => rfl⟩
 
 instance [Operator.Eq L] [Structure.Eq L M] : Structure.Eq L (Model L M) :=
-  ⟨fun x y => by simp[operator_val_ofEquiv_iff]⟩
+  ⟨fun x y => by simp [operator_val_ofEquiv_iff]⟩
 
 instance [Operator.LT L] : LT (Model L M) :=
   ⟨fun x y => (@Operator.LT.lt L _).val ![x, y]⟩
@@ -114,24 +114,24 @@ variable {L₁ L₂ M}
 
 @[simp] lemma val_lMap_add₁ {n} (t : Semiterm L₁ μ n) (e : Fin n → M) (ε : μ → M) :
     Semiterm.val (add L₁ L₂ M) e ε (t.lMap (Language.Hom.add₁ L₁ L₂)) = t.val str₁ e ε := by
-  induction t <;> simp[Semiterm.val, Language.Hom.func_add₁, *]
+  induction t <;> simp [Semiterm.val, Language.Hom.func_add₁, *]
 
 @[simp] lemma val_lMap_add₂ {n} (t : Semiterm L₂ μ n) (e : Fin n → M) (ε : μ → M) :
     Semiterm.val (add L₁ L₂ M) e ε (t.lMap (Language.Hom.add₂ L₁ L₂)) = t.val str₂ e ε := by
-  induction t <;> simp[Semiterm.val, Language.Hom.func_add₂, *]
+  induction t <;> simp [Semiterm.val, Language.Hom.func_add₂, *]
 
 @[simp] lemma eval_lMap_add₁ {n} (p : Semiformula L₁ μ n) (e : Fin n → M) (ε : μ → M) :
     Semiformula.Eval (add L₁ L₂ M) e ε (Semiformula.lMap (Language.Hom.add₁ L₁ L₂) p)
     ↔ Semiformula.Eval str₁ e ε p := by
   induction p using Semiformula.rec' <;>
-    simp[*, Language.Hom.rel_add₁, Semiformula.eval_rel,
+    simp [*, Language.Hom.rel_add₁, Semiformula.eval_rel,
       Semiformula.lMap_rel, Semiformula.eval_nrel, Semiformula.lMap_nrel]
 
 @[simp] lemma eval_lMap_add₂ {n} (p : Semiformula L₂ μ n) (e : Fin n → M) (ε : μ → M) :
     Semiformula.Eval (add L₁ L₂ M) e ε (Semiformula.lMap (Language.Hom.add₂ L₁ L₂) p)
     ↔ Semiformula.Eval str₂ e ε p := by
   induction p using Semiformula.rec' <;>
-    simp[*, Language.Hom.rel_add₂, Semiformula.eval_rel,
+    simp [*, Language.Hom.rel_add₂, Semiformula.eval_rel,
       Semiformula.lMap_rel, Semiformula.eval_nrel, Semiformula.lMap_nrel]
 
 end add
@@ -150,18 +150,48 @@ instance sigma : Structure (Language.sigma L) M where
 
 @[simp] lemma val_lMap_sigma {n} (t : Semiterm (L i) μ n) (e : Fin n → M) (ε : μ → M) :
     Semiterm.val (sigma L M) e ε (t.lMap (Language.Hom.sigma L i)) = t.val (str i) e ε := by
-  induction t <;> simp[Semiterm.val, Language.Hom.func_sigma, *]
+  induction t <;> simp [Semiterm.val, Language.Hom.func_sigma, *]
 
 @[simp] lemma eval_lMap_sigma {n} (p : Semiformula (L i) μ n) (e : Fin n → M) (ε : μ → M) :
     Semiformula.Eval (sigma L M) e ε (Semiformula.lMap (Language.Hom.sigma L i) p)
     ↔ Semiformula.Eval (str i) e ε p := by
   induction p using Semiformula.rec' <;>
-    simp[*, Language.Hom.rel_sigma, Semiformula.eval_rel,
+    simp [*, Language.Hom.rel_sigma, Semiformula.eval_rel,
       Semiformula.lMap_rel, Semiformula.eval_nrel, Semiformula.lMap_nrel]
 
 end sigma
 
 end Structure
+
+section ULift
+
+variable {L : Language.{u}} {M : Type v} [Structure L M]
+
+instance : Structure L (ULift.{v'} M) where
+  func := fun _ f v ↦ ⟨Structure.func f fun i ↦ (v i).down⟩
+  rel := fun _ r v ↦ Structure.rel r fun i ↦ (v i).down
+
+@[simp] lemma Structure.func_uLift {k} (f : L.Func k) (v : Fin k → ULift.{v'} M) :
+    Structure.func f v = ⟨Structure.func f fun i ↦ (v i).down⟩ := rfl
+
+@[simp] lemma Structure.rel_uLift {k} (r : L.Rel k) (v : Fin k → ULift.{v'} M) :
+    Structure.rel r v = Structure.rel r fun i ↦ (v i).down := rfl
+
+lemma Semiterm.valm_uLift {e : Fin n → ULift.{v'} M} {ε : ξ → ULift.{v'} M} {t : Semiterm L ξ n} :
+    Semiterm.valm (ULift.{v'} M) e ε t = ⟨Semiterm.valm M (fun i ↦ (e i).down) (fun i ↦ (ε i).down) t⟩ := by
+  induction t <;> simp [*, Semiterm.val_func]
+
+lemma Semiformula.evalm_uLift {e : Fin n → ULift.{v'} M} {ε : ξ → ULift.{v'} M} {p : Semiformula L ξ n} :
+    Semiformula.Evalm (ULift.{v'} M) e ε p ↔ Semiformula.Evalm M (fun i ↦ (e i).down) (fun i ↦ (ε i).down) p := by
+  induction p using Semiformula.rec' <;>
+    simp [*, Semiformula.eval_rel, Semiformula.eval_nrel, Semiterm.valm_uLift, Matrix.comp_vecCons']
+
+variable (L M)
+
+lemma uLift_elementaryEquiv [Nonempty M] : ULift.{v'} M ≡ₑ[L] M := by
+  intro σ; simp [models_iff, Semiformula.evalm_uLift, Matrix.empty_eq, Empty.eq_elim]
+
+end ULift
 
 end FirstOrder
 

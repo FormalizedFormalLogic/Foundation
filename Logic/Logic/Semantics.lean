@@ -4,160 +4,205 @@ import Logic.Logic.LogicSymbol
 # Basic definitions and properties of semantics-related notions
 
 This file defines the semantics of formulas based on Tarski's truth definitions.
-Also provides a characterization of compactness.
+Also provides 𝓜 characterization of compactness.
 
 ## Main Definitions
-* `LO.Semantics`: The realization of a formula.
+* `LO.Semantics`: The realization of 𝓜 formula.
 * `LO.Compact`: The semantic compactness of logic.
+
+## Notation
+* `𝓜 ⊧ p`: a proposition that states `𝓜` satisfies `p`.
+* `𝓜 ⊧* T`: a proposition that states that `𝓜` satisfies each formulae in a set `T`.
 
 -/
 
 namespace LO
 
-variable {F : Type*} [LogicalConnective F]
+class Semantics (F : outParam Type*) (M : Type*) where
+  Realize : M → F → Prop
 
-class Semantics (F : Type*) [LogicalConnective F] (α : outParam (Type*)) where
-  realize : α → F →ˡᶜ Prop
-
-class Vocabulary (F : Type*) [LogicalConnective F] (V : outParam (Type*)) where
-  voc    : F → Set V
-  verum  : voc ⊤ = ∅
-  falsum : voc ⊥ = ∅
-  neg    : (f : F) → voc (~f) = voc f
-  and    : (f g : F) → voc (f ⋏ g) = voc f ∪ voc g
-  or     : (f g : F) → voc (f ⋎ g) = voc f ∪ voc g
-  imp    : (f g : F) → voc (f ⟶ g) = voc f ∪ voc g
+variable {M : Type*} {F : Type*} [LogicalConnective F] [𝓢 : Semantics F M]
 
 namespace Semantics
-variable {α : Type*} [𝓢 : Semantics F α]
 
-postfix:max " ⊧ " => realize
+infix:45 " ⊧ " => Realize
 
-class RealizeTheory (a : α) (T : Set F) : Prop where
-  realizeTheory : ∀ ⦃f⦄, f ∈ T → realize a f
+section
 
-infix:60 " ⊧* " => RealizeTheory
+variable (M)
 
-lemma realizeTheory_iff {a : α} {T : Set F} : a ⊧* T ↔ ∀ ⦃f⦄, f ∈ T → realize a f :=
-  ⟨by rintro ⟨h⟩; exact h, by intro h; exact ⟨h⟩⟩
+protected class Top where
+  realize_top (𝓜 : M) : 𝓜 ⊧ (⊤ : F)
 
-def Consequence (T : Set F) (f : F) : Prop := ∀ ⦃a : α⦄, a ⊧* T → a ⊧ f
+protected class Bot where
+  realize_bot (𝓜 : M) : ¬𝓜 ⊧ (⊥ : F)
+
+protected class And where
+  realize_and {𝓜 : M} {p q : F} : 𝓜 ⊧ p ⋏ q ↔ 𝓜 ⊧ p ∧ 𝓜 ⊧ q
+
+protected class Or where
+  realize_or {𝓜 : M} {p q : F} : 𝓜 ⊧ p ⋎ q ↔ 𝓜 ⊧ p ∨ 𝓜 ⊧ q
+
+class Tarski extends Semantics.Top M, Semantics.Bot M, Semantics.And M, Semantics.Or M where
+  realize_not {𝓜 : M} {p : F} : 𝓜 ⊧ ~p ↔ ¬𝓜 ⊧ p
+  realize_imp {𝓜 : M} {p q : F} : 𝓜 ⊧ p ⟶ q ↔ (𝓜 ⊧ p → 𝓜 ⊧ q)
+
+attribute [simp]
+  Top.realize_top
+  Bot.realize_bot
+  And.realize_and
+  Or.realize_or
+  Tarski.realize_not
+  Tarski.realize_imp
+
+variable {M}
+
+variable [Tarski M]
+
+variable {𝓜 : M}
+
+@[simp] lemma realize_iff {p q : F} :
+    𝓜 ⊧ p ⟷ q ↔ ((𝓜 ⊧ p) ↔ (𝓜 ⊧ q)) := by
+  simp [LogicalConnective.iff, iff_iff_implies_and_implies]
+
+@[simp] lemma realize_list_conj {l : List F} :
+    𝓜 ⊧ l.conj ↔ ∀ p ∈ l, 𝓜 ⊧ p := by induction l <;> simp [*]
+
+@[simp] lemma realize_finset_conj {s : Finset F} :
+    𝓜 ⊧ s.conj ↔ ∀ p ∈ s, 𝓜 ⊧ p := by simp [Finset.conj]
+
+@[simp] lemma realize_list_disj {l : List F} :
+    𝓜 ⊧ l.disj ↔ ∃ p ∈ l, 𝓜 ⊧ p := by induction l <;> simp [*]
+
+@[simp] lemma realize_finset_disj {s : Finset F} :
+    𝓜 ⊧ s.disj ↔ ∃ p ∈ s, 𝓜 ⊧ p := by simp [Finset.disj]
+
+end
+
+class RealizeSet (𝓜 : M) (T : Set F) : Prop where
+  RealizeSet : ∀ ⦃f⦄, f ∈ T → Realize 𝓜 f
+
+infix:45 " ⊧* " => RealizeSet
+
+variable (M)
+
+def Valid (f : F) : Prop := ∀ 𝓜 : M, 𝓜 ⊧ f
+
+def Satisfiable (T : Set F) : Prop := ∃ 𝓜 : M, 𝓜 ⊧* T
+
+def models (T : Set F) : Set M := {𝓜 | 𝓜 ⊧* T}
+
+variable {M}
+
+def theory (𝓜 : M) : Set F := {f | 𝓜 ⊧ f}
+
+class Meaningful (𝓜 : M) : Prop where
+  exists_unrealize : ∃ f, ¬𝓜 ⊧ f
+
+instance [Semantics.Bot M] (𝓜 : M) : Meaningful 𝓜 := ⟨⟨⊥, by simp⟩⟩
+
+lemma meaningful_iff {𝓜 : M} : Meaningful 𝓜 ↔ ∃ f, ¬𝓜 ⊧ f :=
+  ⟨by rintro ⟨h⟩; exact h, fun h ↦ ⟨h⟩⟩
+
+lemma not_meaningful_iff (𝓜 : M) : ¬Meaningful 𝓜 ↔ ∀ f, 𝓜 ⊧ f := by simp [meaningful_iff]
+
+lemma realizeSet_iff {𝓜 : M} {T : Set F} : 𝓜 ⊧* T ↔ ∀ ⦃f⦄, f ∈ T → Realize 𝓜 f :=
+  ⟨by rintro ⟨h⟩ f hf; exact h hf, by intro h; exact ⟨h⟩⟩
+
+lemma not_satisfiable_finset [Tarski M] [DecidableEq F] (t : Finset F) :
+    ¬Satisfiable M (t : Set F) ↔ Valid M (t.image (~·)).disj := by
+  simp [Satisfiable, realizeSet_iff, Valid, Finset.map_disj]
+
+lemma satisfiableSet_iff_models_nonempty {T : Set F} :
+    Satisfiable M T ↔ (models M T).Nonempty :=
+  ⟨by rintro ⟨𝓜, h𝓜⟩; exact ⟨𝓜, h𝓜⟩, by rintro ⟨𝓜, h𝓜⟩; exact ⟨𝓜, h𝓜⟩⟩
+
+namespace RealizeSet
+
+lemma realize {T : Set F} (𝓜 : M) [𝓜 ⊧* T] (hf : f ∈ T) : 𝓜 ⊧ f :=
+  RealizeSet hf
+
+lemma of_subset {T U : Set F} {𝓜 : M} (h : 𝓜 ⊧* U) (ss : T ⊆ U) : 𝓜 ⊧* T :=
+  ⟨fun _ hf => h.RealizeSet (ss hf)⟩
+
+lemma of_subset' {T U : Set F} {𝓜 : M} [𝓜 ⊧* U] (ss : T ⊆ U) : 𝓜 ⊧* T :=
+  of_subset (𝓜 := 𝓜) inferInstance ss
+
+instance empty' (𝓜 : M) : 𝓜 ⊧* (∅ : Set F) := ⟨by simp⟩
+
+@[simp] lemma empty (𝓜 : M) : 𝓜 ⊧* (∅ : Set F) := ⟨by simp⟩
+
+@[simp] lemma singleton_iff {f : F} {𝓜 : M} :
+    𝓜 ⊧* {f} ↔ 𝓜 ⊧ f := by simp [realizeSet_iff]
+
+@[simp] lemma insert_iff {T : Set F} {f : F} {𝓜 : M} :
+    𝓜 ⊧* insert f T ↔ 𝓜 ⊧ f ∧ 𝓜 ⊧* T := by
+  simp [realizeSet_iff]
+
+@[simp] lemma union_iff {T U : Set F} {𝓜 : M} :
+    𝓜 ⊧* T ∪ U ↔ 𝓜 ⊧* T ∧ 𝓜 ⊧* U := by
+  simp [realizeSet_iff]
+  exact
+    ⟨ fun h => ⟨fun _ hf => h (Or.inl hf), fun _ hf => h (Or.inr hf)⟩,
+      by rintro ⟨h₁, h₂⟩ f (h | h); exact h₁ h; exact h₂ h ⟩
+
+@[simp] lemma image_iff {ι} {f : ι → F} {A : Set ι} {𝓜 : M} :
+    𝓜 ⊧* f '' A ↔ ∀ i ∈ A, 𝓜 ⊧ (f i) := by simp [realizeSet_iff]
+
+@[simp] lemma range_iff {ι} {f : ι → F} {𝓜 : M} :
+    𝓜 ⊧* Set.range f ↔ ∀ i, 𝓜 ⊧ (f i) := by simp [realizeSet_iff]
+
+@[simp] lemma setOf_iff {P : F → Prop} {𝓜 : M} :
+    𝓜 ⊧* setOf P ↔ ∀ f, P f → 𝓜 ⊧ f := by simp [realizeSet_iff]
+
+end RealizeSet
+
+lemma valid_neg_iff [Tarski M] (f : F) : Valid M (~f) ↔ ¬Satisfiable M {f} := by simp [Valid, Satisfiable]
+
+lemma Satisfiable.of_subset {T U : Set F} (h : Satisfiable M U) (ss : T ⊆ U) : Satisfiable M T := by
+  rcases h with ⟨𝓜, h⟩; exact ⟨𝓜, RealizeSet.of_subset h ss⟩
+
+variable (M)
+
+instance [Semantics F M] : Semantics F (Set M) := ⟨fun s f ↦ ∀ ⦃𝓜⦄, 𝓜 ∈ s → 𝓜 ⊧ f⟩
+
+@[simp] lemma empty_models (f : F) : (∅ : Set M) ⊧ f := by rintro h; simp
+
+def Consequence (T : Set F) (f : F) : Prop := models M T ⊧ f
 
 -- note that ⊨ (\vDash) is *NOT* ⊧ (\models)
-infix:55 " ⊨ " => Consequence
+notation T:45 " ⊨[" M "] " p:46 => Consequence M T p
 
-def Valid (f : F) : Prop := ∀ ⦃a : α⦄, a ⊧ f
+variable {M}
 
-def ValidTheory (T : Set F) : Prop := ∀ ⦃a : α⦄, a ⊧* T
+lemma set_models_iff {s : Set M} : s ⊧ f ↔ ∀ 𝓜 ∈ s, 𝓜 ⊧ f := iff_of_eq rfl
 
-def Satisfiable (f : F) : Prop := ∃ a : α, a ⊧ f
+instance [Semantics.Top M] : Semantics.Top (Set M) := ⟨fun s ↦ by simp [set_models_iff]⟩
 
-def SatisfiableTheory (T : Set F) : Prop := ∃ a : α, a ⊧* T
+lemma set_meaningful_iff_nonempty [∀ 𝓜 : M, Meaningful 𝓜] {s : Set M} : Meaningful s ↔ s.Nonempty :=
+  ⟨by rintro ⟨f, hf⟩; by_contra A; rcases Set.not_nonempty_iff_eq_empty.mp A; simp at hf,
+   by rintro ⟨𝓜, h𝓜⟩
+      rcases Meaningful.exists_unrealize (𝓜 := 𝓜) with ⟨f, hf⟩
+      exact ⟨f, by simp [set_models_iff]; exact ⟨𝓜, h𝓜, hf⟩⟩⟩
 
-lemma valid_neg_iff (f : F) : Valid (~f) ↔ ¬Satisfiable f := by simp[Valid, Satisfiable]
+lemma meaningful_iff_satisfiableSet [∀ 𝓜 : M, Meaningful 𝓜] : Satisfiable M T ↔ Meaningful (models M T) := by
+  simp [set_meaningful_iff_nonempty, satisfiableSet_iff_models_nonempty]
 
-lemma not_satisfiable_finset [DecidableEq F] (t : Finset F) :
-    ¬SatisfiableTheory (t : Set F) ↔ Valid (t.image (~·)).disj :=
-  by simp[SatisfiableTheory, realizeTheory_iff, Valid, Finset.map_disj]
+lemma consequence_iff {T : Set F} {f} : T ⊨[M] f ↔ ∀ {𝓜 : M}, 𝓜 ⊧* T → 𝓜 ⊧ f := iff_of_eq rfl
 
-namespace RealizeTheory
+lemma consequence_iff' {T : Set F} {f : F} : T ⊨[M] f ↔ (∀ (𝓜 : M) [𝓜 ⊧* T], 𝓜 ⊧ f) :=
+  ⟨fun h _ _ => consequence_iff.mp h inferInstance, fun H 𝓜 hs => @H 𝓜 hs⟩
 
-lemma realize {T : Set F} (a : α) [a ⊧* T] (hf : f ∈ T) : a ⊧ f :=
-  realizeTheory hf
+lemma consequence_iff_not_satisfiable [Tarski M] {f : F} :
+    T ⊨[M] f ↔ ¬Satisfiable M (insert (~f) T) := by
+  simp [consequence_iff, Satisfiable]; constructor
+  · intro h 𝓜 hf hT; have : 𝓜 ⊧ f := h hT; contradiction
+  · intro h 𝓜; contrapose; exact h 𝓜
 
-lemma of_subset {T U : Set F} {a : α} (h : a ⊧* U) (ss : T ⊆ U) : a ⊧* T :=
-  ⟨fun _ hf => h.realizeTheory (ss hf)⟩
+lemma weakening {T U : Set F} {f} (h : T ⊨[M] f) (ss : T ⊆ U) : U ⊨[M] f :=
+  consequence_iff.mpr fun hs => consequence_iff.mp h (RealizeSet.of_subset hs ss)
 
-lemma of_subset' {T U : Set F} {a : α} [a ⊧* U] (ss : T ⊆ U) : a ⊧* T :=
-  of_subset inferInstance ss
-
-instance empty' (a : α) : a ⊧* (∅ : Set F) := ⟨fun p => by simp⟩
-
-@[simp] lemma empty (a : α) : a ⊧* (∅ : Set F) := ⟨fun p => by simp⟩
-
-@[simp] lemma insert_iff {T : Set F} {f : F} {a : α} :
-    a ⊧* insert f T ↔ a ⊧ f ∧ a ⊧* T := by
-  simp [realizeTheory_iff]
-
-@[simp] lemma union_iff {T U : Set F} {a : α} :
-    a ⊧* T ∪ U ↔ a ⊧* T ∧ a ⊧* U := by
-  simp [realizeTheory_iff]
-  exact
-  ⟨fun h => ⟨fun f hf => h (Or.inl hf), fun f hf => h (Or.inr hf)⟩,
-   by rintro ⟨h₁, h₂⟩ f (h | h); exact h₁ h; exact h₂ h⟩
-
-@[simp] lemma image_iff {ι} {f : ι → F} {A : Set ι} {a : α} :
-    a ⊧* f '' A ↔ ∀ i ∈ A, a ⊧ (f i) := by simp [realizeTheory_iff]
-
-@[simp] lemma range_iff {ι} {f : ι → F} {a : α} :
-    a ⊧* Set.range f ↔ ∀ i, a ⊧ (f i) := by simp [realizeTheory_iff]
-
-@[simp] lemma setOf_iff {P : F → Prop} :
-    a ⊧* setOf P ↔ ∀ f, P f → a ⊧ f := by simp [realizeTheory_iff]
-
-end RealizeTheory
-
-lemma SatisfiableTheory.of_subset {T U : Set F} (h : SatisfiableTheory U) (ss : T ⊆ U) : SatisfiableTheory T :=
-  by rcases h with ⟨a, h⟩; exact ⟨a, RealizeTheory.of_subset h ss⟩
-
-lemma consequence_iff_not_satisfiable {f : F} :
-    T ⊨ f ↔ ¬SatisfiableTheory (insert (~f) T) :=
-  ⟨by rintro hT ⟨a, ha⟩
-      have : a ⊧ f := hT (RealizeTheory.of_subset ha (Set.subset_insert (~f) T))
-      have : ¬a ⊧ f := by simpa using ha.realizeTheory (Set.mem_insert (~f) T)
-      contradiction,
-   by intro h a ha; by_contra hn
-      have : SatisfiableTheory (insert (~f) T) := ⟨a, by simp[*]⟩
-      contradiction⟩
-
-lemma weakening {T U : Set F} {f} (h : T ⊨ f) (ss : T ⊆ U) : U ⊨ f :=
-  fun _ hs => h (RealizeTheory.of_subset hs ss)
-
-lemma of_mem {T : Set F} {f} (h : f ∈ T) : T ⊨ f := fun _ hs => hs.realizeTheory h
-
-lemma consequence_iff {T : Set F} {f : F} : T ⊨ f ↔ ¬SatisfiableTheory (insert (~f) T) := by
-  simp[Consequence, SatisfiableTheory]; constructor
-  · intro h a hf hT; have : a ⊧ f := h hT; contradiction
-  · intro h a; contrapose; exact h a
-
-def theory (a : α) : Set F := {p | a ⊧ p}
-
-def Subtheory (T U : Set F) : Prop := ∀ {f}, T ⊨ f → U ⊨ f
-
-def Equivalent (T U : Set F) : Prop := {f : F} → T ⊨ f ↔ U ⊨ f
-
-namespace Subtheory
-
-variable (T U T₁ T₂ T₃ : Set F)
-
-@[refl] lemma refl : Subtheory T T := id
-
-@[trans] protected lemma trans (h₁ : Subtheory T₁ T₂) (h₂ : Subtheory T₂ T₃) : Subtheory T₁ T₃ :=
-  fun {f} b => h₂ (h₁ b : T₂ ⊨ f)
-
-def ofSubset (h : T ⊆ U) : Subtheory T U := fun b => weakening b h
-
-end Subtheory
-
-lemma RealizeTheory.of_subtheory {a : α} {T U : Set F} (h : a ⊧* U) (ss : Subtheory T U) :
-    a ⊧* T := ⟨fun _ hf => ss (of_mem hf) h⟩
-
-namespace Equivalent
-
-variable (T U T₁ T₂ T₃ : Set F)
-
-@[refl] protected lemma refl : Equivalent T T := ⟨id, id⟩
-
-@[symm] protected lemma symm (h : Equivalent T U) : Equivalent U T := Iff.symm h
-
-@[trans] protected lemma trans (h₁ : Equivalent T₁ T₂) (h₂ : Equivalent T₂ T₃) : Equivalent T₁ T₃ :=
-  Iff.trans h₁ h₂
-
-end Equivalent
-
-lemma consequence_iff' {T : Set F} {σ : F} :
-    T ⊨ σ ↔ (∀ (a : α) [a ⊧* T], a ⊧ σ) :=
-  ⟨fun h _ _ => h inferInstance, fun H a hs => @H a hs⟩
+lemma of_mem {T : Set F} {f} (h : f ∈ T) : T ⊨[M] f := fun _ hs => hs.RealizeSet h
 
 end Semantics
 
@@ -192,33 +237,33 @@ lemma finset_mem {T : ℕ → Set F}
 
 end Cumulative
 
-variable (F)
-variable {α : Type*} [Semantics F α]
+variable (M)
 
 class Compact : Prop where
   compact {T : Set F} :
-    Semantics.SatisfiableTheory T ↔ (∀ u : Finset F, ↑u ⊆ T → Semantics.SatisfiableTheory (u : Set F))
+    Semantics.Satisfiable M T ↔ (∀ u : Finset F, ↑u ⊆ T → Semantics.Satisfiable M (u : Set F))
 
-variable {F}
+variable {M}
 
 namespace Compact
 
-variable [Compact F]
-variable {a : α}
+variable [Compact M]
 
-lemma conseq_compact [DecidableEq F] {f : F} :
-    T ⊨ f ↔ ∃ u : Finset F, ↑u ⊆ T ∧ u ⊨ f := by
-  simp[Semantics.consequence_iff, compact (T := insert (~f) T)]
+variable {𝓜 : M}
+
+lemma conseq_compact [Semantics.Tarski M] [DecidableEq F] {f : F} :
+    T ⊨[M] f ↔ ∃ u : Finset F, ↑u ⊆ T ∧ u ⊨[M] f := by
+  simp [Semantics.consequence_iff_not_satisfiable, compact (T := insert (~f) T)]
   constructor
   · intro ⟨u, ss, hu⟩
-    exact ⟨Finset.erase u (~f), by simp[ss],
-      by simp; intro h; exact hu (Semantics.SatisfiableTheory.of_subset h (by simp))⟩
+    exact ⟨Finset.erase u (~f), by simp [ss],
+      by simp; intro h; exact hu (Semantics.Satisfiable.of_subset h (by simp))⟩
   · intro ⟨u, ss, hu⟩
     exact ⟨insert (~f) u,
       by simpa using Set.insert_subset_insert ss, by simpa using hu⟩
 
 lemma compact_cumulative {T : ℕ → Set F} (hT : Cumulative T) :
-    Semantics.SatisfiableTheory (⋃ s, T s) ↔ ∀ s, Semantics.SatisfiableTheory (T s) :=
+    Semantics.Satisfiable M (⋃ s, T s) ↔ ∀ s, Semantics.Satisfiable M (T s) :=
   ⟨by intro H s
       exact H.of_subset (Set.subset_iUnion T s),
    by intro H
