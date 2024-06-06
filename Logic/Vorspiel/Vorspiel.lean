@@ -609,24 +609,56 @@ lemma append_subset_append {l₁ l₂ l : List α} (h : l₁ ⊆ l₂) : l₁ ++
 
 lemma subset_of_eq {l₁ l₂ : List α} (e : l₁ = l₂) : l₁ ⊆ l₂ := by simp[e]
 
-/-
+lemma nil_iff {l : List α} : l = [] ↔ ∀ a, a ∉ l := by
+  induction l with
+  | nil => simp only [not_mem_nil, not_false_eq_true, implies_true];
+  | cons a _ _ =>
+    simp_all only [mem_cons, not_or, false_iff, not_forall, not_and, not_not];
+    use a;
+    tauto;
 
-@[simp] lemma remove_cons_self [DecidableEq α] (l : List α) (a) :
+section remove
+
+def remove [DecidableEq α] (a : α) : List α → List α := List.filter (· ≠ a)
+
+variable [DecidableEq α]
+
+@[simp]
+lemma remove_nil (a : α) : [].remove a = [] := by simp [List.remove]
+
+@[simp]
+lemma eq_remove_cons {l : List α} : (q :: l).remove q = l.remove q := by induction l <;> simp_all [List.remove];
+
+@[simp]
+lemma remove_singleton_of_ne {p q : α} (h : p ≠ q) : [p].remove q = [p] := by simp_all [List.remove, Ne.symm];
+
+lemma mem_remove_iff {l : List α} : b ∈ l.remove a ↔ b ∈ l ∧ b ≠ a := by
+  simp [List.remove, List.of_mem_filter];
+  constructor;
+  . intro h;
+    exact ⟨mem_of_mem_filter h, by simpa using of_mem_filter h⟩;
+  . rintro ⟨h₁, h₂⟩;
+    exact mem_filter_of_mem h₁ (by simpa using h₂);
+
+lemma mem_of_mem_remove {a b : α} {l : List α} (h : b ∈ l.remove a) : b ∈ l := by
+  rw [mem_remove_iff] at h; exact h.1
+
+@[simp] lemma remove_cons_self (l : List α) (a) :
   (a :: l).remove a = l.remove a := by simp[remove]
 
-lemma remove_cons_of_ne [DecidableEq α] (l : List α) {a b} (ne : a ≠ b) :
-  (a :: l).remove b = a :: l.remove b := by simp[remove, Ne.symm ne]
+lemma remove_cons_of_ne (l : List α) {a b} (ne : a ≠ b) :
+  (a :: l).remove b = a :: l.remove b := by simp_all [remove];
 
-lemma remove_subset [DecidableEq α] (a) (l : List α) :
+lemma remove_subset (a) (l : List α) :
     l.remove a ⊆ l := by
   simp[subset_def, mem_remove_iff]
   intros; simp[*]
 
-lemma remove_subset_remove [DecidableEq α] (a) {l₁ l₂ : List α} (h : l₁ ⊆ l₂) :
+lemma remove_subset_remove (a) {l₁ l₂ : List α} (h : l₁ ⊆ l₂) :
     l₁.remove a ⊆ l₂.remove a := by
   simp[subset_def, mem_remove_iff]; intros; simp[*]; exact h (by assumption)
 
-lemma remove_cons_subset_cons_remove [DecidableEq α] (a b) (l : List α) :
+lemma remove_cons_subset_cons_remove (a b) (l : List α) :
     (a :: l).remove b ⊆ a :: l.remove b := by
   intro x; simp[List.mem_remove_iff]
   rintro (rfl | hx) nex <;> simp[*]
@@ -637,7 +669,7 @@ lemma remove_map_substet_map_remove [DecidableEq α] [DecidableEq β] (f : α �
   intro b hb neb;
   exact ⟨b, ⟨hb, by rintro rfl; exact neb rfl⟩, rfl⟩
 
--/
+end remove
 
 end List
 

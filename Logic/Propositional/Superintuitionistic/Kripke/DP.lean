@@ -122,7 +122,6 @@ theorem disjunctive_int : 𝐈𝐧𝐭 ⊢! p ⋎ q → 𝐈𝐧𝐭 ⊢! p ∨ 
   . apply iff_definability_memAxiomSetFrameClass AxiomSet.EFQ.definability |>.mpr;
     trivial;
   . existsi M.Valuation, M.hereditary, Sum.inl ();
-    push_neg;
     constructor;
     . exact not_imp_not.mpr (Satisfies.formula_hereditary (by apply Fp.Rel_refl)) $ satisfies_left_on_IntDPCounterexampleModel.not.mp hp;
     . exact not_imp_not.mpr (Satisfies.formula_hereditary (by apply Fq.Rel_refl)) $ satisfies_right_on_IntDPCounterexampleModel.not.mp hq;
