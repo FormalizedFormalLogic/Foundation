@@ -115,6 +115,24 @@ def orReplace (hp : 𝓢 ⊢ p₁ ⟶ p₂) (hq : 𝓢 ⊢ q₁ ⟶ q₂) : 𝓢
 lemma or_replace! (hp : 𝓢 ⊢! p₁ ⟶ p₂) (hq : 𝓢 ⊢! q₁ ⟶ q₂) : 𝓢 ⊢! p₁ ⋎ q₁ ⟶ p₂ ⋎ q₂ := ⟨orReplace hp.some hq.some⟩
 
 
+def orReplaceIff (hp : 𝓢 ⊢ p₁ ⟷ p₂) (hq : 𝓢 ⊢ q₁ ⟷ q₂) : 𝓢 ⊢ p₁ ⋎ q₁ ⟷ p₂ ⋎ q₂ := by
+  apply iffIntro;
+  . exact orReplace (conj₁' hp) (conj₁' hq);
+  . exact orReplace (conj₂' hp) (conj₂' hq);
+lemma or_replace_iff! (hp : 𝓢 ⊢! p₁ ⟷ p₂) (hq : 𝓢 ⊢! q₁ ⟷ q₂) : 𝓢 ⊢! p₁ ⋎ q₁ ⟷ p₂ ⋎ q₂ := ⟨orReplaceIff hp.some hq.some⟩
+
+def andReplaceIff (hp : 𝓢 ⊢ p₁ ⟷ p₂) (hq : 𝓢 ⊢ q₁ ⟷ q₂) : 𝓢 ⊢ p₁ ⋏ q₁ ⟷ p₂ ⋏ q₂ := by
+  apply iffIntro;
+  . exact andReplace (conj₁' hp) (conj₁' hq);
+  . exact andReplace (conj₂' hp) (conj₂' hq);
+lemma and_replace_iff! (hp : 𝓢 ⊢! p₁ ⟷ p₂) (hq : 𝓢 ⊢! q₁ ⟷ q₂) : 𝓢 ⊢! p₁ ⋏ q₁ ⟷ p₂ ⋏ q₂ := ⟨andReplaceIff hp.some hq.some⟩
+
+def impReplaceIff (hp : 𝓢 ⊢ p₁ ⟷ p₂) (hq : 𝓢 ⊢ q₁ ⟷ q₂) : 𝓢 ⊢ (p₁ ⟶ q₁) ⟷ (p₂ ⟶ q₂) := by
+  apply iffIntro;
+  . apply deduct'; exact impTrans (of $ conj₂' hp) $ impTrans (FiniteContext.id) (of $ conj₁' hq);
+  . apply deduct'; exact impTrans (of $ conj₁' hp) $ impTrans (FiniteContext.id) (of $ conj₂' hq);
+lemma imp_replace_iff! (hp : 𝓢 ⊢! p₁ ⟷ p₂) (hq : 𝓢 ⊢! q₁ ⟷ q₂) : 𝓢 ⊢! (p₁ ⟶ q₁) ⟷ (p₂ ⟶ q₂) := ⟨impReplaceIff hp.some hq.some⟩
+
 def dni : 𝓢 ⊢ p ⟶ ~~p := by
   rw [NegDefinition.neg];
   apply deduct';

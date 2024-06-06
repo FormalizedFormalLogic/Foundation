@@ -308,6 +308,21 @@ def axiomFive [HasAxiomFive 𝓢] : 𝓢 ⊢ ◇p ⟶ □◇p := HasAxiomFive.Fi
 instance [HasAxiomFive 𝓢] (Γ : FiniteContext F 𝓢) : HasAxiomFive Γ := ⟨fun _ ↦ FiniteContext.of axiomFive⟩
 instance [HasAxiomFive 𝓢] (Γ : Context F 𝓢) : HasAxiomFive Γ := ⟨fun _ ↦ Context.of axiomFive⟩
 
+
+def axiomTc [HasAxiomTc 𝓢] : 𝓢 ⊢ p ⟶ □p := HasAxiomTc.Tc _
+@[simp] lemma axiomTc! [HasAxiomTc 𝓢] : 𝓢 ⊢! p ⟶ □p := ⟨axiomTc⟩
+
+instance [HasAxiomTc 𝓢] (Γ : FiniteContext F 𝓢) : HasAxiomTc Γ := ⟨fun _ ↦ FiniteContext.of axiomTc⟩
+instance [HasAxiomTc 𝓢] (Γ : Context F 𝓢) : HasAxiomTc Γ := ⟨fun _ ↦ Context.of axiomTc⟩
+
+
+def axiomVer [HasAxiomVer 𝓢] : 𝓢 ⊢ □p := HasAxiomVer.Ver _
+@[simp] lemma axiomVer! [HasAxiomVer 𝓢] : 𝓢 ⊢! □p := ⟨axiomVer⟩
+
+instance [HasAxiomVer 𝓢] (Γ : FiniteContext F 𝓢) : HasAxiomVer Γ := ⟨fun _ ↦ FiniteContext.of axiomVer⟩
+instance [HasAxiomVer 𝓢] (Γ : Context F 𝓢) : HasAxiomVer Γ := ⟨fun _ ↦ Context.of axiomVer⟩
+
+
 -- axiomTriv : 𝓢 ⊢ p ⟶ □p はネセシテーションを無意味にするはず
 -- instance [Necessitation 𝓢] (Γ : FiniteContext F 𝓢) (h : 𝓢 ⊢ Γ.ctx.conj ⟶ □Γ.ctx.conj) : Necessitation Γ := ⟨
 --   by intro p hp; exact ofDef $ impTrans h (implyBoxDistribute' $ toDef hp);

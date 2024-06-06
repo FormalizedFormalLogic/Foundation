@@ -213,11 +213,15 @@ instance : Normal (α := α) 𝐒𝟒𝐆𝐫𝐳 where
 protected abbrev Triv : DeductionParameter α := NecOnly (𝗞 ∪ 𝗧 ∪ 𝗧𝗰)
 notation "𝐓𝐫𝐢𝐯" => DeductionParameter.Triv
 instance : Normal (α := α) 𝐓𝐫𝐢𝐯 where
-
+instance : System.Triv (𝐓𝐫𝐢𝐯 : DeductionParameter α) where
+  T _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
+  Tc _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
 
 protected abbrev Ver : DeductionParameter α := NecOnly (𝗞 ∪ 𝗩𝗲𝗿)
 notation "𝐕𝐞𝐫" => DeductionParameter.Ver
 instance : Normal (α := α) 𝐕𝐞𝐫 where
+instance : System.Ver (𝐕𝐞𝐫 : DeductionParameter α) where
+  Ver _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
 
 
 /-- Logic of Pure Necessitation -/
