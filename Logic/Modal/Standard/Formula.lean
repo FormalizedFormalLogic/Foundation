@@ -5,6 +5,7 @@ namespace LO.Modal.Standard
 
 inductive Formula (α : Type u) : Type u where
   | atom   : α → Formula α
+  | verum  : Formula α
   | falsum : Formula α
   | imp    : Formula α → Formula α → Formula α
   | and    : Formula α → Formula α → Formula α
@@ -17,8 +18,6 @@ namespace Formula
 variable {α : Type u}
 
 @[simp] def neg (p : Formula α) : Formula α := imp p falsum
-
-@[simp] def verum : Formula α := neg falsum
 
 @[simp] def dia (p : Formula α) : Formula α := neg (box (neg p))
 
@@ -81,6 +80,7 @@ lemma dia_eq (p : Formula α) : ◇p = ~(□(~p)) := rfl
 
 def complexity : Formula α → ℕ
 | atom _  => 0
+| ⊤       => 0
 | ⊥       => 0
 | p ⟶ q   => max p.complexity q.complexity + 1
 | p ⋏ q   => max p.complexity q.complexity + 1
@@ -97,16 +97,28 @@ def complexity : Formula α → ℕ
 @[simp] lemma complexity_box (p : Formula α) : complexity (□p) = p.complexity + 1 := rfl
 @[simp] lemma complexity_box' (p : Formula α) : complexity (box p) = p.complexity + 1 := rfl
 
+/-- Max numbers of `□` -/
 def degree : Formula α → Nat
   | atom _ => 0
+  | ⊤ => 0
   | ⊥ => 0
   | box p => p.degree + 1
   | p ⟶ q => max p.degree q.degree
   | p ⋏ q => max p.degree q.degree
   | p ⋎ q => max p.degree q.degree
 
+@[simp] lemma degree_bot : degree (⊥ : Formula α) = 0 := rfl
+@[simp] lemma degree_top : degree (⊤ : Formula α) = 0 := rfl
+@[simp] lemma degree_atom {a : α} : degree (atom a) = 0 := rfl
+@[simp] lemma degree_imp {p q : Formula α} : degree (p ⟶ q) = max p.degree q.degree := rfl
+@[simp] lemma degree_box {p : Formula α} : degree (□p) = p.degree + 1 := rfl
+@[simp] lemma degree_and {p q : Formula α} : degree (p ⋏ q) = max p.degree q.degree := rfl
+@[simp] lemma degree_or {p q : Formula α} : degree (p ⋎ q) = max p.degree q.degree := rfl
+@[simp] lemma degree_not {p : Formula α} : degree (~p) = p.degree := by simp [NegDefinition.neg]
+
 @[elab_as_elim]
 def cases' {C : Formula α → Sort w}
+    (hVerum  : C ⊤)
     (hfalsum : C ⊥)
     (hatom   : ∀ a : α, C (atom a))
     (himp    : ∀ (p q : Formula α), C (p ⟶ q))
@@ -114,6 +126,7 @@ def cases' {C : Formula α → Sort w}
     (hor     : ∀ (p q : Formula α), C (p ⋎ q))
     (hbox    : ∀ (p : Formula α), C (□p))
     : (p : Formula α) → C p
+  | ⊤       => hVerum
   | ⊥       => hfalsum
   | atom a  => hatom a
   | p ⟶ q  => himp p q
@@ -123,6 +136,7 @@ def cases' {C : Formula α → Sort w}
 
 @[elab_as_elim]
 def rec' {C : Formula α → Sort w}
+  (hVerum  : C ⊤)
   (hfalsum : C ⊥)
   (hatom   : ∀ a : α, C (atom a))
   (himp    : ∀ (p q : Formula α), C p → C q → C (p ⟶ q))
@@ -130,12 +144,13 @@ def rec' {C : Formula α → Sort w}
   (hor    : ∀ (p q : Formula α), C p → C q → C (p ⋎ q))
   (hbox    : ∀ (p : Formula α), C p → C (□p))
   : (p : Formula α) → C p
+  | ⊤      => hVerum
   | ⊥      => hfalsum
   | atom a => hatom a
-  | p ⟶ q  => himp p q (rec' hfalsum hatom himp hand hor hbox p) (rec' hfalsum hatom himp hand hor hbox q)
-  | p ⋏ q  => hand p q (rec' hfalsum hatom himp hand hor hbox p) (rec' hfalsum hatom himp hand hor hbox q)
-  | p ⋎ q  => hor p q (rec' hfalsum hatom himp hand hor hbox p) (rec' hfalsum hatom himp hand hor hbox q)
-  | box p     => hbox p (rec' hfalsum hatom himp hand hor hbox p)
+  | p ⟶ q  => himp p q (rec' hVerum hfalsum hatom himp hand hor hbox p) (rec' hVerum hfalsum hatom himp hand hor hbox q)
+  | p ⋏ q  => hand p q (rec' hVerum hfalsum hatom himp hand hor hbox p) (rec' hVerum hfalsum hatom himp hand hor hbox q)
+  | p ⋎ q  => hor p q (rec' hVerum hfalsum hatom himp hand hor hbox p) (rec' hVerum hfalsum hatom himp hand hor hbox q)
+  | box p     => hbox p (rec' hVerum hfalsum hatom himp hand hor hbox p)
 
 -- @[simp] lemma complexity_neg (p : Formula α) : complexity (~p) = p.complexity + 1 :=
 --   by induction p using rec' <;> try { simp[neg_eq, neg, *]; rfl;}
@@ -145,6 +160,9 @@ section Decidable
 variable [DecidableEq α]
 
 def hasDecEq : (p q : Formula α) → Decidable (p = q)
+  | ⊤, q => by
+    cases q using cases' <;>
+    { simp; try { exact isFalse not_false }; try { exact isTrue trivial } }
   | ⊥, q => by
     cases q using cases' <;>
     { simp; try { exact isFalse not_false }; try { exact isTrue trivial } }
