@@ -76,13 +76,13 @@ instance instClassicalDefinabilityIdentifiable : Definability (α := α) Ax(𝐂
 instance : System.Consistent (𝐂𝐥 : DeductionParameter α) := inferInstance
 
 
-instance instClassicalKripkeSemantics : Semantics (Formula α) (ClassicalValuation α) := ⟨fun V ↦ Formula.Kripke.Satisfies (ClassicalModel V) ()⟩
+instance instClassicalKripkeSemantics : Semantics (Formula α) (ClassicalValuation α) := ⟨fun V ↦ Formula.Kripke.Satisfies (ClassicalModel V) PUnit.unit⟩
 
 namespace Formula.Kripke.ClassicalSatisfies
 
 variable {V : ClassicalValuation α}
 
-@[simp] protected lemma iff_models : V ⊧ p ↔ Formula.Kripke.Satisfies (ClassicalModel V) () p := iff_of_eq rfl
+@[simp] protected lemma iff_models : V ⊧ p ↔ Formula.Kripke.Satisfies (ClassicalModel V) PUnit.unit p := iff_of_eq rfl
 
 @[simp] lemma atom_def : V ⊧ atom a ↔ V a := by simp
 @[simp] lemma top_def  : V ⊧ ⊤ ↔ True := by simp

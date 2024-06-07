@@ -1,8 +1,7 @@
 import Logic.Modal.Standard.Formula
 import Logic.Modal.Standard.Deduction
 import Logic.Modal.Standard.HilbertStyle
-import Logic.Propositional.Superintuitionistic.Deduction
-import Logic.Propositional.Superintuitionistic.Kripke.Soundness
+import Logic.Propositional.Superintuitionistic.Kripke.Classical
 
 /-!
   # Maximality of `𝐓𝐫𝐢𝐯` and `𝐕𝐞𝐫`
@@ -206,35 +205,39 @@ lemma trivTranslated_of_K4 : 𝐊𝟒 ⊢! p → 𝐂𝐥 ⊢! pᵀᴾ := by
   apply iff_Triv_classical.mp;
   exact System.reducible_iff.mp reducible_K4_Triv h;
 
-example : 𝐓𝐫𝐢𝐯 ⊬! Axioms.L p := by
-  apply iff_Triv_classical.not.mpr;
-  apply not_imp_not.mpr $ Superintuitionistic.Kripke.sound!;
-  dsimp [Axioms.L, TrivTranslation, toPropFormula];
-  -- TODO: Obviously this is not tautology in classical
-  sorry;
+open Superintuitionistic (unprovable_classical_of_exists_ClassicalValuation)
 
-lemma unprovable_AxiomL_K4 : 𝐊𝟒 ⊬! Axioms.L p := by
+variable [Inhabited α]
+
+example : 𝐓𝐫𝐢𝐯 ⊬! Axioms.L (atom default : Formula α) := by
+  apply iff_Triv_classical.not.mpr;
+  apply unprovable_classical_of_exists_ClassicalValuation;
+  simp [Axioms.L, TrivTranslation, toPropFormula];
+  use (λ _ => False);
+  trivial;
+
+lemma unprovable_AxiomL_K4 : 𝐊𝟒 ⊬! Axioms.L (atom default : Formula α) := by
   apply not_imp_not.mpr trivTranslated_of_K4;
-  apply not_imp_not.mpr $ Superintuitionistic.Kripke.sound!;
-  dsimp [Axioms.L, TrivTranslation, toPropFormula];
-  -- TODO: Obviously this is not tautology in classical
-  sorry;
+  apply unprovable_classical_of_exists_ClassicalValuation;
+  simp [Axioms.L, TrivTranslation, toPropFormula];
+  use (λ _ => False);
+  trivial;
 
 theorem strictReducible_K4_GL : (𝐊𝟒 : DeductionParameter α) <ₛ 𝐆𝐋 := by
   dsimp [StrictReducible];
   constructor;
   . apply reducible_K4_GL;
   . simp [System.not_reducible_iff];
-    existsi (Axioms.L ⊤)
+    existsi (Axioms.L (atom default))
     constructor;
     . exact axiomL!;
     . exact unprovable_AxiomL_K4;
 
 example : 𝐕𝐞𝐫 ⊬! (~(□⊥) : Formula α) := by
   apply iff_Ver_classical.not.mpr;
-  apply not_imp_not.mpr $ Superintuitionistic.Kripke.sound!;
+  apply unprovable_classical_of_exists_ClassicalValuation;
   dsimp [VerTranslation, toPropFormula];
-  -- TODO: Obviously this is not tautology in classical
-  sorry;
+  use (λ _ => True);
+  simp;
 
 end LO.Modal.Standard
