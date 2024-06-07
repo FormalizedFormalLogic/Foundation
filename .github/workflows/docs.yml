@@ -24,6 +24,7 @@ jobs:
       - uses: leanprover/lean-action@v1-beta
         with:
           build-args: "-R -K env=docs Logic:docs"
+          test: false
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
