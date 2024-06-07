@@ -18,7 +18,7 @@ abbrev ClassicalValuation (α : Type*) := α → Prop
 abbrev ClassicalModel (V : ClassicalValuation α) : Model α where
   Frame := ClassicalFrame
   Valuation := λ _ a => V a
-  hereditary := by simp;
+  hereditary := by simp only [imp_self, forall_const, forall_true_left];
 
 end Kripke
 
@@ -58,17 +58,20 @@ instance : FrameClass.IsNonempty (𝔽(𝗟𝗘𝗠) : FrameClass' α) where
 
 instance : FrameClass.IsNonempty (𝔽(𝗘𝗙𝗤 ∪ 𝗟𝗘𝗠) : FrameClass' α) := AxiomSet.EFQ.instUnionNonempty AxiomSet.LEM.definability
 
-instance instClassicalDefinability : Definability (α := α) Ax(𝐂𝐥) (λ F => Euclidean F.Rel) := AxiomSet.EFQ.instDefinabilityUnion AxiomSet.LEM.definability
+instance : System.Consistent (𝐂𝐥 : DeductionParameter α) := inferInstance
 
-instance instClassicalDefinability' : Definability (α := α) Ax(𝐂𝐥) (λ F => Identifiable F.Rel) where
+
+instance instClassicalDefinabilityEuclidean : Definability (α := α) Ax(𝐂𝐥) (λ F => Euclidean F.Rel) := AxiomSet.EFQ.instDefinabilityUnion AxiomSet.LEM.definability
+
+instance instClassicalDefinabilityIdentifiable : Definability (α := α) Ax(𝐂𝐥) (λ F => Identifiable F.Rel) where
   defines F := by
-    have hE := instClassicalDefinability.defines F;
+    have hE := instClassicalDefinabilityEuclidean.defines F;
     constructor;
     . intro h;
-      have := hE.mp h;
-      exact ident_of_reflex_antisymm_eucl F.Rel_refl F.Rel_antisymm this;
+      exact ident_of_reflex_antisymm_eucl F.Rel_refl F.Rel_antisymm $ hE.mp h;
     . intro h;
-      sorry;
+      apply hE.mpr;
+      simp_all [Identifiable, Euclidean];
 
 instance : System.Consistent (𝐂𝐥 : DeductionParameter α) := inferInstance
 
@@ -95,23 +98,22 @@ variable {p q : Formula α}
 
 lemma Formula.Kripke.ValidOnModel.classical_iff {V : ClassicalValuation α} : (ClassicalModel V) ⊧ p ↔ V ⊧ p := by simp [ValidOnModel]; tauto;
 
-lemma Formula.Kripke.ValidOnClassicalFrame_iff : 𝔽(Ax(𝐂𝐥)) ⊧ p ↔ ∀ (V : ClassicalValuation α), V ⊧ p := by
-  constructor;
-  . intro h V;
-    exact ValidOnModel.classical_iff.mp $ h (by
-      apply iff_definability_memAxiomSetFrameClass instClassicalDefinability' |>.mpr;
-      simp [Identifiable];
-    ) (ClassicalModel V).Valuation (ClassicalModel V).hereditary;
-  . sorry;
-    -- intro h F hF V hV x;
-    -- obtain ⟨N⟩ := F.World_nonempty;
-    -- have := h (λ a => V N a);
-    -- have := ValidOnModel.classical_iff.mpr this;
---
-    -- have := iff_definability_memAxiomSetFrameClass instClassicalDefinability' |>.mp hF;
-    -- have := @this x x;
-    -- have := @hV x x (by apply this.mpr; trivial);
---
-    -- apply instClassicalDefinability.defines.mp;
+lemma Formula.Kripke.ValidOnClassicalFrame_iff : 𝔽(Ax(𝐂𝐥)) ⊧ p → ∀ (V : ClassicalValuation α), V ⊧ p := by
+  intro h V;
+  apply Formula.Kripke.ValidOnModel.classical_iff.mp;
+  exact h (by
+    apply iff_definability_memAxiomSetFrameClass instClassicalDefinabilityIdentifiable |>.mpr;
+    simp [Identifiable];
+  ) (ClassicalModel V).Valuation (ClassicalModel V).hereditary;
+
+lemma notClassicalValid_of_exists_ClassicalValuation : (∃ (V : ClassicalValuation α), ¬(V ⊧ p)) → (¬𝔽(Ax(𝐂𝐥)) ⊧ p) := by
+  contrapose;
+  push_neg;
+  apply Formula.Kripke.ValidOnClassicalFrame_iff;
+
+lemma unprovable_classical_of_exists_ClassicalValuation (h : ∃ (V : ClassicalValuation α), ¬(V ⊧ p)) : 𝐂𝐥 ⊬! p := by
+  apply not_imp_not.mpr $ Kripke.sound!;
+  apply notClassicalValid_of_exists_ClassicalValuation;
+  assumption;
 
 end LO.Propositional.Superintuitionistic

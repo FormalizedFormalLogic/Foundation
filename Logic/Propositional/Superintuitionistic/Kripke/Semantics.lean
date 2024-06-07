@@ -9,7 +9,7 @@ namespace Kripke
 attribute [simp] Reflexive Transitive Antisymmetric in
 structure Frame where
   World : Type u
-  World_nonempty : Nonempty World := by infer_instance
+  World_nonempty : Inhabited World := by infer_instance
   Rel : World → World → Prop
   Rel_refl : Reflexive Rel := by aesop
   Rel_trans : Transitive Rel := by aesop
@@ -20,7 +20,7 @@ structure FiniteFrame extends Frame where
 
 instance : CoeSort Frame Type* where coe := Frame.World
 
-instance (F : Frame) : Nonempty F.World := F.World_nonempty
+instance (F : Frame) : Inhabited F.World := F.World_nonempty
 
 set_option linter.unusedVariables false in
 abbrev Frame' (α : Type*) := Frame
@@ -33,6 +33,9 @@ def FiniteFrame.toFrame' {α : Type*} (F : FiniteFrame) : Frame' α := F.toFrame
 abbrev Frame.Rel' {F : Frame} (w w' : F.World) := F.Rel w w'
 scoped infix:45 " ≺ " => Frame.Rel'
 
+abbrev Frame.defaultWorld {F : Frame} : F.World := F.World_nonempty.default
+-- NOTE: not `@`, `﹫` (U+FE6B)
+scoped notation "﹫" => Frame.defaultWorld
 
 abbrev Valuation (W α : Type u) := W → α → Prop
 
