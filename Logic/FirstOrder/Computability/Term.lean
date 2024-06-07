@@ -1,7 +1,7 @@
 import Logic.FirstOrder.Basic
 import Logic.Vorspiel.W
 
-attribute [-instance] WType.instEncodableWType Encodable.finPi Encodable.fintypeArrowOfEncodable
+attribute [-instance] WType.instEncodable Encodable.finPi Encodable.fintypeArrowOfEncodable
 
 namespace LO
 
@@ -91,11 +91,11 @@ lemma bv_substLast {t u : UTerm L μ} (ht : t.bv ≤ n + 1) (hu : u.bv ≤ n) : 
   bv_bind _ (fun x hx => by
     have : x < (bv t).pred ∨ x = (bv t).pred ∨ x > (bv t).pred := Nat.lt_trichotomy _ _
     rcases this with (lt | rfl | lt)
-    · simp[lt]
-      have : x < n := by simpa using lt_of_lt_of_le lt (Nat.pred_le_pred ht)
+    · have : x < n := by simpa using lt_of_lt_of_le lt (Nat.pred_le_pred ht)
+      simp only [lt, ↓reduceIte, bv_bvar, ge_iff_le]
       exact this
-    · simp[hu]
-    · simp[Nat.lt_asymm lt, Nat.ne_of_gt lt]
+    · simp [hu]
+    · simp [Nat.lt_asymm lt, Nat.ne_of_gt lt]
       have : x ≤ t.bv.pred := Nat.le_pred_of_lt hx
       exact False.elim (Nat.not_le_of_lt lt this)) (by simp[bv])
 
@@ -190,7 +190,7 @@ instance : (a : Node L μ) → Primcodable (Edge L μ a)
 instance : (a : Node L μ) → DecidableEq (Edge L μ a)
   | (Sum.inl _)                => instDecidableEqEmpty
   | (Sum.inr $ Sum.inl _)      => instDecidableEqEmpty
-  | (Sum.inr $ Sum.inr ⟨_, _⟩) => instDecidableEq
+  | (Sum.inr $ Sum.inr ⟨_, _⟩) => inferInstance
 
 instance : PrimrecCard (Edge L μ) where
   card_prim :=

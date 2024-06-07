@@ -180,7 +180,7 @@ open Encodable
 lemma ofEquiv_toEncodable {α : Type*} {β : Type*} [Primcodable α] (e : β ≃ α) :
   (ofEquiv α e).toEncodable = Encodable.ofEquiv α e := rfl
 
-instance fintypeArrow [DecidableEq α] [Fintype α] [Encodable α] (β : Type*) [Primcodable β] : Primcodable (α → β) :=
+instance (priority := low) fintypeArrow  [DecidableEq α] [Fintype α] [Encodable α] (β : Type*) [Primcodable β] : Primcodable (α → β) :=
     Primcodable.ofEquiv (Fin (Fintype.card α) → β) fintypeArrowEquivFinArrow
 
 end Primcodable
@@ -410,7 +410,6 @@ instance vector (β : Type*) [Primcodable β] : UniformlyPrimcodable (Vector β)
 
 lemma qqqq {P Q : Prop} (h : P) (e : P = Q) : Q := e ▸ h
 
-attribute [-instance] Primcodable.fintypeArrow in
 instance finArrow (β : Type*) [Primcodable β] : UniformlyPrimcodable (Fin · → β) where
   uniformly_prim := by
     have : ∀ n e, encode (decode (α := Vector β n) e) = encode (decode (α := Fin n → β) e) := by
@@ -503,7 +502,6 @@ lemma decode_list :
 lemma decode_vector (e : ℕ) :
     (decode (α := Vector β k) e) = (decode (α := List β) e).bind (List.toVector k) := by
     exact rfl
---  simp[decode, decodeSubtype, List.toVector]
 
 lemma decode_finArrow (β : Type*) [Primcodable β] (e : ℕ) :
     (decode (α := Fin k → β) e) = (decode (α := List β) e).bind (fun l => (l.toVector k).map (Equiv.vectorEquivFin β k)) := by
@@ -571,8 +569,6 @@ open Encodable WType
 variable {σ : Type*} {α : Type*} {β : α → Type*} {γ : Type*}
   [Primcodable σ] [Primcodable α] [(a : α) → Fintype (β a)]
   [(a : α) → DecidableEq (β a)] [(a : α) → Primcodable (β a)] [PrimrecCard β] [Primcodable γ]
-
-attribute [-instance] Primcodable.fintypeArrow
 
 lemma finArrow_list_ofFn {α} [Primcodable α] : Primrec (List.ofFn : (Fin k → α) → List α) :=
   have : Primrec (fun e => Encodable.encode $ Encodable.decode (α := Fin k → α) e) := Primrec.encode.comp (@Primrec.decode _ (Primcodable.finArrow))

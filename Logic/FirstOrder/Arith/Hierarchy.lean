@@ -115,7 +115,7 @@ lemma strict_mono {Γ s} {p : Semiformula L μ n} (hp : Hierarchy Γ s p) (Γ') 
     intro d
     induction' d with s ih
     · simpa using hp.accum Γ'
-    · simpa [Nat.add_succ] using ih.accum _
+    · simpa only [Nat.add_succ, add_zero] using ih.accum _
   simpa [show s + (s' - s.succ) + 1 = s' from by simpa [Nat.succ_add] using Nat.add_sub_of_le h] using this (s' - s.succ)
 
 lemma mono {Γ} {s s' : ℕ} {p : Semiformula L μ n} (hp : Hierarchy Γ s p) (h : s ≤ s') : Hierarchy Γ s' p := by

@@ -1,6 +1,6 @@
 import Logic.FirstOrder.Computability.Term
 
-attribute [-instance] WType.instEncodableWType Encodable.finPi Encodable.fintypeArrowOfEncodable
+attribute [-instance] WType.instEncodable Encodable.finPi Encodable.fintypeArrowOfEncodable
 
 namespace LO
 
@@ -187,8 +187,8 @@ def ofSubformula : {n : ℕ} → Semiformula L μ n → { p : UFormula L μ // p
   | _, Semiformula.nrel r v => ⟨nrel r (fun i => (UTerm.ofSubterm $ v i)), by simp⟩
   | _, p ⋏ q               => ⟨and (ofSubformula p) (ofSubformula q), by simp⟩
   | _, p ⋎ q               => ⟨or (ofSubformula p) (ofSubformula q), by simp⟩
-  | _, ∀' p                => ⟨all (ofSubformula p), by simpa using Iff.mpr Nat.pred_le_iff (ofSubformula p).property⟩
-  | _, ∃' p                => ⟨ex (ofSubformula p), by simpa using Iff.mpr Nat.pred_le_iff (ofSubformula p).property⟩
+  | _, ∀' p                => ⟨all (ofSubformula p), by simp⟩
+  | _, ∃' p                => ⟨ex (ofSubformula p), by simp⟩
 
 lemma toSubformula_ofSubformula : ∀ {n : ℕ} (p : Semiformula L μ n), toSubformula (ofSubformula p).1 (ofSubformula p).2 = p
   | _, ⊤                   => rfl
@@ -213,10 +213,10 @@ lemma ofSubformula_toSubformula : ∀ {n : ℕ} (p : UFormula L μ) (h : p.bv �
     exact ⟨ofSubformula_toSubformula p (by simp at h; exact h.1), ofSubformula_toSubformula q (by simp at h; exact h.2)⟩
   | _, all p,    h => by
     simp[ofSubformula, toSubformula]
-    exact ofSubformula_toSubformula p (by {simp at h; exact Nat.le_add_of_sub_le h })
+    exact ofSubformula_toSubformula p (by simp only [bv_all] at h; exact Nat.le_add_of_sub_le h)
   | _, ex p,     h => by
     simp[ofSubformula, toSubformula]
-    exact ofSubformula_toSubformula p (by {simp at h; exact Nat.le_add_of_sub_le h })
+    exact ofSubformula_toSubformula p (by simp only [bv_ex] at h; exact Nat.le_add_of_sub_le h)
 
 def subfEquiv : Semiformula L μ n ≃ { p : UFormula L μ // p.bv ≤ n } where
   toFun := ofSubformula
@@ -243,10 +243,10 @@ lemma ofSubformula_eq_subfEquiv : @ofSubformula L μ n = subfEquiv := rfl
     subfEquiv (p ⋎ q) = ⟨or (subfEquiv p) (subfEquiv q), by simp⟩ := rfl
 
 @[simp] lemma subfEquiv_all (p : Semiformula L μ (n + 1)) :
-    subfEquiv (∀' p) = ⟨all (subfEquiv p), by simpa using Iff.mpr Nat.pred_le_iff (subfEquiv p).property⟩ := rfl
+    subfEquiv (∀' p) = ⟨all (subfEquiv p), by simp⟩ := rfl
 
 @[simp] lemma subfEquiv_ex (p : Semiformula L μ (n + 1)) :
-    subfEquiv (∃' p) = ⟨ex (subfEquiv p), by simpa using Iff.mpr Nat.pred_le_iff (subfEquiv p).property⟩ := rfl
+    subfEquiv (∃' p) = ⟨ex (subfEquiv p), by simp⟩ := rfl
 
 open Encodable Primrec
 variable [(k : ℕ) → Primcodable (L.Func k)] [(k : ℕ) → Primcodable (L.Rel k)]
@@ -361,8 +361,8 @@ instance : (a : Node L μ) → Primcodable (Edge L μ a)
 instance : (a : Node L μ) → DecidableEq (Edge L μ a)
   | (_, Sum.inl ⟨_, _, _⟩)              => instDecidableEqEmpty
   | (_, Sum.inr $ Sum.inl ())           => instDecidableEqEmpty
-  | (_, Sum.inr $ Sum.inr $ Sum.inl ()) => instDecidableEq
-  | (_, Sum.inr $ Sum.inr $ Sum.inr ()) => instDecidableEq
+  | (_, Sum.inr $ Sum.inr $ Sum.inl ()) => inferInstance
+  | (_, Sum.inr $ Sum.inr $ Sum.inr ()) => inferInstance
 
 instance : PrimrecCard (Edge L μ) where
   card_prim :=

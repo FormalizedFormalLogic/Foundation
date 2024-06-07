@@ -89,7 +89,7 @@ noncomputable def SearchTree.recursion {C : SearchTree T Γ → Sort v}
 
 noncomputable def syntacticMainLemma (σ : SearchTree T Γ) : T ⊢'' σ.seq := by
   apply SearchTree.recursion wf σ
-  intro ⟨s, Δ₁, a₁⟩ ih; simp
+  intro ⟨s, Δ₁, a₁⟩ ih
   have ih' : ∀ {Δ₂}, ReduxNat T s Δ₂ Δ₁ → T ⊢'' Δ₂ := fun {Δ₂} r => ih ⟨s + 1, Δ₂, a₁.succ r⟩ (SearchTree.Lt.intro a₁ r)
   rcases hs : (decode s.unpair.1 : Option (Code L)) with (_ | c)
   { have : ReduxNat T s Δ₁ Δ₁ := ReduxNat.refl hs Δ₁
@@ -179,7 +179,7 @@ lemma chain_monotone {s u : ℕ} (h : s ≤ u) : ⛓️[s] ⊆ ⛓️[u] := by
     simpa[Nat.add_sub_of_le h] using this (u - s)
   intro d; induction' d with d ih
   · simp
-  · simp[Nat.add_succ]; exact subset_trans ih $ ReduxNat.antimonotone (chain_spec nwf (s + d))
+  · simpa only [Nat.add_succ] using subset_trans ih <| ReduxNat.antimonotone (chain_spec nwf (s + d))
 
 lemma chain_spec' (c : Code L) (i : ℕ) : ⛓️[(encode c).pair i + 1] ≺[c] ⛓️[(encode c).pair i] := (chain_spec nwf _).toRedux
 
@@ -293,7 +293,8 @@ lemma semanticMainLemma_val : (p : SyntacticFormula L) → p ∈ ⛓️ → ¬Ev
         contradiction
   | p ⋎ q,    h => by
       have hpq : p ∈ ⛓️ ∧ q ∈ ⛓️ := chainSet_or nwf h
-      simp; rintro (h | h)
+      simp only [LogicalConnective.HomClass.map_or, LogicalConnective.Prop.or_eq]
+      rintro (h | h)
       · exact semanticMainLemma_val p hpq.1 h
       · exact semanticMainLemma_val q hpq.2 h
   | ∀' p,     h => by

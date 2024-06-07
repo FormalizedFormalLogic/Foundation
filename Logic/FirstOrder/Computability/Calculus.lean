@@ -351,7 +351,6 @@ lemma provable_iff_isProofFn {T : Theory L} [DecidablePred T] {σ : Sentence L} 
   · simp; intro e
     rcases decode e.unpair.1 with (_ | ⟨l⟩) <;> simp
     rcases decode e.unpair.2 with (_ | ⟨U⟩) <;> simp
-    simp only [Bool.cond_eq_ite, Bool.and_eq_true, ite_eq_iff]; simp
     intro h₁ h₂ h₃
     exact ⟨l, U, h₁, h₂, h₃⟩
 

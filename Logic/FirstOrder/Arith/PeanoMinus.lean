@@ -100,7 +100,7 @@ scoped instance : LinearOrder M where
     rcases Model.lt_tri x y with (h | rfl | h) <;> simp[*, le_def]
   lt_iff_le_not_le := fun x y =>
     ⟨fun h => ⟨Or.inr h, by
-      simp[le_def]; rintro (rfl | h'); { exact lt_irrefl y h }; { exact lt_irrefl _ (lt_trans _ _ _ h h') }⟩,
+      simp only [le_def]; rintro (rfl | h'); { exact lt_irrefl y h }; { exact lt_irrefl _ (lt_trans _ _ _ h h') }⟩,
      by simp[not_or, le_def]; rintro (rfl | h) <;> simp[*] ⟩
   decidableLE := fun _ _ => Classical.dec _
 

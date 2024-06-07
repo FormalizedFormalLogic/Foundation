@@ -79,7 +79,9 @@ def Code.equiv (L : Language.{u}) :
     rcases x with (⟨_, _, _⟩ | ⟨⟩ | ⟨_, _⟩ | ⟨_, _⟩ | _ | ⟨_, _⟩ | _) <;> simp
 
 attribute [local instance] Semiterm.encodable Semiformula.encodable in
-instance : Encodable (Code L) := Encodable.ofEquiv _ (Code.equiv L)
+instance : Encodable (Code L) :=
+  haveI : Encodable Empty := IsEmpty.toEncodable
+  Encodable.ofEquiv _ (Code.equiv L)
 
 end System
 
