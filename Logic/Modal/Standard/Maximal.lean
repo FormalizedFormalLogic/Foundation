@@ -205,6 +205,31 @@ lemma trivTranslated_of_K4 : 𝐊𝟒 ⊢! p → 𝐂𝐥 ⊢! pᵀᴾ := by
   apply iff_Triv_classical.mp;
   exact System.reducible_iff.mp reducible_K4_Triv h;
 
+lemma verTranslated_of_GL : 𝐆𝐋 ⊢! p → 𝐂𝐥 ⊢! pⱽᴾ := by
+  intro h;
+  induction h.some using Deduction.inducition_with_nec with
+    | hMaxm a =>
+      rcases a with (hK | hVer)
+      . obtain ⟨_, _, e⟩ := hK; subst_vars; dsimp only [Axioms.K, VerTranslation, toPropFormula]; apply imply₁!;
+      . obtain ⟨_, e⟩ := hVer; subst_vars; dsimp [Axioms.Ver, VerTranslation, toPropFormula]; apply imp_id!;
+    | hMdp h₁ h₂ ih₁ ih₂ =>
+      dsimp [VerTranslation, toPropFormula] at ih₁ ih₂;
+      exact (ih₁ ⟨h₁⟩) ⨀ (ih₂ ⟨h₂⟩);
+    | hNec => dsimp [toPropFormula]; exact verum!;
+    | _ =>
+      dsimp [VerTranslation, toPropFormula];
+      try first
+      | apply verum!;
+      | apply imply₁!;
+      | apply imply₂!;
+      | apply conj₁!;
+      | apply conj₂!;
+      | apply conj₃!;
+      | apply disj₁!;
+      | apply disj₂!;
+      | apply disj₃!;
+      | apply dne!;
+
 open Superintuitionistic (unprovable_classical_of_exists_ClassicalValuation)
 
 variable [Inhabited α]
@@ -232,6 +257,28 @@ theorem strictReducible_K4_GL : (𝐊𝟒 : DeductionParameter α) <ₛ 𝐆𝐋
     constructor;
     . exact axiomL!;
     . exact unprovable_AxiomL_K4;
+
+lemma unprovable_AxiomT_GL : 𝐆𝐋 ⊬! Axioms.T (atom default : Formula α) := by
+  apply not_imp_not.mpr verTranslated_of_GL;
+  apply unprovable_classical_of_exists_ClassicalValuation;
+  simp [Axioms.T, VerTranslation, toPropFormula];
+  use (λ _ => False);
+  trivial;
+
+
+instance : System.Consistent (𝐆𝐋 : DeductionParameter α) := by
+  apply consistent_iff_exists_unprovable.mpr;
+  existsi (Axioms.T (atom default));
+  apply unprovable_AxiomT_GL;
+
+
+theorem notReducible_S4_GL : ¬(𝐒𝟒 : DeductionParameter α) ≤ₛ 𝐆𝐋 := by
+  apply System.not_reducible_iff.mpr;
+  existsi (Axioms.T (atom default));
+  constructor;
+  . exact axiomT!;
+  . exact unprovable_AxiomT_GL;
+
 
 example : 𝐕𝐞𝐫 ⊬! (~(□⊥) : Formula α) := by
   apply iff_Ver_classical.not.mpr;
