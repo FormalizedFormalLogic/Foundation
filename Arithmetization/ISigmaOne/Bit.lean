@@ -352,7 +352,7 @@ instance under_definable' (Γ) : Γ-Function₁ (under : M → M) := .of_zero un
 
 lemma eq_zero_of_subset_zero {a : M} : a ⊆ 0 → a = 0 := by
   intro h; by_contra A
-  have : log a ∈ 0 := h (log_mem_of_pos (pos_iff_ne_zero.mpr A))
+  have : log a ∈ (0 : M) := h (log_mem_of_pos (pos_iff_ne_zero.mpr A))
   simp_all
 
 lemma subset_div_two {a b : M} : a ⊆ b → a / 2 ⊆ b / 2 := by
@@ -430,21 +430,21 @@ private lemma finset_comprehension_aux (Γ : Polarity) {P : M → Prop} (hP : (�
   have : ∃ s < exp a, ∀ i < a, P i → i ∈ s :=
     ⟨under a, pred_lt_self_of_pos (by simp), fun i hi _ ↦ by simpa [mem_under_iff] using hi⟩
   rcases this with ⟨s, hsn, hs⟩
-  have : (Γ.alt, m)-Predicate (fun s ↦ ∀ i < a, P i → i ∈ s) := by
+  have : (Γ.alt, m)-Predicate (fun s : M ↦ ∀ i < a, P i → i ∈ s) := by
     apply Definable.ball_lt₀; simp; apply Definable.imp <;> definability
-  have : ∃ t, (∀ i < a, P i → i ∈ t) ∧ ∀ t' < t, ∃ x, P x ∧ x < a ∧ x ∉ t' := by
+  have : ∃ t, (∀ i < a, P i → i ∈ t) ∧ ∀ t' < t, ∃ x < a, P x ∧ x ∉ (t' : M) := by
     simpa using least_number_h (L := ℒₒᵣ) Γ.alt m this hs
   rcases this with ⟨t, ht, t_minimal⟩
   have t_le_s : t ≤ s := not_lt.mp (by
     intro lt
-    rcases t_minimal s lt with ⟨i, hi, hin, his⟩
+    rcases t_minimal s lt with ⟨i, hin, hi, his⟩
     exact his (hs i hin hi))
   have : ∀ i < a, i ∈ t → P i := by
     intro i _ hit
     by_contra Hi
-    have : ∃ j, P j ∧ j < a ∧ (j ∈ t → j = i) := by
+    have : ∃ j < a, P j ∧ (j ∈ t → j = i) := by
       simpa [not_imp_not] using t_minimal (bitRemove i t) (bitRemove_lt_of_mem hit)
-    rcases this with ⟨j, Hj, hjn, hm⟩
+    rcases this with ⟨j, hjn, Hj, hm⟩
     rcases hm (ht j hjn Hj); contradiction
   exact ⟨t, lt_of_le_of_lt t_le_s hsn, fun i hi ↦ ⟨this i hi, ht i hi⟩⟩
 

@@ -33,7 +33,7 @@ notation "𝚷₁" => HierarchySymbol.piOne
 notation "𝚫₁" => HierarchySymbol.deltaOne
 
 namespace HierarchySymbol
-
+/-
 inductive Rel : HierarchySymbol → HierarchySymbol → Prop where
   | delta_le_sigma (m)      : Rel (𝚫, m) (𝚺, m)
   | delta_le_pi (m)         : Rel (𝚫, m) (𝚷, m)
@@ -91,6 +91,7 @@ lemma le_of_lt (Γ₁ Γ₂ : SigmaPiDelta) {m n : ℕ} (h : m < n) : (Γ₁, m)
   | 𝚫, 𝚺 => by simp
   | 𝚫, 𝚷 => by simp
   | 𝚫, 𝚫 => by rfl
+-/
 
 end HierarchySymbol
 
@@ -260,6 +261,7 @@ lemma pi_extd_val (p : HSemiformula ℒₒᵣ ξ n (𝚷, m)) :
     (p.extd L).val = Semiformula.lMap Language.oringEmb p.val := by
   rcases p; simp [extd]
 
+/-
 def ofRel : {Γ₁ Γ₂ : HierarchySymbol} → HierarchySymbol.Rel Γ₁ Γ₂ → HSemiformula L ξ k Γ₁ → HSemiformula L ξ k Γ₂
   | (𝚺, m), (𝚫, n + 1), H, (mkSigma p hp)             =>
     have : n = m := by cases H; rfl
@@ -279,6 +281,7 @@ def ofRel : {Γ₁ Γ₂ : HierarchySymbol} → HierarchySymbol.Rel Γ₁ Γ₂ 
   | (𝚺, m), (𝚫, 0),     H, (mkSigma p hp)             =>
     have : m = 0 := by cases H; rfl
     mkDelta (mkSigma p <| by simpa [this] using hp) (mkPi p <| Hierarchy.of_zero (by simpa [this] using hp))
+-/
 
 lemma sigmaZero (p : HSemiformula L ξ k (Γ, 0)) : Hierarchy 𝚺 0 p.val :=
   match Γ with

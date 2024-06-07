@@ -298,9 +298,9 @@ lemma sq_or_dsq {a : M} (pa : Pow2 a) : ∃ b, a = b^2 ∨ a = 2 * b^2 := by
 lemma sqrt {a : M} (h : Pow2 a) (hsq : (√a)^2 = a) : Pow2 (√a) := by
   rw [←hsq] at h; simpa using h
 
-@[simp] lemma Pow2.not_three : ¬Pow2 (3 : M) := by
+@[simp] lemma not_three : ¬Pow2 (3 : M) := by
   intro h
-  have : 2 ∣ 3 := h.two_dvd (by simp [←two_add_one_eq_three])
+  have : (2 : M) ∣ 3 := h.two_dvd (by simp [←two_add_one_eq_three])
   simp [←two_add_one_eq_three, ←mod_eq_zero_iff_dvd, one_lt_two] at this
 
 lemma four_le {i : M} (hi : Pow2 i) (lt : 2 < i) : 4 ≤ i := by

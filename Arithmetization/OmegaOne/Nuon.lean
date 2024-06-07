@@ -494,7 +494,7 @@ def isSegmentDef : 𝚺₀-Semisentence 5 := .mkSigma
 
 lemma isSegmentDef_defined : Defined (M := M) (λ v ↦ IsSegment (v 0) (v 1) (v 2) (v 3) (v 4)) isSegmentDef := by
   intro v; simp [IsSegment, isSegmentDef, ext_defined.df.iff, fbit_defined.df.iff, lt_succ_iff_le, numeral_eq_natCast]
-  apply ball_congr; intro x _
+  apply forall₂_congr; intro x _
   constructor
   · intro h; exact ⟨_, by simp, rfl, _, by simp, rfl, _, by simp, rfl, h⟩
   · rintro ⟨_, _, rfl, _, _, rfl, _, _, rfl, h⟩; exact h
@@ -524,7 +524,7 @@ lemma bex_eq_lt_iff {p : M → Prop} {b : M} :
 
 lemma isSerieDef_defined : Defined (M := M) (λ v ↦ IsSeries (v 0) (v 1) (v 2) (v 3) (v 4) (v 5)) isSeriesDef := by
   intro v; simp [IsSeries, isSeriesDef, length_defined.df.iff, ext_defined.df.iff, segmentDef_defined.df.iff, lt_succ_iff_le]
-  apply ball_congr; intro x _
+  apply forall₂_congr; intro x _
   rw [bex_eq_le_iff, bex_eq_le_iff, bex_eq_le_iff]
   simp; rfl
 
