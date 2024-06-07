@@ -1,6 +1,6 @@
 import Logic.FirstOrder.Arith.Representation
 import Logic.FirstOrder.Computability.Calculus
-import Logic.AutoProver.Prover
+import Logic.Logic.HilbertStyle.Gentzen
 
 namespace LO
 
@@ -95,15 +95,23 @@ lemma goedel_spec : T ⊢! G ⟷ ~(provableSentence T)/[⸢G⸣] := by
 
 variable [DecidablePred T] [Theory.Computable T]
 
+open LO.System
+
+def imply₂' {𝓢 : Theory ℒₒᵣ} (d₁ : 𝓢 ⊢! p ⟶ q ⟶ r) (d₂ : 𝓢 ⊢! p ⟶ q) (d₃ : 𝓢 ⊢! p) : 𝓢 ⊢! r := imply₂! ⨀ d₁ ⨀ d₂ ⨀ d₃
+
+lemma conj₁'! {𝓢 : Theory ℒₒᵣ} (d : 𝓢 ⊢! (p ⟷ q)) : 𝓢 ⊢! p ⟶ q := by
+  simp [LogicalConnective.iff] at d;
+  exact System.and_left! d
+
 theorem godel_independent : System.Undecidable T G := by
   suffices ¬(T ⊢! G ∨ T ⊢! ~G) by
     simpa[System.Undecidable, not_or] using this
   rintro (H | H)
-  · have h₁ : T ⊢! ~(provableSentence T)/[⸢G⸣] := by prover [goedel_spec T, H]
+  · have h₁ : T ⊢! ~(provableSentence T)/[⸢G⸣] := System.and_left! (goedel_spec T) ⨀ H
     have h₂ : T ⊢! (provableSentence T)/[⸢G⸣]  := by simpa using (provableSentence_representation (L := ℒₒᵣ)).mpr H
     exact (Gentzen.inconsistent_of_provable_and_refutable! h₂ h₁).not_con (consistent_of_sigmaOneSound T)
-  · have : T ⊢! ~G ⟷ (provableSentence T)/[⸢G⸣] := by prover [goedel_spec T]
-    have : T ⊢! (provableSentence T)/[⸢G⸣] := by prover [this, H]
+  · have : T ⊢! ~G ⟷ (provableSentence T)/[⸢G⸣] := Gentzen.not_contra! (goedel_spec T)
+    have : T ⊢! (provableSentence T)/[⸢G⸣] := System.and_left! this ⨀ H
     have : T ⊢! G := (provableSentence_representation (L := ℒₒᵣ)).mp this
     exact (Gentzen.inconsistent_of_provable_and_refutable! this H).not_con (consistent_of_sigmaOneSound T)
 

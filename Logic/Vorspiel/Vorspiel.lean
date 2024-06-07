@@ -194,11 +194,6 @@ def toList : {n : ℕ} → (Fin n → α) → List α
 @[simp] lemma toList_length (v : Fin n → α) : (toList v).length = n :=
   by induction n <;> simp[*]
 
-@[simp] lemma toList_nth (v : Fin n → α) (i) (hi) : (toList v).nthLe i hi = v ⟨i, by simpa using hi⟩ := by
-  induction n generalizing i <;> simp[*, List.nthLe_cons]
-  case zero => contradiction
-  case succ => rcases i <;> simp
-
 @[simp] lemma mem_toList_iff {v : Fin n → α} {a} : a ∈ toList v ↔ ∃ i, v i = a :=
   by induction n <;> simp[*]; constructor; { rintro (rfl | ⟨i, rfl⟩) <;> simp }; { rintro ⟨i, rfl⟩; cases i using Fin.cases <;> simp }
 
@@ -563,19 +558,23 @@ lemma mapM'_eq_none_iff {f : α → Option β} {l : List α} : l.mapM' f = none 
       { have := ih.mpr h; simp[this] } } }
 
 lemma length_mapM' {f : α → Option β} {as : List α} : as.mapM' f = some bs → bs.length = as.length := by
-  induction' as with a as ih generalizing bs <;> simp[Option.pure_eq_some, Option.bind_eq_bind]
-  { rintro rfl; simp }
-  { rintro b _ bs hbs rfl; simpa using ih hbs }
+  induction' as with a as ih generalizing bs
+  · simp only [mapM', Option.pure_eq_some, Option.some.injEq, length_nil]; rintro rfl; simp
+  · simp only [mapM', Option.pure_eq_some, Option.bind_eq_bind, Option.bind_eq_some,
+    Option.some.injEq, length_cons, forall_exists_index, and_imp]; rintro b _ bs hbs rfl; simpa using ih hbs
 
 lemma mapM'_mem_inversion {f : α → Option β} {as : List α} (h : as.mapM' f = some bs) (hb : b ∈ bs) :
     ∃ a, f a = some b := by
-  induction' as with a as ih generalizing bs <;> simp[Option.pure_eq_some, Option.bind_eq_bind] at h
-  { rcases h with rfl; simp at hb }
-  { rcases h with ⟨b', hb', bs', hbs', rfl⟩
+  induction' as with a as ih generalizing bs
+  · simp only [mapM', Option.pure_eq_some, Option.some.injEq] at h
+    rcases h with rfl; simp at hb
+  · simp only [mapM', Option.pure_eq_some, Option.bind_eq_bind, Option.bind_eq_some,
+    Option.some.injEq] at h
+    rcases h with ⟨b', hb', bs', hbs', rfl⟩
     have : b = b' ∨ b ∈ bs' := by simpa using hb
     rcases this with (rfl | hb)
-    { exact ⟨a, hb'⟩ }
-    { exact ih hbs' hb } }
+    · exact ⟨a, hb'⟩
+    · exact ih hbs' hb
 
 lemma mapM'_eq_mapM'_of_eq {f g : α → m β} (l : List α) (hf : ∀ a ∈ l, f a = g a) : l.mapM' f = l.mapM' g := by
   induction' l with a as ih <;> simp
@@ -587,8 +586,8 @@ lemma mapM'_option_map {f : α → Option β} {g : β → γ} (as : List α) :
     as.mapM' (fun a => (f a).map g) = (as.mapM' f).map (fun bs => bs.map g) := by
   induction' as with a as ih generalizing f g <;> simp[Option.pure_eq_some, Option.bind_eq_bind, Function.comp]
   { simp[ih]
-    rcases ha : f a with (_ | b) <;> simp
-    rcases has : mapM' f as with (_ | bs) <;> simp }
+    rcases f a with (_ | b) <;> simp
+    rcases mapM' f as with (_ | bs) <;> simp }
 
 def allSome' : List (Option α) → Option (List α) := mapM' id
 

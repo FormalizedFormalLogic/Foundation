@@ -44,7 +44,7 @@ lemma satisfiable_union_trueArithWithStarUnbounded :
 
 instance trueArithWithStarUnbounded.eqTheory : 𝐄𝐐 ≼ (⋃ c, trueArithWithStarUnbounded c) :=
   System.Subtheory.ofSubset <|
-    Set.subset_iUnion_of_subset 0 (Set.subset_union_of_subset_left (Set.subset_union_left _ _) _)
+    Set.subset_iUnion_of_subset 0 (Set.subset_union_of_subset_left (by simp) _)
 
 abbrev Nonstandard : Type := ModelOfSatEq satisfiable_union_trueArithWithStarUnbounded
 
@@ -63,7 +63,7 @@ lemma models_union_trueArithWithStarUnbounded : ℕ⋆ ⊧ₘ* ⋃ c, trueArithW
 instance trueArith : ℕ⋆ ⊧ₘ* 𝐓𝐀 := ⟨by
   have : ℕ⋆ ⊧ₘ* Semiformula.lMap (Language.Hom.add₁ _ _) '' 𝐓𝐀 :=
     Semantics.RealizeSet.of_subset models_union_trueArithWithStarUnbounded
-      (Set.subset_iUnion_of_subset 0 $ Set.subset_union_of_subset_left (Set.subset_union_right _ _ ) _)
+      (Set.subset_iUnion_of_subset 0 $ Set.subset_union_of_subset_left (by simp) _)
   intro σ hσ
   let s : Structure ℒₒᵣ ℕ⋆ := (ModelOfSatEq.struc satisfiable_union_trueArithWithStarUnbounded).lMap
     (Language.Hom.add₁ ℒₒᵣ Language.unit)

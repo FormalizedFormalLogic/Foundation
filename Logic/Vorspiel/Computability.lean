@@ -62,13 +62,13 @@ lemma fintypeArrowEquivFinArrow_eq (f : ι → α) : fintypeArrowEquivFinArrow f
 @[simp] lemma val_fintypeEquivFin_fin {k : ℕ} (i : Fin k) : (fintypeEquivFin i).val = i.val :=
   congr_arg Fin.val (cast_fintypeEquivFin_fin i)
 
-@[simp] lemma fintypeEquivFin_false : fintypeEquivFin false = 0 := rfl
+@[simp] lemma fintypeEquivFin_false : fintypeEquivFin false = 0 := by simp [fintypeEquivFin]; rfl
 
-@[simp] lemma fintypeEquivFin_true : fintypeEquivFin true = 1 := rfl
+@[simp] lemma fintypeEquivFin_true : fintypeEquivFin true = 1 := by simp [fintypeEquivFin]; rfl
 
-@[simp] lemma fintypeEquivFin_symm_zero : fintypeEquivFin.symm 0 = false := rfl
+@[simp] lemma fintypeEquivFin_symm_zero : fintypeEquivFin.symm 0 = false := by simp [fintypeEquivFin]; rfl
 
-@[simp] lemma fintypeEquivFin_symm_one : fintypeEquivFin.symm 1 = true := rfl
+@[simp] lemma fintypeEquivFin_symm_one : fintypeEquivFin.symm 1 = true := by simp [fintypeEquivFin]; rfl
 
 @[simp] lemma fintypeEquivFin_symm_cast_fin {k : ℕ} (i : Fin k) :
     fintypeEquivFin.symm (i.cast (Fintype.card_fin _).symm) = i := by

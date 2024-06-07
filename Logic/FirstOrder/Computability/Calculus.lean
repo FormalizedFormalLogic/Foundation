@@ -176,13 +176,13 @@ lemma isProper_append {l₁ l₂ : ProofList L} (h₁ : isProper l₁) (h₂ : i
   · simpa
   · simp
     rcases c with ⟨⟨⟩, Γ⟩ <;> simp[isProper] at h₁ ⊢
-    case axL k r v => { exact ⟨⟨ih h₁.1.1, h₁.1.2⟩, h₁.2⟩ }
-    case verum => { exact ⟨ih h₁.1, h₁.2⟩ }
-    case and p q => { exact ⟨⟨⟨ih h₁.1.1.1, h₁.1.1.2⟩, Or.inl h₁.1.2⟩, Or.inl h₁.2⟩ }
-    case or p q => { exact ⟨⟨ih h₁.1.1, h₁.1.2⟩, Or.inl h₁.2⟩ }
-    case all => { exact ⟨⟨ih h₁.1.1, h₁.1.2⟩, Or.inl h₁.2⟩ }
-    case ex => { exact ⟨⟨ih h₁.1.1, h₁.1.2⟩, Or.inl h₁.2⟩ }
-    case wk => { exact ⟨⟨ih h₁.1.1, h₁.1.2⟩, Or.inl h₁.2⟩ }
+    case axL k r v => exact ⟨⟨ih h₁.1.1, h₁.1.2⟩, h₁.2⟩
+    case verum => exact ⟨ih h₁.1, h₁.2⟩
+    case and p q => exact ⟨⟨⟨ih h₁.1.1.1, h₁.1.1.2⟩, Or.inl h₁.1.2⟩, Or.inl h₁.2⟩
+    case or p q => exact ⟨⟨ih h₁.1.1, h₁.1.2⟩, Or.inl h₁.2⟩
+    case all => exact ⟨⟨ih h₁.1.1, h₁.1.2⟩, Or.inl h₁.2⟩
+    case ex => exact ⟨⟨ih h₁.1.1, h₁.1.2⟩, Or.inl h₁.2⟩
+    case wk => exact ⟨⟨ih h₁.1.1, h₁.1.2⟩, Or.inl h₁.2⟩
 
 open Derivation
 

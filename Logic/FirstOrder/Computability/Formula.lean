@@ -477,7 +477,7 @@ lemma and_primrec : Primrec₂ (and : UFormula L μ → UFormula L μ → UFormu
     ((this.comp₂ (Primrec₂.const ()) Primrec.id.to₂).comp₂
       ((Primrec.of_equiv (e := equivW L μ)).comp₂ Primrec₂.left)
       ((Primrec.of_equiv (e := equivW L μ)).comp₂ Primrec₂.right))
-  exact this.of_eq (fun p q => by simp; rw[fintypeEquivFin_false, fintypeEquivFin_true]; simp)
+  exact this.of_eq (fun p q => by simp; rw [fintypeEquivFin_false, fintypeEquivFin_true]; simp)
 
 lemma or_primrec : Primrec₂ (or : UFormula L μ → UFormula L μ → UFormula L μ) := by
   have := w_mk₂ (β := Edge L μ) (fun (_ : Unit) => (false, Sum.inr $ Sum.inr $ Sum.inl ())) (by rintro ⟨⟩; simp[Edge]) (const _)
@@ -485,7 +485,7 @@ lemma or_primrec : Primrec₂ (or : UFormula L μ → UFormula L μ → UFormula
     ((this.comp₂ (Primrec₂.const ()) Primrec.id.to₂).comp₂
       ((Primrec.of_equiv (e := equivW L μ)).comp₂ Primrec₂.left)
       ((Primrec.of_equiv (e := equivW L μ)).comp₂ Primrec₂.right))
-  exact this.of_eq (fun p q => by simp; rw[fintypeEquivFin_false, fintypeEquivFin_true]; simp)
+  exact this.of_eq (fun p q => by simp; rw [fintypeEquivFin_false, fintypeEquivFin_true]; simp)
 
 lemma all_primrec : Primrec (all : UFormula L μ → UFormula L μ) := by
   have := w_mk₁ (β := Edge L μ) (fun (_ : Unit) => (true, Sum.inr $ Sum.inr $ Sum.inr ())) (by rintro ⟨⟩; simp[Edge]) (const _)
@@ -533,7 +533,11 @@ private lemma elim_eq
       (γAll x)
       (γEx x) p =
     WType.elimL (fun p l => F γVerum γFalsum γRel γNrel γAnd γOr γAll γEx x (p, l)) (equivW L μ p) := by
-  induction p <;> simp[elim, WType.elimL_mk, F, *] <;> congr
+  induction p <;> simp [elim, WType.elimL_mk, F, *]
+  · congr; rw [fintypeEquivFin_symm_zero]; rw [fintypeEquivFin_symm_one]
+  · congr; rw [fintypeEquivFin_symm_zero]; rw [fintypeEquivFin_symm_one]
+  · congr
+  · congr
 
 private lemma hF {σ γ} [Primcodable σ] [Primcodable γ] [Inhabited γ]
   {γVerum γFalsum : σ → γ}
@@ -807,7 +811,7 @@ lemma bindq_param_primrec {b : σ → ℕ → UTerm L μ₂} {e : σ → μ₁ �
     have hm : Primrec (fun (q : σ × ℕ × UFormula L μ₁) => q.2.2.depth) := depth_primrec.comp (snd.comp snd)
     have hl : Primrec (bindqL : σ × ℕ × UFormula L μ₁ → List (σ × ℕ × UFormula L μ₁)) := bindqL_primrec
     have hg : Primrec₂ (bindqG b e : σ × ℕ × UFormula L μ₁ → List (UFormula L μ₂) → Option (UFormula L μ₂)) := bindqG_primrec hb he
-    have := nat_omega_rec (fun (q : σ × ℕ × UFormula L μ₁) => bindq (b q.1) (e q.1) q.2.1 q.2.2) hm hl hg
+    have := nat_omega_rec' (fun (q : σ × ℕ × UFormula L μ₁) => bindq (b q.1) (e q.1) q.2.1 q.2.2) hm hl hg
       (by rintro ⟨x₁, m₁, p₁⟩ ⟨x₂, m₂, p₂⟩; simp[bindqL]
           cases p₁ <;> simp[inversion]
           case and => rintro (⟨rfl, rfl, rfl⟩ | ⟨rfl, rfl, rfl⟩) <;> simp[depth, Nat.lt_succ]
@@ -962,7 +966,7 @@ lemma subfEquiv_bind_eq_bind (b : Fin n₁ → Semiterm L μ₂ n₂) (e : μ₁
     (subfEquiv ((Rew.bind b e).hom p)).val =
     UFormula.bind (fun x => if hx : x < n₁ then subtEquiv (b ⟨x, hx⟩) else default) (fun x => subtEquiv $ e x) (subfEquiv p) := by
   induction p using rec' generalizing n₂ μ₂ e <;>
-    simp[Semiterm.subtEquiv_bind_eq_bind, bindq, Rew.rel, Rew.nrel, UFormula.bind,
+    simp [Semiterm.subtEquiv_bind_eq_bind, bindq, Rew.rel, Rew.nrel, UFormula.bind,
       ofSubterm_eq_subtEquiv, ofSubformula_eq_subfEquiv, *]
   case hall _ k p ih =>
     simp[Rew.q_bind, ih, bindq_eq_bind]

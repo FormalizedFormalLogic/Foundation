@@ -42,6 +42,30 @@ instance (𝓣 : S) : Classical 𝓣 where
       (wkL [q ⟶ r, q] (by simp) <| implyLeft (closed q (by simp) (by simp)) (closed r (by simp) (by simp)))
   dne := fun p ↦ of <| implyRight <| negLeft <| negRight <| closed p (by simp) (by simp)
 
+def notContra {𝓣 : S} {p q : F} (b : 𝓣 ⊢ p ⟷ ~q) : 𝓣 ⊢ ~p ⟷ q := by
+  have : [p ⟷ ~q] ⊢² [~p ⟷ q] :=
+    andRight
+      (andLeft <| implyRight
+        <| negLeft <| implyLeft
+          (implyLeft
+            (negRight <| closed q (by simp) (by simp))
+            (closed p (by simp) (by simp)))
+          (negLeft <| implyLeft
+            (negRight <| closed q (by simp) (by simp))
+            (closed p (by simp) (by simp))))
+      (andLeft <| implyRight <| rotateLeft <| implyLeft
+        (rotateRight <| negRight <| closed p (by simp) (by simp))
+        (negLeft <| closed q (by simp) (by simp)))
+  exact toProof this (fun r ↦ by simp; rintro rfl; exact b)
+
+lemma not_contra! {𝓣 : S} {p q : F} (b : 𝓣 ⊢! p ⟷ ~q) : 𝓣 ⊢! ~p ⟷ q := ⟨notContra b.get⟩
+
 end Gentzen
+
+namespace System
+
+variable {F : Type*} [LogicalConnective F] {S : Type*} [System F S] {𝓢 : S} [Classical 𝓢]
+
+end System
 
 end LO

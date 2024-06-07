@@ -110,8 +110,8 @@ def ofSubterm : Semiterm L μ n → { t : UTerm L μ // t.bv ≤ n }
   | Semiterm.func f v => ⟨func f (fun i => ofSubterm (v i)), by simp[bv]⟩
 
 lemma toSubterm_ofSubterm {n} (t : Semiterm L μ n) : toSubterm (ofSubterm t).1 (ofSubterm t).2 = t := by
-  induction t <;> simp[ofSubterm, toSubterm]
-  case func f v ih => { funext i; exact ih i }
+  induction t <;> simp [ofSubterm, toSubterm]
+  case func f v ih => funext i; exact ih i
 
 lemma ofSubterm_toSubterm {n} (t : UTerm L μ) (h : t.bv ≤ n) : ofSubterm (toSubterm t h) = t := by
   induction t <;> simp[ofSubterm, toSubterm]
@@ -195,7 +195,7 @@ instance : (a : Node L μ) → DecidableEq (Edge L μ a)
 instance : PrimrecCard (Edge L μ) where
   card_prim :=
     have : Primrec ((fun a => Sum.casesOn a (fun _ => 0) $ fun c => Sum.casesOn c (fun _ => 0) (fun x => x.1)) : Node L μ → ℕ) :=
-      sum_casesOn Primrec.id (const 0) (by apply sum_casesOn snd (const 0) (sigma_fst.comp₂ right))
+      sum_casesOn Primrec.id (.const 0) (by apply sum_casesOn snd (const 0) (sigma_fst.comp₂ right))
     this.of_eq (fun c => by rcases c with (_ | _ | _) <;> simp[Edge])
 
 instance primcodable : Primcodable (UTerm L μ) := Primcodable.ofEquiv (WType (Edge L μ)) (equivW L μ)
@@ -238,7 +238,7 @@ lemma func_primrec (k) : Primrec₂ (func : L.Func k → (Fin k → UTerm L μ) 
     have h₂ : Primrec (fun v => (fun i => equivW L μ (v i)) : (Fin k → UTerm L μ) → (Fin k → WType (Edge L μ))) :=
       finArrow_map Primrec.of_equiv k
     exact (Primrec₂.comp₂ h₁ Primrec₂.left (h₂.comp₂ Primrec₂.right)).of_eq
-      (fun a v => by simp[equivW, toW, Edge]; funext i; rw[Encodable.fintypeArrowEquivFinArrow'_symm_app_fin_arrow]))
+      (fun a v => by simp[equivW, toW, Edge]))
 
 private def F (b : σ → ℕ → γ) (e : σ → μ → γ) (u : σ → ((k : ℕ) × L.Func k) × List γ → γ) : σ → Node L μ × List γ → γ := fun z p =>
     Sum.casesOn p.1 (fun x => b z x) (fun q => Sum.casesOn q (fun x => e z x) (fun f => u z (f, p.2)))
@@ -371,8 +371,8 @@ lemma subtEquiv_bind_eq_bind (b : Fin n₁ → Semiterm L μ₂ n₂) (e : μ₁
     funext i; simp[ih]; rfl
 
 lemma bv_subtEquiv (t : Semiterm L μ n) : (subtEquiv t).val.bv ≤ n := by
-  induction t <;> simp[UTerm.bv]
-  case bvar x => { exact x.prop }
+  induction t <;> simp [UTerm.bv]
+  case bvar x => exact x.prop
 
 lemma subtEquiv_bShift_eq_bShift (t : Semiterm L μ k) :
     (subtEquiv (Rew.bShift t)).val = UTerm.bShifts 1 (subtEquiv t) := by

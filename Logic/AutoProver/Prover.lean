@@ -2,6 +2,8 @@ import Logic.AutoProver.Litform
 import Logic.Vorspiel.Meta
 import Logic.Propositional.Classical.Basic.Calculus
 
+-- TODO: fix
+
 namespace LO
 
 namespace Gentzen
@@ -9,10 +11,6 @@ namespace Gentzen
 variable {F : Type*} [LogicalConnective F] [Gentzen F]
 
 variable {Γ Δ : List F} {p q r : F}
-
-def rotateLeft (d : Γ ++ [p] ⊢² Δ) : p :: Γ ⊢² Δ := wk d (by simp) (by simp)
-
-def rotateRight (d : Γ ⊢² Δ ++ [p]) : Γ ⊢² p :: Δ := wk d (by simp) (by simp)
 
 def rEmLeft (h : p ∈ Δ) : p :: Γ ⊢² Δ := closed _ (by simp) h
 
@@ -226,7 +224,7 @@ def derive {F : Q(Type u)} (instLS : Q(LogicalConnective $F)) (instGz : Q(Gentze
 end DerivationQ
 
 def isExprProvable? (ty : Q(Prop)) : MetaM ((u : Level) × (v : Level) × (_ : Level) × (F : Q(Type u)) × (S : Q(Type v)) × Q($S) × Q($F)) := do
-  let ~q(@System.Provable $F $S $instSys $T $p) := ty | throwError m!"error: {ty} not a prop _ ⊢! _"
+  let ~q(@System.Provable $F $S $instSys $T $p) := ty | throwError m!"(isExprProvable?) error: {ty} not a prop _ ⊢! _"
   return ⟨_, _, u_3, F, S, T, p⟩
 
 section
@@ -260,7 +258,8 @@ def proverL₀ (T : Q($S)) (seq : Option (TSyntax `LO.AutoProver.termSeq)) :
               match seq with
               | `(termSeq| [ $ss,* ] ) => do
                 ss.getElems.mapM (fun s => do
-                  proofOfProvable? instSys T (← Term.elabTerm s none))
+                  --logInfo m! "(proverL₀) s : {s}, elabType: {←Term.elabType s}, elaberm: {← Term.elabTerm s none}"
+                  proofOfProvable? instSys T (← Term.elabTerm s none true)) -- TODO: fix
               | _                      => return #[]
             | _        => return #[])
   let E : List ((p : Lit F) × Q($T ⊢! $(toExpr F p))) := Array.toList <| ← E.mapM fun e => do

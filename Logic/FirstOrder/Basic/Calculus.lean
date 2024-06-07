@@ -453,7 +453,7 @@ noncomputable def toProof {T : Theory L} {σ} (b : (Rew.emb.hom '' T : Syntactic
   have : ∀ p ∈ Δ, ∃ σ ∈ T, Rew.emb.hom σ = p := by simpa using hΔ
   choose f hf using this
   let Δ' := Δ.pmap f (by simp)
-  have : Δ'.map Rew.emb.hom ⊢² [σ].map Rew.emb.hom := by
+  have : Δ'.map Rew.emb.hom ⊢² ([σ].map Rew.emb.hom : List (SyntacticFormula L)) := by
     rw[show Δ'.map Rew.emb.hom = Δ from by simp [Δ', List.map_pmap, hf]]; exact d
   exact Gentzen.toDisjconseq (twoSidedEquiv.symm this) (by simp [Δ']; rintro σ p hp rfl; exact (hf p hp).1)
 

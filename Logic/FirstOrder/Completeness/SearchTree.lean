@@ -92,49 +92,49 @@ noncomputable def syntacticMainLemma (σ : SearchTree T Γ) : T ⊢'' σ.seq := 
   intro ⟨s, Δ₁, a₁⟩ ih
   have ih' : ∀ {Δ₂}, ReduxNat T s Δ₂ Δ₁ → T ⊢'' Δ₂ := fun {Δ₂} r => ih ⟨s + 1, Δ₂, a₁.succ r⟩ (SearchTree.Lt.intro a₁ r)
   rcases hs : (decode s.unpair.1 : Option (Code L)) with (_ | c)
-  { have : ReduxNat T s Δ₁ Δ₁ := ReduxNat.refl hs Δ₁
-    exact ih' this }
-  { cases c
+  · have : ReduxNat T s Δ₁ Δ₁ := ReduxNat.refl hs Δ₁
+    exact ih' this
+  · cases c
     case axL r v =>
-    { by_cases hr : rel r v ∈ Δ₁ ∧ nrel r v ∈ Δ₁
-      { exact Disjconseq.tauto $ Tait.tauto $ Tait.em hr.1 hr.2 }
-      { exact ih' (ReduxNat.redux hs $ Redux.axLRefl r v (not_and_or.mp hr)) } }
+      by_cases hr : rel r v ∈ Δ₁ ∧ nrel r v ∈ Δ₁
+      · exact Disjconseq.tauto $ Tait.tauto $ Tait.em hr.1 hr.2
+      · exact ih' (ReduxNat.redux hs $ Redux.axLRefl r v (not_and_or.mp hr))
     case verum =>
-    { by_cases h : ⊤ ∈ Δ₁
-      { exact Disjconseq.verum' h }
-      { exact ih' (ReduxNat.redux hs $ Redux.verumRefl h) } }
+      by_cases h : ⊤ ∈ Δ₁
+      · exact Disjconseq.verum' h
+      · exact ih' (ReduxNat.redux hs $ Redux.verumRefl h)
     case and p q =>
-    { by_cases h : p ⋏ q ∈ Δ₁
-      { have rp : p :: Δ₁ ≺[Code.and p q] Δ₁ := Redux.and₁ h
+      by_cases h : p ⋏ q ∈ Δ₁
+      · have rp : p :: Δ₁ ≺[Code.and p q] Δ₁ := Redux.and₁ h
         have rq : q :: Δ₁ ≺[Code.and p q] Δ₁ := Redux.and₂ h
         have dp : T ⊢'' p :: Δ₁ := ih' (ReduxNat.redux hs rp)
         have dq : T ⊢'' q :: Δ₁ := ih' (ReduxNat.redux hs rq)
-        exact Disjconseq.wk (Disjconseq.and dp dq) (by simpa using h) }
-      { exact ih' (ReduxNat.redux hs $ Redux.andRefl h) } }
+        exact Disjconseq.wk (Disjconseq.and dp dq) (by simpa using h)
+      · exact ih' (ReduxNat.redux hs $ Redux.andRefl h)
     case or p q =>
-    { by_cases h : p ⋎ q ∈ Δ₁
-      { have : p :: q :: Δ₁ ≺[Code.or p q] Δ₁ := Redux.or h
+      by_cases h : p ⋎ q ∈ Δ₁
+      · have : p :: q :: Δ₁ ≺[Code.or p q] Δ₁ := Redux.or h
         have : T ⊢'' p :: q :: Δ₁ := ih' (ReduxNat.redux hs this)
-        exact Disjconseq.wk (Disjconseq.or this) (by simpa using h) }
-      { exact ih' (ReduxNat.redux hs $ Redux.orRefl h) } }
+        exact Disjconseq.wk (Disjconseq.or this) (by simpa using h)
+      · exact ih' (ReduxNat.redux hs $ Redux.orRefl h)
     case all p =>
-    { by_cases h : ∀' p ∈ Δ₁
-      { have : p/[&(newVar Δ₁)] :: Δ₁ ≺[Code.all p] Δ₁ := Redux.all h
+      by_cases h : ∀' p ∈ Δ₁
+      · have : p/[&(newVar Δ₁)] :: Δ₁ ≺[Code.all p] Δ₁ := Redux.all h
         have : T ⊢'' p/[&(newVar Δ₁)] :: Δ₁ := ih' (ReduxNat.redux hs this)
-        exact System.allNvar h this }
-      { exact ih' (ReduxNat.redux hs $ Redux.allRefl h) } }
+        exact System.allNvar h this
+      · exact ih' (ReduxNat.redux hs $ Redux.allRefl h)
     case ex p t =>
-    { by_cases h : ∃' p ∈ Δ₁
-      { have : p/[t] :: Δ₁ ≺[Code.ex p t] Δ₁ := Redux.ex h
+      by_cases h : ∃' p ∈ Δ₁
+      · have : p/[t] :: Δ₁ ≺[Code.ex p t] Δ₁ := Redux.ex h
         have : T ⊢'' p/[t] :: Δ₁ := ih' (ReduxNat.redux hs this)
-        exact Disjconseq.wk (System.specialize t this) (by simpa using h) }
-      { exact ih' (ReduxNat.redux hs $ Redux.exRefl h) } }
+        exact Disjconseq.wk (System.specialize t this) (by simpa using h)
+      · exact ih' (ReduxNat.redux hs $ Redux.exRefl h)
     case id σ =>
-    { by_cases h : σ ∈ T
-      { have : (~Rew.emb.hom σ) :: Δ₁ ≺[Code.id σ] Δ₁ := Redux.id h
+      by_cases h : σ ∈ T
+      · have : (~Rew.emb.hom σ) :: Δ₁ ≺[Code.id σ] Δ₁ := Redux.id h
         have : T ⊢'' (~Rew.emb.hom σ) :: Δ₁ := ih' (ReduxNat.redux hs this)
-        exact System.id h this }
-      { exact ih' (ReduxNat.redux hs $ Redux.idRefl h) } } }
+        exact System.id h this
+      · exact ih' (ReduxNat.redux hs $ Redux.idRefl h)
 
 noncomputable def syntacticMainLemmaTop : T ⊢'' Γ := syntacticMainLemma wf ⊤
 
@@ -215,12 +215,12 @@ lemma chainSet_and {p q : SyntacticFormula L} (h : p ⋏ q ∈ ⛓️) : p ∈ �
   generalize hΔ : ⛓️[(encode $ Code.and p q).pair s + 1] = Δ at this
   rcases this
   case and₁ =>
-  { exact Or.inl (Set.mem_iUnion.mpr ⟨(encode $ Code.and p q).pair s + 1, by simp[hΔ]⟩) }
+    exact Or.inl (Set.mem_iUnion.mpr ⟨(encode $ Code.and p q).pair s + 1, by simp[hΔ]⟩)
   case and₂ =>
-  { exact Or.inr (Set.mem_iUnion.mpr ⟨(encode $ Code.and p q).pair s + 1, by simp[hΔ]⟩) }
+    exact Or.inr (Set.mem_iUnion.mpr ⟨(encode $ Code.and p q).pair s + 1, by simp[hΔ]⟩)
   case andRefl =>
-  { have : p ⋏ q ∈ ⛓️[(encode $ Code.and p q).pair s] := chain_monotone nwf (Nat.right_le_pair _ _) hs
-    contradiction }
+    have : p ⋏ q ∈ ⛓️[(encode $ Code.and p q).pair s] := chain_monotone nwf (Nat.right_le_pair _ _) hs
+    contradiction
 
 lemma chainSet_or {p q : SyntacticFormula L} (h : p ⋎ q ∈ ⛓️) : p ∈ ⛓️ ∧ q ∈ ⛓️ := by
   have : ∃ s, p ⋎ q ∈ ⛓️[s] := by simpa[chainSet] using h
