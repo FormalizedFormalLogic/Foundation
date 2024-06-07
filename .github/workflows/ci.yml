@@ -3,12 +3,14 @@ name: CI
 on:
   push:
     branches:
-      - master
+      - "master"
   pull_request:
+  workflow_dispatch:
 
-# concurrency:
-#   group: ${{ github.workflow }}-${{ github.ref }}
-#   cancel-in-progress: true
+permissions:
+  contents: read
+  pages: write
+  id-token: write
 
 jobs:
   build:
@@ -19,15 +21,30 @@ jobs:
         run: |
           curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain none
           echo "$HOME/.elan/bin" >> $GITHUB_PATH
-      - name: Cache outputs
-        uses: actions/cache@v4
+      - uses: actions/cache@v4
         with:
-          path: ./.lake
-          key: deps-${{ runner.os }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}-${{ github.sha }}
+          path: |
+            ./.lake
+          key: ${{ runner.os }}-lake-${{ github.sha }}
           restore-keys: |
             deps-${{ runner.os }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}
             deps-${{ runner.os }}-${{ hashFiles('lean-toolchain') }}
-      - name: Build
-        run: |
-          lake exe cache get
-          lake build
+      - run: lake -R -Kenv=dev exe cache get
+      - run: lake -R -Kenv=dev build
+      - run: lake -R -Kenv=dev build Logic:docs
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./.lake/build/doc/
+
+  deploy:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master' && github.event_name != 'pull_request'
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
+        id: deployment
