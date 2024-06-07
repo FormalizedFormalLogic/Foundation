@@ -131,13 +131,13 @@ def andInversion₁Aux : {Δ : Sequent L} → ⊢ᶜ[C] Δ → (p q : SyntacticF
     have H : r ∈ C ∧ CutRestricted C d ∧ CutRestricted C dn := by simpa using H
     have d : ⊢ᶜ[C] r :: p :: Δ.remove (p ⋏ q) :=
       (andInversion₁Aux ⟨d, H.2.1⟩ p q).wk (by simp[List.subset_def, List.mem_remove_iff]; intros; simp[*])
-    have dn : ⊢ᶜ[C] (~r) :: p :: Δ.remove (p ⋏ q) :=
+    have dn : ⊢ᶜ[C] (Tilde.tilde r) :: p :: Δ.remove (p ⋏ q) :=
       (andInversion₁Aux ⟨dn, H.2.2⟩ p q).wk (by simp[List.subset_def, List.mem_remove_iff]; intros; simp[*])
     d.cut dn H.1
   termination_by _ d _ _ => length d.val
 
 def andInversion₁ {p q} (d : ⊢ᶜ[C] p ⋏ q :: Δ) : ⊢ᶜ[C] p :: Δ :=
-  (andInversion₁Aux d p q).wk (by simp[List.remove]; exact List.subset_cons_of_subset _ (List.remove_subset _ _))
+  (andInversion₁Aux d p q).wk (by simp[List.remove]; exact List.subset_cons_of_subset _ (by simp))
 
 def andInversion₂Aux : {Δ : Sequent L} → ⊢ᶜ[C] Δ → (p q : SyntacticFormula L) → ⊢ᶜ[C] q :: Δ.remove (p ⋏ q)
   | _, ⟨@axL _ Δ _ r v, _⟩,       p, q =>
@@ -189,13 +189,13 @@ def andInversion₂Aux : {Δ : Sequent L} → ⊢ᶜ[C] Δ → (p q : SyntacticF
     have H : r ∈ C ∧ CutRestricted C d ∧ CutRestricted C dn := by simpa using H
     have d : ⊢ᶜ[C] r :: q :: Δ.remove (p ⋏ q) :=
       (andInversion₂Aux ⟨d, H.2.1⟩ p q).wk (by simp[List.subset_def, List.mem_remove_iff]; intros; simp[*])
-    have dn : ⊢ᶜ[C] (~r) :: q :: Δ.remove (p ⋏ q) :=
+    have dn : ⊢ᶜ[C] (Tilde.tilde r) :: q :: Δ.remove (p ⋏ q) :=
       (andInversion₂Aux ⟨dn, H.2.2⟩ p q).wk (by simp[List.subset_def, List.mem_remove_iff]; intros; simp[*])
     d.cut dn H.1
   termination_by _ d _ _ => length d.val
 
 def andInversion₂ {p q} (d : ⊢ᶜ[C] p ⋏ q :: Δ) : ⊢ᶜ[C] q :: Δ :=
-  (andInversion₂Aux d p q).wk (by simp[List.remove]; exact List.subset_cons_of_subset _ (List.remove_subset _ _))
+  (andInversion₂Aux d p q).wk (by simp[List.remove]; exact List.subset_cons_of_subset _ (by simp))
 
 def allInversionAux : {Δ : Sequent L} → ⊢ᶜ[C] Δ →
     (p : SyntacticSemiformula L 1) → (t : SyntacticTerm L) → ⊢ᶜ[C] p/[t] :: Δ.remove (∀' p)
@@ -243,7 +243,7 @@ def allInversionAux : {Δ : Sequent L} → ⊢ᶜ[C] Δ →
     have H : r ∈ C ∧ CutRestricted C d ∧ CutRestricted C dn := by simpa using H
     have d : ⊢ᶜ[C] r :: p/[t] :: Δ.remove (∀' p) :=
       (allInversionAux ⟨d, H.2.1⟩ p t).wk (by simp[List.subset_def, List.mem_remove_iff]; intros; simp[*])
-    have dn : ⊢ᶜ[C] ((~r) :: p/[t] :: Δ.remove (∀' p)) :=
+    have dn : ⊢ᶜ[C] ((Tilde.tilde r) :: p/[t] :: Δ.remove (∀' p)) :=
       (allInversionAux ⟨dn, H.2.2⟩ p t).wk (by simp[List.subset_def, List.mem_remove_iff]; intros; simp[*])
     d.cut dn H.1
   termination_by _ d _ _ => length d.val
@@ -333,8 +333,8 @@ def reductionAux {i} : {Δ : Sequent L} →
         (reductionAux ⟨d, by simpa using H⟩ tp hp dΓ).cast (by
           rw[e, List.remove_cons_of_ne _ (show r ≠ r ⋎ s from (Semiformula.ne_of_ne_complexity $ by simp)),
             List.remove_cons_of_ne _ (show s ≠ r ⋎ s from (Semiformula.ne_of_ne_complexity $ by simp))])
-      have dΓ₁ : ⊢ᶜ[< i] (~r) :: Γ := andInversion₁ (q := ~s) (dΓ.cast (by simp[e]))
-      have dΓ₂ : ⊢ᶜ[< i] (~s) :: Γ := andInversion₂ (p := ~r) (dΓ.cast (by simp[e]))
+      have dΓ₁ : ⊢ᶜ[< i] (Tilde.tilde r) :: Γ := andInversion₁ (q := Tilde.tilde s) (dΓ.cast (by simp[e]))
+      have dΓ₂ : ⊢ᶜ[< i] (Tilde.tilde s) :: Γ := andInversion₂ (p := Tilde.tilde r) (dΓ.cast (by simp[e]))
       have d₃  : ⊢ᶜ[< i] s :: Δ.remove (r ⋎ s) ++ Γ :=
         d₁.cut (dΓ₁.wk $ List.cons_subset_cons _ $ List.subset_append_right _ _) hrs.1
       have : ⊢ᶜ[< i] (Δ.remove (r ⋎ s)) ++ Γ :=
@@ -374,7 +374,7 @@ def reductionAux {i} : {Δ : Sequent L} →
       (reductionAux ⟨d, H.2.1⟩ tp hp dΓ).wk (by
         rw[←List.cons_append]
         exact List.append_subset_append (List.remove_cons_subset_cons_remove _ _ _))
-    have dn₁ : ⊢ᶜ[< i] (~r) :: (Δ.remove p ++ Γ) :=
+    have dn₁ : ⊢ᶜ[< i] (Tilde.tilde r) :: (Δ.remove p ++ Γ) :=
       (reductionAux ⟨dn, H.2.2⟩ tp hp dΓ).wk (by
         rw[←List.cons_append]
         exact List.append_subset_append (List.remove_cons_subset_cons_remove _ _ _))

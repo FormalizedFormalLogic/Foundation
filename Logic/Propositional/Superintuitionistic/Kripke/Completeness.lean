@@ -98,7 +98,7 @@ lemma consistent_either (p : Formula α) : (𝓓)-Consistent ((insert p t.1), t.
 
 lemma disjoint_of_consistent : Disjoint t.1 t.2 := by
   by_contra h;
-  obtain ⟨T, hp₂, hp₁, hp⟩ := by simpa [Disjoint] using h;
+  obtain ⟨T, hp₁, hp₂, hp⟩ := by simpa [Disjoint] using h;
   obtain ⟨p, hp, _⟩ := Set.not_subset.mp hp;
   simp [ParametricConsistent] at hCon;
   have : 𝓓 ⊬! [p].conj' ⟶ [p].disj' := hCon
@@ -173,7 +173,7 @@ variable [Inhabited α]
 
 lemma self_ParametricConsistent [h : System.Consistent 𝓓] : (𝓓)-Consistent (Ax(𝓓), ∅) := by
   intro Γ Δ hΓ hΔ;
-  replace hΔ : Δ = [] := List.empty_def.mpr hΔ;
+  replace hΔ : Δ = [] := List.nil_iff.mpr hΔ;
   obtain ⟨q, hq⟩ := h.exists_unprovable;
   by_contra hC;
   have : 𝓓 ⊢! q := by
@@ -486,7 +486,7 @@ lemma deducible_of_validOnCanonicelModel : (CanonicalModel 𝓓) ⊧ p ↔ 𝓓 
       simp only [Tableau.ParametricConsistent, Collection.not_mem_empty, imp_false, Set.mem_singleton_iff];
       rintro Γ Δ hΓ hΔ;
       by_contra hC;
-      replace hΓ : Γ = [] := List.empty_def.mpr hΓ;
+      replace hΓ : Γ = [] := List.nil_iff.mpr hΓ;
       subst hΓ;
       have : 𝓓 ⊢! p := disj_allsame'! hΔ (hC ⨀ verum!);
       contradiction;

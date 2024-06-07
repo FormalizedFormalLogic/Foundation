@@ -118,10 +118,10 @@ def toSubLanguage' (pf : ∀ k, L.Func k → Prop) (pr : ∀ k, L.Rel k → Prop
   induction p using rec' <;> simp[*, toSubLanguage', lMap_rel, lMap_nrel]
 
 noncomputable def languageFuncIndexed (p : Semiformula L μ n) (k) : Finset (L.Func k) :=
-  Finset.preimage (langFunc p) (Sigma.mk k) (Set.injOn_of_injective sigma_mk_injective _)
+  Finset.preimage (langFunc p) (Sigma.mk k) (Set.injOn_of_injective sigma_mk_injective)
 
 noncomputable def languageRelIndexed (p : Semiformula L μ n) (k) : Finset (L.Rel k) :=
-  Finset.preimage (langRel p) (Sigma.mk k) (Set.injOn_of_injective sigma_mk_injective _)
+  Finset.preimage (langRel p) (Sigma.mk k) (Set.injOn_of_injective sigma_mk_injective)
 
 abbrev languageFinset (Γ : Finset (Semiformula L μ n)) : Language :=
   Language.subLanguage L (fun k f => ∃ p ∈ Γ, ⟨k, f⟩ ∈ langFunc p) (fun k r => ∃ p ∈ Γ, ⟨k, r⟩ ∈ langRel p)

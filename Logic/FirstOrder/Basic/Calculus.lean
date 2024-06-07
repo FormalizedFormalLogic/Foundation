@@ -443,17 +443,17 @@ abbrev DisjconseqTr (T : Theory L) (Γ : Sequent L) : Type _ := (Rew.emb.hom '' 
 
 scoped infix: 45 " ⊢'' " => DisjconseqTr
 
-lemma proofToSyntactic {T : Theory L} {σ} (b : T ⊢ σ) :
+def proofToSyntactic {T : Theory L} {σ} (b : T ⊢ σ) :
     (Rew.emb.hom '' T : SyntacticTheory L) ⊢ (Rew.emb.hom σ : SyntacticFormula L) :=
   ⟨_, by simp; intro σ hσ; exact ⟨σ, Gentzen.Disjconseq.subset b σ hσ, rfl⟩, twoSidedEquiv b.derivation⟩
 
-lemma toProof {T : Theory L} {σ} (b : (Rew.emb.hom '' T : SyntacticTheory L) ⊢ (Rew.emb.hom σ : SyntacticFormula L)) :
+noncomputable def toProof {T : Theory L} {σ} (b : (Rew.emb.hom '' T : SyntacticTheory L) ⊢ (Rew.emb.hom σ : SyntacticFormula L)) :
     T ⊢ σ := by
   rcases Gentzen.proofEquivDerivation b with ⟨⟨Δ, hΔ⟩, d⟩
   have : ∀ p ∈ Δ, ∃ σ ∈ T, Rew.emb.hom σ = p := by simpa using hΔ
   choose f hf using this
   let Δ' := Δ.pmap f (by simp)
-  have : Δ'.map Rew.emb.hom ⊢² [σ].map Rew.emb.hom := by
+  have : Δ'.map Rew.emb.hom ⊢² ([σ].map Rew.emb.hom : List (SyntacticFormula L)) := by
     rw[show Δ'.map Rew.emb.hom = Δ from by simp [Δ', List.map_pmap, hf]]; exact d
   exact Gentzen.toDisjconseq (twoSidedEquiv.symm this) (by simp [Δ']; rintro σ p hp rfl; exact (hf p hp).1)
 

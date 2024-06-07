@@ -20,7 +20,7 @@ end ORingSymbol
 @[simp] lemma Nat.numeral_eq : (n : ℕ) → ORingSymbol.numeral n = n
   | 0     => rfl
   | 1     => rfl
-  | n + 2 => by simp[ORingSymbol.numeral, Nat.numeral_eq (n + 1)]; rfl
+  | n + 2 => by simp[ORingSymbol.numeral, Nat.numeral_eq (n + 1)]
 
 namespace FirstOrder
 

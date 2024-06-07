@@ -12,7 +12,6 @@ import Mathlib.Logic.Encodable.Basic
 import Mathlib.Computability.Primrec
 import Mathlib.Computability.Partrec
 import Mathlib.Data.Finset.Sort
-import Mathlib.Data.List.Card
 
 namespace Nat
 variable {α : ℕ → Sort u}
@@ -194,11 +193,6 @@ def toList : {n : ℕ} → (Fin n → α) → List α
 
 @[simp] lemma toList_length (v : Fin n → α) : (toList v).length = n :=
   by induction n <;> simp[*]
-
-@[simp] lemma toList_nth (v : Fin n → α) (i) (hi) : (toList v).nthLe i hi = v ⟨i, by simpa using hi⟩ := by
-  induction n generalizing i <;> simp[*, List.nthLe_cons]
-  case zero => contradiction
-  case succ => rcases i <;> simp
 
 @[simp] lemma mem_toList_iff {v : Fin n → α} {a} : a ∈ toList v ↔ ∃ i, v i = a :=
   by induction n <;> simp[*]; constructor; { rintro (rfl | ⟨i, rfl⟩) <;> simp }; { rintro ⟨i, rfl⟩; cases i using Fin.cases <;> simp }
@@ -525,7 +519,7 @@ lemma sup_ofFn (f : Fin n → α) : (ofFn f).sup = Finset.sup Finset.univ f := b
 
 end
 
-lemma ofFn_get_eq_map {n} (g : α → β) (as : List α) {h} : ofFn (fun i => g (as.get (i.cast h)) : Fin n → β) = as.map g := by
+lemma ofFn_get_eq_map_cast {n} (g : α → β) (as : List α) {h} : ofFn (fun i => g (as.get (i.cast h)) : Fin n → β) = as.map g := by
   ext i b; simp
   by_cases hi : i < n
   { simp[hi, List.ofFnNthVal, List.get?_eq_get (h ▸ hi)] }
@@ -544,9 +538,9 @@ lemma take_map_range (f : ℕ → α) : ((range n).map f).take m = (range (min n
 
 lemma bind_toList_some {f : β → Option α} {g : β → α} {bs : List β} (h : ∀ x ∈ bs, f x = some (g x)) :
   bs.bind (fun i => (f i).toList) = bs.map g := by
-  have : bs.bind (fun i => (f i).toList) = bs.bind (List.ret ∘ g) :=
-    List.bind_congr (by simp; intro m hm; simp[h _ hm]; rfl)
-  rw[this, List.bind_ret_eq_map]
+  have : bs.bind (fun i => (f i).toList) = bs.bind (pure ∘ g) :=
+    List.bind_congr (by simp; intro m hm; simp[h _ hm])
+  rw[this, List.bind_pure_eq_map]
 
 variable {m : Type _ → Type _} {α : Type _} {β : Type _} [Monad m]
 
@@ -564,19 +558,23 @@ lemma mapM'_eq_none_iff {f : α → Option β} {l : List α} : l.mapM' f = none 
       { have := ih.mpr h; simp[this] } } }
 
 lemma length_mapM' {f : α → Option β} {as : List α} : as.mapM' f = some bs → bs.length = as.length := by
-  induction' as with a as ih generalizing bs <;> simp[Option.pure_eq_some, Option.bind_eq_bind]
-  { rintro rfl; simp }
-  { rintro b _ bs hbs rfl; simpa using ih hbs }
+  induction' as with a as ih generalizing bs
+  · simp only [mapM', Option.pure_eq_some, Option.some.injEq, length_nil]; rintro rfl; simp
+  · simp only [mapM', Option.pure_eq_some, Option.bind_eq_bind, Option.bind_eq_some,
+    Option.some.injEq, length_cons, forall_exists_index, and_imp]; rintro b _ bs hbs rfl; simpa using ih hbs
 
 lemma mapM'_mem_inversion {f : α → Option β} {as : List α} (h : as.mapM' f = some bs) (hb : b ∈ bs) :
     ∃ a, f a = some b := by
-  induction' as with a as ih generalizing bs <;> simp[Option.pure_eq_some, Option.bind_eq_bind] at h
-  { rcases h with rfl; simp at hb }
-  { rcases h with ⟨b', hb', bs', hbs', rfl⟩
+  induction' as with a as ih generalizing bs
+  · simp only [mapM', Option.pure_eq_some, Option.some.injEq] at h
+    rcases h with rfl; simp at hb
+  · simp only [mapM', Option.pure_eq_some, Option.bind_eq_bind, Option.bind_eq_some,
+    Option.some.injEq] at h
+    rcases h with ⟨b', hb', bs', hbs', rfl⟩
     have : b = b' ∨ b ∈ bs' := by simpa using hb
     rcases this with (rfl | hb)
-    { exact ⟨a, hb'⟩ }
-    { exact ih hbs' hb } }
+    · exact ⟨a, hb'⟩
+    · exact ih hbs' hb
 
 lemma mapM'_eq_mapM'_of_eq {f g : α → m β} (l : List α) (hf : ∀ a ∈ l, f a = g a) : l.mapM' f = l.mapM' g := by
   induction' l with a as ih <;> simp
@@ -588,8 +586,8 @@ lemma mapM'_option_map {f : α → Option β} {g : β → γ} (as : List α) :
     as.mapM' (fun a => (f a).map g) = (as.mapM' f).map (fun bs => bs.map g) := by
   induction' as with a as ih generalizing f g <;> simp[Option.pure_eq_some, Option.bind_eq_bind, Function.comp]
   { simp[ih]
-    rcases ha : f a with (_ | b) <;> simp
-    rcases has : mapM' f as with (_ | bs) <;> simp }
+    rcases f a with (_ | b) <;> simp
+    rcases mapM' f as with (_ | bs) <;> simp }
 
 def allSome' : List (Option α) → Option (List α) := mapM' id
 
@@ -610,22 +608,56 @@ lemma append_subset_append {l₁ l₂ l : List α} (h : l₁ ⊆ l₂) : l₁ ++
 
 lemma subset_of_eq {l₁ l₂ : List α} (e : l₁ = l₂) : l₁ ⊆ l₂ := by simp[e]
 
-@[simp] lemma remove_cons_self [DecidableEq α] (l : List α) (a) :
+lemma nil_iff {l : List α} : l = [] ↔ ∀ a, a ∉ l := by
+  induction l with
+  | nil => simp only [not_mem_nil, not_false_eq_true, implies_true];
+  | cons a _ _ =>
+    simp_all only [mem_cons, not_or, false_iff, not_forall, not_and, not_not];
+    use a;
+    tauto;
+
+section remove
+
+def remove [DecidableEq α] (a : α) : List α → List α := List.filter (· ≠ a)
+
+variable [DecidableEq α]
+
+@[simp]
+lemma remove_nil (a : α) : [].remove a = [] := by simp [List.remove]
+
+@[simp]
+lemma eq_remove_cons {l : List α} : (q :: l).remove q = l.remove q := by induction l <;> simp_all [List.remove];
+
+@[simp]
+lemma remove_singleton_of_ne {p q : α} (h : p ≠ q) : [p].remove q = [p] := by simp_all [List.remove, Ne.symm];
+
+lemma mem_remove_iff {l : List α} : b ∈ l.remove a ↔ b ∈ l ∧ b ≠ a := by
+  simp [List.remove, List.of_mem_filter];
+  constructor;
+  . intro h;
+    exact ⟨mem_of_mem_filter h, by simpa using of_mem_filter h⟩;
+  . rintro ⟨h₁, h₂⟩;
+    exact mem_filter_of_mem h₁ (by simpa using h₂);
+
+lemma mem_of_mem_remove {a b : α} {l : List α} (h : b ∈ l.remove a) : b ∈ l := by
+  rw [mem_remove_iff] at h; exact h.1
+
+@[simp] lemma remove_cons_self (l : List α) (a) :
   (a :: l).remove a = l.remove a := by simp[remove]
 
-lemma remove_cons_of_ne [DecidableEq α] (l : List α) {a b} (ne : a ≠ b) :
-  (a :: l).remove b = a :: l.remove b := by simp[remove, Ne.symm ne]
+lemma remove_cons_of_ne (l : List α) {a b} (ne : a ≠ b) :
+  (a :: l).remove b = a :: l.remove b := by simp_all [remove];
 
-lemma remove_subset [DecidableEq α] (a) (l : List α) :
+lemma remove_subset (a) (l : List α) :
     l.remove a ⊆ l := by
   simp[subset_def, mem_remove_iff]
   intros; simp[*]
 
-lemma remove_subset_remove [DecidableEq α] (a) {l₁ l₂ : List α} (h : l₁ ⊆ l₂) :
+lemma remove_subset_remove (a) {l₁ l₂ : List α} (h : l₁ ⊆ l₂) :
     l₁.remove a ⊆ l₂.remove a := by
   simp[subset_def, mem_remove_iff]; intros; simp[*]; exact h (by assumption)
 
-lemma remove_cons_subset_cons_remove [DecidableEq α] (a b) (l : List α) :
+lemma remove_cons_subset_cons_remove (a b) (l : List α) :
     (a :: l).remove b ⊆ a :: l.remove b := by
   intro x; simp[List.mem_remove_iff]
   rintro (rfl | hx) nex <;> simp[*]
@@ -636,11 +668,13 @@ lemma remove_map_substet_map_remove [DecidableEq α] [DecidableEq β] (f : α �
   intro b hb neb;
   exact ⟨b, ⟨hb, by rintro rfl; exact neb rfl⟩, rfl⟩
 
+end remove
+
 end List
 
 namespace Vector
 
-variable {α : Type _}
+variable {α : Type*}
 
 lemma get_mk_eq_get {n} (l : List α) (h : l.length = n) (i : Fin n) : get (⟨l, h⟩ : Vector α n) i = l.get (i.cast h.symm) := rfl
 
@@ -753,6 +787,6 @@ lemma exp_def (n : ℕ) : exp n = 2 ^ n := rfl
 
 @[simp] lemma exp_zero : exp 0 = 1 := rfl
 
-lemma exp_succ (n : ℕ) : exp (n + 1) = 2 * exp n := by simp [exp_def, pow_succ]
+lemma exp_succ (n : ℕ) : exp (n + 1) = 2 * exp n := by simp [exp_def, pow_succ, mul_comm]
 
 end Nat

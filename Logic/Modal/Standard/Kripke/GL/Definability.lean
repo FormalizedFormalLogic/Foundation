@@ -15,7 +15,7 @@ variable {F : Kripke.Frame' α}
 private lemma AxiomSet.L.definability.implies_transitive : F ⊧* 𝗟 → Transitive F.Rel := by
   contrapose;
   intro hT; simp [Transitive] at hT;
-  obtain ⟨w₁, w₂, w₃, r₂₃, r₁₂, nr₁₃⟩ := hT;
+  obtain ⟨w₁, w₂, r₁₂, w₃, r₂₃, nr₁₃⟩ := hT;
   simp only [Semantics.RealizeSet.setOf_iff, ValidOnFrame.models_iff, ValidOnFrame,
     ValidOnModel.iff_models, ValidOnModel, Satisfies.iff_models, forall_exists_index,
     forall_apply_eq_imp_iff, Satisfies.imp_def, Satisfies.box_def, not_forall, exists_prop];

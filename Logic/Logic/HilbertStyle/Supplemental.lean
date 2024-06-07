@@ -1,24 +1,6 @@
 import Logic.Logic.System
 import Logic.Logic.HilbertStyle.Context
 
--- TODO: Move to Vorspiel?
-namespace List
-
-variable [DecidableEq α]
-variable  {l : List α} {p q : α}
-
-lemma empty_def {Γ : List α} : Γ = [] ↔ ∀ p, p ∉ Γ := by induction Γ <;> simp_all;
-
-@[simp]
-lemma eq_remove_cons : (q :: l).remove q = l.remove q := by aesop;
-
-@[simp]
-lemma remove_singleton_of_ne (h : p ≠ q) : [p].remove q = [p] := by simpa using List.remove_cons_of_ne _ h;
-
-end List
-
-
-
 namespace LO.System
 
 variable {F : Type*} [LogicalConnective F] [NegDefinition F] [DecidableEq F]
@@ -45,12 +27,12 @@ lemma efq_of_neg! [HasEFQ 𝓢] (h : 𝓢 ⊢! ~p) : 𝓢 ⊢! p ⟶ q := by
   exact efq'! (dnp ⨀ FiniteContext.id!);
 
 
-lemma orComm : 𝓢 ⊢ p ⋎ q ⟶ q ⋎ p := by
+def orComm : 𝓢 ⊢ p ⋎ q ⟶ q ⋎ p := by
   apply deduct';
   exact disj₃' disj₂ disj₁ $ FiniteContext.id
 lemma orComm! : 𝓢 ⊢! p ⋎ q ⟶ q ⋎ p := ⟨orComm⟩
 
-lemma orComm' (h : 𝓢 ⊢ p ⋎ q) : 𝓢 ⊢ q ⋎ p := orComm ⨀ h
+def orComm' (h : 𝓢 ⊢ p ⋎ q) : 𝓢 ⊢ q ⋎ p := orComm ⨀ h
 lemma orComm'! (h : 𝓢 ⊢! p ⋎ q) : 𝓢 ⊢! q ⋎ p := ⟨orComm' h.some⟩
 
 def implyRightAnd (hq : 𝓢 ⊢ p ⟶ q) (hr : 𝓢 ⊢ p ⟶ r) : 𝓢 ⊢ p ⟶ q ⋏ r := by

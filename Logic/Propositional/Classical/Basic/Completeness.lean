@@ -41,7 +41,7 @@ end Derivation
 lemma soundness {T : Theory α} {p} : T ⊢! p → T ⊨[Valuation α] p := by
   rintro ⟨Γ, hΓ, d⟩ v hT
   by_contra hv
-  have : ∀ v, v ⊧ p ∨ ∃ q ∈ Γ, ¬v ⊧ q := by
+  have : ∀ v : Valuation α, v ⊧ p ∨ ∃ q ∈ Γ, ¬(v ⊧ q) := by
     simpa [Semantics.Valid, List.map_disj] using Derivation.sound (Tait.ofConsRight d)
   have : ∃ q ∈ Γ, ¬v ⊧ q := by simpa [hv] using this v
   rcases this with ⟨q, hqΓ, hq⟩

@@ -285,6 +285,6 @@ example : 𝐕𝐞𝐫 ⊬! (~(□⊥) : Formula α) := by
   apply unprovable_classical_of_exists_ClassicalValuation;
   dsimp [VerTranslation, toPropFormula];
   use (λ _ => True);
-  simp;
+  simp; exact ⟨PUnit.unit, by trivial⟩
 
 end LO.Modal.Standard

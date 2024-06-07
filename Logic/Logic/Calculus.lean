@@ -168,6 +168,10 @@ def wkLeft {Γ Γ' Δ : List F} (d : Γ ⊢² Δ) (ss : Γ ⊆ Γ') : Γ' ⊢² 
 
 def wkRight {Γ Δ Δ' : List F} (d : Γ ⊢² Δ) (ss : Δ ⊆ Δ') : Γ ⊢² Δ' := wk d (by simp) ss
 
+def rotateLeft {Γ Δ : List F} {p} (d : Γ ++ [p] ⊢² Δ) : p :: Γ ⊢² Δ := Gentzen.wkLeft d (by simp)
+
+def rotateRight {Γ Δ : List F} {p} (d : Γ ⊢² Δ ++ [p]) : Γ ⊢² p :: Δ := Gentzen.wkRight d (by simp)
+
 def wkL {Γ' Δ : List F} (Γ) (ss : Γ ⊆ Γ') (d : Γ ⊢² Δ) : Γ' ⊢² Δ := wk d ss (by simp)
 
 def wkR {Γ Δ' : List F} (Δ) (ss : Δ ⊆ Δ') (d : Γ ⊢² Δ) : Γ ⊢² Δ' := wk d (by simp) ss

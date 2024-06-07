@@ -578,7 +578,7 @@ variable {L L' L₁ L₂ L₃ : Language} {ξ ξ' ξ₁ ξ₂ ξ₃ : Type*} {n 
 
 @[simp] lemma fvarList_emb {o : Type*} [e : IsEmpty o] {t : Semiterm L o n} : fvarList (Rew.emb t : Semiterm L ξ n) = [] := by
   induction t <;> simp[*, List.eq_nil_iff_forall_not_mem, Rew.func]
-  case fvar x => { exact IsEmpty.elim' e x }
+  case fvar x => exact IsEmpty.elim' e x
 
 lemma rew_eq_of_funEqOn (ω₁ ω₂ : Rew L ξ₁ n₁ ξ₂ n₂) (t : Semiterm L ξ₁ n₁)
   (hb : ∀ x, ω₁ #x = ω₂ #x)
