@@ -72,6 +72,22 @@ jobs:
           name: docs
           path: ./.lake/build/doc
 
+  mdbook:
+    name: Build mdbook
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: peaceiris/actions-mdbook@v2
+        with:
+          mdbook-version: latest
+      - run: mdbook build
+      - name: Upload mdbook
+        uses: actions/upload-artifact@v4
+        if: github.ref == 'refs/heads/master'
+        with:
+          name: books
+          path: ./.mdbook
+
   deploy:
     name: Deploy to GitHub Pages
     runs-on: ubuntu-latest
@@ -90,6 +106,10 @@ jobs:
         with:
           name: import_graph
           path: ./_site/assets/import_graph/
+      - uses: actions/download-artifact@v4
+        with:
+          name: books
+          path: ./_site/books
       - uses: actions/upload-pages-artifact@v3
         with:
           path: ./_site
