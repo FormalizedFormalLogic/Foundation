@@ -201,12 +201,34 @@ lemma iff_Ver_classical : 𝐕𝐞𝐫 ⊢! p ↔ 𝐂𝐥 ⊢! pⱽᴾ := by
     have d₂ : 𝐕𝐞𝐫 ⊢! pⱽ := by simpa using of_classical h;
     exact d₁ ⨀ d₂;
 
+lemma trivTranslated_of_K4 : 𝐊𝟒 ⊢! p → 𝐂𝐥 ⊢! pᵀᴾ := by
+  intro h;
+  apply iff_Triv_classical.mp;
+  exact System.reducible_iff.mp reducible_K4_Triv h;
+
 example : 𝐓𝐫𝐢𝐯 ⊬! Axioms.L p := by
   apply iff_Triv_classical.not.mpr;
   apply not_imp_not.mpr $ Superintuitionistic.Kripke.sound!;
   dsimp [Axioms.L, TrivTranslation, toPropFormula];
   -- TODO: Obviously this is not tautology in classical
   sorry;
+
+lemma unprovable_AxiomL_K4 : 𝐊𝟒 ⊬! Axioms.L p := by
+  apply not_imp_not.mpr trivTranslated_of_K4;
+  apply not_imp_not.mpr $ Superintuitionistic.Kripke.sound!;
+  dsimp [Axioms.L, TrivTranslation, toPropFormula];
+  -- TODO: Obviously this is not tautology in classical
+  sorry;
+
+theorem strictReducible_K4_GL : (𝐊𝟒 : DeductionParameter α) <ₛ 𝐆𝐋 := by
+  dsimp [StrictReducible];
+  constructor;
+  . apply reducible_K4_GL;
+  . simp [System.not_reducible_iff];
+    existsi (Axioms.L ⊤)
+    constructor;
+    . exact axiomL!;
+    . exact unprovable_AxiomL_K4;
 
 example : 𝐕𝐞𝐫 ⊬! (~(□⊥) : Formula α) := by
   apply iff_Ver_classical.not.mpr;
