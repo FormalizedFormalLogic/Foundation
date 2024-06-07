@@ -109,6 +109,6 @@ instance : FiniteFrameClass.IsNonempty (𝔽ꟳ(Ax(𝐆𝐋)) : FiniteFrameClass
       |>.mpr;
     simp [Transitive, Irreflexive];
 
-instance : System.Consistent (𝐆𝐋 : DeductionParameter α) := inferInstance
+instance instGLConsistencyViaFrameClassNonemptiness : System.Consistent (𝐆𝐋 : DeductionParameter α) := inferInstance
 
 end LO.Modal.Standard

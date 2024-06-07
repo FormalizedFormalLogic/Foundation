@@ -266,7 +266,7 @@ lemma unprovable_AxiomT_GL : 𝐆𝐋 ⊬! Axioms.T (atom default : Formula α) 
   trivial;
 
 
-instance : System.Consistent (𝐆𝐋 : DeductionParameter α) := by
+instance instGLConsistencyViaUnprovableAxiomT : System.Consistent (𝐆𝐋 : DeductionParameter α) := by
   apply consistent_iff_exists_unprovable.mpr;
   existsi (Axioms.T (atom default));
   apply unprovable_AxiomT_GL;
