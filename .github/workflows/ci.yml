@@ -1,4 +1,4 @@
-name: docs
+name: CI
 
 on:
   push:
@@ -29,9 +29,9 @@ jobs:
           restore-keys: |
             deps-${{ runner.os }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}
             deps-${{ runner.os }}-${{ hashFiles('lean-toolchain') }}
-      - run: lake -Kenv=dev exe cache get
-      - run: lake -Kenv=dev build
-      - run: lake -Kenv=dev build Logic:docs
+      - run: lake -R -Kenv=dev exe cache get
+      - run: lake -R -Kenv=dev build
+      - run: lake -R -Kenv=dev build Logic:docs
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
