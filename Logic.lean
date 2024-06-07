@@ -8,8 +8,8 @@ import Logic.Logic.System
 
 -- AutoProver
 
-import Logic.AutoProver.Litform
-import Logic.AutoProver.Prover
+-- import Logic.AutoProver.Litform
+-- import Logic.AutoProver.Prover
 
 -- Propositional
 
