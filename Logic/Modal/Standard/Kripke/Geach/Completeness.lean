@@ -11,7 +11,7 @@ open Formula
 variable {Λ : AxiomSet α} [Inhabited α] [DecidableEq α]
 
 open Theory MaximalParametricConsistentTheory CanonicalFrame in
-lemma definability_canonicalFrame_GeachAxiom {L : DeductionParameter α} [L.HasNec] [includeK : L.IncludeK] [Inhabited (MCT L)] (hAx : 𝗴𝗲(t) ⊆ Ax(L)) : GeachConfluent t (CanonicalFrame L) := by
+lemma definability_canonicalFrame_GeachAxiom {L : DeductionParameter α} [L.HasNecOnly] [includeK : L.IncludeK] [Inhabited (MCT L)] (hAx : 𝗴𝗲(t) ⊆ Ax(L)) : GeachConfluent t (CanonicalFrame L) := by
   have : L.Normal := ⟨⟩;
 
   intro Ω₁ Ω₂ Ω₃ h;
@@ -42,7 +42,7 @@ lemma definability_canonicalFrame_GeachAxiom {L : DeductionParameter α} [L.HasN
   simp [multiframe_def_multibox];
   constructor <;> { intros; apply hΩ; simp_all; }
 
-lemma definability_canonicalFrame_multiGeachAxiom {L : DeductionParameter α} [L.HasNec] [Inhabited (MCT L)] (hAx : 𝗚𝗲(ts) ⊆ Ax(L)) : MultiGeachConfluent ts (CanonicalFrame L) := by
+lemma definability_canonicalFrame_multiGeachAxiom {L : DeductionParameter α} [L.HasNecOnly] [Inhabited (MCT L)] (hAx : 𝗚𝗲(ts) ⊆ Ax(L)) : MultiGeachConfluent ts (CanonicalFrame L) := by
   induction ts with
   | nil => simp [MultiGeachConfluent];
   | cons t ts ih =>

@@ -413,4 +413,27 @@ private def axiomFour_of_L [HasAxiomL 𝓢] : 𝓢 ⊢ Axioms.Four p := by
 
 instance [HasAxiomL 𝓢] : HasAxiomFour 𝓢 := ⟨fun _ ↦ axiomFour_of_L⟩
 
+private def axiomL_of_K4Loeb [K4Loeb 𝓢] : 𝓢 ⊢ Axioms.L p := by
+  dsimp [Axioms.L];
+  sorry;
+instance [K4Loeb 𝓢] : HasAxiomL 𝓢 := ⟨fun _ ↦ axiomL_of_K4Loeb⟩
+
+
+def axiomH [HasAxiomH 𝓢] : 𝓢 ⊢ □(□p ⟷ p) ⟶ □p := HasAxiomH.H _
+@[simp] lemma axiomH! [HasAxiomH 𝓢] : 𝓢 ⊢! □(□p ⟷ p) ⟶ □p := ⟨axiomH⟩
+
+instance [HasAxiomH 𝓢] (Γ : FiniteContext F 𝓢) : HasAxiomH Γ := ⟨fun _ ↦ FiniteContext.of axiomH⟩
+instance [HasAxiomH 𝓢] (Γ : Context F 𝓢) : HasAxiomH Γ := ⟨fun _ ↦ Context.of axiomH⟩
+
+
+instance [K4Henkin 𝓢] : LoebRule 𝓢 where
+  loeb h := by sorry
+
+instance [K4H 𝓢] : HenkinRule 𝓢 where
+  henkin h := by sorry
+
+private def axiomH_of_GL [GL 𝓢] : 𝓢 ⊢ Axioms.H p := by
+  exact impTrans (implyBoxDistribute' $ conj₁) axiomL
+instance [GL 𝓢] : HasAxiomH 𝓢 := ⟨fun _ ↦ axiomH_of_GL⟩
+
 end LO.System
