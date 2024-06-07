@@ -291,6 +291,11 @@ def ofZero (p : HSemiformula L ξ k (Γ', 0)) : (Γ : HierarchySymbol) → HSemi
   | (𝚷, _) => mkPi p.val p.sigmaZero.of_zero
   | (𝚫, _) => mkDelta (mkSigma p.val p.sigmaZero.of_zero) (mkPi p.val p.sigmaZero.of_zero)
 
+def ofDeltaOne (p : HSemiformula L ξ k 𝚫₁) : (Γ : SigmaPiDelta) → (m : ℕ) → HSemiformula L ξ k (Γ, m + 1)
+  | 𝚺, m => mkSigma p.sigma.val (p.sigma.sigma_prop.mono (by simp))
+  | 𝚷, m => mkPi p.pi.val (p.pi.pi_prop.mono (by simp))
+  | 𝚫, m => mkDelta (mkSigma p.sigma.val (p.sigma.sigma_prop.mono (by simp))) (mkPi p.pi.val (p.pi.pi_prop.mono (by simp)))
+
 @[simp] lemma ofZero_val (p : HSemiformula L ξ k (Γ', 0)) (Γ) : (ofZero p Γ).val = p.val := by
   match Γ with
   | (𝚺, _) => simp [ofZero]
@@ -667,6 +672,14 @@ lemma of_zero {R : (Fin k → M) → Prop} {Γ} {p : HSemiformula L M k (Γ', 0)
   | (𝚷, m) => by intro _; simp [h.df.iff]
   | (𝚫, m) => ⟨by simp , by intro _; simp [h.df.iff]⟩
 
+lemma of_deltaOne {R : (Fin k → M) → Prop} {Γ m} {p : HSemiformula L M k 𝚫₁}
+    (h : DefinedWithParam R p) : DefinedWithParam R (p.ofDeltaOne Γ m) :=
+  match Γ with
+  | 𝚺 => by intro _; simp [HSemiformula.ofDeltaOne, h.df.iff, HSemiformula.val_sigma]
+  | 𝚷 => by intro _; simp [HSemiformula.ofDeltaOne, h.df.iff, h.proper.iff']
+  | 𝚫 => ⟨by intro _; simp [HSemiformula.ofDeltaOne, h.df.iff, HSemiformula.val_sigma, h.proper.iff'],
+    by intro _; simp [HSemiformula.ofDeltaOne, h.df.iff, HSemiformula.val_sigma]⟩
+
 lemma emb {R : (Fin k → M) → Prop} {Γ} {p : HSemiformula ℒₒᵣ M k Γ}
     (h : DefinedWithParam R p) : DefinedWithParam R (p.emb L) :=
   match Γ with
@@ -682,6 +695,9 @@ lemma to_definable {p : HSemiformula L M k Γ} (h : DefinedWithParam P p) : Defi
 
 lemma to_definable₀ {p : HSemiformula L M k (Γ', 0)}
     (h : DefinedWithParam P p) : Definable L Γ P := ⟨p.ofZero Γ, h.of_zero⟩
+
+lemma to_definable_deltaOne {p : HSemiformula L M k 𝚫₁} {Γ m}
+    (h : DefinedWithParam P p) : Definable L (Γ, m + 1) P := ⟨p.ofDeltaOne Γ m, h.of_deltaOne⟩
 
 lemma retraction {p : HSemiformula L M k Γ} (hp : DefinedWithParam P p) (f : Fin k → Fin l) :
     DefinedWithParam (fun v ↦ P fun i ↦ v (f i)) (p.rew <| Rew.substs fun x ↦ #(f x)) :=
@@ -790,6 +806,9 @@ instance [Definable ℒₒᵣ Γ P] : Definable L Γ P := Definable.of_oRing inf
 
 lemma of_zero (h : Definable L (Γ', 0) P) (Γ) : Definable L Γ P := by
   rcases h with ⟨⟨p, hp⟩⟩; exact hp.to_definable₀
+
+lemma of_deltaOne (h : Definable L 𝚫₁ P) (Γ m) : Definable L (Γ, m + 1) P := by
+  rcases h with ⟨⟨p, hp⟩⟩; exact hp.to_definable_deltaOne
 
 instance [Definable L 𝚺₀ P] (Γ) : Definable L Γ P := Definable.of_zero (Γ' := 𝚺) inferInstance Γ
 
@@ -1011,6 +1030,9 @@ instance {k} {f : (Fin k → M) → M} [h : DefinableFunction L (𝚺, m) f] : D
 
 instance {k} {f : (Fin k → M) → M} [DefinableFunction L 𝚺₀ f] (Γ) : DefinableFunction L Γ f := inferInstance
 
+lemma of_sigmaOne {k} {f : (Fin k → M) → M}
+    (h : DefinableFunction L 𝚺₁ f) (Γ m) : DefinableFunction L (Γ, m + 1) f := Definable.of_deltaOne (graph_delta h) Γ m
+
 @[simp] lemma var {k} (i : Fin k) : DefinableFunction L Γ (fun v : Fin k → M ↦ v i) :=
   .of_zero (Γ' := 𝚺) ⟨.mkSigma “#0 = !!#i.succ” (by simp), by intro _; simp⟩ _
 
@@ -1088,19 +1110,81 @@ end DefinableRel
 
 namespace DefinableFunction₂
 
-instance add : DefinableFunction₂ L Γ ((· + ·) : M → M → M) :=
+@[simp] instance add : DefinableFunction₂ L Γ ((· + ·) : M → M → M) :=
   Defined.to_definable_oRing₀ (.mkSigma “#0 = #1 + #2” (by simp)) (by intro _; simp)
 
-instance mul : DefinableFunction₂ L Γ ((· * ·) : M → M → M) :=
+@[simp] instance mul : DefinableFunction₂ L Γ ((· * ·) : M → M → M) :=
   Defined.to_definable_oRing₀ (.mkSigma “#0 = #1 * #2” (by simp)) (by intro _; simp)
 
-instance hAdd : DefinableFunction₂ L Γ (HAdd.hAdd : M → M → M) :=
+@[simp] instance hAdd : DefinableFunction₂ L Γ (HAdd.hAdd : M → M → M) :=
   Defined.to_definable_oRing₀ (.mkSigma “#0 = #1 + #2” (by simp)) (by intro _; simp)
 
-instance hMul : DefinableFunction₂ L Γ (HMul.hMul : M → M → M) :=
+@[simp] instance hMul : DefinableFunction₂ L Γ (HMul.hMul : M → M → M) :=
   Defined.to_definable_oRing₀ (.mkSigma “#0 = #1 * #2” (by simp)) (by intro _; simp)
 
 end DefinableFunction₂
+
+namespace Definable
+
+lemma ball_lt {Γ} {P : (Fin k → M) → M → Prop} {f : (Fin k → M) → M}
+    (hf : DefinableFunction L (𝚺, m + 1) f) (h : Definable L (Γ, m + 1) (fun w ↦ P (w ·.succ) (w 0))) :
+    Definable L (Γ, m + 1) (fun v ↦ ∀ x < f v, P v x) := by
+  rcases hf with ⟨bf, hbf⟩
+  rcases h with ⟨p, hp⟩
+  match Γ with
+  | 𝚺 => exact
+    ⟨ .mkSigma (∃' (bf.val ⋏ (∀[“#0 < #1”] Rew.substs (#0 :> (#·.succ.succ)) |>.hom p.val))) (by simp),
+      by intro v; simp [hbf.df.iff, hp.df.iff] ⟩
+  | 𝚷 => exact
+    ⟨ .mkPi (∀' (bf.val ⟶ (∀[“#0 < #1”] Rew.substs (#0 :> (#·.succ.succ)) |>.hom p.val))) (by simp),
+      by intro v; simp [hbf.df.iff, hp.df.iff] ⟩
+  | 𝚫 =>
+    exact .of_sigma_of_pi
+      ⟨ .mkSigma (∃' (bf.val ⋏ (∀[“#0 < #1”] Rew.substs (#0 :> (#·.succ.succ)) |>.hom p.sigma.val))) (by simp),
+          by intro v; simp [hbf.df.iff, hp.df.iff, HSemiformula.val_sigma] ⟩
+      ⟨ .mkPi (∀' (bf.val ⟶ (∀[“#0 < #1”] Rew.substs (#0 :> (#·.succ.succ)) |>.hom p.pi.val))) (by simp),
+        by intro v; simp [hbf.df.iff, hp.df.iff, hp.proper.iff'] ⟩
+
+lemma bex_lt {Γ} {P : (Fin k → M) → M → Prop} {f : (Fin k → M) → M}
+    (hf : DefinableFunction L (𝚺, m + 1) f) (h : Definable L (Γ, m + 1) (fun w ↦ P (w ·.succ) (w 0))) :
+    Definable L (Γ, m + 1) (fun v ↦ ∃ x < f v, P v x) := by
+  rcases hf with ⟨bf, hbf⟩
+  rcases h with ⟨p, hp⟩
+  match Γ with
+  | 𝚺 => exact
+    ⟨ .mkSigma (∃' (bf.val ⋏ (∃[“#0 < #1”] Rew.substs (#0 :> (#·.succ.succ)) |>.hom p.val))) (by simp),
+      by intro v; simp [hbf.df.iff, hp.df.iff] ⟩
+  | 𝚷 => exact
+    ⟨ .mkPi (∀' (bf.val ⟶ (∃[“#0 < #1”] Rew.substs (#0 :> (#·.succ.succ)) |>.hom p.val))) (by simp),
+      by intro v; simp [hbf.df.iff, hp.df.iff] ⟩
+  | 𝚫 =>
+    exact .of_sigma_of_pi
+      ⟨ .mkSigma (∃' (bf.val ⋏ (∃[“#0 < #1”] Rew.substs (#0 :> (#·.succ.succ)) |>.hom p.sigma.val))) (by simp),
+          by intro v; simp [hbf.df.iff, hp.df.iff, HSemiformula.val_sigma] ⟩
+      ⟨ .mkPi (∀' (bf.val ⟶ (∃[“#0 < #1”] Rew.substs (#0 :> (#·.succ.succ)) |>.hom p.pi.val))) (by simp),
+        by intro v; simp [hbf.df.iff, hp.df.iff, hp.proper.iff'] ⟩
+
+lemma ball_le {Γ} {P : (Fin k → M) → M → Prop} {f : (Fin k → M) → M}
+    (hf : DefinableFunction L (𝚺, m + 1) f) (h : Definable L (Γ, m + 1) (fun w ↦ P (w ·.succ) (w 0))) :
+    Definable L (Γ, m + 1) (fun v ↦ ∀ x ≤ f v, P v x) := by
+  have : Definable L (Γ, m + 1) (fun v ↦ ∀ x < f v + 1, P v x) := ball_lt (DefinableFunction₂.comp (by simp) hf (by simp)) h
+  exact this.of_iff <| by intro v; simp [lt_succ_iff_le]
+
+lemma bex_le {Γ} {P : (Fin k → M) → M → Prop} {f : (Fin k → M) → M}
+    (hf : DefinableFunction L (𝚺, m + 1) f) (h : Definable L (Γ, m + 1) (fun w ↦ P (w ·.succ) (w 0))) :
+    Definable L (Γ, m + 1) (fun v ↦ ∃ x ≤ f v, P v x) := by
+  have : Definable L (Γ, m + 1) (fun v ↦ ∃ x < f v + 1, P v x) := bex_lt (DefinableFunction₂.comp (by simp) hf (by simp)) h
+  exact this.of_iff <| by intro v; simp [lt_succ_iff_le]
+
+lemma ball_lt' {Γ} {P : (Fin k → M) → M → Prop} {f : (Fin k → M) → M}
+    (hf : DefinableFunction L (𝚺, m + 1) f) (h : Definable L (Γ, m + 1) (fun w ↦ P (w ·.succ) (w 0))) :
+    Definable L (Γ, m + 1) (fun v ↦ ∀ {x}, x < f v → P v x) := ball_lt hf h
+
+lemma ball_le' {Γ} {P : (Fin k → M) → M → Prop} {f : (Fin k → M) → M}
+    (hf : DefinableFunction L (𝚺, m + 1) f) (h : Definable L (Γ, m + 1) (fun w ↦ P (w ·.succ) (w 0))) :
+    Definable L (Γ, m + 1) (fun v ↦ ∀ {x}, x ≤ f v → P v x) := ball_le hf h
+
+end Definable
 
 end
 

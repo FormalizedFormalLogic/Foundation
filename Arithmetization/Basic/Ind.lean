@@ -90,7 +90,7 @@ lemma order_induction_h {P : M → Prop} (hP : DefinablePred L (Γ, m) P)
   · exact Γ
   · exact m
   · suffices DefinablePred L (Γ, m) fun x => ∀ y < x, P y by exact this
-    exact Definable.ball_lt (L := L) (by simp) (hP.retraction ![0])
+    exact Definable.ball_lt₀ (L := L) (by simp) (hP.retraction ![0])
   case zero => simp
   case succ x IH =>
     intro y hxy

@@ -41,53 +41,24 @@ lemma not_mem_of_lt_exp {i a : M} (h : a < exp i) : i ∉ a := fun H ↦ by have
 
 section
 
-variable {L : Language} [L.ORing] [Structure L M] [Structure.ORing L M] [Structure.Monotone L M]
+@[definability] lemma Definable.ball_mem (Γ m) {P : (Fin k → M) → M → Prop} {f : (Fin k → M) → M}
+    (hf : DefinableFunction ℒₒᵣ (𝚺, m + 1) f) (h : Definable ℒₒᵣ (Γ, m + 1) (fun w ↦ P (w ·.succ) (w 0))) :
+    Definable ℒₒᵣ (Γ, m + 1) (fun v ↦ ∀ x ∈ f v, P v x) := by
+  have : Definable ℒₒᵣ (Γ, m + 1) (fun v ↦ ∀ x < f v, x ∈ f v → P v x) :=
+    .ball_lt hf (.imp (by simpa using Definable.comp₂ (by simp) (hf.retraction _) (by simp)) h)
+  exact this.of_iff <| by intro v; exact ⟨fun h x _ hxv ↦ h x hxv, fun h x hx ↦ h x (lt_of_mem hx) hx⟩
 
-private lemma Definable.ball_mem_aux (Γ : Polarity) (n : ℕ) {P : (Fin k → M) → M → Prop} {f : (Fin k → M) → M}
-    (hf : DefinableBoundedFunction L (Γ, n) f) (h : Definable L (Γ, n) (fun w ↦ P (w ·.succ) (w 0))) :
-    Definable L (Γ, n) (fun v ↦ ∀ x ∈ f v, P v x) := by
-  rcases hf.bounded with ⟨bf, hbf⟩
-  rcases hf.definable with ⟨f_graph, hf_graph⟩
-  rcases h with ⟨p, hp⟩
-  exact .mkPolarity
-    “∃[#0 < !!(Rew.bShift bf) + 1] (!f_graph.val ∧ ∀[#0 < #1] (!bitDef.val .[#0, #1] → !((Rew.substs (#0 :> (#·.succ.succ))).hom p.val)))”
-    (by simp; apply Hierarchy.oringEmb; simp)
-    (by intro v; simp [hf_graph.df.iff, hp.df.iff, bit_defined.df.iff, ←le_iff_lt_succ]
-        constructor
-        · rintro h; exact ⟨f v, hbf v, rfl, fun x _ hx ↦ h x hx⟩
-        · rintro ⟨_, _, rfl, h⟩ x hx; exact h x (lt_of_mem hx) hx)
+@[definability] lemma Definable.ball_mem' (Γ m) {P : (Fin k → M) → M → Prop} {f : (Fin k → M) → M}
+    (hf : DefinableFunction ℒₒᵣ (𝚺, m + 1) f) (h : Definable ℒₒᵣ (Γ, m + 1) (fun w ↦ P (w ·.succ) (w 0))) :
+    Definable ℒₒᵣ (Γ, m + 1) (fun v ↦ ∀ {x}, x ∈ f v → P v x) := Definable.ball_mem Γ m hf h
 
-@[definability] lemma Definable.ball_mem {P : (Fin k → M) → M → Prop} {f : (Fin k → M) → M}
-    (hf : DefinableBoundedFunction L Γ f) (h : Definable L Γ (fun w ↦ P (w ·.succ) (w 0))) :
-    Definable L Γ (fun v ↦ ∀ x ∈ f v, P v x) :=
-  match Γ with
-  | (𝚺, m) => Definable.ball_mem_aux 𝚺 m hf h
-  | (𝚷, m) => Definable.ball_mem_aux 𝚷 m hf h
-  | (𝚫, m) => .of_sigma_of_pi
-    (Definable.ball_mem_aux 𝚺 m hf.of_delta h.of_delta) (Definable.ball_mem_aux 𝚷 m hf.of_delta h.of_delta)
-
-private lemma Definable.bex_mem_aux (Γ : Polarity) (n : ℕ) {P : (Fin k → M) → M → Prop} {f : (Fin k → M) → M}
-    (hf : DefinableBoundedFunction L (Γ, n) f) (h : Definable L (Γ, n) (fun w ↦ P (w ·.succ) (w 0))) :
-    Definable L (Γ, n) (fun v ↦ ∃ x ∈ f v, P v x) := by
-  rcases hf.bounded with ⟨bf, hbf⟩
-  rcases hf.definable with ⟨f_graph, hf_graph⟩
-  rcases h with ⟨p, hp⟩
-  exact .mkPolarity
-    “∃[#0 < !!(Rew.bShift bf) + 1] (!f_graph.val ∧ ∃[#0 < #1] (!bitDef.val .[#0, #1] ∧ !((Rew.substs (#0 :> (#·.succ.succ))).hom p.val)))”
-    (by simp; apply Hierarchy.oringEmb; simp)
-    (by intro v; simp [hf_graph.df.iff, hp.df.iff, bit_defined.df.iff, ←le_iff_lt_succ]
-        constructor
-        · rintro ⟨x, hx, h⟩; exact ⟨f v, hbf v, rfl, x, lt_of_mem hx, hx, h⟩
-        · rintro ⟨_, _, rfl, x, _, hx, h⟩; exact ⟨x, hx, h⟩)
-
-@[definability] lemma Definable.bex_mem {P : (Fin k → M) → M → Prop} {f : (Fin k → M) → M}
-    (hf : DefinableBoundedFunction L Γ f) (h : Definable L Γ (fun w ↦ P (w ·.succ) (w 0))) :
-    Definable L Γ (fun v ↦ ∃ x ∈ f v, P v x) :=
-  match Γ with
-  | (𝚺, m) => Definable.bex_mem_aux 𝚺 m hf h
-  | (𝚷, m) => Definable.bex_mem_aux 𝚷 m hf h
-  | (𝚫, m) => .of_sigma_of_pi
-    (Definable.bex_mem_aux 𝚺 m hf.of_delta h.of_delta) (Definable.bex_mem_aux 𝚷 m hf.of_delta h.of_delta)
+@[definability] lemma Definable.bex_mem (Γ m) {P : (Fin k → M) → M → Prop} {f : (Fin k → M) → M}
+    (hf : DefinableFunction ℒₒᵣ (𝚺, m + 1) f) (h : Definable ℒₒᵣ (Γ, m + 1) (fun w ↦ P (w ·.succ) (w 0))) :
+    Definable ℒₒᵣ (Γ, m + 1) (fun v ↦ ∃ x ∈ f v, P v x) := by
+  have : Definable ℒₒᵣ (Γ, m + 1) (fun v ↦ ∃ x < f v, x ∈ f v ∧ P v x) :=
+    .bex_lt hf (.and (by simpa using Definable.comp₂ (by simp) (hf.retraction _) (by simp)) h)
+  exact this.of_iff <| by
+    intro v; exact ⟨by rintro ⟨x, hx, hxv⟩; exact ⟨x, lt_of_mem hx, hx, hxv⟩, by rintro ⟨x, _, hx, hvx⟩; exact ⟨x, hx, hvx⟩⟩
 
 end
 
@@ -460,7 +431,7 @@ private lemma finset_comprehension_aux (Γ : Polarity) {P : M → Prop} (hP : (�
     ⟨under a, pred_lt_self_of_pos (by simp), fun i hi _ ↦ by simpa [mem_under_iff] using hi⟩
   rcases this with ⟨s, hsn, hs⟩
   have : (Γ.alt, m)-Predicate (fun s ↦ ∀ i < a, P i → i ∈ s) := by
-    apply Definable.ball_lt; simp; apply Definable.imp <;> definability
+    apply Definable.ball_lt₀; simp; apply Definable.imp <;> definability
   have : ∃ t, (∀ i < a, P i → i ∈ t) ∧ ∀ t' < t, ∃ x, P x ∧ x < a ∧ x ∉ t' := by
     simpa using least_number_h (L := ℒₒᵣ) Γ.alt m this hs
   rcases this with ⟨t, ht, t_minimal⟩

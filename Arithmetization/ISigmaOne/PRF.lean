@@ -280,29 +280,28 @@ infix:80 " ^ˢ " => seqExp
 
 @[simp] lemma seqExp_succ (a k : M) : a ^ˢ (k + 1) = (a ^ˢ k) ×ˢ a := by simp [seqExp, seqExp.construction]
 
-def _root_.LO.FirstOrder.Arith.seqExpDef : 𝚫₁-Semisentence 3 := seqExp.formulae.resultDef |>.rew (Rew.substs ![#0, #2, #1]) |>.graphDelta
+def _root_.LO.FirstOrder.Arith.seqExpDef : 𝚺₁-Semisentence 3 := seqExp.formulae.resultDef |>.rew (Rew.substs ![#0, #2, #1])
 
-lemma seqExp_defined : 𝚫₁-Function₂ (seqExp : M → M → M) via seqExpDef := by
-  apply DefinedFunction.graph_delta <| fun v ↦ by simp [seqExp.construction.result_defined_iff]; rfl
+lemma seqExp_defined : 𝚺₁-Function₂ (seqExp : M → M → M) via seqExpDef :=
+  fun v ↦ by simp [seqExp.construction.result_defined_iff, seqExpDef]; rfl
 
 @[simp] lemma seqExp_defined_iff (v) :
     Semiformula.Evalbm M v seqExpDef.val ↔ v 0 = v 1 ^ˢ v 2 := seqExp_defined.df.iff v
 
-instance seqExp_definable : 𝚫₁-Function₂ (seqExp : M → M → M) := Defined.to_definable _ seqExp_defined
+instance seqExp_definable : 𝚺₁-Function₂ (seqExp : M → M → M) := Defined.to_definable _ seqExp_defined
 
-@[simp, definability] instance seqExp_definable' (Γ) : (Γ, 1)-Function₂ (seqExp : M → M → M) := .of_delta seqExp_definable
-
-attribute [definability] DefinableFunction₂.comp
+@[simp, definability] instance seqExp_definable' (Γ) : (Γ, m + 1)-Function₂ (seqExp : M → M → M) :=
+  .of_sigmaOne seqExp_definable _ _
 
 lemma seq_of_mem_seqExp {s a k : M} (h : s ∈ seqExp a k) : Seq s := by
   induction k using induction_iSigmaOne generalizing s
-  · sorry
+  · definability
   case zero =>
     have : s = ∅ := by simpa using h
     simp [this]
   case succ k ih =>
     have : ∃ v ∈ a ^ˢ k, ∃ u ∈ a, s = v ⁀' u := by simpa [mem_seqProduct_iff] using h
-    rcases this with ⟨v, hv, u, hu, rfl⟩
+    rcases this with ⟨v, hv, u, _, rfl⟩
     exact (ih hv).seqCons u
 
 end seqExp

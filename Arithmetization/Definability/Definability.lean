@@ -143,7 +143,7 @@ namespace Definable
 
 variable {P Q : (Fin k → M) → Prop}
 
-lemma ball_lt {P : (Fin k → M) → M → Prop} {f : (Fin k → M) → M}
+lemma ball_lt₀ {P : (Fin k → M) → M → Prop} {f : (Fin k → M) → M}
     (hf : DefinableBoundedFunction L Γ f) (h : Definable L Γ (fun w ↦ P (w ·.succ) (w 0))) :
     Definable L Γ (fun v ↦ ∀ x < f v, P v x) := by
   rcases hf.bounded with ⟨bf, hbf⟩
@@ -153,7 +153,7 @@ lemma ball_lt {P : (Fin k → M) → M → Prop} {f : (Fin k → M) → M}
     simpa [←le_iff_lt_succ] using (hf_graph.and ((hp.retraction (0 :> (·.succ.succ))).ball #0)).bex ᵀ“!!bf + 1”
   exact .of_iff _ (fun v ↦ ⟨fun h ↦ ⟨f v, hbf v, rfl, h⟩, by rintro ⟨y, hy, rfl, h⟩; exact h⟩) ⟨_, this⟩
 
-lemma bex_lt {P : (Fin k → M) → M → Prop} {f : (Fin k → M) → M}
+lemma bex_lt₀ {P : (Fin k → M) → M → Prop} {f : (Fin k → M) → M}
     (hf : DefinableBoundedFunction L Γ f) (h : Definable L Γ (fun w ↦ P (w ·.succ) (w 0))) :
     Definable L Γ (fun v ↦ ∃ x < f v, P v x) := by
   rcases hf.bounded with ⟨bf, hbf⟩
@@ -163,7 +163,7 @@ lemma bex_lt {P : (Fin k → M) → M → Prop} {f : (Fin k → M) → M}
     simpa [←le_iff_lt_succ] using (hf_graph.and ((hp.retraction (0 :> (·.succ.succ))).bex #0)).bex ᵀ“!!bf + 1”
   exact .of_iff _ (fun v ↦ ⟨fun h ↦ ⟨f v, hbf v, rfl, h⟩, by rintro ⟨y, hy, rfl, h⟩; exact h⟩) ⟨_, this⟩
 
-lemma ball_le {P : (Fin k → M) → M → Prop} {f : (Fin k → M) → M}
+lemma ball_le₀ {P : (Fin k → M) → M → Prop} {f : (Fin k → M) → M}
     (hf : DefinableBoundedFunction L Γ f) (h : Definable L Γ (fun w ↦ P (w ·.succ) (w 0))) :
     Definable L Γ (fun v ↦ ∀ x ≤ f v, P v x) := by
   rcases hf.bounded with ⟨bf, hbf⟩
@@ -173,7 +173,7 @@ lemma ball_le {P : (Fin k → M) → M → Prop} {f : (Fin k → M) → M}
     simpa [←le_iff_lt_succ] using (hf_graph.and ((hp.retraction (0 :> (·.succ.succ))).ball ᵀ“#0 + 1”)).bex ᵀ“!!bf + 1”
   exact .of_iff _ (fun v ↦ ⟨fun h ↦ ⟨f v, hbf v, rfl, h⟩, by rintro ⟨y, hy, rfl, h⟩; exact h⟩) ⟨_, this⟩
 
-lemma bex_le {P : (Fin k → M) → M → Prop} {f : (Fin k → M) → M}
+lemma bex_le₀ {P : (Fin k → M) → M → Prop} {f : (Fin k → M) → M}
     (hf : DefinableBoundedFunction L Γ f) (h : Definable L Γ (fun w ↦ P (w ·.succ) (w 0))) :
     Definable L Γ (fun v ↦ ∃ x ≤ f v, P v x) := by
   rcases hf.bounded with ⟨bf, hbf⟩
@@ -209,7 +209,7 @@ lemma bcomp₁ {k} {P : M → Prop} {f : (Fin k → M) → M} [hP : DefinablePre
     Definable L Γ (fun v ↦ P (f v)) := by
   rcases hf.bounded with ⟨bf, hbf⟩
   have : Definable L Γ fun v ↦ ∃ z ≤ Semiterm.valm M v id bf, z = f v ∧ P z :=
-    bex_le (by simp) (and hf.definable <| hP.retraction (fun _ ↦ 0))
+    bex_le₀ (by simp) (and hf.definable <| hP.retraction (fun _ ↦ 0))
   exact this.of_iff _ (by
     intro v; constructor
     · intro h; exact ⟨f v, hbf v, rfl, h⟩
@@ -222,7 +222,7 @@ lemma bcomp₂ {k} {R : M → M → Prop} {f₁ f₂ : (Fin k → M) → M}
   rcases hf₂.bounded with ⟨bf₂, hbf₂⟩
   have : Definable L Γ (fun v ↦
       ∃ z₁ ≤ Semiterm.valm M v id bf₁, ∃ z₂ ≤ Semiterm.valm M v id bf₂, z₁ = f₁ v ∧ z₂ = f₂ v ∧ R z₁ z₂) :=
-    bex_le (DefinableBoundedFunction.term _) <| bex_le (DefinableBoundedFunction.term_retraction _ _)
+    bex_le₀ (DefinableBoundedFunction.term _) <| bex_le₀ (DefinableBoundedFunction.term_retraction _ _)
       <| and (hf₁.definable.rel.retraction _)
         <| and (by simpa using hf₂.definable.rel.retraction (0 :> (·.succ.succ)))
           <| by simpa using hR.retraction (n := k + 2) ![1, 0]
@@ -240,8 +240,8 @@ lemma bcomp₃ {k} {R : M → M → M → Prop} {f₁ f₂ f₃ : (Fin k → M) 
   have : Definable L Γ (fun v ↦
       ∃ z₁ ≤ Semiterm.valm M v id bf₁, ∃ z₂ ≤ Semiterm.valm M v id bf₂, ∃ z₃ ≤ Semiterm.valm M v id bf₃,
         z₁ = f₁ v ∧ z₂ = f₂ v ∧ z₃ = f₃ v ∧ R z₁ z₂ z₃) :=
-    bex_le (DefinableBoundedFunction.term _) <| bex_le (DefinableBoundedFunction.term_retraction _ _)
-      <| bex_le (DefinableBoundedFunction.term_retraction _ _)
+    bex_le₀ (DefinableBoundedFunction.term _) <| bex_le₀ (DefinableBoundedFunction.term_retraction _ _)
+      <| bex_le₀ (DefinableBoundedFunction.term_retraction _ _)
         <| and (by simpa using hf₁.definable.rel.retraction (n := k + 3) (2 :> (·.succ.succ.succ)))
           <| and (by simpa using hf₂.definable.rel.retraction (n := k + 3) (1 :> (·.succ.succ.succ)))
             <| and (by simpa using hf₃.definable.rel.retraction (n := k + 3) (0 :> (·.succ.succ.succ)))
@@ -261,8 +261,8 @@ lemma bcomp₄ {k} {R : M → M → M → M → Prop} {f₁ f₂ f₃ f₄ : (Fi
   have : Definable L Γ (fun v ↦
       ∃ z₁ ≤ Semiterm.valm M v id bf₁, ∃ z₂ ≤ Semiterm.valm M v id bf₂, ∃ z₃ ≤ Semiterm.valm M v id bf₃, ∃ z₄ ≤ Semiterm.valm M v id bf₄,
         z₁ = f₁ v ∧ z₂ = f₂ v ∧ z₃ = f₃ v ∧ z₄ = f₄ v ∧ R z₁ z₂ z₃ z₄) :=
-    bex_le (DefinableBoundedFunction.term _) <| bex_le (DefinableBoundedFunction.term_retraction _ _)
-      <| bex_le (DefinableBoundedFunction.term_retraction _ _) <| bex_le (DefinableBoundedFunction.term_retraction _ _)
+    bex_le₀ (DefinableBoundedFunction.term _) <| bex_le₀ (DefinableBoundedFunction.term_retraction _ _)
+      <| bex_le₀ (DefinableBoundedFunction.term_retraction _ _) <| bex_le₀ (DefinableBoundedFunction.term_retraction _ _)
         <| and (by simpa using hf₁.definable.rel.retraction (n := k + 4) (3 :> (·.succ.succ.succ.succ)))
         <| and (by simpa using hf₂.definable.rel.retraction (n := k + 4) (2 :> (·.succ.succ.succ.succ)))
         <| and (by simpa using hf₃.definable.rel.retraction (n := k + 4) (1 :> (·.succ.succ.succ.succ)))
@@ -323,13 +323,20 @@ open Lean.Parser.Tactic (config)
 
 open Definable
 
+lemma DefinablePred.infer {R : M → Prop} [DefinablePred L Γ R] : DefinablePred L Γ R := inferInstance
+lemma DefinableRel.infer {R : M → M → Prop} [DefinableRel L Γ R] : DefinableRel L Γ R := inferInstance
+lemma DefinableRel₃.infer {R : M → M → M → Prop} [DefinableRel₃ L Γ R] : DefinableRel₃ L Γ R := inferInstance
+lemma DefinableFunction₁.infer {f : M → M} [DefinableFunction₁ L Γ f] : DefinableFunction₁ L Γ f := inferInstance
+lemma DefinableFunction₂.infer {f : M → M → M} [DefinableFunction₂ L Γ f] : DefinableFunction₂ L Γ f := inferInstance
+lemma DefinableFunction₃.infer {f : M → M → M → M} [DefinableFunction₃ L Γ f] : DefinableFunction₃ L Γ f := inferInstance
+
 attribute [aesop (rule_sets := [Definability]) norm]
   sq
   pow_three
   pow_four
   Definable.const
 
-attribute [aesop 1 (rule_sets := [Definability]) safe]
+attribute [aesop 5 (rule_sets := [Definability]) safe]
   DefinableFunction.comp₁
   DefinableFunction.comp₂
   DefinableFunction.comp₃
@@ -337,37 +344,46 @@ attribute [aesop 1 (rule_sets := [Definability]) safe]
   DefinableBoundedFunction.comp₂
   DefinableBoundedFunction.comp₃
 
-attribute [aesop 2 (rule_sets := [Definability]) safe]
-  Definable.comp₁
-  Definable.comp₂
-  Definable.comp₃
-  Definable.comp₄
-
+attribute [aesop 6 (rule_sets := [Definability]) safe]
+  Definable.comp₁'
+  Definable.comp₂'
+  Definable.comp₃'
+  Definable.comp₄'
   Definable.const
 
-attribute [aesop 3 (rule_sets := [Definability]) safe]
+attribute [aesop 7 (rule_sets := [Definability]) safe]
   Definable.bcomp₁
   Definable.bcomp₂
   Definable.bcomp₃
   Definable.bcomp₄
 
-attribute [aesop 4 (rule_sets := [Definability]) safe]
-  Definable.not
-  Definable.imp
-  Definable.iff
+attribute [aesop 8 (rule_sets := [Definability]) safe]
   Definable.ball_lt
   Definable.ball_le
+  Definable.ball_lt'
+  Definable.ball_le'
   Definable.bex_lt
   Definable.bex_le
 
-attribute [aesop 8 (rule_sets := [Definability]) safe]
+attribute [aesop 9 (rule_sets := [Definability]) safe]
+  Definable.ball_lt₀
+  Definable.ball_le₀
+  Definable.bex_lt₀
+  Definable.bex_le₀
+
+attribute [aesop 10 (rule_sets := [Definability]) safe]
+  Definable.not
+  Definable.imp
+  Definable.iff
+
+attribute [aesop 11 (rule_sets := [Definability]) safe]
   Definable.and
   Definable.or
   Definable.all
   Definable.ex
 
 macro "definability" : attr =>
-  `(attr|aesop 3 (rule_sets := [$(Lean.mkIdent `Definability):ident]) safe)
+  `(attr|aesop 10 (rule_sets := [$(Lean.mkIdent `Definability):ident]) safe)
 
 macro "definability" (config)? : tactic =>
   `(tactic| aesop (config := { terminal := true }) (rule_sets := [$(Lean.mkIdent `Definability):ident]))
@@ -384,8 +400,10 @@ example {ex : M → M} [DefinableFunction₁ L 𝚺₀ ex] (c : M) :
 
 example {ex : M → M} [h : DefinableFunction₁ L (𝚫, 1) ex] (c : M) :
     DefinableRel L (𝚺, 1) (fun x y : M ↦ ∃ z, x < y ↔ ex (ex x) = z) := by
-  apply Definable.ex
-  simp
+  definability?
+
+example {ex : M → M} [h : DefinableFunction₁ L (𝚺, 1) ex] (c : M) :
+    DefinableRel L (𝚺, 1) (fun x y : M ↦ ∀ z < ex y, x < y ↔ ex (ex x) = z) := by
   definability?
 
 end
