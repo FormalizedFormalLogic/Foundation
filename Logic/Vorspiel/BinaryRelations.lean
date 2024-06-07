@@ -22,8 +22,6 @@ def RightConvergent := ∀ ⦃w₁ w₂ w₃⦄, w₁ ≺ w₂ ∧ w₁ ≺ w₃
 
 def Extensive := ∀ ⦃x y⦄, x ≺ y → x = y
 
-def Identifiable := ∀ ⦃x y⦄, x ≺ y ↔ x = y
-
 def Antisymmetric := ∀ ⦃w₁ w₂⦄, w₁ ≺ w₂ → w₂ ≺ w₁ → w₁ = w₂
 
 abbrev ConverseWellFounded := WellFounded $ flip (· ≺ ·)
@@ -90,14 +88,9 @@ lemma Finite.converseWellFounded_of_trans_irrefl [IsTrans α rel] [IsIrrefl α r
 end ConverseWellFounded
 
 
-lemma ident_of_reflex_antisymm_eucl (hRefl : Reflexive rel) (hAntisymm : Antisymmetric rel) (hEucl : Euclidean rel) : Identifiable rel := by
-  intro x y;
-  constructor;
-  . have rxx := hRefl x;
-    intro rxy;
-    exact hAntisymm rxy (hEucl rxx rxy);
-  . intro exy;
-    subst exy;
-    exact hRefl x;
+lemma extensive_of_reflex_antisymm_eucl (hRefl : Reflexive rel) (hAntisymm : Antisymmetric rel) (hEucl : Euclidean rel) : Extensive rel := by
+  intro x y rxy;
+  have rxx := hRefl x;
+  exact hAntisymm rxy (hEucl rxx rxy);
 
 end

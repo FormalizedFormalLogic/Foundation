@@ -63,15 +63,19 @@ instance : System.Consistent (𝐂𝐥 : DeductionParameter α) := inferInstance
 
 instance instClassicalDefinabilityEuclidean : Definability (α := α) Ax(𝐂𝐥) (λ F => Euclidean F.Rel) := AxiomSet.EFQ.instDefinabilityUnion AxiomSet.LEM.definability
 
-instance instClassicalDefinabilityIdentifiable : Definability (α := α) Ax(𝐂𝐥) (λ F => Identifiable F.Rel) where
+instance instClassicalDefinabilityExtensive : Definability (α := α) Ax(𝐂𝐥) (λ F => Extensive F.Rel) where
   defines F := by
     have hE := instClassicalDefinabilityEuclidean.defines F;
     constructor;
     . intro h;
-      exact ident_of_reflex_antisymm_eucl F.Rel_refl F.Rel_antisymm $ hE.mp h;
+      exact extensive_of_reflex_antisymm_eucl F.Rel_refl F.Rel_antisymm $ hE.mp h;
     . intro h;
       apply hE.mpr;
-      simp_all [Identifiable, Euclidean];
+      intro x y z rxy ryz;
+      have := h rxy;
+      have := h ryz;
+      subst_vars;
+      apply F.Rel_refl;
 
 instance : System.Consistent (𝐂𝐥 : DeductionParameter α) := inferInstance
 
@@ -102,8 +106,8 @@ lemma Formula.Kripke.ValidOnClassicalFrame_iff : 𝔽(Ax(𝐂𝐥)) ⊧ p → �
   intro h V;
   apply Formula.Kripke.ValidOnModel.classical_iff.mp;
   exact h (by
-    apply iff_definability_memAxiomSetFrameClass instClassicalDefinabilityIdentifiable |>.mpr;
-    simp [Identifiable];
+    apply iff_definability_memAxiomSetFrameClass instClassicalDefinabilityExtensive |>.mpr;
+    simp [Extensive];
   ) (ClassicalModel V).Valuation (ClassicalModel V).hereditary;
 
 lemma notClassicalValid_of_exists_ClassicalValuation : (∃ (V : ClassicalValuation α), ¬(V ⊧ p)) → (¬𝔽(Ax(𝐂𝐥)) ⊧ p) := by
