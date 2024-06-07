@@ -102,6 +102,7 @@ open Standard.Kripke
 
 def Formula.Kripke.Satisfies (M : Kripke.Model α) (w : M.World) : Formula α → Prop
   | atom a  => M.Valuation w a
+  | verum   => True
   | falsum  => False
   | and p q => (Kripke.Satisfies M w p) ∧ (Kripke.Satisfies M w q)
   | or p q  => (Kripke.Satisfies M w p) ∨ (Kripke.Satisfies M w q)

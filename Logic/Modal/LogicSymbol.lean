@@ -184,6 +184,12 @@ prefix:74 "□" => box
 abbrev dia : F → F := mop false
 prefix:74 "◇" => dia
 
+abbrev boxdot (p : F) : F := p ⋏ □p
+prefix:74 "⊡" => boxdot
+
+-- abbrev diadot (p : F) : F := p ⋏ ◇p
+-- prefix:74 "⟐" => diadot
+
 lemma duality' {p : F} : (◇p) = ~(□(~p)) := by apply duality
 
 abbrev multibox (n : ℕ) : F → F := (mop true)^[n]

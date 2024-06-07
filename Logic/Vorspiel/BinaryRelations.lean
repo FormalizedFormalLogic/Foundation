@@ -72,6 +72,7 @@ lemma refl_of_symm_serial_eucl : Reflexive rel := by
   have r₂₁ := hSymm r₁₂;
   exact trans_of_symm_eucl hSymm hEucl r₁₂ r₂₁;
 
+
 section ConverseWellFounded
 
 lemma ConverseWellFounded.iff_has_max : ConverseWellFounded r ↔ (∀ (s : Set α), Set.Nonempty s → ∃ m ∈ s, ∀ x ∈ s, ¬(r m x)) := by
@@ -85,5 +86,11 @@ lemma Finite.converseWellFounded_of_trans_irrefl [IsTrans α rel] [IsIrrefl α r
     ⟨by simp [flip, IsIrrefl.irrefl]⟩
 
 end ConverseWellFounded
+
+
+lemma extensive_of_reflex_antisymm_eucl (hRefl : Reflexive rel) (hAntisymm : Antisymmetric rel) (hEucl : Euclidean rel) : Extensive rel := by
+  intro x y rxy;
+  have rxx := hRefl x;
+  exact hAntisymm rxy (hEucl rxx rxy);
 
 end

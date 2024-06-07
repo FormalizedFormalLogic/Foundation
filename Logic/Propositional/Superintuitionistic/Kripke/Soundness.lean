@@ -43,6 +43,5 @@ instance [FrameClass.IsNonempty 𝔽(Ax(𝓓))] : System.Consistent 𝓓 := Syst
 
 instance : System.Consistent (𝐈𝐧𝐭 : DeductionParameter α) := inferInstance
 
--- instance : System.Consistent (𝐂𝐥 : DeductionParameter α) := inferInstance
 
 end LO.Propositional.Superintuitionistic.Kripke

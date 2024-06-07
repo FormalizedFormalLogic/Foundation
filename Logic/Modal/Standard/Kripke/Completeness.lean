@@ -265,6 +265,9 @@ lemma membership_iff : (p ∈ Ω.theory) ↔ (Ω.theory *⊢[L]! p) := by
 lemma not_mem_falsum : ⊥ ∉ Ω.theory := not_mem_falsum_of_Lconsistent Ω.consistent
 
 @[simp]
+lemma mem_verum : ⊤ ∈ Ω.theory := by apply membership_iff.mpr; apply verum!;
+
+@[simp]
 lemma unprovable_falsum : Ω.theory *⊬[L]! ⊥ := by apply membership_iff.not.mp; simp
 
 lemma iff_mem_neg : (~p ∈ Ω.theory) ↔ (p ∉ Ω.theory) := by
@@ -614,6 +617,7 @@ lemma truthlemma : ∀ {Ω : (CanonicalModel L).World}, Ω ⊧ p ↔ (p ∈ Ω.t
       apply ih.mpr;
       exact CanonicalFrame.frame_def_box.mp hΩ' h;
   | hfalsum => simp [Formula.Kripke.Satisfies.bot_def (M := (CanonicalModel L))];
+  | hVerum => simp [Formula.Kripke.Satisfies.top_def (M := (CanonicalModel L))];
   | _ => simp_all
 
 lemma iff_valid_on_canonicalModel_deducible : (CanonicalModel L) ⊧ p ↔ (L ⊢! p) := by

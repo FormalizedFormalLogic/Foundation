@@ -104,7 +104,7 @@ class S4Grz extends S4 𝓢, HasAxiomGrz 𝓢
 
 class GL extends K 𝓢, HasAxiomL 𝓢
 
-class Triv extends K 𝓢, HasAxiomTc 𝓢
+class Triv extends K 𝓢, HasAxiomT 𝓢, HasAxiomTc 𝓢
 
 class Ver extends K 𝓢, HasAxiomVer 𝓢
 

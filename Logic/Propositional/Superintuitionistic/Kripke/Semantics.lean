@@ -9,7 +9,7 @@ namespace Kripke
 attribute [simp] Reflexive Transitive Antisymmetric in
 structure Frame where
   World : Type u
-  World_nonempty : Nonempty World := by infer_instance
+  World_nonempty : Inhabited World := by infer_instance
   Rel : World → World → Prop
   Rel_refl : Reflexive Rel := by aesop
   Rel_trans : Transitive Rel := by aesop
@@ -20,7 +20,7 @@ structure FiniteFrame extends Frame where
 
 instance : CoeSort Frame Type* where coe := Frame.World
 
-instance (F : Frame) : Nonempty F.World := F.World_nonempty
+instance (F : Frame) : Inhabited F.World := F.World_nonempty
 
 set_option linter.unusedVariables false in
 abbrev Frame' (α : Type*) := Frame
@@ -33,6 +33,9 @@ def FiniteFrame.toFrame' {α : Type*} (F : FiniteFrame) : Frame' α := F.toFrame
 abbrev Frame.Rel' {F : Frame} (w w' : F.World) := F.Rel w w'
 scoped infix:45 " ≺ " => Frame.Rel'
 
+abbrev Frame.defaultWorld {F : Frame} : F.World := F.World_nonempty.default
+-- NOTE: not `@`, `﹫` (U+FE6B)
+scoped notation "﹫" => Frame.defaultWorld
 
 abbrev Valuation (W α : Type u) := W → α → Prop
 
@@ -53,7 +56,7 @@ set_option linter.unusedVariables false in
 abbrev FrameClass' (α : Type*) := FrameClass
 
 class FrameClass.IsNonempty (𝔽 : FrameClass) where
-  nonempty : ∃ F, 𝔽 F
+  nonempty : ∃ F, F ∈ 𝔽
 
 
 
@@ -63,7 +66,7 @@ set_option linter.unusedVariables false in
 abbrev FiniteFrameClass' (α : Type*) := FiniteFrameClass
 
 class FiniteFrameClass.IsNonempty (𝔽 : FiniteFrameClass) where
-  nonempty : ∃ F, 𝔽 F
+  nonempty : ∃ F, F ∈ 𝔽
 
 
 abbrev FrameProperty := Frame → Prop
@@ -307,6 +310,20 @@ lemma validOnAxiomSetFrameClass_axiom (h : p ∈ Ax) : 𝔽(Ax) ⊧ p := by intr
 class Definability (Ax : AxiomSet α) (P : FrameProperty) where
   defines : ∀ (F : Frame' α), F ⊧* Ax ↔ P F
 
+instance Definability.instUnion (definability₁ : Definability Ax₁ P₁) (definability₂ : Definability Ax₂ P₂) : Definability (Ax₁ ∪ Ax₂) (λ F => P₁ F ∧ P₂ F) where
+  defines F := by
+    constructor;
+    . intro h;
+      simp only [Semantics.RealizeSet.union_iff] at h;
+      constructor;
+      . exact Definability.defines F |>.mp h.1;
+      . exact Definability.defines F |>.mp h.2;
+    . intro h;
+      simp only [Semantics.RealizeSet.union_iff];
+      constructor;
+      . apply Definability.defines F |>.mpr h.1;
+      . apply Definability.defines F |>.mpr h.2;
+
 lemma iff_definability_memAxiomSetFrameClass (definability : Definability Ax P) : ∀ {F : Frame' α}, F ∈ 𝔽(Ax) ↔ P F := by
   apply Definability.defines;
 
@@ -327,35 +344,13 @@ instance AxiomSet.EFQ.nonempty : FrameClass.IsNonempty (𝔽(𝗘𝗙𝗤) : Fra
     apply iff_definability_memAxiomSetFrameClass AxiomSet.EFQ.definability |>.mpr;
     trivial;
 
-instance AxiomSet.LEM.definability : Definability (α := α) 𝗟𝗘𝗠 (λ F => Euclidean F.Rel) where
-  defines F := by
-    simp;
-    constructor;
-    . intro h x y z hxy hyz;
-      let V : Valuation F.World α := (λ v _ => z ≺ v);
-      let M := Model.mk F V (by
-        simp [V];
-        intros _ _ hvu hzv;
-        exact F.Rel_trans hzv hvu;
-      );
-      let p : Formula α := Formula.atom default;
+instance AxiomSet.EFQ.instDefinabilityUnion (definability : Definability Ax P) : Definability (𝗘𝗙𝗤 ∪ Ax) P := by simpa using Definability.instUnion AxiomSet.EFQ.definability definability;
 
-      have : Satisfies M z p := by simp [p, V]; exact F.Rel_refl _;
-      have : ¬(Satisfies M x (~p)) := by simp; existsi z; simp_all;
-      have : Satisfies M x p := by
-        have := Formula.Kripke.Satisfies.or_def.mp $ h p V M.hereditary x;
-        aesop;
-      have : Satisfies M y p := Formula.Kripke.Satisfies.formula_hereditary hxy this;
-      simpa [Satisfies, V] using this;
-    . intros hEucl _;
-      apply ValidOnFrame.lem;
-      intro x y hxy;
-      exact F.Rel_antisymm hxy $ hEucl (F.Rel_refl x) hxy;
-
-instance : FrameClass.IsNonempty (𝔽(𝗟𝗘𝗠) : FrameClass' α) where
+instance AxiomSet.EFQ.instUnionNonempty [FrameClass.IsNonempty 𝔽(Ax)] (definability : Definability Ax P) : FrameClass.IsNonempty (𝔽(𝗘𝗙𝗤 ∪ Ax) : FrameClass' α) where
   nonempty := by
-    existsi { World := PUnit, Rel := λ x y => x ≤ y };
-    apply iff_definability_memAxiomSetFrameClass AxiomSet.LEM.definability |>.mpr;
-    simp [Euclidean];
+    obtain ⟨F, hF⟩ := FrameClass.IsNonempty.nonempty (𝔽 := 𝔽(Ax));
+    existsi F;
+    apply iff_definability_memAxiomSetFrameClass (AxiomSet.EFQ.instDefinabilityUnion definability) |>.mpr;
+    apply iff_definability_memAxiomSetFrameClass definability |>.mp hF;
 
 end LO.Propositional.Superintuitionistic
