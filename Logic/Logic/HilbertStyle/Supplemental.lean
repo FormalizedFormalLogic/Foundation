@@ -211,6 +211,11 @@ def tne : 𝓢 ⊢ ~(~~p) ⟶ ~p := contra₀' dni
 def tne' (b : 𝓢 ⊢ ~(~~p)) : 𝓢 ⊢ ~p := tne ⨀ b
 lemma tne'! (b : 𝓢 ⊢! ~(~~p)) : 𝓢 ⊢! ~p := ⟨tne' b.some⟩
 
+def implyLeftReplace (h : 𝓢 ⊢ q ⟶ p) : 𝓢 ⊢ (p ⟶ r) ⟶ (q ⟶ r) := by
+  apply deduct';
+  exact impTrans (of h) id;
+lemma imply_left_replace! (h : 𝓢 ⊢! q ⟶ p) : 𝓢 ⊢! (p ⟶ r) ⟶ (q ⟶ r) := ⟨implyLeftReplace h.some⟩
+
 
 lemma implyLeftReplaceIff'! (h : 𝓢 ⊢! p ⟷ q) : 𝓢 ⊢! p ⟶ r ↔ 𝓢 ⊢! q ⟶ r := by
   constructor;

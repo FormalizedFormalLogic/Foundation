@@ -7,6 +7,7 @@ variable [DecidableEq α]
 
 def Formula.BoxdotTranslation : Formula α → Formula α
   | atom p => .atom p
+  | ⊤ => ⊤
   | ⊥ => ⊥
   | p ⟶ q => (BoxdotTranslation p) ⟶ (BoxdotTranslation q)
   | p ⋏ q => (BoxdotTranslation p) ⋏ (BoxdotTranslation q)
@@ -36,7 +37,7 @@ lemma boxdotTranslatedK4_of_S4 (h : 𝐒𝟒 ⊢! p) : 𝐊𝟒 ⊢! pᵇ := by
   | _ =>
     dsimp [BoxdotTranslation];
     try first
-    | apply imp_id!;
+    | apply verum!;
     | apply conj₁!;
     | apply conj₂!;
     | apply conj₃!;

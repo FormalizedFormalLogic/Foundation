@@ -95,6 +95,8 @@ variable {𝓢 : S} {𝓣 : T} {𝓤 : U}
 lemma reducible_iff : 𝓢 ≤ₛ 𝓣 ↔ (∀ {f}, 𝓢 ⊢! f → 𝓣 ⊢! f) :=
   ⟨fun h _ hf ↦ h hf, fun h _ hf ↦ h hf⟩
 
+lemma not_reducible_iff : ¬𝓢 ≤ₛ 𝓣 ↔ (∃ f, 𝓢 ⊢! f ∧ 𝓣 ⊬! f) := by simp [reducible_iff, Unprovable];
+
 lemma strictReducible_iff : 𝓢 <ₛ 𝓣 ↔ (∀ {f}, 𝓢 ⊢! f → 𝓣 ⊢! f) ∧ (∃ f, 𝓢 ⊬! f ∧ 𝓣 ⊢! f) := by
   simp [StrictReducible, reducible_iff]; intro _
   exact exists_congr (fun _ ↦ by simp [and_comm])

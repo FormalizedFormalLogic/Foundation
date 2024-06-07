@@ -2,6 +2,7 @@ import Logic.Logic.HilbertStyle.Basic
 import Logic.Logic.HilbertStyle.Supplemental
 import Logic.Modal.Standard.System
 import Logic.Modal.Standard.Formula
+import Logic.Modal.Standard.HilbertStyle
 
 namespace LO.Modal.Standard
 
@@ -194,7 +195,8 @@ instance : Normal (α := α) 𝐊𝐓𝟒𝐁 where
 protected abbrev GL : DeductionParameter α := NecOnly (𝗞 ∪ 𝗟)
 notation "𝐆𝐋" => DeductionParameter.GL
 instance : Normal (α := α) 𝐆𝐋 where
-
+instance : System.GL (𝐆𝐋 : DeductionParameter α) where
+  L _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
 
 protected abbrev S4Dot2 : DeductionParameter α := NecOnly (𝗞 ∪ 𝗧 ∪ 𝟰 ∪ .𝟮)
 notation "𝐒𝟒.𝟐" => DeductionParameter.S4Dot2
@@ -209,6 +211,20 @@ instance : Normal (α := α) 𝐒𝟒.𝟑 where
 protected abbrev S4Grz : DeductionParameter α := NecOnly (𝗞 ∪ 𝗧 ∪ 𝟰 ∪ 𝗚𝗿𝘇)
 notation "𝐒𝟒𝐆𝐫𝐳" => DeductionParameter.S4Grz
 instance : Normal (α := α) 𝐒𝟒𝐆𝐫𝐳 where
+
+
+protected abbrev Triv : DeductionParameter α := NecOnly (𝗞 ∪ 𝗧 ∪ 𝗧𝗰)
+notation "𝐓𝐫𝐢𝐯" => DeductionParameter.Triv
+instance : Normal (α := α) 𝐓𝐫𝐢𝐯 where
+instance : System.Triv (𝐓𝐫𝐢𝐯 : DeductionParameter α) where
+  T _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
+  Tc _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
+
+protected abbrev Ver : DeductionParameter α := NecOnly (𝗞 ∪ 𝗩𝗲𝗿)
+notation "𝐕𝐞𝐫" => DeductionParameter.Ver
+instance : Normal (α := α) 𝐕𝐞𝐫 where
+instance : System.Ver (𝐕𝐞𝐫 : DeductionParameter α) where
+  Ver _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
 
 
 /-- Logic of Pure Necessitation -/
@@ -232,5 +248,43 @@ end DeductionParameter
 @[simp] lemma reducible_S4_S4Grz : (𝐒𝟒 : DeductionParameter α) ≤ₛ 𝐒𝟒𝐆𝐫𝐳 := by simp
 
 @[simp] lemma reducible_K_GL : (𝐊 : DeductionParameter α) ≤ₛ 𝐆𝐋 := by simp
+
+open System
+
+lemma normal_reducible
+  {𝓓₁ 𝓓₂ : DeductionParameter α} [𝓓₁.Normal] [𝓓₂.Normal]
+  (hsubset : ∀ {p : Formula α}, p ∈ Ax(𝓓₁) → 𝓓₂ ⊢! p) : (𝓓₁ : DeductionParameter α) ≤ₛ 𝓓₂ := by
+  apply System.reducible_iff.mpr;
+  intro p h;
+  induction h.some using Deduction.inducition_with_nec with
+  | hMaxm hp => exact hsubset hp;
+  | hMdp hpq hp ihpq ihp => exact (ihpq ⟨hpq⟩) ⨀ (ihp ⟨hp⟩)
+  | hNec hp ihp => exact Necessitation.nec! (ihp ⟨hp⟩)
+  | _ =>
+    try first
+    | apply verum!;
+    | apply imply₁!;
+    | apply imply₂!;
+    | apply conj₁!;
+    | apply conj₂!;
+    | apply conj₃!;
+    | apply disj₁!;
+    | apply disj₂!;
+    | apply disj₃!;
+    | apply dne!;
+
+lemma reducible_K4_Triv : (𝐊𝟒 : DeductionParameter α) ≤ₛ 𝐓𝐫𝐢𝐯 := by
+  apply normal_reducible;
+  intro p hp;
+  rcases hp with (hK | hFour)
+  . obtain ⟨_, _, e⟩ := hK; subst_vars; exact axiomK!;
+  . obtain ⟨_, _, e⟩ := hFour; subst_vars; exact axiomFour!;
+
+lemma reducible_K4_GL : (𝐊𝟒 : DeductionParameter α) ≤ₛ 𝐆𝐋 := by
+  apply normal_reducible;
+  intro p hp;
+  rcases hp with (hK | hFour)
+  . obtain ⟨_, _, e⟩ := hK; subst_vars; exact axiomK!;
+  . obtain ⟨_, _, e⟩ := hFour; subst_vars; exact axiomFour!;
 
 end LO.Modal.Standard
