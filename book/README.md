@@ -20,15 +20,15 @@ The list of main formalized results in first-order (Predicate) logics.
 
 The list of main formalized results in superintuitionistic propositional logics.
 
-- Soundness and completeness for Kripke semantics.
-- Law of Excluded Middle doesn't hold in intuitionistic logic.
-- Disjunctive property of intuitionistic logic.
+- [Soundness](./superntuitionistic/kripke_soundness.md) and [completeness](./superntuitionistic/kripke_completeness.md) for Kripke semantics.
+- [Law of Excluded Middle doesn't hold in intuitionistic logic.](./superntuitionistic/reject_lem.md)
+- [Disjunctive property of intuitionistic logic.](./superntuitionistic/dp.md)
 
 ### Standard Modal Logic
 
 The list of main formalized in standard modal logics.
 
 - Definability of Kripke frame.
-- Soundness and completeness for Kripke semantics.
-- _Gödel-McKensey-Tarski Theorem_ and Modal companion.
+- [Soundness](./standard_modal/kripke_soundness.md) and [completeness](./standard_modal/kripke_completeness.md) for Kripke semantics.
+- [_Gödel-McKensey-Tarski Theorem_](./standard_modal/modal_companion.md#gödel-mckensey-tarski-theorem) and [Modal companion](./standard_modal/modal_companion.md#modal-companion-1).
 
