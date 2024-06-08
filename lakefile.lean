@@ -5,17 +5,13 @@ package «logic» {
   -- add package configuration options here
 }
 
+@[default_target]
 lean_lib «Logic» {
   -- add library configuration options here
 }
 
-require mathlib from git
-  "https://github.com/leanprover-community/mathlib4.git"
+require mathlib from git "https://github.com/leanprover-community/mathlib4" @ "master"
+require importGraph from git "https://github.com/leanprover-community/import-graph" @ "main"
 
-@[default_target]
-lean_exe «logic» {
-  root := `Main
-}
-
-meta if get_config? env = some "dev" then
+meta if get_config? env = some "ci" then
 require «doc-gen4» from git "https://github.com/leanprover/doc-gen4" @ "main"

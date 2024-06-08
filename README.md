@@ -1,7 +1,9 @@
 # lean4-logic
+
 Formalizing Logic in Lean4
 
-https://iehality.github.io/lean4-logic/
+- [Book](https://iehality.github.io/lean4-logic/book): Summary of results. **TODO**
+- [Full Documentation](https://iehality.github.io/lean4-logic/docs)
 
 ## Table of Contents
 
@@ -12,17 +14,12 @@ https://iehality.github.io/lean4-logic/
   - [Classical Propositional Logic](#classical-propositional-logic)
     - [Definition](#definition)
     - [Theorem](#theorem)
-  - [Intuitionistic Propositional Logic](#intuitionistic-propositional-logic)
-    - [Definitions](#definitions)
-    - [Kripkean Semantics](#kripkean-semantics)
-      - [Defininitions](#defininitions)
-      - [Theorems](#theorems)
   - [First-Order Logic](#first-order-logic)
     - [Definition](#definition-1)
     - [Theorem](#theorem-1)
-  - [Normal Modal Logic](#normal-modal-logic)
-    - [Definition](#definition-2)
-    - [Theorem](#theorem-2)
+  - Non-Classical
+    - [Superintuitionistic Logic](https://iehality.github.io/lean4-logic/book/superntuitionistic/index.html): Intuitionistic propositional logic and some variants.
+    - [Standard Modal Logic](https://iehality.github.io/lean4-logic/book/standard_modal/index.html): Propositional logic extended modal operators $\Box$ and $\Diamond$.
   - [References](#references)
 
 ## Usage
@@ -80,43 +77,6 @@ The key results are summarised in `Logic/Summary.lean`.
       {T : LO.Propositional.Theory α}
       {p : LO.Propositional.Formula α} :
       T ⊨ p → T ⊢ p
-  ```
-
-## Intuitionistic Propositional Logic
-
-### Definitions
-
-|                                   |                                            | Definition                                 |   Notation   |
-| :-------------------------------: | ------------------------------------------ | :----------------------------------------- | :----------: |
-| $\Gamma \vdash \varphi$       | Deduction　 | LO.Propositional.Intuitionistic.Deduction | `Γ ⊢ⁱ p` |
-| | Deductive (Exists deduction) | LO.Propositional.Intuitionistic.Deductive | `Γ ⊢ⁱ! p` |
-
-### Kripkean Semantics
-
-#### Defininitions
-
-|                                   |                                            | Definition                                 |   Notation   |
-| :-------------------------------: | ------------------------------------------ | :----------------------------------------- | :----------: |
-| $w \Vdash^M \varphi$       | Satisfy on Kripkean Model $M$ and its world $w$　 | LO.Propositional.Intuitionistic.Formula.KripkeSatisfies | `w ⊩[M] p` |
-| $M \vDash \varphi$        | Models                    | LO.Propositional.Intuitionistic.Formula.KripkeModels |  `M ⊧ p`  |
-| $\Gamma \models \varphi$        | Conequences                    | LO.Propositional.Intuitionistic.Formula.KripkeConsequence |  `Γ ⊨ⁱ p`  |
-
-#### Theorems
-- [Soundness](https://iehality.github.io/lean4-logic/Logic/Propositional/Intuitionistic/Kripke/Soundness.html#LO.Propositional.Intuitionistic.Kripke.sounds)
-  ```lean
-  theorem Kripke.sounds {Γ : Theory β} {p : Formula β} : (Γ ⊢ⁱ! p) → (Γ ⊨ⁱ p)
-  ```
-- [Completeness](https://iehality.github.io/lean4-logic/Logic/Propositional/Intuitionistic/Kripke/Completeness.html#LO.Propositional.Intuitionistic.Kripke.completes)
-  ```lean
-  theorem Kripke.completes
-    [DecidableEq β] [Encodable β]
-    {Γ : Theory β} {p : Formula β} : (Γ ⊨ⁱ p) → (Γ ⊢ⁱ! p)
-  ```
-- [Disjunction Property](https://iehality.github.io/lean4-logic/Logic/Propositional/Intuitionistic/Kripke/Completeness.html#LO.Propositional.Intuitionistic.Deduction.disjunctive)
-  ```lean
-  theorem Deduction.disjunctive
-    [DecidableEq β] [Encodable β]
-    {p q : Formula β} : (∅ ⊢ⁱ! p ⋎ q) → (∅ ⊢ⁱ! p) ∨ (∅ ⊢ⁱ! q)
   ```
 
 ## First-Order Logic
@@ -187,78 +147,6 @@ The key results are summarised in `Logic/Summary.lean`.
         T ⊬ LO.FirstOrder.Arith.FirstIncompleteness.undecidable T ∧
         T ⊬ ~LO.FirstOrder.Arith.FirstIncompleteness.undecidable T
     ```
-
-## Normal Modal Logic
-
-### Definition
-
-In this formalization, _(Modal) Logic_ means set of axioms.
-
-| Logic            | Definition                    | Notation | Remarks         |
-| :--------------: | ----------------------------- | :------- | --------------- |
-| $\mathbf{K}$     | [LO.Modal.Normal.AxiomSet.K](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Axioms.html#LO.Modal.Normal.AxiomSet.K) | `𝐊`      |                 |
-| $\mathbf{KD}$     | [LO.Modal.Normal.AxiomSet.KD](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Axioms.html#LO.Modal.Normal.AxiomSet.KD) | `𝐊𝐃`      |                 |
-| $\mathbf{S4}$    | [LO.Modal.Normal.AxiomSet.S4](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Axioms.html#LO.Modal.Normal.AxiomSet.S4) | `𝐒𝟒`     | Alias of `𝐊𝐓𝟒`. |
-| $\mathbf{S4.2}$  | [LO.Modal.Normal.AxiomSet.S4Dot2](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Axioms.html#LO.Modal.Normal.AxiomSet.S4Dot2) | `𝐒𝟒.𝟐`   |                 |
-| $\mathbf{S4.3}$  | [LO.Modal.Normal.AxiomSet.S4Dot3](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Axioms.html#LO.Modal.Normal.AxiomSet.S4Dot3) | `𝐒𝟒.𝟑`   |                 |
-| $\mathbf{S4Grz}$ | [LO.Modal.Normal.AxiomSet.S4Grz](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Axioms.html#LO.Modal.Normal.AxiomSet.S4Grz) | `𝐒𝟒𝐆𝐫𝐳`  |                 |
-| $\mathbf{S5}$    | [LO.Modal.Normal.AxiomSet.S5](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Axioms.html#LO.Modal.Normal.AxiomSet.S5) | `𝐒𝟓`     | Alias of `𝐊𝐓𝟓`. |
-| $\mathbf{GL}$    | [LO.Modal.Normal.AxiomSet.GL](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Axioms.html#LO.Modal.Normal.AxiomSet.GL) | `𝐆𝐋`     |                 |
-
-|                                   |                                            | Definition                                 |   Notation   |
-| :-------------------------------: | ------------------------------------------ | :----------------------------------------- | :----------: |
-|      $M, w \models \varphi$       | Satisfy                                    | [LO.Modal.Normal.Formula.Satisfies](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Semantics.html#LO.Modal.Normal.Formula.Satisfies) | `w ⊧ᴹˢ[M] φ` |
-|        $M \models \varphi$        | Valid on model (Models)                    | [LO.Modal.Normal.Formula.Models](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Semantics.html#LO.Modal.Normal.Formula.Models) |  `⊧ᴹᵐ[M] φ`  |
-|        $F \models \varphi$        | Valid on frame (Frames)                    | [LO.Modal.Normal.Formula.Frames](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Semantics.html#LO.Modal.Normal.Formula.Frames) |  `⊧ᴹᶠ[F] φ`  |
-|    $\Gamma \models^F \varphi$     | Consequence on frame                       | [LO.Modal.Normal.Formula.FrameConsequence](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Semantics.html#LO.Modal.Normal.Formula.FrameConsequence) | `Γ ⊨ᴹᶠ[F] φ` |
-| $\Gamma \vdash_{\Lambda} \varphi$ | Hilbert-style Deduction on logic $\Lambda$ | [LO.Modal.Normal.Deduction](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/HilbertStyle.html#LO.Modal.Normal.Deduction) | `Γ ⊢ᴹ[Λ] φ`  |
-
-### Theorem
-
-- [Soundness of Hilbert-style deduction](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Soundness.html#LO.Modal.Normal.Logic.Hilbert.sounds) for `𝐊` extend `𝐓`, `𝐁`, `𝐃`, `𝟒`, `𝟓` Extensions (i.e. `𝐊𝐃`, `𝐒𝟒`, `𝐒𝟓`, etc.)
-  ```lean
-  theorem LO.Modal.Normal.Logic.Hilbert.sounds
-      {α : Type u} [Inhabited α]
-      {β : Type u} [Inhabited β]
-      (Λ : AxiomSet α)
-      (f : Frame β) (hf : f ∈ (FrameClass β α Λ))
-      {p : LO.Modal.Normal.Formula α}
-      (h : ⊢ᴹ[Λ] p) :
-      ⊧ᴹᶠ[f] p
-  ```
-  - [Consistency](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/Soundness.html#LO.Modal.Normal.Logic.Hilbert.consistency)
-    ```lean
-    theorem LO.Modal.Normal.Logic.Hilbert.consistency
-        {α : Type u}
-        {β : Type u}
-        (Λ : AxiomSet α)
-        (hf : ∃ f, f ∈ (FrameClass β α Λ)) :
-        ⊬ᴹ[Λ]! ⊥
-    ```
-  -  **WIP:** Currently, these theorems was proved where only `Λ` is `𝐊`, `𝐊𝐃`, `𝐒𝟒`, `𝐒𝟓`.
-- Strong Completeness of Hilbert-style deduction for `𝐊` extend `𝐓`, `𝐁`, `𝐃`, `𝟒`, `𝟓` Extensions
-  ```lean
-  def Completeness
-    {α β : Type u}
-    (Λ : AxiomSet β)
-    (𝔽 : FrameClass α)
-    := ∀ (Γ : Theory β) (p : Formula β), (Γ ⊨ᴹ[𝔽] p) → (Γ ⊢ᴹ[Λ]! p)
-
-  theorem LogicK.Hilbert.completes
-    {β : Type u} [inst✝ : DecidableEq β] :
-    Completeness
-      (𝐊 : AxiomSet β)
-      (𝔽((𝐊 : AxiomSet β)) : FrameClass (MaximalConsistentTheory (𝐊 : AxiomSet β)))
-  ```
-- [Gödel-McKensey-Tarski Theorem](https://iehality.github.io/lean4-logic/Logic/Modal/Normal/ModalCompanion.html#LO.Modal.Normal.companion_Int_S4)
-  ```lean
-  def GTranslation : Intuitionistic.Formula α → Formula α
-  postfix:75 "ᵍ" => GTranslation
-
-  theorem companion_Int_S4
-    [DecidableEq α] [Encodable α] [Inhabited α]
-    {p : Intuitionistic.Formula β} : (∅ ⊢! p) ↔ (∅ ⊢ᴹ[𝐒𝟒]! pᵍ)
-  ```
 
 ## References
 - J. Han, F. van Doorn, A formalization of forcing and the unprovability of the continuum hypothesis
