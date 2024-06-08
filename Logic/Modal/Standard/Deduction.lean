@@ -1,6 +1,3 @@
-import Logic.Logic.HilbertStyle.Basic
-import Logic.Logic.HilbertStyle.Supplemental
-import Logic.Modal.Standard.System
 import Logic.Modal.Standard.Formula
 import Logic.Modal.Standard.HilbertStyle
 
@@ -148,11 +145,38 @@ instance [IncludeK 𝓓] : System.HasAxiomK 𝓓 where
 
 instance [Normal 𝓓] : System.K 𝓓 where
 
-noncomputable def inducition_with_nec [HasNecOnly L]
-  {motive  : (p : Formula α) → L ⊢ p → Sort*}
-  (hMaxm   : ∀ {p}, (h : p ∈ Ax(L)) → motive p (maxm h))
-  (hMdp    : ∀ {p q}, (hpq : L ⊢ p ⟶ q) → (hp : L ⊢ p) → motive (p ⟶ q) hpq → motive p hp → motive q (hpq ⨀ hp))
-  (hNec    : ∀ {p}, (hp : L ⊢ p) → motive p hp → motive (□p) (nec HasNec.has_nec hp))
+noncomputable def inducition!
+  {motive  : (p : Formula α) → 𝓓 ⊢! p → Sort*}
+  (hMaxm   : ∀ {p}, (h : p ∈ Ax(𝓓)) → motive p ⟨maxm h⟩)
+  (hMdp    : ∀ {p q}, {hpq : 𝓓 ⊢! p ⟶ q} → {hp : 𝓓 ⊢! p} → motive (p ⟶ q) hpq → motive p hp → motive q ⟨mdp hpq.some hp.some⟩)
+  (hNec    : (hasNec : 𝓓.rules.nec) → ∀ {p}, {hp : 𝓓 ⊢! p} → motive p hp → motive (□p) ⟨(nec hasNec hp.some)⟩)
+  (hLoeb   : (hasLoeb : 𝓓.rules.loeb) → ∀ {p}, {hp : 𝓓 ⊢! □p ⟶ p} → motive (□p ⟶ p) hp → motive p ⟨loeb hasLoeb hp.some⟩)
+  (hHenkin : (hasHenkin : 𝓓.rules.henkin) → ∀ {p}, {hp : 𝓓 ⊢! □p ⟷ p} → motive (□p ⟷ p) hp → motive p ⟨henkin hasHenkin hp.some⟩)
+  (hVerum  : motive ⊤ ⟨verum⟩)
+  (hImply₁ : ∀ {p q}, motive (p ⟶ q ⟶ p) $ ⟨imply₁ p q⟩)
+  (hImply₂ : ∀ {p q r}, motive ((p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r) $ ⟨imply₂ p q r⟩)
+  (hConj₁  : ∀ {p q}, motive (p ⋏ q ⟶ p) $ ⟨conj₁ p q⟩)
+  (hConj₂  : ∀ {p q}, motive (p ⋏ q ⟶ q) $ ⟨conj₂ p q⟩)
+  (hConj₃  : ∀ {p q}, motive (p ⟶ q ⟶ p ⋏ q) $ ⟨conj₃ p q⟩)
+  (hDisj₁  : ∀ {p q}, motive (p ⟶ p ⋎ q) $ ⟨disj₁ p q⟩)
+  (hDisj₂  : ∀ {p q}, motive (q ⟶ p ⋎ q) $ ⟨disj₂ p q⟩)
+  (hDisj₃  : ∀ {p q r}, motive ((p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r)) $ ⟨disj₃ p q r⟩)
+  (hDne    : ∀ {p}, motive (~~p ⟶ p) $ ⟨dne p⟩)
+  : ∀ {p}, (d : 𝓓 ⊢! p) → motive p d := by
+  intro p d;
+  induction d.some with
+  | maxm h => exact hMaxm h
+  | mdp hpq hp ihpq ihp => exact hMdp (ihpq ⟨hpq⟩) (ihp ⟨hp⟩)
+  | nec has hp ihp => exact hNec has (ihp ⟨hp⟩)
+  | loeb has hp ihp => exact hLoeb has (ihp ⟨hp⟩)
+  | henkin has hp ihp => exact hHenkin has (ihp ⟨hp⟩)
+  | _ => aesop
+
+noncomputable def inducition_with_nec [HasNecOnly 𝓓]
+  {motive  : (p : Formula α) → 𝓓 ⊢ p → Sort*}
+  (hMaxm   : ∀ {p}, (h : p ∈ Ax(𝓓)) → motive p (maxm h))
+  (hMdp    : ∀ {p q}, (hpq : 𝓓 ⊢ p ⟶ q) → (hp : 𝓓 ⊢ p) → motive (p ⟶ q) hpq → motive p hp → motive q (mdp hpq hp))
+  (hNec    : ∀ {p}, (hp : 𝓓 ⊢ p) → motive p hp → motive (□p) (nec HasNec.has_nec hp))
   (hVerum  : motive ⊤ verum)
   (hImply₁ : ∀ {p q}, motive (p ⟶ q ⟶ p) $ imply₁ p q)
   (hImply₂ : ∀ {p q r}, motive ((p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r) $ imply₂ p q r)
@@ -171,6 +195,31 @@ noncomputable def inducition_with_nec [HasNecOnly L]
   | nec _ hp ihp => exact hNec hp ihp
   | loeb => have : 𝓓.rules.loeb = false := HasNecOnly.not_has_loeb; simp_all;
   | henkin => have : 𝓓.rules.henkin = false := HasNecOnly.not_has_henkin; simp_all;
+  | _ => aesop
+
+noncomputable def inducition_with_nec! [HasNecOnly 𝓓]
+  {motive  : (p : Formula α) → 𝓓 ⊢! p → Sort*}
+  (hMaxm   : ∀ {p}, (h : p ∈ Ax(𝓓)) → motive p ⟨maxm h⟩)
+  (hMdp    : ∀ {p q}, {hpq : 𝓓 ⊢! p ⟶ q} → {hp : 𝓓 ⊢! p} → motive (p ⟶ q) hpq → motive p hp → motive q (hpq ⨀ hp))
+  (hNec    : ∀ {p}, {hp : 𝓓 ⊢! p} → motive p hp → motive (□p) ⟨(nec HasNec.has_nec hp.some)⟩)
+  (hVerum  : motive ⊤ ⟨verum⟩)
+  (hImply₁ : ∀ {p q}, motive (p ⟶ q ⟶ p) $ ⟨imply₁ p q⟩)
+  (hImply₂ : ∀ {p q r}, motive ((p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r) $ ⟨imply₂ p q r⟩)
+  (hConj₁  : ∀ {p q}, motive (p ⋏ q ⟶ p) $ ⟨conj₁ p q⟩)
+  (hConj₂  : ∀ {p q}, motive (p ⋏ q ⟶ q) $ ⟨conj₂ p q⟩)
+  (hConj₃  : ∀ {p q}, motive (p ⟶ q ⟶ p ⋏ q) $ ⟨conj₃ p q⟩)
+  (hDisj₁  : ∀ {p q}, motive (p ⟶ p ⋎ q) $ ⟨disj₁ p q⟩)
+  (hDisj₂  : ∀ {p q}, motive (q ⟶ p ⋎ q) $ ⟨disj₂ p q⟩)
+  (hDisj₃  : ∀ {p q r}, motive ((p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r)) $ ⟨disj₃ p q r⟩)
+  (hDne    : ∀ {p}, motive (~~p ⟶ p) $ ⟨dne p⟩)
+  : ∀ {p}, (d : 𝓓 ⊢! p) → motive p d := by
+  intro p d;
+  induction d using Deduction.inducition! with
+  | hMaxm h => exact hMaxm h
+  | hMdp ihpq ihp => exact hMdp ihpq ihp
+  | hNec _ ihp => exact hNec ihp
+  | hLoeb => have : 𝓓.rules.loeb = false := HasNecOnly.not_has_loeb; simp_all;
+  | hHenkin => have : 𝓓.rules.henkin = false := HasNecOnly.not_has_henkin; simp_all;
   | _ => aesop
 
 /-
@@ -284,6 +333,9 @@ notation "𝐍" => DeductionParameter.N
 protected abbrev K4H : DeductionParameter α := NecOnly (𝗞 ∪ 𝟰 ∪ 𝗛)
 notation "𝐊𝟒𝐇" => DeductionParameter.K4H
 instance : Normal (α := α) 𝐊𝟒𝐇 where
+instance : System.K4H (𝐊𝟒𝐇 : DeductionParameter α) where
+  Four _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
+  H _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
 
 protected abbrev K4Loeb : DeductionParameter α where
   axiomSet := 𝗞 ∪ 𝟰
@@ -315,10 +367,10 @@ lemma normal_reducible
   (hMaxm : ∀ {p : Formula α}, p ∈ Ax(𝓓₁) → 𝓓₂ ⊢! p) : (𝓓₁ : DeductionParameter α) ≤ₛ 𝓓₂ := by
   apply System.reducible_iff.mpr;
   intro p h;
-  induction h.some using Deduction.inducition_with_nec with
+  induction h using Deduction.inducition_with_nec! with
   | hMaxm hp => exact hMaxm hp;
-  | hMdp hpq hp ihpq ihp => exact (ihpq ⟨hpq⟩) ⨀ (ihp ⟨hp⟩)
-  | hNec hp ihp => exact Necessitation.nec! (ihp ⟨hp⟩)
+  | hMdp ihpq ihp => exact ihpq ⨀ ihp
+  | hNec ihp => exact Necessitation.nec! ihp
   | _ =>
     try first
     | apply verum!;
@@ -368,15 +420,22 @@ lemma reducible_K4_GL : (𝐊𝟒 : DeductionParameter α) ≤ₛ 𝐆𝐋 := by
   . obtain ⟨_, _, e⟩ := hK; subst_vars; exact axiomK!;
   . obtain ⟨_, _, e⟩ := hFour; subst_vars; exact axiomFour!;
 
+-- Macintyre & Simmons (1973)
+-- 𝐆𝐋 = 𝐊𝟒(𝐋) = 𝐊𝟒(𝐇) = 𝐊𝟒𝐇
+section GL
+
 lemma reducible_GL_K4Loeb : (𝐆𝐋 : DeductionParameter α) ≤ₛ 𝐊𝟒(𝐋) := by
   apply System.reducible_iff.mpr;
   intro p h;
-  induction h.some with
-  | maxm hp => sorry;
-  | mdp hpq hp ihpq ihp => exact (ihpq ⟨hpq⟩) ⨀ (ihp ⟨hp⟩)
-  | nec hp ihp => sorry;
-  | loeb => sorry;
-  | henkin => sorry;
+  induction h using Deduction.inducition! with
+  | hMaxm hp =>
+    rcases hp with (hK | hL)
+    . obtain ⟨_, _, e⟩ := hK; subst_vars; exact axiomK!;
+    . obtain ⟨_, e⟩ := hL; subst_vars; exact axiomL!;
+  | hMdp ihpq ihp => exact ihpq ⨀ ihp;
+  | hNec _ ihp => exact Necessitation.nec! ihp;
+  | hLoeb _ ihp => exact LoebRule.loeb! ihp;
+  | hHenkin => simp_all only [Bool.false_eq_true];
   | _ =>
     try first
     | apply verum!;
@@ -393,12 +452,15 @@ lemma reducible_GL_K4Loeb : (𝐆𝐋 : DeductionParameter α) ≤ₛ 𝐊𝟒(�
 lemma reducible_K4Loeb_K4Henkin : (𝐊𝟒(𝐋) : DeductionParameter α) ≤ₛ 𝐊𝟒(𝐇) := by
   apply System.reducible_iff.mpr;
   intro p h;
-  induction h.some with
-  | maxm hp => sorry;
-  | mdp hpq hp ihpq ihp => exact (ihpq ⟨hpq⟩) ⨀ (ihp ⟨hp⟩)
-  | nec hp ihp => sorry;
-  | loeb => sorry;
-  | henkin => sorry;
+  induction h using Deduction.inducition! with
+  | hMaxm hp =>
+    rcases hp with (hK | hFour)
+    . obtain ⟨_, _, e⟩ := hK; subst_vars; exact axiomK!;
+    . obtain ⟨_, e⟩ := hFour; subst_vars; exact axiomFour!;
+  | hMdp ihpq ihp => exact ihpq ⨀ ihp;
+  | hNec _ ihp => exact Necessitation.nec! ihp;
+  | hLoeb _ ihp => exact LoebRule.loeb! ihp;
+  | hHenkin => simp_all only [Bool.false_eq_true];
   | _ =>
     try first
     | apply verum!;
@@ -415,12 +477,15 @@ lemma reducible_K4Loeb_K4Henkin : (𝐊𝟒(𝐋) : DeductionParameter α) ≤�
 lemma reducible_K4Henkin_K4H : (𝐊𝟒(𝐇) : DeductionParameter α) ≤ₛ 𝐊𝟒𝐇 := by
   apply System.reducible_iff.mpr;
   intro p h;
-  induction h.some with
-  | maxm hp => sorry;
-  | mdp hpq hp ihpq ihp => exact (ihpq ⟨hpq⟩) ⨀ (ihp ⟨hp⟩)
-  | nec hp ihp => sorry;
-  | loeb => sorry;
-  | henkin => sorry;
+  induction h using Deduction.inducition! with
+  | hMaxm hp =>
+    rcases hp with (hK | hFour)
+    . obtain ⟨_, _, e⟩ := hK; subst_vars; exact axiomK!;
+    . obtain ⟨_, e⟩ := hFour; subst_vars; exact axiomFour!;
+  | hMdp ihpq ihp => exact ihpq ⨀ ihp;
+  | hNec _ ihp => exact Necessitation.nec! ihp;
+  | hHenkin _ ihp => exact HenkinRule.henkin! ihp;
+  | hLoeb => simp_all only [Bool.false_eq_true];
   | _ =>
     try first
     | apply verum!;
@@ -441,5 +506,7 @@ lemma reducible_K4Henkin_GL : (𝐊𝟒𝐇 : DeductionParameter α) ≤ₛ 𝐆
   . obtain ⟨_, _, e⟩ := hK; subst_vars; exact axiomK!;
   . obtain ⟨_, _, e⟩ := hFour; subst_vars; exact axiomFour!;
   . obtain ⟨_, _, e⟩ := hH; subst_vars; exact axiomH!;
+
+end GL
 
 end LO.Modal.Standard
