@@ -97,6 +97,7 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     needs:
       - build
+      - mdbook
     steps:
       - uses: actions/download-artifact@v4
         with:
