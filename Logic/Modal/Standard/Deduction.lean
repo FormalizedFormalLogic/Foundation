@@ -421,7 +421,7 @@ lemma reducible_K4_GL : (𝐊𝟒 : DeductionParameter α) ≤ₛ 𝐆𝐋 := by
   . obtain ⟨_, _, e⟩ := hFour; subst_vars; exact axiomFour!;
 
 -- Macintyre & Simmons (1973)
--- 𝐆𝐋 = 𝐊𝟒(𝐋) = 𝐊𝟒(𝐇) = 𝐊𝟒𝐇
+-- 𝐆𝐋 =ₛ 𝐊𝟒(𝐋) =ₛ 𝐊𝟒(𝐇) =ₛ 𝐊𝟒𝐇
 section GL
 
 lemma reducible_GL_K4Loeb : (𝐆𝐋 : DeductionParameter α) ≤ₛ 𝐊𝟒(𝐋) := by
