@@ -11,6 +11,7 @@ lean_lib «Logic» {
 }
 
 require mathlib from git "https://github.com/leanprover-community/mathlib4" @ "master"
+require importGraph from git "https://github.com/leanprover-community/import-graph" @ "main"
 
-meta if get_config? env = some "dev" then
+meta if get_config? env = some "ci" then
 require «doc-gen4» from git "https://github.com/leanprover/doc-gen4" @ "main"
