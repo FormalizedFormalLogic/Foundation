@@ -77,9 +77,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: peaceiris/actions-mdbook@v2
+      - uses: baptiste0928/cargo-install@v3
         with:
-          mdbook-version: latest
+          crate: mdbook
+          version: "0.4.40"
+      - uses: baptiste0928/cargo-install@v3
+        with:
+          crate: mdbook-katex
+          version: "0.9.0"
+      - name: Print mdbook and plugins version
+        run: |
+          mdbook --version
+          mdbook-katex --version
       - run: mdbook build
       - name: Upload mdbook
         uses: actions/upload-artifact@v4

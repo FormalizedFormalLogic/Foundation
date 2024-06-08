@@ -11,3 +11,6 @@ build-dir = ".mdbook"
 
 [output.html]
 git-repository-url = "https://github.com/iehality/lean4-logic"
+
+[preprocessor.katex]
+after = ["links"]

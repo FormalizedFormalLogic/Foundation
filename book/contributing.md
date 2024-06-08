@@ -4,6 +4,15 @@
 
 GitHub Discussion is [here](https://github.com/iehality/lean4-logic/discussions). Feel free to correct mistakes, ask questions or share ideas.
 
+## Documentation
+
+To compile this book, you need mdbook and some plugins.
+
+- [mdbook](https://github.com/rust-lang/mdBook)
+- [mdbook-katex](https://github.com/lzanini/mdbook-katex) for [KaTeX](https://katex.org/)
+
+But you don't have to install to simply correct mistakes and write documents, since it can be previewed by your editor's markdown preview.
+
 ## Developing
 
 ### VSCode settings
