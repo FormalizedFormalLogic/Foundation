@@ -27,7 +27,7 @@ The list of main formalized results in first-order (Predicate) logics.
 [fo-soundness]: https://iehality.github.io/lean4-logic/docs/Logic/FirstOrder/Basic/Soundness.html#LO.FirstOrder.soundness
 [fo-completeness]: https://iehality.github.io/lean4-logic/docs/Logic/FirstOrder/Completeness/Completeness.html#LO.FirstOrder.complete'
 [Hauptsatz]: https://iehality.github.io/lean4-logic/docs/Logic/FirstOrder/Hauptsatz.html#LO.FirstOrder.Derivation.hauptsatz
-[Goedel-I]: https://iehality.github.io/lean4-logic/docs/Logic/FirstOrder/Incompleteness/FirstIncompleteness.html#LO.FirstOrder.Arith.first_incompleteness
+[Goedel-I]: ./first_order/goedel1.md
 
 ### Superintuitionistic Propositional Logic
 
