@@ -2,7 +2,7 @@
 
 ## Logics Equivalent to GL
 
-Introduct to Henkin Axiom `𝗛`, Löb Rule `(𝐋)`, Henkin Rule `(𝐇)`.
+Introduct Henkin Axiom `𝗛`, Löb Rule `(𝐋)`, Henkin Rule `(𝐇)`.
 
 ```lean
 protected abbrev H := □(□p ⟷ p) ⟶ □p
