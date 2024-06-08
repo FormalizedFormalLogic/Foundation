@@ -110,6 +110,9 @@ infixl:70 " <: " => vecConsLast
 @[simp] lemma zero_succ_eq_id {n} : (0 : Fin (n + 1)) :> succ = id :=
   funext $ Fin.cases (by simp) (by simp)
 
+@[simp] lemma zero_cons_succ_eq_self (f : Fin (n + 1) → α) : (f 0 :> (f ·.succ) : Fin (n + 1) → α) = f := by
+    funext x; cases x using Fin.cases <;> simp
+
 lemma eq_vecCons (s : Fin (n + 1) → C) : s = s 0 :> s ∘ Fin.succ :=
    funext $ Fin.cases (by simp) (by simp)
 
@@ -203,7 +206,7 @@ def toOptionVec : {n : ℕ} → (Fin n → Option α) → Option (Fin n → α)
 
 @[simp] lemma toOptionVec_some (v : Fin n → α) :
     toOptionVec (fun i => some (v i)) = some v :=
-  by induction n <;> simp[*, Matrix.empty_eq, toOptionVec, Function.comp]; exact funext (Fin.cases (by simp) (by simp))
+  by induction n <;> simp[*, Matrix.empty_eq, toOptionVec, Function.comp]
 
 @[simp] lemma toOptionVec_zero (v : Fin 0 → Option α) : toOptionVec v = some ![] := rfl
 

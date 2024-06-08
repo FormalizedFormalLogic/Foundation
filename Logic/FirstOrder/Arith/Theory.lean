@@ -8,11 +8,11 @@ variable {L : Language} [L.ORing] {ξ : Type*} [DecidableEq ξ]
 
 namespace Arith
 
-def succInd {ξ} (p : Semiformula L ξ 1) : Formula L ξ := “!p [0] → ∀ (!p [#0] → !p [#0 + 1]) → ∀ !p [#0]”
+def succInd {ξ} (p : Semiformula L ξ 1) : Formula L ξ := “!p 0 → (∀ x, !p x → !p (x + 1)) → ∀ x, !p x”
 
-def orderInd {ξ} (p : Semiformula L ξ 1) : Formula L ξ := “∀ (∀[#0 < #1] !p [#0] → !p [#0]) → ∀ !p [#0]”
+def orderInd {ξ} (p : Semiformula L ξ 1) : Formula L ξ := “(∀ x, (∀ y < x, !p y) → !p x) → ∀ x, !p x”
 
-def leastNumber {ξ} (p : Semiformula L ξ 1) : Formula L ξ := “∃ !p [#0] → ∃ (!p [#0] ∧ ∀[#0 < #1] ¬!p [#0])”
+def leastNumber {ξ} (p : Semiformula L ξ 1) : Formula L ξ := “(∃ x, !p x) → ∃ z, !p z ∧ ∀ x < z, ¬!p x”
 
 def succIndᵤ (p : Semiformula L ξ 1) : Sentence L := ∀ᶠ* succInd p
 
@@ -21,23 +21,23 @@ variable (L)
 namespace Theory
 
 inductive peanoMinus : Theory ℒₒᵣ
-  | addZero       : peanoMinus “∀ #0 + 0 = #0”
-  | addAssoc      : peanoMinus “∀ ∀ ∀ (#2 + #1) + #0 = #2 + (#1 + #0)”
-  | addComm       : peanoMinus “∀ ∀ #1 + #0 = #0 + #1”
-  | addEqOfLt     : peanoMinus “∀ ∀ (#1 < #0 → ∃ #2 + #0 = #1)”
-  | zeroLe        : peanoMinus “∀ (0 ≤ #0)”
+  | addZero       : peanoMinus “∀ x, x + 0 = #0”
+  | addAssoc      : peanoMinus “∀ x y z, (x + y) + z = x + (y + z)”
+  | addComm       : peanoMinus “∀ x y, x + y = y + x”
+  | addEqOfLt     : peanoMinus “∀ x y, x < y → ∃ z, x + z = y”
+  | zeroLe        : peanoMinus “∀ x, 0 ≤ x”
   | zeroLtOne     : peanoMinus “0 < 1”
-  | oneLeOfZeroLt : peanoMinus “∀ (0 < #0 → 1 ≤ #0)”
-  | addLtAdd      : peanoMinus “∀ ∀ ∀ (#2 < #1 → #2 + #0 < #1 + #0)”
-  | mulZero       : peanoMinus “∀ #0 * 0 = 0”
-  | mulOne        : peanoMinus “∀ #0 * 1 = #0”
-  | mulAssoc      : peanoMinus “∀ ∀ ∀ (#2 * #1) * #0 = #2 * (#1 * #0)”
-  | mulComm       : peanoMinus “∀ ∀ #1 * #0 = #0 * #1”
-  | mulLtMul      : peanoMinus “∀ ∀ ∀ (#2 < #1 ∧ 0 < #0 → #2 * #0 < #1 * #0)”
-  | distr         : peanoMinus “∀ ∀ ∀ #2 * (#1 + #0) = #2 * #1 + #2 * #0”
-  | ltIrrefl      : peanoMinus “∀ ¬#0 < #0”
-  | ltTrans       : peanoMinus “∀ ∀ ∀ (#2 < #1 ∧ #1 < #0 → #2 < #0)”
-  | ltTri         : peanoMinus “∀ ∀ (#1 < #0 ∨ #1 = #0 ∨ #0 < #1)”
+  | oneLeOfZeroLt : peanoMinus “∀ x, 0 < x → 1 ≤ x”
+  | addLtAdd      : peanoMinus “∀ x y z, x < y → x + z < y + z”
+  | mulZero       : peanoMinus “∀ x, x * 0 = 0”
+  | mulOne        : peanoMinus “∀ x, x * 1 = #0”
+  | mulAssoc      : peanoMinus “∀ x y z, (x * y) * z = x * (y * z)”
+  | mulComm       : peanoMinus “∀ x y, x * y = y * x”
+  | mulLtMul      : peanoMinus “∀ x y z, x < y ∧ 0 < z → x * z < y * z”
+  | distr         : peanoMinus “∀ x y z, x * (y + z) = x * y + x * z”
+  | ltIrrefl      : peanoMinus “∀ x, x ≮ x”
+  | ltTrans       : peanoMinus “∀ x y z, x < y ∧ y < z → x < z”
+  | ltTri         : peanoMinus “∀ x y, x < y ∨ x = y ∨ x > y”
 
 notation "𝐏𝐀⁻" => peanoMinus
 

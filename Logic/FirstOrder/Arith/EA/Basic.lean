@@ -25,7 +25,7 @@ namespace Theory
 
 inductive Exponential : Theory ℒₒᵣ(exp)
   | zero : Exponential “exp 0 = 1”
-  | succ : Exponential “∀ exp (#0 + 1) = 2 * exp #0”
+  | succ : Exponential “∀ x, exp (x + 1) = 2 * exp x”
 
 notation "𝐄𝐗𝐏" => Exponential
 

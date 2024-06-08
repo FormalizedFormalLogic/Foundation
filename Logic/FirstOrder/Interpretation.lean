@@ -22,7 +22,7 @@ variable {L L' : Language.{u}} [L.Eq] {T : Theory L}
 variable (ι : Interpretation T L')
 
 def varEquals {n : ℕ} : Semiterm L' Empty n → Semisentence L (n + 1)
-  | #x                => “#0 = !!#x.succ”
+  | #x                => “z ⋯ | z = #x.succ”
   | Semiterm.func f v =>
       Rew.toS.hom
         <| ∀* ((Matrix.conj fun i ↦ (Rew.embSubsts ![#i]).hom ι.domain ⋏ (Rew.embSubsts (#i :> (& ·.succ))).hom (varEquals <| v i)) ⟶
@@ -155,9 +155,10 @@ end semantics
 protected def id : Interpretation T L where
   domain := ⊤
   rel (r) := Semiformula.rel r (#·)
-  func (f) := “#0 = !!(Semiterm.func f (#·.succ))”
+  func (f) := “z ⋯ | z = !!(Semiterm.func f (#·.succ))”
   domain_nonempty := consequence_iff.mpr (by intro M ⟨x⟩ _ _; simp [models_iff]; exact ⟨x, by simp⟩)
-  func_defined {k} (f) := consequence_iff_add_eq.mpr fun M _ _ _ _ ↦ by simp [models_iff, Semiterm.val_func]
+  func_defined {k} (f) := consequence_iff_add_eq.mpr fun M _ _ _ _ ↦ by
+    simp [models_iff, Semiterm.val_func]
 
 end Interpretation
 

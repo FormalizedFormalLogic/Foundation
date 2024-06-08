@@ -18,7 +18,7 @@ noncomputable def ssbs : Semisentence ℒₒᵣ 3 :=
   graphTotal₂ (fun (σ π : Semisentence ℒₒᵣ 1) ↦ σ/[(⸢π⸣ : Semiterm ℒₒᵣ Empty 0)])
 
 lemma ssbs_spec (σ π : Semisentence ℒₒᵣ 1) :
-    T ⊢! ∀' (ssbs/[#0, ⸢σ⸣, ⸢π⸣] ⟷ “#0 = !!⸢σ/[(⸢π⸣ : Semiterm ℒₒᵣ Empty 0)]⸣”) :=
+    T ⊢! “∀ x, !ssbs x !!⸢σ⸣ !!⸢π⸣ ↔ x = !!⸢σ/[(⸢π⸣ : Semiterm ℒₒᵣ Empty 0)]⸣” :=
   representation_computable₂ T (f := fun (σ π : Semisentence ℒₒᵣ 1) ↦ σ/[(⸢π⸣ : Semiterm ℒₒᵣ Empty 0)])
     (Primrec₂.to_comp <| (Semiformula.substs₁_primrec (L := ℒₒᵣ)).comp₂
       ((Semiterm.Operator.const_primrec (L := ℒₒᵣ)).comp₂ <|
@@ -26,10 +26,10 @@ lemma ssbs_spec (σ π : Semisentence ℒₒᵣ 1) :
         .left) σ π
 
 noncomputable def diag (θ : Semisentence ℒₒᵣ 1) : Semisentence ℒₒᵣ 1 :=
-  ∀' (ssbs/[#0, #1, #1] ⟶ θ/[#0])
+  “x | ∀ y, !ssbs y x x → !θ y”
 
 noncomputable def fixpoint (θ : Semisentence ℒₒᵣ 1) : Sentence ℒₒᵣ :=
-  ∀' (ssbs/[#0, ⸢diag θ⸣, ⸢diag θ⸣] ⟶ θ/[#0])
+  “∀ x, !ssbs x !!⸢diag θ⸣ !!⸢diag θ⸣ → !θ x”
 
 lemma substs_diag (θ σ : Semisentence ℒₒᵣ 1) :
     (diag θ)/[(⸢σ⸣ : Semiterm ℒₒᵣ Empty 0)] = ∀' (ssbs/[#0, ⸢σ⸣, ⸢σ⸣] ⟶ θ/[#0]) := by
