@@ -4,3 +4,6 @@
 /.lake
 
 .vscode/settings.json
+
+# Import-graph
+import_graph.*
