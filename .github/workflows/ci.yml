@@ -7,43 +7,15 @@ on:
   pull_request:
   workflow_dispatch:
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install elan
-        run: |
-          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain none
-          echo "$HOME/.elan/bin" >> $GITHUB_PATH
-      - uses: actions/cache@v4
+      - uses: leanprover/lean-action@v1-beta
         with:
-          path: .lake
-          key: lake-${{ runner.os }}-${{ hashFiles('lake-manifest.json') }}
-          restore-keys: |
-            lake-${{ runner.os }}-${{ hashFiles('lake-manifest.json') }}
-            lake-${{ runner.os }}
-      - run: lake -R -Kenv=dev exe cache get
-      - run: lake -R -Kenv=dev build
-      - run: lake -R -Kenv=dev build Logic:docs
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: ./.lake/build/doc/
-
-  deploy:
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master' && github.event_name != 'pull_request'
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    needs: build
-    steps:
-      - name: Deploy to GitHub Pages
-        uses: actions/deploy-pages@v4
-        id: deployment
+          test: false
