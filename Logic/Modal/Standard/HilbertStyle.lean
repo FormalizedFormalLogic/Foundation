@@ -413,4 +413,38 @@ private def axiomFour_of_L [HasAxiomL 𝓢] : 𝓢 ⊢ Axioms.Four p := by
 
 instance [HasAxiomL 𝓢] : HasAxiomFour 𝓢 := ⟨fun _ ↦ axiomFour_of_L⟩
 
+def axiomH [HasAxiomH 𝓢] : 𝓢 ⊢ □(□p ⟷ p) ⟶ □p := HasAxiomH.H _
+@[simp] lemma axiomH! [HasAxiomH 𝓢] : 𝓢 ⊢! □(□p ⟷ p) ⟶ □p := ⟨axiomH⟩
+
+instance [HasAxiomH 𝓢] (Γ : FiniteContext F 𝓢) : HasAxiomH Γ := ⟨fun _ ↦ FiniteContext.of axiomH⟩
+instance [HasAxiomH 𝓢] (Γ : Context F 𝓢) : HasAxiomH Γ := ⟨fun _ ↦ Context.of axiomH⟩
+
+open LoebRule
+lemma LoebRule.loeb! [LoebRule 𝓢] : 𝓢 ⊢! □p ⟶ p → 𝓢 ⊢! p := by rintro ⟨hp⟩; exact ⟨loeb hp⟩
+
+open HenkinRule
+lemma HenkinRule.henkin! [HenkinRule 𝓢] : 𝓢 ⊢! □p ⟷ p → 𝓢 ⊢! p := by rintro ⟨hp⟩; exact ⟨henkin hp⟩
+
+private def axiomL_of_K4Loeb [K4Loeb 𝓢] : 𝓢 ⊢ Axioms.L p := by
+  dsimp [Axioms.L];
+  generalize e : □(□p ⟶ p) ⟶ □p = q;
+  have d₁ : [□(□p ⟶ p), □q] ⊢[𝓢] □□(□p ⟶ p) ⟶ □□p := FiniteContext.weakening (by aesop) $ deductInv' axiomK;
+  have d₂ : [□(□p ⟶ p), □q] ⊢[𝓢] □□p ⟶ □p := FiniteContext.weakening (by aesop) $ deductInv' axiomK;
+  have d₃ : 𝓢 ⊢ □(□p ⟶ p) ⟶ □□(□p ⟶ p) := axiomFour;
+  have : 𝓢 ⊢ □q ⟶ q := by
+    nth_rw 2 [←e]; apply deduct'; apply deduct;
+    exact d₂ ⨀ (d₁ ⨀ ((of d₃) ⨀ (FiniteContext.byAxm)));
+  exact loeb this;
+instance [K4Loeb 𝓢] : HasAxiomL 𝓢 := ⟨fun _ ↦ axiomL_of_K4Loeb⟩
+
+instance [K4Henkin 𝓢] : LoebRule 𝓢 where
+  loeb h := h ⨀ (henkin $ iffIntro (axiomK' $ nec h) axiomFour);
+
+instance [K4H 𝓢] : HenkinRule 𝓢 where
+  henkin h := (conj₁' h) ⨀ (axiomH ⨀ nec h);
+
+private def axiomH_of_GL [GL 𝓢] : 𝓢 ⊢ Axioms.H p := by
+  exact impTrans (implyBoxDistribute' $ conj₁) axiomL
+instance [GL 𝓢] : HasAxiomH 𝓢 := ⟨fun _ ↦ axiomH_of_GL⟩
+
 end LO.System

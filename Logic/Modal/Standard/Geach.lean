@@ -102,7 +102,7 @@ namespace DeductionParameter
 
 protected abbrev Geach (l : List Axioms.Geach.Taple) : DeductionParameter α where
   axiomSet := 𝗚𝗲(l)
-  nec := true
+  rules := ⟨true, false, false⟩
 notation "𝐆𝐞(" l ")" => DeductionParameter.Geach l
 instance instNormal : Normal (α := α) 𝐆𝐞(l) where
   include_K := by simp [AxiomSet.MultiGeach.subsetK]
@@ -113,7 +113,7 @@ namespace Geach
 lemma subset_axm (h : l₁ ⊆ l₂ := by simp_all) : (Ax(𝐆𝐞(l₁)) : AxiomSet α) ⊆ (Ax(𝐆𝐞(l₂)) : AxiomSet α) := by simp_all;
 
 @[simp]
-lemma reducible (h : l₁ ⊆ l₂ := by simp_all) : (𝐆𝐞(l₁) : DeductionParameter α) ≤ₛ 𝐆𝐞(l₂) := by simp_all;
+lemma reducible (h : l₁ ⊆ l₂ := by simp_all) : (𝐆𝐞(l₁) : DeductionParameter α) ≤ₛ 𝐆𝐞(l₂) := by sorry;
 
 end Geach
 

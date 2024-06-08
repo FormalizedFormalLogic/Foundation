@@ -4,7 +4,7 @@ import Logic.Modal.Standard.Deduction
 namespace LO.Modal.Standard.Kripke
 
 variable {α : Type u}
-         {L : DeductionParameter α} [L.HasNec]
+         {L : DeductionParameter α} [L.HasNecOnly]
 
 open Deduction
 open Formula Formula.Kripke
