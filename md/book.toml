@@ -1,13 +1,12 @@
 [book]
 title = "Logic Formalization in Lean 4"
-src = "book"
+src = "src"
 authors = ["iehality", "SnO2WMaN"]
 language = "en"
 multilingual = false
 
 [build]
-create-missing = false
-build-dir = ".mdbook"
+create-missing = true
 
 [output.html]
 git-repository-url = "https://github.com/iehality/lean4-logic"

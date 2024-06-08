@@ -77,11 +77,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: baptiste0928/cargo-install@v3
+      - name: Install mdbook
+        uses: baptiste0928/cargo-install@v3
         with:
           crate: mdbook
           version: "0.4.40"
-      - uses: baptiste0928/cargo-install@v3
+      - name: Install mdbook-katex
+        uses: baptiste0928/cargo-install@v3
         with:
           crate: mdbook-katex
           version: "0.9.0"
@@ -89,13 +91,13 @@ jobs:
         run: |
           mdbook --version
           mdbook-katex --version
-      - run: mdbook build
+      - run: mdbook build md
       - name: Upload mdbook
         uses: actions/upload-artifact@v4
         if: github.ref == 'refs/heads/master'
         with:
           name: books
-          path: ./.mdbook
+          path: ./book/_out
 
   deploy:
     name: Deploy to GitHub Pages

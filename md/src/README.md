@@ -20,6 +20,7 @@ The list of main formalized results in first-order (Predicate) logics.
 
 The list of main formalized results in superintuitionistic propositional logics.
 
+
 - [Soundness](./superntuitionistic/kripke_soundness.md) and [completeness](./superntuitionistic/kripke_completeness.md) for Kripke semantics.
 - [Law of Excluded Middle doesn't hold in intuitionistic logic.](./superntuitionistic/reject_lem.md)
 - [Disjunctive property of intuitionistic logic.](./superntuitionistic/dp.md)
