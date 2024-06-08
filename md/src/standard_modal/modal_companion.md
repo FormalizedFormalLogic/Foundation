@@ -13,7 +13,7 @@ theorem provable_efq_iff_provable_S4
   {p : Superintuitionistic.Formula α}
   : 𝐈𝐧𝐭 ⊢! p ↔ 𝐒𝟒 ⊢! pᵍ
 ```
-- [LO.Modal.Standard.provable_efq_iff_provable_S4](https://iehality.github.io/lean4-logic/Logic/Modal/Standard/Kripke/ModalCompanion.html#LO.Modal.Standard.provable_efq_iff_provable_S4)
+- [LO.Modal.Standard.provable_efq_iff_provable_S4](https://iehality.github.io/lean4-logic/docs/Logic/Modal/Standard/Kripke/ModalCompanion.html#LO.Modal.Standard.provable_efq_iff_provable_S4)
 
 ## Modal Companion
 
@@ -25,4 +25,4 @@ class ModalCompanion (i𝓓 : Superintuitionistic.DeductionParameter α) (m𝓓 
 
 instance : ModalCompanion 𝐈𝐧𝐭 𝐒𝟒
 ```
-- [LO.Modal.Standard.instModalCompanionIntuitionisticS4](https://iehality.github.io/lean4-logic/Logic/Modal/Standard/Kripke/ModalCompanion.html#LO.Modal.Standard.instModalCompanionIntuitionisticS4)
+- [LO.Modal.Standard.instModalCompanionIntuitionisticS4](https://iehality.github.io/lean4-logic/docs/Logic/Modal/Standard/Kripke/ModalCompanion.html#LO.Modal.Standard.instModalCompanionIntuitionisticS4)

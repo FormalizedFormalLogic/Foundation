@@ -5,4 +5,4 @@ There is no axiom set that irreflexivity of frame defines. In other words, as lo
 ```lean
 theorem Kripke.undefinability_irreflexive : ¬∃ (Ax : AxiomSet α), (∀ {F : Frame}, (Irreflexive F.Rel) ↔ F ⊧* Ax)
 ```
-- [LO.Modal.Standard.Kripke.undefinability_irreflexive](https://iehality.github.io/lean4-logic/Logic/Modal/Standard/Kripke/Morphism.html#LO.Modal.Standard.Kripke.undefinability_irreflexive)
+- [LO.Modal.Standard.Kripke.undefinability_irreflexive](https://iehality.github.io/lean4-logic/docs/Logic/Modal/Standard/Kripke/Morphism.html#LO.Modal.Standard.Kripke.undefinability_irreflexive)

@@ -1,6 +1,6 @@
 # lean4-logic
 
-This project is aim to formalize some various results of mathematical logic in [Lean Theorem Prover](https://lean-lang.org).
+[This project](https://github.com/iehality/lean4-logic) is aim to formalize some various results of mathematical logic in [Lean Theorem Prover](https://lean-lang.org).
 
 This book provides explanation and summaries of formalized concepts, theorems, propositions.
 Proofs of them are not explained, refer to the code or the [references](./references.md).
@@ -11,15 +11,23 @@ Full documentation is [here](https://iehality.github.io/lean4-logic/docs).
 
 ### Classical Propositional Logic
 
-- Soundness and completeness.
+- [Soundness][cpl-soundness] and [completeness][cpl-completeness].
+
+[cpl-soundness]: https://iehality.github.io/lean4-logic/docs/Logic/Propositional/Classical/Basic/Completeness.html#LO.Propositional.Classical.soundness
+[cpl-completeness]: https://iehality.github.io/lean4-logic/docs/Logic/Propositional/Classical/Basic/Completeness.html#LO.Propositional.Classical.completeness
 
 ### First-Order Logic
 
 The list of main formalized results in first-order (Predicate) logics.
 
-- Cut-elimination of sequent calculus (_Gentzen's Hauptsatz_).
-- Soundness and completeness.
-- _Gödel's First Incompleteness Theorem_.
+- [Soundness][fo-soundness] and [completeness][fo-completeness].
+- [Cut-elimination of sequent calculus (_Gentzen's Hauptsatz_).][Hauptsatz]
+- [_Gödel's First Incompleteness Theorem_.][Goedel-I]
+
+[fo-soundness]: https://iehality.github.io/lean4-logic/docs/Logic/FirstOrder/Basic/Soundness.html#LO.FirstOrder.soundness
+[fo-completeness]: https://iehality.github.io/lean4-logic/docs/Logic/FirstOrder/Completeness/Completeness.html#LO.FirstOrder.complete'
+[Hauptsatz]: https://iehality.github.io/lean4-logic/docs/Logic/FirstOrder/Hauptsatz.html#LO.FirstOrder.Derivation.hauptsatz
+[Goedel-I]: https://iehality.github.io/lean4-logic/docs/Logic/FirstOrder/Incompleteness/FirstIncompleteness.html#LO.FirstOrder.Arith.first_incompleteness
 
 ### Superintuitionistic Propositional Logic
 

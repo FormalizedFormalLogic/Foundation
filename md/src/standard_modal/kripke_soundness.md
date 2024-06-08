@@ -21,7 +21,7 @@ instance : FrameClass.IsNonempty 𝔽(Ax(𝐊))
 
 instance : System.Consistent 𝐊
 ```
-- [`LO.System.Consistent 𝐊`](https://iehality.github.io/lean4-logic/Logic/Modal/Standard/Kripke/Soundness.html#LO.Modal.Standard.Kripke.instConsistentFormulaDeductionParameterInstSystemFormulaDeductionParameterK)
+- [`LO.System.Consistent 𝐊`](https://iehality.github.io/lean4-logic/docs/Logic/Modal/Standard/Kripke/Soundness.html#LO.Modal.Standard.Kripke.instConsistentFormulaDeductionParameterInstSystemFormulaDeductionParameterK)
 
 Futhermore, if `𝓓` is Geach, then its frameclass is nonempty, thus it is consistent.
 

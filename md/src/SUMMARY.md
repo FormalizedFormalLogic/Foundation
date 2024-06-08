@@ -2,21 +2,24 @@
 [Usage](./usage.md)
 [Contributing](./contributing.md)
 
-# Common Definition
+---
+
+# Preliminaries
+
+- [Definitions and Notations](./preliminaries/definitions.md)
 
 ---
 
-# Propositional Logic
+# Classical Logics
 
----
-
-# First-Order Logic
+- [Classical Propositional Logic](./classical_propositional/README.md)
+- [First-Order Logic](./first_order/README.md)
 
 ---
 
 # Non-Classical Logics
 
-- [Superintuitionistic Logic](./superntuitionistic/README.md)
+- [Superintuitionistic Propositional Logic](./superntuitionistic/README.md)
   - [Axioms](./superntuitionistic/axioms.md)
   - [Deduction](./superntuitionistic/deduction.md)
     - [Glivenko's Theorem](./superntuitionistic/glivenko.md)
