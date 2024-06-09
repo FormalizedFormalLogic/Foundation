@@ -333,6 +333,18 @@ instance : System.K4Henkin (𝐊𝟒(𝐇) : DeductionParameter α) where
 
 end GLAlternative
 
+/-- Solovey's Truth Provability Logic, remark necessitation is *not* permitted. -/
+protected abbrev GLS : DeductionParameter α where
+  axioms := System.theory 𝐆𝐋 ∪ 𝗧
+  rules := ∅
+notation "𝐆𝐋𝐒" => DeductionParameter.GLS
+instance : System.HasAxiomK (𝐆𝐋𝐒 : DeductionParameter α) where
+  K _ _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) $ by simp [System.theory, System.axiomK!];
+instance : System.HasAxiomL (𝐆𝐋𝐒 : DeductionParameter α) where
+  L _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) $ by simp [System.theory, System.axiomK!];
+instance : System.HasAxiomT (𝐆𝐋𝐒 : DeductionParameter α) where
+  T _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
+
 
 section PLoN
 
@@ -484,6 +496,11 @@ lemma equivalent_GL_K4Loeb : (𝐆𝐋 : DeductionParameter α) =ₛ 𝐊𝟒(�
   . exact WeakerThan.trans (reducible_K4Loeb_K4Henkin) $ WeakerThan.trans reducible_K4Henkin_K4H reducible_K4Henkin_GL
 
 end GL
+
+lemma reducible_GL_GLS : (𝐆𝐋 : DeductionParameter α) ≤ₛ 𝐆𝐋𝐒 := by
+  apply System.weakerThan_iff.mpr;
+  intro p h;
+  exact Deduction.maxm! (by left; simpa);
 
 end Reducible
 
