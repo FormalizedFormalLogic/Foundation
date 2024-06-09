@@ -1,4 +1,4 @@
-# Deduction System and Semantics for Classical Propositional Logic
+# Syntax and Semantics for Classical Propositional Logic
 
 ## Deduction System
   We adupt the Tait-calculus as a deduction system of classical propositional logic.

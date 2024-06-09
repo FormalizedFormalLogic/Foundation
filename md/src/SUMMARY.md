@@ -13,6 +13,7 @@
 # Classical Logics
 
 - [Classical Propositional Logic](./classical_propositional/README.md)
+  - [Syntax and Semantics](./classical_propositional/syntax_and_semantics.md)
 - [First-Order Logic](./first_order/README.md)
   - [Arithmetics](./first_order/arithmetics.md)
     - [Theories of Arithmetics](./first_order/arithmetic_theories.md)
