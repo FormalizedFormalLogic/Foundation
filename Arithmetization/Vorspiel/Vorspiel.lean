@@ -211,13 +211,13 @@ variable [L.LT] {μ : Type v}
 lemma ballClosure_iff {b s n} {p : Semiformula L ξ n} {v : Fin n → Semiterm L ξ 1} (hv : ∀ i, (v i).Positive) :
     Hierarchy b s (ballClosure (fun i ↦ “#0 < !!(v i)”) p) ↔ Hierarchy b s p := by
   induction' n with n IH <;> simp [ballClosure, ←Rew.comp_app]
-  refine Iff.trans (IH (p := “∀[#0 < !!([→ #0] (v 0))] !p”) (v := (v ·.succ)) (by intro; simp [hv])) ?_
+  refine Iff.trans (IH (p := “∀[#0 < !!([→ #0] (v 0))] !!p”) (v := (v ·.succ)) (by intro; simp [hv])) ?_
   rw [ball_iff]; simp [Semiterm.bv_eq_empty_of_positive (hv 0)]
 
 lemma bexClosure_iff {b s n} {p : Semiformula L ξ n} {v : Fin n → Semiterm L ξ 1} (hv : ∀ i, (v i).Positive) :
     Hierarchy b s (bexClosure (fun i ↦ “#0 < !!(v i)”) p) ↔ Hierarchy b s p := by
   induction' n with n IH <;> simp [bexClosure, ←Rew.comp_app]
-  refine Iff.trans (IH (p := “∃[#0 < !!([→ #0] (v 0))] !p”) (v := (v ·.succ)) (by intro; simp [hv])) ?_
+  refine Iff.trans (IH (p := “∃[#0 < !!([→ #0] (v 0))] !!p”) (v := (v ·.succ)) (by intro; simp [hv])) ?_
   rw [bex_iff]; simp [Semiterm.bv_eq_empty_of_positive (hv 0)]
 
 end Arith.Hierarchy

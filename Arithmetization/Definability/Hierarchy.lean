@@ -139,6 +139,14 @@ def val : HSemiformula L ξ n Γ → Semiformula L ξ n
 
 @[simp] lemma val_mkDelta (p : HSemiformula L ξ n (𝚺, m)) (q : HSemiformula L ξ n (𝚷, m)) : (mkDelta p q).val = p.val := rfl
 
+instance : Coe (HSemisentence L n 𝚺₀) (Semisentence L n) := ⟨HSemiformula.val⟩
+instance : Coe (HSemisentence L n 𝚷₀) (Semisentence L n) := ⟨HSemiformula.val⟩
+instance : Coe (HSemisentence L n 𝚫₀) (Semisentence L n) := ⟨HSemiformula.val⟩
+
+instance : Coe (HSemisentence L n 𝚺₁) (Semisentence L n) := ⟨HSemiformula.val⟩
+instance : Coe (HSemisentence L n 𝚷₁) (Semisentence L n) := ⟨HSemiformula.val⟩
+instance : Coe (HSemisentence L n 𝚫₁) (Semisentence L n) := ⟨HSemiformula.val⟩
+
 @[simp] lemma sigma_prop : (p : HSemiformula L ξ n (𝚺, m)) → Hierarchy 𝚺 m p.val
   | mkSigma _ h => h
 
@@ -474,7 +482,7 @@ lemma ProperWithParamOn.bex {t} {p : HSemiformula L M (k + 1) (𝚫, m)}
 def graphDelta (p : HSemiformula L ξ (k + 1) (𝚺, m)) : HSemiformula L ξ (k + 1) (𝚫, m) :=
   match m with
   | 0     => p.ofZero _
-  | m + 1 => mkDelta p (mkPi “∀ (!(Rew.substs (#0 :> (#·.succ.succ)) |>.hom p.val) → #0 = #1)” (by simp))
+  | m + 1 => mkDelta p (mkPi “x | ∀ y, !p.val y ⋯ → y = x” (by simp))
 
 @[simp] lemma graphDelta_val (p : HSemiformula L ξ (k + 1) (𝚺, m)) : p.graphDelta.val = p.val := by cases m <;> simp [graphDelta]
 
@@ -1037,20 +1045,20 @@ lemma of_sigmaOne {k} {f : (Fin k → M) → M}
     (h : DefinableFunction L 𝚺₁ f) (Γ m) : DefinableFunction L (Γ, m + 1) f := Definable.of_deltaOne (graph_delta h) Γ m
 
 @[simp] lemma var {k} (i : Fin k) : DefinableFunction L Γ (fun v : Fin k → M ↦ v i) :=
-  .of_zero (Γ' := 𝚺) ⟨.mkSigma “#0 = !!#i.succ” (by simp), by intro _; simp⟩ _
+  .of_zero (Γ' := 𝚺) ⟨.mkSigma “x | x = !!#i.succ” (by simp), by intro _; simp⟩ _
 
 @[simp] lemma const {k} (c : M) : DefinableFunction L Γ (fun _ : Fin k → M ↦ c) :=
-  .of_zero (Γ' := 𝚺) ⟨.mkSigma “#0 = &c” (by simp), by intro v; simp⟩ _
+  .of_zero (Γ' := 𝚺) ⟨.mkSigma “x | #0 = &c” (by simp), by intro v; simp⟩ _
 
 @[simp] lemma term_retraction (t : Semiterm L M n) (e : Fin n → Fin k) :
     DefinableFunction L Γ fun v : Fin k → M ↦ Semiterm.valm M (fun x ↦ v (e x)) id t :=
   .of_zero (Γ' := 𝚺)
-    ⟨.mkSigma “#0 = !!(Rew.substs (fun x ↦ #(e x).succ) t)” (by simp), by intro v; simp [Semiterm.val_substs]⟩ _
+    ⟨.mkSigma “x | x = !!(Rew.substs (fun x ↦ #(e x).succ) t)” (by simp), by intro v; simp [Semiterm.val_substs]⟩ _
 
 @[simp] lemma term (t : Semiterm L M k) :
     DefinableFunction L Γ fun v : Fin k → M ↦ Semiterm.valm M v id t :=
   .of_zero (Γ' := 𝚺)
-    ⟨.mkSigma “#0 = !!(Rew.bShift t)” (by simp), by intro v; simp [Semiterm.val_bShift']⟩ _
+    ⟨.mkSigma “x | x = !!(Rew.bShift t)” (by simp), by intro v; simp [Semiterm.val_bShift']⟩ _
 
 lemma of_eq {f : (Fin k → M) → M} (g) (h : ∀ v, f v = g v) (H : DefinableFunction L Γ f) : DefinableFunction L Γ g := by
   rwa [show g = f from by funext v; simp [h]]

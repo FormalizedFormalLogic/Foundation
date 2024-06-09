@@ -19,15 +19,15 @@ structure Formulae (k : ℕ) where
   succ : HSemisentence ℒₒᵣ (k + 3) 𝚺₁
 
 def Formulae.cseqDef (p : Formulae k) : HSemisentence ℒₒᵣ (k + 1) 𝚺₁ := .mkSigma
-  “!seqDef.val [#0] ∧
-    (∃[#0 < #1] (!(Rew.substs (#0 :> (#·.succ.succ)) |>.hom p.zero.val) ∧ 0 ~[#1] #0)) ∧
-    ∀[#0 < 2 * #1] (
-      (∃[#0 < 2 * #2 + 1] (!lhDef.val [#0, #2] ∧ #1 + 1 < #0)) →
-      ∀[#0 < #2] (#1 ~[#2] #0 →
-        ∃[#0 < #3] (!(Rew.substs (#0 :> #1 :> #2 :> (#·.succ.succ.succ.succ)) |>.hom p.succ.val) ∧ #2 + 1 ~[#3] #0)))” (by simp)
+  “s |
+    :Seq s
+    ∧ (∃ z < s, !p.zero z ⋯ ∧ 0 ~[s] z)
+    ∧ (∀ i < 2 * s,
+        (∃ l <⁺ 2 * s, !lhDef l s ∧ i + 1 < l) →
+        ∀ z < s, i ~[s] z → ∃ u < s, !p.succ u z i ⋯ ∧ i + 1 ~[s] u)” (by simp)
 
 def Formulae.resultDef (p : Formulae k) : HSemisentence ℒₒᵣ (k + 2) 𝚺₁ := .mkSigma
-  (∃' ((Rew.substs (#0 :> (#·.succ.succ.succ)) |>.hom p.cseqDef.val) ⋏ “#2 ~[#0] #1”)) (by simp)
+  “z u | ∃ s, !p.cseqDef s ⋯ ∧ u ~[s] z” (by simp)
 
 def Formulae.resultDeltaDef (p : Formulae k) : HSemisentence ℒₒᵣ (k + 2) 𝚫₁ := p.resultDef.graphDelta
 
@@ -51,7 +51,7 @@ private lemma cseq_iff (s : M) : c.CSeq v s ↔
     Seq s
     ∧ (∃ z < s, z = c.zero v ∧ ⟪0, z⟫ ∈ s)
     ∧ (∀ i < 2 * s,
-      (∃ l < 2 * s + 1, l = lh s ∧ i + 1 < l) → ∀ z < s, ⟪i, z⟫ ∈ s → ∃ u < s, u = c.succ v i z ∧ ⟪i + 1, u⟫ ∈ s) :=
+      (∃ l ≤ 2 * s, l = lh s ∧ i + 1 < l) → ∀ z < s, ⟪i, z⟫ ∈ s → ∃ u < s, u = c.succ v i z ∧ ⟪i + 1, u⟫ ∈ s) :=
   ⟨by rintro ⟨Hs, hz, hs⟩
       exact ⟨Hs, ⟨c.zero v, lt_of_mem_rng hz, rfl, hz⟩, fun i _ hi z _ hiz ↦
       ⟨c.succ v i z, by
@@ -184,7 +184,7 @@ lemma result_graph (z u : M) : z = c.result v u ↔ ∃ s, c.CSeq v s ∧ ⟪u, 
 lemma result_defined : Model.DefinedFunction ℒₒᵣ 𝚺₁ (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → M) → M) p.resultDef := by
   intro v; simp [Formulae.resultDef, result_graph]
   apply exists_congr; intro x
-  simp [c.cseq_defined_iff]
+  simp [c.cseq_defined_iff]; intros; rfl
 
 lemma result_defined_delta : Model.DefinedFunction ℒₒᵣ 𝚫₁ (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → M) → M) p.resultDeltaDef :=
   c.result_defined.graph_delta
@@ -237,21 +237,21 @@ lemma mem_seqProduct_bound {x s a : M} (h : x ∈ s ×ˢ a) : x ≤ s + exp ((2 
   rcases mem_seqProduct_iff.mp h with ⟨v, hv, u, hu, rfl⟩
   exact seqCons_le (le_of_lt <| lt_of_mem hu) (le_of_lt <| lt_of_mem hv)
 
-private lemma seqProduct_graph (t s a : M) : t = s ×ˢ a ↔ ∃ e, e = exp ((2 * s + a + 1)^2) ∧ ∀ x < t + s + e + 1, x ∈ t ↔ ∃ v ∈ s, ∃ u ∈ a, x = v ⁀' u :=
+private lemma seqProduct_graph (t s a : M) :
+    t = s ×ˢ a ↔ ∃ e, e = exp ((2 * s + a + 1)^2) ∧ ∀ x ≤ t + s + e, x ∈ t ↔ ∃ v ∈ s, ∃ u ∈ a, x = v ⁀' u :=
 ⟨by rintro rfl; exact ⟨exp ((2 * s + a + 1)^2), rfl, by intro x _; simp [mem_seqProduct_iff]⟩,
  by rintro ⟨_, rfl, h⟩
     apply mem_ext; intro x
     constructor
     · intro hx;
       exact mem_seqProduct_iff.mpr
-        <| h x (lt_of_lt_of_le (lt_of_mem hx) (by simp [add_assoc])) |>.mp hx
+        <| h x (le_trans (le_of_lt <| lt_of_mem hx) (by simp [add_assoc])) |>.mp hx
     · intro hx
-      exact h x (lt_succ_iff_le.mpr <| le_trans (mem_seqProduct_bound hx) <| by simp [add_assoc])
+      exact h x (le_trans (mem_seqProduct_bound hx) <| by simp [add_assoc])
         |>.mpr (mem_seqProduct_iff.mp hx)⟩
 
 def _root_.LO.FirstOrder.Arith.seqProductDef : 𝚺₁-Semisentence 3 := .mkSigma
-  “∃ (!expDef.val [#0, (2 * #2 + #3 + 1 ) ^' 2] ∧
-    ∀[#0 < #2 + #3 + #1 + 1] ( #0 ∈ #2 ↔ [∃∈ #3] [∃∈ #5] !seqConsDef.val [#2, #1, #0] ) )”
+  “t s a | ∃ e, !expDef e (2 * s + a + 1)² ∧ ∀ x <⁺ t + s + e, x ∈ t ↔ ∃ v ∈' s, ∃ u ∈' a, !seqConsDef x v u”
   (by simp [Hierarchy.iff_iff])
 
 lemma seqProduct_defined : 𝚺₁-Function₂ (seqProduct : M → M → M) via seqProductDef := by
@@ -263,8 +263,8 @@ lemma seqProduct_defined : 𝚺₁-Function₂ (seqProduct : M → M → M) via 
 instance seqProduct_definable : 𝚺₁-Function₂ (seqProduct : M → M → M) := Defined.to_definable _ seqProduct_defined
 
 def seqExp.formulae : PR.Formulae 1 where
-  zero := .mkSigma “#0 = 1” (by simp)
-  succ := .mkSigma “!seqProductDef.val [#0, #1, #3]” (by simp)
+  zero := .mkSigma “y x | y = 1” (by simp)
+  succ := .mkSigma “y ih n x | !seqProductDef y ih x” (by simp)
 
 def seqExp.construction : PR.Construction M seqExp.formulae where
   zero := fun _ ↦ {∅}

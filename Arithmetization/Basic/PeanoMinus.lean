@@ -1,8 +1,6 @@
 import Arithmetization.Definability.Definability
 
-namespace LO.FirstOrder
-
-namespace Arith
+namespace LO.FirstOrder.Arith
 
 noncomputable section
 
@@ -40,7 +38,7 @@ lemma sub_eq_iff : c = a - b ↔ ((a ≥ b → a = b + c) ∧ (a < b → c = 0))
 open Definability
 
 def _root_.LO.FirstOrder.Arith.subDef : 𝚺₀-Semisentence 3 :=
-  .mkSigma “(#2 ≤ #1 → #1 = #2 + #0) ∧ (#1 < #2 → #0 = 0)” (by simp[Hierarchy.pi_zero_iff_sigma_zero])
+  .mkSigma “z x y | (x ≥ y → x = y + z) ∧ (x < y → z = 0)” (by simp[Hierarchy.pi_zero_iff_sigma_zero])
 
 lemma sub_defined : 𝚺₀-Function₂ ((· - ·) : M → M → M) via subDef := by
   intro v; simp [subDef, sub_eq_iff]
@@ -150,15 +148,25 @@ lemma dvd_iff_bounded {a b : M} : a ∣ b ↔ ∃ c ≤ b, b = a * c := by
     · rintro ⟨c, rfl⟩; exact ⟨c, le_mul_self_of_pos_left (pos_iff_ne_zero.mpr hx), rfl⟩
     · rintro ⟨c, hz, rfl⟩; exact dvd_mul_right a c
 
-def _root_.LO.FirstOrder.Arith.dvdDef : 𝚺₀-Semisentence 2 := .mkSigma “∃[#0 < #2 + 1] #2 = #1 * #0” (by simp)
+def _root_.LO.FirstOrder.Arith.dvdDef : 𝚺₀-Semisentence 2 :=
+  .mkSigma “x y | ∃ z <⁺ y, y = x * z” (by simp)
 
-lemma dvd_defined : 𝚺₀-Relation (λ a b : M ↦ a ∣ b) via dvdDef :=
-  λ v ↦ by simp[dvd_iff_bounded, Matrix.vecHead, Matrix.vecTail, le_iff_lt_succ, dvdDef]
+lemma dvd_defined : 𝚺₀-Relation (fun a b : M ↦ a ∣ b) via dvdDef :=
+  fun v ↦ by simp [dvd_iff_bounded, Matrix.vecHead, Matrix.vecTail, dvdDef]
 
 @[simp] lemma dvd_defined_iff (v) :
     Semiformula.Evalbm M v dvdDef.val ↔ v 0 ∣ v 1 := dvd_defined.df.iff v
 
 instance dvd_definable (Γ) : DefinableRel ℒₒᵣ Γ ((· ∣ ·) : M → M → Prop) := Defined.to_definable₀ _ dvd_defined
+
+section
+
+syntax:45 first_order_term:45 " ∣ " first_order_term:0 : first_order_formula
+
+macro_rules
+  | `(“ $binders* | $t:first_order_term ∣ $u:first_order_term ”) => `(“ $binders* | !dvdDef.val $t $u”)
+
+end
 
 end Dvd
 
@@ -219,16 +227,16 @@ lemma prime_iff_bounded {a : M} : Prime a ↔ 1 < a ∧ ∀ b ≤ a, (b ∣ a �
       · intro b c h
 -/
 
-def IsPrime (a : M) : Prop := 1 < a ∧ ∀ b ≤ a, (b ∣ a → b = 1 ∨ b = a)
+def IsPrime (a : M) : Prop := 1 < a ∧ ∀ b ≤ a, b ∣ a → b = 1 ∨ b = a
 -- TODO: prove IsPrime a ↔ Prime a
 
 def _root_.LO.FirstOrder.Arith.isPrimedef : 𝚺₀-Semisentence 1 :=
-  .mkSigma (“1 < #0” ⋏ (∀[“#0 < #1 + 1”] dvdDef.val/[#0, #1] ⟶ “#0 = 1 ∨ #0 = #1”)) (by simp [Hierarchy.pi_zero_iff_sigma_zero])
+  .mkSigma “x | 1 < x ∧ ∀ y <⁺ x, !dvdDef.val y x → y = 1 ∨ y = x” (by simp [Hierarchy.pi_zero_iff_sigma_zero])
 
 lemma isPrime_defined : 𝚺₀-Predicate (λ a : M ↦ IsPrime a) via isPrimedef := by
   intro v
   simp [Semiformula.eval_substs, Matrix.comp_vecCons', Matrix.vecHead, Matrix.constant_eq_singleton,
-    IsPrime, isPrimedef, le_iff_lt_succ, dvd_defined.df.iff]
+    IsPrime, isPrimedef]
 
 end Prime
 

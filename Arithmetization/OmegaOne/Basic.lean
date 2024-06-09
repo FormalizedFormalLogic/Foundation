@@ -5,7 +5,7 @@ namespace LO.FirstOrder
 namespace Arith
 
 /-- ∀ x, ∃ y, 2^{|x|^2} = y-/
-def omegaOneAxiom : Sentence ℒₒᵣ := “∀ ∃ ∃[#0 < #2 + 1] (!lengthDef.val [#0, #2] ∧ !exponentialDef.val [#0*#0, #1])”
+def omegaOneAxiom : Sentence ℒₒᵣ := “∀ x, ∃ y, ∃ l <⁺ x, !lengthDef l x ∧ !exponentialDef (l * l) y”
 
 inductive Theory.omegaOne : Theory ℒₒᵣ where
   | omega : Theory.omegaOne omegaOneAxiom
@@ -64,7 +64,7 @@ lemma exponential_hash (a b : M) : Exponential (‖a‖ * ‖b‖) (a # b) := Cl
 lemma exponential_hash_one (a : M) : Exponential ‖a‖ (a # 1) := by simpa using exponential_hash a 1
 
 def hashDef : 𝚺₀-Semisentence 3 := .mkSigma
-  “∃[#0 < #2 + 1] ∃[#0 < #4 + 1] (!lengthDef.val [#1, #3] ∧ !lengthDef.val [#0, #4] ∧ !exponentialDef.val [#1 * #0, #2])” (by simp)
+  “z x y | ∃ lx <⁺ x, ∃ ly <⁺ y, !lengthDef lx x ∧ !lengthDef ly y ∧ !exponentialDef (lx * ly) z” (by simp)
 
 lemma hash_defined : 𝚺₀-Function₂ (Hash.hash : M → M → M) via hashDef := by
   intro v; simp[hashDef, length_defined.df.iff, Exponential.defined.df.iff, ←le_iff_lt_succ]

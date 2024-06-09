@@ -17,15 +17,16 @@ variable [M ⊧ₘ* 𝐈𝚫₀]
 def SPPow2 (m : M) : Prop := ¬LenBit 1 m ∧ LenBit 2 m ∧ ∀ i ≤ m, Pow2 i → 2 < i → (LenBit i m ↔ (√i)^2 = i ∧ LenBit (√i) m)
 
 def _root_.LO.FirstOrder.Arith.sppow2Def : 𝚺₀-Semisentence 1 :=
-  .mkSigma “¬!lenbitDef.val [1, #0] ∧ !lenbitDef.val [2, #0] ∧
-      ∀[#0 < #1 + 1] (!pow2Def.val [#0] → 2 < #0 →
-        (!lenbitDef.val [#0, #1] ↔ ∃[#0 < #1 + 1] (!sqrtDef.val [#0, #1] ∧ #0 * #0 = #1 ∧ !lenbitDef.val [#0, #2])))” (by simp)
+  .mkSigma
+  “ m | ¬!lenbitDef 1 m ∧ !lenbitDef 2 m ∧
+    ∀ i <⁺ m, !pow2Def i → 2 < i → (!lenbitDef i m ↔ ∃ s <⁺ i, !sqrtDef s i ∧ s * s = i ∧ !lenbitDef s m)
+  ” (by simp)
 
 lemma sppow2_defined : 𝚺₀-Predicate (SPPow2 : M → Prop) via sppow2Def := by
   intro v
   simp [SPPow2, sppow2Def, Matrix.vecHead, Matrix.vecTail, lenbit_defined.df.iff,
     pow2_defined.df.iff, sqrt_defined.df.iff, ←le_iff_lt_succ, sq, numeral_eq_natCast]
-  intro _ _; apply ball_congr; intro x _; apply imp_congr_right; intro _; apply imp_congr_right; intro _; apply iff_congr
+  intro _ _; apply forall₂_congr; intro x _; apply imp_congr_right; intro _; apply imp_congr_right; intro _; apply iff_congr
   · simp
   · constructor
     · intro h; exact ⟨√x, by simpa using h⟩
@@ -34,7 +35,7 @@ lemma sppow2_defined : 𝚺₀-Predicate (SPPow2 : M → Prop) via sppow2Def := 
 def PPow2 (i : M) : Prop := Pow2 i ∧ ∃ m < 2 * i, SPPow2 m ∧ LenBit i m
 
 def _root_.LO.FirstOrder.Arith.ppow2Def : 𝚺₀-Semisentence 1 :=
-  .mkSigma “!pow2Def.val [#0] ∧ ∃[#0 < 2 * #1] (!sppow2Def.val [#0] ∧ !lenbitDef.val [#1, #0])” (by simp)
+  .mkSigma “i | !pow2Def i ∧ ∃ m < 2 * i, !sppow2Def m ∧ !lenbitDef i m” (by simp)
 
 lemma ppow2_defined : 𝚺₀-Predicate (PPow2 : M → Prop) via ppow2Def := by
   intro v; simp[PPow2, ppow2Def, Matrix.vecHead, Matrix.vecTail,

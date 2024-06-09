@@ -71,16 +71,16 @@ lemma Bounded₃.comp {f : M → M → M → M} {k} {g₁ g₂ g₃ : (Fin k →
 namespace Bounded₂
 
 instance add : Bounded₂ L ((· + ·) : M → M → M) where
-  bounded := ⟨ᵀ“#0 + #1”, by intro _; simp⟩
+  bounded := ⟨‘x y | x + y’, by intro _; simp⟩
 
 instance mul : Bounded₂ L ((· * ·) : M → M → M) where
-  bounded := ⟨ᵀ“#0 * #1”, by intro _; simp⟩
+  bounded := ⟨‘x y | x * y’, by intro _; simp⟩
 
 instance hAdd : Bounded₂ L (HAdd.hAdd : M → M → M) where
-  bounded := ⟨ᵀ“#0 + #1”, by intro _; simp⟩
+  bounded := ⟨‘x y | x + y’, by intro _; simp⟩
 
 instance hMul : Bounded₂ L (HMul.hMul : M → M → M) where
-  bounded := ⟨ᵀ“#0 * #1”, by intro _; simp⟩
+  bounded := ⟨‘x y | x * y’, by intro _; simp⟩
 
 end Bounded₂
 
@@ -150,9 +150,9 @@ lemma ball_lt₀ {P : (Fin k → M) → M → Prop} {f : (Fin k → M) → M}
   rcases hf.definable with ⟨f_graph, hf_graph⟩
   rcases h with ⟨p, hp⟩
   have : DefinedWithParam (fun v ↦ ∃ x ≤ Semiterm.valm M v id bf, x = f v ∧ ∀ y < x, P v y)
-    (HSemiformula.bex (ᵀ“(!!bf + 1)”)
+    (HSemiformula.bex ‘!!bf + 1’
       (f_graph ⋏ HSemiformula.ball (#0) (HSemiformula.rew (Rew.substs (#0 :> fun i => #i.succ.succ)) p))) := by
-    simpa [←le_iff_lt_succ] using (hf_graph.and ((hp.retraction (0 :> (·.succ.succ))).ball #0)).bex ᵀ“!!bf + 1”
+    simpa [←le_iff_lt_succ] using (hf_graph.and ((hp.retraction (0 :> (·.succ.succ))).ball #0)).bex ‘!!bf + 1’
   exact .of_iff _ (fun v ↦ ⟨fun h ↦ ⟨f v, hbf v, rfl, h⟩, by rintro ⟨y, hy, rfl, h⟩; exact h⟩) ⟨_, this⟩
 
 lemma bex_lt₀ {P : (Fin k → M) → M → Prop} {f : (Fin k → M) → M}
@@ -162,9 +162,9 @@ lemma bex_lt₀ {P : (Fin k → M) → M → Prop} {f : (Fin k → M) → M}
   rcases hf.definable with ⟨f_graph, hf_graph⟩
   rcases h with ⟨p, hp⟩
   have : DefinedWithParam (fun v ↦ ∃ x ≤ Semiterm.valm M v id bf, x = f v ∧ ∃ y < x, P v y)
-    (HSemiformula.bex (ᵀ“(!!bf + 1)”)
+    (HSemiformula.bex ‘!!bf + 1’
       (f_graph ⋏ HSemiformula.bex (#0) (HSemiformula.rew (Rew.substs (#0 :> fun i => #i.succ.succ)) p))) := by
-    simpa [←le_iff_lt_succ] using (hf_graph.and ((hp.retraction (0 :> (·.succ.succ))).bex #0)).bex ᵀ“!!bf + 1”
+    simpa [←le_iff_lt_succ] using (hf_graph.and ((hp.retraction (0 :> (·.succ.succ))).bex #0)).bex ‘!!bf + 1’
   exact .of_iff _ (fun v ↦ ⟨fun h ↦ ⟨f v, hbf v, rfl, h⟩, by rintro ⟨y, hy, rfl, h⟩; exact h⟩) ⟨_, this⟩
 
 lemma ball_le₀ {P : (Fin k → M) → M → Prop} {f : (Fin k → M) → M}
@@ -174,9 +174,9 @@ lemma ball_le₀ {P : (Fin k → M) → M → Prop} {f : (Fin k → M) → M}
   rcases hf.definable with ⟨f_graph, hf_graph⟩
   rcases h with ⟨p, hp⟩
   have : DefinedWithParam (fun v ↦ ∃ x ≤ Semiterm.valm M v id bf, x = f v ∧ ∀ y ≤ x, P v y)
-    (HSemiformula.bex (ᵀ“(!!bf + 1)”)
-      (f_graph ⋏ HSemiformula.ball (ᵀ“(#0 + 1)”) (HSemiformula.rew (Rew.substs (#0 :> fun i => #i.succ.succ)) p))) := by
-    simpa [←le_iff_lt_succ] using (hf_graph.and ((hp.retraction (0 :> (·.succ.succ))).ball ᵀ“#0 + 1”)).bex ᵀ“!!bf + 1”
+    (HSemiformula.bex ‘!!bf + 1’
+      (f_graph ⋏ HSemiformula.ball ‘x | x + 1’ (HSemiformula.rew (Rew.substs (#0 :> fun i => #i.succ.succ)) p))) := by
+    simpa [←le_iff_lt_succ] using (hf_graph.and ((hp.retraction (0 :> (·.succ.succ))).ball ‘x | x + 1’)).bex ‘!!bf + 1’
   exact .of_iff _ (fun v ↦ ⟨fun h ↦ ⟨f v, hbf v, rfl, h⟩, by rintro ⟨y, hy, rfl, h⟩; exact h⟩) ⟨_, this⟩
 
 lemma bex_le₀ {P : (Fin k → M) → M → Prop} {f : (Fin k → M) → M}
@@ -186,9 +186,9 @@ lemma bex_le₀ {P : (Fin k → M) → M → Prop} {f : (Fin k → M) → M}
   rcases hf.definable with ⟨f_graph, hf_graph⟩
   rcases h with ⟨p, hp⟩
   have : DefinedWithParam (fun v ↦ ∃ x ≤ Semiterm.valm M v id bf, x = f v ∧ ∃ y ≤ x, P v y)
-    (HSemiformula.bex (ᵀ“(!!bf + 1)”)
-      (f_graph ⋏ HSemiformula.bex (ᵀ“(#0 + 1)”) (HSemiformula.rew (Rew.substs (#0 :> fun i => #i.succ.succ)) p))) := by
-    simpa [←le_iff_lt_succ] using (hf_graph.and ((hp.retraction (0 :> (·.succ.succ))).bex ᵀ“#0 + 1”)).bex ᵀ“!!bf + 1”
+    (HSemiformula.bex ‘!!bf + 1’
+      (f_graph ⋏ HSemiformula.bex ‘x | x + 1’ (HSemiformula.rew (Rew.substs (#0 :> fun i => #i.succ.succ)) p))) := by
+    simpa [←le_iff_lt_succ] using (hf_graph.and ((hp.retraction (0 :> (·.succ.succ))).bex ‘x | x + 1’)).bex ‘!!bf + 1’
   exact .of_iff _ (fun v ↦ ⟨fun h ↦ ⟨f v, hbf v, rfl, h⟩, by rintro ⟨y, hy, rfl, h⟩; exact h⟩) ⟨_, this⟩
 
 end Definable

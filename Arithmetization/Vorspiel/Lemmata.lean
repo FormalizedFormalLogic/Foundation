@@ -29,10 +29,10 @@ namespace Semiterm
 def arithCases {n} {C : Semiterm ℒₒᵣ ξ n → Sort w}
   (hbvar : ∀ x : Fin n, C #x)
   (hfvar : ∀ x : ξ, C &x)
-  (hzero : C ᵀ“0”)
-  (hone  : C ᵀ“1”)
-  (hadd  : ∀ (t u : Semiterm ℒₒᵣ ξ n), C ᵀ“!!t + !!u”)
-  (hmul  : ∀ (t u : Semiterm ℒₒᵣ ξ n), C ᵀ“!!t * !!u”) :
+  (hzero : C ‘0’)
+  (hone  : C ‘1’)
+  (hadd  : ∀ (t u : Semiterm ℒₒᵣ ξ n), C ‘!!t + !!u’)
+  (hmul  : ∀ (t u : Semiterm ℒₒᵣ ξ n), C ‘!!t * !!u’) :
     ∀ (t : Semiterm ℒₒᵣ ξ n), C t
   | #x                        => hbvar x
   | &x                        => hfvar x
@@ -49,10 +49,10 @@ def arithCases {n} {C : Semiterm ℒₒᵣ ξ n → Sort w}
 def arithRec {n} {C : Semiterm ℒₒᵣ ξ n → Sort w}
   (hbvar : ∀ x : Fin n, C #x)
   (hfvar : ∀ x : ξ, C &x)
-  (hzero : C ᵀ“0”)
-  (hone  : C ᵀ“1”)
-  (hadd  : ∀ {t u : Semiterm ℒₒᵣ ξ n}, C t → C u → C ᵀ“!!t + !!u”)
-  (hmul  : ∀ {t u : Semiterm ℒₒᵣ ξ n}, C t → C u → C ᵀ“!!t * !!u”) :
+  (hzero : C ‘0’)
+  (hone  : C ‘1’)
+  (hadd  : ∀ {t u : Semiterm ℒₒᵣ ξ n}, C t → C u → C ‘!!t + !!u’)
+  (hmul  : ∀ {t u : Semiterm ℒₒᵣ ξ n}, C t → C u → C ‘!!t * !!u’) :
     ∀ (t : Semiterm ℒₒᵣ ξ n), C t
   | #x                        => hbvar x
   | &x                        => hfvar x
@@ -242,6 +242,22 @@ instance : Structure.Monotone ℒₒᵣ M := ⟨
   | 0, Language.One.one   => by rfl
   | 2, Language.Add.add   => add_le_add (h 0) (h 1)
   | 2, Language.Mul.mul   => mul_le_mul (h 0) (h 1) (by simp) (by simp)⟩
+
+section
+
+variable {L : Language} [L.LT] [L.Zero] [L.One] [L.Add]
+
+variable [Structure L M] [Structure.LT L M] [Structure.Zero L M] [Structure.One L M] [Structure.Add L M]
+
+@[simp] lemma eval_ballLTSucc {t : Semiterm L ξ n} {p : Semiformula L ξ (n + 1)} :
+    Semiformula.Evalm M e ε (p.ballLTSucc t) ↔ ∀ x ≤ Semiterm.valm M e ε t, Semiformula.Evalm M (x :> e) ε p := by
+  simp [Semiformula.eval_ballLTSucc, lt_succ_iff_le]
+
+@[simp] lemma eval_bexLTSucc {t : Semiterm L ξ n} {p : Semiformula L ξ (n + 1)} :
+    Semiformula.Evalm M e ε (p.bexLTSucc t) ↔ ∃ x ≤ Semiterm.valm M e ε t, Semiformula.Evalm M (x :> e) ε p := by
+  simp [Semiformula.eval_bexLTSucc, lt_succ_iff_le]
+
+end
 
 end Model
 

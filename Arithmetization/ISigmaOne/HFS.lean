@@ -57,7 +57,7 @@ lemma sUnion_graph {u s : M} : u = ⋃ʰᶠ s ↔ ∀ x < u + s, (x ∈ u ↔ �
       exact h x (lt_of_lt_of_le (lt_trans _ _ _ (lt_of_mem hx) (lt_of_mem hc)) (by simp)) |>.mpr ⟨c, hc, hx⟩⟩
 
 def _root_.LO.FirstOrder.Arith.sUnionDef : 𝚺₀-Semisentence 2 := .mkSigma
-  “∀[#0 < #1 + #2](#0 ∈ #1 ↔ [∃∈ #2](#1 ∈ #0))” (by simp)
+  “u s | ∀ x < u + s, (x ∈ u ↔ ∃ t ∈' s, x ∈ t)” (by simp)
 
 lemma sUnion_defined : 𝚺₀-Function₁ ((⋃ʰᶠ ·) : M → M) via sUnionDef := by
   intro v; simp [sUnionDef, sUnion_graph]
@@ -116,7 +116,7 @@ lemma insert_eq_union_singleton (a s : M) : insert a s = {a} ∪ s := mem_ext (f
         _ < log (2 * (a + b)) := by simp [log_two_mul_of_pos (show 0 < a + b from by simp [pos_of_nonempty hi])]
         _ ≤ log (2 * (a + b) + 1) := log_monotone (by simp))
 
-instance : Bounded₂ ℒₒᵣ ((· ∪ ·) : M → M → M) := ⟨ᵀ“2 * (#0 + #1)”, λ _ ↦ by simp⟩
+instance : Bounded₂ ℒₒᵣ ((· ∪ ·) : M → M → M) := ⟨‘x y | 2 * (x + y)’, fun _ ↦ by simp⟩
 
 lemma union_comm (a b : M) : a ∪ b = b ∪ a := mem_ext (by simp [or_comm])
 
@@ -197,7 +197,7 @@ private lemma product_graph {u a b : M} : u = a ×ʰᶠ b ↔ ∀ x < u + (a + b
         (le_trans (pair_polybound a b) <| by simp)) |>.mpr ⟨y, hy, z, hz, rfl⟩⟩
 
 def _root_.LO.FirstOrder.Arith.productDef : 𝚺₀-Semisentence 3 := .mkSigma
-  “∀[#0 < #1 + (#2 + #3 + 1) ^' 2](#0 ∈ #1 ↔ [∃∈ #2][∃∈ #4](!pairDef.val [#2, #1, #0]))” (by simp)
+  “u a b | ∀ x < u + (a + b + 1)², (x ∈ u ↔ ∃ y ∈' a, ∃ z ∈' b, !pairDef x y z)” (by simp)
 
 lemma product_defined : 𝚺₀-Function₂ ((· ×ʰᶠ ·) : M → M → M) via productDef := by
   intro v; simp [productDef, product_graph]
@@ -241,7 +241,7 @@ private lemma domain_graph {u s : M} : u = domain s ↔ ∀ x < u + s, (x ∈ u 
           |>.mpr ⟨y, lt_of_le_of_lt (le_pair_right x y) (lt_of_mem hy), _, hy, rfl⟩⟩
 
 def _root_.LO.FirstOrder.Arith.domainDef : 𝚺₀-Semisentence 2 := .mkSigma
-  “∀[#0 < #1 + #2](#0 ∈ #1 ↔ ∃[#0 < #3] [∃∈ #3](!pairDef.val [#0, #2, #1]))” (by simp)
+  “u s | ∀ x < u + s, (x ∈ u ↔ ∃ y < s, ∃ z ∈' s, !pairDef z x y)” (by simp)
 
 lemma domain_defined : 𝚺₀-Function₁ (domain : M → M) via domainDef := by
   intro v; simp [domainDef, domain_graph]
@@ -275,7 +275,7 @@ instance domain_definable' (Γ) : DefinableFunction₁ ℒₒᵣ Γ (domain : M 
     exact lt_of_le_of_lt (le_trans (le_pair_left i x) (le_log_of_mem hix))
       (by simp [log_two_mul_add_one_of_pos (pos_of_nonempty hix)]))
 
-instance : Bounded₁ ℒₒᵣ (domain : M → M) := ⟨ᵀ“2 * #0”, λ _ ↦ by simp⟩
+instance : Bounded₁ ℒₒᵣ (domain : M → M) := ⟨‘x | 2 * x’, fun _ ↦ by simp⟩
 
 lemma mem_domain_of_pair_mem {x y s : M} (h : ⟪x, y⟫ ∈ s) : x ∈ domain s := mem_domain_iff.mpr ⟨y, h⟩
 
@@ -387,7 +387,7 @@ private lemma isMapping_iff {m : M} : IsMapping m ↔ ∃ d ≤ 2 * m, d = domai
       exact ExistsUnique.intro y hxy (fun y' hxy' ↦ h y' (lt_of_mem_rng hxy') hxy')⟩
 
 def _root_.LO.FirstOrder.Arith.isMappingDef : 𝚺₀-Semisentence 1 := .mkSigma
-  “∃[#0 < 2 * #1 + 1](!domainDef.val [#0, #1] ∧ [∀∈ #0] ∃[#0 < #3](#1 ~[#3] #0 ∧ ∀[#0 < #4](#2 ~[#4] #0 → #0 = #1)))” (by simp)
+  “m | ∃ d <⁺ 2 * m, !domainDef d m ∧ ∀ x ∈' d, ∃ y < m, x ~[m] y ∧ ∀ y' < m, x ~[m] y' → y' = y” (by simp)
 
 lemma isMapping_defined : 𝚺₀-Predicate (IsMapping : M → Prop) via isMappingDef := by
   intro v; simp [isMappingDef, isMapping_iff, lt_succ_iff_le]
@@ -407,16 +407,16 @@ def Seq (s : M) : Prop := IsMapping s ∧ ∃ l, domain s = under l
 
 def Seq.isMapping {s : M} (h : Seq s) : IsMapping s := h.1
 
-private lemma seq_iff (s : M) : Seq s ↔ IsMapping s ∧ ∃ l < 2 * s + 1, ∃ d < 2 * s + 1, d = domain s ∧ d = under l :=
+private lemma seq_iff (s : M) : Seq s ↔ IsMapping s ∧ ∃ l ≤ 2 * s, ∃ d ≤ 2 * s, d = domain s ∧ d = under l :=
   ⟨by rintro ⟨hs, l, h⟩
-      exact ⟨hs, l, lt_succ_iff_le.mpr (by
+      exact ⟨hs, l, (by
       calc
         l ≤ domain s := by simp [h]
-        _ ≤ 2 * s    := by simp), ⟨domain s , by simp [lt_succ_iff_le], rfl, h⟩⟩,
+        _ ≤ 2 * s    := by simp), ⟨domain s , by simp,  rfl, h⟩⟩,
    by rintro ⟨hs, l, _, _, _, rfl, h⟩; exact ⟨hs, l, h⟩⟩
 
 def _root_.LO.FirstOrder.Arith.seqDef : 𝚺₀-Semisentence 1 := .mkSigma
-  “!isMappingDef.val [#0] ∧ ∃[#0 < 2 * #1 + 1] ∃[#0 < 2 * #2 + 1] (!domainDef.val [#0, #2] ∧ !underDef.val [#0, #1])” (by simp)
+  “s | !isMappingDef s ∧ ∃ l <⁺ 2 * s, ∃ d <⁺ 2 * s, !domainDef d s ∧ !underDef d l” (by simp)
 
 lemma seq_defined : 𝚺₀-Predicate (Seq : M → Prop) via seqDef := by
   intro v; simp [seqDef, seq_iff]
@@ -427,6 +427,18 @@ lemma seq_defined : 𝚺₀-Predicate (Seq : M → Prop) via seqDef := by
 instance seq_definable : 𝚺₀-Predicate (Seq : M → Prop) := Defined.to_definable _ seq_defined
 
 @[simp, definability] instance seq_definable' (Γ) : Γ-Predicate (Seq : M → Prop) := .of_zero seq_definable _
+
+section
+
+open Lean PrettyPrinter Delaborator
+
+syntax ":Seq " first_order_term : first_order_formula
+
+scoped macro_rules
+  | `(“ $binders* | :Seq $t:first_order_term ”) =>
+    `(“ $binders* | !seqDef.val $t ”)
+
+end
 
 lemma lh_exists_uniq (s : M) : ∃! l, (Seq s → domain s = under l) ∧ (¬Seq s → l = 0) := by
   by_cases h : Seq s
@@ -451,17 +463,17 @@ lemma Seq.domain_eq {s : M} (h : Seq s) : domain s = under (lh s) := (Model.lh_p
       _    ≤ 2 * s        := by simp [←hs.domain_eq]
   · simp [lh_prop_of_not_seq hs]
 
-private lemma lh_graph (l s : M) : l = lh s ↔ (Seq s → ∃ d < 2 * s + 1, d = domain s ∧ d = under l) ∧ (¬Seq s → l = 0) :=
+private lemma lh_graph (l s : M) : l = lh s ↔ (Seq s → ∃ d ≤ 2 * s, d = domain s ∧ d = under l) ∧ (¬Seq s → l = 0) :=
   ⟨by
     rintro rfl
-    by_cases Hs : Seq s <;> simp [Hs, lt_succ_iff_le, ←Seq.domain_eq, lh_prop_of_not_seq], by
+    by_cases Hs : Seq s <;> simp [Hs, ←Seq.domain_eq, lh_prop_of_not_seq], by
     rintro ⟨h, hn⟩
     by_cases Hs : Seq s
     · rcases h Hs with ⟨_, _, rfl, h⟩; simpa [h] using Hs.domain_eq
     · simp [lh_prop_of_not_seq Hs, hn Hs]⟩
 
 def _root_.LO.FirstOrder.Arith.lhDef : 𝚺₀-Semisentence 2 := .mkSigma
-  “(!seqDef.val [#1] → ∃[#0 < 2 * #2 + 1] (!domainDef.val [#0, #2] ∧ !underDef.val [#0, #1])) ∧ (¬!seqDef.val [#1] → #0 = 0)” (by simp)
+  “l s | (!seqDef s → ∃ d <⁺ 2 * s, !domainDef d s ∧ !underDef d l) ∧ (¬!seqDef s → l = 0)” (by simp)
 
 lemma lh_defined : 𝚺₀-Function₁ (lh : M → M) via lhDef := by
   intro v; simp [lhDef, -exists_eq_right_right, lh_graph]
@@ -473,7 +485,7 @@ instance lh_definable : 𝚺₀-Function₁ (lh : M → M) := Defined.to_definab
 
 instance lh_definable' (Γ) : Γ-Function₁ (lh : M → M) := .of_zero lh_definable _
 
-instance : Bounded₁ ℒₒᵣ (lh : M → M) := ⟨ᵀ“2 * #0”, λ _ ↦ by simp⟩
+instance : Bounded₁ ℒₒᵣ (lh : M → M) := ⟨‘x | 2 * x’, fun _ ↦ by simp⟩
 
 lemma Seq.exists {s : M} (h : Seq s) {x : M} (hx : x < lh s) : ∃ y, ⟪x, y⟫ ∈ s := h.isMapping x (by simpa [h.domain_eq] using hx) |>.exists
 
@@ -531,23 +543,21 @@ lemma mem_seqCons_iff {i x z s : M} : ⟪i, x⟫ ∈ s ⁀' z ↔ (i = lh s ∧ 
   simp [seqCons]
   intro h; have := H.lt_lh_of_mem h; simp at this
 
-lemma Seq.mem_seqCons_iff_of_lt {s x z : M} (H : Seq s) (hi : i < lh s) : ⟪i, x⟫ ∈ s ⁀' z ↔ ⟪i, x⟫ ∈ s := by
+lemma Seq.mem_seqCons_iff_of_lt {s x z : M} (hi : i < lh s) : ⟪i, x⟫ ∈ s ⁀' z ↔ ⟪i, x⟫ ∈ s := by
   simp [seqCons, hi]
   rintro rfl; simp at hi
 
 section
 
 lemma seqCons_graph (t x s : M) :
-    t = s ⁀' x ↔ ∃ l < 2 * s + 1, l = lh s ∧ ∃ p < (2 * s + x + 1)^2 + 1, p = ⟪l, x⟫ ∧ t = insert p s :=
+    t = s ⁀' x ↔ ∃ l ≤ 2 * s, l = lh s ∧ ∃ p ≤ (2 * s + x + 1)^2, p = ⟪l, x⟫ ∧ t = insert p s :=
   ⟨by rintro rfl
       exact ⟨lh s, by simp[lt_succ_iff_le], rfl, ⟪lh s, x⟫,
-        lt_succ_iff_le.mpr <| le_trans (pair_le_pair_left (by simp) x) (pair_polybound (2 * s) x), rfl, by rfl⟩,
+        le_trans (pair_le_pair_left (by simp) x) (pair_polybound (2 * s) x), rfl, by rfl⟩,
    by rintro ⟨l, _, rfl, p, _, rfl, rfl⟩; rfl⟩
 
 def _root_.LO.FirstOrder.Arith.seqConsDef : 𝚺₀-Semisentence 3 := .mkSigma
-  “ ∃[#0 < 2 * #2 + 1] (
-      !lhDef.val [#0, #2] ∧
-      ∃[#0 < (2 * #3 + #4 + 1) ^' 2 + 1] ( !pairDef.val [#0, #1, #4] ∧ !insertDef.val [#2, #0, #3] ) ) ” (by simp)
+  “t s x | ∃ l <⁺ 2 * s, !lhDef l s ∧ ∃ p <⁺ (2 * s + x + 1)², !pairDef p l x ∧ !insertDef t p s” (by simp)
 
 lemma seqCons_defined : 𝚺₀-Function₂ (seqCons : M → M → M) via seqConsDef := by
   intro v; simp [seqConsDef, seqCons_graph]
@@ -686,8 +696,10 @@ lemma Seq.seqMap_exists {s : M} (Hs : Seq s) :
       rcases this with (rfl | hi)
       · have : z = x := by simpa [Hs] using hz
         simp [this, ←hts, Ht]
-      · simp [Ht.mem_seqCons_iff_of_lt (by simpa [hts] using hi), Hs.mem_seqCons_iff_of_lt hi] at hz ⊢
-        exact ih i hi z (lt_of_mem_rng hz) hz ⟩
+      · have : ⟪i, f z⟫ ∈ t ⁀' f x ↔ ⟪i, f z⟫ ∈ t := mem_seqCons_iff_of_lt (x := f z) (z := f x) (by simpa [hts] using hi)
+        rw [this]
+        have : ⟪i, z⟫ ∈ s := mem_seqCons_iff_of_lt hi |>.mp hz
+        exact ih i hi z (lt_of_mem_rng this) this ⟩
 
 lemma seqMap_existsUnique (s : M) (Hs : Seq s) :
     ∃! t, Seq t ∧ lh t = lh s ∧ ∀ i x, ⟪i, x⟫ ∈ s → ⟪i, f x⟫ ∈ t := by
@@ -730,7 +742,7 @@ lemma Seq.mem_seqMap_iff {i y : M} : ⟪i, y⟫ ∈ seqMap hf s ↔ ∃ x, f x =
 
 lemma seqMap_graph (t s : M) :
     t = seqMap hf s ↔
-    (Seq s → Seq t ∧ (∃ l < 2 * s + 1, l = lh s ∧ l = lh t) ∧ ∀ i < s, ∀ x < s, ⟪i, x⟫ ∈ s → ∃ y < t, y = f x ∧ ⟪i, y⟫ ∈ t) ∧
+    (Seq s → Seq t ∧ (∃ l ≤ 2 * s, l = lh s ∧ l = lh t) ∧ ∀ i < s, ∀ x < s, ⟪i, x⟫ ∈ s → ∃ y < t, y = f x ∧ ⟪i, y⟫ ∈ t) ∧
     (¬Seq s → t = 0) :=
   ⟨by rintro rfl;
       by_cases H : Seq s <;> simp only [H, Seq.seqMap, lt_succ_iff_le, Seq.seqMap_lh_eq, and_self,
@@ -755,11 +767,9 @@ section seqMap₀
 variable (p : HSemisentence ℒₒᵣ 2 𝚺₀)
 
 def _root_.LO.FirstOrder.Arith.seqMap₀Def : 𝚺₀-Semisentence 2 := .mkSigma
-  “ ( !seqDef.val [#1] →
-      !seqDef.val [#0] ∧
-      (  ∃[#0 < 2 * #2 + 1] (  !lhDef.val [#0, #2] ∧ !lhDef.val [#0, #1]  )  ) ∧
-      ∀[#0 < #2] ∀[#0 < #3] ( #1 ~[#3] #0 → ∃[#0 < #3] ( !p.val [#0, #1] ∧ #2 ~[#3] #0 ) ) ) ∧
-    ( ¬!seqDef.val [#1] → #0 = 0 )” (by simp)
+  “t s |
+    (:Seq s → :Seq t ∧ (∃ l <⁺ 2 * s, !lhDef l s ∧ !lhDef l t) ∧ ∀ i < s, ∀ x < s, i ~[s] x → ∃ y < t, !p y x ∧ i ~[t] y) ∧
+    (¬:Seq s → t = 0)” (by simp)
 
 variable {p} {f : M → M} (hf : 𝚺₀-Function₁ f via p)
 

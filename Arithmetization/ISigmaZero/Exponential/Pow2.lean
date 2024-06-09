@@ -17,7 +17,7 @@ variable [M ⊧ₘ* 𝐈open]
 def Pow2 (a : M) : Prop := 0 < a ∧ ∀ r ≤ a, 1 < r → r ∣ a → 2 ∣ r
 
 def _root_.LO.FirstOrder.Arith.pow2Def : 𝚺₀-Semisentence 1 :=
-  .mkSigma “0 < #0 ∧ ∀[#0 < #1 + 1] (1 < #0 →  !dvdDef.val [#0, #1] → !dvdDef.val [2, #0])” (by simp [Hierarchy.pi_zero_iff_sigma_zero])
+  .mkSigma “a | 0 < a ∧ ∀ r <⁺ a, 1 < r → r ∣ a → 2 ∣ r” (by simp [Hierarchy.pi_zero_iff_sigma_zero])
 
 lemma pow2_defined : 𝚺₀-Predicate (Pow2 : M → Prop) via pow2Def := by
   intro v
@@ -111,7 +111,7 @@ section LenBit
 def LenBit (i a : M) : Prop := ¬2 ∣ (a / i)
 
 def _root_.LO.FirstOrder.Arith.lenbitDef : 𝚺₀-Semisentence 2 :=
-  .mkSigma “∃[#0 < #2 + 1] (!divDef.val [#0, #2, #1] ∧ ¬!dvdDef.val [2, #0])” (by simp)
+  .mkSigma “i a | ∃ z <⁺ a, !divDef.val z a i ∧ ¬2 ∣ z” (by simp)
 
 lemma lenbit_defined : 𝚺₀-Relation (LenBit : M → M → Prop) via lenbitDef := by
   intro v; simp[sqrt_graph, lenbitDef, Matrix.vecHead, Matrix.vecTail, LenBit, ←le_iff_lt_succ, numeral_eq_natCast]

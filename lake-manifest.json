@@ -103,7 +103,7 @@
   {"url": "https://github.com/iehality/lean4-logic",
    "type": "git",
    "subDir": null,
-   "rev": "f052c036e080a85b197d36a20e95d75c4388490c",
+   "rev": "afcc406b621a8cf5f80d1825078b702b1d3a2d28",
    "name": "logic",
    "manifestFile": "lake-manifest.json",
    "inputRev": "master",
