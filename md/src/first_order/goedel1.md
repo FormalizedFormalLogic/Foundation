@@ -60,8 +60,7 @@ This theorem is proved two distinct approach.
   $$
     \begin{align*}
       \mathrm{fixpoint}_\theta
-        &\coloneqq (\forall x)[
-          \mathrm{ssbs}(x, {\ulcorner \mathrm{diag}_\theta \urcorner}, {\ulcorner \mathrm{diag}_\theta \urcorner}) \to \theta(x) ] \\
+        &\coloneqq \mathrm{diag}_\theta(\ulcorner \mathrm{diag}_\theta \urcorner) \\
       \mathrm{diag}_\theta(x)
         &\coloneqq (\forall y)[\mathrm{ssbs}(y, x, x) \to \theta (y)]
     \end{align*}
@@ -72,7 +71,7 @@ This theorem is proved two distinct approach.
     $$
       \begin{align*}
         \mathrm{fixpoint}_\theta
-          &\leftrightarrow
+          &\equiv
             (\forall x)[
               \mathrm{ssbs}(
                 x,
@@ -82,15 +81,7 @@ This theorem is proved two distinct approach.
               ] \\
           &\leftrightarrow 
             \theta(\ulcorner \mathrm{diag}_\theta(\ulcorner \mathrm{diag}_\theta \urcorner) \urcorner) \\
-          &\leftrightarrow
-            \theta({\ulcorner
-              (\forall y)[
-                \mathrm{ssbs}(
-                  y,
-                  {\ulcorner \mathrm{diag}_\theta \urcorner},
-                  {\ulcorner \mathrm{diag}_\theta \urcorner}) \to
-                \theta (y)] \urcorner}) \\
-          &\leftrightarrow
+          &\equiv
             \theta(\ulcorner \mathrm{fixpoint}_\theta \urcorner)
       \end{align*}
     $$

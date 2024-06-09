@@ -29,11 +29,15 @@ noncomputable def diag (θ : Semisentence ℒₒᵣ 1) : Semisentence ℒₒᵣ 
   “x | ∀ y, !ssbs y x x → !θ y”
 
 noncomputable def fixpoint (θ : Semisentence ℒₒᵣ 1) : Sentence ℒₒᵣ :=
-  “∀ x, !ssbs x !!⸢diag θ⸣ !!⸢diag θ⸣ → !θ x”
+  (diag θ)/[⸢diag θ⸣]
 
 lemma substs_diag (θ σ : Semisentence ℒₒᵣ 1) :
     “!(diag θ) !!(⸢σ⸣ : Semiterm ℒₒᵣ Empty 0)” = “∀ x, !ssbs x !!⸢σ⸣ !!⸢σ⸣ → !θ x” := by
-  simp[diag, Rew.q_substs, ←Rew.hom_comp_app, Rew.substs_comp_substs]
+  simp [diag, Rew.q_substs, ←Rew.hom_comp_app, Rew.substs_comp_substs]
+
+lemma fixpoint_eq (θ : Semisentence ℒₒᵣ 1) :
+    fixpoint θ = “∀ x, !ssbs x !!⸢diag θ⸣ !!⸢diag θ⸣ → !θ x” := by
+  simp [fixpoint, substs_diag]
 
 variable (T)
 
@@ -52,13 +56,12 @@ theorem main (θ : Semisentence ℒₒᵣ 1) :
       simpa [Model.numeral_eq_natCast, Matrix.constant_eq_singleton] using this
     calc
       Evalbm M ![] (fixpoint θ)
-      ↔ ∀ z, Evalbm M ![z, encode (diag θ), encode (diag θ)] ssbs → Evalbm M ![z] θ := by simp[fixpoint, Semiformula.eval_rew,
+      ↔ ∀ z, Evalbm M ![z, encode (diag θ), encode (diag θ)] ssbs → Evalbm M ![z] θ := by simp [fixpoint_eq, Semiformula.eval_rew,
                                                                                             Function.comp, Matrix.comp_vecCons',
                                                                                             Matrix.constant_eq_vec₂,
                                                                                             Model.numeral_eq_natCast,
                                                                                             Matrix.constant_eq_singleton]
-    _ ↔ Evalbm M ![encode “!(diag θ) !!(⸢diag θ⸣ : Semiterm ℒₒᵣ Empty 0)”] θ         := by simp[hssbs]
-    _ ↔ Evalbm M ![encode “∀ x, !ssbs x !!⸢diag θ⸣ !!⸢diag θ⸣ → !θ x”] θ         := by rw[substs_diag]
+    _ ↔ Evalbm M ![encode “!(diag θ) !!(⸢diag θ⸣ : Semiterm ℒₒᵣ Empty 0)”] θ        := by simp [hssbs]
     _ ↔ Evalbm M ![encode (fixpoint θ)] θ                                           := by rfl))
 
 end SelfReference
