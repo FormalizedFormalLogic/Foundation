@@ -4,25 +4,16 @@ Summarize Gödel's First Incompleteness Theorem.
 
 ## Definition
 
-If system $\mathcal{S}$ can prove or refute for every formula $\varphi$ of $\mathcal{S}$, $\mathcal{S}$ is called _complete_.
+If a system $\mathcal{S}$ can prove or refute for every formula $\varphi$ of $\mathcal{S}$, $\mathcal{S}$ is called _complete_.
 Otherwise, $\mathcal{S}$ is called _incomplete_.
 
 ```lean
-def Complete : Prop := ∀ f, 𝓢 ⊢! f ∨ 𝓢 ⊢! ~f
-```
-
-If some formula $\varphi$ exists and $\varphi$ is not provable nor refutable in `\mathcal{S}`, $\mathcal{S}$ is called _undecidable_.
-Obviously $\mathcal{S}$ is incomplete iff undecidable.
-
-```lean
-def Undecidable (f : F) : Prop := 𝓢 ⊬! f ∧ 𝓢 ⊬! ~f
-
-lemma incomplete_iff_exists_undecidable : ¬System.Complete 𝓢 ↔ ∃ f, Undecidable 𝓢 f
+def LO.System.Complete : Prop := ∀ f, 𝓢 ⊢! f ∨ 𝓢 ⊢! ~f
 ```
 
 ## Theorem
 
-Let $T$ is $𝐏𝐀⁻$-extension, $\Sigma_1$-sound, and computable first-order theory. Then, $T$ is incomplete.
+$\Sigma_1$-sound and computable first-order theory, which is stronger than $\mathsf{PA}^-$, is incomplete.
 
 ```lean
 theorem LO.FirstOrder.Arith.first_incompleteness
@@ -34,14 +25,91 @@ theorem LO.FirstOrder.Arith.first_incompleteness
   [LO.FirstOrder.Theory.Computable T] :
   ¬LO.System.Complete T
 ```
-- [Gödel's first incompleteness theorem](https://iehality.github.io/lean4-logic/Logic/FirstOrder/Incompleteness/FirstIncompleteness.html#LO.FirstOrder.Arith.first_incompleteness)
 
+This theorem is proved two distinct approach.
+- [G1 in `FirstIncompleteness.lean`](https://iehality.github.io/lean4-logic/docs/Logic/FirstOrder/Incompleteness/FirstIncompleteness.html#LO.FirstOrder.Arith.first_incompleteness)
+- [G1 in `SelfReference.lean`](https://iehality.github.io/lean4-logic/docs/Logic/FirstOrder/Incompleteness/SelfReference.html#LO.FirstOrder.Arith.FirstIncompletenessBySelfReference.not_complete)
+
+`FirstIncompleteness.lean` is computability theoretic proof, while `SelfReference.lean` uses a well-known self-referencial argument.
+
+### G1 in `FirstIncompleteness.lean`
+  
+  Define a set of formulae with at most one variable.
+  $$ D \coloneqq \{\varphi \mid T \vdash \lnot \varphi({\ulcorner \varphi \urcorner}) \} $$
+  $D$ is r.e. since $T$ is computable. (one could use Craig's trick to weaken this condition to r.e., but I will not do that here.)
+
+  By the representation theorem, there exists a $\Sigma_1$ formula $\rho(x)$ that represents $D$. i.e.,
+
+  $$ T \vdash \rho({\ulcorner \varphi \urcorner}) \iff T \vdash \lnot \varphi({\ulcorner \varphi \urcorner})$$
+
+  Let $\gamma := \rho({\ulcorner \rho \urcorner})$. The next follows immediately.
+
+  $$ T \vdash \gamma \iff T \vdash \lnot \gamma $$
+
+  Thus, as $T$ is consistent, $\gamma$ is undecidable from $T$.
+
+### G1 in `SelfReference.lean`
+  
+  Since the substitution of a formula is computable, there exists an $\Sigma_1$ formula $\mathrm{ssbs}(x, y, z)$ that represents this.
+
+  $$ T \vdash (\forall x)[\mathrm{ssbs}(x, {\ulcorner \varphi \urcorner}, {\ulcorner \psi \urcorner})
+    \leftrightarrow x = {\ulcorner \varphi({\ulcorner \psi \urcorner}) \urcorner}] $$
+
+  Define a sentence $\mathrm{fixpoint}_\theta$ for formula (with at most one variable) $\theta$ as follows.
+  
+  $$
+    \begin{align*}
+      \mathrm{fixpoint}_\theta
+        &\coloneqq (\forall x)[
+          \mathrm{ssbs}(x, {\ulcorner \mathrm{diag}_\theta \urcorner}, {\ulcorner \mathrm{diag}_\theta \urcorner}) \to \theta(x) ] \\
+      \mathrm{diag}_\theta(x)
+        &\coloneqq (\forall y)[\mathrm{ssbs}(y, x, x) \to \theta (y)]
+    \end{align*}
+  $$
+
+  #### Fixpoint Lemma: $T \vdash \mathrm{fixpoint}_\theta \leftrightarrow \theta({\ulcorner \mathrm{fixpoint}_\theta \urcorner})$
+  - _Proof._
+    $$
+      \begin{align*}
+        \mathrm{fixpoint}_\theta
+          &\leftrightarrow
+            (\forall x)[
+              \mathrm{ssbs}(
+                x,
+                {\ulcorner \mathrm{diag}_\theta \urcorner},
+                {\ulcorner \mathrm{diag}_\theta \urcorner}) \to
+              \theta (x)
+              ] \\
+          &\leftrightarrow 
+            \theta(\ulcorner \mathrm{diag}_\theta(\ulcorner \mathrm{diag}_\theta \urcorner) \urcorner) \\
+          &\leftrightarrow
+            \theta({\ulcorner
+              (\forall y)[
+                \mathrm{ssbs}(
+                  y,
+                  {\ulcorner \mathrm{diag}_\theta \urcorner},
+                  {\ulcorner \mathrm{diag}_\theta \urcorner}) \to
+                \theta (y)] \urcorner}) \\
+          &\leftrightarrow
+            \theta(\ulcorner \mathrm{fixpoint}_\theta \urcorner)
+      \end{align*}
+    $$
+    ∎
+  
+  Let $G := \mathrm{fixpoint}_{\lnot\mathrm{prov_T}(x)}$ (Gödel sentence; the sentence that states "This sentence is not provable"), 
+  where $\mathrm{prov}_T(x)$ is a formula represents provability.
+
+  Since $G$ is undecidable, this results in the incompleteness of $T$.
+  - Assume that $T \vdash G$. $T \vdash \lnot \mathrm{prov}_T(\ulcorner G \urcorner)$ follows from the fixpoint lemma, 
+    while $T \vdash \mathrm{prov}_T(\ulcorner G \urcorner)$ follows from the hypothesis. a contradiction.
+  - Assume that $T \vdash \lnot G$. $T \vdash \mathrm{prov}_T(\ulcorner G \urcorner)$ follows from the fixpoint lemma,
+    and $T \vdash G$ follows. a contradiction.
 
 ## About Second Theorem
 
-To demonstrate the second incompleteness theorem, as outlined in Gödel's original paper, one can derive it by proving the first incompleteness theorem again within arithmetic.
+To prove the second incompleteness theorem, as outlined in Gödel's original paper, one can derive it by proving the first incompleteness theorem again within arithmetic.
 Although this fact has not yet been formalized in this project.
-These efforts are being undertaken in a separated repository [iehality/Arithmetization](https://github.com/iehality/Arithmetization) from this project.
+These efforts are being undertaken in a separated repository [iehality/Arithmetization](https://github.com/iehality/Arithmetization).
 
 Notably, the formalization of the second incompleteness theorem has already been accomplished by L. C. Paulson in Isabelle.
 However, owing to the technical simplicity for coding and others. this formalization is on *hereditarily finite sets* and not on arithmetic.
