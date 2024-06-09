@@ -7,6 +7,7 @@
 # Preliminaries
 
 - [Definitions and Notations](./preliminaries/definitions.md)
+- [Computability](./preliminaries/computability.md)
 
 ---
 
@@ -15,9 +16,15 @@
 - [Classical Propositional Logic](./classical_propositional/README.md)
   - [Syntax and Semantics](./classical_propositional/syntax_and_semantics.md)
 - [First-Order Logic](./first_order/README.md)
+  - [Term and Formula](./first_order/syntax.md)
+    - [Binder Notation](./first_order/notation.md)
+  - [Deduction System](./first_order/deduction.md)
+  - [Semantics](./first_order/semantics.md)
+  - [Completeness](./first_order/completeness.md)
   - [Arithmetics](./first_order/arithmetics.md)
     - [Theories of Arithmetics](./first_order/arithmetic_theories.md)
     - [Gödel's First Incompleteness Theorem](./first_order/goedel1.md)
+  - [Interpretation](./first_order/interpretation.md)
 
 ---
 
