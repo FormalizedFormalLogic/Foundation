@@ -135,6 +135,50 @@ variable [Operator.Zero L] [Operator.One L] [Operator.Add L] {M : Type u} [Zero 
 
 end Structure
 
+namespace Semiformula
+
+variable {L : Language} [L.LT] [L.Zero] [L.One] [L.Add] {ξ : Type*}
+
+def ballLTSucc (t : Semiterm L ξ n) (p : Semiformula L ξ (n + 1)) : Semiformula L ξ n := p.ballLT ‘!!t + 1’
+
+def bexLTSucc (t : Semiterm L ξ n) (p : Semiformula L ξ (n + 1)) : Semiformula L ξ n := p.bexLT ‘!!t + 1’
+
+variable {M : Type*} {s : Structure L M} [LT M] [One M] [Add M] [Structure.LT L M] [Structure.One L M] [Structure.Add L M]
+
+variable {t : Semiterm L ξ n} {p : Semiformula L ξ (n + 1)}
+
+lemma eval_ballLTSucc {e ε} :
+    Eval s e ε (p.ballLTSucc t) ↔ ∀ x < t.val s e ε + 1, Eval s (x :> e) ε p := by
+  simp [ballLTSucc, Operator.numeral]
+
+lemma eval_bexLTSucc {e ε} :
+    Eval s e ε (p.bexLTSucc t) ↔ ∃ x < t.val s e ε + 1, Eval s (x :> e) ε p := by
+  simp [bexLTSucc, Operator.numeral]
+
+end Semiformula
+
+namespace BinderNotation
+
+open Lean PrettyPrinter Delaborator SubExpr
+
+syntax:max "∀ " ident " <⁺ " first_order_term ", " first_order_formula:0 : first_order_formula
+
+syntax:max "∃ " ident " <⁺ " first_order_term ", " first_order_formula:0 : first_order_formula
+
+macro_rules
+  | `(“ $bd | ∀ $x <⁺ $t, $p ”) => do
+    let (_, names) ← elabBVBinder bd
+    if names.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
+    let bd' ← bvBinderCons x bd
+    `(Semiformula.ballLTSucc ‘ $bd | $t ’ “ $bd' | $p ”)
+  | `(“ $bd | ∃ $x <⁺ $t, $p ”) => do
+    let (_, names) ← elabBVBinder bd
+    if names.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
+    let bd' ← bvBinderCons x bd
+    `(Semiformula.bexLTSucc ‘ $bd | $t ’ “ $bd' | $p ”)
+
+end BinderNotation
+
 namespace Arith
 
 class SoundOn {L : Language} [Structure L ℕ]

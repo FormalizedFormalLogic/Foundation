@@ -16,22 +16,6 @@ def LT.le : Operator L 2 := Semiformula.Operator.Eq.eq.or Semiformula.Operator.L
 lemma le_eq (t₁ t₂ : Semiterm L μ n) : LT.le.operator ![t₁, t₂] = “!!t₁ = !!t₂ ∨ !!t₁ < !!t₂” := by
   simp [Operator.operator, Operator.or, LT.le, ←Rew.hom_comp_app, ←Matrix.fun_eq_vec₂]
 
-namespace Semiformula
-/-
-section
-variable [L.Mul]
-
-def divides : Finitary.{u, v} L 2 := Abbrev.divides.toOperator
-
-lemma divides_eq (t₁ t₂ : Semiterm L μ n) :
-  divides.operator ![t₁, t₂] = “∃ #0 * !!(.bShift t₁) = !!(.bShift t₂)” := by
-  simp[divides, Abbrev.divides, Abbrev.toOperator, substs_ex]
-
-end
--/
-
-end Semiformula
-
 namespace Order
 variable {T : Theory L} [𝐄𝐐 ≼ T]
 

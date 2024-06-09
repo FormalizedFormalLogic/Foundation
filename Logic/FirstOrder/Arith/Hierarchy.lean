@@ -203,6 +203,18 @@ lemma neg {p : Semiformula L μ n} : Hierarchy Γ s p → Hierarchy Γ.alt s (~p
         exact hp.accum _,
    by intro hp; exact hp.bex ht⟩
 
+@[simp] lemma ballLT_iff {Γ s n} {p : Semiformula L μ (n + 1)} {t : Semiterm L μ n} :
+    Hierarchy Γ s (p.ballLT t) ↔ Hierarchy Γ s p := by simp [Semiformula.ballLT]
+
+@[simp] lemma bexLT_iff {Γ s n} {p : Semiformula L μ (n + 1)} {t : Semiterm L μ n} :
+    Hierarchy Γ s (p.bexLT t) ↔ Hierarchy Γ s p := by simp [Semiformula.bexLT]
+
+@[simp] lemma ballLTSucc_iff [L.Zero] [L.One] [L.Add] {Γ s n} {p : Semiformula L μ (n + 1)} {t : Semiterm L μ n} :
+    Hierarchy Γ s (p.ballLTSucc t) ↔ Hierarchy Γ s p := by simp [Semiformula.ballLTSucc]
+
+@[simp] lemma bexLTSucc_iff [L.Zero] [L.One] [L.Add] {Γ s n} {p : Semiformula L μ (n + 1)} {t : Semiterm L μ n} :
+    Hierarchy Γ s (p.bexLTSucc t) ↔ Hierarchy Γ s p := by simp [Semiformula.bexLTSucc]
+
 lemma pi_of_pi_all {p : Semiformula L μ (n + 1)} : Hierarchy 𝚷 s (∀' p) → Hierarchy 𝚷 s p := by
   generalize hr : ∀' p = r
   generalize hb : (𝚷 : Polarity) = Γ
