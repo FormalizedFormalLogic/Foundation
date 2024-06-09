@@ -34,7 +34,7 @@ protected abbrev Tc := p ⟶ □p
 
 protected abbrev Ver := □p
 
-protected abbrev Dot3 := □(□p ⟶ □q) ⋎ □(□q ⟶ □p)
+protected abbrev Dot3 := □(□p ⟶ q) ⋎ □(□q ⟶ p)
 
 protected abbrev Grz := □(□(p ⟶ □p) ⟶ p) ⟶ p
 
