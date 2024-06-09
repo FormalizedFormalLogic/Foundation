@@ -21,7 +21,7 @@ variable (L)
 namespace Theory
 
 inductive peanoMinus : Theory ℒₒᵣ
-  | addZero       : peanoMinus “∀ x, x + 0 = #0”
+  | addZero       : peanoMinus “∀ x, x + 0 = x”
   | addAssoc      : peanoMinus “∀ x y z, (x + y) + z = x + (y + z)”
   | addComm       : peanoMinus “∀ x y, x + y = y + x”
   | addEqOfLt     : peanoMinus “∀ x y, x < y → ∃ z, x + z = y”
@@ -30,7 +30,7 @@ inductive peanoMinus : Theory ℒₒᵣ
   | oneLeOfZeroLt : peanoMinus “∀ x, 0 < x → 1 ≤ x”
   | addLtAdd      : peanoMinus “∀ x y z, x < y → x + z < y + z”
   | mulZero       : peanoMinus “∀ x, x * 0 = 0”
-  | mulOne        : peanoMinus “∀ x, x * 1 = #0”
+  | mulOne        : peanoMinus “∀ x, x * 1 = x”
   | mulAssoc      : peanoMinus “∀ x y z, (x * y) * z = x * (y * z)”
   | mulComm       : peanoMinus “∀ x y, x * y = y * x”
   | mulLtMul      : peanoMinus “∀ x y z, x < y ∧ 0 < z → x * z < y * z”

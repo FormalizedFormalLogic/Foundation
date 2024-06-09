@@ -32,7 +32,7 @@ noncomputable def fixpoint (θ : Semisentence ℒₒᵣ 1) : Sentence ℒₒᵣ 
   “∀ x, !ssbs x !!⸢diag θ⸣ !!⸢diag θ⸣ → !θ x”
 
 lemma substs_diag (θ σ : Semisentence ℒₒᵣ 1) :
-    (diag θ)/[(⸢σ⸣ : Semiterm ℒₒᵣ Empty 0)] = ∀' (ssbs/[#0, ⸢σ⸣, ⸢σ⸣] ⟶ θ/[#0]) := by
+    “!(diag θ) !!(⸢σ⸣ : Semiterm ℒₒᵣ Empty 0)” = “∀ x, !ssbs x !!⸢σ⸣ !!⸢σ⸣ → !θ x” := by
   simp[diag, Rew.q_substs, ←Rew.hom_comp_app, Rew.substs_comp_substs]
 
 variable (T)
@@ -57,8 +57,8 @@ theorem main (θ : Semisentence ℒₒᵣ 1) :
                                                                                             Matrix.constant_eq_vec₂,
                                                                                             Model.numeral_eq_natCast,
                                                                                             Matrix.constant_eq_singleton]
-    _ ↔ Evalbm M ![encode $ (diag θ)/[(⸢diag θ⸣ : Semiterm ℒₒᵣ Empty 0)]] θ         := by simp[hssbs]
-    _ ↔ Evalbm M ![encode $ ∀' (ssbs/[#0, ⸢diag θ⸣, ⸢diag θ⸣] ⟶ θ/[#0])] θ         := by rw[substs_diag]
+    _ ↔ Evalbm M ![encode “!(diag θ) !!(⸢diag θ⸣ : Semiterm ℒₒᵣ Empty 0)”] θ         := by simp[hssbs]
+    _ ↔ Evalbm M ![encode “∀ x, !ssbs x !!⸢diag θ⸣ !!⸢diag θ⸣ → !θ x”] θ         := by rw[substs_diag]
     _ ↔ Evalbm M ![encode (fixpoint θ)] θ                                           := by rfl))
 
 end SelfReference
@@ -96,12 +96,6 @@ lemma goedel_spec : T ⊢! G ⟷ ~(provableSentence T)/[⸢G⸣] := by
 variable [DecidablePred T] [Theory.Computable T]
 
 open LO.System
-
-def imply₂' {𝓢 : Theory ℒₒᵣ} (d₁ : 𝓢 ⊢! p ⟶ q ⟶ r) (d₂ : 𝓢 ⊢! p ⟶ q) (d₃ : 𝓢 ⊢! p) : 𝓢 ⊢! r := imply₂! ⨀ d₁ ⨀ d₂ ⨀ d₃
-
-lemma conj₁'! {𝓢 : Theory ℒₒᵣ} (d : 𝓢 ⊢! (p ⟷ q)) : 𝓢 ⊢! p ⟶ q := by
-  simp [LogicalConnective.iff] at d;
-  exact System.and_left! d
 
 theorem godel_independent : System.Undecidable T G := by
   suffices ¬(T ⊢! G ∨ T ⊢! ~G) by
