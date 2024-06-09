@@ -28,13 +28,19 @@ syntax:max "#" term:max : first_order_term  -- bounded variable
 syntax:max "&" term:max : first_order_term  -- free variable
 syntax:80 "!" term:max first_order_term:81* (" ⋯")? : first_order_term
 syntax:80 "!!" term:max : first_order_term
+syntax:80 ".!" term:max first_order_term:81* (" ⋯")? : first_order_term
+syntax:80 ".!!" term:max : first_order_term
 
 syntax num : first_order_term
 syntax:max "⋆" : first_order_term
 syntax:50 first_order_term:50 " + " first_order_term:51 : first_order_term
 syntax:60 first_order_term:60 " * " first_order_term:61 : first_order_term
 syntax:65 first_order_term:65 " ^ " first_order_term:66 : first_order_term
-syntax first_order_term " ^' " num  : first_order_term
+syntax:70 first_order_term " ^' " num  : first_order_term
+syntax:max first_order_term "²"  : first_order_term
+syntax:max first_order_term "³"  : first_order_term
+syntax:max first_order_term "⁴"  : first_order_term
+
 syntax:67  "exp " first_order_term:68 : first_order_term
 
 macro_rules
@@ -56,8 +62,12 @@ macro_rules
   | `(‘ $binders* | $e₁ * $e₂ ’)     => `(Semiterm.Operator.Mul.mul.operator ![‘ $binders* | $e₁ ’, ‘ $binders* | $e₂ ’])
   | `(‘ $binders* | $e₁ ^ $e₂ ’)     => `(Semiterm.Operator.Pow.pow.operator ![‘ $binders* | $e₁ ’, ‘ $binders* | $e₂ ’])
   | `(‘ $binders* | $e ^' $n ’)      => `((Semiterm.Operator.npow _ $n).operator ![‘ $binders* | $e ’])
+  | `(‘ $binders* | $e² ’)           => `((Semiterm.Operator.npow _ 2).operator ![‘ $binders* | $e ’])
+  | `(‘ $binders* | $e³ ’)           => `((Semiterm.Operator.npow _ 3).operator ![‘ $binders* | $e ’])
+  | `(‘ $binders* | $e⁴ ’)           => `((Semiterm.Operator.npow _ 4).operator ![‘ $binders* | $e ’])
   | `(‘ $binders* | exp $e ’)        => `(Semiterm.Operator.Exp.exp.operator ![‘ $binders* | $e ’])
   | `(‘ $_*       | !!$t:term ’)     => `($t)
+  | `(‘ $_*       | .!!$t:term ’)    => `(Rew.emb $t)
   | `(‘ $binders* | !$t:term $vs:first_order_term* ’)   => do
     let v ← vs.foldrM (β := Lean.TSyntax _) (init := ← `(![])) (fun a s => `(‘ $binders* | $a ’ :> $s))
     `(Rew.substs $v $t)
@@ -66,8 +76,16 @@ macro_rules
     let length := Syntax.mkNumLit (toString binders.size)
     let v ← vs.foldrM (β := Lean.TSyntax _) (init := ← `(fun x ↦ #(finSuccItr x $length))) (fun a s => `(‘ $binders* | $a ’ :> $s))
     `(Rew.substs $v $t)
+  | `(‘ $binders* | .!$t:term $vs:first_order_term* ’)   => do
+    let v ← vs.foldrM (β := Lean.TSyntax _) (init := ← `(![])) (fun a s => `(‘ $binders* | $a ’ :> $s))
+    `(Rew.embSubsts $v $t)
+  | `(‘ $binders* | .!$t:term $vs:first_order_term* ⋯ ’) =>
+    do
+    let length := Syntax.mkNumLit (toString binders.size)
+    let v ← vs.foldrM (β := Lean.TSyntax _) (init := ← `(fun x ↦ #(finSuccItr x $length))) (fun a s => `(‘ $binders* | $a ’ :> $s))
+    `(Rew.embSubsts $v $t)
 
-#check (‘x | &4 + (4 + 2 * #0 + #1)’ : Semiterm ℒₒᵣ ℕ 1)
+#check (‘x y z | &4 + (4 + 2 * (x⁴ + z)²)’ : Semiterm ℒₒᵣ ℕ 1)
 
 section delab
 
@@ -142,6 +160,9 @@ syntax "(" first_order_formula ")" : first_order_formula
 syntax:60 "!" term:max first_order_term:61* ("⋯")? : first_order_formula
 syntax:60 "!!" term:max : first_order_formula
 
+syntax:60 ".!" term:max first_order_term:61* ("⋯")? : first_order_formula
+syntax:60 ".!!" term:max : first_order_formula
+
 syntax "⊤" : first_order_formula
 syntax "⊥" : first_order_formula
 syntax:32 first_order_formula:33 " ∧ " first_order_formula:32 : first_order_formula
@@ -169,6 +190,15 @@ macro_rules
     let length := Syntax.mkNumLit (toString binders.size)
     let v ← vs.foldrM (β := Lean.TSyntax _) (init := ← `(fun x ↦ #(finSuccItr x $length))) (fun a s => `(‘ $binders* | $a ’ :> $s))
     `(Rew.substs $v |>.hom $p)
+  | `(“ $_*  | .!!$p:term ”)                        => `(Rew.emb.hom $p)
+  | `(“ $binders* | .!$p:term $vs:first_order_term* ”)   => do
+    let v ← vs.foldrM (β := Lean.TSyntax _) (init := ← `(![])) (fun a s => `(‘ $binders* | $a ’ :> $s))
+    `(Rew.embSubsts $v |>.hom $p)
+  | `(“ $binders* | .!$p:term $vs:first_order_term* ⋯ ”) =>
+    do
+    let length := Syntax.mkNumLit (toString binders.size)
+    let v ← vs.foldrM (β := Lean.TSyntax _) (init := ← `(fun x ↦ #(finSuccItr x $length))) (fun a s => `(‘ $binders* | $a ’ :> $s))
+    `(Rew.embSubsts $v |>.hom $p)
   | `(“ $_* | ⊤ ”)                                 => `(⊤)
   | `(“ $_* | ⊥ ”)                                 => `(⊥)
   | `(“ $binders* | $p ∧ $q ”)                          => `(“ $binders* | $p ” ⋏ “ $binders* | $q ”)
@@ -269,8 +299,7 @@ macro_rules
 
 #check “∀ x, ∀ y, ∀ z, ∀ v, ∀ w, x + y + z + v + w = 0”
 #check “∀ x y z v w, x + y + z + v + w = 0”
-
-#check “x y z | ∃ v w, ∀ r < z + v + 7, ∀' x + y + v = x ↔ z = w”
+#check “x y z | ∃ v w, ∀ r < z + v + 7, ∀' x + y + v = x ↔ z = .!(‘#0 + #1’) x y”
 
 section delab
 
