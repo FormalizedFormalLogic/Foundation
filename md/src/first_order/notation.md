@@ -9,9 +9,7 @@ variables `x y z` is just an example and can take any number of `ident`s.
 
 Binder notation of term takes either form:
 - Term: `‘x y z | e’`, Formula: `“x y z | e”`
-  - `x y z` is the symbol for the bound variables, `k:num`-variables denotes the terms in `Semiterm L ξ $k`/`Semiformula L ξ $k`.
-- Term: `‘x y z ⋯ | e’`, Formula: `“x y z ⋯ | e”`
-  - Almost the same as above, but used to represent `Semiterm L ξ (n + $k)`/`Semiformula L ξ (n + $k)` (`n` can be variable).
+  - `x y z` is the symbol for the bound variables, `k:num`-variables denotes the terms in `Semiterm L ξ (n + $k)`/`Semiformula L ξ (n + $k)`. (`n` can be variable)
 - Term: `‘e’`, Formula: `“e”`
   - An abbreviation of `‘ | e’`/`“ | e”`
 
