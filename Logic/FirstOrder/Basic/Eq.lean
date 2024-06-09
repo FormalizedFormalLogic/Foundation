@@ -317,16 +317,14 @@ syntax:max "∃! " first_order_formula:0 : first_order_formula
 syntax:max "∃! " ident ", " first_order_formula:0 : first_order_formula
 
 macro_rules
-  | `(“ $bd | ∃! $p:first_order_formula ”) => do
-    let (_, names) ← elabBVBinder bd
-    let v := mkIdent (Name.mkSimple ("var" ++ toString names.size))
-    let bd' ← bvBinderCons v bd
-    `(∃'! “ $bd' | $p”)
-  | `(“ $bd | ∃! $x, $p ”)                       => do
-    let (_, names) ← elabBVBinder bd
-    if names.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
-    let bd' ← bvBinderCons x bd
-    `(∃'! “ $bd' | $p ”)
+  | `(“ $binders* | ∃! $p:first_order_formula ”) => do
+    let v := mkIdent (Name.mkSimple ("var" ++ toString binders.size))
+    let binders' := binders.insertAt 0 v
+    `(∃'! “ $binders'* | $p”)
+  | `(“ $binders* | ∃! $x, $p ”)                 => do
+    if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
+    let binders' := binders.insertAt 0 x
+    `(∃'! “ $binders'* | $p ”)
 
 end BinderNotation
 

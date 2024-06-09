@@ -18,15 +18,7 @@ open Semiterm Semiformula
 
 declare_syntax_cat first_order_term
 
-syntax bvBinder := ident*
-
-partial def elabBVBinder : Syntax → MacroM (TSyntax `term × TSyntaxArray `ident)
-  | `(bvBinder | $vars*) => do
-    let n := Syntax.mkNumLit (toString vars.size)
-    return (←`(_ + $n), vars)
-  | decl                   => Macro.throwErrorAt decl "unexpected kind of bvBinder"
-
-syntax "‘" bvBinder " | "  first_order_term:0 "’" : term
+syntax "‘" ident* " | "  first_order_term:0 "’" : term
 syntax "‘" first_order_term:0 "’" : term
 
 syntax "(" first_order_term ")" : first_order_term
@@ -46,39 +38,33 @@ syntax first_order_term " ^' " num  : first_order_term
 syntax:67  "exp " first_order_term:68 : first_order_term
 
 macro_rules
-  | `(‘ $e:first_order_term ’) => `(‘ | $e ’)
-  | `(‘ $bd | ($e) ’)          => `(‘ $bd | $e ’)
-  | `(‘ $bd | $x:ident ’)      => do
-    let (n, names) ← elabBVBinder bd
-    let some x := names.getIdx? x | Macro.throwErrorAt x "error: variable did not found."
+  | `(‘ $e:first_order_term ’)       => `(‘ | $e ’)
+  | `(‘ $binders* | ($e) ’)          => `(‘ $binders* | $e ’)
+  | `(‘ $binders* | $x:ident ’)      => do
+    let some x := binders.getIdx? x | Macro.throwErrorAt x "error: variable did not found."
     let i := Syntax.mkNumLit (toString x)
-    `(@bvar _ _ $n $i)
-  | `(‘ $bd | #$x:term ’)      => do
-    let (n, _) ← elabBVBinder bd
-    `(@bvar _ _ $n $x)
-  | `(‘ $bd | &$x:term ’)      => do
-    let (n, _) ← elabBVBinder bd
-    `(@fvar _ _ $n $x)
-  | `(‘ $_ | $m:num ’)         => do
-    --let (n, _) ← elabBVBinder bd
+    `(#$i)
+  | `(‘ $_* | #$x:term ’)            => do
+    `(#$x)
+  | `(‘ $_* | &$x:term ’)            => do
+    `(&$x)
+  | `(‘ $_* | $m:num ’)              => do
     `(@Semiterm.Operator.const _ _ _ (Operator.numeral _ $m))
-  | `(‘ $bd | ⋆ ’)             => do
-    let (n, _) ← elabBVBinder bd
-    `(@Operator.const _ _ $n Operator.Star.star)
-  | `(‘ $bd | $e₁ + $e₂ ’)     => `(Semiterm.Operator.Add.add.operator ![‘ $bd | $e₁ ’, ‘ $bd | $e₂ ’])
-  | `(‘ $bd | $e₁ * $e₂ ’)     => `(Semiterm.Operator.Mul.mul.operator ![‘ $bd | $e₁ ’, ‘ $bd | $e₂ ’])
-  | `(‘ $bd | $e₁ ^ $e₂ ’)     => `(Semiterm.Operator.Pow.pow.operator ![‘ $bd | $e₁ ’, ‘ $bd | $e₂ ’])
-  | `(‘ $bd | $e ^' $n ’)      => `((Semiterm.Operator.npow _ $n).operator ![‘ $bd | $e ’])
-  | `(‘ $bd | exp $e ’)        => `(Semiterm.Operator.Exp.exp.operator ![‘ $bd | $e ’])
-  | `(‘ $_  | !!$t:term ’)   => `($t)
-  | `(‘ $bd | !$t:term $vs:first_order_term* ’)   => do
-    let v ← vs.foldrM (β := Lean.TSyntax _) (init := ← `(![])) (fun a s => `(‘ $bd | $a ’ :> $s))
+  | `(‘ $_* | ⋆ ’)                   => do
+    `(Operator.const Operator.Star.star)
+  | `(‘ $binders* | $e₁ + $e₂ ’)     => `(Semiterm.Operator.Add.add.operator ![‘ $binders* | $e₁ ’, ‘ $binders* | $e₂ ’])
+  | `(‘ $binders* | $e₁ * $e₂ ’)     => `(Semiterm.Operator.Mul.mul.operator ![‘ $binders* | $e₁ ’, ‘ $binders* | $e₂ ’])
+  | `(‘ $binders* | $e₁ ^ $e₂ ’)     => `(Semiterm.Operator.Pow.pow.operator ![‘ $binders* | $e₁ ’, ‘ $binders* | $e₂ ’])
+  | `(‘ $binders* | $e ^' $n ’)      => `((Semiterm.Operator.npow _ $n).operator ![‘ $binders* | $e ’])
+  | `(‘ $binders* | exp $e ’)        => `(Semiterm.Operator.Exp.exp.operator ![‘ $binders* | $e ’])
+  | `(‘ $_*       | !!$t:term ’)     => `($t)
+  | `(‘ $binders* | !$t:term $vs:first_order_term* ’)   => do
+    let v ← vs.foldrM (β := Lean.TSyntax _) (init := ← `(![])) (fun a s => `(‘ $binders* | $a ’ :> $s))
     `(Rew.substs $v $t)
-  | `(‘ $bd | !$t:term $vs:first_order_term* ⋯ ’) =>
+  | `(‘ $binders* | !$t:term $vs:first_order_term* ⋯ ’) =>
     do
-    let (_, names) ← elabBVBinder bd
-    let length := Syntax.mkNumLit (toString names.size)
-    let v ← vs.foldrM (β := Lean.TSyntax _) (init := ← `(fun x ↦ #(finSuccItr x $length))) (fun a s => `(‘ $bd | $a ’ :> $s))
+    let length := Syntax.mkNumLit (toString binders.size)
+    let v ← vs.foldrM (β := Lean.TSyntax _) (init := ← `(fun x ↦ #(finSuccItr x $length))) (fun a s => `(‘ $binders* | $a ’ :> $s))
     `(Rew.substs $v $t)
 
 #check (‘x | &4 + (4 + 2 * #0 + #1)’ : Semiterm ℒₒᵣ ℕ 1)
@@ -148,7 +134,7 @@ open Semiformula
 
 declare_syntax_cat first_order_formula
 
-syntax "“" bvBinder " | "  first_order_formula:0 "”" : term
+syntax "“" ident* " | "  first_order_formula:0 "”" : term
 syntax "“" first_order_formula:0 "”" : term
 
 syntax "(" first_order_formula ")" : first_order_formula
@@ -171,70 +157,59 @@ syntax:max "∃' " first_order_formula:0 : first_order_formula
 syntax:max "∀[" first_order_formula "] " first_order_formula:0 : first_order_formula
 syntax:max "∃[" first_order_formula "] " first_order_formula:0 : first_order_formula
 
-partial def bvBinderCons (x : TSyntax `ident) : TSyntax `LO.FirstOrder.BinderNotation.bvBinder → MacroM (TSyntax `LO.FirstOrder.BinderNotation.bvBinder)
-  | `(bvBinder | $vars*)   => `(bvBinder | $x $vars*)
-  | decl                   => Macro.throwErrorAt decl "unexpected kind of bvBinder"
-
 macro_rules
   | `(“ $e:first_order_formula ”)                 => `(“ | $e ”)
-  | `(“ $bd | ($e:first_order_formula) ”)         => `(“ $bd | $e ”)
-  | `(“ $_  | !!$p:term ”)                        => `($p)
-  | `(“ $bd | !$p:term $vs:first_order_term* ”)   => do
-    let v ← vs.foldrM (β := Lean.TSyntax _) (init := ← `(![])) (fun a s => `(‘ $bd | $a ’ :> $s))
+  | `(“ $binders* | ($e:first_order_formula) ”)         => `(“ $binders* | $e ”)
+  | `(“ $_*  | !!$p:term ”)                        => `($p)
+  | `(“ $binders* | !$p:term $vs:first_order_term* ”)   => do
+    let v ← vs.foldrM (β := Lean.TSyntax _) (init := ← `(![])) (fun a s => `(‘ $binders* | $a ’ :> $s))
     `(Rew.substs $v |>.hom $p)
-  | `(“ $bd | !$p:term $vs:first_order_term* ⋯ ”) =>
+  | `(“ $binders* | !$p:term $vs:first_order_term* ⋯ ”) =>
     do
-    let (_, names) ← elabBVBinder bd
-    let length := Syntax.mkNumLit (toString names.size)
-    let v ← vs.foldrM (β := Lean.TSyntax _) (init := ← `(fun x ↦ #(finSuccItr x $length))) (fun a s => `(‘ $bd | $a ’ :> $s))
+    let length := Syntax.mkNumLit (toString binders.size)
+    let v ← vs.foldrM (β := Lean.TSyntax _) (init := ← `(fun x ↦ #(finSuccItr x $length))) (fun a s => `(‘ $binders* | $a ’ :> $s))
     `(Rew.substs $v |>.hom $p)
-  | `(“ $_ | ⊤ ”)                                 => `(⊤)
-  | `(“ $_ | ⊥ ”)                                 => `(⊥)
-  | `(“ $bd | $p ∧ $q ”)                          => `(“ $bd | $p ” ⋏ “ $bd | $q ”)
-  | `(“ $bd | $p ∨ $q ”)                          => `(“ $bd | $p ” ⋎ “ $bd | $q ”)
-  | `(“ $bd | ¬$p ”)                              => `(~“ $bd | $p ”)
-  | `(“ $bd | $p → $q ”)                          => `(“ $bd | $p ” ⟶ “ $bd | $q ”)
-  | `(“ $bd | $p ↔ $q ”)                          => `(“ $bd | $p ” ⟷ “ $bd | $q ”)
-  | `(“ $bd | ∀ $xs*, $p ”)                       => do
+  | `(“ $_* | ⊤ ”)                                 => `(⊤)
+  | `(“ $_* | ⊥ ”)                                 => `(⊥)
+  | `(“ $binders* | $p ∧ $q ”)                          => `(“ $binders* | $p ” ⋏ “ $binders* | $q ”)
+  | `(“ $binders* | $p ∨ $q ”)                          => `(“ $binders* | $p ” ⋎ “ $binders* | $q ”)
+  | `(“ $binders* | ¬$p ”)                              => `(~“ $binders* | $p ”)
+  | `(“ $binders* | $p → $q ”)                          => `(“ $binders* | $p ” ⟶ “ $binders* | $q ”)
+  | `(“ $binders* | $p ↔ $q ”)                          => `(“ $binders* | $p ” ⟷ “ $binders* | $q ”)
+  | `(“ $binders* | ∀ $xs*, $p ”)                       => do
     let xs := xs.reverse
-    let bd' : TSyntax `LO.FirstOrder.BinderNotation.bvBinder ← xs.foldrM
-      (fun z bd' ↦ do
-        let (_, names) ← elabBVBinder bd'
-        if names.elem z then Macro.throwErrorAt z "error: variable is duplicated." else
-        bvBinderCons z bd')
-      bd
-    let s : TSyntax `term ← xs.size.rec `(“ $bd' | $p ”) (fun _ q ↦ q >>= fun q ↦ `(∀' $q))
+    let binders' : TSyntaxArray `ident ← xs.foldrM
+      (fun z binders' ↦ do
+        if binders.elem z then Macro.throwErrorAt z "error: variable is duplicated." else
+        return binders'.insertAt 0 z)
+      binders
+    let s : TSyntax `term ← xs.size.rec `(“ $binders'* | $p ”) (fun _ q ↦ q >>= fun q ↦ `(∀' $q))
     return s
-  | `(“ $bd | ∃ $xs*, $p ”)                       => do
+  | `(“ $binders* | ∃ $xs*, $p ”)                       => do
     let xs := xs.reverse
-    let bd' : TSyntax `LO.FirstOrder.BinderNotation.bvBinder ← xs.foldrM
-      (fun z bd' ↦ do
-        let (_, names) ← elabBVBinder bd'
-        if names.elem z then Macro.throwErrorAt z "error: variable is duplicated." else
-        bvBinderCons z bd')
-      bd
-    let s : TSyntax `term ← xs.size.rec `(“ $bd' | $p ”) (fun _ q ↦ q >>= fun q ↦ `(∃' $q))
+    let binders' : TSyntaxArray `ident ← xs.foldrM
+      (fun z binders' ↦ do
+        if binders.elem z then Macro.throwErrorAt z "error: variable is duplicated." else
+        return binders'.insertAt 0 z)
+      binders
+    let s : TSyntax `term ← xs.size.rec `(“ $binders'* | $p ”) (fun _ q ↦ q >>= fun q ↦ `(∃' $q))
     return s
-  | `(“ $bd | ∀' $p ”)                            => do
-    let (_, names) ← elabBVBinder bd
-    let v := mkIdent (Name.mkSimple ("var" ++ toString names.size))
-    let bd' ← bvBinderCons v bd
-    `(∀' “ $bd' | $p ”)
-  | `(“ $bd | ∃' $p ”)                            => do
-    let (_, names) ← elabBVBinder bd
-    let v := mkIdent (Name.mkSimple ("var" ++ toString names.size))
-    let bd' ← bvBinderCons v bd
-    `(∃' “ $bd' | $p ”)
-  | `(“ $bd | ∀[ $p ] $q ”)                       => do
-    let (_, names) ← elabBVBinder bd
-    let v := mkIdent (Name.mkSimple ("var" ++ toString names.size))
-    let bd' ← bvBinderCons v bd
-    `(∀[“ $bd' | $p ”] “ $bd' | $q ”)
-  | `(“ $bd | ∃[ $p ] $q ”)                       => do
-    let (_, names) ← elabBVBinder bd
-    let v := mkIdent (Name.mkSimple ("var" ++ toString names.size))
-    let bd' ← bvBinderCons v bd
-    `(∃[“ $bd' | $p ”] “ $bd' | $q ”)
+  | `(“ $binders* | ∀' $p ”)                            => do
+    let v := mkIdent (Name.mkSimple ("var" ++ toString binders.size))
+    let binders' := binders.insertAt 0 v
+    `(∀' “ $binders'* | $p ”)
+  | `(“ $binders* | ∃' $p ”)                            => do
+    let v := mkIdent (Name.mkSimple ("var" ++ toString binders.size))
+    let binders' := binders.insertAt 0 v
+    `(∃' “ $binders'* | $p ”)
+  | `(“ $binders* | ∀[ $p ] $q ”)                       => do
+    let v := mkIdent (Name.mkSimple ("var" ++ toString binders.size))
+    let binders' := binders.insertAt 0 v
+    `(∀[“ $binders'* | $p ”] “ $binders* | $q ”)
+  | `(“ $binders* | ∃[ $p ] $q ”)                       => do
+    let v := mkIdent (Name.mkSimple ("var" ++ toString binders.size))
+    let binders' := binders.insertAt 0 v
+    `(∃[“ $binders'* | $p ”] “ $binders'* | $q ”)
 
 syntax:45 first_order_term:45 " = " first_order_term:0 : first_order_formula
 syntax:45 first_order_term:45 " < " first_order_term:0 : first_order_formula
@@ -256,47 +231,41 @@ syntax:max "∃ " ident " ≤ " first_order_term ", " first_order_formula:0 : fi
 syntax:max "∃ " ident " ∈ " first_order_term ", " first_order_formula:0 : first_order_formula
 
 macro_rules
-  | `(“ $bd | ∀ $x < $t, $p ”) => do
-    let (_, names) ← elabBVBinder bd
-    if names.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
-    let bd' ← bvBinderCons x bd
-    `(Semiformula.ballLT ‘ $bd | $t ’ “ $bd' | $p ”)
-  | `(“ $bd | ∀ $x ≤ $t, $p ”) => do
-    let (_, names) ← elabBVBinder bd
-    if names.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
-    let bd' ← bvBinderCons x bd
-    `(Semiformula.ballLE ‘ $bd | $t ’ “ $bd' | $p ”)
-  | `(“ $bd | ∀ $x ∈ $t, $p ”) => do
-    let (_, names) ← elabBVBinder bd
-    if names.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
-    let bd' ← bvBinderCons x bd
-    `(Semiformula.ballMem ‘ $bd | $t ’ “ $bd' | $p ”)
-  | `(“ $bd | ∃ $x < $t, $p ”) => do
-    let (_, names) ← elabBVBinder bd
-    if names.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
-    let bd' ← bvBinderCons x bd
-    `(Semiformula.bexLT ‘ $bd | $t ’ “ $bd' | $p ”)
-  | `(“ $bd | ∃ $x ≤ $t, $p ”) => do
-    let (_, names) ← elabBVBinder bd
-    if names.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
-    let bd' ← bvBinderCons x bd
-    `(Semiformula.bexLE ‘ $bd | $t ’ “ $bd' | $p ”)
-  | `(“ $bd | ∃ $x ∈ $t, $p ”) => do
-    let (_, names) ← elabBVBinder bd
-    if names.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
-    let bd' ← bvBinderCons x bd
-    `(Semiformula.bexMem ‘ $bd | $t ’ “ $bd' | $p ”)
-  | `(“ $bd | $t:first_order_term = $u:first_order_term ”) => `(Semiformula.Operator.operator Operator.Eq.eq ![‘ $bd | $t ’, ‘ $bd | $u ’])
-  | `(“ $bd | $t:first_order_term < $u:first_order_term ”) => `(Semiformula.Operator.operator Operator.LT.lt ![‘ $bd | $t ’, ‘ $bd | $u ’])
-  | `(“ $bd | $t:first_order_term > $u:first_order_term ”) => `(Semiformula.Operator.operator Operator.LT.lt ![‘ $bd | $u ’, ‘ $bd | $t’])
-  | `(“ $bd | $t:first_order_term ≤ $u:first_order_term ”) => `(Semiformula.Operator.operator Operator.LE.le ![‘ $bd | $t ’, ‘ $bd | $u ’])
-  | `(“ $bd | $t:first_order_term ≥ $u:first_order_term ”) => `(Semiformula.Operator.operator Operator.LE.le ![‘ $bd | $u ’, ‘ $bd | $t ’])
-  | `(“ $bd | $t:first_order_term ∈ $u:first_order_term ”) => `(Semiformula.Operator.operator Operator.Mem.mem ![‘ $bd | $t ’, ‘ $bd | $u ’])
-  | `(“ $bd | $t:first_order_term ∋ $u:first_order_term ”) => `(Semiformula.Operator.operator Operator.Mem.mem ![‘ $bd | $u ’, ‘ $bd | $t ’])
-  | `(“ $bd | $t:first_order_term ≠ $u:first_order_term ”) => `(~(Semiformula.Operator.operator Operator.Eq.eq ![‘ $bd | $t ’, ‘ $bd | $u ’]))
-  | `(“ $bd | $t:first_order_term ≮ $u:first_order_term ”) => `(~(Semiformula.Operator.operator Operator.LT.lt ![‘ $bd | $t ’, ‘ $bd | $u ’]))
-  | `(“ $bd | $t:first_order_term ≰ $u:first_order_term ”) => `(~(Semiformula.Operator.operator Operator.LE.le ![‘ $bd | $t ’, ‘ $bd | $u ’]))
-  | `(“ $bd | $t:first_order_term ∉ $u:first_order_term ”) => `(~(Semiformula.Operator.operator Operator.Mem.mem ![‘ $bd | $t ’, ‘ $bd | $u ’]))
+  | `(“ $binders* | ∀ $x < $t, $p ”) => do
+    if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
+    let binders' := binders.insertAt 0 x
+    `(Semiformula.ballLT ‘ $binders* | $t ’ “ $binders'* | $p ”)
+  | `(“ $binders* | ∀ $x ≤ $t, $p ”) => do
+    if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
+    let binders' := binders.insertAt 0 x
+    `(Semiformula.ballLE ‘ $binders* | $t ’ “ $binders'* | $p ”)
+  | `(“ $binders* | ∀ $x ∈ $t, $p ”) => do
+    if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
+    let binders' := binders.insertAt 0 x
+    `(Semiformula.ballMem ‘ $binders* | $t ’ “ $binders'* | $p ”)
+  | `(“ $binders* | ∃ $x < $t, $p ”) => do
+    if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
+    let binders' := binders.insertAt 0 x
+    `(Semiformula.bexLT ‘ $binders* | $t ’ “ $binders'* | $p ”)
+  | `(“ $binders* | ∃ $x ≤ $t, $p ”) => do
+    if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
+    let binders' := binders.insertAt 0 x
+    `(Semiformula.bexLE ‘ $binders* | $t ’ “ $binders'* | $p ”)
+  | `(“ $binders* | ∃ $x ∈ $t, $p ”) => do
+    if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
+    let binders' := binders.insertAt 0 x
+    `(Semiformula.bexMem ‘ $binders* | $t ’ “ $binders'* | $p ”)
+  | `(“ $binders* | $t:first_order_term = $u:first_order_term ”) => `(Semiformula.Operator.operator Operator.Eq.eq ![‘ $binders* | $t ’, ‘ $binders* | $u ’])
+  | `(“ $binders* | $t:first_order_term < $u:first_order_term ”) => `(Semiformula.Operator.operator Operator.LT.lt ![‘ $binders* | $t ’, ‘ $binders* | $u ’])
+  | `(“ $binders* | $t:first_order_term > $u:first_order_term ”) => `(Semiformula.Operator.operator Operator.LT.lt ![‘ $binders* | $u ’, ‘ $binders* | $t’])
+  | `(“ $binders* | $t:first_order_term ≤ $u:first_order_term ”) => `(Semiformula.Operator.operator Operator.LE.le ![‘ $binders* | $t ’, ‘ $binders* | $u ’])
+  | `(“ $binders* | $t:first_order_term ≥ $u:first_order_term ”) => `(Semiformula.Operator.operator Operator.LE.le ![‘ $binders* | $u ’, ‘ $binders* | $t ’])
+  | `(“ $binders* | $t:first_order_term ∈ $u:first_order_term ”) => `(Semiformula.Operator.operator Operator.Mem.mem ![‘ $binders* | $t ’, ‘ $binders* | $u ’])
+  | `(“ $binders* | $t:first_order_term ∋ $u:first_order_term ”) => `(Semiformula.Operator.operator Operator.Mem.mem ![‘ $binders* | $u ’, ‘ $binders* | $t ’])
+  | `(“ $binders* | $t:first_order_term ≠ $u:first_order_term ”) => `(~(Semiformula.Operator.operator Operator.Eq.eq ![‘ $binders* | $t ’, ‘ $binders* | $u ’]))
+  | `(“ $binders* | $t:first_order_term ≮ $u:first_order_term ”) => `(~(Semiformula.Operator.operator Operator.LT.lt ![‘ $binders* | $t ’, ‘ $binders* | $u ’]))
+  | `(“ $binders* | $t:first_order_term ≰ $u:first_order_term ”) => `(~(Semiformula.Operator.operator Operator.LE.le ![‘ $binders* | $t ’, ‘ $binders* | $u ’]))
+  | `(“ $binders* | $t:first_order_term ∉ $u:first_order_term ”) => `(~(Semiformula.Operator.operator Operator.Mem.mem ![‘ $binders* | $t ’, ‘ $binders* | $u ’]))
 
 #check “∀ x, ∀ y, ∀ z, ∀ v, ∀ w, x + y + z + v + w = 0”
 #check “∀ x y z v w, x + y + z + v + w = 0”

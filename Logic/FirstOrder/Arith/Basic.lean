@@ -166,16 +166,14 @@ syntax:max "∀ " ident " <⁺ " first_order_term ", " first_order_formula:0 : f
 syntax:max "∃ " ident " <⁺ " first_order_term ", " first_order_formula:0 : first_order_formula
 
 macro_rules
-  | `(“ $bd | ∀ $x <⁺ $t, $p ”) => do
-    let (_, names) ← elabBVBinder bd
-    if names.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
-    let bd' ← bvBinderCons x bd
-    `(Semiformula.ballLTSucc ‘ $bd | $t ’ “ $bd' | $p ”)
-  | `(“ $bd | ∃ $x <⁺ $t, $p ”) => do
-    let (_, names) ← elabBVBinder bd
-    if names.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
-    let bd' ← bvBinderCons x bd
-    `(Semiformula.bexLTSucc ‘ $bd | $t ’ “ $bd' | $p ”)
+  | `(“ $binders* | ∀ $x <⁺ $t, $p ”) => do
+    if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
+    let binders' := binders.insertAt 0 x
+    `(Semiformula.ballLTSucc ‘ $binders* | $t ’ “ $binders'* | $p ”)
+  | `(“ $binders* | ∃ $x <⁺ $t, $p ”) => do
+    if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
+    let binders' := binders.insertAt 0 x
+    `(Semiformula.bexLTSucc ‘ $binders* | $t ’ “ $binders'* | $p ”)
 
 end BinderNotation
 
