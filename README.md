@@ -17,35 +17,6 @@ Formalizing Logic in Lean4
 - [Superintuitionistic Logic](https://iehality.github.io/lean4-logic/book/superntuitionistic/index.html): Intuitionistic propositional logic and some variants.
 - [Standard Modal Logic](https://iehality.github.io/lean4-logic/book/standard_modal/index.html): Propositional logic extended modal operators $\Box$ and $\Diamond$.
 
-## Classical Propositional Logic
-
-### Definition
-
-|                                     |                                     | Definition                    | Notation |
-| :----:                              | ----                                | ----                          | :----:   |
-| $(\rm Cut)\vdash_\mathrm{T} \Gamma$ | Derivation in Tait-Calculus + Cut   | [LO.Propositional.Classical.Derivation](https://iehality.github.io/lean4-logic/Logic/Propositional/Classical/Basic/Calculus.html#LO.Propositional.Classical.Derivation) | `⊢¹ Γ`   |
-| $v \models p$                       | Tarski's truth definition condition | [LO.Propositional.Classical.semantics](https://iehality.github.io/lean4-logic/Logic/Propositional/Classical/Basic/Semantics.html#LO.Propositional.Classical.semantics) | `v ⊧ p`  |
-
-### Theorem
-
-- [Soundness theorem](https://iehality.github.io/lean4-logic/Logic/Propositional/Classical/Basic/Completeness.html#LO.Propositional.Classical.soundness)
-  ```lean
-  theorem LO.Propositional.Classical.soundness
-    {α : Type u_1}
-    {T : LO.Propositional.Theory α}
-    {p : LO.Propositional.Formula α} :
-    T ⊢ p → T ⊨ p
-  ```
-
-- [Completeness theorem](https://iehality.github.io/lean4-logic/Logic/Propositional/Classical/Basic/Completeness.html#LO.Propositional.Classical.completeness)
-  ```lean
-  noncomputable def LO.Propositional.Classical.completeness
-      {α : Type u_1}
-      {T : LO.Propositional.Theory α}
-      {p : LO.Propositional.Formula α} :
-      T ⊨ p → T ⊢ p
-  ```
-
 ## First-Order Logic
 
 ### Definition
