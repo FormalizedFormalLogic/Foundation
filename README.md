@@ -2,53 +2,20 @@
 
 Formalizing Logic in Lean4
 
+## Documents
+
 - [Book](https://iehality.github.io/lean4-logic/book): Summary of results. **TODO**
 - [Full Documentation](https://iehality.github.io/lean4-logic/docs)
 
-## Table of Contents
+## Main Results
 
-- [lean4-logic](#lean4-logic)
-  - [Table of Contents](#table-of-contents)
-  - [Usage](#usage)
-  - [Structure](#structure)
-  - [Classical Propositional Logic](#classical-propositional-logic)
-    - [Definition](#definition)
-    - [Theorem](#theorem)
-  - [First-Order Logic](#first-order-logic)
-    - [Definition](#definition-1)
-    - [Theorem](#theorem-1)
-  - Non-Classical
-    - [Superintuitionistic Logic](https://iehality.github.io/lean4-logic/book/superntuitionistic/index.html): Intuitionistic propositional logic and some variants.
-    - [Standard Modal Logic](https://iehality.github.io/lean4-logic/book/standard_modal/index.html): Propositional logic extended modal operators $\Box$ and $\Diamond$.
-  - [References](#references)
-
-## Usage
-  Add following to `lakefile.lean`.
-  ```lean
-  require logic from git "https://github.com/iehality/lean4-logic"
-  ```
-
-## Structure
-
-The key results are summarised in `Logic/Summary.lean`.
-
-- **Logic**
-  - **Vorspiel**: Supplementary definitions and theorems for Mathlib
-  - **Logic**
-  - **AutoProver**: Automated theorem proving based on proof search
-  - **Propositional**: Propositional logic
-    - **Classical**: Classical propositional logic
-      - **Basic**
-    - **Intuitionistic**: Intuitionistic propositional logic
-      - **Kriple**: Kripke semantics
-  - **FirstOrder**: First-order logic
-    - **Basic**
-    - **Computability**: encodeing, computability
-    - **Completeness**: Completeness theorem
-    - **Arith**: Arithmetic
-    - **Incompleteness**: Incompleteness theorem
-  - **Modal**: Variants of modal logics
-    - **Normal**: Normal propositional modal logic
+- [Classical Propositional Logic](#classical-propositional-logic)
+  - [Definition](#definition)
+  - [Theorem](#theorem)
+- [First-Order Logic](https://iehality.github.io/lean4-logic/book/first_order/index.html): First-Order Logic and Arithmetic.
+  - [Gödel's First Incompleteness](https://iehality.github.io/lean4-logic/book/first_order/goedel1.html)
+- [Superintuitionistic Logic](https://iehality.github.io/lean4-logic/book/superntuitionistic/index.html): Intuitionistic propositional logic and some variants.
+- [Standard Modal Logic](https://iehality.github.io/lean4-logic/book/standard_modal/index.html): Propositional logic extended modal operators $\Box$ and $\Diamond$.
 
 ## Classical Propositional Logic
 
@@ -123,42 +90,3 @@ The key results are summarised in `Logic/Summary.lean`.
       {σ : LO.FirstOrder.Sentence L} :
       T ⊨ σ → T ⊢ σ
   ```
-
-- [Gödel's first incompleteness theorem](https://iehality.github.io/lean4-logic/Logic/FirstOrder/Incompleteness/FirstIncompleteness.html#LO.FirstOrder.Arith.first_incompleteness)
-  ```lean
-  theorem LO.FirstOrder.Arith.first_incompleteness
-      (T : LO.FirstOrder.Theory ℒₒᵣ)
-      [DecidablePred T]
-      [𝐄𝐐 ≼ T]
-      [𝐏𝐀⁻ ≼ T]
-      [LO.FirstOrder.Arith.SigmaOneSound T]
-      [LO.FirstOrder.Theory.Computable T] :
-      ¬LO.System.Complete T
-  ```
-  - [undecidable sentence](https://iehality.github.io/lean4-logic/Logic/FirstOrder/Incompleteness/FirstIncompleteness.html#LO.FirstOrder.Arith.undecidable)
-    ```lean
-    theorem LO.FirstOrder.Arith.undecidable
-        (T : LO.FirstOrder.Theory ℒₒᵣ)
-        [DecidablePred T]
-        [𝐄𝐐 ≼ T]
-        [𝐏𝐀⁻ ≼ T]
-        [LO.FirstOrder.Arith.SigmaOneSound T]
-        [LO.FirstOrder.Theory.Computable T] :
-        T ⊬ LO.FirstOrder.Arith.FirstIncompleteness.undecidable T ∧
-        T ⊬ ~LO.FirstOrder.Arith.FirstIncompleteness.undecidable T
-    ```
-
-## References
-- J. Han, F. van Doorn, A formalization of forcing and the unprovability of the continuum hypothesis
-- W. Pohlers, Proof Theory: The First Step into Impredicativity
-- P. Hájek, P. Pudlák, Metamathematics of First-Order Arithmetic
-- R. Kaye, Models of Peano arithmetic
-- 田中 一之, ゲーデルと20世紀の論理学
-- 菊池 誠 (編者), 『数学における証明と真理 ─ 様相論理と数学基礎論』
-- P. Blackburn, M. de Rijke, Y. Venema, "Modal Logic"
-- Open Logic Project, ["The Open Logic Text"](https://builds.openlogicproject.org/)
-- R. Hakli, S. Negri, "Does the deduction theorem fail for modal logic?"
-- G. Boolos, "The Logic of Provability"
-- Huayu Guo, Dongheng Chen, Bruno Bentzen, _"Verified completeness in Henkin-style for intuitionistic propositional logic"_
-  - https://arxiv.org/abs/2310.01916
-  - https://github.com/bbentzen/ipl

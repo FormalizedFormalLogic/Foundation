@@ -14,6 +14,9 @@
 
 - [Classical Propositional Logic](./classical_propositional/README.md)
 - [First-Order Logic](./first_order/README.md)
+  - [Arithmetics](./first_order/arithmetics.md)
+    - [Theories of Arithmetics](./first_order/arithmetic_theories.md)
+    - [Gödel's First Incompleteness Theorem](./first_order/goedel1.md)
 
 ---
 
