@@ -18,5 +18,7 @@ import Arithmetization.OmegaOne.Basic
 import Arithmetization.OmegaOne.Nuon
 
 import Arithmetization.ISigmaOne.Bit
-import Arithmetization.ISigmaOne.HFS
-import Arithmetization.ISigmaOne.PRF
+import Arithmetization.ISigmaOne.HFS.Basic
+import Arithmetization.ISigmaOne.HFS.Seq
+import Arithmetization.ISigmaOne.HFS.PRF
+import Arithmetization.ISigmaOne.HFS.Supplemental
