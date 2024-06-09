@@ -297,7 +297,7 @@ end ModelOfSatEq
 namespace Semiformula
 
 def existsUnique (p : Semiformula L μ (n + 1)) : Semiformula L μ n :=
-  “⋯ | ∃ y, !p y ⋯ ∧ ∀ z, !p z ⋯ → z = y”
+  “∃ y, !p y ⋯ ∧ ∀ z, !p z ⋯ → z = y”
 
 prefix:64 "∃'! " => existsUnique
 

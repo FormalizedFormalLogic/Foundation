@@ -18,11 +18,10 @@ open Semiterm Semiformula
 
 declare_syntax_cat first_order_term
 
-syntax bvBinder := ident* ("⋯")?
+syntax bvBinder := ident*
 
 partial def elabBVBinder : Syntax → MacroM (TSyntax `term × TSyntaxArray `ident)
-  | `(bvBinder | $vars*)   => return (Syntax.mkNumLit (toString vars.size), vars)
-  | `(bvBinder | $vars* ⋯) => do
+  | `(bvBinder | $vars*) => do
     let n := Syntax.mkNumLit (toString vars.size)
     return (←`(_ + $n), vars)
   | decl                   => Macro.throwErrorAt decl "unexpected kind of bvBinder"
@@ -82,7 +81,7 @@ macro_rules
     let v ← vs.foldrM (β := Lean.TSyntax _) (init := ← `(fun x ↦ #(finSuccItr x $length))) (fun a s => `(‘ $bd | $a ’ :> $s))
     `(Rew.substs $v $t)
 
-#check ‘ x ⋯ | &4 + (4 + 2 * #0 + #1)’
+#check (‘x | &4 + (4 + 2 * #0 + #1)’ : Semiterm ℒₒᵣ ℕ 1)
 
 section delab
 
@@ -93,7 +92,7 @@ def unexpsnderNatLit : Unexpander
 
 @[app_unexpander Semiterm.Operator.const]
 def unexpsnderOperatorConst : Unexpander
-  | `($_ $z:num) => `(‘ ⋯ | $z:num ’)
+  | `($_ $z:num) => `(‘ $z:num ’)
   | _ => throw ()
 
 @[app_unexpander Semiterm.Operator.Add.add]
@@ -106,42 +105,42 @@ def unexpsnderMul : Unexpander
 
 @[app_unexpander Semiterm.Operator.operator]
 def unexpandFuncArith : Unexpander
-  | `($_ op(+) ![‘ ⋯ | $t ’, ‘ ⋯ | $u ’]) => `(‘ ⋯ | ($t    + $u   ) ’)
-  | `($_ op(+) ![‘ ⋯ | $t ’, #$x       ]) => `(‘ ⋯ | ($t    + #$x  ) ’)
-  | `($_ op(+) ![‘ ⋯ | $t ’, &$x       ]) => `(‘ ⋯ | ($t    + &$x  ) ’)
-  | `($_ op(+) ![‘ ⋯ | $t ’, $u        ]) => `(‘ ⋯ | ($t    + !$u ⋯) ’)
-  | `($_ op(+) ![#$x,        ‘ ⋯ | $u ’]) => `(‘ ⋯ | (#$x   + $u   ) ’)
-  | `($_ op(+) ![#$x,        #$y       ]) => `(‘ ⋯ | (#$x   + #$y  ) ’)
-  | `($_ op(+) ![#$x,        &$y       ]) => `(‘ ⋯ | (#$x   + &$y  ) ’)
-  | `($_ op(+) ![#$x,        $u        ]) => `(‘ ⋯ | (#$x   + !$u ⋯) ’)
-  | `($_ op(+) ![&$x,        ‘ ⋯ | $u ’]) => `(‘ ⋯ | (&$x   + $u   ) ’)
-  | `($_ op(+) ![&$x,        #$y       ]) => `(‘ ⋯ | (&$x   + #$y  ) ’)
-  | `($_ op(+) ![&$x,        &$y       ]) => `(‘ ⋯ | (&$x   + &$y  ) ’)
-  | `($_ op(+) ![&$x,        $u        ]) => `(‘ ⋯ | (&$x   + !$u ⋯) ’)
-  | `($_ op(+) ![$t,         ‘ ⋯ | $u ’]) => `(‘ ⋯ | (!$t ⋯ + $u   ) ’)
-  | `($_ op(+) ![$t,         #$y       ]) => `(‘ ⋯ | (!$t ⋯ + #$y  ) ’)
-  | `($_ op(+) ![$t,         &$y       ]) => `(‘ ⋯ | (!$t ⋯ + &$y  ) ’)
-  | `($_ op(+) ![$t,         $u        ]) => `(‘ ⋯ | (!$t ⋯ + !$u ⋯) ’)
+  | `($_ op(+) ![‘ $t ’, ‘ $u ’]) => `(‘ ($t    + $u  ) ’)
+  | `($_ op(+) ![‘ $t ’, #$x   ]) => `(‘ ($t    + #$x ) ’)
+  | `($_ op(+) ![‘ $t ’, &$x   ]) => `(‘ ($t    + &$x ) ’)
+  | `($_ op(+) ![‘ $t ’, $u    ]) => `(‘ ($t    + !!$u) ’)
+  | `($_ op(+) ![#$x,    ‘ $u ’]) => `(‘ (#$x   + $u  ) ’)
+  | `($_ op(+) ![#$x,    #$y   ]) => `(‘ (#$x   + #$y ) ’)
+  | `($_ op(+) ![#$x,    &$y   ]) => `(‘ (#$x   + &$y ) ’)
+  | `($_ op(+) ![#$x,    $u    ]) => `(‘ (#$x   + !!$u) ’)
+  | `($_ op(+) ![&$x,    ‘ $u ’]) => `(‘ (&$x   + $u  ) ’)
+  | `($_ op(+) ![&$x,    #$y   ]) => `(‘ (&$x   + #$y ) ’)
+  | `($_ op(+) ![&$x,    &$y   ]) => `(‘ (&$x   + &$y ) ’)
+  | `($_ op(+) ![&$x,    $u    ]) => `(‘ (&$x   + !!$u) ’)
+  | `($_ op(+) ![$t,     ‘ $u ’]) => `(‘ (!!$t + $u   ) ’)
+  | `($_ op(+) ![$t,     #$y   ]) => `(‘ (!!$t + #$y  ) ’)
+  | `($_ op(+) ![$t,     &$y   ]) => `(‘ (!!$t + &$y  ) ’)
+  | `($_ op(+) ![$t,     $u    ]) => `(‘ (!!$t + !!$u ) ’)
 
-  | `($_ op(*) ![‘ ⋯ | $t ’, ‘ ⋯ | $u ’]) => `(‘ ⋯ | ($t    * $u   ) ’)
-  | `($_ op(*) ![‘ ⋯ | $t ’, #$x       ]) => `(‘ ⋯ | ($t    * #$x  ) ’)
-  | `($_ op(*) ![‘ ⋯ | $t ’, &$x       ]) => `(‘ ⋯ | ($t    * &$x  ) ’)
-  | `($_ op(*) ![‘ ⋯ | $t ’, $u        ]) => `(‘ ⋯ | ($t    * !$u ⋯) ’)
-  | `($_ op(*) ![#$x,        ‘ ⋯ | $u ’]) => `(‘ ⋯ | (#$x   * $u   ) ’)
-  | `($_ op(*) ![#$x,        #$y       ]) => `(‘ ⋯ | (#$x   * #$y  ) ’)
-  | `($_ op(*) ![#$x,        &$y       ]) => `(‘ ⋯ | (#$x   * &$y  ) ’)
-  | `($_ op(*) ![#$x,        $u        ]) => `(‘ ⋯ | (#$x   * !$u ⋯) ’)
-  | `($_ op(*) ![&$x,        ‘ ⋯ | $u ’]) => `(‘ ⋯ | (&$x   * $u   ) ’)
-  | `($_ op(*) ![&$x,        #$y       ]) => `(‘ ⋯ | (&$x   * #$y  ) ’)
-  | `($_ op(*) ![&$x,        &$y       ]) => `(‘ ⋯ | (&$x   * &$y  ) ’)
-  | `($_ op(*) ![&$x,        $u        ]) => `(‘ ⋯ | (&$x   * !$u ⋯) ’)
-  | `($_ op(*) ![$t,         ‘ ⋯ | $u ’]) => `(‘ ⋯ | (!$t ⋯ * $u   ) ’)
-  | `($_ op(*) ![$t,         #$y       ]) => `(‘ ⋯ | (!$t ⋯ * #$y  ) ’)
-  | `($_ op(*) ![$t,         &$y       ]) => `(‘ ⋯ | (!$t ⋯ * &$y  ) ’)
-  | `($_ op(*) ![$t,         $u        ]) => `(‘ ⋯ | (!$t ⋯ * !$u ⋯) ’)
-  | _                                     => throw ()
+  | `($_ op(*) ![‘ $t ’, ‘ $u ’]) => `(‘ ($t    * $u  ) ’)
+  | `($_ op(*) ![‘ $t ’, #$x   ]) => `(‘ ($t    * #$x ) ’)
+  | `($_ op(*) ![‘ $t ’, &$x   ]) => `(‘ ($t    * &$x ) ’)
+  | `($_ op(*) ![‘ $t ’, $u    ]) => `(‘ ($t    * !!$u) ’)
+  | `($_ op(*) ![#$x,    ‘ $u ’]) => `(‘ (#$x   * $u  ) ’)
+  | `($_ op(*) ![#$x,    #$y   ]) => `(‘ (#$x   * #$y ) ’)
+  | `($_ op(*) ![#$x,    &$y   ]) => `(‘ (#$x   * &$y ) ’)
+  | `($_ op(*) ![#$x,    $u    ]) => `(‘ (#$x   * !!$u) ’)
+  | `($_ op(*) ![&$x,    ‘ $u ’]) => `(‘ (&$x   * $u  ) ’)
+  | `($_ op(*) ![&$x,    #$y   ]) => `(‘ (&$x   * #$y ) ’)
+  | `($_ op(*) ![&$x,    &$y   ]) => `(‘ (&$x   * &$y ) ’)
+  | `($_ op(*) ![&$x,    $u    ]) => `(‘ (&$x   * !!$u) ’)
+  | `($_ op(*) ![$t,     ‘ $u ’]) => `(‘ (!!$t * $u   ) ’)
+  | `($_ op(*) ![$t,     #$y   ]) => `(‘ (!!$t * #$y  ) ’)
+  | `($_ op(*) ![$t,     &$y   ]) => `(‘ (!!$t * &$y  ) ’)
+  | `($_ op(*) ![$t,     $u    ]) => `(‘ (!!$t * !!$u ) ’)
+  | _                             => throw ()
 
-#check ‘ x ⋯ | &4 + ((4 + 2) * #0 + #1)’
+#check ‘ x | &4 + ((4 + 2) * #0 + #1)’
 
 end delab
 
@@ -174,7 +173,6 @@ syntax:max "∃[" first_order_formula "] " first_order_formula:0 : first_order_f
 
 partial def bvBinderCons (x : TSyntax `ident) : TSyntax `LO.FirstOrder.BinderNotation.bvBinder → MacroM (TSyntax `LO.FirstOrder.BinderNotation.bvBinder)
   | `(bvBinder | $vars*)   => `(bvBinder | $x $vars*)
-  | `(bvBinder | $vars* ⋯) => `(bvBinder | $x $vars* ⋯)
   | decl                   => Macro.throwErrorAt decl "unexpected kind of bvBinder"
 
 macro_rules
@@ -303,9 +301,7 @@ macro_rules
 #check “∀ x, ∀ y, ∀ z, ∀ v, ∀ w, x + y + z + v + w = 0”
 #check “∀ x y z v w, x + y + z + v + w = 0”
 
-#check “x y z w ⋯ | ∀' ∀[# 0 < w] x = w”
-
-#check “x y z ⋯ | ∃ v w, ∀ r < z + v + 7, ∀' x + y + v = x ↔ z = w”
+#check “x y z | ∃ v w, ∀ r < z + v + 7, ∀' x + y + v = x ↔ z = w”
 
 section delab
 
@@ -319,133 +315,133 @@ def unexpsnderLe : Unexpander
 
 @[app_unexpander Wedge.wedge]
 def unexpandAnd : Unexpander
-  | `($_ “ ⋯ | $p:first_order_formula ” “ ⋯ | $q:first_order_formula ”) => `(“ ⋯ | ($p ∧ $q) ”)
-  | `($_ “ ⋯ | $p:first_order_formula ” $u:term                       ) => `(“ ⋯ | ($p ∧ !$u) ”)
-  | `($_ $t:term                        “ ⋯ | $q:first_order_formula ”) => `(“ ⋯ | (!$t ∧ $q) ”)
-  | _                                                                   => throw ()
+  | `($_ “ $p:first_order_formula ” “ $q:first_order_formula ”) => `(“ ($p ∧ $q) ”)
+  | `($_ “ $p:first_order_formula ” $u:term                   ) => `(“ ($p ∧ !$u) ”)
+  | `($_ $t:term                    “ $q:first_order_formula ”) => `(“ (!$t ∧ $q) ”)
+  | _                                                           => throw ()
 
 @[app_unexpander Vee.vee]
 def unexpandOr : Unexpander
-  | `($_ “ ⋯ | $p:first_order_formula ” “ ⋯ | $q:first_order_formula ”) => `(“ ⋯ | ($p ∨ $q) ”)
-  | `($_ “ ⋯ | $p:first_order_formula ” $u:term                       ) => `(“ ⋯ | ($p ∨ !$u) ”)
-  | `($_ $t:term                        “ ⋯ | $q:first_order_formula ”) => `(“ ⋯ | (!$t ∨ $q) ”)
-  | _                                                                   => throw ()
+  | `($_ “ $p:first_order_formula ” “ $q:first_order_formula ”) => `(“ ($p ∨ $q) ”)
+  | `($_ “ $p:first_order_formula ” $u:term                   ) => `(“ ($p ∨ !$u) ”)
+  | `($_ $t:term                    “ $q:first_order_formula ”) => `(“ (!$t ∨ $q) ”)
+  | _                                                           => throw ()
 
 @[app_unexpander Tilde.tilde]
 def unexpandNeg : Unexpander
-  | `($_ “ ⋯ | $p:first_order_formula ”) => `(“ ⋯ | ¬$p ”)
-  | _                                    => throw ()
+  | `($_ “ $p:first_order_formula ”) => `(“ ¬$p ”)
+  | _                                => throw ()
 
 @[app_unexpander UnivQuantifier.univ]
 def unexpandUniv : Unexpander
-  | `($_ “ ⋯ | $p:first_order_formula ”) => `(“ ⋯ | ∀' $p:first_order_formula ”)
-  | _                                    => throw ()
+  | `($_ “ $p:first_order_formula ”) => `(“ ∀' $p:first_order_formula ”)
+  | _                                => throw ()
 
 @[app_unexpander ExQuantifier.ex]
 def unexpandEx : Unexpander
-  | `($_ “ ⋯ | $p:first_order_formula”) => `(“ ⋯ | ∃' $p:first_order_formula ”)
+  | `($_ “ $p:first_order_formula”) => `(“ ∃' $p:first_order_formula ”)
   | _                                   => throw ()
 
 @[app_unexpander LogicalConnective.ball]
 def unexpandBall : Unexpander
-  | `($_ “ ⋯ | $p:first_order_formula ” “ ⋯ | $q:first_order_formula ”) => `(“ ⋯ | (∀[$p] $q) ”)
-  | `($_ “ ⋯ | $p:first_order_formula ” $u:term                       ) => `(“ ⋯ | (∀[$p] !$u) ”)
-  | `($_ $t:term                        “ ⋯ | $q:first_order_formula ”) => `(“ ⋯ | (∀[!$t] $q) ”)
-  | _                                                                   => throw ()
+  | `($_ “ $p:first_order_formula ” “ $q:first_order_formula ”) => `(“ (∀[$p] $q) ”)
+  | `($_ “ $p:first_order_formula ” $u:term                   ) => `(“ (∀[$p] !$u) ”)
+  | `($_ $t:term                    “ $q:first_order_formula ”) => `(“ (∀[!$t] $q) ”)
+  | _                                                           => throw ()
 
 @[app_unexpander LogicalConnective.bex]
 def unexpandBex : Unexpander
-  | `($_ “ ⋯ | $p:first_order_formula ” “ ⋯ | $q:first_order_formula ”) => `(“ ⋯ | (∃[$p] $q) ”)
-  | `($_ “ ⋯ | $p:first_order_formula ” $u:term                       ) => `(“ ⋯ | (∃[$p] !$u) ”)
-  | `($_ $t:term                        “ ⋯ | $q:first_order_formula ”) => `(“ ⋯ | (∃[!$t] $q) ”)
-  | _                                                                   => throw ()
+  | `($_ “ $p:first_order_formula ” “ $q:first_order_formula ”) => `(“ (∃[$p] $q) ”)
+  | `($_ “ $p:first_order_formula ” $u:term                   ) => `(“ (∃[$p] !$u) ”)
+  | `($_ $t:term                    “ $q:first_order_formula ”) => `(“ (∃[!$t] $q) ”)
+  | _                                                           => throw ()
 
 @[app_unexpander Arrow.arrow]
 def unexpandArrow : Unexpander
-  | `($_ “ ⋯ | $p:first_order_formula ” “ ⋯ | $q:first_order_formula”) => `(“ ⋯ | ($p → $q) ”)
-  | `($_ “ ⋯ | $p:first_order_formula ” $u:term                      ) => `(“ ⋯ | ($p → !$u) ”)
-  | `($_ $t:term                        “ ⋯ | $q:first_order_formula”) => `(“ ⋯ | (!$t → $q) ”)
-  | _                                                                  => throw ()
+  | `($_ “ $p:first_order_formula ” “ $q:first_order_formula”) => `(“ ($p → $q) ”)
+  | `($_ “ $p:first_order_formula ” $u:term                  ) => `(“ ($p → !$u) ”)
+  | `($_ $t:term                    “ $q:first_order_formula”) => `(“ (!$t → $q) ”)
+  | _                                                          => throw ()
 
 @[app_unexpander LogicalConnective.iff]
 def unexpandIff : Unexpander
-  | `($_ “ ⋯ | $p:first_order_formula” “ ⋯ | $q:first_order_formula”) => `(“ ⋯ | ($p ↔ $q) ”)
-  | `($_ “ ⋯ | $p:first_order_formula” $u:term                      ) => `(“ ⋯ | ($p ↔ !$u) ”)
-  | `($_ $t:term                       “ ⋯ | $q:first_order_formula”) => `(“ ⋯ | (!$t ↔ $q) ”)
-  | _                                                                 => throw ()
+  | `($_ “ $p:first_order_formula” “ $q:first_order_formula”) => `(“ ($p ↔ $q) ”)
+  | `($_ “ $p:first_order_formula” $u:term                  ) => `(“ ($p ↔ !$u) ”)
+  | `($_ $t:term                   “ $q:first_order_formula”) => `(“ (!$t ↔ $q) ”)
+  | _                                                         => throw ()
 
 @[app_unexpander Semiformula.Operator.operator]
 def unexpandOpArith : Unexpander
-  | `($_ op(=) ![‘ ⋯ | $t:first_order_term ’,  ‘ ⋯ | $u:first_order_term ’]) => `(“ ⋯ | $t:first_order_term = $u    ”)
-  | `($_ op(=) ![‘ ⋯ | $t:first_order_term ’,  #$y:term                   ]) => `(“ ⋯ | $t:first_order_term = #$y   ”)
-  | `($_ op(=) ![‘ ⋯ | $t:first_order_term ’,  &$y:term                   ]) => `(“ ⋯ | $t:first_order_term = &$y   ”)
-  | `($_ op(=) ![‘ ⋯ | $t:first_order_term ’,  $u                         ]) => `(“ ⋯ | $t:first_order_term = !$u ⋯ ”)
-  | `($_ op(=) ![#$x:term,                     ‘ ⋯ | $u:first_order_term ’]) => `(“ ⋯ | #$x                 = $u    ”)
-  | `($_ op(=) ![#$x:term,                     #$y:term                   ]) => `(“ ⋯ | #$x                 = #$y   ”)
-  | `($_ op(=) ![#$x:term,                     &$y:term                   ]) => `(“ ⋯ | #$x                 = &$y   ”)
-  | `($_ op(=) ![#$x:term,                     $u                         ]) => `(“ ⋯ | #$x                 = !$u ⋯ ”)
-  | `($_ op(=) ![&$x:term,                     ‘ ⋯ | $u:first_order_term ’]) => `(“ ⋯ | &$x                 = $u    ”)
-  | `($_ op(=) ![&$x:term,                     #$y:term                   ]) => `(“ ⋯ | &$x                 = #$y   ”)
-  | `($_ op(=) ![&$x:term,                     &$y:term                   ]) => `(“ ⋯ | &$x                 = &$y   ”)
-  | `($_ op(=) ![&$x:term,                     $u                         ]) => `(“ ⋯ | &$x                 = !$u ⋯ ”)
-  | `($_ op(=) ![$t:term,                      ‘ ⋯ | $u:first_order_term ’]) => `(“ ⋯ | !$t ⋯               = $u    ”)
-  | `($_ op(=) ![$t:term,                      #$y:term                   ]) => `(“ ⋯ | !$t ⋯               = #$y   ”)
-  | `($_ op(=) ![$t:term,                      &$y:term                   ]) => `(“ ⋯ | !$t ⋯               = &$y   ”)
-  | `($_ op(=) ![$t:term,                      $u                         ]) => `(“ ⋯ | !$t ⋯               = !$u ⋯ ”)
+  | `($_ op(=) ![‘ $t:first_order_term ’,  ‘ $u:first_order_term ’]) => `(“ $t:first_order_term = $u   ”)
+  | `($_ op(=) ![‘ $t:first_order_term ’,  #$y:term               ]) => `(“ $t:first_order_term = #$y  ”)
+  | `($_ op(=) ![‘ $t:first_order_term ’,  &$y:term               ]) => `(“ $t:first_order_term = &$y  ”)
+  | `($_ op(=) ![‘ $t:first_order_term ’,  $u                     ]) => `(“ $t:first_order_term = !!$u ”)
+  | `($_ op(=) ![#$x:term,                 ‘ $u:first_order_term ’]) => `(“ #$x                 = $u   ”)
+  | `($_ op(=) ![#$x:term,                 #$y:term               ]) => `(“ #$x                 = #$y  ”)
+  | `($_ op(=) ![#$x:term,                 &$y:term               ]) => `(“ #$x                 = &$y  ”)
+  | `($_ op(=) ![#$x:term,                 $u                     ]) => `(“ #$x                 = !!$u ”)
+  | `($_ op(=) ![&$x:term,                 ‘ $u:first_order_term ’]) => `(“ &$x                 = $u   ”)
+  | `($_ op(=) ![&$x:term,                 #$y:term               ]) => `(“ &$x                 = #$y  ”)
+  | `($_ op(=) ![&$x:term,                 &$y:term               ]) => `(“ &$x                 = &$y  ”)
+  | `($_ op(=) ![&$x:term,                 $u                     ]) => `(“ &$x                 = !!$u ”)
+  | `($_ op(=) ![$t:term,                  ‘ $u:first_order_term ’]) => `(“ !!$t                = $u   ”)
+  | `($_ op(=) ![$t:term,                  #$y:term               ]) => `(“ !!$t                = #$y  ”)
+  | `($_ op(=) ![$t:term,                  &$y:term               ]) => `(“ !!$t                = &$y  ”)
+  | `($_ op(=) ![$t:term,                  $u                     ]) => `(“ !!$t                = !!$u ”)
 
-  | `($_ op(<) ![‘ ⋯ | $t:first_order_term ’,  ‘ ⋯ | $u:first_order_term ’]) => `(“ ⋯ | $t:first_order_term < $u    ”)
-  | `($_ op(<) ![‘ ⋯ | $t:first_order_term ’,  #$y:term                   ]) => `(“ ⋯ | $t:first_order_term < #$y   ”)
-  | `($_ op(<) ![‘ ⋯ | $t:first_order_term ’,  &$y:term                   ]) => `(“ ⋯ | $t:first_order_term < &$y   ”)
-  | `($_ op(<) ![‘ ⋯ | $t:first_order_term ’,  $u                         ]) => `(“ ⋯ | $t:first_order_term < !$u ⋯ ”)
-  | `($_ op(<) ![#$x:term,                     ‘ ⋯ | $u:first_order_term ’]) => `(“ ⋯ | #$x                 < $u    ”)
-  | `($_ op(<) ![#$x:term,                     #$y:term                   ]) => `(“ ⋯ | #$x                 < #$y   ”)
-  | `($_ op(<) ![#$x:term,                     &$y:term                   ]) => `(“ ⋯ | #$x                 < &$y   ”)
-  | `($_ op(<) ![#$x:term,                     $u                         ]) => `(“ ⋯ | #$x                 < !$u ⋯ ”)
-  | `($_ op(<) ![&$x:term,                     ‘ ⋯ | $u:first_order_term ’]) => `(“ ⋯ | &$x                 < $u    ”)
-  | `($_ op(<) ![&$x:term,                     #$y:term                   ]) => `(“ ⋯ | &$x                 < #$y   ”)
-  | `($_ op(<) ![&$x:term,                     &$y:term                   ]) => `(“ ⋯ | &$x                 < &$y   ”)
-  | `($_ op(<) ![&$x:term,                     $u                         ]) => `(“ ⋯ | &$x                 < !$u ⋯ ”)
-  | `($_ op(<) ![$t:term,                      ‘ ⋯ | $u:first_order_term ’]) => `(“ ⋯ | !$t ⋯               < $u    ”)
-  | `($_ op(<) ![$t:term,                      #$y:term                   ]) => `(“ ⋯ | !$t ⋯               < #$y   ”)
-  | `($_ op(<) ![$t:term,                      &$y:term                   ]) => `(“ ⋯ | !$t ⋯               < &$y   ”)
-  | `($_ op(<) ![$t:term,                      $u                         ]) => `(“ ⋯ | !$t ⋯               < !$u ⋯ ”)
+  | `($_ op(<) ![‘ $t:first_order_term ’,  ‘ $u:first_order_term ’]) => `(“ $t:first_order_term < $u   ”)
+  | `($_ op(<) ![‘ $t:first_order_term ’,  #$y:term               ]) => `(“ $t:first_order_term < #$y  ”)
+  | `($_ op(<) ![‘ $t:first_order_term ’,  &$y:term               ]) => `(“ $t:first_order_term < &$y  ”)
+  | `($_ op(<) ![‘ $t:first_order_term ’,  $u                     ]) => `(“ $t:first_order_term < !!$u ”)
+  | `($_ op(<) ![#$x:term,                 ‘ $u:first_order_term ’]) => `(“ #$x                 < $u   ”)
+  | `($_ op(<) ![#$x:term,                 #$y:term               ]) => `(“ #$x                 < #$y  ”)
+  | `($_ op(<) ![#$x:term,                 &$y:term               ]) => `(“ #$x                 < &$y  ”)
+  | `($_ op(<) ![#$x:term,                 $u                     ]) => `(“ #$x                 < !!$u ”)
+  | `($_ op(<) ![&$x:term,                 ‘ $u:first_order_term ’]) => `(“ &$x                 < $u   ”)
+  | `($_ op(<) ![&$x:term,                 #$y:term               ]) => `(“ &$x                 < #$y  ”)
+  | `($_ op(<) ![&$x:term,                 &$y:term               ]) => `(“ &$x                 < &$y  ”)
+  | `($_ op(<) ![&$x:term,                 $u                     ]) => `(“ &$x                 < !!$u ”)
+  | `($_ op(<) ![$t:term,                  ‘ $u:first_order_term ’]) => `(“ !!$t                < $u   ”)
+  | `($_ op(<) ![$t:term,                  #$y:term               ]) => `(“ !!$t                < #$y  ”)
+  | `($_ op(<) ![$t:term,                  &$y:term               ]) => `(“ !!$t                < &$y  ”)
+  | `($_ op(<) ![$t:term,                  $u                     ]) => `(“ !!$t                < !!$u ”)
 
-  | `($_ op(≤) ![‘ ⋯ | $t:first_order_term ’,  ‘ ⋯ | $u:first_order_term ’]) => `(“ ⋯ | $t:first_order_term ≤ $u    ”)
-  | `($_ op(≤) ![‘ ⋯ | $t:first_order_term ’,  #$y:term                   ]) => `(“ ⋯ | $t:first_order_term ≤ #$y   ”)
-  | `($_ op(≤) ![‘ ⋯ | $t:first_order_term ’,  &$y:term                   ]) => `(“ ⋯ | $t:first_order_term ≤ &$y   ”)
-  | `($_ op(≤) ![‘ ⋯ | $t:first_order_term ’,  $u                         ]) => `(“ ⋯ | $t:first_order_term ≤ !$u ⋯ ”)
-  | `($_ op(≤) ![#$x:term,                     ‘ ⋯ | $u:first_order_term ’]) => `(“ ⋯ | #$x                 ≤ $u    ”)
-  | `($_ op(≤) ![#$x:term,                     #$y:term                   ]) => `(“ ⋯ | #$x                 ≤ #$y   ”)
-  | `($_ op(≤) ![#$x:term,                     &$y:term                   ]) => `(“ ⋯ | #$x                 ≤ &$y   ”)
-  | `($_ op(≤) ![#$x:term,                     $u                         ]) => `(“ ⋯ | #$x                 ≤ !$u ⋯ ”)
-  | `($_ op(≤) ![&$x:term,                     ‘ ⋯ | $u:first_order_term ’]) => `(“ ⋯ | &$x                 ≤ $u    ”)
-  | `($_ op(≤) ![&$x:term,                     #$y:term                   ]) => `(“ ⋯ | &$x                 ≤ #$y   ”)
-  | `($_ op(≤) ![&$x:term,                     &$y:term                   ]) => `(“ ⋯ | &$x                 ≤ &$y   ”)
-  | `($_ op(≤) ![&$x:term,                     $u                         ]) => `(“ ⋯ | &$x                 ≤ !$u ⋯ ”)
-  | `($_ op(≤) ![$t:term,                      ‘ ⋯ | $u:first_order_term ’]) => `(“ ⋯ | !$t ⋯               ≤ $u    ”)
-  | `($_ op(≤) ![$t:term,                      #$y:term                   ]) => `(“ ⋯ | !$t ⋯               ≤ #$y   ”)
-  | `($_ op(≤) ![$t:term,                      &$y:term                   ]) => `(“ ⋯ | !$t ⋯               ≤ &$y   ”)
-  | `($_ op(≤) ![$t:term,                      $u                         ]) => `(“ ⋯ | !$t ⋯               ≤ !$u ⋯ ”)
+  | `($_ op(≤) ![‘ $t:first_order_term ’,  ‘ $u:first_order_term ’]) => `(“ $t:first_order_term ≤ $u   ”)
+  | `($_ op(≤) ![‘ $t:first_order_term ’,  #$y:term               ]) => `(“ $t:first_order_term ≤ #$y  ”)
+  | `($_ op(≤) ![‘ $t:first_order_term ’,  &$y:term               ]) => `(“ $t:first_order_term ≤ &$y  ”)
+  | `($_ op(≤) ![‘ $t:first_order_term ’,  $u                     ]) => `(“ $t:first_order_term ≤ !!$u ”)
+  | `($_ op(≤) ![#$x:term,                 ‘ $u:first_order_term ’]) => `(“ #$x                 ≤ $u   ”)
+  | `($_ op(≤) ![#$x:term,                 #$y:term               ]) => `(“ #$x                 ≤ #$y  ”)
+  | `($_ op(≤) ![#$x:term,                 &$y:term               ]) => `(“ #$x                 ≤ &$y  ”)
+  | `($_ op(≤) ![#$x:term,                 $u                     ]) => `(“ #$x                 ≤ !!$u ”)
+  | `($_ op(≤) ![&$x:term,                 ‘ $u:first_order_term ’]) => `(“ &$x                 ≤ $u   ”)
+  | `($_ op(≤) ![&$x:term,                 #$y:term               ]) => `(“ &$x                 ≤ #$y  ”)
+  | `($_ op(≤) ![&$x:term,                 &$y:term               ]) => `(“ &$x                 ≤ &$y  ”)
+  | `($_ op(≤) ![&$x:term,                 $u                     ]) => `(“ &$x                 ≤ !!$u ”)
+  | `($_ op(≤) ![$t:term,                  ‘ $u:first_order_term ’]) => `(“ !!$t                ≤ $u   ”)
+  | `($_ op(≤) ![$t:term,                  #$y:term               ]) => `(“ !!$t                ≤ #$y  ”)
+  | `($_ op(≤) ![$t:term,                  &$y:term               ]) => `(“ !!$t                ≤ &$y  ”)
+  | `($_ op(≤) ![$t:term,                  $u                     ]) => `(“ !!$t                ≤ !!$u ”)
 
-  | `($_ op(∈) ![‘ ⋯ | $t:first_order_term ’,  ‘ ⋯ | $u:first_order_term ’]) => `(“ ⋯ | $t:first_order_term ∈ $u    ”)
-  | `($_ op(∈) ![‘ ⋯ | $t:first_order_term ’,  #$y:term                   ]) => `(“ ⋯ | $t:first_order_term ∈ #$y   ”)
-  | `($_ op(∈) ![‘ ⋯ | $t:first_order_term ’,  &$y:term                   ]) => `(“ ⋯ | $t:first_order_term ∈ &$y   ”)
-  | `($_ op(∈) ![‘ ⋯ | $t:first_order_term ’,  $u                         ]) => `(“ ⋯ | $t:first_order_term ∈ !$u ⋯ ”)
-  | `($_ op(∈) ![#$x:term,                     ‘ ⋯ | $u:first_order_term ’]) => `(“ ⋯ | #$x                 ∈ $u    ”)
-  | `($_ op(∈) ![#$x:term,                     #$y:term                   ]) => `(“ ⋯ | #$x                 ∈ #$y   ”)
-  | `($_ op(∈) ![#$x:term,                     &$y:term                   ]) => `(“ ⋯ | #$x                 ∈ &$y   ”)
-  | `($_ op(∈) ![#$x:term,                     $u                         ]) => `(“ ⋯ | #$x                 ∈ !$u ⋯ ”)
-  | `($_ op(∈) ![&$x:term,                     ‘ ⋯ | $u:first_order_term ’]) => `(“ ⋯ | &$x                 ∈ $u    ”)
-  | `($_ op(∈) ![&$x:term,                     #$y:term                   ]) => `(“ ⋯ | &$x                 ∈ #$y   ”)
-  | `($_ op(∈) ![&$x:term,                     &$y:term                   ]) => `(“ ⋯ | &$x                 ∈ &$y   ”)
-  | `($_ op(∈) ![&$x:term,                     $u                         ]) => `(“ ⋯ | &$x                 ∈ !$u ⋯ ”)
-  | `($_ op(∈) ![$t:term,                      ‘ ⋯ | $u:first_order_term ’]) => `(“ ⋯ | !$t ⋯               ∈ $u    ”)
-  | `($_ op(∈) ![$t:term,                      #$y:term                   ]) => `(“ ⋯ | !$t ⋯               ∈ #$y   ”)
-  | `($_ op(∈) ![$t:term,                      &$y:term                   ]) => `(“ ⋯ | !$t ⋯               ∈ &$y   ”)
-  | `($_ op(∈) ![$t:term,                      $u                         ]) => `(“ ⋯ | !$t ⋯               ∈ !$u ⋯ ”)
+  | `($_ op(∈) ![‘ $t:first_order_term ’,  ‘ $u:first_order_term ’]) => `(“ $t:first_order_term ∈ $u   ”)
+  | `($_ op(∈) ![‘ $t:first_order_term ’,  #$y:term               ]) => `(“ $t:first_order_term ∈ #$y  ”)
+  | `($_ op(∈) ![‘ $t:first_order_term ’,  &$y:term               ]) => `(“ $t:first_order_term ∈ &$y  ”)
+  | `($_ op(∈) ![‘ $t:first_order_term ’,  $u                     ]) => `(“ $t:first_order_term ∈ !!$u ”)
+  | `($_ op(∈) ![#$x:term,                 ‘ $u:first_order_term ’]) => `(“ #$x                 ∈ $u   ”)
+  | `($_ op(∈) ![#$x:term,                 #$y:term               ]) => `(“ #$x                 ∈ #$y  ”)
+  | `($_ op(∈) ![#$x:term,                 &$y:term               ]) => `(“ #$x                 ∈ &$y  ”)
+  | `($_ op(∈) ![#$x:term,                 $u                     ]) => `(“ #$x                 ∈ !!$u ”)
+  | `($_ op(∈) ![&$x:term,                 ‘ $u:first_order_term ’]) => `(“ &$x                 ∈ $u   ”)
+  | `($_ op(∈) ![&$x:term,                 #$y:term               ]) => `(“ &$x                 ∈ #$y  ”)
+  | `($_ op(∈) ![&$x:term,                 &$y:term               ]) => `(“ &$x                 ∈ &$y  ”)
+  | `($_ op(∈) ![&$x:term,                 $u                     ]) => `(“ &$x                 ∈ !!$u ”)
+  | `($_ op(∈) ![$t:term,                  ‘ $u:first_order_term ’]) => `(“ !!$t                ∈ $u   ”)
+  | `($_ op(∈) ![$t:term,                  #$y:term               ]) => `(“ !!$t                ∈ #$y  ”)
+  | `($_ op(∈) ![$t:term,                  &$y:term               ]) => `(“ !!$t                ∈ &$y  ”)
+  | `($_ op(∈) ![$t:term,                  $u                     ]) => `(“ !!$t                ∈ !!$u ”)
   | _                                                            => throw ()
 
-#check “x y z ⋯ | ∃ v w, ∀ r < z + v, y + v ≤ x ↔ z = w”
+#check “x y z | ∃ v w, ∀ r < z + v, y + v ≤ x ↔ z = w”
 
 end delab
 
