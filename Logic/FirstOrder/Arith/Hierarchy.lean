@@ -16,9 +16,9 @@ inductive Hierarchy : Polarity → ℕ → {n : ℕ} → Semiformula L μ n → 
   | and {Γ s n} {p q : Semiformula L μ n}            : Hierarchy Γ s p → Hierarchy Γ s q → Hierarchy Γ s (p ⋏ q)
   | or {Γ s n} {p q : Semiformula L μ n}             : Hierarchy Γ s p → Hierarchy Γ s q → Hierarchy Γ s (p ⋎ q)
   | ball {Γ s n} {p : Semiformula L μ (n + 1)} {t : Semiterm L μ (n + 1)} :
-    t.Positive → Hierarchy Γ s p → Hierarchy Γ s (∀[“#0 < !!t”] p)
+    t.Positive → Hierarchy Γ s p → Hierarchy Γ s (∀[“x ⋯ | x < !!t”] p)
   | bex {Γ s n} {p : Semiformula L μ (n + 1)} {t : Semiterm L μ (n + 1)} :
-    t.Positive → Hierarchy Γ s p → Hierarchy Γ s (∃[“#0 < !!t”] p)
+    t.Positive → Hierarchy Γ s p → Hierarchy Γ s (∃[“x ⋯ | x < !!t”] p)
   | ex {s n} {p : Semiformula L μ (n + 1)}           : Hierarchy 𝚺 (s + 1) p → Hierarchy 𝚺 (s + 1) (∃' p)
   | all {s n} {p : Semiformula L μ (n + 1)}          : Hierarchy 𝚷 (s + 1) p → Hierarchy 𝚷 (s + 1) (∀' p)
   | sigma {s n} {p : Semiformula L μ (n + 1)}        : Hierarchy 𝚷 s p → Hierarchy 𝚺 (s + 1) (∃' p)
@@ -164,8 +164,8 @@ lemma neg {p : Semiformula L μ n} : Hierarchy Γ s p → Hierarchy Γ.alt s (~p
 @[simp] lemma imp_iff {p q : Semiformula L μ n} : Hierarchy Γ s (p ⟶ q) ↔ (Hierarchy Γ.alt s p ∧ Hierarchy Γ s q) := by simp[Semiformula.imp_eq]
 
 @[simp] lemma ball_iff {Γ s n} {p : Semiformula L μ (n + 1)} {t : Semiterm L μ (n + 1)} (ht : t.Positive) :
-    Hierarchy Γ s (∀[“#0 < !!t”] p) ↔ Hierarchy Γ s p :=
-  ⟨by generalize hq : (∀[“#0 < !!t”] p) = q
+    Hierarchy Γ s (∀[“x ⋯ | x < !!t”] p) ↔ Hierarchy Γ s p :=
+  ⟨by generalize hq : (∀[“x ⋯ | x < !!t”] p) = q
       intro H
       induction H <;> try simp [LogicalConnective.ball, LogicalConnective.bex] at hq
       case ball p t pt hp ih =>
@@ -184,8 +184,8 @@ lemma neg {p : Semiformula L μ n} : Hierarchy Γ s p → Hierarchy Γ.alt s (~p
    by intro hp; exact hp.ball ht⟩
 
 @[simp] lemma bex_iff {Γ s n} {p : Semiformula L μ (n + 1)} {t : Semiterm L μ (n + 1)} (ht : t.Positive) :
-    Hierarchy Γ s (∃[“#0 < !!t”] p) ↔ Hierarchy Γ s p :=
-  ⟨by generalize hq : (∃[“#0 < !!t”] p) = q
+    Hierarchy Γ s (∃[“x ⋯ | x < !!t”] p) ↔ Hierarchy Γ s p :=
+  ⟨by generalize hq : (∃[“x ⋯ | x < !!t”] p) = q
       intro H
       induction H <;> try simp [LogicalConnective.ball, LogicalConnective.bex] at hq
       case bex p t pt hp ih =>

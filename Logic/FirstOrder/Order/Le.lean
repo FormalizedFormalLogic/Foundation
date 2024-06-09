@@ -13,43 +13,10 @@ open Semiformula
 
 def LT.le : Operator L 2 := Semiformula.Operator.Eq.eq.or Semiformula.Operator.LT.lt
 
-lemma le_eq (t₁ t₂ : Semiterm L μ n) : LT.le.operator ![t₁, t₂] = “!!t₁ = !!t₂ ∨ !!t₁ < !!t₂” := by
+lemma le_eq (t₁ t₂ : Semiterm L μ n) : LT.le.operator ![t₁, t₂] = “⋯ | !!t₁ = !!t₂ ∨ !!t₁ < !!t₂” := by
   simp [Operator.operator, Operator.or, LT.le, ←Rew.hom_comp_app, ←Matrix.fun_eq_vec₂]
 
 namespace Semiformula
-
-syntax:45 foterm:45 " ≤ " foterm:0 : foformula
-
-notation "op(≤)" => Operator.LE.le
-
-macro_rules
-  | `(“ $t₁:foterm ≤ $t₂:foterm ”) => `(op(≤).operator ![ᵀ“$t₁”, ᵀ“$t₂”])
-
-section delab
-open Lean PrettyPrinter Delaborator SubExpr
-
-@[app_unexpander Operator.operator]
-def unexpandOpLe : Unexpander
-  | `($_ op(≤) ![ᵀ“$t:foterm”, ᵀ“$u:foterm”]) => `(“ $t:foterm ≤ $u   ”)
-  | `($_ op(≤) ![ᵀ“$t:foterm”, #$y:term    ]) => `(“ $t:foterm ≤ #$y  ”)
-  | `($_ op(≤) ![ᵀ“$t:foterm”, &$y:term    ]) => `(“ $t:foterm ≤ &$y  ”)
-  | `($_ op(≤) ![ᵀ“$t:foterm”, $u          ]) => `(“ $t:foterm ≤ !!$u ”)
-  | `($_ op(≤) ![#$x:term,     ᵀ“$u:foterm”]) => `(“ #$x       ≤ $u   ”)
-  | `($_ op(≤) ![#$x:term,     #$y:term    ]) => `(“ #$x       ≤ #$y  ”)
-  | `($_ op(≤) ![#$x:term,     &$y:term    ]) => `(“ #$x       ≤ &$y  ”)
-  | `($_ op(≤) ![#$x:term,     $u          ]) => `(“ #$x       ≤ !!$u ”)
-  | `($_ op(≤) ![&$x:term,     ᵀ“$u:foterm”]) => `(“ &$x       ≤ $u   ”)
-  | `($_ op(≤) ![&$x:term,     #$y:term    ]) => `(“ &$x       ≤ #$y  ”)
-  | `($_ op(≤) ![&$x:term,     &$y:term    ]) => `(“ &$x       ≤ &$y  ”)
-  | `($_ op(≤) ![&$x:term,     $u          ]) => `(“ &$x       ≤ !!$u ”)
-  | `($_ op(≤) ![$t:term,      ᵀ“$u:foterm”]) => `(“ !!$t      ≤ $u   ”)
-  | `($_ op(≤) ![$t:term,      #$y:term    ]) => `(“ !!$t      ≤ #$y  ”)
-  | `($_ op(≤) ![$t:term,      &$y:term    ]) => `(“ !!$t      ≤ &$y  ”)
-  | `($_ op(≤) ![$t:term,      $u          ]) => `(“ !!$t      ≤ !!$u ”)
-  | _                                         => throw ()
-
-end delab
-
 /-
 section
 variable [L.Mul]
@@ -68,7 +35,7 @@ end Semiformula
 namespace Order
 variable {T : Theory L} [𝐄𝐐 ≼ T]
 
-noncomputable def leIffEqOrLt : T ⊢! “∀ ∀ (#0 ≤ #1 ↔ #0 = #1 ∨ #0 < #1)” :=
+noncomputable def leIffEqOrLt : T ⊢! “∀ x y, x ≤ y ↔ x = y ∨ x < y” :=
   complete
     (consequence_iff.mpr $ fun _ _ _ _ => by simp[models_def, Semiformula.Operator.LE.def_of_Eq_of_LT])
 

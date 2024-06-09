@@ -1,4 +1,4 @@
-import Logic.FirstOrder.Basic.Elab
+import Logic.FirstOrder.Basic.BinderNotation
 import Logic.FirstOrder.Basic.Semantics.Elementary
 import Logic.FirstOrder.Basic.Soundness
 
@@ -29,7 +29,7 @@ end Semiterm
 
 namespace Semiformula
 
-def vecEq {k} (v w : Fin k → Semiterm L μ n) : Semiformula L μ n := Matrix.conj (fun i => “!!(v i) = !!(w i)”)
+def vecEq {k} (v w : Fin k → Semiterm L μ n) : Semiformula L μ n := Matrix.conj fun i ↦ op(=).operator ![v i, w i]
 
 end Semiformula
 
@@ -42,13 +42,13 @@ class Sub (T U : Theory L) where
 section Eq
 
 inductive eqAxiom : Theory L
-  | refl : eqAxiom “∀ #0 = #0”
-  | symm : eqAxiom “∀ ∀ (#1 = #0 → #0 = #1)”
-  | trans : eqAxiom “∀ ∀ ∀ (#2 = #1 → #1 = #0 → #2 = #0)”
+  | refl : eqAxiom “∀ x, x = x”
+  | symm : eqAxiom “∀ x y, x = y → y = x”
+  | trans : eqAxiom “∀ x y z, x = y → y = z → x = z”
   | funcExt {k} (f : L.Func k) :
-    eqAxiom “∀* (!(Semiformula.vecEq varSumInL varSumInR) → !!(Semiterm.func f varSumInL) = !!(Semiterm.func f varSumInR))”
+    eqAxiom <| ∀* (Semiformula.vecEq varSumInL varSumInR ⟶ op(=).operator ![Semiterm.func f varSumInL, Semiterm.func f varSumInR])
   | relExt {k} (r : L.Rel k) :
-    eqAxiom “∀* (!(Semiformula.vecEq varSumInL varSumInR) → !(Semiformula.rel r varSumInL) → !(Semiformula.rel r varSumInR))”
+    eqAxiom <| ∀* (Semiformula.vecEq varSumInL varSumInR ⟶ Semiformula.rel r varSumInL ⟶ Semiformula.rel r varSumInR)
 
 notation "𝐄𝐐" => eqAxiom
 
@@ -102,30 +102,30 @@ variable (H : M ⊧ₘ* (𝐄𝐐 : Theory L))
 open Semiterm Theory Semiformula
 
 lemma eqv_refl (a : M) : eqv L a a := by
-  have : M ⊧ₘ “∀ #0 = #0” := H.realize (Theory.eqAxiom.refl (L := L))
+  have : M ⊧ₘ “∀ x, x = x” := H.realize (Theory.eqAxiom.refl (L := L))
   simp [models_def] at this
   exact this a
 
 lemma eqv_symm {a b : M} : eqv L a b → eqv L b a := by
-  have : M ⊧ₘ “∀ ∀ (#1 = #0 → #0 = #1)” := H.realize (Theory.eqAxiom.symm (L := L))
+  have : M ⊧ₘ “∀ x y, x = y → y = x” := H.realize (Theory.eqAxiom.symm (L := L))
   simp [models_def] at this
   exact this a b
 
 lemma eqv_trans {a b c : M} : eqv L a b → eqv L b c → eqv L a c := by
-  have : M ⊧ₘ “∀ ∀ ∀ (#2 = #1 → #1 = #0 → #2 = #0)” := H.realize (Theory.eqAxiom.trans (L := L))
+  have : M ⊧ₘ “∀ x y z, x = y → y = z → x = z” := H.realize (Theory.eqAxiom.trans (L := L))
   simp [models_def] at this
   exact this a b c
 
 lemma eqv_funcExt {k} (f : L.Func k) {v w : Fin k → M} (h : ∀ i, eqv L (v i) (w i)) :
     eqv L (func f v) (func f w) := by
-  have : M ⊧ₘ “∀* (!(vecEq varSumInL varSumInR) → !!(Semiterm.func f varSumInL) = !!(Semiterm.func f varSumInR))” :=
+  have : M ⊧ₘ ∀* (Semiformula.vecEq varSumInL varSumInR ⟶ op(=).operator ![Semiterm.func f varSumInL, Semiterm.func f varSumInR]) :=
     H.realize (eqAxiom.funcExt f (L := L))
   simp [varSumInL, varSumInR, models_def, vecEq, Semiterm.val_func] at this
   simpa [Matrix.vecAppend_eq_ite] using this (Matrix.vecAppend rfl v w) (fun i => by simpa [Matrix.vecAppend_eq_ite] using h i)
 
 lemma eqv_relExt_aux {k} (r : L.Rel k) {v w : Fin k → M} (h : ∀ i, eqv L (v i) (w i)) :
     rel r v → rel r w := by
-  have : M ⊧ₘ “∀* (!(vecEq varSumInL varSumInR) → !(Semiformula.rel r varSumInL) → !(Semiformula.rel r varSumInR))” :=
+  have : M ⊧ₘ ∀* (Semiformula.vecEq varSumInL varSumInR ⟶ Semiformula.rel r varSumInL ⟶ Semiformula.rel r varSumInR) :=
     H.realize (eqAxiom.relExt r (L := L))
   simp [varSumInL, varSumInR, models_def, vecEq, Semiterm.val_func, eval_rel (r := r)] at this
   simpa [eval_rel, Matrix.vecAppend_eq_ite] using this (Matrix.vecAppend rfl v w) (fun i => by simpa [Matrix.vecAppend_eq_ite] using h i)
@@ -297,7 +297,7 @@ end ModelOfSatEq
 namespace Semiformula
 
 def existsUnique (p : Semiformula L μ (n + 1)) : Semiformula L μ n :=
-  ∃' (p ⋏ (∀' ((Rew.substs (#0 :> (#·.succ.succ))).hom p ⟶ “#0 = #1”)))
+  “⋯ | ∃ y, !p y ⋯ ∧ ∀ z, !p z ⋯ → z = y”
 
 prefix:64 "∃'! " => existsUnique
 
@@ -307,12 +307,28 @@ variable {M : Type*} [s : Structure L M] [Structure.Eq L M]
     Eval s e ε (∃'! p) ↔ ∃! x, Eval s (x :> e) ε p := by
   simp [existsUnique, Semiformula.eval_substs, Matrix.comp_vecCons', ExistsUnique]
 
-syntax:max "∃! " foformula:35 : foformula
+end Semiformula
+
+namespace BinderNotation
+
+open Lean PrettyPrinter Delaborator SubExpr
+
+syntax:max "∃! " first_order_formula:0 : first_order_formula
+syntax:max "∃! " ident ", " first_order_formula:0 : first_order_formula
 
 macro_rules
-  | `(“ ∃! $p:foformula ”) => `(∃'! “$p”)
+  | `(“ $bd | ∃! $p:first_order_formula ”) => do
+    let (_, names) ← elabBVBinder bd
+    let v := mkIdent (Name.mkSimple ("var" ++ toString names.size))
+    let bd' ← bvBinderCons v bd
+    `(∃'! “ $bd' | $p”)
+  | `(“ $bd | ∃! $x, $p ”)                       => do
+    let (_, names) ← elabBVBinder bd
+    if names.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
+    let bd' ← bvBinderCons x bd
+    `(∃'! “ $bd' | $p ”)
 
-end Semiformula
+end BinderNotation
 
 end FirstOrder
 

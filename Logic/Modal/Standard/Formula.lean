@@ -272,6 +272,9 @@ notation "𝗩𝗲𝗿" => AxiomSet.Ver
 protected abbrev Tc : AxiomSet α := { Axioms.Tc p | p }
 notation "𝗧𝗰" => AxiomSet.Tc
 
+protected abbrev H : AxiomSet α := { Axioms.H p | p }
+notation "𝗛" => AxiomSet.H
+
 end AxiomSet
 
 end LO.Modal.Standard

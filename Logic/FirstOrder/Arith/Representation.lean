@@ -20,17 +20,17 @@ open Nat.ArithPart₁
 def codeAux : {k : ℕ} → Nat.ArithPart₁.Code k → Formula ℒₒᵣ (Fin (k + 1))
   | _, Code.zero _    => “&0 = 0”
   | _, Code.one _     => “&0 = 1”
-  | _, Code.add i j   => “&0 = !!&i.succ + !!&j.succ”
-  | _, Code.mul i j   => “&0 = !!&i.succ * !!&j.succ”
-  | _, Code.equal i j => “(!!&i.succ = !!&j.succ ∧ &0 = 1) ∨ (!!&i.succ ≠ !!&j.succ ∧ &0 = 0)”
-  | _, Code.lt i j    => “(!!&i.succ < !!&j.succ ∧ &0 = 1) ∨ (¬!!&i.succ < !!&j.succ ∧ &0 = 0)”
+  | _, Code.add i j   => “&0 = &i.succ + &j.succ”
+  | _, Code.mul i j   => “&0 = &i.succ * &j.succ”
+  | _, Code.equal i j => “(&i.succ = &j.succ ∧ &0 = 1) ∨ (&i.succ ≠ &j.succ ∧ &0 = 0)”
+  | _, Code.lt i j    => “(&i.succ < &j.succ ∧ &0 = 1) ∨ (&i.succ ≮ &j.succ ∧ &0 = 0)”
   | _, Code.proj i    => “&0 = !!&i.succ”
   | _, Code.comp c d  =>
     exClosure (((Rew.bind ![] (&0 :> (#·))).hom (codeAux c)) ⋏
       Matrix.conj fun i => (Rew.bind ![] (#i :> (&·.succ))).hom (codeAux (d i)))
   | _, Code.rfind c   =>
     (Rew.bind ![] (⸢0⸣ :> &0 :> (&·.succ))).hom (codeAux c) ⋏
-    (∀[“#0 < &0”] ∃' “#0 ≠ 0” ⋏ (Rew.bind ![] (#0 :> #1 :> (&·.succ))).hom (codeAux c))
+    (∀[“z ⋯ | z < &0”] ∃' “z ⋯ | z ≠ 0” ⋏ (Rew.bind ![] (#0 :> #1 :> (&·.succ))).hom (codeAux c))
 
 def code (c : Code k) : Semisentence ℒₒᵣ (k + 1) := (Rew.bind ![] (#0 :> (#·.succ))).hom (codeAux c)
 
@@ -176,7 +176,7 @@ lemma provable_iff_computable {k} {f : Vector ℕ k → ℕ}
 lemma provable_computable_code_uniq {k} {f : Vector ℕ k → ℕ}
     (hf : Nat.Partrec' (f : Vector ℕ k →. ℕ)) (v : Fin k → ℕ) :
     T ⊢! ∀' ((Rew.substs $ #0 :> (⸢v ·⸣)).hom (code $ codeOfPartrec f)
-      ⟷ “#0 = !!(⸢f (Vector.ofFn v)⸣)”) :=
+      ⟷ “x | x = !!(⸢f (Vector.ofFn v)⸣)”) :=
   complete (oRing_consequence_of _ _ (fun M _ _ _ _ _ _ => by
     haveI : M ⊧ₘ* 𝐏𝐀⁻ :=
       ModelsTheory.of_provably_subtheory M 𝐏𝐀⁻ T inferInstance (by assumption)
@@ -214,7 +214,7 @@ theorem representation {f : α →. σ} (hf : Partrec f) {x y} :
     provable_iff_mem_partrec this (y := encode y) (v := ![encode x])
 
 theorem representation_computable {f : α → σ} (hf : Computable f) (a) :
-    T ⊢! ∀' ((graphTotal f)/[#0, ⸢a⸣] ⟷ “#0 = !!⸢f a⸣”) := by
+    T ⊢! ∀' ((graphTotal f)/[#0, ⸢a⸣] ⟷ “x | x = !!⸢f a⸣”) := by
   let f' : Vector ℕ 1 → ℕ := fun x => Option.get! ((decode x.head).map (encode $ f ·))
   have : Nat.Partrec' (f' : Vector ℕ 1 →. ℕ) :=
     Nat.Partrec'.part_iff.mpr <| Computable.partrec <|
@@ -226,7 +226,7 @@ theorem representation_computable {f : α → σ} (hf : Computable f) (a) :
     provable_computable_code_uniq T this ![encode a]
 
 theorem representation_computable₂ {f : α → β → σ} (hf : Computable₂ f) (a b) :
-    T ⊢! ∀' ((graphTotal₂ f)/[#0, ⸢a⸣, ⸢b⸣] ⟷ “#0 = !!⸢f a b⸣”) := by
+    T ⊢! ∀' ((graphTotal₂ f)/[#0, ⸢a⸣, ⸢b⸣] ⟷ “x | x = !!⸢f a b⸣”) := by
   let f' : Vector ℕ 2 → ℕ := fun v =>
     Option.get! ((decode v.head).bind fun x => (decode v.tail.head).map fun y => (encode $ f x y))
   have : Nat.Partrec' (f' : Vector ℕ 2 →. ℕ) :=

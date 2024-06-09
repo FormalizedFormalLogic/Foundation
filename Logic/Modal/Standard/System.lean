@@ -42,11 +42,19 @@ protected abbrev M := (□◇p ⟶ ◇□p)
 
 protected abbrev L := □(□p ⟶ p) ⟶ □p
 
+protected abbrev H := □(□p ⟷ p) ⟶ □p
+
 end Axioms
 
 
 class Necessitation where
   nec {p : F} : 𝓢 ⊢ p → 𝓢 ⊢ □p
+
+class LoebRule where
+  loeb {p : F} : 𝓢 ⊢ □p ⟶ p → 𝓢 ⊢ p
+
+class HenkinRule where
+  henkin {p : F} : 𝓢 ⊢ □p ⟷ p → 𝓢 ⊢ p
 
 class HasAxiomK where
   K (p q : F) : 𝓢 ⊢ Axioms.K p q
@@ -84,6 +92,9 @@ class HasAxiomTc where
 class HasAxiomVer where
   Ver (p : F) : 𝓢 ⊢ Axioms.Ver p
 
+class HasAxiomH where
+  H (p : F) : 𝓢 ⊢ Axioms.H p
+
 class K extends Classical 𝓢, Necessitation 𝓢, HasAxiomK 𝓢
 
 class KT extends K 𝓢, HasAxiomT 𝓢
@@ -107,5 +118,11 @@ class GL extends K 𝓢, HasAxiomL 𝓢
 class Triv extends K 𝓢, HasAxiomT 𝓢, HasAxiomTc 𝓢
 
 class Ver extends K 𝓢, HasAxiomVer 𝓢
+
+class K4H extends K4 𝓢, HasAxiomH 𝓢
+
+class K4Loeb extends K4 𝓢, LoebRule 𝓢
+
+class K4Henkin extends K4 𝓢, HenkinRule 𝓢
 
 end LO.System
