@@ -109,16 +109,32 @@ lemma arithmetical_soundness_K4Loeb (h : 𝐊𝟒(𝐋) ⊢! p) : ∀ f, T ⊢! 
     | apply System.disj₂!;
     | apply System.disj₃!;
 
-theorem arithmetical_soundness (h : 𝐆𝐋 ⊢! p) : ∀ f, T ⊢! f[T] p := by
+theorem arithmetical_soundness_GL (h : 𝐆𝐋 ⊢! p) : ∀ f, T ⊢! f[T] p := by
   apply arithmetical_soundness_K4Loeb;
   exact (System.reducible_iff.mp reducible_GL_K4Loeb) h;
 
-open System
+class ArithmeticalSoundness (T : Theory ℒₒᵣ) (𝓓 : Modal.Standard.DeductionParameter α) where
+  sounds : ∀ {p}, 𝓓 ⊢! p → ∀ f, T ⊢! f[T] p
+
+class ArithmeticalCompleteness (T : Theory ℒₒᵣ) (𝓓 : Modal.Standard.DeductionParameter α) where
+  completes : ∀ {p}, (∀ f, T ⊢! f[T] p) → 𝓓 ⊢! p
+
+instance : ArithmeticalSoundness (α := α) T 𝐆𝐋 := ⟨arithmetical_soundness_GL⟩
+
+
+class IsProvabilityLogicOf (T : Theory ℒₒᵣ) (𝓓 : Modal.Standard.DeductionParameter α) where
+  is : System.theory 𝓓 = { p | ∀ f, T ⊢! f[T] p }
+
+instance [ArithmeticalSoundness T 𝓓] [ArithmeticalCompleteness T 𝓓] : IsProvabilityLogicOf T 𝓓 where
+  is := by
+    apply Set.eq_of_subset_of_subset;
+    . intro p hp;
+      simp only [Set.mem_setOf_eq];
+      exact ArithmeticalSoundness.sounds hp;
+    . intro p hp;
+      simp at hp;
+      exact ArithmeticalCompleteness.completes hp;
 
 end FirstOrder.Arith.SelfReference
-
-namespace System
-
-end System
 
 end LO
