@@ -249,6 +249,10 @@ instance [M ⊧ₘ* 𝐈𝚺 n] : M ⊧ₘ* 𝐈𝐍𝐃Γ n :=
     {P : M → Prop} (hP : DefinablePred ℒₒᵣ 𝚺₁ P)
     (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x := induction_h 𝚺 1 hP zero succ
 
+@[elab_as_elim] lemma induction_iPiOne [M ⊧ₘ* 𝐈𝚺₁]
+    {P : M → Prop} (hP : DefinablePred ℒₒᵣ 𝚷₁ P)
+    (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x := induction_h 𝚷 1 hP zero succ
+
 @[elab_as_elim] lemma order_induction_iSigmaZero [M ⊧ₘ* 𝐈𝚺₀]
     {P : M → Prop} (hP : DefinablePred ℒₒᵣ 𝚺₀ P)
     (ind : ∀ x, (∀ y < x, P y) → P x) : ∀ x, P x :=
