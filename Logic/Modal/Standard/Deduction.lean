@@ -507,6 +507,12 @@ lemma reducible_K4Henkin_GL : (𝐊𝟒𝐇 : DeductionParameter α) ≤ₛ 𝐆
   . obtain ⟨_, _, e⟩ := hFour; subst_vars; exact axiomFour!;
   . obtain ⟨_, _, e⟩ := hH; subst_vars; exact axiomH!;
 
+lemma equivalent_GL_K4Loeb : (𝐆𝐋 : DeductionParameter α) =ₛ 𝐊𝟒(𝐋) := by
+  apply Equiv.antisymm_iff.mpr;
+  constructor;
+  . exact reducible_GL_K4Loeb;
+  . exact Reducible.trans (reducible_K4Loeb_K4Henkin) $ Reducible.trans reducible_K4Henkin_K4H reducible_K4Henkin_GL
+
 end GL
 
 end LO.Modal.Standard
