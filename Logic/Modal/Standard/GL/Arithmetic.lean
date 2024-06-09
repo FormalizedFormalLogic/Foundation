@@ -43,40 +43,67 @@ variable {T : Theory ℒₒᵣ}
 
 open System
 
-private noncomputable abbrev AsBox (T : Theory ℒₒᵣ) (σ : Sentence ℒₒᵣ) : Sentence ℒₒᵣ := Pr(T)/[⸢σ⸣]
-notation:max "⟦" T "⟧" σ:90 => AsBox T σ
+private noncomputable abbrev AsBox (T : Theory ℒₒᵣ) (φ : Sentence ℒₒᵣ) : Sentence ℒₒᵣ := Pr(T)/[⸢φ⸣]
+notation:max "⟦" T "⟧" φ:90 => AsBox T φ
 
 namespace DerivabilityCondition
 
 variable (T U : Theory ℒₒᵣ)
 
 class HBL1 where
-  D1 : ∀ {σ : Sentence ℒₒᵣ}, U ⊢! σ → T ⊢! ⟦U⟧σ -- Necessitation
+  D1 : ∀ {φ : Sentence ℒₒᵣ}, U ⊢! φ → T ⊢! ⟦U⟧φ -- Necessitation
 
 class HBL2 where
-  D2 : ∀ {σ π : Sentence ℒₒᵣ}, T ⊢! ⟦U⟧(σ ⟶ π) ⟶ ⟦U⟧σ ⟶ ⟦U⟧π -- Axiom K
+  D2 : ∀ {φ ψ : Sentence ℒₒᵣ}, T ⊢! ⟦U⟧(φ ⟶ ψ) ⟶ ⟦U⟧φ ⟶ ⟦U⟧ψ -- Axiom K
 
 class HBL3 where
-  D3 : ∀ {σ : Sentence ℒₒᵣ}, T ⊢! ⟦U⟧σ ⟶ ⟦U⟧⟦U⟧σ -- Axiom Four
+  D3 : ∀ {φ : Sentence ℒₒᵣ}, T ⊢! ⟦U⟧φ ⟶ ⟦U⟧⟦U⟧φ -- Axiom Four
 
 class Standard extends HBL1 T U, HBL2 T U, HBL3 T U
 
 class FormalizedDT where
-  FDT : ∀ {σ π : Sentence ℒₒᵣ}, T ⊢! ⟦U⟧(σ ⟶ π) ⟷ ⟦U.insert σ⟧(π)
+  FDT : ∀ {φ ψ : Sentence ℒₒᵣ}, T ⊢! ⟦U⟧(φ ⟶ ψ) ⟷ ⟦U.insert φ⟧(ψ)
 
 class Loeb where
-  LT : ∀ {σ : Sentence ℒₒᵣ}, T ⊢! ⟦U⟧σ ⟶ σ → T ⊢! σ
+  LT : ∀ {φ : Sentence ℒₒᵣ}, T ⊢! ⟦T⟧φ ⟶ φ → T ⊢! φ
 
 class FormalizedLoeb where
-  FLT : ∀ {σ : Sentence ℒₒᵣ}, T ⊢! ⟦U⟧(⟦U⟧σ ⟶ σ) ⟶ ⟦U⟧σ
+  FLT : ∀ {φ : Sentence ℒₒᵣ}, T ⊢! ⟦U⟧(⟦U⟧φ ⟶ φ) ⟶ ⟦U⟧φ
 
 end DerivabilityCondition
 
 
 open DerivabilityCondition
 
+section
+
+variable (T : Theory ℒₒᵣ) [𝐄𝐐 ≼ T] [𝐏𝐀⁻ ≼ T] [SigmaOneSound T]
 variable [Standard T T]
-variable [Loeb T T]
+
+lemma loeb_theorem
+  {φ : Sentence ℒₒᵣ} (h : T ⊢! Pr(T)/[⸢φ⸣] ⟶ φ) : T ⊢! φ := by
+  have := SelfReference.main T $ pred (T ⊢! · ⟶ φ);
+  generalize e : fixpoint (pred (T ⊢! · ⟶ φ)) = K at this;
+  sorry;
+
+instance : Loeb T := ⟨loeb_theorem T⟩
+
+noncomputable abbrev consistency_of (T : Theory ℒₒᵣ) := ~⟦T⟧⊥
+notation "Con(" T ")" => consistency_of T
+
+lemma goedel2_of_loeb [Loeb T] : System.Consistent T → T ⊬! Con(T) := by
+  contrapose;
+  intro hC; simp [consistency_of] at hC;
+  have : T ⊢! ⟦T⟧⊥ ⟶ ⊥ := by sorry; -- TODO: `T ⊢! ~⟦T⟧⊥`より明らかなはず
+  have : T ⊢! ⊥ := Loeb.LT this;
+  apply System.not_consistent_iff_inconsistent.mpr;
+  apply System.inconsistent_of_provable this;
+
+end
+
+
+variable [Standard T T]
+variable [Loeb T]
 
 open LO.Modal.Standard (reducible_GL_K4Loeb Deduction.inducition_with_nec! Deduction.inducition!)
 
