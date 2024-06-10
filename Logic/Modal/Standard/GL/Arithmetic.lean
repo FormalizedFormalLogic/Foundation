@@ -5,8 +5,29 @@ namespace LO
 
 namespace System
 
-variable {S : Type*} [System F S]
+variable {F S : Type*} [LogicalConnective F] [System F S]
 lemma Subtheory.prf! {𝓢 𝓣 : S} [𝓢 ≼ 𝓣] {f} : 𝓢 ⊢! f → 𝓣 ⊢! f := λ ⟨p⟩ ↦ ⟨Subtheory.prf p⟩
+
+/-- Negation `~p` is `p ⟶ ⊥` on **system** -/
+class NegationDef (𝓢 : S) where
+  neg_def {p} : 𝓢 ⊢ ~p ⟷ (p ⟶ ⊥)
+
+
+section
+
+open NegationDef
+
+variable {𝓢 : S}
+         [Minimal 𝓢] [NegationDef 𝓢]
+         {p q : F}
+
+lemma NegationDef.neg_def! : 𝓢 ⊢! ~p ⟷ (p ⟶ ⊥) := ⟨NegationDef.neg_def⟩
+
+def NegationDef.neg_def'.mp : 𝓢 ⊢ ~p → 𝓢 ⊢ p ⟶ ⊥ := λ h => (conj₁' neg_def) ⨀ h
+def NegationDef.neg_def'.mpr : 𝓢 ⊢ p ⟶ ⊥ → 𝓢 ⊢ ~p := λ h => (conj₂' neg_def) ⨀ h
+lemma NegationDef.neg_def'! : 𝓢 ⊢! ~p ↔ 𝓢 ⊢! p ⟶ ⊥ := ⟨λ ⟨h⟩ => ⟨neg_def'.mp h⟩, λ ⟨h⟩ => ⟨neg_def'.mpr h⟩⟩
+
+end
 
 end System
 
@@ -41,22 +62,22 @@ end Fixpoints
 
 end ProvabilityPredicate
 
-open System
+open System System.NegationDef
 variable {L : Language} [Semiterm.Operator.GoedelNumber L (Sentence L)]
                         {β : ProvabilityPredicate L L}
                         {T₀ T : Theory L}
 
 open ProvabilityPredicate
 
-variable [System.Classical T]
+variable [System.Classical T] [System.NegationDef T]
 variable [NegDefinition (Semisentence L 0)] [DecidableEq (Semisentence L 0)] -- TODO: 雑に導入したので消す
 
 
 /-- Second Incompleteness -/
 lemma unprovable_consistency_of_Loeb [Loeb β T] : System.Consistent T → T ⊬! ~⦍β⦎⊥ := by
   contrapose;
-  intro hC;
-  have : T ⊢! ⦍β⦎⊥ ⟶ ⊥ := by sorry; -- TODO: `T ⊢! ~⟦T⟧⊥`より明らかなはず
+  intro hC; simp at hC;
+  have : T ⊢! ⦍β⦎⊥ ⟶ ⊥ := neg_def'.mp hC;
   have : T ⊢! ⊥ := Loeb.LT _ this;
   apply System.not_consistent_iff_inconsistent.mpr;
   apply System.inconsistent_of_provable this;
@@ -130,7 +151,7 @@ variable {L : FirstOrder.Language} [Semiterm.Operator.GoedelNumber L (Sentence L
          (T₀ T : FirstOrder.Theory L) [T₀ ≼ T]
          [β.HilbertBernays T T] -- MEMO: `β.HilbertBernays T₀ T`にするとメタ変数的な問題が発生して困る
          [β.Loeb T] -- TODO: Remove
-variable [Classical T]
+variable [Classical T] [NegationDef T]
 
 lemma arithmetical_soundness_K4Loeb (h : 𝐊𝟒(𝐋) ⊢! p) : ∀ {f : Realization L α}, T ⊢! (f[β] p) := by
   intro f;
