@@ -2,18 +2,21 @@ import Logic.FirstOrder.Arith.PeanoMinus
 import Logic.Vorspiel.Arith
 import Logic.FirstOrder.Computability.Calculus
 
-namespace LO
+namespace LO.FirstOrder.Arith
 
-namespace FirstOrder
+namespace FirstIncompleteness
 
-namespace Arith
+open Encodable Semiterm.Operator.GoedelNumber
 
-open Encodable
+/-- This instance is scoped since we will define canonical Gödel numbering when formalizing G2.  -/
+scoped instance {α} [Primcodable α] : Semiterm.Operator.GoedelNumber ℒₒᵣ α :=
+  Semiterm.Operator.GoedelNumber.ofEncodable
 
-scoped notation: max "⸢" a "⸣" => Semiterm.Operator.godelNumber ℒₒᵣ a
+lemma goedelNumber_def {α} [Primcodable α] (a : α) :
+  goedelNumber a = Semiterm.Operator.encode ℒₒᵣ a := rfl
 
-@[simp] lemma godelNumber_encode_eq {α} [Primcodable α] (a : α) :
-    (⸢encode a⸣ : Semiterm.Const ℒₒᵣ) = ⸢a⸣ := by simp[Semiterm.Operator.godelNumber]
+@[simp] lemma encode_encode_eq {α} [Primcodable α] (a : α) :
+    (goedelNumber (encode a) : Semiterm.Const ℒₒᵣ) = goedelNumber a := by simp [Semiterm.Operator.encode, goedelNumber_def]
 
 open Nat.ArithPart₁
 
@@ -158,12 +161,12 @@ lemma provable_iff_mem_partrec {k} {f : Vector ℕ k →. ℕ} (hf : Nat.Partrec
   constructor
   · rintro ⟨b⟩
     have : Semiformula.Evalbm ℕ (y :> v) (code $ codeOfPartrec f) := by
-      simpa [σ, models_iff, Semiformula.eval_rew, Matrix.empty_eq, Function.comp, Matrix.comp_vecCons'] using
+      simpa [σ, goedelNumber_def, models_iff, Semiformula.eval_rew, Matrix.empty_eq, Function.comp, Matrix.comp_vecCons'] using
         Arith.SoundOn.sound sigma ⟨b⟩
     exact (codeOfPartrec_spec hf).mp this
   · intro h
     exact Arith.sigma_one_completeness sigma (by
-      simp[models_iff, Semiformula.eval_rew, Matrix.empty_eq,
+      simp [goedelNumber_def, models_iff, Semiformula.eval_rew, Matrix.empty_eq,
         Function.comp, Matrix.comp_vecCons', codeOfPartrec_spec hf, h])
 
 variable (T)
@@ -181,9 +184,9 @@ lemma provable_computable_code_uniq {k} {f : Vector ℕ k → ℕ}
     haveI : M ⊧ₘ* 𝐏𝐀⁻ :=
       ModelsTheory.of_provably_subtheory M 𝐏𝐀⁻ T inferInstance (by assumption)
     have Hfv : Semiformula.Evalbm M (f (Vector.ofFn v) :> (v ·)) (code (codeOfPartrec f)) := by
-      simpa [Model.numeral_eq_natCast, models_iff, Semiformula.eval_substs, Matrix.comp_vecCons'] using
+      simpa [goedelNumber_def, Model.numeral_eq_natCast, models_iff, Semiformula.eval_substs, Matrix.comp_vecCons'] using
         consequence_iff'.mp (sound₀! (provable_iff_computable T hf v)) M
-    simp [Model.numeral_eq_natCast, models_iff, Semiformula.eval_substs, Matrix.comp_vecCons']
+    simp [goedelNumber_def, Model.numeral_eq_natCast, models_iff, Semiformula.eval_substs, Matrix.comp_vecCons']
     intro x; constructor
     · intro H; exact code_uniq H Hfv
     · rintro rfl; simpa))
@@ -250,6 +253,8 @@ theorem pred_representation {p : α → Prop} (hp : RePred p) {x} :
     representation hp (T := T) (x := x) (y := ())
 
 end representation
+
+end FirstIncompleteness
 
 end Arith
 

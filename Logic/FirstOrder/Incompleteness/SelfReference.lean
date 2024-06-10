@@ -2,13 +2,11 @@ import Logic.FirstOrder.Arith.Representation
 import Logic.FirstOrder.Computability.Calculus
 import Logic.Logic.HilbertStyle.Gentzen
 
-namespace LO
-
-namespace FirstOrder
-
-namespace Arith
+namespace LO.FirstOrder.Arith.FirstIncompleteness
 
 namespace SelfReference
+
+section
 
 variable {T : Theory ℒₒᵣ} [𝐄𝐐 ≼ T] [𝐏𝐀⁻ ≼ T] [SigmaOneSound T]
 
@@ -49,14 +47,15 @@ theorem main (θ : Semisentence ℒₒᵣ 1) :
     haveI : M ⊧ₘ* 𝐏𝐀⁻ := ModelsTheory.of_provably_subtheory M 𝐏𝐀⁻ T inferInstance (by assumption)
     have hssbs : ∀ σ π : Semisentence ℒₒᵣ 1, ∀ z,
         Evalbm M ![z, encode σ, encode π] ssbs ↔ z = encode (σ/[(⸢π⸣ : Semiterm ℒₒᵣ Empty 0)]) := by
-      simpa [Model.numeral_eq_natCast, models_iff, Semiformula.eval_substs, Matrix.comp_vecCons', Matrix.constant_eq_singleton] using
+      simpa [goedelNumber_def, Model.numeral_eq_natCast, models_iff, Semiformula.eval_substs, Matrix.comp_vecCons', Matrix.constant_eq_singleton] using
       fun σ π => consequence_iff'.mp (sound₀! (ssbs_spec (T := T) σ π)) M
     simp[models_iff, Semiformula.eval_substs, Matrix.comp_vecCons']
     suffices Evalbm M ![] (fixpoint θ) ↔ Evalbm M ![encode (fixpoint θ)] θ by
-      simpa [Model.numeral_eq_natCast, Matrix.constant_eq_singleton] using this
+      simpa [goedelNumber_def, Model.numeral_eq_natCast, Matrix.constant_eq_singleton] using this
     calc
       Evalbm M ![] (fixpoint θ)
-      ↔ ∀ z, Evalbm M ![z, encode (diag θ), encode (diag θ)] ssbs → Evalbm M ![z] θ := by simp [fixpoint_eq, Semiformula.eval_rew,
+      ↔ ∀ z, Evalbm M ![z, encode (diag θ), encode (diag θ)] ssbs → Evalbm M ![z] θ := by simp [goedelNumber_def,
+                                                                                            fixpoint_eq, Semiformula.eval_rew,
                                                                                             Function.comp, Matrix.comp_vecCons',
                                                                                             Matrix.constant_eq_vec₂,
                                                                                             Model.numeral_eq_natCast,
@@ -64,9 +63,7 @@ theorem main (θ : Semisentence ℒₒᵣ 1) :
     _ ↔ Evalbm M ![encode “!(diag θ) !!(⸢diag θ⸣ : Semiterm ℒₒᵣ Empty 0)”] θ        := by simp [hssbs]
     _ ↔ Evalbm M ![encode (fixpoint θ)] θ                                           := by rfl))
 
-end SelfReference
-
-namespace FirstIncompletenessBySelfReference
+end
 
 variable {T : Theory ℒₒᵣ} [𝐄𝐐 ≼ T] [𝐏𝐀⁻ ≼ T] [SigmaOneSound T]
 
@@ -112,12 +109,8 @@ theorem godel_independent : System.Undecidable T G := by
     have : T ⊢! G := (provableSentence_representation (L := ℒₒᵣ)).mp this
     exact (Gentzen.inconsistent_of_provable_and_refutable! this H).not_con (consistent_of_sigmaOneSound T)
 
-theorem not_complete : ¬System.Complete T := System.incomplete_iff_exists_undecidable.mpr ⟨G, godel_independent T⟩
+theorem incomplete : ¬System.Complete T := System.incomplete_iff_exists_undecidable.mpr ⟨G, godel_independent T⟩
 
-end FirstIncompletenessBySelfReference
+end SelfReference
 
-end Arith
-
-end FirstOrder
-
-end LO
+end LO.FirstOrder.Arith.FirstIncompleteness
