@@ -216,10 +216,6 @@ def ofEncodable
 
 end GoedelNumber
 
-section GoedelQuote
-
-end GoedelQuote
-
 end Operator
 
 section complexity
