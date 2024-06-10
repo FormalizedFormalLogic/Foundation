@@ -110,7 +110,7 @@ local infix:45 " ⊩ " => Formula.Kripke.Satisfies M
 @[simp] lemma and_def  : w ⊩ p ⋏ q ↔ w ⊩ p ∧ w ⊩ q := by simp [Satisfies];
 @[simp] lemma or_def   : w ⊩ p ⋎ q ↔ w ⊩ p ∨ w ⊩ q := by simp [Satisfies];
 @[simp] lemma imp_def  : w ⊩ p ⟶ q ↔ ∀ {w'}, (w ≺ w') → (w' ⊩ p → w' ⊩ q) := by simp [Satisfies, imp_iff_not_or];
-@[simp] lemma neg_def  : w ⊩ ~p ↔ ∀ {w'}, (w ≺ w') → ¬(w' ⊩ p) := by simp [NegDefinition.neg];
+@[simp] lemma neg_def  : w ⊩ ~p ↔ ∀ {w'}, (w ≺ w') → ¬(w' ⊩ p) := by simp [NegAbbrev.neg];
 
 instance : Semantics.Top M.World where
   realize_top := by simp [Satisfies];

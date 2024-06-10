@@ -274,8 +274,10 @@ class DeMorgan (F : Type*) [LogicalConnective F] where
 
 attribute [simp] DeMorgan.verum DeMorgan.falsum DeMorgan.and DeMorgan.or DeMorgan.neg
 
-class NegDefinition (F : Type*) [LogicalConnective F] where
+/-- Introducing `~p` as an abbreviation of `p ⟶ ⊥`. -/
+class NegAbbrev (F : Type*) [Tilde F] [Arrow F] [Bot F] where
   neg {p : F} : ~p = p ⟶ ⊥
+attribute [simp] NegAbbrev.neg
 
 namespace LogicalConnective
 

@@ -24,8 +24,7 @@ instance : LogicalConnective (Formula α) where
   top := verum
   bot := falsum
 
-instance : NegDefinition (Formula α) where
-  neg := rfl
+instance : NegAbbrev (Formula α) := ⟨rfl⟩
 
 section ToString
 

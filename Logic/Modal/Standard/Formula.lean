@@ -35,7 +35,7 @@ instance : StandardModalLogicalConnective (Formula α) where
   mop_injective := by simp_all [Function.Injective]
   duality := by simp;
 
-instance : NegDefinition (Formula α) where
+instance : NegAbbrev (Formula α) where
   neg := rfl
 
 section ToString
@@ -77,7 +77,7 @@ lemma dia_eq (p : Formula α) : ◇p = ~(□(~p)) := rfl
 
 @[simp] lemma imp_inj (p₁ q₁ p₂ q₂ : Formula α) : p₁ ⟶ p₂ = q₁ ⟶ q₂ ↔ p₁ = q₁ ∧ p₂ = q₂ := by simp[Arrow.arrow]
 
-@[simp] lemma neg_inj (p q : Formula α) : ~p = ~q ↔ p = q := by simp [NegDefinition.neg]
+@[simp] lemma neg_inj (p q : Formula α) : ~p = ~q ↔ p = q := by simp [NegAbbrev.neg]
 
 def complexity : Formula α → ℕ
 | atom _  => 0
@@ -115,7 +115,7 @@ def degree : Formula α → Nat
 @[simp] lemma degree_box {p : Formula α} : degree (□p) = p.degree + 1 := rfl
 @[simp] lemma degree_and {p q : Formula α} : degree (p ⋏ q) = max p.degree q.degree := rfl
 @[simp] lemma degree_or {p q : Formula α} : degree (p ⋎ q) = max p.degree q.degree := rfl
-@[simp] lemma degree_not {p : Formula α} : degree (~p) = p.degree := by simp [NegDefinition.neg]
+@[simp] lemma degree_not {p : Formula α} : degree (~p) = p.degree := by simp [NegAbbrev.neg]
 
 @[elab_as_elim]
 def cases' {C : Formula α → Sort w}
