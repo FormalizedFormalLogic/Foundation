@@ -25,16 +25,16 @@ section HilbertBernays
 variable [Semiterm.Operator.GoedelNumber L (Sentence L)]
 
 class HilbertBernays₁ (β : ProvabilityPredicate L L) (T₀ : Theory L) (T : outParam (Theory L)) where
-  D1 (σ : Sentence L) : T ⊢! σ → T₀ ⊢! ⦍β⦎σ
+  D1 {σ : Sentence L} : T ⊢! σ → T₀ ⊢! ⦍β⦎σ
 
-class HilbertBernays₂ (β : ProvabilityPredicate L L) (T₀ : Theory L) where
-  D2 (σ τ : Sentence L) : T₀ ⊢! ⦍β⦎(σ ⟶ τ) ⟶ ⦍β⦎σ ⟶ ⦍β⦎τ
+class HilbertBernays₂ (β : ProvabilityPredicate L L) (T₀ : Theory L) (T : outParam (Theory L)) where
+  D2 {σ τ : Sentence L} : T₀ ⊢! ⦍β⦎(σ ⟶ τ) ⟶ ⦍β⦎σ ⟶ ⦍β⦎τ
 
-class HilbertBernays₃ (β : ProvabilityPredicate L L) (T₀ : Theory L) where
-  D3 (σ : Sentence L) : T₀ ⊢! ⦍β⦎σ ⟶ ⦍β⦎⦍β⦎σ
+class HilbertBernays₃ (β : ProvabilityPredicate L L) (T₀ : Theory L) (T : outParam (Theory L)) where
+  D3 {σ : Sentence L} : T₀ ⊢! ⦍β⦎σ ⟶ ⦍β⦎⦍β⦎σ
 
 class HilbertBernays (β : ProvabilityPredicate L L) (T₀ : Theory L) (T : outParam (Theory L))
-  extends β.HilbertBernays₁ T₀ T, β.HilbertBernays₂ T₀, β.HilbertBernays₃ T₀
+  extends β.HilbertBernays₁ T₀ T, β.HilbertBernays₂ T₀ T, β.HilbertBernays₃ T₀ T
 
 end HilbertBernays
 

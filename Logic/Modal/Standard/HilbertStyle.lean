@@ -71,9 +71,6 @@ def multiboxIff' (h : 𝓢 ⊢ p ⟷ q) : 𝓢 ⊢ □^[n]p ⟷ □^[n]q := by
   | succ n ih => simpa using boxIff' ih;
 @[simp] lemma multibox_iff! (h : 𝓢 ⊢! p ⟷ q) : 𝓢 ⊢! □^[n]p ⟷ □^[n]q := ⟨multiboxIff' h.some⟩
 
--- TODO: move and rename
-def negIff' (h : 𝓢 ⊢ p ⟷ q) : 𝓢 ⊢ (~p ⟷ ~q) := conj₃' (contra₀' $ conj₂' h) (contra₀' $ conj₁' h)
-@[simp] lemma neg_iff! (h : 𝓢 ⊢! p ⟷ q) : 𝓢 ⊢! ~p ⟷ ~q := ⟨negIff' h.some⟩
 
 def diaIff' (h : 𝓢 ⊢ p ⟷ q) : 𝓢 ⊢ (◇p ⟷ ◇q) := by
   simp only [StandardModalLogicalConnective.duality'];
@@ -114,7 +111,7 @@ def multidiaDuality : 𝓢 ⊢ ◇^[n]p ⟷ ~(□^[n](~p)) := by
   | zero => simp; apply dn;
   | succ n ih =>
     simp [StandardModalLogicalConnective.duality'];
-    apply neg_iff';
+    apply negIff';
     apply boxIff';
     exact iffTrans (negIff' ih) (iffComm' dn)
 @[simp] lemma multidiaDuality! : 𝓢 ⊢! ◇^[n]p ⟷ ~(□^[n](~p)) := ⟨multidiaDuality⟩
@@ -420,8 +417,7 @@ def goedel2 [HasAxiomL 𝓢] : 𝓢 ⊢ (~(□⊥) ⟷ ~(□(~(□⊥))) : F) :=
     exact efq;
   . exact impTrans (by
       apply implyBoxDistribute';
-      rw [NegDefinition.neg]
-      exact impId _;
+      exact conj₁' NegationEquiv.neg_equiv;
     ) axiomL;
 lemma goedel2! [HasAxiomL 𝓢] : 𝓢 ⊢! (~(□⊥) ⟷ ~(□(~(□⊥))) : F) := ⟨goedel2⟩
 

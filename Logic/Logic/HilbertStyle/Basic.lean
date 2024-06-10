@@ -199,7 +199,7 @@ namespace NegationEquiv
 
 variable [System.NegationEquiv 𝓢]
 
-lemma neg_equiv! : 𝓢 ⊢! ~p ⟷ (p ⟶ ⊥) := ⟨NegationEquiv.neg_equiv⟩
+@[simp] lemma neg_equiv! : 𝓢 ⊢! ~p ⟷ (p ⟶ ⊥) := ⟨NegationEquiv.neg_equiv⟩
 
 def neg_equiv'.mp : 𝓢 ⊢ ~p → 𝓢 ⊢ p ⟶ ⊥ := λ h => (conj₁' neg_equiv) ⨀ h
 def neg_equiv'.mpr : 𝓢 ⊢ p ⟶ ⊥ → 𝓢 ⊢ ~p := λ h => (conj₂' neg_equiv) ⨀ h

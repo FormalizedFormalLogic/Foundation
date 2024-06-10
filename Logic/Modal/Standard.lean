@@ -12,3 +12,5 @@ import Logic.Modal.Standard.Kripke.Geach.Completeness
 import Logic.Modal.Standard.Kripke.Geach.Reducible
 
 import Logic.Modal.Standard.Kripke.ModalCompanion
+
+import Logic.Modal.Standard.Provability.Basic
