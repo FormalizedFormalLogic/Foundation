@@ -3,12 +3,12 @@ import Logic.Modal.Standard.System
 
 namespace LO.System
 
-variable {F : Type*} [StandardModalLogicalConnective F] [NegDefinition F] [DecidableEq F]
+variable {F : Type*} [StandardModalLogicalConnective F][DecidableEq F]
 variable {S : Type*} [System F S]
 variable {p q r : F} {Γ Δ : List F}
 
 variable {𝓢 : S}
-variable [Classical 𝓢]
+variable [System.Classical 𝓢] [System.NegationEquiv 𝓢]
 
 open FiniteContext
 
