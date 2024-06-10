@@ -1,4 +1,4 @@
-import Arithmetization.ISigmaOne.PRF
+import Arithmetization.ISigmaOne.HFS
 
 noncomputable section
 
@@ -10,9 +10,16 @@ namespace FormalizedTerm
 
 variable (M)
 
+structure Language where
+  Func (arity : M) : M → Prop
+  Rel (arity : M) : M → Prop
+
+
 /--  -/
 structure FreeStruc where
   arity : M → M
+
+
 
 /--
 

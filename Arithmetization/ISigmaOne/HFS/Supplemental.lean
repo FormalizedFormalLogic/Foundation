@@ -50,6 +50,8 @@ lemma mem_seqProduct_bound {x s a : M} (h : x ∈ s ×ˢ a) : x ≤ s + exp ((2 
   rcases mem_seqProduct_iff.mp h with ⟨v, hv, u, hu, rfl⟩
   exact seqCons_le (le_of_lt <| lt_of_mem hu) (le_of_lt <| lt_of_mem hv)
 
+section
+
 private lemma seqProduct_graph (t s a : M) :
     t = s ×ˢ a ↔ ∃ e, e = exp ((2 * s + a + 1)^2) ∧ ∀ x ≤ t + s + e, x ∈ t ↔ ∃ v ∈ s, ∃ u ∈ a, x = v ⁀' u :=
 ⟨by rintro rfl; exact ⟨exp ((2 * s + a + 1)^2), rfl, by intro x _; simp [mem_seqProduct_iff]⟩,
@@ -74,6 +76,8 @@ lemma seqProduct_defined : 𝚺₁-Function₂ (seqProduct : M → M → M) via 
     Semiformula.Evalbm M v seqProductDef.val ↔ v 0 = v 1 ×ˢ v 2 := seqProduct_defined.df.iff v
 
 instance seqProduct_definable : 𝚺₁-Function₂ (seqProduct : M → M → M) := Defined.to_definable _ seqProduct_defined
+
+end
 
 def seqExp.formulae : PR.Formulae 1 where
   zero := .mkSigma “y x | y = 1” (by simp)
@@ -143,7 +147,6 @@ lemma mem_seqExp_iff {s a k : M} : s ∈ a ^ˢ k ↔ Seq s ∧ lh s = k ∧ (∀
         have hx : x ∈ a := hs k x (by simp [←hsk])
         have hs : s ∈ a ^ˢ k := @ih s |>.mpr ⟨Hs', hsk, fun i z hiz ↦ hs i z (Seq.subset_seqCons s x hiz)⟩
         exact seqCons_mem_seqProduct hs hx
-
 
 lemma seq_of_mem_seqExp {s a k : M} (h : s ∈ a ^ˢ k) : Seq s := (mem_seqExp_iff.mp h).1
 
