@@ -1,128 +1,156 @@
-import Logic.FirstOrder.Incompleteness.SelfReference
+import Logic.FirstOrder.Incompleteness.ProvabilityCondition
 import Logic.Modal.Standard.Deduction
 
 namespace LO
 
-/-
-  TODO: 一応，様相論理関連の話題ではあるが，Gödel数のnotationなどがこの名前空間でlocalに定義されているためこの名前空間に置かれている．移したい．
--/
-namespace FirstOrder.Arith.SelfReference
+namespace System
+
+variable {S : Type*} [System F S]
+lemma Subtheory.prf! {𝓢 𝓣 : S} [𝓢 ≼ 𝓣] {f} : 𝓢 ⊢! f → 𝓣 ⊢! f := λ ⟨p⟩ ↦ ⟨Subtheory.prf p⟩
+
+end System
+
+
+namespace FirstOrder
+
+-- Supplemental
+namespace ProvabilityPredicate
+
+section Loeb
+
+variable [Semiterm.Operator.GoedelNumber L (Sentence L)]
+
+class Loeb (β : ProvabilityPredicate L L) (T₀ : Theory L) where
+  LT (σ : Sentence L) : T₀ ⊢! ⦍β⦎σ ⟶ σ → T₀ ⊢! σ
+
+class FormalizedLoeb (β : ProvabilityPredicate L L) (T₀ : Theory L) (T : outParam (Theory L)) where
+  FLT (σ : Sentence L) : T ⊢! ⦍β⦎(⦍β⦎σ ⟶ σ) ⟶ ⦍β⦎σ
+
+end Loeb
+
+
+section Fixpoints
+
+variable [Semiterm.Operator.GoedelNumber L₀ (Sentence L)]
+         (β : ProvabilityPredicate L L)
+
+def Consistency (β : ProvabilityPredicate L₀ L) : Sentence L₀ := ~⦍β⦎⊥
+notation "Con⦍" β "⦎" => Consistency β
+
+end Fixpoints
+
+end ProvabilityPredicate
 
 open System
-open Formula
+variable {L : Language} [Semiterm.Operator.GoedelNumber L (Sentence L)]
+                        {β : ProvabilityPredicate L L}
+                        {T₀ T : Theory L}
 
-variable {α : Type*} {a : α} [DecidableEq α]
-variable {p q r : LO.Modal.Standard.Formula α}
-variable {φ ψ ξ : Sentence ℒₒᵣ}
+open ProvabilityPredicate
 
-open LO.Modal.Standard.Formula (atom)
-
-def Realization (α : Type u) := α → Sentence ℒₒᵣ
-
-def Interpretation
-  (f : Realization α)
-  (pred : Semisentence ℒₒᵣ 1)
-  : LO.Modal.Standard.Formula α → Sentence ℒₒᵣ
-  | .atom a => f a
-  | .box p => pred/[⸢(Interpretation f pred p)⸣]
-  | ⊤ => ⊤
-  | ⊥ => ⊥
-  | p ⟶ q => Interpretation f pred p ⟶ Interpretation f pred q
-  | p ⋏ q => Interpretation f pred p ⋏ Interpretation f pred q
-  | p ⋎ q => Interpretation f pred p ⋎ Interpretation f pred q
-notation f "[" Pr "] " p => Interpretation f Pr p
-
-open LO.FirstOrder.Arith.FirstIncompletenessBySelfReference (provableSentence)
-
-notation "Pr(" T ")" => provableSentence T
-
-noncomputable abbrev TheoryFixedInterpretation (f : Realization α) (T : Theory ℒₒᵣ) := (f[Pr(T)] ·)
-notation f "[" T "] " p => TheoryFixedInterpretation f T p
-
-variable {T : Theory ℒₒᵣ}
-
-open System
-
-private noncomputable abbrev AsBox (T : Theory ℒₒᵣ) (φ : Sentence ℒₒᵣ) : Sentence ℒₒᵣ := Pr(T)/[⸢φ⸣]
-notation:max "⟦" T "⟧" φ:90 => AsBox T φ
-
-namespace DerivabilityCondition
-
-variable (T U : Theory ℒₒᵣ)
-
-class HBL1 where
-  D1 : ∀ {φ : Sentence ℒₒᵣ}, U ⊢! φ → T ⊢! ⟦U⟧φ -- Necessitation
-
-class HBL2 where
-  D2 : ∀ {φ ψ : Sentence ℒₒᵣ}, T ⊢! ⟦U⟧(φ ⟶ ψ) ⟶ ⟦U⟧φ ⟶ ⟦U⟧ψ -- Axiom K
-
-class HBL3 where
-  D3 : ∀ {φ : Sentence ℒₒᵣ}, T ⊢! ⟦U⟧φ ⟶ ⟦U⟧⟦U⟧φ -- Axiom Four
-
-class Standard extends HBL1 T U, HBL2 T U, HBL3 T U
-
-class FormalizedDT where
-  FDT : ∀ {φ ψ : Sentence ℒₒᵣ}, T ⊢! ⟦U⟧(φ ⟶ ψ) ⟷ ⟦U.insert φ⟧(ψ)
-
-class Loeb where
-  LT : ∀ {φ : Sentence ℒₒᵣ}, T ⊢! ⟦T⟧φ ⟶ φ → T ⊢! φ
-
-class FormalizedLoeb where
-  FLT : ∀ {φ : Sentence ℒₒᵣ}, T ⊢! ⟦U⟧(⟦U⟧φ ⟶ φ) ⟶ ⟦U⟧φ
-
-end DerivabilityCondition
+variable [System.Classical T]
+variable [NegDefinition (Semisentence L 0)] [DecidableEq (Semisentence L 0)] -- TODO: 雑に導入したので消す
 
 
-open DerivabilityCondition
-
-section
-
-variable (T : Theory ℒₒᵣ) [𝐄𝐐 ≼ T] [𝐏𝐀⁻ ≼ T] [SigmaOneSound T]
-variable [Standard T T]
-
-lemma loeb_theorem
-  {φ : Sentence ℒₒᵣ} (h : T ⊢! Pr(T)/[⸢φ⸣] ⟶ φ) : T ⊢! φ := by
-  have := SelfReference.main T $ pred (T ⊢! · ⟶ φ);
-  generalize e : fixpoint (pred (T ⊢! · ⟶ φ)) = K at this;
-  sorry;
-
-instance : Loeb T := ⟨loeb_theorem T⟩
-
-noncomputable abbrev consistency_of (T : Theory ℒₒᵣ) := ~⟦T⟧⊥
-notation "Con(" T ")" => consistency_of T
-
-lemma goedel2_of_loeb [Loeb T] : System.Consistent T → T ⊬! Con(T) := by
+/-- Second Incompleteness -/
+lemma unprovable_consistency_of_Loeb [Loeb β T] : System.Consistent T → T ⊬! ~⦍β⦎⊥ := by
   contrapose;
-  intro hC; simp [consistency_of] at hC;
-  have : T ⊢! ⟦T⟧⊥ ⟶ ⊥ := by sorry; -- TODO: `T ⊢! ~⟦T⟧⊥`より明らかなはず
-  have : T ⊢! ⊥ := Loeb.LT this;
+  intro hC;
+  have : T ⊢! ⦍β⦎⊥ ⟶ ⊥ := by sorry; -- TODO: `T ⊢! ~⟦T⟧⊥`より明らかなはず
+  have : T ⊢! ⊥ := Loeb.LT _ this;
   apply System.not_consistent_iff_inconsistent.mpr;
   apply System.inconsistent_of_provable this;
 
+-- TODO: Remove H
+lemma formalized2nd [l : Loeb β T] (H : T ⊬! ~Con⦍β⦎) : T ⊬! Con⦍β⦎ ⟶ ~⦍β⦎(~Con⦍β⦎) := by
+  by_contra hC;
+  have : T ⊢! ~Con⦍β⦎ := l.LT _ (System.contra₁'! hC);
+  contradiction;
+
+end FirstOrder
+
+
+namespace Modal.Standard.Provability
+
+open LO.FirstOrder
+
+variable {α : Type*} [DecidableEq α]
+
+/-- Mapping modal prop vars to first-order sentence -/
+def Realization (L) (α : Type u) := α → FirstOrder.Sentence L
+
+/-- Mapping modal formulae to first-order sentence -/
+def Interpretation
+  [Semiterm.Operator.GoedelNumber L (FirstOrder.Sentence L)]
+  (f : Realization L α) (β : ProvabilityPredicate L L) : Formula α → FirstOrder.Sentence L
+  | .atom a => f a
+  | .box p => ⦍β⦎(Interpretation f β p)
+  | ⊤ => ⊤
+  | ⊥ => ⊥
+  | p ⟶ q => (Interpretation f β p) ⟶ (Interpretation f β q)
+  | p ⋏ q => (Interpretation f β p) ⋏ (Interpretation f β q)
+  | p ⋎ q => (Interpretation f β p) ⋎ (Interpretation f β q)
+notation f "[" β "] " p => Interpretation f β p
+
+section
+
+variable {L : FirstOrder.Language} [Semiterm.Operator.GoedelNumber L (Sentence L)]
+variable (β : ProvabilityPredicate L L)
+
+class ArithmeticalSoundness (𝓓 : DeductionParameter α) (T : FirstOrder.Theory L) where
+  sound : ∀ {p}, (𝓓 ⊢! p) → (∀ f, T ⊢! f[β] p)
+
+class ArithmeticalCompleteness (𝓓 : DeductionParameter α) (T : FirstOrder.Theory L) where
+  complete : ∀ {p}, (∀ f, T ⊢! f[β] p) → (𝓓 ⊢! p)
+
+class ProvabilityLogic (𝓓 : DeductionParameter α) (T : FirstOrder.Theory L)where
+  is : System.theory 𝓓 = { p | ∀ f, T ⊢! f[β] p }
+
+variable {β} {𝓓 : DeductionParameter α} {T : FirstOrder.Theory L}
+
+instance [ArithmeticalSoundness β 𝓓 T] [ArithmeticalCompleteness β 𝓓 T] : ProvabilityLogic β 𝓓 T where
+  is := by
+    apply Set.eq_of_subset_of_subset;
+    . intro p hp;
+      simp only [Set.mem_setOf_eq];
+      exact ArithmeticalSoundness.sound hp;
+    . intro p hp;
+      simp at hp;
+      exact ArithmeticalCompleteness.complete hp;
+
 end
 
+section ArithmeticalSoundness
 
-variable [Standard T T]
-variable [Loeb T]
+open System
+open ProvabilityPredicate
 
-open LO.Modal.Standard (reducible_GL_K4Loeb Deduction.inducition_with_nec! Deduction.inducition!)
+variable {L : FirstOrder.Language} [Semiterm.Operator.GoedelNumber L (Sentence L)]
+         (β : ProvabilityPredicate L L)
+         (T₀ T : FirstOrder.Theory L) [T₀ ≼ T]
+         [β.HilbertBernays T T] -- MEMO: `β.HilbertBernays T₀ T`にするとメタ変数的な問題が発生して困る
+         [β.Loeb T] -- TODO: Remove
+variable [Classical T]
 
-lemma arithmetical_soundness_K4Loeb (h : 𝐊𝟒(𝐋) ⊢! p) : ∀ f, T ⊢! f[T] p := by
+lemma arithmetical_soundness_K4Loeb (h : 𝐊𝟒(𝐋) ⊢! p) : ∀ {f : Realization L α}, T ⊢! (f[β] p) := by
   intro f;
   induction h using Deduction.inducition! with
+  | @hNec _ p h ih =>
+    exact (HilbertBernays₁.D1 _) ih;
   | hMaxm hp =>
     rcases hp with (hK | hFour)
-    . obtain ⟨p, q, e⟩ := hK; subst_vars; apply HBL2.D2;
-    . obtain ⟨p, e⟩ := hFour; subst_vars; apply HBL3.D3;
-  | hNec _ ih => exact HBL1.D1 ih;
-  | hLoeb _ ih => exact Loeb.LT ih;
+    . obtain ⟨p, q, e⟩ := hK; subst_vars;
+      apply HilbertBernays₂.D2;
+    . obtain ⟨p, e⟩ := hFour; subst_vars;
+      apply HilbertBernays₃.D3 _;
+  | hLoeb _ ih => apply (Loeb.LT _) ih;
   | hHenkin => simp_all only [Bool.false_eq_true];
   | hMdp ihpq ihp =>
-    simp at ihpq;
+    simp [Interpretation] at ihpq;
     exact ihpq ⨀ ihp;
   | hDne =>
-    dsimp [NegDefinition.neg, TheoryFixedInterpretation, Interpretation]; -- TODO: 単なる二重否定除去であるので直ちに成り立ってほしいが上手く出来ない．
-    sorry;
+    dsimp [NegDefinition.neg, Interpretation]; -- TODO: 単なる二重否定除去であるので直ちに成り立ってほしいが上手く出来ない．
+    sorry; -- apply System.dne!;
   | _ =>
     dsimp;
     first
@@ -136,32 +164,14 @@ lemma arithmetical_soundness_K4Loeb (h : 𝐊𝟒(𝐋) ⊢! p) : ∀ f, T ⊢! 
     | apply System.disj₂!;
     | apply System.disj₃!;
 
-theorem arithmetical_soundness_GL (h : 𝐆𝐋 ⊢! p) : ∀ f, T ⊢! f[T] p := by
+theorem arithmetical_soundness_GL (h : 𝐆𝐋 ⊢! p) : ∀ {f : Realization L α}, T ⊢! (f[β] p) := by
   apply arithmetical_soundness_K4Loeb;
   exact (System.reducible_iff.mp reducible_GL_K4Loeb) h;
 
-class ArithmeticalSoundness (T : Theory ℒₒᵣ) (𝓓 : Modal.Standard.DeductionParameter α) where
-  sounds : ∀ {p}, 𝓓 ⊢! p → ∀ f, T ⊢! f[T] p
+instance : ArithmeticalSoundness (α := α) β 𝐆𝐋 T := ⟨arithmetical_soundness_GL β _⟩
 
-class ArithmeticalCompleteness (T : Theory ℒₒᵣ) (𝓓 : Modal.Standard.DeductionParameter α) where
-  completes : ∀ {p}, (∀ f, T ⊢! f[T] p) → 𝓓 ⊢! p
+end ArithmeticalSoundness
 
-instance : ArithmeticalSoundness (α := α) T 𝐆𝐋 := ⟨arithmetical_soundness_GL⟩
-
-
-class IsProvabilityLogicOf (T : Theory ℒₒᵣ) (𝓓 : Modal.Standard.DeductionParameter α) where
-  is : System.theory 𝓓 = { p | ∀ f, T ⊢! f[T] p }
-
-instance [ArithmeticalSoundness T 𝓓] [ArithmeticalCompleteness T 𝓓] : IsProvabilityLogicOf T 𝓓 where
-  is := by
-    apply Set.eq_of_subset_of_subset;
-    . intro p hp;
-      simp only [Set.mem_setOf_eq];
-      exact ArithmeticalSoundness.sounds hp;
-    . intro p hp;
-      simp at hp;
-      exact ArithmeticalCompleteness.completes hp;
-
-end FirstOrder.Arith.SelfReference
+end Modal.Standard.Provability
 
 end LO
