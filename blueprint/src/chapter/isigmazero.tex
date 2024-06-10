@@ -1,0 +1,32 @@
+\chapter{Theory $\mathsf{I}Sigma_0$}
+
+\section{Define Exponential in $\mathsf{I}Sigma_0$}
+
+\begin{theorem}\label{LO.FirstOrder.Arith.Model.Exponential.defined}\lean{LO.FirstOrder.Arith.Model.Exponential.defined}\leanok
+  Graph of exponential is definable by $\Sigma_0$-formula $\mathrm{Exp}(x, y)$.
+\end{theorem}
+\begin{proof}\leanok
+
+\end{proof}
+
+$\mathrm{Exp}(x, y)$ satisfies following property.
+
+\begin{lemma}\label{LO.FirstOrder.Arith.Model.Exponential.exponential_zero_one}
+  \lean{LO.FirstOrder.Arith.Model.Exponential.exponential_zero_one}
+  \leanok
+  \uses{LO.FirstOrder.Arith.Model.Exponential.defined}
+
+  \begin{align*}
+    \mathsf{I}\Sigma_0 \vdash \mathrm{Exp}(0, 1)
+  \end{align*}
+\end{lemma}
+
+\begin{lemma}\label{LO.FirstOrder.Arith.Model.Exponential.succ}
+  \lean{LO.FirstOrder.Arith.Model.Exponential.succ}
+  \leanok
+  \uses{LO.FirstOrder.Arith.Model.Exponential.defined}
+  
+  \begin{align*}
+    \mathsf{I}\Sigma_0 \vdash (\forall x, y)[\mathrm{Exp}(x, y) \to \mathrm{Exp}(x + 1, 2y)]
+  \end{align*}
+\end{lemma}
