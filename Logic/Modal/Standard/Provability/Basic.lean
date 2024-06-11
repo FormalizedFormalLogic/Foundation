@@ -1,3 +1,4 @@
+import Logic.Logic.HilbertStyle.Gentzen
 import Logic.FirstOrder.Incompleteness.ProvabilityCondition
 import Logic.Modal.Standard.Deduction
 
@@ -81,7 +82,7 @@ variable [DecidableEq (Sentence L)]
 
 section
 
-variable (T₀ T : Theory L) [T₀ ≼ T] [System.Classical T₀] [System.Classical T] [HilbertBernays β T₀ T]
+variable (T₀ T : Theory L) [T₀ ≼ T] [HilbertBernays β T₀ T]
          [KreiselDiagonalizable β T₀ T] -- TODO: 消す
 
 open HilbertBernays₁ HilbertBernays₂ HilbertBernays₃ HilbertBernays
@@ -118,19 +119,17 @@ lemma FormalizedLoebTheorem : T₀ ⊢! ⦍β⦎(⦍β⦎σ ⟶ σ) ⟶ ⦍β⦎
   have : T ⊢! (⦍β⦎σ ⟶ σ) ⟶ θ := Subtheory.prf! $ imp_trans! this hθ₂;
   exact imp_trans! (D2 ⨀ (D1 this)) hθ₁;
 
-instance
-  [T₀ ≼ T] [System.Classical T₀] [System.Classical T] [HilbertBernays β T₀ T]
+instance [T₀ ≼ T] [HilbertBernays β T₀ T]
   [KreiselDiagonalizable β T₀ T] -- TODO: 消す
   : Loeb β T₀ T := ⟨LoebTheorm T₀ T⟩
 
-instance
-  [System.Classical T] [HilbertBernays β T T]
+instance [HilbertBernays β T T]
   [KreiselDiagonalizable β T T] -- TODO: 消す
   : Loeb β T T := inferInstance
 
 end
 
-variable [System.Classical T₀] [System.Classical T] [System.NegationEquiv T]
+variable [System.NegationEquiv T]
 
 /-- Second Incompleteness -/
 lemma unprovable_consistency_of_Loeb [Loeb β T₀ T] : System.Consistent T → T ⊬! ~⦍β⦎⊥ := by
@@ -214,8 +213,7 @@ variable {L : FirstOrder.Language} [Semiterm.Operator.GoedelNumber L (Sentence L
          (T₀ : FirstOrder.Theory L) (T : FirstOrder.Theory L) [T₀ ≼ T]
          (β : ProvabilityPredicate L L)
          [β.HilbertBernays T₀ T] [β.KreiselDiagonalizable T₀ T] -- TODO: 消す
-variable [System.Classical T₀] [System.Classical T] [System.NegationEquiv T]
--- TODO: `T₀ ≼ T`で`T₀`が`System.Classical`なら`T`も`System.Classical`であると思われる．
+variable [System.NegationEquiv T]
 
 lemma arithmetical_soundness_K4Loeb (h : 𝐊𝟒(𝐋) ⊢! p) : ∀ {f : Realization L α}, T ⊢! (f[β] p) := by
   intro f;
