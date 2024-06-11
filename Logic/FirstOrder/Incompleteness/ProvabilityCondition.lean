@@ -70,9 +70,9 @@ def HilbertBernays₂.D2s [HilbertBernays₂ β T₀ T] : T ⊢! ⦍β⦎(σ ⟶
   apply System.Subtheory.prf! (𝓢 := T₀);
   apply HilbertBernays₂.D2;
 
-def HilbertBernays₂.D2' [HilbertBernays β T₀ T] [System.ModusPonens T] : T ⊢! ⦍β⦎(σ ⟶ τ) → T ⊢! ⦍β⦎σ ⟶ ⦍β⦎τ := by
+def HilbertBernays₂.D2' [HilbertBernays β T₀ T] [System.ModusPonens T] : T₀ ⊢! ⦍β⦎(σ ⟶ τ) → T₀ ⊢! ⦍β⦎σ ⟶ ⦍β⦎τ := by
   intro h;
-  exact (HilbertBernays₂.D2s (T₀ := T₀)) ⨀ h;
+  exact HilbertBernays₂.D2 ⨀ h;
 
 def HilbertBernays₃.D3s [HilbertBernays₃ β T₀ T] : T ⊢! ⦍β⦎σ ⟶ ⦍β⦎⦍β⦎σ := by
   apply System.Subtheory.prf! (𝓢 := T₀);
@@ -83,6 +83,66 @@ def Loeb.LT' [Loeb β T₀ T] {σ : Sentence L} : T ⊢! ⦍β⦎σ ⟶ σ → T
 end
 
 end Conditions
+
+section FirstIncompleteness
+
+variable [DecidableEq (Sentence L)]
+         [Semiterm.Operator.GoedelNumber L (Sentence L)]
+         (β : ProvabilityPredicate L L)
+         (T₀ T : Theory L) [T₀ ≼ T] [Diagonalization T₀]
+open LO.System LO.System.NegationEquiv
+open HilbertBernays₁ HilbertBernays₂ HilbertBernays₃
+open Diagonalization
+
+lemma existence_goedel_sentence : ∃ (θ : Sentence L), T ⊢! θ ⟷ ~⦍β⦎θ := by
+  have hθ := diag (T := T₀) “x | ¬!β.prov x”;
+  generalize (fixpoint T₀ “x | ¬!β.prov x”) = θ at hθ;
+
+  have eθ : θ ⟷ (~β.prov/[#0])/[⸢θ⸣] = θ ⟷ ~(⦍β⦎θ) := by
+    simp [←Rew.hom_comp_app, Rew.substs_comp_substs]; rfl;
+
+  use θ;
+  apply Subtheory.prf! (𝓢 := T₀);
+  simpa [←eθ] using hθ;
+
+noncomputable abbrev goedel := (existence_goedel_sentence β T₀ T).choose
+local notation "G" => goedel β T₀ T
+
+lemma goedel_spec : T ⊢! G ⟷ ~⦍β⦎G := (existence_goedel_sentence β T₀ T).choose_spec
+
+
+lemma unprovable_goedel [β.HilbertBernays₁ T₀ T] : System.Consistent T → T ⊬! G := by
+  contrapose;
+  intro h; simp at h;
+  have h₁ : T ⊢! ⦍β⦎G := D1s (T₀ := T₀) h;
+  have h₂ : T ⊢! ~⦍β⦎G := (conj₁'! (goedel_spec β T₀ T)) ⨀ h;
+
+  apply System.not_consistent_iff_inconsistent.mpr;
+  apply System.inconsistent_of_provable;
+  exact (neg_equiv'!.mp h₂) ⨀ h₁;
+
+lemma unrefutable_goedel [β.Conservative T T] : System.Consistent T → T ⊬! ~G := by
+  contrapose;
+  intro h; simp at h;
+  have : T ⊢! ⦍β⦎G := dne'! $ (conj₁'! $ neg_iff'! $ goedel_spec β T₀ T) ⨀ h;
+  have : T ⊢! G := Conservative.iff (T := T) _ |>.mpr this;
+  apply System.not_consistent_iff_inconsistent.mpr;
+  apply System.inconsistent_of_provable;
+  exact (neg_equiv'!.mp h) ⨀ this;
+
+lemma goedel_independent
+  [β.HilbertBernays₁ T₀ T] [β.Conservative T T] [System.Consistent T]
+  : System.Undecidable T G := by
+  suffices T ⊬! G ∧ T ⊬! ~G by simpa [System.Undecidable, not_or] using this;
+  constructor;
+  . apply unprovable_goedel β T₀ T; assumption;
+  . apply unrefutable_goedel β T₀ T; assumption;
+
+lemma first_incompleteness
+  [β.HilbertBernays₁ T₀ T] [β.Conservative T T] [System.Consistent T]
+  : ¬System.Complete T := System.incomplete_iff_exists_undecidable.mpr ⟨G, goedel_independent β T₀ T⟩
+
+end FirstIncompleteness
 
 
 section LoebTheorem
@@ -132,6 +192,37 @@ instance : FormalizedLoeb β T₀ T := ⟨formalized_loeb_theorem T₀ T⟩
 
 end LoebTheorem
 
+
+section
+
+variable [DecidableEq (Sentence L)]
+         [Semiterm.Operator.GoedelNumber L (Sentence L)]
+         {T₀ T : Theory L} [T₀ ≼ T] [Diagonalization T₀]
+         {β : ProvabilityPredicate L L} [β.HilbertBernays T₀ T]
+open LO.System LO.System.NegationEquiv
+open HilbertBernays₁ HilbertBernays₂ HilbertBernays₃
+open Diagonalization
+
+/-- Second Incompleteness Theorem -/
+lemma lemma4_2_3 : T₀ ⊢! ~⦍β⦎σ ⟶ Con⦍β⦎ := contra₀'! $ D2 ⨀ (D1 efq!)
+
+lemma lemma4_2_4 [T₀ ≼ U] [β.HilbertBernays T₀ U] : (U ⊢! Con⦍β⦎ ⟶ ~⦍β⦎σ) ↔ (U ⊢! ⦍β⦎σ ⟶ ⦍β⦎(~σ)) := by
+  constructor;
+  . intro H;
+    exact contra₃'! $ imp_trans! (Subtheory.prf! (𝓢 := T₀) lemma4_2_3) H;
+  . intro H;
+    apply contra₀'!;
+    exact imp_trans! H $ (by
+      have : U ⊢! (σ ⋏ ~σ) ⟶ ⊥ := by sorry;
+      have : T₀ ⊢! ⦍β⦎((σ ⋏ ~σ) ⟶ ⊥) := D1 this;
+      have : T₀ ⊢! ⦍β⦎(σ ⋏ ~σ) ⟶ ⦍β⦎⊥ := D2 ⨀ this;
+      have : U ⊢! ⦍β⦎(σ ⋏ ~σ) ⟶ ⦍β⦎⊥ := Subtheory.prf! (𝓢 := T₀) this
+      exact imp_trans! (by sorry) this;
+    );
+
+end
+
+
 section Second
 
 variable [DecidableEq (Sentence L)]
@@ -143,10 +234,10 @@ open HilbertBernays₁ HilbertBernays₂ HilbertBernays₃
 open Diagonalization
 
 /-- Second Incompleteness Theorem -/
-lemma unprovable_consistency_of_Loeb : System.Consistent T → T ⊬! ~⦍β⦎⊥ := by
+lemma unprovable_consistency_of_Loeb : System.Consistent T → T ⊬! Con⦍β⦎ := by
   contrapose;
-  intro hC; simp [neg_equiv'!] at hC;
-  have : T ⊢! ⊥ := Loeb.LT T₀ hC;
+  intro hC; simp at hC;
+  have : T ⊢! ⊥ := Loeb.LT T₀ $ neg_equiv'!.mp hC;
   apply System.not_consistent_iff_inconsistent.mpr;
   apply System.inconsistent_of_provable this;
 
