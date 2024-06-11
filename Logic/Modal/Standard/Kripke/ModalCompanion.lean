@@ -46,7 +46,7 @@ variable {p q : Superintuitionistic.Formula α}
 @[simp] lemma and_def : (p ⋏ q)ᵍ = pᵍ ⋏ qᵍ := by simp [GoedelTranslation];
 @[simp] lemma or_def : (p ⋎ q)ᵍ = pᵍ ⋎ qᵍ := by simp [GoedelTranslation];
 @[simp] lemma imp_def : (p ⟶ q)ᵍ = □(pᵍ ⟶ qᵍ) := by simp [GoedelTranslation];
-@[simp] lemma neg_def' : (~p)ᵍ = □~(p)ᵍ := by simp [GoedelTranslation, NegDefinition.neg];
+@[simp] lemma neg_def' : (~p)ᵍ = □~(p)ᵍ := by simp [GoedelTranslation, NegAbbrev.neg];
 
 end GoedelTranslation
 

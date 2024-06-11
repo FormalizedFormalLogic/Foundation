@@ -159,6 +159,8 @@ instance : StrongCut (FiniteContext F 𝓢) (FiniteContext F 𝓢) :=
     have : Γ ⊢ Δ.conj := conjIntro _ (fun _ hp ↦ bΓ hp)
     ofDef <| impTrans (toDef this) (toDef bΔ)⟩
 
+instance [System.NegationEquiv 𝓢] (Γ : FiniteContext F 𝓢) : System.NegationEquiv Γ := ⟨λ {_} => of NegationEquiv.neg_equiv⟩
+
 instance [HasEFQ 𝓢] (Γ : FiniteContext F 𝓢) : HasEFQ Γ := ⟨fun _ ↦ of efq⟩
 
 instance [HasWeakLEM 𝓢] (Γ : FiniteContext F 𝓢) : HasWeakLEM Γ := ⟨fun p ↦ of (HasWeakLEM.wlem p)⟩
@@ -310,6 +312,8 @@ instance minimal (Γ : Context F 𝓢) : Minimal Γ where
   disj₁ := fun _ _ ↦ of disj₁
   disj₂ := fun _ _ ↦ of disj₂
   disj₃ := fun _ _ _ ↦ of disj₃
+
+instance [System.NegationEquiv 𝓢] (Γ : Context F 𝓢) : System.NegationEquiv Γ := ⟨λ {_} => of NegationEquiv.neg_equiv⟩
 
 instance [HasEFQ 𝓢] (Γ : Context F 𝓢) : HasEFQ Γ := ⟨fun _ ↦ of efq⟩
 

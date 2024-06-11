@@ -28,6 +28,16 @@ end Axioms
 class ModusPonens where
   mdp {p q : F} : 𝓢 ⊢ p ⟶ q → 𝓢 ⊢ p → 𝓢 ⊢ q
 
+
+/--
+  Negation `~p` is equivalent to `p ⟶ ⊥` on **system**.
+
+  This is weaker asssumption than _"introducing `~p` as an abbreviation of `p ⟶ ⊥`" (`NegAbbrev`)_.
+-/
+protected class NegationEquiv (𝓢 : S) where
+  neg_equiv {p} : 𝓢 ⊢ ~p ⟷ (p ⟶ ⊥)
+
+
 class Minimal extends ModusPonens 𝓢 where
   verum              : 𝓢 ⊢ ⊤
   imply₁ (p q : F)   : 𝓢 ⊢ p ⟶ q ⟶ p
@@ -71,13 +81,19 @@ class Classical extends Minimal 𝓢, HasDNE 𝓢
 
 variable {𝓢}
 
+
+namespace ModusPonens
+
 infixl:90 "⨀" => ModusPonens.mdp
 
-lemma ModusPonens.mdp! [ModusPonens 𝓢] : 𝓢 ⊢! p ⟶ q → 𝓢 ⊢! p → 𝓢 ⊢! q := by
+lemma mdp! [ModusPonens 𝓢] : 𝓢 ⊢! p ⟶ q → 𝓢 ⊢! p → 𝓢 ⊢! q := by
   rintro ⟨hpq⟩ ⟨hp⟩;
   exact ⟨hpq ⨀ hp⟩
 
 infixl:90 "⨀" => ModusPonens.mdp!
+
+end ModusPonens
+
 
 variable [Minimal 𝓢]
 
@@ -178,6 +194,23 @@ def impId (p : F) : 𝓢 ⊢ p ⟶ p := Minimal.imply₂ p (p ⟶ p) p ⨀ imply
 def iffId (p : F) : 𝓢 ⊢ p ⟷ p := conj₃' (impId p) (impId p)
 @[simp] def iff_id! : 𝓢 ⊢! p ⟷ p := ⟨iffId p⟩
 
+
+namespace NegationEquiv
+
+variable [System.NegationEquiv 𝓢]
+
+lemma neg_equiv! : 𝓢 ⊢! ~p ⟷ (p ⟶ ⊥) := ⟨NegationEquiv.neg_equiv⟩
+
+def neg_equiv'.mp : 𝓢 ⊢ ~p → 𝓢 ⊢ p ⟶ ⊥ := λ h => (conj₁' neg_equiv) ⨀ h
+def neg_equiv'.mpr : 𝓢 ⊢ p ⟶ ⊥ → 𝓢 ⊢ ~p := λ h => (conj₂' neg_equiv) ⨀ h
+lemma neg_equiv'! : 𝓢 ⊢! ~p ↔ 𝓢 ⊢! p ⟶ ⊥ := ⟨λ ⟨h⟩ => ⟨neg_equiv'.mp h⟩, λ ⟨h⟩ => ⟨neg_equiv'.mpr h⟩⟩
+
+instance [NegAbbrev F] : System.NegationEquiv 𝓢 where
+  neg_equiv := by intro p; simp [NegAbbrev.neg]; apply iffId;
+
+end NegationEquiv
+
+
 def mdp₁ (bqr : 𝓢 ⊢ p ⟶ q ⟶ r) (bq : 𝓢 ⊢ p ⟶ q) : 𝓢 ⊢ p ⟶ r := Minimal.imply₂ p q r ⨀ bqr ⨀ bq
 lemma mdp₁! (hqr : 𝓢 ⊢! p ⟶ q ⟶ r) (hq : 𝓢 ⊢! p ⟶ q) : 𝓢 ⊢! p ⟶ r := ⟨mdp₁ hqr.some hq.some⟩
 
@@ -273,5 +306,8 @@ def conjImplyConj [DecidableEq F] {Γ Δ : List F} (h : Δ ⊆ Γ) : 𝓢 ⊢ Γ
   implyConj _ _ (fun _ hq ↦ generalConj (h hq))
 
 instance [(𝓢 : S) → ModusPonens 𝓢] [(𝓢 : S) → HasEFQ 𝓢] : DeductiveExplosion S := ⟨fun b _ ↦ efq ⨀ b⟩
+
+
+
 
 end LO.System

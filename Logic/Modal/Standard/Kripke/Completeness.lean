@@ -146,7 +146,8 @@ lemma either_consistent (p) : (L)-Consistent (insert p T) ∨ (L)-Consistent (in
   obtain ⟨Γ, hΓ₁, hΓ₂⟩ := iff_insert_notParametricConsistent.mp hC.1;
   obtain ⟨Δ, hΔ₁, hΔ₂⟩ := iff_insert_notParametricConsistent.mp hC.2;
 
-  rw [←NegDefinition.neg] at hΓ₂ hΔ₂;
+  replace hΓ₂ := NegationEquiv.neg_equiv'!.mp hΓ₂;
+  replace hΔ₂ := NegationEquiv.neg_equiv'!.mp hΔ₂;
   have : L ⊢! Γ.conj' ⋏ Δ.conj' ⟶ ⊥ := demorgan₁'! $ disj₃'! (imp_trans! (implyOfNotOr'! $ demorgan₄'! hΓ₂) disj₁!) (imp_trans! (implyOfNotOr'! $ demorgan₄'! hΔ₂) disj₂!) lem!;
   have := @consisT (Γ ++ Δ) (by
     intro q hq;
@@ -385,7 +386,7 @@ lemma iff_congr : (Ω.theory *⊢[L]! (p ⟷ q)) → ((p ∈ Ω.theory) ↔ (q �
   . intro hp; exact iff_mem_imp.mp (membership_iff.mpr $ conj₁'! hpq) hp;
   . intro hq; exact iff_mem_imp.mp (membership_iff.mpr $ conj₂'! hpq) hq;
 
-lemma mem_dn_iff : (p ∈ Ω.theory) ↔ (~~p ∈ Ω.theory) := iff_congr $ (by simp)
+lemma mem_dn_iff : (p ∈ Ω.theory) ↔ (~~p ∈ Ω.theory) := iff_congr $ dn!
 
 lemma equality_def : Ω₁ = Ω₂ ↔ Ω₁.theory = Ω₂.theory := by
   constructor;
