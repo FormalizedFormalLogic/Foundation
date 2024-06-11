@@ -55,6 +55,8 @@ instance : Repr (Formula α) := ⟨fun t _ => toStr t⟩
 
 instance : ToString (Formula α) := ⟨toStr⟩
 
+instance : Coe α (Formula α) := ⟨atom⟩
+
 end ToString
 
 lemma or_eq (p q : Formula α) : or p q = p ⋎ q := rfl

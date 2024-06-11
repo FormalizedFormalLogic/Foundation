@@ -250,7 +250,6 @@ lemma either_mem (Ω : MCT L) (p) : p ∈ Ω.theory ∨ ~p ∈ Ω.theory := by
 
 lemma maximal' {p : Formula α} (hp : p ∉ Ω.theory) : ¬(L)-Consistent (insert p Ω.theory) := Ω.maximal (Set.ssubset_insert hp)
 
-
 lemma membership_iff : (p ∈ Ω.theory) ↔ (Ω.theory *⊢[L]! p) := by
   constructor;
   . intro h; exact Context.by_axm! h;
@@ -261,6 +260,12 @@ lemma membership_iff : (p ∈ Ω.theory) ↔ (Ω.theory *⊢[L]! p) := by
     have := hnp ⨀ hp;
     have := not_provable_falsum Ω.consistent;
     contradiction;
+
+lemma subset_axiomset : Ax(L) ⊆ Ω.theory := by
+  intro p hp;
+  apply membership_iff.mpr;
+  apply Context.of!;
+  exact ⟨Deduction.maxm (by aesop)⟩
 
 @[simp]
 lemma not_mem_falsum : ⊥ ∉ Ω.theory := not_mem_falsum_of_Lconsistent Ω.consistent
@@ -686,6 +691,19 @@ instance : Canonical (𝐊 : DeductionParameter α) := canonical_of_definability
 -- MEMO: inferInstanceで行けてほしいのだがなぜか通らないので明示的に指定している
 instance : Complete (𝐊 : DeductionParameter α) 𝔽(Ax(𝐊)) := instComplete
 
+instance Canonical.union
+  {𝓓₁ 𝓓₂ : DeductionParameter α}
+  [𝓓₁.Normal] [𝓓₂.Normal]
+  [Inhabited (MCT 𝓓₁)] [Inhabited (MCT 𝓓₂)] [Inhabited (MCT (𝓓₁ ⊔ 𝓓₂))]
+  (definability₁ : Definability Ax(𝓓₁) P₁)
+  (definability₂ : Definability Ax(𝓓₂) P₂)
+  (h₁ : P₁ (CanonicalFrame (DeductionParameter.union 𝓓₁ 𝓓₂ (by done))))
+  (h₂ : P₂ (CanonicalFrame (DeductionParameter.union 𝓓₁ 𝓓₂ (by done))))
+  -- MEMO: `(by done)`としなければならない理由はよくわからない．
+  : Canonical (DeductionParameter.union 𝓓₁ 𝓓₂ (by done)) := by
+  apply canonical_of_definability;
+  apply Definability.union definability₁ definability₂;
+  exact ⟨h₁, h₂⟩;
 
 end Kripke
 

@@ -48,6 +48,9 @@ scoped notation w:45 " ≺^[" n "] " w':46 => Frame.RelItr n w w'
 abbrev Frame.terminal : FiniteFrame := { World := PUnit, Rel := λ _ _ => True }
 
 @[simp]
+lemma Frame.terminal.rel : Frame.Rel' (F := Frame.terminal.toFrame) x y ↔ x = y := by aesop;
+
+@[simp]
 lemma Frame.terminal.relItr : Frame.RelItr n (F := Frame.terminal.toFrame) x y ↔ x = y := by
   induction n with
   | zero => simp;
@@ -59,7 +62,7 @@ set_option linter.unusedVariables false in
 abbrev FrameClass' (α : Type*) := FrameClass
 
 class FrameClass.IsNonempty (𝔽 : FrameClass) where
-  nonempty : ∃ F, 𝔽 F
+  nonempty : ∃ F, F ∈ 𝔽
 
 
 
@@ -69,7 +72,7 @@ set_option linter.unusedVariables false in
 abbrev FiniteFrameClass' (α : Type*) := FiniteFrameClass
 
 class FiniteFrameClass.IsNonempty (𝔽 : FiniteFrameClass) where
-  nonempty : ∃ F, 𝔽 F
+  nonempty : ∃ F, F ∈ 𝔽
 
 
 def FrameClass.toFinite (𝔽 : FrameClass) : FiniteFrameClass := { F | F.toFrame ∈ 𝔽 }
@@ -262,7 +265,7 @@ instance Definability.union (definability₁ : Definability Ax₁ P₁) (definab
       . apply Definability.defines F |>.mpr h.1;
       . apply Definability.defines F |>.mpr h.2;
 
-lemma iff_definability_memAxiomSetFrameClass (definability : Definability Ax P) : ∀ {F : Frame' α}, 𝔽(Ax) F ↔ P F := by
+lemma iff_definability_memAxiomSetFrameClass (definability : Definability Ax P) : ∀ {F : Frame' α}, F ∈ 𝔽(Ax) ↔ P F := by
   apply definability.defines;
 
 
