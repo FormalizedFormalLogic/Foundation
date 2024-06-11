@@ -101,6 +101,9 @@ protected class Div (L : Language) where
 protected class Star (L : Language) where
   star : Semiterm.Const L
 
+class GoedelNumber (L : Language) (α : Type*) where
+  goedelNumber : α → Semiterm.Const L
+
 notation "op(0)" => Zero.zero
 
 notation "op(1)" => One.one
@@ -154,7 +157,7 @@ lemma numeral_succ (hz : z ≠ 0) : numeral L (z + 1) = Operator.Add.add.comp ![
 lemma numeral_add_two : numeral L (z + 2) = Operator.Add.add.comp ![numeral L (z + 1), One.one] :=
   numeral_succ (by simp)
 
-abbrev godelNumber (L : Language) [Operator.Zero L] [Operator.One L] [Operator.Add L]
+protected abbrev encode (L : Language) [Operator.Zero L] [Operator.One L] [Operator.Add L]
     {α : Type*} [Primcodable α] (a : α) : Semiterm.Const L :=
   Semiterm.Operator.numeral L (Encodable.encode a)
 
@@ -190,7 +193,7 @@ lemma npow_succ : npow L (n + 1) = Operator.Mul.mul.comp ![npow L n, bvar 0] := 
 
 end npow
 
-@[simp] lemma npow_positive_iff {L : Language} [Operator.One L] [L.Mul] (t : Semiterm L ξ (n + 1)) (k : ℕ) :
+@[simp] lemma npow_positive_iff [Operator.One L] [L.Mul] (t : Semiterm L ξ (n + 1)) (k : ℕ) :
     ((Operator.npow L k).operator ![t]).Positive ↔ k = 0 ∨ t.Positive := by
   cases k <;> simp [positive_operator_iff, operator_comp, npow_zero, npow_succ]
   case succ k _ =>
@@ -199,6 +202,19 @@ end npow
     · intro h; exact h 1 0 (by simp [bvar])
     · intro h _ _ _
       exact h
+
+namespace GoedelNumber
+
+variable {α} [GoedelNumber L α]
+
+abbrev goedelNumber' (a : α) : Semiterm L ξ n := const (goedelNumber a)
+
+notation:max "⸢" a "⸣" => GoedelNumber.goedelNumber' a
+
+def ofEncodable
+    [Operator.Zero L] [Operator.One L] [Operator.Add L] {α : Type*} [Primcodable α] : GoedelNumber L α := ⟨Operator.encode L⟩
+
+end GoedelNumber
 
 end Operator
 
