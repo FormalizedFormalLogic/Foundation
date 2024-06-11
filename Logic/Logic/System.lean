@@ -335,6 +335,8 @@ def translation [𝓢 ≼ 𝓣] : 𝓢 ↝ 𝓣 where
 
 def ofTranslation (t : 𝓢 ↝ 𝓣) (h : ∀ p, t p = p) : 𝓢 ≼ 𝓣 := ⟨fun {p} b ↦ h p ▸ (t.prf b)⟩
 
+lemma prf! [𝓢 ≼ 𝓣] {f} : 𝓢 ⊢! f → 𝓣 ⊢! f := λ ⟨p⟩ ↦ ⟨Subtheory.prf p⟩
+
 end Subtheory
 
 section

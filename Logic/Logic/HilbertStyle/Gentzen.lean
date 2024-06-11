@@ -42,6 +42,13 @@ instance (𝓣 : S) : Classical 𝓣 where
       (wkL [q ⟶ r, q] (by simp) <| implyLeft (closed q (by simp) (by simp)) (closed r (by simp) (by simp)))
   dne := fun p ↦ of <| implyRight <| negLeft <| negRight <| closed p (by simp) (by simp)
 
+instance (𝓣 : S) : System.NegationEquiv 𝓣 := ⟨
+  λ {p} => of <| andRight
+    (implyRight <| implyRight <| rotateLeft <| negLeft <| closed p (by simp) (by simp))
+    (implyRight <| negRight  <| rotateLeft <| implyLeft (closed p (by simp) (by simp)) (falsum _ _))
+⟩
+
+
 def notContra {𝓣 : S} {p q : F} (b : 𝓣 ⊢ p ⟷ ~q) : 𝓣 ⊢ ~p ⟷ q := by
   have : [p ⟷ ~q] ⊢² [~p ⟷ q] :=
     andRight
