@@ -66,6 +66,7 @@ import Logic.FirstOrder.Arith.Nonstandard
 
 import Logic.FirstOrder.Arith.EA.Basic
 
+import Logic.FirstOrder.Incompleteness.ProvabilityCondition
 import Logic.FirstOrder.Incompleteness.FirstIncompleteness
 import Logic.FirstOrder.Incompleteness.SelfReference
 
