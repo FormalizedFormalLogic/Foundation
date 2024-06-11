@@ -12,16 +12,12 @@ structure DeductionParameterRules where
 
 namespace DeductionParameterRules
 
-abbrev le (R₁ R₂ : DeductionParameterRules) : Prop :=
-  R₁.nec ≤ R₂.nec ∧
-  R₁.loeb ≤ R₂.loeb ∧
-  R₁.henkin ≤ R₂.henkin
-
 instance : LE DeductionParameterRules where
   le R₁ R₂ :=
     R₁.nec ≤ R₂.nec ∧
     R₁.loeb ≤ R₂.loeb ∧
     R₁.henkin ≤ R₂.henkin
+
 
 variable {R₁ R₂ : DeductionParameterRules} (h : R₁ ≤ R₂ := by simpa)
 
@@ -63,6 +59,35 @@ class IncludeK where
   Deduction system of `L` is normal modal 𝓓ogic.
 -/
 class Normal extends HasNecOnly 𝓓, IncludeK 𝓓 where
+
+variable {𝓓}
+
+@[simp] lemma normal_has_nec [𝓓.Normal] : 𝓓.rules.nec = true := HasNec.has_nec
+@[simp] lemma notmal_not_has_loeb [𝓓.Normal] : 𝓓.rules.loeb = false := HasNecOnly.not_has_loeb
+@[simp] lemma notmal_not_has_henkin [𝓓.Normal] : 𝓓.rules.henkin = false := HasNecOnly.not_has_henkin
+
+@[simp] -- TODO: more simple proof
+lemma normal_rule [𝓓.Normal] : 𝓓.rules = ⟨true, false, false⟩ := by
+  nth_rw 1 [←(normal_has_nec (𝓓 := 𝓓))];
+  nth_rw 1 [←(notmal_not_has_loeb (𝓓 := 𝓓))];
+  nth_rw 1 [←(notmal_not_has_henkin (𝓓 := 𝓓))];
+
+@[simp] lemma normal_rules [𝓓₁.Normal] [𝓓₂.Normal] : 𝓓₁.rules = 𝓓₂.rules := by simp;
+
+def union (𝓓₁ 𝓓₂ : DeductionParameter α) (_ : 𝓓₁.rules = 𝓓₂.rules := by first | assumption | simp) : DeductionParameter α where
+  axiomSet := 𝓓₁.axiomSet ∪ 𝓓₂.axiomSet
+  rules := 𝓓₁.rules
+notation:50 𝓓₁ " ⊔ " 𝓓₂ => DeductionParameter.union 𝓓₁ 𝓓₂
+
+variable {𝓓₁ 𝓓₂}
+
+lemma union_left_rules (h : 𝓓₁.rules = 𝓓₂.rules) : (𝓓₁ ⊔ 𝓓₂).rules = 𝓓₁.rules := by cases 𝓓₁; rfl
+
+lemma union_right_rules (h : 𝓓₁.rules = 𝓓₂.rules) : (𝓓₁ ⊔ 𝓓₂).rules = 𝓓₂.rules := by cases 𝓓₂; exact h;
+
+lemma union_left_rules_normal [𝓓₁.Normal] [𝓓₂.Normal] : (𝓓₁ ⊔ 𝓓₂).rules = 𝓓₁.rules := by apply union_left_rules;
+
+lemma union_right_rules_normal [𝓓₁.Normal] [𝓓₂.Normal] : (𝓓₁ ⊔ 𝓓₂).rules = 𝓓₂.rules := by apply union_right_rules;
 
 end DeductionParameter
 

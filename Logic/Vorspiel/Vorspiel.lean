@@ -793,3 +793,35 @@ lemma exp_def (n : ℕ) : exp n = 2 ^ n := rfl
 lemma exp_succ (n : ℕ) : exp (n + 1) = 2 * exp n := by simp [exp_def, pow_succ, mul_comm]
 
 end Nat
+
+
+namespace Set
+
+variable (s₁ s₂ s₃ s₄ : Set F)
+
+@[simp] lemma subset_triunion₁ : s₁ ⊆ (s₁ ∪ s₂ ∪ s₃) := Set.Subset.trans Set.subset_union_left Set.subset_union_left
+
+@[simp] lemma subset_triunion₂ : s₂ ⊆ (s₁ ∪ s₂ ∪ s₃) := Set.Subset.trans Set.subset_union_right Set.subset_union_left
+
+@[simp] lemma subset_triunion₃ : s₃ ⊆ (s₁ ∪ s₂ ∪ s₃) := by simp only [subset_union_right]
+
+
+@[simp] lemma subset_tetraunion₁ : s₁ ⊆ (s₁ ∪ s₂ ∪ s₃ ∪ s₄) :=
+  Set.Subset.trans
+    Set.subset_union_left
+    $ Set.Subset.trans Set.subset_union_left Set.subset_union_left
+
+@[simp]
+lemma subset_tetraunion₂ : s₂ ⊆ (s₁ ∪ s₂ ∪ s₃ ∪ s₄) :=
+  Set.Subset.trans
+    Set.subset_union_right
+    $ Set.Subset.trans Set.subset_union_left Set.subset_union_left
+
+@[simp] lemma subset_tetraunion₃ : s₃ ⊆ (s₁ ∪ s₂ ∪ s₃ ∪ s₄) := by simp only [subset_triunion₂]
+@[simp] lemma subset_tetraunion₄ : s₄ ⊆ (s₁ ∪ s₂ ∪ s₃ ∪ s₄) := by simp only [subset_union_right]
+
+end Set
+
+/-- Class for `α` has at least `n` elements -/
+class Atleast (n : ℕ+) (α) where
+  mapping : ∃ f : Fin n → α, Function.HasLeftInverse f

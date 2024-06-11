@@ -27,6 +27,26 @@ namespace AxiomSet
 abbrev Geach (l : Axioms.Geach.Taple) : AxiomSet α := { Axioms.Geach l p | (p) }
 notation:max "𝗴𝗲(" t ")" => AxiomSet.Geach t
 
+namespace Geach
+
+lemma T_def : 𝗴𝗲(⟨0, 0, 1, 0⟩) = (𝗧 : AxiomSet α) := by aesop;
+
+lemma B_def : 𝗴𝗲(⟨0, 1, 0, 1⟩) = (𝗕 : AxiomSet α) := by aesop;
+
+lemma D_def : 𝗴𝗲(⟨0, 0, 1, 1⟩) = (𝗗 : AxiomSet α) := by aesop;
+
+lemma Four_def : 𝗴𝗲(⟨0, 2, 1, 0⟩) = (𝟰 : AxiomSet α) := by aesop;
+
+lemma Five_def : 𝗴𝗲(⟨1, 1, 0, 1⟩) = (𝟱 : AxiomSet α) := by aesop;
+
+lemma Dot2_def : 𝗴𝗲(⟨1, 1, 1, 1⟩) = (.𝟮 : AxiomSet α) := by aesop;
+
+lemma C4_def : 𝗴𝗲(⟨0, 1, 2, 0⟩) = (𝗖𝟰 : AxiomSet α) := by aesop;
+
+lemma CD_def : 𝗴𝗲(⟨1, 1, 0, 0⟩) = (𝗖𝗗 : AxiomSet α) := by aesop;
+
+end Geach
+
 class IsGeach (Ax : AxiomSet α) where
   taple : Axioms.Geach.Taple
   char : Ax = AxiomSet.Geach taple := by rfl
