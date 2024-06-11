@@ -1,12 +1,5 @@
 import Logic.Modal.Standard.Kripke.Geach.Completeness
 
--- MEMO: 相違な2要素が存在する．一般に`n`に拡張できると便利だが出来るかわからない．
-class Element₂ (α : Type*) where
-  elem₁ : α
-  elem₂ : α
-  neq₁₂ : elem₂ ≠ elem₁
-attribute [simp] Element₂.neq₁₂
-
 namespace LO.Modal.Standard
 
 open System
@@ -15,28 +8,31 @@ open Formula Formula.Kripke
 
 variable {α} [Inhabited α] [DecidableEq α]
 
-variable [Element₂ α]
 variable {F : Kripke.Frame' α}
-
-open Element₂
+variable [atleast : Atleast 2 α]
 
 private lemma AxiomSet.Dot3.definability.implies : F ⊧* .𝟯 → Connected F.Rel := by
   contrapose;
   intro hCon; simp [Connected] at hCon;
   obtain ⟨x, y, rxy, z, ryz, nryz, nrzy⟩ := hCon;
   simp [ValidOnFrame];
-  existsi (atom elem₁), (atom elem₂), (λ w a => if a = elem₁ then y ≺ w else if a = elem₂ then z ≺ w else False); -- TODO: `match`などでどうにか出来ないだろうか？
+  obtain ⟨f, finv, fInj⟩ := atleast.mapping;
+  existsi f 0, f 1, (λ w a =>
+    match (finv a) with
+    | 0 => y ≺ w
+    | 1 => z ≺ w
+  );
   simp [ValidOnModel, not_forall, Axioms.Dot3];
   existsi x;
   constructor;
   . existsi y;
     constructor;
     . assumption;
-    . simp_all [Satisfies];
+    . simp_all [Satisfies, (fInj 0), (fInj 1)];
   . existsi z;
     constructor;
     . assumption;
-    . simp_all [Satisfies];
+    . simp_all [Satisfies, (fInj 0), (fInj 1)];
 
 private lemma AxiomSet.Dot3.definability.impliedBy : Connected F.Rel → F ⊧* .𝟯 := by
   intro hCon;

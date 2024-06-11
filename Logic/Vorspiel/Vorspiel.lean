@@ -821,3 +821,7 @@ lemma subset_tetraunion₂ : s₂ ⊆ (s₁ ∪ s₂ ∪ s₃ ∪ s₄) :=
 @[simp] lemma subset_tetraunion₄ : s₄ ⊆ (s₁ ∪ s₂ ∪ s₃ ∪ s₄) := by simp only [subset_union_right]
 
 end Set
+
+/-- Class for `α` has at least `n` elements -/
+class Atleast (n : ℕ) (α) where
+  mapping : ∃ f : Fin n → α, Function.HasLeftInverse f
