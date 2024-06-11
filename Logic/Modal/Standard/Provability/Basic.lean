@@ -171,6 +171,10 @@ def Interpretation
   | p ⋎ q => (Interpretation f β p) ⋎ (Interpretation f β q)
 notation f "[" β "] " p => Interpretation f β p
 
+/-
+  TODO:
+  `ArithmeticalSoundness`と`ArithmeticalCompleteness`を単純にinstance化する際には大抵`T₀`に依存してしまうため型推論が壊れてしまう．
+  もう少し良いやり方がありそうな気もするので一旦コメントアウト
 section
 
 variable {L : FirstOrder.Language} [Semiterm.Operator.GoedelNumber L (Sentence L)]
@@ -198,6 +202,7 @@ instance [ArithmeticalSoundness α β 𝓓 T] [ArithmeticalCompleteness α β �
       exact ArithmeticalCompleteness.complete hp;
 
 end
+-/
 
 section ArithmeticalSoundness
 
