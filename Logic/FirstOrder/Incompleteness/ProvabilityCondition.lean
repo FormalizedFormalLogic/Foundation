@@ -89,44 +89,42 @@ section LoebTheorem
 
 variable [DecidableEq (Sentence L)]
          [Semiterm.Operator.GoedelNumber L (Sentence L)]
-         (T₀ T : Theory L) [T₀ ≼ T] [Diagonalization T₀]
+         {T₀ T : Theory L} [T₀ ≼ T] [Diagonalization T₀]
+         {β : ProvabilityPredicate L L} [β.HilbertBernays T₀ T]
 open LO.System
 open HilbertBernays₁ HilbertBernays₂ HilbertBernays₃
 open Diagonalization
 
-private lemma loeb_fixpoint
+def kreisel
+  (T₀ T : Theory L) [Diagonalization T₀]
   (β : ProvabilityPredicate L L) [β.HilbertBernays T₀ T]
-  (σ : Sentence L) : ∃ (θ : Sentence L), T₀ ⊢! ⦍β⦎θ ⟶ ⦍β⦎σ ∧ T₀ ⊢! (⦍β⦎θ ⟶ σ) ⟶ θ := by
-  have hθ := diag (T := T₀) “x | !β.prov x → !σ”;
-  generalize (fixpoint T₀ “x | !β.prov x → !σ”) = θ at hθ;
+  (σ : Sentence L) : Sentence L := fixpoint T₀ “x | !β.prov x → !σ”
 
-  have eθ : θ ⟷ (β.prov/[#0] ⟶ σ/[])/[⸢θ⸣] = θ ⟷ (⦍β⦎θ ⟶ σ) := by
-    simp [←Rew.hom_comp_app, Rew.substs_comp_substs]; rfl;
-  replace hθ : T₀ ⊢! θ ⟷ (⦍β⦎θ ⟶ σ) := by simpa [←eθ] using hθ;
+local notation "κ(" σ ")" => kreisel T₀ T β σ
 
-  existsi θ;
-  constructor;
-  . exact (imp_trans! (D2 ⨀ (D1 (Subtheory.prf! $ conj₁'! hθ))) D2) ⨀₁ D3;
-  . exact conj₂'! hθ;
+lemma kreisel_spec (σ : Sentence L) : T₀ ⊢! κ(σ) ⟷ (⦍β⦎(κ(σ)) ⟶ σ) := by
+  convert (diag (T := T₀) “x | !β.prov x → !σ”);
+  simp [kreisel, ←Rew.hom_comp_app, Rew.substs_comp_substs];
+  rfl;
 
-variable {β : ProvabilityPredicate L L} [β.HilbertBernays T₀ T]
+lemma kreisel_specAux₁ (σ : Sentence L) : T₀ ⊢! ⦍β⦎κ(σ) ⟶ ⦍β⦎σ := (imp_trans! (D2 ⨀ (D1 (Subtheory.prf! $ conj₁'! (kreisel_spec σ)))) D2) ⨀₁ D3
+
+lemma kreisel_specAux₂ (σ : Sentence L) : T₀ ⊢! (⦍β⦎κ(σ) ⟶ σ) ⟶ κ(σ) := conj₂'! (kreisel_spec σ)
+
+variable (T₀ T)
 
 theorem loeb_theorm (H : T ⊢! ⦍β⦎σ ⟶ σ) : T ⊢! σ := by
-  obtain ⟨θ, hθ₁, hθ₂⟩ := loeb_fixpoint T₀ T β σ;
-
-  have d₁ : T  ⊢! ⦍β⦎θ ⟶ σ := imp_trans! (Subtheory.prf! hθ₁) H;
-  have    : T₀ ⊢! ⦍β⦎θ      := D1 $ Subtheory.prf! hθ₂ ⨀ d₁;
-  have d₂ : T  ⊢! ⦍β⦎θ      := Subtheory.prf! this;
+  have d₁ : T ⊢! ⦍β⦎κ(σ) ⟶ σ := imp_trans! (Subtheory.prf! (kreisel_specAux₁ σ)) H;
+  have d₂ : T ⊢! ⦍β⦎κ(σ)      := Subtheory.prf! (𝓢 := T₀) (D1 $ Subtheory.prf! (kreisel_specAux₂ σ) ⨀ d₁);
   exact d₁ ⨀ d₂;
 
-instance : Loeb β T₀ T := ⟨loeb_theorm T₀ T⟩
+instance : Loeb β T₀ T := ⟨loeb_theorm  T₀ T⟩
 
 theorem formalized_loeb_theorem : T₀ ⊢! ⦍β⦎(⦍β⦎σ ⟶ σ) ⟶ ⦍β⦎σ := by
-  obtain ⟨θ, hθ₁, hθ₂⟩ := loeb_fixpoint T₀ T β σ;
-
-  have : T₀ ⊢! (⦍β⦎σ ⟶ σ) ⟶ (⦍β⦎θ ⟶ σ) := imply_left_replace! hθ₁
-  have : T ⊢! (⦍β⦎σ ⟶ σ) ⟶ θ := Subtheory.prf! $ imp_trans! this hθ₂;
-  exact imp_trans! (D2 ⨀ (D1 this)) hθ₁;
+  have hκ₁ : T₀ ⊢! ⦍β⦎(κ(σ)) ⟶ ⦍β⦎σ := kreisel_specAux₁ σ;
+  have : T₀ ⊢! (⦍β⦎σ ⟶ σ) ⟶ (⦍β⦎κ(σ) ⟶ σ) := imply_left_replace! hκ₁;
+  have : T ⊢! (⦍β⦎σ ⟶ σ) ⟶ κ(σ) := Subtheory.prf! (𝓢 := T₀) $ imp_trans! this (kreisel_specAux₂ σ);
+  exact imp_trans! (D2 ⨀ (D1 this)) hκ₁;
 
 instance : FormalizedLoeb β T₀ T := ⟨formalized_loeb_theorem T₀ T⟩
 
