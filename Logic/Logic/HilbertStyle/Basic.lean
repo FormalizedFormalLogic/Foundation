@@ -242,6 +242,10 @@ def iffTrans (h₁ : 𝓢 ⊢ p ⟷ q) (h₂ : 𝓢 ⊢ q ⟷ r) : 𝓢 ⊢ p �
   . exact impTrans (conj₂' h₂) (conj₂' h₁);
 lemma iff_trans! (h₁ : 𝓢 ⊢! p ⟷ q) (h₂ : 𝓢 ⊢! q ⟷ r) : 𝓢 ⊢! p ⟷ r := ⟨iffTrans h₁.some h₂.some⟩
 
+lemma unprovable_iff! (H : 𝓢 ⊢! p ⟷ q) : 𝓢 ⊬! p ↔ 𝓢 ⊬! q := by
+  constructor;
+  . intro hp hq; have := conj₂'! H ⨀ hq; contradiction;
+  . intro hq hp; have := conj₁'! H ⨀ hp; contradiction;
 
 def imply₁₁ (p q r : F) : 𝓢 ⊢ p ⟶ q ⟶ r ⟶ p := impTrans (Minimal.imply₁ p r) (Minimal.imply₁ (r ⟶ p) q)
 @[simp] lemma imply₁₁! (p q r : F) : 𝓢 ⊢! p ⟶ q ⟶ r ⟶ p := ⟨imply₁₁ p q r⟩
