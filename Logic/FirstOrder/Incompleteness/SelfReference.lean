@@ -31,11 +31,7 @@ noncomputable def fixpoint (θ : Semisentence ℒₒᵣ 1) : Sentence ℒₒᵣ 
 
 lemma substs_diag (θ σ : Semisentence ℒₒᵣ 1) :
     “!(diag θ) !!(⸢σ⸣ : Semiterm ℒₒᵣ Empty 0)” = “∀ x, !ssbs x !!⸢σ⸣ !!⸢σ⸣ → !θ x” := by
-  -- simp [diag, Rew.q_substs, ←Rew.hom_comp_app, Rew.substs_comp_substs]
-  simp [diag]
-  simp [Rew.q_substs]
-  simp [←Rew.hom_comp_app]
-  simp [Rew.substs_comp_substs]
+  simp [diag, Rew.q_substs, ←Rew.hom_comp_app, Rew.substs_comp_substs]
 
 lemma fixpoint_eq (θ : Semisentence ℒₒᵣ 1) :
     fixpoint θ = “∀ x, !ssbs x !!⸢diag θ⸣ !!⸢diag θ⸣ → !θ x” := by
