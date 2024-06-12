@@ -20,6 +20,7 @@ notation "⦍" β "⦎" σ:80 => pr β σ
 class Conservative (β : ProvabilityPredicate L₀ L) (T₀ : Theory L₀) (T : outParam (Theory L)) where
   iff (σ : Sentence L) : T ⊢! σ ↔ T₀ ⊢! ⦍β⦎ σ
 
+
 def consistency (β : ProvabilityPredicate L₀ L) : Sentence L₀ := ~⦍β⦎⊥
 notation "Con⦍" β "⦎" => consistency β
 
@@ -55,6 +56,14 @@ class Loeb (β : ProvabilityPredicate L L) (T₀ : Theory L) (T : outParam (Theo
 class FormalizedLoeb (β : ProvabilityPredicate L L) (T₀ : Theory L) (T : outParam (Theory L)) where
   FLT {σ : Sentence L} : T₀ ⊢! ⦍β⦎(⦍β⦎σ ⟶ σ) ⟶ ⦍β⦎σ
 
+-- MEMO: Formalized Σ₁-completeness
+class UniformHilbertBernays₃ (β : ProvabilityPredicate L L) (T₀ : Theory L) (T : outParam (Theory L)) (P : Sentence L → Prop) where
+  D3U {σ : Sentence L} : P σ → T₀ ⊢! σ ⟶ ⦍β⦎σ
+
+def HilbertBernays₃_of_UniformHilbertBernays₃
+  (β : ProvabilityPredicate L L) (T₀ : Theory L) (T : outParam (Theory L))
+  [β.UniformHilbertBernays₃ T₀ T P] (hP : ∀ σ, P (⦍β⦎σ))
+  : β.HilbertBernays₃ T₀ T := ⟨λ {σ} ↦UniformHilbertBernays₃.D3U $ hP σ⟩
 
 section
 
@@ -78,20 +87,50 @@ def HilbertBernays₃.D3s [HilbertBernays₃ β T₀ T] : T ⊢! ⦍β⦎σ ⟶ 
   apply System.Subtheory.prf! (𝓢 := T₀);
   apply HilbertBernays₃.D3;
 
+namespace HilbertBernays
+
+open LO.System
+
+variable [DecidableEq (Sentence L)]
+         [HilbertBernays β T₀ T]
+
+def prov_distribute_imply (h : T ⊢! σ ⟶ τ) : T₀ ⊢! ⦍β⦎σ ⟶ ⦍β⦎τ := HilbertBernays₂.D2' $ HilbertBernays₁.D1 h
+
+def prov_distribute_iff (h : T ⊢! σ ⟷ τ) : T₀ ⊢! ⦍β⦎σ ⟷ ⦍β⦎τ := by
+  apply iff_intro!;
+  . exact prov_distribute_imply $ conj₁'! h;
+  . exact prov_distribute_imply $ conj₂'! h;
+
+def prov_distribute_and : T₀ ⊢! ⦍β⦎(σ ⋏ τ) ⟶ ⦍β⦎σ ⋏ ⦍β⦎τ := by
+  have h₁ : T₀ ⊢! ⦍β⦎(σ ⋏ τ) ⟶ ⦍β⦎σ := HilbertBernays₂.D2' <| HilbertBernays₁.D1 conj₁!;
+  have h₂ : T₀ ⊢! ⦍β⦎(σ ⋏ τ) ⟶ ⦍β⦎τ := HilbertBernays₂.D2' <| HilbertBernays₁.D1 conj₂!;
+  exact implyRightAnd! h₁ h₂;
+
+def prov_distribute_and! : T₀ ⊢! ⦍β⦎(σ ⋏ τ) → T₀ ⊢! ⦍β⦎σ ⋏ ⦍β⦎τ := λ h => prov_distribute_and ⨀ h
+
+def prov_collect_and : T₀ ⊢! ⦍β⦎σ ⋏ ⦍β⦎τ ⟶ ⦍β⦎(σ ⋏ τ) := by
+  have h₁ : T₀ ⊢! ⦍β⦎σ ⟶ ⦍β⦎(τ ⟶ σ ⋏ τ) := prov_distribute_imply $ conj₃!;
+  have h₂ : T₀ ⊢! ⦍β⦎(τ ⟶ σ ⋏ τ) ⟶ ⦍β⦎τ ⟶ ⦍β⦎(σ ⋏ τ) := HilbertBernays₂.D2;
+  apply andImplyIffImplyImply'!.mpr;
+  exact imp_trans! h₁ h₂;
+
+
+end HilbertBernays
+
 def Loeb.LT' [Loeb β T₀ T] {σ : Sentence L} : T ⊢! ⦍β⦎σ ⟶ σ → T ⊢! σ := Loeb.LT T₀
 
 end
 
 end Conditions
 
-section FirstIncompleteness
+section
 
 variable [DecidableEq (Sentence L)]
          [Semiterm.Operator.GoedelNumber L (Sentence L)]
          (β : ProvabilityPredicate L L)
          (T₀ T : Theory L) [T₀ ≼ T] [Diagonalization T₀]
 open LO.System LO.System.NegationEquiv
-open HilbertBernays₁ HilbertBernays₂ HilbertBernays₃
+open HilbertBernays₁ HilbertBernays₂ HilbertBernays₃ HilbertBernays
 open Diagonalization
 
 lemma existence_goedel_sentence : ∃ (θ : Sentence L), T ⊢! θ ⟷ ~⦍β⦎θ := by
@@ -142,17 +181,57 @@ lemma first_incompleteness
   [β.HilbertBernays₁ T₀ T] [β.Conservative T T] [System.Consistent T]
   : ¬System.Complete T := System.incomplete_iff_exists_undecidable.mpr ⟨G, goedel_independent β T₀ T⟩
 
-end FirstIncompleteness
+
+section Second
+
+variable {β T₀ T}
+variable [β.HilbertBernays T₀ T]
+
+lemma formalized_consistent_of_existance_unprovable : T₀ ⊢! ~⦍β⦎σ ⟶ Con⦍β⦎ := contra₀'! $ D2 ⨀ (D1 efq!)
+
+private lemma consistency_lemma_1 [T₀ ≼ U] [β.HilbertBernays T₀ U] : (U ⊢! Con⦍β⦎ ⟶ ~⦍β⦎σ) ↔ (U ⊢! ⦍β⦎σ ⟶ ⦍β⦎(~σ)) := by
+  constructor;
+  . intro H;
+    exact contra₃'! $ imp_trans! (Subtheory.prf! (𝓢 := T₀) formalized_consistent_of_existance_unprovable) H;
+  . intro H;
+    apply contra₀'!;
+    have : T₀ ⊢! ⦍β⦎σ ⋏ ⦍β⦎(~σ) ⟶ ⦍β⦎⊥ := imp_trans! prov_collect_and $ prov_distribute_imply no_both!;
+    have : U ⊢! ⦍β⦎σ ⟶ ⦍β⦎(~σ) ⟶ ⦍β⦎⊥ := Subtheory.prf! $ andImplyIffImplyImply'!.mp $ this;
+    exact this ⨀₁ H;
+
+variable [β.Conservative T₀ T]
+
+/-- Formalized First theorem of unprovability -/
+lemma formalized_unprovable_goedel
+  [β.UniformHilbertBernays₃ T₀ T P] (hP : P (~G))
+  : T ⊢! Con⦍β⦎ ⟶ ~⦍β⦎G := by
+  have h₁ : T ⊢! ⦍β⦎G ⟶ ~G := imp_trans! dni! $ conj₂'! $ neg_iff'! $ goedel_spec β T₀ T;
+  have h₂ : T ⊢! ~G ⟶ ⦍β⦎(~G) := Subtheory.prf! (𝓢 := T₀) $ UniformHilbertBernays₃.D3U hP;
+  exact consistency_lemma_1 (T₀ := T₀) |>.mpr $ imp_trans! h₁ h₂;
+
+lemma iff_goedel_consistency
+  [β.UniformHilbertBernays₃ T₀ T P] (hP : P (~G))
+  : T ⊢! G ⟷ Con⦍β⦎ :=
+  iff_trans! (goedel_spec β T₀ T) $ iff_intro! (Subtheory.prf! (𝓢 := T₀) formalized_consistent_of_existance_unprovable) (formalized_unprovable_goedel hP)
+
+lemma unprovable_consistency
+  [β.UniformHilbertBernays₃ T₀ T P] (hP : P (~G))
+  [β.Conservative T₀ T] : System.Consistent T → T ⊬! Con⦍β⦎ := by
+  intro h;
+  exact unprovable_iff! (iff_goedel_consistency hP) |>.mp $ unprovable_goedel β T₀ T h;
+
+lemma unrefutable_consistency
+  [β.UniformHilbertBernays₃ T₀ T P] (hP : P (~G))
+  [β.Conservative T₀ T] [β.Conservative T T] : System.Consistent T → T ⊬! ~Con⦍β⦎ := by
+  intro h;
+  exact unprovable_iff! (neg_iff'! $ iff_goedel_consistency hP) |>.mp $ unrefutable_goedel β T₀ T h;
+
+end Second
 
 
 section LoebTheorem
 
-variable [DecidableEq (Sentence L)]
-         [Semiterm.Operator.GoedelNumber L (Sentence L)]
-         (T₀ T : Theory L) [T₀ ≼ T] [Diagonalization T₀]
-open LO.System
-open HilbertBernays₁ HilbertBernays₂ HilbertBernays₃
-open Diagonalization
+variable (T₀ T : Theory L) [T₀ ≼ T] [Diagonalization T₀]
 
 private lemma loeb_fixpoint
   (β : ProvabilityPredicate L L) [β.HilbertBernays T₀ T]
@@ -193,61 +272,46 @@ instance : FormalizedLoeb β T₀ T := ⟨formalized_loeb_theorem T₀ T⟩
 end LoebTheorem
 
 
-section
+section CorollaryLoeb
 
-variable [DecidableEq (Sentence L)]
-         [Semiterm.Operator.GoedelNumber L (Sentence L)]
-         {T₀ T : Theory L} [T₀ ≼ T] [Diagonalization T₀]
-         {β : ProvabilityPredicate L L} [β.HilbertBernays T₀ T]
-open LO.System LO.System.NegationEquiv
-open HilbertBernays₁ HilbertBernays₂ HilbertBernays₃
-open Diagonalization
-
-/-- Second Incompleteness Theorem -/
-lemma lemma4_2_3 : T₀ ⊢! ~⦍β⦎σ ⟶ Con⦍β⦎ := contra₀'! $ D2 ⨀ (D1 efq!)
-
-lemma lemma4_2_4 [T₀ ≼ U] [β.HilbertBernays T₀ U] : (U ⊢! Con⦍β⦎ ⟶ ~⦍β⦎σ) ↔ (U ⊢! ⦍β⦎σ ⟶ ⦍β⦎(~σ)) := by
-  constructor;
-  . intro H;
-    exact contra₃'! $ imp_trans! (Subtheory.prf! (𝓢 := T₀) lemma4_2_3) H;
-  . intro H;
-    apply contra₀'!;
-    exact imp_trans! H $ (by
-      have : U ⊢! (σ ⋏ ~σ) ⟶ ⊥ := by sorry;
-      have : T₀ ⊢! ⦍β⦎((σ ⋏ ~σ) ⟶ ⊥) := D1 this;
-      have : T₀ ⊢! ⦍β⦎(σ ⋏ ~σ) ⟶ ⦍β⦎⊥ := D2 ⨀ this;
-      have : U ⊢! ⦍β⦎(σ ⋏ ~σ) ⟶ ⦍β⦎⊥ := Subtheory.prf! (𝓢 := T₀) this
-      exact imp_trans! (by sorry) this;
-    );
-
-end
-
-
-section Second
-
-variable [DecidableEq (Sentence L)]
-         [Semiterm.Operator.GoedelNumber L (Sentence L)]
-         (T₀ T : Theory L) [T₀ ≼ T] [Diagonalization T₀]
-         {β : ProvabilityPredicate L L} [β.Loeb T₀ T]
-open LO.System LO.System.NegationEquiv
-open HilbertBernays₁ HilbertBernays₂ HilbertBernays₃
-open Diagonalization
-
-/-- Second Incompleteness Theorem -/
-lemma unprovable_consistency_of_Loeb : System.Consistent T → T ⊬! Con⦍β⦎ := by
+-- another proof of the 2nd incompleteness theorem via Löb
+lemma unprovable_consistency_via_loeb
+  [β.Loeb T₀ T]
+  : System.Consistent T → T ⊬! Con⦍β⦎ := by
   contrapose;
   intro hC; simp at hC;
   have : T ⊢! ⊥ := Loeb.LT T₀ $ neg_equiv'!.mp hC;
   apply System.not_consistent_iff_inconsistent.mpr;
   apply System.inconsistent_of_provable this;
 
-/-- Formalized Second Incompleteness Theorem -/
-lemma formalized_second (H : T ⊬! ~Con⦍β⦎) : T ⊬! Con⦍β⦎ ⟶ ~⦍β⦎(~Con⦍β⦎) := by
+variable {β T₀ T}
+
+/-- Formalized Second theorem of unprovability -/
+lemma formalized_unprovable_consistency
+  [β.HilbertBernays T₀ T]
+  [β.UniformHilbertBernays₃ T₀ T P] (hP : P (~G)) [β.Conservative T₀ T] [β.Conservative T T]
+  : System.Consistent T → T ⊬! Con⦍β⦎ ⟶ ~⦍β⦎(~Con⦍β⦎) := by
+  intro hCon;
   by_contra hC;
   have : T ⊢! ~Con⦍β⦎ := Loeb.LT T₀ $ contra₁'! hC;
+  have : T ⊬! ~Con⦍β⦎ := unrefutable_consistency hP hCon;
   contradiction;
 
-end Second
+/-- Formalized First theorem of unrefutability -/
+lemma formalized_unrefutable_goedel
+  [β.HilbertBernays T₀ T]
+  [β.UniformHilbertBernays₃ T₀ T P] (hP : P (~G)) [β.Conservative T₀ T] [β.Conservative T T]
+  : System.Consistent T → T ⊬! Con⦍β⦎ ⟶ ~⦍β⦎(~G) := by
+  intro hCon;
+  have d₂ : T ⊬! Con⦍β⦎ ⟶ ~⦍β⦎(~Con⦍β⦎)  := formalized_unprovable_consistency hP hCon;
+
+  by_contra hC;
+  have : T ⊢! Con⦍β⦎ ⟶ ~⦍β⦎(~Con⦍β⦎) := imp_trans! hC $ Subtheory.prf! $ conj₁'! $ neg_iff'! $ prov_distribute_iff (T₀ := T₀) $ neg_iff'! $ iff_goedel_consistency hP;
+  contradiction;
+
+end CorollaryLoeb
+
+end
 
 end ProvabilityPredicate
 
