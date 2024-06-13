@@ -1,6 +1,7 @@
 [Lean4 Logic Formalization](README.md)
-[Usage](./usage.md)
-[Contributing](./contributing.md)
+- [Usage](./usage.md)
+- [Contributing](./contributing.md)
+- [References and Related Works](./references.md)
 
 ---
 
@@ -53,5 +54,3 @@
   - [Modal Companion](./standard_modal/modal_companion.md)
 
 ---
-
-- [References](./references.md)
