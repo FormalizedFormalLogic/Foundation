@@ -1,5 +1,4 @@
 import Logic.Vorspiel.BinaryRelations
-import Logic.Modal.Standard.Kripke.Semantics
 import Logic.Modal.Standard.Kripke.Completeness
 
 namespace LO.Modal.Standard
@@ -9,9 +8,6 @@ open Kripke
 open Formula Formula.Kripke
 
 variable {α} [Inhabited α] [DecidableEq α]
-
-variable {F : Kripke.Frame' α}
-variable [atleast : Atleast 2 α]
 
 instance AxiomSet.Ver.definability : Definability (α := α) 𝗩𝗲𝗿 (λ F => Isolated F.Rel) where
   defines := by
