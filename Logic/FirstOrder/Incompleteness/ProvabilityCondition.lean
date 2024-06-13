@@ -20,7 +20,6 @@ notation "⦍" β "⦎" σ:80 => pr β σ
 class Conservative (β : ProvabilityPredicate L₀ L) (T₀ : Theory L₀) (T : outParam (Theory L)) where
   iff (σ : Sentence L) : T ⊢! σ ↔ T₀ ⊢! ⦍β⦎ σ
 
-
 def consistency (β : ProvabilityPredicate L₀ L) : Sentence L₀ := ~⦍β⦎⊥
 notation "Con⦍" β "⦎" => consistency β
 
@@ -113,14 +112,12 @@ def prov_collect_and : T₀ ⊢! ⦍β⦎σ ⋏ ⦍β⦎τ ⟶ ⦍β⦎(σ ⋏ �
   apply andImplyIffImplyImply'!.mpr;
   exact imp_trans! h₁ h₂;
 
-
 end HilbertBernays
-
-def Loeb.LT' [Loeb β T₀ T] {σ : Sentence L} : T ⊢! ⦍β⦎σ ⟶ σ → T ⊢! σ := Loeb.LT T₀
 
 end
 
 end Conditions
+
 
 section
 
