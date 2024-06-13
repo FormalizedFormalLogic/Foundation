@@ -12,14 +12,20 @@ instance exponential_definable [M ⊧ₘ* 𝐈𝚺₀] : 𝚺₀-Relation (Expon
 ```
 - [LO.FirstOrder.Arith.Model.exponential_definable](https://iehality.github.io/Arithmetization/Arithmetization/ISigmaZero/Exponential/Exp.html#LO.FirstOrder.Arith.Model.exponential_definable)
 
+
+![Import Graph](./exp.png)
+
 ```lean
-lemma exponential_zero_one [M ⊧ₘ* 𝐈𝚺₀] : Exponential (0 : M) 1
+lemma exponential_zero_one [M ⊧ₘ* 𝐈𝚺₀] :
+    Exponential 0 1
 ```
 - [LO.FirstOrder.Arith.Model.Exponential.exponential_zero_one](https://iehality.github.io/Arithmetization/Arithmetization/ISigmaZero/Exponential/Exp.html#LO.FirstOrder.Arith.Model.Exponential.exponential_zero_one)
 
 ```lean
-lemma exponential_succ_mul_two [M ⊧ₘ* 𝐈𝚺₀] {x y : M} : Exponential (x + 1) (2 * y) ↔ Exponential x y
+lemma exponential_succ_mul_two [M ⊧ₘ* 𝐈𝚺₀] {x y : M} :
+    Exponential (x + 1) (2 * y) ↔ Exponential x y
 ```
 - [LO.FirstOrder.Arith.Model.Exponential.exponential_succ_mul_two](https://iehality.github.io/Arithmetization/Arithmetization/ISigmaZero/Exponential/Exp.html#LO.FirstOrder.Arith.Model.Exponential.exponential_succ_mul_two)
 
-![Import Graph](./exp.png)
+
+Other basic functions, such as $\log x, |x|$ are defined by using exponential.
