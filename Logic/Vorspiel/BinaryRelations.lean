@@ -26,6 +26,8 @@ def Extensive := ∀ ⦃x y⦄, x ≺ y → x = y
 
 def Antisymmetric := ∀ ⦃w₁ w₂⦄, w₁ ≺ w₂ → w₂ ≺ w₁ → w₁ = w₂
 
+def Isolated := ∀ ⦃x y⦄, ¬(x ≺ y)
+
 abbrev ConverseWellFounded := WellFounded $ flip (· ≺ ·)
 
 end
