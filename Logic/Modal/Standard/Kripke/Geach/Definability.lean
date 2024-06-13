@@ -149,6 +149,8 @@ instance : Definability (α := α) Ax(𝐒𝟒) (λ F => Reflexive F.Rel ∧ Tra
 
 instance : Definability (α := α) Ax(𝐒𝟓) (λ F => Reflexive F.Rel ∧ Euclidean F.Rel) := by simpa using instGeachDefinability (L := 𝐒𝟓);
 
+instance : Definability (α := α) Ax(𝐓𝐫𝐢𝐯) (λ F => Reflexive F.Rel ∧ Extensive F.Rel) := by simpa using instGeachDefinability (L := 𝐓𝐫𝐢𝐯);
+
 end Kripke
 
 end LO.Modal.Standard

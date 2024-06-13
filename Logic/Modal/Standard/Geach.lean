@@ -45,6 +45,8 @@ lemma C4_def : 𝗴𝗲(⟨0, 1, 2, 0⟩) = (𝗖𝟰 : AxiomSet α) := by aesop
 
 lemma CD_def : 𝗴𝗲(⟨1, 1, 0, 0⟩) = (𝗖𝗗 : AxiomSet α) := by aesop;
 
+lemma Tc_def : 𝗴𝗲(⟨0, 1, 0, 0⟩) = (𝗧𝗰 : AxiomSet α) := rfl
+
 end Geach
 
 class IsGeach (Ax : AxiomSet α) where
@@ -66,6 +68,8 @@ instance : IsGeach (α := α) .𝟮 where taple := ⟨1, 1, 1, 1⟩;
 instance : IsGeach (α := α) 𝗖𝟰 where taple := ⟨0, 1, 2, 0⟩;
 
 instance : IsGeach (α := α) 𝗖𝗗 where taple := ⟨1, 1, 0, 0⟩;
+
+instance : IsGeach (α := α) 𝗧𝗰 where taple := ⟨0, 1, 0, 0⟩;
 
 
 def MultiGeach : List Axioms.Geach.Taple → AxiomSet α
@@ -132,9 +136,6 @@ namespace Geach
 @[simp]
 lemma subset_axm (h : l₁ ⊆ l₂ := by simp_all) : (Ax(𝐆𝐞(l₁)) : AxiomSet α) ⊆ (Ax(𝐆𝐞(l₂)) : AxiomSet α) := by simp_all;
 
-@[simp]
-lemma reducible (h : l₁ ⊆ l₂ := by simp_all) : (𝐆𝐞(l₁) : DeductionParameter α) ≤ₛ 𝐆𝐞(l₂) := by sorry;
-
 end Geach
 
 protected class IsGeach (L : DeductionParameter α) where
@@ -165,6 +166,8 @@ instance : DeductionParameter.IsGeach (α := α) 𝐒𝟒.𝟐 where taples := [
 instance : DeductionParameter.IsGeach (α := α) 𝐒𝟓 where taples := [⟨0, 0, 1, 0⟩, ⟨1, 1, 0, 1⟩]
 
 instance : DeductionParameter.IsGeach (α := α) 𝐊𝐓𝟒𝐁 where taples := [⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩, ⟨0, 1, 0, 1⟩]
+
+instance : DeductionParameter.IsGeach (α := α) 𝐓𝐫𝐢𝐯 where taples := [⟨0, 0, 1, 0⟩, ⟨0, 1, 0, 0⟩]
 
 end IsGeach
 
