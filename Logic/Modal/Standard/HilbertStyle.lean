@@ -71,8 +71,6 @@ def multiboxIff' (h : 𝓢 ⊢ p ⟷ q) : 𝓢 ⊢ □^[n]p ⟷ □^[n]q := by
   | succ n ih => simpa using boxIff' ih;
 @[simp] lemma multibox_iff! (h : 𝓢 ⊢! p ⟷ q) : 𝓢 ⊢! □^[n]p ⟷ □^[n]q := ⟨multiboxIff' h.some⟩
 
-def negIff' (h : 𝓢 ⊢ p ⟷ q) : 𝓢 ⊢ (~p ⟷ ~q) := conj₃' (contra₀' $ conj₂' h) (contra₀' $ conj₁' h)
-@[simp] lemma neg_iff! (h : 𝓢 ⊢! p ⟷ q) : 𝓢 ⊢! ~p ⟷ ~q := ⟨negIff' h.some⟩
 
 def diaIff' (h : 𝓢 ⊢ p ⟷ q) : 𝓢 ⊢ (◇p ⟷ ◇q) := by
   simp only [StandardModalLogicalConnective.duality'];
@@ -113,7 +111,7 @@ def multidiaDuality : 𝓢 ⊢ ◇^[n]p ⟷ ~(□^[n](~p)) := by
   | zero => simp; apply dn;
   | succ n ih =>
     simp [StandardModalLogicalConnective.duality'];
-    apply neg_iff';
+    apply negIff';
     apply boxIff';
     exact iffTrans (negIff' ih) (iffComm' dn)
 @[simp] lemma multidiaDuality! : 𝓢 ⊢! ◇^[n]p ⟷ ~(□^[n](~p)) := ⟨multidiaDuality⟩
@@ -410,8 +408,22 @@ private def axiomFour_of_L [HasAxiomL 𝓢] : 𝓢 ⊢ Axioms.Four p := by
     exact conj₃' (FiniteContext.byAxm) (conj₁' (q := □□p) $ FiniteContext.byAxm);
   have : 𝓢 ⊢ p ⟶ (□⊡p ⟶ ⊡p) := impTrans this (implyLeftReplace BoxBoxdot_BoxDotbox);
   exact impTrans (impTrans (implyBoxDistribute' this) axiomL) (implyBoxDistribute' $ conj₂);
-
 instance [HasAxiomL 𝓢] : HasAxiomFour 𝓢 := ⟨fun _ ↦ axiomFour_of_L⟩
+
+def goedel2 [HasAxiomL 𝓢] : 𝓢 ⊢ (~(□⊥) ⟷ ~(□(~(□⊥))) : F) := by
+  apply negIff';
+  apply iffIntro;
+  . apply implyBoxDistribute';
+    exact efq;
+  . exact impTrans (by
+      apply implyBoxDistribute';
+      exact conj₁' NegationEquiv.neg_equiv;
+    ) axiomL;
+lemma goedel2! [HasAxiomL 𝓢] : 𝓢 ⊢! (~(□⊥) ⟷ ~(□(~(□⊥))) : F) := ⟨goedel2⟩
+
+def goedel2'.mp [HasAxiomL 𝓢] : 𝓢 ⊢ (~(□⊥) : F) → 𝓢 ⊢ ~(□(~(□⊥)) : F) := by intro h; exact (conj₁' goedel2) ⨀ h;
+def goedel2'.mpr [HasAxiomL 𝓢] : 𝓢 ⊢ ~(□(~(□⊥)) : F) → 𝓢 ⊢ (~(□⊥) : F) := by intro h; exact (conj₂' goedel2) ⨀ h;
+lemma goedel2'! [HasAxiomL 𝓢] : 𝓢 ⊢! (~(□⊥) : F) ↔ 𝓢 ⊢! ~(□(~(□⊥)) : F) := ⟨λ ⟨h⟩ ↦ ⟨goedel2'.mp h⟩, λ ⟨h⟩ ↦ ⟨goedel2'.mpr h⟩⟩
 
 def axiomH [HasAxiomH 𝓢] : 𝓢 ⊢ □(□p ⟷ p) ⟶ □p := HasAxiomH.H _
 @[simp] lemma axiomH! [HasAxiomH 𝓢] : 𝓢 ⊢! □(□p ⟷ p) ⟶ □p := ⟨axiomH⟩

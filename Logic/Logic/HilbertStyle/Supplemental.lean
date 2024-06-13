@@ -145,6 +145,7 @@ def dn [HasDNE 𝓢] : 𝓢 ⊢ p ⟷ ~~p := iffIntro dni dne
 @[simp] lemma dn! [HasDNE 𝓢] : 𝓢 ⊢! p ⟷ ~~p := ⟨dn⟩
 
 
+
 def contra₀ : 𝓢 ⊢ (p ⟶ q) ⟶ (~q ⟶ ~p) := by
   apply deduct';
   apply deduct;
@@ -189,8 +190,24 @@ def contra₃ [HasDNE 𝓢] : 𝓢 ⊢ (~p ⟶ ~q) ⟶ (q ⟶ p) :=  deduct' $ c
 @[simp] lemma contra₃! [HasDNE 𝓢] : 𝓢 ⊢! (~p ⟶ ~q) ⟶ (q ⟶ p) := ⟨contra₃⟩
 
 
-def neg_iff' (b : 𝓢 ⊢ p ⟷ q) : 𝓢 ⊢ ~p ⟷ ~q := iffIntro (contra₀' $ conj₂' b) (contra₀' $ conj₁' b)
-lemma neg_iff'! (b : 𝓢 ⊢! p ⟷ q) : 𝓢 ⊢! ~p ⟷ ~q := ⟨neg_iff' b.some⟩
+def negIff' (b : 𝓢 ⊢ p ⟷ q) : 𝓢 ⊢ ~p ⟷ ~q := iffIntro (contra₀' $ conj₂' b) (contra₀' $ conj₁' b)
+lemma neg_iff'! (b : 𝓢 ⊢! p ⟷ q) : 𝓢 ⊢! ~p ⟷ ~q := ⟨negIff' b.some⟩
+
+
+namespace NegationEquiv
+
+variable [System.NegationEquiv 𝓢]
+
+def negneg_equiv : 𝓢 ⊢ ~~p ⟷ ((p ⟶ ⊥) ⟶ ⊥) := by
+  apply iffIntro;
+  . exact impTrans (by apply contra₀'; exact conj₂' NegationEquiv.neg_equiv) (conj₁' NegationEquiv.neg_equiv)
+  . exact impTrans (conj₂' NegationEquiv.neg_equiv) (by apply contra₀'; exact conj₁' NegationEquiv.neg_equiv)
+@[simp] lemma negneg_equiv! : 𝓢 ⊢! ~~p ⟷ ((p ⟶ ⊥) ⟶ ⊥) := ⟨negneg_equiv⟩
+
+def negneg_equiv_dne [HasDNE 𝓢] : 𝓢 ⊢ p ⟷ ((p ⟶ ⊥) ⟶ ⊥) := iffTrans dn negneg_equiv
+lemma negneg_equiv_dne! [HasDNE 𝓢] : 𝓢 ⊢! p ⟷ ((p ⟶ ⊥) ⟶ ⊥) := ⟨negneg_equiv_dne⟩
+
+end NegationEquiv
 
 
 def tne : 𝓢 ⊢ ~(~~p) ⟶ ~p := contra₀' dni
