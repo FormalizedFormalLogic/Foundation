@@ -479,4 +479,58 @@ end GL
 
 end Reducible
 
+
+section CNF_DNF
+
+namespace Formula
+
+mutual
+
+def isCNF : Formula α → Prop
+  | p ⋏ q => p.isDNF ∧ q.isDNF
+  | □_ => True
+  | ◇_ => True
+  | p => p.degree = 0
+
+def isDNF : Formula α → Prop
+  | p ⋎ q => p.isCNF ∧ q.isCNF
+  | □_ => True
+  | ◇_ => True
+  | p => p.degree = 0
+
+end
+
+@[simp] lemma top_is_cnf : isCNF (⊤ : Formula α) := by simp [isCNF, degree]
+@[simp] lemma bot_is_cnf : isCNF (⊥ : Formula α) := by simp [isCNF, degree]
+@[simp] lemma atom_is_cnf {a : α} : isCNF (atom a) := by simp [isCNF, degree]
+@[simp] lemma box_is_cnf {p : Formula α} : isCNF (□p) := by simp [isCNF]
+@[simp] lemma dia_is_cnf {p : Formula α} : isCNF (◇p) := by simp [isCNF]
+
+@[simp] lemma top_is_dnf : isDNF (⊤ : Formula α) := by simp [isDNF, degree]
+@[simp] lemma bot_is_dnf : isDNF (⊥ : Formula α) := by simp [isDNF, degree]
+@[simp] lemma atom_is_dnf {a : α} : isDNF (atom a) := by simp [isDNF, degree]
+@[simp] lemma box_is_dnf {p : Formula α} : isDNF (□p) := by simp [isDNF]
+@[simp] lemma dia_is_dnf {p : Formula α} : isDNF (◇p) := by simp [isDNF]
+
+end Formula
+
+lemma exists_CNF_DNF
+  {Λ : DeductionParameter α} [Λ.IsNormal]
+  (p : Formula α) : ∃ pc, ∃ pd, (Λ ⊢! p ⟷ pc ∧ pc.isCNF) ∧ (Λ ⊢! p ⟷ pd ∧ pd.isDNF) := by
+  induction p using Formula.rec' with
+  | hverum => use ⊤, ⊤; simp [iff_id!];
+  | hfalsum => use ⊥, ⊥; simp [iff_id!];
+  | hatom a => use a, a; simp [iff_id!];
+  | hbox p ihp =>
+    obtain ⟨pc, pd, ⟨_, _⟩, ⟨_, _⟩⟩ := ihp;
+    use □pc, □pd;
+    simp;
+    constructor <;> { apply box_iff!; assumption; }
+  | hneg p ihp =>
+    obtain ⟨pc, pd, ⟨_, _⟩, ⟨_, _⟩⟩ := ihp;
+    sorry;
+  | _ => sorry;
+
+end CNF_DNF
+
 end LO.Modal.Standard

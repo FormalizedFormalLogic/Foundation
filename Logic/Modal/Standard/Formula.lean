@@ -199,12 +199,18 @@ instance : DecidableEq (Formula α) := hasDecEq
 
 end Decidable
 
-def isBox : Formula α → Bool
-  | box _ => true
-  | _  => false
+def boxStarts : Formula α → Bool
+  | □_ => true
+  | _   => false
+
+def diaStarts : Formula α → Bool
+  | ◇_ => true
+  | _   => false
 
 
 end Formula
+
+abbrev Formulae (α) := List (Formula α)
 
 abbrev Theory (α) := Set (Formula α)
 
@@ -408,7 +414,7 @@ def atoms : Formula α → Finset (α)
   | ⊤      => ∅
   | ⊥      => ∅
   | ~p     => p.atoms
-  | □p  => p.atoms
+  | □p     => p.atoms
   | p ⟶ q => p.atoms ∪ q.atoms
   | p ⋏ q  => p.atoms ∪ q.atoms
   | p ⋎ q  => p.atoms ∪ q.atoms
