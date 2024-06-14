@@ -36,6 +36,12 @@ However [completeness seems to have been not yet formalized](https://github.com/
 
 ### Lean 3
 
+#### [flypitch](https://flypitch.github.io/)
+
+Independence of the continuum hypothesis.
+
+- [Jesse Michael Han and Floris van Doorn, "A Formal Proof of the Independence of the Continuum Hypothesis"](https://flypitch.github.io/assets/flypitch-cpp.pdf)
+
 #### [bbentzen/ipl](https://github.com/bbentzen/ipl)
 
 Intuitionistic propositional logic.
@@ -77,11 +83,33 @@ Main result are recursion theorem (reducing public announce modality for any PAL
 
 - [Jiatu Li - _"Formalization of PAL⋅S5 in Proof Assistant"_](https://arxiv.org/abs/2012.09388)
 
+### Isabelle
+
+#### [Lawrence C. Paulson's _"Gödel's Incompleteness Theorems"_](https://www.isa-afp.org/entries/Incompleteness.html)
+
+Formalized Gödel's first and second incompleteness theorems.
+Remark the second incompleteness theorem is proved on hereditarily finite sets.
+
+- [Lawrence C. Paulson, _"A Machine-Assisted Proof of Gödel's Incompleteness Theorems for the Theory of Hereditarily Finite Sets"_](https://arxiv.org/abs/2104.14260)
 
 ### HOL/Light
 
-- [jrh13/hol-light/GL](https://github.com/jrh13/hol-light/tree/master/GL)
+#### [jrh13/hol-light/GL](https://github.com/jrh13/hol-light/tree/master/GL)
 
   Completeness of Gödel-Löb (provability) modal logic $\bf GL$.
 
   - [Marco Maggesi, Cosimo Perini Brogi - _"Mechanising Gödel–Löb Provability Logic in HOL Light"_](http://dx.doi.org/10.1007/s10817-023-09677-z)
+
+
+### Coq
+
+#### [ianshil/PhD_thesis](https://github.com/ianshil/PhD_thesis)
+
+Coq formalization of modal logics and their caliculi for [Ian Shillito, _New Foundations for the Proof Theory of Bi-Intuitionistic and Provability Logics Mechanized in Coq_](https://core.ac.uk/download/pdf/553999288.pdf).
+
+#### [hferee/UIML](https://github.com/hferee/UIML)
+
+Uniform interpolants for basic modal logic $\bf K$, Gödel-Löb provability logic $\bf GL$, intuitionistic strong Löb logic $\bf iSL$.
+
+- [demo](https://hferee.github.io/UIML/demo.html)
+- [Hugo Férée, Iris van der Giessen, Sam van Gool, Ian Shillito; _"Mechanised uniform interpolation for modal logics K, GL and iSL"_](https://arxiv.org/abs/2402.10494)
