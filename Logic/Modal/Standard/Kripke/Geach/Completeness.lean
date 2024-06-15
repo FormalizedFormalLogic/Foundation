@@ -8,16 +8,16 @@ namespace Kripke
 open System
 open Formula
 
-variable {Λ : AxiomSet α} [Inhabited α] [DecidableEq α]
+variable [Inhabited α] [DecidableEq α]
 
-open Theory MaximalParametricConsistentTheory CanonicalFrame in
-lemma definability_canonicalFrame_GeachAxiom {L : DeductionParameter α} [L.HasNecOnly] [includeK : L.IncludeK] [Inhabited (MCT L)] (hAx : 𝗴𝗲(t) ⊆ Ax(L)) : GeachConfluent t (CanonicalFrame L) := by
-  have : L.Normal := ⟨⟩;
+open Theory MaximalConsistentTheory CanonicalFrame in
+lemma definability_canonicalFrame_GeachAxiom {𝓓 : DeductionParameter α} [𝓓.HasNecOnly] [includeK : 𝓓.IncludeK] [Inhabited (𝓓)-MCT] (hAx : 𝗴𝗲(t) ⊆ Ax(𝓓)) : GeachConfluent t (CanonicalFrame 𝓓) := by
+  have : 𝓓.Normal := ⟨⟩;
 
   intro Ω₁ Ω₂ Ω₃ h;
   have ⟨r₁₂, r₁₃⟩ := h; clear h;
-  have ⟨Ω, hΩ⟩ := MaximalParametricConsistentTheory.lindenbaum (L := L) (T := ((□''⁻¹^[t.m]Ω₂.theory) ∪ (□''⁻¹^[t.n]Ω₃.theory))) $ by
-    apply intro_union_ParametricConsistent;
+  have ⟨Ω, hΩ⟩ := MaximalConsistentTheory.lindenbaum (𝓓 := 𝓓) (T := ((□''⁻¹^[t.m]Ω₂.theory) ∪ (□''⁻¹^[t.n]Ω₃.theory))) $ by
+    apply intro_union_Consistent;
     intro Γ Δ hΓ hΔ hC;
     replace hΓ : ∀ p ∈ Γ, □^[t.m]p ∈ Ω₂.theory := by simpa using hΓ;
     have hΓconj : □^[t.m](Γ.conj') ∈ Ω₂.theory := iff_mem_multibox_conj'.mpr hΓ;
@@ -42,7 +42,7 @@ lemma definability_canonicalFrame_GeachAxiom {L : DeductionParameter α} [L.HasN
   simp [multiframe_def_multibox];
   constructor <;> { intros; apply hΩ; simp_all; }
 
-lemma definability_canonicalFrame_multiGeachAxiom {L : DeductionParameter α} [L.HasNecOnly] [Inhabited (MCT L)] (hAx : 𝗚𝗲(ts) ⊆ Ax(L)) : MultiGeachConfluent ts (CanonicalFrame L) := by
+lemma definability_canonicalFrame_multiGeachAxiom {𝓓 : DeductionParameter α} [𝓓.HasNecOnly] [Inhabited (𝓓)-MCT] (hAx : 𝗚𝗲(ts) ⊆ Ax(𝓓)) : MultiGeachConfluent ts (CanonicalFrame 𝓓) := by
   induction ts with
   | nil => simp [MultiGeachConfluent];
   | cons t ts ih =>
@@ -54,13 +54,13 @@ lemma definability_canonicalFrame_multiGeachAxiom {L : DeductionParameter α} [L
 
 instance geach_canonical : Canonical (𝐆𝐞(l) : DeductionParameter α) := canonical_of_definability (AxiomSet.MultiGeach.definability l) $ definability_canonicalFrame_multiGeachAxiom (by simp)
 
-variable {L : DeductionParameter α}
+variable {𝓓 : DeductionParameter α}
 
-instance [geach : L.IsGeach] : Canonical L := by
+instance [geach : 𝓓.IsGeach] : Canonical 𝓓 := by
   convert geach_canonical (α := α) (l := geach.taples);
   exact geach.char
 
-instance [L.IsGeach] : Complete L 𝔽(Ax(L)) := instComplete
+instance [𝓓.IsGeach] : Complete 𝓓 𝔽(Ax(𝓓)) := instComplete
 
 instance : Complete (𝐒𝟒 : DeductionParameter α) 𝔽(Ax(𝐒𝟒)) := instComplete
 

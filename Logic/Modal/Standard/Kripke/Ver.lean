@@ -31,9 +31,9 @@ instance : FiniteFrameClass.IsNonempty (𝔽ꟳ(Ax(𝐕𝐞𝐫)) : FiniteFrameC
 
 namespace Kripke
 
-open MaximalParametricConsistentTheory
+open MaximalConsistentTheory
 
-lemma definability_canonicalFrame_Ver {𝓓 : DeductionParameter α} [𝓓.Normal] [Inhabited (MCT 𝓓)] (hAx : 𝗩𝗲𝗿 ⊆ Ax(𝓓))
+lemma definability_canonicalFrame_Ver {𝓓 : DeductionParameter α} [𝓓.Normal] [Inhabited (𝓓)-MCT] (hAx : 𝗩𝗲𝗿 ⊆ Ax(𝓓))
   : Isolated (CanonicalFrame 𝓓).Rel := by
   intro x y hxy;
   have : 𝓓 ⊢! □⊥ := ⟨Deduction.maxm (Set.mem_of_subset_of_mem hAx (by simp))⟩
