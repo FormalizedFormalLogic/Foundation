@@ -411,7 +411,6 @@ def _root_.LO.FirstOrder.Arith.LDef.isSemitermDef : 𝚫₁-Semisentence 2 := .m
   (.mkSigma “n x | ∃ T, !pL.termSetDef T n (x + 1) ∧ x ∈ T” (by simp))
   (.mkPi “n x | ∀ T, !pL.termSetDef T n (x + 1) → x ∈ T” (by simp))
 
-
 lemma isSemiterm_defined : 𝚫₁-Relation (IsSemiterm L pL) via pL.isSemitermDef :=
   ⟨by intro v; simp [LDef.isSemitermDef, termSet_defined_iff L pL],
    by intro v; simp [isSemiterm_iff, LDef.isSemitermDef, termSet_defined_iff L pL]⟩
@@ -440,6 +439,8 @@ instance isTerm_definable : 𝚫₁-Predicate (IsTerm L pL) := Defined.to_defina
 
 end stx
 
+variable {L pL}
+
 lemma IsSemiterm.bvar {z : M} (hz : z < n) : 𝗧ⁿ ^#z := ⟨^#z + 1, bvar_mem_termSet hz (by rfl)⟩
 
 lemma IsSemiterm.fvar (x : M) : 𝗧ⁿ ^&x := ⟨^&x + 1, fvar_mem_termSet (by rfl)⟩
@@ -449,6 +450,36 @@ lemma IsSemiterm.func {k f v : M} (hkf : L.Func k f) (Hv : Seq v) (hlh : k = lh 
   ⟨^func k f v + 1,
     func_mem_termSet (by rfl) hkf Hv hlh (fun i b hi ↦
       termSet_cumulative (lt_iff_succ_le.mp <| lt_qqFunc hi) (isSemiterm_iff.mp (ih i b hi)))⟩
+
+lemma IsSemiterm.cases {t : M} :
+    𝗧ⁿ t ↔
+    (∃ z < n, t = ^#z) ∨
+    (∃ x, t = ^&x) ∨
+    (∃ k f v, L.Func k f ∧ Seq v ∧ k = lh v ∧ (∀ i u, ⟪i, u⟫ ∈ v → 𝗧ⁿ u) ∧ t = ^func k f v) where
+  mp := by
+    intro h
+    rcases mem_termSet_succ_iff.mp (isSemiterm_iff.mp h) with ⟨_, (⟨z, hz, rfl⟩ | ⟨x, rfl⟩ | ⟨k, f, v, hkf, Hv, rfl, hv, _, rfl⟩)⟩
+    · left; exact ⟨z, hz, rfl⟩
+    · right; left; exact ⟨x, rfl⟩
+    · right; right
+      exact ⟨lh v, f, v, hkf, Hv, rfl, fun i u hi ↦ ⟨_, hv i u hi⟩, rfl⟩
+  mpr := by
+    rintro (⟨z, hz, rfl⟩ | ⟨x, rfl⟩ | ⟨k, f, v, hkf, Hv, rfl, h, rfl⟩)
+    · exact IsSemiterm.bvar hz
+    · exact IsSemiterm.fvar x
+    · exact IsSemiterm.func hkf Hv rfl h
+
+lemma IsSemiterm.induction {Γ} {P : M → Prop} (hP : DefinablePred ℒₒᵣ (Γ, 1) P)
+    (hbvar : ∀ z < n, P (^#z)) (hfvar : ∀ x, P (^&x))
+    (hfunc : ∀ k f v, L.Func k f → Seq v → k = lh v → (∀ i b, ⟪i, b⟫ ∈ v → 𝗧ⁿ b → P b) → P (^func k f v)) :
+    ∀ t, 𝗧ⁿ t → P t := by
+  apply @order_induction_hh M _ _ _ _ _ _ ℒₒᵣ _ _ _ _ Γ 1 _
+  · exact Definable.imp (Definable.comp₂' (by simp) (by simp)) (Definable.comp₁' (by simp))
+  intro t ih ht
+  rcases IsSemiterm.cases.mp ht with (⟨z, hz, rfl⟩ | ⟨x, rfl⟩ | ⟨k, f, v, hkf, Hv, rfl, _, rfl⟩)
+  · exact hbvar z hz
+  · exact hfvar x
+  · exact hfunc (lh v) f v hkf Hv rfl (fun i u hi ↦ ih u (lt_qqFunc hi))
 
 end
 

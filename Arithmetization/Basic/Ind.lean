@@ -173,7 +173,6 @@ variable (L)
 
 variable (Γ : SigmaPiDelta) (m : ℕ) [M ⊧ₘ* Theory.indScheme L (Arith.Hierarchy 𝚺 m)]
 
-@[elab_as_elim]
 lemma induction_hh {P : M → Prop} (hP : DefinablePred L (Γ, m) P)
     (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x :=
   match Γ with
@@ -183,7 +182,6 @@ lemma induction_hh {P : M → Prop} (hP : DefinablePred L (Γ, m) P)
     induction_h 𝚷 m hP zero succ
   | 𝚫 => induction_h 𝚺 m hP.of_delta zero succ
 
-@[elab_as_elim]
 lemma order_induction_hh {P : M → Prop} (hP : DefinablePred L (Γ, m) P)
     (ind : ∀ x, (∀ y < x, P y) → P x) : ∀ x, P x :=
   match Γ with
