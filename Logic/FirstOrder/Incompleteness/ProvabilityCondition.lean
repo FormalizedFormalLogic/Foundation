@@ -33,14 +33,11 @@ variable [Semiterm.Operator.GoedelNumber L (Sentence L)]
 class HilbertBernays₁ (β : ProvabilityPredicate L L) (T₀ : Theory L) (T : outParam (Theory L)) where
   D1 {σ : Sentence L} : T ⊢! σ → T₀ ⊢! ⦍β⦎σ
 
-
 class HilbertBernays₂ (β : ProvabilityPredicate L L) (T₀ : Theory L) (T : outParam (Theory L)) where
   D2 {σ τ : Sentence L} : T₀ ⊢! ⦍β⦎(σ ⟶ τ) ⟶ ⦍β⦎σ ⟶ ⦍β⦎τ
 
-
 class HilbertBernays₃ (β : ProvabilityPredicate L L) (T₀ : Theory L) (T : outParam (Theory L)) where
   D3 {σ : Sentence L} : T₀ ⊢! ⦍β⦎σ ⟶ ⦍β⦎⦍β⦎σ
-
 
 class HilbertBernays (β : ProvabilityPredicate L L) (T₀ : Theory L) (T : outParam (Theory L))
   extends β.HilbertBernays₁ T₀ T, β.HilbertBernays₂ T₀ T, β.HilbertBernays₃ T₀ T
@@ -94,7 +91,9 @@ open LO.System
 variable [DecidableEq (Sentence L)]
          [HilbertBernays β T₀ T]
 
-def prov_distribute_imply (h : T ⊢! σ ⟶ τ) : T₀ ⊢! ⦍β⦎σ ⟶ ⦍β⦎τ := HilbertBernays₂.D2' $ HilbertBernays₁.D1 h
+open HilbertBernays₁ HilbertBernays₂ HilbertBernays₃ HilbertBernays
+
+def prov_distribute_imply (h : T ⊢! σ ⟶ τ) : T₀ ⊢! ⦍β⦎σ ⟶ ⦍β⦎τ := D2' $ D1 h
 
 def prov_distribute_iff (h : T ⊢! σ ⟷ τ) : T₀ ⊢! ⦍β⦎σ ⟷ ⦍β⦎τ := by
   apply iff_intro!;
@@ -102,15 +101,15 @@ def prov_distribute_iff (h : T ⊢! σ ⟷ τ) : T₀ ⊢! ⦍β⦎σ ⟷ ⦍β�
   . exact prov_distribute_imply $ conj₂'! h;
 
 def prov_distribute_and : T₀ ⊢! ⦍β⦎(σ ⋏ τ) ⟶ ⦍β⦎σ ⋏ ⦍β⦎τ := by
-  have h₁ : T₀ ⊢! ⦍β⦎(σ ⋏ τ) ⟶ ⦍β⦎σ := HilbertBernays₂.D2' <| HilbertBernays₁.D1 conj₁!;
-  have h₂ : T₀ ⊢! ⦍β⦎(σ ⋏ τ) ⟶ ⦍β⦎τ := HilbertBernays₂.D2' <| HilbertBernays₁.D1 conj₂!;
+  have h₁ : T₀ ⊢! ⦍β⦎(σ ⋏ τ) ⟶ ⦍β⦎σ := D2' <| D1 conj₁!;
+  have h₂ : T₀ ⊢! ⦍β⦎(σ ⋏ τ) ⟶ ⦍β⦎τ := D2' <| D1 conj₂!;
   exact implyRightAnd! h₁ h₂;
 
 def prov_distribute_and! : T₀ ⊢! ⦍β⦎(σ ⋏ τ) → T₀ ⊢! ⦍β⦎σ ⋏ ⦍β⦎τ := λ h => prov_distribute_and ⨀ h
 
 def prov_collect_and : T₀ ⊢! ⦍β⦎σ ⋏ ⦍β⦎τ ⟶ ⦍β⦎(σ ⋏ τ) := by
   have h₁ : T₀ ⊢! ⦍β⦎σ ⟶ ⦍β⦎(τ ⟶ σ ⋏ τ) := prov_distribute_imply $ conj₃!;
-  have h₂ : T₀ ⊢! ⦍β⦎(τ ⟶ σ ⋏ τ) ⟶ ⦍β⦎τ ⟶ ⦍β⦎(σ ⋏ τ) := HilbertBernays₂.D2;
+  have h₂ : T₀ ⊢! ⦍β⦎(τ ⟶ σ ⋏ τ) ⟶ ⦍β⦎τ ⟶ ⦍β⦎(σ ⋏ τ) := D2;
   apply andImplyIffImplyImply'!.mpr;
   exact imp_trans! h₁ h₂;
 
@@ -257,7 +256,8 @@ theorem loeb_theorm (H : T ⊢! ⦍β⦎σ ⟶ σ) : T ⊢! σ := by
 
 instance : Loeb β T₀ T := ⟨loeb_theorm  T₀ T⟩
 
-theorem formalized_loeb_theorem : T₀ ⊢! ⦍β⦎(⦍β⦎σ ⟶ σ) ⟶ ⦍β⦎σ := by
+
+theorem formalized_loeb_theorem [β.HilbertBernays T₀ T] : T₀ ⊢! ⦍β⦎(⦍β⦎σ ⟶ σ) ⟶ ⦍β⦎σ := by
   have hκ₁ : T₀ ⊢! ⦍β⦎(κ(σ)) ⟶ ⦍β⦎σ := kreisel_specAux₁ σ;
   have : T₀ ⊢! (⦍β⦎σ ⟶ σ) ⟶ (⦍β⦎κ(σ) ⟶ σ) := imply_left_replace! hκ₁;
   have : T ⊢! (⦍β⦎σ ⟶ σ) ⟶ κ(σ) := Subtheory.prf! (𝓢 := T₀) $ imp_trans! this (kreisel_specAux₂ σ);
@@ -270,15 +270,11 @@ end LoebTheorem
 
 section CorollaryLoeb
 
--- another proof of the 2nd incompleteness theorem via Löb
-lemma unprovable_consistency_via_loeb
-  [β.Loeb T₀ T]
-  : System.Consistent T → T ⊬! Con⦍β⦎ := by
-  contrapose;
-  intro hC; simp at hC;
+lemma unprovable_consistency_via_loeb [β.Loeb T₀ T] : T ⊬! Con⦍β⦎ := by
+  by_contra hC;
   have : T ⊢! ⊥ := Loeb.LT T₀ $ neg_equiv'!.mp hC;
-  apply System.not_consistent_iff_inconsistent.mpr;
-  apply System.inconsistent_of_provable this;
+  have := not_consistent_iff_inconsistent.mpr $ inconsistent_iff_provable_bot.mpr this;
+  contradiction;
 
 variable {β T₀ T}
 
