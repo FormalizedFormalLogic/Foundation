@@ -366,30 +366,91 @@ lemma termSet_cumulative {s s' : M} : s ≤ s' → 𝐓 s ⊆ 𝐓 s' := by
     · exact fvar_mem_termSet (le_trans hu hs)
     · exact func_mem_termSet (le_trans hu hs) hkf Hv rfl (fun i b hib ↦ ih hs (hv i b hib))
 
-lemma mem_s {u : M} :
-    ∀ s, u ∈ 𝐓 s → u ∈ 𝐓 (u + 1) := by {
-  induction u using order_induction_piOne
+lemma mem_termSet_self {u s : M} :
+    u ∈ 𝐓 s → u ∈ 𝐓 (u + 1) := by
+  induction u using order_induction_piOne generalizing s
   · definability
   case ind u ih =>
-    intro s
     rcases zero_or_succ s with (rfl | ⟨s, rfl⟩)
     · simp
     intro hu
     rcases mem_termSet_succ_iff.mp hu with ⟨hu, (⟨z, hz, rfl⟩ | ⟨x, rfl⟩ | ⟨k, f, v, hkf, Hv, rfl, hv, rfl⟩)⟩
     · exact bvar_mem_termSet hz (by rfl)
     · exact fvar_mem_termSet (by rfl)
-    · have : ∀ i b, ⟪i, b⟫ ∈ v → b ∈ 𝐓 (^func (lh v) f v) := by
-        intro i b hi
-        have := ih b (by {  })
-      apply func_mem_termSet (by rfl) hkf Hv rfl (by {  })
-     }
+    · have : ∀ i b, ⟪i, b⟫ ∈ v → b ∈ 𝐓 (^func (lh v) f v) := fun i b hi ↦ by
+        have : b ∈ 𝐓 (b + 1) := ih b (lt_qqFunc hi) (hv i b hi)
+        exact termSet_cumulative (lt_iff_succ_le.mp <| lt_qqFunc hi) this
+      exact func_mem_termSet (by rfl) hkf Hv rfl this
 
 end FormalizedTerm
 
-variable {L : Model.Language M} {pL : LDef} [Model.Language.Defined L pL]
+section
 
-def IsTerm (n x : M) : Prop := ∃ s, x ∈ FormalizedTerm.termSet L pL n s
+open FormalizedTerm
 
+variable (L : Model.Language M) (pL : LDef) [Model.Language.Defined L pL] {n : M}
+
+def IsSemiterm (n x : M) : Prop := ∃ s, x ∈ FormalizedTerm.termSet L pL n s
+
+abbrev IsTerm (x : M) : Prop := IsSemiterm L pL 0 x
+
+local prefix:max "𝐓" => termSet L pL n
+
+local prefix:max "𝗧ⁿ" => IsSemiterm L pL n
+
+variable {L pL}
+
+lemma isSemiterm_iff {x : M} : IsSemiterm L pL n x ↔ x ∈ 𝐓 (x + 1) :=
+  ⟨by rintro ⟨s, hs⟩; exact mem_termSet_self hs, fun h ↦ ⟨x + 1, h⟩⟩
+
+variable (L pL)
+
+section stx
+
+def _root_.LO.FirstOrder.Arith.LDef.isSemitermDef : 𝚫₁-Semisentence 2 := .mkDelta
+  (.mkSigma “n x | ∃ T, !pL.termSetDef T n (x + 1) ∧ x ∈ T” (by simp))
+  (.mkPi “n x | ∀ T, !pL.termSetDef T n (x + 1) → x ∈ T” (by simp))
+
+
+lemma isSemiterm_defined : 𝚫₁-Relation (IsSemiterm L pL) via pL.isSemitermDef :=
+  ⟨by intro v; simp [LDef.isSemitermDef, termSet_defined_iff L pL],
+   by intro v; simp [isSemiterm_iff, LDef.isSemitermDef, termSet_defined_iff L pL]⟩
+
+@[simp] lemma eval_isSemiterm (v) :
+    Semiformula.Evalbm M v pL.isSemitermDef.val ↔ IsSemiterm L pL (v 0) (v 1) := (isSemiterm_defined L pL).df.iff v
+
+instance isSemiterm_definable : 𝚫₁-Relation (IsSemiterm L pL) := Defined.to_definable _ (isSemiterm_defined L pL)
+
+@[simp, definability] instance isSemiterm_definable' (Γ) : (Γ, m + 1)-Relation (IsSemiterm L pL) :=
+  .of_deltaOne (isSemiterm_definable L pL) _ _
+
+def _root_.LO.FirstOrder.Arith.LDef.isTermDef : 𝚫₁-Semisentence 1 := pL.isSemitermDef.rew (Rew.substs ![‘0’, ‘y n x | x’])
+
+lemma isTerm_defined : 𝚫₁-Predicate (IsTerm L pL) via pL.isTermDef :=
+  ⟨by simp [LDef.isTermDef]; apply HSemiformula.ProperOn.rew ((isSemiterm_defined L pL).proper),
+   by intro v; simp [LDef.isTermDef, eval_isSemiterm L pL, IsTerm]⟩
+
+@[simp] lemma eval_isTerm (v) :
+    Semiformula.Evalbm M v pL.isTermDef.val ↔ IsTerm L pL (v 0) := (isTerm_defined L pL).df.iff v
+
+instance isTerm_definable : 𝚫₁-Predicate (IsTerm L pL) := Defined.to_definable _ (isTerm_defined L pL)
+
+@[simp, definability] instance isTerm_definable' (Γ) : (Γ, m + 1)-Predicate (IsTerm L pL) :=
+  .of_deltaOne (isTerm_definable L pL) _ _
+
+end stx
+
+lemma IsSemiterm.bvar {z : M} (hz : z < n) : 𝗧ⁿ ^#z := ⟨^#z + 1, bvar_mem_termSet hz (by rfl)⟩
+
+lemma IsSemiterm.fvar (x : M) : 𝗧ⁿ ^&x := ⟨^&x + 1, fvar_mem_termSet (by rfl)⟩
+
+lemma IsSemiterm.func {k f v : M} (hkf : L.Func k f) (Hv : Seq v) (hlh : k = lh v) (ih : ∀ i b, ⟪i, b⟫ ∈ v → 𝗧ⁿ b) :
+    𝗧ⁿ (^func k f v) :=
+  ⟨^func k f v + 1,
+    func_mem_termSet (by rfl) hkf Hv hlh (fun i b hi ↦
+      termSet_cumulative (lt_iff_succ_le.mp <| lt_qqFunc hi) (isSemiterm_iff.mp (ih i b hi)))⟩
+
+end
 
 end LO.FirstOrder.Arith.Model
 
