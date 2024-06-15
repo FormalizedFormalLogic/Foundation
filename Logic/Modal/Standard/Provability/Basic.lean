@@ -1,4 +1,4 @@
-import Logic.FirstOrder.Incompleteness.ProvabilityCondition
+import Logic.FirstOrder.Incompleteness.DerivabilityCondition
 import Logic.Modal.Standard.Deduction
 
 namespace LO.Modal.Standard.Provability
