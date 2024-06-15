@@ -34,19 +34,7 @@ lemma boxdotTranslatedK4_of_S4 (h : 𝐒𝟒 ⊢! p) : 𝐊𝟒 ⊢! pᵇ := by
   | hMdp hpq hp ihpq ihp =>
     dsimp [BoxdotTranslation] at ihpq ihp;
     exact (ihpq ⟨hpq⟩) ⨀ (ihp ⟨hp⟩);
-  | _ =>
-    dsimp [BoxdotTranslation];
-    try first
-    | apply verum!;
-    | apply conj₁!;
-    | apply conj₂!;
-    | apply conj₃!;
-    | apply disj₁!;
-    | apply disj₂!;
-    | apply disj₃!;
-    | apply imply₁!;
-    | apply imply₂!;
-    | apply dne!;
+  | _ => dsimp [BoxdotTranslation]; trivial;
 
 lemma iff_boxdotTranslation_S4 : 𝐒𝟒 ⊢! p ⟷ pᵇ := by
   induction p using Formula.rec' with

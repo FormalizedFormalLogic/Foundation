@@ -125,18 +125,7 @@ lemma of_classical {m𝓓 : Modal.Standard.DeductionParameter α} {p : Superintu
   | mdp h₁ h₂ ih₁ ih₂ =>
     dsimp only [Superintuitionistic.Formula.toModalFormula] at ih₁ ih₂;
     exact (ih₁ ⟨h₁⟩) ⨀ (ih₂ ⟨h₂⟩);
-  | _ =>
-    dsimp [Superintuitionistic.Formula.toModalFormula];
-    try first
-    | apply verum!;
-    | apply conj₁!;
-    | apply conj₂!;
-    | apply conj₃!;
-    | apply disj₁!;
-    | apply disj₂!;
-    | apply disj₃!;
-    | apply imply₁!;
-    | apply imply₂!;
+  | _ => dsimp [Superintuitionistic.Formula.toModalFormula]; trivial;
 
 lemma iff_Triv_classical : 𝐓𝐫𝐢𝐯 ⊢! p ↔ 𝐂𝐥 ⊢! pᵀᴾ := by
   constructor;
@@ -151,20 +140,7 @@ lemma iff_Triv_classical : 𝐓𝐫𝐢𝐯 ⊢! p ↔ 𝐂𝐥 ⊢! pᵀᴾ := 
       dsimp [TrivTranslation, toPropFormula] at ih₁ ih₂;
       exact (ih₁ ⟨h₁⟩) ⨀ (ih₂ ⟨h₂⟩);
     | hNec _ ih => exact ih $ axiomT'! h;
-    | _ =>
-      dsimp [TrivTranslation, toPropFormula];
-      try first
-      | apply imp_id!;
-      | apply verum!;
-      | apply conj₁!;
-      | apply conj₂!;
-      | apply conj₃!;
-      | apply disj₁!;
-      | apply disj₂!;
-      | apply disj₃!;
-      | apply imply₁!;
-      | apply imply₂!;
-      | apply dne!;
+    | _ => dsimp [TrivTranslation, toPropFormula]; trivial
   . intro h;
     have d₁ : 𝐓𝐫𝐢𝐯 ⊢! pᵀ ⟶ p := conj₂'! deducible_iff_trivTranslation;
     have d₂ : 𝐓𝐫𝐢𝐯 ⊢! pᵀ := by simpa only [TrivTranslation.back] using of_classical h;
@@ -182,19 +158,7 @@ lemma iff_Ver_classical : 𝐕𝐞𝐫 ⊢! p ↔ 𝐂𝐥 ⊢! pⱽᴾ := by
       dsimp [VerTranslation, toPropFormula] at ih₁ ih₂;
       exact (ih₁ ⟨h₁⟩) ⨀ (ih₂ ⟨h₂⟩);
     | hNec => dsimp [toPropFormula]; exact verum!;
-    | _ =>
-      dsimp [VerTranslation, toPropFormula];
-      try first
-      | apply verum!;
-      | apply imply₁!;
-      | apply imply₂!;
-      | apply conj₁!;
-      | apply conj₂!;
-      | apply conj₃!;
-      | apply disj₁!;
-      | apply disj₂!;
-      | apply disj₃!;
-      | apply dne!;
+    | _ => dsimp [VerTranslation, toPropFormula]; trivial;
   . intro h;
     have d₁ : 𝐕𝐞𝐫 ⊢! pⱽ ⟶ p := conj₂'! deducible_iff_verTranslation;
     have d₂ : 𝐕𝐞𝐫 ⊢! pⱽ := by simpa using of_classical h;
@@ -216,19 +180,7 @@ lemma verTranslated_of_GL : 𝐆𝐋 ⊢! p → 𝐂𝐥 ⊢! pⱽᴾ := by
       dsimp [VerTranslation, toPropFormula] at ih₁ ih₂;
       exact (ih₁ ⟨h₁⟩) ⨀ (ih₂ ⟨h₂⟩);
     | hNec => dsimp [toPropFormula]; exact verum!;
-    | _ =>
-      dsimp [VerTranslation, toPropFormula];
-      try first
-      | apply verum!;
-      | apply imply₁!;
-      | apply imply₂!;
-      | apply conj₁!;
-      | apply conj₂!;
-      | apply conj₃!;
-      | apply disj₁!;
-      | apply disj₂!;
-      | apply disj₃!;
-      | apply dne!;
+    | _ => dsimp [VerTranslation, toPropFormula]; trivial;
 
 open Superintuitionistic (unprovable_classical_of_exists_ClassicalValuation)
 

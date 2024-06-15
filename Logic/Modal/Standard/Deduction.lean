@@ -387,6 +387,24 @@ end DeductionParameter
 
 open System
 
+macro_rules | `(tactic| trivial) => `(tactic|
+    first
+    | apply verum!
+    | apply imply₁!
+    | apply imply₁!
+    | apply imply₂!
+    | apply conj₁!
+    | apply conj₂!
+    | apply conj₃!
+    | apply disj₁!
+    | apply disj₂!
+    | apply disj₃!
+  )
+
+macro_rules | `(tactic| trivial) => `(tactic | apply dne!)
+
+section Reducible
+
 lemma normal_reducible
   {𝓓₁ 𝓓₂ : DeductionParameter α} [𝓓₁.Normal] [𝓓₂.Normal]
   (hMaxm : ∀ {p : Formula α}, p ∈ Ax(𝓓₁) → 𝓓₂ ⊢! p) : (𝓓₁ : DeductionParameter α) ≤ₛ 𝓓₂ := by
@@ -394,20 +412,9 @@ lemma normal_reducible
   intro p h;
   induction h using Deduction.inducition_with_nec! with
   | hMaxm hp => exact hMaxm hp;
-  | hMdp ihpq ihp => exact ihpq ⨀ ihp
-  | hNec ihp => exact Necessitation.nec! ihp
-  | _ =>
-    try first
-    | apply verum!;
-    | apply imply₁!;
-    | apply imply₂!;
-    | apply conj₁!;
-    | apply conj₂!;
-    | apply conj₃!;
-    | apply disj₁!;
-    | apply disj₂!;
-    | apply disj₃!;
-    | apply dne!;
+  | hMdp ihpq ihp => exact ihpq ⨀ ihp;
+  | hNec ihp => exact Necessitation.nec! ihp;
+  | _ => trivial;
 
 lemma normal_reducible_subset {𝓓₁ 𝓓₂ : DeductionParameter α} [𝓓₁.Normal] [𝓓₂.Normal]
   (hSubset : Ax(𝓓₁) ⊆ Ax(𝓓₂)) : (𝓓₁ : DeductionParameter α) ≤ₛ 𝓓₂ := by
@@ -461,18 +468,7 @@ lemma reducible_GL_K4Loeb : (𝐆𝐋 : DeductionParameter α) ≤ₛ 𝐊𝟒(�
   | hNec _ ihp => exact Necessitation.nec! ihp;
   | hLoeb _ ihp => exact LoebRule.loeb! ihp;
   | hHenkin => simp_all only [Bool.false_eq_true];
-  | _ =>
-    try first
-    | apply verum!;
-    | apply imply₁!;
-    | apply imply₂!;
-    | apply conj₁!;
-    | apply conj₂!;
-    | apply conj₃!;
-    | apply disj₁!;
-    | apply disj₂!;
-    | apply disj₃!;
-    | apply dne!;
+  | _ => trivial;
 
 lemma reducible_K4Loeb_K4Henkin : (𝐊𝟒(𝐋) : DeductionParameter α) ≤ₛ 𝐊𝟒(𝐇) := by
   apply System.reducible_iff.mpr;
@@ -486,18 +482,7 @@ lemma reducible_K4Loeb_K4Henkin : (𝐊𝟒(𝐋) : DeductionParameter α) ≤�
   | hNec _ ihp => exact Necessitation.nec! ihp;
   | hLoeb _ ihp => exact LoebRule.loeb! ihp;
   | hHenkin => simp_all only [Bool.false_eq_true];
-  | _ =>
-    try first
-    | apply verum!;
-    | apply imply₁!;
-    | apply imply₂!;
-    | apply conj₁!;
-    | apply conj₂!;
-    | apply conj₃!;
-    | apply disj₁!;
-    | apply disj₂!;
-    | apply disj₃!;
-    | apply dne!;
+  | _ => trivial;
 
 lemma reducible_K4Henkin_K4H : (𝐊𝟒(𝐇) : DeductionParameter α) ≤ₛ 𝐊𝟒𝐇 := by
   apply System.reducible_iff.mpr;
@@ -511,18 +496,7 @@ lemma reducible_K4Henkin_K4H : (𝐊𝟒(𝐇) : DeductionParameter α) ≤ₛ �
   | hNec _ ihp => exact Necessitation.nec! ihp;
   | hHenkin _ ihp => exact HenkinRule.henkin! ihp;
   | hLoeb => simp_all only [Bool.false_eq_true];
-  | _ =>
-    try first
-    | apply verum!;
-    | apply imply₁!;
-    | apply imply₂!;
-    | apply conj₁!;
-    | apply conj₂!;
-    | apply conj₃!;
-    | apply disj₁!;
-    | apply disj₂!;
-    | apply disj₃!;
-    | apply dne!;
+  | _ => trivial;
 
 lemma reducible_K4Henkin_GL : (𝐊𝟒𝐇 : DeductionParameter α) ≤ₛ 𝐆𝐋 := by
   apply normal_reducible;
@@ -539,5 +513,7 @@ lemma equivalent_GL_K4Loeb : (𝐆𝐋 : DeductionParameter α) =ₛ 𝐊𝟒(�
   . exact Reducible.trans (reducible_K4Loeb_K4Henkin) $ Reducible.trans reducible_K4Henkin_K4H reducible_K4Henkin_GL
 
 end GL
+
+end Reducible
 
 end LO.Modal.Standard
