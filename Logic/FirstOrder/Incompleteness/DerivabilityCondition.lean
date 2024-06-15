@@ -152,9 +152,9 @@ open GoedelSound
 
 section First
 
-variable [β.HilbertBernays₁ T₀ T]
+variable [System.Consistent T] [β.HilbertBernays₁ T₀ T]
 
-theorem unprovable_goedel [System.Consistent T] : T ⊬! γ := by
+theorem unprovable_goedel : T ⊬! γ := by
   intro h;
   have h₁ : T ⊢! ⦍β⦎γ := D1s (T₀ := T₀) h;
   have h₂ : T ⊢! ~⦍β⦎γ := (conj₁'! goedel_specAux₁) ⨀ h;
@@ -163,7 +163,7 @@ theorem unprovable_goedel [System.Consistent T] : T ⊬! γ := by
   have := not_consistent_iff_inconsistent.mpr $ inconsistent_iff_provable_bot.mpr this;
   contradiction;
 
-theorem unrefutable_goedel [System.Consistent T] [β.GoedelSound T₀ T] : T ⊬! ~γ := by
+theorem unrefutable_goedel [β.GoedelSound T₀ T] : T ⊬! ~γ := by
   intro h₂;
   have h₁ : T ⊢! γ := γ_sound $ goedel_specAux₂ ⨀ h₂;
   have : T ⊢! ⊥ := (neg_equiv'!.mp h₂) ⨀ h₁;
@@ -171,13 +171,13 @@ theorem unrefutable_goedel [System.Consistent T] [β.GoedelSound T₀ T] : T ⊬
   have := not_consistent_iff_inconsistent.mpr $ inconsistent_iff_provable_bot.mpr this;
   contradiction;
 
-theorem goedel_independent [System.Consistent T] [β.GoedelSound T₀ T] : System.Undecidable T γ := by
+theorem goedel_independent [β.GoedelSound T₀ T] : System.Undecidable T γ := by
   suffices T ⊬! γ ∧ T ⊬! ~γ by simpa [System.Undecidable, not_or] using this;
   constructor;
   . apply unprovable_goedel;
   . apply unrefutable_goedel;
 
-theorem first_incompleteness [System.Consistent T] [β.GoedelSound T₀ T]
+theorem first_incompleteness [β.GoedelSound T₀ T]
   : ¬System.Complete T := System.incomplete_iff_exists_undecidable.mpr ⟨γ, goedel_independent⟩
 
 end First
@@ -185,7 +185,9 @@ end First
 
 section Second
 
-lemma formalized_consistent_of_existance_unprovable [β.HilbertBernays T₀ T] : T₀ ⊢! ~⦍β⦎σ ⟶ Con⦍β⦎ := contra₀'! $ D2 ⨀ (D1 efq!)
+variable [Diagonalization T] [β.HilbertBernays T₀ T]
+
+lemma formalized_consistent_of_existance_unprovable : T₀ ⊢! ~⦍β⦎σ ⟶ Con⦍β⦎ := contra₀'! $ D2 ⨀ (D1 efq!)
 
 private lemma consistency_lemma_1 [T₀ ≼ U] [β.HilbertBernays T₀ U] : (U ⊢! Con⦍β⦎ ⟶ ~⦍β⦎σ) ↔ (U ⊢! ⦍β⦎σ ⟶ ⦍β⦎(~σ)) := by
   constructor;
@@ -196,8 +198,6 @@ private lemma consistency_lemma_1 [T₀ ≼ U] [β.HilbertBernays T₀ U] : (U �
     have : T₀ ⊢! ⦍β⦎σ ⋏ ⦍β⦎(~σ) ⟶ ⦍β⦎⊥ := imp_trans! prov_collect_and $ prov_distribute_imply no_both!;
     have : U ⊢! ⦍β⦎σ ⟶ ⦍β⦎(~σ) ⟶ ⦍β⦎⊥ := Subtheory.prf! $ andImplyIffImplyImply'!.mp $ this;
     exact this ⨀₁ H;
-
-variable [Diagonalization T] [β.HilbertBernays T₀ T]
 
 private lemma consistency_lemma_2 : T₀ ⊢! (⦍β⦎σ ⟶ ⦍β⦎(~σ)) ⟶ ⦍β⦎σ ⟶ ⦍β⦎⊥ := by
   have : T ⊢! σ ⟶ ~σ ⟶ ⊥ := andImplyIffImplyImply'!.mp no_both!
