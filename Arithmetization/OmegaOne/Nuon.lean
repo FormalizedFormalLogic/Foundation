@@ -673,15 +673,18 @@ lemma nuon_bit1 (a : M) : nuon (2 * a + 1) = nuon a + 1 := by
   have : Nuon (2 * a + 1) (nuon a + 1) := by simpa [Nuon, length_two_mul_add_one] using (nuon_nuon a).two_mul_add_one (by simp)
   exact this.nuon_eq
 
+@[simp] lemma nuon_zero : nuon (0 : M) = 0 := Nuon.nuon_eq (by simp [Nuon])
+
 def _root_.LO.FirstOrder.Arith.nuonDef : 𝚺₀-Semisentence 2 := .mkSigma
   “n A | ∃ l <⁺ A, !lengthDef l A ∧ !Nuon.nuonAuxDef A l n” (by simp)
-
--- #eval nuonDef.val
 
 lemma nuon_defined : 𝚺₀-Function₁ (nuon : M → M) via nuonDef := by
   intro v; simp [Nuon.nuon_eq_iff, Nuon, nuonDef,
     length_defined.df.iff, Nuon.nuonAux_defined.df.iff, lt_succ_iff_le]
   rw [Nuon.bex_eq_le_iff]; simp
+
+@[simp] lemma eval_nuon_iff (v) :
+    Semiformula.Evalbm M v nuonDef.val ↔ v 0 = nuon (v 1) :=nuon_defined.df.iff v
 
 instance nuon_definable : DefinableFunction₁ ℒₒᵣ 𝚺₀ (nuon : M → M) := Defined.to_definable _ nuon_defined
 

@@ -224,6 +224,16 @@ end Arith.Hierarchy
 
 end
 
+section
+
+variable {M : Type*} [Nonempty M] [Structure L M]
+
+abbrev Semiterm.Rlz (t : Semiterm L M n) (e : Fin n → M) : M := t.valm M e id
+
+abbrev Semiformula.Rlz (p : Semiformula L M n) (e : Fin n → M) : Prop := Evalm M e id p
+
+end
+
 end FirstOrder
 
 end LO

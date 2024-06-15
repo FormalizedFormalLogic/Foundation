@@ -263,6 +263,11 @@ instance [M ⊧ₘ* 𝐈𝚺 n] : M ⊧ₘ* 𝐈𝐍𝐃Γ n :=
     (ind : ∀ x, (∀ y < x, P y) → P x) : ∀ x, P x :=
   order_induction_h 𝚺 1 hP ind
 
+@[elab_as_elim] lemma order_induction_piOne [M ⊧ₘ* 𝐈𝚺₁]
+    {P : M → Prop} (hP : DefinablePred ℒₒᵣ 𝚷₁ P)
+    (ind : ∀ x, (∀ y < x, P y) → P x) : ∀ x, P x :=
+  order_induction_h 𝚷 1 hP ind
+
 lemma least_number_iSigmaZero [M ⊧ₘ* 𝐈𝚺₀] {P : M → Prop} (hP : DefinablePred ℒₒᵣ 𝚺₀ P)
     {x} (h : P x) : ∃ y, P y ∧ ∀ z < y, ¬P z :=
   least_number_h 𝚺 0 hP h

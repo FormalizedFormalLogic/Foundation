@@ -133,6 +133,14 @@ instance : Bounded₂ ℒₒᵣ ((· ∪ ·) : M → M → M) := ⟨‘x y | 2 *
 
 lemma union_comm (a b : M) : a ∪ b = b ∪ a := mem_ext (by simp [or_comm])
 
+@[simp] lemma union_succ_union_left (a b : M) : a ⊆ a ∪ b := by intro x hx; simp [hx]
+
+@[simp] lemma union_succ_union_right (a b : M) : b ⊆ a ∪ b := by intro x hx; simp [hx]
+
+@[simp] lemma union_succ_union_union_left (a b c : M) : a ⊆ a ∪ b ∪ c := by intro x hx; simp [hx]
+
+@[simp] lemma union_succ_union_union_right (a b c : M) : b ⊆ a ∪ b ∪ c := by intro x hx; simp [hx]
+
 end union
 
 section sInter
@@ -456,6 +464,24 @@ lemma domain_restr_of_subset_domain {f s : M} (h : s ⊆ domain f) : domain (f �
   simp [domain_restr, inter_comm, inter_eq_self_of_subset h]
 
 end restriction
+
+@[elab_as_elim]
+theorem insert_induction {P : M → Prop} (hP : (Γ, 1)-Predicate P)
+    (hempty : P ∅) (hinsert : ∀ a s, a ∉ s → P s → P (insert a s)) : ∀ s, P s :=
+  order_induction_hh ℒₒᵣ Γ 1 hP <| by
+    intro s IH
+    rcases eq_empty_or_nonempty s with (rfl | ⟨x, hx⟩)
+    · exact hempty
+    · simpa [insert_remove hx] using
+        hinsert x (bitRemove x s) (by simp) (IH _ (bitRemove_lt_of_mem hx))
+
+lemma insert_induction_sigmaOne {P : M → Prop} (hP : 𝚺₁-Predicate P)
+    (hempty : P ∅) (hinsert : ∀ a s, a ∉ s → P s → P (insert a s)) : ∀ s, P s :=
+  insert_induction hP hempty hinsert
+
+lemma insert_induction_piOne {P : M → Prop} (hP : 𝚷₁-Predicate P)
+    (hempty : P ∅) (hinsert : ∀ a s, a ∉ s → P s → P (insert a s)) : ∀ s, P s :=
+  insert_induction hP hempty hinsert
 
 end LO.FirstOrder.Arith.Model
 

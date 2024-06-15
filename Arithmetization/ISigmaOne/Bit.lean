@@ -228,6 +228,8 @@ lemma singleton_eq_insert (i : M) : ({i} : M) = insert i ∅ := by simp [singlet
       lenbit_sub_pow2_iff_of_lenbit (exp_pow2 i) (exp_pow2 j) h
   · rintro _ rfl; contradiction
 
+@[simp] lemma not_mem_bitRemove_self (i a : M) : i ∉ bitRemove i a := by simp
+
 lemma insert_graph (b i a : M) :
     b = insert i a ↔ (i ∈ a ∧ b = a) ∨ (i ∉ a ∧ ∃ e ≤ b, e = exp i ∧ b = a + e) :=
   ⟨by rintro rfl; by_cases hi : i ∈ a <;> simp [hi, insert, bitInsert],
@@ -307,6 +309,11 @@ instance bitSubset_definable : DefinableRel ℒₒᵣ 𝚺₀ ((· ⊆ ·) : M �
 @[simp, definability] instance bitSubset_definable' : DefinableRel ℒₒᵣ Γ ((· ⊆ ·) : M → M → Prop) := Defined.to_definable₀ _ bitSubset_defined
 
 lemma subset_iff {a b : M} : a ⊆ b ↔ (∀ x ∈ a, x ∈ b) := by simp [HasSubset.Subset]
+
+@[refl, simp] lemma subset_refl (a : M) : a ⊆ a := by intro x; simp
+
+@[trans] lemma subset_trans {a b c : M} (hab : a ⊆ b) (hbc : b ⊆ c) : a ⊆ c := by
+  intro x hx; exact hbc (hab hx)
 
 lemma mem_exp_add_succ_sub_one (i j : M) : i ∈ exp (i + j + 1) - 1 := by
   have : exp (i + j + 1) - 1 = (exp j - 1) * exp (i + 1) + exp i + (exp i - 1) := calc
@@ -427,6 +434,12 @@ lemma lt_of_lt_log {a b : M} (pos : 0 < b) (h : ∀ i ∈ a, i < log b) : a < b 
 @[simp] lemma under_succ (i : M) : under (i + 1) = insert i (under i) :=
   mem_ext (by simp [mem_under_iff, lt_succ_iff_le, le_iff_eq_or_lt])
 
+lemma insert_remove {i a : M} (h : i ∈ a) : insert i (bitRemove i a) = a := mem_ext <| by
+  simp; intro j
+  constructor
+  · rintro (rfl | ⟨_, hj⟩) <;> assumption
+  · intro hj; simp [hj, eq_or_ne j i]
+
 section
 
 variable {m : ℕ} [Fact (1 ≤ m)] [M ⊧ₘ* 𝐈𝐍𝐃𝚺 m]
@@ -516,6 +529,17 @@ theorem finite_comprehension₁! {P : M → Prop} (hP : (Γ, 1)-Predicate P) (fi
       fun h ↦ (Hs i (exp_monotone.mp (lt_of_le_of_lt (exp_le_of_mem h) hs))).mp h,
       fun h ↦ (Hs i (mh i h)).mpr h⟩
   exact ExistsUnique.intro s H (fun s' H' ↦ mem_ext <| fun i ↦ by simp [H, H'])
+
+/-
+def setExt {Γ} (p : 𝚫₁-Semisentence (n + 1)) : Γ-Semisentence (n + 1) :=
+  match Γ with
+  | (𝚺, m) => .mkSigma “u | ∀ x < u, x ∈ u ↔ !p x ⋯” (by {  })
+
+lemma set_iff {n} {f : (Fin n → M) → M} {R : (Fin (n + 1) → M) → Prop}
+    (hf : ∀ v x, x ∈ f v ↔ R (x :> v)) {Γ} (p : (Γ, 1)-Semisentence (n + 1)) : DefinedFunction ℒₒᵣ (Γ, 1) f p := by {
+
+     }
+-/
 
 end ISigma₁
 
