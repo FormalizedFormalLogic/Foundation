@@ -34,6 +34,12 @@ However [completeness seems to have been not yet formalized](https://github.com/
 - [Andrei-Alexandru Oltean, _"A Formalization of Hybrid Logic in Lean"_](https://raw.githubusercontent.com/alexoltean61/alexoltean61.github.io/main/hybrid.pdf)
 
 
+#### [leanprover-community/con-nf](https://github.com/leanprover-community/con-nf)
+
+Formalizing the consistency of Quine's set theory "New Foundations": $\mathrm{Con}(\mathbf{NF})$.
+
+- [Website](https://leanprover-community.github.io/con-nf/)
+
 ### Lean 3
 
 #### [flypitch](https://flypitch.github.io/)
