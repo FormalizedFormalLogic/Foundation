@@ -270,6 +270,7 @@ open DeductionParameter
 private abbrev NecOnly (Ax : AxiomSet α) : DeductionParameter α where
   axiomSet := Ax
   rules := ⟨true, false, false⟩
+instance : HasNecOnly (α := α) (NecOnly Ax) where
 
 protected abbrev K : DeductionParameter α := NecOnly 𝗞
 notation "𝐊" => DeductionParameter.K
@@ -607,6 +608,12 @@ lemma unprovable_iff_insert_neg_Consistent : T *⊬[𝓓]! p ↔ (𝓓)-Consiste
   . contrapose; simp [not_not]; apply provable_iff_insert_neg_not_Consistent.mpr;
   . contrapose; simp [not_not]; apply provable_iff_insert_neg_not_Consistent.mp;
 
+lemma unprovable_iff_singleton_neg_Consistent : 𝓓 ⊬! p ↔ (𝓓)-Consistent {~p} := by
+  have e : insert (~p) ∅ = ({~p} : Theory α) := by aesop;
+  have H := unprovable_iff_insert_neg_Consistent (𝓓 := 𝓓) (T := ∅) (p := p);
+  rw [e] at H;
+  exact Iff.trans Context.emptyPrf!.symm.not H;
+
 lemma neg_provable_iff_insert_not_Consistent : T *⊢[𝓓]! ~p ↔ ¬(𝓓)-Consistent (insert (p) T) := by
   constructor;
   . intro h;
@@ -716,6 +723,14 @@ lemma intro_union_Consistent
     . exact iff_provable_list_conj.mp (and₁'! FiniteContext.id!) q $ List.mem_filter_of_mem hq (by simpa);
     . exact iff_provable_list_conj.mp (and₂'! FiniteContext.id!) q $ List.mem_filter_of_mem hq (by simpa);
   ) this;
+
+lemma not_singleton_consistent [Necessitation 𝓓] (h : ~(□p) ∈ T) : (𝓓)-Consistent {~p} := by
+  intro Γ hΓ;
+  simp only [Set.mem_singleton_iff] at hΓ;
+  by_contra hC;
+  have : 𝓓 ⊢! ~(□p) ⟶ ⊥ := NegationEquiv.neg_equiv'!.mp $ dni'! $ Necessitation.nec! $ dne'! $ NegationEquiv.neg_equiv'!.mpr $ replace_imply_left_conj'! hΓ hC;
+  have : 𝓓 ⊬! ~(□p) ⟶ ⊥ := by simpa using hConsis (Γ := [~(□p)]) (by aesop)
+  contradiction;
 
 end Theory
 

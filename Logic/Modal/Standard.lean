@@ -17,3 +17,5 @@ import Logic.Modal.Standard.Kripke.Geach.Reducible
 import Logic.Modal.Standard.Kripke.ModalCompanion
 
 import Logic.Modal.Standard.Provability.Basic
+
+import Logic.Modal.Standard.PLoN.PLoN
