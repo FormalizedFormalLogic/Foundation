@@ -172,7 +172,7 @@ open Hierarchy
 
 lemma val_numeral {n} : ∀ (t : Semiterm ℒₒᵣ Empty n),
     ∀ v, Semiterm.valm M (v ·) Empty.elim t = (Semiterm.valm ℕ v Empty.elim t)
-  | #_,                                _ => by simp
+  | #_,                                 _ => by simp
   | Semiterm.func Language.Zero.zero _, e => by simp
   | Semiterm.func Language.One.one _,   e => by simp
   | Semiterm.func Language.Add.add v,   e => by simp[Semiterm.val_func, val_numeral (v 0), val_numeral (v 1)]
@@ -210,13 +210,18 @@ lemma pval_of_pval_nat_of_sigma_one : ∀ {n} {σ : Semisentence ℒₒᵣ n},
 
 end Model
 
-variable {T : Theory ℒₒᵣ} [𝐄𝐐 ≼ T] [𝐏𝐀⁻ ≼ T]
+variable {T : Theory ℒₒᵣ}
 
-theorem sigma_one_completeness {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
+theorem sigma_one_completeness [𝐄𝐐 ≼ T] [𝐏𝐀⁻ ≼ T] {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
     ℕ ⊧ₘ σ → T ⊢! σ := fun H =>
   complete (oRing_consequence_of.{0} _ _ (fun M _ _ _ _ _ _ => by
     haveI : M ⊧ₘ* 𝐏𝐀⁻ := ModelsTheory.of_provably_subtheory M 𝐏𝐀⁻ T inferInstance (by assumption)
     simpa [Matrix.empty_eq] using Model.pval_of_pval_nat_of_sigma_one (M := M) hσ H))
+
+theorem sigma_one_completeness_iff [𝐏𝐀⁻ ≼ T] [ℕ ⊧ₘ* T] {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
+    ℕ ⊧ₘ σ ↔ T ⊢₌! σ :=
+  haveI : 𝐏𝐀⁻ ≼ T⁼ := System.Subtheory.comp (𝓣 := T) inferInstance inferInstance
+  ⟨fun h ↦ sigma_one_completeness hσ h, fun h ↦ consequence_iff_add_eq.mp (sound₀! h) ℕ inferInstance⟩
 
 end
 
