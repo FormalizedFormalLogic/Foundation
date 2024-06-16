@@ -105,18 +105,18 @@ def prov_distribute_imply (h : T ⊢! σ ⟶ τ) : T₀ ⊢! ⦍β⦎σ ⟶ ⦍�
 
 def prov_distribute_iff (h : T ⊢! σ ⟷ τ) : T₀ ⊢! ⦍β⦎σ ⟷ ⦍β⦎τ := by
   apply iff_intro!;
-  . exact prov_distribute_imply $ conj₁'! h;
-  . exact prov_distribute_imply $ conj₂'! h;
+  . exact prov_distribute_imply $ and₁'! h;
+  . exact prov_distribute_imply $ and₂'! h;
 
 def prov_distribute_and : T₀ ⊢! ⦍β⦎(σ ⋏ τ) ⟶ ⦍β⦎σ ⋏ ⦍β⦎τ := by
-  have h₁ : T₀ ⊢! ⦍β⦎(σ ⋏ τ) ⟶ ⦍β⦎σ := D2' <| D1 conj₁!;
-  have h₂ : T₀ ⊢! ⦍β⦎(σ ⋏ τ) ⟶ ⦍β⦎τ := D2' <| D1 conj₂!;
+  have h₁ : T₀ ⊢! ⦍β⦎(σ ⋏ τ) ⟶ ⦍β⦎σ := D2' <| D1 and₁!;
+  have h₂ : T₀ ⊢! ⦍β⦎(σ ⋏ τ) ⟶ ⦍β⦎τ := D2' <| D1 and₂!;
   exact implyRightAnd! h₁ h₂;
 
 def prov_distribute_and! : T₀ ⊢! ⦍β⦎(σ ⋏ τ) → T₀ ⊢! ⦍β⦎σ ⋏ ⦍β⦎τ := λ h => prov_distribute_and ⨀ h
 
 def prov_collect_and : T₀ ⊢! ⦍β⦎σ ⋏ ⦍β⦎τ ⟶ ⦍β⦎(σ ⋏ τ) := by
-  have h₁ : T₀ ⊢! ⦍β⦎σ ⟶ ⦍β⦎(τ ⟶ σ ⋏ τ) := prov_distribute_imply $ conj₃!;
+  have h₁ : T₀ ⊢! ⦍β⦎σ ⟶ ⦍β⦎(τ ⟶ σ ⋏ τ) := prov_distribute_imply $ and₃!;
   have h₂ : T₀ ⊢! ⦍β⦎(τ ⟶ σ ⋏ τ) ⟶ ⦍β⦎τ ⟶ ⦍β⦎(σ ⋏ τ) := D2;
   apply andImplyIffImplyImply'!.mpr;
   exact imp_trans! h₁ h₂;
@@ -153,7 +153,7 @@ lemma goedel_spec : T₀ ⊢! γ ⟷ ~⦍β⦎γ := by
 
 private lemma goedel_specAux₁ : T ⊢! γ ⟷ ~⦍β⦎γ := Subtheory.prf! (𝓢 := T₀) goedel_spec
 
-private lemma goedel_specAux₂ : T ⊢! ~γ ⟶ ⦍β⦎γ := contra₂'! $ conj₂'! goedel_specAux₁
+private lemma goedel_specAux₂ : T ⊢! ~γ ⟶ ⦍β⦎γ := contra₂'! $ and₂'! goedel_specAux₁
 
 end GoedelSentence
 
@@ -171,7 +171,7 @@ variable [System.Consistent T] [β.HilbertBernays₁ T₀ T]
 theorem unprovable_goedel : T ⊬! γ := by
   intro h;
   have h₁ : T ⊢! ⦍β⦎γ := D1s (T₀ := T₀) h;
-  have h₂ : T ⊢! ~⦍β⦎γ := (conj₁'! goedel_specAux₁) ⨀ h;
+  have h₂ : T ⊢! ~⦍β⦎γ := (and₁'! goedel_specAux₁) ⨀ h;
   have : T ⊢! ⊥ := (neg_equiv'!.mp h₂) ⨀ h₁;
 
   have := not_consistent_iff_inconsistent.mpr $ inconsistent_iff_provable_bot.mpr this;
@@ -229,7 +229,7 @@ private lemma consistency_lemma_2 : T₀ ⊢! (⦍β⦎σ ⟶ ⦍β⦎(~σ)) ⟶
 /-- Formalized First Incompleteness Theorem -/
 theorem formalized_unprovable_goedel : T ⊢! Con⦍β⦎ ⟶ ~⦍β⦎γ := by
   have h₁ : T₀ ⊢! ⦍β⦎γ ⟶ ⦍β⦎⦍β⦎γ := D3;
-  have h₂ : T ⊢! ⦍β⦎γ ⟶ ~γ := Subtheory.prf! $ contra₁'! $ conj₁'! goedel_spec;
+  have h₂ : T ⊢! ⦍β⦎γ ⟶ ~γ := Subtheory.prf! $ contra₁'! $ and₁'! goedel_spec;
   have h₃ : T₀ ⊢! ⦍β⦎⦍β⦎γ ⟶ ⦍β⦎(~γ) := prov_distribute_imply h₂;
   exact Subtheory.prf! $ contra₀'! $ consistency_lemma_2 ⨀ (imp_trans! h₁ h₃);
 
@@ -262,9 +262,9 @@ lemma kreisel_spec (σ : Sentence L) : T₀ ⊢! κ(σ) ⟷ (⦍β⦎(κ(σ)) �
   simp [kreisel, ←Rew.hom_comp_app, Rew.substs_comp_substs];
   rfl;
 
-private lemma kreisel_specAux₁ (σ : Sentence L) : T₀ ⊢! ⦍β⦎κ(σ) ⟶ ⦍β⦎σ := (imp_trans! (D2 ⨀ (D1 (Subtheory.prf! $ conj₁'! (kreisel_spec σ)))) D2) ⨀₁ D3
+private lemma kreisel_specAux₁ (σ : Sentence L) : T₀ ⊢! ⦍β⦎κ(σ) ⟶ ⦍β⦎σ := (imp_trans! (D2 ⨀ (D1 (Subtheory.prf! $ and₁'! (kreisel_spec σ)))) D2) ⨀₁ D3
 
-private lemma kreisel_specAux₂ (σ : Sentence L) : T₀ ⊢! (⦍β⦎κ(σ) ⟶ σ) ⟶ κ(σ) := conj₂'! (kreisel_spec σ)
+private lemma kreisel_specAux₂ (σ : Sentence L) : T₀ ⊢! (⦍β⦎κ(σ) ⟶ σ) ⟶ κ(σ) := and₂'! (kreisel_spec σ)
 
 end KrieselSentence
 
@@ -304,7 +304,7 @@ lemma formalized_unrefutable_goedel [β.HilbertBernays T₀ T] [β.GoedelSound T
   : T ⊬! Con⦍β⦎ ⟶ ~⦍β⦎(~γ) := by
   by_contra hC;
   have : T ⊬! Con⦍β⦎ ⟶ ~⦍β⦎(~Con⦍β⦎)  := formalized_unprovable_not_consistency (T₀ := T₀);
-  have : T ⊢! Con⦍β⦎ ⟶ ~⦍β⦎(~Con⦍β⦎) := imp_trans! hC $ Subtheory.prf! $ conj₁'! $ neg_iff'! $ prov_distribute_iff (T₀ := T₀) $ neg_iff'! $ iff_goedel_consistency;
+  have : T ⊢! Con⦍β⦎ ⟶ ~⦍β⦎(~Con⦍β⦎) := imp_trans! hC $ Subtheory.prf! $ and₁'! $ neg_iff'! $ prov_distribute_iff (T₀ := T₀) $ neg_iff'! $ iff_goedel_consistency;
   contradiction;
 
 end Loeb
@@ -334,7 +334,7 @@ lemma unprovable_rosser : T ⊬! ρ := unprovable_goedel
 
 theorem unrefutable_rosser : T ⊬! ~ρ := by
   intro hnρ;
-  have hρ : T ⊢! ρ := Subtheory.prf! $ (conj₂'! rosser_spec) ⨀ (Ro hnρ);
+  have hρ : T ⊢! ρ := Subtheory.prf! $ (and₂'! rosser_spec) ⨀ (Ro hnρ);
   have := not_consistent_iff_inconsistent.mpr $ inconsistent_iff_provable_bot.mpr $ (neg_equiv'!.mp hnρ) ⨀ hρ;
   contradiction;
 

@@ -18,9 +18,9 @@ variable {𝓢 : S}
 
 instance : Coe (List F) (FiniteContext F 𝓢) := ⟨mk⟩
 
-abbrev conj (Γ : FiniteContext F 𝓢) : F := Γ.ctx.conj
+abbrev conj (Γ : FiniteContext F 𝓢) : F := Γ.ctx.conj'
 
-abbrev disj (Γ : FiniteContext F 𝓢) : F := Γ.ctx.disj
+abbrev disj (Γ : FiniteContext F 𝓢) : F := Γ.ctx.disj'
 
 instance : EmptyCollection (FiniteContext F 𝓢) := ⟨⟨[]⟩⟩
 
@@ -67,21 +67,21 @@ notation Γ:45 " ⊢[" 𝓢 "]*! " s:46 => ProvableSet 𝓢 Γ s
 
 lemma system_def (Γ : FiniteContext F 𝓢) (p : F) : (Γ ⊢ p) = (𝓢 ⊢ Γ.conj ⟶ p) := rfl
 
-def ofDef {Γ : List F} {p : F} (b : 𝓢 ⊢ Γ.conj ⟶ p) : Γ ⊢[𝓢] p := b
+def ofDef {Γ : List F} {p : F} (b : 𝓢 ⊢ Γ.conj' ⟶ p) : Γ ⊢[𝓢] p := b
 
-def toDef {Γ : List F} {p : F} (b : Γ ⊢[𝓢] p) : 𝓢 ⊢ Γ.conj ⟶ p := b
+def toDef {Γ : List F} {p : F} (b : Γ ⊢[𝓢] p) : 𝓢 ⊢ Γ.conj' ⟶ p := b
 
-lemma toₛ! (b : Γ ⊢[𝓢]! p) : 𝓢 ⊢! Γ.conj ⟶ p := b
+lemma toₛ! (b : Γ ⊢[𝓢]! p) : 𝓢 ⊢! Γ.conj' ⟶ p := b
 
-lemma provable_iff {p : F} : Γ ⊢[𝓢]! p ↔ 𝓢 ⊢! Γ.conj ⟶ p := iff_of_eq rfl
+lemma provable_iff {p : F} : Γ ⊢[𝓢]! p ↔ 𝓢 ⊢! Γ.conj' ⟶ p := iff_of_eq rfl
 
 section minimal
 
 variable [Minimal 𝓢] {Γ Δ E : List F}
 
 instance : Axiomatized (FiniteContext F 𝓢) where
-  prfAxm := fun hp ↦ generalConj hp
-  weakening := fun H b ↦ impTrans (conjImplyConj H) b
+  prfAxm := fun hp ↦ generalConj' hp
+  weakening := fun H b ↦ impTrans (conjImplyConj' H) b
 
 instance : Compact (FiniteContext F 𝓢) where
   φ := fun {Γ} _ _ ↦ Γ
@@ -97,7 +97,7 @@ def weakening (h : Γ ⊆ Δ) {p} : Γ ⊢[𝓢] p → Δ ⊢[𝓢] p := Axiomat
 
 lemma weakening! (h : Γ ⊆ Δ) {p} : Γ ⊢[𝓢]! p → Δ ⊢[𝓢]! p := fun h ↦ Axiomatized.le_of_subset (by simpa) h
 
-def of {p : F} (b : 𝓢 ⊢ p) : Γ ⊢[𝓢] p := dhyp Γ.conj b
+def of {p : F} (b : 𝓢 ⊢ p) : Γ ⊢[𝓢] p := dhyp Γ.conj' b
 
 def emptyPrf {p : F} : [] ⊢[𝓢] p → 𝓢 ⊢ p := fun b ↦ b ⨀ verum
 
@@ -115,30 +115,29 @@ instance minimal (Γ : FiniteContext F 𝓢) : Minimal Γ where
   verum := of verum
   imply₁ := fun _ _ ↦ of imply₁
   imply₂ := fun _ _ _ ↦ of imply₂
-  conj₁ := fun _ _ ↦ of conj₁
-  conj₂ := fun _ _ ↦ of conj₂
-  conj₃ := fun _ _ ↦ of conj₃
-  disj₁ := fun _ _ ↦ of disj₁
-  disj₂ := fun _ _ ↦ of disj₂
-  disj₃ := fun _ _ _ ↦ of disj₃
+  and₁ := fun _ _ ↦ of and₁
+  and₂ := fun _ _ ↦ of and₂
+  and₃ := fun _ _ ↦ of and₃
+  or₁ := fun _ _ ↦ of or₁
+  or₂ := fun _ _ ↦ of or₂
+  or₃ := fun _ _ _ ↦ of or₃
 
 def mdp' (bΓ : Γ ⊢[𝓢] p ⟶ q) (bΔ : Δ ⊢[𝓢] p) : (Γ ++ Δ) ⊢[𝓢] q := wk (by simp) bΓ ⨀ wk (by simp) bΔ
 
-def deduct {p q : F} {Γ : List F} : (p :: Γ) ⊢[𝓢] q → Γ ⊢[𝓢] p ⟶ q := fun b ↦
-  ofDef <| andLeft (andImplyIffImplyImply Γ.conj p q) ⨀ impTrans (andComm Γ.conj p) (toDef b)
+def deduct {p q : F} : {Γ : List F} → (p :: Γ) ⊢[𝓢] q → Γ ⊢[𝓢] p ⟶ q
+  | .nil => fun b ↦ ofDef <| dhyp _ (toDef b)
+  | .cons _ _ => fun b ↦ ofDef <| andImplyIffImplyImply'.mp (impTrans (andComm _ _) (toDef b))
 
 lemma deduct! (h : (p :: Γ) ⊢[𝓢]! q) :  Γ ⊢[𝓢]! p ⟶ q  := ⟨FiniteContext.deduct h.some⟩
 
-
-def deductInv {p q : F} {Γ : List F} : Γ ⊢[𝓢] p ⟶ q → (p :: Γ) ⊢[𝓢] q := fun b ↦
-  ofDef <| impTrans (andComm p Γ.conj) <| andRight (andImplyIffImplyImply Γ.conj p q) ⨀ toDef b
+def deductInv {p q : F} : {Γ : List F} → Γ ⊢[𝓢] p ⟶ q → (p :: Γ) ⊢[𝓢] q
+  | .nil => λ b => ofDef <| (toDef b) ⨀ verum
+  | .cons _ _ => λ b => ofDef <| (impTrans (andComm _ _) (andImplyIffImplyImply'.mpr (toDef b)))
 
 lemma deductInv! (h : Γ ⊢[𝓢]! p ⟶ q) : (p :: Γ) ⊢[𝓢]! q := ⟨FiniteContext.deductInv h.some⟩
 
-
 lemma deduct_iff {p q : F} {Γ : List F} : Γ ⊢[𝓢]! p ⟶ q ↔ (p :: Γ) ⊢[𝓢]! q :=
   ⟨fun h ↦ ⟨deductInv h.some⟩, fun h ↦ ⟨deduct h.some⟩⟩
-
 
 def deduct' : [p] ⊢[𝓢] q → 𝓢 ⊢ p ⟶ q := fun b ↦ emptyPrf <| deduct b
 
@@ -156,7 +155,7 @@ instance deduction : Deduction (FiniteContext F 𝓢) where
 
 instance : StrongCut (FiniteContext F 𝓢) (FiniteContext F 𝓢) :=
   ⟨fun {Γ Δ _} bΓ bΔ ↦
-    have : Γ ⊢ Δ.conj := conjIntro _ (fun _ hp ↦ bΓ hp)
+    have : Γ ⊢ Δ.conj := conjIntro' _ (fun _ hp ↦ bΓ hp)
     ofDef <| impTrans (toDef this) (toDef bΔ)⟩
 
 instance [System.NegationEquiv 𝓢] (Γ : FiniteContext F 𝓢) : System.NegationEquiv Γ := ⟨λ {_} => of NegationEquiv.neg_equiv⟩
@@ -306,12 +305,12 @@ instance minimal (Γ : Context F 𝓢) : Minimal Γ where
   verum := of verum
   imply₁ := fun _ _ ↦ of imply₁
   imply₂ := fun _ _ _ ↦ of imply₂
-  conj₁ := fun _ _ ↦ of conj₁
-  conj₂ := fun _ _ ↦ of conj₂
-  conj₃ := fun _ _ ↦ of conj₃
-  disj₁ := fun _ _ ↦ of disj₁
-  disj₂ := fun _ _ ↦ of disj₂
-  disj₃ := fun _ _ _ ↦ of disj₃
+  and₁ := fun _ _ ↦ of and₁
+  and₂ := fun _ _ ↦ of and₂
+  and₃ := fun _ _ ↦ of and₃
+  or₁ := fun _ _ ↦ of or₁
+  or₂ := fun _ _ ↦ of or₂
+  or₃ := fun _ _ _ ↦ of or₃
 
 instance [System.NegationEquiv 𝓢] (Γ : Context F 𝓢) : System.NegationEquiv Γ := ⟨λ {_} => of NegationEquiv.neg_equiv⟩
 

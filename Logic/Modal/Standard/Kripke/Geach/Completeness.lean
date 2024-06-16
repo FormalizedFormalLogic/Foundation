@@ -34,7 +34,7 @@ lemma definability_canonicalFrame_GeachAxiom {L : DeductionParameter α} [L.HasN
       apply andImplyIffImplyImply'!.mpr;
       exact imp_trans!
         (show L ⊢! □^[t.n](Δ.conj') ⟶ □^[t.n](~Γ.conj') by exact imply_multibox_distribute'! $ contra₁'! $ andImplyIffImplyImply'!.mp hC)
-        (show L ⊢! □^[t.n](~Γ.conj') ⟶ ~(◇^[t.n]Γ.conj') by exact contra₁'! $ conj₁'! $ multidiaDuality!);
+        (show L ⊢! □^[t.n](~Γ.conj') ⟶ ~(◇^[t.n]Γ.conj') by exact contra₁'! $ and₁'! $ multidiaDuality!);
     have : L ⊬! □^[t.n](Δ.conj') ⋏ ◇^[t.n](Γ.conj') ⟶ ⊥ := by simpa using Ω₃.consistent (Γ := [□^[t.n](Δ.conj'), ◇^[t.n](Γ.conj')]) (by simp_all)
 
     contradiction;

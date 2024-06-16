@@ -79,14 +79,14 @@ lemma provable_iff_insert_neg_not_Lconsistent : T *⊢[L]! p ↔ ¬(L)-Consisten
     . exact hΓ₁;
     . apply andImplyIffImplyImply'!.mpr;
       apply imp_swap'!;
-      exact imp_trans! (FiniteContext.toDef'! hΓ₂) dni!;
+      exact imp_trans! hΓ₂ dni!;
   . intro h;
     apply Context.provable_iff.mpr;
     obtain ⟨Γ, hΓ₁, hΓ₂⟩ := iff_insert_notParametricConsistent.mp h;
     existsi Γ;
     constructor;
     . exact hΓ₁;
-    . exact FiniteContext.ofDef'! $ imp_trans! (imp_swap'! $ andImplyIffImplyImply'!.mp hΓ₂) dne!;
+    . exact imp_trans! (imp_swap'! $ andImplyIffImplyImply'!.mp hΓ₂) dne!;
 
 lemma unprovable_iff_insert_neg_ParametricConsistent : T *⊬[L]! p ↔ (L)-Consistent (insert (~p) T) := by
   constructor;
@@ -103,14 +103,14 @@ lemma neg_provable_iff_insert_not_Lconsistent : T *⊢[L]! ~p ↔ ¬(L)-Consiste
     . assumption;
     . apply andImplyIffImplyImply'!.mpr;
       apply imp_swap'!;
-      exact FiniteContext.toDef'! hΓ₂;
+      exact hΓ₂;
   . intro h;
     apply Context.provable_iff.mpr;
     obtain ⟨Γ, hΓ₁, hΓ₂⟩ := iff_insert_notParametricConsistent.mp h;
     existsi Γ;
     constructor;
     . exact hΓ₁;
-    . exact FiniteContext.ofDef'! $ imp_swap'! $ andImplyIffImplyImply'!.mp hΓ₂;
+    . exact imp_swap'! $ andImplyIffImplyImply'!.mp hΓ₂;
 
 lemma neg_unprovable_iff_insert_ParametricConsistent : T *⊬[L]! ~p ↔ (L)-Consistent (insert (p) T) := by
   constructor;
@@ -125,14 +125,14 @@ lemma unprovable_either : ¬(T *⊢[L]! p ∧ T *⊢[L]! ~p) := by
   have : T *⊢[L]! ⊥ := hC₂ ⨀ hC₁;
   obtain ⟨Γ, hΓ₁, hΓ₂⟩ := Context.provable_iff.mp this;
   have : L ⊬! List.conj' Γ ⟶ ⊥ := consisT hΓ₁;
-  have : L ⊢! List.conj' Γ ⟶ ⊥ := implyLeft_conj_eq_conj'!.mp $ FiniteContext.toₛ! hΓ₂;
+  have : L ⊢! List.conj' Γ ⟶ ⊥ := FiniteContext.toₛ! hΓ₂;
   contradiction;
 
 lemma not_provable_falsum : T *⊬[L]! ⊥ := by
   by_contra hC;
   obtain ⟨Γ, hΓ₁, hΓ₂⟩ := Context.provable_iff.mp $ hC;
   have : L ⊬! List.conj' Γ ⟶ ⊥ := consisT hΓ₁;
-  have : L ⊢! List.conj' Γ ⟶ ⊥ := implyLeft_conj_eq_conj'!.mp hΓ₂;
+  have : L ⊢! List.conj' Γ ⟶ ⊥ := hΓ₂;
   contradiction;
 
 lemma not_mem_falsum_of_Lconsistent : ⊥ ∉ T := by
@@ -148,7 +148,7 @@ lemma either_consistent (p) : (L)-Consistent (insert p T) ∨ (L)-Consistent (in
 
   replace hΓ₂ := NegationEquiv.neg_equiv'!.mp hΓ₂;
   replace hΔ₂ := NegationEquiv.neg_equiv'!.mp hΔ₂;
-  have : L ⊢! Γ.conj' ⋏ Δ.conj' ⟶ ⊥ := demorgan₁'! $ disj₃'! (imp_trans! (implyOfNotOr'! $ demorgan₄'! hΓ₂) disj₁!) (imp_trans! (implyOfNotOr'! $ demorgan₄'! hΔ₂) disj₂!) lem!;
+  have : L ⊢! Γ.conj' ⋏ Δ.conj' ⟶ ⊥ := demorgan₁'! $ or₃'! (imp_trans! (implyOfNotOr'! $ demorgan₄'! hΓ₂) or₁!) (imp_trans! (implyOfNotOr'! $ demorgan₄'! hΔ₂) or₂!) lem!;
   have := @consisT (Γ ++ Δ) (by
     intro q hq;
     simp at hq;
@@ -205,8 +205,8 @@ lemma intro_union_ParametricConsistent (h : ∀ {Γ₁ Γ₂ : List (Formula α)
     apply iff_provable_list_conj.mpr;
     intro q hq;
     cases (hΔ q hq);
-    . exact iff_provable_list_conj.mp (conj₁'! FiniteContext.id!) q $ List.mem_filter_of_mem hq (by simpa);
-    . exact iff_provable_list_conj.mp (conj₂'! FiniteContext.id!) q $ List.mem_filter_of_mem hq (by simpa);
+    . exact iff_provable_list_conj.mp (and₁'! FiniteContext.id!) q $ List.mem_filter_of_mem hq (by simpa);
+    . exact iff_provable_list_conj.mp (and₂'! FiniteContext.id!) q $ List.mem_filter_of_mem hq (by simpa);
   ) this;
 
 
@@ -322,11 +322,11 @@ lemma iff_mem_and : ((p ⋏ q) ∈ Ω.theory) ↔ (p ∈ Ω.theory) ∧ (q ∈ �
   . intro hpq;
     replace hpq := membership_iff.mp hpq;
     constructor;
-    . apply membership_iff.mpr; exact conj₁'! hpq;
-    . apply membership_iff.mpr; exact conj₂'! hpq;
+    . apply membership_iff.mpr; exact and₁'! hpq;
+    . apply membership_iff.mpr; exact and₂'! hpq;
   . rintro ⟨hp, hq⟩;
     apply membership_iff.mpr;
-    exact conj₃'! (membership_iff.mp hp) (membership_iff.mp hq);
+    exact and₃'! (membership_iff.mp hp) (membership_iff.mp hq);
 
 @[simp]
 lemma iff_mem_or : ((p ⋎ q) ∈ Ω.theory) ↔ (p ∈ Ω.theory) ∨ (q ∈ Ω.theory) := by
@@ -337,14 +337,14 @@ lemma iff_mem_or : ((p ⋎ q) ∈ Ω.theory) ↔ (p ∈ Ω.theory) ∨ (q ∈ Ω
     have ⟨hp, hq⟩ := hC;
     replace hp := membership_iff.mp $ iff_mem_neg.mpr hp;
     replace hq := membership_iff.mp $ iff_mem_neg.mpr hq;
-    have : Ω.theory *⊢[L]! ⊥ := disj₃'! hp hq hpq;
+    have : Ω.theory *⊢[L]! ⊥ := or₃'! hp hq hpq;
     have : Ω.theory *⊬[L]! ⊥ := unprovable_falsum;
     contradiction;
   . rintro (hp | hq);
     . apply membership_iff.mpr;
-      exact disj₁'! (membership_iff.mp hp);
+      exact or₁'! (membership_iff.mp hp);
     . apply membership_iff.mpr;
-      exact disj₂'! (membership_iff.mp hq);
+      exact or₂'! (membership_iff.mp hq);
 
 lemma iff_mem_multibox : (□^[n]p ∈ Ω.theory) ↔ (∀ {Ω' : MCT L}, (□''⁻¹^[n]Ω.theory ⊆ Ω'.theory) → (p ∈ Ω'.theory)) := by
   constructor;
@@ -356,11 +356,11 @@ lemma iff_mem_multibox : (□^[n]p ∈ Ω.theory) ↔ (∀ {Ω' : MCT L}, (□''
       apply unprovable_iff_insert_neg_ParametricConsistent.mp;
       by_contra hC;
       obtain ⟨Γ, hΓ₁, hΓ₂⟩ := Context.provable_iff.mp hC;
-      have : L ⊢! □^[n]Γ.conj' ⟶ □^[n]p := imply_multibox_distribute'! $ implyLeft_conj_eq_conj'!.mp hΓ₂;
+      have : L ⊢! □^[n]Γ.conj' ⟶ □^[n]p := imply_multibox_distribute'! $ hΓ₂;
       have : L ⊬! □^[n]Γ.conj' ⟶ □^[n]p := by
         have := Context.provable_iff.not.mp $ membership_iff.not.mp hp;
         push_neg at this;
-        have : L ⊬! (□'^[n]Γ : List (Formula α)).conj' ⟶ □^[n]p := implyLeft_conj_eq_conj'!.not.mp $ FiniteContext.provable_iff.not.mp $ this (□'^[n]Γ) (by
+        have : L ⊬! (□'^[n]Γ).conj' ⟶ □^[n]p := FiniteContext.provable_iff.not.mp $ this (□'^[n]Γ) (by
           intro q hq;
           obtain ⟨r, hr₁, hr₂⟩ := by simpa using hq;
           subst hr₂;
@@ -383,8 +383,8 @@ lemma iff_mem_box : (□p ∈ Ω.theory) ↔ (∀ {Ω' : MCT L}, (□''⁻¹Ω.t
 lemma iff_congr : (Ω.theory *⊢[L]! (p ⟷ q)) → ((p ∈ Ω.theory) ↔ (q ∈ Ω.theory)) := by
   intro hpq;
   constructor;
-  . intro hp; exact iff_mem_imp.mp (membership_iff.mpr $ conj₁'! hpq) hp;
-  . intro hq; exact iff_mem_imp.mp (membership_iff.mpr $ conj₂'! hpq) hq;
+  . intro hp; exact iff_mem_imp.mp (membership_iff.mpr $ and₁'! hpq) hp;
+  . intro hq; exact iff_mem_imp.mp (membership_iff.mpr $ and₂'! hpq) hq;
 
 lemma mem_dn_iff : (p ∈ Ω.theory) ↔ (~~p ∈ Ω.theory) := iff_congr $ dn!
 
@@ -432,14 +432,14 @@ lemma mem_multibox_dual : □^[n]p ∈ Ω.theory ↔ ~(◇^[n](~p)) ∈ Ω.theor
     existsi Γ;
     constructor;
     . assumption;
-    . exact FiniteContext.provable_iff.mpr $ imp_trans! (FiniteContext.provable_iff.mp hΓ₂) (conj₁'! multiboxDuality!);
+    . exact FiniteContext.provable_iff.mpr $ imp_trans! (FiniteContext.provable_iff.mp hΓ₂) (and₁'! multiboxDuality!);
   . intro h;
     obtain ⟨Γ, hΓ₁, hΓ₂⟩ := Context.provable_iff.mp h;
     apply Context.provable_iff.mpr;
     existsi Γ;
     constructor;
     . assumption;
-    . exact FiniteContext.provable_iff.mpr $ imp_trans! (FiniteContext.provable_iff.mp hΓ₂) (conj₂'! multiboxDuality!);
+    . exact FiniteContext.provable_iff.mpr $ imp_trans! (FiniteContext.provable_iff.mp hΓ₂) (and₂'! multiboxDuality!);
 lemma mem_box_dual : □p ∈ Ω.theory ↔ (~(◇(~p)) ∈ Ω.theory) := mem_multibox_dual (n := 1)
 
 -- lemma multidia_dn_iff : (◇^[n](~~p) ∈ Ω.theory) ↔ (◇^[n]p ∈ Ω.theory) := by sorry
@@ -455,14 +455,14 @@ lemma mem_multidia_dual : ◇^[n]p ∈ Ω.theory ↔ ~(□^[n](~p)) ∈ Ω.theor
     existsi Γ;
     constructor;
     . assumption;
-    . exact FiniteContext.provable_iff.mpr $ imp_trans! (FiniteContext.provable_iff.mp hΓ₂) (conj₁'! multidiaDuality!);
+    . exact FiniteContext.provable_iff.mpr $ imp_trans! (FiniteContext.provable_iff.mp hΓ₂) (and₁'! multidiaDuality!);
   . intro h;
     obtain ⟨Γ, hΓ₁, hΓ₂⟩ := Context.provable_iff.mp h;
     apply Context.provable_iff.mpr;
     existsi Γ;
     constructor;
     . assumption;
-    . exact FiniteContext.provable_iff.mpr $ imp_trans! (FiniteContext.provable_iff.mp hΓ₂) (conj₂'! multidiaDuality!);
+    . exact FiniteContext.provable_iff.mpr $ imp_trans! (FiniteContext.provable_iff.mp hΓ₂) (and₂'! multidiaDuality!);
 lemma mem_dia_dual : ◇p ∈ Ω.theory ↔ (~(□(~p)) ∈ Ω.theory) := mem_multidia_dual (n := 1)
 
 lemma multibox_multidia : (∀ {p : Formula α}, (□^[n]p ∈ Ω₁.theory → p ∈ Ω₂.theory)) ↔ (∀ {p : Formula α}, (p ∈ Ω₂.theory → ◇^[n]p ∈ Ω₁.theory)) := by
@@ -549,7 +549,7 @@ lemma multiframe_def_multibox : ((CanonicalFrame L).RelItr n Ω₁ Ω₂) ↔ �
         have hΔconj : (◇'⁻¹^[n]Δ).conj' ∈ Ω₂.theory := iff_mem_conj'.mpr hΔ₂;
 
         have : L ⊢! Γ.conj' ⟶ □^[n](~(◇'⁻¹^[n]Δ).conj') := imp_trans! (andImplyIffImplyImply'!.mp hC)
-          $ contra₂'! $ imp_trans! (conj₂'! multidiaDuality!)
+          $ contra₂'! $ imp_trans! (and₂'! multidiaDuality!)
           $ imp_trans! iff_conj'multidia_multidiaconj'! $ by
             apply conj'conj'_subset;
             intro q hq;

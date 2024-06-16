@@ -92,7 +92,7 @@ lemma consistent_either (p : Formula α) : (𝓓)-Consistent ((insert p t.1), t.
 
   obtain ⟨Γ₂, Δ₂, hΓ₂, hΔ₂, h₂⟩ := iff_not_ParametricConsistent_insert₂.mp hC₂;
 
-  have : 𝓓 ⊢! (Γ₁ ++ Γ₂).conj' ⟶ (Δ₁ ++ Δ₂).disj' := imp_trans! (conj₁'! iff_concat_conj!) $ imp_trans! (cut! h₁ h₂) (conj₂'! iff_concact_disj!);
+  have : 𝓓 ⊢! (Γ₁ ++ Γ₂).conj' ⟶ (Δ₁ ++ Δ₂).disj' := imp_trans! (and₁'! iff_concat_conj!) $ imp_trans! (cut! h₁ h₂) (and₂'! iff_concact_disj!);
   have : 𝓓 ⊬! (Γ₁ ++ Γ₂).conj' ⟶ (Δ₁ ++ Δ₂).disj' := hCon (by simp; rintro q (hq₁ | hq₂); exact hΓ₁ q hq₁; exact hΓ₂ q hq₂) (by simp; rintro q (hq₁ | hq₂); exact hΔ₁ q hq₁; exact hΔ₂ q hq₂);
   contradiction;
 
@@ -384,8 +384,8 @@ lemma iff_mem₁_or : p ⋎ q ∈ t.tableau.1 ↔ p ∈ t.tableau.1 ∨ q ∈ t.
     contradiction;
   . intro h;
     cases h with
-    | inl h => exact mdp₁ h disj₁!
-    | inr h => exact mdp₁ h disj₂!
+    | inl h => exact mdp₁ h or₁!
+    | inr h => exact mdp₁ h or₂!
 
 lemma mem₁_of_provable : 𝓓 ⊢! p → p ∈ t.tableau.1 := by
   intro h;

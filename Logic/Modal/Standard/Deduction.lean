@@ -101,12 +101,12 @@ inductive Deduction (𝓓 : DeductionParameter α) : (Formula α) → Type _
   | verum        : Deduction 𝓓 ⊤
   | imply₁ p q   : Deduction 𝓓 (p ⟶ q ⟶ p)
   | imply₂ p q r : Deduction 𝓓 ((p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r)
-  | conj₁ p q    : Deduction 𝓓 (p ⋏ q ⟶ p)
-  | conj₂ p q    : Deduction 𝓓 (p ⋏ q ⟶ q)
-  | conj₃ p q    : Deduction 𝓓 (p ⟶ q ⟶ p ⋏ q)
-  | disj₁ p q    : Deduction 𝓓 (p ⟶ p ⋎ q)
-  | disj₂ p q    : Deduction 𝓓 (q ⟶ p ⋎ q)
-  | disj₃ p q r  : Deduction 𝓓 ((p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r))
+  | and₁ p q     : Deduction 𝓓 (p ⋏ q ⟶ p)
+  | and₂ p q     : Deduction 𝓓 (p ⋏ q ⟶ q)
+  | and₃ p q     : Deduction 𝓓 (p ⟶ q ⟶ p ⋏ q)
+  | or₁ p q      : Deduction 𝓓 (p ⟶ p ⋎ q)
+  | or₂ p q      : Deduction 𝓓 (q ⟶ p ⋎ q)
+  | or₃ p q r    : Deduction 𝓓 ((p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r))
   | dne p        : Deduction 𝓓 (~~p ⟶ p)
 
 namespace Deduction
@@ -122,12 +122,12 @@ instance : System.Classical 𝓓 where
   verum := verum
   imply₁ := imply₁
   imply₂ := imply₂
-  conj₁ := conj₁
-  conj₂ := conj₂
-  conj₃ := conj₃
-  disj₁ := disj₁
-  disj₂ := disj₂
-  disj₃ := disj₃
+  and₁ := and₁
+  and₂ := and₂
+  and₃ := and₃
+  or₁ := or₁
+  or₂ := or₂
+  or₃ := or₃
   dne := dne
 
 def maxm_subset
@@ -141,12 +141,12 @@ def maxm_subset
   | verum        => verum
   | imply₁ _ _   => imply₁ _ _
   | imply₂ _ _ _ => imply₂ _ _ _
-  | conj₁ _ _    => conj₁ _ _
-  | conj₂ _ _    => conj₂ _ _
-  | conj₃ _ _    => conj₃ _ _
-  | disj₁ _ _    => disj₁ _ _
-  | disj₂ _ _    => disj₂ _ _
-  | disj₃ _ _ _  => disj₃ _ _ _
+  | and₁ _ _    => and₁ _ _
+  | and₂ _ _    => and₂ _ _
+  | and₃ _ _    => and₃ _ _
+  | or₁ _ _    => or₁ _ _
+  | or₂ _ _    => or₂ _ _
+  | or₃ _ _ _  => or₃ _ _ _
   | dne _        => dne _
 
 lemma maxm_subset! (hRules : 𝓓₁.rules ≤ 𝓓₂.rules) (hAx : Ax(𝓓₁) ⊆ Ax(𝓓₂)) (h : 𝓓₁ ⊢! p) : 𝓓₂ ⊢! p := ⟨maxm_subset hRules hAx h.some⟩
@@ -180,12 +180,12 @@ noncomputable def inducition!
   (hVerum  : motive ⊤ ⟨verum⟩)
   (hImply₁ : ∀ {p q}, motive (p ⟶ q ⟶ p) $ ⟨imply₁ p q⟩)
   (hImply₂ : ∀ {p q r}, motive ((p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r) $ ⟨imply₂ p q r⟩)
-  (hConj₁  : ∀ {p q}, motive (p ⋏ q ⟶ p) $ ⟨conj₁ p q⟩)
-  (hConj₂  : ∀ {p q}, motive (p ⋏ q ⟶ q) $ ⟨conj₂ p q⟩)
-  (hConj₃  : ∀ {p q}, motive (p ⟶ q ⟶ p ⋏ q) $ ⟨conj₃ p q⟩)
-  (hDisj₁  : ∀ {p q}, motive (p ⟶ p ⋎ q) $ ⟨disj₁ p q⟩)
-  (hDisj₂  : ∀ {p q}, motive (q ⟶ p ⋎ q) $ ⟨disj₂ p q⟩)
-  (hDisj₃  : ∀ {p q r}, motive ((p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r)) $ ⟨disj₃ p q r⟩)
+  (hConj₁  : ∀ {p q}, motive (p ⋏ q ⟶ p) $ ⟨and₁ p q⟩)
+  (hConj₂  : ∀ {p q}, motive (p ⋏ q ⟶ q) $ ⟨and₂ p q⟩)
+  (hConj₃  : ∀ {p q}, motive (p ⟶ q ⟶ p ⋏ q) $ ⟨and₃ p q⟩)
+  (hDisj₁  : ∀ {p q}, motive (p ⟶ p ⋎ q) $ ⟨or₁ p q⟩)
+  (hDisj₂  : ∀ {p q}, motive (q ⟶ p ⋎ q) $ ⟨or₂ p q⟩)
+  (hDisj₃  : ∀ {p q r}, motive ((p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r)) $ ⟨or₃ p q r⟩)
   (hDne    : ∀ {p}, motive (~~p ⟶ p) $ ⟨dne p⟩)
   : ∀ {p}, (d : 𝓓 ⊢! p) → motive p d := by
   intro p d;
@@ -205,12 +205,12 @@ noncomputable def inducition_with_nec [HasNecOnly 𝓓]
   (hVerum  : motive ⊤ verum)
   (hImply₁ : ∀ {p q}, motive (p ⟶ q ⟶ p) $ imply₁ p q)
   (hImply₂ : ∀ {p q r}, motive ((p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r) $ imply₂ p q r)
-  (hConj₁  : ∀ {p q}, motive (p ⋏ q ⟶ p) $ conj₁ p q)
-  (hConj₂  : ∀ {p q}, motive (p ⋏ q ⟶ q) $ conj₂ p q)
-  (hConj₃  : ∀ {p q}, motive (p ⟶ q ⟶ p ⋏ q) $ conj₃ p q)
-  (hDisj₁  : ∀ {p q}, motive (p ⟶ p ⋎ q) $ disj₁ p q)
-  (hDisj₂  : ∀ {p q}, motive (q ⟶ p ⋎ q) $ disj₂ p q)
-  (hDisj₃  : ∀ {p q r}, motive ((p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r)) $ disj₃ p q r)
+  (hConj₁  : ∀ {p q}, motive (p ⋏ q ⟶ p) $ and₁ p q)
+  (hConj₂  : ∀ {p q}, motive (p ⋏ q ⟶ q) $ and₂ p q)
+  (hConj₃  : ∀ {p q}, motive (p ⟶ q ⟶ p ⋏ q) $ and₃ p q)
+  (hDisj₁  : ∀ {p q}, motive (p ⟶ p ⋎ q) $ or₁ p q)
+  (hDisj₂  : ∀ {p q}, motive (q ⟶ p ⋎ q) $ or₂ p q)
+  (hDisj₃  : ∀ {p q r}, motive ((p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r)) $ or₃ p q r)
   (hDne    : ∀ {p}, motive (~~p ⟶ p) $ dne p)
   : ∀ {p}, (d : 𝓓 ⊢ p) → motive p d := by
   intro p d;
@@ -230,12 +230,12 @@ noncomputable def inducition_with_nec! [HasNecOnly 𝓓]
   (hVerum  : motive ⊤ ⟨verum⟩)
   (hImply₁ : ∀ {p q}, motive (p ⟶ q ⟶ p) $ ⟨imply₁ p q⟩)
   (hImply₂ : ∀ {p q r}, motive ((p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r) $ ⟨imply₂ p q r⟩)
-  (hConj₁  : ∀ {p q}, motive (p ⋏ q ⟶ p) $ ⟨conj₁ p q⟩)
-  (hConj₂  : ∀ {p q}, motive (p ⋏ q ⟶ q) $ ⟨conj₂ p q⟩)
-  (hConj₃  : ∀ {p q}, motive (p ⟶ q ⟶ p ⋏ q) $ ⟨conj₃ p q⟩)
-  (hDisj₁  : ∀ {p q}, motive (p ⟶ p ⋎ q) $ ⟨disj₁ p q⟩)
-  (hDisj₂  : ∀ {p q}, motive (q ⟶ p ⋎ q) $ ⟨disj₂ p q⟩)
-  (hDisj₃  : ∀ {p q r}, motive ((p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r)) $ ⟨disj₃ p q r⟩)
+  (hConj₁  : ∀ {p q}, motive (p ⋏ q ⟶ p) $ ⟨and₁ p q⟩)
+  (hConj₂  : ∀ {p q}, motive (p ⋏ q ⟶ q) $ ⟨and₂ p q⟩)
+  (hConj₃  : ∀ {p q}, motive (p ⟶ q ⟶ p ⋏ q) $ ⟨and₃ p q⟩)
+  (hDisj₁  : ∀ {p q}, motive (p ⟶ p ⋎ q) $ ⟨or₁ p q⟩)
+  (hDisj₂  : ∀ {p q}, motive (q ⟶ p ⋎ q) $ ⟨or₂ p q⟩)
+  (hDisj₃  : ∀ {p q r}, motive ((p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r)) $ ⟨or₃ p q r⟩)
   (hDne    : ∀ {p}, motive (~~p ⟶ p) $ ⟨dne p⟩)
   : ∀ {p}, (d : 𝓓 ⊢! p) → motive p d := by
   intro p d;

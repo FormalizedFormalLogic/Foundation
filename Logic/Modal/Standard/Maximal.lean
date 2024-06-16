@@ -96,8 +96,8 @@ lemma deducible_iff_trivTranslation : 𝐓𝐫𝐢𝐯 ⊢! p ⟷ pᵀ := by
   | hbox p ih =>
     simp [TrivTranslation];
     apply iff_intro!;
-    . exact imp_trans! axiomT! (conj₁'! ih)
-    . exact imp_trans! (conj₂'! ih) axiomTc!
+    . exact imp_trans! axiomT! (and₁'! ih)
+    . exact imp_trans! (and₂'! ih) axiomTc!
   | himp _ _ ih₁ ih₂ => exact imp_replace_iff! ih₁ ih₂;
   | hand _ _ ih₁ ih₂ => exact and_replace_iff! ih₁ ih₂;
   | hor _ _ ih₁ ih₂ => exact or_replace_iff! ih₁ ih₂;
@@ -142,7 +142,7 @@ lemma iff_Triv_classical : 𝐓𝐫𝐢𝐯 ⊢! p ↔ 𝐂𝐥 ⊢! pᵀᴾ := 
     | hNec _ ih => exact ih $ axiomT'! h;
     | _ => dsimp [TrivTranslation, toPropFormula]; trivial
   . intro h;
-    have d₁ : 𝐓𝐫𝐢𝐯 ⊢! pᵀ ⟶ p := conj₂'! deducible_iff_trivTranslation;
+    have d₁ : 𝐓𝐫𝐢𝐯 ⊢! pᵀ ⟶ p := and₂'! deducible_iff_trivTranslation;
     have d₂ : 𝐓𝐫𝐢𝐯 ⊢! pᵀ := by simpa only [TrivTranslation.back] using of_classical h;
     exact d₁ ⨀ d₂;
 
@@ -160,7 +160,7 @@ lemma iff_Ver_classical : 𝐕𝐞𝐫 ⊢! p ↔ 𝐂𝐥 ⊢! pⱽᴾ := by
     | hNec => dsimp [toPropFormula]; exact verum!;
     | _ => dsimp [VerTranslation, toPropFormula]; trivial;
   . intro h;
-    have d₁ : 𝐕𝐞𝐫 ⊢! pⱽ ⟶ p := conj₂'! deducible_iff_verTranslation;
+    have d₁ : 𝐕𝐞𝐫 ⊢! pⱽ ⟶ p := and₂'! deducible_iff_verTranslation;
     have d₂ : 𝐕𝐞𝐫 ⊢! pⱽ := by simpa using of_classical h;
     exact d₁ ⨀ d₂;
 

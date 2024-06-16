@@ -155,20 +155,20 @@ variable {M : Model α} {p q r : Formula α}
 
 @[simp] protected lemma verum : M ⊧ ⊤ := by simp_all [ValidOnModel];
 
-@[simp] protected lemma conj₁ : M ⊧ p ⋏ q ⟶ p := by simp_all [ValidOnModel];
+@[simp] protected lemma and₁ : M ⊧ p ⋏ q ⟶ p := by simp_all [ValidOnModel];
 
-@[simp] protected lemma conj₂ : M ⊧ p ⋏ q ⟶ q := by simp_all [ValidOnModel];
+@[simp] protected lemma and₂ : M ⊧ p ⋏ q ⟶ q := by simp_all [ValidOnModel];
 
-@[simp] protected lemma conj₃ : M ⊧ p ⟶ q ⟶ p ⋏ q := by
+@[simp] protected lemma and₃ : M ⊧ p ⟶ q ⟶ p ⋏ q := by
   simp_all [ValidOnModel];
   intro w₁ w₂ _ hp w₃ hw₂₃ _;
   exact Satisfies.formula_hereditary hw₂₃ hp;
 
-@[simp] protected lemma disj₁ : M ⊧ p ⟶ p ⋎ q := by simp_all [ValidOnModel];
+@[simp] protected lemma or₁ : M ⊧ p ⟶ p ⋎ q := by simp_all [ValidOnModel];
 
-@[simp] protected lemma disj₂ : M ⊧ q ⟶ p ⋎ q := by simp_all [ValidOnModel];
+@[simp] protected lemma or₂ : M ⊧ q ⟶ p ⋎ q := by simp_all [ValidOnModel];
 
-@[simp] protected lemma disj₃ : M ⊧ (p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r) := by
+@[simp] protected lemma or₃ : M ⊧ (p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r) := by
   simp_all only [ValidOnModel.iff_models, ValidOnModel, Satisfies.iff_models, Satisfies.imp_def, Satisfies.or_def];
   intro w₁ w₂ _ hpr w₃ hw₂₃ hqr w₄ hw₃₄ hpq;
   cases hpq with
@@ -220,29 +220,29 @@ variable {F : Frame' α} {p q r : Formula α}
   simp_all only [ValidOnFrame.models_iff, ValidOnFrame, ValidOnModel.iff_models];
   intros; apply ValidOnModel.verum;
 
-@[simp] protected lemma conj₁ : F ⊧ p ⋏ q ⟶ p := by
+@[simp] protected lemma and₁ : F ⊧ p ⋏ q ⟶ p := by
   simp_all only [ValidOnFrame.models_iff, ValidOnFrame, ValidOnModel.iff_models];
-  intros; apply ValidOnModel.conj₁;
+  intros; apply ValidOnModel.and₁;
 
-@[simp] protected lemma conj₂ : F ⊧ p ⋏ q ⟶ q := by
+@[simp] protected lemma and₂ : F ⊧ p ⋏ q ⟶ q := by
   simp_all only [ValidOnFrame.models_iff, ValidOnFrame, ValidOnModel.iff_models];
-  intros; apply ValidOnModel.conj₂;
+  intros; apply ValidOnModel.and₂;
 
-@[simp] protected lemma conj₃ : F ⊧ p ⟶ q ⟶ p ⋏ q := by
+@[simp] protected lemma and₃ : F ⊧ p ⟶ q ⟶ p ⋏ q := by
   simp_all only [ValidOnFrame.models_iff, ValidOnFrame, ValidOnModel.iff_models];
-  intros; apply ValidOnModel.conj₃;
+  intros; apply ValidOnModel.and₃;
 
-@[simp] protected lemma disj₁ : F ⊧ p ⟶ p ⋎ q := by
+@[simp] protected lemma or₁ : F ⊧ p ⟶ p ⋎ q := by
   simp_all only [ValidOnFrame.models_iff, ValidOnFrame, ValidOnModel.iff_models];
-  intros; apply ValidOnModel.disj₁;
+  intros; apply ValidOnModel.or₁;
 
-@[simp] protected lemma disj₂ : F ⊧ q ⟶ p ⋎ q := by
+@[simp] protected lemma or₂ : F ⊧ q ⟶ p ⋎ q := by
   simp_all only [ValidOnFrame.models_iff, ValidOnFrame, ValidOnModel.iff_models];
-  intros; apply ValidOnModel.disj₂;
+  intros; apply ValidOnModel.or₂;
 
-@[simp] protected lemma disj₃ : F ⊧ (p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r) := by
+@[simp] protected lemma or₃ : F ⊧ (p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r) := by
   simp_all only [ValidOnFrame.models_iff, ValidOnFrame, ValidOnModel.iff_models];
-  intros; apply ValidOnModel.disj₃;
+  intros; apply ValidOnModel.or₃;
 
 @[simp] protected lemma imply₁ : F ⊧ p ⟶ q ⟶ p := by
   simp_all only [ValidOnFrame.models_iff, ValidOnFrame, ValidOnModel.iff_models];
