@@ -60,24 +60,93 @@ instance (k) : Semiterm.Operator.GoedelNumber L₀ (L.Rel k) := ⟨fun r ↦ Sem
 
 variable (L)
 
-class DefinableLanguage (T : Theory ℒₒᵣ) where
-  func_def : HSemisentence ℒₒᵣ 2 𝚺₀
-  rel_def : HSemisentence ℒₒᵣ 2 𝚺₀
+class DefinableLanguage extends Arith.LDef where
+  T : Theory ℒₒᵣ
   func_iff {k c : ℕ} :
     c ∈ Set.range (Encodable.encode : L.Func k → ℕ) ↔
-    T ⊢! func_def.val/[Semiterm.Operator.numeral ℒₒᵣ k, Semiterm.Operator.numeral ℒₒᵣ c]
+    T ⊢₌! func.val/[Semiterm.Operator.numeral ℒₒᵣ k, Semiterm.Operator.numeral ℒₒᵣ c]
   rel_iff {k c : ℕ} :
     c ∈ Set.range (Encodable.encode : L.Rel k → ℕ) ↔
-    T ⊢! rel_def.val/[Semiterm.Operator.numeral ℒₒᵣ k, Semiterm.Operator.numeral ℒₒᵣ c]
+    T ⊢₌! rel.val/[Semiterm.Operator.numeral ℒₒᵣ k, Semiterm.Operator.numeral ℒₒᵣ c]
+
+def _root_.LO.FirstOrder.Language.lDef [d : DefinableLanguage L] : LDef := d.toLDef
+
+variable {L}
+
+namespace Model
+
+variable [DefinableLanguage L] [DefinableLanguage.T L ≼ 𝐏𝐀⁻]
+
+variable {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐏𝐀⁻]
+
+variable (L M)
+
+def _root_.LO.FirstOrder.Language.formalize : Model.Language M where
+  Func := fun x y ↦ Semiformula.Evalbm M ![x, y] L.lDef.func.val
+  Rel := fun x y ↦ Semiformula.Evalbm M ![x, y] L.lDef.rel.val
+
+variable {L M}
+
+instance : (L.formalize M).Defined L.lDef where
+  func := by intro v; simp [Language.formalize, ←Matrix.fun_eq_vec₂]
+  rel := by intro v; simp [Language.formalize, ←Matrix.fun_eq_vec₂]
+
+@[simp] lemma formalize_func_encode (k : ℕ) (f : L.Func k) : (L.formalize M).Func k (Encodable.encode f) := by
+  simpa [models_iff, numeral_eq_natCast] using
+    consequence_iff_add_eq.mp (sound! <| DefinableLanguage.func_iff.mp ⟨f, rfl⟩) M
+      (models_of_subtheory (T := 𝐏𝐀⁻) inferInstance)
+
+@[simp] lemma formalize_rel_encode (k : ℕ) (r : L.Rel k) : (L.formalize M).Rel k (Encodable.encode r) := by
+  simpa [models_iff, numeral_eq_natCast] using
+    consequence_iff_add_eq.mp (sound! <| DefinableLanguage.rel_iff.mp ⟨r, rfl⟩) M
+      (models_of_subtheory (T := 𝐏𝐀⁻) inferInstance)
+
+end Model
 
 end
 
-/-
-instance : DefinableLanguage ℒₒᵣ 𝐏𝐀⁻⁼ where
-  func_def := .mkSigma “k f | (k = 0 ∧ f = 0) ∨ (k = 0 ∧ f = 1) ∨ (k = 2 ∧ f = 0) ∨ (k = 2 ∧ f = 1)” (by simp)
-  rel_def  := .mkSigma “k r | (k = 2 ∧ r = 0) ∨ (k = 2 ∧ r = 1)” (by simp)
-  func_iff {k c} := by {  }
--/
+/-- TODO: move to Basic/Syntax/Language.lean-/
+lemma _root_.LO.FirstOrder.Language.ORing.of_mem_range_encode_func {k f : ℕ} :
+    f ∈ Set.range (Encodable.encode : Language.Func ℒₒᵣ k → ℕ) ↔
+    (k = 0 ∧ f = 0) ∨ (k = 0 ∧ f = 1) ∨ (k = 2 ∧ f = 0) ∨ (k = 2 ∧ f = 1) := by
+  constructor
+  · rintro ⟨f, rfl⟩
+    match k, f with
+    | 0, Language.ORing.Func.zero => simp; rfl
+    | 0, Language.ORing.Func.one => simp; rfl
+    | 2, Language.ORing.Func.add => simp; rfl
+    | 2, Language.ORing.Func.mul => simp; rfl
+  · rintro (⟨rfl, rfl⟩ | ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩)
+    · exact ⟨Language.ORing.Func.zero, rfl⟩
+    · exact ⟨Language.ORing.Func.one, rfl⟩
+    · exact ⟨Language.ORing.Func.add, rfl⟩
+    · exact ⟨Language.ORing.Func.mul, rfl⟩
+
+/-- TODO: move to Basic/Syntax/Language.lean-/
+lemma _root_.LO.FirstOrder.Language.ORing.of_mem_range_encode_rel {k r : ℕ} :
+    r ∈ Set.range (Encodable.encode : Language.Rel ℒₒᵣ k → ℕ) ↔
+    (k = 2 ∧ r = 0) ∨ (k = 2 ∧ r = 1) := by
+  constructor
+  · rintro ⟨r, rfl⟩
+    match k, r with
+    | 2, Language.ORing.Rel.eq => simp; rfl
+    | 2, Language.ORing.Rel.lt => simp; rfl
+  · rintro (⟨rfl, rfl⟩ | ⟨rfl, rfl⟩)
+    · exact ⟨Language.ORing.Rel.eq, rfl⟩
+    · exact ⟨Language.ORing.Rel.lt, rfl⟩
+
+instance : DefinableLanguage ℒₒᵣ where
+  T := 𝐏𝐀⁻
+  func := .mkSigma “k f | (k = 0 ∧ f = 0) ∨ (k = 0 ∧ f = 1) ∨ (k = 2 ∧ f = 0) ∨ (k = 2 ∧ f = 1)” (by simp)
+  rel  := .mkSigma “k r | (k = 2 ∧ r = 0) ∨ (k = 2 ∧ r = 1)” (by simp)
+  func_iff {k c} := by
+    rw [←sigma_one_completeness_iff]
+    · simpa [models_iff] using Language.ORing.of_mem_range_encode_func
+    · simp
+  rel_iff {k c} := by
+    rw [←sigma_one_completeness_iff]
+    · simpa [models_iff] using Language.ORing.of_mem_range_encode_rel
+    · simp
 
 end Arith
 
