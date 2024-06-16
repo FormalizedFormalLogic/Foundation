@@ -28,6 +28,12 @@ notation "⟮Loeb⟯" => LoebRule
 abbrev HenkinRule {α} : InferenceRules α := { { antecedents := [□p ⟷ p], consequence := p }| (p) }
 notation "⟮Henkin⟯" => HenkinRule
 
+/--
+
+  | rosser {p}     : (𝓓.rules.rosser = true) → Deduction 𝓓 (~p) → Deduction 𝓓 (~(□p))
+  | rosser_box {p} : (𝓓.rules.rosser_box = true) → Deduction 𝓓 (~(□p)) → Deduction 𝓓 (~(□□p))
+-/
+
 structure DeductionParameter (α : Type*) where
   axioms : AxiomSet α
   rules : InferenceRules α
@@ -332,6 +338,28 @@ notation "𝐍" => DeductionParameter.N
 instance : 𝐍.HasNecOnly (α := α) where
 
 end PLoN
+
+protected abbrev N4 : DeductionParameter α where
+  axiomSet := 𝟰
+  rules := { nec := true }
+notation "𝐍𝟒" => DeductionParameter.N4
+instance : HasNecOnly (α := α) 𝐍𝟒 where
+instance : System.HasAxiomFour (𝐍𝟒 : DeductionParameter α) where
+  Four _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
+
+protected abbrev NRosser : DeductionParameter α where
+  axiomSet := ∅
+  rules := { nec := true, rosser := true }
+notation "𝐍(𝐑)" => DeductionParameter.NRosser
+instance : HasNec (α := α) 𝐍(𝐑) where
+
+protected abbrev N4Rosser : DeductionParameter α where
+  axiomSet := 𝟰
+  rules := { nec := true, rosser := true }
+notation "𝐍𝟒(𝐑)" => DeductionParameter.N4Rosser
+instance : HasNec (α := α) 𝐍𝟒(𝐑) where
+instance : System.HasAxiomFour (𝐍𝟒(𝐑) : DeductionParameter α) where
+  Four _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
 
 end DeductionParameter
 

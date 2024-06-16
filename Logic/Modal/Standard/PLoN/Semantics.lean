@@ -1,6 +1,5 @@
+import Logic.Vorspiel.BinaryRelations
 import Logic.Modal.Standard.Deduction
-
-universe u v
 
 namespace LO.Modal.Standard
 
@@ -43,6 +42,8 @@ structure Model (α) where
 
 abbrev Model.World (M : PLoN.Model α) := M.Frame.World
 instance : CoeSort (PLoN.Model α) (Type _) := ⟨Model.World⟩
+
+
 
 end PLoN
 
@@ -175,10 +176,14 @@ protected lemma elim_contra : 𝔽 ⊧ (Axioms.ElimContra p q) := by intro _ _; 
 end Formula.PLoN.ValidOnFrameClass
 
 
+def DeductionParameter.CharacterizedByPLoNFrameClass (𝓓 : DeductionParameter α) (𝔽 : PLoN.FrameClass α) := ∀ {F : Frame α}, F ∈ 𝔽 → F ⊧* 𝓓.theory
+
+-- MEMO: `←`方向は成り立たない可能性がある
 def DeductionParameter.DefinesPLoNFrameClass (𝓓 : DeductionParameter α) (𝔽 : PLoN.FrameClass α) := ∀ {F : Frame α}, F ⊧* 𝓓.theory ↔ F ∈ 𝔽
 
 namespace PLoN
 
+open Formula.PLoN
 
 abbrev AllFrameClass (α) : FrameClass α := Set.univ
 
@@ -188,7 +193,7 @@ lemma AllFrameClass.nonempty : (AllFrameClass.{_, 0} α).Nonempty := by
 
 open Formula
 
-lemma N_defines : 𝐍.DefinesPLoNFrameClass (AllFrameClass α) := by
+lemma N_characterized : 𝐍.CharacterizedByPLoNFrameClass (AllFrameClass α) := by
   intro F;
   simp [DeductionParameter.theory, System.theory, PLoN.ValidOnFrame, PLoN.ValidOnModel];
   intro p hp;
