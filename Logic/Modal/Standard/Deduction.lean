@@ -270,6 +270,7 @@ open DeductionParameter
 private abbrev NecOnly (Ax : AxiomSet α) : DeductionParameter α where
   axiomSet := Ax
   rules := ⟨true, false, false⟩
+instance : HasNecOnly (α := α) (NecOnly Ax) where
 
 protected abbrev K : DeductionParameter α := NecOnly 𝗞
 notation "𝐊" => DeductionParameter.K
@@ -316,12 +317,6 @@ notation "𝐊𝐓𝟒𝐁" => DeductionParameter.KT4B
 instance : Normal (α := α) 𝐊𝐓𝟒𝐁 where
 
 
-protected abbrev GL : DeductionParameter α := NecOnly (𝗞 ∪ 𝗟)
-notation "𝐆𝐋" => DeductionParameter.GL
-instance : Normal (α := α) 𝐆𝐋 where
-instance : System.GL (𝐆𝐋 : DeductionParameter α) where
-  L _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
-
 protected abbrev S4Dot2 : DeductionParameter α := NecOnly (𝗞 ∪ 𝗧 ∪ 𝟰 ∪ .𝟮)
 notation "𝐒𝟒.𝟐" => DeductionParameter.S4Dot2
 instance : Normal (α := α) 𝐒𝟒.𝟐 where
@@ -351,9 +346,12 @@ instance : System.Ver (𝐕𝐞𝐫 : DeductionParameter α) where
   Ver _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
 
 
-/-- Logic of Pure Necessitation -/
-protected abbrev N : DeductionParameter α := NecOnly ∅
-notation "𝐍" => DeductionParameter.N
+protected abbrev GL : DeductionParameter α := NecOnly (𝗞 ∪ 𝗟)
+notation "𝐆𝐋" => DeductionParameter.GL
+instance : Normal (α := α) 𝐆𝐋 where
+instance : System.GL (𝐆𝐋 : DeductionParameter α) where
+  L _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
+
 
 protected abbrev K4H : DeductionParameter α := NecOnly (𝗞 ∪ 𝟰 ∪ 𝗛)
 notation "𝐊𝟒𝐇" => DeductionParameter.K4H
@@ -361,6 +359,7 @@ instance : Normal (α := α) 𝐊𝟒𝐇 where
 instance : System.K4H (𝐊𝟒𝐇 : DeductionParameter α) where
   Four _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
   H _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
+
 
 protected abbrev K4Loeb : DeductionParameter α where
   axiomSet := 𝗞 ∪ 𝟰
@@ -372,6 +371,7 @@ instance : HasLoebRule (α := α) 𝐊𝟒(𝐋) where
 instance : System.K4Loeb (𝐊𝟒(𝐋) : DeductionParameter α) where
   Four _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
 
+
 protected abbrev K4Henkin : DeductionParameter α where
   axiomSet := 𝗞 ∪ 𝟰
   rules := ⟨true, false, true⟩
@@ -382,6 +382,10 @@ instance : HasHenkinRule (α := α) 𝐊𝟒(𝐇) where
 instance : System.K4Henkin (𝐊𝟒(𝐇) : DeductionParameter α) where
   Four _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
 
+
+/-- Logic of Pure Necessitation -/
+protected abbrev N : DeductionParameter α := NecOnly ∅
+notation "𝐍" => DeductionParameter.N
 
 end DeductionParameter
 

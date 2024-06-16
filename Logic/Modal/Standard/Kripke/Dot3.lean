@@ -92,9 +92,9 @@ instance : FrameClass.IsNonempty (𝔽(Ax(𝐒𝟒.𝟑)) : FrameClass' α) := i
 
 namespace Kripke
 
-open MaximalParametricConsistentTheory
+open MaximalConsistentTheory
 
-lemma definability_canonicalFrame_Dot3 {𝓓 : DeductionParameter α} [𝓓.Normal] [Inhabited (MCT 𝓓)] (hAx : .𝟯 ⊆ Ax(𝓓))
+lemma definability_canonicalFrame_Dot3 {𝓓 : DeductionParameter α} [𝓓.Normal] [Inhabited (𝓓)-MCT] (hAx : .𝟯 ⊆ Ax(𝓓))
   : Connected (CanonicalFrame 𝓓).Rel := by
   dsimp only [Connected];
   intro X Y Z ⟨hXY, hXZ⟩;

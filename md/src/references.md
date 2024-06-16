@@ -12,6 +12,8 @@
 - Open Logic Project, ["The Open Logic Text"](https://builds.openlogicproject.org/)
 - R. Hakli, S. Negri, "Does the deduction theorem fail for modal logic?"
 - G. Boolos, "The Logic of Provability"
+- M. C. Fitting, V. W. Marek, and M. Truszczynski, _"The Pure Logic of Necessitation"_
+- T. Kurahashi, _"The provability logic of all provability predicates"_
 
 ## Related Works
 
