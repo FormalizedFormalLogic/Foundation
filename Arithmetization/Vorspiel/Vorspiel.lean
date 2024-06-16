@@ -234,6 +234,14 @@ abbrev Semiformula.Rlz (p : Semiformula L M n) (e : Fin n → M) : Prop := Evalm
 
 end
 
+namespace Arith
+
+variable {L : Language} [L.ORing]
+
+instance : Semiterm.Operator.GoedelNumber L ℕ := ⟨Semiterm.Operator.numeral L⟩
+
+end Arith
+
 end FirstOrder
 
 end LO

@@ -1,48 +1,10 @@
-import Arithmetization.ISigmaOne.HFS
+import Arithmetization.ISigmaOne.Metamath.Language
 
 noncomputable section
 
 namespace LO.FirstOrder.Arith.Model
 
 variable {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐈𝚺₁]
-
-variable (M)
-
-structure _root_.LO.FirstOrder.Arith.LDef where
-  func : HSemisentence ℒₒᵣ 2 𝚺₀
-  rel : HSemisentence ℒₒᵣ 2 𝚺₀
-
-protected structure Language where
-  Func (arity : M) : M → Prop
-  Rel (arity : M) : M → Prop
-
-variable {M}
-
-namespace Language
-
-class Defined (L : Model.Language M) (pL : outParam LDef) where
-  func : 𝚺₀-Relation L.Func via pL.func
-  rel : 𝚺₀-Relation L.Rel via pL.rel
-
-variable {L : Model.Language M} {pL : LDef} [Defined L pL]
-
-@[simp] lemma Defined.eval_func (v) :
-    Semiformula.Evalbm M v pL.func.val ↔ L.Func (v 0) (v 1) := Defined.func.df.iff v
-
-@[simp] lemma Defined.eval_rel_iff (v) :
-    Semiformula.Evalbm M v pL.rel.val ↔ L.Rel (v 0) (v 1) := Defined.rel.df.iff v
-
-instance Defined.func_definable : 𝚺₀-Relation L.Func := Defined.to_definable _ Defined.func
-
-instance Defined.rel_definable : 𝚺₀-Relation L.Rel := Defined.to_definable _ Defined.rel
-
-@[simp, definability] instance Defined.func_definable' (Γ) : Γ-Relation L.Func :=
-  Definable.of_zero Defined.func_definable _
-
-@[simp, definability] instance Defined.rel_definable' (Γ) : Γ-Relation L.Rel :=
-  Definable.of_zero Defined.rel_definable _
-
-end Language
 
 namespace FormalizedTerm
 
