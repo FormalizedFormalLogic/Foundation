@@ -1,4 +1,3 @@
-import Logic.Modal.Standard.Deduction
 import Logic.Modal.Standard.PLoN.Semantics
 
 namespace LO.Modal.Standard

@@ -1,7 +1,4 @@
-import Logic.Modal.Standard.Deduction
-import Logic.Modal.Standard.Consistent
-import Logic.Modal.Standard.HilbertStyle
-import Logic.Modal.Standard.Kripke.Semantics
+import Logic.Modal.Standard.ConsistentTheory
 import Logic.Modal.Standard.Kripke.Soundness
 
 namespace LO.Modal.Standard

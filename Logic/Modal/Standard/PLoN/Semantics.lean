@@ -1,5 +1,3 @@
-import Logic.Logic.System
-import Logic.Modal.Standard.Formula
 import Logic.Modal.Standard.Deduction
 
 universe u v
