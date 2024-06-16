@@ -2,7 +2,7 @@ import Arithmetization.ISigmaOne.HFS.PRF
 
 /-!
 
-# Limit Construction
+# Fixpoint Construction
 
 -/
 
@@ -12,7 +12,7 @@ namespace LO.FirstOrder.Arith.Model
 
 variable {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐈𝚺₁]
 
-namespace Limit
+namespace Fixpoint
 
 structure Formula (k : ℕ) where
   core : 𝚫₁-Semisentence (k + 2)
@@ -32,7 +32,7 @@ def prFormulae : PR.Formulae k where
 
 def limSeqDef : 𝚺₁-Semisentence (k + 2) := (φ.prFormulae).resultDef
 
-def limitDef : 𝚫₁-Semisentence (k + 1) := .mkDelta
+def fixpointDef : 𝚫₁-Semisentence (k + 1) := .mkDelta
   (.mkSigma “x | ∃ L, !φ.limSeqDef L (x + 1) ⋯  ∧ x ∈ L” (by simp))
   (.mkPi “x | ∀ L, !φ.limSeqDef L (x + 1) ⋯  → x ∈ L” (by simp))
 
@@ -163,41 +163,55 @@ lemma mem_limSeq_self {u s : M} :
 
 variable (v)
 
-def Limit (x : M) : Prop := ∃ s, x ∈ c.limSeq v s
+def Fixpoint (x : M) : Prop := ∃ s, x ∈ c.limSeq v s
 
 variable {v}
 
-lemma limit_iff {x : M} : c.Limit v x ↔ x ∈ c.limSeq v (x + 1) :=
+lemma fixpoint_iff {x : M} : c.Fixpoint v x ↔ x ∈ c.limSeq v (x + 1) :=
   ⟨by rintro ⟨s, hs⟩; exact c.mem_limSeq_self hs, fun h ↦ ⟨x + 1, h⟩⟩
 
-theorem fixpoint :
-    c.Limit v x ↔ c.Φ v {z | c.Limit v z} x :=
+theorem case :
+    c.Fixpoint v x ↔ c.Φ v {z | c.Fixpoint v z} x :=
   ⟨by rintro h
-      have : c.Φ v {z | z ∈ c.limSeq v x} x := (c.mem_limSeq_succ_iff.mp (c.limit_iff.mp h)).2
+      have : c.Φ v {z | z ∈ c.limSeq v x} x := (c.mem_limSeq_succ_iff.mp (c.fixpoint_iff.mp h)).2
       exact c.monotone (fun z hx ↦ by exact ⟨x, hx⟩) this,
    by intro hx
       have : c.Φ v {z | z ∈ c.limSeq v x} x :=
         c.monotone (by
           simp only [Set.setOf_subset_setOf, and_imp]
           intro z hz hzx
-          exact c.limSeq_cumulative (succ_le_iff_lt.mpr hzx) (c.limit_iff.mp hz))
+          exact c.limSeq_cumulative (succ_le_iff_lt.mpr hzx) (c.fixpoint_iff.mp hz))
           (c.finite hx)
       exact ⟨x + 1, c.mem_limSeq_succ_iff.mpr <| ⟨by rfl, this⟩⟩⟩
 
 section
 
-lemma limit_defined : Defined (fun v ↦ c.Limit (v ·.succ) (v 0)) φ.limitDef :=
-  ⟨by intro v; simp [Formula.limitDef, c.eval_limSeqDef],
-   by intro v; simp [Formula.limitDef, c.eval_limSeqDef, limit_iff]⟩
+lemma fixpoint_defined : Defined (fun v ↦ c.Fixpoint (v ·.succ) (v 0)) φ.fixpointDef :=
+  ⟨by intro v; simp [Formula.fixpointDef, c.eval_limSeqDef],
+   by intro v; simp [Formula.fixpointDef, c.eval_limSeqDef, fixpoint_iff]⟩
 
-@[simp] lemma eval_limitDef (v) :
-    Semiformula.Evalbm M v φ.limitDef.val ↔ c.Limit (v ·.succ) (v 0) := c.limit_defined.df.iff v
+@[simp] lemma eval_fixpointDef (v) :
+    Semiformula.Evalbm M v φ.fixpointDef.val ↔ c.Fixpoint (v ·.succ) (v 0) := c.fixpoint_defined.df.iff v
 
 end
 
+theorem induction {P : M → Prop} (hP : DefinablePred ℒₒᵣ (Γ, 1) P)
+    (H : ∀ C : Set M, (∀ x ∈ C, P x) → ∀ x, c.Φ v C x → P x) :
+    ∀ x, c.Fixpoint v x → P x := by
+  apply @order_induction_hh M _ _ _ _ _ _ ℒₒᵣ _ _ _ _ Γ 1 _
+  · apply Definable.imp
+      (Definable.comp₁ (by definability) (by
+        apply Definable.of_deltaOne
+        exact ⟨φ.fixpointDef.rew <| Rew.embSubsts <| #0 :> fun x ↦ &(v x), c.fixpoint_defined.proper.rew' _,
+          by intro v; simp [c.eval_fixpointDef]⟩))
+      (by definability)
+  intro x ih hx
+  have : c.Φ v {y | c.Fixpoint v y ∧ y < x} x := c.finite (c.case.mp hx)
+  exact H {y | c.Fixpoint v y ∧ y < x} (by intro y ⟨hy, hyx⟩; exact ih y hyx hy) x this
+
 end Construction
 
-end Limit
+end Fixpoint
 
 end LO.FirstOrder.Arith.Model
 

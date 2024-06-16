@@ -213,6 +213,10 @@ def rew (ω : Rew L ξ₁ n₁ ξ₂ n₂) : {Γ : HierarchySymbol} → HSemifor
   rcases p; simp [ProperOn, HSemiformula.rew, Semiformula.eval_rew, Function.comp, h.iff, Empty.eq_elim]
   intro e; exact h.iff _
 
+@[simp] lemma ProperOn.rew' {p : HSemisentence L n₁ (𝚫, m)} (h : p.ProperOn M) (ω : Rew L Empty n₁ M n₂) : (p.rew ω).ProperWithParamOn M := by
+  rcases p; intro e; simp [ProperOn, HSemiformula.rew, Semiformula.eval_rew, Function.comp, h.iff, Empty.eq_elim]
+  simpa using h.iff _
+
 @[simp] lemma ProperWithParamOn.rew {p : HSemiformula L M n₁ (𝚫, m)}
     (h : p.ProperWithParamOn M) (f : Fin n₁ → Semiterm L M n₂) : (p.rew (Rew.substs f)).ProperWithParamOn M := by
   rcases p; intro e;
