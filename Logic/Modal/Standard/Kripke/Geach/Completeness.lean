@@ -30,12 +30,12 @@ lemma definability_canonicalFrame_GeachAxiom {𝓓 : DeductionParameter α} [�
       (multiframe_def_multidia.mp r₁₂ hΓconj)
     have : ◇^[t.n]Γ.conj' ∈ Ω₃.theory := multiframe_def_multibox.mp r₁₃ this;
 
-    have : L ⊢! □^[t.n](Δ.conj') ⋏ ◇^[t.n](Γ.conj') ⟶ ⊥ := by
+    have : 𝓓 ⊢! □^[t.n](Δ.conj') ⋏ ◇^[t.n](Γ.conj') ⟶ ⊥ := by
       apply and_imply_iff_imply_imply'!.mpr;
       exact imp_trans''!
-        (show L ⊢! □^[t.n](Δ.conj') ⟶ □^[t.n](~Γ.conj') by exact imply_multibox_distribute'! $ contra₁'! $ and_imply_iff_imply_imply'!.mp hC)
-        (show L ⊢! □^[t.n](~Γ.conj') ⟶ ~(◇^[t.n]Γ.conj') by exact contra₁'! $ and₁'! $ multidia_duality!);
-    have : L ⊬! □^[t.n](Δ.conj') ⋏ ◇^[t.n](Γ.conj') ⟶ ⊥ := by simpa using Ω₃.consistent (Γ := [□^[t.n](Δ.conj'), ◇^[t.n](Γ.conj')]) (by simp_all)
+        (show 𝓓 ⊢! □^[t.n](Δ.conj') ⟶ □^[t.n](~Γ.conj') by exact imply_multibox_distribute'! $ contra₁'! $ and_imply_iff_imply_imply'!.mp hC)
+        (show 𝓓 ⊢! □^[t.n](~Γ.conj') ⟶ ~(◇^[t.n]Γ.conj') by exact contra₁'! $ and₁'! $ multidia_duality!);
+    have : 𝓓 ⊬! □^[t.n](Δ.conj') ⋏ ◇^[t.n](Γ.conj') ⟶ ⊥ := by simpa using Ω₃.consistent (Γ := [□^[t.n](Δ.conj'), ◇^[t.n](Γ.conj')]) (by simp_all)
 
     contradiction;
   existsi Ω;

@@ -1,3 +1,4 @@
+import Logic.Modal.Standard.Consistent
 import Logic.Modal.Standard.PLoN.Soundness
 
 namespace LO.Modal.Standard

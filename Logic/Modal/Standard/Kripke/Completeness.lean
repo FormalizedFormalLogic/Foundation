@@ -1,4 +1,5 @@
 import Logic.Modal.Standard.Deduction
+import Logic.Modal.Standard.Consistent
 import Logic.Modal.Standard.HilbertStyle
 import Logic.Modal.Standard.Kripke.Semantics
 import Logic.Modal.Standard.Kripke.Soundness
@@ -141,8 +142,8 @@ lemma iff_valid_on_canonicalModel_deducible : (CanonicalModel 𝓓) ⊧ p ↔ (�
   . intro h Ω;
     suffices p ∈ Ω.theory by exact truthlemma.mpr this;
     by_contra hC;
-    have := MaximalParametricConsistentTheory.maximal' hC;
-    obtain ⟨Γ, hΓ₁, hΓ₂⟩ := Theory.iff_insert_notParametricConsistent.mp this;
+    have := Ω.maximal' hC;
+    obtain ⟨Γ, hΓ₁, hΓ₂⟩ := Theory.iff_insert_Inconsistent.mp this;
     exact Ω.consistent hΓ₁ $ and_imply_iff_imply_imply'!.mp hΓ₂ ⨀ h;
 
 lemma realize_axiomset_of_self_canonicalModel : CanonicalModel 𝓓 ⊧* Ax(𝓓) := by
