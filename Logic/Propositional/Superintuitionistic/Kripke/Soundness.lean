@@ -23,12 +23,12 @@ lemma sound (d : 𝓓 ⊢ p) : 𝔽(Ax(𝓓)) ⊧ p := by
     | apply ValidOnFrame.verum
     | apply ValidOnFrame.imply₁
     | apply ValidOnFrame.imply₂
-    | apply ValidOnFrame.disj₁
-    | apply ValidOnFrame.disj₂
-    | apply ValidOnFrame.disj₃
-    | apply ValidOnFrame.conj₁
-    | apply ValidOnFrame.conj₂
-    | apply ValidOnFrame.conj₃
+    | apply ValidOnFrame.or₁
+    | apply ValidOnFrame.or₂
+    | apply ValidOnFrame.or₃
+    | apply ValidOnFrame.and₁
+    | apply ValidOnFrame.and₂
+    | apply ValidOnFrame.and₃
 
 lemma sound! : (𝓓 ⊢! p) → 𝔽(Ax(𝓓)) ⊧ p := λ ⟨d⟩ => sound d
 

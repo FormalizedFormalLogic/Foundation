@@ -18,15 +18,16 @@ open Necessitation
 
 variable [Necessitation 𝓢]
 
-lemma Necessitation.nec! : 𝓢 ⊢! p → 𝓢 ⊢! □p := by rintro ⟨hp⟩; exact ⟨nec hp⟩
+alias nec := Necessitation.nec
 
-def Necessitation.multinec : 𝓢 ⊢ p → 𝓢 ⊢ □^[n]p := by
+lemma nec! : 𝓢 ⊢! p → 𝓢 ⊢! □p := by rintro ⟨hp⟩; exact ⟨nec hp⟩
+
+def multinec : 𝓢 ⊢ p → 𝓢 ⊢ □^[n]p := by
   intro h;
   induction n with
   | zero => simpa;
   | succ n ih => simpa using nec ih;
-
-lemma Necessitation.multinec! : 𝓢 ⊢! p → 𝓢 ⊢! □^[n]p := by rintro ⟨hp⟩; exact ⟨multinec hp⟩
+lemma multinec! : 𝓢 ⊢! p → 𝓢 ⊢! □^[n]p := by rintro ⟨hp⟩; exact ⟨multinec hp⟩
 
 
 variable [HasAxiomK 𝓢]
@@ -48,7 +49,7 @@ def axiomK'' (h₁ : 𝓢 ⊢ □(p ⟶ q)) (h₂ : 𝓢 ⊢ □p) : 𝓢 ⊢ �
 def multibox_axiomK : 𝓢 ⊢ □^[n](p ⟶ q) ⟶ □^[n]p ⟶ □^[n]q := by
   induction n with
   | zero => simp; apply impId;
-  | succ n ih => simpa using impTrans (axiomK' $ nec ih) (by apply axiomK);
+  | succ n ih => simpa using impTrans'' (axiomK' $ nec ih) (by apply axiomK);
 
 @[simp] lemma multibox_axiomK! : 𝓢 ⊢! □^[n](p ⟶ q) ⟶ □^[n]p ⟶ □^[n]q := ⟨multibox_axiomK⟩
 
@@ -61,8 +62,8 @@ alias multiboxed_imply_distribute! := multibox_axiomK'!
 
 def boxIff' (h : 𝓢 ⊢ p ⟷ q) : 𝓢 ⊢ (□p ⟷ □q) := by
   apply iffIntro;
-  . exact axiomK' $ nec $ conj₁' h;
-  . exact axiomK' $ nec $ conj₂' h;
+  . exact axiomK' $ nec $ and₁' h;
+  . exact axiomK' $ nec $ and₂' h;
 @[simp] lemma box_iff! (h : 𝓢 ⊢! p ⟷ q) : 𝓢 ⊢! □p ⟷ □q := ⟨boxIff' h.some⟩
 
 def multiboxIff' (h : 𝓢 ⊢ p ⟷ q) : 𝓢 ⊢ □^[n]p ⟷ □^[n]q := by
@@ -92,18 +93,18 @@ def multiboxDuality : 𝓢 ⊢ □^[n]p ⟷ ~(◇^[n](~p)) := by
   | zero => simp; apply dn;
   | succ n ih =>
     simp [StandardModalLogicalConnective.duality'];
-    exact iffTrans (boxIff' ih) dn
-@[simp] lemma multiboxDuality! : 𝓢 ⊢! □^[n]p ⟷ ~(◇^[n](~p)) := ⟨multiboxDuality⟩
+    exact iffTrans'' (boxIff' ih) dn
+@[simp] lemma multibox_duality! : 𝓢 ⊢! □^[n]p ⟷ ~(◇^[n](~p)) := ⟨multiboxDuality⟩
 
 def boxDuality : 𝓢 ⊢ □p ⟷ ~(◇~p) := multiboxDuality (n := 1)
-@[simp] lemma boxDuality! : 𝓢 ⊢! □p ⟷ ~(◇~p) := ⟨boxDuality⟩
+@[simp] lemma box_duality! : 𝓢 ⊢! □p ⟷ ~(◇~p) := ⟨boxDuality⟩
 
-lemma multiboxDuality'! : 𝓢 ⊢! □^[n]p ↔ 𝓢 ⊢! ~(◇^[n](~p)) := by
+lemma multibox_duality'! : 𝓢 ⊢! □^[n]p ↔ 𝓢 ⊢! ~(◇^[n](~p)) := by
   constructor;
-  . intro h; exact (conj₁'! multiboxDuality!) ⨀ h;
-  . intro h; exact (conj₂'! multiboxDuality!) ⨀ h;
+  . intro h; exact (and₁'! multibox_duality!) ⨀ h;
+  . intro h; exact (and₂'! multibox_duality!) ⨀ h;
 
-lemma boxDuality'! : 𝓢 ⊢! □p ↔ 𝓢 ⊢! ~(◇~p) := multiboxDuality'! (n := 1)
+lemma box_duality'! : 𝓢 ⊢! □p ↔ 𝓢 ⊢! ~(◇~p) := multibox_duality'! (n := 1)
 
 
 def multidiaDuality : 𝓢 ⊢ ◇^[n]p ⟷ ~(□^[n](~p)) := by
@@ -113,17 +114,17 @@ def multidiaDuality : 𝓢 ⊢ ◇^[n]p ⟷ ~(□^[n](~p)) := by
     simp [StandardModalLogicalConnective.duality'];
     apply negIff';
     apply boxIff';
-    exact iffTrans (negIff' ih) (iffComm' dn)
-@[simp] lemma multidiaDuality! : 𝓢 ⊢! ◇^[n]p ⟷ ~(□^[n](~p)) := ⟨multidiaDuality⟩
+    exact iffTrans'' (negIff' ih) (iffComm' dn)
+@[simp] lemma multidia_duality! : 𝓢 ⊢! ◇^[n]p ⟷ ~(□^[n](~p)) := ⟨multidiaDuality⟩
 
 def diaDuality : 𝓢 ⊢ ◇p ⟷ ~(□~p) := multidiaDuality (n := 1)
 @[simp] lemma diaDuality! : 𝓢 ⊢! ◇p ⟷ ~(□~p) := ⟨diaDuality⟩
 
-lemma multidiaDuality'! : 𝓢 ⊢! ◇^[n]p ↔ 𝓢 ⊢! ~(□^[n](~p)) := by
+lemma multidia_duality'! : 𝓢 ⊢! ◇^[n]p ↔ 𝓢 ⊢! ~(□^[n](~p)) := by
   constructor;
-  . intro h; exact (conj₁'! multidiaDuality!) ⨀ h;
-  . intro h; exact (conj₂'! multidiaDuality!) ⨀ h;
-lemma diaDuality'! : 𝓢 ⊢! ◇p ↔ 𝓢 ⊢! ~(□~p) := multidiaDuality'! (n := 1)
+  . intro h; exact (and₁'! multidia_duality!) ⨀ h;
+  . intro h; exact (and₂'! multidia_duality!) ⨀ h;
+lemma dia_duality'! : 𝓢 ⊢! ◇p ↔ 𝓢 ⊢! ~(□~p) := multidia_duality'! (n := 1)
 
 
 def multiboxverum : 𝓢 ⊢ (□^[n]⊤ : F) := multinec verum
@@ -140,7 +141,7 @@ def implyBoxDistribute' (h : 𝓢 ⊢ p ⟶ q) : 𝓢 ⊢ □p ⟶ □q := imply
 lemma imply_box_distribute'! (h : 𝓢 ⊢! p ⟶ q) : 𝓢 ⊢! □p ⟶ □q := ⟨implyBoxDistribute' h.some⟩
 
 
-def distribute_multibox_and : 𝓢 ⊢ □^[n](p ⋏ q) ⟶ □^[n]p ⋏ □^[n]q := implyRightAnd (implyMultiboxDistribute' conj₁) (implyMultiboxDistribute' conj₂)
+def distribute_multibox_and : 𝓢 ⊢ □^[n](p ⋏ q) ⟶ □^[n]p ⋏ □^[n]q := implyRightAnd (implyMultiboxDistribute' and₁) (implyMultiboxDistribute' and₂)
 @[simp] lemma distribute_multibox_and! : 𝓢 ⊢! □^[n](p ⋏ q) ⟶ □^[n]p ⋏ □^[n]q := ⟨distribute_multibox_and⟩
 
 def distribute_box_and : 𝓢 ⊢ □(p ⋏ q) ⟶ □p ⋏ □q := distribute_multibox_and (n := 1)
@@ -154,9 +155,9 @@ lemma distribute_box_and'! (d : 𝓢 ⊢! □(p ⋏ q)) : 𝓢 ⊢! □p ⋏ □
 
 
 def collect_multibox_and : 𝓢 ⊢ □^[n]p ⋏ □^[n]q ⟶ □^[n](p ⋏ q) := by
-  have d₁ : 𝓢 ⊢ □^[n]p ⟶ □^[n](q ⟶ p ⋏ q) := implyMultiboxDistribute' conj₃;
+  have d₁ : 𝓢 ⊢ □^[n]p ⟶ □^[n](q ⟶ p ⋏ q) := implyMultiboxDistribute' and₃;
   have d₂ : 𝓢 ⊢ □^[n](q ⟶ p ⋏ q) ⟶ (□^[n]q ⟶ □^[n](p ⋏ q)) := multibox_axiomK;
-  exact (conj₂' (andImplyIffImplyImply _ _ _)) ⨀ (impTrans d₁ d₂);
+  exact (and₂' (andImplyIffImplyImply _ _ _)) ⨀ (impTrans'' d₁ d₂);
 @[simp] lemma collect_multibox_and! : 𝓢 ⊢! □^[n]p ⋏ □^[n]q ⟶ □^[n](p ⋏ q) := ⟨collect_multibox_and⟩
 
 def collect_box_and : 𝓢 ⊢ □p ⋏ □q ⟶ □(p ⋏ q) := collect_multibox_and (n := 1)
@@ -179,10 +180,10 @@ lemma multiboxConj'_iff! : 𝓢 ⊢! □^[n](Γ.conj') ↔ ∀ p ∈ Γ, 𝓢 �
     . intro h;
       have := distribute_multibox_and'! h;
       constructor;
-      . exact conj₁'! this;
-      . exact ih.mp (conj₂'! this);
+      . exact and₁'! this;
+      . exact ih.mp (and₂'! this);
     . rintro ⟨h₁, h₂⟩;
-      exact collect_multibox_and'! $ conj₃'! h₁ (ih.mpr h₂);
+      exact collect_multibox_and'! $ and₃'! h₁ (ih.mpr h₂);
 lemma boxConj'_iff! : 𝓢 ⊢! □(Γ.conj') ↔ ∀ p ∈ Γ, 𝓢 ⊢! □p := multiboxConj'_iff! (n := 1)
 
 lemma multiboxconj'_of_conj'multibox! (d : 𝓢 ⊢! (□'^[n]Γ).conj') : 𝓢 ⊢! □^[n](Γ.conj') := by
@@ -202,13 +203,13 @@ lemma collect_multibox_conj'! : 𝓢 ⊢! (□'^[n]Γ).conj' ⟶ □^[n](Γ.conj
   | hsingle => simp;
   | hcons p Γ h ih =>
     simp_all;
-    exact imp_trans! (implyRightAnd! (generalConj'! (by simp)) (imp_trans! (by simp) ih)) collect_multibox_and!;
+    exact imp_trans''! (imply_right_and! (generalConj'! (by simp)) (imp_trans''! (by simp) ih)) collect_multibox_and!;
 
 @[simp]
 lemma collect_box_conj'! : 𝓢 ⊢! (□'Γ).conj' ⟶ □(Γ.conj') := collect_multibox_conj'! (n := 1)
 
 
-def collect_multibox_or : 𝓢 ⊢ □^[n]p ⋎ □^[n]q ⟶ □^[n](p ⋎ q) := disj₃'' (multibox_axiomK' $ multinec disj₁) (multibox_axiomK' $ multinec disj₂)
+def collect_multibox_or : 𝓢 ⊢ □^[n]p ⋎ □^[n]q ⟶ □^[n](p ⋎ q) := or₃'' (multibox_axiomK' $ multinec or₁) (multibox_axiomK' $ multinec or₂)
 @[simp] lemma collect_multibox_or! : 𝓢 ⊢! □^[n]p ⋎ □^[n]q ⟶ □^[n](p ⋎ q) := ⟨collect_multibox_or⟩
 
 def collect_box_or : 𝓢 ⊢ □p ⋎ □q ⟶ □(p ⋎ q) := collect_multibox_or (n := 1)
@@ -228,7 +229,7 @@ def collect_dia_or : 𝓢 ⊢ ◇p ⋎ ◇q ⟶ ◇(p ⋎ q) := by
   apply demorgan₂';
   apply dniAnd';
   apply deductInv';
-  exact impTrans (implyBoxDistribute' demorgan₃) distribute_box_and;
+  exact impTrans'' (implyBoxDistribute' demorgan₃) distribute_box_and;
 @[simp] lemma collect_dia_or! : 𝓢 ⊢! ◇p ⋎ ◇q ⟶ ◇(p ⋎ q) := ⟨collect_dia_or⟩
 
 def collect_dia_or' (h : 𝓢 ⊢ ◇p ⋎ ◇q) : 𝓢 ⊢ ◇(p ⋎ q) := collect_dia_or ⨀ h
@@ -237,12 +238,12 @@ def collect_dia_or' (h : 𝓢 ⊢ ◇p ⋎ ◇q) : 𝓢 ⊢ ◇(p ⋎ q) := coll
 -- TODO: `distributeMultidiaAnd!` is computable but it's too slow, so leave it.
 @[simp] lemma distribute_multidia_and!: 𝓢 ⊢! ◇^[n](p ⋏ q) ⟶ ◇^[n]p ⋏ ◇^[n]q := by
   suffices h : 𝓢 ⊢! ~(□^[n](~(p ⋏ q))) ⟶ ~(□^[n](~p)) ⋏ ~(□^[n](~q)) by
-    exact imp_trans! (imp_trans! (conj₁'! multidiaDuality!) h) $ andReplace! (conj₂'! multidiaDuality!) (conj₂'! multidiaDuality!);
+    exact imp_trans''! (imp_trans''! (and₁'! multidia_duality!) h) $ and_replace! (and₂'! multidia_duality!) (and₂'! multidia_duality!);
   apply FiniteContext.deduct'!;
   apply demorgan₃'!;
   apply FiniteContext.deductInv'!;
   apply contra₀'!;
-  apply imp_trans! collect_multibox_or! (imply_multibox_distribute'! demorgan₁!)
+  apply imp_trans''! collect_multibox_or! (imply_multibox_distribute'! demorgan₁!)
 
 @[simp] lemma distribute_dia_and! : 𝓢 ⊢! ◇(p ⋏ q) ⟶ ◇p ⋏ ◇q := distribute_multidia_and! (n := 1)
 
@@ -254,16 +255,16 @@ def collect_dia_or' (h : 𝓢 ⊢ ◇p ⋎ ◇q) : 𝓢 ⊢ ◇(p ⋎ q) := coll
   | hsingle p => simp;
   | hcons p Γ h ih =>
     simp_all;
-    exact imp_trans! distribute_multidia_and! $ by
+    exact imp_trans''! distribute_multidia_and! $ by
       apply deduct'!;
       apply iff_provable_list_conj.mpr;
       intro q hq;
       simp at hq;
       cases hq with
-      | inl => subst_vars; exact conj₁'! id!;
+      | inl => subst_vars; exact and₁'! id!;
       | inr hq =>
         obtain ⟨r, hr₁, hr₂⟩ := hq;
-        exact (iff_provable_list_conj.mp $ (of'! ih) ⨀ (conj₂'! $ id!)) q (by aesop);
+        exact (iff_provable_list_conj.mp $ (of'! ih) ⨀ (and₂'! $ id!)) q (by aesop);
 
 -- def distributeDiaAnd' (h : 𝓢 ⊢ ◇(p ⋏ q)) : 𝓢 ⊢ ◇p ⋏ ◇q := distributeDiaAnd ⨀ h
 lemma distribute_dia_and'! (h : 𝓢 ⊢! ◇(p ⋏ q)) : 𝓢 ⊢! ◇p ⋏ ◇q := distribute_dia_and! ⨀ h
@@ -275,20 +276,20 @@ def boxdotAxiomK : 𝓢 ⊢ ⊡(p ⟶ q) ⟶ (⊡p ⟶ ⊡q) := by
   apply deduct';
   apply deduct;
   have d : [p ⋏ □p, (p ⟶ q) ⋏ □(p ⟶ q)] ⊢[𝓢] (p ⟶ q) ⋏ □(p ⟶ q) := FiniteContext.byAxm;
-  exact conj₃' ((conj₁' d) ⨀ (conj₁' (q := □p) (FiniteContext.byAxm))) <|
-    (axiomK' $ conj₂' d) ⨀ (conj₂' (p := p) (FiniteContext.byAxm));
+  exact and₃' ((and₁' d) ⨀ (and₁' (q := □p) (FiniteContext.byAxm))) <|
+    (axiomK' $ and₂' d) ⨀ (and₂' (p := p) (FiniteContext.byAxm));
 @[simp] lemma boxdot_axiomK! : 𝓢 ⊢! ⊡(p ⟶ q) ⟶ (⊡p ⟶ ⊡q) := ⟨boxdotAxiomK⟩
 
-def boxdotAxiomT : 𝓢 ⊢ ⊡p ⟶ p := by exact conj₁;
+def boxdotAxiomT : 𝓢 ⊢ ⊡p ⟶ p := by exact and₁;
 @[simp] lemma boxdot_axiomT! : 𝓢 ⊢! ⊡p ⟶ p := ⟨boxdotAxiomT⟩
 
-def boxdotNec (d : 𝓢 ⊢ p) : 𝓢 ⊢ ⊡p := conj₃' d (nec d)
+def boxdotNec (d : 𝓢 ⊢ p) : 𝓢 ⊢ ⊡p := and₃' d (nec d)
 lemma boxdot_nec! (d : 𝓢 ⊢! p) : 𝓢 ⊢! ⊡p := ⟨boxdotNec d.some⟩
 
-def boxdotBox : 𝓢 ⊢ ⊡p ⟶ □p := by exact conj₂;
+def boxdotBox : 𝓢 ⊢ ⊡p ⟶ □p := by exact and₂;
 lemma boxdot_box! : 𝓢 ⊢! ⊡p ⟶ □p := ⟨boxdotBox⟩
 
-def BoxBoxdot_BoxDotbox : 𝓢 ⊢ □⊡p ⟶ ⊡□p := impTrans distribute_box_and (impId _)
+def BoxBoxdot_BoxDotbox : 𝓢 ⊢ □⊡p ⟶ ⊡□p := impTrans'' distribute_box_and (impId _)
 lemma boxboxdot_boxdotbox : 𝓢 ⊢! □⊡p ⟶ ⊡□p := ⟨BoxBoxdot_BoxDotbox⟩
 
 def axiomT [HasAxiomT 𝓢] : 𝓢 ⊢ □p ⟶ p := HasAxiomT.T _
@@ -323,37 +324,37 @@ instance [HasAxiomFour 𝓢] (Γ : Context F 𝓢) : HasAxiomFour Γ := ⟨fun _
 
 def imply_BoxBoxdot_Box: 𝓢 ⊢  □⊡p ⟶ □p := by
   simp [boxdot];
-  exact impTrans distribute_box_and conj₁
+  exact impTrans'' distribute_box_and and₁
 @[simp] lemma imply_boxboxdot_box : 𝓢 ⊢! □⊡p ⟶ □p := ⟨imply_BoxBoxdot_Box⟩
 
 def iff_Box_BoxBoxdot [HasAxiomFour 𝓢] : 𝓢 ⊢ □p ⟷ □⊡p := by
   simp [boxdot];
   apply iffIntro;
-  . exact impTrans (implyRightAnd (impId _) axiomFour) collect_box_and
+  . exact impTrans'' (implyRightAnd (impId _) axiomFour) collect_box_and
   . exact imply_BoxBoxdot_Box;
 @[simp] lemma iff_box_boxboxdot! [HasAxiomFour 𝓢] : 𝓢 ⊢! □p ⟷ □⊡p := ⟨iff_Box_BoxBoxdot⟩
 
 def iff_Box_BoxdotBox [HasAxiomFour 𝓢] : 𝓢 ⊢ □p ⟷ ⊡□p := by
   simp [boxdot];
   apply iffIntro;
-  . exact impTrans (implyRightAnd (impId _) axiomFour) (impId _)
-  . exact conj₁
+  . exact impTrans'' (implyRightAnd (impId _) axiomFour) (impId _)
+  . exact and₁
 @[simp] lemma iff_box_boxdotbox! [HasAxiomFour 𝓢] : 𝓢 ⊢! □p ⟷ ⊡□p := ⟨iff_Box_BoxdotBox⟩
 
 def iff_Boxdot_BoxdotBoxdot [HasAxiomFour 𝓢] : 𝓢 ⊢ ⊡p ⟷ ⊡⊡p := by
   apply iffIntro;
-  . exact implyRightAnd (impId _) (impTrans boxdotBox (conj₁' iff_Box_BoxBoxdot));
-  . exact conj₁;
+  . exact implyRightAnd (impId _) (impTrans'' boxdotBox (and₁' iff_Box_BoxBoxdot));
+  . exact and₁;
 @[simp] lemma iff_boxdot_boxdotboxdot [HasAxiomFour 𝓢] : 𝓢 ⊢! ⊡p ⟷ ⊡⊡p := ⟨iff_Boxdot_BoxdotBoxdot⟩
 
-def boxdotAxiomFour [HasAxiomFour 𝓢] : 𝓢 ⊢ ⊡p ⟶ ⊡⊡p := conj₁' iff_Boxdot_BoxdotBoxdot
+def boxdotAxiomFour [HasAxiomFour 𝓢] : 𝓢 ⊢ ⊡p ⟶ ⊡⊡p := and₁' iff_Boxdot_BoxdotBoxdot
 @[simp] lemma boxdot_axiomFour! [HasAxiomFour 𝓢] : 𝓢 ⊢! ⊡p ⟶ ⊡⊡p := ⟨boxdotAxiomFour⟩
 
 
 def iff_box_boxdot [HasAxiomT 𝓢] [HasAxiomFour 𝓢] : 𝓢 ⊢ □p ⟷ ⊡p := by
   apply iffIntro;
   . exact implyRightAnd (axiomT) (impId _);
-  . exact conj₂;
+  . exact and₂;
 @[simp] lemma iff_box_boxdot! [HasAxiomT 𝓢] [HasAxiomFour 𝓢] : 𝓢 ⊢! □p ⟷ ⊡p := ⟨iff_box_boxdot⟩
 
 def axiomFive [HasAxiomFive 𝓢] : 𝓢 ⊢ ◇p ⟶ □◇p := HasAxiomFive.Five _
@@ -389,7 +390,7 @@ instance [HasAxiomVer 𝓢] : HasAxiomL 𝓢 := ⟨fun _ ↦ axiomL_of_Ver⟩
 
 -- axiomTriv : 𝓢 ⊢ p ⟶ □p はネセシテーションを無意味にするはず
 -- instance [Necessitation 𝓢] (Γ : FiniteContext F 𝓢) (h : 𝓢 ⊢ Γ.ctx.conj ⟶ □Γ.ctx.conj) : Necessitation Γ := ⟨
---   by intro p hp; exact ofDef $ impTrans h (implyBoxDistribute' $ toDef hp);
+--   by intro p hp; exact ofDef $ impTrans'' h (implyBoxDistribute' $ toDef hp);
 -- ⟩
 
 
@@ -405,9 +406,9 @@ private def axiomFour_of_L [HasAxiomL 𝓢] : 𝓢 ⊢ Axioms.Four p := by
     dsimp [boxdot];
     apply deduct';
     apply deduct;
-    exact conj₃' (FiniteContext.byAxm) (conj₁' (q := □□p) $ FiniteContext.byAxm);
-  have : 𝓢 ⊢ p ⟶ (□⊡p ⟶ ⊡p) := impTrans this (implyLeftReplace BoxBoxdot_BoxDotbox);
-  exact impTrans (impTrans (implyBoxDistribute' this) axiomL) (implyBoxDistribute' $ conj₂);
+    exact and₃' (FiniteContext.byAxm) (and₁' (q := □□p) $ FiniteContext.byAxm);
+  have : 𝓢 ⊢ p ⟶ (□⊡p ⟶ ⊡p) := impTrans'' this (implyLeftReplace BoxBoxdot_BoxDotbox);
+  exact impTrans'' (impTrans'' (implyBoxDistribute' this) axiomL) (implyBoxDistribute' $ and₂);
 instance [HasAxiomL 𝓢] : HasAxiomFour 𝓢 := ⟨fun _ ↦ axiomFour_of_L⟩
 
 def goedel2 [HasAxiomL 𝓢] : 𝓢 ⊢ (~(□⊥) ⟷ ~(□(~(□⊥))) : F) := by
@@ -415,14 +416,14 @@ def goedel2 [HasAxiomL 𝓢] : 𝓢 ⊢ (~(□⊥) ⟷ ~(□(~(□⊥))) : F) :=
   apply iffIntro;
   . apply implyBoxDistribute';
     exact efq;
-  . exact impTrans (by
+  . exact impTrans'' (by
       apply implyBoxDistribute';
-      exact conj₁' NegationEquiv.neg_equiv;
+      exact and₁' neg_equiv;
     ) axiomL;
 lemma goedel2! [HasAxiomL 𝓢] : 𝓢 ⊢! (~(□⊥) ⟷ ~(□(~(□⊥))) : F) := ⟨goedel2⟩
 
-def goedel2'.mp [HasAxiomL 𝓢] : 𝓢 ⊢ (~(□⊥) : F) → 𝓢 ⊢ ~(□(~(□⊥)) : F) := by intro h; exact (conj₁' goedel2) ⨀ h;
-def goedel2'.mpr [HasAxiomL 𝓢] : 𝓢 ⊢ ~(□(~(□⊥)) : F) → 𝓢 ⊢ (~(□⊥) : F) := by intro h; exact (conj₂' goedel2) ⨀ h;
+def goedel2'.mp [HasAxiomL 𝓢] : 𝓢 ⊢ (~(□⊥) : F) → 𝓢 ⊢ ~(□(~(□⊥)) : F) := by intro h; exact (and₁' goedel2) ⨀ h;
+def goedel2'.mpr [HasAxiomL 𝓢] : 𝓢 ⊢ ~(□(~(□⊥)) : F) → 𝓢 ⊢ (~(□⊥) : F) := by intro h; exact (and₂' goedel2) ⨀ h;
 lemma goedel2'! [HasAxiomL 𝓢] : 𝓢 ⊢! (~(□⊥) : F) ↔ 𝓢 ⊢! ~(□(~(□⊥)) : F) := ⟨λ ⟨h⟩ ↦ ⟨goedel2'.mp h⟩, λ ⟨h⟩ ↦ ⟨goedel2'.mpr h⟩⟩
 
 def axiomH [HasAxiomH 𝓢] : 𝓢 ⊢ □(□p ⟷ p) ⟶ □p := HasAxiomH.H _
@@ -431,11 +432,11 @@ def axiomH [HasAxiomH 𝓢] : 𝓢 ⊢ □(□p ⟷ p) ⟶ □p := HasAxiomH.H _
 instance [HasAxiomH 𝓢] (Γ : FiniteContext F 𝓢) : HasAxiomH Γ := ⟨fun _ ↦ FiniteContext.of axiomH⟩
 instance [HasAxiomH 𝓢] (Γ : Context F 𝓢) : HasAxiomH Γ := ⟨fun _ ↦ Context.of axiomH⟩
 
-open LoebRule
-lemma LoebRule.loeb! [LoebRule 𝓢] : 𝓢 ⊢! □p ⟶ p → 𝓢 ⊢! p := by rintro ⟨hp⟩; exact ⟨loeb hp⟩
+alias loeb := LoebRule.loeb
+lemma loeb! [LoebRule 𝓢] : 𝓢 ⊢! □p ⟶ p → 𝓢 ⊢! p := by rintro ⟨hp⟩; exact ⟨loeb hp⟩
 
-open HenkinRule
-lemma HenkinRule.henkin! [HenkinRule 𝓢] : 𝓢 ⊢! □p ⟷ p → 𝓢 ⊢! p := by rintro ⟨hp⟩; exact ⟨henkin hp⟩
+alias henkin := HenkinRule.henkin
+lemma henkin! [HenkinRule 𝓢] : 𝓢 ⊢! □p ⟷ p → 𝓢 ⊢! p := by rintro ⟨hp⟩; exact ⟨henkin hp⟩
 
 private def axiomL_of_K4Loeb [K4Loeb 𝓢] : 𝓢 ⊢ Axioms.L p := by
   dsimp [Axioms.L];
@@ -453,10 +454,10 @@ instance [K4Henkin 𝓢] : LoebRule 𝓢 where
   loeb h := h ⨀ (henkin $ iffIntro (axiomK' $ nec h) axiomFour);
 
 instance [K4H 𝓢] : HenkinRule 𝓢 where
-  henkin h := (conj₁' h) ⨀ (axiomH ⨀ nec h);
+  henkin h := (and₁' h) ⨀ (axiomH ⨀ nec h);
 
 private def axiomH_of_GL [GL 𝓢] : 𝓢 ⊢ Axioms.H p := by
-  exact impTrans (implyBoxDistribute' $ conj₁) axiomL
+  exact impTrans'' (implyBoxDistribute' $ and₁) axiomL
 instance [GL 𝓢] : HasAxiomH 𝓢 := ⟨fun _ ↦ axiomH_of_GL⟩
 
 end LO.System

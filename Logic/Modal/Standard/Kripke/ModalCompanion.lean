@@ -64,20 +64,20 @@ lemma axiomTc_GTranslate! [System.K4 m𝓓] : m𝓓 ⊢! pᵍ ⟶ □pᵍ := by
   | hverum => exact dhyp! (nec! verum!);
   | hand p q ihp ihq =>
     simp only [GoedelTranslation.and_def];
-    exact imp_trans! (andReplace! ihp ihq) collect_box_and!
+    exact imp_trans''! (and_replace! ihp ihq) collect_box_and!
   | hor p q ihp ihq =>
     simp only [GoedelTranslation.or_def];
-    exact imp_trans! (disj₃''! (implyOrLeft'! ihp) (implyOrRight'! ihq)) collect_box_or!
+    exact imp_trans''! (or₃''! (imply_or_left'! ihp) (imply_or_right'! ihq)) collect_box_or!
 
 instance [System.S4 m𝓓] : System.K4 m𝓓 where
 
 private lemma provable_efq_of_provable_S4.case_imply₁ [System.K4 m𝓓] : m𝓓 ⊢! (p ⟶ q ⟶ p)ᵍ := by
   simp only [GoedelTranslation.imp_def];
-  exact nec! $ imp_trans! axiomTc_GTranslate! $ axiomK'! $ nec! $ imply₁!;
+  exact nec! $ imp_trans''! axiomTc_GTranslate! $ axiomK'! $ nec! $ imply₁!;
 
 private lemma provable_efq_of_provable_S4.case_imply₂ [System.S4 m𝓓] : m𝓓 ⊢! ((p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r)ᵍ := by
   simp only [GoedelTranslation.imp_def];
-  refine nec! $ imp_trans! (imp_trans! (axiomK'! $ nec! ?b) axiomFour!) $ axiomK'! $ nec! $ imp_trans! (axiomK'! $ nec! imply₂!) axiomK!;
+  refine nec! $ imp_trans''! (imp_trans''! (axiomK'! $ nec! ?b) axiomFour!) $ axiomK'! $ nec! $ imp_trans''! (axiomK'! $ nec! imply₂!) axiomK!;
   apply provable_iff_provable.mpr;
   apply deduct_iff.mpr;
   apply deduct_iff.mpr;
@@ -86,13 +86,13 @@ private lemma provable_efq_of_provable_S4.case_imply₂ [System.S4 m𝓓] : m�
   have : [pᵍ, pᵍ ⟶ □(qᵍ ⟶ rᵍ)] ⊢[m𝓓]! □(qᵍ ⟶ rᵍ) := (by assumption) ⨀ (by assumption);
   exact axiomT'! this;
 
-private lemma provable_efq_of_provable_S4.case_conj₃ [System.K4 m𝓓] : m𝓓 ⊢! (p ⟶ q ⟶ p ⋏ q)ᵍ := by
+private lemma provable_efq_of_provable_S4.case_and₃ [System.K4 m𝓓] : m𝓓 ⊢! (p ⟶ q ⟶ p ⋏ q)ᵍ := by
   simp only [GoedelTranslation.imp_def, GoedelTranslation.and_def];
-  exact nec! $ imp_trans! axiomTc_GTranslate! $ axiomK'! $ nec! $ conj₃!
+  exact nec! $ imp_trans''! axiomTc_GTranslate! $ axiomK'! $ nec! $ and₃!
 
-private lemma provable_efq_of_provable_S4.case_disj₃ [System.K4 m𝓓] : m𝓓 ⊢! (((p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r)))ᵍ := by
+private lemma provable_efq_of_provable_S4.case_or₃ [System.K4 m𝓓] : m𝓓 ⊢! (((p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r)))ᵍ := by
   simp only [GoedelTranslation.imp_def, GoedelTranslation.or_def];
-  exact nec! $ imp_trans! axiomFour! $ axiomK'! $ nec! $ imp_trans! (axiomK'! $ nec! $ disj₃!) axiomK!;
+  exact nec! $ imp_trans''! axiomFour! $ axiomK'! $ nec! $ imp_trans''! (axiomK'! $ nec! $ or₃!) axiomK!;
 
 open provable_efq_of_provable_S4 in
 lemma provable_efq_of_provable_S4 (h : 𝐈𝐧𝐭 ⊢! p) : 𝐒𝟒 ⊢! pᵍ := by
@@ -106,12 +106,12 @@ lemma provable_efq_of_provable_S4 (h : 𝐈𝐧𝐭 ⊢! p) : 𝐒𝟒 ⊢! pᵍ
   | verum => apply verum!;
   | imply₁ => exact case_imply₁;
   | imply₂ => exact case_imply₂;
-  | conj₁ => simp only [GoedelTranslation.imp_def, GoedelTranslation.and_def]; exact nec! conj₁!;
-  | conj₂ => simp only [GoedelTranslation.imp_def, GoedelTranslation.and_def]; exact nec! conj₂!;
-  | conj₃ => exact case_conj₃;
-  | disj₁ => simp only [GoedelTranslation.imp_def, GoedelTranslation.or_def]; exact nec! disj₁!;
-  | disj₂ => simp only [GoedelTranslation.imp_def, GoedelTranslation.or_def]; exact nec! disj₂!;
-  | disj₃ => exact case_disj₃;
+  | and₁ => simp only [GoedelTranslation.imp_def, GoedelTranslation.and_def]; exact nec! and₁!;
+  | and₂ => simp only [GoedelTranslation.imp_def, GoedelTranslation.and_def]; exact nec! and₂!;
+  | and₃ => exact case_and₃;
+  | or₁ => simp only [GoedelTranslation.imp_def, GoedelTranslation.or_def]; exact nec! or₁!;
+  | or₂ => simp only [GoedelTranslation.imp_def, GoedelTranslation.or_def]; exact nec! or₂!;
+  | or₃ => exact case_or₃;
 
 open Superintuitionistic.Kripke
 open Superintuitionistic.Formula.Kripke
@@ -156,7 +156,7 @@ instance : ModalCompanion (α := α) 𝐈𝐧𝐭 𝐒𝟒 := ⟨provable_efq_if
 
 lemma dp_of_mdp [ModalDisjunctive m𝓓] [ModalCompanion i𝓓 m𝓓] [S4 m𝓓] : i𝓓 ⊢! p ⋎ q → i𝓓 ⊢! p ∨ i𝓓 ⊢! q := by
     intro hpq;
-    have : m𝓓 ⊢! □pᵍ ⋎ □qᵍ := disj₃'! (implyOrLeft'! axiomTc_GTranslate!) (implyOrRight'! axiomTc_GTranslate!) (by simpa using ModalCompanion.companion.mp hpq);
+    have : m𝓓 ⊢! □pᵍ ⋎ □qᵍ := or₃'''! (imply_or_left'! axiomTc_GTranslate!) (imply_or_right'! axiomTc_GTranslate!) (by simpa using ModalCompanion.companion.mp hpq);
     cases ModalDisjunctive.modal_disjunctive this with
     | inl h => left; exact ModalCompanion.companion.mpr h;
     | inr h => right; exact ModalCompanion.companion.mpr h;

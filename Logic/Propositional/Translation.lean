@@ -31,12 +31,12 @@ def Deduction.toClassical {T : Theory α} {p} : T ⊢ p → (T : Classical.Theor
   | efq _ _                    => by simp; prover
   | imply₁ _ _ _               => by simp; prover
   | imply₂ _ _ _ _             => by simp; prover
-  | conj₁ _ _ _                => by simp; prover
-  | conj₂ _ _ _                => by simp; prover
-  | conj₃ _ _ _                => by simp; prover
-  | disj₁ _ _ _                => by simp; prover
-  | disj₂ _ _ _                => by simp; prover
-  | disj₃ _ _ _ _              => by simp; prover
+  | and₁ _ _ _                => by simp; prover
+  | and₂ _ _ _                => by simp; prover
+  | and₃ _ _ _                => by simp; prover
+  | or₁ _ _ _                => by simp; prover
+  | or₂ _ _ _                => by simp; prover
+  | or₃ _ _ _ _              => by simp; prover
 -/
 
 end Superintuitionistic

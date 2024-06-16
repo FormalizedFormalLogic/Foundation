@@ -31,12 +31,12 @@ instance (𝓣 : S) : Classical 𝓣 where
           (closed p (by simp) (by simp))
           (closed q (by simp) (by simp)))
         (closed r (by simp) (by simp)))
-  conj₁ := fun p q ↦ of <| implyRight <| andLeft <| closed p (by simp) (by simp)
-  conj₂ := fun p q ↦ of <| implyRight <| andLeft <| closed q (by simp) (by simp)
-  conj₃ := fun p q ↦ of <| implyRight <| implyRight <| andRight (closed p (by simp) (by simp)) (closed q (by simp) (by simp))
-  disj₁ := fun p q ↦ of <| implyRight <| orRight <| closed p (by simp) (by simp)
-  disj₂ := fun p q ↦ of <| implyRight <| orRight <| closed q (by simp) (by simp)
-  disj₃ := fun p q r ↦ of <| implyRight <| implyRight <| implyRight
+  and₁ := fun p q ↦ of <| implyRight <| andLeft <| closed p (by simp) (by simp)
+  and₂ := fun p q ↦ of <| implyRight <| andLeft <| closed q (by simp) (by simp)
+  and₃ := fun p q ↦ of <| implyRight <| implyRight <| andRight (closed p (by simp) (by simp)) (closed q (by simp) (by simp))
+  or₁  := fun p q ↦ of <| implyRight <| orRight <| closed p (by simp) (by simp)
+  or₂  := fun p q ↦ of <| implyRight <| orRight <| closed q (by simp) (by simp)
+  or₃  := fun p q r ↦ of <| implyRight <| implyRight <| implyRight
     <| orLeft
       (wkL [p ⟶ r, p] (by simp) <| implyLeft (closed p (by simp) (by simp)) (closed r (by simp) (by simp)))
       (wkL [q ⟶ r, q] (by simp) <| implyLeft (closed q (by simp) (by simp)) (closed r (by simp) (by simp)))
