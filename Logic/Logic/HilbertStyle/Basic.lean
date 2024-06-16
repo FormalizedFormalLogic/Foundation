@@ -82,17 +82,14 @@ class Classical extends Minimal 𝓢, HasDNE 𝓢
 variable {𝓢}
 
 
-namespace ModusPonens
+alias mdp := ModusPonens.mdp
+infixl:90 "⨀" => mdp
 
-infixl:90 "⨀" => ModusPonens.mdp
 
 lemma mdp! [ModusPonens 𝓢] : 𝓢 ⊢! p ⟶ q → 𝓢 ⊢! p → 𝓢 ⊢! q := by
   rintro ⟨hpq⟩ ⟨hp⟩;
   exact ⟨hpq ⨀ hp⟩
-
-infixl:90 "⨀" => ModusPonens.mdp!
-
-end ModusPonens
+infixl:90 "⨀" => mdp!
 
 
 variable [Minimal 𝓢]
@@ -181,12 +178,11 @@ lemma or₁'! (d : 𝓢 ⊢! p) : 𝓢 ⊢! p ⋎ q := ⟨or₁' d.some⟩
 def or₂' (d : 𝓢 ⊢ q) : 𝓢 ⊢ p ⋎ q := or₂ ⨀ d
 lemma or₂'! (d : 𝓢 ⊢! q) : 𝓢 ⊢! p ⋎ q := ⟨or₂' d.some⟩
 
-def or₃' (d₁ : 𝓢 ⊢ p ⟶ r) (d₂ : 𝓢 ⊢ q ⟶ r) (d₃ : 𝓢 ⊢ p ⋎ q) : 𝓢 ⊢ r := or₃ ⨀ d₁ ⨀ d₂ ⨀ d₃
-lemma or₃'! (d₁ : 𝓢 ⊢! p ⟶ r) (d₂ : 𝓢 ⊢! q ⟶ r) (d₃ : 𝓢 ⊢! p ⋎ q) : 𝓢 ⊢! r := ⟨or₃' d₁.some d₂.some d₃.some⟩
-
--- TODO: rename `or₃''` to `or₃'`, and `or₃'` to `or₃''`
 def or₃'' (d₁ : 𝓢 ⊢ p ⟶ r) (d₂ : 𝓢 ⊢ q ⟶ r) : 𝓢 ⊢ p ⋎ q ⟶ r := or₃ ⨀ d₁ ⨀ d₂
 lemma or₃''! (d₁ : 𝓢 ⊢! p ⟶ r) (d₂ : 𝓢 ⊢! q ⟶ r) : 𝓢 ⊢! p ⋎ q ⟶ r := ⟨or₃'' d₁.some d₂.some⟩
+
+def or₃''' (d₁ : 𝓢 ⊢ p ⟶ r) (d₂ : 𝓢 ⊢ q ⟶ r) (d₃ : 𝓢 ⊢ p ⋎ q) : 𝓢 ⊢ r := or₃ ⨀ d₁ ⨀ d₂ ⨀ d₃
+lemma or₃'''! (d₁ : 𝓢 ⊢! p ⟶ r) (d₂ : 𝓢 ⊢! q ⟶ r) (d₃ : 𝓢 ⊢! p ⋎ q) : 𝓢 ⊢! r := ⟨or₃''' d₁.some d₂.some d₃.some⟩
 
 def impId (p : F) : 𝓢 ⊢ p ⟶ p := Minimal.imply₂ p (p ⟶ p) p ⨀ imply₁ ⨀ imply₁
 @[simp] def imp_id! : 𝓢 ⊢! p ⟶ p := ⟨impId p⟩
@@ -195,11 +191,12 @@ def iffId (p : F) : 𝓢 ⊢ p ⟷ p := and₃' (impId p) (impId p)
 @[simp] def iff_id! : 𝓢 ⊢! p ⟷ p := ⟨iffId p⟩
 
 
-namespace NegationEquiv
+section NegationEquiv
 
 variable [System.NegationEquiv 𝓢]
 
-@[simp] lemma neg_equiv! : 𝓢 ⊢! ~p ⟷ (p ⟶ ⊥) := ⟨NegationEquiv.neg_equiv⟩
+alias neg_equiv := NegationEquiv.neg_equiv
+@[simp] lemma neg_equiv! : 𝓢 ⊢! ~p ⟷ (p ⟶ ⊥) := ⟨neg_equiv⟩
 
 def neg_equiv'.mp : 𝓢 ⊢ ~p → 𝓢 ⊢ p ⟶ ⊥ := λ h => (and₁' neg_equiv) ⨀ h
 def neg_equiv'.mpr : 𝓢 ⊢ p ⟶ ⊥ → 𝓢 ⊢ ~p := λ h => (and₂' neg_equiv) ⨀ h
@@ -229,25 +226,25 @@ lemma mdp₃! (hqr : 𝓢 ⊢! p ⟶ q ⟶ r ⟶ s ⟶ t) (hq : 𝓢 ⊢! p ⟶ 
 infixl:90 "⨀₃" => mdp₃
 infixl:90 "⨀₃" => mdp₃!
 
-def impTrans (bpq : 𝓢 ⊢ p ⟶ q) (bqr : 𝓢 ⊢ q ⟶ r) : 𝓢 ⊢ p ⟶ r := imply₂ ⨀ dhyp p bqr ⨀ bpq
-lemma imp_trans! (hpq : 𝓢 ⊢! p ⟶ q) (hqr : 𝓢 ⊢! q ⟶ r) : 𝓢 ⊢! p ⟶ r := ⟨impTrans hpq.some hqr.some⟩
+def impTrans'' (bpq : 𝓢 ⊢ p ⟶ q) (bqr : 𝓢 ⊢ q ⟶ r) : 𝓢 ⊢ p ⟶ r := imply₂ ⨀ dhyp p bqr ⨀ bpq
+lemma imp_trans''! (hpq : 𝓢 ⊢! p ⟶ q) (hqr : 𝓢 ⊢! q ⟶ r) : 𝓢 ⊢! p ⟶ r := ⟨impTrans'' hpq.some hqr.some⟩
 
-lemma unprovable_imp_trans! (hpq : 𝓢 ⊢! p ⟶ q) : 𝓢 ⊬! p ⟶ r → 𝓢 ⊬! q ⟶ r := by
+lemma unprovable_imp_trans''! (hpq : 𝓢 ⊢! p ⟶ q) : 𝓢 ⊬! p ⟶ r → 𝓢 ⊬! q ⟶ r := by
   contrapose; simp [neg_neg];
-  exact imp_trans! hpq;
+  exact imp_trans''! hpq;
 
-def iffTrans (h₁ : 𝓢 ⊢ p ⟷ q) (h₂ : 𝓢 ⊢ q ⟷ r) : 𝓢 ⊢ p ⟷ r := by
+def iffTrans'' (h₁ : 𝓢 ⊢ p ⟷ q) (h₂ : 𝓢 ⊢ q ⟷ r) : 𝓢 ⊢ p ⟷ r := by
   apply iffIntro;
-  . exact impTrans (and₁' h₁) (and₁' h₂);
-  . exact impTrans (and₂' h₂) (and₂' h₁);
-lemma iff_trans! (h₁ : 𝓢 ⊢! p ⟷ q) (h₂ : 𝓢 ⊢! q ⟷ r) : 𝓢 ⊢! p ⟷ r := ⟨iffTrans h₁.some h₂.some⟩
+  . exact impTrans'' (and₁' h₁) (and₁' h₂);
+  . exact impTrans'' (and₂' h₂) (and₂' h₁);
+lemma iff_trans''! (h₁ : 𝓢 ⊢! p ⟷ q) (h₂ : 𝓢 ⊢! q ⟷ r) : 𝓢 ⊢! p ⟷ r := ⟨iffTrans'' h₁.some h₂.some⟩
 
 lemma unprovable_iff! (H : 𝓢 ⊢! p ⟷ q) : 𝓢 ⊬! p ↔ 𝓢 ⊬! q := by
   constructor;
   . intro hp hq; have := and₂'! H ⨀ hq; contradiction;
   . intro hq hp; have := and₁'! H ⨀ hp; contradiction;
 
-def imply₁₁ (p q r : F) : 𝓢 ⊢ p ⟶ q ⟶ r ⟶ p := impTrans (Minimal.imply₁ p r) (Minimal.imply₁ (r ⟶ p) q)
+def imply₁₁ (p q r : F) : 𝓢 ⊢ p ⟶ q ⟶ r ⟶ p := impTrans'' (Minimal.imply₁ p r) (Minimal.imply₁ (r ⟶ p) q)
 @[simp] lemma imply₁₁! (p q r : F) : 𝓢 ⊢! p ⟶ q ⟶ r ⟶ p := ⟨imply₁₁ p q r⟩
 
 def generalConj [DecidableEq F] {Γ : List F} {p : F} (h : p ∈ Γ) : 𝓢 ⊢ Γ.conj ⟶ p :=
@@ -258,7 +255,7 @@ def generalConj [DecidableEq F] {Γ : List F} {p : F} (h : p ∈ Γ) : 𝓢 ⊢ 
     then cast (by simp [e]) (and₁ (p := p) (q := Γ.conj))
     else
       have : p ∈ Γ := by simpa [e] using h
-      impTrans and₂ (generalConj this)
+      impTrans'' and₂ (generalConj this)
 
 lemma generalConj! [DecidableEq F] {Γ : List F} {p : F} (h : p ∈ Γ) : 𝓢 ⊢! Γ.conj ⟶ p := ⟨generalConj h⟩
 
@@ -269,17 +266,17 @@ def implyAnd (bq : 𝓢 ⊢ p ⟶ q) (br : 𝓢 ⊢ p ⟶ r) : 𝓢 ⊢ p ⟶ q 
 
 
 def andComm (p q : F) : 𝓢 ⊢ p ⋏ q ⟶ q ⋏ p := implyAnd and₂ and₁
-lemma andComm! : 𝓢 ⊢! p ⋏ q ⟶ q ⋏ p := ⟨andComm p q⟩
+lemma and_comm! : 𝓢 ⊢! p ⋏ q ⟶ q ⋏ p := ⟨andComm p q⟩
 
 def andComm' (h : 𝓢 ⊢ p ⋏ q) : 𝓢 ⊢ q ⋏ p := andComm _ _ ⨀ h
-lemma andComm'! (h : 𝓢 ⊢! p ⋏ q) : 𝓢 ⊢! q ⋏ p := ⟨andComm' h.some⟩
+lemma and_comm'! (h : 𝓢 ⊢! p ⋏ q) : 𝓢 ⊢! q ⋏ p := ⟨andComm' h.some⟩
 
 
 def iffComm (p q : F) : 𝓢 ⊢ (p ⟷ q) ⟶ (q ⟷ p) := andComm _ _
-lemma iffComm! : 𝓢 ⊢! (p ⟷ q) ⟶ (q ⟷ p) := ⟨iffComm p q⟩
+lemma iff_comm! : 𝓢 ⊢! (p ⟷ q) ⟶ (q ⟷ p) := ⟨iffComm p q⟩
 
 def iffComm' (h : 𝓢 ⊢ p ⟷ q) : 𝓢 ⊢ q ⟷ p := iffComm _ _ ⨀ h
-lemma iffComm'! (h : 𝓢 ⊢! p ⟷ q) : 𝓢 ⊢! q ⟷ p := ⟨iffComm' h.some⟩
+lemma iff_comm'! (h : 𝓢 ⊢! p ⟷ q) : 𝓢 ⊢! q ⟷ p := ⟨iffComm' h.some⟩
 
 
 def andImplyIffImplyImply (p q r : F) : 𝓢 ⊢ (p ⋏ q ⟶ r) ⟷ (p ⟶ q ⟶ r) := by
@@ -289,12 +286,12 @@ def andImplyIffImplyImply (p q r : F) : 𝓢 ⊢ (p ⋏ q ⟶ r) ⟷ (p ⟶ q �
     imply₁ ⨀₂ (dhyp (p ⟶ q ⟶ r) and₁) ⨀₂ (dhyp (p ⟶ q ⟶ r) and₂);
   exact iffIntro b₁ b₂
 
-lemma andImplyIffImplyImply! : 𝓢 ⊢! (p ⋏ q ⟶ r) ⟷ (p ⟶ q ⟶ r) := ⟨andImplyIffImplyImply p q r⟩
+lemma and_imply_iff_imply_imply! : 𝓢 ⊢! (p ⋏ q ⟶ r) ⟷ (p ⟶ q ⟶ r) := ⟨andImplyIffImplyImply p q r⟩
 
 def andImplyIffImplyImply'.mp (d : 𝓢 ⊢ p ⋏ q ⟶ r) : 𝓢 ⊢ p ⟶ q ⟶ r := (and₁' $ andImplyIffImplyImply p q r) ⨀ d
 def andImplyIffImplyImply'.mpr (d : 𝓢 ⊢ p ⟶ q ⟶ r) : 𝓢 ⊢ p ⋏ q ⟶ r := (and₂' $ andImplyIffImplyImply p q r) ⨀ d
 
-lemma andImplyIffImplyImply'! : (𝓢 ⊢! p ⋏ q ⟶ r) ↔ (𝓢 ⊢! p ⟶ q ⟶ r) := by
+lemma and_imply_iff_imply_imply'! : (𝓢 ⊢! p ⋏ q ⟶ r) ↔ (𝓢 ⊢! p ⟶ q ⟶ r) := by
   apply Iff.intro;
   . intro ⟨h⟩; exact ⟨andImplyIffImplyImply'.mp h⟩
   . intro ⟨h⟩; exact ⟨andImplyIffImplyImply'.mpr h⟩
@@ -324,7 +321,7 @@ def generalConj' [DecidableEq F] {Γ : List F} {p : F} (h : p ∈ Γ) : 𝓢 ⊢
     by_cases e : p = q;
     . rw [←e]; exact and₁;
     . have : p ∈ (r :: Γ) := by simpa [e] using h;
-      exact impTrans and₂ (generalConj' this);
+      exact impTrans'' and₂ (generalConj' this);
 
 def conjIntro' [DecidableEq F] (Γ : List F) (b : (p : F) → p ∈ Γ → 𝓢 ⊢ p) : 𝓢 ⊢ Γ.conj' :=
   match Γ with

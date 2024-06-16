@@ -111,15 +111,15 @@ def prov_distribute_iff (h : T ⊢! σ ⟷ τ) : T₀ ⊢! ⦍β⦎σ ⟷ ⦍β�
 def prov_distribute_and : T₀ ⊢! ⦍β⦎(σ ⋏ τ) ⟶ ⦍β⦎σ ⋏ ⦍β⦎τ := by
   have h₁ : T₀ ⊢! ⦍β⦎(σ ⋏ τ) ⟶ ⦍β⦎σ := D2' <| D1 and₁!;
   have h₂ : T₀ ⊢! ⦍β⦎(σ ⋏ τ) ⟶ ⦍β⦎τ := D2' <| D1 and₂!;
-  exact implyRightAnd! h₁ h₂;
+  exact imply_right_and! h₁ h₂;
 
 def prov_distribute_and! : T₀ ⊢! ⦍β⦎(σ ⋏ τ) → T₀ ⊢! ⦍β⦎σ ⋏ ⦍β⦎τ := λ h => prov_distribute_and ⨀ h
 
 def prov_collect_and : T₀ ⊢! ⦍β⦎σ ⋏ ⦍β⦎τ ⟶ ⦍β⦎(σ ⋏ τ) := by
   have h₁ : T₀ ⊢! ⦍β⦎σ ⟶ ⦍β⦎(τ ⟶ σ ⋏ τ) := prov_distribute_imply $ and₃!;
   have h₂ : T₀ ⊢! ⦍β⦎(τ ⟶ σ ⋏ τ) ⟶ ⦍β⦎τ ⟶ ⦍β⦎(σ ⋏ τ) := D2;
-  apply andImplyIffImplyImply'!.mpr;
-  exact imp_trans! h₁ h₂;
+  apply and_imply_iff_imply_imply'!.mpr;
+  exact imp_trans''! h₁ h₂;
 
 end
 
@@ -132,7 +132,7 @@ variable [DecidableEq (Sentence L)] [Semiterm.Operator.GoedelNumber L (Sentence 
          [β.HilbertBernays T₀ T]
          {σ τ : Sentence L}
 
-open LO.System LO.System.NegationEquiv
+open LO.System
 open Diagonalization
 open ProvabilityPredicate
 
@@ -206,17 +206,17 @@ lemma formalized_consistent_of_existance_unprovable : T₀ ⊢! ~⦍β⦎σ ⟶ 
 private lemma consistency_lemma_1 [T₀ ≼ U] [β.HilbertBernays T₀ U] : (U ⊢! Con⦍β⦎ ⟶ ~⦍β⦎σ) ↔ (U ⊢! ⦍β⦎σ ⟶ ⦍β⦎(~σ)) := by
   constructor;
   . intro H;
-    exact contra₃'! $ imp_trans! (Subtheory.prf! (𝓢 := T₀) formalized_consistent_of_existance_unprovable) H;
+    exact contra₃'! $ imp_trans''! (Subtheory.prf! (𝓢 := T₀) formalized_consistent_of_existance_unprovable) H;
   . intro H;
     apply contra₀'!;
-    have : T₀ ⊢! ⦍β⦎σ ⋏ ⦍β⦎(~σ) ⟶ ⦍β⦎⊥ := imp_trans! prov_collect_and $ prov_distribute_imply no_both!;
-    have : U ⊢! ⦍β⦎σ ⟶ ⦍β⦎(~σ) ⟶ ⦍β⦎⊥ := Subtheory.prf! $ andImplyIffImplyImply'!.mp $ this;
+    have : T₀ ⊢! ⦍β⦎σ ⋏ ⦍β⦎(~σ) ⟶ ⦍β⦎⊥ := imp_trans''! prov_collect_and $ prov_distribute_imply no_both!;
+    have : U ⊢! ⦍β⦎σ ⟶ ⦍β⦎(~σ) ⟶ ⦍β⦎⊥ := Subtheory.prf! $ and_imply_iff_imply_imply'!.mp $ this;
     exact this ⨀₁ H;
 
 private lemma consistency_lemma_2 : T₀ ⊢! (⦍β⦎σ ⟶ ⦍β⦎(~σ)) ⟶ ⦍β⦎σ ⟶ ⦍β⦎⊥ := by
-  have : T ⊢! σ ⟶ ~σ ⟶ ⊥ := andImplyIffImplyImply'!.mp no_both!
+  have : T ⊢! σ ⟶ ~σ ⟶ ⊥ := and_imply_iff_imply_imply'!.mp no_both!
   have : T₀ ⊢! ⦍β⦎σ ⟶ ⦍β⦎(~σ ⟶ ⊥)  := prov_distribute_imply this;
-  have : T₀ ⊢! ⦍β⦎σ ⟶ (⦍β⦎(~σ) ⟶ ⦍β⦎⊥) := imp_trans! this D2;
+  have : T₀ ⊢! ⦍β⦎σ ⟶ (⦍β⦎(~σ) ⟶ ⦍β⦎⊥) := imp_trans''! this D2;
 
   -- TODO: more simple proof
   apply FiniteContext.deduct'!;
@@ -231,10 +231,10 @@ theorem formalized_unprovable_goedel : T ⊢! Con⦍β⦎ ⟶ ~⦍β⦎γ := by
   have h₁ : T₀ ⊢! ⦍β⦎γ ⟶ ⦍β⦎⦍β⦎γ := D3;
   have h₂ : T ⊢! ⦍β⦎γ ⟶ ~γ := Subtheory.prf! $ contra₁'! $ and₁'! goedel_spec;
   have h₃ : T₀ ⊢! ⦍β⦎⦍β⦎γ ⟶ ⦍β⦎(~γ) := prov_distribute_imply h₂;
-  exact Subtheory.prf! $ contra₀'! $ consistency_lemma_2 ⨀ (imp_trans! h₁ h₃);
+  exact Subtheory.prf! $ contra₀'! $ consistency_lemma_2 ⨀ (imp_trans''! h₁ h₃);
 
 theorem iff_goedel_consistency : T ⊢! γ ⟷ Con⦍β⦎
-  := iff_trans! goedel_specAux₁ $ iff_intro! (Subtheory.prf! (𝓢 := T₀) formalized_consistent_of_existance_unprovable) formalized_unprovable_goedel
+  := iff_trans''! goedel_specAux₁ $ iff_intro! (Subtheory.prf! (𝓢 := T₀) formalized_consistent_of_existance_unprovable) formalized_unprovable_goedel
 
 theorem unprovable_consistency [System.Consistent T] : T ⊬! Con⦍β⦎
   := unprovable_iff! iff_goedel_consistency |>.mp $ unprovable_goedel (T₀ := T₀)
@@ -262,14 +262,14 @@ lemma kreisel_spec (σ : Sentence L) : T₀ ⊢! κ(σ) ⟷ (⦍β⦎(κ(σ)) �
   simp [kreisel, ←Rew.hom_comp_app, Rew.substs_comp_substs];
   rfl;
 
-private lemma kreisel_specAux₁ (σ : Sentence L) : T₀ ⊢! ⦍β⦎κ(σ) ⟶ ⦍β⦎σ := (imp_trans! (D2 ⨀ (D1 (Subtheory.prf! $ and₁'! (kreisel_spec σ)))) D2) ⨀₁ D3
+private lemma kreisel_specAux₁ (σ : Sentence L) : T₀ ⊢! ⦍β⦎κ(σ) ⟶ ⦍β⦎σ := (imp_trans''! (D2 ⨀ (D1 (Subtheory.prf! $ and₁'! (kreisel_spec σ)))) D2) ⨀₁ D3
 
 private lemma kreisel_specAux₂ (σ : Sentence L) : T₀ ⊢! (⦍β⦎κ(σ) ⟶ σ) ⟶ κ(σ) := and₂'! (kreisel_spec σ)
 
 end KrieselSentence
 
 theorem loeb_theorm [β.HilbertBernays T₀ T] (H : T ⊢! ⦍β⦎σ ⟶ σ) : T ⊢! σ := by
-  have d₁ : T ⊢! ⦍β⦎κ(σ) ⟶ σ := imp_trans! (Subtheory.prf! (kreisel_specAux₁ σ)) H;
+  have d₁ : T ⊢! ⦍β⦎κ(σ) ⟶ σ := imp_trans''! (Subtheory.prf! (kreisel_specAux₁ σ)) H;
   have d₂ : T ⊢! ⦍β⦎κ(σ)      := Subtheory.prf! (𝓢 := T₀) (D1 $ Subtheory.prf! (kreisel_specAux₂ σ) ⨀ d₁);
   exact d₁ ⨀ d₂;
 
@@ -278,9 +278,9 @@ instance [β.HilbertBernays T₀ T] : Loeb β T₀ T := ⟨loeb_theorm (T₀ := 
 
 theorem formalized_loeb_theorem [β.HilbertBernays T₀ T] : T₀ ⊢! ⦍β⦎(⦍β⦎σ ⟶ σ) ⟶ ⦍β⦎σ := by
   have hκ₁ : T₀ ⊢! ⦍β⦎(κ(σ)) ⟶ ⦍β⦎σ := kreisel_specAux₁ σ;
-  have : T₀ ⊢! (⦍β⦎σ ⟶ σ) ⟶ (⦍β⦎κ(σ) ⟶ σ) := imply_left_replace! hκ₁;
-  have : T ⊢! (⦍β⦎σ ⟶ σ) ⟶ κ(σ) := Subtheory.prf! (𝓢 := T₀) $ imp_trans! this (kreisel_specAux₂ σ);
-  exact imp_trans! (D2 ⨀ (D1 this)) hκ₁;
+  have : T₀ ⊢! (⦍β⦎σ ⟶ σ) ⟶ (⦍β⦎κ(σ) ⟶ σ) := replace_imply_left! hκ₁;
+  have : T ⊢! (⦍β⦎σ ⟶ σ) ⟶ κ(σ) := Subtheory.prf! (𝓢 := T₀) $ imp_trans''! this (kreisel_specAux₂ σ);
+  exact imp_trans''! (D2 ⨀ (D1 this)) hκ₁;
 
 instance [β.HilbertBernays T₀ T] : FormalizedLoeb β T₀ T := ⟨formalized_loeb_theorem (T₀ := T₀) (T := T)⟩
 
@@ -304,7 +304,7 @@ lemma formalized_unrefutable_goedel [β.HilbertBernays T₀ T] [β.GoedelSound T
   : T ⊬! Con⦍β⦎ ⟶ ~⦍β⦎(~γ) := by
   by_contra hC;
   have : T ⊬! Con⦍β⦎ ⟶ ~⦍β⦎(~Con⦍β⦎)  := formalized_unprovable_not_consistency (T₀ := T₀);
-  have : T ⊢! Con⦍β⦎ ⟶ ~⦍β⦎(~Con⦍β⦎) := imp_trans! hC $ Subtheory.prf! $ and₁'! $ neg_iff'! $ prov_distribute_iff (T₀ := T₀) $ neg_iff'! $ iff_goedel_consistency;
+  have : T ⊢! Con⦍β⦎ ⟶ ~⦍β⦎(~Con⦍β⦎) := imp_trans''! hC $ Subtheory.prf! $ and₁'! $ neg_iff'! $ prov_distribute_iff (T₀ := T₀) $ neg_iff'! $ iff_goedel_consistency;
   contradiction;
 
 end Loeb

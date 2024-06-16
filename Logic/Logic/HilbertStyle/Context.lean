@@ -81,7 +81,7 @@ variable [Minimal 𝓢] {Γ Δ E : List F}
 
 instance : Axiomatized (FiniteContext F 𝓢) where
   prfAxm := fun hp ↦ generalConj' hp
-  weakening := fun H b ↦ impTrans (conjImplyConj' H) b
+  weakening := fun H b ↦ impTrans'' (conjImplyConj' H) b
 
 instance : Compact (FiniteContext F 𝓢) where
   φ := fun {Γ} _ _ ↦ Γ
@@ -126,13 +126,13 @@ def mdp' (bΓ : Γ ⊢[𝓢] p ⟶ q) (bΔ : Δ ⊢[𝓢] p) : (Γ ++ Δ) ⊢[�
 
 def deduct {p q : F} : {Γ : List F} → (p :: Γ) ⊢[𝓢] q → Γ ⊢[𝓢] p ⟶ q
   | .nil => fun b ↦ ofDef <| dhyp _ (toDef b)
-  | .cons _ _ => fun b ↦ ofDef <| andImplyIffImplyImply'.mp (impTrans (andComm _ _) (toDef b))
+  | .cons _ _ => fun b ↦ ofDef <| andImplyIffImplyImply'.mp (impTrans'' (andComm _ _) (toDef b))
 
 lemma deduct! (h : (p :: Γ) ⊢[𝓢]! q) :  Γ ⊢[𝓢]! p ⟶ q  := ⟨FiniteContext.deduct h.some⟩
 
 def deductInv {p q : F} : {Γ : List F} → Γ ⊢[𝓢] p ⟶ q → (p :: Γ) ⊢[𝓢] q
   | .nil => λ b => ofDef <| (toDef b) ⨀ verum
-  | .cons _ _ => λ b => ofDef <| (impTrans (andComm _ _) (andImplyIffImplyImply'.mpr (toDef b)))
+  | .cons _ _ => λ b => ofDef <| (impTrans'' (andComm _ _) (andImplyIffImplyImply'.mpr (toDef b)))
 
 lemma deductInv! (h : Γ ⊢[𝓢]! p ⟶ q) : (p :: Γ) ⊢[𝓢]! q := ⟨FiniteContext.deductInv h.some⟩
 
@@ -156,9 +156,9 @@ instance deduction : Deduction (FiniteContext F 𝓢) where
 instance : StrongCut (FiniteContext F 𝓢) (FiniteContext F 𝓢) :=
   ⟨fun {Γ Δ _} bΓ bΔ ↦
     have : Γ ⊢ Δ.conj := conjIntro' _ (fun _ hp ↦ bΓ hp)
-    ofDef <| impTrans (toDef this) (toDef bΔ)⟩
+    ofDef <| impTrans'' (toDef this) (toDef bΔ)⟩
 
-instance [System.NegationEquiv 𝓢] (Γ : FiniteContext F 𝓢) : System.NegationEquiv Γ := ⟨λ {_} => of NegationEquiv.neg_equiv⟩
+instance [System.NegationEquiv 𝓢] (Γ : FiniteContext F 𝓢) : System.NegationEquiv Γ := ⟨λ {_} => of neg_equiv⟩
 
 instance [HasEFQ 𝓢] (Γ : FiniteContext F 𝓢) : HasEFQ Γ := ⟨fun _ ↦ of efq⟩
 
@@ -312,7 +312,7 @@ instance minimal (Γ : Context F 𝓢) : Minimal Γ where
   or₂ := fun _ _ ↦ of or₂
   or₃ := fun _ _ _ ↦ of or₃
 
-instance [System.NegationEquiv 𝓢] (Γ : Context F 𝓢) : System.NegationEquiv Γ := ⟨λ {_} => of NegationEquiv.neg_equiv⟩
+instance [System.NegationEquiv 𝓢] (Γ : Context F 𝓢) : System.NegationEquiv Γ := ⟨λ {_} => of neg_equiv⟩
 
 instance [HasEFQ 𝓢] (Γ : Context F 𝓢) : HasEFQ Γ := ⟨fun _ ↦ of efq⟩
 

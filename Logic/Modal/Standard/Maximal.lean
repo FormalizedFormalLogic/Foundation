@@ -96,8 +96,8 @@ lemma deducible_iff_trivTranslation : 𝐓𝐫𝐢𝐯 ⊢! p ⟷ pᵀ := by
   | hbox p ih =>
     simp [TrivTranslation];
     apply iff_intro!;
-    . exact imp_trans! axiomT! (and₁'! ih)
-    . exact imp_trans! (and₂'! ih) axiomTc!
+    . exact imp_trans''! axiomT! (and₁'! ih)
+    . exact imp_trans''! (and₂'! ih) axiomTc!
   | himp _ _ ih₁ ih₂ => exact imp_replace_iff! ih₁ ih₂;
   | hand _ _ ih₁ ih₂ => exact and_replace_iff! ih₁ ih₂;
   | hor _ _ ih₁ ih₂ => exact or_replace_iff! ih₁ ih₂;

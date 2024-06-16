@@ -465,8 +465,8 @@ lemma reducible_GL_K4Loeb : (𝐆𝐋 : DeductionParameter α) ≤ₛ 𝐊𝟒(�
     . obtain ⟨_, _, e⟩ := hK; subst_vars; exact axiomK!;
     . obtain ⟨_, e⟩ := hL; subst_vars; exact axiomL!;
   | hMdp ihpq ihp => exact ihpq ⨀ ihp;
-  | hNec _ ihp => exact Necessitation.nec! ihp;
-  | hLoeb _ ihp => exact LoebRule.loeb! ihp;
+  | hNec _ ihp => exact nec! ihp;
+  | hLoeb _ ihp => exact loeb! ihp;
   | hHenkin => simp_all only [Bool.false_eq_true];
   | _ => trivial;
 
@@ -479,8 +479,8 @@ lemma reducible_K4Loeb_K4Henkin : (𝐊𝟒(𝐋) : DeductionParameter α) ≤�
     . obtain ⟨_, _, e⟩ := hK; subst_vars; exact axiomK!;
     . obtain ⟨_, e⟩ := hFour; subst_vars; exact axiomFour!;
   | hMdp ihpq ihp => exact ihpq ⨀ ihp;
-  | hNec _ ihp => exact Necessitation.nec! ihp;
-  | hLoeb _ ihp => exact LoebRule.loeb! ihp;
+  | hNec _ ihp => exact nec! ihp;
+  | hLoeb _ ihp => exact loeb! ihp;
   | hHenkin => simp_all only [Bool.false_eq_true];
   | _ => trivial;
 
@@ -493,8 +493,8 @@ lemma reducible_K4Henkin_K4H : (𝐊𝟒(𝐇) : DeductionParameter α) ≤ₛ �
     . obtain ⟨_, _, e⟩ := hK; subst_vars; exact axiomK!;
     . obtain ⟨_, e⟩ := hFour; subst_vars; exact axiomFour!;
   | hMdp ihpq ihp => exact ihpq ⨀ ihp;
-  | hNec _ ihp => exact Necessitation.nec! ihp;
-  | hHenkin _ ihp => exact HenkinRule.henkin! ihp;
+  | hNec _ ihp => exact nec! ihp;
+  | hHenkin _ ihp => exact henkin! ihp;
   | hLoeb => simp_all only [Bool.false_eq_true];
   | _ => trivial;
 

@@ -43,7 +43,7 @@ lemma iff_boxdotTranslation_S4 : 𝐒𝟒 ⊢! p ⟷ pᵇ := by
   | himp p q ihp ihq => dsimp [BoxdotTranslation]; exact imp_replace_iff! ihp ihq;
   | hbox p ihp =>
     dsimp [BoxdotTranslation];
-    exact iff_trans! (box_iff! ihp) iff_box_boxdot!;
+    exact iff_trans''! (box_iff! ihp) iff_box_boxdot!;
   | _ => dsimp [BoxdotTranslation]; exact iff_id!;
 
 lemma S4_of_boxdotTranslatedK4 (h : 𝐊𝟒 ⊢! pᵇ) : 𝐒𝟒 ⊢! p := by
