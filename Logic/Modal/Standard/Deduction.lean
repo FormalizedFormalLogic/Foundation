@@ -393,12 +393,12 @@ macro_rules | `(tactic| trivial) => `(tactic|
     | apply imply₁!
     | apply imply₁!
     | apply imply₂!
-    | apply conj₁!
-    | apply conj₂!
-    | apply conj₃!
-    | apply disj₁!
-    | apply disj₂!
-    | apply disj₃!
+    | apply and₁!
+    | apply and₂!
+    | apply and₃!
+    | apply or₁!
+    | apply or₂!
+    | apply or₃!
   )
 
 macro_rules | `(tactic| trivial) => `(tactic | apply dne!)
@@ -413,7 +413,7 @@ lemma normal_reducible
   induction h using Deduction.inducition_with_nec! with
   | hMaxm hp => exact hMaxm hp;
   | hMdp ihpq ihp => exact ihpq ⨀ ihp;
-  | hNec ihp => exact Necessitation.nec! ihp;
+  | hNec ihp => exact nec! ihp;
   | _ => trivial;
 
 lemma normal_reducible_subset {𝓓₁ 𝓓₂ : DeductionParameter α} [𝓓₁.Normal] [𝓓₂.Normal]

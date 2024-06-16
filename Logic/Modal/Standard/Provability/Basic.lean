@@ -81,7 +81,7 @@ lemma arithmetical_soundness_K4Loeb (h : 𝐊𝟒(𝐋) ⊢! p) : ∀ {f : reali
     exact ihpq ⨀ ihp;
   | hDne =>
     dsimp [interpretation];
-    exact imp_trans! (conj₁'! $ iffComm'! NegationEquiv.negneg_equiv!) dne!;
+    exact imp_trans''! (and₁'! $ iff_comm'! negneg_equiv!) dne!;
   | _ => dsimp [interpretation]; trivial;
 
 theorem arithmetical_soundness_GL (h : 𝐆𝐋 ⊢! p) : ∀ {f : realization L α}, T ⊢! (f[β] p) := by
