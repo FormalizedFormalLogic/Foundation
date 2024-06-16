@@ -66,6 +66,7 @@ class FormalizedLoeb (β : ProvabilityPredicate L L) (T₀ : Theory L) (T : outP
 class Rosser (β : ProvabilityPredicate L L) (T₀ : Theory L) (T : outParam (Theory L)) where
   Ro {σ : Sentence L} : T ⊢! ~σ → T₀ ⊢! ~⦍β⦎(σ)
 
+
 section
 
 open LO.System
@@ -350,65 +351,6 @@ theorem rosser_first_incompleteness : ¬System.Complete T
 theorem kriesel_remark : T ⊢! Con⦍β⦎ := by
   have : T₀ ⊢! ~⦍β⦎(⊥) := Ro (neg_equiv'!.mpr (by simp));
   exact Subtheory.prf! $ this;
-
-
-section Rosser
-
-variable [DecidableEq (Sentence L)]
-         [Semiterm.Operator.GoedelNumber L (Sentence L)]
-         {T₀ T : Theory L} [T₀ ≼ T] [Diagonalization T₀]
-         {β : ProvabilityPredicate L L}
-open LO.System LO.System.NegationEquiv
-open HilbertBernays₁ HilbertBernays₂ HilbertBernays₃ HilbertBernays
-open Diagonalization
-
-abbrev rosser
-  (T₀ T : Theory L) [Diagonalization T₀]
-  (β : ProvabilityPredicate L L) [β.HilbertBernays₁ T₀ T] [β.Rosser T₀ T] : Sentence L
-  := fixpoint T₀ “x | ¬!β.prov x”
-local notation "ρ" => rosser T₀ T β
-
-section
-
-variable [β.HilbertBernays₁ T₀ T] [β.Rosser T₀ T]
-
-lemma rosser_spec : T₀ ⊢! ρ ⟷ ~⦍β⦎ρ := goedel_spec
-
-lemma rosser_specAux₁ : T ⊢! ρ ⟷ ~⦍β⦎ρ := goedel_specAux₁
-
-end
-
-section
-
-variable [System.Consistent T] [β.HilbertBernays₁ T₀ T] [β.Rosser T₀ T]
-
-open Rosser
-
-lemma unprovable_rosser : T ⊬! ρ := unprovable_goedel
-
-theorem unrefutable_rosser : T ⊬! ~ρ := by
-  intro hnρ;
-  have hρ : T ⊢! ρ := Subtheory.prf! $ (conj₂'! rosser_spec) ⨀ (Ro hnρ);
-  have := not_consistent_iff_inconsistent.mpr $ inconsistent_iff_provable_bot.mpr $ (neg_equiv'!.mp hnρ) ⨀ hρ;
-  contradiction;
-
-theorem rosser_independent : System.Undecidable T ρ := by
-  suffices T ⊬! ρ ∧ T ⊬! ~ρ by simpa [System.Undecidable, not_or] using this;
-  constructor;
-  . apply unprovable_rosser;
-  . apply unrefutable_rosser;
-
-theorem rosser_first_incompleteness : ¬System.Complete T
-  := System.incomplete_iff_exists_undecidable.mpr ⟨ρ, rosser_independent⟩
-
-theorem kriesel_remark [System.Consistent T] [β.Rosser T₀ T] : T ⊢! Con⦍β⦎ := by
-  have : T₀ ⊢! ~⦍β⦎(⊥) := Ro (neg_equiv'!.mpr (by simp));
-  exact Subtheory.prf! $ this;
-
-end
-
-end Rosser
-
 
 end
 
