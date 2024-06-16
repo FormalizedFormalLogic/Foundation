@@ -658,4 +658,13 @@ instance [HasEFQ 𝓢] [HasLEM 𝓢] : HasDNE 𝓢 where
       exact efq' $ nnp ⨀ np;
     ) $ of lem;;
 
+def noBoth : 𝓢 ⊢ (p ⋏ ~p) ⟶ ⊥ := by
+  apply deduct';
+  have h : [p ⋏ ~p] ⊢[𝓢] p ⋏ ~p := FiniteContext.byAxm;
+  have h₁ : [p ⋏ ~p] ⊢[𝓢] p := conj₁' $ h;
+  have h₂ : [p ⋏ ~p] ⊢[𝓢] p ⟶ ⊥ :=  neg_equiv'.mp $ conj₂' h;
+  exact h₂ ⨀ h₁;
+lemma no_both! : 𝓢 ⊢! (p ⋏ ~p) ⟶ ⊥ := ⟨noBoth⟩
+
+
 end LO.System

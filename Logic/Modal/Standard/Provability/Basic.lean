@@ -1,9 +1,9 @@
-import Logic.FirstOrder.Incompleteness.ProvabilityCondition
+import Logic.FirstOrder.Incompleteness.DerivabilityCondition
 import Logic.Modal.Standard.Deduction
 
 namespace LO.Modal.Standard.Provability
 
-open LO.FirstOrder
+open LO.FirstOrder LO.FirstOrder.DerivabilityCondition
 
 variable {α : Type*} [DecidableEq α]
 
@@ -66,16 +66,14 @@ variable {L : FirstOrder.Language} [Semiterm.Operator.GoedelNumber L (Sentence L
          (T₀ T : FirstOrder.Theory L) [T₀ ≼ T] [Diagonalization T₀]
          (β : ProvabilityPredicate L L) [β.HilbertBernays T₀ T]
 
-open LO.FirstOrder.ProvabilityPredicate
-
 lemma arithmetical_soundness_K4Loeb (h : 𝐊𝟒(𝐋) ⊢! p) : ∀ {f : realization L α}, T ⊢! (f[β] p) := by
   intro f;
   induction h using Deduction.inducition! with
-  | hNec _ ih => exact HilbertBernays₁.D1s (T₀ := T₀) ih;
+  | hNec _ ih => exact D1s (T₀ := T₀) ih;
   | hMaxm hp =>
     rcases hp with (hK | hFour)
-    . obtain ⟨p, q, e⟩ := hK; subst_vars; apply HilbertBernays₂.D2s (T₀ := T₀);
-    . obtain ⟨p, e⟩ := hFour; subst_vars; apply HilbertBernays₃.D3s (T₀ := T₀);
+    . obtain ⟨p, q, e⟩ := hK; subst_vars; apply D2s (T₀ := T₀);
+    . obtain ⟨p, e⟩ := hFour; subst_vars; apply D3s (T₀ := T₀);
   | hLoeb _ ih => exact Loeb.LT T₀ ih;
   | hHenkin => simp_all only [Bool.false_eq_true];
   | hMdp ihpq ihp =>
