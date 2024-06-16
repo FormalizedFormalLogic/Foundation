@@ -741,6 +741,12 @@ end polynomial_induction
 
 end Model
 
+namespace Model
+
+lemma nat_pair_eq {m n : ℕ} : ⟪n, m⟫ = Nat.pair n m := by simp [Model.pair, Nat.pair]; congr
+
+end Model
+
 end
 
 end Arith

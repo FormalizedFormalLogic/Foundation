@@ -196,7 +196,7 @@ lemma fixpoint_defined : Defined (fun v ↦ c.Fixpoint (v ·.succ) (v 0)) φ.fix
 end
 
 theorem induction {P : M → Prop} (hP : DefinablePred ℒₒᵣ (Γ, 1) P)
-    (H : ∀ C : Set M, (∀ x ∈ C, P x) → ∀ x, c.Φ v C x → P x) :
+    (H : ∀ C : Set M, (∀ x ∈ C, c.Fixpoint v x ∧ P x) → ∀ x, c.Φ v C x → P x) :
     ∀ x, c.Fixpoint v x → P x := by
   apply @order_induction_hh M _ _ _ _ _ _ ℒₒᵣ _ _ _ _ Γ 1 _
   · apply Definable.imp
@@ -207,7 +207,7 @@ theorem induction {P : M → Prop} (hP : DefinablePred ℒₒᵣ (Γ, 1) P)
       (by definability)
   intro x ih hx
   have : c.Φ v {y | c.Fixpoint v y ∧ y < x} x := c.finite (c.case.mp hx)
-  exact H {y | c.Fixpoint v y ∧ y < x} (by intro y ⟨hy, hyx⟩; exact ih y hyx hy) x this
+  exact H {y | c.Fixpoint v y ∧ y < x} (by intro y ⟨hy, hyx⟩; exact ⟨hy, ih y hyx hy⟩) x this
 
 end Construction
 
