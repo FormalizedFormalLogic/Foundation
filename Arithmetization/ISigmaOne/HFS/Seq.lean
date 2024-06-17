@@ -216,6 +216,13 @@ lemma subset_pair {s t : M} (h : ∀ i x, ⟪i, x⟫ ∈ s → ⟪i, x⟫ ∈ t)
   intro u hu
   simpa using h (π₁ u) (π₂ u) (by simpa using hu)
 
+lemma Seq.lh_ext {s₁ s₂ : M} (H₁ : Seq s₁) (H₂ : Seq s₂) (h : lh s₁ = lh s₂)
+    (H : ∀ i x₁ x₂, ⟪i, x₁⟫ ∈ s₁ → ⟪i, x₂⟫ ∈ s₂ → x₁ = x₂) : s₁ = s₂ := H₁.eq_of_eq_of_subset H₂ h <| subset_pair <| by
+      intro i x hx
+      have hi : i < lh s₂ := by simpa [← h] using H₁.lt_lh_of_mem hx
+      rcases H i _ _ hx (H₂.nth_mem hi)
+      simp
+
 @[simp] lemma Seq.seqCons_ext {a₁ a₂ s₁ s₂ : M} (H₁ : Seq s₁) (H₂ : Seq s₂) :
     s₁ ⁀' a₁ = s₂ ⁀' a₂ ↔ a₁ = a₂ ∧ s₁ = s₂ :=
   ⟨by intro h
@@ -293,6 +300,7 @@ def vecConsUnexpander : Lean.PrettyPrinter.Unexpander
 
 @[simp] lemma singleton_seq (x : M) : Seq !⟨x⟩ := by apply Seq.seqCons; simp
 
+/-
 section seqMap
 
 variable {f : M → M} (hf : 𝚺₁-Function₁ f)
@@ -381,22 +389,13 @@ lemma seqMap_graph (t s : M) :
       · simp [H]⟩
 
 end seqMap
+-/
 
-section seqMap₀
-
-variable (p : HSemisentence ℒₒᵣ 2 𝚺₀)
-
-def _root_.LO.FirstOrder.Arith.seqMap₀Def : 𝚺₀-Semisentence 2 := .mkSigma
-  “t s |
-    (:Seq s → :Seq t ∧ (∃ l <⁺ 2 * s, !lhDef l s ∧ !lhDef l t) ∧ ∀ i < s, ∀ x < s, i ~[s] x → ∃ y < t, !p y x ∧ i ~[t] y) ∧
-    (¬:Seq s → t = 0)” (by simp)
-
-variable {p} {f : M → M} (hf : 𝚺₀-Function₁ f via p)
-
-lemma seqMap₀_defined : 𝚺₀-Function₁ (seqMap (f := f) (Definable.of_zero hf.to_definable _) : M → M) via (seqMap₀Def p) := by
-  intro v; simp [seqMap₀Def, seqMap_graph, hf.df.iff]
-
-end seqMap₀
+theorem sigmaOne_skolem_seq {R : M → M → Prop} (hP : 𝚺₁-Relation R) {l}
+    (H : ∀ x < l, ∃ y, R x y) : ∃ s, Seq s ∧ lh s = l ∧ ∀ i x, ⟪i, x⟫ ∈ s → R i x := by
+  rcases sigmaOne_skolem hP (show ∀ x ∈ under l, ∃ y, R x y by simpa using H) with ⟨s, ms, sdom, h⟩
+  have : Seq s := ⟨ms, l, sdom⟩
+  exact ⟨s, this, by simpa [this.domain_eq] using sdom, h⟩
 
 end LO.FirstOrder.Arith.Model
 

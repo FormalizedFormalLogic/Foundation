@@ -465,7 +465,7 @@ lemma domain_restr_of_subset_domain {f s : M} (h : s ⊆ domain f) : domain (f �
 
 end restriction
 
-@[elab_as_elim]
+
 theorem insert_induction {P : M → Prop} (hP : (Γ, 1)-Predicate P)
     (hempty : P ∅) (hinsert : ∀ a s, a ∉ s → P s → P (insert a s)) : ∀ s, P s :=
   order_induction_hh ℒₒᵣ Γ 1 hP <| by
@@ -475,13 +475,40 @@ theorem insert_induction {P : M → Prop} (hP : (Γ, 1)-Predicate P)
     · simpa [insert_remove hx] using
         hinsert x (bitRemove x s) (by simp) (IH _ (bitRemove_lt_of_mem hx))
 
+@[elab_as_elim]
 lemma insert_induction_sigmaOne {P : M → Prop} (hP : 𝚺₁-Predicate P)
     (hempty : P ∅) (hinsert : ∀ a s, a ∉ s → P s → P (insert a s)) : ∀ s, P s :=
   insert_induction hP hempty hinsert
 
+@[elab_as_elim]
 lemma insert_induction_piOne {P : M → Prop} (hP : 𝚷₁-Predicate P)
     (hempty : P ∅) (hinsert : ∀ a s, a ∉ s → P s → P (insert a s)) : ∀ s, P s :=
   insert_induction hP hempty hinsert
+
+theorem sigmaOne_skolem {R : M → M → Prop} (hP : 𝚺₁-Relation R) {s : M}
+    (H : ∀ x ∈ s, ∃ y, R x y) : ∃ f, IsMapping f ∧ domain f = s ∧ ∀ x y, ⟪x, y⟫ ∈ f → R x y := by
+  have : ∀ u, u ⊆ s → ∃ f, IsMapping f ∧ domain f = u ∧ ∀ x y, ⟪x, y⟫ ∈ f → R x y := by
+    intro u hu
+    induction u using insert_induction_sigmaOne
+    · have : 𝚺₁-Predicate fun u ↦ u ⊆ s → ∃ f, IsMapping f ∧ domain f = u ∧ ∀ x < f, ∀ y < f, ⟪x, y⟫ ∈ f → R x y := by definability
+      exact this.of_iff <| by
+        intro x; apply imp_congr_right <| fun _ ↦ exists_congr <| fun f ↦ and_congr_right
+          <| fun _ ↦ and_congr_right <| fun _ ↦
+            ⟨fun h x _ y _ hxy ↦ h x y hxy, fun h x y hxy ↦ h x (lt_of_mem_dom hxy) y (lt_of_mem_rng hxy) hxy⟩
+    case hempty =>
+      exact ⟨∅, by simp⟩
+    case hinsert a u ha ih =>
+      have : ∃ f, IsMapping f ∧ domain f = u ∧ ∀ x y, ⟪x, y⟫ ∈ f → R x y := ih (subset_trans (susbset_insert a u) hu)
+      rcases this with ⟨f, mf, rfl, hf⟩
+      have : ∃ b, R a b := H a (by simp [subset_iff] at hu; exact hu.1)
+      rcases this with ⟨b, hb⟩
+      let f' := insert ⟪a, b⟫ f
+      exact ⟨f', mf.insert (by simpa using ha), by simp [f'], by
+        intro x y hxy
+        rcases (show x = a ∧ y = b ∨ ⟪x, y⟫ ∈ f by simpa [f'] using hxy) with (⟨rfl, rfl⟩ | h)
+        · exact hb
+        · exact hf x y h⟩
+  exact this s (by rfl)
 
 end LO.FirstOrder.Arith.Model
 
