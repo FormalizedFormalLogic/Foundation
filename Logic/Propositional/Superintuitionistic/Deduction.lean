@@ -24,17 +24,17 @@ class IncludeDNE (𝓓 : DeductionParameter α) where
 end DeductionParameter
 
 inductive Deduction (𝓓 : DeductionParameter α) : Formula α → Type _
-  | eaxm {p}       : p ∈ Ax(𝓓) → Deduction 𝓓 p
-  | mdp {p q}      : Deduction 𝓓 (p ⟶ q) → Deduction 𝓓 p → Deduction 𝓓 q
-  | verum          : Deduction 𝓓 $ ⊤
-  | imply₁ p q     : Deduction 𝓓 $ p ⟶ q ⟶ p
-  | imply₂ p q r   : Deduction 𝓓 $ (p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r
-  | conj₁ p q      : Deduction 𝓓 $ p ⋏ q ⟶ p
-  | conj₂ p q      : Deduction 𝓓 $ p ⋏ q ⟶ q
-  | conj₃ p q      : Deduction 𝓓 $ p ⟶ q ⟶ p ⋏ q
-  | disj₁ p q      : Deduction 𝓓 $ p ⟶ p ⋎ q
-  | disj₂ p q      : Deduction 𝓓 $ q ⟶ p ⋎ q
-  | disj₃ p q r    : Deduction 𝓓 $ (p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r)
+  | eaxm {p}     : p ∈ Ax(𝓓) → Deduction 𝓓 p
+  | mdp {p q}    : Deduction 𝓓 (p ⟶ q) → Deduction 𝓓 p → Deduction 𝓓 q
+  | verum        : Deduction 𝓓 $ ⊤
+  | imply₁ p q   : Deduction 𝓓 $ p ⟶ q ⟶ p
+  | imply₂ p q r : Deduction 𝓓 $ (p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r
+  | and₁ p q     : Deduction 𝓓 $ p ⋏ q ⟶ p
+  | and₂ p q     : Deduction 𝓓 $ p ⋏ q ⟶ q
+  | and₃ p q     : Deduction 𝓓 $ p ⟶ q ⟶ p ⋏ q
+  | or₁ p q      : Deduction 𝓓 $ p ⟶ p ⋎ q
+  | or₂ p q      : Deduction 𝓓 $ q ⟶ p ⋎ q
+  | or₃ p q r    : Deduction 𝓓 $ (p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r)
 
 instance : System (Formula α) (DeductionParameter α) := ⟨Deduction⟩
 
@@ -48,12 +48,12 @@ instance : System.Minimal 𝓓 where
   verum := verum
   imply₁ := imply₁
   imply₂ := imply₂
-  conj₁ := conj₁
-  conj₂ := conj₂
-  conj₃ := conj₃
-  disj₁ := disj₁
-  disj₂ := disj₂
-  disj₃ := disj₃
+  and₁ := and₁
+  and₂ := and₂
+  and₃ := and₃
+  or₁ := or₁
+  or₂ := or₂
+  or₃ := or₃
 
 instance [𝓓.IncludeEFQ] : System.HasEFQ 𝓓 where
   efq _ := eaxm $ Set.mem_of_subset_of_mem IncludeEFQ.include_EFQ (by simp);
@@ -128,7 +128,7 @@ theorem iff_provable_dn_efq_dne_provable: 𝐈𝐧𝐭 ⊢! ~~p ↔ 𝐂𝐥 ⊢
         subst hq;
         apply FiniteContext.deduct'!;
         have : [~(q ⋎ ~q)] ⊢[𝐈𝐧𝐭]! ~q ⋏ ~~q := demorgan₃'! $ FiniteContext.id!;
-        exact (conj₂'! this) ⨀ (conj₁'! this);
+        exact (and₂'! this) ⨀ (and₁'! this);
     | @mdp p q h₁ h₂ ih₁ ih₂ =>
       exact (dn_distribute_imply'! $ ih₁ ⟨h₁⟩) ⨀ ih₂ ⟨h₂⟩;
     | _ => apply dni'!; simp;

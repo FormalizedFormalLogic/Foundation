@@ -1,9 +1,9 @@
-import Logic.FirstOrder.Incompleteness.ProvabilityCondition
+import Logic.FirstOrder.Incompleteness.DerivabilityCondition
 import Logic.Modal.Standard.Deduction
 
 namespace LO.Modal.Standard.Provability
 
-open LO.FirstOrder
+open LO.FirstOrder LO.FirstOrder.DerivabilityCondition
 
 variable {α : Type*} [DecidableEq α]
 
@@ -64,18 +64,16 @@ open ProvabilityPredicate
 variable {L : FirstOrder.Language} [Semiterm.Operator.GoedelNumber L (Sentence L)]
          [DecidableEq (Sentence L)]
          (T₀ T : FirstOrder.Theory L) [T₀ ≼ T] [Diagonalization T₀]
-         (β : ProvabilityPredicate L L) [β.HilbertBernays T₀ T]
+         (β : ProvabilityPredicate L L)
 
-open LO.FirstOrder.ProvabilityPredicate
-
-lemma arithmetical_soundness_K4Loeb (h : 𝐊𝟒(𝐋) ⊢! p) : ∀ {f : realization L α}, T ⊢! (f[β] p) := by
+lemma arithmetical_soundness_K4Loeb [β.HilbertBernays T₀ T] (h : 𝐊𝟒(𝐋) ⊢! p) : ∀ {f : realization L α}, T ⊢! (f[β] p) := by
   intro f;
   induction h using Deduction.inducition! with
-  | hNec _ ih => exact HilbertBernays₁.D1s (T₀ := T₀) ih;
+  | hNec _ ih => exact D1s (T₀ := T₀) ih;
   | hMaxm hp =>
     rcases hp with (hK | hFour)
-    . obtain ⟨p, q, e⟩ := hK; subst_vars; apply HilbertBernays₂.D2s (T₀ := T₀);
-    . obtain ⟨p, e⟩ := hFour; subst_vars; apply HilbertBernays₃.D3s (T₀ := T₀);
+    . obtain ⟨p, q, e⟩ := hK; subst_vars; apply D2s (T₀ := T₀);
+    . obtain ⟨p, e⟩ := hFour; subst_vars; apply D3s (T₀ := T₀);
   | hLoeb _ ih => exact Loeb.LT T₀ ih;
   | hHenkin => simp_all only [Bool.false_eq_true];
   | hMdp ihpq ihp =>
@@ -83,12 +81,28 @@ lemma arithmetical_soundness_K4Loeb (h : 𝐊𝟒(𝐋) ⊢! p) : ∀ {f : reali
     exact ihpq ⨀ ihp;
   | hDne =>
     dsimp [interpretation];
-    exact imp_trans! (conj₁'! $ iffComm'! NegationEquiv.negneg_equiv!) dne!;
+    exact imp_trans''! (and₁'! $ iff_comm'! negneg_equiv!) dne!;
   | _ => dsimp [interpretation]; trivial;
 
-theorem arithmetical_soundness_GL (h : 𝐆𝐋 ⊢! p) : ∀ {f : realization L α}, T ⊢! (f[β] p) := by
+theorem arithmetical_soundness_GL [β.HilbertBernays T₀ T] (h : 𝐆𝐋 ⊢! p) : ∀ {f : realization L α}, T ⊢! (f[β] p) := by
   apply arithmetical_soundness_K4Loeb (T₀ := T₀);
   exact (System.reducible_iff.mp reducible_GL_K4Loeb) h;
+
+
+lemma arithmetical_soundness_N [β.HilbertBernays₁ T₀ T] (h : 𝐍 ⊢! p) : ∀ {f : realization L α}, T ⊢! (f[β] p) := by
+  intro f;
+  induction h using Deduction.inducition! with
+  | hNec _ ih => exact D1s (T₀ := T₀) ih;
+  | hMaxm hp => simp at hp;
+  | hLoeb => simp_all only [Bool.false_eq_true];
+  | hHenkin => simp_all only [Bool.false_eq_true];
+  | hMdp ihpq ihp =>
+    simp [interpretation] at ihpq;
+    exact ihpq ⨀ ihp;
+  | hDne =>
+    dsimp [interpretation];
+    exact imp_trans''! (and₁'! $ iff_comm'! negneg_equiv!) dne!;
+  | _ => dsimp [interpretation]; trivial;
 
 end ArithmeticalSoundness
 

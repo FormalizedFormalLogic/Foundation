@@ -44,7 +44,7 @@ lemma iff_ParametricConsistent_insert₁ : (𝓓)-Consistent ((insert p T), U) �
       | inr h => assumption;
     ) hΔ;
     by_contra hC;
-    have : 𝓓 ⊢! p ⋏ (Γ.remove p).conj' ⟶ Δ.disj' := imp_trans! andComm! $ implyLeftRemoveConj' (p := p) hC;
+    have : 𝓓 ⊢! p ⋏ (Γ.remove p).conj' ⟶ Δ.disj' := imp_trans''! and_comm! $ imply_left_remove_conj'! (p := p) hC;
     contradiction;
 
 lemma iff_not_ParametricConsistent_insert₁ : ¬(𝓓)-Consistent ((insert p T), U) ↔ ∃ Γ Δ : List (Formula α), (∀ p ∈ Γ, p ∈ T) ∧ (∀ p ∈ Δ, p ∈ U) ∧ 𝓓 ⊢! p ⋏ Γ.conj' ⟶ Δ.disj' := by
@@ -69,7 +69,7 @@ lemma iff_ParametricConsistent_insert₂ : (𝓓)-Consistent (T, (insert p U)) �
       | inr h => assumption;
     );
     by_contra hC;
-    have : 𝓓 ⊢! Γ.conj' ⟶ p ⋎ (Δ.remove p).disj' := imp_trans! hC $ forthback_disj'_remove;
+    have : 𝓓 ⊢! Γ.conj' ⟶ p ⋎ (Δ.remove p).disj' := imp_trans''! hC $ forthback_disj'_remove;
     contradiction;
 
 
@@ -92,7 +92,7 @@ lemma consistent_either (p : Formula α) : (𝓓)-Consistent ((insert p t.1), t.
 
   obtain ⟨Γ₂, Δ₂, hΓ₂, hΔ₂, h₂⟩ := iff_not_ParametricConsistent_insert₂.mp hC₂;
 
-  have : 𝓓 ⊢! (Γ₁ ++ Γ₂).conj' ⟶ (Δ₁ ++ Δ₂).disj' := imp_trans! (conj₁'! iff_concat_conj!) $ imp_trans! (cut! h₁ h₂) (conj₂'! iff_concact_disj!);
+  have : 𝓓 ⊢! (Γ₁ ++ Γ₂).conj' ⟶ (Δ₁ ++ Δ₂).disj' := imp_trans''! (and₁'! iff_concat_conj!) $ imp_trans''! (cut! h₁ h₂) (and₂'! iff_concact_disj!);
   have : 𝓓 ⊬! (Γ₁ ++ Γ₂).conj' ⟶ (Δ₁ ++ Δ₂).disj' := hCon (by simp; rintro q (hq₁ | hq₂); exact hΓ₁ q hq₁; exact hΓ₂ q hq₂) (by simp; rintro q (hq₁ | hq₂); exact hΔ₁ q hq₁; exact hΔ₂ q hq₂);
   contradiction;
 
@@ -179,7 +179,7 @@ lemma self_ParametricConsistent [h : System.Consistent 𝓓] : (𝓓)-Consistent
   have : 𝓓 ⊢! q := by
     subst hΔ;
     simp [List.disj'_nil] at hC;
-    exact imp_trans! hC efq! ⨀ (by
+    exact imp_trans''! hC efq! ⨀ (by
       apply iff_provable_list_conj.mpr;
       exact λ _ hp => ⟨Deduction.eaxm $ hΓ _ hp⟩;
     );
@@ -384,8 +384,8 @@ lemma iff_mem₁_or : p ⋎ q ∈ t.tableau.1 ↔ p ∈ t.tableau.1 ∨ q ∈ t.
     contradiction;
   . intro h;
     cases h with
-    | inl h => exact mdp₁ h disj₁!
-    | inr h => exact mdp₁ h disj₂!
+    | inl h => exact mdp₁ h or₁!
+    | inr h => exact mdp₁ h or₂!
 
 lemma mem₁_of_provable : 𝓓 ⊢! p → p ∈ t.tableau.1 := by
   intro h;
@@ -447,7 +447,7 @@ lemma truthlemma {t : (CanonicalModel 𝓓).World} : t ⊧ p ↔ p ∈ t.tableau
           have := by simpa using hΓ r hr₁;
           simp_all;
         by_contra hC;
-        have : 𝓓 ⊢! (Γ.remove p).conj' ⟶ (p ⟶ q) := imp_trans! (andImplyIffImplyImply'!.mp $ implyLeftRemoveConj' hC) (by
+        have : 𝓓 ⊢! (Γ.remove p).conj' ⟶ (p ⟶ q) := imp_trans''! (and_imply_iff_imply_imply'!.mp $ imply_left_remove_conj'! hC) (by
           apply deduct'!;
           apply deduct!;
           have : [p, p ⟶ Δ.disj'] ⊢[𝓓]! p := by_axm! (by simp);
@@ -471,7 +471,7 @@ lemma truthlemma {t : (CanonicalModel 𝓓).World} : t ⊧ p ↔ p ∈ t.tableau
         (by simp_all)
         (show 𝓓 ⊢! [p, p ⟶ q].conj' ⟶ q by
           simp;
-          apply andImplyIffImplyImply'!.mpr;
+          apply and_imply_iff_imply_imply'!.mpr;
           apply deduct'!;
           apply deduct!;
           exact by_axm! ⨀ (by_axm! (p := p));
