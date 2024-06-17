@@ -32,7 +32,7 @@ scoped prefix:max "^func " => qqFunc
 @[simp] lemma terms_lt_qqFunc (k f v : M) : v < ^func k f v :=
   le_iff_lt_succ.mp <| le_trans (le_pair_right f v) <| le_trans (le_pair_right k ⟪f, v⟫) <| le_pair_right 2 ⟪k, ⟪f, v⟫⟫
 
-variable (L pL)
+variable (L)
 
 def Phi (n : M) (C : Set M) (t : M) : Prop :=
   (∃ z < n, t = ^#z) ∨ (∃ x, t = ^&x) ∨ (∃ k f v : M, L.Func k f ∧ Seq v ∧ k = lh v ∧ (∀ i u, ⟪i, u⟫ ∈ v → u ∈ C) ∧ t = ^func k f v)
@@ -96,12 +96,16 @@ lemma qqFunc_defined : 𝚺₀-Function₃ (qqFunc : M → M → M → M) via qq
 @[simp] lemma eval_qqFuncDef (v) :
     Semiformula.Evalbm M v qqFuncDef.val ↔ v 0 = ^func (v 1) (v 2) (v 3) := qqFunc_defined.df.iff v
 
+variable (pL)
+
 def formula : Fixpoint.Formula 1 := ⟨.ofZero (.mkSigma
   “t C n |
     (∃ z < n, !qqBvarDef t z) ∨
     (∃ x < t, !qqFvarDef t x) ∨
     (∃ k < t, ∃ f < t, ∃ v < t, !pL.func k f ∧ :Seq v ∧ !lhDef k v ∧ (∀ i < v, ∀ u < v, i ~[v] u → u ∈ C) ∧ !qqFuncDef t k f v)”
   (by simp)) _⟩
+
+variable {pL}
 
 def construction : Fixpoint.Construction M (formula pL) where
   Φ := fun n ↦ Phi L (n 0)
@@ -122,28 +126,32 @@ end FormalizedTerm
 
 open FormalizedTerm
 
-variable (L : Model.Language M) (pL : LDef) [Model.Language.Defined L pL]
+variable (L : Model.Language M) {pL : LDef} [Model.Language.Defined L pL]
 
-def IsSemiterm (n : M) : M → Prop := (construction L pL).Fixpoint ![n]
+def IsSemiterm (n : M) : M → Prop := (construction L).Fixpoint ![n]
+
+variable (pL)
 
 def _root_.LO.FirstOrder.Arith.isSemitermDef : 𝚫₁-Semisentence 2 := (formula pL).fixpointDef.rew (Rew.substs ![#1, #0])
 
-lemma isSemiterm_defined : 𝚫₁-Relation (IsSemiterm L pL) via (isSemitermDef pL) :=
-  ⟨HSemiformula.ProperOn.rew (construction L pL).fixpoint_defined.proper _,
-   by intro v; simp [isSemitermDef, (construction L pL).eval_fixpointDef]; rfl⟩
+variable {pL}
 
-variable {L pL}
+lemma isSemiterm_defined : 𝚫₁-Relation (IsSemiterm L) via (isSemitermDef pL) :=
+  ⟨HSemiformula.ProperOn.rew (construction L).fixpoint_defined.proper _,
+   by intro v; simp [isSemitermDef, (construction L).eval_fixpointDef]; rfl⟩
+
+variable {L}
 
 variable {n : M}
 
-local prefix:80 "𝐓ⁿ " => IsSemiterm L pL n
+local prefix:80 "𝐓ⁿ " => IsSemiterm L n
 
 lemma IsSemiterm.case {t : M} :
     𝐓ⁿ t ↔
     (∃ z < n, t = ^#z) ∨
     (∃ x, t = ^&x) ∨
     (∃ k f v : M, L.Func k f ∧ Seq v ∧ k = lh v ∧ (∀ i u, ⟪i, u⟫ ∈ v → 𝐓ⁿ u) ∧ t = ^func k f v) :=
-  (construction L pL).case
+  (construction L).case
 
 lemma IsSemiterm.bvar {z : M} (hz : z < n) : 𝐓ⁿ ^#z := IsSemiterm.case.mpr (Or.inl ⟨z, hz, rfl⟩)
 
@@ -155,9 +163,9 @@ lemma IsSemiterm.func {k f v : M} (hkf : L.Func k f) (Sv : Seq v) (hk : k = lh v
 
 lemma IsSemiterm.induction {Γ} {P : M → Prop} (hP : (Γ, 1)-Predicate P)
     (hbvar : ∀ z < n, P (^#z)) (hfvar : ∀ x, P (^&x))
-    (hfunc : ∀ k f v, L.Func k f → Seq v → k = lh v → (∀ i u, ⟪i, u⟫ ∈ v → IsSemiterm L pL n u ∧ P u) → P (^func k f v)) :
-    ∀ t, IsSemiterm L pL n t → P t :=
-  (construction L pL).induction (v := ![n]) hP (by
+    (hfunc : ∀ k f v, L.Func k f → Seq v → k = lh v → (∀ i u, ⟪i, u⟫ ∈ v → 𝐓ⁿ u ∧ P u) → P (^func k f v)) :
+    ∀ t, 𝐓ⁿ t → P t :=
+  (construction L).induction (v := ![n]) hP (by
     rintro C hC x (⟨z, hz, rfl⟩ | ⟨x, rfl⟩ | ⟨k, f, v, hkf, Sv, hk, h, rfl⟩)
     · exact hbvar z hz
     · exact hfvar x
