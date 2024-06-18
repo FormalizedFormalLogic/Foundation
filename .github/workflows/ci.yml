@@ -35,10 +35,7 @@ jobs:
         with:
           path: .lake
           key: lake-${{ runner.os }}-${{ hashFiles('lake-manifest.json') }}-${{ github.ref }}
-          restore-keys: |
-            lake-${{ runner.os }}-${{ hashFiles('lake-manifest.json') }}-${{ github.ref }}
-            lake-${{ runner.os }}-${{ hashFiles('lake-manifest.json') }}
-            lake-${{ runner.os }}
+          restore-keys: lake-${{ runner.os }}-${{ hashFiles('lake-manifest.json') }}-${{ github.ref }}
 
       - name: Fetching cache
         run: lake -R -Kenv=ci exe cache get
