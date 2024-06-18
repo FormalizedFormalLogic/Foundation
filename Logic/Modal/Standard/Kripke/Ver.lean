@@ -22,12 +22,11 @@ instance AxiomSet.Ver.definability : Definability (α := α) 𝗩𝗲𝗿 (λ F 
 instance Ver.definability : Definability (α := α) Ax(𝐕𝐞𝐫) (λ F => Isolated F.Rel) := by
   simpa using Definability.union AxiomSet.K.definability AxiomSet.Ver.definability
 
-instance : FiniteFrameClass.IsNonempty (𝔽ꟳ(Ax(𝐕𝐞𝐫)) : FiniteFrameClass' α) := by
-  existsi { World := PUnit, Rel := λ _ _ => False };
-  apply iff_definability_memAxiomSetFrameClass (Ver.definability) |>.mpr;
-  simp_all [Isolated];
-  intro x y a;
-  exact a;
+instance : (𝔽ꟳ(Ax(𝐕𝐞𝐫)) : FiniteFrameClass α).IsNonempty where
+  nonempty := by
+    use { World := PUnit, Rel := (· ≠ ·) };
+    apply iff_definability_memAxiomSetFrameClass (Ver.definability) |>.mpr;
+    simp_all [Isolated];
 
 namespace Kripke
 

@@ -30,19 +30,19 @@ lemma sound!_on_frameclass : L ⊢! p → 𝔽(Ax(L)) ⊧ p := λ ⟨d⟩ => sou
 
 instance : Sound L 𝔽(L.axiomSet) := ⟨sound!_on_frameclass⟩
 
-lemma unprovable_bot [ne : FrameClass.IsNonempty 𝔽(Ax(L))] : L ⊬! ⊥ := by
+lemma unprovable_bot [ne : 𝔽(Ax(L)).IsNonempty] : L ⊬! ⊥ := by
   intro h;
-  obtain ⟨F, hF⟩ := ne;
+  obtain ⟨F, hF⟩ := ne.nonempty;
   simpa using sound!_on_frameclass h F hF;
 
-instance Consistent_of_nonemptyFrameClass [FrameClass.IsNonempty.{u} 𝔽(Ax(L))] : System.Consistent L := System.Consistent.of_unprovable $ unprovable_bot
+instance Consistent_of_nonemptyFrameClass [𝔽(Ax(L)).IsNonempty] : System.Consistent L := System.Consistent.of_unprovable $ unprovable_bot
 
-lemma unprovable_bot_finite [ne : FiniteFrameClass.IsNonempty 𝔽ꟳ(Ax(L))] : L ⊬! ⊥ := by
+lemma unprovable_bot_finite [ne : 𝔽ꟳ(Ax(L)).IsNonempty] : L ⊬! ⊥ := by
   intro h;
-  obtain ⟨F, hF⟩ := ne;
+  obtain ⟨F, hF⟩ := ne.nonempty;
   simpa using sound!_on_frameclass h F.toFrame hF;
 
-instance Consistent_of_nonemptyFiniteFrameClass [FiniteFrameClass.IsNonempty.{u} 𝔽ꟳ(Ax(L))] : System.Consistent L := System.Consistent.of_unprovable $ unprovable_bot_finite
+instance Consistent_of_nonemptyFiniteFrameClass [𝔽ꟳ(Ax(L)).IsNonempty] : System.Consistent L := System.Consistent.of_unprovable $ unprovable_bot_finite
 
 instance : System.Consistent (𝐊 : DeductionParameter α) := inferInstance
 

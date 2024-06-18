@@ -12,17 +12,17 @@ namespace Kripke
 
 variable [Inhabited α]
 
-def GeachConfluent (t : Geach.Taple) : FrameProperty := λ F => ∀ {x y z : F.World}, (x ≺^[t.i] y) ∧ (x ≺^[t.j] z) → ∃ u, (y ≺^[t.m] u) ∧ (z ≺^[t.n] u)
+def GeachConfluent (t : Geach.Taple) : FrameCondition α := λ F => ∀ {x y z : F}, (x ≺^[t.i] y) ∧ (x ≺^[t.j] z) → ∃ u, (y ≺^[t.m] u) ∧ (z ≺^[t.n] u)
 
 @[simp]
-def MultiGeachConfluent (ts : List Geach.Taple) : FrameProperty :=
+def MultiGeachConfluent (ts : List Geach.Taple) : FrameCondition α :=
   match ts with
   | [] => λ _ => True
   | t :: ts => λ F => (GeachConfluent t F) ∧ (MultiGeachConfluent ts F)
 
 namespace GeachConfluent
 
-variable {F : Frame}
+variable {F : Frame α}
 
 @[simp] lemma serial_def : (GeachConfluent ⟨0, 0, 1, 1⟩ F) ↔ Serial F.Rel := by simp [GeachConfluent, Symmetric]; aesop;
 
@@ -54,21 +54,19 @@ lemma extensive_def : (GeachConfluent ⟨0, 1, 0, 0⟩ F) ↔ Extensive F.Rel :=
 
 @[simp] lemma dense_def : (GeachConfluent ⟨0, 1, 2, 0⟩ F)  ↔ Dense F.Rel := by simp [GeachConfluent, Dense]; aesop;
 
-@[simp]
-lemma terminal_frame : GeachConfluent t Frame.terminal.toFrame := by simp [GeachConfluent, Frame.terminal.relItr.mpr];
+lemma satisfies_TerminalFrame : GeachConfluent t (TerminalFrame α)ꟳ := by simp [GeachConfluent, TerminalFrame.iff_relItr.mpr];
 
 end GeachConfluent
 
 
 namespace MultiGeachConfluent
 
-@[simp]
-lemma terminal_frame : MultiGeachConfluent ts Frame.terminal.toFrame := by
+lemma satisfies_TerminalFrame : MultiGeachConfluent ts (TerminalFrame α)ꟳ := by
   induction ts with
   | nil => simp;
   | cons t ts ih =>
     constructor;
-    . exact Kripke.GeachConfluent.terminal_frame;
+    . exact GeachConfluent.satisfies_TerminalFrame;
     . exact ih;
 
 end MultiGeachConfluent
@@ -128,12 +126,13 @@ instance instGeachDefinability [geach : L.IsGeach] : Definability Ax(L) (Kripke.
   convert AxiomSet.MultiGeach.definability (α := α) geach.taples;
   simp;
 
-instance : FiniteFrameClass.IsNonempty (𝔽ꟳ(𝗚𝗲(l)) : FiniteFrameClass' α) := by
-  existsi Frame.terminal;
-  apply iff_definability_memAxiomSetFrameClass (AxiomSet.MultiGeach.definability l) |>.mpr;
-  exact MultiGeachConfluent.terminal_frame;
+instance : (𝔽ꟳ(𝗚𝗲(l)) : FiniteFrameClass α).IsNonempty where
+  nonempty := by
+    use (TerminalFrame α);
+    apply iff_definability_memAxiomSetFrameClass (AxiomSet.MultiGeach.definability l) |>.mpr;
+    exact MultiGeachConfluent.satisfies_TerminalFrame;
 
-instance : FrameClass.IsNonempty (𝔽(𝗚𝗲(l)) : FrameClass' α) := inferInstance
+instance : FrameClass.IsNonempty (𝔽(𝗚𝗲(l)) : FrameClass α) := inferInstance
 
 instance : System.Consistent (𝐆𝐞(l) : DeductionParameter α) := inferInstance
 

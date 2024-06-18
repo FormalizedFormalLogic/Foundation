@@ -12,16 +12,18 @@ open MaximalConsistentTheory
 
 namespace Kripke
 
-abbrev CanonicalFrame (𝓓 : DeductionParameter α) [Inhabited (𝓓)-MCT] : Frame' α where
+abbrev CanonicalFrame (𝓓 : DeductionParameter α) [Inhabited (𝓓)-MCT] : Frame α where
   World := (𝓓)-MCT
   Rel :=  λ Ω₁ Ω₂ => (□''⁻¹Ω₁.theory : Theory α) ⊆ Ω₂.theory
 
 namespace CanonicalFrame
 
-@[simp]
-lemma frame_def_box: (CanonicalFrame 𝓓).Rel Ω₁ Ω₂ ↔ (∀ {p : Formula α}, □p ∈ Ω₁.theory → p ∈ Ω₂.theory) := by rfl
+variable {Ω₁ Ω₂ : (CanonicalFrame 𝓓).World}
 
-lemma multiframe_def_multibox : ((CanonicalFrame 𝓓).RelItr n Ω₁ Ω₂) ↔ ∀ {p : Formula α}, □^[n]p ∈ Ω₁.theory → p ∈ Ω₂.theory := by
+@[simp]
+lemma frame_def_box: Ω₁ ≺ Ω₂ ↔ ∀ {p}, □p ∈ Ω₁.theory → p ∈ Ω₂.theory := by rfl
+
+lemma multiframe_def_multibox : Ω₁ ≺^[n] Ω₂ ↔ ∀ {p}, □^[n]p ∈ Ω₁.theory → p ∈ Ω₂.theory := by
   induction n generalizing Ω₁ Ω₂ with
   | zero =>
     simp_all;
@@ -70,17 +72,12 @@ lemma multiframe_def_multibox : ((CanonicalFrame 𝓓).RelItr n Ω₁ Ω₂) ↔
         apply hΩ;
         simp_all;
 
-lemma multiframe_def_multibox' : ((CanonicalFrame 𝓓).RelItr n Ω₁ Ω₂) ↔ ∀ {p : Formula α}, p ∈ (□''⁻¹^[n]Ω₁.theory) → p ∈ Ω₂.theory := by
+lemma multiframe_def_multibox' : Ω₁ ≺^[n] Ω₂ ↔ ∀ {p}, p ∈ (□''⁻¹^[n]Ω₁.theory) → p ∈ Ω₂.theory := by
   constructor;
   . intro h p hp; exact multiframe_def_multibox.mp h hp;
   . intro h; apply multiframe_def_multibox.mpr; assumption;
 
-lemma multiframe_def_multibox'' : ((CanonicalFrame 𝓓).RelItr n Ω₁ Ω₂) ↔ ∀ {p : Formula α}, p ∈ (□''⁻¹^[n]Ω₁.theory) → p ∈ Ω₂.theory := by
-  constructor;
-  . intro h p hp; exact multiframe_def_multibox.mp h hp;
-  . intro h; apply multiframe_def_multibox.mpr; assumption;
-
-lemma multiframe_def_multidia : (CanonicalFrame 𝓓).RelItr n Ω₁ Ω₂ ↔ ∀ {p : Formula α}, (p ∈ Ω₂.theory → ◇^[n]p ∈ Ω₁.theory) := Iff.trans multiframe_def_multibox multibox_multidia
+lemma multiframe_def_multidia : Ω₁ ≺^[n] Ω₂ ↔ ∀ {p}, (p ∈ Ω₂.theory → ◇^[n]p ∈ Ω₁.theory) := Iff.trans multiframe_def_multibox multibox_multidia
 
 end CanonicalFrame
 
@@ -140,14 +137,14 @@ lemma iff_valid_on_canonicalModel_deducible : (CanonicalModel 𝓓) ⊧ p ↔ (�
     obtain ⟨Γ, hΓ₁, hΓ₂⟩ := Theory.iff_insert_Inconsistent.mp this;
     exact Ω.consistent hΓ₁ $ and_imply_iff_imply_imply'!.mp hΓ₂ ⨀ h;
 
-lemma realize_axiomset_of_self_canonicalModel : CanonicalModel 𝓓 ⊧* Ax(𝓓) := by
+lemma realize_axiomset_of_self_canonicalModel : (CanonicalModel 𝓓) ⊧* Ax(𝓓) := by
   apply Semantics.realizeSet_iff.mpr;
   intro p hp;
   apply iff_valid_on_canonicalModel_deducible.mpr;
   exact ⟨Deduction.maxm hp⟩;
 
 @[simp]
-lemma realize_theory_of_self_canonicalModel : CanonicalModel 𝓓 ⊧* (System.theory 𝓓) := by
+lemma realize_theory_of_self_canonicalModel : (CanonicalModel 𝓓) ⊧* (System.theory 𝓓) := by
   apply Semantics.realizeSet_iff.mpr;
   intro p hp;
   apply iff_valid_on_canonicalModel_deducible.mpr;

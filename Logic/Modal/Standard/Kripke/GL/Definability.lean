@@ -10,7 +10,7 @@ open System
 open Kripke
 open Formula
 
-variable {F : Kripke.Frame' α}
+variable {F : Kripke.Frame α}
 
 private lemma AxiomSet.L.definability.implies_transitive : F ⊧* 𝗟 → Transitive F.Rel := by
   contrapose;
@@ -91,13 +91,13 @@ instance AxiomSet.L.finiteDefinability : FiniteDefinability (α := α) 𝗟 (λ 
       apply AxiomSet.L.definability.defines F.toFrame |>.mpr;
       exact ⟨hTrans, @Finite.converseWellFounded_of_trans_irrefl _ F.Rel F.World_finite ⟨hTrans⟩ ⟨hIrrefl⟩⟩;
 
-instance : FiniteFrameClass.IsNonempty (𝔽ꟳ(𝗟) : FiniteFrameClass' α) where
+instance : (𝔽ꟳ(𝗟) : FiniteFrameClass α).IsNonempty where
   nonempty := by
     existsi { World := PUnit, Rel := λ _ _ => False };
     apply iff_finiteDefinability_memFiniteFrameClass (AxiomSet.L.finiteDefinability) |>.mpr;
     simp [Transitive, Irreflexive];
 
-instance : FiniteFrameClass.IsNonempty (𝔽ꟳ(Ax(𝐆𝐋)) : FiniteFrameClass' α) where
+instance : (𝔽ꟳ(Ax(𝐆𝐋)) : FiniteFrameClass α).IsNonempty where
   nonempty := by
     existsi { World := PUnit, Rel := λ _ _ => False };
     apply iff_finiteDefinability_memFiniteFrameClass

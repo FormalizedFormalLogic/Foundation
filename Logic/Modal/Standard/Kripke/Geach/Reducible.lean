@@ -14,13 +14,16 @@ section
 variable {L₁ L₂ : DeductionParameter α} [geach₁ : L₁.IsGeach] [geach₂ : L₂.IsGeach]
 
 lemma reducible_of_geach_defnability
-  (hs : ∀ {F : Frame.{u}}, MultiGeachConfluent geach₂.taples F → MultiGeachConfluent geach₁.taples F)
-  : (L₁ ≤ₛ L₂) := reducible_of_definability (definability₁ := instGeachDefinability) (definability₂ := instGeachDefinability) hs
+  (hs : ∀ {F : Frame.{u} α}, MultiGeachConfluent geach₂.taples F → MultiGeachConfluent geach₁.taples F)
+  : L₁ ≤ₛ L₂ := by
+    apply reducible_of_definability.{u} (definability₁ := instGeachDefinability) (definability₂ := instGeachDefinability);
+    intro F hF;
+    have := @hs F;
 
 
 lemma equiv_of_geach_defnability
-  (hs : ∀ {F : Frame.{u}}, MultiGeachConfluent geach₁.taples F ↔ MultiGeachConfluent geach₂.taples F)
-  : (L₁ =ₛ L₂) := equiv_of_iff_definability (definability₁ := instGeachDefinability) (definability₂ := instGeachDefinability) hs
+  (hs : ∀ {F : Frame.{u} α}, MultiGeachConfluent geach₁.taples F ↔ MultiGeachConfluent geach₂.taples F)
+  : L₁ =ₛ L₂ := equiv_of_iff_definability (definability₁ := instGeachDefinability) (definability₂ := instGeachDefinability) hs
 
 end
 

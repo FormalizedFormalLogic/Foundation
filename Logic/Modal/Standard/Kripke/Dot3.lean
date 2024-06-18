@@ -8,7 +8,7 @@ open Formula
 
 variable {α} [Inhabited α] [DecidableEq α]
 
-variable {F : Kripke.Frame' α}
+variable {F : Kripke.Frame α}
 variable [atleast : Atleast 2 α]
 
 private lemma AxiomSet.Dot3.definability.implies : F ⊧* .𝟯 → Connected F.Rel := by
@@ -54,7 +54,7 @@ instance AxiomSet.Dot3.definability : Definability (α := α) .𝟯 (λ F => Con
 instance S4dot3.definability : Definability (α := α) Ax(𝐒𝟒.𝟑) (λ F => Reflexive F.Rel ∧ Transitive F.Rel ∧ Connected F.Rel) := by
   have d := Definability.union (P₁ := λ F => (Reflexive F.Rel ∧ Transitive F.Rel)) (by simpa using instGeachDefinability (α := α) (L := 𝐒𝟒)) AxiomSet.Dot3.definability;
   simp at d;
-  suffices p : ∀ {F : Frame' α}, (Reflexive F.Rel ∧ Transitive F.Rel) ∧ Connected F.Rel ↔ Reflexive F.Rel ∧ Transitive F.Rel ∧ Connected F.Rel by
+  suffices p : ∀ {F : Frame α}, (Reflexive F.Rel ∧ Transitive F.Rel) ∧ Connected F.Rel ↔ Reflexive F.Rel ∧ Transitive F.Rel ∧ Connected F.Rel by
     constructor;
     intro F;
     constructor;
@@ -65,23 +65,24 @@ instance S4dot3.definability : Definability (α := α) Ax(𝐒𝟒.𝟑) (λ F =
       exact d.defines F |>.mpr $ p.mpr h;
   aesop;
 
-instance : FiniteFrameClass.IsNonempty (𝔽ꟳ(Ax(𝐒𝟒.𝟑)) : FiniteFrameClass' α) := by
-  existsi Frame.terminal;
-  apply iff_definability_memAxiomSetFrameClass (S4dot3.definability) |>.mpr;
-  refine ⟨?reflexive, ?transitive, ?connective⟩;
-  . intro x; apply Frame.terminal.rel.mpr; trivial;
-  . intro x y z hxy hyz;
-    have := Frame.terminal.rel.mp hxy;
-    have := Frame.terminal.rel.mp hyz;
-    apply Frame.terminal.rel.mpr;
-    tauto;
-  . intro x y z ⟨hxy, hxz⟩;
-    have := Frame.terminal.rel.mp hxy;
-    have := Frame.terminal.rel.mp hxz;
-    subst_vars;
-    left; assumption;
+instance : FiniteFrameClass.IsNonempty (𝔽ꟳ(Ax(𝐒𝟒.𝟑)) : FiniteFrameClass α) where
+  nonempty := by
+    use (TerminalFrame α);
+    apply iff_definability_memAxiomSetFrameClass (S4dot3.definability) |>.mpr;
+    refine ⟨?reflexive, ?transitive, ?connective⟩;
+    . intro x; apply TerminalFrame.iff_rel.mpr; trivial;
+    . intro x y z hxy hyz;
+      have := TerminalFrame.iff_rel.mp hxy;
+      have := TerminalFrame.iff_rel.mp hyz;
+      apply TerminalFrame.iff_rel.mpr;
+      tauto;
+    . intro x y z ⟨hxy, hxz⟩;
+      have := TerminalFrame.iff_rel.mp hxy;
+      have := TerminalFrame.iff_rel.mp hxz;
+      subst_vars;
+      left; assumption;
 
-instance : FrameClass.IsNonempty (𝔽(Ax(𝐒𝟒.𝟑)) : FrameClass' α) := inferInstance
+instance : FrameClass.IsNonempty (𝔽(Ax(𝐒𝟒.𝟑)) : FrameClass α) := inferInstance
 
 namespace Kripke
 

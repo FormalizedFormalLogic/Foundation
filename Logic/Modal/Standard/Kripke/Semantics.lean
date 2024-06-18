@@ -5,92 +5,78 @@ universe u v
 
 namespace LO.Modal.Standard
 
-namespace Kripke
-
-structure Frame where
-  World : Type u
-  World_nonempty : Nonempty World := by infer_instance
-  Rel : World → World → Prop
-
-structure FiniteFrame extends Frame where
-  World_finite : Finite World := by infer_instance
-
-instance (F : Frame) : Nonempty F.World := F.World_nonempty
-
-instance : CoeSort Frame (Type _) where coe := Frame.World
-
-set_option linter.unusedVariables false in
-abbrev Frame' (α : Type*) := Frame
-
-set_option linter.unusedVariables false in
-abbrev FiniteFrame' (α : Type*) := FiniteFrame
-
-def FiniteFrame.toFrame' {α : Type*} (F : FiniteFrame) : Frame' α := F.toFrame
-
-abbrev Frame.Rel' {F : Frame} (w w' : F.World) := F.Rel w w'
-scoped infix:45 " ≺ " => Frame.Rel'
-
--- MEMO: 様相論理の文脈において`n = 0`のケースの2項関係の合成が`=`として要請されるが一般にはそうではないはず: (`n ≥ 1`で定義するため)
-def RelItr {α : Type*} (R : α → α → Prop) : ℕ → α → α → Prop
+def RelItr (R : α → α → Prop) : ℕ → α → α → Prop
   | 0 => (· = ·)
   | n + 1 => fun x y ↦ ∃ z, R x z ∧ RelItr R n z y
 
-@[simp] lemma relItr_zero {α : Type*} (R : α → α → Prop) (x y : α) : RelItr R 0 x y ↔ x = y := iff_of_eq rfl
+@[simp]
+lemma relItr_zero {R : α → α → Prop} {x y : α} : RelItr R 0 x y ↔ x = y := iff_of_eq rfl
 
-@[simp] lemma relItr_succ {α : Type*} (R : α → α → Prop) (x y : α) :
-    RelItr R (n + 1) x y ↔ ∃ z, R x z ∧ RelItr R n z y := iff_of_eq rfl
+@[simp]
+lemma relItr_succ {R : α → α → Prop} {x y : α} : RelItr R (n + 1) x y ↔ ∃ z, R x z ∧ RelItr R n z y := iff_of_eq rfl
 
-protected abbrev Frame.RelItr (n : ℕ) {F : Frame} (w w' : F.World) : Prop := RelItr (· ≺ ·) n w w'
+namespace Kripke
 
+
+structure Frame (α : Type*) where
+  World : Type*
+  [World_nonempty : Nonempty World]
+  Rel : World → World → Prop
+
+structure FiniteFrame (α) extends Frame α where
+  [World_finite : Finite World]
+
+instance (F : Frame α) : Nonempty F.World := F.World_nonempty
+
+instance : CoeSort (Frame α) (Type*) := ⟨Frame.World⟩
+
+postfix:max "ꟳ" => FiniteFrame.toFrame
+
+abbrev Frame.Rel' {F : Frame α} (w w' : F.World) := F.Rel w w'
+scoped infix:45 " ≺ " => Frame.Rel'
+
+protected abbrev Frame.RelItr (n : ℕ) {F : Frame α} (w w' : F.World) : Prop := RelItr (· ≺ ·) n w w'
 scoped notation w:45 " ≺^[" n "] " w':46 => Frame.RelItr n w w'
 
 /-- Frame with single world and identiy relation -/
-abbrev Frame.terminal : FiniteFrame := { World := PUnit, Rel := λ _ _ => True }
+abbrev TerminalFrame (α) : FiniteFrame α := { World := PUnit, Rel := (· = ·) }
 
 @[simp]
-lemma Frame.terminal.rel : Frame.Rel' (F := Frame.terminal.toFrame) x y ↔ x = y := by aesop;
+lemma TerminalFrame.iff_rel : Frame.Rel' (F := (TerminalFrame α)ꟳ) x y ↔ x = y := by aesop;
 
 @[simp]
-lemma Frame.terminal.relItr : Frame.RelItr n (F := Frame.terminal.toFrame) x y ↔ x = y := by
+lemma TerminalFrame.iff_relItr : Frame.RelItr n (F := (TerminalFrame α)ꟳ) x y ↔ x = y := by
   induction n with
-  | zero => simp;
-  | succ n ih => simp; use x; simp [ih];
+  | zero => simp only [relItr_zero];
+  | succ n ih => simp_all only [relItr_succ, exists_eq_left', iff_true];
 
-abbrev FrameClass := Set Frame
+abbrev FrameClass (α) := Set (Frame α)
 
-set_option linter.unusedVariables false in
-abbrev FrameClass' (α : Type*) := FrameClass
-
-class FrameClass.IsNonempty (𝔽 : FrameClass) where
-  nonempty : ∃ F, F ∈ 𝔽
+class FrameClass.IsNonempty (𝔽 : FrameClass α) where
+  [nonempty : 𝔽.Nonempty]
 
 
 
-abbrev FiniteFrameClass := Set FiniteFrame
+abbrev FiniteFrameClass (α) := Set (FiniteFrame α)
 
-set_option linter.unusedVariables false in
-abbrev FiniteFrameClass' (α : Type*) := FiniteFrameClass
-
-class FiniteFrameClass.IsNonempty (𝔽 : FiniteFrameClass) where
-  nonempty : ∃ F, F ∈ 𝔽
+class FiniteFrameClass.IsNonempty (𝔽 : FiniteFrameClass α) where
+  [nonempty : 𝔽.Nonempty]
 
 
-def FrameClass.toFinite (𝔽 : FrameClass) : FiniteFrameClass := { F | F.toFrame ∈ 𝔽 }
-
+def FrameClass.toFinite (𝔽 : FrameClass α) : FiniteFrameClass α := { F | Fꟳ ∈ 𝔽 }
 postfix:max "ꟳ" => FrameClass.toFinite
-instance : Coe FrameClass FiniteFrameClass := ⟨λ 𝔽 ↦ 𝔽ꟳ⟩
 
-instance : Coe (FrameClass' α) (FiniteFrameClass' α) := ⟨λ 𝔽 ↦ 𝔽ꟳ⟩
+instance : Coe (FrameClass α) (FiniteFrameClass α) := ⟨λ 𝔽 ↦ 𝔽ꟳ⟩
 
-abbrev FrameProperty := Frame → Prop
+abbrev FrameCondition (α) := Frame α → Prop
 
-abbrev FiniteFrameProperty := FiniteFrame → Prop
+abbrev FiniteFrameCondition (α) := FiniteFrame α → Prop
 
 -- MEMO: 型を上手く合わせられず両方とも`u`に属しているが別にする必要があるだろう
 abbrev Valuation (W : Type u) (α : Type u) := W → α → Prop
 
 structure Model (α) where
-  Frame : Frame' α
+  Frame : Frame α
   Valuation : Valuation Frame.World α
 
 abbrev Model.World (M : Model α) := M.Frame.World
@@ -197,46 +183,46 @@ instance : Semantics.Bot (Model α) where
 end Formula.valid_on_KripkeModel
 
 
-def Formula.valid_on_KripkeFrame (F : Frame) (f : Formula α) := ∀ V, (Model.mk F V) ⊧ f
+def Formula.valid_on_KripkeFrame (F : Frame α) (f : Formula α) := ∀ V, (Model.mk F V) ⊧ f
 
 namespace Formula.valid_on_KripkeFrame
 
-protected instance semantics : Semantics (Formula α) (Frame' α) := ⟨fun F ↦ Formula.valid_on_KripkeFrame F⟩
+protected instance semantics : Semantics (Formula α) (Frame α) := ⟨fun F ↦ Formula.valid_on_KripkeFrame F⟩
 
-@[simp] protected lemma models_iff {F : Frame' α} : F ⊧ f ↔ valid_on_KripkeFrame F f := iff_of_eq rfl
+@[simp] protected lemma models_iff {F : Frame α} : F ⊧ f ↔ valid_on_KripkeFrame F f := iff_of_eq rfl
 
-instance : Semantics.Bot (Frame' α) where
+instance : Semantics.Bot (Frame α) where
   realize_bot _ := by simp [valid_on_KripkeFrame];
 
 end Formula.valid_on_KripkeFrame
 
 
-@[simp] def Formula.valid_on_KripkeFrameClass (𝔽 : FrameClass) (f : Formula α) := ∀ (F : Frame' α), F ∈ 𝔽 → F ⊧ f
+@[simp] def Formula.valid_on_KripkeFrameClass (𝔽 : FrameClass α) (f : Formula α) := ∀ (F : Frame α), F ∈ 𝔽 → F ⊧ f
 
 namespace Formula.valid_on_KripkeFrameClass
 
-protected instance semantics : Semantics (Formula α) (FrameClass' α) := ⟨fun 𝔽 ↦ Formula.valid_on_KripkeFrameClass 𝔽⟩
+protected instance semantics : Semantics (Formula α) (FrameClass α) := ⟨fun 𝔽 ↦ Formula.valid_on_KripkeFrameClass 𝔽⟩
 
-@[simp] protected lemma models_iff {𝔽 : FrameClass' α} : 𝔽 ⊧ f ↔ Formula.valid_on_KripkeFrameClass 𝔽 f := iff_of_eq rfl
+@[simp] protected lemma models_iff {𝔽 : FrameClass α} : 𝔽 ⊧ f ↔ Formula.valid_on_KripkeFrameClass 𝔽 f := iff_of_eq rfl
 
 end Formula.valid_on_KripkeFrameClass
 
 
-def Kripke.AxiomSetFrameClass (Ax : AxiomSet α) : FrameClass' α := { (F : Frame' α) | F ⊧* Ax }
+def Kripke.AxiomSetFrameClass (Ax : AxiomSet α) : FrameClass α := { (F : Frame α) | F ⊧* Ax }
 notation "𝔽(" Ax ")" => Kripke.AxiomSetFrameClass Ax
 
 
-@[simp] def Formula.valid_on_FiniteKripkeFrameClass (𝔽 : FiniteFrameClass) (f : Formula α) := ∀ (F : FiniteFrame' α), 𝔽 F → F.toFrame' ⊧ f
+@[simp] def Formula.valid_on_FiniteKripkeFrameClass (𝔽 : FiniteFrameClass α) (f : Formula α) := ∀ (F : FiniteFrame α), 𝔽 F → F.toFrame ⊧ f
 
-protected instance : Semantics (Formula α) (FiniteFrameClass' α) := ⟨fun 𝔽 ↦ Formula.valid_on_FiniteKripkeFrameClass 𝔽⟩
+protected instance : Semantics (Formula α) (FiniteFrameClass α) := ⟨fun 𝔽 ↦ Formula.valid_on_FiniteKripkeFrameClass 𝔽⟩
 
 namespace Formula.valid_on_FiniteKripkeFrameClass
 
-@[simp] protected lemma models_iff {𝔽 : FiniteFrameClass' α} : 𝔽 ⊧ f ↔ Formula.valid_on_FiniteKripkeFrameClass 𝔽 f := iff_of_eq rfl
+@[simp] protected lemma models_iff {𝔽 : FiniteFrameClass α} : 𝔽 ⊧ f ↔ Formula.valid_on_FiniteKripkeFrameClass 𝔽 f := iff_of_eq rfl
 
 end Formula.valid_on_FiniteKripkeFrameClass
 
-def Kripke.AxiomSetFiniteFrameClass (Ax : AxiomSet α) : FiniteFrameClass' α := { (F : FiniteFrame' α) | F.toFrame' ⊧* Ax }
+def Kripke.AxiomSetFiniteFrameClass (Ax : AxiomSet α) : FiniteFrameClass α := { (F : FiniteFrame α) | F.toFrame ⊧* Ax }
 notation "𝔽ꟳ(" Ax ")" => Kripke.AxiomSetFiniteFrameClass Ax
 
 
@@ -249,8 +235,8 @@ namespace Kripke
 lemma validOnAxiomSetFrameClass_axiom (h : p ∈ Ax) : 𝔽(Ax) ⊧ p := by intro F hF; exact hF.realize h;
 
 /-- Every frame that valid all axioms in `Ax` satisfy frame property `P` -/
-class Definability (Ax : AxiomSet α) (P : FrameProperty) where
-  defines : ∀ (F : Frame' α), F ⊧* Ax ↔ P F
+class Definability (Ax : AxiomSet α) (P : FrameCondition α) where
+  defines : ∀ (F : Frame α), F ⊧* Ax ↔ P F
 
 instance Definability.union (definability₁ : Definability Ax₁ P₁) (definability₂ : Definability Ax₂ P₂) : Definability (Ax₁ ∪ Ax₂) (λ F => P₁ F ∧ P₂ F) where
   defines F := by
@@ -266,13 +252,13 @@ instance Definability.union (definability₁ : Definability Ax₁ P₁) (definab
       . apply Definability.defines F |>.mpr h.1;
       . apply Definability.defines F |>.mpr h.2;
 
-lemma iff_definability_memAxiomSetFrameClass (definability : Definability Ax P) : ∀ {F : Frame' α}, F ∈ 𝔽(Ax) ↔ P F := by
+lemma iff_definability_memAxiomSetFrameClass (definability : Definability Ax P) : ∀ {F : Frame α}, F ∈ 𝔽(Ax) ↔ P F := by
   apply definability.defines;
 
 
 /-- Every **finite** frame that valid all axioms in `Ax` satisfy **finite** frame property `P` -/
-class FiniteDefinability (Ax : AxiomSet α) (P : FiniteFrameProperty) where
-  fin_defines : ∀ (F : FiniteFrame' α), F.toFrame' ⊧* Ax ↔ P F
+class FiniteDefinability (Ax : AxiomSet α) (P : FiniteFrameCondition α) where
+  fin_defines : ∀ (F : FiniteFrame α), F.toFrame ⊧* Ax ↔ P F
 
 instance FiniteDefinability.union (definability₁ : FiniteDefinability Ax₁ P₁) (definability₂ : FiniteDefinability Ax₂ P₂) : FiniteDefinability (Ax₁ ∪ Ax₂) (λ F => P₁ F ∧ P₂ F) where
   fin_defines F := by
@@ -288,7 +274,7 @@ instance FiniteDefinability.union (definability₁ : FiniteDefinability Ax₁ P�
       . apply FiniteDefinability.fin_defines F |>.mpr h.1;
       . apply FiniteDefinability.fin_defines F |>.mpr h.2;
 
-lemma iff_finiteDefinability_memFiniteFrameClass (definability : FiniteDefinability Ax P) : ∀ {F : FiniteFrame' α}, 𝔽ꟳ(Ax) F ↔ P F := by
+lemma iff_finiteDefinability_memFiniteFrameClass (definability : FiniteDefinability Ax P) : ∀ {F : FiniteFrame α}, 𝔽ꟳ(Ax) F ↔ P F := by
   apply definability.fin_defines;
 
 instance [definability : Definability Ax P] : FiniteDefinability Ax (λ F => P F.toFrame) where
@@ -297,14 +283,11 @@ instance [definability : Definability Ax P] : FiniteDefinability Ax (λ F => P F
     . exact iff_definability_memAxiomSetFrameClass definability |>.mp;
     . exact iff_definability_memAxiomSetFrameClass definability |>.mpr;
 
-instance {𝔽 : FrameClass' α} [ne : FiniteFrameClass.IsNonempty 𝔽ꟳ] : FrameClass.IsNonempty 𝔽  where
-  nonempty := by
-    obtain ⟨F, hF⟩ := ne;
-    existsi F.toFrame;
-    exact hF;
+instance {𝔽 : FrameClass α} [ne : 𝔽ꟳ.IsNonempty] : FrameClass.IsNonempty 𝔽  where
+  nonempty := by obtain ⟨F, hF⟩ := ne.nonempty; existsi Fꟳ; exact hF;
 
 instance [ne : FiniteFrameClass.IsNonempty 𝔽ꟳ(Ax)] : FrameClass.IsNonempty 𝔽(Ax) where
-  nonempty := by obtain ⟨F, hF⟩ := ne; existsi F.toFrame; exact hF;
+  nonempty := by obtain ⟨F, hF⟩ := ne.nonempty; existsi Fꟳ; exact hF;
 
 end Kripke
 
@@ -326,13 +309,13 @@ instance [definability : Definability Ax P] : Definability (𝗞 ∪ Ax) P := by
 
 instance [definability : FiniteDefinability Ax P] : FiniteDefinability (𝗞 ∪ Ax) P := by simpa using FiniteDefinability.union AxiomSet.K.finiteDefinability definability;
 
-instance : FiniteFrameClass.IsNonempty (𝔽ꟳ(𝗞) : FiniteFrameClass' α) where
+instance : (𝔽ꟳ(𝗞) : FiniteFrameClass α).IsNonempty where
   nonempty := by
-    existsi Frame.terminal;
+    existsi TerminalFrame α;
     apply iff_finiteDefinability_memFiniteFrameClass AxiomSet.K.finiteDefinability |>.mpr;
     trivial;
 
-instance : FrameClass.IsNonempty (𝔽(𝗞) : FrameClass' α) := inferInstance
+instance : FrameClass.IsNonempty (𝔽(𝗞) : FrameClass α) := inferInstance
 
 end K
 
