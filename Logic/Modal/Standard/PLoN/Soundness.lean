@@ -22,12 +22,12 @@ lemma sound!_on_N (d : 𝐍 ⊢! p) : ℕ𝔽(𝐍) ⊧ p := by
   | hLoeb => simp_all only [Bool.false_eq_true];
   | hHenkin => simp_all only [Bool.false_eq_true];
   | hDisj₃ =>
-    simp_all [PLoN_ValidOnFrameClass, PLoN_ValidOnFrame, PLoN_ValidOnModel, PLoN_Satisfies];
+    simp_all [valid_on_PLoNFrameClass, valid_on_PLoNFrame, valid_on_PLoNModel, plon_satisfies];
     intros; rename_i hpr hqr hpq;
     cases hpq with
     | inl hp => exact hpr hp;
     | inr hq => exact hqr hq;
-  | _ => simp_all [PLoN_ValidOnFrameClass, PLoN_ValidOnFrame, PLoN_ValidOnModel, PLoN_Satisfies];
+  | _ => simp_all [valid_on_PLoNFrameClass, valid_on_PLoNFrame, valid_on_PLoNModel, plon_satisfies];
 
 instance : Sound (𝐍 : DeductionParameter α) ℕ𝔽(𝐍) := ⟨sound!_on_N⟩
 

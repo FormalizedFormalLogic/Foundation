@@ -8,7 +8,7 @@ variable {W α : Type u} [Inhabited W] [Inhabited α]
 
 open System
 open Kripke
-open Formula Formula.Kripke
+open Formula
 
 variable {F : Kripke.Frame' α}
 
@@ -16,50 +16,46 @@ private lemma AxiomSet.L.definability.implies_transitive : F ⊧* 𝗟 → Trans
   contrapose;
   intro hT; simp [Transitive] at hT;
   obtain ⟨w₁, w₂, r₁₂, w₃, r₂₃, nr₁₃⟩ := hT;
-  simp only [Semantics.RealizeSet.setOf_iff, ValidOnFrame.models_iff, ValidOnFrame,
-    ValidOnModel.iff_models, ValidOnModel, Satisfies.iff_models, forall_exists_index,
-    forall_apply_eq_imp_iff, Satisfies.imp_def, Satisfies.box_def, not_forall, exists_prop];
+  simp [valid_on_KripkeFrame, valid_on_KripkeFrame, valid_on_KripkeModel];
   existsi (atom default), (λ w' _ => w' ≠ w₂ ∧ w' ≠ w₃), w₁;
   constructor;
   . intro x hx h;
     by_cases hx₂ : x = w₂;
-    . subst hx₂; simpa [Satisfies] using h w₃ r₂₃;
-    . by_cases hx₃ : x = w₃ <;> simp_all [Satisfies, hx₃];
-  . existsi w₂; simpa [Satisfies];
+    . subst hx₂; simpa [kripke_satisfies] using h w₃ r₂₃;
+    . by_cases hx₃ : x = w₃ <;> simp_all [kripke_satisfies, hx₃];
+  . existsi w₂; simpa [kripke_satisfies];
 
 private lemma AxiomSet.L.definability.implies_cwf  : F ⊧* 𝗟 → ConverseWellFounded F.Rel := by
   contrapose;
   intro hCF;
   obtain ⟨X, hX₁, hX₂⟩ := by simpa using ConverseWellFounded.iff_has_max.not.mp hCF;
-  simp only [Semantics.RealizeSet.setOf_iff, ValidOnFrame.models_iff, ValidOnFrame,
-    ValidOnModel.iff_models, ValidOnModel, Satisfies.iff_models, forall_exists_index,
-    forall_apply_eq_imp_iff, Satisfies.imp_def, Satisfies.box_def, not_forall, exists_prop];
+  simp [valid_on_KripkeFrame, valid_on_KripkeFrame, valid_on_KripkeModel];
   existsi (atom default), (λ w _ => w ∉ X), hX₁.some;
   constructor;
   . intro x _;
     by_cases hxs : x ∈ X
     . obtain ⟨y, hy₁, hy₂⟩ := hX₂ x hxs;
       intro h;
-      exact h x (by simp_all only [Satisfies]);
+      exact h x (by simp_all only [kripke_satisfies]);
     . aesop;
   . obtain ⟨w', hw'₁, hw'₂⟩ := hX₂ hX₁.some (by apply Set.Nonempty.some_mem);
     existsi w';
     constructor;
     . simpa using hw'₂;
-    . simpa [Satisfies];
+    . simpa [kripke_satisfies];
 
 private lemma AxiomSet.L.definability.impliedby : (Transitive F.Rel ∧ ConverseWellFounded F.Rel) → F ⊧* 𝗟 := by
   rintro ⟨hTrans, hWF⟩;
   simp [AxiomSet.L, Axioms.L];
   intro p V w;
-  simp only [Satisfies.iff_models, Satisfies.imp_def];
+  simp [kripke_satisfies];
   contrapose;
   intro h;
   obtain ⟨z, rwz, hz⟩ := by simpa using h;
-  obtain ⟨xm, ⟨hxm₁, hxm₂⟩⟩ := hWF.has_min ({ x | (F.Rel w x) ∧ ¬(Satisfies ⟨F, V⟩ x p) }) (by existsi z; simp_all)
-  simp [Satisfies.box_def];
+  obtain ⟨xm, ⟨hxm₁, hxm₂⟩⟩ := hWF.has_min ({ x | (F.Rel w x) ∧ ¬(kripke_satisfies ⟨F, V⟩ x p) }) (by existsi z; simp_all)
+  simp;
   existsi xm;
-  have : Satisfies ⟨F, V⟩ xm (□p) := by
+  have : kripke_satisfies ⟨F, V⟩ xm (□p) := by
     by_contra hC;
     obtain ⟨y, hy₁, hy₂⟩ := by simpa using hC;
     have : ¬(xm ≺ y) := hxm₂ y ⟨(hTrans (by simp_all) hy₁), hy₂⟩;

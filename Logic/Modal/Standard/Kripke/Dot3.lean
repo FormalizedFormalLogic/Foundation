@@ -4,7 +4,7 @@ namespace LO.Modal.Standard
 
 open System
 open Kripke
-open Formula Formula.Kripke
+open Formula
 
 variable {α} [Inhabited α] [DecidableEq α]
 
@@ -15,42 +15,35 @@ private lemma AxiomSet.Dot3.definability.implies : F ⊧* .𝟯 → Connected F.
   contrapose;
   intro hCon; simp [Connected] at hCon;
   obtain ⟨x, y, rxy, z, ryz, nryz, nrzy⟩ := hCon;
-  simp [ValidOnFrame];
+  simp [valid_on_KripkeFrame];
   obtain ⟨f, finv, fInj⟩ := atleast.mapping;
   existsi f 0, f 1, (λ w a =>
     match (finv a) with
     | 0 => y ≺ w
     | 1 => z ≺ w
   );
-  simp [ValidOnModel, not_forall, Axioms.Dot3];
+  simp [valid_on_KripkeModel, not_forall, Axioms.Dot3];
   existsi x;
   constructor;
   . existsi y;
     constructor;
     . assumption;
-    . simp_all [Satisfies, (fInj 0), (fInj 1)];
+    . simp_all [kripke_satisfies, (fInj 0), (fInj 1)];
   . existsi z;
     constructor;
     . assumption;
-    . simp_all [Satisfies, (fInj 0), (fInj 1)];
+    . simp_all [kripke_satisfies, (fInj 0), (fInj 1)];
 
 private lemma AxiomSet.Dot3.definability.impliedBy : Connected F.Rel → F ⊧* .𝟯 := by
   intro hCon;
-  simp [ValidOnFrame, ValidOnModel, Axioms.Dot3];
+  simp [valid_on_KripkeFrame, valid_on_KripkeModel, Axioms.Dot3];
   intro _ p q e V x; subst e;
-  simp only [Satisfies.or_def, or_iff_not_imp_left];
-  intro hnxpq;
-  obtain ⟨y, rxy, hyp, hnyq⟩ := by simpa using hnxpq;
-  intro z rxz;
+  simp [kripke_satisfies];
+  by_contra hC; push_neg at hC;
+  obtain ⟨⟨y, rxy, hp, hnq⟩, ⟨z, rxz, hq, hnp⟩⟩ := hC;
   cases hCon ⟨rxy, rxz⟩ with
-  | inl ryz =>
-    have := hyp _ ryz;
-    simp_all only [Satisfies.imp_def, implies_true];
-  | inr rzy =>
-    simp [Satisfies.box_def, Satisfies.imp_def]
-    intro hq;
-    have hyp := hq y rzy;
-    contradiction;
+  | inl ryz => exact hnp $ hp _ ryz;
+  | inr rzy => exact hnq $ hq _ rzy;
 
 instance AxiomSet.Dot3.definability : Definability (α := α) .𝟯 (λ F => Connected F.Rel) where
   defines F := by

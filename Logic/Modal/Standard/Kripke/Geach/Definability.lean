@@ -75,7 +75,7 @@ end MultiGeachConfluent
 
 
 open Kripke
-open Formula Formula.Kripke
+open Formula
 open AxiomSet
 
 variable {Ax : AxiomSet α}
@@ -86,15 +86,15 @@ instance AxiomSet.Geach.definability (t) : Definability (α := α) 𝗴𝗲(t) (
     constructor;
     . intro h x y z hi hj;
       let M : Model α := { Frame := F, Valuation := λ v _ => y ≺^[t.m] v }
-      have him_x : Satisfies M x (◇^[t.i](□^[t.m](Formula.atom default))) := by
-        apply Satisfies.multidia_def.mpr;
+      have him_x : kripke_satisfies M x (◇^[t.i](□^[t.m](Formula.atom default))) := by
+        apply kripke_satisfies.multidia_def.mpr;
         existsi y;
         constructor;
         . simpa;
-        . apply Satisfies.multibox_def.mpr; aesop;
-      have hjn_x : Satisfies M x (□^[t.j](◇^[t.n]atom default)) := Kripke.Satisfies.mdp (h (Formula.atom default) M.Valuation x) him_x;
-      have hn_z : Satisfies M z (◇^[t.n]atom default) := Satisfies.multibox_def.mp hjn_x z hj;
-      obtain ⟨u, hzu, hyu⟩ := Satisfies.multidia_def.mp hn_z;
+        . apply kripke_satisfies.multibox_def.mpr; aesop;
+      have hjn_x : kripke_satisfies M x (□^[t.j](◇^[t.n]atom default)) := kripke_satisfies.mdp (h (Formula.atom default) M.Valuation x) him_x;
+      have hn_z : kripke_satisfies M z (◇^[t.n]atom default) := kripke_satisfies.multibox_def.mp hjn_x z hj;
+      obtain ⟨u, hzu, hyu⟩ := kripke_satisfies.multidia_def.mp hn_z;
       existsi u;
       exact ⟨hyu, hzu⟩;
     . intro h p V x;

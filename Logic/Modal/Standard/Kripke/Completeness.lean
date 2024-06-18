@@ -95,7 +95,7 @@ namespace CanonicalModel
 variable [Inhabited (MCT 𝓓)]
 
 @[reducible]
-instance : Semantics (Formula α) (CanonicalModel 𝓓).World := instKripkeSemanticsFormulaWorld (CanonicalModel 𝓓)
+instance : Semantics (Formula α) (CanonicalModel 𝓓).World := Formula.kripke_satisfies.semantics (CanonicalModel 𝓓)
 
 @[simp] lemma frame_def : (CanonicalModel 𝓓).Frame.Rel Ω₁ Ω₂ ↔ (□''⁻¹Ω₁.theory : Theory α) ⊆ Ω₂.theory := by rfl
 @[simp] lemma val_def : (CanonicalModel 𝓓).Valuation Ω a ↔ (atom a) ∈ Ω.theory := by rfl
@@ -107,7 +107,6 @@ section
 
 lemma truthlemma : ∀ {Ω : (CanonicalModel 𝓓).World}, Ω ⊧ p ↔ (p ∈ Ω.theory) := by
   induction p using Formula.rec' with
-  | hatom a => simp [Kripke.Satisfies];
   | hbox p ih =>
     intro Ω;
     constructor;
@@ -119,9 +118,7 @@ lemma truthlemma : ∀ {Ω : (CanonicalModel 𝓓).World}, Ω ⊧ p ↔ (p ∈ �
     . intro h Ω' hΩ';
       apply ih.mpr;
       exact CanonicalFrame.frame_def_box.mp hΩ' h;
-  | hfalsum => simp [Formula.Kripke.Satisfies.bot_def (M := (CanonicalModel 𝓓))];
-  | hVerum => simp [Formula.Kripke.Satisfies.top_def (M := (CanonicalModel 𝓓))];
-  | _ => simp_all;
+  | _ => simp_all [kripke_satisfies];
 
 lemma iff_valid_on_canonicalModel_deducible : (CanonicalModel 𝓓) ⊧ p ↔ (𝓓 ⊢! p) := by
   constructor;
@@ -133,7 +130,7 @@ lemma iff_valid_on_canonicalModel_deducible : (CanonicalModel 𝓓) ⊧ p ↔ (�
       have : 𝓓 ⊢! p := dne'! $ replace_imply_left_conj'! hΓ hC;
       contradiction;
     obtain ⟨Ω, hΩ⟩ := lindenbaum this;
-    simp [Kripke.ValidOnModel];
+    simp [valid_on_KripkeModel];
     existsi Ω;
     exact truthlemma.not.mpr $ iff_mem_neg.mp (show ~p ∈ Ω.theory by simp_all);
   . intro h Ω;
@@ -167,7 +164,7 @@ class Canonical (𝓓 : DeductionParameter α) [Inhabited (𝓓)-MCT] where
   realize : (CanonicalFrame 𝓓) ⊧* Ax(𝓓)
 
 lemma complete!_on_frameclass_of_canonical [System.Consistent 𝓓] [Inhabited (𝓓)-MCT] [Canonical 𝓓] : 𝔽(Ax(𝓓)) ⊧ p → 𝓓 ⊢! p := by
-  simp [Kripke.ValidOnFrameClass, Kripke.ValidOnFrame];
+  simp [valid_on_KripkeFrameClass, valid_on_KripkeFrame];
   contrapose;
   push_neg;
   intro h;

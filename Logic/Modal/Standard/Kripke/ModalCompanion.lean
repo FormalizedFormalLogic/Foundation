@@ -118,27 +118,29 @@ open Superintuitionistic.Formula.Kripke
 
 open Kripke
 
+open Formula
+
 lemma provable_S4_of_provable_efq : (𝐒𝟒 ⊢! pᵍ) → (𝐈𝐧𝐭 ⊢! p) := by
   contrapose;
   intro h;
   obtain ⟨iF, _, iV, iV_hereditary, w, h⟩ := by simpa [ValidOnFrameClass, ValidOnFrame, ValidOnModel] using not_imp_not.mpr Superintuitionistic.Kripke.complete! h;
 
   let M : Modal.Standard.Kripke.Model α := { Frame := { Rel := iF.Rel }, Valuation := iV };
-  have h₁ : ∀ q v, Satisfies ⟨iF, iV, iV_hereditary⟩ v q ↔ (Modal.Standard.Formula.Kripke.Satisfies M v (qᵍ)) := by
+  have h₁ : ∀ q v, Satisfies ⟨iF, iV, iV_hereditary⟩ v q ↔ (Modal.Standard.Formula.kripke_satisfies M v (qᵍ)) := by
     intro q v;
     induction q using Superintuitionistic.Formula.rec' generalizing v with
     | hatom a =>
       constructor;
       . intro _ _ h;
-        simp_all only [Satisfies.iff_models, Satisfies, Formula.Kripke.Satisfies];
+        simp_all only [Satisfies.iff_models, Satisfies, Formula.kripke_satisfies];
         exact iV_hereditary h (by assumption);
       . intro h;
-        simpa only [Satisfies.iff_models, Satisfies, Formula.Kripke.Satisfies] using h v $ iF.Rel_refl v;
+        simpa only [Satisfies.iff_models, Satisfies, Formula.kripke_satisfies] using h v $ iF.Rel_refl v;
     | _ => simp_all;
-  have : ¬(Modal.Standard.Formula.Kripke.Satisfies M w (pᵍ)) := (h₁ p w).not.mp h;
+  have : ¬(Modal.Standard.Formula.kripke_satisfies M w (pᵍ)) := (h₁ p w).not.mp h;
 
   apply not_imp_not.mpr $ Modal.Standard.Kripke.sound!_on_frameclass;
-  simp [Formula.Kripke.ValidOnFrame, Formula.Kripke.ValidOnModel];
+  simp [Formula.valid_on_KripkeFrame, valid_on_KripkeModel];
   existsi M.Frame;
   constructor;
   . apply Modal.Standard.Kripke.iff_definability_memAxiomSetFrameClass

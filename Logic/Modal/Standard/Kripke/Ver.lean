@@ -5,13 +5,13 @@ namespace LO.Modal.Standard
 
 open System
 open Kripke
-open Formula Formula.Kripke
+open Formula
 
 variable {α} [Inhabited α] [DecidableEq α]
 
 instance AxiomSet.Ver.definability : Definability (α := α) 𝗩𝗲𝗿 (λ F => Isolated F.Rel) where
   defines := by
-    simp [ValidOnFrame, ValidOnModel, Isolated];
+    simp [valid_on_KripkeFrame, valid_on_KripkeModel, Isolated];
     intro F;
     constructor;
     . intro h x y hxy;

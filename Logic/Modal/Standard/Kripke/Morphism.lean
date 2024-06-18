@@ -3,7 +3,7 @@ import Logic.Modal.Standard.Kripke.Semantics
 namespace LO.Modal.Standard
 
 open Kripke
-open Formula Formula.Kripke
+open Formula
 
 namespace Kripke
 
@@ -20,7 +20,7 @@ variable {M₁ : Model α} {M₂ : Model α}
          {F₁ : Frame' α} {F₂ : Frame' α}
          {f} {p : Formula α} {T : Theory α}
 
-lemma Formula.Kripke.Satisfies.morphism (hMor : Model.pMorphism M₁ M₂ f) {w} : (w ⊧ p) ↔ ((f w) ⊧ p) := by
+lemma Formula.kripke_satisfies.morphism (hMor : Model.pMorphism M₁ M₂ f) {w} : (w ⊧ p) ↔ ((f w) ⊧ p) := by
   induction p using Formula.rec' generalizing w with
   | hatom p =>
     constructor;
@@ -38,25 +38,25 @@ lemma Formula.Kripke.Satisfies.morphism (hMor : Model.pMorphism M₁ M₂ f) {w}
       exact ih.mpr $ h (f w') $ hMor.forth hww';
   | _ => simp_all;
 
-lemma Formula.Kripke.ValidOnFrame.morphism (hSur : Function.Surjective f) (hMorF : Frame.pMorphism F₁ F₂ f) : (F₁ ⊧ p) → (F₂ ⊧ p) := by
+lemma Formula.valid_on_KripkeFrame.morphism (hSur : Function.Surjective f) (hMorF : Frame.pMorphism F₁ F₂ f) : (F₁ ⊧ p) → (F₂ ⊧ p) := by
   contrapose;
   intro h;
-  obtain ⟨V₂, w₂, h⟩ := by simpa [ValidOnFrame, ValidOnModel] using h;
+  obtain ⟨V₂, w₂, h⟩ := by simpa [valid_on_KripkeFrame, valid_on_KripkeModel] using h;
 
-  simp [ValidOnFrame, ValidOnModel];
+  simp [valid_on_KripkeFrame, valid_on_KripkeModel];
   obtain ⟨w₁, e⟩ : ∃ w₁, f w₁ = w₂ := by apply hSur;
   existsi λ w a => V₂ (f w) a, w₁;
   subst e;
-  exact Satisfies.morphism ({
+  exact kripke_satisfies.morphism ({
     forth := by intro w v hwv; apply hMorF.forth hwv,
     back := by intro w v h; apply hMorF.back h,
     atomic := by simp_all;
   }) |>.not.mpr h;
 
-lemma Theory.Kripke.ValidOnFrame.morphism (hSur : Function.Surjective f) (hMorF : Frame.pMorphism F₁ F₂ f) : (F₁ ⊧* T) → (F₂ ⊧* T) := by
+lemma Theory.valid_on_KripkeFrame.morphism (hSur : Function.Surjective f) (hMorF : Frame.pMorphism F₁ F₂ f) : (F₁ ⊧* T) → (F₂ ⊧* T) := by
   simp only [Semantics.realizeSet_iff];
   intro h p hp;
-  exact Formula.Kripke.ValidOnFrame.morphism hSur hMorF (h hp);
+  exact Formula.valid_on_KripkeFrame.morphism hSur hMorF (h hp);
 
 -- TODO: Fix type `α`
 theorem Kripke.undefinability_irreflexive : ¬∃ (Ax : AxiomSet α), (∀ {F : Frame'.{0} α}, (Irreflexive F.Rel) ↔ F ⊧* Ax) := by
@@ -80,7 +80,7 @@ theorem Kripke.undefinability_irreflexive : ¬∃ (Ax : AxiomSet α), (∀ {F : 
       . intro a; left; use (); intro; contradiction;
   }
 
-  have : Irreflexive F₂.Rel := h.mpr $ Theory.Kripke.ValidOnFrame.morphism hSur hMorF (h.mp hIF₁);
+  have : Irreflexive F₂.Rel := h.mpr $ Theory.valid_on_KripkeFrame.morphism hSur hMorF (h.mp hIF₁);
   contradiction;
 
 end LO.Modal.Standard

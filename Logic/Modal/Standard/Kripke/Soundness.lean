@@ -7,24 +7,24 @@ variable {α : Type u}
          {L : DeductionParameter α} [L.HasNecOnly]
 
 open Deduction
-open Formula Formula.Kripke
+open Formula
 
 lemma sound_on_frameclass (d : L ⊢ p) : 𝔽(Ax(L)) ⊧ p := by
   induction d using Deduction.inducition_with_nec with
   | hMaxm h => exact validOnAxiomSetFrameClass_axiom h;
   | hMdp _ _ ihpq ihp =>
     intro F hF V w;
-    exact Satisfies.mdp (ihpq F hF V w) (ihp F hF V w);
+    exact (ihpq F hF V w) (ihp F hF V w);
   | hNec _ ih =>
     intro F hF V w w' _;
     exact ih F hF V w';
   | hDisj₃ =>
-    simp_all [ValidOnFrameClass, ValidOnFrame, ValidOnModel];
+    simp_all [valid_on_KripkeFrameClass, valid_on_KripkeFrame, valid_on_KripkeModel];
     intros; rename_i hpr hqr hpq;
     cases hpq with
     | inl hp => exact hpr hp;
     | inr hq => exact hqr hq;
-  | _ => simp_all [ValidOnFrameClass, ValidOnFrame, ValidOnModel];
+  | _ => simp_all [valid_on_KripkeFrameClass, valid_on_KripkeFrame, valid_on_KripkeModel];
 
 lemma sound!_on_frameclass : L ⊢! p → 𝔽(Ax(L)) ⊧ p := λ ⟨d⟩ => sound_on_frameclass d
 

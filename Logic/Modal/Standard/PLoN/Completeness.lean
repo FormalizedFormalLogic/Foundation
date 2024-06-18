@@ -20,7 +20,7 @@ abbrev CanonicalModelN : PLoN.Model α where
   Valuation Ω a := (atom a) ∈ Ω.theory
 
 @[reducible]
-instance : Semantics (Formula α) (CanonicalModelN (α := α)).World := Formula.PLoN_Satisfies.instSemantics (CanonicalModelN)
+instance : Semantics (Formula α) (CanonicalModelN (α := α)).World := Formula.plon_satisfies.instSemantics (CanonicalModelN)
 
 lemma truthlemma {p : Formula α} : ∀ {Ω : (CanonicalModelN).World}, Ω ⊧ p ↔ (p ∈ Ω.theory) := by
   induction p using Formula.rec' with
@@ -30,7 +30,7 @@ lemma truthlemma {p : Formula α} : ∀ {Ω : (CanonicalModelN).World}, Ω ⊧ p
     . intro h;
       by_contra hC;
       suffices ¬Ω ⊧ □p by contradiction; done;
-      simp [PLoN_Satisfies];
+      simp [plon_satisfies];
       constructor;
       . assumption;
       . obtain ⟨Ω', hΩ'⟩ := lindenbaum (𝓓 := 𝐍) (T := {~p}) (not_singleton_consistent Ω.consistent (iff_mem_neg.mpr hC));
@@ -43,12 +43,12 @@ lemma truthlemma {p : Formula α} : ∀ {Ω : (CanonicalModelN).World}, Ω ⊧ p
           simp_all;
     . intro h;
       by_contra hC;
-      simp [PLoN_Satisfies] at hC;
-      simp_all only [PLoN_Satisfies.iff_models];
-  | _ => simp_all [PLoN_Satisfies];
+      simp [plon_satisfies] at hC;
+      simp_all only [plon_satisfies.iff_models];
+  | _ => simp_all [plon_satisfies];
 
 lemma complete!_on_N {p : Formula α} : ℕ𝔽(𝐍) ⊧ p → 𝐍 ⊢! p:= by
-  simp [PLoN_ValidOnFrameClass, PLoN_ValidOnFrame, PLoN_ValidOnModel];
+  simp [valid_on_PLoNFrameClass, valid_on_PLoNFrame, valid_on_PLoNModel];
   contrapose;
   push_neg;
   intro h;
