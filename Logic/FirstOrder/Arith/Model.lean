@@ -174,6 +174,13 @@ lemma models_succInd (p : Semiformula ℒₒᵣ ℕ 1) : ℕ ⊧ₘ (∀ᶠ* suc
   · exact hzero
   · exact hsucc x ih
 
+instance models_iSigma (Γ k) : ℕ ⊧ₘ* 𝐈𝐍𝐃Γ k := by
+  simp [Theory.indScheme, models_peanoMinus]; rintro _ p _ rfl; simp [models_succInd]
+
+instance models_iSigmaZero : ℕ ⊧ₘ* 𝐈𝚺₀ := inferInstance
+
+instance models_iSigmaOne : ℕ ⊧ₘ* 𝐈𝚺₁ := inferInstance
+
 instance models_peano : ℕ ⊧ₘ* 𝐏𝐀 := by
   simp [Theory.peano, Theory.indScheme, models_peanoMinus]; rintro _ p _ rfl; simp [models_succInd]
 
@@ -199,6 +206,9 @@ end
 abbrev Theory.trueArith : Theory ℒₒᵣ := Structure.theory ℒₒᵣ ℕ
 
 notation "𝐓𝐀" => Theory.trueArith
+
+instance Standard.models_trueArith : ℕ ⊧ₘ* 𝐓𝐀 :=
+  modelsTheory_iff.mpr fun {p} ↦ by simp
 
 variable (T : Theory ℒₒᵣ) [𝐄𝐐 ≼ T]
 

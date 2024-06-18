@@ -64,6 +64,10 @@ prefix:max "𝐈𝚷" => iPi
 
 notation "𝐈𝚷₀" => iPi 0
 
+notation "𝐈𝚺₁" => iSigma 1
+
+notation "𝐈𝚷₁" => iPi 1
+
 abbrev peano : Theory ℒₒᵣ := 𝐏𝐀⁻ + indScheme ℒₒᵣ Set.univ
 
 notation "𝐏𝐀" => peano
