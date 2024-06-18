@@ -782,19 +782,6 @@ class Exp (α : Type*) where
   exp : α → α
 export Exp (exp)
 
-instance : Exp ℕ := ⟨(2 ^ ·)⟩
-
-namespace Nat
-
-lemma exp_def (n : ℕ) : exp n = 2 ^ n := rfl
-
-@[simp] lemma exp_zero : exp 0 = 1 := rfl
-
-lemma exp_succ (n : ℕ) : exp (n + 1) = 2 * exp n := by simp [exp_def, pow_succ, mul_comm]
-
-end Nat
-
-
 namespace Set
 
 variable (s₁ s₂ s₃ s₄ : Set F)

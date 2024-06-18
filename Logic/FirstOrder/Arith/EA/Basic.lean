@@ -97,6 +97,18 @@ lemma standardModelExp_unique (s : Structure ℒₒᵣ(exp) M)
 
 namespace Standard
 
+scoped instance : Exp ℕ := ⟨(2 ^ ·)⟩
+
+namespace Nat
+
+lemma exp_def (n : ℕ) : Exp.exp n = 2 ^ n := rfl
+
+@[simp] lemma exp_zero : Exp.exp 0 = 1 := rfl
+
+lemma exp_succ (n : ℕ) : Exp.exp (n + 1) = 2 * Exp.exp n := by simp [exp_def, pow_succ, mul_comm]
+
+end Nat
+
 instance models_exponential : ℕ ⊧ₘ* 𝐄𝐗𝐏 := ⟨by
   intro σ h; rcases h <;> simp[models_def, Structure.Exp.exp, Nat.exp_succ]⟩
 
