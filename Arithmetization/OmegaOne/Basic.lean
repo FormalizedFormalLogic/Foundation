@@ -21,7 +21,7 @@ namespace Model
 
 variable {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M]
 
-lemma models_Omega₁_iff [M ⊧ₘ* 𝐈𝚫₀] : M ⊧ₘ omegaOneAxiom ↔ ∀ x : M, ∃ y, Exponential (‖x‖^2) y := by
+lemma models_Omega₁_iff [M ⊧ₘ* 𝐈𝚺₀] : M ⊧ₘ omegaOneAxiom ↔ ∀ x : M, ∃ y, Exponential (‖x‖^2) y := by
   simp [models_def, omegaOneAxiom, length_defined.df.iff, Exponential.defined.df.iff, sq, ←le_iff_lt_succ]
   constructor
   · intro h x
@@ -32,14 +32,14 @@ lemma models_Omega₁_iff [M ⊧ₘ* 𝐈𝚫₀] : M ⊧ₘ omegaOneAxiom ↔ �
 
 lemma sigma₁_omega₁ [M ⊧ₘ* 𝐈𝚺₁] : M ⊧ₘ omegaOneAxiom := models_Omega₁_iff.mpr (fun x ↦ Exponential.range_exists (‖x‖^2))
 
-instance [M ⊧ₘ* 𝐈𝚺₁] : M ⊧ₘ* 𝐈𝚫₀ + 𝛀₁ :=
+instance [M ⊧ₘ* 𝐈𝚺₁] : M ⊧ₘ* 𝐈𝚺₀ + 𝛀₁ :=
   ModelsTheory.add_iff.mpr ⟨inferInstance, ⟨by intro _; simp; rintro rfl; exact sigma₁_omega₁⟩⟩
 
-variable [M ⊧ₘ* 𝐈𝚫₀ + 𝛀₁]
+variable [M ⊧ₘ* 𝐈𝚺₀ + 𝛀₁]
 
-instance : M ⊧ₘ* 𝐈𝚫₀ := ModelsTheory.of_add_left M 𝐈𝚫₀ 𝛀₁
+instance : M ⊧ₘ* 𝐈𝚺₀ := ModelsTheory.of_add_left M 𝐈𝚺₀ 𝛀₁
 
-instance : M ⊧ₘ* 𝛀₁ := ModelsTheory.of_add_right M 𝐈𝚫₀ 𝛀₁
+instance : M ⊧ₘ* 𝛀₁ := ModelsTheory.of_add_right M 𝐈𝚺₀ 𝛀₁
 
 lemma exists_exponential_sq_length (x : M) : ∃ y, Exponential (‖x‖^2) y :=
   models_Omega₁_iff.mp (ModelsTheory.models M Theory.omegaOne.omega) x

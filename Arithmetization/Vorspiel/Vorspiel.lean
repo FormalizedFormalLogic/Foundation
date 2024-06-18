@@ -236,11 +236,28 @@ end
 
 namespace Arith
 
-variable {L : Language} [L.ORing]
+variable (M : Type*) [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐏𝐀⁻]
 
-instance : Semiterm.Operator.GoedelNumber L ℕ := ⟨Semiterm.Operator.numeral L⟩
+lemma nat_extention_sigmaOne {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
+    ℕ ⊧ₘ σ → M ⊧ₘ σ := fun h ↦ by
+  simpa [Matrix.empty_eq] using Model.pval_of_pval_nat_of_sigma_one (M := M) hσ h
+
+lemma nat_extention_piOne {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚷 1 σ) :
+    M ⊧ₘ σ → ℕ ⊧ₘ σ := by
+  contrapose
+  simpa using nat_extention_sigmaOne M (σ := ~σ) (by simpa using hσ)
 
 end Arith
+
+section
+
+variable (M : Type*) [Nonempty M] [Structure L M]
+
+abbrev ModelsWithParam {k} (v : Fin k → M) (p : Semisentence L k) : Prop := Semiformula.Evalbm M v p
+
+notation M:45 " ⊧ₘ[" v "] " p:46 => ModelsWithParam M v p
+
+end
 
 end FirstOrder
 

@@ -12,7 +12,7 @@ namespace Model
 
 section ISigma₀
 
-variable [M ⊧ₘ* 𝐈𝚫₀]
+variable [M ⊧ₘ* 𝐈𝚺₀]
 
 def SPPow2 (m : M) : Prop := ¬LenBit 1 m ∧ LenBit 2 m ∧ ∀ i ≤ m, Pow2 i → 2 < i → (LenBit i m ↔ (√i)^2 = i ∧ LenBit (√i) m)
 

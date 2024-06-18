@@ -196,7 +196,7 @@ end IOpen
 
 section ISigma₀
 
-variable [M ⊧ₘ* 𝐈𝚫₀]
+variable [M ⊧ₘ* 𝐈𝚺₀]
 
 namespace Pow2
 

@@ -36,8 +36,8 @@ variable (M)
 structure Construction {k : ℕ} (p : Formulae k) where
   zero : (Fin k → M) → M
   succ : (Fin k → M) → M → M → M
-  zero_defined : DefinedFunction ℒₒᵣ 𝚺₁ zero p.zero
-  succ_defined : DefinedFunction ℒₒᵣ 𝚺₁ (fun v ↦ succ (v ·.succ.succ) (v 1) (v 0)) p.succ
+  zero_defined : DefinedFunction zero p.zero
+  succ_defined : DefinedFunction (fun v ↦ succ (v ·.succ.succ) (v 1) (v 0)) p.succ
 
 variable {M}
 
@@ -181,12 +181,12 @@ lemma result_graph (z u : M) : z = c.result v u ↔ ∃ s, c.CSeq v s ∧ ⟪u, 
         (by simp [←hu, succ_le_iff_lt]; exact Hs.seq.lt_lh_iff.mpr (mem_domain_of_pair_mem h))
         (by simp [←hu]) h' h⟩
 
-lemma result_defined : Model.DefinedFunction ℒₒᵣ 𝚺₁ (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → M) → M) p.resultDef := by
+lemma result_defined : Model.DefinedFunction (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → M) → M) p.resultDef := by
   intro v; simp [Formulae.resultDef, result_graph]
   apply exists_congr; intro x
   simp [c.cseq_defined_iff]; intros; rfl
 
-lemma result_defined_delta : Model.DefinedFunction ℒₒᵣ 𝚫₁ (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → M) → M) p.resultDeltaDef :=
+lemma result_defined_delta : Model.DefinedFunction (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → M) → M) p.resultDeltaDef :=
   c.result_defined.graph_delta
 
 @[simp] lemma result_defined_iff (v) :

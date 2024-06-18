@@ -81,7 +81,7 @@ private lemma succ_graph {u v s ih} :
       exact h x (lt_of_lt_of_le (lt_succ_iff_le.mpr (c.mem_succ_iff.mp hx).1)
         (by simp)) |>.mpr (c.mem_succ_iff.mp hx)⟩
 
-lemma succ_defined : DefinedFunction ℒₒᵣ 𝚺₁ (fun v : Fin (k + 2) → M ↦ c.succ (v ·.succ.succ) (v 1) (v 0)) φ.succDef := by
+lemma succ_defined : DefinedFunction (fun v : Fin (k + 2) → M ↦ c.succ (v ·.succ.succ) (v 1) (v 0)) φ.succDef := by
   intro v
   simp [Formula.succDef, succ_graph, HSemiformula.val_sigma, c.eval_formula,
     c.defined.proper.iff', -and_imp, ←iff_iff_implies_and_implies]
@@ -106,7 +106,7 @@ variable {v}
 
 lemma limSeq_succ (s : M) : c.limSeq v (s + 1) = c.succ v s (c.limSeq v s) := by simp [limSeq, prConstruction]
 
-lemma termSet_defined : DefinedFunction ℒₒᵣ 𝚺₁ (fun v ↦ c.limSeq (v ·.succ) (v 0)) φ.limSeqDef :=
+lemma termSet_defined : DefinedFunction (fun v ↦ c.limSeq (v ·.succ) (v 0)) φ.limSeqDef :=
   fun v ↦ by simp [c.prConstruction.result_defined_iff, Formula.limSeqDef]; rfl
 
 @[simp] lemma eval_limSeqDef (v) :

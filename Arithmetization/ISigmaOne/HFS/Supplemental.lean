@@ -86,7 +86,7 @@ def seqExp.formulae : PR.Formulae 1 where
 def seqExp.construction : PR.Construction M seqExp.formulae where
   zero := fun _ ↦ {∅}
   succ := fun a _ s ↦ s ×ˢ a 0
-  zero_defined := by intro v; simp [formulae, one_eq_singleton]
+  zero_defined := by intro v; simp [formulae, one_eq_singleton (M := M)]
   succ_defined := by intro v; simp [formulae]; rfl
 
 def seqExp (a k : M) : M := seqExp.construction.result ![a] k

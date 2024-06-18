@@ -31,6 +31,9 @@ lemma bit_defined : 𝚺₀-Relation ((· ∈ ·) : M → M → Prop) via bitDef
 
 @[simp, instance, definability] def mem_definable' : DefinableRel ℒₒᵣ Γ ((· ∈ ·) : M → M → Prop) := .of_zero mem_definable _
 
+lemma mem_absolute (i a : ℕ) : i ∈ a ↔ (i : M) ∈ (a : M) := by
+  simpa using Defined.shigmaZero_absolute M bit_defined bit_defined ![i, a]
+
 lemma mem_iff_bit {i a : M} : i ∈ a ↔ Bit i a := iff_of_eq rfl
 
 lemma exp_le_of_mem {i a : M} (h : i ∈ a) : exp i ≤ a := LenBit.le h
@@ -210,7 +213,6 @@ noncomputable def bitRemove (i a : M) : M := if i ∈ a then a - exp i else a
 scoped instance : Insert M M := ⟨bitInsert⟩
 
 lemma insert_eq {i a : M} : insert i a = bitInsert i a := rfl
-
 
 lemma singleton_eq_insert (i : M) : ({i} : M) = insert i ∅ := by simp [singleton_def, insert, bitInsert, emptyset_def]
 

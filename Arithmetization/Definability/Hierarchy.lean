@@ -548,17 +548,21 @@ abbrev DefinedRel₃ (R : M → M → M → Prop) (p : HSemisentence L 3 Γ) : P
 abbrev DefinedRel₄ (R : M → M → M → M → Prop) (p : HSemisentence L 4 Γ) : Prop :=
   Defined (λ v ↦ R (v 0) (v 1) (v 2) (v 3)) p
 
+variable {L Γ}
+
 abbrev DefinedFunction {k} (f : (Fin k → M) → M) (p : HSemisentence L (k + 1) Γ) : Prop :=
   Defined (fun v => v 0 = f (v ·.succ)) p
 
+variable (L Γ)
+
 abbrev DefinedFunction₁ (f : M → M) (p : HSemisentence L 2 Γ) : Prop :=
-  DefinedFunction L Γ (fun v => f (v 0)) p
+  DefinedFunction (fun v => f (v 0)) p
 
 abbrev DefinedFunction₂ (f : M → M → M) (p : HSemisentence L 3 Γ) : Prop :=
-  DefinedFunction L Γ (fun v => f (v 0) (v 1)) p
+  DefinedFunction (fun v => f (v 0) (v 1)) p
 
 abbrev DefinedFunction₃ (f : M → M → M → M) (p : HSemisentence L 4 Γ) : Prop :=
-  DefinedFunction L Γ (fun v => f (v 0) (v 1) (v 2)) p
+  DefinedFunction (fun v => f (v 0) (v 1) (v 2)) p
 
 abbrev DefinablePred (P : M → Prop) : Prop := Definable L Γ (k := 1) (fun v ↦ P (v 0))
 
@@ -658,11 +662,11 @@ end Defined
 namespace DefinedFunction
 
 lemma of_eq {f g : (Fin k → M) → M} (h : ∀ x, f x = g x)
-    {p : HSemisentence L (k + 1) Γ} (H : DefinedFunction L Γ f p) : DefinedFunction L Γ g p :=
+    {p : HSemisentence L (k + 1) Γ} (H : DefinedFunction f p) : DefinedFunction g p :=
   Defined.of_iff (by intro; simp [h]) H
 
 lemma graph_delta {f : (Fin k → M) → M} {p : HSemisentence L (k + 1) (𝚺, m)}
-    (h : DefinedFunction L (𝚺, m) f p) : DefinedFunction L (𝚫, m) f p.graphDelta :=
+    (h : DefinedFunction f p) : DefinedFunction f p.graphDelta :=
   ⟨by cases' m with m <;> simp [HSemiformula.graphDelta]
       intro e; simp [Empty.eq_elim, h.df.iff]
       rw [eq_comm],

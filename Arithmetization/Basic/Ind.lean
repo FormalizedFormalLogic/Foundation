@@ -19,12 +19,6 @@ lemma mem_iOpen_of_qfree {p : Semiformula L ℕ 1} (hp : p.Open) :
 lemma indScheme_subset (h : ∀ {p : Semiformula L ℕ 1},  C p → C' p) : indScheme L C ⊆ indScheme L C' := by
   intro _; simp [indScheme]; rintro p hp rfl; exact ⟨p, h hp, rfl⟩
 
-notation "𝐈𝚫₀" => iSigma 0
-
-notation "𝐈𝚺₁" => iSigma 1
-
-notation "𝐈𝚷₁" => iPi 1
-
 lemma iSigma_subset_mono {s₁ s₂} (h : s₁ ≤ s₂) : 𝐈𝚺 s₁ ⊆ 𝐈𝚺 s₂ :=
   Set.union_subset_union_right _ (Theory.indScheme_subset (fun H ↦ H.mono h))
 

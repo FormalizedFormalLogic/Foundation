@@ -208,6 +208,18 @@ end term
 
 section termSubst
 
+variable (L)
+
+def TermSeq (n m w : M) : Prop := Seq w ∧ n = lh w ∧ ∀ i u, ⟪i, u⟫ ∈ w → IsSemiterm L m u
+
+variable {L}
+
+protected lemma TermSeq.seq {n m w : M} (h : TermSeq L n m w) : Seq w := h.1
+
+protected lemma TermSeq.lh {n m w : M} (h : TermSeq L n m w) : n = lh w := h.2.1
+
+lemma TermSeq.prop {n m w : M} (h : TermSeq L n m w) : ∀ i u, ⟪i, u⟫ ∈ w → IsSemiterm L m u := h.2.2
+
 namespace FormalizedTermSubst
 
 variable (L)
@@ -279,55 +291,55 @@ def construction : Fixpoint.Construction M (formula pL) where
       have : ⟪u, u'⟫ < ⟪π₁ p, π₂ p⟫ := pair_lt_pair (by simpa [h₁] using lt_qqFunc_of_mem hi) (by simpa [h₂] using lt_qqFunc_of_mem hi')
       simpa using this⟩⟩⟩
 
-def Rew (n m w : M) : M → Prop := (construction L).Fixpoint ![n, m, w]
+def Subst (n m w : M) : M → Prop := (construction L).Fixpoint ![n, m, w]
 
-def rewDef (pL : LDef) : 𝚫₁-Semisentence 4 := (formula pL).fixpointDef.rew <| Rew.substs ![#3, #0, #1, #2]
+def substDef (pL : LDef) : 𝚫₁-Semisentence 4 := (formula pL).fixpointDef.rew <| Rew.substs ![#3, #0, #1, #2]
 
-lemma rew_defined : 𝚫₁-Relation₄ (Rew L) via (rewDef pL) :=
+lemma subst_defined : 𝚫₁-Relation₄ (Subst L) via (substDef pL) :=
   ⟨HSemiformula.ProperOn.rew (construction L).fixpoint_defined.proper _,
-   by intro v; simp [rewDef, (construction L).eval_fixpointDef, Rew]⟩
+   by intro v; simp [substDef, (construction L).eval_fixpointDef, Subst]⟩
 
-@[simp] lemma eval_rewDef (v) :
-    Semiformula.Evalbm M v (rewDef pL).val ↔ Rew L (v 0) (v 1) (v 2) (v 3) := (rew_defined L).df.iff v
+@[simp] lemma eval_substDef (v) :
+    Semiformula.Evalbm M v (substDef pL).val ↔ Subst L (v 0) (v 1) (v 2) (v 3) := (subst_defined L).df.iff v
 
-instance rew_definable : 𝚫₁-Relation₄ (Rew L) := Defined.to_definable _ (rew_defined L)
+instance subst_definable : 𝚫₁-Relation₄ (Subst L) := Defined.to_definable _ (subst_defined L)
 
-@[simp, definability] instance rew_definable' (Γ) : (Γ, m + 1)-Relation₄ (Rew L) :=
-  .of_deltaOne (rew_definable L) _ _
+@[simp, definability] instance subst_definable' (Γ) : (Γ, m + 1)-Relation₄ (Subst L) :=
+  .of_deltaOne (subst_definable L) _ _
 
 variable {L}
 
-lemma Rew.case_iff {n m w p : M} :
-    Rew L n m w p ↔
+lemma Subst.case_iff {n m w p : M} :
+    Subst L n m w p ↔
     IsSemiterm L n (π₁ p) ∧ IsSemiterm L m (π₂ p) ∧
     ( (∃ z < n, π₁ p = ^#z ∧ ⟪z, π₂ p⟫ ∈ w) ∨
       (∃ x, π₁ p = ^&x ∧ π₂ p = ^&x) ∨
-      (∃ k f v v', π₁ p = ^func k f v ∧ π₂ p = ^func k f v' ∧ ∀ i u u', ⟪i, u⟫ ∈ v → ⟪i, u'⟫ ∈ v' → Rew L n m w ⟪u, u'⟫) ) :=
+      (∃ k f v v', π₁ p = ^func k f v ∧ π₂ p = ^func k f v' ∧ ∀ i u u', ⟪i, u⟫ ∈ v → ⟪i, u'⟫ ∈ v' → Subst L n m w ⟪u, u'⟫) ) :=
   (construction L).case
 
-alias ⟨Rew.case, Rew.mk⟩ := Rew.case_iff
+alias ⟨Subst.case, Subst.mk⟩ := Subst.case_iff
 
-lemma Rew.semiterm₁ {n m w t t'} (h : Rew L n m w ⟪t, t'⟫) : IsSemiterm L n t := by simpa using h.case.1
+lemma Subst.semiterm₁ {n m w t t'} (h : Subst L n m w ⟪t, t'⟫) : IsSemiterm L n t := by simpa using h.case.1
 
-lemma Rew.semiterm₂ {n m w t t'} (h : Rew L n m w ⟪t, t'⟫) : IsSemiterm L m t' := by simpa using h.case.2.1
+lemma Subst.semiterm₂ {n m w t t'} (h : Subst L n m w ⟪t, t'⟫) : IsSemiterm L m t' := by simpa using h.case.2.1
 
-lemma Rew.bvar {n m w z u : M} (hz : z < n) (hu : IsSemiterm L m u) (h : ⟪z, u⟫ ∈ w) :
-    Rew L n m w ⟪^#z, u⟫ := Rew.mk ⟨by simp [hz], by simpa using hu, Or.inl ⟨z, hz, by simpa using h⟩⟩
+lemma Subst.bvar {n m w z u : M} (hz : z < n) (hu : IsSemiterm L m u) (h : ⟪z, u⟫ ∈ w) :
+    Subst L n m w ⟪^#z, u⟫ := Subst.mk ⟨by simp [hz], by simpa using hu, Or.inl ⟨z, hz, by simpa using h⟩⟩
 
-lemma Rew.bvar_iff {n m w z u : M} :
-    Rew L n m w ⟪^#z, u⟫ ↔ z < n ∧ IsSemiterm L m u ∧ ⟪z, u⟫ ∈ w :=
+lemma Subst.bvar_iff {n m w z u : M} :
+    Subst L n m w ⟪^#z, u⟫ ↔ z < n ∧ IsSemiterm L m u ∧ ⟪z, u⟫ ∈ w :=
   ⟨by intro h
       rcases h.case with ⟨_, hu, (⟨z', hz', hzz', h⟩ | ⟨x, h, _⟩ | ⟨k, f, v, v', h, _⟩)⟩
       · rcases (show z = z' from by simpa using hzz'); exact ⟨hz', by simpa using hu, by simpa using h⟩
       · simp [qqBvar, qqFvar] at h
       · simp [qqBvar, qqFunc] at h,
-   by rintro ⟨hz, Hu, h⟩; exact Rew.bvar hz Hu h⟩
+   by rintro ⟨hz, Hu, h⟩; exact Subst.bvar hz Hu h⟩
 
-@[simp] lemma Rew.fvar {n m w x : M} :
-    Rew L n m w ⟪^&x, ^&x⟫ := Rew.mk ⟨by simp, by simp, Or.inr <| Or.inl ⟨x, by simp⟩⟩
+@[simp] lemma Subst.fvar {n m w x : M} :
+    Subst L n m w ⟪^&x, ^&x⟫ := Subst.mk ⟨by simp, by simp, Or.inr <| Or.inl ⟨x, by simp⟩⟩
 
-lemma Rew.fvar_iff {n m w x u : M} :
-    Rew L n m w ⟪^&x, u⟫ ↔ u = ^&x := by
+lemma Subst.fvar_iff {n m w x u : M} :
+    Subst L n m w ⟪^&x, u⟫ ↔ u = ^&x := by
   constructor
   · intro h
     rcases h.case with ⟨_, _, (⟨_, _, h, _⟩ | ⟨x', hx', h⟩ | ⟨_, _, _, _, h, _⟩)⟩
@@ -336,7 +348,7 @@ lemma Rew.fvar_iff {n m w x u : M} :
     · simp [qqFvar, qqFunc] at h
   · rintro rfl; simp
 
-lemma Rew.func {n m w k f v v' : M}
+lemma Subst.func {n m w k f v v' : M}
     (hkf : L.Func k f)
     (Sv : Seq v)
     (hk : k = lh v)
@@ -344,15 +356,15 @@ lemma Rew.func {n m w k f v v' : M}
     (Sv' : Seq v')
     (hk' : k = lh v')
     (hv' : ∀ i u', ⟪i, u'⟫ ∈ v' → IsSemiterm L m u')
-    (H : ∀ i u u', ⟪i, u⟫ ∈ v → ⟪i, u'⟫ ∈ v' → Rew L n m w ⟪u, u'⟫) :
-    Rew L n m w ⟪^func k f v, ^func k f v'⟫ :=
-  Rew.mk ⟨
+    (H : ∀ i u u', ⟪i, u⟫ ∈ v → ⟪i, u'⟫ ∈ v' → Subst L n m w ⟪u, u'⟫) :
+    Subst L n m w ⟪^func k f v, ^func k f v'⟫ :=
+  Subst.mk ⟨
     by rw [pi₁_pair]; exact IsSemiterm.func hkf Sv hk hv,
     by rw [pi₂_pair]; exact IsSemiterm.func hkf Sv' hk' hv',
     Or.inr <| Or.inr ⟨k, f, v, v', by simp, by simp, H⟩⟩
 
-lemma Rew.func' {n m w k f v u : M} (h : Rew L n m w ⟪^func k f v, u⟫) :
-    ∃ v', Seq v' ∧ k = lh v' ∧ (∀ i u u', ⟪i, u⟫ ∈ v → ⟪i, u'⟫ ∈ v' → Rew L n m w ⟪u, u'⟫) ∧ u = ^func k f v' := by
+lemma Subst.func' {n m w k f v u : M} (h : Subst L n m w ⟪^func k f v, u⟫) :
+    ∃ v', Seq v' ∧ k = lh v' ∧ (∀ i u u', ⟪i, u⟫ ∈ v → ⟪i, u'⟫ ∈ v' → Subst L n m w ⟪u, u'⟫) ∧ u = ^func k f v' := by
   rcases h.case with ⟨_, hu, (⟨_, _, h, _⟩ | ⟨x, h, _⟩ | ⟨k', f', v', v'', h₁, h₂, hv⟩)⟩
   · simp [qqFunc, qqBvar] at h
   · simp [qqFunc, qqFvar] at h
@@ -362,51 +374,39 @@ lemma Rew.func' {n m w k f v u : M} (h : Rew L n m w ⟪^func k f v, u⟫) :
     rcases this with ⟨_, Sv'', hk'', _⟩
     exact ⟨v'', Sv'', hk'', hv, rfl⟩
 
-variable (L)
-
-def TermSeq (n m w : M) : Prop := Seq w ∧ n = lh w ∧ ∀ i u, ⟪i, u⟫ ∈ w → IsSemiterm L m u
-
-variable {L}
-
-protected lemma TermSeq.seq {n m w : M} (h : TermSeq L n m w) : Seq w := h.1
-
-protected lemma TermSeq.lh {n m w : M} (h : TermSeq L n m w) : n = lh w := h.2.1
-
-lemma TermSeq.prop {n m w : M} (h : TermSeq L n m w) : ∀ i u, ⟪i, u⟫ ∈ w → IsSemiterm L m u := h.2.2
-
 variable {n m w} (TSw : TermSeq L n m w)
 
-lemma Rew.rng_exists {t : M} (ht : IsSemiterm L n t) : ∃ u, Rew L n m w ⟪t, u⟫ := by
+lemma Subst.rng_exists {t : M} (ht : IsSemiterm L n t) : ∃ u, Subst L n m w ⟪t, u⟫ := by
   apply IsSemiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
   · definability
   · intro z hz
     have : ∃ u, ⟪z, u⟫ ∈ w := TSw.seq.exists (show z < lh w by simpa [TSw.lh] using hz)
     rcases this with ⟨u, hu⟩
-    exact ⟨u, Rew.bvar hz (TSw.prop z u hu) hu⟩
+    exact ⟨u, Subst.bvar hz (TSw.prop z u hu) hu⟩
   · intro x; exact ⟨^&x, by simp⟩
   · rintro k f v hkf Sv rfl ih
-    have : ∃ v', Seq v' ∧ lh v' = lh v ∧ ∀ i u', ⟪i, u'⟫ ∈ v' → ∀ u, ⟪i, u⟫ ∈ v → Rew L n m w ⟪u, u'⟫ := by
-      have : ∀ i < lh v, ∃ u', ∀ u, ⟪i, u⟫ ∈ v → Rew L n m w ⟪u, u'⟫ := by
+    have : ∃ v', Seq v' ∧ lh v' = lh v ∧ ∀ i u', ⟪i, u'⟫ ∈ v' → ∀ u, ⟪i, u⟫ ∈ v → Subst L n m w ⟪u, u'⟫ := by
+      have : ∀ i < lh v, ∃ u', ∀ u, ⟪i, u⟫ ∈ v → Subst L n m w ⟪u, u'⟫ := by
         intro i hi
-        have : IsSemiterm L n (Sv.nth hi) ∧ ∃ u, Rew L n m w ⟪Sv.nth hi, u⟫ := ih i (Sv.nth hi) (by simp)
+        have : IsSemiterm L n (Sv.nth hi) ∧ ∃ u, Subst L n m w ⟪Sv.nth hi, u⟫ := ih i (Sv.nth hi) (by simp)
         rcases this with ⟨_, u', hu'⟩
         exact ⟨u', fun u hiuv  ↦ by rcases Sv.nth_uniq hi hiuv; exact hu'⟩
       exact sigmaOne_skolem_seq
-        (by have : 𝚺₁-Relation fun x y ↦ ∀ u < v, ⟪x, u⟫ ∈ v → Rew L n m w ⟪u, y⟫ := by definability
+        (by have : 𝚺₁-Relation fun x y ↦ ∀ u < v, ⟪x, u⟫ ∈ v → Subst L n m w ⟪u, y⟫ := by definability
             exact this.of_iff fun w ↦ ⟨fun h u _ ↦ h u, fun h u hv ↦ h u (lt_of_mem_rng hv) hv⟩)
         this
     rcases this with ⟨v', Sv', hvv', h⟩
     exact ⟨^func (lh v) f v',
-      Rew.func hkf Sv rfl (fun i u hi ↦ (ih i u hi).1) Sv' (Eq.symm hvv')
+      Subst.func hkf Sv rfl (fun i u hi ↦ (ih i u hi).1) Sv' (Eq.symm hvv')
         (fun i u' hi ↦ by
           have : i < lh v := by simpa [hvv'] using Sv'.lt_lh_of_mem hi
           exact h i u' hi (Sv.nth this) (by simp) |>.semiterm₂)
         (fun i u u' hi hi' ↦ h i u' hi' u hi)⟩
 
-lemma Rew.rng_unique
-    {t u₁ u₂ : M} : Rew L n m w ⟪t, u₁⟫ → Rew L n m w ⟪t, u₂⟫ → u₁ = u₂ := by
+lemma Subst.rng_unique
+    {t u₁ u₂ : M} : Subst L n m w ⟪t, u₁⟫ → Subst L n m w ⟪t, u₂⟫ → u₁ = u₂ := by
   revert u₁ u₂
-  suffices IsSemiterm L n t → ∀ u₁ u₂, Rew L n m w ⟪t, u₁⟫ → Rew L n m w ⟪t, u₂⟫ → u₁ = u₂
+  suffices IsSemiterm L n t → ∀ u₁ u₂, Subst L n m w ⟪t, u₁⟫ → Subst L n m w ⟪t, u₂⟫ → u₁ = u₂
   by intro u₁ u₂ h₁ h₂; exact this h₁.semiterm₁ u₁ u₂ h₁ h₂
   intro ht
   apply IsSemiterm.induction 𝚷 ?_ ?_ ?_ ?_ t ht
@@ -414,19 +414,27 @@ lemma Rew.rng_unique
   · simp only [bvar_iff, and_imp]
     intro z _ u₁ u₂ _ _ h₁ _ _ h₂
     exact TSw.seq.isMapping.uniq h₁ h₂
-  · simp [Rew.fvar_iff]
+  · simp [Subst.fvar_iff]
   · intro k f v _ Sv hk ih u₁ u₂ h₁ h₂
-    rcases Rew.func' h₁ with ⟨v₁, Sv₁, hk₁, hvv₁, rfl⟩
-    rcases Rew.func' h₂ with ⟨v₂, Sv₂, hk₂, hvv₂, rfl⟩
+    rcases Subst.func' h₁ with ⟨v₁, Sv₁, hk₁, hvv₁, rfl⟩
+    rcases Subst.func' h₂ with ⟨v₂, Sv₂, hk₂, hvv₂, rfl⟩
     have : v₁ = v₂ := Sv₁.lh_ext Sv₂ (by simp [←hk₁, ←hk₂]) (by
       intro i x₁ x₂ hxv₁ hxv₂
       have hi : i < lh v := by simpa [←hk, hk₁] using Sv₁.lt_lh_of_mem hxv₁
       exact ih i (Sv.nth hi) (by simp) |>.2 _ _ (hvv₁ _ _ _ (Sv.nth_mem hi) hxv₁) (hvv₂ _ _ _ (Sv.nth_mem hi) hxv₂))
     rw [this]
-/-
-lemma Rew.rng_exists_unique {t : M} (ht : IsSemiterm L n t) : ∃! u, Rew L n m w ⟪t, u⟫ := by
-  rcases Rew.rng_exists Sw hn Hw ht
--/
+
+lemma Subst.rng_exists_unique {t : M} (ht : IsSemiterm L n t) : ∃! u, Subst L n m w ⟪t, u⟫ := by
+  rcases Subst.rng_exists TSw ht with ⟨u, hu⟩
+  exact ExistsUnique.intro u hu (fun u' hu' ↦ Subst.rng_unique TSw hu' hu)
+
+variable (L)
+
+lemma Subst.rng_exists_unique_total (n m w t : M) :
+    ∃! u, (TermSeq L n m w ∧ IsSemiterm L n t → Subst L n m w ⟪t, u⟫) ∧ (¬(TermSeq L n m w ∧ IsSemiterm L n t) → u = 0) := by
+  by_cases h : TermSeq L n m w ∧ IsSemiterm L n t
+  · simp [h]; exact Subst.rng_exists_unique h.1 h.2
+  · simp [h]
 
 end FormalizedTermSubst
 
@@ -434,7 +442,35 @@ open FormalizedTermSubst
 
 variable (L)
 
+def termSubst (n m w t : M) : M := Classical.choose! (Subst.rng_exists_unique_total L n m w t)
 
+variable {L}
+
+def TermSeq.spec_of_semiterm {n m w t : M} (TSw : TermSeq L n m w) (ht : IsSemiterm L n t) : Subst L n m w ⟪t, termSubst L n m w t⟫ :=
+  Classical.choose!_spec (Subst.rng_exists_unique_total L n m w t) |>.1 ⟨TSw, ht⟩
+
+def termSubst_spec {n m w t : M} :
+    ¬(TermSeq L n m w ∧ IsSemiterm L n t) → termSubst L n m w t = 0 :=
+  Classical.choose!_spec (Subst.rng_exists_unique_total L n m w t) |>.2
+
+variable {n m w : M} (TSw : TermSeq L n m w)
+
+lemma TermSeq.termSubst_eq_of {t} (ht : IsSemiterm L n t) (h : Subst L n m w ⟪t, u⟫) : termSubst L n m w t = u :=
+  (TSw.spec_of_semiterm ht).rng_unique TSw h
+
+lemma termSubst_bvar {z : M} (hz : z < n) (hu : ⟪z, u⟫ ∈ w) : termSubst L n m w (^#z) = u :=
+  TSw.termSubst_eq_of (by simp [hz]) (Subst.bvar hz (TSw.prop z u hu) hu)
+
+@[simp] lemma termSubst_fvar (x : M) : termSubst L n m w (^&x) = ^&x :=
+  TSw.termSubst_eq_of (by simp) (by simp)
+
+/-
+lemma termSubst_func {k f v v' : M} (hfk : L.Func k f)
+    (Sv : Seq v) (hk : k = lh v) (hv : ∀ i u, ⟪i, u⟫ ∈ v → IsSemiterm L n u)
+    (Sv' : Seq v') (hk' : k = lh v') (hv : ∀ i u', ⟪i, u'⟫ ∈ v' → IsSemiterm L m u')
+    (H : ∀ i u u', ⟪i, u⟫ ∈ v → ⟪i, u'⟫ ∈ v' → termSubst L n m w u = u') : termSubst L n m w (^func k f v) = ^func k f v' :=
+  TSw.termSubst_eq_of (by simp ) (Subst.func hz (TSw.prop z u hu) hu)
+-/
 
 end termSubst
 

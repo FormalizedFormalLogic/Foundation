@@ -12,7 +12,7 @@ namespace Model
 
 section ISigma₀
 
-variable [M ⊧ₘ* 𝐈𝚫₀]
+variable [M ⊧ₘ* 𝐈𝚺₀]
 
 lemma log_exists_unique_pos {y : M} (hy : 0 < y) : ∃! x, x < y ∧ ∃ y' ≤ y, Exponential x y' ∧ y < 2 * y' := by
   have : ∃ x < y, ∃ y' ≤ y, Exponential x y' ∧ y < 2 * y' := by

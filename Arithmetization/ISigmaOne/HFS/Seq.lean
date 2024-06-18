@@ -183,6 +183,9 @@ instance seqCons_definable : 𝚺₀-Function₂ (seqCons : M → M → M) := De
 
 instance seqCons_definable' (Γ) : Γ-Function₂ (seqCons : M → M → M) := .of_zero seqCons_definable _
 
+lemma seqCons_absolute (s a : ℕ) : ((s ⁀' a : ℕ) : M) = (s : M) ⁀' (a : M) := by
+  simpa using DefinedFunction.shigmaZero_absolute_func M seqCons_defined seqCons_defined ![s, a]
+
 end
 
 lemma Seq.restr {s : M} (H : Seq s) {i : M} (hi : i ≤ lh s) : Seq (s ↾ under i) :=
@@ -287,7 +290,7 @@ theorem seq_induction (Γ) {P : M → Prop} (hP : DefinablePred ℒₒᵣ (Γ, 1
 syntax (name := vecNotation) "!⟨" term,* "⟩" : term
 
 macro_rules
-  | `(!⟨$term:term, $terms:term,*⟩) => `(seqCons !⟨$terms,*⟩ $term)
+  | `(!⟨$terms:term,*, $term:term⟩) => `(seqCons !⟨$terms,*⟩ $term)
   | `(!⟨$term:term⟩) => `(seqCons ∅ $term)
   | `(!⟨⟩) => `(∅)
 

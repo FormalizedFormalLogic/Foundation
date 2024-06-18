@@ -739,11 +739,13 @@ end polynomial_induction
     (zero : P 0) (even : ∀ x > 0, P x → P (2 * x)) (odd : ∀ x, P x → P (2 * x + 1)) : ∀ x, P x :=
   hierarchy_polynomial_induction 𝚷 1 hP zero even odd
 
+lemma nat_cast_pair (n m : ℕ) : (⟪n, m⟫ : ℕ) = ⟪(n : M), (m : M)⟫ := by simp [pair]
+
 end Model
 
 namespace Model
 
-lemma nat_pair_eq {m n : ℕ} : ⟪n, m⟫ = Nat.pair n m := by simp [Model.pair, Nat.pair]; congr
+lemma nat_pair_eq (m n : ℕ) : ⟪n, m⟫ = Nat.pair n m := by simp [Model.pair, Nat.pair]; congr
 
 end Model
 

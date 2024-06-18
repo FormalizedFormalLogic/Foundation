@@ -12,7 +12,7 @@ namespace Model
 
 section ISigma₀
 
-variable [M ⊧ₘ* 𝐈𝚫₀]
+variable [M ⊧ₘ* 𝐈𝚺₀]
 
 def ext (u z : M) : M := z / u % u
 
@@ -759,6 +759,11 @@ lemma exp_even (a : M) : exp (2 * a) = (exp a)^2 :=
 
 @[simp] lemma exp_monotone_le {a b : M} : exp a ≤ exp b ↔ a ≤ b :=
   Iff.symm <| Exponential.monotone_le_iff (exponential_exp a) (exponential_exp b)
+
+lemma nat_cast_exp (n : ℕ) : (exp n : ℕ) = exp (n : M) := by
+  induction' n with n ih
+  · simp
+  · simp [exp_succ, ih]
 
 end exponential
 
