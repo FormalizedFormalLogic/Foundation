@@ -4,7 +4,7 @@ import Logic.Modal.Standard.Kripke.Soundness
 namespace LO.Modal.Standard
 
 variable {α : Type*} [DecidableEq α] [Inhabited α]
-variable {𝓓 : DeductionParameter α} [𝓓.Normal] [Inhabited (𝓓)-MCT]
+variable {𝓓 : DeductionParameter α} [𝓓.IsNormal] [Inhabited (𝓓)-MCT]
 
 open System
 open Formula
@@ -153,7 +153,7 @@ lemma realize_theory_of_self_canonicalModel : (CanonicalModel 𝓓) ⊧* (System
 end
 
 lemma validOnCanonicalModel_of_subset
-  {𝓓₁ 𝓓₂ : DeductionParameter α} [𝓓₁.Normal] [𝓓₂.Normal] [Inhabited (𝓓₁)-MCT] [Inhabited (𝓓₂)-MCT]
+  {𝓓₁ 𝓓₂ : DeductionParameter α} [𝓓₁.IsNormal] [𝓓₂.IsNormal] [Inhabited (𝓓₁)-MCT] [Inhabited (𝓓₂)-MCT]
   (hRed : 𝓓₁ ≤ₛ 𝓓₂ := by simp) (h : CanonicalModel 𝓓₁ ⊧ p) : CanonicalModel 𝓓₂ ⊧ p :=
   iff_valid_on_canonicalModel_deducible.mpr $ hRed $ iff_valid_on_canonicalModel_deducible.mp h
 
@@ -183,7 +183,7 @@ instance : Complete (𝐊 : DeductionParameter α) 𝔽(Ax(𝐊)) := instComplet
 
 instance Canonical.union
   {𝓓₁ 𝓓₂ : DeductionParameter α}
-  [𝓓₁.Normal] [𝓓₂.Normal]
+  [𝓓₁.IsNormal] [𝓓₂.IsNormal]
   [Inhabited (𝓓₁)-MCT] [Inhabited (𝓓₂)-MCT] [Inhabited (𝓓₁ ⊔ 𝓓₂)-MCT]
   (definability₁ : Definability Ax(𝓓₁) P₁)
   (definability₂ : Definability Ax(𝓓₂) P₂)

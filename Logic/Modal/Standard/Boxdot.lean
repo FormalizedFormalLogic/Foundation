@@ -24,7 +24,7 @@ variable {p : Formula α}
 lemma boxdotTranslatedK4_of_S4 (h : 𝐒𝟒 ⊢! p) : 𝐊𝟒 ⊢! pᵇ := by
   induction h.some using Deduction.inducition_with_nec with
   | hMaxm a =>
-    rcases a with (hK | hT) | hFour;
+    rcases a with (hK | hT | hFour);
     . obtain ⟨_, _, e⟩ := hK; subst_vars; dsimp [Axioms.K, BoxdotTranslation]; apply boxdot_axiomK!;
     . obtain ⟨_, e⟩ := hT; subst_vars; dsimp [Axioms.T, BoxdotTranslation]; apply boxdot_axiomT!;
     . obtain ⟨_, e⟩ := hFour; subst_vars; dsimp [Axioms.Four, BoxdotTranslation]; apply boxdot_axiomFour!;

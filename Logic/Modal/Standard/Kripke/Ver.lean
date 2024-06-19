@@ -32,7 +32,7 @@ namespace Kripke
 
 open MaximalConsistentTheory
 
-lemma definability_canonicalFrame_Ver {𝓓 : DeductionParameter α} [𝓓.Normal] [Inhabited (𝓓)-MCT] (hAx : 𝗩𝗲𝗿 ⊆ Ax(𝓓))
+lemma definability_canonicalFrame_Ver {𝓓 : DeductionParameter α} [𝓓.IsNormal] [Inhabited (𝓓)-MCT] (hAx : 𝗩𝗲𝗿 ⊆ Ax(𝓓))
   : Isolated (CanonicalFrame 𝓓).Rel := by
   intro x y hxy;
   have : 𝓓 ⊢! □⊥ := ⟨Deduction.maxm (Set.mem_of_subset_of_mem hAx (by simp))⟩

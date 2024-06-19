@@ -128,7 +128,7 @@ protected abbrev Geach (l : List Axioms.Geach.Taple) : DeductionParameter α whe
   axiomSet := 𝗚𝗲(l)
   rules := ⟨true, false, false⟩
 notation "𝐆𝐞(" l ")" => DeductionParameter.Geach l
-instance instNormal : Normal (α := α) 𝐆𝐞(l) where
+instance instNormal : IsNormal (α := α) 𝐆𝐞(l) where
   include_K := by simp [AxiomSet.MultiGeach.subsetK]
 
 namespace Geach
@@ -146,7 +146,7 @@ namespace IsGeach
 
 variable {L : DeductionParameter α} [geach : L.IsGeach]
 
-instance : L.Normal := by
+instance : L.IsNormal := by
   rw [geach.char];
   infer_instance
 

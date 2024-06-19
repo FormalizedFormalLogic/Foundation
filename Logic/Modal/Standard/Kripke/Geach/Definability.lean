@@ -54,14 +54,14 @@ lemma extensive_def : (GeachConfluent ⟨0, 1, 0, 0⟩ F) ↔ Extensive F.Rel :=
 
 @[simp] lemma dense_def : (GeachConfluent ⟨0, 1, 2, 0⟩ F)  ↔ Dense F.Rel := by simp [GeachConfluent, Dense]; aesop;
 
-lemma satisfies_TerminalFrame : GeachConfluent t (TerminalFrame α)ꟳ := by simp [GeachConfluent, TerminalFrame.iff_relItr.mpr];
+lemma satisfies_TerminalFrame : GeachConfluent t (TerminalFrame α).toFrame := by simp [GeachConfluent, TerminalFrame.iff_relItr.mpr];
 
 end GeachConfluent
 
 
 namespace MultiGeachConfluent
 
-lemma satisfies_TerminalFrame : MultiGeachConfluent ts (TerminalFrame α)ꟳ := by
+lemma satisfies_TerminalFrame : MultiGeachConfluent ts (TerminalFrame α).toFrame := by
   induction ts with
   | nil => simp;
   | cons t ts ih =>

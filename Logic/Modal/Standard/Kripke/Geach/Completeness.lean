@@ -11,8 +11,8 @@ open Formula
 variable [Inhabited α] [DecidableEq α]
 
 open Theory MaximalConsistentTheory CanonicalFrame in
-lemma definability_canonicalFrame_GeachAxiom {𝓓 : DeductionParameter α} [𝓓.HasNecOnly] [includeK : 𝓓.IncludeK] [Inhabited (𝓓)-MCT] (hAx : 𝗴𝗲(t) ⊆ Ax(𝓓)) : GeachConfluent t (CanonicalFrame 𝓓) := by
-  have : 𝓓.Normal := ⟨⟩;
+lemma definability_canonicalFrame_GeachAxiom {𝓓 : DeductionParameter α} [𝓓.HasNecOnly] [includeK : 𝓓.IsIncludeK] [Inhabited (𝓓)-MCT] (hAx : 𝗴𝗲(t) ⊆ Ax(𝓓)) : GeachConfluent t (CanonicalFrame 𝓓) := by
+  have : 𝓓.IsNormal := ⟨⟩;
 
   intro Ω₁ Ω₂ Ω₃ h;
   have ⟨r₁₂, r₁₃⟩ := h; clear h;

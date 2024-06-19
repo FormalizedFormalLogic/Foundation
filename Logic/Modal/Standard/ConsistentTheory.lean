@@ -386,7 +386,7 @@ lemma neg_iff (h : p ∈ Ω₁.theory ↔ q ∈ Ω₂.theory) : (~p ∈ Ω₁.th
 -- These lemmata require 𝓓 normality
 section Normal
 
-variable [𝓓.Normal]
+variable [𝓓.IsNormal]
 
 lemma iff_mem_multibox : (□^[n]p ∈ Ω.theory) ↔ (∀ {Ω' : (𝓓)-MCT}, (□''⁻¹^[n]Ω.theory ⊆ Ω'.theory) → (p ∈ Ω'.theory)) := by
   constructor;

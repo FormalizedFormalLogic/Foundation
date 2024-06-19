@@ -88,7 +88,7 @@ namespace Kripke
 
 open MaximalConsistentTheory
 
-lemma definability_canonicalFrame_Dot3 {𝓓 : DeductionParameter α} [𝓓.Normal] [Inhabited (𝓓)-MCT] (hAx : .𝟯 ⊆ Ax(𝓓))
+lemma definability_canonicalFrame_Dot3 {𝓓 : DeductionParameter α} [𝓓.IsNormal] [Inhabited (𝓓)-MCT] (hAx : .𝟯 ⊆ Ax(𝓓))
   : Connected (CanonicalFrame 𝓓).Rel := by
   dsimp only [Connected];
   intro X Y Z ⟨hXY, hXZ⟩;
@@ -124,12 +124,12 @@ instance : Canonical (𝐒𝟒.𝟑 : DeductionParameter α)  := by
   refine ⟨?reflexive, ?transitive, ?connective⟩;
   . rw [←GeachConfluent.reflexive_def];
     apply definability_canonicalFrame_GeachAxiom;
-    simp only [AxiomSet.Geach.T_def, Set.subset_tetraunion₂];
+    intro _; aesop;
   . rw [←GeachConfluent.transitive_def];
     apply definability_canonicalFrame_GeachAxiom;
-    simp only [AxiomSet.Geach.Four_def, Set.subset_triunion₂];
+    intro _; aesop;
   . apply definability_canonicalFrame_Dot3;
-    simp only [Set.subset_union_right];
+    intro _; aesop;
 
 instance : Complete (𝐒𝟒.𝟑 : DeductionParameter α) 𝔽(Ax(𝐒𝟒.𝟑)) := instComplete
 
