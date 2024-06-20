@@ -2,6 +2,8 @@
 
 _These results are included in [Arithmetization](https://github.com/iehality/Arithmetization/tree/master)._
 
+We will work in $\mathsf{I}\Sigma_1$. And denote $V$ as universe.
+
 ### Exponential
 
 It is proved that the graph of exponential is definable by $\Sigma_1$-formula,
@@ -39,3 +41,71 @@ def Seq [M ⊧ₘ* 𝐈𝚺₁] (s : M) : Prop := IsMapping s ∧ ∃ l, domain 
 - [LO.FirstOrder.Arith.Model.Seq](https://iehality.github.io/Arithmetization/Arithmetization/ISigmaOne/HFS/Seq.html#LO.FirstOrder.Arith.Model.Seq)
 
 ### Primitive Recursion
+
+Let $f(\vec v)$, $g(\vec{v}, x, z)$ be a $\Sigma_1$ function.
+Then there is a $\Sigma_1$ function $\mathsf{PR}_{f,g}(\vec{v}, u)$ such that:
+
+$$
+\begin{align*}
+  \mathsf{PR}_{f,g}(\vec{v}, 0) &\coloneqq f(\vec{v}) \\
+  \mathsf{PR}_{f,g}(\vec{v}, u + 1) &\coloneqq g(\vec{v}, u, \mathsf{PR}_{f,g}(\vec{v}, u))
+\end{align*}
+$$
+
+```lean
+structure Formulae (k : ℕ) where
+  zero : 𝚺₁-Semisentence (k + 1)
+  succ : 𝚺₁-Semisentence (k + 3)
+
+structure Construction {k : ℕ} (p : Formulae k) where
+  zero : (Fin k → M) → M
+  succ : (Fin k → M) → M → M → M
+  zero_defined : DefinedFunction zero p.zero
+  succ_defined : DefinedFunction (fun v ↦ succ (v ·.succ.succ) (v 1) (v 0)) p.succ
+
+variable {k : ℕ} {p : Formulae k} (c : Construction M p) (v : Fin k → M)
+
+def Construction.result (u : M) : M
+
+theorem Construction.result_zero :
+    c.result v 0 = c.zero v
+
+theorem Construction.result_succ (u : M) :
+    c.result v (u + 1) = c.succ v u (c.result v u)
+```
+- [Formulae](https://iehality.github.io/Arithmetization/Arithmetization/ISigmaOne/HFS/PRF.html#LO.FirstOrder.Arith.Model.PR.Formulae), [Construction](https://iehality.github.io/Arithmetization/Arithmetization/ISigmaOne/HFS/PRF.html#LO.FirstOrder.Arith.Model.PR.Construction), [Construction.result](https://iehality.github.io/Arithmetization/Arithmetization/ISigmaOne/HFS/PRF.html#LO.FirstOrder.Arith.Model.PR.Construction.result), [Construction.result_zero](https://iehality.github.io/Arithmetization/Arithmetization/ISigmaOne/HFS/PRF.html#LO.FirstOrder.Arith.Model.PR.Construction.result_zero), [Construction.result_succ](https://iehality.github.io/Arithmetization/Arithmetization/ISigmaOne/HFS/PRF.html#LO.FirstOrder.Arith.Model.PR.Construction.result_succ)
+
+### Fixpoint
+
+Let $\Phi_C(\vec{v}, x)$ be a predicate, which takes a *class* $C$ as a parameter.
+Then there is a $\Delta_1$-definable predicate $\mathsf{Fix}_{\Phi}(\vec{v}, x)$ such that
+
+$$
+  \mathsf{Fix}_\Phi(\vec{v}, x) \iff \Phi_{\{z \mid \mathsf{Fix}_\Phi(\vec{v}, z)\}} (\vec{v}, x)
+$$
+
+if $\Phi$ satisfies following conditions:
+
+1.  $\Phi$ is $\Delta_1$-definable if $C$ is a set. i.e.,
+    a predicate $(c, \vec{v}, x) \mapsto \Phi_{\{z \mid \mathrm{Bit}(z, c)\}}(\vec{v}, x)$ is $\Delta_1$-definable.
+2.  *Monotone*: $C \subseteq C'$ and $\Phi_C(\vec{v}, x)$ implies $\Phi_{C'}(\vec{v}, x)$.
+3. *Finite*: $\Phi_C (\vec{v}, x)$ implies $\Phi_{\{z \in C \mid z < x\}} (\vec{v}, x)$.
+
+```lean
+structure Formula (k : ℕ) where
+  core : 𝚫₁-Semisentence (k + 2)
+
+structure Construction {k : ℕ} (φ : Formula k) where
+  Φ : (Fin k → M) → Set M → M → Prop
+  defined : Defined (fun v ↦ Φ (v ·.succ.succ) {x | x ∈ v 1} (v 0)) φ.core
+  monotone {C C' : Set M} (h : C ⊆ C') {v x} : Φ v C x → Φ v C' x
+  finite {C : Set M} {v x} : Φ v C x → Φ v {y ∈ C | y < x} x
+
+variable {k : ℕ} {φ : Formula k} (c : Construction M φ) (v : Fin k → M)
+
+def Construction.Fixpoint (x : M) : Prop
+
+theorem Construction.case :
+    c.Fixpoint v x ↔ c.Φ v {z | c.Fixpoint v z} x
+```
+- [Formula](https://iehality.github.io/Arithmetization/Arithmetization/ISigmaOne/HFS/Fixpoint.html#LO.FirstOrder.Arith.Model.Fixpoint.Formula), [Construction](https://iehality.github.io/Arithmetization/Arithmetization/ISigmaOne/HFS/Fixpoint.html#LO.FirstOrder.Arith.Model.Fixpoint.Construction), [Construction.Fixpoint](https://iehality.github.io/Arithmetization/Arithmetization/ISigmaOne/HFS/Fixpoint.html#LO.FirstOrder.Arith.Model.Fixpoint.Construction.Fixpoint), [Construction.case](https://iehality.github.io/Arithmetization/Arithmetization/ISigmaOne/HFS/Fixpoint.html#LO.FirstOrder.Arith.Model.Fixpoint.Construction.case)
