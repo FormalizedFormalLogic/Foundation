@@ -197,7 +197,7 @@ noncomputable def inducition!
   | henkin has hp ihp => exact hHenkin has (ihp ⟨hp⟩)
   | _ => aesop
 
-noncomputable def inducition_with_nec [HasNecOnly 𝓓]
+noncomputable def inducition_with_necOnly [HasNecOnly 𝓓]
   {motive  : (p : Formula α) → 𝓓 ⊢ p → Sort*}
   (hMaxm   : ∀ {p}, (h : p ∈ Ax(𝓓)) → motive p (maxm h))
   (hMdp    : ∀ {p q}, (hpq : 𝓓 ⊢ p ⟶ q) → (hp : 𝓓 ⊢ p) → motive (p ⟶ q) hpq → motive p hp → motive q (mdp hpq hp))
@@ -222,7 +222,7 @@ noncomputable def inducition_with_nec [HasNecOnly 𝓓]
   | henkin => have : 𝓓.rules.henkin = false := HasNecOnly.not_has_henkin; simp_all;
   | _ => aesop
 
-noncomputable def inducition_with_nec! [HasNecOnly 𝓓]
+noncomputable def inducition_with_necOnly! [HasNecOnly 𝓓]
   {motive  : (p : Formula α) → 𝓓 ⊢! p → Sort*}
   (hMaxm   : ∀ {p}, (h : p ∈ Ax(𝓓)) → motive p ⟨maxm h⟩)
   (hMdp    : ∀ {p q}, {hpq : 𝓓 ⊢! p ⟶ q} → {hp : 𝓓 ⊢! p} → motive (p ⟶ q) hpq → motive p hp → motive q (hpq ⨀ hp))
@@ -281,75 +281,76 @@ abbrev Normal (Ax : AxiomSet α) : DeductionParameter α where
   axiomSet := 𝗞 ∪ Ax
   rules := ⟨true, false, false⟩
 instance : IsNormal (α := α) (Normal Ax) where
+postfix:max "ᴺ" => Normal
 
 lemma Normal.isK : 𝐊 = Normal (α := α) 𝗞 := by aesop;
 
-protected abbrev KT : DeductionParameter α := Normal 𝗧
+protected abbrev KT : DeductionParameter α := 𝗧ᴺ
 notation "𝐊𝐓" => DeductionParameter.KT
 
 
-protected abbrev KD : DeductionParameter α := Normal 𝗗
+protected abbrev KD : DeductionParameter α := 𝗗ᴺ
 notation "𝐊𝐃" => DeductionParameter.KD
 
 
-protected abbrev K4 : DeductionParameter α := Normal 𝟰
+protected abbrev K4 : DeductionParameter α := 𝟰ᴺ
 notation "𝐊𝟒" => DeductionParameter.K4
 instance : System.K4 (𝐊𝟒 : DeductionParameter α) where
   Four _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
 
 
-protected abbrev K5 : DeductionParameter α := Normal 𝟱
+protected abbrev K5 : DeductionParameter α := 𝟱ᴺ
 notation "𝐊𝟓" => DeductionParameter.K5
 
 
-protected abbrev S4 : DeductionParameter α := Normal (𝗧 ∪ 𝟰)
+protected abbrev S4 : DeductionParameter α := (𝗧 ∪ 𝟰)ᴺ
 notation "𝐒𝟒" => DeductionParameter.S4
 instance : System.S4 (𝐒𝟒 : DeductionParameter α) where
   T _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
   Four _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
 
 
-protected abbrev S5 : DeductionParameter α := Normal (𝗧 ∪ 𝟱)
+protected abbrev S5 : DeductionParameter α := (𝗧 ∪ 𝟱)ᴺ
 notation "𝐒𝟓" => DeductionParameter.S5
 instance : IsNormal (α := α) 𝐒𝟓 where
 
 
-protected abbrev KT4B : DeductionParameter α := Normal (𝗧 ∪ 𝟰 ∪ 𝗕)
+protected abbrev KT4B : DeductionParameter α := (𝗧 ∪ 𝟰 ∪ 𝗕)ᴺ
 notation "𝐊𝐓𝟒𝐁" => DeductionParameter.KT4B
 
 
-protected abbrev S4Dot2 : DeductionParameter α := Normal (𝗧 ∪ 𝟰 ∪ .𝟮)
+protected abbrev S4Dot2 : DeductionParameter α := (𝗧 ∪ 𝟰 ∪ .𝟮)ᴺ
 notation "𝐒𝟒.𝟐" => DeductionParameter.S4Dot2
 
 
-protected abbrev S4Dot3 : DeductionParameter α := Normal (𝗧 ∪ 𝟰 ∪ .𝟯)
+protected abbrev S4Dot3 : DeductionParameter α := (𝗧 ∪ 𝟰 ∪ .𝟯)ᴺ
 notation "𝐒𝟒.𝟑" => DeductionParameter.S4Dot3
 
 
-protected abbrev S4Grz : DeductionParameter α := Normal (𝗧 ∪ 𝟰 ∪ 𝗚𝗿𝘇)
+protected abbrev S4Grz : DeductionParameter α := (𝗧 ∪ 𝟰 ∪ 𝗚𝗿𝘇)ᴺ
 notation "𝐒𝟒𝐆𝐫𝐳" => DeductionParameter.S4Grz
 
 
-protected abbrev Triv : DeductionParameter α := Normal (𝗧 ∪ 𝗧𝗰)
+protected abbrev Triv : DeductionParameter α := (𝗧 ∪ 𝗧𝗰)ᴺ
 notation "𝐓𝐫𝐢𝐯" => DeductionParameter.Triv
 instance : System.Triv (𝐓𝐫𝐢𝐯 : DeductionParameter α) where
   T _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
   Tc _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
 
 
-protected abbrev Ver : DeductionParameter α := Normal (𝗩𝗲𝗿)
+protected abbrev Ver : DeductionParameter α := (𝗩𝗲𝗿)ᴺ
 notation "𝐕𝐞𝐫" => DeductionParameter.Ver
 instance : System.Ver (𝐕𝐞𝐫 : DeductionParameter α) where
   Ver _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
 
 
-protected abbrev GL : DeductionParameter α := Normal (𝗟)
+protected abbrev GL : DeductionParameter α := (𝗟)ᴺ
 notation "𝐆𝐋" => DeductionParameter.GL
 instance : System.GL (𝐆𝐋 : DeductionParameter α) where
   L _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
 
 
-protected abbrev K4H : DeductionParameter α := Normal (𝟰 ∪ 𝗛)
+protected abbrev K4H : DeductionParameter α := (𝟰 ∪ 𝗛)ᴺ
 notation "𝐊𝟒𝐇" => DeductionParameter.K4H
 instance : System.K4H (𝐊𝟒𝐇 : DeductionParameter α) where
   Four _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
@@ -422,7 +423,7 @@ lemma normal_reducible {𝓓₁ 𝓓₂ : DeductionParameter α} [𝓓₁.IsNorm
   : 𝓓₁ ≤ₛ 𝓓₂ := by
   apply System.reducible_iff.mpr;
   intro p h;
-  induction h using Deduction.inducition_with_nec! with
+  induction h using Deduction.inducition_with_necOnly! with
   | hMaxm hp => exact hMaxm hp;
   | hMdp ihpq ihp => exact ihpq ⨀ ihp;
   | hNec ihp => exact nec! ihp;

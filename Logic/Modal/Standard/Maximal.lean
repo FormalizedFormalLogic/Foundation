@@ -130,16 +130,16 @@ lemma of_classical {m𝓓 : Modal.Standard.DeductionParameter α} {p : Superintu
 lemma iff_Triv_classical : 𝐓𝐫𝐢𝐯 ⊢! p ↔ 𝐂𝐥 ⊢! pᵀᴾ := by
   constructor;
   . intro h;
-    induction h.some using Deduction.inducition_with_nec with
+    induction h using Deduction.inducition_with_necOnly! with
     | hMaxm a =>
       rcases a with (hK | hT | hTc);
       . obtain ⟨_, _, e⟩ := hK; subst_vars; dsimp [Axioms.K, TrivTranslation, toPropFormula]; apply imp_id!;
       . obtain ⟨_, e⟩ := hT; subst_vars; dsimp [Axioms.T, TrivTranslation, toPropFormula]; apply imp_id!;
       . obtain ⟨_, e⟩ := hTc; subst_vars; dsimp [Axioms.Tc, TrivTranslation, toPropFormula]; apply imp_id!;
-    | hMdp h₁ h₂ ih₁ ih₂ =>
+    | hMdp ih₁ ih₂ =>
       dsimp [TrivTranslation, toPropFormula] at ih₁ ih₂;
-      exact (ih₁ ⟨h₁⟩) ⨀ (ih₂ ⟨h₂⟩);
-    | hNec _ ih => exact ih $ axiomT'! h;
+      exact ih₁ ⨀ ih₂;
+    | hNec ih => simp_all only [TrivTranslation];
     | _ => dsimp [TrivTranslation, toPropFormula]; trivial
   . intro h;
     have d₁ : 𝐓𝐫𝐢𝐯 ⊢! pᵀ ⟶ p := and₂'! deducible_iff_trivTranslation;
@@ -149,14 +149,14 @@ lemma iff_Triv_classical : 𝐓𝐫𝐢𝐯 ⊢! p ↔ 𝐂𝐥 ⊢! pᵀᴾ := 
 lemma iff_Ver_classical : 𝐕𝐞𝐫 ⊢! p ↔ 𝐂𝐥 ⊢! pⱽᴾ := by
   constructor;
   . intro h;
-    induction h.some using Deduction.inducition_with_nec with
+    induction h using Deduction.inducition_with_necOnly! with
     | hMaxm a =>
       rcases a with (hK | hVer)
       . obtain ⟨_, _, e⟩ := hK; subst_vars; dsimp only [Axioms.K, VerTranslation, toPropFormula]; apply imply₁!;
       . obtain ⟨_, e⟩ := hVer; subst_vars; dsimp [Axioms.Ver, VerTranslation, toPropFormula]; exact verum!;
-    | hMdp h₁ h₂ ih₁ ih₂ =>
+    | hMdp ih₁ ih₂ =>
       dsimp [VerTranslation, toPropFormula] at ih₁ ih₂;
-      exact (ih₁ ⟨h₁⟩) ⨀ (ih₂ ⟨h₂⟩);
+      exact ih₁ ⨀ ih₂;
     | hNec => dsimp [toPropFormula]; exact verum!;
     | _ => dsimp [VerTranslation, toPropFormula]; trivial;
   . intro h;
@@ -171,14 +171,14 @@ lemma trivTranslated_of_K4 : 𝐊𝟒 ⊢! p → 𝐂𝐥 ⊢! pᵀᴾ := by
 
 lemma verTranslated_of_GL : 𝐆𝐋 ⊢! p → 𝐂𝐥 ⊢! pⱽᴾ := by
   intro h;
-  induction h.some using Deduction.inducition_with_nec with
+  induction h using Deduction.inducition_with_necOnly! with
     | hMaxm a =>
       rcases a with (hK | hVer)
       . obtain ⟨_, _, e⟩ := hK; subst_vars; dsimp only [Axioms.K, VerTranslation, toPropFormula]; apply imply₁!;
       . obtain ⟨_, e⟩ := hVer; subst_vars; dsimp [Axioms.Ver, VerTranslation, toPropFormula]; apply imp_id!;
-    | hMdp h₁ h₂ ih₁ ih₂ =>
+    | hMdp ih₁ ih₂ =>
       dsimp [VerTranslation, toPropFormula] at ih₁ ih₂;
-      exact (ih₁ ⟨h₁⟩) ⨀ (ih₂ ⟨h₂⟩);
+      exact ih₁ ⨀ ih₂;
     | hNec => dsimp [toPropFormula]; exact verum!;
     | _ => dsimp [VerTranslation, toPropFormula]; trivial;
 

@@ -73,18 +73,19 @@ instance : IsGeach (α := α) 𝗧𝗰 where taple := ⟨0, 1, 0, 0⟩;
 
 
 def MultiGeach : List Axioms.Geach.Taple → AxiomSet α
-  | [] => 𝗞
+  | [] => ∅
   | x :: xs => (AxiomSet.Geach x) ∪ (AxiomSet.MultiGeach xs)
 notation:max "𝗚𝗲(" l ")" => AxiomSet.MultiGeach l
 
 namespace MultiGeach
 
 @[simp]
-lemma def_nil : 𝗚𝗲([]) = (𝗞 : AxiomSet α) := by simp [MultiGeach]
+lemma def_nil : 𝗚𝗲([]) = (∅ : AxiomSet α) := by simp [MultiGeach]
 
 @[simp]
 lemma iff_cons : 𝗚𝗲(x :: l) = (𝗴𝗲(x) : AxiomSet α) ∪ 𝗚𝗲(l) := by simp only [MultiGeach];
 
+/-
 @[simp]
 lemma subsetK : (𝗞 : AxiomSet α) ⊆ 𝗚𝗲(l) := by
   induction l with
@@ -92,6 +93,7 @@ lemma subsetK : (𝗞 : AxiomSet α) ⊆ 𝗚𝗲(l) := by
   | cons => simp; apply Set.subset_union_of_subset_right (by assumption);
 
 lemma subsetK' (h : 𝗚𝗲(l) ⊆ Ax) : 𝗞 ⊆ Ax := Set.Subset.trans subsetK h
+-/
 
 -- instance instK : System.K (𝐆𝐞(l) : AxiomSet α) := K_of_subset_K (by simp)
 
@@ -107,8 +109,7 @@ lemma mem (h : x ∈ l) : (𝗴𝗲(x) : AxiomSet α) ⊆ 𝗚𝗲(l) := by
 @[simp]
 lemma subset (h : l₁ ⊆ l₂) : (𝗚𝗲(l₁) : AxiomSet α) ⊆ 𝗚𝗲(l₂) := by
   induction l₁ generalizing l₂ <;> induction l₂;
-  case nil.nil | cons.nil => simp_all;
-  case nil.cons => simp_all; apply Set.subset_union_of_subset_right (by simp);
+  case nil.nil | cons.nil | nil.cons => simp_all;
   case cons.cons a as iha b bs ihb =>
     simp_all;
     constructor;
@@ -124,17 +125,15 @@ end AxiomSet
 
 namespace DeductionParameter
 
-protected abbrev Geach (l : List Axioms.Geach.Taple) : DeductionParameter α where
-  axiomSet := 𝗚𝗲(l)
-  rules := ⟨true, false, false⟩
+protected abbrev Geach (l : List Axioms.Geach.Taple) : DeductionParameter α := (𝗚𝗲(l))ᴺ
 notation "𝐆𝐞(" l ")" => DeductionParameter.Geach l
-instance instNormal : IsNormal (α := α) 𝐆𝐞(l) where
-  include_K := by simp [AxiomSet.MultiGeach.subsetK]
 
 namespace Geach
 
+/-
 @[simp]
 lemma subset_axm (h : l₁ ⊆ l₂ := by simp_all) : (Ax(𝐆𝐞(l₁)) : AxiomSet α) ⊆ (Ax(𝐆𝐞(l₂)) : AxiomSet α) := by simp_all;
+-/
 
 end Geach
 
@@ -144,30 +143,25 @@ protected class IsGeach (L : DeductionParameter α) where
 
 namespace IsGeach
 
-variable {L : DeductionParameter α} [geach : L.IsGeach]
-
-instance : L.IsNormal := by
+instance {L : DeductionParameter α} [geach : L.IsGeach] : L.IsNormal := by
   rw [geach.char];
-  infer_instance
+  infer_instance;
 
-@[simp]
-lemma eq_axiomset : Ax(L) = 𝗚𝗲(IsGeach.taples L) := by have := geach.char; simp_all;
+instance : 𝐊.IsGeach (α := α) where taples := [];
 
-instance : DeductionParameter.IsGeach (α := α) 𝐊 where taples := [];
+instance : 𝐊𝐃.IsGeach (α := α) where taples := [⟨0, 0, 1, 1⟩]
 
-instance : DeductionParameter.IsGeach (α := α) 𝐊𝐃 where taples := [⟨0, 0, 1, 1⟩]
+instance : 𝐊𝐓.IsGeach (α := α) where taples := [⟨0, 0, 1, 0⟩]
 
-instance : DeductionParameter.IsGeach (α := α) 𝐊𝐓 where taples := [⟨0, 0, 1, 0⟩]
+instance : 𝐒𝟒.IsGeach (α := α) where taples := [⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩]
 
-instance : DeductionParameter.IsGeach (α := α) 𝐒𝟒 where taples := [⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩]
+instance : 𝐒𝟒.𝟐.IsGeach (α := α) where taples := [⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩, ⟨1, 1, 1, 1⟩]
 
-instance : DeductionParameter.IsGeach (α := α) 𝐒𝟒.𝟐 where taples := [⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩, ⟨1, 1, 1, 1⟩]
+instance : 𝐒𝟓.IsGeach (α := α) where taples := [⟨0, 0, 1, 0⟩, ⟨1, 1, 0, 1⟩]
 
-instance : DeductionParameter.IsGeach (α := α) 𝐒𝟓 where taples := [⟨0, 0, 1, 0⟩, ⟨1, 1, 0, 1⟩]
+instance : 𝐊𝐓𝟒𝐁.IsGeach (α := α) where taples := [⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩, ⟨0, 1, 0, 1⟩]
 
-instance : DeductionParameter.IsGeach (α := α) 𝐊𝐓𝟒𝐁 where taples := [⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩, ⟨0, 1, 0, 1⟩]
-
-instance : DeductionParameter.IsGeach (α := α) 𝐓𝐫𝐢𝐯 where taples := [⟨0, 0, 1, 0⟩, ⟨0, 1, 0, 0⟩]
+instance : 𝐓𝐫𝐢𝐯.IsGeach (α := α) where taples := [⟨0, 0, 1, 0⟩, ⟨0, 1, 0, 0⟩]
 
 end IsGeach
 

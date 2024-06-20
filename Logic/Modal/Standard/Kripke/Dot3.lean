@@ -2,6 +2,12 @@ import Logic.Modal.Standard.Kripke.Geach.Completeness
 
 namespace LO.Modal.Standard
 
+namespace Kripke
+
+abbrev ConnectedFrameClass (α) : FrameClass α := { F | Connected F }
+
+end Kripke
+
 open System
 open Kripke
 open Formula

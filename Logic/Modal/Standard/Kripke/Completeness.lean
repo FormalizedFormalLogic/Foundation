@@ -4,21 +4,24 @@ import Logic.Modal.Standard.Kripke.Soundness
 namespace LO.Modal.Standard
 
 variable {α : Type*} [DecidableEq α] [Inhabited α]
-variable {𝓓 : DeductionParameter α} [𝓓.IsNormal] [Inhabited (𝓓)-MCT]
+-- variable {Ax : AxiomSet α} [Inhabited (𝓓)-MCT]
+variable {Ax : AxiomSet α}
 
 open System
 open Formula
 open MaximalConsistentTheory
+open DeductionParameter (Normal)
 
 namespace Kripke
 
-abbrev CanonicalFrame (𝓓 : DeductionParameter α) [Inhabited (𝓓)-MCT] : Frame α where
-  World := (𝓓)-MCT
+abbrev CanonicalFrame (Ax : AxiomSet α) [Inhabited (Normal Ax)-MCT] : Frame α where
+  World := (Normal Ax)-MCT
   Rel :=  λ Ω₁ Ω₂ => (□''⁻¹Ω₁.theory : Theory α) ⊆ Ω₂.theory
 
 namespace CanonicalFrame
 
-variable {Ω₁ Ω₂ : (CanonicalFrame 𝓓).World}
+variable [Inhabited (Normal Ax)-MCT]
+variable {Ω₁ Ω₂ : (CanonicalFrame Ax).World}
 
 @[simp]
 lemma frame_def_box: Ω₁ ≺ Ω₂ ↔ ∀ {p}, □p ∈ Ω₁.theory → p ∈ Ω₂.theory := by rfl
@@ -36,12 +39,12 @@ lemma multiframe_def_multibox : Ω₁ ≺^[n] Ω₂ ↔ ∀ {p}, □^[n]p ∈ Ω
       intro Ω₃ h₁₃ h₃₂ p h;
       exact ih.mp h₃₂ $ h₁₃ h;
     . intro h;
-      obtain ⟨Ω, hΩ⟩ := lindenbaum (𝓓 := 𝓓) (T := (□''⁻¹Ω₁.theory ∪ ◇''^[n]Ω₂.theory)) $ by
+      obtain ⟨Ω, hΩ⟩ := lindenbaum (𝓓 := Normal Ax) (T := (□''⁻¹Ω₁.theory ∪ ◇''^[n]Ω₂.theory)) $ by
         apply Theory.intro_union_Consistent;
         intro Γ Δ hΓ hΔ hC;
 
         replace hΓ : ∀ p ∈ Γ, □p ∈ Ω₁.theory := by simpa using hΓ;
-        have dΓconj : Ω₁.theory *⊢[𝓓]! □Γ.conj' := membership_iff.mp $ iff_mem_box_conj'.mpr hΓ;
+        have dΓconj : Ω₁.theory *⊢[_]! □Γ.conj' := membership_iff.mp $ iff_mem_box_conj'.mpr hΓ;
 
         have hΔ₂ : ∀ p ∈ ◇'⁻¹^[n]Δ, p ∈ Ω₂.theory := by
           intro p hp;
@@ -49,7 +52,7 @@ lemma multiframe_def_multibox : Ω₁ ≺^[n] Ω₂ ↔ ∀ {p}, □^[n]p ∈ Ω
 
         have hΔconj : (◇'⁻¹^[n]Δ).conj' ∈ Ω₂.theory := iff_mem_conj'.mpr hΔ₂;
 
-        have : 𝓓 ⊢! Γ.conj' ⟶ □^[n](~(◇'⁻¹^[n]Δ).conj') := imp_trans''! (and_imply_iff_imply_imply'!.mp hC)
+        have : (Normal Ax) ⊢! Γ.conj' ⟶ □^[n](~(◇'⁻¹^[n]Δ).conj') := imp_trans''! (and_imply_iff_imply_imply'!.mp hC)
           $ contra₂'! $ imp_trans''! (and₂'! multidia_duality!)
           $ imp_trans''! iff_conj'multidia_multidiaconj'! $ by
             apply conj'conj'_subset;
@@ -57,7 +60,7 @@ lemma multiframe_def_multibox : Ω₁ ≺^[n] Ω₂ ↔ ∀ {p}, □^[n]p ∈ Ω
             obtain ⟨r, _, _⟩ := by simpa using hΔ q hq;
             subst_vars;
             simpa;
-        have : 𝓓 ⊢! □Γ.conj' ⟶ □^[(n + 1)](~(◇'⁻¹^[n]Δ).conj') := by simpa only [UnaryModalOperator.multimop_succ] using imply_box_distribute'! this;
+        have : (Normal Ax) ⊢! □Γ.conj' ⟶ □^[(n + 1)](~(◇'⁻¹^[n]Δ).conj') := by simpa only [UnaryModalOperator.multimop_succ] using imply_box_distribute'! this;
         have : (◇'⁻¹^[n]Δ).conj' ∉ Ω₂.theory := iff_mem_neg.mp $ h $ membership_iff.mpr $ (Context.of! this) ⨀ dΓconj;
 
         contradiction;
@@ -82,27 +85,29 @@ lemma multiframe_def_multidia : Ω₁ ≺^[n] Ω₂ ↔ ∀ {p}, (p ∈ Ω₂.th
 end CanonicalFrame
 
 
-abbrev CanonicalModel (𝓓 : DeductionParameter α) [Inhabited (𝓓)-MCT] : Model α where
-  Frame := CanonicalFrame 𝓓
+abbrev CanonicalModel (Ax : AxiomSet α) [Inhabited (Normal Ax)-MCT] : Model α where
+  Frame := CanonicalFrame Ax
   Valuation Ω a := (atom a) ∈ Ω.theory
 
 
 namespace CanonicalModel
 
-variable [Inhabited (MCT 𝓓)]
+variable [Inhabited (Normal Ax)-MCT]
 
 @[reducible]
-instance : Semantics (Formula α) (CanonicalModel 𝓓).World := Formula.kripke_satisfies.semantics (CanonicalModel 𝓓)
+instance : Semantics (Formula α) (CanonicalModel Ax).World := Formula.kripke_satisfies.semantics (CanonicalModel Ax)
 
-@[simp] lemma frame_def : (CanonicalModel 𝓓).Frame.Rel Ω₁ Ω₂ ↔ (□''⁻¹Ω₁.theory : Theory α) ⊆ Ω₂.theory := by rfl
-@[simp] lemma val_def : (CanonicalModel 𝓓).Valuation Ω a ↔ (atom a) ∈ Ω.theory := by rfl
+@[simp] lemma frame_def : (CanonicalModel Ax).Frame.Rel Ω₁ Ω₂ ↔ (□''⁻¹Ω₁.theory : Theory α) ⊆ Ω₂.theory := by rfl
+@[simp] lemma val_def : (CanonicalModel Ax).Valuation Ω a ↔ (atom a) ∈ Ω.theory := by rfl
 
 end CanonicalModel
 
 
 section
 
-lemma truthlemma : ∀ {Ω : (CanonicalModel 𝓓).World}, Ω ⊧ p ↔ (p ∈ Ω.theory) := by
+variable [Inhabited (Normal Ax)-MCT]
+
+lemma truthlemma : ∀ {Ω : (CanonicalModel Ax).World}, Ω ⊧ p ↔ (p ∈ Ω.theory) := by
   induction p using Formula.rec' with
   | hbox p ih =>
     intro Ω;
@@ -111,20 +116,20 @@ lemma truthlemma : ∀ {Ω : (CanonicalModel 𝓓).World}, Ω ⊧ p ↔ (p ∈ �
       apply iff_mem_box.mpr;
       intro Ω' hΩ';
       apply ih.mp;
-      exact h Ω' hΩ';
+      exact h hΩ';
     . intro h Ω' hΩ';
       apply ih.mpr;
       exact CanonicalFrame.frame_def_box.mp hΩ' h;
   | _ => simp_all [kripke_satisfies];
 
-lemma iff_valid_on_canonicalModel_deducible : (CanonicalModel 𝓓) ⊧ p ↔ (𝓓 ⊢! p) := by
+lemma iff_valid_on_canonicalModel_deducible : (CanonicalModel Ax) ⊧ p ↔ ((Normal Ax) ⊢! p) := by
   constructor;
   . contrapose;
     intro h;
-    have : (𝓓)-Consistent ({~p}) := by
+    have : (Normal Ax)-Consistent ({~p}) := by
       intro Γ hΓ;
       by_contra hC;
-      have : 𝓓 ⊢! p := dne'! $ replace_imply_left_conj'! hΓ hC;
+      have : _ ⊢! p := dne'! $ replace_imply_left_conj'! hΓ hC;
       contradiction;
     obtain ⟨Ω, hΩ⟩ := lindenbaum this;
     simp [valid_on_KripkeModel];
@@ -137,14 +142,13 @@ lemma iff_valid_on_canonicalModel_deducible : (CanonicalModel 𝓓) ⊧ p ↔ (�
     obtain ⟨Γ, hΓ₁, hΓ₂⟩ := Theory.iff_insert_Inconsistent.mp this;
     exact Ω.consistent hΓ₁ $ and_imply_iff_imply_imply'!.mp hΓ₂ ⨀ h;
 
-lemma realize_axiomset_of_self_canonicalModel : (CanonicalModel 𝓓) ⊧* Ax(𝓓) := by
+lemma realize_axiomset_of_self_canonicalModel : (CanonicalModel Ax) ⊧* Ax := by
   apply Semantics.realizeSet_iff.mpr;
   intro p hp;
   apply iff_valid_on_canonicalModel_deducible.mpr;
-  exact ⟨Deduction.maxm hp⟩;
+  exact ⟨Deduction.maxm (by aesop)⟩;
 
-@[simp]
-lemma realize_theory_of_self_canonicalModel : (CanonicalModel 𝓓) ⊧* (System.theory 𝓓) := by
+lemma realize_theory_of_self_canonicalModel : (CanonicalModel Ax) ⊧* (System.theory (Normal Ax)) := by
   apply Semantics.realizeSet_iff.mpr;
   intro p hp;
   apply iff_valid_on_canonicalModel_deducible.mpr;
@@ -152,48 +156,21 @@ lemma realize_theory_of_self_canonicalModel : (CanonicalModel 𝓓) ⊧* (System
 
 end
 
-lemma validOnCanonicalModel_of_subset
-  {𝓓₁ 𝓓₂ : DeductionParameter α} [𝓓₁.IsNormal] [𝓓₂.IsNormal] [Inhabited (𝓓₁)-MCT] [Inhabited (𝓓₂)-MCT]
-  (hRed : 𝓓₁ ≤ₛ 𝓓₂ := by simp) (h : CanonicalModel 𝓓₁ ⊧ p) : CanonicalModel 𝓓₂ ⊧ p :=
-  iff_valid_on_canonicalModel_deducible.mpr $ hRed $ iff_valid_on_canonicalModel_deducible.mp h
-
-class Canonical (𝓓 : DeductionParameter α) [Inhabited (𝓓)-MCT] where
-  realize : (CanonicalFrame 𝓓) ⊧* Ax(𝓓)
-
-lemma complete!_on_frameclass_of_canonical [System.Consistent 𝓓] [Inhabited (𝓓)-MCT] [Canonical 𝓓] : 𝔽(Ax(𝓓)) ⊧ p → 𝓓 ⊢! p := by
+lemma complete_of_mem_canonicalFrame [Inhabited (Normal Ax)-MCT] {𝔽 : FrameClass α} (hFC : CanonicalFrame Ax ∈ 𝔽) : 𝔽 ⊧ p → (Normal Ax) ⊢! p := by
   simp [valid_on_KripkeFrameClass, valid_on_KripkeFrame];
   contrapose;
   push_neg;
   intro h;
-  use (CanonicalFrame 𝓓);
+  use (CanonicalFrame Ax);
   constructor;
-  . apply Canonical.realize;
-  . existsi (CanonicalModel 𝓓).Valuation;
+  . assumption;
+  . existsi (CanonicalModel Ax).Valuation;
     exact iff_valid_on_canonicalModel_deducible.not.mpr h;
 
-instance instComplete [System.Consistent 𝓓] [Canonical 𝓓] : Complete 𝓓 𝔽(Ax(𝓓)) := ⟨complete!_on_frameclass_of_canonical⟩
+instance instComplete_of_mem_canonicalFrame [Inhabited (Normal Ax)-MCT] {𝔽 : FrameClass α} (hFC : CanonicalFrame Ax ∈ 𝔽) : Complete (Normal Ax) 𝔽 := ⟨complete_of_mem_canonicalFrame hFC⟩
 
-def canonical_of_definability [Inhabited (𝓓)-MCT] (definability : Definability Ax(𝓓) P) (h : P (CanonicalFrame 𝓓)) : Canonical 𝓓 where
-  realize := definability.defines _ |>.mpr h;
-
-instance : Canonical (𝐊 : DeductionParameter α) := canonical_of_definability AxiomSet.K.definability trivial
-
--- MEMO: inferInstanceで行けてほしいのだがなぜか通らないので明示的に指定している
-instance : Complete (𝐊 : DeductionParameter α) 𝔽(Ax(𝐊)) := instComplete
-
-instance Canonical.union
-  {𝓓₁ 𝓓₂ : DeductionParameter α}
-  [𝓓₁.IsNormal] [𝓓₂.IsNormal]
-  [Inhabited (𝓓₁)-MCT] [Inhabited (𝓓₂)-MCT] [Inhabited (𝓓₁ ⊔ 𝓓₂)-MCT]
-  (definability₁ : Definability Ax(𝓓₁) P₁)
-  (definability₂ : Definability Ax(𝓓₂) P₂)
-  (h₁ : P₁ (CanonicalFrame (DeductionParameter.union 𝓓₁ 𝓓₂ (by done))))
-  (h₂ : P₂ (CanonicalFrame (DeductionParameter.union 𝓓₁ 𝓓₂ (by done))))
-  -- MEMO: `(by done)`としなければならない理由はよくわからない．
-  : Canonical (DeductionParameter.union 𝓓₁ 𝓓₂ (by done)) := by
-  apply canonical_of_definability;
-  apply Definability.union definability₁ definability₂;
-  exact ⟨h₁, h₂⟩;
+instance : Complete (𝐊 : DeductionParameter α) (AllFrameClass α) := by
+  simpa [←Normal.isK] using instComplete_of_mem_canonicalFrame (Ax := 𝗞) (𝔽 := AllFrameClass α) trivial;
 
 end Kripke
 

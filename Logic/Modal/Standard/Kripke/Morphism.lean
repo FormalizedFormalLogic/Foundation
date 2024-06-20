@@ -33,11 +33,11 @@ lemma Formula.kripke_satisfies.morphism
     constructor;
     . intro h w₂ hw₂;
       obtain ⟨w₁, ⟨hww₁, e⟩⟩ := morphism.back hw₂;
-      have := ih.mp $ h w₁ hww₁;
+      have := ih.mp $ h hww₁;
       subst e;
       assumption;
     . intro h w' hww';
-      exact ih.mpr $ h (f w') $ morphism.forth hww';
+      exact ih.mpr $ h $ morphism.forth hww';
   | _ => simp_all;
 
 lemma Formula.valid_on_KripkeFrame.morphism

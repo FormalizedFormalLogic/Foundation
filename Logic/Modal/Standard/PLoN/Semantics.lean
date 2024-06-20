@@ -134,7 +134,7 @@ instance Definability.N : Definability (α := α) 𝐍 (λ _ => True) where
   defines := by
     simp [System.theory, valid_on_PLoNFrame, valid_on_PLoNModel];
     intro F p hp;
-    induction hp using Deduction.inducition_with_nec! with
+    induction hp using Deduction.inducition_with_necOnly! with
     | hMaxm h => simp at h;
     | hMdp ihpq ihp =>
       intro V w;
