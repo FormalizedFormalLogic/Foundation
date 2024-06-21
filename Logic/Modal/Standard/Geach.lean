@@ -85,18 +85,6 @@ lemma def_nil : 𝗚𝗲([]) = (∅ : AxiomSet α) := by simp [MultiGeach]
 @[simp]
 lemma iff_cons : 𝗚𝗲(x :: l) = (𝗴𝗲(x) : AxiomSet α) ∪ 𝗚𝗲(l) := by simp only [MultiGeach];
 
-/-
-@[simp]
-lemma subsetK : (𝗞 : AxiomSet α) ⊆ 𝗚𝗲(l) := by
-  induction l with
-  | nil => simp;
-  | cons => simp; apply Set.subset_union_of_subset_right (by assumption);
-
-lemma subsetK' (h : 𝗚𝗲(l) ⊆ Ax) : 𝗞 ⊆ Ax := Set.Subset.trans subsetK h
--/
-
--- instance instK : System.K (𝐆𝐞(l) : AxiomSet α) := K_of_subset_K (by simp)
-
 lemma mem (h : x ∈ l) : (𝗴𝗲(x) : AxiomSet α) ⊆ 𝗚𝗲(l) := by
   induction l with
   | nil => contradiction;
@@ -129,11 +117,6 @@ protected abbrev Geach (l : List Axioms.Geach.Taple) : DeductionParameter α := 
 notation "𝐆𝐞(" l ")" => DeductionParameter.Geach l
 
 namespace Geach
-
-/-
-@[simp]
-lemma subset_axm (h : l₁ ⊆ l₂ := by simp_all) : (Ax(𝐆𝐞(l₁)) : AxiomSet α) ⊆ (Ax(𝐆𝐞(l₂)) : AxiomSet α) := by simp_all;
--/
 
 end Geach
 

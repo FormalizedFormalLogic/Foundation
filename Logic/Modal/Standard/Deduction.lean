@@ -151,6 +151,7 @@ def maxm_subset
 
 lemma maxm_subset! (hRules : 𝓓₁.rules ≤ 𝓓₂.rules) (hAx : Ax(𝓓₁) ⊆ Ax(𝓓₂)) (h : 𝓓₁ ⊢! p) : 𝓓₂ ⊢! p := ⟨maxm_subset hRules hAx h.some⟩
 
+
 @[simp]
 lemma reducible_of_subset (hNec : 𝓓₁.rules ≤ 𝓓₂.rules) (hAx : Ax(𝓓₁) ⊆ Ax(𝓓₂) := by intro; aesop) : 𝓓₁ ≤ₛ 𝓓₂ := by
   intro p hp;
@@ -284,6 +285,8 @@ instance : IsNormal (α := α) (Normal Ax) where
 postfix:max "ᴺ" => Normal
 
 lemma Normal.isK : 𝐊 = Normal (α := α) 𝗞 := by aesop;
+
+lemma Normal.maxm_ax! {Ax : AxiomSet α} (h : p ∈ Ax) : Axᴺ ⊢! p := ⟨Deduction.maxm (by aesop)⟩
 
 protected abbrev KT : DeductionParameter α := 𝗧ᴺ
 notation "𝐊𝐓" => DeductionParameter.KT

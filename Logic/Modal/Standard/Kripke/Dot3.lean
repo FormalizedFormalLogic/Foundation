@@ -1,23 +1,19 @@
-import Logic.Modal.Standard.Kripke.Geach.Completeness
+import Logic.Modal.Standard.Kripke.Geach
 
 namespace LO.Modal.Standard
 
 namespace Kripke
 
-abbrev ConnectedFrameClass (α) : FrameClass α := { F | Connected F }
-
-end Kripke
-
 open System
 open Kripke
 open Formula
 
-variable {α} [Inhabited α] [DecidableEq α]
+abbrev ConnectedFrameClass (α) : FrameClass α := { F | Connected F }
 
+variable {α} [Inhabited α] [DecidableEq α] [atleast : Atleast 2 α]
 variable {F : Kripke.Frame α}
-variable [atleast : Atleast 2 α]
 
-private lemma AxiomSet.Dot3.definability.implies : F ⊧* .𝟯 → Connected F.Rel := by
+private lemma connected_of_dot3 : F ⊧* .𝟯 → Connected F.Rel := by
   contrapose;
   intro hCon; simp [Connected] at hCon;
   obtain ⟨x, y, rxy, z, ryz, nryz, nrzy⟩ := hCon;
@@ -28,19 +24,19 @@ private lemma AxiomSet.Dot3.definability.implies : F ⊧* .𝟯 → Connected F.
     | 0 => y ≺ w
     | 1 => z ≺ w
   );
-  simp [valid_on_KripkeModel, not_forall, Axioms.Dot3];
-  existsi x;
+  simp [valid_on_KripkeModel, kripke_satisfies];
+  use x;
   constructor;
-  . existsi y;
+  . use y;
     constructor;
     . assumption;
     . simp_all [kripke_satisfies, (fInj 0), (fInj 1)];
-  . existsi z;
+  . use z;
     constructor;
     . assumption;
     . simp_all [kripke_satisfies, (fInj 0), (fInj 1)];
 
-private lemma AxiomSet.Dot3.definability.impliedBy : Connected F.Rel → F ⊧* .𝟯 := by
+private lemma dot3_of_connected : Connected F.Rel → F ⊧* .𝟯 := by
   intro hCon;
   simp [valid_on_KripkeFrame, valid_on_KripkeModel, Axioms.Dot3];
   intro _ p q e V x; subst e;
@@ -48,15 +44,17 @@ private lemma AxiomSet.Dot3.definability.impliedBy : Connected F.Rel → F ⊧* 
   by_contra hC; push_neg at hC;
   obtain ⟨⟨y, rxy, hp, hnq⟩, ⟨z, rxz, hq, hnp⟩⟩ := hC;
   cases hCon ⟨rxy, rxz⟩ with
-  | inl ryz => exact hnp $ hp _ ryz;
-  | inr rzy => exact hnq $ hq _ rzy;
+  | inl ryz => exact hnp $ hp ryz;
+  | inr rzy => exact hnq $ hq rzy;
 
-instance AxiomSet.Dot3.definability : Definability (α := α) .𝟯 (λ F => Connected F.Rel) where
-  defines F := by
+instance : .𝟯.DefinesKripkeFrameClass (ConnectedFrameClass α) where
+  defines := by
+    intro F;
     constructor;
-    . exact AxiomSet.Dot3.definability.implies;
-    . exact AxiomSet.Dot3.definability.impliedBy;
+    . exact connected_of_dot3;
+    . exact dot3_of_connected;
 
+/-
 instance S4dot3.definability : Definability (α := α) Ax(𝐒𝟒.𝟑) (λ F => Reflexive F.Rel ∧ Transitive F.Rel ∧ Connected F.Rel) := by
   have d := Definability.union (P₁ := λ F => (Reflexive F.Rel ∧ Transitive F.Rel)) (by simpa using instGeachDefinability (α := α) (L := 𝐒𝟒)) AxiomSet.Dot3.definability;
   simp at d;
@@ -138,6 +136,7 @@ instance : Canonical (𝐒𝟒.𝟑 : DeductionParameter α)  := by
     intro _; aesop;
 
 instance : Complete (𝐒𝟒.𝟑 : DeductionParameter α) 𝔽(Ax(𝐒𝟒.𝟑)) := instComplete
+-/
 
 end Kripke
 

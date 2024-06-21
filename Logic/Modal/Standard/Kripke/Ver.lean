@@ -8,6 +8,7 @@ namespace Kripke
 open System
 open Kripke
 open Formula
+open DeductionParameter (Normal)
 
 variable {α} [Inhabited α] [DecidableEq α]
 
@@ -28,19 +29,18 @@ instance : (IsolatedFrameClass α).IsNonempty where
     use { World := PUnit, Rel := (· ≠ ·) };
     simp [Isolated];
 
-open DeductionParameter (Normal)
 
 instance : System.Consistent (𝐕𝐞𝐫 : DeductionParameter α) := consistent (𝔽 := IsolatedFrameClass α)
 
-lemma isolated_Ver_CanonicalFrame : (CanonicalFrame 𝗩𝗲𝗿) ∈ IsolatedFrameClass α := by
+lemma isolated_CanonicalFrame {Λ : AxiomSet α} (h : 𝗩𝗲𝗿 ⊆ Λ) [System.Consistent Λᴺ] : Isolated (CanonicalFrame Λ) := by
   intro x y rxy;
-  have : (CanonicalModel (α := α) 𝗩𝗲𝗿) ⊧ □⊥ := iff_valid_on_canonicalModel_deducible.mpr $ axiomVer!;
+  have : (CanonicalModel (α := α) Λ) ⊧ □⊥ := iff_valid_on_canonicalModel_deducible.mpr $ Normal.maxm_ax! (by aesop);
   simp [valid_on_KripkeModel, kripke_satisfies] at this;
   obtain ⟨p, ⟨hx, hy⟩⟩ := @this x y;
   have := rxy hx;
   contradiction;
 
-instance : Complete (𝐕𝐞𝐫 : DeductionParameter α) (IsolatedFrameClass α) := instComplete_of_mem_canonicalFrame isolated_Ver_CanonicalFrame
+instance : Complete (𝐕𝐞𝐫 : DeductionParameter α) (IsolatedFrameClass α) := instComplete_of_mem_canonicalFrame $ isolated_CanonicalFrame (by rfl)
 
 end Kripke
 
