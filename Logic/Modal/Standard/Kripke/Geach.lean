@@ -76,11 +76,26 @@ namespace Kripke
 variable [Inhabited α] [DecidableEq α]
 
 
-section Definability
+section
 
 abbrev GeachConfluentFrameClass (α) (t : Geach.Taple) : FrameClass α := { F | (GeachConfluent t) F }
 
 abbrev MultiGeachConfluentFrameClass (α) (ts : List Geach.Taple) : FrameClass α := { F | MultiGeachConfluent ts F }
+
+
+abbrev ReflexiveFrameClass (α) : FrameClass α := { F | Reflexive F }
+
+abbrev SerialFrameClass (α) : FrameClass α := { F | Serial F }
+
+abbrev PreorderFrameClass (α) : FrameClass α := { F | Reflexive F ∧ Transitive F }
+
+abbrev ReflexiveEuclideanFrameClass (α) : FrameClass α := { F | Reflexive F ∧ Euclidean F }
+
+abbrev EquivalenceFrameClass (α) : FrameClass α := { F | Reflexive F ∧ Transitive F ∧ Symmetric F }
+
+end
+
+section Definability
 
 @[simp]
 lemma MultiGeachConfluentFrameClass.def_nil : MultiGeachConfluentFrameClass α [] = AllFrameClass α := by
@@ -89,9 +104,7 @@ lemma MultiGeachConfluentFrameClass.def_nil : MultiGeachConfluentFrameClass α [
 open Formula (atom kripke_satisfies)
 open Formula.kripke_satisfies (multibox_def multidia_def)
 
-variable [Inhabited α]
-
-instance : 𝗴𝗲(t).DefinesKripkeFrameClass (GeachConfluentFrameClass α t) where
+instance instGeachDefinability : 𝗴𝗲(t).DefinesKripkeFrameClass (GeachConfluentFrameClass α t) where
   defines := by
     intro F;
     constructor;
@@ -111,8 +124,9 @@ instance : 𝗴𝗲(t).DefinesKripkeFrameClass (GeachConfluentFrameClass α t) w
       exact ⟨hyu, hzu⟩;
     . simp [AxiomSet.Geach, Axioms.Geach, kripke_satisfies];
       intro h p V x him;
-      simp [multibox_def, multidia_def];
+      apply multibox_def.mpr;
       intro z rxz;
+      apply multidia_def.mpr;
       obtain ⟨y, rxy, hbp⟩ := multidia_def.mp him;
       obtain ⟨u, ryu, rzu⟩ := h ⟨rxy, rxz⟩;
       use u;
@@ -127,7 +141,7 @@ instance : (GeachConfluentFrameClass α t).IsNonempty where
 
 instance : System.Consistent (𝗴𝗲(t)ᴺ : DeductionParameter α) := consistent (𝔽 := GeachConfluentFrameClass α t)
 
-instance : 𝗚𝗲(ts).DefinesKripkeFrameClass (MultiGeachConfluentFrameClass α ts) where
+instance instMultiGeachDefinability : 𝗚𝗲(ts).DefinesKripkeFrameClass (MultiGeachConfluentFrameClass α ts) where
   defines := by
     induction ts with
     | nil => simp;
@@ -150,6 +164,18 @@ instance : (MultiGeachConfluentFrameClass α ts).IsNonempty where
     use (TerminalFrame α);
     exact MultiGeachConfluent.satisfies_eq;
 
+private def instGeachLogicDefinability
+  {Λ : DeductionParameter α} [geach : Λ.IsGeach]
+  (𝔽 : FrameClass α) (h𝔽 : 𝔽 = MultiGeachConfluentFrameClass α geach.taples := by simp_all [MultiGeachConfluentFrameClass, MultiGeachConfluent])
+  : Λ.DefinesKripkeFrameClass 𝔽 := by
+  simp [DeductionParameter.DefinesKripkeFrameClass];
+  nth_rw 1 [geach.char];
+  rw [←(Set.univ_inter 𝔽)];
+  rw [h𝔽];
+  exact AxiomSet.DefinesKripkeFrameClass.union instAxiomKDefinability instMultiGeachDefinability;
+
+instance S4_definability : 𝐒𝟒.DefinesKripkeFrameClass (PreorderFrameClass α) := instGeachLogicDefinability (PreorderFrameClass α)
+
 instance : System.Consistent (𝐆𝐞(ts) : DeductionParameter α) := consistent (𝔽 := MultiGeachConfluentFrameClass α ts)
 
 instance {Λ : DeductionParameter α} [geach : Λ.IsGeach] : System.Consistent Λ := by rw [geach.char]; infer_instance;
@@ -162,16 +188,6 @@ end Definability
 
 
 section Soundness
-
-abbrev ReflexiveFrameClass (α) : FrameClass α := { F | Reflexive F }
-
-abbrev SerialFrameClass (α) : FrameClass α := { F | Serial F }
-
-abbrev PreorderFrameClass (α) : FrameClass α := { F | Reflexive F ∧ Transitive F }
-
-abbrev ReflexiveEuclideanFrameClass (α) : FrameClass α := { F | Reflexive F ∧ Euclidean F }
-
-abbrev EquivalenceFrameClass (α) : FrameClass α := { F | Reflexive F ∧ Transitive F ∧ Symmetric F }
 
 private lemma instGeachLogicSoundAux
   {Λ : DeductionParameter α} [geach : Λ.IsGeach]

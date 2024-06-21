@@ -94,6 +94,15 @@ lemma mem (h : x ∈ l) : (𝗴𝗲(x) : AxiomSet α) ⊆ 𝗚𝗲(l) := by
     . subst_vars; tauto;
     . apply Set.subset_union_of_subset_right $ ih (by assumption);
 
+/-
+@[simp]
+lemma subset_K {l : List Axioms.Geach.Taple} : (𝗞 : AxiomSet α) ⊆ 𝗚𝗲(l) := by
+  induction l with
+  | nil => simp;
+  | cons a as ih => apply Set.subset_union_of_subset_right ih;
+-/
+
+/-
 @[simp]
 lemma subset (h : l₁ ⊆ l₂) : (𝗚𝗲(l₁) : AxiomSet α) ⊆ 𝗚𝗲(l₂) := by
   induction l₁ generalizing l₂ <;> induction l₂;
@@ -105,6 +114,7 @@ lemma subset (h : l₁ ⊆ l₂) : (𝗚𝗲(l₁) : AxiomSet α) ⊆ 𝗚𝗲(l
       . subst_vars; tauto;
       . apply Set.subset_union_of_subset_right $ mem (by assumption);
     . simpa using (iha h.2);
+-/
 
 end MultiGeach
 
@@ -125,6 +135,11 @@ protected class IsGeach (L : DeductionParameter α) where
   char : L = 𝐆𝐞(taples) := by aesop;
 
 namespace IsGeach
+
+lemma ax {Λ : DeductionParameter α} [geach : Λ.IsGeach] : Ax(Λ) = (𝗞 ∪ 𝗚𝗲(geach.taples)) := by
+  have e := geach.char;
+  simp [DeductionParameter.Geach] at e;
+  simp_all;
 
 instance {L : DeductionParameter α} [geach : L.IsGeach] : L.IsNormal := by
   rw [geach.char];

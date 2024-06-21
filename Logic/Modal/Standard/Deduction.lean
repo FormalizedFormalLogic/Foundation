@@ -284,9 +284,15 @@ abbrev Normal (Ax : AxiomSet α) : DeductionParameter α where
 instance : IsNormal (α := α) (Normal Ax) where
 postfix:max "ᴺ" => Normal
 
-lemma Normal.isK : 𝐊 = Normal (α := α) 𝗞 := by aesop;
+namespace Normal
 
-lemma Normal.maxm_ax! {Ax : AxiomSet α} (h : p ∈ Ax) : Axᴺ ⊢! p := ⟨Deduction.maxm (by aesop)⟩
+lemma isK : 𝐊 = Normal (α := α) 𝗞 := by aesop;
+
+lemma maxm_ax! {Ax : AxiomSet α} (h : p ∈ Ax) : Axᴺ ⊢! p := ⟨Deduction.maxm (by aesop)⟩
+
+lemma ax : Ax(Axᴺ) = (𝗞 ∪ Ax) := by simp;
+
+end Normal
 
 protected abbrev KT : DeductionParameter α := 𝗧ᴺ
 notation "𝐊𝐓" => DeductionParameter.KT

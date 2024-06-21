@@ -66,7 +66,7 @@ private lemma L_of_trans_and_cwf : (Transitive F.Rel ∧ ConverseWellFounded F.R
       exact rmn;
     . exact hm;
 
-instance instLDefines : 𝗟.DefinesKripkeFrameClass (TransitiveCWFFrameClass α) where
+instance AxL_defines : 𝗟.DefinesKripkeFrameClass (TransitiveCWFFrameClass α) where
   defines := by
     intro F;
     constructor;
@@ -76,77 +76,33 @@ instance instLDefines : 𝗟.DefinesKripkeFrameClass (TransitiveCWFFrameClass α
       . exact cwf_of_L h;
     . exact L_of_trans_and_cwf;
 
-abbrev TransitiveIrreflexiveFiniteFrameClass (α) : FiniteFrameClass α := { F | Transitive F.toFrame ∧ Irreflexive F.toFrame }
+abbrev TransitiveIrreflexiveFiniteFrameClass (α) : FrameClass α := { F | Transitive F ∧ Irreflexive F }
 
-instance : 𝗟.DefinesFiniteKripkeFrameClass (TransitiveIrreflexiveFiniteFrameClass α) where
+instance AxL_finite_defines : 𝗟.DefinesFiniteKripkeFrameClass (TransitiveIrreflexiveFiniteFrameClass α) where
   defines := by
-    intro F;
+    intro F hF;
     constructor;
     . intro h;
-      obtain ⟨hTrans, hCWF⟩ := instLDefines.defines.mp h;
+      obtain ⟨hTrans, hCWF⟩ := AxL_defines.defines.mp h;
       constructor;
       . exact hTrans;
-      . by_contra hC; simp [Irreflexive] at hC;
-        obtain ⟨w, h⟩ := hC;
-        have := ConverseWellFounded.iff_has_max.mp hCWF {w} (by simp);
-        simp_all;
+      . intro w;
+        simpa using ConverseWellFounded.iff_has_max.mp hCWF {w} (by simp);
     . rintro ⟨hTrans, hIrrefl⟩;
-      apply instLDefines.defines.mpr;
-      exact ⟨hTrans, Finite.converseWellFounded_of_trans_irrefl' F.World_finite hTrans hIrrefl⟩;
+      apply AxL_defines.defines.mpr;
+      exact ⟨hTrans, Finite.converseWellFounded_of_trans_irrefl' hF hTrans hIrrefl⟩;
 
-
-instance : (TransitiveIrreflexiveFiniteFrameClass α).IsNonempty where
+instance : (TransitiveIrreflexiveFiniteFrameClass α)ᶠ.IsNonempty where
   nonempty := by
-    use { World := PUnit, Rel := (· ≠ ·) };
-    simp [Transitive, Irreflexive];
+    use { World := PUnit, Rel := λ _ _ => False };
+    simp only [FrameClass.toFinite];
+    refine ⟨⟨?trans, ?irreflexive⟩, ?finite⟩;
+    . simp [Transitive];
+    . simp [Irreflexive];
+    . simp [Frame.finite];
+      sorry;
 
-
-/-
-open AxiomSet.L.definability in
-instance AxiomSet.L.definability : Definability (α := α) 𝗟 (λ F => Transitive F.Rel ∧ ConverseWellFounded F.Rel) where
-  defines F := by
-    constructor;
-    . intro h;
-      constructor;
-      . exact implies_transitive h;
-      . exact implies_cwf h;
-    . intro h;
-      apply impliedby;
-      simp_all;
-
-instance AxiomSet.L.finiteDefinability : FiniteDefinability (α := α) 𝗟 (λ F => Transitive F.Rel ∧ Irreflexive F.Rel) where
-  fin_defines F := by
-    constructor;
-    . intro h;
-      obtain ⟨hTrans, hCWF⟩ := L.definability.defines F.toFrame |>.mp h;
-      constructor;
-      . simpa;
-      . by_contra hIrrefl;
-        have := ConverseWellFounded.iff_has_max.mp hCWF;
-        simp [Irreflexive] at hIrrefl;
-        obtain ⟨w, h⟩ := hIrrefl;
-        have := this {w} (by simp);
-        simp_all;
-    . rintro ⟨hTrans, hIrrefl⟩;
-      apply AxiomSet.L.definability.defines F.toFrame |>.mpr;
-      exact ⟨hTrans, @Finite.converseWellFounded_of_trans_irrefl _ F.Rel F.World_finite ⟨hTrans⟩ ⟨hIrrefl⟩⟩;
-
-instance : (𝔽ꟳ(𝗟) : FiniteFrameClass α).IsNonempty where
-  nonempty := by
-    existsi { World := PUnit, Rel := λ _ _ => False };
-    apply iff_finiteDefinability_memFiniteFrameClass (AxiomSet.L.finiteDefinability) |>.mpr;
-    simp [Transitive, Irreflexive];
-
-instance : (𝔽ꟳ(Ax(𝐆𝐋)) : FiniteFrameClass α).IsNonempty where
-  nonempty := by
-    existsi { World := PUnit, Rel := λ _ _ => False };
-    apply iff_finiteDefinability_memFiniteFrameClass
-      (show FiniteDefinability (α := α) (𝗞 ∪ 𝗟) (λ F => Transitive F.Rel ∧ Irreflexive F.Rel) by infer_instance)
-      |>.mpr;
-    simp [Transitive, Irreflexive];
-
-instance instGLConsistencyViaFrameClassNonemptiness : System.Consistent (𝐆𝐋 : DeductionParameter α) := inferInstance
--/
+instance : System.Consistent (𝐆𝐋 : DeductionParameter α) := consistent_finite (TransitiveIrreflexiveFiniteFrameClass α)
 
 end Kripke
 

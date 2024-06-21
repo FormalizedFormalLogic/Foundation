@@ -47,12 +47,17 @@ private lemma dot3_of_connected : Connected F.Rel → F ⊧* .𝟯 := by
   | inl ryz => exact hnp $ hp ryz;
   | inr rzy => exact hnq $ hq rzy;
 
-instance : .𝟯.DefinesKripkeFrameClass (ConnectedFrameClass α) where
+instance AxDot3_Definability : .𝟯.DefinesKripkeFrameClass (ConnectedFrameClass α) where
   defines := by
     intro F;
     constructor;
     . exact connected_of_dot3;
     . exact dot3_of_connected;
+
+abbrev ReflexiveTransitiveConnectedFrameClass (α) : FrameClass α := { F | (Reflexive F ∧ Transitive F) ∧ Connected F }
+
+instance S4dot3_definability : (𝗧 ∪ 𝟰 ∪ .𝟯).DefinesKripkeFrameClass (ReflexiveTransitiveConnectedFrameClass α) :=
+  AxiomSet.DefinesKripkeFrameClass.union (by sorry) (AxDot3_Definability)
 
 /-
 instance S4dot3.definability : Definability (α := α) Ax(𝐒𝟒.𝟑) (λ F => Reflexive F.Rel ∧ Transitive F.Rel ∧ Connected F.Rel) := by
