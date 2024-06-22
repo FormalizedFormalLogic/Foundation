@@ -77,6 +77,11 @@ lemma axiomL_defines : 𝗟.DefinesKripkeFrameClass (TransitiveCWFFrameClass α)
 
 abbrev TransitiveIrreflexiveFiniteFrameClass (α) : FrameClass α := { F | Transitive F ∧ Irreflexive F }
 
+lemma TransitiveIrreflexiveFiniteFrameClass.finite_nonempty : (TransitiveIrreflexiveFiniteFrameClass α)ᶠ.Nonempty := by
+  apply nonempty_of_exist_finiteFrame;
+  use { World := PUnit, Rel := (· ≠ ·) };
+  simp [Transitive, Irreflexive];
+
 lemma axiomL_finite_defines : 𝗟.FinitelyDefinesKripkeFrameClass (TransitiveIrreflexiveFiniteFrameClass α) := by
   intro F F_finite;
   constructor;
@@ -94,12 +99,7 @@ instance : Sound 𝐆𝐋 (TransitiveIrreflexiveFiniteFrameClass α)ᶠ := sound
 
 
 
-instance : (TransitiveIrreflexiveFiniteFrameClass α)ᶠ.IsNonempty := by
-  apply nonempty_of_exist_finiteFrame;
-  use { World := PUnit, Rel := (· ≠ ·) };
-  simp [Transitive, Irreflexive];
-
-instance : System.Consistent (𝐆𝐋 : DeductionParameter α) := consistent_of_finitely_defines axiomL_finite_defines
+instance : System.Consistent (𝐆𝐋 : DeductionParameter α) := consistent_of_finitely_defines axiomL_finite_defines TransitiveIrreflexiveFiniteFrameClass.finite_nonempty
 
 end Kripke
 

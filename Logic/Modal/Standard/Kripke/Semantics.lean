@@ -2,9 +2,6 @@ import Logic.Logic.System
 import Logic.Modal.Standard.Formula
 import Logic.Modal.Standard.Deduction
 
-class Set.IsNonempty (s : Set α) where
-  nonempty : s.Nonempty
-
 universe u v
 
 namespace LO.Modal.Standard
@@ -208,16 +205,6 @@ protected lemma mdp {F : Frame α} (hpq : F ⊧ p ⟶ q) (hp : F ⊧ p) : F ⊧ 
 
 end Formula.valid_on_KripkeFrame
 
-/-
-@[simp] def Formula.valid_on_FiniteKripkeFrame (F : FiniteFrame α) (f : Formula α) := (F.toFrame) ⊧ f
-namespace Formula.valid_on_FiniteKripkeFrame
-
-protected instance semantics : Semantics (Formula α) (FiniteFrame α) := ⟨fun F ↦ Formula.valid_on_FiniteKripkeFrame F⟩
-
-@[simp] protected lemma models_iff {F : FiniteFrame α} : F ⊧ f ↔ valid_on_FiniteKripkeFrame F f := iff_of_eq rfl
-
-end Formula.valid_on_FiniteKripkeFrame
--/
 
 @[simp] def Formula.valid_on_KripkeFrameClass (𝔽 : FrameClass α) (p : Formula α) := ∀ F ∈ 𝔽, F ⊧ p
 
@@ -246,17 +233,6 @@ protected lemma mdp (hpq : 𝔽 ⊧ p ⟶ q) (hp : 𝔽 ⊧ p) : 𝔽 ⊧ q := b
 
 end Formula.valid_on_KripkeFrameClass
 
-/-
-@[simp] def Formula.valid_on_FiniteKripkeFrameClass (𝔽 : FiniteFrameClass α) (p : Formula α) := ∀ F ∈ 𝔽, F ⊧ p
-
-namespace Formula.valid_on_FiniteKripkeFrameClass
-
-protected instance : Semantics (Formula α) (FiniteFrameClass α) := ⟨fun 𝔽 ↦ Formula.valid_on_FiniteKripkeFrameClass 𝔽⟩
-
-@[simp] protected lemma models_iff {𝔽 : FiniteFrameClass α} : 𝔽 ⊧ f ↔ Formula.valid_on_FiniteKripkeFrameClass 𝔽 f := iff_of_eq rfl
-
-end Formula.valid_on_FiniteKripkeFrameClass
--/
 
 namespace AxiomSet
 
@@ -304,12 +280,11 @@ lemma DefinesKripkeFrameClass.toFinitely (defines : Ax.DefinesKripkeFrameClass �
   . rintro h₁;
     exact defines.mpr (by simpa);
 
-instance {𝔽 : FrameClass α} [ne : 𝔽ᶠ.IsNonempty] : 𝔽.IsNonempty where
-  nonempty := by
-    obtain ⟨F, hF⟩ := ne;
-    simp [FrameClass.toFinite] at hF;
-    use F;
-    exact hF.1;
+instance {𝔽 : FrameClass α} (ne : 𝔽ᶠ.Nonempty) : 𝔽.Nonempty := by
+  obtain ⟨F, hF⟩ := ne;
+  simp [FrameClass.toFinite] at hF;
+  use F;
+  exact hF.1;
 
 end AxiomSet
 
@@ -321,8 +296,8 @@ open AxiomSet (DefinesKripkeFrameClass)
 
 abbrev AllFrameClass (α) : FrameClass α := Set.univ
 
-instance : (AllFrameClass α).IsNonempty where
-  nonempty := by use TerminalFrame α; trivial;
+lemma AllFrameClass.nonempty : (AllFrameClass α).Nonempty := by
+  use TerminalFrame α; trivial;
 
 lemma axiomK_defines : 𝗞.DefinesKripkeFrameClass (AllFrameClass α) := by
   intro F;
@@ -356,13 +331,12 @@ lemma axiomK_union_definability {Ax : AxiomSet α} {𝔽 : FrameClass α} : (Ax.
       exact defines.mpr h |>.2;
 
 
-def nonempty_of_exist_finiteFrame {𝔽 : FrameClass α} (h : ∃ (F : FiniteFrame α), F.toFrame ∈ 𝔽) : 𝔽ᶠ.IsNonempty where
-  nonempty := by
-    obtain ⟨F, hF⟩ := h;
-    use F.toFrame;
-    constructor;
-    . assumption;
-    . exact F.World_finite;
+def nonempty_of_exist_finiteFrame {𝔽 : FrameClass α} (h : ∃ (F : FiniteFrame α), F.toFrame ∈ 𝔽) : 𝔽ᶠ.Nonempty := by
+  obtain ⟨F, hF⟩ := h;
+  use F.toFrame;
+  constructor;
+  . assumption;
+  . exact F.World_finite;
 
 end Kripke
 

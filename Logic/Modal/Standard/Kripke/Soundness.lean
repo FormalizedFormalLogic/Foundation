@@ -33,16 +33,16 @@ lemma sound_of_defines (defines : Ax.DefinesKripkeFrameClass 𝔽) : Sound Axᴺ
 instance : Sound 𝐊 (AllFrameClass α) := by simpa [←Normal.isK] using (sound_of_defines (Ax := 𝗞) (𝔽 := AllFrameClass α) axiomK_defines);
 
 
-lemma unprovable_bot_of_nonempty_frameClass (defines : Ax.DefinesKripkeFrameClass 𝔽) [nonempty : 𝔽.IsNonempty] : Axᴺ ⊬! ⊥ := by
+lemma unprovable_bot_of_nonempty_frameClass (defines : Ax.DefinesKripkeFrameClass 𝔽) (nonempty : 𝔽.Nonempty) : Axᴺ ⊬! ⊥ := by
   by_contra hC;
-  obtain ⟨F, hF⟩ := nonempty.nonempty
+  obtain ⟨F, hF⟩ := nonempty
   simpa using sound defines hC F hF;
 
-lemma consistent_of_defines (defines : Ax.DefinesKripkeFrameClass 𝔽) [𝔽.IsNonempty] : System.Consistent Axᴺ := by
+lemma consistent_of_defines (defines : Ax.DefinesKripkeFrameClass 𝔽) (nonempty : 𝔽.Nonempty) : System.Consistent Axᴺ := by
   apply System.Consistent.of_unprovable;
-  exact unprovable_bot_of_nonempty_frameClass defines;
+  exact unprovable_bot_of_nonempty_frameClass defines nonempty;
 
-instance K_consistent' : System.Consistent (𝗞 : AxiomSet α)ᴺ := consistent_of_defines axiomK_defines
+instance K_consistent' : System.Consistent (𝗞 : AxiomSet α)ᴺ := consistent_of_defines axiomK_defines AllFrameClass.nonempty
 
 instance K_consistent : System.Consistent (𝐊 : DeductionParameter α) := by
   simpa [←Normal.isK] using K_consistent';
@@ -70,13 +70,13 @@ lemma finite_sound (defines : Ax.FinitelyDefinesKripkeFrameClass 𝔽) (d : Ax�
 
 lemma sound_of_finitely_defines (defines : Ax.FinitelyDefinesKripkeFrameClass 𝔽) : Sound Axᴺ 𝔽ᶠ := ⟨finite_sound defines⟩
 
-lemma unprovable_bot_of_nonempty_finite_frameClass (defines : Ax.FinitelyDefinesKripkeFrameClass 𝔽) [nonempty : 𝔽ᶠ.IsNonempty] : Axᴺ ⊬! ⊥ := by
+lemma unprovable_bot_of_nonempty_finite_frameClass (defines : Ax.FinitelyDefinesKripkeFrameClass 𝔽) (nonempty : 𝔽ᶠ.Nonempty) : Axᴺ ⊬! ⊥ := by
   by_contra hC;
-  obtain ⟨F, hF⟩ := nonempty.nonempty;
+  obtain ⟨F, hF⟩ := nonempty;
   simpa using finite_sound defines hC F hF;
 
-lemma consistent_of_finitely_defines (defines : Ax.FinitelyDefinesKripkeFrameClass 𝔽) [𝔽ᶠ.IsNonempty] : System.Consistent Axᴺ := by
+lemma consistent_of_finitely_defines (defines : Ax.FinitelyDefinesKripkeFrameClass 𝔽) (nonempty : 𝔽ᶠ.Nonempty) : System.Consistent Axᴺ := by
   apply System.Consistent.of_unprovable;
-  exact unprovable_bot_of_nonempty_finite_frameClass defines;
+  exact unprovable_bot_of_nonempty_finite_frameClass defines nonempty;
 
 end LO.Modal.Standard.Kripke

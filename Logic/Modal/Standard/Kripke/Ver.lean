@@ -14,6 +14,10 @@ variable {α} [Inhabited α] [DecidableEq α]
 
 abbrev IsolatedFrameClass (α) : FrameClass α := { F | Isolated F }
 
+lemma IsolatedFrameClass.nonempty : (IsolatedFrameClass α).Nonempty := by
+  use { World := PUnit, Rel := (· ≠ ·) };
+  simp [Isolated];
+
 lemma axiomVer_defines : 𝗩𝗲𝗿.DefinesKripkeFrameClass (IsolatedFrameClass α)  := by
   -- simp [valid_on_KripkeFrame, valid_on_KripkeModel, Isolated];
   simp [AxiomSet.DefinesKripkeFrameClass, valid_on_KripkeFrame];
@@ -25,13 +29,9 @@ lemma axiomVer_defines : 𝗩𝗲𝗿.DefinesKripkeFrameClass (IsolatedFrameClas
     have := hIrrefl hxy;
     contradiction;
 
-instance : (IsolatedFrameClass α).IsNonempty where
-  nonempty := by
-    use { World := PUnit, Rel := (· ≠ ·) };
-    simp [Isolated];
 
 
-instance : System.Consistent (𝐕𝐞𝐫 : DeductionParameter α) := consistent_of_defines axiomVer_defines
+instance : System.Consistent (𝐕𝐞𝐫 : DeductionParameter α) := consistent_of_defines axiomVer_defines IsolatedFrameClass.nonempty
 
 lemma isolated_CanonicalFrame {Ax : AxiomSet α} (h : 𝗩𝗲𝗿 ⊆ Ax) [System.Consistent Axᴺ] : Isolated (CanonicalFrame Ax) := by
   intro x y rxy;

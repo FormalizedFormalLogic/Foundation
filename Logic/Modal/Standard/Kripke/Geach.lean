@@ -80,7 +80,16 @@ section
 
 abbrev GeachConfluentFrameClass (α) (t : Geach.Taple) : FrameClass α := { F | (GeachConfluent t) F }
 
+lemma GeachConfluentFrameClass.nonempty : (GeachConfluentFrameClass α t).Nonempty := by
+  use (TerminalFrame α);
+  exact GeachConfluent.satisfies_eq;
+
+
 abbrev MultiGeachConfluentFrameClass (α) (ts : List Geach.Taple) : FrameClass α := { F | MultiGeachConfluent ts F }
+
+lemma MultiGeachConfluentFrameClass.nonempty : (MultiGeachConfluentFrameClass α ts).Nonempty := by
+  use (TerminalFrame α);
+  exact MultiGeachConfluent.satisfies_eq;
 
 
 abbrev ReflexiveFrameClass (α) : FrameClass α := { F | Reflexive F }
@@ -133,12 +142,8 @@ lemma axiomGeach_defines : 𝗴𝗲(t).DefinesKripkeFrameClass (GeachConfluentFr
     . assumption;
     . exact (multibox_def.mp hbp) _ ryu;
 
-instance : (GeachConfluentFrameClass α t).IsNonempty where
-  nonempty := by
-    use (TerminalFrame α);
-    exact GeachConfluent.satisfies_eq;
 
-instance : System.Consistent (𝗴𝗲(t)ᴺ : DeductionParameter α) := consistent_of_defines axiomGeach_defines
+instance : System.Consistent (𝗴𝗲(t)ᴺ : DeductionParameter α) := consistent_of_defines axiomGeach_defines GeachConfluentFrameClass.nonempty
 
 
 lemma axiomMultiGeach_defines : 𝗚𝗲(ts).DefinesKripkeFrameClass (MultiGeachConfluentFrameClass α ts) := by
@@ -157,11 +162,6 @@ lemma axiomMultiGeach_defines : 𝗚𝗲(ts).DefinesKripkeFrameClass (MultiGeach
       . exact axiomGeach_defines.mpr ht;
       . exact ih.mpr hts;
 
-instance : (MultiGeachConfluentFrameClass α ts).IsNonempty where
-  nonempty := by
-    use (TerminalFrame α);
-    exact MultiGeachConfluent.satisfies_eq;
-
 private def instGeachLogicDefinability
   {Λ : DeductionParameter α} [geach : Λ.IsGeach]
   (𝔽 : FrameClass α) (h𝔽 : 𝔽 = MultiGeachConfluentFrameClass α geach.taples := by simp_all [MultiGeachConfluentFrameClass, MultiGeachConfluent])
@@ -175,7 +175,7 @@ private def instGeachLogicDefinability
 lemma S4_defines : 𝐒𝟒.DefinesKripkeFrameClass (PreorderFrameClass α) := instGeachLogicDefinability (PreorderFrameClass α)
 
 
-instance : System.Consistent (𝐆𝐞(ts) : DeductionParameter α) := consistent_of_defines axiomMultiGeach_defines
+instance : System.Consistent (𝐆𝐞(ts) : DeductionParameter α) := consistent_of_defines axiomMultiGeach_defines MultiGeachConfluentFrameClass.nonempty
 
 instance {Λ : DeductionParameter α} [geach : Λ.IsGeach] : System.Consistent Λ := by rw [geach.char]; infer_instance;
 

@@ -55,6 +55,11 @@ lemma AxDot3_Definability : .𝟯.DefinesKripkeFrameClass (ConnectedFrameClass �
 
 abbrev ReflexiveTransitiveConnectedFrameClass (α) : FrameClass α := { F | Reflexive F ∧ Transitive F ∧ Connected F }
 
+lemma ReflexiveTransitiveConnectedFrameClass.nonempty : (ReflexiveTransitiveConnectedFrameClass α).Nonempty := by
+  use (TerminalFrame α);
+  simp [Reflexive, Transitive, Connected];
+
+
 private lemma S4Dot3_defines' : (𝗧 ∪ 𝟰 ∪ .𝟯).DefinesKripkeFrameClass (ReflexiveTransitiveConnectedFrameClass α) := by
   rw [(show ReflexiveTransitiveConnectedFrameClass α = { (F : Frame α) | (Reflexive F ∧ Transitive F) ∧ Connected F } by aesop)];
   apply AxiomSet.DefinesKripkeFrameClass.union;
@@ -64,12 +69,7 @@ private lemma S4Dot3_defines' : (𝗧 ∪ 𝟰 ∪ .𝟯).DefinesKripkeFrameClas
 lemma S4Dot3_defines : 𝐒𝟒.𝟑.DefinesKripkeFrameClass (ReflexiveTransitiveConnectedFrameClass α) :=
   DeductionParameter.DefinesKripkeFrameClass.ofAx S4Dot3_defines'
 
-instance : (ReflexiveTransitiveConnectedFrameClass α).IsNonempty where
-  nonempty := by
-    use (TerminalFrame α);
-    simp [Reflexive, Transitive, Connected];
-
-instance : System.Consistent (𝐒𝟒.𝟑 : DeductionParameter α) := consistent_of_defines S4Dot3_defines'
+instance : System.Consistent (𝐒𝟒.𝟑 : DeductionParameter α) := consistent_of_defines S4Dot3_defines' ReflexiveTransitiveConnectedFrameClass.nonempty
 
 
 open MaximalConsistentTheory in
