@@ -66,43 +66,40 @@ private lemma L_of_trans_and_cwf : (Transitive F.Rel ∧ ConverseWellFounded F.R
       exact rmn;
     . exact hm;
 
-instance AxL_defines : 𝗟.DefinesKripkeFrameClass (TransitiveCWFFrameClass α) where
-  defines := by
-    intro F;
+lemma axiomL_defines : 𝗟.DefinesKripkeFrameClass (TransitiveCWFFrameClass α) := by
+  intro F;
+  constructor;
+  . intro h;
     constructor;
-    . intro h;
-      constructor;
-      . exact trans_of_L h;
-      . exact cwf_of_L h;
-    . exact L_of_trans_and_cwf;
+    . exact trans_of_L h;
+    . exact cwf_of_L h;
+  . exact L_of_trans_and_cwf;
 
 abbrev TransitiveIrreflexiveFiniteFrameClass (α) : FrameClass α := { F | Transitive F ∧ Irreflexive F }
 
-instance AxL_finite_defines : 𝗟.DefinesFiniteKripkeFrameClass (TransitiveIrreflexiveFiniteFrameClass α) where
-  defines := by
-    intro F hF;
+lemma axiomL_finite_defines : 𝗟.FinitelyDefinesKripkeFrameClass (TransitiveIrreflexiveFiniteFrameClass α) := by
+  intro F F_finite;
+  constructor;
+  . intro h;
+    obtain ⟨hTrans, hCWF⟩ := axiomL_defines.mp h;
     constructor;
-    . intro h;
-      obtain ⟨hTrans, hCWF⟩ := AxL_defines.defines.mp h;
-      constructor;
-      . exact hTrans;
-      . intro w;
-        simpa using ConverseWellFounded.iff_has_max.mp hCWF {w} (by simp);
-    . rintro ⟨hTrans, hIrrefl⟩;
-      apply AxL_defines.defines.mpr;
-      exact ⟨hTrans, Finite.converseWellFounded_of_trans_irrefl' hF hTrans hIrrefl⟩;
+    . exact hTrans;
+    . intro w;
+      simpa using ConverseWellFounded.iff_has_max.mp hCWF {w} (by simp);
+  . rintro ⟨hTrans, hIrrefl⟩;
+    apply axiomL_defines.mpr;
+    exact ⟨hTrans, Finite.converseWellFounded_of_trans_irrefl' F_finite hTrans hIrrefl⟩;
 
-instance : (TransitiveIrreflexiveFiniteFrameClass α)ᶠ.IsNonempty where
-  nonempty := by
-    use { World := PUnit, Rel := λ _ _ => False };
-    simp only [FrameClass.toFinite];
-    refine ⟨⟨?trans, ?irreflexive⟩, ?finite⟩;
-    . simp [Transitive];
-    . simp [Irreflexive];
-    . simp [Frame.finite];
-      sorry;
+instance : Sound 𝐆𝐋 (TransitiveIrreflexiveFiniteFrameClass α)ᶠ := sound_of_finitely_defines axiomL_finite_defines
 
-instance : System.Consistent (𝐆𝐋 : DeductionParameter α) := consistent_finite (TransitiveIrreflexiveFiniteFrameClass α)
+
+
+instance : (TransitiveIrreflexiveFiniteFrameClass α)ᶠ.IsNonempty := by
+  apply nonempty_of_exist_finiteFrame;
+  use { World := PUnit, Rel := (· ≠ ·) };
+  simp [Transitive, Irreflexive];
+
+instance : System.Consistent (𝐆𝐋 : DeductionParameter α) := consistent_of_finitely_defines axiomL_finite_defines
 
 end Kripke
 

@@ -12,8 +12,8 @@ open Formula
 variable
   {α : Type*} [DecidableEq α]
   {Ax₁ Ax₂ : AxiomSet α} (𝔽₁ 𝔽₂ : FrameClass α)
-  [sound₁ : Sound (Normal Ax₁) 𝔽₁] [sound₂ : Sound (Normal Ax₂) 𝔽₂]
-  [complete₁ : Complete (Normal Ax₁) 𝔽₁] [complete₂ : Complete (Normal Ax₂) 𝔽₂]
+  [sound₁ : Sound Ax₁ᴺ 𝔽₁] [sound₂ : Sound Ax₂ᴺ 𝔽₂]
+  [complete₁ : Complete (Ax₁ᴺ) 𝔽₁] [complete₂ : Complete (Ax₂ᴺ) 𝔽₂]
 
 lemma reducible_of_subset_FrameClass (h𝔽 : 𝔽₂ ⊆ 𝔽₁) : Ax₁ᴺ ≤ₛ Ax₂ᴺ := by
   apply System.reducible_iff.mpr;

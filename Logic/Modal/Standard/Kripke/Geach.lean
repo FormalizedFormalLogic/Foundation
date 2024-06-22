@@ -104,60 +104,58 @@ lemma MultiGeachConfluentFrameClass.def_nil : MultiGeachConfluentFrameClass α [
 open Formula (atom kripke_satisfies)
 open Formula.kripke_satisfies (multibox_def multidia_def)
 
-instance instGeachDefinability : 𝗴𝗲(t).DefinesKripkeFrameClass (GeachConfluentFrameClass α t) where
-  defines := by
-    intro F;
-    constructor;
-    . rintro h x y z ⟨hi, hj⟩;
-      simp at h;
-      let M : Model α := { Frame := F, Valuation := λ v _ => y ≺^[t.m] v }
-      have him_x : kripke_satisfies M x (◇^[t.i](□^[t.m](atom default))) := by
-        apply kripke_satisfies.multidia_def.mpr;
-        existsi y;
-        constructor;
-        . simpa;
-        . apply kripke_satisfies.multibox_def.mpr; aesop;
-      have hjn_x : kripke_satisfies M x (□^[t.j](◇^[t.n](atom default))) := h (Formula.atom default) M.Valuation x him_x;
-      have hn_z : kripke_satisfies M z (◇^[t.n](atom default)) := kripke_satisfies.multibox_def.mp hjn_x z hj;
-      obtain ⟨u, hzu, hyu⟩ := kripke_satisfies.multidia_def.mp hn_z;
-      existsi u;
-      exact ⟨hyu, hzu⟩;
-    . simp [AxiomSet.Geach, Axioms.Geach, kripke_satisfies];
-      intro h p V x him;
-      apply multibox_def.mpr;
-      intro z rxz;
-      apply multidia_def.mpr;
-      obtain ⟨y, rxy, hbp⟩ := multidia_def.mp him;
-      obtain ⟨u, ryu, rzu⟩ := h ⟨rxy, rxz⟩;
-      use u;
+lemma axiomGeach_defines : 𝗴𝗲(t).DefinesKripkeFrameClass (GeachConfluentFrameClass α t) := by
+  intro F;
+  constructor;
+  . rintro h x y z ⟨hi, hj⟩;
+    simp at h;
+    let M : Model α := { Frame := F, Valuation := λ v _ => y ≺^[t.m] v }
+    have him_x : kripke_satisfies M x (◇^[t.i](□^[t.m](atom default))) := by
+      apply kripke_satisfies.multidia_def.mpr;
+      existsi y;
       constructor;
-      . assumption;
-      . exact (multibox_def.mp hbp) _ ryu;
+      . simpa;
+      . apply kripke_satisfies.multibox_def.mpr; aesop;
+    have hjn_x : kripke_satisfies M x (□^[t.j](◇^[t.n](atom default))) := h (Formula.atom default) M.Valuation x him_x;
+    have hn_z : kripke_satisfies M z (◇^[t.n](atom default)) := kripke_satisfies.multibox_def.mp hjn_x z hj;
+    obtain ⟨u, hzu, hyu⟩ := kripke_satisfies.multidia_def.mp hn_z;
+    existsi u;
+    exact ⟨hyu, hzu⟩;
+  . simp [AxiomSet.Geach, Axioms.Geach, kripke_satisfies];
+    intro h p V x him;
+    apply multibox_def.mpr;
+    intro z rxz;
+    apply multidia_def.mpr;
+    obtain ⟨y, rxy, hbp⟩ := multidia_def.mp him;
+    obtain ⟨u, ryu, rzu⟩ := h ⟨rxy, rxz⟩;
+    use u;
+    constructor;
+    . assumption;
+    . exact (multibox_def.mp hbp) _ ryu;
 
 instance : (GeachConfluentFrameClass α t).IsNonempty where
   nonempty := by
     use (TerminalFrame α);
     exact GeachConfluent.satisfies_eq;
 
-instance : System.Consistent (𝗴𝗲(t)ᴺ : DeductionParameter α) := consistent (𝔽 := GeachConfluentFrameClass α t)
+instance : System.Consistent (𝗴𝗲(t)ᴺ : DeductionParameter α) := consistent_of_defines axiomGeach_defines
 
-instance instMultiGeachDefinability : 𝗚𝗲(ts).DefinesKripkeFrameClass (MultiGeachConfluentFrameClass α ts) where
-  defines := by
-    induction ts with
-    | nil => simp;
-    | cons t ts ih =>
-      have : 𝗴𝗲(t).DefinesKripkeFrameClass (GeachConfluentFrameClass α t) := inferInstance;
-      simp_all only [Semantics.RealizeSet.union_iff, AxiomSet.MultiGeach.iff_cons, MultiGeachConfluentFrameClass];
-      intro F;
+
+lemma axiomMultiGeach_defines : 𝗚𝗲(ts).DefinesKripkeFrameClass (MultiGeachConfluentFrameClass α ts) := by
+  induction ts with
+  | nil => simp [AxiomSet.DefinesKripkeFrameClass];
+  | cons t ts ih =>
+    intro F;
+    simp_all only [Semantics.RealizeSet.union_iff, AxiomSet.MultiGeach.iff_cons];
+    constructor;
+    . rintro ⟨ht, hts⟩;
       constructor;
-      . rintro ⟨ht, hts⟩;
-        constructor;
-        . exact this.defines.mp ht;
-        . simpa using hts;
-      . rintro ⟨ht, hts⟩;
-        constructor;
-        . exact this.defines.mpr ht;
-        . simpa using hts;
+      . exact axiomGeach_defines.mp ht;
+      . exact ih.mp hts;
+    . rintro ⟨ht, hts⟩;
+      constructor;
+      . exact axiomGeach_defines.mpr ht;
+      . exact ih.mpr hts;
 
 instance : (MultiGeachConfluentFrameClass α ts).IsNonempty where
   nonempty := by
@@ -172,11 +170,12 @@ private def instGeachLogicDefinability
   nth_rw 1 [geach.char];
   rw [←(Set.univ_inter 𝔽)];
   rw [h𝔽];
-  exact AxiomSet.DefinesKripkeFrameClass.union instAxiomKDefinability instMultiGeachDefinability;
+  exact AxiomSet.DefinesKripkeFrameClass.union axiomK_defines axiomMultiGeach_defines;
 
-instance S4_definability : 𝐒𝟒.DefinesKripkeFrameClass (PreorderFrameClass α) := instGeachLogicDefinability (PreorderFrameClass α)
+lemma S4_defines : 𝐒𝟒.DefinesKripkeFrameClass (PreorderFrameClass α) := instGeachLogicDefinability (PreorderFrameClass α)
 
-instance : System.Consistent (𝐆𝐞(ts) : DeductionParameter α) := consistent (𝔽 := MultiGeachConfluentFrameClass α ts)
+
+instance : System.Consistent (𝐆𝐞(ts) : DeductionParameter α) := consistent_of_defines axiomMultiGeach_defines
 
 instance {Λ : DeductionParameter α} [geach : Λ.IsGeach] : System.Consistent Λ := by rw [geach.char]; infer_instance;
 
@@ -194,9 +193,8 @@ private lemma instGeachLogicSoundAux
   {𝔽 : FrameClass α}
   (h𝔽 : 𝔽 = MultiGeachConfluentFrameClass α geach.taples := by simp_all [MultiGeachConfluentFrameClass, MultiGeachConfluent])
   : Sound Λ 𝔽 := by
-    convert instSound (α := α);
+    convert sound_of_defines (α := α) axiomMultiGeach_defines;
     exact geach.char;
-    infer_instance;
 
 instance sound_KD : Sound 𝐊𝐃 (SerialFrameClass α) := instGeachLogicSoundAux
 
