@@ -130,6 +130,8 @@ instance : System.Classical 𝓓 where
   or₃ := or₃
   dne := dne
 
+lemma maxm! {p} (h : p ∈ Ax(𝓓)) : 𝓓 ⊢! p := ⟨maxm h⟩
+
 def maxm_subset
   (hRules : 𝓓₁.rules ≤ 𝓓₂.rules)
   (hAx : Ax(𝓓₁) ⊆ Ax(𝓓₂)) : (𝓓₁ ⊢ p) → (𝓓₂ ⊢ p)
@@ -248,19 +250,6 @@ noncomputable def inducition_with_necOnly! [HasNecOnly 𝓓]
   | hHenkin => have : 𝓓.rules.henkin = false := HasNecOnly.not_has_henkin; simp_all;
   | _ => aesop
 
-/-
-instance : System.K (𝐊 : AxiomSet α) := K_of_subset_K (by rfl)
-
-instance : System.K (𝐊 ∪ Λ : AxiomSet α) := K_of_subset_K
-
-instance S4_of_subset_S4 (hS4 : 𝐒𝟒 ⊆ Λ := by simp) : System.S4 (Λ : AxiomSet α) where
-  K _ _   := Deduction.maxm $ Set.mem_of_subset_of_mem hS4 (by simp);
-  T _     := Deduction.maxm $ Set.mem_of_subset_of_mem hS4 (by simp);
-  Four _  := Deduction.maxm $ Set.mem_of_subset_of_mem hS4 (by simp);
-
-instance : System.S4 (𝐒𝟒 : AxiomSet α) := S4_of_subset_S4 (by rfl)
--/
-
 end Deduction
 
 
@@ -288,9 +277,9 @@ namespace Normal
 
 lemma isK : 𝐊 = Normal (α := α) 𝗞 := by aesop;
 
-lemma maxm_ax! {Ax : AxiomSet α} (h : p ∈ Ax) : Axᴺ ⊢! p := ⟨Deduction.maxm (by aesop)⟩
+lemma def_ax : Ax(Axᴺ) = (𝗞 ∪ Ax) := by simp;
 
-lemma ax : Ax(Axᴺ) = (𝗞 ∪ Ax) := by simp;
+lemma maxm! {Ax : AxiomSet α} (h : p ∈ Ax) : Axᴺ ⊢! p := ⟨Deduction.maxm (by simp [def_ax]; right; assumption)⟩
 
 end Normal
 

@@ -35,7 +35,7 @@ instance : System.Consistent (𝐕𝐞𝐫 : DeductionParameter α) := consisten
 
 lemma isolated_CanonicalFrame {Ax : AxiomSet α} (h : 𝗩𝗲𝗿 ⊆ Ax) [System.Consistent Axᴺ] : Isolated (CanonicalFrame Ax) := by
   intro x y rxy;
-  have : (CanonicalModel Ax) ⊧ □⊥ := iff_valid_on_canonicalModel_deducible.mpr $ Normal.maxm_ax! (by aesop);
+  have : (CanonicalModel Ax) ⊧ □⊥ := iff_valid_on_canonicalModel_deducible.mpr $ Normal.maxm! (by aesop);
   simp [valid_on_KripkeModel, kripke_satisfies] at this;
   obtain ⟨_, ⟨hx, hy⟩⟩ := @this x y;
   have hny := rxy hx;

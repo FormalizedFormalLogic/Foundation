@@ -230,7 +230,7 @@ lemma geachConfluent_CanonicalFrame (h : 𝗴𝗲(t) ⊆ Ax) : GeachConfluent t 
     have : □^[t.n](Δ.conj') ∈ Ω₃.theory := iff_mem_multibox_conj'.mpr hΔ;
 
     have : □^[t.j](◇^[t.n](Γ.conj')) ∈ Ω₁.theory := iff_mem_imp.mp
-      (membership_iff.mpr $ Context.of! $ Normal.maxm_ax! (by aesop))
+      (membership_iff.mpr $ Context.of! $ Normal.maxm! (by aesop))
       (multiframe_def_multidia.mp r₁₂ hΓconj)
     have : ◇^[t.n]Γ.conj' ∈ Ω₃.theory := multiframe_def_multibox.mp r₁₃ this;
 

@@ -145,7 +145,7 @@ lemma realize_axiomset_of_self_canonicalModel : (CanonicalModel Ax) ⊧* Ax := b
   apply Semantics.realizeSet_iff.mpr;
   intro p hp;
   apply iff_valid_on_canonicalModel_deducible.mpr;
-  exact ⟨Deduction.maxm (by aesop)⟩;
+  exact Deduction.maxm! (by aesop);
 
 lemma realize_theory_of_self_canonicalModel : (CanonicalModel Ax) ⊧* (System.theory (Axᴺ)) := by
   apply Semantics.realizeSet_iff.mpr;

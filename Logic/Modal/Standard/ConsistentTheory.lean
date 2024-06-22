@@ -17,7 +17,7 @@ lemma self_Consistent [h : System.Consistent 𝓓] : (𝓓)-Consistent Ax(𝓓) 
   intro Γ hΓ;
   obtain ⟨q, hq⟩ := h.exists_unprovable;
   by_contra hC;
-  have : 𝓓 ⊢! q := imp_trans''! hC efq! ⨀ (iff_provable_list_conj.mpr $ λ _ h => ⟨Deduction.maxm $ hΓ _ h⟩);
+  have : 𝓓 ⊢! q := imp_trans''! hC efq! ⨀ (iff_provable_list_conj.mpr $ λ _ h => Deduction.maxm! $ hΓ _ h);
   contradiction;
 
 lemma def_not_Consistent : ¬(𝓓)-Consistent T ↔ ∃ Γ : List (Formula α), (∀ p ∈ Γ, p ∈ T) ∧ 𝓓 ⊢! Γ.conj' ⟶ ⊥ := by simp [Consistent];
@@ -269,7 +269,7 @@ lemma subset_axiomset : Ax(𝓓) ⊆ Ω.theory := by
   intro p hp;
   apply membership_iff.mpr;
   apply Context.of!;
-  exact ⟨Deduction.maxm (by aesop)⟩
+  exact Deduction.maxm! (by aesop);
 
 @[simp] lemma not_mem_falsum : ⊥ ∉ Ω.theory := not_mem_falsum_of_Consistent Ω.consistent
 
