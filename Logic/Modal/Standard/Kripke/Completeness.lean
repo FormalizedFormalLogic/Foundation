@@ -13,19 +13,22 @@ open DeductionParameter (Normal)
 
 namespace Kripke
 
-abbrev CanonicalFrame (Ax : AxiomSet α) [Inhabited (Axᴺ)-MCT] : Frame α where
-  World := (Axᴺ)-MCT
-  Rel :=  λ Ω₁ Ω₂ => (□''⁻¹Ω₁.theory : Theory α) ⊆ Ω₂.theory
+abbrev CanonicalFrame (Ax : AxiomSet α) [Inhabited (Axᴺ)-MCT] : Frame (Axᴺ)-MCT where
+  World := Set.univ
+  Rel := λ ⟨⟨Ω₁, _⟩, ⟨Ω₂, _⟩⟩ => □''⁻¹Ω₁.theory ⊆ Ω₂.theory
+
+instance [Inhabited (Axᴺ)-MCT] : Coe (Axᴺ)-MCT (CanonicalFrame Ax).World := ⟨λ Ω => ⟨Ω, (by trivial)⟩⟩
+
 
 namespace CanonicalFrame
 
 variable [Inhabited (Axᴺ)-MCT]
-variable {Ω₁ Ω₂ : (CanonicalFrame Ax).World}
+variable {Ω₁ Ω₂ : (Axᴺ)-MCT}
 
 @[simp]
-lemma frame_def_box: Ω₁ ≺ Ω₂ ↔ ∀ {p}, □p ∈ Ω₁.theory → p ∈ Ω₂.theory := by rfl
+lemma frame_def_box: (CanonicalFrame Ax |>.Rel' Ω₁ Ω₂) ↔ ∀ {p}, □p ∈ Ω₁.theory → p ∈ Ω₂.theory := by simp [Frame.Rel']; aesop;
 
-lemma multiframe_def_multibox : Ω₁ ≺^[n] Ω₂ ↔ ∀ {p}, □^[n]p ∈ Ω₁.theory → p ∈ Ω₂.theory := by
+lemma multiframe_def_multibox : (CanonicalFrame Ax |>.RelItr' n Ω₁ Ω₂) ↔ ∀ {p}, □^[n]p ∈ Ω₁.theory → p ∈ Ω₂.theory := by
   induction n generalizing Ω₁ Ω₂ with
   | zero =>
     simp_all;
@@ -34,9 +37,9 @@ lemma multiframe_def_multibox : Ω₁ ≺^[n] Ω₂ ↔ ∀ {p}, □^[n]p ∈ Ω
     . intro h; apply intro_equality; simpa;
   | succ n ih =>
     constructor;
-    . simp;
-      intro Ω₃ h₁₃ h₃₂ p h;
-      exact ih.mp h₃₂ $ h₁₃ h;
+    . intro h p hp;
+      obtain ⟨⟨Ω₃, _⟩, R₁₃, R₃₂⟩ := h;
+      apply ih.mp R₃₂ $ frame_def_box.mp R₁₃ (by simpa using hp);
     . intro h;
       obtain ⟨Ω, hΩ⟩ := lindenbaum (𝓓 := Axᴺ) (T := (□''⁻¹Ω₁.theory ∪ ◇''^[n]Ω₂.theory)) $ by
         apply Theory.intro_union_Consistent;
@@ -63,7 +66,7 @@ lemma multiframe_def_multibox : Ω₁ ≺^[n] Ω₂ ↔ ∀ {p}, □^[n]p ∈ Ω
         have : (◇'⁻¹^[n]Δ).conj' ∉ Ω₂.theory := iff_mem_neg.mp $ h $ membership_iff.mpr $ (Context.of! this) ⨀ dΓconj;
 
         contradiction;
-      existsi Ω;
+      existsi ⟨Ω, (by trivial)⟩;
       constructor;
       . intro p hp;
         apply hΩ;
@@ -74,30 +77,30 @@ lemma multiframe_def_multibox : Ω₁ ≺^[n] Ω₂ ↔ ∀ {p}, □^[n]p ∈ Ω
         apply hΩ;
         simp_all;
 
-lemma multiframe_def_multibox' : Ω₁ ≺^[n] Ω₂ ↔ ∀ {p}, p ∈ (□''⁻¹^[n]Ω₁.theory) → p ∈ Ω₂.theory := by
+lemma multiframe_def_multibox' : (CanonicalFrame Ax |>.RelItr' n Ω₁ Ω₂) ↔ ∀ {p}, p ∈ (□''⁻¹^[n]Ω₁.theory) → p ∈ Ω₂.theory := by
   constructor;
   . intro h p hp; exact multiframe_def_multibox.mp h hp;
   . intro h; apply multiframe_def_multibox.mpr; assumption;
 
-lemma multiframe_def_multidia : Ω₁ ≺^[n] Ω₂ ↔ ∀ {p}, (p ∈ Ω₂.theory → ◇^[n]p ∈ Ω₁.theory) := Iff.trans multiframe_def_multibox multibox_multidia
+lemma multiframe_def_multidia : (CanonicalFrame Ax |>.RelItr' n Ω₁ Ω₂) ↔ ∀ {p}, (p ∈ Ω₂.theory → ◇^[n]p ∈ Ω₁.theory) := Iff.trans multiframe_def_multibox multibox_multidia
 
 end CanonicalFrame
 
 
-abbrev CanonicalModel (Ax : AxiomSet α) [Inhabited (Axᴺ)-MCT] : Model α where
+abbrev CanonicalModel (Ax : AxiomSet α) [Inhabited (Axᴺ)-MCT] : Model (Axᴺ)-MCT α where
   Frame := CanonicalFrame Ax
-  Valuation Ω a := (atom a) ∈ Ω.theory
+  Valuation Ω a := (atom a) ∈ Ω.1.theory
 
 
 namespace CanonicalModel
 
 variable [Inhabited (Axᴺ)-MCT]
 
-@[reducible]
-instance : Semantics (Formula α) (CanonicalModel Ax).World := Formula.kripke_satisfies.semantics (CanonicalModel Ax)
+-- @[reducible]
+-- instance : Semantics (Formula α) (CanonicalModel Ax).World := Formula.kripke_satisfies.semantics (CanonicalModel Ax)
 
-@[simp] lemma frame_def : (CanonicalModel Ax).Frame.Rel Ω₁ Ω₂ ↔ (□''⁻¹Ω₁.theory : Theory α) ⊆ Ω₂.theory := by rfl
-@[simp] lemma val_def : (CanonicalModel Ax).Valuation Ω a ↔ (atom a) ∈ Ω.theory := by rfl
+-- @[simp] lemma frame_def : (CanonicalModel Ax).Rel' Ω₁ Ω₂ ↔ (□''⁻¹Ω₁.theory : Theory α) ⊆ Ω₂.theory := by rfl
+-- @[simp] lemma val_def : (CanonicalModel Ax).Valuation Ω a ↔ (atom a) ∈ Ω.theory := by rfl
 
 end CanonicalModel
 
@@ -106,7 +109,7 @@ section
 
 variable [Inhabited (Axᴺ)-MCT]
 
-lemma truthlemma : ∀ {Ω : (CanonicalModel Ax).World}, Ω ⊧ p ↔ (p ∈ Ω.theory) := by
+lemma truthlemma : ∀ {Ω : (Axᴺ)-MCT}, (CanonicalModel Ax, Ω) ⊧ p ↔ (p ∈ Ω.theory) := by
   induction p using Formula.rec' with
   | hbox p ih =>
     intro Ω;
@@ -132,9 +135,9 @@ lemma iff_valid_on_canonicalModel_deducible : (CanonicalModel Ax) ⊧ p ↔ ((Ax
       contradiction;
     obtain ⟨Ω, hΩ⟩ := lindenbaum this;
     simp [valid_on_KripkeModel];
-    existsi Ω;
+    existsi Ω, (by trivial);
     exact truthlemma.not.mpr $ iff_mem_neg.mp (show ~p ∈ Ω.theory by simp_all);
-  . intro h Ω;
+  . intro h ⟨Ω, _⟩;
     suffices p ∈ Ω.theory by exact truthlemma.mpr this;
     by_contra hC;
     have := Ω.maximal' hC;
@@ -155,21 +158,21 @@ lemma realize_theory_of_self_canonicalModel : (CanonicalModel Ax) ⊧* (System.t
 
 end
 
-lemma complete_of_mem_canonicalFrame [Inhabited (Axᴺ)-MCT] {𝔽 : FrameClass α} (hFC : CanonicalFrame Ax ∈ 𝔽) : 𝔽 ⊧ p → (Axᴺ) ⊢! p := by
+lemma complete_of_mem_canonicalFrame [Inhabited (Axᴺ)-MCT] {𝔽 : FrameClass' α} (hFC : CanonicalFrame Ax ∈ (𝔽 (Axᴺ)-MCT)) : 𝔽 ⊧ p → (Axᴺ) ⊢! p := by
   simp [valid_on_KripkeFrameClass, valid_on_KripkeFrame];
   contrapose;
   push_neg;
   intro h;
-  use (CanonicalFrame Ax);
+  use (Axᴺ)-MCT, (CanonicalFrame Ax);
   constructor;
   . assumption;
-  . existsi (CanonicalModel Ax).Valuation;
+  . use (CanonicalModel Ax).Valuation;
     exact iff_valid_on_canonicalModel_deducible.not.mpr h;
 
-instance instComplete_of_mem_canonicalFrame [Inhabited (Axᴺ)-MCT] {𝔽 : FrameClass α} (hFC : CanonicalFrame Ax ∈ 𝔽) : Complete (Axᴺ) 𝔽 := ⟨complete_of_mem_canonicalFrame hFC⟩
+instance instComplete_of_mem_canonicalFrame [Inhabited (Axᴺ)-MCT] {𝔽 : FrameClass' α} (hFC : CanonicalFrame Ax ∈ (𝔽 (Axᴺ)-MCT)) : Complete (Axᴺ) 𝔽 := ⟨complete_of_mem_canonicalFrame hFC⟩
 
-instance : Complete (𝐊 : DeductionParameter α) (AllFrameClass α) := by
-  simpa [←Normal.isK] using instComplete_of_mem_canonicalFrame (Ax := 𝗞) (𝔽 := AllFrameClass α) trivial;
+instance : Complete 𝐊 (AllFrameClass' α) := by
+  simpa [←Normal.isK] using instComplete_of_mem_canonicalFrame (Ax := 𝗞) (𝔽 := AllFrameClass' α) trivial;
 
 end Kripke
 
