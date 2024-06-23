@@ -109,7 +109,7 @@ section
 
 variable [Inhabited (Axᴺ)-MCT]
 
-lemma truthlemma : ∀ {Ω : (Axᴺ)-MCT}, (CanonicalModel Ax, Ω) ⊧ p ↔ (p ∈ Ω.theory) := by
+lemma truthlemma : ∀ {Ω : (Axᴺ)-MCT}, (⟨CanonicalModel Ax, Ω⟩ : (M : Model (Axᴺ)-MCT α) × M.World) ⊧ p ↔ (p ∈ Ω.theory) := by
   induction p using Formula.rec' with
   | hbox p ih =>
     intro Ω;
