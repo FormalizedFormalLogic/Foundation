@@ -8,12 +8,12 @@ open System
 open Kripke
 open Formula
 
-abbrev ConnectedFrameClass (α) : FrameClass α := { F | Connected F }
+abbrev ConnectedFrameClass : FrameClass := { ⟨_, F⟩ | Connected F }
 
 variable {α} [Inhabited α] [DecidableEq α] [atleast : Atleast 2 α]
-variable {F : Kripke.Frame α}
+variable {F : Kripke.Frame δ}
 
-private lemma connected_of_dot3 : F ⊧* .𝟯 → Connected F.Rel := by
+private lemma connected_of_dot3 : F[α] ⊧* .𝟯 → Connected F := by
   contrapose;
   intro hCon; simp [Connected] at hCon;
   obtain ⟨x, y, rxy, z, ryz, nryz, nrzy⟩ := hCon;
@@ -36,10 +36,10 @@ private lemma connected_of_dot3 : F ⊧* .𝟯 → Connected F.Rel := by
     . assumption;
     . simp_all [kripke_satisfies, (fInj 0), (fInj 1)];
 
-private lemma dot3_of_connected : Connected F.Rel → F ⊧* .𝟯 := by
+private lemma dot3_of_connected : Connected F → F[α] ⊧* .𝟯 := by
   intro hCon;
   simp [valid_on_KripkeFrame, valid_on_KripkeModel, Axioms.Dot3];
-  intro _ p q e V x; subst e;
+  intro δ p q e V x; subst e;
   simp [kripke_satisfies];
   by_contra hC; push_neg at hC;
   obtain ⟨⟨y, rxy, hp, hnq⟩, ⟨z, rxz, hq, hnp⟩⟩ := hC;
@@ -47,38 +47,39 @@ private lemma dot3_of_connected : Connected F.Rel → F ⊧* .𝟯 := by
   | inl ryz => exact hnp $ hp ryz;
   | inr rzy => exact hnq $ hq rzy;
 
-lemma AxDot3_Definability : .𝟯.DefinesKripkeFrameClass (ConnectedFrameClass α) := by
-  intro F;
+lemma AxDot3_Definability : .𝟯.DefinesKripkeFrameClass (α := α) (ConnectedFrameClass) := by
+  intro _ F;
   constructor;
   . exact connected_of_dot3;
   . exact dot3_of_connected;
 
-abbrev ReflexiveTransitiveConnectedFrameClass (α) : FrameClass α := { F | Reflexive F ∧ Transitive F ∧ Connected F }
+abbrev ReflexiveTransitiveConnectedFrameClass : FrameClass := { ⟨_, F⟩ | Reflexive F ∧ Transitive F ∧ Connected F }
 
-lemma ReflexiveTransitiveConnectedFrameClass.nonempty : (ReflexiveTransitiveConnectedFrameClass α).Nonempty := by
-  use (TerminalFrame α);
-  simp [Reflexive, Transitive, Connected];
+lemma ReflexiveTransitiveConnectedFrameClass.nonempty : ReflexiveTransitiveConnectedFrameClass.Nonempty.{0} := by
+  use ⟨Fin 1, TerminalFrame⟩;
+  simp [Reflexive, Transitive, Connected, Frame.Rel'];
 
 
-private lemma S4Dot3_defines' : (𝗧 ∪ 𝟰 ∪ .𝟯).DefinesKripkeFrameClass (ReflexiveTransitiveConnectedFrameClass α) := by
-  rw [(show ReflexiveTransitiveConnectedFrameClass α = { (F : Frame α) | (Reflexive F ∧ Transitive F) ∧ Connected F } by aesop)];
+
+private lemma S4Dot3_defines' : (𝗧 ∪ 𝟰 ∪ .𝟯).DefinesKripkeFrameClass (α := α) ReflexiveTransitiveConnectedFrameClass := by
+  rw [(show ReflexiveTransitiveConnectedFrameClass = { ⟨_, F⟩ | (Reflexive F ∧ Transitive F) ∧ Connected F } by aesop)];
   apply AxiomSet.DefinesKripkeFrameClass.union;
   . exact S4_defines.toAx';
   . exact AxDot3_Definability;
 
-lemma S4Dot3_defines : 𝐒𝟒.𝟑.DefinesKripkeFrameClass (ReflexiveTransitiveConnectedFrameClass α) :=
+lemma S4Dot3_defines : 𝐒𝟒.𝟑.DefinesKripkeFrameClass (α := α) ReflexiveTransitiveConnectedFrameClass :=
   DeductionParameter.DefinesKripkeFrameClass.ofAx S4Dot3_defines'
 
 instance : System.Consistent (𝐒𝟒.𝟑 : DeductionParameter α) := consistent_of_defines S4Dot3_defines' ReflexiveTransitiveConnectedFrameClass.nonempty
 
 
 open MaximalConsistentTheory in
-lemma connected_CanonicalFrame {Ax : AxiomSet α} (hAx : .𝟯 ⊆ Ax) [System.Consistent Axᴺ] : Connected (CanonicalFrame Ax).Rel := by
+lemma connected_CanonicalFrame {Ax : AxiomSet α} (hAx : .𝟯 ⊆ Ax) [System.Consistent Axᴺ] : Connected (CanonicalFrame Ax) := by
   dsimp only [Connected];
   intro X Y Z ⟨hXY, hXZ⟩;
   by_contra hC; push_neg at hC;
   have ⟨nhYZ, nhZY⟩ := hC; clear hC;
-  simp only [Set.not_subset] at nhYZ nhZY;
+  simp only [Frame.Rel', Set.not_subset] at nhYZ nhZY;
   obtain ⟨p, hpY, hpZ⟩ := nhYZ; replace hpY : □p ∈ Y.theory := hpY;
   obtain ⟨q, hqZ, hqY⟩ := nhZY; replace hqZ : □q ∈ Z.theory := hqZ;
 
@@ -99,14 +100,14 @@ lemma connected_CanonicalFrame {Ax : AxiomSet α} (hAx : .𝟯 ⊆ Ax) [System.C
   have : □(□p ⟶ q) ⋎ □(□q ⟶ p) ∈ X.theory := by apply subset_axiomset _; aesop;
   contradiction;
 
-instance : Complete (𝐒𝟒.𝟑 : DeductionParameter α) (ReflexiveTransitiveConnectedFrameClass α) := instComplete_of_mem_canonicalFrame $ by
+instance : Complete (𝐒𝟒.𝟑 : DeductionParameter α) (ReflexiveTransitiveConnectedFrameClass[α]) := instComplete_of_mem_canonicalFrame $ by
   refine ⟨?reflexive, ?transitive, ?connective⟩;
-  . rw [←GeachConfluent.reflexive_def];
+  . simp [←GeachConfluent.reflexive_def];
     apply geachConfluent_CanonicalFrame;
-    rw [AxiomSet.Geach.T_def]; simp;
+    simp [AxiomSet.Geach.T_def];
   . rw [←GeachConfluent.transitive_def];
     apply geachConfluent_CanonicalFrame;
-    rw [AxiomSet.Geach.Four_def]; simp;
+    simp [AxiomSet.Geach.Four_def];
   . apply connected_CanonicalFrame; simp;
 
 end Kripke

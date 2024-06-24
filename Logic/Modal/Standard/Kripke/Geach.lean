@@ -78,18 +78,35 @@ variable {α : Type u} [Inhabited α] [DecidableEq α]
 
 section
 
+lemma TerminalFrame.geach_confluent : GeachConfluent t (TerminalFrame.Rel') := by
+  simp [GeachConfluent];
+  intro x y z Rxy Rxz;
+  replace Rxy := TerminalFrame.iff_relItr'.mp Rxy;
+  replace Rxz := TerminalFrame.iff_relItr'.mp Rxz;
+  use x; subst_vars;
+  constructor <;> { apply TerminalFrame.iff_relItr'.mpr; rfl };
+
+lemma TerminalFrame.multi_geach_confluent : MultiGeachConfluent ts (TerminalFrame.Rel') := by
+  induction ts with
+  | nil => simp [MultiGeachConfluent];
+  | cons t ts ih =>
+    simp [MultiGeachConfluent];
+    constructor;
+    . exact TerminalFrame.geach_confluent;
+    . exact ih;
+
 abbrev GeachConfluentFrameClass (t : Geach.Taple) : FrameClass := { ⟨_, F⟩ | (GeachConfluent t) F }
 
 lemma GeachConfluentFrameClass.nonempty : (GeachConfluentFrameClass.{0} t).Nonempty := by
   use ⟨Fin 1, TerminalFrame⟩;
-  exact GeachConfluent.satisfies_eq;
+  exact TerminalFrame.geach_confluent;
 
 
 abbrev MultiGeachConfluentFrameClass (ts : List Geach.Taple) : FrameClass := { ⟨_, F⟩ | (MultiGeachConfluent ts) F }
 
 lemma MultiGeachConfluentFrameClass.nonempty : (MultiGeachConfluentFrameClass.{0} ts).Nonempty := by
   use ⟨Fin 1, TerminalFrame⟩;
-  exact MultiGeachConfluent.satisfies_eq;
+  exact TerminalFrame.multi_geach_confluent;
 
 
 abbrev ReflexiveFrameClass : FrameClass := { ⟨_, F⟩ | Reflexive F }
@@ -119,18 +136,20 @@ lemma axiomGeach_defines : 𝗴𝗲(t).DefinesKripkeFrameClass (α := α) (Geach
   intro δ F;
   constructor;
   . rintro h x y z ⟨hi, hj⟩;
+    let M : Model δ α := { Frame := F, Valuation := λ v _ => y ≺^[t.m] v };
     simp at h;
-    let M : Model δ α := { Frame := F, Valuation := λ v _ => y ≺^[t.m] v }
-    have him_x : kripke_satisfies M x (◇^[t.i](□^[t.m](atom default))) := by
+    let x : M.World := x;
+    have him_x : x ⊧ (◇^[t.i](□^[t.m](atom default))) := by
       apply kripke_satisfies.multidia_def.mpr;
-      existsi y;
+      use y;
       constructor;
-      . simpa;
+      . exact hi;
       . apply kripke_satisfies.multibox_def.mpr; aesop;
-    have hjn_x : kripke_satisfies M x (□^[t.j](◇^[t.n](atom default))) := h (Formula.atom default) M.Valuation x him_x;
-    have hn_z : kripke_satisfies M z (◇^[t.n](atom default)) := kripke_satisfies.multibox_def.mp hjn_x hj;
+    have hjn_x : x ⊧ □^[t.j](◇^[t.n](atom default)) := h (Formula.atom default) M.Valuation x him_x;
+    let z : M.World := z;
+    have hn_z : z ⊧ ◇^[t.n](atom default) := kripke_satisfies.multibox_def.mp hjn_x hj;
     obtain ⟨u, hzu, hyu⟩ := kripke_satisfies.multidia_def.mp hn_z;
-    existsi u;
+    use u;
     exact ⟨hyu, hzu⟩;
   . simp [AxiomSet.Geach, Axioms.Geach, kripke_satisfies];
     intro h p V x him;
@@ -222,7 +241,7 @@ open DeductionParameter (Normal)
 variable {Ax : AxiomSet α} [System.Consistent Axᴺ]
 
 lemma geachConfluent_CanonicalFrame (h : 𝗴𝗲(t) ⊆ Ax) : GeachConfluent t (CanonicalFrame Ax):= by
-  rintro ⟨Ω₁, _⟩ ⟨Ω₂, _⟩ ⟨Ω₃, _⟩ h;
+  rintro Ω₁ Ω₂ Ω₃ h;
   have ⟨r₁₂, r₁₃⟩ := h; clear h;
   have ⟨Ω, hΩ⟩ := lindenbaum (𝓓 := Axᴺ) (T := ((□''⁻¹^[t.m]Ω₂.theory) ∪ (□''⁻¹^[t.n]Ω₃.theory))) $ by
     apply intro_union_Consistent;
@@ -271,15 +290,13 @@ instance {Λ : DeductionParameter α} [g : Λ.IsGeach] : Complete Λ (MultiGeach
   convert instMultiGeachComplete (α := α);
   exact g.char;
 
-set_option pp.universes true
-
 private def instGeachLogicCompleteAux {Λ : DeductionParameter α} [geach : Λ.IsGeach]
   {𝔽 : FrameClass.Dep α} (h𝔽 : 𝔽 = MultiGeachConfluentFrameClass geach.taples := by simp_all [MultiGeachConfluentFrameClass, MultiGeachConfluent])
   : Complete Λ 𝔽 := by
     convert instMultiGeachComplete (α := α);
     exact geach.char;
 
-instance complete_KT : Complete 𝐊𝐓 (ReflexiveFrameClass[α]) := instGeachLogicCompleteAux
+instance : Complete 𝐊𝐓 (ReflexiveFrameClass[α]) := instGeachLogicCompleteAux
 
 instance : Complete 𝐒𝟒 (PreorderFrameClass[α]) := instGeachLogicCompleteAux
 

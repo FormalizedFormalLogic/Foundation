@@ -14,13 +14,11 @@ variable {α} [Inhabited α] [DecidableEq α]
 
 abbrev IsolatedFrameClass : FrameClass := { ⟨_, F⟩ | Isolated F }
 
-set_option pp.universes true in
 lemma IsolatedFrameClass.nonempty : IsolatedFrameClass.Nonempty.{0} := by
   use ⟨(Fin 1), PointFrame⟩
-  simp [Isolated, Frame.Rel'];
+  simp [Isolated];
 
-lemma axiomVer_defines : 𝗩𝗲𝗿.DefinesKripkeFrameClass (α := α) IsolatedFrameClass  := by
-  -- simp [valid_on_KripkeFrame, valid_on_KripkeModel, Isolated];
+lemma axiomVer_defines : 𝗩𝗲𝗿.DefinesKripkeFrameClass (α := α) IsolatedFrameClass := by
   simp [AxiomSet.DefinesKripkeFrameClass, valid_on_KripkeFrame];
   intro _ F;
   constructor;
