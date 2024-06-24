@@ -257,6 +257,7 @@ namespace DeductionParameter
 
 open DeductionParameter
 
+abbrev theory (𝓓 : DeductionParameter α) := System.theory 𝓓
 
 protected abbrev K : DeductionParameter α where
   axiomSet := 𝗞
