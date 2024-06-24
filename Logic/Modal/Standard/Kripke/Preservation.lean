@@ -15,8 +15,8 @@ section Generation
 
 class GeneratedSubframe (F F' : Kripke.Frame α) where
   subset : F'.World ⊆ F.World
-  rel : ∀ x y : F'.World, F'.Rel' x y ↔ F.Rel' ⟨x, (by aesop)⟩ ⟨y, (by aesop)⟩ -- MEMO: i.e. F.Rel' = F.Rel' ∪ (F.World × F.World)
-  closed : ∀ x : F'.World, ∀ y : F.World, F.Rel' ⟨x.1, (by aesop)⟩ y → y.1 ∈ F'.World
+  rel : ∀ {x y : F'.World}, x ≺ y ↔ F.Rel' ⟨x, (by aesop)⟩ ⟨y, (by aesop)⟩ -- MEMO: i.e. F.Rel' = F.Rel' ∪ (F.World × F.World)
+  closed : ∀ {x : F'.World}, ∀ {y : F.World}, ⟨x.1, (by aesop)⟩ ≺ y → y.1 ∈ F'.World
 
 
 end Generation
@@ -29,16 +29,16 @@ protected class Frame.reduction {F₁ F₂ : Kripke.Frame α} (f : F₁.World �
   back : ∀ {w : F₁.World}, ∀ {v : F₂.World}, (f w) ≺ v → ∃ u, w ≺ u ∧ f u = v
 
 
-protected class Model.reduction {M₁ M₂ : Kripke.Model α β} (f : M₁.World → M₂.World)  extends Frame.reduction f where
+protected class Model.reduction {M₁ M₂ : Kripke.Model δ α} (f : M₁.World → M₂.World)  extends Frame.reduction f where
   atomic : ∀ {w : M₁.World}, ∀ {a}, (M₁.Valuation w a) ↔ (M₂.Valuation (f w) a)
 
 
 open Formula
 
-variable {F₁ F₂ : Kripke.Frame' α β} {M₁ M₂ : Kripke.Model α β} {p : Formula β}
+variable {F₁ F₂ : Kripke.Frame' δ α} {M₁ M₂ : Kripke.Model δ α} {p : Formula α}
 
 lemma iff_formula_satisfies_morphism (f : M₁.World → M₂.World) [Model.reduction f] {w : M₁.World}
-  : (⟨M₁, w⟩ : (M : Model α β) × M.World) ⊧ p ↔ (⟨M₂, (f w)⟩ : (M : Model α β) × M.World) ⊧ p := by
+  : (⟨M₁, w⟩ : (M : Model δ α) × M.World) ⊧ p ↔ (⟨M₂, (f w)⟩ : (M : Model δ α) × M.World) ⊧ p := by
   induction p using Formula.rec' generalizing w with
   | hatom p =>
     constructor;
@@ -65,8 +65,8 @@ lemma iff_formula_valid_on_frame_surjective_morphism (f : F₁.World → F₂.Wo
   let V₁ := λ w a => V₂ (f w) a;
   use V₁, w₁.1, w₁.2;
 
-  let M₁ : Model α β := { Frame := F₁, Valuation := V₁ };
-  let M₂ : Model α β := { Frame := F₂, Valuation := V₂ };
+  let M₁ : Model δ α := { Frame := F₁, Valuation := V₁ };
+  let M₂ : Model δ α := { Frame := F₂, Valuation := V₂ };
   have : Model.reduction (M₁ := M₁) (M₂ := M₂) f := { atomic := by simp_all };
   exact iff_formula_satisfies_morphism (M₁ := M₁) (M₂ := M₂) f |>.not.mpr h;
 
@@ -75,18 +75,18 @@ lemma iff_theory_valid_on_frame_surjective_morphism (f : F₁.World → F₂.Wor
   intro h p hp;
   exact iff_formula_valid_on_frame_surjective_morphism f f_surjective (h hp);
 
-abbrev IrreflexiveFrameClass : FrameClass := λ _ F => Irreflexive F.Rel'
+abbrev IrreflexiveFrameClass : FrameClass := λ ⟨_, F⟩ => Irreflexive F
 
-theorem undefinable_irreflexive : ¬∃ (Ax : AxiomSet β), Ax.DefinesKripkeFrameClass IrreflexiveFrameClass := by
+theorem undefinable_irreflexive : ¬∃ (Ax : AxiomSet α), Ax.DefinesKripkeFrameClass IrreflexiveFrameClass := by
   by_contra hC;
   obtain ⟨Ax, h⟩ := hC;
 
   -- MEMO: `Rel := { (x, y) | x ≠ y }`で行けてほしいのだがなぜか通らない．
-  let F₁ : Frame' (Fin 2) β := { World := {0, 1}, Rel := {(⟨0, by simp⟩, ⟨1, by simp⟩), (⟨1, by simp⟩, ⟨0, by simp⟩)} };
-  have hIF₁ : Irreflexive F₁.Rel' := by simp [Irreflexive, Frame.Rel'];
+  let F₁ : Frame' (Fin 2) α := { World := {0, 1}, Rel := {(⟨0, by simp⟩, ⟨1, by simp⟩), (⟨1, by simp⟩, ⟨0, by simp⟩)} };
+  have hIF₁ : Irreflexive F₁ := by simp [Irreflexive, Frame.Rel'];
 
-  let F₂ : Frame' (Fin 2) β := { World := {0}, Rel := { (x, y) | x = y } };
-  have hIF₂ : ¬Irreflexive F₂.Rel' := by simp [Irreflexive]; use ⟨0, (by simp)⟩; simp [Frame.Rel'];
+  let F₂ : Frame' (Fin 2) α := { World := {0}, Rel := { (x, y) | x = y } };
+  have hIF₂ : ¬Irreflexive F₂ := by simp [Irreflexive]; use ⟨0, (by simp)⟩; simp [Frame.Rel'];
 
   let f : F₁.World → F₂.World := λ _ => ⟨0, (by simp)⟩;
   have hSur : Function.Surjective f := by simp [Function.Surjective]; aesop;
@@ -98,7 +98,7 @@ theorem undefinable_irreflexive : ¬∃ (Ax : AxiomSet β), Ax.DefinesKripkeFram
       | ⟨0, _⟩ => use ⟨1, (by simp)⟩; simp_all [Frame.Rel'];
       | ⟨1, _⟩ => use ⟨0, (by simp)⟩; simp_all [Frame.Rel'];
   };
-  have : Irreflexive F₂.Rel' := h.mp $ iff_theory_valid_on_frame_surjective_morphism f hSur $ h.mpr hIF₁;
+  have : Irreflexive F₂ := h.mp $ iff_theory_valid_on_frame_surjective_morphism f hSur $ h.mpr hIF₁;
   contradiction;
 
 end Reduction

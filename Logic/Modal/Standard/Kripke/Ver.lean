@@ -12,16 +12,17 @@ open DeductionParameter (Normal)
 
 variable {α} [Inhabited α] [DecidableEq α]
 
-abbrev IsolatedFrameClass (α) : FrameClass α := { F | Isolated F }
+abbrev IsolatedFrameClass : FrameClass := { ⟨_, F⟩ | Isolated F }
 
-lemma IsolatedFrameClass.nonempty : (IsolatedFrameClass α).Nonempty := by
-  use { World := PUnit, Rel := (· ≠ ·) };
-  simp [Isolated];
+set_option pp.universes true in
+lemma IsolatedFrameClass.nonempty : IsolatedFrameClass.Nonempty.{0} := by
+  use ⟨(Fin 1), PointFrame⟩
+  simp [Isolated, Frame.Rel'];
 
-lemma axiomVer_defines : 𝗩𝗲𝗿.DefinesKripkeFrameClass (IsolatedFrameClass α)  := by
+lemma axiomVer_defines : 𝗩𝗲𝗿.DefinesKripkeFrameClass (α := α) IsolatedFrameClass  := by
   -- simp [valid_on_KripkeFrame, valid_on_KripkeModel, Isolated];
   simp [AxiomSet.DefinesKripkeFrameClass, valid_on_KripkeFrame];
-  intro F;
+  intro _ F;
   constructor;
   . intro h x y hxy;
     exact h ⊥ (λ _ _ => True) x hxy;
@@ -29,19 +30,16 @@ lemma axiomVer_defines : 𝗩𝗲𝗿.DefinesKripkeFrameClass (IsolatedFrameClas
     have := hIrrefl hxy;
     contradiction;
 
-
+instance : Sound 𝐕𝐞𝐫 IsolatedFrameClass[α] := sound_of_defines axiomVer_defines
 
 instance : System.Consistent (𝐕𝐞𝐫 : DeductionParameter α) := consistent_of_defines axiomVer_defines IsolatedFrameClass.nonempty
 
 lemma isolated_CanonicalFrame {Ax : AxiomSet α} (h : 𝗩𝗲𝗿 ⊆ Ax) [System.Consistent Axᴺ] : Isolated (CanonicalFrame Ax) := by
   intro x y rxy;
   have : (CanonicalModel Ax) ⊧ □⊥ := iff_valid_on_canonicalModel_deducible.mpr $ Normal.maxm! (by aesop);
-  simp [valid_on_KripkeModel, kripke_satisfies] at this;
-  obtain ⟨_, ⟨hx, hy⟩⟩ := @this x y;
-  have hny := rxy hx;
-  contradiction;
+  exact this x rxy;
 
-instance : Complete (𝐕𝐞𝐫 : DeductionParameter α) (IsolatedFrameClass α) := instComplete_of_mem_canonicalFrame $ isolated_CanonicalFrame (by rfl)
+instance : Complete 𝐕𝐞𝐫 IsolatedFrameClass[α] := instComplete_of_mem_canonicalFrame $ isolated_CanonicalFrame (by rfl)
 
 end Kripke
 

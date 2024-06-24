@@ -3,14 +3,14 @@ import Logic.Modal.Standard.Deduction
 
 namespace LO.Modal.Standard.Kripke
 
-variable {Ax : AxiomSet β} {𝔽 : FrameClass' β}
+variable {Ax : AxiomSet α} {𝔽 : FrameClass}
 
 open Deduction
 open Formula
 
 open DeductionParameter (Normal)
 
-lemma sound (defines : Ax.DefinesKripkeFrameClass 𝔽) (d : Axᴺ ⊢! p) : 𝔽 ⊧ p := by
+lemma sound (defines : Ax.DefinesKripkeFrameClass 𝔽) (d : Axᴺ ⊢! p) : 𝔽[α] ⊧ p := by
   induction d using Deduction.inducition_with_necOnly! with
   | hMaxm h =>
     simp only [Set.mem_setOf_eq] at h;
@@ -28,15 +28,15 @@ lemma sound (defines : Ax.DefinesKripkeFrameClass 𝔽) (d : Axᴺ ⊢! p) : �
     | inr hq => exact hqr hq;
   | _ => simp_all [valid_on_KripkeFrameClass, valid_on_KripkeFrame, valid_on_KripkeModel, kripke_satisfies];
 
-lemma sound_of_defines (defines : Ax.DefinesKripkeFrameClass 𝔽) : Sound Axᴺ 𝔽 := ⟨sound defines⟩
+lemma sound_of_defines (defines : Ax.DefinesKripkeFrameClass 𝔽) : Sound Axᴺ 𝔽[α] := ⟨sound defines⟩
 
-instance : Sound 𝐊 (AllFrameClass' β) := by simpa [←Normal.isK] using (sound_of_defines (Ax := 𝗞) (𝔽 := AllFrameClass) axiomK_defines);
+instance K_sound : Sound 𝐊 AllFrameClass[α] := by simpa [←Normal.isK] using sound_of_defines axiomK_defines;
 
 
 lemma unprovable_bot_of_nonempty_frameClass (defines : Ax.DefinesKripkeFrameClass 𝔽) (nonempty : 𝔽.Nonempty) : Axᴺ ⊬! ⊥ := by
   by_contra hC;
-  obtain ⟨_, F, hF⟩ := nonempty;
-  simpa using sound defines hC F hF;
+  obtain ⟨⟨α, F⟩, hF⟩ := nonempty;
+  simpa using sound defines hC hF;
 
 lemma consistent_of_defines (defines : Ax.DefinesKripkeFrameClass 𝔽) (nonempty : 𝔽.Nonempty) : System.Consistent Axᴺ := by
   apply System.Consistent.of_unprovable;

@@ -29,35 +29,40 @@ end RelItr
 namespace Kripke
 
 
-structure Frame (α) where
-  World : Set α
+structure Frame (δ) where
+  World : Set δ
   World_nonempty : World.Nonempty := by aesop
   Rel : Set (World × World)
 
-structure FiniteFrame (α) extends Frame α where
+structure FiniteFrame (δ) extends Frame δ where
   World_finite : World.Finite := by simp;
 
-instance (F : Frame α) : F.World.Nonempty := F.World_nonempty
+instance (F : Frame δ) : F.World.Nonempty := F.World_nonempty
 
 /-
-instance : CoeSort (Frame α) (Type*) := ⟨Frame.World⟩
+instance : CoeSort (Frame δ) (Type*) := ⟨Frame.World⟩
 
-instance : CoeFun (Frame α) (λ F => F.World → F.World → Prop) := ⟨Frame.Rel⟩
+instance : CoeFun (Frame δ) (λ F => F.World → F.World → Prop) := ⟨Frame.Rel⟩
 -/
 
-instance : Coe (FiniteFrame α) (Frame α) := ⟨λ F ↦ F.toFrame⟩
+instance : Coe (FiniteFrame δ) (Frame δ) := ⟨λ F ↦ F.toFrame⟩
 
-abbrev Frame.Rel' {F : Frame α} (x y : F.World) := (x, y) ∈ F.Rel
+abbrev Frame.Rel' {F : Frame δ} (x y : F.World) := (x, y) ∈ F.Rel
 scoped infix:45 " ≺ " => Frame.Rel'
 
-protected abbrev Frame.RelItr'  {F : Frame α} (n : ℕ) (x y : F.World) : Prop := RelItr (· ≺ ·) n x y
+protected abbrev Frame.RelItr' {F : Frame δ} (n : ℕ) (x y : F.World) : Prop := RelItr (· ≺ ·) n x y
 scoped notation x:45 " ≺^[" n "] " y:46 => Frame.RelItr' n x y
 
+instance : CoeFun (Frame δ) (λ F => F.World → F.World → Prop) where
+  coe F x y := F.Rel' x y
 
-protected def Frame.finite (F : Frame α) := Finite F.World
+protected def Frame.finite (F : Frame δ) := Finite F.World
 
 /-- dependent-version frame -/
-abbrev Frame' (α) (β : Type*) := Frame α
+abbrev Frame.Dep (δ) (α : Type*) := Frame δ
+
+abbrev Frame.alt (F : Frame δ) (α : Type*) : Frame.Dep δ α := F
+notation:max F:max "[" α "]" => Frame.alt F α
 
 
 /-- Frame with single world and identiy relation -/
@@ -79,16 +84,20 @@ abbrev PointFrame : FiniteFrame (Fin 1) where
   Rel := ∅
 
 
-abbrev FrameClass := ∀ (α : Type*), Set (Frame α)
+abbrev FrameClass := Set ((δ : Type*) × Frame δ)
 
 /-- dependent-version frame class -/
-abbrev FrameClass' (β : Type*) := FrameClass
+abbrev FrameClass.Dep (α : Type*) := FrameClass
 
+abbrev FrameClass.alt (𝔽 : FrameClass) (α : Type*) : FrameClass.Dep α := 𝔽
+notation:max 𝔽:max "[" α "]" => FrameClass.alt 𝔽 α
+
+/-
 namespace FrameClass
 
 variable  {𝔽 𝔽₁ 𝔽₂ : FrameClass}
 
-abbrev Nonempty (𝔽 : FrameClass) := ∃ (α : Type), (𝔽 α).Nonempty
+abbrev Nonempty (𝔽 : FrameClass) := ∃ (α : Type), 𝔽.Nonempty
 
 abbrev UNonempty (𝔽 : FrameClass) := ∃ (α : Type*), (𝔽 α).Nonempty
 
@@ -105,36 +114,37 @@ instance : HasSubset FrameClass := ⟨FrameClass.subset⟩
 lemma subset_self : 𝔽 ⊆ 𝔽 := by intro; rfl;
 
 end FrameClass
+-/
 
 -- abbrev FrameClass.heq (𝔽₁ 𝔽₂ : FrameClass) := ∀ α, 𝔽₁ α = 𝔽₂ α
 
--- def FrameClass.mem (F : Frame α) (𝔽 : FrameClass) : Prop := F ∈ 𝔽 α
+-- def FrameClass.mem (F : Frame δ) (𝔽 : FrameClass) : Prop := F ∈ 𝔽 α
 
-abbrev FiniteFrameClass (α) := Set (FiniteFrame α)
+abbrev FiniteFrameClass (δ) := Set (FiniteFrame δ)
 
 /-
 def FrameClass.toFinite (𝔽 : FrameClass) : FrameClass := ∀ α, { F | F ∈ 𝔽 α }
 postfix:max "ᶠ" => FrameClass.toFinite
 -/
 
-abbrev Valuation (F : Frame α) (β : Type*) := (F.World) → β → Prop
+abbrev Valuation (F : Frame δ) (α : Type*) := (F.World) → α → Prop
 
-structure Model (α β) where
-  Frame : Frame α
-  Valuation : Valuation Frame β
+structure Model (δ α) where
+  Frame : Frame δ
+  Valuation : Valuation Frame α
 
-abbrev Model.World (M : Model α β) := M.Frame.World
+abbrev Model.World (M : Model δ α) := M.Frame.World
 -- instance : CoeSort (Model α) (Type _) where coe := Model.World
 
 
 end Kripke
 
 
-variable {α β : Type*}
+variable {δ α : Type*}
 
 open Standard.Kripke
 
-def Formula.kripke_satisfies (M : Kripke.Model α β) (x : M.World) : Formula β → Prop
+def Formula.kripke_satisfies (M : Kripke.Model δ α) (x : M.World) : Formula α → Prop
   | atom a  => M.Valuation x a
   | verum   => True
   | falsum  => False
@@ -145,20 +155,20 @@ def Formula.kripke_satisfies (M : Kripke.Model α β) (x : M.World) : Formula β
 
 namespace Formula.kripke_satisfies
 
-protected instance semantics : Semantics (Formula β) ((M : Model α β) × M.World) := ⟨fun ⟨M, x⟩ ↦ Formula.kripke_satisfies M x⟩
+protected instance semantics : Semantics (Formula α) ((M : Model δ α) × M.World) := ⟨fun ⟨M, x⟩ ↦ Formula.kripke_satisfies M x⟩
 
-variable {M : Model α β} {x : ↑M.World} {p q : Formula β}
+variable {M : Model δ α} {x : ↑M.World} {p q : Formula α}
 
 scoped notation:max "(" M ", " x ")" " ⊧ " p:50 => Formula.kripke_satisfies M x p
 
-@[simp] protected lemma iff_models : (⟨M, x⟩ : (M : Model α β) × ↑M.World) ⊧ p ↔ kripke_satisfies M x p := iff_of_eq rfl
+@[simp] protected lemma iff_models : (⟨M, x⟩ : (M : Model δ α) × ↑M.World) ⊧ p ↔ kripke_satisfies M x p := iff_of_eq rfl
 
 lemma and_def : (M, x) ⊧ p ⋏ q ↔ (M, x) ⊧ p ∧ (M, x) ⊧ q := by
   constructor;
   . intro ⟨hp, hq⟩; exact ⟨hp, hq⟩;
   . intro h; exact ⟨h.1, h.2⟩;
 
-protected instance tarski : Semantics.Tarski ((M : Model α β) × M.World) where
+protected instance tarski : Semantics.Tarski ((M : Model δ α) × M.World) where
   realize_top := by intro; trivial;
   realize_bot := by aesop;
   realize_not := by aesop;
@@ -211,15 +221,15 @@ lemma multidia_def : (M, x) ⊧ ◇^[n]p ↔ ∃ y, x ≺^[n] y ∧ (M, y) ⊧ p
 end Formula.kripke_satisfies
 
 
-def Formula.valid_on_KripkeModel (M : Model α β) (p : Formula β) := ∀ x, (⟨M, x⟩ : (M : Model α β) × ↑M.World) ⊧ p
+def Formula.valid_on_KripkeModel (M : Model δ α) (p : Formula α) := ∀ x, (⟨M, x⟩ : (M : Model δ α) × ↑M.World) ⊧ p
 
 namespace Formula.valid_on_KripkeModel
 
-protected instance : Semantics (Formula β) (Model α β) := ⟨fun M ↦ Formula.valid_on_KripkeModel M⟩
+protected instance : Semantics (Formula α) (Model δ α) := ⟨fun M ↦ Formula.valid_on_KripkeModel M⟩
 
-@[simp] protected lemma iff_models {M : Model α β} : M ⊧ f ↔ valid_on_KripkeModel M f := iff_of_eq rfl
+@[simp] protected lemma iff_models {M : Model δ α} : M ⊧ f ↔ valid_on_KripkeModel M f := iff_of_eq rfl
 
-instance : Semantics.Bot (Model α β) where
+instance : Semantics.Bot (Model δ α) where
   realize_bot M := by
     obtain ⟨x, hx⟩ := M.Frame.World_nonempty;
     simp [valid_on_KripkeModel, kripke_satisfies];
@@ -229,18 +239,18 @@ instance : Semantics.Bot (Model α β) where
 end Formula.valid_on_KripkeModel
 
 
-def Formula.valid_on_KripkeFrame (F : Frame α) (p : Formula β) := ∀ V : Valuation F β, (⟨F, V⟩ : Model α β) ⊧ p
+def Formula.valid_on_KripkeFrame (F : Frame δ) (p : Formula α) := ∀ V : Valuation F α, (⟨F, V⟩ : Model δ α) ⊧ p
 
 namespace Formula.valid_on_KripkeFrame
 
-protected instance semantics : Semantics (Formula β) (Frame' α β) := ⟨fun F ↦ Formula.valid_on_KripkeFrame F⟩
+protected instance semantics : Semantics (Formula α) (Frame.Dep δ α) := ⟨fun F ↦ Formula.valid_on_KripkeFrame F⟩
 
-variable {F : Frame' α β}
+variable {F : Frame.Dep δ α}
 
 @[simp] protected lemma models_iff : F ⊧ p ↔ valid_on_KripkeFrame F p := iff_of_eq rfl
 
 
-instance : Semantics.Bot (Frame' α β) where
+instance : Semantics.Bot (Frame.Dep δ α) where
   realize_bot _ := by simp [valid_on_KripkeFrame];
 
 
@@ -261,15 +271,15 @@ protected lemma mdp (hpq : F ⊧ p ⟶ q) (hp : F ⊧ p) : F ⊧ q := by
 end Formula.valid_on_KripkeFrame
 
 
-@[simp] def Formula.valid_on_KripkeFrameClass (𝔽 : FrameClass) (p : Formula β) := ∀ {α}, ∀ (F : Frame' α β), F ∈ (𝔽 α) → F ⊧ p
+@[simp] def Formula.valid_on_KripkeFrameClass (𝔽 : FrameClass) (p : Formula α) := ∀ {δ}, ∀ {F : Frame δ}, ⟨δ, F⟩ ∈ 𝔽 → F[α] ⊧ p
 
 namespace Formula.valid_on_KripkeFrameClass
 
-protected instance semantics : Semantics (Formula β) (FrameClass' β) := ⟨fun 𝔽 ↦ Formula.valid_on_KripkeFrameClass 𝔽⟩
+protected instance semantics : Semantics (Formula α) (FrameClass.Dep α) := ⟨fun 𝔽 ↦ valid_on_KripkeFrameClass 𝔽⟩
 
-variable {𝔽 : FrameClass' β}
+variable {𝔽 : FrameClass.Dep α}
 
-@[simp] protected lemma models_iff : 𝔽 ⊧ f ↔ Formula.valid_on_KripkeFrameClass 𝔽 f := iff_of_eq rfl
+@[simp] protected lemma models_iff : 𝔽 ⊧ p ↔ Formula.valid_on_KripkeFrameClass 𝔽 p := iff_of_eq rfl
 
 
 protected lemma axiomK : 𝔽 ⊧* 𝗞 := by
@@ -279,23 +289,22 @@ protected lemma axiomK : 𝔽 ⊧* 𝗞 := by
   use p, q;
 
 protected lemma nec (h : 𝔽 ⊧ p) : 𝔽 ⊧ □p := by
-  intro _ F hF;
+  intro _ _ hF;
   apply valid_on_KripkeFrame.nec;
-  exact h F hF;
+  exact h hF;
 
 protected lemma mdp (hpq : 𝔽 ⊧ p ⟶ q) (hp : 𝔽 ⊧ p) : 𝔽 ⊧ q := by
-  intro _ F hF;
-  exact valid_on_KripkeFrame.mdp (hpq F hF) (hp F hF)
+  intro _ _ hF;
+  exact valid_on_KripkeFrame.mdp (hpq hF) (hp hF)
 
 end Formula.valid_on_KripkeFrameClass
 
 
 namespace AxiomSet
 
-variable {Ax Ax₁ Ax₂ : AxiomSet β}
+variable {Ax Ax₁ Ax₂ : AxiomSet α}
 
--- TODO: `α : Type`なのは微妙だと思うのでなんとか`α : Type*`にするか別にUniverse-freeなものを定義する
-def DefinesKripkeFrameClass (Ax : AxiomSet β) (𝔽 : FrameClass) := ∀ {α : Type}, ∀ {F : Frame' α β}, F ⊧* Ax ↔ F ∈ (𝔽 α)
+def DefinesKripkeFrameClass (Ax : AxiomSet α) (𝔽 : FrameClass) := ∀ {δ}, ∀ {F : Frame δ}, F[α] ⊧* Ax ↔ ⟨δ, F⟩ ∈ 𝔽
 
 lemma DefinesKripkeFrameClass.union (defines₁ : Ax₁.DefinesKripkeFrameClass 𝔽₁) (defines₂ : Ax₂.DefinesKripkeFrameClass 𝔽₂)
   : (Ax₁ ∪ Ax₂).DefinesKripkeFrameClass (𝔽₁ ∩ 𝔽₂) := by
@@ -312,7 +321,7 @@ lemma DefinesKripkeFrameClass.union (defines₁ : Ax₁.DefinesKripkeFrameClass 
     . apply defines₂.mpr h₂;
 
 
-def FinitelyDefinesKripkeFrameClass (Ax : AxiomSet β) (𝔽 : FrameClass' β) := ∀ {F : Frame' α β}, F.finite → (F ⊧* Ax ↔ F ∈ (𝔽 α))
+def FinitelyDefinesKripkeFrameClass (Ax : AxiomSet α) (𝔽 : FrameClass.Dep α) := ∀ {F : Frame δ}, F.finite → (F[α] ⊧* Ax ↔ ⟨δ, F⟩ ∈ 𝔽)
 
 /-
 def FinitelyDefinesKripkeFrameClass.union (defines₁ : Ax₁.FinitelyDefinesKripkeFrameClass 𝔽₁) (defines₂ : Ax₂.FinitelyDefinesKripkeFrameClass 𝔽₂)
@@ -353,19 +362,18 @@ namespace Kripke
 open Formula
 open AxiomSet (DefinesKripkeFrameClass)
 
-abbrev AllFrameClass : FrameClass := λ _ => Set.univ
-abbrev AllFrameClass' (β : Type*) : FrameClass' β := AllFrameClass
+abbrev AllFrameClass : FrameClass := Set.univ
 
-lemma AllFrameClass.nonempty : AllFrameClass.Nonempty := by
-  use Fin 1, TerminalFrame;
+lemma AllFrameClass.nonempty : AllFrameClass.Nonempty.{0} := by
+  use ⟨Fin 1, TerminalFrame⟩;
   trivial;
 
-lemma axiomK_defines : 𝗞.DefinesKripkeFrameClass (β := β) (AllFrameClass) := by
+lemma axiomK_defines : 𝗞.DefinesKripkeFrameClass (α := α) (AllFrameClass) := by
   intro F;
   simp only [Set.mem_univ, iff_true];
   exact valid_on_KripkeFrame.axiomK;
 
-lemma axiomK_union_definability {Ax : AxiomSet β} {𝔽 : FrameClass' β} : (Ax.DefinesKripkeFrameClass 𝔽) ↔ (𝗞 ∪ Ax).DefinesKripkeFrameClass 𝔽 := by
+lemma axiomK_union_definability {Ax : AxiomSet α} : (Ax.DefinesKripkeFrameClass 𝔽) ↔ (𝗞 ∪ Ax).DefinesKripkeFrameClass 𝔽 := by
   constructor;
   . intro defines _ F;
     simp [DefinesKripkeFrameClass] at defines;
@@ -393,7 +401,7 @@ lemma axiomK_union_definability {Ax : AxiomSet β} {𝔽 : FrameClass' β} : (Ax
 
 
 /-
-def nonempty_of_exist_finiteFrame {𝔽 : FrameClass α} (h : ∃ (F : FiniteFrame α), F.toFrame ∈ 𝔽) : 𝔽ᶠ.Nonempty := by
+def nonempty_of_exist_finiteFrame {𝔽 : FrameClass α} (h : ∃ (F : FiniteFrame δ), F.toFrame ∈ 𝔽) : 𝔽ᶠ.Nonempty := by
   obtain ⟨F, hF⟩ := h;
   use F.toFrame;
   constructor;

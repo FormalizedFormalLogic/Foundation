@@ -9,18 +9,16 @@ namespace Kripke
 
 open Formula
 
-variable
-  {α : Type*} [DecidableEq α]
-  {Ax₁ Ax₂ : AxiomSet α} (𝔽₁ 𝔽₂ : FrameClass' α)
-  [sound₁ : Sound Ax₁ᴺ 𝔽₁] [sound₂ : Sound Ax₂ᴺ 𝔽₂]
-  [complete₁ : Complete (Ax₁ᴺ) 𝔽₁] [complete₂ : Complete (Ax₂ᴺ) 𝔽₂]
+variable {α : Type*} {Ax₁ Ax₂ : AxiomSet α} (𝔽₁ 𝔽₂ : FrameClass)
+  [sound₁ : Sound Ax₁ᴺ 𝔽₁[α]] [sound₂ : Sound Ax₂ᴺ 𝔽₂[α]]
+  [complete₁ : Complete Ax₁ᴺ 𝔽₁[α]] [complete₂ : Complete Ax₂ᴺ 𝔽₂[α]]
 
 lemma reducible_of_subset_FrameClass (h𝔽 : 𝔽₂ ⊆ 𝔽₁) : Ax₁ᴺ ≤ₛ Ax₂ᴺ := by
   apply System.reducible_iff.mpr;
   intro p hp;
   apply complete₂.complete;
   intro _ F hF;
-  exact sound₁.sound hp F $ h𝔽 _ hF;
+  exact sound₁.sound hp $ h𝔽 hF;
 
 /-
 lemma strictreducible_of_ssubset_FrameClass (hne : Ax₂.Nonempty) (h𝔽 : 𝔽₂ ⊂ 𝔽₁) : Ax₁ᴺ <ₛ Ax₂ᴺ := by

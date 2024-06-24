@@ -158,7 +158,7 @@ lemma realize_theory_of_self_canonicalModel : (CanonicalModel Ax) ⊧* (System.t
 
 end
 
-lemma complete_of_mem_canonicalFrame [Inhabited (Axᴺ)-MCT] {𝔽 : FrameClass' α} (hFC : CanonicalFrame Ax ∈ (𝔽 (Axᴺ)-MCT)) : 𝔽 ⊧ p → (Axᴺ) ⊢! p := by
+lemma complete_of_mem_canonicalFrame [Inhabited (Axᴺ)-MCT] {𝔽 : FrameClass.Dep α} (hFC : ⟨(Axᴺ)-MCT, CanonicalFrame Ax⟩ ∈ 𝔽) : 𝔽 ⊧ p → (Axᴺ) ⊢! p := by
   simp [valid_on_KripkeFrameClass, valid_on_KripkeFrame];
   contrapose;
   push_neg;
@@ -169,10 +169,11 @@ lemma complete_of_mem_canonicalFrame [Inhabited (Axᴺ)-MCT] {𝔽 : FrameClass'
   . use (CanonicalModel Ax).Valuation;
     exact iff_valid_on_canonicalModel_deducible.not.mpr h;
 
-instance instComplete_of_mem_canonicalFrame [Inhabited (Axᴺ)-MCT] {𝔽 : FrameClass' α} (hFC : CanonicalFrame Ax ∈ (𝔽 (Axᴺ)-MCT)) : Complete (Axᴺ) 𝔽 := ⟨complete_of_mem_canonicalFrame hFC⟩
+instance instComplete_of_mem_canonicalFrame [Inhabited (Axᴺ)-MCT] {𝔽 : FrameClass.Dep α} (hFC : ⟨(Axᴺ)-MCT, CanonicalFrame Ax⟩ ∈ 𝔽) : Complete (Axᴺ) 𝔽 := ⟨complete_of_mem_canonicalFrame hFC⟩
 
-instance : Complete 𝐊 (AllFrameClass' α) := by
-  simpa [←Normal.isK] using instComplete_of_mem_canonicalFrame (Ax := 𝗞) (𝔽 := AllFrameClass' α) trivial;
+-- LO.Modal.Standard.Kripke.completeness_of_K.{u_1} {α : Type u_1} [DecidableEq α] : Complete 𝐊 (AllFrameClass.Dep α)
+instance K_complete : Complete 𝐊 AllFrameClass[α] := by
+  simpa [←Normal.isK] using instComplete_of_mem_canonicalFrame (Ax := 𝗞) (𝔽 := AllFrameClass[α]) trivial;
 
 end Kripke
 
