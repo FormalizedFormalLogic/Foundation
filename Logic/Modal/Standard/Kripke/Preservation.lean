@@ -2,12 +2,72 @@ import Logic.Modal.Standard.Kripke.Semantics
 
 namespace LO.Modal.Standard
 
+variable {α}
+
 namespace Kripke
 
 
 section Bisimulation
 
+structure Model.Bismulation (M₁ : Kripke.Model δ₁ α) (M₂ : Kripke.Model δ₂ α) where
+  toRel : Rel M₁.World M₂.World
+  atomic {x₁ : M₁.World} {x₂ : M₂.World} {a : α} : toRel x₁ x₂ → ((M₁.Valuation x₁ a) ↔ (M₂.Valuation x₂ a))
+  forth {x₁ y₁ : M₁.World} {x₂ : M₂.World} : toRel x₁ x₂ → x₁ ≺ y₁ → ∃ y₂ : M₂.World, toRel y₁ y₂ ∧ x₂ ≺ y₂
+  back {x₁ : M₁.World} {x₂ y₂ : M₂.World} : toRel x₁ x₂ → x₂ ≺ y₂ → ∃ y₁ : M₁.World, toRel y₁ y₂ ∧ x₁ ≺ y₁
+
+notation M₁ " ⇄ " M₂ => Model.Bismulation M₁ M₂
+
+instance : CoeFun (Model.Bismulation M₁ M₂) (λ _ => M₁.World → M₂.World → Prop) := ⟨λ bi => bi.toRel⟩
+
 end Bisimulation
+
+
+section ModalEquivalent
+
+
+def ModalEquivalent (M₁ : Kripke.Model δ₁ α) (M₂ : Kripke.Model δ₂ α) (w₁ : M₁.World) (w₂ : M₂.World) : Prop := ∀ p, w₁ ⊧ p ↔ w₂ ⊧ p
+notation:max "("  M₁ "," w₁ ")" " ↭ " "("  M₂ "," w₂ ")" => ModalEquivalent M₁ M₂ w₁ w₂
+
+open Formula
+
+variable {M₁ : Kripke.Model δ₁ α} {M₂ : Kripke.Model δ₂ α}
+variable (Bi : M₁ ⇄ M₂)
+
+lemma modal_equivalent_of_bisimilar (bisx : Bi x₁ x₂) : (M₁, x₁) ↭ (M₂, x₂) := by
+  intro p;
+  induction p using Formula.rec' generalizing x₁ x₂ with
+  | hatom a => exact Bi.atomic bisx;
+  | hbox p ih =>
+    constructor;
+    . intro h y₂ rx₂y₂;
+      obtain ⟨y₁, ⟨bisy, rx₁y₁⟩⟩ := Bi.back bisx rx₂y₂;
+      exact ih bisy |>.mp (h rx₁y₁);
+    . intro h y₁ rx₁y₁;
+      obtain ⟨y₂, ⟨bisy, rx₂y₂⟩⟩ := Bi.forth bisx rx₁y₁;
+      exact ih bisy |>.mpr (h rx₂y₂);
+  | hand p q ihp ihq =>
+    constructor;
+    . rintro ⟨hp, hq⟩;
+      exact ⟨ihp bisx |>.mp hp, ihq bisx |>.mp hq⟩;
+    . rintro ⟨hp, hq⟩;
+      exact ⟨ihp bisx |>.mpr hp, ihq bisx |>.mpr hq⟩;
+  | hor p q ihp ihq =>
+    constructor;
+    . rintro (hp | hq);
+      . left; exact ihp bisx |>.mp hp;
+      . right; exact ihq bisx |>.mp hq;
+    . rintro (hp | hq);
+      . left; exact ihp bisx |>.mpr hp;
+      . right; exact ihq bisx |>.mpr hq;
+  | himp p q ihp ihq =>
+    constructor;
+    . intro hpq hp;
+      exact ihq bisx |>.mp $ hpq $ ihp bisx |>.mpr hp;
+    . intro hpq hp;
+      exact ihq bisx |>.mpr $ hpq $ ihp bisx |>.mp hp;
+  | _ => simp_all;
+
+end ModalEquivalent
 
 
 section Generation
@@ -21,14 +81,15 @@ class GeneratedSubframe (F F' : Kripke.Frame α) where
 
 end Generation
 
+
 section pMorphism
 
-variable {α δ₁ δ₂}
+variable {δ₁ δ₂}
 
 structure Frame.pMorphism (F₁ : Kripke.Frame δ₁) (F₂ : Kripke.Frame δ₂) where
   toFun : F₁.World → F₂.World
   forth {x y : F₁.World} : x ≺ y → toFun x ≺ toFun y
-  back {w : F₁.World} {v : F₂.World} : toFun w ≺ v → ∃ u, w ≺ u ∧ toFun u = v
+  back {w : F₁.World} {v : F₂.World} : toFun w ≺ v → ∃ u, toFun u = v ∧ w ≺ u
 
 infix:80 " →ₚ " => Frame.pMorphism
 
@@ -59,7 +120,7 @@ lemma iff_formula_satisfies_morphism (f : M₁ →ₚ M₂) {w : M₁.World}
   | hbox p ih =>
     constructor;
     . intro h w₂ hw₂;
-      obtain ⟨w₁, hww₁, e⟩ := f.back hw₂; subst e;
+      obtain ⟨w₁, e, hww₁⟩ := f.back hw₂; subst e;
       exact ih.mp $ h hww₁;
     . intro h w' hww';
       exact ih.mpr $ h $ f.forth hww';
@@ -115,6 +176,25 @@ theorem undefinable_irreflexive : ¬∃ (Ax : AxiomSet α), AxiomSet.DefinesKrip
   have : ¬Irreflexive F₂ := by simp [Irreflexive];
   have : Irreflexive F₂ := h.mp $ iff_theory_valid_on_frame_surjective_morphism f f_surjective $ h.mpr hIF₁;
   contradiction;
+
+
+def Model.pMorphism.Bismulation (f : M₁ →ₚ M₂) : M₁ ⇄ M₂ := {
+  toRel := Function.graph f,
+  atomic := by
+    intro x₁ x₂ a e; subst e;
+    constructor;
+    . apply f.atomic.mp;
+    . apply f.atomic.mpr;
+  forth := by
+    simp;
+    intro x₁ y₁ rx₁y₁;
+    exact f.forth rx₁y₁;
+  back := by
+    simp;
+    intro x₁ x₂ y₂ e rx₂y₂; subst e;
+    obtain ⟨y₁, _⟩ := f.back rx₂y₂;
+    use y₁;
+}
 
 end pMorphism
 

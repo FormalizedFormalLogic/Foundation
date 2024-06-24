@@ -31,7 +31,7 @@ namespace Kripke
 
 structure Frame (δ) where
   [δ_inhabited : Inhabited δ]
-  Rel : δ → δ → Prop
+  Rel : Rel δ δ
 
 set_option linter.unusedVariables false in
 abbrev Frame.World (F : Frame δ) := δ
