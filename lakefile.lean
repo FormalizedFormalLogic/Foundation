@@ -10,7 +10,7 @@ lean_lib «Arithmetization» {
   -- add any library configuration options here
 }
 
-require mathlib from git "https://github.com/leanprover-community/mathlib4.git" @ "678f4912899df76cc45934a56bdf929ffe3cac50"
+require mathlib from git "https://github.com/leanprover-community/mathlib4.git" @ "739a018e1c14b34b2efccad6e4c0b1cdbf9fa671"
 
 require logic from git "https://github.com/iehality/lean4-logic" @ "master"
 

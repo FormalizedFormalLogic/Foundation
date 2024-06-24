@@ -220,6 +220,39 @@ protected lemma TermSeq.lh {n m w : M} (h : TermSeq L n m w) : n = lh w := h.2.1
 
 lemma TermSeq.prop {n m w : M} (h : TermSeq L n m w) : ∀ i u, ⟪i, u⟫ ∈ w → IsSemiterm L m u := h.2.2
 
+section
+
+private lemma termSeq_iff (n m w : M) :
+    TermSeq L n m w ↔ Seq w ∧ n = lh w ∧ ∀ i < w, ∀ u < w, ⟪i, u⟫ ∈ w → IsSemiterm L m u :=
+  ⟨fun h ↦ ⟨TermSeq.seq h, TermSeq.lh h, fun i _ u _ hi ↦ TermSeq.prop h i u hi⟩,
+   by rintro ⟨Sw, hn, h⟩
+      exact ⟨by simpa using Sw, by simpa using hn,
+        fun i u hi ↦ by simpa using h i (lt_of_mem_dom <| by simpa using hi) u (lt_of_mem_rng <| by simpa using hi) (by simpa using hi)⟩⟩
+
+def _root_.LO.FirstOrder.Arith.LDef.termSeqDef (pL : LDef) : 𝚫₁-Semisentence 3 := .mkDelta
+  (.mkSigma
+    “n m w | :Seq w ∧ !lhDef n w ∧ ∀ i < w, ∀ u < w, i ~[w] u → !pL.isSemitermDef.sigma m u”
+    (by simp))
+  (.mkPi
+    “n m w | :Seq w ∧ !lhDef n w ∧ ∀ i < w, ∀ u < w, i ~[w] u → !pL.isSemitermDef.pi m u”
+    (by simp))
+
+variable (L)
+
+lemma termSeq_defined : 𝚫₁-Relation₃ (TermSeq L) via pL.termSeqDef :=
+  ⟨by intro v; simp [LDef.termSeqDef, HSemiformula.val_sigma, eval_isSemitermDef L, (isSemiterm_defined L).proper.iff'],
+   by intro v; simp [LDef.termSeqDef, HSemiformula.val_sigma, eval_isSemitermDef L, termSeq_iff]⟩
+
+@[simp] lemma eval_termSeq (v) :
+    Semiformula.Evalbm M v pL.termSeqDef.val ↔ TermSeq L (v 0) (v 1) (v 2) := (termSeq_defined L).df.iff v
+
+instance termSeq_definable : 𝚫₁-Relation₃ (TermSeq L) := Defined.to_definable _ (termSeq_defined L)
+
+@[simp, definability] instance termSeq_definable' (Γ) : (Γ, m + 1)-Relation₃ (TermSeq L) :=
+  .of_deltaOne (termSeq_definable L) _ _
+
+end
+
 namespace FormalizedTermSubst
 
 variable (L)
@@ -293,14 +326,14 @@ def construction : Fixpoint.Construction M (formula pL) where
 
 def Subst (n m w : M) : M → Prop := (construction L).Fixpoint ![n, m, w]
 
-def substDef (pL : LDef) : 𝚫₁-Semisentence 4 := (formula pL).fixpointDef.rew <| Rew.substs ![#3, #0, #1, #2]
+def _root_.LO.FirstOrder.Arith.LDef.substDef (pL : LDef) : 𝚫₁-Semisentence 4 := (formula pL).fixpointDef.rew <| Rew.substs ![#3, #0, #1, #2]
 
-lemma subst_defined : 𝚫₁-Relation₄ (Subst L) via (substDef pL) :=
+lemma subst_defined : 𝚫₁-Relation₄ (Subst L) via pL.substDef :=
   ⟨HSemiformula.ProperOn.rew (construction L).fixpoint_defined.proper _,
-   by intro v; simp [substDef, (construction L).eval_fixpointDef, Subst]⟩
+   by intro v; simp [LDef.substDef, (construction L).eval_fixpointDef, Subst]⟩
 
 @[simp] lemma eval_substDef (v) :
-    Semiformula.Evalbm M v (substDef pL).val ↔ Subst L (v 0) (v 1) (v 2) (v 3) := (subst_defined L).df.iff v
+    Semiformula.Evalbm M v pL.substDef.val ↔ Subst L (v 0) (v 1) (v 2) (v 3) := (subst_defined L).df.iff v
 
 instance subst_definable : 𝚫₁-Relation₄ (Subst L) := Defined.to_definable _ (subst_defined L)
 
@@ -472,7 +505,308 @@ lemma termSubst_func {k f v v' : M} (hfk : L.Func k f)
   TSw.termSubst_eq_of (by simp ) (Subst.func hz (TSw.prop z u hu) hu)
 -/
 
+section
+
+variable (L)
+
+private lemma termSubst_graph (u n m w t : M) :
+    u = termSubst L n m w t ↔
+    (TermSeq L n m w ∧ IsSemiterm L n t → ∃ p ≤ (t + u + 1)^2, p = ⟪t, u⟫ ∧ Subst L n m w p) ∧ (¬(TermSeq L n m w ∧ IsSemiterm L n t) → u = 0) :=
+  Iff.trans (Classical.choose!_eq_iff (Subst.rng_exists_unique_total L n m w t)) ⟨by
+    rintro ⟨hp, hn⟩
+    exact ⟨fun h ↦ ⟨⟪t, u⟫, by simp, rfl, hp h⟩, hn⟩, by
+    rintro ⟨hp, hn⟩
+    exact ⟨fun h ↦ by rcases hp h with ⟨_, _, rfl, h⟩; exact h, hn⟩⟩
+
+def _root_.LO.FirstOrder.Arith.LDef.termSubstDef (pL : LDef) : 𝚺₁-Semisentence 5 := .mkSigma
+  “u n m w t | (!pL.termSeqDef.pi n m w ∧ !pL.isSemitermDef.pi n t → ∃ p <⁺ (t + u + 1)², !pairDef p t u ∧ !pL.substDef.sigma n m w p) ∧
+    (¬(!pL.termSeqDef.sigma n m w ∧ !pL.isSemitermDef.sigma n t) → u = 0)” (by simp)
+
+lemma termSubst_defined : DefinedFunction (fun v ↦ termSubst L (v 0) (v 1) (v 2) (v 3)) pL.termSubstDef := by
+  intro v
+  simp [LDef.termSubstDef, termSubst_graph, HSemiformula.val_sigma, eval_termSeq L,
+    eval_isSemitermDef L, (termSeq_defined L).proper.iff', (isSemiterm_defined L).proper.iff', eval_substDef L, -and_imp, -not_and]
+  apply iff_of_eq; congr; simp [imp_iff_not_or]; rfl
+
+@[simp] lemma termSubst_defined_iff (v : Fin 5 → M) :
+    Semiformula.Evalbm (L := ℒₒᵣ) M v pL.termSubstDef ↔ v 0 = termSubst L (v 1) (v 2) (v 3) (v 4) := (termSubst_defined L).df.iff v
+
+instance termSubst_definable : DefinableFunction ℒₒᵣ 𝚺₁ (fun v : Fin 4 → M ↦ termSubst L (v 0) (v 1) (v 2) (v 3)) :=
+  Defined.to_definable _ (termSubst_defined L)
+
+end
+
 end termSubst
+
+section termShift
+
+namespace FormalizedTermShift
+
+variable (L)
+
+def Phi (n : M) (C : Set M) (p : M) : Prop :=
+  IsSemiterm L n (π₁ p) ∧ IsSemiterm L n (π₂ p) ∧
+  ( (∃ z < n, π₁ p = ^#z ∧ π₂ p = ^#z) ∨
+    (∃ x, π₁ p = ^&x ∧ π₂ p = ^&(x + 1)) ∨
+    (∃ k f v v', π₁ p = ^func k f v ∧ π₂ p = ^func k f v' ∧ ∀ i u u', ⟪i, u⟫ ∈ v → ⟪i, u'⟫ ∈ v' → ⟪u, u'⟫ ∈ C) )
+
+private lemma phi_iff (n C p : M) :
+    Phi L n {x | x ∈ C} p ↔
+    ∃ t₁ ≤ p, ∃ t₂ ≤ p, p = ⟪t₁, t₂⟫ ∧ IsSemiterm L n t₁ ∧ IsSemiterm L n t₂ ∧
+    ( (∃ z < n, t₁ = ^#z ∧ t₂ = ^#z) ∨
+      (∃ x < t₁, t₁ = ^&x ∧ t₂ = ^&(x + 1)) ∨
+      (∃ k < t₁, ∃ f < t₁, ∃ v < t₁, ∃ v' < t₂, t₁ = ^func k f v ∧ t₂ = ^func k f v' ∧
+        (∀ i < v, ∀ u < v, ∀ u' < v', ⟪i, u⟫ ∈ v → ⟪i, u'⟫ ∈ v' → ⟪u, u'⟫ ∈ C)) ) := by
+  constructor
+  ·{intro ⟨hp₁, hp₂, h⟩
+    refine ⟨π₁ p, by simp, π₂ p, by simp, by simp, hp₁, hp₂, ?_⟩
+    rcases h with (⟨z, hz, h₁, h⟩ | ⟨x, h₁, h₂⟩ | ⟨k, f, v, v', h₁, h₂, h⟩)
+    · left; exact ⟨z, hz, h₁, h⟩
+    · right; left; exact ⟨x, by simp [h₁], h₁, h₂⟩
+    · right; right
+      exact ⟨k, by simp [h₁], f, by simp [h₁], v, by simp [h₁], v', by simp [h₂],
+        h₁, h₂, fun i _ u _ u' _ hi hi' ↦ h i u u' hi hi'⟩}
+  · rintro ⟨t₁, _, t₂, _, rfl, ht₁, ht₂, h⟩
+    refine ⟨by simpa using ht₁, by simpa using ht₂, ?_⟩
+    rcases h with (⟨z, hz, rfl, h⟩ | ⟨x, _, rfl, rfl⟩ | ⟨k, _, f, _, v, _, v', _, rfl, rfl, h⟩)
+    · left; exact ⟨z, hz, by simp [h]⟩
+    · right; left; exact ⟨x, by simp⟩
+    · right; right
+      exact ⟨k, f, v, v', by simp, by simp, fun i u u' hi hi' ↦
+        h i (lt_of_mem_dom hi) u (lt_of_mem_rng hi) u' (lt_of_mem_rng hi') hi hi'⟩
+
+def formulaAux : Semisentence ℒₒᵣ 5 := “t₁ t₂ p C n |
+  (∃ z < n, !qqBvarDef t₁ z ∧ !qqBvarDef t₂ z) ∨
+  (∃ x < t₁, !qqFvarDef t₁ x ∧ !qqFvarDef t₂ (x + 1)) ∨
+  (∃ k < t₁, ∃ f < t₁, ∃ v < t₁, ∃ v' < t₂, !qqFuncDef t₁ k f v ∧ !qqFuncDef t₂ k f v' ∧
+  (∀ i < v, ∀ u < v, ∀ u' < v', i ~[v] u → i ~[v'] u' → u ~[C] u'))”
+
+def formula (pL : LDef) : Fixpoint.Formula 1 := ⟨.mkDelta
+  (.mkSigma
+    “p C n |
+      ∃ t₁ <⁺ p, ∃ t₂ <⁺ p, !pairDef p t₁ t₂ ∧ !pL.isSemitermDef.sigma n t₁ ∧ !pL.isSemitermDef.sigma n t₂ ∧
+      !formulaAux t₁ t₂ p C n”
+    (by simp [formulaAux]))
+  (.mkPi
+    “p C n |
+      ∃ t₁ <⁺ p, ∃ t₂ <⁺ p, !pairDef p t₁ t₂ ∧ !pL.isSemitermDef.pi n t₁ ∧ !pL.isSemitermDef.pi n t₂ ∧
+      !formulaAux t₁ t₂ p C n”
+    (by simp [formulaAux]))⟩
+
+def construction : Fixpoint.Construction M (formula pL) where
+  Φ := fun v ↦ Phi L (v 0)
+  defined := ⟨fun v ↦
+    by simp [formula, HSemiformula.val_sigma, eval_isSemitermDef L, (isSemiterm_defined L).proper.iff'],
+  fun v ↦ by simpa [formula, HSemiformula.val_sigma, eval_isSemitermDef L, formulaAux] using phi_iff _ _ _ _⟩
+  monotone := by
+    rintro C C' hC v p ⟨ht₁, ht₂, (h | h | ⟨k, f, v, v', h₁, h₂, h⟩)⟩
+    · exact ⟨ht₁, ht₂, Or.inl h⟩
+    · exact ⟨ht₁, ht₂, Or.inr <| Or.inl h⟩
+    · exact ⟨ht₁, ht₂, Or.inr <| Or.inr ⟨k, f, v, v', h₁, h₂, fun i u u' hi hi' ↦ hC (h i u u' hi hi')⟩⟩
+  finite := by
+    rintro C v p ⟨ht₁, ht₂, (h | h | ⟨k, f, v, v', h₁, h₂, h⟩)⟩
+    · exact ⟨ht₁, ht₂, Or.inl h⟩
+    · exact ⟨ht₁, ht₂, Or.inr <| Or.inl h⟩
+    · exact ⟨ht₁, ht₂, Or.inr <| Or.inr ⟨k, f, v, v', h₁, h₂, fun i u u' hi hi' ↦ ⟨h i u u' hi hi', by
+      have : ⟪u, u'⟫ < ⟪π₁ p, π₂ p⟫ := pair_lt_pair (by simpa [h₁] using lt_qqFunc_of_mem hi) (by simpa [h₂] using lt_qqFunc_of_mem hi')
+      simpa using this⟩⟩⟩
+
+def Shift (n : M) : M → Prop := (construction L).Fixpoint ![n]
+
+def shiftDef (pL : LDef) : 𝚫₁-Semisentence 2 := (formula pL).fixpointDef.rew <| Rew.substs ![#1, #0]
+
+lemma shift_defined : 𝚫₁-Relation (Shift L) via (shiftDef pL) :=
+  ⟨HSemiformula.ProperOn.rew (construction L).fixpoint_defined.proper _,
+   by intro v; simp [shiftDef, (construction L).eval_fixpointDef, Shift]⟩
+
+@[simp] lemma eval_shiftDef (v) :
+    Semiformula.Evalbm M v (shiftDef pL).val ↔ Shift L (v 0) (v 1) := (shift_defined L).df.iff v
+
+instance shift_definable : 𝚫₁-Relation (Shift L) := Defined.to_definable _ (shift_defined L)
+
+@[simp, definability] instance shift_definable' (Γ) : (Γ, m + 1)-Relation (Shift L) :=
+  .of_deltaOne (shift_definable L) _ _
+
+variable {L}
+
+lemma Shift.case_iff {n p : M} :
+    Shift L n p ↔
+    IsSemiterm L n (π₁ p) ∧ IsSemiterm L n (π₂ p) ∧
+    ( (∃ z < n, π₁ p = ^#z ∧ π₂ p = ^#z) ∨
+      (∃ x, π₁ p = ^&x ∧ π₂ p = ^&(x + 1)) ∨
+      (∃ k f v v', π₁ p = ^func k f v ∧ π₂ p = ^func k f v' ∧ ∀ i u u', ⟪i, u⟫ ∈ v → ⟪i, u'⟫ ∈ v' → Shift L n ⟪u, u'⟫) ) :=
+  (construction L).case
+
+alias ⟨Shift.case, Shift.mk⟩ := Shift.case_iff
+
+lemma Shift.semiterm₁ {n t t'} (h : Shift L n ⟪t, t'⟫) : IsSemiterm L n t := by simpa using h.case.1
+
+lemma Shift.semiterm₂ {n t t'} (h : Shift L n ⟪t, t'⟫) : IsSemiterm L n t' := by simpa using h.case.2.1
+
+@[simp] lemma Shift.bvar {n z : M} (hz : z < n) :
+    Shift L n ⟪^#z, ^#z⟫ := Shift.mk ⟨by simp [hz], by simp [hz]⟩
+
+lemma Shift.bvar_iff {n z u : M} :
+    Shift L n ⟪^#z, u⟫ ↔ z < n ∧ u = ^#z :=
+  ⟨by intro h
+      rcases h.case with ⟨_, _, (⟨z', hz', hzz', h⟩ | ⟨x, h, _⟩ | ⟨k, f, v, v', h, _⟩)⟩
+      · rcases (show z = z' from by simpa using hzz'); exact ⟨hz', by simpa using h⟩
+      · simp [qqBvar, qqFvar] at h
+      · simp [qqBvar, qqFunc] at h,
+   by rintro ⟨hz, Hu, h⟩; exact Shift.bvar hz⟩
+
+@[simp] lemma Shift.fvar {n : M} (x : M):
+    Shift L n ⟪^&x, ^&(x + 1)⟫ := Shift.mk ⟨by simp, by simp⟩
+
+lemma Shift.fvar_iff {n x u : M} :
+    Shift L n ⟪^&x, u⟫ ↔ u = ^&(x + 1) :=
+  ⟨by intro h
+      rcases h.case with ⟨_, _, (⟨_, _, h, _⟩ | ⟨x', hx', h⟩ | ⟨_, _, _, _, h, _, _⟩)⟩
+      · simp [qqBvar, qqFvar] at h
+      · rcases (show x = x' by simpa using hx'); simpa using h
+      · simp [qqFvar, qqFunc] at h,
+   by rintro ⟨hz, Hu, h⟩; exact Shift.fvar x⟩
+
+lemma Shift.func {n k f v v' : M}
+    (hkf : L.Func k f)
+    (Sv : Seq v)
+    (hk : k = lh v)
+    (hv : ∀ i u, ⟪i, u⟫ ∈ v → IsSemiterm L n u)
+    (Sv' : Seq v')
+    (hk' : k = lh v')
+    (hv' : ∀ i u', ⟪i, u'⟫ ∈ v' → IsSemiterm L n u')
+    (H : ∀ i u u', ⟪i, u⟫ ∈ v → ⟪i, u'⟫ ∈ v' → Shift L n ⟪u, u'⟫) :
+    Shift L n ⟪^func k f v, ^func k f v'⟫ :=
+  Shift.mk ⟨
+    by rw [pi₁_pair]; exact IsSemiterm.func hkf Sv hk hv,
+    by rw [pi₂_pair]; exact IsSemiterm.func hkf Sv' hk' hv',
+    Or.inr <| Or.inr ⟨k, f, v, v', by simp, by simp, H⟩⟩
+
+lemma Shift.func' {n k f v u : M} (h : Shift L n ⟪^func k f v, u⟫) :
+    ∃ v', Seq v' ∧ k = lh v' ∧ (∀ i u u', ⟪i, u⟫ ∈ v → ⟪i, u'⟫ ∈ v' → Shift L n ⟪u, u'⟫) ∧ u = ^func k f v' := by
+  rcases h.case with ⟨_, hu, (⟨_, _, h, _⟩ | ⟨x, h, _⟩ | ⟨k', f', v', v'', h₁, h₂, hv⟩)⟩
+  · simp [qqFunc, qqBvar] at h
+  · simp [qqFunc, qqFvar] at h
+  · rcases (show k = k' ∧ f = f' ∧ v = v' by simpa [qqFunc] using h₁) with ⟨rfl, rfl, rfl⟩
+    rcases (show u = ^func k f v'' by simpa using h₂)
+    have : L.Func k f ∧ Seq v'' ∧ k = lh v'' ∧ ∀ i u, ⟪i, u⟫ ∈ v'' → IsSemiterm L n u := by simpa [IsSemiterm.func_iff] using hu
+    rcases this with ⟨_, Sv'', hk'', _⟩
+    exact ⟨v'', Sv'', hk'', hv, rfl⟩
+
+variable {n : M}
+
+lemma Shift.rng_exists {t : M} (ht : IsSemiterm L n t) : ∃ u, Shift L n ⟪t, u⟫ := by
+  apply IsSemiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
+  · definability
+  · intro z hz; exact ⟨^#z, Shift.bvar hz⟩
+  · intro x; exact ⟨^&(x + 1), by simp⟩
+  · rintro k f v hkf Sv rfl ih
+    have : ∃ v', Seq v' ∧ lh v' = lh v ∧ ∀ i u', ⟪i, u'⟫ ∈ v' → ∀ u, ⟪i, u⟫ ∈ v → Shift L n ⟪u, u'⟫ := by
+      have : ∀ i < lh v, ∃ u', ∀ u, ⟪i, u⟫ ∈ v → Shift L n ⟪u, u'⟫ := by
+        intro i hi
+        have : IsSemiterm L n (Sv.nth hi) ∧ ∃ u, Shift L n ⟪Sv.nth hi, u⟫ := ih i (Sv.nth hi) (by simp)
+        rcases this with ⟨_, u', hu'⟩
+        exact ⟨u', fun u hiuv  ↦ by rcases Sv.nth_uniq hi hiuv; exact hu'⟩
+      exact sigmaOne_skolem_seq
+        (by have : 𝚺₁-Relation fun x y ↦ ∀ u < v, ⟪x, u⟫ ∈ v → Shift L n ⟪u, y⟫ := by definability
+            exact this.of_iff fun w ↦ ⟨fun h u _ ↦ h u, fun h u hv ↦ h u (lt_of_mem_rng hv) hv⟩)
+        this
+    rcases this with ⟨v', Sv', hvv', h⟩
+    exact ⟨^func (lh v) f v',
+      Shift.func hkf Sv rfl (fun i u hi ↦ (ih i u hi).1) Sv' (Eq.symm hvv')
+        (fun i u' hi ↦ by
+          have : i < lh v := by simpa [hvv'] using Sv'.lt_lh_of_mem hi
+          exact h i u' hi (Sv.nth this) (by simp) |>.semiterm₂)
+        (fun i u u' hi hi' ↦ h i u' hi' u hi)⟩
+
+lemma Shift.rng_unique
+    {t u₁ u₂ : M} : Shift L n ⟪t, u₁⟫ → Shift L n ⟪t, u₂⟫ → u₁ = u₂ := by
+  revert u₁ u₂
+  suffices IsSemiterm L n t → ∀ u₁ u₂, Shift L n ⟪t, u₁⟫ → Shift L n ⟪t, u₂⟫ → u₁ = u₂
+  by intro u₁ u₂ h₁ h₂; exact this h₁.semiterm₁ u₁ u₂ h₁ h₂
+  intro ht
+  apply IsSemiterm.induction 𝚷 ?_ ?_ ?_ ?_ t ht
+  · definability
+  · simp only [bvar_iff, and_imp]
+    rintro z _ u₁ u₂ _ rfl _ rfl; rfl
+  · simp [Shift.fvar_iff]
+  · intro k f v _ Sv hk ih u₁ u₂ h₁ h₂
+    rcases Shift.func' h₁ with ⟨v₁, Sv₁, hk₁, hvv₁, rfl⟩
+    rcases Shift.func' h₂ with ⟨v₂, Sv₂, hk₂, hvv₂, rfl⟩
+    have : v₁ = v₂ := Sv₁.lh_ext Sv₂ (by simp [←hk₁, ←hk₂]) (by
+      intro i x₁ x₂ hxv₁ hxv₂
+      have hi : i < lh v := by simpa [←hk, hk₁] using Sv₁.lt_lh_of_mem hxv₁
+      exact ih i (Sv.nth hi) (by simp) |>.2 _ _ (hvv₁ _ _ _ (Sv.nth_mem hi) hxv₁) (hvv₂ _ _ _ (Sv.nth_mem hi) hxv₂))
+    rw [this]
+
+lemma Shift.rng_exists_unique {t : M} (ht : IsSemiterm L n t) : ∃! u, Shift L n ⟪t, u⟫ := by
+  rcases Shift.rng_exists ht with ⟨u, hu⟩
+  exact ExistsUnique.intro u hu (fun u' hu' ↦ Shift.rng_unique hu' hu)
+
+variable (L)
+
+lemma Shift.rng_exists_unique_total (n t : M) :
+    ∃! u, (IsSemiterm L n t → Shift L n ⟪t, u⟫) ∧ (¬IsSemiterm L n t → u = 0) := by
+  by_cases h : IsSemiterm L n t
+  · simp [h]; exact Shift.rng_exists_unique h
+  · simp [h]
+
+end FormalizedTermShift
+
+open FormalizedTermShift
+
+variable (L)
+
+def termShift (n t : M) : M := Classical.choose! (Shift.rng_exists_unique_total L n t)
+
+variable {L}
+
+lemma IsSemiterm.termShift_spec {n t : M} (ht : IsSemiterm L n t) : Shift L n ⟪t, termShift L n t⟫ :=
+  Classical.choose!_spec (Shift.rng_exists_unique_total L n t) |>.1 ht
+
+lemma termShift_spec_of_not_termShift {n t : M} :
+    ¬IsSemiterm L n t → termShift L n t = 0 :=
+  Classical.choose!_spec (Shift.rng_exists_unique_total L n t) |>.2
+
+lemma IsSemiterm.termShift_eq_of {n t} (ht : IsSemiterm L n t) (h : Shift L n ⟪t, u⟫) : termShift L n t = u :=
+  ht.termShift_spec.rng_unique h
+
+lemma termShift_bvar {z : M} (hz : z < n) : termShift L n (^#z) = ^#z :=
+  IsSemiterm.termShift_eq_of (by simp [hz]) (Shift.bvar hz)
+
+@[simp] lemma termShift_fvar (x : M) : termShift L n (^&x) = ^&(x + 1) :=
+  IsSemiterm.termShift_eq_of (by simp) (Shift.fvar x)
+
+section
+
+variable (L)
+
+private lemma termShift_graph (u n t : M) :
+    u = termShift L n t ↔
+    (IsSemiterm L n t → ∃ p ≤ (t + u + 1)^2, p = ⟪t, u⟫ ∧ Shift L n p) ∧ (¬IsSemiterm L n t → u = 0) :=
+  Iff.trans (Classical.choose!_eq_iff (Shift.rng_exists_unique_total L n t)) ⟨by
+    rintro ⟨hp, hn⟩
+    exact ⟨fun h ↦ ⟨⟪t, u⟫, by simp, rfl, hp h⟩, hn⟩, by
+    rintro ⟨hp, hn⟩
+    exact ⟨fun h ↦ by rcases hp h with ⟨_, _, rfl, h⟩; exact h, hn⟩⟩
+
+def _root_.LO.FirstOrder.Arith.LDef.termShiftDef (pL : LDef) : 𝚺₁-Semisentence 3 := .mkSigma
+  “u n t | (!pL.isSemitermDef.pi n t → ∃ p <⁺ (t + u + 1)², !pairDef p t u ∧ !(shiftDef pL).sigma n p) ∧ (¬!pL.isSemitermDef.sigma n t → u = 0)” (by simp)
+
+lemma termShift_defined : 𝚺₁-Function₂ (termShift L) via pL.termShiftDef := by
+  intro v
+  simp [LDef.termShiftDef, termShift_graph, HSemiformula.val_sigma, eval_termSeq L,
+    eval_isSemitermDef L, (termSeq_defined L).proper.iff', (isSemiterm_defined L).proper.iff', eval_shiftDef L, -and_imp, -not_and]
+
+@[simp] lemma termShift_defined_iff (v : Fin 3 → M) :
+    Semiformula.Evalbm (L := ℒₒᵣ) M v pL.termShiftDef ↔ v 0 = termShift L (v 1) (v 2) := (termShift_defined L).df.iff v
+
+instance termShift_definable : 𝚺₁-Function₂ (termShift L) :=
+  Defined.to_definable _ (termShift_defined L)
+
+end
+
+end termShift
 
 end LO.FirstOrder.Arith.Model
 
