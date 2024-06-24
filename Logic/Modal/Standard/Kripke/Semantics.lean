@@ -50,7 +50,6 @@ scoped notation x:45 " ≺^[" n "] " y:46 => Frame.RelItr' n x y
 
 instance : CoeFun (Frame δ) (λ _ => δ → δ → Prop) := ⟨Frame.Rel⟩
 
--- protected def Frame.finite (F : Frame δ) := Finite F.World
 
 set_option linter.unusedVariables false in
 /-- dependent-version frame -/
@@ -75,22 +74,8 @@ abbrev FrameClass.Dep (α : Type*) := FrameClass
 abbrev FrameClass.alt (𝔽 : FrameClass) (α : Type*) : FrameClass.Dep α := 𝔽
 notation:max 𝔽:max "[" α "]" => FrameClass.alt 𝔽 α
 
--- abbrev FrameClass.finite (𝔽 : FrameClass) := ∀ {δ F}, ⟨δ, F⟩ ∈ 𝔽 → F.finite
-
-def FrameClass.toFinite (𝔽 : FrameClass) : FrameClass := { ⟨δ, F⟩ | Finite δ ∧ ⟨δ, F⟩ ∈ 𝔽 }
-postfix:max "ᶠ" => FrameClass.toFinite
-
 
 abbrev FiniteFrameClass := Set ((δ : Type*) × FiniteFrame δ)
-
-/-
-set_option linter.unusedVariables false in
-/-- dependent-version frame class -/
-abbrev FiniteFrameClass.Dep (α : Type*) := FiniteFrameClass
-
-abbrev FiniteFrameClass.alt (𝔽 : FiniteFrameClass) (α : Type*) : FiniteFrameClass.Dep α := 𝔽
-notation:max 𝔽:max "[" α "]" => FiniteFrameClass.alt 𝔽 α
--/
 
 def FiniteFrameClass.toFrameClass (𝔽 : FiniteFrameClass) : FrameClass := { ⟨δ, F⟩ | ∃ F', ⟨δ, F'⟩ ∈ 𝔽 ∧ F'.toFrame = F }
 instance : Coe (FiniteFrameClass) (FrameClass) := ⟨FiniteFrameClass.toFrameClass⟩
@@ -116,39 +101,6 @@ abbrev PointFrame : FiniteFrame (Fin 1) where
 lemma PointFrame.iff_rel' {x y : PointFrame.World} : ¬(x ≺ y) := by simp [Frame.Rel'];
 
 
-/-
-namespace FrameClass
-
-variable  {𝔽 𝔽₁ 𝔽₂ : FrameClass}
-
-abbrev Nonempty (𝔽 : FrameClass) := ∃ (α : Type), 𝔽.Nonempty
-
-abbrev UNonempty (𝔽 : FrameClass) := ∃ (α : Type*), (𝔽 α).Nonempty
-
-abbrev union (𝔽₁ 𝔽₂ : FrameClass) : FrameClass := λ α => 𝔽₁ α ∪ 𝔽₂ α
-instance : Union FrameClass := ⟨FrameClass.union⟩
-
-abbrev inter (𝔽₁ 𝔽₂ : FrameClass) : FrameClass := λ α => 𝔽₁ α ∩ 𝔽₂ α
-instance : Inter FrameClass := ⟨FrameClass.inter⟩
-
-abbrev subset (𝔽₁ 𝔽₂ : FrameClass) := ∀ α, 𝔽₁ α ⊆ 𝔽₂ α
-instance : HasSubset FrameClass := ⟨FrameClass.subset⟩
-
-@[refl]
-lemma subset_self : 𝔽 ⊆ 𝔽 := by intro; rfl;
-
-end FrameClass
--/
-
--- abbrev FrameClass.heq (𝔽₁ 𝔽₂ : FrameClass) := ∀ α, 𝔽₁ α = 𝔽₂ α
-
--- def FrameClass.mem (F : Frame δ) (𝔽 : FrameClass) : Prop := F ∈ 𝔽 α
-
--- abbrev FiniteFrameClass (δ) := Set (FiniteFrame δ)
-
-/-
--/
-
 abbrev Valuation (F : Frame δ) (α : Type*) := F.World → α → Prop
 
 structure Model (δ α) where
@@ -156,7 +108,6 @@ structure Model (δ α) where
   Valuation : Valuation Frame α
 
 abbrev Model.World (M : Model δ α) := M.Frame.World
--- instance : CoeSort (Model α) (Type _) where coe := Model.World
 
 
 end Kripke
@@ -177,7 +128,6 @@ def Formula.kripke_satisfies (M : Kripke.Model δ α) (x : M.World) : Formula α
 
 namespace Formula.kripke_satisfies
 
--- protected instance semantics : Semantics (Formula α) ((M : Model δ α) × M.World) := ⟨fun ⟨M, x⟩ ↦ Formula.kripke_satisfies M x⟩
 protected instance semantics {M : Model δ α} : Semantics (Formula α) (M.World) := ⟨fun x ↦ Formula.kripke_satisfies M x⟩
 
 variable {M : Model δ α} {x : M.World} {p q : Formula α}
@@ -354,23 +304,6 @@ lemma FinitelyDefinesKripkeFrameClass.union (defines₁ : Ax₁.FinitelyDefinesK
     . exact defines₁.mpr h₁;
     . exact defines₂.mpr h₂;
 
-/-
-lemma DefinesKripkeFrameClass.toFinitely (defines : Ax.DefinesKripkeFrameClass 𝔽) : Ax.FinitelyDefinesKripkeFrameClass 𝔽 := by
-  intro _ F;
-  constructor;
-  . intro h;
-    exact defines.mp h
-  . rintro h₁;
-    exact defines.mpr h₁;
--/
-/-
-instance {𝔽 : FrameClass α} (ne : 𝔽ᶠ.Nonempty) : 𝔽.Nonempty := by
-  obtain ⟨F, hF⟩ := ne;
-  simp [FrameClass.toFinite] at hF;
-  use F;
-  exact hF.1;
--/
-
 end AxiomSet
 
 
@@ -416,16 +349,6 @@ lemma axiomK_union_definability {Ax : AxiomSet α} : (Ax.DefinesKripkeFrameClass
       simp only [Semantics.RealizeSet.union_iff] at defines;
       exact defines.mpr h |>.2;
 
-
-/-
-def nonempty_of_exist_finiteFrame {𝔽 : FrameClass α} (h : ∃ (F : FiniteFrame δ), F.toFrame ∈ 𝔽) : 𝔽ᶠ.Nonempty := by
-  obtain ⟨F, hF⟩ := h;
-  use F.toFrame;
-  constructor;
-  . assumption;
-  . exact F.World_finite;
--/
-
 end Kripke
 
 
@@ -448,9 +371,6 @@ lemma DefinesKripkeFrameClass.toAx' (defines : Axᴺ.DefinesKripkeFrameClass �
 lemma DefinesKripkeFrameClass.ofAx (defines : Ax.DefinesKripkeFrameClass 𝔽) [Axᴺ.IsNormal] : (Ax)ᴺ.DefinesKripkeFrameClass 𝔽 := by
   apply axiomK_union_definability.mp;
   assumption;
-
-
--- abbrev FinitelyDefinesKripkeFrameClass (Λ : DeductionParameter α) [Λ.IsNormal] (𝔽 : FrameClass) := AxiomSet.FinitelyDefinesKripkeFrameClass (Ax(Λ)) 𝔽
 
 end DeductionParameter
 
