@@ -287,21 +287,23 @@ theorem seq_induction (Γ) {P : M → Prop} (hP : DefinablePred ℒₒᵣ (Γ, 1
     · exact hcons s x hs (ih s (hs.lt_seqCons x) hs)
 
 /-- `!⟨x, y, z, ...⟩` notation for `Seq` -/
-syntax (name := vecNotation) "!⟨" term,* "⟩" : term
+syntax (name := vecNotation) "!⟦" term,* "⟧" : term
 
 macro_rules
-  | `(!⟨$terms:term,*, $term:term⟩) => `(seqCons !⟨$terms,*⟩ $term)
-  | `(!⟨$term:term⟩) => `(seqCons ∅ $term)
-  | `(!⟨⟩) => `(∅)
+  | `(!⟦$terms:term,*, $term:term⟧) => `(seqCons !⟦$terms,*⟧ $term)
+  | `(!⟦$term:term⟧) => `(seqCons ∅ $term)
+  | `(!⟦⟧) => `(∅)
 
 @[app_unexpander seqCons]
 def vecConsUnexpander : Lean.PrettyPrinter.Unexpander
-  | `($_ $term !⟨$term2, $terms,*⟩) => `(!⟨$term, $term2, $terms,*⟩)
-  | `($_ $term !⟨$term2⟩) => `(!⟨$term, $term2⟩)
-  | `($_ $term ∅) => `(!⟨$term⟩)
+  | `($_ !⟦$term2, $terms,*⟧ $term) => `(!⟦$term2, $terms,*, $term⟧)
+  | `($_ !⟦$term2⟧ $term) => `(!⟦$term2, $term⟧)
+  | `($_ ∅ $term) => `(!⟦$term⟧)
   | _ => throw ()
 
-@[simp] lemma singleton_seq (x : M) : Seq !⟨x⟩ := by apply Seq.seqCons; simp
+#check !⟦1, 0, 9⟧
+
+@[simp] lemma singleton_seq (x : M) : Seq !⟦x⟧ := by apply Seq.seqCons; simp
 
 /-
 section seqMap

@@ -110,7 +110,7 @@ lemma unique {s₁ s₂ : M} (H₁ : c.CSeq v s₁) (H₂ : c.CSeq v s₂) (h₁
 
 end CSeq
 
-lemma CSeq.initial : c.CSeq v !⟨c.zero v⟩ :=
+lemma CSeq.initial : c.CSeq v !⟦c.zero v⟧ :=
   ⟨by simp, by simp [seqCons], by simp⟩
 
 lemma CSeq.successor {s l z : M} (Hs : c.CSeq v s) (hl : l + 1 = lh s) (hz : ⟪l, z⟫ ∈ s) :
@@ -139,7 +139,7 @@ lemma CSeq.exists (l : M) : ∃ s, c.CSeq v s ∧ l + 1 = lh s := by
         intro w; simpa using c.cseq_defined_iff (w 0 :> v) |>.symm⟩
     · definability
   case zero =>
-    exact ⟨!⟨c.zero v⟩, CSeq.initial, by simp⟩
+    exact ⟨!⟦c.zero v⟧, CSeq.initial, by simp⟩
   case succ l ih =>
     rcases ih with ⟨s, Hs, hls⟩
     have hl : l < lh s := by simp [←hls]

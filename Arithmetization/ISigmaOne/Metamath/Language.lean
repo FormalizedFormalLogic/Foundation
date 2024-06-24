@@ -61,13 +61,12 @@ instance (k) : Semiterm.Operator.GoedelNumber L₀ (L.Rel k) := ⟨fun r ↦ Sem
 variable (L)
 
 class DefinableLanguage extends Arith.LDef where
-  T : Theory ℒₒᵣ
   func_iff {k c : ℕ} :
     c ∈ Set.range (Encodable.encode : L.Func k → ℕ) ↔
-    T ⊢₌! func.val/[Semiterm.Operator.numeral ℒₒᵣ k, Semiterm.Operator.numeral ℒₒᵣ c]
+    𝐏𝐀⁻ ⊢₌! func.val/[Semiterm.Operator.numeral ℒₒᵣ k, Semiterm.Operator.numeral ℒₒᵣ c]
   rel_iff {k c : ℕ} :
     c ∈ Set.range (Encodable.encode : L.Rel k → ℕ) ↔
-    T ⊢₌! rel.val/[Semiterm.Operator.numeral ℒₒᵣ k, Semiterm.Operator.numeral ℒₒᵣ c]
+    𝐏𝐀⁻ ⊢₌! rel.val/[Semiterm.Operator.numeral ℒₒᵣ k, Semiterm.Operator.numeral ℒₒᵣ c]
 
 def _root_.LO.FirstOrder.Language.lDef [d : DefinableLanguage L] : LDef := d.toLDef
 
@@ -75,28 +74,28 @@ variable {L}
 
 namespace Model
 
-variable [DefinableLanguage L] [DefinableLanguage.T L ≼ 𝐏𝐀⁻]
+variable [DefinableLanguage L]
 
 variable {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐏𝐀⁻]
 
 variable (L M)
 
-def _root_.LO.FirstOrder.Language.formalize : Model.Language M where
+def _root_.LO.FirstOrder.Language.codeIn : Model.Language M where
   Func := fun x y ↦ Semiformula.Evalbm M ![x, y] L.lDef.func.val
   Rel := fun x y ↦ Semiformula.Evalbm M ![x, y] L.lDef.rel.val
 
 variable {L M}
 
-instance : (L.formalize M).Defined L.lDef where
-  func := by intro v; simp [Language.formalize, ←Matrix.fun_eq_vec₂]
-  rel := by intro v; simp [Language.formalize, ←Matrix.fun_eq_vec₂]
+instance : (L.codeIn M).Defined L.lDef where
+  func := by intro v; simp [Language.codeIn, ←Matrix.fun_eq_vec₂]
+  rel := by intro v; simp [Language.codeIn, ←Matrix.fun_eq_vec₂]
 
-@[simp] lemma formalize_func_encode (k : ℕ) (f : L.Func k) : (L.formalize M).Func k (Encodable.encode f) := by
+@[simp] lemma codeIn_func_encode (k : ℕ) (f : L.Func k) : (L.codeIn M).Func k (Encodable.encode f) := by
   simpa [models_iff, numeral_eq_natCast] using
     consequence_iff_add_eq.mp (sound! <| DefinableLanguage.func_iff.mp ⟨f, rfl⟩) M
       (models_of_subtheory (T := 𝐏𝐀⁻) inferInstance)
 
-@[simp] lemma formalize_rel_encode (k : ℕ) (r : L.Rel k) : (L.formalize M).Rel k (Encodable.encode r) := by
+@[simp] lemma codeIn_rel_encode (k : ℕ) (r : L.Rel k) : (L.codeIn M).Rel k (Encodable.encode r) := by
   simpa [models_iff, numeral_eq_natCast] using
     consequence_iff_add_eq.mp (sound! <| DefinableLanguage.rel_iff.mp ⟨r, rfl⟩) M
       (models_of_subtheory (T := 𝐏𝐀⁻) inferInstance)
@@ -136,7 +135,6 @@ lemma _root_.LO.FirstOrder.Language.ORing.of_mem_range_encode_rel {k r : ℕ} :
     · exact ⟨Language.ORing.Rel.lt, rfl⟩
 
 instance : DefinableLanguage ℒₒᵣ where
-  T := 𝐏𝐀⁻
   func := .mkSigma “k f | (k = 0 ∧ f = 0) ∨ (k = 0 ∧ f = 1) ∨ (k = 2 ∧ f = 0) ∨ (k = 2 ∧ f = 1)” (by simp)
   rel  := .mkSigma “k r | (k = 2 ∧ r = 0) ∨ (k = 2 ∧ r = 1)” (by simp)
   func_iff {k c} := by
@@ -149,6 +147,5 @@ instance : DefinableLanguage ℒₒᵣ where
     · simp
 
 end Arith
-
 
 end LO.FirstOrder
