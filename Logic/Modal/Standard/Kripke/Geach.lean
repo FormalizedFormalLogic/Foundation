@@ -78,15 +78,15 @@ variable {α : Type u} [Inhabited α] [DecidableEq α]
 
 section
 
-lemma TerminalFrame.geach_confluent : GeachConfluent t (TerminalFrame.Rel') := by
+lemma TerminalFrame.geach_confluent : GeachConfluent t (terminalFrame.Rel') := by
   simp [GeachConfluent];
   intro x y z Rxy Rxz;
-  replace Rxy := TerminalFrame.iff_relItr'.mp Rxy;
-  replace Rxz := TerminalFrame.iff_relItr'.mp Rxz;
+  replace Rxy := terminalFrame.iff_relItr'.mp Rxy;
+  replace Rxz := terminalFrame.iff_relItr'.mp Rxz;
   use x; subst_vars;
-  constructor <;> { apply TerminalFrame.iff_relItr'.mpr; rfl };
+  constructor <;> { apply terminalFrame.iff_relItr'.mpr; rfl };
 
-lemma TerminalFrame.multi_geach_confluent : MultiGeachConfluent ts (TerminalFrame.Rel') := by
+lemma TerminalFrame.multi_geach_confluent : MultiGeachConfluent ts (terminalFrame.Rel') := by
   induction ts with
   | nil => simp [MultiGeachConfluent];
   | cons t ts ih =>
@@ -98,14 +98,14 @@ lemma TerminalFrame.multi_geach_confluent : MultiGeachConfluent ts (TerminalFram
 abbrev GeachConfluentFrameClass (t : Geach.Taple) : FrameClass := { F | (GeachConfluent t) F }
 
 lemma GeachConfluentFrameClass.nonempty : (GeachConfluentFrameClass.{0} t).Nonempty := by
-  use TerminalFrame;
+  use terminalFrame
   exact TerminalFrame.geach_confluent;
 
 
 abbrev MultiGeachConfluentFrameClass (ts : List Geach.Taple) : FrameClass := { F | (MultiGeachConfluent ts) F }
 
 lemma MultiGeachConfluentFrameClass.nonempty : (MultiGeachConfluentFrameClass.{0} ts).Nonempty := by
-  use TerminalFrame;
+  use terminalFrame
   exact TerminalFrame.multi_geach_confluent;
 
 

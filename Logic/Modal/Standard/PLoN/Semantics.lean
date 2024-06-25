@@ -27,8 +27,8 @@ structure FiniteFrame (α) extends Frame α where
 instance : Coe (FiniteFrame α) (Frame α) := ⟨λ F ↦ F.toFrame⟩
 
 
-abbrev TerminalFrame (α) : FiniteFrame α where
-  World := Fin 1
+abbrev terminalFrame (α) : FiniteFrame α where
+  World := Unit
   Rel := λ _ _ _ => True
 
 
@@ -154,7 +154,7 @@ namespace PLoN
 abbrev AllFrameClass (α) : FrameClass α := Set.univ
 
 lemma AllFrameClass.nonempty : (AllFrameClass.{_, 0} α).Nonempty := by
-  use TerminalFrame α
+  use terminalFrame α
   trivial;
 
 open Formula

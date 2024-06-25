@@ -56,7 +56,7 @@ lemma AxDot3_Definability : .𝟯.DefinesKripkeFrameClass (α := α) (ConnectedF
 abbrev ReflexiveTransitiveConnectedFrameClass : FrameClass := { F | Reflexive F ∧ Transitive F ∧ Connected F }
 
 lemma ReflexiveTransitiveConnectedFrameClass.nonempty : ReflexiveTransitiveConnectedFrameClass.Nonempty.{0} := by
-  use TerminalFrame;
+  use terminalFrame;
   simp [Reflexive, Transitive, Connected, Frame.Rel'];
 
 

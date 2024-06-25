@@ -80,21 +80,23 @@ instance : Coe (FiniteFrameClass) (FrameClass) := ⟨FiniteFrameClass.toFrameCla
 
 
 /-- Frame with single world and identiy relation -/
-abbrev TerminalFrame : FiniteFrame where
-  World := Fin 1
+abbrev terminalFrame : FiniteFrame where
+  World := Unit;
   Rel := λ _ _ => True
 
 @[simp]
-lemma TerminalFrame.iff_rel' {x y : TerminalFrame.World} : x ≺ y ↔ x = y := by
-  simp [Frame.Rel']; ext1; simp;
+lemma terminalFrame.iff_rel' {x y : terminalFrame.World} : x ≺ y ↔ x = y := by
+  simp [Frame.Rel'];
 
 @[simp]
-lemma TerminalFrame.iff_relItr' {x y : TerminalFrame.World} : x ≺^[n] y ↔ x = y := by
-  induction n <;> aesop;
+lemma terminalFrame.iff_relItr' {x y : terminalFrame.World} : x ≺^[n] y ↔ x = y := by
+  induction n with
+  | zero => simp;
+  | succ n ih => simp_all; use ();
 
 
 abbrev PointFrame : FiniteFrame where
-  World := Fin 1
+  World := Unit
   Rel := (λ _ _ => False)
 
 @[simp]
@@ -315,7 +317,7 @@ open AxiomSet (DefinesKripkeFrameClass)
 abbrev AllFrameClass : FrameClass := Set.univ
 
 lemma AllFrameClass.nonempty : AllFrameClass.Nonempty.{0} := by
-  use TerminalFrame;
+  use terminalFrame;
   trivial;
 
 lemma axiomK_defines : 𝗞.DefinesKripkeFrameClass (α := α) AllFrameClass := by
