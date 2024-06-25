@@ -9,7 +9,7 @@ variable {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐈𝚺
 
 variable {L : Model.Language M} {pL : LDef} [Model.Language.Defined L pL]
 
-section formula
+section blueprint
 
 def qqRel (n k r v : M) : M := ⟪n, 0, k, r, v⟫ + 1
 
@@ -265,7 +265,7 @@ def formulaAux : 𝚺₀-Semisentence 2 := .mkSigma
     (∃ n < p, ∃ q < p, (q ∈ C ∧ !bvDef (n + 1) q) ∧ !qqExistsDef p n q)”
   (by simp)
 
-def formula (pL : LDef) : Fixpoint.Formula 0 := ⟨.mkDelta
+def blueprint (pL : LDef) : Fixpoint.Blueprint 0 := ⟨.mkDelta
   (.mkSigma
     “p C |
       (∃ n < p, ∃ k < p, ∃ r < p, ∃ v < p, !pL.rel k r ∧ !pL.termSeqDef.sigma k n v ∧ !qqRelDef p n k r v) ∨
@@ -277,12 +277,12 @@ def formula (pL : LDef) : Fixpoint.Formula 0 := ⟨.mkDelta
       (∃ n < p, ∃ k < p, ∃ r < p, ∃ v < p, !pL.rel k r ∧ !pL.termSeqDef.pi k n v ∧ !qqNRelDef p n k r v) ∨
       !formulaAux p C” (by simp))⟩
 
-def construction : Fixpoint.Construction M (formula pL) where
+def construction : Fixpoint.Construction M (blueprint pL) where
   Φ := fun _ ↦ Phi L
   defined := ⟨
     by  intro v
-        -- simp [formula, HSemiformula.val_sigma, (termSeq_defined L).proper.iff']
-        simp only [Nat.succ_eq_add_one, Nat.reduceAdd, formula, Fin.isValue, HSemiformula.val_sigma,
+        -- simp [blueprint, HSemiformula.val_sigma, (termSeq_defined L).proper.iff']
+        simp only [Nat.succ_eq_add_one, Nat.reduceAdd, blueprint, Fin.isValue, HSemiformula.val_sigma,
           HSemiformula.sigma_mkDelta, HSemiformula.val_mkSigma, LogicalConnective.HomClass.map_or,
           Semiformula.eval_bexLT, Semiterm.val_bvar, Matrix.cons_val_one, Matrix.vecHead,
           Matrix.cons_val_two, Matrix.vecTail, Function.comp_apply, Fin.succ_zero_eq_one,
@@ -293,8 +293,8 @@ def construction : Fixpoint.Construction M (formula pL) where
           LogicalConnective.Prop.or_eq, HSemiformula.pi_mkDelta, HSemiformula.val_mkPi,
           (termSeq_defined L).proper.iff'],
     by  intro v
-        -- simpa [formula, Language.Defined.eval_rel_iff (L := L), eval_termSeq L, HSemiformula.val_sigma, formulaAux] using phi_iff L _ _
-        simpa only [Fin.isValue, Nat.succ_eq_add_one, Nat.reduceAdd, formula,
+        -- simpa [blueprint, Language.Defined.eval_rel_iff (L := L), eval_termSeq L, HSemiformula.val_sigma, formulaAux] using phi_iff L _ _
+        simpa only [Fin.isValue, Nat.succ_eq_add_one, Nat.reduceAdd, blueprint,
           HSemiformula.val_sigma, formulaAux, HSemiformula.val_mkSigma,
           LogicalConnective.HomClass.map_or, HSemiformula.val_mkDelta, Semiformula.eval_bexLT,
           Semiterm.val_bvar, Matrix.cons_val_one, Matrix.vecHead, Matrix.cons_val_two,
@@ -323,8 +323,10 @@ def construction : Fixpoint.Construction M (formula pL) where
     rcases H with (⟨n, q, ⟨hqC, hq⟩, rfl⟩ | ⟨n, q, ⟨hqC, hq⟩, rfl⟩)
     · left; exact ⟨n, q, ⟨hC hqC, hq⟩, rfl⟩
     · right; exact ⟨n, q, ⟨hC hqC, hq⟩, rfl⟩
-  finite := by
-    unfold Phi
+
+instance : (construction L).StrongFinite M where
+  strong_finite := by
+    unfold construction Phi
     rintro C _ x (h | h | h | h | H)
     · left; exact h
     · right; left; exact h
@@ -348,10 +350,10 @@ variable (L)
 def Language.IsUFormula : M → Prop := (construction L).Fixpoint ![]
 
 def _root_.LO.FirstOrder.Arith.LDef.isUFormulaDef (pL : LDef) : 𝚫₁-Semisentence 1 :=
-  (formula pL).fixpointDef
+  (blueprint pL).fixpointDefΔ₁
 
 lemma isUFormula_defined : 𝚫₁-Predicate L.IsUFormula via pL.isUFormulaDef :=
-  (construction L).fixpoint_defined
+  (construction L).fixpoint_definedΔ₁
 
 @[simp] lemma eval_isUFormulaDef (v) :
     Semiformula.Evalbm M v pL.isUFormulaDef.val ↔ L.IsUFormula (v 0) := (isUFormula_defined L).df.iff v
@@ -416,7 +418,7 @@ alias ⟨Language.IsUFormula.case, Language.IsUFormula.mk⟩ := Language.IsUForm
   Language.IsUFormula.mk (Or.inr <| Or.inr <| Or.inr <| Or.inl ⟨n, rfl⟩)
 
 @[simp] lemma Language.IsUFormula.and {n p q : M} :
-    𝐔 (p ^⋏[n] q) ↔ (𝐔 p ∧ bv p = n) ∧ (𝐔 q ∧ bv q = n) :=
+    𝐔 (p ^⋏[n] q) ↔ L.IsSemiformula n p ∧ L.IsSemiformula n q :=
   ⟨by intro h
       rcases h.case with (⟨_, _, _, _, _, _, h⟩ | ⟨_, _, _, _, _, _, h⟩ | ⟨_, h⟩ | ⟨_, h⟩ |
         ⟨_, _, _, hp, hq, h⟩ | ⟨_, _, _, _, _, h⟩ | ⟨_, _, _, h⟩ | ⟨_, _, _, h⟩) <;>
@@ -427,7 +429,7 @@ alias ⟨Language.IsUFormula.case, Language.IsUFormula.mk⟩ := Language.IsUForm
         ⟨n, p, q, ⟨hp.1, Eq.symm hp.2⟩, ⟨hq.1, Eq.symm hq.2⟩, rfl⟩)⟩
 
 @[simp] lemma Language.IsUFormula.or {n p q : M} :
-    𝐔 (p ^⋎[n] q) ↔ (𝐔 p ∧ bv p = n) ∧ (𝐔 q ∧ bv q = n) :=
+    𝐔 (p ^⋎[n] q) ↔ L.IsSemiformula n p ∧ L.IsSemiformula n q :=
   ⟨by intro h
       rcases h.case with (⟨_, _, _, _, _, _, h⟩ | ⟨_, _, _, _, _, _, h⟩ | ⟨_, h⟩ | ⟨_, h⟩ |
         ⟨_, _, _, _, _, h⟩ | ⟨_, _, _, hp, hq, h⟩ | ⟨_, _, _, h⟩ | ⟨_, _, _, h⟩) <;>
@@ -438,7 +440,7 @@ alias ⟨Language.IsUFormula.case, Language.IsUFormula.mk⟩ := Language.IsUForm
         ⟨n, p, q, ⟨hp.1, Eq.symm hp.2⟩, ⟨hq.1, Eq.symm hq.2⟩, rfl⟩)⟩
 
 @[simp] lemma Language.IsUFormula.all {n p : M} :
-    𝐔 (^∀[n] p) ↔ 𝐔 p ∧ bv p = n + 1 :=
+    𝐔 (^∀[n] p) ↔ L.IsSemiformula (n + 1) p :=
   ⟨by intro h
       rcases h.case with (⟨_, _, _, _, _, _, h⟩ | ⟨_, _, _, _, _, _, h⟩ | ⟨_, h⟩ | ⟨_, h⟩ |
         ⟨_, _, _, _, _, h⟩ | ⟨_, _, _, _, _, h⟩ | ⟨_, _, hp, h⟩ | ⟨_, _, _, h⟩) <;>
@@ -448,7 +450,7 @@ alias ⟨Language.IsUFormula.case, Language.IsUFormula.mk⟩ := Language.IsUForm
       exact Language.IsUFormula.mk (Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl ⟨n, p, ⟨hp.1, Eq.symm hp.2⟩, rfl⟩)⟩
 
 @[simp] lemma Language.IsUFormula.ex {n p : M} :
-    𝐔 (^∃[n] p) ↔ 𝐔 p ∧ bv p = n + 1 :=
+    𝐔 (^∃[n] p) ↔ L.IsSemiformula (n + 1) p :=
   ⟨by intro h
       rcases h.case with (⟨_, _, _, _, _, _, h⟩ | ⟨_, _, _, _, _, _, h⟩ | ⟨_, h⟩ | ⟨_, h⟩ |
         ⟨_, _, _, _, _, h⟩ | ⟨_, _, _, _, _, h⟩ | ⟨_, _, _, h⟩ | ⟨_, _, hp, h⟩) <;>
@@ -457,9 +459,29 @@ alias ⟨Language.IsUFormula.case, Language.IsUFormula.mk⟩ := Language.IsUForm
    by rintro hp
       exact Language.IsUFormula.mk (Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr ⟨n, p, ⟨hp.1, Eq.symm hp.2⟩, rfl⟩)⟩
 
-namespace Language.UformulaRec
+lemma Language.IsUFormula.induction (Γ) {P : M → Prop} (hP : (Γ, 1)-Predicate P)
+    (hrel : ∀ n k r v, L.Rel k r → L.TermSeq k n v → P (^rel n k r v))
+    (hnrel : ∀ n k r v, L.Rel k r → L.TermSeq k n v → P (^nrel n k r v))
+    (hverum : ∀ n, P ^⊤[n])
+    (hfalsum : ∀ n, P ^⊥[n])
+    (hand : ∀ n p q, L.IsSemiformula n p → L.IsSemiformula n q → P p → P q → P (p ^⋏[n] q))
+    (hor : ∀ n p q, L.IsSemiformula n p → L.IsSemiformula n q → P p → P q → P (p ^⋎[n] q))
+    (hall : ∀ n p, L.IsSemiformula (n + 1) p → P p → P (^∀[n] p))
+    (hex : ∀ n p, L.IsSemiformula (n + 1) p → P p → P (^∃[n] p)) :
+    ∀ p, 𝐔 p → P p :=
+  (construction L).induction (v := ![]) hP (by
+    rintro C hC x (⟨n, k, r, v, hkr, hv, rfl⟩ | ⟨n, k, r, v, hkr, hv, rfl⟩ | ⟨n, rfl⟩ | ⟨n, rfl⟩ |
+      ⟨n, p, q, ⟨hp, hnp⟩, ⟨hq, hnq⟩, rfl⟩ | ⟨n, p, q, ⟨hp, hnp⟩, ⟨hq, hnq⟩, rfl⟩ | ⟨n, p, ⟨hp, hnp⟩, rfl⟩ | ⟨n, p, ⟨hp, hnp⟩, rfl⟩)
+    · exact hrel n k r v hkr hv
+    · exact hnrel n k r v hkr hv
+    · exact hverum n
+    · exact hfalsum n
+    · exact hand n p q ⟨(hC p hp).1, Eq.symm hnp⟩ ⟨(hC q hq).1, Eq.symm hnq⟩ (hC p hp).2 (hC q hq).2
+    · exact hor n p q ⟨(hC p hp).1, Eq.symm hnp⟩ ⟨(hC q hq).1, Eq.symm hnq⟩ (hC p hp).2 (hC q hq).2
+    · exact hall n p ⟨(hC p hp).1, Eq.symm hnp⟩ (hC p hp).2
+    · exact hex n p ⟨(hC p hp).1, Eq.symm hnp⟩ (hC p hp).2)
 
-variable (L)
+namespace Language.UformulaRec
 
 structure Blueprint (k : ℕ) where
   rel : 𝚺₁-Semisentence (n + 5)
@@ -471,12 +493,73 @@ structure Blueprint (k : ℕ) where
   all : 𝚺₁-Semisentence (n + 2)
   ex : 𝚺₁-Semisentence (n + 2)
 
-structure Construction
+variable (M)
 
+structure Construction {k : ℕ} (φ : Blueprint k) where
+  rel    : (Fin k → M) → M → M → M → M → M
+  nrel   : (Fin k → M) → M → M → M → M → M
+  verum  : (Fin k → M) → M → M
+  falsum : (Fin k → M) → M → M
+  and    : (Fin k → M) → M → M → M → M
+  or     : (Fin k → M) → M → M → M → M
+  all    : (Fin k → M) → M → M → M
+  ex     : (Fin k → M) → M → M → M
+  rel_defined    : DefinedFunction (fun v : Fin (k + 4) → M ↦ rel (v ·.succ.succ.succ.succ) (v 0) (v 1) (v 2) (v 3)) φ.rel
+  nrel_defined   : DefinedFunction (fun v : Fin (k + 4) → M ↦ rel (v ·.succ.succ.succ.succ) (v 0) (v 1) (v 2) (v 3)) φ.nrel
+  verum_defined  : DefinedFunction (fun v : Fin (k + 1) → M ↦ verum (v ·.succ) (v 0)) φ.verum
+  falsum_defined : DefinedFunction (fun v : Fin (k + 1) → M ↦ falsum (v ·.succ) (v 0)) φ.verum
+  and_defined    : DefinedFunction (fun v : Fin (k + 3) → M ↦ and (v ·.succ.succ.succ) (v 0) (v 1) (v 2)) φ.and
+  or_defined     : DefinedFunction (fun v : Fin (k + 3) → M ↦ or  (v ·.succ.succ.succ) (v 0) (v 1) (v 2)) φ.or
+  all_defined    : DefinedFunction (fun v : Fin (k + 2) → M ↦ all (v ·.succ.succ) (v 0) (v 1)) φ.all
+  ex_defined     : DefinedFunction (fun v : Fin (k + 2) → M ↦ ex  (v ·.succ.succ) (v 0) (v 1)) φ.ex
+
+variable {M}
+
+namespace Construction
+
+variable (L)
+
+variable {β : Blueprint k} (c : Construction M β)
+
+def Phi (param : Fin k → M) (C : Set M) (pr : M) : Prop :=
+  L.IsUFormula (π₁ pr) ∧ (
+  (∃ n k r v, pr = ⟪^rel n k r v, c.rel param n k r v⟫) ∨
+  (∃ n k r v, pr = ⟪^nrel n k r v, c.nrel param n k r v⟫) ∨
+  (∃ n, pr = ⟪^⊤[n], c.verum param n⟫) ∨
+  (∃ n, pr = ⟪^⊥[n], c.verum param n⟫) ∨
+  (∃ n p q p' q', ⟪p, p'⟫ ∈ C ∧ ⟪q, q'⟫ ∈ C ∧ pr = ⟪p ^⋏[n] q, c.and param n p' q'⟫) ∨
+  (∃ n p q p' q', ⟪p, p'⟫ ∈ C ∧ ⟪q, q'⟫ ∈ C ∧ pr = ⟪p ^⋎[n] q, c.or param n p' q'⟫) ∨
+  (∃ n p, pr = ⟪^∀[n] p, c.all param n p⟫) ∨
+  (∃ n p, pr = ⟪^∃[n] p, c.ex param n p⟫) )
+
+/-
+private lemma phi_iff (param : Fin k → M) (C pr : M) :
+    c.Phi L param {x | x ∈ C} pr ↔
+    ∃ p r, pr = ⟪p, r⟫ ∧ L.IsUFormula p ∧
+    (∃ n < p, ∃ k < p, ∃ r < p, ∃ v < p, p = ^rel n k r v ∧ r = c.rel param n k r v) ∨
+    (∃ n < p, ∃ k < p, ∃ r < p, ∃ v < p, p = ^nrel n k r v) ∨
+    (∃ n < p, p = ^⊤[n]) ∨
+    (∃ n < p, p = ^⊥[n]) ∨
+    (∃ n < p, ∃ q < p, ∃ r < p, (q ∈ C ∧ n = bv q) ∧ (r ∈ C ∧ n = bv r) ∧ p = q ^⋏[n] r) ∨
+    (∃ n < p, ∃ q < p, ∃ r < p, (q ∈ C ∧ n = bv q) ∧ (r ∈ C ∧ n = bv r) ∧ p = q ^⋎[n] r) ∨
+    (∃ n < p, ∃ q < p, (q ∈ C ∧ n + 1 = bv q) ∧ p = ^∀[n] q) ∨
+    (∃ n < p, ∃ q < p, (q ∈ C ∧ n + 1 = bv q) ∧ p = ^∃[n] q) where
+  mp := by
+
+def fixpointBlueprint : Fixpoint.Blueprint k := ⟨.mkDelta
+  (.mkSigma “p C |
+    (∃ n < !β.rel)
+  ” (by {  }))
+  (by {  })
+⟩
+
+-/
+
+end Construction
 
 end Language.UformulaRec
 
-end formula
+end blueprint
 
 
 

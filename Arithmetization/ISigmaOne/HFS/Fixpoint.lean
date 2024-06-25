@@ -14,43 +14,54 @@ variable {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐈𝚺
 
 namespace Fixpoint
 
-structure Formula (k : ℕ) where
+structure Blueprint (k : ℕ) where
   core : 𝚫₁-Semisentence (k + 2)
 
-namespace Formula
+namespace Blueprint
 
-variable {k} (φ : Formula k)
+variable {k} (φ : Blueprint k)
 
-instance : Coe (Formula k) (𝚫₁-Semisentence (k + 2)) := ⟨Formula.core⟩
+instance : Coe (Blueprint k) (𝚫₁-Semisentence (k + 2)) := ⟨Blueprint.core⟩
 
 def succDef : 𝚺₁-Semisentence (k + 3) := .mkSigma
   “u ih s | ∀ x < u + (s + 1), (x ∈ u → x ≤ s ∧ !φ.core.sigma x ih ⋯) ∧ (x ≤ s ∧ !φ.core.pi x ih ⋯ → x ∈ u)” (by simp)
 
-def prFormulae : PR.Formulae k where
+def prBlueprint : PR.Blueprint k where
   zero := .mkSigma “x | x = 0” (by simp)
   succ := φ.succDef
 
-def limSeqDef : 𝚺₁-Semisentence (k + 2) := (φ.prFormulae).resultDef
+def limSeqDef : 𝚺₁-Semisentence (k + 2) := (φ.prBlueprint).resultDef
 
-def fixpointDef : 𝚫₁-Semisentence (k + 1) := .mkDelta
+def fixpointDef : 𝚺₁-Semisentence (k + 1) :=
+  .mkSigma “x | ∃ s L, !φ.limSeqDef L s ⋯  ∧ x ∈ L” (by simp)
+
+def fixpointDefΔ₁ : 𝚫₁-Semisentence (k + 1) := .mkDelta
   (.mkSigma “x | ∃ L, !φ.limSeqDef L (x + 1) ⋯  ∧ x ∈ L” (by simp))
   (.mkPi “x | ∀ L, !φ.limSeqDef L (x + 1) ⋯  → x ∈ L” (by simp))
 
-end Formula
+end Blueprint
 
 variable (M)
 
-structure Construction {k : ℕ} (φ : Formula k) where
+structure Construction {k : ℕ} (φ : Blueprint k) where
   Φ : (Fin k → M) → Set M → M → Prop
   defined : Defined (fun v ↦ Φ (v ·.succ.succ) {x | x ∈ v 1} (v 0)) φ.core
   monotone {C C' : Set M} (h : C ⊆ C') {v x} : Φ v C x → Φ v C' x
-  finite {C : Set M} {v x} : Φ v C x → Φ v {y ∈ C | y < x} x
+
+class Construction.Finite {k : ℕ} {φ : Blueprint k} (c : Construction M φ) where
+  finite {C : Set M} {v x} : c.Φ v C x → ∃ m, c.Φ v {y ∈ C | y < m} x
+
+class Construction.StrongFinite {k : ℕ} {φ : Blueprint k} (c : Construction M φ) where
+  strong_finite {C : Set M} {v x} : c.Φ v C x → c.Φ v {y ∈ C | y < x} x
+
+instance {k : ℕ} {φ : Blueprint k} (c : Construction M φ) [c.StrongFinite] : c.Finite where
+  finite {_ _ x} := fun h ↦ ⟨x, Construction.StrongFinite.strong_finite h⟩
 
 variable {M}
 
 namespace Construction
 
-variable {k : ℕ} {φ : Formula k} (c : Construction M φ) (v : Fin k → M)
+variable {k : ℕ} {φ : Blueprint k} (c : Construction M φ) (v : Fin k → M)
 
 lemma eval_formula (v : Fin k.succ.succ → M) :
     Semiformula.Evalbm M v (HSemiformula.val φ.core) ↔ c.Φ (v ·.succ.succ) {x | x ∈ v 1} (v 0) := c.defined.df.iff v
@@ -83,18 +94,18 @@ private lemma succ_graph {u v s ih} :
 
 lemma succ_defined : DefinedFunction (fun v : Fin (k + 2) → M ↦ c.succ (v ·.succ.succ) (v 1) (v 0)) φ.succDef := by
   intro v
-  simp [Formula.succDef, succ_graph, HSemiformula.val_sigma, c.eval_formula,
+  simp [Blueprint.succDef, succ_graph, HSemiformula.val_sigma, c.eval_formula,
     c.defined.proper.iff', -and_imp, ←iff_iff_implies_and_implies]
   rfl
 
 lemma eval_succDef (v) :
     Semiformula.Evalbm M v φ.succDef.val ↔ v 0 = c.succ (v ·.succ.succ.succ) (v 2) (v 1) := c.succ_defined.df.iff v
 
-def prConstruction : PR.Construction M φ.prFormulae where
+def prConstruction : PR.Construction M φ.prBlueprint where
   zero := fun _ ↦ ∅
   succ := c.succ
-  zero_defined := by intro v; simp [Formula.prFormulae, emptyset_def]
-  succ_defined := by intro v; simp [Formula.prFormulae, c.eval_succDef]; rfl
+  zero_defined := by intro v; simp [Blueprint.prBlueprint, emptyset_def]
+  succ_defined := by intro v; simp [Blueprint.prBlueprint, c.eval_succDef]; rfl
 
 variable (v)
 
@@ -107,7 +118,7 @@ variable {v}
 lemma limSeq_succ (s : M) : c.limSeq v (s + 1) = c.succ v s (c.limSeq v s) := by simp [limSeq, prConstruction]
 
 lemma termSet_defined : DefinedFunction (fun v ↦ c.limSeq (v ·.succ) (v 0)) φ.limSeqDef :=
-  fun v ↦ by simp [c.prConstruction.result_defined_iff, Formula.limSeqDef]; rfl
+  fun v ↦ by simp [c.prConstruction.result_defined_iff, Blueprint.limSeqDef]; rfl
 
 @[simp] lemma eval_limSeqDef (v) :
     Semiformula.Evalbm M v φ.limSeqDef.val ↔ v 0 = c.limSeq (v ·.succ.succ) (v 1) := c.termSet_defined.df.iff v
@@ -138,7 +149,7 @@ lemma limSeq_cumulative {s s' : M} : s ≤ s' → c.limSeq v s ⊆ c.limSeq v s'
     rcases c.mem_limSeq_succ_iff.mp hu with ⟨hu, Hu⟩
     exact c.mem_limSeq_succ_iff.mpr ⟨_root_.le_trans hu hs, c.monotone (fun z hz ↦ ih hs hz) Hu⟩
 
-lemma mem_limSeq_self {u s : M} :
+lemma mem_limSeq_self [c.StrongFinite] {u s : M} :
     u ∈ c.limSeq v s → u ∈ c.limSeq v (u + 1) := by
   induction u using order_induction_piOne generalizing s
   · apply Definable.all
@@ -152,7 +163,7 @@ lemma mem_limSeq_self {u s : M} :
     · simp
     intro hu
     rcases c.mem_limSeq_succ_iff.mp hu with ⟨_, Hu⟩
-    have : c.Φ v {z | z ∈ c.limSeq v s ∧ z < u} u := c.finite Hu
+    have : c.Φ v {z | z ∈ c.limSeq v s ∧ z < u} u := StrongFinite.strong_finite Hu
     have : c.Φ v {z | z ∈ c.limSeq v u} u :=
       c.monotone (by
         simp only [Set.setOf_subset_setOf, and_imp]
@@ -167,47 +178,101 @@ def Fixpoint (x : M) : Prop := ∃ s, x ∈ c.limSeq v s
 
 variable {v}
 
-lemma fixpoint_iff {x : M} : c.Fixpoint v x ↔ x ∈ c.limSeq v (x + 1) :=
+lemma fixpoint_iff [c.StrongFinite] {x : M} : c.Fixpoint v x ↔ x ∈ c.limSeq v (x + 1) :=
   ⟨by rintro ⟨s, hs⟩; exact c.mem_limSeq_self hs, fun h ↦ ⟨x + 1, h⟩⟩
 
-theorem case :
-    c.Fixpoint v x ↔ c.Φ v {z | c.Fixpoint v z} x :=
-  ⟨by rintro h
-      have : c.Φ v {z | z ∈ c.limSeq v x} x := (c.mem_limSeq_succ_iff.mp (c.fixpoint_iff.mp h)).2
-      exact c.monotone (fun z hx ↦ by exact ⟨x, hx⟩) this,
+lemma fixpoint_iff_succ {x : M} : c.Fixpoint v x ↔ ∃ u, x ∈ c.limSeq v (u + 1) :=
+  ⟨by
+    rintro ⟨u, h⟩
+    rcases zero_or_succ u with (rfl | ⟨u, rfl⟩)
+    · simp at h
+    · exact ⟨u, h⟩, by rintro ⟨u, h⟩; exact ⟨u + 1, h⟩⟩
+
+lemma finite_upperbound (m : M) : ∃ s, ∀ z < m, c.Fixpoint v z → z ∈ c.limSeq v s := by
+  have : ∃ F : M, ∀ x, x ∈ F ↔ x < m ∧ c.Fixpoint v x := by
+    have : 𝚺₁-Predicate fun x ↦ x < m ∧ c.Fixpoint v x :=
+      Definable.and (by definability)
+        (Definable.ex (Definable.comp₂' (by definability)
+          ⟨φ.limSeqDef.rew <| Rew.embSubsts (#0 :> #1 :> fun i ↦ &(v i)), by intro v; simp [c.eval_limSeqDef]⟩))
+    exact finite_comprehension₁! this ⟨m, fun i hi ↦ hi.1⟩ |>.exists
+  rcases this with ⟨F, hF⟩
+  have : ∀ x ∈ F, ∃ u, x ∈ c.limSeq v u := by
+    intro x hx; exact hF x |>.mp hx |>.2
+  have : ∃ f, IsMapping f ∧ domain f = F ∧ ∀ (x y : M), ⟪x, y⟫ ∈ f → x ∈ c.limSeq v y := sigmaOne_skolem
+    (by apply Definable.comp₂' (by definability)
+        exact ⟨φ.limSeqDef.rew <| Rew.embSubsts (#0 :> #2 :> fun i ↦ &(v i)), by intro v; simp [c.eval_limSeqDef]⟩) this
+  rcases this with ⟨f, mf, rfl, hf⟩
+  exact ⟨f, by
+    intro z hzm hz
+    have : ∃ u, ⟪z, u⟫ ∈ f := mf.get_exists_uniq ((hF z).mpr ⟨hzm, hz⟩) |>.exists
+    rcases this with ⟨u, hu⟩
+    have : z ∈ c.limSeq v u := hf z u hu
+    exact c.limSeq_cumulative (le_of_lt <| lt_of_mem_rng hu) this⟩
+
+theorem case [c.Finite] : c.Fixpoint v x ↔ c.Φ v {z | c.Fixpoint v z} x :=
+  ⟨by intro h
+      rcases c.fixpoint_iff_succ.mp h with ⟨u, hu⟩
+      have : c.Φ v {z | z ∈ c.limSeq v u} x := (c.mem_limSeq_succ_iff.mp hu).2
+      exact c.monotone (fun z hx ↦ by exact ⟨u, hx⟩) this,
    by intro hx
-      have : c.Φ v {z | z ∈ c.limSeq v x} x :=
+      rcases Finite.finite hx with ⟨m, hm⟩
+      simp at hm
+      have : ∃ s, ∀ z < m, c.Fixpoint v z → z ∈ c.limSeq v s := c.finite_upperbound m
+      rcases this with ⟨s, hs⟩
+      have : c.Φ v {z | z ∈ c.limSeq v s} x :=
         c.monotone (by
           simp only [Set.setOf_subset_setOf, and_imp]
-          intro z hz hzx
-          exact c.limSeq_cumulative (succ_le_iff_lt.mpr hzx) (c.fixpoint_iff.mp hz))
-          (c.finite hx)
-      exact ⟨x + 1, c.mem_limSeq_succ_iff.mpr <| ⟨by rfl, this⟩⟩⟩
+          intro z hz hzm; exact hs z hzm hz)
+          hm
+      exact ⟨max s x + 1,
+        c.mem_limSeq_succ_iff.mpr <| ⟨by simp, c.monotone (fun z hz ↦ c.limSeq_cumulative (by simp) hz) this⟩⟩⟩
 
 section
 
-lemma fixpoint_defined : Defined (fun v ↦ c.Fixpoint (v ·.succ) (v 0)) φ.fixpointDef :=
-  ⟨by intro v; simp [Formula.fixpointDef, c.eval_limSeqDef],
-   by intro v; simp [Formula.fixpointDef, c.eval_limSeqDef, fixpoint_iff]⟩
+lemma fixpoint_defined : Defined (fun v ↦ c.Fixpoint (v ·.succ) (v 0)) φ.fixpointDef := by
+  intro v; simp [Blueprint.fixpointDef, c.eval_limSeqDef]; rfl
 
 @[simp] lemma eval_fixpointDef (v) :
     Semiformula.Evalbm M v φ.fixpointDef.val ↔ c.Fixpoint (v ·.succ) (v 0) := c.fixpoint_defined.df.iff v
 
+lemma fixpoint_definedΔ₁ [c.StrongFinite] : Defined (fun v ↦ c.Fixpoint (v ·.succ) (v 0)) φ.fixpointDefΔ₁ :=
+  ⟨by intro v; simp [Blueprint.fixpointDefΔ₁, c.eval_limSeqDef],
+   by intro v; simp [Blueprint.fixpointDefΔ₁, c.eval_limSeqDef, fixpoint_iff]⟩
+
+@[simp] lemma eval_fixpointDefΔ₁ [c.StrongFinite] (v) :
+    Semiformula.Evalbm M v φ.fixpointDefΔ₁.val ↔ c.Fixpoint (v ·.succ) (v 0) := c.fixpoint_definedΔ₁.df.iff v
+
 end
 
-theorem induction {P : M → Prop} (hP : DefinablePred ℒₒᵣ (Γ, 1) P)
+theorem induction [c.StrongFinite] {P : M → Prop} (hP : (Γ, 1)-Predicate P)
     (H : ∀ C : Set M, (∀ x ∈ C, c.Fixpoint v x ∧ P x) → ∀ x, c.Φ v C x → P x) :
     ∀ x, c.Fixpoint v x → P x := by
   apply @order_induction_hh M _ _ _ _ _ _ ℒₒᵣ _ _ _ _ Γ 1 _
   · apply Definable.imp
       (Definable.comp₁ (by definability) (by
         apply Definable.of_deltaOne
-        exact ⟨φ.fixpointDef.rew <| Rew.embSubsts <| #0 :> fun x ↦ &(v x), c.fixpoint_defined.proper.rew' _,
+        exact ⟨φ.fixpointDefΔ₁.rew <| Rew.embSubsts <| #0 :> fun x ↦ &(v x), c.fixpoint_definedΔ₁.proper.rew' _,
+          by intro v; simp [c.eval_fixpointDefΔ₁]⟩))
+      (by definability)
+  intro x ih hx
+  have : c.Φ v {y | c.Fixpoint v y ∧ y < x} x := StrongFinite.strong_finite (c.case.mp hx)
+  exact H {y | c.Fixpoint v y ∧ y < x} (by intro y ⟨hy, hyx⟩; exact ⟨hy, ih y hyx hy⟩) x this
+
+/-
+theorem pi₁_induction [c.Finite] {P : M → Prop} (hP : 𝚷₁-Predicate P)
+    (H : ∀ C : Set M, (∀ x ∈ C, c.Fixpoint v x ∧ P x) → ∀ x, c.Φ v C x → P x) :
+    ∀ x, c.Fixpoint v x → P x := by
+  apply @order_induction_hh M _ _ _ _ _ _ ℒₒᵣ _ _ _ _ 𝚷 1 _
+  · apply Definable.imp
+      (Definable.comp₁ (by definability) (by
+        exact ⟨φ.fixpointDef.rew <| Rew.embSubsts <| #0 :> fun x ↦ &(v x),
           by intro v; simp [c.eval_fixpointDef]⟩))
       (by definability)
   intro x ih hx
-  have : c.Φ v {y | c.Fixpoint v y ∧ y < x} x := c.finite (c.case.mp hx)
+  have := (c.case.mp hx)
+  have : c.Φ v {y | c.Fixpoint v y ∧ y < x} x := StrongFinite.strong_finite (c.case.mp hx)
   exact H {y | c.Fixpoint v y ∧ y < x} (by intro y ⟨hy, hyx⟩; exact ⟨hy, ih y hyx hy⟩) x this
+-/
 
 end Construction
 

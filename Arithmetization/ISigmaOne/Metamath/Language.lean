@@ -22,11 +22,11 @@ variable {M}
 
 namespace Language
 
-class Defined (L : Model.Language M) (pL : outParam LDef) where
+protected class Defined (L : Model.Language M) (pL : outParam LDef) where
   func : 𝚺₀-Relation L.Func via pL.func
   rel : 𝚺₀-Relation L.Rel via pL.rel
 
-variable {L : Model.Language M} {pL : LDef} [Defined L pL]
+variable {L : Model.Language M} {pL : LDef} [L.Defined pL]
 
 @[simp] lemma Defined.eval_func (v) :
     Semiformula.Evalbm M v pL.func.val ↔ L.Func (v 0) (v 1) := Defined.func.df.iff v

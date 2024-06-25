@@ -79,7 +79,7 @@ instance seqProduct_definable : 𝚺₁-Function₂ (seqProduct : M → M → M)
 
 end
 
-def seqExp.formulae : PR.Formulae 1 where
+def seqExp.formulae : PR.Blueprint 1 where
   zero := .mkSigma “y x | y = 1” (by simp)
   succ := .mkSigma “y ih n x | !seqProductDef y ih x” (by simp)
 

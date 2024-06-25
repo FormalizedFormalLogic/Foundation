@@ -14,11 +14,11 @@ variable {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐈𝚺
 
 namespace PR
 
-structure Formulae (k : ℕ) where
+structure Blueprint (k : ℕ) where
   zero : HSemisentence ℒₒᵣ (k + 1) 𝚺₁
   succ : HSemisentence ℒₒᵣ (k + 3) 𝚺₁
 
-def Formulae.cseqDef (p : Formulae k) : HSemisentence ℒₒᵣ (k + 1) 𝚺₁ := .mkSigma
+def Blueprint.cseqDef (p : Blueprint k) : HSemisentence ℒₒᵣ (k + 1) 𝚺₁ := .mkSigma
   “s |
     :Seq s
     ∧ (∃ z < s, !p.zero z ⋯ ∧ 0 ~[s] z)
@@ -26,14 +26,14 @@ def Formulae.cseqDef (p : Formulae k) : HSemisentence ℒₒᵣ (k + 1) 𝚺₁ 
         (∃ l <⁺ 2 * s, !lhDef l s ∧ i + 1 < l) →
         ∀ z < s, i ~[s] z → ∃ u < s, !p.succ u z i ⋯ ∧ i + 1 ~[s] u)” (by simp)
 
-def Formulae.resultDef (p : Formulae k) : HSemisentence ℒₒᵣ (k + 2) 𝚺₁ := .mkSigma
+def Blueprint.resultDef (p : Blueprint k) : HSemisentence ℒₒᵣ (k + 2) 𝚺₁ := .mkSigma
   “z u | ∃ s, !p.cseqDef s ⋯ ∧ u ~[s] z” (by simp)
 
-def Formulae.resultDeltaDef (p : Formulae k) : HSemisentence ℒₒᵣ (k + 2) 𝚫₁ := p.resultDef.graphDelta
+def Blueprint.resultDeltaDef (p : Blueprint k) : HSemisentence ℒₒᵣ (k + 2) 𝚫₁ := p.resultDef.graphDelta
 
 variable (M)
 
-structure Construction {k : ℕ} (p : Formulae k) where
+structure Construction {k : ℕ} (p : Blueprint k) where
   zero : (Fin k → M) → M
   succ : (Fin k → M) → M → M → M
   zero_defined : DefinedFunction zero p.zero
@@ -43,7 +43,7 @@ variable {M}
 
 namespace Construction
 
-variable {k : ℕ} {p : Formulae k} (c : Construction M p) (v : Fin k → M)
+variable {k : ℕ} {p : Blueprint k} (c : Construction M p) (v : Fin k → M)
 
 def CSeq (s : M) : Prop := Seq s ∧ ⟪0, c.zero v⟫ ∈ s ∧ ∀ i < lh s - 1, ∀ z, ⟪i, z⟫ ∈ s → ⟪i + 1, c.succ v i z⟫ ∈ s
 
@@ -65,7 +65,7 @@ private lemma cseq_iff (s : M) : c.CSeq v s ↔
         exact h⟩⟩
 
 lemma cseq_defined : Model.Defined (fun v ↦ c.CSeq (v ·.succ) (v 0) : (Fin (k + 1) → M) → Prop) p.cseqDef := by
-  intro v; simp [Formulae.cseqDef, cseq_iff, c.zero_defined.df.iff, c.succ_defined.df.iff]
+  intro v; simp [Blueprint.cseqDef, cseq_iff, c.zero_defined.df.iff, c.succ_defined.df.iff]
 
 @[simp] lemma cseq_defined_iff (v) :
     Semiformula.Evalbm M v p.cseqDef.val ↔ c.CSeq (v ·.succ) (v 0) := c.cseq_defined.df.iff v
@@ -182,7 +182,7 @@ lemma result_graph (z u : M) : z = c.result v u ↔ ∃ s, c.CSeq v s ∧ ⟪u, 
         (by simp [←hu]) h' h⟩
 
 lemma result_defined : Model.DefinedFunction (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → M) → M) p.resultDef := by
-  intro v; simp [Formulae.resultDef, result_graph]
+  intro v; simp [Blueprint.resultDef, result_graph]
   apply exists_congr; intro x
   simp [c.cseq_defined_iff]; intros; rfl
 

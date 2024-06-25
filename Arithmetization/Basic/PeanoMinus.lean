@@ -240,6 +240,50 @@ lemma isPrime_defined : 𝚺₀-Predicate (λ a : M ↦ IsPrime a) via isPrimede
 
 end Prime
 
+section min
+
+def _root_.LO.FirstOrder.Arith.minDef : 𝚺₀-Semisentence 3 :=
+  .mkSigma “z x y | (x ≤ y → z = x) ∧ (x ≥ y → z = y)” (by simp)
+
+lemma min_defined : 𝚺₀-Function₂ (min : M → M → M) via minDef := by
+  intro v; simp [minDef]
+  rcases le_total (v 1) (v 2) with (h | h) <;> simp [h]
+  · intro h₀₁ h₂₁
+    exact le_antisymm (by simpa [h₀₁] using h) (by simpa [h₀₁] using h₂₁)
+  · intro h₀₂ h₁₂
+    exact le_antisymm (by simpa [h₀₂] using h) (by simpa [h₀₂] using h₁₂)
+
+@[simp] lemma eval_minDef (v) :
+    Semiformula.Evalbm M v minDef.val ↔ v 0 = min (v 1) (v 2) := min_defined.df.iff v
+
+instance min_definable (Γ) : Γ-Function₂ (min : M → M → M) := Defined.to_definable₀ _ min_defined
+
+instance min_polybounded : Bounded₂ ℒₒᵣ (min : M → M → M) := ⟨#0, λ _ ↦ by simp⟩
+
+end min
+
+section max
+
+def _root_.LO.FirstOrder.Arith.maxDef : 𝚺₀-Semisentence 3 :=
+  .mkSigma “z x y | (x ≥ y → z = x) ∧ (x ≤ y → z = y)” (by simp)
+
+lemma max_defined : 𝚺₀-Function₂ (max : M → M → M) via maxDef := by
+  intro v; simp [maxDef]
+  rcases le_total (v 1) (v 2) with (h | h) <;> simp [h]
+  · intro h₀₂ h₂₁
+    exact le_antisymm (by simpa [h₀₂] using h₂₁) (by simpa [h₀₂] using h)
+  · intro h₀₁ h₁₂
+    exact le_antisymm (by simpa [h₀₁] using h₁₂) (by simpa [h₀₁] using h)
+
+@[simp] lemma eval_maxDef (v) :
+    Semiformula.Evalbm M v maxDef.val ↔ v 0 = max (v 1) (v 2) := max_defined.df.iff v
+
+instance max_definable (Γ) : Γ-Function₂ (max : M → M → M) := Defined.to_definable₀ _ max_defined
+
+instance max_polybounded : Bounded₂ ℒₒᵣ (max : M → M → M) := ⟨‘#0 + #1’, λ v ↦ by simp⟩
+
+end max
+
 end Model
 
 end

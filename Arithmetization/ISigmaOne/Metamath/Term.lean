@@ -111,7 +111,7 @@ private lemma phi_iff (n : M) (C : M) (t : M) :
     · right; right; exact ⟨k, f, v, hkf, Sv, hk,
         fun i u hi ↦ hv i (lt_of_mem_dom hi) u (lt_of_mem_rng hi) hi, rfl⟩
 
-def formula (pL : LDef) : Fixpoint.Formula 1 := ⟨.ofZero (.mkSigma
+def formula (pL : LDef) : Fixpoint.Blueprint 1 := ⟨.ofZero (.mkSigma
   “t C n |
     (∃ z < n, !qqBvarDef t z) ∨
     (∃ x < t, !qqFvarDef t x) ∨
@@ -126,7 +126,9 @@ def construction : Fixpoint.Construction M (formula pL) where
     · exact Or.inl h
     · exact Or.inr <| Or.inl h
     · exact Or.inr <| Or.inr ⟨k, f, v, hkf, Sv, hk, fun i u hi ↦ hC (h i u hi), rfl⟩
-  finite := by
+
+instance : (construction L).StrongFinite M where
+  strong_finite := by
     rintro C v x (h | h | ⟨k, f, v, hkf, Sv, hk, h, rfl⟩)
     · exact Or.inl h
     · exact Or.inr <| Or.inl h
@@ -141,11 +143,11 @@ variable (L)
 
 def Language.IsSemiterm (n : M) : M → Prop := (construction L).Fixpoint ![n]
 
-def _root_.LO.FirstOrder.Arith.LDef.isSemitermDef (pL : LDef) : 𝚫₁-Semisentence 2 := (formula pL).fixpointDef.rew (Rew.substs ![#1, #0])
+def _root_.LO.FirstOrder.Arith.LDef.isSemitermDef (pL : LDef) : 𝚫₁-Semisentence 2 := (formula pL).fixpointDefΔ₁.rew (Rew.substs ![#1, #0])
 
 lemma isSemiterm_defined : 𝚫₁-Relation L.IsSemiterm via pL.isSemitermDef :=
-  ⟨HSemiformula.ProperOn.rew (construction L).fixpoint_defined.proper _,
-   by intro v; simp [LDef.isSemitermDef, (construction L).eval_fixpointDef]; rfl⟩
+  ⟨HSemiformula.ProperOn.rew (construction L).fixpoint_definedΔ₁.proper _,
+   by intro v; simp [LDef.isSemitermDef, (construction L).eval_fixpointDefΔ₁]; rfl⟩
 
 @[simp] lemma eval_isSemitermDef (v) :
     Semiformula.Evalbm M v pL.isSemitermDef.val ↔ L.IsSemiterm (v 0) (v 1) := (isSemiterm_defined L).df.iff v
@@ -294,7 +296,7 @@ def formulaAux : Semisentence ℒₒᵣ 7 := “t₁ t₂ p C n m w |
   (∃ k < t₁, ∃ f < t₁, ∃ v < t₁, ∃ v' < t₂, !qqFuncDef t₁ k f v ∧ !qqFuncDef t₂ k f v' ∧
   (∀ i < v, ∀ u < v, ∀ u' < v', i ~[v] u → i ~[v'] u' → u ~[C] u'))”
 
-def formula (pL : LDef) : Fixpoint.Formula 3 := ⟨.mkDelta
+def formula (pL : LDef) : Fixpoint.Blueprint 3 := ⟨.mkDelta
   (.mkSigma
     “p C n m w |
       ∃ t₁ <⁺ p, ∃ t₂ <⁺ p, !pairDef p t₁ t₂ ∧ !pL.isSemitermDef.sigma n t₁ ∧ !pL.isSemitermDef.sigma m t₂ ∧
@@ -316,7 +318,9 @@ def construction : Fixpoint.Construction M (formula pL) where
     · exact ⟨ht₁, ht₂, Or.inl h⟩
     · exact ⟨ht₁, ht₂, Or.inr <| Or.inl h⟩
     · exact ⟨ht₁, ht₂, Or.inr <| Or.inr ⟨k, f, v, v', h₁, h₂, fun i u u' hi hi' ↦ hC (h i u u' hi hi')⟩⟩
-  finite := by
+
+instance : (construction L).StrongFinite M where
+  strong_finite := by
     rintro C v p ⟨ht₁, ht₂, (h | h | ⟨k, f, v, v', h₁, h₂, h⟩)⟩
     · exact ⟨ht₁, ht₂, Or.inl h⟩
     · exact ⟨ht₁, ht₂, Or.inr <| Or.inl h⟩
@@ -326,11 +330,12 @@ def construction : Fixpoint.Construction M (formula pL) where
 
 def Subst (n m w : M) : M → Prop := (construction L).Fixpoint ![n, m, w]
 
-def _root_.LO.FirstOrder.Arith.LDef.substDef (pL : LDef) : 𝚫₁-Semisentence 4 := (formula pL).fixpointDef.rew <| Rew.substs ![#3, #0, #1, #2]
+def _root_.LO.FirstOrder.Arith.LDef.substDef (pL : LDef) : 𝚫₁-Semisentence 4 :=
+  (formula pL).fixpointDefΔ₁.rew <| Rew.substs ![#3, #0, #1, #2]
 
 lemma subst_defined : 𝚫₁-Relation₄ (Subst L) via pL.substDef :=
-  ⟨HSemiformula.ProperOn.rew (construction L).fixpoint_defined.proper _,
-   by intro v; simp [LDef.substDef, (construction L).eval_fixpointDef, Subst]⟩
+  ⟨HSemiformula.ProperOn.rew (construction L).fixpoint_definedΔ₁.proper _,
+   by intro v; simp [LDef.substDef, (construction L).eval_fixpointDefΔ₁, Subst]⟩
 
 @[simp] lemma eval_substDef (v) :
     Semiformula.Evalbm M v pL.substDef.val ↔ Subst L (v 0) (v 1) (v 2) (v 3) := (subst_defined L).df.iff v
@@ -581,7 +586,7 @@ def formulaAux : Semisentence ℒₒᵣ 5 := “t₁ t₂ p C n |
   (∃ k < t₁, ∃ f < t₁, ∃ v < t₁, ∃ v' < t₂, !qqFuncDef t₁ k f v ∧ !qqFuncDef t₂ k f v' ∧
   (∀ i < v, ∀ u < v, ∀ u' < v', i ~[v] u → i ~[v'] u' → u ~[C] u'))”
 
-def formula (pL : LDef) : Fixpoint.Formula 1 := ⟨.mkDelta
+def formula (pL : LDef) : Fixpoint.Blueprint 1 := ⟨.mkDelta
   (.mkSigma
     “p C n |
       ∃ t₁ <⁺ p, ∃ t₂ <⁺ p, !pairDef p t₁ t₂ ∧ !pL.isSemitermDef.sigma n t₁ ∧ !pL.isSemitermDef.sigma n t₂ ∧
@@ -603,7 +608,9 @@ def construction : Fixpoint.Construction M (formula pL) where
     · exact ⟨ht₁, ht₂, Or.inl h⟩
     · exact ⟨ht₁, ht₂, Or.inr <| Or.inl h⟩
     · exact ⟨ht₁, ht₂, Or.inr <| Or.inr ⟨k, f, v, v', h₁, h₂, fun i u u' hi hi' ↦ hC (h i u u' hi hi')⟩⟩
-  finite := by
+
+instance : (construction L).StrongFinite M where
+  strong_finite := by
     rintro C v p ⟨ht₁, ht₂, (h | h | ⟨k, f, v, v', h₁, h₂, h⟩)⟩
     · exact ⟨ht₁, ht₂, Or.inl h⟩
     · exact ⟨ht₁, ht₂, Or.inr <| Or.inl h⟩
@@ -613,11 +620,11 @@ def construction : Fixpoint.Construction M (formula pL) where
 
 def Shift (n : M) : M → Prop := (construction L).Fixpoint ![n]
 
-def shiftDef (pL : LDef) : 𝚫₁-Semisentence 2 := (formula pL).fixpointDef.rew <| Rew.substs ![#1, #0]
+def shiftDef (pL : LDef) : 𝚫₁-Semisentence 2 := (formula pL).fixpointDefΔ₁.rew <| Rew.substs ![#1, #0]
 
 lemma shift_defined : 𝚫₁-Relation (Shift L) via (shiftDef pL) :=
-  ⟨HSemiformula.ProperOn.rew (construction L).fixpoint_defined.proper _,
-   by intro v; simp [shiftDef, (construction L).eval_fixpointDef, Shift]⟩
+  ⟨HSemiformula.ProperOn.rew (construction L).fixpoint_definedΔ₁.proper _,
+   by intro v; simp [shiftDef, (construction L).eval_fixpointDefΔ₁, Shift]⟩
 
 @[simp] lemma eval_shiftDef (v) :
     Semiformula.Evalbm M v (shiftDef pL).val ↔ Shift L (v 0) (v 1) := (shift_defined L).df.iff v
