@@ -125,13 +125,13 @@ lemma iff_formula_satisfies_morphism (f : M₁ →ₚ M₂) {w : M₁.World}
       exact ih.mp $ h hww₁;
     . intro h w' hww';
       exact ih.mpr $ h $ f.forth hww';
-  | _ => simp_all [kripke_satisfies];
+  | _ => simp_all [Kripke.Satisfies];
 
 lemma iff_formula_valid_on_frame_surjective_morphism (f : F₁ →ₚ F₂) (f_surjective : Function.Surjective f) : F₁# ⊧ p → F₂# ⊧ p := by
   contrapose;
   intro h;
-  obtain ⟨V₂, w₂, h⟩ := by simpa [valid_on_KripkeFrame, valid_on_KripkeModel] using h;
-  simp [valid_on_KripkeFrame, valid_on_KripkeModel];
+  obtain ⟨V₂, w₂, h⟩ := by simpa [Kripke.ValidOnFrame, Kripke.ValidOnModel] using h;
+  simp [Kripke.ValidOnFrame, Kripke.ValidOnModel];
 
   obtain ⟨w₁, e⟩ := f_surjective w₂; subst e;
   let V₁ := λ w a => V₂ (f w) a;

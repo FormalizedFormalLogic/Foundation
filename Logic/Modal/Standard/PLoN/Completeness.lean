@@ -20,7 +20,7 @@ abbrev CanonicalModel (Λ : DeductionParameter α) [Inhabited (Λ)-MCT] : PLoN.M
   Frame := CanonicalFrame Λ
   Valuation Ω a := (atom a) ∈ Ω.theory
 
-instance CanonicalModel.instSatisfies [Inhabited (Λ)-MCT] : Semantics (Formula α) ((CanonicalModel Λ).World) := Formula.plon_satisfies.semantics (CanonicalModel Λ)
+instance CanonicalModel.instSatisfies [Inhabited (Λ)-MCT] : Semantics (Formula α) ((CanonicalModel Λ).World) := Formula.PLoN.Satisfies.semantics (CanonicalModel Λ)
 
 variable {Λ : DeductionParameter α} [Inhabited (Λ)-MCT] [Λ.HasNec]
          {p : Formula α}
@@ -33,7 +33,7 @@ lemma truthlemma : ∀ {Ω : (CanonicalModel Λ).World}, Ω ⊧ p ↔ (p ∈ Ω.
     . intro h;
       by_contra hC;
       suffices ¬Ω ⊧ □p by contradiction; done;
-      simp [plon_satisfies];
+      simp [PLoN.Satisfies];
       constructor;
       . assumption;
       . obtain ⟨Ω', hΩ'⟩ := lindenbaum (𝓓 := Λ) (T := {~p}) (not_singleton_consistent Ω.consistent (iff_mem_neg.mpr hC));
@@ -46,12 +46,12 @@ lemma truthlemma : ∀ {Ω : (CanonicalModel Λ).World}, Ω ⊧ p ↔ (p ∈ Ω.
           simp_all;
     . intro h;
       by_contra hC;
-      simp [plon_satisfies] at hC;
-      simp_all only [plon_satisfies.iff_models];
-  | _ => simp_all [plon_satisfies];
+      simp [PLoN.Satisfies] at hC;
+      simp_all only [PLoN.Satisfies.iff_models];
+  | _ => simp_all [PLoN.Satisfies];
 
 lemma complete_of_mem_canonicalFrame {𝔽 : FrameClass α} (hFC : CanonicalFrame Λ ∈ 𝔽) : 𝔽 ⊧ p → Λ ⊢! p:= by
-  simp [valid_on_PLoNFrameClass, valid_on_PLoNFrame, valid_on_PLoNModel];
+  simp [PLoN.ValidOnFrameClass, PLoN.ValidOnFrame, PLoN.ValidOnModel];
   contrapose; push_neg;
   intro h;
   use (CanonicalFrame Λ);

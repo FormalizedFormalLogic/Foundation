@@ -19,7 +19,7 @@ lemma IsolatedFrameClass.nonempty : IsolatedFrameClass.Nonempty.{0} := by
   simp [Isolated];
 
 lemma axiomVer_defines : 𝗩𝗲𝗿.DefinesKripkeFrameClass (α := α) IsolatedFrameClass := by
-  simp [AxiomSet.DefinesKripkeFrameClass, valid_on_KripkeFrame];
+  simp [AxiomSet.DefinesKripkeFrameClass, Kripke.ValidOnFrame];
   intro F;
   constructor;
   . intro h x y hxy;

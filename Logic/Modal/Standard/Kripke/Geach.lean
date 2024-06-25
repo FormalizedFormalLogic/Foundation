@@ -127,8 +127,8 @@ section Definability
 lemma MultiGeachConfluentFrameClass.def_nil : MultiGeachConfluentFrameClass [] = AllFrameClass := by rfl;
 
 
-open Formula (atom kripke_satisfies)
-open Formula.kripke_satisfies (multibox_def multidia_def)
+open Formula (atom Kripke.Satisfies)
+open Formula.Kripke.Satisfies (multibox_def multidia_def)
 
 variable [Inhabited α]
 
@@ -138,18 +138,18 @@ lemma axiomGeach_defines : 𝗴𝗲(t).DefinesKripkeFrameClass (α := α) (Geach
   . rintro h x y z ⟨hi, hj⟩;
     let M : Model α := { Frame := F, Valuation := λ v _ => y ≺^[t.m] v };
     simp at h;
-    have him_x : kripke_satisfies M x (◇^[t.i](□^[t.m](atom default))) := by
-      apply kripke_satisfies.multidia_def.mpr;
+    have him_x : Kripke.Satisfies M x (◇^[t.i](□^[t.m](atom default))) := by
+      apply Kripke.Satisfies.multidia_def.mpr;
       use y;
       constructor;
       . exact hi;
-      . apply kripke_satisfies.multibox_def.mpr; aesop;
-    have hjn_x : kripke_satisfies M x (□^[t.j](◇^[t.n](atom default))) := h (Formula.atom default) M.Valuation x him_x;
-    have hn_z : kripke_satisfies M z (◇^[t.n](atom default)) := kripke_satisfies.multibox_def.mp hjn_x hj;
-    obtain ⟨u, hzu, hyu⟩ := kripke_satisfies.multidia_def.mp hn_z;
+      . apply Kripke.Satisfies.multibox_def.mpr; aesop;
+    have hjn_x : Kripke.Satisfies M x (□^[t.j](◇^[t.n](atom default))) := h (Formula.atom default) M.Valuation x him_x;
+    have hn_z : Kripke.Satisfies M z (◇^[t.n](atom default)) := Kripke.Satisfies.multibox_def.mp hjn_x hj;
+    obtain ⟨u, hzu, hyu⟩ := Kripke.Satisfies.multidia_def.mp hn_z;
     use u;
     exact ⟨hyu, hzu⟩;
-  . simp [AxiomSet.Geach, Axioms.Geach, kripke_satisfies];
+  . simp [AxiomSet.Geach, Axioms.Geach, Kripke.Satisfies];
     intro h p V x him;
     apply multibox_def.mpr;
     intro z rxz;

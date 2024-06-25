@@ -117,22 +117,22 @@ variable {World α : Type*}
 
 open Standard.Kripke
 
-def Formula.kripke_satisfies (M : Kripke.Model α) (x : M.World) : Formula α → Prop
+def Formula.Kripke.Satisfies (M : Kripke.Model α) (x : M.World) : Formula α → Prop
   | atom a  => M.Valuation x a
   | verum   => True
   | falsum  => False
-  | and p q => (kripke_satisfies M x p) ∧ (kripke_satisfies M x q)
-  | or p q  => (kripke_satisfies M x p) ∨ (kripke_satisfies M x q)
-  | imp p q => (kripke_satisfies M x p) → (kripke_satisfies M x q)
-  | box p   => ∀ {y}, x ≺ y → (kripke_satisfies M y p)
+  | and p q => (Satisfies M x p) ∧ (Satisfies M x q)
+  | or p q  => (Satisfies M x p) ∨ (Satisfies M x q)
+  | imp p q => (Satisfies M x p) → (Satisfies M x q)
+  | box p   => ∀ {y}, x ≺ y → (Satisfies M y p)
 
-namespace Formula.kripke_satisfies
+namespace Formula.Kripke.Satisfies
 
-protected instance semantics {M : Kripke.Model α} : Semantics (Formula α) (M.World) := ⟨fun x ↦ Formula.kripke_satisfies M x⟩
+protected instance semantics {M : Kripke.Model α} : Semantics (Formula α) (M.World) := ⟨fun x ↦ Formula.Kripke.Satisfies M x⟩
 
 variable {M : Kripke.Model α} {x : M.World} {p q : Formula α}
 
-@[simp] protected lemma iff_models : x ⊧ p ↔ kripke_satisfies M x p := iff_of_eq rfl
+@[simp] protected lemma iff_models : x ⊧ p ↔ Kripke.Satisfies M x p := iff_of_eq rfl
 
 lemma and_def : x ⊧ p ⋏ q ↔ x ⊧ p ∧ x ⊧ q := by
   constructor;
@@ -148,7 +148,7 @@ protected instance tarski : Semantics.Tarski (M.World) where
   realize_imp := by aesop;
 
 
-lemma dia_def : x ⊧ ◇p ↔ ∃ y, x ≺ y ∧ y ⊧ p := by simp [kripke_satisfies];
+lemma dia_def : x ⊧ ◇p ↔ ∃ y, x ≺ y ∧ y ⊧ p := by simp [Kripke.Satisfies];
 
 lemma multibox_def : x ⊧ □^[n]p ↔ ∀ {y}, x ≺^[n] y → y ⊧ p := by
   induction n generalizing x with
@@ -156,7 +156,7 @@ lemma multibox_def : x ⊧ □^[n]p ↔ ∀ {y}, x ≺^[n] y → y ⊧ p := by
   | succ n ih =>
     constructor;
     . intro h y Rxy;
-      simp [kripke_satisfies] at h;
+      simp [Kripke.Satisfies] at h;
       obtain ⟨u, Rxu, Ruy⟩ := Rxy;
       exact (ih.mp $ h Rxu) Ruy;
     . simp;
@@ -189,40 +189,40 @@ lemma multidia_def : x ⊧ ◇^[n]p ↔ ∃ y, x ≺^[n] y ∧ y ⊧ p := by
       . apply ih.mpr;
         use y;
 
-end Formula.kripke_satisfies
+end Formula.Kripke.Satisfies
 
 
-def Formula.valid_on_KripkeModel (M : Kripke.Model α) (p : Formula α) := ∀ x : M.World, x ⊧ p
+def Formula.Kripke.ValidOnModel (M : Kripke.Model α) (p : Formula α) := ∀ x : M.World, x ⊧ p
 
-namespace Formula.valid_on_KripkeModel
+namespace Formula.Kripke.ValidOnModel
 
-protected instance : Semantics (Formula α) (Kripke.Model α) := ⟨fun M ↦ Formula.valid_on_KripkeModel M⟩
+protected instance : Semantics (Formula α) (Kripke.Model α) := ⟨fun M ↦ Formula.Kripke.ValidOnModel M⟩
 
-@[simp] protected lemma iff_models {M : Kripke.Model α} : M ⊧ f ↔ valid_on_KripkeModel M f := iff_of_eq rfl
+@[simp] protected lemma iff_models {M : Kripke.Model α} : M ⊧ f ↔ Kripke.ValidOnModel M f := iff_of_eq rfl
 
 instance : Semantics.Bot (Kripke.Model α) where
-  realize_bot M := by simp [valid_on_KripkeModel, kripke_satisfies]; use ﹫;
+  realize_bot M := by simp [Kripke.ValidOnModel, Kripke.Satisfies]; use ﹫;
 
-end Formula.valid_on_KripkeModel
+end Formula.Kripke.ValidOnModel
 
 
-def Formula.valid_on_KripkeFrame (F : Frame) (p : Formula α) := ∀ V, (⟨F, V⟩ : Kripke.Model α) ⊧ p
+def Formula.Kripke.ValidOnFrame (F : Frame) (p : Formula α) := ∀ V, (⟨F, V⟩ : Kripke.Model α) ⊧ p
 
-namespace Formula.valid_on_KripkeFrame
+namespace Formula.Kripke.ValidOnFrame
 
-protected instance semantics : Semantics (Formula α) (Frame.Dep α) := ⟨fun F ↦ Formula.valid_on_KripkeFrame F⟩
+protected instance semantics : Semantics (Formula α) (Frame.Dep α) := ⟨fun F ↦ Formula.Kripke.ValidOnFrame F⟩
 
 variable {F : Frame.Dep α}
 
-@[simp] protected lemma models_iff : F ⊧ p ↔ valid_on_KripkeFrame F p := iff_of_eq rfl
+@[simp] protected lemma models_iff : F ⊧ p ↔ Kripke.ValidOnFrame F p := iff_of_eq rfl
 
 
 instance : Semantics.Bot (Frame.Dep α) where
-  realize_bot _ := by simp [valid_on_KripkeFrame];
+  realize_bot _ := by simp [Kripke.ValidOnFrame];
 
 
 protected lemma axiomK : F ⊧* 𝗞 := by
-  simp [valid_on_KripkeFrame, valid_on_KripkeModel, System.Axioms.K];
+  simp [Kripke.ValidOnFrame, Kripke.ValidOnModel, System.Axioms.K];
   intro _ p q e V x; subst e;
   intro h₁ h₂ y Rxy;
   exact h₁ Rxy $ h₂ Rxy;
@@ -235,36 +235,36 @@ protected lemma mdp (hpq : F ⊧ p ⟶ q) (hp : F ⊧ p) : F ⊧ q := by
   intro V x;
   exact (hpq V x) (hp V x);
 
-end Formula.valid_on_KripkeFrame
+end Formula.Kripke.ValidOnFrame
 
 
-@[simp] def Formula.valid_on_KripkeFrameClass (𝔽 : FrameClass) (p : Formula α) := ∀ {F : Frame}, F ∈ 𝔽 → F# ⊧ p
+@[simp] def Formula.Kripke.ValidOnFrameClass (𝔽 : FrameClass) (p : Formula α) := ∀ {F : Frame}, F ∈ 𝔽 → F# ⊧ p
 
-namespace Formula.valid_on_KripkeFrameClass
+namespace Formula.Kripke.ValidOnFrameClass
 
-protected instance semantics : Semantics (Formula α) (FrameClass.Dep α) := ⟨fun 𝔽 ↦ valid_on_KripkeFrameClass 𝔽⟩
+protected instance semantics : Semantics (Formula α) (FrameClass.Dep α) := ⟨fun 𝔽 ↦ Kripke.ValidOnFrameClass 𝔽⟩
 
 variable {𝔽 : FrameClass.Dep α}
 
-@[simp] protected lemma models_iff : 𝔽 ⊧ p ↔ Formula.valid_on_KripkeFrameClass 𝔽 p := iff_of_eq rfl
+@[simp] protected lemma models_iff : 𝔽 ⊧ p ↔ Formula.Kripke.ValidOnFrameClass 𝔽 p := iff_of_eq rfl
 
 
 protected lemma axiomK : 𝔽 ⊧* 𝗞 := by
   simp only [Semantics.RealizeSet.setOf_iff];
   rintro f ⟨p, q, _⟩ F _;
-  apply (Semantics.RealizeSet.setOf_iff.mp $ valid_on_KripkeFrame.axiomK) f;
+  apply (Semantics.RealizeSet.setOf_iff.mp $ Kripke.ValidOnFrame.axiomK) f;
   use p, q;
 
 protected lemma nec (h : 𝔽 ⊧ p) : 𝔽 ⊧ □p := by
   intro _ hF;
-  apply valid_on_KripkeFrame.nec;
+  apply Kripke.ValidOnFrame.nec;
   exact h hF;
 
 protected lemma mdp (hpq : 𝔽 ⊧ p ⟶ q) (hp : 𝔽 ⊧ p) : 𝔽 ⊧ q := by
   intro _ hF;
-  exact valid_on_KripkeFrame.mdp (hpq hF) (hp hF)
+  exact Kripke.ValidOnFrame.mdp (hpq hF) (hp hF)
 
-end Formula.valid_on_KripkeFrameClass
+end Formula.Kripke.ValidOnFrameClass
 
 
 namespace AxiomSet
@@ -321,7 +321,7 @@ lemma AllFrameClass.nonempty : AllFrameClass.Nonempty.{0} := by
 lemma axiomK_defines : 𝗞.DefinesKripkeFrameClass (α := α) AllFrameClass := by
   intro F;
   simp only [Set.mem_univ, iff_true];
-  exact valid_on_KripkeFrame.axiomK;
+  exact Kripke.ValidOnFrame.axiomK;
 
 lemma axiomK_union_definability {Ax : AxiomSet α} : (Ax.DefinesKripkeFrameClass 𝔽) ↔ (𝗞 ∪ Ax).DefinesKripkeFrameClass 𝔽 := by
   constructor;
@@ -334,7 +334,7 @@ lemma axiomK_union_definability {Ax : AxiomSet α} : (Ax.DefinesKripkeFrameClass
     . intro h;
       simp only [Semantics.RealizeSet.union_iff];
       constructor;
-      . apply valid_on_KripkeFrame.axiomK;
+      . apply Kripke.ValidOnFrame.axiomK;
       . exact defines.mpr h;
   . intro defines F;
     simp only [DefinesKripkeFrameClass] at defines;
@@ -343,7 +343,7 @@ lemma axiomK_union_definability {Ax : AxiomSet α} : (Ax.DefinesKripkeFrameClass
       apply defines.mp;
       simp only [Semantics.RealizeSet.union_iff];
       constructor;
-      . apply valid_on_KripkeFrame.axiomK;
+      . apply Kripke.ValidOnFrame.axiomK;
       . exact h;
     . intro h;
       simp only [Semantics.RealizeSet.union_iff] at defines;

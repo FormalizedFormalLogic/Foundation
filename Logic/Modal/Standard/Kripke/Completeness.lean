@@ -94,7 +94,7 @@ namespace CanonicalModel
 variable [Inhabited (Axᴺ)-MCT]
 
 @[reducible]
-instance : Semantics (Formula α) (CanonicalModel Ax).World := Formula.kripke_satisfies.semantics (M := CanonicalModel Ax)
+instance : Semantics (Formula α) (CanonicalModel Ax).World := Formula.Kripke.Satisfies.semantics (M := CanonicalModel Ax)
 
 -- @[simp] lemma frame_def : (CanonicalModel Ax).Rel' Ω₁ Ω₂ ↔ (□''⁻¹Ω₁.theory : Theory α) ⊆ Ω₂.theory := by rfl
 -- @[simp] lemma val_def : (CanonicalModel Ax).Valuation Ω a ↔ (atom a) ∈ Ω.theory := by rfl
@@ -119,7 +119,7 @@ lemma truthlemma : ∀ {Ω : (CanonicalModel Ax).World}, Ω ⊧ p ↔ (p ∈ Ω.
     . intro h Ω' hΩ';
       apply ih.mpr;
       exact CanonicalFrame.frame_def_box.mp hΩ' h;
-  | _ => simp_all [kripke_satisfies];
+  | _ => simp_all [Kripke.Satisfies];
 
 lemma iff_valid_on_canonicalModel_deducible : (CanonicalModel Ax) ⊧ p ↔ ((Axᴺ) ⊢! p) := by
   constructor;
@@ -131,7 +131,7 @@ lemma iff_valid_on_canonicalModel_deducible : (CanonicalModel Ax) ⊧ p ↔ ((Ax
       have : _ ⊢! p := dne'! $ replace_imply_left_conj'! hΓ hC;
       contradiction;
     obtain ⟨Ω, hΩ⟩ := lindenbaum this;
-    simp [valid_on_KripkeModel];
+    simp [Kripke.ValidOnModel];
     use Ω;
     exact truthlemma.not.mpr $ iff_mem_neg.mp (show ~p ∈ Ω.theory by simp_all);
   . intro h Ω;
@@ -155,7 +155,7 @@ lemma realize_theory_of_self_canonicalModel : (CanonicalModel Ax) ⊧* (System.t
 end
 
 lemma complete_of_mem_canonicalFrame [Inhabited (Axᴺ)-MCT] {𝔽 : FrameClass.Dep α} (hFC : CanonicalFrame Ax ∈ 𝔽) : 𝔽 ⊧ p → (Axᴺ) ⊢! p := by
-  simp [valid_on_KripkeFrameClass, valid_on_KripkeFrame];
+  simp [Kripke.ValidOnFrameClass, Kripke.ValidOnFrame];
   contrapose;
   push_neg;
   intro h;

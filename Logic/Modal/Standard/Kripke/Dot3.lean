@@ -17,30 +17,30 @@ private lemma connected_of_dot3 : F# ⊧* (.𝟯 : AxiomSet α) → Connected F 
   contrapose;
   intro hCon; simp [Connected] at hCon;
   obtain ⟨x, y, rxy, z, ryz, nryz, nrzy⟩ := hCon;
-  simp [valid_on_KripkeFrame];
+  simp [Kripke.ValidOnFrame];
   obtain ⟨f, finv, fInj⟩ := atleast.mapping;
   existsi f 0, f 1, (λ w a =>
     match (finv a) with
     | 0 => y ≺ w
     | 1 => z ≺ w
   );
-  simp [valid_on_KripkeModel, kripke_satisfies];
+  simp [Kripke.ValidOnModel, Kripke.Satisfies];
   use x;
   constructor;
   . use y;
     constructor;
     . assumption;
-    . simp_all [kripke_satisfies, (fInj 0), (fInj 1)];
+    . simp_all [Kripke.Satisfies, (fInj 0), (fInj 1)];
   . use z;
     constructor;
     . assumption;
-    . simp_all [kripke_satisfies, (fInj 0), (fInj 1)];
+    . simp_all [Kripke.Satisfies, (fInj 0), (fInj 1)];
 
 private lemma dot3_of_connected : Connected F → F# ⊧* (.𝟯 : AxiomSet α) := by
   intro hCon;
-  simp [valid_on_KripkeFrame, valid_on_KripkeModel, Axioms.Dot3];
+  simp [Kripke.ValidOnFrame, Kripke.ValidOnModel, Axioms.Dot3];
   intro δ p q e V x; subst e;
-  simp [kripke_satisfies];
+  simp [Kripke.Satisfies];
   by_contra hC; push_neg at hC;
   obtain ⟨⟨y, rxy, hp, hnq⟩, ⟨z, rxz, hq, hnp⟩⟩ := hC;
   cases hCon ⟨rxy, rxz⟩ with

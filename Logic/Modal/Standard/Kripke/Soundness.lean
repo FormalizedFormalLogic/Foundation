@@ -18,18 +18,18 @@ lemma sound (defines : Ax.DefinesKripkeFrameClass 𝔽) (d : Axᴺ ⊢! p) : �
   | hMaxm h =>
     simp only [Set.mem_setOf_eq] at h;
     rcases h with (hK | hR);
-    . exact (Semantics.RealizeSet.setOf_iff.mp valid_on_KripkeFrameClass.axiomK) _ hK;
+    . exact (Semantics.RealizeSet.setOf_iff.mp Kripke.ValidOnFrameClass.axiomK) _ hK;
     . intro F hF;
       exact Semantics.RealizeSet.setOf_iff.mp (defines.mpr hF) _ hR;
-  | hMdp ihpq ihp => exact valid_on_KripkeFrameClass.mdp ihpq ihp;
-  | hNec ih => exact valid_on_KripkeFrameClass.nec ih;
+  | hMdp ihpq ihp => exact Kripke.ValidOnFrameClass.mdp ihpq ihp;
+  | hNec ih => exact Kripke.ValidOnFrameClass.nec ih;
   | hDisj₃ =>
-    simp_all [valid_on_KripkeFrameClass, valid_on_KripkeFrame, valid_on_KripkeModel, kripke_satisfies];
+    simp_all [Kripke.ValidOnFrameClass, Kripke.ValidOnFrame, Kripke.ValidOnModel, Kripke.Satisfies];
     intros; rename_i hpr hqr hpq;
     cases hpq with
     | inl hp => exact hpr hp;
     | inr hq => exact hqr hq;
-  | _ => simp_all [valid_on_KripkeFrameClass, valid_on_KripkeFrame, valid_on_KripkeModel, kripke_satisfies];
+  | _ => simp_all [Kripke.ValidOnFrameClass, Kripke.ValidOnFrame, Kripke.ValidOnModel, Kripke.Satisfies];
 
 lemma sound_of_defines (defines : Ax.DefinesKripkeFrameClass 𝔽) : Sound Axᴺ 𝔽# := ⟨sound defines⟩
 
@@ -60,18 +60,18 @@ lemma finite_sound (defines : Ax.FinitelyDefinesKripkeFrameClass 𝔽) (d : Ax�
   | hMaxm h =>
     simp only [Set.mem_setOf_eq] at h;
     rcases h with (hK | hR);
-    . exact (Semantics.RealizeSet.setOf_iff.mp valid_on_KripkeFrameClass.axiomK) _ hK;
+    . exact (Semantics.RealizeSet.setOf_iff.mp Kripke.ValidOnFrameClass.axiomK) _ hK;
     . rintro F ⟨FF, hFF, eFF⟩; subst eFF;
       exact Semantics.RealizeSet.setOf_iff.mp (defines.mpr hFF) _ hR;
-  | hMdp ihpq ihp => exact valid_on_KripkeFrameClass.mdp ihpq ihp;
-  | hNec ih => exact valid_on_KripkeFrameClass.nec ih;
+  | hMdp ihpq ihp => exact Kripke.ValidOnFrameClass.mdp ihpq ihp;
+  | hNec ih => exact Kripke.ValidOnFrameClass.nec ih;
   | hDisj₃ =>
-    simp_all [valid_on_KripkeFrameClass, valid_on_KripkeFrame, valid_on_KripkeModel, kripke_satisfies];
+    simp_all [Kripke.ValidOnFrameClass, Kripke.ValidOnFrame, Kripke.ValidOnModel, Kripke.Satisfies];
     intros; rename_i hpr hqr hpq;
     cases hpq with
     | inl hp => exact hpr hp;
     | inr hq => exact hqr hq;
-  | _ => simp_all [valid_on_KripkeFrameClass, valid_on_KripkeFrame, valid_on_KripkeModel, kripke_satisfies];
+  | _ => simp_all [Kripke.ValidOnFrameClass, Kripke.ValidOnFrame, Kripke.ValidOnModel, Kripke.Satisfies];
 
 lemma sound_of_finitely_defines (defines : Ax.FinitelyDefinesKripkeFrameClass 𝔽) : Sound Axᴺ ↑𝔽# := ⟨finite_sound defines⟩
 

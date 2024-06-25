@@ -31,7 +31,7 @@ lemma strictreducible_of_ssubset_FrameClass (hne : Ax₂.Nonempty) (h𝔽 : 𝔽
     constructor;
     . exact ⟨Deduction.maxm (by simp_all)⟩;
     . apply (not_imp_not.mpr $ sound₁.sound);
-      simp [valid_on_KripkeFrameClass];
+      simp [Kripke.ValidOnFrameClass];
       obtain ⟨F, hF₁, hF₂⟩ := by simpa [Set.not_subset] using h𝔽.2;
       use F;
       constructor;
