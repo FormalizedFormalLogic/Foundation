@@ -1,10 +1,5 @@
-import Logic.Propositional.Superintuitionistic.Kripke.Semantics
 import Logic.Propositional.Superintuitionistic.Kripke.DP
-import Logic.Modal.Standard.Deduction
-import Logic.Modal.Standard.HilbertStyle
-import Logic.Modal.Standard.Kripke.Semantics
-import Logic.Modal.Standard.Kripke.Soundness
-import Logic.Modal.Standard.Kripke.Geach.Definability
+import Logic.Modal.Standard.Kripke.Geach
 
 namespace LO.System
 
@@ -36,19 +31,6 @@ def GoedelTranslation : Superintuitionistic.Formula α → Formula α
 
 postfix:75 "ᵍ" => GoedelTranslation
 
-namespace GoedelTranslation
-
-variable {p q : Superintuitionistic.Formula α}
-
-@[simp] lemma atom_def : (Superintuitionistic.Formula.atom a)ᵍ = □(Formula.atom a) := by simp [GoedelTranslation];
-@[simp] lemma falsum_def : (⊥ : Superintuitionistic.Formula α)ᵍ = ⊥ := by simp [GoedelTranslation];
-@[simp] lemma verum_def : (⊤ : Superintuitionistic.Formula α)ᵍ = ⊤ := by simp [GoedelTranslation];
-@[simp] lemma and_def : (p ⋏ q)ᵍ = pᵍ ⋏ qᵍ := by simp [GoedelTranslation];
-@[simp] lemma or_def : (p ⋎ q)ᵍ = pᵍ ⋎ qᵍ := by simp [GoedelTranslation];
-@[simp] lemma imp_def : (p ⟶ q)ᵍ = □(pᵍ ⟶ qᵍ) := by simp [GoedelTranslation];
-@[simp] lemma neg_def' : (~p)ᵍ = □~(p)ᵍ := by simp [GoedelTranslation, NegAbbrev.neg];
-
-end GoedelTranslation
 
 class ModalCompanion (i𝓓 : Superintuitionistic.DeductionParameter α) (m𝓓 : Modal.Standard.DeductionParameter α) where
   companion : ∀ {p : Superintuitionistic.Formula α}, i𝓓 ⊢! p ↔ m𝓓 ⊢! pᵍ
@@ -58,25 +40,25 @@ variable {p q r : Superintuitionistic.Formula α}
 
 lemma axiomTc_GTranslate! [System.K4 m𝓓] : m𝓓 ⊢! pᵍ ⟶ □pᵍ := by
   induction p using Superintuitionistic.Formula.rec' with
-  | hatom => simp only [GoedelTranslation.atom_def, axiomFour!];
-  | himp => simp only [GoedelTranslation.imp_def, axiomFour!];
-  | hfalsum => simp only [GoedelTranslation.falsum_def, efq!];
+  | hatom => simp [GoedelTranslation, axiomFour!];
+  | himp => simp [GoedelTranslation, axiomFour!];
+  | hfalsum => simp [GoedelTranslation, efq!];
   | hverum => exact dhyp! (nec! verum!);
   | hand p q ihp ihq =>
-    simp only [GoedelTranslation.and_def];
+    simp only [GoedelTranslation];
     exact imp_trans''! (and_replace! ihp ihq) collect_box_and!
   | hor p q ihp ihq =>
-    simp only [GoedelTranslation.or_def];
+    simp only [GoedelTranslation];
     exact imp_trans''! (or₃''! (imply_or_left'! ihp) (imply_or_right'! ihq)) collect_box_or!
 
 instance [System.S4 m𝓓] : System.K4 m𝓓 where
 
 private lemma provable_efq_of_provable_S4.case_imply₁ [System.K4 m𝓓] : m𝓓 ⊢! (p ⟶ q ⟶ p)ᵍ := by
-  simp only [GoedelTranslation.imp_def];
+  simp only [GoedelTranslation];
   exact nec! $ imp_trans''! axiomTc_GTranslate! $ axiomK'! $ nec! $ imply₁!;
 
 private lemma provable_efq_of_provable_S4.case_imply₂ [System.S4 m𝓓] : m𝓓 ⊢! ((p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r)ᵍ := by
-  simp only [GoedelTranslation.imp_def];
+  simp only [GoedelTranslation];
   refine nec! $ imp_trans''! (imp_trans''! (axiomK'! $ nec! ?b) axiomFour!) $ axiomK'! $ nec! $ imp_trans''! (axiomK'! $ nec! imply₂!) axiomK!;
   apply provable_iff_provable.mpr;
   apply deduct_iff.mpr;
@@ -87,11 +69,11 @@ private lemma provable_efq_of_provable_S4.case_imply₂ [System.S4 m𝓓] : m�
   exact axiomT'! this;
 
 private lemma provable_efq_of_provable_S4.case_and₃ [System.K4 m𝓓] : m𝓓 ⊢! (p ⟶ q ⟶ p ⋏ q)ᵍ := by
-  simp only [GoedelTranslation.imp_def, GoedelTranslation.and_def];
+  simp only [GoedelTranslation];
   exact nec! $ imp_trans''! axiomTc_GTranslate! $ axiomK'! $ nec! $ and₃!
 
 private lemma provable_efq_of_provable_S4.case_or₃ [System.K4 m𝓓] : m𝓓 ⊢! (((p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r)))ᵍ := by
-  simp only [GoedelTranslation.imp_def, GoedelTranslation.or_def];
+  simp only [GoedelTranslation];
   exact nec! $ imp_trans''! axiomFour! $ axiomK'! $ nec! $ imp_trans''! (axiomK'! $ nec! $ or₃!) axiomK!;
 
 open provable_efq_of_provable_S4 in
@@ -106,17 +88,19 @@ lemma provable_efq_of_provable_S4 (h : 𝐈𝐧𝐭 ⊢! p) : 𝐒𝟒 ⊢! pᵍ
   | verum => apply verum!;
   | imply₁ => exact case_imply₁;
   | imply₂ => exact case_imply₂;
-  | and₁ => simp only [GoedelTranslation.imp_def, GoedelTranslation.and_def]; exact nec! and₁!;
-  | and₂ => simp only [GoedelTranslation.imp_def, GoedelTranslation.and_def]; exact nec! and₂!;
+  | and₁ => simp only [GoedelTranslation]; exact nec! and₁!;
+  | and₂ => simp only [GoedelTranslation]; exact nec! and₂!;
   | and₃ => exact case_and₃;
-  | or₁ => simp only [GoedelTranslation.imp_def, GoedelTranslation.or_def]; exact nec! or₁!;
-  | or₂ => simp only [GoedelTranslation.imp_def, GoedelTranslation.or_def]; exact nec! or₂!;
+  | or₁ => simp only [GoedelTranslation]; exact nec! or₁!;
+  | or₂ => simp only [GoedelTranslation]; exact nec! or₂!;
   | or₃ => exact case_or₃;
 
 open Superintuitionistic.Kripke
 open Superintuitionistic.Formula.Kripke
 
 open Kripke
+
+open Formula
 
 lemma provable_S4_of_provable_efq : (𝐒𝟒 ⊢! pᵍ) → (𝐈𝐧𝐭 ⊢! p) := by
   contrapose;
@@ -133,21 +117,18 @@ lemma provable_S4_of_provable_efq : (𝐒𝟒 ⊢! pᵍ) → (𝐈𝐧𝐭 ⊢! 
         simp_all only [Satisfies.iff_models, Satisfies, Formula.Kripke.Satisfies];
         exact iV_hereditary h (by assumption);
       . intro h;
-        simpa only [Satisfies.iff_models, Satisfies, Formula.Kripke.Satisfies] using h v $ iF.Rel_refl v;
-    | _ => simp_all;
+        simpa only [Satisfies.iff_models, Satisfies, Formula.Kripke.Satisfies] using h $ iF.Rel_refl v;
+    | _ => simp_all [Kripke.Satisfies];
   have : ¬(Modal.Standard.Formula.Kripke.Satisfies M w (pᵍ)) := (h₁ p w).not.mp h;
 
-  apply not_imp_not.mpr $ Modal.Standard.Kripke.sound!_on_frameclass;
-  simp [Formula.Kripke.ValidOnFrame, Formula.Kripke.ValidOnModel];
-  existsi M.Frame;
-  constructor;
-  . apply Modal.Standard.Kripke.iff_definability_memAxiomSetFrameClass
-      (show Kripke.Definability _ (λ F => Reflexive F.Rel ∧ Transitive F.Rel) by simpa using instGeachDefinability (L := 𝐒𝟒))
-      |>.mpr;
-    constructor;
-    . exact iF.Rel_refl;
-    . exact iF.Rel_trans;
-  . use M.Valuation, w;
+  apply not_imp_not.mpr $ Modal.Standard.Kripke.sound_S4.sound;
+  simp [Formula.Kripke.ValidOnFrame, Kripke.ValidOnModel];
+  use M.Frame;
+  exact ⟨
+    iF.Rel_refl,
+    iF.Rel_trans,
+    by use M.Valuation, w
+  ⟩;
 
 /-- a.k.a. _Gödel-McKinsey-Tarski Theorem_ -/
 theorem provable_efq_iff_provable_S4 : 𝐈𝐧𝐭 ⊢! p ↔ 𝐒𝟒 ⊢! pᵍ := ⟨provable_efq_of_provable_S4, provable_S4_of_provable_efq⟩

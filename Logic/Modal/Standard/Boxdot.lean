@@ -22,18 +22,18 @@ open StandardModalLogicalConnective (boxdot)
 variable {p : Formula α}
 
 lemma boxdotTranslatedK4_of_S4 (h : 𝐒𝟒 ⊢! p) : 𝐊𝟒 ⊢! pᵇ := by
-  induction h.some using Deduction.inducition_with_nec with
+  induction h using Deduction.inducition_with_necOnly! with
   | hMaxm a =>
-    rcases a with (hK | hT) | hFour;
+    rcases a with (hK | hT | hFour);
     . obtain ⟨_, _, e⟩ := hK; subst_vars; dsimp [Axioms.K, BoxdotTranslation]; apply boxdot_axiomK!;
     . obtain ⟨_, e⟩ := hT; subst_vars; dsimp [Axioms.T, BoxdotTranslation]; apply boxdot_axiomT!;
     . obtain ⟨_, e⟩ := hFour; subst_vars; dsimp [Axioms.Four, BoxdotTranslation]; apply boxdot_axiomFour!;
-  | hNec hp ihp =>
+  | hNec ihp =>
     dsimp [BoxdotTranslation];
-    exact boxdot_nec! $ ihp ⟨hp⟩;
-  | hMdp hpq hp ihpq ihp =>
+    exact boxdot_nec! $ ihp;
+  | hMdp ihpq ihp =>
     dsimp [BoxdotTranslation] at ihpq ihp;
-    exact (ihpq ⟨hpq⟩) ⨀ (ihp ⟨hp⟩);
+    exact ihpq ⨀ ihp;
   | _ => dsimp [BoxdotTranslation]; trivial;
 
 lemma iff_boxdotTranslation_S4 : 𝐒𝟒 ⊢! p ⟷ pᵇ := by

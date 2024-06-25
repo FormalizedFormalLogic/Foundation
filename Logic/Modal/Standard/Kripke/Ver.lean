@@ -3,49 +3,41 @@ import Logic.Modal.Standard.Kripke.Completeness
 
 namespace LO.Modal.Standard
 
+namespace Kripke
+
 open System
 open Kripke
-open Formula Formula.Kripke
+open Formula
+open DeductionParameter (Normal)
 
 variable {α} [Inhabited α] [DecidableEq α]
 
-instance AxiomSet.Ver.definability : Definability (α := α) 𝗩𝗲𝗿 (λ F => Isolated F.Rel) where
-  defines := by
-    simp [ValidOnFrame, ValidOnModel, Isolated];
-    intro F;
-    constructor;
-    . intro h x y hxy;
-      exact h ⊥ (λ _ _ => True) x y hxy;
-    . intros;
-      simp_all;
+abbrev IsolatedFrameClass : FrameClass := { F | Isolated F }
 
-instance Ver.definability : Definability (α := α) Ax(𝐕𝐞𝐫) (λ F => Isolated F.Rel) := by
-  simpa using Definability.union AxiomSet.K.definability AxiomSet.Ver.definability
+lemma IsolatedFrameClass.nonempty : IsolatedFrameClass.Nonempty.{0} := by
+  use PointFrame
+  simp [Isolated];
 
-instance : FiniteFrameClass.IsNonempty (𝔽ꟳ(Ax(𝐕𝐞𝐫)) : FiniteFrameClass' α) := by
-  existsi { World := PUnit, Rel := λ _ _ => False };
-  apply iff_definability_memAxiomSetFrameClass (Ver.definability) |>.mpr;
-  simp_all [Isolated];
-  intro x y a;
-  exact a;
+lemma axiomVer_defines : 𝗩𝗲𝗿.DefinesKripkeFrameClass (α := α) IsolatedFrameClass := by
+  simp [AxiomSet.DefinesKripkeFrameClass, Kripke.ValidOnFrame];
+  intro F;
+  constructor;
+  . intro h x y hxy;
+    exact h ⊥ (λ _ _ => True) x hxy;
+  . intro hIrrefl _ _ x y hxy;
+    have := hIrrefl hxy;
+    contradiction;
 
-namespace Kripke
+instance : Sound (𝐕𝐞𝐫 : DeductionParameter α) IsolatedFrameClass# := sound_of_defines axiomVer_defines
 
-open MaximalConsistentTheory
+instance : System.Consistent (𝐕𝐞𝐫 : DeductionParameter α) := consistent_of_defines axiomVer_defines IsolatedFrameClass.nonempty
 
-lemma definability_canonicalFrame_Ver {𝓓 : DeductionParameter α} [𝓓.Normal] [Inhabited (𝓓)-MCT] (hAx : 𝗩𝗲𝗿 ⊆ Ax(𝓓))
-  : Isolated (CanonicalFrame 𝓓).Rel := by
-  intro x y hxy;
-  have : 𝓓 ⊢! □⊥ := ⟨Deduction.maxm (Set.mem_of_subset_of_mem hAx (by simp))⟩
-  have := iff_valid_on_canonicalModel_deducible.mpr this x y hxy;
-  contradiction;
+lemma isolated_CanonicalFrame {Ax : AxiomSet α} (h : 𝗩𝗲𝗿 ⊆ Ax) [System.Consistent Axᴺ] : Isolated (CanonicalFrame Ax) := by
+  intro x y rxy;
+  have : (CanonicalModel Ax) ⊧ □⊥ := iff_valid_on_canonicalModel_deducible.mpr $ Normal.maxm! (by aesop);
+  exact this x rxy;
 
-instance : Canonical (𝐕𝐞𝐫 : DeductionParameter α) := by
-  apply canonical_of_definability Ver.definability;
-  apply definability_canonicalFrame_Ver;
-  simp;
-
-instance : Complete (𝐕𝐞𝐫 : DeductionParameter α) 𝔽(Ax(𝐕𝐞𝐫)) := instComplete
+instance : Complete (𝐕𝐞𝐫 : DeductionParameter α) IsolatedFrameClass# := instComplete_of_mem_canonicalFrame $ isolated_CanonicalFrame (by rfl)
 
 end Kripke
 

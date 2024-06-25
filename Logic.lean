@@ -71,4 +71,4 @@ import Logic.FirstOrder.Incompleteness.FirstIncompleteness
 import Logic.FirstOrder.Incompleteness.SelfReference
 
 -- Modal Logic
-import Logic.Modal.Standard
+import Logic.Modal.Standard.Standard

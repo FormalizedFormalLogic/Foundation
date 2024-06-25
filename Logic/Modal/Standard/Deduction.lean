@@ -6,9 +6,9 @@ namespace LO.Modal.Standard
 variable {α : Type*} [DecidableEq α]
 
 structure DeductionParameterRules where
-  nec : Bool
-  loeb : Bool
-  henkin : Bool
+  nec : Bool := true
+  loeb : Bool := false
+  henkin : Bool := false
 
 namespace DeductionParameterRules
 
@@ -52,27 +52,27 @@ class HasNecOnly extends HasNec 𝓓 where
   not_has_loeb : 𝓓.rules.loeb = false := by rfl
   not_has_henkin : 𝓓.rules.henkin = false := by rfl
 
-class IncludeK where
+class IsIncludeK where
   include_K : 𝗞 ⊆ Ax(𝓓) := by intro; aesop;
 
 /--
-  Deduction system of `L` is normal modal 𝓓ogic.
+  Deduction system of `L` is normal modal Logic.
 -/
-class Normal extends HasNecOnly 𝓓, IncludeK 𝓓 where
+class IsNormal extends HasNecOnly 𝓓, IsIncludeK 𝓓 where
 
 variable {𝓓}
 
-@[simp] lemma normal_has_nec [𝓓.Normal] : 𝓓.rules.nec = true := HasNec.has_nec
-@[simp] lemma notmal_not_has_loeb [𝓓.Normal] : 𝓓.rules.loeb = false := HasNecOnly.not_has_loeb
-@[simp] lemma notmal_not_has_henkin [𝓓.Normal] : 𝓓.rules.henkin = false := HasNecOnly.not_has_henkin
+@[simp] lemma normal_has_nec [𝓓.IsNormal] : 𝓓.rules.nec = true := HasNec.has_nec
+@[simp] lemma notmal_not_has_loeb [𝓓.IsNormal] : 𝓓.rules.loeb = false := HasNecOnly.not_has_loeb
+@[simp] lemma notmal_not_has_henkin [𝓓.IsNormal] : 𝓓.rules.henkin = false := HasNecOnly.not_has_henkin
 
 @[simp] -- TODO: more simple proof
-lemma normal_rule [𝓓.Normal] : 𝓓.rules = ⟨true, false, false⟩ := by
+lemma normal_rule [𝓓.IsNormal] : 𝓓.rules = ⟨true, false, false⟩ := by
   nth_rw 1 [←(normal_has_nec (𝓓 := 𝓓))];
   nth_rw 1 [←(notmal_not_has_loeb (𝓓 := 𝓓))];
   nth_rw 1 [←(notmal_not_has_henkin (𝓓 := 𝓓))];
 
-@[simp] lemma normal_rules [𝓓₁.Normal] [𝓓₂.Normal] : 𝓓₁.rules = 𝓓₂.rules := by simp;
+@[simp] lemma normal_rules [𝓓₁.IsNormal] [𝓓₂.IsNormal] : 𝓓₁.rules = 𝓓₂.rules := by simp;
 
 def union (𝓓₁ 𝓓₂ : DeductionParameter α) (_ : 𝓓₁.rules = 𝓓₂.rules := by first | assumption | simp) : DeductionParameter α where
   axiomSet := 𝓓₁.axiomSet ∪ 𝓓₂.axiomSet
@@ -85,9 +85,9 @@ lemma union_left_rules (h : 𝓓₁.rules = 𝓓₂.rules) : (𝓓₁ ⊔ 𝓓�
 
 lemma union_right_rules (h : 𝓓₁.rules = 𝓓₂.rules) : (𝓓₁ ⊔ 𝓓₂).rules = 𝓓₂.rules := by cases 𝓓₂; exact h;
 
-lemma union_left_rules_normal [𝓓₁.Normal] [𝓓₂.Normal] : (𝓓₁ ⊔ 𝓓₂).rules = 𝓓₁.rules := by apply union_left_rules;
+lemma union_left_rules_normal [𝓓₁.IsNormal] [𝓓₂.IsNormal] : (𝓓₁ ⊔ 𝓓₂).rules = 𝓓₁.rules := by apply union_left_rules;
 
-lemma union_right_rules_normal [𝓓₁.Normal] [𝓓₂.Normal] : (𝓓₁ ⊔ 𝓓₂).rules = 𝓓₂.rules := by apply union_right_rules;
+lemma union_right_rules_normal [𝓓₁.IsNormal] [𝓓₂.IsNormal] : (𝓓₁ ⊔ 𝓓₂).rules = 𝓓₂.rules := by apply union_right_rules;
 
 end DeductionParameter
 
@@ -130,6 +130,8 @@ instance : System.Classical 𝓓 where
   or₃ := or₃
   dne := dne
 
+lemma maxm! {p} (h : p ∈ Ax(𝓓)) : 𝓓 ⊢! p := ⟨maxm h⟩
+
 def maxm_subset
   (hRules : 𝓓₁.rules ≤ 𝓓₂.rules)
   (hAx : Ax(𝓓₁) ⊆ Ax(𝓓₂)) : (𝓓₁ ⊢ p) → (𝓓₂ ⊢ p)
@@ -151,6 +153,7 @@ def maxm_subset
 
 lemma maxm_subset! (hRules : 𝓓₁.rules ≤ 𝓓₂.rules) (hAx : Ax(𝓓₁) ⊆ Ax(𝓓₂)) (h : 𝓓₁ ⊢! p) : 𝓓₂ ⊢! p := ⟨maxm_subset hRules hAx h.some⟩
 
+
 @[simp]
 lemma reducible_of_subset (hNec : 𝓓₁.rules ≤ 𝓓₂.rules) (hAx : Ax(𝓓₁) ⊆ Ax(𝓓₂) := by intro; aesop) : 𝓓₁ ≤ₛ 𝓓₂ := by
   intro p hp;
@@ -165,10 +168,10 @@ instance [HasLoebRule 𝓓] : System.LoebRule 𝓓 where
 instance [HasHenkinRule 𝓓] : System.HenkinRule 𝓓 where
   henkin := henkin HasHenkinRule.has_henkin
 
-instance [IncludeK 𝓓] : System.HasAxiomK 𝓓 where
-  K _ _ := maxm $ Set.mem_of_subset_of_mem (IncludeK.include_K) (by simp);
+instance [IsIncludeK 𝓓] : System.HasAxiomK 𝓓 where
+  K _ _ := maxm $ Set.mem_of_subset_of_mem (IsIncludeK.include_K) (by simp);
 
-instance [Normal 𝓓] : System.K 𝓓 where
+instance [IsNormal 𝓓] : System.K 𝓓 where
 
 noncomputable def inducition!
   {motive  : (p : Formula α) → 𝓓 ⊢! p → Sort*}
@@ -197,7 +200,7 @@ noncomputable def inducition!
   | henkin has hp ihp => exact hHenkin has (ihp ⟨hp⟩)
   | _ => aesop
 
-noncomputable def inducition_with_nec [HasNecOnly 𝓓]
+noncomputable def inducition_with_necOnly [HasNecOnly 𝓓]
   {motive  : (p : Formula α) → 𝓓 ⊢ p → Sort*}
   (hMaxm   : ∀ {p}, (h : p ∈ Ax(𝓓)) → motive p (maxm h))
   (hMdp    : ∀ {p q}, (hpq : 𝓓 ⊢ p ⟶ q) → (hp : 𝓓 ⊢ p) → motive (p ⟶ q) hpq → motive p hp → motive q (mdp hpq hp))
@@ -222,7 +225,7 @@ noncomputable def inducition_with_nec [HasNecOnly 𝓓]
   | henkin => have : 𝓓.rules.henkin = false := HasNecOnly.not_has_henkin; simp_all;
   | _ => aesop
 
-noncomputable def inducition_with_nec! [HasNecOnly 𝓓]
+noncomputable def inducition_with_necOnly! [HasNecOnly 𝓓]
   {motive  : (p : Formula α) → 𝓓 ⊢! p → Sort*}
   (hMaxm   : ∀ {p}, (h : p ∈ Ax(𝓓)) → motive p ⟨maxm h⟩)
   (hMdp    : ∀ {p q}, {hpq : 𝓓 ⊢! p ⟶ q} → {hp : 𝓓 ⊢! p} → motive (p ⟶ q) hpq → motive p hp → motive q (hpq ⨀ hp))
@@ -247,19 +250,6 @@ noncomputable def inducition_with_nec! [HasNecOnly 𝓓]
   | hHenkin => have : 𝓓.rules.henkin = false := HasNecOnly.not_has_henkin; simp_all;
   | _ => aesop
 
-/-
-instance : System.K (𝐊 : AxiomSet α) := K_of_subset_K (by rfl)
-
-instance : System.K (𝐊 ∪ Λ : AxiomSet α) := K_of_subset_K
-
-instance S4_of_subset_S4 (hS4 : 𝐒𝟒 ⊆ Λ := by simp) : System.S4 (Λ : AxiomSet α) where
-  K _ _   := Deduction.maxm $ Set.mem_of_subset_of_mem hS4 (by simp);
-  T _     := Deduction.maxm $ Set.mem_of_subset_of_mem hS4 (by simp);
-  Four _  := Deduction.maxm $ Set.mem_of_subset_of_mem hS4 (by simp);
-
-instance : System.S4 (𝐒𝟒 : AxiomSet α) := S4_of_subset_S4 (by rfl)
--/
-
 end Deduction
 
 
@@ -267,105 +257,114 @@ namespace DeductionParameter
 
 open DeductionParameter
 
-private abbrev NecOnly (Ax : AxiomSet α) : DeductionParameter α where
-  axiomSet := Ax
+abbrev theory (𝓓 : DeductionParameter α) := System.theory 𝓓
+
+protected abbrev K : DeductionParameter α where
+  axiomSet := 𝗞
   rules := ⟨true, false, false⟩
-instance : HasNecOnly (α := α) (NecOnly Ax) where
-
-protected abbrev K : DeductionParameter α := NecOnly 𝗞
 notation "𝐊" => DeductionParameter.K
-instance : Normal (α := α) 𝐊 where
+instance : IsNormal (α := α) 𝐊 where
 
 
-protected abbrev KT : DeductionParameter α := NecOnly (𝗞 ∪ 𝗧)
+section Normal
+
+abbrev Normal (Ax : AxiomSet α) : DeductionParameter α where
+  axiomSet := 𝗞 ∪ Ax
+  rules := ⟨true, false, false⟩
+instance : IsNormal (α := α) (Normal Ax) where
+postfix:max "ᴺ" => Normal
+
+namespace Normal
+
+lemma isK : 𝐊 = Normal (α := α) 𝗞 := by aesop;
+
+lemma def_ax : Ax(Axᴺ) = (𝗞 ∪ Ax) := by simp;
+
+lemma maxm! {Ax : AxiomSet α} (h : p ∈ Ax) : Axᴺ ⊢! p := ⟨Deduction.maxm (by simp [def_ax]; right; assumption)⟩
+
+end Normal
+
+protected abbrev KT : DeductionParameter α := 𝗧ᴺ
 notation "𝐊𝐓" => DeductionParameter.KT
-instance : Normal (α := α) 𝐊𝐓 where
 
 
-protected abbrev KD : DeductionParameter α := NecOnly (𝗞 ∪ 𝗗)
+protected abbrev KD : DeductionParameter α := 𝗗ᴺ
 notation "𝐊𝐃" => DeductionParameter.KD
-instance : Normal (α := α) 𝐊𝐃 where
 
 
-protected abbrev K4 : DeductionParameter α := NecOnly (𝗞 ∪ 𝟰)
+protected abbrev K4 : DeductionParameter α := 𝟰ᴺ
 notation "𝐊𝟒" => DeductionParameter.K4
-instance : Normal (α := α) 𝐊𝟒 where
 instance : System.K4 (𝐊𝟒 : DeductionParameter α) where
   Four _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
 
 
-protected abbrev K5 : DeductionParameter α := NecOnly (𝗞 ∪ 𝟱)
+protected abbrev K5 : DeductionParameter α := 𝟱ᴺ
 notation "𝐊𝟓" => DeductionParameter.K5
-instance : Normal (α := α) 𝐊𝟓 where
 
 
-protected abbrev S4 : DeductionParameter α := NecOnly (𝗞 ∪ 𝗧 ∪ 𝟰)
+protected abbrev S4 : DeductionParameter α := (𝗧 ∪ 𝟰)ᴺ
 notation "𝐒𝟒" => DeductionParameter.S4
-instance : Normal (α := α) 𝐒𝟒 where
 instance : System.S4 (𝐒𝟒 : DeductionParameter α) where
   T _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
   Four _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
 
 
-protected abbrev S5 : DeductionParameter α := NecOnly (𝗞 ∪ 𝗧 ∪ 𝟱)
+protected abbrev S5 : DeductionParameter α := (𝗧 ∪ 𝟱)ᴺ
 notation "𝐒𝟓" => DeductionParameter.S5
-instance : Normal (α := α) 𝐒𝟓 where
+instance : IsNormal (α := α) 𝐒𝟓 where
 
 
-protected abbrev KT4B : DeductionParameter α := NecOnly (𝗞 ∪ 𝗧 ∪ 𝟰 ∪ 𝗕)
+protected abbrev KT4B : DeductionParameter α := (𝗧 ∪ 𝟰 ∪ 𝗕)ᴺ
 notation "𝐊𝐓𝟒𝐁" => DeductionParameter.KT4B
-instance : Normal (α := α) 𝐊𝐓𝟒𝐁 where
 
 
-protected abbrev S4Dot2 : DeductionParameter α := NecOnly (𝗞 ∪ 𝗧 ∪ 𝟰 ∪ .𝟮)
+protected abbrev S4Dot2 : DeductionParameter α := (𝗧 ∪ 𝟰 ∪ .𝟮)ᴺ
 notation "𝐒𝟒.𝟐" => DeductionParameter.S4Dot2
-instance : Normal (α := α) 𝐒𝟒.𝟐 where
 
 
-protected abbrev S4Dot3 : DeductionParameter α := NecOnly (𝗞 ∪ 𝗧 ∪ 𝟰 ∪ .𝟯)
+protected abbrev S4Dot3 : DeductionParameter α := (𝗧 ∪ 𝟰 ∪ .𝟯)ᴺ
 notation "𝐒𝟒.𝟑" => DeductionParameter.S4Dot3
-instance : Normal (α := α) 𝐒𝟒.𝟑 where
 
 
-protected abbrev S4Grz : DeductionParameter α := NecOnly (𝗞 ∪ 𝗧 ∪ 𝟰 ∪ 𝗚𝗿𝘇)
+protected abbrev S4Grz : DeductionParameter α := (𝗧 ∪ 𝟰 ∪ 𝗚𝗿𝘇)ᴺ
 notation "𝐒𝟒𝐆𝐫𝐳" => DeductionParameter.S4Grz
-instance : Normal (α := α) 𝐒𝟒𝐆𝐫𝐳 where
 
 
-protected abbrev Triv : DeductionParameter α := NecOnly (𝗞 ∪ 𝗧 ∪ 𝗧𝗰)
+protected abbrev Triv : DeductionParameter α := (𝗧 ∪ 𝗧𝗰)ᴺ
 notation "𝐓𝐫𝐢𝐯" => DeductionParameter.Triv
-instance : Normal (α := α) 𝐓𝐫𝐢𝐯 where
 instance : System.Triv (𝐓𝐫𝐢𝐯 : DeductionParameter α) where
   T _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
   Tc _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
 
-protected abbrev Ver : DeductionParameter α := NecOnly (𝗞 ∪ 𝗩𝗲𝗿)
+
+protected abbrev Ver : DeductionParameter α := (𝗩𝗲𝗿)ᴺ
 notation "𝐕𝐞𝐫" => DeductionParameter.Ver
-instance : Normal (α := α) 𝐕𝐞𝐫 where
 instance : System.Ver (𝐕𝐞𝐫 : DeductionParameter α) where
   Ver _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
 
 
-protected abbrev GL : DeductionParameter α := NecOnly (𝗞 ∪ 𝗟)
+protected abbrev GL : DeductionParameter α := (𝗟)ᴺ
 notation "𝐆𝐋" => DeductionParameter.GL
-instance : Normal (α := α) 𝐆𝐋 where
 instance : System.GL (𝐆𝐋 : DeductionParameter α) where
   L _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
 
 
-protected abbrev K4H : DeductionParameter α := NecOnly (𝗞 ∪ 𝟰 ∪ 𝗛)
+protected abbrev K4H : DeductionParameter α := (𝟰 ∪ 𝗛)ᴺ
 notation "𝐊𝟒𝐇" => DeductionParameter.K4H
-instance : Normal (α := α) 𝐊𝟒𝐇 where
 instance : System.K4H (𝐊𝟒𝐇 : DeductionParameter α) where
   Four _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
   H _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
 
+end Normal
+
+
+section GLAlternative
 
 protected abbrev K4Loeb : DeductionParameter α where
   axiomSet := 𝗞 ∪ 𝟰
   rules := ⟨true, true, false⟩
 notation "𝐊𝟒(𝐋)" => DeductionParameter.K4Loeb
-instance : IncludeK (α := α) 𝐊𝟒(𝐋) where
+instance : IsIncludeK (α := α) 𝐊𝟒(𝐋) where
 instance : HasNec (α := α) 𝐊𝟒(𝐋) where
 instance : HasLoebRule (α := α) 𝐊𝟒(𝐋) where
 instance : System.K4Loeb (𝐊𝟒(𝐋) : DeductionParameter α) where
@@ -376,16 +375,25 @@ protected abbrev K4Henkin : DeductionParameter α where
   axiomSet := 𝗞 ∪ 𝟰
   rules := ⟨true, false, true⟩
 notation "𝐊𝟒(𝐇)" => DeductionParameter.K4Henkin
-instance : IncludeK (α := α) 𝐊𝟒(𝐇) where
+instance : IsIncludeK (α := α) 𝐊𝟒(𝐇) where
 instance : HasNec (α := α) 𝐊𝟒(𝐇) where
 instance : HasHenkinRule (α := α) 𝐊𝟒(𝐇) where
 instance : System.K4Henkin (𝐊𝟒(𝐇) : DeductionParameter α) where
   Four _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
 
+end GLAlternative
+
+
+section PLoN
 
 /-- Logic of Pure Necessitation -/
-protected abbrev N : DeductionParameter α := NecOnly ∅
+protected abbrev N : DeductionParameter α where
+  axiomSet := ∅
+  rules := ⟨true, false, false⟩
 notation "𝐍" => DeductionParameter.N
+instance : HasNecOnly (α := α) 𝐍 where
+
+end PLoN
 
 end DeductionParameter
 
@@ -409,38 +417,40 @@ macro_rules | `(tactic| trivial) => `(tactic | apply dne!)
 
 section Reducible
 
-lemma normal_reducible
-  {𝓓₁ 𝓓₂ : DeductionParameter α} [𝓓₁.Normal] [𝓓₂.Normal]
-  (hMaxm : ∀ {p : Formula α}, p ∈ Ax(𝓓₁) → 𝓓₂ ⊢! p) : (𝓓₁ : DeductionParameter α) ≤ₛ 𝓓₂ := by
+lemma normal_reducible {𝓓₁ 𝓓₂ : DeductionParameter α} [𝓓₁.IsNormal] [𝓓₂.IsNormal]
+  (hMaxm : ∀ {p : Formula α}, p ∈ Ax(𝓓₁) → 𝓓₂ ⊢! p)
+  : 𝓓₁ ≤ₛ 𝓓₂ := by
   apply System.reducible_iff.mpr;
   intro p h;
-  induction h using Deduction.inducition_with_nec! with
+  induction h using Deduction.inducition_with_necOnly! with
   | hMaxm hp => exact hMaxm hp;
   | hMdp ihpq ihp => exact ihpq ⨀ ihp;
   | hNec ihp => exact nec! ihp;
   | _ => trivial;
 
-lemma normal_reducible_subset {𝓓₁ 𝓓₂ : DeductionParameter α} [𝓓₁.Normal] [𝓓₂.Normal]
-  (hSubset : Ax(𝓓₁) ⊆ Ax(𝓓₂)) : (𝓓₁ : DeductionParameter α) ≤ₛ 𝓓₂ := by
+
+lemma normal_reducible_subset {𝓓₁ 𝓓₂ : DeductionParameter α} [𝓓₁.IsNormal] [𝓓₂.IsNormal]
+  (hSubset : Ax(𝓓₁) ⊆ Ax(𝓓₂) := by intro; aesop;)
+  : 𝓓₁ ≤ₛ 𝓓₂ := by
   apply normal_reducible;
   intro p hp;
   exact ⟨Deduction.maxm $ hSubset hp⟩;
 
-lemma reducible_K_KT : (𝐊 : DeductionParameter α) ≤ₛ 𝐊𝐓 := by apply normal_reducible_subset; simp only [Set.subset_union_left];
+lemma reducible_K_KT : (𝐊 : DeductionParameter α) ≤ₛ 𝐊𝐓 := by exact normal_reducible_subset;
 
-lemma reducible_K_KD : (𝐊 : DeductionParameter α) ≤ₛ 𝐊𝐃 := by apply normal_reducible_subset; simp only [Set.subset_union_left];
+lemma reducible_K_KD : (𝐊 : DeductionParameter α) ≤ₛ 𝐊𝐃 := by exact normal_reducible_subset;
 
-lemma reducible_KT_S4 : (𝐊𝐓 : DeductionParameter α) ≤ₛ 𝐒𝟒 := by apply normal_reducible_subset; simp only [Set.subset_union_left];
+lemma reducible_KT_S4 : (𝐊𝐓 : DeductionParameter α) ≤ₛ 𝐒𝟒 := by exact normal_reducible_subset;
 
-lemma reducible_K4_S4 : (𝐊𝟒 : DeductionParameter α) ≤ₛ 𝐒𝟒 := by apply normal_reducible_subset; intro; aesop;
+lemma reducible_K4_S4 : (𝐊𝟒 : DeductionParameter α) ≤ₛ 𝐒𝟒 := by exact normal_reducible_subset;
 
-lemma reducible_S4_S4Dot2 : (𝐒𝟒 : DeductionParameter α) ≤ₛ 𝐒𝟒.𝟐 := by apply normal_reducible_subset; simp only [Set.subset_union_left];
+lemma reducible_S4_S4Dot2 : (𝐒𝟒 : DeductionParameter α) ≤ₛ 𝐒𝟒.𝟐 := by exact normal_reducible_subset
 
-lemma reducible_S4_S4Dot3 : (𝐒𝟒 : DeductionParameter α) ≤ₛ 𝐒𝟒.𝟑 := by apply normal_reducible_subset; simp only [Set.subset_union_left];
+lemma reducible_S4_S4Dot3 : (𝐒𝟒 : DeductionParameter α) ≤ₛ 𝐒𝟒.𝟑 := by exact normal_reducible_subset
 
-lemma reducible_S4_S4Grz : (𝐒𝟒 : DeductionParameter α) ≤ₛ 𝐒𝟒𝐆𝐫𝐳 := by apply normal_reducible_subset; simp only [Set.subset_union_left];
+lemma reducible_S4_S4Grz : (𝐒𝟒 : DeductionParameter α) ≤ₛ 𝐒𝟒𝐆𝐫𝐳 := by exact normal_reducible_subset
 
-lemma reducible_K_GL : (𝐊 : DeductionParameter α) ≤ₛ 𝐆𝐋 := by apply normal_reducible_subset; simp only [Set.subset_union_left];
+lemma reducible_K_GL : (𝐊 : DeductionParameter α) ≤ₛ 𝐆𝐋 := by exact normal_reducible_subset
 
 lemma reducible_K4_Triv : (𝐊𝟒 : DeductionParameter α) ≤ₛ 𝐓𝐫𝐢𝐯 := by
   apply normal_reducible;
@@ -505,7 +515,7 @@ lemma reducible_K4Henkin_K4H : (𝐊𝟒(𝐇) : DeductionParameter α) ≤ₛ �
 lemma reducible_K4Henkin_GL : (𝐊𝟒𝐇 : DeductionParameter α) ≤ₛ 𝐆𝐋 := by
   apply normal_reducible;
   intro p hp;
-  rcases hp with (hK | hFour) | hH
+  rcases hp with hK | hFour | hH
   . obtain ⟨_, _, e⟩ := hK; subst_vars; exact axiomK!;
   . obtain ⟨_, _, e⟩ := hFour; subst_vars; exact axiomFour!;
   . obtain ⟨_, _, e⟩ := hH; subst_vars; exact axiomH!;
