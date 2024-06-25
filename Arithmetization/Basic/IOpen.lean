@@ -544,7 +544,19 @@ open Classical
 -- https://github.com/leanprover-community/mathlib4/blob/b075cdd0e6ad8b5a3295e7484b2ae59e9b2ec2a7/Mathlib/Data/Nat/Pairing.lean#L37
 def pair (a b : M) : M := if a < b then b * b + a else a * a + a + b
 
-notation "⟪" a ", " b "⟫" => pair a b
+--notation "⟪" a ", " b "⟫" => pair a b
+
+/-- `!⟪x, y, z, ...⟫` notation for `Seq` -/
+syntax "⟪" term,* "⟫" : term
+
+macro_rules
+  | `(⟪$term:term, $terms:term,*⟫) => `(pair $term ⟪$terms,*⟫)
+  | `(⟪$term:term⟫) => `($term)
+
+@[app_unexpander pair]
+def pairUnexpander : Lean.PrettyPrinter.Unexpander
+  | `($_ $term $term2) => `(⟪$term, $term2⟫)
+  | _ => throw ()
 
 lemma pair_graph {a b c : M} :
     c = ⟪a, b⟫ ↔ (a < b ∧ c = b * b + a) ∨ (b ≤ a ∧ c = a * a + a + b) := by
@@ -697,6 +709,45 @@ lemma pair_lt_pair {a₁ a₂ b₁ b₂ : M} (ha : a₁ < a₂) (hb : b₁ < b�
 
 @[simp] lemma pair_ext_iff {a₁ a₂ b₁ b₂ : M} : ⟪a₁, b₁⟫ = ⟪a₂, b₂⟫ ↔ a₁ = a₂ ∧ b₁ = b₂ :=
   ⟨fun e ↦ ⟨by simpa using congr_arg (π₁ ·) e, by simpa using congr_arg (π₂ ·) e⟩, by rintro ⟨rfl, rfl⟩; simp⟩
+
+section
+
+def _root_.LO.FirstOrder.Arith.pair₃Def : 𝚺₀-Semisentence 4 :=
+  .mkSigma “p a b c | ∃ bc <⁺ p, !pairDef p a bc ∧ !pairDef bc b c” (by simp)
+
+def _root_.LO.FirstOrder.Arith.pair₄Def : 𝚺₀-Semisentence 5 :=
+  .mkSigma “p a b c d | ∃ bcd <⁺ p, ∃ cd <⁺ bcd, !pairDef p a bcd ∧ !pairDef bcd b cd ∧ !pairDef cd c d” (by simp)
+
+def _root_.LO.FirstOrder.Arith.pair₅Def : 𝚺₀-Semisentence 6 :=
+  .mkSigma “p a b c d e | ∃ bcde <⁺ p, ∃ cde <⁺ bcde, ∃ de <⁺ cde, !pairDef p a bcde ∧ !pairDef bcde b cde ∧ !pairDef cde c de ∧ !pairDef de d e” (by simp)
+
+lemma pair₃_defined : 𝚺₀-Function₃ ((⟪·, ·, ·⟫) : M → M → M → M) via pair₃Def := by
+  intro v; simp [pair₃Def]; rintro h; simp [h]
+
+@[simp] lemma eval_pair₃Def (v) :
+    Semiformula.Evalbm M v pair₃Def.val ↔ v 0 = ⟪v 1, v 2, v 3⟫ := pair₃_defined.df.iff v
+
+lemma pair₄_defined : 𝚺₀-Function₄ ((⟪·, ·, ·, ·⟫) : M → M → M → M → M) via pair₄Def := by
+  intro v; simp [pair₄Def]
+  constructor
+  · intro h; simp only [Fin.isValue, h, pair_ext_iff, true_and]
+    exact ⟨_, by simp, _, by simp, rfl, rfl, rfl⟩
+  · rintro ⟨_, _, _, _, h, rfl, rfl⟩; exact h
+
+@[simp] lemma eval_pair₄Def (v) :
+    Semiformula.Evalbm M v pair₄Def.val ↔ v 0 = ⟪v 1, v 2, v 3, v 4⟫ := pair₄_defined.df.iff v
+
+lemma pair₅_defined : DefinedFunction (fun v : Fin 5 → M ↦ (⟪v 0, v 1, v 2, v 3, v 4⟫)) pair₅Def := by
+  intro v; simp [pair₅Def]
+  constructor
+  · intro h; simp only [Fin.isValue, h, pair_ext_iff, true_and]
+    exact ⟨_, le_pair_right _ _, _, le_pair_right _ _, _, le_pair_right _ _, rfl, rfl, rfl, rfl⟩
+  · rintro ⟨_, _, _, _, _, _, h, rfl, rfl, rfl⟩; exact h
+
+@[simp] lemma eval_pair₅Def (v) :
+    Semiformula.Evalbm M v pair₅Def.val ↔ v 0 = ⟪v 1, v 2, v 3, v 4, v 5⟫ := pair₅_defined.df.iff v
+
+end
 
 end pair
 

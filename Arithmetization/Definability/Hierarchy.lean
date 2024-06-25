@@ -564,6 +564,9 @@ abbrev DefinedFunction₂ (f : M → M → M) (p : HSemisentence L 3 Γ) : Prop 
 abbrev DefinedFunction₃ (f : M → M → M → M) (p : HSemisentence L 4 Γ) : Prop :=
   DefinedFunction (fun v => f (v 0) (v 1) (v 2)) p
 
+abbrev DefinedFunction₄ (f : M → M → M → M → M) (p : HSemisentence L 5 Γ) : Prop :=
+  DefinedFunction (fun v => f (v 0) (v 1) (v 2) (v 3)) p
+
 abbrev DefinablePred (P : M → Prop) : Prop := Definable L Γ (k := 1) (fun v ↦ P (v 0))
 
 abbrev DefinableRel (P : M → M → Prop) : Prop := Definable L Γ (k := 2) (fun v ↦ P (v 0) (v 1))
@@ -580,6 +583,8 @@ abbrev DefinableFunction₂ (f : M → M → M) : Prop := DefinableFunction L Γ
 
 abbrev DefinableFunction₃ (f : M → M → M → M) : Prop := DefinableFunction L Γ (k := 3) (fun v ↦ f (v 0) (v 1) (v 2))
 
+abbrev DefinableFunction₄ (f : M → M → M → M → M) : Prop := DefinableFunction L Γ (k := 4) (fun v ↦ f (v 0) (v 1) (v 2) (v 3))
+
 notation Γ "-Predicate " P " via " p => DefinedPred ℒₒᵣ Γ P p
 
 notation Γ "-Relation " P " via " p => DefinedRel ℒₒᵣ Γ P p
@@ -594,6 +599,8 @@ notation Γ "-Function₂ " f " via " p => DefinedFunction₂ ℒₒᵣ Γ f p
 
 notation Γ "-Function₃ " f " via " p => DefinedFunction₃ ℒₒᵣ Γ f p
 
+notation Γ "-Function₄ " f " via " p => DefinedFunction₄ ℒₒᵣ Γ f p
+
 notation Γ "-Predicate " P => DefinablePred ℒₒᵣ Γ P
 
 notation Γ "-Relation " P => DefinableRel ℒₒᵣ Γ P
@@ -607,6 +614,8 @@ notation Γ "-Function₁ " f => DefinableFunction₁ ℒₒᵣ Γ f
 notation Γ "-Function₂ " f => DefinableFunction₂ ℒₒᵣ Γ f
 
 notation Γ "-Function₃ " f => DefinableFunction₃ ℒₒᵣ Γ f
+
+notation Γ "-Function₄ " f => DefinableFunction₄ ℒₒᵣ Γ f
 
 variable {L Γ}
 

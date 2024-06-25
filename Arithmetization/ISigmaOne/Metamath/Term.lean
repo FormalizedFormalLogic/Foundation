@@ -15,7 +15,7 @@ def qqBvar (z : M) : M := ⟪0, z⟫ + 1
 
 def qqFvar (x : M) : M := ⟪1, x⟫ + 1
 
-def qqFunc (k f v : M) : M := ⟪2, ⟪k, ⟪f, v⟫⟫⟫ + 1
+def qqFunc (k f v : M) : M := ⟪2, k, f, v⟫ + 1
 
 scoped prefix:max "^#" => qqBvar
 
@@ -71,8 +71,8 @@ private lemma qqFunc_graph {x k f v : M} :
     x = ^func k f v ↔ ∃ fv < x, fv = ⟪f, v⟫ ∧ ∃ kfv < x, kfv = ⟪k, fv⟫ ∧ ∃ x' < x, x' = ⟪2, kfv⟫ ∧ x = x' + 1 :=
   ⟨by rintro rfl
       exact ⟨⟪f, v⟫, lt_succ_iff_le.mpr <| le_trans (le_pair_right _ _) (le_pair_right _ _), rfl,
-        ⟪k, ⟪f, v⟫⟫, lt_succ_iff_le.mpr <| by simp, rfl,
-        ⟪2, ⟪k, ⟪f, v⟫⟫⟫, by simp [qqFunc], rfl, rfl⟩,
+        ⟪k, f, v⟫, lt_succ_iff_le.mpr <| by simp, rfl,
+        ⟪2, k, f, v⟫, by simp [qqFunc], rfl, rfl⟩,
    by rintro ⟨_, _, rfl, _, _, rfl, _, _, rfl, rfl⟩; rfl⟩
 
 def _root_.LO.FirstOrder.Arith.qqFuncDef : 𝚺₀-Semisentence 4 := .mkSigma
@@ -210,21 +210,21 @@ section termSubst
 
 variable (L)
 
-def TermSeq (n m w : M) : Prop := Seq w ∧ n = lh w ∧ ∀ i u, ⟪i, u⟫ ∈ w → L.IsSemiterm m u
+def Language.TermSeq (n m w : M) : Prop := Seq w ∧ n = lh w ∧ ∀ i u, ⟪i, u⟫ ∈ w → L.IsSemiterm m u
 
 variable {L}
 
-protected lemma TermSeq.seq {n m w : M} (h : TermSeq L n m w) : Seq w := h.1
+protected lemma Language.TermSeq.seq {n m w : M} (h : L.TermSeq n m w) : Seq w := h.1
 
-protected lemma TermSeq.lh {n m w : M} (h : TermSeq L n m w) : n = lh w := h.2.1
+protected lemma Language.TermSeq.lh {n m w : M} (h : L.TermSeq n m w) : n = lh w := h.2.1
 
-lemma TermSeq.prop {n m w : M} (h : TermSeq L n m w) : ∀ i u, ⟪i, u⟫ ∈ w → L.IsSemiterm m u := h.2.2
+lemma Language.TermSeq.prop {n m w : M} (h : L.TermSeq n m w) : ∀ i u, ⟪i, u⟫ ∈ w → L.IsSemiterm m u := h.2.2
 
 section
 
 private lemma termSeq_iff (n m w : M) :
-    TermSeq L n m w ↔ Seq w ∧ n = lh w ∧ ∀ i < w, ∀ u < w, ⟪i, u⟫ ∈ w → L.IsSemiterm m u :=
-  ⟨fun h ↦ ⟨TermSeq.seq h, TermSeq.lh h, fun i _ u _ hi ↦ TermSeq.prop h i u hi⟩,
+    L.TermSeq n m w ↔ Seq w ∧ n = lh w ∧ ∀ i < w, ∀ u < w, ⟪i, u⟫ ∈ w → L.IsSemiterm m u :=
+  ⟨fun h ↦ ⟨Language.TermSeq.seq h, Language.TermSeq.lh h, fun i _ u _ hi ↦ Language.TermSeq.prop h i u hi⟩,
    by rintro ⟨Sw, hn, h⟩
       exact ⟨by simpa using Sw, by simpa using hn,
         fun i u hi ↦ by simpa using h i (lt_of_mem_dom <| by simpa using hi) u (lt_of_mem_rng <| by simpa using hi) (by simpa using hi)⟩⟩
@@ -239,16 +239,16 @@ def _root_.LO.FirstOrder.Arith.LDef.termSeqDef (pL : LDef) : 𝚫₁-Semisentenc
 
 variable (L)
 
-lemma termSeq_defined : 𝚫₁-Relation₃ (TermSeq L) via pL.termSeqDef :=
+lemma termSeq_defined : 𝚫₁-Relation₃ (L.TermSeq) via pL.termSeqDef :=
   ⟨by intro v; simp [LDef.termSeqDef, HSemiformula.val_sigma, eval_isSemitermDef L, (isSemiterm_defined L).proper.iff'],
    by intro v; simp [LDef.termSeqDef, HSemiformula.val_sigma, eval_isSemitermDef L, termSeq_iff]⟩
 
 @[simp] lemma eval_termSeq (v) :
-    Semiformula.Evalbm M v pL.termSeqDef.val ↔ TermSeq L (v 0) (v 1) (v 2) := (termSeq_defined L).df.iff v
+    Semiformula.Evalbm M v pL.termSeqDef.val ↔ L.TermSeq (v 0) (v 1) (v 2) := (termSeq_defined L).df.iff v
 
-instance termSeq_definable : 𝚫₁-Relation₃ (TermSeq L) := Defined.to_definable _ (termSeq_defined L)
+instance termSeq_definable : 𝚫₁-Relation₃ (L.TermSeq) := Defined.to_definable _ (termSeq_defined L)
 
-@[simp, definability] instance termSeq_definable' (Γ) : (Γ, m + 1)-Relation₃ (TermSeq L) :=
+@[simp, definability] instance termSeq_definable' (Γ) : (Γ, m + 1)-Relation₃ (L.TermSeq) :=
   .of_deltaOne (termSeq_definable L) _ _
 
 end
@@ -407,7 +407,7 @@ lemma Subst.func' {n m w k f v u : M} (h : Subst L n m w ⟪^func k f v, u⟫) :
     rcases this with ⟨_, Sv'', hk'', _⟩
     exact ⟨v'', Sv'', hk'', hv, rfl⟩
 
-variable {n m w} (TSw : TermSeq L n m w)
+variable {n m w} (TSw : L.TermSeq n m w)
 
 lemma Subst.rng_exists {t : M} (ht : L.IsSemiterm n t) : ∃ u, Subst L n m w ⟪t, u⟫ := by
   apply IsSemiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
@@ -464,8 +464,8 @@ lemma Subst.rng_exists_unique {t : M} (ht : L.IsSemiterm n t) : ∃! u, Subst L 
 variable (L)
 
 lemma Subst.rng_exists_unique_total (n m w t : M) :
-    ∃! u, (TermSeq L n m w ∧ L.IsSemiterm n t → Subst L n m w ⟪t, u⟫) ∧ (¬(TermSeq L n m w ∧ L.IsSemiterm n t) → u = 0) := by
-  by_cases h : TermSeq L n m w ∧ L.IsSemiterm n t
+    ∃! u, (L.TermSeq n m w ∧ L.IsSemiterm n t → Subst L n m w ⟪t, u⟫) ∧ (¬(L.TermSeq n m w ∧ L.IsSemiterm n t) → u = 0) := by
+  by_cases h : L.TermSeq n m w ∧ L.IsSemiterm n t
   · simp [h]; exact Subst.rng_exists_unique h.1 h.2
   · simp [h]
 
@@ -479,16 +479,16 @@ def Language.termSubst (n m w t : M) : M := Classical.choose! (Subst.rng_exists_
 
 variable {L}
 
-def TermSeq.spec_of_semiterm {n m w t : M} (TSw : TermSeq L n m w) (ht : L.IsSemiterm n t) : Subst L n m w ⟪t, L.termSubst n m w t⟫ :=
+def Language.TermSeq.spec_of_semiterm {n m w t : M} (TSw : L.TermSeq n m w) (ht : L.IsSemiterm n t) : Subst L n m w ⟪t, L.termSubst n m w t⟫ :=
   Classical.choose!_spec (Subst.rng_exists_unique_total L n m w t) |>.1 ⟨TSw, ht⟩
 
 def termSubst_spec {n m w t : M} :
-    ¬(TermSeq L n m w ∧ L.IsSemiterm n t) → L.termSubst n m w t = 0 :=
+    ¬(L.TermSeq n m w ∧ L.IsSemiterm n t) → L.termSubst n m w t = 0 :=
   Classical.choose!_spec (Subst.rng_exists_unique_total L n m w t) |>.2
 
-variable {n m w : M} (TSw : TermSeq L n m w)
+variable {n m w : M} (TSw : L.TermSeq n m w)
 
-lemma TermSeq.termSubst_eq_of {t} (ht : L.IsSemiterm n t) (h : Subst L n m w ⟪t, u⟫) : L.termSubst n m w t = u :=
+lemma Language.TermSeq.termSubst_eq_of {t} (ht : L.IsSemiterm n t) (h : Subst L n m w ⟪t, u⟫) : L.termSubst n m w t = u :=
   (TSw.spec_of_semiterm ht).rng_unique TSw h
 
 lemma termSubst_bvar {z : M} (hz : z < n) (hu : ⟪z, u⟫ ∈ w) : L.termSubst n m w (^#z) = u :=
@@ -503,7 +503,7 @@ lemma termSubst_func {k f v v' : M} (hfk : L.Func k f)
     (H : ∀ i u u', ⟪i, u⟫ ∈ v → ⟪i, u'⟫ ∈ v' → L.termSubst n m w u = u') : L.termSubst n m w (^func k f v) = ^func k f v' :=
   TSw.termSubst_eq_of (IsSemiterm.func hfk Sv hk hv)
     (Subst.func hfk Sv hk hv Sv' hk' hv' (fun i u u' hi hi' ↦ by
-      rcases H i u u' hi hi'; exact TermSeq.spec_of_semiterm TSw (hv i u hi)))
+      rcases H i u u' hi hi'; exact TSw.spec_of_semiterm (hv i u hi)))
 
 section
 
@@ -511,7 +511,7 @@ variable (L)
 
 private lemma termSubst_graph (u n m w t : M) :
     u = L.termSubst n m w t ↔
-    (TermSeq L n m w ∧ L.IsSemiterm n t → ∃ p ≤ (t + u + 1)^2, p = ⟪t, u⟫ ∧ Subst L n m w p) ∧ (¬(TermSeq L n m w ∧ L.IsSemiterm n t) → u = 0) :=
+    (L.TermSeq n m w ∧ L.IsSemiterm n t → ∃ p ≤ (t + u + 1)^2, p = ⟪t, u⟫ ∧ Subst L n m w p) ∧ (¬(L.TermSeq n m w ∧ L.IsSemiterm n t) → u = 0) :=
   Iff.trans (Classical.choose!_eq_iff (Subst.rng_exists_unique_total L n m w t)) ⟨by
     rintro ⟨hp, hn⟩
     exact ⟨fun h ↦ ⟨⟪t, u⟫, by simp, rfl, hp h⟩, hn⟩, by
@@ -522,7 +522,7 @@ def _root_.LO.FirstOrder.Arith.LDef.termSubstDef (pL : LDef) : 𝚺₁-Semisente
   “u n m w t | (!pL.termSeqDef.pi n m w ∧ !pL.isSemitermDef.pi n t → ∃ p <⁺ (t + u + 1)², !pairDef p t u ∧ !pL.substDef.sigma n m w p) ∧
     (¬(!pL.termSeqDef.sigma n m w ∧ !pL.isSemitermDef.sigma n t) → u = 0)” (by simp)
 
-lemma termSubst_defined : DefinedFunction (fun v ↦ L.termSubst (v 0) (v 1) (v 2) (v 3)) pL.termSubstDef := by
+lemma termSubst_defined : 𝚺₁-Function₄ L.termSubst via pL.termSubstDef := by
   intro v
   simp [LDef.termSubstDef, termSubst_graph, HSemiformula.val_sigma, eval_termSeq L,
     eval_isSemitermDef L, (termSeq_defined L).proper.iff', (isSemiterm_defined L).proper.iff', eval_substDef L, -and_imp, -not_and]
@@ -531,7 +531,7 @@ lemma termSubst_defined : DefinedFunction (fun v ↦ L.termSubst (v 0) (v 1) (v 
 @[simp] lemma termSubst_defined_iff (v : Fin 5 → M) :
     Semiformula.Evalbm (L := ℒₒᵣ) M v pL.termSubstDef ↔ v 0 = L.termSubst (v 1) (v 2) (v 3) (v 4) := (termSubst_defined L).df.iff v
 
-instance termSubst_definable : DefinableFunction ℒₒᵣ 𝚺₁ (fun v : Fin 4 → M ↦ L.termSubst (v 0) (v 1) (v 2) (v 3)) :=
+instance termSubst_definable : 𝚺₁-Function₄ L.termSubst :=
   Defined.to_definable _ (termSubst_defined L)
 
 end

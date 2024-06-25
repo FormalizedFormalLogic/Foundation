@@ -286,8 +286,8 @@ theorem seq_induction (Γ) {P : M → Prop} (hP : DefinablePred ℒₒᵣ (Γ, 1
     · exact hnil
     · exact hcons s x hs (ih s (hs.lt_seqCons x) hs)
 
-/-- `!⟨x, y, z, ...⟩` notation for `Seq` -/
-syntax (name := vecNotation) "!⟦" term,* "⟧" : term
+/-- `!⟦x, y, z, ...⟧` notation for `Seq` -/
+syntax "!⟦" term,* "⟧" : term
 
 macro_rules
   | `(!⟦$terms:term,*, $term:term⟧) => `(seqCons !⟦$terms,*⟧ $term)
