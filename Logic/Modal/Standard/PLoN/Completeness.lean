@@ -6,17 +6,21 @@ namespace LO.Modal.Standard
 namespace PLoN
 
 variable {α : Type*} [DecidableEq α]
+variable {Λ : DeductionParameter α}
 
 open Formula
 open Theory
 open MaximalConsistentTheory
 
-abbrev CanonicalFrame (Λ : DeductionParameter α) [Inhabited (Λ)-MCT] : PLoN.Frame (Λ)-MCT α where
-  Rel :=  λ p Ω₁ Ω₂ => ~(□p) ∈ Ω₁.theory ∧ ~p ∈ Ω₂.theory
+abbrev CanonicalFrame (Λ : DeductionParameter α) [Inhabited (Λ)-MCT] : PLoN.Frame α where
+  World := (Λ)-MCT
+  Rel := λ p Ω₁ Ω₂ => ~(□p) ∈ Ω₁.theory ∧ ~p ∈ Ω₂.theory
 
-abbrev CanonicalModel (Λ : DeductionParameter α) [Inhabited (Λ)-MCT] : PLoN.Model (Λ)-MCT α where
+abbrev CanonicalModel (Λ : DeductionParameter α) [Inhabited (Λ)-MCT] : PLoN.Model α where
   Frame := CanonicalFrame Λ
   Valuation Ω a := (atom a) ∈ Ω.theory
+
+instance CanonicalModel.instSatisfies [Inhabited (Λ)-MCT] : Semantics (Formula α) ((CanonicalModel Λ).World) := Formula.plon_satisfies.semantics (CanonicalModel Λ)
 
 variable {Λ : DeductionParameter α} [Inhabited (Λ)-MCT] [Λ.HasNec]
          {p : Formula α}
@@ -46,11 +50,11 @@ lemma truthlemma : ∀ {Ω : (CanonicalModel Λ).World}, Ω ⊧ p ↔ (p ∈ Ω.
       simp_all only [plon_satisfies.iff_models];
   | _ => simp_all [plon_satisfies];
 
-lemma complete_of_mem_canonicalFrame {𝔽 : FrameClass α} (hFC : ⟨(Λ)-MCT, CanonicalFrame Λ⟩ ∈ 𝔽) : 𝔽 ⊧ p → Λ ⊢! p:= by
+lemma complete_of_mem_canonicalFrame {𝔽 : FrameClass α} (hFC : CanonicalFrame Λ ∈ 𝔽) : 𝔽 ⊧ p → Λ ⊢! p:= by
   simp [valid_on_PLoNFrameClass, valid_on_PLoNFrame, valid_on_PLoNModel];
   contrapose; push_neg;
   intro h;
-  use (Λ)-MCT, (CanonicalFrame Λ);
+  use (CanonicalFrame Λ);
   constructor;
   . exact hFC;
   . use (CanonicalModel Λ).Valuation;
@@ -63,7 +67,7 @@ lemma complete_of_mem_canonicalFrame {𝔽 : FrameClass α} (hFC : ⟨(Λ)-MCT, 
     apply iff_mem_neg.mp;
     simp_all;
 
-lemma instComplete_of_mem_canonicalFrame {𝔽 : FrameClass α} (hFC : ⟨(Λ)-MCT, CanonicalFrame Λ⟩ ∈ 𝔽) : Complete Λ 𝔽 := ⟨complete_of_mem_canonicalFrame hFC⟩
+lemma instComplete_of_mem_canonicalFrame {𝔽 : FrameClass α} (hFC : CanonicalFrame Λ ∈ 𝔽) : Complete Λ 𝔽 := ⟨complete_of_mem_canonicalFrame hFC⟩
 
 instance : Complete 𝐍 (AllFrameClass α) := instComplete_of_mem_canonicalFrame trivial
 

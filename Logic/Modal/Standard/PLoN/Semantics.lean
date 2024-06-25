@@ -6,51 +6,51 @@ namespace LO.Modal.Standard
 
 namespace PLoN
 
-structure Frame (δ α) where
-  [δ_inhabited : Inhabited δ]
-  Rel : Formula α → δ → δ → Prop
+structure Frame (α) where
+  World : Type*
+  [World_inhabited : Inhabited World]
+  Rel : Formula α → World → World → Prop
 
-abbrev Frame.World (_ : PLoN.Frame δ α) := δ
-
-abbrev Frame.default {F : PLoN.Frame δ α} : F.World := F.δ_inhabited.default
+abbrev Frame.default {F : PLoN.Frame α} : F.World := F.World_inhabited.default
 scoped notation "﹫" => Frame.default
 
 
-instance : CoeFun (PLoN.Frame δ α) (λ F => Formula α → F.World → F.World → Prop) := ⟨Frame.Rel⟩
+instance : CoeFun (PLoN.Frame α) (λ F => Formula α → F.World → F.World → Prop) := ⟨Frame.Rel⟩
 
-abbrev Frame.Rel' {F : PLoN.Frame δ α} (p : Formula α) (x y : F.World) := F.Rel p x y
+abbrev Frame.Rel' {F : PLoN.Frame α} (p : Formula α) (x y : F.World) := F.Rel p x y
 scoped notation:45 x:90 " ≺[" p "] " y:90 => Frame.Rel' p x y
 
 
-structure FiniteFrame (δ α) extends Frame δ α where
-  [δ_finite : Finite δ]
+structure FiniteFrame (α) extends Frame α where
+  [World_finite : Finite World]
 
-instance : Coe (FiniteFrame δ α) (Frame δ α) := ⟨λ F ↦ F.toFrame⟩
+instance : Coe (FiniteFrame α) (Frame α) := ⟨λ F ↦ F.toFrame⟩
 
 
-abbrev TerminalFrame (α) : FiniteFrame (Fin 1) α where
+abbrev TerminalFrame (α) : FiniteFrame α where
+  World := Fin 1
   Rel := λ _ _ _ => True
 
 
-abbrev FrameClass (α : Type*) := Set ((δ : Type*) × PLoN.Frame δ α)
+abbrev FrameClass (α : Type*) := Set (PLoN.Frame α)
 
 
-abbrev Valuation (F : PLoN.Frame δ α) (α : Type*) := F.World → α → Prop
+abbrev Valuation (F : PLoN.Frame α) (α : Type*) := F.World → α → Prop
 
-structure Model (δ α) where
-  Frame : PLoN.Frame δ α
+structure Model (α) where
+  Frame : PLoN.Frame α
   Valuation : PLoN.Valuation Frame α
 
-abbrev Model.World (M : PLoN.Model δ α) := M.Frame.World
-instance : CoeSort (PLoN.Model δ α) (Type _) := ⟨Model.World⟩
+abbrev Model.World (M : PLoN.Model α) := M.Frame.World
+instance : CoeSort (PLoN.Model α) (Type _) := ⟨Model.World⟩
 
 end PLoN
 
-variable {δ α : Type*}
+variable {α : Type*}
 
 open Standard.PLoN
 
-def Formula.plon_satisfies (M : PLoN.Model δ α) (w : M.World) : Formula α → Prop
+def Formula.plon_satisfies (M : PLoN.Model α) (w : M.World) : Formula α → Prop
   | atom a  => M.Valuation w a
   | verum   => True
   | falsum  => False
@@ -62,9 +62,9 @@ def Formula.plon_satisfies (M : PLoN.Model δ α) (w : M.World) : Formula α →
 
 namespace Formula.plon_satisfies
 
-protected instance semantics (M : PLoN.Model δ α) : Semantics (Formula α) (M.World) := ⟨fun w ↦ Formula.plon_satisfies M w⟩
+protected instance semantics (M : PLoN.Model α) : Semantics (Formula α) (M.World) := ⟨fun w ↦ Formula.plon_satisfies M w⟩
 
-variable {M : PLoN.Model δ α} {w : M.World} {p q : Formula α}
+variable {M : PLoN.Model α} {w : M.World} {p q : Formula α}
 
 @[simp] protected lemma iff_models : w ⊧ p ↔ p.plon_satisfies M w := by rfl
 
@@ -79,17 +79,17 @@ instance : Semantics.Tarski M.World where
 end Formula.plon_satisfies
 
 
-def Formula.valid_on_PLoNModel (M : PLoN.Model δ α) (p : Formula α) : Prop := ∀ w : M.World, w ⊧ p
+def Formula.valid_on_PLoNModel (M : PLoN.Model α) (p : Formula α) : Prop := ∀ w : M.World, w ⊧ p
 
 namespace Formula.valid_on_PLoNModel
 
-instance : Semantics (Formula α) (PLoN.Model δ α) := ⟨fun M ↦ Formula.valid_on_PLoNModel M⟩
+instance : Semantics (Formula α) (PLoN.Model α) := ⟨fun M ↦ Formula.valid_on_PLoNModel M⟩
 
 @[simp]
-protected lemma iff_models {M : PLoN.Model δ α} {p : Formula α}
+protected lemma iff_models {M : PLoN.Model α} {p : Formula α}
 : M ⊧ p ↔ Formula.valid_on_PLoNModel M p := by rfl
 
-instance : Semantics.Bot (PLoN.Model δ α) where
+instance : Semantics.Bot (PLoN.Model α) where
   realize_bot _ := by
     simp [Formula.valid_on_PLoNModel];
     use ﹫;
@@ -97,19 +97,19 @@ instance : Semantics.Bot (PLoN.Model δ α) where
 end Formula.valid_on_PLoNModel
 
 
-def Formula.valid_on_PLoNFrame (F : PLoN.Frame δ α) (p : Formula α) := ∀ V, (Model.mk F V) ⊧ p
+def Formula.valid_on_PLoNFrame (F : PLoN.Frame α) (p : Formula α) := ∀ V, (Model.mk F V) ⊧ p
 
 namespace Formula.valid_on_PLoNFrame
 
-instance : Semantics (Formula α) (PLoN.Frame δ α) := ⟨fun F ↦ Formula.valid_on_PLoNFrame F⟩
+instance : Semantics (Formula α) (PLoN.Frame α) := ⟨fun F ↦ Formula.valid_on_PLoNFrame F⟩
 
 @[simp]
-protected lemma iff_models {F : PLoN.Frame δ α} {p : Formula α}
+protected lemma iff_models {F : PLoN.Frame α} {p : Formula α}
 : F ⊧ p ↔ Formula.valid_on_PLoNFrame F p := by rfl
 
-variable {F : Frame δ α}
+variable {F : Frame α}
 
-instance : Semantics.Bot (PLoN.Frame δ α) where
+instance : Semantics.Bot (PLoN.Frame α) where
   realize_bot _ := by simp [Formula.valid_on_PLoNFrame];
 
 protected lemma nec (h : F ⊧ p) : F ⊧ □p := by
@@ -123,7 +123,7 @@ protected lemma mdp (hpq : F ⊧ p ⟶ q) (hp : F ⊧ p) : F ⊧ q := by
 end Formula.valid_on_PLoNFrame
 
 
-def Formula.valid_on_PLoNFrameClass (𝔽 : PLoN.FrameClass α) (p : Formula α) := ∀ {δ F}, ⟨δ, F⟩ ∈ 𝔽 → F ⊧ p
+def Formula.valid_on_PLoNFrameClass (𝔽 : PLoN.FrameClass α) (p : Formula α) := ∀ {F}, F ∈ 𝔽 → F ⊧ p
 
 namespace Formula.valid_on_PLoNFrameClass
 
@@ -135,18 +135,18 @@ variable {𝔽 : FrameClass α}
 protected lemma iff_models {𝔽 : PLoN.FrameClass α} {p : Formula α} : 𝔽 ⊧ p ↔ Formula.valid_on_PLoNFrameClass 𝔽 p := by rfl
 
 protected lemma nec (h : 𝔽 ⊧ p) : 𝔽 ⊧ □p := by
-  intro _ _ hF;
+  intro _ hF;
   apply valid_on_PLoNFrame.nec;
   exact h hF;
 
 protected lemma mdp (hpq : 𝔽 ⊧ p ⟶ q) (hp : 𝔽 ⊧ p) : 𝔽 ⊧ q := by
-  intro _ _ hF;
+  intro _ hF;
   exact valid_on_PLoNFrame.mdp (hpq hF) (hp hF)
 
 end Formula.valid_on_PLoNFrameClass
 
 
-def DeductionParameter.DefinesPLoNFrameClass (𝓓 : DeductionParameter α) (𝔽 : PLoN.FrameClass α) := ∀ {δ}, ∀ {F : Frame δ α}, F ⊧* 𝓓.theory ↔ ⟨δ, F⟩ ∈ 𝔽
+def DeductionParameter.DefinesPLoNFrameClass (𝓓 : DeductionParameter α) (𝔽 : PLoN.FrameClass α) := ∀ {F : Frame α}, F ⊧* 𝓓.theory ↔ F ∈ 𝔽
 
 namespace PLoN
 
@@ -154,13 +154,13 @@ namespace PLoN
 abbrev AllFrameClass (α) : FrameClass α := Set.univ
 
 lemma AllFrameClass.nonempty : (AllFrameClass.{_, 0} α).Nonempty := by
-  use ⟨Fin 1, TerminalFrame α⟩
+  use TerminalFrame α
   trivial;
 
 open Formula
 
 lemma N_defines : 𝐍.DefinesPLoNFrameClass (AllFrameClass α) := by
-  intro δ F;
+  intro F;
   simp [DeductionParameter.theory, System.theory, valid_on_PLoNFrame, valid_on_PLoNModel];
   intro p hp;
   induction hp using Deduction.inducition_with_necOnly! with

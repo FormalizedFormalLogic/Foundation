@@ -9,7 +9,7 @@ open Formula
 variable {p : Formula α} {Λ : DeductionParameter α}
 
 lemma sound (defines : Λ.DefinesPLoNFrameClass 𝔽) (d : Λ ⊢! p) : 𝔽 ⊧ p := by
-  intro δ F hF;
+  intro F hF;
   have := defines.mpr hF;
   exact Semantics.RealizeSet.setOf_iff.mp this p d;
 

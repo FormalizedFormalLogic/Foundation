@@ -95,29 +95,29 @@ lemma TerminalFrame.multi_geach_confluent : MultiGeachConfluent ts (TerminalFram
     . exact TerminalFrame.geach_confluent;
     . exact ih;
 
-abbrev GeachConfluentFrameClass (t : Geach.Taple) : FrameClass := { ⟨_, F⟩ | (GeachConfluent t) F }
+abbrev GeachConfluentFrameClass (t : Geach.Taple) : FrameClass := { F | (GeachConfluent t) F }
 
 lemma GeachConfluentFrameClass.nonempty : (GeachConfluentFrameClass.{0} t).Nonempty := by
-  use ⟨Fin 1, TerminalFrame⟩;
+  use TerminalFrame;
   exact TerminalFrame.geach_confluent;
 
 
-abbrev MultiGeachConfluentFrameClass (ts : List Geach.Taple) : FrameClass := { ⟨_, F⟩ | (MultiGeachConfluent ts) F }
+abbrev MultiGeachConfluentFrameClass (ts : List Geach.Taple) : FrameClass := { F | (MultiGeachConfluent ts) F }
 
 lemma MultiGeachConfluentFrameClass.nonempty : (MultiGeachConfluentFrameClass.{0} ts).Nonempty := by
-  use ⟨Fin 1, TerminalFrame⟩;
+  use TerminalFrame;
   exact TerminalFrame.multi_geach_confluent;
 
 
-abbrev ReflexiveFrameClass : FrameClass := { ⟨_, F⟩ | Reflexive F }
+abbrev ReflexiveFrameClass : FrameClass := { F | Reflexive F }
 
-abbrev SerialFrameClass : FrameClass := { ⟨_, F⟩ | Serial F }
+abbrev SerialFrameClass : FrameClass := { F | Serial F }
 
-abbrev ReflexiveEuclideanFrameClass : FrameClass := { ⟨_, F⟩ | Reflexive F ∧ Euclidean F }
+abbrev ReflexiveEuclideanFrameClass : FrameClass := { F | Reflexive F ∧ Euclidean F }
 
-abbrev EquivalenceFrameClass : FrameClass := { ⟨_, F⟩ | Reflexive F ∧ Transitive F ∧ Symmetric F }
+abbrev EquivalenceFrameClass : FrameClass := { F | Reflexive F ∧ Transitive F ∧ Symmetric F }
 
-abbrev PreorderFrameClass : FrameClass := { ⟨_, F⟩ | Reflexive F ∧ Transitive F }
+abbrev PreorderFrameClass : FrameClass := { F | Reflexive F ∧ Transitive F }
 
 end
 
@@ -133,21 +133,19 @@ open Formula.kripke_satisfies (multibox_def multidia_def)
 variable [Inhabited α]
 
 lemma axiomGeach_defines : 𝗴𝗲(t).DefinesKripkeFrameClass (α := α) (GeachConfluentFrameClass t) := by
-  intro δ F;
+  intro F;
   constructor;
   . rintro h x y z ⟨hi, hj⟩;
-    let M : Model δ α := { Frame := F, Valuation := λ v _ => y ≺^[t.m] v };
+    let M : Model α := { Frame := F, Valuation := λ v _ => y ≺^[t.m] v };
     simp at h;
-    let x : M.World := x;
-    have him_x : x ⊧ (◇^[t.i](□^[t.m](atom default))) := by
+    have him_x : kripke_satisfies M x (◇^[t.i](□^[t.m](atom default))) := by
       apply kripke_satisfies.multidia_def.mpr;
       use y;
       constructor;
       . exact hi;
       . apply kripke_satisfies.multibox_def.mpr; aesop;
-    have hjn_x : x ⊧ □^[t.j](◇^[t.n](atom default)) := h (Formula.atom default) M.Valuation x him_x;
-    let z : M.World := z;
-    have hn_z : z ⊧ ◇^[t.n](atom default) := kripke_satisfies.multibox_def.mp hjn_x hj;
+    have hjn_x : kripke_satisfies M x (□^[t.j](◇^[t.n](atom default))) := h (Formula.atom default) M.Valuation x him_x;
+    have hn_z : kripke_satisfies M z (◇^[t.n](atom default)) := kripke_satisfies.multibox_def.mp hjn_x hj;
     obtain ⟨u, hzu, hyu⟩ := kripke_satisfies.multidia_def.mp hn_z;
     use u;
     exact ⟨hyu, hzu⟩;
@@ -171,7 +169,7 @@ lemma axiomMultiGeach_defines : 𝗚𝗲(ts).DefinesKripkeFrameClass (α := α) 
   induction ts with
   | nil => simp [AxiomSet.DefinesKripkeFrameClass];
   | cons t ts ih =>
-    intro _ F;
+    intro F;
     simp_all only [Semantics.RealizeSet.union_iff, AxiomSet.MultiGeach.iff_cons];
     constructor;
     . rintro ⟨ht, hts⟩;

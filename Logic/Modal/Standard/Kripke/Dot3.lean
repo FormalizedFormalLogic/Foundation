@@ -8,10 +8,10 @@ open System
 open Kripke
 open Formula
 
-abbrev ConnectedFrameClass : FrameClass := { ⟨_, F⟩ | Connected F }
+abbrev ConnectedFrameClass : FrameClass := { F | Connected F }
 
 variable {α} [Inhabited α] [DecidableEq α] [atleast : Atleast 2 α]
-variable {F : Kripke.Frame δ}
+variable {F : Kripke.Frame}
 
 private lemma connected_of_dot3 : F# ⊧* (.𝟯 : AxiomSet α) → Connected F := by
   contrapose;
@@ -48,21 +48,21 @@ private lemma dot3_of_connected : Connected F → F# ⊧* (.𝟯 : AxiomSet α) 
   | inr rzy => exact hnq $ hq rzy;
 
 lemma AxDot3_Definability : .𝟯.DefinesKripkeFrameClass (α := α) (ConnectedFrameClass) := by
-  intro _ F;
+  intro F;
   constructor;
   . exact connected_of_dot3;
   . exact dot3_of_connected;
 
-abbrev ReflexiveTransitiveConnectedFrameClass : FrameClass := { ⟨_, F⟩ | Reflexive F ∧ Transitive F ∧ Connected F }
+abbrev ReflexiveTransitiveConnectedFrameClass : FrameClass := { F | Reflexive F ∧ Transitive F ∧ Connected F }
 
 lemma ReflexiveTransitiveConnectedFrameClass.nonempty : ReflexiveTransitiveConnectedFrameClass.Nonempty.{0} := by
-  use ⟨Fin 1, TerminalFrame⟩;
+  use TerminalFrame;
   simp [Reflexive, Transitive, Connected, Frame.Rel'];
 
 
 
 private lemma S4Dot3_defines' : (𝗧 ∪ 𝟰 ∪ .𝟯).DefinesKripkeFrameClass (α := α) ReflexiveTransitiveConnectedFrameClass := by
-  rw [(show ReflexiveTransitiveConnectedFrameClass = { ⟨_, F⟩ | (Reflexive F ∧ Transitive F) ∧ Connected F } by aesop)];
+  rw [(show ReflexiveTransitiveConnectedFrameClass = ({ F | (Reflexive F ∧ Transitive F) ∧ Connected F } : FrameClass) by aesop)];
   apply AxiomSet.DefinesKripkeFrameClass.union;
   . exact S4_defines.toAx';
   . exact AxDot3_Definability;

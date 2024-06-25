@@ -13,7 +13,8 @@ open DeductionParameter (Normal)
 
 namespace Kripke
 
-abbrev CanonicalFrame (Ax : AxiomSet α) [Inhabited (Axᴺ)-MCT] : Frame (Axᴺ)-MCT where
+abbrev CanonicalFrame (Ax : AxiomSet α) [Inhabited (Axᴺ)-MCT] : Frame where
+  World := (Axᴺ)-MCT
   Rel := λ Ω₁ Ω₂ => □''⁻¹Ω₁.theory ⊆ Ω₂.theory
 
 namespace CanonicalFrame
@@ -83,7 +84,7 @@ lemma multiframe_def_multidia : Ω₁ ≺^[n] Ω₂ ↔ ∀ {p}, (p ∈ Ω₂.th
 end CanonicalFrame
 
 
-abbrev CanonicalModel (Ax : AxiomSet α) [Inhabited (Axᴺ)-MCT] : Model (Axᴺ)-MCT α where
+abbrev CanonicalModel (Ax : AxiomSet α) [Inhabited (Axᴺ)-MCT] : Model α where
   Frame := CanonicalFrame Ax
   Valuation Ω a := (atom a) ∈ Ω.theory
 
@@ -92,8 +93,8 @@ namespace CanonicalModel
 
 variable [Inhabited (Axᴺ)-MCT]
 
--- @[reducible]
--- instance : Semantics (Formula α) (CanonicalModel Ax).World := Formula.kripke_satisfies.semantics (CanonicalModel Ax)
+@[reducible]
+instance : Semantics (Formula α) (CanonicalModel Ax).World := Formula.kripke_satisfies.semantics (M := CanonicalModel Ax)
 
 -- @[simp] lemma frame_def : (CanonicalModel Ax).Rel' Ω₁ Ω₂ ↔ (□''⁻¹Ω₁.theory : Theory α) ⊆ Ω₂.theory := by rfl
 -- @[simp] lemma val_def : (CanonicalModel Ax).Valuation Ω a ↔ (atom a) ∈ Ω.theory := by rfl
@@ -103,7 +104,7 @@ end CanonicalModel
 
 section
 
-variable [Inhabited (Axᴺ)-MCT]
+variable [Inhabited (Axᴺ)-MCT] {p : Formula α}
 
 lemma truthlemma : ∀ {Ω : (CanonicalModel Ax).World}, Ω ⊧ p ↔ (p ∈ Ω.theory) := by
   induction p using Formula.rec' with
@@ -153,18 +154,18 @@ lemma realize_theory_of_self_canonicalModel : (CanonicalModel Ax) ⊧* (System.t
 
 end
 
-lemma complete_of_mem_canonicalFrame [Inhabited (Axᴺ)-MCT] {𝔽 : FrameClass.Dep α} (hFC : ⟨(Axᴺ)-MCT, CanonicalFrame Ax⟩ ∈ 𝔽) : 𝔽 ⊧ p → (Axᴺ) ⊢! p := by
+lemma complete_of_mem_canonicalFrame [Inhabited (Axᴺ)-MCT] {𝔽 : FrameClass.Dep α} (hFC : CanonicalFrame Ax ∈ 𝔽) : 𝔽 ⊧ p → (Axᴺ) ⊢! p := by
   simp [valid_on_KripkeFrameClass, valid_on_KripkeFrame];
   contrapose;
   push_neg;
   intro h;
-  use (Axᴺ)-MCT, (CanonicalFrame Ax);
+  use (CanonicalFrame Ax);
   constructor;
   . assumption;
   . use (CanonicalModel Ax).Valuation;
     exact iff_valid_on_canonicalModel_deducible.not.mpr h;
 
-lemma instComplete_of_mem_canonicalFrame [Inhabited (Axᴺ)-MCT] {𝔽 : FrameClass.Dep α} (hFC : ⟨(Axᴺ)-MCT, CanonicalFrame Ax⟩ ∈ 𝔽) : Complete (Axᴺ) 𝔽 := ⟨complete_of_mem_canonicalFrame hFC⟩
+lemma instComplete_of_mem_canonicalFrame [Inhabited (Axᴺ)-MCT] {𝔽 : FrameClass.Dep α} (hFC : CanonicalFrame Ax ∈ 𝔽) : Complete (Axᴺ) 𝔽 := ⟨complete_of_mem_canonicalFrame hFC⟩
 
 instance K_complete : Complete (𝐊 : DeductionParameter α) AllFrameClass# := by
   simpa [←Normal.isK] using instComplete_of_mem_canonicalFrame (Ax := 𝗞) (𝔽 := AllFrameClass#) trivial;

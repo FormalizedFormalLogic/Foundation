@@ -10,9 +10,9 @@ open Kripke
 open Formula
 
 variable {α : Type u} [Inhabited α]
-variable {F : Kripke.Frame δ}
+variable {F : Kripke.Frame}
 
-abbrev TransitiveCWFFrameClass : FrameClass := { ⟨_, F⟩ | Transitive F ∧ ConverseWellFounded F }
+abbrev TransitiveCWFFrameClass : FrameClass := { F | Transitive F ∧ ConverseWellFounded F }
 
 private lemma trans_of_L : F# ⊧* (𝗟 : AxiomSet α) → Transitive F.Rel := by
   contrapose;
@@ -66,7 +66,7 @@ private lemma L_of_trans_and_cwf : (Transitive F.Rel ∧ ConverseWellFounded F.R
     . exact hm;
 
 lemma axiomL_defines : 𝗟.DefinesKripkeFrameClass (α := α) (TransitiveCWFFrameClass) := by
-  intro _ F;
+  intro F;
   constructor;
   . intro h;
     constructor;
@@ -75,15 +75,15 @@ lemma axiomL_defines : 𝗟.DefinesKripkeFrameClass (α := α) (TransitiveCWFFra
   . exact L_of_trans_and_cwf;
 
 
-abbrev TransitiveIrreflexiveFiniteFrameClass : FiniteFrameClass := { ⟨_, F⟩ | Transitive F.toFrame ∧ Irreflexive F.toFrame }
+abbrev TransitiveIrreflexiveFiniteFrameClass : FiniteFrameClass := { F | Transitive F.toFrame ∧ Irreflexive F.toFrame }
 
 
 lemma TransitiveIrreflexiveFiniteFrameClass.nonempty : TransitiveIrreflexiveFiniteFrameClass.Nonempty.{0} := by
-  use ⟨Fin 1, PointFrame⟩;
+  use PointFrame;
   simp [Transitive, Irreflexive];
 
 lemma axiomL_finite_defines : 𝗟.FinitelyDefinesKripkeFrameClass (α := α) TransitiveIrreflexiveFiniteFrameClass := by
-  intro δ F;
+  intro F;
   constructor;
   . intro h;
     obtain ⟨hTrans, hCWF⟩ := axiomL_defines.mp h;
@@ -95,7 +95,7 @@ lemma axiomL_finite_defines : 𝗟.FinitelyDefinesKripkeFrameClass (α := α) Tr
     apply axiomL_defines.mpr;
     constructor;
     . exact hTrans;
-    . exact Finite.converseWellFounded_of_trans_irrefl' F.δ_finite hTrans hIrrefl;
+    . exact Finite.converseWellFounded_of_trans_irrefl' F.World_finite hTrans hIrrefl;
 
 instance : Sound (𝐆𝐋 : DeductionParameter α) TransitiveIrreflexiveFiniteFrameClass# := sound_of_finitely_defines axiomL_finite_defines
 

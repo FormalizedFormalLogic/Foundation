@@ -17,7 +17,7 @@ lemma reducible_of_subset_FrameClass (h𝔽 : 𝔽₂ ⊆ 𝔽₁) : Ax₁ᴺ �
   apply System.reducible_iff.mpr;
   intro p hp;
   apply complete₂.complete;
-  intro _ F hF;
+  intro F hF;
   exact sound₁.sound hp $ h𝔽 hF;
 
 /-

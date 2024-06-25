@@ -19,7 +19,7 @@ lemma sound (defines : Ax.DefinesKripkeFrameClass 𝔽) (d : Axᴺ ⊢! p) : �
     simp only [Set.mem_setOf_eq] at h;
     rcases h with (hK | hR);
     . exact (Semantics.RealizeSet.setOf_iff.mp valid_on_KripkeFrameClass.axiomK) _ hK;
-    . intro _ F hF;
+    . intro F hF;
       exact Semantics.RealizeSet.setOf_iff.mp (defines.mpr hF) _ hR;
   | hMdp ihpq ihp => exact valid_on_KripkeFrameClass.mdp ihpq ihp;
   | hNec ih => exact valid_on_KripkeFrameClass.nec ih;
@@ -61,7 +61,7 @@ lemma finite_sound (defines : Ax.FinitelyDefinesKripkeFrameClass 𝔽) (d : Ax�
     simp only [Set.mem_setOf_eq] at h;
     rcases h with (hK | hR);
     . exact (Semantics.RealizeSet.setOf_iff.mp valid_on_KripkeFrameClass.axiomK) _ hK;
-    . rintro δ F ⟨FF, hFF, eFF⟩; subst eFF;
+    . rintro F ⟨FF, hFF, eFF⟩; subst eFF;
       exact Semantics.RealizeSet.setOf_iff.mp (defines.mpr hFF) _ hR;
   | hMdp ihpq ihp => exact valid_on_KripkeFrameClass.mdp ihpq ihp;
   | hNec ih => exact valid_on_KripkeFrameClass.nec ih;
@@ -77,8 +77,8 @@ lemma sound_of_finitely_defines (defines : Ax.FinitelyDefinesKripkeFrameClass �
 
 lemma unprovable_bot_of_nonempty_finite_frameClass (defines : Ax.FinitelyDefinesKripkeFrameClass 𝔽) (nonempty : 𝔽.Nonempty) : Axᴺ ⊬! ⊥ := by
   by_contra hC;
-  obtain ⟨⟨δ, F⟩, hF⟩ := nonempty;
-  have := @finite_sound α Ax 𝔽 ⊥ defines hC δ ↑F;
+  obtain ⟨F, hF⟩ := nonempty;
+  have := @finite_sound α Ax 𝔽 ⊥ defines hC ↑F;
   simp [FiniteFrameClass.toFrameClass] at this;
   have := this F hF;
   contradiction;

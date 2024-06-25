@@ -12,15 +12,15 @@ open DeductionParameter (Normal)
 
 variable {α} [Inhabited α] [DecidableEq α]
 
-abbrev IsolatedFrameClass : FrameClass := { ⟨_, F⟩ | Isolated F }
+abbrev IsolatedFrameClass : FrameClass := { F | Isolated F }
 
 lemma IsolatedFrameClass.nonempty : IsolatedFrameClass.Nonempty.{0} := by
-  use ⟨(Fin 1), PointFrame⟩
+  use PointFrame
   simp [Isolated];
 
 lemma axiomVer_defines : 𝗩𝗲𝗿.DefinesKripkeFrameClass (α := α) IsolatedFrameClass := by
   simp [AxiomSet.DefinesKripkeFrameClass, valid_on_KripkeFrame];
-  intro _ F;
+  intro F;
   constructor;
   . intro h x y hxy;
     exact h ⊥ (λ _ _ => True) x hxy;
