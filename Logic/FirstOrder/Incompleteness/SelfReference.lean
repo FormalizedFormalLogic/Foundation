@@ -39,7 +39,7 @@ lemma fixpoint_eq (θ : Semisentence ℒₒᵣ 1) :
 
 variable (T)
 
-open Model
+open LO.Arith
 /-- Fixpoint Lemma -/
 theorem main (θ : Semisentence ℒₒᵣ 1) :
     T ⊢! fixpoint θ ⟷ θ/[⸢fixpoint θ⸣] :=
@@ -47,18 +47,18 @@ theorem main (θ : Semisentence ℒₒᵣ 1) :
     haveI : M ⊧ₘ* 𝐏𝐀⁻ := ModelsTheory.of_provably_subtheory M 𝐏𝐀⁻ T inferInstance (by assumption)
     have hssbs : ∀ σ π : Semisentence ℒₒᵣ 1, ∀ z,
         Evalbm M ![z, encode σ, encode π] ssbs ↔ z = encode (σ/[(⸢π⸣ : Semiterm ℒₒᵣ Empty 0)]) := by
-      simpa [goedelNumber_def, Model.numeral_eq_natCast, models_iff, Semiformula.eval_substs, Matrix.comp_vecCons', Matrix.constant_eq_singleton] using
+      simpa [goedelNumber_def, Arith.numeral_eq_natCast, models_iff, Semiformula.eval_substs, Matrix.comp_vecCons', Matrix.constant_eq_singleton] using
       fun σ π => consequence_iff'.mp (sound₀! (ssbs_spec (T := T) σ π)) M
     simp[models_iff, Semiformula.eval_substs, Matrix.comp_vecCons']
     suffices Evalbm M ![] (fixpoint θ) ↔ Evalbm M ![encode (fixpoint θ)] θ by
-      simpa [goedelNumber_def, Model.numeral_eq_natCast, Matrix.constant_eq_singleton] using this
+      simpa [goedelNumber_def, Arith.numeral_eq_natCast, Matrix.constant_eq_singleton] using this
     calc
       Evalbm M ![] (fixpoint θ)
       ↔ ∀ z, Evalbm M ![z, encode (diag θ), encode (diag θ)] ssbs → Evalbm M ![z] θ := by simp [goedelNumber_def,
                                                                                             fixpoint_eq, Semiformula.eval_rew,
                                                                                             Function.comp, Matrix.comp_vecCons',
                                                                                             Matrix.constant_eq_vec₂,
-                                                                                            Model.numeral_eq_natCast,
+                                                                                            Arith.numeral_eq_natCast,
                                                                                             Matrix.constant_eq_singleton]
     _ ↔ Evalbm M ![encode “!(diag θ) !!(⸢diag θ⸣ : Semiterm ℒₒᵣ Empty 0)”] θ        := by simp [hssbs]
     _ ↔ Evalbm M ![encode (fixpoint θ)] θ                                           := by rfl))

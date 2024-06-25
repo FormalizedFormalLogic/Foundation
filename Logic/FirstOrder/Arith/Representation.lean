@@ -39,7 +39,7 @@ def code (c : Code k) : Semisentence ℒₒᵣ (k + 1) := (Rew.bind ![] (#0 :> (
 
 section model
 
-open Model
+open LO.Arith
 
 variable {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐏𝐀⁻]
 
@@ -151,7 +151,7 @@ variable {T : Theory ℒₒᵣ} [𝐄𝐐 ≼ T] [𝐏𝐀⁻ ≼ T] [DecidableP
 
 section representation
 
-open Model
+open LO.Arith
 
 lemma provable_iff_mem_partrec {k} {f : Vector ℕ k →. ℕ} (hf : Nat.Partrec' f) {y : ℕ} {v : Fin k → ℕ} :
     (T ⊢! (Rew.substs $ ⸢y⸣ :> fun i => ⸢v i⸣).hom (code $ codeOfPartrec f)) ↔ y ∈ f (Vector.ofFn v) := by
@@ -184,9 +184,9 @@ lemma provable_computable_code_uniq {k} {f : Vector ℕ k → ℕ}
     haveI : M ⊧ₘ* 𝐏𝐀⁻ :=
       ModelsTheory.of_provably_subtheory M 𝐏𝐀⁻ T inferInstance (by assumption)
     have Hfv : Semiformula.Evalbm M (f (Vector.ofFn v) :> (v ·)) (code (codeOfPartrec f)) := by
-      simpa [goedelNumber_def, Model.numeral_eq_natCast, models_iff, Semiformula.eval_substs, Matrix.comp_vecCons'] using
+      simpa [goedelNumber_def, Arith.numeral_eq_natCast, models_iff, Semiformula.eval_substs, Matrix.comp_vecCons'] using
         consequence_iff'.mp (sound₀! (provable_iff_computable T hf v)) M
-    simp [goedelNumber_def, Model.numeral_eq_natCast, models_iff, Semiformula.eval_substs, Matrix.comp_vecCons']
+    simp [goedelNumber_def, Arith.numeral_eq_natCast, models_iff, Semiformula.eval_substs, Matrix.comp_vecCons']
     intro x; constructor
     · intro H; exact code_uniq H Hfv
     · rintro rfl; simpa))

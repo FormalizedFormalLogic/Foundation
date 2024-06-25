@@ -128,13 +128,17 @@ end Standard
 
 end model
 
+end Arith
+
+end FirstOrder
+
+namespace Arith
+
 noncomputable section
 
 variable (M : Type) [Zero M] [One M] [Add M] [Mul M] [Exp M] [LT M] [M ⊧ₘ* 𝐄𝐀]
 
-open Language
-
-namespace Model
+open FirstOrder FirstOrder.Arith Language
 
 instance models_peanoMinus_of_models_elementaryArithmetic : M ⊧ₘ* 𝐏𝐀⁻ :=
   haveI : M ⊧ₘ* (Semiformula.lMap Language.oringEmb '' 𝐏𝐀⁻ : Theory ℒₒᵣ(exp)) :=
@@ -156,10 +160,8 @@ instance models_iSigmaZero_of_models_elementaryArithmetic : M ⊧ₘ* 𝐈𝚺�
     ModelsTheory.models M (show (σ : Sentence ℒₒᵣ(exp)) ∈ 𝐄𝐀 from Theory.iSigma₀_subset_EA (Set.mem_image_of_mem _ hσ))
   simpa [models_iff] using this⟩
 
-end Model
-
 end
 
 end Arith
 
-end LO.FirstOrder
+end LO

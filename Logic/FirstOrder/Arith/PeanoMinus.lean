@@ -4,19 +4,17 @@ import Logic.Vorspiel.ExistsUnique
 import Mathlib.Algebra.Order.Monoid.Canonical.Defs
 import Mathlib.Algebra.Associated
 
-namespace LO
+noncomputable section
 
-namespace FirstOrder
+namespace LO
 
 namespace Arith
 
-noncomputable section
+open FirstOrder FirstOrder.Arith
 
 variable {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐏𝐀⁻]
 
 open Language
-
-namespace Model
 
 scoped instance : LE M := ⟨fun x y => x = y ∨ x < y⟩
 
@@ -67,54 +65,54 @@ lemma distr : ∀ x y z : M, x * (y + z) = x * y + x * z := by
 lemma lt_irrefl : ∀ x : M, ¬x < x := by
   simpa[models_iff] using ModelsTheory.models M Theory.peanoMinus.ltIrrefl
 
-lemma lt_trans : ∀ x y z : M, x < y → y < z → x < z := by
+protected lemma lt_trans : ∀ x y z : M, x < y → y < z → x < z := by
   simpa[models_iff] using ModelsTheory.models M Theory.peanoMinus.ltTrans
 
 lemma lt_tri : ∀ x y : M, x < y ∨ x = y ∨ y < x := by
   simpa[models_iff] using ModelsTheory.models M Theory.peanoMinus.ltTri
 
 scoped instance : AddCommMonoid M where
-  add_assoc := Model.add_assoc
-  zero_add  := fun x => Model.add_comm x 0 ▸ Model.add_zero x
-  add_zero  := Model.add_zero
-  add_comm  := Model.add_comm
+  add_assoc := Arith.add_assoc
+  zero_add  := fun x => Arith.add_comm x 0 ▸ Arith.add_zero x
+  add_zero  := Arith.add_zero
+  add_comm  := Arith.add_comm
   nsmul := nsmulRec
 
 scoped instance : CommMonoid M where
-  mul_assoc := Model.mul_assoc
-  one_mul   := fun x => Model.mul_comm x 1 ▸ Model.mul_one x
-  mul_one   :=  Model.mul_one
-  mul_comm  := Model.mul_comm
+  mul_assoc := Arith.mul_assoc
+  one_mul   := fun x => Arith.mul_comm x 1 ▸ Arith.mul_one x
+  mul_one   := Arith.mul_one
+  mul_comm  := Arith.mul_comm
 
 scoped instance : LinearOrder M where
   le_refl := fun x => Or.inl (by simp)
   le_trans := by
     rintro x y z (rfl | hx) (rfl | hy) <;> simp[*, le_def]
-    · exact Or.inr (Model.lt_trans _ _ _ hx hy)
+    · exact Or.inr (Arith.lt_trans _ _ _ hx hy)
   le_antisymm := by
     rintro x y (rfl | hx) <;> simp
     rintro (rfl | hy) <;> try simp
-    exact False.elim $ Model.lt_irrefl _ (Model.lt_trans _ _ _ hx hy)
+    exact False.elim $ Arith.lt_irrefl _ (Arith.lt_trans _ _ _ hx hy)
   le_total := by
     intro x y
-    rcases Model.lt_tri x y with (h | rfl | h) <;> simp[*, le_def]
+    rcases Arith.lt_tri x y with (h | rfl | h) <;> simp[*, le_def]
   lt_iff_le_not_le := fun x y =>
     ⟨fun h => ⟨Or.inr h, by
-      simp only [le_def]; rintro (rfl | h'); { exact lt_irrefl y h }; { exact lt_irrefl _ (lt_trans _ _ _ h h') }⟩,
+      simp only [le_def]; rintro (rfl | h'); { exact lt_irrefl y h }; { exact lt_irrefl _ (Arith.lt_trans _ _ _ h h') }⟩,
      by simp[not_or, le_def]; rintro (rfl | h) <;> simp[*] ⟩
   decidableLE := fun _ _ => Classical.dec _
 
-protected lemma zero_mul : ∀ x : M, 0 * x = 0 := fun x => by simpa[mul_comm] using Model.mul_zero x
+protected lemma zero_mul : ∀ x : M, 0 * x = 0 := fun x => by simpa[mul_comm] using Arith.mul_zero x
 
 scoped instance : LinearOrderedCommSemiring M where
   left_distrib := distr
   right_distrib := fun x y z => by simp[mul_comm _ z]; exact distr z x y
-  zero_mul := Model.zero_mul
-  mul_zero := Model.mul_zero
-  mul_assoc := Model.mul_assoc
+  zero_mul := Arith.zero_mul
+  mul_zero := Arith.mul_zero
+  mul_assoc := Arith.mul_assoc
   mul_comm := mul_comm
-  one_mul   := fun x => Model.mul_comm x 1 ▸ Model.mul_one x
-  mul_one   :=  Model.mul_one
+  one_mul   := fun x => Arith.mul_comm x 1 ▸ Arith.mul_one x
+  mul_one   := Arith.mul_one
   add_le_add_left := by rintro x y (rfl | h) z <;> simp[add_comm z]; exact Or.inr (add_lt_add x y z h)
   zero_le_one := Or.inr zero_lt_one
   le_of_add_le_add_left := by
@@ -208,7 +206,11 @@ lemma pval_of_pval_nat_of_sigma_one : ∀ {n} {σ : Semisentence ℒₒᵣ n},
   | _, _, Hierarchy.ex hp,                     e => by
     simp; intro x hx; exact ⟨x, by simpa[Matrix.comp_vecCons'] using pval_of_pval_nat_of_sigma_one hp hx⟩
 
-end Model
+end Arith
+
+namespace FirstOrder.Arith
+
+open LO.Arith
 
 variable {T : Theory ℒₒᵣ}
 
@@ -216,17 +218,15 @@ theorem sigma_one_completeness [𝐄𝐐 ≼ T] [𝐏𝐀⁻ ≼ T] {σ : Senten
     ℕ ⊧ₘ σ → T ⊢! σ := fun H =>
   complete (oRing_consequence_of.{0} _ _ (fun M _ _ _ _ _ _ => by
     haveI : M ⊧ₘ* 𝐏𝐀⁻ := ModelsTheory.of_provably_subtheory M 𝐏𝐀⁻ T inferInstance (by assumption)
-    simpa [Matrix.empty_eq] using Model.pval_of_pval_nat_of_sigma_one (M := M) hσ H))
+    simpa [Matrix.empty_eq] using Arith.pval_of_pval_nat_of_sigma_one (M := M) hσ H))
 
 theorem sigma_one_completeness_iff [𝐏𝐀⁻ ≼ T] [ℕ ⊧ₘ* T] {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
     ℕ ⊧ₘ σ ↔ T ⊢₌! σ :=
   haveI : 𝐏𝐀⁻ ≼ T⁼ := System.Subtheory.comp (𝓣 := T) inferInstance inferInstance
   ⟨fun h ↦ sigma_one_completeness hσ h, fun h ↦ consequence_iff_add_eq.mp (sound₀! h) ℕ inferInstance⟩
 
-end
-
-end Arith
-
-end FirstOrder
+end FirstOrder.Arith
 
 end LO
+
+end
