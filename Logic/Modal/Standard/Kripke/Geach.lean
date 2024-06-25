@@ -167,7 +167,7 @@ lemma axiomGeach_defines : 𝗴𝗲(t).DefinesKripkeFrameClass (α := α) (Geach
 instance : System.Consistent (𝗴𝗲(t)ᴺ : DeductionParameter α) := consistent_of_defines axiomGeach_defines GeachConfluentFrameClass.nonempty
 
 
-lemma axiomMultiGeach_defines : 𝗚𝗲(ts).DefinesKripkeFrameClass (α := α) (MultiGeachConfluentFrameClass ts)[α] := by
+lemma axiomMultiGeach_defines : 𝗚𝗲(ts).DefinesKripkeFrameClass (α := α) (MultiGeachConfluentFrameClass ts) := by
   induction ts with
   | nil => simp [AxiomSet.DefinesKripkeFrameClass];
   | cons t ts ih =>
@@ -193,7 +193,7 @@ private def instGeachLogicDefinability
   rw [h𝔽];
   exact AxiomSet.DefinesKripkeFrameClass.union axiomK_defines axiomMultiGeach_defines;
 
-lemma S4_defines : 𝐒𝟒.DefinesKripkeFrameClass (α := α) PreorderFrameClass[α] := instGeachLogicDefinability PreorderFrameClass[α] (by
+lemma S4_defines : 𝐒𝟒.DefinesKripkeFrameClass (α := α) PreorderFrameClass := instGeachLogicDefinability PreorderFrameClass (by
   simp_all [PreorderFrameClass, PreorderFrameClass];
   apply Set.eq_of_subset_of_subset <;> simp [MultiGeachConfluent];
 )
@@ -215,20 +215,20 @@ section Soundness
 private lemma instGeachLogicSoundAux
   {Λ : DeductionParameter α} [geach : Λ.IsGeach] {𝔽 : FrameClass}
   (h𝔽 : 𝔽 = MultiGeachConfluentFrameClass geach.taples := by simp_all [MultiGeachConfluentFrameClass, MultiGeachConfluent])
-  : Sound Λ 𝔽[α] := by
+  : Sound Λ 𝔽# := by
     rw [geach.char, h𝔽];
     apply sound_of_defines (α := α) (Ax := 𝗚𝗲(geach.taples));
     exact axiomMultiGeach_defines;
 
-instance sound_KD : Sound 𝐊𝐃 SerialFrameClass[α] := instGeachLogicSoundAux
+instance sound_KD : Sound (𝐊𝐃 : DeductionParameter α) SerialFrameClass# := instGeachLogicSoundAux
 
-instance sound_KT : Sound 𝐊𝐓 ReflexiveFrameClass[α] := instGeachLogicSoundAux
+instance sound_KT : Sound (𝐊𝐓 : DeductionParameter α) ReflexiveFrameClass# := instGeachLogicSoundAux
 
-instance sound_S4 : Sound 𝐒𝟒 PreorderFrameClass[α] := instGeachLogicSoundAux
+instance sound_S4 : Sound (𝐒𝟒 : DeductionParameter α) PreorderFrameClass# := instGeachLogicSoundAux
 
-instance sound_S5 : Sound 𝐒𝟓 ReflexiveEuclideanFrameClass[α] := instGeachLogicSoundAux
+instance sound_S5 : Sound (𝐒𝟓 : DeductionParameter α) ReflexiveEuclideanFrameClass# := instGeachLogicSoundAux
 
-instance sound_KT4B : Sound 𝐊𝐓𝟒𝐁 EquivalenceFrameClass[α] := instGeachLogicSoundAux
+instance sound_KT4B : Sound (𝐊𝐓𝟒𝐁  : DeductionParameter α) EquivalenceFrameClass# := instGeachLogicSoundAux
 
 end Soundness
 
@@ -283,10 +283,10 @@ lemma multiGeachConfluent_CanonicalFrame (h : 𝗚𝗲(ts) ⊆ Ax) : MultiGeachC
     . apply ih;
       simp_all;
 
-private instance instMultiGeachComplete : Complete (𝗚𝗲(ts)ᴺ : DeductionParameter α) (MultiGeachConfluentFrameClass ts)[α] :=
+private instance instMultiGeachComplete : Complete (𝗚𝗲(ts)ᴺ : DeductionParameter α) (MultiGeachConfluentFrameClass ts)# :=
   instComplete_of_mem_canonicalFrame $ multiGeachConfluent_CanonicalFrame (by rfl)
 
-instance {Λ : DeductionParameter α} [g : Λ.IsGeach] : Complete Λ (MultiGeachConfluentFrameClass g.taples)[α] := by
+instance {Λ : DeductionParameter α} [g : Λ.IsGeach] : Complete Λ (MultiGeachConfluentFrameClass g.taples)# := by
   convert instMultiGeachComplete (α := α);
   exact g.char;
 
@@ -296,13 +296,13 @@ private def instGeachLogicCompleteAux {Λ : DeductionParameter α} [geach : Λ.I
     convert instMultiGeachComplete (α := α);
     exact geach.char;
 
-instance : Complete 𝐊𝐓 (ReflexiveFrameClass[α]) := instGeachLogicCompleteAux
+instance : Complete (𝐊𝐓 : DeductionParameter α) (ReflexiveFrameClass#) := instGeachLogicCompleteAux
 
-instance : Complete 𝐒𝟒 (PreorderFrameClass[α]) := instGeachLogicCompleteAux
+instance : Complete (𝐒𝟒 : DeductionParameter α) (PreorderFrameClass#) := instGeachLogicCompleteAux
 
-instance : Complete 𝐒𝟓 (ReflexiveEuclideanFrameClass[α]) := instGeachLogicCompleteAux
+instance : Complete (𝐒𝟓 : DeductionParameter α) (ReflexiveEuclideanFrameClass#) := instGeachLogicCompleteAux
 
-instance : Complete 𝐊𝐓𝟒𝐁 (EquivalenceFrameClass[α]) := instGeachLogicCompleteAux
+instance : Complete (𝐊𝐓𝟒𝐁 : DeductionParameter α) (EquivalenceFrameClass#) := instGeachLogicCompleteAux
 
 end Completeness
 

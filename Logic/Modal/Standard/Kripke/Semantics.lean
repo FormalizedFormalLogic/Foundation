@@ -55,8 +55,8 @@ set_option linter.unusedVariables false in
 /-- dependent-version frame -/
 abbrev Frame.Dep (δ) (α : Type*) := Frame δ
 
-abbrev Frame.alt (F : Frame δ) (α : Type*) : Frame.Dep δ α := F
-notation:max F:max "[" α "]" => Frame.alt F α
+abbrev Frame.alt (F : Frame δ) {α} : Frame.Dep δ α := F
+scoped postfix:max "#" => Frame.alt
 
 
 structure FiniteFrame (δ) extends Frame δ where
@@ -71,8 +71,8 @@ set_option linter.unusedVariables false in
 /-- dependent-version frame class -/
 abbrev FrameClass.Dep (α : Type*) := FrameClass
 
-abbrev FrameClass.alt (𝔽 : FrameClass) (α : Type*) : FrameClass.Dep α := 𝔽
-notation:max 𝔽:max "[" α "]" => FrameClass.alt 𝔽 α
+abbrev FrameClass.alt (𝔽 : FrameClass) {α} : FrameClass.Dep α := 𝔽
+scoped postfix:max "#" => FrameClass.alt
 
 
 abbrev FiniteFrameClass := Set ((δ : Type*) × FiniteFrame δ)
@@ -238,7 +238,7 @@ protected lemma mdp (hpq : F ⊧ p ⟶ q) (hp : F ⊧ p) : F ⊧ q := by
 end Formula.valid_on_KripkeFrame
 
 
-@[simp] def Formula.valid_on_KripkeFrameClass (𝔽 : FrameClass) (p : Formula α) := ∀ {δ}, ∀ {F : Frame δ}, ⟨δ, F⟩ ∈ 𝔽 → F[α] ⊧ p
+@[simp] def Formula.valid_on_KripkeFrameClass (𝔽 : FrameClass) (p : Formula α) := ∀ {δ}, ∀ {F : Frame δ}, ⟨δ, F⟩ ∈ 𝔽 → F# ⊧ p
 
 namespace Formula.valid_on_KripkeFrameClass
 
@@ -271,7 +271,7 @@ namespace AxiomSet
 
 variable {Ax Ax₁ Ax₂ : AxiomSet α}
 
-def DefinesKripkeFrameClass (Ax : AxiomSet α) (𝔽 : FrameClass) := ∀ {δ}, ∀ {F : Frame δ}, F[α] ⊧* Ax ↔ ⟨δ, F⟩ ∈ 𝔽
+def DefinesKripkeFrameClass (Ax : AxiomSet α) (𝔽 : FrameClass) := ∀ {δ}, ∀ {F : Frame δ}, F# ⊧* Ax ↔ ⟨δ, F⟩ ∈ 𝔽
 
 lemma DefinesKripkeFrameClass.union (defines₁ : Ax₁.DefinesKripkeFrameClass 𝔽₁) (defines₂ : Ax₂.DefinesKripkeFrameClass 𝔽₂)
   : (Ax₁ ∪ Ax₂).DefinesKripkeFrameClass (𝔽₁ ∩ 𝔽₂) := by
@@ -288,7 +288,7 @@ lemma DefinesKripkeFrameClass.union (defines₁ : Ax₁.DefinesKripkeFrameClass 
     . apply defines₂.mpr h₂;
 
 
-def FinitelyDefinesKripkeFrameClass (Ax : AxiomSet α) (𝔽 : FiniteFrameClass) := ∀ {δ}, ∀ {F : FiniteFrame δ}, (↑F : Frame δ)[α] ⊧* Ax ↔ ⟨δ, F⟩ ∈ 𝔽
+def FinitelyDefinesKripkeFrameClass (Ax : AxiomSet α) (𝔽 : FiniteFrameClass) := ∀ {δ}, ∀ {F : FiniteFrame δ}, (↑F : Frame δ)# ⊧* Ax ↔ ⟨δ, F⟩ ∈ 𝔽
 
 lemma FinitelyDefinesKripkeFrameClass.union (defines₁ : Ax₁.FinitelyDefinesKripkeFrameClass 𝔽₁) (defines₂ : Ax₂.FinitelyDefinesKripkeFrameClass 𝔽₂)
   : (Ax₁ ∪ Ax₂).FinitelyDefinesKripkeFrameClass (𝔽₁ ∩ 𝔽₂) := by
@@ -318,7 +318,7 @@ lemma AllFrameClass.nonempty : AllFrameClass.Nonempty.{0} := by
   use ⟨Fin 1, TerminalFrame⟩;
   trivial;
 
-lemma axiomK_defines : 𝗞.DefinesKripkeFrameClass (α := α) (AllFrameClass) := by
+lemma axiomK_defines : 𝗞.DefinesKripkeFrameClass (α := α) AllFrameClass := by
   intro F;
   simp only [Set.mem_univ, iff_true];
   exact valid_on_KripkeFrame.axiomK;

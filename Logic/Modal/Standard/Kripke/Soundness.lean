@@ -13,7 +13,7 @@ section
 
 variable {𝔽 : FrameClass}
 
-lemma sound (defines : Ax.DefinesKripkeFrameClass 𝔽) (d : Axᴺ ⊢! p) : 𝔽[α] ⊧ p := by
+lemma sound (defines : Ax.DefinesKripkeFrameClass 𝔽) (d : Axᴺ ⊢! p) : 𝔽# ⊧ p := by
   induction d using Deduction.inducition_with_necOnly! with
   | hMaxm h =>
     simp only [Set.mem_setOf_eq] at h;
@@ -31,7 +31,7 @@ lemma sound (defines : Ax.DefinesKripkeFrameClass 𝔽) (d : Axᴺ ⊢! p) : �
     | inr hq => exact hqr hq;
   | _ => simp_all [valid_on_KripkeFrameClass, valid_on_KripkeFrame, valid_on_KripkeModel, kripke_satisfies];
 
-lemma sound_of_defines (defines : Ax.DefinesKripkeFrameClass 𝔽) : Sound Axᴺ 𝔽[α] := ⟨sound defines⟩
+lemma sound_of_defines (defines : Ax.DefinesKripkeFrameClass 𝔽) : Sound Axᴺ 𝔽# := ⟨sound defines⟩
 
 lemma unprovable_bot_of_nonempty_frameClass (defines : Ax.DefinesKripkeFrameClass 𝔽) (nonempty : 𝔽.Nonempty) : Axᴺ ⊬! ⊥ := by
   by_contra hC;
@@ -42,7 +42,7 @@ lemma consistent_of_defines (defines : Ax.DefinesKripkeFrameClass 𝔽) (nonempt
   apply System.Consistent.of_unprovable;
   exact unprovable_bot_of_nonempty_frameClass defines nonempty;
 
-instance K_sound : Sound 𝐊 AllFrameClass[α] := by simpa [←Normal.isK] using sound_of_defines axiomK_defines;
+instance K_sound : Sound (𝐊 : DeductionParameter α) AllFrameClass# := by simpa [←Normal.isK] using sound_of_defines axiomK_defines;
 
 instance K_consistent' : System.Consistent (𝗞 : AxiomSet α)ᴺ := consistent_of_defines axiomK_defines AllFrameClass.nonempty
 
@@ -55,7 +55,7 @@ section
 
 variable {𝔽 : FiniteFrameClass}
 
-lemma finite_sound (defines : Ax.FinitelyDefinesKripkeFrameClass 𝔽) (d : Axᴺ ⊢! p) : (𝔽 : FrameClass)[α] ⊧ p := by
+lemma finite_sound (defines : Ax.FinitelyDefinesKripkeFrameClass 𝔽) (d : Axᴺ ⊢! p) : (𝔽 : FrameClass)# ⊧ p := by
   induction d using Deduction.inducition_with_necOnly! with
   | hMaxm h =>
     simp only [Set.mem_setOf_eq] at h;
@@ -73,7 +73,7 @@ lemma finite_sound (defines : Ax.FinitelyDefinesKripkeFrameClass 𝔽) (d : Ax�
     | inr hq => exact hqr hq;
   | _ => simp_all [valid_on_KripkeFrameClass, valid_on_KripkeFrame, valid_on_KripkeModel, kripke_satisfies];
 
-lemma sound_of_finitely_defines (defines : Ax.FinitelyDefinesKripkeFrameClass 𝔽) : Sound Axᴺ ↑𝔽[α] := ⟨finite_sound defines⟩
+lemma sound_of_finitely_defines (defines : Ax.FinitelyDefinesKripkeFrameClass 𝔽) : Sound Axᴺ ↑𝔽# := ⟨finite_sound defines⟩
 
 lemma unprovable_bot_of_nonempty_finite_frameClass (defines : Ax.FinitelyDefinesKripkeFrameClass 𝔽) (nonempty : 𝔽.Nonempty) : Axᴺ ⊬! ⊥ := by
   by_contra hC;

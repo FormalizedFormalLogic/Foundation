@@ -9,15 +9,15 @@ namespace Kripke
 
 section Bisimulation
 
-structure Model.Bismulation (M₁ : Kripke.Model δ₁ α) (M₂ : Kripke.Model δ₂ α) where
+structure Model.Bisimulation (M₁ : Kripke.Model δ₁ α) (M₂ : Kripke.Model δ₂ α) where
   toRel : Rel M₁.World M₂.World
   atomic {x₁ : M₁.World} {x₂ : M₂.World} {a : α} : toRel x₁ x₂ → ((M₁.Valuation x₁ a) ↔ (M₂.Valuation x₂ a))
   forth {x₁ y₁ : M₁.World} {x₂ : M₂.World} : toRel x₁ x₂ → x₁ ≺ y₁ → ∃ y₂ : M₂.World, toRel y₁ y₂ ∧ x₂ ≺ y₂
   back {x₁ : M₁.World} {x₂ y₂ : M₂.World} : toRel x₁ x₂ → x₂ ≺ y₂ → ∃ y₁ : M₁.World, toRel y₁ y₂ ∧ x₁ ≺ y₁
 
-notation M₁ " ⇄ " M₂ => Model.Bismulation M₁ M₂
+notation M₁ " ⇄ " M₂ => Model.Bisimulation M₁ M₂
 
-instance : CoeFun (Model.Bismulation M₁ M₂) (λ _ => M₁.World → M₂.World → Prop) := ⟨λ bi => bi.toRel⟩
+instance : CoeFun (Model.Bisimulation M₁ M₂) (λ _ => M₁.World → M₂.World → Prop) := ⟨λ bi => bi.toRel⟩
 
 end Bisimulation
 
@@ -82,26 +82,27 @@ class GeneratedSubframe (F F' : Kripke.Frame α) where
 end Generation
 
 
-section pMorphism
+section PseudoEpimorphism
 
 variable {δ₁ δ₂}
 
-structure Frame.pMorphism (F₁ : Kripke.Frame δ₁) (F₂ : Kripke.Frame δ₂) where
+/-- As known as _p-morphism_. -/
+structure Frame.PseudoEpimorphism (F₁ : Kripke.Frame δ₁) (F₂ : Kripke.Frame δ₂) where
   toFun : F₁.World → F₂.World
   forth {x y : F₁.World} : x ≺ y → toFun x ≺ toFun y
   back {w : F₁.World} {v : F₂.World} : toFun w ≺ v → ∃ u, toFun u = v ∧ w ≺ u
 
-infix:80 " →ₚ " => Frame.pMorphism
+infix:80 " →ₚ " => Frame.PseudoEpimorphism
 
-instance : CoeFun (Frame.pMorphism F₁ F₂) (λ _ => F₁.World → F₂.World) := ⟨λ f => f.toFun⟩
+instance : CoeFun (Frame.PseudoEpimorphism F₁ F₂) (λ _ => F₁.World → F₂.World) := ⟨λ f => f.toFun⟩
 
 
-structure Model.pMorphism (M₁ : Kripke.Model δ₁ α) (M₂ : Kripke.Model δ₂ α) extends M₁.Frame →ₚ M₂.Frame where
+structure Model.PseudoEpimorphism (M₁ : Kripke.Model δ₁ α) (M₂ : Kripke.Model δ₂ α) extends M₁.Frame →ₚ M₂.Frame where
   atomic {w : M₁.World} {a} : (M₁.Valuation w a) ↔ (M₂.Valuation (toFun w) a)
 
-infix:80 " →ₚ " => Model.pMorphism
+infix:80 " →ₚ " => Model.PseudoEpimorphism
 
-instance : CoeFun (Model.pMorphism M₁ M₂) (λ _ => M₁.World → M₂.World) := ⟨λ f => f.toFun⟩
+instance : CoeFun (Model.PseudoEpimorphism M₁ M₂) (λ _ => M₁.World → M₂.World) := ⟨λ f => f.toFun⟩
 
 
 open Formula
@@ -126,7 +127,7 @@ lemma iff_formula_satisfies_morphism (f : M₁ →ₚ M₂) {w : M₁.World}
       exact ih.mpr $ h $ f.forth hww';
   | _ => simp_all [kripke_satisfies];
 
-lemma iff_formula_valid_on_frame_surjective_morphism (f : F₁ →ₚ F₂) (f_surjective : Function.Surjective f) : F₁[α] ⊧ p → F₂[α] ⊧ p := by
+lemma iff_formula_valid_on_frame_surjective_morphism (f : F₁ →ₚ F₂) (f_surjective : Function.Surjective f) : F₁# ⊧ p → F₂# ⊧ p := by
   contrapose;
   intro h;
   obtain ⟨V₂, w₂, h⟩ := by simpa [valid_on_KripkeFrame, valid_on_KripkeModel] using h;
@@ -145,7 +146,7 @@ lemma iff_formula_valid_on_frame_surjective_morphism (f : F₁ →ₚ F₂) (f_s
     atomic := by simp_all
   } |>.not.mpr h;
 
-lemma iff_theory_valid_on_frame_surjective_morphism (f : F₁ →ₚ F₂) (f_surjective : Function.Surjective f) : F₁[α] ⊧* T → F₂[α] ⊧* T := by
+lemma iff_theory_valid_on_frame_surjective_morphism (f : F₁ →ₚ F₂) (f_surjective : Function.Surjective f) : F₁# ⊧* T → F₂# ⊧* T := by
   simp only [Semantics.realizeSet_iff];
   intro h p hp;
   exact iff_formula_valid_on_frame_surjective_morphism f f_surjective (h hp);
@@ -178,7 +179,7 @@ theorem undefinable_irreflexive : ¬∃ (Ax : AxiomSet α), AxiomSet.DefinesKrip
   contradiction;
 
 
-def Model.pMorphism.Bismulation (f : M₁ →ₚ M₂) : M₁ ⇄ M₂ := {
+def Model.PseudoEpimorphism.Bisimulation (f : M₁ →ₚ M₂) : M₁ ⇄ M₂ := {
   toRel := Function.graph f,
   atomic := by
     intro x₁ x₂ a e; subst e;
@@ -196,7 +197,7 @@ def Model.pMorphism.Bismulation (f : M₁ →ₚ M₂) : M₁ ⇄ M₂ := {
     use y₁;
 }
 
-end pMorphism
+end PseudoEpimorphism
 
 end Kripke
 

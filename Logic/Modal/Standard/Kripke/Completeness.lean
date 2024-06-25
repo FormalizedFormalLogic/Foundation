@@ -166,8 +166,8 @@ lemma complete_of_mem_canonicalFrame [Inhabited (Axᴺ)-MCT] {𝔽 : FrameClass.
 
 lemma instComplete_of_mem_canonicalFrame [Inhabited (Axᴺ)-MCT] {𝔽 : FrameClass.Dep α} (hFC : ⟨(Axᴺ)-MCT, CanonicalFrame Ax⟩ ∈ 𝔽) : Complete (Axᴺ) 𝔽 := ⟨complete_of_mem_canonicalFrame hFC⟩
 
-instance K_complete : Complete 𝐊 AllFrameClass[α] := by
-  simpa [←Normal.isK] using instComplete_of_mem_canonicalFrame (Ax := 𝗞) (𝔽 := AllFrameClass[α]) trivial;
+instance K_complete : Complete (𝐊 : DeductionParameter α) AllFrameClass# := by
+  simpa [←Normal.isK] using instComplete_of_mem_canonicalFrame (Ax := 𝗞) (𝔽 := AllFrameClass#) trivial;
 
 end Kripke
 

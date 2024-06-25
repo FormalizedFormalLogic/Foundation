@@ -13,7 +13,7 @@ abbrev ConnectedFrameClass : FrameClass := { ⟨_, F⟩ | Connected F }
 variable {α} [Inhabited α] [DecidableEq α] [atleast : Atleast 2 α]
 variable {F : Kripke.Frame δ}
 
-private lemma connected_of_dot3 : F[α] ⊧* .𝟯 → Connected F := by
+private lemma connected_of_dot3 : F# ⊧* (.𝟯 : AxiomSet α) → Connected F := by
   contrapose;
   intro hCon; simp [Connected] at hCon;
   obtain ⟨x, y, rxy, z, ryz, nryz, nrzy⟩ := hCon;
@@ -36,7 +36,7 @@ private lemma connected_of_dot3 : F[α] ⊧* .𝟯 → Connected F := by
     . assumption;
     . simp_all [kripke_satisfies, (fInj 0), (fInj 1)];
 
-private lemma dot3_of_connected : Connected F → F[α] ⊧* .𝟯 := by
+private lemma dot3_of_connected : Connected F → F# ⊧* (.𝟯 : AxiomSet α) := by
   intro hCon;
   simp [valid_on_KripkeFrame, valid_on_KripkeModel, Axioms.Dot3];
   intro δ p q e V x; subst e;
@@ -100,7 +100,7 @@ lemma connected_CanonicalFrame {Ax : AxiomSet α} (hAx : .𝟯 ⊆ Ax) [System.C
   have : □(□p ⟶ q) ⋎ □(□q ⟶ p) ∈ X.theory := by apply subset_axiomset _; aesop;
   contradiction;
 
-instance : Complete (𝐒𝟒.𝟑 : DeductionParameter α) (ReflexiveTransitiveConnectedFrameClass[α]) := instComplete_of_mem_canonicalFrame $ by
+instance : Complete (𝐒𝟒.𝟑 : DeductionParameter α) (ReflexiveTransitiveConnectedFrameClass#) := instComplete_of_mem_canonicalFrame $ by
   refine ⟨?reflexive, ?transitive, ?connective⟩;
   . simp [←GeachConfluent.reflexive_def];
     apply geachConfluent_CanonicalFrame;

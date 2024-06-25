@@ -28,7 +28,7 @@ lemma axiomVer_defines : 𝗩𝗲𝗿.DefinesKripkeFrameClass (α := α) Isolate
     have := hIrrefl hxy;
     contradiction;
 
-instance : Sound 𝐕𝐞𝐫 IsolatedFrameClass[α] := sound_of_defines axiomVer_defines
+instance : Sound (𝐕𝐞𝐫 : DeductionParameter α) IsolatedFrameClass# := sound_of_defines axiomVer_defines
 
 instance : System.Consistent (𝐕𝐞𝐫 : DeductionParameter α) := consistent_of_defines axiomVer_defines IsolatedFrameClass.nonempty
 
@@ -37,7 +37,7 @@ lemma isolated_CanonicalFrame {Ax : AxiomSet α} (h : 𝗩𝗲𝗿 ⊆ Ax) [Syst
   have : (CanonicalModel Ax) ⊧ □⊥ := iff_valid_on_canonicalModel_deducible.mpr $ Normal.maxm! (by aesop);
   exact this x rxy;
 
-instance : Complete 𝐕𝐞𝐫 IsolatedFrameClass[α] := instComplete_of_mem_canonicalFrame $ isolated_CanonicalFrame (by rfl)
+instance : Complete (𝐕𝐞𝐫 : DeductionParameter α) IsolatedFrameClass# := instComplete_of_mem_canonicalFrame $ isolated_CanonicalFrame (by rfl)
 
 end Kripke
 
