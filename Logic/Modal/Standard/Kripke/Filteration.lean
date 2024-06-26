@@ -1,6 +1,18 @@
+import Mathlib.SetTheory.Cardinal.Basic
 import Logic.Modal.Standard.Formula
 import Logic.Modal.Standard.Kripke.Semantics
 import Logic.Modal.Standard.Kripke.Completeness
+
+namespace Set
+
+-- TODO: move to Vorspiel or Mathlib
+-- https://leanprover.zulipchat.com/#narrow/stream/217875-Is-there-code-for-X.3F/topic/Set.20is.20finite.2C.20then.20its.20powerset.20is.20finite
+lemma powerset_finite_of_finite_set {s : Set α} (hs : s.Finite) : (𝒫 s).Finite := by
+  apply Cardinal.lt_aleph0_iff_finite.mp;
+  simpa using Cardinal.power_lt_aleph0 (Cardinal.nat_lt_aleph0 2) $ Cardinal.lt_aleph0_iff_finite.mpr hs
+
+end Set
+
 
 namespace LO.Modal.Standard
 
@@ -94,7 +106,7 @@ section
 
 def filterEquiv (T : Theory α) [T.IsSubformulaClosed] (M : Kripke.Model α) (x y : M.World) := ∀ p ∈ T, x ⊧ p ↔ y ⊧ p
 
-variable (M : Kripke.Model α) (T : Theory α) [T_closed : T.IsSubformulaClosed]
+variable (M : Kripke.Model.{u, u} α) (T : Theory α) [T_closed : T.IsSubformulaClosed]
 
 lemma filterEquiv.equivalence : Equivalence (filterEquiv T M) where
   refl := by intro x p _; rfl;
@@ -109,7 +121,32 @@ def FilterEqvSetoid : Setoid (M.World) := ⟨filterEquiv T M, filterEquiv.equiva
 abbrev FilterEqvQuotient := Quotient (FilterEqvSetoid M T)
 
 lemma FilterEqvQuotient.finite (T_finite : T.Finite) : Finite (FilterEqvQuotient M T) := by
-  sorry;
+  apply Cardinal.lt_aleph0_iff_finite.mp;
+
+  let f : FilterEqvQuotient M T → 𝒫 T := λ (Qx : FilterEqvQuotient M T) => Quotient.lift (λ x => ⟨{ p ∈ T | x ⊧ p }, (by simp_all)⟩) (by
+    intro x y hxy;
+    simp;
+    apply Set.eq_of_subset_of_subset;
+    . rintro p ⟨hp, hx⟩; exact ⟨hp, (hxy p hp).mp hx⟩;
+    . rintro p ⟨hp, hy⟩; exact ⟨hp, (hxy p hp).mpr hy⟩;
+  ) Qx;
+  have := Cardinal.mk_le_of_injective (f := f) $ by
+    intro Qx Qy h;
+    obtain ⟨x, hx⟩ := Quotient.exists_rep Qx; subst hx;
+    obtain ⟨y, hy⟩ := Quotient.exists_rep Qy; subst hy;
+    simp [f] at h;
+    apply Quotient.eq''.mpr;
+    intro p hp;
+    constructor;
+    . intro hpx;
+      have := h.subset; simp at this;
+      exact this p hp hpx |>.2;
+    . intro hpy;
+      have := h.symm.subset; simp at this;
+      exact this p hp hpy |>.2;
+  apply LE.le.trans_lt this;
+  apply Set.Finite.lt_aleph0;
+  exact Set.powerset_finite_of_finite_set T_finite;
 
 instance : Inhabited (FilterEqvQuotient M T) := ⟨⟦﹫⟧⟩
 
