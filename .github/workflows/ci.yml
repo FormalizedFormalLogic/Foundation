@@ -34,8 +34,8 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: .lake
-          key: lake-${{ runner.os }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}-${{ github.ref }}
-          restore-keys: lake-${{ runner.os }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}-${{ github.ref }}
+          key: lake-${{ runner.os }}-${{ hashFiles('lean-toolchain') }}
+          restore-keys: lake-${{ runner.os }}-${{ hashFiles('lean-toolchain') }}
 
       - name: Fetching cache
         run: lake -R -Kenv=ci exe cache get
