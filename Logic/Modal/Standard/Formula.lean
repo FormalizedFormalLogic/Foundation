@@ -221,6 +221,93 @@ abbrev Theory (α) := Set (Formula α)
 instance : Collection (Formula α) (Theory α) := inferInstance
 
 
+section Subformula
+
+variable [DecidableEq α] [Inhabited α]
+
+def Formula.Subformulas: Formula α → Finset (Formula α)
+  | ⊤      => {⊤}
+  | ⊥      => {⊥}
+  | atom a => {(atom a)}
+  | p ⟶ q => insert (p ⟶ q) (p.Subformulas ∪ q.Subformulas)
+  | p ⋏ q  => {p ⋏ q} ∪ (p.Subformulas ∪ q.Subformulas)
+  | p ⋎ q  => insert (p ⋎ q) (p.Subformulas ∪ q.Subformulas)
+  | box p  => insert (□p) p.Subformulas
+
+namespace Formula.Subformulas
+
+@[simp]
+lemma mem_self (p : Formula α) : p ∈ p.Subformulas := by induction p using Formula.rec' <;> simp [Subformulas];
+
+end Formula.Subformulas
+
+
+def Theory.Subformulas (T : Theory α) := ⋃ i ∈ T, i.Subformulas.toSet
+
+def Theory.SubformulaClosed (T : Theory α) := ∀ p ∈ T, ↑(p.Subformulas) ⊆ T
+
+namespace Theory.SubformulaClosed
+
+variable {T : Theory α} (T_closed : T.SubformulaClosed) {p q : Formula α}
+
+@[simp]
+lemma def_and : p ⋏ q ∈ T → p ∈ T ∧ q ∈ T := by
+  intro h;
+  constructor;
+  all_goals apply (T_closed _ h); simp [Formula.Subformulas];
+
+@[simp]
+lemma def_or : p ⋎ q ∈ T → p ∈ T ∧ q ∈ T := by
+  intro h;
+  constructor;
+  all_goals apply (T_closed _ h); simp [Formula.Subformulas];
+
+@[simp]
+lemma def_imp : p ⟶ q ∈ T → p ∈ T ∧ q ∈ T := by
+  intro h;
+  constructor;
+  all_goals apply (T_closed _ h); simp [Formula.Subformulas];
+
+@[simp]
+lemma def_box : □p ∈ T → p ∈ T := by
+  intro h;
+  apply (T_closed _ h); simp [Formula.Subformulas];
+
+end Theory.SubformulaClosed
+
+
+class Theory.IsSubformulaClosed (T : Theory α) where
+  closed : T.SubformulaClosed
+
+instance {p : Formula α} : Theory.IsSubformulaClosed (p.Subformulas).toSet where
+  closed := by
+    induction p using Formula.rec' with
+    | hbox p ihp =>
+      simp_all [Theory.SubformulaClosed, Formula.Subformulas];
+      rintro r hp;
+      exact Set.Subset.trans (ihp r hp) $ Set.Subset.trans (Set.subset_insert _ _) $ Set.insert_subset_insert $ by rfl;
+    | hand p q ihp ihq =>
+      simp_all [Theory.SubformulaClosed, Formula.Subformulas];
+      rintro r (hp | hq);
+      . exact Set.Subset.trans (ihp r hp) $ Set.Subset.trans (Set.subset_insert _ _) $ Set.insert_subset_insert $ Set.subset_union_left;
+      . exact Set.Subset.trans (ihq r hq) $ Set.Subset.trans (Set.subset_insert _ _) $ Set.insert_subset_insert $ Set.subset_union_right;
+    | hor p q ihp ihq =>
+      simp_all [Theory.SubformulaClosed, Formula.Subformulas];
+      rintro r (hp | hq);
+      . exact Set.Subset.trans (ihp r hp) $ Set.Subset.trans (Set.subset_insert _ _) $ Set.insert_subset_insert $ Set.subset_union_left;
+      . exact Set.Subset.trans (ihq r hq) $ Set.Subset.trans (Set.subset_insert _ _) $ Set.insert_subset_insert $ Set.subset_union_right;
+    | himp p q ihp ihq =>
+      simp_all [Theory.SubformulaClosed, Formula.Subformulas];
+      rintro r (hp | hq);
+      . exact Set.Subset.trans (ihp r hp) $ Set.Subset.trans (Set.subset_insert _ _) $ Set.insert_subset_insert $ Set.subset_union_left;
+      . exact Set.Subset.trans (ihq r hq) $ Set.Subset.trans (Set.subset_insert _ _) $ Set.insert_subset_insert $ Set.subset_union_right;
+    | _ => simp_all [Theory.SubformulaClosed, Formula.Subformulas];
+
+end Subformula
+
+
+section Axiomset
+
 abbrev AxiomSet (α) := Set (Formula α)
 
 namespace AxiomSet
@@ -278,5 +365,7 @@ protected abbrev H : AxiomSet α := { Axioms.H p | p }
 notation "𝗛" => AxiomSet.H
 
 end AxiomSet
+
+end Axiomset
 
 end LO.Modal.Standard
