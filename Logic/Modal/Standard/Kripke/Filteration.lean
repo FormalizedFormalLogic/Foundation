@@ -11,7 +11,7 @@ def Formula.Subformulas: Formula α → Finset (Formula α)
   | ⊥      => {⊥}
   | atom a => {(atom a)}
   | p ⟶ q => insert (p ⟶ q) (p.Subformulas ∪ q.Subformulas)
-  | p ⋏ q  => insert (p ⋏ q) (p.Subformulas ∪ q.Subformulas)
+  | p ⋏ q  => {p ⋏ q} ∪ (p.Subformulas ∪ q.Subformulas)
   | p ⋎ q  => insert (p ⋎ q) (p.Subformulas ∪ q.Subformulas)
   | box p  => insert (□p) p.Subformulas
 
@@ -63,16 +63,25 @@ class Theory.IsSubformulaClosed (T : Theory α) where
 instance {p : Formula α} : Theory.IsSubformulaClosed (p.Subformulas).toSet where
   closed := by
     induction p using Formula.rec' with
+    | hbox p ihp =>
+      simp_all [Theory.SubformulaClosed, Formula.Subformulas];
+      rintro r hp;
+      exact Set.Subset.trans (ihp r hp) $ Set.Subset.trans (Set.subset_insert _ _) $ Set.insert_subset_insert $ by rfl;
     | hand p q ihp ihq =>
       simp_all [Theory.SubformulaClosed, Formula.Subformulas];
       rintro r (hp | hq);
-      . have := ihp r hp;
-        sorry;
-      . have := ihq r hq;
-        sorry;
-    | hor p q ihp ihq => sorry;
-    | himp p q ihp ihq => sorry;
-    | hbox p ihp => sorry;
+      . exact Set.Subset.trans (ihp r hp) $ Set.Subset.trans (Set.subset_insert _ _) $ Set.insert_subset_insert $ Set.subset_union_left;
+      . exact Set.Subset.trans (ihq r hq) $ Set.Subset.trans (Set.subset_insert _ _) $ Set.insert_subset_insert $ Set.subset_union_right;
+    | hor p q ihp ihq =>
+      simp_all [Theory.SubformulaClosed, Formula.Subformulas];
+      rintro r (hp | hq);
+      . exact Set.Subset.trans (ihp r hp) $ Set.Subset.trans (Set.subset_insert _ _) $ Set.insert_subset_insert $ Set.subset_union_left;
+      . exact Set.Subset.trans (ihq r hq) $ Set.Subset.trans (Set.subset_insert _ _) $ Set.insert_subset_insert $ Set.subset_union_right;
+    | himp p q ihp ihq =>
+      simp_all [Theory.SubformulaClosed, Formula.Subformulas];
+      rintro r (hp | hq);
+      . exact Set.Subset.trans (ihp r hp) $ Set.Subset.trans (Set.subset_insert _ _) $ Set.insert_subset_insert $ Set.subset_union_left;
+      . exact Set.Subset.trans (ihq r hq) $ Set.Subset.trans (Set.subset_insert _ _) $ Set.insert_subset_insert $ Set.subset_union_right;
     | _ => simp_all [Theory.SubformulaClosed, Formula.Subformulas];
 
 namespace Kripke
@@ -104,10 +113,10 @@ lemma FilterEqvQuotient.finite (T_finite : T.Finite) : Finite (FilterEqvQuotient
 
 instance : Inhabited (FilterEqvQuotient M T) := ⟨⟦﹫⟧⟩
 
-class IsFilterationModel (FM : Model α) (M : Model α) (T : Theory α) [T_closed : T.IsSubformulaClosed] where
-  def_world : FM.World = FilterEqvQuotient M T := by rfl
-  def_rel₁ : ∀ {x y : M.Frame}, x ≺ y → (cast def_world.symm ⟦x⟧) ≺ (cast def_world.symm ⟦y⟧) := by tauto;
-  def_rel₂ : ∀ {Qx Qy : FM.World}, Qx ≺ Qy → Quotient.lift₂ (λ x y => ∀ p, □p ∈ T → (x ⊧ □p → y ⊧ p)) (by
+class FilterationModel (M : Model α) (T : Theory α) [T_closed : T.IsSubformulaClosed] extends Model α where
+  def_world : Frame.World = FilterEqvQuotient M T := by rfl
+  def_rel₁ : ∀ {x y : M.Frame}, x ≺ y → Frame.Rel' (cast def_world.symm ⟦x⟧) (cast def_world.symm ⟦y⟧) := by tauto;
+  def_rel₂ : ∀ {Qx Qy : Frame.World}, Qx ≺ Qy → Quotient.lift₂ (λ x y => ∀ p, □p ∈ T → (x ⊧ □p → y ⊧ p)) (by
     intro x₁ y₁ x₂ y₂ hx hy;
     simp;
     constructor;
@@ -117,7 +126,7 @@ class IsFilterationModel (FM : Model α) (M : Model α) (T : Theory α) [T_close
       exact hy _ (T_closed.closed.def_box hp) |>.mpr $ h p hp $ hx _ hp |>.mp sp₁;
   ) (cast def_world Qx) (cast def_world Qy) := by tauto;
   def_valuation Qx a : (ha : (atom a) ∈ T) →
-    FM.Valuation Qx a ↔ Quotient.lift (λ x => M.Valuation x a) (by
+    Valuation Qx a ↔ Quotient.lift (λ x => M.Valuation x a) (by
       simp; intro x y h;
       constructor;
       . intro hx; exact h a ha |>.mp hx;
@@ -128,7 +137,7 @@ abbrev FinestFilterationFrame (M : Model α) (T : Theory α) [T.IsSubformulaClos
   World := FilterEqvQuotient M T
   Rel := λ Qx Qy => ∃ x y, Qx = ⟦x⟧ ∧ Qy = ⟦y⟧ ∧ x ≺ y
 
-abbrev FinestFilterationModel (M : Model α) (T : Theory α) [T.IsSubformulaClosed] : Kripke.Model α where
+abbrev FinestFilterationModel (M : Model α) (T : Theory α) [T.IsSubformulaClosed] : Kripke.FilterationModel M T where
   Frame := FinestFilterationFrame M T
   Valuation Qx a := (ha : (atom a) ∈ T) → Quotient.lift (λ x => M.Valuation x a) (by
     simp; intro x y h;
@@ -136,12 +145,11 @@ abbrev FinestFilterationModel (M : Model α) (T : Theory α) [T.IsSubformulaClos
     . intro hx; exact h a ha |>.mp hx;
     . intro hy; exact h a ha |>.mpr hy;
   ) Qx
-
-instance instFinestFilteration {T : Theory α} [T.IsSubformulaClosed] {M} : IsFilterationModel (FinestFilterationModel M T) M T where
   def_rel₂ := by
     intro Qx Qy rQxQy;
     obtain ⟨x, y, rfl, rfl, hxy⟩ := rQxQy;
     simp_all [Satisfies];
+
 
 abbrev CoarsestFilterationFrame (M : Model α) (T : Theory α) [T_closed : T.IsSubformulaClosed] : Kripke.Frame where
   World := FilterEqvQuotient M T
@@ -155,7 +163,7 @@ abbrev CoarsestFilterationFrame (M : Model α) (T : Theory α) [T_closed : T.IsS
       exact hy _ (T_closed.closed.def_box hp) |>.mpr $ h p hp $ hx _ hp |>.mp sp₁;
   ) Qx Qy
 
-abbrev CoarsestFilterationModel (M : Model α) (T : Theory α) [T.IsSubformulaClosed] : Kripke.Model α where
+abbrev CoarsestFilterationModel (M : Model α) (T : Theory α) [T.IsSubformulaClosed] : Kripke.FilterationModel M T where
   Frame := CoarsestFilterationFrame M T
   Valuation Qx a := (ha : (atom a) ∈ T) → Quotient.lift (λ x => M.Valuation x a) (by
     simp; intro x y h;
@@ -164,20 +172,18 @@ abbrev CoarsestFilterationModel (M : Model α) (T : Theory α) [T.IsSubformulaCl
     . intro hy; exact h a ha |>.mpr hy;
   ) Qx
 
-instance instCoarsestFilteration {T : Theory α} [T.IsSubformulaClosed] {M} : IsFilterationModel (CoarsestFilterationModel M T) M T where
-
 end
 
 
 section
 
 variable {M : Model α} {T : Theory α} [T_closed : T.IsSubformulaClosed]
-variable (FM : Model α) [FM_filter : IsFilterationModel FM M T]
+variable (FM : Kripke.FilterationModel M T)
 
-theorem filteration {x : M.World} {p : Formula α} (hs : p ∈ T) : x ⊧ p ↔ (cast FM_filter.def_world.symm ⟦x⟧) ⊧ p := by
+theorem filteration {x : M.World} {p : Formula α} (hs : p ∈ T) : x ⊧ p ↔ (cast FM.def_world.symm ⟦x⟧) ⊧ p := by
   induction p using Formula.rec' generalizing x with
   | hatom a =>
-    have := FM_filter.def_valuation (cast FM_filter.def_world.symm ⟦x⟧) a hs;
+    have := FM.def_valuation (cast FM.def_world.symm ⟦x⟧) a hs;
     simp_all [Satisfies];
   | hand p q ihp ihq =>
     constructor;
@@ -212,13 +218,13 @@ theorem filteration {x : M.World} {p : Formula α} (hs : p ∈ T) : x ⊧ p ↔ 
   | hbox p ihp =>
     constructor;
     . intro h Qy rQxQy;
-      obtain ⟨y, ey⟩ := Quotient.exists_rep (cast FM_filter.def_world Qy);
-      have H := FM_filter.def_rel₂ rQxQy;
+      obtain ⟨y, ey⟩ := Quotient.exists_rep (cast FM.def_world Qy);
+      have H := FM.def_rel₂ rQxQy;
       simp [←ey] at H;
       have h₂ := @ihp y (T_closed.closed.def_box hs) |>.mp $ @H p hs h;
       simpa [ey] using h₂;
     . intro h y rxy;
-      have rQxQy := FM_filter.def_rel₁ rxy;
+      have rQxQy := FM.def_rel₁ rxy;
       exact ihp (T_closed.closed.def_box hs) |>.mpr $ h rQxQy;
   | _ => simp_all;
 
@@ -228,17 +234,23 @@ instance K_finite_complete : Complete (𝐊 : DeductionParameter α) AllFrameCla
   intro p hp;
   apply K_complete.complete;
   intro F _ V x;
-  let FM : Kripke.Model α := CoarsestFilterationModel ⟨F, V⟩ p.Subformulas;
-  have := instCoarsestFilteration (T := p.Subformulas.toSet) (M := ⟨F, V⟩); -- TODO: remove this?
+  let M : Kripke.Model α := ⟨F, V⟩;
+  let FM : Kripke.FilterationModel M p.Subformulas := CoarsestFilterationModel M p.Subformulas;
 
-  apply filteration (T := p.Subformulas) FM (by simp) |>.mpr;
+  apply filteration FM (by simp) |>.mpr;
   apply hp (by
-    simp [FrameClass.restrictFinite, AllFrameClass, FrameClass.alt, FiniteFrameClass.toFrameClass];
-    suffices Finite (FilterEqvQuotient ⟨F, V⟩ p.Subformulas) by use ⟨FM.Frame⟩;
+    suffices Finite (FilterEqvQuotient M p.Subformulas) by simp; use ⟨FM.Frame⟩;
     apply FilterEqvQuotient.finite;
     simp_all;
   ) FM.Valuation
 ⟩
+
+class FiniteFrameProperty (Λ : DeductionParameter α) where
+  FFC : FiniteFrameClass
+  [complete : Complete Λ FFC#]
+
+instance : FiniteFrameProperty (α := α) 𝐊 where
+  FFC := AllFrameClassꟳ
 
 end Kripke
 

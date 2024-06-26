@@ -75,10 +75,11 @@ scoped postfix:max "#" => FrameClass.alt
 
 abbrev FiniteFrameClass := Set (FiniteFrame)
 
+@[simp]
 def FiniteFrameClass.toFrameClass (𝔽 : FiniteFrameClass) : FrameClass := { F | ∃ F', F' ∈ 𝔽 ∧ F'.toFrame = F }
 instance : Coe (FiniteFrameClass) (FrameClass) := ⟨FiniteFrameClass.toFrameClass⟩
 
-
+@[simp]
 def FrameClass.restrictFinite (𝔽 : FrameClass) : FiniteFrameClass := { F | F.toFrame ∈ 𝔽 }
 postfix:max "ꟳ" => FrameClass.restrictFinite
 
