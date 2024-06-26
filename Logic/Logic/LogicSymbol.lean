@@ -1,14 +1,16 @@
-import Logic.Vorspiel.Vorspiel
+import Mathlib.Order.Filter.Ultrafilter
 
 /-!
 # Logic Symbols
 
-This file defines structure that has logical connectives $\top, \bot, \land, \lor, \to, \lnot$
-and their homomorphisms.
+ProofTheory studies proofs as mathematical objects, including axiomatic (Hilbert), deductive,
+and sequent-based systems. This file defines logical symbols as objects abstractly to encompass
+these approaches. It also defines Boolean homomorphisms that preserve these connectives.
 
 ## Main Definitions
-* `LO.LogicSymbol` is defined so that `LO.LogicSymbol F` is a type that has logical connectives $\top, \bot, \land, \lor, \to, \lnot$.
-* `LO.LogicSymbol.Hom` is defined so that `f : F →L G` is a homomorphism from `F` to `G`, i.e.,
+* `LogicSymbol` is defined so that `LogicSymbol F` is a type that has logical connectives $\top,
+  \bot, \land, \lor, \to, \lnot$.
+* `LogicSymbol.Hom` is defined so that `f : F →L G` is a Boolean homomorphism from `F` to `G`, i.e.,
 a function that preserves logical connectives.
 
 -/
@@ -386,6 +388,8 @@ def conj : {n : ℕ} → (Fin n → α) → α
   | _ + 1, v => v 0 ⋏ conj (vecTail v)
 
 @[simp] lemma conj_nil (v : Fin 0 → α) : conj v = ⊤ := rfl
+
+infixr:70 " :> " => vecCons
 
 @[simp] lemma conj_cons {a : α} {v : Fin n → α} : conj (a :> v) = a ⋏ conj v := rfl
 

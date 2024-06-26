@@ -91,7 +91,7 @@ lemma predia_subset {s t : Set α} (h : s ⊆ t) : s.predia ⊆ t.predia := by s
 
 end Set
 
-
+/-
 namespace Finset
 
 open LO.Modal.Normal
@@ -114,3 +114,4 @@ lemma dia_union {s t : Finset α} : ((s ∪ t).dia : Finset α) = (s.dia ∪ t.d
 lemma dia_coe {s : Finset α} :(↑s : Set α).dia = ↑(s.dia) := by simp only [Set.dia, Finset.dia, Finset.coe_image];
 
 end Finset
+-/

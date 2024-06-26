@@ -42,6 +42,7 @@ lemma rec_eq {α : Sort*} (a : α) (f₁ f₂ : ℕ → α → α) (n : ℕ) (H 
   · have : (n.rec a f₁ : α) = n.rec a f₂ := ih (fun m hm a =>  H m (Nat.lt.step hm) a)
     simpa[this] using H n (Nat.lt.base n) (n.rec a f₂)
 
+-- Already in mathlib as exists_least_of_bdd (needs correction to remove DecidablePred)
 lemma least_number (P : ℕ → Prop) (hP : ∃ x, P x) : ∃ x, P x ∧ ∀ z < x, ¬P z := by
   rcases hP with ⟨n, hn⟩
   induction' n using Nat.strongRec with n ih
@@ -93,8 +94,6 @@ def unexpandVecCons : Unexpander
   | `($(_) $a ![])      => `(![$a])
   | `($(_) $a ![$as,*]) => `(![$a, $as,*])
   | _                   => throw ()
-
-#check ![1, 2]
 
 end delab
 
