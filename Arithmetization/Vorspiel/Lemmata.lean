@@ -72,13 +72,13 @@ def arithRec {n} {C : Semiterm ℒₒᵣ ξ n → Sort w}
 
 end Semiterm
 
+end FirstOrder
+
 namespace Arith
 
 noncomputable section
 
 variable {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐏𝐀⁻]
-
-namespace Model
 
 variable {a b c : M}
 
@@ -226,7 +226,7 @@ lemma two_mul_add_one_lt_two_mul_of_lt (h : a < b) : 2 * a + 1 < 2 * b := calc
 
 lemma add_le_cancel (a : M) : AddLECancellable a := by intro b c; simp
 
-open Semiterm
+open FirstOrder FirstOrder.Semiterm
 
 @[simp] lemma val_npow (k : ℕ) (a : M) :
     (Operator.npow ℒₒᵣ k).val ![a] = a ^ k := by
@@ -243,26 +243,24 @@ instance : Structure.Monotone ℒₒᵣ M := ⟨
   | 2, Language.Add.add   => add_le_add (h 0) (h 1)
   | 2, Language.Mul.mul   => mul_le_mul (h 0) (h 1) (by simp) (by simp)⟩
 
-section
-
-variable {L : Language} [L.LT] [L.Zero] [L.One] [L.Add]
-
-variable [Structure L M] [Structure.LT L M] [Structure.Zero L M] [Structure.One L M] [Structure.Add L M]
-
-@[simp] lemma eval_ballLTSucc {t : Semiterm L ξ n} {p : Semiformula L ξ (n + 1)} :
-    Semiformula.Evalm M e ε (p.ballLTSucc t) ↔ ∀ x ≤ Semiterm.valm M e ε t, Semiformula.Evalm M (x :> e) ε p := by
-  simp [Semiformula.eval_ballLTSucc, lt_succ_iff_le]
-
-@[simp] lemma eval_bexLTSucc {t : Semiterm L ξ n} {p : Semiformula L ξ (n + 1)} :
-    Semiformula.Evalm M e ε (p.bexLTSucc t) ↔ ∃ x ≤ Semiterm.valm M e ε t, Semiformula.Evalm M (x :> e) ε p := by
-  simp [Semiformula.eval_bexLTSucc, lt_succ_iff_le]
-
-end
-
-end Model
-
 end
 
 end Arith
 
-end LO.FirstOrder
+namespace FirstOrder.Semiformula
+
+open LO.Arith
+
+variable {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐏𝐀⁻] {L : Language} [L.LT] [L.Zero] [L.One] [L.Add]
+
+variable [Structure L M] [Structure.LT L M] [Structure.Zero L M] [Structure.One L M] [Structure.Add L M]
+
+@[simp] lemma eval_ballLTSucc' {t : Semiterm L ξ n} {p : Semiformula L ξ (n + 1)} :
+    Semiformula.Evalm M e ε (p.ballLTSucc t) ↔ ∀ x ≤ Semiterm.valm M e ε t, Semiformula.Evalm M (x :> e) ε p := by
+  simp [Semiformula.eval_ballLTSucc, lt_succ_iff_le]
+
+@[simp] lemma eval_bexLTSucc' {t : Semiterm L ξ n} {p : Semiformula L ξ (n + 1)} :
+    Semiformula.Evalm M e ε (p.bexLTSucc t) ↔ ∃ x ≤ Semiterm.valm M e ε t, Semiformula.Evalm M (x :> e) ε p := by
+  simp [Semiformula.eval_bexLTSucc, lt_succ_iff_le]
+
+end FirstOrder.Semiformula

@@ -1,12 +1,12 @@
 import Arithmetization.Definability.Absoluteness
 
-namespace LO.FirstOrder.Arith
+namespace LO.Arith
+
+open FirstOrder FirstOrder.Arith
 
 noncomputable section
 
 variable {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐏𝐀⁻]
-
-namespace Model
 
 variable {a b c : M}
 
@@ -37,16 +37,16 @@ lemma sub_eq_iff : c = a - b ↔ ((a ≥ b → a = b + c) ∧ (a < b → c = 0))
 
 open Definability
 
-def _root_.LO.FirstOrder.Arith.subDef : 𝚺₀-Semisentence 3 :=
+def _root_.LO.FirstOrder.Arith.sub : 𝚺₀-Semisentence 3 :=
   .mkSigma “z x y | (x ≥ y → x = y + z) ∧ (x < y → z = 0)” (by simp[Hierarchy.pi_zero_iff_sigma_zero])
 
-lemma sub_defined : 𝚺₀-Function₂ ((· - ·) : M → M → M) via subDef := by
-  intro v; simp [subDef, sub_eq_iff]
+lemma sub_defined : 𝚺₀-Function₂ ((· - ·) : M → M → M) via FirstOrder.Arith.sub := by
+  intro v; simp [FirstOrder.Arith.sub, sub_eq_iff]
 
 @[simp] lemma sub_defined_iff (v) :
-    Semiformula.Evalbm M v subDef.val ↔ v 0 = v 1 - v 2 := sub_defined.df.iff v
+    Semiformula.Evalbm M v FirstOrder.Arith.sub.val ↔ v 0 = v 1 - v 2 := sub_defined.df.iff v
 
-instance sub_definable (Γ) : DefinableFunction₂ ℒₒᵣ Γ ((· - ·) : M → M → M) := Defined.to_definable₀ subDef sub_defined
+instance sub_definable (Γ) : DefinableFunction₂ ℒₒᵣ Γ ((· - ·) : M → M → M) := Defined.to_definable₀ _ sub_defined
 
 instance sub_polybounded : Bounded₂ ℒₒᵣ ((· - ·) : M → M → M) := ⟨#0, λ _ ↦ by simp⟩
 
@@ -148,14 +148,14 @@ lemma dvd_iff_bounded {a b : M} : a ∣ b ↔ ∃ c ≤ b, b = a * c := by
     · rintro ⟨c, rfl⟩; exact ⟨c, le_mul_self_of_pos_left (pos_iff_ne_zero.mpr hx), rfl⟩
     · rintro ⟨c, hz, rfl⟩; exact dvd_mul_right a c
 
-def _root_.LO.FirstOrder.Arith.dvdDef : 𝚺₀-Semisentence 2 :=
+def _root_.LO.FirstOrder.Arith.dvd : 𝚺₀-Semisentence 2 :=
   .mkSigma “x y | ∃ z <⁺ y, y = x * z” (by simp)
 
-lemma dvd_defined : 𝚺₀-Relation (fun a b : M ↦ a ∣ b) via dvdDef :=
-  fun v ↦ by simp [dvd_iff_bounded, Matrix.vecHead, Matrix.vecTail, dvdDef]
+lemma dvd_defined : 𝚺₀-Relation (fun a b : M ↦ a ∣ b) via dvd :=
+  fun v ↦ by simp [dvd_iff_bounded, Matrix.vecHead, Matrix.vecTail, dvd]
 
 @[simp] lemma dvd_defined_iff (v) :
-    Semiformula.Evalbm M v dvdDef.val ↔ v 0 ∣ v 1 := dvd_defined.df.iff v
+    Semiformula.Evalbm M v dvd.val ↔ v 0 ∣ v 1 := dvd_defined.df.iff v
 
 instance dvd_definable (Γ) : DefinableRel ℒₒᵣ Γ ((· ∣ ·) : M → M → Prop) := Defined.to_definable₀ _ dvd_defined
 
@@ -164,7 +164,7 @@ section
 syntax:45 first_order_term:45 " ∣ " first_order_term:0 : first_order_formula
 
 macro_rules
-  | `(“ $binders* | $t:first_order_term ∣ $u:first_order_term ”) => `(“ $binders* | !dvdDef.val $t $u”)
+  | `(“ $binders* | $t:first_order_term ∣ $u:first_order_term ”) => `(“ $binders* | !dvd.val $t $u”)
 
 end
 
@@ -230,23 +230,23 @@ lemma prime_iff_bounded {a : M} : Prime a ↔ 1 < a ∧ ∀ b ≤ a, (b ∣ a �
 def IsPrime (a : M) : Prop := 1 < a ∧ ∀ b ≤ a, b ∣ a → b = 1 ∨ b = a
 -- TODO: prove IsPrime a ↔ Prime a
 
-def _root_.LO.FirstOrder.Arith.isPrimedef : 𝚺₀-Semisentence 1 :=
-  .mkSigma “x | 1 < x ∧ ∀ y <⁺ x, !dvdDef.val y x → y = 1 ∨ y = x” (by simp [Hierarchy.pi_zero_iff_sigma_zero])
+def _root_.LO.FirstOrder.Arith.isPrime : 𝚺₀-Semisentence 1 :=
+  .mkSigma “x | 1 < x ∧ ∀ y <⁺ x, !dvd.val y x → y = 1 ∨ y = x” (by simp [Hierarchy.pi_zero_iff_sigma_zero])
 
-lemma isPrime_defined : 𝚺₀-Predicate (λ a : M ↦ IsPrime a) via isPrimedef := by
+lemma isPrime_defined : 𝚺₀-Predicate (λ a : M ↦ IsPrime a) via isPrime := by
   intro v
   simp [Semiformula.eval_substs, Matrix.comp_vecCons', Matrix.vecHead, Matrix.constant_eq_singleton,
-    IsPrime, isPrimedef]
+    IsPrime, isPrime]
 
 end Prime
 
 section min
 
-def _root_.LO.FirstOrder.Arith.minDef : 𝚺₀-Semisentence 3 :=
+def _root_.LO.FirstOrder.Arith.min : 𝚺₀-Semisentence 3 :=
   .mkSigma “z x y | (x ≤ y → z = x) ∧ (x ≥ y → z = y)” (by simp)
 
-lemma min_defined : 𝚺₀-Function₂ (min : M → M → M) via minDef := by
-  intro v; simp [minDef]
+lemma min_defined : 𝚺₀-Function₂ (min : M → M → M) via min := by
+  intro v; simp [FirstOrder.Arith.min]
   rcases le_total (v 1) (v 2) with (h | h) <;> simp [h]
   · intro h₀₁ h₂₁
     exact le_antisymm (by simpa [h₀₁] using h) (by simpa [h₀₁] using h₂₁)
@@ -254,7 +254,7 @@ lemma min_defined : 𝚺₀-Function₂ (min : M → M → M) via minDef := by
     exact le_antisymm (by simpa [h₀₂] using h) (by simpa [h₀₂] using h₁₂)
 
 @[simp] lemma eval_minDef (v) :
-    Semiformula.Evalbm M v minDef.val ↔ v 0 = min (v 1) (v 2) := min_defined.df.iff v
+    Semiformula.Evalbm M v min.val ↔ v 0 = min (v 1) (v 2) := min_defined.df.iff v
 
 instance min_definable (Γ) : Γ-Function₂ (min : M → M → M) := Defined.to_definable₀ _ min_defined
 
@@ -264,11 +264,11 @@ end min
 
 section max
 
-def _root_.LO.FirstOrder.Arith.maxDef : 𝚺₀-Semisentence 3 :=
+def _root_.LO.FirstOrder.Arith.max : 𝚺₀-Semisentence 3 :=
   .mkSigma “z x y | (x ≥ y → z = x) ∧ (x ≤ y → z = y)” (by simp)
 
-lemma max_defined : 𝚺₀-Function₂ (max : M → M → M) via maxDef := by
-  intro v; simp [maxDef]
+lemma max_defined : 𝚺₀-Function₂ (max : M → M → M) via max := by
+  intro v; simp [Arith.max]
   rcases le_total (v 1) (v 2) with (h | h) <;> simp [h]
   · intro h₀₂ h₂₁
     exact le_antisymm (by simpa [h₀₂] using h₂₁) (by simpa [h₀₂] using h)
@@ -276,7 +276,7 @@ lemma max_defined : 𝚺₀-Function₂ (max : M → M → M) via maxDef := by
     exact le_antisymm (by simpa [h₀₁] using h₁₂) (by simpa [h₀₁] using h)
 
 @[simp] lemma eval_maxDef (v) :
-    Semiformula.Evalbm M v maxDef.val ↔ v 0 = max (v 1) (v 2) := max_defined.df.iff v
+    Semiformula.Evalbm M v max.val ↔ v 0 = max (v 1) (v 2) := max_defined.df.iff v
 
 instance max_definable (Γ) : Γ-Function₂ (max : M → M → M) := Defined.to_definable₀ _ max_defined
 
@@ -284,10 +284,6 @@ instance max_polybounded : Bounded₂ ℒₒᵣ (max : M → M → M) := ⟨‘#
 
 end max
 
-end Model
-
 end
 
-end Arith
-
-end LO.FirstOrder
+end LO.Arith

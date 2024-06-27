@@ -1,14 +1,12 @@
 import Arithmetization.ISigmaZero.Exponential.PPow2
 
-namespace LO.FirstOrder
-
-namespace Arith
-
 noncomputable section
+
+namespace LO.Arith
 
 variable {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M]
 
-namespace Model
+open FirstOrder FirstOrder.Arith
 
 section ISigma₀
 
@@ -136,7 +134,7 @@ lemma two_lt_three : (2 : M) < 3 := by rw [←two_add_one_eq_three]; exact lt_ad
 
 lemma three_lt_four : (3 : M) < 4 := by rw [←three_add_one_eq_four]; exact lt_add_one 3
 
-lemma two_lt_four : (2 : M) < 4 := lt_trans _ _ _ two_lt_three three_lt_four
+lemma two_lt_four : (2 : M) < 4 := lt_trans two_lt_three three_lt_four
 
 lemma seq₀_zero_two : Seq₀ (seqX₀ : M) (seqY₀ : M) := by simp [seqX₀, seqY₀, Seq₀, ext, one_lt_four, two_lt_four]
 
@@ -524,7 +522,7 @@ lemma exponential_succ {x y : M} : Exponential (x + 1) y ↔ ∃ z, y = 2 * z �
           have : 1 < y := by
             simpa using (show 1 < y^2 from lt_of_le_of_lt (by simp) hxy)
           have : Exponential (x + 1) y ↔ ∃ z ≤ y, y = 2 * z ∧ Exponential x z :=
-            IH y (lt_square_of_lt $ this) (lt_trans _ _ _ (by simp) H'.lt)
+            IH y (lt_square_of_lt $ this) (lt_trans (by simp) H'.lt)
           rcases this.mp H' with ⟨y, _, rfl, H''⟩
           exact ⟨2 * y ^ 2, by simp [sq, mul_assoc, mul_left_comm y 2],
             by simp [sq, mul_assoc, mul_left_comm y 2], H''.bit_one⟩
@@ -769,10 +767,6 @@ end exponential
 
 end ISigma₁
 
-end Model
+end LO.Arith
 
 end
-
-end Arith
-
-end LO.FirstOrder

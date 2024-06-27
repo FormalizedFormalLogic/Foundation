@@ -1,8 +1,6 @@
 import Arithmetization.Basic.PeanoMinus
 
-namespace LO.FirstOrder
-
-namespace Arith
+namespace LO.FirstOrder.Arith
 
 namespace Theory
 
@@ -24,9 +22,13 @@ lemma iSigma_subset_mono {s₁ s₂} (h : s₁ ≤ s₂) : 𝐈𝚺 s₁ ⊆ �
 
 end Theory
 
+end LO.FirstOrder.Arith
+
 noncomputable section
 
-namespace Model
+namespace LO.Arith
+
+open FirstOrder FirstOrder.Arith
 
 variable {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M]
 
@@ -272,10 +274,6 @@ lemma least_number_iSigmaZero [M ⊧ₘ* 𝐈𝚺₀] {P : M → Prop} (hP : Def
     {P : M → Prop} (hP : DefinablePred ℒₒᵣ (Γ, 1) P)
     (ind : ∀ x, (∀ y < x, P y) → P x) : ∀ x, P x := order_induction_hh ℒₒᵣ Γ 1 hP ind
 
-end Model
+end LO.Arith
 
 end
-
-end Arith
-
-end LO.FirstOrder

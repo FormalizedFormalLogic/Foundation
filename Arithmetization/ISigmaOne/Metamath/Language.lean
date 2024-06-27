@@ -2,9 +2,11 @@ import Arithmetization.ISigmaOne.HFS
 
 noncomputable section
 
-namespace LO.FirstOrder
+namespace LO.Arith
 
-namespace Arith.Model
+open FirstOrder FirstOrder.Arith
+
+section
 
 variable {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐈𝚺₁]
 
@@ -22,11 +24,11 @@ variable {M}
 
 namespace Language
 
-protected class Defined (L : Model.Language M) (pL : outParam LDef) where
+protected class Defined (L : Arith.Language M) (pL : outParam LDef) where
   func : 𝚺₀-Relation L.Func via pL.func
   rel : 𝚺₀-Relation L.Rel via pL.rel
 
-variable {L : Model.Language M} {pL : LDef} [L.Defined pL]
+variable {L : Arith.Language M} {pL : LDef} [L.Defined pL]
 
 @[simp] lemma Defined.eval_func (v) :
     Semiformula.Evalbm M v pL.func.val ↔ L.Func (v 0) (v 1) := Defined.func.df.iff v
@@ -46,7 +48,7 @@ instance Defined.rel_definable : 𝚺₀-Relation L.Rel := Defined.to_definable 
 
 end Language
 
-end Model
+end
 
 section
 
@@ -80,7 +82,7 @@ variable {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐏𝐀
 
 variable (L M)
 
-def _root_.LO.FirstOrder.Language.codeIn : Model.Language M where
+def _root_.LO.FirstOrder.Language.codeIn : Arith.Language M where
   Func := fun x y ↦ Semiformula.Evalbm M ![x, y] L.lDef.func.val
   Rel := fun x y ↦ Semiformula.Evalbm M ![x, y] L.lDef.rel.val
 
@@ -106,7 +108,7 @@ end
 
 /-- TODO: move to Basic/Syntax/Language.lean-/
 lemma _root_.LO.FirstOrder.Language.ORing.of_mem_range_encode_func {k f : ℕ} :
-    f ∈ Set.range (Encodable.encode : Language.Func ℒₒᵣ k → ℕ) ↔
+    f ∈ Set.range (Encodable.encode : FirstOrder.Language.Func ℒₒᵣ k → ℕ) ↔
     (k = 0 ∧ f = 0) ∨ (k = 0 ∧ f = 1) ∨ (k = 2 ∧ f = 0) ∨ (k = 2 ∧ f = 1) := by
   constructor
   · rintro ⟨f, rfl⟩
@@ -123,7 +125,7 @@ lemma _root_.LO.FirstOrder.Language.ORing.of_mem_range_encode_func {k f : ℕ} :
 
 /-- TODO: move to Basic/Syntax/Language.lean-/
 lemma _root_.LO.FirstOrder.Language.ORing.of_mem_range_encode_rel {k r : ℕ} :
-    r ∈ Set.range (Encodable.encode : Language.Rel ℒₒᵣ k → ℕ) ↔
+    r ∈ Set.range (Encodable.encode : FirstOrder.Language.Rel ℒₒᵣ k → ℕ) ↔
     (k = 2 ∧ r = 0) ∨ (k = 2 ∧ r = 1) := by
   constructor
   · rintro ⟨r, rfl⟩
@@ -146,6 +148,6 @@ instance : DefinableLanguage ℒₒᵣ where
     · simpa [models_iff] using Language.ORing.of_mem_range_encode_rel
     · simp
 
-end Arith
+end LO.Arith
 
-end LO.FirstOrder
+end

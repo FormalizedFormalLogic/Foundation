@@ -9,7 +9,9 @@ import Arithmetization.Vorspiel.ExistsUnique
 
 noncomputable section
 
-namespace LO.FirstOrder.Arith.Model
+namespace LO.Arith
+
+open FirstOrder FirstOrder.Arith
 
 variable {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐈𝚺₁]
 
@@ -41,7 +43,7 @@ lemma sUnion_exists_unique (s : M) :
   have : 𝚺₁-Predicate fun x ↦ ∃ t ∈ s, x ∈ t := by definability
   exact finite_comprehension₁! this
     ⟨s, fun i ↦ by
-      rintro ⟨t, ht, hi⟩; exact lt_trans _ _ _ (lt_of_mem hi) (lt_of_mem ht)⟩
+      rintro ⟨t, ht, hi⟩; exact lt_trans (lt_of_mem hi) (lt_of_mem ht)⟩
 
 def sUnion (s : M) : M := Classical.choose! (sUnion_exists_unique s)
 
@@ -67,7 +69,7 @@ lemma sUnion_graph {u s : M} : u = ⋃ʰᶠ s ↔ ∀ x < u + s, (x ∈ u ↔ �
     · intro hx
       exact h x (lt_of_lt_of_le (lt_of_mem hx) (by simp)) |>.mp hx
     · rintro ⟨c, hc, hx⟩
-      exact h x (lt_of_lt_of_le (lt_trans _ _ _ (lt_of_mem hx) (lt_of_mem hc)) (by simp)) |>.mpr ⟨c, hc, hx⟩⟩
+      exact h x (lt_of_lt_of_le (lt_trans (lt_of_mem hx) (lt_of_mem hc)) (by simp)) |>.mpr ⟨c, hc, hx⟩⟩
 
 def _root_.LO.FirstOrder.Arith.sUnionDef : 𝚺₀-Semisentence 2 := .mkSigma
   “u s | ∀ x < u + s, (x ∈ u ↔ ∃ t ∈' s, x ∈ t)” (by simp)
@@ -465,7 +467,6 @@ lemma domain_restr_of_subset_domain {f s : M} (h : s ⊆ domain f) : domain (f �
 
 end restriction
 
-
 theorem insert_induction {P : M → Prop} (hP : (Γ, 1)-Predicate P)
     (hempty : P ∅) (hinsert : ∀ a s, a ∉ s → P s → P (insert a s)) : ∀ s, P s :=
   order_induction_hh ℒₒᵣ Γ 1 hP <| by
@@ -510,6 +511,6 @@ theorem sigmaOne_skolem {R : M → M → Prop} (hP : 𝚺₁-Relation R) {s : M}
         · exact hf x y h⟩
   exact this s (by rfl)
 
-end LO.FirstOrder.Arith.Model
+end LO.Arith
 
 end

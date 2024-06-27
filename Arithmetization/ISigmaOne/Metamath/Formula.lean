@@ -3,11 +3,13 @@ import Arithmetization.ISigmaOne.HFS
 
 noncomputable section
 
-namespace LO.FirstOrder.Arith.Model
+namespace LO.Arith
+
+open FirstOrder FirstOrder.Arith
 
 variable {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐈𝚺₁]
 
-variable {L : Model.Language M} {pL : LDef} [Model.Language.Defined L pL]
+variable {L : Arith.Language M} {pL : LDef} [Arith.Language.Defined L pL]
 
 section blueprint
 
@@ -146,7 +148,7 @@ lemma qqExists_defined : 𝚺₀-Function₂ (qqExists : M → M → M) via qqEx
 def bv (p : M) : M := π₁ (p - 1)
 
 def _root_.LO.FirstOrder.Arith.bvDef : 𝚺₀-Semisentence 2 :=
-  .mkSigma “n p | ∃ p' <⁺ p, !subDef p' p 1 ∧ !pi₁Def n p'” (by simp)
+  .mkSigma “n p | ∃ p' <⁺ p, !FirstOrder.Arith.sub p' p 1 ∧ !pi₁Def n p'” (by simp)
 
 lemma bv_defined : 𝚺₀-Function₁ (bv : M → M) via bvDef := by
   intro v; simp [bvDef]
@@ -561,8 +563,6 @@ end Language.UformulaRec
 
 end blueprint
 
-
-
-end LO.FirstOrder.Arith.Model
+end LO.Arith
 
 end

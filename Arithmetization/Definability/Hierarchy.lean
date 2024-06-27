@@ -513,7 +513,7 @@ end HSemiformula
 
 end Definability
 
-namespace Model
+open LO.Arith
 
 variable {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐏𝐀⁻] [Structure L M] [Structure.ORing L M] [Structure.Monotone L M]
 
@@ -1215,8 +1215,6 @@ lemma ball_le' {Γ} {P : (Fin k → M) → M → Prop} {f : (Fin k → M) → M}
 end Definable
 
 end
-
-end Model
 
 end Arith
 

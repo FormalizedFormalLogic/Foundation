@@ -3,11 +3,13 @@ import Arithmetization.ISigmaOne.HFS
 
 noncomputable section
 
-namespace LO.FirstOrder.Arith.Model
+namespace LO.Arith
+
+open FirstOrder FirstOrder.Arith
 
 variable {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐈𝚺₁]
 
-variable {L : Model.Language M} {pL : LDef} [Model.Language.Defined L pL]
+variable {L : Arith.Language M} {pL : LDef} [Arith.Language.Defined L pL]
 
 section term
 
@@ -824,6 +826,6 @@ end
 
 end termShift
 
-end LO.FirstOrder.Arith.Model
+end LO.Arith
 
 end

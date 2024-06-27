@@ -4,11 +4,11 @@ noncomputable section
 
 namespace LO.FirstOrder.Arith
 
+open LO.Arith
+
 lemma nat_modelsWithParam_iff_models_substs {v : Fin k → ℕ} {p : Semisentence ℒₒᵣ k} :
     ℕ ⊧ₘ[v] p ↔ ℕ ⊧ₘ (Rew.substs (fun i ↦ Semiterm.Operator.numeral ℒₒᵣ (v i)) |>.hom p) := by
   simp [models_iff]
-
-namespace Model
 
 variable (M : Type*) [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐏𝐀⁻]
 
@@ -24,7 +24,7 @@ lemma shigmaZero_absolute {k} (p : 𝚺₀-Semisentence k) (v : Fin k → ℕ) :
 lemma Defined.shigmaZero_absolute {k} {R : (Fin k → ℕ) → Prop} {R' : (Fin k → M) → Prop} {p : 𝚺₀-Semisentence k}
     (hR : Defined R p) (hR' : Defined R' p) (v : Fin k → ℕ) :
     R v ↔ R' (fun i ↦ (v i : M)) := by
-  simpa [hR.iff, hR'.iff] using Model.shigmaZero_absolute M p v
+  simpa [hR.iff, hR'.iff] using Arith.shigmaZero_absolute M p v
 
 lemma DefinedFunction.shigmaZero_absolute_func {k} {f : (Fin k → ℕ) → ℕ} {f' : (Fin k → M) → M} {p : 𝚺₀-Semisentence (k + 1)}
     (hf : DefinedFunction f p) (hf' : DefinedFunction f' p) (v : Fin k → ℕ) :
@@ -57,6 +57,6 @@ lemma DefinedFunction.shigmaOne_absolute_func {k} {f : (Fin k → ℕ) → ℕ} 
     (f v : M) = f' (fun i ↦ (v i)) := by
   simpa using Defined.shigmaOne_absolute M hf.graph_delta hf'.graph_delta (f v :> v)
 
-end LO.FirstOrder.Arith.Model
+end LO.FirstOrder.Arith
 
 end

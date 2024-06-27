@@ -1,14 +1,12 @@
 import Arithmetization.ISigmaZero.Exponential.Exp
 
-namespace LO.FirstOrder
-
-namespace Arith
-
 noncomputable section
 
 variable {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M]
 
-namespace Model
+namespace LO.Arith
+
+open FirstOrder FirstOrder.Arith
 
 section ISigma₀
 
@@ -490,10 +488,6 @@ lemma exp_le_iff_le_log {i a : M} (pos : 0 < a) : exp i ≤ a ↔ i ≤ log a :=
 
 end ISigma₁
 
-end Model
+end LO.Arith
 
 end
-
-end FirstOrder.Arith
-
-end LO

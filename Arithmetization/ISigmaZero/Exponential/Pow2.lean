@@ -1,14 +1,12 @@
 import Arithmetization.Basic.IOpen
 
-namespace LO.FirstOrder
-
-namespace Arith
-
 noncomputable section
+
+namespace LO.Arith
 
 variable {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M]
 
-namespace Model
+open FirstOrder FirstOrder.Arith
 
 section IOpen
 
@@ -336,7 +334,7 @@ lemma LenBit.add_pow2_iff_of_lt {a i j : M} (pi : Pow2 i) (pj : Pow2 j) (h : a <
   · have : a + j < i := calc
       a + j < 2 * j  := by simp[two_mul, h]
       _     ≤ i      := (pj.lt_iff_two_mul_le pi).mp hij
-    simp [not_lenbit_of_lt this, not_lenbit_of_lt (show a < i from lt_trans _ _ _ h hij), hij.ne.symm]
+    simp [not_lenbit_of_lt this, not_lenbit_of_lt (show a < i from lt_trans h hij), hij.ne.symm]
 
 lemma lenbit_iff_add_mul {i a : M} (hi : Pow2 i) :
     LenBit i a ↔ ∃ k, ∃ r < i, a = k * (2 * i) + i + r := by
@@ -409,10 +407,6 @@ lemma lenbit_sub_pow2_iff_of_lenbit {a i j : M} (pi : Pow2 i) (pj : Pow2 j) (h :
 
 end ISigma₀
 
-end Model
+end LO.Arith
 
 end
-
-end Arith
-
-end LO.FirstOrder

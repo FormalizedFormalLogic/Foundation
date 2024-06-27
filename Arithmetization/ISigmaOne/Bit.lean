@@ -1,15 +1,15 @@
 import Arithmetization.ISigmaZero.Exponential.Exp
 import Arithmetization.ISigmaZero.Exponential.Log
 
-namespace LO.FirstOrder.Arith
-
 noncomputable section
+
+namespace LO.Arith
+
+open FirstOrder FirstOrder.Arith
 
 variable {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M]
 
 variable [M ⊧ₘ* 𝐈𝚺₁]
-
-namespace Model
 
 def Bit (i a : M) : Prop := LenBit (exp i) a
 
@@ -65,13 +65,11 @@ section
 
 end
 
-end Model
+end LO.Arith
 
 end
 
-section
-
-open Model
+namespace LO.FirstOrder.Arith
 
 variable {ξ : Type*} {n}
 
@@ -137,7 +135,9 @@ end
 
 variable {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐈𝚺₁]
 
-scoped instance : Structure.Mem ℒₒᵣ M := ⟨by intro a b; simp [Semiformula.Operator.val, operator_mem_def, Model.bit_defined.df.iff]⟩
+open LO.Arith
+
+scoped instance : Structure.Mem ℒₒᵣ M := ⟨by intro a b; simp [Semiformula.Operator.val, operator_mem_def, bit_defined.df.iff]⟩
 
 @[simp] lemma eval_ballIn {t : Semiterm ℒₒᵣ ξ n} {p : Semiformula ℒₒᵣ ξ (n + 1)} {e ε} :
     Semiformula.Evalm M e ε (ballIn t p) ↔ ∀ x ∈ t.valm M e ε, Semiformula.Evalm M (x :> e) ε p := by
@@ -153,7 +153,7 @@ scoped instance : Structure.Mem ℒₒᵣ M := ⟨by intro a b; simp [Semiformul
   · rintro ⟨x, _, hx, h⟩; exact ⟨x, hx, h⟩
   · rintro ⟨x, hx, h⟩; exact ⟨x, lt_of_mem hx, hx, h⟩
 
-lemma Model.memRel_defined : 𝚺₀-Relation₃ ((fun r x y ↦ ⟪x, y⟫ ∈ r) : M → M → M → Prop) via memRel := by
+lemma memRel_defined : 𝚺₀-Relation₃ ((fun r x y ↦ ⟪x, y⟫ ∈ r) : M → M → M → Prop) via memRel := by
   intro v; simp [memRel, pair_defined.df.iff, lt_succ_iff_le]
   constructor
   · intro h; exact ⟨⟪v 1, v 2⟫, by simp, rfl, h⟩
@@ -164,15 +164,17 @@ lemma Model.memRel_defined : 𝚺₀-Relation₃ ((fun r x y ↦ ⟪x, y⟫ ∈ 
   unfold Semiformula.Operator.val
   simp [memRelOpr, pair_defined.df.iff, memRel_defined.df.iff]
 
-end
+end LO.FirstOrder.Arith
 
 noncomputable section
+
+namespace LO.Arith
+
+open FirstOrder FirstOrder.Arith
 
 variable {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M]
 
 variable [M ⊧ₘ* 𝐈𝚺₁]
-
-namespace Model
 
 lemma mem_iff_mul_exp_add_exp_add {i a : M} : i ∈ a ↔ ∃ k, ∃ r < exp i, a = k * exp (i + 1) + exp i + r := by
   simp [mem_iff_bit, exp_succ]
@@ -545,10 +547,6 @@ lemma set_iff {n} {f : (Fin n → M) → M} {R : (Fin (n + 1) → M) → Prop}
 
 end ISigma₁
 
-end Model
+end LO.Arith
 
 end
-
-end Arith
-
-end LO.FirstOrder

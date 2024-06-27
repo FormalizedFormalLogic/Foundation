@@ -1,6 +1,8 @@
 import Arithmetization.Definability.Hierarchy
 
-namespace LO.FirstOrder.Arith.Model
+namespace LO.FirstOrder.Arith
+
+open LO.Arith
 
 variable {L : Language} [L.ORing] {ξ : Type*} {n : ℕ}
 
@@ -340,7 +342,7 @@ lemma DefinableFunction₃.infer {f : M → M → M → M} [DefinableFunction₃
 
 attribute [aesop (rule_sets := [Definability]) norm]
   sq
-  pow_three
+  Arith.pow_three
   pow_four
   Definable.const
 
@@ -416,4 +418,4 @@ example {ex : M → M} [h : DefinableFunction₁ L (𝚺, 1) ex] (c : M) :
 
 end
 
-end LO.FirstOrder.Arith.Model
+end LO.FirstOrder.Arith

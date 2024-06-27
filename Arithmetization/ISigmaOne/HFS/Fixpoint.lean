@@ -8,7 +8,9 @@ import Arithmetization.ISigmaOne.HFS.PRF
 
 noncomputable section
 
-namespace LO.FirstOrder.Arith.Model
+namespace LO.Arith
+
+open FirstOrder FirstOrder.Arith
 
 variable {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐈𝚺₁]
 
@@ -45,7 +47,7 @@ variable (M)
 
 structure Construction {k : ℕ} (φ : Blueprint k) where
   Φ : (Fin k → M) → Set M → M → Prop
-  defined : Defined (fun v ↦ Φ (v ·.succ.succ) {x | x ∈ v 1} (v 0)) φ.core
+  defined : Arith.Defined (fun v ↦ Φ (v ·.succ.succ) {x | x ∈ v 1} (v 0)) φ.core
   monotone {C C' : Set M} (h : C ⊆ C') {v x} : Φ v C x → Φ v C' x
 
 class Construction.Finite {k : ℕ} {φ : Blueprint k} (c : Construction M φ) where
@@ -229,13 +231,13 @@ theorem case [c.Finite] : c.Fixpoint v x ↔ c.Φ v {z | c.Fixpoint v z} x :=
 
 section
 
-lemma fixpoint_defined : Defined (fun v ↦ c.Fixpoint (v ·.succ) (v 0)) φ.fixpointDef := by
+lemma fixpoint_defined : Arith.Defined (fun v ↦ c.Fixpoint (v ·.succ) (v 0)) φ.fixpointDef := by
   intro v; simp [Blueprint.fixpointDef, c.eval_limSeqDef]; rfl
 
 @[simp] lemma eval_fixpointDef (v) :
     Semiformula.Evalbm M v φ.fixpointDef.val ↔ c.Fixpoint (v ·.succ) (v 0) := c.fixpoint_defined.df.iff v
 
-lemma fixpoint_definedΔ₁ [c.StrongFinite] : Defined (fun v ↦ c.Fixpoint (v ·.succ) (v 0)) φ.fixpointDefΔ₁ :=
+lemma fixpoint_definedΔ₁ [c.StrongFinite] : Arith.Defined (fun v ↦ c.Fixpoint (v ·.succ) (v 0)) φ.fixpointDefΔ₁ :=
   ⟨by intro v; simp [Blueprint.fixpointDefΔ₁, c.eval_limSeqDef],
    by intro v; simp [Blueprint.fixpointDefΔ₁, c.eval_limSeqDef, fixpoint_iff]⟩
 
@@ -278,6 +280,6 @@ end Construction
 
 end Fixpoint
 
-end LO.FirstOrder.Arith.Model
+end LO.Arith
 
 end

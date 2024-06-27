@@ -1,15 +1,13 @@
 import Arithmetization.Basic.Ind
 import Mathlib.Logic.Nonempty
 
-namespace LO.FirstOrder
+namespace LO.Arith
 
-namespace Arith
+open FirstOrder FirstOrder.Arith
 
 noncomputable section
 
 variable {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐏𝐀⁻]
-
-namespace Model
 
 section IOpen
 
@@ -291,7 +289,7 @@ scoped instance : Mod M := ⟨rem⟩
 lemma mod_def (a b : M) : a % b = a - b * (a / b) := rfl
 
 def _root_.LO.FirstOrder.Arith.remDef : 𝚺₀-Semisentence 3 :=
-  .mkSigma “c a b | ∃ d <⁺ a, !divDef.val d a b ∧ !subDef.val c a (b * d)” (by simp)
+  .mkSigma “c a b | ∃ d <⁺ a, !divDef.val d a b ∧ !FirstOrder.Arith.sub.val c a (b * d)” (by simp)
 
 lemma rem_graph (a b c : M) : a = b % c ↔ ∃ x ≤ b, (x = b / c ∧ a = b - c * x) := by
   simp [mod_def]; constructor
@@ -680,7 +678,7 @@ lemma pair_le_pair_left {a₁ a₂ : M} (h : a₁ ≤ a₂) (b) : ⟪a₁, b⟫ 
 
 lemma pair_lt_pair_right (a : M) {b₁ b₂} (h : b₁ < b₂) : ⟪a, b₁⟫ < ⟪a, b₂⟫ := by
   by_cases h₁ : a < b₁ <;> simp [pair, h₁]
-  · simpa [lt_trans _ _ _ h₁ h, ←sq] using h
+  · simpa [lt_trans h₁ h, ←sq] using h
   · by_cases h₂ : a < b₂ <;> simp [h₂, h]
     calc
       a * a + a + b₁ < (a + 1) * (a + 1) + b₁ := by simp [add_mul_self_eq]; apply lt_succ_iff_le.mpr; simp
@@ -792,16 +790,8 @@ end polynomial_induction
 
 lemma nat_cast_pair (n m : ℕ) : (⟪n, m⟫ : ℕ) = ⟪(n : M), (m : M)⟫ := by simp [pair]
 
-end Model
-
-namespace Model
-
-lemma nat_pair_eq (m n : ℕ) : ⟪n, m⟫ = Nat.pair n m := by simp [Model.pair, Nat.pair]; congr
-
-end Model
+lemma nat_pair_eq (m n : ℕ) : ⟪n, m⟫ = Nat.pair n m := by simp [Arith.pair, Nat.pair]; congr
 
 end
 
-end Arith
-
-end LO.FirstOrder
+end LO.Arith

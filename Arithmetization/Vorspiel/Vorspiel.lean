@@ -152,51 +152,11 @@ section
 
 variable {L : Language}
 
-def ballClosure : {n : ℕ} → (Fin n → Semiformula L ξ 1) → Semiformula L ξ n → Formula L ξ
-  | 0,     _, q => q
-  | _ + 1, p, q => ballClosure (p ·.succ) (∀[(p 0)/[#0]] q)
-
-@[simp] lemma ball_closure_zero (p : Fin 0 → Semiformula L ξ 1) (q : Semiformula L ξ 0) : ballClosure p q = q := rfl
-
-lemma ball_closure_succ (p : Fin (n + 1) → Semiformula L ξ 1) (q : Semiformula L ξ (n + 1)) :
-    ballClosure p q = ballClosure (p ·.succ) (∀[(p 0)/[#0]] q) := rfl
-
-def bexClosure : {n : ℕ} → (Fin n → Semiformula L ξ 1) → Semiformula L ξ n → Formula L ξ
-  | 0,     _, q => q
-  | _ + 1, p, q => bexClosure (p ·.succ) (∃[(p 0)/[#0]] q)
-
-@[simp] lemma bex_closure_zero (p : Fin 0 → Semiformula L ξ 1) (q : Semiformula L ξ 0) : bexClosure p q = q := rfl
-
-lemma bex_closure_succ (p : Fin (n + 1) → Semiformula L ξ 1) (q : Semiformula L ξ (n + 1)) :
-    bexClosure p q = bexClosure (p ·.succ) (∃[(p 0)/[#0]] q) := rfl
-
 namespace Semiformula
 
 variable {M : Type*} [Nonempty M] {s : Structure L M}
 
 variable {n : ℕ} {ε : ξ → M}
-
-@[simp] lemma eval_ballClosure {p : Fin n → Semiformula L ξ 1} {q : Semiformula L ξ n} :
-    Evalf s ε (ballClosure p q) ↔ ∀ e : Fin n → M, (∀ i, Eval s ![e i] ε (p i)) → Eval s e ε q := by
-  induction' n with n IH
-  · simp [Matrix.empty_eq]
-  · simp [ball_closure_succ, IH]
-    constructor
-    · intro H e h
-      simpa [Matrix.eq_vecCons'] using H (e ·.succ) (fun i ↦ h i.succ) (e 0) (h 0)
-    · intro H e h x hx
-      exact H (x :> e) (Fin.cases (by simpa [Matrix.empty_eq] using hx) (fun i ↦ by simpa using h i))
-
-@[simp] lemma eval_bexClosure {p : Fin n → Semiformula L ξ 1} {q : Semiformula L ξ n} :
-    Evalf s ε (bexClosure p q) ↔ ∃ e : Fin n → M, (∀ i, Eval s ![e i] ε (p i)) ∧ Eval s e ε q := by
-  induction' n with n IH
-  · simp [Matrix.empty_eq]
-  · simp [bex_closure_succ, IH]
-    constructor
-    · rintro ⟨e, he, x, hx, H⟩
-      exact ⟨x :> e, Fin.cases hx he, H⟩
-    · rintro ⟨e, h, H⟩
-      exact ⟨(e ·.succ), fun i ↦ h i.succ, e 0, h 0, by simpa [Matrix.eq_vecCons'] using H⟩
 
 @[simp] lemma eval_operator₃ {o : Operator L 3} {t₁ t₂ t₃ : Semiterm L ξ n} :
     Eval s e ε (o.operator ![t₁, t₂, t₃]) ↔ o.val ![t₁.val s e ε, t₂.val s e ε, t₃.val s e ε] := by
@@ -207,24 +167,6 @@ variable {n : ℕ} {ε : ξ → M}
   simp [eval_operator]
 
 end Semiformula
-
-namespace Arith.Hierarchy
-
-variable [L.LT] {μ : Type v}
-
-lemma ballClosure_iff {b s n} {p : Semiformula L ξ n} {v : Fin n → Semiterm L ξ 1} (hv : ∀ i, (v i).Positive) :
-    Hierarchy b s (ballClosure (fun i ↦ “#0 < !!(v i)”) p) ↔ Hierarchy b s p := by
-  induction' n with n IH <;> simp [ballClosure, ←Rew.comp_app]
-  refine Iff.trans (IH (p := “∀[#0 < !!([→ #0] (v 0))] !!p”) (v := (v ·.succ)) (by intro; simp [hv])) ?_
-  rw [ball_iff]; simp [Semiterm.bv_eq_empty_of_positive (hv 0)]
-
-lemma bexClosure_iff {b s n} {p : Semiformula L ξ n} {v : Fin n → Semiterm L ξ 1} (hv : ∀ i, (v i).Positive) :
-    Hierarchy b s (bexClosure (fun i ↦ “#0 < !!(v i)”) p) ↔ Hierarchy b s p := by
-  induction' n with n IH <;> simp [bexClosure, ←Rew.comp_app]
-  refine Iff.trans (IH (p := “∃[#0 < !!([→ #0] (v 0))] !!p”) (v := (v ·.succ)) (by intro; simp [hv])) ?_
-  rw [bex_iff]; simp [Semiterm.bv_eq_empty_of_positive (hv 0)]
-
-end Arith.Hierarchy
 
 end
 
@@ -244,7 +186,7 @@ variable (M : Type*) [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐏𝐀
 
 lemma nat_extention_sigmaOne {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
     ℕ ⊧ₘ σ → M ⊧ₘ σ := fun h ↦ by
-  simpa [Matrix.empty_eq] using Model.pval_of_pval_nat_of_sigma_one (M := M) hσ h
+  simpa [Matrix.empty_eq] using Arith.pval_of_pval_nat_of_sigma_one (M := M) hσ h
 
 lemma nat_extention_piOne {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚷 1 σ) :
     M ⊧ₘ σ → ℕ ⊧ₘ σ := by

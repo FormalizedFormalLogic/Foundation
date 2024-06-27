@@ -3,11 +3,11 @@ import Arithmetization.Definability.Absoluteness
 
 noncomputable section
 
-namespace LO.FirstOrder
+namespace LO.Arith
+
+open FirstOrder FirstOrder.Arith
 
 variable {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐈𝚺₁]
-
-namespace Arith.Model
 
 def finArrowToSeq : {k : ℕ} → (Fin k → M) → M
   | 0,     _ => ∅
@@ -49,11 +49,13 @@ lemma finArrowToSeq_absolute (v : Fin k → ℕ) : ((finArrowToSeq v : ℕ) : M)
   · simp [finArrowToSeq, nat_cast_empty]
   · simp [finArrowToSeq, ih, seqCons_absolute]
 
-end Arith.Model
+end LO.Arith
 
-namespace Semiterm
+namespace LO.FirstOrder.Semiterm
 
-open Arith Model
+open LO.Arith FirstOrder.Arith
+
+variable {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐈𝚺₁]
 
 variable {L : Language} [(k : ℕ) → Encodable (L.Func k)] [(k : ℕ) → Encodable (L.Rel k)] [DefinableLanguage L]
 
@@ -71,9 +73,13 @@ def codeIn {n} : SyntacticSemiterm L n → M
 @[simp] lemma codeIn_func {k} (f : L.Func k) (v : Fin k → SyntacticSemiterm L n) :
     (func f v).codeIn M = ^func (k : M) (Encodable.encode f) (finArrowToSeq fun i ↦ (v i).codeIn M) := rfl
 
-end Semiterm
+end LO.FirstOrder.Semiterm
 
-namespace Arith.Model
+namespace LO.Arith
+
+open FirstOrder FirstOrder.Arith
+
+variable {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐈𝚺₁]
 
 variable {L : Language} [(k : ℕ) → Encodable (L.Func k)] [(k : ℕ) → Encodable (L.Rel k)] [DefinableLanguage L]
 
@@ -97,14 +103,14 @@ lemma termSubst_codeIn {n m} (t : SyntacticSemiterm L n) (v : Fin n → Syntacti
   case bvar z =>
     simp; symm
     exact termSubst_bvar
-      (by simp [TermSeq, mem_finArrowToSeq_iff]) (by simp)
+      (by simp [Language.TermSeq, mem_finArrowToSeq_iff]) (by simp)
       (by simp [mem_finArrowToSeq_iff]; exact ⟨z, by simp⟩)
   case fvar x =>
     simp; symm
-    exact termSubst_fvar (by simp [TermSeq, mem_finArrowToSeq_iff]) _
+    exact termSubst_fvar (by simp [Language.TermSeq, mem_finArrowToSeq_iff]) _
   case func k f v ih =>
     simp; symm
-    apply termSubst_func (by simp [TermSeq, mem_finArrowToSeq_iff]) (by simp) (by simp) (by simp)
+    apply termSubst_func (by simp [Language.TermSeq, mem_finArrowToSeq_iff]) (by simp) (by simp) (by simp)
       (by simp [mem_finArrowToSeq_iff]) (by simp) (by simp) (by simp [mem_finArrowToSeq_iff])
     simp only [mem_finArrowToSeq_iff, forall_exists_index, and_imp]
     rintro _ _ _ i rfl rfl j hij rfl
@@ -125,8 +131,6 @@ lemma termShift_codeIn {n} (t : SyntacticSemiterm L n) :
     rcases Fin.val_inj.mp <| nat_cast_inj.mp hij
     exact Eq.symm (ih i)
 
-end Arith.Model
-
-end LO.FirstOrder
+end LO.Arith
 
 end

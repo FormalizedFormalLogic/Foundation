@@ -8,7 +8,9 @@ import Arithmetization.ISigmaOne.HFS.Seq
 
 noncomputable section
 
-namespace LO.FirstOrder.Arith.Model
+namespace LO.Arith
+
+open FirstOrder FirstOrder.Arith
 
 variable {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐈𝚺₁]
 
@@ -64,7 +66,7 @@ private lemma cseq_iff (s : M) : c.CSeq v s ↔
           ⟨lh s, by simp [lt_succ_iff_le], rfl, by simpa [lt_tsub_iff_right] using hi⟩ z (lt_of_mem_rng hiz) hiz with ⟨_, _, rfl, h⟩
         exact h⟩⟩
 
-lemma cseq_defined : Model.Defined (fun v ↦ c.CSeq (v ·.succ) (v 0) : (Fin (k + 1) → M) → Prop) p.cseqDef := by
+lemma cseq_defined : Arith.Defined (fun v ↦ c.CSeq (v ·.succ) (v 0) : (Fin (k + 1) → M) → Prop) p.cseqDef := by
   intro v; simp [Blueprint.cseqDef, cseq_iff, c.zero_defined.df.iff, c.succ_defined.df.iff]
 
 @[simp] lemma cseq_defined_iff (v) :
@@ -181,12 +183,12 @@ lemma result_graph (z u : M) : z = c.result v u ↔ ∃ s, c.CSeq v s ∧ ⟪u, 
         (by simp [←hu, succ_le_iff_lt]; exact Hs.seq.lt_lh_iff.mpr (mem_domain_of_pair_mem h))
         (by simp [←hu]) h' h⟩
 
-lemma result_defined : Model.DefinedFunction (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → M) → M) p.resultDef := by
+lemma result_defined : Arith.DefinedFunction (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → M) → M) p.resultDef := by
   intro v; simp [Blueprint.resultDef, result_graph]
   apply exists_congr; intro x
   simp [c.cseq_defined_iff]; intros; rfl
 
-lemma result_defined_delta : Model.DefinedFunction (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → M) → M) p.resultDeltaDef :=
+lemma result_defined_delta : Arith.DefinedFunction (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → M) → M) p.resultDeltaDef :=
   c.result_defined.graph_delta
 
 @[simp] lemma result_defined_iff (v) :
@@ -202,6 +204,6 @@ end Construction
 
 end PR
 
-end LO.FirstOrder.Arith.Model
+end LO.Arith
 
 end

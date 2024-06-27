@@ -1,8 +1,8 @@
 import Arithmetization.ISigmaZero.Exponential.Log
 
-namespace LO.FirstOrder
+namespace LO.Arith
 
-namespace Arith
+open FirstOrder FirstOrder.Arith
 
 /-- ∀ x, ∃ y, 2^{|x|^2} = y-/
 def omegaOneAxiom : Sentence ℒₒᵣ := “∀ x, ∃ y, ∃ l <⁺ x, !lengthDef l x ∧ !exponentialDef (l * l) y”
@@ -16,8 +16,6 @@ notation "𝛀₁" => Theory.omegaOne
   ⟨by rintro ⟨⟩; rfl, by rintro rfl; exact Theory.omegaOne.omega⟩
 
 noncomputable section
-
-namespace Model
 
 variable {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M]
 
@@ -125,10 +123,6 @@ lemma hash_two_mul_le_sq_hash (a b : M) : a # (2 * b) ≤ (a # b) ^ 2 := by
   · simp [hash_two_mul a pos, sq]
     exact hash_monotone (by rfl) (pos_iff_one_le.mp pos)
 
-end Model
-
 end
 
-end Arith
-
-end LO.FirstOrder
+end LO.Arith

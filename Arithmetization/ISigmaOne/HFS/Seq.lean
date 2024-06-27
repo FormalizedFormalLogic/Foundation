@@ -8,7 +8,9 @@ import Arithmetization.ISigmaOne.HFS.Basic
 
 noncomputable section
 
-namespace LO.FirstOrder.Arith.Model
+namespace LO.Arith
+
+open FirstOrder FirstOrder.Arith
 
 variable {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐈𝚺₁]
 
@@ -63,7 +65,7 @@ lemma lh_prop (s : M) : (Seq s → domain s = under (lh s)) ∧ (¬Seq s → lh 
 
 lemma lh_prop_of_not_seq {s : M} (h : ¬Seq s) : lh s = 0 := (lh_prop s).2 h
 
-lemma Seq.domain_eq {s : M} (h : Seq s) : domain s = under (lh s) := (Model.lh_prop s).1 h
+lemma Seq.domain_eq {s : M} (h : Seq s) : domain s = under (lh s) := (lh_prop s).1 h
 
 @[simp] lemma lh_bound (s : M) : lh s ≤ 2 * s := by
   by_cases hs : Seq s
@@ -301,100 +303,7 @@ def vecConsUnexpander : Lean.PrettyPrinter.Unexpander
   | `($_ ∅ $term) => `(!⟦$term⟧)
   | _ => throw ()
 
-#check !⟦1, 0, 9⟧
-
 @[simp] lemma singleton_seq (x : M) : Seq !⟦x⟧ := by apply Seq.seqCons; simp
-
-/-
-section seqMap
-
-variable {f : M → M} (hf : 𝚺₁-Function₁ f)
-
-lemma Seq.seqMap_exists {s : M} (Hs : Seq s) :
-    ∃ t, Seq t ∧ lh t = lh s ∧ ∀ i x, ⟪i, x⟫ ∈ s → ⟪i, f x⟫ ∈ t := by
-  suffices ∃ t, Seq t ∧ lh t = lh s ∧ ∀ i < lh s, ∀ x < s, ⟪i, x⟫ ∈ s → ⟪i, f x⟫ ∈ t
-  by  rcases this with ⟨t, Ht, hts, h⟩
-      exact ⟨t, Ht, hts, fun i x hx ↦ h i (Hs.lt_lh_of_mem hx) x (lt_of_mem_rng hx) hx⟩
-  revert Hs
-  apply @seq_induction M _ _ _ _ _ _ 𝚺
-  · definability
-  case hnil =>
-    exact ⟨∅, by simp⟩
-  case hcons =>
-    intro s x Hs ⟨t, Ht, hts, ih⟩
-    exact ⟨t ⁀' f x, Ht.seqCons (f x), by simp [Hs, Ht, hts], by
-      simp [Hs, Ht]
-      intro i hi z _ hz
-      have : i ≤ lh s := lt_succ_iff_le.mp hi
-      rcases this with (rfl | hi)
-      · have : z = x := by simpa [Hs] using hz
-        simp [this, ←hts, Ht]
-      · have : ⟪i, f z⟫ ∈ t ⁀' f x ↔ ⟪i, f z⟫ ∈ t := mem_seqCons_iff_of_lt (x := f z) (z := f x) (by simpa [hts] using hi)
-        rw [this]
-        have : ⟪i, z⟫ ∈ s := mem_seqCons_iff_of_lt hi |>.mp hz
-        exact ih i hi z (lt_of_mem_rng this) this ⟩
-
-lemma seqMap_existsUnique (s : M) (Hs : Seq s) :
-    ∃! t, Seq t ∧ lh t = lh s ∧ ∀ i x, ⟪i, x⟫ ∈ s → ⟪i, f x⟫ ∈ t := by
-  rcases Hs.seqMap_exists hf with ⟨t, Ht, hts, h⟩
-  apply ExistsUnique.intro t ⟨Ht, hts, h⟩
-  rintro t' ⟨Ht', ht's, h'⟩
-  apply Ht'.eq_of_eq_of_subset Ht (by simp [hts, ht's])
-  intro u hu
-  have : π₁ u < lh s := by simpa [←ht's] using Ht'.lt_lh_of_mem (show ⟪π₁ u, π₂ u⟫ ∈ t' from by simpa using hu)
-  have : ∃ y, ⟪π₁ u, y⟫ ∈ s := Hs.exists this
-  rcases this with ⟨y, hy⟩
-  have : f y = π₂ u := Ht'.isMapping.uniq (h' _ _ hy) (show ⟪π₁ u, π₂ u⟫ ∈ t' from by simpa using hu)
-  simpa [this] using h _ _ hy
-
-def seqMap (s : M) : M := Classical.extendedChoose! (seqMap_existsUnique hf) 0 s
-
-lemma Seq.seqMap_spec' {s : M} (H : Seq s) :
-    Seq (seqMap hf s) ∧ lh (seqMap hf s) = lh s ∧ ∀ i x, ⟪i, x⟫ ∈ s → ⟪i, f x⟫ ∈ seqMap hf s :=
-  Classical.extendedchoose!_spec (seqMap_existsUnique hf) 0 H
-
-@[simp] lemma seqMap_spec_of_not_seq {s : M} (H : ¬Seq s) :
-    seqMap hf s = 0 :=
-  Classical.extendedchoose!_spec_not (seqMap_existsUnique hf) 0 H
-
-variable {hf} {s : M} (H : Seq s)
-
-@[simp] protected lemma Seq.seqMap : Seq (seqMap hf s) := H.seqMap_spec' hf |>.1
-
-@[simp] lemma Seq.seqMap_lh_eq : lh (seqMap hf s) = lh s := H.seqMap_spec' hf |>.2.1
-
-lemma Seq.seqMap_spec {i x : M} : ⟪i, x⟫ ∈ s → ⟪i, f x⟫ ∈ seqMap hf s := H.seqMap_spec' hf |>.2.2 i x
-
-lemma Seq.mem_seqMap_iff {i y : M} : ⟪i, y⟫ ∈ seqMap hf s ↔ ∃ x, f x = y ∧ ⟪i, x⟫ ∈ s :=
-  ⟨by intro hu
-      have : i < lh s := by simpa [H] using H.seqMap.lt_lh_of_mem hu
-      have : ∃ x, ⟪i, x⟫ ∈ s := H.exists this
-      rcases this with ⟨x, hx⟩
-      exact ⟨x, H.seqMap.isMapping.uniq (H.seqMap_spec hx) hu, hx⟩,
-   by rintro ⟨x, rfl, hx⟩; exact H.seqMap_spec hx⟩
-
-lemma seqMap_graph (t s : M) :
-    t = seqMap hf s ↔
-    (Seq s → Seq t ∧ (∃ l ≤ 2 * s, l = lh s ∧ l = lh t) ∧ ∀ i < s, ∀ x < s, ⟪i, x⟫ ∈ s → ∃ y < t, y = f x ∧ ⟪i, y⟫ ∈ t) ∧
-    (¬Seq s → t = 0) :=
-  ⟨by rintro rfl;
-      by_cases H : Seq s <;> simp only [H, Seq.seqMap, lt_succ_iff_le, Seq.seqMap_lh_eq, and_self,
-        exists_eq_right, lh_bound, true_and, forall_true_left, not_true_eq_false, IsEmpty.forall_iff, and_true,
-        not_false_eq_true, H, seqMap_spec_of_not_seq, forall_true_left]
-      intro i _ x _ hix
-      have : ⟪i, f x⟫ ∈ seqMap hf s := H.seqMap_spec hix
-      exact ⟨f x, lt_of_mem_rng this, rfl, this⟩,
-   by by_cases H : Seq s <;>
-        simp only [H, lt_succ_iff_le, exists_eq_right_right, forall_true_left,
-          not_true_eq_false, IsEmpty.forall_iff, and_true, and_imp]
-      intro Ht _ hl h
-      apply Classical.extendedChoose!_uniq
-      · exact H
-      · exact ⟨Ht, hl, by intro i x hi; rcases h i (lt_of_mem_dom hi) x (lt_of_mem_rng hi) hi with ⟨_, _, rfl, h⟩; exact h⟩
-      · simp [H]⟩
-
-end seqMap
--/
 
 theorem sigmaOne_skolem_seq {R : M → M → Prop} (hP : 𝚺₁-Relation R) {l}
     (H : ∀ x < l, ∃ y, R x y) : ∃ s, Seq s ∧ lh s = l ∧ ∀ i x, ⟪i, x⟫ ∈ s → R i x := by
@@ -499,6 +408,6 @@ end
 
 end seqPop
 
-end LO.FirstOrder.Arith.Model
+end LO.Arith
 
 end

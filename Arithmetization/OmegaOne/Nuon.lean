@@ -1,12 +1,10 @@
 import Arithmetization.OmegaOne.Basic
 
-namespace LO.FirstOrder
+namespace LO.Arith
 
-namespace Arith
+open FirstOrder FirstOrder.Arith
 
 noncomputable section
-
-namespace Model
 
 variable {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐈𝚺₀ + 𝛀₁]
 
@@ -494,7 +492,7 @@ def isSegmentDef : 𝚺₀-Semisentence 5 := .mkSigma
         S_L_i_succ = S_L_i + fb”
   (by simp)
 
-lemma isSegmentDef_defined : Defined (M := M) (λ v ↦ IsSegment (v 0) (v 1) (v 2) (v 3) (v 4)) isSegmentDef := by
+lemma isSegmentDef_defined : Arith.Defined (M := M) (λ v ↦ IsSegment (v 0) (v 1) (v 2) (v 3) (v 4)) isSegmentDef := by
   intro v; simp [IsSegment, isSegmentDef, ext_defined.df.iff, fbit_defined.df.iff, lt_succ_iff_le, numeral_eq_natCast]
   apply forall₂_congr; intro x _
   constructor
@@ -504,7 +502,7 @@ lemma isSegmentDef_defined : Defined (M := M) (λ v ↦ IsSegment (v 0) (v 1) (v
 def segmentDef : 𝚺₀-Semisentence 7 := .mkSigma
   “U L A start intv nₛ nₑ | ∃ S < U, !isSegmentDef L A start intv S ∧ !extDef nₛ L S 0 ∧ !extDef nₑ L S intv” (by simp)
 
-lemma segmentDef_defined : Defined (M := M) (λ v ↦ Segment (v 0) (v 1) (v 2) (v 3) (v 4) (v 5) (v 6)) segmentDef := by
+lemma segmentDef_defined : Arith.Defined (M := M) (λ v ↦ Segment (v 0) (v 1) (v 2) (v 3) (v 4) (v 5) (v 6)) segmentDef := by
   intro v; simp [Segment, segmentDef, ext_defined.df.iff, isSegmentDef_defined.df.iff, @Eq.comm _ (v 5), @Eq.comm _ (v 6)]
   rfl
 
@@ -524,7 +522,7 @@ lemma bex_eq_lt_iff {p : M → Prop} {b : M} :
     (∃ a < z, a = b ∧ p a) ↔ (b < z ∧ p b) :=
   ⟨by rintro ⟨a, hp, rfl, hr⟩; exact ⟨hp, hr⟩, by rintro ⟨hp, hr⟩; exact ⟨b, hp, rfl, hr⟩⟩
 
-lemma isSerieDef_defined : Defined (M := M) (λ v ↦ IsSeries (v 0) (v 1) (v 2) (v 3) (v 4) (v 5)) isSeriesDef := by
+lemma isSerieDef_defined : Arith.Defined (M := M) (λ v ↦ IsSeries (v 0) (v 1) (v 2) (v 3) (v 4) (v 5)) isSeriesDef := by
   intro v; simp [IsSeries, isSeriesDef, length_defined.df.iff, ext_defined.df.iff, segmentDef_defined.df.iff, lt_succ_iff_le]
   apply forall₂_congr; intro x _
   rw [bex_eq_le_iff, bex_eq_le_iff, bex_eq_le_iff]
@@ -534,7 +532,7 @@ lemma isSerieDef_defined : Defined (M := M) (λ v ↦ IsSeries (v 0) (v 1) (v 2)
 def seriesDef : 𝚺₀-Semisentence 6 := .mkSigma
   “U I L A iter n | ∃ T < U, !isSeriesDef U I L A iter T ∧ !extDef 0 L T 0 ∧ !extDef n L T iter” (by simp)
 
-lemma seriesDef_defined : Defined (M := M) (λ v ↦ Series (v 0) (v 1) (v 2) (v 3) (v 4) (v 5)) seriesDef := by
+lemma seriesDef_defined : Arith.Defined (M := M) (λ v ↦ Series (v 0) (v 1) (v 2) (v 3) (v 4) (v 5)) seriesDef := by
   intro v; simp [Series, seriesDef, isSerieDef_defined.df.iff, ext_defined.df.iff]
   apply exists_congr; intro T
   apply and_congr_right; intros
@@ -550,7 +548,7 @@ def seriesSegmentDef : 𝚺₀-Semisentence 6 := .mkSigma
       !seriesDef U I L A d nₖ ∧ !segmentDef U L A (l * d) r nₖ n”
   (by simp)
 
-lemma seriesSegmentDef_defined : Defined (M := M) (λ v ↦ SeriesSegment (v 0) (v 1) (v 2) (v 3) (v 4) (v 5)) seriesSegmentDef := by
+lemma seriesSegmentDef_defined : Arith.Defined (M := M) (λ v ↦ SeriesSegment (v 0) (v 1) (v 2) (v 3) (v 4) (v 5)) seriesSegmentDef := by
   intro v; simp [SeriesSegment, seriesSegmentDef,
     length_defined.df.iff, div_defined.df.iff, rem_defined.df.iff, seriesDef_defined.df.iff, segmentDef_defined.df.iff, lt_succ_iff_le]
   apply exists_congr; intro nₖ
@@ -688,10 +686,6 @@ lemma nuon_defined : 𝚺₀-Function₁ (nuon : M → M) via nuonDef := by
 
 instance nuon_definable : DefinableFunction₁ ℒₒᵣ 𝚺₀ (nuon : M → M) := Defined.to_definable _ nuon_defined
 
-end Model
-
 end
 
-end Arith
-
-end LO.FirstOrder
+end LO.Arith

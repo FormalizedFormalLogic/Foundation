@@ -1,14 +1,12 @@
 import Arithmetization.ISigmaZero.Exponential.Pow2
 
-namespace LO.FirstOrder
-
-namespace Arith
-
 noncomputable section
+
+namespace LO.Arith
 
 variable {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M]
 
-namespace Model
+open FirstOrder FirstOrder.Arith
 
 section ISigma₀
 
@@ -186,7 +184,7 @@ protected lemma sq {i : M} (ppi : PPow2 i) : PPow2 (i^2) := by
           have hsqj : √j < i^2 := lt_of_mul_lt_mul_left (a := 2) (by calc
             2 * √j ≤ (√j)^2  := two_mul_le_sq
                                     (one_lt_iff_two_le.mp <| one_lt_sq_iff.mp <| by
-                                      rw [ej]; exact lt_trans _ _ _ one_lt_two lt2)
+                                      rw [ej]; exact lt_trans one_lt_two lt2)
             _      ≤ j       := by simp
             _      ≤ m + i^2 := hj
             _      < 2 * i^2 := by simp [two_mul, hmi])
@@ -314,10 +312,6 @@ end PPow2
 
 end ISigma₀
 
-end Model
+end LO.Arith
 
 end
-
-end Arith
-
-end LO.FirstOrder
