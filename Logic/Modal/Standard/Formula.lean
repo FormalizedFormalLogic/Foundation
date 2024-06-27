@@ -223,7 +223,7 @@ instance : Collection (Formula α) (Theory α) := inferInstance
 
 section Subformula
 
-variable [DecidableEq α] [Inhabited α]
+variable [DecidableEq α]
 
 def Formula.Subformulas: Formula α → Finset (Formula α)
   | ⊤      => {⊤}
@@ -239,69 +239,36 @@ namespace Formula.Subformulas
 @[simp]
 lemma mem_self (p : Formula α) : p ∈ p.Subformulas := by induction p using Formula.rec' <;> simp [Subformulas];
 
+variable {p q r : Formula α}
+
+lemma mem_and (h : (q ⋏ r) ∈ p.Subformulas) : q ∈ p.Subformulas ∧ r ∈ p.Subformulas := by
+  induction p using Formula.rec' <;> { simp_all [Subformulas]; try aesop; };
+
+lemma mem_or (h : (q ⋎ r) ∈ p.Subformulas) : q ∈ p.Subformulas ∧ r ∈ p.Subformulas := by
+  induction p using Formula.rec' <;> { simp_all [Subformulas]; try aesop; };
+
+lemma mem_imp (h : (q ⟶ r) ∈ p.Subformulas) : q ∈ p.Subformulas ∧ r ∈ p.Subformulas := by
+  induction p using Formula.rec' <;> { simp_all [Subformulas]; try aesop; };
+
+lemma mem_box (h : □q ∈ p.Subformulas) : q ∈ p.Subformulas := by
+  induction p using Formula.rec' <;> { simp_all [Subformulas]; try aesop; };
+
 end Formula.Subformulas
 
+-- TOOD: より抽象的にして`Modal/LogicalSymbol`などに移してもよいかも．
+class Formula.SubformulaClosed (C : (Formula α) → Prop) where
+  and : C (p ⋏ q) → C p ∧ C q
+  or  : C (p ⋎ q) → C p ∧ C q
+  imp : C (p ⟶ q) → C p ∧ C q
+  box : C (□p) → C p
 
-def Theory.Subformulas (T : Theory α) := ⋃ i ∈ T, i.Subformulas.toSet
+open Formula (Subformulas)
 
-def Theory.SubformulaClosed (T : Theory α) := ∀ p ∈ T, ↑(p.Subformulas) ⊆ T
-
-namespace Theory.SubformulaClosed
-
-variable {T : Theory α} (T_closed : T.SubformulaClosed) {p q : Formula α}
-
-@[simp]
-lemma def_and : p ⋏ q ∈ T → p ∈ T ∧ q ∈ T := by
-  intro h;
-  constructor;
-  all_goals apply (T_closed _ h); simp [Formula.Subformulas];
-
-@[simp]
-lemma def_or : p ⋎ q ∈ T → p ∈ T ∧ q ∈ T := by
-  intro h;
-  constructor;
-  all_goals apply (T_closed _ h); simp [Formula.Subformulas];
-
-@[simp]
-lemma def_imp : p ⟶ q ∈ T → p ∈ T ∧ q ∈ T := by
-  intro h;
-  constructor;
-  all_goals apply (T_closed _ h); simp [Formula.Subformulas];
-
-@[simp]
-lemma def_box : □p ∈ T → p ∈ T := by
-  intro h;
-  apply (T_closed _ h); simp [Formula.Subformulas];
-
-end Theory.SubformulaClosed
-
-
-class Theory.IsSubformulaClosed (T : Theory α) where
-  closed : T.SubformulaClosed
-
-instance {p : Formula α} : Theory.IsSubformulaClosed (p.Subformulas).toSet where
-  closed := by
-    induction p using Formula.rec' with
-    | hbox p ihp =>
-      simp_all [Theory.SubformulaClosed, Formula.Subformulas];
-      rintro r hp;
-      exact Set.Subset.trans (ihp r hp) $ Set.Subset.trans (Set.subset_insert _ _) $ Set.insert_subset_insert $ by rfl;
-    | hand p q ihp ihq =>
-      simp_all [Theory.SubformulaClosed, Formula.Subformulas];
-      rintro r (hp | hq);
-      . exact Set.Subset.trans (ihp r hp) $ Set.Subset.trans (Set.subset_insert _ _) $ Set.insert_subset_insert $ Set.subset_union_left;
-      . exact Set.Subset.trans (ihq r hq) $ Set.Subset.trans (Set.subset_insert _ _) $ Set.insert_subset_insert $ Set.subset_union_right;
-    | hor p q ihp ihq =>
-      simp_all [Theory.SubformulaClosed, Formula.Subformulas];
-      rintro r (hp | hq);
-      . exact Set.Subset.trans (ihp r hp) $ Set.Subset.trans (Set.subset_insert _ _) $ Set.insert_subset_insert $ Set.subset_union_left;
-      . exact Set.Subset.trans (ihq r hq) $ Set.Subset.trans (Set.subset_insert _ _) $ Set.insert_subset_insert $ Set.subset_union_right;
-    | himp p q ihp ihq =>
-      simp_all [Theory.SubformulaClosed, Formula.Subformulas];
-      rintro r (hp | hq);
-      . exact Set.Subset.trans (ihp r hp) $ Set.Subset.trans (Set.subset_insert _ _) $ Set.insert_subset_insert $ Set.subset_union_left;
-      . exact Set.Subset.trans (ihq r hq) $ Set.Subset.trans (Set.subset_insert _ _) $ Set.insert_subset_insert $ Set.subset_union_right;
-    | _ => simp_all [Theory.SubformulaClosed, Formula.Subformulas];
+instance {p : Formula α} : (Formula.SubformulaClosed (p.Subformulas).toSet) where
+  and := by intro q r hqr; exact Subformulas.mem_and hqr;
+  or  := by intro q r hqr; exact Subformulas.mem_or hqr;
+  imp := by intro q r hqr; exact Subformulas.mem_imp hqr;
+  box := by intro q hq; exact Subformulas.mem_box hq;
 
 end Subformula
 
