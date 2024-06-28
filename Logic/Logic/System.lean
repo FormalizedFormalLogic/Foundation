@@ -486,7 +486,7 @@ end
 
 variable (S)
 
-class Deduction [Cons F S] where
+class Deduction [Membership F S] [Cons F S] where
   ofInsert {p q : F} {𝓢 : S} : cons p 𝓢 ⊢ q → 𝓢 ⊢ p ⟶ q
   inv {p q : F} {𝓢 : S} : 𝓢 ⊢ p ⟶ q → cons p 𝓢 ⊢ q
 
@@ -494,7 +494,7 @@ variable {S}
 
 section
 
-variable [Cons F S] [Deduction S]
+variable [Membership F S] [Cons F S] [Deduction S]
 
 alias deduction := Deduction.ofInsert
 
