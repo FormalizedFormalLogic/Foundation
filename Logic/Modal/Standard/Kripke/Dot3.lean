@@ -74,7 +74,7 @@ instance : System.Consistent (𝐒𝟒.𝟑 : DeductionParameter α) := consiste
 
 
 open MaximalConsistentTheory in
-lemma connected_CanonicalFrame {Ax : AxiomSet α} (hAx : .𝟯 ⊆ Ax) [System.Consistent Axᴺ] : Connected (CanonicalFrame Ax) := by
+lemma connected_CanonicalFrame {Ax : AxiomSet α} (hAx : .𝟯 ⊆ Ax) [System.Consistent (𝝂Ax)] : Connected (CanonicalFrame Ax) := by
   dsimp only [Connected];
   intro X Y Z ⟨hXY, hXZ⟩;
   by_contra hC; push_neg at hC;

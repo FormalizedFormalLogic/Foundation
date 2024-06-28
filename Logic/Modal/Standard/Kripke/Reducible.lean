@@ -10,10 +10,10 @@ namespace Kripke
 open Formula
 
 variable {α : Type*} {Ax₁ Ax₂ : AxiomSet α} (𝔽₁ 𝔽₂ : FrameClass)
-  [sound₁ : Sound Ax₁ᴺ 𝔽₁#] [sound₂ : Sound Ax₂ᴺ 𝔽₂#]
-  [complete₁ : Complete Ax₁ᴺ 𝔽₁#] [complete₂ : Complete Ax₂ᴺ 𝔽₂#]
+  [sound₁ : Sound 𝝂Ax₁ 𝔽₁#] [sound₂ : Sound 𝝂Ax₂ 𝔽₂#]
+  [complete₁ : Complete 𝝂Ax₁ 𝔽₁#] [complete₂ : Complete 𝝂Ax₂ 𝔽₂#]
 
-lemma reducible_of_subset_FrameClass (h𝔽 : 𝔽₂ ⊆ 𝔽₁) : Ax₁ᴺ ≤ₛ Ax₂ᴺ := by
+lemma reducible_of_subset_FrameClass (h𝔽 : 𝔽₂ ⊆ 𝔽₁) : 𝝂Ax₁ ≤ₛ 𝝂Ax₂ := by
   apply System.reducible_iff.mpr;
   intro p hp;
   apply complete₂.complete;
@@ -39,7 +39,7 @@ lemma strictreducible_of_ssubset_FrameClass (hne : Ax₂.Nonempty) (h𝔽 : 𝔽
       . sorry;
 -/
 
-lemma equiv_of_eq_FrameClass (h𝔽 : 𝔽₁ = 𝔽₂) : Ax₁ᴺ =ₛ Ax₂ᴺ := by
+lemma equiv_of_eq_FrameClass (h𝔽 : 𝔽₁ = 𝔽₂) : 𝝂Ax₁ =ₛ 𝝂Ax₂ := by
   apply System.Equiv.antisymm_iff.mpr;
   constructor;
   . apply reducible_of_subset_FrameClass 𝔽₁ 𝔽₂;

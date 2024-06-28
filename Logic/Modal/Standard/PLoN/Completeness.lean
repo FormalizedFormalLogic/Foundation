@@ -22,7 +22,7 @@ abbrev CanonicalModel (Λ : DeductionParameter α) [Inhabited (Λ)-MCT] : PLoN.M
 
 instance CanonicalModel.instSatisfies [Inhabited (Λ)-MCT] : Semantics (Formula α) ((CanonicalModel Λ).World) := Formula.PLoN.Satisfies.semantics (CanonicalModel Λ)
 
-variable {Λ : DeductionParameter α} [Inhabited (Λ)-MCT] [Λ.HasNec]
+variable {Λ : DeductionParameter α} [Inhabited (Λ)-MCT] [Λ.HasNecessitation]
          {p : Formula α}
 
 lemma truthlemma : ∀ {Ω : (CanonicalModel Λ).World}, Ω ⊧ p ↔ (p ∈ Ω.theory) := by

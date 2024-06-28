@@ -1,5 +1,3 @@
-import Logic.Modal.Standard.System
-import Logic.Modal.Standard.Formula
 import Logic.Modal.Standard.Deduction
 
 namespace LO.System.Axioms
@@ -123,7 +121,7 @@ end AxiomSet
 
 namespace DeductionParameter
 
-protected abbrev Geach (l : List Axioms.Geach.Taple) : DeductionParameter α := (𝗚𝗲(l))ᴺ
+protected abbrev Geach (l : List Axioms.Geach.Taple) : DeductionParameter α := 𝝂(𝗚𝗲(l))
 notation "𝐆𝐞(" l ")" => DeductionParameter.Geach l
 
 namespace Geach

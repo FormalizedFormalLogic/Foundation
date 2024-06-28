@@ -1,6 +1,4 @@
-import Logic.Modal.Standard.Formula
 import Logic.Modal.Standard.Deduction
-import Logic.Modal.Standard.HilbertStyle
 import Logic.Propositional.Superintuitionistic.Kripke.Classical
 
 /-!

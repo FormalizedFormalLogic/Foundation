@@ -1,5 +1,4 @@
 import Logic.Modal.Standard.Deduction
-import Logic.Modal.Standard.HilbertStyle
 
 namespace LO.Modal.Standard
 
