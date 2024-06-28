@@ -7,4 +7,6 @@ import Logic.Modal.Standard.Kripke.Ver
 import Logic.Modal.Standard.Kripke.Dot3
 import Logic.Modal.Standard.Kripke.GL
 
+import Logic.Modal.Standard.Kripke.Filteration
+
 import Logic.Modal.Standard.Kripke.ModalCompanion

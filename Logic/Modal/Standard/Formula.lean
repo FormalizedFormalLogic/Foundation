@@ -221,6 +221,60 @@ abbrev Theory (α) := Set (Formula α)
 instance : Collection (Formula α) (Theory α) := inferInstance
 
 
+section Subformula
+
+variable [DecidableEq α]
+
+def Formula.Subformulas: Formula α → Finset (Formula α)
+  | ⊤      => {⊤}
+  | ⊥      => {⊥}
+  | atom a => {(atom a)}
+  | p ⟶ q => insert (p ⟶ q) (p.Subformulas ∪ q.Subformulas)
+  | p ⋏ q  => {p ⋏ q} ∪ (p.Subformulas ∪ q.Subformulas)
+  | p ⋎ q  => insert (p ⋎ q) (p.Subformulas ∪ q.Subformulas)
+  | box p  => insert (□p) p.Subformulas
+
+namespace Formula.Subformulas
+
+@[simp]
+lemma mem_self (p : Formula α) : p ∈ p.Subformulas := by induction p using Formula.rec' <;> simp [Subformulas];
+
+variable {p q r : Formula α}
+
+lemma mem_and (h : (q ⋏ r) ∈ p.Subformulas) : q ∈ p.Subformulas ∧ r ∈ p.Subformulas := by
+  induction p using Formula.rec' <;> { simp_all [Subformulas]; try aesop; };
+
+lemma mem_or (h : (q ⋎ r) ∈ p.Subformulas) : q ∈ p.Subformulas ∧ r ∈ p.Subformulas := by
+  induction p using Formula.rec' <;> { simp_all [Subformulas]; try aesop; };
+
+lemma mem_imp (h : (q ⟶ r) ∈ p.Subformulas) : q ∈ p.Subformulas ∧ r ∈ p.Subformulas := by
+  induction p using Formula.rec' <;> { simp_all [Subformulas]; try aesop; };
+
+lemma mem_box (h : □q ∈ p.Subformulas) : q ∈ p.Subformulas := by
+  induction p using Formula.rec' <;> { simp_all [Subformulas]; try aesop; };
+
+end Formula.Subformulas
+
+-- TOOD: より抽象的にして`Modal/LogicalSymbol`などに移してもよいかも．
+class Formula.SubformulaClosed (C : (Formula α) → Prop) where
+  and : C (p ⋏ q) → C p ∧ C q
+  or  : C (p ⋎ q) → C p ∧ C q
+  imp : C (p ⟶ q) → C p ∧ C q
+  box : C (□p) → C p
+
+open Formula (Subformulas)
+
+instance {p : Formula α} : (Formula.SubformulaClosed (p.Subformulas).toSet) where
+  and := by intro q r hqr; exact Subformulas.mem_and hqr;
+  or  := by intro q r hqr; exact Subformulas.mem_or hqr;
+  imp := by intro q r hqr; exact Subformulas.mem_imp hqr;
+  box := by intro q hq; exact Subformulas.mem_box hq;
+
+end Subformula
+
+
+section Axiomset
+
 abbrev AxiomSet (α) := Set (Formula α)
 
 namespace AxiomSet
@@ -278,5 +332,7 @@ protected abbrev H : AxiomSet α := { Axioms.H p | p }
 notation "𝗛" => AxiomSet.H
 
 end AxiomSet
+
+end Axiomset
 
 end LO.Modal.Standard
