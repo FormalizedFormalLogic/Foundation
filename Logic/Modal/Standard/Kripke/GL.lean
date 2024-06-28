@@ -48,7 +48,7 @@ private lemma cwf_of_L  : F# ⊧* (𝗟 : AxiomSet α) → ConverseWellFounded F
 
 private lemma L_of_trans_and_cwf : (Transitive F.Rel ∧ ConverseWellFounded F.Rel) → F# ⊧* (𝗟 : AxiomSet α) := by
   rintro ⟨hTrans, hWF⟩;
-  simp [AxiomSet.L, Axioms.L];
+  simp [Axioms.L];
   intro p V w;
   simp [Kripke.Satisfies];
   contrapose; push_neg;
@@ -65,7 +65,7 @@ private lemma L_of_trans_and_cwf : (Transitive F.Rel ∧ ConverseWellFounded F.R
       exact rmn;
     . exact hm;
 
-lemma axiomL_defines : 𝗟.DefinesKripkeFrameClass (α := α) (TransitiveCWFFrameClass) := by
+lemma axiomL_defines : AxiomSet.DefinesKripkeFrameClass (α := α) 𝗟 (TransitiveCWFFrameClass) := by
   intro F;
   constructor;
   . intro h;
@@ -82,7 +82,7 @@ lemma TransitiveIrreflexiveFiniteFrameClass.nonempty : TransitiveIrreflexiveFini
   use PointFrame;
   simp [Transitive, Irreflexive];
 
-lemma axiomL_finite_defines : 𝗟.FinitelyDefinesKripkeFrameClass (α := α) TransitiveIrreflexiveFiniteFrameClass := by
+lemma axiomL_finite_defines : AxiomSet.FinitelyDefinesKripkeFrameClass (α := α) 𝗟 TransitiveIrreflexiveFiniteFrameClass := by
   intro F;
   constructor;
   . intro h;

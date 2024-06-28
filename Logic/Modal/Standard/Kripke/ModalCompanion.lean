@@ -135,13 +135,13 @@ theorem provable_efq_iff_provable_S4 : 𝐈𝐧𝐭 ⊢! p ↔ 𝐒𝟒 ⊢! p�
 instance : ModalCompanion (α := α) 𝐈𝐧𝐭 𝐒𝟒 := ⟨provable_efq_iff_provable_S4⟩
 
 
-lemma dp_of_mdp [ModalDisjunctive m𝓓] [ModalCompanion i𝓓 m𝓓] [S4 m𝓓] : i𝓓 ⊢! p ⋎ q → i𝓓 ⊢! p ∨ i𝓓 ⊢! q := by
+lemma dp_of_mdp [ModalDisjunctive m𝓓] [ModalCompanion i𝓓 m𝓓] [System.S4 m𝓓] : i𝓓 ⊢! p ⋎ q → i𝓓 ⊢! p ∨ i𝓓 ⊢! q := by
     intro hpq;
     have : m𝓓 ⊢! □pᵍ ⋎ □qᵍ := or₃'''! (imply_or_left'! axiomTc_GTranslate!) (imply_or_right'! axiomTc_GTranslate!) (by simpa using ModalCompanion.companion.mp hpq);
     cases ModalDisjunctive.modal_disjunctive this with
     | inl h => left; exact ModalCompanion.companion.mpr h;
     | inr h => right; exact ModalCompanion.companion.mpr h;
 
-theorem disjunctive_of_modalDisjunctive [ModalDisjunctive m𝓓] [ModalCompanion i𝓓 m𝓓] [S4 m𝓓] : Disjunctive i𝓓 := ⟨dp_of_mdp (i𝓓 := i𝓓) (m𝓓 := m𝓓)⟩
+theorem disjunctive_of_modalDisjunctive [ModalDisjunctive m𝓓] [ModalCompanion i𝓓 m𝓓] [System.S4 m𝓓] : Disjunctive i𝓓 := ⟨dp_of_mdp (i𝓓 := i𝓓) (m𝓓 := m𝓓)⟩
 
 end LO.Modal.Standard

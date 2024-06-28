@@ -232,7 +232,7 @@ instance : Semantics.Bot (Frame.Dep α) where
 
 
 protected lemma axiomK : F ⊧* 𝗞 := by
-  simp [Kripke.ValidOnFrame, Kripke.ValidOnModel, System.Axioms.K];
+  simp [Kripke.ValidOnFrame, Kripke.ValidOnModel, Axioms.K];
   intro _ p q e V x; subst e;
   intro h₁ h₂ y Rxy;
   exact h₁ Rxy $ h₂ Rxy;
@@ -328,12 +328,12 @@ lemma AllFrameClass.nonempty : AllFrameClass.Nonempty.{0} := by
   use terminalFrame;
   trivial;
 
-lemma axiomK_defines : 𝗞.DefinesKripkeFrameClass (α := α) AllFrameClass := by
+lemma axiomK_defines : DefinesKripkeFrameClass (α := α) 𝗞 AllFrameClass := by
   intro F;
   simp only [Set.mem_univ, iff_true];
   exact Kripke.ValidOnFrame.axiomK;
 
-lemma axiomK_union_definability {Ax : AxiomSet α} : (Ax.DefinesKripkeFrameClass 𝔽) ↔ (𝗞 ∪ Ax).DefinesKripkeFrameClass 𝔽 := by
+lemma axiomK_union_definability {Ax : AxiomSet α} : (DefinesKripkeFrameClass Ax 𝔽) ↔ DefinesKripkeFrameClass (𝗞 ∪ Ax) 𝔽 := by
   constructor;
   . intro defines F;
     simp [DefinesKripkeFrameClass] at defines;

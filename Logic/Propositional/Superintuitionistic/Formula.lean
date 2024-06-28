@@ -219,33 +219,7 @@ end Formula
 
 abbrev Theory (α : Type u) := Set (Formula α)
 
-
 abbrev AxiomSet (α : Type u) := Set (Formula α)
-
-namespace AxiomSet
-
-open System
-
-protected abbrev EFQ : AxiomSet α := { Axioms.EFQ p | p }
-notation "𝗘𝗙𝗤" => AxiomSet.EFQ
-
-protected abbrev LEM : AxiomSet α := { Axioms.LEM p | p }
-notation "𝗟𝗘𝗠" => AxiomSet.LEM
-
-protected abbrev WeakLEM : AxiomSet α := { Axioms.WeakLEM p | p }
-notation "𝘄𝗟𝗘𝗠" => AxiomSet.WeakLEM
-
-protected abbrev GD : AxiomSet α := { Axioms.GD p q | (p) (q) }
-notation "𝗚𝗗" => AxiomSet.GD
-
-protected abbrev Peirce : AxiomSet α := { Axioms.Peirce p q | (p) (q) }
-notation "𝗣𝗲" => AxiomSet.Peirce
-
-protected abbrev DNE : AxiomSet α := { Axioms.DNE p | p }
-notation "𝗗𝗡𝗘" => AxiomSet.DNE
-
-end AxiomSet
-
 
 abbrev Context (α : Type u) := Finset (Formula α)
 
