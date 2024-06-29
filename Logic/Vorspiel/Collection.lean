@@ -1,29 +1,59 @@
 
 import Logic.Vorspiel.Vorspiel
 
-class Collection (β : outParam Type*) (α : Type*) extends Membership β α, HasSubset α, EmptyCollection α, Singleton β α where
+class Precollection (β : outParam Type*) (α : Type*) extends Membership β α, HasSubset α, EmptyCollection α, Singleton β α where
   subset_iff {a b : α} : a ⊆ b ↔ ∀ x ∈ a, x ∈ b
   not_mem_empty (x : β) : x ∉ (∅ : α)
   mem_singleton {x z : β} : x ∈ ({z} : α) ↔ x = z
 
-attribute [simp] Collection.not_mem_empty
+attribute [simp] Precollection.not_mem_empty Precollection.mem_singleton
 
-instance Set.collection : Collection α (Set α) where
+namespace Precollection
+
+variable {β α : Type*} [Precollection β α]
+
+def set : α → Set β := fun a ↦ {x | x ∈ a}
+
+@[simp] lemma mem_set_iff {x : β} {a : α} : x ∈ (set a : Set β) ↔ x ∈ a := by simp [set]
+
+lemma subset_iff_set_subset_set {a b : α} : a ⊆ b ↔ set a ⊆ set b := by simp [subset_iff, set]
+
+@[simp, refl] lemma subset_refl (a : α) : a ⊆ a := subset_iff_set_subset_set.mpr (Set.Subset.refl _)
+
+@[trans] lemma subset_trans {a b c : α} (ha : a ⊆ b) (hb : b ⊆ c) : a ⊆ c :=
+  subset_iff_set_subset_set.mpr (Set.Subset.trans (subset_iff_set_subset_set.mp ha) (subset_iff_set_subset_set.mp hb))
+
+lemma subset_antisymm {a b : α} (ha : a ⊆ b) (hb : b ⊆ a) : set a = set b :=
+  Set.Subset.antisymm (subset_iff_set_subset_set.mp ha) (subset_iff_set_subset_set.mp hb)
+
+@[simp] lemma empty_subset (a : α) : ∅ ⊆ a := by simp [subset_iff]
+
+@[simp] lemma set_singleton {a : β} : set ({a} : α) = {a} := by
+  simp [set]
+
+@[simp] lemma set_empty : set (∅ : α) = ∅ := by ext; simp [set]
+
+@[simp] lemma singleton_subset_iff_mem {a : β} {s : α} : {a} ⊆ s ↔ a ∈ s := by
+  simp [subset_iff]
+
+end Precollection
+
+instance Set.collection : Precollection α (Set α) where
   subset_iff := iff_of_eq Set.subset_def
   not_mem_empty := by simp
   mem_singleton := by simp
 
-instance List.collection : Collection α (List α) where
+instance List.collection : Precollection α (List α) where
   subset_iff := List.subset_def
   not_mem_empty := by simp
   mem_singleton := by simp [List.singleton_eq]
 
-instance Multiset.collection : Collection α (Multiset α) where
+instance Multiset.collection : Precollection α (Multiset α) where
   subset_iff := Multiset.subset_iff
   not_mem_empty := by simp
   mem_singleton := by simp
 
-instance Finset.collection [DecidableEq α] : Collection α (Finset α) where
+instance Finset.collection [DecidableEq α] : Precollection α (Finset α) where
   subset_iff := Finset.subset_iff
   not_mem_empty := by simp
   mem_singleton := by simp
@@ -71,58 +101,71 @@ lemma singleton_def (a : α) : ({a} : Option α) = some a := rfl
 
 end Option
 
-instance Option.collection : Collection α (Option α) where
+instance Option.collection : Precollection α (Option α) where
   subset_iff := by simp [Option.subset_iff]
   not_mem_empty := by simp
   mem_singleton := by simp [singleton_def, eq_comm]
 
-class Cons (β : outParam Type*) (α : Type*) [Membership β α] where
+class Cons  (β : outParam Type*) (α : Type*) where
   cons : β → α → α
-  mem_cons_iff {x z : β} {a : α} : x ∈ cons z a ↔ x = z ∨ x ∈ a
-
-attribute [simp] Cons.mem_cons_iff
 
 export Cons (cons)
 
-instance (α : Type*) : Cons α (Set α) := ⟨insert, by simp⟩
+class Tie (α : Type*) where
+  tie : α → α → α
 
-instance (α : Type*) : Cons α (List α) := ⟨List.cons, by simp⟩
+export Tie (tie)
 
-instance (α : Type*) : Cons α (Multiset α) := ⟨Multiset.cons, by simp⟩
+class Collection (β : outParam Type*) (α : Type*) extends Precollection β α, Cons β α, Tie α where
+  mem_cons_iff {x z : β} {a : α} : x ∈ cons z a ↔ x = z ∨ x ∈ a
+  mem_tie_iff {x : β} {a b : α} : x ∈ tie a b ↔ x ∈ a ∨ x ∈ b
 
-instance (α : Type*) [DecidableEq α] : Cons α (Finset α) := ⟨insert, by simp⟩
+attribute [simp] Collection.mem_cons_iff
+
+instance (α : Type*) : Collection α (Set α) where
+  cons := insert
+  mem_cons_iff := by simp
+  tie := (· ∪ ·)
+  mem_tie_iff := by simp
+
+instance (α : Type*) : Collection α (List α) where
+  cons := List.cons
+  mem_cons_iff := by simp
+  tie := (· ++ ·)
+  mem_tie_iff := by simp
+
+instance (α : Type*) : Collection α (Multiset α) where
+  cons := Multiset.cons
+  mem_cons_iff := by simp
+  tie := (· + ·)
+  mem_tie_iff := by simp
+
+instance (α : Type*) [DecidableEq α] : Collection α (Finset α) where
+  cons := insert
+  mem_cons_iff := by simp
+  tie := (· ∪ ·)
+  mem_tie_iff := by simp
 
 namespace Collection
 
-variable {β α : Type*} [Collection β α] [Cons β α]
+variable {β α : Type*} [Collection β α]
 
-def set : α → Set β := fun a ↦ {x | x ∈ a}
-
-@[simp] lemma mem_set_iff {x : β} {a : α} : x ∈ (set a : Set β) ↔ x ∈ a := by simp [set]
-
-lemma subset_iff_set_subset_set {a b : α} : a ⊆ b ↔ set a ⊆ set b := by simp [subset_iff, set]
-
-@[simp, refl] lemma subset_refl (a : α) : a ⊆ a := subset_iff_set_subset_set.mpr (Set.Subset.refl _)
-
-@[trans] lemma subset_trans {a b c : α} (ha : a ⊆ b) (hb : b ⊆ c) : a ⊆ c :=
-  subset_iff_set_subset_set.mpr (Set.Subset.trans (subset_iff_set_subset_set.mp ha) (subset_iff_set_subset_set.mp hb))
-
-lemma subset_antisymm {a b : α} (ha : a ⊆ b) (hb : b ⊆ a) : set a = set b :=
-  Set.Subset.antisymm (subset_iff_set_subset_set.mp ha) (subset_iff_set_subset_set.mp hb)
-
-@[simp] lemma empty_subset (a : α) : ∅ ⊆ a := by simp [subset_iff]
+open Precollection
 
 @[simp] lemma mem_cons (a : α) (x : β) : x ∈ cons x a := by simp
 
 @[simp] lemma subset_cons (a : α) (x : β) : a ⊆ cons x a := by simp [subset_iff]; tauto
 
-@[simp] lemma set_empty : set (∅ : α) = ∅ := by ext; simp [set]
+@[simp] lemma set_cons (z : β) (a : α) : Precollection.set (cons z a) = insert z (Precollection.set a) := by
+  ext; simp [Precollection.set]
 
-@[simp] lemma set_cons (z : β) (a : α) : set (cons z a) = insert z (set a) := by ext; simp [set]
+@[simp] lemma cons_empty_subset_singleton {a : β} : cons a (∅ : α) ⊆ {a} :=
+  subset_iff.mpr (by simp)
 
-def Finite (a : α) : Prop := (set a).Finite
+def Finite (a : α) : Prop := (Precollection.set a).Finite
 
-@[simp] lemma empty_finite : Finite (∅ : α) := by simp [Finite]
+@[simp] lemma empty_finite : Finite (∅ : α) := by
+  simp [Finite]
 
 lemma Finite.of_subset {a b : α} (ha : Finite a) (h : b ⊆ a) : Finite b :=
   Set.Finite.subset ha (subset_iff_set_subset_set.mp h)
@@ -145,9 +188,9 @@ noncomputable def _root_.Finset.toCollection : Finset β → α := fun s ↦ s.t
 
 @[simp] lemma mem_finset_toCollection {x : β} {s : Finset β} : x ∈ (s.toCollection : α) ↔ x ∈ s := by simp [Finset.toCollection]
 
-@[simp] lemma list_toCollection_finite (l : List β) : Finite (l.toCollection : α) := by simp [Finite, set]
+@[simp] lemma list_toCollection_finite (l : List β) : Finite (l.toCollection : α) := by simp [Finite, Precollection.set]
 
-@[simp] lemma finset_toCollection_finite (s : Finset β) : Finite (s.toCollection : α) := by simp [Finite, set]
+@[simp] lemma finset_toCollection_finite (s : Finset β) : Finite (s.toCollection : α) := by simp [Finite, Precollection.set]
 
 end Collection
 
@@ -157,7 +200,7 @@ variable {α : Type*}
 
 lemma cons_eq (a : α) (s : Set α) : cons a s = insert a s := rfl
 
-@[simp] lemma collection_set (s : Set α) : Collection.set s = s := rfl
+@[simp] lemma collection_set (s : Set α) : Precollection.set s = s := rfl
 
 @[simp] lemma collection_finite_iff (s : Set α) : Collection.Finite s ↔ s.Finite := by simp [Collection.Finite]
 

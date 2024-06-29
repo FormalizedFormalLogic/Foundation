@@ -356,15 +356,15 @@ lemma incomplete_iff_exists_undecidable [LogicalConnective F] {𝓢 : S} :
 
 variable (S T)
 
-class Axiomatized [Collection F S] where
-  prfAxm {𝓢 : S} : 𝓢 ⊢* Collection.set 𝓢
+class Axiomatized [Precollection F S] where
+  prfAxm {𝓢 : S} : 𝓢 ⊢* Precollection.set 𝓢
   weakening {𝓢 𝓣 : S} : 𝓢 ⊆ 𝓣 → 𝓢 ⊢ f → 𝓣 ⊢ f
 
 alias byAxm := Axiomatized.prfAxm
 alias wk := Axiomatized.weakening
 
 class StrongCut [Collection F T] where
-  cut {𝓢 : S} {𝓣 : T} {p} : 𝓢 ⊢* Collection.set 𝓣 → 𝓣 ⊢ p → 𝓢 ⊢ p
+  cut {𝓢 : S} {𝓣 : T} {p} : 𝓢 ⊢* Precollection.set 𝓣 → 𝓣 ⊢ p → 𝓢 ⊢ p
 
 variable {S T}
 
@@ -374,9 +374,9 @@ namespace Axiomatized
 
 variable [Collection F S] [Axiomatized S] {𝓢 𝓣 : S}
 
-@[simp] lemma provable_axm (𝓢 : S) : 𝓢 ⊢!* Collection.set 𝓢 := fun hf ↦ ⟨prfAxm hf⟩
+@[simp] lemma provable_axm (𝓢 : S) : 𝓢 ⊢!* Precollection.set 𝓢 := fun hf ↦ ⟨prfAxm hf⟩
 
-lemma axm_subset (𝓢 : S) : Collection.set 𝓢 ⊆ theory 𝓢 := fun _ hp ↦ provable_axm 𝓢 hp
+lemma axm_subset (𝓢 : S) : Precollection.set 𝓢 ⊆ theory 𝓢 := fun _ hp ↦ provable_axm 𝓢 hp
 
 lemma le_of_subset (h : 𝓢 ⊆ 𝓣) : 𝓢 ≤ₛ 𝓣 := by rintro f ⟨b⟩; exact ⟨weakening h b⟩
 
@@ -407,10 +407,10 @@ namespace StrongCut
 
 variable [StrongCut S T]
 
-lemma cut! {𝓢 : S} {𝓣 : T} {p : F} (H : 𝓢 ⊢!* Collection.set 𝓣) (hp : 𝓣 ⊢! p) : 𝓢 ⊢! p := by
+lemma cut! {𝓢 : S} {𝓣 : T} {p : F} (H : 𝓢 ⊢!* Precollection.set 𝓣) (hp : 𝓣 ⊢! p) : 𝓢 ⊢! p := by
   rcases hp with ⟨b⟩; exact ⟨StrongCut.cut H.get b⟩
 
-def translation {𝓢 : S} {𝓣 : T} (B : 𝓢 ⊢* Collection.set 𝓣) : 𝓣 ↝ 𝓢 where
+def translation {𝓢 : S} {𝓣 : T} (B : 𝓢 ⊢* Precollection.set 𝓣) : 𝓣 ↝ 𝓢 where
   toFun := id
   prf := StrongCut.cut B
 
@@ -486,7 +486,7 @@ end
 
 variable (S)
 
-class Deduction [Membership F S] [Cons F S] where
+class Deduction [Cons F S] where
   ofInsert {p q : F} {𝓢 : S} : cons p 𝓢 ⊢ q → 𝓢 ⊢ p ⟶ q
   inv {p q : F} {𝓢 : S} : 𝓢 ⊢ p ⟶ q → cons p 𝓢 ⊢ q
 
@@ -494,7 +494,7 @@ variable {S}
 
 section
 
-variable [Membership F S] [Cons F S] [Deduction S]
+variable [Cons F S] [Deduction S]
 
 alias deduction := Deduction.ofInsert
 
