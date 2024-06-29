@@ -5,6 +5,7 @@ import Logic.Vorspiel.Meta
 import Logic.Logic.LogicSymbol
 import Logic.Logic.Semantics
 import Logic.Logic.System
+import Logic.Logic.Sequent
 
 -- AutoProver
 

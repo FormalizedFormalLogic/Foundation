@@ -483,7 +483,7 @@ lemma deducible_of_validOnCanonicelModel : (CanonicalModel 𝓓) ⊧ p ↔ 𝓓 
   . contrapose;
     intro h;
     have : (𝓓)-Consistent (∅, {p}) := by
-      simp only [Tableau.ParametricConsistent, Collection.not_mem_empty, imp_false, Set.mem_singleton_iff];
+      simp only [Tableau.ParametricConsistent, imp_false, Set.mem_singleton_iff];
       rintro Γ Δ hΓ hΔ;
       by_contra hC;
       replace hΓ : Γ = [] := List.nil_iff.mpr hΓ;
