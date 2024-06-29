@@ -1,4 +1,4 @@
-import Logic.Logic.System
+import Logic.Logic.HilbertStyle.Basic
 
 /-!
 # TwosidedCalc calculus and variants
@@ -36,7 +36,7 @@ class Id (𝓒 : C) where
   id (A) : A .⟹[𝓒]. A
 
 class ICut (𝓒 : C) where
-  icut {Γ A Δ} : Γ ⟹[𝓒]. A → A ∷ Δ ⟹[𝓒] Λ → Γ ⟹[𝓒] Λ
+  icut {Γ A Δ} : Γ ⟹[𝓒]. A → A ∷ Γ ⟹[𝓒] Δ → Γ ⟹[𝓒] Δ
 
 class Weakening (𝓒 : C) where
   wk {Γ₁ Γ₂ Δ₁ Δ₂} : Γ₁ ⊆ Γ₂ → Δ₁ ⊆ Δ₂ → Γ₁ ⟹[𝓒] Δ₁ → Γ₂ ⟹[𝓒] Δ₂
@@ -69,7 +69,7 @@ class LJ (𝓒 : C) extends Id 𝓒, Weakening 𝓒 where
   orRight₁ {Γ A B}     : Γ ⟹[𝓒]. A → Γ ⟹[𝓒]. A ⋎ B
   orRight₂ {Γ A B}     : Γ ⟹[𝓒]. B → Γ ⟹[𝓒]. A ⋎ B
   implyLeft {Γ A B C}  : Γ ⟹[𝓒]. A → B ∷ Γ ⟹[𝓒]. C → (A ⟶ B) ∷ Γ ⟹[𝓒]. C
-  implyRight {Γ A B}   : A ∷ Γ ⟹[𝓒]. B → Γ ⟹[𝓒]. (A ⟶ B)
+  implyRight {Γ A B}   : A ∷ Γ ⟹[𝓒]. B → Γ ⟹[𝓒]. A ⟶ B
 
 section LJ
 
@@ -79,7 +79,43 @@ def LJ.verum' (h : ⊤ ∈ Δ) : Γ ⟹[𝓒] Δ := wkR (by simp[h]) (LJ.verum �
 
 -- def ICut.cut' [ICut 𝓒] {Γ Δ : L} (d₁ : Γ ⟹[𝓒]. A) (d₂ : A ∷ Δ ⟹[𝓒]. B) : Γ ∷+ Δ ⟹[𝓒]. B := by {  }
 
+def explosion {Γ Δ} (h : ⊥ ∈ Γ) : Γ ⟹[𝓒] Δ := wk (by simp [h]) (by simp) LJ.falsum
+
+def iefq {Γ A} : Γ ⟹[𝓒]. ⊥ ⟶ A := LJ.implyRight <| explosion (by simp)
+
+def imdp [ICut 𝓒] {Γ A B} (dAB : Γ ⟹[𝓒]. A ⟶ B) (dA : Γ ⟹[𝓒]. A) : Γ ⟹[𝓒]. B :=
+  let d : (A ⟶ B) ∷ A ∷ Γ ⟹[𝓒]. B := LJ.implyLeft (wkL (by simp) dA) (closed B (by simp) (by simp))
+  let d : A ∷ Γ ⟹[𝓒]. B := ICut.icut (wkL (by simp) dAB) d
+  ICut.icut dA d
+
 end LJ
+
+section Axiomatized
+
+variable (C)
+
+class Axiomatized [Precollection F C] where
+  prfAxm {𝓒 : C} {A} : A ∈ 𝓒 → ∅ ⟹[𝓒]. A
+  weakening {𝓒 𝓓 : C} (h : 𝓒 ⊆ 𝓓) {Γ Δ} : Γ ⟹[𝓒] Δ → Γ ⟹[𝓓] Δ
+
+alias byAxm := Axiomatized.prfAxm
+alias wkAxm := Axiomatized.weakening
+
+variable [Precollection F C] [Axiomatized C]
+
+instance : System F C where
+  Prf (𝓒 p) := ∅ ⟹[𝓒]. p
+
+instance : System.Axiomatized C where
+  prfAxm {𝓒 p h} := TwosidedCalc.Axiomatized.prfAxm (by simpa using h)
+  weakening {p 𝓒 𝓓 h b} := TwosidedCalc.Axiomatized.weakening h b
+
+variable (𝓒 : C) [LogicalConnective F] [LJ 𝓒]
+
+instance [ICut 𝓒] : System.ModusPonens 𝓒 where
+  mdp := imdp
+
+end Axiomatized
 
 end TwosidedCalc
 

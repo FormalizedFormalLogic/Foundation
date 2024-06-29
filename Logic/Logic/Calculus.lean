@@ -221,7 +221,7 @@ def DisjconseqEquivDerivation {𝓣 : S} :
 
 def Disjconseq.weakening {𝓣 U : S} {Γ : List F} (b : 𝓣 ⊢' Γ) (h : 𝓣 ⊆ U) : U ⊢' Γ where
   antecedent := b.antecedent
-  subset := fun p hp => Collection.subset_iff.mp h _ (b.subset p hp)
+  subset := fun p hp => Precollection.subset_iff.mp h _ (b.subset p hp)
   derivation := b.derivation
 
 def toDisjconseq {𝓣 : S} {Γ Δ} (d : Γ ⊢² Δ) (ss : ∀ p ∈ Γ, p ∈ 𝓣) : 𝓣 ⊢' Δ where
@@ -234,7 +234,7 @@ namespace Disjconseq
 variable {𝓣 : S}
 
 def wk' {S S'} [Collection F S] [Collection F S'] {𝓣 : S} {𝓣' : S'}
-    (H : Collection.set 𝓣 ⊆ Collection.set 𝓣') {Γ} : 𝓣 ⊢' Γ → 𝓣' ⊢' Γ := fun d ↦
+    (H : Precollection.set 𝓣 ⊆ Precollection.set 𝓣') {Γ} : 𝓣 ⊢' Γ → 𝓣' ⊢' Γ := fun d ↦
   ⟨d.antecedent, fun p hp ↦ H (d.subset p hp), d.derivation⟩
 
 def tauto {Δ} (d : [] ⊢² Δ) : 𝓣 ⊢' Δ := toDisjconseq d (by simp)
@@ -352,7 +352,7 @@ instance deductiveExplosion : System.DeductiveExplosion S := ⟨fun {𝓢} b p �
 instance compact : System.Compact S where
   φ := fun b ↦ b.antecedent.toCollection
   φPrf := fun b ↦ ⟨b.antecedent, by intro p; simp, b.derivation⟩
-  φ_subset := by intro 𝓣 p b; simpa [Collection.subset_iff] using b.subset
+  φ_subset := by intro 𝓣 p b; simpa [Precollection.subset_iff] using b.subset
   φ_finite := by intro 𝓣 p b; simp
 
 variable {𝓣 : S}
@@ -409,12 +409,12 @@ section
 
 variable {S S' : Type*} [Collection F S] [Collection F S']
 
-def wk' {𝓣 : S} {𝓣' : S'} (H : Collection.set 𝓣 ⊆ Collection.set 𝓣') {p} : 𝓣 ⊢ p → 𝓣' ⊢ p := Disjconseq.wk' H
+def wk' {𝓣 : S} {𝓣' : S'} (H : Precollection.set 𝓣 ⊆ Precollection.set 𝓣') {p} : 𝓣 ⊢ p → 𝓣' ⊢ p := Disjconseq.wk' H
 
-def wk'! {𝓣 : S} {𝓣' : S'} (H : Collection.set 𝓣 ⊆ Collection.set 𝓣') {p} : 𝓣 ⊢! p → 𝓣' ⊢! p := by
+def wk'! {𝓣 : S} {𝓣' : S'} (H : Precollection.set 𝓣 ⊆ Precollection.set 𝓣') {p} : 𝓣 ⊢! p → 𝓣' ⊢! p := by
   rintro ⟨b⟩; exact ⟨wk' H b⟩
 
-def le_of_subset {𝓣 : S} {𝓣' : S'} (H : Collection.set 𝓣 ⊆ Collection.set 𝓣') : 𝓣 ≤ₛ 𝓣' := fun _ ↦ wk'! H
+def le_of_subset {𝓣 : S} {𝓣' : S'} (H : Precollection.set 𝓣 ⊆ Precollection.set 𝓣') : 𝓣 ≤ₛ 𝓣' := fun _ ↦ wk'! H
 
 end
 
