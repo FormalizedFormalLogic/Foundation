@@ -47,9 +47,9 @@ infix:45 " ⊢! " => Provable
 
 infix:45 " ⊬! " => Unprovable
 
-def PrfSet (s : Set F) : Type _ := {f : F} → f ∈ s → 𝓢 ⊢ f
+def PrfSet {α} [Membership F α] (s : α) : Type _ := {f : F} → f ∈ s → 𝓢 ⊢ f
 
-def ProvableSet (s : Set F) : Prop := ∀ {f}, f ∈ s → 𝓢 ⊢! f
+def ProvableSet {α} [Membership F α] (s : α) : Prop := ∀ {f}, f ∈ s → 𝓢 ⊢! f
 
 infix:45 " ⊢* " => PrfSet
 

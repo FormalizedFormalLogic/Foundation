@@ -57,9 +57,9 @@ abbrev Provable (𝓢 : S) (Γ : List F) (p : F) : Prop := (Γ : FiniteContext F
 
 abbrev Unprovable (𝓢 : S) (Γ : List F) (p : F) : Prop := (Γ : FiniteContext F 𝓢) ⊬! p
 
-abbrev PrfSet (𝓢 : S) (Γ : List F) (s : Set F) : Type _ := (Γ : FiniteContext F 𝓢) ⊢* s
+abbrev PrfSet (𝓢 : S) (Γ : List F) {α} [Membership F α] (s : α) : Type _ := (Γ : FiniteContext F 𝓢) ⊢* s
 
-abbrev ProvableSet (𝓢 : S) (Γ : List F) (s : Set F) : Prop := (Γ : FiniteContext F 𝓢) ⊢!* s
+abbrev ProvableSet (𝓢 : S) (Γ : List F) {α} [Membership F α] (s : α) : Prop := (Γ : FiniteContext F 𝓢) ⊢!* s
 
 notation Γ:45 " ⊢[" 𝓢 "] " p:46 => Prf 𝓢 Γ p
 
@@ -243,9 +243,9 @@ abbrev Provable (Γ : Set F) (p : F) : Prop := (Γ : Context F 𝓢) ⊢! p
 
 abbrev Unprovable (Γ : Set F) (p : F) : Prop := (Γ : Context F 𝓢) ⊬! p
 
-abbrev PrfSet (Γ : Set F) (s : Set F) : Type _ := (Γ : Context F 𝓢) ⊢* s
+abbrev PrfSet (Γ : Set F) {α} [Membership F α] (s : α) : Type _ := (Γ : Context F 𝓢) ⊢* s
 
-abbrev ProvableSet (Γ : Set F) (s : Set F) : Prop := (Γ : Context F 𝓢) ⊢!* s
+abbrev ProvableSet (Γ : Set F) {α} [Membership F α] (s : α) : Prop := (Γ : Context F 𝓢) ⊢!* s
 
 notation Γ:45 " *⊢[" 𝓢 "] " p:46 => Prf 𝓢 Γ p
 

@@ -120,7 +120,7 @@ class Collection (β : outParam Type*) (α : Type*) extends Precollection β α,
   mem_cons_iff {x z : β} {a : α} : x ∈ cons z a ↔ x = z ∨ x ∈ a
   mem_tie_iff {x : β} {a b : α} : x ∈ tie a b ↔ x ∈ a ∨ x ∈ b
 
-attribute [simp] Collection.mem_cons_iff
+attribute [simp] Collection.mem_cons_iff Collection.mem_tie_iff
 
 instance (α : Type*) : Collection α (Set α) where
   cons := insert
@@ -161,6 +161,16 @@ open Precollection
 
 @[simp] lemma cons_empty_subset_singleton {a : β} : cons a (∅ : α) ⊆ {a} :=
   subset_iff.mpr (by simp)
+
+@[simp] lemma subset_tie_left (a b : α) : a ⊆ tie a b := subset_iff.mpr fun x hx ↦ by simp [hx]
+
+@[simp] lemma subset_tie_right (a b : α) : b ⊆ tie a b := subset_iff.mpr fun x hx ↦ by simp [hx]
+
+lemma cons_subset_cons_iff {x : β} {a b : α} (h : a ⊆ b) : cons x a ⊆ cons x b :=
+  subset_iff.mpr (by simp only [mem_cons_iff, forall_eq_or_imp, true_or, true_and]; intro y hy; simp [subset_iff.mp h y hy])
+
+@[simp] lemma set_tie (a b : α) : Precollection.set (tie a b) = Precollection.set a ∪ Precollection.set b := by
+  ext z; simp
 
 def Finite (a : α) : Prop := (Precollection.set a).Finite
 
