@@ -8,26 +8,32 @@ variable {α : Type*} [DecidableEq α]
 /-- instance of inference rule -/
 structure InferenceRule (α : Type*) where
   antecedents : List (Formula α)
+  /--
+  Empty antecedent rule can be simply regarded as axiom rule.
+  However, union of all these rules including to `DeductionParameter.rules` would be too complex for implementation and induction,
+  so more than one antecedent is required.
+  -/
+  antecedents_nonempty : antecedents ≠ [] := by simp
   consequence : Formula α
 
 abbrev InferenceRules (α : Type*) := Set (InferenceRule α)
 
-abbrev Necessitation {α} : InferenceRules α := { ⟨[p], □p⟩ | (p) }
+abbrev Necessitation {α} : InferenceRules α := { { antecedents := [p], consequence := □p} | (p) }
 notation "⟮Nec⟯" => Necessitation
 
-abbrev LoebRule {α} : InferenceRules α := { ⟨[□p ⟶ p], p⟩ | (p) }
+abbrev LoebRule {α} : InferenceRules α := { { antecedents := [□p ⟶ p], consequence := p} | (p) }
 notation "⟮Loeb⟯" => LoebRule
 
-abbrev HenkinRule {α} : InferenceRules α := { ⟨[□p ⟷ p], p⟩ | (p) }
+abbrev HenkinRule {α} : InferenceRules α := { { antecedents := [□p ⟷ p], consequence := p }| (p) }
 notation "⟮Henkin⟯" => HenkinRule
 
 structure DeductionParameter (α : Type*) where
-  axiomSet : AxiomSet α
+  axioms : AxiomSet α
   rules : InferenceRules α
 
 namespace DeductionParameter
 
-notation "Ax(" 𝓓 ")" => axiomSet 𝓓
+notation "Ax(" 𝓓 ")" => DeductionParameter.axioms 𝓓
 notation "Rl(" 𝓓 ")" => DeductionParameter.rules 𝓓
 
 end DeductionParameter
@@ -36,16 +42,16 @@ inductive Deduction (𝓓 : DeductionParameter α) : (Formula α) → Type _
   | maxm {p}     : p ∈ Ax(𝓓) → Deduction 𝓓 p
   | rule {rl}    : rl ∈ Rl(𝓓) → (∀ {p}, p ∈ rl.antecedents → Deduction 𝓓 p) → Deduction 𝓓 rl.consequence
   | mdp {p q}    : Deduction 𝓓 (p ⟶ q) → Deduction 𝓓 p → Deduction 𝓓 q
-  | verum        : Deduction 𝓓 ⊤
-  | imply₁ p q   : Deduction 𝓓 (p ⟶ q ⟶ p)
-  | imply₂ p q r : Deduction 𝓓 ((p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r)
-  | and₁ p q     : Deduction 𝓓 (p ⋏ q ⟶ p)
-  | and₂ p q     : Deduction 𝓓 (p ⋏ q ⟶ q)
-  | and₃ p q     : Deduction 𝓓 (p ⟶ q ⟶ p ⋏ q)
-  | or₁ p q      : Deduction 𝓓 (p ⟶ p ⋎ q)
-  | or₂ p q      : Deduction 𝓓 (q ⟶ p ⋎ q)
-  | or₃ p q r    : Deduction 𝓓 ((p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r))
-  | dne p        : Deduction 𝓓 (~~p ⟶ p)
+  | verum        : Deduction 𝓓 $ Axioms.Verum
+  | imply₁ p q   : Deduction 𝓓 $ Axioms.Imply₁ p q
+  | imply₂ p q r : Deduction 𝓓 $ Axioms.Imply₂ p q r
+  | and₁ p q     : Deduction 𝓓 $ Axioms.AndElim₁ p q
+  | and₂ p q     : Deduction 𝓓 $ Axioms.AndElim₂ p q
+  | and₃ p q     : Deduction 𝓓 $ Axioms.AndInst p q
+  | or₁ p q      : Deduction 𝓓 $ Axioms.OrInst₁ p q
+  | or₂ p q      : Deduction 𝓓 $ Axioms.OrInst₂ p q
+  | or₃ p q r    : Deduction 𝓓 $ Axioms.OrElim p q r
+  | dne p        : Deduction 𝓓 $ Axioms.DNE p
 
 namespace Deduction
 
@@ -70,34 +76,34 @@ instance : System.Minimal 𝓓 where
 instance : System.Classical 𝓓 where
   dne := dne
 
-lemma maxm! {p} (h : p ∈ 𝓓.axiomSet) : 𝓓 ⊢! p := ⟨maxm h⟩
+lemma maxm! {p} (h : p ∈ 𝓓.axioms) : 𝓓 ⊢! p := ⟨maxm h⟩
 
 end Deduction
 
 
 namespace DeductionParameter
 
-open System
+open System Deduction
 
 class HasNecessitation (𝓓 : DeductionParameter α) where
   has_necessitation : ⟮Nec⟯ ⊆ Rl(𝓓) := by aesop
 
-instance [h : HasNecessitation 𝓓] : System.Necessitation 𝓓 where
-  nec := @λ p d => Deduction.rule (show ⟨[p], □p⟩ ∈ Rl(𝓓) by apply h.has_necessitation; aesop) (by aesop);
+instance [HasNecessitation 𝓓] : System.Necessitation 𝓓 where
+  nec := @λ p d => rule (show { antecedents := [p], consequence := □p } ∈ Rl(𝓓) by apply HasNecessitation.has_necessitation; simp_all) (by aesop);
 
 
 class HasLoebRule (𝓓 : DeductionParameter α) where
   has_loeb : ⟮Loeb⟯ ⊆ Rl(𝓓) := by aesop
 
 instance [HasLoebRule 𝓓] : System.LoebRule 𝓓 where
-  loeb := @λ p d => Deduction.rule (show ⟨[□p ⟶ p], p⟩ ∈ Rl(𝓓) by apply HasLoebRule.has_loeb; aesop) (by aesop);
+  loeb := @λ p d => rule (show { antecedents := [□p ⟶ p], consequence := p } ∈ Rl(𝓓) by apply HasLoebRule.has_loeb; simp_all) (by aesop);
 
 
 class HasHenkinRule (𝓓 : DeductionParameter α) where
   has_henkin : ⟮Henkin⟯ ⊆ Rl(𝓓) := by aesop
 
 instance [HasHenkinRule 𝓓] : System.HenkinRule 𝓓 where
-  henkin := @λ p d => Deduction.rule (show ⟨[□p ⟷ p], p⟩ ∈ Rl(𝓓) by apply HasHenkinRule.has_henkin; aesop) (by aesop);
+  henkin := @λ p d => rule (show { antecedents := [□p ⟷ p], consequence := p } ∈ Rl(𝓓) by apply HasHenkinRule.has_henkin; simp_all) (by aesop);
 
 
 class HasNecOnly (𝓓 : DeductionParameter α) where
@@ -110,7 +116,7 @@ class HasAxiomK (𝓓 : DeductionParameter α) where
   has_axiomK : 𝗞 ⊆ Ax(𝓓) := by aesop
 
 instance [HasAxiomK 𝓓] : System.HasAxiomK 𝓓 where
-  K _ _ := Deduction.maxm (by apply HasAxiomK.has_axiomK; aesop)
+  K _ _ := maxm (by apply HasAxiomK.has_axiomK; simp_all)
 
 class IsNormal (𝓓 : DeductionParameter α) extends 𝓓.HasNecOnly, 𝓓.HasAxiomK where
 
@@ -129,18 +135,18 @@ noncomputable def inducition!
              (hant : ∀ {p}, p ∈ r.antecedents → 𝓓 ⊢! p) →
              (ih : ∀ {p}, (hp : p ∈ r.antecedents) →
              motive p (hant hp)) → motive r.consequence ⟨rule hr (λ hp => (hant hp).some)⟩)
-  (hMaxm   : ∀ {p}, (h : p ∈ Ax(𝓓)) → motive p ⟨maxm h⟩)
-  (hMdp    : ∀ {p q}, {hpq : 𝓓 ⊢! p ⟶ q} → {hp : 𝓓 ⊢! p} → motive (p ⟶ q) hpq → motive p hp → motive q ⟨mdp hpq.some hp.some⟩)
-  (hVerum  : motive ⊤ ⟨verum⟩)
-  (hImply₁ : ∀ {p q}, motive (p ⟶ q ⟶ p) $ ⟨imply₁ p q⟩)
-  (hImply₂ : ∀ {p q r}, motive ((p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r) $ ⟨imply₂ p q r⟩)
-  (hConj₁  : ∀ {p q}, motive (p ⋏ q ⟶ p) $ ⟨and₁ p q⟩)
-  (hConj₂  : ∀ {p q}, motive (p ⋏ q ⟶ q) $ ⟨and₂ p q⟩)
-  (hConj₃  : ∀ {p q}, motive (p ⟶ q ⟶ p ⋏ q) $ ⟨and₃ p q⟩)
-  (hDisj₁  : ∀ {p q}, motive (p ⟶ p ⋎ q) $ ⟨or₁ p q⟩)
-  (hDisj₂  : ∀ {p q}, motive (q ⟶ p ⋎ q) $ ⟨or₂ p q⟩)
-  (hDisj₃  : ∀ {p q r}, motive ((p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r)) $ ⟨or₃ p q r⟩)
-  (hDne    : ∀ {p}, motive (~~p ⟶ p) $ ⟨dne p⟩)
+  (hMaxm     : ∀ {p}, (h : p ∈ Ax(𝓓)) → motive p ⟨maxm h⟩)
+  (hMdp      : ∀ {p q}, {hpq : 𝓓 ⊢! p ⟶ q} → {hp : 𝓓 ⊢! p} → motive (p ⟶ q) hpq → motive p hp → motive q ⟨mdp hpq.some hp.some⟩)
+  (hVerum    : motive ⊤ ⟨verum⟩)
+  (hImply₁   : ∀ {p q}, motive (p ⟶ q ⟶ p) $ ⟨imply₁ p q⟩)
+  (hImply₂   : ∀ {p q r}, motive ((p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r) $ ⟨imply₂ p q r⟩)
+  (hAndElim₁ : ∀ {p q}, motive (p ⋏ q ⟶ p) $ ⟨and₁ p q⟩)
+  (hAndElim₂ : ∀ {p q}, motive (p ⋏ q ⟶ q) $ ⟨and₂ p q⟩)
+  (hAndInst  : ∀ {p q}, motive (p ⟶ q ⟶ p ⋏ q) $ ⟨and₃ p q⟩)
+  (hOrInst₁  : ∀ {p q}, motive (p ⟶ p ⋎ q) $ ⟨or₁ p q⟩)
+  (hOrInst₂  : ∀ {p q}, motive (q ⟶ p ⋎ q) $ ⟨or₂ p q⟩)
+  (hOrElim   : ∀ {p q r}, motive ((p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r)) $ ⟨or₃ p q r⟩)
+  (hDne      : ∀ {p}, motive (~~p ⟶ p) $ ⟨dne p⟩)
   : ∀ {p}, (d : 𝓓 ⊢! p) → motive p d := by
   intro p d;
   induction d.some with
@@ -155,16 +161,16 @@ noncomputable def inducition_with_necOnly! [𝓓.HasNecOnly]
   (hMaxm   : ∀ {p}, (h : p ∈ Ax(𝓓)) → motive p ⟨maxm h⟩)
   (hMdp    : ∀ {p q}, {hpq : 𝓓 ⊢! p ⟶ q} → {hp : 𝓓 ⊢! p} → motive (p ⟶ q) hpq → motive p hp → motive q (hpq ⨀ hp))
   (hNec    : ∀ {p}, {hp : 𝓓 ⊢! p} → (ihp : motive p hp) → motive (□p) (System.nec! hp))
-  (hVerum  : motive ⊤ ⟨verum⟩)
-  (hImply₁ : ∀ {p q}, motive (p ⟶ q ⟶ p) $ ⟨imply₁ p q⟩)
-  (hImply₂ : ∀ {p q r}, motive ((p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r) $ ⟨imply₂ p q r⟩)
-  (hConj₁  : ∀ {p q}, motive (p ⋏ q ⟶ p) $ ⟨and₁ p q⟩)
-  (hConj₂  : ∀ {p q}, motive (p ⋏ q ⟶ q) $ ⟨and₂ p q⟩)
-  (hConj₃  : ∀ {p q}, motive (p ⟶ q ⟶ p ⋏ q) $ ⟨and₃ p q⟩)
-  (hDisj₁  : ∀ {p q}, motive (p ⟶ p ⋎ q) $ ⟨or₁ p q⟩)
-  (hDisj₂  : ∀ {p q}, motive (q ⟶ p ⋎ q) $ ⟨or₂ p q⟩)
-  (hDisj₃  : ∀ {p q r}, motive ((p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r)) $ ⟨or₃ p q r⟩)
-  (hDne    : ∀ {p}, motive (~~p ⟶ p) $ ⟨dne p⟩)
+  (hVerum    : motive ⊤ ⟨verum⟩)
+  (hImply₁   : ∀ {p q}, motive (p ⟶ q ⟶ p) $ ⟨imply₁ p q⟩)
+  (hImply₂   : ∀ {p q r}, motive ((p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r) $ ⟨imply₂ p q r⟩)
+  (hAndElim₁ : ∀ {p q}, motive (p ⋏ q ⟶ p) $ ⟨and₁ p q⟩)
+  (hAndElim₂ : ∀ {p q}, motive (p ⋏ q ⟶ q) $ ⟨and₂ p q⟩)
+  (hAndInst  : ∀ {p q}, motive (p ⟶ q ⟶ p ⋏ q) $ ⟨and₃ p q⟩)
+  (hOrInst₁  : ∀ {p q}, motive (p ⟶ p ⋎ q) $ ⟨or₁ p q⟩)
+  (hOrInst₂  : ∀ {p q}, motive (q ⟶ p ⋎ q) $ ⟨or₂ p q⟩)
+  (hOrElim   : ∀ {p q r}, motive ((p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r)) $ ⟨or₃ p q r⟩)
+  (hDne      : ∀ {p}, motive (~~p ⟶ p) $ ⟨dne p⟩)
   : ∀ {p}, (d : 𝓓 ⊢! p) → motive p d := by
   intro p d;
   induction d using Deduction.inducition! with
@@ -177,12 +183,12 @@ noncomputable def inducition_with_necOnly! [𝓓.HasNecOnly]
   | hVerum => exact hVerum
   | hImply₁ => exact hImply₁
   | hImply₂ => exact hImply₂
-  | hConj₁ => exact hConj₁
-  | hConj₂ => exact hConj₂
-  | hConj₃ => exact hConj₃
-  | hDisj₁ => exact hDisj₁
-  | hDisj₂ => exact hDisj₂
-  | hDisj₃ => exact hDisj₃
+  | hAndElim₁ => exact hAndElim₁
+  | hAndElim₂ => exact hAndElim₂
+  | hAndInst => exact hAndInst
+  | hOrInst₁ => exact hOrInst₁
+  | hOrInst₂ => exact hOrInst₂
+  | hOrElim => exact hOrElim
   | hDne => exact hDne
 
 end Deduction
@@ -195,7 +201,7 @@ open DeductionParameter
 abbrev theory (𝓓 : DeductionParameter α) := System.theory 𝓓
 
 protected abbrev K : DeductionParameter α where
-  axiomSet := 𝗞
+  axioms := 𝗞
   rules := ⟮Nec⟯
 notation "𝐊" => DeductionParameter.K
 instance : 𝐊.IsNormal (α := α) where
@@ -204,7 +210,7 @@ instance : 𝐊.IsNormal (α := α) where
 section Normal
 
 abbrev Normal (Ax : AxiomSet α) : DeductionParameter α where
-  axiomSet := 𝗞 ∪ Ax
+  axioms := 𝗞 ∪ Ax
   rules := ⟮Nec⟯
 instance : IsNormal (α := α) (Normal Ax) where
 prefix:max "𝝂" => Normal
@@ -298,7 +304,7 @@ end Normal
 section GLAlternative
 
 protected abbrev K4Loeb : DeductionParameter α where
-  axiomSet := 𝗞 ∪ 𝟰
+  axioms := 𝗞 ∪ 𝟰
   rules :=  ⟮Nec⟯ ∪ ⟮Loeb⟯
 notation "𝐊𝟒(𝐋)" => DeductionParameter.K4Loeb
 instance : 𝐊𝟒(𝐋).HasAxiomK (α := α) where
@@ -309,7 +315,7 @@ instance : System.K4Loeb (𝐊𝟒(𝐋) : DeductionParameter α) where
 
 
 protected abbrev K4Henkin : DeductionParameter α where
-  axiomSet := 𝗞 ∪ 𝟰
+  axioms := 𝗞 ∪ 𝟰
   rules := ⟮Nec⟯ ∪ ⟮Henkin⟯
 notation "𝐊𝟒(𝐇)" => DeductionParameter.K4Henkin
 instance : 𝐊𝟒(𝐇).HasAxiomK (α := α)  where
@@ -325,7 +331,7 @@ section PLoN
 
 /-- Logic of Pure Necessitation -/
 protected abbrev N : DeductionParameter α where
-  axiomSet := ∅
+  axioms := ∅
   rules := ⟮Nec⟯
 notation "𝐍" => DeductionParameter.N
 instance : 𝐍.HasNecOnly (α := α) where

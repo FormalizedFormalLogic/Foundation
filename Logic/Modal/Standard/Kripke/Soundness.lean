@@ -23,7 +23,7 @@ lemma sound (defines : Ax.DefinesKripkeFrameClass 𝔽) (d : (𝝂Ax) ⊢! p) : 
       exact Semantics.RealizeSet.setOf_iff.mp (defines.mpr hF) _ hR;
   | hMdp ihpq ihp => exact Kripke.ValidOnFrameClass.mdp ihpq ihp;
   | hNec ih => exact Kripke.ValidOnFrameClass.nec ih;
-  | hDisj₃ =>
+  | hOrElim =>
     simp_all [Kripke.ValidOnFrameClass, Kripke.ValidOnFrame, Kripke.ValidOnModel, Kripke.Satisfies];
     intros; rename_i hpr hqr hpq;
     cases hpq with
@@ -65,7 +65,7 @@ lemma finite_sound (defines : Ax.FinitelyDefinesKripkeFrameClass 𝔽) (d : (�
       exact Semantics.RealizeSet.setOf_iff.mp (defines.mpr hFF) _ hR;
   | hMdp ihpq ihp => exact Kripke.ValidOnFrameClass.mdp ihpq ihp;
   | hNec ih => exact Kripke.ValidOnFrameClass.nec ih;
-  | hDisj₃ =>
+  | hOrElim =>
     simp_all [Kripke.ValidOnFrameClass, Kripke.ValidOnFrame, Kripke.ValidOnModel, Kripke.Satisfies];
     intros; rename_i hpr hqr hpq;
     cases hpq with
