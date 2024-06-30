@@ -65,11 +65,11 @@ lemma unprovable_iff_isEmpty {𝓢 : S} {f : F} :
 noncomputable def Provable.get {𝓢 : S} {f : F} (h : 𝓢 ⊢! f) : 𝓢 ⊢ f :=
   Classical.choice h
 
-lemma provableSet_iff {𝓢 : S} {s : Set F} :
+lemma provableSet_iff {𝓢 : S} [Membership F α] {s : α} :
     𝓢 ⊢!* s ↔ Nonempty (𝓢 ⊢* s) := by
   simp [ProvableSet, PrfSet, Provable, Classical.nonempty_pi, ←imp_iff_not_or]
 
-noncomputable def ProvableSet.get {𝓢 : S} {s : Set F} (h : 𝓢 ⊢!* s) : 𝓢 ⊢* s :=
+noncomputable def ProvableSet.get {𝓢 : S} [Membership F α] {s : α} (h : 𝓢 ⊢!* s) : 𝓢 ⊢* s :=
   Classical.choice (α := 𝓢 ⊢* s) (provableSet_iff.mp h : Nonempty (𝓢 ⊢* s))
 
 def Reducible (𝓢 : S) (𝓣 : T) : Prop := theory 𝓢 ⊆ theory 𝓣
@@ -357,14 +357,14 @@ lemma incomplete_iff_exists_undecidable [LogicalConnective F] {𝓢 : S} :
 variable (S T)
 
 class Axiomatized [Precollection F S] where
-  prfAxm {𝓢 : S} : 𝓢 ⊢* Precollection.set 𝓢
+  prfAxm {𝓢 : S} : 𝓢 ⊢* 𝓢
   weakening {𝓢 𝓣 : S} : 𝓢 ⊆ 𝓣 → 𝓢 ⊢ f → 𝓣 ⊢ f
 
 alias byAxm := Axiomatized.prfAxm
 alias wk := Axiomatized.weakening
 
 class StrongCut [Collection F T] where
-  cut {𝓢 : S} {𝓣 : T} {p} : 𝓢 ⊢* Precollection.set 𝓣 → 𝓣 ⊢ p → 𝓢 ⊢ p
+  cut {𝓢 : S} {𝓣 : T} {p} : 𝓢 ⊢* 𝓣 → 𝓣 ⊢ p → 𝓢 ⊢ p
 
 variable {S T}
 
@@ -374,7 +374,7 @@ namespace Axiomatized
 
 variable [Collection F S] [Axiomatized S] {𝓢 𝓣 : S}
 
-@[simp] lemma provable_axm (𝓢 : S) : 𝓢 ⊢!* Precollection.set 𝓢 := fun hf ↦ ⟨prfAxm hf⟩
+@[simp] lemma provable_axm (𝓢 : S) : 𝓢 ⊢!* 𝓢 := fun hf ↦ ⟨prfAxm hf⟩
 
 lemma axm_subset (𝓢 : S) : Precollection.set 𝓢 ⊆ theory 𝓢 := fun _ hp ↦ provable_axm 𝓢 hp
 
@@ -407,10 +407,10 @@ namespace StrongCut
 
 variable [StrongCut S T]
 
-lemma cut! {𝓢 : S} {𝓣 : T} {p : F} (H : 𝓢 ⊢!* Precollection.set 𝓣) (hp : 𝓣 ⊢! p) : 𝓢 ⊢! p := by
+lemma cut! {𝓢 : S} {𝓣 : T} {p : F} (H : 𝓢 ⊢!* 𝓣) (hp : 𝓣 ⊢! p) : 𝓢 ⊢! p := by
   rcases hp with ⟨b⟩; exact ⟨StrongCut.cut H.get b⟩
 
-def translation {𝓢 : S} {𝓣 : T} (B : 𝓢 ⊢* Precollection.set 𝓣) : 𝓣 ↝ 𝓢 where
+def translation {𝓢 : S} {𝓣 : T} (B : 𝓢 ⊢* 𝓣) : 𝓣 ↝ 𝓢 where
   toFun := id
   prf := StrongCut.cut B
 
