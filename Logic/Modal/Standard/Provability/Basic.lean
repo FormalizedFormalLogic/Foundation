@@ -69,13 +69,18 @@ variable {L : FirstOrder.Language} [Semiterm.Operator.GoedelNumber L (Sentence L
 lemma arithmetical_soundness_K4Loeb [β.HilbertBernays T₀ T] (h : 𝐊𝟒(𝐋) ⊢! p) : ∀ {f : realization L α}, T ⊢! (f[β] p) := by
   intro f;
   induction h using Deduction.inducition! with
-  | hNec _ ih => exact D1s (T₀ := T₀) ih;
+  | hRules rl hrl hant ih =>
+    rcases hrl with (hNec | hLoeb)
+    . obtain ⟨p, e⟩ := hNec; subst e;
+      simp_all;
+      exact D1s (T₀ := T₀) ih;
+    . obtain ⟨p, e⟩ := hLoeb; subst e;
+      simp_all;
+      exact Loeb.LT T₀ ih;
   | hMaxm hp =>
     rcases hp with (hK | hFour)
     . obtain ⟨p, q, e⟩ := hK; subst_vars; apply D2s (T₀ := T₀);
     . obtain ⟨p, e⟩ := hFour; subst_vars; apply D3s (T₀ := T₀);
-  | hLoeb _ ih => exact Loeb.LT T₀ ih;
-  | hHenkin => simp_all only [Bool.false_eq_true];
   | hMdp ihpq ihp =>
     simp [interpretation] at ihpq;
     exact ihpq ⨀ ihp;
@@ -92,10 +97,11 @@ theorem arithmetical_soundness_GL [β.HilbertBernays T₀ T] (h : 𝐆𝐋 ⊢! 
 lemma arithmetical_soundness_N [β.HilbertBernays₁ T₀ T] (h : 𝐍 ⊢! p) : ∀ {f : realization L α}, T ⊢! (f[β] p) := by
   intro f;
   induction h using Deduction.inducition! with
-  | hNec _ ih => exact D1s (T₀ := T₀) ih;
   | hMaxm hp => simp at hp;
-  | hLoeb => simp_all only [Bool.false_eq_true];
-  | hHenkin => simp_all only [Bool.false_eq_true];
+  | hRules rl hrl hant ih =>
+    simp at hrl;
+    obtain ⟨p, e⟩ := hrl; subst e; simp_all;
+    exact D1s (T₀ := T₀) ih;
   | hMdp ihpq ihp =>
     simp [interpretation] at ihpq;
     exact ihpq ⨀ ihp;

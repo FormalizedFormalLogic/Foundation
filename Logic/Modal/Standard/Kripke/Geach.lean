@@ -162,7 +162,7 @@ lemma axiomGeach_defines : 𝗴𝗲(t).DefinesKripkeFrameClass (α := α) (Geach
     . exact (multibox_def.mp hbp) ryu;
 
 
-instance : System.Consistent (𝗴𝗲(t)ᴺ : DeductionParameter α) := consistent_of_defines axiomGeach_defines GeachConfluentFrameClass.nonempty
+instance : System.Consistent (𝝂𝗴𝗲(t) : DeductionParameter α) := consistent_of_defines axiomGeach_defines GeachConfluentFrameClass.nonempty
 
 
 lemma axiomMultiGeach_defines : 𝗚𝗲(ts).DefinesKripkeFrameClass (α := α) (MultiGeachConfluentFrameClass ts) := by
@@ -236,12 +236,12 @@ section Completeness
 open Theory MaximalConsistentTheory CanonicalFrame
 open DeductionParameter (Normal)
 
-variable {Ax : AxiomSet α} [System.Consistent Axᴺ]
+variable {Ax : AxiomSet α} [System.Consistent (𝝂Ax)]
 
 lemma geachConfluent_CanonicalFrame (h : 𝗴𝗲(t) ⊆ Ax) : GeachConfluent t (CanonicalFrame Ax):= by
   rintro Ω₁ Ω₂ Ω₃ h;
   have ⟨r₁₂, r₁₃⟩ := h; clear h;
-  have ⟨Ω, hΩ⟩ := lindenbaum (𝓓 := Axᴺ) (T := ((□''⁻¹^[t.m]Ω₂.theory) ∪ (□''⁻¹^[t.n]Ω₃.theory))) $ by
+  have ⟨Ω, hΩ⟩ := lindenbaum (𝓓 := (𝝂Ax)) (T := ((□''⁻¹^[t.m]Ω₂.theory) ∪ (□''⁻¹^[t.n]Ω₃.theory))) $ by
     apply intro_union_Consistent;
     intro Γ Δ hΓ hΔ hC;
 
@@ -256,12 +256,12 @@ lemma geachConfluent_CanonicalFrame (h : 𝗴𝗲(t) ⊆ Ax) : GeachConfluent t 
       (multiframe_def_multidia.mp r₁₂ hΓconj)
     have : ◇^[t.n]Γ.conj' ∈ Ω₃.theory := multiframe_def_multibox.mp r₁₃ this;
 
-    have : Axᴺ ⊢! □^[t.n](Δ.conj') ⋏ ◇^[t.n](Γ.conj') ⟶ ⊥ := by
+    have : (𝝂Ax) ⊢! □^[t.n](Δ.conj') ⋏ ◇^[t.n](Γ.conj') ⟶ ⊥ := by
       apply and_imply_iff_imply_imply'!.mpr;
       exact imp_trans''!
-        (show Axᴺ ⊢! □^[t.n](Δ.conj') ⟶ □^[t.n](~Γ.conj') by exact imply_multibox_distribute'! $ contra₁'! $ and_imply_iff_imply_imply'!.mp hC)
-        (show Axᴺ ⊢! □^[t.n](~Γ.conj') ⟶ ~(◇^[t.n]Γ.conj') by exact contra₁'! $ and₁'! $ multidia_duality!);
-    have : Axᴺ ⊬! □^[t.n](Δ.conj') ⋏ ◇^[t.n](Γ.conj') ⟶ ⊥ := by simpa using Ω₃.consistent (Γ := [□^[t.n](Δ.conj'), ◇^[t.n](Γ.conj')]) (by simp_all)
+        (show (𝝂Ax) ⊢! □^[t.n](Δ.conj') ⟶ □^[t.n](~Γ.conj') by exact imply_multibox_distribute'! $ contra₁'! $ and_imply_iff_imply_imply'!.mp hC)
+        (show (𝝂Ax) ⊢! □^[t.n](~Γ.conj') ⟶ ~(◇^[t.n]Γ.conj') by exact contra₁'! $ and₁'! $ multidia_duality!);
+    have : (𝝂Ax) ⊬! □^[t.n](Δ.conj') ⋏ ◇^[t.n](Γ.conj') ⟶ ⊥ := by simpa using Ω₃.consistent (Γ := [□^[t.n](Δ.conj'), ◇^[t.n](Γ.conj')]) (by simp_all)
 
     contradiction;
 
@@ -281,7 +281,7 @@ lemma multiGeachConfluent_CanonicalFrame (h : 𝗚𝗲(ts) ⊆ Ax) : MultiGeachC
     . apply ih;
       simp_all;
 
-private instance instMultiGeachComplete : Complete (𝗚𝗲(ts)ᴺ : DeductionParameter α) (MultiGeachConfluentFrameClass ts)# :=
+private instance instMultiGeachComplete : Complete (𝝂𝗚𝗲(ts) : DeductionParameter α) (MultiGeachConfluentFrameClass ts)# :=
   instComplete_of_mem_canonicalFrame $ multiGeachConfluent_CanonicalFrame (by rfl)
 
 instance {Λ : DeductionParameter α} [g : Λ.IsGeach] : Complete Λ (MultiGeachConfluentFrameClass g.taples)# := by

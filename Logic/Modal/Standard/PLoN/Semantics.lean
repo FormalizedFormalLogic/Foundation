@@ -171,7 +171,7 @@ lemma N_defines : 𝐍.DefinesPLoNFrameClass (AllFrameClass α) := by
   | hNec ihp =>
     intro V w w' _;
     exact ihp V w';
-  | hDisj₃ =>
+  | hOrElim =>
     simp_all only [PLoN.Satisfies];
     intros; rename_i hpr hqr hpq;
     cases hpq with

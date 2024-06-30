@@ -47,7 +47,7 @@ private lemma dot3_of_connected : Connected F → F# ⊧* (.𝟯 : AxiomSet α) 
   | inl ryz => exact hnp $ hp ryz;
   | inr rzy => exact hnq $ hq rzy;
 
-lemma AxDot3_Definability : .𝟯.DefinesKripkeFrameClass (α := α) (ConnectedFrameClass) := by
+lemma AxDot3_Definability : AxiomSet.DefinesKripkeFrameClass (α := α) .𝟯 ConnectedFrameClass := by
   intro F;
   constructor;
   . exact connected_of_dot3;
@@ -61,7 +61,7 @@ lemma ReflexiveTransitiveConnectedFrameClass.nonempty : ReflexiveTransitiveConne
 
 
 
-private lemma S4Dot3_defines' : (𝗧 ∪ 𝟰 ∪ .𝟯).DefinesKripkeFrameClass (α := α) ReflexiveTransitiveConnectedFrameClass := by
+private lemma S4Dot3_defines' : AxiomSet.DefinesKripkeFrameClass (α := α)  (𝗧 ∪ 𝟰 ∪ .𝟯) ReflexiveTransitiveConnectedFrameClass := by
   rw [(show ReflexiveTransitiveConnectedFrameClass = ({ F | (Reflexive F ∧ Transitive F) ∧ Connected F } : FrameClass) by aesop)];
   apply AxiomSet.DefinesKripkeFrameClass.union;
   . exact S4_defines.toAx';
@@ -74,7 +74,7 @@ instance : System.Consistent (𝐒𝟒.𝟑 : DeductionParameter α) := consiste
 
 
 open MaximalConsistentTheory in
-lemma connected_CanonicalFrame {Ax : AxiomSet α} (hAx : .𝟯 ⊆ Ax) [System.Consistent Axᴺ] : Connected (CanonicalFrame Ax) := by
+lemma connected_CanonicalFrame {Ax : AxiomSet α} (hAx : .𝟯 ⊆ Ax) [System.Consistent (𝝂Ax)] : Connected (CanonicalFrame Ax) := by
   dsimp only [Connected];
   intro X Y Z ⟨hXY, hXZ⟩;
   by_contra hC; push_neg at hC;

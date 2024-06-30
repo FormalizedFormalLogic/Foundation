@@ -203,7 +203,7 @@ lemma intro_union_Consistent
     . exact iff_provable_list_conj.mp (and₂'! FiniteContext.id!) q $ List.mem_filter_of_mem hq (by simpa);
   ) this;
 
-lemma not_singleton_consistent [Necessitation 𝓓] (h : ~(□p) ∈ T) : (𝓓)-Consistent {~p} := by
+lemma not_singleton_consistent [𝓓.HasNecessitation] (h : ~(□p) ∈ T) : (𝓓)-Consistent {~p} := by
   intro Γ hΓ;
   simp only [Set.mem_singleton_iff] at hΓ;
   by_contra hC;

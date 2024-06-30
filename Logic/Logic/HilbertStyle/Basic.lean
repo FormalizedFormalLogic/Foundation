@@ -1,29 +1,11 @@
 import Logic.Logic.System
-import Logic.Logic.Init
+import Logic.Logic.Axioms
 
 namespace LO.System
 
 variable {S F : Type*} [LogicalConnective F] [System F S]
 
 variable (𝓢 : S)
-
-namespace Axioms
-
-variable (p q : F)
-
-protected abbrev EFQ := ⊥ ⟶ p
-
-protected abbrev LEM := p ⋎ ~p
-
-protected abbrev WeakLEM := ~p ⋎ ~~p
-
-protected abbrev GD := (p ⟶ q) ⋎ (q ⟶ p)
-
-protected abbrev DNE := ~~p ⟶ p
-
-protected abbrev Peirce := ((p ⟶ q) ⟶ p) ⟶ p
-
-end Axioms
 
 class ModusPonens where
   mdp {p q : F} : 𝓢 ⊢ p ⟶ q → 𝓢 ⊢ p → 𝓢 ⊢ q
@@ -34,50 +16,55 @@ class ModusPonens where
 
   This is weaker asssumption than _"introducing `~p` as an abbreviation of `p ⟶ ⊥`" (`NegAbbrev`)_.
 -/
-protected class NegationEquiv (𝓢 : S) where
-  neg_equiv {p} : 𝓢 ⊢ ~p ⟷ (p ⟶ ⊥)
+class NegationEquiv (𝓢 : S) where
+  neg_equiv (p) : 𝓢 ⊢ Axioms.NegEquiv p
 
+class HasAxiomVerum (𝓢 : S) where
+  verum : 𝓢 ⊢ Axioms.Verum
 
-class Minimal extends ModusPonens 𝓢 where
-  verum              : 𝓢 ⊢ ⊤
-  imply₁ (p q : F)   : 𝓢 ⊢ p ⟶ q ⟶ p
-  imply₂ (p q r : F) : 𝓢 ⊢ (p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r
-  and₁   (p q : F)   : 𝓢 ⊢ p ⋏ q ⟶ p
-  and₂   (p q : F)   : 𝓢 ⊢ p ⋏ q ⟶ q
-  and₃   (p q : F)   : 𝓢 ⊢ p ⟶ q ⟶ p ⋏ q
-  or₁    (p q : F)   : 𝓢 ⊢ p ⟶ p ⋎ q
-  or₂    (p q : F)   : 𝓢 ⊢ q ⟶ p ⋎ q
-  or₃    (p q r : F) : 𝓢 ⊢ (p ⟶ r) ⟶ (q ⟶ r) ⟶ p ⋎ q ⟶ r
+class HasAxiomImply₁ (𝓢 : S)  where
+  imply₁ (p q : F) : 𝓢 ⊢ Axioms.Imply₁ p q
 
-class HasEFQ where
+class HasAxiomImply₂ (𝓢 : S)  where
+  imply₂ (p q r : F) : 𝓢 ⊢ Axioms.Imply₂ p q r
+
+class HasAxiomAndElim₁ (𝓢 : S)  where
+  and₁ (p q : F) : 𝓢 ⊢ Axioms.AndElim₁ p q
+
+class HasAxiomAndElim₂ (𝓢 : S)  where
+  and₂ (p q : F) : 𝓢 ⊢ Axioms.AndElim₂ p q
+
+class HasAxiomAndInst (𝓢 : S)  where
+  and₃ (p q : F) : 𝓢 ⊢ Axioms.AndInst p q
+
+class HasAxiomOrInst₁ (𝓢 : S)  where
+  or₁ (p q : F) : 𝓢 ⊢ Axioms.OrInst₁ p q
+
+class HasAxiomOrInst₂ (𝓢 : S)  where
+  or₂ (p q : F) : 𝓢 ⊢ Axioms.OrInst₂ p q
+
+class HasAxiomOrElim (𝓢 : S)  where
+  or₃ (p q r : F) : 𝓢 ⊢ Axioms.OrElim p q r
+
+class HasAxiomEFQ where
   efq (p : F) : 𝓢 ⊢ Axioms.EFQ p
 
-class HasWeakLEM where
-  wlem (p : F) : 𝓢 ⊢ Axioms.WeakLEM p
-
-class HasLEM where
+class HasAxiomLEM where
   lem (p : F) : 𝓢 ⊢ Axioms.LEM p
 
-class HasDNE where
+class HasAxiomDNE where
   dne (p : F) : 𝓢 ⊢ Axioms.DNE p
 
-class HasGD where
-  GD (p q : F) : 𝓢 ⊢ Axioms.GD p q
+protected class Minimal extends
+              ModusPonens 𝓢,
+              HasAxiomVerum 𝓢,
+              HasAxiomImply₁ 𝓢, HasAxiomImply₂ 𝓢,
+              HasAxiomAndElim₁ 𝓢, HasAxiomAndElim₂ 𝓢, HasAxiomAndInst 𝓢,
+              HasAxiomOrInst₁ 𝓢, HasAxiomOrInst₂ 𝓢, HasAxiomOrElim 𝓢
 
-class Peirce where
-  peirce (p q : F) : 𝓢 ⊢ Axioms.Peirce p q
+protected class Intuitionistic extends System.Minimal 𝓢, HasAxiomEFQ 𝓢
 
-/-- Intuitionistic Propositional Logic -/
-class Intuitionistic extends Minimal 𝓢, HasEFQ 𝓢
-
-/-- Propositional Logic for Weak Law of Excluded Middle -/
-class WeakLEM extends Intuitionistic 𝓢, HasWeakLEM 𝓢
-
-/-- Gödel-Dummett Propositional Logic -/
-class GD extends Intuitionistic 𝓢, HasGD 𝓢
-
-/-- Classical Propositional Logic -/
-class Classical extends Minimal 𝓢, HasDNE 𝓢
+protected class Classical extends System.Minimal 𝓢, NegationEquiv 𝓢, HasAxiomDNE 𝓢
 
 variable {𝓢}
 
@@ -92,51 +79,51 @@ lemma mdp! [ModusPonens 𝓢] : 𝓢 ⊢! p ⟶ q → 𝓢 ⊢! p → 𝓢 ⊢! 
 infixl:90 "⨀" => mdp!
 
 
-variable [Minimal 𝓢]
+variable [System.Minimal 𝓢]
 
 def cast {p q : F} (e : p = q) (b : 𝓢 ⊢ p) : 𝓢 ⊢ q := e ▸ b
 
-alias verum := Minimal.verum
+def verum [HasAxiomVerum 𝓢] : 𝓢 ⊢ ⊤ := HasAxiomVerum.verum
 @[simp] lemma verum! : 𝓢 ⊢! ⊤ := ⟨verum⟩
 
-def imply₁ : 𝓢 ⊢ p ⟶ q ⟶ p := Minimal.imply₁ _ _
+def imply₁ [HasAxiomImply₁ 𝓢] : 𝓢 ⊢ p ⟶ q ⟶ p := HasAxiomImply₁.imply₁ _ _
 @[simp] lemma imply₁! : 𝓢 ⊢! p ⟶ q ⟶ p := ⟨imply₁⟩
 
-def imply₂ : 𝓢 ⊢ (p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r := Minimal.imply₂ _ _ _
+def imply₂ [HasAxiomImply₂ 𝓢] : 𝓢 ⊢ (p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r := HasAxiomImply₂.imply₂ _ _ _
 @[simp] lemma imply₂! : 𝓢 ⊢! (p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r := ⟨imply₂⟩
 
-def and₁ : 𝓢 ⊢ p ⋏ q ⟶ p := Minimal.and₁ _ _
+def and₁ [HasAxiomAndElim₁ 𝓢] : 𝓢 ⊢ p ⋏ q ⟶ p := HasAxiomAndElim₁.and₁ _ _
 @[simp] lemma and₁! : 𝓢 ⊢! p ⋏ q ⟶ p := ⟨and₁⟩
 
-def and₂ : 𝓢 ⊢ p ⋏ q ⟶ q := Minimal.and₂ _ _
+def and₂ [HasAxiomAndElim₂ 𝓢] : 𝓢 ⊢ p ⋏ q ⟶ q := HasAxiomAndElim₂.and₂ _ _
 @[simp] lemma and₂! : 𝓢 ⊢! p ⋏ q ⟶ q := ⟨and₂⟩
 
-def and₃ : 𝓢 ⊢ p ⟶ q ⟶ p ⋏ q := Minimal.and₃ _ _
+def and₃ [HasAxiomAndInst 𝓢] : 𝓢 ⊢ p ⟶ q ⟶ p ⋏ q := HasAxiomAndInst.and₃ _ _
 @[simp] lemma and₃! : 𝓢 ⊢! p ⟶ q ⟶ p ⋏ q := ⟨and₃⟩
 
-def or₁ : 𝓢 ⊢ p ⟶ p ⋎ q := Minimal.or₁ _ _
+def or₁ [HasAxiomOrInst₁ 𝓢] : 𝓢 ⊢ p ⟶ p ⋎ q := HasAxiomOrInst₁.or₁ _ _
 @[simp] lemma or₁! : 𝓢 ⊢! p ⟶ p ⋎ q := ⟨or₁⟩
 
-def or₂ : 𝓢 ⊢ q ⟶ p ⋎ q := Minimal.or₂ _ _
+def or₂ [HasAxiomOrInst₂ 𝓢] : 𝓢 ⊢ q ⟶ p ⋎ q := HasAxiomOrInst₂.or₂ _ _
 @[simp] lemma or₂! : 𝓢 ⊢! q ⟶ p ⋎ q := ⟨or₂⟩
 
-def or₃ : 𝓢 ⊢ (p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q) ⟶ r := Minimal.or₃ _ _ _
+def or₃ [HasAxiomOrElim 𝓢] : 𝓢 ⊢ (p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q) ⟶ r := HasAxiomOrElim.or₃ _ _ _
 @[simp] lemma or₃! : 𝓢 ⊢! (p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q) ⟶ r := ⟨or₃⟩
 
-def efq [HasEFQ 𝓢] : 𝓢 ⊢ ⊥ ⟶ p := HasEFQ.efq _
-@[simp] lemma efq! [HasEFQ 𝓢] : 𝓢 ⊢! ⊥ ⟶ p := ⟨efq⟩
+def efq [HasAxiomEFQ 𝓢] : 𝓢 ⊢ ⊥ ⟶ p := HasAxiomEFQ.efq _
+@[simp] lemma efq! [HasAxiomEFQ 𝓢] : 𝓢 ⊢! ⊥ ⟶ p := ⟨efq⟩
 
-def efq' [HasEFQ 𝓢] (b : 𝓢 ⊢ ⊥) : 𝓢 ⊢ p := efq ⨀ b
-@[simp] lemma efq'! [HasEFQ 𝓢] (h : 𝓢 ⊢! ⊥) : 𝓢 ⊢! p := ⟨efq' h.some⟩
+def efq' [HasAxiomEFQ 𝓢] (b : 𝓢 ⊢ ⊥) : 𝓢 ⊢ p := efq ⨀ b
+@[simp] lemma efq'! [HasAxiomEFQ 𝓢] (h : 𝓢 ⊢! ⊥) : 𝓢 ⊢! p := ⟨efq' h.some⟩
 
-def lem [HasLEM 𝓢] : 𝓢 ⊢ p ⋎ ~p := HasLEM.lem p
-@[simp] lemma lem! [HasLEM 𝓢] : 𝓢 ⊢! p ⋎ ~p := ⟨lem⟩
+def lem [HasAxiomLEM 𝓢] : 𝓢 ⊢ p ⋎ ~p := HasAxiomLEM.lem p
+@[simp] lemma lem! [HasAxiomLEM 𝓢] : 𝓢 ⊢! p ⋎ ~p := ⟨lem⟩
 
-def dne [HasDNE 𝓢] : 𝓢 ⊢ ~~p ⟶ p := HasDNE.dne _
-@[simp] lemma dne! [HasDNE 𝓢] : 𝓢 ⊢! ~~p ⟶ p := ⟨dne⟩
+def dne [HasAxiomDNE 𝓢] : 𝓢 ⊢ ~~p ⟶ p := HasAxiomDNE.dne _
+@[simp] lemma dne! [HasAxiomDNE 𝓢] : 𝓢 ⊢! ~~p ⟶ p := ⟨dne⟩
 
-def dne' [HasDNE 𝓢] (b : 𝓢 ⊢ ~~p) : 𝓢 ⊢ p := dne ⨀ b
-@[simp] lemma dne'! [HasDNE 𝓢] (h : 𝓢 ⊢! ~~p) : 𝓢 ⊢! p := ⟨dne' h.some⟩
+def dne' [HasAxiomDNE 𝓢] (b : 𝓢 ⊢ ~~p) : 𝓢 ⊢ p := dne ⨀ b
+@[simp] lemma dne'! [HasAxiomDNE 𝓢] (h : 𝓢 ⊢! ~~p) : 𝓢 ⊢! p := ⟨dne' h.some⟩
 
 def imply₁' (h : 𝓢 ⊢ p) : 𝓢 ⊢ q ⟶ p := imply₁ ⨀ h
 lemma imply₁'! (d : 𝓢 ⊢! p) : 𝓢 ⊢! q ⟶ p := ⟨imply₁' d.some⟩
@@ -184,43 +171,37 @@ lemma or₃''! (d₁ : 𝓢 ⊢! p ⟶ r) (d₂ : 𝓢 ⊢! q ⟶ r) : 𝓢 ⊢!
 def or₃''' (d₁ : 𝓢 ⊢ p ⟶ r) (d₂ : 𝓢 ⊢ q ⟶ r) (d₃ : 𝓢 ⊢ p ⋎ q) : 𝓢 ⊢ r := or₃ ⨀ d₁ ⨀ d₂ ⨀ d₃
 lemma or₃'''! (d₁ : 𝓢 ⊢! p ⟶ r) (d₂ : 𝓢 ⊢! q ⟶ r) (d₃ : 𝓢 ⊢! p ⋎ q) : 𝓢 ⊢! r := ⟨or₃''' d₁.some d₂.some d₃.some⟩
 
-def impId (p : F) : 𝓢 ⊢ p ⟶ p := Minimal.imply₂ p (p ⟶ p) p ⨀ imply₁ ⨀ imply₁
+def impId (p : F) : 𝓢 ⊢ p ⟶ p := imply₂ (p := p) (q := (p ⟶ p)) (r := p) ⨀ imply₁ ⨀ imply₁
 @[simp] def imp_id! : 𝓢 ⊢! p ⟶ p := ⟨impId p⟩
 
 def iffId (p : F) : 𝓢 ⊢ p ⟷ p := and₃' (impId p) (impId p)
 @[simp] def iff_id! : 𝓢 ⊢! p ⟷ p := ⟨iffId p⟩
 
 
-section NegationEquiv
+def neg_equiv [NegationEquiv 𝓢] : 𝓢 ⊢ ~p ⟷ (p ⟶ ⊥) := NegationEquiv.neg_equiv _
+@[simp] lemma neg_equiv! [NegationEquiv 𝓢] : 𝓢 ⊢! ~p ⟷ (p ⟶ ⊥) := ⟨neg_equiv⟩
 
-variable [System.NegationEquiv 𝓢]
-
-alias neg_equiv := NegationEquiv.neg_equiv
-@[simp] lemma neg_equiv! : 𝓢 ⊢! ~p ⟷ (p ⟶ ⊥) := ⟨neg_equiv⟩
-
-def neg_equiv'.mp : 𝓢 ⊢ ~p → 𝓢 ⊢ p ⟶ ⊥ := λ h => (and₁' neg_equiv) ⨀ h
-def neg_equiv'.mpr : 𝓢 ⊢ p ⟶ ⊥ → 𝓢 ⊢ ~p := λ h => (and₂' neg_equiv) ⨀ h
-lemma neg_equiv'! : 𝓢 ⊢! ~p ↔ 𝓢 ⊢! p ⟶ ⊥ := ⟨λ ⟨h⟩ => ⟨neg_equiv'.mp h⟩, λ ⟨h⟩ => ⟨neg_equiv'.mpr h⟩⟩
+def neg_equiv'.mp [NegationEquiv 𝓢] : 𝓢 ⊢ ~p → 𝓢 ⊢ p ⟶ ⊥ := λ h => (and₁' neg_equiv) ⨀ h
+def neg_equiv'.mpr [NegationEquiv 𝓢] : 𝓢 ⊢ p ⟶ ⊥ → 𝓢 ⊢ ~p := λ h => (and₂' neg_equiv) ⨀ h
+lemma neg_equiv'! [NegationEquiv 𝓢] : 𝓢 ⊢! ~p ↔ 𝓢 ⊢! p ⟶ ⊥ := ⟨λ ⟨h⟩ => ⟨neg_equiv'.mp h⟩, λ ⟨h⟩ => ⟨neg_equiv'.mpr h⟩⟩
 
 instance [NegAbbrev F] : System.NegationEquiv 𝓢 where
-  neg_equiv := by intro p; simp [NegAbbrev.neg]; apply iffId;
-
-end NegationEquiv
+  neg_equiv := by intro p; simp [Axioms.NegEquiv, NegAbbrev.neg]; apply iffId;
 
 
-def mdp₁ (bqr : 𝓢 ⊢ p ⟶ q ⟶ r) (bq : 𝓢 ⊢ p ⟶ q) : 𝓢 ⊢ p ⟶ r := Minimal.imply₂ p q r ⨀ bqr ⨀ bq
+def mdp₁ (bqr : 𝓢 ⊢ p ⟶ q ⟶ r) (bq : 𝓢 ⊢ p ⟶ q) : 𝓢 ⊢ p ⟶ r := imply₂ ⨀ bqr ⨀ bq
 lemma mdp₁! (hqr : 𝓢 ⊢! p ⟶ q ⟶ r) (hq : 𝓢 ⊢! p ⟶ q) : 𝓢 ⊢! p ⟶ r := ⟨mdp₁ hqr.some hq.some⟩
 
 infixl:90 "⨀₁" => mdp₁
 infixl:90 "⨀₁" => mdp₁!
 
-def mdp₂ (bqr : 𝓢 ⊢ p ⟶ q ⟶ r ⟶ s) (bq : 𝓢 ⊢ p ⟶ q ⟶ r) : 𝓢 ⊢ p ⟶ q ⟶ s := dhyp p (Minimal.imply₂ q r s) ⨀₁ bqr ⨀₁ bq
+def mdp₂ (bqr : 𝓢 ⊢ p ⟶ q ⟶ r ⟶ s) (bq : 𝓢 ⊢ p ⟶ q ⟶ r) : 𝓢 ⊢ p ⟶ q ⟶ s := dhyp p (imply₂) ⨀₁ bqr ⨀₁ bq
 lemma mdp₂! (hqr : 𝓢 ⊢! p ⟶ q ⟶ r ⟶ s) (hq : 𝓢 ⊢! p ⟶ q ⟶ r) : 𝓢 ⊢! p ⟶ q ⟶ s := ⟨mdp₂ hqr.some hq.some⟩
 
 infixl:90 "⨀₂" => mdp₂
 infixl:90 "⨀₂" => mdp₂!
 
-def mdp₃ (bqr : 𝓢 ⊢ p ⟶ q ⟶ r ⟶ s ⟶ t) (bq : 𝓢 ⊢ p ⟶ q ⟶ r ⟶ s) : 𝓢 ⊢ p ⟶ q ⟶ r ⟶ t := (dhyp p <| dhyp q <| Minimal.imply₂ r s t) ⨀₂ bqr ⨀₂ bq
+def mdp₃ (bqr : 𝓢 ⊢ p ⟶ q ⟶ r ⟶ s ⟶ t) (bq : 𝓢 ⊢ p ⟶ q ⟶ r ⟶ s) : 𝓢 ⊢ p ⟶ q ⟶ r ⟶ t := (dhyp p <| dhyp q <| imply₂) ⨀₂ bqr ⨀₂ bq
 lemma mdp₃! (hqr : 𝓢 ⊢! p ⟶ q ⟶ r ⟶ s ⟶ t) (hq : 𝓢 ⊢! p ⟶ q ⟶ r ⟶ s) : 𝓢 ⊢! p ⟶ q ⟶ r ⟶ t := ⟨mdp₃ hqr.some hq.some⟩
 
 infixl:90 "⨀₃" => mdp₃
@@ -244,7 +225,7 @@ lemma unprovable_iff! (H : 𝓢 ⊢! p ⟷ q) : 𝓢 ⊬! p ↔ 𝓢 ⊬! q := b
   . intro hp hq; have := and₂'! H ⨀ hq; contradiction;
   . intro hq hp; have := and₁'! H ⨀ hp; contradiction;
 
-def imply₁₁ (p q r : F) : 𝓢 ⊢ p ⟶ q ⟶ r ⟶ p := impTrans'' (Minimal.imply₁ p r) (Minimal.imply₁ (r ⟶ p) q)
+def imply₁₁ (p q r : F) : 𝓢 ⊢ p ⟶ q ⟶ r ⟶ p := impTrans'' imply₁ imply₁
 @[simp] lemma imply₁₁! (p q r : F) : 𝓢 ⊢! p ⟶ q ⟶ r ⟶ p := ⟨imply₁₁ p q r⟩
 
 def generalConj [DecidableEq F] {Γ : List F} {p : F} (h : p ∈ Γ) : 𝓢 ⊢ Γ.conj ⟶ p :=
@@ -262,7 +243,7 @@ lemma generalConj! [DecidableEq F] {Γ : List F} {p : F} (h : p ∈ Γ) : 𝓢 �
 -- lemma generalConjFinset! [DecidableEq F] {Γ : Finset F} (h : p ∈ Γ) : 𝓢 ⊢! ⋀Γ ⟶ p := by simp [Finset.conj, (generalConj! (Finset.mem_toList.mpr h))];
 
 def implyAnd (bq : 𝓢 ⊢ p ⟶ q) (br : 𝓢 ⊢ p ⟶ r) : 𝓢 ⊢ p ⟶ q ⋏ r :=
-  dhyp p (Minimal.and₃ q r) ⨀₁ bq ⨀₁ br
+  dhyp p and₃ ⨀₁ bq ⨀₁ br
 
 
 def andComm (p q : F) : 𝓢 ⊢ p ⋏ q ⟶ q ⋏ p := implyAnd and₂ and₁
@@ -281,7 +262,7 @@ lemma iff_comm'! (h : 𝓢 ⊢! p ⟷ q) : 𝓢 ⊢! q ⟷ p := ⟨iffComm' h.so
 
 def andImplyIffImplyImply (p q r : F) : 𝓢 ⊢ (p ⋏ q ⟶ r) ⟷ (p ⟶ q ⟶ r) := by
   let b₁ : 𝓢 ⊢ (p ⋏ q ⟶ r) ⟶ p ⟶ q ⟶ r :=
-    imply₁₁ (p ⋏ q ⟶ r) p q ⨀₃ dhyp (p ⋏ q ⟶ r) (Minimal.and₃ p q)
+    imply₁₁ (p ⋏ q ⟶ r) p q ⨀₃ dhyp (p ⋏ q ⟶ r) and₃
   let b₂ : 𝓢 ⊢ (p ⟶ q ⟶ r) ⟶ p ⋏ q ⟶ r :=
     imply₁ ⨀₂ (dhyp (p ⟶ q ⟶ r) and₁) ⨀₂ (dhyp (p ⟶ q ⟶ r) and₂);
   exact iffIntro b₁ b₂
@@ -309,7 +290,7 @@ def implyConj [DecidableEq F] (p : F) (Γ : List F) (b : (q : F) → q ∈ Γ �
 def conjImplyConj [DecidableEq F] {Γ Δ : List F} (h : Δ ⊆ Γ) : 𝓢 ⊢ Γ.conj ⟶ Δ.conj :=
   implyConj _ _ (fun _ hq ↦ generalConj (h hq))
 
-instance [(𝓢 : S) → ModusPonens 𝓢] [(𝓢 : S) → HasEFQ 𝓢] : DeductiveExplosion S := ⟨fun b _ ↦ efq ⨀ b⟩
+instance [(𝓢 : S) → ModusPonens 𝓢] [(𝓢 : S) → HasAxiomEFQ 𝓢] : DeductiveExplosion S := ⟨fun b _ ↦ efq ⨀ b⟩
 
 
 def generalConj' [DecidableEq F] {Γ : List F} {p : F} (h : p ∈ Γ) : 𝓢 ⊢ Γ.conj' ⟶ p :=

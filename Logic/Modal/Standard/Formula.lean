@@ -272,67 +272,6 @@ instance {p : Formula α} : (Formula.SubformulaClosed (p.Subformulas).toSet) whe
 
 end Subformula
 
-
-section Axiomset
-
 abbrev AxiomSet (α) := Set (Formula α)
-
-namespace AxiomSet
-
-open System
-
-variable {p q : Formula α}
-
-protected abbrev K : AxiomSet α := { Axioms.K p q | (p) (q) }
-notation "𝗞" => AxiomSet.K
-
-protected abbrev T : AxiomSet α := { Axioms.T p | p }
-notation "𝗧" => AxiomSet.T
-
-protected abbrev B : AxiomSet α := { Axioms.B p | p }
-notation "𝗕" => AxiomSet.B
-
-protected abbrev D : AxiomSet α := { Axioms.D p | p }
-notation "𝗗" => AxiomSet.D
-
-protected abbrev Four : AxiomSet α := { Axioms.Four p | p }
-notation "𝟰" => AxiomSet.Four
-
-protected abbrev Five : AxiomSet α := { Axioms.Five p | p }
-notation "𝟱" => AxiomSet.Five
-
-protected abbrev L : AxiomSet α := { Axioms.L p | p }
-notation "𝗟" => AxiomSet.L
-
-protected abbrev Dot2 : AxiomSet α := { Axioms.Dot2 p | p }
-notation ".𝟮" => AxiomSet.Dot2
-
-protected abbrev Dot3 : AxiomSet α := { Axioms.Dot3 p q | (p) (q) }
-notation ".𝟯" => AxiomSet.Dot3
-
-protected abbrev Grz : AxiomSet α := { Axioms.Grz p | p }
-notation "𝗚𝗿𝘇" => AxiomSet.Grz
-
-protected abbrev M : AxiomSet α := { Axioms.M p | p }
-notation "𝗠" => AxiomSet.M
-
-protected abbrev CD : AxiomSet α := { Axioms.CD p | p }
-notation "𝗖𝗗" => AxiomSet.CD
-
-protected abbrev C4 : AxiomSet α := { Axioms.C4 p | p }
-notation "𝗖𝟰" => AxiomSet.C4
-
-protected abbrev Ver : AxiomSet α := { Axioms.Ver p | p }
-notation "𝗩𝗲𝗿" => AxiomSet.Ver
-
-protected abbrev Tc : AxiomSet α := { Axioms.Tc p | p }
-notation "𝗧𝗰" => AxiomSet.Tc
-
-protected abbrev H : AxiomSet α := { Axioms.H p | p }
-notation "𝗛" => AxiomSet.H
-
-end AxiomSet
-
-end Axiomset
 
 end LO.Modal.Standard

@@ -18,7 +18,7 @@ lemma IsolatedFrameClass.nonempty : IsolatedFrameClass.Nonempty.{0} := by
   use PointFrame
   simp [Isolated];
 
-lemma axiomVer_defines : 𝗩𝗲𝗿.DefinesKripkeFrameClass (α := α) IsolatedFrameClass := by
+lemma axiomVer_defines : AxiomSet.DefinesKripkeFrameClass (α := α) 𝗩𝗲𝗿 IsolatedFrameClass := by
   simp [AxiomSet.DefinesKripkeFrameClass, Kripke.ValidOnFrame];
   intro F;
   constructor;
@@ -32,7 +32,7 @@ instance : Sound (𝐕𝐞𝐫 : DeductionParameter α) IsolatedFrameClass# := s
 
 instance : System.Consistent (𝐕𝐞𝐫 : DeductionParameter α) := consistent_of_defines axiomVer_defines IsolatedFrameClass.nonempty
 
-lemma isolated_CanonicalFrame {Ax : AxiomSet α} (h : 𝗩𝗲𝗿 ⊆ Ax) [System.Consistent Axᴺ] : Isolated (CanonicalFrame Ax) := by
+lemma isolated_CanonicalFrame {Ax : AxiomSet α} (h : 𝗩𝗲𝗿 ⊆ Ax) [System.Consistent (𝝂Ax)] : Isolated (CanonicalFrame Ax) := by
   intro x y rxy;
   have : (CanonicalModel Ax) ⊧ □⊥ := iff_valid_on_canonicalModel_deducible.mpr $ Normal.maxm! (by aesop);
   exact this x rxy;

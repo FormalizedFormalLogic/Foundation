@@ -55,13 +55,13 @@ instance : System.Minimal 𝓓 where
   or₂ := or₂
   or₃ := or₃
 
-instance [𝓓.IncludeEFQ] : System.HasEFQ 𝓓 where
+instance [𝓓.IncludeEFQ] : System.HasAxiomEFQ 𝓓 where
   efq _ := eaxm $ Set.mem_of_subset_of_mem IncludeEFQ.include_EFQ (by simp);
 
-instance [𝓓.IncludeLEM] : System.HasLEM 𝓓 where
+instance [𝓓.IncludeLEM] : System.HasAxiomLEM 𝓓 where
   lem _ := eaxm $ Set.mem_of_subset_of_mem IncludeLEM.include_LEM (by simp);
 
-instance [𝓓.IncludeDNE] : System.HasDNE 𝓓 where
+instance [𝓓.IncludeDNE] : System.HasAxiomDNE 𝓓 where
   dne _ := eaxm $ Set.mem_of_subset_of_mem IncludeDNE.include_DNE (by simp);
 
 instance [𝓓.IncludeEFQ] : System.Intuitionistic 𝓓 where
