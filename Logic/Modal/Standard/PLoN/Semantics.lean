@@ -209,6 +209,112 @@ lemma N_characterized : 𝐍.CharacterizedByPLoNFrameClass (AllFrameClass α) :=
     simp_all [PLoN.Satisfies];
     try tauto;
 
+
+namespace Frame
+
+variable (F : Frame α)
+
+def SerialOnFormula (p : Formula α) : Prop := Serial (F.Rel' p)
+
+def SerialOnTheory (T : Theory α) : Prop := ∀ p ∈ T, F.SerialOnFormula p
+
+protected def Serial : Prop := ∀ p, F.SerialOnFormula p
+
+
+def TransitiveOnFormula (p : Formula α) : Prop := ∀ {x y z : F.World}, x ≺[□p] y → y ≺[p] z → x ≺[p] z
+
+def TransitiveOnTheory (T : Theory α) : Prop := ∀ p ∈ T, F.SerialOnFormula p
+
+protected def Transitive (F : Frame α) := ∀ p, F.TransitiveOnFormula p
+
+end Frame
+
+
+open System
+
+lemma validRosserRule_of_serial {p : Formula α} {F : PLoN.Frame α} (hSerial : F.SerialOnFormula p) (h : F ⊧ ~p) : F ⊧ ~(□p) := by
+  intro V x;
+  obtain ⟨y, hy⟩ := hSerial x;
+  simp [Formula.PLoN.Satisfies];
+  use y, hy;
+  exact h V y;
+
+lemma validAxiomFour_of_transitive {p : Formula α} {F : PLoN.Frame α} (hTrans : F.TransitiveOnFormula p) : F ⊧ Axioms.Four p := by
+  dsimp [Axioms.Four];
+  intro V x h y rxy z ryz;
+  exact h (hTrans rxy ryz);
+
+
+abbrev TransitiveFrameClass (α) : PLoN.FrameClass α := { F | Frame.Transitive F }
+
+lemma TransitiveFrameClass.nonempty : (TransitiveFrameClass.{_, 0} α).Nonempty := by
+  use terminalFrame α;
+  simp [Frame.Transitive, Frame.TransitiveOnFormula];
+
+
+abbrev SerialFrameClass (α) : PLoN.FrameClass α := { F | Frame.Serial F }
+
+lemma SerialFrameClass.nonempty : (SerialFrameClass.{_, 0} α).Nonempty := by
+  use terminalFrame α;
+  intro p x; use x;
+
+
+abbrev TransitiveSerialFrameClass (α) : PLoN.FrameClass α := { F | F.Transitive ∧ F.Serial }
+
+lemma TransitiveSerialFrameClass.nonempty : (TransitiveSerialFrameClass.{_, 0} α).Nonempty := by
+  use terminalFrame α;
+  simp [Frame.Transitive, Frame.Serial, Frame.TransitiveOnFormula, Frame.SerialOnFormula];
+  intro p x; use x;
+
+
+lemma N4_characterized : 𝐍𝟒.CharacterizedByPLoNFrameClass (TransitiveFrameClass α) := by
+  intro F;
+  simp [DeductionParameter.theory, System.theory, PLoN.ValidOnFrame, PLoN.ValidOnModel];
+  intro hTrans p hp;
+  induction hp using Deduction.inducition_with_necOnly! with
+  | hMaxm h =>
+    obtain ⟨p, e⟩ := h; subst e;
+    exact validAxiomFour_of_transitive (hTrans p);
+  | hMdp ihpq ihp => exact PLoN.ValidOnFrame.mdp ihpq ihp;
+  | hNec ihp => exact PLoN.ValidOnFrame.nec ihp;
+  | hOrElim => exact PLoN.ValidOnFrame.disj₃;
+  | _ => simp_all [PLoN.Satisfies];
+
+lemma NRosser_characterized : 𝐍(𝐑).CharacterizedByPLoNFrameClass (SerialFrameClass α) := by
+  intro F;
+  simp [DeductionParameter.theory, System.theory, PLoN.ValidOnFrame, PLoN.ValidOnModel];
+  intro hSerial p hp;
+  induction hp using Deduction.inducition! with
+  | hMaxm h => simp at h;
+  | hMdp ihpq ihp => exact PLoN.ValidOnFrame.mdp ihpq ihp;
+  | hRules rl hrl hant ih =>
+    rcases hrl with (hNec | hRosser)
+    . obtain ⟨p, e⟩ := hNec; subst e; simp_all;
+      exact PLoN.ValidOnFrame.nec ih;
+    . obtain ⟨p, e⟩ := hRosser; subst e; simp_all;
+      exact validRosserRule_of_serial (hSerial _) ih;
+  | hOrElim => exact PLoN.ValidOnFrame.disj₃;
+  | _ => simp_all [PLoN.Satisfies];
+
+-- TODO: `theory 𝐍𝟒 ∪ theory 𝐍(𝐑) = theory 𝐍𝟒(𝐑)`という事実を示せば共通部分だけで簡単に特徴づけられる気がする
+lemma N4Rosser_characterized : 𝐍𝟒(𝐑).CharacterizedByPLoNFrameClass (TransitiveSerialFrameClass α) := by
+  intro F;
+  simp [DeductionParameter.theory, System.theory, PLoN.ValidOnFrame, PLoN.ValidOnModel];
+  intro hTrans hSerial p hp;
+  induction hp using Deduction.inducition! with
+  | hMaxm h =>
+    obtain ⟨p, e⟩ := h; subst e;
+    exact validAxiomFour_of_transitive (hTrans p);
+  | hMdp ihpq ihp => exact PLoN.ValidOnFrame.mdp ihpq ihp;
+  | hRules rl hrl hant ih =>
+    rcases hrl with (hNec | hRosser)
+    . obtain ⟨p, e⟩ := hNec; subst e; simp_all;
+      exact PLoN.ValidOnFrame.nec ih;
+    . obtain ⟨p, e⟩ := hRosser; subst e; simp_all;
+      exact validRosserRule_of_serial (hSerial _) ih;
+  | hOrElim => exact PLoN.ValidOnFrame.disj₃;
+  | _ => simp_all [PLoN.Satisfies];
+
 end PLoN
 
 end LO.Modal.Standard
