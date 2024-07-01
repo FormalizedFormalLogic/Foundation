@@ -11,8 +11,6 @@ variable {V : Type*} [Zero V] [One V] [Add V] [Mul V] [LT V] [V ⊧ₘ* 𝐈𝚺
 
 variable {L : Arith.Language V} {pL : LDef} [Arith.Language.Defined L pL]
 
-section blueprint
-
 def qqRel (n k r v : V) : V := ⟪n, 0, k, r, v⟫ + 1
 
 def qqNRel (n k r v : V) : V := ⟪n, 1, k, r, v⟫ + 1
@@ -25,9 +23,9 @@ def qqAnd (n p q : V) : V := ⟪n, 4, p, q⟫ + 1
 
 def qqOr (n p q : V) : V := ⟪n, 5, p, q⟫ + 1
 
-def qqForall (n p : V) : V := ⟪n, 6, p⟫ + 1
+def qqAll (n p : V) : V := ⟪n, 6, p⟫ + 1
 
-def qqExists (n p : V) : V := ⟪n, 7, p⟫ + 1
+def qqEx (n p : V) : V := ⟪n, 7, p⟫ + 1
 
 scoped prefix:max "^rel " => qqRel
 
@@ -41,9 +39,9 @@ scoped notation p:69 " ^⋏[" n "] " q:70 => qqAnd n p q
 
 scoped notation p:68 " ^⋎[" n "] " q:69 => qqOr n p q
 
-scoped notation "^∀[" n "] " p:64 => qqForall n p
+scoped notation "^∀[" n "] " p:64 => qqAll n p
 
-scoped notation "^∃[" n "] " p:64 => qqExists n p
+scoped notation "^∃[" n "] " p:64 => qqEx n p
 
 section
 
@@ -65,10 +63,10 @@ def _root_.LO.FirstOrder.Arith.qqAndDef : 𝚺₀-Semisentence 4 :=
 def _root_.LO.FirstOrder.Arith.qqOrDef : 𝚺₀-Semisentence 4 :=
   .mkSigma “r n p q | ∃ r' < r, !pair₄Def r' n 5 p q ∧ r = r' + 1” (by simp)
 
-def _root_.LO.FirstOrder.Arith.qqForallDef : 𝚺₀-Semisentence 3 :=
+def _root_.LO.FirstOrder.Arith.qqAllDef : 𝚺₀-Semisentence 3 :=
   .mkSigma “r n p | ∃ r' < r, !pair₃Def r' n 6 p ∧ r = r' + 1” (by simp)
 
-def _root_.LO.FirstOrder.Arith.qqExistsDef : 𝚺₀-Semisentence 3 :=
+def _root_.LO.FirstOrder.Arith.qqExDef : 𝚺₀-Semisentence 3 :=
   .mkSigma “r n p | ∃ r' < r, !pair₃Def r' n 7 p ∧ r = r' + 1” (by simp)
 
 lemma ss (x : V) : x < x + 1 := by exact lt_add_one x
@@ -109,14 +107,14 @@ lemma qqOr_defined : 𝚺₀-Function₃ (qqOr : V → V → V → V) via qqOrDe
   · intro h; exact ⟨_, by simpa [h] using lt_add_one _, rfl, h⟩
   · rintro ⟨_, _, rfl, h⟩; exact h
 
-lemma qqForall_defined : 𝚺₀-Function₂ (qqForall : V → V → V) via qqForallDef := by
-  intro v; simp [qqForallDef, numeral_eq_natCast]
+lemma qqForall_defined : 𝚺₀-Function₂ (qqAll : V → V → V) via qqAllDef := by
+  intro v; simp [qqAllDef, numeral_eq_natCast]
   constructor
   · intro h; exact ⟨_, by simpa [h] using lt_add_one _, rfl, h⟩
   · rintro ⟨_, _, rfl, h⟩; exact h
 
-lemma qqExists_defined : 𝚺₀-Function₂ (qqExists : V → V → V) via qqExistsDef := by
-  intro v; simp [qqExistsDef, numeral_eq_natCast]
+lemma qqExists_defined : 𝚺₀-Function₂ (qqEx : V → V → V) via qqExDef := by
+  intro v; simp [qqExDef, numeral_eq_natCast]
   constructor
   · intro h; exact ⟨_, by simpa [h] using lt_add_one _, rfl, h⟩
   · rintro ⟨_, _, rfl, h⟩; exact h
@@ -139,11 +137,11 @@ lemma qqExists_defined : 𝚺₀-Function₂ (qqExists : V → V → V) via qqEx
 @[simp] lemma eval_qqOrDef (v) :
     Semiformula.Evalbm V v qqOrDef.val ↔ v 0 = (v 2) ^⋎[v 1] (v 3) := qqOr_defined.df.iff v
 
-@[simp] lemma eval_qqForallDef (v) :
-    Semiformula.Evalbm V v qqForallDef.val ↔ v 0 = ^∀[v 1] (v 2) := qqForall_defined.df.iff v
+@[simp] lemma eval_qqAllDef (v) :
+    Semiformula.Evalbm V v qqAllDef.val ↔ v 0 = ^∀[v 1] (v 2) := qqForall_defined.df.iff v
 
-@[simp] lemma eval_qqExistsDef (v) :
-    Semiformula.Evalbm V v qqExistsDef.val ↔ v 0 = ^∃[v 1] (v 2) := qqExists_defined.df.iff v
+@[simp] lemma eval_qqExDef (v) :
+    Semiformula.Evalbm V v qqExDef.val ↔ v 0 = ^∃[v 1] (v 2) := qqExists_defined.df.iff v
 
 def bv (p : V) : V := π₁ (p - 1)
 
@@ -263,8 +261,8 @@ def formulaAux : 𝚺₀-Semisentence 2 := .mkSigma
     (∃ n < p, !qqFalsumDef p n) ∨
     (∃ n < p, ∃ q < p, ∃ r < p, (q ∈ C ∧ !bvDef n q) ∧ (r ∈ C ∧ !bvDef n r) ∧ !qqAndDef p n q r) ∨
     (∃ n < p, ∃ q < p, ∃ r < p, (q ∈ C ∧ !bvDef n q) ∧ (r ∈ C ∧ !bvDef n r) ∧ !qqOrDef p n q r) ∨
-    (∃ n < p, ∃ q < p, (q ∈ C ∧ !bvDef (n + 1) q) ∧ !qqForallDef p n q) ∨
-    (∃ n < p, ∃ q < p, (q ∈ C ∧ !bvDef (n + 1) q) ∧ !qqExistsDef p n q)”
+    (∃ n < p, ∃ q < p, (q ∈ C ∧ !bvDef (n + 1) q) ∧ !qqAllDef p n q) ∨
+    (∃ n < p, ∃ q < p, (q ∈ C ∧ !bvDef (n + 1) q) ∧ !qqExDef p n q)”
   (by simp)
 
 def blueprint (pL : LDef) : Fixpoint.Blueprint 0 := ⟨.mkDelta
@@ -308,7 +306,7 @@ def construction : Fixpoint.Construction V (blueprint pL) where
           eval_qqNRelDef, eval_qqVerumDef, eval_qqFalsumDef, Semiformula.eval_operator₂,
           Structure.Mem.mem, eval_bvDef, eval_qqAndDef, eval_qqOrDef, Semiterm.val_operator₂,
           Semiterm.val_operator₀, Structure.numeral_eq_numeral, ORingSymbol.one_eq_one,
-          Structure.Add.add, eval_qqForallDef, eval_qqExistsDef, LogicalConnective.Prop.or_eq] using
+          Structure.Add.add, eval_qqAllDef, eval_qqExDef, LogicalConnective.Prop.or_eq] using
           phi_iff L _ _⟩
   monotone := by
     unfold Phi
@@ -344,6 +342,8 @@ instance : (construction L).StrongFinite V where
     · right; exact ⟨n, q, ⟨by simp [hqC], hq⟩, rfl⟩
 
 end FormalizedFormula
+
+section formula
 
 open FormalizedFormula
 
@@ -398,7 +398,7 @@ alias ⟨Language.IsUFormula.case, Language.IsUFormula.mk⟩ := Language.IsUForm
   ⟨by intro h
       rcases h.case with (⟨n, k, r, v, hkr, hv, h⟩ | ⟨_, _, _, _, _, _, h⟩ | ⟨_, h⟩ | ⟨_, h⟩ |
         ⟨_, _, _, _, _, h⟩ | ⟨_, _, _, _, _, h⟩ | ⟨_, _, _, h⟩ | ⟨_, _, _, h⟩) <;>
-          simp [qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqForall, qqExists] at h
+          simp [qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqEx] at h
       · rcases h with ⟨rfl, rfl, rfl, rfl⟩; exact ⟨hkr, hv⟩,
    by rintro ⟨hkr, hv⟩
       exact Language.IsUFormula.mk (Or.inl ⟨n, k, r, v, hkr, hv, rfl⟩)⟩
@@ -408,7 +408,7 @@ alias ⟨Language.IsUFormula.case, Language.IsUFormula.mk⟩ := Language.IsUForm
   ⟨by intro h
       rcases h.case with (⟨_, _, _, _, _, _, h⟩ | ⟨n, k, r, v, hkr, hv, h⟩ | ⟨_, h⟩ | ⟨_, h⟩ |
         ⟨_, _, _, _, _, h⟩ | ⟨_, _, _, _, _, h⟩ | ⟨_, _, _, h⟩ | ⟨_, _, _, h⟩) <;>
-          simp [qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqForall, qqExists] at h
+          simp [qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqEx] at h
       · rcases h with ⟨rfl, rfl, rfl, rfl⟩; exact ⟨hkr, hv⟩,
    by rintro ⟨hkr, hv⟩
       exact Language.IsUFormula.mk (Or.inr <| Or.inl ⟨n, k, r, v, hkr, hv, rfl⟩)⟩
@@ -424,7 +424,7 @@ alias ⟨Language.IsUFormula.case, Language.IsUFormula.mk⟩ := Language.IsUForm
   ⟨by intro h
       rcases h.case with (⟨_, _, _, _, _, _, h⟩ | ⟨_, _, _, _, _, _, h⟩ | ⟨_, h⟩ | ⟨_, h⟩ |
         ⟨_, _, _, hp, hq, h⟩ | ⟨_, _, _, _, _, h⟩ | ⟨_, _, _, h⟩ | ⟨_, _, _, h⟩) <;>
-          simp [qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqForall, qqExists] at h
+          simp [qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqEx] at h
       · rcases h with ⟨rfl, rfl, rfl, rfl⟩; exact ⟨⟨hp.1, Eq.symm hp.2⟩, ⟨hq.1, Eq.symm hq.2⟩⟩,
    by rintro ⟨hp, hq⟩
       exact Language.IsUFormula.mk (Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl
@@ -435,7 +435,7 @@ alias ⟨Language.IsUFormula.case, Language.IsUFormula.mk⟩ := Language.IsUForm
   ⟨by intro h
       rcases h.case with (⟨_, _, _, _, _, _, h⟩ | ⟨_, _, _, _, _, _, h⟩ | ⟨_, h⟩ | ⟨_, h⟩ |
         ⟨_, _, _, _, _, h⟩ | ⟨_, _, _, hp, hq, h⟩ | ⟨_, _, _, h⟩ | ⟨_, _, _, h⟩) <;>
-          simp [qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqForall, qqExists] at h
+          simp [qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqEx] at h
       · rcases h with ⟨rfl, rfl, rfl, rfl⟩; exact ⟨⟨hp.1, Eq.symm hp.2⟩, ⟨hq.1, Eq.symm hq.2⟩⟩,
    by rintro ⟨hp, hq⟩
       exact Language.IsUFormula.mk (Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl
@@ -446,7 +446,7 @@ alias ⟨Language.IsUFormula.case, Language.IsUFormula.mk⟩ := Language.IsUForm
   ⟨by intro h
       rcases h.case with (⟨_, _, _, _, _, _, h⟩ | ⟨_, _, _, _, _, _, h⟩ | ⟨_, h⟩ | ⟨_, h⟩ |
         ⟨_, _, _, _, _, h⟩ | ⟨_, _, _, _, _, h⟩ | ⟨_, _, hp, h⟩ | ⟨_, _, _, h⟩) <;>
-          simp [qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqForall, qqExists] at h
+          simp [qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqEx] at h
       · rcases h with ⟨rfl, rfl, rfl, rfl⟩; exact ⟨hp.1, Eq.symm hp.2⟩,
    by rintro hp
       exact Language.IsUFormula.mk (Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl ⟨n, p, ⟨hp.1, Eq.symm hp.2⟩, rfl⟩)⟩
@@ -456,7 +456,7 @@ alias ⟨Language.IsUFormula.case, Language.IsUFormula.mk⟩ := Language.IsUForm
   ⟨by intro h
       rcases h.case with (⟨_, _, _, _, _, _, h⟩ | ⟨_, _, _, _, _, _, h⟩ | ⟨_, h⟩ | ⟨_, h⟩ |
         ⟨_, _, _, _, _, h⟩ | ⟨_, _, _, _, _, h⟩ | ⟨_, _, _, h⟩ | ⟨_, _, hp, h⟩) <;>
-          simp [qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqForall, qqExists] at h
+          simp [qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqEx] at h
       · rcases h with ⟨rfl, rfl, rfl, rfl⟩; exact ⟨hp.1, Eq.symm hp.2⟩,
    by rintro hp
       exact Language.IsUFormula.mk (Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr ⟨n, p, ⟨hp.1, Eq.symm hp.2⟩, rfl⟩)⟩
@@ -483,17 +483,19 @@ lemma Language.IsUFormula.induction (Γ) {P : V → Prop} (hP : (Γ, 1)-Predicat
     · exact hall n p ⟨(hC p hp).1, Eq.symm hnp⟩ (hC p hp).2
     · exact hex n p ⟨(hC p hp).1, Eq.symm hnp⟩ (hC p hp).2)
 
+end formula
+
 namespace Language.UformulaRec
 
 structure Blueprint (pL : LDef) (k : ℕ) where
-  rel : 𝚺₁-Semisentence (n + 5)
-  nrel : 𝚺₁-Semisentence (n + 5)
-  verum : 𝚺₁-Semisentence (n + 1)
-  falsum : 𝚺₁-Semisentence (n + 1)
-  and : 𝚺₁-Semisentence (n + 3)
-  or : 𝚺₁-Semisentence (n + 3)
-  all : 𝚺₁-Semisentence (n + 3)
-  ex : 𝚺₁-Semisentence (n + 3)
+  rel : 𝚺₁-Semisentence (k + 5)
+  nrel : 𝚺₁-Semisentence (k + 5)
+  verum : 𝚺₁-Semisentence (k + 2)
+  falsum : 𝚺₁-Semisentence (k + 2)
+  and : 𝚺₁-Semisentence (k + 4)
+  or : 𝚺₁-Semisentence (k + 4)
+  all : 𝚺₁-Semisentence (k + 3)
+  ex : 𝚺₁-Semisentence (k + 3)
 
 namespace Blueprint
 
@@ -511,9 +513,9 @@ def blueprint (β : Blueprint pL k) : Fixpoint.Blueprint k := ⟨.mkDelta
     (∃ n < p, ∃ p₁ < p, ∃ p₂ < p, ∃ r₁ < C, ∃ r₂ < C,
       p₁ ~[C] r₁ ∧ p₂ ~[C] r₂ ∧ !qqOrDef p n p₁ p₂ ∧ !β.or.val r n r₁ r₂ ⋯) ∨
     (∃ n < p, ∃ p₁ < p, ∃ r₁ < C,
-      p₁ ~[C] r₁ ∧ !qqForallDef p n p₁ ∧ !β.all.val r n r₁ ⋯) ∨
+      p₁ ~[C] r₁ ∧ !qqAllDef p n p₁ ∧ !β.all.val r n r₁ ⋯) ∨
     (∃ n < p, ∃ p₁ < p, ∃ r₁ < C,
-      p₁ ~[C] r₁ ∧ !qqExistsDef p n p₁ ∧ !β.ex.val r n r₁ ⋯))
+      p₁ ~[C] r₁ ∧ !qqExDef p n p₁ ∧ !β.ex.val r n r₁ ⋯))
   ” (by simp))
   (.mkPi “pr C |
     ∃ p <⁺ pr, ∃ r <⁺ pr, !pairDef pr p r ∧ !pL.isUFormulaDef.pi p ∧
@@ -526,9 +528,9 @@ def blueprint (β : Blueprint pL k) : Fixpoint.Blueprint k := ⟨.mkDelta
     (∃ n < p, ∃ p₁ < p, ∃ p₂ < p, ∃ r₁ < C, ∃ r₂ < C,
       p₁ ~[C] r₁ ∧ p₂ ~[C] r₂ ∧ !qqOrDef p n p₁ p₂ ∧ !β.or.graphDelta.pi.val r n r₁ r₂ ⋯) ∨
     (∃ n < p, ∃ p₁ < p, ∃ r₁ < C,
-      p₁ ~[C] r₁ ∧ !qqForallDef p n p₁ ∧ !β.all.graphDelta.pi.val r n r₁ ⋯) ∨
+      p₁ ~[C] r₁ ∧ !qqAllDef p n p₁ ∧ !β.all.graphDelta.pi.val r n r₁ ⋯) ∨
     (∃ n < p, ∃ p₁ < p, ∃ r₁ < C,
-      p₁ ~[C] r₁ ∧ !qqExistsDef p n p₁ ∧ !β.ex.graphDelta.pi.val r n r₁ ⋯))
+      p₁ ~[C] r₁ ∧ !qqExDef p n p₁ ∧ !β.ex.graphDelta.pi.val r n r₁ ⋯))
   ” (by simp))⟩
 
 def graph : 𝚺₁-Semisentence (k + 2) := .mkSigma
@@ -655,7 +657,7 @@ def construction : Fixpoint.Construction V (β.blueprint) where
         Semiformula.eval_bexLT, Matrix.cons_val_three, Matrix.cons_val_four, Matrix.cons_app_five,
         eval_qqRelDef, Fin.succ_one_eq_two, c.rel_defined.iff, LogicalConnective.Prop.and_eq,
         eval_qqNRelDef, c.nrel_defined.iff, eval_qqVerumDef, c.verum_defined.iff, eval_qqFalsumDef,
-        c.falsum_defined.iff, eval_qqAndDef, c.and_defined.iff, c.or_defined.iff, eval_qqForallDef,
+        c.falsum_defined.iff, eval_qqAndDef, c.and_defined.iff, c.or_defined.iff, eval_qqAllDef,
         c.all_defined.iff, c.ex_defined.iff, LogicalConnective.Prop.or_eq, HSemiformula.pi_mkDelta,
         HSemiformula.val_mkPi, (isUFormula_defined L).proper.iff',
         c.rel_defined.graph_delta.proper.iff', HSemiformula.graphDelta_val,
@@ -689,7 +691,7 @@ def construction : Fixpoint.Construction V (β.blueprint) where
           eval_qqVerumDef, c.verum_defined.iff, eval_qqFalsumDef, c.falsum_defined.iff,
           Matrix.cons_app_six, Matrix.cons_app_seven, Semiformula.eval_operator₃,
           Matrix.cons_app_eight, eval_memRel, eval_qqAndDef, c.and_defined.iff, eval_qqOrDef,
-          c.or_defined.iff, eval_qqForallDef, c.all_defined.iff, eval_qqExistsDef, c.ex_defined.iff,
+          c.or_defined.iff, eval_qqAllDef, c.all_defined.iff, eval_qqExDef, c.ex_defined.iff,
           LogicalConnective.Prop.or_eq] using c.phi_iff _ _ _⟩
   monotone := by
     unfold Phi
@@ -780,8 +782,8 @@ lemma graph_rel_iff {n k r v y} (hkr : L.Rel k r) (hv : L.TermSeq k n v) :
     · simp [qqRel, qqFalsum] at H
     · simp [qqRel, qqAnd] at H
     · simp [qqRel, qqOr] at H
-    · simp [qqRel, qqForall] at H
-    · simp [qqRel, qqExists] at H
+    · simp [qqRel, qqAll] at H
+    · simp [qqRel, qqEx] at H
   · rintro rfl; exact (Graph.case_iff).mpr ⟨by simp [hkr, hv], Or.inl ⟨n, k, r, v, rfl, rfl⟩⟩
 
 lemma graph_nrel_iff {n k r v y} (hkr : L.Rel k r) (hv : L.TermSeq k n v) :
@@ -796,8 +798,8 @@ lemma graph_nrel_iff {n k r v y} (hkr : L.Rel k r) (hv : L.TermSeq k n v) :
     · simp [qqNRel, qqFalsum] at H
     · simp [qqNRel, qqAnd] at H
     · simp [qqNRel, qqOr] at H
-    · simp [qqNRel, qqForall] at H
-    · simp [qqNRel, qqExists] at H
+    · simp [qqNRel, qqAll] at H
+    · simp [qqNRel, qqEx] at H
   · rintro rfl; exact (Graph.case_iff).mpr ⟨by simp [hkr, hv], Or.inr <| Or.inl ⟨n, k, r, v, rfl, rfl⟩⟩
 
 lemma graph_verum_iff {n y} :
@@ -812,8 +814,8 @@ lemma graph_verum_iff {n y} :
     · simp [qqVerum, qqFalsum] at H
     · simp [qqVerum, qqAnd] at H
     · simp [qqVerum, qqOr] at H
-    · simp [qqVerum, qqForall] at H
-    · simp [qqVerum, qqExists] at H
+    · simp [qqVerum, qqAll] at H
+    · simp [qqVerum, qqEx] at H
   · rintro rfl; exact (Graph.case_iff).mpr ⟨by simp, Or.inr <| Or.inr <| Or.inl ⟨n, rfl, rfl⟩⟩
 
 lemma graph_falsum_iff {n y} :
@@ -828,8 +830,8 @@ lemma graph_falsum_iff {n y} :
     · simp [qqFalsum, qqFalsum] at H; rcases H; rfl
     · simp [qqFalsum, qqAnd] at H
     · simp [qqFalsum, qqOr] at H
-    · simp [qqFalsum, qqForall] at H
-    · simp [qqFalsum, qqExists] at H
+    · simp [qqFalsum, qqAll] at H
+    · simp [qqFalsum, qqEx] at H
   · rintro rfl; exact (Graph.case_iff).mpr ⟨by simp, Or.inr <| Or.inr <| Or.inr <| Or.inl ⟨n, rfl, rfl⟩⟩
 
 lemma graph_rel {n k r v} (hkr : L.Rel k r) (hv : L.TermSeq k n v) :
@@ -866,8 +868,8 @@ lemma graph_and_inv {n p₁ p₂ r : V} :
   · simp [qqAnd, qqAnd] at H; rcases H with ⟨rfl, rfl, rfl⟩
     exact ⟨_, _, by assumption, by assumption, rfl⟩
   · simp [qqAnd, qqOr] at H
-  · simp [qqAnd, qqForall] at H
-  · simp [qqAnd, qqExists] at H
+  · simp [qqAnd, qqAll] at H
+  · simp [qqAnd, qqEx] at H
 
 lemma graph_or {n p₁ p₂ r₁ r₂ : V} (hp₁ : L.IsSemiformula n p₁) (hp₂ : L.IsSemiformula n p₂)
     (h₁ : c.Graph param p₁ r₁) (h₂ : c.Graph param p₂ r₂) :
@@ -887,8 +889,8 @@ lemma graph_or_inv {n p₁ p₂ r : V} :
   · simp [qqOr, qqAnd] at H
   · simp [qqOr, qqOr] at H; rcases H with ⟨rfl, rfl, rfl⟩
     exact ⟨_, _, by assumption, by assumption, rfl⟩
-  · simp [qqOr, qqForall] at H
-  · simp [qqOr, qqExists] at H
+  · simp [qqOr, qqAll] at H
+  · simp [qqOr, qqEx] at H
 
 lemma graph_all {n p₁ r₁ : V} (hp₁ : L.IsSemiformula (n + 1) p₁) (h₁ : c.Graph param p₁ r₁) :
     c.Graph param (^∀[n] p₁) (c.all param n r₁) :=
@@ -900,15 +902,15 @@ lemma graph_all_inv {n p₁ r : V} :
   intro h
   rcases Graph.case_iff.mp h with ⟨_, (⟨_, _, _, _, H, _⟩ | ⟨_, _, _, _, H, _⟩ | ⟨_, H, _⟩ | ⟨_, H, _⟩ |
     ⟨_, _, _, _, _, _, _, H, _⟩ | ⟨_, _, _, _, _, _, _, H, _⟩ | ⟨_, _, _, _, H, rfl⟩ | ⟨_, _, _, _, H, _⟩)⟩
-  · simp [qqForall, qqRel] at H
-  · simp [qqForall, qqNRel] at H
-  · simp [qqForall, qqVerum] at H
-  · simp [qqForall, qqFalsum] at H
-  · simp [qqForall, qqAnd] at H
-  · simp [qqForall, qqOr] at H
-  · simp [qqForall, qqForall] at H; rcases H with ⟨rfl, rfl⟩
+  · simp [qqAll, qqRel] at H
+  · simp [qqAll, qqNRel] at H
+  · simp [qqAll, qqVerum] at H
+  · simp [qqAll, qqFalsum] at H
+  · simp [qqAll, qqAnd] at H
+  · simp [qqAll, qqOr] at H
+  · simp [qqAll, qqAll] at H; rcases H with ⟨rfl, rfl⟩
     exact ⟨_, by assumption, rfl⟩
-  · simp [qqForall, qqExists] at H
+  · simp [qqAll, qqEx] at H
 
 lemma graph_ex {n p₁ r₁ : V} (hp₁ : L.IsSemiformula (n + 1) p₁) (h₁ : c.Graph param p₁ r₁) :
     c.Graph param (^∃[n] p₁) (c.ex param n r₁) :=
@@ -920,14 +922,14 @@ lemma graph_ex_inv {n p₁ r : V} :
   intro h
   rcases Graph.case_iff.mp h with ⟨_, (⟨_, _, _, _, H, _⟩ | ⟨_, _, _, _, H, _⟩ | ⟨_, H, _⟩ | ⟨_, H, _⟩ |
     ⟨_, _, _, _, _, _, _, H, _⟩ | ⟨_, _, _, _, _, _, _, H, _⟩ | ⟨_, _, _, _, H, _⟩ | ⟨_, _, _, _, H, rfl⟩)⟩
-  · simp [qqExists, qqRel] at H
-  · simp [qqExists, qqNRel] at H
-  · simp [qqExists, qqVerum] at H
-  · simp [qqExists, qqFalsum] at H
-  · simp [qqExists, qqAnd] at H
-  · simp [qqExists, qqOr] at H
-  · simp [qqExists, qqForall] at H
-  · simp [qqExists, qqExists] at H; rcases H with ⟨rfl, rfl⟩
+  · simp [qqEx, qqRel] at H
+  · simp [qqEx, qqNRel] at H
+  · simp [qqEx, qqVerum] at H
+  · simp [qqEx, qqFalsum] at H
+  · simp [qqEx, qqAnd] at H
+  · simp [qqEx, qqOr] at H
+  · simp [qqEx, qqAll] at H
+  · simp [qqEx, qqEx] at H; rcases H with ⟨rfl, rfl⟩
     exact ⟨_, by assumption, rfl⟩
 
 variable (param)
@@ -1056,7 +1058,157 @@ end Construction
 
 end Language.UformulaRec
 
-end blueprint
+namespace Negation
+
+def blueprint (pL : LDef) : Language.UformulaRec.Blueprint pL 0 where
+  rel := .mkSigma “y n k R v | !qqNRelDef y n k R v” (by simp)
+  nrel := .mkSigma “y n k R v | !qqRelDef y n k R v” (by simp)
+  verum := .mkSigma “y n | !qqFalsumDef y n” (by simp)
+  falsum := .mkSigma “y n | !qqVerumDef y n” (by simp)
+  and := .mkSigma “y n y₁ y₂ | !qqOrDef y n y₁ y₂” (by simp)
+  or := .mkSigma “y n y₁ y₂ | !qqAndDef y n y₁ y₂” (by simp)
+  all := .mkSigma “y n y₁ | !qqExDef y n y₁” (by simp)
+  ex := .mkSigma “y n y₁ | !qqAllDef y n y₁” (by simp)
+
+variable (L)
+
+def construction : Language.UformulaRec.Construction V L (blueprint pL) where
+  rel {_} := fun n k R v ↦ ^nrel n k R v
+  nrel {_} := fun n k R v ↦ ^rel n k R v
+  verum {_} := fun n ↦ ^⊥[n]
+  falsum {_} := fun n ↦ ^⊤[n]
+  and {_} := fun n y₁ y₂ ↦ y₁ ^⋎[n] y₂
+  or {_} := fun n y₁ y₂ ↦ y₁ ^⋏[n] y₂
+  all {_} := fun n y₁ ↦ ^∃[n] y₁
+  ex {_} := fun n y₁ ↦ ^∀[n] y₁
+  rel_defined := by intro v; simp [blueprint]; rfl
+  nrel_defined := by intro v; simp [blueprint]; rfl
+  verum_defined := by intro v; simp [blueprint]
+  falsum_defined := by intro v; simp [blueprint]
+  and_defined := by intro v; simp [blueprint]; rfl
+  or_defined := by intro v; simp [blueprint]; rfl
+  all_defined := by intro v; simp [blueprint]
+  ex_defined := by intro v; simp [blueprint]
+
+end Negation
+
+section negation
+
+open Negation
+
+variable (L)
+
+def Language.neg (p : V) : V := (construction L).result ![] p
+
+variable {L}
+
+@[simp] lemma neg_rel {n k R v} (hR : L.Rel k R) (hv : L.TermSeq k n v) :
+    L.neg (^rel n k R v) = ^nrel n k R v := by simp [Language.neg, hR, hv, construction]
+
+@[simp] lemma neg_nrel {n k R v} (hR : L.Rel k R) (hv : L.TermSeq k n v) :
+    L.neg (^nrel n k R v) = ^rel n k R v := by simp [Language.neg, hR, hv, construction]
+
+@[simp] lemma neg_verum (n) :
+    L.neg ^⊤[n] = ^⊥[n] := by simp [Language.neg, construction]
+
+@[simp] lemma neg_falsum (n) :
+    L.neg ^⊥[n] = ^⊤[n] := by simp [Language.neg, construction]
+
+@[simp] lemma neg_and {n p q} (hp : L.IsSemiformula n p) (hq : L.IsSemiformula n q) :
+    L.neg (p ^⋏[n] q) = L.neg p ^⋎[n] L.neg q := by simp [Language.neg, hp, hq, construction]
+
+@[simp] lemma neg_or {n p q} (hp : L.IsSemiformula n p) (hq : L.IsSemiformula n q) :
+    L.neg (p ^⋎[n] q) = L.neg p ^⋏[n] L.neg q := by simp [Language.neg, hp, hq, construction]
+
+@[simp] lemma neg_all {n p} (hp : L.IsSemiformula (n + 1) p) :
+    L.neg (^∀[n] p) = ^∃[n] (L.neg p) := by simp [Language.neg, hp, construction]
+
+@[simp] lemma neg_ex {n p} (hp : L.IsSemiformula (n + 1) p) :
+    L.neg (^∃[n] p) = ^∀[n] (L.neg p) := by simp [Language.neg, hp, construction]
+
+section
+
+def _root_.LO.FirstOrder.Arith.LDef.negDef (pL : LDef) : 𝚺₁-Semisentence 2 := (blueprint pL).result
+
+variable (L)
+
+lemma neg_defined : 𝚺₁-Function₁ L.neg via pL.negDef := (construction L).result_defined
+
+@[simp] lemma neg_defined_iff (v : Fin 2 → V) :
+    Semiformula.Evalbm (L := ℒₒᵣ) V v pL.negDef ↔ v 0 = L.neg (v 1) := (neg_defined L).df.iff v
+
+instance neg_definable : 𝚺₁-Function₁ L.neg :=
+  Defined.to_definable _ (neg_defined L)
+
+@[simp, definability] instance neg_definable' (Γ) : (Γ, m + 1)-Function₁ L.neg :=
+  .of_sigmaOne (neg_definable L) _ _
+
+end
+
+end negation
+
+section substs
+
+/- TODO: remove -/
+theorem existsUnique_congr {p q : α → Prop} (h : ∀ a, p a ↔ q a) : (∃! a, p a) ↔ ∃! a, q a :=
+  exists_congr fun _ ↦ and_congr (h _) <| forall_congr' fun _ ↦ imp_congr_left (h _)
+
+lemma Language.TermSeq.substs_exists_unique {k n m v w : V} (hv : L.TermSeq n m v) (hw : L.TermSeq k n w) :
+    ∃! w', L.TermSeq k m w' ∧ ∀ i z z', ⟪i, z⟫ ∈ w → ⟪i, z'⟫ ∈ w' → z' = L.termSubst n m v z := by
+  have : ∀ i < k, ∃! z', ∀ z < w, ⟪i, z⟫ ∈ w → z' = L.termSubst n m v z := by
+    intro i hi
+    apply ExistsUnique.intro (L.termSubst n m v (hw.seq.nth (show i < lh w by simpa [←hw.lh] using hi)))
+    · intro z _ hiz; simp [hw.seq.nth_uniq (show i < lh w by simpa [←hw.lh] using hi) hiz]
+    · intro y hy; exact hy _ (by simp) (by simp)
+  refine (existsUnique_congr ?_).mp (sigmaOne_skolem_seq! (by definability) this)
+  intro w'; constructor
+  · rintro ⟨Hw', rfl, hw'w⟩; exact ⟨⟨Hw', rfl, fun i u hi ↦ by
+    have : i < lh w := by simpa [←hw.lh] using Hw'.lt_lh_of_mem hi
+    rcases hw'w i u hi _ (hw.seq.nth_lt this) (by simp)
+    apply hv.substs_isterm (hw.prop i _ (by simp))⟩, fun i z z' hiz hiz' ↦ hw'w i z' hiz' z (lt_of_mem_rng hiz) hiz⟩
+  · rintro ⟨hw', h⟩
+    exact ⟨hw'.seq, Eq.symm hw'.lh, fun i z hiz z' _ hiz' ↦ h i z' z hiz' hiz⟩
+
+lemma Language.TermSeq.substs_exists_unique' (k n m v w : V) : ∃! w',
+    (L.TermSeq n m v ∧ L.TermSeq k n w → L.TermSeq k m w' ∧ ∀ i z z', ⟪i, z⟫ ∈ w → ⟪i, z'⟫ ∈ w' → z' = L.termSubst n m v z) ∧
+    (¬(L.TermSeq n m v ∧ L.TermSeq k n w) → w' = 0) := by
+  by_cases h : L.TermSeq n m v ∧ L.TermSeq k n w <;> simp [h]
+  exact h.1.substs_exists_unique h.2
+
+/-
+def blueprint (pL : LDef) : Language.UformulaRec.Blueprint pL 0 where
+  rel := .mkSigma “y n k R v | !qqNRelDef y n k R v” (by simp)
+  nrel := .mkSigma “y n k R v | !qqRelDef y n k R v” (by simp)
+  verum := .mkSigma “y n | !qqFalsumDef y n” (by simp)
+  falsum := .mkSigma “y n | !qqVerumDef y n” (by simp)
+  and := .mkSigma “y n y₁ y₂ | !qqOrDef y n y₁ y₂” (by simp)
+  or := .mkSigma “y n y₁ y₂ | !qqAndDef y n y₁ y₂” (by simp)
+  all := .mkSigma “y n y₁ | !qqExDef y n y₁” (by simp)
+  ex := .mkSigma “y n y₁ | !qqAllDef y n y₁” (by simp)
+
+variable (L)
+
+def construction : Language.UformulaRec.Construction V L (blueprint pL) where
+  rel {_} := fun n k R v ↦ ^nrel n k R v
+  nrel {_} := fun n k R v ↦ ^rel n k R v
+  verum {_} := fun n ↦ ^⊥[n]
+  falsum {_} := fun n ↦ ^⊤[n]
+  and {_} := fun n y₁ y₂ ↦ y₁ ^⋎[n] y₂
+  or {_} := fun n y₁ y₂ ↦ y₁ ^⋏[n] y₂
+  all {_} := fun n y₁ ↦ ^∃[n] y₁
+  ex {_} := fun n y₁ ↦ ^∀[n] y₁
+  rel_defined := by intro v; simp [blueprint]; rfl
+  nrel_defined := by intro v; simp [blueprint]; rfl
+  verum_defined := by intro v; simp [blueprint]
+  falsum_defined := by intro v; simp [blueprint]
+  and_defined := by intro v; simp [blueprint]; rfl
+  or_defined := by intro v; simp [blueprint]; rfl
+  all_defined := by intro v; simp [blueprint]
+  ex_defined := by intro v; simp [blueprint]
+
+-/
+
+end substs
 
 end LO.Arith
 

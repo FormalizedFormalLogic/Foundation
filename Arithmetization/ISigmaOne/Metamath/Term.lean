@@ -480,6 +480,9 @@ variable {L}
 def Language.TermSeq.spec_of_semiterm {n m w t : V} (TSw : L.TermSeq n m w) (ht : L.IsSemiterm n t) : Subst L n m w ⟪t, L.termSubst n m w t⟫ :=
   Classical.choose!_spec (Subst.rng_exists_unique_total L n m w t) |>.1 ⟨TSw, ht⟩
 
+def Language.TermSeq.substs_isterm {n m w t : V} (TSw : L.TermSeq n m w) (ht : L.IsSemiterm n t) :
+    L.IsSemiterm m (L.termSubst n m w t) := TSw.spec_of_semiterm ht |>.semiterm₂
+
 def termSubst_spec {n m w t : V} :
     ¬(L.TermSeq n m w ∧ L.IsSemiterm n t) → L.termSubst n m w t = 0 :=
   Classical.choose!_spec (Subst.rng_exists_unique_total L n m w t) |>.2
@@ -531,6 +534,15 @@ lemma termSubst_defined : 𝚺₁-Function₄ L.termSubst via pL.termSubstDef :=
 
 instance termSubst_definable : 𝚺₁-Function₄ L.termSubst :=
   Defined.to_definable _ (termSubst_defined L)
+/-
+@[simp, definability] instance termSubst_definable' (Γ m) : (Γ, m + 1)-Function₄ L.termSubst :=
+  .of_sigmaOne (termSubst_definable L) _ _
+-/
+instance termSubst_definable₂ (n m) : 𝚺₁-Function₂ (L.termSubst n m) := by
+  simpa using DefinableFunction.retractiont (n := 2) (termSubst_definable L) ![&n, &m, #0, #1]
+
+@[simp, definability] instance termSubst_definable₂' (Γ l n m) : (Γ, l + 1)-Function₂ (L.termSubst n m) :=
+  .of_sigmaOne (termSubst_definable₂ L n m) _ _
 
 end
 

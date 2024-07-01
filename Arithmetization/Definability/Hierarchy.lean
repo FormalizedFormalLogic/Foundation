@@ -575,6 +575,8 @@ abbrev DefinableRel₃ (P : M → M → M → Prop) : Prop := Definable L Γ (k 
 
 abbrev DefinableRel₄ (P : M → M → M → M → Prop) : Prop := Definable L Γ (k := 4) (fun v ↦ P (v 0) (v 1) (v 2) (v 3))
 
+abbrev DefinableRel₅ (P : M → M → M → M → M → Prop) : Prop := Definable L Γ (k := 5) (fun v ↦ P (v 0) (v 1) (v 2) (v 3) (v 4))
+
 abbrev DefinableFunction (f : (Fin k → M) → M) : Prop := Definable L Γ (k := k + 1) (fun v ↦ v 0 = f (v ·.succ))
 
 abbrev DefinableFunction₁ (f : M → M) : Prop := DefinableFunction L Γ (k := 1) (fun v ↦ f (v 0))
@@ -849,6 +851,15 @@ lemma retraction (h : Definable L Γ P) (f : Fin k → Fin n) :
   | (𝚷, _) => by intro; simp [h.df.iff]
   | (𝚫, _) => ⟨h.proper.rew _, by intro; simp [h.df.iff]⟩⟩
 
+lemma retractiont (h : Definable L Γ P) (f : Fin k → Semiterm L M n) :
+    Definable L Γ fun v ↦ P (fun i ↦ Semiterm.valm M v id (f i)) := by
+  rcases h with ⟨p, h⟩
+  exact ⟨p.rew (Rew.substs f),
+  match Γ with
+  | (𝚺, _) => by intro; simp [h.df.iff]
+  | (𝚷, _) => by intro; simp [h.df.iff]
+  | (𝚫, _) => ⟨h.proper.rew _, by intro; simp [h.df.iff]⟩⟩
+
 lemma const {P : Prop} : Definable L Γ (fun _ : Fin k → M ↦ P) := of_zero (by
   by_cases hP : P
   · exact ⟨.mkSigma ⊤ (by simp), by intro; simp[hP]⟩
@@ -1028,6 +1039,61 @@ lemma comp₄' {k} {P : M → M → M → M → Prop} {f₁ f₂ f₃ f₄ : (Fi
     {Γ : SigmaPiDelta} [DefinableRel₄ L (Γ, m + 1) P] : Definable L (Γ, m + 1) (fun v ↦ P (f₁ v) (f₂ v) (f₃ v) (f₄ v)) :=
   comp₄ hf₁ hf₂ hf₃ hf₄ inferInstance
 
+/-
+lemma comp₅ {k} {P : M → M → M → M → M → Prop} {f₁ f₂ f₃ f₄ f₅ : (Fin k → M) → M}
+    (hf₁ : DefinableFunction L (𝚺, m + 1) f₁) (hf₂ : DefinableFunction L (𝚺, m + 1) f₂)
+    (hf₃ : DefinableFunction L (𝚺, m + 1) f₃) (hf₄ : DefinableFunction L (𝚺, m + 1) f₄)
+    (hf₅ : DefinableFunction L (𝚺, m + 1) f₅)
+    {Γ : SigmaPiDelta} (hP : DefinableRel₅ L (Γ, m + 1) P) : Definable L (Γ, m + 1) (fun v ↦ P (f₁ v) (f₂ v) (f₃ v) (f₄ v) (f₅ v)) := by
+  rcases hf₁ with ⟨pf₁, hpf₁⟩; rcases hf₂ with ⟨pf₂, hpf₂⟩; rcases hf₃ with ⟨pf₃, hpf₃⟩
+  rcases hf₄ with ⟨pf₄, hpf₄⟩; rcases hf₅ with ⟨pf₅, hpf₅⟩
+  match Γ with
+  | 𝚺 =>
+    rcases hP with ⟨p, hp⟩
+    exact
+      ⟨(  pf₁.rew (Rew.substs $ #0 :> (#·.succ.succ.succ.succ.succ))
+        ⋏ pf₂.rew (Rew.substs $ #1 :> (#·.succ.succ.succ.succ.succ))
+        ⋏ pf₃.rew (Rew.substs $ #2 :> (#·.succ.succ.succ.succ.succ))
+        ⋏ pf₄.rew (Rew.substs $ #3 :> (#·.succ.succ.succ.succ.succ))
+        ⋏ pf₅.rew (Rew.substs $ #4 :> (#·.succ.succ.succ.succ.succ))
+        ⋏ (p.rew [→ #0, #1, #2, #3, #4])).ex.ex.ex.ex.ex, by
+      intro v; simp [hp.df.iff, hpf₁.df.iff, hpf₂.df.iff, hpf₃.df.iff, hpf₄.df.iff, hpf₅.df.iff]⟩
+  | 𝚷 =>
+    rcases hP with ⟨p, hp⟩
+    exact
+      ⟨(  (pf₁.rew (Rew.substs $ #0 :> (#·.succ.succ.succ.succ.succ))).negSigma
+        ⋎ (pf₂.rew (Rew.substs $ #1 :> (#·.succ.succ.succ.succ.succ))).negSigma
+        ⋎ (pf₃.rew (Rew.substs $ #2 :> (#·.succ.succ.succ.succ.succ))).negSigma
+        ⋎ (pf₄.rew (Rew.substs $ #3 :> (#·.succ.succ.succ.succ.succ))).negSigma
+        ⋎ (pf₅.rew (Rew.substs $ #4 :> (#·.succ.succ.succ.succ.succ))).negSigma
+        ⋎ (p.rew [→ #0, #1, #2, #3, #4])).all.all.all.all.all, by
+      intro v; simp [hp.df.iff, hpf₁.df.iff, hpf₂.df.iff, hpf₃.df.iff, hpf₄.df.iff, hpf₅.df.iff, ←imp_iff_not_or]⟩
+  | 𝚫 =>
+    rcases hP with ⟨p, hp⟩
+    exact of_sigma_of_pi
+      ⟨(  pf₁.rew (Rew.substs $ #0 :> (#·.succ.succ.succ.succ.succ))
+        ⋏ pf₂.rew (Rew.substs $ #1 :> (#·.succ.succ.succ.succ.succ))
+        ⋏ pf₃.rew (Rew.substs $ #2 :> (#·.succ.succ.succ.succ.succ))
+        ⋏ pf₄.rew (Rew.substs $ #3 :> (#·.succ.succ.succ.succ.succ))
+        ⋏ pf₅.rew (Rew.substs $ #4 :> (#·.succ.succ.succ.succ.succ))
+        ⋏ (p.sigma.rew [→ #0, #1, #2, #3, #4])).ex.ex.ex.ex.ex, by
+      intro v; simp [hp.df.iff, hpf₁.df.iff, hpf₂.df.iff, hpf₃.df.iff, hpf₄.df.iff, hpf₅.df.iff, HSemiformula.val_sigma]⟩
+      ⟨(  (pf₁.rew (Rew.substs $ #0 :> (#·.succ.succ.succ.succ.succ))).negSigma
+        ⋎ (pf₂.rew (Rew.substs $ #1 :> (#·.succ.succ.succ.succ.succ))).negSigma
+        ⋎ (pf₃.rew (Rew.substs $ #2 :> (#·.succ.succ.succ.succ.succ))).negSigma
+        ⋎ (pf₄.rew (Rew.substs $ #3 :> (#·.succ.succ.succ.succ.succ))).negSigma
+        ⋎ (pf₅.rew (Rew.substs $ #4 :> (#·.succ.succ.succ.succ.succ))).negSigma
+        ⋎ (p.pi.rew [→ #0, #1, #2, #3, #4])).all.all.all.all.all, by
+      intro v; simp [hp.df.iff, hpf₁.df.iff, hpf₂.df.iff, hpf₃.df.iff, hpf₄.df.iff, hpf₅.df.iff, ←imp_iff_not_or, hp.proper.iff']⟩
+
+lemma comp₅' {k} {P : M → M → M → M → M → Prop} {f₁ f₂ f₃ f₄ f₅ : (Fin k → M) → M}
+    (hf₁ : DefinableFunction L (𝚺, m + 1) f₁) (hf₂ : DefinableFunction L (𝚺, m + 1) f₂)
+    (hf₃ : DefinableFunction L (𝚺, m + 1) f₃) (hf₄ : DefinableFunction L (𝚺, m + 1) f₄)
+    (hf₅ : DefinableFunction L (𝚺, m + 1) f₅)
+    {Γ : SigmaPiDelta} [DefinableRel₅ L (Γ, m + 1) P] : Definable L (Γ, m + 1) (fun v ↦ P (f₁ v) (f₂ v) (f₃ v) (f₄ v) (f₅ v)) :=
+  comp₅ hf₁ hf₂ hf₃ hf₄ hf₅  inferInstance
+-/
+
 end Definable
 
 lemma DefinablePred.of_iff {P : M → Prop} (Q) (h : ∀ x, P x ↔ Q x) (H : DefinablePred L Γ Q) : DefinablePred L Γ P := by
@@ -1085,6 +1151,11 @@ lemma retraction {f : (Fin k → M) → M} (hf : DefinableFunction L Γ f) (e : 
   have := Definable.retraction (n := n + 1) hf (0 :> fun i ↦ (e i).succ); simp at this
   exact this.of_iff _ (by intro x; simp)
 
+lemma retractiont {f : (Fin k → M) → M} (hf : DefinableFunction L Γ f) (t : Fin k → Semiterm L M n) :
+    DefinableFunction L Γ fun v ↦ f (fun i ↦ Semiterm.valm M v id (t i)) := by
+  have := Definable.retractiont (n := n + 1) hf (#0 :> fun i ↦ Rew.bShift (t i)); simp at this
+  exact this.of_iff _ (by intro x; simp [Semiterm.val_bShift'])
+
 lemma rel {f : (Fin k → M) → M} (h : DefinableFunction L Γ f) :
   Definable L Γ (fun v ↦ v 0 = f (v ·.succ)) := h
 
@@ -1107,6 +1178,16 @@ lemma DefinableFunction₃.comp {Γ} {k} {f : M → M → M → M} {g₁ g₂ g�
   simpa using Definable.comp₄ (P := Function.Graph₃ f) (DefinableFunction.var 0)
     (hg₁.retraction Fin.succ) (hg₂.retraction Fin.succ) (hg₃.retraction Fin.succ) hf
 
+/-
+lemma DefinableFunction₄.comp {Γ} {k} {f : M → M → M → M → M} {g₁ g₂ g₃ g₄ : (Fin k → M) → M}
+    (hf : DefinableFunction₄ L (Γ, m + 1) f) (hg₁ : DefinableFunction L (𝚺, m + 1) g₁)
+    (hg₂ : DefinableFunction L (𝚺, m + 1) g₂) (hg₃ : DefinableFunction L (𝚺, m + 1) g₃)
+    (hg₄ : DefinableFunction L (𝚺, m + 1) g₄) :
+    DefinableFunction L (Γ, m + 1) (fun v ↦ f (g₁ v) (g₂ v) (g₃ v) (g₄ v)) := by
+  simpa using Definable.comp₅ (P := Function.Graph₄ f) (DefinableFunction.var 0)
+    (hg₁.retraction Fin.succ) (hg₂.retraction Fin.succ) (hg₃.retraction Fin.succ) (hg₄.retraction Fin.succ) hf
+-/
+
 lemma DefinableFunction.comp₁ {Γ} {k} {f : M → M} [DefinableFunction₁ L (Γ, m + 1) f]
     {g : (Fin k → M) → M} (hg : DefinableFunction L (𝚺, m + 1) g) :
     DefinableFunction L (Γ, m + 1) (fun v ↦ f (g v)) :=
@@ -1122,6 +1203,15 @@ lemma DefinableFunction.comp₃ {Γ} {k} {f : M → M → M → M} [DefinableFun
     (hg₁ : DefinableFunction L (𝚺, m + 1) g₁) (hg₂ : DefinableFunction L (𝚺, m + 1) g₂) (hg₃ : DefinableFunction L (𝚺, m + 1) g₃) :
     DefinableFunction L (Γ, m + 1) (fun v ↦ f (g₁ v) (g₂ v) (g₃ v)) :=
   DefinableFunction₃.comp inferInstance hg₁ hg₂ hg₃
+
+/-
+lemma DefinableFunction.comp₄ {Γ} {k} {f : M → M → M → M → M} [DefinableFunction₄ L (Γ, m + 1) f]
+    {g₁ g₂ g₃ g₄ : (Fin k → M) → M}
+    (hg₁ : DefinableFunction L (𝚺, m + 1) g₁) (hg₂ : DefinableFunction L (𝚺, m + 1) g₂)
+    (hg₃ : DefinableFunction L (𝚺, m + 1) g₃) (hg₄ : DefinableFunction L (𝚺, m + 1) g₄) :
+    DefinableFunction L (Γ, m + 1) (fun v ↦ f (g₁ v) (g₂ v) (g₃ v) (g₄ v)) :=
+  DefinableFunction₄.comp inferInstance hg₁ hg₂ hg₃ hg₄
+-/
 
 namespace DefinableRel
 
