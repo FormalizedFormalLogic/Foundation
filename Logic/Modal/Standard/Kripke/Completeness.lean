@@ -51,21 +51,22 @@ lemma multiframe_def_multibox : Ω₁ ≺^[n] Ω₂ ↔ ∀ {p}, □^[n]p ∈ Ω
 
         have hΔconj : (◇'⁻¹^[n]Δ).conj' ∈ Ω₂.theory := iff_mem_conj'.mpr hΔ₂;
 
-        have := and_imply_iff_imply_imply'!.mp hC;
-
-        have : 𝝂Ax ⊢! Γ.conj' ⟶ □^[n](~(◇'⁻¹^[n]Δ).conj') := sorry
-          /-
-          imp_trans''! (and_imply_iff_imply_imply'!.mp hC)
-          $ contra₂'! $ imp_trans''! (and₂'! multidia_duality!)
-          $ imp_trans''! iff_conj'multidia_multidiaconj'! $ by
+        have : (◇'⁻¹^[n]Δ).conj' ∉ Ω₂.theory := by {
+          have d₁ : 𝝂Ax ⊢! Γ.conj' ⟶ Δ.conj' ⟶ ⊥ := and_imply_iff_imply_imply'!.mp hC;
+          have : 𝝂Ax ⊢! (◇'^[n]◇'⁻¹^[n]Δ).conj' ⟶ Δ.conj' := by
             apply conj'conj'_subset;
             intro q hq;
-            obtain ⟨r, _, _⟩ := by simpa using hΔ q hq;
+            obtain ⟨r, _, _⟩ := hΔ q hq;
             subst_vars;
             simpa;
-          -/
-        have : (𝝂Ax) ⊢! □Γ.conj' ⟶ □^[(n + 1)](~(◇'⁻¹^[n]Δ).conj') := by simpa only [UnaryModalOperator.multimop_succ] using imply_box_distribute'! this;
-        have : (◇'⁻¹^[n]Δ).conj' ∉ Ω₂.theory := iff_mem_neg.mp $ h $ membership_iff.mpr $ (Context.of! this) ⨀ dΓconj;
+          have : 𝝂Ax ⊢! ◇^[n](◇'⁻¹^[n]Δ).conj' ⟶ Δ.conj' := imp_trans''! iff_conj'multidia_multidiaconj'! $ this;
+          have : 𝝂Ax ⊢! ~(□^[n](~(◇'⁻¹^[n]Δ).conj')) ⟶ Δ.conj' := imp_trans''! (and₂'! multidia_duality!) this;
+          have : 𝝂Ax ⊢! ~Δ.conj' ⟶ □^[n](~(◇'⁻¹^[n]Δ).conj') := contra₂'! this;
+          have : 𝝂Ax ⊢! (Δ.conj' ⟶ ⊥) ⟶ □^[n](~(◇'⁻¹^[n]Δ).conj') := imp_trans''! (and₂'! neg_equiv!) this;
+          have : 𝝂Ax ⊢! Γ.conj' ⟶ □^[n](~(◇'⁻¹^[n]Δ).conj') := imp_trans''! d₁ this;
+          have : 𝝂Ax ⊢! □Γ.conj' ⟶ □^[(n + 1)](~(◇'⁻¹^[n]Δ).conj') := by simpa only [UnaryModalOperator.multimop_succ] using imply_box_distribute'! this;
+          exact iff_mem_neg.mp $ h $ membership_iff.mpr $ (Context.of! this) ⨀ dΓconj;
+        }
 
         contradiction;
       use Ω;
