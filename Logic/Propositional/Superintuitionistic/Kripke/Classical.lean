@@ -94,7 +94,7 @@ variable {V : ClassicalValuation α}
 @[simp] lemma and_def  : V ⊧ p ⋏ q ↔ V ⊧ p ∧ V ⊧ q := by simp
 @[simp] lemma or_def   : V ⊧ p ⋎ q ↔ V ⊧ p ∨ V ⊧ q := by simp
 @[simp] lemma imp_def  : V ⊧ p ⟶ q ↔ V ⊧ p → V ⊧ q := by simp; tauto;
-@[simp] lemma neg_def  : V ⊧ ~p ↔ ¬V ⊧ p := by simp only [NegAbbrev.neg, imp_def, bot_def];
+-- @[simp] lemma neg_def  : V ⊧ ~p ↔ ¬V ⊧ p := by simp;
 
 end Formula.Kripke.ClassicalSatisfies
 

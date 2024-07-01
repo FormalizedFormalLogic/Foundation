@@ -90,7 +90,8 @@ def Formula.Kripke.Satisfies (M : Kripke.Model α) (w : M.World) : Formula α �
   | ⊥      => False
   | p ⋏ q  => Satisfies M w p ∧ Satisfies M w q
   | p ⋎ q  => Satisfies M w p ∨ Satisfies M w q
-  | p ⟶ q => ∀ {w'}, (w ≺ w') → (¬Satisfies M w' p ∨ Satisfies M w' q)
+  | ~p     => ∀ {w'}, (w ≺ w') → ¬Satisfies M w' p
+  | p ⟶ q => ∀ {w'}, (w ≺ w') → (Satisfies M w' p → Satisfies M w' q)
 
 instance instKripkeSemanticsFormulaWorld (M : Model α) : Semantics (Formula α) (M.World) := ⟨fun w ↦ Formula.Kripke.Satisfies M w⟩
 
@@ -110,7 +111,7 @@ local infix:45 " ⊩ " => Formula.Kripke.Satisfies M
 @[simp] lemma and_def  : w ⊩ p ⋏ q ↔ w ⊩ p ∧ w ⊩ q := by simp [Satisfies];
 @[simp] lemma or_def   : w ⊩ p ⋎ q ↔ w ⊩ p ∨ w ⊩ q := by simp [Satisfies];
 @[simp] lemma imp_def  : w ⊩ p ⟶ q ↔ ∀ {w'}, (w ≺ w') → (w' ⊩ p → w' ⊩ q) := by simp [Satisfies, imp_iff_not_or];
-@[simp] lemma neg_def  : w ⊩ ~p ↔ ∀ {w'}, (w ≺ w') → ¬(w' ⊩ p) := by simp [NegAbbrev.neg];
+@[simp] lemma neg_def  : w ⊩ ~p ↔ ∀ {w'}, (w ≺ w') → ¬(w' ⊩ p) := by simp [Satisfies];
 
 instance : Semantics.Top M.World where
   realize_top := by simp [Satisfies];
@@ -131,6 +132,10 @@ lemma formula_hereditary (hw : w ≺ w') : w ⊩ p → w' ⊩ p := by
     simp_all [Satisfies];
     intro hpq v hv;
     exact hpq $ M.Frame.Rel_trans hw hv;
+  | hneg =>
+    simp_all [Satisfies];
+    intro hp v hv;
+    exact hp $ M.Frame.Rel_trans hw hv;
   | hor => simp_all [Satisfies]; tauto;
   | _ => simp_all [Satisfies];
 
@@ -191,6 +196,13 @@ variable {M : Model α} {p q r : Formula α}
   exact hpq _ (M.Frame.Rel_refl w);
 
 @[simp] protected lemma efq : M ⊧ Axioms.EFQ p := by simp_all [ValidOnModel];
+
+@[simp] protected lemma neg_equiv : M ⊧ Axioms.NegEquiv p := by
+  simp_all [ValidOnModel, Axioms.NegEquiv];
+  intro w;
+  constructor;
+  . intro x _ h y rxy hyp; exact h rxy hyp;
+  . intro x _ h y rxy; exact h rxy;
 
 @[simp] protected lemma lem (hExt : Extensive M.Rel) : M ⊧ Axioms.LEM p := by
   simp_all [ValidOnModel];
@@ -260,6 +272,10 @@ variable {F : Frame' α} {p q r : Formula α}
 @[simp] protected lemma efq : F ⊧ Axioms.EFQ p := by
   simp_all only [ValidOnFrame.models_iff, ValidOnFrame, ValidOnModel.iff_models];
   intros; apply ValidOnModel.efq;
+
+@[simp] protected lemma neg_equiv : F ⊧ Axioms.NegEquiv p := by
+  simp_all only [ValidOnFrame.models_iff, ValidOnFrame, ValidOnModel.iff_models];
+  intros; apply ValidOnModel.neg_equiv;
 
 @[simp] protected lemma lem (hExt : Extensive F.Rel) : F ⊧ Axioms.LEM p := by
   simp_all only [ValidOnFrame.models_iff, ValidOnFrame, ValidOnModel.iff_models];

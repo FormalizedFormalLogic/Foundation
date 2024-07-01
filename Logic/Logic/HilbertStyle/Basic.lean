@@ -57,14 +57,14 @@ class HasAxiomDNE where
 
 protected class Minimal extends
               ModusPonens 𝓢,
-              HasAxiomVerum 𝓢,
+              HasAxiomVerum 𝓢, NegationEquiv 𝓢,
               HasAxiomImply₁ 𝓢, HasAxiomImply₂ 𝓢,
               HasAxiomAndElim₁ 𝓢, HasAxiomAndElim₂ 𝓢, HasAxiomAndInst 𝓢,
               HasAxiomOrInst₁ 𝓢, HasAxiomOrInst₂ 𝓢, HasAxiomOrElim 𝓢
 
 protected class Intuitionistic extends System.Minimal 𝓢, HasAxiomEFQ 𝓢
 
-protected class Classical extends System.Minimal 𝓢, NegationEquiv 𝓢, HasAxiomDNE 𝓢
+protected class Classical extends System.Minimal 𝓢, HasAxiomDNE 𝓢
 
 variable {𝓢}
 

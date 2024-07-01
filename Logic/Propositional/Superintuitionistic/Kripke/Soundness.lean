@@ -29,6 +29,7 @@ lemma sound (d : 𝓓 ⊢ p) : 𝔽(Ax(𝓓)) ⊧ p := by
     | apply ValidOnFrame.and₁
     | apply ValidOnFrame.and₂
     | apply ValidOnFrame.and₃
+    | apply ValidOnFrame.neg_equiv
 
 lemma sound! : (𝓓 ⊢! p) → 𝔽(Ax(𝓓)) ⊧ p := λ ⟨d⟩ => sound d
 

@@ -121,6 +121,7 @@ instance minimal (Γ : FiniteContext F 𝓢) : System.Minimal Γ where
   or₁ := fun _ _ ↦ of or₁
   or₂ := fun _ _ ↦ of or₂
   or₃ := fun _ _ _ ↦ of or₃
+  neg_equiv := fun _ ↦ of neg_equiv
 
 def mdp' (bΓ : Γ ⊢[𝓢] p ⟶ q) (bΔ : Δ ⊢[𝓢] p) : (Γ ++ Δ) ⊢[𝓢] q := wk (by simp) bΓ ⨀ wk (by simp) bΔ
 
@@ -157,8 +158,6 @@ instance : StrongCut (FiniteContext F 𝓢) (FiniteContext F 𝓢) :=
   ⟨fun {Γ Δ _} bΓ bΔ ↦
     have : Γ ⊢ Δ.conj := conjIntro' _ (fun _ hp ↦ bΓ hp)
     ofDef <| impTrans'' (toDef this) (toDef bΔ)⟩
-
-instance [System.NegationEquiv 𝓢] (Γ : FiniteContext F 𝓢) : System.NegationEquiv Γ := ⟨λ {_} => of neg_equiv⟩
 
 instance [HasAxiomEFQ 𝓢] (Γ : FiniteContext F 𝓢) : HasAxiomEFQ Γ := ⟨fun _ ↦ of efq⟩
 
@@ -303,8 +302,7 @@ instance minimal (Γ : Context F 𝓢) : System.Minimal Γ where
   or₁ := fun _ _ ↦ of or₁
   or₂ := fun _ _ ↦ of or₂
   or₃ := fun _ _ _ ↦ of or₃
-
-instance [System.NegationEquiv 𝓢] (Γ : Context F 𝓢) : System.NegationEquiv Γ := ⟨λ {_} => of neg_equiv⟩
+  neg_equiv := fun _ ↦ of neg_equiv
 
 instance [HasAxiomEFQ 𝓢] (Γ : Context F 𝓢) : HasAxiomEFQ Γ := ⟨fun _ ↦ of efq⟩
 
