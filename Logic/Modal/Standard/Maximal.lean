@@ -15,6 +15,7 @@ def Formula.toModalFormula : Formula α → Modal.Standard.Formula α
   | ⊥ => ⊥
   | ~p => ~(toModalFormula p)
   | p ⟶ q => (toModalFormula p) ⟶ (toModalFormula q)
+  | ~p => ~(toModalFormula p)
   | p ⋏ q => (toModalFormula p) ⋏ (toModalFormula q)
   | p ⋎ q => (toModalFormula p) ⋎ (toModalFormula q)
 postfix:75 "ᴹ" => Formula.toModalFormula
@@ -54,7 +55,7 @@ postfix:75 "ᵀ" => TrivTranslation
 namespace TrivTranslation
 
 @[simp] lemma degree_zero : pᵀ.degree = 0 := by induction p <;> simp [TrivTranslation, degree, *];
-@[simp] lemma back : pᵀᴾᴹ = pᵀ := by sorry; -- induction p using rec' <;> simp [Superintuitionistic.Formula.toModalFormula, TrivTranslation, *];
+@[simp] lemma back : pᵀᴾᴹ = pᵀ := by induction p using rec' <;> simp [Superintuitionistic.Formula.toModalFormula, TrivTranslation, *];
 
 end TrivTranslation
 
