@@ -144,6 +144,8 @@ lemma hereditary_int {M : Model (𝐈𝐧𝐭 W α)} {w w' : W} {p : Formula α}
   apply hereditary (by simp [FrameClass.Intuitionistic]; tauto) hw;
 -/
 
+lemma neg_equiv : w ⊩ ~p ↔ w ⊩ p ⟶ ⊥ := by simp_all [Satisfies];
+
 end Formula.Kripke.Satisfies
 
 

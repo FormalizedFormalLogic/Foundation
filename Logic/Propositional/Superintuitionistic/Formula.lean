@@ -161,7 +161,6 @@ instance : DecidableEq (Formula α) := hasDecEq
 
 end Decidable
 
-/-
 section Encodable
 
 open Sum
@@ -175,33 +174,30 @@ def Edge (α) : Node α → Type
   | (inr $ inr $ inl _) => Unit
   | (inr $ inr $ inr _) => Bool
 
-#check Bool.rec
-
 def toW : Formula α → WType (Edge α)
   | atom a  => ⟨inl a, Empty.elim⟩
   | falsum  => ⟨inr $ inl 0, Empty.elim⟩
   | verum   => ⟨inr $ inl 1, Empty.elim⟩
-  | neg p   => ⟨inr $ inr $ inl 0, p.toW⟩
+  | neg p   => ⟨inr $ inr $ inl 0, PUnit.rec p.toW⟩
   | imp p q => ⟨inr $ inr $ inr 0, Bool.rec p.toW q.toW⟩
   | or p q  => ⟨inr $ inr $ inr 1, Bool.rec p.toW q.toW⟩
   | and p q => ⟨inr $ inr $ inr 2, Bool.rec p.toW q.toW⟩
 
 def ofW : WType (Edge α) → Formula α
   | ⟨inl a, _⟩        => atom a
-  | ⟨inr $ inl 0, _⟩  => verum
-  | ⟨inr $ inl 1, _⟩  => falsum
+  | ⟨inr $ inl 0, _⟩ => falsum
+  | ⟨inr $ inl 1, _⟩  => verum
   | ⟨inr $ inr $ inl 0, p⟩ => neg (ofW $ p ())
   | ⟨inr $ inr $ inr 0, p⟩ => imp (ofW $ p false) (ofW $ p true)
   | ⟨inr $ inr $ inr 1, p⟩ => or  (ofW $ p false) (ofW $ p true)
   | ⟨inr $ inr $ inr 2, p⟩ => and (ofW $ p false) (ofW $ p true)
 
 lemma toW_ofW : ∀ (w : WType (Edge α)), toW (ofW w) = w
-  | ⟨inl a, _⟩         => by simp [ofW, toW, Empty.eq_elim];
-  | ⟨inr $ inl 0, _⟩   => by simp [ofW, toW, Empty.eq_elim];
-  | ⟨inr $ inl 1, _⟩   => by simp [ofW, toW, Empty.eq_elim];
+  | ⟨inl a, _⟩       => by simp [ofW, toW, Empty.eq_elim];
+  | ⟨inr $ inl 0, _⟩ => by simp [ofW, toW, Empty.eq_elim];
+  | ⟨inr $ inl 1, _⟩ => by simp [ofW, toW, Empty.eq_elim];
   | ⟨inr $ inr $ inl 0, w⟩ => by
-    simp [ofW, toW, toW_ofW (w false), toW_ofW (w true)];
-    ext b; cases b <;> simp;
+    simp [ofW, toW, toW_ofW (w ())];
   | ⟨inr $ inr $ inr 0, w⟩ => by
     simp [ofW, toW, toW_ofW (w false), toW_ofW (w true)];
     ext b; cases b <;> simp;
@@ -235,7 +231,6 @@ variable [Encodable α]
 instance : Encodable (Formula α) := Encodable.ofEquiv (WType (Edge α)) (equivW α)
 
 end Encodable
--/
 
 end Formula
 

@@ -430,52 +430,67 @@ variable [Inhabited (SCT 𝓓)]
 
 variable {t : SCT 𝓓}
 
+private lemma truthlemma.himp
+  {t : (CanonicalModel 𝓓).World}
+  (ihp : ∀ {t : (CanonicalModel 𝓓).World}, t ⊧ p ↔ p ∈ t.tableau.1)
+  (ihq : ∀ {t : (CanonicalModel 𝓓).World}, t ⊧ q ↔ q ∈ t.tableau.1)
+  : t ⊧ p ⟶ q ↔ p ⟶ q ∈ t.tableau.1 := by
+  constructor;
+  . contrapose;
+    simp_all;
+    intro h;
+    replace h := t.not_mem₁_iff_mem₂.mp h;
+    obtain ⟨t', ⟨h, _⟩⟩ := lindenbaum (𝓓 := 𝓓) (t₀ := (insert p t.tableau.1, {q})) $ by
+      simp only [Tableau.ParametricConsistent];
+      intro Γ Δ hΓ hΔ;
+      replace hΓ : ∀ r, r ∈ Γ.remove p → r ∈ t.tableau.1 := by
+        intro r hr;
+        have ⟨hr₁, hr₂⟩ := List.mem_remove_iff.mp hr;
+        have := by simpa using hΓ r hr₁;
+        simp_all;
+      by_contra hC;
+      have : 𝓓 ⊢! (Γ.remove p).conj' ⟶ (p ⟶ q) := imp_trans''! (and_imply_iff_imply_imply'!.mp $ imply_left_remove_conj'! hC) (by
+        apply deduct'!;
+        apply deduct!;
+        have : [p, p ⟶ Δ.disj'] ⊢[𝓓]! p := by_axm!;
+        have : [p, p ⟶ Δ.disj'] ⊢[𝓓]! Δ.disj' := by_axm! ⨀ this;
+        exact disj_allsame'! (by simpa using hΔ) this;
+      )
+      have : 𝓓 ⊬! (Γ.remove p).conj' ⟶ (p ⟶ q) := by simpa only [List.disj'_singleton] using (t.consistent hΓ (show ∀ r ∈ [p ⟶ q], r ∈ t.tableau.2 by simp_all));
+      contradiction;
+    have ⟨_, _⟩ := Set.insert_subset_iff.mp h;
+    existsi t';
+    constructor;
+    . simp_all only [Set.singleton_subset_iff];
+    . constructor;
+      . assumption;
+      . apply t'.not_mem₁_iff_mem₂.mpr;
+        simp_all only [Set.singleton_subset_iff];
+  . simp [Satisfies.imp_def];
+    intro h t' htt' hp;
+    replace hp := ihp.mp hp;
+    have hpq := htt' h;
+    apply ihq.mpr;
+    apply t'.not_mem₂_iff_mem₁.mp;
+    exact not_mem₂
+      (by simp_all)
+      (show 𝓓 ⊢! [p, p ⟶ q].conj' ⟶ q by
+        simp;
+        apply and_imply_iff_imply_imply'!.mpr;
+        apply deduct'!;
+        apply deduct!;
+        exact by_axm! ⨀ (by_axm! (p := p));
+      );
+
+private lemma truthlemma.hneg
+  {t : (CanonicalModel 𝓓).World}
+  (ihp : ∀ {t : (CanonicalModel 𝓓).World}, t ⊧ p ↔ p ∈ t.tableau.1)
+  : t ⊧ ~p ↔ ~p ∈ t.tableau.1 := by sorry;
+
 lemma truthlemma {t : (CanonicalModel 𝓓).World} : t ⊧ p ↔ p ∈ t.tableau.1 := by
   induction p using rec' generalizing t with
-  | himp p q ihp ihq =>
-    constructor;
-    . contrapose;
-      simp_all;
-      intro h;
-      replace h := t.not_mem₁_iff_mem₂.mp h;
-      have : (𝓓)-Consistent (insert p t.tableau.1, {q}) := by
-        simp only [Tableau.ParametricConsistent];
-        intro Γ Δ hΓ hΔ;
-        replace hΓ : ∀ r, r ∈ Γ.remove p → r ∈ t.tableau.1 := by
-          intro r hr;
-          have ⟨hr₁, hr₂⟩ := List.mem_remove_iff.mp hr;
-          have := by simpa using hΓ r hr₁;
-          simp_all;
-        by_contra hC;
-        have : 𝓓 ⊢! (Γ.remove p).conj' ⟶ (p ⟶ q) := imp_trans''! (and_imply_iff_imply_imply'!.mp $ imply_left_remove_conj'! hC) (by
-          apply deduct'!;
-          apply deduct!;
-          have : [p, p ⟶ Δ.disj'] ⊢[𝓓]! p := by_axm! (by simp);
-          have : [p, p ⟶ Δ.disj'] ⊢[𝓓]! Δ.disj' := (by_axm! (by simp)) ⨀ this;
-          exact disj_allsame'! (by simpa using hΔ) this;
-        )
-        have : 𝓓 ⊬! (Γ.remove p).conj' ⟶ (p ⟶ q) := by simpa only [List.disj'_singleton] using (t.consistent hΓ (show ∀ r ∈ [p ⟶ q], r ∈ t.tableau.2 by simp_all));
-        contradiction;
-      obtain ⟨t', ⟨⟨_, _⟩, _⟩⟩ := by simpa [Set.insert_subset_iff] using lindenbaum this;
-      existsi t';
-      simp_all;
-      apply t'.not_mem₁_iff_mem₂.mpr;
-      assumption;
-    . simp [Satisfies.imp_def];
-      intro h t' htt' hp;
-      replace hp := ihp.mp hp;
-      have hpq := htt' h;
-      apply ihq.mpr;
-      apply t'.not_mem₂_iff_mem₁.mp;
-      exact not_mem₂
-        (by simp_all)
-        (show 𝓓 ⊢! [p, p ⟶ q].conj' ⟶ q by
-          simp;
-          apply and_imply_iff_imply_imply'!.mpr;
-          apply deduct'!;
-          apply deduct!;
-          exact by_axm! ⨀ (by_axm! (p := p));
-        );
+  | himp p q ihp ihq => exact truthlemma.himp ihp ihq
+  | hneg p ihp => exact truthlemma.hneg ihp;
   | _ => simp [Satisfies.iff_models, Satisfies, *];
 
 lemma deducible_of_validOnCanonicelModel : (CanonicalModel 𝓓) ⊧ p ↔ 𝓓 ⊢! p := by
