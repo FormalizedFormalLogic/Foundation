@@ -21,6 +21,7 @@ def interpretation
   | p ⟶ q => (interpretation f β p) ⟶ (interpretation f β q)
   | p ⋏ q => (interpretation f β p) ⋏ (interpretation f β q)
   | p ⋎ q => (interpretation f β p) ⋎ (interpretation f β q)
+  | ~p => ~(interpretation f β p)
 scoped notation f "[" β "] " p => interpretation f β p -- TODO: more good notation
 
 /-
@@ -72,10 +73,10 @@ lemma arithmetical_soundness_K4Loeb [β.HilbertBernays T₀ T] (h : 𝐊𝟒(�
   | hRules rl hrl hant ih =>
     rcases hrl with (hNec | hLoeb)
     . obtain ⟨p, e⟩ := hNec; subst e;
-      simp_all;
+      simp_all only [List.mem_singleton, forall_eq];
       exact D1s (T₀ := T₀) ih;
     . obtain ⟨p, e⟩ := hLoeb; subst e;
-      simp_all;
+      simp_all only [List.mem_singleton, forall_eq]
       exact Loeb.LT T₀ ih;
   | hMaxm hp =>
     rcases hp with (hK | hFour)
@@ -86,7 +87,7 @@ lemma arithmetical_soundness_K4Loeb [β.HilbertBernays T₀ T] (h : 𝐊𝟒(�
     exact ihpq ⨀ ihp;
   | hDne =>
     dsimp [interpretation];
-    exact imp_trans''! (and₁'! $ iff_comm'! negneg_equiv!) dne!;
+    exact dne!;
   | _ => dsimp [interpretation]; trivial;
 
 theorem arithmetical_soundness_GL [β.HilbertBernays T₀ T] (h : 𝐆𝐋 ⊢! p) : ∀ {f : realization L α}, T ⊢! (f[β] p) := by
@@ -99,15 +100,15 @@ lemma arithmetical_soundness_N [β.HilbertBernays₁ T₀ T] (h : 𝐍 ⊢! p) :
   induction h using Deduction.inducition! with
   | hMaxm hp => simp at hp;
   | hRules rl hrl hant ih =>
-    simp at hrl;
+    simp only [Set.mem_setOf_eq] at hrl;
     obtain ⟨p, e⟩ := hrl; subst e; simp_all;
     exact D1s (T₀ := T₀) ih;
   | hMdp ihpq ihp =>
-    simp [interpretation] at ihpq;
+    simp only [interpretation] at ihpq;
     exact ihpq ⨀ ihp;
   | hDne =>
     dsimp [interpretation];
-    exact imp_trans''! (and₁'! $ iff_comm'! negneg_equiv!) dne!;
+    exact dne!;
   | _ => dsimp [interpretation]; trivial;
 
 end ArithmeticalSoundness

@@ -29,6 +29,12 @@ lemma efq_of_neg! [System.NegationEquiv 𝓢] [HasAxiomEFQ 𝓢] (h : 𝓢 ⊢! 
   have dnp : [p] ⊢[𝓢]! p ⟶ ⊥ := of'! $ neg_equiv'!.mp h;
   exact efq'! (dnp ⨀ FiniteContext.id!);
 
+def neg_mdp [System.NegationEquiv 𝓢] (hnp : 𝓢 ⊢ ~p) (hn : 𝓢 ⊢ p) : 𝓢 ⊢ ⊥ := (neg_equiv'.mp hnp) ⨀ hn
+-- infixl:90 "⨀" => neg_mdp
+
+lemma neg_mdp! [System.NegationEquiv 𝓢] (hnp : 𝓢 ⊢! ~p) (hn : 𝓢 ⊢! p) : 𝓢 ⊢! ⊥ := ⟨neg_mdp hnp.some hn.some⟩
+-- infixl:90 "⨀" => neg_mdp!
+
 
 def orComm : 𝓢 ⊢ p ⋎ q ⟶ q ⋎ p := by
   apply deduct';
@@ -161,7 +167,6 @@ def contra₀ : 𝓢 ⊢ (p ⟶ q) ⟶ (~q ⟶ ~p) := by
 def contra₀' (b : 𝓢 ⊢ p ⟶ q) : 𝓢 ⊢ ~q ⟶ ~p := contra₀ ⨀ b
 lemma contra₀'! (b : 𝓢 ⊢! p ⟶ q) : 𝓢 ⊢! ~q ⟶ ~p := ⟨contra₀' b.some⟩
 
-
 def contra₀x2' (b : 𝓢 ⊢ p ⟶ q) : 𝓢 ⊢ ~~p ⟶ ~~q := contra₀' $ contra₀' b
 lemma contra₀x2'! (b : 𝓢 ⊢! p ⟶ q) : 𝓢 ⊢! ~~p ⟶ ~~q := ⟨contra₀x2' b.some⟩
 
@@ -190,9 +195,8 @@ def contra₃ [HasAxiomDNE 𝓢] : 𝓢 ⊢ (~p ⟶ ~q) ⟶ (q ⟶ p) :=  deduct
 @[simp] lemma contra₃! [HasAxiomDNE 𝓢] : 𝓢 ⊢! (~p ⟶ ~q) ⟶ (q ⟶ p) := ⟨contra₃⟩
 
 
-def negIff' (b : 𝓢 ⊢ p ⟷ q) : 𝓢 ⊢ ~p ⟷ ~q := iffIntro (contra₀' $ and₂' b) (contra₀' $ and₁' b)
-lemma neg_iff'! (b : 𝓢 ⊢! p ⟷ q) : 𝓢 ⊢! ~p ⟷ ~q := ⟨negIff' b.some⟩
-
+def negReplaceIff' (b : 𝓢 ⊢ p ⟷ q) : 𝓢 ⊢ ~p ⟷ ~q := iffIntro (contra₀' $ and₂' b) (contra₀' $ and₁' b)
+lemma neg_replace_iff'! (b : 𝓢 ⊢! p ⟷ q) : 𝓢 ⊢! ~p ⟷ ~q := ⟨negReplaceIff' b.some⟩
 
 section NegationEquiv
 

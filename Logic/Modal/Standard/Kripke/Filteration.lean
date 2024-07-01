@@ -25,7 +25,6 @@ section
 
 def filterEquiv (M : Kripke.Model α) (T : Theory α) [SubformulaClosed T] (x y : M.World) := ∀ p ∈ T, x ⊧ p ↔ y ⊧ p
 
--- TODO: Model universe specifying is not needed: should be `Model.{u, v}`.
 variable (M : Kripke.Model α) (T : Theory α) [T_closed : SubformulaClosed T]
 
 lemma filterEquiv.equivalence : Equivalence (filterEquiv M T) where
@@ -136,6 +135,14 @@ theorem filteration {x : M.World} {p : Formula α} (hs : p ∈ T) : x ⊧ p ↔ 
   | hatom a =>
     have := FM.def_valuation (cast FM.def_world.symm ⟦x⟧) a hs;
     simp_all [Satisfies];
+  | hneg p ihp =>
+    constructor;
+    . have sp := T_closed.neg hs;
+      rintro hpx;
+      exact ihp sp |>.not.mp hpx;
+    . have sp := T_closed.neg hs;
+      rintro hpx;
+      exact ihp sp |>.not.mpr hpx;
   | hand p q ihp ihq =>
     constructor;
     . have ⟨sp, sq⟩ := T_closed.and hs

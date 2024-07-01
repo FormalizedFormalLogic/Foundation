@@ -65,6 +65,14 @@ lemma modal_equivalent_of_bisimilar (bisx : Bi x₁ x₂) : (M₁, x₁) ↭ (M�
       exact ihq bisx |>.mp $ hpq $ ihp bisx |>.mpr hp;
     . intro hpq hp;
       exact ihq bisx |>.mpr $ hpq $ ihp bisx |>.mp hp;
+  | hneg p ih =>
+    constructor;
+    . intro hnp hp;
+      have := ih bisx |>.not.mp hnp;
+      contradiction;
+    . intro hnp hp;
+      have := ih bisx |>.not.mpr hnp;
+      contradiction;
   | _ => simp_all;
 
 end ModalEquivalent

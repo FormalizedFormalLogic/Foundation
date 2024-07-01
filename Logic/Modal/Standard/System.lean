@@ -160,9 +160,9 @@ def multiboxIff' (h : 𝓢 ⊢ p ⟷ q) : 𝓢 ⊢ □^[n]p ⟷ □^[n]q := by
 
 def diaIff' (h : 𝓢 ⊢ p ⟷ q) : 𝓢 ⊢ (◇p ⟷ ◇q) := by
   simp only [StandardModalLogicalConnective.duality'];
-  apply negIff';
+  apply negReplaceIff';
   apply boxIff';
-  apply negIff';
+  apply negReplaceIff';
   assumption
 @[simp] lemma dia_iff! (h : 𝓢 ⊢! p ⟷ q) : 𝓢 ⊢! ◇p ⟷ ◇q := ⟨diaIff' h.some⟩
 
@@ -197,9 +197,9 @@ def multidiaDuality : 𝓢 ⊢ ◇^[n]p ⟷ ~(□^[n](~p)) := by
   | zero => simp; apply dn;
   | succ n ih =>
     simp [StandardModalLogicalConnective.duality'];
-    apply negIff';
+    apply negReplaceIff';
     apply boxIff';
-    exact iffTrans'' (negIff' ih) (iffComm' dn)
+    exact iffTrans'' (negReplaceIff' ih) (iffComm' dn)
 @[simp] lemma multidia_duality! : 𝓢 ⊢! ◇^[n]p ⟷ ~(□^[n](~p)) := ⟨multidiaDuality⟩
 
 def diaDuality : 𝓢 ⊢ ◇p ⟷ ~(□~p) := multidiaDuality (n := 1)
@@ -497,7 +497,7 @@ private def axiomFour_of_L [HasAxiomL 𝓢] : 𝓢 ⊢ Axioms.Four p := by
 instance [HasAxiomL 𝓢] : HasAxiomFour 𝓢 := ⟨fun _ ↦ axiomFour_of_L⟩
 
 def goedel2 [HasAxiomL 𝓢] : 𝓢 ⊢ (~(□⊥) ⟷ ~(□(~(□⊥))) : F) := by
-  apply negIff';
+  apply negReplaceIff';
   apply iffIntro;
   . apply implyBoxDistribute';
     exact efq;

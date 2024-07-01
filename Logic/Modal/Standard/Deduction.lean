@@ -52,6 +52,7 @@ inductive Deduction (𝓓 : DeductionParameter α) : (Formula α) → Type _
   | or₂ p q      : Deduction 𝓓 $ Axioms.OrInst₂ p q
   | or₃ p q r    : Deduction 𝓓 $ Axioms.OrElim p q r
   | dne p        : Deduction 𝓓 $ Axioms.DNE p
+  | neg_equiv p  : Deduction 𝓓 $ Axioms.NegEquiv p
 
 namespace Deduction
 
@@ -61,7 +62,7 @@ instance : System (Formula α) (DeductionParameter α) := ⟨Deduction⟩
 
 variable {𝓓 𝓓₁ 𝓓₂ : DeductionParameter α}
 
-instance : System.Minimal 𝓓 where
+instance : System.Classical 𝓓 where
   mdp := mdp
   verum := verum
   imply₁ := imply₁
@@ -72,9 +73,8 @@ instance : System.Minimal 𝓓 where
   or₁ := or₁
   or₂ := or₂
   or₃ := or₃
-
-instance : System.Classical 𝓓 where
   dne := dne
+  neg_equiv := neg_equiv
 
 lemma maxm! {p} (h : p ∈ 𝓓.axioms) : 𝓓 ⊢! p := ⟨maxm h⟩
 
@@ -137,7 +137,7 @@ noncomputable def inducition!
              motive p (hant hp)) → motive r.consequence ⟨rule hr (λ hp => (hant hp).some)⟩)
   (hMaxm     : ∀ {p}, (h : p ∈ Ax(𝓓)) → motive p ⟨maxm h⟩)
   (hMdp      : ∀ {p q}, {hpq : 𝓓 ⊢! p ⟶ q} → {hp : 𝓓 ⊢! p} → motive (p ⟶ q) hpq → motive p hp → motive q ⟨mdp hpq.some hp.some⟩)
-  (hVerum    : motive ⊤ ⟨verum⟩)
+  (hverum    : motive ⊤ ⟨verum⟩)
   (hImply₁   : ∀ {p q}, motive (p ⟶ q ⟶ p) $ ⟨imply₁ p q⟩)
   (hImply₂   : ∀ {p q r}, motive ((p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r) $ ⟨imply₂ p q r⟩)
   (hAndElim₁ : ∀ {p q}, motive (p ⋏ q ⟶ p) $ ⟨and₁ p q⟩)
@@ -147,6 +147,7 @@ noncomputable def inducition!
   (hOrInst₂  : ∀ {p q}, motive (q ⟶ p ⋎ q) $ ⟨or₂ p q⟩)
   (hOrElim   : ∀ {p q r}, motive ((p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r)) $ ⟨or₃ p q r⟩)
   (hDne      : ∀ {p}, motive (~~p ⟶ p) $ ⟨dne p⟩)
+  (hNegEquiv : ∀ {p}, motive (~p ⟷ (p ⟶ ⊥)) $ ⟨neg_equiv p⟩)
   : ∀ {p}, (d : 𝓓 ⊢! p) → motive p d := by
   intro p d;
   induction d.some with
@@ -161,7 +162,7 @@ noncomputable def inducition_with_necOnly! [𝓓.HasNecOnly]
   (hMaxm   : ∀ {p}, (h : p ∈ Ax(𝓓)) → motive p ⟨maxm h⟩)
   (hMdp    : ∀ {p q}, {hpq : 𝓓 ⊢! p ⟶ q} → {hp : 𝓓 ⊢! p} → motive (p ⟶ q) hpq → motive p hp → motive q (hpq ⨀ hp))
   (hNec    : ∀ {p}, {hp : 𝓓 ⊢! p} → (ihp : motive p hp) → motive (□p) (System.nec! hp))
-  (hVerum    : motive ⊤ ⟨verum⟩)
+  (hverum    : motive ⊤ ⟨verum⟩)
   (hImply₁   : ∀ {p q}, motive (p ⟶ q ⟶ p) $ ⟨imply₁ p q⟩)
   (hImply₂   : ∀ {p q r}, motive ((p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r) $ ⟨imply₂ p q r⟩)
   (hAndElim₁ : ∀ {p q}, motive (p ⋏ q ⟶ p) $ ⟨and₁ p q⟩)
@@ -171,6 +172,7 @@ noncomputable def inducition_with_necOnly! [𝓓.HasNecOnly]
   (hOrInst₂  : ∀ {p q}, motive (q ⟶ p ⋎ q) $ ⟨or₂ p q⟩)
   (hOrElim   : ∀ {p q r}, motive ((p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r)) $ ⟨or₃ p q r⟩)
   (hDne      : ∀ {p}, motive (~~p ⟶ p) $ ⟨dne p⟩)
+  (hNegEquiv : ∀ {p}, motive (~p ⟷ (p ⟶ ⊥)) $ ⟨neg_equiv p⟩)
   : ∀ {p}, (d : 𝓓 ⊢! p) → motive p d := by
   intro p d;
   induction d using Deduction.inducition! with
@@ -180,7 +182,7 @@ noncomputable def inducition_with_necOnly! [𝓓.HasNecOnly]
     rw [HasNecOnly.has_necessitation_only] at hrl;
     obtain ⟨p, e⟩ := hrl; subst e;
     exact @hNec p (hant (by simp)) $ ih (by simp);
-  | hVerum => exact hVerum
+  | hverum => exact hverum
   | hImply₁ => exact hImply₁
   | hImply₂ => exact hImply₂
   | hAndElim₁ => exact hAndElim₁
@@ -190,6 +192,7 @@ noncomputable def inducition_with_necOnly! [𝓓.HasNecOnly]
   | hOrInst₂ => exact hOrInst₂
   | hOrElim => exact hOrElim
   | hDne => exact hDne
+  | hNegEquiv => exact hNegEquiv
 
 end Deduction
 
@@ -354,6 +357,7 @@ macro_rules | `(tactic| trivial) => `(tactic|
     | apply or₁!
     | apply or₂!
     | apply or₃!
+    | apply neg_equiv!
   )
 
 macro_rules | `(tactic| trivial) => `(tactic | apply dne!)
@@ -436,8 +440,8 @@ lemma reducible_K4Loeb_K4Henkin : (𝐊𝟒(𝐋) : DeductionParameter α) ≤�
   | hMdp ihpq ihp => exact ihpq ⨀ ihp;
   | hRules rl hrl hant ihp =>
     rcases hrl with (hNec | hLoeb);
-    . obtain ⟨p, e⟩ := hNec; subst_vars; exact nec! $ ihp (by aesop);
-    . obtain ⟨p, e⟩ := hLoeb; subst_vars; exact loeb! $ ihp (by aesop);
+    . obtain ⟨p, e⟩ := hNec; subst_vars; exact nec! $ ihp $ by simp_all only [List.mem_singleton, forall_eq];
+    . obtain ⟨p, e⟩ := hLoeb; subst_vars; exact loeb! $ ihp $ by simp_all only [List.mem_singleton, forall_eq];
   | _ => trivial;
 
 lemma reducible_K4Henkin_K4H : (𝐊𝟒(𝐇) : DeductionParameter α) ≤ₛ 𝐊𝟒𝐇 := by
@@ -451,8 +455,8 @@ lemma reducible_K4Henkin_K4H : (𝐊𝟒(𝐇) : DeductionParameter α) ≤ₛ �
   | hMdp ihpq ihp => exact ihpq ⨀ ihp;
   | hRules rl hrl hant ihp =>
     rcases hrl with (hNec | hHenkin);
-    . obtain ⟨p, e⟩ := hNec; subst_vars; exact nec! $ ihp (by aesop);
-    . obtain ⟨p, e⟩ := hHenkin; subst_vars; exact henkin! $ ihp (by aesop);
+    . obtain ⟨p, e⟩ := hNec; subst_vars; exact nec! $ ihp $ by simp_all only [List.mem_singleton, forall_eq];
+    . obtain ⟨p, e⟩ := hHenkin; subst_vars; exact henkin! $ ihp $ by simp_all only [List.mem_singleton, forall_eq];
   | _ => trivial;
 
 lemma reducible_K4Henkin_GL : (𝐊𝟒𝐇 : DeductionParameter α) ≤ₛ 𝐆𝐋 := by

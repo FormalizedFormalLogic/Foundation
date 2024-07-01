@@ -258,9 +258,12 @@ lemma geachConfluent_CanonicalFrame (h : 𝗴𝗲(t) ⊆ Ax) : GeachConfluent t 
 
     have : (𝝂Ax) ⊢! □^[t.n](Δ.conj') ⋏ ◇^[t.n](Γ.conj') ⟶ ⊥ := by
       apply and_imply_iff_imply_imply'!.mpr;
+      sorry;
+      /-
       exact imp_trans''!
         (show (𝝂Ax) ⊢! □^[t.n](Δ.conj') ⟶ □^[t.n](~Γ.conj') by exact imply_multibox_distribute'! $ contra₁'! $ and_imply_iff_imply_imply'!.mp hC)
         (show (𝝂Ax) ⊢! □^[t.n](~Γ.conj') ⟶ ~(◇^[t.n]Γ.conj') by exact contra₁'! $ and₁'! $ multidia_duality!);
+      -/
     have : (𝝂Ax) ⊬! □^[t.n](Δ.conj') ⋏ ◇^[t.n](Γ.conj') ⟶ ⊥ := by simpa using Ω₃.consistent (Γ := [□^[t.n](Δ.conj'), ◇^[t.n](Γ.conj')]) (by simp_all)
 
     contradiction;

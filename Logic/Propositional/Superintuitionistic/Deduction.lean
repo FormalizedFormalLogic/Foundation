@@ -128,7 +128,7 @@ theorem iff_provable_dn_efq_dne_provable: 𝐈𝐧𝐭 ⊢! ~~p ↔ 𝐂𝐥 ⊢
         subst hq;
         apply FiniteContext.deduct'!;
         have : [~(q ⋎ ~q)] ⊢[𝐈𝐧𝐭]! ~q ⋏ ~~q := demorgan₃'! $ FiniteContext.id!;
-        exact (and₂'! this) ⨀ (and₁'! this);
+        exact neg_mdp! (and₂'! this) (and₁'! this);
     | @mdp p q h₁ h₂ ih₁ ih₂ =>
       exact (dn_distribute_imply'! $ ih₁ ⟨h₁⟩) ⨀ ih₂ ⟨h₂⟩;
     | _ => apply dni'!; simp;

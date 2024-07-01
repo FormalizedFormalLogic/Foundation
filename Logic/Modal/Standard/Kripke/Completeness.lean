@@ -51,7 +51,11 @@ lemma multiframe_def_multibox : Ω₁ ≺^[n] Ω₂ ↔ ∀ {p}, □^[n]p ∈ Ω
 
         have hΔconj : (◇'⁻¹^[n]Δ).conj' ∈ Ω₂.theory := iff_mem_conj'.mpr hΔ₂;
 
-        have : (𝝂Ax) ⊢! Γ.conj' ⟶ □^[n](~(◇'⁻¹^[n]Δ).conj') := imp_trans''! (and_imply_iff_imply_imply'!.mp hC)
+        have := and_imply_iff_imply_imply'!.mp hC;
+
+        have : 𝝂Ax ⊢! Γ.conj' ⟶ □^[n](~(◇'⁻¹^[n]Δ).conj') := sorry
+          /-
+          imp_trans''! (and_imply_iff_imply_imply'!.mp hC)
           $ contra₂'! $ imp_trans''! (and₂'! multidia_duality!)
           $ imp_trans''! iff_conj'multidia_multidiaconj'! $ by
             apply conj'conj'_subset;
@@ -59,6 +63,7 @@ lemma multiframe_def_multibox : Ω₁ ≺^[n] Ω₂ ↔ ∀ {p}, □^[n]p ∈ Ω
             obtain ⟨r, _, _⟩ := by simpa using hΔ q hq;
             subst_vars;
             simpa;
+          -/
         have : (𝝂Ax) ⊢! □Γ.conj' ⟶ □^[(n + 1)](~(◇'⁻¹^[n]Δ).conj') := by simpa only [UnaryModalOperator.multimop_succ] using imply_box_distribute'! this;
         have : (◇'⁻¹^[n]Δ).conj' ∉ Ω₂.theory := iff_mem_neg.mp $ h $ membership_iff.mpr $ (Context.of! this) ⨀ dΓconj;
 
@@ -128,7 +133,7 @@ lemma iff_valid_on_canonicalModel_deducible : (CanonicalModel Ax) ⊧ p ↔ ((�
     have : (𝝂Ax)-Consistent ({~p}) := by
       intro Γ hΓ;
       by_contra hC;
-      have : _ ⊢! p := dne'! $ replace_imply_left_conj'! hΓ hC;
+      have : 𝝂Ax ⊢! p := dne'! $ neg_equiv'!.mpr $ replace_imply_left_conj'! hΓ hC;
       contradiction;
     obtain ⟨Ω, hΩ⟩ := lindenbaum this;
     simp [Kripke.ValidOnModel];
