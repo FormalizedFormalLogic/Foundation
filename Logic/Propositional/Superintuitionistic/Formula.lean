@@ -161,7 +161,6 @@ instance : DecidableEq (Formula α) := hasDecEq
 
 end Decidable
 
-/-
 section Encodable
 
 open Sum
@@ -232,7 +231,6 @@ variable [Encodable α]
 instance : Encodable (Formula α) := Encodable.ofEquiv (WType (Edge α)) (equivW α)
 
 end Encodable
--/
 
 end Formula
 
