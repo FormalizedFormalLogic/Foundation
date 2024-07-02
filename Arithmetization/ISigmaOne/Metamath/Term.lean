@@ -702,7 +702,7 @@ end Construction
 
 end Language.TermRec
 
-/--/
+/-
 section termSubst
 
 namespace FormalizedTermSubst
@@ -1277,6 +1277,7 @@ instance termShift_definable : 𝚺₁-Function₂ L.termShift :=
 end
 
 end termShift
+-/
 
 end LO.Arith
 

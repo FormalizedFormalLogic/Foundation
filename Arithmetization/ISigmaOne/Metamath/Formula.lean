@@ -492,10 +492,10 @@ structure Blueprint (pL : LDef) (k : ℕ) where
   nrel : 𝚺₁-Semisentence (k + 5)
   verum : 𝚺₁-Semisentence (k + 2)
   falsum : 𝚺₁-Semisentence (k + 2)
-  and : 𝚺₁-Semisentence (k + 4)
-  or : 𝚺₁-Semisentence (k + 4)
-  all : 𝚺₁-Semisentence (k + 3)
-  ex : 𝚺₁-Semisentence (k + 3)
+  and : 𝚺₁-Semisentence (k + 6)
+  or : 𝚺₁-Semisentence (k + 6)
+  all : 𝚺₁-Semisentence (k + 4)
+  ex : 𝚺₁-Semisentence (k + 4)
 
 namespace Blueprint
 
@@ -509,13 +509,13 @@ def blueprint (β : Blueprint pL k) : Fixpoint.Blueprint k := ⟨.mkDelta
     (∃ n < p, !qqVerumDef p n ∧ !β.verum.val r n ⋯) ∨
     (∃ n < p, !qqFalsumDef p n ∧ !β.falsum.val r n ⋯) ∨
     (∃ n < p, ∃ p₁ < p, ∃ p₂ < p, ∃ r₁ < C, ∃ r₂ < C,
-      p₁ ~[C] r₁ ∧ p₂ ~[C] r₂ ∧ !qqAndDef p n p₁ p₂ ∧ !β.and.val r n r₁ r₂ ⋯) ∨
+      p₁ ~[C] r₁ ∧ p₂ ~[C] r₂ ∧ !qqAndDef p n p₁ p₂ ∧ !β.and.val r n p₁ p₂ r₁ r₂ ⋯) ∨
     (∃ n < p, ∃ p₁ < p, ∃ p₂ < p, ∃ r₁ < C, ∃ r₂ < C,
-      p₁ ~[C] r₁ ∧ p₂ ~[C] r₂ ∧ !qqOrDef p n p₁ p₂ ∧ !β.or.val r n r₁ r₂ ⋯) ∨
+      p₁ ~[C] r₁ ∧ p₂ ~[C] r₂ ∧ !qqOrDef p n p₁ p₂ ∧ !β.or.val r n p₁ p₂ r₁ r₂ ⋯) ∨
     (∃ n < p, ∃ p₁ < p, ∃ r₁ < C,
-      p₁ ~[C] r₁ ∧ !qqAllDef p n p₁ ∧ !β.all.val r n r₁ ⋯) ∨
+      p₁ ~[C] r₁ ∧ !qqAllDef p n p₁ ∧ !β.all.val r n p₁ r₁ ⋯) ∨
     (∃ n < p, ∃ p₁ < p, ∃ r₁ < C,
-      p₁ ~[C] r₁ ∧ !qqExDef p n p₁ ∧ !β.ex.val r n r₁ ⋯))
+      p₁ ~[C] r₁ ∧ !qqExDef p n p₁ ∧ !β.ex.val r n p₁ r₁ ⋯))
   ” (by simp))
   (.mkPi “pr C |
     ∃ p <⁺ pr, ∃ r <⁺ pr, !pairDef pr p r ∧ !pL.isUFormulaDef.pi p ∧
@@ -524,13 +524,13 @@ def blueprint (β : Blueprint pL k) : Fixpoint.Blueprint k := ⟨.mkDelta
     (∃ n < p, !qqVerumDef p n ∧ !β.verum.graphDelta.pi.val r n ⋯) ∨
     (∃ n < p, !qqFalsumDef p n ∧ !β.falsum.graphDelta.pi.val r n ⋯) ∨
     (∃ n < p, ∃ p₁ < p, ∃ p₂ < p, ∃ r₁ < C, ∃ r₂ < C,
-      p₁ ~[C] r₁ ∧ p₂ ~[C] r₂ ∧ !qqAndDef p n p₁ p₂ ∧ !β.and.graphDelta.pi.val r n r₁ r₂ ⋯) ∨
+      p₁ ~[C] r₁ ∧ p₂ ~[C] r₂ ∧ !qqAndDef p n p₁ p₂ ∧ !β.and.graphDelta.pi.val r n p₁ p₂ r₁ r₂ ⋯) ∨
     (∃ n < p, ∃ p₁ < p, ∃ p₂ < p, ∃ r₁ < C, ∃ r₂ < C,
-      p₁ ~[C] r₁ ∧ p₂ ~[C] r₂ ∧ !qqOrDef p n p₁ p₂ ∧ !β.or.graphDelta.pi.val r n r₁ r₂ ⋯) ∨
+      p₁ ~[C] r₁ ∧ p₂ ~[C] r₂ ∧ !qqOrDef p n p₁ p₂ ∧ !β.or.graphDelta.pi.val r n p₁ p₂ r₁ r₂ ⋯) ∨
     (∃ n < p, ∃ p₁ < p, ∃ r₁ < C,
-      p₁ ~[C] r₁ ∧ !qqAllDef p n p₁ ∧ !β.all.graphDelta.pi.val r n r₁ ⋯) ∨
+      p₁ ~[C] r₁ ∧ !qqAllDef p n p₁ ∧ !β.all.graphDelta.pi.val r n p₁ r₁ ⋯) ∨
     (∃ n < p, ∃ p₁ < p, ∃ r₁ < C,
-      p₁ ~[C] r₁ ∧ !qqExDef p n p₁ ∧ !β.ex.graphDelta.pi.val r n r₁ ⋯))
+      p₁ ~[C] r₁ ∧ !qqExDef p n p₁ ∧ !β.ex.graphDelta.pi.val r n p₁ r₁ ⋯))
   ” (by simp))⟩
 
 def graph : 𝚺₁-Semisentence (k + 2) := .mkSigma
@@ -548,18 +548,18 @@ structure Construction (L : Arith.Language V) {k : ℕ} (φ : Blueprint pL k) wh
   nrel   : (Fin k → V) → V → V → V → V → V
   verum  : (Fin k → V) → V → V
   falsum : (Fin k → V) → V → V
-  and    : (Fin k → V) → V → V → V → V
-  or     : (Fin k → V) → V → V → V → V
-  all    : (Fin k → V) → V → V → V
-  ex     : (Fin k → V) → V → V → V
-  rel_defined    : DefinedFunction (fun v : Fin (k + 4) → V ↦ rel (v ·.succ.succ.succ.succ) (v 0) (v 1) (v 2) (v 3)) φ.rel
-  nrel_defined   : DefinedFunction (fun v : Fin (k + 4) → V ↦ nrel (v ·.succ.succ.succ.succ) (v 0) (v 1) (v 2) (v 3)) φ.nrel
-  verum_defined  : DefinedFunction (fun v : Fin (k + 1) → V ↦ verum (v ·.succ) (v 0)) φ.verum
-  falsum_defined : DefinedFunction (fun v : Fin (k + 1) → V ↦ falsum (v ·.succ) (v 0)) φ.falsum
-  and_defined    : DefinedFunction (fun v : Fin (k + 3) → V ↦ and (v ·.succ.succ.succ) (v 0) (v 1) (v 2)) φ.and
-  or_defined     : DefinedFunction (fun v : Fin (k + 3) → V ↦ or  (v ·.succ.succ.succ) (v 0) (v 1) (v 2)) φ.or
-  all_defined    : DefinedFunction (fun v : Fin (k + 2) → V ↦ all (v ·.succ.succ) (v 0) (v 1)) φ.all
-  ex_defined     : DefinedFunction (fun v : Fin (k + 2) → V ↦ ex  (v ·.succ.succ) (v 0) (v 1)) φ.ex
+  and    : (Fin k → V) → V → V → V → V → V → V
+  or     : (Fin k → V) → V → V → V → V → V → V
+  all    : (Fin k → V) → V → V → V → V
+  ex     : (Fin k → V) → V → V → V → V
+  rel_defined    : DefinedFunction (fun v ↦ rel (v ·.succ.succ.succ.succ) (v 0) (v 1) (v 2) (v 3)) φ.rel
+  nrel_defined   : DefinedFunction (fun v ↦ nrel (v ·.succ.succ.succ.succ) (v 0) (v 1) (v 2) (v 3)) φ.nrel
+  verum_defined  : DefinedFunction (fun v ↦ verum (v ·.succ) (v 0)) φ.verum
+  falsum_defined : DefinedFunction (fun v ↦ falsum (v ·.succ) (v 0)) φ.falsum
+  and_defined    : DefinedFunction (fun v ↦ and (v ·.succ.succ.succ.succ.succ) (v 0) (v 1) (v 2) (v 3) (v 4)) φ.and
+  or_defined     : DefinedFunction (fun v ↦ or  (v ·.succ.succ.succ.succ.succ) (v 0) (v 1) (v 2) (v 3) (v 4)) φ.or
+  all_defined    : DefinedFunction (fun v ↦ all (v ·.succ.succ.succ) (v 0) (v 1) (v 2)) φ.all
+  ex_defined     : DefinedFunction (fun v ↦ ex  (v ·.succ.succ.succ) (v 0) (v 1) (v 2)) φ.ex
 
 variable {V}
 
@@ -573,10 +573,10 @@ def Phi (param : Fin k → V) (C : Set V) (pr : V) : Prop :=
   (∃ n k r v, pr = ⟪^nrel n k r v, c.nrel param n k r v⟫) ∨
   (∃ n, pr = ⟪^⊤[n], c.verum param n⟫) ∨
   (∃ n, pr = ⟪^⊥[n], c.falsum param n⟫) ∨
-  (∃ n p q p' q', ⟪p, p'⟫ ∈ C ∧ ⟪q, q'⟫ ∈ C ∧ pr = ⟪p ^⋏[n] q, c.and param n p' q'⟫) ∨
-  (∃ n p q p' q', ⟪p, p'⟫ ∈ C ∧ ⟪q, q'⟫ ∈ C ∧ pr = ⟪p ^⋎[n] q, c.or param n p' q'⟫) ∨
-  (∃ n p p', ⟪p, p'⟫ ∈ C ∧ pr = ⟪^∀[n] p, c.all param n p'⟫) ∨
-  (∃ n p p', ⟪p, p'⟫ ∈ C ∧ pr = ⟪^∃[n] p, c.ex param n p'⟫) )
+  (∃ n p q p' q', ⟪p, p'⟫ ∈ C ∧ ⟪q, q'⟫ ∈ C ∧ pr = ⟪p ^⋏[n] q, c.and param n p q p' q'⟫) ∨
+  (∃ n p q p' q', ⟪p, p'⟫ ∈ C ∧ ⟪q, q'⟫ ∈ C ∧ pr = ⟪p ^⋎[n] q, c.or param n p q p' q'⟫) ∨
+  (∃ n p p', ⟪p, p'⟫ ∈ C ∧ pr = ⟪^∀[n] p, c.all param n p p'⟫) ∨
+  (∃ n p p', ⟪p, p'⟫ ∈ C ∧ pr = ⟪^∃[n] p, c.ex param n p p'⟫) )
 
 private lemma phi_iff (param : Fin k → V) (C pr : V) :
     c.Phi param {x | x ∈ C} pr ↔
@@ -586,11 +586,11 @@ private lemma phi_iff (param : Fin k → V) (C pr : V) :
     (∃ n < p, p = ^⊤[n] ∧ r = c.verum param n) ∨
     (∃ n < p, p = ^⊥[n] ∧ r = c.falsum param n) ∨
     (∃ n < p, ∃ p₁ < p, ∃ p₂ < p, ∃ r₁ < C, ∃ r₂ < C,
-      ⟪p₁, r₁⟫ ∈ C ∧ ⟪p₂, r₂⟫ ∈ C ∧ p = p₁ ^⋏[n] p₂ ∧ r = c.and param n r₁ r₂) ∨
+      ⟪p₁, r₁⟫ ∈ C ∧ ⟪p₂, r₂⟫ ∈ C ∧ p = p₁ ^⋏[n] p₂ ∧ r = c.and param n p₁ p₂ r₁ r₂) ∨
     (∃ n < p, ∃ p₁ < p, ∃ p₂ < p, ∃ r₁ < C, ∃ r₂ < C,
-      ⟪p₁, r₁⟫ ∈ C ∧ ⟪p₂, r₂⟫ ∈ C ∧ p = p₁ ^⋎[n] p₂ ∧ r = c.or param n r₁ r₂) ∨
-    (∃ n < p, ∃ p₁ < p, ∃ r₁ < C, ⟪p₁, r₁⟫ ∈ C ∧ p = ^∀[n] p₁ ∧ r = c.all param n r₁) ∨
-    (∃ n < p, ∃ p₁ < p, ∃ r₁ < C, ⟪p₁, r₁⟫ ∈ C ∧ p = ^∃[n] p₁ ∧ r = c.ex param n r₁)) where
+      ⟪p₁, r₁⟫ ∈ C ∧ ⟪p₂, r₂⟫ ∈ C ∧ p = p₁ ^⋎[n] p₂ ∧ r = c.or param n p₁ p₂ r₁ r₂) ∨
+    (∃ n < p, ∃ p₁ < p, ∃ r₁ < C, ⟪p₁, r₁⟫ ∈ C ∧ p = ^∀[n] p₁ ∧ r = c.all param n p₁ r₁) ∨
+    (∃ n < p, ∃ p₁ < p, ∃ r₁ < C, ⟪p₁, r₁⟫ ∈ C ∧ p = ^∃[n] p₁ ∧ r = c.ex param n p₁ r₁)) where
   mp := by
     rintro ⟨hp, H⟩
     refine ⟨π₁ pr, by simp, π₂ pr, by simp, by simp, hp, ?_⟩
@@ -745,10 +745,10 @@ lemma Graph.case_iff {p r : V} :
     (∃ n k R v, p = ^nrel n k R v ∧ r = c.nrel param n k R v) ∨
     (∃ n, p = ^⊤[n] ∧ r = c.verum param n) ∨
     (∃ n, p = ^⊥[n] ∧ r = c.falsum param n) ∨
-    (∃ n p₁ p₂ r₁ r₂, c.Graph param p₁ r₁ ∧ c.Graph param p₂ r₂ ∧ p = p₁ ^⋏[n] p₂ ∧ r = c.and param n r₁ r₂) ∨
-    (∃ n p₁ p₂ r₁ r₂, c.Graph param p₁ r₁ ∧ c.Graph param p₂ r₂ ∧ p = p₁ ^⋎[n] p₂ ∧ r = c.or param n r₁ r₂) ∨
-    (∃ n p₁ r₁, c.Graph param p₁ r₁ ∧ p = ^∀[n] p₁ ∧ r = c.all param n r₁) ∨
-    (∃ n p₁ r₁, c.Graph param p₁ r₁ ∧ p = ^∃[n] p₁ ∧ r = c.ex param n r₁) ) :=
+    (∃ n p₁ p₂ r₁ r₂, c.Graph param p₁ r₁ ∧ c.Graph param p₂ r₂ ∧ p = p₁ ^⋏[n] p₂ ∧ r = c.and param n p₁ p₂ r₁ r₂) ∨
+    (∃ n p₁ p₂ r₁ r₂, c.Graph param p₁ r₁ ∧ c.Graph param p₂ r₂ ∧ p = p₁ ^⋎[n] p₂ ∧ r = c.or param n p₁ p₂ r₁ r₂) ∨
+    (∃ n p₁ r₁, c.Graph param p₁ r₁ ∧ p = ^∀[n] p₁ ∧ r = c.all param n p₁ r₁) ∨
+    (∃ n p₁ r₁, c.Graph param p₁ r₁ ∧ p = ^∃[n] p₁ ∧ r = c.ex param n p₁ r₁) ) :=
   Iff.trans c.construction.case (by
     apply and_congr (by simp)
     simp [Graph])
@@ -852,12 +852,12 @@ lemma graph_falsum (n : V) :
 
 lemma graph_and {n p₁ p₂ r₁ r₂ : V} (hp₁ : L.IsSemiformula n p₁) (hp₂ : L.IsSemiformula n p₂)
     (h₁ : c.Graph param p₁ r₁) (h₂ : c.Graph param p₂ r₂) :
-    c.Graph param (p₁ ^⋏[n] p₂) (c.and param n r₁ r₂) :=
+    c.Graph param (p₁ ^⋏[n] p₂) (c.and param n p₁ p₂ r₁ r₂) :=
   (Graph.case_iff).mpr ⟨by simp [hp₁, hp₂], Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl ⟨n,
     p₁, p₂, r₁, r₂, h₁, h₂, rfl, rfl⟩⟩
 
 lemma graph_and_inv {n p₁ p₂ r : V} :
-    c.Graph param (p₁ ^⋏[n] p₂) r → ∃ r₁ r₂, c.Graph param p₁ r₁ ∧ c.Graph param p₂ r₂ ∧ r = c.and param n r₁ r₂ := by
+    c.Graph param (p₁ ^⋏[n] p₂) r → ∃ r₁ r₂, c.Graph param p₁ r₁ ∧ c.Graph param p₂ r₂ ∧ r = c.and param n p₁ p₂ r₁ r₂ := by
   intro h
   rcases Graph.case_iff.mp h with ⟨_, (⟨_, _, _, _, H, _⟩ | ⟨_, _, _, _, H, _⟩ | ⟨_, H, _⟩ | ⟨_, H, _⟩ |
     ⟨_, _, _, _, _, _, _, H, rfl⟩ | ⟨_, _, _, _, _, _, _, H, _⟩ | ⟨_, _, _, _, H, _⟩ | ⟨_, _, _, _, H, _⟩)⟩
@@ -873,12 +873,12 @@ lemma graph_and_inv {n p₁ p₂ r : V} :
 
 lemma graph_or {n p₁ p₂ r₁ r₂ : V} (hp₁ : L.IsSemiformula n p₁) (hp₂ : L.IsSemiformula n p₂)
     (h₁ : c.Graph param p₁ r₁) (h₂ : c.Graph param p₂ r₂) :
-    c.Graph param (p₁ ^⋎[n] p₂) (c.or param n r₁ r₂) :=
+    c.Graph param (p₁ ^⋎[n] p₂) (c.or param n p₁ p₂ r₁ r₂) :=
   (Graph.case_iff).mpr ⟨by simp [hp₁, hp₂], Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl ⟨n,
     p₁, p₂, r₁, r₂, h₁, h₂, rfl, rfl⟩⟩
 
 lemma graph_or_inv {n p₁ p₂ r : V} :
-    c.Graph param (p₁ ^⋎[n] p₂) r → ∃ r₁ r₂, c.Graph param p₁ r₁ ∧ c.Graph param p₂ r₂ ∧ r = c.or param n r₁ r₂ := by
+    c.Graph param (p₁ ^⋎[n] p₂) r → ∃ r₁ r₂, c.Graph param p₁ r₁ ∧ c.Graph param p₂ r₂ ∧ r = c.or param n p₁ p₂ r₁ r₂ := by
   intro h
   rcases Graph.case_iff.mp h with ⟨_, (⟨_, _, _, _, H, _⟩ | ⟨_, _, _, _, H, _⟩ | ⟨_, H, _⟩ | ⟨_, H, _⟩ |
     ⟨_, _, _, _, _, _, _, H, _⟩ | ⟨_, _, _, _, _, _, _, H, rfl⟩ | ⟨_, _, _, _, H, _⟩ | ⟨_, _, _, _, H, _⟩)⟩
@@ -893,12 +893,12 @@ lemma graph_or_inv {n p₁ p₂ r : V} :
   · simp [qqOr, qqEx] at H
 
 lemma graph_all {n p₁ r₁ : V} (hp₁ : L.IsSemiformula (n + 1) p₁) (h₁ : c.Graph param p₁ r₁) :
-    c.Graph param (^∀[n] p₁) (c.all param n r₁) :=
+    c.Graph param (^∀[n] p₁) (c.all param n p₁ r₁) :=
   (Graph.case_iff).mpr ⟨by simp [hp₁], Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl ⟨n,
     p₁, r₁, h₁, rfl, rfl⟩⟩
 
 lemma graph_all_inv {n p₁ r : V} :
-    c.Graph param (^∀[n] p₁) r → ∃ r₁, c.Graph param p₁ r₁ ∧ r = c.all param n r₁ := by
+    c.Graph param (^∀[n] p₁) r → ∃ r₁, c.Graph param p₁ r₁ ∧ r = c.all param n p₁ r₁ := by
   intro h
   rcases Graph.case_iff.mp h with ⟨_, (⟨_, _, _, _, H, _⟩ | ⟨_, _, _, _, H, _⟩ | ⟨_, H, _⟩ | ⟨_, H, _⟩ |
     ⟨_, _, _, _, _, _, _, H, _⟩ | ⟨_, _, _, _, _, _, _, H, _⟩ | ⟨_, _, _, _, H, rfl⟩ | ⟨_, _, _, _, H, _⟩)⟩
@@ -913,12 +913,12 @@ lemma graph_all_inv {n p₁ r : V} :
   · simp [qqAll, qqEx] at H
 
 lemma graph_ex {n p₁ r₁ : V} (hp₁ : L.IsSemiformula (n + 1) p₁) (h₁ : c.Graph param p₁ r₁) :
-    c.Graph param (^∃[n] p₁) (c.ex param n r₁) :=
+    c.Graph param (^∃[n] p₁) (c.ex param n p₁ r₁) :=
   (Graph.case_iff).mpr ⟨by simp [hp₁], Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr ⟨n,
     p₁, r₁, h₁, rfl, rfl⟩⟩
 
 lemma graph_ex_inv {n p₁ r : V} :
-    c.Graph param (^∃[n] p₁) r → ∃ r₁, c.Graph param p₁ r₁ ∧ r = c.ex param n r₁ := by
+    c.Graph param (^∃[n] p₁) r → ∃ r₁, c.Graph param p₁ r₁ ∧ r = c.ex param n p₁ r₁ := by
   intro h
   rcases Graph.case_iff.mp h with ⟨_, (⟨_, _, _, _, H, _⟩ | ⟨_, _, _, _, H, _⟩ | ⟨_, H, _⟩ | ⟨_, H, _⟩ |
     ⟨_, _, _, _, _, _, _, H, _⟩ | ⟨_, _, _, _, _, _, _, H, _⟩ | ⟨_, _, _, _, H, _⟩ | ⟨_, _, _, _, H, rfl⟩)⟩
@@ -947,13 +947,13 @@ lemma graph_exists {p : V} : L.IsUFormula p → ∃ r, c.Graph param p r := by
   case hfalsum =>
     intro n; exact ⟨c.falsum param n, c.graph_falsum n⟩
   case hand =>
-    rintro n p₁ p₂ hp₁ hp₂ ⟨r₁, h₁⟩ ⟨r₂, h₂⟩; exact ⟨c.and param n r₁ r₂, c.graph_and hp₁ hp₂ h₁ h₂⟩
+    rintro n p₁ p₂ hp₁ hp₂ ⟨r₁, h₁⟩ ⟨r₂, h₂⟩; exact ⟨c.and param n p₁ p₂ r₁ r₂, c.graph_and hp₁ hp₂ h₁ h₂⟩
   case hor =>
-    rintro n p₁ p₂ hp₁ hp₂ ⟨r₁, h₁⟩ ⟨r₂, h₂⟩; exact ⟨c.or param n r₁ r₂, c.graph_or hp₁ hp₂ h₁ h₂⟩
+    rintro n p₁ p₂ hp₁ hp₂ ⟨r₁, h₁⟩ ⟨r₂, h₂⟩; exact ⟨c.or param n p₁ p₂ r₁ r₂, c.graph_or hp₁ hp₂ h₁ h₂⟩
   case hall =>
-    rintro n p₁ hp₁ ⟨r₁, h₁⟩; exact ⟨c.all param n r₁, c.graph_all hp₁ h₁⟩
+    rintro n p₁ hp₁ ⟨r₁, h₁⟩; exact ⟨c.all param n p₁ r₁, c.graph_all hp₁ h₁⟩
   case hex =>
-    rintro n p₁ hp₁ ⟨r₁, h₁⟩; exact ⟨c.ex param n r₁, c.graph_ex hp₁ h₁⟩
+    rintro n p₁ hp₁ ⟨r₁, h₁⟩; exact ⟨c.ex param n p₁ r₁, c.graph_ex hp₁ h₁⟩
 
 lemma graph_unique {p : V} : L.IsUFormula p → ∀ r r', c.Graph param p r → c.Graph param p r' → r = r' := by
   apply Language.IsUFormula.induction 𝚷 (P := fun p ↦ ∀ {r r'}, c.Graph param p r → c.Graph param p r' → r = r')
@@ -1029,20 +1029,20 @@ lemma result_eq_of_graph {p r} (h : c.Graph param p r) : c.result param p = r :=
 
 @[simp] lemma result_and {n p q}
     (hp : L.IsSemiformula n p) (hq : L.IsSemiformula n q) :
-    c.result param (p ^⋏[n] q) = c.and param n (c.result param p) (c.result param q) :=
+    c.result param (p ^⋏[n] q) = c.and param n p q (c.result param p) (c.result param q) :=
   c.result_eq_of_graph (c.graph_and hp hq (c.result_prop param hp.1) (c.result_prop param hq.1))
 
 @[simp] lemma result_or {n p q}
     (hp : L.IsSemiformula n p) (hq : L.IsSemiformula n q) :
-    c.result param (p ^⋎[n] q) = c.or param n (c.result param p) (c.result param q) :=
+    c.result param (p ^⋎[n] q) = c.or param n p q (c.result param p) (c.result param q) :=
   c.result_eq_of_graph (c.graph_or hp hq (c.result_prop param hp.1) (c.result_prop param hq.1))
 
 @[simp] lemma result_all {n p} (hp : L.IsSemiformula (n + 1) p) :
-    c.result param (^∀[n] p) = c.all param n (c.result param p) :=
+    c.result param (^∀[n] p) = c.all param n p (c.result param p) :=
   c.result_eq_of_graph (c.graph_all hp (c.result_prop param hp.1))
 
 @[simp] lemma result_ex {n p} (hp : L.IsSemiformula (n + 1) p) :
-    c.result param (^∃[n] p) = c.ex param n (c.result param p) :=
+    c.result param (^∃[n] p) = c.ex param n p (c.result param p) :=
   c.result_eq_of_graph (c.graph_ex hp (c.result_prop param hp.1))
 
 section
@@ -1065,10 +1065,10 @@ def blueprint (pL : LDef) : Language.UformulaRec.Blueprint pL 0 where
   nrel := .mkSigma “y n k R v | !qqRelDef y n k R v” (by simp)
   verum := .mkSigma “y n | !qqFalsumDef y n” (by simp)
   falsum := .mkSigma “y n | !qqVerumDef y n” (by simp)
-  and := .mkSigma “y n y₁ y₂ | !qqOrDef y n y₁ y₂” (by simp)
-  or := .mkSigma “y n y₁ y₂ | !qqAndDef y n y₁ y₂” (by simp)
-  all := .mkSigma “y n y₁ | !qqExDef y n y₁” (by simp)
-  ex := .mkSigma “y n y₁ | !qqAllDef y n y₁” (by simp)
+  and := .mkSigma “y n p₁ p₂ y₁ y₂ | !qqOrDef y n y₁ y₂” (by simp)
+  or := .mkSigma “y n p₁ p₂ y₁ y₂ | !qqAndDef y n y₁ y₂” (by simp)
+  all := .mkSigma “y n p₁ y₁ | !qqExDef y n y₁” (by simp)
+  ex := .mkSigma “y n p₁ y₁ | !qqAllDef y n y₁” (by simp)
 
 variable (L)
 
@@ -1077,18 +1077,18 @@ def construction : Language.UformulaRec.Construction V L (blueprint pL) where
   nrel {_} := fun n k R v ↦ ^rel n k R v
   verum {_} := fun n ↦ ^⊥[n]
   falsum {_} := fun n ↦ ^⊤[n]
-  and {_} := fun n y₁ y₂ ↦ y₁ ^⋎[n] y₂
-  or {_} := fun n y₁ y₂ ↦ y₁ ^⋏[n] y₂
-  all {_} := fun n y₁ ↦ ^∃[n] y₁
-  ex {_} := fun n y₁ ↦ ^∀[n] y₁
+  and {_} := fun n _ _ y₁ y₂ ↦ y₁ ^⋎[n] y₂
+  or {_} := fun n _ _ y₁ y₂ ↦ y₁ ^⋏[n] y₂
+  all {_} := fun n _ y₁ ↦ ^∃[n] y₁
+  ex {_} := fun n _ y₁ ↦ ^∀[n] y₁
   rel_defined := by intro v; simp [blueprint]; rfl
   nrel_defined := by intro v; simp [blueprint]; rfl
   verum_defined := by intro v; simp [blueprint]
   falsum_defined := by intro v; simp [blueprint]
   and_defined := by intro v; simp [blueprint]; rfl
   or_defined := by intro v; simp [blueprint]; rfl
-  all_defined := by intro v; simp [blueprint]
-  ex_defined := by intro v; simp [blueprint]
+  all_defined := by intro v; simp [blueprint]; rfl
+  ex_defined := by intro v; simp [blueprint]; rfl
 
 end Negation
 
@@ -1148,65 +1148,6 @@ end
 end negation
 
 section substs
-
-/- TODO: remove -/
-theorem existsUnique_congr {p q : α → Prop} (h : ∀ a, p a ↔ q a) : (∃! a, p a) ↔ ∃! a, q a :=
-  exists_congr fun _ ↦ and_congr (h _) <| forall_congr' fun _ ↦ imp_congr_left (h _)
-
-lemma Language.TermSeq.substs_exists_unique {k n m v w : V} (hv : L.TermSeq n m v) (hw : L.TermSeq k n w) :
-    ∃! w', L.TermSeq k m w' ∧ ∀ i z z', ⟪i, z⟫ ∈ w → ⟪i, z'⟫ ∈ w' → z' = L.termSubst n m v z := by
-  have : ∀ i < k, ∃! z', ∀ z < w, ⟪i, z⟫ ∈ w → z' = L.termSubst n m v z := by
-    intro i hi
-    apply ExistsUnique.intro (L.termSubst n m v (hw.seq.nth (show i < lh w by simpa [←hw.lh] using hi)))
-    · intro z _ hiz; simp [hw.seq.nth_uniq (show i < lh w by simpa [←hw.lh] using hi) hiz]
-    · intro y hy; exact hy _ (by simp) (by simp)
-  refine (existsUnique_congr ?_).mp (sigmaOne_skolem_seq! (by definability) this)
-  intro w'; constructor
-  · rintro ⟨Hw', rfl, hw'w⟩; exact ⟨⟨Hw', rfl, fun i u hi ↦ by
-    have : i < lh w := by simpa [←hw.lh] using Hw'.lt_lh_of_mem hi
-    rcases hw'w i u hi _ (hw.seq.nth_lt this) (by simp)
-    apply hv.substs_isterm (hw.prop i _ (by simp))⟩, fun i z z' hiz hiz' ↦ hw'w i z' hiz' z (lt_of_mem_rng hiz) hiz⟩
-  · rintro ⟨hw', h⟩
-    exact ⟨hw'.seq, Eq.symm hw'.lh, fun i z hiz z' _ hiz' ↦ h i z' z hiz' hiz⟩
-
-lemma Language.TermSeq.substs_exists_unique' (k n m v w : V) : ∃! w',
-    (L.TermSeq n m v ∧ L.TermSeq k n w → L.TermSeq k m w' ∧ ∀ i z z', ⟪i, z⟫ ∈ w → ⟪i, z'⟫ ∈ w' → z' = L.termSubst n m v z) ∧
-    (¬(L.TermSeq n m v ∧ L.TermSeq k n w) → w' = 0) := by
-  by_cases h : L.TermSeq n m v ∧ L.TermSeq k n w <;> simp [h]
-  exact h.1.substs_exists_unique h.2
-
-/-
-def blueprint (pL : LDef) : Language.UformulaRec.Blueprint pL 0 where
-  rel := .mkSigma “y n k R v | !qqNRelDef y n k R v” (by simp)
-  nrel := .mkSigma “y n k R v | !qqRelDef y n k R v” (by simp)
-  verum := .mkSigma “y n | !qqFalsumDef y n” (by simp)
-  falsum := .mkSigma “y n | !qqVerumDef y n” (by simp)
-  and := .mkSigma “y n y₁ y₂ | !qqOrDef y n y₁ y₂” (by simp)
-  or := .mkSigma “y n y₁ y₂ | !qqAndDef y n y₁ y₂” (by simp)
-  all := .mkSigma “y n y₁ | !qqExDef y n y₁” (by simp)
-  ex := .mkSigma “y n y₁ | !qqAllDef y n y₁” (by simp)
-
-variable (L)
-
-def construction : Language.UformulaRec.Construction V L (blueprint pL) where
-  rel {_} := fun n k R v ↦ ^nrel n k R v
-  nrel {_} := fun n k R v ↦ ^rel n k R v
-  verum {_} := fun n ↦ ^⊥[n]
-  falsum {_} := fun n ↦ ^⊤[n]
-  and {_} := fun n y₁ y₂ ↦ y₁ ^⋎[n] y₂
-  or {_} := fun n y₁ y₂ ↦ y₁ ^⋏[n] y₂
-  all {_} := fun n y₁ ↦ ^∃[n] y₁
-  ex {_} := fun n y₁ ↦ ^∀[n] y₁
-  rel_defined := by intro v; simp [blueprint]; rfl
-  nrel_defined := by intro v; simp [blueprint]; rfl
-  verum_defined := by intro v; simp [blueprint]
-  falsum_defined := by intro v; simp [blueprint]
-  and_defined := by intro v; simp [blueprint]; rfl
-  or_defined := by intro v; simp [blueprint]; rfl
-  all_defined := by intro v; simp [blueprint]
-  ex_defined := by intro v; simp [blueprint]
-
--/
 
 end substs
 
