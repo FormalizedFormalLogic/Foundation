@@ -121,6 +121,40 @@ lemma Seq.lt_lh_of_mem {s : M} (h : Seq s) {i x} (hix : ⟪i, x⟫ ∈ s) : i < 
 
 def seqCons (s x : M) : M := insert ⟪lh s, x⟫ s
 
+section znth
+
+def znth_existsUnique (s i : M) : ∃! x, (Seq s ∧ i < lh s → ⟪i, x⟫ ∈ s) ∧ (¬(Seq s ∧ i < lh s) → x = 0) := by
+  by_cases h : Seq s ∧ i < lh s <;> simp [h]
+  exact h.1.nth_exists_uniq h.2
+
+def znth (s i : M) : M := Classical.choose! (znth_existsUnique s i)
+
+lemma Seq.znth {s i : M} (h : Seq s) (hi : i < lh s) : ⟪i, znth s i⟫ ∈ s := Classical.choose!_spec (znth_existsUnique s i) |>.1 ⟨h, hi⟩
+
+lemma znth_prop_not {s i : M} (h : ¬Seq s ∨ lh s ≤ i) : znth s i = 0 :=
+  Classical.choose!_spec (znth_existsUnique s i) |>.2 (by simpa [-not_and, not_and_or] using h)
+
+def _root_.LO.FirstOrder.Arith.znthDef : 𝚺₀-Semisentence 3 := .mkSigma
+  “x s i | ∃ l <⁺ 2 * s, !lhDef l s ∧ (:Seq s ∧ i < l → i ~[s] x) ∧ (¬(:Seq s ∧ i < l) → x = 0)” (by simp)
+
+private lemma znth_graph {x s i : M} : x = znth s i ↔ ∃ l ≤ 2 * s, l = lh s ∧ (Seq s ∧ i < l → ⟪i, x⟫ ∈ s) ∧ (¬(Seq s ∧ i < l) → x = 0) := by
+  simp [znth, Classical.choose!_eq_iff]; constructor
+  · rintro h; exact ⟨lh s, by simp, by simp, h⟩
+  · rintro ⟨_, _, rfl, h⟩; exact h
+
+lemma znth_defined : 𝚺₀-Function₂ (znth : M → M → M) via znthDef := by
+  intro v;
+  simpa [znthDef, -not_and, not_and_or] using znth_graph (M := M)
+
+@[simp] lemma eval_znthDef (v) :
+    Semiformula.Evalbm M v znthDef.val ↔ v 0 = znth (v 1) (v 2) := znth_defined.df.iff v
+
+instance znth_definable : 𝚺₀-Function₂ (znth : M → M → M) := Defined.to_definable _ znth_defined
+
+instance znth_definable' (Γ) : Γ-Function₂ (znth : M → M → M) := .of_zero znth_definable _
+
+end znth
+
 -- infixr:67 " ::ˢ " => seqCons
 
 infixr:67 " ⁀' " => seqCons

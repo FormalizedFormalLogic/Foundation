@@ -689,10 +689,12 @@ private lemma resultSeq_graph {w' k n w} :
 
 lemma resultSeq_defined : Arith.DefinedFunction (fun v ↦ c.resultSeq (v ·.succ.succ.succ) (v 0) (v 1) (v 2)) β.resultSeq := by
   intro v
-  simpa [Blueprint.resultSeq, HSemiformula.val_sigma, (termSeq_defined L).proper.iff', eval_termSeq L, c.eval_graphDef] using c.resultSeq_graph
+  simpa [Blueprint.resultSeq, HSemiformula.val_sigma, (termSeq_defined L).proper.iff',
+    eval_termSeq L, c.eval_graphDef] using c.resultSeq_graph
 
 lemma eval_resultSeq (v : Fin (arity + 4) → V) :
-    Semiformula.Evalbm V v β.resultSeq.val ↔ v 0 = c.resultSeq (v ·.succ.succ.succ.succ) (v 1) (v 2) (v 3) := c.resultSeq_defined.df.iff v
+    Semiformula.Evalbm V v β.resultSeq.val ↔
+    v 0 = c.resultSeq (v ·.succ.succ.succ.succ) (v 1) (v 2) (v 3) := c.resultSeq_defined.df.iff v
 
 end
 
