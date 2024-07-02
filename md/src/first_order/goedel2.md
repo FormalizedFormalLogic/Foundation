@@ -7,24 +7,16 @@ Recall that inside $\mathsf{I}\Sigma_1$ we can do basic set theory and primitive
 ## Coding of Terms and Formulae
 
 ### Term
-Define a sequence of finite sets $\{T^n_s\}_s$.
-To ensure that these sets are finite, each set is bounded by $s$.
-
-The function $T^n \colon s \mapsto T^n_s$ is proved to be $\Sigma_1$ by using primitive recursion.
+Define a class of (semi)terms using [fixpoint](https://iehality.github.io/lean4-logic/book/first_order/isigma1.html#fixpoint).
+Define $T^n_C$ as follows.
 
 $$
 \begin{align*}
-  T^n_0 &\coloneqq &&\emptyset \\
-  T^n_{s + 1} &\coloneqq
-      &&\{\widehat{\#z} \le s \mid z < n \} \cup {} \\
-    & &&\{\widehat{\&x} \le s \mid \} \cup {} \\
-    & &&\{\widehat{f^k(v)} \le s \mid
-      \mathrm{Func}(k, f), v \in (T^n_s)^k\} \\
+  u \in T^n_C &\iff
+      && (\exists z < n)[u = \widehat{\#z}] \lor {}  \\
+    & && (\exists x) [u = \widehat{\&x}] \lor {} \\
+    & && (\exists k, f, v) [\mathrm{Func}_k(f) \land \mathrm{Seq}(v) \land k = \mathrm{lh}(v) \land (\forall i, z)[\braket{i, z} \in v \to z \in C] \land u = \widehat{f^k(v)}] \\
 \end{align*}
-$$
-
-$$
-  \mathrm{Term}_n(u) \iff (\exists s)[u \in T^n_s]
 $$
 
 $\widehat{\bullet}$ is a quasi-quotation.
@@ -36,36 +28,24 @@ $$
 \end{align*}
 $$
 
-This sequence of sets $\{T^n_s\}_s$ is cumulative.
-Moreover, the following holds.
-
-$$
-\mathrm{Term}_n(u) \implies u \in T^n_{u + 1}
-$$
-- _Proof._ $\Pi_1$-order induction on $u$.  ∎
-
-Thus, $\mathrm{Term}_n(u)$ is $\Delta_1$.
+$T^n_C$ is $\Delta_1$ (if $C$ is a finite set) and monotone. Let $\mathrm{Semiterm}_n(t)$ be a fixpoint of $T^n_C$.
+It is $\Delta_1$ since $T^n_C$ satisfies strong finiteness.
 
 ### Formula
-Similarly, Define a sequence of finite sets $\{F_s\}_s$.
+Similarly, Define $F_C$:
 
 $$
 \begin{align*}
-  F_0 &\coloneqq &&\emptyset \\
-  F_{s + 1} &\coloneqq
-      &&\{\widehat{R^k_n(v)} \le s \mid \mathrm{Rel}(k, R), v \in (T^n_s)^k \} \cup {} \\
-    & &&\{\widehat{\lnot R^k_n(v)} \le s \mid \mathrm{Rel}(k, R), v \in (T^n_s)^k \} \cup {} \\
-    & &&\{\widehat{\top_n} \le s \mid \} \cup {} \\
-    & &&\{\widehat{\bot_n} \le s \mid \} \cup {} \\
-    & &&\{\widehat{p \land_n q} \le s \mid p, q \in F_s, \mathrm{bv}(p) = \mathrm{bv}(q) = n \} \cup {} \\
-    & &&\{\widehat{p \lor_n q} \le s \mid p, q \in F_s, \mathrm{bv}(p) = \mathrm{bv}(q) = n \} \cup {} \\
-    & &&\{\widehat{\forall_n p} \le s \mid p \in F_s, \mathrm{bv}(p) = n + 1 \} \cup {} \\
-    & &&\{\widehat{\exists_n p} \le s \mid p \in F_s, \mathrm{bv}(p) = n + 1 \}
+  u \in F_C &\iff
+      && (\exists n, k, R, v)[\mathrm{Rel}_k(R) \land \text{$v$ is a sequence of $\mathrm{Semiterm}_n$ of length $k$} \land u = \widehat{R_n^k (v)}] \lor {}  \\
+    & && (\exists n, k, R, v)[\mathrm{Rel}_k(R) \land \text{$v$ is a sequence of $\mathrm{Semiterm}_n$ of length $k$} \land u = \widehat{\lnot R_n^k (v)}] \lor {}  \\
+    & && (\exists n) [u = \widehat{\top_n}] \lor {} \\
+    & && (\exists n) [u = \widehat{\bot_n}] \lor {} \\
+    & && (\exists n, p, q) [p \in C \land q \in C \land n = \mathrm{bv}(p) = \mathrm{bv}(q) \land u = \widehat{p \land_n q}] \lor {} \\
+    & && (\exists n, p, q) [p \in C \land q \in C \land n = \mathrm{bv}(p) = \mathrm{bv}(q) \land u = \widehat{p \lor_n q}] \lor {} \\
+    & && (\exists n, p) [p \in C \land n + 1 = \mathrm{bv}(p) \land u = \widehat{\forall_n p}] \lor {} \\
+    & && (\exists n, p) [p \in C \land n + 1 = \mathrm{bv}(p) \land u = \widehat{\exists_n p}] 
 \end{align*}
-$$
-
-$$
-  \mathrm{Formula}_n(u) \iff \mathrm{bv}(u) = n \land (\exists s)[u \in F_s]
 $$
 
 The quasi-quotations are defined as follows:
@@ -84,40 +64,18 @@ $$
 $$
 
 $$
-  \mathrm{bv}(x) \coloneqq \pi_1(x)
+  \mathrm{bv}(x) \coloneqq \pi_1(x - 1)
 $$
 
-It is proved that $\mathrm{Formula}_n(u)$ is $\Delta_1$ as well as Term.
+$F_C$ is $\Delta_1$ and monotone. Let $\mathrm{UFormula}(t)$ be a fixpoint of $F_C$ and define
+
+$$
+\mathrm{Semiformula}_n(u) \iff \mathrm{UFormula}(u) \land n = \mathrm{bv}(u)
+$$
+
+$\mathrm{UFormula}(t)$ and $\mathrm{Semiormula}_n(t)$ are again $\Delta_1$ since $F_C$ satisfies strong finiteness.
 
 ### Negation
 
-$$
-\begin{align*}
-  \mathrm{Neg}_0 &\coloneqq &&\empty \\
-  \mathrm{Neg}_{s + 1} &\coloneqq
-      &&\{ (\widehat{R^k_n(v)}, \widehat{\lnot R^k_n(v)}), (\widehat{\lnot R^k_n(v)}, \widehat{R^k_n(v)}) \mid \widehat{R^k_n(v)}, \widehat{\lnot R^k_n(v)} \in F_{s + 1} \} \cup {} \\
-    & &&\{ (\widehat{\top_n}, \widehat{\bot_n}), (\widehat{\bot_n}, \widehat{\top_n}) \mid \widehat{\top_n}, \widehat{\bot_n} \in F_{s + 1}\} \cup {} \\
-    & &&\{ (\widehat{p \land_n q}, \widehat{p' \lor_n q'}), (\widehat{p \lor_n q}, \widehat{p' \land_n q'}) \mid (p, p'), (q, q') \in \mathrm{Neg}_s \} \cup {} \\
-    & &&\{ (\widehat{\forall_n p}, \widehat{\exists_n p'}), (\widehat{\exists_n p}, \widehat{\forall_n p'}) \mid (p, p') \in \mathrm{Neg}_s \}
-\end{align*}
-$$
-
-$$
-  \widehat{\lnot u} = v \iff (\exists s)[(u, v) \in \mathrm{Neg}_s]
-$$
-
-### Term Substitution
-$$
-\begin{align*}
-  \mathrm{TSbs}^{n, v}_0 &\coloneqq &&\emptyset \\
-  \mathrm{TSbs}^{n, v}_{s + 1} &\coloneqq
-      &&\{ (\widehat{\#x}, v_x) \mid \widehat{\#x} \in T^n_{s + 1} \} \cup {} \\
-    & &&\{ (\widehat{\&x}, \widehat{\&x}) \mid \widehat{\&x} \in T^n_{s + 1} \} \cup {} \\
-    & &&\{(\widehat{f^k(w)}, \widehat{f^k(w')}) \mid \widehat{f^k(w)}, \widehat{f^k(w')} \in T^n_{s + 1}, (\forall i)[(w_i, w'_i) \in \mathrm{TSubs}^{n, v}_s ] \}
-\end{align*}
-$$
-
-$$
-  \widehat{u[v]} = v \iff (\exists s)[(u, u') \in \mathrm{TSubs}^{\mathrm{lh}(v), v}_s]
-$$
+### Substitution
 

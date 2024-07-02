@@ -1,11 +1,11 @@
 # Gödel's First Incompleteness Theorem
 
-Summarize Gödel's First Incompleteness Theorem.
+An outline of the formalized proof of Gödel's first incompleteness theorem.
 
 ## Definition
 
-If a system $\mathcal{S}$ can prove or refute for every formula $\varphi$ of $\mathcal{S}$, $\mathcal{S}$ is called _complete_.
-Otherwise, $\mathcal{S}$ is called _incomplete_.
+A deduction system $\mathcal{S}$ is _complete_ iff it can prove or refute every sentence $\sigma$.
+Otherwise, $\mathcal{S}$ is _incomplete_.
 
 ```lean
 def LO.System.Complete : Prop := ∀ f, 𝓢 ⊢! f ∨ 𝓢 ⊢! ~f
@@ -34,7 +34,7 @@ This theorem is proved two distinct approach.
 
 ### G1 in `FirstIncompleteness.lean`
   
-  Define a set of formulae with at most one variable.
+  Define a set of formulae with one variable.
   $$ D \coloneqq \{\varphi \mid T \vdash \lnot \varphi({\ulcorner \varphi \urcorner}) \} $$
   $D$ is r.e. since $T$ is computable. (one could use Craig's trick to weaken this condition to r.e., but I will not do that here.)
 
@@ -50,12 +50,12 @@ This theorem is proved two distinct approach.
 
 ### G1 in `SelfReference.lean`
   
-  Since the substitution of a formula is computable, there exists an $\Sigma_1$ formula $\mathrm{ssbs}(x, y, z)$ that represents this.
+  Since the substitution of a formula is computable, there exists an $\Sigma_1$ formula $\mathrm{ssbs}(x, y, z)$ that represents this:
 
   $$ T \vdash (\forall x)[\mathrm{ssbs}(x, {\ulcorner \varphi \urcorner}, {\ulcorner \psi \urcorner})
     \leftrightarrow x = {\ulcorner \varphi({\ulcorner \psi \urcorner}) \urcorner}] $$
 
-  Define a sentence $\mathrm{fixpoint}_\theta$ for formula (with at most one variable) $\theta$ as follows.
+  Define a sentence $\mathrm{fixpoint}_\theta$ for formula (with one variable) $\theta$ as follows.
   
   $$
     \begin{align*}

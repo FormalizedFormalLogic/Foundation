@@ -2,11 +2,9 @@
 
 _These results are included in [Arithmetization](https://github.com/iehality/Arithmetization/tree/master)._
 
-We will work in $\mathsf{I}\Sigma_1$. And denote $V$ as universe.
-
 ### Exponential
 
-It is proved that the graph of exponential is definable by $\Sigma_1$-formula,
+It is proved that the graph of exponential is definable by $\Sigma_0$-formula,
 and their inductive properties are provable in $\mathsf{I}\Sigma_0$.
 In $\mathsf{I}\Sigma_1$, we can further prove their entireness.
 
@@ -23,7 +21,8 @@ lemma mem_iff_bit [M ⊧ₘ* 𝐈𝚺₁] {i a : M} : i ∈ a ↔ Bit i a
 The following comprehension holds.
 
 ```lean
-theorem finset_comprehension₁ [M ⊧ₘ* 𝐈𝚺₁] {P : M → Prop} (hP : (Γ, 1)-Predicate P) (a : M) :
+theorem finset_comprehension₁ [M ⊧ₘ* 𝐈𝚺₁]
+    {P : M → Prop} (hP : (Γ, 1)-Predicate P) (a : M) :
     ∃ s < exp a, ∀ i < a, i ∈ s ↔ P i
 ```
 - [LO.FirstOrder.Arith.Model.finset_comprehension₁](https://iehality.github.io/Arithmetization/Arithmetization/ISigmaOne/Bit.html#LO.FirstOrder.Arith.Model.finset_comprehension%E2%82%81)
@@ -42,13 +41,13 @@ def Seq [M ⊧ₘ* 𝐈𝚺₁] (s : M) : Prop := IsMapping s ∧ ∃ l, domain 
 
 ### Primitive Recursion
 
-Let $f(\vec v)$, $g(\vec{v}, x, z)$ be a $\Sigma_1$ function.
-Then there is a $\Sigma_1$ function $\mathsf{PR}_{f,g}(\vec{v}, u)$ such that:
+Let $f(\vec v)$, $g(\vec{v}, x, z)$ be a $\Sigma_1$-function.
+There is a $\Sigma_1$-function $\mathsf{PR}_{f,g}(\vec{v}, u)$ such that:
 
 $$
 \begin{align*}
-  \mathsf{PR}_{f,g}(\vec{v}, 0) &\coloneqq f(\vec{v}) \\
-  \mathsf{PR}_{f,g}(\vec{v}, u + 1) &\coloneqq g(\vec{v}, u, \mathsf{PR}_{f,g}(\vec{v}, u))
+  \mathsf{PR}_{f,g}(\vec{v}, 0) &= f(\vec{v}) \\
+  \mathsf{PR}_{f,g}(\vec{v}, u + 1) &= g(\vec{v}, u, \mathsf{PR}_{f,g}(\vec{v}, u))
 \end{align*}
 $$
 
@@ -78,7 +77,7 @@ theorem Construction.result_succ (u : M) :
 ### Fixpoint
 
 Let $\Phi_C(\vec{v}, x)$ be a predicate, which takes a *class* $C$ as a parameter.
-Then there is a $\Delta_1$-definable predicate $\mathsf{Fix}_{\Phi}(\vec{v}, x)$ such that
+Then there is a $\Sigma_1$-predicate $\mathsf{Fix}_{\Phi}(\vec{v}, x)$ such that
 
 $$
   \mathsf{Fix}_\Phi(\vec{v}, x) \iff \Phi_{\{z \mid \mathsf{Fix}_\Phi(\vec{v}, z)\}} (\vec{v}, x)
@@ -89,23 +88,32 @@ if $\Phi$ satisfies following conditions:
 1.  $\Phi$ is $\Delta_1$-definable if $C$ is a set. i.e.,
     a predicate $(c, \vec{v}, x) \mapsto \Phi_{\{z \mid \mathrm{Bit}(z, c)\}}(\vec{v}, x)$ is $\Delta_1$-definable.
 2.  *Monotone*: $C \subseteq C'$ and $\Phi_C(\vec{v}, x)$ implies $\Phi_{C'}(\vec{v}, x)$.
-3. *Finite*: $\Phi_C (\vec{v}, x)$ implies $\Phi_{\{z \in C \mid z < x\}} (\vec{v}, x)$.
+3. *Finite*: $\Phi_C (\vec{v}, x)$ implies the existence of a $m$ s.t. $\Phi_{\{z \in C \mid z < m\}} (\vec{v}, x)$.
 
 ```lean
-structure Formula (k : ℕ) where
+structure Blueprint (k : ℕ) where
   core : 𝚫₁-Semisentence (k + 2)
 
-structure Construction {k : ℕ} (φ : Formula k) where
+structure Construction (φ : Blueprint k) where
   Φ : (Fin k → M) → Set M → M → Prop
-  defined : Defined (fun v ↦ Φ (v ·.succ.succ) {x | x ∈ v 1} (v 0)) φ.core
+  defined : Arith.Defined (fun v ↦ Φ (v ·.succ.succ) {x | x ∈ v 1} (v 0)) φ.core
   monotone {C C' : Set M} (h : C ⊆ C') {v x} : Φ v C x → Φ v C' x
-  finite {C : Set M} {v x} : Φ v C x → Φ v {y ∈ C | y < x} x
 
-variable {k : ℕ} {φ : Formula k} (c : Construction M φ) (v : Fin k → M)
+class Construction.Finite (c : Construction M φ) where
+  finite {C : Set M} {v x} : c.Φ v C x → ∃ m, c.Φ v {y ∈ C | y < m} x
+
+variable {k : ℕ} {φ : Blueprint k} (c : Construction M φ) [Finite c] (v : Fin k → M)
 
 def Construction.Fixpoint (x : M) : Prop
 
 theorem Construction.case :
     c.Fixpoint v x ↔ c.Φ v {z | c.Fixpoint v z} x
 ```
-- [Formula](https://iehality.github.io/Arithmetization/Arithmetization/ISigmaOne/HFS/Fixpoint.html#LO.FirstOrder.Arith.Model.Fixpoint.Formula), [Construction](https://iehality.github.io/Arithmetization/Arithmetization/ISigmaOne/HFS/Fixpoint.html#LO.FirstOrder.Arith.Model.Fixpoint.Construction), [Construction.Fixpoint](https://iehality.github.io/Arithmetization/Arithmetization/ISigmaOne/HFS/Fixpoint.html#LO.FirstOrder.Arith.Model.Fixpoint.Construction.Fixpoint), [Construction.case](https://iehality.github.io/Arithmetization/Arithmetization/ISigmaOne/HFS/Fixpoint.html#LO.FirstOrder.Arith.Model.Fixpoint.Construction.case)
+- [Blueprint](https://iehality.github.io/Arithmetization/Arithmetization/ISigmaOne/HFS/Fixpoint.html#LO.Arith.Fixpoint.Blueprint), [Construction](https://iehality.github.io/Arithmetization/Arithmetization/ISigmaOne/HFS/Fixpoint.html#LO.FirstOrder.Arith.Model.Fixpoint.Construction), [Construction.Finite](https://iehality.github.io/Arithmetization/Arithmetization/ISigmaOne/HFS/Fixpoint.html#LO.Arith.Fixpoint.Construction.Finite), [Construction.Fixpoint](https://iehality.github.io/Arithmetization/Arithmetization/ISigmaOne/HFS/Fixpoint.html#LO.FirstOrder.Arith.Model.Fixpoint.Construction.Fixpoint), [Construction.case](https://iehality.github.io/Arithmetization/Arithmetization/ISigmaOne/HFS/Fixpoint.html#LO.FirstOrder.Arith.Model.Fixpoint.Construction.case)
+
+$\mathsf{Fix}_\Phi(\vec v, x)$ is $\Delta_1$ if $\Phi$ satisfies strong finiteness:
+```lean
+class Construction.StrongFinite (c : Construction M φ) where
+  strong_finite {C : Set M} {v x} : c.Φ v C x → c.Φ v {y ∈ C | y < x} x
+```
+- [StrongFinite](https://iehality.github.io/Arithmetization/Arithmetization/ISigmaOne/HFS/Fixpoint.html#LO.Arith.Fixpoint.Construction.StrongFinite)

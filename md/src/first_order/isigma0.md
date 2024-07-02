@@ -4,7 +4,7 @@ _These results are included in [Arithmetization](https://github.com/iehality/Ari
 
 ## Exponential
 
-The graph of exponential $\mathrm{Exp}(x, y)$ are defined by $\Sigma_0$-fomrula, 
+The graph of exponential $\mathrm{Exp}(x, y)$ is definable by $\Sigma_0$-fomrula, 
 and its inductive properties are proved in $\mathsf{I}\Sigma_0$.
 
 ```lean
