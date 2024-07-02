@@ -1,5 +1,4 @@
-import Arithmetization.ISigmaOne.Metamath.Term
-import Arithmetization.ISigmaOne.HFS
+import Arithmetization.ISigmaOne.Metamath.Term.Basic
 
 noncomputable section
 
@@ -365,15 +364,15 @@ instance isUFormulaDef_definable : 𝚫₁-Predicate L.IsUFormula := Defined.to_
 @[simp, definability] instance isUFormulaDef_definable' (Γ) : (Γ, m + 1)-Predicate L.IsUFormula :=
   .of_deltaOne (isUFormulaDef_definable L) _ _
 
-def Language.IsSemiformula (n p : V) : Prop := L.IsUFormula p ∧ bv p = n
+def Language.Semiformula (n p : V) : Prop := L.IsUFormula p ∧ bv p = n
 
 def _root_.LO.FirstOrder.Arith.LDef.isSemiformulaDef (pL : LDef) : 𝚫₁-Semisentence 2 := .mkDelta
   (.mkSigma “n p | !pL.isUFormulaDef.sigma p ∧ !bvDef n p” (by simp))
   (.mkPi “n p | !pL.isUFormulaDef.pi p ∧ !bvDef n p” (by simp))
 
-lemma isSemisentence_defined : 𝚫₁-Relation L.IsSemiformula via pL.isSemiformulaDef where
+lemma isSemisentence_defined : 𝚫₁-Relation L.Semiformula via pL.isSemiformulaDef where
   left := by intro v; simp [LDef.isSemiformulaDef, HSemiformula.val_sigma, (isUFormula_defined L).proper.iff']
-  right := by intro v; simp [LDef.isSemiformulaDef, HSemiformula.val_sigma, eval_isUFormulaDef L, Language.IsSemiformula, eq_comm]
+  right := by intro v; simp [LDef.isSemiformulaDef, HSemiformula.val_sigma, eval_isUFormulaDef L, Language.Semiformula, eq_comm]
 
 variable {L}
 
@@ -420,7 +419,7 @@ alias ⟨Language.IsUFormula.case, Language.IsUFormula.mk⟩ := Language.IsUForm
   Language.IsUFormula.mk (Or.inr <| Or.inr <| Or.inr <| Or.inl ⟨n, rfl⟩)
 
 @[simp] lemma Language.IsUFormula.and {n p q : V} :
-    𝐔 (p ^⋏[n] q) ↔ L.IsSemiformula n p ∧ L.IsSemiformula n q :=
+    𝐔 (p ^⋏[n] q) ↔ L.Semiformula n p ∧ L.Semiformula n q :=
   ⟨by intro h
       rcases h.case with (⟨_, _, _, _, _, _, h⟩ | ⟨_, _, _, _, _, _, h⟩ | ⟨_, h⟩ | ⟨_, h⟩ |
         ⟨_, _, _, hp, hq, h⟩ | ⟨_, _, _, _, _, h⟩ | ⟨_, _, _, h⟩ | ⟨_, _, _, h⟩) <;>
@@ -431,7 +430,7 @@ alias ⟨Language.IsUFormula.case, Language.IsUFormula.mk⟩ := Language.IsUForm
         ⟨n, p, q, ⟨hp.1, Eq.symm hp.2⟩, ⟨hq.1, Eq.symm hq.2⟩, rfl⟩)⟩
 
 @[simp] lemma Language.IsUFormula.or {n p q : V} :
-    𝐔 (p ^⋎[n] q) ↔ L.IsSemiformula n p ∧ L.IsSemiformula n q :=
+    𝐔 (p ^⋎[n] q) ↔ L.Semiformula n p ∧ L.Semiformula n q :=
   ⟨by intro h
       rcases h.case with (⟨_, _, _, _, _, _, h⟩ | ⟨_, _, _, _, _, _, h⟩ | ⟨_, h⟩ | ⟨_, h⟩ |
         ⟨_, _, _, _, _, h⟩ | ⟨_, _, _, hp, hq, h⟩ | ⟨_, _, _, h⟩ | ⟨_, _, _, h⟩) <;>
@@ -442,7 +441,7 @@ alias ⟨Language.IsUFormula.case, Language.IsUFormula.mk⟩ := Language.IsUForm
         ⟨n, p, q, ⟨hp.1, Eq.symm hp.2⟩, ⟨hq.1, Eq.symm hq.2⟩, rfl⟩)⟩
 
 @[simp] lemma Language.IsUFormula.all {n p : V} :
-    𝐔 (^∀[n] p) ↔ L.IsSemiformula (n + 1) p :=
+    𝐔 (^∀[n] p) ↔ L.Semiformula (n + 1) p :=
   ⟨by intro h
       rcases h.case with (⟨_, _, _, _, _, _, h⟩ | ⟨_, _, _, _, _, _, h⟩ | ⟨_, h⟩ | ⟨_, h⟩ |
         ⟨_, _, _, _, _, h⟩ | ⟨_, _, _, _, _, h⟩ | ⟨_, _, hp, h⟩ | ⟨_, _, _, h⟩) <;>
@@ -452,7 +451,7 @@ alias ⟨Language.IsUFormula.case, Language.IsUFormula.mk⟩ := Language.IsUForm
       exact Language.IsUFormula.mk (Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl ⟨n, p, ⟨hp.1, Eq.symm hp.2⟩, rfl⟩)⟩
 
 @[simp] lemma Language.IsUFormula.ex {n p : V} :
-    𝐔 (^∃[n] p) ↔ L.IsSemiformula (n + 1) p :=
+    𝐔 (^∃[n] p) ↔ L.Semiformula (n + 1) p :=
   ⟨by intro h
       rcases h.case with (⟨_, _, _, _, _, _, h⟩ | ⟨_, _, _, _, _, _, h⟩ | ⟨_, h⟩ | ⟨_, h⟩ |
         ⟨_, _, _, _, _, h⟩ | ⟨_, _, _, _, _, h⟩ | ⟨_, _, _, h⟩ | ⟨_, _, hp, h⟩) <;>
@@ -466,10 +465,10 @@ lemma Language.IsUFormula.induction (Γ) {P : V → Prop} (hP : (Γ, 1)-Predicat
     (hnrel : ∀ n k r v, L.Rel k r → L.TermSeq k n v → P (^nrel n k r v))
     (hverum : ∀ n, P ^⊤[n])
     (hfalsum : ∀ n, P ^⊥[n])
-    (hand : ∀ n p q, L.IsSemiformula n p → L.IsSemiformula n q → P p → P q → P (p ^⋏[n] q))
-    (hor : ∀ n p q, L.IsSemiformula n p → L.IsSemiformula n q → P p → P q → P (p ^⋎[n] q))
-    (hall : ∀ n p, L.IsSemiformula (n + 1) p → P p → P (^∀[n] p))
-    (hex : ∀ n p, L.IsSemiformula (n + 1) p → P p → P (^∃[n] p)) :
+    (hand : ∀ n p q, L.Semiformula n p → L.Semiformula n q → P p → P q → P (p ^⋏[n] q))
+    (hor : ∀ n p q, L.Semiformula n p → L.Semiformula n q → P p → P q → P (p ^⋎[n] q))
+    (hall : ∀ n p, L.Semiformula (n + 1) p → P p → P (^∀[n] p))
+    (hex : ∀ n p, L.Semiformula (n + 1) p → P p → P (^∃[n] p)) :
     ∀ p, 𝐔 p → P p :=
   (construction L).induction (v := ![]) hP (by
     rintro C hC x (⟨n, k, r, v, hkr, hv, rfl⟩ | ⟨n, k, r, v, hkr, hv, rfl⟩ | ⟨n, rfl⟩ | ⟨n, rfl⟩ |
@@ -850,7 +849,7 @@ lemma graph_falsum (n : V) :
     c.Graph param (^⊥[n]) (c.falsum param n) :=
   (Graph.case_iff).mpr ⟨by simp, Or.inr <| Or.inr <| Or.inr <| Or.inl ⟨n, rfl, rfl⟩⟩
 
-lemma graph_and {n p₁ p₂ r₁ r₂ : V} (hp₁ : L.IsSemiformula n p₁) (hp₂ : L.IsSemiformula n p₂)
+lemma graph_and {n p₁ p₂ r₁ r₂ : V} (hp₁ : L.Semiformula n p₁) (hp₂ : L.Semiformula n p₂)
     (h₁ : c.Graph param p₁ r₁) (h₂ : c.Graph param p₂ r₂) :
     c.Graph param (p₁ ^⋏[n] p₂) (c.and param n p₁ p₂ r₁ r₂) :=
   (Graph.case_iff).mpr ⟨by simp [hp₁, hp₂], Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl ⟨n,
@@ -871,7 +870,7 @@ lemma graph_and_inv {n p₁ p₂ r : V} :
   · simp [qqAnd, qqAll] at H
   · simp [qqAnd, qqEx] at H
 
-lemma graph_or {n p₁ p₂ r₁ r₂ : V} (hp₁ : L.IsSemiformula n p₁) (hp₂ : L.IsSemiformula n p₂)
+lemma graph_or {n p₁ p₂ r₁ r₂ : V} (hp₁ : L.Semiformula n p₁) (hp₂ : L.Semiformula n p₂)
     (h₁ : c.Graph param p₁ r₁) (h₂ : c.Graph param p₂ r₂) :
     c.Graph param (p₁ ^⋎[n] p₂) (c.or param n p₁ p₂ r₁ r₂) :=
   (Graph.case_iff).mpr ⟨by simp [hp₁, hp₂], Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl ⟨n,
@@ -892,7 +891,7 @@ lemma graph_or_inv {n p₁ p₂ r : V} :
   · simp [qqOr, qqAll] at H
   · simp [qqOr, qqEx] at H
 
-lemma graph_all {n p₁ r₁ : V} (hp₁ : L.IsSemiformula (n + 1) p₁) (h₁ : c.Graph param p₁ r₁) :
+lemma graph_all {n p₁ r₁ : V} (hp₁ : L.Semiformula (n + 1) p₁) (h₁ : c.Graph param p₁ r₁) :
     c.Graph param (^∀[n] p₁) (c.all param n p₁ r₁) :=
   (Graph.case_iff).mpr ⟨by simp [hp₁], Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl ⟨n,
     p₁, r₁, h₁, rfl, rfl⟩⟩
@@ -912,7 +911,7 @@ lemma graph_all_inv {n p₁ r : V} :
     exact ⟨_, by assumption, rfl⟩
   · simp [qqAll, qqEx] at H
 
-lemma graph_ex {n p₁ r₁ : V} (hp₁ : L.IsSemiformula (n + 1) p₁) (h₁ : c.Graph param p₁ r₁) :
+lemma graph_ex {n p₁ r₁ : V} (hp₁ : L.Semiformula (n + 1) p₁) (h₁ : c.Graph param p₁ r₁) :
     c.Graph param (^∃[n] p₁) (c.ex param n p₁ r₁) :=
   (Graph.case_iff).mpr ⟨by simp [hp₁], Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr ⟨n,
     p₁, r₁, h₁, rfl, rfl⟩⟩
@@ -1028,20 +1027,20 @@ lemma result_eq_of_graph {p r} (h : c.Graph param p r) : c.result param p = r :=
 @[simp] lemma result_falsum {n} : c.result param ^⊥[n] = c.falsum param n := c.result_eq_of_graph (c.graph_falsum n)
 
 @[simp] lemma result_and {n p q}
-    (hp : L.IsSemiformula n p) (hq : L.IsSemiformula n q) :
+    (hp : L.Semiformula n p) (hq : L.Semiformula n q) :
     c.result param (p ^⋏[n] q) = c.and param n p q (c.result param p) (c.result param q) :=
   c.result_eq_of_graph (c.graph_and hp hq (c.result_prop param hp.1) (c.result_prop param hq.1))
 
 @[simp] lemma result_or {n p q}
-    (hp : L.IsSemiformula n p) (hq : L.IsSemiformula n q) :
+    (hp : L.Semiformula n p) (hq : L.Semiformula n q) :
     c.result param (p ^⋎[n] q) = c.or param n p q (c.result param p) (c.result param q) :=
   c.result_eq_of_graph (c.graph_or hp hq (c.result_prop param hp.1) (c.result_prop param hq.1))
 
-@[simp] lemma result_all {n p} (hp : L.IsSemiformula (n + 1) p) :
+@[simp] lemma result_all {n p} (hp : L.Semiformula (n + 1) p) :
     c.result param (^∀[n] p) = c.all param n p (c.result param p) :=
   c.result_eq_of_graph (c.graph_all hp (c.result_prop param hp.1))
 
-@[simp] lemma result_ex {n p} (hp : L.IsSemiformula (n + 1) p) :
+@[simp] lemma result_ex {n p} (hp : L.Semiformula (n + 1) p) :
     c.result param (^∃[n] p) = c.ex param n p (c.result param p) :=
   c.result_eq_of_graph (c.graph_ex hp (c.result_prop param hp.1))
 
@@ -1057,99 +1056,6 @@ end
 end Construction
 
 end Language.UformulaRec
-
-namespace Negation
-
-def blueprint (pL : LDef) : Language.UformulaRec.Blueprint pL 0 where
-  rel := .mkSigma “y n k R v | !qqNRelDef y n k R v” (by simp)
-  nrel := .mkSigma “y n k R v | !qqRelDef y n k R v” (by simp)
-  verum := .mkSigma “y n | !qqFalsumDef y n” (by simp)
-  falsum := .mkSigma “y n | !qqVerumDef y n” (by simp)
-  and := .mkSigma “y n p₁ p₂ y₁ y₂ | !qqOrDef y n y₁ y₂” (by simp)
-  or := .mkSigma “y n p₁ p₂ y₁ y₂ | !qqAndDef y n y₁ y₂” (by simp)
-  all := .mkSigma “y n p₁ y₁ | !qqExDef y n y₁” (by simp)
-  ex := .mkSigma “y n p₁ y₁ | !qqAllDef y n y₁” (by simp)
-
-variable (L)
-
-def construction : Language.UformulaRec.Construction V L (blueprint pL) where
-  rel {_} := fun n k R v ↦ ^nrel n k R v
-  nrel {_} := fun n k R v ↦ ^rel n k R v
-  verum {_} := fun n ↦ ^⊥[n]
-  falsum {_} := fun n ↦ ^⊤[n]
-  and {_} := fun n _ _ y₁ y₂ ↦ y₁ ^⋎[n] y₂
-  or {_} := fun n _ _ y₁ y₂ ↦ y₁ ^⋏[n] y₂
-  all {_} := fun n _ y₁ ↦ ^∃[n] y₁
-  ex {_} := fun n _ y₁ ↦ ^∀[n] y₁
-  rel_defined := by intro v; simp [blueprint]; rfl
-  nrel_defined := by intro v; simp [blueprint]; rfl
-  verum_defined := by intro v; simp [blueprint]
-  falsum_defined := by intro v; simp [blueprint]
-  and_defined := by intro v; simp [blueprint]; rfl
-  or_defined := by intro v; simp [blueprint]; rfl
-  all_defined := by intro v; simp [blueprint]; rfl
-  ex_defined := by intro v; simp [blueprint]; rfl
-
-end Negation
-
-section negation
-
-open Negation
-
-variable (L)
-
-def Language.neg (p : V) : V := (construction L).result ![] p
-
-variable {L}
-
-@[simp] lemma neg_rel {n k R v} (hR : L.Rel k R) (hv : L.TermSeq k n v) :
-    L.neg (^rel n k R v) = ^nrel n k R v := by simp [Language.neg, hR, hv, construction]
-
-@[simp] lemma neg_nrel {n k R v} (hR : L.Rel k R) (hv : L.TermSeq k n v) :
-    L.neg (^nrel n k R v) = ^rel n k R v := by simp [Language.neg, hR, hv, construction]
-
-@[simp] lemma neg_verum (n) :
-    L.neg ^⊤[n] = ^⊥[n] := by simp [Language.neg, construction]
-
-@[simp] lemma neg_falsum (n) :
-    L.neg ^⊥[n] = ^⊤[n] := by simp [Language.neg, construction]
-
-@[simp] lemma neg_and {n p q} (hp : L.IsSemiformula n p) (hq : L.IsSemiformula n q) :
-    L.neg (p ^⋏[n] q) = L.neg p ^⋎[n] L.neg q := by simp [Language.neg, hp, hq, construction]
-
-@[simp] lemma neg_or {n p q} (hp : L.IsSemiformula n p) (hq : L.IsSemiformula n q) :
-    L.neg (p ^⋎[n] q) = L.neg p ^⋏[n] L.neg q := by simp [Language.neg, hp, hq, construction]
-
-@[simp] lemma neg_all {n p} (hp : L.IsSemiformula (n + 1) p) :
-    L.neg (^∀[n] p) = ^∃[n] (L.neg p) := by simp [Language.neg, hp, construction]
-
-@[simp] lemma neg_ex {n p} (hp : L.IsSemiformula (n + 1) p) :
-    L.neg (^∃[n] p) = ^∀[n] (L.neg p) := by simp [Language.neg, hp, construction]
-
-section
-
-def _root_.LO.FirstOrder.Arith.LDef.negDef (pL : LDef) : 𝚺₁-Semisentence 2 := (blueprint pL).result
-
-variable (L)
-
-lemma neg_defined : 𝚺₁-Function₁ L.neg via pL.negDef := (construction L).result_defined
-
-@[simp] lemma neg_defined_iff (v : Fin 2 → V) :
-    Semiformula.Evalbm (L := ℒₒᵣ) V v pL.negDef ↔ v 0 = L.neg (v 1) := (neg_defined L).df.iff v
-
-instance neg_definable : 𝚺₁-Function₁ L.neg :=
-  Defined.to_definable _ (neg_defined L)
-
-@[simp, definability] instance neg_definable' (Γ) : (Γ, m + 1)-Function₁ L.neg :=
-  .of_sigmaOne (neg_definable L) _ _
-
-end
-
-end negation
-
-section substs
-
-end substs
 
 end LO.Arith
 

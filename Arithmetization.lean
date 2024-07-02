@@ -23,5 +23,9 @@ import Arithmetization.ISigmaOne.HFS.Seq
 import Arithmetization.ISigmaOne.HFS.PRF
 import Arithmetization.ISigmaOne.HFS.Supplemental
 import Arithmetization.ISigmaOne.HFS.Fixpoint
-import Arithmetization.ISigmaOne.Metamath.Term
-import Arithmetization.ISigmaOne.Metamath.Formula
+
+import Arithmetization.ISigmaOne.Metamath.Term.Basic
+import Arithmetization.ISigmaOne.Metamath.Term.Functions
+
+import Arithmetization.ISigmaOne.Metamath.Formula.Basic
+import Arithmetization.ISigmaOne.Metamath.Formula.Functions
