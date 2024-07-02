@@ -24,3 +24,4 @@ import Arithmetization.ISigmaOne.HFS.PRF
 import Arithmetization.ISigmaOne.HFS.Supplemental
 import Arithmetization.ISigmaOne.HFS.Fixpoint
 import Arithmetization.ISigmaOne.Metamath.Term
+import Arithmetization.ISigmaOne.Metamath.Formula
