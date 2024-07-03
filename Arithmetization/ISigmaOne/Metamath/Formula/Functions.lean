@@ -55,10 +55,10 @@ def Language.neg (p : V) : V := (construction L).result ![] p
 
 variable {L}
 
-@[simp] lemma neg_rel {n k R v} (hR : L.Rel k R) (hv : L.TermSeq k n v) :
+@[simp] lemma neg_rel {n k R v} (hR : L.Rel k R) (hv : L.SemitermSeq k n v) :
     L.neg (^rel n k R v) = ^nrel n k R v := by simp [Language.neg, hR, hv, construction]
 
-@[simp] lemma neg_nrel {n k R v} (hR : L.Rel k R) (hv : L.TermSeq k n v) :
+@[simp] lemma neg_nrel {n k R v} (hR : L.Rel k R) (hv : L.SemitermSeq k n v) :
     L.neg (^nrel n k R v) = ^rel n k R v := by simp [Language.neg, hR, hv, construction]
 
 @[simp] lemma neg_verum (n) :

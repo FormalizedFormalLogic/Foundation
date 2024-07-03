@@ -289,7 +289,7 @@ scoped instance : Mod M := ⟨rem⟩
 lemma mod_def (a b : M) : a % b = a - b * (a / b) := rfl
 
 def _root_.LO.FirstOrder.Arith.remDef : 𝚺₀-Semisentence 3 :=
-  .mkSigma “c a b | ∃ d <⁺ a, !divDef.val d a b ∧ !FirstOrder.Arith.sub.val c a (b * d)” (by simp)
+  .mkSigma “c a b | ∃ d <⁺ a, !divDef.val d a b ∧ !subDef.val c a (b * d)” (by simp)
 
 lemma rem_graph (a b c : M) : a = b % c ↔ ∃ x ≤ b, (x = b / c ∧ a = b - c * x) := by
   simp [mod_def]; constructor

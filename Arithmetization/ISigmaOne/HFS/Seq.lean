@@ -219,6 +219,8 @@ instance seqCons_definable : 𝚺₀-Function₂ (seqCons : M → M → M) := De
 
 instance seqCons_definable' (Γ) : Γ-Function₂ (seqCons : M → M → M) := .of_zero seqCons_definable _
 
+@[simp] lemma natCast_empty : ((∅ : ℕ) : M) = ∅ := by simp [emptyset_def]
+
 lemma seqCons_absolute (s a : ℕ) : ((s ⁀' a : ℕ) : M) = (s : M) ⁀' (a : M) := by
   simpa using DefinedFunction.shigmaZero_absolute_func M seqCons_defined seqCons_defined ![s, a]
 
@@ -338,6 +340,38 @@ def vecConsUnexpander : Lean.PrettyPrinter.Unexpander
   | _ => throw ()
 
 @[simp] lemma singleton_seq (x : M) : Seq !⟦x⟧ := by apply Seq.seqCons; simp
+
+@[simp] lemma doubleton_seq (x y : M) : Seq !⟦x, y⟧ := by apply Seq.seqCons; simp
+
+section
+
+def _root_.LO.FirstOrder.Arith.mkSeq₁Def : 𝚺₀-Semisentence 2 := .mkSigma
+  “s x | !seqConsDef s 0 x” (by simp)
+
+lemma mkSeq₁_defined : 𝚺₀-Function₁ (fun x : M ↦ !⟦x⟧) via mkSeq₁Def := by
+  intro v; simp [mkSeq₁Def]; rfl
+
+@[simp] lemma eval_mkSeq₁Def (v) :
+    Semiformula.Evalbm M v mkSeq₁Def.val ↔ v 0 = !⟦v 1⟧ := mkSeq₁_defined.df.iff v
+
+instance mkSeq₁_definable : 𝚺₀-Function₁ (fun x : M ↦ !⟦x⟧) := Defined.to_definable _ mkSeq₁_defined
+
+instance mkSeq₁_definable' (Γ) : Γ-Function₁ (fun x : M ↦ !⟦x⟧) := .of_zero mkSeq₁_definable _
+
+def _root_.LO.FirstOrder.Arith.mkSeq₂Def : 𝚺₁-Semisentence 3 := .mkSigma
+  “s x y | ∃ sx, !mkSeq₁Def sx x ∧ !seqConsDef s sx y” (by simp)
+
+lemma mkSeq₂_defined : 𝚺₁-Function₂ (fun x y : M ↦ !⟦x, y⟧) via mkSeq₂Def := by
+  intro v; simp [mkSeq₂Def]
+
+@[simp] lemma eval_mkSeq₂Def (v) :
+    Semiformula.Evalbm M v mkSeq₂Def.val ↔ v 0 = !⟦v 1, v 2⟧ := mkSeq₂_defined.df.iff v
+
+instance mkSeq₂_definable : 𝚺₁-Function₂ (fun x y : M ↦ !⟦x, y⟧) := Defined.to_definable _ mkSeq₂_defined
+
+instance mkSeq₂_definable' (Γ) : (Γ, m + 1)-Function₂ (fun x y : M ↦ !⟦x, y⟧) := .of_sigmaOne mkSeq₂_definable _ _
+
+end
 
 theorem sigmaOne_skolem_seq {R : M → M → Prop} (hP : 𝚺₁-Relation R) {l}
     (H : ∀ x < l, ∃ y, R x y) : ∃ s, Seq s ∧ lh s = l ∧ ∀ i x, ⟪i, x⟫ ∈ s → R i x := by

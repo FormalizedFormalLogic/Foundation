@@ -37,14 +37,14 @@ lemma sub_eq_iff : c = a - b ↔ ((a ≥ b → a = b + c) ∧ (a < b → c = 0))
 
 open Definability
 
-def _root_.LO.FirstOrder.Arith.sub : 𝚺₀-Semisentence 3 :=
+def _root_.LO.FirstOrder.Arith.subDef : 𝚺₀-Semisentence 3 :=
   .mkSigma “z x y | (x ≥ y → x = y + z) ∧ (x < y → z = 0)” (by simp[Hierarchy.pi_zero_iff_sigma_zero])
 
-lemma sub_defined : 𝚺₀-Function₂ ((· - ·) : M → M → M) via FirstOrder.Arith.sub := by
-  intro v; simp [FirstOrder.Arith.sub, sub_eq_iff]
+lemma sub_defined : 𝚺₀-Function₂ ((· - ·) : M → M → M) via subDef := by
+  intro v; simp [FirstOrder.Arith.subDef, sub_eq_iff]
 
 @[simp] lemma sub_defined_iff (v) :
-    Semiformula.Evalbm M v FirstOrder.Arith.sub.val ↔ v 0 = v 1 - v 2 := sub_defined.df.iff v
+    Semiformula.Evalbm M v subDef.val ↔ v 0 = v 1 - v 2 := sub_defined.df.iff v
 
 instance sub_definable (Γ) : DefinableFunction₂ ℒₒᵣ Γ ((· - ·) : M → M → M) := Defined.to_definable₀ _ sub_defined
 

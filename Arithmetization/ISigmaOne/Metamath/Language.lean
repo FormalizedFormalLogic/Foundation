@@ -74,8 +74,6 @@ def _root_.LO.FirstOrder.Language.lDef [d : DefinableLanguage L] : LDef := d.toL
 
 variable {L}
 
-namespace Model
-
 variable [DefinableLanguage L]
 
 variable {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐏𝐀⁻]
@@ -101,8 +99,6 @@ instance : (L.codeIn M).Defined L.lDef where
   simpa [models_iff, numeral_eq_natCast] using
     consequence_iff_add_eq.mp (sound! <| DefinableLanguage.rel_iff.mp ⟨r, rfl⟩) M
       (models_of_subtheory (T := 𝐏𝐀⁻) inferInstance)
-
-end Model
 
 end
 

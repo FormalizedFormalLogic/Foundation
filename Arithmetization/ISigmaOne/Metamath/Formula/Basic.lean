@@ -145,7 +145,7 @@ lemma qqExists_defined : 𝚺₀-Function₂ (qqEx : V → V → V) via qqExDef 
 def bv (p : V) : V := π₁ (p - 1)
 
 def _root_.LO.FirstOrder.Arith.bvDef : 𝚺₀-Semisentence 2 :=
-  .mkSigma “n p | ∃ p' <⁺ p, !FirstOrder.Arith.sub p' p 1 ∧ !pi₁Def n p'” (by simp)
+  .mkSigma “n p | ∃ p' <⁺ p, !subDef p' p 1 ∧ !pi₁Def n p'” (by simp)
 
 lemma bv_defined : 𝚺₀-Function₁ (bv : V → V) via bvDef := by
   intro v; simp [bvDef]
@@ -201,8 +201,8 @@ namespace FormalizedFormula
 variable (L)
 
 def Phi (C : Set V) (p : V) : Prop :=
-  (∃ n k r v, L.Rel k r ∧ L.TermSeq k n v ∧ p = ^rel n k r v) ∨
-  (∃ n k r v, L.Rel k r ∧ L.TermSeq k n v ∧ p = ^nrel n k r v) ∨
+  (∃ n k r v, L.Rel k r ∧ L.SemitermSeq k n v ∧ p = ^rel n k r v) ∨
+  (∃ n k r v, L.Rel k r ∧ L.SemitermSeq k n v ∧ p = ^nrel n k r v) ∨
   (∃ n, p = ^⊤[n]) ∨
   (∃ n, p = ^⊥[n]) ∨
   (∃ n q r, (q ∈ C ∧ n = bv q) ∧ (r ∈ C ∧ n = bv r) ∧ p = q ^⋏[n] r) ∨
@@ -212,8 +212,8 @@ def Phi (C : Set V) (p : V) : Prop :=
 
 private lemma phi_iff (C p : V) :
     Phi L {x | x ∈ C} p ↔
-    (∃ n < p, ∃ k < p, ∃ r < p, ∃ v < p, L.Rel k r ∧ L.TermSeq k n v ∧ p = ^rel n k r v) ∨
-    (∃ n < p, ∃ k < p, ∃ r < p, ∃ v < p, L.Rel k r ∧ L.TermSeq k n v ∧ p = ^nrel n k r v) ∨
+    (∃ n < p, ∃ k < p, ∃ r < p, ∃ v < p, L.Rel k r ∧ L.SemitermSeq k n v ∧ p = ^rel n k r v) ∨
+    (∃ n < p, ∃ k < p, ∃ r < p, ∃ v < p, L.Rel k r ∧ L.SemitermSeq k n v ∧ p = ^nrel n k r v) ∨
     (∃ n < p, p = ^⊤[n]) ∨
     (∃ n < p, p = ^⊥[n]) ∨
     (∃ n < p, ∃ q < p, ∃ r < p, (q ∈ C ∧ n = bv q) ∧ (r ∈ C ∧ n = bv r) ∧ p = q ^⋏[n] r) ∨
@@ -380,8 +380,8 @@ local prefix:80 "𝐔 " => L.IsUFormula
 
 lemma Language.IsUFormula.case_iff {p : V} :
     𝐔 p ↔
-    (∃ n k r v, L.Rel k r ∧ L.TermSeq k n v ∧ p = ^rel n k r v) ∨
-    (∃ n k r v, L.Rel k r ∧ L.TermSeq k n v ∧ p = ^nrel n k r v) ∨
+    (∃ n k r v, L.Rel k r ∧ L.SemitermSeq k n v ∧ p = ^rel n k r v) ∨
+    (∃ n k r v, L.Rel k r ∧ L.SemitermSeq k n v ∧ p = ^nrel n k r v) ∨
     (∃ n, p = ^⊤[n]) ∨
     (∃ n, p = ^⊥[n]) ∨
     (∃ n q r, (𝐔 q ∧ n = bv q) ∧ (𝐔 r ∧ n = bv r) ∧ p = q ^⋏[n] r) ∨
@@ -393,7 +393,7 @@ lemma Language.IsUFormula.case_iff {p : V} :
 alias ⟨Language.IsUFormula.case, Language.IsUFormula.mk⟩ := Language.IsUFormula.case_iff
 
 @[simp] lemma Language.IsUFormula.rel {n k r v : V} :
-    𝐔 (^rel n k r v) ↔ L.Rel k r ∧ L.TermSeq k n v :=
+    𝐔 (^rel n k r v) ↔ L.Rel k r ∧ L.SemitermSeq k n v :=
   ⟨by intro h
       rcases h.case with (⟨n, k, r, v, hkr, hv, h⟩ | ⟨_, _, _, _, _, _, h⟩ | ⟨_, h⟩ | ⟨_, h⟩ |
         ⟨_, _, _, _, _, h⟩ | ⟨_, _, _, _, _, h⟩ | ⟨_, _, _, h⟩ | ⟨_, _, _, h⟩) <;>
@@ -403,7 +403,7 @@ alias ⟨Language.IsUFormula.case, Language.IsUFormula.mk⟩ := Language.IsUForm
       exact Language.IsUFormula.mk (Or.inl ⟨n, k, r, v, hkr, hv, rfl⟩)⟩
 
 @[simp] lemma Language.IsUFormula.nrel {n k r v : V} :
-    𝐔 (^nrel n k r v) ↔ L.Rel k r ∧ L.TermSeq k n v :=
+    𝐔 (^nrel n k r v) ↔ L.Rel k r ∧ L.SemitermSeq k n v :=
   ⟨by intro h
       rcases h.case with (⟨_, _, _, _, _, _, h⟩ | ⟨n, k, r, v, hkr, hv, h⟩ | ⟨_, h⟩ | ⟨_, h⟩ |
         ⟨_, _, _, _, _, h⟩ | ⟨_, _, _, _, _, h⟩ | ⟨_, _, _, h⟩ | ⟨_, _, _, h⟩) <;>
@@ -461,8 +461,8 @@ alias ⟨Language.IsUFormula.case, Language.IsUFormula.mk⟩ := Language.IsUForm
       exact Language.IsUFormula.mk (Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr ⟨n, p, ⟨hp.1, Eq.symm hp.2⟩, rfl⟩)⟩
 
 lemma Language.IsUFormula.induction (Γ) {P : V → Prop} (hP : (Γ, 1)-Predicate P)
-    (hrel : ∀ n k r v, L.Rel k r → L.TermSeq k n v → P (^rel n k r v))
-    (hnrel : ∀ n k r v, L.Rel k r → L.TermSeq k n v → P (^nrel n k r v))
+    (hrel : ∀ n k r v, L.Rel k r → L.SemitermSeq k n v → P (^rel n k r v))
+    (hnrel : ∀ n k r v, L.Rel k r → L.SemitermSeq k n v → P (^nrel n k r v))
     (hverum : ∀ n, P ^⊤[n])
     (hfalsum : ∀ n, P ^⊥[n])
     (hand : ∀ n p q, L.Semiformula n p → L.Semiformula n q → P p → P q → P (p ^⋏[n] q))
@@ -769,7 +769,7 @@ variable {β}
 lemma graph_dom_isUFormula {p r} :
     c.Graph param p r → L.IsUFormula p := fun h ↦ Graph.case_iff.mp h |>.1
 
-lemma graph_rel_iff {n k r v y} (hkr : L.Rel k r) (hv : L.TermSeq k n v) :
+lemma graph_rel_iff {n k r v y} (hkr : L.Rel k r) (hv : L.SemitermSeq k n v) :
     c.Graph param (^rel n k r v) y ↔ y = c.rel param n k r v := by
   constructor
   · intro h
@@ -785,7 +785,7 @@ lemma graph_rel_iff {n k r v y} (hkr : L.Rel k r) (hv : L.TermSeq k n v) :
     · simp [qqRel, qqEx] at H
   · rintro rfl; exact (Graph.case_iff).mpr ⟨by simp [hkr, hv], Or.inl ⟨n, k, r, v, rfl, rfl⟩⟩
 
-lemma graph_nrel_iff {n k r v y} (hkr : L.Rel k r) (hv : L.TermSeq k n v) :
+lemma graph_nrel_iff {n k r v y} (hkr : L.Rel k r) (hv : L.SemitermSeq k n v) :
     c.Graph param (^nrel n k r v) y ↔ y = c.nrel param n k r v := by
   constructor
   · intro h
@@ -833,11 +833,11 @@ lemma graph_falsum_iff {n y} :
     · simp [qqFalsum, qqEx] at H
   · rintro rfl; exact (Graph.case_iff).mpr ⟨by simp, Or.inr <| Or.inr <| Or.inr <| Or.inl ⟨n, rfl, rfl⟩⟩
 
-lemma graph_rel {n k r v} (hkr : L.Rel k r) (hv : L.TermSeq k n v) :
+lemma graph_rel {n k r v} (hkr : L.Rel k r) (hv : L.SemitermSeq k n v) :
     c.Graph param (^rel n k r v) (c.rel param n k r v) :=
   (Graph.case_iff).mpr ⟨by simp [hkr, hv], Or.inl ⟨n, k, r, v, rfl, rfl⟩⟩
 
-lemma graph_nrel {n k r v} (hkr : L.Rel k r) (hv : L.TermSeq k n v) :
+lemma graph_nrel {n k r v} (hkr : L.Rel k r) (hv : L.SemitermSeq k n v) :
     c.Graph param (^nrel n k r v) (c.nrel param n k r v) :=
   (Graph.case_iff).mpr ⟨by simp [hkr, hv], Or.inr <| Or.inl ⟨n, k, r, v, rfl, rfl⟩⟩
 
@@ -1014,11 +1014,11 @@ variable {param}
 lemma result_eq_of_graph {p r} (h : c.Graph param p r) : c.result param p = r := Eq.symm <|
   Classical.choose_uniq (c.exists_unique_all param p) (by simp [c.graph_dom_isUFormula h, h])
 
-@[simp] lemma result_rel {n k R v} (hR : L.Rel k R) (hv : L.TermSeq k n v) :
+@[simp] lemma result_rel {n k R v} (hR : L.Rel k R) (hv : L.SemitermSeq k n v) :
     c.result param (^rel n k R v) = c.rel param n k R v :=
   c.result_eq_of_graph (c.graph_rel hR hv)
 
-@[simp] lemma result_nrel {n k R v} (hR : L.Rel k R) (hv : L.TermSeq k n v) :
+@[simp] lemma result_nrel {n k R v} (hR : L.Rel k R) (hv : L.SemitermSeq k n v) :
     c.result param (^nrel n k R v) = c.nrel param n k R v :=
   c.result_eq_of_graph (c.graph_nrel hR hv)
 
