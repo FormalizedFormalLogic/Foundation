@@ -98,9 +98,72 @@ instance neg_definable : 𝚺₁-Function₁ L.neg :=
 
 end
 
+@[simp] lemma Language.Semiformula.neg {p : V} : L.Semiformula n p → L.Semiformula n (L.neg p) := by
+  apply Language.Semiformula.induction_sigma₁
+  · definability
+  · intro n k r v hr hv; simp [hr, hv]
+  · intro n k r v hr hv; simp [hr, hv]
+  · simp
+  · simp
+  · intro n p q hp hq ihp ihq; simp [hp, hq, ihp, ihq]
+  · intro n p q hp hq ihp ihq; simp [hp, hq, ihp, ihq]
+  · intro n p hp ihp; simp [hp, ihp]
+  · intro n p hp ihp; simp [hp, ihp]
+
+@[simp] lemma neg_neg {p : V} : L.Semiformula n p → L.neg (L.neg p) = p := by
+  apply Language.Semiformula.induction_sigma₁
+  · definability
+  · intro n k r v hr hv; simp [hr, hv]
+  · intro n k r v hr hv; simp [hr, hv]
+  · intro n; simp
+  · intro n; simp
+  · intro n p q hp hq ihp ihq; simp [hp, hq, ihp, ihq]
+  · intro n p q hp hq ihp ihq; simp [hp, hq, ihp, ihq]
+  · intro n p hp ihp; simp [hp, ihp]
+  · intro n p hp ihp; simp [hp, ihp]
+
 end negation
 
 section substs
+
+/-
+def blueprint (pL : LDef) : Language.UformulaRec.Blueprint pL 2 where
+  rel    := .mkSigma “y n k R v m w | ∃ v', !pL.termSubstSeqDef k n m w v v' ∧ !qqRelDef y m k R v'” (by simp)
+  nrel   := .mkSigma “y n k R v m w | ∃ v', !pL.termSubstSeqDef k n m w v v' ∧ !qqNRelDef y m k R v'” (by simp)
+  verum  := .mkSigma “y n m w | !qqVerumDef y m” (by simp)
+  falsum := .mkSigma “y n m w | !qqFalsumDef y m” (by simp)
+  and    := .mkSigma “y n p₁ p₂ y₁ y₂ m w | !qqAndDef y m y₁ y₂” (by simp)
+  or     := .mkSigma “y n p₁ p₂ y₁ y₂ m w | !qqOrDef y m y₁ y₂” (by simp)
+  all    := .mkSigma “y n p₁ y₁ m w | !qqAllDef y m y₁” (by simp)
+  ex     := .mkSigma “y n p₁ y₁ m w | !qqExDef y m y₁” (by simp)
+
+variable (L)
+
+def construction : Language.UformulaRec.Construction V L (blueprint pL) where
+  rel    {param} := fun n k R v ↦ ^rel (param 0) k R (L.termSubstSeq k n (param 0) (param 1) v)
+  nrel   {param} := fun n k R v ↦ ^nrel (param 0) k R (L.termSubstSeq k n (param 0) (param 1) v)
+  verum  {param} := fun n ↦ ^⊤[param 0]
+  falsum {param} := fun n ↦ ^⊥[param 0]
+  and    {param} := fun n _ _ y₁ y₂ ↦ y₁ ^⋎[param 0] y₂
+  or     {param} := fun n _ _ y₁ y₂ ↦ y₁ ^⋏[param 0] y₂
+  all    {param} := fun n _ y₁ ↦ ^∀[param 0] y₁
+  ex     {param} := fun n _ y₁ ↦ ^∃[param 0] y₁
+
+  nrel {_} := fun n k R v ↦ ^rel n k R v
+  verum {_} := fun n ↦ ^⊥[n]
+  falsum {_} := fun n ↦ ^⊤[n]
+  and {_} := fun n _ _ y₁ y₂ ↦ y₁ ^⋎[n] y₂
+  or {_} := fun n _ _ y₁ y₂ ↦ y₁ ^⋏[n] y₂
+  all {_} := fun n _ y₁ ↦ ^∃[n] y₁
+  ex {_} := fun n _ y₁ ↦ ^∀[n] y₁
+  rel_defined := by intro v; simp [blueprint]; rfl
+  nrel_defined := by intro v; simp [blueprint]; rfl
+  verum_defined := by intro v; simp [blueprint]
+  falsum_defined := by intro v; simp [blueprint]
+  and_defined := by intro v; simp [blueprint]; rfl
+  or_defined := by intro v; simp [blueprint]; rfl
+  all_defined := by intro v
+-/
 
 
 
