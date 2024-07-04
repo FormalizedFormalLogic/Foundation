@@ -240,7 +240,7 @@ theorem unprovable_consistency [System.Consistent T] : T ⊬! Con⦍β⦎
   := unprovable_iff! iff_goedel_consistency |>.mp $ unprovable_goedel (T₀ := T₀)
 
 theorem unrefutable_consistency [System.Consistent T] [β.GoedelSound T₀ T] : T ⊬! ~Con⦍β⦎
-  := unprovable_iff! (neg_iff'! $ iff_goedel_consistency) |>.mp $ unrefutable_goedel (T₀ := T₀)
+  := unprovable_iff! (neg_replace_iff'! $ iff_goedel_consistency) |>.mp $ unrefutable_goedel (T₀ := T₀)
 
 end Second
 
@@ -304,7 +304,7 @@ lemma formalized_unrefutable_goedel [β.HilbertBernays T₀ T] [β.GoedelSound T
   : T ⊬! Con⦍β⦎ ⟶ ~⦍β⦎(~γ) := by
   by_contra hC;
   have : T ⊬! Con⦍β⦎ ⟶ ~⦍β⦎(~Con⦍β⦎)  := formalized_unprovable_not_consistency (T₀ := T₀);
-  have : T ⊢! Con⦍β⦎ ⟶ ~⦍β⦎(~Con⦍β⦎) := imp_trans''! hC $ Subtheory.prf! $ and₁'! $ neg_iff'! $ prov_distribute_iff (T₀ := T₀) $ neg_iff'! $ iff_goedel_consistency;
+  have : T ⊢! Con⦍β⦎ ⟶ ~⦍β⦎(~Con⦍β⦎) := imp_trans''! hC $ Subtheory.prf! $ and₁'! $ neg_replace_iff'! $ prov_distribute_iff (T₀ := T₀) $ neg_replace_iff'! $ iff_goedel_consistency;
   contradiction;
 
 end Loeb

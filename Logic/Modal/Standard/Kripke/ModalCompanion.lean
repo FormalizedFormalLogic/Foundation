@@ -23,11 +23,12 @@ variable [DecidableEq α] [Inhabited α] [Encodable α]
 /-- Gödel Translation -/
 def GoedelTranslation : Superintuitionistic.Formula α → Formula α
   | .atom a  => □(Formula.atom a)
-  | .verum   => ⊤
-  | .falsum  => ⊥
-  | .and p q => (GoedelTranslation p) ⋏ (GoedelTranslation q)
-  | .or p q  => (GoedelTranslation p) ⋎ (GoedelTranslation q)
-  | .imp p q => □((GoedelTranslation p) ⟶ (GoedelTranslation q))
+  | ⊤ => ⊤
+  | ⊥ => ⊥
+  | p ⋏ q => (GoedelTranslation p) ⋏ (GoedelTranslation q)
+  | p ⋎ q  => (GoedelTranslation p) ⋎ (GoedelTranslation q)
+  | ~p   => □~(GoedelTranslation p)
+  | p ⟶ q => □((GoedelTranslation p) ⟶ (GoedelTranslation q))
 
 postfix:75 "ᵍ" => GoedelTranslation
 
@@ -40,16 +41,15 @@ variable {p q r : Superintuitionistic.Formula α}
 
 lemma axiomTc_GTranslate! [System.K4 m𝓓] : m𝓓 ⊢! pᵍ ⟶ □pᵍ := by
   induction p using Superintuitionistic.Formula.rec' with
-  | hatom => simp [GoedelTranslation, axiomFour!];
-  | himp => simp [GoedelTranslation, axiomFour!];
-  | hfalsum => simp [GoedelTranslation, efq!];
   | hverum => exact dhyp! (nec! verum!);
+  | hfalsum => simp only [GoedelTranslation, efq!];
   | hand p q ihp ihq =>
     simp only [GoedelTranslation];
     exact imp_trans''! (and_replace! ihp ihq) collect_box_and!
   | hor p q ihp ihq =>
     simp only [GoedelTranslation];
     exact imp_trans''! (or₃''! (imply_or_left'! ihp) (imply_or_right'! ihq)) collect_box_or!
+  | _ => simp only [GoedelTranslation, axiomFour!];
 
 instance [System.S4 m𝓓] : System.K4 m𝓓 where
 
@@ -59,12 +59,12 @@ private lemma provable_efq_of_provable_S4.case_imply₁ [System.K4 m𝓓] : m�
 
 private lemma provable_efq_of_provable_S4.case_imply₂ [System.S4 m𝓓] : m𝓓 ⊢! ((p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r)ᵍ := by
   simp only [GoedelTranslation];
-  refine nec! $ imp_trans''! (imp_trans''! (axiomK'! $ nec! ?b) axiomFour!) $ axiomK'! $ nec! $ imp_trans''! (axiomK'! $ nec! imply₂!) axiomK!;
+  apply nec! $ imp_trans''! (imp_trans''! (axiomK'! $ nec! ?b) axiomFour!) $ axiomK'! $ nec! $ imp_trans''! (axiomK'! $ nec! imply₂!) axiomK!;
   apply provable_iff_provable.mpr;
   apply deduct_iff.mpr;
   apply deduct_iff.mpr;
-  have : [pᵍ, pᵍ ⟶ □(qᵍ ⟶ rᵍ)] ⊢[m𝓓]! pᵍ := by_axm! (by simp);
-  have : [pᵍ, pᵍ ⟶ □(qᵍ ⟶ rᵍ)] ⊢[m𝓓]! (pᵍ ⟶ □(qᵍ ⟶ rᵍ)) := by_axm! (by simp);
+  have : [pᵍ, pᵍ ⟶ □(qᵍ ⟶ rᵍ)] ⊢[m𝓓]! pᵍ := by_axm!;
+  have : [pᵍ, pᵍ ⟶ □(qᵍ ⟶ rᵍ)] ⊢[m𝓓]! (pᵍ ⟶ □(qᵍ ⟶ rᵍ)) := by_axm!;
   have : [pᵍ, pᵍ ⟶ □(qᵍ ⟶ rᵍ)] ⊢[m𝓓]! □(qᵍ ⟶ rᵍ) := (by assumption) ⨀ (by assumption);
   exact axiomT'! this;
 
@@ -76,6 +76,12 @@ private lemma provable_efq_of_provable_S4.case_or₃ [System.K4 m𝓓] : m𝓓 �
   simp only [GoedelTranslation];
   exact nec! $ imp_trans''! axiomFour! $ axiomK'! $ nec! $ imp_trans''! (axiomK'! $ nec! $ or₃!) axiomK!;
 
+private lemma provable_efq_of_provable_S4.case_neg_equiv [System.K4 m𝓓] : m𝓓 ⊢! (Axioms.NegEquiv p)ᵍ := by
+  simp only [GoedelTranslation];
+  apply and₃'!;
+  . exact nec! $ axiomK'! $ nec! $ and₁'! neg_equiv!;
+  . exact nec! $ axiomK'! $ nec! $ and₂'! neg_equiv!;
+
 open provable_efq_of_provable_S4 in
 lemma provable_efq_of_provable_S4 (h : 𝐈𝐧𝐭 ⊢! p) : 𝐒𝟒 ⊢! pᵍ := by
   induction h.some with
@@ -85,15 +91,16 @@ lemma provable_efq_of_provable_S4 (h : 𝐈𝐧𝐭 ⊢! p) : 𝐒𝟒 ⊢! pᵍ
     exact nec! efq!;
   | mdp hpq hp ihpq ihp =>
     exact axiomT'! $ axiomK''! (by simpa using ihpq ⟨hpq⟩) $ nec! $ ihp ⟨hp⟩;
+  | and₁ => simp only [GoedelTranslation]; exact nec! and₁!;
+  | and₂ => simp only [GoedelTranslation]; exact nec! and₂!;
+  | or₁ => simp only [GoedelTranslation]; exact nec! or₁!;
+  | or₂ => simp only [GoedelTranslation]; exact nec! or₂!;
   | verum => apply verum!;
   | imply₁ => exact case_imply₁;
   | imply₂ => exact case_imply₂;
-  | and₁ => simp only [GoedelTranslation]; exact nec! and₁!;
-  | and₂ => simp only [GoedelTranslation]; exact nec! and₂!;
   | and₃ => exact case_and₃;
-  | or₁ => simp only [GoedelTranslation]; exact nec! or₁!;
-  | or₂ => simp only [GoedelTranslation]; exact nec! or₂!;
   | or₃ => exact case_or₃;
+  | neg_equiv => exact case_neg_equiv;
 
 open Superintuitionistic.Kripke
 open Superintuitionistic.Formula.Kripke

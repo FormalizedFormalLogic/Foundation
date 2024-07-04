@@ -73,14 +73,15 @@ lemma provable_iff_insert_neg_not_Consistent : T *⊢[𝓓]! p ↔ ¬(𝓓)-Cons
     . exact hΓ₁;
     . apply and_imply_iff_imply_imply'!.mpr;
       apply imp_swap'!;
-      exact imp_trans''! hΓ₂ dni!;
+      exact neg_equiv'!.mp $ dni'! hΓ₂;
   . intro h;
     apply Context.provable_iff.mpr;
     obtain ⟨Γ, hΓ₁, hΓ₂⟩ := iff_insert_Inconsistent.mp h;
     existsi Γ;
     constructor;
     . exact hΓ₁;
-    . exact imp_trans''! (imp_swap'! $ and_imply_iff_imply_imply'!.mp hΓ₂) dne!;
+    . have : Γ ⊢[𝓓]! ~p ⟶ ⊥ := imp_swap'! $ and_imply_iff_imply_imply'!.mp hΓ₂;
+      exact dne'! $ neg_equiv'!.mpr this;
 
 lemma unprovable_iff_insert_neg_Consistent : T *⊬[𝓓]! p ↔ (𝓓)-Consistent (insert (~p) T) := by
   constructor;
@@ -103,14 +104,15 @@ lemma neg_provable_iff_insert_not_Consistent : T *⊢[𝓓]! ~p ↔ ¬(𝓓)-Con
     . assumption;
     . apply and_imply_iff_imply_imply'!.mpr;
       apply imp_swap'!;
-      exact hΓ₂;
+      exact neg_equiv'!.mp hΓ₂;
   . intro h;
     apply Context.provable_iff.mpr;
     obtain ⟨Γ, hΓ₁, hΓ₂⟩ := iff_insert_Inconsistent.mp h;
     existsi Γ;
     constructor;
     . exact hΓ₁;
-    . exact imp_swap'! $ and_imply_iff_imply_imply'!.mp hΓ₂;
+    . apply neg_equiv'!.mpr;
+      exact imp_swap'! $ and_imply_iff_imply_imply'!.mp hΓ₂;
 
 lemma neg_unprovable_iff_insert_Consistent : T *⊬[𝓓]! ~p ↔ (𝓓)-Consistent (insert (p) T) := by
   constructor;
@@ -122,7 +124,7 @@ variable (hConsis : (𝓓)-Consistent T)
 lemma unprovable_either : ¬(T *⊢[𝓓]! p ∧ T *⊢[𝓓]! ~p) := by
   by_contra hC;
   have ⟨hC₁, hC₂⟩ := hC;
-  have : T *⊢[𝓓]! ⊥ := hC₂ ⨀ hC₁;
+  have : T *⊢[𝓓]! ⊥ := neg_mdp! hC₂ hC₁;
   obtain ⟨Γ, hΓ₁, hΓ₂⟩ := Context.provable_iff.mp this;
   have : 𝓓 ⊬! List.conj' Γ ⟶ ⊥ := hConsis hΓ₁;
   have : 𝓓 ⊢! List.conj' Γ ⟶ ⊥ := FiniteContext.toₛ! hΓ₂;
@@ -146,9 +148,9 @@ lemma either_consistent (p) : (𝓓)-Consistent (insert p T) ∨ (𝓓)-Consiste
   obtain ⟨Γ, hΓ₁, hΓ₂⟩ := iff_insert_Inconsistent.mp hC.1;
   obtain ⟨Δ, hΔ₁, hΔ₂⟩ := iff_insert_Inconsistent.mp hC.2;
 
-  replace hΓ₂ := neg_equiv'!.mp hΓ₂;
-  replace hΔ₂ := neg_equiv'!.mp hΔ₂;
-  have : 𝓓 ⊢! Γ.conj' ⋏ Δ.conj' ⟶ ⊥ := demorgan₁'! $ or₃'''! (imp_trans''! (imply_of_not_or'! $ demorgan₄'! hΓ₂) or₁!) (imp_trans''! (imply_of_not_or'! $ demorgan₄'! hΔ₂) or₂!) lem!;
+  replace hΓ₂ := neg_equiv'!.mpr hΓ₂;
+  replace hΔ₂ := neg_equiv'!.mpr hΔ₂;
+  have : 𝓓 ⊢! Γ.conj' ⋏ Δ.conj' ⟶ ⊥ := neg_equiv'!.mp $ demorgan₁'! $ or₃'''! (imp_trans''! (imply_of_not_or'! $ demorgan₄'! hΓ₂) or₁!) (imp_trans''! (imply_of_not_or'! $ demorgan₄'! hΔ₂) or₂!) lem!
   have : 𝓓 ⊬! Γ.conj' ⋏ Δ.conj' ⟶ ⊥ := unprovable_imp_trans''! imply_left_concat_conj'! (hConsis (by
     simp;
     intro q hq;
@@ -261,7 +263,7 @@ lemma membership_iff : (p ∈ Ω.theory) ↔ (Ω.theory *⊢[𝓓]! p) := by
     suffices ~p ∉ Ω.theory by apply or_iff_not_imp_right.mp $ (either_mem Ω p); assumption;
     by_contra hC;
     have hnp : Ω.theory *⊢[𝓓]! ~p := Context.by_axm! hC;
-    have := hnp ⨀ hp;
+    have := neg_mdp! hnp hp;
     have := not_provable_falsum Ω.consistent;
     contradiction;
 
@@ -278,13 +280,14 @@ lemma subset_axiomset : Ax(𝓓) ⊆ Ω.theory := by
 @[simp]
 lemma unprovable_falsum : Ω.theory *⊬[𝓓]! ⊥ := by apply membership_iff.not.mp; simp
 
+@[simp]
 lemma iff_mem_neg : (~p ∈ Ω.theory) ↔ (p ∉ Ω.theory) := by
   constructor;
   . intro hnp;
     by_contra hp;
     replace hp := membership_iff.mp hp;
     replace hnp := membership_iff.mp hnp;
-    have : Ω.theory *⊢[𝓓]! ⊥ := hnp ⨀ hp;
+    have : Ω.theory *⊢[𝓓]! ⊥ := neg_mdp! hnp hp;
     have : Ω.theory *⊬[𝓓]! ⊥ := unprovable_falsum;
     contradiction;
   . intro hp;
@@ -339,7 +342,7 @@ lemma iff_mem_or : ((p ⋎ q) ∈ Ω.theory) ↔ (p ∈ Ω.theory) ∨ (q ∈ Ω
     have ⟨hp, hq⟩ := hC;
     replace hp := membership_iff.mp $ iff_mem_neg.mpr hp;
     replace hq := membership_iff.mp $ iff_mem_neg.mpr hq;
-    have : Ω.theory *⊢[𝓓]! ⊥ := or₃'''! hp hq hpq;
+    have : Ω.theory *⊢[𝓓]! ⊥ := or₃'''! (neg_equiv'!.mp hp) (neg_equiv'!.mp hq) hpq;
     have : Ω.theory *⊬[𝓓]! ⊥ := unprovable_falsum;
     contradiction;
   . rintro (hp | hq);

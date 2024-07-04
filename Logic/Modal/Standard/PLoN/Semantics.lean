@@ -54,6 +54,7 @@ def Formula.PLoN.Satisfies (M : PLoN.Model α) (w : M.World) : Formula α → Pr
   | atom a  => M.Valuation w a
   | verum   => True
   | falsum  => False
+  | neg p   => ¬(PLoN.Satisfies M w p)
   | and p q => (PLoN.Satisfies M w p) ∧ (PLoN.Satisfies M w q)
   | or p q  => (PLoN.Satisfies M w p) ∨ (PLoN.Satisfies M w q)
   | imp p q => (PLoN.Satisfies M w p) → (PLoN.Satisfies M w q)

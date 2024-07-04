@@ -35,6 +35,7 @@ inductive Deduction (𝓓 : DeductionParameter α) : Formula α → Type _
   | or₁ p q      : Deduction 𝓓 $ p ⟶ p ⋎ q
   | or₂ p q      : Deduction 𝓓 $ q ⟶ p ⋎ q
   | or₃ p q r    : Deduction 𝓓 $ (p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r)
+  | neg_equiv p  : Deduction 𝓓 $ Axioms.NegEquiv p
 
 instance : System (Formula α) (DeductionParameter α) := ⟨Deduction⟩
 
@@ -54,6 +55,7 @@ instance : System.Minimal 𝓓 where
   or₁ := or₁
   or₂ := or₂
   or₃ := or₃
+  neg_equiv := neg_equiv
 
 instance [𝓓.IncludeEFQ] : System.HasAxiomEFQ 𝓓 where
   efq _ := eaxm $ Set.mem_of_subset_of_mem IncludeEFQ.include_EFQ (by simp);
@@ -126,9 +128,10 @@ theorem iff_provable_dn_efq_dne_provable: 𝐈𝐧𝐭 ⊢! ~~p ↔ 𝐂𝐥 ⊢
         exact dni'! efq!;
       . obtain ⟨q, hq⟩ := by simpa using hLEM;
         subst hq;
+        apply neg_equiv'!.mpr;
         apply FiniteContext.deduct'!;
         have : [~(q ⋎ ~q)] ⊢[𝐈𝐧𝐭]! ~q ⋏ ~~q := demorgan₃'! $ FiniteContext.id!;
-        exact (and₂'! this) ⨀ (and₁'! this);
+        exact neg_mdp! (and₂'! this) (and₁'! this);
     | @mdp p q h₁ h₂ ih₁ ih₂ =>
       exact (dn_distribute_imply'! $ ih₁ ⟨h₁⟩) ⨀ ih₂ ⟨h₂⟩;
     | _ => apply dni'!; simp;

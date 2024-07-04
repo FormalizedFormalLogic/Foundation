@@ -134,6 +134,7 @@ def Formula.Kripke.Satisfies (M : Kripke.Model α) (x : M.World) : Formula α �
   | and p q => (Satisfies M x p) ∧ (Satisfies M x q)
   | or p q  => (Satisfies M x p) ∨ (Satisfies M x q)
   | imp p q => (Satisfies M x p) → (Satisfies M x q)
+  | neg p   => ¬(Satisfies M x p)
   | box p   => ∀ {y}, x ≺ y → (Satisfies M y p)
 
 namespace Formula.Kripke.Satisfies
