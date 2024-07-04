@@ -23,6 +23,12 @@ class LoebRule where
 class HenkinRule where
   henkin {p : F} : 𝓢 ⊢ □p ⟷ p → 𝓢 ⊢ p
 
+class RosserRule where
+  rosser {p : F} : 𝓢 ⊢ ~p → 𝓢 ⊢ ~(□p)
+
+class RosserBoxRule where
+  rosser_box {p : F} : 𝓢 ⊢ ~(□p) → 𝓢 ⊢ ~(□□p)
+
 class HasAxiomK where
   K (p q : F) : 𝓢 ⊢ Axioms.K p q
 

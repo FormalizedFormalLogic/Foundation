@@ -24,7 +24,6 @@ lemma consistent_of_characterized (characterized : Λ.CharacterizedByPLoNFrameCl
   apply System.Consistent.of_unprovable;
   exact unprovable_bot_of_nonempty_frameclass characterized nonempty;
 
-
 instance : Sound 𝐍 (AllFrameClass α) := sound_of_characterized N_characterized
 
 instance : Sound 𝐍𝟒 (TransitiveFrameClass α) := sound_of_characterized N4_characterized
@@ -40,6 +39,16 @@ instance : System.Consistent (𝐍𝟒 : DeductionParameter α) := consistent_of
 instance : System.Consistent (𝐍(𝐑) : DeductionParameter α) := consistent_of_characterized NRosser_characterized SerialFrameClass.nonempty
 
 instance : System.Consistent (𝐍𝟒(𝐑) : DeductionParameter α) := consistent_of_characterized N4Rosser_characterized TransitiveSerialFrameClass.nonempty
+
+lemma restrict_finite : 𝔽 ⊧ p → 𝔽ꟳ ⊧ p := by
+  intro h F hF;
+  obtain ⟨fF, hfF, e⟩ := hF; subst e;
+  exact h hfF;
+
+instance {𝔽 : FrameClass α} [sound : Sound Λ 𝔽] : Sound Λ 𝔽ꟳ := ⟨by
+  intro p h;
+  exact restrict_finite $ sound.sound h;
+⟩
 
 end PLoN
 

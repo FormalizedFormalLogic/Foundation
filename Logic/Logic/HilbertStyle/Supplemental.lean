@@ -322,8 +322,14 @@ def negneg_equiv : 𝓢 ⊢ ~~p ⟷ ((p ⟶ ⊥) ⟶ ⊥) := by
   . exact impTrans'' (and₂' neg_equiv) (by apply contra₀'; exact and₁' neg_equiv)
 @[simp] lemma negneg_equiv! : 𝓢 ⊢! ~~p ⟷ ((p ⟶ ⊥) ⟶ ⊥) := ⟨negneg_equiv⟩
 
-def negneg_equiv_dne [HasAxiomDNE 𝓢] : 𝓢 ⊢ p ⟷ ((p ⟶ ⊥) ⟶ ⊥) := iffTrans'' dn negneg_equiv
-lemma negneg_equiv_dne! [HasAxiomDNE 𝓢] : 𝓢 ⊢! p ⟷ ((p ⟶ ⊥) ⟶ ⊥) := ⟨negneg_equiv_dne⟩
+def negneg_equiv'.mp [NegationEquiv 𝓢] : 𝓢 ⊢ ~~p → 𝓢 ⊢ ((p ⟶ ⊥) ⟶ ⊥) := λ h => (and₁' negneg_equiv) ⨀ h
+def negneg_equiv'.mpr [NegationEquiv 𝓢] : 𝓢 ⊢ ((p ⟶ ⊥) ⟶ ⊥) → 𝓢 ⊢ ~~p := λ h => (and₂' negneg_equiv) ⨀ h
+lemma negneg_equiv'! [HasAxiomDNE 𝓢] : 𝓢 ⊢! ~~p ↔ 𝓢 ⊢! ((p ⟶ ⊥) ⟶ ⊥) :=
+  ⟨λ ⟨h⟩ => ⟨negneg_equiv'.mp h⟩, λ ⟨h⟩ => ⟨negneg_equiv'.mpr h⟩⟩
+
+def negneg_equiv_dn [HasAxiomDNE 𝓢] : 𝓢 ⊢ p ⟷ ((p ⟶ ⊥) ⟶ ⊥) := iffTrans'' dn negneg_equiv
+lemma negneg_equiv_dn! [HasAxiomDNE 𝓢] : 𝓢 ⊢! p ⟷ ((p ⟶ ⊥) ⟶ ⊥) := ⟨negneg_equiv_dn⟩
+
 
 end NegationEquiv
 

@@ -100,6 +100,17 @@ class HasHenkinRule (𝓓 : DeductionParameter α) where
 instance [HasHenkinRule 𝓓] : System.HenkinRule 𝓓 where
   henkin := @λ p d => rule (show { antecedents := [□p ⟷ p], consequence := p } ∈ Rl(𝓓) by apply HasHenkinRule.has_henkin; simp_all) (by aesop);
 
+class HasRosserRule (𝓓 : DeductionParameter α) where
+  has_rosser : ⟮Rosser⟯ ⊆ Rl(𝓓) := by aesop
+
+instance [HasRosserRule 𝓓] : System.RosserRule 𝓓 where
+  rosser := @λ p d => rule (show { antecedents := [~p], consequence := ~(□p) } ∈ Rl(𝓓) by apply HasRosserRule.has_rosser; simp_all) (by aesop);
+
+class HasRosserBoxRule (𝓓 : DeductionParameter α) where
+  has_rosser_box : ⟮Rosser□⟯ ⊆ Rl(𝓓) := by aesop
+
+instance [HasRosserBoxRule 𝓓] : System.RosserBoxRule 𝓓 where
+  rosser_box := @λ p d => rule (show { antecedents := [~(□p)], consequence := ~(□□p) } ∈ Rl(𝓓) by apply HasRosserBoxRule.has_rosser_box; simp_all) (by aesop);
 
 class HasNecOnly (𝓓 : DeductionParameter α) where
   has_necessitation_only : Rl(𝓓) = ⟮Nec⟯ := by rfl
@@ -115,6 +126,11 @@ instance [HasAxiomK 𝓓] : System.HasAxiomK 𝓓 where
 
 class IsNormal (𝓓 : DeductionParameter α) extends 𝓓.HasNecOnly, 𝓓.HasAxiomK where
 
+class HasAxiomFour (𝓓 : DeductionParameter α) where
+  has_axiomFour : 𝟰 ⊆ Ax(𝓓) := by aesop
+
+instance [HasAxiomFour 𝓓] : System.HasAxiomFour 𝓓 where
+  Four _ := maxm (by apply HasAxiomFour.has_axiomFour; simp_all)
 
 end DeductionParameter
 
@@ -222,8 +238,7 @@ notation "𝐊𝐓𝐁" => DeductionParameter.KTB
 
 protected abbrev K4 : DeductionParameter α := 𝝂𝟰
 notation "𝐊𝟒" => DeductionParameter.K4
-instance : System.K4 (𝐊𝟒 : DeductionParameter α) where
-  Four _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
+instance : 𝐊𝟒.HasAxiomFour (α := α) where
 
 
 protected abbrev K5 : DeductionParameter α := 𝝂𝟱
@@ -343,23 +358,23 @@ protected abbrev N4 : DeductionParameter α where
   axioms := 𝟰
   rules := ⟮Nec⟯
 notation "𝐍𝟒" => DeductionParameter.N4
-instance : HasNecOnly (α := α) 𝐍𝟒 where
-instance : System.HasAxiomFour (𝐍𝟒 : DeductionParameter α) where
-  Four _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
+instance : 𝐍𝟒.HasNecOnly (α := α)  where
+instance : 𝐍𝟒.HasAxiomFour (α := α) where
 
 protected abbrev NRosser : DeductionParameter α where
   axioms := ∅
   rules := ⟮Nec⟯ ∪ ⟮Rosser⟯
 notation "𝐍(𝐑)" => DeductionParameter.NRosser
 instance : 𝐍(𝐑).HasNecessitation (α := α) where
+instance : 𝐍(𝐑).HasRosserRule (α := α) where
 
 protected abbrev N4Rosser : DeductionParameter α where
   axioms := 𝟰
   rules := ⟮Nec⟯ ∪ ⟮Rosser□⟯
 notation "𝐍𝟒(𝐑)" => DeductionParameter.N4Rosser
 instance : 𝐍𝟒(𝐑).HasNecessitation (α := α) where
-instance : System.HasAxiomFour (𝐍𝟒(𝐑) : DeductionParameter α) where
-  Four _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
+instance : 𝐍𝟒(𝐑).HasRosserBoxRule (α := α) where
+instance : 𝐍𝟒(𝐑).HasAxiomFour (α := α) where
 
 end DeductionParameter
 
