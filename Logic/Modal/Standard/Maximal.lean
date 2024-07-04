@@ -13,8 +13,8 @@ def Formula.toModalFormula : Formula α → Modal.Standard.Formula α
   | .atom a => Modal.Standard.Formula.atom a
   | ⊤ => ⊤
   | ⊥ => ⊥
-  | p ⟶ q => (toModalFormula p) ⟶ (toModalFormula q)
   | ~p => ~(toModalFormula p)
+  | p ⟶ q => (toModalFormula p) ⟶ (toModalFormula q)
   | p ⋏ q => (toModalFormula p) ⋏ (toModalFormula q)
   | p ⋎ q => (toModalFormula p) ⋎ (toModalFormula q)
 postfix:75 "ᴹ" => Formula.toModalFormula
@@ -124,7 +124,7 @@ lemma of_classical {m𝓓 : Modal.Standard.DeductionParameter α} {p : Superintu
     simp_all;
     rcases ih with (efq | lem);
     . obtain ⟨q, e⟩ := efq; subst_vars; exact efq!;
-    . obtain ⟨q, e⟩ := lem; subst_vars; sorry; -- exact lem!;
+    . obtain ⟨q, e⟩ := lem; subst_vars; exact lem!;
   | mdp h₁ h₂ ih₁ ih₂ =>
     dsimp only [Superintuitionistic.Formula.toModalFormula] at ih₁ ih₂;
     exact (ih₁ ⟨h₁⟩) ⨀ (ih₂ ⟨h₂⟩);

@@ -485,7 +485,36 @@ private lemma truthlemma.himp
 private lemma truthlemma.hneg
   {t : (CanonicalModel 𝓓).World}
   (ihp : ∀ {t : (CanonicalModel 𝓓).World}, t ⊧ p ↔ p ∈ t.tableau.1)
-  : t ⊧ ~p ↔ ~p ∈ t.tableau.1 := by sorry;
+  : t ⊧ ~p ↔ ~p ∈ t.tableau.1 := by
+  constructor;
+  . contrapose; simp_all;
+    intro h;
+    replace h := t.not_mem₁_iff_mem₂.mp h;
+    obtain ⟨t', ⟨h, _⟩⟩ := lindenbaum (𝓓 := 𝓓) (t₀ := (insert p t.tableau.1, ∅)) $ by
+      simp only [Tableau.ParametricConsistent];
+      intro Γ Δ hΓ hΔ;
+      replace hΓ : ∀ q, q ∈ Γ.remove p → q ∈ t.tableau.1 := by
+        intro q hq;
+        have ⟨hq₁, hq₂⟩ := List.mem_remove_iff.mp hq;
+        have := by simpa using hΓ q hq₁;
+        simp_all;
+      replace hΔ : Δ = [] := List.nil_iff.mpr hΔ; subst hΔ;
+      by_contra hC; simp at hC;
+      have : 𝓓 ⊢! (Γ.remove p).conj' ⟶ ~p := imp_trans''! (and_imply_iff_imply_imply'!.mp $ imply_left_remove_conj'! hC) (and₂'! neg_equiv!);
+      have : 𝓓 ⊬! (Γ.remove p).conj' ⟶ ~p := by simpa only [List.disj'_singleton] using t.consistent (Δ := [~p]) hΓ (by simpa);
+      contradiction;
+    have ⟨_, _⟩ := Set.insert_subset_iff.mp h;
+    existsi t';
+    constructor;
+    . simp_all only [Set.singleton_subset_iff];
+    . assumption;
+  . simp;
+    intro ht t' htt';
+    apply ihp.not.mpr;
+    by_contra hC;
+    have : 𝓓 ⊬! p ⋏ ~p ⟶ ⊥ := by simpa using t'.consistent (Γ := [p, ~p]) (Δ := []) (by aesop) (by simp);
+    have : 𝓓 ⊢! p ⋏ ~p ⟶ ⊥ := intro_bot_of_and!;
+    contradiction;
 
 lemma truthlemma {t : (CanonicalModel 𝓓).World} : t ⊧ p ↔ p ∈ t.tableau.1 := by
   induction p using rec' generalizing t with

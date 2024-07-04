@@ -96,10 +96,10 @@ def rec' {C : Formula α → Sort w}
   (hfalsum : C ⊥)
   (hverum  : C ⊤)
   (hatom   : ∀ a : α, C (atom a))
-  (hneg   : ∀ p : Formula α, C p → C (~p))
+  (hneg    : ∀ p : Formula α, C p → C (~p))
   (himp    : ∀ (p q : Formula α), C p → C q → C (p ⟶ q))
-  (hand   : ∀ (p q : Formula α), C p → C q → C (p ⋏ q))
-  (hor    : ∀ (p q : Formula α), C p → C q → C (p ⋎ q))
+  (hand    : ∀ (p q : Formula α), C p → C q → C (p ⋏ q))
+  (hor     : ∀ (p q : Formula α), C p → C q → C (p ⋎ q))
   : (p : Formula α) → C p
   | ⊥       => hfalsum
   | ⊤       => hverum

@@ -23,12 +23,12 @@ variable [DecidableEq α] [Inhabited α] [Encodable α]
 /-- Gödel Translation -/
 def GoedelTranslation : Superintuitionistic.Formula α → Formula α
   | .atom a  => □(Formula.atom a)
-  | .verum   => ⊤
-  | .falsum  => ⊥
-  | .and p q => (GoedelTranslation p) ⋏ (GoedelTranslation q)
-  | .or p q  => (GoedelTranslation p) ⋎ (GoedelTranslation q)
-  | .neg p   => □~(GoedelTranslation p)
-  | .imp p q => □((GoedelTranslation p) ⟶ (GoedelTranslation q))
+  | ⊤ => ⊤
+  | ⊥ => ⊥
+  | p ⋏ q => (GoedelTranslation p) ⋏ (GoedelTranslation q)
+  | p ⋎ q  => (GoedelTranslation p) ⋎ (GoedelTranslation q)
+  | ~p   => □~(GoedelTranslation p)
+  | p ⟶ q => □((GoedelTranslation p) ⟶ (GoedelTranslation q))
 
 postfix:75 "ᵍ" => GoedelTranslation
 
@@ -41,17 +41,15 @@ variable {p q r : Superintuitionistic.Formula α}
 
 lemma axiomTc_GTranslate! [System.K4 m𝓓] : m𝓓 ⊢! pᵍ ⟶ □pᵍ := by
   induction p using Superintuitionistic.Formula.rec' with
-  | hatom => simp [GoedelTranslation, axiomFour!];
-  | himp => simp [GoedelTranslation, axiomFour!];
-  | hfalsum => simp [GoedelTranslation, efq!];
   | hverum => exact dhyp! (nec! verum!);
-  | hneg p => simp [GoedelTranslation];
+  | hfalsum => simp only [GoedelTranslation, efq!];
   | hand p q ihp ihq =>
     simp only [GoedelTranslation];
     exact imp_trans''! (and_replace! ihp ihq) collect_box_and!
   | hor p q ihp ihq =>
     simp only [GoedelTranslation];
     exact imp_trans''! (or₃''! (imply_or_left'! ihp) (imply_or_right'! ihq)) collect_box_or!
+  | _ => simp only [GoedelTranslation, axiomFour!];
 
 instance [System.S4 m𝓓] : System.K4 m𝓓 where
 

@@ -12,6 +12,7 @@ def Formula.toClassical : Superintuitionistic.Formula α → Classical.Formula �
   | .atom a => Classical.Formula.atom a
   | ⊤              => ⊤
   | ⊥              => ⊥
+  | ~p             => ~p.toClassical
   | p ⋏ q          => p.toClassical ⋏ q.toClassical
   | p ⋎ q          => p.toClassical ⋎ q.toClassical
   | p ⟶ q          => p.toClassical ⟶ q.toClassical
