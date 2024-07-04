@@ -15,7 +15,6 @@ def Formula.toModalFormula : Formula α → Modal.Standard.Formula α
   | ⊥ => ⊥
   | ~p => ~(toModalFormula p)
   | p ⟶ q => (toModalFormula p) ⟶ (toModalFormula q)
-  | ~p => ~(toModalFormula p)
   | p ⋏ q => (toModalFormula p) ⋏ (toModalFormula q)
   | p ⋎ q => (toModalFormula p) ⋎ (toModalFormula q)
 postfix:75 "ᴹ" => Formula.toModalFormula
