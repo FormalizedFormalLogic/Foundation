@@ -1,5 +1,40 @@
 # Arithmetics
 
+In this formalization, we prefer developping arithmetic *model theoretic*, i.e. 
+show $T \models \sigma$ instead of $T \vdash \sigma$ (They are equivalent thanks to the completeness theorem.). This approach has several advantages:
+
+1. In general, writing a formalized proof (in formalized system!) is very tedious. Meta-proofs, on the other hand, tend to be relatively concise.
+2. Many definitions and proofs of logic and algebra in Mathlib can be used.
+3. Metaprogramming can streamline the proof process (especially `definability`).
+4. It is easy to extend predicates and functions.  When adding predicates or functions, it is necessary to extend its language by *extension by definition* in case of formalized proof, but not in model theoretic approarch.
+
+This procedure is done as follows. 
+Suppose we wish to prove that the totality of an exponential function can be proved in $\mathsf{I}\Sigma_1$.
+First, the graph of the exponential function must be defined. This is achieved by the following two definitions.
+1. Semantic definition.
+    ```lean
+    def Exponential {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐈𝚺₀] :
+        M → M → Prop
+    ```
+2. Syntactic definition that expresses the semantic definition.
+    ```lean
+    def exponentialDef : 𝚺₀-Semisentence 2
+    
+    lemma Exponential.defined :
+        𝚺₀-Relation (Exponential : M → M → Prop) via exponentialDef
+    ```
+Then prove the totality.
+
+```lean
+theorem Exponential.total  {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐈𝚺₀] (x : M) : ∃ y, Exponential x y
+```
+
+
+Since `Exponential` and `Exponential.total` are defined in all the model of $\mathsf{I}\Sigma_1$, 
+`𝐈𝚺₁ ⊢! ∀' ∃' exponentialDef` is obtained by the completeness theorem. This was the result we wanted to achieve.
+
+
+
 
 ## Defined Predicates and Functions
 
