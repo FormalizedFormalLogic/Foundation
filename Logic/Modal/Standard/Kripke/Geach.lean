@@ -246,23 +246,23 @@ lemma geachConfluent_CanonicalFrame (h : 𝗴𝗲(t) ⊆ Ax) : GeachConfluent t 
     intro Γ Δ hΓ hΔ hC;
 
     replace hΓ : ∀ p ∈ Γ, □^[t.m]p ∈ Ω₂.theory := by simpa using hΓ;
-    have hΓconj : □^[t.m](Γ.conj') ∈ Ω₂.theory := iff_mem_multibox_conj'.mpr hΓ;
+    have hΓconj : □^[t.m]⋀Γ ∈ Ω₂.theory := iff_mem_multibox_conj'.mpr hΓ;
 
     replace hΔ : ∀ p ∈ Δ, □^[t.n]p ∈ Ω₃.theory := by simpa using hΔ;
-    have : □^[t.n](Δ.conj') ∈ Ω₃.theory := iff_mem_multibox_conj'.mpr hΔ;
+    have : □^[t.n]⋀Δ ∈ Ω₃.theory := iff_mem_multibox_conj'.mpr hΔ;
 
-    have : □^[t.j](◇^[t.n](Γ.conj')) ∈ Ω₁.theory := iff_mem_imp.mp
+    have : □^[t.j](◇^[t.n]⋀Γ) ∈ Ω₁.theory := iff_mem_imp.mp
       (membership_iff.mpr $ Context.of! $ Normal.maxm! (by aesop))
       (multiframe_def_multidia.mp r₁₂ hΓconj)
-    have : ◇^[t.n]Γ.conj' ∈ Ω₃.theory := multiframe_def_multibox.mp r₁₃ this;
+    have : ◇^[t.n]⋀Γ ∈ Ω₃.theory := multiframe_def_multibox.mp r₁₃ this;
 
-    have : 𝝂Ax ⊢! □^[t.n](Δ.conj') ⋏ ◇^[t.n](Γ.conj') ⟶ ⊥ := by {
+    have : 𝝂Ax ⊢! □^[t.n]⋀Δ ⋏ ◇^[t.n]⋀Γ ⟶ ⊥ := by {
       apply and_imply_iff_imply_imply'!.mpr;
       exact imp_trans''!
-        (show 𝝂Ax ⊢! □^[t.n](Δ.conj') ⟶ □^[t.n](~Γ.conj') by exact imply_multibox_distribute'! $ contra₁'! $ imp_trans''! (and_imply_iff_imply_imply'!.mp hC) (and₂'! neg_equiv!))
-        (show 𝝂Ax ⊢! □^[t.n](~Γ.conj') ⟶ (◇^[t.n]Γ.conj') ⟶ ⊥ by exact imp_trans''! (contra₁'! $ and₁'! $ multidia_duality!) (and₁'! neg_equiv!));
+        (show 𝝂Ax ⊢! □^[t.n]⋀Δ ⟶ □^[t.n](~⋀Γ) by exact imply_multibox_distribute'! $ contra₁'! $ imp_trans''! (and_imply_iff_imply_imply'!.mp hC) (and₂'! neg_equiv!))
+        (show 𝝂Ax ⊢! □^[t.n](~⋀Γ) ⟶ (◇^[t.n]⋀Γ) ⟶ ⊥ by exact imp_trans''! (contra₁'! $ and₁'! $ multidia_duality!) (and₁'! neg_equiv!));
     }
-    have : 𝝂Ax ⊬! □^[t.n](Δ.conj') ⋏ ◇^[t.n](Γ.conj') ⟶ ⊥ := by simpa using Ω₃.consistent (Γ := [□^[t.n](Δ.conj'), ◇^[t.n](Γ.conj')]) (by simp_all)
+    have : 𝝂Ax ⊬! □^[t.n]⋀Δ ⋏ ◇^[t.n]⋀Γ ⟶ ⊥ := by simpa using Ω₃.consistent (Γ := [□^[t.n]⋀Δ, ◇^[t.n]⋀Γ]) (by simp_all)
 
     contradiction;
 

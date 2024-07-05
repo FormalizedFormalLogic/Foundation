@@ -18,9 +18,9 @@ variable {𝓢 : S}
 
 instance : Coe (List F) (FiniteContext F 𝓢) := ⟨mk⟩
 
-abbrev conj (Γ : FiniteContext F 𝓢) : F := Γ.ctx.conj'
+abbrev conj (Γ : FiniteContext F 𝓢) : F := ⋀Γ.ctx
 
-abbrev disj (Γ : FiniteContext F 𝓢) : F := Γ.ctx.disj'
+abbrev disj (Γ : FiniteContext F 𝓢) : F := ⋁Γ.ctx
 
 instance : EmptyCollection (FiniteContext F 𝓢) := ⟨⟨[]⟩⟩
 
@@ -67,13 +67,13 @@ notation Γ:45 " ⊢[" 𝓢 "]*! " s:46 => ProvableSet 𝓢 Γ s
 
 lemma system_def (Γ : FiniteContext F 𝓢) (p : F) : (Γ ⊢ p) = (𝓢 ⊢ Γ.conj ⟶ p) := rfl
 
-def ofDef {Γ : List F} {p : F} (b : 𝓢 ⊢ Γ.conj' ⟶ p) : Γ ⊢[𝓢] p := b
+def ofDef {Γ : List F} {p : F} (b : 𝓢 ⊢ ⋀Γ ⟶ p) : Γ ⊢[𝓢] p := b
 
-def toDef {Γ : List F} {p : F} (b : Γ ⊢[𝓢] p) : 𝓢 ⊢ Γ.conj' ⟶ p := b
+def toDef {Γ : List F} {p : F} (b : Γ ⊢[𝓢] p) : 𝓢 ⊢ ⋀Γ ⟶ p := b
 
-lemma toₛ! (b : Γ ⊢[𝓢]! p) : 𝓢 ⊢! Γ.conj' ⟶ p := b
+lemma toₛ! (b : Γ ⊢[𝓢]! p) : 𝓢 ⊢! ⋀Γ ⟶ p := b
 
-lemma provable_iff {p : F} : Γ ⊢[𝓢]! p ↔ 𝓢 ⊢! Γ.conj' ⟶ p := iff_of_eq rfl
+lemma provable_iff {p : F} : Γ ⊢[𝓢]! p ↔ 𝓢 ⊢! ⋀Γ ⟶ p := iff_of_eq rfl
 
 section minimal
 
@@ -97,7 +97,7 @@ def weakening (h : Γ ⊆ Δ) {p} : Γ ⊢[𝓢] p → Δ ⊢[𝓢] p := Axiomat
 
 lemma weakening! (h : Γ ⊆ Δ) {p} : Γ ⊢[𝓢]! p → Δ ⊢[𝓢]! p := fun h ↦ Axiomatized.le_of_subset (by simpa) h
 
-def of {p : F} (b : 𝓢 ⊢ p) : Γ ⊢[𝓢] p := dhyp Γ.conj' b
+def of {p : F} (b : 𝓢 ⊢ p) : Γ ⊢[𝓢] p := dhyp (⋀Γ) b
 
 def emptyPrf {p : F} : [] ⊢[𝓢] p → 𝓢 ⊢ p := fun b ↦ b ⨀ verum
 

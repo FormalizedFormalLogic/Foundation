@@ -43,28 +43,28 @@ lemma multiframe_def_multibox : Ω₁ ≺^[n] Ω₂ ↔ ∀ {p}, □^[n]p ∈ Ω
         intro Γ Δ hΓ hΔ hC;
 
         replace hΓ : ∀ p ∈ Γ, □p ∈ Ω₁.theory := by simpa using hΓ;
-        have dΓconj : Ω₁.theory *⊢[_]! □Γ.conj' := membership_iff.mp $ iff_mem_box_conj'.mpr hΓ;
+        have dΓconj : Ω₁.theory *⊢[_]! □⋀Γ := membership_iff.mp $ iff_mem_box_conj'.mpr hΓ;
 
         have hΔ₂ : ∀ p ∈ ◇'⁻¹^[n]Δ, p ∈ Ω₂.theory := by
           intro p hp;
           simpa using hΔ (◇^[n]p) (by simp_all);
 
-        have hΔconj : (◇'⁻¹^[n]Δ).conj' ∈ Ω₂.theory := iff_mem_conj'.mpr hΔ₂;
+        have hΔconj : ⋀◇'⁻¹^[n]Δ ∈ Ω₂.theory := iff_mem_conj'.mpr hΔ₂;
 
-        have : (◇'⁻¹^[n]Δ).conj' ∉ Ω₂.theory := by {
-          have d₁ : 𝝂Ax ⊢! Γ.conj' ⟶ Δ.conj' ⟶ ⊥ := and_imply_iff_imply_imply'!.mp hC;
-          have : 𝝂Ax ⊢! (◇'^[n]◇'⁻¹^[n]Δ).conj' ⟶ Δ.conj' := by
+        have : ⋀◇'⁻¹^[n]Δ ∉ Ω₂.theory := by {
+          have d₁ : 𝝂Ax ⊢! ⋀Γ ⟶ ⋀Δ ⟶ ⊥ := and_imply_iff_imply_imply'!.mp hC;
+          have : 𝝂Ax ⊢! ⋀(◇'^[n]◇'⁻¹^[n]Δ) ⟶ ⋀Δ := by
             apply conj'conj'_subset;
             intro q hq;
             obtain ⟨r, _, _⟩ := hΔ q hq;
             subst_vars;
             simpa;
-          have : 𝝂Ax ⊢! ◇^[n](◇'⁻¹^[n]Δ).conj' ⟶ Δ.conj' := imp_trans''! iff_conj'multidia_multidiaconj'! $ this;
-          have : 𝝂Ax ⊢! ~(□^[n](~(◇'⁻¹^[n]Δ).conj')) ⟶ Δ.conj' := imp_trans''! (and₂'! multidia_duality!) this;
-          have : 𝝂Ax ⊢! ~Δ.conj' ⟶ □^[n](~(◇'⁻¹^[n]Δ).conj') := contra₂'! this;
-          have : 𝝂Ax ⊢! (Δ.conj' ⟶ ⊥) ⟶ □^[n](~(◇'⁻¹^[n]Δ).conj') := imp_trans''! (and₂'! neg_equiv!) this;
-          have : 𝝂Ax ⊢! Γ.conj' ⟶ □^[n](~(◇'⁻¹^[n]Δ).conj') := imp_trans''! d₁ this;
-          have : 𝝂Ax ⊢! □Γ.conj' ⟶ □^[(n + 1)](~(◇'⁻¹^[n]Δ).conj') := by simpa only [UnaryModalOperator.multimop_succ] using imply_box_distribute'! this;
+          have : 𝝂Ax ⊢! ◇^[n]⋀◇'⁻¹^[n]Δ ⟶ ⋀Δ := imp_trans''! iff_conj'multidia_multidiaconj'! $ this;
+          have : 𝝂Ax ⊢! ~(□^[n](~⋀◇'⁻¹^[n]Δ)) ⟶ ⋀Δ := imp_trans''! (and₂'! multidia_duality!) this;
+          have : 𝝂Ax ⊢! ~⋀Δ ⟶ □^[n](~⋀◇'⁻¹^[n]Δ) := contra₂'! this;
+          have : 𝝂Ax ⊢! (⋀Δ ⟶ ⊥) ⟶ □^[n](~⋀◇'⁻¹^[n]Δ) := imp_trans''! (and₂'! neg_equiv!) this;
+          have : 𝝂Ax ⊢! ⋀Γ ⟶ □^[n](~⋀◇'⁻¹^[n]Δ) := imp_trans''! d₁ this;
+          have : 𝝂Ax ⊢! □⋀Γ ⟶ □^[(n + 1)](~⋀◇'⁻¹^[n]Δ) := by simpa only [UnaryModalOperator.multimop_succ] using imply_box_distribute'! this;
           exact iff_mem_neg.mp $ h $ membership_iff.mpr $ (Context.of! this) ⨀ dΓconj;
         }
 

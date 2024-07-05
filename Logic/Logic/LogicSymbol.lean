@@ -513,13 +513,15 @@ def conj' : List F → F
 | [p] => p
 | p :: q :: rs => p ⋏ (q :: rs).conj'
 
-@[simp] lemma conj'_nil : conj' (F := F) [] = ⊤ := rfl
+prefix:80 "⋀" => List.conj'
 
-@[simp] lemma conj'_singleton : [p].conj' = p := rfl
+@[simp] lemma conj'_nil : ⋀[] = (⊤ : F) := rfl
 
-@[simp] lemma conj'_doubleton : [p, q].conj' = p ⋏ q := rfl
+@[simp] lemma conj'_singleton : ⋀[p] = p := rfl
 
-@[simp] lemma conj'_cons_nonempty {a : F} {as : List F} (h : as ≠ []) : (a :: as).conj' = a ⋏ as.conj' := by
+@[simp] lemma conj'_doubleton : ⋀[p, q] = p ⋏ q := rfl
+
+@[simp] lemma conj'_cons_nonempty {a : F} {as : List F} (h : as ≠ []) : ⋀(a :: as) = a ⋏ ⋀as := by
   cases as with
   | nil => contradiction;
   | cons q rs => simp [List.conj']
@@ -530,16 +532,18 @@ def disj' : List F → F
 | [p] => p
 | p :: q :: rs => p ⋎ (q :: rs).disj'
 
-@[simp] lemma disj'_nil : disj' (F := F) [] = ⊥ := rfl
+prefix:80 "⋁" => disj'
 
-@[simp] lemma disj'_singleton : [p].disj' = p := rfl
+@[simp] lemma disj'_nil : ⋁[] = (⊥ : F) := rfl
 
-@[simp] lemma disj'_doubleton : [p, q].disj' = p ⋎ q := rfl
+@[simp] lemma disj'_singleton : ⋁[p] = p := rfl
 
-@[simp] lemma disj'_cons_nonempty {a : F} {as : List F} (h : as ≠ []) : (a :: as).disj' = a ⋎ as.disj' := by
+@[simp] lemma disj'_doubleton : ⋁[p, q] = p ⋎ q := rfl
+
+@[simp] lemma disj'_cons_nonempty {a : F} {as : List F} (h : as ≠ []) : ⋁(a :: as) = a ⋎ ⋁as := by
   cases as with
   | nil => contradiction;
-  | cons q rs => simp [List.disj']
+  | cons q rs => simp [disj']
 
 lemma induction_with_singleton
   {motive : List F → Prop}
@@ -565,7 +569,7 @@ section
 variable [LogicalConnective α] [DecidableEq α]
 
 noncomputable def conj (s : Finset α) : α := s.toList.conj
-prefix:80 "⋀" => Finset.conj
+-- prefix:80 "⋀" => Finset.conj
 
 lemma map_conj [FunLike F α Prop] [LogicalConnective.HomClass F α Prop] (f : F) (s : Finset α) : f s.conj ↔ ∀ a ∈ s, f a := by
   simpa using List.map_conj f s.toList
@@ -583,7 +587,7 @@ lemma map_conj_union [FunLike F α Prop] [LogicalConnective.HomClass F α Prop] 
     cases ha <;> simp_all;
 
 noncomputable def disj (s : Finset α) : α := s.toList.disj
-prefix:80 "⋁" => Finset.disj
+-- prefix:80 "⋁" => Finset.disj
 
 lemma map_disj [FunLike F α Prop] [LogicalConnective.HomClass F α Prop] (f : F) (s : Finset α) : f s.disj ↔ ∃ a ∈ s, f a := by
   simpa using List.map_disj f s.toList
