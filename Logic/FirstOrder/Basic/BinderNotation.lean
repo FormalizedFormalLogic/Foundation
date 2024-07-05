@@ -1,4 +1,4 @@
-import Logic.FirstOrder.Basic.Elab
+import Logic.FirstOrder.Basic.Operator
 
 open Lean PrettyPrinter Delaborator SubExpr
 

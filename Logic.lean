@@ -33,7 +33,6 @@ import Logic.FirstOrder.Basic.Semantics.Semantics
 import Logic.FirstOrder.Basic.Semantics.Elementary
 import Logic.FirstOrder.Basic.Calculus
 import Logic.FirstOrder.Basic.Operator
-import Logic.FirstOrder.Basic.Elab
 import Logic.FirstOrder.Basic.Eq
 import Logic.FirstOrder.Basic.Soundness
 
