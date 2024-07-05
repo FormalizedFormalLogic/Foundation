@@ -100,7 +100,12 @@ def bexIn (t : Semiterm ℒₒᵣ ξ n) (p : Semiformula ℒₒᵣ ξ (n + 1)) :
 def memRel : 𝚺₀-Semisentence 3 := .mkSigma
   “R x y | ∃ p <⁺ (x + y + 1)², !pairDef p x y ∧ p ∈ R” (by simp)
 
+def memRel₃ : 𝚺₀-Semisentence 4 := .mkSigma
+  “R x y z | ∃ yz <⁺ (y + z + 1)², !pairDef yz y z ∧ ∃ xyz <⁺ (x + yz + 1)², !pairDef xyz x yz ∧ xyz ∈ R” (by simp)
+
 def memRelOpr : Semiformula.Operator ℒₒᵣ 3 := ⟨memRel.val⟩
+
+def memRel₃Opr : Semiformula.Operator ℒₒᵣ 4 := ⟨memRel₃.val⟩
 
 section
 
@@ -121,17 +126,25 @@ macro_rules
 
 syntax:45 first_order_term:45 " ~[" first_order_term "]" first_order_term:0 : first_order_formula
 syntax:45 first_order_term:45 " ≁[" first_order_term "]" first_order_term:0 : first_order_formula
+syntax:45 ":⟪" first_order_term ", " first_order_term "⟫:∈ " first_order_term:0 : first_order_formula
+syntax:45 ":⟪" first_order_term ", " first_order_term ", " first_order_term "⟫:∈ " first_order_term:0 : first_order_formula
 
 macro_rules
   | `(“ $binders* | $t₁:first_order_term ~[ $u:first_order_term ] $t₂:first_order_term ”) =>
     `(memRelOpr.operator ![‘$binders* | $u’, ‘$binders* | $t₁’, ‘$binders* | $t₂’])
   | `(“ $binders* | $t₁:first_order_term ≁[ $u:first_order_term ] $t₂:first_order_term ”) =>
     `(~memRelOpr.operator ![‘$binders* | $u’, ‘$binders* | $t₁’, ‘$binders* | $t₂’])
-
+  | `(“ $binders* | :⟪$t₁:first_order_term, $t₂:first_order_term⟫:∈ $u:first_order_term ”) =>
+    `(memRelOpr.operator ![‘$binders* | $u’, ‘$binders* | $t₁’, ‘$binders* | $t₂’])
+  | `(“ $binders* | :⟪$t₁:first_order_term, $t₂:first_order_term, $t₃:first_order_term⟫:∈ $u:first_order_term ”) =>
+    `(memRel₃Opr.operator ![‘$binders* | $u’, ‘$binders* | $t₁’, ‘$binders* | $t₂’, ‘$binders* | $t₃’])
 end
 
 @[simp] lemma Hierarchy.memRel {t₁ t₂ u : Semiterm ℒₒᵣ μ n} : Hierarchy Γ s “!!t₁ ~[ !!u ] !!t₂” := by
   simp[Semiformula.Operator.operator, Matrix.fun_eq_vec₂, operator_mem_def, memRelOpr]
+
+@[simp] lemma Hierarchy.memRel₃ {t₁ t₂ t₃ u : Semiterm ℒₒᵣ μ n} : Hierarchy Γ s “:⟪!!t₁, !!t₂, !!t₃⟫:∈ !!u” := by
+  simp[Semiformula.Operator.operator, Matrix.fun_eq_vec₂, operator_mem_def, memRel₃Opr]
 
 variable {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐈𝚺₁]
 
@@ -153,16 +166,27 @@ scoped instance : Structure.Mem ℒₒᵣ M := ⟨by intro a b; simp [Semiformul
   · rintro ⟨x, _, hx, h⟩; exact ⟨x, hx, h⟩
   · rintro ⟨x, hx, h⟩; exact ⟨x, lt_of_mem hx, hx, h⟩
 
-lemma memRel_defined : 𝚺₀-Relation₃ ((fun r x y ↦ ⟪x, y⟫ ∈ r) : M → M → M → Prop) via memRel := by
+lemma memRel_defined : 𝚺₀-Relation₃ (fun r x y : M ↦ ⟪x, y⟫ ∈ r) via memRel := by
   intro v; simp [memRel, pair_defined.df.iff, lt_succ_iff_le]
   constructor
   · intro h; exact ⟨⟪v 1, v 2⟫, by simp, rfl, h⟩
   · rintro ⟨_, _, rfl, h⟩; exact h
 
+lemma memRel₃_defined : 𝚺₀-Relation₄ (fun r x y z : M ↦ ⟪x, y, z⟫ ∈ r) via memRel₃ := by
+  intro v; simp [memRel₃, pair_defined.df.iff, lt_succ_iff_le]
+  constructor
+  · intro h; exact ⟨⟪v 2, v 3⟫, by simp, rfl, ⟪v 1, v 2, v 3⟫, by simp, rfl, h⟩
+  · rintro ⟨_, _, rfl, _, _, rfl, h⟩; exact h
+
 @[simp] lemma eval_memRel {x y r : M} :
     memRelOpr.val ![r, x, y] ↔ ⟪x, y⟫ ∈ r := by
   unfold Semiformula.Operator.val
   simp [memRelOpr, pair_defined.df.iff, memRel_defined.df.iff]
+
+@[simp] lemma eval_memRel₃ {x y z r : M} :
+    memRel₃Opr.val ![r, x, y, z] ↔ ⟪x, y, z⟫ ∈ r := by
+  unfold Semiformula.Operator.val
+  simp [memRel₃Opr, pair_defined.df.iff, memRel₃_defined.df.iff]
 
 end LO.FirstOrder.Arith
 

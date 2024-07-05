@@ -476,6 +476,35 @@ end
 
 end seqPop
 
+section seqToVec
+
+def vecToSeq : {n : ℕ} → (Fin n → M) → M
+  | 0,     _ => ∅
+  | n + 1, v => vecToSeq (v ·.castSucc) ⁀' v (Fin.last n)
+
+@[simp] lemma vecToSeq_nil : vecToSeq ![] = (∅ : M) := by simp [vecToSeq]
+
+@[simp] lemma vecToSeq_vecCons {n} (v : Fin n → M) (a : M) :
+    vecToSeq (v <: a) = vecToSeq v ⁀' a := by simp [vecToSeq]
+
+@[simp] lemma vecToSeq_seq {n} (v : Fin n → M) : Seq (vecToSeq v) := by
+  induction' n with n ih <;> simp [vecToSeq]
+  exact (ih _).seqCons _
+
+@[simp] lemma lh_vecToSeq {n} (v : Fin n → M) : lh (vecToSeq v) = n := by
+  induction' n with n ih <;> simp [vecToSeq, *]
+
+lemma mem_vectoSeq {n : ℕ} (v : Fin n → M) (i : Fin n) : ⟪(i : M), v i⟫ ∈ vecToSeq v := by
+  induction' n with n ih
+  · exact i.elim0
+  · simp [vecToSeq]
+    cases' i using Fin.lastCases with i
+    · simp [mem_seqCons_iff]
+    · simp [mem_seqCons_iff]
+      right; exact ih (v ·.castSucc) i
+
+end seqToVec
+
 end LO.Arith
 
 end
