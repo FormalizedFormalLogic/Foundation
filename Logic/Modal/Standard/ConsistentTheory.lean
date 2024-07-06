@@ -6,10 +6,23 @@ variable {α : Type*} [DecidableEq α] [Inhabited α]
 
 open System
 
-def Theory.Consistent (Λ : DeductionParameter α) (T : Theory α) := ∀ {Γ : List (Formula α)}, (∀ p ∈ Γ, p ∈ T) → Λ ⊬! ⋀Γ ⟶ ⊥
+def Theory.Consistent (Λ : DeductionParameter α) (T : Theory α) := T *⊬[Λ]! ⊥
 notation:max "(" Λ ")-Consistent " T:90 => Theory.Consistent Λ T
 
 namespace Theory
+
+open Context
+
+lemma def_consistent : (Λ)-Consistent T ↔ ∀ (Γ : List (Formula α)), (∀ q ∈ Γ, q ∈ T) → Γ ⊬[Λ]! ⊥ := by
+  constructor;
+  . intro h;
+    simpa using Context.provable_iff.not.mp h;
+  . intro h;
+    apply Context.provable_iff.not.mpr; push_neg;
+    assumption;
+
+lemma def_inconsistent : ¬(Λ)-Consistent T ↔ ∃ (Γ : List (Formula α)), (∀ q ∈ Γ, q ∈ T) ∧ Γ ⊢[Λ]! ⊥ := by
+  simp only [def_consistent]; push_neg; tauto;
 
 variable {Λ : DeductionParameter α} [Λ_consis : System.Consistent Λ]
          {T : Theory α}
@@ -17,6 +30,7 @@ variable {Λ : DeductionParameter α} [Λ_consis : System.Consistent Λ]
 @[simp]
 lemma self_consistent : (Λ)-Consistent Ax(Λ) := by
   obtain ⟨q, hq⟩ := Λ_consis.exists_unprovable;
+  apply def_consistent.mpr;
   intro Γ hΓ;
   by_contra hC;
   have : Λ ⊢! q := imp_trans''! hC efq! ⨀ (iff_provable_list_conj.mpr $ λ _ h => Deduction.maxm! $ hΓ _ h);
@@ -25,24 +39,64 @@ lemma self_consistent : (Λ)-Consistent Ax(Λ) := by
 @[simp]
 lemma emptyset_consistent : (Λ)-Consistent ∅ := by
   obtain ⟨f, hf⟩ := Λ_consis.exists_unprovable;
+  apply def_consistent.mpr;
   intro Γ hΓ; by_contra hC;
   replace hΓ := List.nil_iff.mpr hΓ; subst hΓ;
   have : Λ ⊢! f := efq'! $ hC ⨀ verum!;
   contradiction;
 
-lemma def_not_consistent : ¬(Λ)-Consistent T ↔ ∃ Γ : List (Formula α), (∀ p ∈ Γ, p ∈ T) ∧ Λ ⊢! ⋀Γ ⟶ ⊥ := by simp [Consistent];
-
 lemma union_consistent : (Λ)-Consistent (T₁ ∪ T₂) → (Λ)-Consistent T₁ ∧ (Λ)-Consistent T₂ := by
-  simp only [Consistent];
   intro h;
-  constructor;
-  . intro Γ hΓ; exact h (by intro p hp; simp; left; exact hΓ p hp);
-  . intro Γ hΓ; exact h (by intro p hp; simp; right; exact hΓ p hp);
+  replace h := def_consistent.mp h;
+  constructor <;> { apply def_consistent.mpr; intro Γ hΓ; exact h Γ (by simp_all); }
 
 lemma union_not_consistent : ¬(Λ)-Consistent T₁ ∨ ¬(Λ)-Consistent T₂ → ¬(Λ)-Consistent (T₁ ∪ T₂) := by
-  contrapose;
-  push_neg;
+  contrapose; push_neg;
   exact union_consistent;
+
+open Classical in
+lemma iff_union_consistent : (Λ)-Consistent (T₁ ∪ T₂) ↔
+  ∀ {Γ₁ Γ₂ : List (Formula α)}, (∀ q ∈ Γ₁, q ∈ T₁) → (∀ q ∈ Γ₂, q ∈ T₂) → (Γ₁ ++ Γ₂) ⊬[Λ]! ⊥ := by
+  constructor;
+  . intro h Γ₁ Γ₂ hΓ₁ hΓ₂;
+    exact def_consistent.mp h (Γ₁ ++ Γ₂) $ by
+      intro q hq; simp at hq;
+      cases hq <;> simp_all;
+  . intro h;
+    apply def_consistent.mpr;
+    intro Δ hΔ; simp at hΔ;
+    let Δ₁ := (Δ.filter (· ∈ T₁));
+    let Δ₂ := (Δ.filter (· ∈ T₂));
+    have := @h
+      Δ₁
+      Δ₂
+      (by
+        intro q hq;
+        simpa using List.of_mem_filter hq
+      )
+      (by
+        intro q hq;
+        have := List.of_mem_filter hq; simp at this;
+        have := hΔ q (List.mem_of_mem_filter hq);
+        simp_all only [decide_not, false_or];
+      );
+    sorry;
+
+lemma iff_insert_consistent' : (Λ)-Consistent (insert p T) ↔ ∀ {Γ : List (Formula α)}, (∀ q ∈ Γ, q ∈ T) → Λ ⊬! p ⋏ ⋀Γ ⟶ ⊥ := by
+  have H := iff_union_consistent (Λ := Λ) (T₁ := {p}) (T₂ := T);
+  simp at H;
+  constructor;
+  . intro h Γ hΓ;
+    have := H.mp h (Γ₁ := [p]) (Γ₂ := Γ) (by simp) (by simp_all);
+    have := FiniteContext.provable_iff.not.mp this; simp at this;
+    exact implyLeft_cons_conj'!.not.mp this;
+  . intro h;
+    apply H.mpr;
+    intro Γ₁ Γ₂ hΓ₁ hΓ₂;
+    have := h hΓ₂
+    sorry;
+
+
 
 lemma iff_insert_consistent : (Λ)-Consistent (insert p T) ↔ ∀ {Γ : List (Formula α)}, (∀ q ∈ Γ, q ∈ T) → Λ ⊬! p ⋏ ⋀Γ ⟶ ⊥ := by
   constructor;
@@ -78,7 +132,7 @@ lemma provable_iff_insert_neg_not_consistent : T *⊢[Λ]! p ↔ ¬(Λ)-Consiste
   . intro h;
     apply iff_insert_Inconsistent.mpr;
     obtain ⟨Γ, hΓ₁, hΓ₂⟩ := Context.provable_iff.mp h;
-    existsi Γ;
+    use Γ;
     constructor;
     . exact hΓ₁;
     . apply and_imply_iff_imply_imply'!.mpr;
@@ -129,27 +183,24 @@ lemma neg_unprovable_iff_insert_consistent : T *⊬[Λ]! ~p ↔ (Λ)-Consistent 
   . contrapose; simp [not_not]; apply neg_provable_iff_insert_not_consistent.mpr;
   . contrapose; simp [not_not]; apply neg_provable_iff_insert_not_consistent.mp;
 
-variable (hConsis : (Λ)-Consistent T)
+variable (T_consis : (Λ)-Consistent T)
+
+lemma unprovable_falsum : T *⊬[Λ]! ⊥ := by
+  by_contra hC;
+  obtain ⟨Γ, hΓ₁, _⟩ := Context.provable_iff.mp $ hC;
+  have : Γ ⊬[Λ]! ⊥ := (def_consistent.mp T_consis) _ hΓ₁;
+  contradiction;
 
 lemma unprovable_either : ¬(T *⊢[Λ]! p ∧ T *⊢[Λ]! ~p) := by
   by_contra hC;
   have ⟨hC₁, hC₂⟩ := hC;
   have : T *⊢[Λ]! ⊥ := neg_mdp! hC₂ hC₁;
-  obtain ⟨Γ, hΓ₁, hΓ₂⟩ := Context.provable_iff.mp this;
-  have : Λ ⊬! ⋀Γ ⟶ ⊥ := hConsis hΓ₁;
-  have : Λ ⊢! ⋀Γ ⟶ ⊥ := FiniteContext.toₛ! hΓ₂;
-  contradiction;
-
-lemma not_provable_falsum : T *⊬[Λ]! ⊥ := by
-  by_contra hC;
-  obtain ⟨Γ, hΓ₁, hΓ₂⟩ := Context.provable_iff.mp $ hC;
-  have : Λ ⊬! ⋀Γ ⟶ ⊥ := hConsis hΓ₁;
-  have : Λ ⊢! ⋀Γ ⟶ ⊥ := hΓ₂;
+  have : T *⊬[Λ]! ⊥ := unprovable_falsum T_consis;
   contradiction;
 
 lemma not_mem_falsum_of_consistent : ⊥ ∉ T := by
   by_contra hC;
-  have : Λ ⊬! ⊥ ⟶ ⊥ := hConsis (Γ := [⊥]) (by simpa);
+  have : Λ ⊬! ⊥ ⟶ ⊥ := (def_consistent.mp T_consis) [⊥] (by simpa);
   have : Λ ⊢! ⊥ ⟶ ⊥ := efq!;
   contradiction;
 
@@ -161,7 +212,7 @@ lemma either_consistent (p) : (Λ)-Consistent (insert p T) ∨ (Λ)-Consistent (
   replace hΓ₂ := neg_equiv'!.mpr hΓ₂;
   replace hΔ₂ := neg_equiv'!.mpr hΔ₂;
   have : Λ ⊢! ⋀Γ ⋏ ⋀Δ ⟶ ⊥ := neg_equiv'!.mp $ demorgan₁'! $ or₃'''! (imp_trans''! (imply_of_not_or'! $ demorgan₄'! hΓ₂) or₁!) (imp_trans''! (imply_of_not_or'! $ demorgan₄'! hΔ₂) or₂!) lem!
-  have : Λ ⊬! ⋀Γ ⋏ ⋀Δ ⟶ ⊥ := unprovable_imp_trans''! imply_left_concat_conj'! (hConsis (by
+  have : Λ ⊬! ⋀Γ ⋏ ⋀Δ ⟶ ⊥ := unprovable_imp_trans''! imply_left_concat_conj'! (T_consis (by
     simp;
     intro q hq;
     rcases hq with hΓ | hΔ
@@ -195,7 +246,7 @@ lemma exists_maximal_consistent_theory
       contradiction;
     . intro s a;
       exact Set.subset_sUnion_of_mem a;
-  ) T hConsis
+  ) T T_consis
 protected alias lindenbaum := exists_maximal_consistent_theory
 
 open Classical in
@@ -275,7 +326,7 @@ lemma membership_iff : (p ∈ Ω.theory) ↔ (Ω *⊢[Λ]! p) := by
     by_contra hC;
     have hnp : Ω *⊢[Λ]! ~p := Context.by_axm! hC;
     have := neg_mdp! hnp hp;
-    have := not_provable_falsum Ω.consistent;
+    have := unprovable_falsum Ω.consistent;
     contradiction;
 
 lemma subset_axiomset : Ax(Λ) ⊆ Ω := by

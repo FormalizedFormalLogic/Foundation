@@ -63,15 +63,15 @@ prefix:70 "𝒮 " => Formula.Subformulas
 abbrev ComplementSubformula (p : Formula α) : Finset (Formula α) := (𝒮 p) ∪ (Finset.image (·⁻) $ 𝒮 p)
 prefix:70 "𝒮⁻ " => Formula.ComplementSubformula
 
-abbrev SubformulaC (p : Formula α) : Finset (Formula α) := (𝒮 p) ∪ (Finset.image (~·) $ 𝒮 p)
-prefix:70 "𝒮ᶜ " => Formula.SubformulaC
+abbrev neg_complete_subformulas (p : Formula α) : Finset (Formula α) := (𝒮 p) ∪ (Finset.image (~·) $ 𝒮 p)
+prefix:70 "𝒮ᶜ " => Formula.neg_complete_subformulas
 
-namespace SubformulaC
+namespace neg_complete_subformulas
 
 variable {p q r : Formula α}
 
-@[simp] lemma mem_self : p ∈ 𝒮ᶜ p := by simp [SubformulaC]
-@[simp] lemma mem_neg_self : ~p ∈ 𝒮ᶜ p := by simp [SubformulaC]
+@[simp] lemma mem_self : p ∈ 𝒮ᶜ p := by simp [neg_complete_subformulas]
+@[simp] lemma mem_neg_self : ~p ∈ 𝒮ᶜ p := by simp [neg_complete_subformulas]
 
 /-
 lemma neg_mem : ~q ∈ 𝒮⁻ p → q ∈ 𝒮⁻ p := by
@@ -86,27 +86,23 @@ lemma neg_mem : ~q ∈ 𝒮⁻ p → q ∈ 𝒮⁻ p := by
 
 
 lemma box_mem : □q ∈ 𝒮ᶜ p → q ∈ 𝒮ᶜ p := by
-  simp [SubformulaC];
-  intro h; replace h := Formula.Subformulas.mem_box h;
+  simp; intro h; replace h := Formula.Subformulas.mem_box h;
   aesop;
 
 lemma and_mem : q ⋏ r ∈ 𝒮ᶜ p → q ∈ 𝒮ᶜ p ∧ r ∈ 𝒮ᶜ p := by
-  simp [SubformulaC];
-  intro h; replace h := Formula.Subformulas.mem_and h;
+  simp; intro h; replace h := Formula.Subformulas.mem_and h;
   aesop;
 
 lemma or_mem : q ⋎ r ∈ 𝒮ᶜ p → q ∈ 𝒮ᶜ p ∧ r ∈ 𝒮ᶜ p := by
-  simp [SubformulaC];
-  intro h; replace h := Formula.Subformulas.mem_or h;
+  simp; intro h; replace h := Formula.Subformulas.mem_or h;
   aesop;
 
 lemma imp_mem : q ⟶ r ∈ 𝒮ᶜ p → q ∈ 𝒮ᶜ p ∧ r ∈ 𝒮ᶜ p := by
-  simp [SubformulaC];
-  intro h; replace h := Formula.Subformulas.mem_imp h;
+  simp; intro h; replace h := Formula.Subformulas.mem_imp h;
   aesop;
 
 
-end SubformulaC
+end neg_complete_subformulas
 
 def atoms: Formula α → Finset (α)
   | ⊤      => ∅
@@ -157,8 +153,6 @@ lemma exists_maximal_consistent_theory₂
       exact Set.subset_sUnion_of_mem hX;
   ) T ⟨T_consis, T_subset⟩
 protected alias lindenbaum₂ := exists_maximal_consistent_theory₂
-
--- lemma wow [consis : System.Consistent Λ] :  T *⊢[𝓓]! p → T *⊢[𝓓]! pᶜ
 
 lemma mem_not_either : ¬(p ∈ T ∧ ~p ∈ T) := by
   by_contra hC;
@@ -257,8 +251,6 @@ noncomputable instance instInhabitedCMCT (p) [System.Consistent Λ] : Inhabited 
 variable {p q : Formula α}
          {Ω : (Λ, p)-CMCT}
 
-section
-
 variable (q_sub : q ∈ 𝒮 p := by assumption)
 
 lemma subset_mem_self_csubformula : (insert q Ω.T) ⊆ 𝒮ᶜ p := by
@@ -287,58 +279,8 @@ lemma membership_iff : (q ∈ Ω.T) ↔ (Ω *⊢[Λ]! q) := by
     by_contra hC;
     have hn_ps : Ω *⊢[Λ]! ~q := Context.by_axm! hC;
     have : Ω *⊢[Λ]! ⊥ := neg_mdp! hn_ps hp';
-    have : Ω *⊬[Λ]! ⊥:= Theory.not_provable_falsum Ω.T_consistent;
+    have : Ω *⊬[Λ]! ⊥:= unprovable_falsum Ω.T_consistent;
     contradiction;
-
-end
-
-/-
-section
-
-variable (ps_sub : ps ∈ 𝒮* p := by assumption)
-
-lemma subset_mem_self_csubformula₂ : (insert ps Ω.T) ⊆ 𝒮* p := by
-  apply Set.insert_subset_iff.mpr;
-  constructor;
-  . aesop;
-  . exact Ω.T_subset;
-
-lemma subset_not_mem_self_csubformula₂ : (insert (~ps) Ω.T) ⊆ 𝒮* p := by
-  apply Set.insert_subset_iff.mpr;
-  constructor;
-  . simp_all [Formula.extended_subformulae];
-    sorry;
-  . exact Ω.T_subset;
-
-end
--/
-
-/-
-@[simp]
-lemma not_mem_falsum : ⊥ ∉ Ω.T := Theory.not_mem_falsum_of_consistent Ω.T_consistent
-
-@[simp]
-lemma unprovable_falsum : Ω *⊬[Λ]! ⊥ := by apply membership_iff (by sorry) |>.not.mp; simp
--/
-
-/-
-lemma iff_mem_neg : (~q ∈ Ω.T) ↔ (q ∉ Ω.T) := by
-  constructor;
-  . intro hnp;
-    by_contra hp;
-    replace hp := membership_iff (by sorry) |>.mp hp;
-    replace hnp := membership_iff (by sorry) |>.mp hnp;
-    have : Ω *⊢[Λ]! ⊥ := neg_mdp! hnp hp;
-    have : Ω *⊬[Λ]! ⊥ := unprovable_falsum;
-    contradiction;
-  . intro hp;
-    sorry;
-    -- have := Theory.provable_iff_insert_neg_not_consistent.not.mp $ membership_iff (by sorry) |>.not.mp hp;
-    -- have := (not_imp_not.mpr $ Ω.T_maximal (U := insert (~p) Ω)) (by sorry);
-    -- simp [Set.ssubset_def] at this;
-    -- apply this;
-    -- simp;
--/
 
 @[simp]
 lemma mem_atom {a : α} : atom a ∈ Ω.T → a ∈ 𝒜 p := by
@@ -388,9 +330,9 @@ lemma GLCanonicalFrame.Rel_def {p : Formula α} {X Y : (GLCanonicalFrame p).Worl
 
 noncomputable def GLCanonicalModel (p : Formula α) : Kripke.FiniteModel α where
   Frame := GLCanonicalFrame p
-  Valuation X a := a ∈ 𝒜 p ∧ (atom a) ∈ X.T
+  Valuation X a := a ∈ p.atoms ∧ (atom a) ∈ X.T
 
-open Formula (SubformulaC)
+open Formula (neg_complete_subformulas)
 open ComplementSubsetMaximalConsistentTheory
 
 lemma GLCanonicalModel.truthlemma {q : Formula α} (q_sub : q ∈ 𝒮ᶜ p) : ∀ {X : (GLCanonicalModel p).World}, X ⊧ q ↔ (q ∈ X.T) := by
@@ -398,8 +340,7 @@ lemma GLCanonicalModel.truthlemma {q : Formula α} (q_sub : q ∈ 𝒮ᶜ p) : �
   induction q using Formula.rec' generalizing X with
   | hbox q ih =>
     constructor;
-    . intro h; by_contra hC;
-      suffices ¬(X ⊧ □q) by contradiction;
+    . contrapose; intro h;
       simp [Kripke.Satisfies];
       obtain ⟨Y, hY⟩ := lindenbaum (Λ := 𝐆𝐋) (T := {□q, ~q} ∪ (□''⁻¹X.T ∪ □''□''⁻¹X.T)) (p := p)
         (by
@@ -432,13 +373,13 @@ lemma GLCanonicalModel.truthlemma {q : Formula α} (q_sub : q ∈ 𝒮ᶜ p) : �
           constructor;
           . apply hY₁; tauto;
           . sorry;
-      . apply ih (SubformulaC.box_mem q_sub) |>.not.mpr;
+      . apply ih (neg_complete_subformulas.box_mem q_sub) |>.not.mpr;
         apply not_mem_of_mem_neg;
         apply hY₁;
         tauto;
     . intro h Y hXY;
       have ⟨h₁, ⟨r, hr₁, hr₂⟩⟩ := GLCanonicalFrame.Rel_def.mp hXY;
-      exact ih (SubformulaC.box_mem q_sub) |>.mpr (h₁ _ h |>.1);
+      exact ih (neg_complete_subformulas.box_mem q_sub) |>.mpr (h₁ _ h |>.1);
   | hatom a =>
     simp [GLCanonicalModel, Kripke.Satisfies];
     intro ha;
@@ -455,7 +396,7 @@ lemma GLCanonicalModel.truthlemma {q : Formula α} (q_sub : q ∈ 𝒮ᶜ p) : �
     . sorry;
     . sorry;
   | hand q r ihq ihr =>
-    replace ⟨q_sub, r_sub⟩ := SubformulaC.and_mem q_sub;
+    replace ⟨q_sub, r_sub⟩ := neg_complete_subformulas.and_mem q_sub;
     replace ihq := @ihq q_sub;
     replace ihr := @ihr r_sub;
     constructor;
@@ -468,7 +409,7 @@ lemma GLCanonicalModel.truthlemma {q : Formula α} (q_sub : q ∈ 𝒮ᶜ p) : �
       . apply ihq.mpr; sorry;
       . apply ihr.mpr; sorry;
   | hor q r ihq ihr =>
-    replace ⟨q_sub, r_sub⟩ := SubformulaC.or_mem q_sub;
+    replace ⟨q_sub, r_sub⟩ := neg_complete_subformulas.or_mem q_sub;
     replace ihq := @ihq q_sub;
     replace ihr := @ihr r_sub;
     constructor;
@@ -478,7 +419,7 @@ lemma GLCanonicalModel.truthlemma {q : Formula α} (q_sub : q ∈ 𝒮ᶜ p) : �
     . intro h;
       sorry;
   | himp q r ihq ihr =>
-    replace ⟨q_sub, r_sub⟩ := SubformulaC.imp_mem q_sub;
+    replace ⟨q_sub, r_sub⟩ := neg_complete_subformulas.imp_mem q_sub;
     replace ihq := @ihq q_sub;
     replace ihr := @ihr r_sub;
     constructor;
