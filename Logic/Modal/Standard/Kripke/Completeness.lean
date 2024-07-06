@@ -15,7 +15,7 @@ namespace Kripke
 
 abbrev CanonicalFrame (Ax : AxiomSet α) [Inhabited (𝝂Ax)-MCT] : Frame where
   World := (𝝂Ax)-MCT
-  Rel := λ Ω₁ Ω₂ => □''⁻¹Ω₁.theory ⊆ Ω₂.theory
+  Rel Ω₁ Ω₂ := □''⁻¹Ω₁.theory ⊆ Ω₂.theory
 
 namespace CanonicalFrame
 
@@ -38,12 +38,12 @@ lemma multiframe_def_multibox : Ω₁ ≺^[n] Ω₂ ↔ ∀ {p}, □^[n]p ∈ Ω
       obtain ⟨⟨Ω₃, _⟩, R₁₃, R₃₂⟩ := h;
       apply ih.mp R₃₂ $ frame_def_box.mp R₁₃ (by simpa using hp);
     . intro h;
-      obtain ⟨Ω, hΩ⟩ := lindenbaum (𝓓 := (𝝂Ax)) (T := (□''⁻¹Ω₁.theory ∪ ◇''^[n]Ω₂.theory)) $ by
-        apply Theory.intro_union_Consistent;
+      obtain ⟨Ω, hΩ⟩ := lindenbaum (Λ := 𝝂Ax) (T := (□''⁻¹Ω₁ ∪ ◇''^[n]Ω₂)) $ by
+        apply Theory.intro_union_consistent;
         intro Γ Δ hΓ hΔ hC;
 
         replace hΓ : ∀ p ∈ Γ, □p ∈ Ω₁.theory := by simpa using hΓ;
-        have dΓconj : Ω₁.theory *⊢[_]! □⋀Γ := membership_iff.mp $ iff_mem_box_conj'.mpr hΓ;
+        have dΓconj : Ω₁ *⊢[_]! □⋀Γ := membership_iff.mp $ iff_mem_box_conj'.mpr hΓ;
 
         have hΔ₂ : ∀ p ∈ ◇'⁻¹^[n]Δ, p ∈ Ω₂.theory := by
           intro p hp;

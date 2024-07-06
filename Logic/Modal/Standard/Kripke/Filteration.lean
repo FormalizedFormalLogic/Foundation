@@ -197,18 +197,20 @@ instance K_finite_complete : Complete (𝐊 : DeductionParameter α) AllFrameCla
 
   apply filteration FM (by simp) |>.mpr;
   apply hp (by
-    suffices Finite (FilterEqvQuotient M p.Subformulas) by simp; use ⟨FM.Frame⟩;
+    suffices finite : Finite (FilterEqvQuotient M p.Subformulas) by
+      simp [FrameClass.restrictFinite];
+      use ⟨FM.Frame⟩;
     apply FilterEqvQuotient.finite;
     simp_all;
   ) FM.Valuation
 ⟩
 
 class FiniteFrameProperty (Λ : DeductionParameter α) where
-  FFC : FiniteFrameClass
-  [complete : Complete Λ FFC#]
+  FC : FrameClass
+  [complete : Complete Λ FCꟳ#]
 
 instance : FiniteFrameProperty (α := α) 𝐊 where
-  FFC := AllFrameClassꟳ
+  FC := AllFrameClass
 
 end Kripke
 

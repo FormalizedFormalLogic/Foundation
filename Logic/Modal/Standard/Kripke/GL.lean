@@ -1,4 +1,5 @@
 import Logic.Vorspiel.BinaryRelations
+import Logic.Modal.Standard.ConsistentTheory
 import Logic.Modal.Standard.Kripke.Soundness
 
 namespace LO.Modal.Standard
@@ -10,6 +11,9 @@ open Kripke
 open Formula
 
 variable {α : Type u} [Inhabited α]
+
+section Definability_and_Soundness
+
 variable {F : Kripke.Frame}
 
 abbrev TransitiveCWFFrameClass : FrameClass := { F | Transitive F ∧ ConverseWellFounded F }
@@ -75,14 +79,15 @@ lemma axiomL_defines : AxiomSet.DefinesKripkeFrameClass (α := α) 𝗟 (Transit
   . exact L_of_trans_and_cwf;
 
 
-abbrev TransitiveIrreflexiveFiniteFrameClass : FiniteFrameClass := { F | Transitive F.toFrame ∧ Irreflexive F.toFrame }
+abbrev TransitiveIrreflexiveFrameClass : FrameClass := { F | Transitive F ∧ Irreflexive F }
 
-
-lemma TransitiveIrreflexiveFiniteFrameClass.nonempty : TransitiveIrreflexiveFiniteFrameClass.Nonempty.{0} := by
+/-
+lemma TransitiveIrreflexiveFiniteFrameClass.nonempty : TransitiveIrreflexiveFrameClass.Nonempty.{0} := by
   use PointFrame;
   simp [Transitive, Irreflexive];
+-/
 
-lemma axiomL_finite_defines : AxiomSet.FinitelyDefinesKripkeFrameClass (α := α) 𝗟 TransitiveIrreflexiveFiniteFrameClass := by
+lemma axiomL_finite_defines : AxiomSet.FinitelyDefinesKripkeFrameClass (α := α) 𝗟 ↑TransitiveIrreflexiveFrameClass := by
   intro F;
   constructor;
   . intro h;
@@ -97,10 +102,13 @@ lemma axiomL_finite_defines : AxiomSet.FinitelyDefinesKripkeFrameClass (α := α
     . exact hTrans;
     . exact Finite.converseWellFounded_of_trans_irrefl' F.World_finite hTrans hIrrefl;
 
-instance : Sound (𝐆𝐋 : DeductionParameter α) TransitiveIrreflexiveFiniteFrameClass# := sound_of_finitely_defines axiomL_finite_defines
+instance : Sound (𝐆𝐋 : DeductionParameter α) TransitiveIrreflexiveFrameClassꟳ# := sound_of_finitely_defines axiomL_finite_defines
 
-instance : System.Consistent (𝐆𝐋 : DeductionParameter α) := consistent_of_finitely_defines axiomL_finite_defines TransitiveIrreflexiveFiniteFrameClass.nonempty
+instance : System.Consistent (𝐆𝐋 : DeductionParameter α) := consistent_of_finitely_defines.{0} axiomL_finite_defines $ by
+  use PointFrame;
+  simp [Transitive, Irreflexive];
 
+end Definability_and_Soundness
 
 end Kripke
 
