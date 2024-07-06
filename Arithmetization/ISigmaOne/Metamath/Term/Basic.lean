@@ -19,33 +19,33 @@ def qqFvar (x : V) : V := ⟪1, x⟫ + 1
 
 def qqFunc (k f v : V) : V := ⟪2, k, f, v⟫ + 1
 
-scoped prefix:max "^#" => qqBvar
+scoped prefix:max "#̂" => qqBvar
 
-scoped prefix:max "^&" => qqFvar
+scoped prefix:max "&̂" => qqFvar
 
-scoped prefix:max "^func " => qqFunc
+scoped prefix:max "f̂unc " => qqFunc
 
-@[simp] lemma var_lt_qqBvar (z : V) : z < ^#z := lt_succ_iff_le.mpr <| le_pair_right 0 z
+@[simp] lemma var_lt_qqBvar (z : V) : z < #̂z := lt_succ_iff_le.mpr <| le_pair_right 0 z
 
-@[simp] lemma var_lt_qqFvar (x : V) : x < ^&x := lt_succ_iff_le.mpr <| le_pair_right 1 x
+@[simp] lemma var_lt_qqFvar (x : V) : x < &̂x := lt_succ_iff_le.mpr <| le_pair_right 1 x
 
-@[simp] lemma arity_lt_qqFunc (k f v : V) : k < ^func k f v :=
+@[simp] lemma arity_lt_qqFunc (k f v : V) : k < f̂unc k f v :=
   le_iff_lt_succ.mp <| le_trans (le_pair_right 2 k) <| pair_le_pair_right 2 <| le_pair_left k ⟪f, v⟫
 
-@[simp] lemma func_lt_qqFunc (k f v : V) : f < ^func k f v :=
+@[simp] lemma func_lt_qqFunc (k f v : V) : f < f̂unc k f v :=
   le_iff_lt_succ.mp <| le_trans (le_pair_left f v) <| le_trans (le_pair_right k ⟪f, v⟫) <| le_pair_right 2 ⟪k, ⟪f, v⟫⟫
 
-@[simp] lemma terms_lt_qqFunc (k f v : V) : v < ^func k f v :=
+@[simp] lemma terms_lt_qqFunc (k f v : V) : v < f̂unc k f v :=
   le_iff_lt_succ.mp <| le_trans (le_pair_right f v) <| le_trans (le_pair_right k ⟪f, v⟫) <| le_pair_right 2 ⟪k, ⟪f, v⟫⟫
 
-lemma lt_qqFunc_of_mem {i b k f v : V} (hi : ⟪i, b⟫ ∈ v) : b < ^func k f v :=
+lemma lt_qqFunc_of_mem {i b k f v : V} (hi : ⟪i, b⟫ ∈ v) : b < f̂unc k f v :=
   _root_.lt_trans (lt_of_mem_rng hi) (terms_lt_qqFunc k f v)
 
-@[simp] lemma qqBvar_inj {z z' : V} : ^#z = ^#z' ↔ z = z' := by simp [qqBvar]
+@[simp] lemma qqBvar_inj {z z' : V} : #̂z = #̂z' ↔ z = z' := by simp [qqBvar]
 
-@[simp] lemma qqFvar_inj {x x' : V} : ^&x = ^&x' ↔ x = x' := by simp [qqFvar]
+@[simp] lemma qqFvar_inj {x x' : V} : &̂x = &̂x' ↔ x = x' := by simp [qqFvar]
 
-@[simp] lemma qqFunc_inj {k f v k' f' v' : V} : ^func k f v = ^func k' f' v' ↔ k = k' ∧ f = f' ∧ v = v' := by simp [qqFunc]
+@[simp] lemma qqFunc_inj {k f v k' f' v' : V} : f̂unc k f v = f̂unc k' f' v' ↔ k = k' ∧ f = f' ∧ v = v' := by simp [qqFunc]
 
 def _root_.LO.FirstOrder.Arith.qqBvarDef : 𝚺₀-Semisentence 2 := .mkSigma “t z | ∃ t' < t, !pairDef t' 0 z ∧ t = t' + 1” (by simp)
 
@@ -56,7 +56,7 @@ lemma qqBvar_defined : 𝚺₀-Function₁ (qqBvar : V → V) via qqBvarDef := b
   · rintro ⟨x, _, rfl, h⟩; exact h
 
 @[simp] lemma eval_qqBvarDef (v) :
-    Semiformula.Evalbm V v qqBvarDef.val ↔ v 0 = ^#(v 1) := qqBvar_defined.df.iff v
+    Semiformula.Evalbm V v qqBvarDef.val ↔ v 0 = #̂(v 1) := qqBvar_defined.df.iff v
 
 def _root_.LO.FirstOrder.Arith.qqFvarDef : 𝚺₀-Semisentence 2 := .mkSigma “t x | ∃ t' < t, !pairDef t' 1 x ∧ t = t' + 1” (by simp)
 
@@ -67,10 +67,10 @@ lemma qqFvar_defined : 𝚺₀-Function₁ (qqFvar : V → V) via qqFvarDef := b
   · rintro ⟨x, _, rfl, h⟩; exact h
 
 @[simp] lemma eval_qqFvarDef (v) :
-    Semiformula.Evalbm V v qqFvarDef.val ↔ v 0 = ^&(v 1) := qqFvar_defined.df.iff v
+    Semiformula.Evalbm V v qqFvarDef.val ↔ v 0 = &̂(v 1) := qqFvar_defined.df.iff v
 
 private lemma qqFunc_graph {x k f v : V} :
-    x = ^func k f v ↔ ∃ fv < x, fv = ⟪f, v⟫ ∧ ∃ kfv < x, kfv = ⟪k, fv⟫ ∧ ∃ x' < x, x' = ⟪2, kfv⟫ ∧ x = x' + 1 :=
+    x = f̂unc k f v ↔ ∃ fv < x, fv = ⟪f, v⟫ ∧ ∃ kfv < x, kfv = ⟪k, fv⟫ ∧ ∃ x' < x, x' = ⟪2, kfv⟫ ∧ x = x' + 1 :=
   ⟨by rintro rfl
       exact ⟨⟪f, v⟫, lt_succ_iff_le.mpr <| le_trans (le_pair_right _ _) (le_pair_right _ _), rfl,
         ⟪k, f, v⟫, lt_succ_iff_le.mpr <| by simp, rfl,
@@ -84,20 +84,20 @@ lemma qqFunc_defined : 𝚺₀-Function₃ (qqFunc : V → V → V → V) via qq
   intro v; simp [qqFuncDef, qqFunc_graph]
 
 @[simp] lemma eval_qqFuncDef (v) :
-    Semiformula.Evalbm V v qqFuncDef.val ↔ v 0 = ^func (v 1) (v 2) (v 3) := qqFunc_defined.df.iff v
+    Semiformula.Evalbm V v qqFuncDef.val ↔ v 0 = f̂unc (v 1) (v 2) (v 3) := qqFunc_defined.df.iff v
 
 namespace FormalizedTerm
 
 variable (L)
 
 def Phi (n : V) (C : Set V) (t : V) : Prop :=
-  (∃ z < n, t = ^#z) ∨ (∃ x, t = ^&x) ∨ (∃ k f v : V, L.Func k f ∧ Seq v ∧ k = lh v ∧ (∀ i u, ⟪i, u⟫ ∈ v → u ∈ C) ∧ t = ^func k f v)
+  (∃ z < n, t = #̂z) ∨ (∃ x, t = &̂x) ∨ (∃ k f v : V, L.Func k f ∧ Seq v ∧ k = lh v ∧ (∀ i u, ⟪i, u⟫ ∈ v → u ∈ C) ∧ t = f̂unc k f v)
 
 private lemma phi_iff (n : V) (C : V) (t : V) :
     Phi L n {x | x ∈ C} t ↔
-    (∃ z < n, t = ^#z) ∨
-    (∃ x < t, t = ^&x) ∨
-    (∃ k < t, ∃ f < t, ∃ v < t, L.Func k f ∧ Seq v ∧ k = lh v ∧ (∀ i < v, ∀ u < v, ⟪i, u⟫ ∈ v → u ∈ C) ∧ t = ^func k f v) where
+    (∃ z < n, t = #̂z) ∨
+    (∃ x < t, t = &̂x) ∨
+    (∃ k < t, ∃ f < t, ∃ v < t, L.Func k f ∧ Seq v ∧ k = lh v ∧ (∀ i < v, ∀ u < v, ⟪i, u⟫ ∈ v → u ∈ C) ∧ t = f̂unc k f v) where
   mp := by
     rintro (⟨z, hz, rfl⟩ | ⟨x, rfl⟩ | ⟨k, f, v, hkf, Sv, hk, hv, rfl⟩)
     · left; exact ⟨z, hz, rfl⟩
@@ -235,14 +235,14 @@ local prefix:80 "𝐓ⁿ " => L.Semiterm n
 
 lemma Language.Semiterm.case_iff {t : V} :
     𝐓ⁿ t ↔
-    (∃ z < n, t = ^#z) ∨
-    (∃ x, t = ^&x) ∨
-    (∃ k f v : V, L.Func k f ∧ L.SemitermSeq k n v ∧ t = ^func k f v) := by
+    (∃ z < n, t = #̂z) ∨
+    (∃ x, t = &̂x) ∨
+    (∃ k f v : V, L.Func k f ∧ L.SemitermSeq k n v ∧ t = f̂unc k f v) := by
   simpa [construction, Phi, SemitermSeq, and_assoc] using (construction L).case
 
 alias ⟨Language.Semiterm.case, Language.Semiterm.mk⟩ := Language.Semiterm.case_iff
 
-@[simp] lemma Language.Semiterm.bvar {z : V} : 𝐓ⁿ ^#z ↔ z < n :=
+@[simp] lemma Language.Semiterm.bvar {z : V} : 𝐓ⁿ #̂z ↔ z < n :=
   ⟨by intro h
       rcases h.case with (⟨z', hz, hzz'⟩ | ⟨x, h⟩ | ⟨k, f, v, _, _, h⟩)
       · rcases (show z = z' from by simpa using hzz'); exact hz
@@ -250,10 +250,10 @@ alias ⟨Language.Semiterm.case, Language.Semiterm.mk⟩ := Language.Semiterm.ca
       · simp [qqBvar, qqFunc] at h,
     fun hz ↦ Language.Semiterm.mk (Or.inl ⟨z, hz, rfl⟩)⟩
 
-@[simp] lemma Language.Semiterm.fvar (x : V) : 𝐓ⁿ ^&x := Language.Semiterm.mk (Or.inr <| Or.inl ⟨x, rfl⟩)
+@[simp] lemma Language.Semiterm.fvar (x : V) : 𝐓ⁿ &̂x := Language.Semiterm.mk (Or.inr <| Or.inl ⟨x, rfl⟩)
 
 @[simp] lemma Language.Semiterm.func_iff {k f v : V} :
-    𝐓ⁿ (^func k f v) ↔ L.Func k f ∧ L.SemitermSeq k n v :=
+    𝐓ⁿ (f̂unc k f v) ↔ L.Func k f ∧ L.SemitermSeq k n v :=
   ⟨by intro h
       rcases h.case with (⟨_, _, h⟩ | ⟨x, h⟩ | ⟨k', f', v', hkf, ⟨Sv, hk, hv⟩, h⟩)
       · simp [qqFunc, qqBvar] at h
@@ -263,11 +263,11 @@ alias ⟨Language.Semiterm.case, Language.Semiterm.mk⟩ := Language.Semiterm.ca
    by rintro ⟨hkf, Sv, hk, hv⟩; exact Language.Semiterm.mk (Or.inr <| Or.inr ⟨k, f, v, hkf, ⟨Sv, hk, hv⟩, rfl⟩)⟩
 
 lemma Language.Semiterm.func {k f v : V} (hkf : L.Func k f) (hv : L.SemitermSeq k n v) :
-    𝐓ⁿ (^func k f v) := Language.Semiterm.func_iff.mpr ⟨hkf, hv⟩
+    𝐓ⁿ (f̂unc k f v) := Language.Semiterm.func_iff.mpr ⟨hkf, hv⟩
 
 lemma Language.Semiterm.induction (Γ) {P : V → Prop} (hP : (Γ, 1)-Predicate P)
-    (hbvar : ∀ z < n, P (^#z)) (hfvar : ∀ x, P (^&x))
-    (hfunc : ∀ k f v, L.Func k f → L.SemitermSeq k n v → (∀ i u, ⟪i, u⟫ ∈ v → P u) → P (^func k f v)) :
+    (hbvar : ∀ z < n, P (#̂z)) (hfvar : ∀ x, P (&̂x))
+    (hfunc : ∀ k f v, L.Func k f → L.SemitermSeq k n v → (∀ i u, ⟪i, u⟫ ∈ v → P u) → P (f̂unc k f v)) :
     ∀ t, 𝐓ⁿ t → P t :=
   (construction L).induction (v := ![n]) hP (by
     rintro C hC x (⟨z, hz, rfl⟩ | ⟨x, rfl⟩ | ⟨k, f, v, hkf, Sv, hk, h, rfl⟩)
@@ -337,9 +337,9 @@ variable {arity : ℕ} {β : Blueprint pL arity} (c : Construction V L β)
 
 def Phi (param : Fin arity → V) (n : V) (C : Set V) (pr : V) : Prop :=
   L.Semiterm n (π₁ pr) ∧ (
-  (∃ z, pr = ⟪^#z, c.bvar param n z⟫) ∨
-  (∃ x, pr = ⟪^&x, c.fvar param n x⟫) ∨
-  (∃ k f v v', (Seq v' ∧ k = lh v' ∧ ∀ i z z', ⟪i, z⟫ ∈ v → ⟪i, z'⟫ ∈ v' → ⟪z, z'⟫ ∈ C) ∧ pr = ⟪^func k f v, c.func param n k f v v'⟫))
+  (∃ z, pr = ⟪#̂z, c.bvar param n z⟫) ∨
+  (∃ x, pr = ⟪&̂x, c.fvar param n x⟫) ∨
+  (∃ k f v v', (Seq v' ∧ k = lh v' ∧ ∀ i z z', ⟪i, z⟫ ∈ v → ⟪i, z'⟫ ∈ v' → ⟪z, z'⟫ ∈ C) ∧ pr = ⟪f̂unc k f v, c.func param n k f v v'⟫))
 
 lemma seq_bound {k s m : V} (Ss : Seq s) (hk : k = lh s) (hs : ∀ i z, ⟪i, z⟫ ∈ s → z < m) :
     s < exp ((k + m + 1)^2) := lt_exp_iff.mpr <| fun p hp ↦ by
@@ -351,11 +351,11 @@ lemma seq_bound {k s m : V} (Ss : Seq s) (hk : k = lh s) (hs : ∀ i z, ⟪i, z�
 private lemma phi_iff (param : Fin arity → V) (n C pr : V) :
     c.Phi param n {x | x ∈ C} pr ↔
     ∃ t ≤ pr, ∃ y ≤ pr, pr = ⟪t, y⟫ ∧ L.Semiterm n t ∧ (
-      (∃ z < t, t = ^#z ∧ y = c.bvar param n z) ∨
-      (∃ x < t, t = ^&x ∧ y = c.fvar param n x) ∨
+      (∃ z < t, t = #̂z ∧ y = c.bvar param n z) ∨
+      (∃ x < t, t = &̂x ∧ y = c.fvar param n x) ∨
       (∃ k < t, ∃ f < t, ∃ v < t, ∃ e, e = exp ((k + C + 1)^2) ∧ ∃ v' < e,
         (Seq v' ∧ k = lh v' ∧ ∀ i < v, ∀ z < v, ∀ z' < v', ⟪i, z⟫ ∈ v → ⟪i, z'⟫ ∈ v' → ⟪z, z'⟫ ∈ C) ∧
-        t = ^func k f v ∧ y = c.func param n k f v v')) := by
+        t = f̂unc k f v ∧ y = c.func param n k f v v')) := by
   constructor
   · rintro ⟨ht, H⟩
     refine ⟨π₁ pr, by simp, π₂ pr, by simp, by simp, ht, ?_⟩
@@ -468,10 +468,10 @@ variable {c}
 lemma Graph.case_iff {t y : V} :
     c.Graph param n t y ↔
     L.Semiterm n t ∧
-    ( (∃ z, t = ^#z ∧ y = c.bvar param n z) ∨
-      (∃ x, t = ^&x ∧ y = c.fvar param n x) ∨
+    ( (∃ z, t = #̂z ∧ y = c.bvar param n z) ∨
+      (∃ x, t = &̂x ∧ y = c.fvar param n x) ∨
       (∃ k f v v', (Seq v' ∧ k = lh v' ∧ ∀ i z z', ⟪i, z⟫ ∈ v → ⟪i, z'⟫ ∈ v' → c.Graph param n z z') ∧
-      t = ^func k f v ∧ y = c.func param n k f v v') ) :=
+      t = f̂unc k f v ∧ y = c.func param n k f v v') ) :=
   Iff.trans c.construction.case (by apply and_congr (by simp); simp; rfl)
 
 variable (c)
@@ -496,7 +496,7 @@ lemma graph_dom_isSemiterm {t y} :
     c.Graph param n t y → L.Semiterm n t := fun h ↦ Graph.case_iff.mp h |>.1
 
 lemma graph_bvar_iff {z} (hz : z < n) :
-    c.Graph param n ^#z y ↔ y = c.bvar param n z := by
+    c.Graph param n #̂z y ↔ y = c.bvar param n z := by
   constructor
   · intro H
     rcases Graph.case_iff.mp H with ⟨_, (⟨_, h, rfl⟩ | ⟨_, h, _⟩ | ⟨_, _, _, _, _, h, _⟩)⟩
@@ -506,7 +506,7 @@ lemma graph_bvar_iff {z} (hz : z < n) :
   · rintro rfl; exact Graph.case_iff.mpr ⟨by simp [hz], Or.inl ⟨z, by simp⟩⟩
 
 lemma graph_fvar_iff (x) :
-    c.Graph param n ^&x y ↔ y = c.fvar param n x := by
+    c.Graph param n &̂x y ↔ y = c.fvar param n x := by
   constructor
   · intro H
     rcases Graph.case_iff.mp H with ⟨_, (⟨_, h, _⟩ | ⟨_, h, rfl⟩ | ⟨_, _, _, _, _, h, _⟩)⟩
@@ -517,11 +517,11 @@ lemma graph_fvar_iff (x) :
 
 lemma graph_func {n k f v v'} (hkr : L.Func k f) (hv : L.SemitermSeq k n v)
     (Sv' : Seq v') (hkv' : k = lh v') (hv' : ∀ i z z', ⟪i, z⟫ ∈ v → ⟪i, z'⟫ ∈ v' → c.Graph param n z z') :
-    c.Graph param n (^func k f v) (c.func param n k f v v') := by
+    c.Graph param n (f̂unc k f v) (c.func param n k f v v') := by
   exact Graph.case_iff.mpr ⟨by simp [hkr, hv], Or.inr <| Or.inr ⟨k, f, v, v', ⟨Sv', hkv', hv'⟩, by simp⟩⟩
 
 lemma graph_func_inv {n k f v y} :
-    c.Graph param n (^func k f v) y → ∃ v',
+    c.Graph param n (f̂unc k f v) y → ∃ v',
       (Seq v' ∧ k = lh v' ∧ ∀ i z z', ⟪i, z⟫ ∈ v → ⟪i, z'⟫ ∈ v' → c.Graph param n z z') ∧
       y = c.func param n k f v v' := by
   intro H
@@ -593,15 +593,15 @@ variable {c param n}
 lemma result_eq_of_graph {t y} (ht : L.Semiterm n t) (h : c.Graph param n t y) :
     c.result param n t = y := Eq.symm <| Classical.choose_uniq (c.graph_existsUnique_total param n t) (by simp [h, ht])
 
-@[simp] lemma result_bvar {z} (hz : z < n) : c.result param n (^#z) = c.bvar param n z :=
+@[simp] lemma result_bvar {z} (hz : z < n) : c.result param n (#̂z) = c.bvar param n z :=
   c.result_eq_of_graph (by simp [hz]) (by simp [c.graph_bvar_iff hz])
 
-@[simp] lemma result_fvar (x) : c.result param n (^&x) = c.fvar param n x :=
+@[simp] lemma result_fvar (x) : c.result param n (&̂x) = c.fvar param n x :=
   c.result_eq_of_graph (by simp) (by simp [c.graph_fvar_iff])
 
 lemma result_func {k f v v'} (hkf : L.Func k f) (hv : L.SemitermSeq k n v)
     (Sv' : Seq v') (hkv' : k = lh v') (hv' : ∀ i z z', ⟪i, z⟫ ∈ v → ⟪i, z'⟫ ∈ v' → c.result param n z = z') :
-    c.result param n (^func k f v) = c.func param n k f v v' :=
+    c.result param n (f̂unc k f v) = c.func param n k f v v' :=
   c.result_eq_of_graph (by simp [hkf, hv]) (c.graph_func hkf hv Sv' hkv' (fun i z z' hiz hiz' ↦ by
     rcases hv' i z z' hiz hiz'
     exact c.result_prop param n (hv.prop _ _ hiz)))
@@ -688,7 +688,7 @@ end vec
 variable (c)
 
 @[simp] lemma result_func' {k f v} (hkf : L.Func k f) (hv : L.SemitermSeq k n v) :
-    c.result param n (^func k f v) = c.func param n k f v (c.resultSeq param k n v) :=
+    c.result param n (f̂unc k f v) = c.func param n k f v (c.resultSeq param k n v) :=
   c.result_func hkf hv (c.resultSeq_seq param hv) (by simp [hv])
     (fun i z z' hi hi' ↦ c.resultSeq_prop param hv hi hi')
 
