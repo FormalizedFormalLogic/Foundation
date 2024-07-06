@@ -32,6 +32,7 @@ syntax:80 ".!" term:max first_order_term:81* (" ⋯")? : first_order_term
 syntax:80 ".!!" term:max : first_order_term
 
 syntax num : first_order_term
+syntax:max "↑" term:max : first_order_term
 syntax:max "⋆" : first_order_term
 syntax:50 first_order_term:50 " + " first_order_term:51 : first_order_term
 syntax:60 first_order_term:60 " * " first_order_term:61 : first_order_term
@@ -55,6 +56,8 @@ macro_rules
   | `(‘ $_* | &$x:term ’)            => do
     `(&$x)
   | `(‘ $_* | $m:num ’)              => do
+    `(@Semiterm.Operator.const _ _ _ (Operator.numeral _ $m))
+  | `(‘ $_* | ↑$m:term ’)              => do
     `(@Semiterm.Operator.const _ _ _ (Operator.numeral _ $m))
   | `(‘ $_* | ⋆ ’)                   => do
     `(Operator.const Operator.Star.star)
@@ -85,7 +88,7 @@ macro_rules
     let v ← vs.foldrM (β := Lean.TSyntax _) (init := ← `(fun x ↦ #(finSuccItr x $length))) (fun a s => `(‘ $binders* | $a ’ :> $s))
     `(Rew.embSubsts $v $t)
 
-#check (‘x y z | &4 + (4 + 2 * (x⁴ + z)²)’ : Semiterm ℒₒᵣ ℕ 1)
+#check (‘x y z | &4 + (4 + 2 * (x⁴ + z)²) + ↑4’ : Semiterm ℒₒᵣ ℕ 1)
 
 section delab
 
@@ -170,6 +173,8 @@ syntax:30 first_order_formula:31 " ∨ " first_order_formula:30 : first_order_fo
 syntax:max "¬" first_order_formula:35 : first_order_formula
 syntax:10 first_order_formula:9 " → " first_order_formula:10 : first_order_formula
 syntax:5 first_order_formula " ↔ " first_order_formula : first_order_formula
+syntax:max "⋀ " ident ", " first_order_formula:0 : first_order_formula
+syntax:max "⋁ " ident ", " first_order_formula:0 : first_order_formula
 
 syntax:max "∀ " ident+ ", " first_order_formula:0 : first_order_formula
 syntax:max "∃ " ident+ ", " first_order_formula:0 : first_order_formula
@@ -206,6 +211,8 @@ macro_rules
   | `(“ $binders* | ¬$p ”)                              => `(~“ $binders* | $p ”)
   | `(“ $binders* | $p → $q ”)                          => `(“ $binders* | $p ” ⟶ “ $binders* | $q ”)
   | `(“ $binders* | $p ↔ $q ”)                          => `(“ $binders* | $p ” ⟷ “ $binders* | $q ”)
+  | `(“ $binders* | ⋀ $i, $p ”)                         => `(Matrix.conj fun $i ↦ “ $binders* | $p ”)
+  | `(“ $binders* | ⋁ $i, $p ”)                         => `(Matrix.disj fun $i ↦ “ $binders* | $p ”)
   | `(“ $binders* | ∀ $xs*, $p ”)                       => do
     let xs := xs.reverse
     let binders' : TSyntaxArray `ident ← xs.foldrM

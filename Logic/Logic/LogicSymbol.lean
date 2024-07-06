@@ -461,6 +461,27 @@ lemma hom_conj [FunLike F α β] [LogicalConnective.HomClass F α β] (f : F) (v
 
 lemma hom_conj' [FunLike F α β] [LogicalConnective.HomClass F α β] (f : F) (v : Fin n → α) : f (conj v) = conj fun i => f (v i) := hom_conj f v
 
+def disj : {n : ℕ} → (Fin n → α) → α
+  | 0,     _ => ⊥
+  | _ + 1, v => v 0 ⋎ disj (vecTail v)
+
+@[simp] lemma disj_nil (v : Fin 0 → α) : disj v = ⊥ := rfl
+
+@[simp] lemma disj_cons {a : α} {v : Fin n → α} : disj (a :> v) = a ⋎ disj v := rfl
+
+@[simp] lemma disj_hom_prop [FunLike F α Prop] [LogicalConnective.HomClass F α Prop]
+  (f : F) (v : Fin n → α) : f (disj v) = ∃ i, f (v i) := by
+  induction' n with n ih <;> simp[disj]
+  · simp[ih]; constructor
+    · rintro (H | ⟨i, H⟩); { exact ⟨0, H⟩ }; { exact ⟨i.succ, H⟩ }
+    · rintro ⟨i, h⟩
+      cases i using Fin.cases; { left; exact h }; { right; exact ⟨_, h⟩ }
+
+lemma hom_disj [FunLike F α β] [LogicalConnective.HomClass F α β] (f : F) (v : Fin n → α) : f (disj v) = disj (f ∘ v) := by
+  induction' n with n ih <;> simp[*, disj]
+
+lemma hom_disj' [FunLike F α β] [LogicalConnective.HomClass F α β] (f : F) (v : Fin n → α) : f (disj v) = disj fun i => f (v i) := hom_disj f v
+
 end And
 
 end Matrix
