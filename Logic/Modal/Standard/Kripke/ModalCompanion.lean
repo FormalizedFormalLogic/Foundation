@@ -48,7 +48,7 @@ lemma axiomTc_GTranslate! [System.K4 m𝓓] : m𝓓 ⊢! pᵍ ⟶ □pᵍ := by
     exact imp_trans''! (and_replace! ihp ihq) collect_box_and!
   | hor p q ihp ihq =>
     simp only [GoedelTranslation];
-    exact imp_trans''! (or₃''! (imply_or_left'! ihp) (imply_or_right'! ihq)) collect_box_or!
+    exact imp_trans''! (or₃''! (imply_left_or'! ihp) (imply_right_or'! ihq)) collect_box_or!
   | _ => simp only [GoedelTranslation, axiomFour!];
 
 instance [System.S4 m𝓓] : System.K4 m𝓓 where
@@ -144,7 +144,7 @@ instance : ModalCompanion (α := α) 𝐈𝐧𝐭 𝐒𝟒 := ⟨provable_efq_if
 
 lemma dp_of_mdp [ModalDisjunctive m𝓓] [ModalCompanion i𝓓 m𝓓] [System.S4 m𝓓] : i𝓓 ⊢! p ⋎ q → i𝓓 ⊢! p ∨ i𝓓 ⊢! q := by
     intro hpq;
-    have : m𝓓 ⊢! □pᵍ ⋎ □qᵍ := or₃'''! (imply_or_left'! axiomTc_GTranslate!) (imply_or_right'! axiomTc_GTranslate!) (by simpa using ModalCompanion.companion.mp hpq);
+    have : m𝓓 ⊢! □pᵍ ⋎ □qᵍ := or₃'''! (imply_left_or'! axiomTc_GTranslate!) (imply_right_or'! axiomTc_GTranslate!) (by simpa using ModalCompanion.companion.mp hpq);
     cases ModalDisjunctive.modal_disjunctive this with
     | inl h => left; exact ModalCompanion.companion.mpr h;
     | inr h => right; exact ModalCompanion.companion.mpr h;

@@ -43,23 +43,23 @@ lemma multiframe_def_multibox : Ω₁ ≺^[n] Ω₂ ↔ ∀ {p}, □^[n]p ∈ Ω
         intro Γ Δ hΓ hΔ hC;
 
         replace hΓ : ∀ p ∈ Γ, □p ∈ Ω₁.theory := by simpa using hΓ;
-        have dΓconj : Ω₁.theory *⊢[_]! □⋀Γ := membership_iff.mp $ iff_mem_box_conj'.mpr hΓ;
+        have dΓconj : Ω₁.theory *⊢[_]! □⋀Γ := membership_iff.mp $ iff_mem_box_conj.mpr hΓ;
 
         have hΔ₂ : ∀ p ∈ ◇'⁻¹^[n]Δ, p ∈ Ω₂.theory := by
           intro p hp;
           simpa using hΔ (◇^[n]p) (by simp_all);
 
-        have hΔconj : ⋀◇'⁻¹^[n]Δ ∈ Ω₂.theory := iff_mem_conj'.mpr hΔ₂;
+        have hΔconj : ⋀◇'⁻¹^[n]Δ ∈ Ω₂.theory := iff_mem_conj.mpr hΔ₂;
 
         have : ⋀◇'⁻¹^[n]Δ ∉ Ω₂.theory := by {
           have d₁ : 𝝂Ax ⊢! ⋀Γ ⟶ ⋀Δ ⟶ ⊥ := and_imply_iff_imply_imply'!.mp hC;
           have : 𝝂Ax ⊢! ⋀(◇'^[n]◇'⁻¹^[n]Δ) ⟶ ⋀Δ := by
-            apply conj'conj'_subset;
+            apply conjconj_subset!;
             intro q hq;
             obtain ⟨r, _, _⟩ := hΔ q hq;
             subst_vars;
             simpa;
-          have : 𝝂Ax ⊢! ◇^[n]⋀◇'⁻¹^[n]Δ ⟶ ⋀Δ := imp_trans''! iff_conj'multidia_multidiaconj'! $ this;
+          have : 𝝂Ax ⊢! ◇^[n]⋀◇'⁻¹^[n]Δ ⟶ ⋀Δ := imp_trans''! iff_conjmultidia_multidiaconj! $ this;
           have : 𝝂Ax ⊢! ~(□^[n](~⋀◇'⁻¹^[n]Δ)) ⟶ ⋀Δ := imp_trans''! (and₂'! multidia_duality!) this;
           have : 𝝂Ax ⊢! ~⋀Δ ⟶ □^[n](~⋀◇'⁻¹^[n]Δ) := contra₂'! this;
           have : 𝝂Ax ⊢! (⋀Δ ⟶ ⊥) ⟶ □^[n](~⋀◇'⁻¹^[n]Δ) := imp_trans''! (and₂'! neg_equiv!) this;
@@ -134,7 +134,7 @@ lemma iff_valid_on_canonicalModel_deducible : (CanonicalModel Ax) ⊧ p ↔ ((�
     have : (𝝂Ax)-Consistent ({~p}) := by
       intro Γ hΓ;
       by_contra hC;
-      have : 𝝂Ax ⊢! p := dne'! $ neg_equiv'!.mpr $ replace_imply_left_conj'! hΓ hC;
+      have : 𝝂Ax ⊢! p := dne'! $ neg_equiv'!.mpr $ replace_imply_left_conj! hΓ hC;
       contradiction;
     obtain ⟨Ω, hΩ⟩ := lindenbaum this;
     simp [Kripke.ValidOnModel];

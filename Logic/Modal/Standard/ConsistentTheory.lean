@@ -38,7 +38,7 @@ lemma iff_insert_Consistent : (𝓓)-Consistent (insert p T) ↔ ∀ {Γ : List 
   constructor;
   . intro h Γ hΓ;
     by_contra hC;
-    have : 𝓓 ⊬! p ⋏ ⋀Γ ⟶ ⊥ := implyLeft_cons_conj'!.not.mp $ @h (p :: Γ) (by
+    have : 𝓓 ⊬! p ⋏ ⋀Γ ⟶ ⊥ := iff_imply_left_cons_conj'!.not.mp $ @h (p :: Γ) (by
       rintro q hq;
       simp at hq;
       cases hq with
@@ -55,7 +55,7 @@ lemma iff_insert_Consistent : (𝓓)-Consistent (insert p T) ↔ ∀ {Γ : List 
       | inr h => assumption;
     );
     by_contra hC;
-    have := imp_trans''! and_comm! $ imply_left_remove_conj'! (p := p) hC;
+    have := imp_trans''! and_comm! $ imply_left_remove_conj! (p := p) hC;
     contradiction;
 
 lemma iff_insert_Inconsistent : ¬(𝓓)-Consistent (insert p T) ↔ ∃ Γ : List (Formula α), (∀ p ∈ Γ, p ∈ T) ∧ 𝓓 ⊢! p ⋏ ⋀Γ ⟶ ⊥ := by
@@ -151,7 +151,7 @@ lemma either_consistent (p) : (𝓓)-Consistent (insert p T) ∨ (𝓓)-Consiste
   replace hΓ₂ := neg_equiv'!.mpr hΓ₂;
   replace hΔ₂ := neg_equiv'!.mpr hΔ₂;
   have : 𝓓 ⊢! ⋀Γ ⋏ ⋀Δ ⟶ ⊥ := neg_equiv'!.mp $ demorgan₁'! $ or₃'''! (imp_trans''! (imply_of_not_or'! $ demorgan₄'! hΓ₂) or₁!) (imp_trans''! (imply_of_not_or'! $ demorgan₄'! hΔ₂) or₂!) lem!
-  have : 𝓓 ⊬! ⋀Γ ⋏ ⋀Δ ⟶ ⊥ := unprovable_imp_trans''! imply_left_concat_conj'! (hConsis (by
+  have : 𝓓 ⊬! ⋀Γ ⋏ ⋀Δ ⟶ ⊥ := unprovable_imp_trans''! imply_left_concat_conj! (hConsis (by
     simp;
     intro q hq;
     rcases hq with hΓ | hΔ
@@ -209,7 +209,7 @@ lemma not_singleton_consistent [𝓓.HasNecessitation] (h : ~(□p) ∈ T) : (�
   intro Γ hΓ;
   simp only [Set.mem_singleton_iff] at hΓ;
   by_contra hC;
-  have : 𝓓 ⊢! ~(□p) ⟶ ⊥ := neg_equiv'!.mp $ dni'! $ nec! $ dne'! $ neg_equiv'!.mpr $ replace_imply_left_conj'! hΓ hC;
+  have : 𝓓 ⊢! ~(□p) ⟶ ⊥ := neg_equiv'!.mp $ dni'! $ nec! $ dne'! $ neg_equiv'!.mpr $ replace_imply_left_conj! hΓ hC;
   have : 𝓓 ⊬! ~(□p) ⟶ ⊥ := by simpa using hConsis (Γ := [~(□p)]) (by aesop)
   contradiction;
 
@@ -414,7 +414,7 @@ lemma iff_mem_multibox : (□^[n]p ∈ Ω.theory) ↔ (∀ {Ω' : (𝓓)-MCT}, (
         revert this;
         contrapose;
         simp [neg_neg];
-        exact imp_trans''! collect_multibox_conj'!;
+        exact imp_trans''! collect_multibox_conj!;
       contradiction;
     );
     existsi Ω';
@@ -496,17 +496,17 @@ lemma multibox_multidia : (∀ {p : Formula α}, (□^[n]p ∈ Ω₁.theory → 
 
 variable {Γ : List (Formula α)}
 
-lemma iff_mem_conj' : (⋀Γ ∈ Ω.theory) ↔ (∀ p ∈ Γ, p ∈ Ω.theory) := by simp [membership_iff, iff_provable_list_conj];
+lemma iff_mem_conj : (⋀Γ ∈ Ω.theory) ↔ (∀ p ∈ Γ, p ∈ Ω.theory) := by simp [membership_iff, iff_provable_list_conj];
 
-lemma iff_mem_multibox_conj' : (□^[n]⋀Γ ∈ Ω.theory) ↔ (∀ p ∈ Γ, □^[n]p ∈ Ω.theory) := by
-  simp only [iff_mem_multibox, iff_mem_conj'];
+lemma iff_mem_multibox_conj : (□^[n]⋀Γ ∈ Ω.theory) ↔ (∀ p ∈ Γ, □^[n]p ∈ Ω.theory) := by
+  simp only [iff_mem_multibox, iff_mem_conj];
   constructor;
   . intro h p hp Ω' hΩ';
     exact (h hΩ') p hp;
   . intro h Ω' hΩ' p hp;
     exact @h p hp Ω' hΩ';
 
-lemma iff_mem_box_conj' : (□⋀Γ ∈ Ω.theory) ↔ (∀ p ∈ Γ, □p ∈ Ω.theory) := iff_mem_multibox_conj' (n := 1)
+lemma iff_mem_box_conj : (□⋀Γ ∈ Ω.theory) ↔ (∀ p ∈ Γ, □p ∈ Ω.theory) := iff_mem_multibox_conj (n := 1)
 
 end Normal
 

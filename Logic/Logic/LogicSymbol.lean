@@ -459,7 +459,7 @@ def conj : {n : ℕ} → (Fin n → α) → α
 lemma hom_conj [FunLike F α β] [LogicalConnective.HomClass F α β] (f : F) (v : Fin n → α) : f (conj v) = conj (f ∘ v) := by
   induction' n with n ih <;> simp[*, conj]
 
-lemma hom_conj' [FunLike F α β] [LogicalConnective.HomClass F α β] (f : F) (v : Fin n → α) : f (conj v) = conj fun i => f (v i) := hom_conj f v
+lemma hom_conj₂ [FunLike F α β] [LogicalConnective.HomClass F α β] (f : F) (v : Fin n → α) : f (conj v) = conj fun i => f (v i) := hom_conj f v
 
 end And
 
@@ -507,43 +507,43 @@ section
 variable {F : Type u} [LogicalConnective F]
 variable {p q : F}
 
-/-- Remark: `[p].conj' = p ≠ p ⋏ ⊤ = [p].conj` -/
-def conj' : List F → F
+/-- Remark: `[p].conj₂ = p ≠ p ⋏ ⊤ = [p].conj` -/
+def conj₂ : List F → F
 | [] => ⊤
 | [p] => p
-| p :: q :: rs => p ⋏ (q :: rs).conj'
+| p :: q :: rs => p ⋏ (q :: rs).conj₂
 
-prefix:80 "⋀" => List.conj'
+prefix:80 "⋀" => List.conj₂
 
-@[simp] lemma conj'_nil : ⋀[] = (⊤ : F) := rfl
+@[simp] lemma conj₂_nil : ⋀[] = (⊤ : F) := rfl
 
-@[simp] lemma conj'_singleton : ⋀[p] = p := rfl
+@[simp] lemma conj₂_singleton : ⋀[p] = p := rfl
 
-@[simp] lemma conj'_doubleton : ⋀[p, q] = p ⋏ q := rfl
+@[simp] lemma conj₂_doubleton : ⋀[p, q] = p ⋏ q := rfl
 
-@[simp] lemma conj'_cons_nonempty {a : F} {as : List F} (h : as ≠ []) : ⋀(a :: as) = a ⋏ ⋀as := by
+@[simp] lemma conj₂_cons_nonempty {a : F} {as : List F} (h : as ≠ [] := by assumption) : ⋀(a :: as) = a ⋏ ⋀as := by
   cases as with
   | nil => contradiction;
-  | cons q rs => simp [List.conj']
+  | cons q rs => simp [List.conj₂]
 
 /-- Remark: `[p].disj = p ≠ p ⋎ ⊥ = [p].disj` -/
-def disj' : List F → F
+def disj₂ : List F → F
 | [] => ⊥
 | [p] => p
-| p :: q :: rs => p ⋎ (q :: rs).disj'
+| p :: q :: rs => p ⋎ (q :: rs).disj₂
 
-prefix:80 "⋁" => disj'
+prefix:80 "⋁" => disj₂
 
-@[simp] lemma disj'_nil : ⋁[] = (⊥ : F) := rfl
+@[simp] lemma disj₂_nil : ⋁[] = (⊥ : F) := rfl
 
-@[simp] lemma disj'_singleton : ⋁[p] = p := rfl
+@[simp] lemma disj₂_singleton : ⋁[p] = p := rfl
 
-@[simp] lemma disj'_doubleton : ⋁[p, q] = p ⋎ q := rfl
+@[simp] lemma disj₂_doubleton : ⋁[p, q] = p ⋎ q := rfl
 
-@[simp] lemma disj'_cons_nonempty {a : F} {as : List F} (h : as ≠ []) : ⋁(a :: as) = a ⋎ ⋁as := by
+@[simp] lemma disj₂_cons_nonempty {a : F} {as : List F} (h : as ≠ [] := by assumption) : ⋁(a :: as) = a ⋎ ⋁as := by
   cases as with
   | nil => contradiction;
-  | cons q rs => simp [disj']
+  | cons q rs => simp [disj₂]
 
 lemma induction_with_singleton
   {motive : List F → Prop}
