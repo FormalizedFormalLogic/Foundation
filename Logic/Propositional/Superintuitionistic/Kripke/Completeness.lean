@@ -23,20 +23,20 @@ instance : HasSubset (Tableau α) := ⟨λ t₁ t₂ => t₁.1 ⊆ t₂.1 ∧ t�
   . intro h; cases h; simp;
   . rintro ⟨h₁, h₂⟩; cases t₁; cases t₂; simp_all;
 
-def ParametricConsistent (𝓓 : DeductionParameter α) (t : Tableau α) := ∀ {Γ Δ : List (Formula α)}, (∀ p ∈ Γ, p ∈ t.1) → (∀ p ∈ Δ, p ∈ t.2) → 𝓓 ⊬! Γ.conj' ⟶ Δ.disj'
+def ParametricConsistent (𝓓 : DeductionParameter α) (t : Tableau α) := ∀ {Γ Δ : List (Formula α)}, (∀ p ∈ Γ, p ∈ t.1) → (∀ p ∈ Δ, p ∈ t.2) → 𝓓 ⊬! ⋀Γ ⟶ ⋁Δ
 notation "(" 𝓓 ")-Consistent" => ParametricConsistent 𝓓
 
 
-lemma iff_ParametricConsistent_insert₁ : (𝓓)-Consistent ((insert p T), U) ↔ ∀ {Γ Δ : List (Formula α)}, (∀ p ∈ Γ, p ∈ T) → (∀ p ∈ Δ, p ∈ U) → 𝓓 ⊬! p ⋏ Γ.conj' ⟶ Δ.disj' := by
+lemma iff_ParametricConsistent_insert₁ : (𝓓)-Consistent ((insert p T), U) ↔ ∀ {Γ Δ : List (Formula α)}, (∀ p ∈ Γ, p ∈ T) → (∀ p ∈ Δ, p ∈ U) → 𝓓 ⊬! p ⋏ ⋀Γ ⟶ ⋁Δ := by
   constructor;
   . intro h Γ Δ hΓ hΔ;
     by_contra hC;
-    have : 𝓓 ⊬! (p :: Γ).conj' ⟶ Δ.disj' := h (by simp; intro q hq; right; exact hΓ q hq;) hΔ;
-    have : 𝓓 ⊢! (p :: Γ).conj' ⟶ Δ.disj' := implyLeft_cons_conj'!.mpr hC;
+    have : 𝓓 ⊬! ⋀(p :: Γ) ⟶ ⋁Δ := h (by simp; intro q hq; right; exact hΓ q hq;) hΔ;
+    have : 𝓓 ⊢! ⋀(p :: Γ) ⟶ ⋁Δ := iff_imply_left_cons_conj'!.mpr hC;
     contradiction;
   . intro h Γ Δ hΓ hΔ;
     simp_all only [Set.mem_insert_iff];
-    have : 𝓓 ⊬! p ⋏ (Γ.remove p).conj' ⟶ Δ.disj' := h (by
+    have : 𝓓 ⊬! p ⋏ ⋀(Γ.remove p) ⟶ ⋁Δ := h (by
       intro q hq;
       have := by simpa using hΓ q $ List.mem_of_mem_remove hq;
       cases this with
@@ -44,24 +44,24 @@ lemma iff_ParametricConsistent_insert₁ : (𝓓)-Consistent ((insert p T), U) �
       | inr h => assumption;
     ) hΔ;
     by_contra hC;
-    have : 𝓓 ⊢! p ⋏ (Γ.remove p).conj' ⟶ Δ.disj' := imp_trans''! and_comm! $ imply_left_remove_conj'! (p := p) hC;
+    have : 𝓓 ⊢! p ⋏ ⋀(Γ.remove p) ⟶ ⋁Δ := imp_trans''! and_comm! $ imply_left_remove_conj! (p := p) hC;
     contradiction;
 
-lemma iff_not_ParametricConsistent_insert₁ : ¬(𝓓)-Consistent ((insert p T), U) ↔ ∃ Γ Δ : List (Formula α), (∀ p ∈ Γ, p ∈ T) ∧ (∀ p ∈ Δ, p ∈ U) ∧ 𝓓 ⊢! p ⋏ Γ.conj' ⟶ Δ.disj' := by
+lemma iff_not_ParametricConsistent_insert₁ : ¬(𝓓)-Consistent ((insert p T), U) ↔ ∃ Γ Δ : List (Formula α), (∀ p ∈ Γ, p ∈ T) ∧ (∀ p ∈ Δ, p ∈ U) ∧ 𝓓 ⊢! p ⋏ ⋀Γ ⟶ ⋁Δ := by
   constructor;
   . contrapose; push_neg; apply iff_ParametricConsistent_insert₁.mpr;
   . contrapose; push_neg; apply iff_ParametricConsistent_insert₁.mp;
 
-lemma iff_ParametricConsistent_insert₂ : (𝓓)-Consistent (T, (insert p U)) ↔ ∀ {Γ Δ : List (Formula α)}, (∀ p ∈ Γ, p ∈ T) → (∀ p ∈ Δ, p ∈ U) → 𝓓 ⊬! Γ.conj' ⟶ p ⋎ Δ.disj' := by
+lemma iff_ParametricConsistent_insert₂ : (𝓓)-Consistent (T, (insert p U)) ↔ ∀ {Γ Δ : List (Formula α)}, (∀ p ∈ Γ, p ∈ T) → (∀ p ∈ Δ, p ∈ U) → 𝓓 ⊬! ⋀Γ ⟶ p ⋎ ⋁Δ := by
   constructor;
   . intro h Γ Δ hΓ hΔ;
     by_contra hC;
-    have : 𝓓 ⊬! Γ.conj' ⟶ (p :: Δ).disj' := h hΓ (by simp; intro q hq; right; exact hΔ q hq);
-    have : 𝓓 ⊢! Γ.conj' ⟶ (p :: Δ).disj' := implyRight_cons_disj'!.mpr hC;
+    have : 𝓓 ⊬! ⋀Γ ⟶ ⋁(p :: Δ) := h hΓ (by simp; intro q hq; right; exact hΔ q hq);
+    have : 𝓓 ⊢! ⋀Γ ⟶ ⋁(p :: Δ) := implyRight_cons_disj!.mpr hC;
     contradiction;
   . intro h Γ Δ hΓ hΔ;
     simp_all;
-    have : 𝓓 ⊬! Γ.conj' ⟶ p ⋎ (Δ.remove p).disj' := h hΓ (by
+    have : 𝓓 ⊬! ⋀Γ ⟶ p ⋎ ⋁(Δ.remove p) := h hΓ (by
       intro q hq;
       have := by simpa using hΔ q $ List.mem_of_mem_remove hq;
       cases this with
@@ -69,11 +69,11 @@ lemma iff_ParametricConsistent_insert₂ : (𝓓)-Consistent (T, (insert p U)) �
       | inr h => assumption;
     );
     by_contra hC;
-    have : 𝓓 ⊢! Γ.conj' ⟶ p ⋎ (Δ.remove p).disj' := imp_trans''! hC $ forthback_disj'_remove;
+    have : 𝓓 ⊢! ⋀Γ ⟶ p ⋎ ⋁(Δ.remove p) := imp_trans''! hC $ forthback_disj_remove;
     contradiction;
 
 
-lemma iff_not_ParametricConsistent_insert₂ : ¬(𝓓)-Consistent (T, (insert p U)) ↔ ∃ Γ Δ : List (Formula α), (∀ p ∈ Γ, p ∈ T) ∧ (∀ p ∈ Δ, p ∈ U) ∧ 𝓓 ⊢! Γ.conj' ⟶ p ⋎ Δ.disj' := by
+lemma iff_not_ParametricConsistent_insert₂ : ¬(𝓓)-Consistent (T, (insert p U)) ↔ ∃ Γ Δ : List (Formula α), (∀ p ∈ Γ, p ∈ T) ∧ (∀ p ∈ Δ, p ∈ U) ∧ 𝓓 ⊢! ⋀Γ ⟶ p ⋎ ⋁Δ := by
   constructor;
   . contrapose; push_neg; apply iff_ParametricConsistent_insert₂.mpr;
   . contrapose; push_neg; apply iff_ParametricConsistent_insert₂.mp;
@@ -92,8 +92,8 @@ lemma consistent_either (p : Formula α) : (𝓓)-Consistent ((insert p t.1), t.
 
   obtain ⟨Γ₂, Δ₂, hΓ₂, hΔ₂, h₂⟩ := iff_not_ParametricConsistent_insert₂.mp hC₂;
 
-  have : 𝓓 ⊢! (Γ₁ ++ Γ₂).conj' ⟶ (Δ₁ ++ Δ₂).disj' := imp_trans''! (and₁'! iff_concat_conj!) $ imp_trans''! (cut! h₁ h₂) (and₂'! iff_concact_disj!);
-  have : 𝓓 ⊬! (Γ₁ ++ Γ₂).conj' ⟶ (Δ₁ ++ Δ₂).disj' := hCon (by simp; rintro q (hq₁ | hq₂); exact hΓ₁ q hq₁; exact hΓ₂ q hq₂) (by simp; rintro q (hq₁ | hq₂); exact hΔ₁ q hq₁; exact hΔ₂ q hq₂);
+  have : 𝓓 ⊢! ⋀(Γ₁ ++ Γ₂) ⟶ ⋁(Δ₁ ++ Δ₂) := imp_trans''! (and₁'! iff_concat_conj!) $ imp_trans''! (cut! h₁ h₂) (and₂'! iff_concact_disj!);
+  have : 𝓓 ⊬! ⋀(Γ₁ ++ Γ₂) ⟶ ⋁(Δ₁ ++ Δ₂) := hCon (by simp; rintro q (hq₁ | hq₂); exact hΓ₁ q hq₁; exact hΓ₂ q hq₂) (by simp; rintro q (hq₁ | hq₂); exact hΔ₁ q hq₁; exact hΔ₂ q hq₂);
   contradiction;
 
 lemma disjoint_of_consistent : Disjoint t.1 t.2 := by
@@ -101,16 +101,16 @@ lemma disjoint_of_consistent : Disjoint t.1 t.2 := by
   obtain ⟨T, hp₁, hp₂, hp⟩ := by simpa [Disjoint] using h;
   obtain ⟨p, hp, _⟩ := Set.not_subset.mp hp;
   simp [ParametricConsistent] at hCon;
-  have : 𝓓 ⊬! [p].conj' ⟶ [p].disj' := hCon
+  have : 𝓓 ⊬! ⋀[p] ⟶ ⋁[p] := hCon
     (by simp_all; apply hp₁; assumption)
     (by simp_all; apply hp₂; assumption);
-  have : 𝓓 ⊢! [p].conj' ⟶ [p].disj' := by simp;
+  have : 𝓓 ⊢! ⋀[p] ⟶ ⋁[p] := by simp;
   contradiction;
 
-lemma not_mem₂ {Γ : List (Formula α)} (hΓ : ∀ p ∈ Γ, p ∈ t.1) (h : 𝓓 ⊢! Γ.conj' ⟶ q) : q ∉ t.2 := by
+lemma not_mem₂ {Γ : List (Formula α)} (hΓ : ∀ p ∈ Γ, p ∈ t.1) (h : 𝓓 ⊢! ⋀Γ ⟶ q) : q ∉ t.2 := by
   by_contra hC;
-  have : 𝓓 ⊢! Γ.conj' ⟶ [q].disj' := by simpa;
-  have : 𝓓 ⊬! Γ.conj' ⟶ [q].disj' := hCon (by aesop) (by aesop);
+  have : 𝓓 ⊢! ⋀Γ ⟶ ⋁[q] := by simpa;
+  have : 𝓓 ⊬! ⋀Γ ⟶ ⋁[q] := hCon (by aesop) (by aesop);
   contradiction;
 
 end Consistent
@@ -178,7 +178,7 @@ lemma self_ParametricConsistent [h : System.Consistent 𝓓] : (𝓓)-Consistent
   by_contra hC;
   have : 𝓓 ⊢! q := by
     subst hΔ;
-    simp [List.disj'_nil] at hC;
+    simp at hC;
     exact imp_trans''! hC efq! ⨀ (by
       apply iff_provable_list_conj.mpr;
       exact λ _ hp => ⟨Deduction.eaxm $ hΓ _ hp⟩;
@@ -342,24 +342,24 @@ lemma equality_of₁ (e₁ : t₁.tableau.1 = t₂.tableau.1) : t₁ = t₂ := b
 
 lemma equality_of₂ (e₂ : t₁.tableau.2 = t₂.tableau.2) : t₁ = t₂ := equality_of₁ $ saturated_duality.mpr e₂
 
-lemma not_mem₂ {Γ : List (Formula α)} (hΓ : ∀ p ∈ Γ, p ∈ t.tableau.1) (h : 𝓓 ⊢! Γ.conj' ⟶ q) : q ∉ t.tableau.2 := t.tableau.not_mem₂ t.consistent hΓ h
+lemma not_mem₂ {Γ : List (Formula α)} (hΓ : ∀ p ∈ Γ, p ∈ t.tableau.1) (h : 𝓓 ⊢! ⋀Γ ⟶ q) : q ∉ t.tableau.2 := t.tableau.not_mem₂ t.consistent hΓ h
 
 lemma mdp₁ (hp : p ∈ t.tableau.1) (h : 𝓓 ⊢! p ⟶ q) : q ∈ t.tableau.1 := by
-  exact t.not_mem₂_iff_mem₁.mp $ not_mem₂ (by simpa) (show 𝓓 ⊢! List.conj' [p] ⟶ q by simpa;)
+  exact t.not_mem₂_iff_mem₁.mp $ not_mem₂ (by simpa) (show 𝓓 ⊢! ⋀[p] ⟶ q by simpa;)
 
 @[simp]
 lemma mem₁_verum : ⊤ ∈ t.tableau.1 := by
   apply t.not_mem₂_iff_mem₁.mp;
   by_contra hC;
-  have : 𝓓 ⊬! [].conj' ⟶ [⊤].disj' := t.consistent (by simp) (by simpa);
-  have : 𝓓 ⊢! [].conj' ⟶ [⊤].disj' := by simp;
+  have : 𝓓 ⊬! ⋀[] ⟶ ⋁[⊤] := t.consistent (by simp) (by simpa);
+  have : 𝓓 ⊢! ⋀[] ⟶ ⋁[⊤] := by simp;
   contradiction;
 
 @[simp]
 lemma not_mem₁_falsum : ⊥ ∉ t.tableau.1 := by
   by_contra hC;
-  have : 𝓓 ⊬! [⊥].conj' ⟶ [].disj' := t.consistent (by simpa) (by simp);
-  have : 𝓓 ⊢! [⊥].conj' ⟶ [].disj' := by simp;
+  have : 𝓓 ⊬! ⋀[⊥] ⟶ ⋁[] := t.consistent (by simpa) (by simp);
+  have : 𝓓 ⊢! ⋀[⊥] ⟶ ⋁[] := by simp;
   contradiction;
 
 @[simp]
@@ -368,8 +368,8 @@ lemma iff_mem₁_and : p ⋏ q ∈ t.tableau.1 ↔ p ∈ t.tableau.1 ∧ q ∈ t
   . intro h; constructor <;> exact mdp₁ h (by simp)
   . rintro ⟨hp, hq⟩;
     by_contra hC;
-    have : 𝓓 ⊢! [p, q].conj' ⟶ [p ⋏ q].disj' := by simp;
-    have : 𝓓 ⊬! [p, q].conj' ⟶ [p ⋏ q].disj' := t.consistent (by aesop) (by simpa using t.not_mem₁_iff_mem₂.mp hC);
+    have : 𝓓 ⊢! ⋀[p, q] ⟶ ⋁[p ⋏ q] := by simp;
+    have : 𝓓 ⊬! ⋀[p, q] ⟶ ⋁[p ⋏ q] := t.consistent (by aesop) (by simpa using t.not_mem₁_iff_mem₂.mp hC);
     contradiction;
 
 @[simp]
@@ -379,8 +379,8 @@ lemma iff_mem₁_or : p ⋎ q ∈ t.tableau.1 ↔ p ∈ t.tableau.1 ∨ q ∈ t.
     by_contra hC; simp [not_or] at hC;
     have : p ∈ t.tableau.2 := t.not_mem₁_iff_mem₂.mp hC.1;
     have : q ∈ t.tableau.2 := t.not_mem₁_iff_mem₂.mp hC.2;
-    have : 𝓓 ⊢! [p ⋎ q].conj' ⟶ [p, q].disj' := by simp;
-    have : 𝓓 ⊬! [p ⋎ q].conj' ⟶ [p, q].disj' := t.consistent (by simp_all) (by simp_all);
+    have : 𝓓 ⊢! ⋀[p ⋎ q] ⟶ ⋁[p, q] := by simp;
+    have : 𝓓 ⊬! ⋀[p ⋎ q] ⟶ ⋁[p, q] := t.consistent (by simp_all) (by simp_all);
     contradiction;
   . intro h;
     cases h with
@@ -449,14 +449,14 @@ private lemma truthlemma.himp
         have := by simpa using hΓ r hr₁;
         simp_all;
       by_contra hC;
-      have : 𝓓 ⊢! (Γ.remove p).conj' ⟶ (p ⟶ q) := imp_trans''! (and_imply_iff_imply_imply'!.mp $ imply_left_remove_conj'! hC) (by
+      have : 𝓓 ⊢! ⋀(Γ.remove p) ⟶ (p ⟶ q) := imp_trans''! (and_imply_iff_imply_imply'!.mp $ imply_left_remove_conj! hC) (by
         apply deduct'!;
         apply deduct!;
-        have : [p, p ⟶ Δ.disj'] ⊢[𝓓]! p := by_axm!;
-        have : [p, p ⟶ Δ.disj'] ⊢[𝓓]! Δ.disj' := by_axm! ⨀ this;
+        have : [p, p ⟶ ⋁Δ] ⊢[𝓓]! p := by_axm!;
+        have : [p, p ⟶ ⋁Δ] ⊢[𝓓]! ⋁Δ := by_axm! ⨀ this;
         exact disj_allsame'! (by simpa using hΔ) this;
       )
-      have : 𝓓 ⊬! (Γ.remove p).conj' ⟶ (p ⟶ q) := by simpa only [List.disj'_singleton] using (t.consistent hΓ (show ∀ r ∈ [p ⟶ q], r ∈ t.tableau.2 by simp_all));
+      have : 𝓓 ⊬! ⋀(Γ.remove p) ⟶ (p ⟶ q) := by simpa using (t.consistent hΓ (show ∀ r ∈ [p ⟶ q], r ∈ t.tableau.2 by simp_all));
       contradiction;
     have ⟨_, _⟩ := Set.insert_subset_iff.mp h;
     existsi t';
@@ -474,7 +474,7 @@ private lemma truthlemma.himp
     apply t'.not_mem₂_iff_mem₁.mp;
     exact not_mem₂
       (by simp_all)
-      (show 𝓓 ⊢! [p, p ⟶ q].conj' ⟶ q by
+      (show 𝓓 ⊢! ⋀[p, p ⟶ q] ⟶ q by
         simp;
         apply and_imply_iff_imply_imply'!.mpr;
         apply deduct'!;
@@ -500,8 +500,8 @@ private lemma truthlemma.hneg
         simp_all;
       replace hΔ : Δ = [] := List.nil_iff.mpr hΔ; subst hΔ;
       by_contra hC; simp at hC;
-      have : 𝓓 ⊢! (Γ.remove p).conj' ⟶ ~p := imp_trans''! (and_imply_iff_imply_imply'!.mp $ imply_left_remove_conj'! hC) (and₂'! neg_equiv!);
-      have : 𝓓 ⊬! (Γ.remove p).conj' ⟶ ~p := by simpa only [List.disj'_singleton] using t.consistent (Δ := [~p]) hΓ (by simpa);
+      have : 𝓓 ⊢! ⋀(Γ.remove p) ⟶ ~p := imp_trans''! (and_imply_iff_imply_imply'!.mp $ imply_left_remove_conj! hC) (and₂'! neg_equiv!);
+      have : 𝓓 ⊬! ⋀(Γ.remove p) ⟶ ~p := by simpa using t.consistent (Δ := [~p]) hΓ (by simpa);
       contradiction;
     have ⟨_, _⟩ := Set.insert_subset_iff.mp h;
     existsi t';

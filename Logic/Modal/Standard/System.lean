@@ -255,10 +255,8 @@ def collect_box_and' (h : 𝓢 ⊢ □p ⋏ □q) : 𝓢 ⊢ □(p ⋏ q) := col
 lemma collect_box_and'! (h : 𝓢 ⊢! □p ⋏ □q) : 𝓢 ⊢! □(p ⋏ q) := ⟨collect_box_and' h.some⟩
 
 
-lemma multiboxConj'_iff! : 𝓢 ⊢! □^[n](Γ.conj') ↔ ∀ p ∈ Γ, 𝓢 ⊢! □^[n]p := by
+lemma multiboxConj'_iff! : 𝓢 ⊢! □^[n]⋀Γ ↔ ∀ p ∈ Γ, 𝓢 ⊢! □^[n]p := by
   induction Γ using List.induction_with_singleton with
-  | hnil => simp;
-  | hsingle => simp;
   | hcons p Γ h ih =>
     simp_all;
     constructor;
@@ -269,20 +267,21 @@ lemma multiboxConj'_iff! : 𝓢 ⊢! □^[n](Γ.conj') ↔ ∀ p ∈ Γ, 𝓢 �
       . exact ih.mp (and₂'! this);
     . rintro ⟨h₁, h₂⟩;
       exact collect_multibox_and'! $ and₃'! h₁ (ih.mpr h₂);
-lemma boxConj'_iff! : 𝓢 ⊢! □(Γ.conj') ↔ ∀ p ∈ Γ, 𝓢 ⊢! □p := multiboxConj'_iff! (n := 1)
+  | _ => simp_all;
+lemma boxConj'_iff! : 𝓢 ⊢! □⋀Γ ↔ ∀ p ∈ Γ, 𝓢 ⊢! □p := multiboxConj'_iff! (n := 1)
 
-lemma multiboxconj'_of_conj'multibox! (d : 𝓢 ⊢! (□'^[n]Γ).conj') : 𝓢 ⊢! □^[n](Γ.conj') := by
+lemma multiboxconj_of_conjmultibox! (d : 𝓢 ⊢! ⋀□'^[n]Γ) : 𝓢 ⊢! □^[n]⋀Γ := by
   apply multiboxConj'_iff!.mpr;
   intro p hp;
   exact iff_provable_list_conj.mp d (□^[n]p) (by aesop);
 
 @[simp]
-lemma multibox_cons_conj'! :  𝓢 ⊢! (□'^[n](p :: Γ)).conj' ⟶ (□'^[n]Γ).conj' := by
-  apply conj'conj'_subset;
+lemma multibox_cons_conj! :  𝓢 ⊢! ⋀(□'^[n](p :: Γ)) ⟶ ⋀□'^[n]Γ := by
+  apply conjconj_subset!;
   simp_all;
 
 @[simp]
-lemma collect_multibox_conj'! : 𝓢 ⊢! (□'^[n]Γ).conj' ⟶ □^[n](Γ.conj') := by
+lemma collect_multibox_conj! : 𝓢 ⊢! ⋀□'^[n]Γ ⟶ □^[n]⋀Γ := by
   induction Γ using List.induction_with_singleton with
   | hnil => simpa using dhyp! multiboxverum!;
   | hsingle => simp;
@@ -291,7 +290,7 @@ lemma collect_multibox_conj'! : 𝓢 ⊢! (□'^[n]Γ).conj' ⟶ □^[n](Γ.conj
     exact imp_trans''! (imply_right_and! (generalConj'! (by simp)) (imp_trans''! (by simp) ih)) collect_multibox_and!;
 
 @[simp]
-lemma collect_box_conj'! : 𝓢 ⊢! (□'Γ).conj' ⟶ □(Γ.conj') := collect_multibox_conj'! (n := 1)
+lemma collect_box_conj! : 𝓢 ⊢! ⋀(□'Γ) ⟶ □(⋀Γ) := collect_multibox_conj! (n := 1)
 
 
 def collect_multibox_or : 𝓢 ⊢ □^[n]p ⋎ □^[n]q ⟶ □^[n](p ⋎ q) := or₃'' (multibox_axiomK' $ multinec or₁) (multibox_axiomK' $ multinec or₂)
@@ -333,11 +332,9 @@ def collect_dia_or' (h : 𝓢 ⊢ ◇p ⋎ ◇q) : 𝓢 ⊢ ◇(p ⋎ q) := coll
 @[simp] lemma distribute_dia_and! : 𝓢 ⊢! ◇(p ⋏ q) ⟶ ◇p ⋏ ◇q := distribute_multidia_and! (n := 1)
 
 
--- TODO: `iffConjMultidiaMultidiaconj'` is computable but it's too slow, so leave it.
-@[simp] lemma iff_conj'multidia_multidiaconj'! : 𝓢 ⊢! ◇^[n](Γ.conj') ⟶ (◇'^[n]Γ).conj' := by
+-- TODO: `iffConjMultidiaMultidiaconj` is computable but it's too slow, so leave it.
+@[simp] lemma iff_conjmultidia_multidiaconj! : 𝓢 ⊢! ◇^[n](⋀Γ) ⟶ ⋀(◇'^[n]Γ) := by
   induction Γ using List.induction_with_singleton with
-  | hnil => simpa using dhyp! verum!;
-  | hsingle p => simp;
   | hcons p Γ h ih =>
     simp_all;
     exact imp_trans''! distribute_multidia_and! $ by
@@ -350,6 +347,7 @@ def collect_dia_or' (h : 𝓢 ⊢ ◇p ⋎ ◇q) : 𝓢 ⊢ ◇(p ⋎ q) := coll
       | inr hq =>
         obtain ⟨r, hr₁, hr₂⟩ := hq;
         exact (iff_provable_list_conj.mp $ (of'! ih) ⨀ (and₂'! $ id!)) q (by aesop);
+  | _ => simp
 
 -- def distributeDiaAnd' (h : 𝓢 ⊢ ◇(p ⋏ q)) : 𝓢 ⊢ ◇p ⋏ ◇q := distributeDiaAnd ⨀ h
 lemma distribute_dia_and'! (h : 𝓢 ⊢! ◇(p ⋏ q)) : 𝓢 ⊢! ◇p ⋏ ◇q := distribute_dia_and! ⨀ h
@@ -357,7 +355,7 @@ lemma distribute_dia_and'! (h : 𝓢 ⊢! ◇(p ⋏ q)) : 𝓢 ⊢! ◇p ⋏ ◇
 open StandardModalLogicalConnective (boxdot)
 
 def boxdotAxiomK : 𝓢 ⊢ ⊡(p ⟶ q) ⟶ (⊡p ⟶ ⊡q) := by
-  simp [boxdot]
+  simp [boxdot];
   apply deduct';
   apply deduct;
   have d : [p ⋏ □p, (p ⟶ q) ⋏ □(p ⟶ q)] ⊢[𝓢] (p ⟶ q) ⋏ □(p ⟶ q) := FiniteContext.byAxm;

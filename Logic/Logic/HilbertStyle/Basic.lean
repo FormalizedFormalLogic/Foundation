@@ -293,7 +293,7 @@ def conjImplyConj [DecidableEq F] {Γ Δ : List F} (h : Δ ⊆ Γ) : 𝓢 ⊢ Γ
 instance [(𝓢 : S) → ModusPonens 𝓢] [(𝓢 : S) → HasAxiomEFQ 𝓢] : DeductiveExplosion S := ⟨fun b _ ↦ efq ⨀ b⟩
 
 
-def generalConj' [DecidableEq F] {Γ : List F} {p : F} (h : p ∈ Γ) : 𝓢 ⊢ Γ.conj' ⟶ p :=
+def generalConj' [DecidableEq F] {Γ : List F} {p : F} (h : p ∈ Γ) : 𝓢 ⊢ ⋀Γ ⟶ p :=
   match Γ with
   | []     => by simp at h
   | [q]    => by simp_all; exact impId q;
@@ -304,15 +304,16 @@ def generalConj' [DecidableEq F] {Γ : List F} {p : F} (h : p ∈ Γ) : 𝓢 ⊢
     . have : p ∈ (r :: Γ) := by simpa [e] using h;
       exact impTrans'' and₂ (generalConj' this);
 
-def conjIntro' [DecidableEq F] (Γ : List F) (b : (p : F) → p ∈ Γ → 𝓢 ⊢ p) : 𝓢 ⊢ Γ.conj' :=
+def conjIntro' [DecidableEq F] (Γ : List F) (b : (p : F) → p ∈ Γ → 𝓢 ⊢ p) : 𝓢 ⊢ ⋀Γ :=
   match Γ with
   | []     => verum
   | [q]    => by apply b; simp;
   | q :: r :: Γ => by
     simp;
     exact andIntro (b q (by simp)) (conjIntro' _ (by aesop))
+lemma conj_intro'! [DecidableEq F] {Γ : List F} (b : (p : F) → p ∈ Γ → 𝓢 ⊢! p) : 𝓢 ⊢! ⋀Γ := ⟨conjIntro' Γ (λ p hp => (b p hp).some)⟩
 
-def implyConj' [DecidableEq F] (p : F) (Γ : List F) (b : (q : F) → q ∈ Γ → 𝓢 ⊢ p ⟶ q) : 𝓢 ⊢ p ⟶ Γ.conj' :=
+def implyConj' [DecidableEq F] (p : F) (Γ : List F) (b : (q : F) → q ∈ Γ → 𝓢 ⊢ p ⟶ q) : 𝓢 ⊢ p ⟶ ⋀Γ :=
   match Γ with
   | []     => dhyp p verum
   | [q]    => by apply b; simp;
@@ -320,7 +321,7 @@ def implyConj' [DecidableEq F] (p : F) (Γ : List F) (b : (q : F) → q ∈ Γ �
     simp;
     apply implyAnd (b q (by simp)) (implyConj' p _ (fun q hq ↦ b q (by simp [hq])));
 
-def conjImplyConj' [DecidableEq F] {Γ Δ : List F} (h : Δ ⊆ Γ) : 𝓢 ⊢ Γ.conj' ⟶ Δ.conj' :=
+def conjImplyConj' [DecidableEq F] {Γ Δ : List F} (h : Δ ⊆ Γ) : 𝓢 ⊢ ⋀Γ ⟶ ⋀Δ :=
   implyConj' _ _ (fun _ hq ↦ generalConj' (h hq))
 
 
