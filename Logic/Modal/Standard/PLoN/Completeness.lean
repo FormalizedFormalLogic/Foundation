@@ -59,7 +59,7 @@ lemma complete_of_mem_canonicalFrame {𝔽 : FrameClass α} (hFC : CanonicalFram
   . exact hFC;
   . use (CanonicalModel Λ).Valuation;
     obtain ⟨Ω, hΩ⟩ := lindenbaum (𝓓 := Λ) (T := {~p}) (by
-      apply unprovable_iff_singleton_neg_Consistent.mp;
+      apply unprovable_iff_singleton_neg_consistent.mp;
       exact h;
     );
     use Ω;

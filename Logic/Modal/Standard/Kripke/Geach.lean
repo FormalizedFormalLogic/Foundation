@@ -241,8 +241,8 @@ variable {Ax : AxiomSet α} [System.Consistent (𝝂Ax)]
 lemma geachConfluent_CanonicalFrame (h : 𝗴𝗲(t) ⊆ Ax) : GeachConfluent t (CanonicalFrame Ax):= by
   rintro Ω₁ Ω₂ Ω₃ h;
   have ⟨r₁₂, r₁₃⟩ := h; clear h;
-  have ⟨Ω, hΩ⟩ := lindenbaum (𝓓 := (𝝂Ax)) (T := ((□''⁻¹^[t.m]Ω₂.theory) ∪ (□''⁻¹^[t.n]Ω₃.theory))) $ by
-    apply intro_union_Consistent;
+  have ⟨Ω, hΩ⟩ := lindenbaum (Λ := 𝝂Ax) (T := □''⁻¹^[t.m]Ω₂.theory ∪ □''⁻¹^[t.n]Ω₃.theory) $ by
+    apply intro_union_consistent;
     intro Γ Δ hΓ hΔ hC;
 
     replace hΓ : ∀ p ∈ Γ, □^[t.m]p ∈ Ω₂.theory := by simpa using hΓ;
@@ -262,7 +262,7 @@ lemma geachConfluent_CanonicalFrame (h : 𝗴𝗲(t) ⊆ Ax) : GeachConfluent t 
         (show 𝝂Ax ⊢! □^[t.n]⋀Δ ⟶ □^[t.n](~⋀Γ) by exact imply_multibox_distribute'! $ contra₁'! $ imp_trans''! (and_imply_iff_imply_imply'!.mp hC) (and₂'! neg_equiv!))
         (show 𝝂Ax ⊢! □^[t.n](~⋀Γ) ⟶ (◇^[t.n]⋀Γ) ⟶ ⊥ by exact imp_trans''! (contra₁'! $ and₁'! $ multidia_duality!) (and₁'! neg_equiv!));
     }
-    have : 𝝂Ax ⊬! □^[t.n]⋀Δ ⋏ ◇^[t.n]⋀Γ ⟶ ⊥ := by simpa using Ω₃.consistent (Γ := [□^[t.n]⋀Δ, ◇^[t.n]⋀Γ]) (by simp_all)
+    have : 𝝂Ax ⊬! □^[t.n]⋀Δ ⋏ ◇^[t.n]⋀Γ ⟶ ⊥ := by simpa using (def_consistent.mp Ω₃.consistent) (Γ := [□^[t.n]⋀Δ, ◇^[t.n]⋀Γ]) (by simp_all)
 
     contradiction;
 

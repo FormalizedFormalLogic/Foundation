@@ -15,7 +15,7 @@ namespace Kripke
 
 abbrev CanonicalFrame (Ax : AxiomSet α) [Inhabited (𝝂Ax)-MCT] : Frame where
   World := (𝝂Ax)-MCT
-  Rel := λ Ω₁ Ω₂ => □''⁻¹Ω₁.theory ⊆ Ω₂.theory
+  Rel Ω₁ Ω₂ := □''⁻¹Ω₁.theory ⊆ Ω₂.theory
 
 namespace CanonicalFrame
 
@@ -38,8 +38,8 @@ lemma multiframe_def_multibox : Ω₁ ≺^[n] Ω₂ ↔ ∀ {p}, □^[n]p ∈ Ω
       obtain ⟨⟨Ω₃, _⟩, R₁₃, R₃₂⟩ := h;
       apply ih.mp R₃₂ $ frame_def_box.mp R₁₃ (by simpa using hp);
     . intro h;
-      obtain ⟨Ω, hΩ⟩ := lindenbaum (𝓓 := (𝝂Ax)) (T := (□''⁻¹Ω₁.theory ∪ ◇''^[n]Ω₂.theory)) $ by
-        apply Theory.intro_union_Consistent;
+      obtain ⟨Ω, hΩ⟩ := lindenbaum (Λ := 𝝂Ax) (T := (□''⁻¹Ω₁.theory ∪ ◇''^[n]Ω₂.theory)) $ by
+        apply Theory.intro_union_consistent;
         intro Γ Δ hΓ hΔ hC;
 
         replace hΓ : ∀ p ∈ Γ, □p ∈ Ω₁.theory := by simpa using hΓ;
@@ -132,6 +132,7 @@ lemma iff_valid_on_canonicalModel_deducible : (CanonicalModel Ax) ⊧ p ↔ ((�
   . contrapose;
     intro h;
     have : (𝝂Ax)-Consistent ({~p}) := by
+      apply Theory.def_consistent.mpr;
       intro Γ hΓ;
       by_contra hC;
       have : 𝝂Ax ⊢! p := dne'! $ neg_equiv'!.mpr $ replace_imply_left_conj! hΓ hC;
@@ -143,8 +144,10 @@ lemma iff_valid_on_canonicalModel_deducible : (CanonicalModel Ax) ⊧ p ↔ ((�
   . intro h Ω;
     suffices p ∈ Ω.theory by exact truthlemma.mpr this;
     by_contra hC;
-    obtain ⟨Γ, hΓ₁, hΓ₂⟩ := Theory.iff_insert_Inconsistent.mp $ Ω.maximal' hC;
-    exact Ω.consistent hΓ₁ $ and_imply_iff_imply_imply'!.mp hΓ₂ ⨀ h;
+    obtain ⟨Γ, hΓ₁, hΓ₂⟩ := Theory.iff_insert_inconsistent.mp $ Ω.maximal' hC;
+    have : Γ ⊢[𝝂Ax]! ⊥ := FiniteContext.provable_iff.mpr $ and_imply_iff_imply_imply'!.mp hΓ₂ ⨀ h;
+    have : Γ ⊬[𝝂Ax]! ⊥ := Theory.def_consistent.mp Ω.consistent _ hΓ₁;
+    contradiction;
 
 lemma realize_axiomset_of_self_canonicalModel : (CanonicalModel Ax) ⊧* Ax := by
   apply Semantics.realizeSet_iff.mpr;
