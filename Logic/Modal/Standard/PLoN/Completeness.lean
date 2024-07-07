@@ -36,7 +36,7 @@ lemma truthlemma : ∀ {Ω : (CanonicalModel Λ).World}, Ω ⊧ p ↔ (p ∈ Ω.
       simp [PLoN.Satisfies];
       constructor;
       . assumption;
-      . obtain ⟨Ω', hΩ'⟩ := lindenbaum (𝓓 := Λ) (T := {~p}) (not_singleton_consistent Ω.consistent (iff_mem_neg.mpr hC));
+      . obtain ⟨Ω', hΩ'⟩ := lindenbaum (Λ := Λ) (T := {~p}) (not_singleton_consistent Ω.consistent (iff_mem_neg.mpr hC));
         use Ω';
         constructor;
         . apply iff_mem_neg.mp;
@@ -58,8 +58,8 @@ lemma complete_of_mem_canonicalFrame {𝔽 : FrameClass α} (hFC : CanonicalFram
   constructor;
   . exact hFC;
   . use (CanonicalModel Λ).Valuation;
-    obtain ⟨Ω, hΩ⟩ := lindenbaum (𝓓 := Λ) (T := {~p}) (by
-      apply unprovable_iff_singleton_neg_Consistent.mp;
+    obtain ⟨Ω, hΩ⟩ := lindenbaum (Λ := Λ) (T := {~p}) (by
+      apply unprovable_iff_singleton_neg_consistent.mp;
       exact h;
     );
     use Ω;

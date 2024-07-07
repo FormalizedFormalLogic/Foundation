@@ -32,7 +32,7 @@ lemma iff_ParametricConsistent_insert₁ : (𝓓)-Consistent ((insert p T), U) �
   . intro h Γ Δ hΓ hΔ;
     by_contra hC;
     have : 𝓓 ⊬! ⋀(p :: Γ) ⟶ ⋁Δ := h (by simp; intro q hq; right; exact hΓ q hq;) hΔ;
-    have : 𝓓 ⊢! ⋀(p :: Γ) ⟶ ⋁Δ := implyLeft_cons_conj'!.mpr hC;
+    have : 𝓓 ⊢! ⋀(p :: Γ) ⟶ ⋁Δ := iff_imply_left_cons_conj'!.mpr hC;
     contradiction;
   . intro h Γ Δ hΓ hΔ;
     simp_all only [Set.mem_insert_iff];
@@ -44,7 +44,7 @@ lemma iff_ParametricConsistent_insert₁ : (𝓓)-Consistent ((insert p T), U) �
       | inr h => assumption;
     ) hΔ;
     by_contra hC;
-    have : 𝓓 ⊢! p ⋏ ⋀(Γ.remove p) ⟶ ⋁Δ := imp_trans''! and_comm! $ imply_left_remove_conj'! (p := p) hC;
+    have : 𝓓 ⊢! p ⋏ ⋀(Γ.remove p) ⟶ ⋁Δ := imp_trans''! and_comm! $ imply_left_remove_conj! (p := p) hC;
     contradiction;
 
 lemma iff_not_ParametricConsistent_insert₁ : ¬(𝓓)-Consistent ((insert p T), U) ↔ ∃ Γ Δ : List (Formula α), (∀ p ∈ Γ, p ∈ T) ∧ (∀ p ∈ Δ, p ∈ U) ∧ 𝓓 ⊢! p ⋏ ⋀Γ ⟶ ⋁Δ := by
@@ -57,7 +57,7 @@ lemma iff_ParametricConsistent_insert₂ : (𝓓)-Consistent (T, (insert p U)) �
   . intro h Γ Δ hΓ hΔ;
     by_contra hC;
     have : 𝓓 ⊬! ⋀Γ ⟶ ⋁(p :: Δ) := h hΓ (by simp; intro q hq; right; exact hΔ q hq);
-    have : 𝓓 ⊢! ⋀Γ ⟶ ⋁(p :: Δ) := implyRight_cons_disj'!.mpr hC;
+    have : 𝓓 ⊢! ⋀Γ ⟶ ⋁(p :: Δ) := implyRight_cons_disj!.mpr hC;
     contradiction;
   . intro h Γ Δ hΓ hΔ;
     simp_all;
@@ -69,7 +69,7 @@ lemma iff_ParametricConsistent_insert₂ : (𝓓)-Consistent (T, (insert p U)) �
       | inr h => assumption;
     );
     by_contra hC;
-    have : 𝓓 ⊢! ⋀Γ ⟶ p ⋎ ⋁(Δ.remove p) := imp_trans''! hC $ forthback_disj'_remove;
+    have : 𝓓 ⊢! ⋀Γ ⟶ p ⋎ ⋁(Δ.remove p) := imp_trans''! hC $ forthback_disj_remove;
     contradiction;
 
 
@@ -449,7 +449,7 @@ private lemma truthlemma.himp
         have := by simpa using hΓ r hr₁;
         simp_all;
       by_contra hC;
-      have : 𝓓 ⊢! ⋀(Γ.remove p) ⟶ (p ⟶ q) := imp_trans''! (and_imply_iff_imply_imply'!.mp $ imply_left_remove_conj'! hC) (by
+      have : 𝓓 ⊢! ⋀(Γ.remove p) ⟶ (p ⟶ q) := imp_trans''! (and_imply_iff_imply_imply'!.mp $ imply_left_remove_conj! hC) (by
         apply deduct'!;
         apply deduct!;
         have : [p, p ⟶ ⋁Δ] ⊢[𝓓]! p := by_axm!;
@@ -500,7 +500,7 @@ private lemma truthlemma.hneg
         simp_all;
       replace hΔ : Δ = [] := List.nil_iff.mpr hΔ; subst hΔ;
       by_contra hC; simp at hC;
-      have : 𝓓 ⊢! ⋀(Γ.remove p) ⟶ ~p := imp_trans''! (and_imply_iff_imply_imply'!.mp $ imply_left_remove_conj'! hC) (and₂'! neg_equiv!);
+      have : 𝓓 ⊢! ⋀(Γ.remove p) ⟶ ~p := imp_trans''! (and_imply_iff_imply_imply'!.mp $ imply_left_remove_conj! hC) (and₂'! neg_equiv!);
       have : 𝓓 ⊬! ⋀(Γ.remove p) ⟶ ~p := by simpa using t.consistent (Δ := [~p]) hΓ (by simpa);
       contradiction;
     have ⟨_, _⟩ := Set.insert_subset_iff.mp h;

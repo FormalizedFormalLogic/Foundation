@@ -5,7 +5,6 @@ import Logic.FirstOrder.Basic.Syntax.Rew
 import Logic.FirstOrder.Basic.Semantics.Semantics
 import Logic.FirstOrder.Basic.Semantics.Elementary
 import Logic.FirstOrder.Basic.Operator
-import Logic.FirstOrder.Basic.Elab
 import Logic.FirstOrder.Basic.BinderNotation
 import Logic.FirstOrder.Basic.Model
 import Logic.FirstOrder.Basic.Calculus

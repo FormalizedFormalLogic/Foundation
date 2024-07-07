@@ -311,6 +311,7 @@ def conjIntro' [DecidableEq F] (Γ : List F) (b : (p : F) → p ∈ Γ → 𝓢 
   | q :: r :: Γ => by
     simp;
     exact andIntro (b q (by simp)) (conjIntro' _ (by aesop))
+lemma conj_intro'! [DecidableEq F] {Γ : List F} (b : (p : F) → p ∈ Γ → 𝓢 ⊢! p) : 𝓢 ⊢! ⋀Γ := ⟨conjIntro' Γ (λ p hp => (b p hp).some)⟩
 
 def implyConj' [DecidableEq F] (p : F) (Γ : List F) (b : (q : F) → q ∈ Γ → 𝓢 ⊢ p ⟶ q) : 𝓢 ⊢ p ⟶ ⋀Γ :=
   match Γ with

@@ -209,12 +209,12 @@ private lemma consistency_lemma_1 [T₀ ≼ U] [β.HilbertBernays T₀ U] : (U �
     exact contra₃'! $ imp_trans''! (Subtheory.prf! (𝓢 := T₀) formalized_consistent_of_existance_unprovable) H;
   . intro H;
     apply contra₀'!;
-    have : T₀ ⊢! ⦍β⦎σ ⋏ ⦍β⦎(~σ) ⟶ ⦍β⦎⊥ := imp_trans''! prov_collect_and $ prov_distribute_imply no_both!;
+    have : T₀ ⊢! ⦍β⦎σ ⋏ ⦍β⦎(~σ) ⟶ ⦍β⦎⊥ := imp_trans''! prov_collect_and $ prov_distribute_imply lac!;
     have : U ⊢! ⦍β⦎σ ⟶ ⦍β⦎(~σ) ⟶ ⦍β⦎⊥ := Subtheory.prf! $ and_imply_iff_imply_imply'!.mp $ this;
     exact this ⨀₁ H;
 
 private lemma consistency_lemma_2 : T₀ ⊢! (⦍β⦎σ ⟶ ⦍β⦎(~σ)) ⟶ ⦍β⦎σ ⟶ ⦍β⦎⊥ := by
-  have : T ⊢! σ ⟶ ~σ ⟶ ⊥ := and_imply_iff_imply_imply'!.mp no_both!
+  have : T ⊢! σ ⟶ ~σ ⟶ ⊥ := and_imply_iff_imply_imply'!.mp lac!
   have : T₀ ⊢! ⦍β⦎σ ⟶ ⦍β⦎(~σ ⟶ ⊥)  := prov_distribute_imply this;
   have : T₀ ⊢! ⦍β⦎σ ⟶ (⦍β⦎(~σ) ⟶ ⦍β⦎⊥) := imp_trans''! this D2;
 

@@ -117,3 +117,13 @@ class Construction.StrongFinite (c : Construction M φ) where
   strong_finite {C : Set M} {v x} : c.Φ v C x → c.Φ v {y ∈ C | y < x} x
 ```
 - [StrongFinite](https://iehality.github.io/Arithmetization/Arithmetization/ISigmaOne/HFS/Fixpoint.html#LO.Arith.Fixpoint.Construction.StrongFinite)
+
+Also structural induction holds.
+
+```lean
+theorem Construction.induction [c.StrongFinite]
+    {P : M → Prop} (hP : (Γ, 1)-Predicate P)
+    (H : ∀ C : Set M, (∀ x ∈ C, c.Fixpoint v x ∧ P x) → ∀ x, c.Φ v C x → P x) :
+    ∀ x, c.Fixpoint v x → P x
+```
+- [LO.Arith.Fixpoint.Construction.induction](https://iehality.github.io/Arithmetization/Arithmetization/ISigmaOne/HFS/Fixpoint.html#LO.Arith.Fixpoint.Construction.induction)
