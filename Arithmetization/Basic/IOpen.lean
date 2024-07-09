@@ -747,6 +747,49 @@ lemma pair₅_defined : DefinedFunction (fun v : Fin 5 → M ↦ (⟪v 0, v 1, v
 
 end
 
+def npair : {n : ℕ} → (v : Fin n → M) → M
+  | 0,     _ => 0
+  | _ + 1, v => ⟪v 0, npair (v ·.succ)⟫
+
+@[simp] lemma npair_zero (v : Fin 0 → M) : npair v = 0 := by simp [npair]
+
+lemma npair_succ (x) (v : Fin n → M) : npair (x :> v) = ⟪x, npair v⟫ := by simp [npair]
+
+def unNpair : {n : ℕ} → Fin n → M → M
+  | 0,     i, _ => i.elim0
+  | _ + 1, i, x => Fin.cases (π₁ x) (fun i ↦ unNpair i (π₂ x)) i
+
+@[simp] lemma unNpair_npair {n} (i : Fin n) (v : Fin n → M) : unNpair i (npair v) = v i := by
+  induction' n with n ih <;> simp [npair, unNpair, *]
+  · exact i.elim0
+  · cases i using Fin.cases <;> simp
+
+section
+
+def _root_.LO.FirstOrder.Arith.unNpairDef : {n : ℕ} → (i : Fin n) → 𝚺₀-Semisentence 2
+  | 0,     i => i.elim0
+  | n + 1, i =>
+    Fin.cases pi₁Def (fun i ↦ .mkSigma “z v | ∃ r <⁺ v, !pi₂Def r v ∧ !(unNpairDef i) z r” (by simp)) i
+
+lemma unNpair_defined {n} (i : Fin n) : 𝚺₀-Function₁ (unNpair i : M → M) via unNpairDef i := by
+  induction' n with n ih
+  · exact i.elim0
+  · intro v
+    cases' i using Fin.cases with i
+    · simp [unNpairDef, unNpair]
+    · simp [unNpairDef, unNpair, (ih i).df.iff]
+      constructor
+      · intro h; exact ⟨π₂ (v 1), by simp, rfl, h⟩
+      · rintro ⟨x, _, rfl, h⟩; exact h
+
+@[simp] lemma eval_unNpairDef {n} (i : Fin n) (v) :
+    Semiformula.Evalbm M v (unNpairDef i).val ↔ v 0 = unNpair i (v 1) := (unNpair_defined i).df.iff v
+
+@[definability, simp] instance unNpair_definable {n} (i : Fin n) (Γ) : Γ-Function₁ (unNpair i : M → M) :=
+  Defined.to_definable₀ _ (unNpair_defined i)
+
+end
+
 end pair
 
 end IOpen

@@ -197,6 +197,8 @@ lemma Seq.mem_seqCons_iff_of_lt {s x z : M} (hi : i < lh s) : ⟪i, x⟫ ∈ s �
   simp [seqCons, hi]
   rintro rfl; simp at hi
 
+@[simp] lemma lh_not_mem {s} (Ss : Seq s) (x : M) : ⟪lh s, x⟫ ∉ s := fun h ↦ by have := Ss.lt_lh_of_mem h; simp at this
+
 section
 
 lemma seqCons_graph (t x s : M) :
@@ -343,6 +345,8 @@ def vecConsUnexpander : Lean.PrettyPrinter.Unexpander
 
 @[simp] lemma doubleton_seq (x y : M) : Seq !⟦x, y⟧ := by apply Seq.seqCons; simp
 
+@[simp] lemma mem_singleton_seq_iff (x y : M) : ⟪0, x⟫ ∈ !⟦y⟧ ↔ x = y := by simp [mem_seqCons_iff]
+
 section
 
 def _root_.LO.FirstOrder.Arith.mkSeq₁Def : 𝚺₀-Semisentence 2 := .mkSigma
@@ -444,6 +448,15 @@ lemma Seq.seqPop_succ {a : M} {s} (Ss : Seq s) {i x} :
     have : x = (Ss.seqPop a).nth this := Ss.isMapping.uniq hi (Ss.seqPop_succ ((Ss.seqPop a).nth_mem this))
     rcases this; simp⟩
 
+lemma Seq.seqPop_iff {a s i x : M} (Ss : Seq s) :
+    ⟪i, x⟫ ∈ a `⁀ s ↔ i = 0 ∧ x = a ∨ ∃ j, j + 1 = i ∧ ⟪j, x⟫ ∈ s := by
+  rcases zero_or_succ i with (rfl | ⟨j, rfl⟩)
+  · simp only [true_and, add_eq_zero_iff, one_ne_zero, and_false, false_and, exists_const, or_false]
+    constructor
+    · intro h; exact (Ss.seqPop a).isMapping.uniq h (Ss.seqPop_zero a)
+    · rintro rfl; exact Ss.seqPop_zero x
+  · simp [Ss]
+
 section
 
 private lemma seqPop_graph (t a s : M) :
@@ -504,6 +517,91 @@ lemma mem_vectoSeq {n : ℕ} (v : Fin n → M) (i : Fin n) : ⟪(i : M), v i⟫ 
       right; exact ih (v ·.castSucc) i
 
 end seqToVec
+
+lemma sigma₁_order_ball_induction {f : M → M → M} (hf : 𝚺₁-Function₂ f) {P : M → M → Prop} (hP : 𝚺₁-Relation P)
+    (ind : ∀ x y, (∀ x' < x, ∀ y' ≤ f x y, P x' y') → P x y) : ∀ x y, P x y := by
+  have maxf : ∀ x y, ∃ m, ∀ x' ≤ x, ∀ y' ≤ y, f x' y' ≤ m := by
+    intro x y;
+    rcases sigma₁_replacement₂ hf (under (x + 1)) (under (y + 1)) |>.exists with ⟨m, hm⟩
+    exact ⟨m, fun x' hx' y' hy' ↦
+      le_of_lt <| lt_of_mem <| hm (f x' y') |>.mpr
+        ⟨x', by simpa [lt_succ_iff_le] using hx', y', by simpa [lt_succ_iff_le] using hy', rfl⟩⟩
+  intro x y
+  have : ∀ k ≤ x, ∃ W, Seq W ∧ k + 1 = lh W ∧
+      ⟪0, y⟫ ∈ W ∧
+      ∀ l < k, ∀ m < W, ∀ m' < W, ⟪l, m⟫ ∈ W → ⟪l + 1, m'⟫ ∈ W → ∀ x' ≤ x - l, ∀ y' ≤ m, f x' y' ≤ m' := by
+    intro k hk
+    induction k using induction_iSigmaOne
+    · apply Definable.imp (Definable.comp₂' (DefinableFunction.var _) (DefinableFunction.const _))
+      apply Definable.ex
+      apply Definable.and (Definable.comp₁' (DefinableFunction.var _))
+      apply Definable.and
+        (Definable.comp₂'
+          (DefinableFunction.comp₂ (DefinableFunction.var _) (DefinableFunction.const _))
+          (DefinableFunction.comp₁ <| DefinableFunction.var _))
+      apply Definable.and
+        (Definable.comp₂' (DefinableFunction.comp₂ (DefinableFunction.const _) (DefinableFunction.const _)) (DefinableFunction.var _))
+      apply Definable.ball_lt (DefinableFunction.var _)
+      apply Definable.ball_lt (DefinableFunction.var _)
+      apply Definable.ball_lt (DefinableFunction.var _)
+      apply Definable.imp
+        (Definable.comp₂'
+          (DefinableFunction.comp₂ (DefinableFunction.var _) (DefinableFunction.var _))
+          (DefinableFunction.var _))
+      apply Definable.imp
+        (Definable.comp₂'
+          (DefinableFunction.comp₂
+            (DefinableFunction.comp₂ (DefinableFunction.var _) (DefinableFunction.const _))
+            (DefinableFunction.var _))
+          (DefinableFunction.var _))
+      apply Definable.ball_le
+        (Definable.comp₂' (DefinableFunction.var _) (DefinableFunction.comp₂ (DefinableFunction.const _) (DefinableFunction.var _)))
+      apply Definable.ball_le (DefinableFunction.var _)
+      apply Definable.comp₂' (DefinableFunction.comp₂ (DefinableFunction.var _) (DefinableFunction.var _)) (DefinableFunction.var _)
+    case zero => exact ⟨!⟦y⟧, by simp⟩
+    case succ k ih =>
+      rcases ih (le_trans le_self_add hk) with ⟨W, SW, hkW, hW₀, hWₛ⟩
+      let m₀ := SW.nth (show k < lh W by simp [←hkW])
+      have : ∃ m₁, ∀ x' ≤ x - k, ∀ y' ≤ m₀, f x' y' ≤ m₁ := maxf (x - k) m₀
+      rcases this with ⟨m₁, hm₁⟩
+      exact ⟨W ⁀' m₁, SW.seqCons m₁, by simp [SW, hkW], Seq.subset_seqCons _ _ hW₀, by
+        intro l hl m _ m' _ hm hm' x' hx' y' hy'
+        rcases show l ≤ k from lt_succ_iff_le.mp hl with (rfl | hl)
+        · have hmm₀ : m = m₀ := by simp [mem_seqCons_iff, ←hkW] at hm; exact SW.isMapping.uniq hm (by simp [m₀])
+          have hm'm₁ : m' = m₁ := by simpa [SW, hkW, mem_seqCons_iff] using hm'
+          simpa [hm'm₁] using hm₁ x' hx' y' (by simp [←hmm₀, hy'])
+        · have Hm : ⟪l, m⟫ ∈ W := Seq.mem_seqCons_iff_of_lt (by simpa [←hkW]) |>.mp hm
+          have Hm' : ⟪l + 1, m'⟫ ∈ W := Seq.mem_seqCons_iff_of_lt (by simpa [←hkW]) |>.mp hm'
+          exact hWₛ l hl m (lt_of_mem_rng Hm) m' (lt_of_mem_rng Hm') Hm Hm' x' hx' y' hy'⟩
+  rcases this x (by rfl) with ⟨W, SW, hxW, hW₀, hWₛ⟩
+  have : ∀ i ≤ x, ∀ m < W, ⟪x - i, m⟫ ∈ W → ∀ x' ≤ i, ∀ y' ≤ m, P x' y' := by
+    intro i
+    induction i using induction_iSigmaOne
+    · apply Definable.imp (Definable.comp₂' (DefinableFunction.var _) (DefinableFunction.const _))
+      apply Definable.ball_lt (DefinableFunction.const _)
+      apply Definable.imp
+        (Definable.comp₂'
+          (DefinableFunction.comp₂ (DefinableFunction.comp₂ (DefinableFunction.const _) (DefinableFunction.var _)) (DefinableFunction.var _))
+          (DefinableFunction.const _))
+      apply Definable.ball_le (DefinableFunction.var _)
+      apply Definable.ball_le (DefinableFunction.var _)
+      apply Definable.comp₂' (DefinableFunction.var _) (DefinableFunction.var _)
+    case zero =>
+      intro _ _ _ _ _ h y' _
+      rcases nonpos_iff_eq_zero.mp h
+      exact ind 0 y' (by simp)
+    case succ i ih' =>
+      intro hi m _ hm x' hx' y' hy'
+      have ih : ∀ m < W, ⟪x - i, m⟫ ∈ W → ∀ x' ≤ i, ∀ y' ≤ m, P x' y' := ih' (le_trans le_self_add hi)
+      refine ind x' y' ?_
+      intro x'' hx'' y'' hy''
+      let m₁ := SW.nth (show x - i < lh W by simp [←hxW, lt_succ_iff_le])
+      have : f x' y' ≤ m₁ :=
+        hWₛ (x - (i + 1)) (tsub_lt_iff_left hi |>.mpr (by simp)) m (lt_of_mem_rng hm) m₁ (by simp [m₁]) hm
+          (by rw [←sub_sub, sub_add_self_of_le (show 1 ≤ x - i from le_tsub_of_add_le_left hi)]; simp [m₁])
+          x' (by simp [tsub_tsub_cancel_of_le hi, hx']) y' hy'
+      exact ih m₁ (by simp [m₁]) (by simp [m₁]) x'' (lt_succ_iff_le.mp (lt_of_lt_of_le hx'' hx')) y'' (le_trans hy'' this)
+  exact this x (by rfl) y (lt_of_mem_rng hW₀) (by simpa using hW₀) x (by rfl) y (by rfl)
 
 end LO.Arith
 

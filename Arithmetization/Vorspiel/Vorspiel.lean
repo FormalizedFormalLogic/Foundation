@@ -5,6 +5,9 @@ instance [Zero α] : Nonempty α := ⟨0⟩
 
 notation "exp " x:90 => Exp.exp x
 
+theorem existsUnique_congr {p q : α → Prop} (h : ∀ a, p a ↔ q a) : (∃! a, p a) ↔ ∃! a, q a :=
+  exists_congr fun _ ↦ and_congr (h _) <| forall_congr' fun _ ↦ imp_congr_left (h _)
+
 namespace Matrix
 
 lemma forall_iff {n : ℕ} (p : (Fin (n + 1) → α) → Prop) :
@@ -181,6 +184,25 @@ abbrev Semiformula.Rlz (p : Semiformula L M n) (e : Fin n → M) : Prop := Evalm
 end
 
 namespace Arith
+
+namespace Hierarchy
+
+section
+variable {L : FirstOrder.Language} [L.LT] {μ : Type v}
+
+@[simp]
+lemma exItr {n} : {k : ℕ} → {p : Semiformula L μ (n + k)} → Hierarchy 𝚺 (s + 1) (∃^[k] p) ↔ Hierarchy 𝚺 (s + 1) p
+  | 0,     p => by simp
+  | k + 1, p => by simp [LO.exItr_succ, exItr]
+
+@[simp]
+lemma univItr {n} : {k : ℕ} → {p : Semiformula L μ (n + k)} → Hierarchy 𝚷 (s + 1) (∀^[k] p) ↔ Hierarchy 𝚷 (s + 1) p
+  | 0,     p => by simp
+  | k + 1, p => by simp [LO.univItr_succ, univItr]
+
+end
+
+end Hierarchy
 
 variable (M : Type*) [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐏𝐀⁻]
 

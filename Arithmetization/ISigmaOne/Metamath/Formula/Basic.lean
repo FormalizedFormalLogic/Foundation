@@ -647,8 +647,8 @@ structure Construction (L : Arith.Language V) (φ : Blueprint pL) where
   or_defined     : DefinedFunction (fun v ↦ or  (v 0) (v 1) (v 2) (v 3) (v 4) (v 5)) φ.or
   all_defined    : DefinedFunction (fun v ↦ all (v 0) (v 1) (v 2) (v 3)) φ.all
   ex_defined     : DefinedFunction (fun v ↦ ex  (v 0) (v 1) (v 2) (v 3)) φ.ex
-  allChanges_defined : DefinedFunction (fun v ↦ allChanges (v 0) (v 1)) φ.allChanges
-  exChanges_defined  : DefinedFunction (fun v ↦ exChanges  (v 0) (v 1)) φ.exChanges
+  allChanges_defined : 𝚺₁-Function₂ allChanges via φ.allChanges
+  exChanges_defined  : 𝚺₁-Function₂ exChanges via φ.exChanges
 
 variable {V}
 
@@ -1039,25 +1039,33 @@ lemma graph_ex_inv {n p₁ r : V} :
 
 variable (param)
 
-lemma graph_exists {p : V} : L.UFormula p → ∃ r, c.Graph param p r := by
-  apply Language.UFormula.induction 𝚺 (P := fun p ↦ ∃ r, c.Graph param p r)
-    (by definability)
-  case hrel =>
-    intro n k r v hkr hv; exact ⟨c.rel param n k r v, c.graph_rel hkr hv⟩
-  case hnrel =>
-    intro n k r v hkr hv; exact ⟨c.nrel param n k r v, c.graph_nrel hkr hv⟩
-  case hverum =>
-    intro n; exact ⟨c.verum param n, c.graph_verum n⟩
-  case hfalsum =>
-    intro n; exact ⟨c.falsum param n, c.graph_falsum n⟩
-  case hand =>
-    rintro n p₁ p₂ hp₁ hp₂ ⟨r₁, h₁⟩ ⟨r₂, h₂⟩; exact ⟨c.and param n p₁ p₂ r₁ r₂, c.graph_and hp₁ hp₂ h₁ h₂⟩
-  case hor =>
-    rintro n p₁ p₂ hp₁ hp₂ ⟨r₁, h₁⟩ ⟨r₂, h₂⟩; exact ⟨c.or param n p₁ p₂ r₁ r₂, c.graph_or hp₁ hp₂ h₁ h₂⟩
-  case hall =>
-    rintro n p₁ hp₁ ⟨r₁, h₁⟩; sorry --exact ⟨c.all param n p₁ r₁, c.graph_all hp₁ h₁⟩
-  case hex =>
-    rintro n p₁ hp₁ ⟨r₁, h₁⟩; sorry --exact ⟨c.ex param n p₁ r₁, c.graph_ex hp₁ h₁⟩
+lemma graph_exists {p : V} : L.UFormula p → ∃ y, c.Graph param p y := by
+  haveI : 𝚺₁-Function₂ c.allChanges := c.allChanges_defined.to_definable
+  haveI : 𝚺₁-Function₂ c.exChanges := c.exChanges_defined.to_definable
+  let f : V → V → V := fun p param ↦ max param (max (c.allChanges param (bv p)) (c.exChanges param (bv p)))
+  have hf : 𝚺₁-Function₂ f := by simp [f]; definability
+  apply sigma₁_order_ball_induction hf ?_ ?_ p param
+  · definability
+  intro p param ih hp
+  rcases hp.case with
+    (⟨n, k, r, v, hkr, hv, rfl⟩ | ⟨n, k, r, v, hkr, hv, rfl⟩ |
+    ⟨n, rfl⟩ | ⟨n, rfl⟩ |
+    ⟨n, p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨n, p₁, p₂, hp₁, hp₂, rfl⟩ |
+    ⟨n, p₁, hp₁, rfl⟩ | ⟨n, p₁, hp₁, rfl⟩)
+  · exact ⟨c.rel param n k r v, c.graph_rel hkr hv⟩
+  · exact ⟨c.nrel param n k r v, c.graph_nrel hkr hv⟩
+  · exact ⟨c.verum param n, c.graph_verum n⟩
+  · exact ⟨c.falsum param n, c.graph_falsum n⟩
+  · rcases ih p₁ (by simp) param (by simp [f]) hp₁.1 with ⟨y₁, h₁⟩
+    rcases ih p₂ (by simp) param (by simp [f]) hp₂.1 with ⟨y₂, h₂⟩
+    exact ⟨c.and param n p₁ p₂ y₁ y₂, c.graph_and ⟨hp₁.1, Eq.symm hp₁.2⟩ ⟨hp₂.1, Eq.symm hp₂.2⟩ h₁ h₂⟩
+  · rcases ih p₁ (by simp) param (by simp [f]) hp₁.1 with ⟨y₁, h₁⟩
+    rcases ih p₂ (by simp) param (by simp [f]) hp₂.1 with ⟨y₂, h₂⟩
+    exact ⟨c.or param n p₁ p₂ y₁ y₂, c.graph_or ⟨hp₁.1, Eq.symm hp₁.2⟩ ⟨hp₂.1, Eq.symm hp₂.2⟩ h₁ h₂⟩
+  · rcases ih p₁ (by simp) (c.allChanges param n) (by simp [f]) hp₁.1 with ⟨y₁, h₁⟩
+    exact ⟨c.all param n p₁ y₁, c.graph_all ⟨hp₁.1, Eq.symm hp₁.2⟩ h₁⟩
+  · rcases ih p₁ (by simp) (c.exChanges param n) (by simp [f]) hp₁.1 with ⟨y₁, h₁⟩
+    exact ⟨c.ex param n p₁ y₁, c.graph_ex ⟨hp₁.1, Eq.symm hp₁.2⟩ h₁⟩
 
 lemma graph_unique {p : V} : L.UFormula p → ∀ {param r r'}, c.Graph param p r → c.Graph param p r' → r = r' := by
   apply Language.UFormula.induction 𝚷 (P := fun p ↦ ∀ {param r r'}, c.Graph param p r → c.Graph param p r' → r = r')
@@ -1155,6 +1163,68 @@ end
 end Construction
 
 end Language.UformulaRec1
+
+/-
+namespace Language.UformulaRec
+
+structure Blueprint (pL : LDef) (arity : ℕ) where
+  rel        : 𝚺₁-Semisentence (arity + 5)
+  nrel       : 𝚺₁-Semisentence (arity + 5)
+  verum      : 𝚺₁-Semisentence (arity + 2)
+  falsum     : 𝚺₁-Semisentence (arity + 2)
+  and        : 𝚺₁-Semisentence (arity + 6)
+  or         : 𝚺₁-Semisentence (arity + 6)
+  all        : 𝚺₁-Semisentence (arity + 4)
+  ex         : 𝚺₁-Semisentence (arity + 4)
+  allChanges : Fin arity → 𝚺₁-Semisentence (arity + 2)
+  exChanges  : Fin arity → 𝚺₁-Semisentence (arity + 2)
+
+structure Construction (L : Arith.Language V) {arity} (φ : Blueprint pL arity) where
+  rel                        (param : Fin arity → V) (n k R v : V) : V
+  nrel                       (param : Fin arity → V) (n k R v : V) : V
+  verum                      (param : Fin arity → V) (n : V) : V
+  falsum                     (param : Fin arity → V) (n : V) : V
+  and                        (param : Fin arity → V) (n p₁ p₂ y₁ y₂ : V) : V
+  or                         (param : Fin arity → V) (n p₁ p₂ y₁ y₂ : V) : V
+  all                        (param : Fin arity → V) (n p₁ y₁ : V) : V
+  ex                         (param : Fin arity → V) (n p₁ y₁ : V) : V
+  allChanges (i : Fin arity) (param : Fin arity → V) (n : V) : V
+  exChanges  (i : Fin arity) (param : Fin arity → V) (n : V) : V
+  rel_defined    : DefinedFunction (fun v ↦ rel (v ·.succ.succ.succ.succ) (v 0) (v 1) (v 2) (v 3)) φ.rel
+  nrel_defined   : DefinedFunction (fun v ↦ nrel (v ·.succ.succ.succ.succ) (v 0) (v 1) (v 2) (v 3)) φ.nrel
+  verum_defined  : DefinedFunction (fun v ↦ verum (v ·.succ) (v 0)) φ.verum
+  falsum_defined : DefinedFunction (fun v ↦ falsum (v ·.succ) (v 0)) φ.falsum
+  and_defined    : DefinedFunction (fun v ↦ and (v ·.succ.succ.succ.succ.succ) (v 0) (v 1) (v 2) (v 3) (v 4)) φ.and
+  or_defined     : DefinedFunction (fun v ↦ or  (v ·.succ.succ.succ.succ.succ) (v 0) (v 1) (v 2) (v 3) (v 4)) φ.or
+  all_defined    : DefinedFunction (fun v ↦ all (v ·.succ.succ.succ) (v 0) (v 1) (v 2)) φ.all
+  ex_defined     : DefinedFunction (fun v ↦ ex  (v ·.succ.succ.succ) (v 0) (v 1) (v 2)) φ.ex
+  allChanges_defined (i : Fin arity) : DefinedFunction (fun v ↦ allChanges i (v ·.succ) (v 0)) (φ.allChanges i)
+  exChanges_defined  (i : Fin arity) : DefinedFunction (fun v ↦ exChanges i (v ·.succ) (v 0)) (φ.exChanges i)
+
+variable {arity} (β : Blueprint pL arity)
+
+namespace Blueprint
+
+def decomp {n : ℕ} (s : 𝚺₁-Semisentence n) : 𝚺₁-Semisentence 1 :=
+  .mkSigma (∃^[n] (Matrix.conj fun i : Fin n ↦
+    (unNpairDef i).val/[#(i.natAdd 1), #⟨n, by simp⟩]) ⋏ (Rew.substs fun i : Fin n ↦ #(i.natAdd 1)).hom s) (by simp)
+
+def toRec1 : UformulaRec1.Blueprint pL where
+  rel := .mkSigma “y param n k R v | !qqNRelDef y n k R v” (by simp)
+  nrel := .mkSigma “y param n k R v | !qqRelDef y n k R v” (by simp)
+  verum := .mkSigma “y param n | !qqFalsumDef y n” (by simp)
+  falsum := .mkSigma “y param n | !qqVerumDef y n” (by simp)
+  and := .mkSigma “y param n p₁ p₂ y₁ y₂ | !qqOrDef y n y₁ y₂” (by simp)
+  or := .mkSigma “y param n p₁ p₂ y₁ y₂ | !qqAndDef y n y₁ y₂” (by simp)
+  all := .mkSigma “y param n p₁ y₁ | !qqExDef y n y₁” (by simp)
+  ex := .mkSigma “y param n p₁ y₁ | !qqAllDef y n y₁” (by simp)
+  allChanges := .mkSigma “param' param n | param' = 0” (by simp)
+  exChanges := .mkSigma “param' param n | param' = 0” (by simp)
+
+end Blueprint
+
+end Language.UformulaRec
+-/
 
 end LO.Arith
 

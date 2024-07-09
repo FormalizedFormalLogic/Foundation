@@ -324,9 +324,10 @@ lemma domain_subset_domain_of_subset {s t : M} (h : s ⊆ t) : domain s ⊆ doma
 
 end domain
 
+/-! ### Range -/
+
 section range
 
-/-
 lemma range_exists_unique (s : M) :
     ∃! r : M, ∀ y, y ∈ r ↔ ∃ x, ⟪x, y⟫ ∈ s := by
   have : 𝚺₁-Predicate fun y ↦ ∃ x, ⟪x, y⟫ ∈ s :=
@@ -337,9 +338,42 @@ lemma range_exists_unique (s : M) :
   exact finite_comprehension₁!
     this
     (⟨s, fun y ↦ by rintro ⟨x, hx⟩; exact lt_of_le_of_lt (le_pair_right x y) (lt_of_mem hx)⟩)
--/
+
+
+def range (s : M) : M := Classical.choose! (range_exists_unique s)
+
+lemma mem_range_iff {y s : M} : y ∈ range s ↔ ∃ x, ⟪x, y⟫ ∈ s := Classical.choose!_spec (range_exists_unique s) y
+
+private lemma range_graph {s' s : M} : s' = range s ↔ ∀ y < s' + s, (y ∈ s' ↔ ∃ x < s, ∃ z ∈ s, z = ⟪x, y⟫) :=
+  ⟨by rintro rfl y _; simp [mem_range_iff]
+      exact ⟨by rintro ⟨x, hx⟩; exact ⟨x, lt_of_mem_dom hx, hx⟩, by
+        rintro ⟨y, _, hy⟩; exact ⟨y, hy⟩⟩,
+   by intro h; apply mem_ext; intro y; simp [mem_range_iff]
+      constructor
+      · intro hy
+        rcases h y (lt_of_lt_of_le (lt_of_mem hy) (by simp)) |>.mp hy with ⟨y, _, _, hy, rfl⟩; exact ⟨y, hy⟩
+      · rintro ⟨x, hx⟩
+        exact h y (lt_of_lt_of_le (lt_of_mem_rng hx) (by simp))
+          |>.mpr ⟨x, lt_of_mem_dom hx, _, hx, rfl⟩⟩
+
+def _root_.LO.FirstOrder.Arith.rangeDef : 𝚺₀-Semisentence 2 := .mkSigma
+  “s' s | ∀ y < s' + s, (y ∈ s' ↔ ∃ x < s, ∃ z ∈' s, !pairDef z x y)” (by simp)
+
+lemma range_defined : 𝚺₀-Function₁ (range : M → M) via rangeDef := by
+  intro v; simp [rangeDef, range_graph]
+
+@[simp] lemma range_defined_iff (v) :
+    Semiformula.Evalbm M v rangeDef.val ↔ v 0 = range (v 1) := range_defined.df.iff v
+
+instance range_definable : DefinableFunction₁ ℒₒᵣ 𝚺₀ (range : M → M) := Defined.to_definable _ range_defined
+
+@[definability, simp] instance range_definable' (Γ) : DefinableFunction₁ ℒₒᵣ Γ (range : M → M) := .of_zero range_definable _
+
+@[simp] lemma range_empty : range (∅ : M) = ∅ := mem_ext (by simp [mem_range_iff])
 
 end range
+
+/-! ### Disjoint -/
 
 section disjoint
 
@@ -355,6 +389,8 @@ lemma Disjoint.symm {s t : M} (h : Disjoint s t) : Disjoint t s := by simpa [Dis
 @[simp] lemma Disjoint.singleton_iff {a : M} : Disjoint ({a} : M) s ↔ a ∉ s := by simp [Disjoint, isempty_iff]
 
 end disjoint
+
+/-! ### Mapping -/
 
 section mapping
 
@@ -510,6 +546,36 @@ theorem sigmaOne_skolem {R : M → M → Prop} (hP : 𝚺₁-Relation R) {s : M}
         · exact hb
         · exact hf x y h⟩
   exact this s (by rfl)
+
+theorem sigma₁_replacement {f : M → M} (hf : 𝚺₁-Function₁ f) (s : M) :
+    ∃! t : M, ∀ y, y ∈ t ↔ ∃ x ∈ s, y = f x := by
+  have : ∀ x ∈ s, ∃ y, y = f x := by intro x _; exact ⟨f x, rfl⟩
+  have : ∃ F, IsMapping F ∧ domain F = s ∧ ∀ (x y : M), ⟪x, y⟫ ∈ F → y = f x :=
+    sigmaOne_skolem (by definability) this
+  rcases this with ⟨F, _, rfl, hF⟩
+  refine ExistsUnique.intro (range F) ?_ ?_
+  · intro y
+    simp [mem_range_iff]
+    constructor
+    · rintro ⟨x, hx⟩; exact ⟨x, by simp [mem_domain_iff]; exact ⟨y, hx⟩, hF _ _ hx⟩
+    · simp only [mem_domain_iff, forall_exists_index, and_imp]
+      rintro x y hxy rfl; exact ⟨x, by rcases hF _ _ hxy; exact hxy⟩
+  · intro s' hs'
+    apply mem_ext; intro y
+    simp [hs', mem_domain_iff, mem_range_iff]
+    constructor
+    · rintro ⟨x, ⟨y, hxy⟩, rfl⟩; exact ⟨x, by rcases hF _ _ hxy; exact hxy⟩
+    · rintro ⟨x, hxy⟩; exact ⟨x, ⟨y, hxy⟩, hF _ _ hxy⟩
+
+theorem sigma₁_replacement₂ {f : M → M → M} (hf : 𝚺₁-Function₂ f) (s₁ s₂ : M) :
+    ∃! t : M, ∀ y, y ∈ t ↔ ∃ x₁ ∈ s₁, ∃ x₂ ∈ s₂, y = f x₁ x₂ := by
+  have : 𝚺₁-Function₁ (fun x ↦ f (π₁ x) (π₂ x)) := by definability
+  exact (existsUnique_congr (by
+      intro t; apply forall_congr'; intro y; apply iff_congr (by rfl)
+      simp [mem_product_iff']; constructor
+      · rintro ⟨x, ⟨h₁, h₂⟩, rfl⟩; exact ⟨π₁ x, h₁, π₂ x, h₂, by rfl⟩
+      · rintro ⟨x₁, h₁, x₂, h₂, rfl⟩; exact ⟨⟪x₁, x₂⟫, by simp [h₁, h₂]⟩)).mp
+    (sigma₁_replacement this (s₁ ×ʰᶠ s₂))
 
 end LO.Arith
 
