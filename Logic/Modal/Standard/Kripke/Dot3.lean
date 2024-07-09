@@ -74,7 +74,7 @@ instance : System.Consistent (𝐒𝟒.𝟑 : DeductionParameter α) := consiste
 
 
 open MaximalConsistentTheory in
-lemma connected_CanonicalFrame {Ax : AxiomSet α} (hAx : .𝟯 ⊆ Ax) [System.Consistent (𝝂Ax)] : Connected (CanonicalFrame Ax) := by
+lemma connected_CanonicalFrame {Ax : AxiomSet α} (hAx : .𝟯 ⊆ Ax) [System.Consistent (𝝂Ax)] : Connected (CanonicalFrame 𝝂Ax) := by
   dsimp only [Connected];
   intro X Y Z ⟨hXY, hXZ⟩;
   by_contra hC; push_neg at hC;
@@ -108,7 +108,8 @@ instance : Complete (𝐒𝟒.𝟑 : DeductionParameter α) (ReflexiveTransitive
   . rw [←GeachConfluent.transitive_def];
     apply geachConfluent_CanonicalFrame;
     simp [AxiomSet.Geach.Four_def];
-  . apply connected_CanonicalFrame; simp;
+  . apply connected_CanonicalFrame;
+    simp;
 
 end Kripke
 

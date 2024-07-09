@@ -238,7 +238,7 @@ open DeductionParameter (Normal)
 
 variable {Ax : AxiomSet α} [System.Consistent (𝝂Ax)]
 
-lemma geachConfluent_CanonicalFrame (h : 𝗴𝗲(t) ⊆ Ax) : GeachConfluent t (CanonicalFrame Ax):= by
+lemma geachConfluent_CanonicalFrame (h : 𝗴𝗲(t) ⊆ Ax) : GeachConfluent t (CanonicalFrame 𝝂Ax):= by
   rintro Ω₁ Ω₂ Ω₃ h;
   have ⟨r₁₂, r₁₃⟩ := h; clear h;
   have ⟨Ω, hΩ⟩ := lindenbaum (Λ := 𝝂Ax) (T := □''⁻¹^[t.m]Ω₂.theory ∪ □''⁻¹^[t.n]Ω₃.theory) $ by
@@ -271,7 +271,7 @@ lemma geachConfluent_CanonicalFrame (h : 𝗴𝗲(t) ⊆ Ax) : GeachConfluent t 
   . apply multiframe_def_multibox.mpr; apply hΩ.1;
   . apply multiframe_def_multibox.mpr; apply hΩ.2;
 
-lemma multiGeachConfluent_CanonicalFrame (h : 𝗚𝗲(ts) ⊆ Ax) : MultiGeachConfluent ts (CanonicalFrame Ax) := by
+lemma multiGeachConfluent_CanonicalFrame (h : 𝗚𝗲(ts) ⊆ Ax) : MultiGeachConfluent ts (CanonicalFrame 𝝂Ax) := by
   induction ts with
   | nil => simp [MultiGeachConfluent];
   | cons t ts ih =>
@@ -295,13 +295,13 @@ private def instGeachLogicCompleteAux {Λ : DeductionParameter α} [geach : Λ.I
     convert instMultiGeachComplete (α := α);
     exact geach.char;
 
-instance : Complete (𝐊𝐓 : DeductionParameter α) (ReflexiveFrameClass#) := instGeachLogicCompleteAux
+instance : Complete (𝐊𝐓 : DeductionParameter α) ReflexiveFrameClass# := instGeachLogicCompleteAux
 
-instance : Complete (𝐒𝟒 : DeductionParameter α) (PreorderFrameClass#) := instGeachLogicCompleteAux
+instance : Complete (𝐒𝟒 : DeductionParameter α) PreorderFrameClass# := instGeachLogicCompleteAux
 
-instance : Complete (𝐒𝟓 : DeductionParameter α) (ReflexiveEuclideanFrameClass#) := instGeachLogicCompleteAux
+instance : Complete (𝐒𝟓 : DeductionParameter α) ReflexiveEuclideanFrameClass# := instGeachLogicCompleteAux
 
-instance : Complete (𝐊𝐓𝟒𝐁 : DeductionParameter α) (EquivalenceFrameClass#) := instGeachLogicCompleteAux
+instance : Complete (𝐊𝐓𝟒𝐁 : DeductionParameter α) EquivalenceFrameClass# := instGeachLogicCompleteAux
 
 end Completeness
 
