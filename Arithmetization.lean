@@ -29,3 +29,5 @@ import Arithmetization.ISigmaOne.Metamath.Term.Functions
 
 import Arithmetization.ISigmaOne.Metamath.Formula.Basic
 import Arithmetization.ISigmaOne.Metamath.Formula.Functions
+
+import Arithmetization.ISigmaOne.Metamath.Coding

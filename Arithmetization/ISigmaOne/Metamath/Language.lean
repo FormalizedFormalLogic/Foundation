@@ -90,12 +90,12 @@ instance : (L.codeIn M).Defined L.lDef where
   func := by intro v; simp [Language.codeIn, ←Matrix.fun_eq_vec₂]
   rel := by intro v; simp [Language.codeIn, ←Matrix.fun_eq_vec₂]
 
-@[simp] lemma codeIn_func_encode (k : ℕ) (f : L.Func k) : (L.codeIn M).Func k (Encodable.encode f) := by
+@[simp] lemma codeIn_func_encode {k : ℕ} (f : L.Func k) : (L.codeIn M).Func k (Encodable.encode f) := by
   simpa [models_iff, numeral_eq_natCast] using
     consequence_iff_add_eq.mp (sound! <| DefinableLanguage.func_iff.mp ⟨f, rfl⟩) M
       (models_of_subtheory (T := 𝐏𝐀⁻) inferInstance)
 
-@[simp] lemma codeIn_rel_encode (k : ℕ) (r : L.Rel k) : (L.codeIn M).Rel k (Encodable.encode r) := by
+@[simp] lemma codeIn_rel_encode {k : ℕ} (r : L.Rel k) : (L.codeIn M).Rel k (Encodable.encode r) := by
   simpa [models_iff, numeral_eq_natCast] using
     consequence_iff_add_eq.mp (sound! <| DefinableLanguage.rel_iff.mp ⟨r, rfl⟩) M
       (models_of_subtheory (T := 𝐏𝐀⁻) inferInstance)

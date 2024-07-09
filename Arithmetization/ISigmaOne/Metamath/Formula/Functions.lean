@@ -11,6 +11,8 @@ variable {V : Type*} [Zero V] [One V] [Add V] [Mul V] [LT V] [V ⊧ₘ* 𝐈𝚺
 
 variable {L : Arith.Language V} {pL : LDef} [Arith.Language.Defined L pL]
 
+section negation
+
 namespace Negation
 
 def blueprint (pL : LDef) : Language.UformulaRec1.Blueprint pL where
@@ -50,8 +52,6 @@ def construction : Language.UformulaRec1.Construction V L (blueprint pL) where
   exChanges_defined := by intro v; simp [blueprint]
 
 end Negation
-
-section negation
 
 open Negation
 
@@ -131,11 +131,119 @@ end
 
 end negation
 
+section shift
+
+namespace Shift
+
+def blueprint (pL : LDef) : Language.UformulaRec1.Blueprint pL where
+  rel := .mkSigma “y param n k R v | ∃ v', !pL.termShiftSeqDef v' k n v ∧ !qqRelDef y n k R v'” (by simp)
+  nrel := .mkSigma “y param n k R v | ∃ v', !pL.termShiftSeqDef v' k n v ∧ !qqNRelDef y n k R v'” (by simp)
+  verum := .mkSigma “y param n | !qqVerumDef y n” (by simp)
+  falsum := .mkSigma “y param n | !qqFalsumDef y n” (by simp)
+  and := .mkSigma “y param n p₁ p₂ y₁ y₂ | !qqAndDef y n y₁ y₂” (by simp)
+  or := .mkSigma “y param n p₁ p₂ y₁ y₂ | !qqOrDef y n y₁ y₂” (by simp)
+  all := .mkSigma “y param n p₁ y₁ | !qqAllDef y n y₁” (by simp)
+  ex := .mkSigma “y param n p₁ y₁ | !qqExDef y n y₁” (by simp)
+  allChanges := .mkSigma “param' param n | param' = 0” (by simp)
+  exChanges := .mkSigma “param' param n | param' = 0” (by simp)
+
+variable (L)
+
+def construction : Language.UformulaRec1.Construction V L (blueprint pL) where
+  rel {_} := fun n k R v ↦ ^rel n k R (L.termShiftSeq k n v)
+  nrel {_} := fun n k R v ↦ ^nrel n k R (L.termShiftSeq k n v)
+  verum {_} := fun n ↦ ^⊤[n]
+  falsum {_} := fun n ↦ ^⊥[n]
+  and {_} := fun n _ _ y₁ y₂ ↦ y₁ ^⋏[n] y₂
+  or {_} := fun n _ _ y₁ y₂ ↦ y₁ ^⋎[n] y₂
+  all {_} := fun n _ y₁ ↦ ^∀[n] y₁
+  ex {_} := fun n _ y₁ ↦ ^∃[n] y₁
+  allChanges := fun _ _ ↦ 0
+  exChanges := fun _ _ ↦ 0
+  rel_defined := by intro v; simp [blueprint, (termShiftSeq_defined L).df.iff]; rfl
+  nrel_defined := by intro v; simp [blueprint, (termShiftSeq_defined L).df.iff]; rfl
+  verum_defined := by intro v; simp [blueprint]
+  falsum_defined := by intro v; simp [blueprint]
+  and_defined := by intro v; simp [blueprint]; rfl
+  or_defined := by intro v; simp [blueprint]; rfl
+  all_defined := by intro v; simp [blueprint]; rfl
+  ex_defined := by intro v; simp [blueprint]; rfl
+  allChanges_defined := by intro v; simp [blueprint]
+  exChanges_defined := by intro v; simp [blueprint]
+
+end Shift
+
+open Shift
+
+variable (L)
+
+def Language.shift (p : V) : V := (construction L).result 0 p
+
+variable {L}
+
+section
+
+def _root_.LO.FirstOrder.Arith.LDef.shiftDef (pL : LDef) : 𝚺₁-Semisentence 2 := (blueprint pL).result.rew (Rew.substs ![#0, ‘0’, #1])
+
+variable (L)
+
+lemma shift_defined : 𝚺₁-Function₁ L.shift via pL.shiftDef := fun v ↦ by
+  simpa [LDef.shiftDef] using (construction L).result_defined ![v 0, 0, v 1]
+
+@[simp] lemma shift_defined_iff (v : Fin 2 → V) :
+    Semiformula.Evalbm (L := ℒₒᵣ) V v pL.shiftDef ↔ v 0 = L.shift (v 1) := (shift_defined L).df.iff v
+
+instance shift_definable : 𝚺₁-Function₁ L.shift :=
+  Defined.to_definable _ (shift_defined L)
+
+@[simp, definability] instance shift_definable' (Γ) : (Γ, m + 1)-Function₁ L.shift :=
+  .of_sigmaOne (shift_definable L) _ _
+
+end
+
+@[simp] lemma shift_rel {n k R v} (hR : L.Rel k R) (hv : L.SemitermSeq k n v) :
+    L.shift (^rel n k R v) = ^rel n k R (L.termShiftSeq k n v) := by simp [Language.shift, hR, hv, construction]
+
+@[simp] lemma shift_nrel {n k R v} (hR : L.Rel k R) (hv : L.SemitermSeq k n v) :
+    L.shift (^nrel n k R v) = ^nrel n k R (L.termShiftSeq k n v) := by simp [Language.shift, hR, hv, construction]
+
+@[simp] lemma shift_verum (n) :
+    L.shift ^⊤[n] = ^⊤[n] := by simp [Language.shift, construction]
+
+@[simp] lemma shift_falsum (n) :
+    L.shift ^⊥[n] = ^⊥[n] := by simp [Language.shift, construction]
+
+@[simp] lemma shift_and {n p q} (hp : L.Semiformula n p) (hq : L.Semiformula n q) :
+    L.shift (p ^⋏[n] q) = L.shift p ^⋏[n] L.shift q := by simp [Language.shift, hp, hq, construction]
+
+@[simp] lemma shift_or {n p q} (hp : L.Semiformula n p) (hq : L.Semiformula n q) :
+    L.shift (p ^⋎[n] q) = L.shift p ^⋎[n] L.shift q := by simp [Language.shift, hp, hq, construction]
+
+@[simp] lemma shift_all {n p} (hp : L.Semiformula (n + 1) p) :
+    L.shift (^∀[n] p) = ^∀[n] (L.shift p) := by simp [Language.shift, hp, construction]
+
+@[simp] lemma shift_ex {n p} (hp : L.Semiformula (n + 1) p) :
+    L.shift (^∃[n] p) = ^∃[n] (L.shift p) := by simp [Language.shift, hp, construction]
+
+@[simp] lemma Language.Semiformula.shift {p : V} : L.Semiformula n p → L.Semiformula n (L.shift p) := by
+  apply Language.Semiformula.induction_sigma₁
+  · definability
+  · intro n k r v hr hv; simp [hr, hv]
+  · intro n k r v hr hv; simp [hr, hv]
+  · simp
+  · simp
+  · intro n p q hp hq ihp ihq; simp [hp, hq, ihp, ihq]
+  · intro n p q hp hq ihp ihq; simp [hp, hq, ihp, ihq]
+  · intro n p hp ihp; simp [hp, ihp]
+  · intro n p hp ihp; simp [hp, ihp]
+
+end shift
+
 section substs
 
 variable (L)
 
-def Language.qSeq (k n w : V) : V := #̂0 `⁀ L.termBShiftSeq k n w
+def Language.qSeq (k n w : V) : V := ^#0 `⁀ L.termBShiftSeq k n w
 
 variable {L}
 

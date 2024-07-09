@@ -23,8 +23,8 @@ variable (L)
 
 def construction : Language.TermRec.Construction V L (blueprint pL) where
   bvar (param _ z)        := znth (param 1) z
-  fvar (_     _ x)        := &̂x
-  func (_     _ k f _ v') := f̂unc k f v'
+  fvar (_     _ x)        := ^&x
+  func (_     _ k f _ v') := ^func k f v'
   bvar_defined := by intro v; simp [blueprint]; rfl
   fvar_defined := by intro v; simp [blueprint]
   func_defined := by intro v; simp [blueprint]; rfl
@@ -46,13 +46,13 @@ variable {L}
 variable {n m w : V}
 
 @[simp] lemma termSubst_bvar {z} (hz : z < n) :
-    L.termSubst n m w #̂z = znth w z := by simp [Language.termSubst, hz, construction]
+    L.termSubst n m w ^#z = znth w z := by simp [Language.termSubst, hz, construction]
 
 @[simp] lemma termSubst_fvar (x) :
-    L.termSubst n m w &̂x = &̂x := by simp [Language.termSubst, construction]
+    L.termSubst n m w ^&x = ^&x := by simp [Language.termSubst, construction]
 
 @[simp] lemma termSubst_func {k f v} (hkf : L.Func k f) (hv : L.SemitermSeq k n v) :
-    L.termSubst n m w (f̂unc k f v) = f̂unc k f (L.termSubstSeq k n m w v) := by
+    L.termSubst n m w (^func k f v) = ^func k f (L.termSubstSeq k n m w v) := by
   simp [Language.termSubst, construction, hkf, hv]; rfl
 
 section
@@ -100,7 +100,7 @@ lemma termSubst_rng_semiterm {t} (hw : L.SemitermSeq n m w) (ht : L.Semiterm n t
   · definability
   · intro z hz; simp [hz, hw.prop_znth]
   · intro x; simp
-  · intro k f v hkf hv ih;
+  · intro k f v hkf hv ih
     simp only [hkf, hv, termSubst_func, Language.Semiterm.func_iff, true_and]
     exact ⟨by simp [Language.termSubstSeq, hv], by simp [Language.termSubstSeq, hv], fun i z hiz ↦ by
       rcases (construction L).resultSeq_prop' _ hv hiz with ⟨u, hiu, rfl⟩
@@ -110,6 +110,9 @@ lemma termSubst_rng_semiterm {t} (hw : L.SemitermSeq n m w) (ht : L.Semiterm n t
   ⟨by simp [Language.termSubstSeq, hv], by simp [Language.termSubstSeq, hv], fun i u hiu ↦ by
     rcases (construction L).resultSeq_prop' _ hv hiu with ⟨u', hiu', rfl⟩
     exact termSubst_rng_semiterm hw (hv.prop _ _ hiu')⟩
+
+def Language.SemitermSeq.of_mem_termSubstSeq {k n w i z' : V} (hv : L.SemitermSeq k n v)
+    (h' : ⟪i, z'⟫ ∈ L.termSubstSeq k n m w v) : ∃ z, ⟪i, z⟫ ∈ v ∧ L.termSubst n m w z = z' := (construction L).resultSeq_prop' _ hv h'
 
 end termSubst
 
@@ -123,9 +126,9 @@ def blueprint (pL : LDef) : Language.TermRec.Blueprint pL 0 where
 variable (L)
 
 def construction : Language.TermRec.Construction V L (blueprint pL) where
-  bvar (_ _ z)        := #̂z
-  fvar (_ _ x)        := &̂(x + 1)
-  func (_ _ k f _ v') := f̂unc k f v'
+  bvar (_ _ z)        := ^#z
+  fvar (_ _ x)        := ^&(x + 1)
+  func (_ _ k f _ v') := ^func k f v'
   bvar_defined := by intro v; simp [blueprint]
   fvar_defined := by intro v; simp [blueprint]
   func_defined := by intro v; simp [blueprint]; rfl
@@ -147,13 +150,13 @@ variable {L}
 variable {n : V}
 
 @[simp] lemma termShift_bvar {z} (hz : z < n) :
-    L.termShift n #̂z = #̂z := by simp [Language.termShift, hz, construction]
+    L.termShift n ^#z = ^#z := by simp [Language.termShift, hz, construction]
 
 @[simp] lemma termShift_fvar (x) :
-    L.termShift n &̂x = &̂(x + 1) := by simp [Language.termShift, construction]
+    L.termShift n ^&x = ^&(x + 1) := by simp [Language.termShift, construction]
 
 @[simp] lemma termShift_func {k f v} (hkf : L.Func k f) (hv : L.SemitermSeq k n v) :
-    L.termShift n (f̂unc k f v) = f̂unc k f (L.termShiftSeq k n v) := by
+    L.termShift n (^func k f v) = ^func k f (L.termShiftSeq k n v) := by
   simp [Language.termShift, construction, hkf, hv]; rfl
 
 section
@@ -206,6 +209,10 @@ end
     rcases (construction L).resultSeq_prop' _ hv hiu with ⟨u', hiu', rfl⟩
     exact (hv.prop _ _ hiu').termShift⟩
 
+
+def Language.SemitermSeq.of_mem_termShiftSeq {k n i z' : V} (hv : L.SemitermSeq k n v)
+    (h' : ⟪i, z'⟫ ∈ L.termShiftSeq k n v) : ∃ z, ⟪i, z⟫ ∈ v ∧ L.termShift n z = z' := (construction L).resultSeq_prop' _ hv h'
+
 end termShift
 
 namespace TermBShift
@@ -218,9 +225,9 @@ def blueprint (pL : LDef) : Language.TermRec.Blueprint pL 0 where
 variable (L)
 
 def construction : Language.TermRec.Construction V L (blueprint pL) where
-  bvar (_ _ z)        := #̂(z + 1)
-  fvar (_ _ x)        := &̂x
-  func (_ _ k f _ v') := f̂unc k f v'
+  bvar (_ _ z)        := ^#(z + 1)
+  fvar (_ _ x)        := ^&x
+  func (_ _ k f _ v') := ^func k f v'
   bvar_defined := by intro v; simp [blueprint]
   fvar_defined := by intro v; simp [blueprint]
   func_defined := by intro v; simp [blueprint]; rfl
@@ -242,13 +249,13 @@ variable {L}
 variable {n : V}
 
 @[simp] lemma termBShift_bvar {z} (hz : z < n) :
-    L.termBShift n #̂z = #̂(z + 1) := by simp [Language.termBShift, hz, construction]
+    L.termBShift n ^#z = ^#(z + 1) := by simp [Language.termBShift, hz, construction]
 
 @[simp] lemma termBShift_fvar (x) :
-    L.termBShift n &̂x = &̂x := by simp [Language.termBShift, construction]
+    L.termBShift n ^&x = ^&x := by simp [Language.termBShift, construction]
 
 @[simp] lemma termBShift_func {k f v} (hkf : L.Func k f) (hv : L.SemitermSeq k n v) :
-    L.termBShift n (f̂unc k f v) = f̂unc k f (L.termBShiftSeq k n v) := by
+    L.termBShift n (^func k f v) = ^func k f (L.termBShiftSeq k n v) := by
   simp [Language.termBShift, construction, hkf, hv]; rfl
 
 section
@@ -323,13 +330,13 @@ def eqIndex : ℕ := Encodable.encode (Language.Eq.eq : (ℒₒᵣ : FirstOrder.
 
 def ltIndex : ℕ := Encodable.encode (Language.LT.lt : (ℒₒᵣ : FirstOrder.Language).Rel 2)
 
-protected def zero : ℕ := f̂unc 0 zeroIndex ∅
+protected def zero : ℕ := ^func 0 zeroIndex ∅
 
-protected def one : ℕ := f̂unc 0 oneIndex ∅
+protected def one : ℕ := ^func 0 oneIndex ∅
 
-abbrev qqAdd (x y : V) := f̂unc 2 (addIndex : V) !⟦x, y⟧
+abbrev qqAdd (x y : V) := ^func 2 (addIndex : V) !⟦x, y⟧
 
-abbrev qqMul (x y : V) := f̂unc 2 (mulIndex : V) !⟦x, y⟧
+abbrev qqMul (x y : V) := ^func 2 (mulIndex : V) !⟦x, y⟧
 
 notation "𝟎" => Formalized.zero
 
@@ -339,25 +346,25 @@ infixl:60 " +̂  " => qqAdd
 
 infixl:80 " *̂ " => qqMul
 
-lemma qqFunc_absolute (k f v : ℕ) : ((f̂unc k f v : ℕ) : V) = f̂unc (k : V) (f : V) (v : V) := by simp [qqFunc, nat_cast_pair]
+lemma qqFunc_absolute (k f v : ℕ) : ((^func k f v : ℕ) : V) = ^func (k : V) (f : V) (v : V) := by simp [qqFunc, nat_cast_pair]
 
 @[simp] lemma LOR_func_zeroIndex : ⌜ℒₒᵣ⌝.Func 0 (zeroIndex : V) := by
-  simpa using codeIn_func_encode (M := V) (L := ℒₒᵣ) 0 Language.Zero.zero
+  simpa using codeIn_func_encode (M := V) (L := ℒₒᵣ) Language.Zero.zero
 
 @[simp] lemma LOR_func_oneIndex : ⌜ℒₒᵣ⌝.Func 0 (oneIndex : V) := by
-  simpa using codeIn_func_encode (M := V) (L := ℒₒᵣ) 0 Language.One.one
+  simpa using codeIn_func_encode (M := V) (L := ℒₒᵣ) Language.One.one
 
 @[simp] lemma LOR_func_addIndex : ⌜ℒₒᵣ⌝.Func 2 (addIndex : V) := by
-  simpa using codeIn_func_encode (M := V) (L := ℒₒᵣ) 2 Language.Add.add
+  simpa using codeIn_func_encode (M := V) (L := ℒₒᵣ) Language.Add.add
 
 @[simp] lemma LOR_func_mulIndex : ⌜ℒₒᵣ⌝.Func 2 (mulIndex : V) := by
-  simpa using codeIn_func_encode (M := V) (L := ℒₒᵣ) 2 Language.Mul.mul
+  simpa using codeIn_func_encode (M := V) (L := ℒₒᵣ) Language.Mul.mul
 
 @[simp] lemma LOR_rel_eqIndex : ⌜ℒₒᵣ⌝.Rel 2 (eqIndex : V) := by
-  simpa using codeIn_rel_encode (M := V) (L := ℒₒᵣ) 2 Language.Eq.eq
+  simpa using codeIn_rel_encode (M := V) (L := ℒₒᵣ) Language.Eq.eq
 
 @[simp] lemma LOR_rel_ltIndex : ⌜ℒₒᵣ⌝.Rel 2 (ltIndex : V) := by
-  simpa using codeIn_rel_encode (M := V) (L := ℒₒᵣ) 2 Language.LT.lt
+  simpa using codeIn_rel_encode (M := V) (L := ℒₒᵣ) Language.LT.lt
 
 @[simp] lemma zero_semiterm : ⌜ℒₒᵣ⌝.Semiterm n (𝟎 : V) := by
   simp [Formalized.zero, qqFunc_absolute]

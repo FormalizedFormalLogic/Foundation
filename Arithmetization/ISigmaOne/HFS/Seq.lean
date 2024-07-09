@@ -129,7 +129,10 @@ def znth_existsUnique (s i : M) : ∃! x, (Seq s ∧ i < lh s → ⟪i, x⟫ ∈
 
 def znth (s i : M) : M := Classical.choose! (znth_existsUnique s i)
 
-lemma Seq.znth {s i : M} (h : Seq s) (hi : i < lh s) : ⟪i, znth s i⟫ ∈ s := Classical.choose!_spec (znth_existsUnique s i) |>.1 ⟨h, hi⟩
+protected lemma Seq.znth {s i : M} (h : Seq s) (hi : i < lh s) : ⟪i, znth s i⟫ ∈ s := Classical.choose!_spec (znth_existsUnique s i) |>.1 ⟨h, hi⟩
+
+lemma Seq.znth_eq_of_mem {s i : M} (h : Seq s) (hi : ⟪i, x⟫ ∈ s) : znth s i = x :=
+  h.isMapping.uniq (h.znth (h.lt_lh_of_mem hi)) hi
 
 lemma znth_prop_not {s i : M} (h : ¬Seq s ∨ lh s ≤ i) : znth s i = 0 :=
   Classical.choose!_spec (znth_existsUnique s i) |>.2 (by simpa [-not_and, not_and_or] using h)

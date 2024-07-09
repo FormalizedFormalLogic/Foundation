@@ -1,4 +1,4 @@
-import Arithmetization.ISigmaOne.Metamath.Term
+import Arithmetization.ISigmaOne.Metamath.Formula.Functions
 import Arithmetization.Definability.Absoluteness
 
 noncomputable section
@@ -42,6 +42,15 @@ lemma mem_finArrowToSeq_iff {v : Fin k → M} : ⟪i, x⟫ ∈ finArrowToSeq v �
     case cast i =>
       right; exact ⟨i, by simp⟩
 
+/-- TOFO: move to PeanoMinus -/
+@[simp] lemma nat_cast_inj {n m : ℕ} : (n : M) = (m : M) ↔ n = m := by
+  induction' n with n ih
+  · cases m <;> simp
+  · cases m <;> simp
+
+@[simp] lemma znth_finArrowToSeq_fin {v : Fin k → M} (i : Fin k) : znth (finArrowToSeq v) i = v i :=
+  (finArrowToSeq_seq v).znth_eq_of_mem (by simp [mem_finArrowToSeq_iff, Fin.val_inj])
+
 lemma nat_cast_empty : ((∅ : ℕ) : M) = ∅ := rfl
 
 lemma finArrowToSeq_absolute (v : Fin k → ℕ) : ((finArrowToSeq v : ℕ) : M) = finArrowToSeq fun i ↦ (v i : M) := by
@@ -83,39 +92,28 @@ variable {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐈𝚺
 
 variable {L : Language} [(k : ℕ) → Encodable (L.Func k)] [(k : ℕ) → Encodable (L.Rel k)] [DefinableLanguage L]
 
-@[simp] lemma isSemiterm_codeIn {n} (t : SyntacticSemiterm L n) :
-    (L.codeIn M).IsSemiterm n (t.codeIn M) := by
+@[simp] lemma semiterm_codeIn {n} (t : SyntacticSemiterm L n) :
+    (L.codeIn M).Semiterm n (t.codeIn M) := by
   induction t <;> simp
   case func k f v ih =>
-    exact IsSemiterm.func (by simp) (by simp) (by simp) (by
-      simp only [mem_finArrowToSeq_iff, forall_exists_index, and_imp, forall_apply_eq_imp_iff₂]
-      rintro _ i rfl; exact ih i)
+    exact ⟨by simp, by simp, by simp [mem_finArrowToSeq_iff]; rintro _ i rfl; exact ih i⟩
 
-/-- TOFO: move to PeanoMinus -/
-@[simp] lemma nat_cast_inj {n m : ℕ} : (n : M) = m ↔ n = m := by
-  induction' n with n ih
-  · cases m <;> simp
-  · cases m <;> simp
-
-lemma termSubst_codeIn {n m} (t : SyntacticSemiterm L n) (v : Fin n → SyntacticSemiterm L m) :
-    (Rew.substs v t).codeIn M = (L.codeIn M).termSubst n m (finArrowToSeq fun i ↦ (v i).codeIn M) (t.codeIn M) := by
+lemma termSubst_codeIn {n m} (t : SyntacticSemiterm L n) (w : Fin n → SyntacticSemiterm L m) :
+    (Rew.substs w t).codeIn M = (L.codeIn M).termSubst n m (finArrowToSeq fun i ↦ (w i).codeIn M) (t.codeIn M) := by
   induction t
-  case bvar z =>
-    simp; symm
-    exact termSubst_bvar
-      (by simp [Language.TermSeq, mem_finArrowToSeq_iff]) (by simp)
-      (by simp [mem_finArrowToSeq_iff]; exact ⟨z, by simp⟩)
-  case fvar x =>
-    simp; symm
-    exact termSubst_fvar (by simp [Language.TermSeq, mem_finArrowToSeq_iff]) _
+  case bvar z => simp
+  case fvar x => simp
   case func k f v ih =>
-    simp; symm
-    apply termSubst_func (by simp [Language.TermSeq, mem_finArrowToSeq_iff]) (by simp) (by simp) (by simp)
-      (by simp [mem_finArrowToSeq_iff]) (by simp) (by simp) (by simp [mem_finArrowToSeq_iff])
+    have Hw : (L.codeIn M).SemitermSeq n m (finArrowToSeq fun i ↦ Semiterm.codeIn M (w i)) := ⟨by simp, by simp, by simp [mem_finArrowToSeq_iff]⟩
+    have Hv : (L.codeIn M).SemitermSeq k n (finArrowToSeq fun i ↦ Semiterm.codeIn M (v i)) := ⟨by simp, by simp, by simp [mem_finArrowToSeq_iff]⟩
+    simp only [Rew.func, Semiterm.codeIn_func, codeIn_func_encode, termSubst_func (codeIn_func_encode f) Hv]
+    congr
+    apply Seq.lh_ext (by simp) (Hw.termSubstSeq Hv |>.seq) (by simp [←Hw.termSubstSeq Hv |>.lh])
     simp only [mem_finArrowToSeq_iff, forall_exists_index, and_imp]
-    rintro _ _ _ i rfl rfl j hij rfl
-    rcases Fin.val_inj.mp <| nat_cast_inj.mp hij
-    exact Eq.symm (ih i)
+    rintro _ x₁ x₂ i rfl rfl h
+    have : (L.codeIn M).termSubst n m (finArrowToSeq fun i ↦ Semiterm.codeIn M (w i)) (Semiterm.codeIn M (v i)) = x₂ := by
+      simpa [mem_finArrowToSeq_iff, Fin.val_inj] using Language.SemitermSeq.of_mem_termSubstSeq Hv h
+    rcases this; exact ih i
 
 lemma termShift_codeIn {n} (t : SyntacticSemiterm L n) :
     (Rew.shift t).codeIn M = (L.codeIn M).termShift n (t.codeIn M) := by
@@ -123,13 +121,15 @@ lemma termShift_codeIn {n} (t : SyntacticSemiterm L n) :
   case bvar => simp [termShift_bvar]
   case fvar => simp
   case func k f v ih =>
-    simp; symm
-    apply termShift_func (by simp) (by simp) (by simp) (by simp [mem_finArrowToSeq_iff])
-      (by simp) (by simp) (by simp [mem_finArrowToSeq_iff])
+    have Hv : (L.codeIn M).SemitermSeq k n (finArrowToSeq fun i ↦ Semiterm.codeIn M (v i)) := ⟨by simp, by simp, by simp [mem_finArrowToSeq_iff]⟩
+    simp only [Rew.func, Semiterm.codeIn_func, codeIn_func_encode, termShift_func (codeIn_func_encode f) Hv]
+    congr
+    apply Seq.lh_ext (by simp) (Hv.termShiftSeq |>.seq) (by simp [←Hv.termShiftSeq |>.lh])
     simp only [mem_finArrowToSeq_iff, forall_exists_index, and_imp]
-    rintro _ _ _ i rfl rfl j hij rfl
-    rcases Fin.val_inj.mp <| nat_cast_inj.mp hij
-    exact Eq.symm (ih i)
+    rintro _ x₁ x₂ i rfl rfl h
+    have : (L.codeIn M).termShift n (Semiterm.codeIn M (v i)) = x₂ := by
+      simpa [mem_finArrowToSeq_iff, Fin.val_inj] using Language.SemitermSeq.of_mem_termShiftSeq Hv h
+    rcases this; exact ih i
 
 end LO.Arith
 
