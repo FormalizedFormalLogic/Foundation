@@ -106,7 +106,7 @@ lemma termSubst_rng_semiterm {t} (hw : L.SemitermSeq n m w) (ht : L.Semiterm n t
       rcases (construction L).resultSeq_prop' _ hv hiz with ⟨u, hiu, rfl⟩
       exact ih _ _ hiu⟩
 
-lemma termSubstSeq_rng_termSeq {k n m v} (hw : L.SemitermSeq n m w) (hv : L.SemitermSeq k n v) : L.SemitermSeq k m (L.termSubstSeq k n m w v) :=
+@[simp] lemma Language.SemitermSeq.termSubstSeq {k n m v} (hw : L.SemitermSeq n m w) (hv : L.SemitermSeq k n v) : L.SemitermSeq k m (L.termSubstSeq k n m w v) :=
   ⟨by simp [Language.termSubstSeq, hv], by simp [Language.termSubstSeq, hv], fun i u hiu ↦ by
     rcases (construction L).resultSeq_prop' _ hv hiu with ⟨u', hiu', rfl⟩
     exact termSubst_rng_semiterm hw (hv.prop _ _ hiu')⟩

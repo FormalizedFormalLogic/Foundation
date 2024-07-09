@@ -611,6 +611,8 @@ notation Γ "-Relation₃ " P => DefinableRel₃ ℒₒᵣ Γ P
 
 notation Γ "-Relation₄ " P => DefinableRel₄ ℒₒᵣ Γ P
 
+notation Γ "-Relation₅ " P => DefinableRel₅ ℒₒᵣ Γ P
+
 notation Γ "-Function₁ " f => DefinableFunction₁ ℒₒᵣ Γ f
 
 notation Γ "-Function₂ " f => DefinableFunction₂ ℒₒᵣ Γ f
@@ -1039,7 +1041,6 @@ lemma comp₄' {k} {P : M → M → M → M → Prop} {f₁ f₂ f₃ f₄ : (Fi
     {Γ : SigmaPiDelta} [DefinableRel₄ L (Γ, m + 1) P] : Definable L (Γ, m + 1) (fun v ↦ P (f₁ v) (f₂ v) (f₃ v) (f₄ v)) :=
   comp₄ hf₁ hf₂ hf₃ hf₄ inferInstance
 
-/-
 lemma comp₅ {k} {P : M → M → M → M → M → Prop} {f₁ f₂ f₃ f₄ f₅ : (Fin k → M) → M}
     (hf₁ : DefinableFunction L (𝚺, m + 1) f₁) (hf₂ : DefinableFunction L (𝚺, m + 1) f₂)
     (hf₃ : DefinableFunction L (𝚺, m + 1) f₃) (hf₄ : DefinableFunction L (𝚺, m + 1) f₄)
@@ -1092,7 +1093,6 @@ lemma comp₅' {k} {P : M → M → M → M → M → Prop} {f₁ f₂ f₃ f₄
     (hf₅ : DefinableFunction L (𝚺, m + 1) f₅)
     {Γ : SigmaPiDelta} [DefinableRel₅ L (Γ, m + 1) P] : Definable L (Γ, m + 1) (fun v ↦ P (f₁ v) (f₂ v) (f₃ v) (f₄ v) (f₅ v)) :=
   comp₅ hf₁ hf₂ hf₃ hf₄ hf₅  inferInstance
--/
 
 end Definable
 

@@ -375,7 +375,7 @@ instance uformulaDef_definable : 𝚫₁-Predicate L.UFormula := Defined.to_defi
 @[simp, definability] instance uformulaDef_definable' (Γ) : (Γ, m + 1)-Predicate L.UFormula :=
   .of_deltaOne (uformulaDef_definable L) _ _
 
-def Language.Semiformula (n p : V) : Prop := L.UFormula p ∧ bv p = n
+def Language.Semiformula (n p : V) : Prop := L.UFormula p ∧ n = bv p
 
 def _root_.LO.FirstOrder.Arith.LDef.isSemiformulaDef (pL : LDef) : 𝚫₁-Semisentence 2 := .mkDelta
   (.mkSigma “n p | !pL.uformulaDef.sigma p ∧ !bvDef n p” (by simp))
@@ -440,10 +440,10 @@ alias ⟨Language.UFormula.case, Language.UFormula.mk⟩ := Language.UFormula.ca
       rcases h.case with (⟨_, _, _, _, _, _, h⟩ | ⟨_, _, _, _, _, _, h⟩ | ⟨_, h⟩ | ⟨_, h⟩ |
         ⟨_, _, _, hp, hq, h⟩ | ⟨_, _, _, _, _, h⟩ | ⟨_, _, _, h⟩ | ⟨_, _, _, h⟩) <;>
           simp [qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqEx] at h
-      · rcases h with ⟨rfl, rfl, rfl, rfl⟩; exact ⟨⟨hp.1, Eq.symm hp.2⟩, ⟨hq.1, Eq.symm hq.2⟩⟩,
+      · rcases h with ⟨rfl, rfl, rfl, rfl⟩; exact ⟨hp, hq⟩,
    by rintro ⟨hp, hq⟩
       exact Language.UFormula.mk (Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl
-        ⟨n, p, q, ⟨hp.1, Eq.symm hp.2⟩, ⟨hq.1, Eq.symm hq.2⟩, rfl⟩)⟩
+        ⟨n, p, q, hp, hq, rfl⟩)⟩
 
 @[simp] lemma Language.UFormula.or {n p q : V} :
     𝐔 (p ^⋎[n] q) ↔ L.Semiformula n p ∧ L.Semiformula n q :=
@@ -451,10 +451,10 @@ alias ⟨Language.UFormula.case, Language.UFormula.mk⟩ := Language.UFormula.ca
       rcases h.case with (⟨_, _, _, _, _, _, h⟩ | ⟨_, _, _, _, _, _, h⟩ | ⟨_, h⟩ | ⟨_, h⟩ |
         ⟨_, _, _, _, _, h⟩ | ⟨_, _, _, hp, hq, h⟩ | ⟨_, _, _, h⟩ | ⟨_, _, _, h⟩) <;>
           simp [qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqEx] at h
-      · rcases h with ⟨rfl, rfl, rfl, rfl⟩; exact ⟨⟨hp.1, Eq.symm hp.2⟩, ⟨hq.1, Eq.symm hq.2⟩⟩,
+      · rcases h with ⟨rfl, rfl, rfl, rfl⟩; exact ⟨hp, hq⟩,
    by rintro ⟨hp, hq⟩
       exact Language.UFormula.mk (Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl
-        ⟨n, p, q, ⟨hp.1, Eq.symm hp.2⟩, ⟨hq.1, Eq.symm hq.2⟩, rfl⟩)⟩
+        ⟨n, p, q, hp, hq, rfl⟩)⟩
 
 @[simp] lemma Language.UFormula.all {n p : V} :
     𝐔 (^∀[n] p) ↔ L.Semiformula (n + 1) p :=
@@ -462,9 +462,9 @@ alias ⟨Language.UFormula.case, Language.UFormula.mk⟩ := Language.UFormula.ca
       rcases h.case with (⟨_, _, _, _, _, _, h⟩ | ⟨_, _, _, _, _, _, h⟩ | ⟨_, h⟩ | ⟨_, h⟩ |
         ⟨_, _, _, _, _, h⟩ | ⟨_, _, _, _, _, h⟩ | ⟨_, _, hp, h⟩ | ⟨_, _, _, h⟩) <;>
           simp [qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqEx] at h
-      · rcases h with ⟨rfl, rfl, rfl, rfl⟩; exact ⟨hp.1, Eq.symm hp.2⟩,
+      · rcases h with ⟨rfl, rfl, rfl, rfl⟩; exact hp,
    by rintro hp
-      exact Language.UFormula.mk (Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl ⟨n, p, ⟨hp.1, Eq.symm hp.2⟩, rfl⟩)⟩
+      exact Language.UFormula.mk (Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl ⟨n, p, hp, rfl⟩)⟩
 
 @[simp] lemma Language.UFormula.ex {n p : V} :
     𝐔 (^∃[n] p) ↔ L.Semiformula (n + 1) p :=
@@ -472,9 +472,9 @@ alias ⟨Language.UFormula.case, Language.UFormula.mk⟩ := Language.UFormula.ca
       rcases h.case with (⟨_, _, _, _, _, _, h⟩ | ⟨_, _, _, _, _, _, h⟩ | ⟨_, h⟩ | ⟨_, h⟩ |
         ⟨_, _, _, _, _, h⟩ | ⟨_, _, _, _, _, h⟩ | ⟨_, _, _, h⟩ | ⟨_, _, hp, h⟩) <;>
           simp [qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqEx] at h
-      · rcases h with ⟨rfl, rfl, rfl, rfl⟩; exact ⟨hp.1, Eq.symm hp.2⟩,
+      · rcases h with ⟨rfl, rfl, rfl, rfl⟩; exact hp,
    by rintro hp
-      exact Language.UFormula.mk (Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr ⟨n, p, ⟨hp.1, Eq.symm hp.2⟩, rfl⟩)⟩
+      exact Language.UFormula.mk (Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr ⟨n, p, hp, rfl⟩)⟩
 
 @[simp] lemma Language.Semiformula.rel {n k r v : V} :
     L.Semiformula n (^rel n k r v) ↔ L.Rel k r ∧ L.SemitermSeq k n v := by simp [Language.Semiformula]
@@ -506,10 +506,10 @@ lemma Language.UFormula.induction (Γ) {P : V → Prop} (hP : (Γ, 1)-Predicate 
     · exact hnrel n k r v hkr hv
     · exact hverum n
     · exact hfalsum n
-    · exact hand n p q ⟨(hC p hp).1, Eq.symm hnp⟩ ⟨(hC q hq).1, Eq.symm hnq⟩ (hC p hp).2 (hC q hq).2
-    · exact hor n p q ⟨(hC p hp).1, Eq.symm hnp⟩ ⟨(hC q hq).1, Eq.symm hnq⟩ (hC p hp).2 (hC q hq).2
-    · exact hall n p ⟨(hC p hp).1, Eq.symm hnp⟩ (hC p hp).2
-    · exact hex n p ⟨(hC p hp).1, Eq.symm hnp⟩ (hC p hp).2)
+    · exact hand n p q ⟨(hC p hp).1, hnp⟩ ⟨(hC q hq).1, hnq⟩ (hC p hp).2 (hC q hq).2
+    · exact hor n p q ⟨(hC p hp).1, hnp⟩ ⟨(hC q hq).1, hnq⟩ (hC p hp).2 (hC q hq).2
+    · exact hall n p ⟨(hC p hp).1, hnp⟩ (hC p hp).2
+    · exact hex n p ⟨(hC p hp).1, hnp⟩ (hC p hp).2)
 
 lemma Language.Semiformula.induction (Γ) {P : V → V → Prop} (hP : (Γ, 1)-Relation P)
     (hrel : ∀ n k r v, L.Rel k r → L.SemitermSeq k n v → P n (^rel n k r v))
@@ -522,7 +522,7 @@ lemma Language.Semiformula.induction (Γ) {P : V → V → Prop} (hP : (Γ, 1)-R
     (hex : ∀ n p, L.Semiformula (n + 1) p → P (n + 1) p → P n (^∃[n] p)) :
     ∀ n p, L.Semiformula n p → P n p := by
   suffices ∀ p, 𝐔 p → ∀ n ≤ p, bv p = n → P n p
-  by intro n p ⟨h, rfl⟩; exact this p h (bv p) (by simp) rfl
+  by rintro n p ⟨h, rfl⟩; exact this p h (bv p) (by simp) rfl
   apply Language.UFormula.induction (P := fun p ↦ ∀ n ≤ p, bv p = n → P n p) Γ
   · apply Definable.ball_le (by definability)
     apply Definable.imp (by definability)
@@ -1058,14 +1058,14 @@ lemma graph_exists {p : V} : L.UFormula p → ∃ y, c.Graph param p y := by
   · exact ⟨c.falsum param n, c.graph_falsum n⟩
   · rcases ih p₁ (by simp) param (by simp [f]) hp₁.1 with ⟨y₁, h₁⟩
     rcases ih p₂ (by simp) param (by simp [f]) hp₂.1 with ⟨y₂, h₂⟩
-    exact ⟨c.and param n p₁ p₂ y₁ y₂, c.graph_and ⟨hp₁.1, Eq.symm hp₁.2⟩ ⟨hp₂.1, Eq.symm hp₂.2⟩ h₁ h₂⟩
+    exact ⟨c.and param n p₁ p₂ y₁ y₂, c.graph_and hp₁ hp₂ h₁ h₂⟩
   · rcases ih p₁ (by simp) param (by simp [f]) hp₁.1 with ⟨y₁, h₁⟩
     rcases ih p₂ (by simp) param (by simp [f]) hp₂.1 with ⟨y₂, h₂⟩
-    exact ⟨c.or param n p₁ p₂ y₁ y₂, c.graph_or ⟨hp₁.1, Eq.symm hp₁.2⟩ ⟨hp₂.1, Eq.symm hp₂.2⟩ h₁ h₂⟩
+    exact ⟨c.or param n p₁ p₂ y₁ y₂, c.graph_or hp₁ hp₂ h₁ h₂⟩
   · rcases ih p₁ (by simp) (c.allChanges param n) (by simp [f]) hp₁.1 with ⟨y₁, h₁⟩
-    exact ⟨c.all param n p₁ y₁, c.graph_all ⟨hp₁.1, Eq.symm hp₁.2⟩ h₁⟩
+    exact ⟨c.all param n p₁ y₁, c.graph_all hp₁ h₁⟩
   · rcases ih p₁ (by simp) (c.exChanges param n) (by simp [f]) hp₁.1 with ⟨y₁, h₁⟩
-    exact ⟨c.ex param n p₁ y₁, c.graph_ex ⟨hp₁.1, Eq.symm hp₁.2⟩ h₁⟩
+    exact ⟨c.ex param n p₁ y₁, c.graph_ex hp₁ h₁⟩
 
 lemma graph_unique {p : V} : L.UFormula p → ∀ {param r r'}, c.Graph param p r → c.Graph param p r' → r = r' := by
   apply Language.UFormula.induction 𝚷 (P := fun p ↦ ∀ {param r r'}, c.Graph param p r → c.Graph param p r' → r = r')
@@ -1158,7 +1158,119 @@ lemma result_defined : 𝚺₁-Function₂ c.result via β.result := by
   simp [Blueprint.result, HSemiformula.val_sigma, eval_uformulaDef L, (uformula_defined L).proper.iff', c.eval_graphDef]
   exact Classical.choose!_eq_iff (c.exists_unique_all (v 1) (v 2))
 
+@[definability] instance result_definable : 𝚺₁-Function₂ c.result := c.result_defined.to_definable _
+
 end
+
+lemma uformula_result_induction {P : V → V → V → Prop} (hP : 𝚺₁-Relation₃ P)
+    (hRel : ∀ param n k R v, L.Rel k R → L.SemitermSeq k n v → P param (^rel n k R v) (c.rel param n k R v))
+    (hNRel : ∀ param n k R v, L.Rel k R → L.SemitermSeq k n v → P param (^nrel n k R v) (c.nrel param n k R v))
+    (hverum : ∀ param n, P param (^⊤[n]) (c.verum param n))
+    (hfalsum : ∀ param n, P param (^⊥[n]) (c.falsum param n))
+    (hand : ∀ param n p q, L.Semiformula n p → L.Semiformula n q →
+      P param p (c.result param p) → P param q (c.result param q) → P param (p ^⋏[n] q) (c.and param n p q (c.result param p) (c.result param q)))
+    (hor : ∀ param n p q, L.Semiformula n p → L.Semiformula n q →
+      P param p (c.result param p) → P param q (c.result param q) → P param (p ^⋎[n] q) (c.or param n p q (c.result param p) (c.result param q)))
+    (hall : ∀ param n p, L.Semiformula (n + 1) p →
+      P (c.allChanges param n) p (c.result (c.allChanges param n) p) →
+      P param (^∀[n] p) (c.all param n p (c.result (c.allChanges param n) p)))
+    (hex : ∀ param n p, L.Semiformula (n + 1) p →
+      P (c.exChanges param n) p (c.result (c.exChanges param n) p) →
+      P param (^∃[n] p) (c.ex param n p (c.result (c.exChanges param n) p))) :
+    ∀ {param p : V}, L.UFormula p → P param p (c.result param p) := by
+  haveI : 𝚺₁-Function₂ c.result := c.result_definable
+  intro param p
+  haveI : 𝚺₁-Function₂ c.allChanges := c.allChanges_defined.to_definable
+  haveI : 𝚺₁-Function₂ c.exChanges := c.exChanges_defined.to_definable
+  let f : V → V → V := fun p param ↦ max param (max (c.allChanges param (bv p)) (c.exChanges param (bv p)))
+  have hf : 𝚺₁-Function₂ f :=
+    DefinableFunction.comp₂ (f := Max.max)
+      (DefinableFunction.var _)
+      (DefinableFunction.comp₂
+        (DefinableFunction.comp₂ (DefinableFunction.var _) (DefinableFunction.comp₁ (DefinableFunction.var _)))
+        (DefinableFunction.comp₂ (DefinableFunction.var _) (DefinableFunction.comp₁ (DefinableFunction.var _))))
+  apply sigma₁_order_ball_induction hf ?_ ?_ p param
+  · apply Definable.imp
+      (Definable.comp₁' (DefinableFunction.var _))
+      (Definable.comp₃'
+        (DefinableFunction.var _)
+        (DefinableFunction.var _)
+        (DefinableFunction.comp₂ (DefinableFunction.var _) (DefinableFunction.var _)))
+  intro p param ih hp
+  rcases hp.case with
+    (⟨n, k, r, v, hkr, hv, rfl⟩ | ⟨n, k, r, v, hkr, hv, rfl⟩ |
+    ⟨n, rfl⟩ | ⟨n, rfl⟩ |
+    ⟨n, p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨n, p₁, p₂, hp₁, hp₂, rfl⟩ |
+    ⟨n, p₁, hp₁, rfl⟩ | ⟨n, p₁, hp₁, rfl⟩)
+  · simpa [hkr, hv] using hRel param n k r v hkr hv
+  · simpa [hkr, hv] using hNRel param n k r v hkr hv
+  · simpa using hverum param n
+  · simpa using hfalsum param n
+  · simpa [c.result_and hp₁ hp₂] using
+      hand param n p₁ p₂ hp₁ hp₂ (ih p₁ (by simp) param (by simp [f]) hp₁.1) (ih p₂ (by simp) param (by simp [f]) hp₂.1)
+  · simpa [c.result_or hp₁ hp₂] using
+      hor param n p₁ p₂ hp₁ hp₂ (ih p₁ (by simp) param (by simp [f]) hp₁.1) (ih p₂ (by simp) param (by simp [f]) hp₂.1)
+  · simpa [c.result_all hp₁] using
+      hall param n p₁ hp₁ (ih p₁ (by simp) (c.allChanges param n) (by simp [f]) hp₁.1)
+  · simpa [c.result_ex hp₁] using
+      hex param n p₁ hp₁ (ih p₁ (by simp) (c.exChanges param n) (by simp [f]) hp₁.1)
+
+lemma semiformula_result_induction {P : V → V → V → V → Prop} (hP : 𝚺₁-Relation₄ P)
+    (hRel : ∀ param n k R v, L.Rel k R → L.SemitermSeq k n v → P param n (^rel n k R v) (c.rel param n k R v))
+    (hNRel : ∀ param n k R v, L.Rel k R → L.SemitermSeq k n v → P param n (^nrel n k R v) (c.nrel param n k R v))
+    (hverum : ∀ param n, P param n (^⊤[n]) (c.verum param n))
+    (hfalsum : ∀ param n, P param n (^⊥[n]) (c.falsum param n))
+    (hand : ∀ param n p q, L.Semiformula n p → L.Semiformula n q →
+      P param n p (c.result param p) → P param n q (c.result param q) → P param n (p ^⋏[n] q) (c.and param n p q (c.result param p) (c.result param q)))
+    (hor : ∀ param n p q, L.Semiformula n p → L.Semiformula n q →
+      P param n p (c.result param p) → P param n q (c.result param q) → P param n (p ^⋎[n] q) (c.or param n p q (c.result param p) (c.result param q)))
+    (hall : ∀ param n p, L.Semiformula (n + 1) p →
+      P (c.allChanges param n) (n + 1) p (c.result (c.allChanges param n) p) →
+      P param n (^∀[n] p) (c.all param n p (c.result (c.allChanges param n) p)))
+    (hex : ∀ param n p, L.Semiformula (n + 1) p →
+      P (c.exChanges param n) (n + 1) p (c.result (c.exChanges param n) p) →
+      P param n (^∃[n] p) (c.ex param n p (c.result (c.exChanges param n) p))) :
+    ∀ {param n p : V}, L.Semiformula n p → P param n p (c.result param p) := by
+  suffices ∀ {param p : V}, L.UFormula p → ∀ n ≤ p, n = bv p → P param n p (c.result param p)
+  by intro param n p hp; exact @this param p hp.1 n (by simp [hp.2]) hp.2
+  intro param p hp
+  apply c.uformula_result_induction (P := fun param p y ↦ ∀ n ≤ p, n = bv p → P param n p y)
+    ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
+  · apply Definable.ball_le (DefinableFunction.var _)
+    simp_all only [zero_add, Nat.succ_eq_add_one, Nat.reduceAdd, Fin.isValue, Fin.succ_one_eq_two,
+      Fin.succ_zero_eq_one]
+    apply LO.FirstOrder.Arith.Definable.imp
+    · simp_all only [SigmaPiDelta.alt_sigma, Fin.isValue]
+      apply LO.FirstOrder.Arith.Definable.comp₂'
+      · simp_all only [zero_add, Fin.isValue, DefinableFunction.var]
+      · simp_all only [zero_add, Fin.isValue]
+        apply LO.FirstOrder.Arith.DefinableFunction.comp₁
+        simp_all only [zero_add, Fin.isValue, DefinableFunction.var]
+    · apply LO.FirstOrder.Arith.Definable.comp₄'
+      · simp_all only [zero_add, Fin.isValue, DefinableFunction.var]
+      · simp_all only [zero_add, Fin.isValue]
+        apply LO.FirstOrder.Arith.DefinableFunction.comp₁
+        simp_all only [zero_add, Fin.isValue, DefinableFunction.var]
+      · simp_all only [zero_add, Fin.isValue, DefinableFunction.var]
+      · simp_all only [zero_add, Fin.isValue, DefinableFunction.var]
+  · rintro param n k R v hkR hv _ _ rfl; simpa using hRel param n k R v hkR hv
+  · rintro param n k R v hkR hv _ _ rfl; simpa using hNRel param n k R v hkR hv
+  · rintro param n _ _ rfl; simpa using hverum param n
+  · rintro param n _ _ rfl; simpa using hfalsum param n
+  · rintro param n p q hp hq ihp ihq _ _ rfl
+    have ihp : P param n p (c.result param p) := ihp n (by simp [hp.2]) hp.2
+    have ihq : P param n q (c.result param q) := ihq n (by simp [hq.2]) hq.2
+    simpa using hand param n p q hp hq ihp ihq
+  · rintro param n p q hp hq ihp ihq _ _ rfl
+    have ihp : P param n p (c.result param p) := ihp n (by simp [hp.2]) hp.2
+    have ihq : P param n q (c.result param q) := ihq n (by simp [hq.2]) hq.2
+    simpa using hor param n p q hp hq ihp ihq
+  · rintro param n p hp ihp _ _ rfl
+    have ihp : P (c.allChanges param n) (n + 1) p (c.result (c.allChanges param n) p) := ihp (n + 1) (by simp [hp.2]) hp.2
+    simpa using hall param n p hp ihp
+  · rintro param n p hp ihp _ _ rfl
+    have ihp : P (c.exChanges param n) (n + 1) p (c.result (c.exChanges param n) p) := ihp (n + 1) (by simp [hp.2]) hp.2
+    simpa using hex param n p hp ihp
 
 end Construction
 
