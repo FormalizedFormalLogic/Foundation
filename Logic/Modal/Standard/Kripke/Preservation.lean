@@ -92,8 +92,6 @@ end Generation
 
 section PseudoEpimorphism
 
-variable {δ₁ δ₂}
-
 /-- As known as _p-morphism_. -/
 structure Frame.PseudoEpimorphism (F₁ F₂ : Kripke.Frame) where
   toFun : F₁.World → F₂.World
@@ -177,8 +175,8 @@ theorem undefinable_irreflexive : ¬∃ (Ax : AxiomSet α), AxiomSet.DefinesKrip
       simp;
       intro w;
       match w with
-      | 0 => use 1;
-      | 1 => use 0;
+      | 0 => use 1; intro; contradiction;
+      | 1 => use 0; intro; contradiction;
   };
   have f_surjective : Function.Surjective f := by simp [Function.Surjective]; aesop;
 
