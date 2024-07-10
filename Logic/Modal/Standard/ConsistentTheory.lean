@@ -90,7 +90,7 @@ lemma provable_iff_insert_neg_not_consistent : T *⊢[Λ]! p ↔ ¬(Λ)-Consiste
   . intro h;
     apply iff_insert_inconsistent.mpr;
     obtain ⟨Γ, hΓ₁, hΓ₂⟩ := Context.provable_iff.mp h;
-    existsi Γ;
+    use Γ;
     constructor;
     . exact hΓ₁;
     . apply and_imply_iff_imply_imply'!.mpr;
@@ -245,17 +245,16 @@ variable {p : Formula α}
 
 lemma exists_maximal_Lconsistented_theory (consisT : (Λ)-Consistent T) : ∃ Ω : (Λ)-MCT, (T ⊆ Ω.theory) := by
   have ⟨Ω, hΩ₁, hΩ₂, hΩ₃⟩ := Theory.lindenbaum consisT;
-  existsi ⟨
-    Ω,
-    hΩ₁,
-    by
+  use {
+    theory := Ω,
+    consistent := hΩ₁,
+    maximal := by
       rintro U ⟨hU₁, hU₂⟩;
       by_contra hC;
       have : U = Ω := hΩ₃ U hC hU₁;
       subst_vars;
       simp at hU₂,
-  ⟩;
-  exact hΩ₂;
+  }
 
 alias lindenbaum := exists_maximal_Lconsistented_theory
 

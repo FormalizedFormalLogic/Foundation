@@ -223,11 +223,14 @@ def isBox : Formula α → Bool
   | box _ => true
   | _  => false
 
+
 end Formula
 
 abbrev Theory (α) := Set (Formula α)
 
 instance : Collection (Formula α) (Theory α) := inferInstance
+
+abbrev AxiomSet (α) := Set (Formula α)
 
 
 section Subformula
@@ -244,35 +247,43 @@ def Formula.Subformulas: Formula α → Finset (Formula α)
   | p ⋎ q  => insert (p ⋎ q) (p.Subformulas ∪ q.Subformulas)
   | box p  => insert (□p) p.Subformulas
 
+-- notation "Sub(" p ")" => Formula.Subformulas p
+prefix:70 "𝒮 " => Formula.Subformulas
+
 namespace Formula.Subformulas
 
 @[simp]
-lemma mem_self (p : Formula α) : p ∈ p.Subformulas := by induction p using Formula.rec' <;> simp [Subformulas];
+lemma mem_self (p : Formula α) : p ∈ 𝒮 p := by induction p using Formula.rec' <;> simp [Subformulas];
 
 variable {p q r : Formula α}
 
-lemma mem_neg (h : ~q ∈ p.Subformulas) : q ∈ p.Subformulas := by
+@[aesop safe forward]
+lemma mem_neg (h : ~q ∈ 𝒮 p) : q ∈ 𝒮 p := by
   induction p using Formula.rec' <;> {
     simp_all [Subformulas];
     try rcases h with (hq | hr); simp_all; simp_all;
   };
 
-lemma mem_and (h : (q ⋏ r) ∈ p.Subformulas) : q ∈ p.Subformulas ∧ r ∈ p.Subformulas := by
+@[aesop safe forward]
+lemma mem_and (h : (q ⋏ r) ∈ 𝒮 p) : q ∈ 𝒮 p ∧ r ∈ 𝒮 p := by
   induction p using Formula.rec' with
   | hand => simp_all [Subformulas]; rcases h with ⟨_⟩ | ⟨⟨_⟩ | ⟨_⟩⟩ <;> simp_all
   | _ => simp_all [Subformulas]; try rcases h with (hq | hr); simp_all; simp_all;
 
-lemma mem_or (h : (q ⋎ r) ∈ p.Subformulas) : q ∈ p.Subformulas ∧ r ∈ p.Subformulas := by
+@[aesop safe forward]
+lemma mem_or (h : (q ⋎ r) ∈ 𝒮 p) : q ∈ 𝒮 p ∧ r ∈ 𝒮 p := by
   induction p using Formula.rec' with
   | hor => simp_all [Subformulas]; rcases h with ⟨_⟩ | ⟨⟨_⟩ | ⟨_⟩⟩ <;> simp_all
   | _ => simp_all [Subformulas]; try rcases h with (hq | hr); simp_all; simp_all;
 
-lemma mem_imp (h : (q ⟶ r) ∈ p.Subformulas) : q ∈ p.Subformulas ∧ r ∈ p.Subformulas := by
+@[aesop safe forward]
+lemma mem_imp (h : (q ⟶ r) ∈ 𝒮 p) : q ∈ 𝒮 p ∧ r ∈ 𝒮 p := by
   induction p using Formula.rec' with
   | himp => simp_all [Subformulas]; rcases h with ⟨_⟩ | ⟨⟨_⟩ | ⟨_⟩⟩ <;> simp_all
   | _ => simp_all [Subformulas]; try rcases h with (hq | hr); simp_all; simp_all;
 
-lemma mem_box (h : □q ∈ p.Subformulas) : q ∈ p.Subformulas := by
+@[aesop safe forward]
+lemma mem_box (h : □q ∈ 𝒮 p) : q ∈ 𝒮 p := by
   induction p using Formula.rec' <;> {
     simp_all [Subformulas];
     try rcases h with (hq | hr); simp_all; simp_all;
@@ -280,25 +291,96 @@ lemma mem_box (h : □q ∈ p.Subformulas) : q ∈ p.Subformulas := by
 
 end Formula.Subformulas
 
--- TOOD: より抽象的にして`Modal/LogicalSymbol`などに移してもよいかも．
-class Formula.SubformulaClosed (C : (Formula α) → Prop) where
-  neg : C (~p) → C p
-  and : C (p ⋏ q) → C p ∧ C q
-  or  : C (p ⋎ q) → C p ∧ C q
-  imp : C (p ⟶ q) → C p ∧ C q
-  box : C (□p) → C p
 
-open Formula (Subformulas)
+abbrev Theory.SubformulaClosed (T : Theory α) := StandardModalLogicalConnective.Subclosed (· ∈ T)
 
-instance {p : Formula α} : (Formula.SubformulaClosed (p.Subformulas).toSet) where
-  neg := by intro q hq; exact Subformulas.mem_neg hq;
-  and := by intro q r hqr; exact Subformulas.mem_and hqr;
-  or  := by intro q r hqr; exact Subformulas.mem_or hqr;
-  imp := by intro q r hqr; exact Subformulas.mem_imp hqr;
-  box := by intro q hq; exact Subformulas.mem_box hq;
+namespace Theory.SubformulaClosed
+
+instance {p : Formula α} : (Theory.SubformulaClosed ((𝒮 p).toSet)) where
+  tilde_closed := by aesop;
+  arrow_closed := by aesop;
+  wedge_closed := by aesop;
+  vee_closed   := by aesop;
+  box_closed   := by aesop;
+
+variable {p : Formula α} {T : Theory α} [T_closed : T.SubformulaClosed]
+
+lemma sub_mem_neg (h : ~p ∈ T) : p ∈ T := T_closed.tilde_closed h
+lemma sub_mem_and (h : p ⋏ q ∈ T) : p ∈ T ∧ q ∈ T := T_closed.wedge_closed h
+lemma sub_mem_or (h : p ⋎ q ∈ T) : p ∈ T ∧ q ∈ T := T_closed.vee_closed h
+lemma sub_mem_imp (h : p ⟶ q ∈ T) : p ∈ T ∧ q ∈ T := T_closed.arrow_closed h
+lemma sub_mem_box (h : □p ∈ T) : p ∈ T := T_closed.box_closed h
+
+attribute [aesop safe 5 forward]
+  sub_mem_neg
+  sub_mem_and
+  sub_mem_or
+  sub_mem_imp
+  sub_mem_box
+
+end Theory.SubformulaClosed
 
 end Subformula
 
-abbrev AxiomSet (α) := Set (Formula α)
+
+section Atoms
+
+variable [DecidableEq α]
+
+namespace Formula
+
+def atoms : Formula α → Finset (α)
+  | .atom a => {a}
+  | ⊤      => ∅
+  | ⊥      => ∅
+  | ~p     => p.atoms
+  | .box p  => p.atoms
+  | p ⟶ q => p.atoms ∪ q.atoms
+  | p ⋏ q  => p.atoms ∪ q.atoms
+  | p ⋎ q  => p.atoms ∪ q.atoms
+prefix:70 "𝒜 " => Formula.atoms
+
+@[simp]
+lemma mem_atoms_iff_mem_subformulae {a : α} {p : Formula α} : a ∈ 𝒜 p ↔ (atom a) ∈ 𝒮 p := by
+  induction p using Formula.rec' <;> simp_all [Subformulas, atoms];
+
+end Formula
+
+end Atoms
+
+
+section Complement
+
+variable [DecidableEq α]
+
+namespace Formula
+
+def negated : Formula α → Bool
+  | ~_ => true
+  | _  => false
+
+lemma negated_iff {p : Formula α} : p.negated ↔ ∃ q, p = ~q := by
+  induction p using Formula.rec' <;> simp [negated]
+
+lemma not_negated_iff {p : Formula α} : ¬p.negated ↔ ∀ q, p ≠ ~q := by
+  induction p using Formula.rec' <;> simp [negated]
+
+def complement (p : Formula α) : Formula α := if p.negated then p else ~p
+postfix:80 "⁻" => complement
+
+lemma eq_complement_negated {p : Formula α} (hp : p.negated) : p⁻ = p := by
+  induction p using Formula.rec' <;> simp_all [negated, complement]
+
+lemma eq_complement_not_negated {p : Formula α} (hp : ¬p.negated) : p⁻ = ~p := by
+  induction p using Formula.rec' <;> simp_all [negated, complement]
+
+
+abbrev complement_subformula (p : Formula α) : Finset (Formula α) := (𝒮 p) ∪ (Finset.image (·⁻) $ 𝒮 p)
+prefix:70 "𝒮⁻ " => Formula.ComplementSubformula
+
+end Formula
+
+end Complement
+
 
 end LO.Modal.Standard

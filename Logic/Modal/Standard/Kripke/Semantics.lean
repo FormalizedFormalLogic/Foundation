@@ -80,11 +80,16 @@ def FiniteFrameClass.toFrameClass (𝔽 : FiniteFrameClass) : FrameClass := { F 
 instance : Coe (FiniteFrameClass) (FrameClass) := ⟨FiniteFrameClass.toFrameClass⟩
 
 @[simp]
-def FrameClass.restrictFinite (𝔽 : FrameClass) : FiniteFrameClass := { F | F.toFrame ∈ 𝔽 }
+def FrameClass.toFiniteFrameClass (𝔽 : FrameClass) : FiniteFrameClass := { F | F.toFrame ∈ 𝔽 }
+instance : Coe (FrameClass) (FiniteFrameClass) := ⟨FrameClass.toFiniteFrameClass⟩
+
+@[simp]
+abbrev FrameClass.restrictFinite (𝔽 : FrameClass) : FrameClass := FiniteFrameClass.toFrameClass ↑𝔽
 postfix:max "ꟳ" => FrameClass.restrictFinite
 
-lemma FrameClass.iff_mem_restrictFinite {𝔽 : FrameClass} (h : F ∈ 𝔽) : (finite : Finite F.World) → ⟨F⟩ ∈ 𝔽ꟳ := by
-  simp_all [FrameClass.restrictFinite];
+lemma FrameClass.iff_mem_restrictFinite {𝔽 : FrameClass} (h : F ∈ 𝔽) (F_finite : Finite F.World) : F ∈ 𝔽ꟳ := by
+  simp;
+  use { toFrame := F, World_finite := F_finite };
 
 
 /-- Frame with single world and identiy relation -/
@@ -119,6 +124,18 @@ structure Model (α) where
 
 abbrev Model.World (M : Model α) := M.Frame.World
 instance : CoeSort (Model α) (Type u) := ⟨Model.World⟩
+
+
+structure FiniteModel (α) extends Model α where
+  [World_finite : Finite World]
+
+def FiniteModel.FiniteFrame (M : FiniteModel α) : FiniteFrame := {
+  World := M.World,
+  World_inhabited := M.Frame.World_inhabited,
+  World_finite := M.World_finite,
+  Rel := M.Frame.Rel,
+}
+
 
 end Kripke
 
