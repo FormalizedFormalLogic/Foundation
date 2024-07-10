@@ -308,27 +308,14 @@ end
     rcases (construction L).resultSeq_prop' _ hv hiu with ⟨u', hiu', rfl⟩
     exact (hv.prop _ _ hiu').termBShift⟩
 
+def Language.SemitermSeq.of_mem_termBShiftSeq {k n i z' : V} (hv : L.SemitermSeq k n v)
+    (h' : ⟪i, z'⟫ ∈ L.termBShiftSeq k n v) : ∃ z, ⟪i, z⟫ ∈ v ∧ L.termBShift n z = z' := (construction L).resultSeq_prop' _ hv h'
+
 end termBShift
 
 end
 
 namespace Formalized
-
-abbrev LOR : Arith.Language V := Language.codeIn ℒₒᵣ V
-
-notation "⌜ℒₒᵣ⌝" => LOR
-
-def zeroIndex : ℕ := Encodable.encode (Language.Zero.zero : (ℒₒᵣ : FirstOrder.Language).Func 0)
-
-def oneIndex : ℕ := Encodable.encode (Language.One.one : (ℒₒᵣ : FirstOrder.Language).Func 0)
-
-def addIndex : ℕ := Encodable.encode (Language.Add.add : (ℒₒᵣ : FirstOrder.Language).Func 2)
-
-def mulIndex : ℕ := Encodable.encode (Language.Mul.mul : (ℒₒᵣ : FirstOrder.Language).Func 2)
-
-def eqIndex : ℕ := Encodable.encode (Language.Eq.eq : (ℒₒᵣ : FirstOrder.Language).Rel 2)
-
-def ltIndex : ℕ := Encodable.encode (Language.LT.lt : (ℒₒᵣ : FirstOrder.Language).Rel 2)
 
 protected def zero : ℕ := ^func 0 zeroIndex ∅
 
@@ -347,24 +334,6 @@ infixl:60 " +̂  " => qqAdd
 infixl:80 " *̂ " => qqMul
 
 lemma qqFunc_absolute (k f v : ℕ) : ((^func k f v : ℕ) : V) = ^func (k : V) (f : V) (v : V) := by simp [qqFunc, nat_cast_pair]
-
-@[simp] lemma LOR_func_zeroIndex : ⌜ℒₒᵣ⌝.Func 0 (zeroIndex : V) := by
-  simpa using codeIn_func_encode (M := V) (L := ℒₒᵣ) Language.Zero.zero
-
-@[simp] lemma LOR_func_oneIndex : ⌜ℒₒᵣ⌝.Func 0 (oneIndex : V) := by
-  simpa using codeIn_func_encode (M := V) (L := ℒₒᵣ) Language.One.one
-
-@[simp] lemma LOR_func_addIndex : ⌜ℒₒᵣ⌝.Func 2 (addIndex : V) := by
-  simpa using codeIn_func_encode (M := V) (L := ℒₒᵣ) Language.Add.add
-
-@[simp] lemma LOR_func_mulIndex : ⌜ℒₒᵣ⌝.Func 2 (mulIndex : V) := by
-  simpa using codeIn_func_encode (M := V) (L := ℒₒᵣ) Language.Mul.mul
-
-@[simp] lemma LOR_rel_eqIndex : ⌜ℒₒᵣ⌝.Rel 2 (eqIndex : V) := by
-  simpa using codeIn_rel_encode (M := V) (L := ℒₒᵣ) Language.Eq.eq
-
-@[simp] lemma LOR_rel_ltIndex : ⌜ℒₒᵣ⌝.Rel 2 (ltIndex : V) := by
-  simpa using codeIn_rel_encode (M := V) (L := ℒₒᵣ) Language.LT.lt
 
 @[simp] lemma zero_semiterm : ⌜ℒₒᵣ⌝.Semiterm n (𝟎 : V) := by
   simp [Formalized.zero, qqFunc_absolute]

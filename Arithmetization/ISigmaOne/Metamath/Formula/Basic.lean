@@ -164,6 +164,17 @@ instance bv_definable' (Γ) : Γ-Function₁ (bv : V → V) := .of_zero bv_defin
 
 end
 
+@[simp] lemma qqRel_inj (n₁ k₁ r₁ v₁ n₂ k₂ r₂ v₂ : V) :
+    ^rel n₁ k₁ r₁ v₁ = ^rel n₂ k₂ r₂ v₂ ↔ n₁ = n₂ ∧ k₁ = k₂ ∧ r₁ = r₂ ∧ v₁ = v₂ := by simp [qqRel]
+@[simp] lemma qqNRel_inj (n₁ k₁ r₁ v₁ n₂ k₂ r₂ v₂ : V) :
+    ^nrel n₁ k₁ r₁ v₁ = ^nrel n₂ k₂ r₂ v₂ ↔ n₁ = n₂ ∧ k₁ = k₂ ∧ r₁ = r₂ ∧ v₁ = v₂ := by simp [qqNRel]
+@[simp] lemma qqVerum_inj (n₁ n₂ : V) : ^⊤[n₁] = ^⊤[n₂] ↔ n₁ = n₂ := by simp [qqVerum]
+@[simp] lemma qqFalsum_inj (n₁ n₂ : V) : ^⊥[n₁] = ^⊥[n₂] ↔ n₁ = n₂ := by simp [qqFalsum]
+@[simp] lemma qqAnd_inj (n₁ p₁ q₁ n₂ p₂ q₂ : V) : p₁ ^⋏[n₁] q₁ = p₂ ^⋏[n₂] q₂ ↔ n₁ = n₂ ∧ p₁ = p₂ ∧ q₁ = q₂ := by simp [qqAnd]
+@[simp] lemma qqOr_inj (n₁ p₁ q₁ n₂ p₂ q₂ : V) : p₁ ^⋎[n₁] q₁ = p₂ ^⋎[n₂] q₂ ↔ n₁ = n₂ ∧ p₁ = p₂ ∧ q₁ = q₂ := by simp [qqOr]
+@[simp] lemma qqAll_inj (n₁ p₁ n₂ p₂ : V) : ^∀[n₁] p₁ = ^∀[n₂] p₂ ↔ n₁ = n₂ ∧ p₁ = p₂ := by simp [qqAll]
+@[simp] lemma qqEx_inj (n₁ p₁ n₂ p₂ : V) : ^∃[n₁] p₁ = ^∃[n₂] p₂ ↔ n₁ = n₂ ∧ p₁ = p₂ := by simp [qqEx]
+
 @[simp] lemma bv_lt_rel (n k r v : V) : n < ^rel n k r v := le_iff_lt_succ.mp <| le_pair_left _ _
 @[simp] lemma arity_lt_rel (n k r v : V) : k < ^rel n k r v :=
   le_iff_lt_succ.mp <| le_trans (le_trans (le_pair_left _ _) <| le_pair_right _ _) <| le_pair_right _ _
@@ -376,6 +387,8 @@ instance uformulaDef_definable : 𝚫₁-Predicate L.UFormula := Defined.to_defi
   .of_deltaOne (uformulaDef_definable L) _ _
 
 def Language.Semiformula (n p : V) : Prop := L.UFormula p ∧ n = bv p
+
+def Language.Formula (p : V) : Prop := L.Semiformula 0 p
 
 def _root_.LO.FirstOrder.Arith.LDef.isSemiformulaDef (pL : LDef) : 𝚫₁-Semisentence 2 := .mkDelta
   (.mkSigma “n p | !pL.uformulaDef.sigma p ∧ !bvDef n p” (by simp))

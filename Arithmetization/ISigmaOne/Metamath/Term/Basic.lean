@@ -145,6 +145,8 @@ variable (L)
 
 def Language.Semiterm (n : V) : V → Prop := (construction L).Fixpoint ![n]
 
+abbrev Language.Term : V → Prop := L.Semiterm 0
+
 def _root_.LO.FirstOrder.Arith.LDef.isSemitermDef (pL : LDef) : 𝚫₁-Semisentence 2 := (formula pL).fixpointDefΔ₁.rew (Rew.substs ![#1, #0])
 
 lemma isSemiterm_defined : 𝚫₁-Relation L.Semiterm via pL.isSemitermDef :=

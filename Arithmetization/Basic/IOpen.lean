@@ -719,6 +719,9 @@ def _root_.LO.FirstOrder.Arith.pair₄Def : 𝚺₀-Semisentence 5 :=
 def _root_.LO.FirstOrder.Arith.pair₅Def : 𝚺₀-Semisentence 6 :=
   .mkSigma “p a b c d e | ∃ bcde <⁺ p, ∃ cde <⁺ bcde, ∃ de <⁺ cde, !pairDef p a bcde ∧ !pairDef bcde b cde ∧ !pairDef cde c de ∧ !pairDef de d e” (by simp)
 
+def _root_.LO.FirstOrder.Arith.pair₆Def : 𝚺₀-Semisentence 7 :=
+  .mkSigma “p a b c d e f | ∃ bcdef <⁺ p, !pair₅Def bcdef b c d e f ∧ !pairDef p a bcdef” (by simp)
+
 lemma pair₃_defined : 𝚺₀-Function₃ ((⟪·, ·, ·⟫) : M → M → M → M) via pair₃Def := by
   intro v; simp [pair₃Def]; rintro h; simp [h]
 
@@ -744,6 +747,16 @@ lemma pair₅_defined : DefinedFunction (fun v : Fin 5 → M ↦ (⟪v 0, v 1, v
 
 @[simp] lemma eval_pair₅Def (v) :
     Semiformula.Evalbm M v pair₅Def.val ↔ v 0 = ⟪v 1, v 2, v 3, v 4, v 5⟫ := pair₅_defined.df.iff v
+
+lemma pair₆_defined : DefinedFunction (fun v : Fin 6 → M ↦ (⟪v 0, v 1, v 2, v 3, v 4, v 5⟫)) pair₆Def := by
+  intro v; simp [pair₆Def]
+  constructor
+  · intro h; simp only [Fin.isValue, h, pair_ext_iff, true_and]
+    exact ⟨_, le_pair_right _ _, rfl, rfl⟩
+  · rintro ⟨_, _, rfl, h⟩; exact h
+
+@[simp] lemma eval_pair₆Def (v) :
+    Semiformula.Evalbm M v pair₆Def.val ↔ v 0 = ⟪v 1, v 2, v 3, v 4, v 5, v 6⟫ := pair₆_defined.df.iff v
 
 end
 

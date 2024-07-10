@@ -190,7 +190,7 @@ variable (L)
 lemma shift_defined : 𝚺₁-Function₁ L.shift via pL.shiftDef := fun v ↦ by
   simpa [LDef.shiftDef] using (construction L).result_defined ![v 0, 0, v 1]
 
-@[simp] lemma shift_defined_iff (v : Fin 2 → V) :
+@[simp] lemma eval_shiftDef (v : Fin 2 → V) :
     Semiformula.Evalbm (L := ℒₒᵣ) V v pL.shiftDef ↔ v 0 = L.shift (v 1) := (shift_defined L).df.iff v
 
 instance shift_definable : 𝚺₁-Function₁ L.shift :=
