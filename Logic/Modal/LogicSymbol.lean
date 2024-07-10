@@ -198,6 +198,12 @@ notation:74 "□^[" n:90 "]" p:80 => multibox n p
 abbrev multidia (n : ℕ) : F → F := (mop false)^[n]
 notation:74 "◇^[" n:90 "]" p:80 => multidia n p
 
+
+class Subclosed [StandardModalLogicalConnective F] (C : F → Prop) extends LogicalConnective.Subclosed C where
+  box_closed : C (□p) → C p
+
+attribute [aesop safe 5 forward] StandardModalLogicalConnective.Subclosed.box_closed
+
 end LO.StandardModalLogicalConnective
 
 

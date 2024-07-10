@@ -430,6 +430,36 @@ attribute [simp] AndOrClosed.verum AndOrClosed.falsum
 
 end LogicalConnective
 
+
+section Subclosed
+
+class Tilde.Subclosed [Tilde F] (C : F → Prop) where
+  tilde_closed : C (~p) → C p
+
+class Arrow.Subclosed [Arrow F] (C : F → Prop) where
+  arrow_closed : C (p ⟶ q) → C p ∧ C q
+
+class Wedge.Subclosed [Wedge F] (C : F → Prop) where
+  wedge_closed : C (p ⋏ q) → C p ∧ C q
+
+class Vee.Subclosed [Vee F] (C : F → Prop) where
+  vee_closed : C (p ⋎ q) → C p ∧ C q
+
+attribute [aesop safe 5 forward]
+  Tilde.Subclosed.tilde_closed
+  Arrow.Subclosed.arrow_closed
+  Wedge.Subclosed.wedge_closed
+  Vee.Subclosed.vee_closed
+
+class LogicalConnective.Subclosed [LogicalConnective F] (C : F → Prop) extends
+  Tilde.Subclosed C,
+  Arrow.Subclosed C,
+  Wedge.Subclosed C,
+  Vee.Subclosed C
+
+end Subclosed
+
+
 end LO
 
 open LO

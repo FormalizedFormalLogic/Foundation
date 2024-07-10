@@ -223,11 +223,14 @@ def isBox : Formula α → Bool
   | box _ => true
   | _  => false
 
+
 end Formula
 
 abbrev Theory (α) := Set (Formula α)
 
 instance : Collection (Formula α) (Theory α) := inferInstance
+
+abbrev AxiomSet (α) := Set (Formula α)
 
 
 section Subformula
@@ -288,47 +291,6 @@ lemma mem_box (h : □q ∈ 𝒮 p) : q ∈ 𝒮 p := by
 
 end Formula.Subformulas
 
-end Subformula
-
-abbrev AxiomSet (α) := Set (Formula α)
-
-end LO.Modal.Standard
-
-
-namespace LO
-
-class Tilde.Subclosed [Tilde F] (C : F → Prop) where
-  tilde_closed : C (~p) → C p
-
-class Arrow.Subclosed [Arrow F] (C : F → Prop) where
-  arrow_closed : C (p ⟶ q) → C p ∧ C q
-
-class Wedge.Subclosed [Wedge F] (C : F → Prop) where
-  wedge_closed : C (p ⋏ q) → C p ∧ C q
-
-class Vee.Subclosed [Vee F] (C : F → Prop) where
-  vee_closed : C (p ⋎ q) → C p ∧ C q
-
-class LogicalConnective.Subclosed [LogicalConnective F] (C : F → Prop) extends
-  Tilde.Subclosed C,
-  Arrow.Subclosed C,
-  Wedge.Subclosed C,
-  Vee.Subclosed C
-
-class StandardModalLogicalConnective.Subclosed
-  [StandardModalLogicalConnective F] (C : F → Prop) extends LogicalConnective.Subclosed C where
-  box_closed : C (□p) → C p
-
-attribute [aesop safe 5 forward]
-  Tilde.Subclosed.tilde_closed
-  Arrow.Subclosed.arrow_closed
-  Wedge.Subclosed.wedge_closed
-  Vee.Subclosed.vee_closed
-  StandardModalLogicalConnective.Subclosed.box_closed
-
-namespace Modal.Standard
-
-variable [DecidableEq α]
 
 abbrev Theory.SubformulaClosed (T : Theory α) := StandardModalLogicalConnective.Subclosed (· ∈ T)
 
@@ -358,6 +320,67 @@ attribute [aesop safe 5 forward]
 
 end Theory.SubformulaClosed
 
-end Modal.Standard
+end Subformula
 
-end LO
+
+section Atoms
+
+variable [DecidableEq α]
+
+namespace Formula
+
+def atoms : Formula α → Finset (α)
+  | .atom a => {a}
+  | ⊤      => ∅
+  | ⊥      => ∅
+  | ~p     => p.atoms
+  | .box p  => p.atoms
+  | p ⟶ q => p.atoms ∪ q.atoms
+  | p ⋏ q  => p.atoms ∪ q.atoms
+  | p ⋎ q  => p.atoms ∪ q.atoms
+prefix:70 "𝒜 " => Formula.atoms
+
+@[simp]
+lemma mem_atoms_iff_mem_subformulae {a : α} {p : Formula α} : a ∈ 𝒜 p ↔ (atom a) ∈ 𝒮 p := by
+  induction p using Formula.rec' <;> simp_all [Subformulas, atoms];
+
+end Formula
+
+end Atoms
+
+
+section Complement
+
+variable [DecidableEq α]
+
+namespace Formula
+
+def negated : Formula α → Bool
+  | ~_ => true
+  | _  => false
+
+lemma negated_iff {p : Formula α} : p.negated ↔ ∃ q, p = ~q := by
+  induction p using Formula.rec' <;> simp [negated]
+
+lemma not_negated_iff {p : Formula α} : ¬p.negated ↔ ∀ q, p ≠ ~q := by
+  induction p using Formula.rec' <;> simp [negated]
+
+def complement (p : Formula α) : Formula α := if p.negated then p else ~p
+postfix:80 "⁻" => complement
+
+lemma eq_complement_negated {p : Formula α} (hp : p.negated) : p⁻ = p := by
+  induction p using Formula.rec' <;> simp_all [negated, complement]
+
+lemma eq_complement_not_negated {p : Formula α} (hp : ¬p.negated) : p⁻ = ~p := by
+  induction p using Formula.rec' <;> simp_all [negated, complement]
+
+
+abbrev complement_subformula (p : Formula α) : Finset (Formula α) := (𝒮 p) ∪ (Finset.image (·⁻) $ 𝒮 p)
+prefix:70 "𝒮⁻ " => Formula.ComplementSubformula
+
+end Formula
+
+end Complement
+
+
+end LO.Modal.Standard
