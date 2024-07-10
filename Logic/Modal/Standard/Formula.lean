@@ -244,35 +244,43 @@ def Formula.Subformulas: Formula α → Finset (Formula α)
   | p ⋎ q  => insert (p ⋎ q) (p.Subformulas ∪ q.Subformulas)
   | box p  => insert (□p) p.Subformulas
 
+-- notation "Sub(" p ")" => Formula.Subformulas p
+prefix:70 "𝒮 " => Formula.Subformulas
+
 namespace Formula.Subformulas
 
 @[simp]
-lemma mem_self (p : Formula α) : p ∈ p.Subformulas := by induction p using Formula.rec' <;> simp [Subformulas];
+lemma mem_self (p : Formula α) : p ∈ 𝒮 p := by induction p using Formula.rec' <;> simp [Subformulas];
 
 variable {p q r : Formula α}
 
-lemma mem_neg (h : ~q ∈ p.Subformulas) : q ∈ p.Subformulas := by
+@[aesop safe forward]
+lemma mem_neg (h : ~q ∈ 𝒮 p) : q ∈ 𝒮 p := by
   induction p using Formula.rec' <;> {
     simp_all [Subformulas];
     try rcases h with (hq | hr); simp_all; simp_all;
   };
 
-lemma mem_and (h : (q ⋏ r) ∈ p.Subformulas) : q ∈ p.Subformulas ∧ r ∈ p.Subformulas := by
+@[aesop safe forward]
+lemma mem_and (h : (q ⋏ r) ∈ 𝒮 p) : q ∈ 𝒮 p ∧ r ∈ 𝒮 p := by
   induction p using Formula.rec' with
   | hand => simp_all [Subformulas]; rcases h with ⟨_⟩ | ⟨⟨_⟩ | ⟨_⟩⟩ <;> simp_all
   | _ => simp_all [Subformulas]; try rcases h with (hq | hr); simp_all; simp_all;
 
-lemma mem_or (h : (q ⋎ r) ∈ p.Subformulas) : q ∈ p.Subformulas ∧ r ∈ p.Subformulas := by
+@[aesop safe forward]
+lemma mem_or (h : (q ⋎ r) ∈ 𝒮 p) : q ∈ 𝒮 p ∧ r ∈ 𝒮 p := by
   induction p using Formula.rec' with
   | hor => simp_all [Subformulas]; rcases h with ⟨_⟩ | ⟨⟨_⟩ | ⟨_⟩⟩ <;> simp_all
   | _ => simp_all [Subformulas]; try rcases h with (hq | hr); simp_all; simp_all;
 
-lemma mem_imp (h : (q ⟶ r) ∈ p.Subformulas) : q ∈ p.Subformulas ∧ r ∈ p.Subformulas := by
+@[aesop safe forward]
+lemma mem_imp (h : (q ⟶ r) ∈ 𝒮 p) : q ∈ 𝒮 p ∧ r ∈ 𝒮 p := by
   induction p using Formula.rec' with
   | himp => simp_all [Subformulas]; rcases h with ⟨_⟩ | ⟨⟨_⟩ | ⟨_⟩⟩ <;> simp_all
   | _ => simp_all [Subformulas]; try rcases h with (hq | hr); simp_all; simp_all;
 
-lemma mem_box (h : □q ∈ p.Subformulas) : q ∈ p.Subformulas := by
+@[aesop safe forward]
+lemma mem_box (h : □q ∈ 𝒮 p) : q ∈ 𝒮 p := by
   induction p using Formula.rec' <;> {
     simp_all [Subformulas];
     try rcases h with (hq | hr); simp_all; simp_all;
@@ -280,25 +288,76 @@ lemma mem_box (h : □q ∈ p.Subformulas) : q ∈ p.Subformulas := by
 
 end Formula.Subformulas
 
--- TOOD: より抽象的にして`Modal/LogicalSymbol`などに移してもよいかも．
-class Formula.SubformulaClosed (C : (Formula α) → Prop) where
-  neg : C (~p) → C p
-  and : C (p ⋏ q) → C p ∧ C q
-  or  : C (p ⋎ q) → C p ∧ C q
-  imp : C (p ⟶ q) → C p ∧ C q
-  box : C (□p) → C p
-
-open Formula (Subformulas)
-
-instance {p : Formula α} : (Formula.SubformulaClosed (p.Subformulas).toSet) where
-  neg := by intro q hq; exact Subformulas.mem_neg hq;
-  and := by intro q r hqr; exact Subformulas.mem_and hqr;
-  or  := by intro q r hqr; exact Subformulas.mem_or hqr;
-  imp := by intro q r hqr; exact Subformulas.mem_imp hqr;
-  box := by intro q hq; exact Subformulas.mem_box hq;
-
 end Subformula
 
 abbrev AxiomSet (α) := Set (Formula α)
 
 end LO.Modal.Standard
+
+
+namespace LO
+
+class Tilde.Subclosed [Tilde F] (C : F → Prop) where
+  tilde_closed : C (~p) → C p
+
+class Arrow.Subclosed [Arrow F] (C : F → Prop) where
+  arrow_closed : C (p ⟶ q) → C p ∧ C q
+
+class Wedge.Subclosed [Wedge F] (C : F → Prop) where
+  wedge_closed : C (p ⋏ q) → C p ∧ C q
+
+class Vee.Subclosed [Vee F] (C : F → Prop) where
+  vee_closed : C (p ⋎ q) → C p ∧ C q
+
+class LogicalConnective.Subclosed [LogicalConnective F] (C : F → Prop) extends
+  Tilde.Subclosed C,
+  Arrow.Subclosed C,
+  Wedge.Subclosed C,
+  Vee.Subclosed C
+
+class StandardModalLogicalConnective.Subclosed
+  [StandardModalLogicalConnective F] (C : F → Prop) extends LogicalConnective.Subclosed C where
+  box_closed : C (□p) → C p
+
+attribute [aesop safe 5 forward]
+  Tilde.Subclosed.tilde_closed
+  Arrow.Subclosed.arrow_closed
+  Wedge.Subclosed.wedge_closed
+  Vee.Subclosed.vee_closed
+  StandardModalLogicalConnective.Subclosed.box_closed
+
+namespace Modal.Standard
+
+variable [DecidableEq α]
+
+abbrev Theory.SubformulaClosed (T : Theory α) := StandardModalLogicalConnective.Subclosed (· ∈ T)
+
+namespace Theory.SubformulaClosed
+
+instance {p : Formula α} : (Theory.SubformulaClosed ((𝒮 p).toSet)) where
+  tilde_closed := by aesop;
+  arrow_closed := by aesop;
+  wedge_closed := by aesop;
+  vee_closed   := by aesop;
+  box_closed   := by aesop;
+
+variable {p : Formula α} {T : Theory α} [T_closed : T.SubformulaClosed]
+
+lemma sub_mem_neg (h : ~p ∈ T) : p ∈ T := T_closed.tilde_closed h
+lemma sub_mem_and (h : p ⋏ q ∈ T) : p ∈ T ∧ q ∈ T := T_closed.wedge_closed h
+lemma sub_mem_or (h : p ⋎ q ∈ T) : p ∈ T ∧ q ∈ T := T_closed.vee_closed h
+lemma sub_mem_imp (h : p ⟶ q ∈ T) : p ∈ T ∧ q ∈ T := T_closed.arrow_closed h
+lemma sub_mem_box (h : □p ∈ T) : p ∈ T := T_closed.box_closed h
+
+attribute [aesop safe 5 forward]
+  sub_mem_neg
+  sub_mem_and
+  sub_mem_or
+  sub_mem_imp
+  sub_mem_box
+
+end Theory.SubformulaClosed
+
+end Modal.Standard
+
+end LO

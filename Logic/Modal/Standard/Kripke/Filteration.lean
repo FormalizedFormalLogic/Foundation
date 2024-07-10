@@ -18,14 +18,14 @@ variable {α : Type u} [DecidableEq α]
 
 namespace Kripke
 
-open Formula (atom SubformulaClosed)
+open Formula (atom)
 open Formula.Kripke
 
 section
 
-def filterEquiv (M : Kripke.Model α) (T : Theory α) [SubformulaClosed T] (x y : M.World) := ∀ p ∈ T, x ⊧ p ↔ y ⊧ p
+def filterEquiv (M : Kripke.Model α) (T : Theory α) [T.SubformulaClosed] (x y : M.World) := ∀ p, (_ : p ∈ T := by aesop) → x ⊧ p ↔ y ⊧ p
 
-variable (M : Kripke.Model α) (T : Theory α) [T_closed : SubformulaClosed T]
+variable (M : Kripke.Model α) (T : Theory α) [T_closed : T.SubformulaClosed]
 
 lemma filterEquiv.equivalence : Equivalence (filterEquiv M T) where
   refl := by intro x p _; rfl;
@@ -66,7 +66,7 @@ lemma FilterEqvQuotient.finite (T_finite : T.Finite) : Finite (FilterEqvQuotient
 
 instance : Inhabited (FilterEqvQuotient M T) := ⟨⟦﹫⟧⟩
 
-class FilterationModel (M : Model α) (T : Theory α) [T_closed : SubformulaClosed T] extends Model α where
+class FilterationModel (M : Model α) (T : Theory α) [T_closed : T.SubformulaClosed] extends Model α where
   def_world : Frame.World = FilterEqvQuotient M T := by rfl
   def_rel₁ : ∀ {x y : M.Frame}, x ≺ y → Frame.Rel' (cast def_world.symm ⟦x⟧) (cast def_world.symm ⟦y⟧) := by tauto;
   def_rel₂ : ∀ {Qx Qy : Frame.World}, Qx ≺ Qy → Quotient.lift₂ (λ x y => ∀ p, □p ∈ T → (x ⊧ □p → y ⊧ p)) (by
@@ -74,9 +74,9 @@ class FilterationModel (M : Model α) (T : Theory α) [T_closed : SubformulaClos
     simp;
     constructor;
     . intro h p hp sp₂;
-      exact hy _ (T_closed.box hp) |>.mp $ h p hp $ hx _ hp |>.mpr sp₂;
+      exact hy p |>.mp $ h p hp $ hx _ hp |>.mpr sp₂;
     . intro h p hp sp₁;
-      exact hy _ (T_closed.box hp) |>.mpr $ h p hp $ hx _ hp |>.mp sp₁;
+      exact hy p |>.mpr $ h p hp $ hx _ hp |>.mp sp₁;
   ) (cast def_world Qx) (cast def_world Qy) := by tauto;
   def_valuation Qx a : (ha : (atom a) ∈ T) →
     Valuation Qx a ↔ Quotient.lift (λ x => M.Valuation x a) (by
@@ -93,11 +93,11 @@ abbrev StandardFilterationValuation (Qx : FilterEqvQuotient M T) (a : α) := (ha
   . intro hy; exact h a ha |>.mpr hy;
 ) Qx
 
-abbrev FinestFilterationFrame (M : Model α) (T : Theory α) [SubformulaClosed T] : Kripke.Frame where
+abbrev FinestFilterationFrame (M : Model α) (T : Theory α) [T.SubformulaClosed] : Kripke.Frame where
   World := FilterEqvQuotient M T
-  Rel := λ Qx Qy => ∃ x y, Qx = ⟦x⟧ ∧ Qy = ⟦y⟧ ∧ x ≺ y
+  Rel Qx Qy := ∃ x y, Qx = ⟦x⟧ ∧ Qy = ⟦y⟧ ∧ x ≺ y
 
-abbrev FinestFilterationModel (M : Model α) (T : Theory α) [SubformulaClosed T] : Kripke.FilterationModel M T where
+abbrev FinestFilterationModel (M : Model α) (T : Theory α) [T.SubformulaClosed] : Kripke.FilterationModel M T where
   Frame := FinestFilterationFrame M T
   Valuation := StandardFilterationValuation M T
   def_rel₂ := by
@@ -106,19 +106,19 @@ abbrev FinestFilterationModel (M : Model α) (T : Theory α) [SubformulaClosed T
     simp_all [Satisfies];
 
 
-abbrev CoarsestFilterationFrame (M : Model α) (T : Theory α) [T_closed : SubformulaClosed T] : Kripke.Frame where
+abbrev CoarsestFilterationFrame (M : Model α) (T : Theory α) [T_closed : T.SubformulaClosed] : Kripke.Frame where
   World := FilterEqvQuotient M T
-  Rel := λ Qx Qy => Quotient.lift₂ (λ x y => ∀ p, □p ∈ T → (x ⊧ □p → y ⊧ p)) (by
+  Rel Qx Qy := Quotient.lift₂ (λ x y => ∀ p, □p ∈ T → (x ⊧ □p → y ⊧ p)) (by
     intro x₁ y₁ x₂ y₂ hx hy;
     simp;
     constructor;
     . intro h p hp sp₂;
-      exact hy _ (T_closed.box hp) |>.mp $ h p hp $ hx _ hp |>.mpr sp₂;
+      exact hy p |>.mp $ h p hp $ hx _ hp |>.mpr sp₂;
     . intro h p hp sp₁;
-      exact hy _ (T_closed.box hp) |>.mpr $ h p hp $ hx _ hp |>.mp sp₁;
+      exact hy p |>.mpr $ h p hp $ hx _ hp |>.mp sp₁;
   ) Qx Qy
 
-abbrev CoarsestFilterationModel (M : Model α) (T : Theory α) [SubformulaClosed T] : Kripke.FilterationModel M T where
+abbrev CoarsestFilterationModel (M : Model α) (T : Theory α) [T.SubformulaClosed] : Kripke.FilterationModel M T where
   Frame := CoarsestFilterationFrame M T
   Valuation := StandardFilterationValuation M T
 
@@ -127,63 +127,55 @@ end
 
 section
 
-variable {M : Model α} {T : Theory α} [T_closed : SubformulaClosed T]
+variable {M : Model α} {T : Theory α} [T_closed : T.SubformulaClosed]
 variable (FM : Kripke.FilterationModel M T)
 
-theorem filteration {x : M.World} {p : Formula α} (hs : p ∈ T) : x ⊧ p ↔ (cast FM.def_world.symm ⟦x⟧) ⊧ p := by
+theorem filteration {x : M.World} {p : Formula α} (hs : p ∈ T := by aesop) : x ⊧ p ↔ (cast FM.def_world.symm ⟦x⟧) ⊧ p := by
   induction p using Formula.rec' generalizing x with
   | hatom a =>
     have := FM.def_valuation (cast FM.def_world.symm ⟦x⟧) a hs;
     simp_all [Satisfies];
   | hneg p ihp =>
     constructor;
-    . have sp := T_closed.neg hs;
-      rintro hpx;
-      exact ihp sp |>.not.mp hpx;
-    . have sp := T_closed.neg hs;
-      rintro hpx;
-      exact ihp sp |>.not.mpr hpx;
+    . rintro hpx;
+      exact ihp (by aesop) |>.not.mp hpx;
+    . rintro hpx;
+      exact ihp (by aesop) |>.not.mpr hpx;
   | hand p q ihp ihq =>
     constructor;
-    . have ⟨sp, sq⟩ := T_closed.and hs
-      rintro ⟨hp, hq⟩;
+    . rintro ⟨hp, hq⟩;
       constructor;
-      . exact ihp sp |>.mp hp;
-      . exact ihq sq |>.mp hq;
-    . have ⟨sp, sq⟩ := T_closed.and hs
-      rintro ⟨hp, hq⟩;
+      . exact ihp (by aesop) |>.mp hp;
+      . exact ihq (by aesop) |>.mp hq;
+    . rintro ⟨hp, hq⟩;
       constructor;
-      . exact ihp sp |>.mpr hp;
-      . exact ihq sq |>.mpr hq;
+      . exact ihp (by aesop) |>.mpr hp;
+      . exact ihq (by aesop) |>.mpr hq;
   | hor p q ihp ihq =>
     constructor;
-    . have ⟨sp, sq⟩ := T_closed.or hs
-      rintro (hp | hq);
-      . left; exact (ihp sp |>.mp hp);
-      . right; exact (ihq sq |>.mp hq);
-    . have ⟨sp, sq⟩ := T_closed.or hs
-      rintro (hp | hq);
-      . left; exact (ihp sp |>.mpr hp);
-      . right; exact (ihq sq |>.mpr hq);
+    . rintro (hp | hq);
+      . left;  exact (ihp (by aesop) |>.mp hp);
+      . right; exact (ihq (by aesop) |>.mp hq);
+    . rintro (hp | hq);
+      . left;  exact (ihp (by aesop) |>.mpr hp);
+      . right; exact (ihq (by aesop) |>.mpr hq);
   | himp p q ihp ihq =>
     constructor;
-    . have ⟨sp, sq⟩ := T_closed.imp hs
-      rintro hxy hp;
-      exact (ihq sq |>.mp $ hxy (ihp sp |>.mpr hp));
     . rintro hxy hp;
-      have ⟨sp, sq⟩ := T_closed.imp hs
-      exact (ihq sq |>.mpr $ hxy (ihp sp |>.mp hp));
+      exact (ihq (by aesop) |>.mp $ hxy (ihp (by aesop) |>.mpr hp));
+    . rintro hxy hp;
+      exact (ihq (by aesop) |>.mpr $ hxy (ihp (by aesop) |>.mp hp));
   | hbox p ihp =>
     constructor;
     . intro h Qy rQxQy;
       obtain ⟨y, ey⟩ := Quotient.exists_rep (cast FM.def_world Qy);
       have H := FM.def_rel₂ rQxQy;
       simp [←ey] at H;
-      have h₂ := @ihp y (T_closed.box hs) |>.mp $ @H p hs h;
+      have h₂ := @ihp y (by aesop) |>.mp $ @H p hs h;
       simpa [ey] using h₂;
     . intro h y rxy;
       have rQxQy := FM.def_rel₁ rxy;
-      exact ihp (T_closed.box hs) |>.mpr $ h rQxQy;
+      exact ihp (by aesop) |>.mpr $ h rQxQy;
   | _ => simp_all;
 
 end
@@ -195,7 +187,7 @@ instance K_finite_complete : Complete (𝐊 : DeductionParameter α) AllFrameCla
   let M : Kripke.Model α := ⟨F, V⟩;
   let FM : Kripke.FilterationModel M p.Subformulas := CoarsestFilterationModel M ↑p.Subformulas;
 
-  apply filteration FM (by simp) |>.mpr;
+  apply filteration FM |>.mpr;
   apply hp (by
     suffices finite : Finite (FilterEqvQuotient M p.Subformulas) by
       simp [FrameClass.restrictFinite];

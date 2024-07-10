@@ -114,7 +114,6 @@ lemma and_assoc! : 𝓢 ⊢! (p ⋏ q) ⋏ r ⟷ p ⋏ (q ⋏ r) := by
     . exact and₃'! hp hq;
     . exact hr;
 
-
 def andReplaceLeft' (hc : 𝓢 ⊢ p ⋏ q) (h : 𝓢 ⊢ p ⟶ r) : 𝓢 ⊢ r ⋏ q := and₃' (h ⨀ and₁' hc) (and₂' hc)
 lemma and_replace_left'! (hc : 𝓢 ⊢! p ⋏ q) (h : 𝓢 ⊢! p ⟶ r) : 𝓢 ⊢! r ⋏ q := ⟨andReplaceLeft' hc.some h.some⟩
 
@@ -559,6 +558,7 @@ lemma forthback_conj_remove! : 𝓢 ⊢! ⋀(Γ.remove p) ⋏ p ⟶ ⋀Γ := by
   . subst e; exact and₂'! id!;
   . exact iff_provable_list_conj.mp (and₁'! id!) q (by apply List.mem_remove_iff.mpr; simp_all);
 
+-- TODO: make `p` explicit
 lemma imply_left_remove_conj! (b : 𝓢 ⊢! ⋀Γ ⟶ q) : 𝓢 ⊢! ⋀(Γ.remove p) ⋏ p ⟶ q := imp_trans''! forthback_conj_remove! b
 
 lemma iff_concat_conj'! : 𝓢 ⊢! ⋀(Γ ++ Δ) ↔ 𝓢 ⊢! ⋀Γ ⋏ ⋀Δ := by

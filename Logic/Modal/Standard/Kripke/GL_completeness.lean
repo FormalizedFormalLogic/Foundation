@@ -57,8 +57,6 @@ lemma eq_complement_complement {p : Formula α} : p⁻⁻ = p := by
     sorry;
 -/
 
--- notation "Sub(" p ")" => Formula.Subformulas p
-prefix:70 "𝒮 " => Formula.Subformulas
 
 abbrev ComplementSubformula (p : Formula α) : Finset (Formula α) := (𝒮 p) ∪ (Finset.image (·⁻) $ 𝒮 p)
 prefix:70 "𝒮⁻ " => Formula.ComplementSubformula

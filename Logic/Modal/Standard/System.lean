@@ -405,6 +405,11 @@ def axiomFour [HasAxiomFour 𝓢] : 𝓢 ⊢ □p ⟶ □□p := HasAxiomFour.Fo
 instance [HasAxiomFour 𝓢] (Γ : FiniteContext F 𝓢) : HasAxiomFour Γ := ⟨fun _ ↦ FiniteContext.of axiomFour⟩
 instance [HasAxiomFour 𝓢] (Γ : Context F 𝓢) : HasAxiomFour Γ := ⟨fun _ ↦ Context.of axiomFour⟩
 
+variable [HasAxiomFour 𝓢]
+
+def axiomFour' (h : 𝓢 ⊢ □p) : 𝓢 ⊢ □□p := axiomFour ⨀ h
+def axiomFour'! (h : 𝓢 ⊢! □p) : 𝓢 ⊢! □□p := ⟨axiomFour' h.some⟩
+
 def imply_BoxBoxdot_Box: 𝓢 ⊢  □⊡p ⟶ □p := by
   simp [boxdot];
   exact impTrans'' distribute_box_and and₁
