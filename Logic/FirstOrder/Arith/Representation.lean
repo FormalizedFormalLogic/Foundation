@@ -15,6 +15,9 @@ scoped instance {α} [Primcodable α] : Semiterm.Operator.GoedelNumber ℒₒᵣ
 lemma goedelNumber_def {α} [Primcodable α] (a : α) :
   goedelNumber a = Semiterm.Operator.encode ℒₒᵣ a := rfl
 
+lemma goedelNumber'_def {α} [Primcodable α] (a : α) :
+  (⌜a⌝ : Semiterm ℒₒᵣ ξ n) = Semiterm.Operator.encode ℒₒᵣ a := rfl
+
 @[simp] lemma encode_encode_eq {α} [Primcodable α] (a : α) :
     (goedelNumber (encode a) : Semiterm.Const ℒₒᵣ) = goedelNumber a := by simp [Semiterm.Operator.encode, goedelNumber_def]
 
@@ -32,7 +35,7 @@ def codeAux : {k : ℕ} → Nat.ArithPart₁.Code k → Formula ℒₒᵣ (Fin (
     exClosure (((Rew.bind ![] (&0 :> (#·))).hom (codeAux c)) ⋏
       Matrix.conj fun i => (Rew.bind ![] (#i :> (&·.succ))).hom (codeAux (d i)))
   | _, Code.rfind c   =>
-    (Rew.bind ![] (⸢0⸣ :> &0 :> (&·.succ))).hom (codeAux c) ⋏
+    (Rew.bind ![] (⌜0⌝ :> &0 :> (&·.succ))).hom (codeAux c) ⋏
     (∀[“z | z < &0”] ∃' “z | z ≠ 0” ⋏ (Rew.bind ![] (#0 :> #1 :> (&·.succ))).hom (codeAux c))
 
 def code (c : Code k) : Semisentence ℒₒᵣ (k + 1) := (Rew.bind ![] (#0 :> (#·.succ))).hom (codeAux c)
@@ -154,39 +157,39 @@ section representation
 open LO.Arith
 
 lemma provable_iff_mem_partrec {k} {f : Vector ℕ k →. ℕ} (hf : Nat.Partrec' f) {y : ℕ} {v : Fin k → ℕ} :
-    (T ⊢! (Rew.substs $ ⸢y⸣ :> fun i => ⸢v i⸣).hom (code $ codeOfPartrec f)) ↔ y ∈ f (Vector.ofFn v) := by
-  let σ : Sentence ℒₒᵣ := (Rew.substs $ ⸢y⸣ :> fun i => ⸢v i⸣).hom (code $ codeOfPartrec f)
+    (T ⊢! (Rew.substs $ ⌜y⌝ :> fun i => ⌜v i⌝).hom (code $ codeOfPartrec f)) ↔ y ∈ f (Vector.ofFn v) := by
+  let σ : Sentence ℒₒᵣ := (Rew.substs $ ⌜y⌝ :> fun i => ⌜v i⌝).hom (code $ codeOfPartrec f)
   have sigma : Hierarchy 𝚺 1 σ :=
-    (Hierarchy.rew (Rew.substs $ ⸢y⸣ :> fun i => ⸢v i⸣) (code_sigma_one (codeOfPartrec f)))
+    (Hierarchy.rew (Rew.substs $ ⌜y⌝ :> fun i => ⌜v i⌝) (code_sigma_one (codeOfPartrec f)))
   constructor
   · rintro ⟨b⟩
     have : Semiformula.Evalbm ℕ (y :> v) (code $ codeOfPartrec f) := by
-      simpa [σ, goedelNumber_def, models_iff, Semiformula.eval_rew, Matrix.empty_eq, Function.comp, Matrix.comp_vecCons'] using
+      simpa [σ, goedelNumber'_def, goedelNumber_def, models_iff, Semiformula.eval_rew, Matrix.empty_eq, Function.comp, Matrix.comp_vecCons'] using
         Arith.SoundOn.sound sigma ⟨b⟩
     exact (codeOfPartrec_spec hf).mp this
   · intro h
     exact Arith.sigma_one_completeness sigma (by
-      simp [goedelNumber_def, models_iff, Semiformula.eval_rew, Matrix.empty_eq,
+      simp [goedelNumber'_def, goedelNumber_def, models_iff, Semiformula.eval_rew, Matrix.empty_eq,
         Function.comp, Matrix.comp_vecCons', codeOfPartrec_spec hf, h])
 
 variable (T)
 
 lemma provable_iff_computable {k} {f : Vector ℕ k → ℕ}
     (hf : Nat.Partrec' (f : Vector ℕ k →. ℕ)) (v : Fin k → ℕ) :
-    T ⊢! (Rew.substs $ ⸢f (Vector.ofFn v)⸣ :> (⸢v ·⸣)).hom (code $ codeOfPartrec f) :=
+    T ⊢! (Rew.substs $ ⌜f (Vector.ofFn v)⌝ :> (⌜v ·⌝)).hom (code $ codeOfPartrec f) :=
   (provable_iff_mem_partrec hf (T := T) (y := f (Vector.ofFn v)) (v := v)).mpr (by simp)
 
 lemma provable_computable_code_uniq {k} {f : Vector ℕ k → ℕ}
     (hf : Nat.Partrec' (f : Vector ℕ k →. ℕ)) (v : Fin k → ℕ) :
-    T ⊢! ∀' ((Rew.substs $ #0 :> (⸢v ·⸣)).hom (code $ codeOfPartrec f)
-      ⟷ “x | x = !!(⸢f (Vector.ofFn v)⸣)”) :=
+    T ⊢! ∀' ((Rew.substs $ #0 :> (⌜v ·⌝)).hom (code $ codeOfPartrec f)
+      ⟷ “x | x = !!(⌜f (Vector.ofFn v)⌝)”) :=
   complete (oRing_consequence_of _ _ (fun M _ _ _ _ _ _ => by
     haveI : M ⊧ₘ* 𝐏𝐀⁻ :=
       ModelsTheory.of_provably_subtheory M 𝐏𝐀⁻ T inferInstance (by assumption)
     have Hfv : Semiformula.Evalbm M (f (Vector.ofFn v) :> (v ·)) (code (codeOfPartrec f)) := by
-      simpa [goedelNumber_def, Arith.numeral_eq_natCast, models_iff, Semiformula.eval_substs, Matrix.comp_vecCons'] using
+      simpa [goedelNumber'_def, goedelNumber_def, Arith.numeral_eq_natCast, models_iff, Semiformula.eval_substs, Matrix.comp_vecCons'] using
         consequence_iff'.mp (sound₀! (provable_iff_computable T hf v)) M
-    simp [goedelNumber_def, Arith.numeral_eq_natCast, models_iff, Semiformula.eval_substs, Matrix.comp_vecCons']
+    simp [goedelNumber'_def, goedelNumber_def, Arith.numeral_eq_natCast, models_iff, Semiformula.eval_substs, Matrix.comp_vecCons']
     intro x; constructor
     · intro H; exact code_uniq H Hfv
     · rintro rfl; simpa))
@@ -207,7 +210,7 @@ noncomputable def graphTotal₂ (f : α → β → σ) : Semisentence ℒₒᵣ 
 def toVecFun (f : α →. σ) : Vector ℕ 1 →. ℕ := fun x => Part.bind (decode (α := α) x.head) fun a => (f a).map encode
 
 theorem representation {f : α →. σ} (hf : Partrec f) {x y} :
-    T ⊢! (graph f)/[⸢y⸣, ⸢x⸣] ↔ y ∈ f x := by
+    T ⊢! (graph f)/[⌜y⌝, ⌜x⌝] ↔ y ∈ f x := by
   let f' : Vector ℕ 1 →. ℕ := fun x => Part.bind (decode (α := α) x.head) fun a => (f a).map encode
   have : Nat.Partrec' f' :=
     Nat.Partrec'.part_iff.mpr
@@ -217,7 +220,7 @@ theorem representation {f : α →. σ} (hf : Partrec f) {x y} :
     provable_iff_mem_partrec this (y := encode y) (v := ![encode x])
 
 theorem representation_computable {f : α → σ} (hf : Computable f) (a) :
-    T ⊢! ∀' ((graphTotal f)/[#0, ⸢a⸣] ⟷ “x | x = !!⸢f a⸣”) := by
+    T ⊢! ∀' ((graphTotal f)/[#0, ⌜a⌝] ⟷ “x | x = !!⌜f a⌝”) := by
   let f' : Vector ℕ 1 → ℕ := fun x => Option.get! ((decode x.head).map (encode $ f ·))
   have : Nat.Partrec' (f' : Vector ℕ 1 →. ℕ) :=
     Nat.Partrec'.part_iff.mpr <| Computable.partrec <|
@@ -229,7 +232,7 @@ theorem representation_computable {f : α → σ} (hf : Computable f) (a) :
     provable_computable_code_uniq T this ![encode a]
 
 theorem representation_computable₂ {f : α → β → σ} (hf : Computable₂ f) (a b) :
-    T ⊢! ∀' ((graphTotal₂ f)/[#0, ⸢a⸣, ⸢b⸣] ⟷ “x | x = !!⸢f a b⸣”) := by
+    T ⊢! ∀' ((graphTotal₂ f)/[#0, ⌜a⌝, ⌜b⌝] ⟷ “x | x = !!⌜f a b⌝”) := by
   let f' : Vector ℕ 2 → ℕ := fun v =>
     Option.get! ((decode v.head).bind fun x => (decode v.tail.head).map fun y => (encode $ f x y))
   have : Nat.Partrec' (f' : Vector ℕ 2 →. ℕ) :=
@@ -240,16 +243,16 @@ theorem representation_computable₂ {f : α → β → σ} (hf : Computable₂ 
               Computable.option_map
                 (Computable.decode.comp $ Computable.vector_head.comp $ Computable.vector_tail.comp .fst) <|
                   Computable.encode.comp₂ <| hf.comp₂ (Computable.snd.comp₂ .left) .right
-  simpa [f', Matrix.comp_vecCons' (fun x : ℕ => (⸢x⸣ : Semiterm ℒₒᵣ Empty 1)),
+  simpa [f', Matrix.comp_vecCons' (fun x : ℕ => (⌜x⌝ : Semiterm ℒₒᵣ Empty 1)),
     Matrix.constant_eq_singleton, graphTotal₂] using
       provable_computable_code_uniq T this ![encode a, encode b]
 
 noncomputable def pred (p : α → Prop) : Semisentence ℒₒᵣ 1 :=
-  (graph (fun a => Part.assert (p a) fun _ => Part.some ()))/[⸢()⸣, #0]
+  (graph (fun a => Part.assert (p a) fun _ => Part.some ()))/[⌜()⌝, #0]
 
 theorem pred_representation {p : α → Prop} (hp : RePred p) {x} :
-    T ⊢! (pred p)/[⸢x⸣] ↔ p x := by
-  simpa [pred, ←Rew.hom_comp_app, Rew.substs_comp_substs] using
+    T ⊢! (pred p)/[⌜x⌝] ↔ p x := by
+  simpa [goedelNumber'_def, pred, ←Rew.hom_comp_app, Rew.substs_comp_substs] using
     representation hp (T := T) (x := x) (y := ())
 
 end representation

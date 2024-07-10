@@ -26,8 +26,8 @@ variable {T : Theory ℒₒᵣ} [𝐄𝐐 ≼ T] [𝐏𝐀⁻ ≼ T] [DecidableP
 variable (T)
 
 /-- Set $D \coloneqq \{\sigma\ |\ T \vdash \lnot\sigma(\ulcorner \sigma \urcorner)\}$ is r.e. -/
-lemma diagRefutation_re : RePred (fun σ ↦ T ⊢! ~σ/[⸢σ⸣]) := by
-  have : Partrec fun σ : Semisentence ℒₒᵣ 1 ↦ (provableFn T (~σ/[⸢σ⸣])).map (fun _ ↦ ()) :=
+lemma diagRefutation_re : RePred (fun σ ↦ T ⊢! ~σ/[⌜σ⌝]) := by
+  have : Partrec fun σ : Semisentence ℒₒᵣ 1 ↦ (provableFn T (~σ/[⌜σ⌝])).map (fun _ ↦ ()) :=
     Partrec.map
       ((provableFn_partrec T).comp <| Primrec.to_comp
         <| (Semiformula.neg_primrec (L := ℒₒᵣ)).comp
@@ -37,18 +37,18 @@ lemma diagRefutation_re : RePred (fun σ ↦ T ⊢! ~σ/[⸢σ⸣]) := by
       (.const ())
   exact this.of_eq <| by intro σ; ext; simp[←provable_iff_provableFn]
 
-noncomputable def diagRefutation : Semisentence ℒₒᵣ 1 := pred (fun σ => T ⊢! ~σ/[⸢σ⸣])
+noncomputable def diagRefutation : Semisentence ℒₒᵣ 1 := pred (fun σ => T ⊢! ~σ/[⌜σ⌝])
 
 local notation "ρ" => diagRefutation T
 
 /-- Define sentence $\gamma := \rho(\ulcorner \rho \urcorner)$ -/
-noncomputable def γ : Sentence ℒₒᵣ := ρ/[⸢ρ⸣]
+noncomputable def γ : Sentence ℒₒᵣ := ρ/[⌜ρ⌝]
 
 local notation "γ" => γ T
 
 /-- ρ is a sentence that represents $D$ -/
 lemma diagRefutation_spec (σ : Semisentence ℒₒᵣ 1) :
-    T ⊢! ρ/[⸢σ⸣] ↔ T ⊢! ~σ/[⸢σ⸣] := by
+    T ⊢! ρ/[⌜σ⌝] ↔ T ⊢! ~σ/[⌜σ⌝] := by
   simpa[diagRefutation] using pred_representation T (diagRefutation_re T) (x := σ)
 
 /-- It is obvious that $T \vdash \gamma \iff T \vdash \lnot \gamma$. Since

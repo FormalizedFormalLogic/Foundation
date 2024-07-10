@@ -14,7 +14,7 @@ namespace ProvabilityPredicate
 
 variable [Semiterm.Operator.GoedelNumber L₀ (Sentence L)]
 
-def pr (β : ProvabilityPredicate L₀ L) (σ : Sentence L) : Semisentence L₀ n := β.prov/[⸢σ⸣]
+def pr (β : ProvabilityPredicate L₀ L) (σ : Sentence L) : Semisentence L₀ n := β.prov/[⌜σ⌝]
 
 notation "⦍" β "⦎" σ:80 => pr β σ
 
@@ -25,7 +25,7 @@ class Diagonalization
   [Semiterm.Operator.GoedelNumber L (Sentence L)]
   (T : Theory L) where
   fixpoint : Semisentence L 1 → Sentence L
-  diag (θ) : T ⊢! fixpoint θ ⟷ θ/[⸢fixpoint θ⸣]
+  diag (θ) : T ⊢! fixpoint θ ⟷ θ/[⌜fixpoint θ⌝]
 
 
 section Consistency

@@ -1,4 +1,5 @@
 import Logic.FirstOrder.Basic.Semantics.Semantics
+import Logic.Vorspiel.NotationClass
 
 namespace LO
 
@@ -209,7 +210,7 @@ variable {α} [GoedelNumber L α]
 
 abbrev goedelNumber' (a : α) : Semiterm L ξ n := const (goedelNumber a)
 
-notation:max "⸢" a "⸣" => GoedelNumber.goedelNumber' a
+instance : GoedelQuote α (Semiterm L ξ n) := ⟨goedelNumber'⟩
 
 def ofEncodable
     [Operator.Zero L] [Operator.One L] [Operator.Add L] {α : Type*} [Primcodable α] : GoedelNumber L α := ⟨Operator.encode L⟩
