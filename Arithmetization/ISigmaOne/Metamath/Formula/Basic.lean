@@ -142,25 +142,25 @@ lemma qqExists_defined : 𝚺₀-Function₂ (qqEx : V → V → V) via qqExDef 
 @[simp] lemma eval_qqExDef (v) :
     Semiformula.Evalbm V v qqExDef.val ↔ v 0 = ^∃[v 1] (v 2) := qqExists_defined.df.iff v
 
-def bv (p : V) : V := π₁ (p - 1)
+def fstIdx (p : V) : V := π₁ (p - 1)
 
-@[simp] lemma bv_le_self (p : V) : bv p ≤ p := le_trans (by simp [bv]) (show p - 1 ≤ p by simp)
+@[simp] lemma fstIdx_le_self (p : V) : fstIdx p ≤ p := le_trans (by simp [fstIdx]) (show p - 1 ≤ p by simp)
 
-def _root_.LO.FirstOrder.Arith.bvDef : 𝚺₀-Semisentence 2 :=
+def _root_.LO.FirstOrder.Arith.fstIdxDef : 𝚺₀-Semisentence 2 :=
   .mkSigma “n p | ∃ p' <⁺ p, !subDef p' p 1 ∧ !pi₁Def n p'” (by simp)
 
-lemma bv_defined : 𝚺₀-Function₁ (bv : V → V) via bvDef := by
-  intro v; simp [bvDef]
+lemma fstIdx_defined : 𝚺₀-Function₁ (fstIdx : V → V) via fstIdxDef := by
+  intro v; simp [fstIdxDef]
   constructor
   · intro h; exact ⟨v 1 - 1, by simp, rfl, h⟩
   · rintro ⟨_, _, rfl, h⟩; exact h
 
-@[simp] lemma eval_bvDef (v) :
-    Semiformula.Evalbm V v bvDef.val ↔ v 0 = bv (v 1) := bv_defined.df.iff v
+@[simp] lemma eval_fstIdxDef (v) :
+    Semiformula.Evalbm V v fstIdxDef.val ↔ v 0 = fstIdx (v 1) := fstIdx_defined.df.iff v
 
-instance bv_definable : 𝚺₀-Function₁ (bv : V → V) := Defined.to_definable _ bv_defined
+instance fstIdx_definable : 𝚺₀-Function₁ (fstIdx : V → V) := Defined.to_definable _ fstIdx_defined
 
-instance bv_definable' (Γ) : Γ-Function₁ (bv : V → V) := .of_zero bv_definable _
+instance fstIdx_definable' (Γ) : Γ-Function₁ (fstIdx : V → V) := .of_zero fstIdx_definable _
 
 end
 
@@ -175,7 +175,7 @@ end
 @[simp] lemma qqAll_inj (n₁ p₁ n₂ p₂ : V) : ^∀[n₁] p₁ = ^∀[n₂] p₂ ↔ n₁ = n₂ ∧ p₁ = p₂ := by simp [qqAll]
 @[simp] lemma qqEx_inj (n₁ p₁ n₂ p₂ : V) : ^∃[n₁] p₁ = ^∃[n₂] p₂ ↔ n₁ = n₂ ∧ p₁ = p₂ := by simp [qqEx]
 
-@[simp] lemma bv_lt_rel (n k r v : V) : n < ^rel n k r v := le_iff_lt_succ.mp <| le_pair_left _ _
+@[simp] lemma fstIdx_lt_rel (n k r v : V) : n < ^rel n k r v := le_iff_lt_succ.mp <| le_pair_left _ _
 @[simp] lemma arity_lt_rel (n k r v : V) : k < ^rel n k r v :=
   le_iff_lt_succ.mp <| le_trans (le_trans (le_pair_left _ _) <| le_pair_right _ _) <| le_pair_right _ _
 @[simp] lemma r_lt_rel (n k r v : V) : r < ^rel n k r v :=
@@ -183,7 +183,7 @@ end
 @[simp] lemma v_lt_rel (n k r v : V) : v < ^rel n k r v :=
   le_iff_lt_succ.mp <| le_trans (le_trans (le_trans (le_pair_right _ _) <| le_pair_right _ _) <| le_pair_right _ _) <| le_pair_right _ _
 
-@[simp] lemma bv_lt_nrel (n k r v : V) : n < ^nrel n k r v := le_iff_lt_succ.mp <| le_pair_left _ _
+@[simp] lemma fstIdx_lt_nrel (n k r v : V) : n < ^nrel n k r v := le_iff_lt_succ.mp <| le_pair_left _ _
 @[simp] lemma arity_lt_nrel (n k r v : V) : k < ^nrel n k r v :=
   le_iff_lt_succ.mp <| le_trans (le_trans (le_pair_left _ _) <| le_pair_right _ _) <| le_pair_right _ _
 @[simp] lemma r_lt_nrel (n k r v : V) : r < ^nrel n k r v :=
@@ -191,32 +191,32 @@ end
 @[simp] lemma v_lt_nrel (n k r v : V) : v < ^nrel n k r v :=
   le_iff_lt_succ.mp <| le_trans (le_trans (le_trans (le_pair_right _ _) <| le_pair_right _ _) <| le_pair_right _ _) <| le_pair_right _ _
 
-@[simp] lemma bv_lt_verum (n : V) : n < ^⊤[n] := le_iff_lt_succ.mp <| le_pair_left _ _
+@[simp] lemma fstIdx_lt_verum (n : V) : n < ^⊤[n] := le_iff_lt_succ.mp <| le_pair_left _ _
 
-@[simp] lemma bv_lt_falsum (n : V) : n < ^⊥[n] := le_iff_lt_succ.mp <| le_pair_left _ _
+@[simp] lemma fstIdx_lt_falsum (n : V) : n < ^⊥[n] := le_iff_lt_succ.mp <| le_pair_left _ _
 
-@[simp] lemma bv_lt_and (n p q : V) : n < p ^⋏[n] q := le_iff_lt_succ.mp <| le_pair_left _ _
+@[simp] lemma fstIdx_lt_and (n p q : V) : n < p ^⋏[n] q := le_iff_lt_succ.mp <| le_pair_left _ _
 @[simp] lemma lt_and_left (n p q : V) : p < p ^⋏[n] q := le_iff_lt_succ.mp <| le_trans (le_trans (le_pair_left _ _) <| le_pair_right _ _) <| le_pair_right _ _
 @[simp] lemma lt_and_right (n p q : V) : q < p ^⋏[n] q := le_iff_lt_succ.mp <| le_trans (le_trans (le_pair_right _ _) <| le_pair_right _ _) <| le_pair_right _ _
 
-@[simp] lemma bv_lt_or (n p q : V) : n < p ^⋎[n] q := le_iff_lt_succ.mp <| le_pair_left _ _
+@[simp] lemma fstIdx_lt_or (n p q : V) : n < p ^⋎[n] q := le_iff_lt_succ.mp <| le_pair_left _ _
 @[simp] lemma lt_or_left (n p q : V) : p < p ^⋎[n] q := le_iff_lt_succ.mp <| le_trans (le_trans (le_pair_left _ _) <| le_pair_right _ _) <| le_pair_right _ _
 @[simp] lemma lt_or_right (n p q : V) : q < p ^⋎[n] q := le_iff_lt_succ.mp <| le_trans (le_trans (le_pair_right _ _) <| le_pair_right _ _) <| le_pair_right _ _
 
-@[simp] lemma bv_lt_forall (n p : V) : n < ^∀[n] p := le_iff_lt_succ.mp <| le_pair_left _ _
+@[simp] lemma fstIdx_lt_forall (n p : V) : n < ^∀[n] p := le_iff_lt_succ.mp <| le_pair_left _ _
 @[simp] lemma lt_forall (n p : V) : p < ^∀[n] p := le_iff_lt_succ.mp <| le_trans (le_pair_right _ _) <| le_pair_right _ _
 
-@[simp] lemma bv_lt_exists (n p : V) : n < ^∃[n] p := le_iff_lt_succ.mp <| le_pair_left _ _
+@[simp] lemma fstIdx_lt_exists (n p : V) : n < ^∃[n] p := le_iff_lt_succ.mp <| le_pair_left _ _
 @[simp] lemma lt_exists (n p : V) : p < ^∃[n] p := le_iff_lt_succ.mp <| le_trans (le_pair_right _ _) <| le_pair_right _ _
 
-@[simp] lemma bv_rel (n k r v : V) : bv (^rel n k r v) = n := by simp [bv, qqRel]
-@[simp] lemma bv_nrel (n k r v : V) : bv (^nrel n k r v) = n := by simp [bv, qqNRel]
-@[simp] lemma bv_verum (n : V) : bv ^⊤[n] = n := by simp [bv, qqVerum]
-@[simp] lemma bv_falsum (n : V) : bv ^⊥[n] = n := by simp [bv, qqFalsum]
-@[simp] lemma bv_and (n p q : V) : bv (p ^⋏[n] q) = n := by simp [bv, qqAnd]
-@[simp] lemma bv_or (n p q : V) : bv (p ^⋎[n] q) = n := by simp [bv, qqOr]
-@[simp] lemma bv_all (n p : V) : bv (^∀[n] p) = n := by simp [bv, qqAll]
-@[simp] lemma bv_ex (n p : V) : bv (^∃[n] p) = n := by simp [bv, qqEx]
+@[simp] lemma fstIdx_rel (n k r v : V) : fstIdx (^rel n k r v) = n := by simp [fstIdx, qqRel]
+@[simp] lemma fstIdx_nrel (n k r v : V) : fstIdx (^nrel n k r v) = n := by simp [fstIdx, qqNRel]
+@[simp] lemma fstIdx_verum (n : V) : fstIdx ^⊤[n] = n := by simp [fstIdx, qqVerum]
+@[simp] lemma fstIdx_falsum (n : V) : fstIdx ^⊥[n] = n := by simp [fstIdx, qqFalsum]
+@[simp] lemma fstIdx_and (n p q : V) : fstIdx (p ^⋏[n] q) = n := by simp [fstIdx, qqAnd]
+@[simp] lemma fstIdx_or (n p q : V) : fstIdx (p ^⋎[n] q) = n := by simp [fstIdx, qqOr]
+@[simp] lemma fstIdx_all (n p : V) : fstIdx (^∀[n] p) = n := by simp [fstIdx, qqAll]
+@[simp] lemma fstIdx_ex (n p : V) : fstIdx (^∃[n] p) = n := by simp [fstIdx, qqEx]
 
 namespace FormalizedFormula
 
@@ -227,10 +227,10 @@ def Phi (C : Set V) (p : V) : Prop :=
   (∃ n k r v, L.Rel k r ∧ L.SemitermSeq k n v ∧ p = ^nrel n k r v) ∨
   (∃ n, p = ^⊤[n]) ∨
   (∃ n, p = ^⊥[n]) ∨
-  (∃ n q r, (q ∈ C ∧ n = bv q) ∧ (r ∈ C ∧ n = bv r) ∧ p = q ^⋏[n] r) ∨
-  (∃ n q r, (q ∈ C ∧ n = bv q) ∧ (r ∈ C ∧ n = bv r) ∧ p = q ^⋎[n] r) ∨
-  (∃ n q, (q ∈ C ∧ n + 1 = bv q) ∧ p = ^∀[n] q) ∨
-  (∃ n q, (q ∈ C ∧ n + 1 = bv q) ∧ p = ^∃[n] q)
+  (∃ n q r, (q ∈ C ∧ n = fstIdx q) ∧ (r ∈ C ∧ n = fstIdx r) ∧ p = q ^⋏[n] r) ∨
+  (∃ n q r, (q ∈ C ∧ n = fstIdx q) ∧ (r ∈ C ∧ n = fstIdx r) ∧ p = q ^⋎[n] r) ∨
+  (∃ n q, (q ∈ C ∧ n + 1 = fstIdx q) ∧ p = ^∀[n] q) ∨
+  (∃ n q, (q ∈ C ∧ n + 1 = fstIdx q) ∧ p = ^∃[n] q)
 
 private lemma phi_iff (C p : V) :
     Phi L {x | x ∈ C} p ↔
@@ -238,10 +238,10 @@ private lemma phi_iff (C p : V) :
     (∃ n < p, ∃ k < p, ∃ r < p, ∃ v < p, L.Rel k r ∧ L.SemitermSeq k n v ∧ p = ^nrel n k r v) ∨
     (∃ n < p, p = ^⊤[n]) ∨
     (∃ n < p, p = ^⊥[n]) ∨
-    (∃ n < p, ∃ q < p, ∃ r < p, (q ∈ C ∧ n = bv q) ∧ (r ∈ C ∧ n = bv r) ∧ p = q ^⋏[n] r) ∨
-    (∃ n < p, ∃ q < p, ∃ r < p, (q ∈ C ∧ n = bv q) ∧ (r ∈ C ∧ n = bv r) ∧ p = q ^⋎[n] r) ∨
-    (∃ n < p, ∃ q < p, (q ∈ C ∧ n + 1 = bv q) ∧ p = ^∀[n] q) ∨
-    (∃ n < p, ∃ q < p, (q ∈ C ∧ n + 1 = bv q) ∧ p = ^∃[n] q) where
+    (∃ n < p, ∃ q < p, ∃ r < p, (q ∈ C ∧ n = fstIdx q) ∧ (r ∈ C ∧ n = fstIdx r) ∧ p = q ^⋏[n] r) ∨
+    (∃ n < p, ∃ q < p, ∃ r < p, (q ∈ C ∧ n = fstIdx q) ∧ (r ∈ C ∧ n = fstIdx r) ∧ p = q ^⋎[n] r) ∨
+    (∃ n < p, ∃ q < p, (q ∈ C ∧ n + 1 = fstIdx q) ∧ p = ^∀[n] q) ∨
+    (∃ n < p, ∃ q < p, (q ∈ C ∧ n + 1 = fstIdx q) ∧ p = ^∃[n] q) where
   mp := by
     rintro (⟨n, k, r, v, hkr, hv, rfl⟩ | ⟨n, k, r, v, hkr, hv, rfl⟩ | H)
     · left; refine ⟨n, ?_, k, ?_, r, ?_, v, ?_, hkr, hv, rfl⟩ <;> simp
@@ -280,10 +280,10 @@ def formulaAux : 𝚺₀-Semisentence 2 := .mkSigma
   “p C |
     (∃ n < p, !qqVerumDef p n) ∨
     (∃ n < p, !qqFalsumDef p n) ∨
-    (∃ n < p, ∃ q < p, ∃ r < p, (q ∈ C ∧ !bvDef n q) ∧ (r ∈ C ∧ !bvDef n r) ∧ !qqAndDef p n q r) ∨
-    (∃ n < p, ∃ q < p, ∃ r < p, (q ∈ C ∧ !bvDef n q) ∧ (r ∈ C ∧ !bvDef n r) ∧ !qqOrDef p n q r) ∨
-    (∃ n < p, ∃ q < p, (q ∈ C ∧ !bvDef (n + 1) q) ∧ !qqAllDef p n q) ∨
-    (∃ n < p, ∃ q < p, (q ∈ C ∧ !bvDef (n + 1) q) ∧ !qqExDef p n q)”
+    (∃ n < p, ∃ q < p, ∃ r < p, (q ∈ C ∧ !fstIdxDef n q) ∧ (r ∈ C ∧ !fstIdxDef n r) ∧ !qqAndDef p n q r) ∨
+    (∃ n < p, ∃ q < p, ∃ r < p, (q ∈ C ∧ !fstIdxDef n q) ∧ (r ∈ C ∧ !fstIdxDef n r) ∧ !qqOrDef p n q r) ∨
+    (∃ n < p, ∃ q < p, (q ∈ C ∧ !fstIdxDef (n + 1) q) ∧ !qqAllDef p n q) ∨
+    (∃ n < p, ∃ q < p, (q ∈ C ∧ !fstIdxDef (n + 1) q) ∧ !qqExDef p n q)”
   (by simp)
 
 def blueprint (pL : LDef) : Fixpoint.Blueprint 0 := ⟨.mkDelta
@@ -325,7 +325,7 @@ def construction : Fixpoint.Construction V (blueprint pL) where
           Matrix.constant_eq_singleton, Language.Defined.eval_rel_iff (L := L), eval_termSeq L,
           Matrix.cons_val_four, Matrix.cons_val_succ, eval_qqRelDef, LogicalConnective.Prop.and_eq,
           eval_qqNRelDef, eval_qqVerumDef, eval_qqFalsumDef, Semiformula.eval_operator₂,
-          Structure.Mem.mem, eval_bvDef, eval_qqAndDef, eval_qqOrDef, Semiterm.val_operator₂,
+          Structure.Mem.mem, eval_fstIdxDef, eval_qqAndDef, eval_qqOrDef, Semiterm.val_operator₂,
           Semiterm.val_operator₀, Structure.numeral_eq_numeral, ORingSymbol.one_eq_one,
           Structure.Add.add, eval_qqAllDef, eval_qqExDef, LogicalConnective.Prop.or_eq] using
           phi_iff L _ _⟩
@@ -386,13 +386,13 @@ instance uformulaDef_definable : 𝚫₁-Predicate L.UFormula := Defined.to_defi
 @[simp, definability] instance uformulaDef_definable' (Γ) : (Γ, m + 1)-Predicate L.UFormula :=
   .of_deltaOne (uformulaDef_definable L) _ _
 
-def Language.Semiformula (n p : V) : Prop := L.UFormula p ∧ n = bv p
+def Language.Semiformula (n p : V) : Prop := L.UFormula p ∧ n = fstIdx p
 
 def Language.Formula (p : V) : Prop := L.Semiformula 0 p
 
 def _root_.LO.FirstOrder.Arith.LDef.isSemiformulaDef (pL : LDef) : 𝚫₁-Semisentence 2 := .mkDelta
-  (.mkSigma “n p | !pL.uformulaDef.sigma p ∧ !bvDef n p” (by simp))
-  (.mkPi “n p | !pL.uformulaDef.pi p ∧ !bvDef n p” (by simp))
+  (.mkSigma “n p | !pL.uformulaDef.sigma p ∧ !fstIdxDef n p” (by simp))
+  (.mkPi “n p | !pL.uformulaDef.pi p ∧ !fstIdxDef n p” (by simp))
 
 lemma semiformula_defined : 𝚫₁-Relation L.Semiformula via pL.isSemiformulaDef where
   left := by intro v; simp [LDef.isSemiformulaDef, HSemiformula.val_sigma, (uformula_defined L).proper.iff']
@@ -413,10 +413,10 @@ lemma Language.UFormula.case_iff {p : V} :
     (∃ n k r v, L.Rel k r ∧ L.SemitermSeq k n v ∧ p = ^nrel n k r v) ∨
     (∃ n, p = ^⊤[n]) ∨
     (∃ n, p = ^⊥[n]) ∨
-    (∃ n q r, (𝐔 q ∧ n = bv q) ∧ (𝐔 r ∧ n = bv r) ∧ p = q ^⋏[n] r) ∨
-    (∃ n q r, (𝐔 q ∧ n = bv q) ∧ (𝐔 r ∧ n = bv r) ∧ p = q ^⋎[n] r) ∨
-    (∃ n q, (𝐔 q ∧ n + 1 = bv q) ∧ p = ^∀[n] q) ∨
-    (∃ n q, (𝐔 q ∧ n + 1 = bv q) ∧ p = ^∃[n] q) :=
+    (∃ n q r, (𝐔 q ∧ n = fstIdx q) ∧ (𝐔 r ∧ n = fstIdx r) ∧ p = q ^⋏[n] r) ∨
+    (∃ n q r, (𝐔 q ∧ n = fstIdx q) ∧ (𝐔 r ∧ n = fstIdx r) ∧ p = q ^⋎[n] r) ∨
+    (∃ n q, (𝐔 q ∧ n + 1 = fstIdx q) ∧ p = ^∀[n] q) ∨
+    (∃ n q, (𝐔 q ∧ n + 1 = fstIdx q) ∧ p = ^∃[n] q) :=
   (construction L).case
 
 alias ⟨Language.UFormula.case, Language.UFormula.mk⟩ := Language.UFormula.case_iff
@@ -534,9 +534,9 @@ lemma Language.Semiformula.induction (Γ) {P : V → V → Prop} (hP : (Γ, 1)-R
     (hall : ∀ n p, L.Semiformula (n + 1) p → P (n + 1) p → P n (^∀[n] p))
     (hex : ∀ n p, L.Semiformula (n + 1) p → P (n + 1) p → P n (^∃[n] p)) :
     ∀ n p, L.Semiformula n p → P n p := by
-  suffices ∀ p, 𝐔 p → ∀ n ≤ p, bv p = n → P n p
-  by rintro n p ⟨h, rfl⟩; exact this p h (bv p) (by simp) rfl
-  apply Language.UFormula.induction (P := fun p ↦ ∀ n ≤ p, bv p = n → P n p) Γ
+  suffices ∀ p, 𝐔 p → ∀ n ≤ p, fstIdx p = n → P n p
+  by rintro n p ⟨h, rfl⟩; exact this p h (fstIdx p) (by simp) rfl
+  apply Language.UFormula.induction (P := fun p ↦ ∀ n ≤ p, fstIdx p = n → P n p) Γ
   · apply Definable.ball_le (by definability)
     apply Definable.imp (by definability)
     simp; exact hP
@@ -546,14 +546,14 @@ lemma Language.Semiformula.induction (Γ) {P : V → V → Prop} (hP : (Γ, 1)-R
   · rintro n _ _ rfl; simpa using hfalsum n
   · rintro n p q hp hq ihp ihq _ _ rfl
     simpa using hand n p q hp hq
-      (by simpa [hp.2] using ihp (bv p) (by simp) rfl) (by simpa [hq.2] using ihq (bv q) (by simp) rfl)
+      (by simpa [hp.2] using ihp (fstIdx p) (by simp) rfl) (by simpa [hq.2] using ihq (fstIdx q) (by simp) rfl)
   · rintro n p q hp hq ihp ihq _ _ rfl
     simpa using hor n p q hp hq
-      (by simpa [hp.2] using ihp (bv p) (by simp) rfl) (by simpa [hq.2] using ihq (bv q) (by simp) rfl)
+      (by simpa [hp.2] using ihp (fstIdx p) (by simp) rfl) (by simpa [hq.2] using ihq (fstIdx q) (by simp) rfl)
   · rintro n p hp ih _ _ rfl
-    simpa using hall n p hp (by simpa [hp.2] using ih (bv p) (by simp) rfl)
+    simpa using hall n p hp (by simpa [hp.2] using ih (fstIdx p) (by simp) rfl)
   · rintro n p hp ih _ _ rfl
-    simpa using hex n p hp (by simpa [hp.2] using ih (bv p) (by simp) rfl)
+    simpa using hex n p hp (by simpa [hp.2] using ih (fstIdx p) (by simp) rfl)
 
 lemma Language.Semiformula.induction_sigma₁ {P : V → V → Prop} (hP : 𝚺₁-Relation P)
     (hrel : ∀ n k r v, L.Rel k r → L.SemitermSeq k n v → P n (^rel n k r v))
@@ -1055,7 +1055,7 @@ variable (param)
 lemma graph_exists {p : V} : L.UFormula p → ∃ y, c.Graph param p y := by
   haveI : 𝚺₁-Function₂ c.allChanges := c.allChanges_defined.to_definable
   haveI : 𝚺₁-Function₂ c.exChanges := c.exChanges_defined.to_definable
-  let f : V → V → V := fun p param ↦ max param (max (c.allChanges param (bv p)) (c.exChanges param (bv p)))
+  let f : V → V → V := fun p param ↦ max param (max (c.allChanges param (fstIdx p)) (c.exChanges param (fstIdx p)))
   have hf : 𝚺₁-Function₂ f := by simp [f]; definability
   apply sigma₁_order_ball_induction hf ?_ ?_ p param
   · definability
@@ -1195,7 +1195,7 @@ lemma uformula_result_induction {P : V → V → V → Prop} (hP : 𝚺₁-Relat
   intro param p
   haveI : 𝚺₁-Function₂ c.allChanges := c.allChanges_defined.to_definable
   haveI : 𝚺₁-Function₂ c.exChanges := c.exChanges_defined.to_definable
-  let f : V → V → V := fun p param ↦ max param (max (c.allChanges param (bv p)) (c.exChanges param (bv p)))
+  let f : V → V → V := fun p param ↦ max param (max (c.allChanges param (fstIdx p)) (c.exChanges param (fstIdx p)))
   have hf : 𝚺₁-Function₂ f :=
     DefinableFunction.comp₂ (f := Max.max)
       (DefinableFunction.var _)
@@ -1244,10 +1244,10 @@ lemma semiformula_result_induction {P : V → V → V → V → Prop} (hP : 𝚺
       P (c.exChanges param n) (n + 1) p (c.result (c.exChanges param n) p) →
       P param n (^∃[n] p) (c.ex param n p (c.result (c.exChanges param n) p))) :
     ∀ {param n p : V}, L.Semiformula n p → P param n p (c.result param p) := by
-  suffices ∀ {param p : V}, L.UFormula p → ∀ n ≤ p, n = bv p → P param n p (c.result param p)
+  suffices ∀ {param p : V}, L.UFormula p → ∀ n ≤ p, n = fstIdx p → P param n p (c.result param p)
   by intro param n p hp; exact @this param p hp.1 n (by simp [hp.2]) hp.2
   intro param p hp
-  apply c.uformula_result_induction (P := fun param p y ↦ ∀ n ≤ p, n = bv p → P param n p y)
+  apply c.uformula_result_induction (P := fun param p y ↦ ∀ n ≤ p, n = fstIdx p → P param n p y)
     ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
   · apply Definable.ball_le (DefinableFunction.var _)
     simp_all only [zero_add, Nat.succ_eq_add_one, Nat.reduceAdd, Fin.isValue, Fin.succ_one_eq_two,
