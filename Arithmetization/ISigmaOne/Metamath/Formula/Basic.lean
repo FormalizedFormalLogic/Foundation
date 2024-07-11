@@ -142,26 +142,6 @@ lemma qqExists_defined : 𝚺₀-Function₂ (qqEx : V → V → V) via qqExDef 
 @[simp] lemma eval_qqExDef (v) :
     Semiformula.Evalbm V v qqExDef.val ↔ v 0 = ^∃[v 1] (v 2) := qqExists_defined.df.iff v
 
-def fstIdx (p : V) : V := π₁ (p - 1)
-
-@[simp] lemma fstIdx_le_self (p : V) : fstIdx p ≤ p := le_trans (by simp [fstIdx]) (show p - 1 ≤ p by simp)
-
-def _root_.LO.FirstOrder.Arith.fstIdxDef : 𝚺₀-Semisentence 2 :=
-  .mkSigma “n p | ∃ p' <⁺ p, !subDef p' p 1 ∧ !pi₁Def n p'” (by simp)
-
-lemma fstIdx_defined : 𝚺₀-Function₁ (fstIdx : V → V) via fstIdxDef := by
-  intro v; simp [fstIdxDef]
-  constructor
-  · intro h; exact ⟨v 1 - 1, by simp, rfl, h⟩
-  · rintro ⟨_, _, rfl, h⟩; exact h
-
-@[simp] lemma eval_fstIdxDef (v) :
-    Semiformula.Evalbm V v fstIdxDef.val ↔ v 0 = fstIdx (v 1) := fstIdx_defined.df.iff v
-
-instance fstIdx_definable : 𝚺₀-Function₁ (fstIdx : V → V) := Defined.to_definable _ fstIdx_defined
-
-instance fstIdx_definable' (Γ) : Γ-Function₁ (fstIdx : V → V) := .of_zero fstIdx_definable _
-
 end
 
 @[simp] lemma qqRel_inj (n₁ k₁ r₁ v₁ n₂ k₂ r₂ v₂ : V) :
