@@ -282,6 +282,15 @@ lemma cutRule_defined : 𝚺₀-Function₄ (cutRule : V → V → V → V → V
 @[simp] lemma d₂_lt_cutRule (s p d₁ d₂ : V) : d₂ < cutRule s p d₁ d₂ :=
   le_iff_lt_succ.mp <| le_trans (le_trans (le_trans (le_pair_right _ _) <| le_pair_right _ _) <| le_pair_right _ _) <| le_pair_right _ _
 
+@[simp] lemma fstIdx_axL (s p : V) : fstIdx (axL s p) = s := by simp [fstIdx, axL]
+@[simp] lemma fstIdx_verumIntro (s : V) : fstIdx (verumIntro s) = s := by simp [fstIdx, verumIntro]
+@[simp] lemma fstIdx_andIntro (s p q dp dq : V) : fstIdx (andIntro s p q dp dq) = s := by simp [fstIdx, andIntro]
+@[simp] lemma fstIdx_orIntro (s p q dpq : V) : fstIdx (orIntro s p q dpq) = s := by simp [fstIdx, orIntro]
+@[simp] lemma fstIdx_allIntro (s p d : V) : fstIdx (allIntro s p d) = s := by simp [fstIdx, allIntro]
+@[simp] lemma fstIdx_exIntro (s p t d : V) : fstIdx (exIntro s p t d) = s := by simp [fstIdx, exIntro]
+@[simp] lemma fstIdx_wkRule (s d : V) : fstIdx (wkRule s d) = s := by simp [fstIdx, wkRule]
+@[simp] lemma fstIdx_cutRule (s p d₁ d₂ : V) : fstIdx (cutRule s p d₁ d₂) = s := by simp [fstIdx, cutRule]
+
 end
 
 namespace Derivation
@@ -495,7 +504,7 @@ variable (L)
 
 def Language.Derivation : V → Prop := (construction L).Fixpoint ![]
 
-def Language.DerivationOf (d s : V) : Prop := L.Derivation d ∧ s = conseq d
+def Language.DerivationOf (d s : V) : Prop := fstIdx d = s ∧ L.Derivation d
 
 section
 
@@ -517,15 +526,20 @@ lemma Language.Derivation.case_iff {d : V} :
     L.FormulaSet (fstIdx d) ∧
     ( (∃ s p, d = axL s p ∧ p ∈ s ∧ L.neg p ∈ s) ∨
       (∃ s, d = verumIntro s ∧ ^⊤[0] ∈ s) ∨
-      (∃ s p q dp dq, d = andIntro s p q dp dq ∧ p ^⋏[0] q ∈ s ∧ (fstIdx dp = insert p s ∧ L.Derivation dp) ∧ (fstIdx dq = insert q s ∧ L.Derivation dq)) ∨
-      (∃ s p q dpq, d = orIntro s p q dpq ∧ p ^⋎[0] q ∈ s ∧ fstIdx dpq = insert p (insert q s) ∧ L.Derivation dpq) ∨
-      (∃ s p dp, d = allIntro s p dp ∧ ^∀[0] p ∈ s ∧ fstIdx dp = insert (L.free p) (L.setShift s) ∧ L.Derivation dp) ∨
-      (∃ s p t dp, d = exIntro s p t dp ∧ ^∃[0] p ∈ s ∧ L.Term t ∧ fstIdx dp = insert (L.substs₁ t p) s ∧ L.Derivation dp) ∨
+      (∃ s p q dp dq, d = andIntro s p q dp dq ∧ p ^⋏[0] q ∈ s ∧ L.DerivationOf dp (insert p s) ∧ L.DerivationOf dq (insert q s)) ∨
+      (∃ s p q dpq, d = orIntro s p q dpq ∧ p ^⋎[0] q ∈ s ∧ L.DerivationOf dpq (insert p (insert q s))) ∨
+      (∃ s p dp, d = allIntro s p dp ∧ ^∀[0] p ∈ s ∧ L.DerivationOf dp (insert (L.free p) (L.setShift s))) ∨
+      (∃ s p t dp, d = exIntro s p t dp ∧ ^∃[0] p ∈ s ∧ L.Term t ∧ L.DerivationOf dp (insert (L.substs₁ t p) s)) ∨
       (∃ s d', d = wkRule s d' ∧ fstIdx d' ⊆ s ∧ L.Derivation d') ∨
-      (∃ s p d₁ d₂, d = cutRule s p d₁ d₂ ∧ (fstIdx d₁ = insert p s ∧ L.Derivation d₁) ∧ (fstIdx d₂ = insert (L.neg p) s ∧ L.Derivation d₂)) ) :=
+      (∃ s p d₁ d₂, d = cutRule s p d₁ d₂ ∧ L.DerivationOf d₁ (insert p s) ∧ L.DerivationOf d₂ (insert (L.neg p) s)) ) :=
   (construction L).case
 
 alias ⟨Language.Derivation.case, Language.Derivation.mk⟩ := Language.Derivation.case_iff
+
+lemma Language.Derivation.axL {s p : V} (hs : L.FormulaSet s) (h : p ∈ s) (hn : L.neg p ∈ s) : L.Derivation (axL s p) :=
+  Language.Derivation.mk ⟨by simpa using hs, Or.inl ⟨s, p, rfl, h, hn⟩⟩
+
+
 
 end derivation
 
