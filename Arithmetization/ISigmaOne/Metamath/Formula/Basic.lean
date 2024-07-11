@@ -203,8 +203,8 @@ namespace FormalizedFormula
 variable (L)
 
 def Phi (C : Set V) (p : V) : Prop :=
-  (∃ n k r v, L.Rel k r ∧ L.SemitermSeq k n v ∧ p = ^rel n k r v) ∨
-  (∃ n k r v, L.Rel k r ∧ L.SemitermSeq k n v ∧ p = ^nrel n k r v) ∨
+  (∃ n k r v, L.Rel k r ∧ L.SemitermVec k n v ∧ p = ^rel n k r v) ∨
+  (∃ n k r v, L.Rel k r ∧ L.SemitermVec k n v ∧ p = ^nrel n k r v) ∨
   (∃ n, p = ^⊤[n]) ∨
   (∃ n, p = ^⊥[n]) ∨
   (∃ n q r, (q ∈ C ∧ n = fstIdx q) ∧ (r ∈ C ∧ n = fstIdx r) ∧ p = q ^⋏[n] r) ∨
@@ -214,8 +214,8 @@ def Phi (C : Set V) (p : V) : Prop :=
 
 private lemma phi_iff (C p : V) :
     Phi L {x | x ∈ C} p ↔
-    (∃ n < p, ∃ k < p, ∃ r < p, ∃ v < p, L.Rel k r ∧ L.SemitermSeq k n v ∧ p = ^rel n k r v) ∨
-    (∃ n < p, ∃ k < p, ∃ r < p, ∃ v < p, L.Rel k r ∧ L.SemitermSeq k n v ∧ p = ^nrel n k r v) ∨
+    (∃ n < p, ∃ k < p, ∃ r < p, ∃ v < p, L.Rel k r ∧ L.SemitermVec k n v ∧ p = ^rel n k r v) ∨
+    (∃ n < p, ∃ k < p, ∃ r < p, ∃ v < p, L.Rel k r ∧ L.SemitermVec k n v ∧ p = ^nrel n k r v) ∨
     (∃ n < p, p = ^⊤[n]) ∨
     (∃ n < p, p = ^⊥[n]) ∨
     (∃ n < p, ∃ q < p, ∃ r < p, (q ∈ C ∧ n = fstIdx q) ∧ (r ∈ C ∧ n = fstIdx r) ∧ p = q ^⋏[n] r) ∨
@@ -269,13 +269,13 @@ def formulaAux : 𝚺₀-Semisentence 2 := .mkSigma
 def blueprint (pL : LDef) : Fixpoint.Blueprint 0 := ⟨.mkDelta
   (.mkSigma
     “p C |
-      (∃ n < p, ∃ k < p, ∃ r < p, ∃ v < p, !pL.rel k r ∧ !pL.termSeqDef.sigma k n v ∧ !qqRelDef p n k r v) ∨
-      (∃ n < p, ∃ k < p, ∃ r < p, ∃ v < p, !pL.rel k r ∧ !pL.termSeqDef.sigma k n v ∧ !qqNRelDef p n k r v) ∨
+      (∃ n < p, ∃ k < p, ∃ r < p, ∃ v < p, !pL.rel k r ∧ !pL.semitermVecDef.sigma k n v ∧ !qqRelDef p n k r v) ∨
+      (∃ n < p, ∃ k < p, ∃ r < p, ∃ v < p, !pL.rel k r ∧ !pL.semitermVecDef.sigma k n v ∧ !qqNRelDef p n k r v) ∨
       !formulaAux p C” (by simp))
   (.mkPi
     “p C |
-      (∃ n < p, ∃ k < p, ∃ r < p, ∃ v < p, !pL.rel k r ∧ !pL.termSeqDef.pi k n v ∧ !qqRelDef p n k r v) ∨
-      (∃ n < p, ∃ k < p, ∃ r < p, ∃ v < p, !pL.rel k r ∧ !pL.termSeqDef.pi k n v ∧ !qqNRelDef p n k r v) ∨
+      (∃ n < p, ∃ k < p, ∃ r < p, ∃ v < p, !pL.rel k r ∧ !pL.semitermVecDef.pi k n v ∧ !qqRelDef p n k r v) ∨
+      (∃ n < p, ∃ k < p, ∃ r < p, ∃ v < p, !pL.rel k r ∧ !pL.semitermVecDef.pi k n v ∧ !qqNRelDef p n k r v) ∨
       !formulaAux p C” (by simp))⟩
 
 def construction : Fixpoint.Construction V (blueprint pL) where
@@ -292,7 +292,7 @@ def construction : Fixpoint.Construction V (blueprint pL) where
           Matrix.cons_val_fin_one, Matrix.constant_eq_singleton, Matrix.cons_val_four,
           Matrix.cons_val_succ, eval_qqRelDef, LogicalConnective.Prop.and_eq, eval_qqNRelDef,
           LogicalConnective.Prop.or_eq, HSemiformula.pi_mkDelta, HSemiformula.val_mkPi,
-          (termSeq_defined L).proper.iff'],
+          (semitermVec_defined L).proper.iff'],
     by  intro v
         -- simpa [blueprint, Language.Defined.eval_rel_iff (L := L), eval_termSeq L, HSemiformula.val_sigma, formulaAux] using phi_iff L _ _
         simpa only [Fin.isValue, Nat.succ_eq_add_one, Nat.reduceAdd, blueprint,
@@ -302,7 +302,7 @@ def construction : Fixpoint.Construction V (blueprint pL) where
           Matrix.vecTail, Function.comp_apply, Fin.succ_zero_eq_one, Matrix.cons_val_three,
           Fin.succ_one_eq_two, LogicalConnective.HomClass.map_and, Semiformula.eval_substs,
           Matrix.comp_vecCons', Matrix.cons_val_zero, Matrix.cons_val_fin_one,
-          Matrix.constant_eq_singleton, Language.Defined.eval_rel_iff (L := L), eval_termSeq L,
+          Matrix.constant_eq_singleton, Language.Defined.eval_rel_iff (L := L), (semitermVec_defined L).df.iff,
           Matrix.cons_val_four, Matrix.cons_val_succ, eval_qqRelDef, LogicalConnective.Prop.and_eq,
           eval_qqNRelDef, eval_qqVerumDef, eval_qqFalsumDef, Semiformula.eval_operator₂,
           Structure.Mem.mem, eval_fstIdxDef, eval_qqAndDef, eval_qqOrDef, Semiterm.val_operator₂,
@@ -389,8 +389,8 @@ local prefix:80 "𝐔 " => L.UFormula
 
 lemma Language.UFormula.case_iff {p : V} :
     𝐔 p ↔
-    (∃ n k r v, L.Rel k r ∧ L.SemitermSeq k n v ∧ p = ^rel n k r v) ∨
-    (∃ n k r v, L.Rel k r ∧ L.SemitermSeq k n v ∧ p = ^nrel n k r v) ∨
+    (∃ n k r v, L.Rel k r ∧ L.SemitermVec k n v ∧ p = ^rel n k r v) ∨
+    (∃ n k r v, L.Rel k r ∧ L.SemitermVec k n v ∧ p = ^nrel n k r v) ∨
     (∃ n, p = ^⊤[n]) ∨
     (∃ n, p = ^⊥[n]) ∨
     (∃ n q r, (𝐔 q ∧ n = fstIdx q) ∧ (𝐔 r ∧ n = fstIdx r) ∧ p = q ^⋏[n] r) ∨
@@ -402,7 +402,7 @@ lemma Language.UFormula.case_iff {p : V} :
 alias ⟨Language.UFormula.case, Language.UFormula.mk⟩ := Language.UFormula.case_iff
 
 @[simp] lemma Language.UFormula.rel {n k r v : V} :
-    𝐔 (^rel n k r v) ↔ L.Rel k r ∧ L.SemitermSeq k n v :=
+    𝐔 (^rel n k r v) ↔ L.Rel k r ∧ L.SemitermVec k n v :=
   ⟨by intro h
       rcases h.case with (⟨n, k, r, v, hkr, hv, h⟩ | ⟨_, _, _, _, _, _, h⟩ | ⟨_, h⟩ | ⟨_, h⟩ |
         ⟨_, _, _, _, _, h⟩ | ⟨_, _, _, _, _, h⟩ | ⟨_, _, _, h⟩ | ⟨_, _, _, h⟩) <;>
@@ -412,7 +412,7 @@ alias ⟨Language.UFormula.case, Language.UFormula.mk⟩ := Language.UFormula.ca
       exact Language.UFormula.mk (Or.inl ⟨n, k, r, v, hkr, hv, rfl⟩)⟩
 
 @[simp] lemma Language.UFormula.nrel {n k r v : V} :
-    𝐔 (^nrel n k r v) ↔ L.Rel k r ∧ L.SemitermSeq k n v :=
+    𝐔 (^nrel n k r v) ↔ L.Rel k r ∧ L.SemitermVec k n v :=
   ⟨by intro h
       rcases h.case with (⟨_, _, _, _, _, _, h⟩ | ⟨n, k, r, v, hkr, hv, h⟩ | ⟨_, h⟩ | ⟨_, h⟩ |
         ⟨_, _, _, _, _, h⟩ | ⟨_, _, _, _, _, h⟩ | ⟨_, _, _, h⟩ | ⟨_, _, _, h⟩) <;>
@@ -470,9 +470,9 @@ alias ⟨Language.UFormula.case, Language.UFormula.mk⟩ := Language.UFormula.ca
       exact Language.UFormula.mk (Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr ⟨n, p, hp, rfl⟩)⟩
 
 @[simp] lemma Language.Semiformula.rel {n k r v : V} :
-    L.Semiformula n (^rel n k r v) ↔ L.Rel k r ∧ L.SemitermSeq k n v := by simp [Language.Semiformula]
+    L.Semiformula n (^rel n k r v) ↔ L.Rel k r ∧ L.SemitermVec k n v := by simp [Language.Semiformula]
 @[simp] lemma Language.Semiformula.nrel {n k r v : V} :
-    L.Semiformula n (^nrel n k r v) ↔ L.Rel k r ∧ L.SemitermSeq k n v := by simp [Language.Semiformula]
+    L.Semiformula n (^nrel n k r v) ↔ L.Rel k r ∧ L.SemitermVec k n v := by simp [Language.Semiformula]
 @[simp] lemma Language.Semiformula.verum (n : V) : L.Semiformula n ^⊤[n] := by simp [Language.Semiformula]
 @[simp] lemma Language.Semiformula.falsum (n : V) : L.Semiformula n ^⊥[n] := by simp [Language.Semiformula]
 @[simp] lemma Language.Semiformula.and {n p q : V} :
@@ -483,8 +483,8 @@ alias ⟨Language.UFormula.case, Language.UFormula.mk⟩ := Language.UFormula.ca
 @[simp] lemma Language.Semiformula.ex {n p : V} : L.Semiformula n (^∃[n] p) ↔ L.Semiformula (n + 1) p := by simp [Language.Semiformula]
 
 lemma Language.UFormula.induction (Γ) {P : V → Prop} (hP : (Γ, 1)-Predicate P)
-    (hrel : ∀ n k r v, L.Rel k r → L.SemitermSeq k n v → P (^rel n k r v))
-    (hnrel : ∀ n k r v, L.Rel k r → L.SemitermSeq k n v → P (^nrel n k r v))
+    (hrel : ∀ n k r v, L.Rel k r → L.SemitermVec k n v → P (^rel n k r v))
+    (hnrel : ∀ n k r v, L.Rel k r → L.SemitermVec k n v → P (^nrel n k r v))
     (hverum : ∀ n, P ^⊤[n])
     (hfalsum : ∀ n, P ^⊥[n])
     (hand : ∀ n p q, L.Semiformula n p → L.Semiformula n q → P p → P q → P (p ^⋏[n] q))
@@ -505,8 +505,8 @@ lemma Language.UFormula.induction (Γ) {P : V → Prop} (hP : (Γ, 1)-Predicate 
     · exact hex n p ⟨(hC p hp).1, hnp⟩ (hC p hp).2)
 
 lemma Language.Semiformula.induction (Γ) {P : V → V → Prop} (hP : (Γ, 1)-Relation P)
-    (hrel : ∀ n k r v, L.Rel k r → L.SemitermSeq k n v → P n (^rel n k r v))
-    (hnrel : ∀ n k r v, L.Rel k r → L.SemitermSeq k n v → P n (^nrel n k r v))
+    (hrel : ∀ n k r v, L.Rel k r → L.SemitermVec k n v → P n (^rel n k r v))
+    (hnrel : ∀ n k r v, L.Rel k r → L.SemitermVec k n v → P n (^nrel n k r v))
     (hverum : ∀ n, P n ^⊤[n])
     (hfalsum : ∀ n, P n ^⊥[n])
     (hand : ∀ n p q, L.Semiformula n p → L.Semiformula n q → P n p → P n q → P n (p ^⋏[n] q))
@@ -536,8 +536,8 @@ lemma Language.Semiformula.induction (Γ) {P : V → V → Prop} (hP : (Γ, 1)-R
     simpa using hex n p hp (by simpa [hp.2] using ih (fstIdx p) (by simp) rfl)
 
 lemma Language.Semiformula.induction_sigma₁ {P : V → V → Prop} (hP : 𝚺₁-Relation P)
-    (hrel : ∀ n k r v, L.Rel k r → L.SemitermSeq k n v → P n (^rel n k r v))
-    (hnrel : ∀ n k r v, L.Rel k r → L.SemitermSeq k n v → P n (^nrel n k r v))
+    (hrel : ∀ n k r v, L.Rel k r → L.SemitermVec k n v → P n (^rel n k r v))
+    (hnrel : ∀ n k r v, L.Rel k r → L.SemitermVec k n v → P n (^nrel n k r v))
     (hverum : ∀ n, P n ^⊤[n])
     (hfalsum : ∀ n, P n ^⊥[n])
     (hand : ∀ n p q, L.Semiformula n p → L.Semiformula n q → P n p → P n q → P n (p ^⋏[n] q))
@@ -548,8 +548,8 @@ lemma Language.Semiformula.induction_sigma₁ {P : V → V → Prop} (hP : 𝚺�
   Language.Semiformula.induction 𝚺 hP hrel hnrel hverum hfalsum hand hor hall hex
 
 lemma Language.Semiformula.induction_pi₁ {P : V → V → Prop} (hP : 𝚷₁-Relation P)
-    (hrel : ∀ n k r v, L.Rel k r → L.SemitermSeq k n v → P n (^rel n k r v))
-    (hnrel : ∀ n k r v, L.Rel k r → L.SemitermSeq k n v → P n (^nrel n k r v))
+    (hrel : ∀ n k r v, L.Rel k r → L.SemitermVec k n v → P n (^rel n k r v))
+    (hnrel : ∀ n k r v, L.Rel k r → L.SemitermVec k n v → P n (^nrel n k r v))
     (hverum : ∀ n, P n ^⊤[n])
     (hfalsum : ∀ n, P n ^⊥[n])
     (hand : ∀ n p q, L.Semiformula n p → L.Semiformula n q → P n p → P n q → P n (p ^⋏[n] q))
@@ -868,7 +868,7 @@ variable {β}
 lemma graph_dom_uformula {p r} :
     c.Graph param p r → L.UFormula p := fun h ↦ Graph.case_iff.mp h |>.1
 
-lemma graph_rel_iff {n k r v y} (hkr : L.Rel k r) (hv : L.SemitermSeq k n v) :
+lemma graph_rel_iff {n k r v y} (hkr : L.Rel k r) (hv : L.SemitermVec k n v) :
     c.Graph param (^rel n k r v) y ↔ y = c.rel param n k r v := by
   constructor
   · intro h
@@ -884,7 +884,7 @@ lemma graph_rel_iff {n k r v y} (hkr : L.Rel k r) (hv : L.SemitermSeq k n v) :
     · simp [qqRel, qqEx] at H
   · rintro rfl; exact (Graph.case_iff).mpr ⟨by simp [hkr, hv], Or.inl ⟨n, k, r, v, rfl, rfl⟩⟩
 
-lemma graph_nrel_iff {n k r v y} (hkr : L.Rel k r) (hv : L.SemitermSeq k n v) :
+lemma graph_nrel_iff {n k r v y} (hkr : L.Rel k r) (hv : L.SemitermVec k n v) :
     c.Graph param (^nrel n k r v) y ↔ y = c.nrel param n k r v := by
   constructor
   · intro h
@@ -932,11 +932,11 @@ lemma graph_falsum_iff {n y} :
     · simp [qqFalsum, qqEx] at H
   · rintro rfl; exact (Graph.case_iff).mpr ⟨by simp, Or.inr <| Or.inr <| Or.inr <| Or.inl ⟨n, rfl, rfl⟩⟩
 
-lemma graph_rel {n k r v} (hkr : L.Rel k r) (hv : L.SemitermSeq k n v) :
+lemma graph_rel {n k r v} (hkr : L.Rel k r) (hv : L.SemitermVec k n v) :
     c.Graph param (^rel n k r v) (c.rel param n k r v) :=
   (Graph.case_iff).mpr ⟨by simp [hkr, hv], Or.inl ⟨n, k, r, v, rfl, rfl⟩⟩
 
-lemma graph_nrel {n k r v} (hkr : L.Rel k r) (hv : L.SemitermSeq k n v) :
+lemma graph_nrel {n k r v} (hkr : L.Rel k r) (hv : L.SemitermVec k n v) :
     c.Graph param (^nrel n k r v) (c.nrel param n k r v) :=
   (Graph.case_iff).mpr ⟨by simp [hkr, hv], Or.inr <| Or.inl ⟨n, k, r, v, rfl, rfl⟩⟩
 
@@ -1114,11 +1114,11 @@ variable {param}
 lemma result_eq_of_graph {p r} (h : c.Graph param p r) : c.result param p = r := Eq.symm <|
   Classical.choose_uniq (c.exists_unique_all param p) (by simp [c.graph_dom_uformula h, h])
 
-@[simp] lemma result_rel {n k R v} (hR : L.Rel k R) (hv : L.SemitermSeq k n v) :
+@[simp] lemma result_rel {n k R v} (hR : L.Rel k R) (hv : L.SemitermVec k n v) :
     c.result param (^rel n k R v) = c.rel param n k R v :=
   c.result_eq_of_graph (c.graph_rel hR hv)
 
-@[simp] lemma result_nrel {n k R v} (hR : L.Rel k R) (hv : L.SemitermSeq k n v) :
+@[simp] lemma result_nrel {n k R v} (hR : L.Rel k R) (hv : L.SemitermVec k n v) :
     c.result param (^nrel n k R v) = c.nrel param n k R v :=
   c.result_eq_of_graph (c.graph_nrel hR hv)
 
@@ -1156,8 +1156,8 @@ lemma result_defined : 𝚺₁-Function₂ c.result via β.result := by
 end
 
 lemma uformula_result_induction {P : V → V → V → Prop} (hP : 𝚺₁-Relation₃ P)
-    (hRel : ∀ param n k R v, L.Rel k R → L.SemitermSeq k n v → P param (^rel n k R v) (c.rel param n k R v))
-    (hNRel : ∀ param n k R v, L.Rel k R → L.SemitermSeq k n v → P param (^nrel n k R v) (c.nrel param n k R v))
+    (hRel : ∀ param n k R v, L.Rel k R → L.SemitermVec k n v → P param (^rel n k R v) (c.rel param n k R v))
+    (hNRel : ∀ param n k R v, L.Rel k R → L.SemitermVec k n v → P param (^nrel n k R v) (c.nrel param n k R v))
     (hverum : ∀ param n, P param (^⊤[n]) (c.verum param n))
     (hfalsum : ∀ param n, P param (^⊥[n]) (c.falsum param n))
     (hand : ∀ param n p q, L.Semiformula n p → L.Semiformula n q →
@@ -1209,8 +1209,8 @@ lemma uformula_result_induction {P : V → V → V → Prop} (hP : 𝚺₁-Relat
       hex param n p₁ hp₁ (ih p₁ (by simp) (c.exChanges param n) (by simp [f]) hp₁.1)
 
 lemma semiformula_result_induction {P : V → V → V → V → Prop} (hP : 𝚺₁-Relation₄ P)
-    (hRel : ∀ param n k R v, L.Rel k R → L.SemitermSeq k n v → P param n (^rel n k R v) (c.rel param n k R v))
-    (hNRel : ∀ param n k R v, L.Rel k R → L.SemitermSeq k n v → P param n (^nrel n k R v) (c.nrel param n k R v))
+    (hRel : ∀ param n k R v, L.Rel k R → L.SemitermVec k n v → P param n (^rel n k R v) (c.rel param n k R v))
+    (hNRel : ∀ param n k R v, L.Rel k R → L.SemitermVec k n v → P param n (^nrel n k R v) (c.nrel param n k R v))
     (hverum : ∀ param n, P param n (^⊤[n]) (c.verum param n))
     (hfalsum : ∀ param n, P param n (^⊥[n]) (c.falsum param n))
     (hand : ∀ param n p q, L.Semiformula n p → L.Semiformula n q →

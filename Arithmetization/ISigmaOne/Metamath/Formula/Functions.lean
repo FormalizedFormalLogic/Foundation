@@ -81,10 +81,10 @@ instance neg_definable : 𝚺₁-Function₁ L.neg :=
 
 end
 
-@[simp] lemma neg_rel {n k R v} (hR : L.Rel k R) (hv : L.SemitermSeq k n v) :
+@[simp] lemma neg_rel {n k R v} (hR : L.Rel k R) (hv : L.SemitermVec k n v) :
     L.neg (^rel n k R v) = ^nrel n k R v := by simp [Language.neg, hR, hv, construction]
 
-@[simp] lemma neg_nrel {n k R v} (hR : L.Rel k R) (hv : L.SemitermSeq k n v) :
+@[simp] lemma neg_nrel {n k R v} (hR : L.Rel k R) (hv : L.SemitermVec k n v) :
     L.neg (^nrel n k R v) = ^rel n k R v := by simp [Language.neg, hR, hv, construction]
 
 @[simp] lemma neg_verum (n) :
@@ -136,8 +136,8 @@ section shift
 namespace Shift
 
 def blueprint (pL : LDef) : Language.UformulaRec1.Blueprint pL where
-  rel := .mkSigma “y param n k R v | ∃ v', !pL.termShiftSeqDef v' k n v ∧ !qqRelDef y n k R v'” (by simp)
-  nrel := .mkSigma “y param n k R v | ∃ v', !pL.termShiftSeqDef v' k n v ∧ !qqNRelDef y n k R v'” (by simp)
+  rel := .mkSigma “y param n k R v | ∃ v', !pL.termShiftVecDef v' k n v ∧ !qqRelDef y n k R v'” (by simp)
+  nrel := .mkSigma “y param n k R v | ∃ v', !pL.termShiftVecDef v' k n v ∧ !qqNRelDef y n k R v'” (by simp)
   verum := .mkSigma “y param n | !qqVerumDef y n” (by simp)
   falsum := .mkSigma “y param n | !qqFalsumDef y n” (by simp)
   and := .mkSigma “y param n p₁ p₂ y₁ y₂ | !qqAndDef y n y₁ y₂” (by simp)
@@ -150,8 +150,8 @@ def blueprint (pL : LDef) : Language.UformulaRec1.Blueprint pL where
 variable (L)
 
 def construction : Language.UformulaRec1.Construction V L (blueprint pL) where
-  rel {_} := fun n k R v ↦ ^rel n k R (L.termShiftSeq k n v)
-  nrel {_} := fun n k R v ↦ ^nrel n k R (L.termShiftSeq k n v)
+  rel {_} := fun n k R v ↦ ^rel n k R (L.termShiftVec k n v)
+  nrel {_} := fun n k R v ↦ ^nrel n k R (L.termShiftVec k n v)
   verum {_} := fun n ↦ ^⊤[n]
   falsum {_} := fun n ↦ ^⊥[n]
   and {_} := fun n _ _ y₁ y₂ ↦ y₁ ^⋏[n] y₂
@@ -160,8 +160,8 @@ def construction : Language.UformulaRec1.Construction V L (blueprint pL) where
   ex {_} := fun n _ y₁ ↦ ^∃[n] y₁
   allChanges := fun _ _ ↦ 0
   exChanges := fun _ _ ↦ 0
-  rel_defined := by intro v; simp [blueprint, (termShiftSeq_defined L).df.iff]; rfl
-  nrel_defined := by intro v; simp [blueprint, (termShiftSeq_defined L).df.iff]; rfl
+  rel_defined := by intro v; simp [blueprint, (termShiftVec_defined L).df.iff]; rfl
+  nrel_defined := by intro v; simp [blueprint, (termShiftVec_defined L).df.iff]; rfl
   verum_defined := by intro v; simp [blueprint]
   falsum_defined := by intro v; simp [blueprint]
   and_defined := by intro v; simp [blueprint]; rfl
@@ -201,11 +201,11 @@ instance shift_definable : 𝚺₁-Function₁ L.shift :=
 
 end
 
-@[simp] lemma shift_rel {n k R v} (hR : L.Rel k R) (hv : L.SemitermSeq k n v) :
-    L.shift (^rel n k R v) = ^rel n k R (L.termShiftSeq k n v) := by simp [Language.shift, hR, hv, construction]
+@[simp] lemma shift_rel {n k R v} (hR : L.Rel k R) (hv : L.SemitermVec k n v) :
+    L.shift (^rel n k R v) = ^rel n k R (L.termShiftVec k n v) := by simp [Language.shift, hR, hv, construction]
 
-@[simp] lemma shift_nrel {n k R v} (hR : L.Rel k R) (hv : L.SemitermSeq k n v) :
-    L.shift (^nrel n k R v) = ^nrel n k R (L.termShiftSeq k n v) := by simp [Language.shift, hR, hv, construction]
+@[simp] lemma shift_nrel {n k R v} (hR : L.Rel k R) (hv : L.SemitermVec k n v) :
+    L.shift (^nrel n k R v) = ^nrel n k R (L.termShiftVec k n v) := by simp [Language.shift, hR, hv, construction]
 
 @[simp] lemma shift_verum (n) :
     L.shift ^⊤[n] = ^⊤[n] := by simp [Language.shift, construction]
@@ -243,72 +243,71 @@ section substs
 
 variable (L)
 
-def Language.qSeq (k n w : V) : V := ^#0 `⁀ L.termBShiftSeq k n w
+def Language.qVec (k n w : V) : V := ^#0 ∷ L.termBShiftVec k n w
 
 variable {L}
 
-lemma Language.SemitermSeq.qSeq {k n w : V} (h : L.SemitermSeq k n w) : L.SemitermSeq (k + 1) (n + 1) (L.qSeq k n w) :=
-  ⟨Seq.seqPop _ h.termBShiftSeq.seq,
-    by simp [Language.qSeq, h.termBShiftSeq.seq.seqPop_lh, ←h.termBShiftSeq.lh], by
-      simp [Language.qSeq]
-      intro i t hit
-      rcases h.termBShiftSeq.seq.seqPop_iff.mp hit with (⟨rfl, rfl⟩ | ⟨i, rfl, ht⟩)
-      · simp
-      · exact h.termBShiftSeq.prop _ _ ht⟩
+lemma Language.SemitermVec.qVec {k n w : V} (h : L.SemitermVec k n w) : L.SemitermVec (k + 1) (n + 1) (L.qVec k n w) :=
+  ⟨by simp [Language.qVec, ←h.termBShiftVec.lh], by
+      intro i hi
+      rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
+      · simp [Language.qVec]
+      · simpa [Language.qVec, nth_termBShiftVec h (by simpa using hi)] using
+          h.prop (by simpa using hi) |>.termBShift⟩
 
 section
 
 variable (L)
 
-def _root_.LO.FirstOrder.Arith.LDef.qSeqDef (pL : LDef) : 𝚺₁-Semisentence 4 := .mkSigma
-  “w' k n w | ∃ sw, !pL.termBShiftSeqDef sw k n w ∧ ∃ t, !qqBvarDef t 0 ∧ !seqPopDef w' t sw” (by simp)
+def _root_.LO.FirstOrder.Arith.LDef.qVecDef (pL : LDef) : 𝚺₁-Semisentence 4 := .mkSigma
+  “w' k n w | ∃ sw, !pL.termBShiftVecDef sw k n w ∧ ∃ t, !qqBvarDef t 0 ∧ !consDef w' t sw” (by simp)
 
-lemma qSeq_defined : 𝚺₁-Function₃ L.qSeq via pL.qSeqDef := by
-  intro v; simp [LDef.qSeqDef, eval_termBShiftSeqDef L]; rfl
+lemma qVec_defined : 𝚺₁-Function₃ L.qVec via pL.qVecDef := by
+  intro v; simp [LDef.qVecDef, eval_termBShiftVecDef L]; rfl
 
-instance qSeq_definable : 𝚺₁-Function₃ L.qSeq := Defined.to_definable _ (qSeq_defined L)
+instance qVec_definable : 𝚺₁-Function₃ L.qVec := Defined.to_definable _ (qVec_defined L)
 
-@[simp, definability] instance qSeq_definable' (Γ m) : (Γ, m + 1)-Function₃ L.qSeq := .of_sigmaOne (qSeq_definable L) _ _
+@[simp, definability] instance qVec_definable' (Γ m) : (Γ, m + 1)-Function₃ L.qVec := .of_sigmaOne (qVec_definable L) _ _
 
 end
 
 namespace Substs
 
 def blueprint (pL : LDef) : Language.UformulaRec1.Blueprint pL where
-  rel    := .mkSigma “y param n k R v | ∃ m, !pi₁Def m param ∧ ∃ w, !pi₂Def w param ∧ ∃ v', !pL.termSubstSeqDef v' k n m w v ∧ !qqRelDef y m k R v'” (by simp)
-  nrel   := .mkSigma “y param n k R v | ∃ m, !pi₁Def m param ∧ ∃ w, !pi₂Def w param ∧ ∃ v', !pL.termSubstSeqDef v' k n m w v ∧ !qqNRelDef y m k R v'” (by simp)
+  rel    := .mkSigma “y param n k R v | ∃ m, !pi₁Def m param ∧ ∃ w, !pi₂Def w param ∧ ∃ v', !pL.termSubstVecDef v' k n m w v ∧ !qqRelDef y m k R v'” (by simp)
+  nrel   := .mkSigma “y param n k R v | ∃ m, !pi₁Def m param ∧ ∃ w, !pi₂Def w param ∧ ∃ v', !pL.termSubstVecDef v' k n m w v ∧ !qqNRelDef y m k R v'” (by simp)
   verum  := .mkSigma “y param n | ∃ m, !pi₁Def m param ∧ !qqVerumDef y m” (by simp)
   falsum := .mkSigma “y param n | ∃ m, !pi₁Def m param ∧ !qqFalsumDef y m” (by simp)
   and    := .mkSigma “y param n p₁ p₂ y₁ y₂ | ∃ m, !pi₁Def m param ∧ !qqAndDef y m y₁ y₂” (by simp)
   or     := .mkSigma “y param n p₁ p₂ y₁ y₂ | ∃ m, !pi₁Def m param ∧ !qqOrDef y m y₁ y₂” (by simp)
   all    := .mkSigma “y param n p₁ y₁ | ∃ m, !pi₁Def m param ∧ !qqAllDef y m y₁” (by simp)
   ex     := .mkSigma “y param n p₁ y₁ | ∃ m, !pi₁Def m param ∧ !qqExDef y m y₁” (by simp)
-  allChanges := .mkSigma “param' param n | ∃ m, !pi₁Def m param ∧ ∃ w, !pi₂Def w param ∧ ∃ qseq, !pL.qSeqDef qseq n m w ∧ !pairDef param' (m + 1) qseq” (by simp)
-  exChanges := .mkSigma “param' param n | ∃ m, !pi₁Def m param ∧ ∃ w, !pi₂Def w param ∧ ∃ qseq, !pL.qSeqDef qseq n m w ∧ !pairDef param' (m + 1) qseq” (by simp)
+  allChanges := .mkSigma “param' param n | ∃ m, !pi₁Def m param ∧ ∃ w, !pi₂Def w param ∧ ∃ qseq, !pL.qVecDef qseq n m w ∧ !pairDef param' (m + 1) qseq” (by simp)
+  exChanges := .mkSigma “param' param n | ∃ m, !pi₁Def m param ∧ ∃ w, !pi₂Def w param ∧ ∃ qseq, !pL.qVecDef qseq n m w ∧ !pairDef param' (m + 1) qseq” (by simp)
 
 variable (L)
 
 def construction : Language.UformulaRec1.Construction V L (blueprint pL) where
-  rel (param) := fun n k R v ↦ ^rel (π₁ param) k R (L.termSubstSeq k n (π₁ param) (π₂ param) v)
-  nrel (param) := fun n k R v ↦ ^nrel (π₁ param) k R (L.termSubstSeq k n (π₁ param) (π₂ param) v)
+  rel (param) := fun n k R v ↦ ^rel (π₁ param) k R (L.termSubstVec k n (π₁ param) (π₂ param) v)
+  nrel (param) := fun n k R v ↦ ^nrel (π₁ param) k R (L.termSubstVec k n (π₁ param) (π₂ param) v)
   verum (param) := fun _ ↦ ^⊤[π₁ param]
   falsum (param) := fun _ ↦ ^⊥[π₁ param]
   and (param) := fun _ _ _ y₁ y₂ ↦ y₁ ^⋏[π₁ param] y₂
   or (param) := fun _ _ _ y₁ y₂ ↦ y₁ ^⋎[π₁ param] y₂
   all (param) := fun _ _ y₁ ↦ ^∀[π₁ param] y₁
   ex (param) := fun _ _ y₁ ↦ ^∃[π₁ param] y₁
-  allChanges (param n) := ⟪π₁ param + 1, L.qSeq n (π₁ param) (π₂ param)⟫
-  exChanges (param n) := ⟪π₁ param + 1, L.qSeq n (π₁ param) (π₂ param)⟫
-  rel_defined := by intro v; simp [blueprint, (termSubstSeq_defined L).df.iff]; rfl
-  nrel_defined := by intro v; simp [blueprint, (termSubstSeq_defined L).df.iff]; rfl
+  allChanges (param n) := ⟪π₁ param + 1, L.qVec n (π₁ param) (π₂ param)⟫
+  exChanges (param n) := ⟪π₁ param + 1, L.qVec n (π₁ param) (π₂ param)⟫
+  rel_defined := by intro v; simp [blueprint, (termSubstVec_defined L).df.iff]; rfl
+  nrel_defined := by intro v; simp [blueprint, (termSubstVec_defined L).df.iff]; rfl
   verum_defined := by intro v; simp [blueprint]
   falsum_defined := by intro v; simp [blueprint]
   and_defined := by intro v; simp [blueprint]; rfl
   or_defined := by intro v; simp [blueprint]; rfl
   all_defined := by intro v; simp [blueprint]; rfl
   ex_defined := by intro v; simp [blueprint]; rfl
-  allChanges_defined := by intro v; simp [blueprint, (qSeq_defined L).df.iff]
-  exChanges_defined := by intro v; simp [blueprint, (qSeq_defined L).df.iff]
+  allChanges_defined := by intro v; simp [blueprint, (qVec_defined L).df.iff]
+  exChanges_defined := by intro v; simp [blueprint, (qVec_defined L).df.iff]
 
 end Substs
 
@@ -343,11 +342,11 @@ end
 
 variable {m w : V}
 
-@[simp] lemma substs_rel {n k R v} (hR : L.Rel k R) (hv : L.SemitermSeq k n v) :
-    L.substs m w (^rel n k R v) = ^rel m k R (L.termSubstSeq k n m w v) := by simp [Language.substs, hR, hv, construction]
+@[simp] lemma substs_rel {n k R v} (hR : L.Rel k R) (hv : L.SemitermVec k n v) :
+    L.substs m w (^rel n k R v) = ^rel m k R (L.termSubstVec k n m w v) := by simp [Language.substs, hR, hv, construction]
 
-@[simp] lemma substs_nrel {n k R v} (hR : L.Rel k R) (hv : L.SemitermSeq k n v) :
-    L.substs m w (^nrel n k R v) = ^nrel m k R (L.termSubstSeq k n m w v) := by simp [Language.substs, hR, hv, construction]
+@[simp] lemma substs_nrel {n k R v} (hR : L.Rel k R) (hv : L.SemitermVec k n v) :
+    L.substs m w (^nrel n k R v) = ^nrel m k R (L.termSubstVec k n m w v) := by simp [Language.substs, hR, hv, construction]
 
 @[simp] lemma substs_verum (n) :
     L.substs m w ^⊤[n] = ^⊤[m] := by simp [Language.substs, construction]
@@ -362,14 +361,14 @@ variable {m w : V}
     L.substs m w (p ^⋎[n] q) = L.substs m w p ^⋎[m] L.substs m w q := by simp [Language.substs, hp, hq, construction]
 
 @[simp] lemma substs_all {n p} (hp : L.Semiformula (n + 1) p) :
-    L.substs m w (^∀[n] p) = ^∀[m] (L.substs (m + 1) (L.qSeq n m w) p) := by simp [Language.substs, hp, construction]
+    L.substs m w (^∀[n] p) = ^∀[m] (L.substs (m + 1) (L.qVec n m w) p) := by simp [Language.substs, hp, construction]
 
 @[simp] lemma substs_ex {n p} (hp : L.Semiformula (n + 1) p) :
-    L.substs m w (^∃[n] p) = ^∃[m] (L.substs (m + 1) (L.qSeq n m w) p) := by simp [Language.substs, hp, construction]
+    L.substs m w (^∃[n] p) = ^∃[m] (L.substs (m + 1) (L.qVec n m w) p) := by simp [Language.substs, hp, construction]
 
 lemma semiformula_subst_induction {P : V → V → V → V → V → Prop} (hP : 𝚺₁-Relation₅ P)
-    (hRel : ∀ n m w k R v, L.Rel k R → L.SemitermSeq k n v → P n m w (^rel n k R v) (^rel m k R (L.termSubstSeq k n m w v)))
-    (hNRel : ∀ n m w k R v, L.Rel k R → L.SemitermSeq k n v → P n m w (^nrel n k R v) (^nrel m k R (L.termSubstSeq k n m w v)))
+    (hRel : ∀ n m w k R v, L.Rel k R → L.SemitermVec k n v → P n m w (^rel n k R v) (^rel m k R (L.termSubstVec k n m w v)))
+    (hNRel : ∀ n m w k R v, L.Rel k R → L.SemitermVec k n v → P n m w (^nrel n k R v) (^nrel m k R (L.termSubstVec k n m w v)))
     (hverum : ∀ n m w, P n m w (^⊤[n]) (^⊤[m]))
     (hfalsum : ∀ n m w, P n m w (^⊥[n]) (^⊥[m]))
     (hand : ∀ n m w p q, L.Semiformula n p → L.Semiformula n q →
@@ -377,11 +376,11 @@ lemma semiformula_subst_induction {P : V → V → V → V → V → Prop} (hP :
     (hor : ∀ n m w p q, L.Semiformula n p → L.Semiformula n q →
       P n m w p (L.substs m w p) → P n m w q (L.substs m w q) → P n m w (p ^⋎[n] q) (L.substs m w p ^⋎[m] L.substs m w q))
     (hall : ∀ n m w p, L.Semiformula (n + 1) p →
-      P (n + 1) (m + 1) (L.qSeq n m w) p (L.substs (m + 1) (L.qSeq n m w) p) →
-      P n m w (^∀[n] p) (^∀[m] (L.substs (m + 1) (L.qSeq n m w) p)))
+      P (n + 1) (m + 1) (L.qVec n m w) p (L.substs (m + 1) (L.qVec n m w) p) →
+      P n m w (^∀[n] p) (^∀[m] (L.substs (m + 1) (L.qVec n m w) p)))
     (hex : ∀ n m w p, L.Semiformula (n + 1) p →
-      P (n + 1) (m + 1) (L.qSeq n m w) p (L.substs (m + 1) (L.qSeq n m w) p) →
-      P n m w (^∃[n] p) (^∃[m] (L.substs (m + 1) (L.qSeq n m w) p))) :
+      P (n + 1) (m + 1) (L.qVec n m w) p (L.substs (m + 1) (L.qVec n m w) p) →
+      P n m w (^∃[n] p) (^∃[m] (L.substs (m + 1) (L.qVec n m w) p))) :
     ∀ {n p m w}, L.Semiformula n p → P n m w p (L.substs m w p) := by
   suffices ∀ param n p, L.Semiformula n p → P n (π₁ param) (π₂ param) p ((construction L).result param p) by
     intro n p m w hp; simpa using this ⟪m, w⟫ n p hp
@@ -408,8 +407,8 @@ lemma semiformula_subst_induction {P : V → V → V → V → V → Prop} (hP :
     simpa using hex n (π₁ param) (π₂ param) p hp (by simpa [construction] using ihp)
 
 @[simp] lemma Language.Semiformula.substs {n p m w : V} :
-    L.Semiformula n p → L.SemitermSeq n m w → L.Semiformula m (L.substs m w p) := by
-  apply semiformula_subst_induction (P := fun n m w _ y ↦ L.SemitermSeq n m w → L.Semiformula m y)
+    L.Semiformula n p → L.SemitermVec n m w → L.Semiformula m (L.substs m w p) := by
+  apply semiformula_subst_induction (P := fun n m w _ y ↦ L.SemitermVec n m w → L.Semiformula m y)
   · definability
   case hRel => intro n m w k R v hR hv hw; simp [hR, hv, hw]
   case hNRel => intro n m w k R v hR hv hw; simp [hR, hv, hw]
@@ -423,10 +422,10 @@ lemma semiformula_subst_induction {P : V → V → V → V → V → Prop} (hP :
     simp [ihp hw, ihq hw]
   case hall =>
     intro n m w p _ ih hw
-    simpa using ih hw.qSeq
+    simpa using ih hw.qVec
   case hex =>
     intro n m w p _ ih hw
-    simpa using ih hw.qSeq
+    simpa using ih hw.qVec
 
 end substs
 

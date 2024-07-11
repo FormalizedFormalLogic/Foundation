@@ -208,14 +208,14 @@ def _root_.LO.FirstOrder.Arith.LDef.semitermVecDef (pL : LDef) : 𝚫₁-Semisen
 
 variable (L)
 
-lemma semitermVecDef_defined : 𝚫₁-Relation₃ L.SemitermVec via pL.semitermVecDef :=
+lemma semitermVec_defined : 𝚫₁-Relation₃ L.SemitermVec via pL.semitermVecDef :=
   ⟨by intro v; simp [LDef.semitermVecDef, HSemiformula.val_sigma, eval_isSemitermDef L, (isSemiterm_defined L).proper.iff'],
    by intro v; simp [LDef.semitermVecDef, HSemiformula.val_sigma, eval_isSemitermDef L, Language.SemitermVec]⟩
 
 @[simp] lemma eval_semitermVecDef (v) :
-    Semiformula.Evalbm V v pL.semitermVecDef.val ↔ L.SemitermVec (v 0) (v 1) (v 2) := (semitermVecDef_defined L).df.iff v
+    Semiformula.Evalbm V v pL.semitermVecDef.val ↔ L.SemitermVec (v 0) (v 1) (v 2) := (semitermVec_defined L).df.iff v
 
-instance semitermVecDef_definable : 𝚫₁-Relation₃ (L.SemitermVec) := Defined.to_definable _ (semitermVecDef_defined L)
+instance semitermVecDef_definable : 𝚫₁-Relation₃ (L.SemitermVec) := Defined.to_definable _ (semitermVec_defined L)
 
 @[simp, definability] instance semitermVecDef_definable' (Γ) : (Γ, m + 1)-Relation₃ (L.SemitermVec) :=
   .of_deltaOne (semitermVecDef_definable L) _ _
@@ -659,7 +659,7 @@ private lemma resultVec_graph {w' k n w} :
 
 lemma resultVec_defined : Arith.DefinedFunction (fun v ↦ c.resultVec (v ·.succ.succ.succ) (v 0) (v 1) (v 2)) β.resultVec := by
   intro v
-  simpa [Blueprint.resultVec, HSemiformula.val_sigma, (semitermVecDef_defined L).proper.iff',
+  simpa [Blueprint.resultVec, HSemiformula.val_sigma, (semitermVec_defined L).proper.iff',
     eval_semitermVecDef L, c.eval_graphDef] using c.resultVec_graph
 
 lemma eval_resultVec (v : Fin (arity + 4) → V) :
