@@ -130,14 +130,16 @@ open Nth
 
 def nth (v i : V) : V := Classical.choose! (graph_existsUnique v i)
 
-lemma nth_graph (v i : V) : Graph ⟪v, i, nth v i⟫ :=
+scoped notation:max v:max ".[" i "]" => nth v i
+
+lemma nth_graph (v i : V) : Graph ⟪v, i, v.[i]⟫ :=
   Classical.choose!_spec (graph_existsUnique v i)
 
 lemma nth_eq_of_graph {v i x : V} (h : Graph ⟪v, i, x⟫) : nth v i = x := graph_unique (nth_graph v i) h
 
-lemma nth_zero (v : V) : nth v 0 = fstIdx v := nth_eq_of_graph (graph_zero.mpr rfl)
+lemma nth_zero (v : V) : v.[0] = fstIdx v := nth_eq_of_graph (graph_zero.mpr rfl)
 
-lemma nth_succ (v i : V) : nth v (i + 1) = nth (sndIdx v) i := nth_eq_of_graph (graph_succ.mpr <| nth_graph _ _)
+lemma nth_succ (v i : V) : v.[i + 1] = (sndIdx v).[i] := nth_eq_of_graph (graph_succ.mpr <| nth_graph _ _)
 
 instance : Cons V V := ⟨(⟪·, ·⟫ + 1)⟩
 
@@ -180,11 +182,20 @@ lemma nil_or_cons (z : V) : z = 0 ∨ ∃ x v, z = x ∷ v := by
 @[simp] lemma cons_inj (x₁ x₂ v₁ v₂ : V) :
     x₁ ∷ v₁ = x₂ ∷ v₂ ↔ x₁ = x₂ ∧ v₁ = v₂ := by simp [cons_def]
 
-@[simp] lemma nth_cons_zero (x v : V) : nth (x ∷ v) 0 = x := by
+lemma cons_le_cons {x₁ x₂ v₁ v₂ : V} (hx : x₁ ≤ x₂) (hv : v₁ ≤ v₂) :
+    x₁ ∷ v₁ ≤ x₂ ∷ v₂ := by simpa [cons_def] using pair_le_pair hx hv
+
+@[simp] lemma nth_cons_zero (x v : V) : (x ∷ v).[0] = x := by
   simp [nth_zero]
 
-@[simp] lemma nth_cons_succ (x v i : V) : nth (x ∷ v) (i + 1) = nth v i := by
+@[simp] lemma nth_cons_succ (x v i : V) : (x ∷ v).[i + 1] = v.[i] := by
   simp [nth_succ]
+
+@[simp] lemma nth_cons_one (x v : V) : (x ∷ v).[1] = v.[0] := by
+  simpa using nth_cons_succ x v 0
+
+@[simp] lemma nth_cons_two (x v : V) : (x ∷ v).[2] = v.[1] := by
+  simpa [-nth_cons_succ, one_add_one_eq_two] using nth_cons_succ x v 1
 
 lemma cons_induction (Γ) {P : V → Prop} (hP : (Γ, 1)-Predicate P)
     (nil : P 0) (cons : ∀ x v, P v → P (x ∷ v)) : ∀ v, P v :=
@@ -238,6 +249,32 @@ instance cons_definable : 𝚺₀-Function₂ (cons : V → V → V) := Defined.
 
 instance cons_definable' (Γ) : Γ-Function₂ (cons : V → V → V) := .of_zero cons_definable _
 
+def _root_.LO.FirstOrder.Arith.mkVec₁Def : 𝚺₀-Semisentence 2 := .mkSigma
+  “s x | !consDef s x 0” (by simp)
+
+lemma mkVec₁_defined : 𝚺₀-Function₁ (fun x : V ↦ ?[x]) via mkVec₁Def := by
+  intro v; simp [mkVec₁Def]
+
+@[simp] lemma eval_mkVec₁Def (v) :
+    Semiformula.Evalbm V v mkVec₁Def.val ↔ v 0 = ?[v 1] := mkVec₁_defined.df.iff v
+
+instance mkVec₁_definable : 𝚺₀-Function₁ (fun x : V ↦ ?[x]) := Defined.to_definable _ mkVec₁_defined
+
+instance mkVec₁_definable' (Γ) : Γ-Function₁ (fun x : V ↦ ?[x]) := .of_zero mkVec₁_definable _
+
+def _root_.LO.FirstOrder.Arith.mkVec₂Def : 𝚺₁-Semisentence 3 := .mkSigma
+  “s x y | ∃ sy, !mkVec₁Def sy y ∧ !consDef s x sy” (by simp)
+
+lemma mkVec₂_defined : 𝚺₁-Function₂ (fun x y : V ↦ ?[x, y]) via mkVec₂Def := by
+  intro v; simp [mkVec₂Def]
+
+@[simp] lemma eval_mkVec₂Def (v) :
+    Semiformula.Evalbm V v mkVec₂Def.val ↔ v 0 = ?[v 1, v 2] := mkVec₂_defined.df.iff v
+
+instance mkVec₂_definable : 𝚺₁-Function₂ (fun x y : V ↦ ?[x, y]) := Defined.to_definable _ mkVec₂_defined
+
+instance mkVec₂_definable' (Γ) : (Γ, m + 1)-Function₂ (fun x y : V ↦ ?[x, y]) := .of_sigmaOne mkVec₂_definable _ _
+
 end
 
 /-- TODO: move-/
@@ -245,13 +282,13 @@ lemma pi₁_zero : π₁ (0 : V) = 0 := nonpos_iff_eq_zero.mp (pi₁_le_self 0)
 
 lemma pi₂_zero : π₂ (0 : V) = 0 := nonpos_iff_eq_zero.mp (pi₂_le_self 0)
 
-@[simp] lemma nth_zero_idx (i : V) : nth 0 i = 0 := by
+@[simp] lemma nth_zero_idx (i : V) : (0).[i] = 0 := by
   induction i using induction_iSigmaOne
   · definability
   case zero => simp [nth_zero, fstIdx, pi₁_zero]
   case succ i ih => simp [nth_succ, sndIdx, pi₂_zero, ih]
 
-lemma nth_lt_of_pos {v} (hv : 0 < v) (i : V) : nth v i < v := by
+lemma nth_lt_of_pos {v} (hv : 0 < v) (i : V) : v.[i] < v := by
   induction i using induction_iPiOne generalizing v
   · definability
   case zero =>
@@ -266,7 +303,7 @@ lemma nth_lt_of_pos {v} (hv : 0 < v) (i : V) : nth v i < v := by
       · simp [h]
       · exact lt_trans (ih h) (by simp)
 
-@[simp] lemma nth_le (v i : V) : nth v i ≤ v := by
+@[simp] lemma nth_le (v i : V) : v.[i] ≤ v := by
   rcases eq_zero_or_pos v with (h | h)
   · simp [h]
   · exact le_of_lt <| nth_lt_of_pos h i
@@ -412,7 +449,7 @@ end
 @[simp] lemma len_zero_iff_eq_nil {v : V} : len v = 0 ↔ v = 0 := by
   rcases nil_or_cons v with (rfl | ⟨x, v, rfl⟩) <;> simp
 
-lemma nth_lt_len {v i : V} (hl : len v ≤ i) : nth v i = 0 := by
+lemma nth_lt_len {v i : V} (hl : len v ≤ i) : v.[i] = 0 := by
   induction v using cons_induction_pi₁ generalizing i
   · definability
   case nil => simp
@@ -421,7 +458,7 @@ lemma nth_lt_len {v i : V} (hl : len v ≤ i) : nth v i = 0 := by
     · simp at hl
     simpa using ih (by simpa using hl)
 
-lemma nth_ext {v₁ v₂ : V} (hl : len v₁ = len v₂) (H : ∀ i < len v₁, nth v₁ i = nth v₂ i) : v₁ = v₂ := by
+lemma nth_ext {v₁ v₂ : V} (hl : len v₁ = len v₂) (H : ∀ i < len v₁, v₁.[i] = v₂.[i]) : v₁ = v₂ := by
   induction v₁ using cons_induction_pi₁ generalizing v₂
   · definability
   case nil =>
@@ -432,6 +469,91 @@ lemma nth_ext {v₁ v₂ : V} (hl : len v₁ = len v₂) (H : ∀ i < len v₁, 
     have hx : x₁ = x₂ := by simpa using H 0 (by simp)
     have hv : v₁ = v₂ := ih (by simpa using hl) (by intro i hi; simpa using H (i + 1) (by simpa using hi))
     simp [hx, hv]
+
+lemma le_of_nth_le_nth {v₁ v₂ : V} (hl : len v₁ = len v₂) (H : ∀ i < len v₁, v₁.[i] ≤ v₂.[i]) : v₁ ≤ v₂ := by
+  induction v₁ using cons_induction_pi₁ generalizing v₂
+  · definability
+  case nil => simp
+  case cons x₁ v₁ ih =>
+    rcases nil_or_cons v₂ with (rfl | ⟨x₂, v₂, rfl⟩)
+    · simp at hl
+    have hx : x₁ ≤ x₂ := by simpa using H 0 (by simp)
+    have hv : v₁ ≤ v₂ := ih (by simpa using hl) (by intro i hi; simpa using H (i + 1) (by simpa using hi))
+    exact cons_le_cons hx hv
+
+theorem sigmaOne_skolem_vec {R : V → V → Prop} (hP : 𝚺₁-Relation R) {l}
+    (H : ∀ x < l, ∃ y, R x y) : ∃ v, len v = l ∧ ∀ i < l, R i v.[i] := by
+  have : ∀ k ≤ l, ∃ v, len v = k ∧ ∀ i < k, R (l - k + i) v.[i] := by
+    intro k hk
+    induction k using induction_iSigmaOne
+    · definability
+    case zero => exact ⟨0, by simp⟩
+    case succ k ih =>
+      rcases ih (le_trans (by simp) hk) with ⟨v, hvk, hv⟩
+      have : ∃ y, R (l - (k + 1)) y := H (l - (k + 1)) (by simp [tsub_lt_iff_left hk])
+      rcases this with ⟨y, hy⟩
+      exact ⟨y ∷ v, by simp [hvk], fun i hi ↦ by
+        rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
+        · simpa using hy
+        · simpa [sub_succ_add_succ (succ_le_iff_lt.mp hk) i] using hv i (by simpa using hi)⟩
+  simpa using this l (by rfl)
+
+section repaetVec
+
+def repeatVec.blueprint : PR.Blueprint 1 where
+  zero := .mkSigma “y x | y = 0” (by simp)
+  succ := .mkSigma “y ih n x | !consDef y x ih” (by simp)
+
+def repeatVec.construction : PR.Construction V repeatVec.blueprint where
+  zero := fun _ ↦ 0
+  succ := fun x _ ih ↦ x 0 ∷ ih
+  zero_defined := by intro v; simp [blueprint]
+  succ_defined := by intro v; simp [blueprint]; rfl
+
+/-- `repeatVec x k = x ∷ x ∷ x ∷ ... k times ... ∷ 0`-/
+def repeatVec (x k : V) : V := repeatVec.construction.result ![x] k
+
+@[simp] lemma repeatVec_zero (x : V) : repeatVec x 0 = 0 := by simp [repeatVec, repeatVec.construction]
+
+@[simp] lemma repeatVec_succ (x k : V) : repeatVec x (k + 1) = x ∷ repeatVec x k := by simp [repeatVec, repeatVec.construction]
+
+section
+
+def _root_.LO.FirstOrder.Arith.repeatVecDef : 𝚺₁-Semisentence 3 := repeatVec.blueprint.resultDef |>.rew (Rew.substs ![#0, #2, #1])
+
+lemma repeatVec_defined : 𝚺₁-Function₂ (repeatVec : V → V → V) via repeatVecDef :=
+  fun v ↦ by simp [repeatVec.construction.result_defined_iff, repeatVecDef]; rfl
+
+@[simp] lemma eval_repeatVec (v) :
+    Semiformula.Evalbm V v repeatVecDef.val ↔ v 0 = repeatVec (v 1) (v 2) := repeatVec_defined.df.iff v
+
+instance repeatVec_definable : 𝚺₁-Function₂ (repeatVec : V → V → V) := Defined.to_definable _ repeatVec_defined
+
+@[simp] instance repeatVec_definable' (Γ) : (Γ, m + 1)-Function₂ (repeatVec : V → V → V) :=
+  .of_sigmaOne repeatVec_definable _ _
+
+end
+
+@[simp] lemma len_repeatVec (x k : V) : len (repeatVec x k) = k := by
+  induction k using induction_iSigmaOne
+  · definability
+  case zero => simp
+  case succ k ih => simp [ih]
+
+lemma nth_repeatVec (x k : V) {i} (h : i < k) : (repeatVec x k).[i] = x := by
+  induction k using induction_iSigmaOne generalizing i
+  · definability
+  case zero => simp at h
+  case succ k ih =>
+    rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
+    · simp
+    · simpa using ih (by simpa using h)
+
+lemma len_repeatVec_of_nth_le {v m : V} (H : ∀ i < len v, v.[i] ≤ m) : v ≤ repeatVec m (len v) :=
+  le_of_nth_le_nth (by simp) (fun i hi ↦ by simp [nth_repeatVec m (len v) hi, H i hi])
+
+end repaetVec
+
 
 end len
 

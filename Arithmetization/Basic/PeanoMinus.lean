@@ -130,6 +130,11 @@ lemma mul_sub (h : b ≤ a) : c * (a - b) = c * a - c * b := by simp [mul_comm c
 
 lemma add_sub_of_le (h : c ≤ b) (a : M) : a + b - c = a + (b - c) := add_tsub_assoc_of_le h a
 
+lemma sub_succ_add_succ {x y : M} (h : y < x) (z) : x - (y + 1) + (z + 1) = x - y + z := calc
+  x - (y + 1) + (z + 1) = x - (y + 1) + 1 + z := by simp [add_assoc, add_comm]
+  _                     = x - y - 1 + 1 + z   := by simp [sub_sub]
+  _                     = x - y + z           := by simp; rw [sub_add_self_of_le (one_le_of_zero_lt _ (pos_sub_iff_lt.mpr h))]
+
 end sub
 
 section Dvd

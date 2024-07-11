@@ -383,7 +383,7 @@ instance : ExQuantifier (HSemiformula L ξ · (𝚺, m + 1)) := ⟨ex⟩
 instance : UnivQuantifier (HSemiformula L ξ · (𝚷, m + 1)) := ⟨all⟩
 
 def substSigma (p : HSemiformula L ξ 1 (𝚺, m + 1)) (F : HSemiformula L ξ (n + 1) (𝚺, m + 1)) :
-    HSemiformula L ξ n (𝚺, m + 1) := (F ⋏ p.rew [→ #0]).ex
+    HSemiformula L ξ n (𝚺, m + 1) := (F ⋏ p.rew (Rew.substs ![#0])).ex
 
 @[simp] lemma val_verum {Γ}: (⊤ : HSemiformula L ξ n Γ).val = ⊤ := by
   rcases Γ with ⟨Γ, m⟩; rcases Γ <;> simp [val]
@@ -920,15 +920,15 @@ lemma comp₁ {k} {P : M → Prop} {f : (Fin k → M) → M} (hf : DefinableFunc
   match Γ with
   | 𝚺 =>
     rcases hP with ⟨p, hp⟩; rcases hf with ⟨pf, hpf⟩
-    exact ⟨(pf ⋏ (p.rew [→ #0])).ex, by intro v; simp [hp.df.iff, hpf.df.iff]⟩
+    exact ⟨(pf ⋏ (p.rew (Rew.substs ![#0]))).ex, by intro v; simp [hp.df.iff, hpf.df.iff]⟩
   | 𝚷 =>
     rcases hP with ⟨p, hp⟩; rcases hf with ⟨pf, hpf⟩
-    exact ⟨(pf.negSigma ⋎ (p.rew [→ #0])).all, by intro v; simp [hp.df.iff, hpf.df.iff, ←imp_iff_not_or]⟩
+    exact ⟨(pf.negSigma ⋎ (p.rew (Rew.substs ![#0]))).all, by intro v; simp [hp.df.iff, hpf.df.iff, ←imp_iff_not_or]⟩
   | 𝚫 =>
     rcases hP with ⟨p, hp⟩; rcases hf with ⟨pf, hpf⟩
     exact of_sigma_of_pi
-      ⟨(pf ⋏ (p.sigma.rew [→ #0])).ex, by intro v; simp [hp.df.iff, hpf.df.iff, HSemiformula.val_sigma]  ⟩
-      ⟨(pf.negSigma ⋎ (p.pi.rew [→ #0])).all, by intro v; simp [hp.df.iff, hpf.df.iff, ←imp_iff_not_or, hp.proper.iff']⟩
+      ⟨(pf ⋏ (p.sigma.rew (Rew.substs ![#0]))).ex, by intro v; simp [hp.df.iff, hpf.df.iff, HSemiformula.val_sigma]  ⟩
+      ⟨(pf.negSigma ⋎ (p.pi.rew (Rew.substs ![#0]))).all, by intro v; simp [hp.df.iff, hpf.df.iff, ←imp_iff_not_or, hp.proper.iff']⟩
 
 lemma comp₁' {k} {P : M → Prop} {f : (Fin k → M) → M} (hf : DefinableFunction L (𝚺, m + 1) f)
     {Γ : SigmaPiDelta} [DefinablePred L (Γ, m + 1) P] : Definable L (Γ, m + 1) (fun v ↦ P (f v)) :=
@@ -940,19 +940,19 @@ lemma comp₂ {k} {P : M → M → Prop} {f g : (Fin k → M) → M}
   match Γ with
   | 𝚺 =>
     rcases hP with ⟨p, hp⟩; rcases hf with ⟨pf, hpf⟩; rcases hg with ⟨pg, hpg⟩
-    exact ⟨(pf.rew (Rew.substs $ #0 :> (#·.succ.succ)) ⋏ pg.rew (Rew.substs $ #1 :> (#·.succ.succ)) ⋏ (p.rew [→ #0, #1])).ex.ex, by
+    exact ⟨(pf.rew (Rew.substs $ #0 :> (#·.succ.succ)) ⋏ pg.rew (Rew.substs $ #1 :> (#·.succ.succ)) ⋏ (p.rew (Rew.substs ![#0, #1]))).ex.ex, by
       intro v; simp [hp.df.iff, hpf.df.iff, hpg.df.iff]⟩
   | 𝚷 =>
     rcases hP with ⟨p, hp⟩; rcases hf with ⟨pf, hpf⟩; rcases hg with ⟨pg, hpg⟩
-    exact ⟨((pf.rew (Rew.substs $ #0 :> (#·.succ.succ))).negSigma ⋎ (pg.rew (Rew.substs $ #1 :> (#·.succ.succ))).negSigma ⋎ (p.rew [→ #0, #1])).all.all, by
+    exact ⟨((pf.rew (Rew.substs $ #0 :> (#·.succ.succ))).negSigma ⋎ (pg.rew (Rew.substs $ #1 :> (#·.succ.succ))).negSigma ⋎ (p.rew (Rew.substs ![#0, #1]))).all.all, by
       intro v; simp [hp.df.iff, hpf.df.iff, hpg.df.iff, ←imp_iff_not_or]⟩
   | 𝚫 =>
     rcases hP with ⟨p, hp⟩; rcases hf with ⟨pf, hpf⟩; rcases hg with ⟨pg, hpg⟩
     exact of_sigma_of_pi
-      ⟨(pf.rew (Rew.substs $ #0 :> (#·.succ.succ)) ⋏ pg.rew (Rew.substs $ #1 :> (#·.succ.succ)) ⋏ (p.sigma.rew [→ #0, #1])).ex.ex, by
+      ⟨(pf.rew (Rew.substs $ #0 :> (#·.succ.succ)) ⋏ pg.rew (Rew.substs $ #1 :> (#·.succ.succ)) ⋏ (p.sigma.rew (Rew.substs ![#0, #1]))).ex.ex, by
         intro v; simp [hp.df.iff, hpf.df.iff, hpg.df.iff, HSemiformula.val_sigma]⟩
       ⟨((pf.rew (Rew.substs $ #0 :> (#·.succ.succ))).negSigma
-          ⋎ (pg.rew (Rew.substs $ #1 :> (#·.succ.succ))).negSigma ⋎ (p.pi.rew [→ #0, #1])).all.all, by
+          ⋎ (pg.rew (Rew.substs $ #1 :> (#·.succ.succ))).negSigma ⋎ (p.pi.rew (Rew.substs ![#0, #1]))).all.all, by
         intro v; simp [hp.df.iff, hpf.df.iff, hpg.df.iff, ←imp_iff_not_or, hp.proper.iff']⟩
 
 lemma comp₂' {k} {P : M → M → Prop} {f g : (Fin k → M) → M}
@@ -971,7 +971,7 @@ lemma comp₃ {k} {P : M → M → M → Prop} {f₁ f₂ f₃ : (Fin k → M) �
       ⟨(  pf₁.rew (Rew.substs $ #0 :> (#·.succ.succ.succ))
         ⋏ pf₂.rew (Rew.substs $ #1 :> (#·.succ.succ.succ))
         ⋏ pf₃.rew (Rew.substs $ #2 :> (#·.succ.succ.succ))
-        ⋏ (p.rew [→ #0, #1, #2])).ex.ex.ex, by
+        ⋏ (p.rew (Rew.substs ![#0, #1, #2]))).ex.ex.ex, by
       intro v; simp [hp.df.iff, hpf₁.df.iff, hpf₂.df.iff, hpf₃.df.iff]⟩
   | 𝚷 =>
     rcases hP with ⟨p, hp⟩
@@ -979,7 +979,7 @@ lemma comp₃ {k} {P : M → M → M → Prop} {f₁ f₂ f₃ : (Fin k → M) �
       ⟨(  (pf₁.rew (Rew.substs $ #0 :> (#·.succ.succ.succ))).negSigma
         ⋎ (pf₂.rew (Rew.substs $ #1 :> (#·.succ.succ.succ))).negSigma
         ⋎ (pf₃.rew (Rew.substs $ #2 :> (#·.succ.succ.succ))).negSigma
-        ⋎ (p.rew [→ #0, #1, #2])).all.all.all, by
+        ⋎ (p.rew (Rew.substs ![#0, #1, #2]))).all.all.all, by
       intro v; simp [hp.df.iff, hpf₁.df.iff, hpf₂.df.iff, hpf₃.df.iff, ←imp_iff_not_or]⟩
   | 𝚫 =>
     rcases hP with ⟨p, hp⟩
@@ -987,12 +987,12 @@ lemma comp₃ {k} {P : M → M → M → Prop} {f₁ f₂ f₃ : (Fin k → M) �
       ⟨(  pf₁.rew (Rew.substs $ #0 :> (#·.succ.succ.succ))
         ⋏ pf₂.rew (Rew.substs $ #1 :> (#·.succ.succ.succ))
         ⋏ pf₃.rew (Rew.substs $ #2 :> (#·.succ.succ.succ))
-        ⋏ (p.sigma.rew [→ #0, #1, #2])).ex.ex.ex, by
+        ⋏ (p.sigma.rew (Rew.substs ![#0, #1, #2]))).ex.ex.ex, by
         intro v; simp [hp.df.iff, hpf₁.df.iff, hpf₂.df.iff, hpf₃.df.iff, HSemiformula.val_sigma]⟩
       ⟨(  (pf₁.rew (Rew.substs $ #0 :> (#·.succ.succ.succ))).negSigma
         ⋎ (pf₂.rew (Rew.substs $ #1 :> (#·.succ.succ.succ))).negSigma
         ⋎ (pf₃.rew (Rew.substs $ #2 :> (#·.succ.succ.succ))).negSigma
-        ⋎ (p.pi.rew [→ #0, #1, #2])).all.all.all, by
+        ⋎ (p.pi.rew (Rew.substs ![#0, #1, #2]))).all.all.all, by
         intro v; simp [hp.df.iff, hpf₁.df.iff, hpf₂.df.iff, hpf₃.df.iff, ←imp_iff_not_or, hp.proper.iff']⟩
 
 lemma comp₃' {k} {P : M → M → M → Prop} {f₁ f₂ f₃ : (Fin k → M) → M}
@@ -1013,7 +1013,7 @@ lemma comp₄ {k} {P : M → M → M → M → Prop} {f₁ f₂ f₃ f₄ : (Fin
         ⋏ pf₂.rew (Rew.substs $ #1 :> (#·.succ.succ.succ.succ))
         ⋏ pf₃.rew (Rew.substs $ #2 :> (#·.succ.succ.succ.succ))
         ⋏ pf₄.rew (Rew.substs $ #3 :> (#·.succ.succ.succ.succ))
-        ⋏ (p.rew [→ #0, #1, #2, #3])).ex.ex.ex.ex, by
+        ⋏ (p.rew (Rew.substs ![#0, #1, #2, #3]))).ex.ex.ex.ex, by
       intro v; simp [hp.df.iff, hpf₁.df.iff, hpf₂.df.iff, hpf₃.df.iff, hpf₄.df.iff]⟩
   | 𝚷 =>
     rcases hP with ⟨p, hp⟩
@@ -1022,7 +1022,7 @@ lemma comp₄ {k} {P : M → M → M → M → Prop} {f₁ f₂ f₃ f₄ : (Fin
         ⋎ (pf₂.rew (Rew.substs $ #1 :> (#·.succ.succ.succ.succ))).negSigma
         ⋎ (pf₃.rew (Rew.substs $ #2 :> (#·.succ.succ.succ.succ))).negSigma
         ⋎ (pf₄.rew (Rew.substs $ #3 :> (#·.succ.succ.succ.succ))).negSigma
-        ⋎ (p.rew [→ #0, #1, #2, #3])).all.all.all.all, by
+        ⋎ (p.rew (Rew.substs ![#0, #1, #2, #3]))).all.all.all.all, by
       intro v; simp [hp.df.iff, hpf₁.df.iff, hpf₂.df.iff, hpf₃.df.iff, hpf₄.df.iff, ←imp_iff_not_or]⟩
   | 𝚫 =>
     rcases hP with ⟨p, hp⟩
@@ -1031,13 +1031,13 @@ lemma comp₄ {k} {P : M → M → M → M → Prop} {f₁ f₂ f₃ f₄ : (Fin
         ⋏ pf₂.rew (Rew.substs $ #1 :> (#·.succ.succ.succ.succ))
         ⋏ pf₃.rew (Rew.substs $ #2 :> (#·.succ.succ.succ.succ))
         ⋏ pf₄.rew (Rew.substs $ #3 :> (#·.succ.succ.succ.succ))
-        ⋏ (p.sigma.rew [→ #0, #1, #2, #3])).ex.ex.ex.ex, by
+        ⋏ (p.sigma.rew (Rew.substs ![#0, #1, #2, #3]))).ex.ex.ex.ex, by
         intro v; simp [hp.df.iff, hpf₁.df.iff, hpf₂.df.iff, hpf₃.df.iff, hpf₄.df.iff, HSemiformula.val_sigma]⟩
       ⟨(  (pf₁.rew (Rew.substs $ #0 :> (#·.succ.succ.succ.succ))).negSigma
         ⋎ (pf₂.rew (Rew.substs $ #1 :> (#·.succ.succ.succ.succ))).negSigma
         ⋎ (pf₃.rew (Rew.substs $ #2 :> (#·.succ.succ.succ.succ))).negSigma
         ⋎ (pf₄.rew (Rew.substs $ #3 :> (#·.succ.succ.succ.succ))).negSigma
-        ⋎ (p.pi.rew [→ #0, #1, #2, #3])).all.all.all.all, by
+        ⋎ (p.pi.rew (Rew.substs ![#0, #1, #2, #3]))).all.all.all.all, by
         intro v; simp [hp.df.iff, hpf₁.df.iff, hpf₂.df.iff, hpf₃.df.iff, hpf₄.df.iff, ←imp_iff_not_or, hp.proper.iff']⟩
 
 lemma comp₄' {k} {P : M → M → M → M → Prop} {f₁ f₂ f₃ f₄ : (Fin k → M) → M}
@@ -1062,7 +1062,7 @@ lemma comp₅ {k} {P : M → M → M → M → M → Prop} {f₁ f₂ f₃ f₄ 
         ⋏ pf₃.rew (Rew.substs $ #2 :> (#·.succ.succ.succ.succ.succ))
         ⋏ pf₄.rew (Rew.substs $ #3 :> (#·.succ.succ.succ.succ.succ))
         ⋏ pf₅.rew (Rew.substs $ #4 :> (#·.succ.succ.succ.succ.succ))
-        ⋏ (p.rew [→ #0, #1, #2, #3, #4])).ex.ex.ex.ex.ex, by
+        ⋏ (p.rew (Rew.substs ![#0, #1, #2, #3, #4]))).ex.ex.ex.ex.ex, by
       intro v; simp [hp.df.iff, hpf₁.df.iff, hpf₂.df.iff, hpf₃.df.iff, hpf₄.df.iff, hpf₅.df.iff]⟩
   | 𝚷 =>
     rcases hP with ⟨p, hp⟩
@@ -1072,7 +1072,7 @@ lemma comp₅ {k} {P : M → M → M → M → M → Prop} {f₁ f₂ f₃ f₄ 
         ⋎ (pf₃.rew (Rew.substs $ #2 :> (#·.succ.succ.succ.succ.succ))).negSigma
         ⋎ (pf₄.rew (Rew.substs $ #3 :> (#·.succ.succ.succ.succ.succ))).negSigma
         ⋎ (pf₅.rew (Rew.substs $ #4 :> (#·.succ.succ.succ.succ.succ))).negSigma
-        ⋎ (p.rew [→ #0, #1, #2, #3, #4])).all.all.all.all.all, by
+        ⋎ (p.rew (Rew.substs ![#0, #1, #2, #3, #4]))).all.all.all.all.all, by
       intro v; simp [hp.df.iff, hpf₁.df.iff, hpf₂.df.iff, hpf₃.df.iff, hpf₄.df.iff, hpf₅.df.iff, ←imp_iff_not_or]⟩
   | 𝚫 =>
     rcases hP with ⟨p, hp⟩
@@ -1082,14 +1082,14 @@ lemma comp₅ {k} {P : M → M → M → M → M → Prop} {f₁ f₂ f₃ f₄ 
         ⋏ pf₃.rew (Rew.substs $ #2 :> (#·.succ.succ.succ.succ.succ))
         ⋏ pf₄.rew (Rew.substs $ #3 :> (#·.succ.succ.succ.succ.succ))
         ⋏ pf₅.rew (Rew.substs $ #4 :> (#·.succ.succ.succ.succ.succ))
-        ⋏ (p.sigma.rew [→ #0, #1, #2, #3, #4])).ex.ex.ex.ex.ex, by
+        ⋏ (p.sigma.rew (Rew.substs ![#0, #1, #2, #3, #4]))).ex.ex.ex.ex.ex, by
       intro v; simp [hp.df.iff, hpf₁.df.iff, hpf₂.df.iff, hpf₃.df.iff, hpf₄.df.iff, hpf₅.df.iff, HSemiformula.val_sigma]⟩
       ⟨(  (pf₁.rew (Rew.substs $ #0 :> (#·.succ.succ.succ.succ.succ))).negSigma
         ⋎ (pf₂.rew (Rew.substs $ #1 :> (#·.succ.succ.succ.succ.succ))).negSigma
         ⋎ (pf₃.rew (Rew.substs $ #2 :> (#·.succ.succ.succ.succ.succ))).negSigma
         ⋎ (pf₄.rew (Rew.substs $ #3 :> (#·.succ.succ.succ.succ.succ))).negSigma
         ⋎ (pf₅.rew (Rew.substs $ #4 :> (#·.succ.succ.succ.succ.succ))).negSigma
-        ⋎ (p.pi.rew [→ #0, #1, #2, #3, #4])).all.all.all.all.all, by
+        ⋎ (p.pi.rew (Rew.substs ![#0, #1, #2, #3, #4]))).all.all.all.all.all, by
       intro v; simp [hp.df.iff, hpf₁.df.iff, hpf₂.df.iff, hpf₃.df.iff, hpf₄.df.iff, hpf₅.df.iff, ←imp_iff_not_or, hp.proper.iff']⟩
 
 lemma comp₅' {k} {P : M → M → M → M → M → Prop} {f₁ f₂ f₃ f₄ f₅ : (Fin k → M) → M}
