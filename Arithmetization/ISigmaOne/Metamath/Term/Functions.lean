@@ -294,7 +294,7 @@ instance termBShiftVec_definable : 𝚺₁-Function₃ L.termBShiftVec :=
 
 end
 
-lemma nth_termBShiftVec {k n ts i : V} (hts : L.SemitermVec k n ts) (hi : i < k) :
+@[simp] lemma nth_termBShiftVec {k n ts i : V} (hts : L.SemitermVec k n ts) (hi : i < k) :
     (L.termBShiftVec k n ts).[i] = L.termBShift n ts.[i] :=
   (construction L).nth_resultVec _ hts hi
 

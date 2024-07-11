@@ -277,6 +277,9 @@ instance mkVec₂_definable' (Γ) : (Γ, m + 1)-Function₂ (fun x y : V ↦ ?[x
 
 end
 
+lemma cons_absolute (a v : ℕ) : ((a ∷ v : ℕ) : V) = (a : V) ∷ (v : V) := by
+  simpa using DefinedFunction.shigmaZero_absolute_func V cons_defined cons_defined ![a, v]
+
 /-- TODO: move-/
 lemma pi₁_zero : π₁ (0 : V) = 0 := nonpos_iff_eq_zero.mp (pi₁_le_self 0)
 
