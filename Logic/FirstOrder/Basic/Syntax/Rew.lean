@@ -551,23 +551,6 @@ lemma embSubsts_bv (t : Semiterm L Empty n) (v : Fin n → Semiterm L ξ m) :
 
 end Rew
 
-scoped syntax (name := substsNotation) "[→ " term,* "]" : term
-
-scoped macro_rules
-  | `([→ $terms:term,*]) => `(Rew.substs ![$terms,*])
-
-@[app_unexpander Rew.substs]
-def substsUnexpander : Lean.PrettyPrinter.Unexpander
-  | `($_ ![$terms,*]) => `([→ $terms,*])
-  | _ => throw ()
-
-scoped notation "⇑" => Rew.shift
-
-scoped syntax (name := embSubstsHomNotation) term:max ".[" term,* "]" : term
-
-scoped macro_rules (kind := embSubstsHomNotation)
-  | `($p:term .[$terms:term,*]) => `((Rew.embSubsts ![$terms,*]).hom $p)
-
 /-!
 ### Rewriting system of terms
 
@@ -948,7 +931,7 @@ lemma rew_eq_of_funEqOn {ω₁ ω₂ : Rew L ξ₁ n₁ ξ₂ n₂} {p}
 lemma rew_eq_of_funEqOn₀ {ω₁ ω₂ : Rew L ξ₁ 0 ξ₂ n₂} {p} (hf : Function.funEqOn (fvar? p) (ω₁ ∘ Semiterm.fvar) (ω₂ ∘ Semiterm.fvar)) : ω₁.hom p = ω₂.hom p :=
   rew_eq_of_funEqOn (fun x => Fin.elim0 x) hf
 
-@[simp] lemma ex_ne_subst (p : Semiformula L ξ 1) (t) : [→ t].hom p ≠ ∃' p := ne_of_ne_complexity (by simp)
+@[simp] lemma ex_ne_subst (p : Semiformula L ξ 1) (t) : p/[t] ≠ ∃' p := ne_of_ne_complexity (by simp)
 
 section lMap
 

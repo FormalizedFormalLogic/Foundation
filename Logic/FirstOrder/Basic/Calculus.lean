@@ -297,7 +297,7 @@ private lemma shift_rewrite_eq (f : ℕ → SyntacticTerm L) (p : SyntacticFormu
   simp[←Rew.hom_comp_app]; exact Rew.hom_ext' (by ext x <;> simp[Rew.comp_app])
 
 private lemma rewrite_subst_eq (f : ℕ → SyntacticTerm L) (t) (p : SyntacticSemiformula L 1) :
-    (Rew.rewrite f).hom ([→ t].hom p) = [→ Rew.rewrite f t].hom ((Rew.rewrite (Rew.bShift ∘ f)).hom p) := by
+    (Rew.rewrite f).hom (p/[t]) = ((Rew.rewrite (Rew.bShift ∘ f)).hom p)/[Rew.rewrite f t] := by
   simp[←Rew.hom_comp_app]; exact Rew.hom_ext' (by ext x <;> simp[Rew.comp_app])
 
 attribute [simp] Rew.q_rewrite

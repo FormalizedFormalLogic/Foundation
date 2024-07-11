@@ -298,16 +298,16 @@ lemma semanticMainLemma_val : (p : SyntacticFormula L) → p ∈ ⛓️ → ¬Ev
       · exact semanticMainLemma_val p hpq.1 h
       · exact semanticMainLemma_val q hpq.2 h
   | ∀' p,     h => by
-      have : ∃ u, [→ u].hom p ∈ ⛓️ := chainSet_all nwf h
+      have : ∃ u, p/[u] ∈ ⛓️ := chainSet_all nwf h
       rcases this with ⟨u, hu⟩
       have : ¬Eval (Model.structure T Γ) ![u] Semiterm.fvar p := by
-        simpa[eval_substs, Matrix.constant_eq_singleton] using semanticMainLemma_val ([→ u].hom p) hu
+        simpa[eval_substs, Matrix.constant_eq_singleton] using semanticMainLemma_val (p/[u]) hu
       simp; exact ⟨u, this⟩
   | ∃' p,     h => by
       simp; intro u
-      have : [→ u].hom p ∈ ⛓️ := chainSet_ex nwf h u
+      have : p/[u] ∈ ⛓️ := chainSet_ex nwf h u
       have : ¬Eval (Model.structure T Γ) ![u] Semiterm.fvar p := by
-        simpa[eval_substs, Matrix.constant_eq_singleton] using semanticMainLemma_val ([→ u].hom p) this
+        simpa[eval_substs, Matrix.constant_eq_singleton] using semanticMainLemma_val (p/[u]) this
       assumption
   termination_by p _ => p.complexity
 
