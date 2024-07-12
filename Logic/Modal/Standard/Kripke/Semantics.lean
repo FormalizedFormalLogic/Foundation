@@ -292,8 +292,24 @@ protected lemma mdp (hpq : 𝔽 ⊧ p ⟶ q) (hp : 𝔽 ⊧ p) : 𝔽 ⊧ q := b
   intro _ hF;
   exact Kripke.ValidOnFrame.mdp (hpq hF) (hp hF)
 
-end Formula.Kripke.ValidOnFrameClass
+end ValidOnFrameClass
 
+end Formula.Kripke
+
+namespace Kripke
+
+open Formula.Kripke
+
+lemma iff_not_validOnFrameClass {𝔽 : FrameClass} : ¬(𝔽# ⊧ p) ↔ ∃ F ∈ 𝔽, ∃ V x, ¬Satisfies ⟨F, V⟩ x p := by
+  simp [ValidOnFrame, ValidOnModel, Satisfies];
+
+lemma iff_not_set_validOnFrameClass {𝔽 : FrameClass} : ¬(𝔽# ⊧* T) ↔ ∃ p ∈ T, ∃ F ∈ 𝔽, ∃ V x, ¬Satisfies ⟨F, V⟩ x p  := by
+  simp [Semantics.realizeSet_iff, ValidOnFrame, ValidOnModel, Satisfies];
+
+lemma iff_not_validOnFrame {F : Frame} : ¬(F# ⊧* T) ↔ ∃ p ∈ T, ∃ V x, ¬Satisfies ⟨F, V⟩ x p  := by
+  simp [Semantics.realizeSet_iff, ValidOnFrame, ValidOnModel, Satisfies];
+
+end Kripke
 
 namespace AxiomSet
 
