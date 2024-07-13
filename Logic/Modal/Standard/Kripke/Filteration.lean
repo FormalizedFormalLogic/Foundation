@@ -286,14 +286,14 @@ def filterOf : (FinestFilterationTransitiveClosureModel M T).FilterOf M T where
     obtain ⟨y, rfl⟩ := Quotient.exists_rep Qy;
     intro p hp hpx;
     obtain ⟨n, RQxQy⟩ := RQxQy;
-    induction n using PNat.inductionOn generalizing x y with
-    | one =>
+    induction n using PNat.recOn generalizing x y with
+    | p1 =>
       simp_all;
       obtain ⟨w, v, hQxQw, hQyQv, rwv⟩ := RQxQy;
       simp at hQxQw hQyQv;
       apply hQyQv p (by aesop) |>.mpr;
       exact hQxQw (□p) (by aesop) |>.mp hpx $ rwv;
-    | succ n ih =>
+    | hp n ih =>
       simp at RQxQy;
       obtain ⟨Qz, RQxQz, RQzQy⟩ := RQxQy;
       obtain ⟨z, rfl⟩ := Quotient.exists_rep Qz;

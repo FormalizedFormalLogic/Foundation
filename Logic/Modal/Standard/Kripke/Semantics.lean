@@ -4,28 +4,6 @@ import Logic.Modal.Standard.Deduction
 
 universe u v
 
--- TODO: move to mathlib or vorspiel
-section
-
-def _root_.Nat.inductionOne {p : ℕ → Sort*} (zero : p 0) (one : p 1) (succ_one : ∀ k > 0, p k → p (k + 1)) : ∀n, p n := by
-  intro n;
-  induction n with
-  | zero => exact zero;
-  | succ n ih =>
-    by_cases h : n = 0
-    . subst_vars; exact one;
-    . exact succ_one n (by omega) ih;
-
-def _root_.PNat.inductionOn {p : ℕ+ → Sort*} (n : ℕ+) (one : p 1) (succ : ∀ k, p k → p (k + 1)) : p n := by
-  obtain ⟨n, lt⟩ := n;
-  induction n using Nat.inductionOne with
-  | zero => simp at lt;
-  | one => exact one;
-  | succ_one n hn ih => exact succ ⟨n, hn⟩ $ ih (by simpa);
-
-end
-
-
 namespace LO.Modal.Standard
 
 def RelItr (R : α → α → Prop) : ℕ → α → α → Prop
@@ -185,9 +163,9 @@ lemma rel_symmetric_of_symmetric {F : Frame} (hSymm : Symmetric F.Rel) : Symmetr
   intro x y hxy;
   obtain ⟨n, hxy⟩ := hxy;
   use n;
-  induction n using PNat.inductionOn generalizing x y with
-  | one => simp_all; exact hSymm hxy;
-  | succ n ih =>
+  induction n using PNat.recOn generalizing x y with
+  | p1 => simp_all; exact hSymm hxy;
+  | hp n ih =>
     obtain ⟨z, hxz, hzy⟩ := RelItr.forward $ hxy;
     use z;
     constructor;
