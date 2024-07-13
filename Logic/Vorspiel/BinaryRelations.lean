@@ -1,6 +1,5 @@
 import Mathlib.Init.Logic
 import Mathlib.Data.Finite.Basic
-import Mathlib.Tactic.Existsi
 
 section
 
