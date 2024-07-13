@@ -14,6 +14,62 @@ open FirstOrder FirstOrder.Arith
 
 variable {V : Type*} [Zero V] [One V] [Add V] [Mul V] [LT V] [V ⊧ₘ* 𝐈𝚺₁]
 
+section cons
+
+instance : Cons V V := ⟨(⟪·, ·⟫ + 1)⟩
+
+scoped infixr:67 " ∷ " => cons
+
+syntax "?[" term,* "]" : term
+
+macro_rules
+  | `(?[$term:term, $terms:term,*]) => `(cons $term ?[$terms,*])
+  | `(?[$term:term]) => `(cons $term 0)
+  | `(?[]) => `(0)
+
+@[app_unexpander Cons.cons]
+def consUnexpander : Lean.PrettyPrinter.Unexpander
+  | `($_ $term ?[$terms,*]) => `(?[$term, $terms,*])
+  | `($_ $term 0) => `(?[$term])
+  | _ => throw ()
+
+lemma cons_def (x v : V) : x ∷ v = ⟪x, v⟫ + 1 := rfl
+
+@[simp] lemma fstIdx_cons (x v : V) : fstIdx (x ∷ v) = x := by simp [cons_def, fstIdx]
+
+@[simp] lemma sndIdx_cons (x v : V) : sndIdx (x ∷ v) = v := by simp [cons_def, sndIdx]
+
+lemma succ_eq_cons (x : V) : x + 1 = π₁ x ∷ π₂ x := by simp [cons_def]
+
+@[simp] lemma lt_cons (x v : V) : x < x ∷ v := by simp [cons_def, lt_succ_iff_le]
+
+@[simp] lemma lt_cons' (x v : V) : v < x ∷ v := by simp [cons_def, lt_succ_iff_le]
+
+@[simp] lemma zero_lt_cons (x v : V) : 0 < x ∷ v := by simp [cons_def]
+
+@[simp] lemma cons_ne_zero (x v : V) : x ∷ v ≠ 0 := by simp [cons_def]
+
+@[simp] lemma zero_ne_cons (x v : V) : 0 ≠ x ∷ v := by symm; simp [cons_def]
+
+lemma nil_or_cons (z : V) : z = 0 ∨ ∃ x v, z = x ∷ v := by
+  rcases zero_or_succ z with (rfl | ⟨z, rfl⟩)
+  · left; rfl
+  · right; exact ⟨π₁ z, π₂ z, by simp [succ_eq_cons]⟩
+
+@[simp] lemma cons_inj (x₁ x₂ v₁ v₂ : V) :
+    x₁ ∷ v₁ = x₂ ∷ v₂ ↔ x₁ = x₂ ∧ v₁ = v₂ := by simp [cons_def]
+
+lemma cons_le_cons {x₁ x₂ v₁ v₂ : V} (hx : x₁ ≤ x₂) (hv : v₁ ≤ v₂) :
+    x₁ ∷ v₁ ≤ x₂ ∷ v₂ := by simpa [cons_def] using pair_le_pair hx hv
+
+end cons
+
+/-!
+
+### N-th element of List
+
+-/
+
 namespace Nth
 
 def Phi (C : Set V) (pr : V) : Prop :=
@@ -140,50 +196,6 @@ lemma nth_eq_of_graph {v i x : V} (h : Graph ⟪v, i, x⟫) : nth v i = x := gra
 lemma nth_zero (v : V) : v.[0] = fstIdx v := nth_eq_of_graph (graph_zero.mpr rfl)
 
 lemma nth_succ (v i : V) : v.[i + 1] = (sndIdx v).[i] := nth_eq_of_graph (graph_succ.mpr <| nth_graph _ _)
-
-instance : Cons V V := ⟨(⟪·, ·⟫ + 1)⟩
-
-scoped infixr:67 " ∷ " => cons
-
-syntax "?[" term,* "]" : term
-
-macro_rules
-  | `(?[$term:term, $terms:term,*]) => `(cons $term ?[$terms,*])
-  | `(?[$term:term]) => `(cons $term 0)
-  | `(?[]) => `(0)
-
-@[app_unexpander Cons.cons]
-def consUnexpander : Lean.PrettyPrinter.Unexpander
-  | `($_ $term ?[$terms,*]) => `(?[$term, $terms,*])
-  | `($_ $term 0) => `(?[$term])
-  | _ => throw ()
-
-lemma cons_def (x v : V) : x ∷ v = ⟪x, v⟫ + 1 := rfl
-
-@[simp] lemma fstIdx_cons (x v : V) : fstIdx (x ∷ v) = x := by simp [cons_def, fstIdx]
-
-@[simp] lemma sndIdx_cons (x v : V) : sndIdx (x ∷ v) = v := by simp [cons_def, sndIdx]
-
-lemma succ_eq_cons (x : V) : x + 1 = π₁ x ∷ π₂ x := by simp [cons_def]
-
-@[simp] lemma lt_cons (x v : V) : x < x ∷ v := by simp [cons_def, lt_succ_iff_le]
-
-@[simp] lemma lt_cons' (x v : V) : v < x ∷ v := by simp [cons_def, lt_succ_iff_le]
-
-@[simp] lemma zero_lt_cons (x v : V) : 0 < x ∷ v := by simp [cons_def]
-
-@[simp] lemma cons_ne_zero (x v : V) : x ∷ v ≠ 0 := by simp [cons_def]
-
-lemma nil_or_cons (z : V) : z = 0 ∨ ∃ x v, z = x ∷ v := by
-  rcases zero_or_succ z with (rfl | ⟨z, rfl⟩)
-  · left; rfl
-  · right; exact ⟨π₁ z, π₂ z, by simp [succ_eq_cons]⟩
-
-@[simp] lemma cons_inj (x₁ x₂ v₁ v₂ : V) :
-    x₁ ∷ v₁ = x₂ ∷ v₂ ↔ x₁ = x₂ ∧ v₁ = v₂ := by simp [cons_def]
-
-lemma cons_le_cons {x₁ x₂ v₁ v₂ : V} (hx : x₁ ≤ x₂) (hv : v₁ ≤ v₂) :
-    x₁ ∷ v₁ ≤ x₂ ∷ v₂ := by simpa [cons_def] using pair_le_pair hx hv
 
 @[simp] lemma nth_cons_zero (x v : V) : (x ∷ v).[0] = x := by
   simp [nth_zero]
@@ -313,105 +325,217 @@ lemma nth_lt_of_pos {v} (hv : 0 < v) (i : V) : v.[i] < v := by
 
 end nth
 
-namespace Len
 
-def Phi (C : Set V) (pr : V) : Prop :=
-  pr = ⟪0, 0⟫ ∨ (∃ v i, v ≠ 0 ∧ pr = ⟪v, i + 1⟫ ∧ ⟪sndIdx v, i⟫ ∈ C)
+/-!
 
-private lemma phi_iff (C pr : V) :
-    Phi {x | x ∈ C} pr ↔
-    pr = ⟪0, 0⟫ ∨
-    (∃ v ≤ pr, ∃ i ≤ pr, v ≠ 0 ∧ pr = ⟪v, i + 1⟫ ∧ ∃ snd ≤ v, snd = sndIdx v ∧ ∃ six < C, six = ⟪snd, i⟫ ∧ six ∈ C) := by
-  constructor
-  · rintro (rfl | ⟨v, i, hv, rfl, hC⟩)
-    · left; rfl
-    · right; exact ⟨v, by simp,
-        i, le_trans le_self_add (le_pair_right _ _),
-        hv, rfl, _, by simp, rfl, _, lt_of_mem hC, rfl, hC⟩
-  · rintro (⟨v, _, _, _, rfl, rfl⟩ | ⟨v, _, i, _, hv, rfl, _, _, rfl, _, _, rfl, hC⟩)
-    · left; rfl
-    · right; exact ⟨v, i, hv, rfl, hC⟩
+### Inductivly Construction of Function on List
 
-def blueprint : Fixpoint.Blueprint 0 where
-  core := .ofZero
+-/
+
+namespace VecRec
+
+structure Blueprint (arity : ℕ) where
+  nil : 𝚺₁-Semisentence (arity + 1)
+  cons : 𝚺₁-Semisentence (arity + 4)
+
+namespace Blueprint
+
+variable {arity : ℕ} (β : Blueprint arity)
+
+def blueprint : Fixpoint.Blueprint arity where
+  core := .mkDelta
     (.mkSigma “pr C |
-      !pairDef pr 0 0 ∨
-      (∃ v <⁺ pr, ∃ i <⁺ pr, v ≠ 0 ∧ !pairDef pr v (i + 1) ∧
-        ∃ snd <⁺ v, !sndIdxDef snd v ∧ ∃ six < C, !pairDef six snd i ∧ six ∈ C)”
-    (by simp))
-    _
+        (∃ nil, !β.nil nil ⋯ ∧ !pairDef pr 0 nil) ∨
+        (∃ x < pr, ∃ xs < pr, ∃ ih < C,
+          ∃ xxs, !consDef xxs x xs ∧
+          ∃ cons, !β.cons cons x xs ih ⋯ ∧
+          !pairDef pr xxs cons ∧ :⟪xs, ih⟫:∈ C)”
+      (by simp))
+    (.mkPi “pr C |
+        (∀ nil, !β.nil nil ⋯ → !pairDef pr 0 nil) ∨
+        (∃ x < pr, ∃ xs < pr, ∃ ih < C,
+          ∀ xxs, !consDef xxs x xs →
+          ∀ cons, !β.cons cons x xs ih ⋯ →
+          !pairDef pr xxs cons ∧ :⟪xs, ih⟫:∈ C)”
+      (by simp))
 
-def construction : Fixpoint.Construction V blueprint where
-  Φ := fun _ ↦ Phi
-  defined := .of_zero <| by intro v; simp [phi_iff]
+def graphDef : 𝚺₁-Semisentence (arity + 1) := β.blueprint.fixpointDef
+
+def resultDef : 𝚺₁-Semisentence (arity + 2) :=
+  .mkSigma “y xs | ∃ pr, !pairDef pr xs y ∧ !β.graphDef pr ⋯” (by simp)
+
+end Blueprint
+
+variable (V)
+
+structure Construction {arity : ℕ} (β : Blueprint arity) where
+  nil (param : Fin arity → V) : V
+  cons (param : Fin arity → V) (x xs ih) : V
+  nil_defined : DefinedFunction nil β.nil
+  cons_defined : DefinedFunction (fun v ↦ cons (v ·.succ.succ.succ) (v 0) (v 1) (v 2)) β.cons
+
+variable {V}
+
+namespace Construction
+
+variable {arity : ℕ} {β : Blueprint arity} (c : Construction V β)
+
+def Phi (param : Fin arity → V) (C : Set V) (pr : V) : Prop :=
+  pr = ⟪0, c.nil param⟫ ∨ (∃ x xs ih, pr = ⟪x ∷ xs, c.cons param x xs ih⟫ ∧ ⟪xs, ih⟫ ∈ C)
+
+private lemma phi_iff (param : Fin arity → V) (C pr : V) :
+    c.Phi param {x | x ∈ C} pr ↔
+    pr = ⟪0, c.nil param⟫ ∨ (∃ x < pr, ∃ xs < pr, ∃ ih < C, pr = ⟪x ∷ xs, c.cons param x xs ih⟫ ∧ ⟪xs, ih⟫ ∈ C) := by
+  constructor
+  · rintro (h | ⟨x, xs, ih, rfl, hC⟩)
+    · left; exact h
+    · right
+      exact ⟨x, lt_of_lt_of_le (by simp) (le_pair_left _ _),
+        xs, lt_of_lt_of_le (by simp) (le_pair_left _ _), ih, lt_of_mem_rng hC, rfl , hC⟩
+  · rintro (h | ⟨x, _, xs, _, ih, _, rfl, hC⟩)
+    · left; exact h
+    · right; exact ⟨x, xs, ih, rfl, hC⟩
+
+def construction : Fixpoint.Construction V β.blueprint where
+  Φ := c.Phi
+  defined := ⟨by
+    intro v; simp [Blueprint.blueprint, c.nil_defined.df.iff, c.cons_defined.df.iff], by
+    intro v; simpa [Blueprint.blueprint, c.nil_defined.df.iff, c.cons_defined.df.iff] using c.phi_iff _ _ _⟩
   monotone := by
     rintro C C' hC _ x (h | ⟨v, i, hv, rfl, h⟩)
     · left; exact h
     · right; exact ⟨v, i, hv, rfl, hC h⟩
 
-instance : construction.Finite V where
+instance : c.construction.Finite V where
   finite := by
-    rintro C v x (h | ⟨v, i, hv, rfl, h⟩)
+    rintro C v x (h | ⟨x, xs, ih, rfl, h⟩)
     · exact ⟨0, Or.inl h⟩
-    · exact ⟨⟪sndIdx v, i⟫ + 1, Or.inr ⟨v, i, hv, rfl, h, by simp⟩⟩
+    · exact ⟨⟪xs, ih⟫ + 1, Or.inr ⟨x, xs, ih, rfl, h, by simp⟩⟩
 
-def Graph : V → Prop := construction.Fixpoint ![]
+variable (param : Fin arity → V)
+
+def Graph : V → Prop := c.construction.Fixpoint param
 
 section
 
-def graphDef : 𝚺₁-Semisentence 1 := blueprint.fixpointDef
+lemma graph_defined : Arith.Defined (fun v ↦ c.Graph (v ·.succ) (v 0)) β.graphDef :=
+  c.construction.fixpoint_defined
 
-lemma graph_defined : 𝚺₁-Predicate (Graph : V → Prop) via graphDef :=
-  construction.fixpoint_defined
+instance graph_definable : Arith.Definable ℒₒᵣ 𝚺₁ (fun v ↦ c.Graph (v ·.succ) (v 0)) := Defined.to_definable _ c.graph_defined
 
-instance graph_definable : 𝚺₁-Predicate (Graph : V → Prop) := Defined.to_definable _ graph_defined
+instance graph_definable' (param) : 𝚺₁-Predicate (c.Graph param) := by
+  simpa using Definable.retractiont (n := 1) c.graph_definable (#0 :> fun i ↦ &(param i))
 
 end
 
+variable {param}
+
 lemma graph_case {pr : V} :
-    Graph pr ↔ pr = ⟪0, 0⟫ ∨ (∃ v i, v ≠ 0 ∧ pr = ⟪v, i + 1⟫ ∧ Graph ⟪sndIdx v, i⟫) :=
-  construction.case
+    c.Graph param pr ↔ pr = ⟪0, c.nil param⟫ ∨ (∃ x xs ih, pr = ⟪x ∷ xs, c.cons param x xs ih⟫ ∧ c.Graph param ⟪xs, ih⟫) :=
+  c.construction.case
 
-lemma graph_zero {l : V} :
-    Graph ⟪0, l⟫ ↔ l = 0 := by
+lemma graph_nil {l : V} :
+    c.Graph param ⟪0, l⟫ ↔ l = c.nil param := by
   constructor
   · intro h
-    rcases graph_case.mp h with (h | ⟨v, i, hv, h, _⟩)
+    rcases c.graph_case.mp h with (h | ⟨x, xs, ih, h, _⟩)
     · simp at h; rcases h with ⟨rfl, rfl⟩; rfl
-    · simp at h; rcases h with ⟨rfl, rfl⟩; simp at hv
-  · rintro rfl; exact graph_case.mpr <| Or.inl rfl
+    · simp at h
+  · rintro rfl; exact c.graph_case.mpr <| Or.inl rfl
 
-lemma graph_succ {v x : V} :
-    Graph ⟪x ∷ v, l⟫ ↔ ∃ l', l = l' + 1 ∧ Graph ⟪v, l'⟫ := by
+lemma graph_cons {x xs y : V} :
+    c.Graph param ⟪x ∷ xs, y⟫ ↔ ∃ y', y = c.cons param x xs y' ∧ c.Graph param ⟪xs, y'⟫ := by
   constructor
   · intro h
-    rcases graph_case.mp h with (h | ⟨v, l, hv, h, hg⟩)
+    rcases c.graph_case.mp h with (h | ⟨x, xs, y, h, hg⟩)
     · simp at h
-    · simp at h; rcases h with ⟨rfl, rfl⟩; exact ⟨l, rfl, by simpa using hg⟩
-  · rintro ⟨l, rfl, h⟩; exact graph_case.mpr <| Or.inr ⟨x ∷ v, l, by simp, rfl, by simpa using h⟩
+    · simp at h; rcases h with ⟨⟨rfl, rfl⟩, rfl⟩
+      exact ⟨y, rfl, hg⟩
+  · rintro ⟨y, rfl, h⟩; exact c.graph_case.mpr <| Or.inr ⟨x, xs, y, rfl, h⟩
 
-lemma graph_exists (v : V) : ∃ l, Graph ⟪v, l⟫ := by
-  induction v using cons_induction_sigma₁
+variable (param)
+
+lemma graph_exists (xs : V) : ∃ y, c.Graph param ⟪xs, y⟫ := by
+  induction xs using cons_induction_sigma₁
   · definability
   case nil =>
-    exact ⟨0, graph_zero.mpr rfl⟩
-  case cons x v ih =>
-    · rcases ih with ⟨l, hl⟩
-      exact ⟨l + 1, graph_succ.mpr ⟨l, rfl, hl⟩⟩
+    exact ⟨c.nil param, c.graph_nil.mpr rfl⟩
+  case cons x xs ih =>
+    · rcases ih with ⟨y, hy⟩
+      exact ⟨c.cons param x xs y, c.graph_cons.mpr ⟨y, rfl, hy⟩⟩
 
-lemma graph_unique {v l₁ l₂ : V} : Graph ⟪v, l₁⟫ → Graph ⟪v, l₂⟫ → l₁ = l₂ := by
-  induction v using cons_induction_pi₁ generalizing l₁ l₂
+variable {param}
+
+lemma graph_unique {xs y₁ y₂ : V} : c.Graph param ⟪xs, y₁⟫ → c.Graph param ⟪xs, y₂⟫ → y₁ = y₂ := by
+  induction xs using cons_induction_pi₁ generalizing y₁ y₂
   · definability
   case nil =>
-    simp [graph_zero]; rintro rfl rfl; rfl
+    simp [graph_nil]; rintro rfl rfl; rfl
   case cons x v ih =>
-    simp [graph_succ]
+    simp [graph_cons]
     rintro l₁ rfl h₁ l₂ rfl h₂
     rcases ih h₁ h₂; rfl
 
-lemma graph_existsUnique (v : V) : ∃! l, Graph ⟪v, l⟫ := by
-  rcases graph_exists v with ⟨l, hl⟩
-  exact ExistsUnique.intro l hl (fun y hy ↦ graph_unique hy hl)
+variable (param)
+
+lemma graph_existsUnique (xs : V) : ∃! y, c.Graph param ⟪xs, y⟫ := by
+  rcases c.graph_exists param xs with ⟨y, hy⟩
+  exact ExistsUnique.intro y hy (fun y' hy' ↦ c.graph_unique hy' hy)
+
+def result (xs : V) : V := Classical.choose! (c.graph_existsUnique param xs)
+
+lemma result_graph (xs : V) : c.Graph param ⟪xs, c.result param xs⟫ :=
+  Classical.choose!_spec (c.graph_existsUnique param xs)
+
+lemma result_eq_of_graph {xs y : V} (h : c.Graph param ⟪xs, y⟫) : c.result param xs = y :=
+  c.graph_unique (c.result_graph param xs) h
+
+@[simp] lemma result_nil : c.result param (0 : V) = c.nil param := c.result_eq_of_graph param (c.graph_nil.mpr rfl)
+
+@[simp] lemma result_cons (x xs : V) :
+    c.result param (x ∷ xs) = c.cons param x xs (c.result param xs) :=
+  c.result_eq_of_graph param (c.graph_cons.mpr ⟨_, rfl, c.result_graph param xs⟩)
+
+section
+
+lemma result_defined : Arith.DefinedFunction (fun v ↦ c.result (v ·.succ) (v 0)) β.resultDef := by
+  intro v; simp [Blueprint.resultDef, c.graph_defined.df.iff]
+  constructor
+  · intro h; rw [h]; exact c.result_graph _ _
+  · intro h; rw [c.result_eq_of_graph _ h]
+
+@[simp] lemma eval_resultDef (v) :
+    Semiformula.Evalbm V v β.resultDef.val ↔ v 0 = c.result (v ·.succ.succ) (v 1) := c.result_defined.df.iff v
+
+instance result_definable : Arith.DefinableFunction ℒₒᵣ 𝚺₁ (fun v ↦ c.result (v ·.succ) (v 0)) :=
+  Defined.to_definable _ c.result_defined
+
+instance result_definable' (Γ m) :
+  Arith.DefinableFunction ℒₒᵣ (Γ, m + 1) (fun v ↦ c.result (v ·.succ) (v 0)) := .of_sigmaOne c.result_definable _ _
+
+end
+
+end Construction
+
+end VecRec
+
+/-!
+
+### Length of List
+
+-/
+
+namespace Len
+
+def blueprint : VecRec.Blueprint 0 where
+  nil := .mkSigma “y | y = 0” (by simp)
+  cons := .mkSigma “y x xs ih | y = ih + 1” (by simp)
+
+def construction : VecRec.Construction V blueprint where
+  nil _ := 0
+  cons _ _ _ ih := ih + 1
+  nil_defined := by intro v; simp [blueprint]
+  cons_defined := by intro v; simp [blueprint]; rfl
 
 end Len
 
@@ -419,26 +543,17 @@ section len
 
 open Len
 
-def len (v : V) : V := Classical.choose! (graph_existsUnique v)
+def len (v : V) : V := construction.result ![] v
 
-lemma len_graph (v : V) : Graph ⟪v, len v⟫ := Classical.choose!_spec (graph_existsUnique v)
+@[simp] lemma len_nil : len (0 : V) = 0 := by simp [len, construction]
 
-lemma len_eq_of_graph {v l : V} (h : Graph ⟪v, l⟫) : len v = l := graph_unique (len_graph v) h
-
-@[simp] lemma len_nil : len (0 : V) = 0 := len_eq_of_graph (graph_zero.mpr rfl)
-
-@[simp] lemma len_cons (x v : V) : len (x ∷ v) = len v + 1 := len_eq_of_graph (graph_succ.mpr ⟨_, rfl, len_graph v⟩)
+@[simp] lemma len_cons (x v : V) : len (x ∷ v) = len v + 1 := by simp [len, construction]
 
 section
 
-def _root_.LO.FirstOrder.Arith.lenDef : 𝚺₁-Semisentence 2 :=
-  .mkSigma “l v | ∃ pr, !pairDef pr v l ∧ !graphDef pr” (by simp)
+def _root_.LO.FirstOrder.Arith.lenDef : 𝚺₁-Semisentence 2 := blueprint.resultDef
 
-lemma len_defined : 𝚺₁-Function₁ (len : V → V) via lenDef := by
-  intro v; simp [lenDef, graph_defined.df.iff]
-  constructor
-  · intro h; rw [h]; exact len_graph _
-  · intro h; rw [len_eq_of_graph h]
+lemma len_defined : 𝚺₁-Function₁ (len : V → V) via lenDef := construction.result_defined
 
 @[simp] lemma eval_lenDef (v) :
     Semiformula.Evalbm V v lenDef.val ↔ v 0 = len (v 1) := len_defined.df.iff v
@@ -460,6 +575,8 @@ lemma nth_lt_len {v i : V} (hl : len v ≤ i) : v.[i] = 0 := by
     rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
     · simp at hl
     simpa using ih (by simpa using hl)
+
+end len
 
 lemma nth_ext {v₁ v₂ : V} (hl : len v₁ = len v₂) (H : ∀ i < len v₁, v₁.[i] = v₂.[i]) : v₁ = v₂ := by
   induction v₁ using cons_induction_pi₁ generalizing v₂
@@ -556,8 +673,5 @@ lemma len_repeatVec_of_nth_le {v m : V} (H : ∀ i < len v, v.[i] ≤ m) : v ≤
   le_of_nth_le_nth (by simp) (fun i hi ↦ by simp [nth_repeatVec m (len v) hi, H i hi])
 
 end repaetVec
-
-
-end len
 
 end LO.Arith
