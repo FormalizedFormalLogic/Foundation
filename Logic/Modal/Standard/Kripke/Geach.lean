@@ -303,7 +303,7 @@ instance : Complete (𝐊𝐓 : DeductionParameter α) ReflexiveFrameClass# := i
 
 instance KTB_complete : Complete (𝐊𝐓𝐁 : DeductionParameter α) ReflexiveSymmetricFrameClass# := instGeachLogicCompleteAux
 
-instance : Complete (𝐒𝟒 : DeductionParameter α) PreorderFrameClass# := instGeachLogicCompleteAux
+instance S4_complete : Complete (𝐒𝟒 : DeductionParameter α) PreorderFrameClass# := instGeachLogicCompleteAux
 
 instance : Complete (𝐒𝟓 : DeductionParameter α) ReflexiveEuclideanFrameClass# := instGeachLogicCompleteAux
 

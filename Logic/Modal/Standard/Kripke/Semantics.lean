@@ -4,6 +4,28 @@ import Logic.Modal.Standard.Deduction
 
 universe u v
 
+-- TODO: move to mathlib or vorspiel
+section
+
+def _root_.Nat.inductionOne {p : ℕ → Sort*} (zero : p 0) (one : p 1) (succ_one : ∀ k > 0, p k → p (k + 1)) : ∀n, p n := by
+  intro n;
+  induction n with
+  | zero => exact zero;
+  | succ n ih =>
+    by_cases h : n = 0
+    . subst_vars; exact one;
+    . exact succ_one n (by omega) ih;
+
+def _root_.PNat.inductionOn {p : ℕ+ → Sort*} (n : ℕ+) (one : p 1) (succ : ∀ k, p k → p (k + 1)) : p n := by
+  obtain ⟨n, lt⟩ := n;
+  induction n using Nat.inductionOne with
+  | zero => simp at lt;
+  | one => exact one;
+  | succ_one n hn ih => exact succ ⟨n, hn⟩ $ ih (by simpa);
+
+end
+
+
 namespace LO.Modal.Standard
 
 def RelItr (R : α → α → Prop) : ℕ → α → α → Prop
@@ -23,6 +45,18 @@ lemma eq : RelItr (α := α) (· = ·) n = (· = ·) := by
   induction n with
   | zero => rfl;
   | succ n ih => aesop
+
+lemma forward {R} {n : ℕ} (hxy : RelItr R (n + 1) x y) : ∃ z, RelItr R n x z ∧ R z y := by
+  obtain ⟨z, Rzx, Rzy⟩ := hxy;
+  induction n generalizing x z with
+  | zero => simp_all;
+  | succ n ih =>
+    obtain ⟨w, Rwz, Rwy⟩ := Rzy;
+    obtain ⟨v, Rzv, Rvy⟩ := @ih z w Rwz Rwy;
+    use v;
+    constructor;
+    . use z;
+    . assumption;
 
 end RelItr
 
@@ -48,6 +82,44 @@ scoped notation x:45 " ≺^[" n "] " y:46 => Frame.RelItr' n x y
 
 instance : CoeFun (Frame) (λ F => F.World → F.World → Prop) := ⟨Frame.Rel⟩
 
+namespace Frame.RelItr'
+
+lemma congr {F : Frame} {x y : F.World} {n m : ℕ} (h : x ≺^[n] y) (he : n = m := by omega) : x ≺^[m] y := by
+  subst_vars; exact h;
+
+
+lemma forward {F : Frame} {x y : F.World} (h : x ≺^[n + 1] y) : ∃ z, x ≺^[n] z ∧ z ≺ y := by
+  obtain ⟨z, hzx, hzy⟩ := RelItr.forward h;
+  use z;
+
+lemma comp {F : Frame} {x y : F.World} {n m : ℕ} : (∃ z, x ≺^[n] z ∧ z ≺^[m] y) ↔ x ≺^[n + m] y := by
+  constructor;
+  . rintro ⟨z, hzx, hzy⟩;
+    induction n generalizing x with
+    | zero => simp_all;
+    | succ n ih =>
+      suffices x ≺^[(n + m + 1)] y by apply congr this;
+      obtain ⟨w, hxw, hwz⟩ := hzx;
+      use w;
+      constructor;
+      . exact hxw;
+      . exact @ih w hwz;
+  . rintro h;
+    induction n generalizing x with
+    | zero => simp_all;
+    | succ n ih =>
+      have rxy : x ≺^[n + m + 1] y := congr h;
+      obtain ⟨w, rxw, rwy⟩ := rxy;
+      obtain ⟨u, rwu, ruy⟩ := @ih w rwy;
+      use u;
+      constructor;
+      . use w;
+      . assumption;
+
+lemma comp' {F : Frame} {x y : F.World} {n m : ℕ+} : (∃ z, x ≺^[n] z ∧ z ≺^[m] y) ↔ x ≺^[n + m] y := comp
+
+end Frame.RelItr'
+
 
 set_option linter.unusedVariables false in
 /-- dependent-version frame -/
@@ -61,6 +133,68 @@ structure FiniteFrame extends Frame where
   [World_finite : Finite World]
 
 instance : Coe (FiniteFrame) (Frame) := ⟨λ F ↦ F.toFrame⟩
+
+
+def TransitiveReflexiveClosureFrame (F : Frame) : Frame where
+  World := F.World
+  World_inhabited := F.World_inhabited
+  Rel x y := ∃ n : ℕ, x ≺^[n] y
+
+namespace TransitiveReflexiveClosureFrame
+
+@[simp]
+lemma rel_one {F : Frame} {x y : F.World} (hxy : F.Rel x y) : (TransitiveReflexiveClosureFrame F).Rel x y := by
+  use 1; simpa;
+
+lemma rel_reflexive : Reflexive (TransitiveReflexiveClosureFrame F).Rel := by
+  intro x;
+  use 0; simp;
+
+lemma rel_transitive : Transitive (TransitiveReflexiveClosureFrame F).Rel := by
+  intro x y z hxy hyz;
+  obtain ⟨n, hxy⟩ := hxy;
+  obtain ⟨m, hyz⟩ := hyz;
+  use n + m;
+  apply Frame.RelItr'.comp.mp;
+  use y;
+
+end TransitiveReflexiveClosureFrame
+
+
+def TransitiveClosureFrame (F : Frame) : Frame where
+  World := F.World
+  World_inhabited := F.World_inhabited
+  Rel x y := ∃ n : ℕ+, x ≺^[n] y
+
+namespace TransitiveClosureFrame
+
+@[simp]
+lemma rel_one {F : Frame} {x y : F.World} (hxy : F.Rel x y) : (TransitiveClosureFrame F).Rel x y := by
+  use 1; simpa;
+
+lemma rel_transitive : Transitive (TransitiveClosureFrame F).Rel := by
+  intro x y z hxy hyz;
+  obtain ⟨n, hxy⟩ := hxy;
+  obtain ⟨m, hyz⟩ := hyz;
+  use n + m;
+  suffices F.RelItr' (↑n + ↑m) x z by convert this
+  apply Frame.RelItr'.comp'.mp;
+  use y;
+
+lemma rel_symmetric_of_symmetric {F : Frame} (hSymm : Symmetric F.Rel) : Symmetric (TransitiveClosureFrame F).Rel := by
+  intro x y hxy;
+  obtain ⟨n, hxy⟩ := hxy;
+  use n;
+  induction n using PNat.inductionOn generalizing x y with
+  | one => simp_all; exact hSymm hxy;
+  | succ n ih =>
+    obtain ⟨z, hxz, hzy⟩ := RelItr.forward $ hxy;
+    use z;
+    constructor;
+    . exact hSymm hzy;
+    . exact ih hxz;
+
+end TransitiveClosureFrame
 
 
 abbrev FrameClass := Set (Frame)

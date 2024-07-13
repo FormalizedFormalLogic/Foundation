@@ -237,7 +237,8 @@ class FiniteFrameProperty (Λ : DeductionParameter α) (𝔽 : FrameClass.{u}) w
   [complete : Complete Λ 𝔽ꟳ#]
   [sound : Sound Λ 𝔽ꟳ#]
 
-instance K_ffp : FiniteFrameProperty (α := α) 𝐊 AllFrameClass where
+instance : FiniteFrameProperty (α := α) 𝐊 AllFrameClass where
+
 
 instance KTB_finite_complete : Complete (𝐊𝐓𝐁 : DeductionParameter α) ReflexiveSymmetricFrameClassꟳ# := ⟨by
   intro p hp;
@@ -258,131 +259,7 @@ instance KTB_finite_complete : Complete (𝐊𝐓𝐁 : DeductionParameter α) R
   ) FM.Valuation
 ⟩
 
-instance KTB_ffp : FiniteFrameProperty (α := α) 𝐊𝐓𝐁 ReflexiveSymmetricFrameClass where
-
-
-def _root_.Nat.inductionOne {p : ℕ → Sort*} (zero : p 0) (one : p 1) (succ_one : ∀ k > 0, p k → p (k + 1)) : ∀n, p n := by
-  intro n;
-  induction n with
-  | zero => exact zero;
-  | succ n ih =>
-    by_cases h : n = 0
-    . subst_vars; exact one;
-    . exact succ_one n (by omega) ih;
-
-def _root_.PNat.inductionOn {p : ℕ+ → Sort*} (n : ℕ+) (one : p 1) (succ : ∀ k, p k → p (k + 1)) : p n := by
-  obtain ⟨n, lt⟩ := n;
-  induction n using Nat.inductionOne with
-  | zero => simp at lt;
-  | one => exact one;
-  | succ_one n hn ih => exact succ ⟨n, hn⟩ $ ih (by simpa);
-
-
-lemma Frame.RelItr'.lem1 {F : Frame} {x y : F.World} {n m : ℕ} (h : x ≺^[n] y) (he : n = m := by omega) : x ≺^[m] y := by
-  subst_vars; exact h;
-
-lemma relitr₂ {R} {n : ℕ} (hxy : RelItr R (n + 1) x y) : ∃ z, RelItr R n x z ∧ R z y := by
-  obtain ⟨z, Rzx, Rzy⟩ := hxy;
-  induction n generalizing x z with
-  | zero => simp_all;
-  | succ n ih =>
-    obtain ⟨w, Rwz, Rwy⟩ := Rzy;
-    obtain ⟨v, Rzv, Rvy⟩ := @ih z w Rwz Rwy;
-    use v;
-    constructor;
-    . use z;
-    . assumption;
-
-lemma Frame.RelItr'.lem2 {F : Frame} {x y : F.World} (h : x ≺^[n + 1] y) : ∃ z, x ≺^[n] z ∧ z ≺ y := by
-  obtain ⟨z, hzx, hzy⟩ := relitr₂ h;
-  use z;
-
-lemma Frame.RelItr'.comp {F : Frame} {x y : F.World} {n m : ℕ} : (∃ z, x ≺^[n] z ∧ z ≺^[m] y) ↔ x ≺^[n + m] y := by
-  constructor;
-  . rintro ⟨z, hzx, hzy⟩;
-    induction n generalizing x with
-    | zero => simp_all;
-    | succ n ih =>
-      suffices x ≺^[(n + m + 1)] y by apply Frame.RelItr'.lem1 this;
-      obtain ⟨w, hxw, hwz⟩ := hzx;
-      use w;
-      constructor;
-      . exact hxw;
-      . exact @ih w hwz;
-  . rintro h;
-    induction n generalizing x with
-    | zero => simp_all;
-    | succ n ih =>
-      have rxy : x ≺^[n + m + 1] y := Frame.RelItr'.lem1 h;
-      obtain ⟨w, rxw, rwy⟩ := rxy;
-      obtain ⟨u, rwu, ruy⟩ := @ih w rwy;
-      use u;
-      constructor;
-      . use w;
-      . assumption;
-
-lemma Frame.RelItr.comp' {F : Frame} {x y : F.World} {n m : ℕ+} : (∃ z, x ≺^[n] z ∧ z ≺^[m] y) ↔ x ≺^[n + m] y := Frame.RelItr'.comp
-
-def TransitiveReflexiveClosureFrame (F : Frame) : Frame where
-  World := F.World
-  World_inhabited := F.World_inhabited
-  Rel x y := ∃ n : ℕ, x ≺^[n] y
-
-namespace TransitiveReflexiveClosureFrame
-
-@[simp]
-lemma rel_one {F : Frame} {x y : F.World} (hxy : F.Rel x y) : (TransitiveReflexiveClosureFrame F).Rel x y := by
-  use 1; simpa;
-
-lemma rel_reflexive : Reflexive (TransitiveReflexiveClosureFrame F).Rel := by
-  intro x;
-  use 0; simp;
-
-lemma rel_transitive : Transitive (TransitiveReflexiveClosureFrame F).Rel := by
-  intro x y z hxy hyz;
-  obtain ⟨n, hxy⟩ := hxy;
-  obtain ⟨m, hyz⟩ := hyz;
-  use n + m;
-  apply Frame.RelItr'.comp.mp;
-  use y;
-
-end TransitiveReflexiveClosureFrame
-
-
-def TransitiveClosureFrame (F : Frame) : Frame where
-  World := F.World
-  World_inhabited := F.World_inhabited
-  Rel x y := ∃ n : ℕ+, x ≺^[n] y
-
-namespace TransitiveClosureFrame
-
-@[simp]
-lemma rel_one {F : Frame} {x y : F.World} (hxy : F.Rel x y) : (TransitiveClosureFrame F).Rel x y := by
-  use 1; simpa;
-
-lemma rel_transitive : Transitive (TransitiveClosureFrame F).Rel := by
-  intro x y z hxy hyz;
-  obtain ⟨n, hxy⟩ := hxy;
-  obtain ⟨m, hyz⟩ := hyz;
-  use n + m;
-  suffices F.RelItr' (↑n + ↑m) x z by convert this
-  apply Frame.RelItr.comp'.mp;
-  use y;
-
-lemma rel_symmetric_of_symmetric {F : Frame} (hSymm : Symmetric F.Rel) : Symmetric (TransitiveClosureFrame F).Rel := by
-  intro x y hxy;
-  obtain ⟨n, hxy⟩ := hxy;
-  use n;
-  induction n using PNat.inductionOn generalizing x y with
-  | one => simp_all; exact hSymm hxy;
-  | succ n ih =>
-    obtain ⟨z, hxz, hzy⟩ := relitr₂ $ hxy;
-    use z;
-    constructor;
-    . exact hSymm hzy;
-    . exact ih hxz;
-
-end TransitiveClosureFrame
+instance : FiniteFrameProperty (α := α) 𝐊𝐓𝐁 ReflexiveSymmetricFrameClass where
 
 section
 
@@ -441,6 +318,28 @@ end FinestFilterationTransitiveClosureModel
 
 end
 
+instance S4_finite_complete : Complete (𝐒𝟒 : DeductionParameter α)  PreorderFrameClassꟳ# := ⟨by
+  intro p hp;
+  apply S4_complete.complete;
+  intro F ⟨F_refl, F_trans⟩ V x;
+  let M : Kripke.Model α := ⟨F, V⟩;
+  let FM := FinestFilterationTransitiveClosureModel M (𝒮 p);
+  apply filteration FM (FinestFilterationTransitiveClosureModel.filterOf (by simpa using F_trans)) |>.mpr;
+  apply hp (by
+    suffices Finite (FilterEqvQuotient M (𝒮 p)) by
+      simp [FrameClass.restrictFinite];
+      use { toFrame := FM.Frame, World_finite := by aesop };
+      refine ⟨⟨?refl, ?trans⟩, (by simp)⟩;
+      . exact FinestFilterationTransitiveClosureModel.reflexive (by simpa using F_trans) F_refl;
+      . exact FinestFilterationTransitiveClosureModel.transitive;
+    apply FilterEqvQuotient.finite;
+    simp;
+  ) FM.Valuation;
+⟩
+
+instance S4_ffp : FiniteFrameProperty (α := α) 𝐒𝟒 PreorderFrameClass where
+
+
 instance KT4B_finite_complete : Complete (𝐊𝐓𝟒𝐁 : DeductionParameter α) EquivalenceFrameClassꟳ# := ⟨by
   intro p hp;
   apply KT4B_complete.complete;
@@ -461,9 +360,12 @@ instance KT4B_finite_complete : Complete (𝐊𝐓𝟒𝐁 : DeductionParameter 
   ) FM.Valuation;
 ⟩
 
-instance KT4B_ffp : FiniteFrameProperty (α := α) 𝐊𝐓𝟒𝐁 EquivalenceFrameClass where
-
+instance KT4B : FiniteFrameProperty (α := α) 𝐊𝐓𝟒𝐁 EquivalenceFrameClass where
 -- MEMO: `𝐒𝟓 =ₛ 𝐊𝐓𝟒𝐁`だから決定可能性という面では`𝐒𝟓`も決定可能．
+
+#instances FiniteFrameProperty
+
+#print axioms KT4B
 
 end Kripke
 
