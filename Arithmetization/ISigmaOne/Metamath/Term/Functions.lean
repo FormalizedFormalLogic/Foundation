@@ -99,6 +99,13 @@ lemma nth_termSubstVec {k n ts i : V} (hts : L.SemitermVec k n ts) (hi : i < k) 
     (L.termSubstVec k n m w ts).[i] = L.termSubst n m w ts.[i] :=
   (construction L).nth_resultVec _ hts hi
 
+@[simp] lemma termSubstVec_nil (n : V) : L.termSubstVec 0 n m w 0 = 0 :=
+  (construction L).resultVec_nil _ _
+
+lemma termSubstVec_cons {k n t ts : V} (ht : L.Semiterm n t) (hts : L.SemitermVec k n ts) :
+    L.termSubstVec (k + 1) n m w (t ∷ ts) = L.termSubst n m w t ∷ L.termSubstVec k n m w ts :=
+  (construction L).resultVec_cons ![m, w] hts ht
+
 @[simp] lemma termSubst_rng_semiterm {t} (hw : L.SemitermVec n m w) (ht : L.Semiterm n t) : L.Semiterm m (L.termSubst n m w t) := by
   apply Language.Semiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
   · definability
@@ -199,6 +206,13 @@ lemma nth_termShiftVec {k n ts i : V} (hts : L.SemitermVec k n ts) (hi : i < k) 
     (L.termShiftVec k n ts).[i] = L.termShift n ts.[i] :=
   (construction L).nth_resultVec _ hts hi
 
+@[simp] lemma termShiftVec_nil (n : V) : L.termShiftVec 0 n 0 = 0 :=
+  (construction L).resultVec_nil ![] _
+
+lemma termShiftVec_cons {k n t ts : V} (ht : L.Semiterm n t) (hts : L.SemitermVec k n ts) :
+    L.termShiftVec (k + 1) n (t ∷ ts) = L.termShift n t ∷ L.termShiftVec k n ts :=
+  (construction L).resultVec_cons ![] hts ht
+
 @[simp] lemma Language.Semiterm.termShift {t} (ht : L.Semiterm n t) : L.Semiterm n (L.termShift n t) := by
   apply Language.Semiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
   · definability
@@ -297,6 +311,13 @@ end
 @[simp] lemma nth_termBShiftVec {k n ts i : V} (hts : L.SemitermVec k n ts) (hi : i < k) :
     (L.termBShiftVec k n ts).[i] = L.termBShift n ts.[i] :=
   (construction L).nth_resultVec _ hts hi
+
+@[simp] lemma termBShiftVec_nil (n : V) : L.termBShiftVec 0 n 0 = 0 :=
+  (construction L).resultVec_nil ![] _
+
+lemma termBShiftVec_cons {k n t ts : V} (ht : L.Semiterm n t) (hts : L.SemitermVec k n ts) :
+    L.termBShiftVec (k + 1) n (t ∷ ts) = L.termBShift n t ∷ L.termBShiftVec k n ts :=
+  (construction L).resultVec_cons ![] hts ht
 
 @[simp] lemma Language.Semiterm.termBShift {t} (ht : L.Semiterm n t) : L.Semiterm (n + 1) (L.termBShift n t) := by
   apply Language.Semiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht

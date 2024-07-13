@@ -368,7 +368,10 @@ instance uformulaDef_definable : 𝚫₁-Predicate L.UFormula := Defined.to_defi
 
 def Language.Semiformula (n p : V) : Prop := L.UFormula p ∧ n = fstIdx p
 
-def Language.Formula (p : V) : Prop := L.Semiformula 0 p
+abbrev Language.Formula (p : V) : Prop := L.Semiformula 0 p
+
+lemma Language.UFormula.toSemiformula {p} (h : L.UFormula p) : L.Semiformula (fstIdx p) p :=
+  ⟨h, by rfl⟩
 
 def _root_.LO.FirstOrder.Arith.LDef.isSemiformulaDef (pL : LDef) : 𝚫₁-Semisentence 2 := .mkDelta
   (.mkSigma “n p | !pL.uformulaDef.sigma p ∧ !fstIdxDef n p” (by simp))
@@ -393,10 +396,10 @@ lemma Language.UFormula.case_iff {p : V} :
     (∃ n k r v, L.Rel k r ∧ L.SemitermVec k n v ∧ p = ^nrel n k r v) ∨
     (∃ n, p = ^⊤[n]) ∨
     (∃ n, p = ^⊥[n]) ∨
-    (∃ n q r, (𝐔 q ∧ n = fstIdx q) ∧ (𝐔 r ∧ n = fstIdx r) ∧ p = q ^⋏[n] r) ∨
-    (∃ n q r, (𝐔 q ∧ n = fstIdx q) ∧ (𝐔 r ∧ n = fstIdx r) ∧ p = q ^⋎[n] r) ∨
-    (∃ n q, (𝐔 q ∧ n + 1 = fstIdx q) ∧ p = ^∀[n] q) ∨
-    (∃ n q, (𝐔 q ∧ n + 1 = fstIdx q) ∧ p = ^∃[n] q) :=
+    (∃ n q r, L.Semiformula n q ∧ L.Semiformula n r ∧ p = q ^⋏[n] r) ∨
+    (∃ n q r, L.Semiformula n q ∧ L.Semiformula n r ∧ p = q ^⋎[n] r) ∨
+    (∃ n q, L.Semiformula (n + 1) q ∧ p = ^∀[n] q) ∨
+    (∃ n q, L.Semiformula (n + 1) q ∧ p = ^∃[n] q) :=
   (construction L).case
 
 alias ⟨Language.UFormula.case, Language.UFormula.mk⟩ := Language.UFormula.case_iff
@@ -468,6 +471,15 @@ alias ⟨Language.UFormula.case, Language.UFormula.mk⟩ := Language.UFormula.ca
       · rcases h with ⟨rfl, rfl, rfl, rfl⟩; exact hp,
    by rintro hp
       exact Language.UFormula.mk (Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr ⟨n, p, hp, rfl⟩)⟩
+
+lemma Language.UFormula.pos {p : V} (h : L.UFormula p) : 0 < p := by
+  rcases h.case with (⟨_, _, _, _, _, _, rfl⟩ | ⟨_, _, _, _, _, _, rfl⟩ | ⟨_, rfl⟩ | ⟨_, rfl⟩ |
+    ⟨_, _, _, _, _, rfl⟩ | ⟨_, _, _, _, _, rfl⟩ | ⟨_, _, _, rfl⟩ | ⟨_, _, _, rfl⟩) <;>
+    simp [qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqEx]
+
+@[simp] lemma Language.UFormula.not_zero : ¬L.UFormula (0 : V) := by intro h; simpa using h.pos
+
+lemma Language.Semiformula.pos {n p : V} (h : L.Semiformula n p) : 0 < p := h.1.pos
 
 @[simp] lemma Language.Semiformula.rel {n k r v : V} :
     L.Semiformula n (^rel n k r v) ↔ L.Rel k r ∧ L.SemitermVec k n v := by simp [Language.Semiformula]

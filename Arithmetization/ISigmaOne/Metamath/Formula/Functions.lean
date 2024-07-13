@@ -105,7 +105,15 @@ end
 @[simp] lemma neg_ex {n p} (hp : L.Semiformula (n + 1) p) :
     L.neg (^∃[n] p) = ^∀[n] (L.neg p) := by simp [Language.neg, hp, construction]
 
-@[simp] lemma Language.Semiformula.neg {p : V} : L.Semiformula n p → L.Semiformula n (L.neg p) := by
+lemma neg_not_uformula {x} (h : ¬L.UFormula x) :
+    L.neg x = 0 := (construction L).result_prop_not _ h
+
+lemma fstIdx_neg {p} (h : L.UFormula p) : fstIdx (L.neg p) = fstIdx p := by
+  rcases h.case with (⟨_, _, _, _, _, _, rfl⟩ | ⟨_, _, _, _, _, _, rfl⟩ | ⟨_, rfl⟩ | ⟨_, rfl⟩ |
+    ⟨_, _, _, _, _, rfl⟩ | ⟨_, _, _, _, _, rfl⟩ | ⟨_, _, _, rfl⟩ | ⟨_, _, _, rfl⟩) <;>
+    simp [*]
+
+lemma Language.Semiformula.neg {p : V} : L.Semiformula n p → L.Semiformula n (L.neg p) := by
   apply Language.Semiformula.induction_sigma₁
   · definability
   · intro n k r v hr hv; simp [hr, hv]
@@ -116,6 +124,15 @@ end
   · intro n p q hp hq ihp ihq; simp [hp, hq, ihp, ihq]
   · intro n p hp ihp; simp [hp, ihp]
   · intro n p hp ihp; simp [hp, ihp]
+
+@[simp] lemma Language.Semiformula.neg_iff {p : V} : L.Semiformula n (L.neg p) ↔ L.Semiformula n p :=
+  ⟨fun h ↦ by
+    rcases h with ⟨h, rfl⟩
+    have : L.UFormula p := by
+      by_contra hp
+      simp [neg_not_uformula hp] at h
+    exact ⟨this, by simp [fstIdx_neg this]⟩,
+    Language.Semiformula.neg⟩
 
 @[simp] lemma neg_neg {p : V} : L.Semiformula n p → L.neg (L.neg p) = p := by
   apply Language.Semiformula.induction_sigma₁
@@ -225,7 +242,10 @@ end
 @[simp] lemma shift_ex {n p} (hp : L.Semiformula (n + 1) p) :
     L.shift (^∃[n] p) = ^∃[n] (L.shift p) := by simp [Language.shift, hp, construction]
 
-@[simp] lemma Language.Semiformula.shift {p : V} : L.Semiformula n p → L.Semiformula n (L.shift p) := by
+lemma shift_not_uformula {x} (h : ¬L.UFormula x) :
+    L.shift x = 0 := (construction L).result_prop_not _ h
+
+lemma Language.Semiformula.shift {p : V} : L.Semiformula n p → L.Semiformula n (L.shift p) := by
   apply Language.Semiformula.induction_sigma₁
   · definability
   · intro n k r v hr hv; simp [hr, hv]
@@ -236,6 +256,20 @@ end
   · intro n p q hp hq ihp ihq; simp [hp, hq, ihp, ihq]
   · intro n p hp ihp; simp [hp, ihp]
   · intro n p hp ihp; simp [hp, ihp]
+
+lemma fstIdx_shift {p} (h : L.UFormula p) : fstIdx (L.shift p) = fstIdx p := by
+  rcases h.case with (⟨_, _, _, _, _, _, rfl⟩ | ⟨_, _, _, _, _, _, rfl⟩ | ⟨_, rfl⟩ | ⟨_, rfl⟩ |
+    ⟨_, _, _, _, _, rfl⟩ | ⟨_, _, _, _, _, rfl⟩ | ⟨_, _, _, rfl⟩ | ⟨_, _, _, rfl⟩) <;>
+    simp [*]
+
+@[simp] lemma Language.Semiformula.shift_iff {p : V} : L.Semiformula n (L.shift p) ↔ L.Semiformula n p :=
+  ⟨fun h ↦ by
+    rcases h with ⟨h, rfl⟩
+    have : L.UFormula p := by
+      by_contra hp
+      simp [shift_not_uformula hp] at h
+    exact ⟨this, by simp [fstIdx_shift this]⟩,
+    Language.Semiformula.shift⟩
 
 end shift
 
@@ -426,6 +460,9 @@ lemma semiformula_subst_induction {P : V → V → V → V → V → Prop} (hP :
   case hex =>
     intro n m w p _ ih hw
     simpa using ih hw.qVec
+
+lemma substs_not_uformula {m w x} (h : ¬L.UFormula x) :
+    L.substs m w x = 0 := (construction L).result_prop_not _ h
 
 end substs
 
