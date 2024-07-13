@@ -14,7 +14,7 @@ variable {α : Type*} {Ax₁ Ax₂ : AxiomSet α} (𝔽₁ 𝔽₂ : FrameClass)
   [complete₁ : Complete 𝝂Ax₁ 𝔽₁#] [complete₂ : Complete 𝝂Ax₂ 𝔽₂#]
 
 lemma reducible_of_subset_FrameClass (h𝔽 : 𝔽₂ ⊆ 𝔽₁) : 𝝂Ax₁ ≤ₛ 𝝂Ax₂ := by
-  apply System.reducible_iff.mpr;
+  apply System.weakerThan_iff.mpr;
   intro p hp;
   apply complete₂.complete;
   intro F hF;
@@ -25,7 +25,7 @@ lemma strictreducible_of_ssubset_FrameClass (hne : Ax₂.Nonempty) (h𝔽 : 𝔽
   rw [Set.ssubset_def] at h𝔽;
   constructor;
   . apply reducible_of_subset_FrameClass sound₁ complete₂; exact h𝔽.1;
-  . apply System.not_reducible_iff.mpr;
+  . apply System.not_weakerThan_iff.mpr;
     obtain ⟨p, hp⟩ := hne;
     use p;
     constructor;

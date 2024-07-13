@@ -72,13 +72,13 @@ lemma provableSet_iff {𝓢 : S} {s : Set F} :
 noncomputable def ProvableSet.get {𝓢 : S} {s : Set F} (h : 𝓢 ⊢!* s) : 𝓢 ⊢* s :=
   Classical.choice (α := 𝓢 ⊢* s) (provableSet_iff.mp h : Nonempty (𝓢 ⊢* s))
 
-def Reducible (𝓢 : S) (𝓣 : T) : Prop := theory 𝓢 ⊆ theory 𝓣
+def WeakerThan (𝓢 : S) (𝓣 : T) : Prop := theory 𝓢 ⊆ theory 𝓣
 
-infix:40 " ≤ₛ " => Reducible
+infix:40 " ≤ₛ " => WeakerThan
 
-def StrictReducible (𝓢 : S) (𝓣 : T) : Prop := 𝓢 ≤ₛ 𝓣 ∧ ¬𝓣 ≤ₛ 𝓢
+def StrictlyWeakerThan (𝓢 : S) (𝓣 : T) : Prop := 𝓢 ≤ₛ 𝓣 ∧ ¬𝓣 ≤ₛ 𝓢
 
-infix:40 " <ₛ " => StrictReducible
+infix:40 " <ₛ " => StrictlyWeakerThan
 
 def Equiv (𝓢 : S) (𝓣 : T) : Prop := theory 𝓢 = theory 𝓣
 
@@ -88,20 +88,20 @@ section
 
 variable {𝓢 : S} {𝓣 : T} {𝓤 : U}
 
-@[simp, refl] protected lemma Reducible.refl (𝓢 : S) : 𝓢 ≤ₛ 𝓢 := Set.Subset.refl _
+@[simp, refl] protected lemma WeakerThan.refl (𝓢 : S) : 𝓢 ≤ₛ 𝓢 := Set.Subset.refl _
 
-@[trans] lemma Reducible.trans : 𝓢 ≤ₛ 𝓣 → 𝓣 ≤ₛ 𝓤 → 𝓢 ≤ₛ 𝓤 := Set.Subset.trans
+@[trans] lemma WeakerThan.trans : 𝓢 ≤ₛ 𝓣 → 𝓣 ≤ₛ 𝓤 → 𝓢 ≤ₛ 𝓤 := Set.Subset.trans
 
-lemma reducible_iff : 𝓢 ≤ₛ 𝓣 ↔ (∀ {f}, 𝓢 ⊢! f → 𝓣 ⊢! f) :=
+lemma weakerThan_iff : 𝓢 ≤ₛ 𝓣 ↔ (∀ {f}, 𝓢 ⊢! f → 𝓣 ⊢! f) :=
   ⟨fun h _ hf ↦ h hf, fun h _ hf ↦ h hf⟩
 
-lemma not_reducible_iff : ¬𝓢 ≤ₛ 𝓣 ↔ (∃ f, 𝓢 ⊢! f ∧ 𝓣 ⊬! f) := by simp [reducible_iff, Unprovable];
+lemma not_weakerThan_iff : ¬𝓢 ≤ₛ 𝓣 ↔ (∃ f, 𝓢 ⊢! f ∧ 𝓣 ⊬! f) := by simp [weakerThan_iff, Unprovable];
 
-lemma strictReducible_iff : 𝓢 <ₛ 𝓣 ↔ (∀ {f}, 𝓢 ⊢! f → 𝓣 ⊢! f) ∧ (∃ f, 𝓢 ⊬! f ∧ 𝓣 ⊢! f) := by
-  simp [StrictReducible, reducible_iff]; intro _
+lemma strictlyWeakerThan_iff : 𝓢 <ₛ 𝓣 ↔ (∀ {f}, 𝓢 ⊢! f → 𝓣 ⊢! f) ∧ (∃ f, 𝓢 ⊬! f ∧ 𝓣 ⊢! f) := by
+  simp [StrictlyWeakerThan, weakerThan_iff]; intro _
   exact exists_congr (fun _ ↦ by simp [and_comm])
 
-lemma weakening (h : 𝓢 ≤ₛ 𝓣) {f} : 𝓢 ⊢! f → 𝓣 ⊢! f := reducible_iff.mp h
+lemma weakening (h : 𝓢 ≤ₛ 𝓣) {f} : 𝓢 ⊢! f → 𝓣 ⊢! f := weakerThan_iff.mp h
 
 lemma Equiv.iff : 𝓢 =ₛ 𝓣 ↔ (∀ f, 𝓢 ⊢! f ↔ 𝓣 ⊢! f) := by simp [Equiv, Set.ext_iff, theory]
 
@@ -115,7 +115,7 @@ lemma Equiv.antisymm_iff : 𝓢 =ₛ 𝓣 ↔ 𝓢 ≤ₛ 𝓣 ∧ 𝓣 ≤ₛ �
 
 alias ⟨_, Equiv.antisymm⟩ := Equiv.antisymm_iff
 
-lemma Equiv.le : 𝓢 =ₛ 𝓣 → 𝓢 ≤ₛ 𝓣 := by simp [Equiv, Reducible]; intro e; rw [e]
+lemma Equiv.le : 𝓢 =ₛ 𝓣 → 𝓢 ≤ₛ 𝓣 := by simp [Equiv, WeakerThan]; intro e; rw [e]
 
 end
 
@@ -136,7 +136,7 @@ namespace Logic
 @[simp] lemma of_eq_of {𝓢 𝓣 : S} : (⟦𝓢⟧ : Logic S) = ⟦𝓣⟧ ↔ 𝓢 ≈ 𝓣 := Quotient.eq
 
 instance : LE (Logic S) :=
-  ⟨Quotient.lift₂ (· ≤ₛ ·) (fun 𝓢₁ 𝓣₁ 𝓢₂ 𝓣₂ h𝓢 h𝓣 ↦ by simp [Reducible, equiv_def.mp h𝓢, equiv_def.mp h𝓣])⟩
+  ⟨Quotient.lift₂ (· ≤ₛ ·) (fun 𝓢₁ 𝓣₁ 𝓢₂ 𝓣₂ h𝓢 h𝓣 ↦ by simp [WeakerThan, equiv_def.mp h𝓢, equiv_def.mp h𝓣])⟩
 
 @[simp] lemma le_iff {𝓢 𝓣 : S} : (⟦𝓢⟧ : Logic S) ≤ ⟦𝓣⟧ ↔ 𝓢 ≤ₛ 𝓣 := iff_of_eq rfl
 
@@ -146,7 +146,7 @@ instance : PartialOrder (Logic S) where
     induction Λ₁ using Quotient.ind
     induction Λ₂ using Quotient.ind
     induction Λ₃ using Quotient.ind
-    simp; exact Reducible.trans
+    simp; exact WeakerThan.trans
   le_antisymm := fun Λ₁ Λ₂ ↦ by
     induction Λ₁ using Quotient.ind
     induction Λ₂ using Quotient.ind

@@ -369,7 +369,7 @@ section Reducible
 lemma normal_reducible {𝓓₁ 𝓓₂ : DeductionParameter α} [𝓓₁.IsNormal] [𝓓₂.IsNormal]
   (hMaxm : ∀ {p : Formula α}, p ∈ Ax(𝓓₁) → 𝓓₂ ⊢! p)
   : 𝓓₁ ≤ₛ 𝓓₂ := by
-  apply System.reducible_iff.mpr;
+  apply System.weakerThan_iff.mpr;
   intro p h;
   induction h using Deduction.inducition_with_necOnly! with
   | hMaxm hp => exact hMaxm hp;
@@ -420,7 +420,7 @@ lemma reducible_K4_GL : (𝐊𝟒 : DeductionParameter α) ≤ₛ 𝐆𝐋 := by
 section GL
 
 lemma reducible_GL_K4Loeb : (𝐆𝐋 : DeductionParameter α) ≤ₛ 𝐊𝟒(𝐋) := by
-  apply System.reducible_iff.mpr;
+  apply System.weakerThan_iff.mpr;
   intro p h;
   induction h using Deduction.inducition_with_necOnly! with
   | hMaxm hp =>
@@ -432,7 +432,7 @@ lemma reducible_GL_K4Loeb : (𝐆𝐋 : DeductionParameter α) ≤ₛ 𝐊𝟒(�
   | _ => trivial;
 
 lemma reducible_K4Loeb_K4Henkin : (𝐊𝟒(𝐋) : DeductionParameter α) ≤ₛ 𝐊𝟒(𝐇) := by
-  apply System.reducible_iff.mpr;
+  apply System.weakerThan_iff.mpr;
   intro p h;
   induction h using Deduction.inducition! with
   | hMaxm hp =>
@@ -447,7 +447,7 @@ lemma reducible_K4Loeb_K4Henkin : (𝐊𝟒(𝐋) : DeductionParameter α) ≤�
   | _ => trivial;
 
 lemma reducible_K4Henkin_K4H : (𝐊𝟒(𝐇) : DeductionParameter α) ≤ₛ 𝐊𝟒𝐇 := by
-  apply System.reducible_iff.mpr;
+  apply System.weakerThan_iff.mpr;
   intro p h;
   induction h using Deduction.inducition! with
   | hMaxm hp =>
@@ -473,7 +473,7 @@ lemma equivalent_GL_K4Loeb : (𝐆𝐋 : DeductionParameter α) =ₛ 𝐊𝟒(�
   apply Equiv.antisymm_iff.mpr;
   constructor;
   . exact reducible_GL_K4Loeb;
-  . exact Reducible.trans (reducible_K4Loeb_K4Henkin) $ Reducible.trans reducible_K4Henkin_K4H reducible_K4Henkin_GL
+  . exact WeakerThan.trans (reducible_K4Loeb_K4Henkin) $ WeakerThan.trans reducible_K4Henkin_K4H reducible_K4Henkin_GL
 
 end GL
 

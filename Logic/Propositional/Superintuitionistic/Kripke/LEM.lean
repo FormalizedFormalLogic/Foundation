@@ -57,7 +57,7 @@ theorem noLEM : ∃ (p : Formula α), 𝐈𝐧𝐭 ⊬! p ⋎ ~p := by
 theorem strictReducible_intuitionistic_classical : (𝐈𝐧𝐭 : DeductionParameter α) <ₛ 𝐂𝐥 := by
   constructor;
   . exact reducible_efq_dne;
-  . apply reducible_iff.not.mpr;
+  . apply weakerThan_iff.not.mpr;
     push_neg;
     obtain ⟨p, hp⟩ := noLEM (α := α);
     existsi (p ⋎ ~p);

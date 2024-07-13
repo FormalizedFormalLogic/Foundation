@@ -92,7 +92,7 @@ lemma arithmetical_soundness_K4Loeb [β.HilbertBernays T₀ T] (h : 𝐊𝟒(�
 
 theorem arithmetical_soundness_GL [β.HilbertBernays T₀ T] (h : 𝐆𝐋 ⊢! p) : ∀ {f : realization L α}, T ⊢! (f[β] p) := by
   apply arithmetical_soundness_K4Loeb (T₀ := T₀);
-  exact (System.reducible_iff.mp reducible_GL_K4Loeb) h;
+  exact (System.weakerThan_iff.mp reducible_GL_K4Loeb) h;
 
 
 lemma arithmetical_soundness_N [β.HilbertBernays₁ T₀ T] (h : 𝐍 ⊢! p) : ∀ {f : realization L α}, T ⊢! (f[β] p) := by

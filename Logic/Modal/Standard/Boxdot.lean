@@ -46,7 +46,7 @@ lemma iff_boxdotTranslation_S4 : 𝐒𝟒 ⊢! p ⟷ pᵇ := by
   | _ => dsimp [BoxdotTranslation]; exact iff_id!;
 
 lemma S4_of_boxdotTranslatedK4 (h : 𝐊𝟒 ⊢! pᵇ) : 𝐒𝟒 ⊢! p := by
-  exact (and₂'! iff_boxdotTranslation_S4) ⨀ (reducible_iff.mp $ reducible_K4_S4) h
+  exact (and₂'! iff_boxdotTranslation_S4) ⨀ (weakerThan_iff.mp $ reducible_K4_S4) h
 
 theorem iff_S4_boxdotTranslatedK4 : 𝐒𝟒 ⊢! p ↔ 𝐊𝟒 ⊢! pᵇ := by
   constructor;

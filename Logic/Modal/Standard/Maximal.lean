@@ -170,7 +170,7 @@ lemma iff_Ver_classical : 𝐕𝐞𝐫 ⊢! p ↔ 𝐂𝐥 ⊢! pⱽᴾ := by
 lemma trivTranslated_of_K4 : 𝐊𝟒 ⊢! p → 𝐂𝐥 ⊢! pᵀᴾ := by
   intro h;
   apply iff_Triv_classical.mp;
-  exact System.reducible_iff.mp reducible_K4_Triv h;
+  exact System.weakerThan_iff.mp reducible_K4_Triv h;
 
 lemma verTranslated_of_GL : 𝐆𝐋 ⊢! p → 𝐂𝐥 ⊢! pⱽᴾ := by
   intro h;
@@ -204,10 +204,10 @@ lemma unprovable_AxiomL_K4 : 𝐊𝟒 ⊬! Axioms.L (atom default : Formula α) 
   trivial;
 
 theorem strictReducible_K4_GL : (𝐊𝟒 : DeductionParameter α) <ₛ 𝐆𝐋 := by
-  dsimp [StrictReducible];
+  dsimp [StrictlyWeakerThan];
   constructor;
   . apply reducible_K4_GL;
-  . simp [System.not_reducible_iff];
+  . simp [System.not_weakerThan_iff];
     existsi (Axioms.L (atom default))
     constructor;
     . exact axiomL!;
@@ -228,7 +228,7 @@ instance instGLConsistencyViaUnprovableAxiomT : System.Consistent (𝐆𝐋 : De
 
 
 theorem notReducible_S4_GL : ¬(𝐒𝟒 : DeductionParameter α) ≤ₛ 𝐆𝐋 := by
-  apply System.not_reducible_iff.mpr;
+  apply System.not_weakerThan_iff.mpr;
   existsi (Axioms.T (atom default));
   constructor;
   . exact axiomT!;
