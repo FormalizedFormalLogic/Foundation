@@ -307,7 +307,7 @@ instance : Complete (𝐒𝟒 : DeductionParameter α) PreorderFrameClass# := in
 
 instance : Complete (𝐒𝟓 : DeductionParameter α) ReflexiveEuclideanFrameClass# := instGeachLogicCompleteAux
 
-instance : Complete (𝐊𝐓𝟒𝐁 : DeductionParameter α) EquivalenceFrameClass# := instGeachLogicCompleteAux
+instance KT4B_complete : Complete (𝐊𝐓𝟒𝐁 : DeductionParameter α) EquivalenceFrameClass# := instGeachLogicCompleteAux
 
 end Completeness
 

@@ -113,6 +113,7 @@ instance FinestFilterationModel.filterOf {M} {T : Theory α} [T.SubformulaClosed
     obtain ⟨x, y, rfl, rfl, hxy⟩ := rQxQy;
     simp_all [Satisfies];
 
+
 abbrev CoarsestFilterationFrame (M : Model α) (T : Theory α) [T_closed : T.SubformulaClosed] : Kripke.Frame where
   World := FilterEqvQuotient M T
   Rel Qx Qy := Quotient.lift₂ (λ x y => ∀ p, □p ∈ T → (x ⊧ □p → y ⊧ p)) (by
@@ -134,19 +135,19 @@ instance CoarsestFilterationModel.filterOf {M} {T : Theory α} [T.SubformulaClos
 
 section
 
-variable {M} {T : Theory α} [T.SubformulaClosed] (FM : Kripke.Model α) [filterOf : FM.FilterOf M T]
+variable {M} {T : Theory α} [T.SubformulaClosed] {FM : Kripke.Model α} (h_filter : FM.FilterOf M T)
 
 lemma reflexive_filteration_model (hRefl : Reflexive M.Frame) : Reflexive FM.Frame := by
   intro Qx;
-  obtain ⟨x, hx⟩ := Quotient.exists_rep (cast (filterOf.def_world) Qx);
-  convert filterOf.def_rel₁ $ hRefl x <;> simp_all;
+  obtain ⟨x, hx⟩ := Quotient.exists_rep (cast (h_filter.def_world) Qx);
+  convert h_filter.def_rel₁ $ hRefl x <;> simp_all;
 
 lemma serial_filteration_model (hSerial : Serial M.Frame) : Serial FM.Frame := by
   intro Qx;
-  obtain ⟨x, hx⟩ := Quotient.exists_rep (cast (filterOf.def_world) Qx);
+  obtain ⟨x, hx⟩ := Quotient.exists_rep (cast (h_filter.def_world) Qx);
   obtain ⟨y, Rxy⟩ := hSerial x;
-  use (cast (filterOf.def_world.symm) ⟦y⟧);
-  convert filterOf.def_rel₁ $ Rxy;
+  use (cast (h_filter.def_world.symm) ⟦y⟧);
+  convert h_filter.def_rel₁ $ Rxy;
   simp_all;
 
 lemma symmetric_finest_filteration_model (hSymm : Symmetric M.Frame) : Symmetric (FinestFilterationModel M T).Frame := by
@@ -243,14 +244,14 @@ instance KTB_finite_complete : Complete (𝐊𝐓𝐁 : DeductionParameter α) R
   apply KTB_complete.complete;
   intro F ⟨F_refl, F_symm⟩ V x;
   let M : Kripke.Model α := ⟨F, V⟩;
-  let FM := FinestFilterationModel ⟨F, V⟩ ↑(𝒮 p);
+  let FM := FinestFilterationModel M (𝒮 p);
   apply filteration FM (FinestFilterationModel.filterOf) |>.mpr;
   apply hp (by
-    suffices Finite (FilterEqvQuotient M p.Subformulas) by
+    suffices Finite (FilterEqvQuotient M (𝒮 p)) by
       simp [FrameClass.restrictFinite];
       use ⟨FM.Frame⟩;
       refine ⟨⟨?refl, ?symm⟩, (by simp)⟩;
-      . exact reflexive_filteration_model (filterOf := FinestFilterationModel.filterOf) F_refl;
+      . exact reflexive_filteration_model (FinestFilterationModel.filterOf) F_refl;
       . exact symmetric_finest_filteration_model F_symm;
     apply FilterEqvQuotient.finite;
     simp;
@@ -258,6 +259,211 @@ instance KTB_finite_complete : Complete (𝐊𝐓𝐁 : DeductionParameter α) R
 ⟩
 
 instance KTB_ffp : FiniteFrameProperty (α := α) 𝐊𝐓𝐁 ReflexiveSymmetricFrameClass where
+
+
+def _root_.Nat.inductionOne {p : ℕ → Sort*} (zero : p 0) (one : p 1) (succ_one : ∀ k > 0, p k → p (k + 1)) : ∀n, p n := by
+  intro n;
+  induction n with
+  | zero => exact zero;
+  | succ n ih =>
+    by_cases h : n = 0
+    . subst_vars; exact one;
+    . exact succ_one n (by omega) ih;
+
+def _root_.PNat.inductionOn {p : ℕ+ → Sort*} (n : ℕ+) (one : p 1) (succ : ∀ k, p k → p (k + 1)) : p n := by
+  obtain ⟨n, lt⟩ := n;
+  induction n using Nat.inductionOne with
+  | zero => simp at lt;
+  | one => exact one;
+  | succ_one n hn ih => exact succ ⟨n, hn⟩ $ ih (by simpa);
+
+
+lemma Frame.RelItr'.lem1 {F : Frame} {x y : F.World} {n m : ℕ} (h : x ≺^[n] y) (he : n = m := by omega) : x ≺^[m] y := by
+  subst_vars; exact h;
+
+lemma relitr₂ {R} {n : ℕ} (hxy : RelItr R (n + 1) x y) : ∃ z, RelItr R n x z ∧ R z y := by
+  obtain ⟨z, Rzx, Rzy⟩ := hxy;
+  induction n generalizing x z with
+  | zero => simp_all;
+  | succ n ih =>
+    obtain ⟨w, Rwz, Rwy⟩ := Rzy;
+    obtain ⟨v, Rzv, Rvy⟩ := @ih z w Rwz Rwy;
+    use v;
+    constructor;
+    . use z;
+    . assumption;
+
+lemma Frame.RelItr'.lem2 {F : Frame} {x y : F.World} (h : x ≺^[n + 1] y) : ∃ z, x ≺^[n] z ∧ z ≺ y := by
+  obtain ⟨z, hzx, hzy⟩ := relitr₂ h;
+  use z;
+
+lemma Frame.RelItr'.comp {F : Frame} {x y : F.World} {n m : ℕ} : (∃ z, x ≺^[n] z ∧ z ≺^[m] y) ↔ x ≺^[n + m] y := by
+  constructor;
+  . rintro ⟨z, hzx, hzy⟩;
+    induction n generalizing x with
+    | zero => simp_all;
+    | succ n ih =>
+      suffices x ≺^[(n + m + 1)] y by apply Frame.RelItr'.lem1 this;
+      obtain ⟨w, hxw, hwz⟩ := hzx;
+      use w;
+      constructor;
+      . exact hxw;
+      . exact @ih w hwz;
+  . rintro h;
+    induction n generalizing x with
+    | zero => simp_all;
+    | succ n ih =>
+      have rxy : x ≺^[n + m + 1] y := Frame.RelItr'.lem1 h;
+      obtain ⟨w, rxw, rwy⟩ := rxy;
+      obtain ⟨u, rwu, ruy⟩ := @ih w rwy;
+      use u;
+      constructor;
+      . use w;
+      . assumption;
+
+lemma Frame.RelItr.comp' {F : Frame} {x y : F.World} {n m : ℕ+} : (∃ z, x ≺^[n] z ∧ z ≺^[m] y) ↔ x ≺^[n + m] y := Frame.RelItr'.comp
+
+def TransitiveReflexiveClosureFrame (F : Frame) : Frame where
+  World := F.World
+  World_inhabited := F.World_inhabited
+  Rel x y := ∃ n : ℕ, x ≺^[n] y
+
+namespace TransitiveReflexiveClosureFrame
+
+@[simp]
+lemma rel_one {F : Frame} {x y : F.World} (hxy : F.Rel x y) : (TransitiveReflexiveClosureFrame F).Rel x y := by
+  use 1; simpa;
+
+lemma rel_reflexive : Reflexive (TransitiveReflexiveClosureFrame F).Rel := by
+  intro x;
+  use 0; simp;
+
+lemma rel_transitive : Transitive (TransitiveReflexiveClosureFrame F).Rel := by
+  intro x y z hxy hyz;
+  obtain ⟨n, hxy⟩ := hxy;
+  obtain ⟨m, hyz⟩ := hyz;
+  use n + m;
+  apply Frame.RelItr'.comp.mp;
+  use y;
+
+end TransitiveReflexiveClosureFrame
+
+
+def TransitiveClosureFrame (F : Frame) : Frame where
+  World := F.World
+  World_inhabited := F.World_inhabited
+  Rel x y := ∃ n : ℕ+, x ≺^[n] y
+
+namespace TransitiveClosureFrame
+
+@[simp]
+lemma rel_one {F : Frame} {x y : F.World} (hxy : F.Rel x y) : (TransitiveClosureFrame F).Rel x y := by
+  use 1; simpa;
+
+lemma rel_transitive : Transitive (TransitiveClosureFrame F).Rel := by
+  intro x y z hxy hyz;
+  obtain ⟨n, hxy⟩ := hxy;
+  obtain ⟨m, hyz⟩ := hyz;
+  use n + m;
+  suffices F.RelItr' (↑n + ↑m) x z by convert this
+  apply Frame.RelItr.comp'.mp;
+  use y;
+
+lemma rel_symmetric_of_symmetric {F : Frame} (hSymm : Symmetric F.Rel) : Symmetric (TransitiveClosureFrame F).Rel := by
+  intro x y hxy;
+  obtain ⟨n, hxy⟩ := hxy;
+  use n;
+  induction n using PNat.inductionOn generalizing x y with
+  | one => simp_all; exact hSymm hxy;
+  | succ n ih =>
+    obtain ⟨z, hxz, hzy⟩ := relitr₂ $ hxy;
+    use z;
+    constructor;
+    . exact hSymm hzy;
+    . exact ih hxz;
+
+end TransitiveClosureFrame
+
+section
+
+variable {M : Model α} (M_trans : Transitive M.Frame) {T : Theory α} [T.SubformulaClosed]
+
+abbrev FinestFilterationTransitiveClosureModel (M : Model α) (T : Theory α) [T.SubformulaClosed] : Kripke.Model α where
+  Frame := TransitiveClosureFrame (FinestFilterationFrame M T)
+  Valuation := StandardFilterationValuation M T
+
+namespace FinestFilterationTransitiveClosureModel
+
+lemma transitive : Transitive (FinestFilterationTransitiveClosureModel M T).Frame.Rel :=
+  TransitiveClosureFrame.rel_transitive
+
+@[instance]
+def filterOf : (FinestFilterationTransitiveClosureModel M T).FilterOf M T where
+  def_rel₁ := by
+    intro x y hxy;
+    apply TransitiveClosureFrame.rel_one;
+    tauto;
+  def_rel₂ := by
+    intro Qx Qy RQxQy;
+    obtain ⟨x, rfl⟩ := Quotient.exists_rep Qx;
+    obtain ⟨y, rfl⟩ := Quotient.exists_rep Qy;
+    intro p hp hpx;
+    obtain ⟨n, RQxQy⟩ := RQxQy;
+    induction n using PNat.inductionOn generalizing x y with
+    | one =>
+      simp_all;
+      obtain ⟨w, v, hQxQw, hQyQv, rwv⟩ := RQxQy;
+      simp at hQxQw hQyQv;
+      apply hQyQv p (by aesop) |>.mpr;
+      exact hQxQw (□p) (by aesop) |>.mp hpx $ rwv;
+    | succ n ih =>
+      simp at RQxQy;
+      obtain ⟨Qz, RQxQz, RQzQy⟩ := RQxQy;
+      obtain ⟨z, rfl⟩ := Quotient.exists_rep Qz;
+      apply ih z y;
+      . obtain ⟨x', z', hx', hz', rxz'⟩ := RQxQz;
+        simp at hx' hz';
+        suffices z' ⊧ □p by have : z ⊧ □p := hz' (□p) |>.mpr this; simpa;
+        intro w' rzw';
+        have rxw' : x' ≺ w' := M_trans rxz' rzw';
+        suffices x' ⊧ □p by exact this rxw';
+        exact hx' (□p) |>.mp hpx;
+      . assumption;
+
+lemma symmetric (M_symm : Symmetric M.Frame) : Symmetric (TransitiveClosureFrame (FinestFilterationFrame M T)) :=
+  TransitiveClosureFrame.rel_symmetric_of_symmetric $ symmetric_finest_filteration_model M_symm
+
+lemma reflexive (M_refl : Reflexive M.Frame) : Reflexive (TransitiveClosureFrame (FinestFilterationFrame M T)) := by
+  apply reflexive_filteration_model (filterOf M_trans);
+  assumption;
+
+end FinestFilterationTransitiveClosureModel
+
+end
+
+instance KT4B_finite_complete : Complete (𝐊𝐓𝟒𝐁 : DeductionParameter α) EquivalenceFrameClassꟳ# := ⟨by
+  intro p hp;
+  apply KT4B_complete.complete;
+  intro F ⟨F_refl, F_trans, F_symm⟩ V x;
+  let M : Kripke.Model α := ⟨F, V⟩;
+  let FM := FinestFilterationTransitiveClosureModel M (𝒮 p);
+  apply filteration FM (FinestFilterationTransitiveClosureModel.filterOf (by simpa using F_trans)) |>.mpr;
+  apply hp (by
+    suffices Finite (FilterEqvQuotient M (𝒮 p)) by
+      simp [FrameClass.restrictFinite];
+      use { toFrame := FM.Frame, World_finite := by aesop };
+      refine ⟨⟨?refl, ?trans, ?symm⟩, (by simp)⟩;
+      . exact FinestFilterationTransitiveClosureModel.reflexive (by simpa using F_trans) F_refl;
+      . exact FinestFilterationTransitiveClosureModel.transitive;
+      . exact FinestFilterationTransitiveClosureModel.symmetric F_symm;
+    apply FilterEqvQuotient.finite;
+    simp;
+  ) FM.Valuation;
+⟩
+
+instance KT4B_ffp : FiniteFrameProperty (α := α) 𝐊𝐓𝟒𝐁 EquivalenceFrameClass where
+
+-- MEMO: `𝐒𝟓 =ₛ 𝐊𝐓𝟒𝐁`だから決定可能性という面では`𝐒𝟓`も決定可能．
 
 end Kripke
 
