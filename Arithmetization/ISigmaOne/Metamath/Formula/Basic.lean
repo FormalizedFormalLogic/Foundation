@@ -42,6 +42,18 @@ scoped notation "^∀[" n "] " p:64 => qqAll n p
 
 scoped notation "^∃[" n "] " p:64 => qqEx n p
 
+scoped notation "^⊤" => qqVerum 0
+
+scoped notation "^⊥" => qqFalsum 0
+
+scoped notation p:69 " ^⋏ " q:70 => qqAnd 0 p q
+
+scoped notation p:68 " ^⋎ " q:69 => qqOr 0 p q
+
+scoped notation "^∀ " p:64 => qqAll 0 p
+
+scoped notation "^∃ " p:64 => qqEx 0 p
+
 section
 
 def _root_.LO.FirstOrder.Arith.qqRelDef : 𝚺₀-Semisentence 5 :=

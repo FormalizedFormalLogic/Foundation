@@ -33,6 +33,8 @@ def qqConj (n ps : V) : V := construction.result ![n] ps
 
 scoped notation:65 "^⋀[" n "] " ps:66 => qqConj n ps
 
+scoped notation:65 "^⋀ " ps:66 => qqConj 0 ps
+
 @[simp] lemma qqConj_nil (n : V) : ^⋀[n] 0 = ^⊤[n] := by simp [qqConj, construction]
 
 @[simp] lemma qqConj_cons (n p ps : V) : ^⋀[n] (p ∷ ps) = p ^⋏[n] (^⋀[n] ps) := by simp [qqConj, construction]
@@ -94,6 +96,8 @@ open QQDisj
 def qqDisj (n ps : V) : V := construction.result ![n] ps
 
 scoped notation:65 "^⋁[" n "] " ps:66 => qqDisj n ps
+
+scoped notation:65 "^⋁ " ps:66 => qqDisj 0 ps
 
 @[simp] lemma qqDisj_nil (n : V) : ^⋁[n] 0 = ^⊥[n] := by simp [qqDisj, construction]
 

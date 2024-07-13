@@ -618,6 +618,109 @@ theorem sigmaOne_skolem_vec {R : V → V → Prop} (hP : 𝚺₁-Relation R) {l}
         · simpa [sub_succ_add_succ (succ_le_iff_lt.mp hk) i] using hv i (by simpa using hi)⟩
   simpa using this l (by rfl)
 
+
+/-!
+
+### Take Last k-Element
+
+-/
+
+namespace TakeLast
+
+def blueprint : VecRec.Blueprint 1 where
+  nil := .mkSigma “y k | y = 0” (by simp)
+  cons := .mkSigma “y x xs ih k |
+    ∃ l, !lenDef l xs ∧
+    (l < k → !consDef y x xs) ∧ (k ≤ l → y = ih)” (by simp)
+
+def construction : VecRec.Construction V blueprint where
+  nil _ := 0
+  cons (param x xs ih) := if len xs < param 0 then x ∷ xs else ih
+  nil_defined := by intro v; simp [blueprint]
+  cons_defined := by
+    intro v
+    simp [blueprint, Fin.isValue]
+
+    show (v 0 = if len (v 2) < v 4 then v 1 ∷ v 2 else v 3) ↔
+      (len (v 2) < v 4 → v 0 = v 1 ∷ v 2) ∧ (v 4 ≤ len (v 2) → v 0 = v 3)
+    rcases lt_or_ge (len (v 2)) (v 4) with (hv | hv)
+    · simp [hv]
+    · simp [hv, not_lt_of_le hv]
+
+end TakeLast
+
+section takeLast
+
+open TakeLast
+
+def takeLast (v k : V) : V := construction.result ![k] v
+
+@[simp] lemma takeLast_nil : takeLast (0 : V) k = 0 := by simp [takeLast, construction]
+
+lemma takeLast_cons (x v : V) :
+    takeLast (x ∷ v) k = if len v < k then x ∷ v else takeLast v k := by simp [takeLast, construction]
+
+section
+
+def _root_.LO.FirstOrder.Arith.takeLastDef : 𝚺₁-Semisentence 3 := blueprint.resultDef
+
+lemma takeLast_defined : 𝚺₁-Function₂ (takeLast : V → V → V) via takeLastDef := construction.result_defined
+
+@[simp] lemma eval_takeLastDef (v) :
+    Semiformula.Evalbm V v takeLastDef.val ↔ v 0 = takeLast (v 1) (v 2) := takeLast_defined.df.iff v
+
+instance takeLast_definable : 𝚺₁-Function₂ (takeLast : V → V → V) := Defined.to_definable _ takeLast_defined
+
+instance takeLast_definable' (Γ) : (Γ, m + 1)-Function₂ (takeLast : V → V → V) := .of_sigmaOne takeLast_definable _ _
+
+end
+
+lemma len_takeLast {v k : V} (h : k ≤ len v) : len (takeLast v k) = k := by
+  induction v using cons_induction_sigma₁
+  · definability
+  case nil => simp_all
+  case cons x v ih =>
+    simp [takeLast_cons]
+    have : k = len v + 1 ∨ k ≤ len v := by
+      rcases eq_or_lt_of_le h with (h | h)
+      · left; simpa using h
+      · right; simpa [lt_succ_iff_le] using h
+    rcases this with (rfl | hkv)
+    · simp
+    · simp [not_lt_of_le hkv, ih hkv]
+
+@[simp] lemma takeLast_len_self (v : V) : takeLast v (len v) = v := by
+  rcases nil_or_cons v with (rfl | ⟨x, v, rfl⟩) <;> simp [takeLast_cons]
+
+/-- TODO: move -/
+@[simp] lemma add_sub_add (a b c : V) : (a + c) - (b + c) = a - b := add_tsub_add_eq_tsub_right a c b
+
+@[simp] lemma takeLast_zero (v : V) : takeLast v 0 = 0 := by
+  induction v using cons_induction_sigma₁
+  · definability
+  case nil => simp
+  case cons x v ih => simp [takeLast_cons, ih]
+
+lemma takeLast_succ_of_lt {i v : V} (h : i < len v) : takeLast v (i + 1) = v.[len v - (i + 1)] ∷ takeLast v i := by
+  induction v using cons_induction_sigma₁ generalizing i
+  · definability
+  case nil => simp at h
+  case cons x v ih =>
+    simp [takeLast_cons, lt_succ_iff_le]
+    rcases show i = len v ∨ i < len v from eq_or_lt_of_le (by simpa [lt_succ_iff_le] using h) with (rfl | hi)
+    · simp
+    · have : len v - i = len v - (i + 1) + 1 := by
+        rw [←sub_sub, sub_add_self_of_le (pos_iff_one_le.mp (tsub_pos_of_lt hi))]
+      simpa [not_le_of_lt hi, ↓reduceIte, this, nth_cons_succ, not_lt_of_gt hi] using ih hi
+
+end takeLast
+
+/-!
+
+### Repeat
+
+-/
+
 section repaetVec
 
 def repeatVec.blueprint : PR.Blueprint 1 where
@@ -673,5 +776,71 @@ lemma len_repeatVec_of_nth_le {v m : V} (H : ∀ i < len v, v.[i] ≤ m) : v ≤
   le_of_nth_le_nth (by simp) (fun i hi ↦ by simp [nth_repeatVec m (len v) hi, H i hi])
 
 end repaetVec
+
+/-!
+
+### Convert to Set
+
+-/
+
+namespace VecToSet
+
+def blueprint : VecRec.Blueprint 0 where
+  nil := .mkSigma “y | y = 0” (by simp)
+  cons := .mkSigma “y x xs ih | !insertDef y x ih” (by simp)
+
+def construction : VecRec.Construction V blueprint where
+  nil _ := ∅
+  cons (_ x _ ih) := insert x ih
+  nil_defined := by intro v; simp [blueprint, emptyset_def]
+  cons_defined := by intro v; simp [blueprint]; rfl
+
+end VecToSet
+
+section vecToSet
+
+open VecToSet
+
+def vecToSet (v : V) : V := construction.result ![] v
+
+@[simp] lemma vecToSet_nil : vecToSet (0 : V) = ∅ := by simp [vecToSet, construction]
+
+@[simp] lemma vecToSet_cons (x v : V) :
+    vecToSet (x ∷ v) = insert x (vecToSet v) := by simp [vecToSet, construction]
+
+section
+
+def _root_.LO.FirstOrder.Arith.vecToSetDef : 𝚺₁-Semisentence 2 := blueprint.resultDef
+
+lemma vecToSet_defined : 𝚺₁-Function₁ (vecToSet : V → V) via vecToSetDef := construction.result_defined
+
+@[simp] lemma eval_vecToSetDef (v) :
+    Semiformula.Evalbm V v vecToSetDef.val ↔ v 0 = vecToSet (v 1) := vecToSet_defined.df.iff v
+
+instance vecToSet_definable : 𝚺₁-Function₁ (vecToSet : V → V) := Defined.to_definable _ vecToSet_defined
+
+instance vecToSet_definable' (Γ) : (Γ, m + 1)-Function₁ (vecToSet : V → V) := .of_sigmaOne vecToSet_definable _ _
+
+end
+
+lemma mem_vecToSet_iff {v x : V} : x ∈ vecToSet v ↔ ∃ i < len v, x = v.[i] := by
+  induction v using cons_induction_sigma₁
+  · definability
+  case nil => simp
+  case cons y v ih =>
+    simp only [vecToSet_cons, mem_bitInsert_iff, ih, len_cons]
+    constructor
+    · rintro (rfl | ⟨i, hi, rfl⟩)
+      · exact ⟨0, by simp⟩
+      · exact ⟨i + 1, by simp [hi]⟩
+    · rintro ⟨i, hi, rfl⟩
+      rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
+      · simp
+      · right; exact ⟨i, by simpa using hi, by simp⟩
+
+@[simp] lemma nth_mem_vecToSet {v i : V} (h : i < len v) : v.[i] ∈ vecToSet v :=
+  mem_vecToSet_iff.mpr ⟨i, h, rfl⟩
+
+end vecToSet
 
 end LO.Arith
