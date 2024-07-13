@@ -119,6 +119,8 @@ abbrev EquivalenceFrameClass : FrameClass := { F | Reflexive F ∧ Transitive F 
 
 abbrev PreorderFrameClass : FrameClass := { F | Reflexive F ∧ Transitive F }
 
+abbrev ReflexiveSymmetricFrameClass : FrameClass := { F | Reflexive F ∧ Symmetric F }
+
 end
 
 section Definability
@@ -222,6 +224,8 @@ instance sound_KD : Sound (𝐊𝐃 : DeductionParameter α) SerialFrameClass# :
 
 instance sound_KT : Sound (𝐊𝐓 : DeductionParameter α) ReflexiveFrameClass# := instGeachLogicSoundAux
 
+instance sound_KTB : Sound (𝐊𝐓𝐁 : DeductionParameter α) ReflexiveSymmetricFrameClass# := instGeachLogicSoundAux
+
 instance sound_S4 : Sound (𝐒𝟒 : DeductionParameter α) PreorderFrameClass# := instGeachLogicSoundAux
 
 instance sound_S5 : Sound (𝐒𝟓 : DeductionParameter α) ReflexiveEuclideanFrameClass# := instGeachLogicSoundAux
@@ -297,11 +301,13 @@ private def instGeachLogicCompleteAux {Λ : DeductionParameter α} [geach : Λ.I
 
 instance : Complete (𝐊𝐓 : DeductionParameter α) ReflexiveFrameClass# := instGeachLogicCompleteAux
 
-instance : Complete (𝐒𝟒 : DeductionParameter α) PreorderFrameClass# := instGeachLogicCompleteAux
+instance KTB_complete : Complete (𝐊𝐓𝐁 : DeductionParameter α) ReflexiveSymmetricFrameClass# := instGeachLogicCompleteAux
+
+instance S4_complete : Complete (𝐒𝟒 : DeductionParameter α) PreorderFrameClass# := instGeachLogicCompleteAux
 
 instance : Complete (𝐒𝟓 : DeductionParameter α) ReflexiveEuclideanFrameClass# := instGeachLogicCompleteAux
 
-instance : Complete (𝐊𝐓𝟒𝐁 : DeductionParameter α) EquivalenceFrameClass# := instGeachLogicCompleteAux
+instance KT4B_complete : Complete (𝐊𝐓𝟒𝐁 : DeductionParameter α) EquivalenceFrameClass# := instGeachLogicCompleteAux
 
 end Completeness
 
@@ -310,7 +316,7 @@ section Reducible
 
 
 theorem reducible_KD_KT : (𝐊𝐃 : DeductionParameter α) ≤ₛ 𝐊𝐓 := by
-  apply reducible_of_subset_FrameClass (α := α) SerialFrameClass.{u} ReflexiveFrameClass.{u};
+  apply reducible_of_subset_FrameClass (α := α) SerialFrameClass ReflexiveFrameClass;
   simp_all [serial_of_refl];
 
 

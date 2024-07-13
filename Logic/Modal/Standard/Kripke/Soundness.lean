@@ -89,4 +89,22 @@ lemma consistent_of_finitely_defines (defines : Ax.FinitelyDefinesKripkeFrameCla
 
 end
 
+section
+
+variable {𝔽 : FrameClass}
+
+lemma restrict_finite : 𝔽# ⊧ p → 𝔽ꟳ# ⊧ p := by
+  intro h F hF;
+  obtain ⟨fF, hfF, e⟩ := hF; subst e;
+  exact h hfF;
+
+instance instFiniteSound {Λ : DeductionParameter α} [Λ.IsNormal] [sound : Sound Λ 𝔽#] : Sound Λ 𝔽ꟳ# := ⟨by
+  intro p h;
+  exact restrict_finite $ sound.sound h;
+⟩
+
+instance K_fin_sound : Sound (𝐊 : DeductionParameter α) AllFrameClassꟳ# := inferInstance
+
+end
+
 end LO.Modal.Standard.Kripke

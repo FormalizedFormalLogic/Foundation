@@ -237,6 +237,8 @@ notation "𝐊𝐓" => DeductionParameter.KT
 protected abbrev KD : DeductionParameter α := 𝝂𝗗
 notation "𝐊𝐃" => DeductionParameter.KD
 
+protected abbrev KTB : DeductionParameter α := 𝝂(𝗧 ∪ 𝗕)
+notation "𝐊𝐓𝐁" => DeductionParameter.KTB
 
 protected abbrev K4 : DeductionParameter α := 𝝂𝟰
 notation "𝐊𝟒" => DeductionParameter.K4
@@ -383,21 +385,21 @@ lemma normal_reducible_subset {𝓓₁ 𝓓₂ : DeductionParameter α} [𝓓₁
   intro p hp;
   exact ⟨Deduction.maxm $ hSubset hp⟩;
 
-lemma reducible_K_KT : (𝐊 : DeductionParameter α) ≤ₛ 𝐊𝐓 := by exact normal_reducible_subset;
+lemma reducible_K_KT : (𝐊 : DeductionParameter α) ≤ₛ 𝐊𝐓 := normal_reducible_subset
 
-lemma reducible_K_KD : (𝐊 : DeductionParameter α) ≤ₛ 𝐊𝐃 := by exact normal_reducible_subset;
+lemma reducible_K_KD : (𝐊 : DeductionParameter α) ≤ₛ 𝐊𝐃 := normal_reducible_subset
 
-lemma reducible_KT_S4 : (𝐊𝐓 : DeductionParameter α) ≤ₛ 𝐒𝟒 := by exact normal_reducible_subset;
+lemma reducible_KT_S4 : (𝐊𝐓 : DeductionParameter α) ≤ₛ 𝐒𝟒 := normal_reducible_subset
 
-lemma reducible_K4_S4 : (𝐊𝟒 : DeductionParameter α) ≤ₛ 𝐒𝟒 := by exact normal_reducible_subset;
+lemma reducible_K4_S4 : (𝐊𝟒 : DeductionParameter α) ≤ₛ 𝐒𝟒 := normal_reducible_subset
 
-lemma reducible_S4_S4Dot2 : (𝐒𝟒 : DeductionParameter α) ≤ₛ 𝐒𝟒.𝟐 := by exact normal_reducible_subset
+lemma reducible_S4_S4Dot2 : (𝐒𝟒 : DeductionParameter α) ≤ₛ 𝐒𝟒.𝟐 := normal_reducible_subset
 
-lemma reducible_S4_S4Dot3 : (𝐒𝟒 : DeductionParameter α) ≤ₛ 𝐒𝟒.𝟑 := by exact normal_reducible_subset
+lemma reducible_S4_S4Dot3 : (𝐒𝟒 : DeductionParameter α) ≤ₛ 𝐒𝟒.𝟑 := normal_reducible_subset
 
-lemma reducible_S4_S4Grz : (𝐒𝟒 : DeductionParameter α) ≤ₛ 𝐒𝟒𝐆𝐫𝐳 := by exact normal_reducible_subset
+lemma reducible_S4_S4Grz : (𝐒𝟒 : DeductionParameter α) ≤ₛ 𝐒𝟒𝐆𝐫𝐳 := normal_reducible_subset
 
-lemma reducible_K_GL : (𝐊 : DeductionParameter α) ≤ₛ 𝐆𝐋 := by exact normal_reducible_subset
+lemma reducible_K_GL : (𝐊 : DeductionParameter α) ≤ₛ 𝐆𝐋 := normal_reducible_subset
 
 lemma reducible_K4_Triv : (𝐊𝟒 : DeductionParameter α) ≤ₛ 𝐓𝐫𝐢𝐯 := by
   apply normal_reducible;
