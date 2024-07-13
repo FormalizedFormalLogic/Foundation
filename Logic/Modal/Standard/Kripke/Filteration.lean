@@ -337,7 +337,7 @@ instance S4_finite_complete : Complete (𝐒𝟒 : DeductionParameter α)  Preor
   ) FM.Valuation;
 ⟩
 
-instance S4_ffp : FiniteFrameProperty (α := α) 𝐒𝟒 PreorderFrameClass where
+instance : FiniteFrameProperty (α := α) 𝐒𝟒 PreorderFrameClass where
 
 
 instance KT4B_finite_complete : Complete (𝐊𝐓𝟒𝐁 : DeductionParameter α) EquivalenceFrameClassꟳ# := ⟨by
@@ -360,12 +360,8 @@ instance KT4B_finite_complete : Complete (𝐊𝐓𝟒𝐁 : DeductionParameter 
   ) FM.Valuation;
 ⟩
 
-instance KT4B : FiniteFrameProperty (α := α) 𝐊𝐓𝟒𝐁 EquivalenceFrameClass where
+instance : FiniteFrameProperty (α := α) 𝐊𝐓𝟒𝐁 EquivalenceFrameClass where
 -- MEMO: `𝐒𝟓 =ₛ 𝐊𝐓𝟒𝐁`だから決定可能性という面では`𝐒𝟓`も決定可能．
-
-#instances FiniteFrameProperty
-
-#print axioms KT4B
 
 end Kripke
 
