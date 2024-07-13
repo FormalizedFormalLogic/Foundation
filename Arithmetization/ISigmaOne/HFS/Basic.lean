@@ -143,6 +143,10 @@ lemma union_comm (a b : V) : a ∪ b = b ∪ a := mem_ext (by simp [or_comm])
 
 @[simp] lemma union_succ_union_union_right (a b c : V) : b ⊆ a ∪ b ∪ c := by intro x hx; simp [hx]
 
+@[simp] lemma union_empty_eq_right (a : V) : a ∪ ∅ = a := mem_ext <| by simp
+
+@[simp] lemma union_empty_eq_left (a : V) : ∅ ∪ a = a := mem_ext <| by simp
+
 end union
 
 section sInter

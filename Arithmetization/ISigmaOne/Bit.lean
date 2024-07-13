@@ -242,6 +242,9 @@ lemma insert_eq {i a : M} : insert i a = bitInsert i a := rfl
 
 lemma singleton_eq_insert (i : M) : ({i} : M) = insert i ∅ := by simp [singleton_def, insert, bitInsert, emptyset_def]
 
+instance : LawfulSingleton M M where
+  insert_emptyc_eq := fun x ↦ Eq.symm <| singleton_eq_insert x
+
 @[simp] lemma mem_bitInsert_iff {i j a : M} :
     i ∈ insert j a ↔ i = j ∨ i ∈ a := by
   by_cases h : j ∈ a <;> simp [h, insert_eq, bitInsert]
