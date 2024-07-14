@@ -106,6 +106,14 @@ lemma termSubstVec_cons {k n t ts : V} (ht : L.Semiterm n t) (hts : L.SemitermVe
     L.termSubstVec (k + 1) n m w (t ∷ ts) = L.termSubst n m w t ∷ L.termSubstVec k n m w ts :=
   (construction L).resultVec_cons ![m, w] hts ht
 
+@[simp] lemma termSubstVec_cons₁ {n t : V} (ht : L.Semiterm n t) :
+    L.termSubstVec 1 n m w ?[t] = ?[L.termSubst n m w t] := by
+  rw [show (1 : V) = 0 + 1  by simp, termSubstVec_cons] <;> simp [*]
+
+@[simp] lemma termSubstVec_cons₂ {n t₁ t₂ : V} (ht₁ : L.Semiterm n t₁) (ht₂ : L.Semiterm n t₂) :
+    L.termSubstVec 2 n m w ?[t₁, t₂] = ?[L.termSubst n m w t₁, L.termSubst n m w t₂] := by
+  rw [show (2 : V) = 0 + 1 + 1  by simp [one_add_one_eq_two], termSubstVec_cons] <;> simp [*]
+
 @[simp] lemma termSubst_rng_semiterm {t} (hw : L.SemitermVec n m w) (ht : L.Semiterm n t) : L.Semiterm m (L.termSubst n m w t) := by
   apply Language.Semiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
   · definability
@@ -213,6 +221,14 @@ lemma termShiftVec_cons {k n t ts : V} (ht : L.Semiterm n t) (hts : L.SemitermVe
     L.termShiftVec (k + 1) n (t ∷ ts) = L.termShift n t ∷ L.termShiftVec k n ts :=
   (construction L).resultVec_cons ![] hts ht
 
+@[simp] lemma termShiftVec_cons₁ {n t₁ : V} (ht₁ : L.Semiterm n t₁) :
+    L.termShiftVec 1 n ?[t₁] = ?[L.termShift n t₁] := by
+  rw [show (1 : V) = 0 + 1  by simp, termShiftVec_cons] <;> simp [*]
+
+@[simp] lemma termShiftVec_cons₂ {n t₁ t₂ : V} (ht₁ : L.Semiterm n t₁) (ht₂ : L.Semiterm n t₂) :
+    L.termShiftVec 2 n ?[t₁, t₂] = ?[L.termShift n t₁, L.termShift n t₂] := by
+  rw [show (2 : V) = 0 + 1 + 1  by simp [one_add_one_eq_two], termShiftVec_cons] <;> simp [*]
+
 @[simp] lemma Language.Semiterm.termShift {t} (ht : L.Semiterm n t) : L.Semiterm n (L.termShift n t) := by
   apply Language.Semiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
   · definability
@@ -319,6 +335,14 @@ lemma termBShiftVec_cons {k n t ts : V} (ht : L.Semiterm n t) (hts : L.SemitermV
     L.termBShiftVec (k + 1) n (t ∷ ts) = L.termBShift n t ∷ L.termBShiftVec k n ts :=
   (construction L).resultVec_cons ![] hts ht
 
+@[simp] lemma termBShiftVec_cons₁ {n t₁ : V} (ht₁ : L.Semiterm n t₁) :
+    L.termBShiftVec 1 n ?[t₁] = ?[L.termBShift n t₁] := by
+  rw [show (1 : V) = 0 + 1  by simp, termBShiftVec_cons] <;> simp [*]
+
+@[simp] lemma termBShiftVec_cons₂ {n t₁ t₂ : V} (ht₁ : L.Semiterm n t₁) (ht₂ : L.Semiterm n t₂) :
+    L.termBShiftVec 2 n ?[t₁, t₂] = ?[L.termBShift n t₁, L.termBShift n t₂] := by
+  rw [show (2 : V) = 0 + 1 + 1  by simp [one_add_one_eq_two], termBShiftVec_cons] <;> simp [*]
+
 @[simp] lemma Language.Semiterm.termBShift {t} (ht : L.Semiterm n t) : L.Semiterm (n + 1) (L.termBShift n t) := by
   apply Language.Semiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
   · definability
@@ -345,17 +369,17 @@ protected def zero : ℕ := ^func 0 zeroIndex 0
 
 protected def one : ℕ := ^func 0 oneIndex 0
 
-abbrev qqAdd (x y : V) := ^func 2 (addIndex : V) ?[x, y]
+def qqAdd (x y : V) := ^func 2 (addIndex : V) ?[x, y]
 
-abbrev qqMul (x y : V) := ^func 2 (mulIndex : V) ?[x, y]
+def qqMul (x y : V) := ^func 2 (mulIndex : V) ?[x, y]
 
 notation "𝟎" => Formalized.zero
 
 notation "𝟏" => Formalized.one
 
-infixl:60 " ^+ " => qqAdd
+infixl:80 " ^+ " => qqAdd
 
-infixl:80 " ^* " => qqMul
+infixl:82 " ^* " => qqMul
 
 lemma qqFunc_absolute (k f v : ℕ) : ((^func k f v : ℕ) : V) = ^func (k : V) (f : V) (v : V) := by simp [qqFunc, nat_cast_pair]
 
@@ -377,7 +401,7 @@ def construction : PR.Construction V blueprint where
   zero := fun _ ↦ 𝟏
   succ := fun _ _ t ↦ t ^+ 𝟏
   zero_defined := by intro v; simp [blueprint, numeral_eq_natCast]
-  succ_defined := by intro v; simp [blueprint, numeral_eq_natCast]
+  succ_defined := by intro v; simp [qqAdd, blueprint, numeral_eq_natCast]
 
 def numeralAux (x : V) : V := construction.result ![] x
 
@@ -403,7 +427,7 @@ end
   induction x using induction_iSigmaOne
   · definability
   case zero => simp
-  case succ x ih => simp [ih]
+  case succ x ih => simp [qqAdd, ih]
 
 end Numeral
 
@@ -414,6 +438,15 @@ open Numeral
 def numeral (x : V) : V := if x = 0 then 𝟎 else numeralAux (x - 1)
 
 @[simp] lemma numeral_zero : numeral (0 : V) = 𝟎 := by simp [numeral]
+
+@[simp] lemma numeral_one : numeral (1 : V) = 𝟏 := by simp [numeral]
+
+@[simp] lemma numeral_add_two : numeral (n + 1 + 1 : V) = numeral (n + 1) ^+ 𝟏 := by simp [numeral, ←add_assoc]
+
+lemma numeral_succ_pos (pos : 0 < n) : numeral (n + 1 : V) = numeral n ^+ 𝟏 := by
+  rcases zero_or_succ n with (rfl | ⟨n, rfl⟩)
+  · simp at pos
+  simp [numeral, ←one_add_one_eq_two, ←add_assoc]
 
 @[simp] lemma numeral_semiterm (n x : V) : ⌜ℒₒᵣ⌝.Semiterm n (numeral x) := by
   by_cases hx : x = 0 <;> simp [hx, numeral]
@@ -438,6 +471,36 @@ lemma numeral_defined : 𝚺₁-Function₁ (numeral : V → V) via numeralDef :
 @[simp] instance numeral_definable' (Γ m) : (Γ, m + 1)-Function₁ (numeral : V → V) := .of_sigmaOne numeral_definable _ _
 
 end
+
+@[simp] lemma numeral_substs {w : V} (hw : ⌜ℒₒᵣ⌝.SemitermVec n m w) (x : V) :
+    ⌜ℒₒᵣ⌝.termSubst n m w (numeral x) = numeral x := by
+  induction x using induction_iSigmaOne
+  · definability
+  case zero => simp [hw, Formalized.zero, qqFunc_absolute]
+  case succ x ih =>
+    rcases zero_or_succ x with (rfl | ⟨x, rfl⟩)
+    · simp [hw, Formalized.one, qqFunc_absolute]
+    · simp [qqAdd, hw, ih, Formalized.one, qqFunc_absolute]
+
+@[simp] lemma numeral_shift (x : V) :
+    ⌜ℒₒᵣ⌝.termShift n (numeral x) = numeral x := by
+  induction x using induction_iSigmaOne
+  · definability
+  case zero => simp [Formalized.zero, qqFunc_absolute]
+  case succ x ih =>
+    rcases zero_or_succ x with (rfl | ⟨x, rfl⟩)
+    · simp [Formalized.one, qqFunc_absolute]
+    · simp [qqAdd, ih, Formalized.one, qqFunc_absolute]
+
+@[simp] lemma numeral_bShift (x : V) :
+    ⌜ℒₒᵣ⌝.termBShift n (numeral x) = numeral x := by
+  induction x using induction_iSigmaOne
+  · definability
+  case zero => simp [Formalized.zero, qqFunc_absolute]
+  case succ x ih =>
+    rcases zero_or_succ x with (rfl | ⟨x, rfl⟩)
+    · simp [Formalized.one, qqFunc_absolute]
+    · simp [qqAdd, ih, Formalized.one, qqFunc_absolute]
 
 end numeral
 

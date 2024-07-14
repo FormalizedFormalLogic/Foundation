@@ -466,6 +466,26 @@ lemma substs_not_uformula {m w x} (h : ¬L.UFormula x) :
 
 end substs
 
+namespace Formalized
+
+def qqEQ (n x y : V) : V := ^rel n 2 (eqIndex : V) ?[x, y]
+
+def qqNEQ (n x y : V) : V := ^nrel n 2 (eqIndex : V) ?[x, y]
+
+def qqLT (n x y : V) : V := ^rel n 2 (ltIndex : V) ?[x, y]
+
+def qqNLT (n x y : V) : V := ^nrel n 2 (ltIndex : V) ?[x, y]
+
+notation:75 x:75 " ^=[" n "] " y:76 => qqEQ n x y
+
+notation:75 x:75 " ^≠[" n "] " y:76 => qqNEQ n x y
+
+notation:78 x:78 " ^<[" n "] " y:79 => qqLT n x y
+
+notation:78 x:78 " ^≮[" n "] " y:79 => qqNLT n x y
+
+end Formalized
+
 end LO.Arith
 
 end
