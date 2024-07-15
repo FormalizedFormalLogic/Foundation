@@ -282,34 +282,29 @@ lemma rel_transitive : Transitive (FinestFilterationTransitiveClosureModel M T).
 def filterOf : (FinestFilterationTransitiveClosureModel M T).FilterOf M T where
   def_rel₁ := by
     intro x y hxy;
-    apply TransitiveClosure.rel_one;
+    apply TransitiveClosure.single;
     tauto;
   def_rel₂ := by
     intro Qx Qy RQxQy;
-    obtain ⟨x, rfl⟩ := Quotient.exists_rep Qx;
-    obtain ⟨y, rfl⟩ := Quotient.exists_rep Qy;
-    intro p hp hpx;
-    obtain ⟨n, RQxQy⟩ := RQxQy;
-    induction n using PNat.recOn generalizing x y with
-    | p1 =>
-      simp_all;
-      obtain ⟨w, v, hQxQw, hQyQv, rwv⟩ := RQxQy;
-      simp at hQxQw hQyQv;
-      apply hQyQv p (by aesop) |>.mpr;
-      exact hQxQw (□p) (by aesop) |>.mp hpx $ rwv;
-    | hp n ih =>
-      simp at RQxQy;
-      obtain ⟨Qz, RQxQz, RQzQy⟩ := RQxQy;
-      obtain ⟨z, rfl⟩ := Quotient.exists_rep Qz;
-      apply ih z y;
-      . obtain ⟨x', z', hx', hz', rxz'⟩ := RQxQz;
-        simp at hx' hz';
-        suffices z' ⊧ □p by have : z ⊧ □p := hz' (□p) |>.mpr this; simpa;
-        intro w' rzw';
-        have rxw' : x' ≺ w' := M_trans rxz' rzw';
-        suffices x' ⊧ □p by exact this rxw';
-        exact hx' (□p) |>.mp hpx;
-      . assumption;
+    induction RQxQy using Relation.TransGen.head_induction_on with
+    | base rxy =>
+      obtain ⟨x, y, rfl, rfl, rxy⟩ := rxy;
+      intro p _ hpx;
+      exact hpx rxy;
+    | ih ha hxy hyz =>
+      obtain ⟨x, y, rfl, rfl, rxy⟩ := ha;
+      obtain ⟨w, z, _, rfl, _⟩ := hxy;
+      . subst_vars;
+        intro p hp hpx;
+        apply hyz p hp;
+        intro v ryv;
+        exact hpx (M_trans rxy ryv);
+      . rename_i h;
+        obtain ⟨w, z, rfl, rfl, _⟩ := h;
+        intro p hp hpx;
+        apply hyz p hp;
+        intro v ryv;
+        exact hpx (M_trans rxy ryv);
 
 lemma symmetric (M_symm : Symmetric M.Frame) : Symmetric ((FinestFilterationFrame M T).TransitiveClosure) :=
   TransitiveClosure.rel_symmetric_of_symmetric $ symmetric_finest_filteration_model M_symm

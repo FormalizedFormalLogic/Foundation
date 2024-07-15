@@ -4,6 +4,7 @@ import Logic.Modal.Standard.Deduction
 
 universe u v
 
+
 namespace LO.Modal.Standard
 
 def RelItr (R : α → α → Prop) : ℕ → α → α → Prop
@@ -117,32 +118,32 @@ structure FiniteFrame extends Frame where
 instance : Coe (FiniteFrame) (Frame) := ⟨λ F ↦ F.toFrame⟩
 
 
+open Relation
+
 def Frame.TransitiveReflexiveClosure (F : Frame) : Frame where
   World := F.World
   default := F.default
-  Rel x y := ∃ n : ℕ, x ≺^[n] y
+  Rel := ReflTransGen (· ≺ ·)
 
 namespace Frame.TransitiveReflexiveClosure
 
 variable {F : Frame}
 
 @[simp]
-lemma rel_one {x y : F.World} (hxy : F.Rel x y) : (F.TransitiveReflexiveClosure).Rel x y := by
-  use 1; simpa;
+lemma single {x y : F.World} (hxy : F.Rel x y) : (F.TransitiveReflexiveClosure).Rel x y := ReflTransGen.single hxy
 
+-- TODO: extract to `Relation.ReflTransGen.reflexive`
 @[simp]
-lemma rel_reflexive : Reflexive (F.TransitiveReflexiveClosure).Rel := by
-  intro x;
-  use 0; simp;
+lemma rel_reflexive : Reflexive (F.TransitiveReflexiveClosure).Rel := by intro x; exact ReflTransGen.refl;
 
+-- TODO: extract to `Relation.ReflTransGen.transitive`
 @[simp]
 lemma rel_transitive : Transitive (F.TransitiveReflexiveClosure).Rel := by
-  intro x y z hxy hyz;
-  obtain ⟨n, hxy⟩ := hxy;
-  obtain ⟨m, hyz⟩ := hyz;
-  use n + m;
-  apply Frame.RelItr'.comp.mp;
-  use y;
+  intro _ _ _ rxy ryz;
+  exact ReflTransGen.trans rxy ryz;
+
+lemma rel_symmetric_of_symmetric (hSymm : Symmetric F.Rel) : Symmetric (F.TransitiveReflexiveClosure).Rel :=
+  ReflTransGen.symmetric hSymm
 
 end Frame.TransitiveReflexiveClosure
 
@@ -150,38 +151,27 @@ end Frame.TransitiveReflexiveClosure
 def Frame.TransitiveClosure (F : Frame) : Frame where
   World := F.World
   default := F.default
-  Rel x y := ∃ n : ℕ+, x ≺^[n] y
+  Rel := TransGen (· ≺ ·)
 
 namespace Frame.TransitiveClosure
 
 variable {F : Frame}
 
 @[simp]
-lemma rel_one {x y : F.World} (hxy : F.Rel x y) : (F.TransitiveClosure).Rel x y := by
-  use 1; simpa;
+lemma single {x y : F.World} (hxy : F.Rel x y) : (F.TransitiveClosure).Rel x y := TransGen.single hxy
 
+-- TODO: extract to `Relation.TransGen.transitive`
 @[simp]
 lemma rel_transitive : Transitive (F.TransitiveClosure).Rel := by
-  intro x y z hxy hyz;
-  obtain ⟨n, hxy⟩ := hxy;
-  obtain ⟨m, hyz⟩ := hyz;
-  use n + m;
-  suffices F.RelItr' (↑n + ↑m) x z by convert this
-  apply Frame.RelItr'.comp'.mp;
-  use y;
+  intro _ _ _ hxy hyz
+  exact TransGen.trans hxy hyz;
 
+-- TODO: extract to `Relation.TransGen.symmetric`
 lemma rel_symmetric_of_symmetric (hSymm : Symmetric F.Rel) : Symmetric (F.TransitiveClosure).Rel := by
-  intro x y hxy;
-  obtain ⟨n, hxy⟩ := hxy;
-  use n;
-  induction n using PNat.recOn generalizing x y with
-  | p1 => simp_all; exact hSymm hxy;
-  | hp n ih =>
-    obtain ⟨z, hxz, hzy⟩ := RelItr.forward.mp $ hxy;
-    use z;
-    constructor;
-    . exact hSymm hzy;
-    . exact ih hxz;
+  intro x y rxy;
+  induction rxy with
+  | single h => exact Relation.TransGen.single $ hSymm h;
+  | tail _ h₂ ih => exact Relation.TransGen.trans (Relation.TransGen.single $ hSymm h₂) ih;
 
 end Frame.TransitiveClosure
 
