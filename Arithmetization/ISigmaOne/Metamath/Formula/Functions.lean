@@ -417,6 +417,45 @@ variable {m w : V}
 @[simp] lemma substs_ex {n p} (hp : L.Semiformula (n + 1) p) :
     L.substs m w (^∃[n] p) = ^∃[m] (L.substs (m + 1) (L.qVec n m w) p) := by simp [Language.substs, hp, construction]
 
+lemma uformula_subst_induction {P : V → V → V → V → Prop} (hP : 𝚺₁-Relation₄ P)
+    (hRel : ∀ n m w k R v, L.Rel k R → L.SemitermVec k n v → P m w (^rel n k R v) (^rel m k R (L.termSubstVec k n m w v)))
+    (hNRel : ∀ n m w k R v, L.Rel k R → L.SemitermVec k n v → P m w (^nrel n k R v) (^nrel m k R (L.termSubstVec k n m w v)))
+    (hverum : ∀ n m w, P m w (^⊤[n]) (^⊤[m]))
+    (hfalsum : ∀ n m w, P m w (^⊥[n]) (^⊥[m]))
+    (hand : ∀ n m w p q, L.Semiformula n p → L.Semiformula n q →
+      P m w p (L.substs m w p) → P m w q (L.substs m w q) → P m w (p ^⋏[n] q) (L.substs m w p ^⋏[m] L.substs m w q))
+    (hor : ∀ n m w p q, L.Semiformula n p → L.Semiformula n q →
+      P m w p (L.substs m w p) → P m w q (L.substs m w q) → P m w (p ^⋎[n] q) (L.substs m w p ^⋎[m] L.substs m w q))
+    (hall : ∀ n m w p, L.Semiformula (n + 1) p →
+      P (m + 1) (L.qVec n m w) p (L.substs (m + 1) (L.qVec n m w) p) →
+      P m w (^∀[n] p) (^∀[m] (L.substs (m + 1) (L.qVec n m w) p)))
+    (hex : ∀ n m w p, L.Semiformula (n + 1) p →
+      P (m + 1) (L.qVec n m w) p (L.substs (m + 1) (L.qVec n m w) p) →
+      P m w (^∃[n] p) (^∃[m] (L.substs (m + 1) (L.qVec n m w) p))) :
+    ∀ {p m w}, L.UFormula p → P m w p (L.substs m w p) := by
+  suffices ∀ param p, L.UFormula p → P (π₁ param) (π₂ param) p ((construction L).result param p) by
+    intro p m w hp; simpa using this ⟪m, w⟫ p hp
+  apply (construction L).uformula_result_induction (P := fun param p y ↦ P (π₁ param) (π₂ param) p y)
+  · apply Definable.comp₄'
+      (DefinableFunction.comp₁ (DefinableFunction.var _))
+      (DefinableFunction.comp₁ (DefinableFunction.var _))
+      (DefinableFunction.var _)
+      (DefinableFunction.var _)
+  · intro param n k R v hkR hv; simpa using hRel n (π₁ param) (π₂ param) k R v hkR hv
+  · intro param n k R v hkR hv; simpa using hNRel n (π₁ param) (π₂ param) k R v hkR hv
+  · intro param n; simpa using hverum n (π₁ param) (π₂ param)
+  · intro param n; simpa using hfalsum n (π₁ param) (π₂ param)
+  · intro param n p q hp hq ihp ihq
+    simpa [Language.substs] using
+      hand n (π₁ param) (π₂ param) p q hp hq (by simpa [Language.substs] using ihp) (by simpa [Language.substs] using ihq)
+  · intro param n p q hp hq ihp ihq
+    simpa [Language.substs] using
+      hor n (π₁ param) (π₂ param) p q hp hq (by simpa [Language.substs] using ihp) (by simpa [Language.substs] using ihq)
+  · intro param n p hp ihp
+    simpa using hall n (π₁ param) (π₂ param) p hp (by simpa [construction] using ihp)
+  · intro param n p hp ihp
+    simpa using hex n (π₁ param) (π₂ param) p hp (by simpa [construction] using ihp)
+
 lemma semiformula_subst_induction {P : V → V → V → V → V → Prop} (hP : 𝚺₁-Relation₅ P)
     (hRel : ∀ n m w k R v, L.Rel k R → L.SemitermVec k n v → P n m w (^rel n k R v) (^rel m k R (L.termSubstVec k n m w v)))
     (hNRel : ∀ n m w k R v, L.Rel k R → L.SemitermVec k n v → P n m w (^nrel n k R v) (^nrel m k R (L.termSubstVec k n m w v)))
@@ -481,16 +520,6 @@ lemma semiformula_subst_induction {P : V → V → V → V → V → Prop} (hP :
 lemma substs_not_uformula {m w x} (h : ¬L.UFormula x) :
     L.substs m w x = 0 := (construction L).result_prop_not _ h
 
-@[simp] lemma Language.Semiformula.substs_iff {n p m w : V} (hw : L.SemitermVec n m w) :
-    L.Semiformula m (L.substs m w p) ↔ L.Semiformula n p := by
-  constructor
-  · intro hp
-    have h : L.UFormula p := by
-      by_contra A; simp [substs_not_uformula A] at hp
-    exact ⟨h, by {  }⟩
-
-
-/--/
 end substs
 
 namespace Formalized

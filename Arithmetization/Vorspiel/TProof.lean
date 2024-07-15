@@ -16,12 +16,12 @@ inductive FDerivation : Finset (SyntacticFormula L) → Type _
 | wk    {Δ Γ} : FDerivation Δ → Δ ⊆ Γ → FDerivation Γ
 | cut   {Δ p} : FDerivation (insert p Δ) → FDerivation (insert (~p) Δ) → FDerivation Δ
 
-prefix: 45 " ⊢ᶠ " => FDerivation
+prefix: 45 " ⊢¹ᶠ " => FDerivation
 
 lemma shifts_toFinset_eq_image_shift (Δ : Sequent L) :
     (shifts Δ).toFinset = Δ.toFinset.image Rew.shift.hom := by ext p; simp [shifts]
 
-def Derivation.toFDerivation : {Γ : Sequent L} → ⊢¹ Γ → ⊢ᶠ Γ.toFinset
+def Derivation.toFDerivation : {Γ : Sequent L} → ⊢¹ Γ → ⊢¹ᶠ Γ.toFinset
   | _, Derivation.axL Δ r v          => FDerivation.axL (Semiformula.rel r v) (by simp) (by simp)
   | _, Derivation.verum Δ            => FDerivation.verum (by simp)
   | _, @Derivation.and _ Δ p q dp dq =>

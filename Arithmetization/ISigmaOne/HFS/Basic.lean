@@ -23,6 +23,12 @@ lemma lt_of_mem_dom {x y m : V} (h : ⟪x, y⟫ ∈ m) : x < m := lt_of_le_of_lt
 
 lemma lt_of_mem_rng {x y m : V} (h : ⟪x, y⟫ ∈ m) : y < m := lt_of_le_of_lt (by simp) (lt_of_mem h)
 
+lemma insert_subset_insert_of_subset {a b : V} (x : V) (h : a ⊆ b) : insert x a ⊆ insert x b := by
+  intro z hz
+  rcases mem_bitInsert_iff.mp hz with (rfl | hz)
+  · simp
+  · simp [h hz]
+
 section under
 
 @[simp] lemma under_subset_under_of_le {i j : V} : under i ⊆ under j ↔ i ≤ j :=

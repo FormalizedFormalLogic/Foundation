@@ -489,9 +489,11 @@ lemma Language.UFormula.pos {p : V} (h : L.UFormula p) : 0 < p := by
     ⟨_, _, _, _, _, rfl⟩ | ⟨_, _, _, _, _, rfl⟩ | ⟨_, _, _, rfl⟩ | ⟨_, _, _, rfl⟩) <;>
     simp [qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqEx]
 
+lemma Language.Semiformula.pos {n p : V} (h : L.Semiformula n p) : 0 < p := h.1.pos
+
 @[simp] lemma Language.UFormula.not_zero : ¬L.UFormula (0 : V) := by intro h; simpa using h.pos
 
-lemma Language.Semiformula.pos {n p : V} (h : L.Semiformula n p) : 0 < p := h.1.pos
+@[simp] lemma Language.Semiformula.not_zero (m : V) : ¬L.Semiformula m (0 : V) := by intro h; simpa using h.pos
 
 @[simp] lemma Language.Semiformula.rel {n k r v : V} :
     L.Semiformula n (^rel n k r v) ↔ L.Rel k r ∧ L.SemitermVec k n v := by simp [Language.Semiformula]

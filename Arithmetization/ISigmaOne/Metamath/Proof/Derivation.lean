@@ -121,6 +121,8 @@ def Language.setShift (s : V) : V := Classical.choose! (setShift_existsUnique L 
 
 variable {L}
 
+section setShift
+
 lemma mem_setShift_iff {s y : V} : y ∈ L.setShift s ↔ ∃ x ∈ s, y = L.shift x :=
   Classical.choose!_spec (setShift_existsUnique L s) y
 
@@ -134,6 +136,19 @@ lemma shift_mem_setShift {p s : V} (h : p ∈ s) : L.shift p ∈ L.setShift s :=
 @[simp] lemma Language.FormulaSet.setShift_iff {s : V} :
     L.FormulaSet (L.setShift s) ↔ L.FormulaSet s :=
   ⟨by intro h p hp; simpa using h (L.shift p) (shift_mem_setShift hp), Language.FormulaSet.setShift⟩
+
+@[simp] lemma mem_setShift_union {s t : V} : L.setShift (s ∪ t) = L.setShift s ∪ L.setShift t := mem_ext <| by
+  simp [mem_setShift_iff]; intro x
+  constructor
+  · rintro ⟨z, (hz | hz), rfl⟩
+    · left; exact ⟨z, hz, rfl⟩
+    · right; exact ⟨z, hz, rfl⟩
+  · rintro (⟨z, hz, rfl⟩ | ⟨z, hz, rfl⟩)
+    exact ⟨z, Or.inl hz, rfl⟩
+    exact ⟨z, Or.inr hz, rfl⟩
+
+@[simp] lemma mem_setShift_insert {x s : V} : L.setShift (insert x s) = insert (L.shift x) (L.setShift s) := mem_ext <| by
+  simp [mem_setShift_iff]
 
 section
 
@@ -162,6 +177,8 @@ lemma setShift_defined : 𝚺₁-Function₁ L.setShift via pL.setShiftDef := by
 @[simp, definability] instance setShift_definable : 𝚺₁-Function₁ L.setShift := Defined.to_definable _ (setShift_defined L)
 
 end
+
+end setShift
 
 def axL (s p : V) : V := ⟪s, 0, p⟫ + 1
 
@@ -697,13 +714,6 @@ lemma cut {s : V} (p) (hd₁ : L.Derivable (insert p s)) (hd₂ : L.Derivable (i
     L.Derivable s := by
   rcases hd₁ with ⟨d₁, hd₁⟩; rcases hd₂ with ⟨d₂, hd₂⟩
   exact ⟨cutRule s p d₁ d₂, by simp, Language.Derivation.cutRule hd₁ hd₂⟩
-
-/-- TODO: move-/
-lemma insert_subset_insert_of_subset {a b : V} (x : V) (h : a ⊆ b) : insert x a ⊆ insert x b := by
-  intro z hz
-  rcases mem_bitInsert_iff.mp hz with (rfl | hz)
-  · simp
-  · simp [h hz]
 
 lemma and {s p q : V} (hp : L.Derivable (insert p s)) (hq : L.Derivable (insert q s)) :
     L.Derivable (insert (p ^⋏ q) s) :=

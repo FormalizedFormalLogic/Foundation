@@ -87,74 +87,64 @@ end typed_sequent
 
 section typed_derivation
 
-structure Language.Theory.TDerivation (Γ : L.Sequent) where
+structure Language.Theory.TDerivation (T : L.Theory) (Γ : L.Sequent) where
   antecedents : V
-
+  antecedents_fvFree : ∀ p ∈ antecedents, L.neg p ∈ T
   derivation : V
-  derivationOf : L.DerivationOf derivation Γ.val
+  derivationOf : L.DerivationOf derivation (antecedents ∪ Γ.val)
 
-scoped prefix:45 "⊢ₜ " => Language.TDerivation
+scoped infix:45 " ⊢ₜ " => Language.Theory.TDerivation
 
-def Language.Derivable.toTDerivation (Γ : L.Sequent) (h : L.Derivable Γ.val) : ⊢ₜ Γ := by
-  choose d hd using h
-  exact ⟨d, hd⟩
+def Language.Theory.Derivable.toTDerivation {T : L.Theory} (Γ : L.Sequent) (h : T.Derivable Γ.val) : T ⊢ₜ Γ := by
+  choose a ha using h; choose d hd using ha.2
+  exact ⟨a, ha.1, d, hd⟩
 
-namespace Language.TDerivation
+def Language.Theory.TDerivation.toDerivable {T : L.Theory} {Γ : L.Sequent} (d : T ⊢ₜ Γ) : T.Derivable Γ.val :=
+  ⟨d.antecedents, d.antecedents_fvFree, d.derivation, d.derivationOf⟩
 
-variable {Γ Δ : L.Sequent} {p q : L.TFormula}
+namespace Language.Theory.TDerivation
 
-protected def axL (h : p ∈ Γ) (hn : ~p ∈ Γ) : ⊢ₜ Γ where
-  derivation := axL Γ.val p.val
-  derivationOf := ⟨by simp, Language.Derivation.axL (by simp) h hn⟩
-/--/
-def verum (h : ⊤ ∈ Γ) : ⊢ₜ Γ where
-  derivation := verumIntro Γ.val
-  derivationOf := ⟨by simp, Language.Derivation.verumIntro (by simp) h⟩
+variable {T : L.Theory} {pT : pL.TDef} [T.Defined pT] {Γ Δ : L.Sequent} {p q : L.TFormula}
 
-def and_m (dp : ⊢ₜ insert p Γ) (dq : ⊢ₜ insert q Γ) (h : p ⋏ q ∈ Γ) : ⊢ₜ Γ where
-  derivation := andIntro Γ.val p.val q.val dp.derivation dq.derivation
-  derivationOf := ⟨by simp, Language.Derivation.andIntro h dp.derivationOf dq.derivationOf⟩
+def em (p) (h : p ∈ Γ) (hn : ~p ∈ Γ) : T ⊢ₜ Γ :=
+  Language.Theory.Derivable.toTDerivation _
+    <| Language.Theory.Derivable.em (by simp) p.val (Language.Sequent.mem_iff.mp h) (by simpa using Language.Sequent.mem_iff.mp hn)
 
-def or_m (dpq : ⊢ₜ insert p (insert q Γ)) (h : p ⋎ q ∈ Γ) : ⊢ₜ Γ where
-  derivation := orIntro Γ.val p.val q.val dpq.derivation
-  derivationOf := ⟨by simp, Language.Derivation.orIntro h dpq.derivationOf⟩
+def verum (h : ⊤ ∈ Γ) : T ⊢ₜ Γ :=
+  Language.Theory.Derivable.toTDerivation _
+    <| Language.Theory.Derivable.verum (by simp) (by simpa using Language.Sequent.mem_iff.mp h)
 
-def all_m {p : L.TSemiformula (0 + 1)} (dp : ⊢ₜ insert p.free Γ.shift) (h : p.all ∈ Γ) : ⊢ₜ Γ where
-  derivation := allIntro Γ.val p.val dp.derivation
-  derivationOf := ⟨by simp, Language.Derivation.allIntro h (by simpa using dp.derivationOf)⟩
+def and (dp : T ⊢ₜ insert p Γ) (dq : T ⊢ₜ insert q Γ) : T ⊢ₜ insert (p ⋏ q) Γ :=
+  Language.Theory.Derivable.toTDerivation _
+    <| by simpa using Language.Theory.Derivable.and (by simpa using dp.toDerivable) (by simpa using dq.toDerivable)
 
-def ex_m {p : L.TSemiformula (0 + 1)} (t : L.TTerm) (dp : ⊢ₜ insert (p.substs₁ t) Γ) (h : p.ex ∈ Γ) : ⊢ₜ Γ where
-  derivation := exIntro Γ.val p.val t.val dp.derivation
-  derivationOf := ⟨by simp, Language.Derivation.exIntro h (by simp) dp.derivationOf⟩
+def or_m (dpq : T ⊢ₜ insert p (insert q Γ)) : T ⊢ₜ insert (p ⋎ q) Γ :=
+  Language.Theory.Derivable.toTDerivation _ <| by simpa using Language.Theory.Derivable.or (by simpa using dpq.toDerivable)
 
-def wk (d : ⊢ₜ Δ) (h : Δ ⊆ Γ) : ⊢ₜ Γ where
-  derivation := wkRule Γ.val d.derivation
-  derivationOf := ⟨by simp, Language.Derivation.wkRule (by simp) h d.derivationOf⟩
+def all_m {p : L.TSemiformula (0 + 1)} (dp : T ⊢ₜ insert p.free Γ.shift) : T ⊢ₜ insert p.all Γ :=
+  Language.Theory.Derivable.toTDerivation _ <| by
+    simpa using Language.Theory.Derivable.all (by simpa using p.prop) (by simpa using dp.toDerivable)
 
-def cut (d₁ : ⊢ₜ insert p Γ) (d₂ : ⊢ₜ insert (~p) Γ) : ⊢ₜ Γ where
-  derivation := cutRule Γ.val p.val d₁.derivation d₂.derivation
-  derivationOf := ⟨by simp, Language.Derivation.cutRule d₁.derivationOf d₂.derivationOf⟩
+def ex_m {p : L.TSemiformula (0 + 1)} (t : L.TTerm) (dp : T ⊢ₜ insert (p.substs₁ t) Γ) : T ⊢ₜ insert p.ex Γ :=
+  Language.Theory.Derivable.toTDerivation _ <| by
+    simpa using Language.Theory.Derivable.ex (by simpa using p.prop) t.prop (by simpa using dp.toDerivable)
 
-/-- TODO: move-/
-lemma insert_subset_iff_insert {s t : V} (h : s ⊆ t) (x : V) : insert x s ⊆ insert x t := by
-  intro z hz
-  rcases mem_bitInsert_iff.mp hz with (rfl | hz)
-  · simp
-  · simp [h hz]
+def wk (d : T ⊢ₜ Δ) (h : Δ ⊆ Γ) : T ⊢ₜ Γ :=
+  Language.Theory.Derivable.toTDerivation _ <| by
+    simpa using Language.Theory.Derivable.wk (by simp) (Language.Sequent.subset_iff.mp h) (by simpa using d.toDerivable)
 
-def cut' (d₁ : ⊢ₜ insert p Γ) (d₂ : ⊢ₜ insert (~p) Δ) : ⊢ₜ Γ ∪ Δ :=
-  cut (p := p) (d₁.wk (insert_subset_iff_insert (by simp) _)) (d₂.wk (insert_subset_iff_insert (by simp) _))
+def cut (d₁ : T ⊢ₜ insert p Γ) (d₂ : T ⊢ₜ insert (~p) Γ) : T ⊢ₜ Γ :=
+  Language.Theory.Derivable.toTDerivation _ <| by
+    simpa using Language.Theory.Derivable.cut p.val (by simpa using d₁.toDerivable) (by simpa using d₂.toDerivable)
 
-def and (dp : ⊢ₜ insert p Γ) (dq : ⊢ₜ insert q Γ) : ⊢ₜ insert (p ⋏ q) Γ := and_m (p := p) (q := q)
-  (dp.wk <| by intro x; simp; tauto) (dq.wk <| by intro x; simp; tauto) (by simp)
+def cut' (d₁ : T ⊢ₜ insert p Γ) (d₂ : T ⊢ₜ insert (~p) Δ) : T ⊢ₜ Γ ∪ Δ :=
+  cut (p := p) (d₁.wk (by intro x; simp; tauto)) (d₂.wk (by intro x; simp; tauto))
 
-lemma toDerivable (d : ⊢ₜ Γ) : L.Derivable Γ.val := ⟨d.derivation, d.derivationOf⟩
+def conj (ps : L.TSemiformulaVec 0) (ds : ∀ i, (hi : i < len ps.val) → T ⊢ₜ insert (ps.nth i hi) Γ) : T ⊢ₜ insert ps.conj Γ := by
+  have : ∀ i < len ps.val, T.Derivable (insert (ps.val.[i]) Γ.val) := by intro i hi; simpa using (ds i hi).toDerivable
+  have : T.Derivable (insert (^⋀ ps.val) Γ.val) := Language.Theory.Derivable.conj ps.val (by simp) this
+  exact Language.Theory.Derivable.toTDerivation _ (by simpa using this)
 
-def conj (ps : L.TSemiformulaVec 0) (ds : ∀ i, (hi : i < len ps.val) → ⊢ₜ insert (ps.nth i hi) Γ) : ⊢ₜ insert ps.conj Γ := by
-  have : ∀ i < len ps.val, L.Derivable (insert (ps.val.[i]) Γ.val) := by intro i hi; simpa using (ds i hi).toDerivable
-  have : L.Derivable (insert (^⋀ ps.val) Γ.val) := Language.Derivable.conj ps.val (by simp) this
-  exact Language.Derivable.toTDerivation _ (by simpa using this)
-
-end Language.TDerivation
+end Language.Theory.TDerivation
 
 end typed_derivation
