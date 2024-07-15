@@ -142,6 +142,7 @@ lemma filter_truthlemma
 
 noncomputable abbrev GLFilteredFrame (p : Formula α) : Kripke.FiniteFrame where
   World := FilterEqvQuotient GLCanonicalModel ((𝒮 p).toSet)
+  default := ⟦default⟧
   World_finite := by apply FilterEqvQuotient.finite; simp;
   Rel := Quotient.lift₂
     (λ X Y =>
@@ -258,7 +259,7 @@ private lemma GL_truthlemma.lemma1
 open Formula MaximalConsistentTheory in
 lemma GL_truthlemma
   {p : Formula α} {X : (CanonicalModel 𝐆𝐋).World} {q : Formula α} (hq : q ∈ 𝒮 p) :
-  Formula.Kripke.Satisfies (GLFilteredModel p) ⟦X⟧ q ↔ q ∈ X.theory := by
+  Satisfies (GLFilteredModel p) ⟦X⟧ q ↔ q ∈ X.theory := by
   induction q using Formula.rec' generalizing X with
   | hbox q ih =>
     constructor;

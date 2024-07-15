@@ -15,6 +15,7 @@ namespace Kripke
 
 abbrev CanonicalFrame (Λ : DeductionParameter α) [Inhabited (Λ)-MCT] : Frame where
   World := (Λ)-MCT
+  default := default
   Rel Ω₁ Ω₂ := □''⁻¹Ω₁.theory ⊆ Ω₂.theory
 
 namespace CanonicalFrame

@@ -80,13 +80,6 @@ end ModalEquivalent
 
 section Generation
 
-/-
-class GeneratedSubframe (F F' : Kripke.Frame α) where
-  subset : F'.World ⊆ F.World
-  rel : ∀ {x y : F'.World}, x ≺ y ↔ F.Rel' ⟨x, (by aesop)⟩ ⟨y, (by aesop)⟩ -- MEMO: i.e. F.Rel' = F.Rel' ∪ (F.World × F.World)
-  closed : ∀ {x : F'.World}, ∀ {y : F.World}, ⟨x.1, (by aesop)⟩ ≺ y → y.1 ∈ F'.World
--/
-
 end Generation
 
 
@@ -163,10 +156,10 @@ theorem undefinable_irreflexive : ¬∃ (Ax : AxiomSet α), AxiomSet.DefinesKrip
   by_contra hC;
   obtain ⟨Ax, h⟩ := hC;
 
-  let F₁ : Frame := { World := Fin 2, Rel := (· ≠ ·) };
+  let F₁ : Frame := { World := Fin 2, default := 0, Rel := (· ≠ ·) };
   have hIF₁ : Irreflexive F₁ := by simp [Irreflexive, Frame.Rel'];
 
-  let F₂ : Frame := { World := Fin 1, Rel := (· = ·) };
+  let F₂ : Frame := { World := Fin 1, default := 0, Rel := (· = ·) };
 
   let f : F₁ →ₚ F₂ := {
     toFun := λ _ => 0,

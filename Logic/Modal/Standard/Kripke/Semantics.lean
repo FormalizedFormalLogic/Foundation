@@ -24,17 +24,23 @@ lemma eq : RelItr (α := α) (· = ·) n = (· = ·) := by
   | zero => rfl;
   | succ n ih => aesop
 
-lemma forward {R} {n : ℕ} (hxy : RelItr R (n + 1) x y) : ∃ z, RelItr R n x z ∧ R z y := by
-  obtain ⟨z, Rzx, Rzy⟩ := hxy;
-  induction n generalizing x z with
+lemma forward {R} {n : ℕ} : (RelItr R (n + 1) x y) ↔ ∃ z, RelItr R n x z ∧ R z y := by
+  induction n generalizing x y with
   | zero => simp_all;
   | succ n ih =>
-    obtain ⟨w, Rwz, Rwy⟩ := Rzy;
-    obtain ⟨v, Rzv, Rvy⟩ := @ih z w Rwz Rwy;
-    use v;
     constructor;
-    . use z;
-    . assumption;
+    . rintro ⟨z, Rxz, Rzy⟩;
+      obtain ⟨w, Rzw, Rwy⟩ := ih.mp Rzy;
+      use w;
+      constructor;
+      . use z;
+      . assumption;
+    . rintro ⟨z, ⟨w, Rxw, Rwz⟩, Rzy⟩;
+      use w;
+      constructor;
+      . assumption;
+      . apply ih.mpr;
+        use z;
 
 end RelItr
 
@@ -43,11 +49,11 @@ namespace Kripke
 
 structure Frame where
   World : Type*
-  [World_inhabited : Inhabited World]
+  default : World
   Rel : Rel World World
 
-abbrev Frame.default {F : Frame} : F.World := F.World_inhabited.default
-scoped notation "﹫" => Frame.default
+
+instance {F : Frame} : Inhabited F.World := ⟨F.default⟩
 
 instance : CoeSort Frame (Type u) := ⟨Frame.World⟩
 instance : CoeFun Frame (λ F => F.World → F.World → Prop) := ⟨Frame.Rel⟩
@@ -66,9 +72,7 @@ lemma congr {F : Frame} {x y : F.World} {n m : ℕ} (h : x ≺^[n] y) (he : n = 
   subst_vars; exact h;
 
 
-lemma forward {F : Frame} {x y : F.World} (h : x ≺^[n + 1] y) : ∃ z, x ≺^[n] z ∧ z ≺ y := by
-  obtain ⟨z, hzx, hzy⟩ := RelItr.forward h;
-  use z;
+lemma forward {F : Frame} {x y : F.World} : x ≺^[n + 1] y ↔ ∃ z, x ≺^[n] z ∧ z ≺ y := RelItr.forward
 
 lemma comp {F : Frame} {x y : F.World} {n m : ℕ} : (∃ z, x ≺^[n] z ∧ z ≺^[m] y) ↔ x ≺^[n + m] y := by
   constructor;
@@ -113,22 +117,26 @@ structure FiniteFrame extends Frame where
 instance : Coe (FiniteFrame) (Frame) := ⟨λ F ↦ F.toFrame⟩
 
 
-def TransitiveReflexiveClosureFrame (F : Frame) : Frame where
+def Frame.TransitiveReflexiveClosure (F : Frame) : Frame where
   World := F.World
-  World_inhabited := F.World_inhabited
+  default := F.default
   Rel x y := ∃ n : ℕ, x ≺^[n] y
 
-namespace TransitiveReflexiveClosureFrame
+namespace Frame.TransitiveReflexiveClosure
+
+variable {F : Frame}
 
 @[simp]
-lemma rel_one {F : Frame} {x y : F.World} (hxy : F.Rel x y) : (TransitiveReflexiveClosureFrame F).Rel x y := by
+lemma rel_one {x y : F.World} (hxy : F.Rel x y) : (F.TransitiveReflexiveClosure).Rel x y := by
   use 1; simpa;
 
-lemma rel_reflexive : Reflexive (TransitiveReflexiveClosureFrame F).Rel := by
+@[simp]
+lemma rel_reflexive : Reflexive (F.TransitiveReflexiveClosure).Rel := by
   intro x;
   use 0; simp;
 
-lemma rel_transitive : Transitive (TransitiveReflexiveClosureFrame F).Rel := by
+@[simp]
+lemma rel_transitive : Transitive (F.TransitiveReflexiveClosure).Rel := by
   intro x y z hxy hyz;
   obtain ⟨n, hxy⟩ := hxy;
   obtain ⟨m, hyz⟩ := hyz;
@@ -136,21 +144,24 @@ lemma rel_transitive : Transitive (TransitiveReflexiveClosureFrame F).Rel := by
   apply Frame.RelItr'.comp.mp;
   use y;
 
-end TransitiveReflexiveClosureFrame
+end Frame.TransitiveReflexiveClosure
 
 
-def TransitiveClosureFrame (F : Frame) : Frame where
+def Frame.TransitiveClosure (F : Frame) : Frame where
   World := F.World
-  World_inhabited := F.World_inhabited
+  default := F.default
   Rel x y := ∃ n : ℕ+, x ≺^[n] y
 
-namespace TransitiveClosureFrame
+namespace Frame.TransitiveClosure
+
+variable {F : Frame}
 
 @[simp]
-lemma rel_one {F : Frame} {x y : F.World} (hxy : F.Rel x y) : (TransitiveClosureFrame F).Rel x y := by
+lemma rel_one {x y : F.World} (hxy : F.Rel x y) : (F.TransitiveClosure).Rel x y := by
   use 1; simpa;
 
-lemma rel_transitive : Transitive (TransitiveClosureFrame F).Rel := by
+@[simp]
+lemma rel_transitive : Transitive (F.TransitiveClosure).Rel := by
   intro x y z hxy hyz;
   obtain ⟨n, hxy⟩ := hxy;
   obtain ⟨m, hyz⟩ := hyz;
@@ -159,20 +170,20 @@ lemma rel_transitive : Transitive (TransitiveClosureFrame F).Rel := by
   apply Frame.RelItr'.comp'.mp;
   use y;
 
-lemma rel_symmetric_of_symmetric {F : Frame} (hSymm : Symmetric F.Rel) : Symmetric (TransitiveClosureFrame F).Rel := by
+lemma rel_symmetric_of_symmetric (hSymm : Symmetric F.Rel) : Symmetric (F.TransitiveClosure).Rel := by
   intro x y hxy;
   obtain ⟨n, hxy⟩ := hxy;
   use n;
   induction n using PNat.recOn generalizing x y with
   | p1 => simp_all; exact hSymm hxy;
   | hp n ih =>
-    obtain ⟨z, hxz, hzy⟩ := RelItr.forward $ hxy;
+    obtain ⟨z, hxz, hzy⟩ := RelItr.forward.mp $ hxy;
     use z;
     constructor;
     . exact hSymm hzy;
     . exact ih hxz;
 
-end TransitiveClosureFrame
+end Frame.TransitiveClosure
 
 
 abbrev FrameClass := Set (Frame)
@@ -207,6 +218,7 @@ lemma FrameClass.iff_mem_restrictFinite {𝔽 : FrameClass} (h : F ∈ 𝔽) (F_
 /-- Frame with single world and identiy relation -/
 abbrev terminalFrame : FiniteFrame where
   World := Unit;
+  default := ();
   Rel := λ _ _ => True
 
 @[simp]
@@ -222,6 +234,7 @@ lemma terminalFrame.iff_relItr' {x y : terminalFrame.World} : x ≺^[n] y ↔ x 
 
 abbrev PointFrame : FiniteFrame where
   World := Unit
+  default := ();
   Rel := (λ _ _ => False)
 
 @[simp]
@@ -243,7 +256,7 @@ structure FiniteModel (α) extends Model α where
 
 def FiniteModel.FiniteFrame (M : FiniteModel α) : FiniteFrame := {
   World := M.World,
-  World_inhabited := M.Frame.World_inhabited,
+  default := M.Frame.default,
   World_finite := M.World_finite,
   Rel := M.Frame.Rel,
 }
@@ -341,7 +354,7 @@ protected instance : Semantics (Formula α) (Kripke.Model α) := ⟨fun M ↦ Fo
 @[simp] protected lemma iff_models {M : Kripke.Model α} : M ⊧ f ↔ Kripke.ValidOnModel M f := iff_of_eq rfl
 
 instance : Semantics.Bot (Kripke.Model α) where
-  realize_bot M := by simp [Kripke.ValidOnModel, Kripke.Satisfies]; use ﹫;
+  realize_bot M := by simp [Kripke.ValidOnModel, Kripke.Satisfies];
 
 end Formula.Kripke.ValidOnModel
 
