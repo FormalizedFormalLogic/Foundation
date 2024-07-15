@@ -80,10 +80,10 @@ lemma val_inj {p q : L.TSemiformula n} :
 
 @[simp] lemma neg_verum : ~(⊤ : L.TSemiformula n) = ⊥ := by ext; simp
 @[simp] lemma neg_falsum : ~(⊥ : L.TSemiformula n) = ⊤ := by ext; simp
-lemma neg_and (p q : L.TSemiformula n) : ~(p ⋏ q) = ~p ⋎ ~q := by ext; simp
-lemma neg_or (p q : L.TSemiformula n) : ~(p ⋎ q) = ~p ⋏ ~q := by ext; simp
-lemma neg_all (p : L.TSemiformula (n + 1)) : ~p.all = (~p).ex := by ext; simp
-lemma neg_ex (p : L.TSemiformula (n + 1)) : ~p.ex = (~p).all := by ext; simp
+@[simp] lemma neg_and (p q : L.TSemiformula n) : ~(p ⋏ q) = ~p ⋎ ~q := by ext; simp
+@[simp] lemma neg_or (p q : L.TSemiformula n) : ~(p ⋎ q) = ~p ⋏ ~q := by ext; simp
+@[simp] lemma neg_all (p : L.TSemiformula (n + 1)) : ~p.all = (~p).ex := by ext; simp
+@[simp] lemma neg_ex (p : L.TSemiformula (n + 1)) : ~p.ex = (~p).all := by ext; simp
 
 lemma imp_def (p q : L.TSemiformula n) : p ⟶ q = ~p ⋎ q := by ext; simp [imp]
 
