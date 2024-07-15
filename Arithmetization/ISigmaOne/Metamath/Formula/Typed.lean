@@ -1,5 +1,5 @@
 import Arithmetization.ISigmaOne.Metamath.Term.Typed
-import Arithmetization.ISigmaOne.Metamath.Formula.Functions
+import Arithmetization.ISigmaOne.Metamath.Formula.Iteration
 
 /-!
 
@@ -117,6 +117,29 @@ def substs (p : L.TSemiformula n) (w : L.TSemitermVec n m) : L.TSemiformula m :=
 
 end Language.TSemiformula
 
+
+structure Language.TSemiformulaVec (n : V) where
+  val : V
+  prop : ∀ i < len val, L.Semiformula n val.[i]
+
+namespace Language.TSemiformulaVec
+
+def conj (ps : L.TSemiformulaVec n) : L.TSemiformula n := ⟨^⋀[n] ps.val, by simpa using ps.prop⟩
+
+def disj (ps : L.TSemiformulaVec n) : L.TSemiformula n := ⟨^⋁[n] ps.val, by simpa using ps.prop⟩
+
+def nth (ps : L.TSemiformulaVec n) (i : V) (hi : i < len ps.val) : L.TSemiformula n :=
+  ⟨ps.val.[i], ps.prop i hi⟩
+
+@[simp] lemma val_conj (ps : L.TSemiformulaVec n) : ps.conj.val = ^⋀[n] ps.val := rfl
+
+@[simp] lemma val_disj (ps : L.TSemiformulaVec n) : ps.disj.val = ^⋁[n] ps.val := rfl
+
+@[simp] lemma val_nth (ps : L.TSemiformulaVec n) (i : V) (hi : i < len ps.val) :
+    (ps.nth i hi).val = ps.val.[i] := rfl
+
+end Language.TSemiformulaVec
+
 end typed_formula
 
 namespace Formalized
@@ -137,7 +160,7 @@ scoped infix:75 " ≺ " => lessThan
 
 scoped infix:75 " ⊀ " => notLessThan
 
-variable {n : V}
+variable {n m : V}
 
 @[simp] lemma shift_equals (t₁ t₂ : ⌜ℒₒᵣ⌝.TSemiterm n) :
     (t₁ =' t₂).shift = (t₁.shift =' t₂.shift) := by
@@ -154,6 +177,22 @@ variable {n : V}
 @[simp] lemma shift_notLessThan (t₁ t₂ : ⌜ℒₒᵣ⌝.TSemiterm n) :
     (t₁ ⊀ t₂).shift = (t₁.shift ⊀ t₂.shift) := by
   ext; simp [notLessThan, Language.TSemiterm.shift, Language.TSemiformula.shift, qqNLT]
+
+@[simp] lemma substs_equals (w : ⌜ℒₒᵣ⌝.TSemitermVec n m) (t₁ t₂ : ⌜ℒₒᵣ⌝.TSemiterm n) :
+    (t₁ =' t₂).substs w = (t₁.substs w =' t₂.substs w) := by
+  ext; simp [equals, Language.TSemiterm.substs, Language.TSemiformula.substs, qqEQ]
+
+@[simp] lemma substs_notEquals (w : ⌜ℒₒᵣ⌝.TSemitermVec n m) (t₁ t₂ : ⌜ℒₒᵣ⌝.TSemiterm n) :
+    (t₁ ≠' t₂).substs w = (t₁.substs w ≠' t₂.substs w) := by
+  ext; simp [notEquals, Language.TSemiterm.substs, Language.TSemiformula.substs, qqNEQ]
+
+@[simp] lemma substs_lessThan (w : ⌜ℒₒᵣ⌝.TSemitermVec n m) (t₁ t₂ : ⌜ℒₒᵣ⌝.TSemiterm n) :
+    (t₁ ≺ t₂).substs w = (t₁.substs w ≺ t₂.substs w) := by
+  ext; simp [lessThan, Language.TSemiterm.substs, Language.TSemiformula.substs, qqLT]
+
+@[simp] lemma substs_notLessThan (w : ⌜ℒₒᵣ⌝.TSemitermVec n m) (t₁ t₂ : ⌜ℒₒᵣ⌝.TSemiterm n) :
+    (t₁ ⊀ t₂).substs w = (t₁.substs w ⊀ t₂.substs w) := by
+  ext; simp [notLessThan, Language.TSemiterm.substs, Language.TSemiformula.substs, qqNLT]
 
 end Formalized
 

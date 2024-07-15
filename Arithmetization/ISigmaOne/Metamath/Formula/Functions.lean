@@ -146,6 +146,11 @@ lemma Language.Semiformula.neg {p : V} : L.Semiformula n p → L.Semiformula n (
   · intro n p hp ihp; simp [hp, ihp]
   · intro n p hp ihp; simp [hp, ihp]
 
+@[simp] lemma neg_inj_iff (hp : L.Semiformula n p) (hq : L.Semiformula n q) : L.neg p = L.neg q ↔ p = q := by
+  constructor
+  · intro h; simpa [neg_neg hp, neg_neg hq] using congrArg L.neg h
+  · rintro rfl; rfl
+
 end negation
 
 section shift
@@ -270,6 +275,18 @@ lemma fstIdx_shift {p} (h : L.UFormula p) : fstIdx (L.shift p) = fstIdx p := by
       simp [shift_not_uformula hp] at h
     exact ⟨this, by simp [fstIdx_shift this]⟩,
     Language.Semiformula.shift⟩
+
+lemma shift_neg {p : V} (hp : L.Semiformula n p) : L.shift (L.neg p) = L.neg (L.shift p) := by
+  apply Language.Semiformula.induction_sigma₁ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ _ _ hp
+  · definability
+  · intro n k R v hR hv; simp [*]
+  · intro n k R v hR hv; simp [*]
+  · intro n; simp
+  · intro n; simp
+  · intro n p q hp hq ihp ihq; simp [*]
+  · intro n p q hp hq ihp ihq; simp [*]
+  · intro n p hp ih; simp [*]
+  · intro n p hp ih; simp [*]
 
 end shift
 
@@ -464,6 +481,16 @@ lemma semiformula_subst_induction {P : V → V → V → V → V → Prop} (hP :
 lemma substs_not_uformula {m w x} (h : ¬L.UFormula x) :
     L.substs m w x = 0 := (construction L).result_prop_not _ h
 
+@[simp] lemma Language.Semiformula.substs_iff {n p m w : V} (hw : L.SemitermVec n m w) :
+    L.Semiformula m (L.substs m w p) ↔ L.Semiformula n p := by
+  constructor
+  · intro hp
+    have h : L.UFormula p := by
+      by_contra A; simp [substs_not_uformula A] at hp
+    exact ⟨h, by {  }⟩
+
+
+/--/
 end substs
 
 namespace Formalized

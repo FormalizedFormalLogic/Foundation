@@ -640,7 +640,6 @@ def construction : VecRec.Construction V blueprint where
   cons_defined := by
     intro v
     simp [blueprint, Fin.isValue]
-
     show (v 0 = if len (v 2) < v 4 then v 1 ∷ v 2 else v 3) ↔
       (len (v 2) < v 4 → v 0 = v 1 ∷ v 2) ∧ (v 4 ≤ len (v 2) → v 0 = v 3)
     rcases lt_or_ge (len (v 2)) (v 4) with (hv | hv)
@@ -714,6 +713,98 @@ lemma takeLast_succ_of_lt {i v : V} (h : i < len v) : takeLast v (i + 1) = v.[le
       simpa [not_le_of_lt hi, ↓reduceIte, this, nth_cons_succ, not_lt_of_gt hi] using ih hi
 
 end takeLast
+
+/-!
+
+### Membership
+
+-/
+
+section vec_membership
+
+def MemVec (x v : V) : Prop := ∃ i < len v, x = v.[i]
+
+scoped infix:40 " ∈ᵥ " => MemVec
+
+@[simp] lemma not_memVec_empty (x : V) : ¬x ∈ᵥ 0 := by rintro ⟨i, h, _⟩; simp at h
+
+lemma nth_mem_memVec {i v : V} (h : i < len v) : v.[i] ∈ᵥ v := ⟨i, by simp [h]⟩
+
+@[simp] lemma memVec_insert_fst {x v : V} : x ∈ᵥ x ∷ v := ⟨0, by simp⟩
+
+@[simp] lemma memVec_cons_iff {x y v : V} : x ∈ᵥ y ∷ v ↔ x = y ∨ x ∈ᵥ v := by
+  constructor
+  · rintro ⟨i, h, rfl⟩
+    rcases zero_or_succ i with (rfl | ⟨i, rfl⟩) <;> simp
+    right; exact nth_mem_memVec (by simpa using h)
+  · rintro (rfl | hx)
+    · simp
+    · rcases hx with ⟨i, hi, rfl⟩
+      exact ⟨i + 1, by simp [hi]⟩
+
+lemma le_of_memVec {x v : V} (h : x ∈ᵥ v) : x ≤ v := by
+  rcases h with ⟨i, _, rfl⟩; simp
+
+section
+
+def _root_.LO.FirstOrder.Arith.memVecDef : 𝚫₁-Semisentence 2 := .mkDelta
+  (.mkSigma “x v | ∃ l, !lenDef l v ∧ ∃ i < l, !nthDef x v i” (by simp))
+  (.mkPi “x v | ∀ l, !lenDef l v → ∃ i < l, ∀ vi, !nthDef vi v i → x = vi” (by simp))
+
+lemma memVec_defined : 𝚫₁-Relation (MemVec : V → V → Prop) via memVecDef :=
+  ⟨by intro v; simp [memVecDef], by intro v; simp [memVecDef, MemVec]⟩
+
+@[simp] lemma eval_memVecDef (v) :
+    Semiformula.Evalbm V v memVecDef.val ↔ v 0 ∈ᵥ v 1 := memVec_defined.df.iff v
+
+instance memVec_definable : 𝚫₁-Relation (MemVec : V → V → Prop) := Defined.to_definable _ memVec_defined
+
+instance memVec_definable' (Γ) : (Γ, m + 1)-Relation (MemVec : V → V → Prop) := .of_deltaOne memVec_definable _ _
+
+end
+
+end vec_membership
+
+/-!
+
+### Subset
+
+-/
+
+section vec_subset
+
+def SubsetVec (v w : V) : Prop := ∀ x, x ∈ᵥ v → x ∈ᵥ w
+
+scoped infix:30 " ⊆ᵥ " => SubsetVec
+
+@[simp, refl] lemma SubsetVec.refl (v : V) : v ⊆ᵥ v := fun _ hx ↦ hx
+
+@[simp] lemma subsetVec_insert_tail (x v : V) : v ⊆ᵥ x ∷ v := by intro y hy; simp [hy]
+
+section
+
+def _root_.LO.FirstOrder.Arith.subsetVecDef : 𝚫₁-Semisentence 2 := .mkDelta
+  (.mkSigma “v w | ∀ x <⁺ v, !memVecDef.pi x v → !memVecDef.sigma x w” (by simp))
+  (.mkPi “v w | ∀ x <⁺ v, !memVecDef.sigma x v → !memVecDef.pi x w” (by simp))
+
+lemma subsetVec_defined : 𝚫₁-Relation (SubsetVec : V → V → Prop) via subsetVecDef :=
+  ⟨by intro v; simp [subsetVecDef, HSemiformula.val_sigma, memVec_defined.proper.iff'],
+   by intro v
+      simp [subsetVecDef, HSemiformula.val_sigma, memVec_defined.proper.iff']
+      constructor
+      · intro h x _; exact h x
+      · intro h x hx; exact h x (le_of_memVec hx) hx⟩
+
+@[simp] lemma eval_subsetVecDef (v) :
+    Semiformula.Evalbm V v subsetVecDef.val ↔ v 0 ⊆ᵥ v 1 := subsetVec_defined.df.iff v
+
+instance subsetVec_definable : 𝚫₁-Relation (SubsetVec : V → V → Prop) := Defined.to_definable _ subsetVec_defined
+
+instance subsetVec_definable' (Γ) : (Γ, m + 1)-Relation (SubsetVec : V → V → Prop) := .of_deltaOne subsetVec_definable _ _
+
+end
+
+end vec_subset
 
 /-!
 

@@ -16,6 +16,28 @@ variable {V : Type*} [Zero V] [One V] [Add V] [Mul V] [LT V] [V ⊧ₘ* 𝐈𝚺
 
 variable {L : Arith.Language V} {pL : LDef} [Arith.Language.Defined L pL]
 
+/-
+section typed_fin
+
+structure TFin (n : V) where
+  val : V
+  prop : val < n
+
+attribute [simp] TFin.prop
+
+namespace TFin
+
+variable {n : V}
+
+lemma ext_iff {i j : TFin n} : i = j ↔ i.val = j.val := by rcases i; rcases j; simp
+
+@[ext] lemma ext {i j : TFin n} (h : i.val = j.val) : i = j := ext_iff.mpr h
+
+end TFin
+
+end typed_fin
+-/
+
 section typed_term
 
 variable (L)
@@ -30,7 +52,7 @@ structure Language.TSemitermVec (m n : V) where
 
 attribute [simp] Language.TSemiterm.prop Language.TSemitermVec.prop
 
-abbrev Language.FTerm := L.TSemiterm 0
+abbrev Language.TTerm := L.TSemiterm 0
 
 @[ext]
 lemma Language.TSemiterm.ext {t u : L.TSemiterm n}
