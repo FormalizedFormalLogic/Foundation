@@ -62,10 +62,9 @@ instance : CoeFun Frame (λ F => F.World → F.World → Prop) := ⟨Frame.Rel�
 abbrev Frame.Rel' {F : Frame} (x y : F.World) := F.Rel x y
 scoped infix:45 " ≺ " => Frame.Rel'
 
-protected abbrev Frame.RelItr' {F : Frame} (n : ℕ) (x y : F.World) : Prop := RelItr (· ≺ ·) n x y
+protected abbrev Frame.RelItr' {F : Frame} (n : ℕ) : _root_.Rel F.World F.World := RelItr (· ≺ ·) n
 scoped notation x:45 " ≺^[" n "] " y:46 => Frame.RelItr' n x y
 
-instance : CoeFun (Frame) (λ F => F.World → F.World → Prop) := ⟨Frame.Rel⟩
 
 namespace Frame.RelItr'
 
@@ -104,6 +103,14 @@ lemma comp' {F : Frame} {x y : F.World} {n m : ℕ+} : (∃ z, x ≺^[n] z ∧ z
 end Frame.RelItr'
 
 
+protected abbrev Frame.RelTransGen {F : Frame} : _root_.Rel F.World F.World := Relation.TransGen (· ≺ ·)
+scoped infix:45 " ≺+ " => Frame.RelTransGen
+
+protected abbrev Frame.RelReflTransGen {F : Frame} : _root_.Rel F.World F.World:= Relation.ReflTransGen (· ≺ ·)
+scoped infix:45 " ≺* " => Frame.RelReflTransGen
+
+@[simp] lemma Frame.RelReflTransGen.reflexive : x ≺* x := Relation.ReflTransGen.refl
+
 set_option linter.unusedVariables false in
 /-- dependent-version frame -/
 abbrev Frame.Dep (α : Type*) := Frame
@@ -120,17 +127,17 @@ instance : Coe (FiniteFrame) (Frame) := ⟨λ F ↦ F.toFrame⟩
 
 open Relation
 
-def Frame.TransitiveReflexiveClosure (F : Frame) : Frame where
+abbrev Frame.TransitiveReflexiveClosure (F : Frame) : Frame where
   World := F.World
   default := F.default
-  Rel := ReflTransGen (· ≺ ·)
+  Rel := (· ≺* ·)
 
 namespace Frame.TransitiveReflexiveClosure
 
 variable {F : Frame}
 
 @[simp]
-lemma single {x y : F.World} (hxy : F.Rel x y) : (F.TransitiveReflexiveClosure).Rel x y := ReflTransGen.single hxy
+lemma single {x y : F.World} (hxy : x ≺ y) : (F.TransitiveReflexiveClosure).Rel x y := ReflTransGen.single hxy
 
 -- TODO: extract to `Relation.ReflTransGen.reflexive`
 @[simp]
@@ -148,17 +155,17 @@ lemma rel_symmetric_of_symmetric (hSymm : Symmetric F.Rel) : Symmetric (F.Transi
 end Frame.TransitiveReflexiveClosure
 
 
-def Frame.TransitiveClosure (F : Frame) : Frame where
+abbrev Frame.TransitiveClosure (F : Frame) : Frame where
   World := F.World
   default := F.default
-  Rel := TransGen (· ≺ ·)
+  Rel := (· ≺+ ·)
 
 namespace Frame.TransitiveClosure
 
 variable {F : Frame}
 
 @[simp]
-lemma single {x y : F.World} (hxy : F.Rel x y) : (F.TransitiveClosure).Rel x y := TransGen.single hxy
+lemma single {x y : F.World} (hxy : x ≺ y) : (F.TransitiveClosure).Rel x y := TransGen.single hxy
 
 -- TODO: extract to `Relation.TransGen.transitive`
 @[simp]
@@ -172,6 +179,22 @@ lemma rel_symmetric_of_symmetric (hSymm : Symmetric F.Rel) : Symmetric (F.Transi
   induction rxy with
   | single h => exact Relation.TransGen.single $ hSymm h;
   | tail _ h₂ ih => exact Relation.TransGen.trans (Relation.TransGen.single $ hSymm h₂) ih;
+
+/-
+lemma rel_irreflexive_of_irreflexive : Irreflexive F.Rel → Irreflexive (F.TransitiveClosure).Rel := by
+  contrapose;
+  simp [Irreflexive];
+  intro x rxx;
+
+
+  cases h with
+  | single h => exact @hIrrefl x h;
+  | @tail y _ hxy ih => sorry;
+  -- simp [TransitiveClosure] at h;
+  -- induction h with
+  -- | single h => contradiction;
+  -- | tail _ h₂ ih => sorry;
+-/
 
 end Frame.TransitiveClosure
 

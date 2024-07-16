@@ -5,6 +5,18 @@ def Assymetric (rel : α → α → Prop) := ∀ ⦃x y⦄, (rel x y) → ¬(rel
 
 lemma irreflexive_of_assymetric (h : Assymetric rel) : Irreflexive rel := by simp_all [Assymetric, Irreflexive];
 
+-- TODO: move
+lemma List.last_length_1 {α} {l : List α} (h : l.length = 1) : l = [l.getLast (by aesop)] := by
+  match l with
+  | [r] => rfl
+
+-- TODO: move
+lemma List.interpolant {α} {l₁ l₂ : List α} (h_length : l₁.length + 1 = l₂.length) (h_prefix : l₁ <+: l₂)
+  : ∃ z, l₁ ++ [z] = l₂ := by
+    obtain ⟨l₃, rfl⟩ := h_prefix;
+    use l₃.getLast (by aesop);
+    have : l₃ = [l₃.getLast _] := List.last_length_1 (by simp_all);
+    rw [←this];
 
 namespace LO.Modal.Standard
 
@@ -17,15 +29,17 @@ open Formula.Kripke
 variable {α} [Inhabited α] [DecidableEq α]
 
 
-def Frame.isRooted (F : Frame) (r : F.World) : Prop := ∀ w ≠ r, r ≺ w
+def Frame.isStrictRooted (F : Frame) (r : F.World) : Prop := ∀ w ≠ r, r ≺ w
 
-def Frame.isWeakRooted (F : Frame) (r : F.World) : Prop := ∀ w, r ≺ w
+def Frame.isRooted (F : Frame) (r : F.World) : Prop := ∀ w, r ≺ w
 
 @[simp]
-lemma Frame.rooted_of_weak_rooted {F : Frame} {r : F.World} (h : F.isWeakRooted r) : F.isRooted r := by
+lemma Frame.strictly_rooted_of_rooted {F : Frame} {r : F.World} (h : F.isRooted r) : F.isStrictRooted r := by
   intros w _;
   exact h w;
 
+
+-- TODO: 証明したがおそらく不要．
 section ComplexityLimit
 
 def Frame.ComplexityLimit {F : Kripke.Frame} (w : F.World) (p : Formula α) : Kripke.Frame where
@@ -143,41 +157,40 @@ lemma zero_complexity_limit_model (hq : p ∈ 𝒮 q) : Satisfies (M.ComplexityL
 end ComplexityLimit
 
 
+open Relation (TransGen ReflTransGen)
+
+structure RootedFrame extends Kripke.Frame where
+  root : World
+  default := root
+  def_root : ∀ w ≠ root, root ≺* w
+
+
 section
 
-/-
-def Frame.Cuttage (F : Kripke.Frame) (S : Set F.World) [S_inhabited : Inhabited S] : Kripke.Frame where
-  World := { w | (∃ s ∈ S, s ≺ w) ∨ w ∈ S }
-  default := ⟨S_inhabited.default, by simp⟩
+def Frame.Cuttage (F : Kripke.Frame) (r : F.World) : Kripke.RootedFrame where
+  World := { w | r ≺* w }
   Rel x y := x.1 ≺ y.1
+  root := ⟨r, by tauto⟩
+  def_root := by
+    rintro ⟨w, hw⟩ ne_wr;
+    simp at hw;
+    sorry
+    -- rintro x (rfl | ⟨Rrz, Rzx⟩);
+    -- . simp;
+    -- . rename_i z;
+    --   replace Rzx : Rel ⟨z, Rrz⟩ ⟨x, ReflTransGen.tail Rrz Rzx⟩ := Rzx;
+    --   exact ReflTransGen.tail (by sorry) Rzx;
+      -- have : self.Rel ⟨z, (by sorry)⟩ ⟨x, (by sorry)⟩ := by sorry;
+      -- rename_i z hzx;
 infix:100 "↾" => Frame.Cuttage
-
-lemma Frame.Cuttage.root_seeds (h : s ∈ S) : (F↾S).isRoot ⟨s, (by simp_all)⟩ := by
-  rintro ⟨x, (⟨y, hy₁, hy₂⟩ | hx)⟩;
-  . sorry;
-  . sorry;
--/
-
--- lemma Frame.SubframeGeneration.eq_world {F : Kripke.Frame} {X : Set F.World} [Inhabited X] {w : F.World} : w ∈ (F↾X).World ↔ (∃ x ∈ X, x ≺ w) ∨ w ∈ X := by
-
-abbrev Frame.Cuttage (F : Kripke.Frame) (r : F.World) : Kripke.Frame where
-  World := { w | w = r ∨ r ≺ w }
-  default := ⟨r, by simp⟩
-  Rel x y := x.1 ≺ y.1
-infix:100 "↾" => Frame.Cuttage
-
-@[simp]
-lemma Frame.Cuttage.default_root {F : Kripke.Frame} {r : F.World} : (F↾r).isRooted (F↾r).default := by
-  rintro ⟨x, (rfl | hr)⟩;
-  . intros; simp_all;
-  . intros; exact hr;
 
 
 def Model.Cuttage (M : Kripke.Model α) (r : M.World) : Kripke.Model α where
-  Frame := M.Frame↾r
+  Frame := (M.Frame↾r).toFrame
   Valuation w a := M.Valuation w.1 a
 infix:100 "↾" => Model.Cuttage
 
+/-
 section
 
 variable {M : Kripke.Model α} {r y : M.World} {p : Formula α}
@@ -314,27 +327,17 @@ lemma cuttage_on_root₂ : r ⊧ p ↔ Satisfies (M↾r) ⟨r, (by simp)⟩ p :=
 end
 
 end
-
-
-section PointGenerated
-
-/-
-class Frame.PointSubframeGenerated (F₁ : Kripke.Frame) (F₂ : Kripke.Frame) (w : F₁.World) where
-  toFun : F₁.World → F₂.World
-  rel₁ : w ≺ x → toFun w ≺ toFun x
-  r : F₁.World → F₁.World → Prop := λ x y => x ≺ y ∨ x = w ∧ y = w
 -/
 
-infix:100 "↾" => Frame.SubframeGeneration
+def Frame.downward {F : Kripke.Frame} (x : F.World) : Type u := { w // w ≺+ x }
+postfix:100 "↓" => Frame.downward
 
-end PointGenerated
+structure Tree extends Kripke.RootedFrame where
+  branching : ∀ x : World, ∀ y z : x↓, y ≠ z → (y.1 ≺ z.1 ∨ z.1 ≺ y.1) -- linear order
 
-structure TransitiveTree extends Kripke.Frame where
-  root : World
-  def_root : Frame.isRooted _ root
-  rel_assymetric : Assymetric Rel
+structure TransitiveTree extends Kripke.Tree where
+  rel_irreflexive : Irreflexive Rel
   rel_transitive : Transitive Rel
-  rel_comparable : ∀ x y z : World, (y ≺ x ∧ z ≺ x) → (y ≺ z ∨ z ≺ y ∨ y = z)
 
 structure FiniteTransitiveTree extends TransitiveTree, FiniteFrame where
 
@@ -350,15 +353,13 @@ instance : Semantics (Formula α) (FiniteTransitiveTree.Dep α) := ⟨fun T ↦ 
 end FiniteTransitiveTree
 
 
+
 section TreeUnravelling
 
 def Frame.TreeUnravelling (F : Frame) (r : F.World) : Kripke.Frame where
   World := { c : List F.World | [r] <+: c ∧ c.Chain' F.Rel }
   default := ⟨[r], (by simp)⟩
-  Rel cx cy := (cx.1.length + 1 = cy.1.length) ∧ cx.1 <+: cy.1
-
-abbrev Frame.TransitiveTreeUnravelling (F : Frame) (r : F.World) := F.TreeUnravelling r |>.TransitiveClosure
-
+  Rel cx cy := ∃ z, cx.1 ++ [z] = cy.1
 
 namespace Frame.TreeUnravelling
 
@@ -366,58 +367,78 @@ variable {F : Frame} {r : F.World}
 
 @[simp]
 lemma not_nil {c : (F.TreeUnravelling r).World} : c.1 ≠ [] := by
-  by_contra;
   have := c.2.1;
+  by_contra;
   simp_all;
 
-lemma _root_.List.last_length_1 {α} {l : List α} (h : l.length = 1) : l = [l.getLast (by aesop)] := by
-  match l with
-  | [r] => rfl
+@[simp]
+lemma irreflexive : Irreflexive (F.TreeUnravelling r).Rel := by
+  intro x; simp [TreeUnravelling];
 
-def p_morphism (F : Frame) (r : F) : F.TreeUnravelling r →ₚ F where
+def PMorphism (F : Frame) (r : F) : F.TreeUnravelling r →ₚ F where
   toFun c := c.1.getLast (by simp)
   forth {cx cy} h := by
-    have ⟨h₁, ⟨cz, hxzy⟩⟩ := h;
-    have hz := List.last_length_1 (l := cz) (by simp [←hxzy] at h₁; tauto);
-    simp;
-    generalize ex : cx.1.getLast (by simp) = x;
-    generalize ey : cy.1.getLast (by simp) = y;
-    generalize ez : cz.getLast (by rw [hz]; tauto) = z;
-    have eyz : y = z := by
-      rw [hz] at hxzy;
-      sorry;
-    sorry;
+    obtain ⟨z, hz⟩ := h;
+    have ⟨_, _, h⟩ := @List.chain'_append _ F.Rel cx.1 [z] |>.mp (by rw [hz]; exact cy.2.2);
+    refine h (cx.1.getLast (by aesop)) ?hx (cy.1.getLast (by aesop)) ?hy;
+    . exact List.getLast?_eq_getLast_of_ne_nil (by simp);
+    . rw [←@List.getLast_append_singleton _ z cx.1]; simp_all;
   back {cx y} h := by
     simp_all;
     use ⟨cx.1 ++ [y], ?_⟩;
-    simp_all; constructor <;> simp;
-    constructor;
-    . obtain ⟨i, hi⟩ := cx.2.1;
-      use (i ++ [y]);
-      simp_rw [←List.append_assoc, hi];
-    . apply List.Chain'.append;
-      . exact cx.2.2;
+    . constructor;
       . simp;
-      . intro z hz; simp;
-        convert h;
-        exact List.mem_getLast?_eq_getLast hz |>.2;
+      . use y;
+    . constructor;
+      . obtain ⟨i, hi⟩ := cx.2.1;
+        use (i ++ [y]);
+        simp_rw [←List.append_assoc, hi];
+      . apply List.Chain'.append;
+        . exact cx.2.2;
+        . simp;
+        . intro z hz; simp;
+          convert h;
+          exact List.mem_getLast?_eq_getLast hz |>.2;
 
-variable (hr : F.isWeakRooted r)
+variable (hr : F.isRooted r)
 
 @[simp]
-lemma p_morphism.surjective_of_root : Function.Surjective (p_morphism F r) := by
+lemma PMorphism.surjective_of_rooted : Function.Surjective (PMorphism F r) := by
   intro x;
   use ⟨[r, x], ?_⟩
-  simp [p_morphism];
+  simp [PMorphism];
   constructor;
   . use [x]; simp;
   . simp; exact hr x;
 
 lemma validOnBaseFrame : (F.TreeUnravelling r)# ⊧ p → F# ⊧ p
-  := iff_formula_valid_on_frame_surjective_morphism (p_morphism F r) (by simp_all)
+  := iff_formula_valid_on_frame_surjective_morphism (PMorphism F r) (by simp_all)
 
 end Frame.TreeUnravelling
 
+
+def Model.TreeUnravelling (M : Kripke.Model α) (r : M.World) : Kripke.Model α where
+  Frame := M.Frame.TreeUnravelling r
+  Valuation c a := M.Valuation (c.1.getLast (by simp)) a
+
+namespace Model.TreeUnravelling
+
+variable {M : Kripke.Model α} {r : M.World} {p : Formula α}
+
+def PMorphism (M : Kripke.Model α) (r : M.World) : M.TreeUnravelling r →ₚ M :=
+  Model.PseudoEpimorphism.mkAtomic (Frame.TreeUnravelling.PMorphism M.Frame r) $ by aesop;
+
+end Model.TreeUnravelling
+
+end TreeUnravelling
+
+
+/-
+section TransitiveTreeUnravelling
+
+abbrev Frame.TransitiveTreeUnravelling (F : Frame) (r : F.World) :=
+  letI FX := (F↾r).TreeUnravelling (⟨r, by simp⟩) |>.TransitiveClosure
+  FX
 
 namespace Frame.TransitiveTreeUnravelling
 
@@ -429,111 +450,188 @@ lemma not_nil {c : (F.TransitiveTreeUnravelling r).World} : c.1 ≠ [] := by
   have := c.2.1;
   simp_all;
 
-def p_morphism (F : Frame) (F_trans : Transitive F) (r : F) : F.TransitiveTreeUnravelling r →ₚ F where
+@[simp]
+lemma transitive : Transitive (F.TransitiveTreeUnravelling r).Rel := by simp
+
+def PMorphism (F : Frame) (r : F) (F_trans : Transitive F): F.TransitiveTreeUnravelling r →ₚ F where
   toFun c := c.1.getLast (by simp)
   forth {cx cy} h := by
-    simp;
+    obtain ⟨h₁, h₂⟩ := h;
+    sorry;
     sorry;
   back {cx y} h := by
     simp_all;
     use ⟨(cx.1 ++ [y]), ?_⟩;
-    sorry;
-    sorry;
+    . constructor;
+      . simp;
+      . sorry;
+    . simp;
+      constructor;
+      . obtain ⟨i, hi⟩ := cx.2.1;
+        use (i ++ [y]);
+        simp_rw [←List.append_assoc, hi];;
+      . apply List.Chain'.append;
+        . exact cx.2.2;
+        . simp;
+        . intro z hz; simp;
+          convert h;
+          exact List.mem_getLast?_eq_getLast hz |>.2;
 
-variable (F_trans : Transitive F) (hr : F.isWeakRooted r)
+variable (F_trans : Transitive F)
 
 @[simp]
-lemma p_morphism.surjective_of_root : Function.Surjective (p_morphism F F_trans r) := by
+lemma PMorphism.surjective_of_weak_rooted (hr : F.isRooted r) : Function.Surjective (PMorphism F r F_trans) := by
   intro x;
   use ⟨[r, x], ?_⟩
-  simp [p_morphism];
+  simp [PMorphism];
   constructor;
   . use [x]; simp;
   . simpa using @hr x;
 
-lemma validOnBaseFrame : (F.TransitiveTreeUnravelling r)# ⊧ p → F# ⊧ p
-  := iff_formula_valid_on_frame_surjective_morphism (p_morphism F F_trans r) (by simp_all)
+lemma validOnBaseFrame_of_weak_rooted (hr : F.isRooted r) : (F.TransitiveTreeUnravelling r)# ⊧ p → F# ⊧ p
+  := iff_formula_valid_on_frame_surjective_morphism (TransitiveTreeUnravelling.PMorphism F r F_trans) (by simp_all)
+
+
+@[simp]
+lemma PMorphism.surjective_of_reflexive_rooted (hRefl : Reflexive F.Rel) (hr : F.isStrictRooted r) : Function.Surjective (TransitiveTreeUnravelling.PMorphism F r F_trans) := by
+  intro x;
+  use ⟨[r, x], ?_⟩;
+  simp [PMorphism];
+  constructor;
+  . use [x]; simp;
+  . simp;
+    by_cases hx : x = r;
+    . subst hx; exact hRefl x;
+    . exact hr x hx;
+
+lemma validOnBaseFrame_of_reflexive_rooted (hRefl : Reflexive F.Rel) (hr : F.isStrictRooted r) : (F.TransitiveTreeUnravelling r)# ⊧ p → F# ⊧ p
+  := iff_formula_valid_on_frame_surjective_morphism (TransitiveTreeUnravelling.PMorphism F r F_trans) (by simp_all)
 
 end Frame.TransitiveTreeUnravelling
 
-
-def Model.TreeUnravelling (M : Kripke.Model α) (r : M.World) : Kripke.Model α where
-  Frame := M.Frame.TreeUnravelling r
-  Valuation c a := M.Valuation (c.1.getLast (by simp)) a
 
 def Model.TransitiveTreeUnravelling (M : Kripke.Model α) (r : M.World) : Kripke.Model α where
   Frame := M.Frame.TransitiveTreeUnravelling r
   Valuation c a := M.Valuation (c.1.getLast (by simp)) a
 
-end TreeUnravelling
+namespace Model.TransitiveTreeUnravelling
 
+def PMorphism (M : Kripke.Model α) (r : M.World) (M_trans : Transitive M.Frame) : (M.TransitiveTreeUnravelling r) →ₚ M :=
+  Model.PseudoEpimorphism.mkAtomic (Frame.TransitiveTreeUnravelling.PMorphism M.Frame r M_trans) $ by aesop;
+
+variable {M : Kripke.Model α} {r : M.World} (M_trans : Transitive M.Frame)
+
+lemma modal_equivalence : ((M.TransitiveTreeUnravelling r), w) ↭ (M, w.1.getLast (by simp)) := by
+    have H := @modal_equivalence_of_modal_morphism _ (M.TransitiveTreeUnravelling r) M (PMorphism M r M_trans) w;
+    intro p;
+    have Hp := @H p;
+    constructor;
+    . intro hp;
+      exact Hp.mp hp;
+    . intro hp;
+      exact Hp.mpr hp;
+
+end Model.TransitiveTreeUnravelling
+
+end TransitiveTreeUnravelling
+-/
+
+
+section TreeUnravelling
+
+abbrev Frame.TreeUnravelling₂ (F : Frame) (r : F.World) : TransitiveTree :=
+  letI Fx := ((F↾r).TreeUnravelling (F↾r).root).TransitiveClosure;
+  {
+    World := Fx.World
+    Rel := Fx.Rel
+    root := Fx.default
+    def_root := by
+      rintro ⟨w, ⟨z, rfl⟩, hw₂⟩ enr;
+      sorry;
+    branching := by
+      rintro x y z hne;
+      sorry;
+    rel_transitive := by simp [Fx];
+    rel_irreflexive := by
+      simp [Irreflexive];
+      intro x Rxx;
+      simp [Fx] at Rxx;
+      sorry;
+  }
+
+abbrev Frame.mkFiniteTransitiveTree (F : TransitiveTree) (_ : Finite F.World) : FiniteTransitiveTree where
+  World := F.World
+  default := F.default
+  def_root := F.def_root
+  rel_irreflexive := F.rel_irreflexive
+  rel_transitive := F.rel_transitive
+  branching := F.branching
+
+abbrev FiniteFrame.TreeUnravelling (F : FiniteFrame) (r : F.World) : FiniteTransitiveTree :=
+  Frame.mkFiniteTransitiveTree (F.TreeUnravelling₂ r) $ by
+    simp [Frame.TreeUnravelling₂];
+    sorry;
+
+end TreeUnravelling
 
 
 variable {p : Formula α}
 
-lemma validOnFTT_Aux (h : TransitiveIrreflexiveFrameClass.{u}ꟳ# ⊧ p) : ∀ F : FiniteTransitiveTree.{u}, F# ⊧ p := by
+lemma validOnFTT_Aux (h : TransitiveIrreflexiveFrameClass.{u}ꟳ# ⊧ p) : ∀ T : FiniteTransitiveTree.{u}, T# ⊧ p := by
   simp at h;
   intro T;
   apply @h T.toFrame T.toFiniteFrame;
   . exact T.rel_transitive;
-  . exact irreflexive_of_assymetric T.rel_assymetric;
+  . exact T.rel_irreflexive;
   . tauto;
 
-lemma validOnFTT_root (h : ∀ F : FiniteTransitiveTree.{u}, F# ⊧ p) : ∀ T : FiniteTransitiveTree.{u}, ∀ V, ∀ x, Satisfies ⟨T.toFrame, V⟩ x p := by
-  intro T V x;
-  exact h T V x;
+lemma validOnFTT_root (h : ∀ F : FiniteTransitiveTree.{u}, F# ⊧ p) : ∀ T : FiniteTransitiveTree.{u}, ∀ V, Satisfies ⟨T.toFrame, V⟩ T.root p := by
+  intro T V; exact h T V _;
 
-lemma validOnFTT_root' : (∀ F : FiniteTransitiveTree.{u}, ∀ V, ∀ x, Satisfies ⟨F.toFrame, V⟩ x p) → TransitiveIrreflexiveFrameClass.{u}ꟳ# ⊧ p := by
+-- set_option pp.proofs true in
+lemma validOnFTT_root' : (∀ T : FiniteTransitiveTree.{u}, ∀ V, Satisfies ⟨T.toFrame, V⟩ T.root p) → TransitiveIrreflexiveFrameClass.{u}ꟳ# ⊧ p := by
   contrapose; push_neg;
   intro h; simp [ValidOnFrame, ValidOnModel] at h;
-  obtain ⟨_, F, F_trans, F_irrefl, rfl, h⟩ := h;
-  have a := @Frame.TransitiveTreeUnravelling.validOnBaseFrame α F -- F_trans (by sorry);
-  /-
-
-  let M : Model α := { Frame := F, Valuation := V };
-
-  let CF : Kripke.FiniteFrame := {
-    World := { c | [w] <+: c ∧ List.Chain' F.Rel c },
-    World_inhabited := ⟨[w], (by simp)⟩,
-    World_finite := by sorry,
-    Rel := λ X Y => (X.1.length < Y.1.length) ∧ (X.1 <+: Y.1),
-  };
-  let CM : Model α := {
-    Frame := CF,
-    Valuation := λ X a => V (X.1.getLast (by aesop)) a
-  };
-
-  have H : ∀ q, ∀ X : CM.World, Satisfies CM X q ↔ Satisfies M (X.1.getLast (by aesop)) q := by
-    intro q X;
-    induction q using Formula.rec' generalizing X with
-    | hbox q ih =>
-      constructor;
-      . intro h y Rxy;
-        have := @h ⟨(X.1).concat y, (by simp; sorry)⟩ (by aesop);
-        simpa using @ih _ |>.mp this;
-      . intro h Y RXY;
-        simp [Satisfies] at h;
-        obtain ⟨lXY, ⟨Z, RZY⟩⟩ := RXY;
+  obtain ⟨_, F, F_trans, F_irrefl, rfl, V, x, hx⟩ := h;
+  let T := F.TreeUnravelling x;
+  let TV : Valuation T.toFrame α := λ x a => V (x.1.getLast (by simp)).1 a
+  use T, TV;
+  apply @modal_equivalence_of_modal_morphism α ⟨T.toFrame, TV⟩ ⟨F, V⟩ ?m T.root p |>.not.mpr ?s;
+  . exact {
+      toFun := λ c => c.1.getLast (by simp) |>.1
+      atomic := by simp;
+      back := by
+        simp;
+        rintro ⟨ws, hw₁, hw₂⟩ v hwv;
+        let v' : (F.toFrame↾x).World := ⟨v, ?hv⟩;
+        use ⟨ws ++ [v'], ?hwv⟩;
+        . constructor;
+          . simp;
+          . apply Frame.TransitiveClosure.single;
+            use v';
+        . constructor;
+          . obtain ⟨i, hi⟩ := hw₁;
+            use (i ++ [v']);
+            simp_rw [←List.append_assoc, hi];
+          . apply List.Chain'.append;
+            . exact hw₂;
+            . simp;
+            . sorry;
+        . simp_all;
+          sorry;
+      forth := by
+        -- rintro cx cy ⟨z, hz⟩;
+        -- have := @List.chain'_append _ T.Rel;
         sorry;
-    | _ => sorry; -- simp_all [Satisfies]; try aesop;
+        -- obtain ⟨z, hz⟩ := h;
+        -- have ⟨_, _, h⟩ := @List.chain'_append _ F.Rel cx [z] |>.mp (by rw [hz]; exact cy.2.2);
+        -- refine h (cx.1.getLast (by aesop)) ?hx (cy.1.getLast (by aesop)) ?hy;
+        -- . exact List.getLast?_eq_getLast_of_ne_nil (by simp);
+        -- . rw [←@List.getLast_append_singleton _ z cx.1]; simp_all;
+    }
+  . exact hx;
 
-  let W : CF.World := ⟨[w], (by simp)⟩;
-  let GM : Kripke.Model α := (CM↾W);
-  have h₁ : ¬Satisfies CM W p := H p W |>.not.mpr h;
-  have h₂ : ¬Satisfies GM ⟨W, _⟩ p := @satisfies_on_root α CM W p |>.not.mp h₁;
-  use {
-    World := GM.World,
-    World_inhabited := ⟨W, (by aesop)⟩,
-    World_finite := by sorry,
-    Rel := GM.Frame.Rel,
-    root := ⟨W, (by aesop)⟩,
-    def_root := by sorry,
-    rel_assymetric := by sorry,
-    rel_transitive := by sorry,
-    rel_comparable := by sorry,
-  }, GM.Valuation, ⟨W, (by aesop)⟩;
-  exact h₂;
-  -/
+end
 
 end Kripke
 

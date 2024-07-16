@@ -25,8 +25,8 @@ end Bisimulation
 section ModalEquivalent
 
 
-def ModalEquivalent (M₁ M₂ : Kripke.Model α) (w₁ : M₁.World) (w₂ : M₂.World) : Prop := ∀ p, w₁ ⊧ p ↔ w₂ ⊧ p
-notation:max "("  M₁ "," w₁ ")" " ↭ " "("  M₂ "," w₂ ")" => ModalEquivalent M₁ M₂ w₁ w₂
+def ModalEquivalent (M₁ M₂ : Kripke.Model α) (w₁ : M₁.World) (w₂ : M₂.World) : Prop := ∀ {p}, w₁ ⊧ p ↔ w₂ ⊧ p
+notation:max "("  M₁ ", " w₁ ")" " ↭ " "("  M₂ ", " w₂ ")" => ModalEquivalent M₁ M₂ w₁ w₂
 
 open Formula
 
@@ -78,11 +78,6 @@ lemma modal_equivalent_of_bisimilar (bisx : Bi x₁ x₂) : (M₁, x₁) ↭ (M�
 end ModalEquivalent
 
 
-section Generation
-
-end Generation
-
-
 section PseudoEpimorphism
 
 /-- As known as _p-morphism_. -/
@@ -103,6 +98,34 @@ infix:80 " →ₚ " => Model.PseudoEpimorphism
 
 instance : CoeFun (Model.PseudoEpimorphism M₁ M₂) (λ _ => M₁.World → M₂.World) := ⟨λ f => f.toFun⟩
 
+def Model.PseudoEpimorphism.mkAtomic
+  {M₁ M₂ : Kripke.Model α}
+  (f : M₁.Frame →ₚ M₂.Frame) (atomic : ∀ {w a}, (M₁.Valuation w a) ↔ (M₂.Valuation (f w) a))
+  : M₁ →ₚ M₂
+  := {
+    toFun := f,
+    forth := f.forth,
+    back := f.back,
+    atomic := atomic,
+  }
+
+def Model.PseudoEpimorphism.Bisimulation {M₁ M₂ : Kripke.Model α} (f : M₁ →ₚ M₂) : M₁ ⇄ M₂ := {
+  toRel := Function.graph f,
+  atomic := by
+    intro x₁ x₂ a e; subst e;
+    constructor;
+    . apply f.atomic.mp;
+    . apply f.atomic.mpr;
+  forth := by
+    simp;
+    intro x₁ y₁ rx₁y₁;
+    exact f.forth rx₁y₁;
+  back := by
+    simp;
+    intro x₁ x₂ y₂ e rx₂y₂; subst e;
+    obtain ⟨y₁, _⟩ := f.back rx₂y₂;
+    use y₁;
+}
 
 open Formula
 
@@ -110,21 +133,9 @@ variable {F₁ F₂ : Kripke.Frame}
          {M₁ M₂ : Kripke.Model α}
          {p : Formula α}
 
-lemma iff_formula_satisfies_morphism (f : M₁ →ₚ M₂) {w : M₁.World}
-  : w ⊧ p ↔ (f w) ⊧ p := by
-  induction p using Formula.rec' generalizing w with
-  | hatom p =>
-    constructor;
-    . apply f.atomic |>.mp;
-    . apply f.atomic |>.mpr
-  | hbox p ih =>
-    constructor;
-    . intro h w₂ hw₂;
-      obtain ⟨w₁, e, hww₁⟩ := f.back hw₂; subst e;
-      exact ih.mp $ h hww₁;
-    . intro h w' hww';
-      exact ih.mpr $ h $ f.forth hww';
-  | _ => simp_all [Kripke.Satisfies];
+lemma modal_equivalence_of_modal_morphism (f : M₁ →ₚ M₂) {w : M₁.World} : (M₁, w) ↭ (M₂, f w) := by
+  apply modal_equivalent_of_bisimilar $ Model.PseudoEpimorphism.Bisimulation f;
+  simp [Model.PseudoEpimorphism.Bisimulation];
 
 lemma iff_formula_valid_on_frame_surjective_morphism (f : F₁ →ₚ F₂) (f_surjective : Function.Surjective f) : F₁# ⊧ p → F₂# ⊧ p := by
   contrapose;
@@ -138,7 +149,7 @@ lemma iff_formula_valid_on_frame_surjective_morphism (f : F₁ →ₚ F₂) (f_s
 
   let M₁ : Model α := { Frame := F₁, Valuation := V₁ };
   let M₂ : Model α := { Frame := F₂, Valuation := V₂ };
-  exact iff_formula_satisfies_morphism (M₁ := M₁) (M₂ := M₂) {
+  exact modal_equivalence_of_modal_morphism (M₁ := M₁) (M₂ := M₂) {
     toFun := f,
     forth := f.forth,
     back := f.back,
@@ -176,25 +187,6 @@ theorem undefinable_irreflexive : ¬∃ (Ax : AxiomSet α), AxiomSet.DefinesKrip
   have : ¬Irreflexive F₂ := by simp [Irreflexive];
   have : Irreflexive F₂ := h.mp $ iff_theory_valid_on_frame_surjective_morphism f f_surjective $ h.mpr hIF₁;
   contradiction;
-
-
-def Model.PseudoEpimorphism.Bisimulation (f : M₁ →ₚ M₂) : M₁ ⇄ M₂ := {
-  toRel := Function.graph f,
-  atomic := by
-    intro x₁ x₂ a e; subst e;
-    constructor;
-    . apply f.atomic.mp;
-    . apply f.atomic.mpr;
-  forth := by
-    simp;
-    intro x₁ y₁ rx₁y₁;
-    exact f.forth rx₁y₁;
-  back := by
-    simp;
-    intro x₁ x₂ y₂ e rx₂y₂; subst e;
-    obtain ⟨y₁, _⟩ := f.back rx₂y₂;
-    use y₁;
-}
 
 end PseudoEpimorphism
 
