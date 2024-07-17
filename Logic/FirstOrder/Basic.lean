@@ -8,5 +8,6 @@ import Logic.FirstOrder.Basic.Operator
 import Logic.FirstOrder.Basic.BinderNotation
 import Logic.FirstOrder.Basic.Model
 import Logic.FirstOrder.Basic.Calculus
+import Logic.FirstOrder.Basic.Calculus2
 import Logic.FirstOrder.Basic.Eq
 import Logic.FirstOrder.Basic.Soundness

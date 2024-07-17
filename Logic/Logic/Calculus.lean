@@ -158,6 +158,14 @@ def equiv : Γ ⊢² Δ ≃ ⊢¹ Γ.map (~·) ++ Δ := Equiv.refl _
 
 def tauto (b : ⊢¹ Δ) : Γ ⊢² Δ := wk b (by simp)
 
+def verum' (h : ⊤ ∈ Γ) : ⊢¹ Γ := wk (verum Γ) (by simp [h])
+
+def and' {p q : F} (h : p ⋏ q ∈ Γ) (dp : ⊢¹ p :: Γ) (dq : ⊢¹ q :: Γ) : ⊢¹ Γ :=
+  wk (and dp dq) (by simp [h])
+
+def or' {p q : F} (h : p ⋎ q ∈ Γ) (dpq : ⊢¹ p :: q :: Γ) : ⊢¹ Γ :=
+  wk (or dpq) (by simp [h])
+
 end Tait
 
 namespace Gentzen

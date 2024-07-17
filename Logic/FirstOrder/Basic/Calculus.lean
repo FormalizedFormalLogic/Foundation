@@ -198,6 +198,10 @@ def verum' (h : ⊤ ∈ Δ) : ⊢¹ Δ := (verum Δ).wk (by simp[h])
 def axL' {k} (r : L.Rel k) (v)
     (h : Semiformula.rel r v ∈ Δ) (hn : Semiformula.nrel r v ∈ Δ) : ⊢¹ Δ := (axL Δ r v).wk (by simp[h, hn])
 
+def all' {p} (h : ∀' p ∈ Δ) (d : ⊢¹ Rew.free.hom p :: Δ⁺) : ⊢¹ Δ := d.all.wk (by simp [h])
+
+def ex' {p} (h : ∃' p ∈ Δ) (t) (d : ⊢¹ p/[t] :: Δ) : ⊢¹ Δ := (d.ex t).wk (by simp [h])
+
 @[simp] lemma ne_step_max (n m : ℕ) : n ≠ max n m + 1 :=
   ne_of_lt $ Nat.lt_succ_of_le $ by simp
 
