@@ -322,10 +322,6 @@ lemma pure_eq_some (a : α) : pure a = some a := rfl
 @[simp] lemma toList_eq_iff {o : Option α} {a} :
     o.toList = [a] ↔ o = some a := by rcases o <;> simp
 
-@[simp] lemma get!_none [Inhabited α] : (none : Option α).get! = default := rfl
-
-@[simp] lemma get!_some [Inhabited α] {a : α} : (some a).get! = a := rfl
-
 end Option
 
 def Nat.natToVec : ℕ → (n : ℕ) → Option (Fin n → ℕ)
@@ -537,19 +533,19 @@ end
 lemma ofFn_get_eq_map_cast {n} (g : α → β) (as : List α) {h} : ofFn (fun i => g (as.get (i.cast h)) : Fin n → β) = as.map g := by
   ext i b; simp
   by_cases hi : i < n
-  { simp[hi, List.ofFnNthVal, List.get?_eq_get (h ▸ hi)] }
-  { simp[hi, List.ofFnNthVal, List.get?_len_le (le_of_not_lt $ h ▸ hi)] }
+  · simp [hi, List.ofFnNthVal, List.getElem?_eq_getElem (h ▸ hi)]
+  · simp [hi, List.ofFnNthVal, List.getElem?_len_le (le_of_not_lt $ h ▸ hi)]
 
 lemma take_map_range (f : ℕ → α) : ((range n).map f).take m = (range (min n m)).map f := by
   induction' m with m ih
   · simp
   · simp[take_succ, ih]
-    rcases hm : ((range n).get? m) with (_ | i) <;> simp
-    · have : n ≤ m := by simpa using get?_eq_none.mp hm
-      simp[Nat.min_eq_left this, Nat.min_eq_left (Nat.le_step this)]
-    · have : m < n ∧ m = i := by simpa using get?_eq_some.mp hm
+    rcases hm : (range n)[m]? with (_ | i) <;> simp
+    · have : n ≤ m := by simpa using getElem?_eq_none_iff.mp hm
+      simp [Nat.min_eq_left this, Nat.min_eq_left (Nat.le_step this)]
+    · have : m < n ∧ m = i := by simpa using getElem?_eq_some.mp hm
       rcases this with ⟨lt, rfl⟩
-      simp[Nat.min_eq_right lt, Nat.min_eq_right (le_of_lt lt), range_succ]
+      simp [Nat.min_eq_right lt, Nat.min_eq_right (le_of_lt lt), range_succ]
 
 lemma bind_toList_some {f : β → Option α} {g : β → α} {bs : List β} (h : ∀ x ∈ bs, f x = some (g x)) :
   bs.bind (fun i => (f i).toList) = bs.map g := by
@@ -687,7 +683,7 @@ end remove
 
 end List
 
-namespace Vector
+namespace Mathlib.Vector
 
 variable {α : Type*}
 
@@ -729,16 +725,19 @@ lemma erase_union [DecidableEq α] {a : α} {s t : Finset α} :
   (s ∪ t).erase a = (s.erase a) ∪ (t.erase a) := by ext; simp[and_or_left]
 
 @[simp] lemma equiv_univ {α α'} [Fintype α] [Fintype α'] [DecidableEq α'] (e : α ≃ α') :
-    (univ : Finset α).image e = univ := by ext x; simp
+    (Finset.univ : Finset α).image e = Finset.univ := by ext x; simp
 
 @[simp] lemma sup_univ_equiv {α α'} [DecidableEq α] [Fintype α] [Fintype α'] [SemilatticeSup β] [OrderBot β] (f : α → β) (e : α' ≃ α) :
-    sup univ (fun i => f (e i)) = sup univ f := by simpa[Function.comp] using Eq.symm <| Finset.sup_image univ e f
+    Finset.sup Finset.univ (fun i => f (e i)) = Finset.sup Finset.univ f := by
+  simpa [Function.comp] using Eq.symm <| Finset.sup_image Finset.univ e f
 
 lemma sup_univ_list_eq_sup_map {σ : Type _} {α : Type _} [SemilatticeSup α] [OrderBot α]
-  (l : List σ) (f : σ → α) : Finset.sup Finset.univ (fun (i : Fin l.length) => f $ l.get i) = (l.map f).sup := by
+  (l : List σ) (f : σ → α) : Finset.sup Finset.univ (fun (i : Fin l.length) => f $ l[i]) = (l.map f).sup := by
   induction' l with s l ih <;> simp
-  { have : (Finset.univ : Finset (Fin $ l.length + 1)) = insert 0 ((Finset.univ : Finset (Fin l.length)).image Fin.succ) := by ext; simp
-    rw[this, Finset.sup_insert, Finset.sup_image]; simp[Function.comp, ih] }
+  · have : (Finset.univ : Finset (Fin $ l.length + 1)) = insert 0 ((Finset.univ : Finset (Fin l.length)).image Fin.succ) := by ext; simp
+    rw [this, Finset.sup_insert, Finset.sup_image]
+    simp at ih
+    simp[Function.comp, ih]
 
 lemma sup_univ_cast {α : Type _} [SemilatticeSup α] [OrderBot α] {n} (f : Fin n → α) (n') {h : n' = n} :
     Finset.sup Finset.univ (fun (i : Fin n') => f (i.cast h)) = Finset.sup Finset.univ f := by rcases h with rfl; simp
@@ -747,7 +746,7 @@ end Finset
 
 namespace Denumerable
 
-lemma lt_of_mem_list : ∀ n i, i ∈ ofNat (List ℕ) n → i < n
+lemma lt_of_mem_list : ∀ n i, i ∈ Denumerable.ofNat (List ℕ) n → i < n
   | 0     => by simp
   | n + 1 =>
     have : n.unpair.2 < n + 1 := Nat.lt_succ_of_le (Nat.unpair_right_le n)
@@ -802,7 +801,7 @@ variable (s₁ s₂ s₃ s₄ : Set F)
 
 @[simp] lemma subset_triunion₂ : s₂ ⊆ (s₁ ∪ s₂ ∪ s₃) := Set.Subset.trans Set.subset_union_right Set.subset_union_left
 
-@[simp] lemma subset_triunion₃ : s₃ ⊆ (s₁ ∪ s₂ ∪ s₃) := by simp only [subset_union_right]
+@[simp] lemma subset_triunion₃ : s₃ ⊆ (s₁ ∪ s₂ ∪ s₃) := by simp [Set.subset_union_right]
 
 
 @[simp] lemma subset_tetraunion₁ : s₁ ⊆ (s₁ ∪ s₂ ∪ s₃ ∪ s₄) :=
@@ -817,7 +816,7 @@ lemma subset_tetraunion₂ : s₂ ⊆ (s₁ ∪ s₂ ∪ s₃ ∪ s₄) :=
     $ Set.Subset.trans Set.subset_union_left Set.subset_union_left
 
 @[simp] lemma subset_tetraunion₃ : s₃ ⊆ (s₁ ∪ s₂ ∪ s₃ ∪ s₄) := by simp only [subset_triunion₂]
-@[simp] lemma subset_tetraunion₄ : s₄ ⊆ (s₁ ∪ s₂ ∪ s₃ ∪ s₄) := by simp only [subset_union_right]
+@[simp] lemma subset_tetraunion₄ : s₄ ⊆ (s₁ ∪ s₂ ∪ s₃ ∪ s₄) := by simp only [Set.subset_union_right]
 
 end Set
 

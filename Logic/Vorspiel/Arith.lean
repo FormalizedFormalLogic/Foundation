@@ -2,10 +2,9 @@ import Logic.Vorspiel.Vorspiel
 import Mathlib.Computability.Halting
 import Mathlib.Data.Nat.ModEq
 import Mathlib.Data.List.FinRange
-import Mathlib.Data.Nat.Prime
 import Mathlib.Logic.Godel.GodelBetaFunction
 
-open Vector Part
+open Mathlib Mathlib.Vector Part
 
 namespace Nat
 
@@ -451,8 +450,9 @@ def recSequence (f : Vector ℕ n → ℕ) (g : Vector ℕ (n + 2) → ℕ) (z :
 lemma beta_unbeta_recSequence_eq (f : Vector ℕ n → ℕ) (g : Vector ℕ (n + 2) → ℕ) (z : ℕ) (v : Vector ℕ n)
   (m : ℕ) (hm : m < z + 1) :
     Nat.beta (unbeta (recSequence f g z v)) m = m.rec (f v) (fun y IH => g (y ::ᵥ IH ::ᵥ v)) := by
-  have := Nat.beta_unbeta_coe (recSequence f g z v) ⟨m, by simp[recSequence, hm]⟩
-  simp at this; rw[this]; simp[recSequence]
+  have : (unbeta (recSequence f g z v)).beta m = (recSequence f g z v).get ⟨m, _⟩ :=
+    Nat.beta_unbeta_coe (recSequence f g z v) ⟨m, by simp[recSequence, hm]⟩
+  rw [this]; simp [List.get_ofFn, recSequence, -List.get_eq_getElem]
 
 lemma beta_unbeta_recSequence_zero (f : Vector ℕ n → ℕ) (g : Vector ℕ (n + 2) → ℕ) (z : ℕ) (v : Vector ℕ n) :
     Nat.beta (unbeta (recSequence f g z v)) 0 = f v := by

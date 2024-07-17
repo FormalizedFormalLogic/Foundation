@@ -3,6 +3,8 @@ import Logic.Vorspiel.OmegaRec
 
 attribute [-instance] WType.instEncodable Encodable.finPi Encodable.fintypeArrowOfEncodable
 
+open Mathlib
+
 namespace WType
 
 open Encodable Primrec Primcodable UniformlyPrimcodable
@@ -132,7 +134,7 @@ lemma elimDecode_eq_induction (f : α → List γ → γ) (s e) :
     rcases List.mapM' (decode : ℕ → Option (SubWType β s)) (Denumerable.ofNat (List ℕ) e.unpair.2) with (_ | w) <;> simp
     { simp[List.toVector]
       by_cases hlw : w.length = Fintype.card (β a) <;> simp[hlw, elim, elim']
-      { simp[Vector.get_mk_eq_get, List.ofFn_get_eq_map_cast]; congr
+      { simp only [Vector.get_mk_eq_get, Fin.coe_cast]; congr
         rw[Encodable.fintypeArrowEquivFinArrow_fintypeEquivFin (fun i =>
           WType.elim γ (fun x => f x.fst (List.ofFn (fintypeArrowEquivFinArrow x.snd))) (w.get (i.cast hlw.symm)).val)];
         rw[List.ofFn_get_eq_map_cast (fun z => WType.elim γ (fun x => f x.fst (List.ofFn (fintypeArrowEquivFinArrow x.snd))) z.val) w];rfl } }
@@ -376,15 +378,15 @@ lemma w_mkL : Primrec₂ (WType.mkL : α → List (WType β) → Option (WType �
     { simp[encode_mk_eq]; constructor
       { exact Eq.trans (by rw[Finset.sup_univ_cast (fun i => depth (l.get i))]; exact Eq.symm <| Finset.sup_univ_list_eq_sup_map _ _)
           (Eq.symm <| Finset.sup_univ_equiv (fun i => depth (l.get (i.cast h.symm)) : Fin (Fintype.card (β a)) → ℕ) fintypeEquivFin) }
-      { simp[encode_fintypeArrow, encode_finArrow]
+      { simp [encode_fintypeArrow, encode_finArrow]
         ext i c; simp
         rcases hw : (l.get? i) with (_ | w) <;> simp[List.ofFnNthVal]
-        · have : ¬i < Fintype.card (β a) := by simpa[h] using List.get?_eq_none.mp hw
-          simp[this]
+        · have : Fintype.card (β a) ≤ i := by simpa[h] using List.get?_eq_none.mp hw
+          simp [this, List.getElem?_len_le (List.get?_eq_none.mp hw)]
         · have : ∃ hi, l.get ⟨i, hi⟩ = w := List.get?_eq_some.mp hw
           rcases this with ⟨hi, rfl⟩
           have : i < Fintype.card (β a) := by simpa[h] using hi
-          simp[this] } } })
+          simp [this, exists_true_left, List.getElem?_eq_getElem hi] } } })
 
 lemma w_mk₀ (f : σ → α) (h : (x : σ) → IsEmpty (β (f x))) (hf : Primrec f) {v : {x : σ} → β (f x) → WType β}:
     Primrec (fun x => WType.mk (f x) v : σ → WType β) := by
