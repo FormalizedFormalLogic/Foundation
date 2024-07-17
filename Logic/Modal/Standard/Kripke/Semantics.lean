@@ -103,14 +103,6 @@ lemma comp' {F : Frame} {x y : F.World} {n m : ℕ+} : (∃ z, x ≺^[n] z ∧ z
 end Frame.RelItr'
 
 
-protected abbrev Frame.RelTransGen {F : Frame} : _root_.Rel F.World F.World := Relation.TransGen (· ≺ ·)
-scoped infix:45 " ≺+ " => Frame.RelTransGen
-
-protected abbrev Frame.RelReflTransGen {F : Frame} : _root_.Rel F.World F.World:= Relation.ReflTransGen (· ≺ ·)
-scoped infix:45 " ≺* " => Frame.RelReflTransGen
-
-@[simp] lemma Frame.RelReflTransGen.reflexive : x ≺* x := Relation.ReflTransGen.refl
-
 set_option linter.unusedVariables false in
 /-- dependent-version frame -/
 abbrev Frame.Dep (α : Type*) := Frame
@@ -125,76 +117,100 @@ structure FiniteFrame extends Frame where
 instance : Coe (FiniteFrame) (Frame) := ⟨λ F ↦ F.toFrame⟩
 
 
-open Relation
+open Relation (ReflTransGen TransGen)
+
+protected abbrev Frame.RelReflTransGen {F : Frame} : _root_.Rel F.World F.World:= ReflTransGen (· ≺ ·)
+scoped infix:45 " ≺^* " => Frame.RelReflTransGen
+
+namespace Frame.RelReflTransGen
+
+variable {F : Frame}
+
+@[simp] lemma single {x y : F.World} (hxy : x ≺ y) : x ≺^* y := ReflTransGen.single hxy
+
+@[simp] lemma reflexive : Reflexive F.RelReflTransGen := by intro x; exact ReflTransGen.refl;
+
+@[simp] lemma refl {x : F.World} : x ≺^* x := reflexive x
+
+@[simp]
+lemma transitive : Transitive F.RelReflTransGen := by
+  intro x y z Rxy Ryz;
+  exact ReflTransGen.trans Rxy Ryz;
+
+@[simp] lemma symmetric : Symmetric F.Rel → Symmetric F.RelReflTransGen := ReflTransGen.symmetric
+
+end Frame.RelReflTransGen
+
 
 abbrev Frame.TransitiveReflexiveClosure (F : Frame) : Frame where
   World := F.World
   default := F.default
-  Rel := (· ≺* ·)
+  Rel := (· ≺^* ·)
+postfix:max "^*" => Frame.TransitiveReflexiveClosure
 
 namespace Frame.TransitiveReflexiveClosure
 
 variable {F : Frame}
 
-@[simp]
-lemma single {x y : F.World} (hxy : x ≺ y) : (F.TransitiveReflexiveClosure).Rel x y := ReflTransGen.single hxy
+lemma single {x y : F.World} (hxy : x ≺ y) : F^* x y := ReflTransGen.single hxy
 
--- TODO: extract to `Relation.ReflTransGen.reflexive`
-@[simp]
-lemma rel_reflexive : Reflexive (F.TransitiveReflexiveClosure).Rel := by intro x; exact ReflTransGen.refl;
+lemma rel_reflexive : Reflexive F^* := by intro x; exact ReflTransGen.refl;
 
--- TODO: extract to `Relation.ReflTransGen.transitive`
-@[simp]
-lemma rel_transitive : Transitive (F.TransitiveReflexiveClosure).Rel := by
-  intro _ _ _ rxy ryz;
-  exact ReflTransGen.trans rxy ryz;
+lemma rel_transitive : Transitive F^* := by simp;
 
-lemma rel_symmetric_of_symmetric (hSymm : Symmetric F.Rel) : Symmetric (F.TransitiveReflexiveClosure).Rel :=
-  ReflTransGen.symmetric hSymm
+lemma rel_symmetric : Symmetric F.Rel → Symmetric F^* := ReflTransGen.symmetric
 
 end Frame.TransitiveReflexiveClosure
+
+
+def Frame.RelItr'.toReflTransGen {F : Frame} {x y : F.World} {n : ℕ} (h : x ≺^[n] y) : x ≺^* y := by
+  induction n generalizing x y with
+  | zero => subst h; exact Relation.ReflTransGen.refl;
+  | succ n ih =>
+    obtain ⟨z, Rxz, Rzy⟩ := h;
+    exact Relation.ReflTransGen.head Rxz $ ih Rzy;
+
+
+protected abbrev Frame.RelTransGen {F : Frame} : _root_.Rel F.World F.World := TransGen (· ≺ ·)
+scoped infix:45 " ≺^+ " => Frame.RelTransGen
+
+namespace Frame.RelTransGen
+
+variable {F : Frame}
+
+@[simp] lemma single {x y : F.World} (hxy : x ≺ y) : x ≺^+ y := TransGen.single hxy
+
+@[simp]
+lemma transitive : Transitive F.RelTransGen := by
+  intro x y z Rxy Ryz;
+  exact TransGen.trans Rxy Ryz;
+
+@[simp]
+lemma symmetric (hSymm : Symmetric F.Rel) : Symmetric F.RelTransGen := by
+  intro x y rxy;
+  induction rxy with
+  | single h => exact TransGen.single $ hSymm h;
+  | tail _ hyz ih => exact TransGen.trans (TransGen.single $ hSymm hyz) ih
+
+end Frame.RelTransGen
+
 
 
 abbrev Frame.TransitiveClosure (F : Frame) : Frame where
   World := F.World
   default := F.default
-  Rel := (· ≺+ ·)
+  Rel := (· ≺^+ ·)
+scoped postfix:max "^+" => Frame.TransitiveClosure
 
 namespace Frame.TransitiveClosure
 
 variable {F : Frame}
 
-@[simp]
-lemma single {x y : F.World} (hxy : x ≺ y) : (F.TransitiveClosure).Rel x y := TransGen.single hxy
+lemma single {x y : F.World} (hxy : x ≺ y) : F^+ x y := TransGen.single hxy
 
--- TODO: extract to `Relation.TransGen.transitive`
-@[simp]
-lemma rel_transitive : Transitive (F.TransitiveClosure).Rel := by
-  intro _ _ _ hxy hyz
-  exact TransGen.trans hxy hyz;
+lemma rel_transitive : Transitive F^+ := by simp;
 
--- TODO: extract to `Relation.TransGen.symmetric`
-lemma rel_symmetric_of_symmetric (hSymm : Symmetric F.Rel) : Symmetric (F.TransitiveClosure).Rel := by
-  intro x y rxy;
-  induction rxy with
-  | single h => exact Relation.TransGen.single $ hSymm h;
-  | tail _ h₂ ih => exact Relation.TransGen.trans (Relation.TransGen.single $ hSymm h₂) ih;
-
-/-
-lemma rel_irreflexive_of_irreflexive : Irreflexive F.Rel → Irreflexive (F.TransitiveClosure).Rel := by
-  contrapose;
-  simp [Irreflexive];
-  intro x rxx;
-
-
-  cases h with
-  | single h => exact @hIrrefl x h;
-  | @tail y _ hxy ih => sorry;
-  -- simp [TransitiveClosure] at h;
-  -- induction h with
-  -- | single h => contradiction;
-  -- | tail _ h₂ ih => sorry;
--/
+lemma rel_symmetric (hSymm : Symmetric F.Rel) : Symmetric F.TransitiveClosure := by simp_all
 
 end Frame.TransitiveClosure
 
@@ -555,7 +571,5 @@ lemma DefinesKripkeFrameClass.ofAx (defines : Ax.DefinesKripkeFrameClass 𝔽) [
   assumption;
 
 end DeductionParameter
-
-
 
 end LO.Modal.Standard

@@ -25,15 +25,20 @@ end Bisimulation
 section ModalEquivalent
 
 
-def ModalEquivalent (M₁ M₂ : Kripke.Model α) (w₁ : M₁.World) (w₂ : M₂.World) : Prop := ∀ {p}, w₁ ⊧ p ↔ w₂ ⊧ p
-notation:max "("  M₁ ", " w₁ ")" " ↭ " "("  M₂ ", " w₂ ")" => ModalEquivalent M₁ M₂ w₁ w₂
+def ModalEquivalent {M₁ M₂ : Kripke.Model α} (w₁ : M₁.World) (w₂ : M₂.World) : Prop := ∀ {p}, w₁ ⊧ p ↔ w₂ ⊧ p
+infix:50 " ↭ " => ModalEquivalent
+
+-- notation:max "("  M₁ ", " w₁ ")" " ↭ " "("  M₂ ", " w₂ ")" => ModalEquivalent M₁ M₂ w₁ w₂
+
+-- def ModalEquivalent₂ (Mw : (Kripke.Model α) × M₁.World) (w₁ : M₁.World) (w₂ : M₂.World) : Prop := ∀ {p}, w₁ ⊧ p ↔ w₂ ⊧ p
+-- notation:max "("  M₁ ", " w₁ ")" " ↭ " "("  M₂ ", " w₂ ")" => ModalEquivalent M₁ M₂ w₁ w₂
 
 open Formula
 
 variable {M₁ M₂ : Kripke.Model α}
 variable (Bi : M₁ ⇄ M₂)
 
-lemma modal_equivalent_of_bisimilar (bisx : Bi x₁ x₂) : (M₁, x₁) ↭ (M₂, x₂) := by
+lemma modal_equivalent_of_bisimilar (bisx : Bi x₁ x₂) : x₁ ↭ x₂ := by
   intro p;
   induction p using Formula.rec' generalizing x₁ x₂ with
   | hatom a => exact Bi.atomic bisx;
@@ -133,7 +138,7 @@ variable {F₁ F₂ : Kripke.Frame}
          {M₁ M₂ : Kripke.Model α}
          {p : Formula α}
 
-lemma modal_equivalence_of_modal_morphism (f : M₁ →ₚ M₂) {w : M₁.World} : (M₁, w) ↭ (M₂, f w) := by
+lemma modal_equivalence_of_modal_morphism (f : M₁ →ₚ M₂) (w : M₁.World) : w ↭ (f w) := by
   apply modal_equivalent_of_bisimilar $ Model.PseudoEpimorphism.Bisimulation f;
   simp [Model.PseudoEpimorphism.Bisimulation];
 
@@ -154,7 +159,7 @@ lemma iff_formula_valid_on_frame_surjective_morphism (f : F₁ →ₚ F₂) (f_s
     forth := f.forth,
     back := f.back,
     atomic := by simp_all
-  } |>.not.mpr h;
+  } w₁ |>.not.mpr h;
 
 lemma iff_theory_valid_on_frame_surjective_morphism (f : F₁ →ₚ F₂) (f_surjective : Function.Surjective f) : F₁# ⊧* T → F₂# ⊧* T := by
   simp only [Semantics.realizeSet_iff];
