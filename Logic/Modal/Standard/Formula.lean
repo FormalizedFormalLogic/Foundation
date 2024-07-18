@@ -229,7 +229,6 @@ def Formula.Subformulas: Formula α → Finset (Formula α)
   | p ⋎ q  => insert (p ⋎ q) (p.Subformulas ∪ q.Subformulas)
   | box p  => insert (□p) p.Subformulas
 
--- notation "Sub(" p ")" => Formula.Subformulas p
 prefix:70 "𝒮 " => Formula.Subformulas
 
 namespace Formula.Subformulas

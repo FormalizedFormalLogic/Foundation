@@ -7,29 +7,9 @@ def Frame.ComplexityLimit {F : Kripke.Frame} (r : F.World) (p : Formula α) : Kr
   default := ⟨r, by use 0; simp⟩
   Rel x y := x.1 ≺ y.1
 
-/-
-def Frame.ComplexityLimit₂ {F : Kripke.Frame} (r : F.World) (p : Formula α) : Kripke.RootedFrame where
-  World := { x | ∃ n ≤ p.complexity, r ≺^[n] x }
-  Rel x y := x.1 ≺^* y.1
-  root := ⟨r, by use 0; simp⟩
-  def_root := by
-    rintro ⟨w, n, hn, Rrw⟩;
-    induction n generalizing r w with
-    | zero => subst Rrw; exact Relation.ReflTransGen.refl;
-    | succ n ih =>
-      obtain ⟨z, Rrz, Rzw⟩ := Rrw;
-      exact Relation.ReflTransGen.head Rrz $ ih z w (by omega) Rzw
--/
-
 def Model.ComplexityLimit {M : Kripke.Model α} (w : M.World) (p : Formula α) : Kripke.Model α where
   Frame := M.Frame.ComplexityLimit w p
   Valuation x a := M.Valuation x.1 a
-
-/-
-def Model.ComplexityLimit₂ {M : Kripke.Model α} (w : M.World) (p : Formula α) : Kripke.Model α where
-  Frame := M.Frame.ComplexityLimit₂ w p |>.toFrame
-  Valuation x a := M.Valuation x.1 a
--/
 
 variable [DecidableEq α]
          {M : Kripke.Model α} {r x : M.World} {p q : Formula α}
@@ -45,7 +25,9 @@ lemma iff_satisfy_complexity_limit_modelAux
   | hbox q ihq =>
     obtain ⟨n, hn, hx⟩ := hx;
     simp [Formula.complexity] at hn;
-    have : n + 1 ≤ p.complexity - q.complexity := by sorry; -- TODO 正しいはずなのだが`omega`ではなぜか通らない
+    have : n + 1 ≤ p.complexity - q.complexity := by
+      have : q.complexity + 1 ≤ p.complexity := by simpa using complexity_lower hq;
+      omega;
     constructor;
     . rintro h ⟨y, hy⟩ Rxy;
       apply ihq (mem_box (by assumption)) ?_ |>.mp;
