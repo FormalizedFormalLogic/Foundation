@@ -412,16 +412,17 @@ lemma rel_primrec :
   let i : (k : ℕ) × L.Rel k × (Fin k → UTerm L μ) → Node L μ := fun t => (true, Sum.inl t)
   have : Primrec i := Primrec.pair (Primrec.const true) (sum_inl.comp Primrec.id)
   have : Primrec (fun t => WType.mk (i t) Empty.elim) :=
-    w_mk₀ (β := Edge L μ) i (by intros; exact instIsEmptyEmpty) this
-  have := (of_equiv_symm (e := equivW L μ)).comp this
-  simpa using this
+    w_mk₀ (β := Edge L μ) (f := i) (by intros; exact instIsEmptyEmpty) this (v := Empty.elim)
+  have : Primrec fun a => (equivW L μ).symm (WType.mk (i a) Empty.elim) :=
+    (of_equiv_symm (e := equivW L μ)).comp this
+  exact this
 
 lemma nrel_primrec :
     Primrec (fun p => nrel p.2.1 p.2.2 : (k : ℕ) × L.Rel k × (Fin k → UTerm L μ) → UFormula L μ) := by
   let i : (k : ℕ) × L.Rel k × (Fin k → UTerm L μ) → Node L μ := fun t => (false, Sum.inl t)
   have : Primrec i := Primrec.pair (Primrec.const false) (sum_inl.comp Primrec.id)
   have : Primrec (fun t => WType.mk (i t) Empty.elim) :=
-    w_mk₀ (β := Edge L μ) i (by intros; exact instIsEmptyEmpty) this
+    w_mk₀ (β := Edge L μ) (f := i) (by intros; exact instIsEmptyEmpty) this (v := Empty.elim)
   have := (of_equiv_symm (e := equivW L μ)).comp this
   simpa using this
 
@@ -893,8 +894,7 @@ lemma relL_primrec : Primrec₂ (relL : (Σ k, L.Rel k) → List (Semiterm L μ 
   exact encode_iff.mp <| (Primrec.encode.comp this).of_eq <| by
     rintro ⟨⟨k, f⟩, l⟩; simp[relL, UFormula.relL]
     by_cases hl : l.length = k <;> simp[hl]
-    { simp[Encodable.encode_ofEquiv subfEquiv, Encodable.Subtype.encode_eq]
-      funext i; congr }
+    { simp[Encodable.encode_ofEquiv subfEquiv, Encodable.Subtype.encode_eq] }
 
 example (t : Semiformula L μ n) : encode (some t) = encode t + 1 := by { simp }
 
@@ -906,8 +906,7 @@ lemma nrelL_primrec : Primrec₂ (nrelL : (Σ k, L.Rel k) → List (Semiterm L �
   exact encode_iff.mp <| (Primrec.encode.comp this).of_eq <| by
     rintro ⟨⟨k, f⟩, l⟩; simp[nrelL, UFormula.nrelL]
     by_cases hl : l.length = k <;> simp[hl]
-    { simp[Encodable.encode_ofEquiv subfEquiv, Encodable.Subtype.encode_eq]
-      funext i; congr }
+    { simp[Encodable.encode_ofEquiv subfEquiv, Encodable.Subtype.encode_eq] }
 
 lemma and_primrec : Primrec₂ (· ⋏ · : Semiformula L μ n → Semiformula L μ n → Semiformula L μ n) := by
   letI : ∀ n , Primcodable { p : UFormula L μ // p.bv ≤ n } := fun n => Primcodable.subtype (nat_le.comp bv_primrec (Primrec.const n))

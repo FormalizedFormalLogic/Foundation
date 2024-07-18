@@ -696,7 +696,7 @@ lemma ofFn_vecCons (a : α) (v : Fin n → α) :
     ofFn (a :> v) = a ::ᵥ ofFn v := by
   ext i; cases i using Fin.cases <;> simp
 
-end Vector
+end Mathlib.Vector
 
 namespace Finset
 
@@ -760,11 +760,11 @@ end Denumerable
 
 namespace Part
 
-@[simp] lemma mem_vector_mOfFn : ∀ {n : ℕ} {w : Vector α n} {v : Fin n →. α},
-    w ∈ Vector.mOfFn v ↔ ∀ i, w.get i ∈ v i
-  | 0,     _, _ => by simp[Vector.mOfFn, Vector.eq_nil]
+@[simp] lemma mem_vector_mOfFn : ∀ {n : ℕ} {w : Mathlib.Vector α n} {v : Fin n →. α},
+    w ∈ Mathlib.Vector.mOfFn v ↔ ∀ i, w.get i ∈ v i
+  | 0,     _, _ => by simp[Mathlib.Vector.mOfFn, Mathlib.Vector.eq_nil]
   | n + 1, w, v => by
-    simp[Vector.mOfFn, @mem_vector_mOfFn _ n]
+    simp[Mathlib.Vector.mOfFn, @mem_vector_mOfFn _ n]
     exact ⟨by rintro ⟨a, ha, v, hv, rfl⟩ i; cases i using Fin.cases <;> simp[ha, hv],
       by intro h; exact ⟨w.head, by simpa using h 0, w.tail, fun i => by simpa using h i.succ, by simp⟩⟩
 

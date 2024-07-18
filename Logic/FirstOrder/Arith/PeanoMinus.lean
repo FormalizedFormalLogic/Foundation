@@ -2,7 +2,6 @@ import Logic.FirstOrder.Completeness.Lemmata
 import Logic.FirstOrder.Arith.Model
 import Logic.Vorspiel.ExistsUnique
 import Mathlib.Algebra.Order.Monoid.Canonical.Defs
-import Mathlib.Algebra.Associated
 
 noncomputable section
 
