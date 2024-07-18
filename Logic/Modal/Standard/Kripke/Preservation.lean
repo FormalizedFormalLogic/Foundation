@@ -28,11 +28,6 @@ section ModalEquivalent
 def ModalEquivalent {M₁ M₂ : Kripke.Model α} (w₁ : M₁.World) (w₂ : M₂.World) : Prop := ∀ {p}, w₁ ⊧ p ↔ w₂ ⊧ p
 infix:50 " ↭ " => ModalEquivalent
 
--- notation:max "("  M₁ ", " w₁ ")" " ↭ " "("  M₂ ", " w₂ ")" => ModalEquivalent M₁ M₂ w₁ w₂
-
--- def ModalEquivalent₂ (Mw : (Kripke.Model α) × M₁.World) (w₁ : M₁.World) (w₂ : M₂.World) : Prop := ∀ {p}, w₁ ⊧ p ↔ w₂ ⊧ p
--- notation:max "("  M₁ ", " w₁ ")" " ↭ " "("  M₂ ", " w₂ ")" => ModalEquivalent M₁ M₂ w₁ w₂
-
 open Formula
 
 variable {M₁ M₂ : Kripke.Model α}

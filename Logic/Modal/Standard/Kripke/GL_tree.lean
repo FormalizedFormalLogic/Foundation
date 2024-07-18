@@ -36,9 +36,37 @@ variable {α} [Inhabited α] [DecidableEq α]
 
 open Relation (TransGen ReflTransGen)
 
+
 def Frame.isStrictRooted (F : Frame) (r : F.World) : Prop := ∀ w ≠ r, r ≺ w
 
 def Frame.isRooted (F : Frame) (r : F.World) : Prop := ∀ w, r ≺ w
+
+
+namespace Frame
+
+variable {F : Kripke.Frame} (x : F.World)
+
+def successors := { w // x ≺^* w }
+postfix:100 "↑*" => Frame.upward
+
+def immediate_successors := { w // x ≺ w }
+postfix:100 "↑¹" => Frame.immediate_successor
+
+def proper_immediate_successors := { w // x ≠ w ∧ x ≺ w }
+postfix:100 "↑" => Frame.proper_immediate_successor
+
+
+def predeccsors := { w // w ≺^* x }
+postfix:100 "↓*" => Frame.downward
+
+def immediate_predeccsors := { w // w ≺ x }
+postfix:100 "↓¹" => Frame.immediate_predeccsor
+
+def proper_immediate_predeccsors := { w // w ≠ x ∧ w ≺ x }
+postfix:100 "↓" => Frame.proper_immediate_predeccsors
+
+end Frame
+
 
 @[simp]
 lemma Frame.strictly_rooted_of_rooted {F : Frame} {r : F.World} (h : F.isRooted r) : F.isStrictRooted r := by
@@ -47,31 +75,97 @@ lemma Frame.strictly_rooted_of_rooted {F : Frame} {r : F.World} (h : F.isRooted 
 
 structure RootedFrame extends Kripke.Frame where
   root : World
+  def_root : ∀ w ≠ root, root ≺^* w
+  -- no_root_cycle : ∀ w ≠ root, ¬(w ≺^* root)
   default := root
-  def_root : ∀ w, root ≺ w
 
 section
 
-/-- point generated -/
-def Frame.Cuttage (F : Kripke.Frame) (r : F.World) : Kripke.RootedFrame where
+def Frame.PointGenerated (F : Kripke.Frame) (r : F.World) : Kripke.Frame where
   World := { w | w = r ∨ r ≺ w }
   Rel x y := x.1 ≺ y.1
-  root := ⟨r, by tauto⟩
-  def_root := by sorry
-infix:100 "↾" => Frame.Cuttage
+  default := ⟨r, by tauto⟩
+infix:100 "↾" => Frame.PointGenerated
 
 
-def Model.Cuttage (M : Kripke.Model α) (r : M.World) : Kripke.Model α where
-  Frame := (M.Frame↾r).toFrame
+def Model.PointGenerated (M : Kripke.Model α) (r : M.World) : Kripke.Model α where
+  Frame := (M.Frame↾r)
   Valuation w a := M.Valuation w.1 a
-infix:100 "↾" => Model.Cuttage
+infix:100 "↾" => Model.PointGenerated
+
+def Model.PointGenerated.Bisimulation (M : Model α) (M_trans : Transitive M.Frame) (r : M.World): (M↾r) ⇄ M where
+  toRel x y := x.1 = y
+  atomic := by
+    rintro x y a rfl;
+    simp [Model.PointGenerated];
+  forth := by
+    rintro x₁ y₁ x₂ rfl Rx₂y₁;
+    use y₁.1;
+    constructor;
+    . simp;
+    . exact Rx₂y₁;
+  back := by
+    rintro ⟨x₁, (rfl | hx₁)⟩ x₂ y₂ rfl Rx₂y₂;
+    . use ⟨y₂, by right; exact Rx₂y₂⟩;
+      constructor;
+      . simp;
+      . exact Rx₂y₂;
+    . use ⟨y₂, ?h₂⟩;
+      constructor;
+      . simp;
+      . exact Rx₂y₂;
+      right;
+      exact M_trans hx₁ Rx₂y₂;
+
+lemma Model.PointGenerated.Bisimulation.rooted (M_trans : Transitive M.Frame := by assumption) : (Bisimulation M M_trans r) ⟨r, by simp⟩ r := by simp [Bisimulation];
+
+lemma Model.PointGenerated.modal_equivalent_to_root (M_trans : Transitive M.Frame) : ModalEquivalent (M₁ := M↾r) (M₂ := M) ⟨r, by simp⟩ r
+  := modal_equivalent_of_bisimilar (Bisimulation M M_trans r) Bisimulation.rooted
 
 
-def Frame.downward {F : Kripke.Frame} (x : F.World) : Type u := { w // w ≺^+ x }
-postfix:100 "↓" => Frame.downward
+-- TODO: move
+section S5
+
+def _root_.Universal {α} (R : α → α → Prop) : Prop := ∀ ⦃x y : α⦄, R x y
+
+lemma _root_.refl_of_universal (h : Universal R) : Reflexive R := by
+  intro x; exact @h x x;
+
+lemma _root_.eucl_of_universal (h : Universal R) : Euclidean R := by
+  rintro x y z _ _; exact @h z y;
+
+lemma Frame.PointGenerated.rel_universal
+  {F : Kripke.Frame} {r : F.World} (F_refl : Reflexive F) (F_eucl : Euclidean F) : Universal (F↾r).Rel := by
+  have F_symm := symm_of_refl_eucl F_refl F_eucl;
+  simp [Frame.PointGenerated];
+  rintro ⟨x, (rfl | hx)⟩ ⟨y, (rfl | hy)⟩;
+  . apply F_refl;
+  . exact hy;
+  . exact F_symm hx;
+  . apply F_symm $ F_eucl hx hy;
+
+abbrev UniversalFrameClass : FrameClass := { F | Universal F }
+
+lemma iff_Universal_ReflexiveEuclidean_validOnFrameClass : UniversalFrameClass.{u}# ⊧ p ↔ ReflexiveEuclideanFrameClass.{u}# ⊧ p := by
+  constructor;
+  . intro h F hF V r;
+    apply Model.PointGenerated.modal_equivalent_to_root (by apply trans_of_refl_eucl hF.1 hF.2) |>.mp;
+    apply @h (F↾r) (Frame.PointGenerated.rel_universal hF.1 hF.2) ((⟨F, V⟩)↾r).Valuation;
+  . rintro h F F_univ;
+    exact @h F (⟨refl_of_universal F_univ, eucl_of_universal F_univ⟩);
+
+instance S5_complete_universal : Complete (𝐒𝟓 : DeductionParameter α) UniversalFrameClass# := ⟨by
+  intro p hF;
+  have : ReflexiveEuclideanFrameClass# ⊧ p := iff_Universal_ReflexiveEuclidean_validOnFrameClass.mp hF;
+  exact S5_complete.complete this;
+⟩
+
+end S5
+
+
 
 structure Tree extends Kripke.RootedFrame where
-  branching : ∀ x : World, ∀ y z : x↓, y ≠ z → (y.1 ≺ z.1 ∨ z.1 ≺ y.1) -- linear order
+  goback : ∀ w ≠ root, ∃! x : w↓, w ≺ x.1
 
 structure TransitiveTree extends Kripke.Tree where
   rel_irreflexive : Irreflexive Rel
@@ -80,7 +174,7 @@ structure TransitiveTree extends Kripke.Tree where
 structure FiniteTransitiveTree extends TransitiveTree, FiniteFrame where
 
 set_option linter.unusedVariables false in
-protected abbrev FiniteTransitiveTree.Dep (α : Type u) := FiniteTransitiveTree
+protected abbrev FiniteTransitiveTree.Dep (α : Type*) := FiniteTransitiveTree
 protected abbrev FiniteTransitiveTree.alt (T : FiniteTransitiveTree) {α} : FiniteTransitiveTree.Dep α := T
 postfix:max "#" => FiniteTransitiveTree.alt
 
@@ -168,10 +262,28 @@ end Model.TreeUnravelling
 
 end TreeUnravelling
 
+-- TODO: move
+def Frame.PseudoEpimorphism.TransitiveClosure {F₁ F₂ : Frame} (f : F₁ →ₚ F₂) (F₂_trans : Transitive F₂) : F₁^+ →ₚ F₂ where
+  toFun := f.toFun
+  forth := by
+    intro x y hxy; simp at x y;
+    induction hxy with
+    | single hxy => exact f.forth hxy;
+    | @tail z y _ Rzy Rxz =>
+      replace Rzy := f.forth Rzy;
+      exact F₂_trans Rxz Rzy;
+  back := by
+    intro x w hxw;
+    obtain ⟨u, ⟨rfl, hxu⟩⟩ := f.back hxw;
+    use u;
+    constructor;
+    . rfl;
+    . exact RelTransGen.single hxu;
+
 
 section TransitiveTreeUnravelling
 
-abbrev Frame.TransitiveTreeUnravelling (F : Frame) (r : F.World) := F.TreeUnravelling r |>.TransitiveClosure
+abbrev Frame.TransitiveTreeUnravelling (F : Frame) (r : F.World) := (F.TreeUnravelling r)^+
 
 namespace Frame.TransitiveTreeUnravelling
 
@@ -183,9 +295,41 @@ lemma not_nil {c : (F.TransitiveTreeUnravelling r).World} : c.1 ≠ [] := by
   have := c.2.1;
   simp_all;
 
-@[simp] lemma transitive : Transitive (F.TransitiveTreeUnravelling r) := by simp
+lemma rel_transitive : Transitive (F.TransitiveTreeUnravelling r) := TransitiveClosure.rel_transitive
+
+/-
+lemma rel_irreflexive : Irreflexive (F.TransitiveTreeUnravelling r).Rel := by
+  simp [TransitiveTreeUnravelling, TreeUnravelling];
+  rintro x Rxx;
+  cases Rxx with
+  | single h => exact TreeUnravelling.irreflexive x h;
+  | tail Rxw Rwx =>
+    induction Rxw with
+    | single => aesop;
+    | tail Rxv Rvw ih => sorry;
+
+lemma rel_branching : ∀ x : (F.TransitiveTreeUnravelling r).World, ∀ y z : x↓, y ≠ z → (y.1 ≺ z.1 ∨ z.1 ≺ y.1) := by sorry;
+-/
+
+
+def PMorphism (F : Frame) (F_trans : Transitive F.Rel) (r : F) : (F.TransitiveTreeUnravelling r) →ₚ F := (Frame.TreeUnravelling.PMorphism F r).TransitiveClosure F_trans
 
 end Frame.TransitiveTreeUnravelling
+
+
+def Model.TransitiveTreeUnravelling (M : Kripke.Model α) (r : M.World) : Kripke.Model α where
+  Frame := M.Frame.TransitiveTreeUnravelling r
+  Valuation c a := M.Valuation (c.1.getLast (by simp)) a
+
+namespace Model.TransitiveTreeUnravelling
+
+variable {M : Kripke.Model α} {r : M.World} {p : Formula α}
+
+def PMorphism (M : Kripke.Model α) (M_trans : Transitive M.Frame) (r : M.World) : M.TransitiveTreeUnravelling r →ₚ M :=
+  Model.PseudoEpimorphism.mkAtomic (Frame.TransitiveTreeUnravelling.PMorphism M.Frame M_trans r) $ by aesop;
+
+end Model.TransitiveTreeUnravelling
+
 
 end TransitiveTreeUnravelling
 
@@ -278,6 +422,8 @@ lemma modal_equivalence {w : M.GLTreeUnravelling r} : w ↭ (w.1.getLast (by sim
 end Model.GLTreeUnravelling
 
 end GLTreeUnravelling
+
+
 
 variable {p : Formula α}
 
