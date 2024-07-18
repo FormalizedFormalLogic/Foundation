@@ -30,7 +30,7 @@ variable {α} [DecidableEq α]
 
 namespace Formula
 
-def toPropFormula (p : Formula α) (_ : p.degree = 0 := by simp_all) : Superintuitionistic.Formula α :=
+def toPropFormula (p : Formula α) (_ : p.degree = 0 := by simp_all [Formula.degree]) : Superintuitionistic.Formula α :=
   match p with
   | atom a => Superintuitionistic.Formula.atom a
   | ⊤ => ⊤
