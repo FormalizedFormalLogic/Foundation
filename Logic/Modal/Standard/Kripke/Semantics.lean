@@ -128,14 +128,11 @@ variable {F : Frame}
 
 @[simp] lemma single {x y : F.World} (hxy : x ≺ y) : x ≺^* y := ReflTransGen.single hxy
 
-@[simp] lemma reflexive : Reflexive F.RelReflTransGen := by intro x; exact ReflTransGen.refl;
+@[simp] lemma reflexive : Reflexive F.RelReflTransGen := Relation.reflexive_reflTransGen
 
 @[simp] lemma refl {x : F.World} : x ≺^* x := reflexive x
 
-@[simp]
-lemma transitive : Transitive F.RelReflTransGen := by
-  intro x y z Rxy Ryz;
-  exact ReflTransGen.trans Rxy Ryz;
+@[simp] lemma transitive : Transitive F.RelReflTransGen := Relation.transitive_reflTransGen
 
 @[simp] lemma symmetric : Symmetric F.Rel → Symmetric F.RelReflTransGen := ReflTransGen.symmetric
 
@@ -181,9 +178,7 @@ variable {F : Frame}
 @[simp] lemma single {x y : F.World} (hxy : x ≺ y) : x ≺^+ y := TransGen.single hxy
 
 @[simp]
-lemma transitive : Transitive F.RelTransGen := by
-  intro x y z Rxy Ryz;
-  exact TransGen.trans Rxy Ryz;
+lemma transitive : Transitive F.RelTransGen := λ _ _ _ => TransGen.trans
 
 @[simp]
 lemma symmetric (hSymm : Symmetric F.Rel) : Symmetric F.RelTransGen := by

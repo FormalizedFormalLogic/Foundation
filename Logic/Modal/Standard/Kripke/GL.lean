@@ -110,7 +110,7 @@ lemma axiomL_finite_defines : AxiomSet.FinitelyDefinesKripkeFrameClass (α := α
     . exact hTrans;
     . exact Finite.converseWellFounded_of_trans_irrefl' F.World_finite hTrans hIrrefl;
 
-instance : Sound (𝐆𝐋 : DeductionParameter α) TransitiveIrreflexiveFrameClassꟳ# := sound_of_finitely_defines axiomL_finite_defines
+instance GL_sound : Sound (𝐆𝐋 : DeductionParameter α) TransitiveIrreflexiveFrameClassꟳ# := sound_of_finitely_defines axiomL_finite_defines
 
 instance : System.Consistent (𝐆𝐋 : DeductionParameter α) := consistent_of_finitely_defines.{0} axiomL_finite_defines $ by
   use PointFrame;
