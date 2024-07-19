@@ -398,16 +398,15 @@ namespace Kripke
 
 open SaturatedConsistentTableau
 
-noncomputable def CanonicalFrame (𝓓 : DeductionParameter α) [Inhabited (SCT 𝓓)] : Frame' α where
+def CanonicalFrame (𝓓 : DeductionParameter α) [Inhabited (SCT 𝓓)] : Frame' α where
   World := SCT 𝓓
-  World_decEq := Classical.decEq _
   Rel := λ t₁ t₂ => t₁.tableau.1 ⊆ t₂.tableau.1
   Rel_antisymm := by
     intro x y hxy hyx;
     exact equality_of₁ $ Set.Subset.antisymm hxy hyx;
   Rel_trans := by intro x y z; apply Set.Subset.trans;
 
-noncomputable def CanonicalModel (𝓓 : DeductionParameter α) [Inhabited (SCT 𝓓)] : Model α where
+def CanonicalModel (𝓓 : DeductionParameter α) [Inhabited (SCT 𝓓)] : Model α where
   Frame := CanonicalFrame 𝓓
   Valuation t a := (atom a) ∈ t.tableau.1
   hereditary := by aesop;

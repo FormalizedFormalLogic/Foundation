@@ -52,10 +52,8 @@ structure Frame where
   World : Type*
   Rel : Rel World World
   [World_inhabited : Inhabited World]
-  [World_decEq : DecidableEq World]
 
 instance {F : Frame} : Inhabited F.World := F.World_inhabited
-instance {F : Frame} : DecidableEq F.World := F.World_decEq
 
 instance : CoeSort Frame (Type u) := ⟨Frame.World⟩
 instance : CoeFun Frame (λ F => F.World → F.World → Prop) := ⟨Frame.Rel⟩

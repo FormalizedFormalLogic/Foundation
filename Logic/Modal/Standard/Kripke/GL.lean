@@ -145,7 +145,6 @@ lemma filter_truthlemma
 noncomputable abbrev GLFilteredFrame (p : Formula α) : Kripke.FiniteFrame where
   World := FilterEqvQuotient GLCanonicalModel ((𝒮 p).toSet)
   World_finite := by apply FilterEqvQuotient.finite; simp;
-  World_decEq := Classical.decEq _
   Rel := Quotient.lift₂
     (λ X Y =>
       (∀ q ∈ □''⁻¹(𝒮 p), □q ∈ X.theory → q ⋏ □q ∈ Y.theory) ∧
@@ -157,27 +156,27 @@ noncomputable abbrev GLFilteredFrame (p : Formula α) : Kripke.FiniteFrame where
       . rintro ⟨h₁, ⟨r, br_mem_sub, br_nmem_X₁, br_mem_Y₁⟩⟩;
         constructor;
         . intro q bq_mem_sub bq_mem_X₂;
-          have bq_mem_X₁ : □q ∈ X₁.theory := filter_truthlemma (by aesop) |>.mpr bq_mem_X₂;
+          have bq_mem_X₁ : □q ∈ X₁.theory := filter_truthlemma (by simpa) |>.mpr bq_mem_X₂;
           have ⟨q_mem_Y₁, bq_mem_Y₁⟩ := h₁ q bq_mem_sub bq_mem_X₁;
           constructor;
-          . exact filter_truthlemma (by aesop) |>.mp q_mem_Y₁;
-          . exact filter_truthlemma (by aesop) |>.mp bq_mem_Y₁;
+          . exact filter_truthlemma (by simpa) |>.mp q_mem_Y₁;
+          . exact filter_truthlemma (by simpa) |>.mp bq_mem_Y₁;
         . use r;
           refine ⟨br_mem_sub, ?br_nmem_X₂, ?br_mem_Y₂⟩;
-          . exact filter_truthlemma (by aesop) |>.not.mp br_nmem_X₁;
-          . exact filter_truthlemma (by aesop) |>.mp br_mem_Y₁;
+          . exact filter_truthlemma (by simpa) |>.not.mp br_nmem_X₁;
+          . exact filter_truthlemma (by simpa) |>.mp br_mem_Y₁;
       . rintro ⟨h₁, ⟨r, br_mem_sub, br_nmem_X₂, br_mem_Y₂⟩⟩;
         constructor;
         . intro q bq_mem_sub bq_mem_X₂;
-          have bq_mem_X₂ : □q ∈ X₂.theory := filter_truthlemma (by aesop) |>.mp bq_mem_X₂;
+          have bq_mem_X₂ : □q ∈ X₂.theory := filter_truthlemma (by simpa) |>.mp bq_mem_X₂;
           have ⟨q_mem_Y₂, bq_mem_Y₂⟩ := h₁ q bq_mem_sub bq_mem_X₂;
           constructor;
-          . exact filter_truthlemma (by aesop) |>.mpr q_mem_Y₂;
-          . exact filter_truthlemma (by aesop) |>.mpr bq_mem_Y₂;
+          . exact filter_truthlemma (by simpa) |>.mpr q_mem_Y₂;
+          . exact filter_truthlemma (by simpa) |>.mpr bq_mem_Y₂;
         . use r;
           refine ⟨br_mem_sub, ?m, ?me⟩;
-          . exact filter_truthlemma (by aesop) |>.not.mpr br_nmem_X₂;
-          . exact filter_truthlemma (by aesop) |>.mpr br_mem_Y₂;
+          . exact filter_truthlemma (by simpa) |>.not.mpr br_nmem_X₂;
+          . exact filter_truthlemma (by simpa) |>.mpr br_mem_Y₂;
     )
 
 lemma GLFilteredFrame.def_rel {p : Formula α} {X Y : GLCanonicalFrame.World} :
@@ -570,7 +569,7 @@ lemma rel_irreflexive (T : FiniteTransitiveTree) : Irreflexive T.Rel := irreflex
 
 end FiniteTransitiveTree
 
-
+open Classical in
 abbrev FiniteFrame.FiniteTransitiveTreeUnravelling
   (F : FiniteFrame) [DecidableEq F.World] (F_trans : Transitive F.toFrame) (F_irrefl : Irreflexive F.toFrame) (r : F.World) : FiniteTransitiveTree :=
   letI T := (F↾r).TransitiveTreeUnravelling ⟨r, by tauto⟩
@@ -597,11 +596,16 @@ namespace Model.GLTreeUnravelling
 end Model.GLTreeUnravelling
 
 
+section
+
+
 /-
   TODO: `FiniteTransitiveTreeClass`のようなものを定義して適当に書き換える
 -/
 
 variable {p : Formula α}
+
+open Classical
 
 lemma valid_on_FiniteTransitiveTreeClass_of_valid_on_TransitiveIrreflexiveFrameClass (h : TransitiveIrreflexiveFrameClass.{u}ꟳ# ⊧ p) : ∀ T : FiniteTransitiveTree.{u}, T# ⊧ p := by
   simp at h;
@@ -633,6 +637,8 @@ theorem iff_provable_GL_satisfies_at_root_on_FiniteTransitiveTree : 𝐆𝐋 ⊢
   . intro h;
     apply GL_complete.complete;
     exact valid_on_TransitiveIrreflexiveFrameClass_of_satisfies_at_root_on_FiniteTransitiveTree h;
+
+end
 
 end Kripke
 

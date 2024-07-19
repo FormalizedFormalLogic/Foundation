@@ -10,14 +10,12 @@ attribute [simp] Reflexive Transitive Antisymmetric in
 structure Frame where
   World : Type u
   [World_nonempty : Inhabited World]
-  [World_decEq : DecidableEq World]
   Rel : World → World → Prop
   Rel_refl : Reflexive Rel := by aesop
   Rel_trans : Transitive Rel := by aesop
   Rel_antisymm : Antisymmetric Rel := by aesop
 
 instance {F : Frame} : Inhabited F.World := F.World_nonempty
-instance {F : Frame} : DecidableEq F.World := F.World_decEq
 
 structure FiniteFrame extends Frame where
   [World_finite : Finite World]
