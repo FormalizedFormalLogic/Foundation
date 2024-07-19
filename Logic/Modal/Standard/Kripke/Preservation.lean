@@ -91,7 +91,16 @@ infix:80 " →ₚ " => Frame.PseudoEpimorphism
 instance : CoeFun (Frame.PseudoEpimorphism F₁ F₂) (λ _ => F₁.World → F₂.World) := ⟨λ f => f.toFun⟩
 
 
-def Frame.PseudoEpimorphism.TransitiveClosure {F₁ F₂ : Frame} (f : F₁ →ₚ F₂) (F₂_trans : Transitive F₂) : F₁^+ →ₚ F₂ where
+namespace Frame.PseudoEpimorphism
+
+variable {F F₁ F₂ F₃ : Frame}
+
+def id : F →ₚ F where
+  toFun := _root_.id
+  forth := by simp;
+  back := by simp;
+
+def TransitiveClosure (f : F₁ →ₚ F₂) (F₂_trans : Transitive F₂) : F₁^+ →ₚ F₂ where
   toFun := f.toFun
   forth := by
     intro x y hxy; simp at x y;
@@ -108,6 +117,22 @@ def Frame.PseudoEpimorphism.TransitiveClosure {F₁ F₂ : Frame} (f : F₁ →�
     . rfl;
     . exact RelTransGen.single hxu;
 
+def comp (f : F₁ →ₚ F₂) (g : F₂ →ₚ F₃) : F₁ →ₚ F₃ where
+  toFun := g ∘ f
+  forth := by
+    intro x y hxy;
+    exact g.forth $ f.forth hxy;
+  back := by
+    intro x w hxw;
+    simp at hxw;
+    obtain ⟨y, ⟨hyz, hxy⟩⟩ := g.back hxw;
+    obtain ⟨u, ⟨hgu, hfu⟩⟩ := f.back hxy;
+    use u;
+    constructor;
+    . subst_vars; simp;
+    . assumption;
+
+end Frame.PseudoEpimorphism
 
 
 structure Model.PseudoEpimorphism (M₁ M₂ : Kripke.Model α) extends M₁.Frame →ₚ M₂.Frame where
@@ -117,8 +142,22 @@ infix:80 " →ₚ " => Model.PseudoEpimorphism
 
 instance : CoeFun (Model.PseudoEpimorphism M₁ M₂) (λ _ => M₁.World → M₂.World) := ⟨λ f => f.toFun⟩
 
-def Model.PseudoEpimorphism.mkAtomic
-  {M₁ M₂ : Kripke.Model α}
+namespace Model.PseudoEpimorphism
+
+variable {M M₁ M₂ M₃ : Kripke.Model α}
+
+def toFramePseudoEpimorphism (f : M₁ →ₚ M₂) : M₁.Frame →ₚ M₂.Frame where
+  toFun := f.toFun
+  forth := f.forth
+  back := f.back
+
+def id : M →ₚ M where
+  toFun := _root_.id
+  forth := by simp;
+  back := by simp;
+  atomic := by simp;
+
+def mkAtomic
   (f : M₁.Frame →ₚ M₂.Frame) (atomic : ∀ {w a}, (M₁.Valuation w a) ↔ (M₂.Valuation (f w) a))
   : M₁ →ₚ M₂
   := {
@@ -128,7 +167,19 @@ def Model.PseudoEpimorphism.mkAtomic
     atomic := atomic,
   }
 
-def Model.PseudoEpimorphism.Bisimulation {M₁ M₂ : Kripke.Model α} (f : M₁ →ₚ M₂) : M₁ ⇄ M₂ := {
+def comp (f : M₁ →ₚ M₂) (g : M₂ →ₚ M₃) : M₁ →ₚ M₃ := mkAtomic (f.toFramePseudoEpimorphism.comp (g.toFramePseudoEpimorphism)) $ by
+    intro x p;
+    constructor;
+    . intro h;
+      apply g.atomic.mp;
+      apply f.atomic.mp;
+      assumption;
+    . intro h;
+      apply f.atomic.mpr;
+      apply g.atomic.mpr;
+      assumption;
+
+def Bisimulation {M₁ M₂ : Kripke.Model α} (f : M₁ →ₚ M₂) : M₁ ⇄ M₂ := {
   toRel := Function.graph f,
   atomic := by
     intro x₁ x₂ a e; subst e;
@@ -145,6 +196,8 @@ def Model.PseudoEpimorphism.Bisimulation {M₁ M₂ : Kripke.Model α} (f : M₁
     obtain ⟨y₁, _⟩ := f.back rx₂y₂;
     use y₁;
 }
+
+end Model.PseudoEpimorphism
 
 open Formula
 
@@ -303,6 +356,17 @@ lemma Model.PointGenerated.Bisimulation.rooted (M_trans : Transitive M.Frame := 
 
 lemma Model.PointGenerated.modal_equivalent_to_root (M : Model α) (M_trans : Transitive M.Frame) (r : M.World) : ModalEquivalent (M₁ := M↾r) (M₂ := M) ⟨r, by simp⟩ r
   := modal_equivalent_of_bisimilar (Bisimulation M M_trans r) Bisimulation.rooted
+
+
+section Generation
+
+structure Frame.GeneratedSub (F₁ F₂ : Kripke.Frame) extends F₁ →ₚ F₂ where
+ monic : Function.Injective toFun
+
+infix:80 " ⊆ₚ " => Frame.GeneratedSub
+
+end Generation
+
 
 
 namespace Frame
