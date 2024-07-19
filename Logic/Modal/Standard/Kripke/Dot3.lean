@@ -10,7 +10,7 @@ open Formula
 
 abbrev ConnectedFrameClass : FrameClass := { F | Connected F }
 
-variable {α} [Inhabited α] [DecidableEq α] [atleast : Atleast 2 α]
+variable {α : Type u} [Inhabited α] [DecidableEq α] [atleast : Atleast 2 α]
 variable {F : Kripke.Frame}
 
 private lemma connected_of_dot3 : F# ⊧* (.𝟯 : AxiomSet α) → Connected F := by
@@ -100,7 +100,7 @@ lemma connected_CanonicalFrame {Ax : AxiomSet α} (hAx : .𝟯 ⊆ Ax) [System.C
   have : □(□p ⟶ q) ⋎ □(□q ⟶ p) ∈ X.theory := by apply subset_axiomset _; aesop;
   contradiction;
 
-instance : Complete (𝐒𝟒.𝟑 : DeductionParameter α) (ReflexiveTransitiveConnectedFrameClass#) := instComplete_of_mem_canonicalFrame $ by
+instance : Complete (𝐒𝟒.𝟑 : DeductionParameter α) (ReflexiveTransitiveConnectedFrameClass.{u}#) := instComplete_of_mem_canonicalFrame $ by
   refine ⟨?reflexive, ?transitive, ?connective⟩;
   . simp [←GeachConfluent.reflexive_def];
     apply geachConfluent_CanonicalFrame;

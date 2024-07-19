@@ -55,7 +55,9 @@ lemma list_take : Primrec₂ (List.take : ℕ → List α → List α) := by
     to₂ (nat_rec' fst (const [])
       (list_append.comp₂ (snd.comp₂ Primrec₂.right)
         (option_toList.comp₂ $ list_get?.comp₂ (snd.comp₂ Primrec₂.left) (fst.comp₂ Primrec₂.right))))
-  exact this.of_eq (fun n as => by induction' n with n ih <;> simp[List.take_succ, *])
+  exact this.of_eq (fun n as => by
+    simp only [List.get?_eq_getElem?]
+    induction' n with n ih <;> simp [List.take_succ, *])
 
 lemma nat_pow : Primrec₂ ((· ^ ·) : ℕ → ℕ → ℕ) :=
   Primrec₂.unpaired'.1 Nat.Primrec.pow

@@ -221,8 +221,7 @@ lemma funcL_primrec :
     this.comp₂ (sum_inr.comp₂ $ sum_inr.comp₂ Primrec₂.left) Primrec₂.right
   this.of_eq (fun ⟨k, f⟩ l => by
       simp[WType.mkL, Edge]
-      by_cases hl : l.length = k <;> simp[hl, funcL]
-      { funext i; congr })
+      by_cases hl : l.length = k <;> simp[hl, funcL])
 
 lemma funcL_primrec' (k : ℕ) :
   Primrec₂ (funcL ⟨k, ·⟩ : L.Func k → List (UTerm L μ) → Option (UTerm L μ)) :=
@@ -341,8 +340,7 @@ lemma funcL_primrec : Primrec₂ (funcL : (k : ℕ) × L.Func k → List (Semite
     intro ⟨k, f⟩ l
     simp[funcL, UTerm.funcL]
     by_cases hl : l.length = k <;> simp[hl]
-    { simp[Encodable.encode_ofEquiv subtEquiv, Encodable.Subtype.encode_eq]
-      funext i; congr }
+    · simp[Encodable.encode_ofEquiv subtEquiv, Encodable.Subtype.encode_eq]
 
 lemma funcL_primrec' (k) : Primrec₂ (funcL ⟨k, ·⟩ : L.Func k → List (Semiterm L μ n) → Option (Semiterm L μ n)) :=
   (funcL_primrec.comp₂ ((sigma_pair k).comp₂ Primrec₂.left) Primrec₂.right).of_eq <| by simp[funcL]

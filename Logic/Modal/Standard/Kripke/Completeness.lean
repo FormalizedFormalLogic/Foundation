@@ -8,7 +8,7 @@ open Formula
 open MaximalConsistentTheory
 open DeductionParameter (Normal)
 
-variable {α : Type*} [DecidableEq α] [Inhabited α]
+variable {α : Type u} [DecidableEq α] [Inhabited α]
 variable {Λ : DeductionParameter α} [Λ.IsNormal]
 
 namespace Kripke
@@ -176,8 +176,8 @@ lemma complete_of_mem_canonicalFrame [Inhabited (Λ)-MCT] {𝔽 : FrameClass.Dep
 
 lemma instComplete_of_mem_canonicalFrame [Inhabited (Λ)-MCT] {𝔽 : FrameClass.Dep α} (hFC : CanonicalFrame Λ ∈ 𝔽) : Complete (Λ) 𝔽 := ⟨complete_of_mem_canonicalFrame hFC⟩
 
-instance K_complete : Complete (𝐊 : DeductionParameter α) AllFrameClass# := by
-  simpa [←Normal.isK] using instComplete_of_mem_canonicalFrame (Λ := 𝐊) (𝔽 := AllFrameClass#) trivial;
+instance K_complete : Complete (𝐊 : DeductionParameter.{u} α) AllFrameClass.{u}# := by
+  simpa [←Normal.isK] using instComplete_of_mem_canonicalFrame (𝔽 := AllFrameClass#) trivial;
 
 end Kripke
 

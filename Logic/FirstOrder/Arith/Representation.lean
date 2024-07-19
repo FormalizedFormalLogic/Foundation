@@ -6,7 +6,7 @@ namespace LO.FirstOrder.Arith
 
 namespace FirstIncompleteness
 
-open Encodable Semiterm.Operator.GoedelNumber
+open Mathlib Encodable Semiterm.Operator.GoedelNumber
 
 /-- This instance is scoped since we will define canonical Gödel numbering when formalizing G2.  -/
 scoped instance {α} [Primcodable α] : Semiterm.Operator.GoedelNumber ℒₒᵣ α :=

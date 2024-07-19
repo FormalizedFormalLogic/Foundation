@@ -3,14 +3,6 @@ import Logic.Modal.Standard.Kripke.Geach
 
 universe u v
 
-namespace Set
-
-@[deprecated "TODO: Use `Set.Finite.powerset`"]
-lemma powerset_finite_of_finite_set {s : Set α} (hs : s.Finite) : (𝒫 s).Finite := Set.Finite.finite_subsets hs
-
-end Set
-
-
 namespace LO.Modal.Standard
 
 variable {α : Type u} [DecidableEq α] [Inhabited α]
@@ -39,7 +31,7 @@ def FilterEqvSetoid : Setoid (M.World) := ⟨filterEquiv M T, filterEquiv.equiva
 abbrev FilterEqvQuotient := Quotient (FilterEqvSetoid M T)
 
 lemma FilterEqvQuotient.finite (T_finite : T.Finite) : Finite (FilterEqvQuotient M T) := by
-  have : Finite (𝒫 T) := Set.powerset_finite_of_finite_set T_finite
+  have : Finite (𝒫 T) := Set.Finite.powerset T_finite
   let f : FilterEqvQuotient M T → 𝒫 T :=
     λ (Qx : FilterEqvQuotient M T) => Quotient.lift (λ x => ⟨{ p ∈ T | x ⊧ p }, (by simp_all)⟩) (by
       intro x y hxy; simp;
@@ -216,7 +208,7 @@ theorem filteration {x : M.World} {p : Formula α} (hs : p ∈ T := by aesop) : 
 
 end
 
-instance K_finite_complete : Complete (𝐊 : DeductionParameter α) AllFrameClassꟳ# := ⟨by
+instance K_finite_complete : Complete (𝐊 : DeductionParameter α) AllFrameClass.{u}ꟳ# := ⟨by
   intro p hp;
   apply K_complete.complete;
   intro F _ V x;
@@ -240,7 +232,7 @@ class FiniteFrameProperty (Λ : DeductionParameter α) (𝔽 : FrameClass.{u}) w
 instance : FiniteFrameProperty (α := α) 𝐊 AllFrameClass where
 
 
-instance KTB_finite_complete : Complete (𝐊𝐓𝐁 : DeductionParameter α) ReflexiveSymmetricFrameClassꟳ# := ⟨by
+instance KTB_finite_complete : Complete (𝐊𝐓𝐁 : DeductionParameter α) ReflexiveSymmetricFrameClass.{u}ꟳ# := ⟨by
   intro p hp;
   apply KTB_complete.complete;
   intro F ⟨F_refl, F_symm⟩ V x;
@@ -315,7 +307,7 @@ end
 
 open FinestFilterationTransitiveClosureModel
 
-instance S4_finite_complete : Complete (𝐒𝟒 : DeductionParameter α)  PreorderFrameClassꟳ# := ⟨by
+instance S4_finite_complete : Complete (𝐒𝟒 : DeductionParameter α)  PreorderFrameClass.{u}ꟳ# := ⟨by
   intro p hp;
   apply S4_complete.complete;
   intro F ⟨F_refl, F_trans⟩ V x;
@@ -336,7 +328,7 @@ instance S4_finite_complete : Complete (𝐒𝟒 : DeductionParameter α)  Preor
 instance : FiniteFrameProperty (α := α) 𝐒𝟒 PreorderFrameClass where
 
 
-instance KT4B_finite_complete : Complete (𝐊𝐓𝟒𝐁 : DeductionParameter α) EquivalenceFrameClassꟳ# := ⟨by
+instance KT4B_finite_complete : Complete (𝐊𝐓𝟒𝐁 : DeductionParameter α) EquivalenceFrameClass.{u}ꟳ# := ⟨by
   intro p hp;
   apply KT4B_complete.complete;
   intro F ⟨F_refl, F_trans, F_symm⟩ V x;

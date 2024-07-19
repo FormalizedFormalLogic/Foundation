@@ -5,7 +5,7 @@ namespace LO.Modal.Standard
 
 namespace Kripke
 
-variable [Inhabited α] [DecidableEq α]
+variable {α : Type u} [Inhabited α] [DecidableEq α]
 
 lemma Frame.PointGenerated.rel_universal
   {F : Kripke.Frame} {r : F.World} (F_refl : Reflexive F) (F_eucl : Euclidean F) : Universal (F↾r).Rel := by
@@ -27,7 +27,7 @@ lemma iff_Universal_ReflexiveEuclidean_validOnFrameClass : UniversalFrameClass.{
   . rintro h F F_univ;
     exact @h F (⟨refl_of_universal F_univ, eucl_of_universal F_univ⟩);
 
-instance S5_complete_universal : Complete (𝐒𝟓 : DeductionParameter α) UniversalFrameClass# := ⟨by
+instance S5_complete_universal : Complete (𝐒𝟓 : DeductionParameter α) UniversalFrameClass.{u}# := ⟨by
   intro p hF;
   have : ReflexiveEuclideanFrameClass# ⊧ p := iff_Universal_ReflexiveEuclidean_validOnFrameClass.mp hF;
   exact S5_complete.complete this;

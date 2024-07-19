@@ -54,7 +54,7 @@ section complete
 
 def consistentTheory : Set (Theory α) := { U : Theory α | System.Consistent U }
 
-variable {T : Theory α} (consisT : Consistent T)
+variable {T : Theory α} (consisT : System.Consistent T)
 open System Gentzen
 
 lemma exists_maximal_consistent_theory :

@@ -1,6 +1,8 @@
 import Logic.Vorspiel.Vorspiel
 import Mathlib.Computability.Halting
 
+open Mathlib
+
 attribute [-instance] WType.instEncodable Encodable.finPi Encodable.fintypeArrowOfEncodable
 namespace Nat
 
@@ -289,24 +291,24 @@ private lemma casesOn_eq_uncurry (l : σ → List α) (f : σ → β) (g : σ �
     (fun x => List.casesOn (l x) (f x) (fun a as => (Function.uncurry $ g x) (a, as))) := by rfl
 
 private lemma decodeZipWithRec_primrec {f : σ → α × β → γ} (hf : Primrec₂ f) : Primrec₂ (decodeZipWithRec f) := by
-  exact option_bind (Primrec.decode.comp $ snd.comp fst)
-    (by apply to₂'; rw[casesOn_eq_uncurry]
-        apply list_casesOn (fst.comp snd) (Primrec.const _)
-          (by apply to₂'; simp[Function.uncurry]; rw[casesOn_eq_uncurry]
-              apply list_casesOn (snd.comp $ snd.comp fst) (const _)
-                (by unfold Function.uncurry
-                    apply option_map (list_get?.comp (snd.comp $ fst.comp $ fst.comp fst)
-                      (Primrec₂.natPair.comp
-                        (snd.comp $ unpair.comp $ pred.comp $ fst.comp $ unpair.comp $ snd.comp $ fst.comp $ fst.comp $ fst.comp fst)
-                        (snd.comp $ unpair.comp $ pred.comp $ snd.comp $ unpair.comp $ snd.comp $ fst.comp $ fst.comp $ fst.comp fst)))
-                      (list_cons.comp₂
-                        (hf.comp₂
-                          (fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ fst.comp₂ $ Primrec₂.left)
-                          (Primrec₂.pair.comp₂
-                            (fst.comp₂ $ snd.comp₂ $ fst.comp₂ Primrec₂.left)
-                            (fst.comp₂ $ snd.comp₂ Primrec₂.left)))
-                        (option_iget.comp₂ Primrec₂.right)))))
-
+  exact option_bind (Primrec.decode.comp $ snd.comp fst) <|
+    to₂' <| by
+      rw [casesOn_eq_uncurry]
+      apply list_casesOn (fst.comp snd) (Primrec.const _)
+      apply to₂'
+      unfold Function.uncurry; rw [casesOn_eq_uncurry]
+      apply list_casesOn (snd.comp $ snd.comp fst) (const _)
+      apply to₂'
+      apply option_map
+        (list_get?.comp (snd.comp <| fst.comp <| fst.comp fst)
+          <| Primrec.encode.comp <| Primrec.pair
+            (snd.comp <| unpair.comp <| pred.comp <| fst.comp <| unpair.comp <| snd.comp <| fst.comp <| fst.comp <| fst.comp <| fst)
+            (snd.comp <| unpair.comp <| pred.comp <| snd.comp <| unpair.comp <| snd.comp <| fst.comp <| fst.comp <| fst.comp <| fst))
+        (list_cons.comp₂
+          (hf.comp₂
+            (fst.comp₂ <| fst.comp₂ <| fst.comp₂ <| fst.comp₂ <| fst.comp₂ <| Primrec₂.left)
+            (to₂ <| pair (fst.comp <| snd.comp <| fst.comp fst) (fst.comp <| snd.comp fst)))
+          (option_iget.comp₂ Primrec₂.right))
 
 lemma list_zipWith_param {f : σ → α × β → γ} (hf : Primrec₂ f) :
     Primrec₂ (fun x p => List.zipWith (fun a b => f x (a, b)) p.1 p.2 : σ → List α × List β → List γ) := by
@@ -336,7 +338,7 @@ lemma list_zipWith_param {f : σ → α × β → γ} (hf : Primrec₂ f) :
       have lt₂ : e.unpair.2.pred.unpair.2 < e.unpair.2 :=
         lt_of_le_of_lt (Nat.unpair_right_le _) (Nat.pred_lt (fun eq => by simp[eq] at hbs))
       simpa using lt_trans (Nat.pair_lt_pair_left e.unpair.2.pred.unpair.2 lt₁) (Nat.pair_lt_pair_right e.unpair.1 lt₂) }
-    rw[List.get?_range this]
+    rw [List.get?_range this]
     simp only [Option.some.injEq, exists_eq_left', Nat.unpair_pair, of_list_decode_eq_some_cons has,
       of_list_decode_eq_some_cons hbs, Option.map_some', Option.some_bind])
   exact Primrec₂.decode_iff₂.mp (this.of_eq $ fun x e => by simp only [Option.map_eq_bind]; rfl)
@@ -675,7 +677,7 @@ lemma list_mem [BEq α] [LawfulBEq α] : PrimrecRel (· ∈ · : α → List α 
       <| (dom_bool₂ Bool.or).comp₂
         (Primrec.lawfulbeq.comp₂ (fst.comp₂ Primrec₂.left) (fst.comp₂ Primrec₂.right))
         (snd.comp₂ Primrec₂.right)
-  exact this.of_eq <| by intro a as; induction as <;> simp[*]; symm; simp[decide_eq_iff]
+  exact this.of_eq <| by intro a as; induction as <;> simp[*]
 
 lemma list_subset [DecidableEq α] : PrimrecRel (· ⊆ · : List α → List α → Prop) := by
   have : Primrec₂ (fun l₁ l₂ => l₁.foldr (fun a' ih => a' ∈ l₂ && ih) true : List α → List α → Bool) :=
@@ -699,7 +701,7 @@ lemma list_replicate {α : Type*} [Primcodable α] : Primrec₂ (@List.replicate
    have : Primrec₂ (fun p ih => p.2 :: ih.2 : ℕ × α → ℕ × List α → List α) :=
      list_cons.comp₂ (snd.comp₂ .left) (snd.comp₂ .right)
    exact (Primrec.nat_rec' Primrec.fst (.const []) this).of_eq <| by
-     rintro ⟨n, a⟩; simp; induction n <;> simp[*]
+     rintro ⟨n, a⟩; simp; induction n <;> simp[*, List.replicate]
 
 end Primrec
 
@@ -717,6 +719,8 @@ lemma _root_.Computable₂.right : Computable₂ fun (_ : α) (b : β) => b := .
 
 lemma to₂' {f : α → β → σ} (hf : Computable (fun p => f p.1 p.2 : α × β → σ)) : Computable₂ f := hf
 
+attribute [-simp] List.get?_eq_getElem?
+
 lemma list_all {α : Type*} {β : Type*} [Primcodable α] [Primcodable β]
   {p : α → β → Bool} {l : α → List β} (hp : Computable₂ p) (hl : Computable l) : Computable (fun a => (l a).all (p a)) := by
   let f : α → ℕ → Bool := fun a n => n.recOn true (fun m ih => ((l a).reverse.get? m).casesOn false (fun b => p a b && ih))
@@ -727,7 +731,7 @@ lemma list_all {α : Type*} {β : Type*} [Primcodable α] [Primcodable β]
       (const false) (by apply dom_bool₂.comp₂ (hp.comp₂ (fst.comp₂ $ fst.comp₂ .left) .right) (snd.comp₂ $ snd.comp₂ .left))
   have hf : Computable₂ f := (nat_rec snd (const true) this).to₂
   exact (hf.comp Computable.id (list_length.comp hl)).of_eq <| by
-    intro a; simp [f]
+    intro a; simp [id_eq, f]
     generalize l a = la
     induction' la with b la' ih <;> simp
     { have : List.get? (List.reverse la' ++ [b]) la'.length = some b := by

@@ -272,7 +272,7 @@ structure Model (α) where
 abbrev Model.World (M : Model α) := M.Frame.World
 instance : CoeSort (Model α) (Type u) := ⟨Model.World⟩
 
-
+/-
 structure FiniteModel (α) extends Model α where
   [World_finite : Finite World]
 
@@ -281,6 +281,7 @@ instance {M : FiniteModel α} : Finite M.World := M.World_finite
 def FiniteModel.FiniteFrame (M : FiniteModel α) : Kripke.FiniteFrame where
   World := M.World
   Rel := M.Frame.Rel
+-/
 
 end Kripke
 

@@ -10,7 +10,7 @@ open Kripke
 open Formula
 open DeductionParameter (Normal)
 
-variable {α} [Inhabited α] [DecidableEq α]
+variable {α : Type u} [Inhabited α] [DecidableEq α]
 
 abbrev IsolatedFrameClass : FrameClass := { F | Isolated F }
 
@@ -37,7 +37,7 @@ lemma isolated_CanonicalFrame {Ax : AxiomSet α} (h : 𝗩𝗲𝗿 ⊆ Ax) [Syst
   have : (CanonicalModel 𝝂Ax) ⊧ □⊥ := iff_valid_on_canonicalModel_deducible.mpr $ Normal.maxm! (by aesop);
   exact this x rxy;
 
-instance : Complete (𝐕𝐞𝐫 : DeductionParameter α) IsolatedFrameClass# := instComplete_of_mem_canonicalFrame $ isolated_CanonicalFrame (by rfl)
+instance : Complete (𝐕𝐞𝐫 : DeductionParameter α) IsolatedFrameClass.{u}# := instComplete_of_mem_canonicalFrame $ isolated_CanonicalFrame (by rfl)
 
 end Kripke
 

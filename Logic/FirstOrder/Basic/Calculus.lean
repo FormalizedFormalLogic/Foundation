@@ -362,7 +362,9 @@ protected def map {Δ : Sequent L} (d : ⊢¹ Δ) (f : ℕ → ℕ) :
     ⊢¹ Δ.map (Rew.rewriteMap f).hom := rewrite d (fun x ↦ &(f x))
 
 protected def shift {Δ : Sequent L} (d : ⊢¹ Δ) :
-    ⊢¹ Δ⁺ := Derivation.cast (Derivation.map d Nat.succ) (by simp[shifts]; congr)
+    ⊢¹ Δ⁺ :=
+  Derivation.cast (Derivation.map d Nat.succ)
+    (by simp only [shifts, List.map_inj_left]; intro _ _; rfl)
 
 private lemma map_subst_eq_free (p : SyntacticSemiformula L 1) (h : ¬p.fvar? m) :
     (Rew.rewriteMap (fun x => if x = m then 0 else x + 1)).hom (p/[&m]) = Rew.free.hom p := by
@@ -372,7 +374,7 @@ private lemma map_subst_eq_free (p : SyntacticSemiformula L 1) (h : ¬p.fvar? m)
 
 private lemma map_rewriteMap_eq_shifts (Δ : Sequent L) (h : ∀ p ∈ Δ, ¬p.fvar? m) :
     Δ.map (Rew.rewriteMap (fun x => if x = m then 0 else x + 1)).hom = Δ⁺ := by
-  simp[shifts]; apply List.map_congr
+  apply List.map_congr_left
   intro p hp; exact rew_eq_of_funEqOn₀ (by intro x hx; simp; rintro rfl; have := h p hp; contradiction)
 
 def genelalizeByNewver
