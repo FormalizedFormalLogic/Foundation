@@ -242,9 +242,6 @@ def toOptionVec : {n : ℕ} → (Fin n → Option α) → Option (Fin n → α)
           by funext i; cases i using Fin.cases <;> simp[hz, this]
         simp[this, ←comp_vecCons', Iff.symm Function.funext_iff ] } }
 
-def vecToNat : {n : ℕ} → (Fin n → ℕ) → ℕ
-  | 0,     _ => 0
-  | _ + 1, v => Nat.pair (v 0) (vecToNat $ v ∘ Fin.succ)
 
 variable {m : Type u → Type v} [Monad m] {α : Type w} {β : Type u}
 
@@ -264,6 +261,20 @@ def appendr {n m} (v : Fin n → α) (w : Fin m → α) : Fin (m + n) → α := 
 @[simp] lemma appendr_nil {m} (w : Fin m → α) : appendr ![] w = w := by funext i; simp [appendr]
 
 @[simp] lemma appendr_cons {m n} (x : α) (v : Fin n → α) (w : Fin m → α) : appendr (x :> v) w = x :> appendr v w := by funext i; simp [appendr]
+
+section vecToNat
+
+def vecToNat : {n : ℕ} → (Fin n → ℕ) → ℕ
+  | 0,     _ => 0
+  | _ + 1, v => Nat.pair (v 0) (vecToNat $ v ∘ Fin.succ) + 1
+
+open Encodable
+
+@[simp] lemma vecToNat_empty (v : Fin 0 → ℕ) : vecToNat v = 0 := by rfl
+
+@[simp] lemma encode_succ {n} (x : ℕ) (v : Fin n → ℕ) : vecToNat (x :> v) = Nat.pair x (vecToNat v) + 1 := by simp [vecToNat, Function.comp]
+
+end vecToNat
 
 end Matrix
 
@@ -317,29 +328,30 @@ lemma pure_eq_some (a : α) : pure a = some a := rfl
 
 end Option
 
-def Nat.unvector : {n : ℕ} → ℕ → Fin n → ℕ
-  | 0,     _ => Matrix.vecEmpty
-  | _ + 1, e => e.unpair.1 :> Nat.unvector e.unpair.2
+def Nat.natToVec : ℕ → (n : ℕ) → Option (Fin n → ℕ)
+  | 0,     0     => some Matrix.vecEmpty
+  | e + 1, n + 1 => Nat.natToVec e.unpair.2 n |>.map (e.unpair.1 :> ·)
+  | _,     _     => none
 
 namespace Nat
 open Matrix
 variable {n : ℕ}
 
-@[simp] lemma unvector_le (e : ℕ) (i : Fin n) : unvector e i ≤ e := by
-  induction' n with n ih generalizing e <;> simp[*, unvector]
-  · have := i.isLt; contradiction
-  · exact Fin.cases (by simpa using Nat.unpair_left_le _) (fun i => le_trans (ih e.unpair.2 i) (Nat.unpair_right_le _)) i
+@[simp] lemma natToVec_vecToNat (v : Fin n → ℕ) : (vecToNat v).natToVec n = some v := by
+  induction n <;> simp[*, Nat.natToVec, vecToNat, Matrix.empty_eq]
+  exact funext (fun i ↦ i.cases (by simp[Matrix.empty_eq]) (by simp[Matrix.empty_eq]))
 
---@[simp] lemma unvector_vecToNat (v : Fin n → ℕ) : unvector (vecToNat v) = v := by { sorry }
-
-@[simp] lemma unvector_vecToNat (v : Fin n → ℕ) : unvector (vecToNat v) = v := by
-  induction n <;> simp[*, Nat.unvector, vecToNat, Matrix.empty_eq]
-  exact funext (fun i => i.cases (by simp[Matrix.empty_eq]) (by simp[Matrix.empty_eq]))
-
--- @[simp] lemma toNat_unvector (ln : 0 < n) (e : ℕ) : Fin.vecToNat (unvector e : Fin n → ℕ) = e := by
---   induction n generalizing e <;> simp[unvector, Fin.vecToNat, Function.comp]
---   · simp at ln
---   · {simp[Function.comp]; sorry}
+lemma lt_of_eq_natToVec {e : ℕ} {v : Fin n → ℕ} (h : e.natToVec n = some v) (i : Fin n) : v i < e := by
+  induction' n with n ih generalizing e
+  · exact i.elim0
+  · cases' e with e
+    · simp [natToVec] at h
+    · simp only [natToVec, Option.map_eq_some'] at h
+      rcases h with ⟨v, hnv, rfl⟩
+      cases' i using Fin.cases with i
+      · simp [lt_succ, unpair_left_le]
+      · simp only [cons_val_succ]
+        exact lt_trans (ih hnv i) (lt_succ.mpr <| unpair_right_le e)
 
 lemma one_le_of_bodd {n : ℕ} (h : n.bodd = true) : 1 ≤ n :=
 by induction n <;> simp[←Nat.add_one] at h ⊢
