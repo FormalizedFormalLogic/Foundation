@@ -51,9 +51,9 @@ namespace Kripke
 structure Frame where
   World : Type*
   Rel : Rel World World
-  [World_inhabited : Inhabited World]
+  [World_nonempty : Nonempty World]
 
-instance {F : Frame} : Inhabited F.World := F.World_inhabited
+instance {F : Frame} : Nonempty F.World := F.World_nonempty
 
 instance : CoeSort Frame (Type u) := ⟨Frame.World⟩
 instance : CoeFun Frame (λ F => F.World → F.World → Prop) := ⟨Frame.Rel⟩
@@ -64,6 +64,8 @@ scoped infix:45 " ≺ " => Frame.Rel'
 protected abbrev Frame.RelItr' {F : Frame} (n : ℕ) : _root_.Rel F.World F.World := RelItr (· ≺ ·) n
 scoped notation x:45 " ≺^[" n "] " y:46 => Frame.RelItr' n x y
 
+noncomputable abbrev Frame.default {F : Frame} : F.World := Classical.choice F.World_nonempty
+notation "﹫" => Frame.default
 
 namespace Frame.RelItr'
 

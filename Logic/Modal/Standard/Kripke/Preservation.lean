@@ -282,7 +282,7 @@ open Relation (TransGen ReflTransGen)
 def Frame.PointGenerated (F : Kripke.Frame) (r : F.World) : Kripke.Frame where
   World := { w | w = r ∨ r ≺ w }
   Rel x y := x.1 ≺ y.1
-  World_inhabited := ⟨r, by tauto⟩
+  World_nonempty := ⟨r, by tauto⟩
 
 namespace Frame.PointGenerated
 

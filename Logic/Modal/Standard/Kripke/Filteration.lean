@@ -63,7 +63,7 @@ lemma FilterEqvQuotient.finite (T_finite : T.Finite) : Finite (FilterEqvQuotient
       exact this p hp hpy |>.2;
   exact Finite.of_injective f hf
 
-instance : Inhabited (FilterEqvQuotient M T) := ⟨⟦default⟧⟩
+instance : Nonempty (FilterEqvQuotient M T) := ⟨⟦﹫⟧⟩
 
 class Model.FilterOf (FM : Model α) (M : Model α) (T : Theory α) [T_closed : T.SubformulaClosed] where
   def_world : FM.World = FilterEqvQuotient M T := by rfl

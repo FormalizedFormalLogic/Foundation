@@ -377,7 +377,7 @@ section TreeUnravelling
 
 def Frame.TreeUnravelling (F : Frame) (r : F.World) : Kripke.Frame where
   World := { c : List F.World | [r] <+: c ∧ c.Chain' F.Rel }
-  World_inhabited := ⟨[r], (by simp)⟩
+  World_nonempty := ⟨[r], (by simp)⟩
   Rel cx cy := ∃ z, cx.1 ++ [z] = cy.1
 
 namespace Frame.TreeUnravelling
