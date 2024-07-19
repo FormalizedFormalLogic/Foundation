@@ -95,7 +95,10 @@ instance termSubstVec_definable₂ (k n m : V) : 𝚺₁-Function₂ (L.termSubs
 
 end
 
-lemma nth_termSubstVec {k n ts i : V} (hts : L.SemitermVec k n ts) (hi : i < k) :
+@[simp] lemma len_termSubstVec {k n ts : V} (hts : L.SemitermVec k n ts) :
+    len (L.termSubstVec k n m w ts) = k := (construction L).resultVec_lh _ hts
+
+@[simp] lemma nth_termSubstVec {k n ts i : V} (hts : L.SemitermVec k n ts) (hi : i < k) :
     (L.termSubstVec k n m w ts).[i] = L.termSubst n m w ts.[i] :=
   (construction L).nth_resultVec _ hts hi
 
@@ -130,6 +133,17 @@ lemma termSubstVec_cons {k n t ts : V} (ht : L.Semiterm n t) (hts : L.SemitermVe
   ⟨by simp [Language.termSubstVec, hv], fun i hi ↦ by
     rw [nth_termSubstVec hv hi]
     exact termSubst_rng_semiterm hw (hv.prop hi)⟩
+
+@[simp] lemma substs_nil {t} (ht : L.Semiterm 0 t) : L.termSubst 0 0 0 t = t := by
+  apply Language.Semiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
+  · definability
+  · intro z; simp
+  · intro x; simp
+  · intro k f v hf hv ih
+    simp only [hf, hv, termSubst_func, qqFunc_inj, true_and]
+    apply nth_ext' k (by simp [hv]) (by simp [hv.1])
+    intro i hi
+    simp [nth_termSubstVec hv hi, ih i hi]
 
 end termSubst
 
@@ -324,6 +338,9 @@ instance termBShiftVec_definable : 𝚺₁-Function₃ L.termBShiftVec :=
 
 end
 
+@[simp] lemma len_termBShiftVec {k n ts : V} (hts : L.SemitermVec k n ts) :
+    len (L.termBShiftVec k n ts) = k := (construction L).resultVec_lh _ hts
+
 @[simp] lemma nth_termBShiftVec {k n ts i : V} (hts : L.SemitermVec k n ts) (hi : i < k) :
     (L.termBShiftVec k n ts).[i] = L.termBShift n ts.[i] :=
   (construction L).nth_resultVec _ hts hi
@@ -360,6 +377,48 @@ lemma termBShiftVec_cons {k n t ts : V} (ht : L.Semiterm n t) (hts : L.SemitermV
     exact (hv.prop hi).termBShift⟩
 
 end termBShift
+
+variable (L)
+
+def Language.qVec (k n w : V) : V := ^#0 ∷ L.termBShiftVec k n w
+
+variable {L}
+
+lemma Language.SemitermVec.qVec {k n w : V} (h : L.SemitermVec k n w) : L.SemitermVec (k + 1) (n + 1) (L.qVec k n w) :=
+  ⟨by simp [Language.qVec, ←h.termBShiftVec.lh], by
+      intro i hi
+      rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
+      · simp [Language.qVec]
+      · simpa [Language.qVec, nth_termBShiftVec h (by simpa using hi)] using
+          h.prop (by simpa using hi) |>.termBShift⟩
+
+lemma substs_cons_bShift {n m u t w} (ht : L.Semiterm n t) (hw : L.SemitermVec n m w) :
+    L.termSubst (n + 1) m (u ∷ w) (L.termBShift n t) = L.termSubst n m w t := by
+  apply Language.Semiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
+  · definability
+  · intro z hz; simp [hz]
+  · intro x; simp
+  · intro k f v hf hv ih
+    simp [hf, hv]
+    apply nth_ext' k (by simp [hv, hw]) (by simp [hv, hw])
+    intro i hi
+    simp [nth_termSubstVec hv.termBShiftVec hi, nth_termSubstVec hv hi, nth_termBShiftVec hv hi, ih i hi]
+
+lemma bShift_substs {n m w t} (ht : L.Semiterm n t) (hw : L.SemitermVec n m w) :
+    L.termBShift m (L.termSubst n m w t) = L.termSubst n (m + 1) (L.termBShiftVec n m w) t := by
+  apply Language.Semiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
+  · definability
+  · intro z hz; simp [hz, nth_termBShiftVec hw hz]
+  · intro x; simp
+  · intro k f v hf hv ih
+    simp only [hf, hv, termSubst_func, hw.termSubstVec hv, termBShift_func, qqFunc_inj, true_and]
+    apply nth_ext' k (by simp [hw, hv]) (by simp [hv])
+    intro i hi
+    simp [nth_termBShiftVec (hw.termSubstVec hv) hi, nth_termSubstVec hv hi, ih i hi]
+
+lemma substs_qVec_bShift {n t m w} (ht : L.Semiterm n t) (hw : L.SemitermVec n m w) :
+    L.termSubst (n + 1) (m + 1) (L.qVec n m w) (L.termBShift n t) = L.termBShift m (L.termSubst n m w t) := by
+  simp [Language.qVec, substs_cons_bShift ht hw.termBShiftVec, bShift_substs ht hw]
 
 end
 
@@ -453,7 +512,7 @@ lemma numeral_succ_pos (pos : 0 < n) : numeral (n + 1 : V) = numeral n ^+ 𝟏 :
 
 section
 
-def numeralDef : 𝚺₁-Semisentence 2 := .mkSigma
+def _root_.LO.FirstOrder.Arith.numeralDef : 𝚺₁-Semisentence 2 := .mkSigma
   “t x |
     (x = 0 → t = !!(Semiterm.Operator.numeral ℒₒᵣ Formalized.zero)) ∧
     (x ≠ 0 → ∃ x', !subDef x' x 1 ∧ !numeralAuxDef t x')”

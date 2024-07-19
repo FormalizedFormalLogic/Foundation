@@ -1,4 +1,4 @@
-import Arithmetization.ISigmaOne.Metamath.Formula.Functions
+import Arithmetization.ISigmaOne.Metamath.Proof.Typed
 import Arithmetization.Definability.Absoluteness
 
 noncomputable section
@@ -272,4 +272,17 @@ lemma substs_quote {n m} (w : Fin n → SyntacticSemiterm L m) (p : SyntacticSem
 
 end LO.Arith
 
-end
+namespace LO.FirstOrder.Derivation2
+
+open LO.Arith FirstOrder.Arith
+
+variable {V : Type*} [Zero V] [One V] [Add V] [Mul V] [LT V] [V ⊧ₘ* 𝐈𝚺₁]
+
+variable {L : Language} [(k : ℕ) → DecidableEq (L.Func k)] [(k : ℕ) → DecidableEq (L.Rel k)]
+  [(k : ℕ) → Encodable (L.Func k)] [(k : ℕ) → Encodable (L.Rel k)] [DefinableLanguage L]
+
+variable (V)
+
+-- def codeIn : {Γ : Finset (SyntacticFormula L)} → Derivation2 Γ → V
+
+end LO.FirstOrder.Derivation2

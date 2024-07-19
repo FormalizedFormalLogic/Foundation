@@ -590,6 +590,9 @@ lemma nth_ext {v₁ v₂ : V} (hl : len v₁ = len v₂) (H : ∀ i < len v₁, 
     have hv : v₁ = v₂ := ih (by simpa using hl) (by intro i hi; simpa using H (i + 1) (by simpa using hi))
     simp [hx, hv]
 
+lemma nth_ext' (l : V) {v₁ v₂ : V} (hl₁ : len v₁ = l) (hl₂ : len v₂ = l) (H : ∀ i < l, v₁.[i] = v₂.[i]) : v₁ = v₂ := by
+  rcases hl₂; exact nth_ext hl₁ (by simpa [hl₁] using H)
+
 lemma le_of_nth_le_nth {v₁ v₂ : V} (hl : len v₁ = len v₂) (H : ∀ i < len v₁, v₁.[i] ≤ v₂.[i]) : v₁ ≤ v₂ := by
   induction v₁ using cons_induction_pi₁ generalizing v₂
   · definability

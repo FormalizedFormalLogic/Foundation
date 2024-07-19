@@ -292,20 +292,6 @@ end shift
 
 section substs
 
-variable (L)
-
-def Language.qVec (k n w : V) : V := ^#0 ∷ L.termBShiftVec k n w
-
-variable {L}
-
-lemma Language.SemitermVec.qVec {k n w : V} (h : L.SemitermVec k n w) : L.SemitermVec (k + 1) (n + 1) (L.qVec k n w) :=
-  ⟨by simp [Language.qVec, ←h.termBShiftVec.lh], by
-      intro i hi
-      rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
-      · simp [Language.qVec]
-      · simpa [Language.qVec, nth_termBShiftVec h (by simpa using hi)] using
-          h.prop (by simpa using hi) |>.termBShift⟩
-
 section
 
 variable (L)
@@ -520,6 +506,24 @@ lemma semiformula_subst_induction {P : V → V → V → V → V → Prop} (hP :
 lemma substs_not_uformula {m w x} (h : ¬L.UFormula x) :
     L.substs m w x = 0 := (construction L).result_prop_not _ h
 
+lemma substs_neg {p} (hp : L.Semiformula n p) :
+    L.SemitermVec n m w → L.substs m w (L.neg p) = L.neg (L.substs m w p) := by
+  revert m w
+  apply Language.Semiformula.induction_pi₁ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ _ _ hp
+  · definability
+  · intros; simp [*]
+  · intros; simp [*]
+  · intros; simp [*]
+  · intros; simp [*]
+  · intro n p q hp hq ihp ihq m w hw
+    simp [hp, hq, hw, hp.substs, hq.substs, ihp hw, ihq hw]
+  · intro n p q hp hq ihp ihq m w hw
+    simp [hp, hq, hw, hp.substs, hq.substs, ihp hw, ihq hw]
+  · intro n p hp ih m w hw
+    simp [hp, hw, hp.substs hw.qVec, ih hw.qVec]
+  · intro n p hp ih m w hw
+    simp [hp, hw, hp.substs hw.qVec, ih hw.qVec]
+
 end substs
 
 namespace Formalized
@@ -534,11 +538,19 @@ def qqNLT (n x y : V) : V := ^nrel n 2 (ltIndex : V) ?[x, y]
 
 notation:75 x:75 " ^=[" n "] " y:76 => qqEQ n x y
 
+notation:75 x:75 " ^= " y:76 => qqEQ 0 x y
+
 notation:75 x:75 " ^≠[" n "] " y:76 => qqNEQ n x y
+
+notation:75 x:75 " ^≠ " y:76 => qqNEQ 0 x y
 
 notation:78 x:78 " ^<[" n "] " y:79 => qqLT n x y
 
+notation:78 x:78 " ^< " y:79 => qqLT 0 x y
+
 notation:78 x:78 " ^≮[" n "] " y:79 => qqNLT n x y
+
+notation:78 x:78 " ^≮ " y:79 => qqNLT 0 x y
 
 end Formalized
 

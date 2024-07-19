@@ -20,7 +20,7 @@ variable {L : Arith.Language V} {pL : LDef} [Arith.Language.Defined L pL]
 
 section typed_formula
 
-def Language.TSemiformula.substs₁ (p : L.TSemiformula (0 + 1)) (t : L.TTerm) : L.TFormula := p.substs (t ∷ᵗ .nil L 0)
+def Language.TSemiformula.substs₁ (p : L.TSemiformula (0 + 1)) (t : L.TTerm) : L.TFormula := p.substs t.sing
 
 def Language.TSemiformula.free (p : L.TSemiformula (0 + 1)) : L.TFormula := p.shift.substs₁ (L.fvar 0)
 
@@ -30,7 +30,24 @@ def Language.TSemiformula.free (p : L.TSemiformula (0 + 1)) : L.TFormula := p.sh
 @[simp] lemma Language.TSemiformula.val_free (p : L.TSemiformula (0 + 1)) :
     p.free.val = L.substs 0 ?[^&0] (L.shift p.val) := by simp [free, substs₁, substs, shift, fvar]
 
+@[simp] lemma substs₁_neg (p : L.TSemiformula (0 + 1)) (t : L.TTerm) :
+    (~p).substs₁ t = ~(p.substs₁ t) := by simp [Language.TSemiformula.substs₁]
+
+@[simp] lemma substs₁_all (p : L.TSemiformula (0 + 1 + 1)) (t : L.TTerm) :
+    p.all.substs₁ t = (p.substs t.sing.q).all := by simp [Language.TSemiformula.substs₁]
+
+@[simp] lemma substs₁_ex (p : L.TSemiformula (0 + 1 + 1)) (t : L.TTerm) :
+    p.ex.substs₁ t = (p.substs t.sing.q).ex := by simp [Language.TSemiformula.substs₁]
+
 end typed_formula
+
+section typed_theory
+
+abbrev Language.Theory.tmem (p : L.TFormula) (T : L.Theory) : Prop := p.val ∈ T
+
+scoped infix:50 " ∈' " => Language.Theory.tmem
+
+end typed_theory
 
 section typed_sequent
 
@@ -124,7 +141,7 @@ namespace Language.Theory.TDerivation
 
 variable {T : L.Theory} {pT : pL.TDef} [T.Defined pT] {Γ Δ : L.Sequent} {p q p₀ p₁ p₂ p₃ p₄ : L.TFormula}
 
-def byAxm (p) (h : p.val ∈ T) (hΓ : p ∈ Γ) : T ⊢¹ Γ :=
+def byAxm (p) (h : p ∈' T) (hΓ : p ∈ Γ) : T ⊢¹ Γ :=
   Language.Theory.Derivable.toTDerivation _
     <| Language.Theory.Derivable.by_axm (by simp) h hΓ
 
@@ -192,8 +209,10 @@ namespace Language.Theory.TProof
 
 variable {T : L.Theory} {pT : pL.TDef} [T.Defined pT] {p q : L.TFormula}
 
-/-- Condition D1 -/
+/-- Condition D2 -/
 def modusPonens (d : T ⊢ p ⟶ q) (b : T ⊢ p) : T ⊢ q := TDerivation.modusPonens d b
+
+def byAxm {p : L.TFormula} (h : p ∈' T) : T ⊢ p := TDerivation.byAxm p h (by simp)
 
 instance : System.ModusPonens T := ⟨modusPonens⟩
 
@@ -287,6 +306,15 @@ instance : System.Classical T where
     simp [Axioms.DNE, TSemiformula.imp_def]
     apply TDerivation.or
     exact TDerivation.em p
+
+def exIntro (p : L.TSemiformula (0 + 1)) (t : L.TTerm) (b : T ⊢ p.substs₁ t) : T ⊢ p.ex := TDerivation.ex t b
+
+def specialize {p : L.TSemiformula (0 + 1)} (b : T ⊢ p.all) (t : L.TTerm) : T ⊢ p.substs₁ t := by
+  apply TDerivation.cut (p := p.all)
+  · exact (TDerivation.wk b <| by intro x; simp; tauto)
+  · rw [TSemiformula.neg_all]
+    apply TDerivation.ex t
+    apply TDerivation.em (p.substs₁ t)
 
 end Language.Theory.TProof
 

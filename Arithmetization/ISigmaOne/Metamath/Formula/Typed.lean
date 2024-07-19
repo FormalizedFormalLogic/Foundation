@@ -109,11 +109,18 @@ def substs (p : L.TSemiformula n) (w : L.TSemitermVec n m) : L.TSemiformula m :=
 @[simp] lemma substs_or (w : L.TSemitermVec n m) (p q : L.TSemiformula n) :
     (p ⋎ q).substs w = p.substs w ⋎ q.substs w := by ext; simp [substs]
 @[simp] lemma substs_all (w : L.TSemitermVec n m) (p : L.TSemiformula (n + 1)) :
-    p.all.substs w = (p.substs (L.bvar (0 : V) (by simp) ∷ᵗ w.bShift)).all := by
-  ext; simp [substs, Language.bvar, Language.qVec, Language.TSemitermVec.bShift]
+    p.all.substs w = (p.substs w.q).all := by
+  ext; simp [substs, Language.bvar, Language.qVec, Language.TSemitermVec.bShift, Language.TSemitermVec.q]
 @[simp] lemma substs_ex (w : L.TSemitermVec n m) (p : L.TSemiformula (n + 1)) :
-    p.ex.substs w = (p.substs (L.bvar (0 : V) (by simp) ∷ᵗ w.bShift)).ex := by
-  ext; simp [substs, Language.bvar, Language.qVec, Language.TSemitermVec.bShift]
+    p.ex.substs w = (p.substs w.q).ex := by
+  ext; simp [substs, Language.bvar, Language.qVec, Language.TSemitermVec.bShift, Language.TSemitermVec.q]
+
+@[simp] lemma substs_neg (w : L.TSemitermVec n m) (p : L.TSemiformula n) : (~p).substs w = ~(p.substs w) := by
+  ext; simp only [substs, val_neg, TSemitermVec.prop, Arith.substs_neg p.prop]
+@[simp] lemma substs_imp (w : L.TSemitermVec n m) (p q : L.TSemiformula n) : (p ⟶ q).substs w = p.substs w ⟶ q.substs w := by
+  simp [imp_def]
+@[simp] lemma substs_imply (w : L.TSemitermVec n m) (p q : L.TSemiformula n) : (p ⟷ q).substs w = p.substs w ⟷ q.substs w := by
+  simp [LogicalConnective.iff]
 
 end Language.TSemiformula
 
@@ -156,9 +163,9 @@ scoped infix:75 " =' " => equals
 
 scoped infix:75 " ≠' " => notEquals
 
-scoped infix:75 " ≺ " => lessThan
+scoped infix:75 " <' " => lessThan
 
-scoped infix:75 " ⊀ " => notLessThan
+scoped infix:75 " ≮' " => notLessThan
 
 variable {n m : V}
 
@@ -171,11 +178,11 @@ variable {n m : V}
   ext; simp [notEquals, Language.TSemiterm.shift, Language.TSemiformula.shift, qqNEQ]
 
 @[simp] lemma shift_lessThan (t₁ t₂ : ⌜ℒₒᵣ⌝.TSemiterm n) :
-    (t₁ ≺ t₂).shift = (t₁.shift ≺ t₂.shift) := by
+    (t₁ <' t₂).shift = (t₁.shift <' t₂.shift) := by
   ext; simp [lessThan, Language.TSemiterm.shift, Language.TSemiformula.shift, qqLT]
 
 @[simp] lemma shift_notLessThan (t₁ t₂ : ⌜ℒₒᵣ⌝.TSemiterm n) :
-    (t₁ ⊀ t₂).shift = (t₁.shift ⊀ t₂.shift) := by
+    (t₁ ≮' t₂).shift = (t₁.shift ≮' t₂.shift) := by
   ext; simp [notLessThan, Language.TSemiterm.shift, Language.TSemiformula.shift, qqNLT]
 
 @[simp] lemma substs_equals (w : ⌜ℒₒᵣ⌝.TSemitermVec n m) (t₁ t₂ : ⌜ℒₒᵣ⌝.TSemiterm n) :
@@ -187,11 +194,11 @@ variable {n m : V}
   ext; simp [notEquals, Language.TSemiterm.substs, Language.TSemiformula.substs, qqNEQ]
 
 @[simp] lemma substs_lessThan (w : ⌜ℒₒᵣ⌝.TSemitermVec n m) (t₁ t₂ : ⌜ℒₒᵣ⌝.TSemiterm n) :
-    (t₁ ≺ t₂).substs w = (t₁.substs w ≺ t₂.substs w) := by
+    (t₁ <' t₂).substs w = (t₁.substs w <' t₂.substs w) := by
   ext; simp [lessThan, Language.TSemiterm.substs, Language.TSemiformula.substs, qqLT]
 
 @[simp] lemma substs_notLessThan (w : ⌜ℒₒᵣ⌝.TSemitermVec n m) (t₁ t₂ : ⌜ℒₒᵣ⌝.TSemiterm n) :
-    (t₁ ⊀ t₂).substs w = (t₁.substs w ⊀ t₂.substs w) := by
+    (t₁ ≮' t₂).substs w = (t₁.substs w ≮' t₂.substs w) := by
   ext; simp [notLessThan, Language.TSemiterm.substs, Language.TSemiformula.substs, qqNLT]
 
 end Formalized

@@ -139,6 +139,41 @@ lemma qqDisj_semiformula {n ps : V} :
 
 end qqDisj
 
+section qqBvarVec
+
+namespace QQBverVec
+
+def blueprint : PR.Blueprint 0 where
+  zero := .mkSigma “y | y = 0” (by simp)
+  succ := .mkSigma “y ih k | ∃ t, !qqBvarDef t k ∧ !consDef y t ih” (by simp)
+
+def construction : PR.Construction V blueprint where
+  zero _ := 0
+  succ _ k ih := ^#k ∷ ih
+  zero_defined := by intro _; simp [blueprint]
+  succ_defined := by intro _; simp [blueprint]
+
+end QQBverVec
+
+end qqBvarVec
+
+namespace Formalized
+
+section fList
+
+namespace FList
+
+def blueprint : PR.Blueprint 2 where
+  zero := .mkSigma “y n p | y = 0” (by simp)
+  succ := .mkSigma “y ih k n p | ∃ numeral, !numeralDef numeral k ∧ ∃ w, !consDef w numeral 0 ∧
+    ∃ sp, !(Language.lDef ℒₒᵣ).substsDef sp 0 w p ∧ !consDef y p ih” (by simp)
+
+end FList
+
+end fList
+
+end Formalized
+
 end LO.Arith
 
 end

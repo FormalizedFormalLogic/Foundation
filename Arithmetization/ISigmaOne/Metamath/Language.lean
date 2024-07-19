@@ -160,6 +160,12 @@ abbrev LOR : Arith.Language V := Language.codeIn ℒₒᵣ V
 
 notation "⌜ℒₒᵣ⌝" => LOR
 
+variable (V)
+
+instance LOR.defined : (⌜ℒₒᵣ⌝ : Arith.Language V).Defined (Language.lDef ℒₒᵣ) := inferInstance
+
+variable {V}
+
 def zeroIndex : ℕ := Encodable.encode (Language.Zero.zero : (ℒₒᵣ : FirstOrder.Language).Func 0)
 
 def oneIndex : ℕ := Encodable.encode (Language.One.one : (ℒₒᵣ : FirstOrder.Language).Func 0)
