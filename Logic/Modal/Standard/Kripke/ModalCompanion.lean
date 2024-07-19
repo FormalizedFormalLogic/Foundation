@@ -114,7 +114,7 @@ lemma provable_S4_of_provable_efq : (𝐒𝟒 ⊢! pᵍ) → (𝐈𝐧𝐭 ⊢! 
   intro h;
   obtain ⟨iF, _, iV, iV_hereditary, w, h⟩ := by simpa [ValidOnFrameClass, ValidOnFrame, ValidOnModel] using not_imp_not.mpr Superintuitionistic.Kripke.complete! h;
 
-  let M : Modal.Standard.Kripke.Model α := { Frame := { Rel := iF.Rel }, Valuation := iV };
+  let M : Modal.Standard.Kripke.Model α := { Frame := { Rel := iF.Rel, }, Valuation := iV };
   have h₁ : ∀ q v, Satisfies ⟨iF, iV, iV_hereditary⟩ v q ↔ (Modal.Standard.Formula.Kripke.Satisfies M v (qᵍ)) := by
     intro q v;
     induction q using Superintuitionistic.Formula.rec' generalizing v with

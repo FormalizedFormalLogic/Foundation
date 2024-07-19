@@ -28,6 +28,10 @@ def Antisymmetric := ∀ ⦃w₁ w₂⦄, w₁ ≺ w₂ → w₂ ≺ w₁ → w�
 
 def Isolated := ∀ ⦃x y⦄, ¬(x ≺ y)
 
+def Assymetric := ∀ ⦃x y⦄, (x ≺ y) → ¬(y ≺ x)
+
+def Universal := ∀ ⦃x y⦄, x ≺ y
+
 abbrev ConverseWellFounded := WellFounded $ flip (· ≺ ·)
 
 end
@@ -99,5 +103,18 @@ lemma extensive_of_reflex_antisymm_eucl (hRefl : Reflexive rel) (hAntisymm : Ant
   intro x y rxy;
   have rxx := hRefl x;
   exact hAntisymm rxy (hEucl rxx rxy);
+
+
+lemma irreflexive_of_assymetric (hAssym : Assymetric rel) : Irreflexive rel := by
+  intro x Rxx;
+  have := hAssym Rxx;
+  contradiction;
+
+
+lemma refl_of_universal (h : Universal rel) : Reflexive rel := by
+  intro x; exact @h x x;
+
+lemma eucl_of_universal (h : Universal rel) : Euclidean rel := by
+  rintro x y z _ _; exact @h z y;
 
 end

@@ -78,6 +78,7 @@ lemma dia_eq (p : Formula α) : ◇p = ~(□(~p)) := rfl
 
 @[simp] lemma neg_inj (p q : Formula α) : ~p = ~q ↔ p = q := by simp[Tilde.tilde]
 
+/-- Formula complexity -/
 def complexity : Formula α → ℕ
 | atom _  => 0
 | ⊤       => 0
@@ -87,16 +88,6 @@ def complexity : Formula α → ℕ
 | p ⋏ q   => max p.complexity q.complexity + 1
 | p ⋎ q   => max p.complexity q.complexity + 1
 | box p   => p.complexity + 1
-
-@[simp] lemma complexity_bot : complexity (⊥ : Formula α) = 0 := rfl
-
-@[simp] lemma complexity_atom (a : α) : complexity (atom a) = 0 := rfl
-
-@[simp] lemma complexity_imp (p q : Formula α) : complexity (p ⟶ q) = max p.complexity q.complexity + 1 := rfl
-@[simp] lemma complexity_imp' (p q : Formula α) : complexity (imp p q) = max p.complexity q.complexity + 1 := rfl
-
-@[simp] lemma complexity_box (p : Formula α) : complexity (□p) = p.complexity + 1 := rfl
-@[simp] lemma complexity_box' (p : Formula α) : complexity (box p) = p.complexity + 1 := rfl
 
 /-- Max numbers of `□` -/
 def degree : Formula α → Nat
@@ -108,15 +99,6 @@ def degree : Formula α → Nat
   | p ⟶ q => max p.degree q.degree
   | p ⋏ q => max p.degree q.degree
   | p ⋎ q => max p.degree q.degree
-
-@[simp] lemma degree_bot : degree (⊥ : Formula α) = 0 := rfl
-@[simp] lemma degree_top : degree (⊤ : Formula α) = 0 := rfl
-@[simp] lemma degree_atom {a : α} : degree (atom a) = 0 := rfl
-@[simp] lemma degree_imp {p q : Formula α} : degree (p ⟶ q) = max p.degree q.degree := rfl
-@[simp] lemma degree_box {p : Formula α} : degree (□p) = p.degree + 1 := rfl
-@[simp] lemma degree_and {p q : Formula α} : degree (p ⋏ q) = max p.degree q.degree := rfl
-@[simp] lemma degree_or {p q : Formula α} : degree (p ⋎ q) = max p.degree q.degree := rfl
-@[simp] lemma degree_neg {p : Formula α} : degree (~p) = p.degree := rfl
 
 @[elab_as_elim]
 def cases' {C : Formula α → Sort w}
@@ -247,7 +229,6 @@ def Formula.Subformulas: Formula α → Finset (Formula α)
   | p ⋎ q  => insert (p ⋎ q) (p.Subformulas ∪ q.Subformulas)
   | box p  => insert (□p) p.Subformulas
 
--- notation "Sub(" p ")" => Formula.Subformulas p
 prefix:70 "𝒮 " => Formula.Subformulas
 
 namespace Formula.Subformulas
@@ -257,37 +238,129 @@ lemma mem_self (p : Formula α) : p ∈ 𝒮 p := by induction p using Formula.r
 
 variable {p q r : Formula α}
 
-@[aesop safe forward]
-lemma mem_neg (h : ~q ∈ 𝒮 p) : q ∈ 𝒮 p := by
+lemma mem_neg (h : ~q ∈ 𝒮 p := by assumption) : q ∈ 𝒮 p := by
   induction p using Formula.rec' <;> {
     simp_all [Subformulas];
     try rcases h with (hq | hr); simp_all; simp_all;
   };
 
-@[aesop safe forward]
-lemma mem_and (h : (q ⋏ r) ∈ 𝒮 p) : q ∈ 𝒮 p ∧ r ∈ 𝒮 p := by
+lemma mem_and (h : (q ⋏ r) ∈ 𝒮 p := by assumption) : q ∈ 𝒮 p ∧ r ∈ 𝒮 p := by
   induction p using Formula.rec' with
   | hand => simp_all [Subformulas]; rcases h with ⟨_⟩ | ⟨⟨_⟩ | ⟨_⟩⟩ <;> simp_all
   | _ => simp_all [Subformulas]; try rcases h with (hq | hr); simp_all; simp_all;
 
-@[aesop safe forward]
-lemma mem_or (h : (q ⋎ r) ∈ 𝒮 p) : q ∈ 𝒮 p ∧ r ∈ 𝒮 p := by
+lemma mem_and₁ (h : (q ⋏ r) ∈ 𝒮 p := by assumption) : q ∈ 𝒮 p := mem_and (r := r) |>.1
+
+lemma mem_and₂ (h : (q ⋏ r) ∈ 𝒮 p := by assumption) : r ∈ 𝒮 p := mem_and (r := r) |>.2
+
+lemma mem_or (h : (q ⋎ r) ∈ 𝒮 p := by assumption) : q ∈ 𝒮 p ∧ r ∈ 𝒮 p := by
   induction p using Formula.rec' with
   | hor => simp_all [Subformulas]; rcases h with ⟨_⟩ | ⟨⟨_⟩ | ⟨_⟩⟩ <;> simp_all
   | _ => simp_all [Subformulas]; try rcases h with (hq | hr); simp_all; simp_all;
 
-@[aesop safe forward]
-lemma mem_imp (h : (q ⟶ r) ∈ 𝒮 p) : q ∈ 𝒮 p ∧ r ∈ 𝒮 p := by
+lemma mem_or₁ (h : (q ⋎ r) ∈ 𝒮 p := by assumption) : q ∈ 𝒮 p := mem_or (r := r) |>.1
+
+lemma mem_or₂ (h : (q ⋎ r) ∈ 𝒮 p := by assumption) : r ∈ 𝒮 p := mem_or (r := r) |>.2
+
+lemma mem_imp (h : (q ⟶ r) ∈ 𝒮 p := by assumption) : q ∈ 𝒮 p ∧ r ∈ 𝒮 p := by
   induction p using Formula.rec' with
   | himp => simp_all [Subformulas]; rcases h with ⟨_⟩ | ⟨⟨_⟩ | ⟨_⟩⟩ <;> simp_all
   | _ => simp_all [Subformulas]; try rcases h with (hq | hr); simp_all; simp_all;
 
-@[aesop safe forward]
-lemma mem_box (h : □q ∈ 𝒮 p) : q ∈ 𝒮 p := by
+lemma mem_imp₁ (h : (q ⟶ r) ∈ 𝒮 p := by assumption) : q ∈ 𝒮 p := mem_imp (r := r) |>.1
+
+lemma mem_imp₂ (h : (q ⟶ r) ∈ 𝒮 p := by assumption) : r ∈ 𝒮 p := mem_imp (r := r) |>.2
+
+lemma mem_box (h : □q ∈ 𝒮 p := by assumption) : q ∈ 𝒮 p := by
   induction p using Formula.rec' <;> {
     simp_all [Subformulas];
     try rcases h with (hq | hr); simp_all; simp_all;
   };
+
+attribute [aesop safe 5 forward]
+  mem_neg
+  mem_and₁
+  mem_and₂
+  mem_or₁
+  mem_or₂
+  mem_imp₁
+  mem_imp₂
+  mem_box
+
+@[simp]
+lemma complexity_lower (h : q ∈ 𝒮 p) : q.complexity ≤ p.complexity  := by
+  induction p using Formula.rec' with
+  | hand p₁ p₂ ihp₁ ihp₂ =>
+    simp_all [Subformulas];
+    rcases h with _ | h₁ | h₂;
+    . subst_vars; simp [Formula.complexity];
+    . have := ihp₁ h₁; simp [Formula.complexity]; omega;
+    . have := ihp₂ h₂; simp [Formula.complexity]; omega;
+  | hor p₁ p₂ ihp₁ ihp₂ =>
+    simp_all [Subformulas];
+    rcases h with _ | h₁ | h₂;
+    . subst_vars; simp [Formula.complexity];
+    . have := ihp₁ h₁; simp [Formula.complexity]; omega;
+    . have := ihp₂ h₂; simp [Formula.complexity]; omega;
+  | himp p₁ p₂ ihp₁ ihp₂ =>
+    simp_all [Subformulas];
+    rcases h with _ | h₁ | h₂;
+    . subst_vars; simp [Formula.complexity];
+    . have := ihp₁ h₁; simp [Formula.complexity]; omega;
+    . have := ihp₂ h₂; simp [Formula.complexity]; omega;
+  | hbox p ihp =>
+    simp_all [Subformulas];
+    rcases h with _ | h₁;
+    . subst_vars; simp [Formula.complexity];
+    . have := ihp h₁; simp [Formula.complexity]; omega;
+  | hneg p ihp =>
+    simp_all [Subformulas];
+    rcases h with _ | h₁;
+    . subst_vars; simp [Formula.complexity];
+    . have := ihp h₁; simp [Formula.complexity]; omega;
+  | _ => simp_all [Subformulas, Formula.complexity];
+
+@[simp]
+lemma degree_lower (h : q ∈ 𝒮 p) : q.degree ≤ p.degree := by
+  induction p using Formula.rec' with
+  | hand p₁ p₂ ihp₁ ihp₂ =>
+    simp_all [Subformulas];
+    rcases h with _ | h₁ | h₂;
+    . subst_vars; simp [Formula.degree];
+    . have := ihp₁ h₁; simp [Formula.degree]; omega;
+    . have := ihp₂ h₂; simp [Formula.degree]; omega;
+  | hor p₁ p₂ ihp₁ ihp₂ =>
+    simp_all [Subformulas];
+    rcases h with _ | h₁ | h₂;
+    . subst_vars; simp [Formula.degree];
+    . have := ihp₁ h₁; simp [Formula.degree]; omega;
+    . have := ihp₂ h₂; simp [Formula.degree]; omega;
+  | himp p₁ p₂ ihp₁ ihp₂ =>
+    simp_all [Subformulas];
+    rcases h with _ | h₁ | h₂;
+    . subst_vars; simp [Formula.degree];
+    . have := ihp₁ h₁; simp [Formula.degree]; omega;
+    . have := ihp₂ h₂; simp [Formula.degree]; omega;
+  | hbox p ihp =>
+    simp_all [Subformulas];
+    rcases h with _ | h₁;
+    . subst_vars; simp [Formula.degree];
+    . have := ihp h₁; simp [Formula.degree]; omega;
+  | hneg p ihp =>
+    simp_all [Subformulas];
+    rcases h with _ | h₁;
+    . subst_vars; simp [Formula.degree];
+    . have := ihp h₁; simp [Formula.degree]; omega;
+  | _ => simp_all [Subformulas, Formula.degree];
+
+lemma sub_of_top (h : p ∈ 𝒮 ⊤) : p = ⊤ := by simp_all [Subformulas];
+lemma sub_of_bot (h : p ∈ 𝒮 ⊥) : p = ⊥ := by simp_all [Subformulas];
+lemma sub_of_atom {a : α} (h : p ∈ 𝒮 (atom a)) : p = atom a := by simp_all [Subformulas];
+
+-- attribute [aesop safe forward]
+--   sub_of_top
+--   sub_of_bot
+--   sub_of_atom
 
 end Formula.Subformulas
 
@@ -307,7 +380,7 @@ variable {p : Formula α} {T : Theory α} [T_closed : T.SubformulaClosed]
 
 lemma sub_mem_neg (h : ~p ∈ T) : p ∈ T := T_closed.tilde_closed h
 lemma sub_mem_and (h : p ⋏ q ∈ T) : p ∈ T ∧ q ∈ T := T_closed.wedge_closed h
-lemma sub_mem_or (h : p ⋎ q ∈ T) : p ∈ T ∧ q ∈ T := T_closed.vee_closed h
+lemma sub_mem_or  (h : p ⋎ q ∈ T) : p ∈ T ∧ q ∈ T := T_closed.vee_closed h
 lemma sub_mem_imp (h : p ⟶ q ∈ T) : p ∈ T ∧ q ∈ T := T_closed.arrow_closed h
 lemma sub_mem_box (h : □p ∈ T) : p ∈ T := T_closed.box_closed h
 

@@ -596,6 +596,7 @@ prefix:80 "⋁" => disj₂
   | nil => contradiction;
   | cons q rs => simp [disj₂]
 
+-- TODO: Move to vorpsiel
 lemma induction_with_singleton
   {motive : List F → Prop}
   (hnil : motive [])
