@@ -138,13 +138,20 @@ lemma not_nil {c : (F.TransitiveTreeUnravelling r).World} : c.1 ≠ [] := by
   have := c.2.1;
   simp_all;
 
-
 lemma rel_length {x y : (F.TransitiveTreeUnravelling r).World} (Rxy : x ≺ y) : x.1.length < y.1.length := by
   induction Rxy with
   | single Rxy => exact TreeUnravelling.rel_length Rxy;
   | tail _ h ih => have := TreeUnravelling.rel_length h; omega;
 
--- TODO: そうであるはずなのだが逆が上手く証明出来ない
+lemma rel_transitive : Transitive (F.TransitiveTreeUnravelling r) := TransitiveClosure.rel_transitive
+
+lemma rel_asymmetric : Assymetric (F.TransitiveTreeUnravelling r).Rel := by
+  rintro x y hxy;
+  by_contra hyx;
+  replace hxy := rel_length hxy;
+  replace hyx := rel_length hyx;
+  exact hxy.not_lt hyx;
+
 lemma rel_def {x y : (F.TransitiveTreeUnravelling r).World} : x ≺ y ↔ (x.1.length < y.1.length ∧ x.1 <+: y.1) := by
   constructor;
   . intro Rxy;
@@ -163,20 +170,27 @@ lemma rel_def {x y : (F.TransitiveTreeUnravelling r).World} : x ≺ y ↔ (x.1.l
       . simp;
       . use zs ++ [w];
         simp [List.append_assoc];
-  . rintro ⟨h_len, ⟨zs, hz⟩⟩;
-    induction zs generalizing x y with
-    | nil => simp_all;
-    | cons z zs ih =>
-      sorry;
-
-lemma rel_transitive : Transitive (F.TransitiveTreeUnravelling r) := TransitiveClosure.rel_transitive
-
-lemma rel_asymmetric : Assymetric (F.TransitiveTreeUnravelling r).Rel := by
-  rintro x y hxy;
-  by_contra hyx;
-  replace hxy := rel_length hxy;
-  replace hyx := rel_length hyx;
-  exact hxy.not_lt hyx;
+  . replace ⟨xs, ⟨ws, hw⟩, hx₂⟩ := x;
+    replace ⟨ys, ⟨vs, hv⟩, hy₂⟩ := y;
+    subst hw hv;
+    rintro ⟨hl, ⟨zs, hzs⟩⟩; simp at hzs;
+    induction zs using List.induction_with_singleton generalizing ws vs with
+    | hnil => simp_all;
+    | hsingle z =>
+      apply TransGen.single;
+      use z;
+      simp_all;
+    | hcons z zs h ih =>
+      simp_all;
+      refine TransGen.head ?h₁ $ ih (ws ++ [z]) vs ?h₂ ?h₃ ?h₄ ?h₅;
+      . use z; simp;
+      . apply List.Chain'.prefix hy₂;
+        use zs; simp_all;
+      . exact hy₂;
+      . rw [←hzs]; simp;
+        by_contra hC;
+        simp_all;
+      . simp_all;
 
 lemma rooted : (F.TransitiveTreeUnravelling r).isRooted ⟨[r], by tauto⟩ := by
   intro x ha;
@@ -231,8 +245,11 @@ lemma rel_irreflexive (T : FiniteTransitiveTree) : Irreflexive T.Rel := irreflex
 
 end FiniteTransitiveTree
 
+lemma _root_.List.chains_finite [finite : Finite α] (R_trans : Transitive R) (R_irrefl : Irreflexive R)
+  : Finite { l : List α // l.Chain' R } := by
+  sorry;
 
-abbrev FiniteFrame.FiniteTransitiveTreeUnravelling (F : FiniteFrame) (F_irrefl : Irreflexive F.toFrame) (r : F.World) : FiniteTransitiveTree :=
+abbrev FiniteFrame.FiniteTransitiveTreeUnravelling (F : FiniteFrame) (F_trans : Transitive F.toFrame) (F_irrefl : Irreflexive F.toFrame) (r : F.World) : FiniteTransitiveTree :=
   letI T := (F↾r).TransitiveTreeUnravelling ⟨r, by tauto⟩
   {
     World := T
@@ -241,9 +258,12 @@ abbrev FiniteFrame.FiniteTransitiveTreeUnravelling (F : FiniteFrame) (F_irrefl :
     rel_assymetric := Frame.TransitiveTreeUnravelling.rel_asymmetric
     root_rooted := Frame.TransitiveTreeUnravelling.rooted
     World_finite := by
-      -- TODO: 非反射的なので有限鎖は高々有限個しか存在しない．
+      have := F.World_finite;
       simp [Frame.TreeUnravelling];
-      sorry;
+      suffices h : Finite { x // List.Chain' (F.PointGenerated r).Rel x } by
+        exact Finite.of_injective (β := { x // List.Chain' (F.PointGenerated r).Rel x })
+          (fun x => ⟨x.1, x.2.2⟩) (by simp [Function.Injective]);
+      exact List.chains_finite (Frame.PointGenerated.rel_transitive F_trans) (Frame.PointGenerated.rel_irreflexive F_irrefl)
   }
 
 abbrev Model.FiniteTransitiveTreeUnravelling (M : Kripke.Model α) (r : M.World) : Kripke.Model α := (M↾r).TransitiveTreeUnravelling ⟨r, by tauto⟩
@@ -274,7 +294,7 @@ lemma validOnFTT_root' : (∀ T : FiniteTransitiveTree.{u}, ∀ V, Satisfies ⟨
   let M : Kripke.Model α := ⟨F, V⟩;
   apply Model.PointGenerated.modal_equivalent_to_root M F_trans r |>.mp;
   apply Model.TransitiveTreeUnravelling.modal_equivalence_to_root (M↾r) (Frame.PointGenerated.rel_transitive F_trans) ⟨r, by tauto⟩ |>.mp;
-  exact H (F.FiniteTransitiveTreeUnravelling F_irrefl r) (M.FiniteTransitiveTreeUnravelling r).Valuation;
+  exact H (F.FiniteTransitiveTreeUnravelling F_trans F_irrefl r) (M.FiniteTransitiveTreeUnravelling r).Valuation;
 
 /--
   _Segerberg [1971]_?

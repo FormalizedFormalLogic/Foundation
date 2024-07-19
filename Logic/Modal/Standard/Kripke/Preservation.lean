@@ -248,6 +248,10 @@ lemma rooted : (F.PointGenerated r).isRooted ⟨r, by tauto⟩ := by
   . intro h; contradiction;
   . intro _; exact hx;
 
+instance finite [Finite F.World] : Finite (F.PointGenerated r).World := by
+  simp [Frame.PointGenerated];
+  apply Subtype.finite;
+
 end Frame.PointGenerated
 
 
