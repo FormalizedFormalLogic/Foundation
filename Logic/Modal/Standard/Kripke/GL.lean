@@ -142,6 +142,7 @@ lemma filter_truthlemma
 
 noncomputable abbrev GLFilteredFrame (p : Formula α) : Kripke.FiniteFrame where
   World := FilterEqvQuotient GLCanonicalModel ((𝒮 p).toSet)
+  World_deceq := Classical.decEq _
   default := ⟦default⟧
   World_finite := by apply FilterEqvQuotient.finite; simp;
   Rel := Quotient.lift₂

@@ -13,8 +13,9 @@ variable {Λ : DeductionParameter α} [Λ.IsNormal]
 
 namespace Kripke
 
-abbrev CanonicalFrame (Λ : DeductionParameter α) [Inhabited (Λ)-MCT] : Frame where
+noncomputable abbrev CanonicalFrame (Λ : DeductionParameter α) [Inhabited (Λ)-MCT] : Frame where
   World := (Λ)-MCT
+  World_deceq := Classical.decEq _ -- TODO: removable?
   default := default
   Rel Ω₁ Ω₂ := □''⁻¹Ω₁.theory ⊆ Ω₂.theory
 
@@ -91,7 +92,7 @@ lemma multiframe_def_multidia : Ω₁ ≺^[n] Ω₂ ↔ ∀ {p}, (p ∈ Ω₂.th
 end CanonicalFrame
 
 
-abbrev CanonicalModel (Λ : DeductionParameter α) [Inhabited (Λ)-MCT]  : Model α where
+noncomputable abbrev CanonicalModel (Λ : DeductionParameter α) [Inhabited (Λ)-MCT]  : Model α where
   Frame := CanonicalFrame Λ
   Valuation Ω a := (atom a) ∈ Ω.theory
 

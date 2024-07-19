@@ -1,24 +1,49 @@
+import Mathlib.Data.Fintype.List
 import Logic.Modal.Standard.Kripke.GL
 import Logic.Modal.Standard.Kripke.Preservation
 
--- TODO: move
-lemma List.last_length_1 {α} {l : List α} (h : l.length = 1) : l = [l.getLast (by aesop)] := by
-  match l with
+namespace List
+
+variable {l l₁ l₂ : List α}
+variable {R : α → α → Prop}
+
+-- TODO: 使っていない．Mathlibにこれに対応する補題があるかは微妙．
+lemma head?_eq_head_of_ne_nil (h : l₁ ≠ []) : l₁.head? = some (l₁.head h):= by
+  induction l₁ with
+  | nil => contradiction;
+  | cons => simp_all;
+
+/-
+lemma last_length_1 (h : l₁.length = 1) : l₁ = [l₁.getLast (by aesop)] := by
+  match l₁ with
   | [r] => rfl
 
--- TODO: move
-lemma List.interpolant {α} {l₁ l₂ : List α} (h_length : l₁.length + 1 = l₂.length) (h_prefix : l₁ <+: l₂)
+
+lemma interpolant (h_length : l₁.length + 1 = l₂.length) (h_prefix : l₁ <+: l₂)
   : ∃ z, l₁ ++ [z] = l₂ := by
     obtain ⟨l₃, rfl⟩ := h_prefix;
     use l₃.getLast (by aesop);
     have : l₃ = [l₃.getLast _] := List.last_length_1 (by simp_all);
     rw [←this];
+-/
 
--- TODO: is exists?
-lemma List.head?_eq_head_of_ne_nil {l : List α} (h : l ≠ []) : l.head? = some (l.head h):= by
-  induction l with
-  | nil => contradiction;
-  | cons => simp_all;
+lemma Chain'.nodup_of_trans_irreflex (R_trans : Transitive R) (R_irrefl : Irreflexive R) (h_chain : l.Chain' R) : l.Nodup := by
+  by_contra hC;
+  replace ⟨d, hC⟩ := List.exists_duplicate_iff_not_nodup.mpr hC;
+  have := List.duplicate_iff_sublist.mp hC;
+  have := @List.Chain'.sublist α R [d, d] l ⟨by aesop⟩ h_chain this;
+  simp at this;
+  exact R_irrefl d this;
+
+instance finiteNodupList [DecidableEq α] [Finite α] : Finite { l : List α // l.Nodup } := @fintypeNodupList α _ (Fintype.ofFinite α) |>.finite
+
+lemma chains_finite [DecidableEq α] [Finite α] (R_trans : Transitive R) (R_irrefl : Irreflexive R) : Finite { l : List α // l.Chain' R } := by
+  apply @Finite.of_injective { l : List α // l.Chain' R } { l : List α // l.Nodup } _ ?f;
+  case f => intro ⟨l, hl⟩; refine ⟨l, List.Chain'.nodup_of_trans_irreflex R_trans R_irrefl hl⟩;
+  simp [Function.Injective];
+
+end List
+
 
 namespace LO.Modal.Standard
 
@@ -245,11 +270,9 @@ lemma rel_irreflexive (T : FiniteTransitiveTree) : Irreflexive T.Rel := irreflex
 
 end FiniteTransitiveTree
 
-lemma _root_.List.chains_finite [finite : Finite α] (R_trans : Transitive R) (R_irrefl : Irreflexive R)
-  : Finite { l : List α // l.Chain' R } := by
-  sorry;
 
-abbrev FiniteFrame.FiniteTransitiveTreeUnravelling (F : FiniteFrame) (F_trans : Transitive F.toFrame) (F_irrefl : Irreflexive F.toFrame) (r : F.World) : FiniteTransitiveTree :=
+abbrev FiniteFrame.FiniteTransitiveTreeUnravelling
+  (F : FiniteFrame) [DecidableEq F.World] (F_trans : Transitive F.toFrame) (F_irrefl : Irreflexive F.toFrame) (r : F.World) : FiniteTransitiveTree :=
   letI T := (F↾r).TransitiveTreeUnravelling ⟨r, by tauto⟩
   {
     World := T

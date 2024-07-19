@@ -52,9 +52,10 @@ structure Frame where
   World : Type*
   default : World
   Rel : Rel World World
-
+  [World_deceq : DecidableEq World]
 
 instance {F : Frame} : Inhabited F.World := ⟨F.default⟩
+instance {F : Frame} : DecidableEq F.World := F.World_deceq
 
 instance : CoeSort Frame (Type u) := ⟨Frame.World⟩
 instance : CoeFun Frame (λ F => F.World → F.World → Prop) := ⟨Frame.Rel⟩
@@ -114,6 +115,7 @@ scoped postfix:max "#" => Frame.alt
 structure FiniteFrame extends Frame where
   [World_finite : Finite World]
 
+instance {F : FiniteFrame} : Finite (F.World) := F.World_finite
 instance : Coe (FiniteFrame) (Frame) := ⟨λ F ↦ F.toFrame⟩
 
 
@@ -278,13 +280,12 @@ instance : CoeSort (Model α) (Type u) := ⟨Model.World⟩
 structure FiniteModel (α) extends Model α where
   [World_finite : Finite World]
 
-def FiniteModel.FiniteFrame (M : FiniteModel α) : FiniteFrame := {
-  World := M.World,
-  default := M.Frame.default,
-  World_finite := M.World_finite,
-  Rel := M.Frame.Rel,
-}
+instance {M : FiniteModel α} : Finite M.World := M.World_finite
 
+def FiniteModel.FiniteFrame (M : FiniteModel α) : Kripke.FiniteFrame where
+  World := M.World
+  default := M.Frame.default
+  Rel := M.Frame.Rel
 
 end Kripke
 

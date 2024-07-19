@@ -98,12 +98,13 @@ abbrev StandardFilterationValuation (Qx : FilterEqvQuotient M T) (a : α) := (ha
   . intro hy; exact h a ha |>.mpr hy;
 ) Qx
 
-abbrev FinestFilterationFrame (M : Model α) (T : Theory α) [T.SubformulaClosed] : Kripke.Frame where
+noncomputable abbrev FinestFilterationFrame (M : Model α) (T : Theory α) [T.SubformulaClosed] : Kripke.Frame where
   World := FilterEqvQuotient M T
+  World_deceq := Classical.decEq _
   default := ⟦default⟧
   Rel Qx Qy := ∃ x y, Qx = ⟦x⟧ ∧ Qy = ⟦y⟧ ∧ x ≺ y
 
-abbrev FinestFilterationModel (M : Model α) (T : Theory α) [T.SubformulaClosed] : Kripke.Model α where
+noncomputable abbrev FinestFilterationModel (M : Model α) (T : Theory α) [T.SubformulaClosed] : Kripke.Model α where
   Frame := FinestFilterationFrame M T
   Valuation := StandardFilterationValuation M T
 
@@ -115,8 +116,9 @@ instance FinestFilterationModel.filterOf {M} {T : Theory α} [T.SubformulaClosed
     simp_all [Satisfies];
 
 
-abbrev CoarsestFilterationFrame (M : Model α) (T : Theory α) [T_closed : T.SubformulaClosed] : Kripke.Frame where
+noncomputable abbrev CoarsestFilterationFrame (M : Model α) (T : Theory α) [T_closed : T.SubformulaClosed] : Kripke.Frame where
   World := FilterEqvQuotient M T
+  World_deceq := Classical.decEq _
   default := ⟦default⟧
   Rel Qx Qy := Quotient.lift₂ (λ x y => ∀ p, □p ∈ T → (x ⊧ □p → y ⊧ p)) (by
     intro x₁ y₁ x₂ y₂ hx hy;
@@ -128,7 +130,7 @@ abbrev CoarsestFilterationFrame (M : Model α) (T : Theory α) [T_closed : T.Sub
       exact hy p |>.mpr $ h p hp $ hx _ hp |>.mp sp₁;
   ) Qx Qy
 
-abbrev CoarsestFilterationModel (M : Model α) (T : Theory α) [T.SubformulaClosed] : Kripke.Model α where
+noncomputable abbrev CoarsestFilterationModel (M : Model α) (T : Theory α) [T.SubformulaClosed] : Kripke.Model α where
   Frame := CoarsestFilterationFrame M T
   Valuation := StandardFilterationValuation M T
 
@@ -269,7 +271,7 @@ open Frame (TransitiveClosure)
 
 variable {M : Model α} (M_trans : Transitive M.Frame) {T : Theory α} [T.SubformulaClosed]
 
-abbrev FinestFilterationTransitiveClosureModel (M : Model α) (T : Theory α) [T.SubformulaClosed] : Kripke.Model α where
+noncomputable abbrev FinestFilterationTransitiveClosureModel (M : Model α) (T : Theory α) [T.SubformulaClosed] : Kripke.Model α where
   Frame := (FinestFilterationFrame M T)^+
   Valuation := StandardFilterationValuation M T
 
