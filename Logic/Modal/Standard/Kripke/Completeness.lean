@@ -15,8 +15,7 @@ namespace Kripke
 
 noncomputable abbrev CanonicalFrame (Λ : DeductionParameter α) [Inhabited (Λ)-MCT] : Frame where
   World := (Λ)-MCT
-  World_deceq := Classical.decEq _ -- TODO: removable?
-  default := default
+  World_decEq := Classical.decEq _
   Rel Ω₁ Ω₂ := □''⁻¹Ω₁.theory ⊆ Ω₂.theory
 
 namespace CanonicalFrame

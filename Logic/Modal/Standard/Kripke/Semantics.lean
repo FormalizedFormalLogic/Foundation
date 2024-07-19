@@ -50,12 +50,12 @@ namespace Kripke
 
 structure Frame where
   World : Type*
-  default : World
   Rel : Rel World World
-  [World_deceq : DecidableEq World]
+  [World_inhabited : Inhabited World]
+  [World_decEq : DecidableEq World]
 
-instance {F : Frame} : Inhabited F.World := ⟨F.default⟩
-instance {F : Frame} : DecidableEq F.World := F.World_deceq
+instance {F : Frame} : Inhabited F.World := F.World_inhabited
+instance {F : Frame} : DecidableEq F.World := F.World_decEq
 
 instance : CoeSort Frame (Type u) := ⟨Frame.World⟩
 instance : CoeFun Frame (λ F => F.World → F.World → Prop) := ⟨Frame.Rel⟩
@@ -143,7 +143,6 @@ end Frame.RelReflTransGen
 
 abbrev Frame.TransitiveReflexiveClosure (F : Frame) : Frame where
   World := F.World
-  default := F.default
   Rel := (· ≺^* ·)
 postfix:max "^*" => Frame.TransitiveReflexiveClosure
 
@@ -195,7 +194,6 @@ end Frame.RelTransGen
 
 abbrev Frame.TransitiveClosure (F : Frame) : Frame where
   World := F.World
-  default := F.default
   Rel := (· ≺^+ ·)
 scoped postfix:max "^+" => Frame.TransitiveClosure
 
@@ -244,7 +242,6 @@ lemma FrameClass.iff_mem_restrictFinite {𝔽 : FrameClass} (h : F ∈ 𝔽) (F_
 /-- Frame with single world and identiy relation -/
 abbrev terminalFrame : FiniteFrame where
   World := Unit;
-  default := ();
   Rel := λ _ _ => True
 
 @[simp]
@@ -260,7 +257,6 @@ lemma terminalFrame.iff_relItr' {x y : terminalFrame.World} : x ≺^[n] y ↔ x 
 
 abbrev PointFrame : FiniteFrame where
   World := Unit
-  default := ();
   Rel := (λ _ _ => False)
 
 @[simp]
@@ -284,7 +280,6 @@ instance {M : FiniteModel α} : Finite M.World := M.World_finite
 
 def FiniteModel.FiniteFrame (M : FiniteModel α) : Kripke.FiniteFrame where
   World := M.World
-  default := M.Frame.default
   Rel := M.Frame.Rel
 
 end Kripke

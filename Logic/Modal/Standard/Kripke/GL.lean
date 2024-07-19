@@ -144,9 +144,8 @@ lemma filter_truthlemma
 
 noncomputable abbrev GLFilteredFrame (p : Formula α) : Kripke.FiniteFrame where
   World := FilterEqvQuotient GLCanonicalModel ((𝒮 p).toSet)
-  World_deceq := Classical.decEq _
-  default := ⟦default⟧
   World_finite := by apply FilterEqvQuotient.finite; simp;
+  World_decEq := Classical.decEq _
   Rel := Quotient.lift₂
     (λ X Y =>
       (∀ q ∈ □''⁻¹(𝒮 p), □q ∈ X.theory → q ⋏ □q ∈ Y.theory) ∧
@@ -379,7 +378,7 @@ section TreeUnravelling
 
 def Frame.TreeUnravelling (F : Frame) (r : F.World) : Kripke.Frame where
   World := { c : List F.World | [r] <+: c ∧ c.Chain' F.Rel }
-  default := ⟨[r], (by simp)⟩
+  World_inhabited := ⟨[r], (by simp)⟩
   Rel cx cy := ∃ z, cx.1 ++ [z] = cy.1
 
 namespace Frame.TreeUnravelling
@@ -573,7 +572,7 @@ end FiniteTransitiveTree
 
 
 abbrev FiniteFrame.FiniteTransitiveTreeUnravelling
-  (F : FiniteFrame) (F_trans : Transitive F.toFrame) (F_irrefl : Irreflexive F.toFrame) (r : F.World) : FiniteTransitiveTree :=
+  (F : FiniteFrame) [DecidableEq F.World] (F_trans : Transitive F.toFrame) (F_irrefl : Irreflexive F.toFrame) (r : F.World) : FiniteTransitiveTree :=
   letI T := (F↾r).TransitiveTreeUnravelling ⟨r, by tauto⟩
   {
     World := T

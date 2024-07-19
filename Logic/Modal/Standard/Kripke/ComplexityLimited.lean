@@ -4,7 +4,7 @@ namespace LO.Modal.Standard.Kripke
 
 def Frame.ComplexityLimit {F : Kripke.Frame} (r : F.World) (p : Formula α) : Kripke.Frame where
   World := { x | ∃ n ≤ p.complexity, r ≺^[n] x }
-  default := ⟨r, by use 0; simp⟩
+  World_inhabited := ⟨r, by use 0; simp⟩
   Rel x y := x.1 ≺ y.1
 
 def Model.ComplexityLimit {M : Kripke.Model α} (w : M.World) (p : Formula α) : Kripke.Model α where

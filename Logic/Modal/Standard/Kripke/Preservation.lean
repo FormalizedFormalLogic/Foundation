@@ -239,10 +239,10 @@ theorem undefinable_irreflexive : ¬∃ (Ax : AxiomSet α), AxiomSet.DefinesKrip
   by_contra hC;
   obtain ⟨Ax, h⟩ := hC;
 
-  let F₁ : Frame := { World := Fin 2, default := 0, Rel := (· ≠ ·) };
+  let F₁ : Frame := { World := Fin 2, Rel := (· ≠ ·) };
   have hIF₁ : Irreflexive F₁ := by simp [Irreflexive, Frame.Rel'];
 
-  let F₂ : Frame := { World := Fin 1, default := 0, Rel := (· = ·) };
+  let F₂ : Frame := { World := Fin 1, Rel := (· = ·) };
 
   let f : F₁ →ₚ F₂ := {
     toFun := λ _ => 0,
@@ -282,7 +282,7 @@ open Relation (TransGen ReflTransGen)
 def Frame.PointGenerated (F : Kripke.Frame) (r : F.World) : Kripke.Frame where
   World := { w | w = r ∨ r ≺ w }
   Rel x y := x.1 ≺ y.1
-  default := ⟨r, by tauto⟩
+  World_inhabited := ⟨r, by tauto⟩
 
 namespace Frame.PointGenerated
 
@@ -301,9 +301,12 @@ lemma rooted : (F.PointGenerated r).isRooted ⟨r, by tauto⟩ := by
   . intro h; contradiction;
   . intro _; exact hx;
 
-instance finite [Finite F.World] : Finite (F.PointGenerated r).World := by
+instance [Finite F.World] : Finite (F.PointGenerated r).World := by
   simp [Frame.PointGenerated];
   apply Subtype.finite;
+
+instance [DecidableEq F.World] : DecidableEq (F.PointGenerated r).World := by
+  apply Subtype.instDecidableEq (p := λ w => w = r ∨ r ≺ w);
 
 end Frame.PointGenerated
 

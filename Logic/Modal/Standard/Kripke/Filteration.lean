@@ -100,8 +100,7 @@ abbrev StandardFilterationValuation (Qx : FilterEqvQuotient M T) (a : α) := (ha
 
 noncomputable abbrev FinestFilterationFrame (M : Model α) (T : Theory α) [T.SubformulaClosed] : Kripke.Frame where
   World := FilterEqvQuotient M T
-  World_deceq := Classical.decEq _
-  default := ⟦default⟧
+  World_decEq := Classical.decEq _
   Rel Qx Qy := ∃ x y, Qx = ⟦x⟧ ∧ Qy = ⟦y⟧ ∧ x ≺ y
 
 noncomputable abbrev FinestFilterationModel (M : Model α) (T : Theory α) [T.SubformulaClosed] : Kripke.Model α where
@@ -118,8 +117,7 @@ instance FinestFilterationModel.filterOf {M} {T : Theory α} [T.SubformulaClosed
 
 noncomputable abbrev CoarsestFilterationFrame (M : Model α) (T : Theory α) [T_closed : T.SubformulaClosed] : Kripke.Frame where
   World := FilterEqvQuotient M T
-  World_deceq := Classical.decEq _
-  default := ⟦default⟧
+  World_decEq := Classical.decEq _
   Rel Qx Qy := Quotient.lift₂ (λ x y => ∀ p, □p ∈ T → (x ⊧ □p → y ⊧ p)) (by
     intro x₁ y₁ x₂ y₂ hx hy;
     simp;
