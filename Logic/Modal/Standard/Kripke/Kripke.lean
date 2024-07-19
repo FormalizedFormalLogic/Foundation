@@ -10,7 +10,5 @@ import Logic.Modal.Standard.Kripke.Ver
 import Logic.Modal.Standard.Kripke.Dot3
 import Logic.Modal.Standard.Kripke.S5
 import Logic.Modal.Standard.Kripke.GL
--- TODO: move
-import Logic.Modal.Standard.Kripke.GL_tree
 
 import Logic.Modal.Standard.Kripke.ModalCompanion
