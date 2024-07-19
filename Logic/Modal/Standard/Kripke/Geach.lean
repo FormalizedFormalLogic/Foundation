@@ -5,8 +5,11 @@ import Logic.Modal.Standard.Kripke.Reducible
 
 namespace LO.Modal.Standard
 
+
 open System
 open System.Axioms (Geach)
+
+variable {α : Type u}
 
 def GeachConfluent (t : Geach.Taple) (R : α → α → Prop) := ∀ {x y z : α}, (RelItr R t.i x y) ∧ (RelItr R t.j x z) → ∃ u, (RelItr R t.m y u) ∧ (RelItr R t.n z u)
 
@@ -286,28 +289,28 @@ lemma multiGeachConfluent_CanonicalFrame (h : 𝗚𝗲(ts) ⊆ Ax) : MultiGeachC
     . apply ih;
       simp_all;
 
-private instance instMultiGeachComplete : Complete (𝝂𝗚𝗲(ts) : DeductionParameter α) (MultiGeachConfluentFrameClass ts)# :=
+private instance instMultiGeachComplete : Complete (𝝂𝗚𝗲(ts) : DeductionParameter.{u} α) (MultiGeachConfluentFrameClass.{u} ts)# :=
   instComplete_of_mem_canonicalFrame $ multiGeachConfluent_CanonicalFrame (by rfl)
 
-instance {Λ : DeductionParameter α} [g : Λ.IsGeach] : Complete Λ (MultiGeachConfluentFrameClass g.taples)# := by
+instance {Λ : DeductionParameter α} [g : Λ.IsGeach] : Complete Λ (MultiGeachConfluentFrameClass.{u} g.taples)# := by
   convert instMultiGeachComplete (α := α);
   exact g.char;
 
 private def instGeachLogicCompleteAux {Λ : DeductionParameter α} [geach : Λ.IsGeach]
-  {𝔽 : FrameClass.Dep α} (h𝔽 : 𝔽 = MultiGeachConfluentFrameClass geach.taples := by simp_all [MultiGeachConfluentFrameClass, MultiGeachConfluent])
+  {𝔽 : FrameClass.Dep.{u, u} α} (h𝔽 : 𝔽 = MultiGeachConfluentFrameClass geach.taples := by simp_all [MultiGeachConfluentFrameClass, MultiGeachConfluent])
   : Complete Λ 𝔽 := by
-    convert instMultiGeachComplete (α := α);
+    convert instMultiGeachComplete.{u} (α := α);
     exact geach.char;
 
-instance : Complete (𝐊𝐓 : DeductionParameter α) ReflexiveFrameClass# := instGeachLogicCompleteAux
+instance : Complete (𝐊𝐓 : DeductionParameter α) ReflexiveFrameClass.{u}# := instGeachLogicCompleteAux
 
-instance KTB_complete : Complete (𝐊𝐓𝐁 : DeductionParameter α) ReflexiveSymmetricFrameClass# := instGeachLogicCompleteAux
+instance KTB_complete : Complete (𝐊𝐓𝐁 : DeductionParameter α) ReflexiveSymmetricFrameClass.{u}# := instGeachLogicCompleteAux
 
-instance S4_complete : Complete (𝐒𝟒 : DeductionParameter α) PreorderFrameClass# := instGeachLogicCompleteAux
+instance S4_complete : Complete (𝐒𝟒 : DeductionParameter α) PreorderFrameClass.{u}# := instGeachLogicCompleteAux
 
-instance S5_complete : Complete (𝐒𝟓 : DeductionParameter α) ReflexiveEuclideanFrameClass# := instGeachLogicCompleteAux
+instance S5_complete : Complete (𝐒𝟓 : DeductionParameter α) ReflexiveEuclideanFrameClass.{u}# := instGeachLogicCompleteAux
 
-instance KT4B_complete : Complete (𝐊𝐓𝟒𝐁 : DeductionParameter α) EquivalenceFrameClass# := instGeachLogicCompleteAux
+instance KT4B_complete : Complete (𝐊𝐓𝟒𝐁 : DeductionParameter α) EquivalenceFrameClass.{u}# := instGeachLogicCompleteAux
 
 end Completeness
 

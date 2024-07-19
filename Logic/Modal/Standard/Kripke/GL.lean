@@ -114,7 +114,7 @@ lemma axiomL_finite_defines : AxiomSet.FinitelyDefinesKripkeFrameClass (α := α
 
 instance GL_sound : Sound (𝐆𝐋 : DeductionParameter α) TransitiveIrreflexiveFrameClassꟳ# := sound_of_finitely_defines axiomL_finite_defines
 
-instance : System.Consistent (𝐆𝐋 : DeductionParameter α) := consistent_of_finitely_defines.{0} axiomL_finite_defines $ by
+instance : System.Consistent (𝐆𝐋 : DeductionParameter α) := consistent_of_finitely_defines.{u} axiomL_finite_defines $ by
   use PointFrame;
   simp [Transitive, Irreflexive];
 
@@ -319,7 +319,7 @@ private lemma GL_completeAux {p : Formula α} : TransitiveIrreflexiveFrameClass.
     apply MaximalConsistentTheory.iff_mem_neg.mp;
     simpa using hX;
 
-instance GL_complete : Complete (𝐆𝐋 : DeductionParameter α) TransitiveIrreflexiveFrameClassꟳ# := ⟨GL_completeAux⟩
+instance GL_complete : Complete (𝐆𝐋 : DeductionParameter α) TransitiveIrreflexiveFrameClass.{u}ꟳ# := ⟨GL_completeAux⟩
 
 instance : FiniteFrameProperty (α := α) 𝐆𝐋 TransitiveIrreflexiveFrameClass where
 

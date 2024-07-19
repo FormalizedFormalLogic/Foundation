@@ -5,7 +5,7 @@ namespace LO.Modal.Standard
 
 namespace PLoN
 
-variable {α : Type*} [DecidableEq α]
+variable {α : Type u} [DecidableEq α]
 variable {Λ : DeductionParameter α}
 
 open Formula
@@ -69,7 +69,7 @@ lemma complete_of_mem_canonicalFrame {𝔽 : FrameClass α} (hFC : CanonicalFram
 
 lemma instComplete_of_mem_canonicalFrame {𝔽 : FrameClass α} (hFC : CanonicalFrame Λ ∈ 𝔽) : Complete Λ 𝔽 := ⟨complete_of_mem_canonicalFrame hFC⟩
 
-instance : Complete 𝐍 (AllFrameClass α) := instComplete_of_mem_canonicalFrame trivial
+instance : Complete 𝐍 (AllFrameClass.{u, u} α) := instComplete_of_mem_canonicalFrame (by simp)
 
 end PLoN
 
