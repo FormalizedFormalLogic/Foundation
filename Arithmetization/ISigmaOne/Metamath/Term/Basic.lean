@@ -177,7 +177,7 @@ lemma Language.SemitermVec.prop {n m w : V} (h : L.SemitermVec n m w) {i} : i < 
 
 @[simp] lemma Language.SemitermVec.empty (m : V) : L.SemitermVec 0 m 0 := ⟨by simp, by simp⟩
 
-lemma Language.SemitermVec.cons {n m w t : V} (h : L.SemitermVec n m w) (ht : L.Semiterm m t) : L.SemitermVec (n + 1) m (t ∷ w) :=
+@[simp] lemma Language.SemitermVec.cons {n m w t : V} (h : L.SemitermVec n m w) (ht : L.Semiterm m t) : L.SemitermVec (n + 1) m (t ∷ w) :=
   ⟨by simp [h.lh], fun i hi ↦ by
     rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
     · simpa

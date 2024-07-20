@@ -621,7 +621,6 @@ theorem sigmaOne_skolem_vec {R : V → V → Prop} (hP : 𝚺₁-Relation R) {l}
         · simpa [sub_succ_add_succ (succ_le_iff_lt.mp hk) i] using hv i (by simpa using hi)⟩
   simpa using this l (by rfl)
 
-
 /-!
 
 ### Take Last k-Element
@@ -716,6 +715,79 @@ lemma takeLast_succ_of_lt {i v : V} (h : i < len v) : takeLast v (i + 1) = v.[le
       simpa [not_le_of_lt hi, ↓reduceIte, this, nth_cons_succ, not_lt_of_gt hi] using ih hi
 
 end takeLast
+
+
+/-!
+
+### Concatation
+
+-/
+
+namespace Concat
+
+def blueprint : VecRec.Blueprint 1 where
+  nil := .mkSigma “y z | !consDef y z 0” (by simp)
+  cons := .mkSigma “y x xs ih z | !consDef y x ih” (by simp)
+
+def construction : VecRec.Construction V blueprint where
+  nil param := ?[param 0]
+  cons (_ x _ ih) := x ∷ ih
+  nil_defined := by intro v; simp [blueprint]
+  cons_defined := by
+    intro v; simp [blueprint, Fin.isValue]; rfl
+
+end Concat
+
+section concat
+
+open Concat
+
+def concat (v z : V) : V := construction.result ![z] v
+
+@[simp] lemma concat_nil (z : V) : concat 0 z = ?[z] := by simp [concat, construction]
+
+@[simp] lemma concat_cons (x v z : V) : concat (x ∷ v) z = x ∷ concat v z := by simp [concat, construction]
+
+section
+
+def _root_.LO.FirstOrder.Arith.concatDef : 𝚺₁-Semisentence 3 := blueprint.resultDef
+
+lemma concat_defined : 𝚺₁-Function₂ (concat : V → V → V) via concatDef := construction.result_defined
+
+@[simp] lemma eval_concatDef (v) :
+    Semiformula.Evalbm V v concatDef.val ↔ v 0 = concat (v 1) (v 2) := concat_defined.df.iff v
+
+instance concat_definable : 𝚺₁-Function₂ (concat : V → V → V) := Defined.to_definable _ concat_defined
+
+instance concat_definable' (Γ) : (Γ, m + 1)-Function₂ (concat : V → V → V) := .of_sigmaOne concat_definable _ _
+
+end
+
+@[simp] lemma len_concat (v z : V) : len (concat v z) = len v + 1 := by
+  induction v using cons_induction_sigma₁
+  · definability
+  case nil => simp
+  case cons x v ih => simp [ih]
+
+lemma concat_nth_lt (v z : V) {i} (hi : i < len v) : (concat v z).[i] = v.[i] := by
+  induction v using cons_induction_sigma₁ generalizing i
+  · definability
+  case nil => simp at hi
+  case cons x v ih =>
+    rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
+    · simp
+    · simp [ih (by simpa using hi)]
+
+@[simp] lemma concat_nth_len (v z : V) : (concat v z).[len v] = z := by
+  induction v using cons_induction_sigma₁
+  · definability
+  case nil => simp
+  case cons x v ih => simp [ih]
+
+lemma concat_nth_len' (v z : V) {i} (hi : len v = i) : (concat v z).[i] = z := by
+  rcases hi; simp
+
+end concat
 
 /-!
 

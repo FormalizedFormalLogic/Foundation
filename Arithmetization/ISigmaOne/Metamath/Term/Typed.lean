@@ -88,7 +88,7 @@ variable {L}
 @[simp] lemma Language.TSemitermvec.val_nil (n : V) :
     (Language.TSemitermVec.nil L n).val = 0 := rfl
 
-abbrev Language.TTerm.sing (t : L.TTerm) : L.TSemitermVec (0 + 1) 0 := t ∷ᵗ .nil L 0
+abbrev Language.TSemiterm.sing {n} (t : L.TSemiterm n) : L.TSemitermVec (0 + 1) n := t ∷ᵗ .nil L n
 
 namespace Language.TSemiterm
 
@@ -209,7 +209,7 @@ namespace Language.TSemiterm
 
 @[simp] lemma bShift_substs_sing (t u : L.TTerm) :
     t.bShift.substs u.sing = t := by
-  ext; simp [substs, bShift, Language.TTerm.sing]
+  ext; simp [substs, bShift]
   rw [show (1 : V) = 0 + 1 by simp, substs_cons_bShift] <;> simp
 
 end Language.TSemiterm

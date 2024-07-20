@@ -145,6 +145,18 @@ lemma termSubstVec_cons {k n t ts : V} (ht : L.Semiterm n t) (hts : L.SemitermVe
     intro i hi
     simp [nth_termSubstVec hv hi, ih i hi]
 
+lemma termSubst_termSubst {l n m w v t : V} (hv : L.SemitermVec l n v) (ht : L.Semiterm l t) :
+    L.termSubst n m w (L.termSubst l n v t) = L.termSubst l m (L.termSubstVec l n m w v) t := by
+  apply Language.Semiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
+  · definability
+  · intro z hz; simp [hz, hv]
+  · intro x; simp [hv]
+  · intro k f ts hf hts ih
+    simp only [termSubst_func, Language.SemitermVec.termSubstVec, qqFunc_inj, true_and, hf, hts, hv]
+    apply nth_ext' k (by simp [hv, hts]) (by simp [hts])
+    intro i hi
+    rw [nth_termSubstVec (hv.termSubstVec hts) hi, nth_termSubstVec hts hi, nth_termSubstVec hts hi, ih i hi]
+
 end termSubst
 
 namespace TermShift
@@ -384,8 +396,10 @@ def Language.qVec (k n w : V) : V := ^#0 ∷ L.termBShiftVec k n w
 
 variable {L}
 
+@[simp] lemma len_qVec {k n w : V} (h : L.SemitermVec k n w) : len (L.qVec k n w) = k + 1 := by simp [Language.qVec, h]
+
 lemma Language.SemitermVec.qVec {k n w : V} (h : L.SemitermVec k n w) : L.SemitermVec (k + 1) (n + 1) (L.qVec k n w) :=
-  ⟨by simp [Language.qVec, ←h.termBShiftVec.lh], by
+  ⟨by simp [h], by
       intro i hi
       rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
       · simp [Language.qVec]
@@ -419,6 +433,23 @@ lemma bShift_substs {n m w t} (ht : L.Semiterm n t) (hw : L.SemitermVec n m w) :
 lemma substs_qVec_bShift {n t m w} (ht : L.Semiterm n t) (hw : L.SemitermVec n m w) :
     L.termSubst (n + 1) (m + 1) (L.qVec n m w) (L.termBShift n t) = L.termBShift m (L.termSubst n m w t) := by
   simp [Language.qVec, substs_cons_bShift ht hw.termBShiftVec, bShift_substs ht hw]
+
+lemma termSubstVec_qVec_qVec {l n m : V} (hv : L.SemitermVec l n v) (hw : L.SemitermVec n m w) :
+    L.termSubstVec (l + 1) (n + 1) (m + 1) (L.qVec n m w) (L.qVec l n v) = L.qVec l m (L.termSubstVec l n m w v) := by
+  apply nth_ext' (l + 1) (by rw[len_termSubstVec hv.qVec]) (by simp [hw, hv])
+  intro i hi
+  unfold Language.qVec
+  rw [termSubstVec_cons (by simp) hv.termBShiftVec]
+  rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
+  · simp
+  · simp
+    have hi : i < l := by simpa using hi
+    rw [nth_termSubstVec hv.termBShiftVec hi,
+      nth_termBShiftVec hv hi,
+      nth_termBShiftVec (hw.termSubstVec hv) hi,
+      nth_termSubstVec hv hi,
+      substs_cons_bShift (hv.2 i hi) hw.termBShiftVec,
+      bShift_substs (hv.2 i hi) hw]
 
 end
 

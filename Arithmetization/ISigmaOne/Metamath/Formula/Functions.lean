@@ -524,6 +524,50 @@ lemma substs_neg {p} (hp : L.Semiformula n p) :
   · intro n p hp ih m w hw
     simp [hp, hw, hp.substs hw.qVec, ih hw.qVec]
 
+lemma substs_substs {p} (hp : L.Semiformula l p) :
+    L.SemitermVec n m w → L.SemitermVec l n v → L.substs m w (L.substs n v p) = L.substs m (L.termSubstVec l n m w v) p := by
+  revert m w n v
+  apply Language.Semiformula.induction_pi₁ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ _ _ hp
+  · apply Definable.all
+    apply Definable.all
+    apply Definable.all
+    apply Definable.all
+    apply Definable.imp (by definability)
+    apply Definable.imp (by definability)
+    apply Definable.comp₂' (by simp; definability)
+    apply DefinableFunction.comp₃ (by definability) ?_ (by definability)
+    apply DefinableFunction₅.comp (termSubstVec_definable _) <;> definability
+  · intro l k R ts hR hts m w n v _ hv
+    simp only [substs_rel, Language.SemitermVec.termSubstVec, qqRel_inj, true_and, hR, hts, hv]
+    apply nth_ext' k (by simp [hv, hts]) (by simp [hts])
+    intro i hi
+    rw [nth_termSubstVec (hv.termSubstVec hts) hi,
+      nth_termSubstVec hts hi,
+      nth_termSubstVec hts hi,
+      termSubst_termSubst hv (hts.2 i hi)]
+  · intro l k R ts hR hts m w n v _ hv
+    simp only [substs_nrel, Language.SemitermVec.termSubstVec, qqNRel_inj, true_and, hR, hts, hv]
+    apply nth_ext' k (by simp [hv, hts]) (by simp [hts])
+    intro i hi
+    rw [nth_termSubstVec (hv.termSubstVec hts) hi,
+      nth_termSubstVec hts hi,
+      nth_termSubstVec hts hi,
+      termSubst_termSubst hv (hts.2 i hi)]
+  · intro l m w n v _ _; simp [*]
+  · intro l m w n v _ _; simp [*]
+  · intro l p q hp hq ihp ihq m w n v hw hv
+    simp only [substs_and, hp, hq]
+    rw [substs_and (hp.substs hv) (hq.substs hv), ihp hw hv, ihq hw hv]
+  · intro l p q hp hq ihp ihq m w n v hw hv
+    simp only [substs_or, hp, hq]
+    rw [substs_or (hp.substs hv) (hq.substs hv), ihp hw hv, ihq hw hv]
+  · intro l p hp ih m w n v hw hv
+    simp only [substs_all, hp]
+    rw [substs_all (hp.substs hv.qVec), ih hw.qVec hv.qVec, termSubstVec_qVec_qVec hv hw]
+  · intro l p hp ih m w n v hw hv
+    simp only [substs_ex, hp]
+    rw [substs_ex (hp.substs hv.qVec), ih hw.qVec hv.qVec, termSubstVec_qVec_qVec hv hw]
+
 end substs
 
 namespace Formalized
