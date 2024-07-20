@@ -42,6 +42,7 @@ class EQTheory (T : LOR.Theory V) where
   trans : (#'2 =' #'1 ⟶ #'1 =' #'0 ⟶ #'2 =' #'0).all.all.all ∈' T
   addExt : (#'3 =' #'2 ⟶ #'1 =' #'0 ⟶ (#'3 + #'1) =' (#'2 + #'0)).all.all.all.all ∈' T
   mulExt : (#'3 =' #'2 ⟶ #'1 =' #'0 ⟶ (#'3 * #'1) =' (#'2 * #'0)).all.all.all.all ∈' T
+  ltExt : (#'3 =' #'2 ⟶ #'1 =' #'0 ⟶ #'3 <' #'1 ⟶ #'2 <' #'0).all.all.all.all ∈' T
 
 class R'Theory (T : LOR.Theory V) where
   add (n m : V) : (↑n + ↑m) =' ↑(n + m) ∈' T
@@ -49,9 +50,11 @@ class R'Theory (T : LOR.Theory V) where
   ne {n m : V} : n ≠ m → ↑n ≠' ↑m ∈' T
   lt {n m : V} : n < m → ↑n <' ↑m ∈' T
   nlt {n m : V} : ¬n < m → ↑n ≮' ↑m ∈' T
-  bound (n : V) : (#'0 <' ↑n ⟷ (tSubstItr (#'0).sing (#'1 =' #'0) n).disj).all ∈' T
+  ltNumeral (n : V) : (#'0 <' ↑n ⟷ (tSubstItr (#'0).sing (#'1 =' #'0) n).disj).all ∈' T
 
 variable {T : LOR.Theory V} [EQTheory T]
+
+namespace TProof
 
 open Language.Theory.TProof
 
@@ -83,6 +86,27 @@ def mulExt (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.TTerm) : T ⊢ t₁ =' t₂ �
   have := by simpa using specialize this t₂
   have := by simpa using specialize this u₁
   simpa [Language.TSemitermVec.q_of_pos, Language.TSemiformula.substs₁] using specialize this u₂
+
+def ltExt (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.TTerm) : T ⊢ t₁ =' t₂ ⟶ u₁ =' u₂ ⟶ t₁ <' u₁ ⟶ t₂ <' u₂ := by
+  have : T ⊢ (#'3 =' #'2 ⟶ #'1 =' #'0 ⟶ #'3 <' #'1 ⟶ #'2 <' #'0).all.all.all.all := byAxm EQTheory.ltExt
+  have := by simpa using specialize this t₁
+  have := by simpa using specialize this t₂
+  have := by simpa using specialize this u₁
+  simpa [Language.TSemitermVec.q_of_pos, Language.TSemiformula.substs₁] using specialize this u₂
+
+variable [R'Theory T]
+
+def add (n m : V) : T ⊢ (↑n + ↑m) =' ↑(n + m) := byAxm (R'Theory.add n m)
+
+def mul (n m : V) : T ⊢ (↑n * ↑m) =' ↑(n * m) := byAxm (R'Theory.mul n m)
+
+def ne {n m : V} (h : n ≠ m) : T ⊢ ↑n ≠' ↑m := byAxm (R'Theory.ne h)
+
+def ltNumeral (n : V) (t : ⌜ℒₒᵣ⌝.TTerm) : T ⊢ t <' ↑n ⟷ (tSubstItr t.sing (#'1 =' #'0) n).disj := by
+  have : T ⊢ (#'0 <' ↑n ⟷ (tSubstItr (#'0).sing (#'1 =' #'0) n).disj).all := byAxm (R'Theory.ltNumeral n)
+  simpa [Language.TSemitermVec.q_of_pos, Language.TSemiformula.substs₁] using specialize this t
+
+end TProof
 
 end Formalized
 
