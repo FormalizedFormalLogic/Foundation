@@ -49,10 +49,8 @@ class R'Theory (T : LOR.Theory V) where
   ne {n m : V} : n ≠ m → ↑n ≠' ↑m ∈' T
   lt {n m : V} : n < m → ↑n <' ↑m ∈' T
   nlt {n m : V} : ¬n < m → ↑n ≮' ↑m ∈' T
-  bound (n : V) : (#'0 <' ↑n ⟷ #'0 <' ↑n).all ∈' T
+  bound (n : V) : (#'0 <' ↑n ⟷ (tSubstItr (#'0).sing (#'1 =' #'0) n).disj).all ∈' T
 
-
-/--/
 variable {T : LOR.Theory V} [EQTheory T]
 
 open Language.Theory.TProof

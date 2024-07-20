@@ -201,6 +201,40 @@ variable {n m : V}
     (t₁ ≮' t₂).substs w = (t₁.substs w ≮' t₂.substs w) := by
   ext; simp [notLessThan, Language.TSemiterm.substs, Language.TSemiformula.substs, qqNLT]
 
+def tSubstItr {n m : V} (w : ⌜ℒₒᵣ⌝.TSemitermVec n m) (p : ⌜ℒₒᵣ⌝.TSemiformula (n + 1)) (k : V) :
+    ⌜ℒₒᵣ⌝.TSemiformulaVec m := ⟨substItr m w.val p.val k, by
+  intro i hi
+  have : i < k := by simpa using hi
+  simp only [gt_iff_lt, this, substItr_nth]
+  exact Language.Semiformula.substs p.prop (w.prop.cons (by simp))⟩
+
+@[simp] lemma val_tSubstItr {n m : V} (w : ⌜ℒₒᵣ⌝.TSemitermVec n m) (p : ⌜ℒₒᵣ⌝.TSemiformula (n + 1)) (k : V) :
+    (tSubstItr w p k).val = substItr m w.val p.val k := by simp [tSubstItr]
+
+@[simp] lemma len_tSubstItr {n m : V} (w : ⌜ℒₒᵣ⌝.TSemitermVec n m) (p : ⌜ℒₒᵣ⌝.TSemiformula (n + 1)) (k : V) :
+    len (tSubstItr w p k).val = k := by simp
+
+lemma nth_tSubstItr {n m : V} (w : ⌜ℒₒᵣ⌝.TSemitermVec n m) (p : ⌜ℒₒᵣ⌝.TSemiformula (n + 1)) (k : V) {i} (hi : i < k) :
+    (tSubstItr w p k).nth i (by simp [hi]) = p.substs (↑(k - (i + 1)) ∷ᵗ w) := by ext; simp [tSubstItr, Language.TSemiformula.substs, hi]
+
+@[simp] lemma neg_conj_tSubstItr {n m : V} (w : ⌜ℒₒᵣ⌝.TSemitermVec n m) (p : ⌜ℒₒᵣ⌝.TSemiformula (n + 1)) (k : V) :
+    ~(tSubstItr w p k).conj = (tSubstItr w (~p) k).disj := by
+  ext; simp [neg_conj_substItr p.prop w.prop]
+
+@[simp] lemma neg_disj_tSubstItr {n m : V} (w : ⌜ℒₒᵣ⌝.TSemitermVec n m) (p : ⌜ℒₒᵣ⌝.TSemiformula (n + 1)) (k : V) :
+    ~(tSubstItr w p k).disj = (tSubstItr w (~p) k).conj := by
+  ext; simp [neg_disj_substItr p.prop w.prop]
+
+@[simp] lemma substs_conj_tSubstItr {n m l : V} (v : ⌜ℒₒᵣ⌝.TSemitermVec m l) (w : ⌜ℒₒᵣ⌝.TSemitermVec n m) (p : ⌜ℒₒᵣ⌝.TSemiformula (n + 1)) (k : V) :
+    (tSubstItr w p k).conj.substs v = (tSubstItr (w.substs v) p k).conj := by
+  ext; simp [Language.TSemiformula.substs, Language.TSemitermVec.substs]
+  rw [substs_conj_substItr p.prop w.prop v.prop]
+
+@[simp] lemma substs_disj_tSubstItr {n m l : V} (v : ⌜ℒₒᵣ⌝.TSemitermVec m l) (w : ⌜ℒₒᵣ⌝.TSemitermVec n m) (p : ⌜ℒₒᵣ⌝.TSemiformula (n + 1)) (k : V) :
+    (tSubstItr w p k).disj.substs v = (tSubstItr (w.substs v) p k).disj := by
+  ext; simp [Language.TSemiformula.substs, Language.TSemitermVec.substs]
+  rw [substs_disj_substItr p.prop w.prop v.prop]
+
 end Formalized
 
 end LO.Arith

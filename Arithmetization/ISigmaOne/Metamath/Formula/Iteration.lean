@@ -139,38 +139,138 @@ lemma qqDisj_semiformula {n ps : V} :
 
 end qqDisj
 
-section qqBvarVec
+namespace Formalized
 
-namespace QQBverVec
+section substItr
 
-def blueprint : PR.Blueprint 0 where
-  zero := .mkSigma “y | y = 0” (by simp)
-  succ := .mkSigma “y ih k | ∃ t, !qqBvarDef t k ∧ !consDef y t ih” (by simp)
+namespace SubstItr
+
+def blueprint : PR.Blueprint 3 where
+  zero := .mkSigma “y n w p | y = 0” (by simp)
+  succ := .mkSigma “y ih k n w p | ∃ numeral, !numeralDef numeral k ∧ ∃ v, !consDef v numeral w ∧
+    ∃ sp, !(Language.lDef ℒₒᵣ).substsDef sp n v p ∧ !consDef y sp ih” (by simp)
 
 def construction : PR.Construction V blueprint where
   zero _ := 0
-  succ _ k ih := ^#k ∷ ih
-  zero_defined := by intro _; simp [blueprint]
-  succ_defined := by intro _; simp [blueprint]
+  succ param k ih := (⌜ℒₒᵣ⌝.substs (param 0) (numeral k ∷ param 1) (param 2)) ∷ ih
+  zero_defined := by intro v; simp [blueprint]
+  succ_defined := by intro v; simp [blueprint, (substs_defined ⌜ℒₒᵣ⌝).df.iff]; rfl
 
-end QQBverVec
+end SubstItr
 
-end qqBvarVec
+open SubstItr
 
-namespace Formalized
+def substItr (n w p k : V) : V := construction.result ![n, w, p] k
 
-section fList
+@[simp] lemma substItr_zero (n w p : V) : substItr n w p 0 = 0 := by simp [substItr, construction]
 
-namespace FList
+@[simp] lemma substItr_succ (n w p k : V) : substItr n w p (k + 1) = ⌜ℒₒᵣ⌝.substs n (numeral k ∷ w) p ∷ substItr n w p k := by simp [substItr, construction]
 
-def blueprint : PR.Blueprint 2 where
-  zero := .mkSigma “y n p | y = 0” (by simp)
-  succ := .mkSigma “y ih k n p | ∃ numeral, !numeralDef numeral k ∧ ∃ w, !consDef w numeral 0 ∧
-    ∃ sp, !(Language.lDef ℒₒᵣ).substsDef sp 0 w p ∧ !consDef y p ih” (by simp)
+section
 
-end FList
+def _root_.LO.FirstOrder.Arith.substItrDef : 𝚺₁-Semisentence 5 := blueprint.resultDef |>.rew (Rew.substs ![#0, #4, #1, #2, #3])
 
-end fList
+lemma substItr_defined : 𝚺₁-Function₄ (substItr : V → V → V → V → V) via substItrDef :=
+  fun v ↦ by simp [construction.result_defined_iff, substItrDef]; rfl
+
+@[simp] lemma substItr_defined_iff (v) :
+    Semiformula.Evalbm V v substItrDef.val ↔ v 0 = substItr (v 1) (v 2) (v 3) (v 4) := substItr_defined.df.iff v
+
+instance substItr_definable : 𝚺₁-Function₄ (substItr : V → V → V → V → V) := Defined.to_definable _ substItr_defined
+
+@[simp, definability] instance substItr_definable' (Γ m) : (Γ, m + 1)-Function₄ (substItr : V → V → V → V → V) :=
+  .of_sigmaOne substItr_definable _ _
+
+instance substItr_definable₁ (n w p : V) : 𝚺₁-Function₁ (substItr n w p) := by
+  simpa using substItr_definable.retractiont ![&n, &w, &p, #0]
+
+instance substItr_definable₁' (n w p : V) (Γ m) : (Γ, m + 1)-Function₁ (substItr n w p) :=
+  .of_sigmaOne (substItr_definable₁ n w p) _ _
+
+end
+
+@[simp] lemma len_substItr (n w p k : V) : len (substItr n w p k) = k := by
+  induction k using induction_iSigmaOne
+  · definability
+  case zero => simp
+  case succ k ih => simp [ih]
+
+@[simp] lemma substItr_nth (n w p k : V) {i} (hi : i < k) :
+    (substItr n w p k).[i] = ⌜ℒₒᵣ⌝.substs n (numeral (k - (i + 1)) ∷ w) p := by
+  induction k using induction_iSigmaOne generalizing i
+  · definability
+  case zero => simp at hi
+  case succ k ih =>
+    simp only [substItr_succ]
+    rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
+    · simp
+    · simp [ih (by simpa using hi)]
+
+lemma neg_conj_substItr {n w p k : V} (hp : ⌜ℒₒᵣ⌝.Semiformula (n + 1) p) (hw : ⌜ℒₒᵣ⌝.SemitermVec n m w) :
+    ⌜ℒₒᵣ⌝.neg (^⋀[m] (substItr m w p k)) = ^⋁[m] (substItr m w (⌜ℒₒᵣ⌝.neg p) k) := by
+  induction k using induction_iSigmaOne
+  · definability
+  case zero => simp
+  case succ k ih =>
+    simp [hw]
+    rw [neg_and, ←substs_neg hp, ih]
+    · simp [hw]
+    · apply Language.Semiformula.substs hp (by simp [hw])
+    · simp only [qqConj_semiformula, len_substItr]
+      intro i hi
+      simp only [gt_iff_lt, hi, substItr_nth]
+      apply Language.Semiformula.substs hp (by simp [hw])
+
+lemma neg_disj_substItr {n w p k : V} (hp : ⌜ℒₒᵣ⌝.Semiformula (n + 1) p) (hw : ⌜ℒₒᵣ⌝.SemitermVec n m w) :
+    ⌜ℒₒᵣ⌝.neg (^⋁[m] (substItr m w p k)) = ^⋀[m] (substItr m w (⌜ℒₒᵣ⌝.neg p) k) := by
+  induction k using induction_iSigmaOne
+  · definability
+  case zero => simp
+  case succ k ih =>
+    simp [hw]
+    rw [neg_or, ←substs_neg hp, ih]
+    · simp [hw]
+    · apply Language.Semiformula.substs hp (by simp [hw])
+    · simp only [qqDisj_semiformula, len_substItr]
+      intro i hi
+      simp only [gt_iff_lt, hi, substItr_nth]
+      apply Language.Semiformula.substs hp (by simp [hw])
+
+lemma substs_conj_substItr {n m l w p k : V} (hp : ⌜ℒₒᵣ⌝.Semiformula (n + 1) p) (hw : ⌜ℒₒᵣ⌝.SemitermVec n m w) (hv : ⌜ℒₒᵣ⌝.SemitermVec m l v) :
+    ⌜ℒₒᵣ⌝.substs l v (^⋀[m] (substItr m w p k)) = ^⋀[l] (substItr l (⌜ℒₒᵣ⌝.termSubstVec n m l v w) p k) := by
+  induction k using induction_iSigmaOne
+  · definability
+  case zero => simp
+  case succ k ih =>
+    have hkw : ⌜ℒₒᵣ⌝.SemitermVec (n + 1) m (numeral k ∷ w) := by simp [hw]
+    have ha : ⌜ℒₒᵣ⌝.Semiformula m (^⋀[m] substItr m w p k) := by
+      simp only [qqConj_semiformula, len_substItr]
+      intro i hi; simpa [hi] using hp.substs (hw.cons (by simp))
+    simp only [substItr_succ, qqConj_cons]
+    rw [substs_and (hp.substs hkw) ha,
+      substs_substs hp hv hkw,
+      termSubstVec_cons (by simp) hw,
+      numeral_substs hv]
+    simp [ih]
+
+lemma substs_disj_substItr {n m l w p k : V} (hp : ⌜ℒₒᵣ⌝.Semiformula (n + 1) p) (hw : ⌜ℒₒᵣ⌝.SemitermVec n m w) (hv : ⌜ℒₒᵣ⌝.SemitermVec m l v) :
+    ⌜ℒₒᵣ⌝.substs l v (^⋁[m] (substItr m w p k)) = ^⋁[l] (substItr l (⌜ℒₒᵣ⌝.termSubstVec n m l v w) p k) := by
+  induction k using induction_iSigmaOne
+  · definability
+  case zero => simp
+  case succ k ih =>
+    have hkw : ⌜ℒₒᵣ⌝.SemitermVec (n + 1) m (numeral k ∷ w) := by simp [hw]
+    have ha : ⌜ℒₒᵣ⌝.Semiformula m (^⋁[m] substItr m w p k) := by
+      simp only [qqDisj_semiformula, len_substItr]
+      intro i hi; simpa [hi] using hp.substs (hw.cons (by simp))
+    simp only [substItr_succ, qqDisj_cons]
+    rw [substs_or (hp.substs hkw) ha,
+      substs_substs hp hv hkw,
+      termSubstVec_cons (by simp) hw,
+      numeral_substs hv]
+    simp [ih]
+
+end substItr
 
 end Formalized
 
