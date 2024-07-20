@@ -44,19 +44,17 @@ class EQTheory (T : LOR.Theory V) where
   mulExt : (#'3 =' #'2 ⟶ #'1 =' #'0 ⟶ (#'3 * #'1) =' (#'2 * #'0)).all.all.all.all ∈' T
   ltExt : (#'3 =' #'2 ⟶ #'1 =' #'0 ⟶ #'3 <' #'1 ⟶ #'2 <' #'0).all.all.all.all ∈' T
 
-class R'Theory (T : LOR.Theory V) where
+class R₀Theory (T : LOR.Theory V) where
   add (n m : V) : (↑n + ↑m) =' ↑(n + m) ∈' T
   mul (n m : V) : (↑n * ↑m) =' ↑(n * m) ∈' T
   ne {n m : V} : n ≠ m → ↑n ≠' ↑m ∈' T
-  lt {n m : V} : n < m → ↑n <' ↑m ∈' T
-  nlt {n m : V} : ¬n < m → ↑n ≮' ↑m ∈' T
   ltNumeral (n : V) : (#'0 <' ↑n ⟷ (tSubstItr (#'0).sing (#'1 =' #'0) n).disj).all ∈' T
 
-variable {T : LOR.Theory V} [EQTheory T]
+variable {T : LOR.Theory V} {pT : (Language.lDef ℒₒᵣ).TDef} [T.Defined pT] [EQTheory T]
 
 namespace TProof
 
-open Language.Theory.TProof
+open Language.Theory.TProof System
 
 def eqRefl (t : ⌜ℒₒᵣ⌝.TTerm) : T ⊢ t =' t := by
   have : T ⊢ (#'0 =' #'0).all := byAxm EQTheory.refl
@@ -94,17 +92,35 @@ def ltExt (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.TTerm) : T ⊢ t₁ =' t₂ ⟶
   have := by simpa using specialize this u₁
   simpa [Language.TSemitermVec.q_of_pos, Language.TSemiformula.substs₁] using specialize this u₂
 
-variable [R'Theory T]
+variable [R₀Theory T]
 
-def add (n m : V) : T ⊢ (↑n + ↑m) =' ↑(n + m) := byAxm (R'Theory.add n m)
+def addComplete (n m : V) : T ⊢ (↑n + ↑m) =' ↑(n + m) := byAxm (R₀Theory.add n m)
 
-def mul (n m : V) : T ⊢ (↑n * ↑m) =' ↑(n * m) := byAxm (R'Theory.mul n m)
+def mulComplete (n m : V) : T ⊢ (↑n * ↑m) =' ↑(n * m) := byAxm (R₀Theory.mul n m)
 
-def ne {n m : V} (h : n ≠ m) : T ⊢ ↑n ≠' ↑m := byAxm (R'Theory.ne h)
+def neComplete {n m : V} (h : n ≠ m) : T ⊢ ↑n ≠' ↑m := byAxm (R₀Theory.ne h)
 
-def ltNumeral (n : V) (t : ⌜ℒₒᵣ⌝.TTerm) : T ⊢ t <' ↑n ⟷ (tSubstItr t.sing (#'1 =' #'0) n).disj := by
-  have : T ⊢ (#'0 <' ↑n ⟷ (tSubstItr (#'0).sing (#'1 =' #'0) n).disj).all := byAxm (R'Theory.ltNumeral n)
+def ltNumeral (t : ⌜ℒₒᵣ⌝.TTerm) (n : V) : T ⊢ t <' ↑n ⟷ (tSubstItr t.sing (#'1 =' #'0) n).disj := by
+  have : T ⊢ (#'0 <' ↑n ⟷ (tSubstItr (#'0).sing (#'1 =' #'0) n).disj).all := byAxm (R₀Theory.ltNumeral n)
   simpa [Language.TSemitermVec.q_of_pos, Language.TSemiformula.substs₁] using specialize this t
+
+def ltComplete {n m : V} (h : n < m) : T ⊢ ↑n <' ↑m := by
+  have : T ⊢ ↑n <' ↑m ⟷ _ := ltNumeral (T := T) n m
+  apply andRight this ⨀ ?_
+  apply disj (i := m - (n + 1)) _ (by simpa using sub_succ_lt_self (by simp [h]))
+  simpa [nth_tSubstItr', h] using eqRefl (T := T) ↑n
+
+open Classical
+
+noncomputable def nltComplete {n m : V} (h : m ≤ n) : T ⊢ ↑n ≮' ↑m := by
+  have : T ⊢ ↑n ≮' ↑m ⟷ (tSubstItr (↑n : ⌜ℒₒᵣ⌝.TTerm).sing (#'1 ≠' #'0) m).conj := by
+    simpa using negReplaceIff' <| ltNumeral (T := T) n m
+  refine andRight this ⨀ ?_
+  apply conj'
+  intro i hi
+  have hi : i < m := by simpa using hi
+  have : n ≠ i := Ne.symm <| ne_of_lt <| lt_of_lt_of_le hi h
+  simpa [nth_tSubstItr', hi] using neComplete this
 
 end TProof
 

@@ -184,6 +184,12 @@ def conj (ps : L.TSemiformulaVec 0) (ds : ∀ i, (hi : i < len ps.val) → T ⊢
   have : T.Derivable (insert (^⋀ ps.val) Γ.val) := Language.Theory.Derivable.conj ps.val (by simp) this
   exact Language.Theory.Derivable.toTDerivation _ (by simpa using this)
 
+def disj (ps : L.TSemiformulaVec 0) {i} (hi : i < len ps.val)
+    (d : T ⊢¹ insert (ps.nth i hi) Γ) : T ⊢¹ insert ps.disj Γ := by
+  have : T.Derivable (insert (^⋁ ps.val) Γ.val) :=
+    Language.Theory.Derivable.disj ps.val Γ.val ps.prop hi (by simpa using d.toDerivable)
+  apply Language.Theory.Derivable.toTDerivation _ (by simpa using this)
+
 def modusPonens (dpq : T ⊢¹ insert (p ⟶ q) Γ) (dp : T ⊢¹ insert p Γ) : T ⊢¹ insert q Γ := by
   let d : T ⊢¹ insert (p ⟶ q) (insert q Γ) := dpq.wk (insert_subset_insert_of_subset _ <| by simp)
   let b : T ⊢¹ insert (~(p ⟶ q)) (insert q Γ) := by
@@ -315,6 +321,16 @@ def specialize {p : L.TSemiformula (0 + 1)} (b : T ⊢ p.all) (t : L.TTerm) : T 
   · rw [TSemiformula.neg_all]
     apply TDerivation.ex t
     apply TDerivation.em (p.substs₁ t)
+
+def conj (ps : L.TSemiformulaVec 0) (ds : ∀ i, (hi : i < len ps.val) → T ⊢ ps.nth i hi) : T ⊢ ps.conj :=
+  TDerivation.conj ps ds
+
+def conj' (ps : L.TSemiformulaVec 0) (ds : ∀ i, (hi : i < len ps.val) → T ⊢ ps.nth (len ps.val - (i + 1)) (sub_succ_lt_self hi)) : T ⊢ ps.conj :=
+  TDerivation.conj ps <| fun i hi ↦ by
+    simpa [sub_succ_lt_selfs hi] using ds (len ps.val - (i + 1)) (by simp [tsub_lt_iff_left (succ_le_iff_lt.mpr hi)])
+
+def disj (ps : L.TSemiformulaVec 0) {i} (hi : i < len ps.val) (d : T ⊢ ps.nth i hi) : T ⊢ ps.disj :=
+  TDerivation.disj ps hi d
 
 end Language.Theory.TProof
 

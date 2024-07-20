@@ -135,6 +135,10 @@ lemma sub_succ_add_succ {x y : M} (h : y < x) (z) : x - (y + 1) + (z + 1) = x - 
   _                     = x - y - 1 + 1 + z   := by simp [sub_sub]
   _                     = x - y + z           := by simp; rw [sub_add_self_of_le (one_le_of_zero_lt _ (pos_sub_iff_lt.mpr h))]
 
+lemma le_sub_one_of_lt {a b : M} (h : a < b) : a ≤ b - 1 := by
+  have : 1 ≤ b := one_le_of_zero_lt _ (pos_of_gt h)
+  simp [le_iff_lt_succ, sub_add_self_of_le this, h]
+
 end sub
 
 section Dvd

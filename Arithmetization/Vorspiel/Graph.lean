@@ -12,6 +12,8 @@ def Graph₃ (f : α → β → γ → σ) : σ → α → β → γ → Prop :=
 
 def Graph₄ (f : α → β → γ → δ → σ) : σ → α → β → γ → δ → Prop := fun y x₁ x₂ x₃ x₄ ↦ y = f x₁ x₂ x₃ x₄
 
+def Graph₅ (f : α → β → γ → δ → ε → σ) : σ → α → β → γ → δ → ε → Prop := fun y x₁ x₂ x₃ x₄ x₅ ↦ y = f x₁ x₂ x₃ x₄ x₅
+
 lemma Graph.eq {f : α → σ} {y x} (h : Graph f y x) : f x = y := h.symm
 
 lemma Graph.iff_left (f : α → σ) {y x} : f x = y ↔ Graph f y x := by simp [Graph, eq_comm]

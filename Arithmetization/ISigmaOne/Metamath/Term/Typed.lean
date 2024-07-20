@@ -147,6 +147,9 @@ def nth (t : L.TSemitermVec k n) (i : V) (hi : i < k := by simp) : L.TSemiterm n
 @[simp] lemma nth_succ (t : L.TSemiterm n) (v : L.TSemitermVec k n) (i : V) (hi : i < k) :
     (t ∷ᵗ v).nth (i + 1) (by simp [hi]) = v.nth i hi := by ext; simp [nth]
 
+@[simp] lemma nth_one (t : L.TSemiterm n) (v : L.TSemitermVec (k + 1) n)  :
+    (t ∷ᵗ v).nth 1 (by simp) = v.nth 0 (by simp) := by ext; simp [nth]
+
 lemma nth_of_pos (t : L.TSemiterm n) (v : L.TSemitermVec k n) (i : V) (ipos : 0 < i) (hi : i < k + 1) :
     (t ∷ᵗ v).nth i (by simp [hi]) = v.nth (i - 1) (tsub_lt_iff_left (one_le_of_zero_lt i ipos) |>.mpr hi) := by
   ext; simp only [nth, TSemitermvec.val_cons]

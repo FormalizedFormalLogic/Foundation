@@ -446,6 +446,8 @@ lemma nonempty_iff {s : M} : s ≠ ∅ ↔ ∃ x, x ∈ s := by
 lemma isempty_iff {s : M} : s = ∅ ↔ ∀ x, x ∉ s := by
   simpa using not_iff_not.mpr (nonempty_iff (s := s))
 
+@[simp] lemma empty_subset (s : M) : ∅ ⊆ s := by intro x; simp
+
 lemma lt_of_lt_log {a b : M} (pos : 0 < b) (h : ∀ i ∈ a, i < log b) : a < b := by
   rcases zero_le a with (rfl | apos)
   · exact pos

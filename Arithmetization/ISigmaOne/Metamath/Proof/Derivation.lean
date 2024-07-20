@@ -710,6 +710,11 @@ lemma wk {s s' : V} (hs : L.FormulaSet s) (h : s' ⊆ s) (hd : L.Derivable s') :
   rcases hd with ⟨d, hd⟩
   exact ⟨wkRule s d, by simp, Language.Derivation.wkRule hs h hd⟩
 
+lemma ofSetEq {s s' : V} (h : ∀ x, x ∈ s' ↔ x ∈ s) (hd : L.Derivable s') :
+    L.Derivable s := by
+  have : s' = s := mem_ext h
+  rcases this; exact hd
+
 lemma cut {s : V} (p) (hd₁ : L.Derivable (insert p s)) (hd₂ : L.Derivable (insert (L.neg p) s)) :
     L.Derivable s := by
   rcases hd₁ with ⟨d₁, hd₁⟩; rcases hd₂ with ⟨d₂, hd₂⟩
@@ -741,6 +746,58 @@ lemma conj (ps : V) {s} (hs : L.FormulaSet s)
       have : L.Derivable (insert ps.[len ps - (k + 1)] s) := ds (len ps - (k + 1)) ((tsub_lt_iff_left hk).mpr (by simp))
       exact this.and ih
   simpa using this (len ps) (by rfl)
+
+lemma disjDistr (ps s : V) (d : L.Derivable (vecToSet ps ∪ s)) : L.Derivable (insert (^⋁ ps) s) := by
+  have : ∀ k ≤ len ps, ∀ s' ≤ vecToSet ps, s' ⊆ vecToSet ps →
+      (∀ i < len ps - k, ps.[i] ∈ s') → L.Derivable (insert (^⋁ takeLast ps k) (s' ∪ s)) := by
+    intro k hk
+    induction k using induction_iSigmaOne
+    · apply Definable.imp (by definability)
+      apply Definable.ball_le (by definability)
+      apply Definable.imp (by definability)
+      apply Definable.imp (by definability)
+      definability
+    case zero =>
+      intro s' _ ss hs'
+      refine wk ?_ ?_ d
+      · simp [by simpa using d.formulaSet]
+        intro x hx
+        exact d.formulaSet x (by simp [ss hx])
+      · intro x
+        simp only [mem_cup_iff, mem_vecToSet_iff, takeLast_zero, qqDisj_nil, mem_bitInsert_iff]
+        rintro (⟨i, hi, rfl⟩ | hx)
+        · right; left; exact hs' i (by simpa using hi)
+        · right; right; exact hx
+    case succ k ih =>
+      intro s' _ ss hs'
+      simp [takeLast_succ_of_lt (succ_le_iff_lt.mp hk)]
+      apply Derivable.or
+      let s'' := insert ps.[len ps - (k + 1)] s'
+      have hs'' : s'' ⊆ vecToSet ps := by
+        intro x; simp [s'']
+        rintro (rfl | h)
+        · exact mem_vecToSet_iff.mpr ⟨_, by simp [tsub_lt_iff_left hk], rfl⟩
+        · exact ss h
+      have : L.Derivable (insert (^⋁ takeLast ps k) (s'' ∪ s)) := by
+        refine ih (le_trans (by simp) hk) s'' (le_of_subset hs'') hs'' ?_
+        intro i hi
+        have : i ≤ len ps - (k + 1) := by
+          simpa [sub_sub] using le_sub_one_of_lt hi
+        rcases lt_or_eq_of_le this with (hi | rfl)
+        · simp [s'', hs' i hi]
+        · simp [s'']
+      exact ofSetEq (by intro x; simp [s'']; tauto) this
+  simpa using this (len ps) (by rfl) ∅ (by simp [emptyset_def]) (by simp) (by simp)
+
+lemma disj (ps s : V) {i} (hps : ∀ i < len ps, L.Formula ps.[i])
+  (hi : i < len ps) (d : L.Derivable (insert ps.[i] s)) : L.Derivable (insert (^⋁ ps) s) :=
+  disjDistr ps s <| wk
+    (by simp [by simpa using d.formulaSet]; intro x hx; rcases mem_vecToSet_iff.mp hx with ⟨i, hi, rfl⟩; exact hps i hi)
+    (by
+      intro x; simp only [mem_bitInsert_iff, mem_cup_iff]
+      rintro (rfl | hx)
+      · left; exact mem_vecToSet_iff.mpr ⟨i, hi, rfl⟩
+      · right; exact hx) d
 
 end Language.Derivable
 

@@ -17,6 +17,16 @@ variable {V : Type*} [Zero V] [One V] [Add V] [Mul V] [LT V] [V ⊧ₘ* 𝐈𝚺
 
 variable {L : Arith.Language V} {pL : LDef} [Arith.Language.Defined L pL]
 
+lemma sub_succ_lt_self {a b : V} (h : b < a) : a - (b + 1) < a := by
+  simp [tsub_lt_iff_left (succ_le_iff_lt.mpr h)]
+
+lemma sub_succ_lt_selfs {a b : V} (h : b < a) : a - (a - (b + 1) + 1) = b := by
+  rw [←sub_sub]
+  apply sub_remove_left
+  apply sub_remove_left
+  rw [←add_sub_of_le (succ_le_iff_lt.mpr h)]
+  simp
+
 section typed_formula
 
 variable (L)
@@ -169,6 +179,22 @@ scoped infix:75 " ≮' " => notLessThan
 
 variable {n m : V}
 
+@[simp] lemma neg_equals (t₁ t₂ : ⌜ℒₒᵣ⌝.TSemiterm n) :
+    ~(t₁ =' t₂) = (t₁ ≠' t₂) := by
+  ext; simp [equals, notEquals, qqEQ, qqNEQ]
+
+@[simp] lemma neg_notEquals (t₁ t₂ : ⌜ℒₒᵣ⌝.TSemiterm n) :
+    ~(t₁ ≠' t₂) = (t₁ =' t₂) := by
+  ext; simp [equals, notEquals, qqEQ, qqNEQ]
+
+@[simp] lemma neg_lessThan (t₁ t₂ : ⌜ℒₒᵣ⌝.TSemiterm n) :
+    ~(t₁ <' t₂) = (t₁ ≮' t₂) := by
+  ext; simp [lessThan, notLessThan, qqLT, qqNLT]
+
+@[simp] lemma neg_notLessThan (t₁ t₂ : ⌜ℒₒᵣ⌝.TSemiterm n) :
+    ~(t₁ ≮' t₂) = (t₁ <' t₂) := by
+  ext; simp [lessThan, notLessThan, qqLT, qqNLT]
+
 @[simp] lemma shift_equals (t₁ t₂ : ⌜ℒₒᵣ⌝.TSemiterm n) :
     (t₁ =' t₂).shift = (t₁.shift =' t₂.shift) := by
   ext; simp [equals, Language.TSemiterm.shift, Language.TSemiformula.shift, qqEQ]
@@ -216,6 +242,10 @@ def tSubstItr {n m : V} (w : ⌜ℒₒᵣ⌝.TSemitermVec n m) (p : ⌜ℒₒᵣ
 
 lemma nth_tSubstItr {n m : V} (w : ⌜ℒₒᵣ⌝.TSemitermVec n m) (p : ⌜ℒₒᵣ⌝.TSemiformula (n + 1)) (k : V) {i} (hi : i < k) :
     (tSubstItr w p k).nth i (by simp [hi]) = p.substs (↑(k - (i + 1)) ∷ᵗ w) := by ext; simp [tSubstItr, Language.TSemiformula.substs, hi]
+
+lemma nth_tSubstItr' {n m : V} (w : ⌜ℒₒᵣ⌝.TSemitermVec n m) (p : ⌜ℒₒᵣ⌝.TSemiformula (n + 1)) (k : V) {i} (hi : i < k) :
+    (tSubstItr w p k).nth (k - (i + 1)) (by simpa using sub_succ_lt_self hi) = p.substs (↑i ∷ᵗ w) := by
+  ext; simp [tSubstItr, Language.TSemiformula.substs, hi, sub_succ_lt_self hi, sub_succ_lt_selfs hi]
 
 @[simp] lemma neg_conj_tSubstItr {n m : V} (w : ⌜ℒₒᵣ⌝.TSemitermVec n m) (p : ⌜ℒₒᵣ⌝.TSemiformula (n + 1)) (k : V) :
     ~(tSubstItr w p k).conj = (tSubstItr w (~p) k).disj := by
