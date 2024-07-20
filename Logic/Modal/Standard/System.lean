@@ -218,6 +218,8 @@ def multiboxverum : 𝓢 ⊢ (□^[n]⊤ : F) := multinec verum
 def boxverum : 𝓢 ⊢ (□⊤ : F) := multiboxverum (n := 1)
 @[simp] lemma boxverum! : 𝓢 ⊢! (□⊤ : F) := ⟨boxverum⟩
 
+def boxdotverum : 𝓢 ⊢ (⊡⊤ : F) := andIntro verum boxverum
+@[simp] lemma boxdotverum! : 𝓢 ⊢! (⊡⊤ : F) := ⟨boxdotverum⟩
 
 def implyMultiboxDistribute' (h : 𝓢 ⊢ p ⟶ q) : 𝓢 ⊢ □^[n]p ⟶ □^[n]q := multibox_axiomK' $ multinec h
 lemma imply_multibox_distribute'! (h : 𝓢 ⊢! p ⟶ q) : 𝓢 ⊢! □^[n]p ⟶ □^[n]q := ⟨implyMultiboxDistribute' h.some⟩
