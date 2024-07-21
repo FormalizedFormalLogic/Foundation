@@ -263,7 +263,14 @@ lemma distribute_multibox_conj! : 𝓢 ⊢! □^[n]⋀Γ ⟶ ⋀□'^[n]Γ := by
     have h₂ : 𝓢 ⊢! □^[n](p ⋏ ⋀Γ) ⟶ ⋀□'^[n]Γ := imp_trans''! (imply_multibox_distribute'! $ and₂!) ih;
     have := imply_right_and! h₁ h₂;
     exact imp_trans''! this $ by
-      sorry
+      apply imply_conj'!;
+      intro q hq;
+      simp at hq;
+      rcases hq with (rfl | ⟨q, hq, rfl⟩)
+      . apply and₁!;
+      . suffices 𝓢 ⊢! ⋀□'^[n]Γ ⟶ (UnaryModalOperator.mop true)^[n] q by exact dhyp_and_left! this;
+        apply generate_conj'!;
+        simpa;
 
 @[simp] lemma distribute_box_conj! : 𝓢 ⊢! □(⋀Γ) ⟶ ⋀(□'Γ) := distribute_multibox_conj! (n := 1)
 

@@ -62,6 +62,13 @@ lemma imply_right_and! (hq : 𝓢 ⊢! p ⟶ q) (hr : 𝓢 ⊢! p ⟶ r) : 𝓢 
 
 lemma imply_left_and_comm'! (d : 𝓢 ⊢! p ⋏ q ⟶ r) : 𝓢 ⊢! q ⋏ p ⟶ r := imp_trans''! and_comm! d
 
+lemma dhyp_and_left! (h : 𝓢 ⊢! p ⟶ r) : 𝓢 ⊢! (q ⋏ p) ⟶ r := by
+  apply and_imply_iff_imply_imply'!.mpr;
+  apply deduct'!;
+  exact FiniteContext.of'! (Γ := [q]) h;
+
+lemma dhyp_and_right! (h : 𝓢 ⊢! p ⟶ r) : 𝓢 ⊢! (p ⋏ q) ⟶ r := imp_trans''! and_comm! (dhyp_and_left! h)
+
 lemma cut! (d₁ : 𝓢 ⊢! p₁ ⋏ c ⟶ q₁) (d₂ : 𝓢 ⊢! p₂ ⟶ c ⋎ q₂) : 𝓢 ⊢! p₁ ⋏ p₂ ⟶ q₁ ⋎ q₂ := by
   apply deduct'!;
   exact or₃'''! (imply_left_or'! $ of'! (and_imply_iff_imply_imply'!.mp d₁) ⨀ (and₁'! id!)) or₂! (of'! d₂ ⨀ and₂'! id!);

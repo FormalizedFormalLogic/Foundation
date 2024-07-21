@@ -303,6 +303,7 @@ def generalConj' [DecidableEq F] {Γ : List F} {p : F} (h : p ∈ Γ) : 𝓢 ⊢
     . rw [←e]; exact and₁;
     . have : p ∈ (r :: Γ) := by simpa [e] using h;
       exact impTrans'' and₂ (generalConj' this);
+lemma generate_conj'! [DecidableEq F] {Γ : List F} {p : F} (h : p ∈ Γ) : 𝓢 ⊢! ⋀Γ ⟶ p := ⟨generalConj' h⟩
 
 def conjIntro' [DecidableEq F] (Γ : List F) (b : (p : F) → p ∈ Γ → 𝓢 ⊢ p) : 𝓢 ⊢ ⋀Γ :=
   match Γ with
@@ -320,6 +321,7 @@ def implyConj' [DecidableEq F] (p : F) (Γ : List F) (b : (q : F) → q ∈ Γ �
   | q :: r :: Γ => by
     simp;
     apply implyAnd (b q (by simp)) (implyConj' p _ (fun q hq ↦ b q (by simp [hq])));
+lemma imply_conj'! [DecidableEq F] (p : F) (Γ : List F) (b : (q : F) → q ∈ Γ → 𝓢 ⊢! p ⟶ q) : 𝓢 ⊢! p ⟶ ⋀Γ := ⟨implyConj' p Γ (λ q hq => (b q hq).some)⟩
 
 def conjImplyConj' [DecidableEq F] {Γ Δ : List F} (h : Δ ⊆ Γ) : 𝓢 ⊢ ⋀Γ ⟶ ⋀Δ :=
   implyConj' _ _ (fun _ hq ↦ generalConj' (h hq))
