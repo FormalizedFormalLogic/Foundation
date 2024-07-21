@@ -344,6 +344,10 @@ def conj' (ps : L.TSemiformulaVec 0) (ds : ∀ i, (hi : i < len ps.val) → T �
   TDerivation.conj ps <| fun i hi ↦ by
     simpa [sub_succ_lt_selfs hi] using ds (len ps.val - (i + 1)) (by simp [tsub_lt_iff_left (succ_le_iff_lt.mpr hi)])
 
+def conjOr' (ps : L.TSemiformulaVec 0) (q) (ds : ∀ i, (hi : i < len ps.val) → T ⊢ ps.nth (len ps.val - (i + 1)) (sub_succ_lt_self hi) ⋎ q) : T ⊢ ps.conj ⋎ q :=
+  TDerivation.or <| TDerivation.conj ps <| fun i hi ↦ by
+    simpa [sub_succ_lt_selfs hi] using TDerivation.orInv (ds (len ps.val - (i + 1)) (by simp [tsub_lt_iff_left (succ_le_iff_lt.mpr hi)]))
+
 def disj (ps : L.TSemiformulaVec 0) {i} (hi : i < len ps.val) (d : T ⊢ ps.nth i hi) : T ⊢ ps.disj :=
   TDerivation.disj ps hi d
 

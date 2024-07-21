@@ -128,6 +128,9 @@ def ltNumeral (t : ⌜ℒₒᵣ⌝.TTerm) (n : V) : T ⊢ t <' ↑n ⟷ (tSubstI
   have : T ⊢ (#'0 <' ↑n ⟷ (tSubstItr (#'0).sing (#'1 =' #'0) n).disj).all := byAxm (R₀Theory.ltNumeral n)
   simpa [Language.TSemitermVec.q_of_pos, Language.TSemiformula.substs₁] using specialize this t
 
+noncomputable def nltNumeral (t : ⌜ℒₒᵣ⌝.TTerm) (n : V) : T ⊢ t ≮' ↑n ⟷ (tSubstItr t.sing (#'1 ≠' #'0) n).conj := by
+  simpa using negReplaceIff' <| ltNumeral T t n
+
 def ltComplete {n m : V} (h : n < m) : T ⊢ ↑n <' ↑m := by
   have : T ⊢ ↑n <' ↑m ⟷ _ := ltNumeral T n m
   apply andRight this ⨀ ?_
@@ -143,6 +146,27 @@ noncomputable def nltComplete {n m : V} (h : m ≤ n) : T ⊢ ↑n ≮' ↑m := 
   have hi : i < m := by simpa using hi
   have : n ≠ i := Ne.symm <| ne_of_lt <| lt_of_lt_of_le hi h
   simpa [nth_tSubstItr', hi] using neComplete T this
+
+/-
+noncomputable def ballIntro (p : ⌜ℒₒᵣ⌝.TSemiformula (0 + 1)) (n : V)
+    (bs : ∀ i < n, T ⊢ p ^/[(i : ⌜ℒₒᵣ⌝.TTerm).sing]) :
+    T ⊢ p.ball ↑n := by {
+  apply all
+  suffices T ⊢ &'0 ≮' ↑n ⋎ p.shift^/[(&'0).sing] by
+    simpa [Language.TSemiformula.free, Language.TSemiformula.substs₁]
+  apply orReplaceLeft' ?_ (andRight (nltNumeral T (&'0) n))
+  have : T ⊢ (tSubstItr (&'0).sing (#'1 ≠' #'0) n).conj ⋎ p.shift^/[(&'0).sing] := by {
+    apply conjOr'
+    intro i hi
+    have hi : i < n := by simpa using hi
+    suffices T ⊢ &'0 =' ↑i ⟶ p.shift^/[(&'0).sing] by
+      simpa [nth_tSubstItr', hi, Language.TSemiformula.imp_def] using this
+
+
+   }
+
+    }
+-/
 
 end TProof
 

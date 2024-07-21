@@ -38,3 +38,4 @@ import Arithmetization.ISigmaOne.Metamath.Proof.Theory
 import Arithmetization.ISigmaOne.Metamath.Proof.Typed
 
 import Arithmetization.ISigmaOne.Metamath.Coding
+import Arithmetization.ISigmaOne.Metamath.FormalizedSigmaOneCompleteness
