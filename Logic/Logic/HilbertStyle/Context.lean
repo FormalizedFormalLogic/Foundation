@@ -291,6 +291,16 @@ def mdp {Γ : Set F} (bpq : Γ *⊢[𝓢] p ⟶ q) (bp : Γ *⊢[𝓢] p) : Γ *
 
 lemma by_axm! (h : p ∈ Γ) : Γ *⊢[𝓢]! p := System.by_axm _ (by simpa)
 
+def emptyPrf {p : F} : ∅ *⊢[𝓢] p → 𝓢 ⊢ p := by
+  rintro ⟨Γ, hΓ, h⟩;
+  have := List.nil_iff.mpr hΓ;
+  subst this;
+  exact FiniteContext.emptyPrf h;
+
+lemma emptyPrf! {p : F} : ∅ *⊢[𝓢]! p → 𝓢 ⊢! p := fun h ↦ ⟨emptyPrf h.some⟩
+
+lemma provable_iff_provable {p : F} : 𝓢 ⊢! p ↔ ∅ *⊢[𝓢]! p := ⟨of!, emptyPrf!⟩
+
 instance minimal (Γ : Context F 𝓢) : System.Minimal Γ where
   mdp := mdp
   verum := of verum

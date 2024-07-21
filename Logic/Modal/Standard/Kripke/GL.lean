@@ -618,6 +618,7 @@ instance : CoeSort (FiniteTransitiveTreeModel α) (Type u) := ⟨World⟩
 @[reducible]
 instance {M : FiniteTransitiveTreeModel α} : Semantics (Formula α) (M.World) := Formula.Kripke.Satisfies.semantics (M := M.toModel)
 
+
 end FiniteTransitiveTreeModel
 
 
@@ -632,7 +633,7 @@ variable {p : Formula α}
 
 open Classical
 
-lemma valid_on_FiniteTransitiveTreeClass_of_valid_on_TransitiveIrreflexiveFrameClass (h : TransitiveIrreflexiveFrameClass.{u}ꟳ# ⊧ p) : ∀ T : FiniteTransitiveTree.{u}, T# ⊧ p := by
+lemma valid_on_FiniteTransitiveTreeClass_of_valid_on_TransitiveIrreflexiveFrameClass (h : TransitiveIrreflexiveFrameClass.{v}ꟳ# ⊧ p) : ∀ T : FiniteTransitiveTree.{v}, T# ⊧ p := by
   simp at h;
   intro T;
   apply @h T.toFrame T.toFiniteFrame;
@@ -640,11 +641,11 @@ lemma valid_on_FiniteTransitiveTreeClass_of_valid_on_TransitiveIrreflexiveFrameC
   . exact T.rel_irreflexive;
   . tauto;
 
-lemma satisfies_at_root_on_FiniteTransitiveTree (h : ∀ F : FiniteTransitiveTree.{u}, F# ⊧ p) : ∀ M : FiniteTransitiveTreeModel.{u, u} α, Satisfies M.toModel M.root p := by
+lemma satisfies_at_root_on_FiniteTransitiveTree (h : ∀ F : FiniteTransitiveTree.{v}, F# ⊧ p) : ∀ M : FiniteTransitiveTreeModel.{u, v} α, Satisfies M.toModel M.root p := by
   intro M;
   exact h M.Tree M.Valuation M.root
 
-lemma valid_on_TransitiveIrreflexiveFrameClass_of_satisfies_at_root_on_FiniteTransitiveTree : (∀ M : FiniteTransitiveTreeModel.{u, u} α, Satisfies M.toModel M.root p) → TransitiveIrreflexiveFrameClass.{u}ꟳ# ⊧ p := by
+lemma valid_on_TransitiveIrreflexiveFrameClass_of_satisfies_at_root_on_FiniteTransitiveTree : (∀ M : FiniteTransitiveTreeModel.{u, v} α, Satisfies M.toModel M.root p) → TransitiveIrreflexiveFrameClass.{v}ꟳ# ⊧ p := by
   rintro H _ ⟨F, ⟨F_trans, F_irrefl⟩, rfl⟩ V r;
   let M : Kripke.Model α := ⟨F, V⟩;
   apply Model.PointGenerated.modal_equivalent_to_root M F_trans r |>.mp;
@@ -767,7 +768,6 @@ end
 
 end Kripke
 
-
 section
 
 open System
@@ -823,6 +823,5 @@ noncomputable instance : System.Unnecessitation (𝐆𝐋 : DeductionParameter �
   unnec := λ h => GL_unnecessitation! ⟨h⟩ |>.some
 
 end
-
 
 end LO.Modal.Standard

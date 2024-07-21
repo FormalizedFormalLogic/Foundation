@@ -480,21 +480,6 @@ lemma implyLeft_conj_eq_conj! : 𝓢 ⊢! Γ.conj ⟶ p ↔ 𝓢 ⊢! ⋀Γ ⟶ 
 lemma generalConj'! (h : p ∈ Γ) : 𝓢 ⊢! ⋀Γ ⟶ p := replace_imply_left_by_iff'! conjIffConj! |>.mpr (generalConj! h)
 lemma generalConj'₂! (h : p ∈ Γ) (d : 𝓢 ⊢! ⋀Γ) : 𝓢 ⊢! p := (generalConj'! h) ⨀ d
 
-
-namespace Context
-
-lemma emptyPrf! {p : F} : ∅ *⊢[𝓢]! p ↔ 𝓢 ⊢! p := by
-  constructor;
-  . intro h;
-    obtain ⟨Δ, hΔ₁, hΔ₂⟩ := provable_iff.mp h;
-    have := FiniteContext.provable_iff.mp hΔ₂;
-    have e : Δ = [] := List.nil_iff.mpr (by aesop)
-    rw [e] at this; simp at this;
-    exact this ⨀ verum!;
-  . intro h; exact of! h;
-
-end Context
-
 section Conjunction
 
 lemma iff_provable_list_conj {Γ : List F} : (𝓢 ⊢! ⋀Γ) ↔ (∀ p ∈ Γ, 𝓢 ⊢! p) := by

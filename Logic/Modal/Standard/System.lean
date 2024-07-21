@@ -243,6 +243,29 @@ lemma distribute_multibox_and'! (d : 𝓢 ⊢! □^[n](p ⋏ q)) : 𝓢 ⊢! □
 def distribute_box_and' (h : 𝓢 ⊢ □(p ⋏ q)) : 𝓢 ⊢ □p ⋏ □q := distribute_multibox_and' (n := 1) h
 lemma distribute_box_and'! (d : 𝓢 ⊢! □(p ⋏ q)) : 𝓢 ⊢! □p ⋏ □q := ⟨distribute_box_and' d.some⟩
 
+lemma conj_cons! : 𝓢 ⊢! (p ⋏ ⋀Γ) ⟷ ⋀(p :: Γ) := by
+  induction Γ using List.induction_with_singleton with
+  | hnil =>
+    simp;
+    apply iff_intro!;
+    . simp;
+    . exact imply_right_and! (by simp) (by simp);
+  | _ => simp;
+
+@[simp]
+lemma distribute_multibox_conj! : 𝓢 ⊢! □^[n]⋀Γ ⟶ ⋀□'^[n]Γ := by
+  induction Γ using List.induction_with_singleton with
+  | hnil => simp;
+  | hsingle => simp;
+  | hcons p Γ h ih =>
+    simp_all;
+    have h₁ : 𝓢 ⊢! □^[n](p ⋏ ⋀Γ) ⟶ □^[n]p := imply_multibox_distribute'! $ and₁!;
+    have h₂ : 𝓢 ⊢! □^[n](p ⋏ ⋀Γ) ⟶ ⋀□'^[n]Γ := imp_trans''! (imply_multibox_distribute'! $ and₂!) ih;
+    have := imply_right_and! h₁ h₂;
+    exact imp_trans''! this $ by
+      sorry
+
+@[simp] lemma distribute_box_conj! : 𝓢 ⊢! □(⋀Γ) ⟶ ⋀(□'Γ) := distribute_multibox_conj! (n := 1)
 
 def collect_multibox_and : 𝓢 ⊢ □^[n]p ⋏ □^[n]q ⟶ □^[n](p ⋏ q) := by
   have d₁ : 𝓢 ⊢ □^[n]p ⟶ □^[n](q ⟶ p ⋏ q) := implyMultiboxDistribute' and₃;
@@ -281,9 +304,20 @@ lemma multiboxconj_of_conjmultibox! (d : 𝓢 ⊢! ⋀□'^[n]Γ) : 𝓢 ⊢! �
   exact iff_provable_list_conj.mp d (□^[n]p) (by aesop);
 
 @[simp]
-lemma multibox_cons_conj! :  𝓢 ⊢! ⋀(□'^[n](p :: Γ)) ⟶ ⋀□'^[n]Γ := by
+lemma multibox_cons_conjAux₁! :  𝓢 ⊢! ⋀(□'^[n](p :: Γ)) ⟶ ⋀□'^[n]Γ := by
   apply conjconj_subset!;
   simp_all;
+
+@[simp]
+lemma multibox_cons_conjAux₂! :  𝓢 ⊢! ⋀(□'^[n](p :: Γ)) ⟶ □^[n]p := by
+  suffices 𝓢 ⊢! ⋀(□'^[n](p :: Γ)) ⟶ ⋀□'^[n]([p]) by simpa;
+  apply conjconj_subset!;
+  simp_all;
+
+
+@[simp]
+lemma multibox_cons_conj! :  𝓢 ⊢! ⋀(□'^[n](p :: Γ)) ⟶ ⋀□'^[n]Γ ⋏ □^[n]p :=
+  imply_right_and! multibox_cons_conjAux₁! multibox_cons_conjAux₂!
 
 @[simp]
 lemma collect_multibox_conj! : 𝓢 ⊢! ⋀□'^[n]Γ ⟶ □^[n]⋀Γ := by
@@ -590,20 +624,67 @@ def imply_boxdot_boxdot_of_imply_boxdot_plain (h : 𝓢 ⊢ ⊡p ⟶ q) : 𝓢 �
   have : 𝓢 ⊢ □p ⟶ □q := impTrans'' imply_Box_BoxBoxdot this;
   have : 𝓢 ⊢ ⊡p ⟶ □q := impTrans'' boxdotBox this;
   exact implyRightAnd h this;
+lemma imply_boxdot_boxdot_of_imply_boxdot_plain! (h : 𝓢 ⊢! ⊡p ⟶ q) : 𝓢 ⊢! ⊡p ⟶ ⊡q := ⟨imply_boxdot_boxdot_of_imply_boxdot_plain h.some⟩
 
 def imply_boxdot_axiomT_of_imply_boxdot_boxdot (h : 𝓢 ⊢ ⊡p ⟶ ⊡q) : 𝓢 ⊢ ⊡p ⟶ (□q ⟶ q) := by
   apply deduct';
   apply deduct;
   have : [□q, ⊡p] ⊢[𝓢] ⊡q := (FiniteContext.of h) ⨀ (FiniteContext.byAxm);
   exact and₁' this;
+lemma imply_boxdot_axiomT_of_imply_boxdot_boxdot! (h : 𝓢 ⊢! ⊡p ⟶ ⊡q) : 𝓢 ⊢! ⊡p ⟶ (□q ⟶ q) := ⟨imply_boxdot_axiomT_of_imply_boxdot_boxdot h.some⟩
 
 def imply_box_box_of_imply_boxdot_axiomT (h : 𝓢 ⊢ ⊡p ⟶ (□q ⟶ q)) : 𝓢 ⊢ □p ⟶ □q := by
   have : 𝓢 ⊢ □⊡p ⟶ □(□q ⟶ q) := implyBoxDistribute' h;
   have : 𝓢 ⊢ □⊡p ⟶ □q := impTrans'' this axiomL;
   exact impTrans'' imply_Box_BoxBoxdot this;
+lemma imply_box_box_of_imply_boxdot_axiomT! (h : 𝓢 ⊢! ⊡p ⟶ (□q ⟶ q)) : 𝓢 ⊢! □p ⟶ □q := ⟨imply_box_box_of_imply_boxdot_axiomT h.some⟩
+
+lemma imply_box_box_of_imply_boxdot_plain! (h : 𝓢 ⊢! ⊡p ⟶ q) : 𝓢 ⊢! □p ⟶ □q := by
+  exact imply_box_box_of_imply_boxdot_axiomT! $ imply_boxdot_axiomT_of_imply_boxdot_boxdot! $ imply_boxdot_boxdot_of_imply_boxdot_plain! h
 
 end
 
 end
+
+section ModalDP
+
+variable {F : Type*} [StandardModalLogicalConnective F]
+variable {S : Type*} [System F S]
+
+class ModalDisjunctive (𝓢 : S) : Prop where
+  modal_disjunctive : ∀ {p q : F}, 𝓢 ⊢! □p ⋎ □q → 𝓢 ⊢! p ∨ 𝓢 ⊢! q
+
+end ModalDP
+
+
+section Contextual
+
+variable {F : Type*} [StandardModalLogicalConnective F]
+variable {S : Type*} [System F S] [DecidableEq F]
+         {𝓢 : S} [System.Minimal 𝓢]
+         {X : Set F} {p : F}
+
+
+lemma Context.provable_iff_boxed : (□''X) *⊢[𝓢]! p ↔ ∃ Δ : List F, (∀ q ∈ □'Δ, q ∈ □''X) ∧ (□'Δ) ⊢[𝓢]! p := by
+  constructor;
+  . intro h;
+    obtain ⟨Γ,sΓ, hΓ⟩ := Context.provable_iff.mp h;
+    use □'⁻¹Γ;
+    constructor;
+    . rintro q hq;
+      apply sΓ q;
+      aesop;
+    . apply FiniteContext.provable_iff.mpr;
+      apply imp_trans''! ?_ (FiniteContext.provable_iff.mp hΓ);
+      apply conjconj_subset!;
+      intro q hq;
+      have := sΓ q hq;
+      obtain ⟨r, _, rfl⟩ := this;
+      aesop;
+  . rintro ⟨Δ, hΔ, h⟩;
+    apply Context.provable_iff.mpr;
+    use □'Δ;
+
+end Contextual
 
 end LO.System
