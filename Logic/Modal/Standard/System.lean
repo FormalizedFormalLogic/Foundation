@@ -11,6 +11,9 @@ variable (𝓢 : S)
 class Necessitation where
   nec {p : F} : 𝓢 ⊢ p → 𝓢 ⊢ □p
 
+class Unnecessitation where
+  unnec {p : F} : 𝓢 ⊢ □p → 𝓢 ⊢ p
+
 class LoebRule where
   loeb {p : F} : 𝓢 ⊢ □p ⟶ p → 𝓢 ⊢ p
 
@@ -417,10 +420,14 @@ def imply_BoxBoxdot_Box: 𝓢 ⊢  □⊡p ⟶ □p := by
   exact impTrans'' distribute_box_and and₁
 @[simp] lemma imply_boxboxdot_box : 𝓢 ⊢! □⊡p ⟶ □p := ⟨imply_BoxBoxdot_Box⟩
 
-def iff_Box_BoxBoxdot [HasAxiomFour 𝓢] : 𝓢 ⊢ □p ⟷ □⊡p := by
+def imply_Box_BoxBoxdot : 𝓢 ⊢ □p ⟶ □⊡p := by
   simp [boxdot];
+  exact impTrans'' (implyRightAnd (impId _) axiomFour) collect_box_and
+@[simp] lemma imply_box_boxboxdot! : 𝓢 ⊢! □p ⟶ □⊡p := ⟨imply_Box_BoxBoxdot⟩
+
+def iff_Box_BoxBoxdot [HasAxiomFour 𝓢] : 𝓢 ⊢ □p ⟷ □⊡p := by
   apply iffIntro;
-  . exact impTrans'' (implyRightAnd (impId _) axiomFour) collect_box_and
+  . exact imply_Box_BoxBoxdot
   . exact imply_BoxBoxdot_Box;
 @[simp] lemma iff_box_boxboxdot! [HasAxiomFour 𝓢] : 𝓢 ⊢! □p ⟷ □⊡p := ⟨iff_Box_BoxBoxdot⟩
 
@@ -549,6 +556,53 @@ instance [HasAxiomFour 𝓢] [HasAxiomH 𝓢] : HenkinRule 𝓢 where
 private def axiomH_of_GL [HasAxiomL 𝓢] : 𝓢 ⊢ Axioms.H p := by
   exact impTrans'' (implyBoxDistribute' $ and₁) axiomL
 instance [HasAxiomL 𝓢] : HasAxiomH 𝓢 := ⟨fun _ ↦ axiomH_of_GL⟩
+
+section
+
+variable [Unnecessitation 𝓢]
+
+alias unnec := Unnecessitation.unnec
+
+lemma unnec! : 𝓢 ⊢! □p → 𝓢 ⊢! p := by rintro ⟨hp⟩; exact ⟨unnec hp⟩
+
+def multiunnec : 𝓢 ⊢ □^[n]p → 𝓢 ⊢ p := by
+  intro h;
+  induction n generalizing p with
+  | zero => simpa;
+  | succ n ih => exact unnec $ @ih (□p) h;
+lemma multiunnec! : 𝓢 ⊢! □^[n]p → 𝓢 ⊢! p := by rintro ⟨hp⟩; exact ⟨multiunnec hp⟩
+
+instance [HasAxiomT 𝓢] : Unnecessitation 𝓢 := ⟨by
+  intro p hp;
+  exact axiomT ⨀ hp;
+⟩
+
+end
+
+
+
+section
+
+variable [Necessitation 𝓢] [HasAxiomK 𝓢] [HasAxiomFour 𝓢] [HasAxiomL 𝓢]
+
+def imply_boxdot_boxdot_of_imply_boxdot_plain (h : 𝓢 ⊢ ⊡p ⟶ q) : 𝓢 ⊢ ⊡p ⟶ ⊡q := by
+  have : 𝓢 ⊢ □⊡p ⟶ □q := implyBoxDistribute' h;
+  have : 𝓢 ⊢ □p ⟶ □q := impTrans'' imply_Box_BoxBoxdot this;
+  have : 𝓢 ⊢ ⊡p ⟶ □q := impTrans'' boxdotBox this;
+  exact implyRightAnd h this;
+
+def imply_boxdot_axiomT_of_imply_boxdot_boxdot (h : 𝓢 ⊢ ⊡p ⟶ ⊡q) : 𝓢 ⊢ ⊡p ⟶ (□q ⟶ q) := by
+  apply deduct';
+  apply deduct;
+  have : [□q, ⊡p] ⊢[𝓢] ⊡q := (FiniteContext.of h) ⨀ (FiniteContext.byAxm);
+  exact and₁' this;
+
+def imply_box_box_of_imply_boxdot_axiomT (h : 𝓢 ⊢ ⊡p ⟶ (□q ⟶ q)) : 𝓢 ⊢ □p ⟶ □q := by
+  have : 𝓢 ⊢ □⊡p ⟶ □(□q ⟶ q) := implyBoxDistribute' h;
+  have : 𝓢 ⊢ □⊡p ⟶ □q := impTrans'' this axiomL;
+  exact impTrans'' imply_Box_BoxBoxdot this;
+
+end
 
 end
 

@@ -777,8 +777,13 @@ open Kripke Kripke.FiniteTransitiveTreeModel
 variable [DecidableEq α] [Inhabited α]
 variable {p q : Formula α}
 
--- TODO: 逆は純粋に構文論的に示せる．
-lemma GL_imply_boxdot_unbox_of_imply_box_box : 𝐆𝐋 ⊢! □p ⟶ □q → 𝐆𝐋 ⊢! ⊡p ⟶ q := by
+/-
+  逆は以下を順に辿って構文論的に証明できる．
+  - `System.imply_boxdot_boxdot_of_imply_boxdot_plain`
+  - `System.imply_boxdot_axiomT_of_imply_boxdot_boxdot`
+  - `System.imply_box_box_of_imply_boxdot_axiomT`
+-/
+lemma GL_imply_boxdot_plain_of_imply_box_box : 𝐆𝐋 ⊢! □p ⟶ □q → 𝐆𝐋 ⊢! ⊡p ⟶ q := by
   contrapose;
   intro h;
   have := iff_unprovable_GL_exists_unsatisfies_at_root_on_FiniteTransitiveTree.mp h;
@@ -808,13 +813,14 @@ lemma GL_imply_boxdot_unbox_of_imply_box_box : 𝐆𝐋 ⊢! □p ⟶ □q → �
   apply iff_unprovable_GL_exists_unsatisfies_at_root_on_FiniteTransitiveTree.mpr;
   use M↧;
 
-theorem GL_unnecessitation : 𝐆𝐋 ⊢! p ↔ 𝐆𝐋 ⊢! □p := by
-  constructor;
-  . apply nec!;
-  . intro h;
-    have : 𝐆𝐋 ⊢! □⊤ ⟶ □p := dhyp! (q := □⊤) h;
-    have : 𝐆𝐋 ⊢! ⊡⊤ ⟶ p := GL_imply_boxdot_unbox_of_imply_box_box this;
-    exact this ⨀ boxdotverum!;
+theorem GL_unnecessitation! : 𝐆𝐋 ⊢! □p → 𝐆𝐋 ⊢! p := by
+  intro h;
+  have : 𝐆𝐋 ⊢! □⊤ ⟶ □p := dhyp! (q := □⊤) h;
+  have : 𝐆𝐋 ⊢! ⊡⊤ ⟶ p := GL_imply_boxdot_plain_of_imply_box_box this;
+  exact this ⨀ boxdotverum!;
+
+noncomputable instance : System.Unnecessitation (𝐆𝐋 : DeductionParameter α) where
+  unnec := λ h => GL_unnecessitation! ⟨h⟩ |>.some
 
 end
 
