@@ -123,6 +123,10 @@ def bShift (v : L.TSemitermVec k n) : L.TSemitermVec k (n + 1) :=
 def substs (v : L.TSemitermVec k n) (w : L.TSemitermVec n m) : L.TSemitermVec k m :=
   ⟨L.termSubstVec k n m w.val v.val, Language.SemitermVec.termSubstVec w.prop v.prop⟩
 
+@[simp] lemma val_shift (v : L.TSemitermVec k n) : v.shift.val = L.termShiftVec k n v.val := rfl
+@[simp] lemma val_bShift (v : L.TSemitermVec k n) : v.bShift.val = L.termBShiftVec k n v.val := rfl
+@[simp] lemma val_substs (v : L.TSemitermVec k n) (w : L.TSemitermVec n m) : (v.substs w).val = L.termSubstVec k n m w.val v.val := rfl
+
 @[simp] lemma bShift_nil (n : V) :
     (nil L n).bShift = nil L (n + 1) := by
   ext; simp [bShift]
@@ -175,6 +179,9 @@ def q (w : L.TSemitermVec k n) : L.TSemitermVec (k + 1) (n + 1) := L.bvar (0 : V
     w.q.nth (i + 1) (by simp [hi]) = (w.nth i hi).bShift := by
   simp only [q, gt_iff_lt, hi, nth_succ]
   ext; simp [bShift, nth, Language.TSemiterm.bShift, hi]
+
+@[simp] lemma q_one (w : L.TSemitermVec k n) (h : 0 < k) : w.q.nth 1 (by simp [h]) = (w.nth 0 h).bShift := by
+  simpa using q_succ w h
 
 lemma q_of_pos (w : L.TSemitermVec k n) (i) (ipos : 0 < i) (hi : i < k + 1) :
     w.q.nth i (by simp [hi]) = (w.nth (i - 1) (tsub_lt_iff_left (one_le_of_zero_lt i ipos) |>.mpr hi)).bShift := by

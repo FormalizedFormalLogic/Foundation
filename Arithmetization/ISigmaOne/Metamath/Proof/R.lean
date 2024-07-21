@@ -43,9 +43,7 @@ class EQTheory (T : LOR.Theory V) where
   refl : (#'0 =' #'0).all ∈' T
   symm : (#'1 =' #'0 ⟶ #'0 =' #'1).all.all ∈' T
   trans : (#'2 =' #'1 ⟶ #'1 =' #'0 ⟶ #'2 =' #'0).all.all.all ∈' T
-  addExt : (#'3 =' #'2 ⟶ #'1 =' #'0 ⟶ (#'3 + #'1) =' (#'2 + #'0)).all.all.all.all ∈' T
-  mulExt : (#'3 =' #'2 ⟶ #'1 =' #'0 ⟶ (#'3 * #'1) =' (#'2 * #'0)).all.all.all.all ∈' T
-  ltExt : (#'3 =' #'2 ⟶ #'1 =' #'0 ⟶ #'3 <' #'1 ⟶ #'2 <' #'0).all.all.all.all ∈' T
+  replace (p : ⌜ℒₒᵣ⌝.TSemiformula (0 + 1)) : (#'1 =' #'0 ⟶ p^/[(#'1).sing] ⟶ p^/[(#'0).sing]).all.all ∈' T
 
 class R₀Theory (T : LOR.Theory V) where
   add (n m : V) : (↑n + ↑m) =' ↑(n + m) ∈' T
@@ -57,7 +55,7 @@ variable (T : LOR.Theory V) {pT : (Language.lDef ℒₒᵣ).TDef} [T.Defined pT]
 
 namespace TProof
 
-open Language.Theory.TProof System
+open Language.Theory.TProof System System.FiniteContext
 
 def eqRefl (t : ⌜ℒₒᵣ⌝.TTerm) : T ⊢ t =' t := by
   have : T ⊢ (#'0 =' #'0).all := byAxm EQTheory.refl
@@ -74,28 +72,67 @@ def eqTrans (t₁ t₂ t₃ : ⌜ℒₒᵣ⌝.TTerm) : T ⊢ t₁ =' t₂ ⟶ t�
   have := by simpa using specialize this t₂
   simpa [Language.TSemitermVec.q_of_pos, Language.TSemiformula.substs₁] using specialize this t₃
 
-def addExt (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.TTerm) : T ⊢ t₁ =' t₂ ⟶ u₁ =' u₂ ⟶ (t₁ + u₁) =' (t₂ + u₂) := by
-  have : T ⊢ (#'3 =' #'2 ⟶ #'1 =' #'0 ⟶ (#'3 + #'1) =' (#'2 + #'0)).all.all.all.all := byAxm EQTheory.addExt
-  have := by simpa using specialize this t₁
-  have := by simpa using specialize this t₂
-  have := by simpa using specialize this u₁
-  simpa [Language.TSemitermVec.q_of_pos, Language.TSemiformula.substs₁] using specialize this u₂
+noncomputable def replace (p : ⌜ℒₒᵣ⌝.TSemiformula (0 + 1)) (t u : ⌜ℒₒᵣ⌝.TTerm) :
+    T ⊢ t =' u ⟶ p^/[t.sing] ⟶ p^/[u.sing] := by
+  have : T ⊢ (#'1 =' #'0 ⟶ p^/[(#'1).sing] ⟶ p^/[(#'0).sing]).all.all := byAxm <| EQTheory.replace p
+  have := by simpa using specialize this t
+  simpa [Language.TSemitermVec.q_of_pos, Language.TSemiformula.substs₁,
+    Language.TSemifromula.substs_substs] using specialize this u
 
-def mulExt (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.TTerm) : T ⊢ t₁ =' t₂ ⟶ u₁ =' u₂ ⟶ (t₁ * u₁) =' (t₂ * u₂) := by
-  have : T ⊢ (#'3 =' #'2 ⟶ #'1 =' #'0 ⟶ (#'3 * #'1) =' (#'2 * #'0)).all.all.all.all := byAxm EQTheory.mulExt
-  have := by simpa using specialize this t₁
-  have := by simpa using specialize this t₂
-  have := by simpa using specialize this u₁
-  simpa [Language.TSemitermVec.q_of_pos, Language.TSemiformula.substs₁] using specialize this u₂
+noncomputable def addExt (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.TTerm) : T ⊢ t₁ =' t₂ ⟶ u₁ =' u₂ ⟶ (t₁ + u₁) =' (t₂ + u₂) := by
+  apply deduct'
+  apply deduct
+  let Γ := [u₁ =' u₂, t₁ =' t₂]
+  have bt : Γ ⊢[T] t₁ =' t₂ := FiniteContext.byAxm <| by simp [Γ]
+  have bu : Γ ⊢[T] u₁ =' u₂ := FiniteContext.byAxm <| by simp [Γ]
+  have : T ⊢ t₁ =' t₂ ⟶ (t₁ + u₁) =' (t₁ + u₁) ⟶ (t₁ + u₁) =' (t₂ + u₁) := by
+    have := replace T ((t₁.bShift + u₁.bShift) =' (#'0 + u₁.bShift)) t₁ t₂
+    simpa using this
+  have b : Γ ⊢[T] (t₁ + u₁) =' (t₂ + u₁) := of (Γ := Γ) this ⨀ bt ⨀ of (eqRefl _ _)
+  have : T ⊢ u₁ =' u₂ ⟶ (t₁ + u₁) =' (t₂ + u₁) ⟶ (t₁ + u₁) =' (t₂ + u₂) := by
+    have := replace T ((t₁.bShift + u₁.bShift) =' (t₂.bShift + #'0)) u₁ u₂
+    simpa using this
+  exact of (Γ := Γ) this ⨀ bu ⨀ b
 
-def ltExt (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.TTerm) : T ⊢ t₁ =' t₂ ⟶ u₁ =' u₂ ⟶ t₁ <' u₁ ⟶ t₂ <' u₂ := by
-  have : T ⊢ (#'3 =' #'2 ⟶ #'1 =' #'0 ⟶ #'3 <' #'1 ⟶ #'2 <' #'0).all.all.all.all := byAxm EQTheory.ltExt
-  have := by simpa using specialize this t₁
-  have := by simpa using specialize this t₂
-  have := by simpa using specialize this u₁
-  simpa [Language.TSemitermVec.q_of_pos, Language.TSemiformula.substs₁] using specialize this u₂
+noncomputable def mulExt (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.TTerm) : T ⊢ t₁ =' t₂ ⟶ u₁ =' u₂ ⟶ (t₁ * u₁) =' (t₂ * u₂) := by
+  apply deduct'
+  apply deduct
+  let Γ := [u₁ =' u₂, t₁ =' t₂]
+  have bt : Γ ⊢[T] t₁ =' t₂ := FiniteContext.byAxm <| by simp [Γ]
+  have bu : Γ ⊢[T] u₁ =' u₂ := FiniteContext.byAxm <| by simp [Γ]
+  have : T ⊢ t₁ =' t₂ ⟶ (t₁ * u₁) =' (t₁ * u₁) ⟶ (t₁ * u₁) =' (t₂ * u₁) := by
+    have := replace T ((t₁.bShift * u₁.bShift) =' (#'0 * u₁.bShift)) t₁ t₂
+    simpa using this
+  have b : Γ ⊢[T] (t₁ * u₁) =' (t₂ * u₁) := of (Γ := Γ) this ⨀ bt ⨀ of (eqRefl _ _)
+  have : T ⊢ u₁ =' u₂ ⟶ (t₁ * u₁) =' (t₂ * u₁) ⟶ (t₁ * u₁) =' (t₂ * u₂) := by
+    have := replace T ((t₁.bShift * u₁.bShift) =' (t₂.bShift * #'0)) u₁ u₂
+    simpa using this
+  exact of (Γ := Γ) this ⨀ bu ⨀ b
 
-open LO.System LO.System.FiniteContext
+noncomputable def ltExt (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.TTerm) : T ⊢ t₁ =' t₂ ⟶ u₁ =' u₂ ⟶ t₁ <' u₁ ⟶ t₂ <' u₂ := by
+  apply deduct'
+  apply deduct
+  apply deduct
+  let Γ := [t₁ <' u₁, u₁ =' u₂, t₁ =' t₂]
+  have bt : Γ ⊢[T] t₁ =' t₂ := FiniteContext.byAxm <| by simp [Γ]
+  have bu : Γ ⊢[T] u₁ =' u₂ := FiniteContext.byAxm <| by simp [Γ]
+  have bl : Γ ⊢[T] t₁ <' u₁ := FiniteContext.byAxm <| by simp [Γ]
+  have : T ⊢ t₁ =' t₂ ⟶ t₁ <' u₁ ⟶ t₂ <' u₁ := by
+    have := replace T (#'0 <' u₁.bShift) t₁ t₂
+    simpa using this
+  have b : Γ ⊢[T] t₂ <' u₁ := of (Γ := Γ) this ⨀ bt ⨀ bl
+  have : T ⊢ u₁ =' u₂ ⟶ t₂ <' u₁ ⟶ t₂ <' u₂ := by
+    have := replace T (t₂.bShift <' #'0) u₁ u₂
+    simpa using this
+  exact of (Γ := Γ) this ⨀ bu ⨀ b
+
+/-
+noncomputable def ballReplace (p : ⌜ℒₒᵣ⌝.TSemiformula (0 + 1)) (t u : ⌜ℒₒᵣ⌝.TTerm) :
+    T ⊢ t =' u ⟶ p.ball t ⟶ p.ball u := by {
+  have := replace T ((p^/[(#'0).sing]).ball #'0) t u
+  simp [Language.TSemifromula.substs_substs] at this
+  sorry}
+-/
 
 noncomputable def ballReplace (p : ⌜ℒₒᵣ⌝.TSemiformula (0 + 1)) (t u : ⌜ℒₒᵣ⌝.TTerm) :
     T ⊢ t =' u ⟶ p.ball t ⟶ p.ball u := by
@@ -147,26 +184,23 @@ noncomputable def nltComplete {n m : V} (h : m ≤ n) : T ⊢ ↑n ≮' ↑m := 
   have : n ≠ i := Ne.symm <| ne_of_lt <| lt_of_lt_of_le hi h
   simpa [nth_tSubstItr', hi] using neComplete T this
 
-/-
 noncomputable def ballIntro (p : ⌜ℒₒᵣ⌝.TSemiformula (0 + 1)) (n : V)
     (bs : ∀ i < n, T ⊢ p ^/[(i : ⌜ℒₒᵣ⌝.TTerm).sing]) :
     T ⊢ p.ball ↑n := by {
   apply all
   suffices T ⊢ &'0 ≮' ↑n ⋎ p.shift^/[(&'0).sing] by
     simpa [Language.TSemiformula.free, Language.TSemiformula.substs₁]
-  apply orReplaceLeft' ?_ (andRight (nltNumeral T (&'0) n))
   have : T ⊢ (tSubstItr (&'0).sing (#'1 ≠' #'0) n).conj ⋎ p.shift^/[(&'0).sing] := by {
     apply conjOr'
     intro i hi
     have hi : i < n := by simpa using hi
     suffices T ⊢ &'0 =' ↑i ⟶ p.shift^/[(&'0).sing] by
       simpa [nth_tSubstItr', hi, Language.TSemiformula.imp_def] using this
-
-
-   }
-
-    }
--/
+    apply deduct'
+    sorry
+  }
+  exact orReplaceLeft' this (andRight (nltNumeral T (&'0) n))
+}
 
 end TProof
 

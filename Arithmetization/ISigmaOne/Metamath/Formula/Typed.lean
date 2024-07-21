@@ -169,6 +169,13 @@ def nth (ps : L.TSemiformulaVec n) (i : V) (hi : i < len ps.val) : L.TSemiformul
 
 end Language.TSemiformulaVec
 
+namespace Language.TSemifromula
+
+lemma substs_substs {n m l : V} (v : L.TSemitermVec m l) (w : L.TSemitermVec n m) (p : L.TSemiformula n) :
+  (p^/[w])^/[v] = p^/[w.substs v] := by ext; simp; rw [Arith.substs_substs p.prop v.prop w.prop]
+
+end Language.TSemifromula
+
 end typed_formula
 
 open Formalized
