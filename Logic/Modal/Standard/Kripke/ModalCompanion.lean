@@ -1,17 +1,6 @@
 import Logic.Propositional.Superintuitionistic.Kripke.DP
 import Logic.Modal.Standard.Kripke.Geach
 
-namespace LO.System
-
-variable {F : Type*} [StandardModalLogicalConnective F]
-variable {S : Type*} [System F S]
-
-class ModalDisjunctive (𝓢 : S) : Prop where
-  modal_disjunctive : ∀ {p q : F}, 𝓢 ⊢! □p ⋎ □q → 𝓢 ⊢! p ∨ 𝓢 ⊢! q
-
-end LO.System
-
-
 namespace LO.Modal.Standard
 
 open System FiniteContext

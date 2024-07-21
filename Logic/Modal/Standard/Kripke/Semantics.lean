@@ -313,13 +313,28 @@ lemma and_def : x ⊧ p ⋏ q ↔ x ⊧ p ∧ x ⊧ q := by
   . intro ⟨hp, hq⟩; exact ⟨hp, hq⟩;
   . intro h; exact ⟨h.1, h.2⟩;
 
+lemma or_def : x ⊧ p ⋎ q ↔ x ⊧ p ∨ x ⊧ q := by
+  constructor;
+  . intro h; exact h.elim (λ hp => Or.inl hp) (λ hq => Or.inr hq);
+  . intro h; exact h.elim (λ hp => Or.inl hp) (λ hq => Or.inr hq);
+
+lemma not_def : x ⊧ ~p ↔ ¬(x ⊧ p) := by
+  constructor;
+  . intro h; exact h;
+  . intro h; exact h;
+
+lemma imp_def : x ⊧ p ⟶ q ↔ (x ⊧ p) → (x ⊧ q) := by
+  constructor;
+  . intro h; exact h;
+  . intro h; exact h;
+
 protected instance tarski : Semantics.Tarski (M.World) where
   realize_top := by intro; trivial;
   realize_bot := by aesop;
-  realize_not := by aesop;
+  realize_not := not_def;
   realize_and := and_def;
-  realize_or  := by aesop;
-  realize_imp := by aesop;
+  realize_or  := or_def;
+  realize_imp := imp_def;
 
 
 lemma dia_def : x ⊧ ◇p ↔ ∃ y, x ≺ y ∧ y ⊧ p := by simp [Kripke.Satisfies];

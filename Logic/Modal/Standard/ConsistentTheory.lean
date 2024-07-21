@@ -112,7 +112,7 @@ lemma unprovable_iff_singleton_neg_consistent : Λ ⊬! p ↔ (Λ)-Consistent {~
   have e : insert (~p) ∅ = ({~p} : Theory α) := by aesop;
   have H := unprovable_iff_insert_neg_consistent (Λ := Λ) (T := ∅) (p := p);
   rw [e] at H;
-  exact Iff.trans Context.emptyPrf!.symm.not H;
+  exact Iff.trans Context.provable_iff_provable.not H;
 
 lemma neg_provable_iff_insert_not_consistent : T *⊢[Λ]! ~p ↔ ¬(Λ)-Consistent (insert (p) T) := by
   constructor;

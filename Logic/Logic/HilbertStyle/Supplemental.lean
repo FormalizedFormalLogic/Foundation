@@ -62,6 +62,13 @@ lemma imply_right_and! (hq : 𝓢 ⊢! p ⟶ q) (hr : 𝓢 ⊢! p ⟶ r) : 𝓢 
 
 lemma imply_left_and_comm'! (d : 𝓢 ⊢! p ⋏ q ⟶ r) : 𝓢 ⊢! q ⋏ p ⟶ r := imp_trans''! and_comm! d
 
+lemma dhyp_and_left! (h : 𝓢 ⊢! p ⟶ r) : 𝓢 ⊢! (q ⋏ p) ⟶ r := by
+  apply and_imply_iff_imply_imply'!.mpr;
+  apply deduct'!;
+  exact FiniteContext.of'! (Γ := [q]) h;
+
+lemma dhyp_and_right! (h : 𝓢 ⊢! p ⟶ r) : 𝓢 ⊢! (p ⋏ q) ⟶ r := imp_trans''! and_comm! (dhyp_and_left! h)
+
 lemma cut! (d₁ : 𝓢 ⊢! p₁ ⋏ c ⟶ q₁) (d₂ : 𝓢 ⊢! p₂ ⟶ c ⋎ q₂) : 𝓢 ⊢! p₁ ⋏ p₂ ⟶ q₁ ⋎ q₂ := by
   apply deduct'!;
   exact or₃'''! (imply_left_or'! $ of'! (and_imply_iff_imply_imply'!.mp d₁) ⨀ (and₁'! id!)) or₂! (of'! d₂ ⨀ and₂'! id!);
@@ -479,21 +486,6 @@ lemma implyLeft_conj_eq_conj! : 𝓢 ⊢! Γ.conj ⟶ p ↔ 𝓢 ⊢! ⋀Γ ⟶ 
 
 lemma generalConj'! (h : p ∈ Γ) : 𝓢 ⊢! ⋀Γ ⟶ p := replace_imply_left_by_iff'! conjIffConj! |>.mpr (generalConj! h)
 lemma generalConj'₂! (h : p ∈ Γ) (d : 𝓢 ⊢! ⋀Γ) : 𝓢 ⊢! p := (generalConj'! h) ⨀ d
-
-
-namespace Context
-
-lemma emptyPrf! {p : F} : ∅ *⊢[𝓢]! p ↔ 𝓢 ⊢! p := by
-  constructor;
-  . intro h;
-    obtain ⟨Δ, hΔ₁, hΔ₂⟩ := provable_iff.mp h;
-    have := FiniteContext.provable_iff.mp hΔ₂;
-    have e : Δ = [] := List.nil_iff.mpr (by aesop)
-    rw [e] at this; simp at this;
-    exact this ⨀ verum!;
-  . intro h; exact of! h;
-
-end Context
 
 section Conjunction
 
