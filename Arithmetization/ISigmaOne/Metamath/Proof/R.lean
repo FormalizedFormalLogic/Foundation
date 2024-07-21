@@ -2,11 +2,13 @@ import Arithmetization.ISigmaOne.Metamath.Proof.Typed
 
 /-!
 
-# Theory $\mathsf{R}$
+# Formalized Theory $\mathsf{R_0}$
 
 -/
 
 noncomputable section
+
+open Classical
 
 namespace LO.Arith
 
@@ -18,7 +20,6 @@ variable {L : Arith.Language V} {pL : LDef} [Arith.Language.Defined L pL]
 
 namespace Formalized
 
-
 variable (V)
 
 abbrev LOR.Theory := @Language.Theory V _ _ _ _ _ _ ⌜ℒₒᵣ⌝ (Language.lDef ℒₒᵣ) _
@@ -26,8 +27,10 @@ abbrev LOR.Theory := @Language.Theory V _ _ _ _ _ _ ⌜ℒₒᵣ⌝ (Language.lD
 variable {V}
 
 abbrev bv {n : V} (x : V) (h : x < n := by simp) : ⌜ℒₒᵣ⌝.TSemiterm n := ⌜ℒₒᵣ⌝.bvar x h
+abbrev fv {n : V} (x : V) : ⌜ℒₒᵣ⌝.TSemiterm n := ⌜ℒₒᵣ⌝.fvar x
 
 scoped prefix:max "#'" => bv
+scoped prefix:max "&'" => fv
 
 /-- TODO: move -/
 @[simp] lemma two_lt_three : (2 : V) < (1 + 1 + 1 : V) := by simp [←one_add_one_eq_two]
@@ -50,7 +53,7 @@ class R₀Theory (T : LOR.Theory V) where
   ne {n m : V} : n ≠ m → ↑n ≠' ↑m ∈' T
   ltNumeral (n : V) : (#'0 <' ↑n ⟷ (tSubstItr (#'0).sing (#'1 =' #'0) n).disj).all ∈' T
 
-variable {T : LOR.Theory V} {pT : (Language.lDef ℒₒᵣ).TDef} [T.Defined pT] [EQTheory T]
+variable (T : LOR.Theory V) {pT : (Language.lDef ℒₒᵣ).TDef} [T.Defined pT] [EQTheory T]
 
 namespace TProof
 
@@ -92,6 +95,27 @@ def ltExt (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.TTerm) : T ⊢ t₁ =' t₂ ⟶
   have := by simpa using specialize this u₁
   simpa [Language.TSemitermVec.q_of_pos, Language.TSemiformula.substs₁] using specialize this u₂
 
+open LO.System LO.System.FiniteContext
+
+noncomputable def ballReplace (p : ⌜ℒₒᵣ⌝.TSemiformula (0 + 1)) (t u : ⌜ℒₒᵣ⌝.TTerm) :
+    T ⊢ t =' u ⟶ p.ball t ⟶ p.ball u := by
+  apply deduct'
+  apply deduct
+  simp only [Language.TSemiformula.ball_eq_imp]
+  apply generalize
+  simp [Language.TSemiformula.free, Language.TSemiformula.substs₁]
+  apply deduct
+  simp only [← Language.TSemiterm.bShift_shift_comm, Language.TSemiterm.bShift_substs_sing]
+  let Γ := [&'0 <' u.shift, (#'0 <' t.shift.bShift ⟶ p.shift).all, t.shift =' u.shift]
+  have    : Γ ⊢[T] (#'0 <' t.shift.bShift ⟶ p.shift).all  := FiniteContext.byAxm <| by simp [Γ]
+  have bp : Γ ⊢[T] &'0 <' t.shift ⟶ p.shift^/[(&'0).sing] := by simpa [Language.TSemiformula.substs₁] using specializeWithCtx this (&'0)
+  have bu : Γ ⊢[T] &'0 <' u.shift                         := FiniteContext.byAxm <| by simp [Γ]
+  have    : Γ ⊢[T] &'0 <' t.shift                         := by
+    refine (of (Γ := Γ) <| ltExt T (&'0) (&'0) u.shift t.shift) ⨀ (of <| eqRefl T _) ⨀ ?_ ⨀ bu
+    have e  : Γ ⊢[T] t.shift =' u.shift := FiniteContext.byAxm <| by simp [Γ]
+    exact (of (Γ := Γ) <| eqSymm T t.shift u.shift) ⨀ e
+  exact bp ⨀ this
+
 variable [R₀Theory T]
 
 def addComplete (n m : V) : T ⊢ (↑n + ↑m) =' ↑(n + m) := byAxm (R₀Theory.add n m)
@@ -105,22 +129,20 @@ def ltNumeral (t : ⌜ℒₒᵣ⌝.TTerm) (n : V) : T ⊢ t <' ↑n ⟷ (tSubstI
   simpa [Language.TSemitermVec.q_of_pos, Language.TSemiformula.substs₁] using specialize this t
 
 def ltComplete {n m : V} (h : n < m) : T ⊢ ↑n <' ↑m := by
-  have : T ⊢ ↑n <' ↑m ⟷ _ := ltNumeral (T := T) n m
+  have : T ⊢ ↑n <' ↑m ⟷ _ := ltNumeral T n m
   apply andRight this ⨀ ?_
   apply disj (i := m - (n + 1)) _ (by simpa using sub_succ_lt_self (by simp [h]))
-  simpa [nth_tSubstItr', h] using eqRefl (T := T) ↑n
-
-open Classical
+  simpa [nth_tSubstItr', h] using eqRefl T ↑n
 
 noncomputable def nltComplete {n m : V} (h : m ≤ n) : T ⊢ ↑n ≮' ↑m := by
   have : T ⊢ ↑n ≮' ↑m ⟷ (tSubstItr (↑n : ⌜ℒₒᵣ⌝.TTerm).sing (#'1 ≠' #'0) m).conj := by
-    simpa using negReplaceIff' <| ltNumeral (T := T) n m
+    simpa using negReplaceIff' <| ltNumeral T n m
   refine andRight this ⨀ ?_
   apply conj'
   intro i hi
   have hi : i < m := by simpa using hi
   have : n ≠ i := Ne.symm <| ne_of_lt <| lt_of_lt_of_le hi h
-  simpa [nth_tSubstItr', hi] using neComplete this
+  simpa [nth_tSubstItr', hi] using neComplete T this
 
 end TProof
 

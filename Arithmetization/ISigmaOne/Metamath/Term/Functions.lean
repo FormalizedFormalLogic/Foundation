@@ -236,7 +236,10 @@ instance termShiftVec_definable : 𝚺₁-Function₃ L.termShiftVec :=
 
 end
 
-lemma nth_termShiftVec {k n ts i : V} (hts : L.SemitermVec k n ts) (hi : i < k) :
+@[simp] lemma len_termShiftVec {k n ts : V} (hts : L.SemitermVec k n ts) :
+    len (L.termShiftVec k n ts) = k := (construction L).resultVec_lh _ hts
+
+@[simp] lemma nth_termShiftVec {k n ts i : V} (hts : L.SemitermVec k n ts) (hi : i < k) :
     (L.termShiftVec k n ts).[i] = L.termShift n ts.[i] :=
   (construction L).nth_resultVec _ hts hi
 
@@ -387,6 +390,19 @@ lemma termBShiftVec_cons {k n t ts : V} (ht : L.Semiterm n t) (hts : L.SemitermV
   ⟨by simp [Language.termBShiftVec, hv], fun i hi ↦ by
     rw [nth_termBShiftVec hv hi]
     exact (hv.prop hi).termBShift⟩
+
+lemma termBShift_termShift {t} (ht : L.Semiterm n t) : L.termBShift n (L.termShift n t) = L.termShift (n + 1) (L.termBShift n t) := by
+  apply Language.Semiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
+  · definability
+  · intro z hz; simp [hz]
+  · intro x; simp
+  · intro k f v hkf hv ih
+    simp only [termShift_func, Language.SemitermVec.termShiftVec, termBShift_func,
+      Language.SemitermVec.termBShiftVec, qqFunc_inj, true_and, hkf, hv]
+    apply nth_ext' k (by simp [hv]) (by simp [hv])
+    intro i hi
+    rw [nth_termBShiftVec hv.termShiftVec hi, nth_termShiftVec hv hi,
+      nth_termShiftVec hv.termBShiftVec hi, nth_termBShiftVec hv hi, ih i hi]
 
 end termBShift
 

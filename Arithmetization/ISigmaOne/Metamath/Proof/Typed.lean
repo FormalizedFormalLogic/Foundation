@@ -106,9 +106,15 @@ lemma subset_iff : Γ ⊆ Δ ↔ Γ.val ⊆ Δ.val := iff_of_eq rfl
   · intro hx; simpa using mem_iff.mp <| (h ⟨x, hΓ x hx⟩ |>.1 (by simp [mem_iff, hx]))
   · intro hx; simpa using mem_iff.mp <| (h ⟨x, hΔ x hx⟩ |>.2 (by simp [mem_iff, hx]))
 
-end Language.Sequent
+lemma ext' (h : Γ.val = Δ.val) : Γ = Δ := by rcases Γ; rcases Δ; simpa using h
 
-def Language.Sequent.shift (s : L.Sequent) : L.Sequent := ⟨L.setShift s.val, by simp⟩
+def shift (s : L.Sequent) : L.Sequent := ⟨L.setShift s.val, by simp⟩
+
+@[simp] lemma shift_empty : (∅ : L.Sequent).shift = ∅ := ext' <| by simp [shift]
+
+@[simp] lemma shift_insert : (insert p Γ).shift = insert p.shift Γ.shift := ext' <| by simp [shift]
+
+end Language.Sequent
 
 end typed_sequent
 
@@ -208,6 +214,20 @@ def rotate₂ (d : T ⊢¹ p₀ ⫽ p₁ ⫽ p₂ ⫽ Γ) : T ⊢¹ p₂ ⫽ p�
 
 def rotate₃ (d : T ⊢¹ p₀ ⫽ p₁ ⫽ p₂ ⫽ p₃ ⫽ Γ) : T ⊢¹ p₃ ⫽ p₁ ⫽ p₂ ⫽ p₀ ⫽ Γ :=
   ofEq d (by ext x; simp; tauto)
+
+def orInv (d : T ⊢¹ p ⋎ q ⫽ Γ) : T ⊢¹ p ⫽ q ⫽ Γ := by
+  have b : T ⊢¹ p ⋎ q ⫽ p ⫽ q ⫽ Γ := wk d (by intro x; simp; tauto)
+  have : T ⊢¹ ~(p ⋎ q) ⫽ p ⫽ q ⫽ Γ := by
+    simp only [TSemiformula.neg_or]
+    apply and (em p) (em q)
+  exact cut b this
+
+def specialize {p : L.TSemiformula (0 + 1)} (b : T ⊢¹ p.all ⫽ Γ) (t : L.TTerm) : T ⊢¹ p.substs₁ t ⫽ Γ := by
+  apply TDerivation.cut (p := p.all)
+  · exact (TDerivation.wk b <| by intro x; simp; tauto)
+  · rw [TSemiformula.neg_all]
+    apply TDerivation.ex t
+    apply TDerivation.em (p.substs₁ t)
 
 end Language.Theory.TDerivation
 
@@ -315,12 +335,7 @@ instance : System.Classical T where
 
 def exIntro (p : L.TSemiformula (0 + 1)) (t : L.TTerm) (b : T ⊢ p.substs₁ t) : T ⊢ p.ex := TDerivation.ex t b
 
-def specialize {p : L.TSemiformula (0 + 1)} (b : T ⊢ p.all) (t : L.TTerm) : T ⊢ p.substs₁ t := by
-  apply TDerivation.cut (p := p.all)
-  · exact (TDerivation.wk b <| by intro x; simp; tauto)
-  · rw [TSemiformula.neg_all]
-    apply TDerivation.ex t
-    apply TDerivation.em (p.substs₁ t)
+def specialize {p : L.TSemiformula (0 + 1)} (b : T ⊢ p.all) (t : L.TTerm) : T ⊢ p.substs₁ t := TDerivation.specialize b t
 
 def conj (ps : L.TSemiformulaVec 0) (ds : ∀ i, (hi : i < len ps.val) → T ⊢ ps.nth i hi) : T ⊢ ps.conj :=
   TDerivation.conj ps ds
@@ -331,6 +346,36 @@ def conj' (ps : L.TSemiformulaVec 0) (ds : ∀ i, (hi : i < len ps.val) → T �
 
 def disj (ps : L.TSemiformulaVec 0) {i} (hi : i < len ps.val) (d : T ⊢ ps.nth i hi) : T ⊢ ps.disj :=
   TDerivation.disj ps hi d
+
+def all {p : L.TSemiformula (0 + 1)} (dp : T ⊢ p.free) : T ⊢ p.all := TDerivation.all (by simpa using dp)
+
+def generalizeAux {C : L.TFormula} {p : L.TSemiformula (0 + 1)} (dp : T ⊢ C.shift ⟶ p.free) : T ⊢ C ⟶ p.all := by
+  rw [TSemiformula.imp_def] at dp ⊢
+  apply TDerivation.or
+  apply TDerivation.rotate₁
+  apply TDerivation.all
+  exact TDerivation.wk (TDerivation.orInv dp) (by intro x; simp; tauto)
+
+lemma conj_shift (Γ : List L.TFormula) : (⋀Γ).shift = ⋀(Γ.map .shift) := by
+    induction Γ using List.induction_with_singleton
+    case hnil => simp
+    case hsingle => simp [List.conj₂]
+    case hcons p ps hps ih =>
+      simp [hps, ih]
+
+def generalize {Γ} {p : L.TSemiformula (0 + 1)} (d : Γ.map .shift ⊢[T] p.free) : Γ ⊢[T] p.all := by
+  apply System.FiniteContext.ofDef
+  apply generalizeAux
+  simpa [conj_shift] using System.FiniteContext.toDef d
+
+def specializeWithCtxAux {C : L.TFormula} {p : L.TSemiformula (0 + 1)} (d : T ⊢ C ⟶ p.all) (t : L.TTerm) : T ⊢ C ⟶ p.substs₁ t := by
+  rw [TSemiformula.imp_def] at d ⊢
+  apply TDerivation.or
+  apply TDerivation.rotate₁
+  apply TDerivation.specialize
+  exact TDerivation.wk (TDerivation.orInv d) (by intro x; simp; tauto)
+
+def specializeWithCtx {Γ} {p : L.TSemiformula (0 + 1)} (d : Γ ⊢[T] p.all) (t) : Γ ⊢[T] p.substs₁ t := specializeWithCtxAux d t
 
 end Language.Theory.TProof
 

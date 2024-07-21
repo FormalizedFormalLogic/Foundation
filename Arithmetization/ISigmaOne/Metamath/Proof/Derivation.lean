@@ -150,6 +150,8 @@ lemma shift_mem_setShift {p s : V} (h : p ∈ s) : L.shift p ∈ L.setShift s :=
 @[simp] lemma mem_setShift_insert {x s : V} : L.setShift (insert x s) = insert (L.shift x) (L.setShift s) := mem_ext <| by
   simp [mem_setShift_iff]
 
+@[simp] lemma setShift_empty : L.setShift ∅ = ∅ := mem_ext <| by simp [mem_setShift_iff]
+
 section
 
 private lemma setShift_graph (t s : V) :

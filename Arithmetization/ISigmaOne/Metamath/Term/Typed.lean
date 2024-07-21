@@ -71,6 +71,9 @@ def Language.func {n k f : V} (hf : L.Func k f) (v : L.TSemitermVec k n) :
 
 variable {L}
 
+@[simp] lemma Language.val_bvar {n : V} (z : V) (hz : z < n) : (L.bvar z hz).val = ^#z := rfl
+@[simp] lemma Language.val_fvar {n : V} (x : V) : (L.fvar x : L.TSemiterm n).val = ^&x := rfl
+
 def Language.TSemiterm.cons {m n} (t : L.TSemiterm n) (v : L.TSemitermVec m n) :
     L.TSemitermVec (m + 1) n := ⟨t.val ∷ v.val, v.prop.cons t.prop⟩
 
@@ -101,7 +104,13 @@ def bShift (t : L.TSemiterm n) : L.TSemiterm (n + 1) :=
 def substs (t : L.TSemiterm n) (w : L.TSemitermVec n m) : L.TSemiterm m :=
   ⟨L.termSubst n m w.val t.val, termSubst_rng_semiterm w.prop t.prop⟩
 
+@[simp] lemma val_shift (t : L.TSemiterm n) : t.shift.val = L.termShift n t.val := rfl
+@[simp] lemma val_bShift (t : L.TSemiterm n) : t.bShift.val = L.termBShift n t.val := rfl
+@[simp] lemma val_substs (w : L.TSemitermVec n m) (t : L.TSemiterm n) : (t.substs w).val = L.termSubst n m w.val t.val := rfl
+
 end Language.TSemiterm
+
+notation t:max "^ᵗ/[" w "]" => Language.TSemiterm.substs t w
 
 namespace Language.TSemitermVec
 
@@ -113,7 +122,6 @@ def bShift (v : L.TSemitermVec k n) : L.TSemitermVec k (n + 1) :=
 
 def substs (v : L.TSemitermVec k n) (w : L.TSemitermVec n m) : L.TSemitermVec k m :=
   ⟨L.termSubstVec k n m w.val v.val, Language.SemitermVec.termSubstVec w.prop v.prop⟩
-
 
 @[simp] lemma bShift_nil (n : V) :
     (nil L n).bShift = nil L (n + 1) := by
@@ -141,6 +149,8 @@ def substs (v : L.TSemitermVec k n) (w : L.TSemitermVec n m) : L.TSemitermVec k 
 
 def nth (t : L.TSemitermVec k n) (i : V) (hi : i < k := by simp) : L.TSemiterm n :=
   ⟨t.val.[i], t.prop.prop hi⟩
+
+@[simp] lemma nth_val (v : L.TSemitermVec k n) (i : V) (hi : i < k) : (v.nth i hi).val = v.val.[i] := by simp [nth]
 
 @[simp] lemma nth_zero (t : L.TSemiterm n) (v : L.TSemitermVec k n) : (t ∷ᵗ v).nth 0 = t := by ext; simp [nth]
 
@@ -214,6 +224,10 @@ namespace Language.TSemiterm
     t.bShift.substs u.sing = t := by
   ext; simp [substs, bShift]
   rw [show (1 : V) = 0 + 1 by simp, substs_cons_bShift] <;> simp
+
+lemma bShift_shift_comm (t : L.TSemiterm n) :
+    t.shift.bShift = t.bShift.shift := by
+  ext; simp [termBShift_termShift]
 
 end Language.TSemiterm
 
