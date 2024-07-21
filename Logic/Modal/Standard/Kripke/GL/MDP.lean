@@ -1,4 +1,4 @@
-import Logic.Modal.Standard.Kripke.GL
+import Logic.Modal.Standard.Kripke.GL.Tree
 
 namespace LO.Modal.Standard
 
