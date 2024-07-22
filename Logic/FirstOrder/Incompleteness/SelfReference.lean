@@ -112,7 +112,7 @@ theorem godel_independent : System.Undecidable T G := by
 
 theorem incomplete : ¬System.Complete T := System.incomplete_iff_exists_undecidable.mpr ⟨G, godel_independent T⟩
 
-lemma not_disjunctive : ¬Disjunctive T := by apply iff_complete_disjunctive.not.mp $ incomplete T
+lemma not_disjunctive : ¬Disjunctive T := iff_complete_disjunctive.not.mp $ incomplete T
 
 end SelfReference
 
