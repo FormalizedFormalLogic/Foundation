@@ -1,16 +1,6 @@
+import Logic.Logic.Disjunctive
 import Logic.Propositional.Superintuitionistic.Kripke.Soundness
 import Logic.Propositional.Superintuitionistic.Kripke.Completeness
-
-namespace LO.System
-
-variable {F : Type*} [LogicalConnective F]
-variable {S : Type*} [System F S]
-
-class Disjunctive (𝓢 : S) : Prop where
-  disjunctive : ∀ {p q}, 𝓢 ⊢! p ⋎ q → 𝓢 ⊢! p ∨ 𝓢 ⊢! q
-
-end LO.System
-
 
 namespace LO.Propositional.Superintuitionistic
 

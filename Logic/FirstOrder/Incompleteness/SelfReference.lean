@@ -1,6 +1,7 @@
 import Logic.FirstOrder.Arith.Representation
 import Logic.FirstOrder.Computability.Calculus
 import Logic.Logic.HilbertStyle.Gentzen
+import Logic.Logic.Disjunctive
 
 namespace LO.FirstOrder.Arith.FirstIncompleteness
 
@@ -110,6 +111,8 @@ theorem godel_independent : System.Undecidable T G := by
     exact (Gentzen.inconsistent_of_provable_and_refutable! this H).not_con (consistent_of_sigmaOneSound T)
 
 theorem incomplete : ¬System.Complete T := System.incomplete_iff_exists_undecidable.mpr ⟨G, godel_independent T⟩
+
+lemma not_disjunctive : ¬Disjunctive T := iff_complete_disjunctive.not.mp $ incomplete T
 
 end SelfReference
 
