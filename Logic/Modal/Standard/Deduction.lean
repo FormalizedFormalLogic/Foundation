@@ -297,6 +297,12 @@ instance : System.GL (𝐆𝐋 : DeductionParameter α) where
   L _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
 
 
+protected abbrev KH : DeductionParameter α := 𝝂(𝗛)
+notation "𝐊𝐇" => DeductionParameter.KH
+instance : System.KH (𝐊𝐇 : DeductionParameter α) where
+  H _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
+
+
 protected abbrev K4H : DeductionParameter α := 𝝂(𝟰 ∪ 𝗛)
 notation "𝐊𝟒𝐇" => DeductionParameter.K4H
 instance : System.K4H (𝐊𝟒𝐇 : DeductionParameter α) where
