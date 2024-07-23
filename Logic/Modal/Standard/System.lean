@@ -5,7 +5,7 @@ namespace LO.System
 
 section Systems
 
-variable {S F : Type*} [LogicalConnective F] [StandardModalLogicalConnective F] [System F S]
+variable {S F : Type*} [LogicalConnective F] [BasicModalLogicalConnective F] [System F S]
 variable (𝓢 : S)
 
 class Necessitation where
@@ -19,6 +19,9 @@ class LoebRule where
 
 class HenkinRule where
   henkin {p : F} : 𝓢 ⊢ □p ⟷ p → 𝓢 ⊢ p
+
+class HasDiaDuality where
+  dia_dual (p : F) : 𝓢 ⊢ Axioms.DiaDuality p
 
 class HasAxiomK where
   K (p q : F) : 𝓢 ⊢ Axioms.K p q
@@ -94,7 +97,7 @@ end Systems
 section
 
 
-variable {F : Type*} [StandardModalLogicalConnective F][DecidableEq F]
+variable {F : Type*} [BasicModalLogicalConnective F][DecidableEq F]
 variable {S : Type*} [System F S]
 variable {p q r : F} {Γ Δ : List F}
 
@@ -161,12 +164,43 @@ def multiboxIff' (h : 𝓢 ⊢ p ⟷ q) : 𝓢 ⊢ □^[n]p ⟷ □^[n]q := by
 @[simp] lemma multibox_iff! (h : 𝓢 ⊢! p ⟷ q) : 𝓢 ⊢! □^[n]p ⟷ □^[n]q := ⟨multiboxIff' h.some⟩
 
 
+def diaDuality [HasDiaDuality 𝓢] : 𝓢 ⊢ ◇p ⟷ ~(□(~p)) := HasDiaDuality.dia_dual _
+@[simp] lemma dia_duality! [HasDiaDuality 𝓢] : 𝓢 ⊢! ◇p ⟷ ~(□(~p)) := ⟨diaDuality⟩
+
+def diaDuality'.mp [HasDiaDuality 𝓢] (h : 𝓢 ⊢ ◇p) : 𝓢 ⊢ ~(□(~p)) := (and₁' diaDuality) ⨀ h
+def diaDuality'.mpr [HasDiaDuality 𝓢] (h : 𝓢 ⊢ ~(□(~p))) : 𝓢 ⊢ ◇p := (and₂' diaDuality) ⨀ h
+
+lemma dia_duality'! [HasDiaDuality 𝓢] : 𝓢 ⊢! ◇p ↔ 𝓢 ⊢! ~(□(~p)) := ⟨
+  λ h => ⟨diaDuality'.mp h.some⟩,
+  λ h => ⟨diaDuality'.mpr h.some⟩
+⟩
+
+def multiDiaDuality [HasDiaDuality 𝓢] : 𝓢 ⊢ ◇^[n]p ⟷ ~(□^[n](~p)) := by
+  induction n with
+  | zero => simp; apply dn;
+  | succ n ih =>
+    simp;
+    sorry;
+
+variable [HasDiaDuality 𝓢]
+
+lemma multidia_duality'! : 𝓢 ⊢! ◇^[n]p ↔ 𝓢 ⊢! ~(□^[n](~p)) := by
+  constructor;
+  . intro h; exact (and₁'! multidia_duality!) ⨀ h;
+  . intro h; exact (and₂'! multidia_duality!) ⨀ h;
+lemma dia_duality'! : 𝓢 ⊢! ◇p ↔ 𝓢 ⊢! ~(□(~p)) := multidia_duality'! (n := 1)
+
+
 def diaIff' (h : 𝓢 ⊢ p ⟷ q) : 𝓢 ⊢ (◇p ⟷ ◇q) := by
-  simp only [StandardModalLogicalConnective.duality'];
+  apply iffTrans'' diaDuality;
+  apply andComm';
+  apply iffTrans'' diaDuality;
   apply negReplaceIff';
   apply boxIff';
   apply negReplaceIff';
-  assumption
+  apply andComm';
+  assumption;
+
 @[simp] lemma dia_iff! (h : 𝓢 ⊢! p ⟷ q) : 𝓢 ⊢! ◇p ⟷ ◇q := ⟨diaIff' h.some⟩
 
 def multidiaIff' (h : 𝓢 ⊢ p ⟷ q) : 𝓢 ⊢ ◇^[n]p ⟷ ◇^[n]q := by
@@ -180,19 +214,20 @@ def multiboxDuality : 𝓢 ⊢ □^[n]p ⟷ ~(◇^[n](~p)) := by
   induction n with
   | zero => simp; apply dn;
   | succ n ih =>
-    simp [StandardModalLogicalConnective.duality'];
+    -- simp [StandardModalLogicalConnective.duality'];
+    simp;
     exact iffTrans'' (boxIff' ih) dn
 @[simp] lemma multibox_duality! : 𝓢 ⊢! □^[n]p ⟷ ~(◇^[n](~p)) := ⟨multiboxDuality⟩
 
-def boxDuality : 𝓢 ⊢ □p ⟷ ~(◇~p) := multiboxDuality (n := 1)
-@[simp] lemma box_duality! : 𝓢 ⊢! □p ⟷ ~(◇~p) := ⟨boxDuality⟩
+def boxDuality : 𝓢 ⊢ □p ⟷ ~(◇(~p)) := multiboxDuality (n := 1)
+@[simp] lemma box_duality! : 𝓢 ⊢! □p ⟷ ~(◇(~p)) := ⟨boxDuality⟩
 
 lemma multibox_duality'! : 𝓢 ⊢! □^[n]p ↔ 𝓢 ⊢! ~(◇^[n](~p)) := by
   constructor;
   . intro h; exact (and₁'! multibox_duality!) ⨀ h;
   . intro h; exact (and₂'! multibox_duality!) ⨀ h;
 
-lemma box_duality'! : 𝓢 ⊢! □p ↔ 𝓢 ⊢! ~(◇~p) := multibox_duality'! (n := 1)
+lemma box_duality'! : 𝓢 ⊢! □p ↔ 𝓢 ⊢! ~(◇(~p)) := multibox_duality'! (n := 1)
 
 
 def multidiaDuality : 𝓢 ⊢ ◇^[n]p ⟷ ~(□^[n](~p)) := by
@@ -204,15 +239,6 @@ def multidiaDuality : 𝓢 ⊢ ◇^[n]p ⟷ ~(□^[n](~p)) := by
     apply boxIff';
     exact iffTrans'' (negReplaceIff' ih) (iffComm' dn)
 @[simp] lemma multidia_duality! : 𝓢 ⊢! ◇^[n]p ⟷ ~(□^[n](~p)) := ⟨multidiaDuality⟩
-
-def diaDuality : 𝓢 ⊢ ◇p ⟷ ~(□~p) := multidiaDuality (n := 1)
-@[simp] lemma diaDuality! : 𝓢 ⊢! ◇p ⟷ ~(□~p) := ⟨diaDuality⟩
-
-lemma multidia_duality'! : 𝓢 ⊢! ◇^[n]p ↔ 𝓢 ⊢! ~(□^[n](~p)) := by
-  constructor;
-  . intro h; exact (and₁'! multidia_duality!) ⨀ h;
-  . intro h; exact (and₂'! multidia_duality!) ⨀ h;
-lemma dia_duality'! : 𝓢 ⊢! ◇p ↔ 𝓢 ⊢! ~(□~p) := multidia_duality'! (n := 1)
 
 
 def multiboxverum : 𝓢 ⊢ (□^[n]⊤ : F) := multinec verum
@@ -268,7 +294,7 @@ lemma distribute_multibox_conj! : 𝓢 ⊢! □^[n]⋀Γ ⟶ ⋀□'^[n]Γ := by
       simp at hq;
       rcases hq with (rfl | ⟨q, hq, rfl⟩)
       . apply and₁!;
-      . suffices 𝓢 ⊢! ⋀□'^[n]Γ ⟶ (UnaryModalOperator.mop true)^[n] q by exact dhyp_and_left! this;
+      . suffices 𝓢 ⊢! ⋀□'^[n]Γ ⟶ □^[n]q by exact dhyp_and_left! this;
         apply generate_conj'!;
         simpa;
 
@@ -353,7 +379,7 @@ lemma collect_box_or'! (h : 𝓢 ⊢! □p ⋎ □q) : 𝓢 ⊢! □(p ⋎ q) :=
 
 
 def collect_dia_or : 𝓢 ⊢ ◇p ⋎ ◇q ⟶ ◇(p ⋎ q) := by
-  simp [StandardModalLogicalConnective.duality'];
+
   apply contra₁';
   apply deduct';
   apply demorgan₂';
@@ -398,10 +424,9 @@ def collect_dia_or' (h : 𝓢 ⊢ ◇p ⋎ ◇q) : 𝓢 ⊢ ◇(p ⋎ q) := coll
 -- def distributeDiaAnd' (h : 𝓢 ⊢ ◇(p ⋏ q)) : 𝓢 ⊢ ◇p ⋏ ◇q := distributeDiaAnd ⨀ h
 lemma distribute_dia_and'! (h : 𝓢 ⊢! ◇(p ⋏ q)) : 𝓢 ⊢! ◇p ⋏ ◇q := distribute_dia_and! ⨀ h
 
-open StandardModalLogicalConnective (boxdot)
+-- open StandardModalLogicalConnective (boxdot)
 
 def boxdotAxiomK : 𝓢 ⊢ ⊡(p ⟶ q) ⟶ (⊡p ⟶ ⊡q) := by
-  simp [boxdot];
   apply deduct';
   apply deduct;
   have d : [p ⋏ □p, (p ⟶ q) ⋏ □(p ⟶ q)] ⊢[𝓢] (p ⟶ q) ⋏ □(p ⟶ q) := FiniteContext.byAxm;
@@ -457,12 +482,10 @@ def axiomFour' (h : 𝓢 ⊢ □p) : 𝓢 ⊢ □□p := axiomFour ⨀ h
 def axiomFour'! (h : 𝓢 ⊢! □p) : 𝓢 ⊢! □□p := ⟨axiomFour' h.some⟩
 
 def imply_BoxBoxdot_Box: 𝓢 ⊢  □⊡p ⟶ □p := by
-  simp [boxdot];
   exact impTrans'' distribute_box_and and₁
 @[simp] lemma imply_boxboxdot_box : 𝓢 ⊢! □⊡p ⟶ □p := ⟨imply_BoxBoxdot_Box⟩
 
 def imply_Box_BoxBoxdot : 𝓢 ⊢ □p ⟶ □⊡p := by
-  simp [boxdot];
   exact impTrans'' (implyRightAnd (impId _) axiomFour) collect_box_and
 @[simp] lemma imply_box_boxboxdot! : 𝓢 ⊢! □p ⟶ □⊡p := ⟨imply_Box_BoxBoxdot⟩
 
@@ -473,7 +496,6 @@ def iff_Box_BoxBoxdot [HasAxiomFour 𝓢] : 𝓢 ⊢ □p ⟷ □⊡p := by
 @[simp] lemma iff_box_boxboxdot! [HasAxiomFour 𝓢] : 𝓢 ⊢! □p ⟷ □⊡p := ⟨iff_Box_BoxBoxdot⟩
 
 def iff_Box_BoxdotBox [HasAxiomFour 𝓢] : 𝓢 ⊢ □p ⟷ ⊡□p := by
-  simp [boxdot];
   apply iffIntro;
   . exact impTrans'' (implyRightAnd (impId _) axiomFour) (impId _)
   . exact and₁
@@ -541,7 +563,6 @@ instance [HasAxiomL 𝓢] (Γ : Context F 𝓢) : HasAxiomL Γ := ⟨fun _ ↦ C
 private def axiomFour_of_L [HasAxiomL 𝓢] : 𝓢 ⊢ Axioms.Four p := by
   dsimp [Axioms.Four];
   have : 𝓢 ⊢ p ⟶ (⊡□p ⟶ ⊡p) := by
-    dsimp [boxdot];
     apply deduct';
     apply deduct;
     exact and₃' (FiniteContext.byAxm) (and₁' (q := □□p) $ FiniteContext.byAxm);
@@ -655,7 +676,7 @@ end
 
 section ModalDP
 
-variable {F : Type*} [StandardModalLogicalConnective F]
+variable {F : Type*} [LogicalConnective F] [Box F]
 variable {S : Type*} [System F S]
 
 class ModalDisjunctive (𝓢 : S) : Prop where
@@ -666,7 +687,7 @@ end ModalDP
 
 section Contextual
 
-variable {F : Type*} [StandardModalLogicalConnective F]
+variable {F : Type*}  [LogicalConnective F] [Box F]
 variable {S : Type*} [System F S] [DecidableEq F]
          {𝓢 : S} [System.Minimal 𝓢]
          {X : Set F} {p : F}
@@ -680,14 +701,16 @@ lemma Context.provable_iff_boxed : (□''X) *⊢[𝓢]! p ↔ ∃ Δ : List F, (
     constructor;
     . rintro q hq;
       apply sΓ q;
-      aesop;
+      simp at hq;
+      obtain ⟨r, _, rfl⟩ := hq;
+      assumption;
     . apply FiniteContext.provable_iff.mpr;
       apply imp_trans''! ?_ (FiniteContext.provable_iff.mp hΓ);
       apply conjconj_subset!;
       intro q hq;
       have := sΓ q hq;
       obtain ⟨r, _, rfl⟩ := this;
-      aesop;
+      simp_all;
   . rintro ⟨Δ, hΔ, h⟩;
     apply Context.provable_iff.mpr;
     use □'Δ;
