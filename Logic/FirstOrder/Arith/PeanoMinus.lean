@@ -175,35 +175,35 @@ lemma val_numeral {n} : ∀ (t : Semiterm ℒₒᵣ Empty n),
   | Semiterm.func Language.Add.add v,   e => by simp[Semiterm.val_func, val_numeral (v 0), val_numeral (v 1)]
   | Semiterm.func Language.Mul.mul v,   e => by simp[Semiterm.val_func, val_numeral (v 0), val_numeral (v 1)]
 
-lemma pval_of_pval_nat_of_sigma_one : ∀ {n} {σ : Semisentence ℒₒᵣ n},
-    Hierarchy 𝚺 1 σ → ∀ {e}, Semiformula.Evalbm ℕ e σ → Semiformula.Evalbm M (e ·) σ
-  | _, _, Hierarchy.verum _ _ _,               _ => by simp
-  | _, _, Hierarchy.falsum _ _ _,              _ => by simp
-  | _, _, Hierarchy.rel _ _ Language.Eq.eq v,  e => by simp[Semiformula.eval_rel, Matrix.comp_vecCons', val_numeral]
-  | _, _, Hierarchy.nrel _ _ Language.Eq.eq v, e => by simp[Semiformula.eval_nrel, Matrix.comp_vecCons', val_numeral]
-  | _, _, Hierarchy.rel _ _ Language.LT.lt v,  e => by simp[Semiformula.eval_rel, Matrix.comp_vecCons', val_numeral]
-  | _, _, Hierarchy.nrel _ _ Language.LT.lt v, e => by simp[Semiformula.eval_nrel, Matrix.comp_vecCons', val_numeral]
-  | _, _, Hierarchy.and hp hq,                 e => by
-    simp; intro ep eq; exact ⟨pval_of_pval_nat_of_sigma_one hp ep, pval_of_pval_nat_of_sigma_one hq eq⟩
-  | _, _, Hierarchy.or hp hq,                  e => by
-    simp; rintro (h | h)
-    · left; exact pval_of_pval_nat_of_sigma_one hp h
-    · right; exact pval_of_pval_nat_of_sigma_one hq h
-  | _, _, Hierarchy.ball pt hp,                e => by
-    rcases Rew.positive_iff.mp pt with ⟨t, rfl⟩
-    simp[val_numeral]; intro h x hx
+lemma bold_sigma_one_completeness {n} {p : Semisentence ℒₒᵣ n} (hp : Hierarchy 𝚺 1 p) {e} :
+    ℕ ⊧/e p → M ⊧/(e ·) p := by
+  revert e
+  apply sigma₁_induction' hp
+  case hVerum => simp
+  case hFalsum => simp
+  case hEQ => intro n t₁ t₂ e; simp [val_numeral]
+  case hNEQ => intro n t₁ t₂ e; simp [val_numeral]
+  case hLT => intro n t₁ t₂ e; simp [val_numeral]
+  case hNLT => intro n t₁ t₂ e; simp [val_numeral]
+  case hAnd =>
+    simp only [LogicalConnective.HomClass.map_and, LogicalConnective.Prop.and_eq, and_imp]
+    intro n p q _ _ ihp ihq e hp hq
+    exact ⟨ihp hp, ihq hq⟩
+  case hOr =>
+    simp only [LogicalConnective.HomClass.map_or, LogicalConnective.Prop.or_eq]
+    rintro n p q _ _ ihp ihq e (hp | hq)
+    · left; exact ihp hp
+    · right; exact ihq hq
+  case hBall =>
+    simp only [Semiformula.eval_ball, Nat.succ_eq_add_one, Semiformula.eval_operator₂,
+      Semiterm.val_bvar, Matrix.cons_val_zero, Semiterm.val_bShift, Structure.LT.lt, val_numeral]
+    intro n t p _ ihp e hp x hx
     rcases eq_nat_of_lt_nat hx with ⟨x, rfl⟩
-    simpa[Matrix.comp_vecCons'] using pval_of_pval_nat_of_sigma_one hp (h x (by simpa using hx))
-  | _, _, Hierarchy.bex pt hp,                 e => by
-    rcases Rew.positive_iff.mp pt with ⟨t, rfl⟩
-    simp[val_numeral]; intro x hx h
-    exact ⟨x, by simpa using hx, by simpa[Matrix.comp_vecCons'] using pval_of_pval_nat_of_sigma_one hp h⟩
-  | _, _, Hierarchy.sigma (p := p) hp,         e => by
-    simp; intro x h
-    have : Hierarchy 𝚺 1 p := hp.accum _
-    exact ⟨x, by simpa[Matrix.comp_vecCons'] using pval_of_pval_nat_of_sigma_one this h⟩
-  | _, _, Hierarchy.ex hp,                     e => by
-    simp; intro x hx; exact ⟨x, by simpa[Matrix.comp_vecCons'] using pval_of_pval_nat_of_sigma_one hp hx⟩
+    simpa [Matrix.comp_vecCons'] using ihp (hp x (by simpa using hx))
+  case hEx =>
+    simp only [Semiformula.eval_ex, Nat.succ_eq_add_one, forall_exists_index]
+    intro n p _ ihp e x hp
+    exact ⟨x, by simpa [Matrix.comp_vecCons'] using ihp hp⟩
 
 end Arith
 
@@ -217,7 +217,7 @@ theorem sigma_one_completeness [𝐄𝐐 ≼ T] [𝐏𝐀⁻ ≼ T] {σ : Senten
     ℕ ⊧ₘ σ → T ⊢! σ := fun H =>
   complete (oRing_consequence_of.{0} _ _ (fun M _ _ _ _ _ _ => by
     haveI : M ⊧ₘ* 𝐏𝐀⁻ := ModelsTheory.of_provably_subtheory M 𝐏𝐀⁻ T inferInstance (by assumption)
-    simpa [Matrix.empty_eq] using Arith.pval_of_pval_nat_of_sigma_one (M := M) hσ H))
+    simpa [Matrix.empty_eq] using Arith.bold_sigma_one_completeness (M := M) hσ H))
 
 theorem sigma_one_completeness_iff [𝐏𝐀⁻ ≼ T] [ℕ ⊧ₘ* T] {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
     ℕ ⊧ₘ σ ↔ T ⊢₌! σ :=

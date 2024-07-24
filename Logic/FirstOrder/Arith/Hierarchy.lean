@@ -361,6 +361,64 @@ lemma consistent_of_sigmaOneSound (T : Theory L) [SigmaOneSound T] :
 
 end
 
+section LOR
+
+lemma sigma₁_induction {P : (n : ℕ) → Semiformula ℒₒᵣ ξ n → Prop}
+    (hVerum : ∀ n, P n ⊤)
+    (hFalsum : ∀ n, P n ⊥)
+    (hEQ : ∀ n t₁ t₂, P n (.rel Language.Eq.eq ![t₁, t₂]))
+    (hNEQ : ∀ n t₁ t₂, P n (.nrel Language.Eq.eq ![t₁, t₂]))
+    (hLT : ∀ n t₁ t₂, P n (.rel Language.LT.lt ![t₁, t₂]))
+    (hNLT : ∀ n t₁ t₂, P n (.nrel Language.LT.lt ![t₁, t₂]))
+    (hAnd : ∀ n p q, Hierarchy 𝚺 1 p → Hierarchy 𝚺 1 q → P n p → P n q → P n (p ⋏ q))
+    (hOr : ∀ n p q, Hierarchy 𝚺 1 p → Hierarchy 𝚺 1 q → P n p → P n q → P n (p ⋎ q))
+    (hBall : ∀ n t p, Hierarchy 𝚺 1 p → P (n + 1) p → P n (∀[“#0 < !!(Rew.bShift t)”] p))
+    (hEx : ∀ n p, Hierarchy 𝚺 1 p → P (n + 1) p → P n (∃' p)) : ∀ n p, Hierarchy 𝚺 1 p → P n p
+  | _, _, Hierarchy.verum _ _ _               => hVerum _
+  | _, _, Hierarchy.falsum _ _ _              => hFalsum _
+  | _, _, Hierarchy.rel _ _ Language.Eq.eq v  => by simpa [←Matrix.fun_eq_vec₂] using hEQ _ (v 0) (v 1)
+  | _, _, Hierarchy.nrel _ _ Language.Eq.eq v => by simpa [←Matrix.fun_eq_vec₂] using hNEQ _ (v 0) (v 1)
+  | _, _, Hierarchy.rel _ _ Language.LT.lt v  => by simpa [←Matrix.fun_eq_vec₂] using hLT _ (v 0) (v 1)
+  | _, _, Hierarchy.nrel _ _ Language.LT.lt v => by simpa [←Matrix.fun_eq_vec₂] using hNLT _ (v 0) (v 1)
+  | _, _, Hierarchy.and hp hq                 =>
+    hAnd _ _ _ hp hq
+      (sigma₁_induction hVerum hFalsum hEQ hNEQ hLT hNLT hAnd hOr hBall hEx _ _ hp)
+      (sigma₁_induction hVerum hFalsum hEQ hNEQ hLT hNLT hAnd hOr hBall hEx _ _ hq)
+  | _, _, Hierarchy.or hp hq                  =>
+    hOr _ _ _ hp hq
+      (sigma₁_induction hVerum hFalsum hEQ hNEQ hLT hNLT hAnd hOr hBall hEx _ _ hp)
+      (sigma₁_induction hVerum hFalsum hEQ hNEQ hLT hNLT hAnd hOr hBall hEx _ _ hq)
+  | _, _, Hierarchy.ball pt hp                => by
+    rcases Rew.positive_iff.mp pt with ⟨t, rfl⟩
+    exact hBall _ t _ hp (sigma₁_induction hVerum hFalsum hEQ hNEQ hLT hNLT hAnd hOr hBall hEx _ _ hp)
+  | _, _, Hierarchy.bex pt hp                 => by
+    apply hEx
+    · simp [hp]
+    · rcases Rew.positive_iff.mp pt with ⟨t, rfl⟩
+      apply hAnd _ _ _ (by simp) hp (by simpa [Semiformula.Operator.lt_def] using hLT _ _ _)
+        (sigma₁_induction hVerum hFalsum hEQ hNEQ hLT hNLT hAnd hOr hBall hEx _ _ hp)
+  | _, _, Hierarchy.sigma (p := p) hp         => by
+    have : Hierarchy 𝚺 1 p := hp.accum _
+    exact hEx _ _ this (sigma₁_induction hVerum hFalsum hEQ hNEQ hLT hNLT hAnd hOr hBall hEx _ _ this)
+  | _, _, Hierarchy.ex hp                     => by
+    exact hEx _ _ hp (sigma₁_induction hVerum hFalsum hEQ hNEQ hLT hNLT hAnd hOr hBall hEx _ _ hp)
+
+lemma sigma₁_induction' {n p} (hp : Hierarchy 𝚺 1 p)
+    {P : (n : ℕ) → Semiformula ℒₒᵣ ξ n → Prop}
+    (hVerum : ∀ n, P n ⊤)
+    (hFalsum : ∀ n, P n ⊥)
+    (hEQ : ∀ n t₁ t₂, P n (.rel Language.Eq.eq ![t₁, t₂]))
+    (hNEQ : ∀ n t₁ t₂, P n (.nrel Language.Eq.eq ![t₁, t₂]))
+    (hLT : ∀ n t₁ t₂, P n (.rel Language.LT.lt ![t₁, t₂]))
+    (hNLT : ∀ n t₁ t₂, P n (.nrel Language.LT.lt ![t₁, t₂]))
+    (hAnd : ∀ n p q, Hierarchy 𝚺 1 p → Hierarchy 𝚺 1 q → P n p → P n q → P n (p ⋏ q))
+    (hOr : ∀ n p q, Hierarchy 𝚺 1 p → Hierarchy 𝚺 1 q → P n p → P n q → P n (p ⋎ q))
+    (hBall : ∀ n t p, Hierarchy 𝚺 1 p → P (n + 1) p → P n (∀[“#0 < !!(Rew.bShift t)”] p))
+    (hEx : ∀ n p, Hierarchy 𝚺 1 p → P (n + 1) p → P n (∃' p)) : P n p :=
+  sigma₁_induction hVerum hFalsum hEQ hNEQ hLT hNLT hAnd hOr hBall hEx n p hp
+
+end LOR
+
 end Arith
 
 end FirstOrder

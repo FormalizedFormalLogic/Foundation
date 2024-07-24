@@ -12,6 +12,7 @@ inductive Derivation2 : Finset (SyntacticFormula L) → Type _
 | all   {Δ} {p : SyntacticSemiformula L 1} : ∀' p ∈ Δ → Derivation2 (insert (Rew.free.hom p) (Δ.image Rew.shift.hom)) → Derivation2 Δ
 | ex    {Δ} {p : SyntacticSemiformula L 1} : ∃' p ∈ Δ → (t : SyntacticTerm L) → Derivation2 (insert (p/[t]) Δ) → Derivation2 Δ
 | wk    {Δ Γ} : Derivation2 Δ → Δ ⊆ Γ → Derivation2 Γ
+| shift {Δ}   : Derivation2 Δ → Derivation2 (Δ.image Rew.shift.hom)
 | cut   {Δ p} : Derivation2 (insert p Δ) → Derivation2 (insert (~p) Δ) → Derivation2 Δ
 
 prefix: 45 " ⊢¹ᶠ " => Derivation2
@@ -59,6 +60,7 @@ noncomputable def Derivation2.toDerivation : {Γ : Finset (SyntacticFormula L)} 
     Derivation.ex' (p := p) (by simp [h]) t (Tait.wk d.toDerivation <| by intro x; simp [shifts])
   | _, Derivation2.wk d h =>
     Tait.wk d.toDerivation (by intro x; simp; exact @h x)
+  | _, Derivation2.shift d => Derivation.wk (Derivation.shift d.toDerivation) <| by intro x; simp [shifts]
   | _, Derivation2.cut (p := p) d dn =>
     Derivation.cut (p := p) (Tait.wk d.toDerivation <| by intro x; simp) (Tait.wk dn.toDerivation <| by intro x; simp)
 

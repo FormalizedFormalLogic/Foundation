@@ -237,6 +237,8 @@ abbrev Evalfm (M : Type w) [s : Structure L M] (ε : μ → M) :
 abbrev Evalbm (M : Type w) [s : Structure L M] (e : Fin n → M) :
     Semiformula L Empty n →ˡᶜ Prop := Evalb s e
 
+notation:max M:90 " ⊧/" e:max => Evalbm M e
+
 abbrev Realize (s : Structure L M) : Formula L M →ˡᶜ Prop := Eval s ![] id
 
 lemma eval_rel {k} {r : L.Rel k} {v} :
@@ -386,12 +388,12 @@ section Syntactic
 variable (ε : ℕ → M)
 
 @[simp] lemma eval_free (p : SyntacticSemiformula L (n + 1)) :
-    Eval s e (a :>ₙ ε) (Rew.free.hom p) ↔ Eval s (e <: a) ε p :=
-  by simp [eval_rew, Function.comp]; congr; apply iff_of_eq; congr; funext x; cases x using Fin.lastCases <;> simp
+    Eval s e (a :>ₙ ε) (Rew.free.hom p) ↔ Eval s (e <: a) ε p := by
+  simp [eval_rew, Function.comp]; apply iff_of_eq; congr; funext x; cases x using Fin.lastCases <;> simp
 
 @[simp] lemma eval_shift (p : SyntacticSemiformula L n) :
-    Eval s e (a :>ₙ ε) (Rew.shift.hom p) ↔ Eval s e ε p :=
-  by simp [eval_rew, Function.comp]
+    Eval s e (a :>ₙ ε) (Rew.shift.hom p) ↔ Eval s e ε p := by
+  simp [eval_rew, Function.comp]
 
 end Syntactic
 
