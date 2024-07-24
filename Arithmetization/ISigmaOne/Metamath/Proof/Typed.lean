@@ -20,9 +20,9 @@ variable {L : Arith.Language V} {pL : LDef} [Arith.Language.Defined L pL]
 
 section typed_formula
 
-def Language.TSemiformula.substs₁ (p : L.TSemiformula (0 + 1)) (t : L.TTerm) : L.TFormula := p.substs t.sing
+abbrev Language.TSemiformula.substs₁ (p : L.TSemiformula (0 + 1)) (t : L.TTerm) : L.TFormula := p.substs t.sing
 
-def Language.TSemiformula.free (p : L.TSemiformula (0 + 1)) : L.TFormula := p.shift.substs₁ (L.fvar 0)
+abbrev Language.TSemiformula.free (p : L.TSemiformula (0 + 1)) : L.TFormula := p.shift.substs₁ (L.fvar 0)
 
 @[simp] lemma Language.TSemiformula.val_substs₁ (p : L.TSemiformula (0 + 1)) (t : L.TTerm) :
     (p.substs₁ t).val = L.substs 0 ?[t.val] p.val := by simp [substs₁, substs]
@@ -177,6 +177,10 @@ def ex {p : L.TSemiformula (0 + 1)} (t : L.TTerm) (dp : T ⊢¹ insert (p.substs
 def wk (d : T ⊢¹ Δ) (h : Δ ⊆ Γ) : T ⊢¹ Γ :=
   Language.Theory.Derivable.toTDerivation _ <| by
     simpa using Language.Theory.Derivable.wk (by simp) (Language.Sequent.subset_iff.mp h) (by simpa using d.toDerivable)
+
+def shift (d : T ⊢¹ Γ) : T ⊢¹ Γ.shift :=
+  Language.Theory.Derivable.toTDerivation _ <| by
+    simpa using Language.Theory.Derivable.shift (by simpa using d.toDerivable)
 
 def cut (d₁ : T ⊢¹ insert p Γ) (d₂ : T ⊢¹ insert (~p) Γ) : T ⊢¹ Γ :=
   Language.Theory.Derivable.toTDerivation _ <| by
@@ -351,6 +355,8 @@ def conjOr' (ps : L.TSemiformulaVec 0) (q) (ds : ∀ i, (hi : i < len ps.val) �
 def disj (ps : L.TSemiformulaVec 0) {i} (hi : i < len ps.val) (d : T ⊢ ps.nth i hi) : T ⊢ ps.disj :=
   TDerivation.disj ps hi d
 
+def shift {p : L.TFormula} (d : T ⊢ p) : T ⊢ p.shift := by simpa using TDerivation.shift d
+
 def all {p : L.TSemiformula (0 + 1)} (dp : T ⊢ p.free) : T ⊢ p.all := TDerivation.all (by simpa using dp)
 
 def generalizeAux {C : L.TFormula} {p : L.TSemiformula (0 + 1)} (dp : T ⊢ C.shift ⟶ p.free) : T ⊢ C ⟶ p.all := by
@@ -380,6 +386,8 @@ def specializeWithCtxAux {C : L.TFormula} {p : L.TSemiformula (0 + 1)} (d : T �
   exact TDerivation.wk (TDerivation.orInv d) (by intro x; simp; tauto)
 
 def specializeWithCtx {Γ} {p : L.TSemiformula (0 + 1)} (d : Γ ⊢[T] p.all) (t) : Γ ⊢[T] p.substs₁ t := specializeWithCtxAux d t
+
+def ex {p : L.TSemiformula (0 + 1)} (t) (dp : T ⊢ p.substs₁ t) : T ⊢ p.ex := TDerivation.ex t (by simpa using dp)
 
 end Language.Theory.TProof
 

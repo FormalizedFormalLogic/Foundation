@@ -171,8 +171,24 @@ end Language.TSemiformulaVec
 
 namespace Language.TSemifromula
 
+lemma subst_eq_self {n : V} (w : L.TSemitermVec n n) (p : L.TSemiformula n) (H : ∀ i, (hi : i < n) → w.nth i hi = L.bvar i hi) :
+    p^/[w] = p := by
+  ext; simp; rw [Arith.subst_eq_self p.prop w.prop]
+  intro i hi
+  simpa using congr_arg Language.TSemiterm.val (H i hi)
+
+@[simp] lemma subst_eq_self₁ (p : L.TSemiformula (0 + 1)) :
+    p^/[(L.bvar 0 (by simp)).sing] = p := by
+  apply subst_eq_self
+  simp only [zero_add, lt_one_iff_eq_zero]
+  rintro _ rfl
+  simp
+
+lemma shift_substs {n m : V} (w : L.TSemitermVec n m) (p : L.TSemiformula n) :
+    (p^/[w]).shift = p.shift^/[w.shift] := by ext; simp; rw [Arith.shift_substs p.prop w.prop]
+
 lemma substs_substs {n m l : V} (v : L.TSemitermVec m l) (w : L.TSemitermVec n m) (p : L.TSemiformula n) :
-  (p^/[w])^/[v] = p^/[w.substs v] := by ext; simp; rw [Arith.substs_substs p.prop v.prop w.prop]
+    (p^/[w])^/[v] = p^/[w.substs v] := by ext; simp; rw [Arith.substs_substs p.prop v.prop w.prop]
 
 end Language.TSemifromula
 

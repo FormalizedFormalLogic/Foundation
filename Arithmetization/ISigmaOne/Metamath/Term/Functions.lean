@@ -157,6 +157,18 @@ lemma termSubst_termSubst {l n m w v t : V} (hv : L.SemitermVec l n v) (ht : L.S
     intro i hi
     rw [nth_termSubstVec (hv.termSubstVec hts) hi, nth_termSubstVec hts hi, nth_termSubstVec hts hi, ih i hi]
 
+lemma termSubst_eq_self {n m w t : V} (ht : L.Semiterm n t) (H : ∀ i < n, w.[i] = ^#i) :
+    L.termSubst n m w t = t := by
+  apply Language.Semiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
+  · definability
+  · intro z hz; simp [hz, H]
+  · intro x; simp
+  · intro k f v hf hv ih
+    simp only [termSubst_func, qqFunc_inj, true_and, hf, hv]
+    apply nth_ext' k (by simp [*]) (by simp [hv.1])
+    intro i hi
+    rw [nth_termSubstVec hv hi, ih i hi]
+
 end termSubst
 
 namespace TermShift
@@ -434,6 +446,22 @@ lemma substs_cons_bShift {n m u t w} (ht : L.Semiterm n t) (hw : L.SemitermVec n
     intro i hi
     simp [nth_termSubstVec hv.termBShiftVec hi, nth_termSubstVec hv hi, nth_termBShiftVec hv hi, ih i hi]
 
+lemma termShift_termSubsts {n m w t} (ht : L.Semiterm n t) (hw : L.SemitermVec n m w) :
+    L.termShift m (L.termSubst n m w t) = L.termSubst n m (L.termShiftVec n m w) (L.termShift n t) := by
+  apply Language.Semiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
+  · definability
+  · intro z hz; simp [hz, nth_termShiftVec hw hz]
+  · intro x; simp
+  · intro k f v hf hv ih
+    simp only [termSubst_func, Language.SemitermVec.termSubstVec, termShift_func,
+      Language.SemitermVec.termShiftVec, qqFunc_inj, true_and, hf, hv, hw]
+    apply nth_ext' k (by simp [hw, hv]) (by simp [hv])
+    intro i hi
+    rw [nth_termShiftVec (hw.termSubstVec hv) hi,
+      nth_termSubstVec hv hi,
+      nth_termSubstVec hv.termShiftVec hi,
+      nth_termShiftVec hv hi, ih i hi]
+
 lemma bShift_substs {n m w t} (ht : L.Semiterm n t) (hw : L.SemitermVec n m w) :
     L.termBShift m (L.termSubst n m w t) = L.termSubst n (m + 1) (L.termBShiftVec n m w) t := by
   apply Language.Semiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
@@ -466,6 +494,20 @@ lemma termSubstVec_qVec_qVec {l n m : V} (hv : L.SemitermVec l n v) (hw : L.Semi
       nth_termSubstVec hv hi,
       substs_cons_bShift (hv.2 i hi) hw.termBShiftVec,
       bShift_substs (hv.2 i hi) hw]
+
+lemma termShift_qVec {n m w : V} (hw : L.SemitermVec n m w) :
+    L.termShiftVec (n + 1) (m + 1) (L.qVec n m w) = L.qVec n m (L.termShiftVec n m w) := by
+  apply nth_ext' (n + 1) (by rw [len_termShiftVec hw.qVec]) (by simp [hw])
+  intro i hi
+  rw [nth_termShiftVec hw.qVec hi]
+  unfold Language.qVec
+  rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
+  · simp
+  · rw [nth_cons_succ, nth_cons_succ,
+      nth_termBShiftVec hw (by simpa using hi),
+      nth_termBShiftVec hw.termShiftVec (by simpa using hi),
+      nth_termShiftVec hw (by simpa using hi),
+      termBShift_termShift (hw.2 i (by simpa using hi))]
 
 end
 

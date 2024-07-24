@@ -524,6 +524,46 @@ lemma substs_neg {p} (hp : L.Semiformula n p) :
   · intro n p hp ih m w hw
     simp [hp, hw, hp.substs hw.qVec, ih hw.qVec]
 
+lemma shift_substs {p} (hp : L.Semiformula n p) :
+    L.SemitermVec n m w → L.shift (L.substs m w p) = L.substs m (L.termShiftVec n m w) (L.shift p) := by
+  revert m w
+  apply Language.Semiformula.induction_pi₁ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ _ _ hp
+  · definability
+  · intro n k R v hR hv m w hw
+    simp only [substs_rel, Language.SemitermVec.termSubstVec, shift_rel,
+      Language.SemitermVec.termShiftVec, qqRel_inj, true_and, hR, hv, hw]
+    apply nth_ext' k (by simp [*]) (by simp [*])
+    intro i hi
+    rw [nth_termShiftVec (hw.termSubstVec hv) hi,
+      nth_termSubstVec hv hi,
+      nth_termSubstVec hv.termShiftVec hi,
+      nth_termShiftVec hv hi,
+      termShift_termSubsts (hv.2 i hi) hw]
+  · intro n k R v hR hv m w hw
+    simp only [substs_nrel, Language.SemitermVec.termSubstVec, shift_nrel,
+      Language.SemitermVec.termShiftVec, qqNRel_inj, true_and, hR, hv, hw]
+    apply nth_ext' k (by simp [*]) (by simp [*])
+    intro i hi
+    rw [nth_termShiftVec (hw.termSubstVec hv) hi,
+      nth_termSubstVec hv hi,
+      nth_termSubstVec hv.termShiftVec hi,
+      nth_termShiftVec hv hi,
+      termShift_termSubsts (hv.2 i hi) hw]
+  · intro n w hw; simp
+  · intro n w hw; simp
+  · intro n p q hp hq ihp ihq m w hw
+    simp [*]
+    rw [shift_and (hp.substs hw) (hq.substs hw), ihp hw, ihq hw]
+  · intro n p q hp hq ihp ihq m w hw
+    simp [*]
+    rw [shift_or (hp.substs hw) (hq.substs hw), ihp hw, ihq hw]
+  · intro n p hp ih m w hw
+    simp only [substs_all, shift_all, Language.Semiformula.shift_iff, hp]
+    rw [shift_all (hp.substs hw.qVec), ih hw.qVec, termShift_qVec hw]
+  · intro n p hp ih m w hw
+    simp only [substs_ex, shift_ex, Language.Semiformula.shift_iff, hp]
+    rw [shift_ex (hp.substs hw.qVec), ih hw.qVec, termShift_qVec hw]
+
 lemma substs_substs {p} (hp : L.Semiformula l p) :
     L.SemitermVec n m w → L.SemitermVec l n v → L.substs m w (L.substs n v p) = L.substs m (L.termSubstVec l n m w v) p := by
   revert m w n v
@@ -567,6 +607,48 @@ lemma substs_substs {p} (hp : L.Semiformula l p) :
   · intro l p hp ih m w n v hw hv
     simp only [substs_ex, hp]
     rw [substs_ex (hp.substs hv.qVec), ih hw.qVec hv.qVec, termSubstVec_qVec_qVec hv hw]
+
+lemma subst_eq_self {n w : V} (hp : L.Semiformula n p) (hw : L.SemitermVec n n w) (H : ∀ i < n, w.[i] = ^#i) :
+    L.substs n w p = p := by
+  revert w
+  apply Language.Semiformula.induction_pi₁ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ _ _ hp
+  · definability
+  · intro n k R v hR hv w _ H
+    simp only [substs_rel, qqRel_inj, true_and, hR, hv]
+    apply nth_ext' k (by simp [*]) (by simp [hv.1])
+    intro i hi
+    rw [nth_termSubstVec hv hi, termSubst_eq_self (hv.2 i hi) H]
+  · intro n k R v hR hv w _ H
+    simp only [substs_nrel, qqNRel_inj, true_and, hR, hv]
+    apply nth_ext' k (by simp [*]) (by simp [hv.1])
+    intro i hi
+    rw [nth_termSubstVec hv hi, termSubst_eq_self (hv.2 i hi) H]
+  · intro n w _ _; simp
+  · intro n w _ _; simp
+  · intro n p q hp hq ihp ihq w hw H
+    simp [*, ihp hw H, ihq hw H]
+  · intro n p q hp hq ihp ihq w hw H
+    simp [*, ihp hw H, ihq hw H]
+  · intro n p hp ih w hw H
+    have H : ∀ i < n + 1, (L.qVec n n w).[i] = ^#i := by
+      intro i hi
+      rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
+      · simp [Language.qVec]
+      · have hi : i < n := by simpa using hi
+        simp only [Language.qVec, nth_cons_succ]
+        rw [nth_termBShiftVec hw hi]
+        simp [H i hi, hi]
+    simp [*, ih hw.qVec H]
+  · intro n p hp ih w hw H
+    have H : ∀ i < n + 1, (L.qVec n n w).[i] = ^#i := by
+      intro i hi
+      rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
+      · simp [Language.qVec]
+      · have hi : i < n := by simpa using hi
+        simp only [Language.qVec, nth_cons_succ]
+        rw [nth_termBShiftVec hw hi]
+        simp [H i hi, hi]
+    simp [*, ih hw.qVec H]
 
 end substs
 

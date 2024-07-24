@@ -126,32 +126,13 @@ noncomputable def ltExt (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.TTerm) : T ⊢ t�
     simpa using this
   exact of (Γ := Γ) this ⨀ bu ⨀ b
 
-/-
-noncomputable def ballReplace (p : ⌜ℒₒᵣ⌝.TSemiformula (0 + 1)) (t u : ⌜ℒₒᵣ⌝.TTerm) :
-    T ⊢ t =' u ⟶ p.ball t ⟶ p.ball u := by {
-  have := replace T ((p^/[(#'0).sing]).ball #'0) t u
-  simp [Language.TSemifromula.substs_substs] at this
-  sorry}
--/
-
 noncomputable def ballReplace (p : ⌜ℒₒᵣ⌝.TSemiformula (0 + 1)) (t u : ⌜ℒₒᵣ⌝.TTerm) :
     T ⊢ t =' u ⟶ p.ball t ⟶ p.ball u := by
-  apply deduct'
-  apply deduct
-  simp only [Language.TSemiformula.ball_eq_imp]
-  apply generalize
-  simp [Language.TSemiformula.free, Language.TSemiformula.substs₁]
-  apply deduct
-  simp only [← Language.TSemiterm.bShift_shift_comm, Language.TSemiterm.bShift_substs_sing]
-  let Γ := [&'0 <' u.shift, (#'0 <' t.shift.bShift ⟶ p.shift).all, t.shift =' u.shift]
-  have    : Γ ⊢[T] (#'0 <' t.shift.bShift ⟶ p.shift).all  := FiniteContext.byAxm <| by simp [Γ]
-  have bp : Γ ⊢[T] &'0 <' t.shift ⟶ p.shift^/[(&'0).sing] := by simpa [Language.TSemiformula.substs₁] using specializeWithCtx this (&'0)
-  have bu : Γ ⊢[T] &'0 <' u.shift                         := FiniteContext.byAxm <| by simp [Γ]
-  have    : Γ ⊢[T] &'0 <' t.shift                         := by
-    refine (of (Γ := Γ) <| ltExt T (&'0) (&'0) u.shift t.shift) ⨀ (of <| eqRefl T _) ⨀ ?_ ⨀ bu
-    have e  : Γ ⊢[T] t.shift =' u.shift := FiniteContext.byAxm <| by simp [Γ]
-    exact (of (Γ := Γ) <| eqSymm T t.shift u.shift) ⨀ e
-  exact bp ⨀ this
+  simpa [Language.TSemifromula.substs_substs] using replace T ((p^/[(#'0).sing]).ball #'0) t u
+
+noncomputable def bexReplace (p : ⌜ℒₒᵣ⌝.TSemiformula (0 + 1)) (t u : ⌜ℒₒᵣ⌝.TTerm) :
+    T ⊢ t =' u ⟶ p.bex t ⟶ p.bex u := by
+  simpa [Language.TSemifromula.substs_substs] using replace T ((p^/[(#'0).sing]).bex #'0) t u
 
 variable [R₀Theory T]
 
@@ -186,21 +167,29 @@ noncomputable def nltComplete {n m : V} (h : m ≤ n) : T ⊢ ↑n ≮' ↑m := 
 
 noncomputable def ballIntro (p : ⌜ℒₒᵣ⌝.TSemiformula (0 + 1)) (n : V)
     (bs : ∀ i < n, T ⊢ p ^/[(i : ⌜ℒₒᵣ⌝.TTerm).sing]) :
-    T ⊢ p.ball ↑n := by {
+    T ⊢ p.ball ↑n := by
   apply all
   suffices T ⊢ &'0 ≮' ↑n ⋎ p.shift^/[(&'0).sing] by
     simpa [Language.TSemiformula.free, Language.TSemiformula.substs₁]
-  have : T ⊢ (tSubstItr (&'0).sing (#'1 ≠' #'0) n).conj ⋎ p.shift^/[(&'0).sing] := by {
+  have : T ⊢ (tSubstItr (&'0).sing (#'1 ≠' #'0) n).conj ⋎ p.shift^/[(&'0).sing] := by
     apply conjOr'
     intro i hi
     have hi : i < n := by simpa using hi
-    suffices T ⊢ &'0 =' ↑i ⟶ p.shift^/[(&'0).sing] by
-      simpa [nth_tSubstItr', hi, Language.TSemiformula.imp_def] using this
-    apply deduct'
-    sorry
-  }
+    let Γ := [&'0 =' typedNumeral 0 i]
+    suffices Γ ⊢[T] p.shift^/[(&'0).sing] by
+      simpa [nth_tSubstItr', hi, Language.TSemiformula.imp_def] using deduct' this
+    have e : Γ ⊢[T] ↑i =' &'0 := of (eqSymm T &'0 ↑i) ⨀ (FiniteContext.byAxm <| by simp [Γ])
+    have : T ⊢ p.shift^/[(i : ⌜ℒₒᵣ⌝.TTerm).sing] := by
+      simpa [Language.TSemifromula.shift_substs] using shift (bs i hi)
+    exact of (replace T p.shift ↑i &'0) ⨀ e ⨀ of this
   exact orReplaceLeft' this (andRight (nltNumeral T (&'0) n))
-}
+
+noncomputable def bexIntro (p : ⌜ℒₒᵣ⌝.TSemiformula (0 + 1)) (n : V) {i}
+    (hi : i < n) (bs : T ⊢ p ^/[(i : ⌜ℒₒᵣ⌝.TTerm).sing]) :
+    T ⊢ p.bex ↑n := by
+  apply ex i
+  suffices T ⊢ i <' n ⋏ p^/[(i : ⌜ℒₒᵣ⌝.TTerm).sing] by simpa
+  exact System.andIntro (ltComplete T hi) bs
 
 end TProof
 

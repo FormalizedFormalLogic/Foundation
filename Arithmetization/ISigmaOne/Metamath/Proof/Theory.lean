@@ -170,6 +170,15 @@ lemma wk {s s' : V} (h : L.FormulaSet s) (hs : s' ⊆ s) (d : T.Derivable s') : 
   rcases d with ⟨Γ, hΓ, d⟩
   exact ⟨Γ, hΓ, Language.Derivable.wk (by simp [by simpa using d.formulaSet, h]) (by intro x; simp; tauto) d⟩
 
+lemma shift {s : V} (d : T.Derivable s) : T.Derivable (L.setShift s) := by
+  rcases d with ⟨Γ, hΓ, d⟩
+  have hs : L.setShift Γ = Γ := mem_ext <| by
+    simp only [mem_setShift_iff]; intro x
+    constructor
+    · rintro ⟨x, hx, rfl⟩; simpa [fvFree_of_neg_mem (hΓ x hx) |>.2] using hx
+    · intro hx; exact ⟨x, hx, by simp [fvFree_of_neg_mem (hΓ x hx) |>.2]⟩
+  exact ⟨Γ, hΓ, by simpa [hs] using Language.Derivable.shift d⟩
+
 lemma cut {s : V} (p : V) (d : T.Derivable (insert p s)) (dn : T.Derivable (insert (L.neg p) s)) : T.Derivable s := by
   rcases d with ⟨Γ, hΓ, d⟩; rcases dn with ⟨Δ, hΔ, b⟩
   exact ⟨Γ ∪ Δ, fun p hp ↦ by rcases mem_cup_iff.mp hp with (h | h); { exact hΓ p h }; { exact hΔ p h },
@@ -248,9 +257,6 @@ lemma disj (ps s : V) {i} (hps : ∀ i < len ps, L.Formula ps.[i])
 
 end Language.Theory.Derivable
 
-
 end derivableWithTheory
-
-
 
 end LO.Arith
