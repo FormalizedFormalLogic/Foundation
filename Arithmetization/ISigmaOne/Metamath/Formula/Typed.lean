@@ -57,6 +57,9 @@ scoped instance : LogicalConnective (L.TSemiformula n) where
 
 def Language.TSemiformula.cast (p : L.TSemiformula n) (eq : n = n' := by simp) : L.TSemiformula n' := eq ▸ p
 
+@[simp] lemma Language.TSemiformula.val_cast (p : L.TSemiformula n) (eq : n = n') :
+    (p.cast eq).val = p.val := by rcases eq; simp [Language.TSemiformula.cast]
+
 def Language.TSemiformula.all (p : L.TSemiformula (n + 1)) : L.TSemiformula n := ⟨^∀[n] p.val, by simp⟩
 
 def Language.TSemiformula.ex (p : L.TSemiformula (n + 1)) : L.TSemiformula n := ⟨^∃[n] p.val, by simp⟩

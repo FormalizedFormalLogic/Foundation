@@ -339,10 +339,15 @@ instance : System.Classical T where
 
 def exIntro (p : L.TSemiformula (0 + 1)) (t : L.TTerm) (b : T ⊢ p.substs₁ t) : T ⊢ p.ex := TDerivation.ex t b
 
+lemma ex_intro! (p : L.TSemiformula (0 + 1)) (t : L.TTerm) (b : T ⊢! p.substs₁ t) : T ⊢! p.ex := ⟨exIntro _ t b.get⟩
+
 def specialize {p : L.TSemiformula (0 + 1)} (b : T ⊢ p.all) (t : L.TTerm) : T ⊢ p.substs₁ t := TDerivation.specialize b t
 
-def conj (ps : L.TSemiformulaVec 0) (ds : ∀ i, (hi : i < len ps.val) → T ⊢ ps.nth i hi) : T ⊢ ps.conj :=
-  TDerivation.conj ps ds
+lemma specialize! {p : L.TSemiformula (0 + 1)} (b : T ⊢! p.all) (t : L.TTerm) : T ⊢! p.substs₁ t := ⟨TDerivation.specialize b.get t⟩
+
+def conj (ps : L.TSemiformulaVec 0) (ds : ∀ i, (hi : i < len ps.val) → T ⊢ ps.nth i hi) : T ⊢ ps.conj := TDerivation.conj ps ds
+
+lemma conj! (ps : L.TSemiformulaVec 0) (ds : ∀ i, (hi : i < len ps.val) → T ⊢! ps.nth i hi) : T ⊢! ps.conj := ⟨conj ps fun i hi ↦ (ds i hi).get⟩
 
 def conj' (ps : L.TSemiformulaVec 0) (ds : ∀ i, (hi : i < len ps.val) → T ⊢ ps.nth (len ps.val - (i + 1)) (sub_succ_lt_self hi)) : T ⊢ ps.conj :=
   TDerivation.conj ps <| fun i hi ↦ by
@@ -357,7 +362,11 @@ def disj (ps : L.TSemiformulaVec 0) {i} (hi : i < len ps.val) (d : T ⊢ ps.nth 
 
 def shift {p : L.TFormula} (d : T ⊢ p) : T ⊢ p.shift := by simpa using TDerivation.shift d
 
+lemma shift! {p : L.TFormula} (d : T ⊢! p) : T ⊢! p.shift := ⟨by simpa using TDerivation.shift d.get⟩
+
 def all {p : L.TSemiformula (0 + 1)} (dp : T ⊢ p.free) : T ⊢ p.all := TDerivation.all (by simpa using dp)
+
+lemma all! {p : L.TSemiformula (0 + 1)} (dp : T ⊢! p.free) : T ⊢! p.all := ⟨all dp.get⟩
 
 def generalizeAux {C : L.TFormula} {p : L.TSemiformula (0 + 1)} (dp : T ⊢ C.shift ⟶ p.free) : T ⊢ C ⟶ p.all := by
   rw [TSemiformula.imp_def] at dp ⊢
@@ -378,6 +387,8 @@ def generalize {Γ} {p : L.TSemiformula (0 + 1)} (d : Γ.map .shift ⊢[T] p.fre
   apply generalizeAux
   simpa [conj_shift] using System.FiniteContext.toDef d
 
+lemma generalize! {Γ} {p : L.TSemiformula (0 + 1)} (d : Γ.map .shift ⊢[T]! p.free) : Γ ⊢[T]! p.all := ⟨generalize d.get⟩
+
 def specializeWithCtxAux {C : L.TFormula} {p : L.TSemiformula (0 + 1)} (d : T ⊢ C ⟶ p.all) (t : L.TTerm) : T ⊢ C ⟶ p.substs₁ t := by
   rw [TSemiformula.imp_def] at d ⊢
   apply TDerivation.or
@@ -387,7 +398,11 @@ def specializeWithCtxAux {C : L.TFormula} {p : L.TSemiformula (0 + 1)} (d : T �
 
 def specializeWithCtx {Γ} {p : L.TSemiformula (0 + 1)} (d : Γ ⊢[T] p.all) (t) : Γ ⊢[T] p.substs₁ t := specializeWithCtxAux d t
 
+lemma specialize_with_ctx! {Γ} {p : L.TSemiformula (0 + 1)} (d : Γ ⊢[T]! p.all) (t) : Γ ⊢[T]! p.substs₁ t := ⟨specializeWithCtx d.get t⟩
+
 def ex {p : L.TSemiformula (0 + 1)} (t) (dp : T ⊢ p.substs₁ t) : T ⊢ p.ex := TDerivation.ex t (by simpa using dp)
+
+lemma ex! {p : L.TSemiformula (0 + 1)} (t) (dp : T ⊢! p.substs₁ t) : T ⊢! p.ex := ⟨ex t dp.get⟩
 
 end Language.Theory.TProof
 

@@ -48,6 +48,33 @@ def toNumVec {n} (e : Fin n → V) : (Language.codeIn ℒₒᵣ V).TSemitermVec 
 
 @[simp] lemma toNumVec_nth {n} (e : Fin n → V) (i : Fin n) : (toNumVec e).nth i = ↑(e i) := by ext; simp [toNumVec]
 
+@[simp] lemma toNumVec_val_nth {n} (e : Fin n → V) (i : Fin n) : (toNumVec e).val.[i] = numeral (e i) := by simp [toNumVec]
+
+/-- TODO: move-/
+@[simp] lemma coe_coe_lt {n} (i : Fin n) : (i : V) < (n : V) :=
+  calc (i : V) < (i : V) + (n - i : V) := by simp
+  _  = (n : V) := by simp
+
+@[simp] lemma cast_substs_numVec (p : Semisentence ℒₒᵣ (n + 1)) :
+    ((.cast (V := V) (n := ↑(n + 1)) (n' := ↑n + 1) ⌜Rew.embₙ.hom p⌝ (by simp)) ^/[(toNumVec e).q.substs (typedNumeral 0 x).sing]) =
+    ⌜Rew.embₙ.hom p⌝ ^/[toNumVec (x :> e)] := by
+  have : (toNumVec e).q.substs (typedNumeral 0 x).sing = x ∷ᵗ toNumVec e := by
+    ext; simp
+    apply nth_ext' ((↑n : V) + 1)
+      (by rw [len_termSubstVec]; simpa using (toNumVec e).prop.qVec)
+      (by simp [←(toNumVec e).prop.1])
+    intro i hi
+    rw [nth_termSubstVec (by simpa using (toNumVec e).prop.qVec) hi]
+    rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
+    · simp [Language.qVec]
+    · simp only [Language.qVec, nth_cons_succ, Language.TSemitermVec.prop]
+      rcases eq_fin_of_lt_nat (by simpa using hi) with ⟨i, rfl⟩
+      rw [nth_termBShiftVec (by simp)]
+      simp; exact coe_coe_lt (V := V) i
+  rw [this]
+  ext; simp [toNumVec]
+
+
 namespace TProof
 
 open Language.Theory.TProof System
@@ -80,9 +107,11 @@ open FirstOrder.Arith
 
 theorem boldSigma₁Complete : ∀ {n} {σ : Semisentence ℒₒᵣ n},
     Hierarchy 𝚺 1 σ → ∀ {e}, Semiformula.Evalbm V e σ → T ⊢! ⌜Rew.embₙ.hom σ⌝^/[toNumVec e]
-  | _, _, Hierarchy.verum _ _ _,               _, h => by simp
-  | _, _, Hierarchy.falsum _ _ _,              _, h => by simp at h
-  | _, _, Hierarchy.rel _ _ Language.Eq.eq v,  e, h => by { simp [Rew.rel]; sorry }
+  | _, _, Hierarchy.verum _ _ _,               _, h => by simp only [LogicalConnective.HomClass.map_top,
+    Semiformula.codeIn'_verum, Language.TSemiformula.substs_verum, Language.TSemiformula.neg_verum,
+    Language.TSemiformula.neg_falsum, verum!, dne'!]
+  | _, _, Hierarchy.falsum _ _ _,              _, h => by sorry
+  | _, _, Hierarchy.rel _ _ Language.Eq.eq v,  e, h => by sorry
   | _, _, Hierarchy.nrel _ _ Language.Eq.eq v, e, h => by sorry
   | _, _, Hierarchy.rel _ _ Language.LT.lt v,  e, h => by sorry
   | _, _, Hierarchy.nrel _ _ Language.LT.lt v, e, h => by sorry
@@ -94,17 +123,40 @@ theorem boldSigma₁Complete : ∀ {n} {σ : Semisentence ℒₒᵣ n},
     rcases this with (h | h)
     · simpa using or₁'! (boldSigma₁Complete hp h)
     · simpa using or₂'! (boldSigma₁Complete hq h)
-  | _, _, Hierarchy.ball pt hp,                e, h => by {
+  | _, _, Hierarchy.ball (p := p) pt hp,                e, h => by
     rcases Rew.positive_iff.mp pt with ⟨t, rfl⟩
-    have := termEqComplete T e t
-    simp [←Rew.emb_bShift_term]
-    sorry
-
-
-       }
-  | _, _, Hierarchy.bex pt hp,                 e, h => by sorry
-  | _, _, Hierarchy.sigma (p := p) hp,         e, h => by sorry
-  | _, _, Hierarchy.ex hp,                     e, h => by sorry
+    simp only [Rew.ball, Rew.q_emb, Rew.hom_finitary2, Rew.emb_bvar, ← Rew.emb_bShift_term,
+      Semiformula.codeIn'_ball, substs_ball]
+    apply ball_replace! T _ _ _ ⨀ (eq_symm! T _ _ ⨀ termEq_complete! T e t) ⨀ ?_
+    apply ball_intro!
+    intro x hx
+    suffices T ⊢! ⌜Rew.embₙ.hom p⌝^/[toNumVec (x :> e)]  by
+      simpa [Language.TSemifromula.substs_substs]
+    have : Semiformula.Evalbm V (x :> e) p := by
+      simp at h; exact h x hx
+    exact boldSigma₁Complete hp this
+  | _, _, Hierarchy.bex (p := p) (t := t) pt hp,                 e, h => by
+    rcases Rew.positive_iff.mp pt with ⟨t, rfl⟩
+    simp only [Rew.bex, Rew.q_emb, Rew.hom_finitary2, Rew.emb_bvar, ← Rew.emb_bShift_term,
+      Semiformula.codeIn'_bex, substs_bex]
+    apply bex_replace! T _ _ _ ⨀ (eq_symm! T _ _ ⨀ termEq_complete! T e t) ⨀ ?_
+    have : ∃ x < t.valbm V e, Semiformula.Evalbm V (x :> e) p := by simpa using h
+    rcases this with ⟨x, hx, Hx⟩
+    apply bex_intro! T _ _ hx
+    simpa [Language.TSemifromula.substs_substs] using boldSigma₁Complete hp Hx
+  | _, _, Hierarchy.sigma (p := p) hp,         e, h => by
+    have hp : Hierarchy 𝚺 1 p := hp.accum _
+    simp only [Rew.ex, Rew.q_emb, Semiformula.codeIn'_ex, Language.TSemiformula.substs_ex]
+    have : ∃ x, Semiformula.Evalbm V (x :> e) p := by simpa using h
+    rcases this with ⟨x, hx⟩
+    apply ex! x
+    simpa [Language.TSemifromula.substs_substs] using boldSigma₁Complete hp hx
+  | _, _, Hierarchy.ex (p := p) hp,                     e, h => by
+    simp only [Rew.ex, Rew.q_emb, Semiformula.codeIn'_ex, Language.TSemiformula.substs_ex]
+    have : ∃ x, Semiformula.Evalbm V (x :> e) p := by simpa using h
+    rcases this with ⟨x, hx⟩
+    apply ex! x
+    simpa [Language.TSemifromula.substs_substs] using boldSigma₁Complete hp hx
 
 end TProof
 

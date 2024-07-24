@@ -61,10 +61,14 @@ def eqRefl (t : ⌜ℒₒᵣ⌝.TTerm) : T ⊢ t =' t := by
   have : T ⊢ (#'0 =' #'0).all := byAxm EQTheory.refl
   simpa [Language.TSemiformula.substs₁] using specialize this t
 
+lemma eq_refl! (t : ⌜ℒₒᵣ⌝.TTerm) : T ⊢! t =' t := ⟨eqRefl T t⟩
+
 def eqSymm (t₁ t₂ : ⌜ℒₒᵣ⌝.TTerm) : T ⊢ t₁ =' t₂ ⟶ t₂ =' t₁ := by
   have : T ⊢ (#'1 =' #'0 ⟶ #'0 =' #'1).all.all := byAxm EQTheory.symm
   have := by simpa using specialize this t₁
   simpa [Language.TSemitermVec.q_of_pos, Language.TSemiformula.substs₁] using specialize this t₂
+
+lemma eq_symm! (t₁ t₂ : ⌜ℒₒᵣ⌝.TTerm) : T ⊢! t₁ =' t₂ ⟶ t₂ =' t₁ := ⟨eqSymm T t₁ t₂⟩
 
 def eqTrans (t₁ t₂ t₃ : ⌜ℒₒᵣ⌝.TTerm) : T ⊢ t₁ =' t₂ ⟶ t₂ =' t₃ ⟶ t₁ =' t₃ := by
   have : T ⊢ (#'2 =' #'1 ⟶ #'1 =' #'0 ⟶ #'2 =' #'0).all.all.all := byAxm EQTheory.trans
@@ -72,12 +76,16 @@ def eqTrans (t₁ t₂ t₃ : ⌜ℒₒᵣ⌝.TTerm) : T ⊢ t₁ =' t₂ ⟶ t�
   have := by simpa using specialize this t₂
   simpa [Language.TSemitermVec.q_of_pos, Language.TSemiformula.substs₁] using specialize this t₃
 
+lemma eq_trans! (t₁ t₂ t₃ : ⌜ℒₒᵣ⌝.TTerm) : T ⊢! t₁ =' t₂ ⟶ t₂ =' t₃ ⟶ t₁ =' t₃ := ⟨eqTrans T t₁ t₂ t₃⟩
+
 noncomputable def replace (p : ⌜ℒₒᵣ⌝.TSemiformula (0 + 1)) (t u : ⌜ℒₒᵣ⌝.TTerm) :
     T ⊢ t =' u ⟶ p^/[t.sing] ⟶ p^/[u.sing] := by
   have : T ⊢ (#'1 =' #'0 ⟶ p^/[(#'1).sing] ⟶ p^/[(#'0).sing]).all.all := byAxm <| EQTheory.replace p
   have := by simpa using specialize this t
   simpa [Language.TSemitermVec.q_of_pos, Language.TSemiformula.substs₁,
     Language.TSemifromula.substs_substs] using specialize this u
+
+lemma replace! (p : ⌜ℒₒᵣ⌝.TSemiformula (0 + 1)) (t u : ⌜ℒₒᵣ⌝.TTerm) : T ⊢! t =' u ⟶ p^/[t.sing] ⟶ p^/[u.sing] := ⟨replace T p t u⟩
 
 noncomputable def addExt (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.TTerm) : T ⊢ t₁ =' t₂ ⟶ u₁ =' u₂ ⟶ (t₁ + u₁) =' (t₂ + u₂) := by
   apply deduct'
@@ -94,6 +102,8 @@ noncomputable def addExt (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.TTerm) : T ⊢ t
     simpa using this
   exact of (Γ := Γ) this ⨀ bu ⨀ b
 
+lemma add_ext! (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.TTerm) : T ⊢! t₁ =' t₂ ⟶ u₁ =' u₂ ⟶ (t₁ + u₁) =' (t₂ + u₂) := ⟨addExt T t₁ t₂ u₁ u₂⟩
+
 noncomputable def mulExt (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.TTerm) : T ⊢ t₁ =' t₂ ⟶ u₁ =' u₂ ⟶ (t₁ * u₁) =' (t₂ * u₂) := by
   apply deduct'
   apply deduct
@@ -108,6 +118,8 @@ noncomputable def mulExt (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.TTerm) : T ⊢ t
     have := replace T ((t₁.bShift * u₁.bShift) =' (t₂.bShift * #'0)) u₁ u₂
     simpa using this
   exact of (Γ := Γ) this ⨀ bu ⨀ b
+
+lemma mul_ext! (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.TTerm) : T ⊢! t₁ =' t₂ ⟶ u₁ =' u₂ ⟶ (t₁ * u₁) =' (t₂ * u₂) := ⟨mulExt T t₁ t₂ u₁ u₂⟩
 
 noncomputable def ltExt (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.TTerm) : T ⊢ t₁ =' t₂ ⟶ u₁ =' u₂ ⟶ t₁ <' u₁ ⟶ t₂ <' u₂ := by
   apply deduct'
@@ -126,21 +138,35 @@ noncomputable def ltExt (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.TTerm) : T ⊢ t�
     simpa using this
   exact of (Γ := Γ) this ⨀ bu ⨀ b
 
+lemma lt_ext! (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.TTerm) : T ⊢! t₁ =' t₂ ⟶ u₁ =' u₂ ⟶ t₁ <' u₁ ⟶ t₂ <' u₂ := ⟨ltExt T t₁ t₂ u₁ u₂⟩
+
 noncomputable def ballReplace (p : ⌜ℒₒᵣ⌝.TSemiformula (0 + 1)) (t u : ⌜ℒₒᵣ⌝.TTerm) :
     T ⊢ t =' u ⟶ p.ball t ⟶ p.ball u := by
   simpa [Language.TSemifromula.substs_substs] using replace T ((p^/[(#'0).sing]).ball #'0) t u
+
+lemma ball_replace! (p : ⌜ℒₒᵣ⌝.TSemiformula (0 + 1)) (t u : ⌜ℒₒᵣ⌝.TTerm) :
+    T ⊢! t =' u ⟶ p.ball t ⟶ p.ball u := ⟨ballReplace T p t u⟩
 
 noncomputable def bexReplace (p : ⌜ℒₒᵣ⌝.TSemiformula (0 + 1)) (t u : ⌜ℒₒᵣ⌝.TTerm) :
     T ⊢ t =' u ⟶ p.bex t ⟶ p.bex u := by
   simpa [Language.TSemifromula.substs_substs] using replace T ((p^/[(#'0).sing]).bex #'0) t u
 
+lemma bex_replace! (p : ⌜ℒₒᵣ⌝.TSemiformula (0 + 1)) (t u : ⌜ℒₒᵣ⌝.TTerm) :
+    T ⊢! t =' u ⟶ p.bex t ⟶ p.bex u := ⟨bexReplace T p t u⟩
+
 variable [R₀Theory T]
 
 def addComplete (n m : V) : T ⊢ (↑n + ↑m) =' ↑(n + m) := byAxm (R₀Theory.add n m)
 
+lemma add_complete! (n m : V) : T ⊢! (↑n + ↑m) =' ↑(n + m) := ⟨addComplete T n m⟩
+
 def mulComplete (n m : V) : T ⊢ (↑n * ↑m) =' ↑(n * m) := byAxm (R₀Theory.mul n m)
 
+lemma mul_complete! (n m : V) : T ⊢! (↑n * ↑m) =' ↑(n * m) := ⟨mulComplete T n m⟩
+
 def neComplete {n m : V} (h : n ≠ m) : T ⊢ ↑n ≠' ↑m := byAxm (R₀Theory.ne h)
+
+lemma ne_complete! {n m : V} (h : n ≠ m) : T ⊢! ↑n ≠' ↑m := ⟨neComplete T h⟩
 
 def ltNumeral (t : ⌜ℒₒᵣ⌝.TTerm) (n : V) : T ⊢ t <' ↑n ⟷ (tSubstItr t.sing (#'1 =' #'0) n).disj := by
   have : T ⊢ (#'0 <' ↑n ⟷ (tSubstItr (#'0).sing (#'1 =' #'0) n).disj).all := byAxm (R₀Theory.ltNumeral n)
@@ -155,6 +181,8 @@ def ltComplete {n m : V} (h : n < m) : T ⊢ ↑n <' ↑m := by
   apply disj (i := m - (n + 1)) _ (by simpa using sub_succ_lt_self (by simp [h]))
   simpa [nth_tSubstItr', h] using eqRefl T ↑n
 
+lemma lt_complete! {n m : V} (h : n < m) : T ⊢! ↑n <' ↑m := ⟨ltComplete T h⟩
+
 noncomputable def nltComplete {n m : V} (h : m ≤ n) : T ⊢ ↑n ≮' ↑m := by
   have : T ⊢ ↑n ≮' ↑m ⟷ (tSubstItr (↑n : ⌜ℒₒᵣ⌝.TTerm).sing (#'1 ≠' #'0) m).conj := by
     simpa using negReplaceIff' <| ltNumeral T n m
@@ -164,6 +192,8 @@ noncomputable def nltComplete {n m : V} (h : m ≤ n) : T ⊢ ↑n ≮' ↑m := 
   have hi : i < m := by simpa using hi
   have : n ≠ i := Ne.symm <| ne_of_lt <| lt_of_lt_of_le hi h
   simpa [nth_tSubstItr', hi] using neComplete T this
+
+lemma nlt_complete {n m : V} (h : m ≤ n) : T ⊢! ↑n ≮' ↑m := ⟨nltComplete T h⟩
 
 noncomputable def ballIntro (p : ⌜ℒₒᵣ⌝.TSemiformula (0 + 1)) (n : V)
     (bs : ∀ i < n, T ⊢ p ^/[(i : ⌜ℒₒᵣ⌝.TTerm).sing]) :
@@ -184,12 +214,20 @@ noncomputable def ballIntro (p : ⌜ℒₒᵣ⌝.TSemiformula (0 + 1)) (n : V)
     exact of (replace T p.shift ↑i &'0) ⨀ e ⨀ of this
   exact orReplaceLeft' this (andRight (nltNumeral T (&'0) n))
 
+lemma ball_intro! (p : ⌜ℒₒᵣ⌝.TSemiformula (0 + 1)) (n : V)
+    (bs : ∀ i < n, T ⊢! p ^/[(i : ⌜ℒₒᵣ⌝.TTerm).sing]) :
+    T ⊢! p.ball ↑n := ⟨ballIntro T p n fun i hi ↦ (bs i hi).get⟩
+
 noncomputable def bexIntro (p : ⌜ℒₒᵣ⌝.TSemiformula (0 + 1)) (n : V) {i}
-    (hi : i < n) (bs : T ⊢ p ^/[(i : ⌜ℒₒᵣ⌝.TTerm).sing]) :
+    (hi : i < n) (b : T ⊢ p ^/[(i : ⌜ℒₒᵣ⌝.TTerm).sing]) :
     T ⊢ p.bex ↑n := by
   apply ex i
   suffices T ⊢ i <' n ⋏ p^/[(i : ⌜ℒₒᵣ⌝.TTerm).sing] by simpa
-  exact System.andIntro (ltComplete T hi) bs
+  exact System.andIntro (ltComplete T hi) b
+
+lemma bex_intro! (p : ⌜ℒₒᵣ⌝.TSemiformula (0 + 1)) (n : V) {i}
+    (hi : i < n) (b : T ⊢! p ^/[(i : ⌜ℒₒᵣ⌝.TTerm).sing]) :
+    T ⊢! p.bex ↑n := ⟨bexIntro T p n hi b.get⟩
 
 end TProof
 
