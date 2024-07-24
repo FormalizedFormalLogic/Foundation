@@ -5,9 +5,6 @@ instance [Zero α] : Nonempty α := ⟨0⟩
 
 notation "exp " x:90 => Exp.exp x
 
-theorem existsUnique_congr {p q : α → Prop} (h : ∀ a, p a ↔ q a) : (∃! a, p a) ↔ ∃! a, q a :=
-  exists_congr fun _ ↦ and_congr (h _) <| forall_congr' fun _ ↦ imp_congr_left (h _)
-
 namespace Matrix
 
 lemma forall_iff {n : ℕ} (p : (Fin (n + 1) → α) → Prop) :
@@ -208,7 +205,7 @@ variable (M : Type*) [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐏𝐀
 
 lemma nat_extention_sigmaOne {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
     ℕ ⊧ₘ σ → M ⊧ₘ σ := fun h ↦ by
-  simpa [Matrix.empty_eq] using Arith.pval_of_pval_nat_of_sigma_one (M := M) hσ h
+  simpa [Matrix.empty_eq] using Arith.bold_sigma_one_completeness (M := M) hσ h
 
 lemma nat_extention_piOne {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚷 1 σ) :
     M ⊧ₘ σ → ℕ ⊧ₘ σ := by
