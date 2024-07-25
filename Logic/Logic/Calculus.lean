@@ -19,7 +19,7 @@ class OneSided (F : Type u) where
 class TwoSided (F : Type u) where
   Derivation : List F → List F → Type u
 
-prefix: 45 " ⊢¹ " => OneSided.Derivation
+prefix: 45 "⊢¹ " => OneSided.Derivation
 
 infix: 45 " ⊢² " => TwoSided.Derivation
 
@@ -27,7 +27,7 @@ abbrev OneSided.Derivable [OneSided F] (Δ : List F) : Prop := Nonempty (⊢¹ �
 
 abbrev TwoSided.Derivable [TwoSided F] (Γ Δ : List F) : Prop := Nonempty (Γ ⊢² Δ)
 
-prefix: 45 " ⊢¹! " => OneSided.Derivable
+prefix: 45 "⊢¹! " => OneSided.Derivable
 
 infix: 45 " ⊢²! " => TwoSided.Derivable
 
@@ -91,6 +91,8 @@ variable {Γ Δ : List F}
 
 instance : TwoSided F where
   Derivation := fun Γ Δ => ⊢¹ Γ.map (~·) ++ Δ
+
+lemma derivable_iff : Γ ⊢²! Δ ↔ ⊢¹! Γ.map (~·) ++ Δ := by rfl
 
 def ofConsLeft {p : F} {Γ Δ : List F} (b : p :: Γ ⊢² Δ) :
     ⊢¹ ~p :: (Γ.map (~·) ++ Δ) := wk b (by simp)

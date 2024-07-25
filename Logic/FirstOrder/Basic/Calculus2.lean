@@ -15,7 +15,7 @@ inductive Derivation2 : Finset (SyntacticFormula L) → Type _
 | shift {Δ}   : Derivation2 Δ → Derivation2 (Δ.image Rew.shift.hom)
 | cut   {Δ p} : Derivation2 (insert p Δ) → Derivation2 (insert (~p) Δ) → Derivation2 Δ
 
-prefix: 45 " ⊢¹ᶠ " => Derivation2
+prefix: 45 "⊢¹ᶠ " => Derivation2
 
 lemma shifts_toFinset_eq_image_shift (Δ : Sequent L) :
     (shifts Δ).toFinset = Δ.toFinset.image Rew.shift.hom := by ext p; simp [shifts]
@@ -63,5 +63,26 @@ noncomputable def Derivation2.toDerivation : {Γ : Finset (SyntacticFormula L)} 
   | _, Derivation2.shift d => Derivation.wk (Derivation.shift d.toDerivation) <| by intro x; simp [shifts]
   | _, Derivation2.cut (p := p) d dn =>
     Derivation.cut (p := p) (Tait.wk d.toDerivation <| by intro x; simp) (Tait.wk dn.toDerivation <| by intro x; simp)
+
+lemma Derivation2.nonempty_iff {Γ : List (SyntacticFormula L)} : ⊢¹! Γ ↔ Nonempty (⊢¹ᶠ Γ.toFinset) := by
+  constructor
+  · rintro ⟨d⟩; exact ⟨by simpa using Derivation.toDerivation2 d⟩
+  · rintro ⟨d⟩; exact ⟨Tait.wk d.toDerivation (by intro x; simp)⟩
+
+variable {T : Theory L}
+
+lemma syntactic_provable_iff_derivation2 {T : SyntacticTheory L} {σ} :
+    T ⊢! σ ↔ ∃ Γ : Finset (SyntacticFormula L), (∀ π ∈ Γ, ~π ∈ T) ∧ Nonempty (⊢¹ᶠ insert σ Γ) := by
+  simp [Gentzen.provable_iff, Tait.derivable_iff, Derivation2.nonempty_iff]
+  constructor
+  · rintro ⟨Δ, hΔ, ⟨d⟩⟩
+    exact ⟨(Δ.map (~·)).toFinset, by simpa using hΔ, ⟨Derivation2.wk d <| by intro x; simp; tauto⟩⟩
+  · rintro ⟨Γ, hΓ, ⟨d⟩⟩
+    exact ⟨Γ.toList.map (~·), by simpa, ⟨Derivation2.wk d <| by intro x; simp [Function.comp]; tauto⟩⟩
+
+lemma provable_iff_derivation2 {σ} :
+    T ⊢! σ ↔ ∃ Γ : Finset (SyntacticFormula L),
+      (∀ π ∈ Γ, ∃ π₀ ∈ T, Rew.emb.hom π₀ = ~ π) ∧ Nonempty (⊢¹ᶠ insert (Rew.emb.hom σ) Γ) := by
+  simp [provable_iff, syntactic_provable_iff_derivation2]
 
 end LO.FirstOrder

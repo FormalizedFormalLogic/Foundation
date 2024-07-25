@@ -100,6 +100,8 @@ def substs {n'} (v : Fin n → Semiterm L ξ n') : Rew L ξ n ξ n' :=
 
 def emb {o : Type v₁} [h : IsEmpty o] {ξ : Type v₂} {n} : Rew L o n ξ n := map id h.elim
 
+abbrev embs {o : Type v₁} [IsEmpty o] {n} : Rew L o n ℕ n := emb
+
 def empty {o : Type v₁} [h : IsEmpty o] {ξ : Type v₂} {n} : Rew L o 0 ξ n := map Fin.elim0 h.elim
 
 def bShift : Rew L ξ n ξ (n + 1) :=
@@ -548,6 +550,15 @@ lemma embSubsts_bv (t : Semiterm L Empty n) (v : Fin n → Semiterm L ξ m) :
 
 @[simp] lemma bshift_positive (t : Semiterm L ξ n) : Positive (Rew.bShift t) := by
   induction t <;> simp
+
+lemma emb_comp_bShift_comm {o : Type v₁} [IsEmpty o] :
+    Rew.bShift.comp (Rew.emb : Rew L o n ξ n) = Rew.emb.comp Rew.bShift := by
+  ext x; simp [comp_app]
+  exact IsEmpty.elim (by assumption) x
+
+lemma emb_bShift_term {o : Type v₁} [IsEmpty o] (t : Semiterm L o n) :
+    Rew.bShift (Rew.emb t : Semiterm L ξ n) = Rew.emb (Rew.bShift t) := by
+  simp [←comp_app, emb_comp_bShift_comm]
 
 end Rew
 

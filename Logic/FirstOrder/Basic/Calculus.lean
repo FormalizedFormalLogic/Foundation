@@ -463,6 +463,11 @@ noncomputable def toProof {T : Theory L} {σ} (b : (Rew.emb.hom '' T : Syntactic
     rw[show Δ'.map Rew.emb.hom = Δ from by simp [Δ', List.map_pmap, hf]]; exact d
   exact Gentzen.toDisjconseq (twoSidedEquiv.symm this) (by simp [Δ']; rintro σ p hp rfl; exact (hf p hp).1)
 
+lemma provable_iff {T : Theory L} {σ} : T ⊢! σ ↔ Rew.embs.hom '' T ⊢! Rew.embs.hom σ := by
+  constructor
+  · intro h; exact ⟨proofToSyntactic h.get⟩
+  · intro h; exact ⟨toProof h.get⟩
+
 namespace Gentzen
 
 variable {Γ Δ : Sequent L}
