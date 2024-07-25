@@ -112,8 +112,6 @@ instance seqExp_definable : 𝚺₁-Function₂ (seqExp : M → M → M) := Defi
 @[simp, definability] instance seqExp_definable' (Γ) : (Γ, m + 1)-Function₂ (seqExp : M → M → M) :=
   .of_sigmaOne seqExp_definable _ _
 
-@[simp] lemma zero_ne_add_one (a : M) : 0 ≠ a + 1 := ne_of_lt (by simp)
-
 lemma mem_seqExp_iff {s a k : M} : s ∈ a ^ˢ k ↔ Seq s ∧ lh s = k ∧ (∀ i z, ⟪i, z⟫ ∈ s → z ∈ a) := by
   induction k using induction_iPiOne generalizing s
   · suffices 𝚷₁-Predicate fun {k} => ∀ {s : M}, s ∈ a ^ˢ k ↔ Seq s ∧ lh s = k ∧ ∀ i < s, ∀ z < s, ⟪i, z⟫ ∈ s → z ∈ a

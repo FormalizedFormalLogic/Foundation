@@ -25,6 +25,17 @@ def Language.IsFVFreeSemiterm (n t : V) : Prop := L.termShift n t = t
 
 def Language.IsFVFree (p : V) : Prop := L.Formula p ∧ L.shift p = p
 
+section
+
+def _root_.LO.FirstOrder.Arith.LDef.isFVFreeDef (pL : LDef) : 𝚺₁-Semisentence 1 :=
+  .mkSigma “p | !pL.isSemiformulaDef.sigma 0 p ∧ !pL.shiftDef p p” (by simp)
+
+lemma isFVFree_defined : 𝚺₁-Predicate (L.IsFVFree : V → Prop) via pL.isFVFreeDef := by
+  intro v; simp [LDef.isFVFreeDef, HSemiformula.val_sigma, (semiformula_defined L).df.iff, (shift_defined L).df.iff]
+  simp [Language.IsFVFree, eq_comm]
+
+end
+
 variable {L}
 
 @[simp] lemma neg_iff : L.IsFVFree (L.neg p) ↔ L.IsFVFree p := by

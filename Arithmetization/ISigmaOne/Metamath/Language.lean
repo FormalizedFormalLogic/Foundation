@@ -108,6 +108,18 @@ lemma quote_rel_def (R : L.Rel k) : (⌜R⌝ : V) = ↑(Encodable.encode R) := r
     consequence_iff_add_eq.mp (sound! <| DefinableLanguage.rel_iff.mp ⟨r, rfl⟩) V
       (models_of_subtheory (T := 𝐏𝐀⁻) inferInstance)
 
+@[simp] lemma quote_func_inj (f₁ f₂ : L.Func k) : (⌜f₁⌝ : V) = (⌜f₂⌝ : V) ↔ f₁ = f₂ := by
+  simp [quote_func_def]
+
+@[simp] lemma quote_rel_inj (R₁ R₂ : L.Rel k) : (⌜R₁⌝ : V) = (⌜R₂⌝ : V) ↔ R₁ = R₂ := by
+  simp [quote_rel_def]
+
+@[simp] lemma coe_quote_func_nat (f : L.Func k) : ((⌜f⌝ : ℕ) : V) = (⌜f⌝ : V) := by
+  simp [quote_func_def]
+
+@[simp] lemma coe_quote_rel_nat (R : L.Rel k) : ((⌜R⌝ : ℕ) : V) = (⌜R⌝ : V) := by
+  simp [quote_rel_def]
+
 end
 
 /-- TODO: move to Basic/Syntax/Language.lean-/
@@ -158,7 +170,11 @@ variable {V : Type*} [Zero V] [One V] [Add V] [Mul V] [LT V] [V ⊧ₘ* 𝐈𝚺
 
 abbrev LOR : Arith.Language V := Language.codeIn ℒₒᵣ V
 
+abbrev LOR.code : LDef := Language.lDef ℒₒᵣ
+
 notation "⌜ℒₒᵣ⌝" => LOR
+
+notation "p⌜ℒₒᵣ⌝" => LOR.code
 
 variable (V)
 

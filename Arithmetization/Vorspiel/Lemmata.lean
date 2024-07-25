@@ -243,6 +243,32 @@ instance : Structure.Monotone ℒₒᵣ M := ⟨
   | 2, Language.Add.add   => add_le_add (h 0) (h 1)
   | 2, Language.Mul.mul   => mul_le_mul (h 0) (h 1) (by simp) (by simp)⟩
 
+@[simp] lemma zero_ne_add_one (x : M) : 0 ≠ x + (1 : M) := ne_of_lt (by simp)
+
+@[simp] lemma nat_cast_inj {n m : ℕ} : (n : M) = (m : M) ↔ n = m := by
+  induction' n with n ih
+  · cases m <;> simp
+  · cases m <;> simp
+
+@[simp] lemma coe_coe_lt {n m : ℕ} : (n : M) < (m : M) ↔ n < m := by
+  induction' n with n ih
+  · cases m <;> simp
+  · cases m <;> simp
+
+/-- TODO: move-/
+lemma coe_succ (x : ℕ) : ((x + 1 : ℕ) : M) = (x : M) + 1 := by simp
+
+variable (M)
+
+abbrev natCast : NatCast M := inferInstance
+
+variable {M}
+
+@[simp] lemma natCast_nat (n : ℕ) : @Nat.cast ℕ (natCast ℕ) n = n := by
+  induction n
+  · rfl
+  · unfold natCast; rw [coe_succ]; simp [*]
+
 end
 
 end Arith

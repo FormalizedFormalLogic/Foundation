@@ -1,5 +1,6 @@
 import Arithmetization.ISigmaOne.Metamath.Proof.Typed
 import Arithmetization.Definability.Absoluteness
+import Mathlib.Combinatorics.Colex
 
 namespace LO.FirstOrder
 
@@ -21,12 +22,6 @@ namespace LO.Arith
 open FirstOrder FirstOrder.Arith
 
 variable {V : Type*} [Zero V] [One V] [Add V] [Mul V] [LT V] [V ⊧ₘ* 𝐈𝚺₁]
-
-/-- TOFO: move to PeanoMinus -/
-@[simp] lemma nat_cast_inj {n m : ℕ} : (n : V) = (m : V) ↔ n = m := by
-  induction' n with n ih
-  · cases m <;> simp
-  · cases m <;> simp
 
 lemma nat_cast_empty : ((∅ : ℕ) : V) = ∅ := rfl
 
@@ -54,6 +49,17 @@ lemma quote_matrix_succ (v : Fin (k + 1) → V) :
 @[simp] lemma quote_cons (v : Fin k → V) (a : V) :
     (⌜a :> v⌝ : V) = a ∷ ⌜v⌝  := by simp [quote_matrix_succ]
 
+@[simp] lemma quote_matrix_inj (v w : Fin k → V) : (⌜v⌝ : V) = ⌜w⌝ ↔ v = w := by
+  induction' k with k ih
+  · simp [Matrix.empty_eq]
+  · simp [quote_matrix_succ, ih]
+    constructor
+    · rintro ⟨h0, hs⟩
+      funext x; cases' x using Fin.cases with x
+      · exact h0
+      · exact congr_fun hs x
+    · rintro rfl; simp
+
 @[simp] lemma quote_lh (v : Fin k → V) : len (⌜v⌝ : V) = k := by
   induction' k with k ih <;> simp [quote_matrix_succ, Matrix.empty_eq, *]
 
@@ -62,7 +68,7 @@ lemma quote_matrix_succ (v : Fin (k + 1) → V) :
   · exact i.elim0
   · cases' i using Fin.cases with i <;> simp [ih]
 
-lemma quote_matrix_absolute (v : Fin k → ℕ) : ((⌜v⌝ : ℕ) : V) = ⌜fun i ↦ (v i : V)⌝ := by
+@[simp] lemma quote_matrix_absolute (v : Fin k → ℕ) : ((⌜v⌝ : ℕ) : V) = ⌜fun i ↦ (v i : V)⌝ := by
   induction' k with k ih
   · simp
   · simp [quote_matrix_succ, ih, cons_absolute]
@@ -95,6 +101,17 @@ lemma quote_fvar (x : ℕ) : ⌜(&x : SyntacticSemiterm L n)⌝ = ^&(x : V) := r
 lemma quote_func {k} (f : L.Func k) (v : Fin k → SyntacticSemiterm L n) :
     ⌜func f v⌝ = ^func (k : V) ⌜f⌝ ⌜fun i ↦ ⌜v i⌝⌝ := rfl
 
+@[simp] lemma codeIn_inj {n} {t u : SyntacticSemiterm L n} : (⌜t⌝ : V) = ⌜u⌝ ↔ t = u := by
+  induction t generalizing u
+  case bvar z => rcases u <;> simp [quote_bvar, quote_fvar, quote_func, qqBvar, qqFvar, qqFunc, Fin.val_inj]
+  case fvar x => rcases u <;> simp [quote_bvar, quote_fvar, quote_func, qqBvar, qqFvar, qqFunc]
+  case func k f v ih =>
+    rcases u <;> simp [quote_bvar, quote_fvar, quote_func, qqBvar, qqFvar, qqFunc]
+    rintro rfl; simp; rintro rfl
+    constructor
+    · intro h; funext i; exact (ih i).mp (congr_fun h i)
+    · rintro rfl; rfl
+
 @[simp] lemma quote_zero (n) :
     (⌜(Semiterm.func Language.Zero.zero ![] : SyntacticSemiterm ℒₒᵣ n)⌝ : V) = 𝟎 := by
   simp [FirstOrder.Semiterm.quote_func, Formalized.zero, Formalized.qqFunc_absolute]; rfl
@@ -108,6 +125,10 @@ lemma quote_func {k} (f : L.Func k) (v : Fin k → SyntacticSemiterm L n) :
 
 @[simp] lemma quote_mul (t u : SyntacticSemiterm ℒₒᵣ n) :
     (⌜Semiterm.func Language.Mul.mul ![t, u]⌝ : V) = (⌜t⌝ ^* ⌜u⌝) := by simp [FirstOrder.Semiterm.quote_func]; rfl
+
+@[simp] lemma quote_absolute (t : SyntacticSemiterm L n) :
+    ((⌜t⌝ : ℕ) : V) = ⌜t⌝ := by
+  induction t <;> simp [quote_bvar, quote_fvar, quote_func, qqBvar, qqFvar, qqFunc, Fin.val_inj, nat_cast_pair, *]
 
 end LO.FirstOrder.Semiterm
 
@@ -251,6 +272,70 @@ lemma quote_ex (p : SyntacticSemiformula L (n + 1)) : ⌜∃' p⌝ = ^∃[(n : V
 @[simp] lemma quote_nlt (t u : SyntacticSemiterm ℒₒᵣ n) :
     (⌜Semiformula.nrel Language.LT.lt ![t, u]⌝ : V) = (⌜t⌝ ^≮[(n : V)] ⌜u⌝) := by simp [FirstOrder.Semiformula.quote_nrel]; rfl
 
+@[simp] lemma codeIn_inj {n} {p q : SyntacticSemiformula L n} : (⌜p⌝ : V) = ⌜q⌝ ↔ p = q := by
+  induction p using rec'
+  case hrel =>
+    cases q using cases' <;>
+      simp [quote_rel, quote_nrel, quote_verum, quote_falsum, quote_and, quote_or, quote_all, quote_ex,
+        qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqEx]
+    rintro rfl; simp; rintro rfl;
+    constructor
+    · intro h; funext i; simpa using congr_fun h i
+    · rintro rfl; rfl
+  case hnrel =>
+    cases q using cases' <;>
+      simp [quote_rel, quote_nrel, quote_verum, quote_falsum, quote_and, quote_or, quote_all, quote_ex,
+        qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqEx]
+    rintro rfl; simp; rintro rfl;
+    constructor
+    · intro h; funext i; simpa using congr_fun h i
+    · rintro rfl; rfl
+  case hverum =>
+    cases q using cases' <;>
+      simp [quote_rel, quote_nrel, quote_verum, quote_falsum, quote_and, quote_or, quote_all, quote_ex,
+        qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqEx]
+  case hfalsum =>
+    cases q using cases' <;>
+      simp [quote_rel, quote_nrel, quote_verum, quote_falsum, quote_and, quote_or, quote_all, quote_ex,
+        qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqEx]
+  case hand n p q ihp ihq =>
+    cases q using cases' <;>
+      simp [quote_rel, quote_nrel, quote_verum, quote_falsum, quote_and, quote_or, quote_all, quote_ex,
+        qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqEx]
+    rw [ihp, ihq]
+  case hor n p q ihp ihq =>
+    cases q using cases' <;>
+      simp [quote_rel, quote_nrel, quote_verum, quote_falsum, quote_and, quote_or, quote_all, quote_ex,
+        qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqEx]
+    rw [ihp, ihq]
+  case hall n p ih =>
+    cases q using cases' <;>
+      simp [quote_rel, quote_nrel, quote_verum, quote_falsum, quote_and, quote_or, quote_all, quote_ex,
+        qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqEx]
+    rw [ih]
+  case hex n p ih =>
+    cases q using cases' <;>
+      simp [quote_rel, quote_nrel, quote_verum, quote_falsum, quote_and, quote_or, quote_all, quote_ex,
+        qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqEx]
+    rw [ih]
+
+@[simp] lemma quote_absolute (p : SyntacticSemiformula L n) :
+    ((⌜p⌝ : ℕ) : V) = ⌜p⌝ := by
+  induction p using rec' <;> simp [quote_rel, quote_nrel, quote_verum, quote_falsum, quote_and, quote_or, quote_all, quote_ex,
+        qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqEx, nat_cast_pair, *]
+
+instance : GoedelQuote (Semisentence L n) V := ⟨fun σ ↦ ⌜(Rew.emb.hom σ : SyntacticSemiformula L n)⌝⟩
+
+lemma quote_semisentence_def (p : Semisentence L n) : (⌜p⌝ : V) = ⌜(Rew.emb.hom p : SyntacticSemiformula L n)⌝ := rfl
+
+@[simp] lemma quote_semisentence_absolute (p : Semisentence L n) : ((⌜p⌝ : ℕ) : V) = ⌜p⌝ := by
+  simp [quote_semisentence_def]
+
+instance : Semiterm.Operator.GoedelNumber ℒₒᵣ (Sentence L) := ⟨fun σ ↦ Semiterm.Operator.numeral ℒₒᵣ ⌜σ⌝⟩
+
+lemma sentence_goedelNumber_def (σ : Sentence L) :
+  (⌜σ⌝ : Semiterm ℒₒᵣ ξ n) = Semiterm.Operator.numeral ℒₒᵣ ⌜σ⌝ := rfl
+
 end LO.FirstOrder.Semiformula
 
 namespace LO.Arith
@@ -308,6 +393,11 @@ lemma substs_quote {n m} (w : Fin n → SyntacticSemiterm L m) (p : SyntacticSem
       Rew.rel, Rew.nrel, termSubstVec_quote, Rew.q_substs]
   case hall p ih => simp [←ih, qVec_quote, Semiterm.quote_bvar]
   case hex p ih => simp [←ih, qVec_quote, Semiterm.quote_bvar]
+
+lemma free_quote (p : SyntacticSemiformula L 1) :
+    (L.codeIn V).free ⌜p⌝ = ⌜Rew.free.hom p⌝ := by
+  rw [←Rew.hom_substs_mbar_zero_comp_shift_eq_free, ←substs_quote, ←shift_quote]
+  simp [Language.free, Language.substs₁, Semiterm.quote_fvar]
 
 end LO.Arith
 
@@ -415,6 +505,70 @@ open LO.Arith Formalized
 
 end Semiformula
 
+namespace Derivation2
+
+def Sequent.codeIn (Γ : Finset (SyntacticFormula L)) : V := ∑ p ∈ Γ, exp (⌜p⌝ : V)
+
+instance : GoedelQuote (Finset (SyntacticFormula L)) V := ⟨Sequent.codeIn V⟩
+
+lemma Sequent.codeIn_def (Γ : Finset (SyntacticFormula L)) : ⌜Γ⌝ = ∑ p ∈ Γ, exp (⌜p⌝ : V) := rfl
+
+variable {V}
+
+open Classical
+
+@[simp] lemma Sequent.codeIn_empty : (⌜(∅ : Finset (SyntacticFormula L))⌝ : V) = ∅ := by
+  simp [Sequent.codeIn_def, emptyset_def]
+
+lemma Sequent.mem_codeIn_iff {Γ : Finset (SyntacticFormula L)} {p} : ⌜p⌝ ∈ (⌜Γ⌝ : V) ↔ p ∈ Γ := by
+  induction Γ using Finset.induction generalizing p
+  case empty => simp [Sequent.codeIn_def]
+  case insert a Γ ha ih =>
+    have : exp ⌜a⌝ + ∑ p ∈ Γ, exp (⌜p⌝ : V) = insert (⌜a⌝ : V) (⌜Γ⌝ : V) := by
+      simp [insert, bitInsert, (not_iff_not.mpr ih.symm).mp ha, add_comm]
+      rw [Sequent.codeIn_def]
+    simp [ha, Sequent.codeIn_def]
+    rw [this]
+    simp [←ih]
+
+@[simp] lemma Sequent.codeIn_insert (Γ : Finset (SyntacticFormula L)) (p) : (⌜(insert p Γ)⌝ : V) = insert ⌜p⌝ ⌜Γ⌝ := by
+  by_cases hp : p ∈ Γ
+  · simp [Sequent.mem_codeIn_iff, hp, insert_eq_self_of_mem]
+  · have : (⌜insert p Γ⌝ : V) = exp ⌜p⌝ + ⌜Γ⌝ := by simp [Sequent.codeIn_def, hp]
+    simp [Sequent.mem_codeIn_iff, this, insert_eq, bitInsert, hp, add_comm]
+
+lemma Sequent.mem_codeIn {Γ : Finset (SyntacticFormula L)} (hx : x ∈ (⌜Γ⌝ : V)) : ∃ p ∈ Γ, x = ⌜p⌝ := by
+  induction Γ using Finset.induction
+  case empty => simp at hx
+  case insert a Γ _ ih =>
+    have : x = ⌜a⌝ ∨ x ∈ (⌜Γ⌝ : V) := by simpa using hx
+    rcases this with (rfl | hx)
+    · exact ⟨a, by simp⟩
+    · rcases ih hx with ⟨p, hx, rfl⟩
+      exact ⟨p, by simp [*]⟩
+
+variable (V)
+
+def codeIn : {Γ : Finset (SyntacticFormula L)} → ⊢¹ᶠ Γ → V
+  | _, axL (Δ := Δ) p _ _                     => Arith.axL ⌜Δ⌝ ⌜p⌝
+  | _, verum (Δ := Δ) _                       => Arith.verumIntro ⌜Δ⌝
+  | _, and (Δ := Δ) _ (p := p) (q := q) bp bq => Arith.andIntro ⌜Δ⌝ ⌜p⌝ ⌜q⌝ bp.codeIn bq.codeIn
+  | _, or (Δ := Δ) (p := p) (q := q) _ d      => Arith.orIntro ⌜Δ⌝ ⌜p⌝ ⌜q⌝ d.codeIn
+  | _, all (Δ := Δ) (p := p) _ d              => Arith.allIntro ⌜Δ⌝ ⌜p⌝ d.codeIn
+  | _, ex (Δ := Δ) (p := p) _ t d             => Arith.exIntro ⌜Δ⌝ ⌜p⌝ ⌜t⌝ d.codeIn
+  | _, wk (Γ := Γ) d _                        => Arith.wkRule ⌜Γ⌝ d.codeIn
+  | _, shift (Δ := Δ) d                       => Arith.shiftRule ⌜Δ.image Rew.shift.hom⌝ d.codeIn
+  | _, cut (Δ := Δ) (p := p) d dn             => Arith.cutRule ⌜Δ⌝ ⌜p⌝ d.codeIn dn.codeIn
+
+instance (Γ : Finset (SyntacticFormula L)) : GoedelQuote (⊢¹ᶠ Γ) V := ⟨codeIn V⟩
+
+lemma quote_derivation_def {Γ : Finset (SyntacticFormula L)} (d : ⊢¹ᶠ Γ) : (⌜d⌝ : V) = d.codeIn V := rfl
+
+@[simp] lemma fstidx_quote {Γ : Finset (SyntacticFormula L)} (d : ⊢¹ᶠ Γ) : fstIdx (⌜d⌝ : V) = ⌜Γ⌝ := by
+  induction d <;> simp [quote_derivation_def, codeIn]
+
+end Derivation2
+
 end LO.FirstOrder
 
 namespace LO.Arith
@@ -425,7 +579,109 @@ variable {V : Type*} [Zero V] [One V] [Add V] [Mul V] [LT V] [V ⊧ₘ* 𝐈𝚺
 
 variable {L : Language} [(k : ℕ) → Encodable (L.Func k)] [(k : ℕ) → Encodable (L.Rel k)] [DefinableLanguage L]
 
+open Classical
+
+@[simp] lemma formulaSet_codeIn_finset (Γ : Finset (SyntacticFormula L)) : (L.codeIn V).FormulaSet ⌜Γ⌝ := by
+  intro x hx
+  rcases Derivation2.Sequent.mem_codeIn hx with ⟨p, _, rfl⟩;
+  apply semiformula_quote
+
+open Derivation2
+
+lemma quote_image_shift (Γ : Finset (SyntacticFormula L)) : (L.codeIn V).setShift (⌜Γ⌝ : V) = ⌜Γ.image Rew.shift.hom⌝ := by
+  induction Γ using Finset.induction
+  case empty => simp
+  case insert p Γ _ ih => simp [shift_quote, ih]
+
+@[simp] lemma derivation_quote {Γ : Finset (SyntacticFormula L)} (d : ⊢¹ᶠ Γ) : (L.codeIn V).Derivation ⌜d⌝ := by
+  induction d
+  case axL p hp hn =>
+    exact Language.Derivation.axL (by simp)
+      (by simp [Sequent.mem_codeIn_iff, hp])
+      (by simp [Sequent.mem_codeIn_iff, neg_quote, hn])
+  case verum Δ h =>
+    exact Language.Derivation.verumIntro (by simp)
+      (by simpa [quote_verum] using (Sequent.mem_codeIn_iff (V := V)).mpr h)
+  case and Δ p q hpq dp dq ihp ihq =>
+    apply Language.Derivation.andIntro
+      (by simpa using (Sequent.mem_codeIn_iff (V := V)).mpr hpq)
+      ⟨by simp [fstidx_quote], ihp⟩
+      ⟨by simp [fstidx_quote], ihq⟩
+  case or Δ p q hpq d ih =>
+    apply Language.Derivation.orIntro
+      (by simpa using (Sequent.mem_codeIn_iff (V := V)).mpr hpq)
+      ⟨by simp [fstidx_quote], ih⟩
+  case all Δ p h d ih =>
+    apply Language.Derivation.allIntro
+      (by simpa using (Sequent.mem_codeIn_iff (V := V)).mpr h)
+      ⟨by simp [fstidx_quote, quote_image_shift, free_quote], ih⟩
+  case ex Δ p h t d ih =>
+    apply Language.Derivation.exIntro
+      (by simpa using (Sequent.mem_codeIn_iff (V := V)).mpr h)
+      (semiterm_codeIn t)
+      ⟨by simp [fstidx_quote, ←substs_quote, Language.substs₁], ih⟩
+  case wk Δ Γ d h ih =>
+    apply Language.Derivation.wkRule (s' := ⌜Δ⌝)
+      (by simp)
+      (by intro x hx; rcases Sequent.mem_codeIn hx with ⟨p, hp, rfl⟩
+          simp [Sequent.mem_codeIn_iff, h hp])
+      ⟨by simp [fstidx_quote], ih⟩
+  case shift Δ d ih =>
+    simp [quote_derivation_def, Derivation2.codeIn, ←quote_image_shift]
+    apply Language.Derivation.shiftRule
+      ⟨by simp [fstidx_quote], ih⟩
+  case cut Δ p d dn ih ihn =>
+    apply Language.Derivation.cutRule
+      ⟨by simp [fstidx_quote], ih⟩
+      ⟨by simp [fstidx_quote, neg_quote], ihn⟩
+
+@[simp] lemma derivationOf_quote {Γ : Finset (SyntacticFormula L)} (d : ⊢¹ᶠ Γ) : (L.codeIn V).DerivationOf ⌜d⌝ ⌜Γ⌝ :=
+  ⟨by simp, by simp⟩
+
+section
+
+class DefinableSigma₁Theory (T : Theory L) extends LDef.TDef L.lDef where
+  mem_iff {σ} : σ ∈ T ↔ 𝐈𝚺₁ ⊢₌! ch.val/[⌜σ⌝]
+  fvfree : 𝐈𝚺₁ ⊢₌! “∀ σ, !ch σ → !L.lDef.isFVFreeDef σ”
+
+def _root_.LO.FirstOrder.Theory.tDef (T : Theory L) [d : DefinableSigma₁Theory T] : LDef.TDef L.lDef := d.toTDef
+
+variable {T : Theory L} [DefinableSigma₁Theory T]
+
+variable (T V)
+
+def _root_.LO.FirstOrder.Theory.codeIn : (L.codeIn V).Theory where
+  set := {x | V ⊧/![x] T.tDef.ch.val}
+  set_fvFree := by
+    intro x hx
+    have : ∀ x, V ⊧/![x] T.tDef.ch.val → (L.codeIn V).IsFVFree x := by
+      simpa [models_iff, (isFVFree_defined (V := V) (L.codeIn V)).df.iff] using
+        consequence_iff_add_eq.mp (sound! <| DefinableSigma₁Theory.fvfree (T := T)) V inferInstance
+    exact this x hx
+
+variable {T V}
+
+lemma Language.Theory.codeIn_iff : x ∈ T.codeIn V ↔ V ⊧/![x] T.tDef.ch.val := iff_of_eq rfl
+
+lemma mem_coded_theory {σ} (h : σ ∈ T) : ⌜σ⌝ ∈ T.codeIn V := Language.Theory.codeIn_iff.mpr <| by
+  have := consequence_iff_add_eq.mp (sound! <| DefinableSigma₁Theory.mem_iff.mp h) V inferInstance
+  simpa [models_iff, Semiformula.sentence_goedelNumber_def, numeral_eq_natCast] using this
+
+instance : (T.codeIn V).Defined T.tDef where
+  defined := by intro v; simp [Theory.codeIn, ←Matrix.constant_eq_singleton']
+
+theorem D1 : T ⊢! σ → (T.codeIn V).Provable ⌜σ⌝ := by {
+  provable_iff_derivation2
+  }
+
+end
+
+namespace Formalized
+
+variable (T : Theory ℒₒᵣ)
 
 
+
+end Formalized
 
 end LO.Arith

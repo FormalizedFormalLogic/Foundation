@@ -303,6 +303,9 @@ lemma pos_of_nonempty {i a : M} (h : i ∈ a) : 0 < a := by
 
 @[simp] lemma mem_insert (i a : M) : i ∈ insert i a := by simp
 
+lemma insert_eq_self_of_mem {i a : M} (h : i ∈ a) : insert i a = a := by
+  simp [insert_eq, bitInsert, h]
+
 lemma log_mem_of_pos {a : M} (h : 0 < a) : log a ∈ a :=
   mem_iff_mul_exp_add_exp_add.mpr
     ⟨0, a - exp log a,
