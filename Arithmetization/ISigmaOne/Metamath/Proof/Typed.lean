@@ -136,8 +136,16 @@ def Language.Theory.Derivable.toTDerivation {T : L.Theory} (Γ : L.Sequent) (h :
   choose a ha using h; choose d hd using ha.2
   exact ⟨a, ha.1, d, hd⟩
 
-def Language.Theory.TDerivation.toDerivable {T : L.Theory} {Γ : L.Sequent} (d : T ⊢¹ Γ) : T.Derivable Γ.val :=
+lemma Language.Theory.TDerivation.toDerivable {T : L.Theory} {Γ : L.Sequent} (d : T ⊢¹ Γ) : T.Derivable Γ.val :=
   ⟨d.antecedents, d.antecedents_fvFree, d.derivation, d.derivationOf⟩
+
+lemma Language.Theory.TProvable.iff_provable {T : L.Theory} {σ : L.TFormula} :
+    T ⊢! σ ↔ T.Provable σ.val := by
+  constructor
+  · intro b
+    simpa [←singleton_eq_insert] using Language.Theory.TDerivation.toDerivable b.get
+  · intro h
+    exact ⟨Language.Theory.Derivable.toTDerivation _ <| by simpa [←singleton_eq_insert] using h⟩
 
 def Language.Theory.TDerivation.toTProof {T : L.Theory} {p} (d : T ⊢¹ insert p ∅) : T ⊢ p := d
 

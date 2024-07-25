@@ -503,6 +503,12 @@ open LO.Arith Formalized
   ext; simp [LogicalConnective.bex, imp_eq, Language.TSemiformula.cast,
     Language.TSemiformula.ball, Semiformula.Operator.lt_eq, termBShift_quote]
 
+instance : GoedelQuote (Sentence L) ((L.codeIn V).TFormula) := ⟨fun σ ↦ (⌜Rew.embs.hom σ⌝ : (Language.codeIn L V).TSemiformula (0 : ℕ))⟩
+
+lemma quote_semisentence_def' (σ : Sentence L) : (⌜σ⌝ : (L.codeIn V).TFormula) = (⌜Rew.embs.hom σ⌝ : (Language.codeIn L V).TSemiformula (0 : ℕ)) := rfl
+
+@[simp] lemma quote_semisentence_val (σ : Sentence L) : (⌜σ⌝ : (L.codeIn V).TFormula).val = ⌜σ⌝ := rfl
+
 end Semiformula
 
 namespace Derivation2
@@ -638,6 +644,9 @@ lemma quote_image_shift (Γ : Finset (SyntacticFormula L)) : (L.codeIn V).setShi
 @[simp] lemma derivationOf_quote {Γ : Finset (SyntacticFormula L)} (d : ⊢¹ᶠ Γ) : (L.codeIn V).DerivationOf ⌜d⌝ ⌜Γ⌝ :=
   ⟨by simp, by simp⟩
 
+lemma derivable_of_quote {Γ : Finset (SyntacticFormula L)} (d : ⊢¹ᶠ Γ) : (L.codeIn V).Derivable ⌜Γ⌝ :=
+  ⟨⌜d⌝, by simp⟩
+
 section
 
 class DefinableSigma₁Theory (T : Theory L) extends LDef.TDef L.lDef where
@@ -670,18 +679,24 @@ lemma mem_coded_theory {σ} (h : σ ∈ T) : ⌜σ⌝ ∈ T.codeIn V := Language
 instance : (T.codeIn V).Defined T.tDef where
   defined := by intro v; simp [Theory.codeIn, ←Matrix.constant_eq_singleton']
 
-theorem D1 : T ⊢! σ → (T.codeIn V).Provable ⌜σ⌝ := by {
-  provable_iff_derivation2
-  }
+/-- D1 -/
+theorem provable_of_provable : T ⊢! σ → (T.codeIn V).Provable ⌜σ⌝ := by
+  intro h
+  rcases provable_iff_derivation2.mp h with ⟨Γ, h, ⟨d⟩⟩
+  refine ⟨⌜Γ⌝, ?_, ?_⟩
+  · intro x hx
+    rcases Sequent.mem_codeIn hx with ⟨p, hp, rfl⟩
+    rcases h p hp with ⟨π, hπ, hπp⟩
+    have : p = ~Rew.embs.hom π := by simp [hπp]
+    rcases this with rfl
+    simp [neg_quote, ←quote_semisentence_def]; exact mem_coded_theory hπ
+  · have : (⌜Γ⌝ : V) ∪ {⌜σ⌝} = insert ⌜σ⌝ ⌜Γ⌝ := mem_ext fun x ↦ by simp; tauto
+    rw [this]
+    simpa [quote_semisentence_def] using derivable_of_quote (V := V) d
+
+theorem tprovable_of_provable : T ⊢! σ → T.codeIn V ⊢! ⌜σ⌝ := fun h ↦ by
+  simpa [Language.Theory.TProvable.iff_provable] using provable_of_provable (V := V) h
 
 end
-
-namespace Formalized
-
-variable (T : Theory ℒₒᵣ)
-
-
-
-end Formalized
 
 end LO.Arith
