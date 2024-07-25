@@ -342,7 +342,8 @@ def provableFn (T : Theory L) [DecidablePred T] : Sentence L →. Unit := fun x 
 
 lemma provable_iff_isProofFn {T : Theory L} [DecidablePred T] {σ : Sentence L} :
     T ⊢! σ ↔ ∃ e, isProofFn T σ e := by
-  simp[provable_iff, isProofFn]
+  simp only [ProofList.provable_iff, List.all_eq_true, decide_eq_true_eq, List.map_cons, List.map_map,
+    isProofFn, Bool.cond_false_right, Bool.and_true, decode_prod_val]
   constructor
   · rintro ⟨l, U, hU, hl, hproper⟩
     use encode (l, U)
