@@ -1,54 +1,8 @@
-import Logic.Modal.Standard.Kripke.GL.Completeness
+import Logic.Modal.Standard.Kripke.Semantics
 
 namespace LO.Modal.Standard
 
 variable [DecidableEq α] [Inhabited α]
-
--- TODO: 結局使わなかった．
-namespace Formula
-
-def subst (p : Formula α) (a : α) (t : Formula α) : Formula α :=
-  match p with
-  | ⊥ => ⊥
-  | ⊤ => ⊤
-  | atom b => if b = a then t else atom b
-  | ~p => ~(p.subst a t)
-  | p ⋏ q => (p.subst a t) ⋏ (q.subst a t)
-  | p ⋎ q => (p.subst a t) ⋎ (q.subst a t)
-  | p ⟶ q => (p.subst a t)  ⟶ (q.subst a t)
-  | box p => □(p.subst a t)
-
-end Formula
-
-lemma GL_deduct_substitution {p : Formula α} (a : α) (q : Formula α) : 𝐆𝐋 ⊢! p → 𝐆𝐋 ⊢! (p.subst a q) := by
-  intro h;
-  induction h using Deduction.inducition_with_necOnly! with
-  | hMaxm hp =>
-    apply Deduction.maxm!;
-    rcases hp with (hAxK | hAxL);
-    . obtain ⟨p, q, rfl⟩ := hAxK; simp [Formula.subst];
-    . obtain ⟨p, q, rfl⟩ := hAxL; simp [Formula.subst];
-  | hMdp ihpq ihp =>
-    simp only [Formula.subst] at ihpq ihp;
-    exact ihpq ⨀ ihp;
-  | hNec ih =>
-    simp only [Formula.subst];
-    exact System.nec! ih;
-  | _ =>
-    simp only [Formula.subst];
-    trivial;
-
-lemma KH_deduct_substitution {p : Formula α} (a : α) (q : Formula α) : 𝐊𝐇 ⊢! p → 𝐊𝐇 ⊢! (p.subst a q) := by
-  intro h;
-  induction h using Deduction.inducition_with_necOnly! with
-  | hMaxm hp =>
-    apply Deduction.maxm!;
-    rcases hp with (hAxK | hAxH);
-    . obtain ⟨p, q, rfl⟩ := hAxK; simp [Formula.subst];
-    . obtain ⟨p, q, rfl⟩ := hAxH; simp [Formula.subst]; rfl;
-  | hMdp ihpq ihp => simp only [Formula.subst] at ihpq ihp; exact ihpq ⨀ ihp;
-  | hNec ih => simp only [Formula.subst]; exact System.nec! ih;
-  | _ => simp only [Formula.subst]; trivial;
 
 namespace Kripke
 
@@ -56,7 +10,7 @@ open System
 open Kripke
 open Formula Formula.Kripke
 
-variable {a : α} {F : Kripke.Frame}
+variable (a : α) {F : Kripke.Frame}
 
 lemma valid_H_of_valid_L : F# ⊧ Axioms.L (atom a) → F# ⊧ Axioms.H (atom a) := by
   simp [Axioms.L, Axioms.H];
@@ -101,10 +55,55 @@ lemma valid_L_of_valid_H : F# ⊧ Axioms.H (atom a) → F# ⊧ Axioms.L (atom a)
 
 lemma iff_valid_L_valid_H : F# ⊧ Axioms.L (atom a) ↔ F# ⊧ Axioms.H (atom a) := by
   constructor;
-  . exact valid_H_of_valid_L;
-  . exact valid_L_of_valid_H;
+  . exact valid_H_of_valid_L a;
+  . exact valid_L_of_valid_H a;
 
-lemma H_not_Four : 𝐊𝐇 ⊬! □(atom a) ⟶ □□(atom a) := by sorry
+lemma _root_.LO.Modal.Standard.KH_not_Four : 𝐊𝐇 ⊬! Axioms.Four (atom a) := by sorry
+
+lemma _root_.LO.Modal.Standard.KH_not_Loeb : 𝐊𝐇 ⊬! Axioms.L (atom a) := by
+  by_contra hC;
+  have : System.HasAxiomL 𝐊𝐇 := ⟨by
+    intro p;
+    simpa [subst] using KH_deduct_substitution a p hC |>.some;
+  ⟩;
+  have : 𝐊𝐇 ⊢! Axioms.Four (atom a) := axiomFour!;
+  exact KH_not_Four a this;
+
+
+notation "Thm(" Λ:90 ")" => System.theory Λ
+
+/-- Set of frame that every theorems of `Λ` are valid on. -/
+abbrev TheoremsFrameClass (Λ : DeductionParameter α) : FrameClass.Dep α := { F : Frame | F# ⊧* Thm(Λ) }
+notation "𝔽(" Λ:90 ")" => TheoremsFrameClass Λ
+
+variable [Inhabited α]
+
+lemma KH_incompleteAux (𝔽 : FrameClass) (hFH : 𝔽# ⊧* (𝗛 : AxiomSet α)) : ∃ p : Formula α, (𝔽# ⊧ p ∧ 𝐊𝐇 ⊬! p) := by
+  by_contra hC;
+  push_neg at hC;
+  have := hC (Axioms.L (atom default)) ?h;
+  have := KH_not_Loeb (α := α) default;
+  contradiction;
+
+  intro F hF;
+  apply iff_valid_L_valid_H (default) |>.mpr;
+  simp at hFH;
+  exact hFH _ hF;
+
+theorem KH_incomplete : ∃ p : Formula α, 𝔽(𝐊𝐇) ⊧ p ∧ 𝐊𝐇 ⊬! p := by
+  obtain ⟨p, hs, hp⟩ := KH_incompleteAux (α := α) 𝔽(𝐊𝐇) $ by
+    simp;
+    intro p F hp;
+    exact Semantics.realizeSet_iff.mp hp (by simp [System.theory]);
+  use p;
+
+/--
+  Type class for _"`Λ` is incomplete for Kripke semantics"_
+-/
+class Incomplete (Λ : DeductionParameter α) : Prop where
+  incomplete : ∃ p, 𝔽(Λ) ⊧ p ∧ Λ ⊬! p
+
+instance : Incomplete (α := α) 𝐊𝐇 := ⟨KH_incomplete⟩
 
 end Kripke
 

@@ -12,4 +12,6 @@ import Logic.Modal.Standard.Kripke.S5
 
 import Logic.Modal.Standard.Kripke.GL.GL
 
+import Logic.Modal.Standard.Kripke.KH
+
 import Logic.Modal.Standard.Kripke.ModalCompanion
