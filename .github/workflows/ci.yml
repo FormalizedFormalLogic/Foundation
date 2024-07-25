@@ -70,38 +70,6 @@ jobs:
           name: docs
           path: ./.lake/build/doc
 
-  mdbook:
-    name: Build mdbook
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      # broken link checker
-      - uses: lycheeverse/lychee-action@v1
-        with:
-          args: lychee --verbose --no-progress ./md/**/*.md
-
-      - name: Install mdbook
-        uses: baptiste0928/cargo-install@v3
-        with:
-          crate: mdbook
-          version: "0.4.40"
-      - name: Install mdbook-katex
-        uses: baptiste0928/cargo-install@v3
-        with:
-          crate: mdbook-katex
-          version: "0.9.0"
-      - name: Print mdbook and plugins version
-        run: |
-          mdbook --version
-          mdbook-katex --version
-      - run: mdbook build md
-      - name: Upload mdbook
-        uses: actions/upload-artifact@v4
-        if: github.ref == 'refs/heads/master'
-        with:
-          name: book
-          path: ./md/book
-
   deploy:
     name: Deploy to GitHub Pages
     runs-on: ubuntu-latest
@@ -111,7 +79,6 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     needs:
       - build
-      - mdbook
     steps:
       - uses: actions/download-artifact@v4
         with:
@@ -121,10 +88,6 @@ jobs:
         with:
           name: import_graph
           path: ./_site/assets/import_graph/
-      - uses: actions/download-artifact@v4
-        with:
-          name: book
-          path: ./_site/book/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: ./_site

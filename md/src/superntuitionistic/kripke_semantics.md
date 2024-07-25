@@ -1,3 +1,0 @@
-# Kripke Semantics
-
-TODO:
