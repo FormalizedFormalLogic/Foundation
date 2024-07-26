@@ -62,6 +62,52 @@ lemma nil_or_cons (z : V) : z = 0 ∨ ∃ x v, z = x ∷ v := by
 lemma cons_le_cons {x₁ x₂ v₁ v₂ : V} (hx : x₁ ≤ x₂) (hv : v₁ ≤ v₂) :
     x₁ ∷ v₁ ≤ x₂ ∷ v₂ := by simpa [cons_def] using pair_le_pair hx hv
 
+section
+
+def _root_.LO.FirstOrder.Arith.consDef : 𝚺₀-Semisentence 3 :=
+  .mkSigma “w x v | ∃ xv < w, !pairDef xv x v ∧ w = xv + 1” (by simp)
+
+lemma cons_defined : 𝚺₀-Function₂ (cons : V → V → V) via consDef := by
+  intro v; simp [consDef]
+  constructor
+  · intro h; rw [h]; exact ⟨_, by simp [cons_def], rfl, rfl⟩
+  · intro ⟨_, _, rfl, h⟩; exact h
+
+@[simp] lemma eval_cons (v) :
+    Semiformula.Evalbm V v consDef.val ↔ v 0 = v 1 ∷ v 2 := cons_defined.df.iff v
+
+instance cons_definable : 𝚺₀-Function₂ (cons : V → V → V) := Defined.to_definable _ cons_defined
+
+instance cons_definable' (Γ) : Γ-Function₂ (cons : V → V → V) := .of_zero cons_definable _
+
+def _root_.LO.FirstOrder.Arith.mkVec₁Def : 𝚺₀-Semisentence 2 := .mkSigma
+  “s x | !consDef s x 0” (by simp)
+
+lemma mkVec₁_defined : 𝚺₀-Function₁ (fun x : V ↦ ?[x]) via mkVec₁Def := by
+  intro v; simp [mkVec₁Def]
+
+@[simp] lemma eval_mkVec₁Def (v) :
+    Semiformula.Evalbm V v mkVec₁Def.val ↔ v 0 = ?[v 1] := mkVec₁_defined.df.iff v
+
+instance mkVec₁_definable : 𝚺₀-Function₁ (fun x : V ↦ ?[x]) := Defined.to_definable _ mkVec₁_defined
+
+instance mkVec₁_definable' (Γ) : Γ-Function₁ (fun x : V ↦ ?[x]) := .of_zero mkVec₁_definable _
+
+def _root_.LO.FirstOrder.Arith.mkVec₂Def : 𝚺₁-Semisentence 3 := .mkSigma
+  “s x y | ∃ sy, !mkVec₁Def sy y ∧ !consDef s x sy” (by simp)
+
+lemma mkVec₂_defined : 𝚺₁-Function₂ (fun x y : V ↦ ?[x, y]) via mkVec₂Def := by
+  intro v; simp [mkVec₂Def]
+
+@[simp] lemma eval_mkVec₂Def (v) :
+    Semiformula.Evalbm V v mkVec₂Def.val ↔ v 0 = ?[v 1, v 2] := mkVec₂_defined.df.iff v
+
+instance mkVec₂_definable : 𝚺₁-Function₂ (fun x y : V ↦ ?[x, y]) := Defined.to_definable _ mkVec₂_defined
+
+instance mkVec₂_definable' (Γ) : (Γ, m + 1)-Function₂ (fun x y : V ↦ ?[x, y]) := .of_sigmaOne mkVec₂_definable _ _
+
+end
+
 end cons
 
 /-!
@@ -244,48 +290,6 @@ lemma nth_defined : 𝚺₁-Function₂ (nth : V → V → V) via nthDef := by
 instance nth_definable : 𝚺₁-Function₂ (nth : V → V → V) := Defined.to_definable _ nth_defined
 
 instance nth_definable' (Γ) : (Γ, m + 1)-Function₂ (nth : V → V → V) := .of_sigmaOne nth_definable _ _
-
-def _root_.LO.FirstOrder.Arith.consDef : 𝚺₀-Semisentence 3 :=
-  .mkSigma “w x v | ∃ xv < w, !pairDef xv x v ∧ w = xv + 1” (by simp)
-
-lemma cons_defined : 𝚺₀-Function₂ (cons : V → V → V) via consDef := by
-  intro v; simp [consDef]
-  constructor
-  · intro h; rw [h]; exact ⟨_, by simp [cons_def], rfl, rfl⟩
-  · intro ⟨_, _, rfl, h⟩; exact h
-
-@[simp] lemma eval_cons (v) :
-    Semiformula.Evalbm V v consDef.val ↔ v 0 = v 1 ∷ v 2 := cons_defined.df.iff v
-
-instance cons_definable : 𝚺₀-Function₂ (cons : V → V → V) := Defined.to_definable _ cons_defined
-
-instance cons_definable' (Γ) : Γ-Function₂ (cons : V → V → V) := .of_zero cons_definable _
-
-def _root_.LO.FirstOrder.Arith.mkVec₁Def : 𝚺₀-Semisentence 2 := .mkSigma
-  “s x | !consDef s x 0” (by simp)
-
-lemma mkVec₁_defined : 𝚺₀-Function₁ (fun x : V ↦ ?[x]) via mkVec₁Def := by
-  intro v; simp [mkVec₁Def]
-
-@[simp] lemma eval_mkVec₁Def (v) :
-    Semiformula.Evalbm V v mkVec₁Def.val ↔ v 0 = ?[v 1] := mkVec₁_defined.df.iff v
-
-instance mkVec₁_definable : 𝚺₀-Function₁ (fun x : V ↦ ?[x]) := Defined.to_definable _ mkVec₁_defined
-
-instance mkVec₁_definable' (Γ) : Γ-Function₁ (fun x : V ↦ ?[x]) := .of_zero mkVec₁_definable _
-
-def _root_.LO.FirstOrder.Arith.mkVec₂Def : 𝚺₁-Semisentence 3 := .mkSigma
-  “s x y | ∃ sy, !mkVec₁Def sy y ∧ !consDef s x sy” (by simp)
-
-lemma mkVec₂_defined : 𝚺₁-Function₂ (fun x y : V ↦ ?[x, y]) via mkVec₂Def := by
-  intro v; simp [mkVec₂Def]
-
-@[simp] lemma eval_mkVec₂Def (v) :
-    Semiformula.Evalbm V v mkVec₂Def.val ↔ v 0 = ?[v 1, v 2] := mkVec₂_defined.df.iff v
-
-instance mkVec₂_definable : 𝚺₁-Function₂ (fun x y : V ↦ ?[x, y]) := Defined.to_definable _ mkVec₂_defined
-
-instance mkVec₂_definable' (Γ) : (Γ, m + 1)-Function₂ (fun x y : V ↦ ?[x, y]) := .of_sigmaOne mkVec₂_definable _ _
 
 end
 

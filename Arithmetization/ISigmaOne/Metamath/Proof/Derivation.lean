@@ -15,60 +15,6 @@ section derivation
 
 variable (L)
 
-def Language.substs₁ (t u : V) : V := L.substs 0 ?[t] u
-
-variable {L}
-
-section substs₁
-
-section
-
-def _root_.LO.FirstOrder.Arith.LDef.substs₁Def (pL : LDef) : 𝚺₁-Semisentence 3 := .mkSigma
-  “ z t p | ∃ v, !consDef v t 0 ∧ !pL.substsDef z 0 v p” (by simp)
-
-variable (L)
-
-lemma substs₁_defined : 𝚺₁-Function₂ L.substs₁ via pL.substs₁Def := by
-  intro v; simp [LDef.substs₁Def, (substs_defined L).df.iff]; rfl
-
-@[simp] instance substs₁_definable : 𝚺₁-Function₂ L.substs₁ := Defined.to_definable _ (substs₁_defined L)
-
-end
-
-lemma Language.Semiformula.substs₁ (ht : L.Term t) (hp : L.Semiformula 1 p) : L.Semiformula 0 (L.substs₁ t p) :=
-  Language.Semiformula.substs hp (by simp [ht])
-
-end substs₁
-
-variable (L)
-
-def Language.free (p : V) : V := L.substs₁ ^&0 (L.shift p)
-
-variable {L}
-
-section free
-
-section
-
-def _root_.LO.FirstOrder.Arith.LDef.freeDef (pL : LDef) : 𝚺₁-Semisentence 2 := .mkSigma
-  “q p | ∃ fz, !qqFvarDef fz 0 ∧ ∃ sp, !pL.shiftDef sp p ∧ !pL.substs₁Def q fz sp” (by simp)
-
-variable (L)
-
-lemma free_defined : 𝚺₁-Function₁ L.free via pL.freeDef := by
-  intro v; simp [LDef.freeDef, (shift_defined L).df.iff, (substs₁_defined L).df.iff, Language.free]
-
-@[simp] instance free_definable : 𝚺₁-Function₁ L.free := Defined.to_definable _ (free_defined L)
-
-end
-
-@[simp] lemma Language.Semiformula.free (hp : L.Semiformula 1 p) : L.Formula (L.free p) :=
-  Language.Semiformula.substs₁ (by simp) (by simp [hp])
-
-end free
-
-variable (L)
-
 def Language.FormulaSet (s : V) : Prop := ∀ p ∈ s, L.Formula p
 
 variable {L}

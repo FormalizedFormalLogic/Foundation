@@ -153,6 +153,42 @@ lemma Language.Semiformula.neg {p : V} : L.Semiformula n p → L.Semiformula n (
 
 end negation
 
+variable (L)
+
+def Language.imp (n p q : V) : V := L.neg p ^⋎[n] q
+
+variable {L}
+
+namespace imp
+
+@[simp] lemma Language.Semiformula.imp {n p q : V} :
+    L.Semiformula n (L.imp n p q) ↔ L.Semiformula n p ∧ L.Semiformula n q := by
+  simp [Language.imp]
+
+
+section
+
+def _root_.LO.FirstOrder.Arith.LDef.impDef (pL : LDef) : 𝚺₁-Semisentence 4 := .mkSigma
+  “r n p q | ∃ np, !pL.negDef np p ∧ !qqOrDef r n np q” (by simp)
+
+variable (L)
+
+lemma imp_defined : 𝚺₁-Function₃ L.imp via pL.impDef := fun v ↦ by
+  simp [LDef.impDef, (neg_defined L).df.iff]; rfl
+
+@[simp] lemma eval_impDef (v : Fin 4 → V) :
+    Semiformula.Evalbm V v pL.impDef.val ↔ v 0 = L.imp (v 1) (v 2) (v 3) := (imp_defined L).df.iff v
+
+instance imp_definable : 𝚺₁-Function₃ L.imp :=
+  Defined.to_definable _ (imp_defined L)
+
+instance imp_definable' (Γ) : (Γ, m + 1)-Function₃ L.imp :=
+  .of_sigmaOne (imp_definable L) _ _
+
+end
+
+end imp
+
 section shift
 
 namespace Shift
@@ -652,6 +688,61 @@ lemma subst_eq_self {n w : V} (hp : L.Semiformula n p) (hw : L.SemitermVec n n w
 
 end substs
 
+
+variable (L)
+
+def Language.substs₁ (t u : V) : V := L.substs 0 ?[t] u
+
+variable {L}
+
+section substs₁
+
+section
+
+def _root_.LO.FirstOrder.Arith.LDef.substs₁Def (pL : LDef) : 𝚺₁-Semisentence 3 := .mkSigma
+  “ z t p | ∃ v, !consDef v t 0 ∧ !pL.substsDef z 0 v p” (by simp)
+
+variable (L)
+
+lemma substs₁_defined : 𝚺₁-Function₂ L.substs₁ via pL.substs₁Def := by
+  intro v; simp [LDef.substs₁Def, (substs_defined L).df.iff]; rfl
+
+@[simp] instance substs₁_definable : 𝚺₁-Function₂ L.substs₁ := Defined.to_definable _ (substs₁_defined L)
+
+end
+
+lemma Language.Semiformula.substs₁ (ht : L.Term t) (hp : L.Semiformula 1 p) : L.Semiformula 0 (L.substs₁ t p) :=
+  Language.Semiformula.substs hp (by simp [ht])
+
+end substs₁
+
+variable (L)
+
+def Language.free (p : V) : V := L.substs₁ ^&0 (L.shift p)
+
+variable {L}
+
+section free
+
+section
+
+def _root_.LO.FirstOrder.Arith.LDef.freeDef (pL : LDef) : 𝚺₁-Semisentence 2 := .mkSigma
+  “q p | ∃ fz, !qqFvarDef fz 0 ∧ ∃ sp, !pL.shiftDef sp p ∧ !pL.substs₁Def q fz sp” (by simp)
+
+variable (L)
+
+lemma free_defined : 𝚺₁-Function₁ L.free via pL.freeDef := by
+  intro v; simp [LDef.freeDef, (shift_defined L).df.iff, (substs₁_defined L).df.iff, Language.free]
+
+@[simp] instance free_definable : 𝚺₁-Function₁ L.free := Defined.to_definable _ (free_defined L)
+
+end
+
+@[simp] lemma Language.Semiformula.free (hp : L.Semiformula 1 p) : L.Formula (L.free p) :=
+  Language.Semiformula.substs₁ (by simp) (by simp [hp])
+
+end free
+
 namespace Formalized
 
 def qqEQ (n x y : V) : V := ^rel n 2 (eqIndex : V) ?[x, y]
@@ -677,6 +768,38 @@ notation:78 x:78 " ^< " y:79 => qqLT 0 x y
 notation:78 x:78 " ^≮[" n "] " y:79 => qqNLT n x y
 
 notation:78 x:78 " ^≮ " y:79 => qqNLT 0 x y
+
+def _root_.LO.FirstOrder.Arith.qqEQDef : 𝚺₁-Semisentence 4 :=
+  .mkSigma “p n x y | ∃ v, !mkVec₂Def v x y ∧ !qqRelDef p n 2 (!(.Operator.numeral ℒₒᵣ eqIndex)) v” (by simp)
+
+def _root_.LO.FirstOrder.Arith.qqNEQDef : 𝚺₁-Semisentence 4 :=
+  .mkSigma “p n x y | ∃ v, !mkVec₂Def v x y ∧ !qqNRelDef p n 2 (!(.Operator.numeral ℒₒᵣ eqIndex)) v” (by simp)
+
+def _root_.LO.FirstOrder.Arith.qqLTDef : 𝚺₁-Semisentence 4 :=
+  .mkSigma “p n x y | ∃ v, !mkVec₂Def v x y ∧ !qqRelDef p n 2 (!(.Operator.numeral ℒₒᵣ ltIndex)) v” (by simp)
+
+def _root_.LO.FirstOrder.Arith.qqNLTDef : 𝚺₁-Semisentence 4 :=
+  .mkSigma “p n x y | ∃ v, !mkVec₂Def v x y ∧ !qqNRelDef p n 2 (!(.Operator.numeral ℒₒᵣ ltIndex)) v” (by simp)
+
+lemma qqEQ_defined : 𝚺₁-Function₃ (qqEQ : V → V → V → V) via qqEQDef := by
+  intro v; simp [qqEQDef, numeral_eq_natCast, qqEQ]
+
+lemma qqNEQ_defined : 𝚺₁-Function₃ (qqNEQ : V → V → V → V) via qqNEQDef := by
+  intro v; simp [qqNEQDef, numeral_eq_natCast, qqNEQ]
+
+lemma qqLT_defined : 𝚺₁-Function₃ (qqLT : V → V → V → V) via qqLTDef := by
+  intro v; simp [qqLTDef, numeral_eq_natCast, qqLT]
+
+lemma qqNLT_defined : 𝚺₁-Function₃ (qqNLT : V → V → V → V) via qqNLTDef := by
+  intro v; simp [qqNLTDef, numeral_eq_natCast, qqNLT]
+
+@[simp] lemma eval_qqEQDef (v) : Semiformula.Evalbm V v qqEQDef.val ↔ v 0 = v 2 ^=[v 1] v 3 := qqEQ_defined.df.iff v
+
+@[simp] lemma eval_qqNEQDef (v) : Semiformula.Evalbm V v qqNEQDef.val ↔ v 0 = v 2 ^≠[v 1] v 3 := qqNEQ_defined.df.iff v
+
+@[simp] lemma eval_qqLTDef (v) : Semiformula.Evalbm V v qqLTDef.val ↔ v 0 = v 2 ^<[v 1] v 3 := qqLT_defined.df.iff v
+
+@[simp] lemma eval_qqNLTDef (v) : Semiformula.Evalbm V v qqNLTDef.val ↔ v 0 = v 2 ^≮[v 1] v 3 := qqNLT_defined.df.iff v
 
 end Formalized
 

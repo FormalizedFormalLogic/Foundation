@@ -41,12 +41,6 @@ abbrev Language.TFormula := L.TSemiformula 0
 
 variable {L}
 
-def Language.imp (n p q : V) : V := L.neg p ^⋎[n] q
-
-@[simp] lemma Language.Semiformula.imp {n p q : V} :
-    L.Semiformula n (L.imp n p q) ↔ L.Semiformula n p ∧ L.Semiformula n q := by
-  simp [Language.imp]
-
 scoped instance : LogicalConnective (L.TSemiformula n) where
   top := ⟨^⊤[n], by simp⟩
   bot := ⟨^⊥[n], by simp⟩
@@ -186,6 +180,9 @@ lemma subst_eq_self {n : V} (w : L.TSemitermVec n n) (p : L.TSemiformula n) (H :
   simp only [zero_add, lt_one_iff_eq_zero]
   rintro _ rfl
   simp
+
+@[simp] lemma subst_nil_eq_self (w : L.TSemitermVec 0 0) :
+    p^/[w] = p := subst_eq_self _ _ (by simp)
 
 lemma shift_substs {n m : V} (w : L.TSemitermVec n m) (p : L.TSemiformula n) :
     (p^/[w]).shift = p.shift^/[w.shift] := by ext; simp; rw [Arith.shift_substs p.prop w.prop]

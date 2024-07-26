@@ -1,4 +1,4 @@
-import Arithmetization.ISigmaOne.Metamath.Formula.Typed
+import Arithmetization.ISigmaOne.Metamath.Coding
 import Arithmetization.ISigmaOne.Metamath.Proof.Derivation
 
 /-!
