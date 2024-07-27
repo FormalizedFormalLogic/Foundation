@@ -1,4 +1,4 @@
-import Logic.Modal.LogicSymbol2
+import Logic.Modal.LogicSymbol
 
 namespace LO.Axioms
 
