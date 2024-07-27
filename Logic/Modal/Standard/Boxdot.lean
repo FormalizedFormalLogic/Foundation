@@ -12,12 +12,11 @@ def Formula.BoxdotTranslation : Formula α → Formula α
   | p ⟶ q => (BoxdotTranslation p) ⟶ (BoxdotTranslation q)
   | p ⋏ q => (BoxdotTranslation p) ⋏ (BoxdotTranslation q)
   | p ⋎ q => (BoxdotTranslation p) ⋎ (BoxdotTranslation q)
-  | box p => ⊡(BoxdotTranslation p)
+  | □p => ⊡(BoxdotTranslation p)
 postfix:75 "ᵇ" => Formula.BoxdotTranslation
 
 open System
 open Formula
-open StandardModalLogicalConnective (boxdot)
 
 variable {p : Formula α}
 

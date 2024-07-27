@@ -7,12 +7,13 @@ namespace LO
 @[notation_class]
 class Box (F : Type*) where
   box : F → F
-  box_injective : Function.Injective box
+  box_injective : Function.Injective box := by simp [Function.Injective];
 
 prefix:76 "□" => Box.box
 
 namespace Box
 
+attribute [match_pattern] Box.box
 attribute [simp] Box.box_injective
 
 variable [Box F]
@@ -23,7 +24,7 @@ prefix:76 "⊡" => boxdot
 abbrev multibox (n : ℕ) : F → F := (□ ·)^[n]
 notation:76 "□^[" n:90 "]" p:80 => multibox n p
 
-class Subclosed [LogicalConnective F] (C : F → Prop) extends LogicalConnective.Subclosed C where
+class Subclosed (C : F → Prop) where
   box_closed : C (□p) → C p
 
 attribute [aesop safe 5 forward] Subclosed.box_closed
@@ -50,14 +51,16 @@ lemma multimop_injective' : □^[n]p = □^[n]q ↔ p = q := by
 end Box
 
 
+@[notation_class]
 class Dia (F : Type*) where
   dia : F → F
-  dia_injective : Function.Injective dia
+  dia_injective : Function.Injective dia := by simp [Function.Injective];
 
 prefix:76 "◇" => Dia.dia
 
 namespace Dia
 
+attribute [match_pattern] Dia.dia
 attribute [simp] Dia.dia_injective
 
 variable [Dia F]
@@ -66,10 +69,10 @@ abbrev multidia (n : ℕ) : F → F := (◇ ·)^[n]
 
 notation:76 "◇^[" n:90 "]" p:80 => multidia n p
 
-class Subclosed [LogicalConnective F] (C : F → Prop) extends LogicalConnective.Subclosed C where
-  box_closed : C (◇p) → C p
+class Subclosed [LogicalConnective F] (C : F → Prop)  where
+  dia_closed : C (◇p) → C p
 
-attribute [aesop safe 5 forward] Subclosed.box_closed
+attribute [aesop safe 5 forward] Subclosed.dia_closed
 
 variable {p q : F} {n : ℕ}
 
@@ -92,6 +95,15 @@ lemma multidia_injective' : ◇^[n]p = ◇^[n]q ↔ p = q := by
 end Dia
 
 class BasicModalLogicalConnective (F : Type*) extends LogicalConnective F, Box F, Dia F
+
+class BasicModalLogicConnective.Subclosed [BasicModalLogicalConnective F] (C : F → Prop) extends
+  LogicalConnective.Subclosed C,
+  Box.Subclosed C,
+  Dia.Subclosed C
+
+class DiaAbbrev (F : Type*) [Box F] [Dia F] [Tilde F] where
+  dia_abbrev {p : F} : ◇p =  ~(□(~p))
+-- attribute [aesop safe 5 forward] DiaAbbrev.dia_abbrev
 
 end LO
 
@@ -148,6 +160,11 @@ variable [Box F] [Dia F] {s t : Set F}
 @[simp] lemma premultidia_subset_mono (h : s ⊆ t) : ◇''⁻¹^[n]s ⊆ ◇''⁻¹^[n]t := by simp_all [Set.subset_def];
 @[simp] lemma predia_subset_mono (h : s ⊆ t) : ◇''⁻¹s ⊆ ◇''⁻¹t := by simpa using premultidia_subset_mono (n := 1) h;
 
+@[simp] lemma iff_mem_premultibox : p ∈ □''⁻¹^[n]s ↔ □^[n]p ∈ s := by simp;
+@[simp] lemma iff_mem_multibox : □^[n]p ∈ □''^[n]s ↔ p ∈ s := by simp;
+
+@[simp] lemma iff_mem_premultidia : p ∈ ◇''⁻¹^[n]s ↔ ◇^[n]p ∈ s := by simp;
+@[simp] lemma iff_mem_multidia : ◇^[n]p ∈ ◇''^[n]s ↔ p ∈ s := by simp;
 
 lemma subset_premulitibox_iff_multibox_subset (h : s ⊆ □''⁻¹^[n]t) :  □''^[n]s ⊆ t := by
   intro p hp;

@@ -8,6 +8,9 @@ section Systems
 variable {S F : Type*} [LogicalConnective F] [BasicModalLogicalConnective F] [System F S]
 variable (𝓢 : S)
 
+class HasDiaDuality where
+  dia_dual (p : F) : 𝓢 ⊢ Axioms.DiaDuality p
+
 class Necessitation where
   nec {p : F} : 𝓢 ⊢ p → 𝓢 ⊢ □p
 
@@ -19,9 +22,6 @@ class LoebRule where
 
 class HenkinRule where
   henkin {p : F} : 𝓢 ⊢ □p ⟷ p → 𝓢 ⊢ p
-
-class HasDiaDuality where
-  dia_dual (p : F) : 𝓢 ⊢ Axioms.DiaDuality p
 
 class HasAxiomK where
   K (p q : F) : 𝓢 ⊢ Axioms.K p q
@@ -163,6 +163,11 @@ def multiboxIff' (h : 𝓢 ⊢ p ⟷ q) : 𝓢 ⊢ □^[n]p ⟷ □^[n]q := by
   | succ n ih => simpa using boxIff' ih;
 @[simp] lemma multibox_iff! (h : 𝓢 ⊢! p ⟷ q) : 𝓢 ⊢! □^[n]p ⟷ □^[n]q := ⟨multiboxIff' h.some⟩
 
+instance [DiaAbbrev F] : HasDiaDuality 𝓢 := ⟨by
+  intro p;
+  simp [Axioms.DiaDuality, DiaAbbrev.dia_abbrev];
+  apply iffId;
+⟩
 
 def diaDuality [HasDiaDuality 𝓢] : 𝓢 ⊢ ◇p ⟷ ~(□(~p)) := HasDiaDuality.dia_dual _
 @[simp] lemma dia_duality! [HasDiaDuality 𝓢] : 𝓢 ⊢! ◇p ⟷ ~(□(~p)) := ⟨diaDuality⟩
@@ -180,7 +185,13 @@ def multiDiaDuality [HasDiaDuality 𝓢] : 𝓢 ⊢ ◇^[n]p ⟷ ~(□^[n](~p)) 
   | zero => simp; apply dn;
   | succ n ih =>
     simp;
-    sorry;
+    apply iffTrans'' $ diaDuality (p := ◇^[n]p);
+    apply negReplaceIff';
+    apply boxIff';
+    apply iffIntro;
+    . exact contra₂' $ and₂' ih;
+    . exact contra₁' $ and₁' ih;
+lemma multidia_duality! [HasDiaDuality 𝓢] : 𝓢 ⊢! ◇^[n]p ⟷ ~(□^[n](~p)) := ⟨multiDiaDuality⟩
 
 variable [HasDiaDuality 𝓢]
 
@@ -188,8 +199,6 @@ lemma multidia_duality'! : 𝓢 ⊢! ◇^[n]p ↔ 𝓢 ⊢! ~(□^[n](~p)) := by
   constructor;
   . intro h; exact (and₁'! multidia_duality!) ⨀ h;
   . intro h; exact (and₂'! multidia_duality!) ⨀ h;
-lemma dia_duality'! : 𝓢 ⊢! ◇p ↔ 𝓢 ⊢! ~(□(~p)) := multidia_duality'! (n := 1)
-
 
 def diaIff' (h : 𝓢 ⊢ p ⟷ q) : 𝓢 ⊢ (◇p ⟷ ◇q) := by
   apply iffTrans'' diaDuality;
@@ -209,14 +218,15 @@ def multidiaIff' (h : 𝓢 ⊢ p ⟷ q) : 𝓢 ⊢ ◇^[n]p ⟷ ◇^[n]q := by
   | succ n ih => simpa using diaIff' ih;
 @[simp] lemma multidia_iff! (h : 𝓢 ⊢! p ⟷ q) : 𝓢 ⊢! ◇^[n]p ⟷ ◇^[n]q := ⟨multidiaIff' h.some⟩
 
-
 def multiboxDuality : 𝓢 ⊢ □^[n]p ⟷ ~(◇^[n](~p)) := by
   induction n with
   | zero => simp; apply dn;
   | succ n ih =>
-    -- simp [StandardModalLogicalConnective.duality'];
     simp;
-    exact iffTrans'' (boxIff' ih) dn
+    apply iffTrans'' (boxIff' ih);
+    apply iffNegRightToLeft';
+    exact iffComm' $ diaDuality;
+
 @[simp] lemma multibox_duality! : 𝓢 ⊢! □^[n]p ⟷ ~(◇^[n](~p)) := ⟨multiboxDuality⟩
 
 def boxDuality : 𝓢 ⊢ □p ⟷ ~(◇(~p)) := multiboxDuality (n := 1)
@@ -228,17 +238,6 @@ lemma multibox_duality'! : 𝓢 ⊢! □^[n]p ↔ 𝓢 ⊢! ~(◇^[n](~p)) := by
   . intro h; exact (and₂'! multibox_duality!) ⨀ h;
 
 lemma box_duality'! : 𝓢 ⊢! □p ↔ 𝓢 ⊢! ~(◇(~p)) := multibox_duality'! (n := 1)
-
-
-def multidiaDuality : 𝓢 ⊢ ◇^[n]p ⟷ ~(□^[n](~p)) := by
-  induction n with
-  | zero => simp; apply dn;
-  | succ n ih =>
-    simp [StandardModalLogicalConnective.duality'];
-    apply negReplaceIff';
-    apply boxIff';
-    exact iffTrans'' (negReplaceIff' ih) (iffComm' dn)
-@[simp] lemma multidia_duality! : 𝓢 ⊢! ◇^[n]p ⟷ ~(□^[n](~p)) := ⟨multidiaDuality⟩
 
 
 def multiboxverum : 𝓢 ⊢ (□^[n]⊤ : F) := multinec verum
@@ -377,15 +376,27 @@ lemma collect_multibox_or'! (h : 𝓢 ⊢! □^[n]p ⋎ □^[n]q) : 𝓢 ⊢! �
 def collect_box_or' (h : 𝓢 ⊢ □p ⋎ □q) : 𝓢 ⊢ □(p ⋎ q) := collect_multibox_or' (n := 1) h
 lemma collect_box_or'! (h : 𝓢 ⊢! □p ⋎ □q) : 𝓢 ⊢! □(p ⋎ q) := ⟨collect_box_or' h.some⟩
 
+def diaOrInst₁ : 𝓢 ⊢ ◇p ⟶ ◇(p ⋎ q) := by
+  apply impTrans'' (and₁' diaDuality);
+  apply impTrans'' ?h (and₂' diaDuality);
+  apply contra₀';
+  apply axiomK';
+  apply nec;
+  apply contra₀';
+  exact or₁;
+@[simp] lemma dia_or_inst₁! : 𝓢 ⊢! ◇p ⟶ ◇(p ⋎ q) := ⟨diaOrInst₁⟩
 
-def collect_dia_or : 𝓢 ⊢ ◇p ⋎ ◇q ⟶ ◇(p ⋎ q) := by
+def diaOrInst₂ : 𝓢 ⊢ ◇q ⟶ ◇(p ⋎ q) := by
+  apply impTrans'' (and₁' diaDuality);
+  apply impTrans'' ?h (and₂' diaDuality);
+  apply contra₀';
+  apply axiomK';
+  apply nec;
+  apply contra₀';
+  exact or₂;
+@[simp] lemma dia_or_inst₂! : 𝓢 ⊢! ◇q ⟶ ◇(p ⋎ q) := ⟨diaOrInst₂⟩
 
-  apply contra₁';
-  apply deduct';
-  apply demorgan₂';
-  apply dniAnd';
-  apply deductInv';
-  exact impTrans'' (implyBoxDistribute' demorgan₃) distribute_box_and;
+def collect_dia_or : 𝓢 ⊢ ◇p ⋎ ◇q ⟶ ◇(p ⋎ q) := or₃'' diaOrInst₁ diaOrInst₂
 @[simp] lemma collect_dia_or! : 𝓢 ⊢! ◇p ⋎ ◇q ⟶ ◇(p ⋎ q) := ⟨collect_dia_or⟩
 
 def collect_dia_or' (h : 𝓢 ⊢ ◇p ⋎ ◇q) : 𝓢 ⊢ ◇(p ⋎ q) := collect_dia_or ⨀ h
@@ -424,7 +435,7 @@ def collect_dia_or' (h : 𝓢 ⊢ ◇p ⋎ ◇q) : 𝓢 ⊢ ◇(p ⋎ q) := coll
 -- def distributeDiaAnd' (h : 𝓢 ⊢ ◇(p ⋏ q)) : 𝓢 ⊢ ◇p ⋏ ◇q := distributeDiaAnd ⨀ h
 lemma distribute_dia_and'! (h : 𝓢 ⊢! ◇(p ⋏ q)) : 𝓢 ⊢! ◇p ⋏ ◇q := distribute_dia_and! ⨀ h
 
--- open StandardModalLogicalConnective (boxdot)
+-- open BasicModalLogicalConnective (boxdot)
 
 def boxdotAxiomK : 𝓢 ⊢ ⊡(p ⟶ q) ⟶ (⊡p ⟶ ⊡q) := by
   apply deduct';

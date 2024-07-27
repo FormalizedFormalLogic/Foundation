@@ -281,6 +281,16 @@ def contra₃ [HasAxiomDNE 𝓢] : 𝓢 ⊢ (~p ⟶ ~q) ⟶ (q ⟶ p) :=  deduct
 def negReplaceIff' (b : 𝓢 ⊢ p ⟷ q) : 𝓢 ⊢ ~p ⟷ ~q := iffIntro (contra₀' $ and₂' b) (contra₀' $ and₁' b)
 lemma neg_replace_iff'! (b : 𝓢 ⊢! p ⟷ q) : 𝓢 ⊢! ~p ⟷ ~q := ⟨negReplaceIff' b.some⟩
 
+
+def iffNegLeftToRight' [HasAxiomDNE 𝓢] (h : 𝓢 ⊢ p ⟷ ~q) : 𝓢 ⊢ ~p ⟷ q := by
+  apply iffIntro;
+  . apply contra₂' $  and₂' h;
+  . apply contra₁' $  and₁' h;
+lemma iff_neg_left_to_right'! [HasAxiomDNE 𝓢] (h : 𝓢 ⊢! p ⟷ ~q) : 𝓢 ⊢! ~p ⟷ q := ⟨iffNegLeftToRight' h.some⟩
+
+def iffNegRightToLeft' [HasAxiomDNE 𝓢] (h : 𝓢 ⊢ ~p ⟷ q) : 𝓢 ⊢ p ⟷ ~q := iffComm' $ iffNegLeftToRight' $ iffComm' h
+lemma iff_neg_right_to_left'! [HasAxiomDNE 𝓢] (h : 𝓢 ⊢! ~p ⟷ q) : 𝓢 ⊢! p ⟷ ~q := ⟨iffNegRightToLeft' h.some⟩
+
 section NegationEquiv
 
 variable [System.NegationEquiv 𝓢]

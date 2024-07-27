@@ -43,11 +43,11 @@ lemma multiframe_def_multibox : Ω₁ ≺^[n] Ω₂ ↔ ∀ {p}, □^[n]p ∈ Ω
         intro Γ Δ hΓ hΔ hC;
 
         replace hΓ : ∀ p ∈ Γ, □p ∈ Ω₁.theory := by simpa using hΓ;
-        have dΓconj : Ω₁.theory *⊢[_]! □⋀Γ := membership_iff.mp $ iff_mem_box_conj.mpr hΓ;
+        have dΓconj : Ω₁.theory *⊢[Λ]! □⋀Γ := membership_iff.mp $ iff_mem_box_conj.mpr hΓ;
 
         have hΔ₂ : ∀ p ∈ ◇'⁻¹^[n]Δ, p ∈ Ω₂.theory := by
           intro p hp;
-          simpa using hΔ (◇^[n]p) (by simp_all);
+          exact Set.iff_mem_multidia.mp $ hΔ (◇^[n]p) (by simpa using hp);
 
         have hΔconj : ⋀◇'⁻¹^[n]Δ ∈ Ω₂.theory := iff_mem_conj.mpr hΔ₂;
 
@@ -64,7 +64,7 @@ lemma multiframe_def_multibox : Ω₁ ≺^[n] Ω₂ ↔ ∀ {p}, □^[n]p ∈ Ω
           have : Λ ⊢! ~⋀Δ ⟶ □^[n](~⋀◇'⁻¹^[n]Δ) := contra₂'! this;
           have : Λ ⊢! (⋀Δ ⟶ ⊥) ⟶ □^[n](~⋀◇'⁻¹^[n]Δ) := imp_trans''! (and₂'! neg_equiv!) this;
           have : Λ ⊢! ⋀Γ ⟶ □^[n](~⋀◇'⁻¹^[n]Δ) := imp_trans''! d₁ this;
-          have : Λ ⊢! □⋀Γ ⟶ □^[(n + 1)](~⋀◇'⁻¹^[n]Δ) := by simpa only [UnaryModalOperator.multimop_succ] using imply_box_distribute'! this;
+          have : Λ ⊢! □⋀Γ ⟶ □^[(n + 1)](~⋀◇'⁻¹^[n]Δ) := by simpa using imply_box_distribute'! this;
           exact iff_mem_neg.mp $ h $ membership_iff.mpr $ (Context.of! this) ⨀ dΓconj;
         }
 

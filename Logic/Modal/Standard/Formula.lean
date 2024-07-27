@@ -1,5 +1,4 @@
 import Logic.Vorspiel.Collection
-import Logic.Modal.LogicSymbol
 import Logic.Modal.Standard.System
 
 namespace LO.Modal.Standard
@@ -21,18 +20,17 @@ variable {α : Type u}
 
 @[simp] def dia (p : Formula α) : Formula α := neg (box (neg p))
 
-instance : StandardModalLogicalConnective (Formula α) where
+instance : BasicModalLogicalConnective (Formula α) where
   tilde := neg
   arrow := imp
   wedge := and
   vee := or
   top := verum
   bot := falsum
-  mop b := match b with
-    | true => box
-    | false => dia
-  mop_injective := by simp_all [Function.Injective]
-  duality := by simp;
+  box := box
+  dia := dia
+
+instance : DiaAbbrev (Formula α) := ⟨by intro; rfl⟩
 
 section ToString
 
@@ -46,7 +44,7 @@ def toStr : Formula α → String
   | p ⟶ q  => "\\left(" ++ toStr p ++ " \\to "   ++ toStr q ++ "\\right)"
   | p ⋏ q   => "\\left(" ++ toStr p ++ " \\land " ++ toStr q ++ "\\right)"
   | p ⋎ q   => "\\left(" ++ toStr p ++ " \\lor "   ++ toStr q ++ "\\right)"
-  | box p   => "\\Box " ++ toStr p
+  | □p   => "\\Box " ++ toStr p
 
 instance : Repr (Formula α) := ⟨fun t _ => toStr t⟩
 
@@ -87,14 +85,14 @@ def complexity : Formula α → ℕ
 | p ⟶ q  => max p.complexity q.complexity + 1
 | p ⋏ q   => max p.complexity q.complexity + 1
 | p ⋎ q   => max p.complexity q.complexity + 1
-| box p   => p.complexity + 1
+| □p   => p.complexity + 1
 
 /-- Max numbers of `□` -/
 def degree : Formula α → Nat
   | atom _ => 0
   | ⊤ => 0
   | ⊥ => 0
-  | box p => p.degree + 1
+  | □p => p.degree + 1
   | ~p => p.degree
   | p ⟶ q => max p.degree q.degree
   | p ⋏ q => max p.degree q.degree
@@ -118,7 +116,7 @@ def cases' {C : Formula α → Sort w}
   | p ⟶ q  => himp p q
   | p ⋏ q   => hand p q
   | p ⋎ q   => hor p q
-  | box p      => hbox p
+  | □p      => hbox p
 
 @[elab_as_elim]
 def rec' {C : Formula α → Sort w}
@@ -138,7 +136,7 @@ def rec' {C : Formula α → Sort w}
   | p ⟶ q  => himp p q (rec' hverum hfalsum hatom hneg himp hand hor hbox p) (rec' hverum hfalsum hatom hneg himp hand hor hbox q)
   | p ⋏ q  => hand p q (rec' hverum hfalsum hatom hneg himp hand hor hbox p) (rec' hverum hfalsum hatom hneg himp hand hor hbox q)
   | p ⋎ q  => hor p q (rec' hverum hfalsum hatom hneg himp hand hor hbox p) (rec' hverum hfalsum hatom hneg himp hand hor hbox q)
-  | box p     => hbox p (rec' hverum hfalsum hatom hneg himp hand hor hbox p)
+  | □p     => hbox p (rec' hverum hfalsum hatom hneg himp hand hor hbox p)
 
 -- @[simp] lemma complexity_neg (p : Formula α) : complexity (~p) = p.complexity + 1 :=
 --   by induction p using rec' <;> try { simp[neg_eq, neg, *]; rfl;}
@@ -190,7 +188,7 @@ def hasDecEq : (p q : Formula α) → Decidable (p = q)
         | isTrue hq  => isTrue (hp ▸ hq ▸ rfl)
         | isFalse hq => isFalse (by simp[hp, hq])
       | isFalse hp => isFalse (by simp[hp])
-  | box p, q => by
+  | □p, q => by
     cases q using cases' <;> try { simp; exact isFalse not_false }
     case hbox p' =>
       exact match hasDecEq p p' with
@@ -227,7 +225,7 @@ def Formula.Subformulas: Formula α → Finset (Formula α)
   | p ⟶ q => insert (p ⟶ q) (p.Subformulas ∪ q.Subformulas)
   | p ⋏ q  => {p ⋏ q} ∪ (p.Subformulas ∪ q.Subformulas)
   | p ⋎ q  => insert (p ⋎ q) (p.Subformulas ∪ q.Subformulas)
-  | box p  => insert (□p) p.Subformulas
+  | □p  => insert (□p) p.Subformulas
 
 prefix:70 "𝒮 " => Formula.Subformulas
 
@@ -365,16 +363,17 @@ lemma sub_of_atom {a : α} (h : p ∈ 𝒮 (atom a)) : p = atom a := by simp_all
 end Formula.Subformulas
 
 
-abbrev Theory.SubformulaClosed (T : Theory α) := StandardModalLogicalConnective.Subclosed (· ∈ T)
+abbrev Theory.SubformulaClosed (T : Theory α) := BasicModalLogicConnective.Subclosed (· ∈ T)
 
 namespace Theory.SubformulaClosed
 
-instance {p : Formula α} : (Theory.SubformulaClosed ((𝒮 p).toSet)) where
+instance {p : Formula α} : Theory.SubformulaClosed (𝒮 p).toSet where
   tilde_closed := by aesop;
   arrow_closed := by aesop;
   wedge_closed := by aesop;
   vee_closed   := by aesop;
   box_closed   := by aesop;
+  dia_closed   := by simp [DiaAbbrev.dia_abbrev]; aesop;
 
 variable {p : Formula α} {T : Theory α} [T_closed : T.SubformulaClosed]
 
@@ -383,6 +382,7 @@ lemma sub_mem_and (h : p ⋏ q ∈ T) : p ∈ T ∧ q ∈ T := T_closed.wedge_cl
 lemma sub_mem_or  (h : p ⋎ q ∈ T) : p ∈ T ∧ q ∈ T := T_closed.vee_closed h
 lemma sub_mem_imp (h : p ⟶ q ∈ T) : p ∈ T ∧ q ∈ T := T_closed.arrow_closed h
 lemma sub_mem_box (h : □p ∈ T) : p ∈ T := T_closed.box_closed h
+lemma sub_mem_dia (h : ◇p ∈ T) : p ∈ T := T_closed.dia_closed h
 
 attribute [aesop safe 5 forward]
   sub_mem_neg
@@ -390,6 +390,7 @@ attribute [aesop safe 5 forward]
   sub_mem_or
   sub_mem_imp
   sub_mem_box
+  sub_mem_dia
 
 end Theory.SubformulaClosed
 
@@ -407,7 +408,7 @@ def atoms : Formula α → Finset (α)
   | ⊤      => ∅
   | ⊥      => ∅
   | ~p     => p.atoms
-  | .box p  => p.atoms
+  | □p  => p.atoms
   | p ⟶ q => p.atoms ∪ q.atoms
   | p ⋏ q  => p.atoms ∪ q.atoms
   | p ⋎ q  => p.atoms ∪ q.atoms

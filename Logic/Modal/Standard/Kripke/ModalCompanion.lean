@@ -16,10 +16,10 @@ def GoedelTranslation : Superintuitionistic.Formula α → Formula α
   | ⊥ => ⊥
   | p ⋏ q => (GoedelTranslation p) ⋏ (GoedelTranslation q)
   | p ⋎ q  => (GoedelTranslation p) ⋎ (GoedelTranslation q)
-  | ~p   => □~(GoedelTranslation p)
+  | ~p   => □(~(GoedelTranslation p))
   | p ⟶ q => □((GoedelTranslation p) ⟶ (GoedelTranslation q))
 
-postfix:75 "ᵍ" => GoedelTranslation
+postfix:90 "ᵍ" => GoedelTranslation
 
 
 class ModalCompanion (i𝓓 : Superintuitionistic.DeductionParameter α) (m𝓓 : Modal.Standard.DeductionParameter α) where
