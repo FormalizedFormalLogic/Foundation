@@ -58,7 +58,7 @@ def Formula.PLoN.Satisfies (M : PLoN.Model α) (w : M.World) : Formula α → Pr
   | and p q => (PLoN.Satisfies M w p) ∧ (PLoN.Satisfies M w q)
   | or p q  => (PLoN.Satisfies M w p) ∨ (PLoN.Satisfies M w q)
   | imp p q => (PLoN.Satisfies M w p) → (PLoN.Satisfies M w q)
-  | box p   => ∀ {w'}, w ≺[p] w' → (PLoN.Satisfies M w' p)
+  | □p   => ∀ {w'}, w ≺[p] w' → (PLoN.Satisfies M w' p)
 
 
 namespace Formula.PLoN.Satisfies

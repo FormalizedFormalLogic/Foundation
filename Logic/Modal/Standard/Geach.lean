@@ -2,7 +2,7 @@ import Logic.Modal.Standard.Deduction
 
 namespace LO.System.Axioms
 
-variable {F : Type*} [LogicalConnective F] [StandardModalLogicalConnective F]
+variable {F : Type*} [LogicalConnective F] [BasicModalLogicalConnective F]
 
 structure Geach.Taple where
   i : ℕ

@@ -44,7 +44,7 @@ postfix:75 "ᴾ" => Formula.toPropFormula
 
 def TrivTranslation : Formula α → Formula α
   | atom a => atom a
-  | box p => p.TrivTranslation
+  | □p => p.TrivTranslation
   | ⊤ => ⊤
   | ⊥ => ⊥
   | ~p => ~(p.TrivTranslation)

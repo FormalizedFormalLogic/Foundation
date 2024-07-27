@@ -15,7 +15,7 @@ def interpretation
   [Semiterm.Operator.GoedelNumber L (FirstOrder.Sentence L)]
   (f : realization L α) (β : ProvabilityPredicate L L) : Formula α → FirstOrder.Sentence L
   | .atom a => f a
-  | .box p => ⦍β⦎(interpretation f β p)
+  | □p => ⦍β⦎(interpretation f β p)
   | ⊤ => ⊤
   | ⊥ => ⊥
   | p ⟶ q => (interpretation f β p) ⟶ (interpretation f β q)

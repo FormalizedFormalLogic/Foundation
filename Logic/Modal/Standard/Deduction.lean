@@ -406,14 +406,14 @@ lemma reducible_K4_Triv : (𝐊𝟒 : DeductionParameter α) ≤ₛ 𝐓𝐫𝐢
   intro p hp;
   rcases hp with (hK | hFour)
   . obtain ⟨_, _, e⟩ := hK; subst_vars; exact axiomK!;
-  . obtain ⟨_, _, e⟩ := hFour; subst_vars; exact axiomFour!;
+  . obtain ⟨_, _, e⟩ := hFour; exact axiomFour!;
 
 lemma reducible_K4_GL : (𝐊𝟒 : DeductionParameter α) ≤ₛ 𝐆𝐋 := by
   apply normal_reducible;
   intro p hp;
   rcases hp with (hK | hFour)
   . obtain ⟨_, _, e⟩ := hK; subst_vars; exact axiomK!;
-  . obtain ⟨_, _, e⟩ := hFour; subst_vars; exact axiomFour!;
+  . obtain ⟨_, _, e⟩ := hFour; exact axiomFour!;
 
 -- Macintyre & Simmons (1973)
 -- 𝐆𝐋 =ₛ 𝐊𝟒(𝐋) =ₛ 𝐊𝟒(𝐇) =ₛ 𝐊𝟒𝐇
@@ -466,8 +466,8 @@ lemma reducible_K4Henkin_GL : (𝐊𝟒𝐇 : DeductionParameter α) ≤ₛ 𝐆
   intro p hp;
   rcases hp with hK | hFour | hH
   . obtain ⟨_, _, e⟩ := hK; subst_vars; exact axiomK!;
-  . obtain ⟨_, _, e⟩ := hFour; subst_vars; exact axiomFour!;
-  . obtain ⟨_, _, e⟩ := hH; subst_vars; exact axiomH!;
+  . obtain ⟨_, _, e⟩ := hFour; exact axiomFour!;
+  . obtain ⟨_, _, e⟩ := hH; exact axiomH!;
 
 lemma equivalent_GL_K4Loeb : (𝐆𝐋 : DeductionParameter α) =ₛ 𝐊𝟒(𝐋) := by
   apply Equiv.antisymm_iff.mpr;
