@@ -328,6 +328,8 @@ lemma imp_def : x ⊧ p ⟶ q ↔ (x ⊧ p) → (x ⊧ q) := by
   . intro h; exact h;
   . intro h; exact h;
 
+lemma imp_def_notor : x ⊧ p ⟶ q ↔ x ⊧ ~p ⋎ q := by simp [Satisfies, imp_iff_not_or]
+
 protected instance tarski : Semantics.Tarski (M.World) where
   realize_top := by intro; trivial;
   realize_bot := by aesop;
