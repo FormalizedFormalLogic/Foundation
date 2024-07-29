@@ -107,4 +107,77 @@ instance K_fin_sound : Sound (𝐊 : DeductionParameter α) AllFrameClassꟳ# :=
 
 end
 
-end LO.Modal.Standard.Kripke
+end Kripke
+
+section Reducible
+
+variable [Inhabited α] [DecidableEq α]
+
+open System (weakerThan_iff)
+open Kripke
+open Formula (atom)
+open Formula.Kripke
+
+theorem K_strictlyWeakerThan_KD : (𝐊 : DeductionParameter α) <ₛ 𝐊𝐃 := by
+  constructor;
+  . apply reducible_K_KD;
+  . simp [weakerThan_iff];
+    use (□(atom default) ⟶ ◇(atom default));
+    constructor;
+    . exact Deduction.maxm! (by simp);
+    . apply K_sound.not_provable_of_countermodel;
+      simp [FrameClass, ValidOnFrame, ValidOnModel];
+      use { World := Fin 1, Rel := λ _ _ => False }, (λ w _ => w = 0), 0;
+      simp [Satisfies];
+
+theorem K_strictlyWeakerThan_K4 : (𝐊 : DeductionParameter α) <ₛ 𝐊𝟒 := by
+  constructor;
+  . apply reducible_K_K4;
+  . simp [weakerThan_iff];
+    use (□(atom default) ⟶ □□(atom default));
+    constructor;
+    . exact Deduction.maxm! (by simp);
+    . apply K_sound.not_provable_of_countermodel;
+      simp [FrameClass, ValidOnFrame, ValidOnModel];
+      use { World := Fin 2, Rel := λ x y => x ≠ y }, (λ w _ => w = 1), 0;
+      simp [Satisfies];
+      constructor;
+      . intro y;
+        match y with
+        | 0 => simp [Frame.Rel]; aesop;
+        | 1 => simp;
+      . use 1;
+        constructor;
+        . simp [Frame.Rel]; aesop;
+        . use 0; simp [Frame.Rel]; aesop;
+
+theorem K_strictlyWeakerThan_KB : (𝐊 : DeductionParameter α) <ₛ 𝐊𝐁 := by
+  constructor;
+  . apply reducible_K_KB;
+  . simp [weakerThan_iff];
+    use ((atom default) ⟶ □◇(atom default));
+    constructor;
+    . exact Deduction.maxm! (by simp);
+    . apply K_sound.not_provable_of_countermodel;
+      simp [FrameClass, ValidOnFrame, ValidOnModel];
+      use { World := Fin 2, Rel := λ x y => x = 0 ∧ y = 1 }, (λ w _ => w = 0), 0;
+      simp [Satisfies];
+      use 1;
+
+theorem K_strictlyWeakerThan_K5 : (𝐊 : DeductionParameter α) <ₛ 𝐊𝟓 := by
+  constructor;
+  . apply reducible_K_K5;
+  . simp [weakerThan_iff];
+    use (◇(atom default) ⟶ □◇(atom default));
+    constructor;
+    . exact Deduction.maxm! (by simp);
+    . apply K_sound.not_provable_of_countermodel;
+      simp [FrameClass, ValidOnFrame, ValidOnModel];
+      use { World := Fin 2, Rel := λ x _ => x = 0 }, (λ w _ => w = 0), 0;
+      simp [Satisfies];
+      use 1;
+      simp;
+
+end Reducible
+
+end LO.Modal.Standard

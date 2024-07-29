@@ -116,6 +116,8 @@ abbrev ReflexiveFrameClass : FrameClass := { F | Reflexive F }
 
 abbrev SerialFrameClass : FrameClass := { F | Serial F }
 
+abbrev TransitiveFrameClass : FrameClass := { F | Transitive F }
+
 abbrev ReflexiveEuclideanFrameClass : FrameClass := { F | Reflexive F ∧ Euclidean F }
 
 abbrev EquivalenceFrameClass : FrameClass := { F | Reflexive F ∧ Transitive F ∧ Symmetric F }
@@ -229,6 +231,8 @@ instance sound_KT : Sound (𝐊𝐓 : DeductionParameter α) ReflexiveFrameClass
 
 instance sound_KTB : Sound (𝐊𝐓𝐁 : DeductionParameter α) ReflexiveSymmetricFrameClass# := instGeachLogicSoundAux
 
+instance sound_K4 : Sound (𝐊𝟒 : DeductionParameter α) TransitiveFrameClass# := instGeachLogicSoundAux
+
 instance sound_S4 : Sound (𝐒𝟒 : DeductionParameter α) PreorderFrameClass# := instGeachLogicSoundAux
 
 instance sound_S5 : Sound (𝐒𝟓 : DeductionParameter α) ReflexiveEuclideanFrameClass# := instGeachLogicSoundAux
@@ -304,6 +308,8 @@ private def instGeachLogicCompleteAux {Λ : DeductionParameter α} [geach : Λ.I
 
 instance : Complete (𝐊𝐓 : DeductionParameter α) ReflexiveFrameClass.{u}# := instGeachLogicCompleteAux
 
+instance KT_complete : Complete (𝐊𝐓 : DeductionParameter α) ReflexiveFrameClass.{u}# := instGeachLogicCompleteAux
+
 instance KTB_complete : Complete (𝐊𝐓𝐁 : DeductionParameter α) ReflexiveSymmetricFrameClass.{u}# := instGeachLogicCompleteAux
 
 instance S4_complete : Complete (𝐒𝟒 : DeductionParameter α) PreorderFrameClass.{u}# := instGeachLogicCompleteAux
@@ -314,18 +320,87 @@ instance KT4B_complete : Complete (𝐊𝐓𝟒𝐁 : DeductionParameter α) Equ
 
 end Completeness
 
+end Kripke
+
 
 section Reducible
 
+variable [Inhabited α] [DecidableEq α]
 
-theorem reducible_KD_KT : (𝐊𝐃 : DeductionParameter α) ≤ₛ 𝐊𝐓 := by
+open Kripke
+open Formula (atom)
+open Formula.Kripke
+
+
+theorem KD_weakerThan_KT : (𝐊𝐃 : DeductionParameter α) ≤ₛ 𝐊𝐓 := by
   apply reducible_of_subset_FrameClass (α := α) SerialFrameClass ReflexiveFrameClass;
   simp_all [serial_of_refl];
 
+theorem KD_strictlyWeakerThan_KT : (𝐊𝐃 : DeductionParameter α) <ₛ 𝐊𝐓 := by
+  constructor;
+  . apply KD_weakerThan_KT;
+  . simp [weakerThan_iff];
+    use (□(atom default) ⟶ (atom default));
+    constructor;
+    . exact Deduction.maxm! (by simp);
+    . apply sound_KD.not_provable_of_countermodel;
+      simp [FrameClass];
+      use { World := Fin 2, Rel := λ _ y => y = 1 };
+      constructor;
+      . simp [Serial];
+      . simp [ValidOnFrame, ValidOnModel];
+        use (λ w _ => w = 1), 0;
+        simp [Satisfies];
 
-theorem reducible_S4_S5 : (𝐒𝟒 : DeductionParameter α) ≤ₛ 𝐒𝟓 := by
+
+example : (𝐊 : DeductionParameter α) <ₛ 𝐊𝐓 := strictlyWeakerThan.trans K_strictlyWeakerThan_KD KD_strictlyWeakerThan_KT
+
+
+theorem K4_weakerThan_S4 : (𝐊𝟒 : DeductionParameter α) ≤ₛ 𝐒𝟒 := by
+  apply reducible_of_subset_FrameClass (α := α) TransitiveFrameClass PreorderFrameClass;
+  simp;
+
+theorem K4_strictlyWeakerThan_S4 : (𝐊𝟒 : DeductionParameter α) <ₛ 𝐒𝟒 := by
+  constructor;
+  . apply K4_weakerThan_S4;
+  . simp [weakerThan_iff]
+    use (□(atom default) ⟶ (atom default));
+    constructor;
+    . exact Deduction.maxm! (by simp)
+    . apply sound_K4.not_provable_of_countermodel;
+      simp [FrameClass];
+      use { World := Fin 3, Rel := λ _ y => y = 1 };
+      constructor;
+      . simp [Transitive];
+      . simp [ValidOnFrame, ValidOnModel];
+        use (λ w _ => w = 1), 0;
+        simp [Satisfies];
+
+
+theorem S4_weakerThan_S5 : (𝐒𝟒 : DeductionParameter α) ≤ₛ 𝐒𝟓 := by
   apply reducible_of_subset_FrameClass PreorderFrameClass ReflexiveEuclideanFrameClass;
   simp_all [trans_of_refl_eucl];
+
+theorem S4_strictlyWeakerThan_S5 : (𝐒𝟒 : DeductionParameter α) <ₛ 𝐒𝟓 := by
+  constructor;
+  . apply S4_weakerThan_S5;
+  . simp [weakerThan_iff];
+    use (◇(atom default) ⟶  □◇(atom default));
+    constructor;
+    . exact Deduction.maxm! (by simp);
+    . apply sound_S4.not_provable_of_countermodel;
+      simp [FrameClass];
+      use { World := Fin 3, Rel := λ x y => (x = y) ∨ (x = 0 ∧ y = 1) ∨ (x = 0 ∧ y = 2) };
+      refine ⟨?_, ?_, ?_⟩;
+      . simp [Reflexive];
+      . simp [Transitive]; aesop;
+      . simp [ValidOnFrame, ValidOnModel];
+        use (λ w _ => w = 2), 0;
+        simp [Satisfies];
+        constructor;
+        . omega;
+        . use 1; omega;
+
 
 theorem equiv_S5_KT4B : (𝐒𝟓 : DeductionParameter α) =ₛ 𝐊𝐓𝟒𝐁 := by
   apply equiv_of_eq_FrameClass ReflexiveEuclideanFrameClass EquivalenceFrameClass;
@@ -333,68 +408,6 @@ theorem equiv_S5_KT4B : (𝐒𝟓 : DeductionParameter α) =ₛ 𝐊𝐓𝟒𝐁
   . simp_all [symm_of_refl_eucl, trans_of_refl_eucl];
   . simp_all [eucl_of_symm_trans];
 
-
-/- TODO: strict reducible
-theorem LogicalStrictStrong.KD_KT [hα : Nontrivial α] : (𝐊𝐃 : AxiomSet α) <ᴸ 𝐊𝐓 := by
-  constructor;
-  . simp;
-  . obtain ⟨x, y, hxy⟩ := hα.exists_pair_ne
-    simp only [LogicalStrong, not_forall];
-    use (□(Formula.atom default) ⟶ (Formula.atom default));
-    use ⟨Deduction.maxm (by simp)⟩
-    apply not_imp_not.mpr $ AxiomSet.sounds;
-    simp [Formula.FrameClassConsequence];
-    existsi (λ _ w₂ => w₂ = y);
-    constructor;
-    . simp only [AxiomSetFrameClass.geach];
-      apply GeachLogic.frameClassDefinability_aux.mp;
-      simp [Serial];
-    . simp [Formula.FrameConsequence];
-      use (λ w _ => w = y);
-      simp;
-      use x;
-
-theorem LogicalStrictStrong.K4_S4 [hα : Nontrivial α] : (𝐊𝟒 : AxiomSet α) <ᴸ 𝐒𝟒 := by
-  constructor;
-  . apply LogicalStrong.of_subset; simp;
-  . obtain ⟨x, y, hxy⟩ := hα.exists_pair_ne;
-    simp only [LogicalStrong, not_forall];
-    use (□(Formula.atom default) ⟶ (Formula.atom default));
-    use ⟨Deduction.maxm (by simp)⟩
-    apply not_imp_not.mpr $ AxiomSet.sounds;
-    simp [Formula.FrameClassConsequence];
-    existsi (λ _ w₂ => w₂ = y);
-    constructor;
-    . simp only [AxiomSetFrameClass.geach];
-      apply GeachLogic.frameClassDefinability_aux.mp;
-      simp [Transitive];
-    . simp [Formula.FrameConsequence];
-      use (λ w _ => w = y);
-      simp;
-      use x;
-
-theorem LogicalStrictStrong.S4_S5 : (𝐒𝟒 : AxiomSet (Fin 3)) <ᴸ 𝐒𝟓 := by
-  constructor;
-  . simp;
-  . simp only [LogicalStrong, not_forall];
-    existsi (◇(Formula.atom default) ⟶ □◇(Formula.atom default));
-    use ⟨Deduction.maxm (by simp)⟩;
-    apply not_imp_not.mpr $ AxiomSet.sounds;
-    simp [Formula.FrameClassConsequence];
-    existsi (λ w₁ w₂ => (w₁ = w₂) ∨ (w₁ = 0 ∧ w₂ = 1) ∨ (w₁ = 0 ∧ w₂ = 2));
-    constructor;
-    . simp only [AxiomSetFrameClass.geach];
-      apply GeachLogic.frameClassDefinability_aux.mp;
-      simp [Reflexive, Transitive];
-      aesop;
-    . simp [Formula.FrameConsequence];
-      use (λ w₁ w₂ => (w₁ = w₂) ∨ (w₁ = 0 ∧ w₂ = 1) ∨ (w₁ = 0 ∧ w₂ = 2));
-      aesop;
--/
-
 end Reducible
-
-
-end Kripke
 
 end LO.Modal.Standard

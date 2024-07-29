@@ -151,6 +151,8 @@ instance : 𝐊𝐓.IsGeach (α := α) where taples := [⟨0, 0, 1, 0⟩]
 
 instance : 𝐊𝐓𝐁.IsGeach (α := α) where taples := [⟨0, 0, 1, 0⟩, ⟨0, 1, 0, 1⟩]
 
+instance : 𝐊𝟒.IsGeach (α := α) where taples := [⟨0, 2, 1, 0⟩]
+
 instance : 𝐒𝟒.IsGeach (α := α) where taples := [⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩]
 
 instance : 𝐒𝟒.𝟐.IsGeach (α := α) where taples := [⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩, ⟨1, 1, 1, 1⟩]
