@@ -87,6 +87,20 @@ lemma val_inj {p q : L.TSemiformula n} :
 
 @[ext] lemma ext {p q : L.TSemiformula n} (h : p.val = q.val) : p = q := val_inj.mp h
 
+lemma ext_iff {p q : L.TSemiformula n} : p = q ↔ p.val = q.val := by rcases p; rcases q; simp
+
+@[simp] lemma and_inj {p₁ p₂ q₁ q₂ : L.TSemiformula n} :
+    p₁ ⋏ p₂ = q₁ ⋏ q₂ ↔ p₁ = q₁ ∧ p₂ = q₂ := by simp [ext_iff]
+
+@[simp] lemma or_inj {p₁ p₂ q₁ q₂ : L.TSemiformula n} :
+    p₁ ⋎ p₂ = q₁ ⋎ q₂ ↔ p₁ = q₁ ∧ p₂ = q₂ := by simp [ext_iff]
+
+@[simp] lemma all_inj {p q : L.TSemiformula (n + 1)} :
+    p.all = q.all ↔ p = q := by simp [ext_iff]
+
+@[simp] lemma ex_inj {p q : L.TSemiformula (n + 1)} :
+    p.ex = q.ex ↔ p = q := by simp [ext_iff]
+
 @[simp] lemma neg_verum : ~(⊤ : L.TSemiformula n) = ⊥ := by ext; simp
 @[simp] lemma neg_falsum : ~(⊥ : L.TSemiformula n) = ⊤ := by ext; simp
 @[simp] lemma neg_and (p q : L.TSemiformula n) : ~(p ⋏ q) = ~p ⋎ ~q := by ext; simp
@@ -113,6 +127,13 @@ def substs (p : L.TSemiformula n) (w : L.TSemitermVec n m) : L.TSemiformula m :=
 @[simp] lemma shift_or (p q : L.TSemiformula n) : (p ⋎ q).shift = p.shift ⋎ q.shift := by ext; simp [shift]
 @[simp] lemma shift_all (p : L.TSemiformula (n + 1)) : p.all.shift = p.shift.all := by ext; simp [shift]
 @[simp] lemma shift_ex (p : L.TSemiformula (n + 1)) : p.ex.shift = p.shift.ex := by ext; simp [shift]
+
+@[simp] lemma neg_inj {p q : L.TSemiformula n} :
+    ~p = ~q ↔ p = q :=
+  ⟨by intro h; simpa using congr_arg (~·) h, by rintro rfl; rfl⟩
+
+@[simp] lemma imp_inj {p₁ p₂ q₁ q₂ : L.TSemiformula n} :
+    p₁ ⟶ p₂ = q₁ ⟶ q₂ ↔ p₁ = q₁ ∧ p₂ = q₂ := by simp [imp_def]
 
 @[simp] lemma shift_neg (p : L.TSemiformula n) : (~p).shift = ~(p.shift) := by
   ext; simp [shift, val_neg, TSemitermVec.prop]
@@ -194,6 +215,42 @@ end Language.TSemifromula
 
 end typed_formula
 
+section typed_isfvfree
+
+namespace Language.TSemiformula
+
+def FVFree (p : L.TSemiformula n) : Prop := L.IsFVFree n p.val
+
+lemma FVFree.iff {p : L.TSemiformula n} : p.FVFree ↔ p.shift = p := by
+  simp [FVFree, Language.IsFVFree, ext_iff]
+
+@[simp] lemma Fvfree.verum : (⊤ : L.TSemiformula n).FVFree := by simp [FVFree]
+
+@[simp] lemma Fvfree.falsum : (⊥ : L.TSemiformula n).FVFree := by simp [FVFree]
+
+@[simp] lemma Fvfree.and {p q : L.TSemiformula n} :
+    (p ⋏ q).FVFree ↔ p.FVFree ∧ q.FVFree := by
+  simp [FVFree.iff, FVFree.iff]
+
+@[simp] lemma Fvfree.or {p q : L.TSemiformula n} : (p ⋎ q).FVFree ↔ p.FVFree ∧ q.FVFree := by
+  simp [FVFree.iff]
+
+@[simp] lemma Fvfree.neg {p : L.TSemiformula n} : (~p).FVFree ↔ p.FVFree := by
+  simp [FVFree.iff]
+
+@[simp] lemma Fvfree.all {p : L.TSemiformula (n + 1)} : p.all.FVFree ↔ p.FVFree := by
+  simp [FVFree.iff]
+
+@[simp] lemma Fvfree.ex {p : L.TSemiformula (n + 1)} : p.ex.FVFree ↔ p.FVFree := by
+  simp [FVFree.iff]
+
+@[simp] lemma Fvfree.imp {p q : L.TSemiformula n} : (p ⟶ q).FVFree ↔ p.FVFree ∧ q.FVFree := by
+  simp [FVFree.iff]
+
+end Language.TSemiformula
+
+end typed_isfvfree
+
 open Formalized
 
 def Language.TSemiterm.equals {n : V} (t u : ⌜ℒₒᵣ⌝.TSemiterm n) : ⌜ℒₒᵣ⌝.TSemiformula n := ⟨t.val ^=[n] u.val, by simp [qqEQ]⟩
@@ -226,6 +283,22 @@ variable {n m : V}
 @[simp] lemma val_notEquals {n : V} (t u : ⌜ℒₒᵣ⌝.TSemiterm n) : (t ≠' u).val = t.val ^≠[n] u.val := rfl
 @[simp] lemma val_lessThan {n : V} (t u : ⌜ℒₒᵣ⌝.TSemiterm n) : (t <' u).val = t.val ^<[n] u.val := rfl
 @[simp] lemma val_notLessThan {n : V} (t u : ⌜ℒₒᵣ⌝.TSemiterm n) : (t ≮' u).val = t.val ^≮[n] u.val := rfl
+
+@[simp] lemma equals_iff {t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.TSemiterm n} :
+    (t₁ =' u₁) = (t₂ =' u₂) ↔ t₁ = t₂ ∧ u₁ = u₂ := by
+  simp [Language.TSemiformula.ext_iff, Language.TSemiterm.ext_iff, qqEQ]
+
+@[simp] lemma notequals_iff {t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.TSemiterm n} :
+    (t₁ ≠' u₁) = (t₂ ≠' u₂) ↔ t₁ = t₂ ∧ u₁ = u₂ := by
+  simp [Language.TSemiformula.ext_iff, Language.TSemiterm.ext_iff, qqNEQ]
+
+@[simp] lemma lessThan_iff {t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.TSemiterm n} :
+    (t₁ <' u₁) = (t₂ <' u₂) ↔ t₁ = t₂ ∧ u₁ = u₂ := by
+  simp [Language.TSemiformula.ext_iff, Language.TSemiterm.ext_iff, qqLT]
+
+@[simp] lemma notLessThan_iff {t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.TSemiterm n} :
+    (t₁ ≮' u₁) = (t₂ ≮' u₂) ↔ t₁ = t₂ ∧ u₁ = u₂ := by
+  simp [Language.TSemiformula.ext_iff, Language.TSemiterm.ext_iff, qqNLT]
 
 @[simp] lemma neg_equals (t₁ t₂ : ⌜ℒₒᵣ⌝.TSemiterm n) :
     ~(t₁ =' t₂) = (t₁ ≠' t₂) := by
@@ -344,6 +417,18 @@ lemma nth_tSubstItr' {n m : V} (w : ⌜ℒₒᵣ⌝.TSemitermVec n m) (p : ⌜�
     (tSubstItr w p k).disj.substs v = (tSubstItr (w.substs v) p k).disj := by
   ext; simp [Language.TSemiformula.substs, Language.TSemitermVec.substs]
   rw [substs_disj_substItr p.prop w.prop v.prop]
+
+@[simp] lemma equals_fvfree {t u : ⌜ℒₒᵣ⌝.TSemiterm n} : (t =' u).FVFree ↔ t.FVFree ∧ u.FVFree := by
+  simp [Language.TSemiformula.FVFree.iff, Language.TSemiterm.FVFree.iff]
+
+@[simp] lemma notEquals_fvfree {t u : ⌜ℒₒᵣ⌝.TSemiterm n} : (t ≠' u).FVFree ↔ t.FVFree ∧ u.FVFree := by
+  simp [Language.TSemiformula.FVFree.iff, Language.TSemiterm.FVFree.iff]
+
+@[simp] lemma lessThan_fvfree {t u : ⌜ℒₒᵣ⌝.TSemiterm n} : (t <' u).FVFree ↔ t.FVFree ∧ u.FVFree := by
+  simp [Language.TSemiformula.FVFree.iff, Language.TSemiterm.FVFree.iff]
+
+@[simp] lemma notLessThan_fvfree {t u : ⌜ℒₒᵣ⌝.TSemiterm n} : (t ≮' u).FVFree ↔ t.FVFree ∧ u.FVFree := by
+  simp [Language.TSemiformula.FVFree.iff, Language.TSemiterm.FVFree.iff]
 
 end Formalized
 

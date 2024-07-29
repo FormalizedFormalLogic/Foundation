@@ -26,12 +26,6 @@ abbrev LOR.Theory := @Language.Theory V _ _ _ _ _ _ ⌜ℒₒᵣ⌝ (Language.lD
 
 variable {V}
 
-abbrev bv {n : V} (x : V) (h : x < n := by simp) : ⌜ℒₒᵣ⌝.TSemiterm n := ⌜ℒₒᵣ⌝.bvar x h
-abbrev fv {n : V} (x : V) : ⌜ℒₒᵣ⌝.TSemiterm n := ⌜ℒₒᵣ⌝.fvar x
-
-scoped prefix:max "#'" => bv
-scoped prefix:max "&'" => fv
-
 /-- TODO: move -/
 @[simp] lemma two_lt_three : (2 : V) < (1 + 1 + 1 : V) := by simp [←one_add_one_eq_two]
 @[simp] lemma two_lt_four : (2 : V) < (1 + 1 + 1 + 1 : V) := by simp [←one_add_one_eq_two]
@@ -43,7 +37,7 @@ class EQTheory (T : LOR.Theory V) : Prop where
   refl : (#'0 =' #'0).all ∈' T
   replace (p : ⌜ℒₒᵣ⌝.TSemiformula (0 + 1)) : (#'1 =' #'0 ⟶ p^/[(#'1).sing] ⟶ p^/[(#'0).sing]).all.all ∈' T
 
-class R₀Theory (T : LOR.Theory V) : Prop where
+class R₀Theory (T : LOR.Theory V) extends EQTheory T : Prop where
   add (n m : V) : (↑n + ↑m) =' ↑(n + m) ∈' T
   mul (n m : V) : (↑n * ↑m) =' ↑(n * m) ∈' T
   ne {n m : V} : n ≠ m → ↑n ≠' ↑m ∈' T

@@ -509,6 +509,23 @@ lemma termShift_qVec {n m w : V} (hw : L.SemitermVec n m w) :
       nth_termShiftVec hw (by simpa using hi),
       termBShift_termShift (hw.2 i (by simpa using hi))]
 
+section fvfree
+
+variable (L)
+
+def Language.IsTermFVFree (n t : V) : Prop := L.Semiterm n t ∧ L.termShift n t = t
+
+variable {L}
+
+@[simp] lemma Language.IsTermFVFree.bvar (x : V) : L.IsTermFVFree n ^#x ↔ x < n := by
+  simp [Language.IsTermFVFree]
+  intro h; simp [h]
+
+@[simp] lemma Language.IsTermFVFree.fvar (x : V) : ¬L.IsTermFVFree n ^&x := by
+  simp [Language.IsTermFVFree]
+
+end fvfree
+
 end
 
 namespace Formalized

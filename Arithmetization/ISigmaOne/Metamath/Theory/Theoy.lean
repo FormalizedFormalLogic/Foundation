@@ -1,6 +1,5 @@
-import Arithmetization.ISigmaOne.Metamath.Proof.R
-import Arithmetization.ISigmaOne.Metamath.DerivabilityConditions.D1
-import Arithmetization.ISigmaOne.Metamath.Coding
+import Arithmetization.ISigmaOne.Metamath.Proof.Typed
+import Arithmetization.ISigmaOne.Metamath.Theory.SigmaOneDefinable
 
 /-!
 
@@ -34,25 +33,6 @@ end Theory
 
 namespace Arith
 
-def thEQDef : (Language.lDef ℒₒᵣ).TDef where
-  ch := .mkSigma “σ |
-    ( let v0 := qqBvarDef 0;
-      ∃ eq, !qqEQDef eq 1 v0 v0 ∧
-      !qqAllDef σ 0 eq ) ∨
-    ( ∃ p, !p⌜ℒₒᵣ⌝.isSemiformulaDef.sigma 1 p ∧
-      ∃ x0, !qqBvarDef x0 0 ∧
-      ∃ x1, !qqBvarDef x1 1 ∧
-      ∃ eq, !qqEQDef eq 2 x0 x1 ∧
-      ∃ v0, !mkVec₁Def v0 x0 ∧
-      ∃ v1, !mkVec₁Def v1 x1 ∧
-      ∃ p0, !p⌜ℒₒᵣ⌝.substsDef p0 2 v0 p ∧
-      ∃ p1, !p⌜ℒₒᵣ⌝.substsDef p0 2 v1 p ∧
-      ∃ imp0, !p⌜ℒₒᵣ⌝.impDef imp0 2 p0 p1 ∧
-      ∃ imp1, !p⌜ℒₒᵣ⌝.impDef imp1 2 eq imp0 ∧
-      ∃ all0, !qqAllDef all0 1 imp1 ∧
-      !qqAllDef σ 0all0)
-    ” (by simp)
-
 end Arith
 
 end LO.FirstOrder
@@ -69,8 +49,34 @@ variable {V : Type*} [Zero V] [One V] [Add V] [Mul V] [LT V] [V ⊧ₘ* 𝐈𝚺
 
 namespace Formalized
 
+def thEQDef : (Language.lDef ℒₒᵣ).TDef where
+  ch := .mkSigma “σ |
+    ( let v0 := qqBvarDef 0;
+      ∃ eq, !qqEQDef eq 1 v0 v0 ∧
+      !qqAllDef σ 0 eq ) ∨
+    ( ∃ p, !p⌜ℒₒᵣ⌝.isSemiformulaDef.sigma 1 p ∧
+      ∃ x0, !qqBvarDef x0 0 ∧
+      ∃ x1, !qqBvarDef x1 1 ∧
+      ∃ eq, !qqEQDef eq 2 x0 x1 ∧
+      ∃ v0, !mkVec₁Def v0 x0 ∧
+      ∃ v1, !mkVec₁Def v1 x1 ∧
+      ∃ p0, !p⌜ℒₒᵣ⌝.substsDef p0 2 v0 p ∧
+      ∃ p1, !p⌜ℒₒᵣ⌝.substsDef p0 2 v1 p ∧
+      ∃ imp0, !p⌜ℒₒᵣ⌝.impDef imp0 2 p0 p1 ∧
+      ∃ imp1, !p⌜ℒₒᵣ⌝.impDef imp1 2 eq imp0 ∧
+      ∃ all0, !qqAllDef all0 1 imp1 ∧
+      !qqAllDef σ 0all0)”
+    (by simp)
+
+variable (V)
+
+def thEQ : (Language.codeIn ℒₒᵣ V).Theory where
+  set := { ^∀ (^#0 ^=[1] ^#0) } ∪ { ^∀ ^∀ (^#1 ^=[2] ^#0 ^→[⌜ℒₒᵣ⌝; 2] ⌜ℒₒᵣ⌝.substs 2 ?[^#0] p ^→[⌜ℒₒᵣ⌝; 2] ⌜ℒₒᵣ⌝.substs 2 ?[^#0] p) | p }
+  set_fvFree := by { 
+    simp
+   }
 
 
-def thEQ :
+def thEQ : Set V := { ^∀ (^#0 ^=[1] ^#0) } ∪ { ^∀ ^∀ (^#1 ^=[2] ^#0 ^→[⌜ℒₒᵣ⌝; 2] ⌜ℒₒᵣ⌝.substs 2 ?[^#0] p ^→[⌜ℒₒᵣ⌝; 2] ⌜ℒₒᵣ⌝.substs 2 ?[^#0] p) | p }
 
-variable {T : LOR.Theory V} {pT : (Language.lDef ℒₒᵣ).TDef} [T.Defined pT] [EQTheory T] [R₀Theory T]
+instance : (thEQ V).Defined thEQDef

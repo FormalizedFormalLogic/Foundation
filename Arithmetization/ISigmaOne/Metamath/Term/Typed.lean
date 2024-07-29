@@ -58,6 +58,8 @@ abbrev Language.TTerm := L.TSemiterm 0
 lemma Language.TSemiterm.ext {t u : L.TSemiterm n}
     (h : t.val = u.val) : t = u := by rcases t; rcases u; simpa using h
 
+lemma Language.TSemiterm.ext_iff {t u : L.TSemiterm n} : t = u ↔ t.val = u.val := by rcases t; rcases u; simp
+
 @[ext]
 lemma Language.TSemitermVec.ext {v w : L.TSemitermVec k n}
     (h : v.val = w.val) : v = w := by rcases v; rcases w; simpa using h
@@ -70,6 +72,12 @@ def Language.func {n k f : V} (hf : L.Func k f) (v : L.TSemitermVec k n) :
     L.TSemiterm n := ⟨^func k f v.val , by simp [hf]⟩
 
 variable {L}
+
+abbrev bv {n : V} (x : V) (h : x < n := by simp) : L.TSemiterm n := L.bvar x h
+abbrev fv {n : V} (x : V) : L.TSemiterm n := L.fvar x
+
+scoped prefix:max "#'" => bv
+scoped prefix:max "&'" => fv
 
 @[simp] lemma Language.val_bvar {n : V} (z : V) (hz : z < n) : (L.bvar z hz).val = ^#z := rfl
 @[simp] lemma Language.val_fvar {n : V} (x : V) : (L.fvar x : L.TSemiterm n).val = ^&x := rfl
@@ -240,6 +248,24 @@ end Language.TSemiterm
 
 end typed_term
 
+section typed_isfvfree
+
+namespace Language.TSemiterm
+
+def FVFree (t : L.TSemiterm n) : Prop := L.IsTermFVFree n t.val
+
+lemma FVFree.iff {t : L.TSemiterm n} : t.FVFree ↔ t.shift = t := by
+  simp [FVFree, Language.IsTermFVFree, ext_iff]
+
+@[simp] lemma FVFree.bvar (z : V) (h : z < n) : (L.bvar z h).FVFree := by simp [FVFree, h]
+
+@[simp] lemma FVFree.bShift (t : L.TSemiterm n) (ht : t.FVFree) :
+    t.bShift.FVFree := by simp [FVFree.iff, ←bShift_shift_comm, FVFree.iff.mp ht]
+
+end Language.TSemiterm
+
+end typed_isfvfree
+
 namespace Formalized
 
 def typedNumeral (n m : V) : ⌜ℒₒᵣ⌝.TSemiterm n := ⟨numeral m, by simp⟩
@@ -261,6 +287,14 @@ variable {n : V}
 @[simp] lemma val_add (t₁ t₂ : ⌜ℒₒᵣ⌝.TSemiterm n) : (t₁ + t₂).val = t₁.val ^+ t₂.val := rfl
 
 @[simp] lemma val_mul (t₁ t₂ : ⌜ℒₒᵣ⌝.TSemiterm n) : (t₁ * t₂).val = t₁.val ^* t₂.val := rfl
+
+@[simp] lemma add_inj_iff {t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.TSemiterm n} :
+    t₁ + t₂ = u₁ + u₂ ↔ t₁ = u₁ ∧ t₂ = u₂ := by
+  simp [Language.TSemiterm.ext_iff, qqAdd]
+
+@[simp] lemma mul_inj_iff {t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.TSemiterm n} :
+    t₁ * t₂ = u₁ * u₂ ↔ t₁ = u₁ ∧ t₂ = u₂ := by
+  simp [Language.TSemiterm.ext_iff, qqMul]
 
 @[simp] lemma subst_numeral {m n : V} (w : ⌜ℒₒᵣ⌝.TSemitermVec n m) (x : V) :
     (↑x : ⌜ℒₒᵣ⌝.TSemiterm n).substs w = ↑x := by
@@ -291,6 +325,14 @@ variable {n : V}
 
 @[simp] lemma bShift_mul (t₁ t₂ : ⌜ℒₒᵣ⌝.TSemiterm n) : (t₁ * t₂).bShift = t₁.bShift * t₂.bShift := by
   ext; simp [qqMul, Language.TSemiterm.bShift]
+
+@[simp] lemma fvFree_numeral (x : V) : (↑x : ⌜ℒₒᵣ⌝.TSemiterm n).FVFree := by simp [Language.TSemiterm.FVFree.iff]
+
+@[simp] lemma fvFree_add (t₁ t₂ : ⌜ℒₒᵣ⌝.TSemiterm n) :
+    (t₁ + t₂).FVFree ↔ t₁.FVFree ∧ t₂.FVFree := by simp [Language.TSemiterm.FVFree.iff]
+
+@[simp] lemma fvFree_mul (t₁ t₂ : ⌜ℒₒᵣ⌝.TSemiterm n) :
+    (t₁ * t₂).FVFree ↔ t₁.FVFree ∧ t₂.FVFree := by simp [Language.TSemiterm.FVFree.iff]
 
 end Formalized
 

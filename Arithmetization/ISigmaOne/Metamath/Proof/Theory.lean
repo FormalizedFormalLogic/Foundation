@@ -17,39 +17,6 @@ variable {V : Type*} [Zero V] [One V] [Add V] [Mul V] [LT V] [V ⊧ₘ* 𝐈𝚺
 
 variable {L : Arith.Language V} {pL : LDef} [Arith.Language.Defined L pL]
 
-section FVFree
-
-variable (L)
-
-def Language.IsFVFreeSemiterm (n t : V) : Prop := L.termShift n t = t
-
-def Language.IsFVFree (p : V) : Prop := L.Formula p ∧ L.shift p = p
-
-section
-
-def _root_.LO.FirstOrder.Arith.LDef.isFVFreeDef (pL : LDef) : 𝚺₁-Semisentence 1 :=
-  .mkSigma “p | !pL.isSemiformulaDef.sigma 0 p ∧ !pL.shiftDef p p” (by simp)
-
-lemma isFVFree_defined : 𝚺₁-Predicate (L.IsFVFree : V → Prop) via pL.isFVFreeDef := by
-  intro v; simp [LDef.isFVFreeDef, HSemiformula.val_sigma, (semiformula_defined L).df.iff, (shift_defined L).df.iff]
-  simp [Language.IsFVFree, eq_comm]
-
-end
-
-variable {L}
-
-@[simp] lemma neg_iff : L.IsFVFree (L.neg p) ↔ L.IsFVFree p := by
-  constructor
-  · intro h
-    have hp : L.Formula p := Language.Semiformula.neg_iff.mp h.1
-    have : L.shift (L.neg p) = L.neg p := h.2
-    simp [shift_neg hp, neg_inj_iff hp.shift hp] at this
-    exact ⟨hp, this⟩
-  · intro h; exact ⟨by simp [h.1], by rw [shift_neg h.1, h.2]⟩
-
-
-end FVFree
-
 section theory
 
 variable (L)
@@ -59,7 +26,7 @@ structure _root_.LO.FirstOrder.Arith.LDef.TDef (pL : LDef) where
 
 protected structure Language.Theory where
   set : Set V
-  set_fvFree : ∀ p ∈ set, L.IsFVFree p
+  set_fvFree : ∀ p ∈ set, L.IsFVFree 0 p
 
 instance : Membership V L.Theory := ⟨fun x T ↦ x ∈ T.set⟩
 
@@ -78,9 +45,9 @@ instance mem_definable : 𝚺₁-Predicate (· ∈ T) := Defined.defined.to_defi
 
 variable {T}
 
-lemma fvFree_neg_of_mem {p} (hp : p ∈ T) : L.IsFVFree (L.neg p) := by simpa using T.set_fvFree p hp
+lemma fvFree_neg_of_mem {p} (hp : p ∈ T) : L.IsFVFree 0 (L.neg p) := by simpa using T.set_fvFree p hp
 
-lemma fvFree_of_neg_mem {p} (hp : L.neg p ∈ T) : L.IsFVFree p := by simpa using T.set_fvFree _ hp
+lemma fvFree_of_neg_mem {p} (hp : L.neg p ∈ T) : L.IsFVFree 0 p := by simpa using T.set_fvFree _ hp
 
 end Language.Theory
 

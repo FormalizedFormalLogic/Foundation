@@ -9,7 +9,7 @@ variable {L : Language} [(k : ℕ) → Encodable (L.Func k)] [(k : ℕ) → Enco
 
 class _root_.LO.FirstOrder.Theory.Sigma₁Definable (T : Theory L) extends Arith.LDef.TDef L.lDef where
   mem_iff {σ} : σ ∈ T ↔ 𝐈𝚺₁ ⊢₌! ch.val/[(⌜σ⌝ : Semiterm ℒₒᵣ Empty 0)]
-  fvfree : 𝐈𝚺₁ ⊢₌! “∀ σ, !ch σ → !L.lDef.isFVFreeDef σ”
+  fvfree : 𝐈𝚺₁ ⊢₌! “∀ σ, !ch σ → !L.lDef.isFVFreeDef 0 σ”
 
 def _root_.LO.FirstOrder.Theory.tDef (T : Theory L) [d : T.Sigma₁Definable] : Arith.LDef.TDef L.lDef := d.toTDef
 
@@ -23,7 +23,7 @@ def _root_.LO.FirstOrder.Theory.codeIn : (L.codeIn V).Theory where
   set := {x | V ⊧/![x] T.tDef.ch.val}
   set_fvFree := by
     intro x hx
-    have : ∀ x, V ⊧/![x] T.tDef.ch.val → (L.codeIn V).IsFVFree x := by
+    have : ∀ x, V ⊧/![x] T.tDef.ch.val → (L.codeIn V).IsFVFree 0 x := by
       simpa [models_iff, (isFVFree_defined (V := V) (L.codeIn V)).df.iff] using
         consequence_iff_add_eq.mp (sound! <| LO.FirstOrder.Theory.Sigma₁Definable.fvfree (T := T)) V inferInstance
     exact this x hx
