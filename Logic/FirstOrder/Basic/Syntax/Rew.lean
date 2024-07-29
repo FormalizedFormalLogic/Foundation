@@ -1121,6 +1121,14 @@ lemma embs_close (p : SyntacticFormula L) : Rew.embs.hom p.close = ∀* (Rew.fix
   · intro x hx
     simp [q] at hx
 
+@[simp] lemma substs_comp_fixitr_eq_map (p : SyntacticFormula L) (f : ℕ → SyntacticTerm L) :
+    (Rew.substs (ξ := ℕ) (fun x ↦ f x)).hom ((Rew.fixitr 0 p.upper).hom p) = (Rew.rewrite f).hom p := by
+  simp [←Rew.hom_comp_app]
+  apply rew_eq_of_funEqOn
+  · simp
+  · intro x hx
+    simp [Rew.comp_app, Rew.fixitr_fvar, Semiformula.lt_upper_of_fvar? hx]
+
 @[simp] lemma substs_comp_fixitr (p : SyntacticFormula L) :
     (Rew.substs (ξ := ℕ) (fun x ↦ &x)).hom ((Rew.fixitr 0 p.upper).hom p) = p := by
   simp [←Rew.hom_comp_app]
@@ -1170,7 +1178,18 @@ lemma lMap_rewriteMap (p : Semiformula L₁ ξ₁ n) (f : ξ₁ → ξ₂) :
 
 end lMap
 
-lemma app_cast_eq {n'} (h : n = n') (p : Semiformula L ξ n) : (h ▸ p) = (Rew.cast h).hom p := by rcases h; simp
+lemma free_rewrite_eq (f : ℕ → SyntacticTerm L) (p : SyntacticSemiformula L 1) :
+    Rew.free.hom ((Rew.rewrite (fun x ↦ Rew.bShift (f x))).hom p) =
+    (Rew.rewrite (&0 :>ₙ fun x ↦ Rew.shift (f x))).hom (Rew.free.hom p) := by
+  simpa [←Rew.hom_comp_app] using Rew.hom_ext' (by ext x <;> simp[Rew.comp_app, Fin.eq_zero])
+
+lemma shift_rewrite_eq (f : ℕ → SyntacticTerm L) (p : SyntacticFormula L) :
+    Rew.shift.hom ((Rew.rewrite f).hom p) = (Rew.rewrite (&0 :>ₙ fun x => Rew.shift (f x))).hom (Rew.shift.hom p) := by
+  simpa [←Rew.hom_comp_app] using Rew.hom_ext' (by ext x <;> simp[Rew.comp_app])
+
+lemma rewrite_subst_eq (f : ℕ → SyntacticTerm L) (t) (p : SyntacticSemiformula L 1) :
+    (Rew.rewrite f).hom (p/[t]) = ((Rew.rewrite (Rew.bShift ∘ f)).hom p)/[Rew.rewrite f t] := by
+  simpa [←Rew.hom_comp_app] using Rew.hom_ext' (by ext x <;> simp[Rew.comp_app])
 
 end Semiformula
 

@@ -296,19 +296,6 @@ lemma CutRestricted.lMap {C : Set (SyntacticFormula L₂)} {Δ : Sequent L₁} (
 
 end Hom
 
-private lemma free_rewrite_eq (f : ℕ → SyntacticTerm L) (p : SyntacticSemiformula L 1) :
-    Rew.free.hom ((Rew.rewrite (fun x => Rew.bShift (f x))).hom p) =
-    (Rew.rewrite (&0 :>ₙ fun x => Rew.shift (f x))).hom (Rew.free.hom p) := by
-  simp[←Rew.hom_comp_app]; exact Rew.hom_ext' (by ext x <;> simp[Rew.comp_app, Fin.eq_zero])
-
-private lemma shift_rewrite_eq (f : ℕ → SyntacticTerm L) (p : SyntacticFormula L) :
-    Rew.shift.hom ((Rew.rewrite f).hom p) = (Rew.rewrite (&0 :>ₙ fun x => Rew.shift (f x))).hom (Rew.shift.hom p) := by
-  simp[←Rew.hom_comp_app]; exact Rew.hom_ext' (by ext x <;> simp[Rew.comp_app])
-
-private lemma rewrite_subst_eq (f : ℕ → SyntacticTerm L) (t) (p : SyntacticSemiformula L 1) :
-    (Rew.rewrite f).hom (p/[t]) = ((Rew.rewrite (Rew.bShift ∘ f)).hom p)/[Rew.rewrite f t] := by
-  simp[←Rew.hom_comp_app]; exact Rew.hom_ext' (by ext x <;> simp[Rew.comp_app])
-
 attribute [simp] Rew.q_rewrite
 
 def rewrite : ∀ {Δ}, ⊢¹ Δ → ∀ (f : ℕ → SyntacticTerm L), ⊢¹ Δ.map (Rew.rewrite f).hom
