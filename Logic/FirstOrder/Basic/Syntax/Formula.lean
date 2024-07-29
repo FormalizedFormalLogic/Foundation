@@ -413,31 +413,39 @@ def fvarList : {n : ℕ} → Semiformula L ξ n → List ξ
 abbrev fvar? (p : Semiformula L ξ n) (x : ξ) : Prop := x ∈ p.fvarList
 
 @[simp] lemma fvarList_top : fvarList (⊤ : Semiformula L ξ n) = [] := rfl
-
 @[simp] lemma fvarList_bot : fvarList (⊥ : Semiformula L ξ n) = [] := rfl
-
 @[simp] lemma fvarList_and (p q : Semiformula L ξ n) : fvarList (p ⋏ q) = p.fvarList ++ q.fvarList := rfl
-
 @[simp] lemma fvarList_or (p q : Semiformula L ξ n) : fvarList (p ⋎ q) = p.fvarList ++ q.fvarList := rfl
-
 @[simp] lemma fvarList_all (p : Semiformula L ξ (n + 1)) : fvarList (∀' p) = fvarList p := rfl
-
 @[simp] lemma fvarList_ex (p : Semiformula L ξ (n + 1)) : fvarList (∃' p) = fvarList p := rfl
-
 @[simp] lemma fvarList_neg (p : Semiformula L ξ n) : fvarList (~p) = fvarList p := by
   induction p using rec' <;> simp[*, fvarList, ←neg_eq]
-
 @[simp] lemma fvarList_sentence {o : Type*} [IsEmpty o] (p : Semiformula L o n) : fvarList p = [] := by
   induction p using rec' <;> simp[*, fvarList, ←neg_eq]
 
+@[simp] lemma fvar?_rel (x) {k} (R : L.Rel k) (v : Fin k → Semiterm L ξ n) :
+    fvar? (rel R v) x ↔ ∃ i, (v i).fvar? x := by simp [fvar?, fvarList]
+@[simp] lemma fvar?_nrel (x) {k} (R : L.Rel k) (v : Fin k → Semiterm L ξ n) :
+    fvar? (nrel R v) x ↔ ∃ i, (v i).fvar? x := by simp [fvar?, fvarList]
+@[simp] lemma fvar?_top (x) : ¬fvar? (⊤ : Semiformula L ξ n) x := by simp [fvar?]
+@[simp] lemma fvar?_falsum (x) : ¬fvar? (⊥ : Semiformula L ξ n) x := by simp [fvar?]
+@[simp] lemma fvar?_and (x) (p q : Semiformula L ξ n) : fvar? (p ⋏ q) x ↔ fvar? p x ∨ fvar? q x := by simp [fvar?]
+@[simp] lemma fvar?_or (x) (p q : Semiformula L ξ n) : fvar? (p ⋎ q) x ↔ fvar? p x ∨ fvar? q x := by simp [fvar?]
+@[simp] lemma fvar?_all (x) (p : Semiformula L ξ (n + 1)) : fvar? (∀' p) x ↔ fvar? p x := by simp [fvar?]
+@[simp] lemma fvar?_ex (x) (p : Semiformula L ξ (n + 1)) : fvar? (∃' p) x ↔ fvar? p x := by simp [fvar?]
+
 def upper (p : SyntacticSemiformula L n) : ℕ := Finset.sup p.fvarList.toFinset id + 1
 
+lemma lt_upper_of_fvar? {p : SyntacticSemiformula L n} : fvar? p m → m < p.upper := by
+  simp [upper, Nat.add_one_le_iff, fvar?, Nat.lt_succ]
+  intro h
+  exact Finset.le_sup (f := id) (by simp[h])
+
 lemma not_fvar?_of_lt_upper (p : SyntacticSemiformula L n) (h : p.upper ≤ m) : ¬fvar? p m := by
-  simp[upper, Nat.add_one_le_iff, fvar?] at h ⊢
   intro hm
-  have : m ≤ Finset.sup p.fvarList.toFinset id :=
-    Finset.le_sup (s := p.fvarList.toFinset) (b := m) (f := id) (by simpa using hm)
-  exact irrefl_of _ _ $ lt_of_lt_of_le h this
+  exact (lt_self_iff_false _).mp (lt_of_le_of_lt h <| lt_upper_of_fvar? hm)
+
+@[simp] lemma upper_pos (p : SyntacticSemiformula L n) : 0 < p.upper := by simp [upper]
 
 @[simp] lemma not_fvar?_upper (p : SyntacticSemiformula L n) : ¬fvar? p p.upper :=
   not_fvar?_of_lt_upper p (by simp)
@@ -555,6 +563,17 @@ lemma fvListingInv_fvListing {p : Semiformula L ξ n} {x : ξ} (hx : x ∈ p.fva
   exact False.elim <| not_le.mpr (List.indexOf_lt_length.mpr hx) h
 
 end fvListing
+
+/-
+/-- TODO: rewrite upper with fvSup -/
+def fvSup (p : SyntacticSemiformula L n) : WithBot ℕ := p.fvarList.maximum
+
+@[simp] lemma fvSup_verum : fvSup (⊤ : SyntacticSemiformula L n) = ⊥ := by simp [fvSup]
+@[simp] lemma fvSup_falsum : fvSup (⊥ : SyntacticSemiformula L n) = ⊥ := by simp [fvSup]
+@[simp] lemma fvSup_rel {k} (r : L.Rel k) (v : Fin k → SyntacticSemiterm L n) : fvSup (rel r v) =  := by simp [fvSup]
+@[simp] lemma fvSup_and (p q : SyntacticSemiformula L n) : fvSup (p ⋏ q) = max (fvSup p) (fvSup q) := by simp [fvSup]
+
+-/
 
 end Semiformula
 

@@ -144,12 +144,14 @@ def fvarList : Semiterm L ξ n → List ξ
 abbrev fvar? (t : Semiterm L ξ n) (x : ξ) : Prop := x ∈ t.fvarList
 
 @[simp] lemma fvarList_bvar : fvarList (#x : Semiterm L ξ n) = [] := rfl
-
 @[simp] lemma fvarList_fvar : fvarList (&x : Semiterm L ξ n) = [x] := rfl
-
 @[simp] lemma mem_fvarList_func {k} {f : L.Func k} {v : Fin k → Semiterm L ξ n} :
     x ∈ (func f v).fvarList ↔ ∃ i, x ∈ (v i).fvarList :=
   by simp[fvarList]
+@[simp] lemma fvar?_bvar (x z) : ¬fvar? (#x : Semiterm L ξ n) z := by simp [fvar?]
+@[simp] lemma fvar?_fvar (x z) : fvar? (&x : Semiterm L ξ n) z ↔ x = z := by simp [fvar?, Eq.comm]
+@[simp] lemma fvar?_func (x) {k} (f : L.Func k) (v : Fin k → Semiterm L ξ n) :
+    fvar? (func f v) x ↔ ∃ i, fvar? (v i) x := by simp [fvar?]
 
 @[simp] lemma fvarList_empty {o : Type*} [e : IsEmpty o] {t : Semiterm L o n} : fvarList t = [] := by
   induction t <;> simp[List.eq_nil_iff_forall_not_mem]

@@ -110,6 +110,9 @@ def bShift : Rew L ξ n ξ (n + 1) :=
 def bShiftAdd (m : ℕ) : Rew L ξ n ξ (n + m) :=
   map (Fin.addNat · m) id
 
+def cast {n n' : ℕ} (h : n = n') : Rew L ξ n ξ n' :=
+  map (Fin.cast h) id
+
 def castLE {n n' : ℕ} (h : n ≤ n') : Rew L ξ n ξ n' :=
   map (Fin.castLE h) id
 
@@ -283,6 +286,18 @@ lemma substs_comp_substs (v : Fin l → Semiterm L ξ k) (w : Fin k → Semiterm
 
 end substs
 
+section cast
+
+variable {n'} (h : n = n')
+
+@[simp] lemma cast_bvar (x : Fin n) : cast h (#x : Semiterm L ξ n) = #(Fin.cast h x) := rfl
+
+@[simp] lemma cast_fvar (x : ξ) : cast h (&x : Semiterm L ξ n) = &x := rfl
+
+@[simp] lemma cast_eq_id {h} : (cast h : Rew L ξ n ξ n) = Rew.id := by ext <;> simp
+
+end cast
+
 section castLE
 
 @[simp] lemma castLe_bvar {n'} (h : n ≤ n') (x : Fin n) : castLE h (#x : Semiterm L ξ n) = #(Fin.castLE h x) := rfl
@@ -375,6 +390,10 @@ lemma q_rewrite (f : ξ₁ → Semiterm L ξ₂ n) :
 
 @[simp] lemma qpow_emb {o : Type v₁} [e : IsEmpty o] {n k} :
     (emb (L := L) (o := o) (ξ := ξ₂) (n := n)).qpow k = emb := by induction k <;> simp[*]
+
+@[simp] lemma q_cast {n n'} (h : n = n') :
+    (cast h : Rew L ξ n ξ n').q = cast (congrFun (congrArg HAdd.hAdd h) 1) := by
+  ext x <;> simp; cases x using Fin.cases <;> simp
 
 @[simp] lemma q_castLE {n n'} (h : n ≤ n') :
     (castLE h : Rew L ξ n ξ n').q = castLE (Nat.add_le_add_right h 1) := by
@@ -525,7 +544,40 @@ variable (ω : SyntacticRew L n₁ n₂)
 @[simp] lemma q_fix : (fix (L := L) (n := n)).q = fix := by
   ext x; { cases x using Fin.cases <;> simp[Fin.succ_castSucc] }; { cases x <;> simp }
 
+--@[simp] lemma qpow_fix (k : ℕ) : (fix (L := L) (n := n)).qpow k = fix := by
+
 end q
+
+def fixitr (n : ℕ) : (m : ℕ) → SyntacticRew L n (n + m)
+  | 0     => Rew.id
+  | m + 1 => Rew.fix.comp (fixitr n m)
+
+@[simp] lemma fixitr_zero :
+    fixitr (L := L) n 0 = Rew.id := by simp [fixitr]
+
+lemma fixitr_succ (m) :
+    fixitr (L := L) n (m + 1) = Rew.fix.comp (fixitr n m) := by
+  simp [fixitr]
+
+@[simp] lemma fixitr_bvar (n m) (x : Fin n) : fixitr n m (#x : SyntacticSemiterm L n) = #(x.castAdd m) := by
+  induction m <;> simp [*, comp_app, fixitr_succ]
+  case succ m ih =>
+    simpa [ih] using comp_app fix (fixitr (L := L) n m) #x
+
+lemma fixitr_fvar (n m) (x : ℕ) :
+    fixitr n m (&x : SyntacticSemiterm L n) = if h : x < m then #(Fin.natAdd n ⟨x, h⟩) else &(x - m) := by
+  induction m <;> simp [*, comp_app]
+  case succ m ih =>
+    suffices fix (fixitr n m &x) = if h : x < m + 1 then #⟨n + x, _⟩ else &(x - (m + 1)) from Eq.trans (comp_app _ _ _) this
+    simp [ih]
+    by_cases hx : x < m
+    · simp [hx, Nat.lt_add_right 1 hx]
+    by_cases hx2 : x < m + 1
+    · have : x = m := Nat.le_antisymm (by { simpa [Nat.lt_succ] using hx2 }) (by simpa using hx)
+      simp [this, hx, hx2]; ext; simp
+    · simp [hx, hx2]
+      have : x - m = x - (m + 1) + 1 := by omega
+      simp [this]
 
 end Syntactic
 
@@ -610,6 +662,28 @@ lemma lMap_fix (t : SyntacticSemiterm L₁ n) : (fix t).lMap Φ = fix (t.lMap Φ
   by simp[fix, lMap_bind]; congr; funext x; cases x <;> simp
 
 end lMap
+
+lemma fvar?_bind
+    {b : Fin n₁ → Semiterm L ξ₂ n₂} {f : ξ₁ → Semiterm L ξ₂ n₂}
+    {t : Semiterm L ξ₁ n₁} {x} :
+    (Rew.bind b f t).fvar? x → (∃ z, (b z).fvar? x) ∨ (∃ z, t.fvar? z ∧ (f z).fvar? x) := by
+  induction t
+  case bvar z =>
+    simp only [Rew.bind_bvar]
+    intro h; left; exact ⟨z, h⟩
+  case fvar z =>
+    simp only [Rew.bind_fvar]
+    intro h; right; exact ⟨z, by simp [h]⟩
+  case func k F v ih =>
+    simp only [Rew.func, mem_fvarList_func, forall_exists_index]
+    intro i hx
+    rcases ih i hx with (h | ⟨z, hi, hz⟩)
+    · left; exact h
+    · right; exact ⟨z, ⟨i, hi⟩, hz⟩
+
+@[simp] lemma fvarList_bShift {t : Semiterm L ξ n} {x} :
+    (Rew.bShift t).fvar? x ↔ t.fvar? x := by
+  induction t <;> simp [Rew.func, *]
 
 end Semiterm
 
@@ -752,6 +826,8 @@ lemma hom_comp_eq (ω₂ : Rew L ξ₂ n₂ ξ₃ n₃) (ω₁ : Rew L ξ₁ n�
 
 lemma hom_comp_app (ω₂ : Rew L ξ₂ n₂ ξ₃ n₃) (ω₁ : Rew L ξ₁ n₁ ξ₂ n₂) (p : Semiformula L ξ₁ n₁) :
     (ω₂.comp ω₁).hom p = ω₂.hom (ω₁.hom p) := by simp[hom_comp_eq]
+
+lemma eq_self_of_eq_id {ω : Rew L ξ n ξ n} (h : ω = Rew.id) {p} : ω.hom p = p := by rcases h; simp
 
 lemma mapl_inj : ∀ {n₁ n₂ ξ₁ ξ₂} {b : Fin n₁ → Fin n₂} {e : ξ₁ → ξ₂},
     (hb : Function.Injective b) → (hf : Function.Injective e) → Function.Injective $ (map (L := L) b e).hom
@@ -914,6 +990,69 @@ def formulaRec {C : SyntacticFormula L → Sort _}
   | ∃' p     => hex p (formulaRec hverum hfalsum hrel hnrel hand hor hall hex (Rew.free.hom p))
   termination_by p => p.complexity
 
+lemma fvar?_bind {p : Semiformula L ξ₁ n₁} {b : Fin n₁ → Semiterm L ξ₂ n₂} {f : ξ₁ → Semiterm L ξ₂ n₂}
+    {x} (h : ((Rew.bind b f).hom p).fvar? x) :
+    (∃ z, (b z).fvar? x) ∨ (∃ z, p.fvar? z ∧ (f z).fvar? x) := by
+  induction p using rec' generalizing n₂
+  case hverum => simp [fvar?] at h
+  case hfalsum => simp [fvar?] at h
+  case hrel n k r v =>
+    simp only [fvar?, Rew.rel] at h
+    simp only [fvarList, List.mem_join, Matrix.mem_toList_iff,
+      exists_exists_eq_and] at h
+    rcases h with ⟨i, hi⟩
+    rcases Semiterm.fvar?_bind hi with (h | ⟨z, hi, hz⟩)
+    · left; exact h
+    · right; exact ⟨z, by simp; exact ⟨i, hi⟩, hz⟩
+  case hnrel n k r v =>
+    simp only [fvar?, Rew.nrel] at h
+    simp only [fvarList, List.mem_join, Matrix.mem_toList_iff,
+      exists_exists_eq_and] at h
+    rcases h with ⟨i, hi⟩
+    rcases Semiterm.fvar?_bind hi with (h | ⟨z, hi, hz⟩)
+    · left; exact h
+    · right; exact ⟨z, by simp; exact ⟨i, hi⟩, hz⟩
+  case hand n p q ihp ihq =>
+    simp only [fvar?, LogicalConnective.HomClass.map_and, fvarList_and, List.mem_append] at h
+    rcases h with (h | h)
+    · rcases ihp h with (h | ⟨z, hi, hz⟩)
+      · left; exact h
+      · right; exact ⟨z, by simp [hi], hz⟩
+    · rcases ihq h with (h | ⟨z, hi, hz⟩)
+      · left; exact h
+      · right; exact ⟨z, by simp [hi], hz⟩
+  case hor n p q ihp ihq =>
+    simp only [fvar?, LogicalConnective.HomClass.map_or, fvarList_or, List.mem_append] at h
+    rcases h with (h | h)
+    · rcases ihp h with (h | ⟨z, hi, hz⟩)
+      · left; exact h
+      · right; exact ⟨z, by simp [hi], hz⟩
+    · rcases ihq h with (h | ⟨z, hi, hz⟩)
+      · left; exact h
+      · right; exact ⟨z, by simp [hi], hz⟩
+  case hall n p ihp =>
+    simp only [fvar?, Rew.all, fvarList_all] at h
+    simp only [Rew.q_bind, Nat.succ_eq_add_one] at h
+    rcases ihp h with (⟨z, hz⟩ | ⟨z, hz⟩)
+    · cases z using Fin.cases
+      case zero => simp at hz
+      case succ z =>
+        have : (b z).fvar? x := by simpa using hz
+        left; exact ⟨z, this⟩
+    · have : p.fvar? z ∧ (f z).fvar? x := by simpa using hz
+      right; exact ⟨z, this⟩
+  case hex n p ihp =>
+    simp only [fvar?, Rew.ex, fvarList_ex] at h
+    simp only [Rew.q_bind, Nat.succ_eq_add_one] at h
+    rcases ihp h with (⟨z, hz⟩ | ⟨z, hz⟩)
+    · cases z using Fin.cases
+      case zero => simp at hz
+      case succ z =>
+        have : (b z).fvar? x := by simpa using hz
+        left; exact ⟨z, this⟩
+    · have : p.fvar? z ∧ (f z).fvar? x := by simpa using hz
+      right; exact ⟨z, this⟩
+
 @[simp] lemma fvarList_emb {o : Type*} [IsEmpty o] (p : Semiformula L o n) : fvarList (Rew.emb.hom p : Semiformula L ξ n) = [] := by
   induction p using rec' <;> simp[*, Rew.rel, Rew.nrel, fvarList, ←neg_eq]
 
@@ -942,7 +1081,53 @@ lemma rew_eq_of_funEqOn {ω₁ ω₂ : Rew L ξ₁ n₁ ξ₂ n₂} {p}
 lemma rew_eq_of_funEqOn₀ {ω₁ ω₂ : Rew L ξ₁ 0 ξ₂ n₂} {p} (hf : Function.funEqOn (fvar? p) (ω₁ ∘ Semiterm.fvar) (ω₂ ∘ Semiterm.fvar)) : ω₁.hom p = ω₂.hom p :=
   rew_eq_of_funEqOn (fun x => Fin.elim0 x) hf
 
+lemma rew_eq_self_of {ω : Rew L ξ n ξ n} {p}
+  (hb : ∀ x, ω #x = #x) (hf : ∀ x, fvar? p x → ω &x = &x) :
+    ω.hom p = p := by
+  suffices ω.hom p = Rew.id.hom p by simpa using this
+  apply rew_eq_of_funEqOn
+  · intro x; simpa using hb x
+  · intro x hx; simp [hf x hx]
+
 @[simp] lemma ex_ne_subst (p : Semiformula L ξ 1) (t) : p/[t] ≠ ∃' p := ne_of_ne_complexity (by simp)
+
+lemma fix_allClosure (p : SyntacticSemiformula L n) :
+    ∀' Rew.fix.hom (∀* p) = ∀* (Rew.fix.hom p) := by
+  induction n
+  case zero => simp [univClosure_succ]
+  case succ n ih => simp [univClosure_succ, ih]
+
+lemma allClosure_fixitr : ∀* (Rew.fixitr 0 (m + 1)).hom p = ∀' Rew.fix.hom (∀* (Rew.fixitr 0 m).hom p) := by
+  simp [Rew.fixitr_succ, fix_allClosure, Rew.hom_comp_app]; rfl
+
+def close (p : SyntacticFormula L) : Sentence L := ∀* (Rew.rewrite (fun _ ↦ #⟨0, by simp⟩)).hom ((Rew.fixitr 0 p.upper).hom p)
+
+@[simp] lemma not_fvar?_fixitr_upper : ¬((Rew.fixitr 0 p.upper).hom p).fvar? x := by
+  rw [Rew.eq_bind (Rew.fixitr 0 p.upper)]
+  simp only [Function.comp, Rew.fixitr_bvar, Rew.fixitr_fvar, Fin.natAdd_mk, zero_add]
+  intro h
+  rcases fvar?_bind h with (⟨z, hz⟩ | ⟨z, hz, hx⟩)
+  · simp at hz
+  · have : z < p.upper := lt_upper_of_fvar? hz
+    simp [this] at hx
+
+lemma embs_close (p : SyntacticFormula L) : Rew.embs.hom p.close = ∀* (Rew.fixitr 0 p.upper).hom p := by
+  let q := (Rew.hom (Rew.fixitr 0 (upper p))) p
+  simp only [close, Fin.zero_eta, Rew.emb_univClosure, univClosure_inj]
+  suffices Rew.emb.hom ((Rew.rewrite fun _ => #⟨0, by simp⟩).hom q) = q by simpa [q] using this
+  simp [←Rew.hom_comp_app]
+  apply rew_eq_self_of
+  · intro x; simp [Rew.comp_app]
+  · intro x hx
+    simp [q] at hx
+
+@[simp] lemma substs_comp_fixitr (p : SyntacticFormula L) :
+    (Rew.substs (ξ := ℕ) (fun x ↦ &x)).hom ((Rew.fixitr 0 p.upper).hom p) = p := by
+  simp [←Rew.hom_comp_app]
+  apply rew_eq_self_of
+  · simp
+  · intro x hx
+    simp [Rew.comp_app, Rew.fixitr_fvar, Semiformula.lt_upper_of_fvar? hx]
 
 section lMap
 
@@ -984,6 +1169,8 @@ lemma lMap_rewriteMap (p : Semiformula L₁ ξ₁ n) (f : ξ₁ → ξ₂) :
   simp [Rew.rewriteMap, lMap_rewrite, Function.comp]
 
 end lMap
+
+lemma app_cast_eq {n'} (h : n = n') (p : Semiformula L ξ n) : (h ▸ p) = (Rew.cast h).hom p := by rcases h; simp
 
 end Semiformula
 

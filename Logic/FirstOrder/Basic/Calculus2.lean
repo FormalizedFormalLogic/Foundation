@@ -1,88 +1,118 @@
 import Logic.FirstOrder.Basic.Calculus
 
+/-!
+
+# Derivation2
+
+Different characterizations of proof.
+
+-/
+
 namespace LO.FirstOrder
 
 variable {L : Language} [(k : ℕ) → DecidableEq (L.Func k)] [(k : ℕ) → DecidableEq (L.Rel k)]
 
-inductive Derivation2 : Finset (SyntacticFormula L) → Type _
-| axL   {Δ} (p : SyntacticFormula L)       : p ∈ Δ → ~p ∈ Δ → Derivation2 Δ
-| verum {Δ}                                : ⊤ ∈ Δ → Derivation2 Δ
-| and   {Δ} {p q : SyntacticFormula L}     : p ⋏ q ∈ Δ → Derivation2 (insert p Δ) → Derivation2 (insert q Δ) → Derivation2 Δ
-| or    {Δ} {p q : SyntacticFormula L}     : p ⋎ q ∈ Δ → Derivation2 (insert p (insert q Δ)) → Derivation2 Δ
-| all   {Δ} {p : SyntacticSemiformula L 1} : ∀' p ∈ Δ → Derivation2 (insert (Rew.free.hom p) (Δ.image Rew.shift.hom)) → Derivation2 Δ
-| ex    {Δ} {p : SyntacticSemiformula L 1} : ∃' p ∈ Δ → (t : SyntacticTerm L) → Derivation2 (insert (p/[t]) Δ) → Derivation2 Δ
-| wk    {Δ Γ} : Derivation2 Δ → Δ ⊆ Γ → Derivation2 Γ
-| shift {Δ}   : Derivation2 Δ → Derivation2 (Δ.image Rew.shift.hom)
-| cut   {Δ p} : Derivation2 (insert p Δ) → Derivation2 (insert (~p) Δ) → Derivation2 Δ
+open Semiformula
 
-prefix: 45 "⊢¹ᶠ " => Derivation2
+def SyntacticTheory.close (T : SyntacticTheory L) : Theory L := Semiformula.close '' T
 
-lemma shifts_toFinset_eq_image_shift (Δ : Sequent L) :
-    (shifts Δ).toFinset = Δ.toFinset.image Rew.shift.hom := by ext p; simp [shifts]
+inductive Derivation2 (T : SyntacticTheory L) : Sequent L → Type _
+| axL (Γ) {k} (r : L.Rel k) (v) : Derivation2 T (rel r v :: nrel r v :: Γ)
+| root (Γ) {p} : p ∈ T → Derivation2 T (p :: Γ)
+| verum (Γ)    : Derivation2 T (⊤ :: Γ)
+| or {Γ p q}   : Derivation2 T (p :: q :: Γ) → Derivation2 T (p ⋎ q :: Γ)
+| and {Γ p q}  : Derivation2 T (p :: Γ) → Derivation2 T (q :: Γ) → Derivation2 T (p ⋏ q :: Γ)
+| all {Γ p}    : Derivation2 T (Rew.free.hom p :: Γ⁺) → Derivation2 T ((∀' p) :: Γ)
+| ex {Γ p} (t) : Derivation2 T (p/[t] :: Γ) → Derivation2 T ((∃' p) :: Γ)
+| wk {Γ Δ}     : Derivation2 T Γ → Γ ⊆ Δ → Derivation2 T Δ
+| cut {Γ p}    : Derivation2 T (p :: Γ) → Derivation2 T (~p :: Γ) → Derivation2 T Γ
 
-def Derivation.toDerivation2 : {Γ : Sequent L} → ⊢¹ Γ → ⊢¹ᶠ Γ.toFinset
-  | _, Derivation.axL Δ r v          => Derivation2.axL (Semiformula.rel r v) (by simp) (by simp)
-  | _, Derivation.verum Δ            => Derivation2.verum (by simp)
-  | _, @Derivation.and _ Δ p q dp dq =>
-    Derivation2.and (p := p) (q := q) (by simp)
-      (Derivation2.wk (Derivation.toDerivation2 dp) (by simpa using Finset.insert_subset_insert _ (by simp)))
-      (Derivation2.wk (Derivation.toDerivation2 dq) (by simpa using Finset.insert_subset_insert _ (by simp)))
-  | _, @Derivation.or _ Δ p q dpq    =>
-    Derivation2.or (p := p) (q := q) (by simp)
-      (Derivation2.wk (Derivation.toDerivation2 dpq)
-      (by simpa using Finset.insert_subset_insert _ <| Finset.insert_subset_insert _ (by simp)))
-  | _, @Derivation.all _ Δ p dp      =>
-    Derivation2.all (p := p) (by simp)
-      (Derivation2.wk (Derivation.toDerivation2 dp)
-        (by simpa using Finset.insert_subset_insert _ (by simp [shifts_toFinset_eq_image_shift])))
-  | _, @Derivation.ex _ Δ p t dp     =>
-    Derivation2.ex (p := p) (by simp) t
-      (Derivation2.wk (Derivation.toDerivation2 dp) (by simpa using Finset.insert_subset_insert _ (by simp)))
-  | _, Derivation.wk d h             =>
-    Derivation2.wk (Derivation.toDerivation2 d) (List.toFinset_mono h)
-  | _, @Derivation.cut _ Δ p d₁ d₂   =>
-    Derivation2.cut (p := p)
-      (Derivation2.wk (Derivation.toDerivation2 d₁) (by simp))
-      (Derivation2.wk (Derivation.toDerivation2 d₂) (by simp))
+scoped infix: 45 " ⊢₂ " => Derivation2
 
-noncomputable def Derivation2.toDerivation : {Γ : Finset (SyntacticFormula L)} → ⊢¹ᶠ Γ → ⊢¹ Γ.toList
-  | _, Derivation2.axL p hp hn => Derivation.em (p := p) (by simp [hp]) (by simp [hn])
-  | _, Derivation2.verum h => Derivation.verum' (by simp [h])
-  | _, Derivation2.and (p := p) (q := q) h dp dq =>
-    Tait.and' (p := p) (q := q) (by simp [h])
-      (Tait.wk dp.toDerivation <| by intro x; simp)
-      (Tait.wk dq.toDerivation <| by intro x; simp)
-  | _, Derivation2.or (p := p) (q := q) h dpq =>
-    Tait.or' (p := p) (q := q) (by simp [h]) (Tait.wk dpq.toDerivation <| by intro x; simp)
-  | _, Derivation2.all (p := p) h d =>
-    Derivation.all' (p := p) (by simp [h]) (Tait.wk d.toDerivation <| by intro x; simp [shifts])
-  | _, Derivation2.ex (p := p) h t d =>
-    Derivation.ex' (p := p) (by simp [h]) t (Tait.wk d.toDerivation <| by intro x; simp [shifts])
-  | _, Derivation2.wk d h =>
-    Tait.wk d.toDerivation (by intro x; simp; exact @h x)
-  | _, Derivation2.shift d => Derivation.wk (Derivation.shift d.toDerivation) <| by intro x; simp [shifts]
-  | _, Derivation2.cut (p := p) d dn =>
-    Derivation.cut (p := p) (Tait.wk d.toDerivation <| by intro x; simp) (Tait.wk dn.toDerivation <| by intro x; simp)
+abbrev Derivable2 (T : SyntacticTheory L) (Γ : Sequent L) : Prop := Nonempty (T ⊢₂ Γ)
 
-lemma Derivation2.nonempty_iff {Γ : List (SyntacticFormula L)} : ⊢¹! Γ ↔ Nonempty (⊢¹ᶠ Γ.toFinset) := by
-  constructor
-  · rintro ⟨d⟩; exact ⟨by simpa using Derivation.toDerivation2 d⟩
-  · rintro ⟨d⟩; exact ⟨Tait.wk d.toDerivation (by intro x; simp)⟩
+scoped infix: 45 " ⊢₂! " => Derivable2
 
-variable {T : Theory L}
+abbrev Derivation2SingleConseq (T : SyntacticTheory L) (p : SyntacticFormula L) : Type _ := T ⊢₂ [p]
 
-lemma syntactic_provable_iff_derivation2 {T : SyntacticTheory L} {σ} :
-    T ⊢! σ ↔ ∃ Γ : Finset (SyntacticFormula L), (∀ π ∈ Γ, ~π ∈ T) ∧ Nonempty (⊢¹ᶠ insert σ Γ) := by
-  simp [Gentzen.provable_iff, Tait.derivable_iff, Derivation2.nonempty_iff]
-  constructor
-  · rintro ⟨Δ, hΔ, ⟨d⟩⟩
-    exact ⟨(Δ.map (~·)).toFinset, by simpa using hΔ, ⟨Derivation2.wk d <| by intro x; simp; tauto⟩⟩
-  · rintro ⟨Γ, hΓ, ⟨d⟩⟩
-    exact ⟨Γ.toList.map (~·), by simpa, ⟨Derivation2.wk d <| by intro x; simp [Function.comp]; tauto⟩⟩
+abbrev Derivable2SingleConseq (T : SyntacticTheory L) (p : SyntacticFormula L) : Prop := Nonempty (T ⊢₂ [p])
 
-lemma provable_iff_derivation2 {σ} :
-    T ⊢! σ ↔ ∃ Γ : Finset (SyntacticFormula L),
-      (∀ π ∈ Γ, ∃ π₀ ∈ T, Rew.emb.hom π₀ = ~ π) ∧ Nonempty (⊢¹ᶠ insert (Rew.emb.hom σ) Γ) := by
-  simp [provable_iff, syntactic_provable_iff_derivation2]
+scoped infix: 45 " ⊢₂. " => Derivation2SingleConseq
 
-end LO.FirstOrder
+scoped infix: 45 " ⊢₂.! " => Derivable2SingleConseq
+
+def Derivation.toDerivation2 : {Γ : Sequent L} → ⊢¹ Γ → T ⊢₂ Γ
+  | _, Derivation.axL Δ r v => Derivation2.axL Δ r v
+  | _, Derivation.verum Δ   => Derivation2.verum Δ
+  | _, Derivation.and dp dq => Derivation2.and (toDerivation2 dp) (toDerivation2 dq)
+  | _, Derivation.or dpq    => Derivation2.or (toDerivation2 dpq)
+  | _, Derivation.all dp    => Derivation2.all (toDerivation2 dp)
+  | _, Derivation.ex t dp   => Derivation2.ex t (toDerivation2 dp)
+  | _, Derivation.wk d h    => Derivation2.wk (toDerivation2 d) h
+  | _, Derivation.cut d₁ d₂ => Derivation2.cut (toDerivation2 d₁) (toDerivation2 d₂)
+
+lemma Derivable.toDerivable2 {Γ : Sequent L} (h : ⊢¹! Γ) : T ⊢₂! Γ := ⟨Derivation.toDerivation2 <| Classical.choice h⟩
+
+namespace Derivable2
+
+lemma wk! {Γ Δ : Sequent L} (d : T ⊢₂! Γ) (h : Γ ⊆ Δ) : T ⊢₂! Δ := ⟨d.some.wk h⟩
+
+end Derivable2
+
+namespace Derivation2
+
+lemma toDerivable2 {Γ : Sequent L} (d : T ⊢₂ Γ) : T ⊢₂! Γ := ⟨d⟩
+
+def allClosureFixitr {p : SyntacticFormula L} (dp : T ⊢₂. p) : (m : ℕ) → T ⊢₂. ∀* (Rew.fixitr 0 m).hom p
+  | 0     => by simpa
+  | m + 1 => by
+    simp [Semiformula.allClosure_fixitr]
+    apply all; simpa using allClosureFixitr dp m
+
+def close {p : SyntacticFormula L} (dp : T ⊢₂. p) : T ⊢₂. Rew.embs.hom p.close := by
+  simpa [Semiformula.embs_close] using allClosureFixitr dp p.upper
+
+def cutList : (Δ : Sequent L) → T ⊢₂ Δ ++ Γ → (∀ q ∈ Δ, T ⊢₂ ~q :: Γ) → T ⊢₂ Γ
+  | [],     d, _  => d
+  | p :: Δ, d, ds =>
+    let d : T ⊢₂ Δ ++ p :: Γ := d.wk (by intro x; simp; tauto)
+    let dp : T ⊢₂ p :: Γ := cutList Δ d (fun q hq ↦ (ds q (by simp [hq])).wk (by intro x; simp; tauto))
+    dp.cut (ds p (by simp))
+
+lemma cutList! (Δ : Sequent L) (h : T ⊢₂! Δ ++ Γ) (H : ∀ q ∈ Δ, T ⊢₂! ~q :: Γ) : T ⊢₂! Γ :=
+  ⟨cutList Δ h.some (fun q hq ↦ (H q hq).some)⟩
+
+end Derivation2
+
+open Derivation2
+
+variable {T : SyntacticTheory L}
+
+def Provable.toDerivation2 {σ} (b : T.close ⊢! σ) : T ⊢₂.! Rew.embs.hom σ := by
+  let ⟨Γ, hΓ, d⟩ := Gentzen.provable_iff.mp (provable_iff.mp b)
+  let b : T ⊢₂! List.map (~·) Γ ++ [Rew.emb.hom σ] := Derivable.toDerivable2 d
+  refine cutList! _ b (fun p hp ↦ by
+    have : ∃ x ∈ Γ, ~x = p := by simpa using hp
+    rcases this with ⟨p, Hp, rfl⟩
+    have : ∃ x ∈ T, Rew.embs.hom (x.close) = p := by
+      simpa [SyntacticTheory.close] using hΓ p Hp
+    rcases this with ⟨p, hpT, rfl⟩
+    simpa using (Derivation2.root [] hpT).close.toDerivable2.wk! (by simp))
+
+def Derivation2.toDisjconseqTr : {Γ : Sequent L} → T ⊢₂ Γ → T.close ⊢'' Γ
+  | _, axL Δ r v          => Gentzen.Disjconseq.em (Semiformula.rel r v) (by simp) (by simp)
+  | _, root Γ (p := p) hp =>
+    have : T.close ⊢'' [∀* (Rew.fixitr 0 p.upper).hom p] :=
+      Gentzen.Disjconseq.byAxm _ (by simp [SyntacticTheory.close]; exact ⟨p, hp, by simp [Semiformula.embs_close]⟩)
+    have : T.close ⊢'' [p] := by simpa using System.specializeVec (fun x ↦ &x) this
+    Gentzen.Disjconseq.wk this (by simp)
+  | _, verum Γ            => Gentzen.Disjconseq.verum Γ
+  | _, and dp dq          => Gentzen.Disjconseq.and (toDisjconseqTr dp) (toDisjconseqTr dq)
+  | _, or dpq             => Gentzen.Disjconseq.or (toDisjconseqTr dpq)
+  | _, all dp             => System.generalize (toDisjconseqTr dp)
+  | _, ex t dp            => System.witness t (toDisjconseqTr dp)
+  | _, wk d h             => Gentzen.Disjconseq.wk (toDisjconseqTr d) h
+  | _, cut dp dn          => Gentzen.Disjconseq.cut (toDisjconseqTr dp) (toDisjconseqTr dn)
+
+def provable_iff_derivable2 {σ} : T.close ⊢! σ ↔ T ⊢₂.! Rew.embs.hom σ :=
+  ⟨Provable.toDerivation2, fun b ↦ provable_iff.mpr ⟨b.some.toDisjconseqTr⟩⟩

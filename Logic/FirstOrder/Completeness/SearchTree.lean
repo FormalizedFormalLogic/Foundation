@@ -127,7 +127,7 @@ noncomputable def syntacticMainLemma (σ : SearchTree T Γ) : T ⊢'' σ.seq := 
       by_cases h : ∃' p ∈ Δ₁
       · have : p/[t] :: Δ₁ ≺[Code.ex p t] Δ₁ := Redux.ex h
         have : T ⊢'' p/[t] :: Δ₁ := ih' (ReduxNat.redux hs this)
-        exact Disjconseq.wk (System.specialize t this) (by simpa using h)
+        exact Disjconseq.wk (System.witness t this) (by simpa using h)
       · exact ih' (ReduxNat.redux hs $ Redux.exRefl h)
     case id σ =>
       by_cases h : σ ∈ T

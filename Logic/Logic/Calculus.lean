@@ -282,6 +282,12 @@ def verum (Γ : List F) : 𝓣 ⊢' ⊤ :: Γ := ⟨[], by simp, Gentzen.verum _
 
 def verum' (h : ⊤ ∈ Γ) : 𝓣 ⊢' Γ := wk (verum Γ) (by simp[h])
 
+def em (p) (hp : p ∈ Γ) (hn : ~p ∈ Γ) : 𝓣 ⊢' Γ := tauto (by
+  have : [] ⊢² ~p :: p :: Γ := negRight <| closed p (by simp) (by simp)
+  exact Gentzen.wkRight this (by
+    intro x; simp
+    rintro (rfl | rfl | h) <;> simp [*]))
+
 def and (bp : 𝓣 ⊢' p :: Δ) (bq : 𝓣 ⊢' q :: Δ) : 𝓣 ⊢' p ⋏ q :: Δ where
   antecedent := bp.antecedent ++ bq.antecedent
   subset := by
@@ -317,6 +323,8 @@ def deductionNeg [DecidableEq F] {p} (b : cons (~p) 𝓣 ⊢' Δ) : 𝓣 ⊢' p 
   derivation := ofNegLeft (wkLeft b.derivation $ by
     intro q hq
     by_cases e : q = ~p <;> simp[List.mem_filter, hq, e])
+
+def byAxm (p) (h : p ∈ 𝓣) : 𝓣 ⊢' p :: Δ := ⟨[p], by simp [h], closed p (by simp) (by simp)⟩
 
 end Disjconseq
 

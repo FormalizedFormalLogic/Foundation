@@ -13,7 +13,7 @@ variable {L : Language}
 def shifts (Δ : List (SyntacticSemiformula L n)) :
   List (SyntacticSemiformula L n) := Δ.map Rew.shift.hom
 
-local postfix:max "⁺" => shifts
+scoped postfix:max "⁺" => shifts
 
 @[simp] lemma mem_shifts_iff {p : SyntacticSemiformula L n} {Δ : List (SyntacticSemiformula L n)} :
     Rew.shift.hom p ∈ Δ⁺ ↔ p ∈ Δ :=
@@ -25,8 +25,13 @@ local postfix:max "⁺" => shifts
 lemma shifts_cons (p : SyntacticSemiformula L n) (Δ : List (SyntacticSemiformula L n)) :
     (p :: Δ)⁺ = Rew.shift.hom p :: Δ⁺ := by simp[shifts]
 
+@[simp] lemma shifts_nil : ([] : Sequent L)⁺ = [] := by rfl
+
 lemma shifts_union (Δ Γ : List (SyntacticSemiformula L n)) :
     (Δ ++ Γ)⁺ = Δ⁺ ++ Γ⁺ := by simp[shifts]
+
+lemma shifts_neg (Γ : List (SyntacticSemiformula L n)) :
+    (Γ.map (~·))⁺ = (Γ⁺).map (~·) := by simp [shifts]
 
 @[simp] lemma shifts_emb (Γ : List (Semisentence L n)) :
     (Γ.map Rew.emb.hom)⁺ = Γ.map Rew.emb.hom := by
@@ -449,7 +454,7 @@ abbrev DisjconseqTr (T : Theory L) (Γ : Sequent L) : Type _ := (Rew.emb.hom '' 
 
 scoped infix: 45 " ⊢'' " => DisjconseqTr
 
-def proofToSyntactic {T : Theory L} {σ} (b : T ⊢ σ) :
+def Proof.toSyntactic {T : Theory L} {σ} (b : T ⊢ σ) :
     (Rew.emb.hom '' T : SyntacticTheory L) ⊢ (Rew.emb.hom σ : SyntacticFormula L) :=
   ⟨_, by simp; intro σ hσ; exact ⟨σ, Gentzen.Disjconseq.subset b σ hσ, rfl⟩, twoSidedEquiv b.derivation⟩
 
@@ -465,12 +470,14 @@ noncomputable def toProof {T : Theory L} {σ} (b : (Rew.emb.hom '' T : Syntactic
 
 lemma provable_iff {T : Theory L} {σ} : T ⊢! σ ↔ Rew.embs.hom '' T ⊢! Rew.embs.hom σ := by
   constructor
-  · intro h; exact ⟨proofToSyntactic h.get⟩
+  · intro h; exact ⟨Proof.toSyntactic h.get⟩
   · intro h; exact ⟨toProof h.get⟩
 
 namespace Gentzen
 
 variable {Γ Δ : Sequent L}
+
+def castRight (d₁ : Γ ⊢² Δ₁) (h : Δ₁ = Δ₂) : Γ ⊢² Δ₂ := h ▸ d₁
 
 def genelalizeByNewver {p : SyntacticSemiformula L 1}
     (hp : ¬p.fvar? m) (hΓ : ∀ q ∈ Γ, ¬q.fvar? m) (hΔ : ∀ q ∈ Δ, ¬q.fvar? m) :
@@ -481,9 +488,34 @@ def genelalizeByNewver {p : SyntacticSemiformula L 1}
         · simpa using hΔ q (by simp[hq]))
     (Tait.ofConsRight d)
 
-def specialize {p : SyntacticSemiformula L 1} (t : SyntacticTerm L) :
+def witness {p : SyntacticSemiformula L 1} (t : SyntacticTerm L) :
     Γ ⊢² p/[t] :: Δ → Γ ⊢² (∃' p) :: Δ := fun d ↦
   Tait.toConsRight <| Derivation.ex t (Tait.ofConsRight d)
+
+def specialize {p : SyntacticSemiformula L 1} (t : SyntacticTerm L) :
+    Γ ⊢² (∀' p) :: Δ → Γ ⊢² p/[t] :: Δ := fun d ↦
+  Tait.toConsRight <| by
+    let Ξ := Γ.map (~·) ++ Δ
+    have : ⊢¹ ~p/[t] :: p/[t] :: Ξ := Tait.em (p := p/[t]) (by simp) (by simp)
+    have dn : ⊢¹ ~(∀' p) :: p/[t] :: Ξ := by
+      simp only [neg_all, Nat.reduceAdd, Nat.succ_eq_add_one]
+      exact Derivation.ex t (by simpa using this)
+    have dp : ⊢¹ (∀' p) :: p/[t] :: Ξ :=
+      Derivation.wk (Tait.ofConsRight d) (List.cons_subset_cons _ <| by simp [Ξ])
+    exact Derivation.cut dp dn
+
+def specializeVec : {n : ℕ} → {p : SyntacticSemiformula L n} →
+    Γ ⊢² (∀* p) :: Δ → (v : Fin n → SyntacticTerm L) → Γ ⊢² (Rew.substs v |>.hom p) :: Δ
+  | 0,     p, d, v => by simpa using d
+  | n + 1, p, d, v => by
+    have : Γ ⊢² (∀* ∀' p) :: Δ := d
+    have : Γ ⊢² (∀' (Rew.substs (v ·.succ)).q.hom p) :: Δ := by
+      simpa using specializeVec this (v ·.succ)
+    exact castRight (specialize (v 0) this) (by
+      simp [←Rew.hom_comp_app]; congr 2
+      ext x
+      · cases x using Fin.cases <;> simp [Rew.comp_app]
+      · simp [Rew.comp_app])
 
 def lMap (Φ : L₁ →ᵥ L₂) {Γ Δ : Sequent L₁} (b : Γ ⊢² Δ) :
     Γ.map (Semiformula.lMap Φ) ⊢² Δ.map (Semiformula.lMap Φ) :=
@@ -509,10 +541,29 @@ def genelalizeByNewver {p : SyntacticSemiformula L 1} (hp : ¬p.fvar? m) (hΔ : 
           rcases this with ⟨σ, _, rfl⟩; simp[Semiformula.fvar?])
       hΔ d⟩
 
-def specialize {p : SyntacticSemiformula L 1} (t : SyntacticTerm L) :
+def generalize {p : SyntacticSemiformula L 1} :
+    T ⊢'' (Rew.free.hom p) :: Δ⁺ → T ⊢'' (∀' p) :: Δ := fun d ↦
+  let ⟨Γ, d⟩ := Gentzen.DisjconseqEquivDerivation d
+  Gentzen.DisjconseqEquivDerivation.symm ⟨Γ, Tait.toConsRight <| Derivation.all <| by
+    simp [shifts_union, shifts_neg]
+    have : (Γ : Sequent L)⁺ = Γ := by
+      apply List.ext_getElem (by simp [shifts])
+      simp only [shifts, List.length_map, List.getElem_map]
+      intro i hi _
+      rcases Γ.prop ((↑Γ : Sequent L)[i]) (by simp [List.getElem_mem]) with ⟨σ, hσ, e⟩
+      simp [←e, ←Rew.hom_comp_app]
+    rw [this]
+    exact (Tait.ofConsRight d)⟩
+
+def witness {p : SyntacticSemiformula L 1} (t : SyntacticTerm L) :
     T ⊢'' p/[t] :: Δ → T ⊢'' (∃' p) :: Δ := fun d ↦
   let ⟨Γ, d⟩ := Gentzen.DisjconseqEquivDerivation d
-  Gentzen.DisjconseqEquivDerivation.symm ⟨Γ, Gentzen.specialize t d⟩
+  Gentzen.DisjconseqEquivDerivation.symm ⟨Γ, Gentzen.witness t d⟩
+
+def specializeVec {p : SyntacticSemiformula L n} (v : Fin n → SyntacticTerm L) :
+    T ⊢'' (∀* p) :: Δ → T ⊢'' (Rew.substs v |>.hom p) :: Δ := fun d ↦
+  let ⟨Γ, d⟩ := Gentzen.DisjconseqEquivDerivation d
+  Gentzen.DisjconseqEquivDerivation.symm ⟨Γ, Gentzen.specializeVec d v⟩
 
 variable (Φ : L₁ →ᵥ L₂) {T : Theory L₁}
 

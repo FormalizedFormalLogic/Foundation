@@ -20,16 +20,13 @@ variable (L)
 
 namespace Theory
 
-/-- Mostwski-Robinson-Tarski Arithmetic -/
-inductive MRT : Theory ℒₒᵣ
-  | add (n m : ℕ)  : MRT “↑n + ↑m = ↑(n + m)”
-  | mul (n m : ℕ)  : MRT “↑n * ↑m = ↑(n * m)”
-  | ne  (n m : ℕ)  : n ≠ m → MRT “↑n ≠ ↑m”
-  | bound (n : ℕ)  : MRT “∀ x, x < ↑n ↔ ⋁ i, x = ↑(i : Fin n)”
-  | zeroMinimal    : MRT “∀ x, x ≮ 0”
-  | total (n : ℕ)  : MRT “∀ x, x < ↑n ∨ ↑n ≤ x”
+inductive MRT0 : Theory ℒₒᵣ
+  | add (n m : ℕ)  : MRT0 “↑n + ↑m = ↑(n + m)”
+  | mul (n m : ℕ)  : MRT0 “↑n * ↑m = ↑(n * m)”
+  | ne  (n m : ℕ)  : n ≠ m → MRT0 “↑n ≠ ↑m”
+  | bound (n : ℕ)  : MRT0 “∀ x, x < ↑n ↔ ⋁ i, x = ↑(i : Fin n)”
 
-notation "𝐑" => MRT
+notation "𝐑₀" => MRT0
 
 inductive peanoMinus : Theory ℒₒᵣ
   | addZero       : peanoMinus “∀ x, x + 0 = x”
