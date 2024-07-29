@@ -101,6 +101,19 @@ lemma strictlyWeakerThan_iff : 𝓢 <ₛ 𝓣 ↔ (∀ {f}, 𝓢 ⊢! f → 𝓣
   simp [StrictlyWeakerThan, weakerThan_iff]; intro _
   exact exists_congr (fun _ ↦ by simp [and_comm])
 
+@[trans]
+lemma strictlyWeakerThan.trans : 𝓢 <ₛ 𝓣 → 𝓣 <ₛ 𝓤 → 𝓢 <ₛ 𝓤 := by
+  rintro ⟨h₁, nh₁⟩ ⟨h₂, _⟩;
+  constructor;
+  . exact WeakerThan.trans h₁ h₂;
+  . apply not_weakerThan_iff.mpr;
+    obtain ⟨f, hf₁, hf₂⟩ := not_weakerThan_iff.mp nh₁;
+    use f;
+    constructor;
+    . apply weakerThan_iff.mp h₂;
+      assumption;
+    . assumption;
+
 lemma weakening (h : 𝓢 ≤ₛ 𝓣) {f} : 𝓢 ⊢! f → 𝓣 ⊢! f := weakerThan_iff.mp h
 
 lemma Equiv.iff : 𝓢 =ₛ 𝓣 ↔ (∀ f, 𝓢 ⊢! f ↔ 𝓣 ⊢! f) := by simp [Equiv, Set.ext_iff, theory]

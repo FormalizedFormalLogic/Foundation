@@ -233,6 +233,8 @@ end Normal
 protected abbrev KT : DeductionParameter α := 𝝂𝗧
 notation "𝐊𝐓" => DeductionParameter.KT
 
+protected abbrev KB : DeductionParameter α := 𝝂𝗕
+notation "𝐊𝐁" => DeductionParameter.KB
 
 protected abbrev KD : DeductionParameter α := 𝝂𝗗
 notation "𝐊𝐃" => DeductionParameter.KD
@@ -388,6 +390,12 @@ lemma normal_reducible_subset {𝓓₁ 𝓓₂ : DeductionParameter α} [𝓓₁
 lemma reducible_K_KT : (𝐊 : DeductionParameter α) ≤ₛ 𝐊𝐓 := normal_reducible_subset
 
 lemma reducible_K_KD : (𝐊 : DeductionParameter α) ≤ₛ 𝐊𝐃 := normal_reducible_subset
+
+lemma reducible_K_KB : (𝐊 : DeductionParameter α) ≤ₛ 𝐊𝐁 := normal_reducible_subset
+
+lemma reducible_K_K4 : (𝐊 : DeductionParameter α) ≤ₛ 𝐊𝟒 := normal_reducible_subset
+
+lemma reducible_K_K5 : (𝐊 : DeductionParameter α) ≤ₛ 𝐊𝟓 := normal_reducible_subset
 
 lemma reducible_KT_S4 : (𝐊𝐓 : DeductionParameter α) ≤ₛ 𝐒𝟒 := normal_reducible_subset
 
