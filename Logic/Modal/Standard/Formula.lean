@@ -412,11 +412,19 @@ def atoms : Formula α → Finset (α)
   | p ⟶ q => p.atoms ∪ q.atoms
   | p ⋏ q  => p.atoms ∪ q.atoms
   | p ⋎ q  => p.atoms ∪ q.atoms
-prefix:70 "𝒜 " => Formula.atoms
+prefix:80 "𝒜 " => Formula.atoms
 
 @[simp]
 lemma mem_atoms_iff_mem_subformulae {a : α} {p : Formula α} : a ∈ 𝒜 p ↔ (atom a) ∈ 𝒮 p := by
   induction p using Formula.rec' <;> simp_all [Subformulas, atoms];
+
+variable {a : α}
+
+lemma not_mem_neg (h : a ∉ 𝒜 (~p) := by assumption) : a ∉ 𝒜 p := by simp_all [Formula.Subformulas];
+lemma not_mem_and (h : a ∉ 𝒜 (p ⋏ q) := by assumption) : a ∉ 𝒜 p ∧ a ∉ 𝒜 q := by simp_all [Formula.Subformulas];
+lemma not_mem_or  (h : a ∉ 𝒜 (p ⋎ q) := by assumption) : a ∉ 𝒜 p ∧ a ∉ 𝒜 q := by simp_all [Formula.Subformulas];
+lemma not_mem_imp (h : a ∉ 𝒜 (p ⟶ q) := by assumption) : a ∉ 𝒜 p ∧ a ∉ 𝒜 q := by simp_all [Formula.Subformulas];
+lemma not_mem_box (h : a ∉ 𝒜 (□p) := by assumption) : a ∉ 𝒜 p := by simp_all [Formula.Subformulas];
 
 end Formula
 
