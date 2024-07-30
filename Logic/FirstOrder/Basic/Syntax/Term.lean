@@ -201,6 +201,16 @@ lemma fvEnumInv_fvEnum {t : Semiterm L ξ n} {x : ξ} (hx : x ∈ t.fvarList) :
 
 end fvEnum
 
+section
+
+variable [L.ConstantInhabited]
+
+instance : Inhabited (Semiterm L ξ n) := ⟨func default ![]⟩
+
+lemma default_def : (default : Semiterm L ξ n) = func default ![] := rfl
+
+end
+
 end Semiterm
 
 end FirstOrder

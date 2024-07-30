@@ -12,9 +12,16 @@ namespace LO.FirstOrder
 
 variable {L : Language} [(k : ℕ) → DecidableEq (L.Func k)] [(k : ℕ) → DecidableEq (L.Rel k)]
 
+variable [L.ConstantInhabited]
+
 open Semiformula
 
 def SyntacticTheory.close (T : SyntacticTheory L) : Theory L := Semiformula.close '' T
+
+instance : Coe (Theory L) (SyntacticTheory L) := ⟨fun T ↦ Rew.embs.hom '' T⟩
+
+@[simp] lemma Theory.open_close (T : Theory L) : SyntacticTheory.close (T : SyntacticTheory L) = T := by
+  ext σ; simp [SyntacticTheory.close]
 
 inductive Derivation2 (T : SyntacticTheory L) : Sequent L → Type _
 | closed (Γ p) : Derivation2 T (p :: ~p :: Γ)
@@ -60,6 +67,8 @@ lemma wk! {Γ Δ : Sequent L} (d : T ⊢₂! Γ) (h : Γ ⊆ Δ) : T ⊢₂! Δ 
 end Derivable2
 
 namespace Derivation2
+
+variable {T : SyntacticTheory L}
 
 lemma toDerivable2 {Γ : Sequent L} (d : T ⊢₂ Γ) : T ⊢₂! Γ := ⟨d⟩
 
@@ -159,6 +168,8 @@ end Derivation2
 
 open Derivation2
 
+section
+
 variable {T : SyntacticTheory L}
 
 def Provable.toDerivation2 {σ} (b : T.close ⊢! σ) : T ⊢₂.! Rew.embs.hom σ := by
@@ -189,3 +200,15 @@ def Derivation2.toDisjconseqTr : {Γ : Sequent L} → T ⊢₂ Γ → T.close �
 
 def provable_iff_derivable2 {σ} : T.close ⊢! σ ↔ T ⊢₂.! Rew.embs.hom σ :=
   ⟨Provable.toDerivation2, fun b ↦ provable_iff.mpr ⟨b.some.toDisjconseqTr⟩⟩
+
+def provable_iff_derivable2' {T : Theory L} {σ} : T ⊢! σ ↔ T ⊢₂.! Rew.embs.hom σ := by simp [←provable_iff_derivable2]
+
+end
+
+section
+
+variable {T : Theory L}
+
+
+
+end

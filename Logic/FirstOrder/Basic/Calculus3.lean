@@ -4,6 +4,8 @@ namespace LO.FirstOrder
 
 variable {L : Language} [(k : ℕ) → DecidableEq (L.Func k)] [(k : ℕ) → DecidableEq (L.Rel k)]
 
+variable [L.ConstantInhabited]
+
 inductive Derivation3 (T : SyntacticTheory L) : Finset (SyntacticFormula L) → Type _
 | closed (Δ) (p : SyntacticFormula L)      : p ∈ Δ → ~p ∈ Δ → Derivation3 T Δ
 | root  {Δ} (p : SyntacticFormula L)       : p ∈ T → p ∈ Δ → Derivation3 T Δ
@@ -87,5 +89,8 @@ lemma derivable2_iff_derivable3 {Γ : List (SyntacticFormula L)} : T ⊢₂! Γ 
 
 def provable_iff_derivable3 {σ} : T.close ⊢! σ ↔ T ⊢₃.! Rew.embs.hom σ := by
   simp [provable_iff_derivable2, derivable2_iff_derivable3]
+
+def provable_iff_derivable3' {T : Theory L} {σ} : T ⊢! σ ↔ T ⊢₃.! Rew.embs.hom σ := by
+  simp [provable_iff_derivable2', derivable2_iff_derivable3]
 
 end LO.FirstOrder

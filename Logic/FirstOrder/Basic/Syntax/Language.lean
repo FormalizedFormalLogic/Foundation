@@ -29,6 +29,10 @@ class IsRelational (L : Language) where
 class IsConstant (L : Language) extends IsRelational L where
   rel_empty  : ∀ k, IsEmpty (L.Rel k)
 
+class ConstantInhabited (L : Language) extends Inhabited (L.Func 0)
+
+instance {L : Language} [L.ConstantInhabited] : Inhabited (L.Func 0) := inferInstance
+
 protected def empty : Language where
   Func := fun _ => PEmpty
   Rel  := fun _ => PEmpty
@@ -359,6 +363,9 @@ instance : ORing oRing where
   one := .one
   add := .add
   mul := .mul
+
+instance : ConstantInhabited ℒₒᵣ where
+  default := Language.Zero.zero
 
 instance : ORing oRingExp where
   eq := .eq
