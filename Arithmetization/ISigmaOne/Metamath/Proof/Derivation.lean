@@ -1,5 +1,4 @@
-import Arithmetization.ISigmaOne.Metamath.Formula.Functions
-import Arithmetization.ISigmaOne.Metamath.Formula.Iteration
+import Arithmetization.ISigmaOne.Metamath.Proof.Thy
 
 noncomputable section
 
@@ -10,6 +9,8 @@ open FirstOrder FirstOrder.Arith
 variable {V : Type*} [Zero V] [One V] [Add V] [Mul V] [LT V] [V ⊧ₘ* 𝐈𝚺₁]
 
 variable {L : Arith.Language V} {pL : LDef} [Arith.Language.Defined L pL]
+
+variable {T : L.Theory} {pT : pL.TDef} [T.Defined pT]
 
 section derivation
 
@@ -146,6 +147,8 @@ def shiftRule (s d : V) : V := ⟪s, 7, d⟫ + 1
 
 def cutRule (s p d₁ d₂ : V) : V := ⟪s, 8, p, d₁, d₂⟫ + 1
 
+def root (s p : V) : V := ⟪s, 9, p⟫ + 1
+
 section
 
 def _root_.LO.FirstOrder.Arith.axLDef : 𝚺₀-Semisentence 3 :=
@@ -256,6 +259,18 @@ lemma cutRule_defined : 𝚺₀-Function₄ (cutRule : V → V → V → V → V
 @[simp] lemma eval_cutRuleDef (v) :
     Semiformula.Evalbm V v cutRuleDef.val ↔ v 0 = cutRule (v 1) (v 2) (v 3) (v 4) := cutRule_defined.df.iff v
 
+def _root_.LO.FirstOrder.Arith.rootDef : 𝚺₀-Semisentence 3 :=
+  .mkSigma “y s p | ∃ y' < y, !pair₃Def y' s 9 p ∧ y = y' + 1” (by simp)
+
+lemma root_defined : 𝚺₀-Function₂ (root : V → V → V) via rootDef := by
+  intro v; simp [rootDef, numeral_eq_natCast]
+  constructor
+  · intro h; exact ⟨_, by simpa [h] using lt_add_one _, rfl, h⟩
+  · rintro ⟨_, _, rfl, h⟩; exact h
+
+@[simp] lemma eval_rootDef (v) :
+    Semiformula.Evalbm V v rootDef.val ↔ v 0 = root (v 1) (v 2) := root_defined.df.iff v
+
 @[simp] lemma seq_lt_axL (s p : V) : s < axL s p := le_iff_lt_succ.mp <| le_pair_left _ _
 @[simp] lemma arity_lt_axL (s p : V) : p < axL s p :=
   le_iff_lt_succ.mp <| le_trans (by simp) <| le_pair_right _ _
@@ -308,6 +323,9 @@ lemma cutRule_defined : 𝚺₀-Function₄ (cutRule : V → V → V → V → V
 @[simp] lemma d₂_lt_cutRule (s p d₁ d₂ : V) : d₂ < cutRule s p d₁ d₂ :=
   le_iff_lt_succ.mp <| le_trans (le_trans (le_trans (le_pair_right _ _) <| le_pair_right _ _) <| le_pair_right _ _) <| le_pair_right _ _
 
+@[simp] lemma seq_lt_root (s p : V) : s < root s p := le_iff_lt_succ.mp <| le_pair_left _ _
+@[simp] lemma p_lt_root (s p : V) : p < root s p := le_iff_lt_succ.mp <| le_trans (le_pair_right _ _) <| le_pair_right _ _
+
 @[simp] lemma fstIdx_axL (s p : V) : fstIdx (axL s p) = s := by simp [fstIdx, axL]
 @[simp] lemma fstIdx_verumIntro (s : V) : fstIdx (verumIntro s) = s := by simp [fstIdx, verumIntro]
 @[simp] lemma fstIdx_andIntro (s p q dp dq : V) : fstIdx (andIntro s p q dp dq) = s := by simp [fstIdx, andIntro]
@@ -317,6 +335,7 @@ lemma cutRule_defined : 𝚺₀-Function₄ (cutRule : V → V → V → V → V
 @[simp] lemma fstIdx_wkRule (s d : V) : fstIdx (wkRule s d) = s := by simp [fstIdx, wkRule]
 @[simp] lemma fstIdx_shiftRule (s d : V) : fstIdx (shiftRule s d) = s := by simp [fstIdx, shiftRule]
 @[simp] lemma fstIdx_cutRule (s p d₁ d₂ : V) : fstIdx (cutRule s p d₁ d₂) = s := by simp [fstIdx, cutRule]
+@[simp] lemma fstIdx_root (s p : V) : fstIdx (root s p) = s := by simp [fstIdx, root]
 
 end
 
@@ -324,7 +343,7 @@ namespace Derivation
 
 abbrev conseq (x : V) : V := π₁ x
 
-variable (L)
+variable (T)
 
 def Phi (C : Set V) (d : V) : Prop :=
   L.FormulaSet (fstIdx d) ∧
@@ -336,10 +355,11 @@ def Phi (C : Set V) (d : V) : Prop :=
     (∃ s p t dp, d = exIntro s p t dp ∧ ^∃ p ∈ s ∧ L.Term t ∧ fstIdx dp = insert (L.substs₁ t p) s ∧ dp ∈ C) ∨
     (∃ s d', d = wkRule s d' ∧ fstIdx d' ⊆ s ∧ d' ∈ C) ∨
     (∃ s d', d = shiftRule s d' ∧ s = L.setShift (fstIdx d') ∧ d' ∈ C) ∨
-    (∃ s p d₁ d₂, d = cutRule s p d₁ d₂ ∧ (fstIdx d₁ = insert p s ∧ d₁ ∈ C) ∧ (fstIdx d₂ = insert (L.neg p) s ∧ d₂ ∈ C)) )
+    (∃ s p d₁ d₂, d = cutRule s p d₁ d₂ ∧ (fstIdx d₁ = insert p s ∧ d₁ ∈ C) ∧ (fstIdx d₂ = insert (L.neg p) s ∧ d₂ ∈ C)) ∨
+    (∃ s p, d = root s p ∧ p ∈ s ∧ p ∈ T) )
 
 private lemma phi_iff (C d : V) :
-    Phi L {x | x ∈ C} d ↔
+    Phi T {x | x ∈ C} d ↔
     L.FormulaSet (fstIdx d) ∧
     ( (∃ s < d, ∃ p < d, d = axL s p ∧ p ∈ s ∧ L.neg p ∈ s) ∨
       (∃ s < d, d = verumIntro s ∧ ^⊤ ∈ s) ∨
@@ -356,12 +376,14 @@ private lemma phi_iff (C d : V) :
       (∃ s < d, ∃ d' < d,
         d = shiftRule s d' ∧ s = L.setShift (fstIdx d') ∧ d' ∈ C) ∨
       (∃ s < d, ∃ p < d, ∃ d₁ < d, ∃ d₂ < d,
-        d = cutRule s p d₁ d₂ ∧ (fstIdx d₁ = insert p s ∧ d₁ ∈ C) ∧ (fstIdx d₂ = insert (L.neg p) s ∧ d₂ ∈ C)) ) := by
+        d = cutRule s p d₁ d₂ ∧ (fstIdx d₁ = insert p s ∧ d₁ ∈ C) ∧ (fstIdx d₂ = insert (L.neg p) s ∧ d₂ ∈ C)) ∨
+      (∃ s < d, ∃ p < d,
+        d = root s p ∧ p ∈ s ∧ p ∈ T) ) := by
   constructor
   · rintro ⟨hs, H⟩
     refine ⟨hs, ?_⟩
     rcases H with (⟨s, p, rfl, h⟩ | ⟨s, rfl, h⟩ | ⟨s, p, q, dp, dq, rfl, h⟩ | ⟨s, p, q, dpq, rfl, h⟩ |
-      ⟨s, p, dp, rfl, h⟩ | ⟨s, p, t, dp, rfl, h⟩ | ⟨s, d', rfl, h⟩ | ⟨s, d', rfl, h⟩ | ⟨s, p, d₁, d₂, rfl, h⟩)
+      ⟨s, p, dp, rfl, h⟩ | ⟨s, p, t, dp, rfl, h⟩ | ⟨s, d', rfl, h⟩ | ⟨s, d', rfl, h⟩ | ⟨s, p, d₁, d₂, rfl, h⟩ | ⟨s, p, rfl, h⟩)
     · left; exact ⟨s, by simp, p, by simp, rfl, h⟩
     · right; left; exact ⟨s, by simp, rfl, h⟩
     · right; right; left; exact ⟨s, by simp, p, by simp, q, by simp, dp, by simp, dq, by simp, rfl, h⟩
@@ -370,11 +392,13 @@ private lemma phi_iff (C d : V) :
     · right; right; right; right; right; left; exact ⟨s, by simp, p, by simp, t, by simp, dp, by simp, rfl, h⟩
     · right; right; right; right; right; right; left; exact ⟨s, by simp, d', by simp, rfl, h⟩
     · right; right; right; right; right; right; right; left; exact ⟨s, by simp, d', by simp, rfl, h⟩
-    · right; right; right; right; right; right; right; right; exact ⟨s, by simp, p, by simp, d₁, by simp, d₂, by simp, rfl, h⟩
+    · right; right; right; right; right; right; right; right; left; exact ⟨s, by simp, p, by simp, d₁, by simp, d₂, by simp, rfl, h⟩
+    · right; right; right; right; right; right; right; right; right; exact ⟨s, by simp, p, by simp, rfl, h⟩
   · rintro ⟨hs, H⟩
     refine ⟨hs, ?_⟩
     rcases H with (⟨s, _, p, _, rfl, h⟩ | ⟨s, _, rfl, h⟩ | ⟨s, _, p, _, q, _, dp, _, dq, _, rfl, h⟩ | ⟨s, _, p, _, q, _, dpq, _, rfl, h⟩ |
-      ⟨s, _, p, _, dp, _, rfl, h⟩ | ⟨s, _, p, _, t, _, dp, _, rfl, h⟩ | ⟨s, _, d', _, rfl, h⟩ | ⟨s, _, d', _, rfl, h⟩ | ⟨s, _, p, _, d₁, _, d₂, _, rfl, h⟩)
+      ⟨s, _, p, _, dp, _, rfl, h⟩ | ⟨s, _, p, _, t, _, dp, _, rfl, h⟩ | ⟨s, _, d', _, rfl, h⟩ |
+      ⟨s, _, d', _, rfl, h⟩ | ⟨s, _, p, _, d₁, _, d₂, _, rfl, h⟩ | ⟨s, _, p, _, h⟩)
     · left; exact ⟨s, p, rfl, h⟩
     · right; left; exact ⟨s, rfl, h⟩
     · right; right; left; exact ⟨s, p, q, dp, dq, rfl, h⟩
@@ -383,9 +407,10 @@ private lemma phi_iff (C d : V) :
     · right; right; right; right; right; left; exact ⟨s, p, t, dp, rfl, h⟩
     · right; right; right; right; right; right; left; exact ⟨s, d', rfl, h⟩
     · right; right; right; right; right; right; right; left; exact ⟨s, d', rfl, h⟩
-    · right; right; right; right; right; right; right; right; exact ⟨s, p, d₁, d₂, rfl, h⟩
+    · right; right; right; right; right; right; right; right; left; exact ⟨s, p, d₁, d₂, rfl, h⟩
+    · right; right; right; right; right; right; right; right; right; exact ⟨s, p, h⟩
 
-def blueprint (pL : LDef) : Fixpoint.Blueprint 0 := ⟨.mkDelta
+def blueprint {pL : LDef} (pT : pL.TDef) : Fixpoint.Blueprint 0 := ⟨.mkDelta
   (.mkSigma “d C |
     (∃ fst, !fstIdxDef fst d ∧ !pL.formulaSetDef.sigma fst) ∧
     ( (∃ s < d, ∃ p < d, !axLDef d s p ∧ p ∈ s ∧ ∃ np, !pL.negDef np p ∧ np ∈ s) ∨
@@ -411,7 +436,9 @@ def blueprint (pL : LDef) : Fixpoint.Blueprint 0 := ⟨.mkDelta
       (∃ s < d, ∃ p < d, ∃ d₁ < d, ∃ d₂ < d,
         !cutRuleDef d s p d₁ d₂ ∧
         (∃ c, !fstIdxDef c d₁ ∧ !insertDef c p s ∧ d₁ ∈ C) ∧
-        (∃ c, !fstIdxDef c d₂ ∧ ∃ np, !pL.negDef np p ∧ !insertDef c np s ∧ d₂ ∈ C)) )”
+        (∃ c, !fstIdxDef c d₂ ∧ ∃ np, !pL.negDef np p ∧ !insertDef c np s ∧ d₂ ∈ C)) ∨
+      (∃ s < d, ∃ p < d,
+        !rootDef d s p ∧ p ∈ s ∧ !pT.ch.sigma p) )”
     (by simp))
   (.mkPi “d C |
     (∀ fst, !fstIdxDef fst d → !pL.formulaSetDef.pi fst) ∧
@@ -439,12 +466,15 @@ def blueprint (pL : LDef) : Fixpoint.Blueprint 0 := ⟨.mkDelta
       (∃ s < d, ∃ p < d, ∃ d₁ < d, ∃ d₂ < d,
         !cutRuleDef d s p d₁ d₂ ∧
         (∀ c, !fstIdxDef c d₁ → !insertDef c p s ∧ d₁ ∈ C) ∧
-        (∀ c, !fstIdxDef c d₂ → ∀ np, !pL.negDef np p → !insertDef c np s ∧ d₂ ∈ C)) )”
+        (∀ c, !fstIdxDef c d₂ → ∀ np, !pL.negDef np p → !insertDef c np s ∧ d₂ ∈ C)) ∨
+      (∃ s < d, ∃ p < d,
+        !rootDef d s p ∧ p ∈ s ∧ !pT.ch.pi p) )”
     (by simp))⟩
 
-def construction : Fixpoint.Construction V (blueprint pL) where
-  Φ := fun _ ↦ Phi L
-  defined := ⟨by{
+def construction : Fixpoint.Construction V (blueprint pT) where
+  Φ := fun _ ↦ Phi T
+  defined :=
+  ⟨by
     intro v
     /-
     simp? [blueprint, HSemiformula.val_sigma,
@@ -453,8 +483,10 @@ def construction : Fixpoint.Construction V (blueprint pL) where
       (free_defined L).df.iff,
       (setShift_defined L).df.iff,
       (isSemiterm_defined L).df.iff, (isSemiterm_defined L).proper.iff',
-      (substs₁_defined L).df.iff]
+      (substs₁_defined L).df.iff,
+      T.mem_defined.df.iff, T.mem_defined.proper.iff']
     -/
+
     simp only [Nat.succ_eq_add_one, Nat.reduceAdd, blueprint, Fin.isValue, HSemiformula.val_sigma,
       HSemiformula.sigma_mkDelta, HSemiformula.val_mkSigma, LogicalConnective.HomClass.map_and,
       Semiformula.eval_ex, Semiformula.eval_substs, Matrix.comp_vecCons', Semiterm.val_bvar,
@@ -470,11 +502,11 @@ def construction : Fixpoint.Construction V (blueprint pL) where
       Matrix.cons_app_seven, Matrix.cons_app_six, eval_orIntroDef, eval_qqOrDef, eval_allIntroDef,
       eval_qqAllDef, (free_defined L).df.iff, (setShift_defined L).df.iff, eval_exIntroDef,
       eval_qqExDef, (isSemiterm_defined L).df.iff, (substs₁_defined L).df.iff, eval_wkRuleDef,
-      bitSubset_defined_iff, eval_shiftRuleDef, eval_cutRuleDef, LogicalConnective.Prop.or_eq,
-      HSemiformula.pi_mkDelta, HSemiformula.val_mkPi, Semiformula.eval_all,
-      LogicalConnective.HomClass.map_imply, (formulaSet_defined L).proper.iff',
-      LogicalConnective.Prop.arrow_eq, forall_eq, (isSemiterm_defined L).proper.iff',
-      Structure.Eq.eq]},
+      bitSubset_defined_iff, eval_shiftRuleDef, eval_cutRuleDef, eval_rootDef, T.mem_defined.df.iff,
+      LogicalConnective.Prop.or_eq, HSemiformula.pi_mkDelta, HSemiformula.val_mkPi,
+      Semiformula.eval_all, LogicalConnective.HomClass.map_imply,
+      (formulaSet_defined L).proper.iff', LogicalConnective.Prop.arrow_eq, forall_eq,
+      (isSemiterm_defined L).proper.iff', Structure.Eq.eq, T.mem_defined.proper.iff'],
   by
     intro v
     /-
@@ -484,7 +516,8 @@ def construction : Fixpoint.Construction V (blueprint pL) where
       (free_defined L).df.iff,
       (setShift_defined L).df.iff,
       (isSemiterm_defined L).df.iff, (isSemiterm_defined L).proper.iff',
-      (substs₁_defined L).df.iff]
+      (substs₁_defined L).df.iff,
+      T.mem_defined.df.iff]
     -/
     simp only [Fin.isValue, phi_iff, Nat.succ_eq_add_one, Nat.reduceAdd, blueprint,
       HSemiformula.val_sigma, HSemiformula.val_mkDelta, HSemiformula.val_mkSigma,
@@ -501,14 +534,14 @@ def construction : Fixpoint.Construction V (blueprint pL) where
       insert_defined_iff, Matrix.cons_app_seven, Matrix.cons_app_six, eval_orIntroDef, eval_qqOrDef,
       eval_allIntroDef, eval_qqAllDef, (free_defined L).df.iff, (setShift_defined L).df.iff,
       eval_exIntroDef, eval_qqExDef, (isSemiterm_defined L).df.iff, (substs₁_defined L).df.iff,
-      eval_wkRuleDef, bitSubset_defined_iff, eval_shiftRuleDef, eval_cutRuleDef,
-      LogicalConnective.Prop.or_eq]⟩
+      eval_wkRuleDef, bitSubset_defined_iff, eval_shiftRuleDef, eval_cutRuleDef, eval_rootDef,
+      T.mem_defined.df.iff, LogicalConnective.Prop.or_eq]⟩
   monotone := by
     rintro C C' hC _ d ⟨hs, H⟩
     refine ⟨hs, ?_⟩
     rcases H with (h | h | ⟨s, p, q, dp, dq, rfl, hpq, ⟨hp, hpC⟩, ⟨hq, hqC⟩⟩ | ⟨s, p, q, dpq, rfl, hpq, h, hdC⟩ |
       ⟨s, p, dp, rfl, hp, h, hdC⟩ | ⟨s, p, t, dp, rfl, hp, ht, h, hdC⟩ |
-      ⟨s, d', rfl, ss, hdC⟩ | ⟨s, d', rfl, ss, hdC⟩ | ⟨s, p, d₁, d₂, rfl, ⟨h₁, hd₁C⟩, ⟨h₂, hd₂C⟩⟩)
+      ⟨s, d', rfl, ss, hdC⟩ | ⟨s, d', rfl, ss, hdC⟩ | ⟨s, p, d₁, d₂, rfl, ⟨h₁, hd₁C⟩, ⟨h₂, hd₂C⟩⟩ | ⟨s, p, h⟩)
     · left; exact h
     · right; left; exact h
     · right; right; left; exact ⟨s, p, q, dp, dq, rfl, hpq, ⟨hp, hC hpC⟩, ⟨hq, hC hqC⟩⟩
@@ -517,15 +550,16 @@ def construction : Fixpoint.Construction V (blueprint pL) where
     · right; right; right; right; right; left; exact ⟨s, p, t, dp, rfl, hp, ht, h, hC hdC⟩
     · right; right; right; right; right; right; left; exact ⟨s, d', rfl, ss, hC hdC⟩
     · right; right; right; right; right; right; right; left; exact ⟨s, d', rfl, ss, hC hdC⟩
-    · right; right; right; right; right; right; right; right; exact ⟨s, p, d₁, d₂, rfl, ⟨h₁, hC hd₁C⟩, ⟨h₂, hC hd₂C⟩⟩
+    · right; right; right; right; right; right; right; right; left; exact ⟨s, p, d₁, d₂, rfl, ⟨h₁, hC hd₁C⟩, ⟨h₂, hC hd₂C⟩⟩
+    · right; right; right; right; right; right; right; right; right; exact ⟨s, p, h⟩
 
-instance : (construction L).StrongFinite V where
+instance : (construction T).StrongFinite V where
   strong_finite := by
     rintro C _ d ⟨hs, H⟩
     refine ⟨hs, ?_⟩
     rcases H with (h | h | ⟨s, p, q, dp, dq, rfl, hpq, ⟨hp, hpC⟩, ⟨hq, hqC⟩⟩ | ⟨s, p, q, dpq, rfl, hpq, h, hdC⟩ |
       ⟨s, p, dp, rfl, hp, h, hdC⟩ | ⟨s, p, t, dp, rfl, hp, ht, h, hdC⟩ |
-      ⟨s, d', rfl, ss, hdC⟩ | ⟨s, d', rfl, ss, hdC⟩ | ⟨s, p, d₁, d₂, rfl, ⟨h₁, hd₁C⟩, ⟨h₂, hd₂C⟩⟩)
+      ⟨s, d', rfl, ss, hdC⟩ | ⟨s, d', rfl, ss, hdC⟩ | ⟨s, p, d₁, d₂, rfl, ⟨h₁, hd₁C⟩, ⟨h₂, hd₂C⟩⟩ | ⟨s, p, h⟩)
     · left; exact h
     · right; left; exact h
     · right; right; left; exact ⟨s, p, q, dp, dq, rfl, hpq, ⟨hp, hpC, by simp⟩, ⟨hq, hqC, by simp⟩⟩
@@ -534,213 +568,238 @@ instance : (construction L).StrongFinite V where
     · right; right; right; right; right; left; exact ⟨s, p, t, dp, rfl, hp, ht, h, hdC, by simp⟩
     · right; right; right; right; right; right; left; exact ⟨s, d', rfl, ss, hdC, by simp⟩
     · right; right; right; right; right; right; right; left; exact ⟨s, d', rfl, ss, hdC, by simp⟩
-    · right; right; right; right; right; right; right; right; exact ⟨s, p, d₁, d₂, rfl, ⟨h₁, hd₁C, by simp⟩, ⟨h₂, hd₂C, by simp⟩⟩
+    · right; right; right; right; right; right; right; right; left; exact ⟨s, p, d₁, d₂, rfl, ⟨h₁, hd₁C, by simp⟩, ⟨h₂, hd₂C, by simp⟩⟩
+    · right; right; right; right; right; right; right; right; right; exact ⟨s, p, h⟩
 
 end Derivation
 
 open Derivation
 
-variable (L)
+variable (T)
 
-def Language.Derivation : V → Prop := (construction L).Fixpoint ![]
+def Language.Theory.Derivation : V → Prop := (construction T).Fixpoint ![]
 
-def Language.DerivationOf (d s : V) : Prop := fstIdx d = s ∧ L.Derivation d
+def Language.Theory.DerivationOf (d s : V) : Prop := fstIdx d = s ∧ T.Derivation d
 
-def Language.Derivable (s : V) : Prop := ∃ d, L.DerivationOf d s
+def Language.Theory.Derivable (s : V) : Prop := ∃ d, T.DerivationOf d s
+
+def Language.Theory.Provable (p : V) : Prop := T.Derivable {p}
 
 section
 
-def _root_.LO.FirstOrder.Arith.LDef.derivationDef (pL : LDef) : 𝚫₁-Semisentence 1 := (blueprint pL).fixpointDefΔ₁
+def _root_.LO.FirstOrder.Arith.LDef.TDef.derivationDef {pL : LDef} (pT : pL.TDef) : 𝚫₁-Semisentence 1 := (blueprint pT).fixpointDefΔ₁
 
-lemma derivation_defined : 𝚫₁-Predicate L.Derivation via pL.derivationDef := (construction L).fixpoint_definedΔ₁
+lemma derivation_defined : 𝚫₁-Predicate T.Derivation via pT.derivationDef := (construction T).fixpoint_definedΔ₁
 
-instance derivation_definable : 𝚫₁-Predicate L.Derivation := Defined.to_definable _ (derivation_defined L)
+instance derivation_definable : 𝚫₁-Predicate T.Derivation := Defined.to_definable _ (derivation_defined T)
 
-@[simp] instance derivatin_definable' (Γ) : (Γ, m + 1)-Predicate L.Derivation :=
-  .of_deltaOne (derivation_definable L) _ _
+@[simp] instance derivatin_definable' (Γ) : (Γ, m + 1)-Predicate T.Derivation :=
+  .of_deltaOne (derivation_definable T) _ _
 
-def _root_.LO.FirstOrder.Arith.LDef.derivationOfDef (pL : LDef) : 𝚫₁-Semisentence 2 := .mkDelta
-  (.mkSigma “d s | !fstIdxDef s d ∧ !pL.derivationDef.sigma d” (by simp))
-  (.mkPi “d s | !fstIdxDef s d ∧ !pL.derivationDef.pi d” (by simp))
+def _root_.LO.FirstOrder.Arith.LDef.TDef.derivationOfDef {pL : LDef} (pT : pL.TDef) : 𝚫₁-Semisentence 2 := .mkDelta
+  (.mkSigma “d s | !fstIdxDef s d ∧ !pT.derivationDef.sigma d” (by simp))
+  (.mkPi “d s | !fstIdxDef s d ∧ !pT.derivationDef.pi d” (by simp))
 
-lemma derivationOf_defined : 𝚫₁-Relation L.DerivationOf via pL.derivationOfDef :=
-  ⟨by intro v; simp [LDef.derivationOfDef, HSemiformula.val_sigma, (derivation_defined L).proper.iff'],
-   by intro v; simp [LDef.derivationOfDef, HSemiformula.val_sigma, (derivation_defined L).df.iff, eq_comm (b := fstIdx (v 0))]; rfl⟩
+lemma derivationOf_defined : 𝚫₁-Relation T.DerivationOf via pT.derivationOfDef :=
+  ⟨by intro v; simp [LDef.TDef.derivationOfDef, HSemiformula.val_sigma, (derivation_defined T).proper.iff'],
+   by intro v; simp [LDef.TDef.derivationOfDef, HSemiformula.val_sigma, (derivation_defined T).df.iff, eq_comm (b := fstIdx (v 0))]; rfl⟩
 
-instance derivationOf_definable : 𝚫₁-Relation L.DerivationOf := Defined.to_definable _ (derivationOf_defined L)
+instance derivationOf_definable : 𝚫₁-Relation T.DerivationOf := Defined.to_definable _ (derivationOf_defined T)
 
-@[simp] instance derivatinOf_definable' (Γ) : (Γ, m + 1)-Relation L.DerivationOf :=
-  .of_deltaOne (derivationOf_definable L) _ _
+@[simp] instance derivatinOf_definable' (Γ) : (Γ, m + 1)-Relation T.DerivationOf :=
+  .of_deltaOne (derivationOf_definable T) _ _
 
-def _root_.LO.FirstOrder.Arith.LDef.derivableDef (pL : LDef) : 𝚺₁-Semisentence 1 := .mkSigma
-  “s | ∃ d, !pL.derivationOfDef.sigma d s” (by simp)
+def _root_.LO.FirstOrder.Arith.LDef.TDef.derivableDef {pL : LDef} (pT : pL.TDef) : 𝚺₁-Semisentence 1 := .mkSigma
+  “s | ∃ d, !pT.derivationOfDef.sigma d s” (by simp)
 
-lemma derivable_defined : 𝚺₁-Predicate L.Derivable via pL.derivableDef := by
-  intro v; simp [LDef.derivableDef, HSemiformula.val_sigma, (derivationOf_defined L).df.iff, Language.Derivable]
+lemma Language.Theory.derivable_defined : 𝚺₁-Predicate T.Derivable via pT.derivableDef := by
+  intro v; simp [LDef.TDef.derivableDef, HSemiformula.val_sigma, (derivationOf_defined T).df.iff, Language.Theory.Derivable]
 
-instance derivable_definable : 𝚺₁-Predicate L.Derivable := Defined.to_definable _ (derivable_defined L)
+instance Language.Theory.derivable_definable : 𝚺₁-Predicate T.Derivable := Defined.to_definable _ (derivable_defined T)
 
 /-- instance for definability tactic-/
-@[simp] instance derivable_definable' : (𝚺, 0 + 1)-Predicate L.Derivable := derivable_definable L
+@[simp] instance Language.Theory.derivable_definable' : (𝚺, 0 + 1)-Predicate T.Derivable := derivable_definable T
+
+def _root_.LO.FirstOrder.Arith.LDef.TDef.prv {pL : LDef} (pT : pL.TDef) : 𝚺₁-Semisentence 1 := .mkSigma
+  “p | ∃ s, !insertDef s p 0 ∧ !pT.derivableDef s” (by simp)
+
+protected lemma Language.Theory.provable_defined : 𝚺₁-Predicate T.Provable via pT.prv := by
+  intro v; simp [LDef.TDef.prv, (derivable_defined T).df.iff, Language.Theory.Provable, singleton_eq_insert, emptyset_def]
+
+instance Language.Theory.provable_definable : 𝚺₁-Predicate T.Provable := Defined.to_definable _ T.provable_defined
+
+/-- instance for definability tactic-/
+@[simp] instance Language.Theory.provable_definable' : (𝚺, 0 + 1)-Predicate T.Provable := T.provable_definable
 
 end
 
-variable {L}
+variable {T}
 
-lemma Language.Derivation.case_iff {d : V} :
-    L.Derivation d ↔
+lemma Language.Theory.Derivation.case_iff {d : V} :
+    T.Derivation d ↔
     L.FormulaSet (fstIdx d) ∧
     ( (∃ s p, d = axL s p ∧ p ∈ s ∧ L.neg p ∈ s) ∨
       (∃ s, d = verumIntro s ∧ ^⊤ ∈ s) ∨
-      (∃ s p q dp dq, d = andIntro s p q dp dq ∧ p ^⋏ q ∈ s ∧ L.DerivationOf dp (insert p s) ∧ L.DerivationOf dq (insert q s)) ∨
-      (∃ s p q dpq, d = orIntro s p q dpq ∧ p ^⋎ q ∈ s ∧ L.DerivationOf dpq (insert p (insert q s))) ∨
-      (∃ s p dp, d = allIntro s p dp ∧ ^∀ p ∈ s ∧ L.DerivationOf dp (insert (L.free p) (L.setShift s))) ∨
-      (∃ s p t dp, d = exIntro s p t dp ∧ ^∃ p ∈ s ∧ L.Term t ∧ L.DerivationOf dp (insert (L.substs₁ t p) s)) ∨
-      (∃ s d', d = wkRule s d' ∧ fstIdx d' ⊆ s ∧ L.Derivation d') ∨
-      (∃ s d', d = shiftRule s d' ∧ s = L.setShift (fstIdx d') ∧ L.Derivation d') ∨
-      (∃ s p d₁ d₂, d = cutRule s p d₁ d₂ ∧ L.DerivationOf d₁ (insert p s) ∧ L.DerivationOf d₂ (insert (L.neg p) s)) ) :=
-  (construction L).case
+      (∃ s p q dp dq, d = andIntro s p q dp dq ∧ p ^⋏ q ∈ s ∧ T.DerivationOf dp (insert p s) ∧ T.DerivationOf dq (insert q s)) ∨
+      (∃ s p q dpq, d = orIntro s p q dpq ∧ p ^⋎ q ∈ s ∧ T.DerivationOf dpq (insert p (insert q s))) ∨
+      (∃ s p dp, d = allIntro s p dp ∧ ^∀ p ∈ s ∧ T.DerivationOf dp (insert (L.free p) (L.setShift s))) ∨
+      (∃ s p t dp, d = exIntro s p t dp ∧ ^∃ p ∈ s ∧ L.Term t ∧ T.DerivationOf dp (insert (L.substs₁ t p) s)) ∨
+      (∃ s d', d = wkRule s d' ∧ fstIdx d' ⊆ s ∧ T.Derivation d') ∨
+      (∃ s d', d = shiftRule s d' ∧ s = L.setShift (fstIdx d') ∧ T.Derivation d') ∨
+      (∃ s p d₁ d₂, d = cutRule s p d₁ d₂ ∧ T.DerivationOf d₁ (insert p s) ∧ T.DerivationOf d₂ (insert (L.neg p) s)) ∨
+      (∃ s p, d = root s p ∧ p ∈ s ∧ p ∈ T) ) :=
+  (construction T).case
 
-alias ⟨Language.Derivation.case, Language.Derivation.mk⟩ := Language.Derivation.case_iff
+alias ⟨Language.Theory.Derivation.case, Language.Theory.Derivation.mk⟩ := Language.Theory.Derivation.case_iff
 
-lemma Language.DerivationOf.formulaSet {d s : V} (h : L.DerivationOf d s) : L.FormulaSet s := by
+lemma Language.Theory.DerivationOf.formulaSet {d s : V} (h : T.DerivationOf d s) : L.FormulaSet s := by
   simpa [h.1] using h.2.case.1
 
-lemma Language.Derivation.axL {s p : V} (hs : L.FormulaSet s) (h : p ∈ s) (hn : L.neg p ∈ s) : L.Derivation (axL s p) :=
-  Language.Derivation.mk ⟨by simpa using hs, Or.inl ⟨s, p, rfl, h, hn⟩⟩
+lemma Language.Theory.Derivation.axL {s p : V} (hs : L.FormulaSet s) (h : p ∈ s) (hn : L.neg p ∈ s) : T.Derivation (axL s p) :=
+  Language.Theory.Derivation.mk ⟨by simpa using hs, Or.inl ⟨s, p, rfl, h, hn⟩⟩
 
-lemma Language.Derivation.verumIntro {s : V} (hs : L.FormulaSet s) (h : ^⊤ ∈ s) :
-    L.Derivation (verumIntro s) :=
-  Language.Derivation.mk ⟨by simpa using hs, Or.inr <| Or.inl ⟨s, rfl, h⟩⟩
+lemma Language.Theory.Derivation.verumIntro {s : V} (hs : L.FormulaSet s) (h : ^⊤ ∈ s) :
+    T.Derivation (verumIntro s) :=
+  Language.Theory.Derivation.mk ⟨by simpa using hs, Or.inr <| Or.inl ⟨s, rfl, h⟩⟩
 
-lemma Language.Derivation.andIntro {s p q dp dq : V} (h : p ^⋏ q ∈ s)
-    (hdp : L.DerivationOf dp (insert p s)) (hdq : L.DerivationOf dq (insert q s)) :
-    L.Derivation (andIntro s p q dp dq) :=
-  Language.Derivation.mk ⟨by simp; intro r hr; exact hdp.formulaSet r (by simp [hr]),
+lemma Language.Theory.Derivation.andIntro {s p q dp dq : V} (h : p ^⋏ q ∈ s)
+    (hdp : T.DerivationOf dp (insert p s)) (hdq : T.DerivationOf dq (insert q s)) :
+    T.Derivation (andIntro s p q dp dq) :=
+  Language.Theory.Derivation.mk ⟨by simp; intro r hr; exact hdp.formulaSet r (by simp [hr]),
     Or.inr <| Or.inr <| Or.inl ⟨s, p, q, dp, dq, rfl, h, hdp, hdq⟩⟩
 
-lemma Language.Derivation.orIntro {s p q dpq : V} (h : p ^⋎ q ∈ s)
-    (hdpq : L.DerivationOf dpq (insert p (insert q s))) :
-    L.Derivation (orIntro s p q dpq) :=
-  Language.Derivation.mk ⟨by simp; intro r hr; exact hdpq.formulaSet r (by simp [hr]),
+lemma Language.Theory.Derivation.orIntro {s p q dpq : V} (h : p ^⋎ q ∈ s)
+    (hdpq : T.DerivationOf dpq (insert p (insert q s))) :
+    T.Derivation (orIntro s p q dpq) :=
+  Language.Theory.Derivation.mk ⟨by simp; intro r hr; exact hdpq.formulaSet r (by simp [hr]),
     Or.inr <| Or.inr <| Or.inr <| Or.inl ⟨s, p, q, dpq, rfl, h, hdpq⟩⟩
 
-lemma Language.Derivation.allIntro {s p dp : V} (h : ^∀ p ∈ s)
-    (hdp : L.DerivationOf dp (insert (L.free p) (L.setShift s))) :
-    L.Derivation (allIntro s p dp) :=
-  Language.Derivation.mk
+lemma Language.Theory.Derivation.allIntro {s p dp : V} (h : ^∀ p ∈ s)
+    (hdp : T.DerivationOf dp (insert (L.free p) (L.setShift s))) :
+    T.Derivation (allIntro s p dp) :=
+  Language.Theory.Derivation.mk
     ⟨by simp; intro q hq; simpa using hdp.formulaSet (L.shift q) (by simp [shift_mem_setShift hq]),
       Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl ⟨s, p, dp, rfl, h, hdp⟩⟩
 
-lemma Language.Derivation.exIntro {s p t dp : V}
+lemma Language.Theory.Derivation.exIntro {s p t dp : V}
     (h : ^∃ p ∈ s) (ht : L.Term t)
-    (hdp : L.DerivationOf dp (insert (L.substs₁ t p) s)) :
-    L.Derivation (exIntro s p t dp) :=
-  Language.Derivation.mk
+    (hdp : T.DerivationOf dp (insert (L.substs₁ t p) s)) :
+    T.Derivation (exIntro s p t dp) :=
+  Language.Theory.Derivation.mk
     ⟨by simp; intro q hq; exact hdp.formulaSet q (by simp [hq]),
       Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl ⟨s, p, t, dp, rfl, h, ht, hdp⟩⟩
 
-lemma Language.Derivation.wkRule {s s' d : V} (hs : L.FormulaSet s)
-    (h : s' ⊆ s) (hd : L.DerivationOf d s') : L.Derivation (wkRule s d) :=
-  Language.Derivation.mk
+lemma Language.Theory.Derivation.wkRule {s s' d : V} (hs : L.FormulaSet s)
+    (h : s' ⊆ s) (hd : T.DerivationOf d s') : T.Derivation (wkRule s d) :=
+  Language.Theory.Derivation.mk
     ⟨by simpa using hs,
       Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl ⟨s, d, rfl, by simp [hd.1, h], hd.2⟩⟩
 
-lemma Language.Derivation.shiftRule {s d : V}
-    (hd : L.DerivationOf d s) : L.Derivation (shiftRule (L.setShift s) d) :=
-  Language.Derivation.mk
+lemma Language.Theory.Derivation.shiftRule {s d : V}
+    (hd : T.DerivationOf d s) : T.Derivation (shiftRule (L.setShift s) d) :=
+  Language.Theory.Derivation.mk
     ⟨by simp [hd.formulaSet],
       Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl ⟨L.setShift s, d, rfl, by simp [hd.1], hd.2⟩⟩
 
-lemma Language.Derivation.cutRule {s p d₁ d₂ : V}
-    (hd₁ : L.DerivationOf d₁ (insert p s))
-    (hd₂ : L.DerivationOf d₂ (insert (L.neg p) s)) :
-    L.Derivation (cutRule s p d₁ d₂) :=
-  Language.Derivation.mk
+lemma Language.Theory.Derivation.cutRule {s p d₁ d₂ : V}
+    (hd₁ : T.DerivationOf d₁ (insert p s))
+    (hd₂ : T.DerivationOf d₂ (insert (L.neg p) s)) :
+    T.Derivation (cutRule s p d₁ d₂) :=
+  Language.Theory.Derivation.mk
     ⟨by simp; intro q hq; exact hd₁.formulaSet q (by simp [hq]),
-      Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr ⟨s, p, d₁, d₂, rfl, hd₁, hd₂⟩⟩
+      Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl ⟨s, p, d₁, d₂, rfl, hd₁, hd₂⟩⟩
 
-namespace Language.Derivable
+lemma Language.Theory.Derivation.root {s p : V} (hs : L.FormulaSet s) (hp : p ∈ s) (hT : p ∈ T) :
+    T.Derivation (root s p) :=
+  Language.Theory.Derivation.mk
+    ⟨by simpa using hs,
+      Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr ⟨s, p, rfl, hp, hT⟩⟩
 
-lemma formulaSet {s : V} (h : L.Derivable s) : L.FormulaSet s := by
+namespace Language.Theory.Derivable
+
+lemma formulaSet {s : V} (h : T.Derivable s) : L.FormulaSet s := by
   rcases h with ⟨d, hd⟩; exact hd.formulaSet
 
-lemma em {s p : V} (hs : L.FormulaSet s) (h : p ∈ s) (hn : L.neg p ∈ s) :
-    L.Derivable s := ⟨axL s p, by simp, Language.Derivation.axL hs h hn⟩
+lemma em {s : V} (hs : L.FormulaSet s) (p) (h : p ∈ s) (hn : L.neg p ∈ s) :
+    T.Derivable s := ⟨axL s p, by simp, Language.Theory.Derivation.axL hs h hn⟩
 
 lemma verum {s : V} (hs : L.FormulaSet s) (h : ^⊤ ∈ s) :
-    L.Derivable s := ⟨verumIntro s, by simp, Language.Derivation.verumIntro hs h⟩
+    T.Derivable s := ⟨verumIntro s, by simp, Language.Theory.Derivation.verumIntro hs h⟩
 
-lemma and_m {s p q : V} (h : p ^⋏ q ∈ s) (hp : L.Derivable (insert p s)) (hq : L.Derivable (insert q s)) :
-    L.Derivable s := by
+lemma and_m {s p q : V} (h : p ^⋏ q ∈ s) (hp : T.Derivable (insert p s)) (hq : T.Derivable (insert q s)) :
+    T.Derivable s := by
   rcases hp with ⟨dp, hdp⟩; rcases hq with ⟨dq, hdq⟩
-  exact ⟨andIntro s p q dp dq, by simp, Language.Derivation.andIntro h hdp hdq⟩
+  exact ⟨andIntro s p q dp dq, by simp, Language.Theory.Derivation.andIntro h hdp hdq⟩
 
-lemma or_m {s p q : V} (h : p ^⋎ q ∈ s) (hpq : L.Derivable (insert p (insert q s))) :
-    L.Derivable s := by
+lemma or_m {s p q : V} (h : p ^⋎ q ∈ s) (hpq : T.Derivable (insert p (insert q s))) :
+    T.Derivable s := by
   rcases hpq with ⟨dpq, hdpq⟩
-  exact ⟨orIntro s p q dpq, by simp, Language.Derivation.orIntro h hdpq⟩
+  exact ⟨orIntro s p q dpq, by simp, Language.Theory.Derivation.orIntro h hdpq⟩
 
-lemma all_m {s p : V} (h : ^∀ p ∈ s) (hp : L.Derivable (insert (L.free p) (L.setShift s))) :
-    L.Derivable s := by
+lemma all_m {s p : V} (h : ^∀ p ∈ s) (hp : T.Derivable (insert (L.free p) (L.setShift s))) :
+    T.Derivable s := by
   rcases hp with ⟨dp, hdp⟩
-  exact ⟨allIntro s p dp, by simp, Language.Derivation.allIntro h hdp⟩
+  exact ⟨allIntro s p dp, by simp, Language.Theory.Derivation.allIntro h hdp⟩
 
-lemma ex_m {s p t : V} (h : ^∃ p ∈ s) (ht : L.Term t) (hp : L.Derivable (insert (L.substs₁ t p) s)) :
-    L.Derivable s := by
+lemma ex_m {s p t : V} (h : ^∃ p ∈ s) (ht : L.Term t) (hp : T.Derivable (insert (L.substs₁ t p) s)) :
+    T.Derivable s := by
   rcases hp with ⟨dp, hdp⟩
-  exact ⟨exIntro s p t dp, by simp, Language.Derivation.exIntro h ht hdp⟩
+  exact ⟨exIntro s p t dp, by simp, Language.Theory.Derivation.exIntro h ht hdp⟩
 
-lemma wk {s s' : V} (hs : L.FormulaSet s) (h : s' ⊆ s) (hd : L.Derivable s') :
-    L.Derivable s := by
+lemma wk {s s' : V} (hs : L.FormulaSet s) (h : s' ⊆ s) (hd : T.Derivable s') :
+    T.Derivable s := by
   rcases hd with ⟨d, hd⟩
-  exact ⟨wkRule s d, by simp, Language.Derivation.wkRule hs h hd⟩
+  exact ⟨wkRule s d, by simp, Language.Theory.Derivation.wkRule hs h hd⟩
 
-lemma shift {s : V} (hd : L.Derivable s) :
-    L.Derivable (L.setShift s) := by
+lemma shift {s : V} (hd : T.Derivable s) :
+    T.Derivable (L.setShift s) := by
   rcases hd with ⟨d, hd⟩
-  exact ⟨shiftRule (L.setShift s) d, by simp, Language.Derivation.shiftRule hd⟩
+  exact ⟨shiftRule (L.setShift s) d, by simp, Language.Theory.Derivation.shiftRule hd⟩
 
-lemma ofSetEq {s s' : V} (h : ∀ x, x ∈ s' ↔ x ∈ s) (hd : L.Derivable s') :
-    L.Derivable s := by
+lemma ofSetEq {s s' : V} (h : ∀ x, x ∈ s' ↔ x ∈ s) (hd : T.Derivable s') :
+    T.Derivable s := by
   have : s' = s := mem_ext h
   rcases this; exact hd
 
-lemma cut {s : V} (p) (hd₁ : L.Derivable (insert p s)) (hd₂ : L.Derivable (insert (L.neg p) s)) :
-    L.Derivable s := by
+lemma cut {s : V} (p) (hd₁ : T.Derivable (insert p s)) (hd₂ : T.Derivable (insert (L.neg p) s)) :
+    T.Derivable s := by
   rcases hd₁ with ⟨d₁, hd₁⟩; rcases hd₂ with ⟨d₂, hd₂⟩
-  exact ⟨cutRule s p d₁ d₂, by simp, Language.Derivation.cutRule hd₁ hd₂⟩
+  exact ⟨cutRule s p d₁ d₂, by simp, Language.Theory.Derivation.cutRule hd₁ hd₂⟩
 
-lemma and {s p q : V} (hp : L.Derivable (insert p s)) (hq : L.Derivable (insert q s)) :
-    L.Derivable (insert (p ^⋏ q) s) :=
+lemma by_axm {s : V} (hs : L.FormulaSet s) (p) (hp : p ∈ s) (hT : p ∈ T) :
+    T.Derivable s := by
+  exact ⟨Arith.root s p, by simp, Language.Theory.Derivation.root hs hp hT⟩
+
+lemma and {s p q : V} (hp : T.Derivable (insert p s)) (hq : T.Derivable (insert q s)) :
+    T.Derivable (insert (p ^⋏ q) s) :=
   and_m (p := p) (q := q) (by simp)
     (wk (by simp [hp.formulaSet.insert, hq.formulaSet.insert]) (insert_subset_insert_of_subset _ <| by simp) hp)
     (wk (by simp [hp.formulaSet.insert, hq.formulaSet.insert]) (insert_subset_insert_of_subset _ <| by simp) hq)
 
-lemma or {s p q : V} (hpq : L.Derivable (insert p (insert q s))) :
-    L.Derivable (insert (p ^⋎ q) s) :=
+lemma or {s p q : V} (hpq : T.Derivable (insert p (insert q s))) :
+    T.Derivable (insert (p ^⋎ q) s) :=
   or_m (p := p) (q := q) (by simp)
     (wk (by simp [hpq.formulaSet.insert, hpq.formulaSet.insert.2.insert])
       (insert_subset_insert_of_subset _ <| insert_subset_insert_of_subset _ <| by simp) hpq)
 
 /-- Crucial inducion for formalized $\Sigma_1$-completeness. -/
 lemma conj (ps : V) {s} (hs : L.FormulaSet s)
-    (ds : ∀ i < len ps, L.Derivable (insert ps.[i] s)) : L.Derivable (insert (^⋀ ps) s) := by
-  have : ∀ k ≤ len ps, L.Derivable (insert (^⋀ (takeLast ps k)) s) := by
+    (ds : ∀ i < len ps, T.Derivable (insert ps.[i] s)) : T.Derivable (insert (^⋀ ps) s) := by
+  have : ∀ k ≤ len ps, T.Derivable (insert (^⋀ (takeLast ps k)) s) := by
     intro k hk
     induction k using induction_iSigmaOne
     · definability
     case zero => simpa using verum (by simp [hs]) (by simp)
     case succ k ih =>
       simp [takeLast_succ_of_lt (succ_le_iff_lt.mp hk)]
-      have ih : L.Derivable (insert (^⋀ takeLast ps k) s) := ih (le_trans le_self_add hk)
-      have : L.Derivable (insert ps.[len ps - (k + 1)] s) := ds (len ps - (k + 1)) ((tsub_lt_iff_left hk).mpr (by simp))
+      have ih : T.Derivable (insert (^⋀ takeLast ps k) s) := ih (le_trans le_self_add hk)
+      have : T.Derivable (insert ps.[len ps - (k + 1)] s) := ds (len ps - (k + 1)) ((tsub_lt_iff_left hk).mpr (by simp))
       exact this.and ih
   simpa using this (len ps) (by rfl)
 
-lemma disjDistr (ps s : V) (d : L.Derivable (vecToSet ps ∪ s)) : L.Derivable (insert (^⋁ ps) s) := by
+lemma disjDistr (ps s : V) (d : T.Derivable (vecToSet ps ∪ s)) : T.Derivable (insert (^⋁ ps) s) := by
   have : ∀ k ≤ len ps, ∀ s' ≤ vecToSet ps, s' ⊆ vecToSet ps →
-      (∀ i < len ps - k, ps.[i] ∈ s') → L.Derivable (insert (^⋁ takeLast ps k) (s' ∪ s)) := by
+      (∀ i < len ps - k, ps.[i] ∈ s') → T.Derivable (insert (^⋁ takeLast ps k) (s' ∪ s)) := by
     intro k hk
     induction k using induction_iSigmaOne
     · apply Definable.imp (by definability)
@@ -769,7 +828,7 @@ lemma disjDistr (ps s : V) (d : L.Derivable (vecToSet ps ∪ s)) : L.Derivable (
         rintro (rfl | h)
         · exact mem_vecToSet_iff.mpr ⟨_, by simp [tsub_lt_iff_left hk], rfl⟩
         · exact ss h
-      have : L.Derivable (insert (^⋁ takeLast ps k) (s'' ∪ s)) := by
+      have : T.Derivable (insert (^⋁ takeLast ps k) (s'' ∪ s)) := by
         refine ih (le_trans (by simp) hk) s'' (le_of_subset hs'') hs'' ?_
         intro i hi
         have : i ≤ len ps - (k + 1) := by
@@ -781,7 +840,7 @@ lemma disjDistr (ps s : V) (d : L.Derivable (vecToSet ps ∪ s)) : L.Derivable (
   simpa using this (len ps) (by rfl) ∅ (by simp [emptyset_def]) (by simp) (by simp)
 
 lemma disj (ps s : V) {i} (hps : ∀ i < len ps, L.Formula ps.[i])
-  (hi : i < len ps) (d : L.Derivable (insert ps.[i] s)) : L.Derivable (insert (^⋁ ps) s) :=
+  (hi : i < len ps) (d : T.Derivable (insert ps.[i] s)) : T.Derivable (insert (^⋁ ps) s) :=
   disjDistr ps s <| wk
     (by simp [by simpa using d.formulaSet]; intro x hx; rcases mem_vecToSet_iff.mp hx with ⟨i, hi, rfl⟩; exact hps i hi)
     (by
@@ -790,7 +849,14 @@ lemma disj (ps s : V) {i} (hps : ∀ i < len ps, L.Formula ps.[i])
       · left; exact mem_vecToSet_iff.mpr ⟨i, hi, rfl⟩
       · right; exact hx) d
 
-end Language.Derivable
+lemma all {p : V} (hp : L.Semiformula 1 p) (dp : T.Derivable (insert (L.free p) (L.setShift s))) : T.Derivable (insert (^∀ p) s) :=
+  all_m (p := p) (by simp) (wk (by simp [hp, by simpa using dp.formulaSet]) (by intro x; simp; tauto) dp)
+
+lemma ex {p t : V} (hp : L.Semiformula 1 p) (ht : L.Term t)
+    (dp : T.Derivable (insert (L.substs₁ t p) s)) : T.Derivable (insert (^∃ p) s) :=
+  ex_m (p := p) (by simp) ht (wk (by simp [ht, hp, by simpa using dp.formulaSet]) (by intro x; simp; tauto) dp)
+
+end Language.Theory.Derivable
 
 end derivation
 

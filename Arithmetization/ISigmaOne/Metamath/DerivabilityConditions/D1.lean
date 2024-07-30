@@ -14,7 +14,7 @@ variable {L : Language} [(k : ℕ) → Encodable (L.Func k)] [(k : ℕ) → Enco
 
 variable (V)
 
-namespace Derivation2
+namespace Derivation3
 
 def Sequent.codeIn (Γ : Finset (SyntacticFormula L)) : V := ∑ p ∈ Γ, exp (⌜p⌝ : V)
 
@@ -40,6 +40,9 @@ lemma Sequent.mem_codeIn_iff {Γ : Finset (SyntacticFormula L)} {p} : ⌜p⌝ �
     rw [this]
     simp [←ih]
 
+@[simp] lemma Sequent.codeIn_singleton (p : SyntacticFormula L) :
+    (⌜({p} : Finset (SyntacticFormula L))⌝ : V) = {⌜p⌝} := by simp [Sequent.codeIn_def]; rfl
+
 @[simp] lemma Sequent.codeIn_insert (Γ : Finset (SyntacticFormula L)) (p) : (⌜(insert p Γ)⌝ : V) = insert ⌜p⌝ ⌜Γ⌝ := by
   by_cases hp : p ∈ Γ
   · simp [Sequent.mem_codeIn_iff, hp, insert_eq_self_of_mem]
@@ -58,8 +61,11 @@ lemma Sequent.mem_codeIn {Γ : Finset (SyntacticFormula L)} (hx : x ∈ (⌜Γ�
 
 variable (V)
 
-def codeIn : {Γ : Finset (SyntacticFormula L)} → ⊢¹ᶠ Γ → V
-  | _, axL (Δ := Δ) p _ _                     => Arith.axL ⌜Δ⌝ ⌜p⌝
+variable {T : SyntacticTheory L} [T.Δ₁Definable]
+
+def codeIn : {Γ : Finset (SyntacticFormula L)} → T ⊢₃ Γ → V
+  | _, closed Δ p _ _                         => Arith.axL ⌜Δ⌝ ⌜p⌝
+  | _, root (Δ := Δ) p _ _                    => Arith.root ⌜Δ⌝ ⌜p⌝
   | _, verum (Δ := Δ) _                       => Arith.verumIntro ⌜Δ⌝
   | _, and (Δ := Δ) _ (p := p) (q := q) bp bq => Arith.andIntro ⌜Δ⌝ ⌜p⌝ ⌜q⌝ bp.codeIn bq.codeIn
   | _, or (Δ := Δ) (p := p) (q := q) _ d      => Arith.orIntro ⌜Δ⌝ ⌜p⌝ ⌜q⌝ d.codeIn
@@ -69,14 +75,14 @@ def codeIn : {Γ : Finset (SyntacticFormula L)} → ⊢¹ᶠ Γ → V
   | _, shift (Δ := Δ) d                       => Arith.shiftRule ⌜Δ.image Rew.shift.hom⌝ d.codeIn
   | _, cut (Δ := Δ) (p := p) d dn             => Arith.cutRule ⌜Δ⌝ ⌜p⌝ d.codeIn dn.codeIn
 
-instance (Γ : Finset (SyntacticFormula L)) : GoedelQuote (⊢¹ᶠ Γ) V := ⟨codeIn V⟩
+instance (Γ : Finset (SyntacticFormula L)) : GoedelQuote (T ⊢₃ Γ) V := ⟨codeIn V⟩
 
-lemma quote_derivation_def {Γ : Finset (SyntacticFormula L)} (d : ⊢¹ᶠ Γ) : (⌜d⌝ : V) = d.codeIn V := rfl
+lemma quote_derivation_def {Γ : Finset (SyntacticFormula L)} (d : T ⊢₃ Γ) : (⌜d⌝ : V) = d.codeIn V := rfl
 
-@[simp] lemma fstidx_quote {Γ : Finset (SyntacticFormula L)} (d : ⊢¹ᶠ Γ) : fstIdx (⌜d⌝ : V) = ⌜Γ⌝ := by
+@[simp] lemma fstidx_quote {Γ : Finset (SyntacticFormula L)} (d : T ⊢₃ Γ) : fstIdx (⌜d⌝ : V) = ⌜Γ⌝ := by
   induction d <;> simp [quote_derivation_def, codeIn]
 
-end Derivation2
+end Derivation3
 
 end LO.FirstOrder
 
@@ -88,89 +94,89 @@ variable {V : Type*} [Zero V] [One V] [Add V] [Mul V] [LT V] [V ⊧ₘ* 𝐈𝚺
 
 variable {L : Language} [(k : ℕ) → Encodable (L.Func k)] [(k : ℕ) → Encodable (L.Rel k)] [DefinableLanguage L]
 
+variable {T : SyntacticTheory L} [T.Δ₁Definable]
+
 open Classical
 
 @[simp] lemma formulaSet_codeIn_finset (Γ : Finset (SyntacticFormula L)) : (L.codeIn V).FormulaSet ⌜Γ⌝ := by
   intro x hx
-  rcases Derivation2.Sequent.mem_codeIn hx with ⟨p, _, rfl⟩;
+  rcases Derivation3.Sequent.mem_codeIn hx with ⟨p, _, rfl⟩;
   apply semiformula_quote
 
-open Derivation2
+open Derivation3
 
 lemma quote_image_shift (Γ : Finset (SyntacticFormula L)) : (L.codeIn V).setShift (⌜Γ⌝ : V) = ⌜Γ.image Rew.shift.hom⌝ := by
   induction Γ using Finset.induction
   case empty => simp
   case insert p Γ _ ih => simp [shift_quote, ih]
 
-@[simp] lemma derivation_quote {Γ : Finset (SyntacticFormula L)} (d : ⊢¹ᶠ Γ) : (L.codeIn V).Derivation ⌜d⌝ := by
+@[simp] lemma derivation_quote {Γ : Finset (SyntacticFormula L)} (d : T ⊢₃ Γ) : (T.codeIn V).Derivation ⌜d⌝ := by
   induction d
-  case axL p hp hn =>
-    exact Language.Derivation.axL (by simp)
+  case closed p hp hn =>
+    exact Language.Theory.Derivation.axL (by simp)
       (by simp [Sequent.mem_codeIn_iff, hp])
       (by simp [Sequent.mem_codeIn_iff, neg_quote, hn])
+  case root Δ p hT hp =>
+    apply Language.Theory.Derivation.root (by simp)
+      (by simp [Sequent.mem_codeIn_iff, hp])
+      (mem_coded_theory hT)
   case verum Δ h =>
-    exact Language.Derivation.verumIntro (by simp)
+    exact Language.Theory.Derivation.verumIntro (by simp)
       (by simpa [quote_verum] using (Sequent.mem_codeIn_iff (V := V)).mpr h)
   case and Δ p q hpq dp dq ihp ihq =>
-    apply Language.Derivation.andIntro
+    apply Language.Theory.Derivation.andIntro
       (by simpa using (Sequent.mem_codeIn_iff (V := V)).mpr hpq)
       ⟨by simp [fstidx_quote], ihp⟩
       ⟨by simp [fstidx_quote], ihq⟩
   case or Δ p q hpq d ih =>
-    apply Language.Derivation.orIntro
+    apply Language.Theory.Derivation.orIntro
       (by simpa using (Sequent.mem_codeIn_iff (V := V)).mpr hpq)
       ⟨by simp [fstidx_quote], ih⟩
   case all Δ p h d ih =>
-    apply Language.Derivation.allIntro
+    apply Language.Theory.Derivation.allIntro
       (by simpa using (Sequent.mem_codeIn_iff (V := V)).mpr h)
       ⟨by simp [fstidx_quote, quote_image_shift, free_quote], ih⟩
   case ex Δ p h t d ih =>
-    apply Language.Derivation.exIntro
+    apply Language.Theory.Derivation.exIntro
       (by simpa using (Sequent.mem_codeIn_iff (V := V)).mpr h)
       (semiterm_codeIn t)
       ⟨by simp [fstidx_quote, ←substs_quote, Language.substs₁], ih⟩
   case wk Δ Γ d h ih =>
-    apply Language.Derivation.wkRule (s' := ⌜Δ⌝)
+    apply Language.Theory.Derivation.wkRule (s' := ⌜Δ⌝)
       (by simp)
       (by intro x hx; rcases Sequent.mem_codeIn hx with ⟨p, hp, rfl⟩
           simp [Sequent.mem_codeIn_iff, h hp])
       ⟨by simp [fstidx_quote], ih⟩
   case shift Δ d ih =>
-    simp [quote_derivation_def, Derivation2.codeIn, ←quote_image_shift]
-    apply Language.Derivation.shiftRule
+    simp [quote_derivation_def, Derivation3.codeIn, ←quote_image_shift]
+    apply Language.Theory.Derivation.shiftRule
       ⟨by simp [fstidx_quote], ih⟩
   case cut Δ p d dn ih ihn =>
-    apply Language.Derivation.cutRule
+    apply Language.Theory.Derivation.cutRule
       ⟨by simp [fstidx_quote], ih⟩
       ⟨by simp [fstidx_quote, neg_quote], ihn⟩
 
-@[simp] lemma derivationOf_quote {Γ : Finset (SyntacticFormula L)} (d : ⊢¹ᶠ Γ) : (L.codeIn V).DerivationOf ⌜d⌝ ⌜Γ⌝ :=
+@[simp] lemma derivationOf_quote {Γ : Finset (SyntacticFormula L)} (d : T ⊢₃ Γ) : (T.codeIn V).DerivationOf ⌜d⌝ ⌜Γ⌝ :=
   ⟨by simp, by simp⟩
 
-lemma derivable_of_quote {Γ : Finset (SyntacticFormula L)} (d : ⊢¹ᶠ Γ) : (L.codeIn V).Derivable ⌜Γ⌝ :=
+lemma derivable_of_quote {Γ : Finset (SyntacticFormula L)} (d : T ⊢₃ Γ) : (T.codeIn V).Derivable ⌜Γ⌝ :=
   ⟨⌜d⌝, by simp⟩
 
 section
 
-variable {T : Theory L} [T.Sigma₁Definable]
+variable [L.ConstantInhabited] {T : Theory L} [T.Δ₁Definable]
 
 /-- D1 -/
-theorem provable_of_provable : T ⊢! σ → (T.codeIn V).Provable ⌜σ⌝ := by
+theorem provable_of_provable : T ⊢! p → (T.codeIn V).Provable ⌜p⌝ := by
   intro h
-  rcases provable_iff_derivation2.mp h with ⟨Γ, h, ⟨d⟩⟩
-  refine ⟨⌜Γ⌝, ?_, ?_⟩
-  · intro x hx
-    rcases Sequent.mem_codeIn hx with ⟨p, hp, rfl⟩
-    rcases h p hp with ⟨π, hπ, hπp⟩
-    have : p = ~Rew.embs.hom π := by simp [hπp]
-    rcases this with rfl
-    simp [neg_quote, ←quote_semisentence_def]; exact mem_coded_theory hπ
-  · have : (⌜Γ⌝ : V) ∪ {⌜σ⌝} = insert ⌜σ⌝ ⌜Γ⌝ := mem_ext fun x ↦ by simp; tauto
-    rw [this]
-    simpa [quote_semisentence_def] using derivable_of_quote (V := V) d
+  have := derivable_of_quote (V := V) (provable_iff_derivable3'.mp h).some
+  simp [quote_semisentence_def] at this ⊢
+  exact this
 
-theorem tprovable_of_provable : T ⊢! σ → T.codeIn V ⊢! ⌜σ⌝ := fun h ↦ by
+/-
+theorem tprovable_of_provable : T ⊢! σ → (T.codeIn V) ⊢! ⌜σ⌝ := fun h ↦ by
   simpa [Language.Theory.TProvable.iff_provable] using provable_of_provable (V := V) h
+-/
 
 end
 

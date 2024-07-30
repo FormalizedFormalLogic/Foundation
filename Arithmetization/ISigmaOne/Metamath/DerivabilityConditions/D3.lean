@@ -19,7 +19,7 @@ variable {V : Type*} [Zero V] [One V] [Add V] [Mul V] [LT V] [V ⊧ₘ* 𝐈𝚺
 
 namespace Formalized
 
-variable {T : LOR.Theory V} {pT : (Language.lDef ℒₒᵣ).TDef} [T.Defined pT] [EQTheory T] [R₀Theory T]
+variable {T : LOR.TTheory (V := V)} [EQTheory T.thy] [R₀Theory T.thy]
 
 def toNumVec {n} (e : Fin n → V) : (Language.codeIn ℒₒᵣ V).TSemitermVec n 0 :=
   ⟨⌜fun i ↦ numeral (e i)⌝, by simp, by

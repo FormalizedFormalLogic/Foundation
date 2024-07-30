@@ -331,10 +331,15 @@ lemma quote_semisentence_def (p : Semisentence L n) : (⌜p⌝ : V) = ⌜(Rew.em
 @[simp] lemma quote_semisentence_absolute (p : Semisentence L n) : ((⌜p⌝ : ℕ) : V) = ⌜p⌝ := by
   simp [quote_semisentence_def]
 
+instance : Semiterm.Operator.GoedelNumber ℒₒᵣ (SyntacticFormula L) := ⟨fun p ↦ Semiterm.Operator.numeral ℒₒᵣ ⌜p⌝⟩
+
 instance : Semiterm.Operator.GoedelNumber ℒₒᵣ (Sentence L) := ⟨fun σ ↦ Semiterm.Operator.numeral ℒₒᵣ ⌜σ⌝⟩
 
 lemma sentence_goedelNumber_def (σ : Sentence L) :
   (⌜σ⌝ : Semiterm ℒₒᵣ ξ n) = Semiterm.Operator.numeral ℒₒᵣ ⌜σ⌝ := rfl
+
+lemma syntacticformula_goedelNumber_def (p : SyntacticFormula L) :
+  (⌜p⌝ : Semiterm ℒₒᵣ ξ n) = Semiterm.Operator.numeral ℒₒᵣ ⌜p⌝ := rfl
 
 end LO.FirstOrder.Semiformula
 
@@ -505,9 +510,9 @@ open LO.Arith Formalized
 
 instance : GoedelQuote (Sentence L) ((L.codeIn V).TFormula) := ⟨fun σ ↦ (⌜Rew.embs.hom σ⌝ : (Language.codeIn L V).TSemiformula (0 : ℕ))⟩
 
-lemma quote_semisentence_def' (σ : Sentence L) : (⌜σ⌝ : (L.codeIn V).TFormula) = (⌜Rew.embs.hom σ⌝ : (Language.codeIn L V).TSemiformula (0 : ℕ)) := rfl
+lemma quote_sentence_def' (σ : Sentence L) : (⌜σ⌝ : (L.codeIn V).TFormula) = (⌜Rew.embs.hom σ⌝ : (Language.codeIn L V).TSemiformula (0 : ℕ)) := rfl
 
-@[simp] lemma quote_semisentence_val (σ : Sentence L) : (⌜σ⌝ : (L.codeIn V).TFormula).val = ⌜σ⌝ := rfl
+@[simp] lemma quote_sentence_val (σ : Sentence L) : (⌜σ⌝ : (L.codeIn V).TFormula).val = ⌜σ⌝ := rfl
 
 end Semiformula
 

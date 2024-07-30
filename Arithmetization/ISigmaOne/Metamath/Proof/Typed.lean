@@ -1,5 +1,5 @@
 import Arithmetization.ISigmaOne.Metamath.Formula.Typed
-import Arithmetization.ISigmaOne.Metamath.Proof.Theory
+import Arithmetization.ISigmaOne.Metamath.Proof.Derivation
 import Logic.Logic.HilbertStyle.Supplemental
 
 /-!
@@ -120,44 +120,55 @@ end typed_sequent
 
 section typed_derivation
 
-structure Language.Theory.TDerivation (T : L.Theory) (Γ : L.Sequent) where
-  antecedents : V
-  antecedents_fvFree : ∀ p ∈ antecedents, L.neg p ∈ T
+variable (L)
+
+structure Language.TTheory where
+  thy : L.Theory
+  pthy : pL.TDef
+  [defined : thy.Defined pthy]
+
+instance (T : Language.TTheory L) : T.thy.Defined T.pthy := T.defined
+
+variable {L}
+
+structure Language.Theory.TDerivation (T : Language.TTheory L) (Γ : L.Sequent) where
   derivation : V
-  derivationOf : L.DerivationOf derivation (antecedents ∪ Γ.val)
+  derivationOf : T.thy.DerivationOf derivation Γ.val
 
 scoped infix:45 " ⊢¹ " => Language.Theory.TDerivation
 
-def Language.Theory.TProof (T : L.Theory) (p : L.TFormula) := T ⊢¹ insert p ∅
+def Language.Theory.TProof (T : Language.TTheory L) (p : L.TFormula) := T ⊢¹ insert p ∅
 
-instance : System L.TFormula L.Theory := ⟨Language.Theory.TProof⟩
+instance : System L.TFormula L.TTheory := ⟨Language.Theory.TProof⟩
 
-def Language.Theory.Derivable.toTDerivation {T : L.Theory} (Γ : L.Sequent) (h : T.Derivable Γ.val) : T ⊢¹ Γ := by
+variable {T : L.TTheory}
+
+def Language.Theory.Derivable.toTDerivation (Γ : L.Sequent) (h : T.thy.Derivable Γ.val) : T ⊢¹ Γ := by
   choose a ha using h; choose d hd using ha.2
   exact ⟨a, ha.1, d, hd⟩
 
-lemma Language.Theory.TDerivation.toDerivable {T : L.Theory} {Γ : L.Sequent} (d : T ⊢¹ Γ) : T.Derivable Γ.val :=
-  ⟨d.antecedents, d.antecedents_fvFree, d.derivation, d.derivationOf⟩
+lemma Language.Theory.TDerivation.toDerivable {Γ : L.Sequent} (d : T ⊢¹ Γ) : T.thy.Derivable Γ.val :=
+  ⟨d.derivation, d.derivationOf⟩
 
-lemma Language.Theory.TProvable.iff_provable {T : L.Theory} {σ : L.TFormula} :
-    T ⊢! σ ↔ T.Provable σ.val := by
+lemma Language.Theory.TProvable.iff_provable {σ : L.TFormula} :
+    T ⊢! σ ↔ T.thy.Provable σ.val := by
   constructor
   · intro b
     simpa [←singleton_eq_insert] using Language.Theory.TDerivation.toDerivable b.get
   · intro h
     exact ⟨Language.Theory.Derivable.toTDerivation _ <| by simpa [←singleton_eq_insert] using h⟩
 
-def Language.Theory.TDerivation.toTProof {T : L.Theory} {p} (d : T ⊢¹ insert p ∅) : T ⊢ p := d
+def Language.Theory.TDerivation.toTProof {p} (d : T ⊢¹ insert p ∅) : T ⊢ p := d
 
-def Language.Theory.TProof.toTDerivation {T : L.Theory} {p} (d : T ⊢ p) : T ⊢¹ insert p ∅ := d
+def Language.Theory.TProof.toTDerivation {p} (d : T ⊢ p) : T ⊢¹ insert p ∅ := d
 
 namespace Language.Theory.TDerivation
 
-variable {T : L.Theory} {pT : pL.TDef} [T.Defined pT] {Γ Δ : L.Sequent} {p q p₀ p₁ p₂ p₃ p₄ : L.TFormula}
+variable {Γ Δ : L.Sequent} {p q p₀ p₁ p₂ p₃ p₄ : L.TFormula}
 
-def byAxm (p) (h : p ∈' T) (hΓ : p ∈ Γ) : T ⊢¹ Γ :=
+def byAxm (p) (h : p ∈' T.thy) (hΓ : p ∈ Γ) : T ⊢¹ Γ :=
   Language.Theory.Derivable.toTDerivation _
-    <| Language.Theory.Derivable.by_axm (by simp) h hΓ
+    <| Language.Theory.Derivable.by_axm (by simp) _ hΓ h
 
 def em (p) (h : p ∈ Γ := by simp) (hn : ~p ∈ Γ := by simp) : T ⊢¹ Γ :=
   Language.Theory.Derivable.toTDerivation _
@@ -198,13 +209,13 @@ def cut' (d₁ : T ⊢¹ insert p Γ) (d₂ : T ⊢¹ insert (~p) Δ) : T ⊢¹ 
   cut (p := p) (d₁.wk (by intro x; simp; tauto)) (d₂.wk (by intro x; simp; tauto))
 
 def conj (ps : L.TSemiformulaVec 0) (ds : ∀ i, (hi : i < len ps.val) → T ⊢¹ insert (ps.nth i hi) Γ) : T ⊢¹ insert ps.conj Γ := by
-  have : ∀ i < len ps.val, T.Derivable (insert (ps.val.[i]) Γ.val) := by intro i hi; simpa using (ds i hi).toDerivable
-  have : T.Derivable (insert (^⋀ ps.val) Γ.val) := Language.Theory.Derivable.conj ps.val (by simp) this
+  have : ∀ i < len ps.val, T.thy.Derivable (insert (ps.val.[i]) Γ.val) := by intro i hi; simpa using (ds i hi).toDerivable
+  have : T.thy.Derivable (insert (^⋀ ps.val) Γ.val) := Language.Theory.Derivable.conj ps.val (by simp) this
   exact Language.Theory.Derivable.toTDerivation _ (by simpa using this)
 
 def disj (ps : L.TSemiformulaVec 0) {i} (hi : i < len ps.val)
     (d : T ⊢¹ insert (ps.nth i hi) Γ) : T ⊢¹ insert ps.disj Γ := by
-  have : T.Derivable (insert (^⋁ ps.val) Γ.val) :=
+  have : T.thy.Derivable (insert (^⋁ ps.val) Γ.val) :=
     Language.Theory.Derivable.disj ps.val Γ.val ps.prop hi (by simpa using d.toDerivable)
   apply Language.Theory.Derivable.toTDerivation _ (by simpa using this)
 
@@ -245,12 +256,12 @@ end Language.Theory.TDerivation
 
 namespace Language.Theory.TProof
 
-variable {T : L.Theory} {pT : pL.TDef} [T.Defined pT] {p q : L.TFormula}
+variable {T : L.TTheory} {p q : L.TFormula}
 
 /-- Condition D2 -/
 def modusPonens (d : T ⊢ p ⟶ q) (b : T ⊢ p) : T ⊢ q := TDerivation.modusPonens d b
 
-def byAxm {p : L.TFormula} (h : p ∈' T) : T ⊢ p := TDerivation.byAxm p h (by simp)
+def byAxm {p : L.TFormula} (h : p ∈' T.thy) : T ⊢ p := TDerivation.byAxm p h (by simp)
 
 instance : System.ModusPonens T := ⟨modusPonens⟩
 

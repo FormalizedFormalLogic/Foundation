@@ -22,7 +22,7 @@ namespace Formalized
 
 variable (V)
 
-abbrev LOR.Theory := @Language.Theory V _ _ _ _ _ _ ⌜ℒₒᵣ⌝ (Language.lDef ℒₒᵣ) _
+abbrev LOR.Theory := @Language.Theory V _ _ _ _ _ ⌜ℒₒᵣ⌝ (Language.lDef ℒₒᵣ) _
 
 variable {V}
 
@@ -52,7 +52,7 @@ def _root_.LO.FirstOrder.Arith.eqTheory : 𝚺₁-Semisentence 0 := .mkSigma
 end
 -/
 
-variable (T : LOR.Theory V) {pT : (Language.lDef ℒₒᵣ).TDef} [T.Defined pT] [EQTheory T]
+variable (T : LOR.TTheory (V := V)) [EQTheory T.thy]
 
 namespace TProof
 
@@ -63,7 +63,6 @@ def eqRefl (t : ⌜ℒₒᵣ⌝.TTerm) : T ⊢ t =' t := by
   simpa [Language.TSemiformula.substs₁] using specialize this t
 
 lemma eq_refl! (t : ⌜ℒₒᵣ⌝.TTerm) : T ⊢! t =' t := ⟨eqRefl T t⟩
-
 
 noncomputable def replace (p : ⌜ℒₒᵣ⌝.TSemiformula (0 + 1)) (t u : ⌜ℒₒᵣ⌝.TTerm) :
     T ⊢ t =' u ⟶ p^/[t.sing] ⟶ p^/[u.sing] := by
@@ -218,7 +217,7 @@ noncomputable def bexReplace (p : ⌜ℒₒᵣ⌝.TSemiformula (0 + 1)) (t u : �
 lemma bex_replace! (p : ⌜ℒₒᵣ⌝.TSemiformula (0 + 1)) (t u : ⌜ℒₒᵣ⌝.TTerm) :
     T ⊢! t =' u ⟶ p.bex t ⟶ p.bex u := ⟨bexReplace T p t u⟩
 
-variable [R₀Theory T]
+variable [R₀Theory T.thy]
 
 def addComplete (n m : V) : T ⊢ (↑n + ↑m) =' ↑(n + m) := byAxm (R₀Theory.add n m)
 
