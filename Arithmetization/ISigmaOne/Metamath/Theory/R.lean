@@ -52,11 +52,15 @@ def _root_.LO.FirstOrder.Arith.eqTheory : 𝚺₁-Semisentence 0 := .mkSigma
 end
 -/
 
-variable (T : LOR.TTheory (V := V)) [EQTheory T.thy]
+variable (T : LOR.TTheory (V := V))
 
 namespace TProof
 
 open Language.Theory.TProof System System.FiniteContext
+
+section EQTheory
+
+variable [EQTheory T.thy]
 
 def eqRefl (t : ⌜ℒₒᵣ⌝.TTerm) : T ⊢ t =' t := by
   have : T ⊢ (#'0 =' #'0).all := byAxm EQTheory.refl
@@ -217,6 +221,10 @@ noncomputable def bexReplace (p : ⌜ℒₒᵣ⌝.TSemiformula (0 + 1)) (t u : �
 lemma bex_replace! (p : ⌜ℒₒᵣ⌝.TSemiformula (0 + 1)) (t u : ⌜ℒₒᵣ⌝.TTerm) :
     T ⊢! t =' u ⟶ p.bex t ⟶ p.bex u := ⟨bexReplace T p t u⟩
 
+end EQTheory
+
+section R₀
+
 variable [R₀Theory T.thy]
 
 def addComplete (n m : V) : T ⊢ (↑n + ↑m) =' ↑(n + m) := byAxm (R₀Theory.add n m)
@@ -296,6 +304,8 @@ noncomputable def bexIntro (p : ⌜ℒₒᵣ⌝.TSemiformula (0 + 1)) (n : V) {i
 lemma bex_intro! (p : ⌜ℒₒᵣ⌝.TSemiformula (0 + 1)) (n : V) {i}
     (hi : i < n) (b : T ⊢! p ^/[(i : ⌜ℒₒᵣ⌝.TTerm).sing]) :
     T ⊢! p.bex ↑n := ⟨bexIntro T p n hi b.get⟩
+
+end R₀
 
 end TProof
 

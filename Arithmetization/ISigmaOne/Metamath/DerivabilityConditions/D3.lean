@@ -19,7 +19,7 @@ variable {V : Type*} [Zero V] [One V] [Add V] [Mul V] [LT V] [V ⊧ₘ* 𝐈𝚺
 
 namespace Formalized
 
-variable {T : LOR.TTheory (V := V)} [EQTheory T.thy] [R₀Theory T.thy]
+variable {T : LOR.TTheory (V := V)} [R₀Theory T.thy]
 
 def toNumVec {n} (e : Fin n → V) : (Language.codeIn ℒₒᵣ V).TSemitermVec n 0 :=
   ⟨⌜fun i ↦ numeral (e i)⌝, by simp, by
@@ -150,6 +150,7 @@ theorem bold_sigma₁_complete {n} {p : Semisentence ℒₒᵣ n} (hp : Hierarch
     apply ex! x
     simpa [Language.TSemifromula.substs_substs] using ihp hx
 
+/-- Hilbert–Bernays provability condition D3 -/
 theorem sigma₁_complete {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) : V ⊧ₘ σ → T ⊢! ⌜σ⌝ := by
   intro h; simpa using bold_sigma₁_complete T hσ (e := ![]) h
 

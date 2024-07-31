@@ -166,17 +166,12 @@ section
 
 variable [L.ConstantInhabited] {T : Theory L} [T.Δ₁Definable]
 
-/-- D1 -/
-theorem provable_of_provable : T ⊢! p → (T.codeIn V).Provable ⌜p⌝ := by
-  intro h
-  have := derivable_of_quote (V := V) (provable_iff_derivable3'.mp h).some
-  simp [quote_semisentence_def] at this ⊢
-  exact this
+theorem provable_of_provable : T ⊢! p → (T.codeIn V).Provable ⌜p⌝ := fun h ↦ by
+  simpa [quote_semisentence_def] using derivable_of_quote (V := V) (provable_iff_derivable3'.mp h).some
 
-/-
-theorem tprovable_of_provable : T ⊢! σ → (T.codeIn V) ⊢! ⌜σ⌝ := fun h ↦ by
+/-- Hilbert–Bernays provability condition D1 -/
+theorem tprovable_of_provable : T ⊢! σ → T.tCodeIn V ⊢! ⌜σ⌝ := fun h ↦ by
   simpa [Language.Theory.TProvable.iff_provable] using provable_of_provable (V := V) h
--/
 
 end
 

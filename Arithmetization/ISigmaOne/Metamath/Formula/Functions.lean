@@ -161,7 +161,7 @@ notation:60 p:61 " ^→[" L "; " n "] " q:60 => Language.imp L n p q
 
 variable {L}
 
-namespace imp
+section imp
 
 @[simp] lemma Language.Semiformula.imp {n p q : V} :
     L.Semiformula n (L.imp n p q) ↔ L.Semiformula n p ∧ L.Semiformula n q := by

@@ -15,6 +15,8 @@ abbrev _root_.LO.FirstOrder.Theory.Δ₁Definable (T : Theory L) := SyntacticThe
 
 def _root_.LO.FirstOrder.SyntacticTheory.tDef (T : SyntacticTheory L) [d : T.Δ₁Definable] : Arith.LDef.TDef L.lDef := d.toTDef
 
+abbrev _root_.LO.FirstOrder.Theory.tDef (T : Theory L) [d : T.Δ₁Definable] : Arith.LDef.TDef L.lDef := d.toTDef
+
 variable {V : Type*} [Zero V] [One V] [Add V] [Mul V] [LT V] [V ⊧ₘ* 𝐈𝚺₁]
 
 variable {T : SyntacticTheory L} [T.Δ₁Definable]
@@ -34,7 +36,7 @@ lemma mem_coded_theory {σ} (h : σ ∈ T) : ⌜σ⌝ ∈ T.codeIn V := Language
   have := consequence_iff_add_eq.mp (sound! <| SyntacticTheory.Δ₁Definable.mem_iff.mp h) V inferInstance
   simpa [models_iff, Semiformula.syntacticformula_goedelNumber_def, numeral_eq_natCast] using this
 
-instance : (T.codeIn V).Defined T.tDef where
+instance tDef_defined : (T.codeIn V).Defined T.tDef where
   defined := ⟨by
     intro v
     rw [show v = ![v 0] from Matrix.constant_eq_singleton']
@@ -42,5 +44,15 @@ instance : (T.codeIn V).Defined T.tDef where
     simp [models_iff] at this ⊢
     simp [SyntacticTheory.tDef, this],
   by intro v; simp [SyntacticTheory.codeIn, ←Matrix.constant_eq_singleton']⟩
+
+variable (T V)
+
+def _root_.LO.FirstOrder.SyntacticTheory.tCodeIn (T : SyntacticTheory L) [T.Δ₁Definable] : (L.codeIn V).TTheory where
+  thy := T.codeIn V
+  pthy := T.tDef
+
+def _root_.LO.FirstOrder.Theory.tCodeIn (T : Theory L) [T.Δ₁Definable] : (L.codeIn V).TTheory where
+  thy := T.codeIn V
+  pthy := T.tDef
 
 end LO.Arith
