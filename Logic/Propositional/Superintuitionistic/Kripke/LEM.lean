@@ -1,4 +1,4 @@
-import Logic.Propositional.Superintuitionistic.Kripke.Soundness
+import Logic.Propositional.Superintuitionistic.Kripke.Semantics
 
 /-!
   # Counterexample to the Law of Excluded Middle in Intuitionistic Logic
@@ -11,44 +11,61 @@ namespace LO.Propositional.Superintuitionistic.Kripke
 
 open System
 
-def LEMCounterexampleModel {α : Type} : Model α where
-  Frame := {
-    World := Fin 2,
-    Rel := λ w₁ w₂ => (w₁ = w₂) ∨ (w₁ = 0)
-  };
-  Valuation w _ := w = 1;
-  hereditary := by aesop;
+abbrev LEMCounterexampleFrame : Kripke.Frame where
+  World := PUnit ⊕ PUnit
+  Rel x y :=
+    match x, y with
+    | .inl _, .inl _ => True
+    | .inr _, .inr _ => True
+    | .inl _, .inr _ => True
+    | _, _ => False
 
-def LEMCounterexampleFrame : Frame' α := (LEMCounterexampleModel).Frame
+lemma LEMCounterexampleFrame.reflexive : Reflexive (LEMCounterexampleFrame.Rel) := by simp [Reflexive];
+
+lemma LEMCounterexampleFrame.transitive : Transitive (LEMCounterexampleFrame.Rel) := by simp [Transitive];
+
+lemma LEMCounterexampleFrame.mem_IntFrameClass : LEMCounterexampleFrame ∈ 𝔽((𝐈𝐧𝐭 : DeductionParameter α)) := by
+  apply Characteraizable_Int.characterize;
+  constructor;
+  . exact LEMCounterexampleFrame.transitive;
+  . exact LEMCounterexampleFrame.reflexive;
+
+abbrev LEMCounterexampleModel (α) : Kripke.Model α where
+  Frame := LEMCounterexampleFrame
+  Valuation w _ :=
+    match w with
+    | .inr _ => True
+    | .inl _ => False
 
 open Formula Formula.Kripke
 
-lemma noLEM_atom {a : α} : ¬(LEMCounterexampleModel ⊧ (atom a) ⋎ ~(atom a)) := by
+lemma noLEM_atom {a : α} : ¬(LEMCounterexampleModel α ⊧ (atom a) ⋎ ~(atom a)) := by
   simp [ValidOnModel.iff_models, Satisfies.iff_models, ValidOnModel, Satisfies, LEMCounterexampleModel];
-  use 0;
-  aesop;
 
-variable {α : Type} -- TODO: fix type `α`?
+variable {α : Type*}
 variable [Inhabited α]
 
-lemma noLEM_on_frameclass : ∃ (p : Formula α), ¬(𝔽(Ax(𝐈𝐧𝐭))) ⊧ p ⋎ ~p := by
-  simp [ValidOnFrameClass.iff_models, ValidOnFrameClass];
-  existsi (atom default), (LEMCounterexampleModel).Frame;
+lemma noLEM_on_frameclass : ∃ (p : Formula α), ¬((Kripke.FrameClassOfSystem.{_, _, _, _, 0} 𝐈𝐧𝐭) ⊧ p ⋎ ~p) := by
+  use (atom default);
+  simp only [ValidOnFrameClass.iff_models, ValidOnFrameClass, ValidOnFrame];
+  push_neg;
+  use LEMCounterexampleFrame;
   constructor;
-  . apply iff_definability_memAxiomSetFrameClass AxiomSet.EFQ.definability |>.mpr;
-    trivial;
+  . exact LEMCounterexampleFrame.mem_IntFrameClass;
   . simp [ValidOnFrame];
-    existsi (LEMCounterexampleModel).Valuation, LEMCounterexampleModel.hereditary;
-    apply noLEM_atom;
+    use (LEMCounterexampleModel α).Valuation;
+    constructor;
+    . simp [Kripke.Valuation.atomic_hereditary];
+    . apply noLEM_atom;
 
 /--
   Law of Excluded Middle is not always provable in intuitionistic logic.
 -/
 theorem noLEM : ∃ (p : Formula α), 𝐈𝐧𝐭 ⊬! p ⋎ ~p := by
-  obtain ⟨p, _⟩ : ∃ (p : Formula α), ¬(𝔽(Ax(𝐈𝐧𝐭))) ⊧ p ⋎ ~p := noLEM_on_frameclass;
+  obtain ⟨p, hp⟩ := noLEM_on_frameclass (α := α);
   existsi p;
   by_contra hC;
-  have : 𝔽(Ax(𝐈𝐧𝐭)) ⊧ p ⋎ ~p := sound! hC;
+  have := Kripke.sound hC;
   contradiction;
 
 /--

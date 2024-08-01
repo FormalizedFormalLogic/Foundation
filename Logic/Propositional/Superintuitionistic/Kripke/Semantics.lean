@@ -197,10 +197,7 @@ end Soundness
 
 abbrev Valuation (F : Frame) (α : Type*) := F.World → α → Prop
 
-def Valuation.atomic_hereditary (V : Valuation F α) : Prop := ∀ {w₁ w₂ : F.World}, (w₁ ≺ w₂) → ∀ {a}, (V w₁ a) → (V w₂ a)
-  -- (atom_hereditary : ∀ {w₁ w₂ : M.World}, (w₁ ≺ w₂) → ∀ {a}, (M.Valuation w₁ a) → (M.Valuation w₂ a))
-  -- (F_trans : Transitive M.Frame.Rel)
-  -- (F_refl : Reflexive M.Frame.Rel)
+abbrev Valuation.atomic_hereditary (V : Valuation F α) : Prop := ∀ {w₁ w₂ : F.World}, (w₁ ≺ w₂) → ∀ {a}, (V w₁ a) → (V w₂ a)
 
 
 structure Model (α) where
@@ -442,7 +439,8 @@ instance : Semantics (Formula α) (Model α) := ⟨fun M ↦ Formula.Kripke.Vali
 end Formula.Kripke.ValidOnModel
 
 
-def Formula.Kripke.ValidOnFrame (F : Frame) (p : Formula α) := ∀ {V : Valuation F α}, {_ : V.atomic_hereditary} → (⟨F, V⟩ : Kripke.Model α) ⊧ p
+def Formula.Kripke.ValidOnFrame (F : Frame) (p : Formula α) :=
+  ∀ {V : Valuation F α}, (_ : V.atomic_hereditary) → (⟨F, V⟩ : Kripke.Model α) ⊧ p
 
 namespace Formula.Kripke.ValidOnFrame
 
@@ -456,33 +454,31 @@ variable {F : Frame.Dep α} {p q r : Formula α}
          (F_trans : Transitive F)
          (F_refl : Reflexive F)
 
-@[simp] protected lemma verum : F ⊧ ⊤ := ValidOnModel.verum
+@[simp] protected lemma verum : F ⊧ ⊤ := fun _ => ValidOnModel.verum
 
-@[simp] protected lemma and₁ : F ⊧ p ⋏ q ⟶ p := ValidOnModel.and₁
+@[simp] protected lemma and₁ : F ⊧ p ⋏ q ⟶ p := fun _ => ValidOnModel.and₁
 
-@[simp] protected lemma and₂ : F ⊧ p ⋏ q ⟶ q := ValidOnModel.and₂
+@[simp] protected lemma and₂ : F ⊧ p ⋏ q ⟶ q := fun _ => ValidOnModel.and₂
 
-@[simp] protected lemma and₃ : F ⊧ p ⟶ q ⟶ p ⋏ q := by intros _ hV; exact ValidOnModel.and₃ hV;
+@[simp] protected lemma and₃ : F ⊧ p ⟶ q ⟶ p ⋏ q := fun hV => ValidOnModel.and₃ hV F_trans
 
-@[simp] protected lemma or₁ : F ⊧ p ⟶ p ⋎ q := ValidOnModel.or₁
+@[simp] protected lemma or₁ : F ⊧ p ⟶ p ⋎ q := fun _ => ValidOnModel.or₁
 
-@[simp] protected lemma or₂ : F ⊧ q ⟶ p ⋎ q := ValidOnModel.or₂
+@[simp] protected lemma or₂ : F ⊧ q ⟶ p ⋎ q := fun _ => ValidOnModel.or₂
 
-@[simp] protected lemma or₃ : F ⊧ (p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r) := ValidOnModel.or₃
+@[simp] protected lemma or₃ : F ⊧ (p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r) := fun _ => ValidOnModel.or₃ F_trans
 
-@[simp] protected lemma imply₁ : F ⊧ p ⟶ q ⟶ p := by intros _ hV; exact ValidOnModel.imply₁ hV;
+@[simp] protected lemma imply₁ : F ⊧ p ⟶ q ⟶ p := fun hV => ValidOnModel.imply₁ hV F_trans
 
-@[simp] protected lemma imply₂ : F ⊧ (p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r := ValidOnModel.imply₂
+@[simp] protected lemma imply₂ : F ⊧ (p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r := fun _ => ValidOnModel.imply₂ F_trans F_refl
 
-@[simp] protected lemma mdp (hpq : F ⊧ p ⟶ q) (hp : F ⊧ p) : F ⊧ q := by
-  intros V hV;
-  exact ValidOnModel.mdp (F_refl := F_refl) (@hpq V hV) (@hp V hV);
+@[simp] protected lemma mdp (hpq : F ⊧ p ⟶ q) (hp : F ⊧ p) : F ⊧ q := fun hV => ValidOnModel.mdp F_refl (hpq hV) (hp hV)
 
-@[simp] protected lemma efq : F ⊧ Axioms.EFQ p := ValidOnModel.efq
+@[simp] protected lemma efq : F ⊧ Axioms.EFQ p := fun _ => ValidOnModel.efq
 
-@[simp] protected lemma neg_equiv : F ⊧ Axioms.NegEquiv p := ValidOnModel.neg_equiv
+@[simp] protected lemma neg_equiv : F ⊧ Axioms.NegEquiv p := fun _ => ValidOnModel.neg_equiv
 
-@[simp] protected lemma lem (hExt : Extensive F.Rel) : F ⊧ Axioms.LEM p := ValidOnModel.lem hExt
+@[simp] protected lemma lem (hExt : Extensive F.Rel) : F ⊧ Axioms.LEM p := fun _ => ValidOnModel.lem hExt
 
 instance : Semantics.Bot (Frame.Dep α) where
   realize_bot _ := by
@@ -538,9 +534,8 @@ instance Characteraizable_Int : Kripke.Characteraizable 𝔽((𝐈𝐧𝐭 : Ded
     | or₃ => apply ValidOnFrame.or₃; simpa;
     | neg_equiv => apply ValidOnFrame.neg_equiv;
     | mdp ihpq ihp =>
-      apply ValidOnFrame.mdp hRefl;
-      assumption;
-      assumption;
+      apply ValidOnFrame.mdp;
+      repeat simpa;
     | eaxm h =>
       obtain ⟨_, rfl⟩ := h;
       apply ValidOnFrame.efq;
@@ -570,9 +565,8 @@ instance Characteraizable_Cl : Kripke.Characteraizable 𝔽((𝐂𝐥 : Deductio
     | or₃ => apply ValidOnFrame.or₃; simpa;
     | neg_equiv => apply ValidOnFrame.neg_equiv;
     | mdp ihpq ihp =>
-      apply ValidOnFrame.mdp hRefl;
-      assumption;
-      assumption;
+      apply ValidOnFrame.mdp;
+      repeat simpa;
     | eaxm h =>
       rcases h with (⟨_, rfl⟩ | ⟨_, rfl⟩);
       . apply ValidOnFrame.efq;
@@ -587,85 +581,5 @@ instance : Sound (𝐂𝐥 : DeductionParameter α) TransitiveReflexiveExtensive
   LO.Kripke.instSoundOfCharacterizability (characterizability := Kripke.Characteraizable_Cl)
 
 end Kripke
-
-
-namespace Kripke
-
-def AxiomSetFrameClass (Ax : AxiomSet α) : FrameClass.Dep α := { (F : Frame.Dep α) | F ⊧* Ax }
-notation "𝔽(" Ax ")" => Kripke.AxiomSetFrameClass Ax
-
-def FrameClassOf (Λ : DeductionParameter α) : FrameClass.Dep α := { (F : Frame.Dep α) | F ⊧* System.theory Λ }
-
-/-
-
-def AxiomSetFiniteFrameClass (Ax : AxiomSet α) : FiniteFrameClass' α := { (F : FiniteFrame' α) | F.toFrame' ⊧* Ax }
-notation "𝔽ꟳ(" Ax ")" => Kripke.AxiomSetFiniteFrameClass Ax
--/
-
-variable {Ax : AxiomSet α}
-
-lemma validOnAxiomSetFrameClass_axiom (h : p ∈ Ax) : 𝔽(Ax) ⊧ p := by
-  intro F hF;
-  apply hF.realize;
-  simpa;
-
-class Definability (Ax : AxiomSet α) (P : Frame → Prop) where
-  defines : ∀ (F : Frame.Dep α), F# ⊧* Ax ↔ P F
-
-instance Definability.instUnion
-  (definability₁ : Definability Ax₁ P₁)
-  (definability₂ : Definability Ax₂ P₂)
-  : Definability (Ax₁ ∪ Ax₂) (λ F => P₁ F ∧ P₂ F) where
-  defines F := by
-    constructor;
-    . intro h;
-      simp only [Semantics.RealizeSet.union_iff] at h;
-      constructor;
-      . exact Definability.defines F |>.mp h.1;
-      . exact Definability.defines F |>.mp h.2;
-    . intro h;
-      simp only [Semantics.RealizeSet.union_iff];
-      constructor;
-      . apply Definability.defines F |>.mpr h.1;
-      . apply Definability.defines F |>.mpr h.2;
-
-lemma iff_definability_memAxiomSetFrameClass (definability : Definability Ax P) : ∀ {F}, F ∈ 𝔽(Ax) ↔ P F := by
-  apply Definability.defines;
-
-/-
-class FiniteDefinability (Ax : AxiomSet α) (P : FiniteFrameProperty) where
-  defines : ∀ (F : FiniteFrame' α), F.toFrame' ⊧* Ax ↔ P F
-
-lemma iff_definability_memAxiomSetFiniteFrameClass (definability : FiniteDefinability Ax P) : ∀ {F : FiniteFrame' α}, F ∈ 𝔽ꟳ(Ax) ↔ P F := by
-  apply definability.defines;
--/
-
-
-instance EFQ_definability : Kripke.Definability (α := α) 𝗘𝗙𝗤 (λ _ => True) where
-  defines F := by simp; intros; apply ValidOnFrame.efq
-
-instance : (𝔽(𝗘𝗙𝗤) : FrameClass.Dep α).Nonempty := by
-  use { World := PUnit, Rel := λ x y => x ≤ y };
-  apply iff_definability_memAxiomSetFrameClass EFQ_definability |>.mpr;
-  trivial;
-
-end Kripke
-
-/-
-instance AxiomSet.EFQ.nonempty : (𝔽(𝗘𝗙𝗤) : FrameClass.Dep α).Nonempty where
-  nonempty := by
-    existsi { World := PUnit, Rel := λ x y => x ≤ y };
-    apply iff_definability_memAxiomSetFrameClass AxiomSet.EFQ.definability |>.mpr;
-    trivial;
-
-instance AxiomSet.EFQ.instDefinabilityUnion (definability : Definability Ax P) : Definability (𝗘𝗙𝗤 ∪ Ax) P := by simpa using Definability.instUnion AxiomSet.EFQ.definability definability;
-
-instance AxiomSet.EFQ.instUnionNonempty [FrameClass.IsNonempty 𝔽(Ax)] (definability : Definability Ax P) : FrameClass.IsNonempty (𝔽(𝗘𝗙𝗤 ∪ Ax) : FrameClass' α) where
-  nonempty := by
-    obtain ⟨F, hF⟩ := FrameClass.IsNonempty.nonempty (𝔽 := 𝔽(Ax));
-    existsi F;
-    apply iff_definability_memAxiomSetFrameClass (AxiomSet.EFQ.instDefinabilityUnion definability) |>.mpr;
-    apply iff_definability_memAxiomSetFrameClass definability |>.mp hF;
--/
 
 end LO.Propositional.Superintuitionistic
