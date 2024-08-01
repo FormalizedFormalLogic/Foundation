@@ -100,6 +100,36 @@ protected abbrev WeakClassical : DeductionParameter α := { axiomSet := 𝗣𝗲
 end DeductionParameter
 
 
+namespace Deduction
+
+variable {Λ : DeductionParameter α}
+
+open System
+
+noncomputable def rec! {α : Type u} {𝓓 : DeductionParameter α}
+  {motive : (a : Formula α) → 𝓓 ⊢! a → Sort u_1}
+  (eaxm   : ∀ {p}, (a : p ∈ Ax(𝓓)) → motive p ⟨eaxm a⟩)
+  (mdp    : ∀ {p q}, {hpq : 𝓓 ⊢! (p ⟶ q)} → {hp : 𝓓 ⊢! p} → motive (p ⟶ q) hpq → motive p hp → motive q (hpq ⨀ hp))
+  (verum  : motive ⊤ verum!)
+  (imply₁ : ∀ {p q},   motive (p ⟶ q ⟶ p) imply₁!)
+  (imply₂ : ∀ {p q r}, motive ((p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r) imply₂!)
+  (and₁   : ∀ {p q},   motive (p ⋏ q ⟶ p) and₁!)
+  (and₂   : ∀ {p q},   motive (p ⋏ q ⟶ q) and₂!)
+  (and₃   : ∀ {p q},   motive (p ⟶ q ⟶ p ⋏ q) and₃!)
+  (or₁    : ∀ {p q},   motive (p ⟶ p ⋎ q) or₁!)
+  (or₂    : ∀ {p q},   motive (q ⟶ p ⋎ q) or₂!)
+  (or₃    : ∀ {p q r}, motive ((p ⟶ r) ⟶ (q ⟶ r) ⟶ p ⋎ q ⟶ r) or₃!)
+  (neg_equiv : ∀ {p}, motive (Axioms.NegEquiv p) neg_equiv!) :
+  {a : Formula α} → (t : 𝓓 ⊢! a) → motive a t := by
+  intro p d;
+  induction d.some with
+  | eaxm h => exact eaxm h
+  | mdp hpq hp ihpq ihp => exact mdp (ihpq ⟨hpq⟩) (ihp ⟨hp⟩)
+  | _ => aesop
+
+end Deduction
+
+
 open System
 
 lemma reducible_efq_dne : (𝐈𝐧𝐭 : DeductionParameter α) ≤ₛ 𝐂𝐥 := by

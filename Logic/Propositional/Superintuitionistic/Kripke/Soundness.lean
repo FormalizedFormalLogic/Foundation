@@ -1,48 +1,55 @@
-import Logic.Propositional.Superintuitionistic.Deduction
 import Logic.Propositional.Superintuitionistic.Kripke.Semantics
+
+universe u
 
 namespace LO.Propositional.Superintuitionistic.Kripke
 
-variable {α : Type*} [Inhabited α]
+variable {α : Type u} [Inhabited α]
+variable {Λ : DeductionParameter α}
 
-variable {𝓓 : DeductionParameter α}
+lemma sound : Λ ⊢! p → 𝔽(Λ) ⊧ p := LO.Kripke.sound
 
+instance : Sound (𝐈𝐧𝐭 : DeductionParameter α) 𝔽((λ F => Transitive F ∧ Reflexive F)).alt :=
+  LO.Kripke.instSoundOfCharacterizability (characterizability := Kripke.Characteraizable_Int)
+
+/-
+open LO.Kripke
 open Formula Formula.Kripke
 open Formula.Kripke.ValidOnFrame
-open FrameClass
 
-lemma sound (d : 𝓓 ⊢ p) : 𝔽(Ax(𝓓)) ⊧ p := by
-  simp [-ValidOnFrame.models_iff];
-  intro F hF;
-  induction d with
-  | eaxm h => exact validOnAxiomSetFrameClass_axiom h hF;
-  | mdp _ _ ihpq ihp => exact ValidOnFrame.mdp ihpq ihp;
-  | _ =>
-    intros;
-    first
-    | apply ValidOnFrame.verum
-    | apply ValidOnFrame.imply₁
-    | apply ValidOnFrame.imply₂
-    | apply ValidOnFrame.or₁
-    | apply ValidOnFrame.or₂
-    | apply ValidOnFrame.or₃
-    | apply ValidOnFrame.and₁
-    | apply ValidOnFrame.and₂
-    | apply ValidOnFrame.and₃
-    | apply ValidOnFrame.neg_equiv
+variable {Λ : DeductionParameter α}
 
-lemma sound! : (𝓓 ⊢! p) → 𝔽(Ax(𝓓)) ⊧ p := λ ⟨d⟩ => sound d
+lemma sound! : Λ ⊢! p → 𝔽(Λ) ⊧ p := by simp_all [System.theory];
 
-instance : Sound 𝓓 𝔽(Ax(𝓓)) := ⟨sound!⟩
+instance : Sound Λ 𝔽(Λ) := ⟨sound!⟩
 
-lemma unprovable_bot [ne : FrameClass.IsNonempty 𝔽(Ax(𝓓))] : 𝓓 ⊬! ⊥ := by
-  intro h;
-  obtain ⟨F, hF⟩ := ne;
-  simpa using sound! h hF;
+lemma unprovable_bot (ne : 𝔽(Λ).Nonempty) : Λ ⊬! ⊥ := by
+  apply (not_imp_not.mpr sound!);
+  apply Kripke.ValidOnFrameClass.realize_bot ne;
 
-instance [FrameClass.IsNonempty 𝔽(Ax(𝓓))] : System.Consistent 𝓓 := System.Consistent.of_unprovable $ unprovable_bot
+instance (ne : 𝔽(Λ).Nonempty) : System.Consistent Λ := System.Consistent.of_unprovable $ unprovable_bot ne
 
-instance : System.Consistent (𝐈𝐧𝐭 : DeductionParameter α) := inferInstance
 
+lemma sound!_of_characteriazble [characteriability : Kripke.Characteraizable 𝔽(Λ) P] : Λ ⊢! p → 𝔽(P)# ⊧ p := by
+  intro h F hF;
+  apply sound! h;
+  apply characteriability.characterize hF;
+
+instance [Kripke.Characteraizable 𝔽(Λ) P] : Sound Λ 𝔽(P)# := ⟨sound!_of_characteriazble⟩
+
+set_option pp.universes true
+
+variable (P : Kripke.FrameProperty.{u})
+         [characteriability : Kripke.Characteraizable 𝔽(Λ) P]
+
+lemma unprovable_bot' : Λ ⊬! ⊥ := by
+  apply (not_imp_not.mpr $ sound!_of_characteriazble (characteriability := characteriability));
+  apply Kripke.ValidOnFrameClass.realize_bot;
+  apply characteriability.nonempty;
+
+instance : System.Consistent Λ := by
+  apply System.Consistent.of_unprovable;
+  exact unprovable_bot' (P := P);
+-/
 
 end LO.Propositional.Superintuitionistic.Kripke
