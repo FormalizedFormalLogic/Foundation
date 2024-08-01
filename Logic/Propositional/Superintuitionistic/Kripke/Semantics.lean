@@ -1,4 +1,4 @@
-import Logic.Logic.Kripke
+import Logic.Logic.Kripke.Basic
 import Logic.Propositional.Superintuitionistic.Deduction
 
 namespace LO.Propositional.Superintuitionistic
