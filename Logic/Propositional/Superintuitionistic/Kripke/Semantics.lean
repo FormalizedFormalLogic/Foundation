@@ -4,12 +4,15 @@ import Logic.Propositional.Superintuitionistic.Deduction
 
 namespace LO.Kripke
 
+universe u v
+-- set_option autoImplicit false
+
 structure Frame where
-  World : Type*
+  World : Type u
   Rel : Rel World World
   [World_nonempty : Nonempty World]
 
-instance : CoeSort Frame Type* := ⟨Frame.World⟩
+instance : CoeSort Frame (Type u) := ⟨Frame.World⟩
 instance : CoeFun Frame (λ F => F.World → F.World → Prop) := ⟨Frame.Rel⟩
 
 instance {F : Frame} : Nonempty F.World := F.World_nonempty
@@ -24,8 +27,8 @@ notation "﹫" => Frame.default
 set_option linter.unusedVariables false in
 abbrev Frame.Dep (α : Type*) := Frame
 
-abbrev Frame.alt (F : Frame) {α} : Frame.Dep α := F
-scoped postfix:max "#" => Frame.alt
+abbrev Frame.alt (F : Frame) (α) : Frame.Dep α := F
+notation F:max "#" α:max => Frame.alt F α
 
 
 structure FiniteFrame extends Frame where
@@ -127,10 +130,10 @@ abbrev FrameClass := Set (Frame)
 set_option linter.unusedVariables false in
 abbrev FrameClass.Dep (α : Type*) := FrameClass
 
-abbrev FrameClass.alt (𝔽 : FrameClass) {α} : FrameClass.Dep α := 𝔽
-scoped postfix:max "#" => FrameClass.alt
+abbrev FrameClass.alt (𝔽 : FrameClass) (α) : FrameClass.Dep α := 𝔽
+notation 𝔽:max "#" α:max => FrameClass.alt 𝔽 α
 
-
+/-
 abbrev FiniteFrameClass := Set (FiniteFrame)
 
 @[simp] def FiniteFrameClass.toFrameClass (𝔽 : FiniteFrameClass) : FrameClass := { F | ∃ F', F' ∈ 𝔽 ∧ F'.toFrame = F }
@@ -142,55 +145,66 @@ instance : Coe (FrameClass) (FiniteFrameClass) := ⟨FrameClass.toFiniteFrameCla
 @[simp] abbrev FrameClass.restrictFinite (𝔽 : FrameClass) : FrameClass := FiniteFrameClass.toFrameClass ↑𝔽
 postfix:max "ꟳ" => FrameClass.restrictFinite
 
-lemma FrameClass.iff_mem_restrictFinite {𝔽 : FrameClass} (h : F ∈ 𝔽) (F_finite : Finite F.World) : F ∈ 𝔽ꟳ := by
+lemma FrameClass.iff_mem_restrictFinite {𝔽 : FrameClass} {F : Frame} (h : F ∈ 𝔽) (F_finite : Finite F.World) : F ∈ 𝔽ꟳ := by
   simp;
   use { toFrame := F, World_finite := F_finite };
+-/
 
-
-abbrev FrameClassOfSystem [System F S] [Semantics F (Frame.Dep α)] (𝓢 : S) : FrameClass.Dep α := { (F : Frame.Dep α) | F ⊧* System.theory 𝓢 }
-notation "𝔽(" 𝓢 ")" => FrameClassOfSystem 𝓢
+-- set_option pp.universes true in
+abbrev FrameClassOfSystem {F : Type u} [System F S] (𝓢 : S) (α : Type u) [Semantics F (Frame.Dep α)] : FrameClass.Dep α := { F | F ⊧* System.theory 𝓢 }
+notation "𝔽(" 𝓢 " of " α ")" => FrameClassOfSystem 𝓢 α
 
 abbrev FrameClassOfFrameProperty (P : FrameProperty) : FrameClass := { F | P F }
 notation "𝔽(" P ")" => FrameClassOfFrameProperty P
 
 
-class Characteraizable (𝔽 : FrameClass) (P : FrameProperty) where
+class FrameClass.Characteraizable (𝔽 : FrameClass) (P : FrameProperty) where
   characterize : ∀ {F}, P F → F ∈ 𝔽
   nonempty : ∃ F, P F
 
 
 section Soundness
 
-variable [System F S] [Semantics F (Frame.Dep α)] {𝓢 : S}
+variable
+  {F : Type u} {S} {α : Type u}
+  [System F S] [Semantics F (Frame.Dep α)]
+  {𝓢 : S} {p : F} {P : FrameProperty}
 
-lemma sound : 𝓢 ⊢! p → (FrameClassOfSystem (α := α) 𝓢) ⊧ p := by
+lemma sound : 𝓢 ⊢! p → 𝔽(𝓢 of α) ⊧ p := by
   intro hp F hF;
   simp [System.theory] at hF;
   exact hF p hp;
 
-instance : Sound 𝓢 (FrameClassOfSystem (α := α) 𝓢) := ⟨sound⟩
+instance : Sound 𝓢 𝔽(𝓢 of α) := ⟨sound⟩
 
 
-lemma sound_of_characterizability (characterizability : Characteraizable (FrameClassOfSystem (α := α) 𝓢) P) : 𝓢 ⊢! p → 𝔽(P) ⊧ p := by
+lemma sound_of_characterizability (characterizability : 𝔽(𝓢 of α).Characteraizable P) : 𝓢 ⊢! p → 𝔽(P) ⊧ p := by
   intro h F hF;
   apply sound h;
   apply characterizability.characterize hF;
 
-instance instSoundOfCharacterizability (characterizability : Characteraizable (FrameClassOfSystem (α := α) 𝓢) P)
-  : Sound 𝓢 (FrameClassOfFrameProperty P) := ⟨sound_of_characterizability characterizability⟩
+instance instSoundOfCharacterizability (characterizability : 𝔽(𝓢 of α).Characteraizable P) : Sound 𝓢 𝔽(P) := ⟨sound_of_characterizability characterizability⟩
 
 
-variable [LogicalConnective F] [Semantics.Bot (FrameClass.Dep α)]
+variable [LogicalConnective F] [Semantics.Bot (Frame.Dep α)]
 
-lemma unprovable_bot : 𝓢 ⊬! ⊥ := by
+lemma unprovable_bot (hc : 𝔽(𝓢 of α).Nonempty) : 𝓢 ⊬! ⊥ := by
   apply (not_imp_not.mpr (sound (α := α)));
-  exact Semantics.Bot.realize_bot 𝔽(𝓢);
+  simp [Semantics.Realize];
+  exact hc;
 
-lemma unprovable_bot_of_characterizability [characterizability : Characteraizable (FrameClassOfSystem (α := α) 𝓢) P] : 𝓢 ⊬! ⊥ := by
+  -- exact Semantics.Bot.realize_bot 𝔽(𝓢 of α);
+
+lemma unprovable_bot_of_characterizability (characterizability : 𝔽(𝓢 of α).Characteraizable P) : 𝓢 ⊬! ⊥ := by
   apply not_imp_not.mpr $ sound_of_characterizability (characterizability := characterizability);
-  exact Semantics.Bot.realize_bot 𝔽(P);
+  simp [Semantics.Realize];
+  exact characterizability.nonempty;
 
--- instance : System.Consistent 𝓢 := System.Consistent.of_unprovable $ unprovable_bot (α := α)
+/-
+instance
+  [characterizability : 𝔽(𝓢 of α).Characteraizable P]
+  : System.Consistent 𝓢 := System.Consistent.of_unprovable $ unprovable_bot_of_characterizability (α := α) (characterizability := characterizability)
+-/
 
 end Soundness
 
@@ -211,87 +225,6 @@ end LO.Kripke
 
 
 namespace LO.Propositional.Superintuitionistic
-
-/-
-namespace Kripke
-
-attribute [simp] Reflexive Transitive Antisymmetric in
-structure Frame where
-  World : Type u
-  [World_nonempty : Inhabited World]
-  Rel : World → World → Prop
-  Rel_refl : Reflexive Rel := by aesop
-  Rel_trans : Transitive Rel := by aesop
-  Rel_antisymm : Antisymmetric Rel := by aesop
-
-instance {F : Frame} : Inhabited F.World := F.World_nonempty
-
-structure FiniteFrame extends Frame where
-  [World_finite : Finite World]
-
-instance {F : FiniteFrame} : Finite F.World := F.World_finite
-
-instance : CoeSort Frame Type* where coe := Frame.World
-
-instance (F : Frame) : Inhabited F.World := F.World_nonempty
-
-set_option linter.unusedVariables false in
-abbrev Frame' (α : Type*) := Frame
-
-set_option linter.unusedVariables false in
-abbrev FiniteFrame' (α : Type*) := FiniteFrame
-
-def FiniteFrame.toFrame' {α : Type*} (F : FiniteFrame) : Frame' α := F.toFrame
-
-abbrev Frame.Rel' {F : Frame} (w w' : F.World) := F.Rel w w'
-scoped infix:45 " ≺ " => Frame.Rel'
-
-abbrev Frame.defaultWorld {F : Frame} : F.World := F.World_nonempty.default
--- NOTE: not `@`, `﹫` (U+FE6B)
-scoped notation "﹫" => Frame.defaultWorld
-
-abbrev Valuation (W α : Type u) := W → α → Prop
-
-structure Model (α) where
-  Frame : Frame' α
-  Valuation : Valuation Frame.World α
-  hereditary : ∀ {w₁ w₂}, (w₁ ≺ w₂) → ∀ {a}, (Valuation w₁ a) → (Valuation w₂ a)
-
-abbrev Model.World (M : Model α) := M.Frame.World
-instance : CoeSort (Model α) (Type u) where coe := Model.World
-
-abbrev Model.Rel (M : Model α) := M.Frame.Rel
-
-
-abbrev FrameClass := Set Frame
-
-set_option linter.unusedVariables false in
-abbrev FrameClass' (α : Type*) := FrameClass
-
-class FrameClass.IsNonempty (𝔽 : FrameClass) where
-  nonempty : ∃ F, F ∈ 𝔽
-
-
-
-abbrev FiniteFrameClass := Set FiniteFrame
-
-set_option linter.unusedVariables false in
-abbrev FiniteFrameClass' (α : Type*) := FiniteFrameClass
-
-class FiniteFrameClass.IsNonempty (𝔽 : FiniteFrameClass) where
-  nonempty : ∃ F, F ∈ 𝔽
-
-
-abbrev FrameProperty := Frame → Prop
-
-abbrev FiniteFrameProperty := FiniteFrame → Prop
-
-section
-
-end
-
-end Kripke
--/
 
 open System
 open Kripke
@@ -439,8 +372,7 @@ instance : Semantics (Formula α) (Model α) := ⟨fun M ↦ Formula.Kripke.Vali
 end Formula.Kripke.ValidOnModel
 
 
-def Formula.Kripke.ValidOnFrame (F : Frame) (p : Formula α) :=
-  ∀ {V : Valuation F α}, (_ : V.atomic_hereditary) → (⟨F, V⟩ : Kripke.Model α) ⊧ p
+def Formula.Kripke.ValidOnFrame (F : Frame) (p : Formula α) := ∀ {V : Valuation F α}, (_ : V.atomic_hereditary) → (⟨F, V⟩ : Kripke.Model α) ⊧ p
 
 namespace Formula.Kripke.ValidOnFrame
 
@@ -488,7 +420,16 @@ instance : Semantics.Bot (Frame.Dep α) where
 
 end Formula.Kripke.ValidOnFrame
 
+instance : Semantics (Formula α) (FrameClass.Dep α) := LO.Semantics.instSet (Frame.Dep α)
 
+/-
+instance : Semantics.Bot (FrameClass.Dep α) := ⟨by
+  simp [Semantics.Realize];
+  intro 𝔽;
+⟩
+-/
+
+/-
 @[simp] def Formula.Kripke.ValidOnFrameClass (𝔽 : FrameClass) (p : Formula α) := ∀ {F : Frame}, F ∈ 𝔽 → F# ⊧ p
 
 namespace Formula.Kripke.ValidOnFrameClass
@@ -502,6 +443,7 @@ protected lemma realize_bot {𝔽 : FrameClass.Dep α} (ne : 𝔽.Nonempty) : ¬
   exact ne;
 
 end Formula.Kripke.ValidOnFrameClass
+-/
 
 /-
 @[simp] def Formula.Kripke.ValidOnFiniteFrameClass (𝔽 : FiniteFrameClass) (f : Formula α) := ∀ (F : FiniteFrame' α), F ∈ 𝔽 → F.toFrame' ⊧ f
@@ -518,7 +460,7 @@ end Formula.Kripke.ValidOnFiniteFrameClass
 
 namespace Kripke
 
-instance Characteraizable_Int : Kripke.Characteraizable 𝔽((𝐈𝐧𝐭 : DeductionParameter α)) (λ F => Transitive F ∧ Reflexive F) where
+instance Int_Characteraizable : 𝔽(𝐈𝐧𝐭 of α).Characteraizable (λ F => Transitive F ∧ Reflexive F) where
   characterize := by
     simp [System.theory];
     intro F hTrans hRefl p hp;
@@ -543,13 +485,21 @@ instance Characteraizable_Int : Kripke.Characteraizable 𝔽((𝐈𝐧𝐭 : Ded
     use { World := PUnit, Rel := λ _ _ => True };
     simp [Transitive, Reflexive];
 
-abbrev _root_.LO.Kripke.TransitiveReflexiveFrameClass : FrameClass := 𝔽((λ F => Transitive F ∧ Reflexive F))
+abbrev _root_.LO.Kripke.TransitiveReflexiveFrameClass := 𝔽((λ F => Transitive F ∧ Reflexive F))
 
 
-instance : Sound (𝐈𝐧𝐭 : DeductionParameter α) TransitiveReflexiveFrameClass# :=
-  LO.Kripke.instSoundOfCharacterizability (characterizability := Kripke.Characteraizable_Int)
+-- set_option pp.universes true in
+instance : Sound 𝐈𝐧𝐭 (TransitiveReflexiveFrameClass#α) := Kripke.instSoundOfCharacterizability Int_Characteraizable
 
-instance Characteraizable_Cl : Kripke.Characteraizable 𝔽((𝐂𝐥 : DeductionParameter α)) (λ F => Transitive F ∧ Reflexive F ∧ Extensive F) where
+/-
+instance : System.Consistent (𝐈𝐧𝐭 : DeductionParameter α) := by
+  apply System.Consistent.of_unprovable;
+  apply unprovable_bot_of_characterizability;
+  exact Int_Characteraizable;
+  -- sorry;
+-/
+
+instance Cl_Characteraizable : 𝔽(𝐂𝐥 of α).Characteraizable (λ F => Transitive F ∧ Reflexive F ∧ Extensive F) where
   characterize := by
     simp [System.theory];
     intro F hTrans hRefl hExt p hp;
@@ -575,10 +525,9 @@ instance Characteraizable_Cl : Kripke.Characteraizable 𝔽((𝐂𝐥 : Deductio
     use { World := PUnit, Rel := λ _ _ => True };
     simp [Transitive, Reflexive, Extensive];
 
-abbrev _root_.LO.Kripke.TransitiveReflexiveExtensiveFrameClass : FrameClass := 𝔽((λ F => Transitive F ∧ Reflexive F ∧ Extensive F))
+abbrev _root_.LO.Kripke.TransitiveReflexiveExtensiveFrameClass := 𝔽((λ F => Transitive F ∧ Reflexive F ∧ Extensive F))
 
-instance : Sound (𝐂𝐥 : DeductionParameter α) TransitiveReflexiveExtensiveFrameClass# :=
-  LO.Kripke.instSoundOfCharacterizability (characterizability := Kripke.Characteraizable_Cl)
+instance : Sound 𝐂𝐥 (TransitiveReflexiveExtensiveFrameClass#α) := Kripke.instSoundOfCharacterizability Cl_Characteraizable
 
 end Kripke
 

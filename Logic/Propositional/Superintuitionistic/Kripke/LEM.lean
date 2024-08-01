@@ -11,52 +11,30 @@ namespace LO.Propositional.Superintuitionistic.Kripke
 
 open System
 
-abbrev LEMCounterexampleFrame : Kripke.Frame where
-  World := PUnit ⊕ PUnit
-  Rel x y :=
-    match x, y with
-    | .inl _, .inl _ => True
-    | .inr _, .inr _ => True
-    | .inl _, .inr _ => True
-    | _, _ => False
-
-lemma LEMCounterexampleFrame.reflexive : Reflexive (LEMCounterexampleFrame.Rel) := by simp [Reflexive];
-
-lemma LEMCounterexampleFrame.transitive : Transitive (LEMCounterexampleFrame.Rel) := by simp [Transitive];
-
-lemma LEMCounterexampleFrame.mem_IntFrameClass : LEMCounterexampleFrame ∈ 𝔽((𝐈𝐧𝐭 : DeductionParameter α)) := by
-  apply Characteraizable_Int.characterize;
-  constructor;
-  . exact LEMCounterexampleFrame.transitive;
-  . exact LEMCounterexampleFrame.reflexive;
-
-abbrev LEMCounterexampleModel (α) : Kripke.Model α where
-  Frame := LEMCounterexampleFrame
-  Valuation w _ :=
-    match w with
-    | .inr _ => True
-    | .inl _ => False
-
 open Formula Formula.Kripke
-
-lemma noLEM_atom {a : α} : ¬(LEMCounterexampleModel α ⊧ (atom a) ⋎ ~(atom a)) := by
-  simp [ValidOnModel.iff_models, Satisfies.iff_models, ValidOnModel, Satisfies, LEMCounterexampleModel];
 
 variable {α : Type*}
 variable [Inhabited α]
 
-lemma noLEM_on_frameclass : ∃ (p : Formula α), ¬((Kripke.FrameClassOfSystem.{_, _, _, _, 0} 𝐈𝐧𝐭) ⊧ p ⋎ ~p) := by
+lemma noLEM_on_frameclass : ∃ (p : Formula α), ¬((Kripke.FrameClassOfSystem.{_, _, _, _, 0} 𝐈𝐧𝐭 α) ⊧ p ⋎ ~p) := by
   use (atom default);
-  simp only [ValidOnFrameClass.iff_models, ValidOnFrameClass, ValidOnFrame];
-  push_neg;
-  use LEMCounterexampleFrame;
+  simp [Semantics.Realize];
+  use ⟨
+    PUnit ⊕ PUnit,
+    λ x y => match x, y with
+    | .inl _, .inl _ => True
+    | .inr _, .inr _ => True
+    | .inl _, .inr _ => True
+    | _, _ => False,
+  ⟩;
   constructor;
-  . exact LEMCounterexampleFrame.mem_IntFrameClass;
+  . apply Int_Characteraizable.characterize;
+    simp [Transitive, Reflexive];
   . simp [ValidOnFrame];
-    use (LEMCounterexampleModel α).Valuation;
+    use (λ w _ => match w with | .inr _ => True | .inl _ => False);
     constructor;
-    . simp [Kripke.Valuation.atomic_hereditary];
-    . apply noLEM_atom;
+    . simp;
+    . simp [ValidOnModel, Satisfies];
 
 /--
   Law of Excluded Middle is not always provable in intuitionistic logic.
@@ -77,7 +55,7 @@ theorem strictReducible_intuitionistic_classical : (𝐈𝐧𝐭 : DeductionPara
   . apply weakerThan_iff.not.mpr;
     push_neg;
     obtain ⟨p, hp⟩ := noLEM (α := α);
-    existsi (p ⋎ ~p);
+    use (p ⋎ ~p);
     constructor;
     . exact lem!;
     . assumption;

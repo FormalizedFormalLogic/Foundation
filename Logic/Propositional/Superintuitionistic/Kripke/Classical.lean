@@ -2,6 +2,11 @@ import Logic.Propositional.Superintuitionistic.Deduction
 import Logic.Propositional.Superintuitionistic.Kripke.Semantics
 import Logic.Propositional.Superintuitionistic.Kripke.Soundness
 
+namespace LO.Kripke
+
+
+end LO.Kripke
+
 
 namespace LO.Propositional.Superintuitionistic
 
@@ -11,14 +16,14 @@ open Formula
 
 namespace Kripke
 
-abbrev ClassicalFrame : Frame := { World := PUnit, Rel := λ _ _ => True }
+abbrev ClassicalFrame : Kripke.Frame := { World := PUnit, Rel := λ _ _ => True }
 
 abbrev ClassicalValuation (α : Type*) := α → Prop
 
-abbrev ClassicalModel (V : ClassicalValuation α) : Model α where
+abbrev ClassicalModel (V : ClassicalValuation α) : Kripke.Model α where
   Frame := ClassicalFrame
   Valuation := λ _ a => V a
-  hereditary := by simp only [imp_self, forall_const, forall_true_left];
+  -- hereditary := by simp only [imp_self, forall_const, forall_true_left];
 
 end Kripke
 

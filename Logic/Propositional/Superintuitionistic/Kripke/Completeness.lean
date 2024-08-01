@@ -1,16 +1,17 @@
-import Logic.Propositional.Superintuitionistic.Deduction
-import Logic.Propositional.Superintuitionistic.Kripke.Soundness
+import Logic.Propositional.Superintuitionistic.Kripke.Semantics
 
+set_option autoImplicit false
+universe u v
 
 namespace LO.Propositional.Superintuitionistic
 
 open System FiniteContext
 open Formula Formula.Kripke
 
-variable [DecidableEq α] [Inhabited α]
-variable {𝓓 : DeductionParameter α} [𝓓.IncludeEFQ]
+variable {α : Type u} [DecidableEq α] [Inhabited α]
+variable {Λ : DeductionParameter α} [Λ.IncludeEFQ]
 
-def Tableau (α) := Theory α × Theory α
+def Tableau (α : Type u) := Theory α × Theory α
 
 namespace Tableau
 
@@ -23,20 +24,21 @@ instance : HasSubset (Tableau α) := ⟨λ t₁ t₂ => t₁.1 ⊆ t₂.1 ∧ t�
   . intro h; cases h; simp;
   . rintro ⟨h₁, h₂⟩; cases t₁; cases t₂; simp_all;
 
-def ParametricConsistent (𝓓 : DeductionParameter α) (t : Tableau α) := ∀ {Γ Δ : List (Formula α)}, (∀ p ∈ Γ, p ∈ t.1) → (∀ p ∈ Δ, p ∈ t.2) → 𝓓 ⊬! ⋀Γ ⟶ ⋁Δ
-notation "(" 𝓓 ")-Consistent" => ParametricConsistent 𝓓
+def ParametricConsistent (Λ : DeductionParameter α) (t : Tableau α) := ∀ {Γ Δ : List (Formula α)}, (∀ p ∈ Γ, p ∈ t.1) → (∀ p ∈ Δ, p ∈ t.2) → Λ ⊬! ⋀Γ ⟶ ⋁Δ
+notation "(" Λ ")-Consistent" => ParametricConsistent Λ
 
+variable {p q: Formula α} {T U : Theory α}
 
-lemma iff_ParametricConsistent_insert₁ : (𝓓)-Consistent ((insert p T), U) ↔ ∀ {Γ Δ : List (Formula α)}, (∀ p ∈ Γ, p ∈ T) → (∀ p ∈ Δ, p ∈ U) → 𝓓 ⊬! p ⋏ ⋀Γ ⟶ ⋁Δ := by
+lemma iff_ParametricConsistent_insert₁ : (Λ)-Consistent ((insert p T), U) ↔ ∀ {Γ Δ : List (Formula α)}, (∀ p ∈ Γ, p ∈ T) → (∀ p ∈ Δ, p ∈ U) → Λ ⊬! p ⋏ ⋀Γ ⟶ ⋁Δ := by
   constructor;
   . intro h Γ Δ hΓ hΔ;
     by_contra hC;
-    have : 𝓓 ⊬! ⋀(p :: Γ) ⟶ ⋁Δ := h (by simp; intro q hq; right; exact hΓ q hq;) hΔ;
-    have : 𝓓 ⊢! ⋀(p :: Γ) ⟶ ⋁Δ := iff_imply_left_cons_conj'!.mpr hC;
+    have : Λ ⊬! ⋀(p :: Γ) ⟶ ⋁Δ := h (by simp; intro q hq; right; exact hΓ q hq;) hΔ;
+    have : Λ ⊢! ⋀(p :: Γ) ⟶ ⋁Δ := iff_imply_left_cons_conj'!.mpr hC;
     contradiction;
   . intro h Γ Δ hΓ hΔ;
     simp_all only [Set.mem_insert_iff];
-    have : 𝓓 ⊬! p ⋏ ⋀(Γ.remove p) ⟶ ⋁Δ := h (by
+    have : Λ ⊬! p ⋏ ⋀(Γ.remove p) ⟶ ⋁Δ := h (by
       intro q hq;
       have := by simpa using hΓ q $ List.mem_of_mem_remove hq;
       cases this with
@@ -44,24 +46,24 @@ lemma iff_ParametricConsistent_insert₁ : (𝓓)-Consistent ((insert p T), U) �
       | inr h => assumption;
     ) hΔ;
     by_contra hC;
-    have : 𝓓 ⊢! p ⋏ ⋀(Γ.remove p) ⟶ ⋁Δ := imp_trans''! and_comm! $ imply_left_remove_conj! (p := p) hC;
+    have : Λ ⊢! p ⋏ ⋀(Γ.remove p) ⟶ ⋁Δ := imp_trans''! and_comm! $ imply_left_remove_conj! (p := p) hC;
     contradiction;
 
-lemma iff_not_ParametricConsistent_insert₁ : ¬(𝓓)-Consistent ((insert p T), U) ↔ ∃ Γ Δ : List (Formula α), (∀ p ∈ Γ, p ∈ T) ∧ (∀ p ∈ Δ, p ∈ U) ∧ 𝓓 ⊢! p ⋏ ⋀Γ ⟶ ⋁Δ := by
+lemma iff_not_ParametricConsistent_insert₁ : ¬(Λ)-Consistent ((insert p T), U) ↔ ∃ Γ Δ : List (Formula α), (∀ p ∈ Γ, p ∈ T) ∧ (∀ p ∈ Δ, p ∈ U) ∧ Λ ⊢! p ⋏ ⋀Γ ⟶ ⋁Δ := by
   constructor;
   . contrapose; push_neg; apply iff_ParametricConsistent_insert₁.mpr;
   . contrapose; push_neg; apply iff_ParametricConsistent_insert₁.mp;
 
-lemma iff_ParametricConsistent_insert₂ : (𝓓)-Consistent (T, (insert p U)) ↔ ∀ {Γ Δ : List (Formula α)}, (∀ p ∈ Γ, p ∈ T) → (∀ p ∈ Δ, p ∈ U) → 𝓓 ⊬! ⋀Γ ⟶ p ⋎ ⋁Δ := by
+lemma iff_ParametricConsistent_insert₂ : (Λ)-Consistent (T, (insert p U)) ↔ ∀ {Γ Δ : List (Formula α)}, (∀ p ∈ Γ, p ∈ T) → (∀ p ∈ Δ, p ∈ U) → Λ ⊬! ⋀Γ ⟶ p ⋎ ⋁Δ := by
   constructor;
   . intro h Γ Δ hΓ hΔ;
     by_contra hC;
-    have : 𝓓 ⊬! ⋀Γ ⟶ ⋁(p :: Δ) := h hΓ (by simp; intro q hq; right; exact hΔ q hq);
-    have : 𝓓 ⊢! ⋀Γ ⟶ ⋁(p :: Δ) := implyRight_cons_disj!.mpr hC;
+    have : Λ ⊬! ⋀Γ ⟶ ⋁(p :: Δ) := h hΓ (by simp; intro q hq; right; exact hΔ q hq);
+    have : Λ ⊢! ⋀Γ ⟶ ⋁(p :: Δ) := implyRight_cons_disj!.mpr hC;
     contradiction;
   . intro h Γ Δ hΓ hΔ;
     simp_all;
-    have : 𝓓 ⊬! ⋀Γ ⟶ p ⋎ ⋁(Δ.remove p) := h hΓ (by
+    have : Λ ⊬! ⋀Γ ⟶ p ⋎ ⋁(Δ.remove p) := h hΓ (by
       intro q hq;
       have := by simpa using hΔ q $ List.mem_of_mem_remove hq;
       cases this with
@@ -69,20 +71,20 @@ lemma iff_ParametricConsistent_insert₂ : (𝓓)-Consistent (T, (insert p U)) �
       | inr h => assumption;
     );
     by_contra hC;
-    have : 𝓓 ⊢! ⋀Γ ⟶ p ⋎ ⋁(Δ.remove p) := imp_trans''! hC $ forthback_disj_remove;
+    have : Λ ⊢! ⋀Γ ⟶ p ⋎ ⋁(Δ.remove p) := imp_trans''! hC $ forthback_disj_remove;
     contradiction;
 
 
-lemma iff_not_ParametricConsistent_insert₂ : ¬(𝓓)-Consistent (T, (insert p U)) ↔ ∃ Γ Δ : List (Formula α), (∀ p ∈ Γ, p ∈ T) ∧ (∀ p ∈ Δ, p ∈ U) ∧ 𝓓 ⊢! ⋀Γ ⟶ p ⋎ ⋁Δ := by
+lemma iff_not_ParametricConsistent_insert₂ : ¬(Λ)-Consistent (T, (insert p U)) ↔ ∃ Γ Δ : List (Formula α), (∀ p ∈ Γ, p ∈ T) ∧ (∀ p ∈ Δ, p ∈ U) ∧ Λ ⊢! ⋀Γ ⟶ p ⋎ ⋁Δ := by
   constructor;
   . contrapose; push_neg; apply iff_ParametricConsistent_insert₂.mpr;
   . contrapose; push_neg; apply iff_ParametricConsistent_insert₂.mp;
 
 section Consistent
 
-variable (hCon : (𝓓)-Consistent t)
+variable {t} (hCon : (Λ)-Consistent t)
 
-lemma consistent_either (p : Formula α) : (𝓓)-Consistent ((insert p t.1), t.2) ∨ (𝓓)-Consistent (t.1, (insert p t.2)) := by
+lemma consistent_either (p : Formula α) : (Λ)-Consistent ((insert p t.1), t.2) ∨ (Λ)-Consistent (t.1, (insert p t.2)) := by
   by_contra hC;
   push_neg at hC;
   have ⟨hC₁, hC₂⟩ := hC;
@@ -92,8 +94,8 @@ lemma consistent_either (p : Formula α) : (𝓓)-Consistent ((insert p t.1), t.
 
   obtain ⟨Γ₂, Δ₂, hΓ₂, hΔ₂, h₂⟩ := iff_not_ParametricConsistent_insert₂.mp hC₂;
 
-  have : 𝓓 ⊢! ⋀(Γ₁ ++ Γ₂) ⟶ ⋁(Δ₁ ++ Δ₂) := imp_trans''! (and₁'! iff_concat_conj!) $ imp_trans''! (cut! h₁ h₂) (and₂'! iff_concact_disj!);
-  have : 𝓓 ⊬! ⋀(Γ₁ ++ Γ₂) ⟶ ⋁(Δ₁ ++ Δ₂) := hCon (by simp; rintro q (hq₁ | hq₂); exact hΓ₁ q hq₁; exact hΓ₂ q hq₂) (by simp; rintro q (hq₁ | hq₂); exact hΔ₁ q hq₁; exact hΔ₂ q hq₂);
+  have : Λ ⊢! ⋀(Γ₁ ++ Γ₂) ⟶ ⋁(Δ₁ ++ Δ₂) := imp_trans''! (and₁'! iff_concat_conj!) $ imp_trans''! (cut! h₁ h₂) (and₂'! iff_concact_disj!);
+  have : Λ ⊬! ⋀(Γ₁ ++ Γ₂) ⟶ ⋁(Δ₁ ++ Δ₂) := hCon (by simp; rintro q (hq₁ | hq₂); exact hΓ₁ q hq₁; exact hΓ₂ q hq₂) (by simp; rintro q (hq₁ | hq₂); exact hΔ₁ q hq₁; exact hΔ₂ q hq₂);
   contradiction;
 
 lemma disjoint_of_consistent : Disjoint t.1 t.2 := by
@@ -101,16 +103,16 @@ lemma disjoint_of_consistent : Disjoint t.1 t.2 := by
   obtain ⟨T, hp₁, hp₂, hp⟩ := by simpa [Disjoint] using h;
   obtain ⟨p, hp, _⟩ := Set.not_subset.mp hp;
   simp [ParametricConsistent] at hCon;
-  have : 𝓓 ⊬! ⋀[p] ⟶ ⋁[p] := hCon
+  have : Λ ⊬! ⋀[p] ⟶ ⋁[p] := hCon
     (by simp_all; apply hp₁; assumption)
     (by simp_all; apply hp₂; assumption);
-  have : 𝓓 ⊢! ⋀[p] ⟶ ⋁[p] := by simp;
+  have : Λ ⊢! ⋀[p] ⟶ ⋁[p] := by simp;
   contradiction;
 
-lemma not_mem₂ {Γ : List (Formula α)} (hΓ : ∀ p ∈ Γ, p ∈ t.1) (h : 𝓓 ⊢! ⋀Γ ⟶ q) : q ∉ t.2 := by
+lemma not_mem₂ {Γ : List (Formula α)} (hΓ : ∀ p ∈ Γ, p ∈ t.1) (h : Λ ⊢! ⋀Γ ⟶ q) : q ∉ t.2 := by
   by_contra hC;
-  have : 𝓓 ⊢! ⋀Γ ⟶ ⋁[q] := by simpa;
-  have : 𝓓 ⊬! ⋀Γ ⟶ ⋁[q] := hCon (by aesop) (by aesop);
+  have : Λ ⊢! ⋀Γ ⟶ ⋁[q] := by simpa;
+  have : Λ ⊬! ⋀Γ ⟶ ⋁[q] := hCon (by aesop) (by aesop);
   contradiction;
 
 end Consistent
@@ -120,7 +122,8 @@ abbrev Saturated (t : Tableau α) := ∀ p : Formula α, p ∈ t.1 ∨ p ∈ t.2
 
 section Saturated
 
-variable (hCon : (𝓓)-Consistent t := by assumption) (hMat : Saturated t := by assumption)
+variable {t : Tableau α}
+variable (hCon : (Λ)-Consistent t := by assumption) (hMat : Saturated t := by assumption)
 
 lemma mem₂_of_not_mem₁ : p ∉ t.1 → p ∈ t.2 := by
   intro h;
@@ -146,7 +149,7 @@ lemma not_mem₂_iff_mem₁ : p ∉ t.2 ↔ p ∈ t.1 := by
 
 lemma saturated_duality
   {t₁ t₂ : Tableau α}
-  (ct₁ : (𝓓)-Consistent t₁) (ct₂ : (𝓓)-Consistent t₂)
+  (ct₁ : (Λ)-Consistent t₁) (ct₂ : (Λ)-Consistent t₂)
   (st₁ : Saturated t₁) (st₂ : Saturated t₂)
   : t₁.1 = t₂.1 ↔ t₁.2 = t₂.2 := by
   constructor;
@@ -171,12 +174,12 @@ end Saturated
 
 variable [Inhabited α]
 
-lemma self_ParametricConsistent [h : System.Consistent 𝓓] : (𝓓)-Consistent (Ax(𝓓), ∅) := by
+lemma self_ParametricConsistent [h : System.Consistent Λ] : (Λ)-Consistent (Ax(Λ), ∅) := by
   intro Γ Δ hΓ hΔ;
   replace hΔ : Δ = [] := List.nil_iff.mpr hΔ;
   obtain ⟨q, hq⟩ := h.exists_unprovable;
   by_contra hC;
-  have : 𝓓 ⊢! q := by
+  have : Λ ⊢! q := by
     subst hΔ;
     simp at hC;
     exact imp_trans''! hC efq! ⨀ (by
@@ -188,28 +191,28 @@ lemma self_ParametricConsistent [h : System.Consistent 𝓓] : (𝓓)-Consistent
 section lindenbaum
 
 variable [Encodable α]
-variable (𝓓)
+variable (Λ)
 variable {t : Tableau α}
 
 open Classical
 open Encodable
 
-def lindenbaum_next (p : Formula α) (t : Tableau α) : Tableau α := if (𝓓)-Consistent (insert p t.1, t.2) then (insert p t.1, t.2) else (t.1, insert p t.2)
+def lindenbaum_next (p : Formula α) (t : Tableau α) : Tableau α := if (Λ)-Consistent (insert p t.1, t.2) then (insert p t.1, t.2) else (t.1, insert p t.2)
 
 def lindenbaum_next_indexed (t : Tableau α) : ℕ → Tableau α
   | 0 => t
   | i + 1 =>
     match (decode i) with
-    | some p => (lindenbaum_next_indexed t i).lindenbaum_next 𝓓 p
+    | some p => (lindenbaum_next_indexed t i).lindenbaum_next Λ p
     | none => lindenbaum_next_indexed t i
-local notation:max t"[" i "]" => lindenbaum_next_indexed 𝓓 t i
+local notation:max t"[" i "]" => lindenbaum_next_indexed Λ t i
 
 def lindenbaum_maximal (t : Tableau α) : Tableau α := (⋃ i, t[i].1, ⋃ i, t[i].2)
-local notation:max t"∞" => lindenbaum_maximal 𝓓 t
+local notation:max t"∞" => lindenbaum_maximal Λ t
 
-variable {𝓓}
+variable {Λ}
 
-lemma next_parametericConsistent (consistent : (𝓓)-Consistent t) (p : Formula α) : (𝓓)-Consistent (t.lindenbaum_next 𝓓 p) := by
+lemma next_parametericConsistent (consistent : (Λ)-Consistent t) (p : Formula α) : (Λ)-Consistent (t.lindenbaum_next Λ p) := by
   simp [lindenbaum_next];
   split;
   . simpa;
@@ -217,9 +220,9 @@ lemma next_parametericConsistent (consistent : (𝓓)-Consistent t) (p : Formula
     simp_all only [false_or];
 
 @[simp]
-lemma lindenbaum_next_indexed_zero {t : Tableau α} : (t.lindenbaum_next_indexed 𝓓 0) = t := by simp [lindenbaum_next_indexed]
+lemma lindenbaum_next_indexed_zero {t : Tableau α} : (t.lindenbaum_next_indexed Λ 0) = t := by simp [lindenbaum_next_indexed]
 
-lemma lindenbaum_next_indexed_parametricConsistent_succ {i : ℕ} : (𝓓)-Consistent t[i] → (𝓓)-Consistent t[i + 1] := by
+lemma lindenbaum_next_indexed_parametricConsistent_succ {i : ℕ} : (Λ)-Consistent t[i] → (Λ)-Consistent t[i + 1] := by
   simp [lindenbaum_next_indexed];
   split;
   . intro h; apply next_parametericConsistent; assumption;
@@ -231,10 +234,12 @@ lemma mem_lindenbaum_next_indexed (t) (p : Formula α) : p ∈ t[(encode p) + 1]
   . left; tauto;
   . right; tauto;
 
-lemma lindenbaum_next_indexed_parametricConsistent (consistent : (𝓓)-Consistent t) (i : ℕ) : (𝓓)-Consistent t[i] := by
+lemma lindenbaum_next_indexed_parametricConsistent (consistent : (Λ)-Consistent t) (i : ℕ) : (Λ)-Consistent t[i] := by
   induction i with
   | zero => simpa;
   | succ i ih => apply lindenbaum_next_indexed_parametricConsistent_succ; assumption;
+
+variable {m n : ℕ}
 
 lemma lindenbaum_next_indexed_subset₁_of_lt (h : m ≤ n) : t[m].1 ⊆ t[n].1 := by
   induction h with
@@ -254,7 +259,7 @@ lemma lindenbaum_next_indexed_subset₂_of_lt (h : m ≤ n) : t[m].2 ⊆ t[n].2 
     . split <;> tauto;
     . tauto;
 
-lemma exists_parametricConsistent_saturated_tableau (hCon : (𝓓)-Consistent t) : ∃ u, t ⊆ u ∧ ((𝓓)-Consistent u) ∧ (Saturated u) := by
+lemma exists_parametricConsistent_saturated_tableau (hCon : (Λ)-Consistent t) : ∃ u, t ⊆ u ∧ ((Λ)-Consistent u) ∧ (Saturated u) := by
   use t∞;
   refine ⟨?subset, ?consistent, ?saturated⟩;
   case subset => constructor <;> apply Set.subset_iUnion_of_subset 0 (by simp);
@@ -306,22 +311,24 @@ variable [Encodable α]
 
 open Tableau
 
-structure SaturatedConsistentTableau (𝓓 : DeductionParameter α) where
+structure SaturatedConsistentTableau (Λ : DeductionParameter α) where
   tableau : Tableau α
   saturated : Saturated tableau
-  consistent : (𝓓)-Consistent tableau
+  consistent : (Λ)-Consistent tableau
 
 alias SCT := SaturatedConsistentTableau
 
 namespace SaturatedConsistentTableau
 
-lemma lindenbaum (hCon : (𝓓)-Consistent t₀) : ∃ (t : SaturatedConsistentTableau 𝓓), t₀ ⊆ t.tableau := by
+variable {t₀ : Tableau α} {p q : Formula α}
+
+lemma lindenbaum (hCon : (Λ)-Consistent t₀) : ∃ (t : SaturatedConsistentTableau Λ), t₀ ⊆ t.tableau := by
   obtain ⟨t, ht, hCon, hMax⟩ := Tableau.lindenbaum hCon;
   exact ⟨⟨t, hMax, hCon⟩, ht⟩;
 
-noncomputable instance [System.Consistent 𝓓] : Inhabited (SCT 𝓓) := ⟨lindenbaum Tableau.self_ParametricConsistent |>.choose⟩
+noncomputable instance [System.Consistent Λ] : Inhabited (SCT Λ) := ⟨lindenbaum Tableau.self_ParametricConsistent |>.choose⟩
 
-variable (t : SCT 𝓓)
+variable (t : SCT Λ)
 
 @[simp] lemma disjoint : Disjoint t.tableau.1 t.tableau.2 := t.tableau.disjoint_of_consistent t.consistent
 
@@ -329,7 +336,7 @@ lemma not_mem₁_iff_mem₂ : p ∉ t.tableau.1 ↔ p ∈ t.tableau.2 := Tableau
 
 lemma not_mem₂_iff_mem₁ : p ∉ t.tableau.2 ↔ p ∈ t.tableau.1 := Tableau.not_mem₂_iff_mem₁ t.consistent t.saturated
 
-variable {t t₁ t₂ : SCT 𝓓}
+variable {t t₁ t₂ : SCT Λ}
 
 lemma saturated_duality: t₁.tableau.1 = t₂.tableau.1 ↔ t₁.tableau.2 = t₂.tableau.2 := Tableau.saturated_duality t₁.consistent t₂.consistent t₁.saturated t₂.saturated
 
@@ -342,24 +349,24 @@ lemma equality_of₁ (e₁ : t₁.tableau.1 = t₂.tableau.1) : t₁ = t₂ := b
 
 lemma equality_of₂ (e₂ : t₁.tableau.2 = t₂.tableau.2) : t₁ = t₂ := equality_of₁ $ saturated_duality.mpr e₂
 
-lemma not_mem₂ {Γ : List (Formula α)} (hΓ : ∀ p ∈ Γ, p ∈ t.tableau.1) (h : 𝓓 ⊢! ⋀Γ ⟶ q) : q ∉ t.tableau.2 := t.tableau.not_mem₂ t.consistent hΓ h
+lemma not_mem₂ {Γ : List (Formula α)} (hΓ : ∀ p ∈ Γ, p ∈ t.tableau.1) (h : Λ ⊢! ⋀Γ ⟶ q) : q ∉ t.tableau.2 := t.tableau.not_mem₂ t.consistent hΓ h
 
-lemma mdp₁ (hp : p ∈ t.tableau.1) (h : 𝓓 ⊢! p ⟶ q) : q ∈ t.tableau.1 := by
-  exact t.not_mem₂_iff_mem₁.mp $ not_mem₂ (by simpa) (show 𝓓 ⊢! ⋀[p] ⟶ q by simpa;)
+lemma mdp₁ (hp : p ∈ t.tableau.1) (h : Λ ⊢! p ⟶ q) : q ∈ t.tableau.1 := by
+  exact t.not_mem₂_iff_mem₁.mp $ not_mem₂ (by simpa) (show Λ ⊢! ⋀[p] ⟶ q by simpa;)
 
 @[simp]
 lemma mem₁_verum : ⊤ ∈ t.tableau.1 := by
   apply t.not_mem₂_iff_mem₁.mp;
   by_contra hC;
-  have : 𝓓 ⊬! ⋀[] ⟶ ⋁[⊤] := t.consistent (by simp) (by simpa);
-  have : 𝓓 ⊢! ⋀[] ⟶ ⋁[⊤] := by simp;
+  have : Λ ⊬! ⋀[] ⟶ ⋁[⊤] := t.consistent (by simp) (by simpa);
+  have : Λ ⊢! ⋀[] ⟶ ⋁[⊤] := by simp;
   contradiction;
 
 @[simp]
 lemma not_mem₁_falsum : ⊥ ∉ t.tableau.1 := by
   by_contra hC;
-  have : 𝓓 ⊬! ⋀[⊥] ⟶ ⋁[] := t.consistent (by simpa) (by simp);
-  have : 𝓓 ⊢! ⋀[⊥] ⟶ ⋁[] := by simp;
+  have : Λ ⊬! ⋀[⊥] ⟶ ⋁[] := t.consistent (by simpa) (by simp);
+  have : Λ ⊢! ⋀[⊥] ⟶ ⋁[] := by simp;
   contradiction;
 
 @[simp]
@@ -368,8 +375,8 @@ lemma iff_mem₁_and : p ⋏ q ∈ t.tableau.1 ↔ p ∈ t.tableau.1 ∧ q ∈ t
   . intro h; constructor <;> exact mdp₁ h (by simp)
   . rintro ⟨hp, hq⟩;
     by_contra hC;
-    have : 𝓓 ⊢! ⋀[p, q] ⟶ ⋁[p ⋏ q] := by simp;
-    have : 𝓓 ⊬! ⋀[p, q] ⟶ ⋁[p ⋏ q] := t.consistent (by aesop) (by simpa using t.not_mem₁_iff_mem₂.mp hC);
+    have : Λ ⊢! ⋀[p, q] ⟶ ⋁[p ⋏ q] := by simp;
+    have : Λ ⊬! ⋀[p, q] ⟶ ⋁[p ⋏ q] := t.consistent (by aesop) (by simpa using t.not_mem₁_iff_mem₂.mp hC);
     contradiction;
 
 @[simp]
@@ -379,15 +386,15 @@ lemma iff_mem₁_or : p ⋎ q ∈ t.tableau.1 ↔ p ∈ t.tableau.1 ∨ q ∈ t.
     by_contra hC; simp [not_or] at hC;
     have : p ∈ t.tableau.2 := t.not_mem₁_iff_mem₂.mp hC.1;
     have : q ∈ t.tableau.2 := t.not_mem₁_iff_mem₂.mp hC.2;
-    have : 𝓓 ⊢! ⋀[p ⋎ q] ⟶ ⋁[p, q] := by simp;
-    have : 𝓓 ⊬! ⋀[p ⋎ q] ⟶ ⋁[p, q] := t.consistent (by simp_all) (by simp_all);
+    have : Λ ⊢! ⋀[p ⋎ q] ⟶ ⋁[p, q] := by simp;
+    have : Λ ⊬! ⋀[p ⋎ q] ⟶ ⋁[p, q] := t.consistent (by simp_all) (by simp_all);
     contradiction;
   . intro h;
     cases h with
     | inl h => exact mdp₁ h or₁!
     | inr h => exact mdp₁ h or₂!
 
-lemma mem₁_of_provable : 𝓓 ⊢! p → p ∈ t.tableau.1 := by
+lemma mem₁_of_provable : Λ ⊢! p → p ∈ t.tableau.1 := by
   intro h;
   exact mdp₁ mem₁_verum $ dhyp! h;
 
@@ -398,49 +405,65 @@ namespace Kripke
 
 open SaturatedConsistentTableau
 
-def CanonicalFrame (𝓓 : DeductionParameter α) [Inhabited (SCT 𝓓)] : Frame' α where
-  World := SCT 𝓓
-  Rel := λ t₁ t₂ => t₁.tableau.1 ⊆ t₂.tableau.1
-  Rel_antisymm := by
-    intro x y hxy hyx;
-    exact equality_of₁ $ Set.Subset.antisymm hxy hyx;
-  Rel_trans := by intro x y z; apply Set.Subset.trans;
+def CanonicalFrame (Λ : DeductionParameter α) [Nonempty (SCT Λ)] : Kripke.Frame.Dep α where
+  World := SCT Λ
+  Rel t₁ t₂ := t₁.tableau.1 ⊆ t₂.tableau.1
 
-def CanonicalModel (𝓓 : DeductionParameter α) [Inhabited (SCT 𝓓)] : Model α where
-  Frame := CanonicalFrame 𝓓
+namespace CanonicalFrame
+
+variable [Nonempty (SCT Λ)]
+
+lemma antisymmetric : Antisymmetric (CanonicalFrame Λ) := by
+  simp [CanonicalFrame];
+  intro x y Rxy Ryx;
+  exact equality_of₁ $ Set.Subset.antisymm Rxy Ryx;
+
+lemma transitive : Transitive (CanonicalFrame Λ) := by
+  simp [CanonicalFrame];
+  intro x y z;
+  apply Set.Subset.trans;
+
+end CanonicalFrame
+
+
+def CanonicalModel (Λ : DeductionParameter α) [Nonempty (SCT Λ)] : Kripke.Model α where
+  Frame := CanonicalFrame Λ
   Valuation t a := (atom a) ∈ t.tableau.1
-  hereditary := by aesop;
-
+  -- hereditary := by aesop;
 
 namespace CanonicalModel
 
-variable [Inhabited (SCT 𝓓)]
+variable [Nonempty (SCT Λ)] {t t₁ t₂ : SCT Λ}
+
+lemma hereditary : (CanonicalModel Λ).Valuation.atomic_hereditary := by
+  intros _ _;
+  aesop;
 
 @[reducible]
-instance : Semantics (Formula α) (CanonicalModel 𝓓).World := instKripkeSemanticsFormulaWorld (CanonicalModel 𝓓)
+instance : Semantics (Formula α) (CanonicalModel Λ).World := instKripkeSemanticsFormulaWorld (CanonicalModel Λ)
 
-@[simp] lemma frame_def {t₁ t₂ : SCT 𝓓} : (CanonicalModel 𝓓).Rel t₁ t₂ ↔ t₁.tableau.1 ⊆ t₂.tableau.1 := by rfl
-@[simp] lemma valuation_def {t : SCT 𝓓} {a : α} : (CanonicalModel 𝓓).Valuation t a ↔ (atom a) ∈ t.tableau.1 := by rfl
+@[simp] lemma frame_def : (CanonicalModel Λ).Frame t₁ t₂ ↔ t₁.tableau.1 ⊆ t₂.tableau.1 := by rfl
+@[simp] lemma valuation_def {a : α} : (CanonicalModel Λ).Valuation t a ↔ (atom a) ∈ t.tableau.1 := by rfl
 
 end CanonicalModel
 
 section
 
-variable [Inhabited (SCT 𝓓)]
+variable [Inhabited (SCT Λ)]
 
-variable {t : SCT 𝓓}
+variable {t : SCT Λ} {p q : Formula α}
 
 private lemma truthlemma.himp
-  {t : (CanonicalModel 𝓓).World}
-  (ihp : ∀ {t : (CanonicalModel 𝓓).World}, t ⊧ p ↔ p ∈ t.tableau.1)
-  (ihq : ∀ {t : (CanonicalModel 𝓓).World}, t ⊧ q ↔ q ∈ t.tableau.1)
+  {t : (CanonicalModel Λ).World}
+  (ihp : ∀ {t : (CanonicalModel Λ).World}, t ⊧ p ↔ p ∈ t.tableau.1)
+  (ihq : ∀ {t : (CanonicalModel Λ).World}, t ⊧ q ↔ q ∈ t.tableau.1)
   : t ⊧ p ⟶ q ↔ p ⟶ q ∈ t.tableau.1 := by
   constructor;
   . contrapose;
-    simp_all;
+    simp_all [Satisfies];
     intro h;
     replace h := t.not_mem₁_iff_mem₂.mp h;
-    obtain ⟨t', ⟨h, _⟩⟩ := lindenbaum (𝓓 := 𝓓) (t₀ := (insert p t.tableau.1, {q})) $ by
+    obtain ⟨t', ⟨h, _⟩⟩ := lindenbaum (Λ := Λ) (t₀ := (insert p t.tableau.1, {q})) $ by
       simp only [Tableau.ParametricConsistent];
       intro Γ Δ hΓ hΔ;
       replace hΓ : ∀ r, r ∈ Γ.remove p → r ∈ t.tableau.1 := by
@@ -449,17 +472,17 @@ private lemma truthlemma.himp
         have := by simpa using hΓ r hr₁;
         simp_all;
       by_contra hC;
-      have : 𝓓 ⊢! ⋀(Γ.remove p) ⟶ (p ⟶ q) := imp_trans''! (and_imply_iff_imply_imply'!.mp $ imply_left_remove_conj! hC) (by
+      have : Λ ⊢! ⋀(Γ.remove p) ⟶ (p ⟶ q) := imp_trans''! (and_imply_iff_imply_imply'!.mp $ imply_left_remove_conj! hC) (by
         apply deduct'!;
         apply deduct!;
-        have : [p, p ⟶ ⋁Δ] ⊢[𝓓]! p := by_axm!;
-        have : [p, p ⟶ ⋁Δ] ⊢[𝓓]! ⋁Δ := by_axm! ⨀ this;
+        have : [p, p ⟶ ⋁Δ] ⊢[Λ]! p := by_axm!;
+        have : [p, p ⟶ ⋁Δ] ⊢[Λ]! ⋁Δ := by_axm! ⨀ this;
         exact disj_allsame'! (by simpa using hΔ) this;
       )
-      have : 𝓓 ⊬! ⋀(Γ.remove p) ⟶ (p ⟶ q) := by simpa using (t.consistent hΓ (show ∀ r ∈ [p ⟶ q], r ∈ t.tableau.2 by simp_all));
+      have : Λ ⊬! ⋀(Γ.remove p) ⟶ (p ⟶ q) := by simpa using (t.consistent hΓ (show ∀ r ∈ [p ⟶ q], r ∈ t.tableau.2 by simp_all));
       contradiction;
     have ⟨_, _⟩ := Set.insert_subset_iff.mp h;
-    existsi t';
+    use t';
     constructor;
     . simp_all only [Set.singleton_subset_iff];
     . constructor;
@@ -474,7 +497,7 @@ private lemma truthlemma.himp
     apply t'.not_mem₂_iff_mem₁.mp;
     exact not_mem₂
       (by simp_all)
-      (show 𝓓 ⊢! ⋀[p, p ⟶ q] ⟶ q by
+      (show Λ ⊢! ⋀[p, p ⟶ q] ⟶ q by
         simp;
         apply and_imply_iff_imply_imply'!.mpr;
         apply deduct'!;
@@ -483,14 +506,15 @@ private lemma truthlemma.himp
       );
 
 private lemma truthlemma.hneg
-  {t : (CanonicalModel 𝓓).World}
-  (ihp : ∀ {t : (CanonicalModel 𝓓).World}, t ⊧ p ↔ p ∈ t.tableau.1)
+  {t : (CanonicalModel Λ).World}
+  (ihp : ∀ {t : (CanonicalModel Λ).World}, t ⊧ p ↔ p ∈ t.tableau.1)
   : t ⊧ ~p ↔ ~p ∈ t.tableau.1 := by
   constructor;
-  . contrapose; simp_all;
+  . contrapose;
+    simp_all [Satisfies];
     intro h;
     replace h := t.not_mem₁_iff_mem₂.mp h;
-    obtain ⟨t', ⟨h, _⟩⟩ := lindenbaum (𝓓 := 𝓓) (t₀ := (insert p t.tableau.1, ∅)) $ by
+    obtain ⟨t', ⟨h, _⟩⟩ := lindenbaum (Λ := Λ) (t₀ := (insert p t.tableau.1, ∅)) $ by
       simp only [Tableau.ParametricConsistent];
       intro Γ Δ hΓ hΔ;
       replace hΓ : ∀ q, q ∈ Γ.remove p → q ∈ t.tableau.1 := by
@@ -500,39 +524,36 @@ private lemma truthlemma.hneg
         simp_all;
       replace hΔ : Δ = [] := List.nil_iff.mpr hΔ; subst hΔ;
       by_contra hC; simp at hC;
-      have : 𝓓 ⊢! ⋀(Γ.remove p) ⟶ ~p := imp_trans''! (and_imply_iff_imply_imply'!.mp $ imply_left_remove_conj! hC) (and₂'! neg_equiv!);
-      have : 𝓓 ⊬! ⋀(Γ.remove p) ⟶ ~p := by simpa using t.consistent (Δ := [~p]) hΓ (by simpa);
+      have : Λ ⊢! ⋀(Γ.remove p) ⟶ ~p := imp_trans''! (and_imply_iff_imply_imply'!.mp $ imply_left_remove_conj! hC) (and₂'! neg_equiv!);
+      have : Λ ⊬! ⋀(Γ.remove p) ⟶ ~p := by simpa using t.consistent (Δ := [~p]) hΓ (by simpa);
       contradiction;
     have ⟨_, _⟩ := Set.insert_subset_iff.mp h;
-    existsi t';
-    constructor;
-    . simp_all only [Set.singleton_subset_iff];
-    . assumption;
+    use t';
   . simp;
     intro ht t' htt';
     apply ihp.not.mpr;
     by_contra hC;
-    have : 𝓓 ⊬! p ⋏ ~p ⟶ ⊥ := by simpa using t'.consistent (Γ := [p, ~p]) (Δ := []) (by aesop) (by simp);
-    have : 𝓓 ⊢! p ⋏ ~p ⟶ ⊥ := intro_bot_of_and!;
+    have : Λ ⊬! p ⋏ ~p ⟶ ⊥ := by simpa using t'.consistent (Γ := [p, ~p]) (Δ := []) (by aesop) (by simp);
+    have : Λ ⊢! p ⋏ ~p ⟶ ⊥ := intro_bot_of_and!;
     contradiction;
 
-lemma truthlemma {t : (CanonicalModel 𝓓).World} : t ⊧ p ↔ p ∈ t.tableau.1 := by
+lemma truthlemma {t : (CanonicalModel Λ).World} : t ⊧ p ↔ p ∈ t.tableau.1 := by
   induction p using rec' generalizing t with
   | himp p q ihp ihq => exact truthlemma.himp ihp ihq
   | hneg p ihp => exact truthlemma.hneg ihp;
   | _ => simp [Satisfies.iff_models, Satisfies, *];
 
-lemma deducible_of_validOnCanonicelModel : (CanonicalModel 𝓓) ⊧ p ↔ 𝓓 ⊢! p := by
+lemma deducible_of_validOnCanonicelModel : (CanonicalModel Λ) ⊧ p ↔ Λ ⊢! p := by
   constructor;
   . contrapose;
     intro h;
-    have : (𝓓)-Consistent (∅, {p}) := by
+    have : (Λ)-Consistent (∅, {p}) := by
       simp only [Tableau.ParametricConsistent, Collection.not_mem_empty, imp_false, Set.mem_singleton_iff];
       rintro Γ Δ hΓ hΔ;
       by_contra hC;
       replace hΓ : Γ = [] := List.nil_iff.mpr hΓ;
       subst hΓ;
-      have : 𝓓 ⊢! p := disj_allsame'! hΔ (hC ⨀ verum!);
+      have : Λ ⊢! p := disj_allsame'! hΔ (hC ⨀ verum!);
       contradiction;
     obtain ⟨t', ht'⟩ := lindenbaum this;
     simp [ValidOnModel.iff_models, ValidOnModel]
@@ -546,22 +567,45 @@ lemma deducible_of_validOnCanonicelModel : (CanonicalModel 𝓓) ⊧ p ↔ 𝓓 
 
 end
 
-class Canonical (𝓓 : DeductionParameter α) [Inhabited (SCT 𝓓)] where
-  realize : (CanonicalFrame 𝓓) ⊧* Ax(𝓓)
+class Canonical (Λ : DeductionParameter α) [Inhabited (SCT Λ)] where
+  mem : (CanonicalFrame Λ) ∈ 𝔽(Λ of α)
 
-lemma complete! [System.Consistent 𝓓] [Canonical 𝓓] : (𝔽(Ax(𝓓)) : FrameClass' α) ⊧ p → 𝓓 ⊢! p := by
+variable [Inhabited (SCT Λ)]
+
+lemma complete [System.Consistent Λ] [Canonical Λ] {p : Formula α} : (Kripke.FrameClassOfSystem.{_, _, _, u} Λ α) ⊧ p → Λ ⊢! p := by
+  intro h;
+  apply deducible_of_validOnCanonicelModel.mp;
+  apply h;
+  . apply Canonical.mem;
+  . exact CanonicalModel.hereditary;
+
+instance instComplete [System.Consistent Λ] [Canonical Λ] : Complete Λ (Kripke.FrameClassOfSystem.{_, _, _, u} Λ α) := ⟨complete⟩
+
+/-
+lemma a {P : Kripke.FrameProperty} [𝔽(Λ of α).Characteraizable P] [Inhabited (SCT Λ)] : Canonical Λ := ⟨by
+  apply Kripke.FrameClass.Characteraizable.characterize;
+  sorry;
+⟩
+-/
+
+/-
+class Canonical (Λ : DeductionParameter α) [Nonempty (SCT Λ)] where
+  realize : (CanonicalFrame Λ) ⊧* Ax(Λ)
+
+lemma complete! [System.Consistent Λ] [Canonical Λ] : (𝔽(Ax(Λ)) : FrameClass' α) ⊧ p → Λ ⊢! p := by
   intro h;
   apply deducible_of_validOnCanonicelModel.mp;
   exact h Canonical.realize _ _;
 
-instance instComplete [System.Consistent 𝓓] [Canonical 𝓓] : Complete 𝓓 𝔽(Ax(𝓓)) := ⟨complete!⟩
+instance instComplete [System.Consistent Λ] [Canonical Λ] : Complete Λ 𝔽(Ax(Λ)) := ⟨complete!⟩
 
-instance canonical_of_definability [Inhabited (SCT 𝓓)] (definability : Definability Ax(𝓓) P) (h : P (CanonicalFrame 𝓓)) : Canonical 𝓓 where
+instance canonical_of_definability [Inhabited (SCT Λ)] (definability : Definability Ax(Λ) P) (h : P (CanonicalFrame Λ)) : Canonical Λ where
   realize := definability.defines _ |>.mpr h;
 
 instance : Canonical (𝐈𝐧𝐭 : DeductionParameter α) := canonical_of_definability AxiomSet.EFQ.definability trivial
 
 instance intComplete : Complete (𝐈𝐧𝐭 : DeductionParameter α) 𝔽(Ax(𝐈𝐧𝐭)) := instComplete
+-/
 
 end Kripke
 
