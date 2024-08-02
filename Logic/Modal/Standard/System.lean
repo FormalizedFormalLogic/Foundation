@@ -82,6 +82,8 @@ protected class S4Grz extends System.S4 𝓢, HasAxiomGrz 𝓢
 
 protected class GL extends System.K 𝓢, HasAxiomL 𝓢
 
+protected class Grz extends System.K 𝓢, HasAxiomGrz 𝓢
+
 protected class Triv extends System.K 𝓢, HasAxiomT 𝓢, HasAxiomTc 𝓢
 
 protected class Ver extends System.K 𝓢, HasAxiomVer 𝓢
@@ -682,6 +684,54 @@ lemma imply_box_box_of_imply_boxdot_plain! (h : 𝓢 ⊢! ⊡p ⟶ q) : 𝓢 ⊢
   exact imply_box_box_of_imply_boxdot_axiomT! $ imply_boxdot_axiomT_of_imply_boxdot_boxdot! $ imply_boxdot_boxdot_of_imply_boxdot_plain! h
 
 end
+
+
+section Grz
+
+variable [System.K 𝓢] [HasAxiomGrz 𝓢]
+
+def axiomGrz : 𝓢 ⊢ □(□(p ⟶ □p) ⟶ p) ⟶ p := HasAxiomGrz.Grz _
+@[simp] lemma axiomGrz! : 𝓢 ⊢! □(□(p ⟶ □p) ⟶ p) ⟶ p := ⟨axiomGrz⟩
+
+def dhyp_imp (h : 𝓢 ⊢ p ⟶ q) : 𝓢 ⊢ (r ⟶ p) ⟶ (r ⟶ q) := imply₂ (𝓢 := 𝓢) (p := r) (q := p) (r := q) ⨀ (dhyp r h)
+
+def ppq (h : 𝓢 ⊢ p ⟶ p ⟶ q) : 𝓢 ⊢ p ⟶ q := by
+  apply deduct';
+  have := of (Γ := [p]) h;
+  exact this ⨀ (FiniteContext.byAxm) ⨀ (FiniteContext.byAxm);
+
+private noncomputable def lemma_Grz : 𝓢 ⊢ □p ⟶ (p ⋏ (□p ⟶ □□p)) := by
+  let q := p ⋏ (□p ⟶ □□p);
+  have    : 𝓢 ⊢ ((□p ⟶ □□p) ⟶ □p) ⟶ □p := peirce
+  have    : 𝓢 ⊢ (p ⟶ ((□p ⟶ □□p) ⟶ □p)) ⟶ (p ⟶ □p) := dhyp_imp this;
+  have d₁ : 𝓢 ⊢ (q ⟶ □p) ⟶ p ⟶ □p := impTrans'' (and₁' $ andImplyIffImplyImply p (□p ⟶ □□p) (□p)) this;
+  have    : 𝓢 ⊢ q ⟶ p := and₁;
+  have    : 𝓢 ⊢ □q ⟶ □p := implyBoxDistribute' this;
+  have d₂ : 𝓢 ⊢ (q ⟶ □q) ⟶ (q ⟶ □p) := dhyp_imp this;
+  have    : 𝓢 ⊢ (q ⟶ □q) ⟶ p ⟶ □p := impTrans'' d₂ d₁;
+  have    : 𝓢 ⊢ □(q ⟶ □q) ⟶ □(p ⟶ □p) := implyBoxDistribute' this;
+  have    : 𝓢 ⊢ □(q ⟶ □q) ⟶ (□p ⟶ □□p) := impTrans'' this axiomK;
+  have    : 𝓢 ⊢ (p ⟶ □(q ⟶ □q)) ⟶ (p ⟶ (□p ⟶ □□p)) := dhyp_imp this;
+  have    : 𝓢 ⊢ p ⟶ (□(q ⟶ □q) ⟶ (p ⋏ (□p ⟶ □□p))) := by
+    apply deduct';
+    apply deduct;
+    apply and₃';
+    . exact FiniteContext.byAxm;
+    . exact (of this) ⨀ (dhyp p FiniteContext.byAxm) ⨀ (FiniteContext.byAxm);
+  have    : 𝓢 ⊢ p ⟶ (□(q ⟶ □q) ⟶ q) := this;
+  have    : 𝓢 ⊢ □p ⟶ □(□(q ⟶ □q) ⟶ q) := implyBoxDistribute' this;
+  exact impTrans'' this axiomGrz;
+
+private noncomputable def Four_of_Grz : 𝓢 ⊢ □p ⟶ □□p := ppq $ impTrans'' lemma_Grz and₂
+
+noncomputable instance : HasAxiomFour 𝓢 := ⟨fun _ ↦ Four_of_Grz⟩
+
+private noncomputable def T_of_Grz : 𝓢 ⊢ □p ⟶ p := impTrans'' lemma_Grz and₁
+
+noncomputable instance : HasAxiomT 𝓢 := ⟨fun _ ↦ T_of_Grz⟩
+
+end Grz
+
 
 end
 
