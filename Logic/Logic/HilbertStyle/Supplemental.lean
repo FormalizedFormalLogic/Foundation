@@ -481,6 +481,15 @@ instance [HasAxiomEFQ 𝓢] [HasAxiomLEM 𝓢] : HasAxiomDNE 𝓢 where
       exact efq' $ nnp ⨀ np;
     ) $ of lem;;
 
+noncomputable instance [HasAxiomDNE 𝓢] : HasAxiomPeirce 𝓢 where
+  peirce p q := by
+    refine or₃''' imply₁ ?_ lem;
+    apply deduct';
+    apply deduct;
+    refine (FiniteContext.byAxm (p := (p ⟶ q) ⟶ p)) ⨀ ?_;
+    apply deduct;
+    apply efq_of_mem_either (by aesop) (by aesop)
+
 end Instantinate
 
 

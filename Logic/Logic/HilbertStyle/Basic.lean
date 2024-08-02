@@ -55,6 +55,9 @@ class HasAxiomLEM where
 class HasAxiomDNE where
   dne (p : F) : 𝓢 ⊢ Axioms.DNE p
 
+class HasAxiomPeirce where
+  peirce (p q : F) : 𝓢 ⊢ Axioms.Peirce p q
+
 protected class Minimal extends
               ModusPonens 𝓢,
               HasAxiomVerum 𝓢, NegationEquiv 𝓢,
@@ -124,6 +127,9 @@ def dne [HasAxiomDNE 𝓢] : 𝓢 ⊢ ~~p ⟶ p := HasAxiomDNE.dne _
 
 def dne' [HasAxiomDNE 𝓢] (b : 𝓢 ⊢ ~~p) : 𝓢 ⊢ p := dne ⨀ b
 @[simp] lemma dne'! [HasAxiomDNE 𝓢] (h : 𝓢 ⊢! ~~p) : 𝓢 ⊢! p := ⟨dne' h.some⟩
+
+def peirce [HasAxiomPeirce 𝓢] : 𝓢 ⊢ ((p ⟶ q) ⟶ p) ⟶ p := HasAxiomPeirce.peirce _ _
+@[simp] lemma peirce! [HasAxiomPeirce 𝓢] : 𝓢 ⊢! ((p ⟶ q) ⟶ p) ⟶ p := ⟨peirce⟩
 
 def imply₁' (h : 𝓢 ⊢ p) : 𝓢 ⊢ q ⟶ p := imply₁ ⨀ h
 lemma imply₁'! (d : 𝓢 ⊢! p) : 𝓢 ⊢! q ⟶ p := ⟨imply₁' d.some⟩
