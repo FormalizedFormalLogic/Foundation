@@ -13,23 +13,33 @@ open System
 
 open Formula Formula.Kripke
 
-variable {α : Type*}
-variable [Inhabited α]
+variable {α : Type u}
+variable [DecidableEq α] [Inhabited α]
 
-lemma noLEM_on_frameclass : ∃ (p : Formula α), ¬((Kripke.FrameClassOfSystem.{_, _, _, _, 0} 𝐈𝐧𝐭 α) ⊧ p ⋎ ~p) := by
-  use (atom default);
-  simp [Semantics.Realize];
-  use ⟨
-    PUnit ⊕ PUnit,
-    λ x y => match x, y with
+abbrev NoLEMFrame : Kripke.Frame where
+  World := PUnit ⊕ PUnit
+  Rel x y :=
+    match x, y with
     | .inl _, .inl _ => True
     | .inr _, .inr _ => True
     | .inl _, .inr _ => True
-    | _, _ => False,
-  ⟩;
+    | _, _ => False
+
+lemma NoLEMFrame.transitive : Transitive NoLEMFrame.Rel := by simp [Transitive];
+
+lemma NoLEMFrame.reflexive : Reflexive NoLEMFrame.Rel := by simp [Reflexive];
+
+lemma NoLEMFrame.confluent : Confluent NoLEMFrame.Rel := by simp [Confluent];
+
+lemma NoLEMFrame.connected : Connected NoLEMFrame.Rel := by simp [Connected];
+
+lemma noLEM_on_frameclass : ∃ (p : Formula α), ¬((Kripke.FrameClassOfSystem.{u, _, 0} α 𝐈𝐧𝐭) ⊧ p ⋎ ~p) := by
+  use (atom default);
+  simp [Semantics.Realize];
+  use NoLEMFrame;
   constructor;
   . apply Int_Characteraizable.characterize;
-    simp [Transitive, Reflexive];
+    exact ⟨NoLEMFrame.reflexive, NoLEMFrame.transitive⟩;
   . simp [ValidOnFrame];
     use (λ w _ => match w with | .inr _ => True | .inl _ => False);
     constructor;
@@ -41,7 +51,7 @@ lemma noLEM_on_frameclass : ∃ (p : Formula α), ¬((Kripke.FrameClassOfSystem.
 -/
 theorem noLEM : ∃ (p : Formula α), 𝐈𝐧𝐭 ⊬! p ⋎ ~p := by
   obtain ⟨p, hp⟩ := noLEM_on_frameclass (α := α);
-  existsi p;
+  use p;
   by_contra hC;
   have := Kripke.sound hC;
   contradiction;
@@ -49,9 +59,9 @@ theorem noLEM : ∃ (p : Formula α), 𝐈𝐧𝐭 ⊬! p ⋎ ~p := by
 /--
   Intuitionistic logic is proper weaker than classical logic.
 -/
-theorem strictReducible_intuitionistic_classical : (𝐈𝐧𝐭 : DeductionParameter α) <ₛ 𝐂𝐥 := by
+theorem Int_strictly_weaker_than_Cl : (𝐈𝐧𝐭 : DeductionParameter α) <ₛ 𝐂𝐥 := by
   constructor;
-  . exact reducible_efq_dne;
+  . exact Int_weaker_than_Cl;
   . apply weakerThan_iff.not.mpr;
     push_neg;
     obtain ⟨p, hp⟩ := noLEM (α := α);
@@ -59,5 +69,79 @@ theorem strictReducible_intuitionistic_classical : (𝐈𝐧𝐭 : DeductionPara
     constructor;
     . exact lem!;
     . assumption;
+
+
+
+section
+
+lemma noLEM_on_frameclass_KC : ∃ (p : Formula α), ¬((Kripke.FrameClassOfSystem.{u, _, 0} α 𝐊𝐂) ⊧ p ⋎ ~p) := by
+  use (atom default);
+  simp [Semantics.Realize];
+  use NoLEMFrame;
+  constructor;
+  . apply KC_Characteraizable.characterize;
+    exact ⟨NoLEMFrame.reflexive, NoLEMFrame.transitive, NoLEMFrame.confluent⟩;
+  . simp [ValidOnFrame];
+    use (λ w _ => match w with | .inr _ => True | .inl _ => False);
+    constructor;
+    . simp;
+    . simp [ValidOnModel, Satisfies];
+
+lemma noLEM_KC: ∃ (p : Formula α), 𝐊𝐂 ⊬! p ⋎ ~p := by
+  obtain ⟨p, hp⟩ := noLEM_on_frameclass_KC (α := α);
+  use p;
+  by_contra hC;
+  have := Kripke.sound hC;
+  contradiction;
+
+theorem KC_strictly_weaker_than_Cl : (𝐊𝐂 : DeductionParameter α) <ₛ 𝐂𝐥 := by
+  constructor;
+  . exact KC_weaker_than_Cl;
+  . apply weakerThan_iff.not.mpr;
+    push_neg;
+    obtain ⟨p, hp⟩ := noLEM_KC (α := α);
+    use (p ⋎ ~p);
+    constructor;
+    . exact lem!;
+    . assumption;
+
+end
+
+
+section
+
+lemma noLEM_on_frameclass_LC : ∃ (p : Formula α), ¬((Kripke.FrameClassOfSystem.{u, _, 0} α 𝐋𝐂) ⊧ p ⋎ ~p) := by
+  use (atom default);
+  simp [Semantics.Realize];
+  use NoLEMFrame;
+  constructor;
+  . apply LC_Characteraizable.characterize;
+    exact ⟨NoLEMFrame.reflexive, NoLEMFrame.transitive, NoLEMFrame.connected⟩;
+  . simp [ValidOnFrame];
+    use (λ w _ => match w with | .inr _ => True | .inl _ => False);
+    constructor;
+    . simp;
+    . simp [ValidOnModel, Satisfies];
+
+lemma noLEM_LC: ∃ (p : Formula α), 𝐋𝐂 ⊬! p ⋎ ~p := by
+  obtain ⟨p, hp⟩ := noLEM_on_frameclass_LC (α := α);
+  use p;
+  by_contra hC;
+  have := Kripke.sound hC;
+  contradiction;
+
+theorem LC_strictly_weaker_than_Cl : (𝐋𝐂 : DeductionParameter α) <ₛ 𝐂𝐥 := by
+  constructor;
+  . exact LC_weaker_than_Cl;
+  . apply weakerThan_iff.not.mpr;
+    push_neg;
+    obtain ⟨p, hp⟩ := noLEM_LC (α := α);
+    use (p ⋎ ~p);
+    constructor;
+    . exact lem!;
+    . assumption;
+
+end
+
 
 end LO.Propositional.Superintuitionistic.Kripke

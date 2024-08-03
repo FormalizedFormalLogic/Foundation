@@ -75,6 +75,8 @@ instance [𝓓.IncludeEFQ] [𝓓.IncludeLEM] : System.Classical 𝓓 where
 
 namespace DeductionParameter
 
+lemma eaxm! {𝓓 : DeductionParameter α} {p : Formula α} (h : p ∈ Ax(𝓓)) : 𝓓 ⊢! p := ⟨eaxm h⟩
+
 protected abbrev Minimal : DeductionParameter α := { axiomSet := ∅ }
 
 protected abbrev Intuitionistic : DeductionParameter α := { axiomSet := 𝗘𝗙𝗤 }
@@ -86,6 +88,16 @@ protected abbrev Classical : DeductionParameter α := { axiomSet := 𝗘𝗙𝗤
 notation "𝐂𝐥" => DeductionParameter.Classical
 instance : IncludeLEM (α := α) 𝐂𝐥 where
 instance : IncludeEFQ (α := α) 𝐂𝐥 where
+
+-- `𝐊𝐂` from chagrov & zakharyaschev (1997)
+protected abbrev KC : DeductionParameter α := { axiomSet := 𝗘𝗙𝗤 ∪ 𝗪𝗟𝗘𝗠 }
+notation "𝐊𝐂" => DeductionParameter.KC
+instance : IncludeEFQ (α := α) 𝐊𝐂 where
+
+-- `𝐋𝐂` from chagrov & zakharyaschev (1997)
+protected abbrev LC : DeductionParameter α := { axiomSet := 𝗘𝗙𝗤 ∪ 𝗗𝘂𝗺 }
+notation "𝐋𝐂" => DeductionParameter.LC
+instance : IncludeEFQ (α := α) 𝐋𝐂 where
 
 /- MEMO:
   Term `WeakMinimal` and `WeakClassical` are from Ariola (2007)
@@ -132,22 +144,43 @@ end Deduction
 
 open System
 
-lemma reducible_efq_dne : (𝐈𝐧𝐭 : DeductionParameter α) ≤ₛ 𝐂𝐥 := by
-  rintro p hp;
-  simp [System.theory];
-  induction hp.some with
-  | eaxm h =>
-    obtain ⟨q, hq⟩ := by simpa using h;
-    subst hq;
-    apply efq!;
-  | mdp h₁ h₂ ih₁ ih₂ => exact (ih₁ ⟨h₁⟩) ⨀ (ih₂ ⟨h₂⟩);
+variable {Λ₁ Λ₂ : DeductionParameter α}
+
+lemma weaker_than_of_subset_axiomset' (hMaxm : ∀ {p : Formula α}, p ∈ Ax(Λ₁) → Λ₂ ⊢! p)
+  : Λ₁ ≤ₛ Λ₂ := by
+  apply System.weakerThan_iff.mpr;
+  intro p h;
+  induction h using Deduction.rec! with
+  | eaxm hp => apply hMaxm hp;
+  | mdp ihpq ihp => exact ihpq ⨀ ihp;
   | _ => simp;
+
+lemma weaker_than_of_subset_axiomset (hSubset : Ax(Λ₁) ⊆ Ax(Λ₂) := by aesop) : Λ₁ ≤ₛ Λ₂ := by
+  apply weaker_than_of_subset_axiomset';
+  intro p hp;
+  apply eaxm! $ hSubset hp;
+
+lemma Int_weaker_than_Cl : (𝐈𝐧𝐭 : DeductionParameter α) ≤ₛ 𝐂𝐥 := weaker_than_of_subset_axiomset
+
+lemma Int_weaker_than_KC : (𝐈𝐧𝐭 : DeductionParameter α) ≤ₛ 𝐊𝐂 := weaker_than_of_subset_axiomset
+
+lemma Int_weaker_than_LC : (𝐈𝐧𝐭 : DeductionParameter α) ≤ₛ 𝐋𝐂 := weaker_than_of_subset_axiomset
+
+lemma KC_weaker_than_Cl : (𝐊𝐂 : DeductionParameter α) ≤ₛ 𝐂𝐥 := by
+  apply weaker_than_of_subset_axiomset';
+  intro p hp;
+  rcases hp with (⟨_, rfl⟩ | ⟨_, rfl⟩) <;> simp;
+
+lemma LC_weaker_than_Cl : (𝐋𝐂 : DeductionParameter α) ≤ₛ 𝐂𝐥 := by
+  apply weaker_than_of_subset_axiomset';
+  intro p hp;
+  rcases hp with (⟨_, rfl⟩ | ⟨_, _, rfl⟩) <;> simp;
 
 variable {p : Formula α}
 
 theorem iff_provable_dn_efq_dne_provable: 𝐈𝐧𝐭 ⊢! ~~p ↔ 𝐂𝐥 ⊢! p := by
   constructor;
-  . intro d; exact dne'! $ reducible_efq_dne d;
+  . intro d; exact dne'! $ Int_weaker_than_Cl d;
   . intro d;
     induction d.some with
     | eaxm h =>

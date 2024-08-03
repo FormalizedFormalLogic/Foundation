@@ -163,10 +163,16 @@ notation "𝔽(" P ")" => FrameClassOfFrameProperty P
 section
 
 /-- FrameClass for `𝐈𝐧𝐭` or `𝐒𝟒` -/
-abbrev TransitiveReflexiveFrameClass := 𝔽((λ F => Transitive F ∧ Reflexive F))
+abbrev ReflexiveTransitiveFrameClass := 𝔽((λ F => Reflexive F ∧ Transitive F))
 
 /-- FrameClass for `𝐂𝐥` -/
-abbrev TransitiveReflexiveExtensiveFrameClass := 𝔽((λ F => Transitive F ∧ Reflexive F ∧ Extensive F))
+abbrev ReflexiveTransitiveExtensiveFrameClass := 𝔽((λ F => Reflexive F ∧ Transitive F ∧ Extensive F))
+
+/-- FrameClass for `𝐊𝐂` or `𝐒𝟒.𝟐` -/
+abbrev ReflexiveTransitiveConfluentFrameClass := 𝔽((λ F => Reflexive F ∧ Transitive F ∧ Confluent F))
+
+/-- FrameClass for `𝐋𝐂` or `𝐒𝟒.𝟑` -/
+abbrev ReflexiveTransitiveConnectedFrameClass := 𝔽((λ F => Reflexive F ∧ Transitive F ∧ Connected F))
 
 end
 

@@ -24,6 +24,18 @@ def bot_of_mem_either [System.NegationEquiv 𝓢] (h₁ : p ∈ Γ) (h₂ : ~p �
 def efq_of_mem_either [System.NegationEquiv 𝓢] [HasAxiomEFQ 𝓢] (h₁ : p ∈ Γ) (h₂ : ~p ∈ Γ) : Γ ⊢[𝓢] q := efq' $ bot_of_mem_either h₁ h₂
 @[simp] lemma efq_of_mem_either! [System.NegationEquiv 𝓢] [HasAxiomEFQ 𝓢] (h₁ : p ∈ Γ) (h₂ : ~p ∈ Γ) : Γ ⊢[𝓢]! q := ⟨efq_of_mem_either h₁ h₂⟩
 
+def efq_imply_not₁ [System.NegationEquiv 𝓢] [HasAxiomEFQ 𝓢] : 𝓢 ⊢ ~p ⟶ p ⟶ q := by
+  apply deduct';
+  apply deduct;
+  apply efq_of_mem_either (p := p) (by simp) (by simp);
+@[simp] lemma efq_imply_not₁! [System.NegationEquiv 𝓢] [HasAxiomEFQ 𝓢] : 𝓢 ⊢! ~p ⟶ p ⟶ q := ⟨efq_imply_not₁⟩
+
+def efq_imply_not₂ [System.NegationEquiv 𝓢] [HasAxiomEFQ 𝓢] : 𝓢 ⊢ p ⟶ ~p ⟶ q := by
+  apply deduct';
+  apply deduct;
+  apply efq_of_mem_either (p := p) (by simp) (by simp);
+@[simp] lemma efq_imply_not₂! [System.NegationEquiv 𝓢] [HasAxiomEFQ 𝓢] : 𝓢 ⊢! p ⟶ ~p ⟶ q := ⟨efq_imply_not₂⟩
+
 lemma efq_of_neg! [System.NegationEquiv 𝓢] [HasAxiomEFQ 𝓢] (h : 𝓢 ⊢! ~p) : 𝓢 ⊢! p ⟶ q := by
   apply provable_iff_provable.mpr;
   apply deduct_iff.mpr;
@@ -480,6 +492,15 @@ instance [HasAxiomEFQ 𝓢] [HasAxiomLEM 𝓢] : HasAxiomDNE 𝓢 where
       have np : [~p, ~~p] ⊢[𝓢] ~p := FiniteContext.byAxm;
       exact efq' $ nnp ⨀ np;
     ) $ of lem;;
+
+instance [HasAxiomLEM 𝓢] : HasAxiomWeakLEM 𝓢 where
+  wlem p := lem (p := ~p);
+
+instance [HasAxiomEFQ 𝓢] [HasAxiomLEM 𝓢] : HasAxiomDummett 𝓢 where
+  dummett p q := by
+    have d₁ : 𝓢 ⊢ p ⟶ ((p ⟶ q) ⋎ (q ⟶ p)) := impTrans'' imply₁ or₂;
+    have d₂ : 𝓢 ⊢ ~p ⟶ ((p ⟶ q) ⋎ (q ⟶ p)) := impTrans'' efq_imply_not₁ or₁;
+    exact or₃''' d₁ d₂ lem;
 
 end Instantinate
 
