@@ -586,7 +586,7 @@ lemma complete (H : CanonicalFrame Λ ∈ 𝔽) {p : Formula α} : 𝔽#α ⊧ p
 
 instance instComplete (H : CanonicalFrame Λ ∈ 𝔽) : Complete Λ (𝔽#α) := ⟨complete H⟩
 
-instance : Complete (𝐈𝐧𝐭 : DeductionParameter α) (Kripke.ReflexiveTransitiveFrameClass.{u}#α) := instComplete $ by
+instance Int_Complete : Complete (𝐈𝐧𝐭 : DeductionParameter α) (Kripke.ReflexiveTransitiveFrameClass.{u}#α) := instComplete $ by
   simp;
   constructor;
   . exact CanonicalFrame.reflexive;

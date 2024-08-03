@@ -300,7 +300,7 @@ instance Int_Characteraizable : 𝔽(𝐈𝐧𝐭 of α).Characteraizable (λ F 
     use { World := PUnit, Rel := λ _ _ => True };
     simp [Transitive, Reflexive];
 
-instance : Sound 𝐈𝐧𝐭 (ReflexiveTransitiveFrameClass#α) := inferInstance
+instance Int_sound : Sound 𝐈𝐧𝐭 (ReflexiveTransitiveFrameClass#α) := inferInstance
 
 instance : System.Consistent (𝐈𝐧𝐭 : DeductionParameter α) := inferInstance
 
