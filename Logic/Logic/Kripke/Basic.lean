@@ -195,5 +195,35 @@ abbrev Model.World (M : Model α) := M.Frame.World
 instance : CoeSort (Model α) (Type u) := ⟨Model.World⟩
 
 
+section Classical
+
+abbrev ClassicalFrame : Kripke.Frame where
+  World := Unit
+  Rel _ _ := True
+
+
+namespace ClassicalFrame
+
+lemma transitive : Transitive ClassicalFrame := by simp [Transitive];
+
+lemma reflexive : Reflexive ClassicalFrame := by simp [Reflexive];
+
+lemma euclidean : Euclidean ClassicalFrame := by simp [Euclidean];
+
+lemma extensive : Extensive ClassicalFrame := by simp [Extensive];
+
+lemma universal : Universal ClassicalFrame := by simp [Universal];
+
+end ClassicalFrame
+
+
+abbrev ClassicalValuation (α : Type*) := α → Prop
+
+abbrev ClassicalModel (V : ClassicalValuation α) : Kripke.Model α where
+  Frame := ClassicalFrame
+  Valuation _ a := V a
+
+end Classical
+
 
 end LO.Kripke

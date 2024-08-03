@@ -6,11 +6,11 @@ namespace LO.Propositional.Superintuitionistic
 open System
 open Kripke
 
-variable [Inhabited α]
+variable {α : Type u} [Inhabited α]
 
 namespace Formula.Kripke
 
-def Satisfies (M : Kripke.Model α) (w : M.World) : Formula α → Prop
+def Satisfies (M : Kripke.Model.{u, v} α) (w : M.World) : Formula α → Prop
   | atom a => M.Valuation w a
   | ⊤      => True
   | ⊥      => False
@@ -18,7 +18,7 @@ def Satisfies (M : Kripke.Model α) (w : M.World) : Formula α → Prop
   | p ⋎ q  => Satisfies M w p ∨ Satisfies M w q
   | ~p     => ∀ {w' : M.World}, (w ≺ w') → ¬Satisfies M w' p
   | p ⟶ q => ∀ {w' : M.World}, (w ≺ w') → (Satisfies M w' p → Satisfies M w' q)
-instance instSatisfiesSemantics (M : Model α) : Semantics (Formula α) (M.World) := ⟨fun w ↦ Formula.Kripke.Satisfies M w⟩
+instance instSatisfiesSemantics (M : Kripke.Model.{u, v} α) : Semantics (Formula α) (M.World) := ⟨fun w ↦ Formula.Kripke.Satisfies M w⟩
 
 namespace Satisfies
 
@@ -401,5 +401,60 @@ instance : Sound 𝐋𝐂 (ReflexiveTransitiveConnectedFrameClass#α) := inferIn
 instance : System.Consistent (𝐋𝐂 : DeductionParameter α) := inferInstance
 
 end Kripke
+
+
+section Classical
+
+open LO.Kripke
+
+namespace Formula.Kripke
+
+abbrev ClassicalSatisfies (V : ClassicalValuation α) (p : Formula α) : Prop := Satisfies (ClassicalModel V) () p
+
+instance : Semantics (Formula α) (ClassicalValuation α) := ⟨ClassicalSatisfies⟩
+
+namespace ClassicalSatisfies
+
+variable {V : ClassicalValuation α}
+
+@[simp] lemma atom_def : V ⊧ atom a ↔ V a := by simp only [Semantics.Realize, Satisfies]
+
+instance : Semantics.Tarski (ClassicalValuation α) where
+  realize_top := by simp [Semantics.Realize, ClassicalSatisfies, Satisfies];
+  realize_bot := by simp [Semantics.Realize, ClassicalSatisfies, Satisfies];
+  realize_or  := by simp [Semantics.Realize, ClassicalSatisfies, Satisfies];
+  realize_and := by simp [Semantics.Realize, ClassicalSatisfies, Satisfies];
+  realize_imp := by simp [Semantics.Realize, Satisfies]; tauto;
+  realize_not := by simp [Semantics.Realize, Satisfies]; tauto;
+
+end ClassicalSatisfies
+
+end Formula.Kripke
+
+
+namespace Kripke
+
+open Formula.Kripke (ClassicalSatisfies)
+
+lemma ValidOnClassicalFrame_iff : (Kripke.FrameClassOfSystem.{u, _, 0} α 𝐂𝐥) ⊧ p → ∀ (V : ClassicalValuation α), V ⊧ p := by
+  intro h V;
+  refine @h (ClassicalFrame) ?_ (λ _ a => V a) (by simp [Valuation.atomic_hereditary]) ();
+  . apply @Cl_Characteraizable α |>.characterize;
+    refine ⟨ClassicalFrame.reflexive, ClassicalFrame.transitive, ClassicalFrame.extensive⟩;
+
+lemma notClassicalValid_of_exists_ClassicalValuation : (∃ (V : ClassicalValuation α), ¬(V ⊧ p)) → ¬(Kripke.FrameClassOfSystem.{u, _, 0} α 𝐂𝐥) ⊧ p := by
+  contrapose; push_neg;
+  have := @ValidOnClassicalFrame_iff α p;
+  exact this;
+
+lemma unprovable_classical_of_exists_ClassicalValuation (h : ∃ (V : ClassicalValuation α), ¬(V ⊧ p)) : 𝐂𝐥 ⊬! p := by
+  apply not_imp_not.mpr $ Kripke.sound.{u, u, 0};
+  apply notClassicalValid_of_exists_ClassicalValuation;
+  assumption;
+
+end Kripke
+
+end Classical
+
 
 end LO.Propositional.Superintuitionistic
