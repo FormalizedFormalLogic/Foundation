@@ -25,9 +25,9 @@ notation "﹫" => Frame.default
 
 
 set_option linter.unusedVariables false in
-abbrev Frame.Dep (α : Type*) := Frame
+protected abbrev Frame.Dep (α : Type v) := Frame.{u}
 
-abbrev Frame.alt (F : Frame) (α) : Frame.Dep α := F
+abbrev Frame.alt (F : Frame.{u}) (α : Type v) : Frame.Dep α := F
 notation F:max "#" α:max => Frame.alt F α
 
 
@@ -151,8 +151,10 @@ lemma FrameClass.iff_mem_restrictFinite {𝔽 : FrameClass} {F : Frame} (h : F �
 -/
 
 -- set_option pp.universes true in
+/-
 abbrev FrameClassOfSystem {F : Type u} [System F S] (𝓢 : S) (α : Type u) [Semantics F (Frame.Dep α)] : FrameClass.Dep α := { F | F ⊧* System.theory 𝓢 }
 notation "𝔽(" 𝓢 " of " α ")" => FrameClassOfSystem 𝓢 α
+-/
 
 abbrev FrameClassOfFrameProperty (P : FrameProperty) : FrameClass := { F | P F }
 notation "𝔽(" P ")" => FrameClassOfFrameProperty P
@@ -169,55 +171,9 @@ abbrev TransitiveReflexiveExtensiveFrameClass := 𝔽((λ F => Transitive F ∧ 
 end
 
 
-class FrameClass.Characteraizable (𝔽 : FrameClass) (P : FrameProperty) where
+class FrameClass.Characteraizable (𝔽 : FrameClass) (P : outParam FrameProperty) where
   characterize : ∀ {F}, P F → F ∈ 𝔽
   nonempty : ∃ F, P F
-
-
-section Soundness
-
-variable
-  {F : Type u} {S} {α : Type u}
-  [System F S] [Semantics F (Frame.Dep α)]
-  {𝓢 : S} {p : F} {P : FrameProperty}
-
-lemma sound : 𝓢 ⊢! p → 𝔽(𝓢 of α) ⊧ p := by
-  intro hp F hF;
-  simp [System.theory] at hF;
-  exact hF p hp;
-
-instance : Sound 𝓢 𝔽(𝓢 of α) := ⟨sound⟩
-
-
-lemma sound_of_characterizability (characterizability : 𝔽(𝓢 of α).Characteraizable P) : 𝓢 ⊢! p → 𝔽(P) ⊧ p := by
-  intro h F hF;
-  apply sound h;
-  apply characterizability.characterize hF;
-
-instance instSoundOfCharacterizability (characterizability : 𝔽(𝓢 of α).Characteraizable P) : Sound 𝓢 𝔽(P) := ⟨sound_of_characterizability characterizability⟩
-
-
-variable [LogicalConnective F] [Semantics.Bot (Frame.Dep α)]
-
-lemma unprovable_bot (hc : 𝔽(𝓢 of α).Nonempty) : 𝓢 ⊬! ⊥ := by
-  apply (not_imp_not.mpr (sound (α := α)));
-  simp [Semantics.Realize];
-  exact hc;
-
-  -- exact Semantics.Bot.realize_bot 𝔽(𝓢 of α);
-
-lemma unprovable_bot_of_characterizability (characterizability : 𝔽(𝓢 of α).Characteraizable P) : 𝓢 ⊬! ⊥ := by
-  apply not_imp_not.mpr $ sound_of_characterizability (characterizability := characterizability);
-  simp [Semantics.Realize];
-  exact characterizability.nonempty;
-
-/-
-instance
-  [characterizability : 𝔽(𝓢 of α).Characteraizable P]
-  : System.Consistent 𝓢 := System.Consistent.of_unprovable $ unprovable_bot_of_characterizability (α := α) (characterizability := characterizability)
--/
-
-end Soundness
 
 
 abbrev Valuation (F : Frame) (α : Type*) := F.World → α → Prop

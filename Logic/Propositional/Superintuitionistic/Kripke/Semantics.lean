@@ -8,7 +8,9 @@ open Kripke
 
 variable [Inhabited α]
 
-def Formula.Kripke.Satisfies (M : Kripke.Model α) (w : M.World) : Formula α → Prop
+namespace Formula.Kripke
+
+def Satisfies (M : Kripke.Model α) (w : M.World) : Formula α → Prop
   | atom a => M.Valuation w a
   | ⊤      => True
   | ⊥      => False
@@ -16,12 +18,9 @@ def Formula.Kripke.Satisfies (M : Kripke.Model α) (w : M.World) : Formula α �
   | p ⋎ q  => Satisfies M w p ∨ Satisfies M w q
   | ~p     => ∀ {w' : M.World}, (w ≺ w') → ¬Satisfies M w' p
   | p ⟶ q => ∀ {w' : M.World}, (w ≺ w') → (Satisfies M w' p → Satisfies M w' q)
+instance (M : Model α) : Semantics (Formula α) (M.World) := ⟨fun w ↦ Formula.Kripke.Satisfies M w⟩
 
-instance instKripkeSemanticsFormulaWorld (M : Model α) : Semantics (Formula α) (M.World) := ⟨fun w ↦ Formula.Kripke.Satisfies M w⟩
-
-open Formula.Kripke
-
-namespace Formula.Kripke.Satisfies
+namespace Satisfies
 
 variable {M : Model α} {w : M.World} {p q r : Formula α}
 
@@ -47,8 +46,6 @@ instance : Semantics.And M.World where
 instance : Semantics.Or M.World where
   realize_or := by simp [Satisfies];
 
-
-
 lemma formula_hereditary
   (herditary : M.Valuation.atomic_hereditary)
   (F_trans : Transitive M.Frame.Rel)
@@ -64,30 +61,25 @@ lemma formula_hereditary
   | hor => simp_all [Satisfies]; tauto;
   | _ => simp_all [Satisfies];
 
-/-
-lemma hereditary_int {M : Model (𝐈𝐧𝐭 W α)} {w w' : W} {p : Formula α} (hw : M.frame w w') : (M, w) ⊧ p → (M, w') ⊧ p := by
-  apply hereditary (by simp [FrameClass.Intuitionistic]; tauto) hw;
--/
 
 lemma neg_equiv : w ⊧ ~p ↔ w ⊧ p ⟶ ⊥ := by simp_all [Satisfies];
 
-end Formula.Kripke.Satisfies
+end Satisfies
 
 
-open Formula.Kripke.Satisfies (formula_hereditary)
+open Satisfies
 
 
-def Formula.Kripke.ValidOnModel (M : Model α) (p : Formula α) := ∀ w : M.World, w ⊧ p
+def ValidOnModel (M : Model α) (p : Formula α) := ∀ w : M.World, w ⊧ p
+instance : Semantics (Formula α) (Model α) := ⟨fun M ↦ Formula.Kripke.ValidOnModel M⟩
 
-namespace Formula.Kripke.ValidOnModel
+namespace ValidOnModel
 
 variable
   {M : Model α} {p q r : Formula α}
   (atom_hereditary : ∀ {w₁ w₂ : M.World}, (w₁ ≺ w₂) → ∀ {a}, (M.Valuation w₁ a) → (M.Valuation w₂ a))
   (F_trans : Transitive M.Frame.Rel := by simpa)
   (F_refl : Reflexive M.Frame.Rel := by simpa)
-
-instance : Semantics (Formula α) (Model α) := ⟨fun M ↦ Formula.Kripke.ValidOnModel M⟩
 
 @[simp] protected lemma iff_models : M ⊧ p ↔ Formula.Kripke.ValidOnModel M p := iff_of_eq rfl
 
@@ -146,14 +138,14 @@ instance : Semantics (Formula α) (Model α) := ⟨fun M ↦ Formula.Kripke.Vali
     rw [←(hExt hww')];
     assumption;
 
-end Formula.Kripke.ValidOnModel
+end ValidOnModel
 
 
-def Formula.Kripke.ValidOnFrame (F : Frame) (p : Formula α) := ∀ {V : Valuation F α}, (_ : V.atomic_hereditary) → (⟨F, V⟩ : Kripke.Model α) ⊧ p
-
-namespace Formula.Kripke.ValidOnFrame
+def ValidOnFrame (F : Frame) (p : Formula α) := ∀ {V : Valuation F α}, (_ : V.atomic_hereditary) → (⟨F, V⟩ : Kripke.Model α) ⊧ p
 
 instance : Semantics (Formula α) (Frame.Dep α) := ⟨fun F ↦ Formula.Kripke.ValidOnFrame F⟩
+
+namespace ValidOnFrame
 
 variable {F : Frame.Dep α}
 
@@ -195,40 +187,65 @@ instance : Semantics.Bot (Frame.Dep α) where
     existsi (λ _ _ => True);
     simp_all [Satisfies, Valuation.atomic_hereditary];
 
-end Formula.Kripke.ValidOnFrame
+end ValidOnFrame
+
 
 instance : Semantics (Formula α) (FrameClass.Dep α) := LO.Semantics.instSet (Frame.Dep α)
 
-/-
-@[simp] def Formula.Kripke.ValidOnFrameClass (𝔽 : FrameClass) (p : Formula α) := ∀ {F : Frame}, F ∈ 𝔽 → F# ⊧ p
 
-namespace Formula.Kripke.ValidOnFrameClass
+end Formula.Kripke
 
-instance : Semantics (Formula α) (FrameClass.Dep α) := ⟨fun 𝔽 ↦ Formula.Kripke.ValidOnFrameClass 𝔽⟩
-
-@[simp] protected lemma iff_models {𝔽 : FrameClass.Dep α} : 𝔽 ⊧ p ↔ Formula.Kripke.ValidOnFrameClass 𝔽 p := iff_of_eq rfl
-
-protected lemma realize_bot {𝔽 : FrameClass.Dep α} (ne : 𝔽.Nonempty) : ¬(𝔽 ⊧ ⊥) := by
-  simp [ValidOnFrameClass.iff_models, ValidOnFrameClass];
-  exact ne;
-
-end Formula.Kripke.ValidOnFrameClass
--/
-
-/-
-@[simp] def Formula.Kripke.ValidOnFiniteFrameClass (𝔽 : FiniteFrameClass) (f : Formula α) := ∀ (F : FiniteFrame' α), F ∈ 𝔽 → F.toFrame' ⊧ f
-
-instance : Semantics (Formula α) (FiniteFrameClass' α) := ⟨fun 𝔽 ↦ Formula.Kripke.ValidOnFiniteFrameClass 𝔽⟩
-
-namespace Formula.Kripke.ValidOnFiniteFrameClass
-
-@[simp] protected lemma models_iff {𝔽 : FiniteFrameClass' α} : 𝔽 ⊧ f ↔ Formula.Kripke.ValidOnFiniteFrameClass 𝔽 f := iff_of_eq rfl
-
-end Formula.Kripke.ValidOnFiniteFrameClass
--/
-
+open Formula.Kripke
+open Formula.Kripke.Satisfies (formula_hereditary)
 
 namespace Kripke
+
+
+abbrev FrameClassOfSystem (α : Type u) {S : Type u} [System (Formula α) S] (𝓢 : S) : FrameClass.Dep α := { (F : Frame.Dep α) | F ⊧* System.theory 𝓢 }
+notation "𝔽(" 𝓢 " of " α ")" => FrameClassOfSystem α 𝓢
+
+section Soundness
+
+variable {α : Type u} [System (Formula α) S] {𝓢 : S} {p : Formula α} {P : FrameProperty}
+
+lemma sound : 𝓢 ⊢! p → 𝔽(𝓢 of α) ⊧ p := by
+  intro hp F hF;
+  simp [System.theory] at hF;
+  exact hF p hp;
+
+instance : Sound 𝓢 𝔽(𝓢 of α) := ⟨sound⟩
+
+lemma unprovable_bot (hc : 𝔽(𝓢 of α).Nonempty) : 𝓢 ⊬! ⊥ := by
+  apply (not_imp_not.mpr (sound (α := α)));
+  simp [Semantics.Realize];
+  obtain ⟨F, hF⟩ := hc;
+  use F;
+  constructor;
+  . exact hF;
+  . exact Semantics.Bot.realize_bot (F := Formula α) (M := Frame.Dep α) F;
+
+instance (hc : 𝔽(𝓢 of α).Nonempty) : System.Consistent 𝓢 := System.Consistent.of_unprovable $ unprovable_bot hc
+
+
+lemma sound_of_characterizability [characterizability : 𝔽(𝓢 of α).Characteraizable P] : 𝓢 ⊢! p → 𝔽(P)#α ⊧ p := by
+  intro h F hF;
+  apply sound h;
+  apply characterizability.characterize hF;
+
+instance instSoundOfCharacterizability [𝔽(𝓢 of α).Characteraizable P] : Sound 𝓢 (𝔽(P)#α) := ⟨sound_of_characterizability⟩
+
+lemma unprovable_bot_of_characterizability [characterizability : 𝔽(𝓢 of α).Characteraizable P] : 𝓢 ⊬! ⊥ := by
+  apply unprovable_bot;
+  obtain ⟨F, hF⟩ := characterizability.nonempty;
+  use F;
+  apply characterizability.characterize hF;
+
+instance instConsistentOfCharacterizability [FrameClass.Characteraizable.{u} 𝔽(𝓢 of α) P] : System.Consistent 𝓢 := System.Consistent.of_unprovable $ unprovable_bot_of_characterizability
+
+end Soundness
+
+
+variable {α : Type u}
 
 instance Int_Characteraizable : 𝔽(𝐈𝐧𝐭 of α).Characteraizable (λ F => Transitive F ∧ Reflexive F) where
   characterize := by
@@ -247,7 +264,7 @@ instance Int_Characteraizable : 𝔽(𝐈𝐧𝐭 of α).Characteraizable (λ F 
     | neg_equiv => apply ValidOnFrame.neg_equiv;
     | mdp ihpq ihp =>
       apply ValidOnFrame.mdp;
-      repeat simpa;
+      repeat simpa only [ValidOnFrame.models_iff];
     | eaxm h =>
       obtain ⟨_, rfl⟩ := h;
       apply ValidOnFrame.efq;
@@ -255,16 +272,10 @@ instance Int_Characteraizable : 𝔽(𝐈𝐧𝐭 of α).Characteraizable (λ F 
     use { World := PUnit, Rel := λ _ _ => True };
     simp [Transitive, Reflexive];
 
--- set_option pp.universes true in
-instance : Sound 𝐈𝐧𝐭 (TransitiveReflexiveFrameClass#α) := Kripke.instSoundOfCharacterizability Int_Characteraizable
+instance : Sound 𝐈𝐧𝐭 (TransitiveReflexiveFrameClass#α) := inferInstance
 
-/-
-instance : System.Consistent (𝐈𝐧𝐭 : DeductionParameter α) := by
-  apply System.Consistent.of_unprovable;
-  apply unprovable_bot_of_characterizability;
-  exact Int_Characteraizable;
-  -- sorry;
--/
+instance : System.Consistent (𝐈𝐧𝐭 : DeductionParameter α) := inferInstance
+
 
 instance Cl_Characteraizable : 𝔽(𝐂𝐥 of α).Characteraizable (λ F => Transitive F ∧ Reflexive F ∧ Extensive F) where
   characterize := by
@@ -292,7 +303,9 @@ instance Cl_Characteraizable : 𝔽(𝐂𝐥 of α).Characteraizable (λ F => Tr
     use { World := PUnit, Rel := λ _ _ => True };
     simp [Transitive, Reflexive, Extensive];
 
-instance : Sound 𝐂𝐥 (TransitiveReflexiveExtensiveFrameClass#α) := Kripke.instSoundOfCharacterizability Cl_Characteraizable
+instance : Sound 𝐂𝐥 (TransitiveReflexiveExtensiveFrameClass#α) := inferInstance
+
+instance : System.Consistent (𝐂𝐥 : DeductionParameter α) := inferInstance
 
 end Kripke
 
