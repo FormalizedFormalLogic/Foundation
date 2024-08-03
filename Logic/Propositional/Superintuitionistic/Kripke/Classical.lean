@@ -1,35 +1,92 @@
 import Logic.Propositional.Superintuitionistic.Deduction
 import Logic.Propositional.Superintuitionistic.Kripke.Semantics
-import Logic.Propositional.Superintuitionistic.Kripke.Soundness
+
+universe u v
 
 namespace LO.Kripke
 
+abbrev ClassicalFrame : Kripke.Frame where
+  World := Unit
+  Rel _ _ := True
+
+abbrev ClassicalValuation (α : Type*) := α → Prop
+
+abbrev ClassicalModel (V : ClassicalValuation α) : Kripke.Model α where
+  Frame := ClassicalFrame
+  Valuation _ a := V a
+  -- hereditary := by simp only [imp_self, forall_const, forall_true_left];
 
 end LO.Kripke
 
 
 namespace LO.Propositional.Superintuitionistic
 
-variable [Inhabited α]
+variable {α : Type u} [Inhabited α]
 
-open Formula
+open LO.Kripke
+
+namespace Formula.Kripke
+
+
+--
+
+instance cla : Semantics (Formula α) (ClassicalValuation α) := ⟨λ V => Satisfies (ClassicalModel.{u} V) ()⟩
+
+namespace ClassicalSatisfies
+
+variable {V : ClassicalValuation α}
+
+set_option pp.universes true
+@[simp] protected lemma iff_models : V ⊧ p ↔ Satisfies (ClassicalModel V) () p := by rfl
+
+@[simp] lemma atom_def : V ⊧ atom a ↔ V a := by simp [Satisfies]
+
+instance : Semantics.Tarski (ClassicalValuation α) where
+  realize_top := by simp [Satisfies];
+  realize_bot := by simp [Satisfies];
+  realize_or  := by simp [Satisfies];
+  realize_and := by simp [Satisfies];
+  realize_imp := by simp [Satisfies]; tauto;
+  realize_not := by simp [Satisfies]; tauto;
+
+end ClassicalSatisfies
+
+
+lemma ValidOnModel.classical_iff {V : ClassicalValuation α} : (ClassicalModel V) ⊧ p ↔ V ⊧ p := by tauto;
+
+end Formula.Kripke
+
 
 namespace Kripke
 
-abbrev ClassicalFrame : Kripke.Frame := { World := PUnit, Rel := λ _ _ => True }
+lemma ValidOnClassicalFrame_iff : 𝔽(𝐂𝐥 of α) ⊧ p → ∀ (V : ClassicalValuation α), V ⊧ p := by
+  intro h V;
+  apply Formula.Kripke.ValidOnModel.classical_iff.mp;
+  intro w;
 
-abbrev ClassicalValuation (α : Type*) := α → Prop
+  sorry;
+  /-
+  exact h (by
+    apply iff_definability_memAxiomSetFrameClass instClassicalDefinabilityExtensive |>.mpr;
+    simp [Extensive];
+  ) (ClassicalModel V).Valuation (ClassicalModel V).hereditary;
+  -/
 
-abbrev ClassicalModel (V : ClassicalValuation α) : Kripke.Model α where
-  Frame := ClassicalFrame
-  Valuation := λ _ a => V a
-  -- hereditary := by simp only [imp_self, forall_const, forall_true_left];
+lemma notClassicalValid_of_exists_ClassicalValuation : (∃ (V : ClassicalValuation α), ¬(V ⊧ p)) → ¬𝔽(𝐂𝐥 of α) ⊧ p := by
+  contrapose; push_neg;
+  apply ValidOnClassicalFrame_iff;
+
+/-
+set_option pp.universes true
+lemma unprovable_classical_of_exists_ClassicalValuation (h : ∃ (V : ClassicalValuation α), ¬(V ⊧ p)) : 𝐂𝐥 ⊬! p := by
+  apply not_imp_not.mpr $ Kripke.sound;
+  apply notClassicalValid_of_exists_ClassicalValuation;
+  assumption;
+-/
 
 end Kripke
 
-
-open Kripke
-
+/-
 instance AxiomSet.LEM.definability : Definability (α := α) 𝗟𝗘𝗠 (λ F => Euclidean F.Rel) where
   defines F := by
     simp;
@@ -124,5 +181,6 @@ lemma unprovable_classical_of_exists_ClassicalValuation (h : ∃ (V : ClassicalV
   apply not_imp_not.mpr $ Kripke.sound!;
   apply notClassicalValid_of_exists_ClassicalValuation;
   assumption;
+-/
 
 end LO.Propositional.Superintuitionistic

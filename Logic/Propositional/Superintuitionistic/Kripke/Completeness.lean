@@ -326,7 +326,7 @@ lemma lindenbaum (hCon : (Λ)-Consistent t₀) : ∃ (t : SaturatedConsistentTab
   obtain ⟨t, ht, hCon, hMax⟩ := Tableau.lindenbaum hCon;
   exact ⟨⟨t, hMax, hCon⟩, ht⟩;
 
-noncomputable instance [System.Consistent Λ] : Inhabited (SCT Λ) := ⟨lindenbaum Tableau.self_ParametricConsistent |>.choose⟩
+instance [System.Consistent Λ] : Nonempty (SCT Λ) := ⟨lindenbaum Tableau.self_ParametricConsistent |>.choose⟩
 
 variable (t : SCT Λ)
 
@@ -413,6 +413,11 @@ namespace CanonicalFrame
 
 variable [Nonempty (SCT Λ)]
 
+lemma reflexive : Reflexive (CanonicalFrame Λ) := by
+  simp [CanonicalFrame];
+  intro x;
+  apply Set.Subset.refl;
+
 lemma antisymmetric : Antisymmetric (CanonicalFrame Λ) := by
   simp [CanonicalFrame];
   intro x y Rxy Ryx;
@@ -440,7 +445,7 @@ lemma hereditary : (CanonicalModel Λ).Valuation.atomic_hereditary := by
   aesop;
 
 @[reducible]
-instance : Semantics (Formula α) (CanonicalModel Λ).World := instKripkeSemanticsFormulaWorld (CanonicalModel Λ)
+instance : Semantics (Formula α) (CanonicalModel Λ).World := instSatisfiesSemantics (CanonicalModel Λ)
 
 @[simp] lemma frame_def : (CanonicalModel Λ).Frame t₁ t₂ ↔ t₁.tableau.1 ⊆ t₂.tableau.1 := by rfl
 @[simp] lemma valuation_def {a : α} : (CanonicalModel Λ).Valuation t a ↔ (atom a) ∈ t.tableau.1 := by rfl
@@ -449,7 +454,7 @@ end CanonicalModel
 
 section
 
-variable [Inhabited (SCT Λ)]
+variable [Nonempty (SCT Λ)]
 
 variable {t : SCT Λ} {p q : Formula α}
 
@@ -565,47 +570,40 @@ lemma deducible_of_validOnCanonicelModel : (CanonicalModel Λ) ⊧ p ↔ Λ ⊢!
     suffices p ∈ t.tableau.1 by exact truthlemma.mpr this;
     exact mem₁_of_provable h;
 
-end
 
-class Canonical (Λ : DeductionParameter α) [Inhabited (SCT Λ)] where
-  mem : (CanonicalFrame Λ) ∈ 𝔽(Λ of α)
+section
 
-variable [Inhabited (SCT Λ)]
+variable [System.Consistent Λ]
+variable [DecidableEq α] [Encodable α]
+variable {𝔽 : Kripke.FrameClass}
 
-lemma complete [System.Consistent Λ] [Canonical Λ] {p : Formula α} : (Kripke.FrameClassOfSystem.{_, _, _, u} Λ α) ⊧ p → Λ ⊢! p := by
+lemma complete (H : CanonicalFrame Λ ∈ 𝔽) {p : Formula α} : 𝔽#α ⊧ p → Λ ⊢! p := by
   intro h;
   apply deducible_of_validOnCanonicelModel.mp;
   apply h;
-  . apply Canonical.mem;
+  . exact H;
   . exact CanonicalModel.hereditary;
 
-instance instComplete [System.Consistent Λ] [Canonical Λ] : Complete Λ (Kripke.FrameClassOfSystem.{_, _, _, u} Λ α) := ⟨complete⟩
+instance instComplete (H : CanonicalFrame Λ ∈ 𝔽) : Complete Λ (𝔽#α) := ⟨complete H⟩
 
-/-
-lemma a {P : Kripke.FrameProperty} [𝔽(Λ of α).Characteraizable P] [Inhabited (SCT Λ)] : Canonical Λ := ⟨by
-  apply Kripke.FrameClass.Characteraizable.characterize;
-  sorry;
+instance : Complete (𝐈𝐧𝐭 : DeductionParameter α) (Kripke.ReflexiveTransitiveFrameClass.{u}#α) := instComplete $ by
+  simp;
+  constructor;
+  . exact CanonicalFrame.reflexive;
+  . exact CanonicalFrame.transitive;
+
+instance : Complete (𝐈𝐧𝐭 : DeductionParameter α) (Kripke.FrameClassOfSystem.{_, _, u} α 𝐈𝐧𝐭) := ⟨by
+  intro p h;
+  apply Complete.complete (𝓜 := Kripke.ReflexiveTransitiveFrameClass#α);
+  intro F hF;
+  apply h;
+  exact Kripke.Int_Characteraizable.characterize hF;
 ⟩
--/
 
-/-
-class Canonical (Λ : DeductionParameter α) [Nonempty (SCT Λ)] where
-  realize : (CanonicalFrame Λ) ⊧* Ax(Λ)
+end
 
-lemma complete! [System.Consistent Λ] [Canonical Λ] : (𝔽(Ax(Λ)) : FrameClass' α) ⊧ p → Λ ⊢! p := by
-  intro h;
-  apply deducible_of_validOnCanonicelModel.mp;
-  exact h Canonical.realize _ _;
 
-instance instComplete [System.Consistent Λ] [Canonical Λ] : Complete Λ 𝔽(Ax(Λ)) := ⟨complete!⟩
-
-instance canonical_of_definability [Inhabited (SCT Λ)] (definability : Definability Ax(Λ) P) (h : P (CanonicalFrame Λ)) : Canonical Λ where
-  realize := definability.defines _ |>.mpr h;
-
-instance : Canonical (𝐈𝐧𝐭 : DeductionParameter α) := canonical_of_definability AxiomSet.EFQ.definability trivial
-
-instance intComplete : Complete (𝐈𝐧𝐭 : DeductionParameter α) 𝔽(Ax(𝐈𝐧𝐭)) := instComplete
--/
+end
 
 end Kripke
 

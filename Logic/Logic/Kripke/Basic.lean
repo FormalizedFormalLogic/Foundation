@@ -128,7 +128,7 @@ abbrev FrameProperty := Frame → Prop
 abbrev FrameClass := Set (Frame)
 
 set_option linter.unusedVariables false in
-abbrev FrameClass.Dep (α : Type*) := FrameClass
+abbrev FrameClass.Dep (α : Type v) := FrameClass.{u}
 
 abbrev FrameClass.alt (𝔽 : FrameClass) (α) : FrameClass.Dep α := 𝔽
 notation 𝔽:max "#" α:max => FrameClass.alt 𝔽 α

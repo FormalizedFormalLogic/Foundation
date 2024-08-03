@@ -18,7 +18,7 @@ def Satisfies (M : Kripke.Model α) (w : M.World) : Formula α → Prop
   | p ⋎ q  => Satisfies M w p ∨ Satisfies M w q
   | ~p     => ∀ {w' : M.World}, (w ≺ w') → ¬Satisfies M w' p
   | p ⟶ q => ∀ {w' : M.World}, (w ≺ w') → (Satisfies M w' p → Satisfies M w' q)
-instance (M : Model α) : Semantics (Formula α) (M.World) := ⟨fun w ↦ Formula.Kripke.Satisfies M w⟩
+instance instSatisfiesSemantics (M : Model α) : Semantics (Formula α) (M.World) := ⟨fun w ↦ Formula.Kripke.Satisfies M w⟩
 
 namespace Satisfies
 
@@ -228,7 +228,6 @@ open Formula.Kripke
 open Formula.Kripke.Satisfies (formula_hereditary)
 
 namespace Kripke
-
 
 abbrev FrameClassOfSystem (α : Type u) {S : Type u} [System (Formula α) S] (𝓢 : S) : FrameClass.Dep α := { (F : Frame.Dep α) | F ⊧* System.theory 𝓢 }
 notation "𝔽(" 𝓢 " of " α ")" => FrameClassOfSystem α 𝓢
