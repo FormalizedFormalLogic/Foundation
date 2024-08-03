@@ -25,7 +25,7 @@ notation "﹫" => Frame.default
 
 
 set_option linter.unusedVariables false in
-protected abbrev Frame.Dep (α : Type v) := Frame.{u}
+abbrev Frame.Dep (α : Type v) := Frame.{u}
 
 abbrev Frame.alt (F : Frame.{u}) (α : Type v) : Frame.Dep α := F
 notation F:max "#" α:max => Frame.alt F α
@@ -41,7 +41,7 @@ instance : Coe (FiniteFrame) (Frame) := ⟨λ F ↦ F.toFrame⟩
 open Relation (ReflTransGen TransGen)
 
 
-protected abbrev Frame.RelReflTransGen {F : Frame} : _root_.Rel F.World F.World:= ReflTransGen (· ≺ ·)
+abbrev Frame.RelReflTransGen {F : Frame} : _root_.Rel F.World F.World:= ReflTransGen (· ≺ ·)
 scoped infix:45 " ≺^* " => Frame.RelReflTransGen
 
 namespace Frame.RelReflTransGen
@@ -82,7 +82,7 @@ end Frame.TransitiveReflexiveClosure
 
 
 
-protected abbrev Frame.RelTransGen {F : Frame} : _root_.Rel F.World F.World := TransGen (· ≺ ·)
+abbrev Frame.RelTransGen {F : Frame} : _root_.Rel F.World F.World := TransGen (· ≺ ·)
 scoped infix:45 " ≺^+ " => Frame.RelTransGen
 
 namespace Frame.RelTransGen
