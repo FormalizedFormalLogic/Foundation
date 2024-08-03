@@ -61,6 +61,9 @@ class HasAxiomWeakLEM where
 class HasAxiomDummett where
   dummett (p q : F) : 𝓢 ⊢ Axioms.GD p q
 
+class HasAxiomPeirce where
+  peirce (p q : F) : 𝓢 ⊢ Axioms.Peirce p q
+
 protected class Minimal extends
               ModusPonens 𝓢,
               HasAxiomVerum 𝓢, NegationEquiv 𝓢,
@@ -134,8 +137,11 @@ def dne' [HasAxiomDNE 𝓢] (b : 𝓢 ⊢ ~~p) : 𝓢 ⊢ p := dne ⨀ b
 def wlem [HasAxiomWeakLEM 𝓢] : 𝓢 ⊢ ~p ⋎ ~~p := HasAxiomWeakLEM.wlem p
 @[simp] lemma wlem! [HasAxiomWeakLEM 𝓢] : 𝓢 ⊢! ~p ⋎ ~~p := ⟨wlem⟩
 
-def dummett [HasAxiomDummett 𝓢] : 𝓢 ⊢ Axioms.GD p q := HasAxiomDummett.dummett p q
+def dummett [HasAxiomDummett 𝓢] : 𝓢 ⊢ (p ⟶ q) ⋎ (q ⟶ p) := HasAxiomDummett.dummett p q
 @[simp] lemma dummett! [HasAxiomDummett 𝓢] : 𝓢 ⊢! Axioms.GD p q := ⟨dummett⟩
+
+def peirce [HasAxiomPeirce 𝓢] : 𝓢 ⊢ ((p ⟶ q) ⟶ p) ⟶ p := HasAxiomPeirce.peirce _ _
+@[simp] lemma peirce! [HasAxiomPeirce 𝓢] : 𝓢 ⊢! ((p ⟶ q) ⟶ p) ⟶ p := ⟨peirce⟩
 
 def imply₁' (h : 𝓢 ⊢ p) : 𝓢 ⊢ q ⟶ p := imply₁ ⨀ h
 lemma imply₁'! (d : 𝓢 ⊢! p) : 𝓢 ⊢! q ⟶ p := ⟨imply₁' d.some⟩

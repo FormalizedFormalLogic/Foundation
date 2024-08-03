@@ -298,6 +298,10 @@ notation "𝐆𝐋" => DeductionParameter.GL
 instance : System.GL (𝐆𝐋 : DeductionParameter α) where
   L _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
 
+protected abbrev Grz : DeductionParameter α := 𝝂(𝗚𝗿𝘇)
+notation "𝐆𝐫𝐳" => DeductionParameter.Grz
+instance : System.Grz (𝐆𝐫𝐳 : DeductionParameter α) where
+  Grz _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
 
 protected abbrev K4H : DeductionParameter α := 𝝂(𝟰 ∪ 𝗛)
 notation "𝐊𝟒𝐇" => DeductionParameter.K4H
@@ -434,6 +438,20 @@ lemma reducible_K4_GL : (𝐊𝟒 : DeductionParameter α) ≤ₛ 𝐆𝐋 := by
   rcases hp with (hK | hFour)
   . obtain ⟨_, _, e⟩ := hK; subst_vars; exact axiomK!;
   . obtain ⟨_, _, e⟩ := hFour; exact axiomFour!;
+
+lemma reducible_KT_Grz : (𝐊𝐓 : DeductionParameter α) ≤ₛ 𝐆𝐫𝐳 := by
+  apply normal_reducible;
+  intro p hp;
+  rcases hp with (hK | hGrz)
+  . obtain ⟨_, _, e⟩ := hK; subst_vars; exact axiomK!;
+  . obtain ⟨_, _, e⟩ := hGrz; exact axiomT!;
+
+lemma reducible_K4_Grz : (𝐊𝟒 : DeductionParameter α) ≤ₛ 𝐆𝐫𝐳 := by
+  apply normal_reducible;
+  intro p hp;
+  rcases hp with (hK | hGrz)
+  . obtain ⟨_, _, e⟩ := hK; subst_vars; exact axiomK!;
+  . obtain ⟨_, _, e⟩ := hGrz; exact axiomFour!;
 
 -- Macintyre & Simmons (1973)
 -- 𝐆𝐋 =ₛ 𝐊𝟒(𝐋) =ₛ 𝐊𝟒(𝐇) =ₛ 𝐊𝟒𝐇

@@ -502,6 +502,15 @@ instance [HasAxiomEFQ 𝓢] [HasAxiomLEM 𝓢] : HasAxiomDummett 𝓢 where
     have d₂ : 𝓢 ⊢ ~p ⟶ ((p ⟶ q) ⋎ (q ⟶ p)) := impTrans'' efq_imply_not₁ or₁;
     exact or₃''' d₁ d₂ lem;
 
+noncomputable instance [HasAxiomDNE 𝓢] : HasAxiomPeirce 𝓢 where
+  peirce p q := by
+    refine or₃''' imply₁ ?_ lem;
+    apply deduct';
+    apply deduct;
+    refine (FiniteContext.byAxm (p := (p ⟶ q) ⟶ p)) ⨀ ?_;
+    apply deduct;
+    apply efq_of_mem_either (by aesop) (by aesop)
+
 end Instantinate
 
 
