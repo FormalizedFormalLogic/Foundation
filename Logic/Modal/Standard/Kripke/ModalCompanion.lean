@@ -103,7 +103,7 @@ lemma provable_S4_of_provable_efq : (𝐒𝟒 ⊢! pᵍ) → (𝐈𝐧𝐭 ⊢! 
   intro h;
   replace h := (not_imp_not.mpr $ Superintuitionistic.Kripke.Int_Complete.complete) h;
   simp [Semantics.Realize, ValidOnFrame, ValidOnModel] at h;
-  obtain ⟨IF, IF_refl, IF_trans, IV, IV_hered, w, hp⟩ := h;
+  obtain ⟨IF, ⟨IF_refl, IF_trans⟩, IV, IV_hered, w, hp⟩ := h;
 
   let M : Modal.Standard.Kripke.Model α := { Frame := { Rel := IF.Rel, }, Valuation := IV };
 

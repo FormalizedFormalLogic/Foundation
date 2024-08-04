@@ -122,9 +122,6 @@ lemma rel_symmetric (hSymm : Symmetric F.Rel) : Symmetric F.TransitiveClosure :=
 end Frame.TransitiveClosure
 
 
-abbrev FrameProperty := Frame → Prop
-
-
 abbrev FrameClass := Set (Frame)
 
 set_option linter.unusedVariables false in
@@ -156,30 +153,26 @@ abbrev FrameClassOfSystem {F : Type u} [System F S] (𝓢 : S) (α : Type u) [Se
 notation "𝔽(" 𝓢 " of " α ")" => FrameClassOfSystem 𝓢 α
 -/
 
-abbrev FrameClassOfFrameProperty (P : FrameProperty) : FrameClass := { F | P F }
-notation "𝔽(" P ")" => FrameClassOfFrameProperty P
-
-
 section
 
 /-- FrameClass for `𝐈𝐧𝐭` and `𝐒𝟒` -/
-abbrev ReflexiveTransitiveFrameClass := 𝔽((λ F => Reflexive F ∧ Transitive F))
+abbrev ReflexiveTransitiveFrameClass : FrameClass := λ F => Reflexive F ∧ Transitive F
 
 /-- FrameClass for `𝐊𝐂` and `𝐒𝟒.𝟐` -/
-abbrev ReflexiveTransitiveConfluentFrameClass := 𝔽((λ F => Reflexive F ∧ Transitive F ∧ Confluent F))
+abbrev ReflexiveTransitiveConfluentFrameClass : FrameClass := λ F => Reflexive F ∧ Transitive F ∧ Confluent F
 
 /-- FrameClass for `𝐋𝐂` and `𝐒𝟒.𝟑` -/
-abbrev ReflexiveTransitiveConnectedFrameClass := 𝔽((λ F => Reflexive F ∧ Transitive F ∧ Connected F))
+abbrev ReflexiveTransitiveConnectedFrameClass : FrameClass := λ F => Reflexive F ∧ Transitive F ∧ Connected F
 
 /-- FrameClass for `𝐂𝐥` and `𝐊𝐓𝟒𝐁` (`𝐒𝟓`) -/
-abbrev ReflexiveTransitiveSymmetricFrameClass := 𝔽((λ F => Reflexive F ∧ Transitive F ∧ Symmetric F))
+abbrev ReflexiveTransitiveSymmetricFrameClass : FrameClass := λ F => Reflexive F ∧ Transitive F ∧ Symmetric F
 
 end
 
-
-class FrameClass.Characteraizable (𝔽 : FrameClass) (P : outParam FrameProperty) where
-  characterize : ∀ {F}, P F → F ∈ 𝔽
-  nonempty : ∃ F, P F
+/-- `𝔽₁` is characterized by `𝔽₂` -/
+class FrameClass.Characteraizable (𝔽₁ : FrameClass) (𝔽₂ : outParam (FrameClass)) where
+  characterize : ∀ {F}, F ∈ 𝔽₂ → F ∈ 𝔽₁
+  nonempty : ∃ F, F ∈ 𝔽₂
 
 
 abbrev Valuation (F : Frame) (α : Type*) := F.World → α → Prop

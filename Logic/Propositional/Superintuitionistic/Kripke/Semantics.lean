@@ -235,7 +235,7 @@ notation "𝔽(" 𝓢 " of " α ")" => FrameClassOfSystem α 𝓢
 
 section Soundness
 
-variable {α : Type u} [System (Formula α) S] {𝓢 : S} {p : Formula α} {P : FrameProperty}
+variable {α : Type u} [System (Formula α) S] {𝓢 : S} {p : Formula α}
 
 lemma sound : 𝓢 ⊢! p → 𝔽(𝓢 of α) ⊧ p := by
   intro hp F hF;
@@ -256,30 +256,32 @@ lemma unprovable_bot (hc : 𝔽(𝓢 of α).Nonempty) : 𝓢 ⊬! ⊥ := by
 instance (hc : 𝔽(𝓢 of α).Nonempty) : System.Consistent 𝓢 := System.Consistent.of_unprovable $ unprovable_bot hc
 
 
-lemma sound_of_characterizability [characterizability : 𝔽(𝓢 of α).Characteraizable P] : 𝓢 ⊢! p → 𝔽(P)#α ⊧ p := by
+lemma sound_of_characterizability [characterizability : 𝔽(𝓢 of α).Characteraizable 𝔽₂] : 𝓢 ⊢! p → 𝔽₂#α ⊧ p := by
   intro h F hF;
   apply sound h;
   apply characterizability.characterize hF;
 
-instance instSoundOfCharacterizability [𝔽(𝓢 of α).Characteraizable P] : Sound 𝓢 (𝔽(P)#α) := ⟨sound_of_characterizability⟩
+instance instSoundOfCharacterizability [𝔽(𝓢 of α).Characteraizable 𝔽₂] : Sound 𝓢 (𝔽₂#α) := ⟨sound_of_characterizability⟩
 
-lemma unprovable_bot_of_characterizability [characterizability : 𝔽(𝓢 of α).Characteraizable P] : 𝓢 ⊬! ⊥ := by
+lemma unprovable_bot_of_characterizability [characterizability : 𝔽(𝓢 of α).Characteraizable 𝔽₂] : 𝓢 ⊬! ⊥ := by
   apply unprovable_bot;
   obtain ⟨F, hF⟩ := characterizability.nonempty;
   use F;
   apply characterizability.characterize hF;
 
-instance instConsistentOfCharacterizability [FrameClass.Characteraizable.{u} 𝔽(𝓢 of α) P] : System.Consistent 𝓢 := System.Consistent.of_unprovable $ unprovable_bot_of_characterizability
+instance instConsistentOfCharacterizability [FrameClass.Characteraizable.{u} 𝔽(𝓢 of α) 𝔽₂] : System.Consistent 𝓢 := System.Consistent.of_unprovable $ unprovable_bot_of_characterizability
 
 end Soundness
 
 
+section
+
 variable {α : Type u}
 
-instance Int_Characteraizable : 𝔽(𝐈𝐧𝐭 of α).Characteraizable (λ F => Reflexive F ∧ Transitive F) where
+instance Int_Characteraizable : 𝔽(𝐈𝐧𝐭 of α).Characteraizable ReflexiveTransitiveFrameClass where
   characterize := by
     simp [System.theory];
-    intro F hTrans hRefl p hp;
+    rintro F ⟨hTrans, hRefl⟩ p hp;
     induction hp using Deduction.rec! with
     | verum => apply ValidOnFrame.verum;
     | imply₁ => apply ValidOnFrame.imply₁; simpa;
@@ -299,7 +301,8 @@ instance Int_Characteraizable : 𝔽(𝐈𝐧𝐭 of α).Characteraizable (λ F 
       apply ValidOnFrame.efq;
   nonempty := by
     use { World := PUnit, Rel := λ _ _ => True };
-    simp [Transitive, Reflexive];
+    refine ⟨by simp [Reflexive], by simp [Transitive]⟩;
+
 
 instance Int_sound : Sound 𝐈𝐧𝐭 (ReflexiveTransitiveFrameClass#α) := inferInstance
 
@@ -309,7 +312,7 @@ instance : System.Consistent (𝐈𝐧𝐭 : DeductionParameter α) := inferInst
 instance Cl_Characteraizable : 𝔽(𝐂𝐥 of α).Characteraizable (λ F => Reflexive F ∧ Transitive F ∧ Symmetric F) where
   characterize := by
     simp [System.theory];
-    intro F hTrans hRefl hExt p hp;
+    rintro F ⟨hTrans, hRefl, hExt⟩ p hp;
     induction hp using Deduction.rec! with
     | verum => apply ValidOnFrame.verum;
     | imply₁ => apply ValidOnFrame.imply₁; simpa;
@@ -330,7 +333,7 @@ instance Cl_Characteraizable : 𝔽(𝐂𝐥 of α).Characteraizable (λ F => Re
       . apply ValidOnFrame.lem; simpa; simpa;
   nonempty := by
     use { World := PUnit, Rel := λ _ _ => True };
-    simp [Reflexive, Transitive, Symmetric];
+    refine ⟨by simp [Reflexive], by simp [Transitive], by simp [Symmetric]⟩;
 
 instance : Sound 𝐂𝐥 (ReflexiveTransitiveSymmetricFrameClass#α) := inferInstance
 
@@ -338,7 +341,7 @@ instance : System.Consistent (𝐂𝐥 : DeductionParameter α) := inferInstance
 
 
 
-instance KC_Characteraizable : 𝔽(𝐊𝐂 of α).Characteraizable (λ F => Reflexive F ∧ Transitive F ∧ Confluent F) where
+instance KC_Characteraizable : 𝔽(𝐊𝐂 of α).Characteraizable ReflexiveTransitiveConfluentFrameClass where
   characterize := by
     rintro F ⟨F_trans, F_refl, F_confl⟩;
     simp [System.theory];
@@ -363,14 +366,14 @@ instance KC_Characteraizable : 𝔽(𝐊𝐂 of α).Characteraizable (λ F => Re
       . apply ValidOnFrame.wlem; simpa; simpa;
   nonempty := by
     use { World := PUnit, Rel := λ _ _ => True };
-    simp [Transitive, Reflexive, Confluent];
+    refine ⟨by simp [Reflexive], by simp [Transitive], by simp [Confluent]⟩;
 
 instance : Sound 𝐊𝐂 (ReflexiveTransitiveConfluentFrameClass#α) := inferInstance
 
 instance : System.Consistent (𝐊𝐂 : DeductionParameter α) := inferInstance
 
 
-instance LC_Characteraizable : 𝔽(𝐋𝐂 of α).Characteraizable (λ F => Reflexive F ∧ Transitive F ∧ Connected F) where
+instance LC_Characteraizable : 𝔽(𝐋𝐂 of α).Characteraizable ReflexiveTransitiveConnectedFrameClass where
   characterize := by
     rintro F ⟨F_trans, F_refl, F_conn⟩;
     simp [System.theory];
@@ -395,11 +398,13 @@ instance LC_Characteraizable : 𝔽(𝐋𝐂 of α).Characteraizable (λ F => Re
       . apply ValidOnFrame.dum; simpa; simpa;
   nonempty := by
     use { World := PUnit, Rel := λ _ _ => True };
-    simp [Transitive, Reflexive, Connected];
+    refine ⟨by simp [Reflexive], by simp [Transitive], by simp [Connected]⟩;
 
 instance : Sound 𝐋𝐂 (ReflexiveTransitiveConnectedFrameClass#α) := inferInstance
 
 instance : System.Consistent (𝐋𝐂 : DeductionParameter α) := inferInstance
+
+end
 
 end Kripke
 

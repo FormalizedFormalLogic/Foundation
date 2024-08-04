@@ -116,12 +116,12 @@ theorem disjunctive_int : 𝐈𝐧𝐭 ⊢! p ⋎ q → 𝐈𝐧𝐭 ⊢! p ∨ 
   contrapose;
   intro hC; push_neg at hC;
   have ⟨hnp, hnq⟩ := hC;
-  obtain ⟨Fp, Fp_refl, Fp_trans, Vp, Vp_hered, wp, hp⟩ := by simpa [Semantics.Realize, ValidOnFrame, ValidOnModel] using not_imp_not.mpr (@Kripke.Int_Complete α _ _ |>.complete) hnp;
-  obtain ⟨Fq, Fq_refl, Fq_trans, Vq, Vq_hered, wq, hq⟩ := by simpa [Semantics.Realize, ValidOnFrame, ValidOnModel] using not_imp_not.mpr (@Kripke.Int_Complete α _ _ |>.complete) hnq;
+  obtain ⟨Fp, ⟨Fp_refl, Fp_trans⟩, Vp, Vp_hered, wp, hp⟩ := by simpa [Semantics.Realize, ValidOnFrame, ValidOnModel] using not_imp_not.mpr (@Kripke.Int_Complete α _ _ |>.complete) hnp;
+  obtain ⟨Fq, ⟨Fq_refl, Fq_trans⟩, Vq, Vq_hered, wq, hq⟩ := by simpa [Semantics.Realize, ValidOnFrame, ValidOnModel] using not_imp_not.mpr (@Kripke.Int_Complete α _ _ |>.complete) hnq;
   apply (not_imp_not.mpr Int_sound.sound);
   simp [Semantics.Realize, ValidOnFrame, ValidOnModel, Satisfies];
   use (IntDPCounterexampleFrame Fp Fq wp wq);
-  refine ⟨IntDPCounterexampleFrame.reflexive Fp_refl Fq_refl, IntDPCounterexampleFrame.transitive Fp_trans Fq_trans, ?_⟩;
+  refine ⟨⟨IntDPCounterexampleFrame.reflexive Fp_refl Fq_refl, IntDPCounterexampleFrame.transitive Fp_trans Fq_trans⟩, ?_⟩;
   use (IntDPCounterexampleModel ⟨Fp, Vp⟩ ⟨Fq, Vq⟩ wp wq).Valuation;
   constructor;
   . exact @IntDPCounterexampleModel.atomic_hereditary α ⟨Fp, Vp⟩ ⟨Fq, Vq⟩ wp wq Vp_hered Vq_hered;
