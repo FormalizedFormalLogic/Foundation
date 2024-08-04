@@ -93,11 +93,15 @@ instance : IncludeEFQ (α := α) 𝐂𝐥 where
 protected abbrev KC : DeductionParameter α := { axiomSet := 𝗘𝗙𝗤 ∪ 𝗪𝗟𝗘𝗠 }
 notation "𝐊𝐂" => DeductionParameter.KC
 instance : IncludeEFQ (α := α) 𝐊𝐂 where
+instance : System.HasAxiomWeakLEM (𝐊𝐂 : DeductionParameter α) where
+  wlem p := by apply eaxm; aesop;
 
 -- `𝐋𝐂` from chagrov & zakharyaschev (1997)
 protected abbrev LC : DeductionParameter α := { axiomSet := 𝗘𝗙𝗤 ∪ 𝗗𝘂𝗺 }
 notation "𝐋𝐂" => DeductionParameter.LC
 instance : IncludeEFQ (α := α) 𝐋𝐂 where
+instance : System.HasAxiomDummett (𝐋𝐂 : DeductionParameter α) where
+  dummett p q := by apply eaxm; aesop;
 
 /- MEMO:
   Term `WeakMinimal` and `WeakClassical` are from Ariola (2007)

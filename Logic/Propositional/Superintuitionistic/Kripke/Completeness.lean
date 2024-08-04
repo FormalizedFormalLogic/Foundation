@@ -394,6 +394,18 @@ lemma iff_mem₁_or : p ⋎ q ∈ t.tableau.1 ↔ p ∈ t.tableau.1 ∨ q ∈ t.
     | inl h => exact mdp₁ h or₁!
     | inr h => exact mdp₁ h or₂!
 
+lemma not_mem₁_neg_of_mem₁ : p ∈ t.tableau.1 → ~p ∉ t.tableau.1 := by
+  intro hp;
+  by_contra hnp;
+  have := iff_mem₁_and.mpr ⟨hp, hnp⟩;
+  have : ⊥ ∈ t.tableau.1 := mdp₁ (q := ⊥) this (by simp);
+  have : ⊥ ∉ t.tableau.1 := not_mem₁_falsum
+  contradiction;
+
+lemma mem₂_neg_of_mem₁ : p ∈ t.tableau.1 → ~p ∈ t.tableau.2 := by
+  intro h;
+  exact not_mem₁_iff_mem₂ (p := ~p) (t := t) |>.mp $ not_mem₁_neg_of_mem₁ h;
+
 lemma mem₁_of_provable : Λ ⊢! p → p ∈ t.tableau.1 := by
   intro h;
   exact mdp₁ mem₁_verum $ dhyp! h;
@@ -427,6 +439,35 @@ lemma transitive : Transitive (CanonicalFrame Λ) := by
   simp [CanonicalFrame];
   intro x y z;
   apply Set.Subset.trans;
+
+lemma confluent [HasAxiomWeakLEM Λ] : Confluent (CanonicalFrame Λ) := by
+  simp [Confluent, CanonicalFrame];
+  intro x y z Rxy Rxz;
+  suffices (Λ)-Consistent (y.tableau.1 ∪ z.tableau.1, ∅) by
+    obtain ⟨w, hw⟩ := lindenbaum (Λ := Λ) this;
+    use w; aesop;
+  intro Γ Δ;
+  simp;
+  intro hΓ hΔ h;
+  have := List.nil_iff.mpr hΔ; subst this; simp at h; clear hΔ;
+  sorry;
+
+lemma connected [HasAxiomDummett Λ] : Connected (CanonicalFrame Λ) := by
+  simp [Connected, CanonicalFrame];
+  intro x y z Rxy Ryz;
+  apply or_iff_not_imp_left.mpr;
+  intro nRyz;
+  obtain ⟨p, hyp, nhzp⟩ := Set.not_subset.mp nRyz;
+  intro q hq;
+  have : q ⟶ p ∉ x.tableau.1 := by
+    by_contra hqpx;
+    have hqpz : q ⟶ p ∈ z.tableau.1 := by aesop;
+    sorry;
+  have := iff_mem₁_or.mp $ mem₁_of_provable (t := x) (p := (p ⟶ q) ⋎ (q ⟶ p)) dummett!;
+  have : p ⟶ q ∈ x.tableau.1 := by aesop;
+  have : p ⟶ q ∈ y.tableau.1 := by aesop;
+  apply mdp₁ hyp _;
+  sorry;
 
 end CanonicalFrame
 
@@ -597,6 +638,22 @@ instance : Complete (𝐈𝐧𝐭 : DeductionParameter α) (Kripke.FrameClassOfS
   intro F hF;
   apply h;
   exact Kripke.Int_Characteraizable.characterize hF;
+⟩
+
+
+instance LC_Complete : Complete (𝐋𝐂 : DeductionParameter α) (Kripke.ReflexiveTransitiveConnectedFrameClass.{u}#α) := instComplete $ by
+  refine ⟨
+    CanonicalFrame.reflexive,
+    CanonicalFrame.transitive,
+    CanonicalFrame.connected
+  ⟩;
+
+instance : Complete (𝐋𝐂 : DeductionParameter α) (Kripke.FrameClassOfSystem.{_, _, u} α 𝐋𝐂) := ⟨by
+  intro p h;
+  apply Complete.complete (𝓜 := Kripke.ReflexiveTransitiveConnectedFrameClass#α);
+  intro F hF;
+  apply h;
+  exact Kripke.LC_Characteraizable.characterize hF;
 ⟩
 
 end
