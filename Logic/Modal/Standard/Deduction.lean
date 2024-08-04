@@ -159,6 +159,25 @@ noncomputable def inducition_with_necOnly! [𝓓.HasNecOnly]
   | hImply₂ => exact hImply₂
   | hElimContra => exact hElimContra
 
+open System in
+macro_rules | `(tactic| trivial) => `(tactic|
+    first
+    | apply verum!
+    | apply imply₁!
+    | apply imply₁!
+    | apply imply₂!
+    | apply and₁!
+    | apply and₂!
+    | apply and₃!
+    | apply or₁!
+    | apply or₂!
+    | apply or₃!
+    | apply neg_equiv!
+  )
+
+open System in
+macro_rules | `(tactic| trivial) => `(tactic | apply dne!)
+
 end Deduction
 
 
@@ -183,11 +202,15 @@ abbrev Normal (Ax : AxiomSet α) : DeductionParameter α where
 instance : IsNormal (α := α) (Normal Ax) where
 prefix:max "𝝂" => Normal
 
+lemma K_is_empty_normal : 𝐊 = Normal (α := α) ∅ := by aesop;
+
+lemma K_is_K_normal : 𝐊 = Normal (α := α) 𝗞 := by aesop;
+
 namespace Normal
 
-variable {Ax : AxiomSet α}
+open System
 
-lemma isK : 𝐊 = Normal (α := α) 𝗞 := by aesop;
+variable {Ax : AxiomSet α}
 
 lemma def_ax : Ax(𝝂Ax) = (𝗞 ∪ Ax) := by simp;
 
