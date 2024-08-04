@@ -1,5 +1,5 @@
 import Logic.Modal.Standard.Deduction
-import Logic.Propositional.Superintuitionistic.Kripke.Classical
+import Logic.Propositional.Superintuitionistic.Kripke.Semantics
 
 /-!
   # Maximality of `𝐓𝐫𝐢𝐯` and `𝐕𝐞𝐫`
@@ -185,21 +185,21 @@ lemma verTranslated_of_GL : 𝐆𝐋 ⊢! p → 𝐂𝐥 ⊢! pⱽᴾ := by
     | hNec => dsimp [toPropFormula]; exact verum!;
     | _ => dsimp [VerTranslation, toPropFormula]; trivial;
 
-open Superintuitionistic (unprovable_classical_of_exists_ClassicalValuation)
+open Superintuitionistic.Kripke (unprovable_classical_of_exists_ClassicalValuation)
 
 variable [Inhabited α]
 
 example : 𝐓𝐫𝐢𝐯 ⊬! Axioms.L (atom default : Formula α) := by
   apply iff_Triv_classical.not.mpr;
   apply unprovable_classical_of_exists_ClassicalValuation;
-  simp [Axioms.L, TrivTranslation, toPropFormula];
+  simp [Axioms.L, TrivTranslation, toPropFormula, Superintuitionistic.Formula.Kripke.Satisfies];
   use (λ _ => False);
   trivial;
 
 lemma unprovable_AxiomL_K4 : 𝐊𝟒 ⊬! Axioms.L (atom default : Formula α) := by
   apply not_imp_not.mpr trivTranslated_of_K4;
   apply unprovable_classical_of_exists_ClassicalValuation;
-  simp [Axioms.L, TrivTranslation, toPropFormula];
+  simp [Axioms.L, TrivTranslation, toPropFormula, Superintuitionistic.Formula.Kripke.Satisfies];
   use (λ _ => False);
   trivial;
 
@@ -216,7 +216,7 @@ theorem strictReducible_K4_GL : (𝐊𝟒 : DeductionParameter α) <ₛ 𝐆𝐋
 lemma unprovable_AxiomT_GL : 𝐆𝐋 ⊬! Axioms.T (atom default : Formula α) := by
   apply not_imp_not.mpr verTranslated_of_GL;
   apply unprovable_classical_of_exists_ClassicalValuation;
-  simp [Axioms.T, VerTranslation, toPropFormula];
+  simp [Axioms.T, VerTranslation, toPropFormula, Superintuitionistic.Formula.Kripke.Satisfies];
   use (λ _ => False);
   trivial;
 
@@ -238,8 +238,8 @@ theorem notReducible_S4_GL : ¬(𝐒𝟒 : DeductionParameter α) ≤ₛ 𝐆�
 example : 𝐕𝐞𝐫 ⊬! (~(□⊥) : Formula α) := by
   apply iff_Ver_classical.not.mpr;
   apply unprovable_classical_of_exists_ClassicalValuation;
-  dsimp [VerTranslation, toPropFormula];
+  dsimp [VerTranslation, toPropFormula, Superintuitionistic.Formula.Kripke.Satisfies];
   use (λ _ => True);
-  simp; exact ⟨PUnit.unit, by trivial⟩
+  simp;
 
 end LO.Modal.Standard

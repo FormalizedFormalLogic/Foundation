@@ -1,4 +1,4 @@
-import Logic.Propositional.Superintuitionistic.Kripke.Soundness
+import Logic.Propositional.Superintuitionistic.Kripke.Semantics
 
 /-!
   # Counterexample to the Law of Excluded Middle in Intuitionistic Logic
@@ -11,58 +11,137 @@ namespace LO.Propositional.Superintuitionistic.Kripke
 
 open System
 
-def LEMCounterexampleModel {α : Type} : Model α where
-  Frame := {
-    World := Fin 2,
-    Rel := λ w₁ w₂ => (w₁ = w₂) ∨ (w₁ = 0)
-  };
-  Valuation w _ := w = 1;
-  hereditary := by aesop;
-
-def LEMCounterexampleFrame : Frame' α := (LEMCounterexampleModel).Frame
-
 open Formula Formula.Kripke
 
-lemma noLEM_atom {a : α} : ¬(LEMCounterexampleModel ⊧ (atom a) ⋎ ~(atom a)) := by
-  simp [ValidOnModel.iff_models, Satisfies.iff_models, ValidOnModel, Satisfies, LEMCounterexampleModel];
-  use 0;
-  aesop;
+variable {α : Type u}
+variable [DecidableEq α] [Inhabited α]
 
-variable {α : Type} -- TODO: fix type `α`?
-variable [Inhabited α]
+abbrev NoLEMFrame : Kripke.Frame where
+  World := PUnit ⊕ PUnit
+  Rel x y :=
+    match x, y with
+    | .inl _, .inl _ => True
+    | .inr _, .inr _ => True
+    | .inl _, .inr _ => True
+    | _, _ => False
 
-lemma noLEM_on_frameclass : ∃ (p : Formula α), ¬(𝔽(Ax(𝐈𝐧𝐭))) ⊧ p ⋎ ~p := by
-  simp [ValidOnFrameClass.iff_models, ValidOnFrameClass];
-  existsi (atom default), (LEMCounterexampleModel).Frame;
+lemma NoLEMFrame.transitive : Transitive NoLEMFrame.Rel := by simp [Transitive];
+
+lemma NoLEMFrame.reflexive : Reflexive NoLEMFrame.Rel := by simp [Reflexive];
+
+lemma NoLEMFrame.confluent : Confluent NoLEMFrame.Rel := by simp [Confluent];
+
+lemma NoLEMFrame.connected : Connected NoLEMFrame.Rel := by simp [Connected];
+
+lemma noLEM_on_frameclass : ∃ (p : Formula α), ¬((Kripke.FrameClassOfSystem.{u, _, 0} α 𝐈𝐧𝐭) ⊧ p ⋎ ~p) := by
+  use (atom default);
+  simp [Semantics.Realize];
+  use NoLEMFrame;
   constructor;
-  . apply iff_definability_memAxiomSetFrameClass AxiomSet.EFQ.definability |>.mpr;
-    trivial;
+  . apply Int_Characteraizable.characterize;
+    exact ⟨NoLEMFrame.reflexive, NoLEMFrame.transitive⟩;
   . simp [ValidOnFrame];
-    existsi (LEMCounterexampleModel).Valuation, LEMCounterexampleModel.hereditary;
-    apply noLEM_atom;
+    use (λ w _ => match w with | .inr _ => True | .inl _ => False);
+    constructor;
+    . simp;
+    . simp [ValidOnModel, Satisfies];
 
 /--
   Law of Excluded Middle is not always provable in intuitionistic logic.
 -/
 theorem noLEM : ∃ (p : Formula α), 𝐈𝐧𝐭 ⊬! p ⋎ ~p := by
-  obtain ⟨p, _⟩ : ∃ (p : Formula α), ¬(𝔽(Ax(𝐈𝐧𝐭))) ⊧ p ⋎ ~p := noLEM_on_frameclass;
-  existsi p;
+  obtain ⟨p, hp⟩ := noLEM_on_frameclass (α := α);
+  use p;
   by_contra hC;
-  have : 𝔽(Ax(𝐈𝐧𝐭)) ⊧ p ⋎ ~p := sound! hC;
+  have := Kripke.sound hC;
   contradiction;
 
 /--
   Intuitionistic logic is proper weaker than classical logic.
 -/
-theorem strictReducible_intuitionistic_classical : (𝐈𝐧𝐭 : DeductionParameter α) <ₛ 𝐂𝐥 := by
+theorem Int_strictly_weaker_than_Cl : (𝐈𝐧𝐭 : DeductionParameter α) <ₛ 𝐂𝐥 := by
   constructor;
-  . exact reducible_efq_dne;
+  . exact Int_weaker_than_Cl;
   . apply weakerThan_iff.not.mpr;
     push_neg;
     obtain ⟨p, hp⟩ := noLEM (α := α);
-    existsi (p ⋎ ~p);
+    use (p ⋎ ~p);
     constructor;
     . exact lem!;
     . assumption;
+
+
+
+section
+
+lemma noLEM_on_frameclass_KC : ∃ (p : Formula α), ¬((Kripke.FrameClassOfSystem.{u, _, 0} α 𝐊𝐂) ⊧ p ⋎ ~p) := by
+  use (atom default);
+  simp [Semantics.Realize];
+  use NoLEMFrame;
+  constructor;
+  . apply KC_Characteraizable.characterize;
+    exact ⟨NoLEMFrame.reflexive, NoLEMFrame.transitive, NoLEMFrame.confluent⟩;
+  . simp [ValidOnFrame];
+    use (λ w _ => match w with | .inr _ => True | .inl _ => False);
+    constructor;
+    . simp;
+    . simp [ValidOnModel, Satisfies];
+
+lemma noLEM_KC: ∃ (p : Formula α), 𝐊𝐂 ⊬! p ⋎ ~p := by
+  obtain ⟨p, hp⟩ := noLEM_on_frameclass_KC (α := α);
+  use p;
+  by_contra hC;
+  have := Kripke.sound hC;
+  contradiction;
+
+theorem KC_strictly_weaker_than_Cl : (𝐊𝐂 : DeductionParameter α) <ₛ 𝐂𝐥 := by
+  constructor;
+  . exact KC_weaker_than_Cl;
+  . apply weakerThan_iff.not.mpr;
+    push_neg;
+    obtain ⟨p, hp⟩ := noLEM_KC (α := α);
+    use (p ⋎ ~p);
+    constructor;
+    . exact lem!;
+    . assumption;
+
+end
+
+
+section
+
+lemma noLEM_on_frameclass_LC : ∃ (p : Formula α), ¬((Kripke.FrameClassOfSystem.{u, _, 0} α 𝐋𝐂) ⊧ p ⋎ ~p) := by
+  use (atom default);
+  simp [Semantics.Realize];
+  use NoLEMFrame;
+  constructor;
+  . apply LC_Characteraizable.characterize;
+    exact ⟨NoLEMFrame.reflexive, NoLEMFrame.transitive, NoLEMFrame.connected⟩;
+  . simp [ValidOnFrame];
+    use (λ w _ => match w with | .inr _ => True | .inl _ => False);
+    constructor;
+    . simp;
+    . simp [ValidOnModel, Satisfies];
+
+lemma noLEM_LC: ∃ (p : Formula α), 𝐋𝐂 ⊬! p ⋎ ~p := by
+  obtain ⟨p, hp⟩ := noLEM_on_frameclass_LC (α := α);
+  use p;
+  by_contra hC;
+  have := Kripke.sound hC;
+  contradiction;
+
+theorem LC_strictly_weaker_than_Cl : (𝐋𝐂 : DeductionParameter α) <ₛ 𝐂𝐥 := by
+  constructor;
+  . exact LC_weaker_than_Cl;
+  . apply weakerThan_iff.not.mpr;
+    push_neg;
+    obtain ⟨p, hp⟩ := noLEM_LC (α := α);
+    use (p ⋎ ~p);
+    constructor;
+    . exact lem!;
+    . assumption;
+
+end
+
 
 end LO.Propositional.Superintuitionistic.Kripke

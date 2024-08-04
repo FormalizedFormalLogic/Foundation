@@ -55,6 +55,12 @@ class HasAxiomLEM where
 class HasAxiomDNE where
   dne (p : F) : 𝓢 ⊢ Axioms.DNE p
 
+class HasAxiomWeakLEM where
+  wlem (p : F) : 𝓢 ⊢ Axioms.WeakLEM p
+
+class HasAxiomDummett where
+  dummett (p q : F) : 𝓢 ⊢ Axioms.GD p q
+
 class HasAxiomPeirce where
   peirce (p q : F) : 𝓢 ⊢ Axioms.Peirce p q
 
@@ -127,6 +133,12 @@ def dne [HasAxiomDNE 𝓢] : 𝓢 ⊢ ~~p ⟶ p := HasAxiomDNE.dne _
 
 def dne' [HasAxiomDNE 𝓢] (b : 𝓢 ⊢ ~~p) : 𝓢 ⊢ p := dne ⨀ b
 @[simp] lemma dne'! [HasAxiomDNE 𝓢] (h : 𝓢 ⊢! ~~p) : 𝓢 ⊢! p := ⟨dne' h.some⟩
+
+def wlem [HasAxiomWeakLEM 𝓢] : 𝓢 ⊢ ~p ⋎ ~~p := HasAxiomWeakLEM.wlem p
+@[simp] lemma wlem! [HasAxiomWeakLEM 𝓢] : 𝓢 ⊢! ~p ⋎ ~~p := ⟨wlem⟩
+
+def dummett [HasAxiomDummett 𝓢] : 𝓢 ⊢ (p ⟶ q) ⋎ (q ⟶ p) := HasAxiomDummett.dummett p q
+@[simp] lemma dummett! [HasAxiomDummett 𝓢] : 𝓢 ⊢! Axioms.GD p q := ⟨dummett⟩
 
 def peirce [HasAxiomPeirce 𝓢] : 𝓢 ⊢ ((p ⟶ q) ⟶ p) ⟶ p := HasAxiomPeirce.peirce _ _
 @[simp] lemma peirce! [HasAxiomPeirce 𝓢] : 𝓢 ⊢! ((p ⟶ q) ⟶ p) ⟶ p := ⟨peirce⟩
