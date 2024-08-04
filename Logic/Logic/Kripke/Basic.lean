@@ -162,17 +162,17 @@ notation "𝔽(" P ")" => FrameClassOfFrameProperty P
 
 section
 
-/-- FrameClass for `𝐈𝐧𝐭` or `𝐒𝟒` -/
+/-- FrameClass for `𝐈𝐧𝐭` and `𝐒𝟒` -/
 abbrev ReflexiveTransitiveFrameClass := 𝔽((λ F => Reflexive F ∧ Transitive F))
 
-/-- FrameClass for `𝐂𝐥` -/
-abbrev ReflexiveTransitiveExtensiveFrameClass := 𝔽((λ F => Reflexive F ∧ Transitive F ∧ Extensive F))
-
-/-- FrameClass for `𝐊𝐂` or `𝐒𝟒.𝟐` -/
+/-- FrameClass for `𝐊𝐂` and `𝐒𝟒.𝟐` -/
 abbrev ReflexiveTransitiveConfluentFrameClass := 𝔽((λ F => Reflexive F ∧ Transitive F ∧ Confluent F))
 
-/-- FrameClass for `𝐋𝐂` or `𝐒𝟒.𝟑` -/
+/-- FrameClass for `𝐋𝐂` and `𝐒𝟒.𝟑` -/
 abbrev ReflexiveTransitiveConnectedFrameClass := 𝔽((λ F => Reflexive F ∧ Transitive F ∧ Connected F))
+
+/-- FrameClass for `𝐂𝐥` and `𝐊𝐓𝟒𝐁` (`𝐒𝟓`) -/
+abbrev ReflexiveTransitiveSymmetricFrameClass := 𝔽((λ F => Reflexive F ∧ Transitive F ∧ Symmetric F))
 
 end
 
@@ -204,15 +204,17 @@ abbrev ClassicalFrame : Kripke.Frame where
 
 namespace ClassicalFrame
 
-lemma transitive : Transitive ClassicalFrame := by simp [Transitive];
+@[simp] lemma transitive : Transitive ClassicalFrame := by simp [Transitive];
 
-lemma reflexive : Reflexive ClassicalFrame := by simp [Reflexive];
+@[simp] lemma reflexive : Reflexive ClassicalFrame := by simp [Reflexive];
 
-lemma euclidean : Euclidean ClassicalFrame := by simp [Euclidean];
+@[simp] lemma euclidean : Euclidean ClassicalFrame := by simp [Euclidean];
 
-lemma extensive : Extensive ClassicalFrame := by simp [Extensive];
+@[simp] lemma symmetric : Symmetric ClassicalFrame := by simp [Symmetric];
 
-lemma universal : Universal ClassicalFrame := by simp [Universal];
+@[simp] lemma extensive : Extensive ClassicalFrame := by simp [Extensive];
+
+@[simp] lemma universal : Universal ClassicalFrame := by simp [Universal];
 
 end ClassicalFrame
 

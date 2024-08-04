@@ -128,15 +128,16 @@ protected lemma neg_equiv : M ⊧ Axioms.NegEquiv p := by
   . intro x _ h y rxy hyp; exact h rxy hyp;
   . intro x _ h y rxy; exact h rxy;
 
-protected lemma lem (F_ext : Extensive M.Frame.Rel) : M ⊧ Axioms.LEM p := by
-  simp_all [ValidOnModel];
-  intro w;
-  by_cases h : w ⊧ p
-  . left; assumption;
-  . right;
-    intro w' hww';
-    rw [←(F_ext hww')];
-    assumption;
+protected lemma lem : Symmetric M.Frame.Rel → M ⊧ Axioms.LEM p := by
+  simp_all [ValidOnModel, Satisfies, Symmetric];
+  contrapose; push_neg;
+  rintro ⟨x, nhxp, ⟨y, Rxy, hyp⟩⟩;
+  use x, y;
+  constructor;
+  . exact Rxy;
+  . by_contra Ryx;
+    have := formula_hereditary atom_hereditary F_trans Ryx hyp;
+    contradiction;
 
 protected lemma dum : Connected M.Frame.Rel → M ⊧ Axioms.GD p q := by
   simp [ValidOnModel, Satisfies, Connected];
@@ -204,7 +205,7 @@ protected lemma efq : F ⊧ Axioms.EFQ p := fun _ => ValidOnModel.efq
 
 protected lemma neg_equiv : F ⊧ Axioms.NegEquiv p := fun _ => ValidOnModel.neg_equiv
 
-protected lemma lem (hExt : Extensive F.Rel) : F ⊧ Axioms.LEM p := fun _ => ValidOnModel.lem hExt
+protected lemma lem (F_symm : Symmetric F.Rel) : F ⊧ Axioms.LEM p := fun hV => ValidOnModel.lem hV F_trans F_symm
 
 protected lemma dum (F_conn : Connected F.Rel) : F ⊧ Axioms.GD p q := fun hV => ValidOnModel.dum hV F_trans F_conn
 
@@ -305,7 +306,7 @@ instance Int_sound : Sound 𝐈𝐧𝐭 (ReflexiveTransitiveFrameClass#α) := in
 instance : System.Consistent (𝐈𝐧𝐭 : DeductionParameter α) := inferInstance
 
 
-instance Cl_Characteraizable : 𝔽(𝐂𝐥 of α).Characteraizable (λ F => Reflexive F ∧ Transitive F ∧ Extensive F) where
+instance Cl_Characteraizable : 𝔽(𝐂𝐥 of α).Characteraizable (λ F => Reflexive F ∧ Transitive F ∧ Symmetric F) where
   characterize := by
     simp [System.theory];
     intro F hTrans hRefl hExt p hp;
@@ -326,12 +327,12 @@ instance Cl_Characteraizable : 𝔽(𝐂𝐥 of α).Characteraizable (λ F => Re
     | eaxm h =>
       rcases h with (⟨_, rfl⟩ | ⟨_, rfl⟩);
       . apply ValidOnFrame.efq;
-      . apply ValidOnFrame.lem; simpa;
+      . apply ValidOnFrame.lem; simpa; simpa;
   nonempty := by
     use { World := PUnit, Rel := λ _ _ => True };
-    simp [Transitive, Reflexive, Extensive];
+    simp [Reflexive, Transitive, Symmetric];
 
-instance : Sound 𝐂𝐥 (ReflexiveTransitiveExtensiveFrameClass#α) := inferInstance
+instance : Sound 𝐂𝐥 (ReflexiveTransitiveSymmetricFrameClass#α) := inferInstance
 
 instance : System.Consistent (𝐂𝐥 : DeductionParameter α) := inferInstance
 
@@ -440,7 +441,7 @@ lemma ValidOnClassicalFrame_iff : (Kripke.FrameClassOfSystem.{u, _, 0} α 𝐂�
   intro h V;
   refine @h (ClassicalFrame) ?_ (λ _ a => V a) (by simp [Valuation.atomic_hereditary]) ();
   . apply @Cl_Characteraizable α |>.characterize;
-    refine ⟨ClassicalFrame.reflexive, ClassicalFrame.transitive, ClassicalFrame.extensive⟩;
+    refine ⟨ClassicalFrame.reflexive, ClassicalFrame.transitive, ClassicalFrame.symmetric⟩;
 
 lemma notClassicalValid_of_exists_ClassicalValuation : (∃ (V : ClassicalValuation α), ¬(V ⊧ p)) → ¬(Kripke.FrameClassOfSystem.{u, _, 0} α 𝐂𝐥) ⊧ p := by
   contrapose; push_neg;
