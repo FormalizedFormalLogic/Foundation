@@ -1,8 +1,9 @@
 import Logic.Modal.Standard.ConsistentTheory
-import Logic.Modal.Standard.Kripke.Soundness
+import Logic.Modal.Standard.Kripke.Semantics
 
 namespace LO.Modal.Standard
 
+open LO.Kripke
 open System
 open Formula
 open MaximalConsistentTheory
@@ -13,7 +14,7 @@ variable {Λ : DeductionParameter α} [Λ.IsNormal]
 
 namespace Kripke
 
-abbrev CanonicalFrame (Λ : DeductionParameter α) [Inhabited (Λ)-MCT] : Frame where
+abbrev CanonicalFrame (Λ : DeductionParameter α) [Inhabited (Λ)-MCT] : Kripke.Frame where
   World := (Λ)-MCT
   Rel Ω₁ Ω₂ := □''⁻¹Ω₁.theory ⊆ Ω₂.theory
 
@@ -180,7 +181,7 @@ lemma realize_theory_of_self_canonicalModel : (CanonicalModel Λ) ⊧* (System.t
 end
 
 lemma complete_of_mem_canonicalFrame [Inhabited (Λ)-MCT] {𝔽 : FrameClass.Dep α} (hFC : CanonicalFrame Λ ∈ 𝔽) : 𝔽 ⊧ p → (Λ) ⊢! p := by
-  simp [Kripke.ValidOnFrameClass, Kripke.ValidOnFrame];
+  simp [Semantics.Realize, Kripke.ValidOnFrame];
   contrapose;
   push_neg;
   intro h;
@@ -190,10 +191,13 @@ lemma complete_of_mem_canonicalFrame [Inhabited (Λ)-MCT] {𝔽 : FrameClass.Dep
   . use (CanonicalModel Λ).Valuation;
     exact iff_valid_on_canonicalModel_deducible.not.mpr h;
 
-lemma instComplete_of_mem_canonicalFrame [Inhabited (Λ)-MCT] {𝔽 : FrameClass.Dep α} (hFC : CanonicalFrame Λ ∈ 𝔽) : Complete (Λ) 𝔽 := ⟨complete_of_mem_canonicalFrame hFC⟩
+lemma instComplete_of_mem_canonicalFrame [Inhabited (Λ)-MCT] (𝔽 : FrameClass.Dep α) (hFC : CanonicalFrame Λ ∈ 𝔽) : Complete (Λ) 𝔽 := ⟨complete_of_mem_canonicalFrame hFC⟩
 
-instance K_complete : Complete (𝐊 : DeductionParameter.{u} α) AllFrameClass.{u}# := by
-  simpa [←Normal.K_is_K_normal] using instComplete_of_mem_canonicalFrame (𝔽 := AllFrameClass#) trivial;
+instance K_complete : Complete 𝐊 (AllFrameClass.{u}#α) := by
+  convert instComplete_of_mem_canonicalFrame (AllFrameClass#α) trivial;
+  rw [DeductionParameter.K_is_empty_normal];
+  . tauto;
+  . infer_instance;
 
 end Kripke
 
