@@ -262,7 +262,7 @@ lemma iff_not_validOnFrame : ¬(F#α ⊧* T) ↔ ∃ p ∈ T, ∃ V x, ¬Satisfi
 abbrev FrameClassOfSystem (α : Type u) {S : Type u} [System (Formula α) S] (𝓢 : S) : FrameClass.Dep α := { (F : Frame.Dep α) | F ⊧* System.theory 𝓢 }
 notation "𝔽(" 𝓢 " of " α ")" => FrameClassOfSystem α 𝓢
 
-def satisfies_by_axm {Ax : Set (Formula α)} {𝔽 : FrameClass} (nonempty : 𝔽.Nonempty) (h : 𝔽#α ⊧* Ax)
+def characterizable_of_valid_axiomset {Ax : Set (Formula α)} {𝔽 : FrameClass} (nonempty : 𝔽.Nonempty) (h : 𝔽#α ⊧* Ax)
   : FrameClass.Characteraizable { (F : Frame.Dep α) | F ⊧* (System.theory 𝝂(Ax)) } 𝔽 where
   characterize := by
     simp only [System.theory, Semantics.RealizeSet.setOf_iff, ValidOnFrame.models_iff, Set.mem_setOf_eq];
@@ -323,7 +323,7 @@ instance instConsistentOfCharacterizability [FrameClass.Characteraizable.{u} �
 end Sound
 
 
-private instance K_characterizable' : FrameClass.Characteraizable { (F : Frame.Dep α) | F ⊧* (System.theory 𝝂(∅)) } AllFrameClass := satisfies_by_axm
+private instance K_characterizable' : FrameClass.Characteraizable { (F : Frame.Dep α) | F ⊧* (System.theory 𝝂(∅)) } AllFrameClass := characterizable_of_valid_axiomset
   ⟨⟨PUnit,  λ _ _ => True⟩, trivial⟩
   (by aesop)
 

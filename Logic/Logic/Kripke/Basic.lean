@@ -210,11 +210,11 @@ end
 /-- `𝔽₁` is characterized by `𝔽₂` -/
 class FrameClass.Characteraizable (𝔽₁ : FrameClass) (𝔽₂ : outParam (FrameClass)) where
   characterize : ∀ {F}, F ∈ 𝔽₂ → F ∈ 𝔽₁
-  nonempty : ∃ F, F ∈ 𝔽₂
+  nonempty : 𝔽₂.Nonempty
 
 class FrameClass.DefinedBy (𝔽₁ : FrameClass) (𝔽₂ : outParam (FrameClass)) where
   define : ∀ {F}, F ∈ 𝔽₁ ↔ F ∈ 𝔽₂
-  nonempty : ∃ F, F ∈ 𝔽₂
+  nonempty : 𝔽₂.Nonempty
 
 instance {𝔽₁ 𝔽₂ : FrameClass} [defines : 𝔽₁.DefinedBy 𝔽₂] : FrameClass.Characteraizable 𝔽₁ 𝔽₂ where
   characterize hF := defines.define.mpr hF

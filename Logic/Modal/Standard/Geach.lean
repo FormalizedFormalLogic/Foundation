@@ -1,18 +1,90 @@
 import Logic.Modal.Standard.Deduction
+import Logic.Logic.Kripke.RelItr
+import Logic.Vorspiel.BinaryRelations
 
-namespace LO.System.Axioms
-
-variable {F : Type*} [LogicalConnective F] [BasicModalLogicalConnective F]
-
-structure Geach.Taple where
+structure GeachTaple where
   i : ℕ
   j : ℕ
   m : ℕ
   n : ℕ
 
-abbrev Geach (l : Geach.Taple) (p : F) := ◇^[l.i](□^[l.m]p) ⟶ □^[l.j](◇^[l.n]p)
+def GeachConfluent (t : GeachTaple) (R : Rel α α) := ∀ {x y z : α}, (R.iterate t.i x y) ∧ (R.iterate t.j x z) → ∃ u, (R.iterate t.m y u) ∧ (R.iterate t.n z u)
+
+namespace GeachConfluent
+
+variable {R : Rel α α}
+
+ lemma serial_def : Serial R ↔ (GeachConfluent ⟨0, 0, 1, 1⟩ R) := by simp [GeachConfluent, Serial];
+
+lemma reflexive_def : Reflexive R ↔ (GeachConfluent ⟨0, 0, 1, 0⟩ R) := by simp [GeachConfluent, Reflexive];
+
+lemma symmetric_def : Symmetric R ↔ (GeachConfluent ⟨0, 1, 0, 1⟩ R) := by
+  simp [GeachConfluent, Symmetric];
+  constructor;
+  . rintro h x y z rfl Rxz; exact h Rxz;
+  . intro h x y Rxy; exact h rfl Rxy;
+
+lemma transitive_def : Transitive R ↔ (GeachConfluent ⟨0, 2, 1, 0⟩ R) := by
+  simp [GeachConfluent, Transitive];
+  constructor;
+  . rintro h x y z rfl w Rxw Rwz; exact h Rxw Rwz;
+  . intro h x y z Rxy Ryz; exact h rfl y Rxy Ryz
+
+lemma euclidean_def : Euclidean R ↔ (GeachConfluent ⟨1, 1, 0, 1⟩ R) := by simp [GeachConfluent, Euclidean];
+
+lemma confluent_def : Confluent R ↔ (GeachConfluent ⟨1, 1, 1, 1⟩ R) := by simp [GeachConfluent, Confluent];
+
+lemma extensive_def : Extensive R ↔ (GeachConfluent ⟨0, 1, 0, 0⟩ R) := by
+  simp [GeachConfluent, Extensive];
+  constructor;
+  . rintro h x y z rfl Rxz; have := h Rxz; tauto;
+  . intro h x y Rxy; have := h rfl Rxy; tauto;
+
+lemma functional_def : Functional R ↔ (GeachConfluent ⟨1, 1, 0, 0⟩ R) := by
+  simp [GeachConfluent, Functional];
+  constructor <;> tauto;
+
+lemma dense_def : Dense R ↔ (GeachConfluent ⟨0, 1, 2, 0⟩ R) := by
+  simp [GeachConfluent, Dense];
+  constructor;
+  . rintro h x y z rfl Rxz; exact h Rxz;
+  . intro h x y Rxy; exact h rfl Rxy;
+
+@[simp]
+lemma satisfies_eq : GeachConfluent (α := α) t (· = ·) := by simp [GeachConfluent];
+
+end GeachConfluent
+
+
+def MultiGeachConfluent (ts : List GeachTaple) (R : Rel α α) : Prop :=
+  match ts with
+  | [] => True
+  | [t] => (GeachConfluent t R)
+  | t :: ts => (GeachConfluent t R) ∧ (MultiGeachConfluent ts R)
+
+namespace MultiGeachConfluent
+
+@[simp] lemma iff_nil : MultiGeachConfluent [] R := by simp [MultiGeachConfluent];
+
+@[simp] lemma iff_singleton : MultiGeachConfluent [t] R ↔ (GeachConfluent t R) := by simp [MultiGeachConfluent];
+
+lemma iff_cons (h : ts ≠ []) : MultiGeachConfluent (t :: ts) R ↔ (GeachConfluent t R) ∧ (MultiGeachConfluent ts R) := by simp [MultiGeachConfluent];
+
+@[simp]
+lemma satisfies_eq : MultiGeachConfluent (α := α) ts (· = ·) := by induction ts using List.induction_with_singleton <;> simp_all [MultiGeachConfluent];
+
+end MultiGeachConfluent
+
+
+
+namespace LO.System.Axioms
+
+variable {F : Type*} [LogicalConnective F] [BasicModalLogicalConnective F]
+
+abbrev Geach (l : GeachTaple) (p : F) := ◇^[l.i](□^[l.m]p) ⟶ □^[l.j](◇^[l.n]p)
 
 end LO.System.Axioms
+
 
 namespace LO.Modal.Standard
 
@@ -22,7 +94,7 @@ open System
 
 namespace AxiomSet
 
-abbrev Geach (l : Axioms.Geach.Taple) : AxiomSet α := { Axioms.Geach l p | (p) }
+abbrev Geach (l : GeachTaple) : AxiomSet α := { Axioms.Geach l p | (p) }
 notation:max "𝗴𝗲(" t ")" => AxiomSet.Geach t
 
 namespace Geach
@@ -48,7 +120,7 @@ lemma Tc_def : 𝗴𝗲(⟨0, 1, 0, 0⟩) = (𝗧𝗰 : AxiomSet α) := rfl
 end Geach
 
 class IsGeach (Ax : AxiomSet α) where
-  taple : Axioms.Geach.Taple
+  taple : GeachTaple
   char : Ax = AxiomSet.Geach taple := by rfl
 
 instance : IsGeach (α := α) 𝗧 where taple := ⟨0, 0, 1, 0⟩;
@@ -70,7 +142,7 @@ instance : IsGeach (α := α) 𝗖𝗗 where taple := ⟨1, 1, 0, 0⟩;
 instance : IsGeach (α := α) 𝗧𝗰 where taple := ⟨0, 1, 0, 0⟩;
 
 
-def MultiGeach : List Axioms.Geach.Taple → AxiomSet α
+def MultiGeach : List GeachTaple → AxiomSet α
   | [] => ∅
   | x :: xs => (AxiomSet.Geach x) ∪ (AxiomSet.MultiGeach xs)
 notation:max "𝗚𝗲(" l ")" => AxiomSet.MultiGeach l
@@ -121,47 +193,50 @@ end AxiomSet
 
 namespace DeductionParameter
 
-protected abbrev Geach (l : List Axioms.Geach.Taple) : DeductionParameter α := 𝝂(𝗚𝗲(l))
+protected abbrev Geach (l : List GeachTaple) : DeductionParameter α := 𝝂(𝗚𝗲(l))
 notation "𝐆𝐞(" l ")" => DeductionParameter.Geach l
 
 namespace Geach
 
 end Geach
 
-protected class IsGeach (L : DeductionParameter α) where
-  taples : List Axioms.Geach.Taple
+protected class IsGeach (L : DeductionParameter α) (taples : List GeachTaple) where
   char : L = 𝐆𝐞(taples) := by aesop;
+
+attribute [simp] IsGeach.char
 
 namespace IsGeach
 
-lemma ax {Λ : DeductionParameter α} [geach : Λ.IsGeach] : Ax(Λ) = (𝗞 ∪ 𝗚𝗲(geach.taples)) := by
+lemma ax {Λ : DeductionParameter α} [geach : Λ.IsGeach ts] : Ax(Λ) = (𝗞 ∪ 𝗚𝗲(ts)) := by
   have e := geach.char;
   simp [DeductionParameter.Geach] at e;
   simp_all;
 
+/-
 instance {L : DeductionParameter α} [geach : L.IsGeach] : L.IsNormal := by
   rw [geach.char];
   infer_instance;
+-/
 
-instance : 𝐊.IsGeach (α := α) where taples := [];
+instance : 𝐊.IsGeach (α := α) [] where
 
-instance : 𝐊𝐃.IsGeach (α := α) where taples := [⟨0, 0, 1, 1⟩]
+instance : 𝐊𝐃.IsGeach (α := α) [⟨0, 0, 1, 1⟩] where
 
-instance : 𝐊𝐓.IsGeach (α := α) where taples := [⟨0, 0, 1, 0⟩]
+instance : 𝐊𝐓.IsGeach (α := α) [⟨0, 0, 1, 0⟩] where
 
-instance : 𝐊𝐓𝐁.IsGeach (α := α) where taples := [⟨0, 0, 1, 0⟩, ⟨0, 1, 0, 1⟩]
+instance : 𝐊𝐓𝐁.IsGeach (α := α) [⟨0, 0, 1, 0⟩, ⟨0, 1, 0, 1⟩] where
 
-instance : 𝐊𝟒.IsGeach (α := α) where taples := [⟨0, 2, 1, 0⟩]
+instance : 𝐊𝟒.IsGeach (α := α) [⟨0, 2, 1, 0⟩] where
 
-instance : 𝐒𝟒.IsGeach (α := α) where taples := [⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩]
+instance : 𝐒𝟒.IsGeach (α := α) [⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩] where
 
-instance : 𝐒𝟒.𝟐.IsGeach (α := α) where taples := [⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩, ⟨1, 1, 1, 1⟩]
+instance : 𝐒𝟒.𝟐.IsGeach (α := α) [⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩, ⟨1, 1, 1, 1⟩] where
 
-instance : 𝐒𝟓.IsGeach (α := α) where taples := [⟨0, 0, 1, 0⟩, ⟨1, 1, 0, 1⟩]
+instance : 𝐒𝟓.IsGeach (α := α) [⟨0, 0, 1, 0⟩, ⟨1, 1, 0, 1⟩] where
 
-instance : 𝐊𝐓𝟒𝐁.IsGeach (α := α) where taples := [⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩, ⟨0, 1, 0, 1⟩]
+instance : 𝐊𝐓𝟒𝐁.IsGeach (α := α) [⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩, ⟨0, 1, 0, 1⟩] where
 
-instance : 𝐓𝐫𝐢𝐯.IsGeach (α := α) where taples := [⟨0, 0, 1, 0⟩, ⟨0, 1, 0, 0⟩]
+instance : 𝐓𝐫𝐢𝐯.IsGeach (α := α) [⟨0, 0, 1, 0⟩, ⟨0, 1, 0, 0⟩] where
 
 end IsGeach
 

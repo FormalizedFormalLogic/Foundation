@@ -38,4 +38,9 @@ lemma forward : (R.iterate (n + 1) x y) ↔ ∃ z, R.iterate n x z ∧ R z y := 
       . apply ih.mpr;
         use z;
 
+lemma true_any (h : x = y) : Rel.iterate (λ _ _ => True) n x y := by
+  induction n with
+  | zero => simpa;
+  | succ n ih => use x;
+
 end Rel.iterate

@@ -14,13 +14,13 @@ variable {Λ : DeductionParameter α} [Λ.IsNormal]
 
 namespace Kripke
 
-abbrev CanonicalFrame (Λ : DeductionParameter α) [Inhabited (Λ)-MCT] : Kripke.Frame where
+abbrev CanonicalFrame (Λ : DeductionParameter α) [Nonempty (Λ)-MCT] : Kripke.Frame where
   World := (Λ)-MCT
   Rel Ω₁ Ω₂ := □''⁻¹Ω₁.theory ⊆ Ω₂.theory
 
 namespace CanonicalFrame
 
-variable [Inhabited (Λ)-MCT]
+variable [Nonempty (Λ)-MCT]
 variable {Ω₁ Ω₂ : (CanonicalFrame Λ).World}
 
 @[simp]
@@ -93,14 +93,14 @@ lemma rel_def_dia : Ω₁ ≺ Ω₂ ↔ ∀ {p}, p ∈ Ω₂.theory → ◇p ∈
 end CanonicalFrame
 
 
-abbrev CanonicalModel (Λ : DeductionParameter α) [Inhabited (Λ)-MCT] : Model α where
+abbrev CanonicalModel (Λ : DeductionParameter α) [Nonempty (Λ)-MCT]  : Model α where
   Frame := CanonicalFrame Λ
   Valuation Ω a := (atom a) ∈ Ω.theory
 
 
 namespace CanonicalModel
 
-variable [Inhabited (Λ)-MCT]
+variable [Nonempty (Λ)-MCT]
 
 @[reducible]
 instance : Semantics (Formula α) (CanonicalModel Λ).World := Formula.Kripke.Satisfies.semantics (M := CanonicalModel Λ)
@@ -113,7 +113,7 @@ end CanonicalModel
 
 section
 
-variable [Inhabited (Λ)-MCT] {p : Formula α}
+variable [Nonempty (Λ)-MCT] {p : Formula α}
 
 lemma truthlemma : ∀ {Ω : (CanonicalModel Λ).World}, Ω ⊧ p ↔ (p ∈ Ω.theory) := by
   induction p using Formula.rec' with
@@ -180,7 +180,7 @@ lemma realize_theory_of_self_canonicalModel : (CanonicalModel Λ) ⊧* (System.t
 
 end
 
-lemma complete_of_mem_canonicalFrame [Inhabited (Λ)-MCT] {𝔽 : FrameClass.Dep α} (hFC : CanonicalFrame Λ ∈ 𝔽) : 𝔽 ⊧ p → (Λ) ⊢! p := by
+lemma complete_of_mem_canonicalFrame [Nonempty (Λ)-MCT] {𝔽 : FrameClass} (hFC : CanonicalFrame Λ ∈ 𝔽) : 𝔽#α ⊧ p → (Λ) ⊢! p := by
   simp [Semantics.Realize, Kripke.ValidOnFrame];
   contrapose;
   push_neg;
@@ -191,10 +191,10 @@ lemma complete_of_mem_canonicalFrame [Inhabited (Λ)-MCT] {𝔽 : FrameClass.Dep
   . use (CanonicalModel Λ).Valuation;
     exact iff_valid_on_canonicalModel_deducible.not.mpr h;
 
-lemma instComplete_of_mem_canonicalFrame [Inhabited (Λ)-MCT] (𝔽 : FrameClass.Dep α) (hFC : CanonicalFrame Λ ∈ 𝔽) : Complete (Λ) 𝔽 := ⟨complete_of_mem_canonicalFrame hFC⟩
+instance instComplete_of_mem_canonicalFrame [Nonempty (Λ)-MCT] (𝔽 : FrameClass) (hFC : CanonicalFrame Λ ∈ 𝔽) : Complete (Λ) (𝔽#α) := ⟨complete_of_mem_canonicalFrame hFC⟩
 
 instance K_complete : Complete 𝐊 (AllFrameClass.{u}#α) := by
-  convert instComplete_of_mem_canonicalFrame (AllFrameClass#α) trivial;
+  convert instComplete_of_mem_canonicalFrame (α := α) AllFrameClass trivial;
   rw [DeductionParameter.K_is_empty_normal];
   . tauto;
   . infer_instance;

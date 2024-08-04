@@ -305,7 +305,7 @@ lemma exists_maximal_Lconsistented_theory (consisT : (Λ)-Consistent T) : ∃ Ω
 
 alias lindenbaum := exists_maximal_Lconsistented_theory
 
-noncomputable instance [System.Consistent Λ] : Inhabited (Λ)-MCT := ⟨lindenbaum emptyset_consistent |>.choose⟩
+instance [System.Consistent Λ] : Nonempty (Λ)-MCT := ⟨lindenbaum emptyset_consistent |>.choose⟩
 
 lemma either_mem (Ω : (Λ)-MCT) (p) : p ∈ Ω.theory ∨ ~p ∈ Ω.theory := by
   by_contra hC; push_neg at hC;
