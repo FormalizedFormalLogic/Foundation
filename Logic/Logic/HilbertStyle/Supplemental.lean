@@ -622,6 +622,11 @@ lemma iff_concat_conj! : 𝓢 ⊢! ⋀(Γ ++ Δ) ⟷ ⋀Γ ⋏ ⋀Δ := by
   . apply deduct'!; apply iff_concat_conj'!.mp; exact id!;
   . apply deduct'!; apply iff_concat_conj'!.mpr; exact id!;
 
+lemma imply_left_conj_concat! : 𝓢 ⊢! ⋀(Γ ++ Δ) ⟶ p ↔ 𝓢 ⊢! (⋀Γ ⋏ ⋀Δ) ⟶ p := by
+  constructor;
+  . intro h; exact imp_trans''! (and₂'! iff_concat_conj!) h;
+  . intro h; exact imp_trans''! (and₁'! iff_concat_conj!) h;
+
 end Conjunction
 
 

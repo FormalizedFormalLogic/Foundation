@@ -383,6 +383,20 @@ lemma iff_mem₁_and : p ⋏ q ∈ t.tableau.1 ↔ p ∈ t.tableau.1 ∧ q ∈ t
     have : Λ ⊬! ⋀[p, q] ⟶ ⋁[p ⋏ q] := t.consistent (by simp_all) (by simp_all);
     contradiction;
 
+lemma iff_mem₁_conj {Γ : List (Formula α)} : ⋀Γ ∈ t.tableau.1 ↔ ∀ p ∈ Γ, p ∈ t.tableau.1 := by
+  induction Γ using List.induction_with_singleton with
+  | hnil => simp;
+  | hsingle p => simp;
+  | hcons p Γ Γ_nil ih =>
+    simp only [(List.conj₂_cons_nonempty Γ_nil), List.mem_cons];
+    constructor;
+    . rintro h p (rfl | hp);
+      . exact iff_mem₁_and.mp h |>.1;
+      . exact ih.mp (iff_mem₁_and.mp h |>.2) _ hp;
+    . intro h;
+      apply iff_mem₁_and.mpr;
+      simp_all;
+
 @[simp]
 lemma iff_mem₁_or : p ⋎ q ∈ t.tableau.1 ↔ p ∈ t.tableau.1 ∨ q ∈ t.tableau.1 := by
   constructor;
@@ -451,17 +465,96 @@ lemma transitive : Transitive (CanonicalFrame Λ) := by
   intro x y z;
   apply Set.Subset.trans;
 
+open Classical in
 lemma confluent [HasAxiomWeakLEM Λ] : Confluent (CanonicalFrame Λ) := by
   simp [Confluent, CanonicalFrame];
   intro x y z Rxy Rxz;
   suffices (Λ)-Consistent (y.tableau.1 ∪ z.tableau.1, ∅) by
     obtain ⟨w, hw⟩ := lindenbaum (Λ := Λ) this;
-    use w; aesop;
+    use w;
+    simp_all;
+
   intro Γ Δ;
-  simp;
   intro hΓ hΔ h;
+  simp_all;
   have := List.nil_iff.mpr hΔ; subst this; simp at h; clear hΔ;
-  sorry;
+
+  have hΓy : ¬(∀ w, w ∈ Γ → w ∈ y.tableau.1) := by
+    by_contra hC;
+    have := by simpa using y.consistent (Γ := Γ) (Δ := []) hC (by simp);
+    contradiction;
+  push_neg at hΓy;
+
+  have hΓz : ¬(∀ w, w ∈ Γ → w ∈ z.tableau.1) := by
+    by_contra hC;
+    have := by simpa using z.consistent (Γ := Γ) (Δ := []) hC (by simp);
+    contradiction;
+  push_neg at hΓz;
+
+  let Θy := Γ.filter (λ p => p ∈ y.tableau.1 ∧ p ∉ x.tableau.1);
+  let Θz := Γ.filter (λ p => p ∈ z.tableau.1 ∧ p ∉ x.tableau.1);
+  let Θx := Γ.filter (λ p => (p ∈ y.tableau.1 ∧ p ∈ x.tableau.1) ∨ (p ∈ z.tableau.1 ∧ p ∈ x.tableau.1));
+
+  suffices ~⋀Θy ∈ x.tableau.1 by
+    have : ~⋀Θy ∈ y.tableau.1 := Rxy this;
+    have : ⋀Θy ∈ y.tableau.1 := iff_mem₁_conj.mpr $ by
+      intro p hp;
+      have := by simpa using List.of_mem_filter hp;
+      exact this.1;
+    have : Λ ⊬! ⋀Θy ⋏ ~⋀Θy ⟶ ⊥ := y.consistent (Γ := [⋀Θy, ~⋀Θy]) (Δ := []) (by simp; constructor <;> assumption) (by simp);
+    have : Λ ⊢! ⋀Θy ⋏ ~⋀Θy ⟶ ⊥ := by simp;
+    contradiction;
+
+  have : Λ ⊢! (⋀Θx ⋏ (⋀Θy ⋏ ⋀Θz)) ⟶ ⊥ := imp_trans''! (by
+    -- TODO: need more refactor
+    have d₁ : Λ ⊢! ⋀Θx ⋏ ⋀(Θy ++ Θz) ⟶ ⋀(Θx ++ (Θy ++ Θz)) := and₂'! $ iff_concat_conj!;
+    have d₂ : Λ ⊢! ⋀Θy ⋏ ⋀Θz ⟶ ⋀(Θy ++ Θz) := and₂'! $ iff_concat_conj!;
+    have d₃ : Λ ⊢! ⋀Θx ⋏ ⋀Θy ⋏ ⋀Θz ⟶ ⋀(Θx ++ (Θy ++ Θz)) := imp_trans''! (by
+      apply deduct'!;
+      have : [⋀Θx ⋏ ⋀Θy ⋏ ⋀Θz] ⊢[Λ]! ⋀Θx ⋏ ⋀Θy ⋏ ⋀Θz := FiniteContext.by_axm!;
+      apply and₃'!;
+      . exact and₁'! this;
+      . exact (FiniteContext.of'! d₂) ⨀ (and₂'! this);
+    ) d₁;
+    exact imp_trans''! d₃ $ conjconj_subset! $ by
+      intro p hp; simp;
+      apply or_iff_not_imp_left.mpr;
+      intro nmem_Θx;
+      have := (not_imp_not.mpr $ List.mem_filter_of_mem hp) nmem_Θx; simp at this;
+      have ⟨hy₁, hz₁⟩ := this;
+      rcases hΓ _ hp with (hy | hz);
+      . left;
+        apply List.mem_filter_of_mem hp;
+        simp;
+        constructor;
+        . assumption;
+        . exact hy₁ hy;
+      . right;
+        apply List.mem_filter_of_mem hp;
+        simp;
+        constructor;
+        . assumption;
+        . exact hz₁ hz;
+  ) h;
+  have : Λ ⊢! ⋀Θx ⟶ ⋀Θy ⟶ ~⋀Θz := and_imply_iff_imply_imply'!.mp $
+    (imp_trans''! (and_imply_iff_imply_imply'!.mp $ imp_trans''! (and₁'! and_assoc!) this) (and₂'! $ neg_equiv!));
+  have d : Λ ⊢! ⋀Θx ⟶ ~~⋀Θz ⟶ ~⋀Θy := imp_trans''! this contra₀!;
+
+  have mem_Θx_x : ⋀Θx ∈ x.tableau.1 := iff_mem₁_conj.mpr $ by
+    intro p hp;
+    have := by simpa using List.of_mem_filter hp;
+    rcases this with ⟨_, _⟩ | ⟨_, _⟩ <;> assumption;
+  have mem_Θz_z : ⋀Θz ∈ z.tableau.1 := iff_mem₁_conj.mpr $ by
+    intro p hp;
+    have := by simpa using List.of_mem_filter hp;
+    exact this.1;
+
+  have nmem_nΘz_z : ~⋀Θz ∉ z.tableau.1 := not_mem₁_neg_of_mem₁ mem_Θz_z;
+  have nmem_nΘz_x : ~⋀Θz ∉ x.tableau.1 := Set.not_mem_subset Rxz nmem_nΘz_z;
+  have mem_nnΘz_x : ~~⋀Θz ∈ x.tableau.1 := or_iff_not_imp_left.mp (iff_mem₁_or.mp $ mem₁_of_provable $ wlem!) nmem_nΘz_x;
+
+  exact mdp₁_mem mem_nnΘz_x $ mdp₁ mem_Θx_x d;
+
 
 lemma connected [HasAxiomDummett Λ] : Connected (CanonicalFrame Λ) := by
   simp [Connected, CanonicalFrame];
