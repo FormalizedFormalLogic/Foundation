@@ -328,7 +328,7 @@ lemma lindenbaum (hCon : (Λ)-Consistent t₀) : ∃ (t : SaturatedConsistentTab
 
 instance [System.Consistent Λ] : Nonempty (SCT Λ) := ⟨lindenbaum Tableau.self_ParametricConsistent |>.choose⟩
 
-variable (t : SCT Λ)
+variable {t : SCT Λ}
 
 @[simp] lemma disjoint : Disjoint t.tableau.1 t.tableau.2 := t.tableau.disjoint_of_consistent t.consistent
 
@@ -351,12 +351,15 @@ lemma equality_of₂ (e₂ : t₁.tableau.2 = t₂.tableau.2) : t₁ = t₂ := e
 
 lemma not_mem₂ {Γ : List (Formula α)} (hΓ : ∀ p ∈ Γ, p ∈ t.tableau.1) (h : Λ ⊢! ⋀Γ ⟶ q) : q ∉ t.tableau.2 := t.tableau.not_mem₂ t.consistent hΓ h
 
-lemma mdp₁ (hp : p ∈ t.tableau.1) (h : Λ ⊢! p ⟶ q) : q ∈ t.tableau.1 := by
-  exact t.not_mem₂_iff_mem₁.mp $ not_mem₂ (by simpa) (show Λ ⊢! ⋀[p] ⟶ q by simpa;)
+lemma mdp₁ (hp₁ : p ∈ t.tableau.1) (h : Λ ⊢! p ⟶ q) : q ∈ t.tableau.1 := by
+  apply not_mem₂_iff_mem₁.mp;
+  by_contra hq₂;
+  have : Λ ⊬! p ⟶ q := by simpa using t.consistent (Γ := [p]) (Δ := [q]) (by simpa) (by simpa);
+  contradiction;
 
 @[simp]
 lemma mem₁_verum : ⊤ ∈ t.tableau.1 := by
-  apply t.not_mem₂_iff_mem₁.mp;
+  apply not_mem₂_iff_mem₁.mp;
   by_contra hC;
   have : Λ ⊬! ⋀[] ⟶ ⋁[⊤] := t.consistent (by simp) (by simpa);
   have : Λ ⊢! ⋀[] ⟶ ⋁[⊤] := by simp;
@@ -374,18 +377,19 @@ lemma iff_mem₁_and : p ⋏ q ∈ t.tableau.1 ↔ p ∈ t.tableau.1 ∧ q ∈ t
   constructor;
   . intro h; constructor <;> exact mdp₁ h (by simp)
   . rintro ⟨hp, hq⟩;
+    apply not_mem₂_iff_mem₁.mp;
     by_contra hC;
     have : Λ ⊢! ⋀[p, q] ⟶ ⋁[p ⋏ q] := by simp;
-    have : Λ ⊬! ⋀[p, q] ⟶ ⋁[p ⋏ q] := t.consistent (by aesop) (by simpa using t.not_mem₁_iff_mem₂.mp hC);
+    have : Λ ⊬! ⋀[p, q] ⟶ ⋁[p ⋏ q] := t.consistent (by simp_all) (by simp_all);
     contradiction;
 
 @[simp]
 lemma iff_mem₁_or : p ⋎ q ∈ t.tableau.1 ↔ p ∈ t.tableau.1 ∨ q ∈ t.tableau.1 := by
   constructor;
   . intro h;
-    by_contra hC; simp [not_or] at hC;
-    have : p ∈ t.tableau.2 := t.not_mem₁_iff_mem₂.mp hC.1;
-    have : q ∈ t.tableau.2 := t.not_mem₁_iff_mem₂.mp hC.2;
+    by_contra hC; push_neg at hC;
+    have : p ∈ t.tableau.2 := not_mem₁_iff_mem₂.mp hC.1;
+    have : q ∈ t.tableau.2 := not_mem₁_iff_mem₂.mp hC.2;
     have : Λ ⊢! ⋀[p ⋎ q] ⟶ ⋁[p, q] := by simp;
     have : Λ ⊬! ⋀[p ⋎ q] ⟶ ⋁[p, q] := t.consistent (by simp_all) (by simp_all);
     contradiction;
@@ -409,6 +413,13 @@ lemma mem₂_neg_of_mem₁ : p ∈ t.tableau.1 → ~p ∈ t.tableau.2 := by
 lemma mem₁_of_provable : Λ ⊢! p → p ∈ t.tableau.1 := by
   intro h;
   exact mdp₁ mem₁_verum $ dhyp! h;
+
+lemma mdp₁_mem (hp : p ∈ t.tableau.1) (h : p ⟶ q ∈ t.tableau.1) : q ∈ t.tableau.1 := by
+  apply not_mem₂_iff_mem₁.mp;
+  by_contra hC;
+  have : Λ ⊬! (p ⋏ (p ⟶ q)) ⟶ q := t.consistent (Γ := [p, p ⟶ q]) (Δ := [q]) (by aesop) (by simpa);
+  have : Λ ⊢! (p ⋏ (p ⟶ q)) ⟶ q := mdp_in!
+  contradiction;
 
 end SaturatedConsistentTableau
 
@@ -458,16 +469,17 @@ lemma connected [HasAxiomDummett Λ] : Connected (CanonicalFrame Λ) := by
   apply or_iff_not_imp_left.mpr;
   intro nRyz;
   obtain ⟨p, hyp, nhzp⟩ := Set.not_subset.mp nRyz;
-  intro q hq;
+  intro q hqz;
   have : q ⟶ p ∉ x.tableau.1 := by
     by_contra hqpx;
     have hqpz : q ⟶ p ∈ z.tableau.1 := by aesop;
-    sorry;
+    have : p ∈ z.tableau.1 := mdp₁_mem hqz hqpz;
+    contradiction;
   have := iff_mem₁_or.mp $ mem₁_of_provable (t := x) (p := (p ⟶ q) ⋎ (q ⟶ p)) dummett!;
-  have : p ⟶ q ∈ x.tableau.1 := by aesop;
-  have : p ⟶ q ∈ y.tableau.1 := by aesop;
-  apply mdp₁ hyp _;
-  sorry;
+  have hpqx : p ⟶ q ∈ x.tableau.1 := by aesop;
+  have hpqy : p ⟶ q ∈ y.tableau.1 := Rxy hpqx;
+  have : q ∈ y.tableau.1 := mdp₁_mem hyp hpqy;
+  exact this;
 
 end CanonicalFrame
 
@@ -508,7 +520,7 @@ private lemma truthlemma.himp
   . contrapose;
     simp_all [Satisfies];
     intro h;
-    replace h := t.not_mem₁_iff_mem₂.mp h;
+    replace h := not_mem₁_iff_mem₂.mp h;
     obtain ⟨t', ⟨h, _⟩⟩ := lindenbaum (Λ := Λ) (t₀ := (insert p t.tableau.1, {q})) $ by
       simp only [Tableau.ParametricConsistent];
       intro Γ Δ hΓ hΔ;
@@ -533,14 +545,14 @@ private lemma truthlemma.himp
     . simp_all only [Set.singleton_subset_iff];
     . constructor;
       . assumption;
-      . apply t'.not_mem₁_iff_mem₂.mpr;
+      . apply not_mem₁_iff_mem₂.mpr;
         simp_all only [Set.singleton_subset_iff];
   . simp [Satisfies.imp_def];
     intro h t' htt' hp;
     replace hp := ihp.mp hp;
     have hpq := htt' h;
     apply ihq.mpr;
-    apply t'.not_mem₂_iff_mem₁.mp;
+    apply not_mem₂_iff_mem₁.mp;
     exact not_mem₂
       (by simp_all)
       (show Λ ⊢! ⋀[p, p ⟶ q] ⟶ q by
@@ -559,7 +571,7 @@ private lemma truthlemma.hneg
   . contrapose;
     simp_all [Satisfies];
     intro h;
-    replace h := t.not_mem₁_iff_mem₂.mp h;
+    replace h := not_mem₁_iff_mem₂.mp h;
     obtain ⟨t', ⟨h, _⟩⟩ := lindenbaum (Λ := Λ) (t₀ := (insert p t.tableau.1, ∅)) $ by
       simp only [Tableau.ParametricConsistent];
       intro Γ Δ hΓ hΔ;
@@ -605,7 +617,7 @@ lemma deducible_of_validOnCanonicelModel : (CanonicalModel Λ) ⊧ p ↔ Λ ⊢!
     simp [ValidOnModel.iff_models, ValidOnModel]
     existsi t';
     apply truthlemma.not.mpr;
-    apply t'.not_mem₁_iff_mem₂.mpr;
+    apply not_mem₁_iff_mem₂.mpr;
     simp_all;
   . intro h t;
     suffices p ∈ t.tableau.1 by exact truthlemma.mpr this;
@@ -627,7 +639,7 @@ lemma complete (H : CanonicalFrame Λ ∈ 𝔽) {p : Formula α} : 𝔽#α ⊧ p
 
 instance instComplete (H : CanonicalFrame Λ ∈ 𝔽) : Complete Λ (𝔽#α) := ⟨complete H⟩
 
-instance Int_Complete : Complete (𝐈𝐧𝐭 : DeductionParameter α) (Kripke.ReflexiveTransitiveFrameClass.{u}#α) := instComplete $ by
+instance Int_complete : Complete 𝐈𝐧𝐭 (Kripke.ReflexiveTransitiveFrameClass.{u}#α) := instComplete $ by
   constructor;
   . exact CanonicalFrame.reflexive;
   . exact CanonicalFrame.transitive;
@@ -641,20 +653,19 @@ instance : Complete (𝐈𝐧𝐭 : DeductionParameter α) (Kripke.FrameClassOfS
 ⟩
 
 
-instance LC_Complete : Complete (𝐋𝐂 : DeductionParameter α) (Kripke.ReflexiveTransitiveConnectedFrameClass.{u}#α) := instComplete $ by
+instance LC_complete : Complete 𝐋𝐂 (Kripke.ReflexiveTransitiveConnectedFrameClass.{u}#α) := instComplete $ by
   refine ⟨
     CanonicalFrame.reflexive,
     CanonicalFrame.transitive,
     CanonicalFrame.connected
   ⟩;
 
-instance : Complete (𝐋𝐂 : DeductionParameter α) (Kripke.FrameClassOfSystem.{_, _, u} α 𝐋𝐂) := ⟨by
-  intro p h;
-  apply Complete.complete (𝓜 := Kripke.ReflexiveTransitiveConnectedFrameClass#α);
-  intro F hF;
-  apply h;
-  exact Kripke.LC_Characteraizable.characterize hF;
-⟩
+instance KC_complete : Complete 𝐊𝐂 (Kripke.ReflexiveTransitiveConfluentFrameClass.{u}#α) := instComplete $ by
+  refine ⟨
+    CanonicalFrame.reflexive,
+    CanonicalFrame.transitive,
+    CanonicalFrame.confluent
+  ⟩;
 
 end
 

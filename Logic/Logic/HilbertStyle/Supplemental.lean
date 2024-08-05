@@ -13,6 +13,13 @@ open NegationEquiv
 open FiniteContext
 open List
 
+def mdp_in : 𝓢 ⊢ p ⋏ (p ⟶ q) ⟶ q := by
+  apply deduct';
+  have hp  : [p, p ⟶ q] ⊢[𝓢] p := FiniteContext.byAxm;
+  have hpq : [p, p ⟶ q] ⊢[𝓢] p ⟶ q := FiniteContext.byAxm;
+  exact hpq ⨀ hp;
+lemma mdp_in! : 𝓢 ⊢! p ⋏ (p ⟶ q) ⟶ q := ⟨mdp_in⟩
+
 def bot_of_mem_either [System.NegationEquiv 𝓢] (h₁ : p ∈ Γ) (h₂ : ~p ∈ Γ) : Γ ⊢[𝓢] ⊥ := by
   have hp : Γ ⊢[𝓢] p := FiniteContext.byAxm h₁;
   have hnp : Γ ⊢[𝓢] p ⟶ ⊥ := neg_equiv'.mp $ FiniteContext.byAxm h₂;
