@@ -700,7 +700,7 @@ def ppq (h : 𝓢 ⊢ p ⟶ p ⟶ q) : 𝓢 ⊢ p ⟶ q := by
   have := of (Γ := [p]) h;
   exact this ⨀ (FiniteContext.byAxm) ⨀ (FiniteContext.byAxm);
 
-private noncomputable def lemma_Grz : 𝓢 ⊢ □p ⟶ (p ⋏ (□p ⟶ □□p)) := by
+noncomputable def lemma_Grz₁ : 𝓢 ⊢ □p ⟶ □(□((p ⋏ (□p ⟶ □□p)) ⟶ □(p ⋏ (□p ⟶ □□p))) ⟶ (p ⋏ (□p ⟶ □□p))) := by
   let q := p ⋏ (□p ⟶ □□p);
   have    : 𝓢 ⊢ ((□p ⟶ □□p) ⟶ □p) ⟶ □p := peirce
   have    : 𝓢 ⊢ (p ⟶ ((□p ⟶ □□p) ⟶ □p)) ⟶ (p ⟶ □p) := dhyp_imp this;
@@ -719,14 +719,16 @@ private noncomputable def lemma_Grz : 𝓢 ⊢ □p ⟶ (p ⋏ (□p ⟶ □□p
     . exact FiniteContext.byAxm;
     . exact (of this) ⨀ (dhyp p FiniteContext.byAxm) ⨀ (FiniteContext.byAxm);
   have    : 𝓢 ⊢ p ⟶ (□(q ⟶ □q) ⟶ q) := this;
-  have    : 𝓢 ⊢ □p ⟶ □(□(q ⟶ □q) ⟶ q) := implyBoxDistribute' this;
-  exact impTrans'' this axiomGrz;
+  exact implyBoxDistribute' this;
+lemma lemma_Grz₁! : 𝓢 ⊢! (□p ⟶ □(□((p ⋏ (□p ⟶ □□p)) ⟶ □(p ⋏ (□p ⟶ □□p))) ⟶ (p ⋏ (□p ⟶ □□p)))) := ⟨lemma_Grz₁⟩
 
-private noncomputable def Four_of_Grz : 𝓢 ⊢ □p ⟶ □□p := ppq $ impTrans'' lemma_Grz and₂
+noncomputable def lemma_Grz₂ : 𝓢 ⊢ □p ⟶ (p ⋏ (□p ⟶ □□p)) := impTrans'' (lemma_Grz₁ (p := p)) axiomGrz
+
+private noncomputable def Four_of_Grz : 𝓢 ⊢ □p ⟶ □□p := ppq $ impTrans'' lemma_Grz₂ and₂
 
 noncomputable instance : HasAxiomFour 𝓢 := ⟨fun _ ↦ Four_of_Grz⟩
 
-private noncomputable def T_of_Grz : 𝓢 ⊢ □p ⟶ p := impTrans'' lemma_Grz and₁
+private noncomputable def T_of_Grz : 𝓢 ⊢ □p ⟶ p := impTrans'' lemma_Grz₂ and₁
 
 noncomputable instance : HasAxiomT 𝓢 := ⟨fun _ ↦ T_of_Grz⟩
 
