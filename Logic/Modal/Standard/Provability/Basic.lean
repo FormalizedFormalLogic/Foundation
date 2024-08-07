@@ -67,7 +67,7 @@ variable {L : FirstOrder.Language} [Semiterm.Operator.GoedelNumber L (Sentence L
          (T₀ T : FirstOrder.Theory L) [T₀ ≼ T] [Diagonalization T₀]
          (β : ProvabilityPredicate L L)
 
-lemma arithmetical_soundness_K4Loeb [β.HilbertBernays T₀ T] (h : 𝐊𝟒(𝐋) ⊢! p) : ∀ {f : realization L α}, T ⊢! (f[β] p) := by
+lemma arithmetical_soundness_K4Loeb [β.HBL T₀ T] (h : 𝐊𝟒(𝐋) ⊢! p) : ∀ {f : realization L α}, T ⊢! (f[β] p) := by
   intro f;
   induction h using Deduction.inducition! with
   | hRules rl hrl hant ih =>
@@ -90,18 +90,19 @@ lemma arithmetical_soundness_K4Loeb [β.HilbertBernays T₀ T] (h : 𝐊𝟒(�
     exact dne!;
   | _ => dsimp [interpretation]; trivial;
 
-theorem arithmetical_soundness_GL [β.HilbertBernays T₀ T] (h : 𝐆𝐋 ⊢! p) : ∀ {f : realization L α}, T ⊢! (f[β] p) := by
+theorem arithmetical_soundness_GL [β.HBL T₀ T] (h : 𝐆𝐋 ⊢! p) : ∀ {f : realization L α}, T ⊢! (f[β] p) := by
   apply arithmetical_soundness_K4Loeb (T₀ := T₀);
   exact (System.weakerThan_iff.mp reducible_GL_K4Loeb) h;
 
 
-lemma arithmetical_soundness_N [β.HilbertBernays₁ T₀ T] (h : 𝐍 ⊢! p) : ∀ {f : realization L α}, T ⊢! (f[β] p) := by
+lemma arithmetical_soundness_N [β.HBL T₀ T] (h : 𝐍 ⊢! p) : ∀ {f : realization L α}, T ⊢! (f[β] p) := by
   intro f;
   induction h using Deduction.inducition! with
   | hMaxm hp => simp at hp;
   | hRules rl hrl hant ih =>
     simp only [Set.mem_setOf_eq] at hrl;
-    obtain ⟨p, e⟩ := hrl; subst e; simp_all;
+    obtain ⟨p, e⟩ := hrl; subst e;
+    simp_all only [List.mem_singleton, forall_eq];
     exact D1s (T₀ := T₀) ih;
   | hMdp ihpq ihp =>
     simp only [interpretation] at ihpq;
