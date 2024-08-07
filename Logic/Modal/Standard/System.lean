@@ -502,6 +502,9 @@ def imply_Box_BoxBoxdot : 𝓢 ⊢ □p ⟶ □⊡p := by
   exact impTrans'' (implyRightAnd (impId _) axiomFour) collect_box_and
 @[simp] lemma imply_box_boxboxdot! : 𝓢 ⊢! □p ⟶ □⊡p := ⟨imply_Box_BoxBoxdot⟩
 
+def imply_Box_BoxBoxdot' (h : 𝓢 ⊢ □p) : 𝓢 ⊢ □⊡p := imply_Box_BoxBoxdot ⨀ h
+def imply_Box_BoxBoxdot'! (h : 𝓢 ⊢! □p) : 𝓢 ⊢! □⊡p := ⟨imply_Box_BoxBoxdot' h.some⟩
+
 def iff_Box_BoxBoxdot [HasAxiomFour 𝓢] : 𝓢 ⊢ □p ⟷ □⊡p := by
   apply iffIntro;
   . exact imply_Box_BoxBoxdot
@@ -731,6 +734,38 @@ private noncomputable def T_of_Grz : 𝓢 ⊢ □p ⟶ p := impTrans'' lemma_Grz
 noncomputable instance : HasAxiomT 𝓢 := ⟨fun _ ↦ T_of_Grz⟩
 
 end Grz
+
+
+section GL_Grz
+
+variable [System.K 𝓢] [HasAxiomL 𝓢]
+
+private noncomputable def boxdot_Grz_of_L1 : 𝓢 ⊢ (⊡(⊡(p ⟶ ⊡p) ⟶ p)) ⟶ (□(p ⟶ ⊡p) ⟶ p) := by
+  have : 𝓢 ⊢ (□(p ⟶ ⊡p) ⋏ ~p) ⟶ ⊡(p ⟶ ⊡p) := by
+    apply deduct';
+    apply and₃';
+    . exact (of efq_imply_not₁) ⨀ and₂;
+    . exact (of (impId _)) ⨀ and₁;
+  have : 𝓢 ⊢ ~⊡(p ⟶ ⊡p) ⟶ (~□(p ⟶ ⊡p) ⋎ p) := impTrans'' (contra₀' this) $ impTrans'' demorgan₄ (orReplaceRight dne);
+  have : 𝓢 ⊢ (~⊡(p ⟶ ⊡p) ⋎ p) ⟶ (~□(p ⟶ ⊡p) ⋎ p) := or₃'' this or₂;
+  have : 𝓢 ⊢ ~⊡(p ⟶ ⊡p) ⋎ p ⟶ □(p ⟶ ⊡p) ⟶ p := impTrans'' this implyOfNotOr;
+  have : 𝓢 ⊢ (⊡(p ⟶ ⊡p) ⟶ p) ⟶ (□(p ⟶ ⊡p) ⟶ p) := impTrans'' NotOrOfImply this;
+  exact impTrans'' boxdotAxiomT this;
+
+noncomputable def boxdot_Grz_of_L : 𝓢 ⊢ ⊡(⊡(p ⟶ ⊡p) ⟶ p) ⟶ p := by
+  have : 𝓢 ⊢ □(⊡(p ⟶ ⊡p) ⟶ p) ⟶ □⊡(p ⟶ ⊡p) ⟶ □p := axiomK;
+  have : 𝓢 ⊢ □(⊡(p ⟶ ⊡p) ⟶ p) ⟶ □(p ⟶ ⊡p) ⟶ □p := impTrans'' this $ implyLeftReplace $ imply_Box_BoxBoxdot;
+  have : 𝓢 ⊢ □(⊡(p ⟶ ⊡p) ⟶ p) ⟶ □(p ⟶ ⊡p) ⟶ (p ⟶ ⊡p) := by
+    apply deduct'; apply deduct; apply deduct;
+    exact and₃' FiniteContext.byAxm $ (of this) ⨀ (FiniteContext.byAxm) ⨀ (FiniteContext.byAxm);
+  have : 𝓢 ⊢ □□(⊡(p ⟶ ⊡p) ⟶ p) ⟶ □(□(p ⟶ ⊡p) ⟶ (p ⟶ ⊡p)) := implyBoxDistribute' this;
+  have : 𝓢 ⊢ □(⊡(p ⟶ ⊡p) ⟶ p) ⟶ □(□(p ⟶ ⊡p) ⟶ (p ⟶ ⊡p)) := impTrans'' axiomFour this;
+  have : 𝓢 ⊢ □(⊡(p ⟶ ⊡p) ⟶ p) ⟶ □(p ⟶ ⊡p) := impTrans'' this axiomL;
+  have : 𝓢 ⊢ ⊡(⊡(p ⟶ ⊡p) ⟶ p) ⟶ □(p ⟶ ⊡p) := impTrans'' boxdotBox this;
+  exact mdp₁ boxdot_Grz_of_L1 this;
+lemma boxdot_Grz_of_L! : 𝓢 ⊢! ⊡(⊡(p ⟶ ⊡p) ⟶ p) ⟶ p := ⟨boxdot_Grz_of_L⟩
+
+end GL_Grz
 
 
 end

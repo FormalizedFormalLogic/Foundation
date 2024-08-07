@@ -447,6 +447,12 @@ noncomputable def NotOrOfImply' [HasAxiomDNE 𝓢] (d : 𝓢 ⊢ p ⟶ q) : 𝓢
   exact d₂ ⨀ d₃;
 lemma not_or_of_imply'! [HasAxiomDNE 𝓢] (d : 𝓢 ⊢! p ⟶ q) : 𝓢 ⊢! ~p ⋎ q := ⟨NotOrOfImply' d.some⟩
 
+noncomputable def NotOrOfImply [HasAxiomDNE 𝓢]  : 𝓢 ⊢ (p ⟶ q) ⟶ (~p ⋎ q) := by
+  apply deduct';
+  apply NotOrOfImply';
+  exact FiniteContext.byAxm;
+lemma not_or_of_imply! [HasAxiomDNE 𝓢] : 𝓢 ⊢! (p ⟶ q) ⟶ ~p ⋎ q := ⟨NotOrOfImply⟩
+
 -- TODO: Actually this can be computable but it's too slow.
 noncomputable def dnCollectImply [HasAxiomEFQ 𝓢] : 𝓢 ⊢ (~~p ⟶ ~~q) ⟶ ~~(p ⟶ q) := by
   apply deduct';
