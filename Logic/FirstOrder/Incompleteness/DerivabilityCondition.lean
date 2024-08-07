@@ -45,17 +45,17 @@ class Conservative
 
 variable [Semiterm.Operator.GoedelNumber L (Sentence L)]
 
-class HilbertBernays₁ (β : ProvabilityPredicate L L) (T₀ : Theory L) (T : outParam (Theory L)) where
+class HBL1 (β : ProvabilityPredicate L L) (T₀ : Theory L) (T : outParam (Theory L)) where
   D1 {σ : Sentence L} : T ⊢! σ → T₀ ⊢! ⦍β⦎σ
 
-class HilbertBernays₂ (β : ProvabilityPredicate L L) (T₀ : Theory L) (T : outParam (Theory L)) where
+class HBL2 (β : ProvabilityPredicate L L) (T₀ : Theory L) (T : outParam (Theory L)) where
   D2 {σ τ : Sentence L} : T₀ ⊢! ⦍β⦎(σ ⟶ τ) ⟶ ⦍β⦎σ ⟶ ⦍β⦎τ
 
-class HilbertBernays₃ (β : ProvabilityPredicate L L) (T₀ : Theory L) (T : outParam (Theory L)) where
+class HBL3 (β : ProvabilityPredicate L L) (T₀ : Theory L) (T : outParam (Theory L)) where
   D3 {σ : Sentence L} : T₀ ⊢! ⦍β⦎σ ⟶ ⦍β⦎⦍β⦎σ
 
-class HilbertBernays (β : ProvabilityPredicate L L) (T₀ : Theory L) (T : outParam (Theory L)) extends
-  β.HilbertBernays₁ T₀ T, β.HilbertBernays₂ T₀ T, β.HilbertBernays₃ T₀ T
+class HBL (β : ProvabilityPredicate L L) (T₀ : Theory L) (T : outParam (Theory L)) extends
+  β.HBL1 T₀ T, β.HBL2 T₀ T, β.HBL3 T₀ T
 
 class Loeb (β : ProvabilityPredicate L L) (T₀ : Theory L) (T : outParam (Theory L)) where
   LT {σ : Sentence L} : T ⊢! ⦍β⦎σ ⟶ σ → T ⊢! σ
@@ -74,32 +74,32 @@ open LO.System
 variable [DecidableEq (Sentence L)] [Semiterm.Operator.GoedelNumber L (Sentence L)]
          {β : ProvabilityPredicate L L}
          {T₀ T : Theory L} [T₀ ≼ T]
-         [β.HilbertBernays T₀ T]
+         [β.HBL T₀ T]
          {σ τ : Sentence L}
 
-alias D1 := HilbertBernays₁.D1
-alias D2 := HilbertBernays₂.D2
-alias D3 := HilbertBernays₃.D3
+alias D1 := HBL1.D1
+alias D2 := HBL2.D2
+alias D3 := HBL3.D3
 alias LT := Loeb.LT
 alias FLT := FormalizedLoeb.FLT
 alias Ro := Rosser.Ro
 
-def D1s [HilbertBernays₁ β T₀ T]: T ⊢! σ → T ⊢! ⦍β⦎σ := by
+def D1s [HBL1 β T₀ T]: T ⊢! σ → T ⊢! ⦍β⦎σ := by
   intro h;
   apply System.Subtheory.prf! (𝓢 := T₀);
-  apply HilbertBernays₁.D1 h;
+  apply D1 h;
 
-def D2s [HilbertBernays₂ β T₀ T] : T ⊢! ⦍β⦎(σ ⟶ τ) ⟶ ⦍β⦎σ ⟶ ⦍β⦎τ := by
+def D2s [HBL2 β T₀ T] : T ⊢! ⦍β⦎(σ ⟶ τ) ⟶ ⦍β⦎σ ⟶ ⦍β⦎τ := by
   apply System.Subtheory.prf! (𝓢 := T₀);
-  apply HilbertBernays₂.D2;
+  apply D2;
 
-def D2' [HilbertBernays β T₀ T] [System.ModusPonens T] : T₀ ⊢! ⦍β⦎(σ ⟶ τ) → T₀ ⊢! ⦍β⦎σ ⟶ ⦍β⦎τ := by
+def D2' [HBL β T₀ T] [System.ModusPonens T] : T₀ ⊢! ⦍β⦎(σ ⟶ τ) → T₀ ⊢! ⦍β⦎σ ⟶ ⦍β⦎τ := by
   intro h;
-  exact HilbertBernays₂.D2 ⨀ h;
+  exact D2 ⨀ h;
 
-def D3s [HilbertBernays₃ β T₀ T] : T ⊢! ⦍β⦎σ ⟶ ⦍β⦎⦍β⦎σ := by
+def D3s [HBL3 β T₀ T] : T ⊢! ⦍β⦎σ ⟶ ⦍β⦎⦍β⦎σ := by
   apply System.Subtheory.prf! (𝓢 := T₀);
-  apply HilbertBernays₃.D3;
+  apply D3;
 
 def prov_distribute_imply (h : T ⊢! σ ⟶ τ) : T₀ ⊢! ⦍β⦎σ ⟶ ⦍β⦎τ := D2' $ D1 h
 
@@ -129,7 +129,7 @@ end ProvabilityPredicate
 variable [DecidableEq (Sentence L)] [Semiterm.Operator.GoedelNumber L (Sentence L)]
          {β : ProvabilityPredicate L L}
          {T₀ T : Theory L} [T₀ ≼ T] [Diagonalization T₀]
-         [β.HilbertBernays T₀ T]
+         [β.HBL T₀ T]
          {σ τ : Sentence L}
 
 open LO.System
@@ -138,13 +138,13 @@ open ProvabilityPredicate
 
 abbrev goedel
   (T₀ T : Theory L) [Diagonalization T₀]
-  (β : ProvabilityPredicate L L) [β.HilbertBernays₁ T₀ T] : Sentence L
+  (β : ProvabilityPredicate L L) [β.HBL1 T₀ T] : Sentence L
   := fixpoint T₀ “x | ¬!β.prov x”
 local notation "γ" => goedel T₀ T β
 
 section GoedelSentence
 
-variable [β.HilbertBernays₁ T₀ T]
+variable [β.HBL1 T₀ T]
 
 lemma goedel_spec : T₀ ⊢! γ ⟷ ~⦍β⦎γ := by
   convert (diag (T := T₀) “x | ¬!β.prov x”);
@@ -158,7 +158,7 @@ private lemma goedel_specAux₂ : T ⊢! ~γ ⟶ ⦍β⦎γ := contra₂'! $ and
 end GoedelSentence
 
 
-class ProvabilityPredicate.GoedelSound (β : ProvabilityPredicate L L) (T₀ T) [Diagonalization T₀] [β.HilbertBernays₁ T₀ T] where
+class ProvabilityPredicate.GoedelSound (β : ProvabilityPredicate L L) (T₀ T) [Diagonalization T₀] [β.HBL1 T₀ T] where
   γ_sound : T ⊢! ⦍β⦎(goedel T₀ T β) → T ⊢! (goedel T₀ T β)
 
 open GoedelSound
@@ -166,7 +166,7 @@ open GoedelSound
 
 section First
 
-variable [System.Consistent T] [β.HilbertBernays₁ T₀ T]
+variable [System.Consistent T] [β.HBL1 T₀ T]
 
 theorem unprovable_goedel : T ⊬! γ := by
   intro h;
@@ -199,11 +199,11 @@ end First
 
 section Second
 
-variable [Diagonalization T] [β.HilbertBernays T₀ T]
+variable [Diagonalization T] [β.HBL T₀ T]
 
 lemma formalized_consistent_of_existance_unprovable : T₀ ⊢! ~⦍β⦎σ ⟶ Con⦍β⦎ := contra₀'! $ D2 ⨀ (D1 efq!)
 
-private lemma consistency_lemma_1 [T₀ ≼ U] [β.HilbertBernays T₀ U] : (U ⊢! Con⦍β⦎ ⟶ ~⦍β⦎σ) ↔ (U ⊢! ⦍β⦎σ ⟶ ⦍β⦎(~σ)) := by
+private lemma consistency_lemma_1 [T₀ ≼ U] [β.HBL T₀ U] : (U ⊢! Con⦍β⦎ ⟶ ~⦍β⦎σ) ↔ (U ⊢! ⦍β⦎σ ⟶ ⦍β⦎(~σ)) := by
   constructor;
   . intro H;
     exact contra₃'! $ imp_trans''! (Subtheory.prf! (𝓢 := T₀) formalized_consistent_of_existance_unprovable) H;
@@ -249,13 +249,13 @@ section Loeb
 
 def kreisel
   (T₀ T : Theory L) [Diagonalization T₀]
-  (β : ProvabilityPredicate L L) [β.HilbertBernays T₀ T]
+  (β : ProvabilityPredicate L L) [β.HBL T₀ T]
   (σ : Sentence L) : Sentence L := fixpoint T₀ “x | !β.prov x → !σ”
 local notation "κ(" σ ")" => kreisel T₀ T β σ
 
 section KrieselSentence
 
-variable [β.HilbertBernays T₀ T]
+variable [β.HBL T₀ T]
 
 lemma kreisel_spec (σ : Sentence L) : T₀ ⊢! κ(σ) ⟷ (⦍β⦎(κ(σ)) ⟶ σ) := by
   convert (diag (T := T₀) “x | !β.prov x → !σ”);
@@ -268,21 +268,21 @@ private lemma kreisel_specAux₂ (σ : Sentence L) : T₀ ⊢! (⦍β⦎κ(σ) �
 
 end KrieselSentence
 
-theorem loeb_theorm [β.HilbertBernays T₀ T] (H : T ⊢! ⦍β⦎σ ⟶ σ) : T ⊢! σ := by
+theorem loeb_theorm [β.HBL T₀ T] (H : T ⊢! ⦍β⦎σ ⟶ σ) : T ⊢! σ := by
   have d₁ : T ⊢! ⦍β⦎κ(σ) ⟶ σ := imp_trans''! (Subtheory.prf! (kreisel_specAux₁ σ)) H;
   have d₂ : T ⊢! ⦍β⦎κ(σ)      := Subtheory.prf! (𝓢 := T₀) (D1 $ Subtheory.prf! (kreisel_specAux₂ σ) ⨀ d₁);
   exact d₁ ⨀ d₂;
 
-instance [β.HilbertBernays T₀ T] : Loeb β T₀ T := ⟨loeb_theorm (T₀ := T₀) (T := T)⟩
+instance [β.HBL T₀ T] : Loeb β T₀ T := ⟨loeb_theorm (T₀ := T₀) (T := T)⟩
 
 
-theorem formalized_loeb_theorem [β.HilbertBernays T₀ T] : T₀ ⊢! ⦍β⦎(⦍β⦎σ ⟶ σ) ⟶ ⦍β⦎σ := by
+theorem formalized_loeb_theorem [β.HBL T₀ T] : T₀ ⊢! ⦍β⦎(⦍β⦎σ ⟶ σ) ⟶ ⦍β⦎σ := by
   have hκ₁ : T₀ ⊢! ⦍β⦎(κ(σ)) ⟶ ⦍β⦎σ := kreisel_specAux₁ σ;
   have : T₀ ⊢! (⦍β⦎σ ⟶ σ) ⟶ (⦍β⦎κ(σ) ⟶ σ) := replace_imply_left! hκ₁;
   have : T ⊢! (⦍β⦎σ ⟶ σ) ⟶ κ(σ) := Subtheory.prf! (𝓢 := T₀) $ imp_trans''! this (kreisel_specAux₂ σ);
   exact imp_trans''! (D2 ⨀ (D1 this)) hκ₁;
 
-instance [β.HilbertBernays T₀ T] : FormalizedLoeb β T₀ T := ⟨formalized_loeb_theorem (T₀ := T₀) (T := T)⟩
+instance [β.HBL T₀ T] : FormalizedLoeb β T₀ T := ⟨formalized_loeb_theorem (T₀ := T₀) (T := T)⟩
 
 
 variable [System.Consistent T]
@@ -293,14 +293,14 @@ lemma unprovable_consistency_via_loeb [β.Loeb T₀ T] : T ⊬! Con⦍β⦎ := b
   have := not_consistent_iff_inconsistent.mpr $ inconsistent_iff_provable_bot.mpr this;
   contradiction;
 
-lemma formalized_unprovable_not_consistency [β.HilbertBernays T₀ T] [β.GoedelSound T₀ T]
+lemma formalized_unprovable_not_consistency [β.HBL T₀ T] [β.GoedelSound T₀ T]
   : T ⊬! Con⦍β⦎ ⟶ ~⦍β⦎(~Con⦍β⦎) := by
   by_contra hC;
   have : T ⊢! ~Con⦍β⦎ := Loeb.LT T₀ $ contra₁'! hC;
   have : T ⊬! ~Con⦍β⦎ := unrefutable_consistency (T₀ := T₀);
   contradiction;
 
-lemma formalized_unrefutable_goedel [β.HilbertBernays T₀ T] [β.GoedelSound T₀ T]
+lemma formalized_unrefutable_goedel [β.HBL T₀ T] [β.GoedelSound T₀ T]
   : T ⊬! Con⦍β⦎ ⟶ ~⦍β⦎(~γ) := by
   by_contra hC;
   have : T ⊬! Con⦍β⦎ ⟶ ~⦍β⦎(~Con⦍β⦎)  := formalized_unprovable_not_consistency (T₀ := T₀);
@@ -312,13 +312,13 @@ end Loeb
 
 abbrev rosser
   (T₀ T : Theory L) [Diagonalization T₀]
-  (β : ProvabilityPredicate L L) [β.HilbertBernays₁ T₀ T] [β.Rosser T₀ T] : Sentence L
+  (β : ProvabilityPredicate L L) [β.HBL1 T₀ T] [β.Rosser T₀ T] : Sentence L
   := fixpoint T₀ “x | ¬!β.prov x”
 local notation "ρ" => rosser T₀ T β
 
 section RosserSentence
 
-variable [β.HilbertBernays₁ T₀ T] [β.Rosser T₀ T]
+variable [β.HBL1 T₀ T] [β.Rosser T₀ T]
 
 lemma rosser_spec : T₀ ⊢! ρ ⟷ ~⦍β⦎ρ := goedel_spec
 
@@ -328,7 +328,7 @@ end RosserSentence
 
 section
 
-variable [System.Consistent T] [β.HilbertBernays₁ T₀ T] [β.Rosser T₀ T]
+variable [System.Consistent T] [β.HBL1 T₀ T] [β.Rosser T₀ T]
 
 lemma unprovable_rosser : T ⊬! ρ := unprovable_goedel
 
