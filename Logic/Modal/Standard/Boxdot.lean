@@ -52,4 +52,19 @@ theorem iff_S4_boxdotTranslatedK4 : 𝐒𝟒 ⊢! p ↔ 𝐊𝟒 ⊢! pᵇ := by
   . apply boxdotTranslatedK4_of_S4;
   . apply S4_of_boxdotTranslatedK4;
 
+lemma boxdotTranslatedGL_of_Grz : 𝐆𝐫𝐳 ⊢! p → 𝐆𝐋 ⊢! pᵇ := by
+  intro h;
+  induction h using Deduction.inducition_with_necOnly! with
+  | hMaxm a =>
+    rcases a with (⟨_, _, rfl⟩ | ⟨_, rfl⟩);
+    . exact boxdot_axiomK!;
+    . exact boxdot_Grz_of_L!;
+  | hNec ihp =>
+    dsimp [BoxdotTranslation];
+    exact boxdot_nec! $ ihp;
+  | hMdp ihpq ihp =>
+    dsimp [BoxdotTranslation] at ihpq ihp;
+    exact ihpq ⨀ ihp;
+  | _ => dsimp [BoxdotTranslation]; trivial;
+
 end LO.Modal.Standard
