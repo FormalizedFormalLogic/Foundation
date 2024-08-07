@@ -5,6 +5,19 @@ postfix:max "⁻ʳ" => irreflexivize
 
 abbrev WeaklyConverseWellFounded (R : α → α → Prop) := ConverseWellFounded R⁻ʳ
 
+lemma antisymm_of_WCWF : WeaklyConverseWellFounded R → Antisymmetric R := by
+  contrapose;
+  simp [Antisymmetric];
+  intro x y Rxy Ryz hxy;
+  apply ConverseWellFounded.iff_has_max.not.mpr;
+  push_neg;
+  use {x, y};
+  constructor;
+  . simp;
+  . intro z hz;
+    by_cases z = x;
+    . use y; simp_all [irreflexivize];
+    . use x; simp_all [irreflexivize];
 
 namespace LO.Modal.Standard
 
