@@ -79,8 +79,6 @@ open Kripke
 open Formula (atom)
 open Formula.Kripke
 
-abbrev ConnectedFrameClass : FrameClass := { F | Connected F }
-
 variable {α : Type u} [Inhabited α] [DecidableEq α]
 variable {F : Kripke.Frame}
 
