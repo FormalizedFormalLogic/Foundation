@@ -140,28 +140,47 @@ private lemma wcwf_of_Grz : F# ⊧* (𝗚𝗿𝘇 : AxiomSet α) → WeaklyConve
   use (Axioms.Grz (atom default));
   constructor;
   . simp;
-  . by_cases H : ∀ j₁ j₂, (j₁ < j₂ → f j₁ ≠ f j₂)
-    . let V : Valuation F α := (λ v _ => ∀ i, v ≠ f (2 * i));
-      use V, (f 0);
+  . by_cases H : ∀ j₁ j₂, (j₁ < j₂ → f j₂ ≠ f j₁)
+    . use (λ v _ => ∀ i, v ≠ f (2 * i)), (f 0);
       apply Classical.not_imp.mpr
       constructor;
-      . sorry;
-      . simp [Satisfies, V]; use 0;
-    . push_neg at H;
-      obtain ⟨j₁, j₂, ljk, ejk⟩ := H;
-      let V : Valuation F α := (λ v _ => v ≠ f j₁);
-      use V, (f j₁);
-      apply Classical.not_imp.mpr;
-      constructor;
-      . suffices Satisfies ⟨F, V⟩ (f j₁) (□(~(atom default) ⟶ ~(□(atom default ⟶ □atom default)))) by
+      . suffices Satisfies ⟨F, _⟩ (f 0) (□(~(atom default) ⟶ ~(□(atom default ⟶ □atom default)))) by
           intro x hx;
           exact not_imp_not.mp $ this hx;
-        suffices H : Satisfies ⟨F, V⟩ (f (j₁ + 1)) (~(atom default ⟶ □atom default)) by
-          sorry;
-        simp [Satisfies, V];
-        constructor;
-        . have := @hf j₁ |>.1; aesop;
-        . sorry;
+        simp [Satisfies];
+        rintro v h0v j rfl;
+        use f (2 * j + 1);
+        refine ⟨?_, ?_, f ((2 * j) + 2), ?_, ?_⟩;
+        . apply hf _ |>.2;
+        . intro i;
+          rcases (lt_trichotomy i j) with (hij | rfl | hij);
+          . apply H; omega;
+          . apply H; omega;
+          . apply @H _ _ ?_ |>.symm; omega;
+        . apply hf _ |>.2;
+        . use (j + 1); rfl;
+      . simp [Satisfies]; use 0;
+    . push_neg at H;
+      obtain ⟨j, k, ljk, ejk⟩ := H;
+      let V : Valuation F α := (λ v _ => v ≠ f j);
+      use V, (f j);
+      apply Classical.not_imp.mpr;
+      constructor;
+      . have : Satisfies ⟨F, V⟩ (f (j + 1)) (~((atom default) ⟶ □atom default)) := by
+          simp_all [Satisfies, V];
+          have h := hf j;
+          have y := hf k;
+          constructor;
+          . exact Ne.symm $ h.1;
+          . sorry;
+        have : Satisfies ⟨F, V⟩ (f j) (□(~(atom default) ⟶ ~□((atom default) ⟶ □atom default))) := by
+          simp_all [Satisfies, V];
+          rintro x hx rfl;
+          use f (j + 1);
+          refine ⟨(hf j).2, Ne.symm $ (hf j).1, this.2⟩;
+        intro x hx;
+        contrapose;
+        exact this hx;
       . simp [Satisfies, V];
 
 private lemma Grz_of_wcwf : (Reflexive F.Rel ∧ Transitive F.Rel ∧ WeaklyConverseWellFounded F.Rel) → F# ⊧* (𝗚𝗿𝘇 : AxiomSet α) := by
