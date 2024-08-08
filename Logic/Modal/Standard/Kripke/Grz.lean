@@ -121,13 +121,11 @@ private lemma refl_of_Grz (h : F# ⊧* (𝗚𝗿𝘇 : AxiomSet α)) : Reflexive
 private lemma trans_of_Grz (h : F# ⊧* (𝗚𝗿𝘇 : AxiomSet α)) : Transitive F := by
   exact axiomFour_defines.mp $ (valid_on_frame_Four_of_Grz h);
 
-open Classical in
-private lemma wcwf_of_Grz : F# ⊧* (𝗚𝗿𝘇 : AxiomSet α) → WeaklyConverseWellFounded F := by
-  intro h;
-  have : Transitive F := trans_of_Grz h;
-  have : Reflexive F := refl_of_Grz h;
-  revert h;
+private lemma wcwf_of_Grz (h : F# ⊧* (𝗚𝗿𝘇 : AxiomSet α)) : WeaklyConverseWellFounded F := by
+  have F_trans : Transitive F := trans_of_Grz h;
+  have F_refl : Reflexive F := refl_of_Grz h;
 
+  revert h;
   contrapose;
   intro hWCWF;
 
@@ -163,16 +161,24 @@ private lemma wcwf_of_Grz : F# ⊧* (𝗚𝗿𝘇 : AxiomSet α) → WeaklyConve
     . push_neg at H;
       obtain ⟨j, k, ljk, ejk⟩ := H;
       let V : Valuation F α := (λ v _ => v ≠ f j);
-      use V, (f j);
+      use (λ v _ => v ≠ f j), (f j);
       apply Classical.not_imp.mpr;
       constructor;
-      . have : Satisfies ⟨F, V⟩ (f (j + 1)) (~((atom default) ⟶ □atom default)) := by
+      . have : Satisfies ⟨F, V⟩ (f (j + 1)) (~((atom default) ⟶ □(atom default))) := by
           simp_all [Satisfies, V];
-          have h := hf j;
-          have y := hf k;
           constructor;
-          . exact Ne.symm $ h.1;
-          . sorry;
+          . exact Ne.symm $ (hf j).1;
+          . rw [←ejk];
+            have H : ∀ {x y : ℕ}, x < y → F.Rel (f x) (f y) := by
+              intro x y hxy;
+              induction hxy with
+              | refl => exact (hf x).2;
+              | step _ ih => exact F_trans ih (hf _).2;
+            by_cases h : j + 1 = k;
+            . subst_vars
+              apply F_refl;
+            . have : j + 1 < k := by omega;
+              exact H this;
         have : Satisfies ⟨F, V⟩ (f j) (□(~(atom default) ⟶ ~□((atom default) ⟶ □atom default))) := by
           simp_all [Satisfies, V];
           rintro x hx rfl;
