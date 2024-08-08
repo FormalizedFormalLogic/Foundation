@@ -5,6 +5,21 @@ postfix:max "⁻ʳ" => irreflexivize
 
 abbrev WeaklyConverseWellFounded (R : α → α → Prop) := ConverseWellFounded R⁻ʳ
 
+-- TODO: move?
+lemma dependent_choice
+  {R : α → α → Prop} (h : ∃ s : Set α, s.Nonempty ∧ ∀ a ∈ s, ∃ b ∈ s, R a b)
+  : ∃ f : ℕ → α, ∀ x, R (f x) (f (x + 1))
+  := by
+  obtain ⟨s, ⟨x, hx⟩, h'⟩ := h;
+  choose! f hfs hR using h';
+  use fun n ↦ f^[n] x;
+  intro n;
+  simp only [Function.iterate_succ'];
+  refine hR (f^[n] x) ?a;
+  induction n with
+  | zero => simpa;
+  | succ n ih => simp only [Function.iterate_succ']; apply hfs _ ih;
+
 lemma antisymm_of_WCWF : WeaklyConverseWellFounded R → Antisymmetric R := by
   contrapose;
   simp [Antisymmetric];
@@ -18,6 +33,42 @@ lemma antisymm_of_WCWF : WeaklyConverseWellFounded R → Antisymmetric R := by
     by_cases z = x;
     . use y; simp_all [irreflexivize];
     . use x; simp_all [irreflexivize];
+
+-- TODO: move?
+lemma Finite.exists_ne_map_eq_of_infinite_lt {α β} [LinearOrder α] [Infinite α] [Finite β] (f : α → β)
+  : ∃ x y : α, (x < y) ∧ f x = f y
+  := by
+    obtain ⟨i, j, hij, e⟩ := Finite.exists_ne_map_eq_of_infinite f;
+    rcases lt_trichotomy i j with (hij | _ | hij);
+    . use i, j;
+    . contradiction;
+    . use j, i; simp [hij, e];
+
+lemma WCWF_of_antisymm_trans
+  {R : α → α → Prop}
+  (hFin : Finite α) (R_trans : Transitive R)
+  : Antisymmetric R → WeaklyConverseWellFounded R := by
+  contrapose;
+  intro hWCWF;
+  replace hWCWF := ConverseWellFounded.iff_has_max.not.mp hWCWF;
+  push_neg at hWCWF;
+  obtain ⟨f, hf⟩ := dependent_choice hWCWF; clear hWCWF;
+  simp [irreflexivize] at hf;
+
+  simp [Antisymmetric];
+  obtain ⟨i, j, hij, e⟩ := Finite.exists_ne_map_eq_of_infinite_lt f;
+  use (f i), (f (i + 1));
+  have ⟨hi₁, hi₂⟩ := hf i;
+  refine ⟨(by assumption), ?_, (by assumption)⟩;
+
+  have : i + 1 < j := lt_iff_le_and_ne.mpr ⟨by omega, by aesop⟩;
+  have H : ∀ i j, i < j → R (f i) (f j) := by
+    intro i j hij
+    induction hij with
+    | refl => exact hf i |>.2;
+    | step _ ih => exact R_trans ih $ hf _ |>.2;
+  have := H (i + 1) j this;
+  simpa [e];
 
 namespace LO.Modal.Standard
 
@@ -70,28 +121,48 @@ private lemma refl_of_Grz (h : F# ⊧* (𝗚𝗿𝘇 : AxiomSet α)) : Reflexive
 private lemma trans_of_Grz (h : F# ⊧* (𝗚𝗿𝘇 : AxiomSet α)) : Transitive F := by
   exact axiomFour_defines.mp $ (valid_on_frame_Four_of_Grz h);
 
-
+open Classical in
 private lemma wcwf_of_Grz : F# ⊧* (𝗚𝗿𝘇 : AxiomSet α) → WeaklyConverseWellFounded F := by
+  intro h;
+  have : Transitive F := trans_of_Grz h;
+  have : Reflexive F := refl_of_Grz h;
+  revert h;
+
   contrapose;
   intro hWCWF;
 
   replace hWCWF := ConverseWellFounded.iff_has_max.not.mp hWCWF;
   push_neg at hWCWF;
-  obtain ⟨X, ⟨x, hx⟩, hX⟩ := hWCWF;
+  obtain ⟨f, hf⟩ := dependent_choice hWCWF; clear hWCWF;
+  simp [irreflexivize] at hf;
 
   apply iff_not_validOnFrame.mpr;
   use (Axioms.Grz (atom default));
   constructor;
   . simp;
-  . sorry;
-    /-
-    use (λ w _ => w ∉ X), x;
-    simp only [Formula.Kripke.Satisfies]; push_neg;
-    constructor;
-    . intro y Rxy h;
-      have := @h x;
-    . assumption;
-    -/
+  . by_cases H : ∀ j₁ j₂, (j₁ < j₂ → f j₁ ≠ f j₂)
+    . let V : Valuation F α := (λ v _ => ∀ i, v ≠ f (2 * i));
+      use V, (f 0);
+      apply Classical.not_imp.mpr
+      constructor;
+      . sorry;
+      . simp [Satisfies, V]; use 0;
+    . push_neg at H;
+      obtain ⟨j₁, j₂, ljk, ejk⟩ := H;
+      let V : Valuation F α := (λ v _ => v ≠ f j₁);
+      use V, (f j₁);
+      apply Classical.not_imp.mpr;
+      constructor;
+      . suffices Satisfies ⟨F, V⟩ (f j₁) (□(~(atom default) ⟶ ~(□(atom default ⟶ □atom default)))) by
+          intro x hx;
+          exact not_imp_not.mp $ this hx;
+        suffices H : Satisfies ⟨F, V⟩ (f (j₁ + 1)) (~(atom default ⟶ □atom default)) by
+          sorry;
+        simp [Satisfies, V];
+        constructor;
+        . have := @hf j₁ |>.1; aesop;
+        . sorry;
+      . simp [Satisfies, V];
 
 private lemma Grz_of_wcwf : (Reflexive F.Rel ∧ Transitive F.Rel ∧ WeaklyConverseWellFounded F.Rel) → F# ⊧* (𝗚𝗿𝘇 : AxiomSet α) := by
   rintro ⟨hRefl, hTrans, hWCWF⟩;
@@ -144,13 +215,33 @@ private lemma Grz_of_wcwf : (Reflexive F.Rel ∧ Transitive F.Rel ∧ WeaklyConv
       . exact Rwx;
 
 abbrev ReflexiveTransitiveWeaklyConverseWellFoundedFrameClass : FrameClass := λ F => Reflexive F.Rel ∧ Transitive F ∧ WeaklyConverseWellFounded F
-alias GrzFrameClass := ReflexiveTransitiveWeaklyConverseWellFoundedFrameClass
-
-lemma axiomGrz_defines : AxiomSet.DefinesKripkeFrameClass (α := α) 𝗚𝗿𝘇 (GrzFrameClass) := by
+lemma axiomGrz_defines : AxiomSet.DefinesKripkeFrameClass (α := α) 𝗚𝗿𝘇 (ReflexiveTransitiveWeaklyConverseWellFoundedFrameClass) := by
   intro F;
   constructor;
   . intro h; refine ⟨refl_of_Grz h, trans_of_Grz h, wcwf_of_Grz h⟩;
   . exact Grz_of_wcwf;
+
+
+abbrev ReflexiveTransitiveAntisymmetricFrameClass : FrameClass := λ F => Reflexive F.Rel ∧ Transitive F ∧ Antisymmetric F
+lemma axiomGrz_finite_defines : AxiomSet.FinitelyDefinesKripkeFrameClass (α := α) 𝗚𝗿𝘇 ReflexiveTransitiveAntisymmetricFrameClass := by
+  intro F;
+  constructor;
+  . intro h;
+    obtain ⟨hRefl, hTrans, hCWF⟩ := axiomGrz_defines.mp h;
+    refine ⟨hRefl, hTrans, antisymm_of_WCWF hCWF⟩;
+  . intro d;
+    have ⟨hRefl, hTrans, hAsymm⟩ := d;
+    apply axiomGrz_defines.mpr;
+    refine ⟨hRefl, hTrans, ?_⟩;
+    apply WCWF_of_antisymm_trans;
+    . exact F.World_finite;
+    . assumption;
+    . assumption;
+
+instance Grz_sound : Sound (𝐆𝐫𝐳 : DeductionParameter α) ReflexiveTransitiveAntisymmetricFrameClassꟳ# := sound_of_finitely_defines axiomGrz_finite_defines
+
+instance : System.Consistent (𝐆𝐫𝐳 : DeductionParameter α) := consistent_of_finitely_defines.{u} axiomGrz_finite_defines $ by
+  use terminalFrame; refine ⟨?_, ?_, ?_⟩ <;> simp [Reflexive, Transitive, Antisymmetric];
 
 end Kripke
 
