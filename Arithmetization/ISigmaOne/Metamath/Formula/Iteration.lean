@@ -73,6 +73,14 @@ lemma qqConj_semiformula {n ps : V} :
         by simpa using h 0 (by simp),
         fun i hi ↦ by simpa using h (i + 1) (by simpa using hi)⟩
 
+@[simp] lemma len_le_conj (n ps : V) : len ps ≤ ^⋀[n] ps := by
+  induction ps using cons_induction_sigma₁
+  · definability
+  case nil => simp [qqVerum]
+  case cons p ps ih =>
+    simp only [len_cons, qqConj_cons, succ_le_iff_lt]
+    exact lt_of_le_of_lt ih (by simp)
+
 end qqConj
 
 namespace QQDisj
@@ -273,6 +281,33 @@ lemma substs_disj_substItr {n m l w p k : V} (hp : ⌜ℒₒᵣ⌝.Semiformula (
 end substItr
 
 end Formalized
+
+section verums
+
+def qqVerums (n k : V) : V := ^⋀[n] repeatVec (^⊤[n]) k
+
+@[simp] lemma le_qqVerums (n k : V) : k ≤ qqVerums n k := by
+  simpa [qqVerums] using len_le_conj n (repeatVec ^⊤[n] k)
+
+section
+
+def _root_.LO.FirstOrder.Arith.qqVerumsDef : 𝚺₁-Semisentence 3 := .mkSigma
+  “y n k | ∃ verum, !qqVerumDef verum n ∧ ∃ vs, !repeatVecDef vs verum k ∧ !qqConjDef y n vs” (by simp)
+
+lemma qqVerums_defined : 𝚺₁-Function₂ (qqVerums : V → V → V) via qqVerumsDef :=
+  fun v ↦ by simp [qqVerumsDef]; rfl
+
+@[simp] lemma qqVerums_repeatVec (v) :
+    Semiformula.Evalbm V v qqVerumsDef.val ↔ v 0 = qqVerums (v 1) (v 2) := qqVerums_defined.df.iff v
+
+instance qqVerums_definable : 𝚺₁-Function₂ (qqVerums : V → V → V) := Defined.to_definable _ qqVerums_defined
+
+@[simp] instance qqVerums_definable' (Γ) : (Γ, m + 1)-Function₂ (qqVerums : V → V → V) :=
+  .of_sigmaOne qqVerums_definable _ _
+
+end
+
+end verums
 
 end LO.Arith
 

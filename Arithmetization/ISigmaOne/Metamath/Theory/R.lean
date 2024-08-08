@@ -33,15 +33,15 @@ variable {V}
 @[simp] lemma two_sub_one_eq_one : (2 : V) - 1 = 1 := by simp [←one_add_one_eq_two]
 @[simp] lemma three_sub_one_eq_two : (3 : V) - 1 = 2 := by simp [←two_add_one_eq_three]
 
-class EQTheory (T : LOR.Theory V) : Prop where
-  refl : (#'0 =' #'0).all ∈' T
-  replace (p : ⌜ℒₒᵣ⌝.TSemiformula (0 + 1)) : (#'1 =' #'0 ⟶ p^/[(#'1).sing] ⟶ p^/[(#'0).sing]).all.all ∈' T
+class EQTheory (T : LOR.TTheory (V := V)) where
+  refl : T ⊢ (#'0 =' #'0).all
+  replace (p : ⌜ℒₒᵣ⌝.TSemiformula (0 + 1)) : T ⊢ (#'1 =' #'0 ⟶ p^/[(#'1).sing] ⟶ p^/[(#'0).sing]).all.all
 
-class R₀Theory (T : LOR.Theory V) extends EQTheory T : Prop where
-  add (n m : V) : (↑n + ↑m) =' ↑(n + m) ∈' T
-  mul (n m : V) : (↑n * ↑m) =' ↑(n * m) ∈' T
-  ne {n m : V} : n ≠ m → ↑n ≠' ↑m ∈' T
-  ltNumeral (n : V) : (#'0 <' ↑n ⟷ (tSubstItr (#'0).sing (#'1 =' #'0) n).disj).all ∈' T
+class R₀Theory (T : LOR.TTheory (V := V)) extends EQTheory T where
+  add (n m : V) : T ⊢ (↑n + ↑m) =' ↑(n + m)
+  mul (n m : V) : T ⊢ (↑n * ↑m) =' ↑(n * m)
+  ne {n m : V} : n ≠ m → T ⊢ ↑n ≠' ↑m
+  ltNumeral (n : V) : T ⊢ (#'0 <' ↑n ⟷ (tSubstItr (#'0).sing (#'1 =' #'0) n).disj).all
 
 /-
 section
@@ -60,17 +60,17 @@ open Language.Theory.TProof System System.FiniteContext
 
 section EQTheory
 
-variable [EQTheory T.thy]
+variable [EQTheory T]
 
 def eqRefl (t : ⌜ℒₒᵣ⌝.TTerm) : T ⊢ t =' t := by
-  have : T ⊢ (#'0 =' #'0).all := byAxm EQTheory.refl
+  have : T ⊢ (#'0 =' #'0).all := EQTheory.refl
   simpa [Language.TSemiformula.substs₁] using specialize this t
 
 lemma eq_refl! (t : ⌜ℒₒᵣ⌝.TTerm) : T ⊢! t =' t := ⟨eqRefl T t⟩
 
 noncomputable def replace (p : ⌜ℒₒᵣ⌝.TSemiformula (0 + 1)) (t u : ⌜ℒₒᵣ⌝.TTerm) :
     T ⊢ t =' u ⟶ p^/[t.sing] ⟶ p^/[u.sing] := by
-  have : T ⊢ (#'1 =' #'0 ⟶ p^/[(#'1).sing] ⟶ p^/[(#'0).sing]).all.all := byAxm <| EQTheory.replace p
+  have : T ⊢ (#'1 =' #'0 ⟶ p^/[(#'1).sing] ⟶ p^/[(#'0).sing]).all.all := EQTheory.replace p
   have := by simpa using specialize this t
   simpa [Language.TSemitermVec.q_of_pos, Language.TSemiformula.substs₁,
     Language.TSemifromula.substs_substs] using specialize this u
@@ -225,22 +225,22 @@ end EQTheory
 
 section R₀
 
-variable [R₀Theory T.thy]
+variable [R₀Theory T]
 
-def addComplete (n m : V) : T ⊢ (↑n + ↑m) =' ↑(n + m) := byAxm (R₀Theory.add n m)
+def addComplete (n m : V) : T ⊢ (↑n + ↑m) =' ↑(n + m) := R₀Theory.add n m
 
 lemma add_complete! (n m : V) : T ⊢! (↑n + ↑m) =' ↑(n + m) := ⟨addComplete T n m⟩
 
-def mulComplete (n m : V) : T ⊢ (↑n * ↑m) =' ↑(n * m) := byAxm (R₀Theory.mul n m)
+def mulComplete (n m : V) : T ⊢ (↑n * ↑m) =' ↑(n * m) := R₀Theory.mul n m
 
 lemma mul_complete! (n m : V) : T ⊢! (↑n * ↑m) =' ↑(n * m) := ⟨mulComplete T n m⟩
 
-def neComplete {n m : V} (h : n ≠ m) : T ⊢ ↑n ≠' ↑m := byAxm (R₀Theory.ne h)
+def neComplete {n m : V} (h : n ≠ m) : T ⊢ ↑n ≠' ↑m := R₀Theory.ne h
 
 lemma ne_complete! {n m : V} (h : n ≠ m) : T ⊢! ↑n ≠' ↑m := ⟨neComplete T h⟩
 
 def ltNumeral (t : ⌜ℒₒᵣ⌝.TTerm) (n : V) : T ⊢ t <' ↑n ⟷ (tSubstItr t.sing (#'1 =' #'0) n).disj := by
-  have : T ⊢ (#'0 <' ↑n ⟷ (tSubstItr (#'0).sing (#'1 =' #'0) n).disj).all := byAxm (R₀Theory.ltNumeral n)
+  have : T ⊢ (#'0 <' ↑n ⟷ (tSubstItr (#'0).sing (#'1 =' #'0) n).disj).all := R₀Theory.ltNumeral n
   simpa [Language.TSemitermVec.q_of_pos, Language.TSemiformula.substs₁] using specialize this t
 
 noncomputable def nltNumeral (t : ⌜ℒₒᵣ⌝.TTerm) (n : V) : T ⊢ t ≮' ↑n ⟷ (tSubstItr t.sing (#'1 ≠' #'0) n).conj := by

@@ -174,6 +174,8 @@ abbrev LOR.code : LDef := Language.lDef ℒₒᵣ
 
 notation "⌜ℒₒᵣ⌝" => LOR
 
+notation "⌜ℒₒᵣ⌝[" V "]" => LOR (V := V)
+
 notation "p⌜ℒₒᵣ⌝" => LOR.code
 
 variable (V)

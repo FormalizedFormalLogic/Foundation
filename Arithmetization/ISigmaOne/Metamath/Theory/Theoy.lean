@@ -9,19 +9,48 @@ import Arithmetization.ISigmaOne.Metamath.Theory.SigmaOneDefinable
 
 namespace LO.FirstOrder
 
+variable {L : Language}
+
+namespace Semiformula
+
+def ifElse (c p q : Semiformula L ξ n) : Semiformula L ξ n := (c ⟶ p) ⋏ (~c ⟶ q)
+
+variable {M : Type w} {s : Structure L M}
+
+open Classical
+
+@[simp] lemma val_ifElse {c p q : Semiformula L ξ n} : Eval s e ε (c.ifElse p q) ↔ if Eval s e ε c then Eval s e ε p else Eval s e ε q := by
+  simp [ifElse]; by_cases h : Eval s e ε c <;> simp [h]
+
+end Semiformula
+
 section
 
 open Lean PrettyPrinter Delaborator
 
 syntax:max "let " ident " := " term:max first_order_term:61* "; " first_order_formula:0 : first_order_formula
 syntax:max "let' " ident " := " term:max first_order_term:61* "; " first_order_formula:0 : first_order_formula
+syntax:max "if " first_order_formula:0 " then " first_order_formula:0 " else " first_order_formula:0 : first_order_formula
 
 macro_rules
   | `(“ $binders* | let $x:ident := $f:term $vs:first_order_term* ; $p:first_order_formula ”) =>
     `(“ $binders* | ∃ $x, !$f:term #0 $vs:first_order_term* ∧ $p ”)
   | `(“ $binders* | let' $x:ident := $f:term $vs:first_order_term* ; $p:first_order_formula ”) =>
     `(“ $binders* | ∀ $x, !$f:term #0 $vs:first_order_term* → $p ”)
+  | `(“ $binders* | if $c:first_order_formula then $p:first_order_formula else $q:first_order_formula ”) =>
+    `(Semiformula.ifElse “ $binders* | $c ” “ $binders* | $p ” “ $binders* | $q ”)
+
 end
+
+namespace Arith.Hierarchy
+
+variable [L.LT]
+
+lemma ifElse_iff {c p q : Semiformula L ξ n} :
+    Hierarchy Γ s (c.ifElse p q) ↔ Hierarchy Γ s c ∧ Hierarchy Γ.alt s c ∧ Hierarchy Γ s p ∧ Hierarchy Γ s q := by
+  simp [Semiformula.ifElse]; tauto
+
+end Arith.Hierarchy
 
 namespace Theory
 
@@ -53,20 +82,20 @@ section
 
 variable {L : Language} [(k : ℕ) → Encodable (L.Func k)] [(k : ℕ) → Encodable (L.Rel k)] [DefinableLanguage L]
 
-variable (V)
+variable (L V)
 
-def Language.Theory.const (p : FirstOrder.SyntacticFormula L) : (L.codeIn V).Theory where
+def Language.Theory.singleton (p : FirstOrder.SyntacticFormula L) : (L.codeIn V).Theory where
   set := {⌜p⌝}
 
+variable {L V}
+
 @[simp] lemma Language.Theory.const_set_def (p : FirstOrder.SyntacticFormula L) :
-    (Language.Theory.const V p).set = {⌜p⌝} := rfl
+    (Language.Theory.singleton V L p).set = {⌜p⌝} := rfl
 
-variable {V}
-
-def Language.Theory.constDef (p : FirstOrder.SyntacticFormula L) : L.lDef.TDef where
+def Language.Theory.singletonDef (p : FirstOrder.SyntacticFormula L) : L.lDef.TDef where
   ch := .ofZero (.mkSigma “x | x = ↑⌜p⌝” (by simp)) _
 
-instance const_defined_const (p : FirstOrder.SyntacticFormula L) : (Language.Theory.const V p).Defined (Language.Theory.constDef p) where
+instance const_defined_const (p : FirstOrder.SyntacticFormula L) : (Language.Theory.singleton V L p).Defined (Language.Theory.singletonDef p) where
   defined := .of_zero (by intro v; simp [numeral_eq_natCast])
 
 end
@@ -75,40 +104,55 @@ section scheme
 
 variable {L : Arith.Language V} {pL : LDef} [Arith.Language.Defined L pL]
 
-variable (V)
-
 structure Language.Scheme (L : Arith.Language V) {pL : LDef} [Arith.Language.Defined L pL] where
   scheme : V → V
   increasing : ∀ x, x ≤ scheme x
 
-variable {V}
+structure Language.Craig (L : Arith.Language V) {pL : LDef} [Arith.Language.Defined L pL] where
+  core : V → V
 
-structure _root_.LO.FirstOrder.Arith.LDef.schemeDef (pL : LDef) where
-  schemeDef : HSemisentence ℒₒᵣ 2 𝚺₁
+structure _root_.LO.FirstOrder.Arith.LDef.SchemeDef (pL : LDef) where
+core : HSemisentence ℒₒᵣ 2 𝚺₁
 
-class Language.Scheme.Defined (φ : L.Scheme V) (ps : outParam pL.schemeDef) : Prop where
-  defined : 𝚺₁-Function₁ φ.scheme via ps.schemeDef
+class Language.Scheme.Defined (φ : L.Scheme) (ps : outParam pL.SchemeDef) : Prop where
+  defined : 𝚺₁-Function₁ φ.scheme via ps.core
 
-variable {φ : L.Scheme} {ps : pL.schemeDef} [φ.Defined ps]
+variable {φ : L.Scheme} {ps : pL.SchemeDef} [φ.Defined ps]
 
 def Language.Scheme.toTheory (φ : L.Scheme) : L.Theory where
   set := Set.range φ.scheme
 
-def _root_.LO.FirstOrder.Arith.LDef.schemeDef.tDef {pL : LDef} (ps : pL.schemeDef) : pL.TDef where
+def _root_.LO.FirstOrder.Arith.LDef.SchemeDef.toTDef {pL : LDef} (ps : pL.SchemeDef) : pL.TDef where
   ch := .mkDelta
-    (.mkSigma “p | ∃ x, !ps.schemeDef p x” (by simp))
-    (.mkPi “p | ∃ x <⁺ p, ∀ y, !ps.schemeDef y x → p = y”  (by simp))
+    (.mkSigma “p | ∃ x, !ps.core p x” (by simp))
+    (.mkPi “p | ∃ x <⁺ p, ∀ y, !ps.core y x → p = y”  (by simp))
 
-instance scheme_defined_scheme (φ : L.Scheme) {ps : pL.schemeDef} [φ.Defined ps] : φ.toTheory.Defined ps.tDef where
+instance scheme_defined_scheme (φ : L.Scheme) {ps : pL.SchemeDef} [φ.Defined ps] : φ.toTheory.Defined ps.toTDef where
   defined := ⟨by
     intro v
-    simp [Arith.LDef.schemeDef.tDef, (Language.Scheme.Defined.defined (V := V) (φ := φ)).df.iff]
+    simp [Arith.LDef.SchemeDef.toTDef, (Language.Scheme.Defined.defined (V := V) (φ := φ)).df.iff]
     constructor
     · rintro ⟨x, h⟩; exact ⟨x, by simp [h, φ.increasing], h⟩
     · rintro ⟨x, _, h⟩; exact ⟨x, h⟩, by
     intro v
-    simp [Language.Scheme.toTheory, Arith.LDef.schemeDef.tDef,
+    simp [Language.Scheme.toTheory, Arith.LDef.SchemeDef.toTDef,
       (Language.Scheme.Defined.defined (V := V) (φ := φ)).df.iff, eq_comm]⟩
+
+def Language.Craig.toScheme {L : Arith.Language V} {pL : LDef} [Arith.Language.Defined L pL] (c : L.Craig) : L.Scheme where
+  scheme (x) := c.core x ^⋏ qqVerums 0 x
+  increasing (x) := le_trans (le_qqVerums 0 x) (le_of_lt <| by simp)
+
+structure _root_.LO.FirstOrder.Arith.LDef.CraigDef (pL : LDef) where
+  core : HSemisentence ℒₒᵣ 2 𝚺₁
+
+class Language.Craig.Defined (φ : L.Craig) (ps : outParam pL.CraigDef) : Prop where
+  defined : 𝚺₁-Function₁ φ.core via ps.core
+
+def _root_.LO.FirstOrder.Arith.LDef.CraigDef.toSchemeDef {pL : LDef} (c : pL.CraigDef) : pL.SchemeDef where
+  core := .mkSigma “p x | ∃ p', !c.core p' x ∧ ∃ vs, !qqVerumsDef vs 0 x ∧ !qqAndDef p 0 p' vs” (by simp)
+
+instance (φ : L.Craig) (c : pL.CraigDef) [φ.Defined c] : φ.toScheme.Defined c.toSchemeDef where
+  defined := by intro v; simp [Language.Craig.toScheme, Arith.LDef.CraigDef.toSchemeDef, (Language.Craig.Defined.defined (φ := φ)).df.iff]
 
 end scheme
 
@@ -134,9 +178,54 @@ instance union_Defined_union (T U : L.Theory) {t u : pL.TDef} [T.Defined t] [U.D
       (Language.Theory.Defined.defined (T := U)).df.iff]⟩
 
 end union
-/-
+
 namespace Formalized
 
+section thEQ
+
+def eqRefl : ⌜ℒₒᵣ⌝[V].Theory := Language.Theory.singleton V ℒₒᵣ “∀ x, x = x”
+
+def eqReplaceC : ⌜ℒₒᵣ⌝[V].Craig where
+  core := fun p ↦ if ⌜ℒₒᵣ⌝.Semiformula 1 p then ^∀[0] ^∀[1] (^#1 ^=[2] ^#0 ^→[⌜ℒₒᵣ⌝; 2] ⌜ℒₒᵣ⌝.substs 2 ?[^#1] p ^→[⌜ℒₒᵣ⌝; 2] ⌜ℒₒᵣ⌝.substs 2 ?[^#0] p) else 0
+
+def eqReplaceCDef : p⌜ℒₒᵣ⌝.CraigDef where
+  core := .mkSigma “σ p |
+    ( !p⌜ℒₒᵣ⌝.isSemiformulaDef.pi 1 p →
+      let x0 := qqBvarDef 0;
+      let x1 := qqBvarDef 1;
+      let eq := qqEQDef 2 x1 x0;
+      let v0 := mkVec₁Def x0;
+      let v1 := mkVec₁Def x1;
+      let p0 := p⌜ℒₒᵣ⌝.substsDef 2 v1 p;
+      let p1 := p⌜ℒₒᵣ⌝.substsDef 2 v0 p;
+      let imp0 := p⌜ℒₒᵣ⌝.impDef 2 p0 p1;
+      let imp1 := p⌜ℒₒᵣ⌝.impDef 2 eq imp0;
+      let all0 := qqAllDef 1 imp1;
+      !qqAllDef σ 0all0 ) ∧
+    ( ¬!p⌜ℒₒᵣ⌝.isSemiformulaDef.sigma 1 p → σ = 0)” (by simp)
+
+instance : (eqReplaceC (V := V)).Defined eqReplaceCDef where
+  defined := by
+    intro v
+    simp [eqReplaceC, eqReplaceCDef,
+      HSemiformula.val_sigma,
+      (semiformula_defined (LOR (V := V))).df.iff, (semiformula_defined (LOR (V := V))).proper.iff',
+      (substs_defined (LOR (V := V))).df.iff, (imp_defined (LOR (V := V))).df.iff]
+    by_cases h : ⌜ℒₒᵣ⌝.Semiformula 1 (v 1) <;> simp [h]
+
+variable (V)
+
+def thEQ : ⌜ℒₒᵣ⌝[V].Theory := (Language.Theory.singleton V ℒₒᵣ “∀ x, x = x”).union eqReplaceC.toScheme.toTheory
+
+variable {V}
+
+def thEQDef : p⌜ℒₒᵣ⌝.TDef := (Language.Theory.singletonDef (L := ℒₒᵣ) “∀ x, x = x”).union eqReplaceCDef.toSchemeDef.toTDef
+
+instance thEQ_defined : (thEQ V).Defined thEQDef := by apply union_Defined_union
+
+end thEQ
+
+/-
 def thEQDef : (Language.lDef ℒₒᵣ).TDef where
   ch := .mkDelta
     (.mkSigma “σ |

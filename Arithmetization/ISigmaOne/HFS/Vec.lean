@@ -255,6 +255,11 @@ lemma nth_succ (v i : V) : v.[i + 1] = (sndIdx v).[i] := nth_eq_of_graph (graph_
 @[simp] lemma nth_cons_two (x v : V) : (x ∷ v).[2] = v.[1] := by
   simpa [-nth_cons_succ, one_add_one_eq_two] using nth_cons_succ x v 1
 
+lemma cons_cases (x : V) : x = 0 ∨ ∃ y v, x = y ∷ v := by
+  rcases zero_or_succ x with (rfl | ⟨z, rfl⟩)
+  · simp
+  · right; exact ⟨π₁ z, π₂ z, by simp [cons]⟩
+
 lemma cons_induction (Γ) {P : V → Prop} (hP : (Γ, 1)-Predicate P)
     (nil : P 0) (cons : ∀ x v, P v → P (x ∷ v)) : ∀ v, P v :=
   order_induction_hh ℒₒᵣ Γ 1 hP (by
@@ -579,6 +584,15 @@ lemma nth_lt_len {v i : V} (hl : len v ≤ i) : v.[i] = 0 := by
     rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
     · simp at hl
     simpa using ih (by simpa using hl)
+
+@[simp] lemma len_le (v : V) : len v ≤ v := by
+  induction v using cons_induction_pi₁
+  · definability
+  case nil => simp
+  case cons x v ih =>
+    simp only [len_cons]
+    simp only [cons, add_le_add_iff_right]
+    exact le_trans ih (le_pair_right x v)
 
 end len
 
@@ -932,6 +946,9 @@ end
   · definability
   case zero => simp
   case succ k ih => simp [ih]
+
+@[simp] lemma le_repaetVec (x k : V) : k ≤ repeatVec x k := by
+  simpa using len_le (repeatVec x k)
 
 lemma nth_repeatVec (x k : V) {i} (h : i < k) : (repeatVec x k).[i] = x := by
   induction k using induction_iSigmaOne generalizing i
