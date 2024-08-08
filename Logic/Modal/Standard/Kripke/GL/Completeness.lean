@@ -40,25 +40,22 @@ private lemma trans_of_L : F# ⊧* (𝗟 : AxiomSet α) → Transitive F.Rel := 
 private lemma cwf_of_L  : F# ⊧* (𝗟 : AxiomSet α) → ConverseWellFounded F.Rel := by
   contrapose;
   intro hCF;
-  obtain ⟨X, hX₁, hX₂⟩ := by simpa using ConverseWellFounded.iff_has_max.not.mp hCF;
+  obtain ⟨X, ⟨x, _⟩, hX₂⟩ := by simpa using ConverseWellFounded.iff_has_max.not.mp hCF;
   apply iff_not_validOnFrame.mpr;
   use (Axioms.L (atom default));
   constructor;
   . simp;
-  . use (λ w _ => w ∉ X), hX₁.some;
+  . use (λ w _ => w ∉ X), x;
     simp only [Kripke.Satisfies]; push_neg;
     constructor;
-    . intro x _;
-      by_cases hxs : x ∈ X
-      . obtain ⟨y, hy₁, hy₂⟩ := hX₂ x hxs;
-        intro h;
-        exact h (by simp_all only [Kripke.Satisfies]);
+    . intro y _;
+      by_cases hys : y ∈ X
+      . obtain ⟨z, _, Rxz⟩ := hX₂ y hys;
+        simp_all;
+        use z;
       . aesop;
-    . obtain ⟨w', hw'₁, hw'₂⟩ := hX₂ hX₁.some (by apply Set.Nonempty.some_mem);
-      existsi w';
-      constructor;
-      . simpa using hw'₂;
-      . simpa [Kripke.Satisfies];
+    . obtain ⟨y, _, _⟩ := hX₂ x (by assumption);
+      use y;
 
 private lemma L_of_trans_and_cwf : (Transitive F.Rel ∧ ConverseWellFounded F.Rel) → F# ⊧* (𝗟 : AxiomSet α) := by
   rintro ⟨hTrans, hWF⟩;
