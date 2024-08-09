@@ -3,8 +3,14 @@ import Logic.Modal.Standard.Kripke.GL.Completeness
 
 namespace LO.Modal.Standard
 
-abbrev Formula.GrzSubformulas [DecidableEq α] (p : Formula α) := (𝒮 p) ∪ ((𝒮 p).image (λ q => □(q ⟶ □q)))
-prefix:70 "𝒮ᴳ" => Formula.GrzSubformulas
+namespace Formula
+
+variable [DecidableEq α]
+
+abbrev GrzSubformulas (p : Formula α) := (𝒮 p) ∪ ((𝒮 p).image (λ q => □(q ⟶ □q)))
+prefix:70 "𝒮ᴳ " => Formula.GrzSubformulas
+
+end Formula
 
 namespace Kripke
 
@@ -32,17 +38,21 @@ abbrev GrzFilteredFrame (p : Formula α) : Kripke.FiniteFrame where
     )
     (by
       intro X₁ Y₁ X₂ Y₂ hX hY;
-      simp only [Set.eq_prebox_premultibox_one, Set.mem_preimage, Function.iterate_one, Finset.mem_coe, eq_iff_iff];
+      simp only [Formula.GrzSubformulas, Finset.coe_union, Finset.coe_image, Set.preimage_union,
+        Function.iterate_one, Set.mem_union, Set.mem_preimage, Finset.mem_coe, Set.mem_image,
+        Box.box_injective', eq_iff_iff];
       constructor;
       . rintro ⟨h₁, h₂⟩;
         constructor;
-        . sorry;
-          /-
-          intro q _ hq;
-          have : □q ∈ X₁.theory := filter_truthlemma (by simpa only) |>.mpr hq;
-          have : □q ∈ Y₁.theory := h₁ q (by assumption) this;
-          exact filter_truthlemma (by simpa only) |>.mp this;
-          -/
+        . rintro q (h_sub | ⟨q, h_sub, rfl⟩) hq
+          . have : □q ∈ X₁.theory := filter_truthlemma (by simpa only) |>.mpr hq;
+            have : □q ∈ Y₁.theory := h₁ q (by left; assumption) this;
+            exact filter_truthlemma (by simpa only) |>.mp this;
+          . sorry;
+            -- have : □(q ⟶ □q) ∈ X₁.theory := filter_truthlemma (by sorry) |>.mpr hq;
+          -- have : □q ∈ X₁.theory := filter_truthlemma (by simpa only) |>.mpr hq;
+          -- have : □q ∈ Y₁.theory := h₁ q (by assumption) this;
+          -- exact filter_truthlemma (by simpa only) |>.mp this;
         . sorry;
           /-
           intro h q _;
@@ -120,21 +130,21 @@ lemma GrzFilteredFrame.transitive {p : Formula α} : Transitive (GrzFilteredFram
   . intro q hs hq;
     exact hYZ₁ q hs $ hXY₁ q hs hq
   . intro h;
-    have hX := hXY₂ $ by
+    have eXY := hXY₂ $ by
       intro q hs hq;
       exact h q hs $ hYZ₁ q hs hq;
-    have hZ := hYZ₂ $ by
+    have eYZ := hYZ₂ $ by
       intro q hs hq;
       exact hXY₁ q hs $ h q hs hq
-    intro q hq;
-    exact Iff.trans (hX q hq) (hZ q hq);
+    subst_vars;
+    tauto;
 
 lemma GrzFilteredFrame.antisymm {p : Formula α} : Antisymmetric (GrzFilteredFrame p).Rel := by
   intro QX QY RXY RYX;
   obtain ⟨X, hX⟩ := Quotient.exists_rep QX; subst hX;
   obtain ⟨Y, hY⟩ := Quotient.exists_rep QY; subst hY;
   have := RXY.2 RYX.1;
-  sorry;
+  tauto;
 
 abbrev GrzFilteredModel (p : Formula α) : Kripke.Model α where
   Frame := GrzFilteredFrame p
