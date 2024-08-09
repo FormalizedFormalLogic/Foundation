@@ -3,6 +3,9 @@ import Logic.Modal.Standard.Kripke.GL.Completeness
 
 namespace LO.Modal.Standard
 
+abbrev Formula.GrzSubformulas [DecidableEq α] (p : Formula α) := (𝒮 p) ∪ ((𝒮 p).image (λ q => □(q ⟶ □q)))
+prefix:70 "𝒮ᴳ" => Formula.GrzSubformulas
+
 namespace Kripke
 
 open System
@@ -24,8 +27,8 @@ abbrev GrzFilteredFrame (p : Formula α) : Kripke.FiniteFrame where
   World_finite := by apply FilterEqvQuotient.finite; simp;
   Rel := Quotient.lift₂
     (λ X Y =>
-      (∀ q ∈ □''⁻¹(𝒮 p), □q ∈ X.theory → □q ∈ Y.theory) ∧
-      ((∀ q ∈ □''⁻¹(𝒮 p), □q ∈ Y.theory → □q ∈ X.theory) → ∀ q ∈ □''⁻¹(𝒮 p), q ∈ X.theory ↔ q ∈ Y.theory)
+      (∀ q ∈ □''⁻¹(𝒮ᴳ p), □q ∈ X.theory → □q ∈ Y.theory) ∧
+      ((∀ q ∈ □''⁻¹(𝒮ᴳ p), □q ∈ Y.theory → □q ∈ X.theory) → X = Y)
     )
     (by
       intro X₁ Y₁ X₂ Y₂ hX hY;
@@ -33,11 +36,16 @@ abbrev GrzFilteredFrame (p : Formula α) : Kripke.FiniteFrame where
       constructor;
       . rintro ⟨h₁, h₂⟩;
         constructor;
-        . intro q _ hq;
+        . sorry;
+          /-
+          intro q _ hq;
           have : □q ∈ X₁.theory := filter_truthlemma (by simpa only) |>.mpr hq;
           have : □q ∈ Y₁.theory := h₁ q (by assumption) this;
           exact filter_truthlemma (by simpa only) |>.mp this;
-        . intro h q _;
+          -/
+        . sorry;
+          /-
+          intro h q _;
           constructor;
           . intro hq;
             have : q ∈ X₁.theory := filter_truthlemma (by simpa only) |>.mpr hq;
@@ -55,13 +63,19 @@ abbrev GrzFilteredFrame (p : Formula α) : Kripke.FiniteFrame where
             have : □q ∈ Y₂.theory := filter_truthlemma (by simpa only) |>.mp hq;
             have : □q ∈ X₂.theory := h q (by assumption) this;
             exact filter_truthlemma (by simpa only) |>.mpr this;
+          -/
       . rintro ⟨h₁, h₂⟩;
         constructor;
-        . intro q _ hq;
+        . sorry;
+          /-
+          intro q _ hq;
           have : □q ∈ X₂.theory := filter_truthlemma (by simpa only) |>.mp hq;
           have : □q ∈ Y₂.theory := h₁ q (by assumption) this;
           exact filter_truthlemma (by simpa only) |>.mpr this;
-        . intro h q _;
+          -/
+        . sorry;
+          /-
+          intro h q _;
           constructor;
           . intro hq;
             have : q ∈ X₂.theory := filter_truthlemma (by simpa only) |>.mp hq;
@@ -79,13 +93,14 @@ abbrev GrzFilteredFrame (p : Formula α) : Kripke.FiniteFrame where
             have : □q ∈ Y₁.theory := filter_truthlemma (by simpa only) |>.mpr hq;
             have : □q ∈ X₁.theory := h q (by assumption) this;
             exact filter_truthlemma (by simpa only) |>.mp this;
+          -/
     )
 
 lemma GrzFilteredFrame.def_rel {p : Formula α} {X Y : GrzCanonicalFrame.World} :
   ((GrzFilteredFrame p).Rel ⟦X⟧ ⟦Y⟧) ↔
   (
-    (∀ q ∈ □''⁻¹(𝒮 p), □q ∈ X.theory → □q ∈ Y.theory) ∧
-    ((∀ q ∈ □''⁻¹(𝒮 p), □q ∈ Y.theory → □q ∈ X.theory) → ∀ q ∈ □''⁻¹(𝒮 p), q ∈ X.theory ↔ q ∈ Y.theory)
+    (∀ q ∈ □''⁻¹(𝒮ᴳ p), □q ∈ X.theory → □q ∈ Y.theory) ∧
+    ((∀ q ∈ □''⁻¹(𝒮ᴳ p), □q ∈ Y.theory → □q ∈ X.theory) → X = Y)
   )
   := by simp;
 
@@ -136,50 +151,20 @@ private lemma K4_lemma1 {q : Formula α} : 𝐊𝟒 ⊢! (□q ⟶ □(q ⟶ □
   have := h (F_trans Rxy Ryz);
   contradiction;
 
-open System System.FiniteContext MaximalConsistentTheory in
-private lemma Grz_truthlemma.lemma1
-  {q : Formula α}
-  {X : (CanonicalModel 𝐆𝐫𝐳).World} (h : □(q ⟶ □q) ∉ X.theory) : (𝐆𝐫𝐳)-Consistent ({□(q ⟶ □q), ~q} ∪ (□''□''⁻¹X.theory)) := by
+-- TODO: syntactical proof
+private lemma KT_lemma1 {q : Formula α} : 𝐊𝐓 ⊢! (q ⋏ □(q ⟶ □q)) ⟶ □q := by
   by_contra hC;
-  obtain ⟨Γ, hΓ₁, hΓ₂⟩ := Context.provable_iff.mp hC;
-  have := toₛ! hΓ₂;
-  have : 𝐆𝐫𝐳 ⊢! ⋀(Γ.remove (~q)) ⋏ ~q ⟶ ⊥ := imply_left_remove_conj! (p := ~q) this;
-  have : 𝐆𝐫𝐳 ⊢! ⋀(Γ.remove (~q)) ⟶ ~q ⟶ ⊥ := and_imply_iff_imply_imply'!.mp this;
-  have : 𝐆𝐫𝐳 ⊢! ⋀(Γ.remove (~q)) ⟶ q := imp_trans''! this $ imp_trans''! (and₂'! neg_equiv!) dne!
-  have : 𝐆𝐫𝐳 ⊢! ⋀((Γ.remove (~q)).remove (□(q ⟶ □q))) ⋏ (□(q ⟶ □q)) ⟶ q := imply_left_remove_conj! (p := □(q ⟶ □q)) this;
-  have : 𝐆𝐫𝐳 ⊢! ⋀((Γ.remove (~q)).remove (□(q ⟶ □q))) ⟶ (□(q ⟶ □q) ⟶ q)  := and_imply_iff_imply_imply'!.mp this;
-  have : 𝐆𝐫𝐳 ⊢! □⋀((Γ.remove (~q)).remove (□(q ⟶ □q))) ⟶ □(□(q ⟶ □q) ⟶ q) := imply_box_distribute'! this;
-  have : 𝐆𝐫𝐳 ⊢! □⋀((Γ.remove (~q)).remove (□(q ⟶ □q))) ⟶ q := imp_trans''! this axiomGrz!;
-  have : 𝐆𝐫𝐳 ⊢! □□⋀((Γ.remove (~q)).remove (□(q ⟶ □q))) ⟶ □q := imply_box_distribute'! this;
-  have : 𝐆𝐫𝐳 ⊢! □⋀((Γ.remove (~q)).remove (□(q ⟶ □q))) ⟶ □q := imp_trans''! axiomFour! this;
-  have : 𝐆𝐫𝐳 ⊢! ⋀□'((Γ.remove (~q)).remove (□(q ⟶ □q))) ⟶ □q := imp_trans''! collect_box_conj! this;
-  have : 𝐆𝐫𝐳 ⊢! ⋀□'((Γ.remove (~q)).remove (□(q ⟶ □q))) ⟶ (□(q ⟶ □q)) := imp_trans''! this (reducible_K4_Grz K4_lemma1)
-
-  have : X.theory *⊢[𝐆𝐫𝐳]! (□(q ⟶ □q)) := by
-    apply Context.provable_iff.mpr;
-    use (□'List.remove (□(q ⟶ □q)) (List.remove (~q) Γ));
-    constructor;
-    . intro r hr; simp at hr;
-      obtain ⟨s, hs, rfl⟩ := hr;
-      have ⟨s_mem', hs₁⟩ := List.mem_remove_iff.mp hs;
-      have ⟨s_mem, hs₂⟩ := List.mem_remove_iff.mp s_mem';
-      clear hs s_mem';
-      have := hΓ₁ s s_mem;
-      simp at this;
-      rcases this with ((rfl | rfl) | ⟨s, hs, rfl⟩);
-      . contradiction;
-      . contradiction;
-      . apply membership_iff.mpr;
-        apply axiomFour'!;
-        apply membership_iff.mp;
-        assumption;
-    . assumption;
-
-  have : □(q ⟶ □q) ∈ X.theory := membership_iff.mpr this;
+  have := (not_imp_not.mpr $ KT_complete (α := α) |>.complete) hC;
+  simp at this;
+  obtain ⟨F, F_refl, hF⟩ := this;
+  simp [ValidOnFrame, ValidOnModel, Satisfies] at hF;
+  obtain ⟨V, x, h₁, h₂, ⟨y, Rxy, h₃⟩⟩ := hF;
+  have := h₂ (F_refl x);
+  have := (this h₁) Rxy;
   contradiction;
 
 open System System.FiniteContext MaximalConsistentTheory in
-private lemma Grz_truthlemma.lemma2
+private lemma Grz_truthlemma.lemma
   {q : Formula α}
   {X : (CanonicalModel 𝐆𝐫𝐳).World} (h : □q ∉ X.theory) : (𝐆𝐫𝐳)-Consistent ({□(q ⟶ □q), ~q} ∪ (□''□''⁻¹X.theory)) := by
   by_contra hC;
@@ -226,41 +211,54 @@ lemma Grz_truthlemma
   Satisfies (GrzFilteredModel p) ⟦X⟧ q ↔ q ∈ X.theory := by
   induction q using Formula.rec' generalizing X with
   | hbox q ih =>
-    constructor;
-    . contrapose;
-      intro h;
-      obtain ⟨Y, hY⟩ := lindenbaum (Λ := 𝐆𝐫𝐳) (T := ({□(q ⟶ □q), ~q} ∪ (□''□''⁻¹X.theory))) $ Grz_truthlemma.lemma2 h;
+    by_cases bq_mem_X : □q ∈ X.theory;
+    . simp [bq_mem_X];
+      intro QY RXY;
+      obtain ⟨Y, hY⟩ := Quotient.exists_rep QY; subst hY;
+      have : □q ∈ Y.theory := GrzFilteredFrame.def_rel.mp RXY |>.1 q (by simp; left; assumption) bq_mem_X;
+      have : q ∈ Y.theory := iff_mem_imp (Ω := Y) |>.mp (membership_iff.mpr (axiomT!)) this;
+      exact @ih Y (Subformulas.mem_box hq) |>.mpr this;
+    . simp [bq_mem_X]
+      wlog q_mem_X : q ∈ X.theory;
+      . have : ¬Satisfies (GrzFilteredModel p) ⟦X⟧ q := @ih X (Subformulas.mem_box hq) |>.not.mpr q_mem_X;
+        have : ¬Satisfies (GrzFilteredModel p) ⟦X⟧ (□q) := by
+          simp [Satisfies];
+          use ⟦X⟧;
+          constructor;
+          . apply GrzFilteredFrame.reflexive;
+          . assumption;
+        tauto;
       simp [Satisfies];
+      obtain ⟨Y, hY⟩ := lindenbaum (Λ := 𝐆𝐫𝐳) (T := ({□(q ⟶ □q), ~q} ∪ (□''□''⁻¹X.theory))) $ Grz_truthlemma.lemma bq_mem_X;
+      simp [Set.insert_subset_iff] at hY;
+      obtain ⟨⟨mem_q₁_Y, nmem_q_Y⟩, hY₂⟩ := hY;
       use ⟦Y⟧;
       constructor;
       . apply GrzFilteredFrame.def_rel.mpr;
-        simp [Set.insert_subset_iff] at hY;
-        have ⟨⟨mem_q₁_Y, nmem_q_Y⟩, hY₂⟩ := hY;
         constructor;
-        . intro r _ _; apply hY₂; simpa;
-        . by_contra hC;
-          push_neg at hC;
-          obtain ⟨hr, r, hr₁, (⟨hr₂, hr₃⟩ | ⟨hr₂, hr₃⟩)⟩ := hC;
-          . simp at hr₁;
-            sorry;
-          . have := @hr r (by sorry) (by sorry);
-            sorry;
-      . apply ih (by aesop) |>.not.mpr;
-        apply iff_mem_neg.mp;
-        apply hY;
-        simp;
-    . intro bq_mem_X QY RXY;
-      obtain ⟨Y, hY⟩ := Quotient.exists_rep QY; subst hY;
-      have ⟨h₁, _⟩ := GrzFilteredFrame.def_rel.mp RXY; simp at h₁;
-      have := h₁ q hq bq_mem_X;
-      apply @ih Y (Subformulas.mem_box hq) |>.mpr;
-      sorry;
-      -- have ⟨q_mem_Y, _⟩ := h₁ q hq bq_mem_X;
-      -- exact ih (by aesop) |>.mpr q_mem_Y;
+        . intro r hr;
+          simp [GrzSubformulas] at hr;
+          rcases hr with (_ | ⟨r, _, rfl⟩) <;> apply hY₂;
+        . apply imp_iff_not_or (a := (∀ q ∈ □''⁻¹↑(𝒮ᴳ p), □q ∈ Y.theory → □q ∈ X.theory)) (b := X = Y) |>.mpr;
+          left; push_neg;
+          use (q ⟶ □q);
+          refine ⟨?_, ?_, ?_⟩;
+          . simp; right; exact Subformulas.mem_box hq;
+          . assumption;
+          . by_contra hC;
+            have : 𝐆𝐫𝐳 ⊢! (q ⋏ □(q ⟶ □q)) ⟶ □q := reducible_KT_Grz KT_lemma1;
+            have : (q ⋏ □(q ⟶ □q) ⟶ □q) ∈ X.theory := membership_iff.mpr $ Context.of! this;
+            have : □q ∈ X.theory := iff_mem_imp.mp this ?_;
+            contradiction;
+            apply iff_mem_and.mpr;
+            constructor;
+            . assumption;
+            . assumption;
+      . apply @ih Y (Subformulas.mem_box hq) |>.not.mpr;
+        assumption
   | _ =>
-    sorry;
-    -- simp_all [Satisfies, StandardFilterationValuation];
-    -- try aesop;
+    simp_all [Satisfies, StandardFilterationValuation];
+    try aesop;
 
 private lemma Grz_completeAux {p : Formula α} : ReflexiveTransitiveAntisymmetricFrameClass.{u}ꟳ# ⊧ p → 𝐆𝐫𝐳 ⊢! p := by
   contrapose;
