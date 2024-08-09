@@ -1203,18 +1203,18 @@ lemma uformula_result_induction {P : V → V → V → Prop} (hP : 𝚺₁-Relat
   haveI : 𝚺₁-Function₂ c.exChanges := c.exChanges_defined.to_definable
   let f : V → V → V := fun p param ↦ max param (max (c.allChanges param (fstIdx p)) (c.exChanges param (fstIdx p)))
   have hf : 𝚺₁-Function₂ f :=
-    DefinableFunction.comp₂ (f := Max.max)
+    DefinableFunction.comp₂_infer (f := Max.max)
       (DefinableFunction.var _)
-      (DefinableFunction.comp₂
-        (DefinableFunction.comp₂ (DefinableFunction.var _) (DefinableFunction.comp₁ (DefinableFunction.var _)))
-        (DefinableFunction.comp₂ (DefinableFunction.var _) (DefinableFunction.comp₁ (DefinableFunction.var _))))
+      (DefinableFunction.comp₂_infer
+        (DefinableFunction.comp₂_infer (DefinableFunction.var _) (DefinableFunction.comp₁_infer (DefinableFunction.var _)))
+        (DefinableFunction.comp₂_infer (DefinableFunction.var _) (DefinableFunction.comp₁_infer (DefinableFunction.var _))))
   apply sigma₁_order_ball_induction hf ?_ ?_ p param
   · apply Definable.imp
-      (Definable.comp₁' (DefinableFunction.var _))
-      (Definable.comp₃'
+      (Definable.comp₁_infer (DefinableFunction.var _))
+      (Definable.comp₃_infer
         (DefinableFunction.var _)
         (DefinableFunction.var _)
-        (DefinableFunction.comp₂ (DefinableFunction.var _) (DefinableFunction.var _)))
+        (DefinableFunction.comp₂_infer (DefinableFunction.var _) (DefinableFunction.var _)))
   intro p param ih hp
   rcases hp.case with
     (⟨n, k, r, v, hkr, hv, rfl⟩ | ⟨n, k, r, v, hkr, hv, rfl⟩ |
@@ -1260,15 +1260,15 @@ lemma semiformula_result_induction {P : V → V → V → V → Prop} (hP : 𝚺
       Fin.succ_zero_eq_one]
     apply LO.FirstOrder.Arith.Definable.imp
     · simp_all only [SigmaPiDelta.alt_sigma, Fin.isValue]
-      apply LO.FirstOrder.Arith.Definable.comp₂'
+      apply LO.FirstOrder.Arith.Definable.comp₂_infer
       · simp_all only [zero_add, Fin.isValue, DefinableFunction.var]
       · simp_all only [zero_add, Fin.isValue]
-        apply LO.FirstOrder.Arith.DefinableFunction.comp₁
+        apply LO.FirstOrder.Arith.DefinableFunction.comp₁_infer
         simp_all only [zero_add, Fin.isValue, DefinableFunction.var]
-    · apply LO.FirstOrder.Arith.Definable.comp₄'
+    · apply LO.FirstOrder.Arith.Definable.comp₄_infer
       · simp_all only [zero_add, Fin.isValue, DefinableFunction.var]
       · simp_all only [zero_add, Fin.isValue]
-        apply LO.FirstOrder.Arith.DefinableFunction.comp₁
+        apply LO.FirstOrder.Arith.DefinableFunction.comp₁_infer
         simp_all only [zero_add, Fin.isValue, DefinableFunction.var]
       · simp_all only [zero_add, Fin.isValue, DefinableFunction.var]
       · simp_all only [zero_add, Fin.isValue, DefinableFunction.var]

@@ -56,15 +56,15 @@ lemma order_induction_sigma_or_pi {P Q : V → Prop} (hP : (𝚺, m)-Predicate P
     · clear hp hq ind
       apply LO.FirstOrder.Arith.Definable.imp
       · simp_all only [SigmaPiDelta.alt_sigma, Fin.isValue]
-        apply LO.FirstOrder.Arith.Definable.comp₂'
+        apply LO.FirstOrder.Arith.Definable.comp₂_infer
         · simp_all only [zero_add, Fin.isValue, DefinableFunction.var]
         · simp_all only [zero_add, DefinableFunction.const]
       · simp_all only [Fin.isValue]
         apply LO.FirstOrder.Arith.Definable.or
-        · apply LO.FirstOrder.Arith.Definable.comp₂'
+        · apply LO.FirstOrder.Arith.Definable.comp₂_infer
           · simp_all only [zero_add, Fin.isValue, DefinableFunction.var]
           · simp_all only [zero_add, DefinableFunction.const]
-        · apply LO.FirstOrder.Arith.Definable.comp₂'
+        · apply LO.FirstOrder.Arith.Definable.comp₂_infer
           · simp_all only [zero_add, Fin.isValue, DefinableFunction.var]
           · simp_all only [zero_add, DefinableFunction.const]
     case ind z ih =>

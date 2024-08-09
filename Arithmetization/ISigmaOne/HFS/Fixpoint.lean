@@ -138,7 +138,7 @@ lemma mem_limSeq_succ_iff {x s : M} :
 lemma limSeq_cumulative {s s' : M} : s ≤ s' → c.limSeq v s ⊆ c.limSeq v s' := by
   induction s' using induction_iSigmaOne generalizing s
   · apply Definable.ball_le' (by definability)
-    apply Definable.comp₂'
+    apply Definable.comp₂_infer
     · exact ⟨φ.limSeqDef.rew <| Rew.embSubsts (#0 :> #1 :> fun i ↦ &(v i)), by intro v; simp [c.eval_limSeqDef]⟩
     · exact ⟨φ.limSeqDef.rew <| Rew.embSubsts (#0 :> #2 :> fun i ↦ &(v i)), by intro v; simp [c.eval_limSeqDef]⟩
   case zero =>
@@ -156,9 +156,9 @@ lemma mem_limSeq_self [c.StrongFinite] {u s : M} :
   induction u using order_induction_piOne generalizing s
   · apply Definable.all
     apply Definable.imp
-    · apply Definable.comp₂' (by definability)
+    · apply Definable.comp₂_infer (by definability)
       exact ⟨φ.limSeqDef.rew <| Rew.embSubsts (#0 :> #1 :> fun i ↦ &(v i)), by intro v; simp [c.eval_limSeqDef]⟩
-    · apply Definable.comp₂' (by definability)
+    · apply Definable.comp₂_infer (by definability)
       exact ⟨φ.limSeqDef.rew <| Rew.embSubsts (#0 :> ‘#2 + 1’ :> fun i ↦ &(v i)), by intro v; simp [c.eval_limSeqDef]⟩
   case ind u ih =>
     rcases zero_or_succ s with (rfl | ⟨s, rfl⟩)
@@ -194,14 +194,14 @@ lemma finite_upperbound (m : M) : ∃ s, ∀ z < m, c.Fixpoint v z → z ∈ c.l
   have : ∃ F : M, ∀ x, x ∈ F ↔ x < m ∧ c.Fixpoint v x := by
     have : 𝚺₁-Predicate fun x ↦ x < m ∧ c.Fixpoint v x :=
       Definable.and (by definability)
-        (Definable.ex (Definable.comp₂' (by definability)
+        (Definable.ex (Definable.comp₂_infer (by definability)
           ⟨φ.limSeqDef.rew <| Rew.embSubsts (#0 :> #1 :> fun i ↦ &(v i)), by intro v; simp [c.eval_limSeqDef]⟩))
     exact finite_comprehension₁! this ⟨m, fun i hi ↦ hi.1⟩ |>.exists
   rcases this with ⟨F, hF⟩
   have : ∀ x ∈ F, ∃ u, x ∈ c.limSeq v u := by
     intro x hx; exact hF x |>.mp hx |>.2
   have : ∃ f, IsMapping f ∧ domain f = F ∧ ∀ (x y : M), ⟪x, y⟫ ∈ f → x ∈ c.limSeq v y := sigmaOne_skolem
-    (by apply Definable.comp₂' (by definability)
+    (by apply Definable.comp₂_infer (by definability)
         exact ⟨φ.limSeqDef.rew <| Rew.embSubsts (#0 :> #2 :> fun i ↦ &(v i)), by intro v; simp [c.eval_limSeqDef]⟩) this
   rcases this with ⟨f, mf, rfl, hf⟩
   exact ⟨f, by

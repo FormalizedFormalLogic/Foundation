@@ -459,9 +459,9 @@ lemma uformula_subst_induction {P : V → V → V → V → Prop} (hP : 𝚺₁-
   suffices ∀ param p, L.UFormula p → P (π₁ param) (π₂ param) p ((construction L).result param p) by
     intro p m w hp; simpa using this ⟪m, w⟫ p hp
   apply (construction L).uformula_result_induction (P := fun param p y ↦ P (π₁ param) (π₂ param) p y)
-  · apply Definable.comp₄'
-      (DefinableFunction.comp₁ (DefinableFunction.var _))
-      (DefinableFunction.comp₁ (DefinableFunction.var _))
+  · apply Definable.comp₄_infer
+      (DefinableFunction.comp₁_infer (DefinableFunction.var _))
+      (DefinableFunction.comp₁_infer (DefinableFunction.var _))
       (DefinableFunction.var _)
       (DefinableFunction.var _)
   · intro param n k R v hkR hv; simpa using hRel n (π₁ param) (π₂ param) k R v hkR hv
@@ -498,10 +498,10 @@ lemma semiformula_subst_induction {P : V → V → V → V → V → Prop} (hP :
   suffices ∀ param n p, L.Semiformula n p → P n (π₁ param) (π₂ param) p ((construction L).result param p) by
     intro n p m w hp; simpa using this ⟪m, w⟫ n p hp
   apply (construction L).semiformula_result_induction (P := fun param n p y ↦ P n (π₁ param) (π₂ param) p y)
-  · apply Definable.comp₅'
+  · apply Definable.comp₅_infer
       (DefinableFunction.var _)
-      (DefinableFunction.comp₁ (DefinableFunction.var _))
-      (DefinableFunction.comp₁ (DefinableFunction.var _))
+      (DefinableFunction.comp₁_infer (DefinableFunction.var _))
+      (DefinableFunction.comp₁_infer (DefinableFunction.var _))
       (DefinableFunction.var _)
       (DefinableFunction.var _)
   · intro param n k R v hkR hv; simpa using hRel n (π₁ param) (π₂ param) k R v hkR hv
@@ -611,8 +611,8 @@ lemma substs_substs {p} (hp : L.Semiformula l p) :
     apply Definable.all
     apply Definable.imp (by definability)
     apply Definable.imp (by definability)
-    apply Definable.comp₂' (by simp; definability)
-    apply DefinableFunction.comp₃ (by definability) ?_ (by definability)
+    apply Definable.comp₂_infer (by simp; definability)
+    apply DefinableFunction.comp₃_infer (by definability) ?_ (by definability)
     apply DefinableFunction₅.comp (termSubstVec_definable _) <;> definability
   · intro l k R ts hR hts m w n v _ hv
     simp only [substs_rel, Language.SemitermVec.termSubstVec, qqRel_inj, true_and, hR, hts, hv]

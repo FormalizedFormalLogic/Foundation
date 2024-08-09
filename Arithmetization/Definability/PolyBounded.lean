@@ -347,18 +347,18 @@ attribute [aesop (rule_sets := [Definability]) norm]
   Definable.const
 
 attribute [aesop 5 (rule_sets := [Definability]) safe]
-  DefinableFunction.comp₁
-  DefinableFunction.comp₂
-  DefinableFunction.comp₃
+  DefinableFunction.comp₁_infer
+  DefinableFunction.comp₂_infer
+  DefinableFunction.comp₃_infer
   DefinableBoundedFunction.comp₁
   DefinableBoundedFunction.comp₂
   DefinableBoundedFunction.comp₃
 
 attribute [aesop 6 (rule_sets := [Definability]) safe]
-  Definable.comp₁'
-  Definable.comp₂'
-  Definable.comp₃'
-  Definable.comp₄'
+  Definable.comp₁_infer
+  Definable.comp₂_infer
+  Definable.comp₃_infer
+  Definable.comp₄_infer
   Definable.const
 
 attribute [aesop 7 (rule_sets := [Definability]) safe]

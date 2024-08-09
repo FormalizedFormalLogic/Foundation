@@ -437,32 +437,32 @@ lemma sigma₁_order_ball_induction {f : M → M → M} (hf : 𝚺₁-Function�
       ∀ l < k, ∀ m < W, ∀ m' < W, ⟪l, m⟫ ∈ W → ⟪l + 1, m'⟫ ∈ W → ∀ x' ≤ x - l, ∀ y' ≤ m, f x' y' ≤ m' := by
     intro k hk
     induction k using induction_iSigmaOne
-    · apply Definable.imp (Definable.comp₂' (DefinableFunction.var _) (DefinableFunction.const _))
+    · apply Definable.imp (Definable.comp₂_infer (DefinableFunction.var _) (DefinableFunction.const _))
       apply Definable.ex
-      apply Definable.and (Definable.comp₁' (DefinableFunction.var _))
+      apply Definable.and (Definable.comp₁_infer (DefinableFunction.var _))
       apply Definable.and
-        (Definable.comp₂'
-          (DefinableFunction.comp₂ (DefinableFunction.var _) (DefinableFunction.const _))
-          (DefinableFunction.comp₁ <| DefinableFunction.var _))
+        (Definable.comp₂_infer
+          (DefinableFunction.comp₂_infer (DefinableFunction.var _) (DefinableFunction.const _))
+          (DefinableFunction.comp₁_infer <| DefinableFunction.var _))
       apply Definable.and
-        (Definable.comp₂' (DefinableFunction.comp₂ (DefinableFunction.const _) (DefinableFunction.const _)) (DefinableFunction.var _))
+        (Definable.comp₂_infer (DefinableFunction.comp₂_infer (DefinableFunction.const _) (DefinableFunction.const _)) (DefinableFunction.var _))
       apply Definable.ball_lt (DefinableFunction.var _)
       apply Definable.ball_lt (DefinableFunction.var _)
       apply Definable.ball_lt (DefinableFunction.var _)
       apply Definable.imp
-        (Definable.comp₂'
-          (DefinableFunction.comp₂ (DefinableFunction.var _) (DefinableFunction.var _))
+        (Definable.comp₂_infer
+          (DefinableFunction.comp₂_infer (DefinableFunction.var _) (DefinableFunction.var _))
           (DefinableFunction.var _))
       apply Definable.imp
-        (Definable.comp₂'
-          (DefinableFunction.comp₂
-            (DefinableFunction.comp₂ (DefinableFunction.var _) (DefinableFunction.const _))
+        (Definable.comp₂_infer
+          (DefinableFunction.comp₂_infer
+            (DefinableFunction.comp₂_infer (DefinableFunction.var _) (DefinableFunction.const _))
             (DefinableFunction.var _))
           (DefinableFunction.var _))
       apply Definable.ball_le
-        (Definable.comp₂' (DefinableFunction.var _) (DefinableFunction.comp₂ (DefinableFunction.const _) (DefinableFunction.var _)))
+        (Definable.comp₂_infer (DefinableFunction.var _) (DefinableFunction.comp₂_infer (DefinableFunction.const _) (DefinableFunction.var _)))
       apply Definable.ball_le (DefinableFunction.var _)
-      apply Definable.comp₂' (DefinableFunction.comp₂ (DefinableFunction.var _) (DefinableFunction.var _)) (DefinableFunction.var _)
+      apply Definable.comp₂_infer (DefinableFunction.comp₂_infer (DefinableFunction.var _) (DefinableFunction.var _)) (DefinableFunction.var _)
     case zero => exact ⟨!⟦y⟧, by simp⟩
     case succ k ih =>
       rcases ih (le_trans le_self_add hk) with ⟨W, SW, hkW, hW₀, hWₛ⟩
@@ -482,15 +482,15 @@ lemma sigma₁_order_ball_induction {f : M → M → M} (hf : 𝚺₁-Function�
   have : ∀ i ≤ x, ∀ m < W, ⟪x - i, m⟫ ∈ W → ∀ x' ≤ i, ∀ y' ≤ m, P x' y' := by
     intro i
     induction i using induction_iSigmaOne
-    · apply Definable.imp (Definable.comp₂' (DefinableFunction.var _) (DefinableFunction.const _))
+    · apply Definable.imp (Definable.comp₂_infer (DefinableFunction.var _) (DefinableFunction.const _))
       apply Definable.ball_lt (DefinableFunction.const _)
       apply Definable.imp
-        (Definable.comp₂'
-          (DefinableFunction.comp₂ (DefinableFunction.comp₂ (DefinableFunction.const _) (DefinableFunction.var _)) (DefinableFunction.var _))
+        (Definable.comp₂_infer
+          (DefinableFunction.comp₂_infer (DefinableFunction.comp₂_infer (DefinableFunction.const _) (DefinableFunction.var _)) (DefinableFunction.var _))
           (DefinableFunction.const _))
       apply Definable.ball_le (DefinableFunction.var _)
       apply Definable.ball_le (DefinableFunction.var _)
-      apply Definable.comp₂' (DefinableFunction.var _) (DefinableFunction.var _)
+      apply Definable.comp₂_infer (DefinableFunction.var _) (DefinableFunction.var _)
     case zero =>
       intro _ _ _ _ _ h y' _
       rcases nonpos_iff_eq_zero.mp h
