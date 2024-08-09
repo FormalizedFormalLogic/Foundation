@@ -1,5 +1,7 @@
 # Arithmetization
 
+*This branch is saved only for the concrete description of the $\Sigma_0$ definition of $\mathrm{Exp}$.*
+
 Formalization of weak arithmetic and arithmetization of metamathematics. This project depends on [lean4-logic](https://github.com/iehality/lean4-logic/tree/master).
 
 https://iehality.github.io/Arithmetization/
