@@ -188,13 +188,13 @@ lemma iff_mem_and (hq : (q ⋏ r) ∈ 𝒮 p) : ((q ⋏ r) ∈ Ω.theory) ↔ (q
 
 lemma iff_mem_or (hq : (q ⋎ r) ∈ 𝒮 p) : ((q ⋎ r) ∈ Ω.theory) ↔ (q ∈ Ω.theory) ∨ (r ∈ Ω.theory) := by
   constructor;
-  . intro hpq;
-    replace hpq := membership_iff (by assumption) |>.mp hpq;
+  . intro hqr;
+    replace hqr := membership_iff (by aesop) |>.mp hqr;
     by_contra hC; push_neg at hC;
-    have ⟨hq, hr⟩ := hC;
-    replace hq := membership_iff (by sorry) |>.mp $ @iff_mem_neg α _ Λ p Ω q (by sorry) |>.mpr hC.1;
-    replace hr := membership_iff (by sorry) |>.mp $ @iff_mem_neg α _ Λ p Ω r (by sorry) |>.mpr hC.2;
-    have : Ω.theory *⊢[Λ]! ⊥ := or₃'''! (neg_equiv'!.mp hq) (neg_equiv'!.mp hr) hpq;
+    obtain ⟨hq, hr⟩ := hC;
+    replace hq := membership_iff (by sorry) |>.mp $ @iff_mem_neg α _ Λ p Ω q (by sorry) |>.mpr hq;
+    replace hr := membership_iff (by sorry) |>.mp $ @iff_mem_neg α _ Λ p Ω r (by sorry) |>.mpr hr;
+    have : Ω.theory *⊢[Λ]! ⊥ := or₃'''! (neg_equiv'!.mp hq) (neg_equiv'!.mp hr) hqr;
     exact Ω.consistent this;
   . rintro (hp | hq);
     . apply membership_iff (by aesop) |>.mpr;
@@ -202,13 +202,28 @@ lemma iff_mem_or (hq : (q ⋎ r) ∈ 𝒮 p) : ((q ⋎ r) ∈ Ω.theory) ↔ (q 
     . apply membership_iff (by aesop) |>.mpr;
       exact or₂'! (membership_iff (by aesop) |>.mp hq);
 
-lemma iff_mem_imp (hq : (q ⟶ r) ∈ 𝒮 p) : ((q ⟶ r) ∈ Ω.theory) ↔ (q ∈ Ω.theory) → (r ∈ Ω.theory) := by
+lemma iff_mem_imp (hsub : (q ⟶ r) ∈ 𝒮 p) : ((q ⟶ r) ∈ Ω.theory) ↔ (q ∈ Ω.theory) → (r ∈ Ω.theory) := by
   constructor;
-  . intro hpq;
-    sorry;
-  . rintro hqr;
+  . intro hqr hq;
+    have dqr := membership_iff (by aesop) |>.mp hqr;
+    have dq  := membership_iff (by aesop) |>.mp hq;
     apply membership_iff (by aesop) |>.mpr;
-    sorry;
+    exact dqr ⨀ dq;
+  . rintro hqr;
+    replace hqr := not_or_of_imp hqr;
+    rcases hqr with (hq | hr);
+    . apply membership_iff (by aesop) |>.mpr;
+      replace hq := mem_compl_of_not_mem (by sorry) hq;
+      by_cases n : q.negated;
+      . rw [Formula.eq_complement_negated n] at hq;
+        sorry;
+      . rw [Formula.eq_complement_not_negated n] at hq;
+        exact efq_of_neg! $ membership_iff (by sorry) |>.mp hq;
+
+    . apply membership_iff (by aesop) |>.mpr;
+      exact dhyp! $ membership_iff (by aesop) |>.mp hr;
+    -- apply membership_iff (by aesop) |>.mpr;
+    -- sorry;
 
 end CompleteConsistentTheory
 
@@ -339,43 +354,35 @@ lemma GL_truthlemma₂
       . left; apply ihq (X := X) hq₁ |>.mpr; exact h;
       . right; apply ihr (X := X) hq₂ |>.mpr; exact h;
   | himp q r ihq ihr =>
-    have := Subformulas.mem_imp₁ $ GLSubformulas.mem_subformula_of_mem_imp h_sub;
-    have := Subformulas.mem_imp₂ $ GLSubformulas.mem_subformula_of_mem_imp h_sub;
+    replace h_sub : q ⟶ r ∈ 𝒮 p := GLSubformulas.mem_subformula_of_mem_imp h_sub;
+    have : q ∈ 𝒮 p := Subformulas.mem_imp₁ $ h_sub;
+    have : r ∈ 𝒮 p := Subformulas.mem_imp₂ $ h_sub;
+
     constructor;
-    . contrapose;
-      intro h;
-      sorry;
+    . intro h; replace h := not_or_of_imp h;
+      rcases h with (hq | hr);
+      . replace hq := ihq (by aesop) |>.not.mp hq;
+        apply membership_iff h_sub |>.mpr;
+        by_cases q.negated;
+        . sorry;
+        . sorry;
+
+      . replace hr := ihr (by aesop) |>.mp hr;
+        apply membership_iff h_sub |>.mpr;
+        exact System.dhyp! $ membership_iff (by aesop) |>.mp hr;
     . contrapose;
       intro h; simp [Satisfies] at h;
       obtain ⟨hq, hr⟩ := h;
-      replace hq : X.theory *⊢[𝐆𝐋]! q := CompleteConsistentTheory.membership_iff (by assumption) |>.mp
-        $ ihq (GLSubformulas.mem_of_mem_imp₁ h_sub) |>.mp hq;
-      replace hr : -r ∈ X.theory := mem_compl_of_not_mem (by assumption) $ ihr (GLSubformulas.mem_of_mem_imp₂ h_sub) |>.not.mp hr;
-      by_cases n : r.negated;
-      . rw [Formula.eq_complement_negated n] at *;
-        replace hr := CompleteConsistentTheory.membership_iff (by assumption) |>.mp hr;
-        apply Theory.not_mem_of_mem_neg X.consistent;
-        apply CompleteConsistentTheory.membership_iff (by sorry) |>.mpr;
-        sorry;
-      . rw [Formula.eq_complement_not_negated n] at *;
+      replace hq : q ∈ X.theory := ihq (by aesop) |>.mp hq;
+      replace hq : X.theory *⊢[𝐆𝐋]! q  := membership_iff (by aesop) |>.mp hq;
 
-        apply Theory.not_mem_of_mem_neg X.consistent;
-        sorry;
-    /-
-    . intro h; simp [Satisfies] at h;
-      have ⟨hq₁, hq₂⟩ := GLSubformulas.mem_of_mem_imp hq;
-      apply iff_mem_imp (GLSubformulas.mem_subformula_of_mem_imp hq) |>.mpr;
-      intro hq;
-      apply ihr hq₂ |>.mp $ ihr hq₂ |>.mpr (by aesop);
-    . intro h hhq;
-      have ⟨hq₁, hq₂⟩ := GLSubformulas.mem_of_mem_imp hq;
-      have := @CompleteConsistentTheory.iff_mem_imp α _ 𝐆𝐋 p X q r ?_ |>.mp h ?_;
-      apply ihr ?_ |>.mpr;
-      assumption;
-      . assumption;
-      . exact GLSubformulas.mem_subformula_of_mem_imp hq
-      . simp_all;
-    -/
+      replace hr : r ∉ X.theory := ihr (by aesop) |>.not.mp hr;
+      replace hr : X.theory *⊬[𝐆𝐋]! r  := membership_iff (by aesop) |>.not.mp hr;
+
+      by_contra hqr;
+      replace hqr : X.theory *⊢[𝐆𝐋]! q ⟶ r := membership_iff h_sub |>.mp hqr;
+      have : X.theory *⊢[𝐆𝐋]! r := hqr ⨀ hq;
+      contradiction;
   | hneg q ihq =>
     constructor;
     . intro h; simp [Satisfies] at h;
