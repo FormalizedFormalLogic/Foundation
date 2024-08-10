@@ -25,10 +25,7 @@ lemma sound (defines : Ax.DefinesKripkeFrameClass 𝔽) (d : (𝝂Ax) ⊢! p) : 
   | hNec ih => exact Kripke.ValidOnFrameClass.nec ih;
   | hOrElim =>
     simp_all [Kripke.ValidOnFrameClass, Kripke.ValidOnFrame, Kripke.ValidOnModel, Kripke.Satisfies];
-    intros; rename_i hpr hqr hpq;
-    cases hpq with
-    | inl hp => exact hpr hp;
-    | inr hq => exact hqr hq;
+    tauto;
   | _ => simp_all [Kripke.ValidOnFrameClass, Kripke.ValidOnFrame, Kripke.ValidOnModel, Kripke.Satisfies];
 
 lemma sound_of_defines (defines : Ax.DefinesKripkeFrameClass 𝔽) : Sound (𝝂Ax) 𝔽# := ⟨sound defines⟩
@@ -67,10 +64,7 @@ lemma finite_sound (defines : Ax.FinitelyDefinesKripkeFrameClass 𝔽) (d : (�
   | hNec ih => exact Kripke.ValidOnFrameClass.nec ih;
   | hOrElim =>
     simp_all [Kripke.ValidOnFrameClass, Kripke.ValidOnFrame, Kripke.ValidOnModel, Kripke.Satisfies];
-    intros; rename_i hpr hqr hpq;
-    cases hpq with
-    | inl hp => exact hpr hp;
-    | inr hq => exact hqr hq;
+    tauto;
   | _ => simp_all [Kripke.ValidOnFrameClass, Kripke.ValidOnFrame, Kripke.ValidOnModel, Kripke.Satisfies];
 
 lemma sound_of_finitely_defines (defines : Ax.FinitelyDefinesKripkeFrameClass 𝔽) : Sound (𝝂Ax) ↑𝔽# := ⟨finite_sound defines⟩

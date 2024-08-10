@@ -136,16 +136,10 @@ lemma GL_MDP_Aux (h : (□''X) *⊢[𝐆𝐋]! □p₁ ⋎ □p₂) : (□''X) *
     obtain ⟨M₁, hM₁⟩ := iff_unprovable_GL_exists_unsatisfies_at_root_on_FiniteTransitiveTree.mp h₁;
     obtain ⟨M₂, hM₂⟩ := iff_unprovable_GL_exists_unsatisfies_at_root_on_FiniteTransitiveTree.mp h₂;
 
-    replace hM₁ : (Satisfies M₁.toModel M₁.root (⊡c ⋏ ~p₁)) := by
-      simp only [Satisfies] at hM₁;
-      push_neg at hM₁;
-      exact hM₁;
+    replace hM₁ : (Satisfies M₁.toModel M₁.root (⊡c ⋏ ~p₁)) := by simp_all [Satisfies, Semantics.Realize];
     replace hM₁ := @GL_MDPCounterexampleModel.modal_equivalence_original_world₁ (M₁ := M₁) (M₂ := M₂) M₁.root (⊡c ⋏ ~p₁) |>.mp hM₁;
 
-    replace hM₂ : (Satisfies M₂.toModel M₂.root (⊡c ⋏ ~p₂)) := by
-      simp only [Satisfies] at hM₂;
-      push_neg at hM₂;
-      exact hM₂;
+    replace hM₂ : (Satisfies M₂.toModel M₂.root (⊡c ⋏ ~p₂)) := by simp_all [Satisfies, Semantics.Realize];
     replace hM₂ := @GL_MDPCounterexampleModel.modal_equivalence_original_world₂ (M₁ := M₁) (M₂ := M₂) M₂.root (⊡c ⋏ ~p₂) |>.mp hM₂;
 
     let M := GL_MDPCounterexampleModel M₁ M₂;

@@ -258,7 +258,7 @@ open Formula MaximalConsistentTheory in
 lemma GL_truthlemma
   {p : Formula α} {X : (CanonicalModel 𝐆𝐋).World} {q : Formula α} (hq : q ∈ 𝒮 p) :
   Satisfies (GLFilteredModel p) ⟦X⟧ q ↔ q ∈ X.theory := by
-  induction q using Formula.rec' generalizing X with
+  induction q using Formula.minimum_rec' generalizing X with
   | hbox q ih =>
     constructor;
     . contrapose;

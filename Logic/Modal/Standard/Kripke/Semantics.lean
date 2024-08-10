@@ -292,12 +292,8 @@ open Standard.Kripke
 
 def Formula.Kripke.Satisfies (M : Kripke.Model α) (x : M.World) : Formula α → Prop
   | atom a  => M.Valuation x a
-  | verum   => True
-  | falsum  => False
-  | and p q => (Satisfies M x p) ∧ (Satisfies M x q)
-  | or p q  => (Satisfies M x p) ∨ (Satisfies M x q)
-  | imp p q => (Satisfies M x p) → (Satisfies M x q)
-  | neg p   => ¬(Satisfies M x p)
+  | ⊥  => False
+  | p ⟶ q => (Satisfies M x p) → (Satisfies M x q)
   | □p   => ∀ {y}, x ≺ y → (Satisfies M y p)
 
 namespace Formula.Kripke.Satisfies
@@ -308,29 +304,17 @@ variable {M : Kripke.Model α} {x : M.World} {p q : Formula α}
 
 @[simp] protected lemma iff_models : x ⊧ p ↔ Kripke.Satisfies M x p := iff_of_eq rfl
 
-lemma and_def : x ⊧ p ⋏ q ↔ x ⊧ p ∧ x ⊧ q := by
-  constructor;
-  . intro ⟨hp, hq⟩; exact ⟨hp, hq⟩;
-  . intro h; exact ⟨h.1, h.2⟩;
+lemma imp_def : x ⊧ p ⟶ q ↔ (x ⊧ p) → (x ⊧ q) := by constructor <;> tauto;
 
-lemma or_def : x ⊧ p ⋎ q ↔ x ⊧ p ∨ x ⊧ q := by
-  constructor;
-  . intro h; exact h.elim (λ hp => Or.inl hp) (λ hq => Or.inr hq);
-  . intro h; exact h.elim (λ hp => Or.inl hp) (λ hq => Or.inr hq);
+lemma not_def : x ⊧ ~p ↔ ¬(x ⊧ p) := by constructor <;> tauto;
 
-lemma not_def : x ⊧ ~p ↔ ¬(x ⊧ p) := by
-  constructor;
-  . intro h; exact h;
-  . intro h; exact h;
+lemma or_def : x ⊧ p ⋎ q ↔ x ⊧ p ∨ x ⊧ q := by constructor <;> { simp [Satisfies]; tauto; }
 
-lemma imp_def : x ⊧ p ⟶ q ↔ (x ⊧ p) → (x ⊧ q) := by
-  constructor;
-  . intro h; exact h;
-  . intro h; exact h;
+lemma and_def : x ⊧ p ⋏ q ↔ x ⊧ p ∧ x ⊧ q := by constructor <;> { simp [Satisfies]; }
 
 protected instance tarski : Semantics.Tarski (M.World) where
-  realize_top := by intro; trivial;
-  realize_bot := by aesop;
+  realize_top := by intro; tauto;
+  realize_bot := by tauto;
   realize_not := not_def;
   realize_and := and_def;
   realize_or  := or_def;

@@ -452,19 +452,17 @@ lemma GL_imply_boxdot_plain_of_imply_box_box : 𝐆𝐋 ⊢! □p ⟶ □q → �
   intro h;
   have := iff_unprovable_GL_exists_unsatisfies_at_root_on_FiniteTransitiveTree.mp h;
   obtain ⟨M, hs⟩ := this;
-
-  replace hs : M.root ⊧ ⊡p ⋏ ~q := by
-    simp only [Satisfies] at hs;
-    push_neg at hs;
-    exact hs;
+  have hs : M.root ⊧ ⊡p ⋏ ~q := by simp_all [Satisfies, Semantics.Realize];
   replace hs := @FiniteTransitiveTreeModel.SimpleExtension.modal_equivalence_original_world α M M.root (⊡p ⋏ ~q) |>.mp hs;
-  replace ⟨⟨hs₁, hs₂⟩, hs₃⟩ := hs;
+
+  simp [Satisfies, Semantics.Realize] at hs;
+  have ⟨hs₁, hs₂, hs₃⟩ := hs;
 
   have hbp : (Satisfies M↧.toModel (M↧.root) (□p)) := by
     intro x hx;
     rcases @FiniteTransitiveTree.SimpleExtension.through_original_root M.Tree x hx with (rfl | b)
     . assumption;
-    . exact hs₂ b;
+    . exact hs₂ _ b;
   have hbq : ¬(Satisfies M↧.toModel (M↧.root) (□q)) := by
     simp [Satisfies];
     use M.root;

@@ -113,7 +113,7 @@ section
 variable [Inhabited (Λ)-MCT] {p : Formula α}
 
 lemma truthlemma : ∀ {Ω : (CanonicalModel Λ).World}, Ω ⊧ p ↔ (p ∈ Ω.theory) := by
-  induction p using Formula.rec' with
+  induction p using Formula.minimum_rec' with
   | hbox p ih =>
     intro Ω;
     constructor;

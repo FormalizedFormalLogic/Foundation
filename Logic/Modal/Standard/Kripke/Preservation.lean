@@ -35,7 +35,7 @@ variable (Bi : M₁ ⇄ M₂)
 
 lemma modal_equivalent_of_bisimilar (bisx : Bi x₁ x₂) : x₁ ↭ x₂ := by
   intro p;
-  induction p using Formula.rec' generalizing x₁ x₂ with
+  induction p using Formula.minimum_rec' generalizing x₁ x₂ with
   | hatom a => exact Bi.atomic bisx;
   | hbox p ih =>
     constructor;
@@ -45,34 +45,12 @@ lemma modal_equivalent_of_bisimilar (bisx : Bi x₁ x₂) : x₁ ↭ x₂ := by
     . intro h y₁ rx₁y₁;
       obtain ⟨y₂, ⟨bisy, rx₂y₂⟩⟩ := Bi.forth bisx rx₁y₁;
       exact ih bisy |>.mpr (h rx₂y₂);
-  | hand p q ihp ihq =>
-    constructor;
-    . rintro ⟨hp, hq⟩;
-      exact ⟨ihp bisx |>.mp hp, ihq bisx |>.mp hq⟩;
-    . rintro ⟨hp, hq⟩;
-      exact ⟨ihp bisx |>.mpr hp, ihq bisx |>.mpr hq⟩;
-  | hor p q ihp ihq =>
-    constructor;
-    . rintro (hp | hq);
-      . left; exact ihp bisx |>.mp hp;
-      . right; exact ihq bisx |>.mp hq;
-    . rintro (hp | hq);
-      . left; exact ihp bisx |>.mpr hp;
-      . right; exact ihq bisx |>.mpr hq;
   | himp p q ihp ihq =>
     constructor;
     . intro hpq hp;
       exact ihq bisx |>.mp $ hpq $ ihp bisx |>.mpr hp;
     . intro hpq hp;
       exact ihq bisx |>.mpr $ hpq $ ihp bisx |>.mp hp;
-  | hneg p ih =>
-    constructor;
-    . intro hnp hp;
-      have := ih bisx |>.not.mp hnp;
-      contradiction;
-    . intro hnp hp;
-      have := ih bisx |>.not.mpr hnp;
-      contradiction;
   | _ => simp_all;
 
 end ModalEquivalent

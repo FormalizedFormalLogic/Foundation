@@ -6,12 +6,8 @@ variable [DecidableEq α]
 
 def Formula.BoxdotTranslation : Formula α → Formula α
   | atom p => .atom p
-  | ⊤ => ⊤
   | ⊥ => ⊥
-  | ~p => ~(BoxdotTranslation p)
   | p ⟶ q => (BoxdotTranslation p) ⟶ (BoxdotTranslation q)
-  | p ⋏ q => (BoxdotTranslation p) ⋏ (BoxdotTranslation q)
-  | p ⋎ q => (BoxdotTranslation p) ⋎ (BoxdotTranslation q)
   | □p => ⊡(BoxdotTranslation p)
 postfix:75 "ᵇ" => Formula.BoxdotTranslation
 
@@ -37,9 +33,6 @@ lemma boxdotTranslatedK4_of_S4 (h : 𝐒𝟒 ⊢! p) : 𝐊𝟒 ⊢! pᵇ := by
 
 lemma iff_boxdotTranslation_S4 : 𝐒𝟒 ⊢! p ⟷ pᵇ := by
   induction p using Formula.rec' with
-  | hneg p ihp => dsimp [BoxdotTranslation]; exact neg_replace_iff'! ihp;
-  | hand p q ihp ihq => dsimp [BoxdotTranslation]; exact and_replace_iff! ihp ihq;
-  | hor p q ihp ihq => dsimp [BoxdotTranslation]; exact or_replace_iff! ihp ihq;
   | himp p q ihp ihq => dsimp [BoxdotTranslation]; exact imp_replace_iff! ihp ihq;
   | hbox p ihp => dsimp [BoxdotTranslation]; exact iff_trans''! (box_iff! ihp) iff_box_boxdot!;
   | _ => dsimp [BoxdotTranslation]; exact iff_id!;

@@ -159,34 +159,10 @@ variable {M : Model α} {T : Theory α} [T_closed : T.SubformulaClosed]
          (FM : Model α) (filterOf : FM.FilterOf M T)
 
 theorem filteration {x : M.World} {p : Formula α} (hs : p ∈ T := by aesop) : x ⊧ p ↔ (cast (filterOf.def_world.symm) ⟦x⟧) ⊧ p := by
-  induction p using Formula.rec' generalizing x with
+  induction p using Formula.minimum_rec' generalizing x with
   | hatom a =>
     have := filterOf.def_valuation (cast filterOf.def_world.symm ⟦x⟧) a hs;
     simp_all [Satisfies];
-  | hneg p ihp =>
-    constructor;
-    . rintro hpx;
-      exact ihp (by aesop) |>.not.mp hpx;
-    . rintro hpx;
-      exact ihp (by aesop) |>.not.mpr hpx;
-  | hand p q ihp ihq =>
-    constructor;
-    . rintro ⟨hp, hq⟩;
-      constructor;
-      . exact ihp (by aesop) |>.mp hp;
-      . exact ihq (by aesop) |>.mp hq;
-    . rintro ⟨hp, hq⟩;
-      constructor;
-      . exact ihp (by aesop) |>.mpr hp;
-      . exact ihq (by aesop) |>.mpr hq;
-  | hor p q ihp ihq =>
-    constructor;
-    . rintro (hp | hq);
-      . left;  exact (ihp (by aesop) |>.mp hp);
-      . right; exact (ihq (by aesop) |>.mp hq);
-    . rintro (hp | hq);
-      . left;  exact (ihp (by aesop) |>.mpr hp);
-      . right; exact (ihq (by aesop) |>.mpr hq);
   | himp p q ihp ihq =>
     constructor;
     . rintro hxy hp;
