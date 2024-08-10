@@ -404,7 +404,7 @@ end Atoms
 
 section Complement
 
-variable [DecidableEq α]
+variable {p q r : Formula α}
 
 namespace Formula
 
@@ -419,17 +419,43 @@ lemma not_negated_iff {p : Formula α} : ¬p.negated ↔ ∀ q, p ≠ ~q := by
   induction p using Formula.rec' <;> simp [negated]
 
 def complement (p : Formula α) : Formula α := if p.negated then p else ~p
-postfix:80 "⁻" => complement
+prefix:80 "-" => complement
 
-lemma eq_complement_negated {p : Formula α} (hp : p.negated) : p⁻ = p := by
+lemma eq_complement_negated {p : Formula α} (hp : p.negated) : -p = p := by
   induction p using Formula.rec' <;> simp_all [negated, complement]
 
-lemma eq_complement_not_negated {p : Formula α} (hp : ¬p.negated) : p⁻ = ~p := by
+lemma eq_complement_not_negated {p : Formula α} (hp : ¬p.negated) : -p = ~p := by
   induction p using Formula.rec' <;> simp_all [negated, complement]
 
+lemma complement_top (h : -p = ⊤) : p = ⊤ := by
+  by_cases hn : p.negated;
+  . rw [eq_complement_negated hn] at h; exact h;
+  . rw [eq_complement_not_negated hn] at h; contradiction;
 
-abbrev complement_subformula (p : Formula α) : Finset (Formula α) := (𝒮 p) ∪ (Finset.image (·⁻) $ 𝒮 p)
-prefix:70 "𝒮⁻ " => Formula.ComplementSubformula
+lemma complement_bot (h : -p = ⊥) : p = ⊥ := by
+  by_cases hn : p.negated;
+  . rw [eq_complement_negated hn] at h; exact h;
+  . rw [eq_complement_not_negated hn] at h; contradiction;
+
+lemma complement_imp (h : -p = q ⟶ r) : p = q ⟶ r := by
+  by_cases hn : p.negated;
+  . rw [eq_complement_negated hn] at h; exact h;
+  . rw [eq_complement_not_negated hn] at h; contradiction;
+
+lemma complement_and (h : -p = q ⋏ r) : p = q ⋏ r := by
+  by_cases hn : p.negated;
+  . rw [eq_complement_negated hn] at h; exact h;
+  . rw [eq_complement_not_negated hn] at h; contradiction;
+
+lemma complement_or (h : -p = q ⋎ r) : p = q ⋎ r := by
+  by_cases hn : p.negated;
+  . rw [eq_complement_negated hn] at h; exact h;
+  . rw [eq_complement_not_negated hn] at h; contradiction;
+
+lemma complement_box (h : -p = □q) : p = □q := by
+  by_cases hn : p.negated;
+  . rw [eq_complement_negated hn] at h; exact h;
+  . rw [eq_complement_not_negated hn] at h; contradiction;
 
 end Formula
 
