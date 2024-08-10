@@ -19,9 +19,6 @@ def interpretation
   | ⊤ => ⊤
   | ⊥ => ⊥
   | p ⟶ q => (interpretation f β p) ⟶ (interpretation f β q)
-  | p ⋏ q => (interpretation f β p) ⋏ (interpretation f β q)
-  | p ⋎ q => (interpretation f β p) ⋎ (interpretation f β q)
-  | ~p => ~(interpretation f β p)
 scoped notation f "[" β "] " p => interpretation f β p -- TODO: more good notation
 
 /-

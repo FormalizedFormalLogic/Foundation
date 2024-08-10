@@ -105,13 +105,13 @@ private lemma valid_on_frame_T_of_Grz (h : F# ⊧* (𝗚𝗿𝘇 : AxiomSet α))
   have := valid_on_frame_T_and_Four_of_Grz h;
   simp_all [ValidOnFrame, ValidOnModel, Axioms.T, Axioms.Grz];
   intro p V x hx;
-  exact this p V x hx |>.1;
+  exact (Satisfies.and_def.mp $ this p V x hx) |>.1;
 
 private lemma valid_on_frame_Four_of_Grz (h : F# ⊧* (𝗚𝗿𝘇 : AxiomSet α)) : F# ⊧* (𝟰 : AxiomSet α) := by
   have := valid_on_frame_T_and_Four_of_Grz h;
   simp_all [ValidOnFrame, ValidOnModel, Axioms.T, Axioms.Grz];
   intro p V x hx;
-  exact (this p V x hx |>.2) hx;
+  exact (Satisfies.and_def.mp $ this p V x hx) |>.2 hx;
 
 private lemma refl_of_Grz (h : F# ⊧* (𝗚𝗿𝘇 : AxiomSet α)) : Reflexive F := by
   exact axiomT_defines.mp $ (valid_on_frame_T_of_Grz h);

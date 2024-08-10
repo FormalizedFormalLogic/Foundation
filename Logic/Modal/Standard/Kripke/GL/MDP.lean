@@ -144,28 +144,30 @@ lemma GL_MDP_Aux (h : (□''X) *⊢[𝐆𝐋]! □p₁ ⋎ □p₂) : (□''X) *
 
     let M := GL_MDPCounterexampleModel M₁ M₂;
 
+
     have hc : Satisfies M.toModel M.root (□c) := by
       intro x Rrx;
       rcases GL_MDPCounterexampleFrame.through_original_root Rrx with ((rfl | Rrx) | (rfl | Rrx))
-      . exact hM₁.1.1;
-      . exact hM₁.1.2 Rrx;
-      . exact hM₂.1.1;
-      . exact hM₂.1.2 Rrx;
+      . exact (Satisfies.and_def.mp $ (Satisfies.and_def.mp hM₁).1).1;
+      . exact (Satisfies.and_def.mp $ (Satisfies.and_def.mp hM₁).1).2 Rrx;
+      . exact (Satisfies.and_def.mp $ (Satisfies.and_def.mp hM₂).1).1;
+      . exact (Satisfies.and_def.mp $ (Satisfies.and_def.mp hM₂).1).2 Rrx;
     have hp₁ : ¬(Satisfies M.toModel M.root (□p₁)) := by
       dsimp [Satisfies]; push_neg;
       use .inr (.inl M₁.root);
       constructor;
       . apply M.Tree.root_rooted; simp;
-      . exact hM₁.2;
+      . exact (Satisfies.and_def.mp hM₁).2;
     have hp₂ : ¬(Satisfies M.toModel M.root (□p₂)) := by
       dsimp [Satisfies]; push_neg;
       use .inr (.inr M₂.root);
       constructor;
       . apply M.Tree.root_rooted; simp;
-      . exact hM₂.2;
+      . exact (Satisfies.and_def.mp hM₂).2;
     have : ¬(Satisfies M.toModel M.root (□p₁ ⋎ □p₂)) := by
       apply Satisfies.not_def.mpr;
-      apply not_or.mpr;
+      apply Satisfies.or_def.not.mpr;
+      push_neg;
       exact ⟨hp₁, hp₂⟩;
     have : ¬(Satisfies M.toModel M.root (□c ⟶ (□p₁ ⋎ □p₂))) := _root_.not_imp.mpr ⟨hc, this⟩;
     have := iff_unprovable_GL_exists_unsatisfies_at_root_on_FiniteTransitiveTree.mpr ⟨M, this⟩;

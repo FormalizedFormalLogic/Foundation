@@ -32,7 +32,7 @@ lemma boxdotTranslatedK4_of_S4 (h : 𝐒𝟒 ⊢! p) : 𝐊𝟒 ⊢! pᵇ := by
   | _ => dsimp [BoxdotTranslation]; trivial;
 
 lemma iff_boxdotTranslation_S4 : 𝐒𝟒 ⊢! p ⟷ pᵇ := by
-  induction p using Formula.rec' with
+  induction p using Formula.minimum_rec' with
   | himp p q ihp ihq => dsimp [BoxdotTranslation]; exact imp_replace_iff! ihp ihq;
   | hbox p ihp => dsimp [BoxdotTranslation]; exact iff_trans''! (box_iff! ihp) iff_box_boxdot!;
   | _ => dsimp [BoxdotTranslation]; exact iff_id!;

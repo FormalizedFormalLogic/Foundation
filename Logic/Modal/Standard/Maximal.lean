@@ -35,9 +35,9 @@ def toPropFormula (p : Formula α) (_ : p.degree = 0 := by simp_all [Formula.deg
   | atom a => Superintuitionistic.Formula.atom a
   | ⊤ => ⊤
   | ⊥ => ⊥
-  | ~p => ~(p.toPropFormula)
-  | p ⋏ q => p.toPropFormula ⋏ q.toPropFormula
   | p ⋎ q => p.toPropFormula ⋎ q.toPropFormula
+  | p ⋏ q => p.toPropFormula ⋏ q.toPropFormula
+  | ~p => ~(p.toPropFormula)
   | p ⟶ q => p.toPropFormula ⟶ q.toPropFormula
 postfix:75 "ᴾ" => Formula.toPropFormula
 
@@ -117,7 +117,7 @@ lemma deducible_iff_verTranslation : 𝐕𝐞𝐫 ⊢! p ⟷ pⱽ := by
   | hor _ _ ih₁ ih₂ => exact or_replace_iff! ih₁ ih₂;
   | _ => apply iff_id!
 
-lemma of_classical {m𝓓 : Modal.Standard.DeductionParameter α} {p : Superintuitionistic.Formula α} : (𝐂𝐥 ⊢! p) → (m𝓓 ⊢! pᴹ) := by
+lemma of_classical {mΛ : Modal.Standard.DeductionParameter α} {p : Superintuitionistic.Formula α} : (𝐂𝐥 ⊢! p) → (mΛ ⊢! pᴹ) := by
   intro h;
   induction h.some with
   | eaxm ih =>
