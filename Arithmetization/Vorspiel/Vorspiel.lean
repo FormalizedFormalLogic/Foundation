@@ -52,6 +52,65 @@ lemma eq_vecCons' (s : Fin (n + 1) → C) : s 0 :> (s ·.succ) = s :=
 
 end Matrix
 
+lemma forall_fin_iff_zero_and_forall_succ {P : Fin (k + 1) → Prop} : (∀ i, P i) ↔ P 0 ∧ ∀ i : Fin k, P i.succ :=
+  ⟨fun h ↦ ⟨h 0, fun i ↦ h i.succ⟩, by
+    rintro ⟨hz, hs⟩ i
+    cases' i using Fin.cases with i
+    · exact hz
+    · exact hs i⟩
+
+lemma exists_fin_iff_zero_or_exists_succ {P : Fin (k + 1) → Prop} : (∃ i, P i) ↔ P 0 ∨ ∃ i : Fin k, P i.succ :=
+  ⟨by rintro ⟨i, hi⟩
+      cases i using Fin.cases
+      · left; exact hi
+      · right; exact ⟨_, hi⟩,
+   by rintro (hz | ⟨i, h⟩)
+      · exact ⟨0, hz⟩
+      · exact ⟨_, h⟩⟩
+
+lemma forall_vec_iff_forall_forall_vec {P : (Fin (k + 1) → α) → Prop} :
+    (∀ v : Fin (k + 1) → α, P v) ↔ ∀ x, ∀ v : Fin k → α, P (x :> v) := by
+  constructor
+  · intro h x v; exact h _
+  · intro h v; simpa using h (v 0) (v ·.succ)
+
+lemma exists_vec_iff_exists_exists_vec {P : (Fin (k + 1) → α) → Prop} :
+    (∃ v : Fin (k + 1) → α, P v) ↔ ∃ x, ∃ v : Fin k → α, P (x :> v) := by
+  constructor
+  · rintro ⟨v, h⟩; exact ⟨v 0, (v ·.succ), by simpa using h⟩
+  · rintro ⟨x, v, h⟩; exact ⟨_, h⟩
+
+lemma exists_le_vec_iff_exists_le_exists_vec [LE α] {P : (Fin (k + 1) → α) → Prop} {f : Fin (k + 1) → α} :
+    (∃ v ≤ f, P v) ↔ ∃ x ≤ f 0, ∃ v ≤ (f ·.succ), P (x :> v) := by
+  constructor
+  · rintro ⟨w, hw, h⟩
+    exact ⟨w 0, hw 0, (w ·.succ), fun i ↦ hw i.succ, by simpa using h⟩
+  · rintro ⟨x, hx, v, hv, h⟩
+    refine ⟨x :> v, ?_, h⟩
+    intro i; cases' i using Fin.cases with i
+    · exact hx
+    · exact hv i
+
+lemma forall_le_vec_iff_forall_le_forall_vec [LE α] {P : (Fin (k + 1) → α) → Prop} {f : Fin (k + 1) → α} :
+    (∀ v ≤ f, P v) ↔ ∀ x ≤ f 0, ∀ v ≤ (f ·.succ), P (x :> v) := by
+  constructor
+  · intro h x hx v hv
+    refine h (x :> v) ?_
+    intro i; cases' i using Fin.cases with i
+    · exact hx
+    · exact hv i
+  · intro h v hv
+    simpa using h (v 0) (hv 0) (v ·.succ) (hv ·.succ)
+
+@[simp] lemma forall_fin_two_iff {P : Fin 2 → Prop} : (∀ i, P i) ↔ P 0 ∧ P 1 := by
+  constructor
+  · intro h; exact ⟨h 0, h 1⟩
+  · rintro ⟨h0, h1⟩
+    intro i
+    match i with
+    | 0 => exact h0
+    | 1 => exact h1
+
 instance : ToString Empty := ⟨Empty.elim⟩
 
 class Hash (α : Type*) where

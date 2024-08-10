@@ -14,22 +14,22 @@ This file defines the $\Sigma_n / \Pi_n / \Delta_n$ formulas of arithmetic of fi
 
 -/
 
-namespace LO
+namespace LO.Arith
 
 class SigmaPiDeltaLike (Ω : Type*) [SigmaSymbol Ω] [PiSymbol Ω] [DeltaSymbol Ω] where
   alt : Ω → Ω
 
 variable {V : Type*}
 
-class SigmaPiDeltaSystem (V : Type*) where
+structure SigmaPiDeltaSystem (V : Type*) where
   VecPr : SigmaPiDelta → {k : ℕ} → ((Fin k → V) → Prop) → Prop
   vecPr_delta_iff_sigma_and_pi {k} {P : (Fin k → V) → Prop} : VecPr 𝚫 P ↔ VecPr 𝚺 P ∧ VecPr 𝚷 P
-  verum' (Γ k) : VecPr Γ fun _ : Fin k → V ↦ ⊤
-  and' {k} {P Q : (Fin k → V) → Prop} : VecPr Γ P → VecPr Γ Q → VecPr Γ fun x ↦ P x ∧ Q x
-  not' {k} {P : (Fin k → V) → Prop} : VecPr Γ.alt P → VecPr Γ fun x ↦ ¬P x
-  all' {k} {P : (Fin k → V) → V → Prop} : VecPr 𝚷 (fun x ↦ P (x ·.succ) (x 0)) → VecPr 𝚷 fun x ↦ ∀ z, P x z
-  retraction' {k l} {P : (Fin k → V) → Prop} (hP : VecPr Γ P) (f : Fin k → Fin l) : VecPr Γ fun v ↦ P fun i ↦ v (f i)
-  equal' (Γ) : VecPr Γ fun v : Fin 2 → V ↦ v 0 = v 1
+  verum (Γ k) : VecPr Γ fun _ : Fin k → V ↦ ⊤
+  and {k} {P Q : (Fin k → V) → Prop} : VecPr Γ P → VecPr Γ Q → VecPr Γ fun x ↦ P x ∧ Q x
+  not {k} {P : (Fin k → V) → Prop} : VecPr Γ.alt P → VecPr Γ fun x ↦ ¬P x
+  all {k} {P : (Fin k → V) → V → Prop} : VecPr 𝚷 (fun x ↦ P (x ·.succ) (x 0)) → VecPr 𝚷 fun x ↦ ∀ z, P x z
+  retraction {k l} {P : (Fin k → V) → Prop} (hP : VecPr Γ P) (f : Fin k → Fin l) : VecPr Γ fun v ↦ P fun i ↦ v (f i)
+  equal (Γ) : VecPr Γ fun v : Fin 2 → V ↦ v 0 = v 1
 
 abbrev SigmaPiDeltaSystem.VecFunc (𝔖 : SigmaPiDeltaSystem V)
   (Γ : SigmaPiDelta) (f : (Fin k → V) → V) : Prop := 𝔖.VecPr Γ fun v ↦ v 0 = f (v ·.succ)
@@ -38,19 +38,28 @@ namespace SigmaPiDeltaSystem
 
 variable {𝔖 : SigmaPiDeltaSystem V} {Γ : SigmaPiDelta} {k} {P Q : (Fin k → V) → Prop}
 
-namespace VecPr
+/-
+variable (𝔖 Γ)
 
-alias verum := verum'
+abbrev Pred (P : V → Prop) : Prop := 𝔖.VecPr Γ (k := 1) (fun v ↦ P (v 0))
 
-alias and := and'
+abbrev Rel (P : V → V → Prop) : Prop := 𝔖.VecPr Γ (k := 2) (fun v ↦ P (v 0) (v 1))
 
-alias not := not'
+abbrev Rel₃ (P : V → V → V → Prop) : Prop := 𝔖.VecPr Γ (k := 3) (fun v ↦ P (v 0) (v 1) (v 2))
 
-alias all := all'
+abbrev Rel₄ (P : V → V → V → V → Prop) : Prop := 𝔖.VecPr Γ (k := 4) (fun v ↦ P (v 0) (v 1) (v 2) (v 3))
 
-alias retraction := retraction'
+abbrev Rel₅ (P : V → V → V → V → V → Prop) : Prop := 𝔖.VecPr Γ (k := 5) (fun v ↦ P (v 0) (v 1) (v 2) (v 3) (v 4))
 
-alias equal := equal'
+abbrev Function (f : V → V) : Prop := 𝔖.VecFunc Γ (k := 1) (fun v ↦ f (v 0))
+
+abbrev Function₂ (f : V → V → V) : Prop := 𝔖.VecFunc Γ (k := 2) (fun v ↦ f (v 0) (v 1))
+
+abbrev Function₃ (f : V → V → V → V) : Prop := 𝔖.VecFunc Γ (k := 3) (fun v ↦ f (v 0) (v 1) (v 2))
+
+abbrev Function₄ (f : V → V → V → V → V) : Prop := 𝔖.VecFunc Γ (k := 4) (fun v ↦ f (v 0) (v 1) (v 2) (v 3))
+
+-/
 
 lemma of_iff (hP : 𝔖.VecPr Γ P) (h : ∀ x, P x ↔ Q x) : 𝔖.VecPr Γ Q := by
   have : P = Q := funext <| by simpa
@@ -61,19 +70,19 @@ lemma of_sigma_of_pi (hσ : 𝔖.VecPr 𝚺 P) (hπ : 𝔖.VecPr 𝚷 P) : 𝔖.
   match Γ with
   | 𝚺 => hσ
   | 𝚷 => hπ
-  | 𝚫 => vecPr_delta_iff_sigma_and_pi.mpr ⟨hσ, hπ⟩
+  | 𝚫 => (vecPr_delta_iff_sigma_and_pi _).mpr ⟨hσ, hπ⟩
 
 lemma of_delta (h : 𝔖.VecPr 𝚫 P) {Γ} : 𝔖.VecPr Γ P :=
   of_sigma_of_pi
-    (vecPr_delta_iff_sigma_and_pi.mp h |>.1)
-    (vecPr_delta_iff_sigma_and_pi.mp h |>.2)
+    ((vecPr_delta_iff_sigma_and_pi _).mp h |>.1)
+    ((vecPr_delta_iff_sigma_and_pi _).mp h |>.2)
 
-lemma not' (h : 𝔖.VecPr Γ P) : 𝔖.VecPr Γ.alt fun x ↦ ¬P x := not (by simpa)
+lemma not' (h : 𝔖.VecPr Γ P) : 𝔖.VecPr Γ.alt fun x ↦ ¬P x := 𝔖.not (by simpa)
 
 lemma of_not (h : 𝔖.VecPr Γ.alt (fun x ↦ ¬P x)) : 𝔖.VecPr Γ P := by simpa using not' h
 
 lemma falsum (Γ : SigmaPiDelta) (k : ℕ) : 𝔖.VecPr Γ fun _ : Fin k → V ↦ ⊥ :=
-  of_sigma_of_pi (by simpa using not' (verum 𝚷 k)) (by simpa using not' (verum 𝚺 k))
+  of_sigma_of_pi (by simpa using not' (𝔖.verum 𝚷 k)) (by simpa using not' (𝔖.verum 𝚺 k))
 
 @[simp] lemma constant (Γ : SigmaPiDelta) (k : ℕ) (P : Prop) : 𝔖.VecPr Γ fun _ : Fin k → V ↦ P := by
   by_cases h : P <;> simp [h]
@@ -87,12 +96,12 @@ lemma or (hP : 𝔖.VecPr Γ P) (hQ : 𝔖.VecPr Γ Q) : 𝔖.VecPr Γ fun x : F
     · apply not' hQ
 
 lemma imply (hP : 𝔖.VecPr Γ.alt P) (hQ : 𝔖.VecPr Γ Q) : 𝔖.VecPr Γ fun x : Fin k → V ↦ P x → Q x := by
-  simp [imp_iff_not_or]; apply or
-  · apply not hP
+  simp only [imp_iff_not_or]; apply or
+  · apply 𝔖.not hP
   · exact hQ
 
 lemma ex {k} {P : (Fin k → V) → V → Prop} (h : 𝔖.VecPr 𝚺 fun x ↦ P (x ·.succ) (x 0)) : 𝔖.VecPr 𝚺 fun x ↦ ∃ z, P x z := of_not <| by
-  simpa using all (by apply not' h)
+  simpa using 𝔖.all (by apply not' h)
 
 lemma iff (hP : 𝔖.VecPr 𝚫 P) (hQ : 𝔖.VecPr 𝚫 Q) : 𝔖.VecPr Γ fun x : Fin k → V ↦ P x ↔ Q x := of_delta <| by
   simp only [iff_iff_implies_and_implies]
@@ -101,13 +110,13 @@ lemma iff (hP : 𝔖.VecPr 𝚫 P) (hQ : 𝔖.VecPr 𝚫 Q) : 𝔖.VecPr Γ fun 
   · exact imply hQ hP
 
 lemma equal' (Γ) (i j : Fin k) : 𝔖.VecPr Γ fun v ↦ v i = v j := by
-  simpa using retraction (equal Γ) ![i, j]
+  simpa using 𝔖.retraction (𝔖.equal Γ) ![i, j]
 
 lemma VecFunc.of_sigma {f : (Fin k → V) → V} (h : 𝔖.VecFunc 𝚺 f) {Γ} : 𝔖.VecFunc Γ f := by
   apply of_sigma_of_pi
   · exact h
-  · have : 𝔖.VecPr 𝚷 fun v ↦ ∀ y, y = f (v ·.succ) → v 0 = y := all <| imply
-      (by simpa using retraction h (0 :> (·.succ.succ)))
+  · have : 𝔖.VecPr 𝚷 fun v ↦ ∀ y, y = f (v ·.succ) → v 0 = y := 𝔖.all <| imply
+      (by simpa using 𝔖.retraction h (0 :> (·.succ.succ)))
       (by simpa using equal' 𝚷 1 0)
     exact of_iff this (fun v ↦ by simp)
 
@@ -126,7 +135,7 @@ lemma conj {k l} {P : Fin l → (Fin k → V) → Prop}
         · exact hs i
       · intro h
         exact ⟨h 0, fun i ↦ h i.succ⟩
-    apply and (h 0); apply ih
+    apply 𝔖.and (h 0); apply ih
     intro i; exact h i.succ
 
 lemma exVec {k l} {P : (Fin k → V) → (Fin l → V) → Prop}
@@ -142,7 +151,7 @@ lemma exVec {k l} {P : (Fin k → V) → (Fin l → V) → Prop}
       · rintro ⟨ys, h⟩; exact ⟨ys 0, (ys ·.succ), by simpa using h⟩
     apply ex; apply ih
     let g : Fin (k + (l + 1)) → Fin (k + 1 + l) := Matrix.vecAppend rfl (fun x ↦ x.succ.castAdd l) (Fin.castAdd l 0 :> fun j ↦ j.natAdd (k + 1))
-    exact of_iff (retraction h g) (by
+    exact of_iff (𝔖.retraction h g) (by
       intro v; simp [g]
       apply iff_of_eq; congr
       · ext i; congr 1; ext; simp [Matrix.vecAppend_eq_ite]
@@ -164,7 +173,7 @@ lemma allVec {k l} {P : (Fin k → V) → (Fin l → V) → Prop}
       · intro h y ys; apply h
     apply all; apply ih
     let g : Fin (k + (l + 1)) → Fin (k + 1 + l) := Matrix.vecAppend rfl (fun x ↦ x.succ.castAdd l) (Fin.castAdd l 0 :> fun j ↦ j.natAdd (k + 1))
-    exact of_iff (retraction h g) (by
+    exact of_iff (𝔖.retraction h g) (by
       intro v; simp [g]
       apply iff_of_eq; congr
       · ext i; congr 1; ext; simp [Matrix.vecAppend_eq_ite]
@@ -178,8 +187,8 @@ private lemma substitution_sigma {f : Fin k → (Fin l → V) → V} (hP : 𝔖.
   have : 𝔖.VecPr 𝚺 fun z ↦ ∃ ys : Fin k → V, (∀ i, ys i = f i z) ∧ P ys := by
     apply exVec; apply and
     · apply conj; intro i
-      simpa using retraction (VecFunc.of_sigma (hf i)) (i.natAdd l :> fun i ↦ i.castAdd k)
-    · exact retraction hP (Fin.natAdd l)
+      simpa using 𝔖.retraction (VecFunc.of_sigma (hf i)) (i.natAdd l :> fun i ↦ i.castAdd k)
+    · exact 𝔖.retraction hP (Fin.natAdd l)
   exact of_iff this <| by
     intro v
     constructor
@@ -194,8 +203,8 @@ private lemma substitution_pi {f : Fin k → (Fin l → V) → V} (hP : 𝔖.Vec
   have : 𝔖.VecPr 𝚷 fun z ↦ ∀ ys : Fin k → V, (∀ i, ys i = f i z) → P ys := by
     apply allVec; apply imply
     · apply conj; intro i
-      simpa using retraction (VecFunc.of_sigma (hf i)) (i.natAdd l :> fun i ↦ i.castAdd k)
-    · exact retraction hP (Fin.natAdd l)
+      simpa using 𝔖.retraction (VecFunc.of_sigma (hf i)) (i.natAdd l :> fun i ↦ i.castAdd k)
+    · exact 𝔖.retraction hP (Fin.natAdd l)
   exact of_iff this <| by
     intro v
     constructor
@@ -210,26 +219,35 @@ lemma substitution {f : Fin k → (Fin l → V) → V} (hP : 𝔖.VecPr Γ P) (h
   | 𝚷 => substitution_pi hP hf
   | 𝚫 => of_sigma_of_pi (substitution_sigma (of_delta hP) hf) (substitution_pi (of_delta hP) hf)
 
-end VecPr
-
 namespace VecFunc
 
 variable {F : (Fin k → V) → V}
 
-open VecPr
-
-lemma nth (Γ) (i : Fin k) : 𝔖.VecFunc Γ fun w ↦ w i := VecPr.equal' Γ 0 i.succ
+lemma nth (Γ) (i : Fin k) : 𝔖.VecFunc Γ fun w ↦ w i := 𝔖.equal' Γ 0 i.succ
 
 lemma substitution {f : Fin k → (Fin l → V) → V} (hF : 𝔖.VecFunc Γ F) (hf : ∀ i, 𝔖.VecFunc 𝚺 (f i)) :
     𝔖.VecFunc Γ fun z ↦ F (fun i ↦ f i z) := by
   simp only [VecFunc, Nat.succ_eq_add_one]
-  simpa using VecPr.substitution (f := (· 0) :> fun i w ↦ f i (w ·.succ)) hF
+  simpa using 𝔖.substitution (f := (· 0) :> fun i w ↦ f i (w ·.succ)) hF
     (by intro i
         cases' i using Fin.cases with i
         · simpa using nth 𝚺 0
-        · simpa using retraction (hf i) (0 :> (·.succ.succ)))
+        · simpa using 𝔖.retraction (hf i) (0 :> (·.succ.succ)))
 
 end VecFunc
+
+variable [Zero V] [One V] [Add V] [Mul V] [LT V] [V ⊧ₘ* 𝐏𝐀⁻]
+
+class Arithmetical (𝔖 : SigmaPiDeltaSystem V) where
+  zero' (Γ) : 𝔖.VecFunc Γ fun _ : Fin 1 → V ↦ 0
+  one' (Γ) : 𝔖.VecFunc Γ fun _ : Fin 1 → V ↦ 1
+  add' (Γ) : 𝔖.VecFunc Γ fun v : Fin 2 → V ↦ v 0 + v 1
+  mul' (Γ) : 𝔖.VecFunc Γ fun v : Fin 2 → V ↦ v 0 * v 1
+  lt' (Γ) : 𝔖.VecPr Γ fun v : Fin 2 → V ↦ v 0 < v 1
+  ball' {Γ} {P : (Fin k → V) → V → Prop} : 𝔖.VecPr Γ (fun v ↦ P (v ·.succ) (v 0)) →  𝔖.VecPr Γ fun v ↦ ∀ x ≤ v 0, P (v ·.succ) x
+  bex' {Γ} {P : (Fin k → V) → V → Prop} : 𝔖.VecPr Γ (fun v ↦ P (v ·.succ) (v 0)) →  𝔖.VecPr Γ fun v ↦ ∃ x ≤ v 0, P (v ·.succ) x
+
+
 
 end SigmaPiDeltaSystem
 
