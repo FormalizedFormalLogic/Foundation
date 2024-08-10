@@ -102,15 +102,6 @@ lemma forall_le_vec_iff_forall_le_forall_vec [LE α] {P : (Fin (k + 1) → α) �
   · intro h v hv
     simpa using h (v 0) (hv 0) (v ·.succ) (hv ·.succ)
 
-@[simp] lemma forall_fin_two_iff {P : Fin 2 → Prop} : (∀ i, P i) ↔ P 0 ∧ P 1 := by
-  constructor
-  · intro h; exact ⟨h 0, h 1⟩
-  · rintro ⟨h0, h1⟩
-    intro i
-    match i with
-    | 0 => exact h0
-    | 1 => exact h1
-
 instance : ToString Empty := ⟨Empty.elim⟩
 
 class Hash (α : Type*) where

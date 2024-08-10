@@ -239,12 +239,12 @@ end VecFunc
 variable [Zero V] [One V] [Add V] [Mul V] [LT V] [V ⊧ₘ* 𝐏𝐀⁻]
 
 class Arithmetical (𝔖 : SigmaPiDeltaSystem V) where
-  zero' (Γ) : 𝔖.VecFunc Γ fun _ : Fin 1 → V ↦ 0
-  one' (Γ) : 𝔖.VecFunc Γ fun _ : Fin 1 → V ↦ 1
-  add' (Γ) : 𝔖.VecFunc Γ fun v : Fin 2 → V ↦ v 0 + v 1
-  mul' (Γ) : 𝔖.VecFunc Γ fun v : Fin 2 → V ↦ v 0 * v 1
-  lt' (Γ) : 𝔖.VecPr Γ fun v : Fin 2 → V ↦ v 0 < v 1
-  ball' {Γ} {P : (Fin k → V) → V → Prop} : 𝔖.VecPr Γ (fun v ↦ P (v ·.succ) (v 0)) →  𝔖.VecPr Γ fun v ↦ ∀ x ≤ v 0, P (v ·.succ) x
+  zero (Γ) : 𝔖.VecFunc Γ fun _ : Fin 1 → V ↦ 0
+  one (Γ) : 𝔖.VecFunc Γ fun _ : Fin 1 → V ↦ 1
+  add (Γ) : 𝔖.VecFunc Γ fun v : Fin 2 → V ↦ v 0 + v 1
+  mul (Γ) : 𝔖.VecFunc Γ fun v : Fin 2 → V ↦ v 0 * v 1
+  lt (Γ) : 𝔖.VecPr Γ fun v : Fin 2 → V ↦ v 0 < v 1
+  ball {Γ} {P : (Fin k → V) → V → Prop} : 𝔖.VecPr Γ (fun v ↦ P (v ·.succ) (v 0)) →  𝔖.VecPr Γ fun v ↦ ∀ x ≤ v 0, P (v ·.succ) x
   bex' {Γ} {P : (Fin k → V) → V → Prop} : 𝔖.VecPr Γ (fun v ↦ P (v ·.succ) (v 0)) →  𝔖.VecPr Γ fun v ↦ ∃ x ≤ v 0, P (v ·.succ) x
 
 
