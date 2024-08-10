@@ -111,6 +111,8 @@ lemma iff_eq (p q : Formula α) : p ⟷ q = (p ⟶ q) ⋏ (q ⟶ p) := rfl
 
 @[simp] lemma imp_inj (p₁ q₁ p₂ q₂ : Formula α) : p₁ ⟶ p₂ = q₁ ⟶ q₂ ↔ p₁ = q₁ ∧ p₂ = q₂ := by simp[Arrow.arrow]
 
+@[simp] lemma neg_inj (p q : Formula α) : ~p = ~q ↔ p = q := by simp;
+
 /-
 instance : ModalDeMorgan (Formula α) where
   verum := rfl
