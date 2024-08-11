@@ -159,16 +159,15 @@ variable {M : Model α} {T : Theory α} [T_closed : T.SubformulaClosed]
          (FM : Model α) (filterOf : FM.FilterOf M T)
 
 theorem filteration {x : M.World} {p : Formula α} (hs : p ∈ T := by aesop) : x ⊧ p ↔ (cast (filterOf.def_world.symm) ⟦x⟧) ⊧ p := by
-  induction p using Formula.minimum_rec' generalizing x with
+  induction p using Formula.rec' generalizing x with
   | hatom a =>
     have := filterOf.def_valuation (cast filterOf.def_world.symm ⟦x⟧) a hs;
     simp_all [Satisfies];
-  | himp p q ihp ihq =>
-    constructor;
-    . rintro hxy hp;
-      exact (ihq (by aesop) |>.mp $ hxy (ihp (by aesop) |>.mpr hp));
-    . rintro hxy hp;
-      exact (ihq (by aesop) |>.mpr $ hxy (ihp (by aesop) |>.mp hp));
+  | hnatom a =>
+    simp [Satisfies];
+    apply Iff.not;
+    have := filterOf.def_valuation (cast filterOf.def_world.symm ⟦x⟧) a (by sorry);
+    simp_all [Satisfies];
   | hbox p ihp =>
     constructor;
     . intro h Qy rQxQy;
@@ -179,8 +178,16 @@ theorem filteration {x : M.World} {p : Formula α} (hs : p ∈ T := by aesop) : 
       simpa [ey] using h₂;
     . intro h y rxy;
       have rQxQy := filterOf.def_rel₁ rxy;
-      exact ihp (by aesop) |>.mpr $ h rQxQy;
-  | _ => simp_all;
+      exact ihp (by aesop) |>.mpr $ h _ rQxQy;
+  | hdia p ihp =>
+    constructor;
+    . intro h;
+      obtain ⟨Qy, rQxQy, h₂⟩ := h;
+      sorry;
+    . intro h;
+      obtain ⟨Qy, rQxQy, h₂⟩ := h;
+      sorry;
+  | _ => aesop;
 
 end
 
@@ -253,21 +260,20 @@ def filterOf : (FinestFilterationTransitiveClosureModel M T).FilterOf M T where
     | base rxy =>
       obtain ⟨x, y, rfl, rfl, rxy⟩ := rxy;
       intro p _ hpx;
-      exact hpx rxy;
+      exact hpx _ rxy;
     | ih ha hxy hyz =>
       obtain ⟨x, y, rfl, rfl, rxy⟩ := ha;
       obtain ⟨w, z, _, rfl, _⟩ := hxy;
-      . subst_vars;
-        intro p hp hpx;
+      . intro p hp hpx;
         apply hyz p hp;
         intro v ryv;
-        exact hpx (M_trans rxy ryv);
+        exact hpx _ (M_trans rxy ryv);
       . rename_i h;
         obtain ⟨w, z, rfl, rfl, _⟩ := h;
         intro p hp hpx;
         apply hyz p hp;
         intro v ryv;
-        exact hpx (M_trans rxy ryv);
+        exact hpx _ (M_trans rxy ryv);
 
 lemma rel_transitive : Transitive (FinestFilterationTransitiveClosureModel M T).Frame := Frame.TransitiveClosure.rel_transitive
 

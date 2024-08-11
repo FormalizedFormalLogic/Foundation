@@ -400,6 +400,10 @@ lemma multidia_def : x ⊧ ◇^[n]p ↔ ∃ y, x ≺^[n] y ∧ y ⊧ p := by
       . apply ih.mpr;
         use y;
 
+lemma trans (hpq : x ⊧ p ⟶ q) (hqr : x ⊧ q ⟶ r) : x ⊧ p ⟶ r := by simp_all;
+
+lemma mdp (hpq : x ⊧ p ⟶ q) (hp : x ⊧ p) : x ⊧ q := by simp_all;
+
 end Formula.Kripke.Satisfies
 
 
@@ -445,6 +449,21 @@ protected lemma orElim : M ⊧ (Axioms.OrElim p q r) := by simp [ValidOnModel]; 
 protected lemma dne : M ⊧ (Axioms.DNE p) := by simp [ValidOnModel];
 
 protected lemma negEquiv : M ⊧ (Axioms.NegEquiv p) := by simp [ValidOnModel];
+
+protected lemma diaDual : M ⊧ (Axioms.DiaDuality p) := by
+  intro x;
+  simp [ValidOnModel, Satisfies];
+  constructor;
+  . rintro ⟨y, Rxy, hy⟩; use y;
+    constructor;
+    . exact Rxy;
+    . intro h; replace h:= Satisfies.not_def.mp h;
+      contradiction;
+  . rintro ⟨y, Rxy, hy⟩; use y;
+    constructor;
+    . exact Rxy;
+    . replace hy := Satisfies.not_def.not.mp hy;
+      tauto;
 
 protected lemma axiomK : M ⊧ (Axioms.K p q)  := by
   intro V;
@@ -498,6 +517,8 @@ protected lemma dne : F ⊧ (Axioms.DNE p) := by intro V; exact ValidOnModel.dne
 
 protected lemma negEquiv : F ⊧ (Axioms.NegEquiv p) := by intro V; exact ValidOnModel.negEquiv (M := ⟨F, V⟩);
 
+protected lemma diaDual : F ⊧ (Axioms.DiaDuality p) := by intro V; exact ValidOnModel.diaDual (M := ⟨F, V⟩);
+
 protected lemma axiomK : F ⊧ (Axioms.K p q) := by intro V; exact ValidOnModel.axiomK (M := ⟨F, V⟩);
 
 protected lemma axiomK_set : F ⊧* 𝗞 := by
@@ -544,6 +565,8 @@ variable {𝔽 : FrameClass.Dep α}
 @[simp] protected lemma dne : 𝔽 ⊧ (Axioms.DNE p) := by intro _ _; exact ValidOnFrame.dne;
 
 @[simp] protected lemma negEquiv : 𝔽 ⊧ (Axioms.NegEquiv p) := by intro _ _; exact ValidOnFrame.negEquiv;
+
+@[simp] protected lemma diaDual : 𝔽 ⊧ (Axioms.DiaDuality p) := by intro _ _; exact ValidOnFrame.diaDual;
 
 @[simp] protected lemma axiomK : 𝔽 ⊧ (Axioms.K p q) := by intro _ _; exact ValidOnFrame.axiomK;
 

@@ -62,7 +62,7 @@ class HasAxiomVer where
 class HasAxiomH where
   H (p : F) : 𝓢 ⊢ Axioms.H p
 
-protected class K extends System.Classical 𝓢, Necessitation 𝓢, HasAxiomK 𝓢
+protected class K extends System.Classical 𝓢, Necessitation 𝓢, HasAxiomK 𝓢, HasDiaDuality 𝓢
 
 protected class KT extends System.K 𝓢, HasAxiomT 𝓢
 

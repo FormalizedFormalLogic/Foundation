@@ -116,9 +116,9 @@ lemma provable_S4_of_provable_efq : (𝐒𝟒 ⊢! pᵍ) → (𝐈𝐧𝐭 ⊢! 
         simp_all only [Satisfies.iff_models, Satisfies, Formula.Kripke.Satisfies];
         exact IV_hered h (by assumption);
       . intro h;
-        simpa only [Satisfies.iff_models, Satisfies, Formula.Kripke.Satisfies] using h $ IF_refl v;
+        simpa only [Satisfies.iff_models, Satisfies, Formula.Kripke.Satisfies] using h _ $ IF_refl v;
     | _ =>
-      simp_all only [Satisfies, Kripke.Satisfies];
+      simp_all [Satisfies, Kripke.Satisfies];
       try tauto;
   have : ¬(Modal.Standard.Formula.Kripke.Satisfies M w (pᵍ)) := (h₁ p w).not.mp hp;
 

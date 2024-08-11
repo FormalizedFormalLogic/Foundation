@@ -36,6 +36,7 @@ lemma sound (defines : Ax.DefinesKripkeFrameClass 𝔽) (d : (𝝂Ax) ⊢! p) : 
     | exact ValidOnFrameClass.verum;
     | exact ValidOnFrameClass.dne;
     | exact ValidOnFrameClass.negEquiv;
+    | exact ValidOnFrameClass.diaDual;
 
 lemma sound_of_defines (defines : Ax.DefinesKripkeFrameClass 𝔽) : Sound (𝝂Ax) 𝔽# := ⟨sound defines⟩
 
@@ -83,6 +84,7 @@ lemma finite_sound (defines : Ax.FinitelyDefinesKripkeFrameClass 𝔽) (d : (�
     | exact ValidOnFrameClass.verum;
     | exact ValidOnFrameClass.dne;
     | exact ValidOnFrameClass.negEquiv;
+    | exact ValidOnFrameClass.diaDual;
 
 lemma sound_of_finitely_defines (defines : Ax.FinitelyDefinesKripkeFrameClass 𝔽) : Sound (𝝂Ax) ↑𝔽# := ⟨finite_sound defines⟩
 

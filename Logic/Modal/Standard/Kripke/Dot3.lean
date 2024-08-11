@@ -44,8 +44,12 @@ private lemma dot3_of_connected : Connected F → F# ⊧* (.𝟯 : AxiomSet α) 
   by_contra hC; push_neg at hC;
   obtain ⟨⟨y, rxy, hp, hnq⟩, ⟨z, rxz, hq, hnp⟩⟩ := hC;
   cases hCon ⟨rxy, rxz⟩ with
-  | inl ryz => exact hnp $ hp ryz;
-  | inr rzy => exact hnq $ hq rzy;
+  | inl ryz =>
+    have := Kripke.Satisfies.not_def.not.mp $ hp z ryz;
+    contradiction;
+  | inr rzy =>
+    have := Kripke.Satisfies.not_def.not.mp $ hq y rzy;
+    contradiction;
 
 lemma AxDot3_Definability : AxiomSet.DefinesKripkeFrameClass (α := α) .𝟯 ConnectedFrameClass := by
   intro F;

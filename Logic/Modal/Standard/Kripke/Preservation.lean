@@ -35,22 +35,45 @@ variable (Bi : M₁ ⇄ M₂)
 
 lemma modal_equivalent_of_bisimilar (bisx : Bi x₁ x₂) : x₁ ↭ x₂ := by
   intro p;
-  induction p using Formula.minimum_rec' generalizing x₁ x₂ with
+  induction p using Formula.rec' generalizing x₁ x₂ with
   | hatom a => exact Bi.atomic bisx;
+  | hnatom a => apply Iff.not; exact Bi.atomic bisx;
   | hbox p ih =>
     constructor;
     . intro h y₂ rx₂y₂;
       obtain ⟨y₁, ⟨bisy, rx₁y₁⟩⟩ := Bi.back bisx rx₂y₂;
-      exact ih bisy |>.mp (h rx₁y₁);
+      exact ih bisy |>.mp (h _ rx₁y₁);
     . intro h y₁ rx₁y₁;
       obtain ⟨y₂, ⟨bisy, rx₂y₂⟩⟩ := Bi.forth bisx rx₁y₁;
-      exact ih bisy |>.mpr (h rx₂y₂);
-  | himp p q ihp ihq =>
+      exact ih bisy |>.mpr (h _ rx₂y₂);
+  | hdia p ih =>
     constructor;
-    . intro hpq hp;
-      exact ihq bisx |>.mp $ hpq $ ihp bisx |>.mpr hp;
-    . intro hpq hp;
-      exact ihq bisx |>.mpr $ hpq $ ihp bisx |>.mp hp;
+    . rintro ⟨y₁, rx₁y₁, h⟩;
+      obtain ⟨y₂, ⟨bisy, rx₂y₂⟩⟩ := Bi.forth bisx rx₁y₁;
+      use y₂;
+      constructor;
+      . assumption;
+      . exact ih bisy |>.mp h;
+    . rintro ⟨y₂, rx₂y₂, h⟩;
+      obtain ⟨y₁, ⟨bisy, rx₁y₁⟩⟩ := Bi.back bisx rx₂y₂;
+      use y₁;
+      constructor;
+      . assumption;
+      . exact ih bisy |>.mpr h;
+  | hand p q ihp ihq =>
+    constructor;
+    . rintro ⟨hp, hq⟩;
+      exact ⟨ihp bisx |>.mp hp, ihq bisx |>.mp hq⟩;
+    . rintro ⟨hp, hq⟩;
+      exact ⟨ihp bisx |>.mpr hp, ihq bisx |>.mpr hq⟩;
+  | hor p q ihp ihq =>
+    constructor;
+    . rintro (hp | hq);
+      . left; exact ihp bisx |>.mp hp;
+      . right; exact ihq bisx |>.mp hq;
+    . rintro (hp | hq);
+      . left; exact ihp bisx |>.mpr hp;
+      . right; exact ihq bisx |>.mpr hq;
   | _ => simp_all;
 
 end ModalEquivalent

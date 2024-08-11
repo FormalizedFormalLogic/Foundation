@@ -33,22 +33,21 @@ namespace Formula
 def toPropFormula (p : Formula α) (_ : p.degree = 0 := by simp_all [Formula.degree]) : Superintuitionistic.Formula α :=
   match p with
   | atom a => Superintuitionistic.Formula.atom a
+  | natom a => ~Superintuitionistic.Formula.atom a
   | ⊤ => ⊤
   | ⊥ => ⊥
   | p ⋎ q => p.toPropFormula ⋎ q.toPropFormula
   | p ⋏ q => p.toPropFormula ⋏ q.toPropFormula
-  | ~p => ~(p.toPropFormula)
-  | p ⟶ q => p.toPropFormula ⟶ q.toPropFormula
 postfix:75 "ᴾ" => Formula.toPropFormula
 
 
 def TrivTranslation : Formula α → Formula α
   | atom a => atom a
+  | natom a => natom a
   | □p => p.TrivTranslation
+  | ◇p => p.TrivTranslation
   | ⊤ => ⊤
   | ⊥ => ⊥
-  | ~p => ~(p.TrivTranslation)
-  | p ⟶ q => (p.TrivTranslation) ⟶ (q.TrivTranslation)
   | p ⋏ q => (p.TrivTranslation) ⋏ (q.TrivTranslation)
   | p ⋎ q => (p.TrivTranslation) ⋎ (q.TrivTranslation)
 postfix:75 "ᵀ" => TrivTranslation
@@ -63,11 +62,11 @@ end TrivTranslation
 
 def VerTranslation : Formula α → Formula α
   | atom a => atom a
+  | natom a => natom a
   | box _ => ⊤
+  | dia _ => ⊥
   | ⊤ => ⊤
   | ⊥ => ⊥
-  | ~p => ~(p.VerTranslation)
-  | p ⟶ q => (p.VerTranslation) ⟶ (q.VerTranslation)
   | p ⋏ q => (p.VerTranslation) ⋏ (q.VerTranslation)
   | p ⋎ q => (p.VerTranslation) ⋎ (q.VerTranslation)
 postfix:75 "ⱽ" => VerTranslation
@@ -99,8 +98,13 @@ lemma deducible_iff_trivTranslation : 𝐓𝐫𝐢𝐯 ⊢! p ⟷ pᵀ := by
     apply iff_intro!;
     . exact imp_trans''! axiomT! (and₁'! ih)
     . exact imp_trans''! (and₂'! ih) axiomTc!
-  | hneg _ ih => exact neg_replace_iff'! ih;
-  | himp _ _ ih₁ ih₂ => exact imp_replace_iff! ih₁ ih₂;
+  | hdia p ih =>
+    simp [TrivTranslation];
+    apply iff_intro!;
+    . apply imp_trans''! ?_ (and₁'! ih);
+      sorry;
+    . apply imp_trans''! (and₂'! ih) ?_;
+      sorry;
   | hand _ _ ih₁ ih₂ => exact and_replace_iff! ih₁ ih₂;
   | hor _ _ ih₁ ih₂ => exact or_replace_iff! ih₁ ih₂;
   | _ => apply iff_id!
