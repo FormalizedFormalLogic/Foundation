@@ -292,9 +292,13 @@ open Standard.Kripke
 
 def Formula.Kripke.Satisfies (M : Kripke.Model α) (x : M.World) : Formula α → Prop
   | atom a  => M.Valuation x a
+  | natom a => ¬M.Valuation x a
+  | ⊤  => True
   | ⊥  => False
-  | p ⟶ q => (Satisfies M x p) → (Satisfies M x q)
-  | □p   => ∀ {y}, x ≺ y → (Satisfies M y p)
+  | p ⋏ q => (Satisfies M x p) ∧ (Satisfies M x q)
+  | p ⋎ q => (Satisfies M x p) ∨ (Satisfies M x q)
+  | □p   => ∀ y, x ≺ y → (Satisfies M y p)
+  | ◇p   => ∃ y, x ≺ y ∧ (Satisfies M y p)
 
 namespace Formula.Kripke.Satisfies
 
@@ -304,13 +308,47 @@ variable {M : Kripke.Model α} {x : M.World} {p q : Formula α}
 
 @[simp] protected lemma iff_models : x ⊧ p ↔ Kripke.Satisfies M x p := iff_of_eq rfl
 
-lemma imp_def : x ⊧ p ⟶ q ↔ (x ⊧ p) → (x ⊧ q) := by constructor <;> tauto;
-
-lemma not_def : x ⊧ ~p ↔ ¬(x ⊧ p) := by constructor <;> tauto;
-
-lemma or_def : x ⊧ p ⋎ q ↔ x ⊧ p ∨ x ⊧ q := by constructor <;> { simp [Satisfies]; tauto; }
+lemma or_def : x ⊧ p ⋎ q ↔ x ⊧ p ∨ x ⊧ q := by constructor <;> { simp [Satisfies]; }
 
 lemma and_def : x ⊧ p ⋏ q ↔ x ⊧ p ∧ x ⊧ q := by constructor <;> { simp [Satisfies]; }
+
+lemma not_def : x ⊧ ~p ↔ ¬(x ⊧ p) := by
+  induction p using Formula.rec' generalizing x with
+  | hbox p ih =>
+    simp_all [Satisfies];
+    constructor;
+    . rintro ⟨y, Rxy, h⟩;
+      use y;
+      constructor;
+      . assumption;
+      . exact ih.mp h;
+    . rintro ⟨y, Rxy, h⟩;
+      use y;
+      constructor;
+      . assumption;
+      . exact ih.mpr h;
+  | hdia p ih =>
+    simp_all [Satisfies];
+    constructor;
+    . intro h y Rxy; exact ih.mp $ h y Rxy;
+    . intro h y Rxy; exact ih.mpr $ h y Rxy;
+  | _ =>
+    simp_all [Satisfies]
+    try tauto;
+
+@[simp]
+lemma imp_def : x ⊧ p ⟶ q ↔ (x ⊧ p) → (x ⊧ q) := by
+  constructor;
+  . intro hpq;
+    apply imp_iff_not_or (b := x ⊧ q) |>.mpr;
+    rcases hpq with (hp | hq);
+    . left; exact not_def.mp hp;
+    . right; exact hq;
+  . intro hpq;
+    simp only [Formula.imp_eq];
+    rcases imp_iff_not_or.mp hpq with (hp | hq);
+    . left; exact not_def.mpr hp;
+    . right; exact hq;
 
 protected instance tarski : Semantics.Tarski (M.World) where
   realize_top := by intro; tauto;
@@ -331,7 +369,7 @@ lemma multibox_def : x ⊧ □^[n]p ↔ ∀ {y}, x ≺^[n] y → y ⊧ p := by
     . intro h y Rxy;
       simp [Kripke.Satisfies] at h;
       obtain ⟨u, Rxu, Ruy⟩ := Rxy;
-      exact (ih.mp $ h Rxu) Ruy;
+      exact (ih.mp $ h _ Rxu) Ruy;
     . simp;
       intro h y Rxy;
       apply ih.mpr;
@@ -376,6 +414,48 @@ protected instance : Semantics (Formula α) (Kripke.Model α) := ⟨fun M ↦ Fo
 instance : Semantics.Bot (Kripke.Model α) where
   realize_bot M := by simp [Kripke.ValidOnModel, Kripke.Satisfies];
 
+variable {M : Model α} {p q r : Formula α}
+
+protected lemma mdp (hpq : M ⊧ p ⟶ q) (hp : M ⊧ p) : M ⊧ q := by
+  intro x;
+  exact (Satisfies.imp_def.mp $ hpq x) (hp x);
+
+protected lemma nec (h : M ⊧ p) : M ⊧ □p := by
+  intro x y _;
+  exact h y;
+
+protected lemma verum : M ⊧ ⊤ := by intro; tauto;
+
+protected lemma imply₁ : M ⊧ (Axioms.Imply₁ p q) := by simp [ValidOnModel]; tauto;
+
+protected lemma imply₂ : M ⊧ (Axioms.Imply₂ p q r) := by simp [ValidOnModel]; tauto;
+
+protected lemma andElim₁ : M ⊧ (Axioms.AndElim₁ p q) := by simp [ValidOnModel]; tauto;
+
+protected lemma andElim₂ : M ⊧ (Axioms.AndElim₂ p q) := by simp [ValidOnModel];
+
+protected lemma andInst : M ⊧ (Axioms.AndInst p q) := by simp [ValidOnModel]; tauto;
+
+protected lemma orInst₁ : M ⊧ (Axioms.OrInst₁ p q) := by simp [ValidOnModel]; tauto;
+
+protected lemma orInst₂ : M ⊧ (Axioms.OrInst₂ p q) := by simp [ValidOnModel]; tauto;
+
+protected lemma orElim : M ⊧ (Axioms.OrElim p q r) := by simp [ValidOnModel]; tauto;
+
+protected lemma dne : M ⊧ (Axioms.DNE p) := by simp [ValidOnModel];
+
+protected lemma negEquiv : M ⊧ (Axioms.NegEquiv p) := by simp [ValidOnModel];
+
+protected lemma axiomK : M ⊧ (Axioms.K p q)  := by
+  intro V;
+  apply Satisfies.imp_def.mpr;
+  intro hpq;
+  apply Satisfies.imp_def.mpr;
+  intro hp x Rxy;
+  replace hpq := Satisfies.imp_def.mp $ hpq x Rxy;
+  replace hp := hp x Rxy;
+  exact hpq hp;
+
 end Formula.Kripke.ValidOnModel
 
 
@@ -389,24 +469,41 @@ variable {F : Frame.Dep α}
 
 @[simp] protected lemma models_iff : F ⊧ p ↔ Kripke.ValidOnFrame F p := iff_of_eq rfl
 
-
 instance : Semantics.Bot (Frame.Dep α) where
   realize_bot _ := by simp [Kripke.ValidOnFrame];
 
+protected lemma mdp (hpq : F ⊧ p ⟶ q) (hp : F ⊧ p) : F ⊧ q := by intro V; exact ValidOnModel.mdp (hpq V) (hp V);
 
-protected lemma axiomK : F ⊧* 𝗞 := by
-  simp [Kripke.ValidOnFrame, Kripke.ValidOnModel, Axioms.K];
-  intro _ p q e V x; subst e;
-  intro h₁ h₂ y Rxy;
-  exact h₁ Rxy $ h₂ Rxy;
+protected lemma nec (h : F ⊧ p) : F ⊧ □p := by intro V; exact ValidOnModel.nec (h V);
 
-protected lemma nec (h : F ⊧ p) : F ⊧ □p := by
-  intro V x y _;
-  exact h V y;
+protected lemma verum : F ⊧ ⊤ := by intros _; tauto;
 
-protected lemma mdp (hpq : F ⊧ p ⟶ q) (hp : F ⊧ p) : F ⊧ q := by
-  intro V x;
-  exact (hpq V x) (hp V x);
+protected lemma imply₁ : F ⊧ (Axioms.Imply₁ p q) := by intro V; exact ValidOnModel.imply₁ (M := ⟨F, V⟩);
+
+protected lemma imply₂ : F ⊧ (Axioms.Imply₂ p q r) := by intro V; exact ValidOnModel.imply₂ (M := ⟨F, V⟩);
+
+protected lemma andElim₁ : F ⊧ (Axioms.AndElim₁ p q) := by intro V; exact ValidOnModel.andElim₁ (M := ⟨F, V⟩);
+
+protected lemma andElim₂ : F ⊧ (Axioms.AndElim₂ p q) := by intro V; exact ValidOnModel.andElim₂ (M := ⟨F, V⟩);
+
+protected lemma andInst : F ⊧ (Axioms.AndInst p q) := by intro V; exact ValidOnModel.andInst (M := ⟨F, V⟩);
+
+protected lemma orInst₁ : F ⊧ (Axioms.OrInst₁ p q) := by intro V; exact ValidOnModel.orInst₁ (M := ⟨F, V⟩);
+
+protected lemma orInst₂ : F ⊧ (Axioms.OrInst₂ p q) := by intro V; exact ValidOnModel.orInst₂ (M := ⟨F, V⟩);
+
+protected lemma orElim : F ⊧ (Axioms.OrElim p q r) := by intro V; exact ValidOnModel.orElim (M := ⟨F, V⟩);
+
+protected lemma dne : F ⊧ (Axioms.DNE p) := by intro V; exact ValidOnModel.dne (M := ⟨F, V⟩);
+
+protected lemma negEquiv : F ⊧ (Axioms.NegEquiv p) := by intro V; exact ValidOnModel.negEquiv (M := ⟨F, V⟩);
+
+protected lemma axiomK : F ⊧ (Axioms.K p q) := by intro V; exact ValidOnModel.axiomK (M := ⟨F, V⟩);
+
+protected lemma axiomK_set : F ⊧* 𝗞 := by
+  simp [Semantics.realizeSet_iff];
+  rintro f x y rfl;
+  exact ValidOnFrame.axiomK;
 
 end Formula.Kripke.ValidOnFrame
 
@@ -422,20 +519,38 @@ variable {𝔽 : FrameClass.Dep α}
 @[simp] protected lemma models_iff : 𝔽 ⊧ p ↔ Formula.Kripke.ValidOnFrameClass 𝔽 p := iff_of_eq rfl
 
 
-protected lemma axiomK : 𝔽 ⊧* 𝗞 := by
-  simp only [Semantics.RealizeSet.setOf_iff];
-  rintro f ⟨p, q, _⟩ F _;
-  apply (Semantics.RealizeSet.setOf_iff.mp $ Kripke.ValidOnFrame.axiomK) f;
-  use p, q;
+@[simp] protected lemma mdp (hpq : 𝔽 ⊧ p ⟶ q) (hp : 𝔽 ⊧ p) : 𝔽 ⊧ q := by intro _ hF; exact ValidOnFrame.mdp (hpq hF) (hp hF)
 
-protected lemma nec (h : 𝔽 ⊧ p) : 𝔽 ⊧ □p := by
-  intro _ hF;
-  apply Kripke.ValidOnFrame.nec;
-  exact h hF;
+@[simp] protected lemma nec (h : 𝔽 ⊧ p) : 𝔽 ⊧ □p := by intro _ hF; exact ValidOnFrame.nec (h hF);
 
-protected lemma mdp (hpq : 𝔽 ⊧ p ⟶ q) (hp : 𝔽 ⊧ p) : 𝔽 ⊧ q := by
-  intro _ hF;
-  exact Kripke.ValidOnFrame.mdp (hpq hF) (hp hF)
+@[simp] protected lemma verum : 𝔽 ⊧ ⊤ := by intro _ _; tauto;
+
+@[simp] protected lemma imply₁ : 𝔽 ⊧ (Axioms.Imply₁ p q) := by intro _ _; exact ValidOnFrame.imply₁;
+
+@[simp] protected lemma imply₂ : 𝔽 ⊧ (Axioms.Imply₂ p q r)  := by intro _ _; exact ValidOnFrame.imply₂;
+
+@[simp] protected lemma andElim₁ : 𝔽 ⊧ (Axioms.AndElim₁ p q) := by intro _ _; exact ValidOnFrame.andElim₁;
+
+@[simp] protected lemma andElim₂ : 𝔽 ⊧ (Axioms.AndElim₂ p q) := by intro _ _; exact ValidOnFrame.andElim₂;
+
+@[simp] protected lemma andInst : 𝔽 ⊧ (Axioms.AndInst p q) := by intro _ _; exact ValidOnFrame.andInst;
+
+@[simp] protected lemma orInst₁ : 𝔽 ⊧ (Axioms.OrInst₁ p q) := by intro _ _; exact ValidOnFrame.orInst₁;
+
+@[simp] protected lemma orInst₂ : 𝔽 ⊧ (Axioms.OrInst₂ p q) := by intro _ _; exact ValidOnFrame.orInst₂;
+
+@[simp] protected lemma orElim : 𝔽 ⊧ (Axioms.OrElim p q r) := by intro _ _; exact ValidOnFrame.orElim;
+
+@[simp] protected lemma dne : 𝔽 ⊧ (Axioms.DNE p) := by intro _ _; exact ValidOnFrame.dne;
+
+@[simp] protected lemma negEquiv : 𝔽 ⊧ (Axioms.NegEquiv p) := by intro _ _; exact ValidOnFrame.negEquiv;
+
+@[simp] protected lemma axiomK : 𝔽 ⊧ (Axioms.K p q) := by intro _ _; exact ValidOnFrame.axiomK;
+
+protected lemma axiomK_set : 𝔽 ⊧* 𝗞 := by
+  simp [Semantics.realizeSet_iff];
+  rintro f x y rfl;
+  exact ValidOnFrameClass.axiomK;
 
 end ValidOnFrameClass
 
@@ -510,7 +625,7 @@ lemma AllFrameClass.nonempty : AllFrameClass.Nonempty.{0} := by
 lemma axiomK_defines : DefinesKripkeFrameClass (α := α) 𝗞 AllFrameClass := by
   intro F;
   simp only [Set.mem_univ, iff_true];
-  exact Kripke.ValidOnFrame.axiomK;
+  exact Kripke.ValidOnFrame.axiomK_set;
 
 lemma axiomK_union_definability {Ax : AxiomSet α} : (DefinesKripkeFrameClass Ax 𝔽) ↔ DefinesKripkeFrameClass (𝗞 ∪ Ax) 𝔽 := by
   constructor;
@@ -523,7 +638,7 @@ lemma axiomK_union_definability {Ax : AxiomSet α} : (DefinesKripkeFrameClass Ax
     . intro h;
       simp only [Semantics.RealizeSet.union_iff];
       constructor;
-      . apply Kripke.ValidOnFrame.axiomK;
+      . apply Kripke.ValidOnFrame.axiomK_set;
       . exact defines.mpr h;
   . intro defines F;
     simp only [DefinesKripkeFrameClass] at defines;
@@ -532,7 +647,7 @@ lemma axiomK_union_definability {Ax : AxiomSet α} : (DefinesKripkeFrameClass Ax
       apply defines.mp;
       simp only [Semantics.RealizeSet.union_iff];
       constructor;
-      . apply Kripke.ValidOnFrame.axiomK;
+      . apply Kripke.ValidOnFrame.axiomK_set;
       . exact h;
     . intro h;
       simp only [Semantics.RealizeSet.union_iff] at defines;

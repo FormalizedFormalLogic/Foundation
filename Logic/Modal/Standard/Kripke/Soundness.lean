@@ -6,6 +6,7 @@ namespace LO.Modal.Standard.Kripke
 variable {Ax : AxiomSet α}
 
 open Formula
+open Formula.Kripke
 open Deduction
 open DeductionParameter (Normal)
 
@@ -17,16 +18,24 @@ lemma sound (defines : Ax.DefinesKripkeFrameClass 𝔽) (d : (𝝂Ax) ⊢! p) : 
   induction d using Deduction.inducition_with_necOnly! with
   | hMaxm h =>
     simp only [Set.mem_setOf_eq] at h;
-    rcases h with (hK | hR);
-    . exact (Semantics.RealizeSet.setOf_iff.mp Kripke.ValidOnFrameClass.axiomK) _ hK;
+    rcases h with (⟨p, q, rfl⟩ | hR);
+    . exact Kripke.ValidOnFrameClass.axiomK;
     . intro F hF;
       exact Semantics.RealizeSet.setOf_iff.mp (defines.mpr hF) _ hR;
   | hMdp ihpq ihp => exact Kripke.ValidOnFrameClass.mdp ihpq ihp;
   | hNec ih => exact Kripke.ValidOnFrameClass.nec ih;
-  | hOrElim =>
-    simp_all [Kripke.ValidOnFrameClass, Kripke.ValidOnFrame, Kripke.ValidOnModel, Kripke.Satisfies];
-    tauto;
-  | _ => simp_all [Kripke.ValidOnFrameClass, Kripke.ValidOnFrame, Kripke.ValidOnModel, Kripke.Satisfies];
+  | _ => first
+    | exact ValidOnFrameClass.orInst₁;
+    | exact ValidOnFrameClass.orInst₂;
+    | exact ValidOnFrameClass.orElim;
+    | exact ValidOnFrameClass.andInst;
+    | exact ValidOnFrameClass.andElim₁;
+    | exact ValidOnFrameClass.andElim₂;
+    | exact ValidOnFrameClass.imply₁;
+    | exact ValidOnFrameClass.imply₂;
+    | exact ValidOnFrameClass.verum;
+    | exact ValidOnFrameClass.dne;
+    | exact ValidOnFrameClass.negEquiv;
 
 lemma sound_of_defines (defines : Ax.DefinesKripkeFrameClass 𝔽) : Sound (𝝂Ax) 𝔽# := ⟨sound defines⟩
 
@@ -56,16 +65,24 @@ lemma finite_sound (defines : Ax.FinitelyDefinesKripkeFrameClass 𝔽) (d : (�
   induction d using Deduction.inducition_with_necOnly! with
   | hMaxm h =>
     simp only [Set.mem_setOf_eq] at h;
-    rcases h with (hK | hR);
-    . exact (Semantics.RealizeSet.setOf_iff.mp Kripke.ValidOnFrameClass.axiomK) _ hK;
-    . rintro F ⟨FF, hFF, eFF⟩; subst eFF;
+    rcases h with (⟨p, q, rfl⟩ | hR);
+    . exact Kripke.ValidOnFrameClass.axiomK;
+    . rintro F ⟨FF, hFF, rfl⟩;
       exact Semantics.RealizeSet.setOf_iff.mp (defines.mpr hFF) _ hR;
   | hMdp ihpq ihp => exact Kripke.ValidOnFrameClass.mdp ihpq ihp;
   | hNec ih => exact Kripke.ValidOnFrameClass.nec ih;
-  | hOrElim =>
-    simp_all [Kripke.ValidOnFrameClass, Kripke.ValidOnFrame, Kripke.ValidOnModel, Kripke.Satisfies];
-    tauto;
-  | _ => simp_all [Kripke.ValidOnFrameClass, Kripke.ValidOnFrame, Kripke.ValidOnModel, Kripke.Satisfies];
+  | _ => first
+    | exact ValidOnFrameClass.orInst₁;
+    | exact ValidOnFrameClass.orInst₂;
+    | exact ValidOnFrameClass.orElim;
+    | exact ValidOnFrameClass.andInst;
+    | exact ValidOnFrameClass.andElim₁;
+    | exact ValidOnFrameClass.andElim₂;
+    | exact ValidOnFrameClass.imply₁;
+    | exact ValidOnFrameClass.imply₂;
+    | exact ValidOnFrameClass.verum;
+    | exact ValidOnFrameClass.dne;
+    | exact ValidOnFrameClass.negEquiv;
 
 lemma sound_of_finitely_defines (defines : Ax.FinitelyDefinesKripkeFrameClass 𝔽) : Sound (𝝂Ax) ↑𝔽# := ⟨finite_sound defines⟩
 
@@ -120,9 +137,9 @@ theorem K_strictlyWeakerThan_KD : (𝐊 : DeductionParameter α) <ₛ 𝐊𝐃 :
     constructor;
     . exact Deduction.maxm! (by simp);
     . apply K_sound.not_provable_of_countermodel;
-      simp [FrameClass, ValidOnFrame, ValidOnModel];
+      simp [FrameClass, ValidOnFrame, ValidOnModel, Satisfies];
       use { World := Fin 1, Rel := λ _ _ => False }, (λ w _ => w = 0), 0;
-      simp [Satisfies];
+      simp;
 
 theorem K_strictlyWeakerThan_K4 : (𝐊 : DeductionParameter α) <ₛ 𝐊𝟒 := by
   constructor;
@@ -132,18 +149,18 @@ theorem K_strictlyWeakerThan_K4 : (𝐊 : DeductionParameter α) <ₛ 𝐊𝟒 :
     constructor;
     . exact Deduction.maxm! (by simp);
     . apply K_sound.not_provable_of_countermodel;
-      simp [FrameClass, ValidOnFrame, ValidOnModel];
+      simp [FrameClass, ValidOnFrame, ValidOnModel, Satisfies, Frame.Rel'];
       use { World := Fin 2, Rel := λ x y => x ≠ y }, (λ w _ => w = 1), 0;
-      simp [Satisfies];
+      simp;
       constructor;
       . intro y;
         match y with
-        | 0 => simp [Frame.Rel]; aesop;
-        | 1 => simp;
+        | 0 => tauto;
+        | 1 => tauto;
       . use 1;
         constructor;
-        . simp [Frame.Rel]; aesop;
-        . use 0; simp [Frame.Rel]; aesop;
+        . simp;
+        . use 0; simp;
 
 theorem K_strictlyWeakerThan_KB : (𝐊 : DeductionParameter α) <ₛ 𝐊𝐁 := by
   constructor;
@@ -153,9 +170,9 @@ theorem K_strictlyWeakerThan_KB : (𝐊 : DeductionParameter α) <ₛ 𝐊𝐁 :
     constructor;
     . exact Deduction.maxm! (by simp);
     . apply K_sound.not_provable_of_countermodel;
-      simp [FrameClass, ValidOnFrame, ValidOnModel];
+      simp [FrameClass, ValidOnFrame, ValidOnModel, Satisfies];
       use { World := Fin 2, Rel := λ x y => x = 0 ∧ y = 1 }, (λ w _ => w = 0), 0;
-      simp [Satisfies];
+      simp;
       use 1;
 
 theorem K_strictlyWeakerThan_K5 : (𝐊 : DeductionParameter α) <ₛ 𝐊𝟓 := by
@@ -166,11 +183,10 @@ theorem K_strictlyWeakerThan_K5 : (𝐊 : DeductionParameter α) <ₛ 𝐊𝟓 :
     constructor;
     . exact Deduction.maxm! (by simp);
     . apply K_sound.not_provable_of_countermodel;
-      simp [FrameClass, ValidOnFrame, ValidOnModel];
-      use { World := Fin 2, Rel := λ x _ => x = 0 }, (λ w _ => w = 0), 0;
-      simp [Satisfies];
-      use 1;
+      simp [FrameClass, ValidOnFrame, ValidOnModel, Satisfies, Frame.Rel'];
+      use { World := Fin 2, Rel := λ x _ => x = 0 }, (λ w _ => w = 1), 0;
       simp;
+      use 1; tauto;
 
 end Reducible
 
