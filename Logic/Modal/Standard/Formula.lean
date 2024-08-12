@@ -256,15 +256,14 @@ section Subformula
 variable [DecidableEq α]
 
 def Formula.Subformulas: Formula α → Finset (Formula α)
-  | atom a => {(atom a), (natom a)}
-  | natom a => {(atom a), (natom a)}
+  | atom a => {(atom a)}
+  | natom a => {(natom a), (atom a)}
   | ⊤      => {⊤}
   | ⊥      => {⊥}
   | p ⋏ q  => insert (p ⋏ q) (p.Subformulas ∪ q.Subformulas)
   | p ⋎ q  => insert (p ⋎ q) (p.Subformulas ∪ q.Subformulas)
   | □p     => insert (□p) p.Subformulas
   | ◇p    => insert (◇p) p.Subformulas
-  -- | ~p     => insert (~p) p.Subformulas
 
 prefix:70 "𝒮 " => Formula.Subformulas
 
@@ -274,14 +273,6 @@ namespace Formula.Subformulas
 lemma mem_self (p : Formula α) : p ∈ 𝒮 p := by induction p <;> { simp [Subformulas]; try tauto; }
 
 variable {p q r : Formula α}
-
-/-
-lemma mem_neg (h : ~q ∈ 𝒮 p := by assumption) : q ∈ 𝒮 p := by
-  induction p using Formula.rec' <;> {
-    simp_all [Subformulas];
-    try rcases h with (hq | hr); simp_all; simp_all;
-  };
--/
 
 lemma mem_and (h : (q ⋏ r) ∈ 𝒮 p := by assumption) : q ∈ 𝒮 p ∧ r ∈ 𝒮 p := by
   induction p using Formula.rec' with
@@ -301,17 +292,6 @@ lemma mem_or₁ (h : (q ⋎ r) ∈ 𝒮 p := by assumption) : q ∈ 𝒮 p := me
 
 lemma mem_or₂ (h : (q ⋎ r) ∈ 𝒮 p := by assumption) : r ∈ 𝒮 p := mem_or (r := r) |>.2
 
-/-
-lemma mem_imp (h : (q ⟶ r) ∈ 𝒮 p := by assumption) : q ∈ 𝒮 p ∧ r ∈ 𝒮 p := by
-  induction p with
-  | imp => simp_all [Subformulas]; rcases h with ⟨_⟩ | ⟨⟨_⟩ | ⟨_⟩⟩ <;> simp_all
-  | _ => simp_all [Subformulas]; try rcases h with (hq | hr); simp_all; simp_all;
-
-lemma mem_imp₁ (h : (q ⟶ r) ∈ 𝒮 p := by assumption) : q ∈ 𝒮 p := mem_imp (r := r) |>.1
-
-lemma mem_imp₂ (h : (q ⟶ r) ∈ 𝒮 p := by assumption) : r ∈ 𝒮 p := mem_imp (r := r) |>.2
--/
-
 lemma mem_box (h : □q ∈ 𝒮 p := by assumption) : q ∈ 𝒮 p := by
   induction p using Formula.rec' <;> {
     simp_all [Subformulas];
@@ -325,13 +305,10 @@ lemma mem_dia (h : ◇q ∈ 𝒮 p := by assumption) : q ∈ 𝒮 p := by
   };
 
 attribute [aesop safe 5 forward]
-  -- mem_neg
   mem_and₁
   mem_and₂
   mem_or₁
   mem_or₂
-  -- mem_imp₁
-  -- mem_imp₂
   mem_box
   mem_dia
 
@@ -406,54 +383,29 @@ lemma degree_lower (h : q ∈ 𝒮 p) : q.degree ≤ p.degree := by
 lemma sub_of_top (h : p ∈ 𝒮 ⊤) : p = ⊤ := by simp_all [Subformulas];
 lemma sub_of_bot (h : p ∈ 𝒮 ⊥) : p = ⊥ := by simp_all [Subformulas];
 
-lemma sub_either_mem_atom (h : (atom a) ∈ 𝒮 p) : (atom a) ∈ 𝒮 p ∧ (natom a) ∈ 𝒮 p := by
-  constructor;
-  . assumption;
-  . induction p using Formula.rec' with
-    | hand q r ihq ihr =>
-      simp_all [Subformulas];
-      rcases h with (hq | hr);
-      . left; exact ihq hq;
-      . right; exact ihr hr;
-    | hor q r ihq ihr =>
-      simp_all [Subformulas];
-      rcases h with (hq | hr);
-      . left; exact ihq hq;
-      . right; exact ihr hr;
-    | _ => simp_all [Subformulas];
-lemma mem_natom_of_mem_atom (h : (atom a) ∈ 𝒮 p) : (natom a) ∈ 𝒮 p := (sub_either_mem_atom h).2
 
-lemma sub_either_mem_natom (h : (natom a) ∈ 𝒮 p) : (atom a) ∈ 𝒮 p ∧ (natom a) ∈ 𝒮 p := by
-  constructor;
-  . induction p using Formula.rec' with
-    | hand q r ihq ihr =>
-      simp_all [Subformulas];
-      rcases h with (hq | hr);
-      . left; exact ihq hq;
-      . right; exact ihr hr;
-    | hor q r ihq ihr =>
-      simp_all [Subformulas];
-      rcases h with (hq | hr);
-      . left; exact ihq hq;
-      . right; exact ihr hr;
-    | _ => simp_all [Subformulas];
-  . assumption;
-lemma mem_atom_of_mem_natom (h : (natom a) ∈ 𝒮 p) : (atom a) ∈ 𝒮 p := (sub_either_mem_natom h).1
+lemma mem_atom_of_mem_natom (h : (natom a) ∈ 𝒮 p) : (atom a) ∈ 𝒮 p := by
+  induction p using Formula.rec' with
+  | hand q r ihq ihr =>
+    simp_all [Subformulas];
+    rcases h with (hq | hr);
+    . left; exact ihq hq;
+    . right; exact ihr hr;
+  | hor q r ihq ihr =>
+    simp_all [Subformulas];
+    rcases h with (hq | hr);
+    . left; exact ihq hq;
+    . right; exact ihr hr;
+  | _ => simp_all [Subformulas];
 
-attribute [aesop safe forward]
-  mem_natom_of_mem_atom
-  mem_atom_of_mem_natom
---   sub_of_bot
---   sub_of_atom
-
--- lemma sub_of_atom {a : α} (h : p ∈ 𝒮 (atom a)) : atom a := by simp_all [Subformulas];
--- lemma sub_of_atom {a : α} (h : p ∈ 𝒮 (atom a)) : p = atom a := by simp_all [Subformulas];
--- lemma sub_of_natom {a : α} (h : p ∈ 𝒮 (natom a)) : p = natom a := by simp_all [Subformulas];
-
+attribute [aesop safe forward] mem_atom_of_mem_natom
 
 end Formula.Subformulas
 
+
+open Formula
 class Theory.SubformulaClosed (T : Theory α) where
+  natom_closed : ∀ {a}, natom a ∈ T → atom a ∈ T
   and_closed   : ∀ {p q}, p ⋏ q ∈ T → p ∈ T ∧ q ∈ T
   or_closed    : ∀ {p q}, p ⋎ q ∈ T → p ∈ T ∧ q ∈ T
   box_closed   : ∀ {p}, □p ∈ T → p ∈ T
@@ -462,6 +414,7 @@ class Theory.SubformulaClosed (T : Theory α) where
 namespace Theory.SubformulaClosed
 
 instance {p : Formula α} : Theory.SubformulaClosed (𝒮 p).toSet where
+  natom_closed := by aesop;
   and_closed   := by aesop;
   or_closed    := by aesop;
   box_closed   := by aesop;
@@ -469,20 +422,26 @@ instance {p : Formula α} : Theory.SubformulaClosed (𝒮 p).toSet where
 
 variable {p : Formula α} {T : Theory α} [T_closed : T.SubformulaClosed]
 
--- lemma sub_mem_neg (h : ~p ∈ T) : p ∈ T := T_closed.tilde_closed h
+lemma sub_mem_natom (h : natom a ∈ T) : atom a ∈ T := T_closed.natom_closed h
 lemma sub_mem_and (h : p ⋏ q ∈ T) : p ∈ T ∧ q ∈ T := T_closed.and_closed h
+lemma sub_mem_and₁ (h : p ⋏ q ∈ T) : p ∈ T := (sub_mem_and h).1
+lemma sub_mem_and₂ (h : p ⋏ q ∈ T) : q ∈ T := (sub_mem_and h).2
 lemma sub_mem_or  (h : p ⋎ q ∈ T) : p ∈ T ∧ q ∈ T := T_closed.or_closed h
--- lemma sub_mem_imp (h : p ⟶ q ∈ T) : p ∈ T ∧ q ∈ T := T_closed.arrow_closed h
+lemma sub_mem_or₁ (h : p ⋎ q ∈ T) : p ∈ T := (sub_mem_or h).1
+lemma sub_mem_or₂ (h : p ⋎ q ∈ T) : q ∈ T := (sub_mem_or h).2
 lemma sub_mem_box (h : □p ∈ T) : p ∈ T := T_closed.box_closed h
 lemma sub_mem_dia (h : ◇p ∈ T) : p ∈ T := T_closed.dia_closed h
 
-attribute [aesop safe 5 forward]
-  -- sub_mem_neg
-  sub_mem_and
-  sub_mem_or
-  -- sub_mem_imp
-  sub_mem_box
-  sub_mem_dia
+macro_rules | `(tactic| trivial) => `(tactic|
+    first
+    | apply sub_mem_natom $ by assumption
+    | apply sub_mem_and₁  $ by assumption
+    | apply sub_mem_and₂  $ by assumption
+    | apply sub_mem_or₁   $ by assumption
+    | apply sub_mem_or₂   $ by assumption
+    | apply sub_mem_box   $ by assumption
+    | apply sub_mem_dia   $ by assumption
+  )
 
 end Theory.SubformulaClosed
 

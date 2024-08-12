@@ -7,44 +7,6 @@ namespace LO.Modal.Standard
 
 variable {α : Type u} [DecidableEq α] [Inhabited α]
 
-open Formula in
-class Theory.SubformulaClosed' (T : Theory α) where
-  natom_closed : ∀ {a}, natom a ∈ T → atom a ∈ T
-  and_closed   : ∀ {p q}, p ⋏ q ∈ T → p ∈ T ∧ q ∈ T
-  or_closed    : ∀ {p q}, p ⋎ q ∈ T → p ∈ T ∧ q ∈ T
-  box_closed   : ∀ {p}, □p ∈ T → p ∈ T
-  dia_closed   : ∀ {p}, ◇p ∈ T → p ∈ T
-
-namespace Theory.SubformulaClosed'
-
-variable [Theory.SubformulaClosed' T]
-
-open Theory.SubformulaClosed'
-
-lemma and_closed₁ (hpq : p ⋏ q ∈ T) : p ∈ T := (and_closed hpq).1
-lemma and_closed₂ (hpq : p ⋏ q ∈ T) : q ∈ T := (and_closed hpq).2
-
-lemma or_closed₁ (hpq : p ⋎ q ∈ T) : p ∈ T := (or_closed hpq).1
-lemma or_closed₂ (hpq : p ⋎ q ∈ T) : q ∈ T := (or_closed hpq).2
-
-instance {p : Formula α} : Theory.SubformulaClosed' (𝒮 p).toSet where
-  natom_closed := by sorry;
-  and_closed   := by sorry;
-  or_closed    := by sorry;
-  box_closed   := by sorry;
-  dia_closed   := by sorry;
-
-/-
-attribute [aesop safe 5 forward]
-  Theory.SubformulaClosed'.natom_closed
-  Theory.SubformulaClosed'.and_closed
-  Theory.SubformulaClosed'.or_closed
-  Theory.SubformulaClosed'.box_closed
-  Theory.SubformulaClosed'.dia_closed
--/
-
-end Theory.SubformulaClosed'
-
 namespace Kripke
 
 open Formula (atom natom)
@@ -52,21 +14,9 @@ open Formula.Kripke
 
 section
 
-open Theory.SubformulaClosed' in
-macro_rules | `(tactic| trivial) => `(tactic|
-    first
-    | apply natom_closed $ by assumption
-    | apply and_closed₁ $ by assumption
-    | apply and_closed₂ $ by assumption
-    | apply or_closed₁ $ by assumption
-    | apply or_closed₂ $ by assumption
-    | apply box_closed $ by assumption
-    | apply dia_closed $ by assumption
-  )
+def filterEquiv (M : Kripke.Model α) (T : Theory α) [T.SubformulaClosed] (x y : M.World) := ∀ p, (_ : p ∈ T := by trivial) → x ⊧ p ↔ y ⊧ p
 
-def filterEquiv (M : Kripke.Model α) (T : Theory α) [T.SubformulaClosed'] (x y : M.World) := ∀ p, (_ : p ∈ T := by trivial) → x ⊧ p ↔ y ⊧ p
-
-variable (M : Kripke.Model α) (T : Theory α) [T_closed : T.SubformulaClosed']
+variable (M : Kripke.Model α) (T : Theory α) [T_closed : T.SubformulaClosed]
 
 lemma filterEquiv.equivalence : Equivalence (filterEquiv M T) where
   refl := by intro x p _; rfl;
@@ -107,7 +57,7 @@ lemma FilterEqvQuotient.finite (T_finite : T.Finite) : Finite (FilterEqvQuotient
 
 instance : Nonempty (FilterEqvQuotient M T) := ⟨⟦﹫⟧⟩
 
-class Model.FilterOf (FM : Model α) (M : Model α) (T : Theory α) [T.SubformulaClosed'] where
+class Model.FilterOf (FM : Model α) (M : Model α) (T : Theory α) [T.SubformulaClosed] where
   def_world : FM.World = FilterEqvQuotient M T := by rfl
   def_rel₁ : ∀ {x y : M.Frame}, x ≺ y → Frame.Rel' (cast def_world.symm ⟦x⟧) (cast def_world.symm ⟦y⟧) := by tauto;
   def_box : ∀ {Qx Qy : FM.World}, Qx ≺ Qy → Quotient.lift₂ (λ x y => ∀ p, □p ∈ T → (x ⊧ □p → y ⊧ p)) (by
@@ -146,19 +96,19 @@ abbrev StandardFilterationValuation (Qx : FilterEqvQuotient M T) (a : α) := (ha
 ) Qx
 
 
-abbrev FinestFilterationFrame (M : Model α) (T : Theory α) [T.SubformulaClosed'] : Kripke.Frame where
+abbrev FinestFilterationFrame (M : Model α) (T : Theory α) [T.SubformulaClosed] : Kripke.Frame where
   World := FilterEqvQuotient M T
   Rel Qx Qy := ∃ x y, Qx = ⟦x⟧ ∧ Qy = ⟦y⟧ ∧ x ≺ y
 
-abbrev FinestFilterationModel (M : Model α) (T : Theory α) [T.SubformulaClosed'] : Kripke.Model α where
+abbrev FinestFilterationModel (M : Model α) (T : Theory α) [T.SubformulaClosed] : Kripke.Model α where
   Frame := FinestFilterationFrame M T
   Valuation := StandardFilterationValuation M T
 
 @[simp]
-instance FinestFilterationModel.filterOf {M} {T : Theory α} [T.SubformulaClosed'] : (FinestFilterationModel M T).FilterOf M T where
+instance FinestFilterationModel.filterOf {M} {T : Theory α} [T.SubformulaClosed] : (FinestFilterationModel M T).FilterOf M T where
 
 
-abbrev CoarsestFilterationFrame (M : Model α) (T : Theory α) [T.SubformulaClosed'] : Kripke.Frame where
+abbrev CoarsestFilterationFrame (M : Model α) (T : Theory α) [T.SubformulaClosed] : Kripke.Frame where
   World := FilterEqvQuotient M T
   Rel Qx Qy := Quotient.lift₂ (λ x y => ∀ p, □p ∈ T → (x ⊧ □p → y ⊧ p)) (by
     intro x₁ y₁ x₂ y₂ hx hy;
@@ -168,16 +118,16 @@ abbrev CoarsestFilterationFrame (M : Model α) (T : Theory α) [T.SubformulaClos
     . intro h p hp sp₁; exact hy p |>.mpr $ h p hp $ hx (□p) hp |>.mp sp₁;
   ) Qx Qy
 
-noncomputable abbrev CoarsestFilterationModel (M : Model α) (T : Theory α) [T.SubformulaClosed'] : Kripke.Model α where
+noncomputable abbrev CoarsestFilterationModel (M : Model α) (T : Theory α) [T.SubformulaClosed] : Kripke.Model α where
   Frame := CoarsestFilterationFrame M T
   Valuation := StandardFilterationValuation M T
 
 @[simp]
-instance CoarsestFilterationModel.filterOf {M} {T : Theory α} [T.SubformulaClosed'] : (CoarsestFilterationModel M T).FilterOf M T where
+instance CoarsestFilterationModel.filterOf {M} {T : Theory α} [T.SubformulaClosed] : (CoarsestFilterationModel M T).FilterOf M T where
 
 section
 
-variable {M} {T : Theory α} [T.SubformulaClosed'] {FM : Kripke.Model α} (h_filter : FM.FilterOf M T)
+variable {M} {T : Theory α} [T.SubformulaClosed] {FM : Kripke.Model α} (h_filter : FM.FilterOf M T)
 
 lemma reflexive_filteration_model (hRefl : Reflexive M.Frame) : Reflexive FM.Frame := by
   intro Qx;
@@ -205,10 +155,10 @@ end
 
 section
 
-variable {M : Model α} {T : Theory α} [T.SubformulaClosed']
+variable {M : Model α} {T : Theory α} [T.SubformulaClosed]
          (FM : Model α) (filterOf : FM.FilterOf M T)
 
-theorem filteration {x : M.World} {p : Formula α} (hs : p ∈ T) : x ⊧ p ↔ (cast (filterOf.def_world.symm) ⟦x⟧) ⊧ p := by
+theorem filteration {x : M.World} {p : Formula α} (hs : p ∈ T := by trivial) : x ⊧ p ↔ (cast (filterOf.def_world.symm) ⟦x⟧) ⊧ p := by
   induction p using Formula.rec' generalizing x with
   | hatom a =>
     have := filterOf.def_valuation (cast filterOf.def_world.symm ⟦x⟧) a;
@@ -303,9 +253,9 @@ section
 
 open Frame (TransitiveClosure)
 
-variable {M : Model α} (M_trans : Transitive M.Frame) {T : Theory α} [T.SubformulaClosed']
+variable {M : Model α} (M_trans : Transitive M.Frame) {T : Theory α} [T.SubformulaClosed]
 
-noncomputable abbrev FinestFilterationTransitiveClosureModel (M : Model α) (T : Theory α) [T.SubformulaClosed'] : Kripke.Model α where
+noncomputable abbrev FinestFilterationTransitiveClosureModel (M : Model α) (T : Theory α) [T.SubformulaClosed] : Kripke.Model α where
   Frame := (FinestFilterationFrame M T)^+
   Valuation := StandardFilterationValuation M T
 
@@ -357,7 +307,7 @@ instance S4_finite_complete : Complete (𝐒𝟒 : DeductionParameter α)  Preor
   intro F ⟨F_refl, F_trans⟩ V x;
   let M : Kripke.Model α := ⟨F, V⟩;
   let FM := FinestFilterationTransitiveClosureModel M (𝒮 p);
-  apply @filteration α M (𝒮 p) _ FM ?filterOf x p (by sorry) |>.mpr;
+  apply @filteration α M (𝒮 p) _ FM ?filterOf x p (by simp) |>.mpr;
   apply hp (by
     suffices Finite (FilterEqvQuotient M (𝒮 p)) by
       simp [FrameClass.restrictFinite];
@@ -381,7 +331,7 @@ instance KT4B_finite_complete : Complete (𝐊𝐓𝟒𝐁 : DeductionParameter 
   intro F ⟨F_refl, F_trans, F_symm⟩ V x;
   let M : Kripke.Model α := ⟨F, V⟩;
   let FM := FinestFilterationTransitiveClosureModel M (𝒮 p);
-  apply @filteration α M (𝒮 p) _ FM ?filterOf x p (by sorry) |>.mpr;
+  apply @filteration α M (𝒮 p) _ FM ?filterOf x p (by simp) |>.mpr;
   apply hp (by
     suffices Finite (FilterEqvQuotient M (𝒮 p)) by
       simp [FrameClass.restrictFinite];
