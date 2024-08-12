@@ -45,66 +45,22 @@ lemma iff_satisfy_complexity_limit_modelAux
         . assumption;
         . apply Frame.RelItr'.forward.mpr;
           use x;
-  | hdia q ihq =>
-    obtain ⟨n, hn, hx⟩ := hx;
-    simp [Formula.complexity] at hn;
-    have : n + 1 ≤ p.complexity - q.complexity := by
-      have : q.complexity + 1 ≤ p.complexity := by simpa using complexity_lower hq;
-      omega;
-    constructor;
-    . rintro ⟨y, Rxy, hy⟩;
-      use ⟨y, ?_⟩;
-      constructor;
-      . exact Rxy;
-      . refine @ihq y p (mem_dia (by assumption)) ?_ |>.mp hy;
-        . use (n + 1);
-          constructor;
-          . assumption;
-          . apply Frame.RelItr'.forward.mpr;
-            use x;
-    . rintro ⟨⟨y, hy⟩, Rxy, hy⟩;
-      use y;
-      constructor;
-      . exact Rxy;
-      . apply @ihq y p (mem_dia (by assumption)) ?_ |>.mpr hy;
-        . use (n + 1);
-          constructor;
-          . assumption;
-          . apply Frame.RelItr'.forward.mpr;
-            use x;
-            constructor;
-            . assumption;
-            . exact Rxy;
-  | hand q₁ q₂ ihq₁ ihq₂ =>
+  | himp q₁ q₂ ihq₁ ihq₂ =>
     obtain ⟨n, hn, hx⟩ := hx;
     simp [Formula.complexity] at hn;
     constructor;
-    . rintro ⟨hq₁, hq₂⟩;
-      constructor;
-      . apply ihq₁ (mem_and (by assumption) |>.1) ?_ |>.mp hq₁;
-        use n; constructor; omega; assumption;
-      . apply ihq₂ (mem_and (by assumption) |>.2) ?_ |>.mp hq₂;
-        use n; constructor; omega; assumption;
-    . rintro ⟨hq₁, hq₂⟩;
-      constructor;
-      . apply ihq₁ (mem_and (by assumption) |>.1) ?_ |>.mpr hq₁;
-        use n; constructor; omega; assumption;
-      . apply ihq₂ (mem_and (by assumption) |>.2) ?_ |>.mpr hq₂;
-        use n; constructor; omega; assumption;
-  | hor q₁ q₂ ihq₁ ihq₂ =>
-    obtain ⟨n, hn, hx⟩ := hx;
-    simp [Formula.complexity] at hn;
-    constructor;
-    . rintro (hq₁ | hq₂);
-      . left;  apply ihq₁ (mem_or (by assumption) |>.1) ?_ |>.mp hq₁;
-        use n; constructor; omega; assumption;
-      . right; apply ihq₂ (mem_or (by assumption) |>.2) ?_ |>.mp hq₂;
-        use n; constructor; omega; assumption;
-    . rintro (hq₁ | hq₂);
-      . left;  apply ihq₁ (mem_or (by assumption) |>.1) ?_ |>.mpr hq₁;
-        use n; constructor; omega; assumption;
-      . right; apply ihq₂ (mem_or (by assumption) |>.2) ?_ |>.mpr hq₂;
-        use n; constructor; omega; assumption;
+    . rintro hq₁ hq₂;
+      apply ihq₂ (mem_imp (by assumption) |>.2) ?_ |>.mp;
+      apply hq₁;
+      apply ihq₁ (mem_imp (by assumption) |>.1) ?_ |>.mpr hq₂;
+      use n; constructor; omega; assumption;
+      use n; constructor; omega; assumption;
+    . rintro hq₁ hq₂;
+      apply ihq₂ (mem_imp (by assumption) |>.2) ?_ |>.mpr;
+      apply hq₁;
+      apply ihq₁ (mem_imp (by assumption) |>.1) ?_ |>.mp hq₂;
+      use n; constructor; omega; assumption;
+      use n; constructor; omega; assumption;
   | _ => simp [Satisfies, Model.ComplexityLimit];
 
 lemma iff_satisfy_complexity_limit_model : r ⊧ p ↔ Satisfies (M.ComplexityLimit r p) ⟨r, (by use 0; simp)⟩ p := by

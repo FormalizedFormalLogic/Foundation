@@ -171,6 +171,12 @@ instance [ModalDeMorgan F] [HasAxiomDNE 𝓢] : HasDiaDuality 𝓢 := ⟨by
   apply iffId;
 ⟩
 
+instance [DiaAbbrev F] : HasDiaDuality 𝓢 := ⟨by
+  intro p;
+  simp only [Axioms.DiaDuality, DiaAbbrev.dia_abbrev];
+  apply iffId;
+⟩
+
 def diaDuality [HasDiaDuality 𝓢] : 𝓢 ⊢ ◇p ⟷ ~(□(~p)) := HasDiaDuality.dia_dual _
 @[simp] lemma dia_duality! [HasDiaDuality 𝓢] : 𝓢 ⊢! ◇p ⟷ ~(□(~p)) := ⟨diaDuality⟩
 

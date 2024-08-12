@@ -309,7 +309,11 @@ lemma iff_mem_neg : (~p ∈ Ω.theory) ↔ (p ∉ Ω.theory) := by
     apply this;
     simp;
 
-lemma iff_mem_negneg : (~~p ∈ Ω.theory) ↔ (p ∈ Ω.theory) := by simp [membership_iff];
+lemma iff_mem_negneg : (~~p ∈ Ω.theory) ↔ (p ∈ Ω.theory) := by
+  simp only [membership_iff];
+  constructor;
+  . exact dne'!;
+  . exact dni'!;
 
 @[simp]
 lemma iff_mem_imp : ((p ⟶ q) ∈ Ω.theory) ↔ (p ∈ Ω.theory) → (q ∈ Ω.theory) := by

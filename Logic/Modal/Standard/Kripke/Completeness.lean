@@ -127,30 +127,19 @@ lemma truthlemma : ∀ {Ω : (CanonicalModel Λ).World}, Ω ⊧ p ↔ (p ∈ Ω.
     . intro h Ω' hΩ';
       apply ih.mpr;
       exact CanonicalFrame.rel_def_box.mp hΩ' h;
-  | hdia p ih =>
+  | himp p q ihp ihq =>
     intro Ω;
     constructor;
     . intro h;
-      obtain ⟨Ω', h₁, h₂⟩ := h;
-      apply iff_mem_dia.mpr;
-      use Ω';
-      constructor;
-      . apply h₁;
-      . apply ih.mp; exact h₂;
+      apply iff_mem_imp.mpr;
+      intro hp; replace hp := ihp.mpr hp;
+      exact ihq.mp $ h hp;
     . intro h;
-      obtain ⟨Ω', h₁, h₂⟩ := iff_mem_dia.mp h;
-      use Ω';
-      constructor;
-      . apply h₁;
-      . exact ih.mpr h₂;
+      have := iff_mem_imp.mp h;
+      intro hp; replace hp := ihp.mp hp;
+      exact ihq.mpr $ this hp
   | hatom a =>
     simp_all [Kripke.Satisfies];
-  | hnatom a =>
-    simp_all [Kripke.Satisfies];
-    intro Ω;
-    constructor;
-    . intro h; exact iff_mem_neg.mpr h;
-    . intro h; apply iff_mem_neg.mp; exact h;
   | _ => simp_all [Kripke.Satisfies];
 
 

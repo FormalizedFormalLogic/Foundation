@@ -33,11 +33,8 @@ namespace Formula
 def toPropFormula (p : Formula α) (_ : p.degree = 0 := by simp_all [Formula.degree, Formula.degree_neg, Formula.degree_imp]) : Superintuitionistic.Formula α :=
   match p with
   | atom a => Superintuitionistic.Formula.atom a
-  | natom a => ~Superintuitionistic.Formula.atom a
-  | ⊤ => ⊤
   | ⊥ => ⊥
-  | p ⋎ q => p.toPropFormula ⋎ q.toPropFormula
-  | p ⋏ q => p.toPropFormula ⋏ q.toPropFormula
+  | p ⟶ q => p.toPropFormula ⟶ q.toPropFormula
 postfix:75 "ᴾ" => Formula.toPropFormula
 
 namespace toPropFormula
@@ -45,28 +42,17 @@ namespace toPropFormula
 open System
 variable {p q : Formula α} (hp : p.degree = 0 := by simpa) (hq : q.degree = 0 := by simpa)
 
+/-
 lemma neg_classical : 𝐂𝐥 ⊢! (~p)ᴾ ↔ 𝐂𝐥 ⊢! ~(pᴾ) := by
   induction p using Formula.rec' with
   | hatom => simp only [toPropFormula];
-  | hnatom =>
-    simp only [toPropFormula];
-    exact ⟨dni'!, dne'!⟩;
-  | hverum =>
-    simp only [toPropFormula];
-    exact ⟨efq'!, (by sorry)⟩;
   | hfalsum =>
     simp only [toPropFormula];
     constructor;
     . intro;
       sorry;
     . intro; exact verum!;
-  | hand p q ihp ihq =>
-    simp only [toPropFormula, Formula.toPropFormula, Formula.degree, Formula.degree_neg, Formula.degree_imp];
-    constructor;
-    . intro h;
-      sorry;
-    . sorry;
-  | hor p q ihp ihq =>
+  | himp =>
     simp only [toPropFormula, Formula.toPropFormula, Formula.degree, Formula.degree_neg, Formula.degree_imp];
     constructor;
     . sorry;
@@ -83,49 +69,32 @@ lemma imp_classical : 𝐂𝐥 ⊢! (pᴾ ⟶ qᴾ) ↔ 𝐂𝐥 ⊢! (toPropFor
   . intro h;
     apply or₃'''! ?_ imply₁! h;
     . sorry;
+-/
 
 end toPropFormula
 
 def TrivTranslation : Formula α → Formula α
   | atom a => atom a
-  | natom a => natom a
   | □p => p.TrivTranslation
-  | ◇p => p.TrivTranslation
-  | ⊤ => ⊤
   | ⊥ => ⊥
-  | p ⋏ q => (p.TrivTranslation) ⋏ (q.TrivTranslation)
-  | p ⋎ q => (p.TrivTranslation) ⋎ (q.TrivTranslation)
+  | p ⟶ q => (p.TrivTranslation) ⟶ (q.TrivTranslation)
 postfix:75 "ᵀ" => TrivTranslation
 
 namespace TrivTranslation
 
 lemma box_def : (□p)ᵀ = pᵀ := by rfl;
 
-lemma dia_def : (◇p)ᵀ = pᵀ := by rfl;
+lemma imp_def : (p ⟶ q)ᵀ = (pᵀ) ⟶ (qᵀ) := by rfl;
 
-lemma neg_def : (~p)ᵀ = ~(pᵀ) := by
-  induction p using Formula.rec' <;> simp [TrivTranslation, Formula.neg_eq, *];
+lemma and_def : (p ⋏ q)ᵀ = (pᵀ) ⋏ (qᵀ) := by rfl;
 
-lemma imp_def : (p ⟶ q)ᵀ = (pᵀ) ⟶ (qᵀ) := by
-  simp [TrivTranslation, Formula.imp_eq];
-  rw [Formula.neg_eq];
-  simp [neg_def];
+lemma or_def : (p ⋎ q)ᵀ = (pᵀ) ⋎ (qᵀ) := by rfl;
 
-lemma and_def : (p ⋏ q)ᵀ = (pᵀ) ⋏ (qᵀ) := by
-  induction p using Formula.rec' with
-  | hand p q ihp ihq => simp [TrivTranslation, Formula.and_eq, ihp, ihq];
-  | _ => simp [TrivTranslation, Formula.and_eq];
+lemma axiomK : (Axioms.K p q)ᵀ = (pᵀ ⟶ qᵀ) ⟶ pᵀ ⟶ qᵀ := by rfl;
 
-lemma or_def : (p ⋎ q)ᵀ = (pᵀ) ⋎ (qᵀ) := by
-  induction p using Formula.rec' with
-  | hor p q ihp ihq => simp [TrivTranslation, Formula.or_eq, ihp, ihq];
-  | _ => simp [TrivTranslation, Formula.or_eq];
+lemma axiomT : (Axioms.T p)ᵀ = pᵀ ⟶ pᵀ := by rfl;
 
-lemma axiomK : (Axioms.K p q)ᵀ = (pᵀ ⟶ qᵀ) ⟶ pᵀ ⟶ qᵀ := by simp [Axioms.K, imp_def, box_def];
-
-lemma axiomT : (Axioms.T p)ᵀ = pᵀ ⟶ pᵀ := by simp [Axioms.T, imp_def, box_def];
-
-lemma axiomTc : (Axioms.Tc p)ᵀ = pᵀ ⟶ pᵀ := by simp [Axioms.Tc, imp_def, box_def];
+lemma axiomTc : (Axioms.Tc p)ᵀ = pᵀ ⟶ pᵀ := by rfl;
 
 @[simp] lemma degree_zero : pᵀ.degree = 0 := by induction p <;> simp [TrivTranslation, degree, *];
 @[simp] lemma back : pᵀᴾᴹ = pᵀ := by induction p using rec' <;> simp [Superintuitionistic.Formula.toModalFormula, TrivTranslation, *];
@@ -135,38 +104,23 @@ end TrivTranslation
 
 def VerTranslation : Formula α → Formula α
   | atom a => atom a
-  | natom a => natom a
   | □_ => ⊤
-  | ◇_ => ⊥
-  | ⊤ => ⊤
   | ⊥ => ⊥
-  | p ⋏ q => (p.VerTranslation) ⋏ (q.VerTranslation)
-  | p ⋎ q => (p.VerTranslation) ⋎ (q.VerTranslation)
+  | p ⟶ q => (p.VerTranslation) ⟶ (q.VerTranslation)
 postfix:75 "ⱽ" => VerTranslation
 
 namespace VerTranslation
 
 lemma box_def : (□p)ⱽ = ⊤ := by rfl;
 
-lemma dia_def : (◇p)ⱽ = ⊥ := by rfl;
-
 lemma neg_def : (~p)ⱽ = ~(pⱽ) := by
   induction p using Formula.rec' <;> simp [VerTranslation, Formula.neg_eq, *];
 
-lemma imp_def : (p ⟶ q)ⱽ = (pⱽ) ⟶ (qⱽ) := by
-  simp [VerTranslation, Formula.imp_eq];
-  rw [Formula.neg_eq];
-  simp [neg_def];
+lemma imp_def : (p ⟶ q)ⱽ = (pⱽ) ⟶ (qⱽ) := by rfl
 
-lemma and_def : (p ⋏ q)ⱽ = (pⱽ) ⋏ (qⱽ) := by
-  induction p using Formula.rec' with
-  | hand p q ihp ihq => simp [VerTranslation, Formula.and_eq, ihp, ihq];
-  | _ => simp [VerTranslation, Formula.and_eq];
+lemma and_def : (p ⋏ q)ⱽ = (pⱽ) ⋏ (qⱽ) := by rfl
 
-lemma or_def : (p ⋎ q)ⱽ = (pⱽ) ⋎ (qⱽ) := by
-  induction p using Formula.rec' with
-  | hor p q ihp ihq => simp [VerTranslation, Formula.or_eq, ihp, ihq];
-  | _ => simp [VerTranslation, Formula.or_eq];
+lemma or_def : (p ⋎ q)ⱽ = (pⱽ) ⋎ (qⱽ) := by rfl
 
 lemma axiomK : (Axioms.K p q)ⱽ = ⊤ ⟶ ⊤ ⟶ ⊤ := by simp [Axioms.K, imp_def, box_def];
 
@@ -175,8 +129,8 @@ lemma axiomVer : (Axioms.Ver p)ⱽ = ⊤ := by simp [Axioms.Ver, VerTranslation]
 @[simp] lemma degree_zero : pⱽ.degree = 0 := by induction p <;> simp [degree, *];
 @[simp] lemma back  : pⱽᴾᴹ = pⱽ := by
   induction p using rec' with
-  | hbox _ => simp [VerTranslation, toPropFormula, Superintuitionistic.Formula.toModalFormula];
-  | _ => simp [VerTranslation, toPropFormula, Superintuitionistic.Formula.toModalFormula, *];
+  | himp => simp [VerTranslation, toPropFormula, Superintuitionistic.Formula.toModalFormula, *];
+  | _ => rfl;
 
 end VerTranslation
 
@@ -197,13 +151,7 @@ lemma deducible_iff_trivTranslation : 𝐓𝐫𝐢𝐯 ⊢! p ⟷ pᵀ := by
     apply iff_intro!;
     . exact imp_trans''! axiomT! (and₁'! ih)
     . exact imp_trans''! (and₂'! ih) axiomTc!
-  | hdia p ih =>
-    simp [TrivTranslation];
-    apply iff_intro!;
-    . apply imp_trans''! diaT! (and₁'! ih);
-    . apply imp_trans''! (and₂'! ih) diaTc!;
-  | hand _ _ ih₁ ih₂ => exact and_replace_iff! ih₁ ih₂;
-  | hor _ _ ih₁ ih₂ => exact or_replace_iff! ih₁ ih₂;
+  | himp _ _ ih₁ ih₂ => exact imp_replace_iff! ih₁ ih₂;
   | _ => apply iff_id!
 
 lemma deducible_iff_verTranslation : 𝐕𝐞𝐫 ⊢! p ⟷ pⱽ := by
@@ -212,13 +160,7 @@ lemma deducible_iff_verTranslation : 𝐕𝐞𝐫 ⊢! p ⟷ pⱽ := by
     apply iff_intro!;
     . exact imply₁'! verum!
     . exact dhyp! (by simp)
-  | hdia =>
-    simp [VerTranslation];
-    apply iff_intro!;
-    . exact bot_of_dia!;
-    . exact efq!;
-  | hand _ _ ih₁ ih₂ => exact and_replace_iff! ih₁ ih₂;
-  | hor _ _ ih₁ ih₂ => exact or_replace_iff! ih₁ ih₂;
+  | himp _ _ ih₁ ih₂ => exact imp_replace_iff! ih₁ ih₂;
   | _ => apply iff_id!
 
 lemma of_classical {mΛ : Modal.Standard.DeductionParameter α} {p : Superintuitionistic.Formula α} : (𝐂𝐥 ⊢! p) → (mΛ ⊢! pᴹ) := by
@@ -240,18 +182,11 @@ lemma iff_Triv_classical : 𝐓𝐫𝐢𝐯 ⊢! p ↔ 𝐂𝐥 ⊢! pᵀᴾ := 
     induction h using Deduction.inducition_with_necOnly! with
     | hMaxm a =>
       rcases a with (⟨_, _, rfl⟩ | ⟨_, rfl⟩ | ⟨_, rfl⟩);
-      . simp only [TrivTranslation.axiomK];
-        apply toPropFormula.imp_classical (by simp) (by simp) |>.mp;
-        exact imp_id!;
-      . simp only [TrivTranslation.axiomT];
-        apply toPropFormula.imp_classical (by simp) (by simp) |>.mp;
-        exact imp_id!;
-      . simp only [TrivTranslation.axiomTc];
-        apply toPropFormula.imp_classical (by simp) (by simp) |>.mp;
-        exact imp_id!;
+      . simp only [toPropFormula]; exact imp_id!;
+      . simp only [toPropFormula]; exact imp_id!;
+      . simp only [toPropFormula]; exact imp_id!;
     | hMdp ih₁ ih₂ =>
-      simp only [TrivTranslation.imp_def] at ih₁;
-      replace ih₁ := toPropFormula.imp_classical (by simp) (by simp) |>.mpr ih₁;
+      dsimp [TrivTranslation, toPropFormula] at ih₁ ih₂;
       exact ih₁ ⨀ ih₂;
     | hNec ih => simp_all only [TrivTranslation];
     | _ =>
@@ -272,10 +207,9 @@ lemma iff_Ver_classical : 𝐕𝐞𝐫 ⊢! p ↔ 𝐂𝐥 ⊢! pⱽᴾ := by
       . simp only [VerTranslation.axiomVer];
         sorry;
     | hMdp ih₁ ih₂ =>
-      simp only [VerTranslation.imp_def] at ih₁;
-      replace ih₁ := toPropFormula.imp_classical (by simp) (by simp) |>.mpr ih₁;
+      dsimp [VerTranslation, toPropFormula] at ih₁ ih₂;
       exact ih₁ ⨀ ih₂;
-    | hNec => dsimp [toPropFormula]; exact verum!;
+    | hNec => dsimp [toPropFormula]; simp;
     | _ =>
       dsimp [VerTranslation, toPropFormula];
       sorry;

@@ -24,7 +24,7 @@ private lemma trans_of_L : F# ⊧* (𝗟 : AxiomSet α) → Transitive F.Rel := 
   constructor;
   . simp;
   . use (λ w' _ => w' ≠ w₂ ∧ w' ≠ w₃), w₁;
-    simp only [Kripke.Satisfies]; push_neg;
+    simp only [Kripke.Satisfies]; simp;
     constructor;
     . intro x hx h;
       by_cases hx₂ : x = w₂;
@@ -42,7 +42,7 @@ private lemma cwf_of_L  : F# ⊧* (𝗟 : AxiomSet α) → ConverseWellFounded F
   constructor;
   . simp;
   . use (λ w _ => w ∉ X), x;
-    simp only [Kripke.Satisfies]; push_neg;
+    simp only [Kripke.Satisfies]; simp;
     constructor;
     . intro y _;
       by_cases hys : y ∈ X
@@ -69,8 +69,6 @@ private lemma L_of_trans_and_cwf : (Transitive F.Rel ∧ ConverseWellFounded F.R
   . constructor;
     . simp [flip] at hm₂;
       intro n rmn;
-      apply Kripke.Satisfies.not_def.not.mpr;
-      simp;
       apply not_imp_not.mp $ hm₂ n (hTrans rwm rmn);
       exact rmn;
     . exact hm;

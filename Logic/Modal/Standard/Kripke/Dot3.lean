@@ -24,32 +24,34 @@ private lemma connected_of_dot3 : F# ⊧* (.𝟯 : AxiomSet α) → Connected F 
     | 0 => y ≺ w
     | 1 => z ≺ w
   );
-  simp [Kripke.ValidOnModel, Kripke.Satisfies];
+
+  simp [Kripke.ValidOnModel];
   use x;
+  apply Kripke.Satisfies.or_def.not.mpr;
+  push_neg;
   constructor;
-  . use y;
+  . apply Kripke.Satisfies.box_def.not.mpr; push_neg;
+    use y;
     constructor;
     . assumption;
-    . simp_all [Kripke.Satisfies, (fInj 0), (fInj 1)];
-  . use z;
+    . sorry;
+  . apply Kripke.Satisfies.box_def.not.mpr; push_neg;
+    use z;
     constructor;
     . assumption;
-    . simp_all [Kripke.Satisfies, (fInj 0), (fInj 1)];
+    . sorry;
 
 private lemma dot3_of_connected : Connected F → F# ⊧* (.𝟯 : AxiomSet α) := by
   intro hCon;
   simp [Kripke.ValidOnFrame, Kripke.ValidOnModel, Axioms.Dot3];
   intro δ p q e V x; subst e;
+  apply Kripke.Satisfies.or_def.mpr;
   simp [Kripke.Satisfies];
   by_contra hC; push_neg at hC;
   obtain ⟨⟨y, rxy, hp, hnq⟩, ⟨z, rxz, hq, hnp⟩⟩ := hC;
   cases hCon ⟨rxy, rxz⟩ with
-  | inl ryz =>
-    have := Kripke.Satisfies.not_def.not.mp $ hp z ryz;
-    contradiction;
-  | inr rzy =>
-    have := Kripke.Satisfies.not_def.not.mp $ hq y rzy;
-    contradiction;
+  | inl ryz => have := hp z ryz; contradiction;
+  | inr rzy => have := hq y rzy; contradiction;
 
 lemma AxDot3_Definability : AxiomSet.DefinesKripkeFrameClass (α := α) .𝟯 ConnectedFrameClass := by
   intro F;

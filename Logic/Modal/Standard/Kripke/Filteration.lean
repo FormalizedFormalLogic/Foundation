@@ -9,7 +9,7 @@ variable {α : Type u} [DecidableEq α] [Inhabited α]
 
 namespace Kripke
 
-open Formula (atom natom)
+open Formula (atom)
 open Formula.Kripke
 
 section
@@ -67,13 +67,6 @@ class Model.FilterOf (FM : Model α) (M : Model α) (T : Theory α) [T.Subformul
     . intro h p hp sp₂; exact hy p |>.mp $ h p hp $ hx (□p) hp |>.mpr sp₂;
     . intro h p hp sp₁; exact hy p |>.mpr $ h p hp $ hx (□p) hp |>.mp sp₁;
   ) (cast def_world Qx) (cast def_world Qy)
-  def_dia : ∀ {Qx Qy : FM.World}, Qx ≺ Qy → Quotient.lift₂ (λ x y => ∀ p, ◇p ∈ T → (y ⊧ p → x ⊧ ◇p)) (by
-    intro x₁ y₁ x₂ y₂ hx hy;
-    simp;
-    constructor;
-    . intro h p hp sp₁; exact hx (◇p) |>.mp $ h p (by trivial) $ hy p |>.mpr sp₁;
-    . intro h p hp sp₂; exact hx (◇p) |>.mpr $ h p (by trivial) $ hy p |>.mp sp₂;
-  ) (cast def_world Qx) (cast def_world Qy)
   def_valuation Qx a : (ha : (atom a) ∈ T := by trivial) →
     FM.Valuation Qx a ↔ Quotient.lift (λ x => M.Valuation x a) (by
       simp; intro x y h;
@@ -109,12 +102,6 @@ instance FinestFilterationModel.filterOf {M} {T : Theory α} [T.SubformulaClosed
     intro Qx Qy rQxQy;
     obtain ⟨x, y, rfl, rfl, hxy⟩ := rQxQy;
     simp_all [Satisfies];
-  def_dia := by
-    intro Qx Qy rQxQy;
-    obtain ⟨x, y, rfl, rfl, hxy⟩ := rQxQy;
-    simp_all [Satisfies];
-    intros;
-    use y;
 
 abbrev CoarsestFilterationFrame (M : Model α) (T : Theory α) [T.SubformulaClosed] : Kripke.Frame where
   World := FilterEqvQuotient M T
@@ -126,14 +113,6 @@ abbrev CoarsestFilterationFrame (M : Model α) (T : Theory α) [T.SubformulaClos
       . intro h p hp sp₂; exact hy p |>.mp $ h p hp $ hx (□p) hp |>.mpr sp₂;
       . intro h p hp sp₁; exact hy p |>.mpr $ h p hp $ hx (□p) hp |>.mp sp₁;
     ) Qx Qy
-    ∧
-    Quotient.lift₂ (λ x y => ∀ p, ◇p ∈ T → (y ⊧ p → x ⊧ ◇p)) (by
-      intro x₁ y₁ x₂ y₂ hx hy;
-      simp;
-      constructor;
-      . intro h p hp sp₁; exact hx (◇p) |>.mp $ h p (by trivial) $ hy p |>.mpr sp₁;
-      . intro h p hp sp₂; exact hx (◇p) |>.mpr $ h p (by trivial) $ hy p |>.mp sp₂;
-    ) Qx Qy;
 
 noncomputable abbrev CoarsestFilterationModel (M : Model α) (T : Theory α) [T.SubformulaClosed] : Kripke.Model α where
   Frame := CoarsestFilterationFrame M T
@@ -141,7 +120,6 @@ noncomputable abbrev CoarsestFilterationModel (M : Model α) (T : Theory α) [T.
 
 instance CoarsestFilterationModel.filterOf {M} {T : Theory α} [T.SubformulaClosed] : (CoarsestFilterationModel M T).FilterOf M T where
   def_box := by tauto
-  def_dia := by tauto
 
 section
 
@@ -181,10 +159,6 @@ theorem filteration {x : M.World} {p : Formula α} (hs : p ∈ T := by trivial) 
   | hatom a =>
     have := filterOf.def_valuation (cast filterOf.def_world.symm ⟦x⟧) a;
     simp_all [Satisfies];
-  | hnatom a =>
-    apply Iff.not;
-    have := filterOf.def_valuation (cast filterOf.def_world.symm ⟦x⟧) a;
-    simp_all [Satisfies];
   | hbox p ihp =>
     constructor;
     . intro h Qy rQxQy;
@@ -194,30 +168,12 @@ theorem filteration {x : M.World} {p : Formula α} (hs : p ∈ T := by trivial) 
     . intro h y rxy;
       have rQxQy := filterOf.def_rel₁ rxy;
       exact ihp (by trivial) |>.mpr $ h _ rQxQy;
-  | hdia p ihp =>
+  | himp p q ihp ihq =>
     constructor;
-    . rintro ⟨y, Rxy, h⟩;
-      use ?_;
-      constructor;
-      . exact filterOf.def_rel₁ Rxy
-      . exact ihp (by trivial) |>.mp h;
-    . intro h;
-      obtain ⟨Qy, RQxQy, hy⟩ := h;
-      obtain ⟨y, ey⟩ := Quotient.exists_rep (cast (filterOf.def_world) Qy);
-      have := filterOf.def_dia (Qy := Qy) RQxQy; simp [←ey] at this;
-      exact this p (by trivial) $ @ihp y (by trivial) |>.mpr (by aesop);
-  | hand p q ihp ihq =>
-    constructor;
-    . rintro ⟨hp, hq⟩; exact ⟨ihp (by trivial) |>.mp hp, ihq (by trivial) |>.mp hq⟩;
-    . rintro ⟨hp, hq⟩; exact ⟨ihp (by trivial) |>.mpr hp, ihq (by trivial) |>.mpr hq⟩;
-  | hor p q ihp ihq =>
-    constructor;
-    . rintro (hp | hq);
-      . left; exact ihp (by trivial) |>.mp hp;
-      . right; exact ihq (by trivial) |>.mp hq;
-    . rintro (hp | hq);
-      . left; exact ihp (by trivial) |>.mpr hp;
-      . right; exact ihq (by trivial) |>.mpr hq;
+    . rintro hxy hp;
+      exact (ihq (by trivial) |>.mp $ hxy (ihp (by trivial) |>.mpr hp));
+    . rintro hxy hp;
+      exact (ihq (by trivial) |>.mpr $ hxy (ihp (by trivial) |>.mp hp));
   | _ => trivial
 
 end
@@ -305,32 +261,6 @@ def filterOf : (FinestFilterationTransitiveClosureModel M T).FilterOf M T where
         apply hyz p hp;
         intro v ryv;
         exact hpx _ (M_trans rxy ryv);
-  def_dia := by
-    intro Qx Qy RQxQy;
-    induction RQxQy using Relation.TransGen.head_induction_on with
-    | base rxy =>
-      obtain ⟨x, y, rfl, rfl, rxy⟩ := rxy;
-      intro p _ hpx;
-      exact ⟨y, rxy, hpx⟩
-    | ih ha hxy hyz =>
-      obtain ⟨x, y, rfl, rfl, rxy⟩ := ha;
-      obtain ⟨w, z, _, rfl, _⟩ := hxy;
-      . intro p hp hpx;
-        simp at hyz;
-        obtain ⟨z, ryz, hz⟩ := hyz p hp hpx;
-        use z;
-        constructor;
-        . exact M_trans rxy ryz;
-        . assumption;
-      . rename_i h;
-        obtain ⟨w, z, rfl, rfl, _⟩ := h;
-        intro p hp hpx;
-        simp at hyz;
-        obtain ⟨z, ryz, hz⟩ := hyz p hp hpx;
-        use z;
-        constructor;
-        . exact M_trans rxy ryz;
-        . assumption;
 
 
 lemma rel_transitive : Transitive (FinestFilterationTransitiveClosureModel M T).Frame := Frame.TransitiveClosure.rel_transitive

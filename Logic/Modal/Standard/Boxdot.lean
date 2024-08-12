@@ -6,13 +6,9 @@ variable [DecidableEq α]
 
 def Formula.BoxdotTranslation : Formula α → Formula α
   | atom p => .atom p
-  | natom p => .natom p
   | ⊥ => ⊥
-  | ⊤ => ⊤
-  | p ⋏ q => (BoxdotTranslation p) ⋏ (BoxdotTranslation q)
-  | p ⋎ q => (BoxdotTranslation p) ⋎ (BoxdotTranslation q)
+  | p ⟶ q => (BoxdotTranslation p) ⟶ (BoxdotTranslation q)
   | □p => ⊡(BoxdotTranslation p)
-  | ◇p => ⟐(BoxdotTranslation p)
 postfix:90 "ᵇ" => Formula.BoxdotTranslation
 
 namespace Formula.BoxdotTranslation
@@ -23,35 +19,25 @@ lemma top_def : (⊤ : Formula α)ᵇ = ⊤ := by rfl;
 
 lemma box_def : (□p)ᵇ = ⊡(pᵇ) := by rfl;
 
-lemma neg_def : (~p)ᵇ = ~(pᵇ) := by
-  induction p using Formula.rec' <;> simp [BoxdotTranslation, Formula.neg_eq, *];
+lemma imp_def : (p ⟶ q)ᵇ = (pᵇ ⟶ qᵇ) := by rfl;
 
-lemma and_def : (p ⋏ q)ᵇ = (pᵇ ⋏ qᵇ) := by
-  induction p using Formula.rec' with
-  | hand p q ihp ihq => simp [BoxdotTranslation, Formula.and_eq, ihp, ihq];
-  | _ => simp [BoxdotTranslation, Formula.and_eq];
+lemma neg_def : (~p)ᵇ = ~(pᵇ) := by rfl;
 
-lemma or_def : (p ⋎ q)ᵇ = (pᵇ ⋎ qᵇ) := by
-  induction p using Formula.rec' with
-  | hor p q ihp ihq => simp [BoxdotTranslation, Formula.or_eq, ihp, ihq];
-  | _ => simp [BoxdotTranslation, Formula.or_eq];
+lemma and_def : (p ⋏ q)ᵇ = (pᵇ ⋏ qᵇ) := by rfl;
 
-lemma imp_def : (p ⟶ q)ᵇ = (pᵇ ⟶ qᵇ) := by
-  simp [BoxdotTranslation, Formula.imp_eq];
-  rw [Formula.neg_eq];
-  simp [neg_def];
+lemma or_def : (p ⋎ q)ᵇ = (pᵇ ⋎ qᵇ) := by rfl;
 
-lemma iff_def : (p ⟷ q)ᵇ = (pᵇ ⟷ qᵇ) := by simp only [Formula.iff_eq, and_def, imp_def];
+lemma iff_def : (p ⟷ q)ᵇ = (pᵇ ⟷ qᵇ) := by rfl;
 
-lemma axiomK : (Axioms.K p q)ᵇ = ⊡(pᵇ ⟶ qᵇ) ⟶ ⊡(pᵇ) ⟶ ⊡(qᵇ) := by simp [Axioms.K, imp_def, box_def];
+lemma axiomK : (Axioms.K p q)ᵇ = ⊡(pᵇ ⟶ qᵇ) ⟶ ⊡(pᵇ) ⟶ ⊡(qᵇ) := by rfl;
 
-lemma axiomT : (Axioms.T p)ᵇ = ⊡(pᵇ) ⟶ pᵇ := by simp [Axioms.T, imp_def, box_def];
+lemma axiomT : (Axioms.T p)ᵇ = ⊡(pᵇ) ⟶ pᵇ := by rfl;
 
-lemma axiomFour : (Axioms.Four p)ᵇ = ⊡(pᵇ) ⟶ ⊡⊡(pᵇ) := by simp [Axioms.Four, imp_def, box_def];
+lemma axiomFour : (Axioms.Four p)ᵇ = ⊡(pᵇ) ⟶ ⊡⊡(pᵇ) := by rfl;
 
-lemma axiomL : (Axioms.L p)ᵇ = ⊡(⊡pᵇ ⟶ pᵇ) ⟶ ⊡pᵇ := by simp [Axioms.L, imp_def, box_def];
+lemma axiomL : (Axioms.L p)ᵇ = ⊡(⊡pᵇ ⟶ pᵇ) ⟶ ⊡pᵇ := by rfl;
 
-lemma axiomGrz : (Axioms.Grz p)ᵇ =  ⊡(⊡(pᵇ ⟶ ⊡pᵇ) ⟶ pᵇ) ⟶ pᵇ := by simp [Axioms.Grz, imp_def, box_def];
+lemma axiomGrz : (Axioms.Grz p)ᵇ =  ⊡(⊡(pᵇ ⟶ ⊡pᵇ) ⟶ pᵇ) ⟶ pᵇ := by rfl;
 
 end Formula.BoxdotTranslation
 
@@ -86,10 +72,8 @@ lemma boxdotTranslatedK4_of_S4 : 𝐒𝟒 ⊢! p → 𝐊𝟒 ⊢! pᵇ := boxdo
 lemma iff_boxdotTranslation_S4 : 𝐒𝟒 ⊢! p ⟷ pᵇ := by
   induction p using Formula.rec' with
   | hbox p ihp => exact iff_trans''! (box_iff! ihp) iff_box_boxdot!;
-  | hdia p ihp => exact iff_trans''! (dia_iff! ihp) iff_dia_diadot!;
-  | hand p q ihp ihq => exact and_replace_iff! ihp ihq;
-  | hor p q ihp ihq => exact or_replace_iff! ihp ihq;
-  | _ => dsimp [BoxdotTranslation]; exact iff_id!;
+  | himp p q ihp ihq => exact imp_replace_iff! ihp ihq;
+  | _ => exact iff_id!;
 
 lemma S4_of_boxdotTranslatedK4 (h : 𝐊𝟒 ⊢! pᵇ) : 𝐒𝟒 ⊢! p := by
   exact (and₂'! iff_boxdotTranslation_S4) ⨀ (weakerThan_iff.mp $ reducible_K4_S4) h

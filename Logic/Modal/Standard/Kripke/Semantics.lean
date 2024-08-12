@@ -292,13 +292,9 @@ open Standard.Kripke
 
 def Formula.Kripke.Satisfies (M : Kripke.Model α) (x : M.World) : Formula α → Prop
   | atom a  => M.Valuation x a
-  | natom a => ¬M.Valuation x a
-  | ⊤  => True
   | ⊥  => False
-  | p ⋏ q => (Satisfies M x p) ∧ (Satisfies M x q)
-  | p ⋎ q => (Satisfies M x p) ∨ (Satisfies M x q)
+  | p ⟶ q => (Satisfies M x p) ⟶ (Satisfies M x q)
   | □p   => ∀ y, x ≺ y → (Satisfies M y p)
-  | ◇p   => ∃ y, x ≺ y ∧ (Satisfies M y p)
 
 namespace Formula.Kripke.Satisfies
 
@@ -309,36 +305,23 @@ variable {M : Kripke.Model α} {x : M.World} {p q : Formula α}
 @[simp]
 protected lemma iff_models : x ⊧ p ↔ Kripke.Satisfies M x p := iff_of_eq rfl
 
-
-lemma or_def : x ⊧ p ⋎ q ↔ x ⊧ p ∨ x ⊧ q := by constructor <;> simp [Satisfies];
-instance : Semantics.Or (M.World) := ⟨or_def⟩
-
-lemma and_def : x ⊧ p ⋏ q ↔ x ⊧ p ∧ x ⊧ q := by constructor <;> simp [Satisfies];
-instance : Semantics.And (M.World) := ⟨and_def⟩
-
 lemma box_def : x ⊧ □p ↔ ∀ y, x ≺ y → y ⊧ p := by simp [Kripke.Satisfies];
 
 lemma dia_def : x ⊧ ◇p ↔ ∃ y, x ≺ y ∧ y ⊧ p := by simp [Kripke.Satisfies];
 
-@[simp]
 lemma not_def : x ⊧ ~p ↔ ¬(x ⊧ p) := by
   induction p using Formula.rec' generalizing x with
   | _ => simp_all [Satisfies]; try tauto;
 instance : Semantics.Not (M.World) := ⟨not_def⟩
 
-@[simp]
-lemma imp_def : x ⊧ p ⟶ q ↔ (x ⊧ p) → (x ⊧ q) := by
-  constructor;
-  . intro hpq;
-    apply imp_iff_not_or (b := x ⊧ q) |>.mpr;
-    rcases hpq with (hp | hq);
-    . left; exact not_def.mp hp;
-    . right; exact hq;
-  . intro hpq;
-    rcases imp_iff_not_or.mp hpq with (hp | hq);
-    . left; exact not_def.mpr hp;
-    . right; exact hq;
+lemma imp_def : x ⊧ p ⟶ q ↔ (x ⊧ p) → (x ⊧ q) := by tauto;
 instance : Semantics.Imp (M.World) := ⟨imp_def⟩
+
+lemma or_def : x ⊧ p ⋎ q ↔ x ⊧ p ∨ x ⊧ q := by simp [Satisfies]; tauto;
+instance : Semantics.Or (M.World) := ⟨or_def⟩
+
+lemma and_def : x ⊧ p ⋏ q ↔ x ⊧ p ∧ x ⊧ q := by simp [Satisfies];
+instance : Semantics.And (M.World) := ⟨and_def⟩
 
 protected instance : Semantics.Tarski (M.World) where
   realize_top := by tauto;

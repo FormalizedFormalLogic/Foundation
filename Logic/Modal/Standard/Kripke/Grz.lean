@@ -99,23 +99,19 @@ private lemma valid_on_frame_T_and_Four_of_Grz (h : F# ⊧* (𝗚𝗿𝘇 : Axio
   let q := p ⋏ (□p ⟶ □□p);
   have h₁ : Satisfies ⟨F#, V⟩ x (□p ⟶ □(□(q ⟶ □q) ⟶ q)) := K_sound.sound lemma_Grz₁! (by simp) V x;
   have h₂ : Satisfies ⟨F#, V⟩ x (□(□(q ⟶ □q) ⟶ q) ⟶ q)  := h q V x;
-  exact Satisfies.trans h₁ h₂;
+  exact λ f => h₂ (h₁ f);
 
 private lemma valid_on_frame_T_of_Grz (h : F# ⊧* (𝗚𝗿𝘇 : AxiomSet α)) : F# ⊧* (𝗧 : AxiomSet α) := by
   have := valid_on_frame_T_and_Four_of_Grz h;
   simp_all [ValidOnFrame, ValidOnModel, Axioms.T, Axioms.Grz];
-  intro p V x;
-  apply Satisfies.imp_def.mpr;
-  intro hp;
-  exact Satisfies.mdp (this p V x) hp |>.1;
+  intro p V x hx;
+  exact Satisfies.and_def.mp (this p V x hx) |>.1
 
 private lemma valid_on_frame_Four_of_Grz (h : F# ⊧* (𝗚𝗿𝘇 : AxiomSet α)) : F# ⊧* (𝟰 : AxiomSet α) := by
   have := valid_on_frame_T_and_Four_of_Grz h;
   simp_all [ValidOnFrame, ValidOnModel, Axioms.T, Axioms.Grz];
-  intro p V x;
-  apply Satisfies.imp_def.mpr;
-  intro hp;
-  exact Satisfies.mdp (Satisfies.mdp (this p V x) hp |>.2) hp;
+  intro p V x hx;
+  exact (Satisfies.and_def.mp (this p V x hx) |>.2) hx;
 
 private lemma refl_of_Grz (h : F# ⊧* (𝗚𝗿𝘇 : AxiomSet α)) : Reflexive F := by
   exact axiomT_defines.mp $ (valid_on_frame_T_of_Grz h);
@@ -142,30 +138,23 @@ private lemma wcwf_of_Grz (h : F# ⊧* (𝗚𝗿𝘇 : AxiomSet α)) : WeaklyCon
   . simp;
   . by_cases H : ∀ j₁ j₂, (j₁ < j₂ → f j₂ ≠ f j₁)
     . use (λ v _ => ∀ i, v ≠ f (2 * i)), (f 0);
-      apply Satisfies.imp_def.not.mpr;
       apply Classical.not_imp.mpr
       constructor;
       . suffices Satisfies ⟨F, _⟩ (f 0) (□(~(atom default) ⟶ ~(□(atom default ⟶ □atom default)))) by
           intro x hx;
-          have := Satisfies.imp_def.mp $ this _ hx;
-          apply Satisfies.imp_def.mpr;
-          contrapose;
-          sorry;
+          exact not_imp_not.mp $ this _ hx;
         simp [Satisfies];
-        rintro v h0v;
-        constructor;
-        . sorry;
-        . rintro v h0v j rfl;
-          use f (2 * j + 1);
-          refine ⟨?_, ?_, f ((2 * j) + 2), ?_, ?_⟩;
-          . apply hf _ |>.2;
-          . intro i;
-            rcases (lt_trichotomy i j) with (hij | rfl | hij);
-            . apply H; omega;
-            . apply H; omega;
-            . apply @H _ _ ?_ |>.symm; omega;
-          . apply hf _ |>.2;
-          . use (j + 1); rfl;
+        rintro v h0v j rfl;
+        use f (2 * j + 1);
+        refine ⟨?_, ?_, f ((2 * j) + 2), ?_, ?_⟩;
+        . apply hf _ |>.2;
+        . intro i;
+          rcases (lt_trichotomy i j) with (hij | rfl | hij);
+          . apply H; omega;
+          . apply H; omega;
+          . apply @H _ _ ?_ |>.symm; omega;
+        . apply hf _ |>.2;
+        . use (j + 1); rfl;
       . simp [Satisfies]; use 0;
     . push_neg at H;
       obtain ⟨j, k, ljk, ejk⟩ := H;
@@ -195,7 +184,7 @@ private lemma wcwf_of_Grz (h : F# ⊧* (𝗚𝗿𝘇 : AxiomSet α)) : WeaklyCon
           refine ⟨(hf j).2, Ne.symm $ (hf j).1, this.2⟩;
         intro x hx;
         contrapose;
-        exact this hx;
+        exact this _ hx;
       . simp [Satisfies, V];
 
 private lemma Grz_of_wcwf : (Reflexive F.Rel ∧ Transitive F.Rel ∧ WeaklyConverseWellFounded F.Rel) → F# ⊧* (𝗚𝗿𝘇 : AxiomSet α) := by
@@ -218,27 +207,23 @@ private lemma Grz_of_wcwf : (Reflexive F.Rel ∧ Transitive F.Rel ∧ WeaklyConv
     -- TODO: need more refactor
     have := Set.not_nonempty_iff_eq_empty.mpr this;
     have := Set.nonempty_def.not.mp this; push_neg at this;
-    intro x;
-    have := this x;
     simp [X] at this;
-    exact Satisfies.imp_def.mpr this;
+    exact this;
 
   intro w hw;
   rcases hw with (⟨hw₁, hw₂⟩ | ⟨hw₁, hw₂, hw₃⟩);
   . have := hw₁ _ (by apply hRefl);
-    have := not_imp_not.mpr (Satisfies.imp_def.mp this) hw₂;
+    have := not_imp_not.mpr this hw₂;
     simp [Satisfies] at this;
     obtain ⟨x, Rwx, hx, hbx⟩ := this;
     use x;
     constructor;
     . right;
-      refine ⟨?_, (by simp [Satisfies, hbx]), (by sorry)⟩;
-      intro y Rxy;
-      apply Satisfies.imp_def.mpr;
-      intro hy;
-      exact Satisfies.mdp (hw₁ y (hTrans Rwx Rxy)) hy;
+      refine ⟨?_, (by simp [Satisfies, hbx]), (by assumption)⟩;
+      intro y Rxy hy;
+      exact hw₁ _ (hTrans Rwx Rxy) hy;
     . constructor;
-      . sorry; -- aesop;
+      . aesop;
       . exact Rwx;
   . simp [Satisfies] at hw₂;
     obtain ⟨x, Rwx, hx⟩ := hw₂;
@@ -246,10 +231,8 @@ private lemma Grz_of_wcwf : (Reflexive F.Rel ∧ Transitive F.Rel ∧ WeaklyConv
     constructor;
     . left;
       refine ⟨?_, (by assumption)⟩;
-      intro y Rxy;
-      apply Satisfies.imp_def.mpr;
-      intro hy;
-      exact Satisfies.mdp (hw₁ y (hTrans Rwx Rxy)) hy;
+      intro y Rxy hy;
+      exact hw₁ _ (hTrans Rwx Rxy) hy;
     . constructor;
       . aesop;
       . exact Rwx;

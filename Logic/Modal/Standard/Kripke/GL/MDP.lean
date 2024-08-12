@@ -149,9 +149,9 @@ lemma GL_MDP_Aux (h : (□''X) *⊢[𝐆𝐋]! □p₁ ⋎ □p₂) : (□''X) *
       intro x Rrx;
       rcases GL_MDPCounterexampleFrame.through_original_root Rrx with ((rfl | Rrx) | (rfl | Rrx))
       . exact (Satisfies.and_def.mp $ (Satisfies.and_def.mp hM₁).1).1;
-      . exact (Satisfies.and_def.mp $ (Satisfies.and_def.mp hM₁).1).2 Rrx;
+      . exact (Satisfies.and_def.mp $ (Satisfies.and_def.mp hM₁).1).2 _ Rrx
       . exact (Satisfies.and_def.mp $ (Satisfies.and_def.mp hM₂).1).1;
-      . exact (Satisfies.and_def.mp $ (Satisfies.and_def.mp hM₂).1).2 Rrx;
+      . exact (Satisfies.and_def.mp $ (Satisfies.and_def.mp hM₂).1).2 _ Rrx
     have hp₁ : ¬(Satisfies M.toModel M.root (□p₁)) := by
       dsimp [Satisfies]; push_neg;
       use .inr (.inl M₁.root);

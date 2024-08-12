@@ -1,3 +1,4 @@
+import Mathlib.Data.Fintype.List
 import Logic.Modal.Standard.Kripke.GL.Completeness
 
 -- TODO: Move to vorspiel or etc.

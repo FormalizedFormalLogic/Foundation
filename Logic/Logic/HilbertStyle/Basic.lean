@@ -67,12 +67,14 @@ class HasAxiomDummett where
 class HasAxiomPeirce where
   peirce (p q : F) : 𝓢 ⊢ Axioms.Peirce p q
 
-protected class Minimal extends
+protected class WeakMinimal extends
               ModusPonens 𝓢,
-              HasAxiomVerum 𝓢, NegationEquiv 𝓢,
+              HasAxiomVerum 𝓢,
               HasAxiomImply₁ 𝓢, HasAxiomImply₂ 𝓢,
               HasAxiomAndElim₁ 𝓢, HasAxiomAndElim₂ 𝓢, HasAxiomAndInst 𝓢,
               HasAxiomOrInst₁ 𝓢, HasAxiomOrInst₂ 𝓢, HasAxiomOrElim 𝓢
+
+protected class Minimal extends System.WeakMinimal 𝓢, NegationEquiv 𝓢
 
 protected class Intuitionistic extends System.Minimal 𝓢, HasAxiomEFQ 𝓢
 

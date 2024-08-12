@@ -182,7 +182,6 @@ lemma GL_truthlemma
       have ⟨h₁, _⟩ := GLFilteredFrame.def_rel.mp RXY; simp at h₁;
       have ⟨q_mem_Y, _⟩ := h₁ q hq bq_mem_X;
       exact ih (by aesop) |>.mpr q_mem_Y;
-  | hdia q ih => sorry;
   | _ =>
     simp_all [Satisfies, StandardFilterationValuation];
     try aesop;

@@ -135,6 +135,18 @@ lemma provable_S4_of_provable_efq : (𝐒𝟒 ⊢! pᵍ) → (𝐈𝐧𝐭 ⊢! 
         apply ihr x |>.mp $ h Rvx $ ihq x |>.mpr hq;
       . intro h x Rvx hq;
         exact ihr x |>.mpr $ Kripke.Satisfies.imp_def.mp (@h x Rvx) $ ihq x |>.mp hq;
+    | hor q r ihq ihr =>
+      simp [GoedelTranslation];
+      constructor;
+      . rintro (hq | hr);
+        . apply Kripke.Satisfies.or_def.mpr;
+          left; exact @ihq v |>.mp hq;
+        . apply Kripke.Satisfies.or_def.mpr;
+          right; exact @ihr v |>.mp hr;
+      . intro h;
+        rcases Kripke.Satisfies.or_def.mp h with (hq | hr);
+        . left; exact @ihq v |>.mpr hq;
+        . right; exact @ihr v |>.mpr hr;
     | _ =>
       simp_all [Satisfies, Kripke.Satisfies];
   have : ¬(Modal.Standard.Formula.Kripke.Satisfies M w (pᵍ)) := (h₁ p w).not.mp hp;

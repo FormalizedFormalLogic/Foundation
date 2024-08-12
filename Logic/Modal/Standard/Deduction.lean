@@ -53,7 +53,6 @@ inductive Deduction (𝓓 : DeductionParameter α) : (Formula α) → Type _
   | or₂ p q      : Deduction 𝓓 $ Axioms.OrInst₂ p q
   | or₃ p q r    : Deduction 𝓓 $ Axioms.OrElim p q r
   | dne p        : Deduction 𝓓 $ Axioms.DNE p
-  | neg_equiv p  : Deduction 𝓓 $ Axioms.NegEquiv p
 
 namespace Deduction
 
@@ -63,7 +62,7 @@ instance : System (Formula α) (DeductionParameter α) := ⟨Deduction⟩
 
 variable {𝓓 𝓓₁ 𝓓₂ : DeductionParameter α}
 
-instance : System.Classical 𝓓 where
+instance : System.WeakMinimal 𝓓 where
   mdp := mdp
   verum := verum
   imply₁ := imply₁
@@ -74,8 +73,13 @@ instance : System.Classical 𝓓 where
   or₁ := or₁
   or₂ := or₂
   or₃ := or₃
+
+instance : System.HasAxiomDNE 𝓓 where
   dne := dne
-  neg_equiv := neg_equiv
+
+instance : System.Classical 𝓓 where
+
+instance : System.HasDiaDuality 𝓓 := inferInstance
 
 lemma maxm! {p} (h : p ∈ 𝓓.axioms) : 𝓓 ⊢! p := ⟨maxm h⟩
 
@@ -148,7 +152,6 @@ noncomputable def inducition!
   (hOrInst₂  : ∀ {p q}, motive (q ⟶ p ⋎ q) $ ⟨or₂ p q⟩)
   (hOrElim   : ∀ {p q r}, motive ((p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r)) $ ⟨or₃ p q r⟩)
   (hDne      : ∀ {p}, motive (~~p ⟶ p) $ ⟨dne p⟩)
-  (hNegEquiv : ∀ {p}, motive (~p ⟷ (p ⟶ ⊥)) $ ⟨neg_equiv p⟩)
   : ∀ {p}, (d : 𝓓 ⊢! p) → motive p d := by
   intro p d;
   induction d.some with
@@ -173,7 +176,6 @@ noncomputable def inducition_with_necOnly! [𝓓.HasNecOnly]
   (hOrInst₂  : ∀ {p q}, motive (q ⟶ p ⋎ q) $ ⟨or₂ p q⟩)
   (hOrElim   : ∀ {p q r}, motive ((p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r)) $ ⟨or₃ p q r⟩)
   (hDne      : ∀ {p}, motive (~~p ⟶ p) $ ⟨dne p⟩)
-  (hNegEquiv : ∀ {p}, motive (~p ⟷ (p ⟶ ⊥)) $ ⟨neg_equiv p⟩)
   : ∀ {p}, (d : 𝓓 ⊢! p) → motive p d := by
   intro p d;
   induction d using Deduction.inducition! with
@@ -193,7 +195,6 @@ noncomputable def inducition_with_necOnly! [𝓓.HasNecOnly]
   | hOrInst₂ => exact hOrInst₂
   | hOrElim => exact hOrElim
   | hDne => exact hDne
-  | hNegEquiv => exact hNegEquiv
 
 end Deduction
 
