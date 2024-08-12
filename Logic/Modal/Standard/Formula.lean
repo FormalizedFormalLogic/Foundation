@@ -60,7 +60,6 @@ instance : ToString (Formula α) := ⟨toStr⟩
 
 instance : Coe α (Formula α) := ⟨atom⟩
 
-
 end ToString
 
 @[simp] lemma neg_top : ~(⊤ : Formula α) = ⊥ := rfl
@@ -257,8 +256,8 @@ section Subformula
 variable [DecidableEq α]
 
 def Formula.Subformulas: Formula α → Finset (Formula α)
-  | atom a => {(atom a)}
-  | natom a => {(natom a)}
+  | atom a => {(atom a), (natom a)}
+  | natom a => {(atom a), (natom a)}
   | ⊤      => {⊤}
   | ⊥      => {⊥}
   | p ⋏ q  => insert (p ⋏ q) (p.Subformulas ∪ q.Subformulas)
@@ -406,13 +405,51 @@ lemma degree_lower (h : q ∈ 𝒮 p) : q.degree ≤ p.degree := by
 
 lemma sub_of_top (h : p ∈ 𝒮 ⊤) : p = ⊤ := by simp_all [Subformulas];
 lemma sub_of_bot (h : p ∈ 𝒮 ⊥) : p = ⊥ := by simp_all [Subformulas];
-lemma sub_of_atom {a : α} (h : p ∈ 𝒮 (atom a)) : p = atom a := by simp_all [Subformulas];
-lemma sub_of_natom {a : α} (h : p ∈ 𝒮 (natom a)) : p = natom a := by simp_all [Subformulas];
 
--- attribute [aesop safe forward]
---   sub_of_top
+lemma sub_either_mem_atom (h : (atom a) ∈ 𝒮 p) : (atom a) ∈ 𝒮 p ∧ (natom a) ∈ 𝒮 p := by
+  constructor;
+  . assumption;
+  . induction p using Formula.rec' with
+    | hand q r ihq ihr =>
+      simp_all [Subformulas];
+      rcases h with (hq | hr);
+      . left; exact ihq hq;
+      . right; exact ihr hr;
+    | hor q r ihq ihr =>
+      simp_all [Subformulas];
+      rcases h with (hq | hr);
+      . left; exact ihq hq;
+      . right; exact ihr hr;
+    | _ => simp_all [Subformulas];
+lemma mem_natom_of_mem_atom (h : (atom a) ∈ 𝒮 p) : (natom a) ∈ 𝒮 p := (sub_either_mem_atom h).2
+
+lemma sub_either_mem_natom (h : (natom a) ∈ 𝒮 p) : (atom a) ∈ 𝒮 p ∧ (natom a) ∈ 𝒮 p := by
+  constructor;
+  . induction p using Formula.rec' with
+    | hand q r ihq ihr =>
+      simp_all [Subformulas];
+      rcases h with (hq | hr);
+      . left; exact ihq hq;
+      . right; exact ihr hr;
+    | hor q r ihq ihr =>
+      simp_all [Subformulas];
+      rcases h with (hq | hr);
+      . left; exact ihq hq;
+      . right; exact ihr hr;
+    | _ => simp_all [Subformulas];
+  . assumption;
+lemma mem_atom_of_mem_natom (h : (natom a) ∈ 𝒮 p) : (atom a) ∈ 𝒮 p := (sub_either_mem_natom h).1
+
+attribute [aesop safe forward]
+  mem_natom_of_mem_atom
+  mem_atom_of_mem_natom
 --   sub_of_bot
 --   sub_of_atom
+
+-- lemma sub_of_atom {a : α} (h : p ∈ 𝒮 (atom a)) : atom a := by simp_all [Subformulas];
+-- lemma sub_of_atom {a : α} (h : p ∈ 𝒮 (atom a)) : p = atom a := by simp_all [Subformulas];
+-- lemma sub_of_natom {a : α} (h : p ∈ 𝒮 (natom a)) : p = natom a := by simp_all [Subformulas];
+
 
 end Formula.Subformulas
 

@@ -306,12 +306,21 @@ protected instance semantics {M : Kripke.Model α} : Semantics (Formula α) (M.W
 
 variable {M : Kripke.Model α} {x : M.World} {p q : Formula α}
 
-@[simp] protected lemma iff_models : x ⊧ p ↔ Kripke.Satisfies M x p := iff_of_eq rfl
+@[simp]
+protected lemma iff_models : x ⊧ p ↔ Kripke.Satisfies M x p := iff_of_eq rfl
 
-lemma or_def : x ⊧ p ⋎ q ↔ x ⊧ p ∨ x ⊧ q := by constructor <;> { simp [Satisfies]; }
 
-lemma and_def : x ⊧ p ⋏ q ↔ x ⊧ p ∧ x ⊧ q := by constructor <;> { simp [Satisfies]; }
+lemma or_def : x ⊧ p ⋎ q ↔ x ⊧ p ∨ x ⊧ q := by constructor <;> simp [Satisfies];
+instance : Semantics.Or (M.World) := ⟨or_def⟩
 
+lemma and_def : x ⊧ p ⋏ q ↔ x ⊧ p ∧ x ⊧ q := by constructor <;> simp [Satisfies];
+instance : Semantics.And (M.World) := ⟨and_def⟩
+
+lemma box_def : x ⊧ □p ↔ ∀ y, x ≺ y → y ⊧ p := by simp [Kripke.Satisfies];
+
+lemma dia_def : x ⊧ ◇p ↔ ∃ y, x ≺ y ∧ y ⊧ p := by simp [Kripke.Satisfies];
+
+@[simp]
 lemma not_def : x ⊧ ~p ↔ ¬(x ⊧ p) := by
   induction p using Formula.rec' generalizing x with
   | hbox p ih =>
@@ -335,6 +344,7 @@ lemma not_def : x ⊧ ~p ↔ ¬(x ⊧ p) := by
   | _ =>
     simp_all [Satisfies]
     try tauto;
+instance : Semantics.Not (M.World) := ⟨not_def⟩
 
 @[simp]
 lemma imp_def : x ⊧ p ⟶ q ↔ (x ⊧ p) → (x ⊧ q) := by
@@ -345,21 +355,16 @@ lemma imp_def : x ⊧ p ⟶ q ↔ (x ⊧ p) → (x ⊧ q) := by
     . left; exact not_def.mp hp;
     . right; exact hq;
   . intro hpq;
-    simp only [Formula.imp_eq];
     rcases imp_iff_not_or.mp hpq with (hp | hq);
     . left; exact not_def.mpr hp;
     . right; exact hq;
+instance : Semantics.Imp (M.World) := ⟨imp_def⟩
 
-protected instance tarski : Semantics.Tarski (M.World) where
-  realize_top := by intro; tauto;
+protected instance : Semantics.Tarski (M.World) where
+  realize_top := by tauto;
   realize_bot := by tauto;
-  realize_not := not_def;
-  realize_and := and_def;
-  realize_or  := or_def;
-  realize_imp := imp_def;
 
-
-lemma dia_def : x ⊧ ◇p ↔ ∃ y, x ≺ y ∧ y ⊧ p := by simp [Kripke.Satisfies];
+lemma negneg_def : x ⊧ ~~p ↔ x ⊧ p := by simp [Satisfies];
 
 lemma multibox_def : x ⊧ □^[n]p ↔ ∀ {y}, x ≺^[n] y → y ⊧ p := by
   induction n generalizing x with
@@ -403,6 +408,32 @@ lemma multidia_def : x ⊧ ◇^[n]p ↔ ∃ y, x ≺^[n] y ∧ y ⊧ p := by
 lemma trans (hpq : x ⊧ p ⟶ q) (hqr : x ⊧ q ⟶ r) : x ⊧ p ⟶ r := by simp_all;
 
 lemma mdp (hpq : x ⊧ p ⟶ q) (hp : x ⊧ p) : x ⊧ q := by simp_all;
+
+lemma dia_dual : x ⊧ ◇p ↔ x ⊧ ~□(~p) := by
+  simp [Satisfies];
+  constructor;
+  . rintro ⟨y, Rxy, h⟩;
+    use y;
+    constructor;
+    . exact Rxy;
+    . apply not_def.mp; simpa;
+  . rintro ⟨y, Rxy, h⟩;
+    use y;
+    constructor;
+    . exact Rxy;
+    . have := not_def.mpr h; simpa;
+
+lemma box_dual : x ⊧ □p ↔ x ⊧ ~◇(~p) := by
+  simp [Satisfies];
+  constructor;
+  . intro h y Rxy;
+    have := h y Rxy;
+    apply not_def.mp;
+    simpa;
+  . intro h y Rxy;
+    have := h y Rxy;
+    have := not_def.mpr this;
+    simpa;
 
 end Formula.Kripke.Satisfies
 
