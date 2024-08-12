@@ -95,6 +95,8 @@ lemma neg_eq (p : Formula α) : neg p = ~p := rfl
 
 lemma box_eq (p : Formula α) : box p = □p := rfl
 
+lemma dia_eq (p : Formula α) : dia p = ◇p := rfl
+
 lemma imp_eq (p q : Formula α) : p ⟶ q = ~p ⋎ q := rfl
 
 lemma iff_eq (p q : Formula α) : p ⟷ q = (p ⟶ q) ⋏ (q ⟶ p) := rfl
@@ -136,6 +138,9 @@ def degree : Formula α → Nat
   | p ⋎ q => max p.degree q.degree
   | □p => p.degree + 1
   | ◇p => p.degree + 1
+
+@[simp] lemma degree_neg (p : Formula α) : degree (~p) = degree p := by induction p <;> simp_all [degree, neg, neg_eq]
+@[simp] lemma degree_imp (p q : Formula α) : degree (p ⟶ q) = max (degree p) (degree q) := by rw [imp_eq]; simp [degree, imp_eq]
 
 @[elab_as_elim]
 def cases' {C : Formula α → Sort w}
@@ -184,23 +189,19 @@ section Decidable
 
 variable [DecidableEq α]
 
-/-
 def hasDecEq : (p q : Formula α) → Decidable (p = q)
-  /-
   | ⊤, q => by
     cases q using cases' <;>
     { simp; try { exact isFalse not_false }; try { exact isTrue trivial } }
-  -/
   | ⊥, q => by
-    cases q <;> {
-      simp;
-      try { exact isFalse not_false };
-      try { exact isTrue trivial };
-    }
+    cases q using cases' <;>
+    { simp; try { exact isFalse not_false }; try { exact isTrue trivial } }
   | atom a, q => by
     cases q <;> try { simp; exact isFalse not_false }
     simp; exact decEq _ _;
-  /-
+  | natom a, q => by
+    cases q <;> try { simp; exact isFalse not_false }
+    simp; exact decEq _ _;
   | p ⋏ q, r => by
     cases r using cases' <;> try { simp; exact isFalse not_false }
     case hand p' q' =>
@@ -219,30 +220,20 @@ def hasDecEq : (p q : Formula α) → Decidable (p = q)
         | isTrue hq  => isTrue (hp ▸ hq ▸ rfl)
         | isFalse hq => isFalse (by simp[hp, hq])
       | isFalse hp => isFalse (by simp[hp])
-  | ~p, q => by
-    cases q using cases' <;> try { simp; exact isFalse not_false }
-    case hneg p' =>
-      exact match hasDecEq p p' with
-      | isTrue hp  => isTrue (hp ▸ rfl)
-      | isFalse hp => isFalse (by simp[hp])
-  -/
-  | p ⟶ q, r => by
-    cases r <;> try { simp; exact isFalse not_false }
-    case imp p' q' =>
-      exact match hasDecEq p p' with
-      | isTrue hp =>
-        match hasDecEq q q' with
-        | isTrue hq  => isTrue (hp ▸ hq ▸ rfl)
-        | isFalse hq => isFalse (by simp[hp, hq])
-      | isFalse hp => isFalse (by simp[hp])
   | □p, q => by
     cases q <;> try { simp; exact isFalse not_false }
     case box p' =>
       exact match hasDecEq p p' with
       | isTrue hp  => isTrue (hp ▸ rfl)
       | isFalse hp => isFalse (by simp[hp, box_eq])
+  | ◇p, q => by
+    cases q <;> try { simp; exact isFalse not_false }
+    case dia p' =>
+      exact match hasDecEq p p' with
+      | isTrue hp  => isTrue (hp ▸ rfl)
+      | isFalse hp => isFalse (by simp[hp, dia_eq])
 instance : DecidableEq (Formula α) := hasDecEq
--/
+
 
 end Decidable
 
@@ -320,7 +311,7 @@ attribute [aesop safe 5 forward]
   mem_box
   mem_dia
 
-/-
+
 @[simp]
 lemma complexity_lower (h : q ∈ 𝒮 p) : q.complexity ≤ p.complexity  := by
   induction p using Formula.rec' with
@@ -336,22 +327,19 @@ lemma complexity_lower (h : q ∈ 𝒮 p) : q.complexity ≤ p.complexity  := by
     . subst_vars; simp [Formula.complexity];
     . have := ihp₁ h₁; simp [Formula.complexity]; omega;
     . have := ihp₂ h₂; simp [Formula.complexity]; omega;
-  | himp p₁ p₂ ihp₁ ihp₂ =>
-    simp_all [Subformulas];
-    rcases h with _ | h₁ | h₂;
-    . subst_vars; simp [Formula.complexity];
-    . have := ihp₁ h₁; simp [Formula.complexity]; omega;
-    . have := ihp₂ h₂; simp [Formula.complexity]; omega;
   | hbox p ihp =>
     simp_all [Subformulas];
     rcases h with _ | h₁;
     . subst_vars; simp [Formula.complexity];
     . have := ihp h₁; simp [Formula.complexity]; omega;
-  | hneg p ihp =>
+  | hdia p ihp =>
     simp_all [Subformulas];
     rcases h with _ | h₁;
     . subst_vars; simp [Formula.complexity];
     . have := ihp h₁; simp [Formula.complexity]; omega;
+  | hnatom =>
+    simp_all [Subformulas];
+    rcases h with rfl | rfl <;> simp [Formula.complexity];
   | _ => simp_all [Subformulas, Formula.complexity];
 
 @[simp]
@@ -369,24 +357,20 @@ lemma degree_lower (h : q ∈ 𝒮 p) : q.degree ≤ p.degree := by
     . subst_vars; simp [Formula.degree];
     . have := ihp₁ h₁; simp [Formula.degree]; omega;
     . have := ihp₂ h₂; simp [Formula.degree]; omega;
-  | himp p₁ p₂ ihp₁ ihp₂ =>
-    simp_all [Subformulas];
-    rcases h with _ | h₁ | h₂;
-    . subst_vars; simp [Formula.degree];
-    . have := ihp₁ h₁; simp [Formula.degree]; omega;
-    . have := ihp₂ h₂; simp [Formula.degree]; omega;
   | hbox p ihp =>
     simp_all [Subformulas];
     rcases h with _ | h₁;
     . subst_vars; simp [Formula.degree];
     . have := ihp h₁; simp [Formula.degree]; omega;
-  | hneg p ihp =>
+  | hdia p ihp =>
     simp_all [Subformulas];
     rcases h with _ | h₁;
     . subst_vars; simp [Formula.degree];
     . have := ihp h₁; simp [Formula.degree]; omega;
+  | hnatom =>
+    simp_all [Subformulas];
+    rcases h with rfl | rfl <;> simp [Formula.degree];
   | _ => simp_all [Subformulas, Formula.degree];
--/
 
 lemma sub_of_top (h : p ∈ 𝒮 ⊤) : p = ⊤ := by simp_all [Subformulas];
 lemma sub_of_bot (h : p ∈ 𝒮 ⊥) : p = ⊥ := by simp_all [Subformulas];

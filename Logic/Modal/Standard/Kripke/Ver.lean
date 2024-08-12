@@ -23,7 +23,7 @@ lemma axiomVer_defines : AxiomSet.DefinesKripkeFrameClass (α := α) 𝗩𝗲�
   intro F;
   constructor;
   . intro h x y hxy;
-    exact h ⊥ (λ _ _ => True) x hxy;
+    exact h ⊥ (λ _ _ => True) x _ hxy;
   . intro hIrrefl _ _ x y hxy;
     have := hIrrefl hxy;
     contradiction;
@@ -35,7 +35,7 @@ instance : System.Consistent (𝐕𝐞𝐫 : DeductionParameter α) := consisten
 lemma isolated_CanonicalFrame {Ax : AxiomSet α} (h : 𝗩𝗲𝗿 ⊆ Ax) [System.Consistent 𝝂Ax] : Isolated (CanonicalFrame 𝝂Ax) := by
   intro x y rxy;
   have : (CanonicalModel 𝝂Ax) ⊧ □⊥ := iff_valid_on_canonicalModel_deducible.mpr $ Normal.maxm! (by aesop);
-  exact this x rxy;
+  exact this x _ rxy;
 
 instance : Complete (𝐕𝐞𝐫 : DeductionParameter α) IsolatedFrameClass.{u}# := instComplete_of_mem_canonicalFrame $ isolated_CanonicalFrame (by rfl)
 

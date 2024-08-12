@@ -323,27 +323,7 @@ lemma dia_def : x ⊧ ◇p ↔ ∃ y, x ≺ y ∧ y ⊧ p := by simp [Kripke.Sat
 @[simp]
 lemma not_def : x ⊧ ~p ↔ ¬(x ⊧ p) := by
   induction p using Formula.rec' generalizing x with
-  | hbox p ih =>
-    simp_all [Satisfies];
-    constructor;
-    . rintro ⟨y, Rxy, h⟩;
-      use y;
-      constructor;
-      . assumption;
-      . exact ih.mp h;
-    . rintro ⟨y, Rxy, h⟩;
-      use y;
-      constructor;
-      . assumption;
-      . exact ih.mpr h;
-  | hdia p ih =>
-    simp_all [Satisfies];
-    constructor;
-    . intro h y Rxy; exact ih.mp $ h y Rxy;
-    . intro h y Rxy; exact ih.mpr $ h y Rxy;
-  | _ =>
-    simp_all [Satisfies]
-    try tauto;
+  | _ => simp_all [Satisfies]; try tauto;
 instance : Semantics.Not (M.World) := ⟨not_def⟩
 
 @[simp]
@@ -409,31 +389,9 @@ lemma trans (hpq : x ⊧ p ⟶ q) (hqr : x ⊧ q ⟶ r) : x ⊧ p ⟶ r := by si
 
 lemma mdp (hpq : x ⊧ p ⟶ q) (hp : x ⊧ p) : x ⊧ q := by simp_all;
 
-lemma dia_dual : x ⊧ ◇p ↔ x ⊧ ~□(~p) := by
-  simp [Satisfies];
-  constructor;
-  . rintro ⟨y, Rxy, h⟩;
-    use y;
-    constructor;
-    . exact Rxy;
-    . apply not_def.mp; simpa;
-  . rintro ⟨y, Rxy, h⟩;
-    use y;
-    constructor;
-    . exact Rxy;
-    . have := not_def.mpr h; simpa;
+lemma dia_dual : x ⊧ ◇p ↔ x ⊧ ~□(~p) := by simp [Satisfies];
 
-lemma box_dual : x ⊧ □p ↔ x ⊧ ~◇(~p) := by
-  simp [Satisfies];
-  constructor;
-  . intro h y Rxy;
-    have := h y Rxy;
-    apply not_def.mp;
-    simpa;
-  . intro h y Rxy;
-    have := h y Rxy;
-    have := not_def.mpr this;
-    simpa;
+lemma box_dual : x ⊧ □p ↔ x ⊧ ~◇(~p) := by simp [Satisfies];
 
 end Formula.Kripke.Satisfies
 
@@ -481,20 +439,7 @@ protected lemma dne : M ⊧ (Axioms.DNE p) := by simp [ValidOnModel];
 
 protected lemma negEquiv : M ⊧ (Axioms.NegEquiv p) := by simp [ValidOnModel];
 
-protected lemma diaDual : M ⊧ (Axioms.DiaDuality p) := by
-  intro x;
-  simp [ValidOnModel, Satisfies];
-  constructor;
-  . rintro ⟨y, Rxy, hy⟩; use y;
-    constructor;
-    . exact Rxy;
-    . intro h; replace h:= Satisfies.not_def.mp h;
-      contradiction;
-  . rintro ⟨y, Rxy, hy⟩; use y;
-    constructor;
-    . exact Rxy;
-    . replace hy := Satisfies.not_def.not.mp hy;
-      tauto;
+protected lemma diaDual : M ⊧ (Axioms.DiaDuality p) := by intro x; simp [ValidOnModel, Satisfies];
 
 protected lemma axiomK : M ⊧ (Axioms.K p q)  := by
   intro V;
