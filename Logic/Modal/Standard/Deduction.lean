@@ -43,16 +43,9 @@ inductive Deduction (𝓓 : DeductionParameter α) : (Formula α) → Type _
   | maxm {p}     : p ∈ Ax(𝓓) → Deduction 𝓓 p
   | rule {rl}    : rl ∈ Rl(𝓓) → (∀ {p}, p ∈ rl.antecedents → Deduction 𝓓 p) → Deduction 𝓓 rl.consequence
   | mdp {p q}    : Deduction 𝓓 (p ⟶ q) → Deduction 𝓓 p → Deduction 𝓓 q
-  | verum        : Deduction 𝓓 $ Axioms.Verum
   | imply₁ p q   : Deduction 𝓓 $ Axioms.Imply₁ p q
   | imply₂ p q r : Deduction 𝓓 $ Axioms.Imply₂ p q r
-  | and₁ p q     : Deduction 𝓓 $ Axioms.AndElim₁ p q
-  | and₂ p q     : Deduction 𝓓 $ Axioms.AndElim₂ p q
-  | and₃ p q     : Deduction 𝓓 $ Axioms.AndInst p q
-  | or₁ p q      : Deduction 𝓓 $ Axioms.OrInst₁ p q
-  | or₂ p q      : Deduction 𝓓 $ Axioms.OrInst₂ p q
-  | or₃ p q r    : Deduction 𝓓 $ Axioms.OrElim p q r
-  | dne p        : Deduction 𝓓 $ Axioms.DNE p
+  | ec p q       : Deduction 𝓓 $ Axioms.ElimContra p q
 
 namespace Deduction
 
@@ -62,20 +55,11 @@ instance : System (Formula α) (DeductionParameter α) := ⟨Deduction⟩
 
 variable {𝓓 𝓓₁ 𝓓₂ : DeductionParameter α}
 
-instance : System.WeakMinimal 𝓓 where
+instance : System.Lukasiewicz 𝓓 where
   mdp := mdp
-  verum := verum
   imply₁ := imply₁
   imply₂ := imply₂
-  and₁ := and₁
-  and₂ := and₂
-  and₃ := and₃
-  or₁ := or₁
-  or₂ := or₂
-  or₃ := or₃
-
-instance : System.HasAxiomDNE 𝓓 where
-  dne := dne
+  elim_contra := ec
 
 instance : System.Classical 𝓓 where
 
@@ -142,16 +126,9 @@ noncomputable def inducition!
              motive p (hant hp)) → motive r.consequence ⟨rule hr (λ hp => (hant hp).some)⟩)
   (hMaxm     : ∀ {p}, (h : p ∈ Ax(𝓓)) → motive p ⟨maxm h⟩)
   (hMdp      : ∀ {p q}, {hpq : 𝓓 ⊢! p ⟶ q} → {hp : 𝓓 ⊢! p} → motive (p ⟶ q) hpq → motive p hp → motive q ⟨mdp hpq.some hp.some⟩)
-  (hverum    : motive ⊤ ⟨verum⟩)
-  (hImply₁   : ∀ {p q}, motive (p ⟶ q ⟶ p) $ ⟨imply₁ p q⟩)
-  (hImply₂   : ∀ {p q r}, motive ((p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r) $ ⟨imply₂ p q r⟩)
-  (hAndElim₁ : ∀ {p q}, motive (p ⋏ q ⟶ p) $ ⟨and₁ p q⟩)
-  (hAndElim₂ : ∀ {p q}, motive (p ⋏ q ⟶ q) $ ⟨and₂ p q⟩)
-  (hAndInst  : ∀ {p q}, motive (p ⟶ q ⟶ p ⋏ q) $ ⟨and₃ p q⟩)
-  (hOrInst₁  : ∀ {p q}, motive (p ⟶ p ⋎ q) $ ⟨or₁ p q⟩)
-  (hOrInst₂  : ∀ {p q}, motive (q ⟶ p ⋎ q) $ ⟨or₂ p q⟩)
-  (hOrElim   : ∀ {p q r}, motive ((p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r)) $ ⟨or₃ p q r⟩)
-  (hDne      : ∀ {p}, motive (~~p ⟶ p) $ ⟨dne p⟩)
+  (hImply₁     : ∀ {p q}, motive (p ⟶ q ⟶ p) $ ⟨imply₁ p q⟩)
+  (hImply₂     : ∀ {p q r}, motive ((p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r) $ ⟨imply₂ p q r⟩)
+  (hElimContra : ∀ {p q}, motive (Axioms.ElimContra p q) $ ⟨ec p q⟩)
   : ∀ {p}, (d : 𝓓 ⊢! p) → motive p d := by
   intro p d;
   induction d.some with
@@ -166,16 +143,9 @@ noncomputable def inducition_with_necOnly! [𝓓.HasNecOnly]
   (hMaxm   : ∀ {p}, (h : p ∈ Ax(𝓓)) → motive p ⟨maxm h⟩)
   (hMdp    : ∀ {p q}, {hpq : 𝓓 ⊢! p ⟶ q} → {hp : 𝓓 ⊢! p} → motive (p ⟶ q) hpq → motive p hp → motive q (hpq ⨀ hp))
   (hNec    : ∀ {p}, {hp : 𝓓 ⊢! p} → (ihp : motive p hp) → motive (□p) (System.nec! hp))
-  (hverum    : motive ⊤ ⟨verum⟩)
   (hImply₁   : ∀ {p q}, motive (p ⟶ q ⟶ p) $ ⟨imply₁ p q⟩)
   (hImply₂   : ∀ {p q r}, motive ((p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r) $ ⟨imply₂ p q r⟩)
-  (hAndElim₁ : ∀ {p q}, motive (p ⋏ q ⟶ p) $ ⟨and₁ p q⟩)
-  (hAndElim₂ : ∀ {p q}, motive (p ⋏ q ⟶ q) $ ⟨and₂ p q⟩)
-  (hAndInst  : ∀ {p q}, motive (p ⟶ q ⟶ p ⋏ q) $ ⟨and₃ p q⟩)
-  (hOrInst₁  : ∀ {p q}, motive (p ⟶ p ⋎ q) $ ⟨or₁ p q⟩)
-  (hOrInst₂  : ∀ {p q}, motive (q ⟶ p ⋎ q) $ ⟨or₂ p q⟩)
-  (hOrElim   : ∀ {p q r}, motive ((p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r)) $ ⟨or₃ p q r⟩)
-  (hDne      : ∀ {p}, motive (~~p ⟶ p) $ ⟨dne p⟩)
+  (hElimContra : ∀ {p q}, motive (Axioms.ElimContra p q) $ ⟨ec p q⟩)
   : ∀ {p}, (d : 𝓓 ⊢! p) → motive p d := by
   intro p d;
   induction d using Deduction.inducition! with
@@ -185,16 +155,9 @@ noncomputable def inducition_with_necOnly! [𝓓.HasNecOnly]
     rw [HasNecOnly.has_necessitation_only] at hrl;
     obtain ⟨p, e⟩ := hrl; subst e;
     exact @hNec p (hant (by simp)) $ ih (by simp);
-  | hverum => exact hverum
   | hImply₁ => exact hImply₁
   | hImply₂ => exact hImply₂
-  | hAndElim₁ => exact hAndElim₁
-  | hAndElim₂ => exact hAndElim₂
-  | hAndInst => exact hAndInst
-  | hOrInst₁ => exact hOrInst₁
-  | hOrInst₂ => exact hOrInst₂
-  | hOrElim => exact hOrElim
-  | hDne => exact hDne
+  | hElimContra => exact hElimContra
 
 end Deduction
 
@@ -371,16 +334,8 @@ macro_rules | `(tactic| trivial) => `(tactic|
     first
     | apply verum!
     | apply imply₁!
-    | apply imply₁!
     | apply imply₂!
-    | apply and₁!
-    | apply and₂!
-    | apply and₃!
-    | apply or₁!
-    | apply or₂!
-    | apply or₃!
-    | apply neg_equiv!
-    | apply dia_duality!
+    | apply elim_contra!
   )
 
 macro_rules | `(tactic| trivial) => `(tactic | apply dne!)

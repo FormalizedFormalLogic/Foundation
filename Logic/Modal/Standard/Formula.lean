@@ -1,3 +1,4 @@
+import Logic.Logic.HilbertStyle.Lukasiewicz
 import Logic.Vorspiel.Collection
 import Logic.Modal.Standard.System
 
@@ -20,7 +21,7 @@ abbrev top : Formula α := imp falsum falsum
 
 abbrev or (p q : Formula α) : Formula α := imp (neg p) q
 
-abbrev and (p q : Formula α) : Formula α := neg (or (neg p) (neg q))
+abbrev and (p q : Formula α) : Formula α := neg (imp p (neg q))
 
 abbrev dia (p : Formula α) : Formula α := neg (box (neg p))
 
@@ -36,7 +37,11 @@ instance : BasicModalLogicalConnective (Formula α) where
   box := box
   dia := dia
 
-instance : NegAbbrev (Formula α) := ⟨rfl⟩
+instance : LukasiewiczAbbrev (Formula α) where
+  top := rfl
+  neg := rfl
+  or := rfl
+  and := rfl
 instance : DiaAbbrev (Formula α) := ⟨rfl⟩
 
 section ToString

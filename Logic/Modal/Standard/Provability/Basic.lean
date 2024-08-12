@@ -20,6 +20,18 @@ def interpretation
   | p ⟶ q => (interpretation f β p) ⟶ (interpretation f β q)
 scoped notation f "[" β "] " p => interpretation f β p -- TODO: more good notation
 
+namespace interpretation
+
+variable [Semiterm.Operator.GoedelNumber L (FirstOrder.Sentence L)]
+         {f : realization L α} {β : ProvabilityPredicate L L} {p q : Formula α}
+         [NegAbbrev (FirstOrder.Sentence L)]
+
+lemma imp_def : (f[β] (p ⟶ q)) = ((f[β] p) ⟶ (f[β] q)) := by rfl
+lemma box_def : (f[β] □p) = ⦍β⦎(f[β] p) := by rfl
+lemma neg_def : (f[β] ~p) = (f[β] p) ⟶ ⊥ := by rfl
+
+end interpretation
+
 /-
   TODO:
   `ArithmeticalSoundness`と`ArithmeticalCompleteness`を単純にinstance化する際には大抵`T₀`に依存してしまうため型推論が壊れてしまう．
@@ -62,6 +74,9 @@ variable {L : FirstOrder.Language} [Semiterm.Operator.GoedelNumber L (Sentence L
          [DecidableEq (Sentence L)]
          (T₀ T : FirstOrder.Theory L) [T₀ ≼ T] [Diagonalization T₀]
          (β : ProvabilityPredicate L L)
+-- TODO: 強すぎる仮定かもしれない
+variable [HasAxiomDNE T]
+variable [NegAbbrev (FirstOrder.Sentence L)]
 
 lemma arithmetical_soundness_K4Loeb [β.HBL T₀ T] (h : 𝐊𝟒(𝐋) ⊢! p) : ∀ {f : realization L α}, T ⊢! (f[β] p) := by
   intro f;
@@ -81,9 +96,9 @@ lemma arithmetical_soundness_K4Loeb [β.HBL T₀ T] (h : 𝐊𝟒(𝐋) ⊢! p) 
   | hMdp ihpq ihp =>
     simp [interpretation] at ihpq;
     exact ihpq ⨀ ihp;
-  | hDne =>
+  | @hElimContra p q =>
     dsimp [interpretation];
-    exact dne!;
+    simpa [NegAbbrev.neg] using (contra₃! (𝓢 := T) (p := f[β] q) (q := f[β] p));
   | _ => dsimp [interpretation]; trivial;
 
 theorem arithmetical_soundness_GL [β.HBL T₀ T] (h : 𝐆𝐋 ⊢! p) : ∀ {f : realization L α}, T ⊢! (f[β] p) := by
@@ -103,9 +118,9 @@ lemma arithmetical_soundness_N [β.HBL T₀ T] (h : 𝐍 ⊢! p) : ∀ {f : real
   | hMdp ihpq ihp =>
     simp only [interpretation] at ihpq;
     exact ihpq ⨀ ihp;
-  | hDne =>
+  | @hElimContra p q =>
     dsimp [interpretation];
-    exact dne!;
+    simpa [NegAbbrev.neg] using (contra₃! (𝓢 := T) (p := f[β] q) (q := f[β] p));
   | _ => dsimp [interpretation]; trivial;
 
 end ArithmeticalSoundness

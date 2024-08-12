@@ -424,6 +424,8 @@ protected lemma negEquiv : M ⊧ (Axioms.NegEquiv p) := by simp [ValidOnModel];
 
 protected lemma diaDual : M ⊧ (Axioms.DiaDuality p) := by intro x; simp [ValidOnModel, Satisfies];
 
+protected lemma elimContra : M ⊧ (Axioms.ElimContra p q) := by simp [ValidOnModel, Satisfies]; tauto;
+
 protected lemma axiomK : M ⊧ (Axioms.K p q)  := by
   intro V;
   apply Satisfies.imp_def.mpr;
@@ -474,6 +476,8 @@ protected lemma orElim : F ⊧ (Axioms.OrElim p q r) := by intro V; exact ValidO
 
 protected lemma dne : F ⊧ (Axioms.DNE p) := by intro V; exact ValidOnModel.dne (M := ⟨F, V⟩);
 
+protected lemma elimContra : F ⊧ (Axioms.ElimContra p q) := by intro V; exact ValidOnModel.elimContra (M := ⟨F, V⟩);
+
 protected lemma negEquiv : F ⊧ (Axioms.NegEquiv p) := by intro V; exact ValidOnModel.negEquiv (M := ⟨F, V⟩);
 
 protected lemma diaDual : F ⊧ (Axioms.DiaDuality p) := by intro V; exact ValidOnModel.diaDual (M := ⟨F, V⟩);
@@ -522,6 +526,8 @@ variable {𝔽 : FrameClass.Dep α}
 @[simp] protected lemma orElim : 𝔽 ⊧ (Axioms.OrElim p q r) := by intro _ _; exact ValidOnFrame.orElim;
 
 @[simp] protected lemma dne : 𝔽 ⊧ (Axioms.DNE p) := by intro _ _; exact ValidOnFrame.dne;
+
+@[simp] protected lemma elimContra : 𝔽 ⊧ (Axioms.ElimContra p q) := by intro _ _; exact ValidOnFrame.elimContra;
 
 @[simp] protected lemma negEquiv : 𝔽 ⊧ (Axioms.NegEquiv p) := by intro _ _; exact ValidOnFrame.negEquiv;
 

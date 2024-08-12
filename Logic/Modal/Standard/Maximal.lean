@@ -144,6 +144,22 @@ variable {p : Formula α}
 open System
 open Formula
 
+macro_rules | `(tactic| trivial) => `(tactic|
+    first
+    | apply verum!
+    | apply imply₁!
+    | apply imply₂!
+    | apply elim_contra!
+    | apply and₁!
+    | apply and₂!
+    | apply and₃!
+    | apply or₁!
+    | apply or₂!
+    | apply or₃!
+    | apply neg_equiv!
+    | apply dia_duality!
+  )
+
 lemma deducible_iff_trivTranslation : 𝐓𝐫𝐢𝐯 ⊢! p ⟷ pᵀ := by
   induction p using Formula.rec' with
   | hbox p ih =>

@@ -25,18 +25,9 @@ lemma sound (defines : Ax.DefinesKripkeFrameClass 𝔽) (d : (𝝂Ax) ⊢! p) : 
   | hMdp ihpq ihp => exact Kripke.ValidOnFrameClass.mdp ihpq ihp;
   | hNec ih => exact Kripke.ValidOnFrameClass.nec ih;
   | _ => first
-    | exact ValidOnFrameClass.orInst₁;
-    | exact ValidOnFrameClass.orInst₂;
-    | exact ValidOnFrameClass.orElim;
-    | exact ValidOnFrameClass.andInst;
-    | exact ValidOnFrameClass.andElim₁;
-    | exact ValidOnFrameClass.andElim₂;
     | exact ValidOnFrameClass.imply₁;
     | exact ValidOnFrameClass.imply₂;
-    | exact ValidOnFrameClass.verum;
-    | exact ValidOnFrameClass.dne;
-    | exact ValidOnFrameClass.negEquiv;
-    | exact ValidOnFrameClass.diaDual;
+    | exact ValidOnFrameClass.elimContra;
 
 lemma sound_of_defines (defines : Ax.DefinesKripkeFrameClass 𝔽) : Sound (𝝂Ax) 𝔽# := ⟨sound defines⟩
 
@@ -73,18 +64,9 @@ lemma finite_sound (defines : Ax.FinitelyDefinesKripkeFrameClass 𝔽) (d : (�
   | hMdp ihpq ihp => exact Kripke.ValidOnFrameClass.mdp ihpq ihp;
   | hNec ih => exact Kripke.ValidOnFrameClass.nec ih;
   | _ => first
-    | exact ValidOnFrameClass.orInst₁;
-    | exact ValidOnFrameClass.orInst₂;
-    | exact ValidOnFrameClass.orElim;
-    | exact ValidOnFrameClass.andInst;
-    | exact ValidOnFrameClass.andElim₁;
-    | exact ValidOnFrameClass.andElim₂;
     | exact ValidOnFrameClass.imply₁;
     | exact ValidOnFrameClass.imply₂;
-    | exact ValidOnFrameClass.verum;
-    | exact ValidOnFrameClass.dne;
-    | exact ValidOnFrameClass.negEquiv;
-    | exact ValidOnFrameClass.diaDual;
+    | exact ValidOnFrameClass.elimContra;
 
 lemma sound_of_finitely_defines (defines : Ax.FinitelyDefinesKripkeFrameClass 𝔽) : Sound (𝝂Ax) ↑𝔽# := ⟨finite_sound defines⟩
 
