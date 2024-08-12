@@ -28,6 +28,9 @@ class HasAxiomImply₁ (𝓢 : S)  where
 class HasAxiomImply₂ (𝓢 : S)  where
   imply₂ (p q r : F) : 𝓢 ⊢ Axioms.Imply₂ p q r
 
+class HasAxiomElimContra (𝓢 : S)  where
+  elim_contra (p q : F) : 𝓢 ⊢ Axioms.ElimContra p q
+
 class HasAxiomAndElim₁ (𝓢 : S)  where
   and₁ (p q : F) : 𝓢 ⊢ Axioms.AndElim₁ p q
 
@@ -88,35 +91,45 @@ lemma mdp! [ModusPonens 𝓢] : 𝓢 ⊢! p ⟶ q → 𝓢 ⊢! p → 𝓢 ⊢! 
 infixl:90 "⨀" => mdp!
 
 
-variable [System.Minimal 𝓢]
+variable
+  [System.ModusPonens 𝓢]
+  [System.HasAxiomVerum 𝓢]
+  [System.HasAxiomImply₁ 𝓢]
+  [System.HasAxiomImply₂ 𝓢]
+  [System.HasAxiomAndElim₁ 𝓢]
+  [System.HasAxiomAndElim₂ 𝓢]
+  [System.HasAxiomAndInst 𝓢]
+  [System.HasAxiomOrInst₁ 𝓢]
+  [System.HasAxiomOrInst₂ 𝓢]
+  [System.HasAxiomOrElim 𝓢]
 
 def cast {p q : F} (e : p = q) (b : 𝓢 ⊢ p) : 𝓢 ⊢ q := e ▸ b
 
-def verum [HasAxiomVerum 𝓢] : 𝓢 ⊢ ⊤ := HasAxiomVerum.verum
-@[simp] lemma verum! : 𝓢 ⊢! ⊤ := ⟨verum⟩
+def verum : 𝓢 ⊢ ⊤ := HasAxiomVerum.verum
+@[simp] lemma verum! [HasAxiomVerum 𝓢] : 𝓢 ⊢! ⊤ := ⟨verum⟩
 
-def imply₁ [HasAxiomImply₁ 𝓢] : 𝓢 ⊢ p ⟶ q ⟶ p := HasAxiomImply₁.imply₁ _ _
+def imply₁ : 𝓢 ⊢ p ⟶ q ⟶ p := HasAxiomImply₁.imply₁ _ _
 @[simp] lemma imply₁! : 𝓢 ⊢! p ⟶ q ⟶ p := ⟨imply₁⟩
 
-def imply₂ [HasAxiomImply₂ 𝓢] : 𝓢 ⊢ (p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r := HasAxiomImply₂.imply₂ _ _ _
+def imply₂ : 𝓢 ⊢ (p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r := HasAxiomImply₂.imply₂ _ _ _
 @[simp] lemma imply₂! : 𝓢 ⊢! (p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r := ⟨imply₂⟩
 
-def and₁ [HasAxiomAndElim₁ 𝓢] : 𝓢 ⊢ p ⋏ q ⟶ p := HasAxiomAndElim₁.and₁ _ _
+def and₁ : 𝓢 ⊢ p ⋏ q ⟶ p := HasAxiomAndElim₁.and₁ _ _
 @[simp] lemma and₁! : 𝓢 ⊢! p ⋏ q ⟶ p := ⟨and₁⟩
 
-def and₂ [HasAxiomAndElim₂ 𝓢] : 𝓢 ⊢ p ⋏ q ⟶ q := HasAxiomAndElim₂.and₂ _ _
+def and₂ : 𝓢 ⊢ p ⋏ q ⟶ q := HasAxiomAndElim₂.and₂ _ _
 @[simp] lemma and₂! : 𝓢 ⊢! p ⋏ q ⟶ q := ⟨and₂⟩
 
-def and₃ [HasAxiomAndInst 𝓢] : 𝓢 ⊢ p ⟶ q ⟶ p ⋏ q := HasAxiomAndInst.and₃ _ _
+def and₃ : 𝓢 ⊢ p ⟶ q ⟶ p ⋏ q := HasAxiomAndInst.and₃ _ _
 @[simp] lemma and₃! : 𝓢 ⊢! p ⟶ q ⟶ p ⋏ q := ⟨and₃⟩
 
-def or₁ [HasAxiomOrInst₁ 𝓢] : 𝓢 ⊢ p ⟶ p ⋎ q := HasAxiomOrInst₁.or₁ _ _
+def or₁ : 𝓢 ⊢ p ⟶ p ⋎ q := HasAxiomOrInst₁.or₁ _ _
 @[simp] lemma or₁! : 𝓢 ⊢! p ⟶ p ⋎ q := ⟨or₁⟩
 
-def or₂ [HasAxiomOrInst₂ 𝓢] : 𝓢 ⊢ q ⟶ p ⋎ q := HasAxiomOrInst₂.or₂ _ _
+def or₂ : 𝓢 ⊢ q ⟶ p ⋎ q := HasAxiomOrInst₂.or₂ _ _
 @[simp] lemma or₂! : 𝓢 ⊢! q ⟶ p ⋎ q := ⟨or₂⟩
 
-def or₃ [HasAxiomOrElim 𝓢] : 𝓢 ⊢ (p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q) ⟶ r := HasAxiomOrElim.or₃ _ _ _
+def or₃ : 𝓢 ⊢ (p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q) ⟶ r := HasAxiomOrElim.or₃ _ _ _
 @[simp] lemma or₃! : 𝓢 ⊢! (p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q) ⟶ r := ⟨or₃⟩
 
 def efq [HasAxiomEFQ 𝓢] : 𝓢 ⊢ ⊥ ⟶ p := HasAxiomEFQ.efq _
@@ -142,6 +155,9 @@ def dummett [HasAxiomDummett 𝓢] : 𝓢 ⊢ (p ⟶ q) ⋎ (q ⟶ p) := HasAxio
 
 def peirce [HasAxiomPeirce 𝓢] : 𝓢 ⊢ ((p ⟶ q) ⟶ p) ⟶ p := HasAxiomPeirce.peirce _ _
 @[simp] lemma peirce! [HasAxiomPeirce 𝓢] : 𝓢 ⊢! ((p ⟶ q) ⟶ p) ⟶ p := ⟨peirce⟩
+
+def elim_contra [HasAxiomElimContra 𝓢] : 𝓢 ⊢ (~q ⟶ ~p) ⟶ (p ⟶ q) := HasAxiomElimContra.elim_contra _ _
+@[simp] lemma elim_contra! [HasAxiomElimContra 𝓢] : 𝓢 ⊢! (~q ⟶ ~p) ⟶ (p ⟶ q) := ⟨elim_contra⟩
 
 def imply₁' (h : 𝓢 ⊢ p) : 𝓢 ⊢ q ⟶ p := imply₁ ⨀ h
 lemma imply₁'! (d : 𝓢 ⊢! p) : 𝓢 ⊢! q ⟶ p := ⟨imply₁' d.some⟩
