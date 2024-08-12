@@ -117,9 +117,26 @@ lemma provable_S4_of_provable_efq : (𝐒𝟒 ⊢! pᵍ) → (𝐈𝐧𝐭 ⊢! 
         exact IV_hered h (by assumption);
       . intro h;
         simpa only [Satisfies.iff_models, Satisfies, Formula.Kripke.Satisfies] using h _ $ IF_refl v;
+    | hneg q ih =>
+      simp [GoedelTranslation];
+      constructor;
+      . intro h x Rvx;
+        apply Kripke.Satisfies.not_def.mpr;
+        intro hq;
+        exact h Rvx $ ih x |>.mpr hq;
+      . intro h x Rvx hq;
+        exact (Kripke.Satisfies.not_def.mp $ h x Rvx) $ ih x |>.mp hq;
+    | himp q r ihq ihr =>
+      simp [GoedelTranslation];
+      constructor;
+      . intro h x Rvx;
+        apply Kripke.Satisfies.imp_def.mpr;
+        intro hq;
+        apply ihr x |>.mp $ h Rvx $ ihq x |>.mpr hq;
+      . intro h x Rvx hq;
+        exact ihr x |>.mpr $ Kripke.Satisfies.imp_def.mp (@h x Rvx) $ ihq x |>.mp hq;
     | _ =>
       simp_all [Satisfies, Kripke.Satisfies];
-      try tauto;
   have : ¬(Modal.Standard.Formula.Kripke.Satisfies M w (pᵍ)) := (h₁ p w).not.mp hp;
 
   apply not_imp_not.mpr $ Modal.Standard.Kripke.sound_S4.sound;
