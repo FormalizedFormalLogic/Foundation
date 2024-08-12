@@ -67,14 +67,13 @@ class HasAxiomDummett where
 class HasAxiomPeirce where
   peirce (p q : F) : 𝓢 ⊢ Axioms.Peirce p q
 
-protected class WeakMinimal extends
+protected class Minimal extends
+              NegationEquiv 𝓢,
               ModusPonens 𝓢,
               HasAxiomVerum 𝓢,
               HasAxiomImply₁ 𝓢, HasAxiomImply₂ 𝓢,
               HasAxiomAndElim₁ 𝓢, HasAxiomAndElim₂ 𝓢, HasAxiomAndInst 𝓢,
               HasAxiomOrInst₁ 𝓢, HasAxiomOrInst₂ 𝓢, HasAxiomOrElim 𝓢
-
-protected class Minimal extends System.WeakMinimal 𝓢, NegationEquiv 𝓢
 
 protected class Intuitionistic extends System.Minimal 𝓢, HasAxiomEFQ 𝓢
 
@@ -158,8 +157,8 @@ def dummett [HasAxiomDummett 𝓢] : 𝓢 ⊢ (p ⟶ q) ⋎ (q ⟶ p) := HasAxio
 def peirce [HasAxiomPeirce 𝓢] : 𝓢 ⊢ ((p ⟶ q) ⟶ p) ⟶ p := HasAxiomPeirce.peirce _ _
 @[simp] lemma peirce! [HasAxiomPeirce 𝓢] : 𝓢 ⊢! ((p ⟶ q) ⟶ p) ⟶ p := ⟨peirce⟩
 
-def elim_contra [HasAxiomElimContra 𝓢] : 𝓢 ⊢ ((q ⟶ ⊥) ⟶ (p ⟶ ⊥)) ⟶ (p ⟶ q) := HasAxiomElimContra.elim_contra _ _
-@[simp] lemma elim_contra! [HasAxiomElimContra 𝓢] : 𝓢 ⊢! ((q ⟶ ⊥) ⟶ (p ⟶ ⊥)) ⟶ (p ⟶ q) := ⟨elim_contra⟩
+def elim_contra [HasAxiomElimContra 𝓢] : 𝓢 ⊢ (~q ⟶ ~p) ⟶ (p ⟶ q) := HasAxiomElimContra.elim_contra _ _
+@[simp] lemma elim_contra! [HasAxiomElimContra 𝓢] : 𝓢 ⊢! (~q ⟶ ~p) ⟶ (p ⟶ q) := ⟨elim_contra⟩
 
 def imply₁' (h : 𝓢 ⊢ p) : 𝓢 ⊢ q ⟶ p := imply₁ ⨀ h
 lemma imply₁'! (d : 𝓢 ⊢! p) : 𝓢 ⊢! q ⟶ p := ⟨imply₁' d.some⟩
