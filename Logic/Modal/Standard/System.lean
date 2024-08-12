@@ -165,9 +165,9 @@ def multiboxIff' (h : 𝓢 ⊢ p ⟷ q) : 𝓢 ⊢ □^[n]p ⟷ □^[n]q := by
   | succ n ih => simpa using boxIff' ih;
 @[simp] lemma multibox_iff! (h : 𝓢 ⊢! p ⟷ q) : 𝓢 ⊢! □^[n]p ⟷ □^[n]q := ⟨multiboxIff' h.some⟩
 
-instance [DiaAbbrev F] : HasDiaDuality 𝓢 := ⟨by
+instance [ModalDeMorgan F] [HasAxiomDNE 𝓢] : HasDiaDuality 𝓢 := ⟨by
   intro p;
-  simp [Axioms.DiaDuality, DiaAbbrev.dia_abbrev];
+  simp only [Axioms.DiaDuality, ModalDeMorgan.box, DeMorgan.neg];
   apply iffId;
 ⟩
 
@@ -468,6 +468,13 @@ instance [HasAxiomT 𝓢] (Γ : Context F 𝓢) : HasAxiomT Γ := ⟨fun _ ↦ C
 def axiomT' [HasAxiomT 𝓢] (h : 𝓢 ⊢ □p) : 𝓢 ⊢ p := axiomT ⨀ h
 @[simp] lemma axiomT'! [HasAxiomT 𝓢] (h : 𝓢 ⊢! □p) : 𝓢 ⊢! p := ⟨axiomT' h.some⟩
 
+def diaT [HasDiaDuality 𝓢] [HasAxiomT 𝓢] : 𝓢 ⊢ p ⟶ ◇p := by
+  apply impTrans'' ?_ (and₂' diaDuality);
+  exact impTrans'' dni $ contra₀' axiomT;
+@[simp] lemma diaT! [HasDiaDuality 𝓢] [HasAxiomT 𝓢] : 𝓢 ⊢! p ⟶ ◇p := ⟨diaT⟩
+
+def diaT' [HasDiaDuality 𝓢] [HasAxiomT 𝓢] (h : 𝓢 ⊢ p) : 𝓢 ⊢ ◇p := diaT ⨀ h
+lemma diaT'! [HasDiaDuality 𝓢] [HasAxiomT 𝓢] (h : 𝓢 ⊢! p) : 𝓢 ⊢! ◇p := ⟨diaT' h.some⟩
 
 def axiomB [HasAxiomB 𝓢] : 𝓢 ⊢ p ⟶ □◇p := HasAxiomB.B _
 @[simp] lemma axiomB! [HasAxiomB 𝓢] : 𝓢 ⊢! p ⟶ □◇p := ⟨axiomB⟩
@@ -532,6 +539,12 @@ def iff_box_boxdot [HasAxiomT 𝓢] [HasAxiomFour 𝓢] : 𝓢 ⊢ □p ⟷ ⊡p
   . exact implyRightAnd (axiomT) (impId _);
   . exact and₂;
 @[simp] lemma iff_box_boxdot! [HasAxiomT 𝓢] [HasAxiomFour 𝓢] : 𝓢 ⊢! □p ⟷ ⊡p := ⟨iff_box_boxdot⟩
+
+def iff_dia_diadot [HasAxiomT 𝓢] [HasAxiomFour 𝓢] : 𝓢 ⊢ ◇p ⟷ ⟐p := by
+  apply iffIntro;
+  . exact or₂;
+  . exact or₃'' (diaT) (impId _)
+@[simp] lemma iff_dia_diadot! [HasAxiomT 𝓢] [HasAxiomFour 𝓢] : 𝓢 ⊢! ◇p ⟷ ⟐p := ⟨iff_dia_diadot⟩
 
 def axiomFive [HasAxiomFive 𝓢] : 𝓢 ⊢ ◇p ⟶ □◇p := HasAxiomFive.Five _
 @[simp] lemma axiomFive! [HasAxiomFive 𝓢] : 𝓢 ⊢! ◇p ⟶ □◇p := ⟨axiomFive⟩
@@ -765,7 +778,7 @@ noncomputable def boxdot_Grz_of_L : 𝓢 ⊢ ⊡(⊡(p ⟶ ⊡p) ⟶ p) ⟶ p :=
   have : 𝓢 ⊢ □(⊡(p ⟶ ⊡p) ⟶ p) ⟶ □(p ⟶ ⊡p) := impTrans'' this axiomL;
   have : 𝓢 ⊢ ⊡(⊡(p ⟶ ⊡p) ⟶ p) ⟶ □(p ⟶ ⊡p) := impTrans'' boxdotBox this;
   exact mdp₁ boxdot_Grz_of_L1 this;
-lemma boxdot_Grz_of_L! : 𝓢 ⊢! ⊡(⊡(p ⟶ ⊡p) ⟶ p) ⟶ p := ⟨boxdot_Grz_of_L⟩
+@[simp] lemma boxdot_Grz_of_L! : 𝓢 ⊢! ⊡(⊡(p ⟶ ⊡p) ⟶ p) ⟶ p := ⟨boxdot_Grz_of_L⟩
 
 end GL_Grz
 

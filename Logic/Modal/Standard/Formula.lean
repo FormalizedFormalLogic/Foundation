@@ -16,7 +16,7 @@ inductive Formula (α : Type u) : Type u where
 
 namespace Formula
 
-def neg : Formula α → Formula α
+abbrev neg : Formula α → Formula α
   | verum   => falsum
   | falsum  => verum
   | atom a  => natom a
@@ -26,13 +26,15 @@ def neg : Formula α → Formula α
   | box p   => dia (neg p)
   | dia p   => box (neg p)
 
+abbrev imp : Formula α → Formula α → Formula α := λ p q => or (neg p) q
+
 lemma neg_neg (p : Formula α) : neg (neg p) = p := by induction p <;> simp[*, neg]
 
 variable {α : Type u}
 
 instance : BasicModalLogicalConnective (Formula α) where
   tilde := neg
-  arrow := λ p q => or (neg p) q
+  arrow := imp
   wedge := and
   vee := or
   top := verum
@@ -76,6 +78,10 @@ end ToString
 
 @[simp] lemma neg_neg' (p : Formula α) : ~~p = p := neg_neg p
 
+@[simp] lemma neg_box (p : Formula α) : ~(□p) = ◇(~p) := rfl
+
+@[simp] lemma neg_dia (p : Formula α) : ~(◇p) = □(~p) := rfl
+
 @[simp] lemma neg_inj (p q : Formula α) : ~p = ~q ↔ p = q := by
   constructor
   · intro h; simpa using congr_arg (~·) h
@@ -99,13 +105,15 @@ lemma iff_eq (p q : Formula α) : p ⟷ q = (p ⟶ q) ⋏ (q ⟶ p) := rfl
 
 -- @[simp] lemma imp_inj (p₁ q₁ p₂ q₂ : Formula α) : p₁ ⟶ p₂ = q₁ ⟶ q₂ ↔ p₁ = q₁ ∧ p₂ = q₂ := by simp[Arrow.arrow]
 
-instance : DeMorgan (Formula α) where
+instance : ModalDeMorgan (Formula α) where
   verum := rfl
   falsum := rfl
   and := by simp
   or := by simp
   imply := by simp[imp_eq]
   neg := by simp
+  dia := by simp
+  box := by simp
 
 /-- Formula complexity -/
 def complexity : Formula α → ℕ
