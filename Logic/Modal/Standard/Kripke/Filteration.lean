@@ -16,7 +16,7 @@ section
 
 def filterEquiv (M : Kripke.Model α) (T : Theory α) [T.SubformulaClosed] (x y : M.World) := ∀ p, (_ : p ∈ T := by trivial) → x ⊧ p ↔ y ⊧ p
 
-variable (M : Kripke.Model α) (T : Theory α) [T_closed : T.SubformulaClosed]
+variable (M : Kripke.Model α) (T : Theory α) [T.SubformulaClosed]
 
 lemma filterEquiv.equivalence : Equivalence (filterEquiv M T) where
   refl := by intro x p _; rfl;
@@ -66,14 +66,14 @@ class Model.FilterOf (FM : Model α) (M : Model α) (T : Theory α) [T.Subformul
     constructor;
     . intro h p hp sp₂; exact hy p |>.mp $ h p hp $ hx (□p) hp |>.mpr sp₂;
     . intro h p hp sp₁; exact hy p |>.mpr $ h p hp $ hx (□p) hp |>.mp sp₁;
-  ) (cast def_world Qx) (cast def_world Qy) := by tauto;
+  ) (cast def_world Qx) (cast def_world Qy)
   def_dia : ∀ {Qx Qy : FM.World}, Qx ≺ Qy → Quotient.lift₂ (λ x y => ∀ p, ◇p ∈ T → (y ⊧ p → x ⊧ ◇p)) (by
     intro x₁ y₁ x₂ y₂ hx hy;
     simp;
     constructor;
     . intro h p hp sp₁; exact hx (◇p) |>.mp $ h p (by trivial) $ hy p |>.mpr sp₁;
     . intro h p hp sp₂; exact hx (◇p) |>.mpr $ h p (by trivial) $ hy p |>.mp sp₂;
-  ) (cast def_world Qx) (cast def_world Qy) := by tauto;
+  ) (cast def_world Qx) (cast def_world Qy)
   def_valuation Qx a : (ha : (atom a) ∈ T := by trivial) →
     FM.Valuation Qx a ↔ Quotient.lift (λ x => M.Valuation x a) (by
       simp; intro x y h;
@@ -104,26 +104,44 @@ abbrev FinestFilterationModel (M : Model α) (T : Theory α) [T.SubformulaClosed
   Frame := FinestFilterationFrame M T
   Valuation := StandardFilterationValuation M T
 
-@[simp]
 instance FinestFilterationModel.filterOf {M} {T : Theory α} [T.SubformulaClosed] : (FinestFilterationModel M T).FilterOf M T where
-
+  def_box := by
+    intro Qx Qy rQxQy;
+    obtain ⟨x, y, rfl, rfl, hxy⟩ := rQxQy;
+    simp_all [Satisfies];
+  def_dia := by
+    intro Qx Qy rQxQy;
+    obtain ⟨x, y, rfl, rfl, hxy⟩ := rQxQy;
+    simp_all [Satisfies];
+    intros;
+    use y;
 
 abbrev CoarsestFilterationFrame (M : Model α) (T : Theory α) [T.SubformulaClosed] : Kripke.Frame where
   World := FilterEqvQuotient M T
-  Rel Qx Qy := Quotient.lift₂ (λ x y => ∀ p, □p ∈ T → (x ⊧ □p → y ⊧ p)) (by
-    intro x₁ y₁ x₂ y₂ hx hy;
-    simp;
-    constructor;
-    . intro h p hp sp₂; exact hy p |>.mp $ h p hp $ hx (□p) hp |>.mpr sp₂;
-    . intro h p hp sp₁; exact hy p |>.mpr $ h p hp $ hx (□p) hp |>.mp sp₁;
-  ) Qx Qy
+  Rel Qx Qy :=
+    Quotient.lift₂ (λ x y => ∀ p, □p ∈ T → (x ⊧ □p → y ⊧ p)) (by
+      intro x₁ y₁ x₂ y₂ hx hy;
+      simp;
+      constructor;
+      . intro h p hp sp₂; exact hy p |>.mp $ h p hp $ hx (□p) hp |>.mpr sp₂;
+      . intro h p hp sp₁; exact hy p |>.mpr $ h p hp $ hx (□p) hp |>.mp sp₁;
+    ) Qx Qy
+    ∧
+    Quotient.lift₂ (λ x y => ∀ p, ◇p ∈ T → (y ⊧ p → x ⊧ ◇p)) (by
+      intro x₁ y₁ x₂ y₂ hx hy;
+      simp;
+      constructor;
+      . intro h p hp sp₁; exact hx (◇p) |>.mp $ h p (by trivial) $ hy p |>.mpr sp₁;
+      . intro h p hp sp₂; exact hx (◇p) |>.mpr $ h p (by trivial) $ hy p |>.mp sp₂;
+    ) Qx Qy;
 
 noncomputable abbrev CoarsestFilterationModel (M : Model α) (T : Theory α) [T.SubformulaClosed] : Kripke.Model α where
   Frame := CoarsestFilterationFrame M T
   Valuation := StandardFilterationValuation M T
 
-@[simp]
 instance CoarsestFilterationModel.filterOf {M} {T : Theory α} [T.SubformulaClosed] : (CoarsestFilterationModel M T).FilterOf M T where
+  def_box := by tauto
+  def_dia := by tauto
 
 section
 
@@ -287,6 +305,33 @@ def filterOf : (FinestFilterationTransitiveClosureModel M T).FilterOf M T where
         apply hyz p hp;
         intro v ryv;
         exact hpx _ (M_trans rxy ryv);
+  def_dia := by
+    intro Qx Qy RQxQy;
+    induction RQxQy using Relation.TransGen.head_induction_on with
+    | base rxy =>
+      obtain ⟨x, y, rfl, rfl, rxy⟩ := rxy;
+      intro p _ hpx;
+      exact ⟨y, rxy, hpx⟩
+    | ih ha hxy hyz =>
+      obtain ⟨x, y, rfl, rfl, rxy⟩ := ha;
+      obtain ⟨w, z, _, rfl, _⟩ := hxy;
+      . intro p hp hpx;
+        simp at hyz;
+        obtain ⟨z, ryz, hz⟩ := hyz p hp hpx;
+        use z;
+        constructor;
+        . exact M_trans rxy ryz;
+        . assumption;
+      . rename_i h;
+        obtain ⟨w, z, rfl, rfl, _⟩ := h;
+        intro p hp hpx;
+        simp at hyz;
+        obtain ⟨z, ryz, hz⟩ := hyz p hp hpx;
+        use z;
+        constructor;
+        . exact M_trans rxy ryz;
+        . assumption;
+
 
 lemma rel_transitive : Transitive (FinestFilterationTransitiveClosureModel M T).Frame := Frame.TransitiveClosure.rel_transitive
 
