@@ -75,8 +75,6 @@ lemma toₛ! (b : Γ ⊢[𝓢]! p) : 𝓢 ⊢! ⋀Γ ⟶ p := b
 
 lemma provable_iff {p : F} : Γ ⊢[𝓢]! p ↔ 𝓢 ⊢! ⋀Γ ⟶ p := iff_of_eq rfl
 
-section minimal
-
 variable {Γ Δ E : List F}
 
 variable
@@ -89,6 +87,7 @@ variable
   [System.HasAxiomAndInst 𝓢]
   [System.HasAxiomOrInst₁ 𝓢]
   [System.HasAxiomOrInst₂ 𝓢]
+
 instance : Axiomatized (FiniteContext F 𝓢) where
   prfAxm := fun hp ↦ generalConj' hp
   weakening := fun H b ↦ impTrans'' (conjImplyConj' H) b
@@ -184,7 +183,7 @@ instance [HasAxiomEFQ 𝓢] : DeductiveExplosion (FiniteContext F 𝓢) := infer
 
 instance [HasAxiomDNE 𝓢] (Γ : FiniteContext F 𝓢) : HasAxiomDNE Γ := ⟨fun p ↦ of (HasAxiomDNE.dne p)⟩
 
-end minimal
+instance [System.Minimal 𝓢] (Γ : FiniteContext F 𝓢) : System.Minimal Γ where
 
 instance [System.Intuitionistic 𝓢] (Γ : FiniteContext F 𝓢) : System.Intuitionistic Γ where
 
