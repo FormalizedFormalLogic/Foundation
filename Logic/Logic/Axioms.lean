@@ -20,7 +20,7 @@ protected abbrev Imply₂ := (p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r
 abbrev Imply₂.set : Set F := { Axioms.Imply₂ p q r | (p) (q) (r) }
 notation "⟶₂" => Imply₂.set
 
-protected abbrev ElimContra := (~q ⟶ ~p) ⟶ (p ⟶ q)
+protected abbrev ElimContra := ((q ⟶ ⊥) ⟶ (p ⟶ ⊥)) ⟶ (p ⟶ q)
 abbrev ElimContra.set : Set F := { Axioms.ElimContra p q | (p) (q) }
 
 protected abbrev AndElim₁ := p ⋏ q ⟶ p

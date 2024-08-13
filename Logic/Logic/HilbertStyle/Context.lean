@@ -77,8 +77,18 @@ lemma provable_iff {p : F} : Γ ⊢[𝓢]! p ↔ 𝓢 ⊢! ⋀Γ ⟶ p := iff_of
 
 section minimal
 
-variable [System.Minimal 𝓢] {Γ Δ E : List F}
+variable {Γ Δ E : List F}
 
+variable
+  [System.ModusPonens 𝓢]
+  [System.HasAxiomVerum 𝓢]
+  [System.HasAxiomImply₁ 𝓢]
+  [System.HasAxiomImply₂ 𝓢]
+  [System.HasAxiomAndElim₁ 𝓢]
+  [System.HasAxiomAndElim₂ 𝓢]
+  [System.HasAxiomAndInst 𝓢]
+  [System.HasAxiomOrInst₁ 𝓢]
+  [System.HasAxiomOrInst₂ 𝓢]
 instance : Axiomatized (FiniteContext F 𝓢) where
   prfAxm := fun hp ↦ generalConj' hp
   weakening := fun H b ↦ impTrans'' (conjImplyConj' H) b
@@ -110,18 +120,27 @@ def id : [p] ⊢[𝓢] p := byAxm
 
 @[simp] lemma id! : [p] ⊢[𝓢]! p := by_axm!
 
-instance minimal (Γ : FiniteContext F 𝓢) : System.Minimal Γ where
-  mdp := mdp₁
-  verum := of verum
-  imply₁ := fun _ _ ↦ of imply₁
-  imply₂ := fun _ _ _ ↦ of imply₂
-  and₁ := fun _ _ ↦ of and₁
-  and₂ := fun _ _ ↦ of and₂
-  and₃ := fun _ _ ↦ of and₃
-  or₁ := fun _ _ ↦ of or₁
-  or₂ := fun _ _ ↦ of or₂
-  or₃ := fun _ _ _ ↦ of or₃
-  neg_equiv := fun _ ↦ of neg_equiv
+instance (Γ : FiniteContext F 𝓢) : System.ModusPonens Γ := ⟨mdp₁⟩
+
+instance (Γ : FiniteContext F 𝓢) : System.HasAxiomVerum Γ := ⟨of verum⟩
+
+instance (Γ : FiniteContext F 𝓢) : System.HasAxiomImply₁ Γ := ⟨fun _ _ ↦ of imply₁⟩
+
+instance (Γ : FiniteContext F 𝓢) : System.HasAxiomImply₂ Γ := ⟨fun _ _ _ ↦ of imply₂⟩
+
+instance (Γ : FiniteContext F 𝓢) : System.HasAxiomAndElim₁ Γ := ⟨fun _ _ ↦ of and₁⟩
+
+instance (Γ : FiniteContext F 𝓢) : System.HasAxiomAndElim₂ Γ := ⟨fun _ _ ↦ of and₂⟩
+
+instance (Γ : FiniteContext F 𝓢) : System.HasAxiomAndInst Γ := ⟨fun _ _ ↦ of and₃⟩
+
+instance (Γ : FiniteContext F 𝓢) : System.HasAxiomOrInst₁ Γ := ⟨fun _ _ ↦ of or₁⟩
+
+instance (Γ : FiniteContext F 𝓢) : System.HasAxiomOrInst₂ Γ := ⟨fun _ _ ↦ of or₂⟩
+
+instance [HasAxiomOrElim 𝓢] (Γ : FiniteContext F 𝓢) : System.HasAxiomOrElim Γ := ⟨fun _ _ _ ↦ of or₃⟩
+
+instance [NegationEquiv 𝓢] (Γ : FiniteContext F 𝓢) : System.NegationEquiv Γ := ⟨fun _ ↦ of neg_equiv⟩
 
 def mdp' (bΓ : Γ ⊢[𝓢] p ⟶ q) (bΔ : Δ ⊢[𝓢] p) : (Γ ++ Δ) ⊢[𝓢] q := wk (by simp) bΓ ⨀ wk (by simp) bΔ
 
