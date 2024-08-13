@@ -146,9 +146,13 @@ def andInst'' (hp : 𝓢 ⊢ p) (hq : 𝓢 ⊢ q) : 𝓢 ⊢ p ⋏ q := by
   have : 𝓢 ⊢ q ⟶ ~(p ⟶ ~q) := impTrans'' dni $ contraIntro' this;
   exact this ⨀ hq;
 
--- and_destruct
 def andInst : 𝓢 ⊢ p ⟶ q ⟶ p ⋏ q := by
-  sorry;
+  have d₁ : 𝓢 ⊢ p ⟶ q ⟶ (p ⟶ ~q) ⟶ p ⟶ ~q := dhyp p <| dhyp q <| impId (p ⟶ ~q);
+  have d₂ : 𝓢 ⊢ p ⟶ q ⟶ (p ⟶ ~q) ⟶ p := imply₁₁ (p := p) (q := q) (r := (p ⟶ ~q));
+  have d₃ : 𝓢 ⊢ p ⟶ q ⟶ (p ⟶ ~q) ⟶ q := dhyp p <| imply₁;
+  have d₄ : 𝓢 ⊢ p ⟶ q ⟶ (p ⟶ ~q) ⟶ ~q := d₁ ⨀₃ d₂;
+  have d₄ : 𝓢 ⊢ p ⟶ q ⟶ (p ⟶ ~q) ⟶ q ⟶ ⊥ := by simpa using d₄;
+  simpa using d₄ ⨀₃ d₃;
 
 instance : HasAxiomAndInst 𝓢 := ⟨λ p q => Lukasiewicz.andInst (p := p) (q := q)⟩
 
