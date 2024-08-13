@@ -423,6 +423,28 @@ end Formula
 end Atoms
 
 
+section Substitution
+
+namespace Formula
+
+variable [DecidableEq α]
+
+def subst (p : Formula α) (a : α) (t : Formula α) : Formula α :=
+  match p with
+  | ⊥ => ⊥
+  | ⊤ => ⊤
+  | atom b => if b = a then t else atom b
+  | ~p => ~(p.subst a t)
+  | p ⋏ q => (p.subst a t) ⋏ (q.subst a t)
+  | p ⋎ q => (p.subst a t) ⋎ (q.subst a t)
+  | p ⟶ q => (p.subst a t)  ⟶ (q.subst a t)
+  | box p => □(p.subst a t)
+
+end Formula
+
+end Substitution
+
+
 section Complement
 
 variable [DecidableEq α]

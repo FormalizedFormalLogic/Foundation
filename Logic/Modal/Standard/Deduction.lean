@@ -303,6 +303,12 @@ notation "𝐆𝐫𝐳" => DeductionParameter.Grz
 instance : System.Grz (𝐆𝐫𝐳 : DeductionParameter α) where
   Grz _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
 
+protected abbrev KH : DeductionParameter α := 𝝂(𝗛)
+notation "𝐊𝐇" => DeductionParameter.KH
+instance : System.KH (𝐊𝐇 : DeductionParameter α) where
+  H _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
+
+
 protected abbrev K4H : DeductionParameter α := 𝝂(𝟰 ∪ 𝗛)
 notation "𝐊𝟒𝐇" => DeductionParameter.K4H
 instance : System.K4H (𝐊𝟒𝐇 : DeductionParameter α) where
@@ -521,5 +527,40 @@ lemma reducible_GL_GLS : (𝐆𝐋 : DeductionParameter α) ≤ₛ 𝐆𝐋𝐒 
   exact Deduction.maxm! (by left; simpa);
 
 end Reducible
+
+
+section Substitution
+
+lemma GL_deduct_substitution {p : Formula α} (a : α) (q : Formula α) : 𝐆𝐋 ⊢! p → 𝐆𝐋 ⊢! (p.subst a q) := by
+  intro h;
+  induction h using Deduction.inducition_with_necOnly! with
+  | hMaxm hp =>
+    apply Deduction.maxm!;
+    rcases hp with (hAxK | hAxL);
+    . obtain ⟨p, q, rfl⟩ := hAxK; simp [Formula.subst];
+    . obtain ⟨p, q, rfl⟩ := hAxL; simp [Formula.subst];
+  | hMdp ihpq ihp =>
+    simp only [Formula.subst] at ihpq ihp;
+    exact ihpq ⨀ ihp;
+  | hNec ih =>
+    simp only [Formula.subst];
+    exact System.nec! ih;
+  | _ =>
+    simp only [Formula.subst];
+    trivial;
+
+lemma KH_deduct_substitution {p : Formula α} (a : α) (q : Formula α) : 𝐊𝐇 ⊢! p → 𝐊𝐇 ⊢! (p.subst a q) := by
+  intro h;
+  induction h using Deduction.inducition_with_necOnly! with
+  | hMaxm hp =>
+    apply Deduction.maxm!;
+    rcases hp with (hAxK | hAxH);
+    . obtain ⟨p, q, rfl⟩ := hAxK; simp [Formula.subst];
+    . obtain ⟨p, q, rfl⟩ := hAxH; simp [Formula.subst]; rfl;
+  | hMdp ihpq ihp => simp only [Formula.subst] at ihpq ihp; exact ihpq ⨀ ihp;
+  | hNec ih => simp only [Formula.subst]; exact System.nec! ih;
+  | _ => simp only [Formula.subst]; trivial;
+
+end Substitution
 
 end LO.Modal.Standard

@@ -88,6 +88,8 @@ protected class Triv extends System.K 𝓢, HasAxiomT 𝓢, HasAxiomTc 𝓢
 
 protected class Ver extends System.K 𝓢, HasAxiomVer 𝓢
 
+protected class KH extends System.K 𝓢, HasAxiomH 𝓢
+
 protected class K4H extends System.K4 𝓢, HasAxiomH 𝓢
 
 protected class K4Loeb extends System.K4 𝓢, LoebRule 𝓢
