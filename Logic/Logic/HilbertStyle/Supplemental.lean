@@ -524,6 +524,12 @@ noncomputable instance [HasAxiomDNE 𝓢] : HasAxiomPeirce 𝓢 where
     apply deduct;
     apply efq_of_mem_either (by aesop) (by aesop)
 
+instance [HasAxiomDNE 𝓢] : HasAxiomElimContra 𝓢 where
+  elim_contra p q := by
+    apply deduct';
+    have : [(q ⟶ ⊥) ⟶ p ⟶ ⊥] ⊢[𝓢] (q ⟶ ⊥) ⟶ p ⟶ ⊥ := FiniteContext.byAxm;
+    exact contra₃' $ impTrans''  (and₁' neg_equiv) $ impTrans'' this (and₂' neg_equiv);
+
 end Instantinate
 
 

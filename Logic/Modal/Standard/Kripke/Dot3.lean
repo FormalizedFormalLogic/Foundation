@@ -32,14 +32,10 @@ private lemma connected_of_dot3 : F# ⊧* (.𝟯 : AxiomSet α) → Connected F 
   constructor;
   . apply Kripke.Satisfies.box_def.not.mpr; push_neg;
     use y;
-    constructor;
-    . assumption;
-    . sorry;
+    simp_all [Semantics.Realize, Kripke.Satisfies, (fInj 0), (fInj 1)];
   . apply Kripke.Satisfies.box_def.not.mpr; push_neg;
     use z;
-    constructor;
-    . assumption;
-    . sorry;
+    simp_all [Semantics.Realize, Kripke.Satisfies, (fInj 0), (fInj 1)];
 
 private lemma dot3_of_connected : Connected F → F# ⊧* (.𝟯 : AxiomSet α) := by
   intro hCon;

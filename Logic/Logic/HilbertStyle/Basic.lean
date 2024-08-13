@@ -157,8 +157,8 @@ def dummett [HasAxiomDummett 𝓢] : 𝓢 ⊢ (p ⟶ q) ⋎ (q ⟶ p) := HasAxio
 def peirce [HasAxiomPeirce 𝓢] : 𝓢 ⊢ ((p ⟶ q) ⟶ p) ⟶ p := HasAxiomPeirce.peirce _ _
 @[simp] lemma peirce! [HasAxiomPeirce 𝓢] : 𝓢 ⊢! ((p ⟶ q) ⟶ p) ⟶ p := ⟨peirce⟩
 
-def elim_contra [HasAxiomElimContra 𝓢] : 𝓢 ⊢ (~q ⟶ ~p) ⟶ (p ⟶ q) := HasAxiomElimContra.elim_contra _ _
-@[simp] lemma elim_contra! [HasAxiomElimContra 𝓢] : 𝓢 ⊢! (~q ⟶ ~p) ⟶ (p ⟶ q) := ⟨elim_contra⟩
+def elim_contra [HasAxiomElimContra 𝓢] : 𝓢 ⊢ ((q ⟶ ⊥) ⟶ (p ⟶ ⊥)) ⟶ (p ⟶ q) := HasAxiomElimContra.elim_contra _ _
+@[simp] lemma elim_contra! [HasAxiomElimContra 𝓢] : 𝓢 ⊢! ((q ⟶ ⊥) ⟶ (p ⟶ ⊥)) ⟶ (p ⟶ q) := ⟨elim_contra⟩
 
 def imply₁' (h : 𝓢 ⊢ p) : 𝓢 ⊢ q ⟶ p := imply₁ ⨀ h
 lemma imply₁'! (d : 𝓢 ⊢! p) : 𝓢 ⊢! q ⟶ p := ⟨imply₁' d.some⟩
