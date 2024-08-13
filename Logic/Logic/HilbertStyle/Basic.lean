@@ -157,8 +157,8 @@ def dummett [HasAxiomDummett 𝓢] : 𝓢 ⊢ (p ⟶ q) ⋎ (q ⟶ p) := HasAxio
 def peirce [HasAxiomPeirce 𝓢] : 𝓢 ⊢ ((p ⟶ q) ⟶ p) ⟶ p := HasAxiomPeirce.peirce _ _
 @[simp] lemma peirce! [HasAxiomPeirce 𝓢] : 𝓢 ⊢! ((p ⟶ q) ⟶ p) ⟶ p := ⟨peirce⟩
 
-def elim_contra [HasAxiomElimContra 𝓢] : 𝓢 ⊢ ((q ⟶ ⊥) ⟶ (p ⟶ ⊥)) ⟶ (p ⟶ q) := HasAxiomElimContra.elim_contra _ _
-@[simp] lemma elim_contra! [HasAxiomElimContra 𝓢] : 𝓢 ⊢! ((q ⟶ ⊥) ⟶ (p ⟶ ⊥)) ⟶ (p ⟶ q) := ⟨elim_contra⟩
+def elim_contra [HasAxiomElimContra 𝓢] : 𝓢 ⊢ ((~q) ⟶ (~p)) ⟶ (p ⟶ q) := HasAxiomElimContra.elim_contra _ _
+@[simp] lemma elim_contra! [HasAxiomElimContra 𝓢] : 𝓢 ⊢! (~q ⟶ ~p) ⟶ (p ⟶ q)  := ⟨elim_contra⟩
 
 def imply₁' (h : 𝓢 ⊢ p) : 𝓢 ⊢ q ⟶ p := imply₁ ⨀ h
 lemma imply₁'! (d : 𝓢 ⊢! p) : 𝓢 ⊢! q ⟶ p := ⟨imply₁' d.some⟩
@@ -222,7 +222,6 @@ lemma neg_equiv'! [NegationEquiv 𝓢] : 𝓢 ⊢! ~p ↔ 𝓢 ⊢! p ⟶ ⊥ :=
 
 instance [NegAbbrev F] : System.NegationEquiv 𝓢 where
   neg_equiv := by intro p; simp [Axioms.NegEquiv, NegAbbrev.neg]; apply iffId;
-
 
 def mdp₁ (bqr : 𝓢 ⊢ p ⟶ q ⟶ r) (bq : 𝓢 ⊢ p ⟶ q) : 𝓢 ⊢ p ⟶ r := imply₂ ⨀ bqr ⨀ bq
 lemma mdp₁! (hqr : 𝓢 ⊢! p ⟶ q ⟶ r) (hq : 𝓢 ⊢! p ⟶ q) : 𝓢 ⊢! p ⟶ r := ⟨mdp₁ hqr.some hq.some⟩

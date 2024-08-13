@@ -92,6 +92,7 @@ macro_rules | `(tactic| trivial) => `(tactic|
     | apply imply₁!
     | apply imply₂!
     | apply elim_contra!
+    | apply elim_contra_neg!
     | apply and₁!
     | apply and₂!
     | apply and₃!

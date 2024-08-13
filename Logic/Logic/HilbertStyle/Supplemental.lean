@@ -325,6 +325,12 @@ lemma negneg_equiv_dne! [HasAxiomDNE 𝓢] : 𝓢 ⊢! p ⟷ ((p ⟶ ⊥) ⟶ �
 
 end NegationEquiv
 
+def elim_contra_neg [NegationEquiv 𝓢] [HasAxiomElimContra 𝓢] : 𝓢 ⊢ ((q ⟶ ⊥) ⟶ (p ⟶ ⊥)) ⟶ (p ⟶ q) := by
+  refine impTrans'' ?_ elim_contra;
+  apply deduct';
+  exact impTrans'' (impTrans'' (and₁' neg_equiv) FiniteContext.byAxm) (and₂' neg_equiv);
+lemma elim_contra_neg! [NegationEquiv 𝓢] [HasAxiomElimContra 𝓢] : 𝓢 ⊢! ((q ⟶ ⊥) ⟶ (p ⟶ ⊥)) ⟶ (p ⟶ q) := ⟨elim_contra_neg⟩
+
 
 def tne : 𝓢 ⊢ ~(~~p) ⟶ ~p := contra₀' dni
 @[simp] lemma tne! : 𝓢 ⊢! ~(~~p) ⟶ ~p := ⟨tne⟩
@@ -527,8 +533,8 @@ noncomputable instance [HasAxiomDNE 𝓢] : HasAxiomPeirce 𝓢 where
 instance [HasAxiomDNE 𝓢] : HasAxiomElimContra 𝓢 where
   elim_contra p q := by
     apply deduct';
-    have : [(q ⟶ ⊥) ⟶ p ⟶ ⊥] ⊢[𝓢] (q ⟶ ⊥) ⟶ p ⟶ ⊥ := FiniteContext.byAxm;
-    exact contra₃' $ impTrans''  (and₁' neg_equiv) $ impTrans'' this (and₂' neg_equiv);
+    have : [~q ⟶ ~p] ⊢[𝓢] ~q ⟶ ~p := FiniteContext.byAxm;
+    exact contra₃' this;
 
 end Instantinate
 
