@@ -128,8 +128,8 @@ instance : HasAxiomAndElim₁ 𝓢 := ⟨λ p q => Lukasiewicz.andElim₁ (p := 
 
 def andElim₂ : 𝓢 ⊢ p ⋏ q ⟶ q := by
   simp only [LukasiewiczAbbrev.and];
-  have := imply₁ (𝓢 := 𝓢) (p := ~q) (q := p);
-  have := contraIntro' this;
+  have : 𝓢 ⊢ ~q ⟶ p ⟶ ~q := imply₁ (p := ~q) (q := p);
+  have : 𝓢 ⊢ ~(p ⟶ ~q) ⟶ ~~q := contraIntro' this;
   exact impTrans'' this dne;
 instance : HasAxiomAndElim₂ 𝓢 := ⟨λ p q => Lukasiewicz.andElim₂ (p := p) (q := q)⟩
 
@@ -170,7 +170,21 @@ instance : HasAxiomOrInst₂ 𝓢 := ⟨λ p q => Lukasiewicz.orInst₂ (p := p)
 -- or_imply
 def orElim : 𝓢 ⊢ (p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r) := by
   simp only [LukasiewiczAbbrev.or];
-  sorry;
+  have d₁ : 𝓢 ⊢ (p ⟶ r) ⟶ (q ⟶ r) ⟶ (~p ⟶ q) ⟶ (p ⟶ r) ⟶ ~(r) ⟶ ~p
+    := (dhyp (p ⟶ r) <| dhyp (q ⟶ r) <| dhyp (~p ⟶ q) <| contraIntro (p := p) (q := r));
+  have d₂ : 𝓢 ⊢ (p ⟶ r) ⟶ (q ⟶ r) ⟶ (~p ⟶ q) ⟶ ~(r) ⟶ ~p
+    := d₁ ⨀₃ (imply₁₁ (p ⟶ r) (q ⟶ r) (~p ⟶ q));
+  have d₃ : 𝓢 ⊢ (p ⟶ r) ⟶ (q ⟶ r) ⟶ (~p ⟶ q) ⟶ ~(r) ⟶ q
+    := (dhyp (p ⟶ r) <| dhyp (q ⟶ r) <| imply₁ (p := ~p ⟶ q) (q := ~(r))) ⨀₄ d₂;
+  have d₄ : 𝓢 ⊢ (p ⟶ r) ⟶ (q ⟶ r) ⟶ (~p ⟶ q) ⟶ ~(r) ⟶ r
+    := (dhyp (p ⟶ r) <| imply₁₁ (p := q ⟶ r) (q := ~p ⟶ q) (r := ~(r))) ⨀₄ d₃;
+  have d₅ : 𝓢 ⊢ (p ⟶ r) ⟶ (q ⟶ r) ⟶ (~p ⟶ q) ⟶ ~(r) ⟶ r ⟶ ⊥
+    := by simpa using dhyp (p ⟶ r) <| dhyp (q ⟶ r) <| dhyp (~p ⟶ q) <| impId (p := ~(r));
+  have d₆ : 𝓢 ⊢ (p ⟶ r) ⟶ (q ⟶ r) ⟶ (~p ⟶ q) ⟶ ~~(r)
+    := by simpa using d₅ ⨀₄ d₄;
+  have d₇ : 𝓢 ⊢ (p ⟶ r) ⟶ (q ⟶ r) ⟶ (~p ⟶ q) ⟶ ~~(r) ⟶ r
+    := dhyp (p ⟶ r) <| dhyp (q ⟶ r) <| dhyp (~p ⟶ q) <| dne (p := r);
+  exact d₇ ⨀₃ d₆;
 
 instance : HasAxiomOrElim 𝓢 := ⟨λ p q r => Lukasiewicz.orElim (p := p) (q := q) (r := r)⟩
 

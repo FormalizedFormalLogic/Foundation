@@ -241,6 +241,11 @@ lemma mdp₃! (hqr : 𝓢 ⊢! p ⟶ q ⟶ r ⟶ s ⟶ t) (hq : 𝓢 ⊢! p ⟶ 
 infixl:90 "⨀₃" => mdp₃
 infixl:90 "⨀₃" => mdp₃!
 
+def mdp₄ (bqr : 𝓢 ⊢ p ⟶ q ⟶ r ⟶ s ⟶ t ⟶ u) (bq : 𝓢 ⊢ p ⟶ q ⟶ r ⟶ s ⟶ t) : 𝓢 ⊢ p ⟶ q ⟶ r ⟶ s ⟶ u := (dhyp p <| dhyp q <| dhyp r <| imply₂) ⨀₃ bqr ⨀₃ bq
+lemma mdp₄! (hqr : 𝓢 ⊢! p ⟶ q ⟶ r ⟶ s ⟶ t ⟶ u) (hq : 𝓢 ⊢! p ⟶ q ⟶ r ⟶ s ⟶ t) : 𝓢 ⊢! p ⟶ q ⟶ r ⟶ s ⟶ u := ⟨mdp₄ hqr.some hq.some⟩
+infixl:90 "⨀₄" => mdp₄
+infixl:90 "⨀₄" => mdp₄!
+
 def impTrans'' (bpq : 𝓢 ⊢ p ⟶ q) (bqr : 𝓢 ⊢ q ⟶ r) : 𝓢 ⊢ p ⟶ r := imply₂ ⨀ dhyp p bqr ⨀ bpq
 lemma imp_trans''! (hpq : 𝓢 ⊢! p ⟶ q) (hqr : 𝓢 ⊢! q ⟶ r) : 𝓢 ⊢! p ⟶ r := ⟨impTrans'' hpq.some hqr.some⟩
 
