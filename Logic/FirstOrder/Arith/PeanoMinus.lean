@@ -11,7 +11,7 @@ namespace Arith
 
 open FirstOrder FirstOrder.Arith
 
-variable {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐏𝐀⁻]
+variable {M : Type*} [ORingStruc M] [M ⊧ₘ* 𝐏𝐀⁻]
 
 open Language
 
@@ -215,7 +215,7 @@ variable {T : Theory ℒₒᵣ}
 
 theorem sigma_one_completeness [𝐄𝐐 ≼ T] [𝐏𝐀⁻ ≼ T] {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
     ℕ ⊧ₘ σ → T ⊢! σ := fun H =>
-  complete (oRing_consequence_of.{0} _ _ (fun M _ _ _ _ _ _ => by
+  complete (oRing_consequence_of.{0} _ _ (fun M _ _ => by
     haveI : M ⊧ₘ* 𝐏𝐀⁻ := ModelsTheory.of_provably_subtheory M 𝐏𝐀⁻ T inferInstance (by assumption)
     simpa [Matrix.empty_eq] using Arith.bold_sigma_one_completeness (M := M) hσ H))
 

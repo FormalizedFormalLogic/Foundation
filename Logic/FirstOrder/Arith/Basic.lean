@@ -2,9 +2,13 @@ import Logic.FirstOrder.Order.Le
 
 namespace LO
 
+class ORingStruc (α : Type*) extends Zero α, One α, Add α, Mul α, LT α
+
+instance [Zero α] [One α] [Add α] [Mul α] [LT α] : ORingStruc α where
+
 namespace ORingSymbol
 
-variable {α : Type*} [Zero α] [One α] [Add α] [Mul α] [LT α]
+variable {α : Type*} [ORingStruc α]
 
 def numeral : ℕ → α
   | 0     => 0
@@ -117,14 +121,14 @@ open Semiterm Semiformula
 
 abbrev Polynomial (n : ℕ) : Type := Semiterm ℒₒᵣ Empty n
 
-class Structure.ORing (L : Language) [L.ORing] (M : Type w) [Zero M] [One M] [Add M] [Mul M] [LT M] [Structure L M] extends
+class Structure.ORing (L : Language) [L.ORing] (M : Type w) [ORingStruc M] [Structure L M] extends
   Structure.Zero L M, Structure.One L M, Structure.Add L M, Structure.Mul L M, Structure.Eq L M, Structure.LT L M
 
 attribute [instance] Structure.ORing.mk
 
 namespace Structure
 
-variable [Operator.Zero L] [Operator.One L] [Operator.Add L] {M : Type u} [Zero M] [One M] [Add M] [Mul M] [LT M]
+variable [Operator.Zero L] [Operator.One L] [Operator.Add L] {M : Type u} [ORingStruc M]
   [Structure L M] [Structure.Zero L M] [Structure.One L M] [Structure.Add L M]
 
 @[simp] lemma numeral_eq_numeral : (z : ℕ) → (Semiterm.Operator.numeral L z).val ![] = (ORingSymbol.numeral z : M)
@@ -196,7 +200,7 @@ variable {L : Language.{u}} [L.ORing] (T : Theory L) [𝐄𝐐 ≼ T]
 
 lemma consequence_of (σ : Sentence L)
   (H : ∀ (M : Type (max u w))
-         [Zero M] [One M] [Add M] [Mul M] [LT M]
+         [ORingStruc M]
          [Structure L M]
          [Structure.ORing L M]
          [M ⊧ₘ* T],

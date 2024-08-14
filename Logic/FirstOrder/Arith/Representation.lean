@@ -4,10 +4,9 @@ import Logic.FirstOrder.Computability.Calculus
 
 namespace LO.FirstOrder.Arith
 
-namespace FirstIncompleteness
-
 open Mathlib Encodable Semiterm.Operator.GoedelNumber
 
+/-
 /-- This instance is scoped since we will define canonical Gödel numbering when formalizing G2.  -/
 scoped instance {α} [Primcodable α] : Semiterm.Operator.GoedelNumber ℒₒᵣ α :=
   Semiterm.Operator.GoedelNumber.ofEncodable
@@ -20,6 +19,8 @@ lemma goedelNumber'_def {α} [Primcodable α] (a : α) :
 
 @[simp] lemma encode_encode_eq {α} [Primcodable α] (a : α) :
     (goedelNumber (encode a) : Semiterm.Const ℒₒᵣ) = goedelNumber a := by simp [Semiterm.Operator.encode, goedelNumber_def]
+
+-/
 
 open Nat.ArithPart₁
 
@@ -35,7 +36,7 @@ def codeAux : {k : ℕ} → Nat.ArithPart₁.Code k → Formula ℒₒᵣ (Fin (
     exClosure (((Rew.bind ![] (&0 :> (#·))).hom (codeAux c)) ⋏
       Matrix.conj fun i => (Rew.bind ![] (#i :> (&·.succ))).hom (codeAux (d i)))
   | _, Code.rfind c   =>
-    (Rew.bind ![] (⌜0⌝ :> &0 :> (&·.succ))).hom (codeAux c) ⋏
+    (Rew.bind ![] (‘0’ :> &0 :> (&·.succ))).hom (codeAux c) ⋏
     (∀[“z | z < &0”] ∃' “z | z ≠ 0” ⋏ (Rew.bind ![] (#0 :> #1 :> (&·.succ))).hom (codeAux c))
 
 def code (c : Code k) : Semisentence ℒₒᵣ (k + 1) := (Rew.bind ![] (#0 :> (#·.succ))).hom (codeAux c)
@@ -44,9 +45,9 @@ section model
 
 open LO.Arith
 
-variable {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐏𝐀⁻]
+variable {M : Type*} [ORingStruc M] [M ⊧ₘ* 𝐏𝐀⁻]
 
-lemma codeAux_uniq {k} {c : Code k} {v : Fin k → M} {z z' : M} :
+private lemma codeAux_uniq {k} {c : Code k} {v : Fin k → M} {z z' : M} :
     Semiformula.Evalfm M (z :> v) (codeAux c) → Semiformula.Evalfm M (z' :> v) (codeAux c) → z = z' := by
   induction c generalizing z z' <;> simp[code, codeAux]
   case zero => rintro rfl rfl; rfl
@@ -87,7 +88,7 @@ lemma code_uniq {k} {c : Code k} {v : Fin k → M} {z z' : M} :
 
 end model
 
-lemma codeAux_sigma_one {k} (c : Nat.ArithPart₁.Code k) : Hierarchy 𝚺 1 (codeAux c) := by
+private lemma codeAux_sigma_one {k} (c : Nat.ArithPart₁.Code k) : Hierarchy 𝚺 1 (codeAux c) := by
   induction c <;> simp[codeAux, Matrix.fun_eq_vec₂]
   case comp c d ihc ihg =>
     exact Hierarchy.exClosure (by simp [ihc, ihg])
@@ -98,7 +99,7 @@ lemma code_sigma_one {k} (c : Nat.ArithPart₁.Code k) : Hierarchy 𝚺 1 (code 
 
 @[simp] lemma natCast_nat (n : ℕ) : Nat.cast n = n := by rfl
 
-lemma models_codeAux {c : Code k} {f : Vector ℕ k →. ℕ} (hc : c.eval f) (y : ℕ) (v : Fin k → ℕ) :
+private lemma models_codeAux {c : Code k} {f : Vector ℕ k →. ℕ} (hc : c.eval f) (y : ℕ) (v : Fin k → ℕ) :
     Semiformula.Evalfm ℕ (y :> v) (codeAux c) ↔ f (Vector.ofFn v) = Part.some y := by
   induction hc generalizing y <;> simp [code, codeAux, models_iff]
   case zero =>
@@ -140,72 +141,87 @@ lemma models_code {c : Code k} {f : Vector ℕ k →. ℕ} (hc : c.eval f) (y : 
   simpa[code, models_iff, Semiformula.eval_rew, Matrix.empty_eq, Function.comp,
     Matrix.comp_vecCons', ←Part.eq_some_iff] using models_codeAux hc y v
 
-noncomputable def codeOfPartrec {k} (f : Vector ℕ k →. ℕ) : Code k :=
-  Classical.epsilon (fun c => ∀ y v, Semiformula.Evalbm ℕ (y :> v) (code c) ↔ y ∈ f (Vector.ofFn v))
+noncomputable def codeOfPartrec' {k} (f : Vector ℕ k →. ℕ) : Semisentence ℒₒᵣ (k + 1) :=
+  code <| Classical.epsilon (fun c ↦ ∀ y v, Semiformula.Evalbm ℕ (y :> v) (code c) ↔ y ∈ f (Vector.ofFn v))
 
-lemma codeOfPartrec_spec {k} {f : Vector ℕ k →. ℕ} (hf : Nat.Partrec' f) {y : ℕ} {v : Fin k → ℕ} :
-    Semiformula.Evalbm ℕ (y :> v) (code $ codeOfPartrec f) ↔ y ∈ f (Vector.ofFn v) := by
+lemma codeOfPartrec'_spec {k} {f : Vector ℕ k →. ℕ} (hf : Nat.Partrec' f) {y : ℕ} {v : Fin k → ℕ} :
+    Semiformula.Evalbm ℕ (y :> v) (codeOfPartrec' f) ↔ y ∈ f (Vector.ofFn v) := by
   have : ∃ c, ∀ y v, Semiformula.Evalbm ℕ (y :> v) (code c) ↔ y ∈ f (Vector.ofFn v) := by
     rcases Nat.ArithPart₁.exists_code (of_partrec hf) with ⟨c, hc⟩
     exact ⟨c, models_code hc⟩
   exact Classical.epsilon_spec this y v
 
-variable {T : Theory ℒₒᵣ} [𝐄𝐐 ≼ T] [𝐏𝐀⁻ ≼ T] [DecidablePred T] [SigmaOneSound T] [Theory.Computable T]
+namespace FirstIncompleteness
 
-section representation
+open Mathlib Encodable Semiterm.Operator.GoedelNumber
+
+variable {T : Theory ℒₒᵣ} [𝐄𝐐 ≼ T] [𝐏𝐀⁻ ≼ T] [DecidablePred T] [SigmaOneSound T] [Theory.Computable T]
 
 open LO.Arith
 
 lemma provable_iff_mem_partrec {k} {f : Vector ℕ k →. ℕ} (hf : Nat.Partrec' f) {y : ℕ} {v : Fin k → ℕ} :
-    (T ⊢! (Rew.substs $ ⌜y⌝ :> fun i => ⌜v i⌝).hom (code $ codeOfPartrec f)) ↔ y ∈ f (Vector.ofFn v) := by
-  let σ : Sentence ℒₒᵣ := (Rew.substs $ ⌜y⌝ :> fun i => ⌜v i⌝).hom (code $ codeOfPartrec f)
+    (T ⊢! (Rew.substs $ ‘↑y’ :> fun i ↦ ‘↑(v i)’).hom (codeOfPartrec' f)) ↔ y ∈ f (Vector.ofFn v) := by
+  let σ : Sentence ℒₒᵣ := (Rew.substs $ ‘↑y’ :> fun i => ‘↑(v i)’).hom (codeOfPartrec' f)
   have sigma : Hierarchy 𝚺 1 σ :=
-    (Hierarchy.rew (Rew.substs $ ⌜y⌝ :> fun i => ⌜v i⌝) (code_sigma_one (codeOfPartrec f)))
+    (Hierarchy.rew (Rew.substs $ ‘↑y’ :> fun i => ‘↑(v i)’) (code_sigma_one _))
   constructor
   · rintro ⟨b⟩
-    have : Semiformula.Evalbm ℕ (y :> v) (code $ codeOfPartrec f) := by
-      simpa [σ, goedelNumber'_def, goedelNumber_def, models_iff, Semiformula.eval_rew, Matrix.empty_eq, Function.comp, Matrix.comp_vecCons'] using
+    have : Semiformula.Evalbm ℕ (y :> v) (codeOfPartrec' f) := by
+      simpa [σ, models_iff, Semiformula.eval_rew, Matrix.empty_eq, Function.comp, Matrix.comp_vecCons'] using
         Arith.SoundOn.sound sigma ⟨b⟩
-    exact (codeOfPartrec_spec hf).mp this
+    exact (codeOfPartrec'_spec hf).mp this
   · intro h
     exact Arith.sigma_one_completeness sigma (by
-      simp [goedelNumber'_def, goedelNumber_def, models_iff, Semiformula.eval_rew, Matrix.empty_eq,
-        Function.comp, Matrix.comp_vecCons', codeOfPartrec_spec hf, h])
+      simp [models_iff, Semiformula.eval_rew, Matrix.empty_eq,
+        Function.comp, Matrix.comp_vecCons', codeOfPartrec'_spec hf, h])
 
 variable (T)
 
 lemma provable_iff_computable {k} {f : Vector ℕ k → ℕ}
     (hf : Nat.Partrec' (f : Vector ℕ k →. ℕ)) (v : Fin k → ℕ) :
-    T ⊢! (Rew.substs $ ⌜f (Vector.ofFn v)⌝ :> (⌜v ·⌝)).hom (code $ codeOfPartrec f) :=
+    T ⊢! (Rew.substs $ ‘↑(f (Vector.ofFn v))’ :> fun x ↦ ‘↑(v x)’).hom (codeOfPartrec' f) :=
   (provable_iff_mem_partrec hf (T := T) (y := f (Vector.ofFn v)) (v := v)).mpr (by simp)
 
 lemma provable_computable_code_uniq {k} {f : Vector ℕ k → ℕ}
     (hf : Nat.Partrec' (f : Vector ℕ k →. ℕ)) (v : Fin k → ℕ) :
-    T ⊢! ∀' ((Rew.substs $ #0 :> (⌜v ·⌝)).hom (code $ codeOfPartrec f)
-      ⟷ “x | x = !!(⌜f (Vector.ofFn v)⌝)”) :=
-  complete (oRing_consequence_of _ _ (fun M _ _ _ _ _ _ => by
+    T ⊢! ∀' ((Rew.substs $ #0 :> fun x ↦ ‘↑(v x)’).hom (codeOfPartrec' f)
+      ⟷ “x | x = ↑(f (Vector.ofFn v))”) :=
+  complete (oRing_consequence_of _ _ (fun M _ _ ↦ by
     haveI : M ⊧ₘ* 𝐏𝐀⁻ :=
       ModelsTheory.of_provably_subtheory M 𝐏𝐀⁻ T inferInstance (by assumption)
-    have Hfv : Semiformula.Evalbm M (f (Vector.ofFn v) :> (v ·)) (code (codeOfPartrec f)) := by
-      simpa [goedelNumber'_def, goedelNumber_def, Arith.numeral_eq_natCast, models_iff, Semiformula.eval_substs, Matrix.comp_vecCons'] using
+    have Hfv : Semiformula.Evalbm M (f (Vector.ofFn v) :> (v ·)) ((codeOfPartrec' f)) := by
+      simpa [Arith.numeral_eq_natCast, models_iff, Semiformula.eval_substs, Matrix.comp_vecCons'] using
         consequence_iff'.mp (sound₀! (provable_iff_computable T hf v)) M
-    simp [goedelNumber'_def, goedelNumber_def, Arith.numeral_eq_natCast, models_iff, Semiformula.eval_substs, Matrix.comp_vecCons']
+    simp [Arith.numeral_eq_natCast, models_iff, Semiformula.eval_substs, Matrix.comp_vecCons']
     intro x; constructor
     · intro H; exact code_uniq H Hfv
     · rintro rfl; simpa))
 
+/-- This instance is scoped since we will define canonical Gödel numbering when formalizing G2.  -/
+scoped instance {α} [Primcodable α] : Semiterm.Operator.GoedelNumber ℒₒᵣ α :=
+  Semiterm.Operator.GoedelNumber.ofEncodable
+
+lemma goedelNumber_def {α} [Primcodable α] (a : α) :
+  goedelNumber a = Semiterm.Operator.encode ℒₒᵣ a := rfl
+
+lemma goedelNumber'_def {α} [Primcodable α] (a : α) :
+  (⌜a⌝ : Semiterm ℒₒᵣ ξ n) = Semiterm.Operator.encode ℒₒᵣ a := rfl
+
+@[simp] lemma encode_encode_eq {α} [Primcodable α] (a : α) :
+    (goedelNumber (encode a) : Semiterm.Const ℒₒᵣ) = goedelNumber a := by simp [Semiterm.Operator.encode, goedelNumber_def]
+
 variable {α β : Type*} {σ : Type*} [Primcodable α] [Primcodable β] [Primcodable σ]
 
 noncomputable def graph (f : α →. σ) : Semisentence ℒₒᵣ 2 :=
-  code (codeOfPartrec fun x => Part.bind (decode (α := α) x.head) fun a => (f a).map encode)
+  codeOfPartrec' fun x => Part.bind (decode (α := α) x.head) fun a => (f a).map encode
 
 noncomputable def graphTotal (f : α → σ) : Semisentence ℒₒᵣ 2 :=
-  code (codeOfPartrec (fun x => Option.get! ((decode x.head).map (encode $ f ·)) : Vector ℕ 1 → ℕ))
+  codeOfPartrec' (fun x => Option.get! ((decode x.head).map (encode $ f ·)) : Vector ℕ 1 → ℕ)
 
 noncomputable def graphTotal₂ (f : α → β → σ) : Semisentence ℒₒᵣ 3 :=
-  code (codeOfPartrec (fun x =>
+  codeOfPartrec' (fun x =>
     Option.get! ((decode x.head).bind fun y => (decode x.tail.head).map fun z =>
-       (encode $ f y z)) : Vector ℕ 2 → ℕ))
+       (encode $ f y z)) : Vector ℕ 2 → ℕ)
 
 def toVecFun (f : α →. σ) : Vector ℕ 1 →. ℕ := fun x => Part.bind (decode (α := α) x.head) fun a => (f a).map encode
 
@@ -243,7 +259,7 @@ theorem representation_computable₂ {f : α → β → σ} (hf : Computable₂ 
               Computable.option_map
                 (Computable.decode.comp $ Computable.vector_head.comp $ Computable.vector_tail.comp .fst) <|
                   Computable.encode.comp₂ <| hf.comp₂ (Computable.snd.comp₂ .left) .right
-  simpa [f', Matrix.comp_vecCons' (fun x : ℕ => (⌜x⌝ : Semiterm ℒₒᵣ Empty 1)),
+  simpa [f', Matrix.comp_vecCons' (fun x : ℕ => (‘↑x’ : Semiterm ℒₒᵣ Empty 1)),
     Matrix.constant_eq_singleton, graphTotal₂] using
       provable_computable_code_uniq T this ![encode a, encode b]
 
@@ -254,8 +270,6 @@ theorem pred_representation {p : α → Prop} (hp : RePred p) {x} :
     T ⊢! (pred p)/[⌜x⌝] ↔ p x := by
   simpa [goedelNumber'_def, pred, ←Rew.hom_comp_app, Rew.substs_comp_substs] using
     representation hp (T := T) (x := x) (y := ())
-
-end representation
 
 end FirstIncompleteness
 

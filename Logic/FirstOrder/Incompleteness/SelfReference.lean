@@ -44,7 +44,7 @@ open LO.Arith
 /-- Fixpoint Lemma -/
 theorem main (θ : Semisentence ℒₒᵣ 1) :
     T ⊢! fixpoint θ ⟷ θ/[⌜fixpoint θ⌝] :=
-  complete (oRing_consequence_of _ _ (fun M _ _ _ _ _ _ => by
+  complete (oRing_consequence_of _ _ (fun M _ _ ↦ by
     haveI : M ⊧ₘ* 𝐏𝐀⁻ := ModelsTheory.of_provably_subtheory M 𝐏𝐀⁻ T inferInstance (by assumption)
     have hssbs : ∀ σ π : Semisentence ℒₒᵣ 1, ∀ z,
         Evalbm M ![z, encode σ, encode π] ssbs ↔ z = encode (σ/[(⌜π⌝ : Semiterm ℒₒᵣ Empty 0)]) := by
