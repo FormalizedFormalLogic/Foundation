@@ -74,9 +74,6 @@ variable {L : FirstOrder.Language} [Semiterm.Operator.GoedelNumber L (Sentence L
          [DecidableEq (Sentence L)]
          (T₀ T : FirstOrder.Theory L) [T₀ ≼ T] [Diagonalization T₀]
          (β : ProvabilityPredicate L L)
--- TODO: 強すぎる仮定かもしれない
-variable [HasAxiomDNE T]
-variable [NegAbbrev (FirstOrder.Sentence L)]
 
 lemma arithmetical_soundness_K4Loeb [β.HBL T₀ T] (h : 𝐊𝟒(𝐋) ⊢! p) : ∀ {f : realization L α}, T ⊢! (f[β] p) := by
   intro f;
