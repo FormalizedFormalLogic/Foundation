@@ -6,22 +6,6 @@ namespace LO.FirstOrder.Arith
 
 open Mathlib Encodable Semiterm.Operator.GoedelNumber
 
-/-
-/-- This instance is scoped since we will define canonical Gödel numbering when formalizing G2.  -/
-scoped instance {α} [Primcodable α] : Semiterm.Operator.GoedelNumber ℒₒᵣ α :=
-  Semiterm.Operator.GoedelNumber.ofEncodable
-
-lemma goedelNumber_def {α} [Primcodable α] (a : α) :
-  goedelNumber a = Semiterm.Operator.encode ℒₒᵣ a := rfl
-
-lemma goedelNumber'_def {α} [Primcodable α] (a : α) :
-  (⌜a⌝ : Semiterm ℒₒᵣ ξ n) = Semiterm.Operator.encode ℒₒᵣ a := rfl
-
-@[simp] lemma encode_encode_eq {α} [Primcodable α] (a : α) :
-    (goedelNumber (encode a) : Semiterm.Const ℒₒᵣ) = goedelNumber a := by simp [Semiterm.Operator.encode, goedelNumber_def]
-
--/
-
 open Nat.ArithPart₁
 
 def codeAux : {k : ℕ} → Nat.ArithPart₁.Code k → Formula ℒₒᵣ (Fin (k + 1))
@@ -45,7 +29,7 @@ section model
 
 open LO.Arith
 
-variable {M : Type*} [ORingStruc M] [M ⊧ₘ* 𝐏𝐀⁻]
+variable {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐏𝐀⁻]
 
 private lemma codeAux_uniq {k} {c : Code k} {v : Fin k → M} {z z' : M} :
     Semiformula.Evalfm M (z :> v) (codeAux c) → Semiformula.Evalfm M (z' :> v) (codeAux c) → z = z' := by
