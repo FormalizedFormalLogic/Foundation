@@ -43,17 +43,29 @@ protected class And where
 protected class Or where
   realize_or {𝓜 : M} {p q : F} : 𝓜 ⊧ p ⋎ q ↔ 𝓜 ⊧ p ∨ 𝓜 ⊧ q
 
-class Tarski extends Semantics.Top M, Semantics.Bot M, Semantics.And M, Semantics.Or M where
-  realize_not {𝓜 : M} {p : F} : 𝓜 ⊧ ~p ↔ ¬𝓜 ⊧ p
+protected class Imp where
   realize_imp {𝓜 : M} {p q : F} : 𝓜 ⊧ p ⟶ q ↔ (𝓜 ⊧ p → 𝓜 ⊧ q)
+
+protected class Not where
+  realize_not {𝓜 : M} {p : F} : 𝓜 ⊧ ~p ↔ ¬𝓜 ⊧ p
+
+class Tarski extends
+  Semantics.Top M,
+  Semantics.Bot M,
+  Semantics.And M,
+  Semantics.Or M,
+  Semantics.Imp M,
+  Semantics.Not M
+  where
+
 
 attribute [simp]
   Top.realize_top
   Bot.realize_bot
+  Not.realize_not
   And.realize_and
   Or.realize_or
-  Tarski.realize_not
-  Tarski.realize_imp
+  Imp.realize_imp
 
 variable {M}
 

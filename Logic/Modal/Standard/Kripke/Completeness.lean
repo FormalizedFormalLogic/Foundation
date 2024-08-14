@@ -23,9 +23,9 @@ variable [Inhabited (Λ)-MCT]
 variable {Ω₁ Ω₂ : (CanonicalFrame Λ).World}
 
 @[simp]
-lemma frame_def_box: Ω₁ ≺ Ω₂ ↔ ∀ {p}, □p ∈ Ω₁.theory → p ∈ Ω₂.theory := by simp [Frame.Rel']; aesop;
+lemma rel_def_box: Ω₁ ≺ Ω₂ ↔ ∀ {p}, □p ∈ Ω₁.theory → p ∈ Ω₂.theory := by simp [Frame.Rel']; aesop;
 
-lemma multiframe_def_multibox : Ω₁ ≺^[n] Ω₂ ↔ ∀ {p}, □^[n]p ∈ Ω₁.theory → p ∈ Ω₂.theory := by
+lemma multirel_def_multibox : Ω₁ ≺^[n] Ω₂ ↔ ∀ {p}, □^[n]p ∈ Ω₁.theory → p ∈ Ω₂.theory := by
   induction n generalizing Ω₁ Ω₂ with
   | zero =>
     simp_all;
@@ -36,7 +36,7 @@ lemma multiframe_def_multibox : Ω₁ ≺^[n] Ω₂ ↔ ∀ {p}, □^[n]p ∈ Ω
     constructor;
     . intro h p hp;
       obtain ⟨⟨Ω₃, _⟩, R₁₃, R₃₂⟩ := h;
-      apply ih.mp R₃₂ $ frame_def_box.mp R₁₃ (by simpa using hp);
+      apply ih.mp R₃₂ $ rel_def_box.mp R₁₃ (by simpa using hp);
     . intro h;
       obtain ⟨Ω, hΩ⟩ := lindenbaum (Λ := Λ) (T := (□''⁻¹Ω₁.theory ∪ ◇''^[n]Ω₂.theory)) $ by
         apply Theory.intro_union_consistent;
@@ -80,17 +80,19 @@ lemma multiframe_def_multibox : Ω₁ ≺^[n] Ω₂ ↔ ∀ {p}, □^[n]p ∈ Ω
         apply hΩ;
         simp_all;
 
-lemma multiframe_def_multibox' : Ω₁ ≺^[n] Ω₂ ↔ ∀ {p}, p ∈ (□''⁻¹^[n]Ω₁.theory) → p ∈ Ω₂.theory := by
+lemma multirel_def_multibox' : Ω₁ ≺^[n] Ω₂ ↔ ∀ {p}, p ∈ (□''⁻¹^[n]Ω₁.theory) → p ∈ Ω₂.theory := by
   constructor;
-  . intro h p hp; exact multiframe_def_multibox.mp h hp;
-  . intro h; apply multiframe_def_multibox.mpr; assumption;
+  . intro h p hp; exact multirel_def_multibox.mp h hp;
+  . intro h; apply multirel_def_multibox.mpr; assumption;
 
-lemma multiframe_def_multidia : Ω₁ ≺^[n] Ω₂ ↔ ∀ {p}, (p ∈ Ω₂.theory → ◇^[n]p ∈ Ω₁.theory) := Iff.trans multiframe_def_multibox multibox_multidia
+lemma multirel_def_multidia : Ω₁ ≺^[n] Ω₂ ↔ ∀ {p}, (p ∈ Ω₂.theory → ◇^[n]p ∈ Ω₁.theory) := Iff.trans multirel_def_multibox multibox_multidia
+
+lemma rel_def_dia : Ω₁ ≺ Ω₂ ↔ ∀ {p}, p ∈ Ω₂.theory → ◇p ∈ Ω₁.theory := by simpa using multirel_def_multidia (n := 1) (Ω₁ := Ω₁) (Ω₂ := Ω₂)
 
 end CanonicalFrame
 
 
-abbrev CanonicalModel (Λ : DeductionParameter α) [Inhabited (Λ)-MCT]  : Model α where
+abbrev CanonicalModel (Λ : DeductionParameter α) [Inhabited (Λ)-MCT] : Model α where
   Frame := CanonicalFrame Λ
   Valuation Ω a := (atom a) ∈ Ω.theory
 
@@ -121,11 +123,25 @@ lemma truthlemma : ∀ {Ω : (CanonicalModel Λ).World}, Ω ⊧ p ↔ (p ∈ Ω.
       apply iff_mem_box.mpr;
       intro Ω' hΩ';
       apply ih.mp;
-      exact h hΩ';
+      exact h Ω' hΩ';
     . intro h Ω' hΩ';
       apply ih.mpr;
-      exact CanonicalFrame.frame_def_box.mp hΩ' h;
+      exact CanonicalFrame.rel_def_box.mp hΩ' h;
+  | himp p q ihp ihq =>
+    intro Ω;
+    constructor;
+    . intro h;
+      apply iff_mem_imp.mpr;
+      intro hp; replace hp := ihp.mpr hp;
+      exact ihq.mp $ h hp;
+    . intro h;
+      have := iff_mem_imp.mp h;
+      intro hp; replace hp := ihp.mp hp;
+      exact ihq.mpr $ this hp
+  | hatom a =>
+    simp_all [Kripke.Satisfies];
   | _ => simp_all [Kripke.Satisfies];
+
 
 lemma iff_valid_on_canonicalModel_deducible : (CanonicalModel Λ) ⊧ p ↔ Λ ⊢! p := by
   constructor;

@@ -24,28 +24,30 @@ private lemma connected_of_dot3 : F# ⊧* (.𝟯 : AxiomSet α) → Connected F 
     | 0 => y ≺ w
     | 1 => z ≺ w
   );
-  simp [Kripke.ValidOnModel, Kripke.Satisfies];
+
+  simp [Kripke.ValidOnModel];
   use x;
+  apply Kripke.Satisfies.or_def.not.mpr;
+  push_neg;
   constructor;
-  . use y;
-    constructor;
-    . assumption;
-    . simp_all [Kripke.Satisfies, (fInj 0), (fInj 1)];
-  . use z;
-    constructor;
-    . assumption;
-    . simp_all [Kripke.Satisfies, (fInj 0), (fInj 1)];
+  . apply Kripke.Satisfies.box_def.not.mpr; push_neg;
+    use y;
+    simp_all [Semantics.Realize, Kripke.Satisfies, (fInj 0), (fInj 1)];
+  . apply Kripke.Satisfies.box_def.not.mpr; push_neg;
+    use z;
+    simp_all [Semantics.Realize, Kripke.Satisfies, (fInj 0), (fInj 1)];
 
 private lemma dot3_of_connected : Connected F → F# ⊧* (.𝟯 : AxiomSet α) := by
   intro hCon;
   simp [Kripke.ValidOnFrame, Kripke.ValidOnModel, Axioms.Dot3];
   intro δ p q e V x; subst e;
+  apply Kripke.Satisfies.or_def.mpr;
   simp [Kripke.Satisfies];
   by_contra hC; push_neg at hC;
   obtain ⟨⟨y, rxy, hp, hnq⟩, ⟨z, rxz, hq, hnp⟩⟩ := hC;
   cases hCon ⟨rxy, rxz⟩ with
-  | inl ryz => exact hnp $ hp ryz;
-  | inr rzy => exact hnq $ hq rzy;
+  | inl ryz => have := hp z ryz; contradiction;
+  | inr rzy => have := hq y rzy; contradiction;
 
 lemma AxDot3_Definability : AxiomSet.DefinesKripkeFrameClass (α := α) .𝟯 ConnectedFrameClass := by
   intro F;

@@ -16,13 +16,21 @@ def interpretation
   (f : realization L α) (β : ProvabilityPredicate L L) : Formula α → FirstOrder.Sentence L
   | .atom a => f a
   | □p => ⦍β⦎(interpretation f β p)
-  | ⊤ => ⊤
   | ⊥ => ⊥
   | p ⟶ q => (interpretation f β p) ⟶ (interpretation f β q)
-  | p ⋏ q => (interpretation f β p) ⋏ (interpretation f β q)
-  | p ⋎ q => (interpretation f β p) ⋎ (interpretation f β q)
-  | ~p => ~(interpretation f β p)
 scoped notation f "[" β "] " p => interpretation f β p -- TODO: more good notation
+
+namespace interpretation
+
+variable [Semiterm.Operator.GoedelNumber L (FirstOrder.Sentence L)]
+         {f : realization L α} {β : ProvabilityPredicate L L} {p q : Formula α}
+         [NegAbbrev (FirstOrder.Sentence L)]
+
+lemma imp_def : (f[β] (p ⟶ q)) = ((f[β] p) ⟶ (f[β] q)) := by rfl
+lemma box_def : (f[β] □p) = ⦍β⦎(f[β] p) := by rfl
+lemma neg_def : (f[β] ~p) = (f[β] p) ⟶ ⊥ := by rfl
+
+end interpretation
 
 /-
   TODO:
@@ -71,23 +79,16 @@ lemma arithmetical_soundness_K4Loeb [β.HBL T₀ T] (h : 𝐊𝟒(𝐋) ⊢! p) 
   intro f;
   induction h using Deduction.inducition! with
   | hRules rl hrl hant ih =>
-    rcases hrl with (hNec | hLoeb)
-    . obtain ⟨p, e⟩ := hNec; subst e;
-      simp_all only [List.mem_singleton, forall_eq];
-      exact D1s (T₀ := T₀) ih;
-    . obtain ⟨p, e⟩ := hLoeb; subst e;
-      simp_all only [List.mem_singleton, forall_eq]
-      exact Loeb.LT T₀ ih;
+    rcases hrl with (⟨_, rfl⟩ | ⟨_, rfl⟩)
+    . simp_all only [List.mem_singleton, forall_eq]; exact D1s (T₀ := T₀) ih;
+    . simp_all only [List.mem_singleton, forall_eq]; exact Loeb.LT T₀ ih;
   | hMaxm hp =>
-    rcases hp with (hK | hFour)
-    . obtain ⟨p, q, e⟩ := hK; subst_vars; apply D2s (T₀ := T₀);
-    . obtain ⟨p, e⟩ := hFour; subst_vars; apply D3s (T₀ := T₀);
+    rcases hp with (⟨_, _, rfl⟩ | ⟨_, rfl⟩)
+    . exact D2s (T₀ := T₀);
+    . exact D3s (T₀ := T₀);
   | hMdp ihpq ihp =>
     simp [interpretation] at ihpq;
     exact ihpq ⨀ ihp;
-  | hDne =>
-    dsimp [interpretation];
-    exact dne!;
   | _ => dsimp [interpretation]; trivial;
 
 theorem arithmetical_soundness_GL [β.HBL T₀ T] (h : 𝐆𝐋 ⊢! p) : ∀ {f : realization L α}, T ⊢! (f[β] p) := by
@@ -101,15 +102,12 @@ lemma arithmetical_soundness_N [β.HBL T₀ T] (h : 𝐍 ⊢! p) : ∀ {f : real
   | hMaxm hp => simp at hp;
   | hRules rl hrl hant ih =>
     simp only [Set.mem_setOf_eq] at hrl;
-    obtain ⟨p, e⟩ := hrl; subst e;
+    obtain ⟨p, rfl⟩ := hrl;
     simp_all only [List.mem_singleton, forall_eq];
     exact D1s (T₀ := T₀) ih;
   | hMdp ihpq ihp =>
     simp only [interpretation] at ihpq;
     exact ihpq ⨀ ihp;
-  | hDne =>
-    dsimp [interpretation];
-    exact dne!;
   | _ => dsimp [interpretation]; trivial;
 
 end ArithmeticalSoundness

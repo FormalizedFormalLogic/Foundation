@@ -116,8 +116,39 @@ lemma provable_S4_of_provable_efq : (𝐒𝟒 ⊢! pᵍ) → (𝐈𝐧𝐭 ⊢! 
         simp_all only [Satisfies.iff_models, Satisfies, Formula.Kripke.Satisfies];
         exact IV_hered h (by assumption);
       . intro h;
-        simpa only [Satisfies.iff_models, Satisfies, Formula.Kripke.Satisfies] using h $ IF_refl v;
-    | _ => simp_all only [Satisfies, Kripke.Satisfies];
+        simpa only [Satisfies.iff_models, Satisfies, Formula.Kripke.Satisfies] using h _ $ IF_refl v;
+    | hneg q ih =>
+      simp [GoedelTranslation];
+      constructor;
+      . intro h x Rvx;
+        apply Kripke.Satisfies.not_def.mpr;
+        intro hq;
+        exact h Rvx $ ih x |>.mpr hq;
+      . intro h x Rvx hq;
+        exact (Kripke.Satisfies.not_def.mp $ h x Rvx) $ ih x |>.mp hq;
+    | himp q r ihq ihr =>
+      simp [GoedelTranslation];
+      constructor;
+      . intro h x Rvx;
+        apply Kripke.Satisfies.imp_def.mpr;
+        intro hq;
+        apply ihr x |>.mp $ h Rvx $ ihq x |>.mpr hq;
+      . intro h x Rvx hq;
+        exact ihr x |>.mpr $ Kripke.Satisfies.imp_def.mp (@h x Rvx) $ ihq x |>.mp hq;
+    | hor q r ihq ihr =>
+      simp [GoedelTranslation];
+      constructor;
+      . rintro (hq | hr);
+        . apply Kripke.Satisfies.or_def.mpr;
+          left; exact @ihq v |>.mp hq;
+        . apply Kripke.Satisfies.or_def.mpr;
+          right; exact @ihr v |>.mp hr;
+      . intro h;
+        rcases Kripke.Satisfies.or_def.mp h with (hq | hr);
+        . left; exact @ihq v |>.mpr hq;
+        . right; exact @ihr v |>.mpr hr;
+    | _ =>
+      simp_all [Satisfies, Kripke.Satisfies];
   have : ¬(Modal.Standard.Formula.Kripke.Satisfies M w (pᵍ)) := (h₁ p w).not.mp hp;
 
   apply not_imp_not.mpr $ Modal.Standard.Kripke.sound_S4.sound;

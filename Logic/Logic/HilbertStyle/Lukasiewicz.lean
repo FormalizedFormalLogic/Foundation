@@ -42,15 +42,10 @@ variable [System.Lukasiewicz 𝓢]
 def verum : 𝓢 ⊢ ⊤ := by simp [LukasiewiczAbbrev.top]; exact impId ⊥;
 instance : HasAxiomVerum 𝓢 := ⟨Lukasiewicz.verum⟩
 
-private def elim_contra₂ : 𝓢 ⊢ (~q ⟶ ~p) ⟶ (p ⟶ q) := by
-  have : 𝓢 ⊢ ((q ⟶ ⊥) ⟶ (p ⟶ ⊥)) ⟶ (p ⟶ q) := elim_contra
-  repeat rw [LukasiewiczAbbrev.neg];
-  exact this;
-
 def dne : 𝓢 ⊢ ~~p ⟶ p := by
-  have d₁ : 𝓢 ⊢ ~~p ⟶ (~~(~~p) ⟶ ~~p) ⟶ ~p ⟶ ~(~~p) := dhyp _ $ elim_contra₂;
+  have d₁ : 𝓢 ⊢ ~~p ⟶ (~~(~~p) ⟶ ~~p) ⟶ ~p ⟶ ~(~~p) := dhyp _ $ elim_contra;
   have d₂ : 𝓢 ⊢ ~~p ⟶ ~~(~~p) ⟶ ~~p := imply₁;
-  have d₃ : 𝓢 ⊢ ~~p ⟶ (~p ⟶ ~(~~p)) ⟶ ~~p ⟶ p := dhyp _ $ elim_contra₂;
+  have d₃ : 𝓢 ⊢ ~~p ⟶ (~p ⟶ ~(~~p)) ⟶ ~~p ⟶ p := dhyp _ $ elim_contra;
   have d₄ : 𝓢 ⊢ ~~p ⟶ ~p ⟶ ~(~~p) := d₁ ⨀₁ d₂;
   have d₅ : 𝓢 ⊢ ~~p ⟶ ~~p ⟶ p := d₃ ⨀₁ d₄;
   have d₆ : 𝓢 ⊢ ~~p ⟶ ~~p := impId _;
@@ -58,25 +53,25 @@ def dne : 𝓢 ⊢ ~~p ⟶ p := by
 instance : HasAxiomDNE 𝓢 := ⟨λ p => Lukasiewicz.dne (p := p)⟩
 
 def dni : 𝓢 ⊢ p ⟶ ~~p := by
-  have d₁ : 𝓢 ⊢ (~(~~p) ⟶ ~p) ⟶ p ⟶ ~~p := elim_contra₂;
+  have d₁ : 𝓢 ⊢ (~(~~p) ⟶ ~p) ⟶ p ⟶ ~~p := elim_contra;
   have d₂ : 𝓢 ⊢ ~(~~p) ⟶ ~p := dne (p := ~p);
   exact d₁ ⨀ d₂;
 
 def explode (h₁ : 𝓢 ⊢ p) (h₂ : 𝓢 ⊢ ~p) : 𝓢 ⊢ q := by
   have d₁ := imply₁ (𝓢 := 𝓢) (p := ~p) (q := ~q);
   have := d₁ ⨀ h₂;
-  exact elim_contra₂ ⨀ this ⨀ h₁;
+  exact elim_contra ⨀ this ⨀ h₁;
 
 def explodeHyp (h₁ : 𝓢 ⊢ p ⟶ q) (h₂ : 𝓢 ⊢ p ⟶ ~q) : 𝓢 ⊢ p ⟶ r := by
   have : 𝓢 ⊢ p ⟶ ~q ⟶ ~(r) ⟶ ~q := dhyp imply₁ (q := p)
   have : 𝓢 ⊢ p ⟶ ~(r) ⟶ ~q := this ⨀₁ h₂;
-  have : 𝓢 ⊢ p ⟶ q ⟶ r := (dhyp elim_contra₂ (q := p)) ⨀₁ this;
+  have : 𝓢 ⊢ p ⟶ q ⟶ r := (dhyp elim_contra (q := p)) ⨀₁ this;
   exact this ⨀₁ h₁;
 
 def explodeHyp₂ (h₁ : 𝓢 ⊢ p ⟶ q ⟶ r) (h₂ : 𝓢 ⊢ p ⟶ q ⟶ ~(r)) : 𝓢 ⊢ p ⟶ q ⟶ s := by
   have : 𝓢 ⊢ p ⟶ q ⟶ ~(r) ⟶ ~s ⟶ ~(r) := dhyp (dhyp imply₁ (q := q)) (q := p)
   have : 𝓢 ⊢ p ⟶ q ⟶ ~(s) ⟶ ~(r) := this ⨀₂ h₂;
-  have : 𝓢 ⊢ p ⟶ q ⟶ r ⟶ s := (dhyp (dhyp elim_contra₂ (q := q)) (q := p)) ⨀₂ this;
+  have : 𝓢 ⊢ p ⟶ q ⟶ r ⟶ s := (dhyp (dhyp elim_contra (q := q)) (q := p)) ⨀₂ this;
   exact this ⨀₂ h₁;
 
 def efq : 𝓢 ⊢ ⊥ ⟶ p := by

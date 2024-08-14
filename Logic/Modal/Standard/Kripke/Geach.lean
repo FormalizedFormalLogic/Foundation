@@ -151,13 +151,15 @@ lemma axiomGeach_defines : 𝗴𝗲(t).DefinesKripkeFrameClass (α := α) (Geach
       constructor;
       . exact hi;
       . apply Kripke.Satisfies.multibox_def.mpr; aesop;
-    have hjn_x : Kripke.Satisfies M x (□^[t.j](◇^[t.n](atom default))) := h (Formula.atom default) M.Valuation x him_x;
+    have hjn_x : Kripke.Satisfies M x (□^[t.j](◇^[t.n](atom default))) := Kripke.Satisfies.imp_def.mp (h (atom default) M.Valuation x) him_x;
     have hn_z : Kripke.Satisfies M z (◇^[t.n](atom default)) := Kripke.Satisfies.multibox_def.mp hjn_x hj;
     obtain ⟨u, hzu, hyu⟩ := Kripke.Satisfies.multidia_def.mp hn_z;
     use u;
     exact ⟨hyu, hzu⟩;
   . simp [AxiomSet.Geach, Axioms.Geach, Kripke.Satisfies];
-    intro h p V x him;
+    intro h p V x;
+    apply Kripke.Satisfies.imp_def.mpr;
+    intro him;
     apply multibox_def.mpr;
     intro z rxz;
     apply multidia_def.mpr;
@@ -264,8 +266,8 @@ lemma geachConfluent_CanonicalFrame (h : 𝗴𝗲(t) ⊆ Ax) : GeachConfluent t 
 
     have : □^[t.j](◇^[t.n]⋀Γ) ∈ Ω₁.theory := iff_mem_imp.mp
       (membership_iff.mpr $ Context.of! $ Normal.maxm! (by aesop))
-      (multiframe_def_multidia.mp r₁₂ hΓconj)
-    have : ◇^[t.n]⋀Γ ∈ Ω₃.theory := multiframe_def_multibox.mp r₁₃ this;
+      (multirel_def_multidia.mp r₁₂ hΓconj)
+    have : ◇^[t.n]⋀Γ ∈ Ω₃.theory := multirel_def_multibox.mp r₁₃ this;
 
     have : 𝝂Ax ⊢! □^[t.n]⋀Δ ⋏ ◇^[t.n]⋀Γ ⟶ ⊥ := by {
       apply and_imply_iff_imply_imply'!.mpr;
@@ -279,8 +281,8 @@ lemma geachConfluent_CanonicalFrame (h : 𝗴𝗲(t) ⊆ Ax) : GeachConfluent t 
 
   use Ω; simp only [Set.union_subset_iff] at hΩ;
   constructor;
-  . apply multiframe_def_multibox.mpr; apply hΩ.1;
-  . apply multiframe_def_multibox.mpr; apply hΩ.2;
+  . apply multirel_def_multibox.mpr; apply hΩ.1;
+  . apply multirel_def_multibox.mpr; apply hΩ.2;
 
 lemma multiGeachConfluent_CanonicalFrame (h : 𝗚𝗲(ts) ⊆ Ax) : MultiGeachConfluent ts (CanonicalFrame 𝝂Ax) := by
   induction ts with

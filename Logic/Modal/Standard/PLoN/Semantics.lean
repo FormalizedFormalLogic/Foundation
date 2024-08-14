@@ -52,12 +52,8 @@ open Standard.PLoN
 
 def Formula.PLoN.Satisfies (M : PLoN.Model α) (w : M.World) : Formula α → Prop
   | atom a  => M.Valuation w a
-  | verum   => True
   | falsum  => False
-  | neg p   => ¬(PLoN.Satisfies M w p)
-  | and p q => (PLoN.Satisfies M w p) ∧ (PLoN.Satisfies M w q)
-  | or p q  => (PLoN.Satisfies M w p) ∨ (PLoN.Satisfies M w q)
-  | imp p q => (PLoN.Satisfies M w p) → (PLoN.Satisfies M w q)
+  | p ⟶ q => (PLoN.Satisfies M w p) → (PLoN.Satisfies M w q)
   | □p   => ∀ {w'}, w ≺[p] w' → (PLoN.Satisfies M w' p)
 
 
@@ -65,17 +61,29 @@ namespace Formula.PLoN.Satisfies
 
 protected instance semantics (M : PLoN.Model α) : Semantics (Formula α) (M.World) := ⟨fun w ↦ Formula.PLoN.Satisfies M w⟩
 
-variable {M : PLoN.Model α} {w : M.World} {p q : Formula α}
+variable {M : PLoN.Model α} {x : M.World} {p q : Formula α}
 
-@[simp] protected lemma iff_models : w ⊧ p ↔ PLoN.Satisfies M w p := by rfl
+@[simp] protected lemma iff_models : x ⊧ p ↔ PLoN.Satisfies M x p := by rfl
+
+lemma box_def : x ⊧ □p ↔ ∀ y, x ≺[p] y → y ⊧ p := by simp [PLoN.Satisfies];
+
+lemma not_def : x ⊧ ~p ↔ ¬(x ⊧ p) := by
+  induction p using Formula.rec' generalizing x with
+  | _ => simp_all [Satisfies]; try tauto;
+instance : Semantics.Not (M.World) := ⟨not_def⟩
+
+lemma imp_def : x ⊧ p ⟶ q ↔ (x ⊧ p) → (x ⊧ q) := by tauto;
+instance : Semantics.Imp (M.World) := ⟨imp_def⟩
+
+lemma or_def : x ⊧ p ⋎ q ↔ x ⊧ p ∨ x ⊧ q := by simp [Satisfies]; tauto;
+instance : Semantics.Or (M.World) := ⟨or_def⟩
+
+lemma and_def : x ⊧ p ⋏ q ↔ x ⊧ p ∧ x ⊧ q := by simp [Satisfies];
+instance : Semantics.And (M.World) := ⟨and_def⟩
 
 instance : Semantics.Tarski M.World where
   realize_top := by simp [PLoN.Satisfies];
   realize_bot := by simp [PLoN.Satisfies];
-  realize_not := by simp [PLoN.Satisfies];
-  realize_and := by simp [PLoN.Satisfies];
-  realize_or  := by simp [PLoN.Satisfies];
-  realize_imp := by simp [PLoN.Satisfies];
 
 end Formula.PLoN.Satisfies
 
@@ -94,6 +102,14 @@ instance : Semantics.Bot (PLoN.Model α) where
   realize_bot _ := by
     simp [Formula.PLoN.ValidOnModel];
     use ﹫;
+
+variable {M : PLoN.Model α}
+
+protected lemma imply₁ : M ⊧ (Axioms.Imply₁ p q) := by simp [ValidOnModel]; tauto;
+
+protected lemma imply₂ : M ⊧ (Axioms.Imply₂ p q r) := by simp [ValidOnModel]; tauto;
+
+protected lemma elim_contra : M ⊧ (Axioms.ElimContra p q) := by simp [ValidOnModel]; tauto;
 
 end Formula.PLoN.ValidOnModel
 
@@ -121,6 +137,12 @@ protected lemma mdp (hpq : F ⊧ p ⟶ q) (hp : F ⊧ p) : F ⊧ q := by
   intro V x;
   exact (hpq V x) (hp V x);
 
+protected lemma imply₁ : F ⊧ (Axioms.Imply₁ p q) := by simp [ValidOnFrame]; tauto;
+
+protected lemma imply₂ : F ⊧ (Axioms.Imply₂ p q r) := by simp [ValidOnFrame]; tauto;
+
+protected lemma elim_contra : F ⊧ (Axioms.ElimContra p q) := by intro V; exact ValidOnModel.elim_contra;
+
 end Formula.PLoN.ValidOnFrame
 
 
@@ -143,6 +165,12 @@ protected lemma nec (h : 𝔽 ⊧ p) : 𝔽 ⊧ □p := by
 protected lemma mdp (hpq : 𝔽 ⊧ p ⟶ q) (hp : 𝔽 ⊧ p) : 𝔽 ⊧ q := by
   intro _ hF;
   exact PLoN.ValidOnFrame.mdp (hpq hF) (hp hF)
+
+protected lemma imply₁ : 𝔽 ⊧ (Axioms.Imply₁ p q) := by intro _ _; exact PLoN.ValidOnFrame.imply₁;
+
+protected lemma imply₂ : 𝔽 ⊧ (Axioms.Imply₂ p q r) := by intro _ _; exact PLoN.ValidOnFrame.imply₂;
+
+protected lemma elim_contra : 𝔽 ⊧ (Axioms.ElimContra p q) := by intro _ _; exact PLoN.ValidOnFrame.elim_contra;
 
 end Formula.PLoN.ValidOnFrameClass
 
@@ -172,13 +200,9 @@ lemma N_defines : 𝐍.DefinesPLoNFrameClass (AllFrameClass α) := by
   | hNec ihp =>
     intro V w w' _;
     exact ihp V w';
-  | hOrElim =>
-    simp_all only [PLoN.Satisfies];
-    intros; rename_i hpr hqr hpq;
-    cases hpq with
-    | inl hp => exact hpr hp;
-    | inr hq => exact hqr hq;
-  | _ => simp_all [PLoN.Satisfies];
+  | _ =>
+    simp_all [PLoN.Satisfies];
+    try tauto;
 
 end PLoN
 

@@ -310,10 +310,10 @@ lemma iff_mem_neg : (~p ∈ Ω.theory) ↔ (p ∉ Ω.theory) := by
     simp;
 
 lemma iff_mem_negneg : (~~p ∈ Ω.theory) ↔ (p ∈ Ω.theory) := by
-  simp [membership_iff];
+  simp only [membership_iff];
   constructor;
-  . intro h; exact dne'! h;
-  . intro h; exact dni'! h;
+  . exact dne'!;
+  . exact dni'!;
 
 @[simp]
 lemma iff_mem_imp : ((p ⟶ q) ∈ Ω.theory) ↔ (p ∈ Ω.theory) → (q ∈ Ω.theory) := by
@@ -442,7 +442,6 @@ lemma multibox_dn_iff : (□^[n](~~p) ∈ Ω.theory) ↔ (□^[n]p ∈ Ω.theory
   constructor;
   . intro h Ω hΩ; exact iff_mem_negneg.mp $ h hΩ;
   . intro h Ω hΩ; exact iff_mem_negneg.mpr $ h hΩ;
-
 lemma box_dn_iff : (□(~~p) ∈ Ω.theory) ↔ (□p ∈ Ω.theory) := multibox_dn_iff (n := 1)
 
 lemma mem_multibox_dual : □^[n]p ∈ Ω.theory ↔ ~(◇^[n](~p)) ∈ Ω.theory := by
@@ -466,7 +465,7 @@ lemma mem_box_dual : □p ∈ Ω.theory ↔ (~(◇(~p)) ∈ Ω.theory) := mem_mu
 
 -- lemma multidia_dn_iff : (◇^[n](~~p) ∈ Ω.theory) ↔ (◇^[n]p ∈ Ω.theory) := by sorry
 
-lemma dia_dn_iff : (◇(~~p) ∈ Ω.theory) ↔ (◇p) ∈ Ω.theory := neg_iff box_dn_iff -- TODO: multidia_dn_iff (n := 1)
+-- lemma dia_dn_iff : (◇(~~p) ∈ Ω.theory) ↔ (◇p) ∈ Ω.theory := neg_iff box_dn_iff -- TODO: multidia_dn_iff (n := 1)
 
 lemma mem_multidia_dual : ◇^[n]p ∈ Ω.theory ↔ ~(□^[n](~p)) ∈ Ω.theory := by
   simp [membership_iff];
@@ -486,6 +485,29 @@ lemma mem_multidia_dual : ◇^[n]p ∈ Ω.theory ↔ ~(□^[n](~p)) ∈ Ω.theor
     . assumption;
     . exact FiniteContext.provable_iff.mpr $ imp_trans''! (FiniteContext.provable_iff.mp hΓ₂) (and₂'! multidia_duality!);
 lemma mem_dia_dual : ◇p ∈ Ω.theory ↔ (~(□(~p)) ∈ Ω.theory) := mem_multidia_dual (n := 1)
+
+lemma iff_mem_multidia : (◇^[n]p ∈ Ω.theory) ↔ (∃ Ω' : (Λ)-MCT, (□''⁻¹^[n]Ω.theory ⊆ Ω'.theory) ∧ (p ∈ Ω'.theory)) := by
+  constructor;
+  . intro h;
+    have := mem_multidia_dual.mp h;
+    have := iff_mem_neg.mp this;
+    have := iff_mem_multibox.not.mp this;
+    push_neg at this;
+    obtain ⟨Ω', h₁, h₂⟩ := this;
+    use Ω';
+    constructor;
+    . exact h₁;
+    . exact mem_dn_iff.mpr $ iff_mem_neg.mpr h₂;
+  . rintro ⟨Ω', h₁, h₂⟩;
+    apply mem_multidia_dual.mpr;
+    apply iff_mem_neg.mpr;
+    apply iff_mem_multibox.not.mpr;
+    push_neg;
+    use Ω';
+    constructor;
+    . exact h₁;
+    . exact iff_mem_neg.mp $ mem_dn_iff.mp h₂;
+lemma iff_mem_dia : (◇p ∈ Ω.theory) ↔ (∃ Ω' : (Λ)-MCT, (□''⁻¹Ω.theory ⊆ Ω'.theory) ∧ (p ∈ Ω'.theory)) := iff_mem_multidia (n := 1)
 
 lemma multibox_multidia : (∀ {p : Formula α}, (□^[n]p ∈ Ω₁.theory → p ∈ Ω₂.theory)) ↔ (∀ {p : Formula α}, (p ∈ Ω₂.theory → ◇^[n]p ∈ Ω₁.theory)) := by
   constructor;

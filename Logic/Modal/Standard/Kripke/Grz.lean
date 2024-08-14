@@ -105,13 +105,13 @@ private lemma valid_on_frame_T_of_Grz (h : F# ⊧* (𝗚𝗿𝘇 : AxiomSet α))
   have := valid_on_frame_T_and_Four_of_Grz h;
   simp_all [ValidOnFrame, ValidOnModel, Axioms.T, Axioms.Grz];
   intro p V x hx;
-  exact this p V x hx |>.1;
+  exact Satisfies.and_def.mp (this p V x hx) |>.1
 
 private lemma valid_on_frame_Four_of_Grz (h : F# ⊧* (𝗚𝗿𝘇 : AxiomSet α)) : F# ⊧* (𝟰 : AxiomSet α) := by
   have := valid_on_frame_T_and_Four_of_Grz h;
   simp_all [ValidOnFrame, ValidOnModel, Axioms.T, Axioms.Grz];
   intro p V x hx;
-  exact (this p V x hx |>.2) hx;
+  exact (Satisfies.and_def.mp (this p V x hx) |>.2) hx;
 
 private lemma refl_of_Grz (h : F# ⊧* (𝗚𝗿𝘇 : AxiomSet α)) : Reflexive F := by
   exact axiomT_defines.mp $ (valid_on_frame_T_of_Grz h);
@@ -142,7 +142,7 @@ private lemma wcwf_of_Grz (h : F# ⊧* (𝗚𝗿𝘇 : AxiomSet α)) : WeaklyCon
       constructor;
       . suffices Satisfies ⟨F, _⟩ (f 0) (□(~(atom default) ⟶ ~(□(atom default ⟶ □atom default)))) by
           intro x hx;
-          exact not_imp_not.mp $ this hx;
+          exact not_imp_not.mp $ this _ hx;
         simp [Satisfies];
         rintro v h0v j rfl;
         use f (2 * j + 1);
@@ -184,7 +184,7 @@ private lemma wcwf_of_Grz (h : F# ⊧* (𝗚𝗿𝘇 : AxiomSet α)) : WeaklyCon
           refine ⟨(hf j).2, Ne.symm $ (hf j).1, this.2⟩;
         intro x hx;
         contrapose;
-        exact this hx;
+        exact this _ hx;
       . simp [Satisfies, V];
 
 private lemma Grz_of_wcwf : (Reflexive F.Rel ∧ Transitive F.Rel ∧ WeaklyConverseWellFounded F.Rel) → F# ⊧* (𝗚𝗿𝘇 : AxiomSet α) := by
@@ -212,7 +212,7 @@ private lemma Grz_of_wcwf : (Reflexive F.Rel ∧ Transitive F.Rel ∧ WeaklyConv
 
   intro w hw;
   rcases hw with (⟨hw₁, hw₂⟩ | ⟨hw₁, hw₂, hw₃⟩);
-  . have := hw₁ (by apply hRefl);
+  . have := hw₁ _ (by apply hRefl);
     have := not_imp_not.mpr this hw₂;
     simp [Satisfies] at this;
     obtain ⟨x, Rwx, hx, hbx⟩ := this;
@@ -221,7 +221,7 @@ private lemma Grz_of_wcwf : (Reflexive F.Rel ∧ Transitive F.Rel ∧ WeaklyConv
     . right;
       refine ⟨?_, (by simp [Satisfies, hbx]), (by assumption)⟩;
       intro y Rxy hy;
-      exact hw₁ (hTrans Rwx Rxy) hy;
+      exact hw₁ _ (hTrans Rwx Rxy) hy;
     . constructor;
       . aesop;
       . exact Rwx;
@@ -232,7 +232,7 @@ private lemma Grz_of_wcwf : (Reflexive F.Rel ∧ Transitive F.Rel ∧ WeaklyConv
     . left;
       refine ⟨?_, (by assumption)⟩;
       intro y Rxy hy;
-      exact hw₁ (hTrans Rwx Rxy) hy;
+      exact hw₁ _ (hTrans Rwx Rxy) hy;
     . constructor;
       . aesop;
       . exact Rwx;
