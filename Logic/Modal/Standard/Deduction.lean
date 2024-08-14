@@ -1,5 +1,6 @@
 import Logic.Modal.Standard.Formula
 import Logic.Modal.Standard.System
+import Logic.Logic.HilbertStyle.Lukasiewicz
 
 namespace LO.Modal.Standard
 
