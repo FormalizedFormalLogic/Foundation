@@ -113,7 +113,7 @@ instance seqExp_definable : 𝚺₁-Function₂ (seqExp : M → M → M) := Defi
   .of_sigmaOne seqExp_definable _ _
 
 lemma mem_seqExp_iff {s a k : M} : s ∈ a ^ˢ k ↔ Seq s ∧ lh s = k ∧ (∀ i z, ⟪i, z⟫ ∈ s → z ∈ a) := by
-  induction k using induction_iPiOne generalizing s
+  induction k using induction_pi1 generalizing s
   · suffices 𝚷₁-Predicate fun {k} => ∀ {s : M}, s ∈ a ^ˢ k ↔ Seq s ∧ lh s = k ∧ ∀ i < s, ∀ z < s, ⟪i, z⟫ ∈ s → z ∈ a
     by exact this.of_iff (fun k ↦
       forall_congr' <| fun s ↦ iff_congr (by rfl) <| and_congr (by rfl) <| and_congr (by rfl)

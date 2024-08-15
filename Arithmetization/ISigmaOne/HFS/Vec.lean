@@ -64,7 +64,7 @@ lemma cons_le_cons {x₁ x₂ v₁ v₂ : V} (hx : x₁ ≤ x₂) (hv : v₁ ≤
 
 section
 
-def _root_.LO.FirstOrder.Arith.consDef : 𝚺₀-Semisentence 3 :=
+def _root_.LO.FirstOrder.Arith.consDef : 𝚺₀.Semisentence 3 :=
   .mkSigma “w x v | ∃ xv < w, !pairDef xv x v ∧ w = xv + 1” (by simp)
 
 lemma cons_defined : 𝚺₀-Function₂ (cons : V → V → V) via consDef := by
@@ -80,7 +80,7 @@ instance cons_definable : 𝚺₀-Function₂ (cons : V → V → V) := Defined.
 
 instance cons_definable' (Γ) : Γ-Function₂ (cons : V → V → V) := .of_zero cons_definable _
 
-def _root_.LO.FirstOrder.Arith.mkVec₁Def : 𝚺₀-Semisentence 2 := .mkSigma
+def _root_.LO.FirstOrder.Arith.mkVec₁Def : 𝚺₀.Semisentence 2 := .mkSigma
   “s x | !consDef s x 0” (by simp)
 
 lemma mkVec₁_defined : 𝚺₀-Function₁ (fun x : V ↦ ?[x]) via mkVec₁Def := by
@@ -200,7 +200,7 @@ lemma graph_succ {v i x : V} :
 lemma graph_exists (v i : V) : ∃ x, Graph ⟪v, i, x⟫ := by
   suffices ∀ i' ≤ i, ∀ v' ≤ v, ∃ x, Graph ⟪v', i', x⟫ from this i (by simp) v (by simp)
   intro i' hi'
-  induction i' using induction_iSigmaOne
+  induction i' using induction_sigma1
   · definability
   case zero =>
     intro v' _
@@ -211,7 +211,7 @@ lemma graph_exists (v i : V) : ∃ x, Graph ⟪v, i, x⟫ := by
     exact ⟨x, graph_case.mpr <| Or.inr ⟨v', i', x, rfl, hx⟩⟩
 
 lemma graph_unique {v i x₁ x₂ : V} : Graph ⟪v, i, x₁⟫ → Graph ⟪v, i, x₂⟫ → x₁ = x₂ := by
-  induction i using induction_iPiOne generalizing v x₁ x₂
+  induction i using induction_pi1 generalizing v x₁ x₂
   · definability
   case zero =>
     simp [graph_zero]
@@ -307,13 +307,13 @@ lemma pi₁_zero : π₁ (0 : V) = 0 := nonpos_iff_eq_zero.mp (pi₁_le_self 0)
 lemma pi₂_zero : π₂ (0 : V) = 0 := nonpos_iff_eq_zero.mp (pi₂_le_self 0)
 
 @[simp] lemma nth_zero_idx (i : V) : (0).[i] = 0 := by
-  induction i using induction_iSigmaOne
+  induction i using induction_sigma1
   · definability
   case zero => simp [nth_zero, fstIdx, pi₁_zero]
   case succ i ih => simp [nth_succ, sndIdx, pi₂_zero, ih]
 
 lemma nth_lt_of_pos {v} (hv : 0 < v) (i : V) : v.[i] < v := by
-  induction i using induction_iPiOne generalizing v
+  induction i using induction_pi1 generalizing v
   · definability
   case zero =>
     rcases zero_or_succ v with (rfl | ⟨v, rfl⟩)
@@ -626,7 +626,7 @@ theorem sigmaOne_skolem_vec {R : V → V → Prop} (hP : 𝚺₁-Relation R) {l}
     (H : ∀ x < l, ∃ y, R x y) : ∃ v, len v = l ∧ ∀ i < l, R i v.[i] := by
   have : ∀ k ≤ l, ∃ v, len v = k ∧ ∀ i < k, R (l - k + i) v.[i] := by
     intro k hk
-    induction k using induction_iSigmaOne
+    induction k using induction_sigma1
     · definability
     case zero => exact ⟨0, by simp⟩
     case succ k ih =>
@@ -942,7 +942,7 @@ instance repeatVec_definable : 𝚺₁-Function₂ (repeatVec : V → V → V) :
 end
 
 @[simp] lemma len_repeatVec (x k : V) : len (repeatVec x k) = k := by
-  induction k using induction_iSigmaOne
+  induction k using induction_sigma1
   · definability
   case zero => simp
   case succ k ih => simp [ih]
@@ -951,7 +951,7 @@ end
   simpa using len_le (repeatVec x k)
 
 lemma nth_repeatVec (x k : V) {i} (h : i < k) : (repeatVec x k).[i] = x := by
-  induction k using induction_iSigmaOne generalizing i
+  induction k using induction_sigma1 generalizing i
   · definability
   case zero => simp at h
   case succ k ih =>

@@ -134,7 +134,7 @@ namespace HierarchySymbol.Boldface
 
 variable {P Q : (Fin k → V) → Prop}
 
-lemma ball_lt_boldfaceBoundedFunction {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
+lemma ball_blt {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
     (hf : BoldfaceBoundedFunction f) (h : ℌ.Boldface fun w ↦ P (w ·.succ) (w 0)) :
     ℌ.Boldface fun v ↦ ∀ x < f v, P v x := by
   rcases hf.bounded with ⟨bf, hbf⟩
@@ -147,7 +147,7 @@ lemma ball_lt_boldfaceBoundedFunction {P : (Fin k → V) → V → Prop} {f : (F
   exact .of_iff ⟨_, this⟩ (fun v ↦ ⟨fun h ↦ ⟨f v, hbf v, rfl, h⟩, by rintro ⟨y, hy, rfl, h⟩; exact h⟩)
 
 
-lemma bex_lt_boldfaceBoundedFunction {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
+lemma bex_blt {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
     (hf : BoldfaceBoundedFunction f) (h : ℌ.Boldface fun w ↦ P (w ·.succ) (w 0)) :
     ℌ.Boldface fun v ↦ ∃ x < f v, P v x := by
   rcases hf.bounded with ⟨bf, hbf⟩
@@ -159,7 +159,7 @@ lemma bex_lt_boldfaceBoundedFunction {P : (Fin k → V) → V → Prop} {f : (Fi
     simpa [←le_iff_lt_succ] using (hf_graph.and ((hp.retraction (0 :> (·.succ.succ))).bex #0)).bex ‘!!bf + 1’
   exact .of_iff ⟨_, this⟩ (fun v ↦ ⟨fun h ↦ ⟨f v, hbf v, rfl, h⟩, by rintro ⟨y, hy, rfl, h⟩; exact h⟩)
 
-lemma ball_le_boldfaceBoundedFunction {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
+lemma ball_ble {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
     (hf : BoldfaceBoundedFunction f) (h : ℌ.Boldface fun w ↦ P (w ·.succ) (w 0)) :
     ℌ.Boldface fun v ↦ ∀ x ≤ f v, P v x := by
   rcases hf.bounded with ⟨bf, hbf⟩
@@ -171,7 +171,7 @@ lemma ball_le_boldfaceBoundedFunction {P : (Fin k → V) → V → Prop} {f : (F
     simpa [←le_iff_lt_succ] using (hf_graph.and ((hp.retraction (0 :> (·.succ.succ))).ball ‘x | x + 1’)).bex ‘!!bf + 1’
   exact .of_iff ⟨_, this⟩ (fun v ↦ ⟨fun h ↦ ⟨f v, hbf v, rfl, h⟩, by rintro ⟨y, hy, rfl, h⟩; exact h⟩)
 
-lemma bex_le_boldfaceBoundedFunction {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
+lemma bex_ble {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
     (hf : BoldfaceBoundedFunction f) (h : ℌ.Boldface fun w ↦ P (w ·.succ) (w 0)) :
     ℌ.Boldface fun v ↦ ∃ x ≤ f v, P v x := by
   rcases hf.bounded with ⟨bf, hbf⟩
@@ -183,21 +183,21 @@ lemma bex_le_boldfaceBoundedFunction {P : (Fin k → V) → V → Prop} {f : (Fi
     simpa [←le_iff_lt_succ] using (hf_graph.and ((hp.retraction (0 :> (·.succ.succ))).bex ‘x | x + 1’)).bex ‘!!bf + 1’
   exact .of_iff ⟨_, this⟩ (fun v ↦ ⟨fun h ↦ ⟨f v, hbf v, rfl, h⟩, by rintro ⟨y, hy, rfl, h⟩; exact h⟩)
 
-lemma ball_lt_zero {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
+lemma ball_blt_zero {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
     (hf : BoldfaceBoundedFunction f) (h : Γ-[0].Boldface fun w ↦ P (w ·.succ) (w 0)) :
-    Γ-[0].Boldface fun v ↦ ∀ x < f v, P v x := ball_lt_boldfaceBoundedFunction hf h
+    Γ-[0].Boldface fun v ↦ ∀ x < f v, P v x := ball_blt hf h
 
-lemma bex_lt_zero {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
+lemma bex_blt_zero {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
     (hf : BoldfaceBoundedFunction f) (h : Γ-[0].Boldface fun w ↦ P (w ·.succ) (w 0)) :
-    Γ-[0].Boldface fun v ↦ ∃ x < f v, P v x := bex_lt_boldfaceBoundedFunction hf h
+    Γ-[0].Boldface fun v ↦ ∃ x < f v, P v x := bex_blt hf h
 
-lemma ball_le_zero {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
+lemma ball_ble_zero {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
     (hf : BoldfaceBoundedFunction f) (h : Γ-[0].Boldface fun w ↦ P (w ·.succ) (w 0)) :
-    Γ-[0].Boldface fun v ↦ ∀ x ≤ f v, P v x := ball_le_boldfaceBoundedFunction hf h
+    Γ-[0].Boldface fun v ↦ ∀ x ≤ f v, P v x := ball_ble hf h
 
-lemma bex_le_zero {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
+lemma bex_ble_zero {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
     (hf : BoldfaceBoundedFunction f) (h : Γ-[0].Boldface fun w ↦ P (w ·.succ) (w 0)) :
-    Γ-[0].Boldface fun v ↦ ∃ x ≤ f v, P v x := bex_le_boldfaceBoundedFunction hf h
+    Γ-[0].Boldface fun v ↦ ∃ x ≤ f v, P v x := bex_ble hf h
 
 lemma bex_vec_le_boldfaceBoundedFunction {k} {p : Fin l → (Fin k → V) → V} {P : (Fin k → V) → (Fin l → V) → Prop}
     (pp : ∀ i, BoldfaceBoundedFunction (p i)) (hP : ℌ.Boldface fun w : Fin (k + l) → V ↦ P (fun i ↦ w (i.castAdd l)) (fun j ↦ w (j.natAdd k))) :
@@ -206,7 +206,7 @@ lemma bex_vec_le_boldfaceBoundedFunction {k} {p : Fin l → (Fin k → V) → V}
   case zero => simpa [Matrix.empty_eq (α := V)] using hP
   case succ l ih =>
     simp only [exists_le_vec_iff_exists_le_exists_vec]
-    apply bex_le_boldfaceBoundedFunction (pp 0)
+    apply bex_ble (pp 0)
     apply ih
     · intro i; apply BoldfaceBoundedFunction.retraction (pp i.succ)
     · let g : Fin (k + (l + 1)) → Fin (k + 1 + l) := Matrix.vecAppend rfl (fun x ↦ x.succ.castAdd l) (Fin.castAdd l 0 :> fun j ↦ j.natAdd (k + 1))
@@ -259,22 +259,43 @@ namespace HierarchySymbol.Boldface
 
 open BoldfaceBoundedFunction
 
-lemma bcomp₁ {k} {P : V → Prop} {f : (Fin k → V) → V} [hP : Γ-[0].BoldfacePred P] (hf : BoldfaceBoundedFunction f) :
+lemma bcomp₁ {k} {P : V → Prop} {f : (Fin k → V) → V} [hP : ℌ.BoldfacePred P] (hf : BoldfaceBoundedFunction f) :
+    ℌ.Boldface fun v ↦ P (f v) :=
+  substitution_boldfaceBoundedFunction (f := ![f]) hP (by simp [*])
+
+lemma bcomp₂ {k} {R : V → V → Prop} {f₁ f₂ : (Fin k → V) → V} [hR : ℌ.BoldfaceRel R]
+    (hf₁ : BoldfaceBoundedFunction f₁) (hf₂ : BoldfaceBoundedFunction f₂) :
+    ℌ.Boldface fun v ↦ R (f₁ v) (f₂ v) :=
+  substitution_boldfaceBoundedFunction (f := ![f₁, f₂]) hR (by simp [forall_fin_iff_zero_and_forall_succ, *])
+
+lemma bcomp₃ {k} {R : V → V → V → Prop} {f₁ f₂ f₃ : (Fin k → V) → V} [hR : ℌ.BoldfaceRel₃ R]
+    (hf₁ : BoldfaceBoundedFunction f₁) (hf₂ : BoldfaceBoundedFunction f₂)
+    (hf₃ : BoldfaceBoundedFunction f₃) :
+    ℌ.Boldface fun v ↦ R (f₁ v) (f₂ v) (f₃ v) :=
+  substitution_boldfaceBoundedFunction (f := ![f₁, f₂, f₃]) hR (by simp [forall_fin_iff_zero_and_forall_succ, *])
+
+lemma bcomp₄ {k} {R : V → V → V → V → Prop} {f₁ f₂ f₃ f₄ : (Fin k → V) → V} [hR : ℌ.BoldfaceRel₄ R]
+    (hf₁ : BoldfaceBoundedFunction f₁) (hf₂ : BoldfaceBoundedFunction f₂)
+    (hf₃ : BoldfaceBoundedFunction f₃) (hf₄ : BoldfaceBoundedFunction f₄) :
+    ℌ.Boldface fun v ↦ R (f₁ v) (f₂ v) (f₃ v) (f₄ v) :=
+  substitution_boldfaceBoundedFunction (f := ![f₁, f₂, f₃, f₄]) hR (by simp [forall_fin_iff_zero_and_forall_succ, *])
+
+lemma bcomp₁_zero {k} {P : V → Prop} {f : (Fin k → V) → V} [hP : Γ-[0].BoldfacePred P] (hf : BoldfaceBoundedFunction f) :
     Γ-[0].Boldface fun v ↦ P (f v) :=
   substitution_boldfaceBoundedFunction (f := ![f]) hP (by simp [*])
 
-lemma bcomp₂ {k} {R : V → V → Prop} {f₁ f₂ : (Fin k → V) → V} [hR : Γ-[0].BoldfaceRel R]
+lemma bcomp₂_zero {k} {R : V → V → Prop} {f₁ f₂ : (Fin k → V) → V} [hR : Γ-[0].BoldfaceRel R]
     (hf₁ : BoldfaceBoundedFunction f₁) (hf₂ : BoldfaceBoundedFunction f₂) :
     Γ-[0].Boldface fun v ↦ R (f₁ v) (f₂ v) :=
   substitution_boldfaceBoundedFunction (f := ![f₁, f₂]) hR (by simp [forall_fin_iff_zero_and_forall_succ, *])
 
-lemma bcomp₃ {k} {R : V → V → V → Prop} {f₁ f₂ f₃ : (Fin k → V) → V} [hR : Γ-[0].BoldfaceRel₃ R]
+lemma bcomp₃_zero {k} {R : V → V → V → Prop} {f₁ f₂ f₃ : (Fin k → V) → V} [hR : Γ-[0].BoldfaceRel₃ R]
     (hf₁ : BoldfaceBoundedFunction f₁) (hf₂ : BoldfaceBoundedFunction f₂)
     (hf₃ : BoldfaceBoundedFunction f₃) :
     Γ-[0].Boldface fun v ↦ R (f₁ v) (f₂ v) (f₃ v) :=
   substitution_boldfaceBoundedFunction (f := ![f₁, f₂, f₃]) hR (by simp [forall_fin_iff_zero_and_forall_succ, *])
 
-lemma bcomp₄ {k} {R : V → V → V → V → Prop} {f₁ f₂ f₃ f₄ : (Fin k → V) → V} [hR : Γ-[0].BoldfaceRel₄ R]
+lemma bcomp₄_zero {k} {R : V → V → V → V → Prop} {f₁ f₂ f₃ f₄ : (Fin k → V) → V} [hR : Γ-[0].BoldfaceRel₄ R]
     (hf₁ : BoldfaceBoundedFunction f₁) (hf₂ : BoldfaceBoundedFunction f₂)
     (hf₃ : BoldfaceBoundedFunction f₃) (hf₄ : BoldfaceBoundedFunction f₄) :
     Γ-[0].Boldface fun v ↦ R (f₁ v) (f₂ v) (f₃ v) (f₄ v) :=
@@ -366,26 +387,20 @@ attribute [aesop 6 (rule_sets := [Definability]) safe]
   Boldface.comp₃
   Boldface.comp₄
   Boldface.const
-
-attribute [aesop 7 (rule_sets := [Definability]) safe]
-  Boldface.bcomp₁
-  Boldface.bcomp₂
-  Boldface.bcomp₃
-  Boldface.bcomp₄
+  Boldface.bcomp₁_zero
+  Boldface.bcomp₂_zero
+  Boldface.bcomp₃_zero
+  Boldface.bcomp₄_zero
 
 attribute [aesop 8 (rule_sets := [Definability]) safe]
   Boldface.ball_lt
   Boldface.ball_le
-  Boldface.ball_lt'
-  Boldface.ball_le'
   Boldface.bex_lt
   Boldface.bex_le
-
-attribute [aesop 9 (rule_sets := [Definability]) safe]
-  Boldface.ball_lt_zero
-  Boldface.ball_le_zero
-  Boldface.bex_lt_zero
-  Boldface.bex_le_zero
+  Boldface.ball_blt_zero
+  Boldface.ball_ble_zero
+  Boldface.bex_blt_zero
+  Boldface.bex_ble_zero
 
 attribute [aesop 10 (rule_sets := [Definability]) safe]
   Boldface.not

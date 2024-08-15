@@ -14,7 +14,7 @@ variable [M ⊧ₘ* 𝐈open]
 
 def Pow2 (a : M) : Prop := 0 < a ∧ ∀ r ≤ a, 1 < r → r ∣ a → 2 ∣ r
 
-def _root_.LO.FirstOrder.Arith.pow2Def : 𝚺₀-Semisentence 1 :=
+def _root_.LO.FirstOrder.Arith.pow2Def : 𝚺₀.Semisentence 1 :=
   .mkSigma “a | 0 < a ∧ ∀ r <⁺ a, 1 < r → r ∣ a → 2 ∣ r” (by simp [Hierarchy.pi_zero_iff_sigma_zero])
 
 lemma pow2_defined : 𝚺₀-Predicate (Pow2 : M → Prop) via pow2Def := by
@@ -108,7 +108,7 @@ section LenBit
 /-- $\mathrm{LenBit} (2^i, a) \iff \text{$i$th-bit of $a$ is $1$}$. -/
 def LenBit (i a : M) : Prop := ¬2 ∣ (a / i)
 
-def _root_.LO.FirstOrder.Arith.lenbitDef : 𝚺₀-Semisentence 2 :=
+def _root_.LO.FirstOrder.Arith.lenbitDef : 𝚺₀.Semisentence 2 :=
   .mkSigma “i a | ∃ z <⁺ a, !divDef.val z a i ∧ ¬2 ∣ z” (by simp)
 
 lemma lenbit_defined : 𝚺₀-Relation (LenBit : M → M → Prop) via lenbitDef := by
@@ -204,7 +204,7 @@ lemma mul {a b : M} (ha : Pow2 a) (hb : Pow2 b) : Pow2 (a * b) := by
   suffices ∀ b : M, ∀ a ≤ b, Pow2 a → Pow2 b → Pow2 (a * b) by
     exact this b a hab ha hb
   intro b
-  induction b using order_induction_iSigmaZero
+  induction b using order_induction_sigma0
   · definability
   case ind IH a b IH =>
     intro a hab ha hb
@@ -234,7 +234,7 @@ lemma sq {a : M} : Pow2 a → Pow2 (a^2) := by
 lemma dvd_of_le {a b : M} (ha : Pow2 a) (hb : Pow2 b) : a ≤ b → a ∣ b := by
   suffices  ∀ b : M, ∀ a ≤ b, Pow2 a → Pow2 b → a ∣ b by
     intro hab; exact this b a hab ha hb
-  intro b; induction b using order_induction_iSigmaZero
+  intro b; induction b using order_induction_sigma0
   · definability
   case ind b IH =>
     intro a hab ha hb
@@ -282,7 +282,7 @@ lemma sq_or_dsq {a : M} (pa : Pow2 a) : ∃ b, a = b^2 ∨ a = 2 * b^2 := by
   suffices ∃ b ≤ a, a = b^2 ∨ a = 2 * b^2 by
     rcases this with ⟨b, _, h⟩
     exact ⟨b, h⟩
-  induction a using order_induction_iSigmaZero
+  induction a using order_induction_sigma0
   · definability
   case ind a IH =>
     rcases Pow2.elim'.mp pa with (rfl | ⟨ha, a, rfl, pa'⟩)

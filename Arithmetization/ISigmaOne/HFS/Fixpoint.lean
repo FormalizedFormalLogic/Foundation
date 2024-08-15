@@ -136,7 +136,7 @@ lemma mem_limSeq_succ_iff {x s : M} :
     x ∈ c.limSeq v (s + 1) ↔ x ≤ s ∧ c.Φ v {z | z ∈ c.limSeq v s} x := by simp [limSeq_succ, mem_succ_iff]
 
 lemma limSeq_cumulative {s s' : M} : s ≤ s' → c.limSeq v s ⊆ c.limSeq v s' := by
-  induction s' using induction_iSigmaOne generalizing s
+  induction s' using induction_sigma1 generalizing s
   · apply Definable.ball_le' (by definability)
     apply Definable.comp₂_infer
     · exact ⟨φ.limSeqDef.rew <| Rew.embSubsts (#0 :> #1 :> fun i ↦ &(v i)), by intro v; simp [c.eval_limSeqDef]⟩
@@ -153,7 +153,7 @@ lemma limSeq_cumulative {s s' : M} : s ≤ s' → c.limSeq v s ⊆ c.limSeq v s'
 
 lemma mem_limSeq_self [c.StrongFinite] {u s : M} :
     u ∈ c.limSeq v s → u ∈ c.limSeq v (u + 1) := by
-  induction u using order_induction_piOne generalizing s
+  induction u using order_induction_pi1 generalizing s
   · apply Definable.all
     apply Definable.imp
     · apply Definable.comp₂_infer (by definability)

@@ -546,7 +546,7 @@ lemma substs_not_uformula {m w x} (h : ¬L.UFormula x) :
 lemma substs_neg {p} (hp : L.Semiformula n p) :
     L.SemitermVec n m w → L.substs m w (L.neg p) = L.neg (L.substs m w p) := by
   revert m w
-  apply Language.Semiformula.induction_pi₁ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ _ _ hp
+  apply Language.Semiformula.induction_pi1 ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ _ _ hp
   · definability
   · intros; simp [*]
   · intros; simp [*]
@@ -564,7 +564,7 @@ lemma substs_neg {p} (hp : L.Semiformula n p) :
 lemma shift_substs {p} (hp : L.Semiformula n p) :
     L.SemitermVec n m w → L.shift (L.substs m w p) = L.substs m (L.termShiftVec n m w) (L.shift p) := by
   revert m w
-  apply Language.Semiformula.induction_pi₁ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ _ _ hp
+  apply Language.Semiformula.induction_pi1 ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ _ _ hp
   · definability
   · intro n k R v hR hv m w hw
     simp only [substs_rel, Language.SemitermVec.termSubstVec, shift_rel,
@@ -604,7 +604,7 @@ lemma shift_substs {p} (hp : L.Semiformula n p) :
 lemma substs_substs {p} (hp : L.Semiformula l p) :
     L.SemitermVec n m w → L.SemitermVec l n v → L.substs m w (L.substs n v p) = L.substs m (L.termSubstVec l n m w v) p := by
   revert m w n v
-  apply Language.Semiformula.induction_pi₁ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ _ _ hp
+  apply Language.Semiformula.induction_pi1 ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ _ _ hp
   · apply Definable.all
     apply Definable.all
     apply Definable.all
@@ -648,7 +648,7 @@ lemma substs_substs {p} (hp : L.Semiformula l p) :
 lemma subst_eq_self {n w : V} (hp : L.Semiformula n p) (hw : L.SemitermVec n n w) (H : ∀ i < n, w.[i] = ^#i) :
     L.substs n w p = p := by
   revert w
-  apply Language.Semiformula.induction_pi₁ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ _ _ hp
+  apply Language.Semiformula.induction_pi1 ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ _ _ hp
   · definability
   · intro n k R v hR hv w _ H
     simp only [substs_rel, qqRel_inj, true_and, hR, hv]

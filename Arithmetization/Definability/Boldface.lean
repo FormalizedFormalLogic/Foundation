@@ -41,7 +41,7 @@ section
 
 variable (ℌ)
 
-class Definable {k} (P : (Fin k → V) → Prop) : Prop where
+class Lightface {k} (P : (Fin k → V) → Prop) : Prop where
   definable : ∃ p : ℌ.Semisentence k, Defined P p
 
 class Boldface {k} (P : (Fin k → V) → Prop) : Prop where
@@ -107,6 +107,43 @@ abbrev BoldfaceFunction₅ (f : V → V → V → V → V → V) : Prop := ℌ.B
 
 variable {ℌ}
 
+notation Γ "-Predicate " P " via " p => DefinedPred Γ P p
+
+notation Γ "-Relation " P " via " p => DefinedRel Γ P p
+
+notation Γ "-Relation₃ " P " via " p => DefinedRel₃ Γ P p
+
+notation Γ "-Relation₄ " P " via " p => DefinedRel₄ Γ P p
+
+notation Γ "-Function₁ " f " via " p => DefinedFunction₁ Γ f p
+
+notation Γ "-Function₂ " f " via " p => DefinedFunction₂ Γ f p
+
+notation Γ "-Function₃ " f " via " p => DefinedFunction₃ Γ f p
+
+notation Γ "-Function₄ " f " via " p => DefinedFunction₄ Γ f p
+
+notation Γ "-Function₅ " f " via " p => DefinedFunction₅ Γ f p
+
+notation Γ "-Predicate " P => BoldfacePred Γ P
+
+notation Γ "-Relation " P => BoldfaceRel Γ P
+
+notation Γ "-Relation₃ " P => BoldfaceRel₃ Γ P
+
+notation Γ "-Relation₄ " P => BoldfaceRel₄ Γ P
+
+notation Γ "-Relation₅ " P => BoldfaceRel₅ Γ P
+
+notation Γ "-Function₁ " f => BoldfaceFunction₁ Γ f
+
+notation Γ "-Function₂ " f => BoldfaceFunction₂ Γ f
+
+notation Γ "-Function₃ " f => BoldfaceFunction₃ Γ f
+
+notation Γ "-Function₄ " f => BoldfaceFunction₄ Γ f
+
+
 end
 
 section
@@ -146,14 +183,14 @@ lemma to_definable (p : ℌ.Semisentence k) (hP : Defined P p) : ℌ.Boldface P 
     fun v ↦ by rcases p; simpa [HierarchySymbol.Semiformula.rew] using hP.proper.rew Rew.emb v,
     by intro; simp [hP.df.iff]⟩⟩
 
-lemma to_definable₀ (p : 𝚺₀.Semisentence k) (hP : Defined P p) :
+lemma to_definable₀ {p : 𝚺₀.Semisentence k} (hP : Defined P p) :
     ℌ.Boldface P := Defined.to_definable (p.ofZero ℌ) hP.of_zero
 
 lemma to_definable_oRing (p : ℌ.Semisentence k) (hP : Defined P p) :
     ℌ.Boldface P := Defined.to_definable p.emb hP.emb
 
 lemma to_definable_oRing₀ (p : 𝚺₀.Semisentence k) (hP : Defined P p) :
-    ℌ.Boldface P := Defined.to_definable₀ p.emb hP.emb
+    ℌ.Boldface P := Defined.to_definable₀ hP.emb
 
 end Defined
 

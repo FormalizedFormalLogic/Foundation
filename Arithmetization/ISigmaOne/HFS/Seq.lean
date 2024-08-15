@@ -26,7 +26,7 @@ private lemma seq_iff (s : M) : Seq s ↔ IsMapping s ∧ ∃ l ≤ 2 * s, ∃ d
         _ ≤ 2 * s    := by simp), ⟨domain s , by simp,  rfl, h⟩⟩,
    by rintro ⟨hs, l, _, _, _, rfl, h⟩; exact ⟨hs, l, h⟩⟩
 
-def _root_.LO.FirstOrder.Arith.seqDef : 𝚺₀-Semisentence 1 := .mkSigma
+def _root_.LO.FirstOrder.Arith.seqDef : 𝚺₀.Semisentence 1 := .mkSigma
   “s | !isMappingDef s ∧ ∃ l <⁺ 2 * s, ∃ d <⁺ 2 * s, !domainDef d s ∧ !underDef d l” (by simp)
 
 lemma seq_defined : 𝚺₀-Predicate (Seq : M → Prop) via seqDef := by
@@ -83,7 +83,7 @@ private lemma lh_graph (l s : M) : l = lh s ↔ (Seq s → ∃ d ≤ 2 * s, d = 
     · rcases h Hs with ⟨_, _, rfl, h⟩; simpa [h] using Hs.domain_eq
     · simp [lh_prop_of_not_seq Hs, hn Hs]⟩
 
-def _root_.LO.FirstOrder.Arith.lhDef : 𝚺₀-Semisentence 2 := .mkSigma
+def _root_.LO.FirstOrder.Arith.lhDef : 𝚺₀.Semisentence 2 := .mkSigma
   “l s | (!seqDef s → ∃ d <⁺ 2 * s, !domainDef d s ∧ !underDef d l) ∧ (¬!seqDef s → l = 0)” (by simp)
 
 lemma lh_defined : 𝚺₀-Function₁ (lh : M → M) via lhDef := by
@@ -96,7 +96,7 @@ instance lh_definable : 𝚺₀-Function₁ (lh : M → M) := Defined.to_definab
 
 instance lh_definable' (Γ) : Γ-Function₁ (lh : M → M) := .of_zero lh_definable _
 
-instance : Bounded₁ ℒₒᵣ (lh : M → M) := ⟨‘x | 2 * x’, fun _ ↦ by simp⟩
+instance : Bounded₁ (lh : M → M) := ⟨‘x | 2 * x’, fun _ ↦ by simp⟩
 
 lemma Seq.exists {s : M} (h : Seq s) {x : M} (hx : x < lh s) : ∃ y, ⟪x, y⟫ ∈ s := h.isMapping x (by simpa [h.domain_eq] using hx) |>.exists
 
@@ -137,7 +137,7 @@ lemma Seq.znth_eq_of_mem {s i : M} (h : Seq s) (hi : ⟪i, x⟫ ∈ s) : znth s 
 lemma znth_prop_not {s i : M} (h : ¬Seq s ∨ lh s ≤ i) : znth s i = 0 :=
   Classical.choose!_spec (znth_existsUnique s i) |>.2 (by simpa [-not_and, not_and_or] using h)
 
-def _root_.LO.FirstOrder.Arith.znthDef : 𝚺₀-Semisentence 3 := .mkSigma
+def _root_.LO.FirstOrder.Arith.znthDef : 𝚺₀.Semisentence 3 := .mkSigma
   “x s i | ∃ l <⁺ 2 * s, !lhDef l s ∧ (:Seq s ∧ i < l → i ~[s] x) ∧ (¬(:Seq s ∧ i < l) → x = 0)” (by simp)
 
 private lemma znth_graph {x s i : M} : x = znth s i ↔ ∃ l ≤ 2 * s, l = lh s ∧ (Seq s ∧ i < l → ⟪i, x⟫ ∈ s) ∧ (¬(Seq s ∧ i < l) → x = 0) := by
@@ -211,7 +211,7 @@ lemma seqCons_graph (t x s : M) :
         le_trans (pair_le_pair_left (by simp) x) (pair_polybound (2 * s) x), rfl, by rfl⟩,
    by rintro ⟨l, _, rfl, p, _, rfl, rfl⟩; rfl⟩
 
-def _root_.LO.FirstOrder.Arith.seqConsDef : 𝚺₀-Semisentence 3 := .mkSigma
+def _root_.LO.FirstOrder.Arith.seqConsDef : 𝚺₀.Semisentence 3 := .mkSigma
   “t s x | ∃ l <⁺ 2 * s, !lhDef l s ∧ ∃ p <⁺ (2 * s + x + 1)², !pairDef p l x ∧ !insertDef t p s” (by simp)
 
 lemma seqCons_defined : 𝚺₀-Function₂ (seqCons : M → M → M) via seqConsDef := by
@@ -320,7 +320,7 @@ theorem seq_induction (Γ) {P : M → Prop} (hP : DefinablePred ℒₒᵣ (Γ, 1
   (hnil : P ∅) (hcons : ∀ s x, Seq s → P s → P (s ⁀' x)) :
     ∀ {s : M}, Seq s → P s := by
   intro s sseq
-  induction s using order_induction_h_iSigmaOne
+  induction s using order_induction_h_sigma1
   · exact Γ
   · definability
   case ind s ih =>
@@ -352,7 +352,7 @@ def vecConsUnexpander : Lean.PrettyPrinter.Unexpander
 
 section
 
-def _root_.LO.FirstOrder.Arith.mkSeq₁Def : 𝚺₀-Semisentence 2 := .mkSigma
+def _root_.LO.FirstOrder.Arith.mkSeq₁Def : 𝚺₀.Semisentence 2 := .mkSigma
   “s x | !seqConsDef s 0 x” (by simp)
 
 lemma mkSeq₁_defined : 𝚺₀-Function₁ (fun x : M ↦ !⟦x⟧) via mkSeq₁Def := by
@@ -436,7 +436,7 @@ lemma sigma₁_order_ball_induction {f : M → M → M} (hf : 𝚺₁-Function�
       ⟪0, y⟫ ∈ W ∧
       ∀ l < k, ∀ m < W, ∀ m' < W, ⟪l, m⟫ ∈ W → ⟪l + 1, m'⟫ ∈ W → ∀ x' ≤ x - l, ∀ y' ≤ m, f x' y' ≤ m' := by
     intro k hk
-    induction k using induction_iSigmaOne
+    induction k using induction_sigma1
     · apply Definable.imp (Definable.comp₂_infer (DefinableFunction.var _) (DefinableFunction.const _))
       apply Definable.ex
       apply Definable.and (Definable.comp₁_infer (DefinableFunction.var _))
@@ -481,7 +481,7 @@ lemma sigma₁_order_ball_induction {f : M → M → M} (hf : 𝚺₁-Function�
   rcases this x (by rfl) with ⟨W, SW, hxW, hW₀, hWₛ⟩
   have : ∀ i ≤ x, ∀ m < W, ⟪x - i, m⟫ ∈ W → ∀ x' ≤ i, ∀ y' ≤ m, P x' y' := by
     intro i
-    induction i using induction_iSigmaOne
+    induction i using induction_sigma1
     · apply Definable.imp (Definable.comp₂_infer (DefinableFunction.var _) (DefinableFunction.const _))
       apply Definable.ball_lt (DefinableFunction.const _)
       apply Definable.imp

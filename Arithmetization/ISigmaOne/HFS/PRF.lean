@@ -90,7 +90,7 @@ lemma unique {s₁ s₂ : M} (H₁ : c.CSeq v s₁) (H₂ : c.CSeq v s₂) (h₁
   suffices ∀ z₁ < s₁, ∀ z₂ < s₂, ⟪i, z₁⟫ ∈ s₁ → ⟪i, z₂⟫ ∈ s₂ → z₁ = z₂
   by intro z₁ z₂ hz₁ hz₂; exact this z₁ (lt_of_mem_rng hz₁) z₂ (lt_of_mem_rng hz₂) hz₁ hz₂
   intro z₁ hz₁ z₂ hz₂ h₁ h₂
-  induction i using induction_iSigmaOne generalizing z₁ z₂
+  induction i using induction_sigma1 generalizing z₁ z₂
   · definability
   case zero =>
     have : z₁ = c.zero v := H₁.seq.isMapping.uniq h₁ H₁.zero
@@ -134,7 +134,7 @@ lemma CSeq.successor {s l z : M} (Hs : c.CSeq v s) (hl : l + 1 = lh s) (hz : ⟪
 variable (c v)
 
 lemma CSeq.exists (l : M) : ∃ s, c.CSeq v s ∧ l + 1 = lh s := by
-  induction l using induction_iSigmaOne
+  induction l using induction_sigma1
   · apply Definable.ex
     apply Definable.and
     · exact ⟨p.cseqDef.rew (Rew.embSubsts <| #0 :> fun i ↦ &(v i)), by

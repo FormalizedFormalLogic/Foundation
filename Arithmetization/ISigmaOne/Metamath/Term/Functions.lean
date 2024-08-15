@@ -589,7 +589,7 @@ lemma numeralAux_defined : 𝚺₁-Function₁ (numeralAux : V → V) via numera
 end
 
 @[simp] lemma numeralAux_semiterm (n x : V) : ⌜ℒₒᵣ⌝.Semiterm n (numeralAux x) := by
-  induction x using induction_iSigmaOne
+  induction x using induction_sigma1
   · definability
   case zero => simp
   case succ x ih => simp [qqAdd, ih]
@@ -639,7 +639,7 @@ end
 
 @[simp] lemma numeral_substs {w : V} (hw : ⌜ℒₒᵣ⌝.SemitermVec n m w) (x : V) :
     ⌜ℒₒᵣ⌝.termSubst n m w (numeral x) = numeral x := by
-  induction x using induction_iSigmaOne
+  induction x using induction_sigma1
   · definability
   case zero => simp [hw, Formalized.zero, qqFunc_absolute]
   case succ x ih =>
@@ -649,7 +649,7 @@ end
 
 @[simp] lemma numeral_shift (x : V) :
     ⌜ℒₒᵣ⌝.termShift n (numeral x) = numeral x := by
-  induction x using induction_iSigmaOne
+  induction x using induction_sigma1
   · definability
   case zero => simp [Formalized.zero, qqFunc_absolute]
   case succ x ih =>
@@ -659,7 +659,7 @@ end
 
 @[simp] lemma numeral_bShift (x : V) :
     ⌜ℒₒᵣ⌝.termBShift n (numeral x) = numeral x := by
-  induction x using induction_iSigmaOne
+  induction x using induction_sigma1
   · definability
   case zero => simp [Formalized.zero, qqFunc_absolute]
   case succ x ih =>

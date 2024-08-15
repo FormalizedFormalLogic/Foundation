@@ -198,14 +198,14 @@ instance substItr_definable₁' (n w p : V) (Γ m) : (Γ, m + 1)-Function₁ (su
 end
 
 @[simp] lemma len_substItr (n w p k : V) : len (substItr n w p k) = k := by
-  induction k using induction_iSigmaOne
+  induction k using induction_sigma1
   · definability
   case zero => simp
   case succ k ih => simp [ih]
 
 @[simp] lemma substItr_nth (n w p k : V) {i} (hi : i < k) :
     (substItr n w p k).[i] = ⌜ℒₒᵣ⌝.substs n (numeral (k - (i + 1)) ∷ w) p := by
-  induction k using induction_iSigmaOne generalizing i
+  induction k using induction_sigma1 generalizing i
   · definability
   case zero => simp at hi
   case succ k ih =>
@@ -216,7 +216,7 @@ end
 
 lemma neg_conj_substItr {n w p k : V} (hp : ⌜ℒₒᵣ⌝.Semiformula (n + 1) p) (hw : ⌜ℒₒᵣ⌝.SemitermVec n m w) :
     ⌜ℒₒᵣ⌝.neg (^⋀[m] (substItr m w p k)) = ^⋁[m] (substItr m w (⌜ℒₒᵣ⌝.neg p) k) := by
-  induction k using induction_iSigmaOne
+  induction k using induction_sigma1
   · definability
   case zero => simp
   case succ k ih =>
@@ -231,7 +231,7 @@ lemma neg_conj_substItr {n w p k : V} (hp : ⌜ℒₒᵣ⌝.Semiformula (n + 1) 
 
 lemma neg_disj_substItr {n w p k : V} (hp : ⌜ℒₒᵣ⌝.Semiformula (n + 1) p) (hw : ⌜ℒₒᵣ⌝.SemitermVec n m w) :
     ⌜ℒₒᵣ⌝.neg (^⋁[m] (substItr m w p k)) = ^⋀[m] (substItr m w (⌜ℒₒᵣ⌝.neg p) k) := by
-  induction k using induction_iSigmaOne
+  induction k using induction_sigma1
   · definability
   case zero => simp
   case succ k ih =>
@@ -246,7 +246,7 @@ lemma neg_disj_substItr {n w p k : V} (hp : ⌜ℒₒᵣ⌝.Semiformula (n + 1) 
 
 lemma substs_conj_substItr {n m l w p k : V} (hp : ⌜ℒₒᵣ⌝.Semiformula (n + 1) p) (hw : ⌜ℒₒᵣ⌝.SemitermVec n m w) (hv : ⌜ℒₒᵣ⌝.SemitermVec m l v) :
     ⌜ℒₒᵣ⌝.substs l v (^⋀[m] (substItr m w p k)) = ^⋀[l] (substItr l (⌜ℒₒᵣ⌝.termSubstVec n m l v w) p k) := by
-  induction k using induction_iSigmaOne
+  induction k using induction_sigma1
   · definability
   case zero => simp
   case succ k ih =>
@@ -263,7 +263,7 @@ lemma substs_conj_substItr {n m l w p k : V} (hp : ⌜ℒₒᵣ⌝.Semiformula (
 
 lemma substs_disj_substItr {n m l w p k : V} (hp : ⌜ℒₒᵣ⌝.Semiformula (n + 1) p) (hw : ⌜ℒₒᵣ⌝.SemitermVec n m w) (hv : ⌜ℒₒᵣ⌝.SemitermVec m l v) :
     ⌜ℒₒᵣ⌝.substs l v (^⋁[m] (substItr m w p k)) = ^⋁[l] (substItr l (⌜ℒₒᵣ⌝.termSubstVec n m l v w) p k) := by
-  induction k using induction_iSigmaOne
+  induction k using induction_sigma1
   · definability
   case zero => simp
   case succ k ih =>

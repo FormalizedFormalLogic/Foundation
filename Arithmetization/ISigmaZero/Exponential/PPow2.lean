@@ -14,7 +14,7 @@ variable [M ⊧ₘ* 𝐈𝚺₀]
 
 def SPPow2 (m : M) : Prop := ¬LenBit 1 m ∧ LenBit 2 m ∧ ∀ i ≤ m, Pow2 i → 2 < i → (LenBit i m ↔ (√i)^2 = i ∧ LenBit (√i) m)
 
-def _root_.LO.FirstOrder.Arith.sppow2Def : 𝚺₀-Semisentence 1 :=
+def _root_.LO.FirstOrder.Arith.sppow2Def : 𝚺₀.Semisentence 1 :=
   .mkSigma
   “ m | ¬!lenbitDef 1 m ∧ !lenbitDef 2 m ∧
     ∀ i <⁺ m, !pow2Def i → 2 < i → (!lenbitDef i m ↔ ∃ s <⁺ i, !sqrtDef s i ∧ s * s = i ∧ !lenbitDef s m)
@@ -32,7 +32,7 @@ lemma sppow2_defined : 𝚺₀-Predicate (SPPow2 : M → Prop) via sppow2Def := 
 
 def PPow2 (i : M) : Prop := Pow2 i ∧ ∃ m < 2 * i, SPPow2 m ∧ LenBit i m
 
-def _root_.LO.FirstOrder.Arith.ppow2Def : 𝚺₀-Semisentence 1 :=
+def _root_.LO.FirstOrder.Arith.ppow2Def : 𝚺₀.Semisentence 1 :=
   .mkSigma “i | !pow2Def i ∧ ∃ m < 2 * i, !sppow2Def m ∧ !lenbitDef i m” (by simp)
 
 lemma ppow2_defined : 𝚺₀-Predicate (PPow2 : M → Prop) via ppow2Def := by
@@ -92,7 +92,7 @@ lemma sq_le_of_lt {i j : M} (pi : Pow2 i) (pj : Pow2 j) (hi : LenBit i m) (hj : 
   intro hij
   suffices ∀ i < j, Pow2 i → Pow2 j → LenBit i m → LenBit j m → i^2 ≤ j from this i hij pi pj hi hj
   clear i pi hi hij pj hj
-  induction j using order_induction_iSigmaZero
+  induction j using order_induction_sigma0
   · definability
   case ind j IH =>
     intro i hij pi pj  hi hj
@@ -263,7 +263,7 @@ lemma sq_le_of_lt {i j : M} (hi : PPow2 i) (hj : PPow2 j) : i < j → i^2 ≤ j 
   intro hij
   suffices ∀ i < j, PPow2 i → PPow2 j → i^2 ≤ j from this i hij hi hj
   clear hi hij hj
-  induction j using order_induction_iSigmaZero
+  induction j using order_induction_sigma0
   · definability
   case ind j IH =>
     intro i hij hi hj

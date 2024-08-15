@@ -99,7 +99,7 @@ lemma conj (ps : V) {s} (hs : L.FormulaSet s)
     (ds : ∀ i < len ps, T.Derivable (insert ps.[i] s)) : T.Derivable (insert (^⋀ ps) s) := by
   have : ∀ k ≤ len ps, T.Derivable (insert (^⋀ (takeLast ps k)) s) := by
     intro k hk
-    induction k using induction_iSigmaOne
+    induction k using induction_sigma1
     · definability
     case zero => simpa using verum (by simp [hs]) (by simp)
     case succ k ih =>
@@ -113,7 +113,7 @@ lemma disjDistr (ps s : V) (d : T.Derivable (vecToSet ps ∪ s)) : T.Derivable (
   have : ∀ k ≤ len ps, ∀ s' ≤ vecToSet ps, s' ⊆ vecToSet ps →
       (∀ i < len ps - k, ps.[i] ∈ s') → T.Derivable (insert (^⋁ takeLast ps k) (s' ∪ s)) := by
     intro k hk
-    induction k using induction_iSigmaOne
+    induction k using induction_sigma1
     · apply Definable.imp (by definability)
       apply Definable.ball_le (by definability)
       apply Definable.imp (by definability)

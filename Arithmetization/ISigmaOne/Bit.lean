@@ -15,7 +15,7 @@ def Bit (i a : M) : Prop := LenBit (exp i) a
 
 instance : Membership M M := ⟨Bit⟩
 
-def _root_.LO.FirstOrder.Arith.bitDef : 𝚺₀-Semisentence 2 := .mkSigma
+def _root_.LO.FirstOrder.Arith.bitDef : 𝚺₀.Semisentence 2 := .mkSigma
   “x y | ∃ z <⁺ y, !expDef z x ∧ !lenbitDef z y” (by simp)
 
 lemma bit_defined : 𝚺₀-Relation ((· ∈ ·) : M → M → Prop) via bitDef := by
@@ -97,10 +97,10 @@ def bexIn (t : Semiterm ℒₒᵣ ξ n) (p : Semiformula ℒₒᵣ ξ (n + 1)) :
   intros
   simp [Semiformula.Operator.operator, operator_mem_def]
 
-def memRel : 𝚺₀-Semisentence 3 := .mkSigma
+def memRel : 𝚺₀.Semisentence 3 := .mkSigma
   “R x y | ∃ p <⁺ (x + y + 1)², !pairDef p x y ∧ p ∈ R” (by simp)
 
-def memRel₃ : 𝚺₀-Semisentence 4 := .mkSigma
+def memRel₃ : 𝚺₀.Semisentence 4 := .mkSigma
   “R x y z | ∃ yz <⁺ (y + z + 1)², !pairDef yz y z ∧ ∃ xyz <⁺ (x + yz + 1)², !pairDef xyz x yz ∧ xyz ∈ R” (by simp)
 
 def memRelOpr : Semiformula.Operator ℒₒᵣ 3 := ⟨memRel.val⟩
@@ -269,7 +269,7 @@ lemma insert_graph (b i a : M) :
         not_false_eq_true, true_and, false_or, forall_exists_index, and_imp]
       rintro x _ rfl rfl; rfl ⟩
 
-def _root_.LO.FirstOrder.Arith.insertDef : 𝚺₀-Semisentence 3 := .mkSigma
+def _root_.LO.FirstOrder.Arith.insertDef : 𝚺₀.Semisentence 3 := .mkSigma
   “b i a | (i ∈ a ∧ b = a) ∨ (i ∉ a ∧ ∃ e <⁺ b, !expDef e i ∧ b = a + e)” (by simp)
 
 lemma insert_defined : 𝚺₀-Function₂ (insert : M → M → M) via insertDef := by
@@ -328,7 +328,7 @@ lemma lt_exp_iff {a i : M} : a < exp i ↔ ∀ j ∈ a, j < i :=
 
 instance : HasSubset M := ⟨fun a b ↦ ∀ ⦃i⦄, i ∈ a → i ∈ b⟩
 
-def _root_.LO.FirstOrder.Arith.bitSubsetDef : 𝚺₀-Semisentence 2 := .mkSigma
+def _root_.LO.FirstOrder.Arith.bitSubsetDef : 𝚺₀.Semisentence 2 := .mkSigma
   “a b | ∀ i < a, i ∈ a → i ∈ b” (by simp)
 
 lemma bitSubset_defined : 𝚺₀-Relation ((· ⊆ ·) : M → M → Prop) via bitSubsetDef := by
@@ -386,7 +386,7 @@ def under (a : M) : M := exp a - 1
 private lemma under_graph (x y : M) : y = under x ↔ y + 1 = exp x :=
   ⟨by rintro rfl; simp [under, sub_add_self_of_le], by intro h; have := congr_arg (· - 1) h; simp [under] at this ⊢; exact this⟩
 
-def _root_.LO.FirstOrder.Arith.underDef : 𝚺₀-Semisentence 2 := .mkSigma
+def _root_.LO.FirstOrder.Arith.underDef : 𝚺₀.Semisentence 2 := .mkSigma
   “y x | !expDef.val (y + 1) x” (by simp)
 
 lemma under_defined : 𝚺₀-Function₁ (under : M → M) via underDef := by
@@ -481,9 +481,9 @@ section
 variable {m : ℕ} [Fact (1 ≤ m)] [M ⊧ₘ* 𝐈𝐍𝐃𝚺 m]
 
 private lemma finset_comprehension_aux (Γ : Polarity) {P : M → Prop} (hP : (Γ, m)-Predicate P) (a : M) :
-    haveI : M ⊧ₘ* 𝐈𝚺₁ := mod_iSigma_of_le (show 1 ≤ m from Fact.out)
+    haveI : M ⊧ₘ* 𝐈𝚺₁ := mod_ISigma_of_le (show 1 ≤ m from Fact.out)
     ∃ s < exp a, ∀ i < a, i ∈ s ↔ P i := by
-  haveI : M ⊧ₘ* 𝐈𝚺₁ := mod_iSigma_of_le (show 1 ≤ m from Fact.out)
+  haveI : M ⊧ₘ* 𝐈𝚺₁ := mod_ISigma_of_le (show 1 ≤ m from Fact.out)
   have : ∃ s < exp a, ∀ i < a, P i → i ∈ s :=
     ⟨under a, pred_lt_self_of_pos (by simp), fun i hi _ ↦ by simpa [mem_under_iff] using hi⟩
   rcases this with ⟨s, hsn, hs⟩
@@ -506,7 +506,7 @@ private lemma finset_comprehension_aux (Γ : Polarity) {P : M → Prop} (hP : (�
   exact ⟨t, lt_of_le_of_lt t_le_s hsn, fun i hi ↦ ⟨this i hi, ht i hi⟩⟩
 
 theorem finset_comprehension {Γ} {P : M → Prop} (hP : (Γ, m)-Predicate P) (a : M) :
-    haveI : M ⊧ₘ* 𝐈𝚺₁ := mod_iSigma_of_le (show 1 ≤ m from Fact.out)
+    haveI : M ⊧ₘ* 𝐈𝚺₁ := mod_ISigma_of_le (show 1 ≤ m from Fact.out)
     ∃ s < exp a, ∀ i < a, i ∈ s ↔ P i :=
   match Γ with
   | 𝚺 => finset_comprehension_aux 𝚺 hP a
@@ -514,9 +514,9 @@ theorem finset_comprehension {Γ} {P : M → Prop} (hP : (Γ, m)-Predicate P) (a
   | 𝚫 => finset_comprehension_aux 𝚺 hP.of_delta a
 
 theorem finset_comprehension_exists_unique {P : M → Prop} (hP : (Γ, m)-Predicate P) (a : M) :
-    haveI : M ⊧ₘ* 𝐈𝚺₁ := mod_iSigma_of_le (show 1 ≤ m from Fact.out)
+    haveI : M ⊧ₘ* 𝐈𝚺₁ := mod_ISigma_of_le (show 1 ≤ m from Fact.out)
     ∃! s, s < exp a ∧ ∀ i < a, i ∈ s ↔ P i := by
-  haveI : M ⊧ₘ* 𝐈𝚺₁ := mod_iSigma_of_le (show 1 ≤ m from Fact.out)
+  haveI : M ⊧ₘ* 𝐈𝚺₁ := mod_ISigma_of_le (show 1 ≤ m from Fact.out)
   rcases finset_comprehension hP a with ⟨s, hs, Hs⟩
   exact ExistsUnique.intro s ⟨hs, Hs⟩ (by
     intro t ⟨ht, Ht⟩

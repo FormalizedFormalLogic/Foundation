@@ -60,7 +60,7 @@ lemma ext_graph (z S L i : M) : z = S{L}[i] ↔
       rcases h lt with ⟨b, hb, Hb, hL, _, HhL, _, _, rfl, rfl⟩
       exact ⟨b, hb, Hb, by rw [HhL.uniq (exponential_hash_one L)]⟩
 
-def extDef : 𝚺₀-Semisentence 4 := .mkSigma
+def extDef : 𝚺₀.Semisentence 4 := .mkSigma
   “z L S i |
     ∃ lS <⁺ S, !lengthDef lS S ∧ ∃ lL <⁺ L, !lengthDef lL L ∧
       (lS ≤ i * lL → z = 0) ∧
@@ -213,7 +213,7 @@ lemma SeriesSegment.series {U I L A k n : M} (H : SeriesSegment U I L A k n) :
 
 lemma IsSegment.le_add {L A start intv S : M} (H : IsSegment L A start intv S) : ∀ i ≤ intv, S{L}[i] ≤ S{L}[0] + i := by
   intro i
-  induction i using induction_iSigmaZero
+  induction i using induction_sigma0
   · definability
   case zero => simp
   case succ i IH =>
@@ -238,7 +238,7 @@ lemma Segment.uniq {U L A start intv nₛ nₑ₁ nₑ₂ : M}
   rcases H₁ with ⟨S₁, _, HS₁, Hₛ, rfl⟩
   rcases H₂ with ⟨S₂, _, HS₂, rfl, rfl⟩
   suffices ∀ i ≤ intv, S₁{L}[i] = S₂{L}[i] from this intv (by rfl)
-  intro i; induction i using induction_iSigmaZero
+  intro i; induction i using induction_sigma0
   · definability
   case zero => intro _; exact Hₛ
   case succ i IH =>
@@ -249,7 +249,7 @@ lemma Segment.uniq {U L A start intv nₛ nₑ₁ nₑ₂ : M}
 
 lemma IsSeries.le_add {U I L A iter T : M} (H : IsSeries U I L A iter T) : ∀ l ≤ iter, T{L}[l] ≤ T{L}[0] + ‖I‖ * l := by
   intro l
-  induction l using induction_iSigmaZero
+  induction l using induction_sigma0
   · definability
   case zero => simp
   case succ l IH =>
@@ -266,7 +266,7 @@ lemma Series.uniq {U I L A iter n₁ n₂ : M} (H₁ : Series U I L A iter n₁)
   rcases H₁ with ⟨T₁, _, HT₁, Hₛ₁, rfl⟩
   rcases H₂ with ⟨T₂, _, HT₂, Hₛ₂, rfl⟩
   suffices ∀ i ≤ iter, T₁{L}[i] = T₂{L}[i] from this iter (by rfl)
-  intro i; induction i using induction_iSigmaZero
+  intro i; induction i using induction_sigma0
   · definability
   case zero => intro _; simp [Hₛ₁, Hₛ₂]
   case succ i IH =>
@@ -483,7 +483,7 @@ lemma sq_polyI_hash_polyL_polybounded {A : M} (pos : 0 < A) : ((polyI A) # (poly
 
 def NuonAux (A k n : M) : Prop := SeriesSegment (polyU A) (polyI A) (polyL A) A k n
 
-def isSegmentDef : 𝚺₀-Semisentence 5 := .mkSigma
+def isSegmentDef : 𝚺₀.Semisentence 5 := .mkSigma
   “L A start intv S |
     ∀ i < intv,
       ∃ S_L_i_succ <⁺ S, !extDef S_L_i_succ L S (i + 1) ∧
@@ -499,14 +499,14 @@ lemma isSegmentDef_defined : Arith.Defined (M := M) (λ v ↦ IsSegment (v 0) (v
   · intro h; exact ⟨_, by simp, rfl, _, by simp, rfl, _, by simp, rfl, h⟩
   · rintro ⟨_, _, rfl, _, _, rfl, _, _, rfl, h⟩; exact h
 
-def segmentDef : 𝚺₀-Semisentence 7 := .mkSigma
+def segmentDef : 𝚺₀.Semisentence 7 := .mkSigma
   “U L A start intv nₛ nₑ | ∃ S < U, !isSegmentDef L A start intv S ∧ !extDef nₛ L S 0 ∧ !extDef nₑ L S intv” (by simp)
 
 lemma segmentDef_defined : Arith.Defined (M := M) (λ v ↦ Segment (v 0) (v 1) (v 2) (v 3) (v 4) (v 5) (v 6)) segmentDef := by
   intro v; simp [Segment, segmentDef, ext_defined.df.iff, isSegmentDef_defined.df.iff, @Eq.comm _ (v 5), @Eq.comm _ (v 6)]
   rfl
 
-def isSeriesDef : 𝚺₀-Semisentence 6 := .mkSigma
+def isSeriesDef : 𝚺₀.Semisentence 6 := .mkSigma
   “U I L A iter T |
     ∀ l < iter,
       ∃ lI <⁺ I, !lengthDef lI I ∧
@@ -529,7 +529,7 @@ lemma isSerieDef_defined : Arith.Defined (M := M) (λ v ↦ IsSeries (v 0) (v 1)
   simp; rfl
 
 
-def seriesDef : 𝚺₀-Semisentence 6 := .mkSigma
+def seriesDef : 𝚺₀.Semisentence 6 := .mkSigma
   “U I L A iter n | ∃ T < U, !isSeriesDef U I L A iter T ∧ !extDef 0 L T 0 ∧ !extDef n L T iter” (by simp)
 
 lemma seriesDef_defined : Arith.Defined (M := M) (λ v ↦ Series (v 0) (v 1) (v 2) (v 3) (v 4) (v 5)) seriesDef := by
@@ -539,7 +539,7 @@ lemma seriesDef_defined : Arith.Defined (M := M) (λ v ↦ Series (v 0) (v 1) (v
   apply and_congr_right; intros
   simp [Eq.comm]
 
-def seriesSegmentDef : 𝚺₀-Semisentence 6 := .mkSigma
+def seriesSegmentDef : 𝚺₀.Semisentence 6 := .mkSigma
   “U I L A k n |
     ∃ nₖ <⁺ n,
       ∃ l <⁺ I, !lengthDef l I ∧
@@ -555,7 +555,7 @@ lemma seriesSegmentDef_defined : Arith.Defined (M := M) (λ v ↦ SeriesSegment 
   apply and_congr_right; intros
   rw [bex_eq_le_iff, bex_eq_le_iff, bex_eq_le_iff]; simp; rfl
 
-def nuonAuxDef : 𝚺₀-Semisentence 3 := .mkSigma
+def nuonAuxDef : 𝚺₀.Semisentence 3 := .mkSigma
   “A k n |
     ∃ lA <⁺ A, !lengthDef lA A ∧
     ∃ sA <⁺ lA, !sqrtDef sA lA ∧
@@ -591,7 +591,7 @@ lemma NuonAux.exists {k : M} (hk : k ≤ ‖A‖) : ∃ n, NuonAux A k n := by
   suffices ∃ n ≤ k, NuonAux A k n by
     rcases this with ⟨n, _, h⟩; exact ⟨n, h⟩
   revert hk
-  induction k using induction_iSigmaZero
+  induction k using induction_sigma0
   · definability
   case zero =>
     intro _; exact ⟨0, by simp⟩
@@ -618,7 +618,7 @@ lemma NuonAux.two_mul {k n : M} (hk : k ≤ ‖A‖) : NuonAux A k n → NuonAux
   suffices ∀ n ≤ k, k ≤ ‖A‖ → NuonAux A k n → NuonAux (2 * A) (k + 1) n by
     intro n hk H
     exact this n H.le hk H
-  induction k using induction_iSigmaZero
+  induction k using induction_sigma0
   · definability
   case zero =>
     simp; simpa using (NuonAux.initial (2 * A)).succ (by simp)
@@ -633,7 +633,7 @@ lemma NuonAux.two_mul_add_one {k n : M} (hk : k ≤ ‖A‖) : NuonAux A k n →
   suffices ∀ n ≤ k, k ≤ ‖A‖ → NuonAux A k n → NuonAux (2 * A + 1) (k + 1) (n + 1) by
     intro n hk H
     exact this n H.le hk H
-  induction k using induction_iSigmaZero
+  induction k using induction_sigma0
   · definability
   case zero =>
     simpa using (NuonAux.initial (2 * A + 1)).succ (by simp)
@@ -673,7 +673,7 @@ lemma nuon_bit1 (a : M) : nuon (2 * a + 1) = nuon a + 1 := by
 
 @[simp] lemma nuon_zero : nuon (0 : M) = 0 := Nuon.nuon_eq (by simp [Nuon])
 
-def _root_.LO.FirstOrder.Arith.nuonDef : 𝚺₀-Semisentence 2 := .mkSigma
+def _root_.LO.FirstOrder.Arith.nuonDef : 𝚺₀.Semisentence 2 := .mkSigma
   “n A | ∃ l <⁺ A, !lengthDef l A ∧ !Nuon.nuonAuxDef A l n” (by simp)
 
 lemma nuon_defined : 𝚺₀-Function₁ (nuon : M → M) via nuonDef := by
@@ -684,7 +684,7 @@ lemma nuon_defined : 𝚺₀-Function₁ (nuon : M → M) via nuonDef := by
 @[simp] lemma eval_nuon_iff (v) :
     Semiformula.Evalbm M v nuonDef.val ↔ v 0 = nuon (v 1) :=nuon_defined.df.iff v
 
-instance nuon_definable : DefinableFunction₁ ℒₒᵣ 𝚺₀ (nuon : M → M) := Defined.to_definable _ nuon_defined
+instance nuon_definable : 𝚺₀-Function₁ (nuon : M → M) := Defined.to_definable _ nuon_defined
 
 end
 

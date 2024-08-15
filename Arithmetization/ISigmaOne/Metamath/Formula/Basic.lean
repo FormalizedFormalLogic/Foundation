@@ -56,28 +56,28 @@ scoped notation "^∃ " p:64 => qqEx 0 p
 
 section
 
-def _root_.LO.FirstOrder.Arith.qqRelDef : 𝚺₀-Semisentence 5 :=
+def _root_.LO.FirstOrder.Arith.qqRelDef : 𝚺₀.Semisentence 5 :=
   .mkSigma “p n k r v | ∃ p' < p, !pair₅Def p' n 0 k r v ∧ p = p' + 1” (by simp)
 
-def _root_.LO.FirstOrder.Arith.qqNRelDef : 𝚺₀-Semisentence 5 :=
+def _root_.LO.FirstOrder.Arith.qqNRelDef : 𝚺₀.Semisentence 5 :=
   .mkSigma “p n k r v | ∃ p' < p, !pair₅Def p' n 1 k r v ∧ p = p' + 1” (by simp)
 
-def _root_.LO.FirstOrder.Arith.qqVerumDef : 𝚺₀-Semisentence 2 :=
+def _root_.LO.FirstOrder.Arith.qqVerumDef : 𝚺₀.Semisentence 2 :=
   .mkSigma “p n | ∃ p' < p, !pair₃Def p' n 2 0 ∧ p = p' + 1” (by simp)
 
-def _root_.LO.FirstOrder.Arith.qqFalsumDef : 𝚺₀-Semisentence 2 :=
+def _root_.LO.FirstOrder.Arith.qqFalsumDef : 𝚺₀.Semisentence 2 :=
   .mkSigma “p n | ∃ p' < p, !pair₃Def p' n 3 0 ∧ p = p' + 1” (by simp)
 
-def _root_.LO.FirstOrder.Arith.qqAndDef : 𝚺₀-Semisentence 4 :=
+def _root_.LO.FirstOrder.Arith.qqAndDef : 𝚺₀.Semisentence 4 :=
   .mkSigma “r n p q | ∃ r' < r, !pair₄Def r' n 4 p q ∧ r = r' + 1” (by simp)
 
-def _root_.LO.FirstOrder.Arith.qqOrDef : 𝚺₀-Semisentence 4 :=
+def _root_.LO.FirstOrder.Arith.qqOrDef : 𝚺₀.Semisentence 4 :=
   .mkSigma “r n p q | ∃ r' < r, !pair₄Def r' n 5 p q ∧ r = r' + 1” (by simp)
 
-def _root_.LO.FirstOrder.Arith.qqAllDef : 𝚺₀-Semisentence 3 :=
+def _root_.LO.FirstOrder.Arith.qqAllDef : 𝚺₀.Semisentence 3 :=
   .mkSigma “r n p | ∃ r' < r, !pair₃Def r' n 6 p ∧ r = r' + 1” (by simp)
 
-def _root_.LO.FirstOrder.Arith.qqExDef : 𝚺₀-Semisentence 3 :=
+def _root_.LO.FirstOrder.Arith.qqExDef : 𝚺₀.Semisentence 3 :=
   .mkSigma “r n p | ∃ r' < r, !pair₃Def r' n 7 p ∧ r = r' + 1” (by simp)
 
 lemma ss (x : V) : x < x + 1 := by exact lt_add_one x
@@ -268,7 +268,7 @@ private lemma phi_iff (C p : V) :
     · left; exact ⟨n, q, hq, rfl⟩
     · right; exact ⟨n, q, hq, rfl⟩
 
-def formulaAux : 𝚺₀-Semisentence 2 := .mkSigma
+def formulaAux : 𝚺₀.Semisentence 2 := .mkSigma
   “p C |
     (∃ n < p, !qqVerumDef p n) ∨
     (∃ n < p, !qqFalsumDef p n) ∨
@@ -573,7 +573,7 @@ lemma Language.Semiformula.induction_sigma₁ {P : V → V → Prop} (hP : 𝚺�
     ∀ n p, L.Semiformula n p → P n p :=
   Language.Semiformula.induction 𝚺 hP hrel hnrel hverum hfalsum hand hor hall hex
 
-lemma Language.Semiformula.induction_pi₁ {P : V → V → Prop} (hP : 𝚷₁-Relation P)
+lemma Language.Semiformula.induction_pi1 {P : V → V → Prop} (hP : 𝚷₁-Relation P)
     (hrel : ∀ n k r v, L.Rel k r → L.SemitermVec k n v → P n (^rel n k r v))
     (hnrel : ∀ n k r v, L.Rel k r → L.SemitermVec k n v → P n (^nrel n k r v))
     (hverum : ∀ n, P n ^⊤[n])

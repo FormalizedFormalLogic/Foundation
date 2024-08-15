@@ -19,19 +19,19 @@ lemma ext_graph (a b c : M) : a = ext b c ↔ ∃ x ≤ c, x = c / b ∧ a = x %
   · rintro rfl; exact ⟨c / b, by simp, rfl, by rfl⟩
   · rintro ⟨_, _, rfl, rfl⟩; simp
 
-def _root_.LO.FirstOrder.Arith.extDef : 𝚺₀-Semisentence 3 :=
+def _root_.LO.FirstOrder.Arith.extDef : 𝚺₀.Semisentence 3 :=
   .mkSigma “a b c | ∃ x <⁺ c, !divDef x c b ∧ !remDef a x b” (by simp)
 
 lemma ext_defined : 𝚺₀-Function₂ (λ a b : M ↦ ext a b) via extDef := by
   intro v; simp [Matrix.vecHead, Matrix.vecTail, extDef,
     ext_graph, Semiformula.eval_substs, div_defined.df.iff, rem_defined.df.iff, le_iff_lt_succ]
 
-instance ext_definable : DefinableFunction₂ ℒₒᵣ 𝚺₀ (ext : M → M → M) := Defined.to_definable _ ext_defined
+instance ext_definable : 𝚺₀-Function₂ (ext : M → M → M) := Defined.to_definable _ ext_defined
 
 @[simp] lemma ext_le_add (u z : M) : ext u z ≤ z :=
   le_trans (mod_le (z / u) u) (by simp [add_comm])
 
-instance : Bounded₂ ℒₒᵣ (ext : M → M → M) := ⟨#1, by intro v; simp⟩
+instance : Bounded₂ (ext : M → M → M) := ⟨#1, by intro v; simp⟩
 
 @[simp] lemma ext_lt {u} (z : M) (pos : 0 < u) : ext u z < u := by simp [ext, pos]
 
@@ -77,7 +77,7 @@ lemma Exponential.Seqₛ.iff (y X Y : M) :
       · exact Or.inl ⟨by simp [hx, hy], by simp [hx, hy]⟩
       · exact Or.inr ⟨by simp [hx, hy], by simp [hx, hy]⟩⟩
 
-def Exponential.Seqₛ.def : 𝚺₀-Semisentence 3 := .mkSigma
+def Exponential.Seqₛ.def : 𝚺₀.Semisentence 3 := .mkSigma
   “ y X Y |
     ∀ u <⁺ y, u ≠ 2 → !ppow2Def u →
       ( (∃ ext_u_X <⁺ X, !extDef ext_u_X u X ∧ !extDef (2 * ext_u_X) u² X) ∧
@@ -102,7 +102,7 @@ lemma Exponential.graph_iff (x y : M) :
       · exact Or.inl H
       · exact Or.inr ⟨X, bX, Y, bY, ⟨H₀.1.symm, H₀.2.symm⟩, Hₛ, ⟨u, hu, ne2, ppu, hX.symm, hY.symm⟩⟩⟩
 
-def _root_.LO.FirstOrder.Arith.exponentialDef : 𝚺₀-Semisentence 2 := .mkSigma
+def _root_.LO.FirstOrder.Arith.exponentialDef : 𝚺₀.Semisentence 2 := .mkSigma
   “x y |
     (x = 0 ∧ y = 1) ∨ ∃ X <⁺ y⁴, ∃ Y <⁺ y⁴,
       (!extDef 1 4 X ∧ !extDef 2 4 Y) ∧
@@ -203,7 +203,7 @@ lemma Seqₛ.append {z x y X Y i : M} (h : Seqₛ z X Y) (ppi : PPow2 i) (hz : z
 
 lemma pow2_ext_of_seq₀_of_seqₛ {y X Y : M} (h₀ : Exponential.Seq₀ X Y) (hₛ : Exponential.Seqₛ y X Y)
     {i} (ne2 : i ≠ 2) (hi : i ≤ y^2) (ppi : PPow2 i) : Pow2 (ext i Y) := by
-  induction i using order_induction_iSigmaZero
+  induction i using order_induction_sigma0
   · definability
   case ind i IH =>
     by_cases ei : i = 4
@@ -224,7 +224,7 @@ lemma range_pow2 {x y : M} (h : Exponential x y) : Pow2 y := by
 
 lemma le_sq_ext_of_seq₀_of_seqₛ {y X Y : M} (h₀ : Exponential.Seq₀ X Y) (hₛ : Exponential.Seqₛ y X Y)
     {i} (ne2 : i ≠ 2) (hi : i ≤ y^2) (ppi : PPow2 i) : i ≤ (ext i Y)^2 := by
-  induction i using order_induction_iSigmaZero
+  induction i using order_induction_sigma0
   · definability
   case ind i IH =>
     by_cases ei : i = 4
@@ -245,7 +245,7 @@ example {a b c : ℕ} : a * (b * c) = b * (a * c) := by exact Nat.mul_left_comm 
 
 lemma two_mul_ext_le_of_seq₀_of_seqₛ {y X Y : M} (h₀ : Exponential.Seq₀ X Y) (hₛ : Exponential.Seqₛ y X Y)
     {i} (ne2 : i ≠ 2) (hi : i ≤ y^2) (ppi : PPow2 i) : 2 * ext i Y ≤ i := by
-  induction i using order_induction_iSigmaZero
+  induction i using order_induction_sigma0
   · definability
   case ind i IH =>
     by_cases ei : i = 4
@@ -427,7 +427,7 @@ lemma exponential_odd_two_mul_sq {x y : M} : Exponential (2 * x + 1) (2 * y ^ 2)
 
 lemma two_le_ext_of_seq₀_of_seqₛ {y X Y : M} (h₀ : Exponential.Seq₀ X Y) (hₛ : Exponential.Seqₛ y X Y)
     {i} (ne2 : i ≠ 2) (hi : i ≤ y^2) (ppi : PPow2 i) : 2 ≤ ext i Y := by
-  induction i using order_induction_iSigmaZero
+  induction i using order_induction_sigma0
   · definability
   case ind i IH =>
     by_cases ei : i = 4
@@ -448,7 +448,7 @@ lemma two_le_ext_of_seq₀_of_seqₛ {y X Y : M} (h₀ : Exponential.Seq₀ X Y)
 
 lemma ext_le_ext_of_seq₀_of_seqₛ {y X Y : M} (h₀ : Exponential.Seq₀ X Y) (hₛ : Exponential.Seqₛ y X Y)
     {i} (ne2 : i ≠ 2) (hi : i ≤ y^2) (ppi : PPow2 i) : ext i X < ext i Y := by
-  induction i using order_induction_iSigmaZero
+  induction i using order_induction_sigma0
   · definability
   case ind i IH =>
     by_cases ne4 : i = 4
@@ -503,7 +503,7 @@ lemma exponential_succ {x y : M} : Exponential (x + 1) y ↔ ∃ z, y = 2 * z �
       rintro z rfl
       exact not_exponential_of_le (le_trans le_two_mul_left $  by simpa using hxy)
   · revert x
-    induction y using order_induction_iSigmaZero
+    induction y using order_induction_sigma0
     · definability
     case ind y IH =>
       intro x hxy
@@ -547,7 +547,7 @@ alias ⟨of_succ_two_mul, succ⟩ := exponential_succ_mul_two
 
 lemma one_le_ext_of_seq₀_of_seqₛ {y X Y : M} (h₀ : Exponential.Seq₀ X Y) (hₛ : Exponential.Seqₛ y X Y)
     {i} (ne2 : i ≠ 2) (hi : i ≤ y^2) (ppi : PPow2 i) : 1 ≤ ext i X := by
-  induction i using order_induction_iSigmaZero
+  induction i using order_induction_sigma0
   · definability
   case ind i IH =>
     by_cases ne4 : i = 4
@@ -582,7 +582,7 @@ protected lemma uniq {x y₁ y₂ : M} : Exponential x y₁ → Exponential x y�
   revert x h y₁
   suffices ∀ x < y₂, ∀ y₁ ≤ y₂, Exponential x y₁ → Exponential x y₂ → y₁ = y₂ by
     intro x y₁ h₁ h₂ hy; exact this x h₂.lt y₁ hy h₁ h₂
-  induction y₂ using order_induction_iSigmaZero
+  induction y₂ using order_induction_sigma0
   · definability
   case ind y₂ IH =>
     intro x _ y₁ h h₁ h₂
@@ -599,7 +599,7 @@ protected lemma inj {x₁ x₂ y : M} : Exponential x₁ y → Exponential x₂ 
   revert x₁ x₂ h₁ h₂
   suffices ∀ x₁ < y, ∀ x₂ < y, Exponential x₁ y → Exponential x₂ y → x₁ = x₂ by
     intro x₁ x₂ h₁ h₂; exact this x₁ h₁.lt x₂ h₂.lt h₁ h₂
-  induction y using order_induction_iSigmaZero
+  induction y using order_induction_sigma0
   · definability
   case ind y IH =>
     intro x₁ _ x₂ _ h₁ h₂
@@ -633,7 +633,7 @@ lemma monotone {x₁ x₂ y₁ y₂ : M} : Exponential x₁ y₁ → Exponential
     intro h₁ h₂; contrapose; simp
     intro hy
     exact this x₁ h₁.lt y₂ hy x₂ h₂.lt h₁ h₂
-  induction y₁ using order_induction_iSigmaZero
+  induction y₁ using order_induction_sigma0
   · definability
   case ind y₁ IH =>
     intro x₁ _ y₂ hy x₂ _ h₁ h₂
@@ -671,7 +671,7 @@ lemma add_mul {x₁ x₂ y₁ y₂ : M} (h₁ : Exponential x₁ y₁) (h₂ : E
   revert y₂
   suffices ∀ y₂ ≤ y₁, Exponential x₂ y₂ → Exponential (x₁ + x₂) (y₁ * y₂) by
     intro y₂ h₂ hy; exact this y₂ hy h₂
-  induction x₂ using induction_iSigmaZero
+  induction x₂ using induction_sigma0
   · definability
   case zero =>
     intro y₂ _ h₂
@@ -693,7 +693,7 @@ variable [M ⊧ₘ* 𝐈𝚺₁]
 namespace Exponential
 
 lemma range_exists (x : M) : ∃ y, Exponential x y := by
-  induction x using induction_iSigmaOne
+  induction x using induction_sigma1
   · apply Definable.ex
     definability
   case zero => exact ⟨1, by simp⟩
@@ -715,7 +715,7 @@ lemma exponential_exp (a : M) : Exponential a (exp a) := Classical.choose!_spec 
 
 lemma exponential_graph {a b : M} : a = exp b ↔ Exponential b a := Classical.choose!_eq_iff _
 
-def _root_.LO.FirstOrder.Arith.expDef : 𝚺₀-Semisentence 2 := .mkSigma “x y | !exponentialDef.val y x” (by simp)
+def _root_.LO.FirstOrder.Arith.expDef : 𝚺₀.Semisentence 2 := .mkSigma “x y | !exponentialDef.val y x” (by simp)
 
 lemma exp_defined_deltaZero : 𝚺₀-Function₁ (Exp.exp : M → M) via expDef := by
   intro v; simp [expDef, exponential_graph]
@@ -723,7 +723,7 @@ lemma exp_defined_deltaZero : 𝚺₀-Function₁ (Exp.exp : M → M) via expDef
 @[simp] lemma exp_defined_iff (v) :
     Semiformula.Evalbm M v expDef.val ↔ v 0 = Exp.exp (v 1) := exp_defined_deltaZero.df.iff v
 
-instance exp_definable_deltaZero : DefinableFunction₁ ℒₒᵣ 𝚺₀ (Exp.exp : M → M) := Defined.to_definable _ exp_defined_deltaZero
+instance exp_definable_deltaZero : 𝚺₀-Function₁ (Exp.exp : M → M) := Defined.to_definable _ exp_defined_deltaZero
 
 lemma exp_of_exponential {a b : M} (h : Exponential a b) : exp a = b :=
   Eq.symm <| exponential_graph.mpr h

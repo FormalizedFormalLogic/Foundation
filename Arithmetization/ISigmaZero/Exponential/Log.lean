@@ -65,7 +65,7 @@ lemma log_lt_self_of_pos {y : M} (pos : 0 < y) : log y < y :=
 
 lemma log_graph {x y : M} : x = log y ↔ (y = 0 → x = 0) ∧ (0 < y → x < y ∧ ∃ y' ≤ y, Exponential x y' ∧ y < 2 * y') := Classical.choose!_eq_iff _
 
-def _root_.LO.FirstOrder.Arith.logDef : 𝚺₀-Semisentence 2 := .mkSigma
+def _root_.LO.FirstOrder.Arith.logDef : 𝚺₀.Semisentence 2 := .mkSigma
   “x y | (y = 0 → x = 0) ∧ (0 < y → x < y ∧ ∃ y' <⁺ y, !exponentialDef x y' ∧ y < 2 * y')” (by simp)
 
 lemma log_defined : 𝚺₀-Function₁ (log : M → M) via logDef := by
@@ -74,9 +74,9 @@ lemma log_defined : 𝚺₀-Function₁ (log : M → M) via logDef := by
 @[simp] lemma log_defined_iff (v) :
     Semiformula.Evalbm M v logDef.val ↔ v 0 = log (v 1) := log_defined.df.iff v
 
-instance log_definable : DefinableFunction₁ ℒₒᵣ 𝚺₀ (log : M → M) := Defined.to_definable _ log_defined
+instance log_definable : 𝚺₀-Function₁ (log : M → M) := Defined.to_definable _ log_defined
 
-instance : Bounded₁ ℒₒᵣ (log : M → M) := ⟨#0, λ _ ↦ by simp⟩
+instance : Bounded₁ (log : M → M) := ⟨#0, λ _ ↦ by simp⟩
 
 lemma log_eq_of_pos {x y : M} (pos : 0 < y) {y'} (H : Exponential x y') (hy' : y' ≤ y) (hy : y < 2 * y') : log y = x :=
   (log_exists_unique_pos pos).unique ⟨log_lt_self_of_pos pos, log_pos pos⟩ ⟨lt_of_lt_of_le H.lt hy', y', hy', H, hy⟩
@@ -160,7 +160,7 @@ lemma length_graph {i a : M} : i = ‖a‖ ↔ (0 < a → ∃ k ≤ a, k = log a
     · rintro rfl; exact ⟨log a, by simp⟩
     · rintro ⟨_, _, rfl, rfl⟩; rfl
 
-def _root_.LO.FirstOrder.Arith.lengthDef : 𝚺₀-Semisentence 2 := .mkSigma
+def _root_.LO.FirstOrder.Arith.lengthDef : 𝚺₀.Semisentence 2 := .mkSigma
   “i a | (0 < a → ∃ k <⁺ a, !logDef k a ∧ i = k + 1) ∧ (a = 0 → i = 0)” (by simp)
 
 lemma length_defined : 𝚺₀-Function₁ (‖·‖ : M → M) via lengthDef := by
@@ -169,9 +169,9 @@ lemma length_defined : 𝚺₀-Function₁ (‖·‖ : M → M) via lengthDef :=
 @[simp] lemma length_defined_iff (v) :
     Semiformula.Evalbm M v lengthDef.val ↔ v 0 = ‖v 1‖ := length_defined.df.iff v
 
-instance length_definable : DefinableFunction₁ ℒₒᵣ 𝚺₀ (‖·‖ : M → M) := Defined.to_definable _ length_defined
+instance length_definable : 𝚺₀-Function₁ (‖·‖ : M → M) := Defined.to_definable _ length_defined
 
-instance : Bounded₁ ℒₒᵣ (‖·‖ : M → M) := ⟨#0, λ _ ↦ by simp⟩
+instance : Bounded₁ (‖·‖ : M → M) := ⟨#0, λ _ ↦ by simp⟩
 
 @[simp] lemma length_one : ‖(1 : M)‖ = 1 := by simp [length_eq_binaryLength]
 
@@ -285,7 +285,7 @@ lemma brange_exists_unique (a : M) : ∀ x < ‖a‖, ∃! y, Exponential x y :=
     intro x hx; rcases this x hx with ⟨_, _, H⟩
     exact ExistsUnique.intro _ H (fun y' H' ↦ H'.uniq H)
   intro x
-  induction x using induction_iSigmaZero
+  induction x using induction_sigma0
   · definability
   case zero =>
     intro ha
@@ -335,7 +335,7 @@ lemma bexp_graph {y a x : M} : y = bexp a x ↔ ∃ l ≤ a, l = ‖a‖ ∧ (x 
     · exact (hlt lt).uniq (exp_bexp_of_lt lt)
     · rcases hle le; simp [bexp_eq_zero_of_le le]⟩
 
-def _root_.LO.FirstOrder.Arith.bexpDef : 𝚺₀-Semisentence 3 := .mkSigma
+def _root_.LO.FirstOrder.Arith.bexpDef : 𝚺₀.Semisentence 3 := .mkSigma
   “y a x | ∃ l <⁺ a, !lengthDef l a ∧ (x < l → !exponentialDef x y) ∧ (l ≤ x → y = 0)” (by simp)
 
 lemma bexp_defined : 𝚺₀-Function₂ (bexp : M → M → M) via bexpDef := by
@@ -344,9 +344,9 @@ lemma bexp_defined : 𝚺₀-Function₂ (bexp : M → M → M) via bexpDef := b
 @[simp] lemma bexp_defined_iff (v) :
     Semiformula.Evalbm M v bexpDef.val ↔ v 0 = bexp (v 1) (v 2) := bexp_defined.df.iff v
 
-instance bexp_definable : DefinableFunction₂ ℒₒᵣ 𝚺₀ (bexp : M → M → M) := Defined.to_definable _ bexp_defined
+instance bexp_definable : 𝚺₀-Function₂ (bexp : M → M → M) := Defined.to_definable _ bexp_defined
 
-instance : Bounded₂ ℒₒᵣ (bexp : M → M → M) := ⟨#0, λ _ ↦ by simp⟩
+instance : Bounded₂ (bexp : M → M → M) := ⟨#0, λ _ ↦ by simp⟩
 
 lemma bexp_monotone_iff {a i j : M} (hi : i < ‖a‖) (hj : j < ‖a‖) : bexp a i < bexp a j ↔ i < j :=
   Iff.symm <| Exponential.monotone_iff (by simp [hi]) (by simp [hj])
@@ -415,7 +415,7 @@ lemma fbit_eq_zero_iff {a i : M} : fbit a i = 0 ↔ ¬LenBit (bexp a i) a := by 
 
 lemma fbit_eq_zero_of_le {a i : M} (hi : ‖a‖ ≤ i) : fbit a i = 0 := by simp [fbit, bexp_eq_zero_of_le hi]
 
-def _root_.LO.FirstOrder.Arith.fbitDef : 𝚺₀-Semisentence 3 := .mkSigma
+def _root_.LO.FirstOrder.Arith.fbitDef : 𝚺₀.Semisentence 3 := .mkSigma
   “b a i | ∃ x <⁺ a, !bexpDef x a i ∧ ∃ y <⁺ a, !divDef y a x ∧ !remDef b y 2” (by simp)
 
 lemma fbit_defined : 𝚺₀-Function₂ (fbit : M → M → M) via fbitDef := by
@@ -427,9 +427,9 @@ lemma fbit_defined : 𝚺₀-Function₂ (fbit : M → M → M) via fbitDef := b
 @[simp] lemma fbit_defined_iff (v) :
     Semiformula.Evalbm M v fbitDef.val ↔ v 0 = fbit (v 1) (v 2) := fbit_defined.df.iff v
 
-instance fbit_definable : DefinableFunction₂ ℒₒᵣ 𝚺₀ (fbit : M → M → M) := Defined.to_definable _ fbit_defined
+instance fbit_definable : 𝚺₀-Function₂ (fbit : M → M → M) := Defined.to_definable _ fbit_defined
 
-instance : Bounded₂ ℒₒᵣ (fbit : M → M → M) := ⟨‘1’, λ _ ↦ by simp⟩
+instance : Bounded₂ (fbit : M → M → M) := ⟨‘1’, λ _ ↦ by simp⟩
 
 @[simp] lemma fbit_zero (i : M) : fbit 0 i = 0 := by simp [fbit]
 
