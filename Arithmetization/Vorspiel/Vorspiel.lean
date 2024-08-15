@@ -187,7 +187,7 @@ section model
 
 variable {T : Theory ℒₒᵣ} [𝐄𝐐 ≼ T]
 
-variable (M : Type*) [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* T]
+variable (M : Type*) [ORingStruc M] [M ⊧ₘ* T]
 
 lemma oring_sound {σ : Sentence ℒₒᵣ} (h : T ⊢! σ) : M ⊧ₘ σ := (consequence_iff' (T := T)).mp (LO.Sound.sound h) M
 
@@ -251,7 +251,7 @@ end
 
 end Hierarchy
 
-variable (M : Type*) [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐏𝐀⁻]
+variable (M : Type*) [ORingStruc M] [M ⊧ₘ* 𝐏𝐀⁻]
 
 lemma nat_extention_sigmaOne {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
     ℕ ⊧ₘ σ → M ⊧ₘ σ := fun h ↦ by

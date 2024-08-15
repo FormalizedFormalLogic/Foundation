@@ -78,7 +78,7 @@ namespace Arith
 
 noncomputable section
 
-variable {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐏𝐀⁻]
+variable {M : Type*} [ORingStruc M] [M ⊧ₘ* 𝐏𝐀⁻]
 
 variable {a b c : M}
 

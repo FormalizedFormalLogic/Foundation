@@ -1,4 +1,4 @@
-import Arithmetization.Definability.Definability
+import Arithmetization.Definability.Basic
 
 noncomputable section
 

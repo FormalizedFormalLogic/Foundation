@@ -1,4 +1,4 @@
-import Arithmetization.Definability.Absoluteness
+import Arithmetization.Vorspiel.Lemmata
 
 namespace LO.Arith
 
