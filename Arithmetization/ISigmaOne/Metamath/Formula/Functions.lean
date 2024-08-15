@@ -76,7 +76,7 @@ lemma neg_defined : 𝚺₁-Function₁ L.neg via pL.negDef := fun v ↦ by
 instance neg_definable : 𝚺₁-Function₁ L.neg :=
   Defined.to_definable _ (neg_defined L)
 
-@[simp, definability] instance neg_definable' (Γ) : (Γ, m + 1)-Function₁ L.neg :=
+@[simp, definability] instance neg_definable' (Γ) : Γ-[m + 1]-Function₁ L.neg :=
   .of_sigmaOne (neg_definable L) _ _
 
 end
@@ -183,7 +183,7 @@ lemma imp_defined : 𝚺₁-Function₃ L.imp via pL.impDef := fun v ↦ by
 instance imp_definable : 𝚺₁-Function₃ L.imp :=
   Defined.to_definable _ (imp_defined L)
 
-instance imp_definable' (Γ) : (Γ, m + 1)-Function₃ L.imp :=
+instance imp_definable' (Γ) : Γ-[m + 1]-Function₃ L.imp :=
   .of_sigmaOne (imp_definable L) _ _
 
 end
@@ -255,7 +255,7 @@ lemma shift_defined : 𝚺₁-Function₁ L.shift via pL.shiftDef := fun v ↦ b
 instance shift_definable : 𝚺₁-Function₁ L.shift :=
   Defined.to_definable _ (shift_defined L)
 
-@[simp, definability] instance shift_definable' (Γ) : (Γ, m + 1)-Function₁ L.shift :=
+@[simp, definability] instance shift_definable' (Γ) : Γ-[m + 1]-Function₁ L.shift :=
   .of_sigmaOne (shift_definable L) _ _
 
 end
@@ -341,7 +341,7 @@ lemma qVec_defined : 𝚺₁-Function₃ L.qVec via pL.qVecDef := by
 
 instance qVec_definable : 𝚺₁-Function₃ L.qVec := Defined.to_definable _ (qVec_defined L)
 
-@[simp, definability] instance qVec_definable' (Γ m) : (Γ, m + 1)-Function₃ L.qVec := .of_sigmaOne (qVec_definable L) _ _
+@[simp, definability] instance qVec_definable' (Γ m) : Γ-[m + 1]-Function₃ L.qVec := .of_sigmaOne (qVec_definable L) _ _
 
 end
 
@@ -409,7 +409,7 @@ lemma substs_defined : 𝚺₁-Function₃ L.substs via pL.substsDef := fun v �
 instance substs_definable : 𝚺₁-Function₃ L.substs :=
   Defined.to_definable _ (substs_defined L)
 
-@[simp, definability] instance substs_definable' (Γ) : (Γ, m + 1)-Function₃ L.substs :=
+@[simp, definability] instance substs_definable' (Γ) : Γ-[m + 1]-Function₃ L.substs :=
   .of_sigmaOne (substs_definable L) _ _
 
 end
@@ -756,7 +756,7 @@ def _root_.LO.FirstOrder.Arith.LDef.isFVFreeDef (pL : LDef) : 𝚺₁.Semisenten
   .mkSigma “n p | !pL.isSemiformulaDef.sigma n p ∧ !pL.shiftDef p p” (by simp)
 
 lemma isFVFree_defined : 𝚺₁-Relation L.IsFVFree via pL.isFVFreeDef := by
-  intro v; simp [LDef.isFVFreeDef, HSemiformula.val_sigma, (semiformula_defined L).df.iff, (shift_defined L).df.iff]
+  intro v; simp [LDef.isFVFreeDef, HierarchySymbol.Semiformula.val_sigma, (semiformula_defined L).df.iff, (shift_defined L).df.iff]
   simp [Language.IsFVFree, eq_comm]
 
 end

@@ -8,13 +8,13 @@ open FirstOrder FirstOrder.Arith
 
 section
 
-variable {V : Type*} [Zero V] [One V] [Add V] [Mul V] [LT V] [V ⊧ₘ* 𝐈𝚺₁]
+variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
 variable (V)
 
 structure _root_.LO.FirstOrder.Arith.LDef where
-  func : HSemisentence ℒₒᵣ 2 𝚺₀
-  rel : HSemisentence ℒₒᵣ 2 𝚺₀
+  func : 𝚺₀.Semisentence 2
+  rel : 𝚺₀.Semisentence 2
 
 protected structure Language where
   Func (arity : V) : V → Prop
@@ -36,15 +36,15 @@ variable {L : Arith.Language V} {pL : LDef} [L.Defined pL]
 @[simp] lemma Defined.eval_rel_iff (v) :
     Semiformula.Evalbm V v pL.rel.val ↔ L.Rel (v 0) (v 1) := Defined.rel.df.iff v
 
-instance Defined.func_definable : 𝚺₀-Relation L.Func := Defined.to_definable _ Defined.func
+instance Defined.func_definable : 𝚺₀-Relation L.Func := Defined.func.to_definable
 
-instance Defined.rel_definable : 𝚺₀-Relation L.Rel := Defined.to_definable _ Defined.rel
+instance Defined.rel_definable : 𝚺₀-Relation L.Rel := Defined.rel.to_definable
 
-@[simp, definability] instance Defined.func_definable' (Γ) : Γ-Relation L.Func :=
-  HierarchySymbol.Boldface.of_zero Defined.func_definable _
+@[simp, definability] instance Defined.func_definable' (ℌ) : ℌ-Relation L.Func :=
+  HierarchySymbol.Boldface.of_zero Defined.func_definable
 
-@[simp, definability] instance Defined.rel_definable' (Γ) : Γ-Relation L.Rel :=
-  HierarchySymbol.Boldface.of_zero Defined.rel_definable _
+@[simp, definability] instance Defined.rel_definable' (ℌ) : ℌ-Relation L.Rel :=
+  HierarchySymbol.Boldface.of_zero Defined.rel_definable
 
 end Language
 

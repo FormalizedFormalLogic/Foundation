@@ -6,7 +6,7 @@ namespace LO.Arith
 
 open FirstOrder FirstOrder.Arith
 
-variable {V : Type*} [Zero V] [One V] [Add V] [Mul V] [LT V] [V ⊧ₘ* 𝐈𝚺₁]
+variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
 section
 
@@ -63,34 +63,34 @@ def _root_.LO.FirstOrder.Arith.LDef.termSubstVecDef (pL : LDef) : 𝚺₁.Semise
 
 variable (L)
 
-lemma termSubst_defined : Arith.DefinedFunction (fun v ↦ L.termSubst (v 0) (v 1) (v 2) (v 3)) pL.termSubstDef := by
+lemma termSubst_defined : 𝚺₁.DefinedFunction (fun v ↦ L.termSubst (v 0) (v 1) (v 2) (v 3)) pL.termSubstDef := by
   intro v; simpa [LDef.termSubstDef, Language.termSubst] using (construction L).result_defined ![v 0, v 1, v 4, v 2, v 3]
 
 @[simp] lemma eval_termSubstDef (v : Fin 5 → V) :
     Semiformula.Evalbm (L := ℒₒᵣ) V v pL.termSubstDef ↔ v 0 = L.termSubst (v 1) (v 2) (v 3) (v 4) := (termSubst_defined L).df.iff v
 
-instance termSubst_definable : Arith.DefinableFunction ℒₒᵣ 𝚺₁ (fun v : Fin 4 → V ↦ L.termSubst (v 0) (v 1) (v 2) (v 3)) :=
-  Defined.to_definable _ (termSubst_defined L)
+instance termSubst_definable : 𝚺₁.BoldfaceFunction (fun v : Fin 4 → V ↦ L.termSubst (v 0) (v 1) (v 2) (v 3)) :=
+  (termSubst_defined L).to_definable
 
 instance termSubst_definable₂ (n m : V) : 𝚺₁-Function₂ (L.termSubst n m) := by
-  simpa using DefinableFunction.retractiont (n := 2) (termSubst_definable L) ![&n, &m, #0, #1]
+  simpa using HierarchySymbol.BoldfaceFunction.retractiont (n := 2) (termSubst_definable L) ![&n, &m, #0, #1]
 
-@[simp, definability] instance termSubst_definable₂' (Γ k) (n m : V) : (Γ, k + 1)-Function₂ (L.termSubst n m) :=
+@[simp, definability] instance termSubst_definable₂' (Γ k) (n m : V) : Γ-[k + 1]-Function₂ (L.termSubst n m) :=
   .of_sigmaOne (termSubst_definable₂ L n m) _ _
 
-lemma termSubstVec_defined : Arith.DefinedFunction (fun v ↦ L.termSubstVec (v 0) (v 1) (v 2) (v 3) (v 4)) pL.termSubstVecDef := by
+lemma termSubstVec_defined : 𝚺₁.DefinedFunction (fun v ↦ L.termSubstVec (v 0) (v 1) (v 2) (v 3) (v 4)) pL.termSubstVecDef := by
   intro v; simpa [LDef.termSubstVecDef, Language.termSubstVec] using (construction L).resultVec_defined ![v 0, v 1, v 2, v 5, v 3, v 4]
 
 @[simp] lemma eval_termSubstVecDef (v : Fin 6 → V) :
     Semiformula.Evalbm (L := ℒₒᵣ) V v pL.termSubstVecDef ↔ v 0 = L.termSubstVec (v 1) (v 2) (v 3) (v 4) (v 5) := (termSubstVec_defined L).df.iff v
 
-instance termSubstVec_definable : Arith.DefinableFunction ℒₒᵣ 𝚺₁ (fun v : Fin 5 → V ↦ L.termSubstVec (v 0) (v 1) (v 2) (v 3) (v 4)) :=
-  Defined.to_definable _ (termSubstVec_defined L)
+instance termSubstVec_definable : 𝚺₁.BoldfaceFunction (fun v : Fin 5 → V ↦ L.termSubstVec (v 0) (v 1) (v 2) (v 3) (v 4)) :=
+  (termSubstVec_defined L).to_definable
 
 instance termSubstVec_definable₂ (k n m : V) : 𝚺₁-Function₂ (L.termSubstVec k n m) := by
-  simpa using DefinableFunction.retractiont (n := 2) (termSubstVec_definable L) ![&k, &n, &m, #0, #1]
+  simpa using HierarchySymbol.BoldfaceFunction.retractiont (n := 2) (termSubstVec_definable L) ![&k, &n, &m, #0, #1]
 
-@[simp, definability] instance termSubstVec_definable₂' (Γ i) (k n m : V) : (Γ, i + 1)-Function₂ (L.termSubstVec k n m) :=
+@[simp, definability] instance termSubstVec_definable₂' (Γ i) (k n m : V) : Γ-[i + 1]-Function₂ (L.termSubstVec k n m) :=
   .of_sigmaOne (termSubstVec_definable₂ L k n m) _ _
 
 end
@@ -230,7 +230,7 @@ lemma termShift_defined : 𝚺₁-Function₂ L.termShift via pL.termShiftDef :=
     Semiformula.Evalbm (L := ℒₒᵣ) V v pL.termShiftDef ↔ v 0 = L.termShift (v 1) (v 2) := (termShift_defined L).df.iff v
 
 instance termShift_definable : 𝚺₁-Function₂ L.termShift :=
-  Defined.to_definable _ (termShift_defined L)
+  (termShift_defined L).to_definable
 
 @[definability, simp] instance termShift_definable' (Γ i) : (Γ, i + 1)-Function₂ L.termShift := .of_sigmaOne (termShift_definable L) _ _
 
@@ -633,7 +633,7 @@ lemma numeral_defined : 𝚺₁-Function₁ (numeral : V → V) via numeralDef :
 
 @[simp] instance numeral_definable : 𝚺₁-Function₁ (numeral : V → V) := Defined.to_definable _ numeral_defined
 
-@[simp] instance numeral_definable' (Γ m) : (Γ, m + 1)-Function₁ (numeral : V → V) := .of_sigmaOne numeral_definable _ _
+@[simp] instance numeral_definable' (Γ m) : Γ-[m + 1]-Function₁ (numeral : V → V) := .of_sigmaOne numeral_definable _ _
 
 end
 

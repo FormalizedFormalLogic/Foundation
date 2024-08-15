@@ -294,22 +294,22 @@ def construction : Fixpoint.Construction V (blueprint pL) where
   Φ := fun _ ↦ Phi L
   defined := ⟨
     by  intro v
-        -- simp [blueprint, HSemiformula.val_sigma, (termSeq_defined L).proper.iff']
-        simp only [Nat.succ_eq_add_one, Nat.reduceAdd, blueprint, Fin.isValue, HSemiformula.val_sigma,
-          HSemiformula.sigma_mkDelta, HSemiformula.val_mkSigma, LogicalConnective.HomClass.map_or,
+        -- simp [blueprint, HierarchySymbol.Semiformula.val_sigma, (termSeq_defined L).proper.iff']
+        simp only [Nat.succ_eq_add_one, Nat.reduceAdd, blueprint, Fin.isValue, HierarchySymbol.Semiformula.val_sigma,
+          HierarchySymbol.Semiformula.sigma_mkDelta, HierarchySymbol.Semiformula.val_mkSigma, LogicalConnective.HomClass.map_or,
           Semiformula.eval_bexLT, Semiterm.val_bvar, Matrix.cons_val_one, Matrix.vecHead,
           Matrix.cons_val_two, Matrix.vecTail, Function.comp_apply, Fin.succ_zero_eq_one,
           Matrix.cons_val_three, Fin.succ_one_eq_two, LogicalConnective.HomClass.map_and,
           Semiformula.eval_substs, Matrix.comp_vecCons', Matrix.cons_val_zero,
           Matrix.cons_val_fin_one, Matrix.constant_eq_singleton, Matrix.cons_val_four,
           Matrix.cons_val_succ, eval_qqRelDef, LogicalConnective.Prop.and_eq, eval_qqNRelDef,
-          LogicalConnective.Prop.or_eq, HSemiformula.pi_mkDelta, HSemiformula.val_mkPi,
+          LogicalConnective.Prop.or_eq, HierarchySymbol.Semiformula.pi_mkDelta, HierarchySymbol.Semiformula.val_mkPi,
           (semitermVec_defined L).proper.iff'],
     by  intro v
-        -- simpa [blueprint, Language.Defined.eval_rel_iff (L := L), eval_termSeq L, HSemiformula.val_sigma, formulaAux] using phi_iff L _ _
+        -- simpa [blueprint, Language.Defined.eval_rel_iff (L := L), eval_termSeq L, HierarchySymbol.Semiformula.val_sigma, formulaAux] using phi_iff L _ _
         simpa only [Fin.isValue, Nat.succ_eq_add_one, Nat.reduceAdd, blueprint,
-          HSemiformula.val_sigma, formulaAux, HSemiformula.val_mkSigma,
-          LogicalConnective.HomClass.map_or, HSemiformula.val_mkDelta, Semiformula.eval_bexLT,
+          HierarchySymbol.Semiformula.val_sigma, formulaAux, HierarchySymbol.Semiformula.val_mkSigma,
+          LogicalConnective.HomClass.map_or, HierarchySymbol.Semiformula.val_mkDelta, Semiformula.eval_bexLT,
           Semiterm.val_bvar, Matrix.cons_val_one, Matrix.vecHead, Matrix.cons_val_two,
           Matrix.vecTail, Function.comp_apply, Fin.succ_zero_eq_one, Matrix.cons_val_three,
           Fin.succ_one_eq_two, LogicalConnective.HomClass.map_and, Semiformula.eval_substs,
@@ -375,7 +375,7 @@ lemma uformula_defined : 𝚫₁-Predicate L.UFormula via pL.uformulaDef :=
 
 instance uformulaDef_definable : 𝚫₁-Predicate L.UFormula := Defined.to_definable _ (uformula_defined L)
 
-@[simp, definability] instance uformulaDef_definable' (Γ) : (Γ, m + 1)-Predicate L.UFormula :=
+@[simp, definability] instance uformulaDef_definable' (Γ) : Γ-[m + 1]-Predicate L.UFormula :=
   .of_deltaOne (uformulaDef_definable L) _ _
 
 def Language.Semiformula (n p : V) : Prop := L.UFormula p ∧ n = fstIdx p
@@ -390,12 +390,12 @@ def _root_.LO.FirstOrder.Arith.LDef.isSemiformulaDef (pL : LDef) : 𝚫₁.Semis
   (.mkPi “n p | !pL.uformulaDef.pi p ∧ !fstIdxDef n p” (by simp))
 
 lemma semiformula_defined : 𝚫₁-Relation L.Semiformula via pL.isSemiformulaDef where
-  left := by intro v; simp [LDef.isSemiformulaDef, HSemiformula.val_sigma, (uformula_defined L).proper.iff']
-  right := by intro v; simp [LDef.isSemiformulaDef, HSemiformula.val_sigma, eval_uformulaDef L, Language.Semiformula, eq_comm]
+  left := by intro v; simp [LDef.isSemiformulaDef, HierarchySymbol.Semiformula.val_sigma, (uformula_defined L).proper.iff']
+  right := by intro v; simp [LDef.isSemiformulaDef, HierarchySymbol.Semiformula.val_sigma, eval_uformulaDef L, Language.Semiformula, eq_comm]
 
 instance semiformula_definable : 𝚫₁-Relation L.Semiformula := Defined.to_definable _ (semiformula_defined L)
 
-@[simp, definability] instance semiformula_defined' (Γ) : (Γ, m + 1)-Relation L.Semiformula :=
+@[simp, definability] instance semiformula_defined' (Γ) : Γ-[m + 1]-Relation L.Semiformula :=
   .of_deltaOne (semiformula_definable L) _ _
 
 variable {L}
@@ -750,7 +750,7 @@ def construction : Fixpoint.Construction V (β.blueprint) where
   defined :=
   ⟨by intro v
       /-
-      simp? [HSemiformula.val_sigma, Blueprint.blueprint,
+      simp? [HierarchySymbol.Semiformula.val_sigma, Blueprint.blueprint,
         eval_uformulaDef L, (uformula_defined L).proper.iff',
         c.rel_defined.iff, c.rel_defined.graph_delta.proper.iff',
         c.nrel_defined.iff, c.nrel_defined.graph_delta.proper.iff',
@@ -764,7 +764,7 @@ def construction : Fixpoint.Construction V (β.blueprint) where
         c.exChanges_defined.iff, c.exChanges_defined.graph_delta.proper.iff']
       -/
       simp only [Nat.succ_eq_add_one, Nat.reduceAdd, Blueprint.blueprint, Fin.isValue,
-        HSemiformula.val_sigma, HSemiformula.sigma_mkDelta, HSemiformula.val_mkSigma,
+        HierarchySymbol.Semiformula.val_sigma, HierarchySymbol.Semiformula.sigma_mkDelta, HierarchySymbol.Semiformula.val_mkSigma,
         Semiformula.eval_bexLTSucc', Semiterm.val_bvar, Matrix.cons_val_one, Matrix.vecHead,
         Matrix.cons_val_two, Matrix.vecTail, Function.comp_apply, Fin.succ_zero_eq_one,
         LogicalConnective.HomClass.map_and, Semiformula.eval_substs, Matrix.comp_vecCons',
@@ -778,16 +778,16 @@ def construction : Fixpoint.Construction V (β.blueprint) where
         eval_memRel₃, eval_qqAndDef, c.and_defined.iff, eval_qqOrDef, c.or_defined.iff,
         Semiformula.eval_ex, c.allChanges_defined.iff, exists_eq_left, eval_qqAllDef,
         c.all_defined.iff, c.exChanges_defined.iff, eval_qqExDef, c.ex_defined.iff,
-        LogicalConnective.Prop.or_eq, HSemiformula.pi_mkDelta, HSemiformula.val_mkPi,
+        LogicalConnective.Prop.or_eq, HierarchySymbol.Semiformula.pi_mkDelta, HierarchySymbol.Semiformula.val_mkPi,
         (uformula_defined L).proper.iff', c.rel_defined.graph_delta.proper.iff',
-        HSemiformula.graphDelta_val, c.nrel_defined.graph_delta.proper.iff',
+        HierarchySymbol.Semiformula.graphDelta_val, c.nrel_defined.graph_delta.proper.iff',
         c.verum_defined.graph_delta.proper.iff', c.falsum_defined.graph_delta.proper.iff',
         c.and_defined.graph_delta.proper.iff', c.or_defined.graph_delta.proper.iff',
         Semiformula.eval_all, LogicalConnective.HomClass.map_imply, LogicalConnective.Prop.arrow_eq,
         forall_eq, c.all_defined.graph_delta.proper.iff', c.ex_defined.graph_delta.proper.iff'],
     by  intro v
         /-
-        simpa [HSemiformula.val_sigma, Blueprint.blueprint,
+        simpa [HierarchySymbol.Semiformula.val_sigma, Blueprint.blueprint,
           eval_uformulaDef L,
           c.rel_defined.iff,
           c.nrel_defined.iff,
@@ -801,7 +801,7 @@ def construction : Fixpoint.Construction V (β.blueprint) where
           c.exChanges_defined.iff] using c.phi_iff _ _
         -/
         simpa only [Fin.isValue, Nat.succ_eq_add_one, Nat.reduceAdd, Blueprint.blueprint,
-          HSemiformula.val_sigma, HSemiformula.val_mkDelta, HSemiformula.val_mkSigma,
+          HierarchySymbol.Semiformula.val_sigma, HierarchySymbol.Semiformula.val_mkDelta, HierarchySymbol.Semiformula.val_mkSigma,
           Semiformula.eval_bexLTSucc', Semiterm.val_bvar, Matrix.cons_val_one, Matrix.vecHead,
           Matrix.cons_val_two, Matrix.vecTail, Function.comp_apply, Fin.succ_zero_eq_one,
           LogicalConnective.HomClass.map_and, Semiformula.eval_substs, Matrix.comp_vecCons',
@@ -1174,7 +1174,7 @@ section
 
 lemma result_defined : 𝚺₁-Function₂ c.result via β.result := by
   intro v
-  simp [Blueprint.result, HSemiformula.val_sigma, eval_uformulaDef L, (uformula_defined L).proper.iff', c.eval_graphDef]
+  simp [Blueprint.result, HierarchySymbol.Semiformula.val_sigma, eval_uformulaDef L, (uformula_defined L).proper.iff', c.eval_graphDef]
   exact Classical.choose!_eq_iff (c.exists_unique_all (v 1) (v 2))
 
 @[definability] instance result_definable : 𝚺₁-Function₂ c.result := c.result_defined.to_definable _

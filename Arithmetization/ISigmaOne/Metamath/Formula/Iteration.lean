@@ -51,7 +51,7 @@ lemma qqConj_defined : 𝚺₁-Function₂ (qqConj : V → V → V) via qqConjDe
 
 instance qqConj_definable : 𝚺₁-Function₂ (qqConj : V → V → V) := Defined.to_definable _ qqConj_defined
 
-instance qqConj_definable' (Γ) : (Γ, m + 1)-Function₂ (qqConj : V → V → V) := .of_sigmaOne qqConj_definable _ _
+instance qqConj_definable' (Γ) : Γ-[m + 1]-Function₂ (qqConj : V → V → V) := .of_sigmaOne qqConj_definable _ _
 
 end
 
@@ -123,7 +123,7 @@ lemma qqDisj_defined : 𝚺₁-Function₂ (qqDisj : V → V → V) via qqDisjDe
 
 instance qqDisj_definable : 𝚺₁-Function₂ (qqDisj : V → V → V) := Defined.to_definable _ qqDisj_defined
 
-instance qqDisj_definable' (Γ) : (Γ, m + 1)-Function₂ (qqDisj : V → V → V) := .of_sigmaOne qqDisj_definable _ _
+instance qqDisj_definable' (Γ) : Γ-[m + 1]-Function₂ (qqDisj : V → V → V) := .of_sigmaOne qqDisj_definable _ _
 
 end
 
@@ -186,13 +186,13 @@ lemma substItr_defined : 𝚺₁-Function₄ (substItr : V → V → V → V →
 
 instance substItr_definable : 𝚺₁-Function₄ (substItr : V → V → V → V → V) := Defined.to_definable _ substItr_defined
 
-@[simp, definability] instance substItr_definable' (Γ m) : (Γ, m + 1)-Function₄ (substItr : V → V → V → V → V) :=
+@[simp, definability] instance substItr_definable' (Γ m) : Γ-[m + 1]-Function₄ (substItr : V → V → V → V → V) :=
   .of_sigmaOne substItr_definable _ _
 
 instance substItr_definable₁ (n w p : V) : 𝚺₁-Function₁ (substItr n w p) := by
   simpa using substItr_definable.retractiont ![&n, &w, &p, #0]
 
-instance substItr_definable₁' (n w p : V) (Γ m) : (Γ, m + 1)-Function₁ (substItr n w p) :=
+instance substItr_definable₁' (n w p : V) (Γ m) : Γ-[m + 1]-Function₁ (substItr n w p) :=
   .of_sigmaOne (substItr_definable₁ n w p) _ _
 
 end
@@ -302,7 +302,7 @@ lemma qqVerums_defined : 𝚺₁-Function₂ (qqVerums : V → V → V) via qqVe
 
 instance qqVerums_definable : 𝚺₁-Function₂ (qqVerums : V → V → V) := Defined.to_definable _ qqVerums_defined
 
-@[simp] instance qqVerums_definable' (Γ) : (Γ, m + 1)-Function₂ (qqVerums : V → V → V) :=
+@[simp] instance qqVerums_definable' (Γ) : Γ-[m + 1]-Function₂ (qqVerums : V → V → V) :=
   .of_sigmaOne qqVerums_definable _ _
 
 end

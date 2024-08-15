@@ -169,6 +169,8 @@ lemma graph_defined : 𝚺₁-Predicate (Graph : V → Prop) via graphDef :=
 
 instance graph_definable : 𝚺₁-Predicate (Graph : V → Prop) := graph_defined.to_definable
 
+instance graph_definable' : 𝚺-[0 + 1]-Predicate (Graph : V → Prop) := graph_definable
+
 end
 
 /-- TODO: move-/
@@ -201,7 +203,7 @@ lemma graph_exists (v i : V) : ∃ x, Graph ⟪v, i, x⟫ := by
   suffices ∀ i' ≤ i, ∀ v' ≤ v, ∃ x, Graph ⟪v', i', x⟫ from this i (by simp) v (by simp)
   intro i' hi'
   induction i' using induction_sigma1
-  · {  }
+  · definability
   case zero =>
     intro v' _
     exact ⟨fstIdx v', graph_case.mpr <| Or.inl ⟨v', rfl⟩⟩
@@ -209,7 +211,7 @@ lemma graph_exists (v i : V) : ∃ x, Graph ⟪v, i, x⟫ := by
     intro v' hv'
     rcases ih (le_trans le_self_add hi') (sndIdx v') (le_trans (by simp) hv') with ⟨x, hx⟩
     exact ⟨x, graph_case.mpr <| Or.inr ⟨v', i', x, rfl, hx⟩⟩
-/--/
+
 lemma graph_unique {v i x₁ x₂ : V} : Graph ⟪v, i, x₁⟫ → Graph ⟪v, i, x₂⟫ → x₁ = x₂ := by
   induction i using induction_pi1 generalizing v x₁ x₂
   · definability
@@ -262,7 +264,7 @@ lemma cons_cases (x : V) : x = 0 ∨ ∃ y v, x = y ∷ v := by
 
 lemma cons_induction (Γ) {P : V → Prop} (hP : Γ-[1]-Predicate P)
     (nil : P 0) (cons : ∀ x v, P v → P (x ∷ v)) : ∀ v, P v :=
-  order_induction_hh ℒₒᵣ Γ 1 hP (by
+  order_induction_hh Γ 1 hP (by
     intro v ih
     rcases nil_or_cons v with (rfl | ⟨x, v, rfl⟩)
     · exact nil
@@ -292,9 +294,9 @@ lemma nth_defined : 𝚺₁-Function₂ (nth : V → V → V) via nthDef := by
 @[simp] lemma eval_nthDef (v) :
     Semiformula.Evalbm V v nthDef.val ↔ v 0 = nth (v 1) (v 2) := nth_defined.df.iff v
 
-instance nth_definable : 𝚺₁-Function₂ (nth : V → V → V) := Defined.to_definable _ nth_defined
+instance nth_definable : 𝚺₁-Function₂ (nth : V → V → V) := nth_defined.to_definable
 
-instance nth_definable' (Γ) : (Γ, m + 1)-Function₂ (nth : V → V → V) := .of_sigmaOne nth_definable _ _
+instance nth_definable' (Γ m) : Γ-[m + 1]-Function₂ (nth : V → V → V) := .of_sigmaOne nth_definable _ _
 
 end
 
@@ -380,8 +382,8 @@ variable (V)
 structure Construction {arity : ℕ} (β : Blueprint arity) where
   nil (param : Fin arity → V) : V
   cons (param : Fin arity → V) (x xs ih) : V
-  nil_defined : DefinedFunction nil β.nil
-  cons_defined : DefinedFunction (fun v ↦ cons (v ·.succ.succ.succ) (v 0) (v 1) (v 2)) β.cons
+  nil_defined : 𝚺₁.DefinedFunction nil β.nil
+  cons_defined : 𝚺₁.DefinedFunction (fun v ↦ cons (v ·.succ.succ.succ) (v 0) (v 1) (v 2)) β.cons
 
 variable {V}
 
@@ -427,13 +429,15 @@ def Graph : V → Prop := c.construction.Fixpoint param
 
 section
 
-lemma graph_defined : Arith.Defined (fun v ↦ c.Graph (v ·.succ) (v 0)) β.graphDef :=
+lemma graph_defined : 𝚺₁.Defined (fun v ↦ c.Graph (v ·.succ) (v 0)) β.graphDef :=
   c.construction.fixpoint_defined
 
-instance graph_definable : Arith.Definable ℒₒᵣ 𝚺₁ (fun v ↦ c.Graph (v ·.succ) (v 0)) := Defined.to_definable _ c.graph_defined
+instance graph_definable : 𝚺₁.Boldface (fun v ↦ c.Graph (v ·.succ) (v 0)) := c.graph_defined.to_definable
 
 instance graph_definable' (param) : 𝚺₁-Predicate (c.Graph param) := by
   simpa using HierarchySymbol.Boldface.retractiont (n := 1) c.graph_definable (#0 :> fun i ↦ &(param i))
+
+instance graph_definable'' (param) : 𝚺-[0 + 1]-Predicate (c.Graph param) := c.graph_definable' param
 
 end
 
@@ -507,7 +511,7 @@ lemma result_eq_of_graph {xs y : V} (h : c.Graph param ⟪xs, y⟫) : c.result p
 
 section
 
-lemma result_defined : Arith.DefinedFunction (fun v ↦ c.result (v ·.succ) (v 0)) β.resultDef := by
+lemma result_defined : 𝚺₁.DefinedFunction (fun v ↦ c.result (v ·.succ) (v 0)) β.resultDef := by
   intro v; simp [Blueprint.resultDef, c.graph_defined.df.iff]
   constructor
   · intro h; rw [h]; exact c.result_graph _ _
@@ -516,11 +520,11 @@ lemma result_defined : Arith.DefinedFunction (fun v ↦ c.result (v ·.succ) (v 
 @[simp] lemma eval_resultDef (v) :
     Semiformula.Evalbm V v β.resultDef.val ↔ v 0 = c.result (v ·.succ.succ) (v 1) := c.result_defined.df.iff v
 
-instance result_definable : Arith.DefinableFunction ℒₒᵣ 𝚺₁ (fun v ↦ c.result (v ·.succ) (v 0)) :=
-  Defined.to_definable _ c.result_defined
+instance result_definable : 𝚺₁.BoldfaceFunction (fun v ↦ c.result (v ·.succ) (v 0)) :=
+  c.result_defined.to_definable
 
 instance result_definable' (Γ m) :
-  Arith.DefinableFunction ℒₒᵣ (Γ, m + 1) (fun v ↦ c.result (v ·.succ) (v 0)) := .of_sigmaOne c.result_definable _ _
+    Γ-[m + 1].BoldfaceFunction (fun v ↦ c.result (v ·.succ) (v 0)) := .of_sigmaOne c.result_definable _ _
 
 end
 
@@ -567,9 +571,9 @@ lemma len_defined : 𝚺₁-Function₁ (len : V → V) via lenDef := constructi
 @[simp] lemma eval_lenDef (v) :
     Semiformula.Evalbm V v lenDef.val ↔ v 0 = len (v 1) := len_defined.df.iff v
 
-instance len_definable : 𝚺₁-Function₁ (len : V → V) := Defined.to_definable _ len_defined
+instance len_definable : 𝚺₁-Function₁ (len : V → V) := len_defined.to_definable
 
-instance len_definable' (Γ) : (Γ, m + 1)-Function₁ (len : V → V) := .of_sigmaOne len_definable _ _
+instance len_definable' (Γ m) : Γ-[m + 1]-Function₁ (len : V → V) := .of_sigmaOne len_definable _ _
 
 end
 
@@ -688,9 +692,9 @@ lemma takeLast_defined : 𝚺₁-Function₂ (takeLast : V → V → V) via take
 @[simp] lemma eval_takeLastDef (v) :
     Semiformula.Evalbm V v takeLastDef.val ↔ v 0 = takeLast (v 1) (v 2) := takeLast_defined.df.iff v
 
-instance takeLast_definable : 𝚺₁-Function₂ (takeLast : V → V → V) := Defined.to_definable _ takeLast_defined
+instance takeLast_definable : 𝚺₁-Function₂ (takeLast : V → V → V) := takeLast_defined.to_definable
 
-instance takeLast_definable' (Γ) : (Γ, m + 1)-Function₂ (takeLast : V → V → V) := .of_sigmaOne takeLast_definable _ _
+instance takeLast_definable' (Γ m) : Γ-[m + 1]-Function₂ (takeLast : V → V → V) := .of_sigmaOne takeLast_definable _ _
 
 end
 
@@ -775,9 +779,9 @@ lemma concat_defined : 𝚺₁-Function₂ (concat : V → V → V) via concatDe
 @[simp] lemma eval_concatDef (v) :
     Semiformula.Evalbm V v concatDef.val ↔ v 0 = concat (v 1) (v 2) := concat_defined.df.iff v
 
-instance concat_definable : 𝚺₁-Function₂ (concat : V → V → V) := Defined.to_definable _ concat_defined
+instance concat_definable : 𝚺₁-Function₂ (concat : V → V → V) := concat_defined.to_definable
 
-instance concat_definable' (Γ) : (Γ, m + 1)-Function₂ (concat : V → V → V) := .of_sigmaOne concat_definable _ _
+instance concat_definable' (Γ m) : Γ-[m + 1]-Function₂ (concat : V → V → V) := .of_sigmaOne concat_definable _ _
 
 end
 
@@ -850,9 +854,9 @@ lemma memVec_defined : 𝚫₁-Relation (MemVec : V → V → Prop) via memVecDe
 @[simp] lemma eval_memVecDef (v) :
     Semiformula.Evalbm V v memVecDef.val ↔ v 0 ∈ᵥ v 1 := memVec_defined.df.iff v
 
-instance memVec_definable : 𝚫₁-Relation (MemVec : V → V → Prop) := Defined.to_definable _ memVec_defined
+instance memVec_definable : 𝚫₁-Relation (MemVec : V → V → Prop) := memVec_defined.to_definable
 
-instance memVec_definable' (Γ) : (Γ, m + 1)-Relation (MemVec : V → V → Prop) := .of_deltaOne memVec_definable _ _
+instance memVec_definable' (Γ m) : Γ-[m + 1]-Relation (MemVec : V → V → Prop) := .of_deltaOne memVec_definable _ _
 
 end
 
@@ -881,9 +885,9 @@ def _root_.LO.FirstOrder.Arith.subsetVecDef : 𝚫₁.Semisentence 2 := .mkDelta
   (.mkPi “v w | ∀ x <⁺ v, !memVecDef.sigma x v → !memVecDef.pi x w” (by simp))
 
 lemma subsetVec_defined : 𝚫₁-Relation (SubsetVec : V → V → Prop) via subsetVecDef :=
-  ⟨by intro v; simp [subsetVecDef, HSemiformula.val_sigma, memVec_defined.proper.iff'],
+  ⟨by intro v; simp [subsetVecDef, HierarchySymbol.Semiformula.val_sigma, memVec_defined.proper.iff'],
    by intro v
-      simp [subsetVecDef, HSemiformula.val_sigma, memVec_defined.proper.iff']
+      simp [subsetVecDef, HierarchySymbol.Semiformula.val_sigma, memVec_defined.proper.iff']
       constructor
       · intro h x _; exact h x
       · intro h x hx; exact h x (le_of_memVec hx) hx⟩
@@ -891,9 +895,9 @@ lemma subsetVec_defined : 𝚫₁-Relation (SubsetVec : V → V → Prop) via su
 @[simp] lemma eval_subsetVecDef (v) :
     Semiformula.Evalbm V v subsetVecDef.val ↔ v 0 ⊆ᵥ v 1 := subsetVec_defined.df.iff v
 
-instance subsetVec_definable : 𝚫₁-Relation (SubsetVec : V → V → Prop) := Defined.to_definable _ subsetVec_defined
+instance subsetVec_definable : 𝚫₁-Relation (SubsetVec : V → V → Prop) := subsetVec_defined.to_definable
 
-instance subsetVec_definable' (Γ) : (Γ, m + 1)-Relation (SubsetVec : V → V → Prop) := .of_deltaOne subsetVec_definable _ _
+instance subsetVec_definable' (Γ m) : Γ-[m + 1]-Relation (SubsetVec : V → V → Prop) := .of_deltaOne subsetVec_definable _ _
 
 end
 
@@ -934,9 +938,9 @@ lemma repeatVec_defined : 𝚺₁-Function₂ (repeatVec : V → V → V) via re
 @[simp] lemma eval_repeatVec (v) :
     Semiformula.Evalbm V v repeatVecDef.val ↔ v 0 = repeatVec (v 1) (v 2) := repeatVec_defined.df.iff v
 
-instance repeatVec_definable : 𝚺₁-Function₂ (repeatVec : V → V → V) := Defined.to_definable _ repeatVec_defined
+instance repeatVec_definable : 𝚺₁-Function₂ (repeatVec : V → V → V) := repeatVec_defined.to_definable
 
-@[simp] instance repeatVec_definable' (Γ) : (Γ, m + 1)-Function₂ (repeatVec : V → V → V) :=
+@[simp] instance repeatVec_definable' (Γ) : Γ-[m + 1]-Function₂ (repeatVec : V → V → V) :=
   .of_sigmaOne repeatVec_definable _ _
 
 end
@@ -1004,9 +1008,9 @@ lemma vecToSet_defined : 𝚺₁-Function₁ (vecToSet : V → V) via vecToSetDe
 @[simp] lemma eval_vecToSetDef (v) :
     Semiformula.Evalbm V v vecToSetDef.val ↔ v 0 = vecToSet (v 1) := vecToSet_defined.df.iff v
 
-instance vecToSet_definable : 𝚺₁-Function₁ (vecToSet : V → V) := Defined.to_definable _ vecToSet_defined
+instance vecToSet_definable : 𝚺₁-Function₁ (vecToSet : V → V) := vecToSet_defined.to_definable
 
-instance vecToSet_definable' (Γ) : (Γ, m + 1)-Function₁ (vecToSet : V → V) := .of_sigmaOne vecToSet_definable _ _
+instance vecToSet_definable' (Γ) : Γ-[m + 1]-Function₁ (vecToSet : V → V) := .of_sigmaOne vecToSet_definable _ _
 
 end
 

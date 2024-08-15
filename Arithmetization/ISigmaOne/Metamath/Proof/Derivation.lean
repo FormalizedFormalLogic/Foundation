@@ -29,8 +29,8 @@ def _root_.LO.FirstOrder.Arith.LDef.formulaSetDef (pL : LDef) : 𝚫₁.Semisent
 variable (L)
 
 lemma formulaSet_defined : 𝚫₁-Predicate L.FormulaSet via pL.formulaSetDef :=
-  ⟨by intro v; simp [LDef.formulaSetDef, HSemiformula.val_sigma, (semiformula_defined L).df.iff, (semiformula_defined L).proper.iff'],
-   by intro v; simp [LDef.formulaSetDef, HSemiformula.val_sigma, (semiformula_defined L).df.iff]; rfl⟩
+  ⟨by intro v; simp [LDef.formulaSetDef, HierarchySymbol.Semiformula.val_sigma, (semiformula_defined L).df.iff, (semiformula_defined L).proper.iff'],
+   by intro v; simp [LDef.formulaSetDef, HierarchySymbol.Semiformula.val_sigma, (semiformula_defined L).df.iff]; rfl⟩
 
 @[simp] instance formulaSet_definable : 𝚫₁-Predicate L.FormulaSet := Defined.to_definable _ (formulaSet_defined L)
 
@@ -477,7 +477,7 @@ def construction : Fixpoint.Construction V (blueprint pT) where
   ⟨by
     intro v
     /-
-    simp? [blueprint, HSemiformula.val_sigma,
+    simp? [blueprint, HierarchySymbol.Semiformula.val_sigma,
       (formulaSet_defined L).df.iff, (formulaSet_defined L).proper.iff',
       (neg_defined L).df.iff,
       (free_defined L).df.iff,
@@ -487,8 +487,8 @@ def construction : Fixpoint.Construction V (blueprint pT) where
       T.mem_defined.df.iff, T.mem_defined.proper.iff']
     -/
 
-    simp only [Nat.succ_eq_add_one, Nat.reduceAdd, blueprint, Fin.isValue, HSemiformula.val_sigma,
-      HSemiformula.sigma_mkDelta, HSemiformula.val_mkSigma, LogicalConnective.HomClass.map_and,
+    simp only [Nat.succ_eq_add_one, Nat.reduceAdd, blueprint, Fin.isValue, HierarchySymbol.Semiformula.val_sigma,
+      HierarchySymbol.Semiformula.sigma_mkDelta, HierarchySymbol.Semiformula.val_mkSigma, LogicalConnective.HomClass.map_and,
       Semiformula.eval_ex, Semiformula.eval_substs, Matrix.comp_vecCons', Semiterm.val_bvar,
       Matrix.cons_val_zero, Matrix.cons_val_fin_one, Matrix.cons_val_one, Matrix.vecHead,
       Matrix.constant_eq_singleton, eval_fstIdxDef, (formulaSet_defined L).df.iff,
@@ -503,14 +503,14 @@ def construction : Fixpoint.Construction V (blueprint pT) where
       eval_qqAllDef, (free_defined L).df.iff, (setShift_defined L).df.iff, eval_exIntroDef,
       eval_qqExDef, (isSemiterm_defined L).df.iff, (substs₁_defined L).df.iff, eval_wkRuleDef,
       bitSubset_defined_iff, eval_shiftRuleDef, eval_cutRuleDef, eval_rootDef, T.mem_defined.df.iff,
-      LogicalConnective.Prop.or_eq, HSemiformula.pi_mkDelta, HSemiformula.val_mkPi,
+      LogicalConnective.Prop.or_eq, HierarchySymbol.Semiformula.pi_mkDelta, HierarchySymbol.Semiformula.val_mkPi,
       Semiformula.eval_all, LogicalConnective.HomClass.map_imply,
       (formulaSet_defined L).proper.iff', LogicalConnective.Prop.arrow_eq, forall_eq,
       (isSemiterm_defined L).proper.iff', Structure.Eq.eq, T.mem_defined.proper.iff'],
   by
     intro v
     /-
-    simp? [phi_iff, blueprint, HSemiformula.val_sigma,
+    simp? [phi_iff, blueprint, HierarchySymbol.Semiformula.val_sigma,
       (formulaSet_defined L).df.iff, (formulaSet_defined L).proper.iff',
       (neg_defined L).df.iff,
       (free_defined L).df.iff,
@@ -520,7 +520,7 @@ def construction : Fixpoint.Construction V (blueprint pT) where
       T.mem_defined.df.iff]
     -/
     simp only [Fin.isValue, phi_iff, Nat.succ_eq_add_one, Nat.reduceAdd, blueprint,
-      HSemiformula.val_sigma, HSemiformula.val_mkDelta, HSemiformula.val_mkSigma,
+      HierarchySymbol.Semiformula.val_sigma, HierarchySymbol.Semiformula.val_mkDelta, HierarchySymbol.Semiformula.val_mkSigma,
       LogicalConnective.HomClass.map_and, Semiformula.eval_ex, Semiformula.eval_substs,
       Matrix.comp_vecCons', Semiterm.val_bvar, Matrix.cons_val_zero, Matrix.cons_val_fin_one,
       Matrix.cons_val_one, Matrix.vecHead, Matrix.constant_eq_singleton, eval_fstIdxDef,
@@ -593,7 +593,7 @@ lemma derivation_defined : 𝚫₁-Predicate T.Derivation via pT.derivationDef :
 
 instance derivation_definable : 𝚫₁-Predicate T.Derivation := Defined.to_definable _ (derivation_defined T)
 
-@[simp] instance derivatin_definable' (Γ) : (Γ, m + 1)-Predicate T.Derivation :=
+@[simp] instance derivatin_definable' (Γ) : Γ-[m + 1]-Predicate T.Derivation :=
   .of_deltaOne (derivation_definable T) _ _
 
 def _root_.LO.FirstOrder.Arith.LDef.TDef.derivationOfDef {pL : LDef} (pT : pL.TDef) : 𝚫₁.Semisentence 2 := .mkDelta
@@ -601,19 +601,19 @@ def _root_.LO.FirstOrder.Arith.LDef.TDef.derivationOfDef {pL : LDef} (pT : pL.TD
   (.mkPi “d s | !fstIdxDef s d ∧ !pT.derivationDef.pi d” (by simp))
 
 lemma derivationOf_defined : 𝚫₁-Relation T.DerivationOf via pT.derivationOfDef :=
-  ⟨by intro v; simp [LDef.TDef.derivationOfDef, HSemiformula.val_sigma, (derivation_defined T).proper.iff'],
-   by intro v; simp [LDef.TDef.derivationOfDef, HSemiformula.val_sigma, (derivation_defined T).df.iff, eq_comm (b := fstIdx (v 0))]; rfl⟩
+  ⟨by intro v; simp [LDef.TDef.derivationOfDef, HierarchySymbol.Semiformula.val_sigma, (derivation_defined T).proper.iff'],
+   by intro v; simp [LDef.TDef.derivationOfDef, HierarchySymbol.Semiformula.val_sigma, (derivation_defined T).df.iff, eq_comm (b := fstIdx (v 0))]; rfl⟩
 
 instance derivationOf_definable : 𝚫₁-Relation T.DerivationOf := Defined.to_definable _ (derivationOf_defined T)
 
-@[simp] instance derivatinOf_definable' (Γ) : (Γ, m + 1)-Relation T.DerivationOf :=
+@[simp] instance derivatinOf_definable' (Γ) : Γ-[m + 1]-Relation T.DerivationOf :=
   .of_deltaOne (derivationOf_definable T) _ _
 
 def _root_.LO.FirstOrder.Arith.LDef.TDef.derivableDef {pL : LDef} (pT : pL.TDef) : 𝚺₁.Semisentence 1 := .mkSigma
   “s | ∃ d, !pT.derivationOfDef.sigma d s” (by simp)
 
 lemma Language.Theory.derivable_defined : 𝚺₁-Predicate T.Derivable via pT.derivableDef := by
-  intro v; simp [LDef.TDef.derivableDef, HSemiformula.val_sigma, (derivationOf_defined T).df.iff, Language.Theory.Derivable]
+  intro v; simp [LDef.TDef.derivableDef, HierarchySymbol.Semiformula.val_sigma, (derivationOf_defined T).df.iff, Language.Theory.Derivable]
 
 instance Language.Theory.derivable_definable : 𝚺₁-Predicate T.Derivable := Defined.to_definable _ (derivable_defined T)
 
