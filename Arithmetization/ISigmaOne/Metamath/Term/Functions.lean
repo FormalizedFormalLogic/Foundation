@@ -57,9 +57,9 @@ variable {n m w : V}
 
 section
 
-def _root_.LO.FirstOrder.Arith.LDef.termSubstDef (pL : LDef) : 𝚺₁-Semisentence 5 := (blueprint pL).result.rew <| Rew.substs ![#0, #1, #4, #2, #3]
+def _root_.LO.FirstOrder.Arith.LDef.termSubstDef (pL : LDef) : 𝚺₁.Semisentence 5 := (blueprint pL).result.rew <| Rew.substs ![#0, #1, #4, #2, #3]
 
-def _root_.LO.FirstOrder.Arith.LDef.termSubstVecDef (pL : LDef) : 𝚺₁-Semisentence 6 := (blueprint pL).resultVec.rew <| Rew.substs ![#0, #1, #2, #5, #3, #4]
+def _root_.LO.FirstOrder.Arith.LDef.termSubstVecDef (pL : LDef) : 𝚺₁.Semisentence 6 := (blueprint pL).resultVec.rew <| Rew.substs ![#0, #1, #2, #5, #3, #4]
 
 variable (L)
 
@@ -216,10 +216,10 @@ variable {n : V}
 
 section
 
-def _root_.LO.FirstOrder.Arith.LDef.termShiftDef (pL : LDef) : 𝚺₁-Semisentence 3 :=
+def _root_.LO.FirstOrder.Arith.LDef.termShiftDef (pL : LDef) : 𝚺₁.Semisentence 3 :=
   (blueprint pL).result
 
-def _root_.LO.FirstOrder.Arith.LDef.termShiftVecDef (pL : LDef) : 𝚺₁-Semisentence 4 := (blueprint pL).resultVec
+def _root_.LO.FirstOrder.Arith.LDef.termShiftVecDef (pL : LDef) : 𝚺₁.Semisentence 4 := (blueprint pL).resultVec
 
 variable (L)
 
@@ -333,10 +333,10 @@ variable {n : V}
 
 section
 
-def _root_.LO.FirstOrder.Arith.LDef.termBShiftDef (pL : LDef) : 𝚺₁-Semisentence 3 :=
+def _root_.LO.FirstOrder.Arith.LDef.termBShiftDef (pL : LDef) : 𝚺₁.Semisentence 3 :=
   (blueprint pL).result
 
-def _root_.LO.FirstOrder.Arith.LDef.termBShiftVecDef (pL : LDef) : 𝚺₁-Semisentence 4 := (blueprint pL).resultVec
+def _root_.LO.FirstOrder.Arith.LDef.termBShiftVecDef (pL : LDef) : 𝚺₁.Semisentence 4 := (blueprint pL).resultVec
 
 variable (L)
 
@@ -576,7 +576,7 @@ def numeralAux (x : V) : V := construction.result ![] x
 
 section
 
-def numeralAuxDef : 𝚺₁-Semisentence 2 := blueprint.resultDef
+def numeralAuxDef : 𝚺₁.Semisentence 2 := blueprint.resultDef
 
 lemma numeralAux_defined : 𝚺₁-Function₁ (numeralAux : V → V) via numeralAuxDef :=
   fun v ↦ by simp [construction.result_defined_iff, numeralAuxDef]; rfl
@@ -618,7 +618,7 @@ lemma numeral_succ_pos (pos : 0 < n) : numeral (n + 1 : V) = numeral n ^+ 𝟏 :
 
 section
 
-def _root_.LO.FirstOrder.Arith.numeralDef : 𝚺₁-Semisentence 2 := .mkSigma
+def _root_.LO.FirstOrder.Arith.numeralDef : 𝚺₁.Semisentence 2 := .mkSigma
   “t x |
     (x = 0 → t = !!(Semiterm.Operator.numeral ℒₒᵣ Formalized.zero)) ∧
     (x ≠ 0 → ∃ x', !subDef x' x 1 ∧ !numeralAuxDef t x')”

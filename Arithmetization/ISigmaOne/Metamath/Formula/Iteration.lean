@@ -41,7 +41,7 @@ scoped notation:65 "^⋀ " ps:66 => qqConj 0 ps
 
 section
 
-def _root_.LO.FirstOrder.Arith.qqConjDef : 𝚺₁-Semisentence 3 := blueprint.resultDef.rew (Rew.substs ![#0, #2, #1])
+def _root_.LO.FirstOrder.Arith.qqConjDef : 𝚺₁.Semisentence 3 := blueprint.resultDef.rew (Rew.substs ![#0, #2, #1])
 
 lemma qqConj_defined : 𝚺₁-Function₂ (qqConj : V → V → V) via qqConjDef := by
   intro v; simpa [qqConjDef] using construction.result_defined ![v 0, v 2, v 1]
@@ -113,7 +113,7 @@ scoped notation:65 "^⋁ " ps:66 => qqDisj 0 ps
 
 section
 
-def _root_.LO.FirstOrder.Arith.qqDisjDef : 𝚺₁-Semisentence 3 := blueprint.resultDef.rew (Rew.substs ![#0, #2, #1])
+def _root_.LO.FirstOrder.Arith.qqDisjDef : 𝚺₁.Semisentence 3 := blueprint.resultDef.rew (Rew.substs ![#0, #2, #1])
 
 lemma qqDisj_defined : 𝚺₁-Function₂ (qqDisj : V → V → V) via qqDisjDef := by
   intro v; simpa [qqDisjDef] using construction.result_defined ![v 0, v 2, v 1]
@@ -176,7 +176,7 @@ def substItr (n w p k : V) : V := construction.result ![n, w, p] k
 
 section
 
-def _root_.LO.FirstOrder.Arith.substItrDef : 𝚺₁-Semisentence 5 := blueprint.resultDef |>.rew (Rew.substs ![#0, #4, #1, #2, #3])
+def _root_.LO.FirstOrder.Arith.substItrDef : 𝚺₁.Semisentence 5 := blueprint.resultDef |>.rew (Rew.substs ![#0, #4, #1, #2, #3])
 
 lemma substItr_defined : 𝚺₁-Function₄ (substItr : V → V → V → V → V) via substItrDef :=
   fun v ↦ by simp [construction.result_defined_iff, substItrDef]; rfl
@@ -291,7 +291,7 @@ def qqVerums (n k : V) : V := ^⋀[n] repeatVec (^⊤[n]) k
 
 section
 
-def _root_.LO.FirstOrder.Arith.qqVerumsDef : 𝚺₁-Semisentence 3 := .mkSigma
+def _root_.LO.FirstOrder.Arith.qqVerumsDef : 𝚺₁.Semisentence 3 := .mkSigma
   “y n k | ∃ verum, !qqVerumDef verum n ∧ ∃ vs, !repeatVecDef vs verum k ∧ !qqConjDef y n vs” (by simp)
 
 lemma qqVerums_defined : 𝚺₁-Function₂ (qqVerums : V → V → V) via qqVerumsDef :=

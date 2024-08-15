@@ -22,7 +22,7 @@ variable {L}
 
 section
 
-def _root_.LO.FirstOrder.Arith.LDef.formulaSetDef (pL : LDef) : 𝚫₁-Semisentence 1 := .mkDelta
+def _root_.LO.FirstOrder.Arith.LDef.formulaSetDef (pL : LDef) : 𝚫₁.Semisentence 1 := .mkDelta
   (.mkSigma “s | ∀ p ∈' s, !pL.isSemiformulaDef.sigma 0 p” (by simp))
   (.mkPi “s | ∀ p ∈' s, !pL.isSemiformulaDef.pi 0 p” (by simp))
 
@@ -115,7 +115,7 @@ private lemma setShift_graph (t s : V) :
       rcases mem_setShift_iff.mp hy with ⟨x, hx, rfl⟩
       exact h₂ x hx
 
-def _root_.LO.FirstOrder.Arith.LDef.setShiftDef (pL : LDef) : 𝚺₁-Semisentence 2 := .mkSigma
+def _root_.LO.FirstOrder.Arith.LDef.setShiftDef (pL : LDef) : 𝚺₁.Semisentence 2 := .mkSigma
   “t s | (∀ y ∈' t, ∃ x ∈' s, !pL.shiftDef y x) ∧ (∀ x ∈' s, ∃ y, !pL.shiftDef y x ∧ y ∈ t)” (by simp)
 
 variable (L)
@@ -587,7 +587,7 @@ def Language.Theory.Provable (p : V) : Prop := T.Derivable {p}
 
 section
 
-def _root_.LO.FirstOrder.Arith.LDef.TDef.derivationDef {pL : LDef} (pT : pL.TDef) : 𝚫₁-Semisentence 1 := (blueprint pT).fixpointDefΔ₁
+def _root_.LO.FirstOrder.Arith.LDef.TDef.derivationDef {pL : LDef} (pT : pL.TDef) : 𝚫₁.Semisentence 1 := (blueprint pT).fixpointDefΔ₁
 
 lemma derivation_defined : 𝚫₁-Predicate T.Derivation via pT.derivationDef := (construction T).fixpoint_definedΔ₁
 
@@ -596,7 +596,7 @@ instance derivation_definable : 𝚫₁-Predicate T.Derivation := Defined.to_def
 @[simp] instance derivatin_definable' (Γ) : (Γ, m + 1)-Predicate T.Derivation :=
   .of_deltaOne (derivation_definable T) _ _
 
-def _root_.LO.FirstOrder.Arith.LDef.TDef.derivationOfDef {pL : LDef} (pT : pL.TDef) : 𝚫₁-Semisentence 2 := .mkDelta
+def _root_.LO.FirstOrder.Arith.LDef.TDef.derivationOfDef {pL : LDef} (pT : pL.TDef) : 𝚫₁.Semisentence 2 := .mkDelta
   (.mkSigma “d s | !fstIdxDef s d ∧ !pT.derivationDef.sigma d” (by simp))
   (.mkPi “d s | !fstIdxDef s d ∧ !pT.derivationDef.pi d” (by simp))
 
@@ -609,7 +609,7 @@ instance derivationOf_definable : 𝚫₁-Relation T.DerivationOf := Defined.to_
 @[simp] instance derivatinOf_definable' (Γ) : (Γ, m + 1)-Relation T.DerivationOf :=
   .of_deltaOne (derivationOf_definable T) _ _
 
-def _root_.LO.FirstOrder.Arith.LDef.TDef.derivableDef {pL : LDef} (pT : pL.TDef) : 𝚺₁-Semisentence 1 := .mkSigma
+def _root_.LO.FirstOrder.Arith.LDef.TDef.derivableDef {pL : LDef} (pT : pL.TDef) : 𝚺₁.Semisentence 1 := .mkSigma
   “s | ∃ d, !pT.derivationOfDef.sigma d s” (by simp)
 
 lemma Language.Theory.derivable_defined : 𝚺₁-Predicate T.Derivable via pT.derivableDef := by
@@ -620,7 +620,7 @@ instance Language.Theory.derivable_definable : 𝚺₁-Predicate T.Derivable := 
 /-- instance for definability tactic-/
 @[simp] instance Language.Theory.derivable_definable' : (𝚺, 0 + 1)-Predicate T.Derivable := derivable_definable T
 
-def _root_.LO.FirstOrder.Arith.LDef.TDef.prv {pL : LDef} (pT : pL.TDef) : 𝚺₁-Semisentence 1 := .mkSigma
+def _root_.LO.FirstOrder.Arith.LDef.TDef.prv {pL : LDef} (pT : pL.TDef) : 𝚺₁.Semisentence 1 := .mkSigma
   “p | ∃ s, !insertDef s p 0 ∧ !pT.derivableDef s” (by simp)
 
 protected lemma Language.Theory.provable_defined : 𝚺₁-Predicate T.Provable via pT.prv := by
@@ -802,10 +802,10 @@ lemma disjDistr (ps s : V) (d : T.Derivable (vecToSet ps ∪ s)) : T.Derivable (
       (∀ i < len ps - k, ps.[i] ∈ s') → T.Derivable (insert (^⋁ takeLast ps k) (s' ∪ s)) := by
     intro k hk
     induction k using induction_sigma1
-    · apply Definable.imp (by definability)
-      apply Definable.ball_le (by definability)
-      apply Definable.imp (by definability)
-      apply Definable.imp (by definability)
+    · apply HierarchySymbol.Boldface.imp (by definability)
+      apply HierarchySymbol.Boldface.ball_le (by definability)
+      apply HierarchySymbol.Boldface.imp (by definability)
+      apply HierarchySymbol.Boldface.imp (by definability)
       definability
     case zero =>
       intro s' _ ss hs'

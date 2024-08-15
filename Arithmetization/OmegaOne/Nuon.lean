@@ -6,31 +6,31 @@ open FirstOrder FirstOrder.Arith
 
 noncomputable section
 
-variable {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐈𝚺₀ + 𝛀₁]
+variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₀ + 𝛀₁]
 
 namespace Nuon
 
-@[simp] lemma llen_lt_len_hash_len (K : M) : ‖‖K‖‖ < ‖K # ‖K‖‖ := by
+@[simp] lemma llen_lt_len_hash_len (K : V) : ‖‖K‖‖ < ‖K # ‖K‖‖ := by
   simp [length_hash, lt_succ_iff_le]
   rcases zero_le ‖K‖ with (hK | pos)
   · simp [←hK]
   · exact le_mul_of_pos_left pos
 
-lemma mul_len_lt_len_hash {i I L : M} (hi : i ≤ ‖I‖) : i * ‖L‖ < ‖I # L‖ := by
+lemma mul_len_lt_len_hash {i I L : V} (hi : i ≤ ‖I‖) : i * ‖L‖ < ‖I # L‖ := by
   simp [length_hash, lt_succ_iff_le]; exact mul_le_mul_right' hi ‖L‖
 
-lemma mul_len_lt_len_hash' {i K z : M} (hi : i ≤ ‖z‖) : i * ‖‖K‖‖ < ‖z # ‖K‖‖ := by
+lemma mul_len_lt_len_hash' {i K z : V} (hi : i ≤ ‖z‖) : i * ‖‖K‖‖ < ‖z # ‖K‖‖ := by
   simp [length_hash, lt_succ_iff_le]; exact mul_le_mul_right' hi ‖‖K‖‖
 
-def ext (L S i : M) : M := S / bexp S (i * ‖L‖) % (L # 1)
+def ext (L S i : V) : V := S / bexp S (i * ‖L‖) % (L # 1)
 
 local notation S "{" L "}[" i "]" => ext L S i
 
-lemma ext_eq_zero_of_lt {L S i : M} (h : ‖S‖ ≤ i * ‖L‖) : S{L}[i] = 0 := by simp [ext, bexp_eq_zero_of_le h]
+lemma ext_eq_zero_of_lt {L S i : V} (h : ‖S‖ ≤ i * ‖L‖) : S{L}[i] = 0 := by simp [ext, bexp_eq_zero_of_le h]
 
-@[simp] lemma ext_le_self (L S i : M) : S{L}[i] ≤ S := le_trans (mod_le _ _) (by simp [ext])
+@[simp] lemma ext_le_self (L S i : V) : S{L}[i] ≤ S := le_trans (mod_le _ _) (by simp [ext])
 
-lemma ext_graph_aux (z S L i : M) : z = S{L}[i] ↔ (‖S‖ ≤ i * ‖L‖ → z = 0) ∧ (i * ‖L‖ < ‖S‖ → ∃ b ≤ S, Exponential (i * ‖L‖) b ∧ z = S / b % (L # 1)) := by
+lemma ext_graph_aux (z S L i : V) : z = S{L}[i] ↔ (‖S‖ ≤ i * ‖L‖ → z = 0) ∧ (i * ‖L‖ < ‖S‖ → ∃ b ≤ S, Exponential (i * ‖L‖) b ∧ z = S / b % (L # 1)) := by
   rcases show ‖S‖ ≤ i * ‖L‖ ∨ i * ‖L‖ < ‖S‖ from le_or_lt _ _ with (le | lt)
   · simp [ext_eq_zero_of_lt le, le, not_lt.mpr le]
   · simp [lt, not_le.mpr lt, ext]
@@ -40,7 +40,7 @@ lemma ext_graph_aux (z S L i : M) : z = S{L}[i] ↔ (‖S‖ ≤ i * ‖L‖ →
     · rintro ⟨b, _, H, rfl⟩
       rcases H.uniq (exp_bexp_of_lt lt); rfl
 
-lemma ext_graph (z S L i : M) : z = S{L}[i] ↔
+lemma ext_graph (z S L i : V) : z = S{L}[i] ↔
     ∃ lS ≤ S, lS = ‖S‖ ∧ ∃ lL ≤ L, lL = ‖L‖ ∧
       (lS ≤ i * lL → z = 0) ∧
       (i * lL < lS →
@@ -76,24 +76,24 @@ def extDef : 𝚺₀.Semisentence 4 := .mkSigma
 
 @[simp] lemma cons_app_nine {n : ℕ} (a : α) (s : Fin n.succ.succ.succ.succ.succ.succ.succ.succ.succ → α) : (a :> s) 9 = s 8 := rfl
 
-lemma ext_defined : 𝚺₀-Function₃ (ext : M → M → M → M) via extDef := by
+lemma ext_defined : 𝚺₀-Function₃ (ext : V → V → V → V) via extDef := by
   intro v; simp [extDef, length_defined.df.iff, Exponential.defined.df.iff,
     div_defined.df.iff, rem_defined.df.iff, lt_succ_iff_le, ext_graph, numeral_eq_natCast]
 
-instance ext_Definable : DefinableFunction₃ ℒₒᵣ 𝚺₀ (ext : M → M → M → M) := Defined.to_definable₀ _ ext_defined
+instance ext_Definable : 𝚺₀-Function₃ (ext : V → V → V → V) := ext_defined.to_definable
 
-instance : Bounded₃ ℒₒᵣ (ext : M → M → M → M) := ⟨#1, λ _ ↦ by simp⟩
+instance : Bounded₃ (ext : V → V → V → V) := ⟨#1, λ _ ↦ by simp⟩
 
-@[simp] lemma ext_zero (L i : M) : 0{L}[i] = 0 := by simp [ext]
+@[simp] lemma ext_zero (L i : V) : 0{L}[i] = 0 := by simp [ext]
 
-lemma ext_zero_eq_self_of_le {L S : M} (h : ‖S‖ ≤ ‖L‖) : S{L}[0] = S := by
+lemma ext_zero_eq_self_of_le {L S : V} (h : ‖S‖ ≤ ‖L‖) : S{L}[0] = S := by
   rcases zero_le S with (rfl | pos)
   · simp [ext]
   · simp [ext]
     have : bexp S 0 = 1 := (exp_bexp_of_lt (show 0 < ‖S‖ from by simp [pos])).zero_uniq
     simp [this, lt_hash_one_iff.mpr h]
 
-lemma ext_eq_of_ge {L S S' i : M} (h : S ≤ S') : S / bexp S' (i * ‖L‖) % (L # 1) = S{L}[i] := by
+lemma ext_eq_of_ge {L S S' i : V} (h : S ≤ S') : S / bexp S' (i * ‖L‖) % (L # 1) = S{L}[i] := by
   rcases show i * ‖L‖ < ‖S‖ ∨ ‖S‖ ≤ i * ‖L‖ from lt_or_ge (i * ‖L‖) ‖S‖ with (lt | le)
   · unfold ext; congr 2; exact bexp_eq_of_lt_length (lt_of_lt_of_le lt $ length_monotone h) lt
   · simp [ext_eq_zero_of_lt le]
@@ -102,17 +102,17 @@ lemma ext_eq_of_ge {L S S' i : M} (h : S ≤ S') : S / bexp S' (i * ‖L‖) % (
       simp [this]
     · simp [bexp_eq_zero_of_le le']
 
-lemma ext_eq_of_gt {L S S' i : M} (h : i * ‖L‖ < ‖S'‖) : S / bexp S' (i * ‖L‖) % (L # 1) = S{L}[i] := by
+lemma ext_eq_of_gt {L S S' i : V} (h : i * ‖L‖ < ‖S'‖) : S / bexp S' (i * ‖L‖) % (L # 1) = S{L}[i] := by
   rcases show i * ‖L‖ < ‖S‖ ∨ ‖S‖ ≤ i * ‖L‖ from lt_or_ge (i * ‖L‖) ‖S‖ with (lt | le)
   · unfold ext; congr 2; exact bexp_eq_of_lt_length h lt
   · simp [ext_eq_zero_of_lt le]
     have : S < bexp S' (i * ‖L‖) := ((exp_bexp_of_lt h).lt_iff_len_le).mpr le
     simp [this]
 
-lemma ext_eq_hash_of_le {L S i : M} (h : i ≤ ‖I‖) : S / bexp (I # L) (i * ‖L‖) % (L # 1) = S{L}[i] :=
+lemma ext_eq_hash_of_le {L S i : V} (h : i ≤ ‖I‖) : S / bexp (I # L) (i * ‖L‖) % (L # 1) = S{L}[i] :=
   ext_eq_of_gt (mul_len_lt_len_hash h)
 
-lemma ext_add₁_pow2 {L i S₁ S₂ p : M} (pp : Pow2 p) (h : (i + 1) * ‖L‖ < ‖p‖) :
+lemma ext_add₁_pow2 {L i S₁ S₂ p : V} (pp : Pow2 p) (h : (i + 1) * ‖L‖ < ‖p‖) :
     (S₁ + S₂ * p){L}[i] = S₁{L}[i] := by
   rcases zero_le S₂ with (rfl | pos₂)
   · simp
@@ -133,12 +133,12 @@ lemma ext_add₁_pow2 {L i S₁ S₂ p : M} (pp : Pow2 p) (h : (i + 1) * ‖L‖
     _                   = S₁ / bexp (S₁ + S₂ * p) (i * ‖L‖) % L # 1                    := by simp [mul_assoc]
     _                   = S₁{L}[i]                                                     := ext_eq_of_ge le_self_add
 
-lemma ext_add₁_bexp {L i j S₁ S₂ : M} (hi : i ≤ ‖I‖) (hij : j < i) :
+lemma ext_add₁_bexp {L i j S₁ S₂ : V} (hi : i ≤ ‖I‖) (hij : j < i) :
     (S₁ + S₂ * bexp (I # L) (i * ‖L‖)){L}[j] = S₁{L}[j] :=
   ext_add₁_pow2 (bexp_pow2 $ mul_len_lt_len_hash hi)
     (by rw [len_bexp (mul_len_lt_len_hash hi), lt_succ_iff_le]; exact mul_le_mul_right (succ_le_iff_lt.mpr hij))
 
-lemma ext_add₂_bexp {I i j S₁ S₂ : M} (hij : i + j ≤ ‖I‖) (hS₁ : ‖S₁‖ ≤ i * ‖L‖) :
+lemma ext_add₂_bexp {I i j S₁ S₂ : V} (hij : i + j ≤ ‖I‖) (hS₁ : ‖S₁‖ ≤ i * ‖L‖) :
     (S₁ + S₂ * bexp (I # L) (i * ‖L‖)){L}[i + j] = S₂{L}[j] := by
   have hie : Exponential (i * ‖L‖) (bexp (I # L) (i * ‖L‖)) := exp_bexp_of_lt (mul_len_lt_len_hash $ le_trans le_self_add hij)
   calc  (S₁ + S₂ * bexp (I # L) (i * ‖L‖)){L}[i + j]
@@ -149,18 +149,18 @@ lemma ext_add₂_bexp {I i j S₁ S₂ : M} (hij : i + j ≤ ‖I‖) (hS₁ : �
       congr 2; rw [div_add_mul_self, div_eq_zero_of_lt] <;> simp [hie.lt_iff_len_le.mpr hS₁, hie.range_pos]
     _ = S₂{L}[j]                                                                                       := ext_eq_hash_of_le (le_trans le_add_self hij)
 
-def append (I L S i X : M) : M := S % bexp (I # L) (i * ‖L‖) + X * bexp (I # L) (i * ‖L‖)
+def append (I L S i X : V) : V := S % bexp (I # L) (i * ‖L‖) + X * bexp (I # L) (i * ‖L‖)
 
-lemma append_nil (I L S i : M) : append I L S i 0 = S % bexp (I # L) (i * ‖L‖) := by simp [append]
+lemma append_nil (I L S i : V) : append I L S i 0 = S % bexp (I # L) (i * ‖L‖) := by simp [append]
 
-lemma len_append (I L S : M) {i X} (hi : i ≤ ‖I‖) (hX : 0 < X) : ‖append I L S i X‖ = ‖X‖ + i * ‖L‖ := calc
+lemma len_append (I L S : V) {i X} (hi : i ≤ ‖I‖) (hX : 0 < X) : ‖append I L S i X‖ = ‖X‖ + i * ‖L‖ := calc
   ‖append I L S i X‖ = ‖X * bexp (I # L) (i * ‖L‖) + S % bexp (I # L) (i * ‖L‖)‖ := by simp [append, add_comm]
   _                  = ‖X‖ + log (bexp (I # L) (i * ‖L‖))                        := length_mul_pow2_add_of_lt hX
                                                                                       (bexp_pow2 $ mul_len_lt_len_hash hi)
                                                                                       (mod_lt _ $ bexp_pos $ mul_len_lt_len_hash hi)
   _                  = ‖X‖ + i * ‖L‖                                             := by simp [log_bexp (mul_len_lt_len_hash hi)]
 
-lemma append_lt_hash (I L S : M) {i X} (hi : i < ‖I‖) (hX : ‖X‖ ≤ ‖L‖) : append I L S i X < I # L := by
+lemma append_lt_hash (I L S : V) {i X} (hi : i < ‖I‖) (hX : ‖X‖ ≤ ‖L‖) : append I L S i X < I # L := by
   rcases zero_le X with (rfl | pos)
   · simp [append_nil]
     exact lt_of_lt_of_le (mod_lt _ (bexp_pos $ mul_len_lt_len_hash $ le_of_lt hi)) (by simp)
@@ -169,7 +169,7 @@ lemma append_lt_hash (I L S : M) {i X} (hi : i < ‖I‖) (hX : ‖X‖ ≤ ‖L
       ‖X‖ + i * ‖L‖ ≤ (i + 1) * ‖L‖ := by simp [add_mul, add_comm (i * ‖L‖), hX]
       _             ≤ ‖I‖ * ‖L‖     := mul_le_mul_right (succ_le_iff_lt.mpr hi)
 
-lemma append_lt_sq_hash (I L S : M) {i X} (hi : i ≤ ‖I‖) (hX : ‖X‖ ≤ ‖L‖) (Ipos : 0 < I) : append I L S i X < (I # L)^2 := by
+lemma append_lt_sq_hash (I L S : V) {i X} (hi : i ≤ ‖I‖) (hX : ‖X‖ ≤ ‖L‖) (Ipos : 0 < I) : append I L S i X < (I # L)^2 := by
   rcases hi with (rfl | hi)
   · calc
       append I L S ‖I‖ X = S % I # L + X * I # L := by simp [append, bexp_eq_hash]
@@ -178,14 +178,14 @@ lemma append_lt_sq_hash (I L S : M) {i X} (hi : i ≤ ‖I‖) (hX : ‖X‖ ≤
       _                  ≤ (I # L) ^ 2           := by simp [sq, hash_comm L 1]; exact hash_monotone (pos_iff_one_le.mp Ipos) (by rfl)
   · exact lt_of_lt_of_le (append_lt_hash I L S hi hX) (by simp)
 
-lemma ext_append_last (I L S : M) {i X} (hi : i ≤ ‖I‖) (hX : ‖X‖ ≤ ‖L‖) : (append I L S i X){L}[i] = X := calc
+lemma ext_append_last (I L S : V) {i X} (hi : i ≤ ‖I‖) (hX : ‖X‖ ≤ ‖L‖) : (append I L S i X){L}[i] = X := calc
   (append I L S i X){L}[i] = (S % bexp (I # L) (i * ‖L‖) + X * bexp (I # L) (i * ‖L‖)){L}[i + 0] := by simp [append]
   _                        =  X{L}[0]                                                            := ext_add₂_bexp (by simpa using hi)
                                                                                                       ((exp_bexp_of_lt (mul_len_lt_len_hash hi)).lt_iff_len_le.mp
                                                                                                         (mod_lt _ $ bexp_pos $ mul_len_lt_len_hash hi))
   _                        =  X                                                                  := ext_zero_eq_self_of_le hX
 
-lemma ext_append_lt (I L S : M) {i j X} (hi : i ≤ ‖I‖) (hij : j < i) :
+lemma ext_append_lt (I L S : V) {i j X} (hi : i ≤ ‖I‖) (hij : j < i) :
     (append I L S i X){L}[j] = S{L}[j] := calc
   (append I L S i X){L}[j] = (S % bexp (I # L) (i * ‖L‖) + X * bexp (I # L) (i * ‖L‖)){L}[j] := rfl
   _                        = (S % bexp (I # L) (i * ‖L‖)){L}[j]                              := ext_add₁_bexp hi hij
@@ -194,24 +194,24 @@ lemma ext_append_lt (I L S : M) {i j X} (hi : i ≤ ‖I‖) (hij : j < i) :
 
 section
 
-variable {L A : M}
+variable {L A : V}
 
-def IsSegment (L A start intv S : M) : Prop := ∀ i < intv, S{L}[i + 1] = S{L}[i] + fbit A (start + i)
+def IsSegment (L A start intv S : V) : Prop := ∀ i < intv, S{L}[i + 1] = S{L}[i] + fbit A (start + i)
 
-def Segment (U L A start intv nₛ nₑ : M) : Prop := ∃ S < U, IsSegment L A start intv S ∧ S{L}[0] = nₛ ∧ S{L}[intv] = nₑ
+def Segment (U L A start intv nₛ nₑ : V) : Prop := ∃ S < U, IsSegment L A start intv S ∧ S{L}[0] = nₛ ∧ S{L}[intv] = nₑ
 
-def IsSeries (U I L A iter T : M) : Prop := ∀ l < iter, Segment U L A (‖I‖ * l) ‖I‖ (T{L}[l]) (T{L}[l + 1])
+def IsSeries (U I L A iter T : V) : Prop := ∀ l < iter, Segment U L A (‖I‖ * l) ‖I‖ (T{L}[l]) (T{L}[l + 1])
 
-def Series (U I L A iter n : M) : Prop := ∃ T < U, IsSeries U I L A iter T ∧ T{L}[0] = 0 ∧ T{L}[iter] = n
+def Series (U I L A iter n : V) : Prop := ∃ T < U, IsSeries U I L A iter T ∧ T{L}[0] = 0 ∧ T{L}[iter] = n
 
-def SeriesSegment (U I L A k n : M) : Prop := ∃ nₖ ≤ n, Series U I L A (k / ‖I‖) nₖ ∧ Segment U L A (‖I‖ * (k / ‖I‖)) (k % ‖I‖) nₖ n
+def SeriesSegment (U I L A k n : V) : Prop := ∃ nₖ ≤ n, Series U I L A (k / ‖I‖) nₖ ∧ Segment U L A (‖I‖ * (k / ‖I‖)) (k % ‖I‖) nₖ n
 
-lemma SeriesSegment.series {U I L A k n : M} (H : SeriesSegment U I L A k n) :
+lemma SeriesSegment.series {U I L A k n : V} (H : SeriesSegment U I L A k n) :
     ∃ T S, IsSeries U I L A (k / ‖I‖) T ∧ IsSegment L A (‖I‖ * (k / ‖I‖)) (k % ‖I‖) S ∧ T{L}[0] = 0 ∧ T{L}[k / ‖I‖] = S{L}[0] ∧ S{L}[k % ‖I‖] = n := by
   rcases H with ⟨_, _, ⟨T, _, hT, hTₛ, hTₑ⟩, ⟨S, _, hS, rfl, rfl⟩⟩
   exact ⟨T, S, hT, hS, hTₛ, hTₑ, rfl⟩
 
-lemma IsSegment.le_add {L A start intv S : M} (H : IsSegment L A start intv S) : ∀ i ≤ intv, S{L}[i] ≤ S{L}[0] + i := by
+lemma IsSegment.le_add {L A start intv S : V} (H : IsSegment L A start intv S) : ∀ i ≤ intv, S{L}[i] ≤ S{L}[0] + i := by
   intro i
   induction i using induction_sigma0
   · definability
@@ -224,16 +224,16 @@ lemma IsSegment.le_add {L A start intv S : M} (H : IsSegment L A start intv S) :
       _           ≤ S{L}[i] + 1                  := by simp
       _           ≤ S{L}[0] + (i + 1)            := by simp [←add_assoc, IH]
 
--- lemma Segment.refl (U L A start n : M) (hU : n < U) (hn : ‖n‖ ≤ ‖L‖) : Segment U L A start 0 n n :=
+-- lemma Segment.refl (U L A start n : V) (hU : n < U) (hn : ‖n‖ ≤ ‖L‖) : Segment U L A start 0 n n :=
 --   ⟨n, hU, by intro; simp, ext_zero_eq_self_of_le hn, ext_zero_eq_self_of_le hn⟩
 
-lemma Segment.refl (U L A start n : M) (hL : L # 1 ≤ U) (hn : ‖n‖ ≤ ‖L‖) : Segment U L A start 0 n n :=
+lemma Segment.refl (U L A start n : V) (hL : L # 1 ≤ U) (hn : ‖n‖ ≤ ‖L‖) : Segment U L A start 0 n n :=
   ⟨n, lt_of_lt_of_le (lt_hash_one_iff.mpr hn) hL, by intro; simp, ext_zero_eq_self_of_le hn, ext_zero_eq_self_of_le hn⟩
 
-lemma Segment.le_add {U L A start intv nₛ nₑ : M} (H : Segment U L A start intv nₛ nₑ) : nₑ ≤ nₛ + intv := by
+lemma Segment.le_add {U L A start intv nₛ nₑ : V} (H : Segment U L A start intv nₛ nₑ) : nₑ ≤ nₛ + intv := by
   rcases H with ⟨S, _, hS, rfl, rfl⟩; exact hS.le_add intv (by rfl)
 
-lemma Segment.uniq {U L A start intv nₛ nₑ₁ nₑ₂ : M}
+lemma Segment.uniq {U L A start intv nₛ nₑ₁ nₑ₂ : V}
     (H₁ : Segment U L A start intv nₛ nₑ₁) (H₂ : Segment U L A start intv nₛ nₑ₂) : nₑ₁ = nₑ₂ := by
   rcases H₁ with ⟨S₁, _, HS₁, Hₛ, rfl⟩
   rcases H₂ with ⟨S₂, _, HS₂, rfl, rfl⟩
@@ -247,7 +247,7 @@ lemma Segment.uniq {U L A start intv nₛ nₑ₁ nₑ₂ : M}
     have h₂ : S₂{L}[i + 1] = S₂{L}[i] + fbit A (start + i) := HS₂ i (lt_iff_succ_le.mpr hi)
     simp [IH (le_trans (by simp) hi), h₁, h₂]
 
-lemma IsSeries.le_add {U I L A iter T : M} (H : IsSeries U I L A iter T) : ∀ l ≤ iter, T{L}[l] ≤ T{L}[0] + ‖I‖ * l := by
+lemma IsSeries.le_add {U I L A iter T : V} (H : IsSeries U I L A iter T) : ∀ l ≤ iter, T{L}[l] ≤ T{L}[0] + ‖I‖ * l := by
   intro l
   induction l using induction_sigma0
   · definability
@@ -259,10 +259,10 @@ lemma IsSeries.le_add {U I L A iter T : M} (H : IsSeries U I L A iter T) : ∀ l
       T{L}[l + 1] ≤ T{L}[l] + ‖I‖           := (H l (succ_le_iff_lt.mp h)).le_add
       _           ≤ T{L}[0] + ‖I‖ * (l + 1) := by simpa [mul_add, ←add_assoc] using IH
 
-lemma Series.le_add {U I L A iter n : M} (H : Series U I L A iter n) : n ≤ ‖I‖ * iter := by
+lemma Series.le_add {U I L A iter n : V} (H : Series U I L A iter n) : n ≤ ‖I‖ * iter := by
   rcases H with ⟨T, _, hT, hzero, rfl⟩; simpa [hzero] using hT.le_add iter (by rfl)
 
-lemma Series.uniq {U I L A iter n₁ n₂ : M} (H₁ : Series U I L A iter n₁) (H₂ : Series U I L A iter n₂) : n₁ = n₂ := by
+lemma Series.uniq {U I L A iter n₁ n₂ : V} (H₁ : Series U I L A iter n₁) (H₂ : Series U I L A iter n₂) : n₁ = n₂ := by
   rcases H₁ with ⟨T₁, _, HT₁, Hₛ₁, rfl⟩
   rcases H₂ with ⟨T₂, _, HT₂, Hₛ₂, rfl⟩
   suffices ∀ i ≤ iter, T₁{L}[i] = T₂{L}[i] from this iter (by rfl)
@@ -276,7 +276,7 @@ lemma Series.uniq {U I L A iter n₁ n₂ : M} (H₁ : Series U I L A iter n₁)
     have h₂ : Segment U L A (‖I‖ * i) ‖I‖ (T₁{L}[i]) (T₂{L}[i + 1]) := by simpa [IH] using HT₂ i (lt_iff_succ_le.mpr hi)
     exact h₁.uniq h₂
 
-lemma SeriesSegment.le {U I L A k n : M} (H : SeriesSegment U I L A k n) :
+lemma SeriesSegment.le {U I L A k n : V} (H : SeriesSegment U I L A k n) :
     n ≤ k := by
   rcases H with ⟨nₖ, _, hT, hS⟩
   calc
@@ -284,22 +284,22 @@ lemma SeriesSegment.le {U I L A k n : M} (H : SeriesSegment U I L A k n) :
     _ ≤ ‖I‖ * (k / ‖I‖) + k % ‖I‖ := by simpa [mul_comm] using hT.le_add
     _ = k                         := div_add_mod k ‖I‖
 
-lemma SeriesSegment.initial {U I L A : M} (Upos : 0 < U) : SeriesSegment U I L A 0 0 :=
+lemma SeriesSegment.initial {U I L A : V} (Upos : 0 < U) : SeriesSegment U I L A 0 0 :=
   ⟨0, by rfl, ⟨0, Upos, by simp [IsSeries]⟩, ⟨0, Upos, by simp [IsSegment]⟩⟩
 
-lemma SeriesSegment.zero {U I L k : M} (Upos : 0 < U) : SeriesSegment U I L 0 k 0 :=
+lemma SeriesSegment.zero {U I L k : V} (Upos : 0 < U) : SeriesSegment U I L 0 k 0 :=
   ⟨0, by rfl, ⟨0, Upos, fun _ _ ↦ ⟨0, Upos, fun _ _ ↦ by simp, by simp⟩, by simp⟩, ⟨0, Upos, fun _ _ ↦ by simp, by simp⟩⟩
 
-lemma SeriesSegment.uniq {U I L A k n₁ n₂ : M} (H₁ : SeriesSegment U I L A k n₁) (H₂ : SeriesSegment U I L A k n₂) :
+lemma SeriesSegment.uniq {U I L A k n₁ n₂ : V} (H₁ : SeriesSegment U I L A k n₁) (H₂ : SeriesSegment U I L A k n₂) :
     n₁ = n₂ := by
   rcases H₁ with ⟨nₘ₁, _, hT₁, hS₁⟩
   rcases H₂ with ⟨nₘ₂, _, hT₂, hS₂⟩
   rcases show nₘ₁ = nₘ₂ from hT₁.uniq hT₂
   exact hS₁.uniq hS₂
 
-variable {U I L A : M} (hU : (I # L)^2 ≤ U) (hIL : ‖‖I‖^2‖ ≤ ‖L‖) (Ipos : 0 < I)
+variable {U I L A : V} (hU : (I # L)^2 ≤ U) (hIL : ‖‖I‖^2‖ ≤ ‖L‖) (Ipos : 0 < I)
 
-lemma Segment.succ {start intv nₛ nₑ : M} (H : Segment U L A start intv nₛ nₑ) (hintv : intv < ‖I‖) (hnₛ : ‖nₛ + ‖I‖‖ ≤ ‖L‖) :
+lemma Segment.succ {start intv nₛ nₑ : V} (H : Segment U L A start intv nₛ nₑ) (hintv : intv < ‖I‖) (hnₛ : ‖nₛ + ‖I‖‖ ≤ ‖L‖) :
     Segment U L A start (intv + 1) nₛ (nₑ + fbit A (start + intv)) := by
   rcases H with ⟨S, _, H, rfl, rfl⟩
   let S' := append I L S (intv + 1) (S{L}[intv] + fbit A (start + intv))
@@ -325,7 +325,7 @@ lemma Segment.succ {start intv nₛ nₑ : M} (H : Segment U L A start intv nₛ
       ext_append_lt I L S (succ_le_iff_lt.mpr hintv) (by simp),
       ext_append_last I L S (succ_le_iff_lt.mpr hintv) le_len_L ⟩
 
-lemma Series.succ {iter n n' : M} (HT : Series U I L A iter n) (HS : Segment U L A (‖I‖ * iter) ‖I‖ n n') (hiter : iter < ‖I‖) :
+lemma Series.succ {iter n n' : V} (HT : Series U I L A iter n) (HS : Segment U L A (‖I‖ * iter) ‖I‖ n n') (hiter : iter < ‖I‖) :
     Series U I L A (iter + 1) n' := by
   have Hn : n ≤ ‖I‖ * iter := HT.le_add
   rcases HT with ⟨T, _, HT, Tₛ, rfl⟩
@@ -351,7 +351,7 @@ lemma Series.succ {iter n n' : M} (HT : Series U I L A iter n) (HS : Segment U L
     Eq.trans (ext_append_lt I L T (succ_le_iff_lt.mpr hiter) (by simp)) Tₛ,
     hTlast ⟩
 
-lemma div_mod_succ (a b : M) : ((a + 1) / b = a / b + 1 ∧ (a + 1) % b = 0 ∧ a % b + 1 = b) ∨ ((a + 1) / b = a / b ∧ (a + 1) % b = a % b + 1) := by
+lemma div_mod_succ (a b : V) : ((a + 1) / b = a / b + 1 ∧ (a + 1) % b = 0 ∧ a % b + 1 = b) ∨ ((a + 1) / b = a / b ∧ (a + 1) % b = a % b + 1) := by
   rcases zero_le b with (rfl | pos)
   · simp
   have : a % b + 1 ≤ b := lt_iff_succ_le.mp <| mod_lt a (by simp [pos])
@@ -369,7 +369,7 @@ lemma div_mod_succ (a b : M) : ((a + 1) / b = a / b + 1 ∧ (a + 1) % b = 0 ∧ 
     · rw [←this, mul_comm b, mod_mul_add _ _ pos]
       simp [ltb]
 
-lemma SeriesSegment.succ {k n : M} (hk : k < ‖I‖^2) (H : SeriesSegment U I L A k n) :
+lemma SeriesSegment.succ {k n : V} (hk : k < ‖I‖^2) (H : SeriesSegment U I L A k n) :
     SeriesSegment U I L A (k + 1) (n + fbit A k) := by
   have hhk : (k + 1)/‖I‖ ≤ ‖I‖ := by simpa using div_monotone (succ_le_iff_lt.mpr hk) ‖I‖
   have hnk : n ≤ k := H.le
@@ -413,24 +413,24 @@ section
   4. $\| A \| < \|I\|^2$
 -/
 
-def polyI (A : M) : M := bexp (2 * A) (√‖A‖)
+def polyI (A : V) : V := bexp (2 * A) (√‖A‖)
 
-def polyL (A : M) : M := ‖polyI A‖ ^ 2
+def polyL (A : V) : V := ‖polyI A‖ ^ 2
 
-def polyU (A : M) : M := (2 * A + 1) ^ 128
+def polyU (A : V) : V := (2 * A + 1) ^ 128
 
-lemma len_polyI {A : M} (pos : 0 < A) : ‖polyI A‖ = √‖A‖ + 1 :=
+lemma len_polyI {A : V} (pos : 0 < A) : ‖polyI A‖ = √‖A‖ + 1 :=
   len_bexp (show √‖A‖ < ‖2 * A‖ from by simp [length_two_mul_of_pos pos, lt_succ_iff_le])
 
-lemma polyI_le {A : M} (pos : 0 < A) : ‖A‖ < ‖polyI A‖ ^ 2 := by simp [len_polyI pos]
+lemma polyI_le {A : V} (pos : 0 < A) : ‖A‖ < ‖polyI A‖ ^ 2 := by simp [len_polyI pos]
 
-lemma two_add_two_eq_four : 2 + 2 = (4 : M) := by simp [←three_add_one_eq_four, ←two_add_one_eq_three, ←one_add_one_eq_two, add_assoc]
+lemma two_add_two_eq_four : 2 + 2 = (4 : V) := by simp [←three_add_one_eq_four, ←two_add_one_eq_three, ←one_add_one_eq_two, add_assoc]
 
-lemma four_mul_eq_two_mul_two_mul (a : M) : 4 * a = 2 * (2 * a) := by simp [←two_add_two_eq_four, add_mul, two_mul]
+lemma four_mul_eq_two_mul_two_mul (a : V) : 4 * a = 2 * (2 * a) := by simp [←two_add_two_eq_four, add_mul, two_mul]
 
-@[simp] lemma two_mul_sqrt_le_self (a : M) : 2 * √a ≤ a + 1 := le_trans (two_mul_le_sq_add_one (√a)) (by simp)
+@[simp] lemma two_mul_sqrt_le_self (a : V) : 2 * √a ≤ a + 1 := le_trans (two_mul_le_sq_add_one (√a)) (by simp)
 
-lemma four_mul_hash_self (a : M) : (4 * a) # (4 * a) ≤ (a # a) ^ 16 := calc
+lemma four_mul_hash_self (a : V) : (4 * a) # (4 * a) ≤ (a # a) ^ 16 := calc
   (4 * a) # (4 * a) ≤ ((4 * a) # (2 * a)) ^ 2 := by simp [four_mul_eq_two_mul_two_mul, hash_two_mul_le_sq_hash]
   _                 ≤ ((4 * a) # a) ^ 4       := by simp [pow_four_eq_sq_sq, hash_two_mul_le_sq_hash]
   _                 ≤ ((a # (2 * a)) ^ 2) ^ 4 := by rw [hash_comm (4 * a) a]
@@ -438,14 +438,14 @@ lemma four_mul_hash_self (a : M) : (4 * a) # (4 * a) ≤ (a # a) ^ 16 := calc
   _                 ≤ ((a # a) ^ 4) ^ 4       := by simp [pow_four_eq_sq_sq, hash_two_mul_le_sq_hash]
   _                 ≤ (a # a) ^ 16       := by simp [←pow_mul]
 
-@[simp] lemma pos_sq_iff {a : M} : 0 < √a ↔ 0 < a :=
+@[simp] lemma pos_sq_iff {a : V} : 0 < √a ↔ 0 < a :=
   ⟨fun h ↦ lt_of_lt_of_le h (by simp),
     by intro h; by_contra A; simp at A;
        simp [show a = 0 from by simpa [A] using sqrt_lt_sq a] at h⟩
 
-@[simp] lemma pow_four_le_pow_four {a b : M} : a ^ 4 ≤ b ^ 4 ↔ a ≤ b := by simp [pow_four_eq_sq_sq]
+@[simp] lemma pow_four_le_pow_four {a b : V} : a ^ 4 ≤ b ^ 4 ↔ a ≤ b := by simp [pow_four_eq_sq_sq]
 
-lemma bexp_four_mul {a a' x : M} (hx : 4 * x < ‖a‖) (hx' : x < ‖a'‖) :
+lemma bexp_four_mul {a a' x : V} (hx : 4 * x < ‖a‖) (hx' : x < ‖a'‖) :
     bexp a (4 * x) = (bexp a' x) ^ 4 := by
   rw [four_mul_eq_two_mul_two_mul, bexp_two_mul (a' := a), bexp_two_mul (a := a), pow_four_eq_sq_sq]
   · exact lt_of_le_of_lt (by simp [four_mul_eq_two_mul_two_mul]) hx
@@ -453,7 +453,7 @@ lemma bexp_four_mul {a a' x : M} (hx : 4 * x < ‖a‖) (hx' : x < ‖a'‖) :
   · simpa [four_mul_eq_two_mul_two_mul] using hx
   · exact lt_of_le_of_lt (by simp [four_mul_eq_two_mul_two_mul]) hx
 
-lemma polyI_hash_self_polybounded {A : M} (pos : 0 < A) : (polyI A) # (polyI A) ≤ (2 * A + 1) ^ 4 := calc
+lemma polyI_hash_self_polybounded {A : V} (pos : 0 < A) : (polyI A) # (polyI A) ≤ (2 * A + 1) ^ 4 := calc
   (polyI A) # (polyI A) = bexp ((polyI A) # (polyI A)) ((√‖A‖ + 1) ^ 2) := Eq.symm <| by simpa [sq, len_polyI pos] using bexp_eq_hash (polyI A) (polyI A)
   _                     ≤ bexp ((2 * A) # (2 * A)) ((2 * √‖A‖) ^ 2)     :=
     (bexp_monotone_le
@@ -470,18 +470,18 @@ lemma polyI_hash_self_polybounded {A : M} (pos : 0 < A) : (polyI A) # (polyI A) 
   _                     = (A # 1) ^ 4                                   := by congr 1; simpa using bexp_eq_hash A 1
   _                     ≤ (2 * A + 1) ^ 4                               := by simp
 
-lemma polyI_hash_polyL_polybounded {A : M} (pos : 0 < A) : (polyI A) # (polyL A) ≤ (2 * A + 1) ^ 64 := calc
+lemma polyI_hash_polyL_polybounded {A : V} (pos : 0 < A) : (polyI A) # (polyL A) ≤ (2 * A + 1) ^ 64 := calc
   (polyI A) # (polyL A) ≤ (polyI A) # (3 * polyI A)         := hash_monotone (by rfl) (by simp [polyL, sq_len_le_three_mul])
   _                     ≤ (4 * polyI A) # (4 * polyI A)     := hash_monotone (le_mul_of_pos_left $ by simp) (mul_le_mul_right $ by simp [←three_add_one_eq_four])
   _                     ≤ ((polyI A) # (polyI A)) ^ (4 * 4) := by simpa using four_mul_hash_self _
   _                     ≤ ((2 * A + 1) ^ 4) ^ (4 * 4)       := by simp only [pow_mul, pow_four_le_pow_four, polyI_hash_self_polybounded pos]
   _                     = (2 * A + 1) ^ 64         := by simp [←pow_mul]
 
-lemma sq_polyI_hash_polyL_polybounded {A : M} (pos : 0 < A) : ((polyI A) # (polyL A)) ^ 2 ≤ polyU A := calc
+lemma sq_polyI_hash_polyL_polybounded {A : V} (pos : 0 < A) : ((polyI A) # (polyL A)) ^ 2 ≤ polyU A := calc
   ((polyI A) # (polyL A)) ^ 2 ≤ ((2 * A + 1) ^ 64) ^ 2 := by simp [polyI_hash_polyL_polybounded pos]
   _                           = polyU A                         := by simp [polyU, ←pow_mul]
 
-def NuonAux (A k n : M) : Prop := SeriesSegment (polyU A) (polyI A) (polyL A) A k n
+def NuonAux (A k n : V) : Prop := SeriesSegment (polyU A) (polyI A) (polyL A) A k n
 
 def isSegmentDef : 𝚺₀.Semisentence 5 := .mkSigma
   “L A start intv S |
@@ -492,7 +492,7 @@ def isSegmentDef : 𝚺₀.Semisentence 5 := .mkSigma
         S_L_i_succ = S_L_i + fb”
   (by simp)
 
-lemma isSegmentDef_defined : Arith.Defined (M := M) (λ v ↦ IsSegment (v 0) (v 1) (v 2) (v 3) (v 4)) isSegmentDef := by
+lemma isSegmentDef_defined : 𝚺₀.Defined (V := V) (λ v ↦ IsSegment (v 0) (v 1) (v 2) (v 3) (v 4)) isSegmentDef := by
   intro v; simp [IsSegment, isSegmentDef, ext_defined.df.iff, fbit_defined.df.iff, lt_succ_iff_le, numeral_eq_natCast]
   apply forall₂_congr; intro x _
   constructor
@@ -502,7 +502,7 @@ lemma isSegmentDef_defined : Arith.Defined (M := M) (λ v ↦ IsSegment (v 0) (v
 def segmentDef : 𝚺₀.Semisentence 7 := .mkSigma
   “U L A start intv nₛ nₑ | ∃ S < U, !isSegmentDef L A start intv S ∧ !extDef nₛ L S 0 ∧ !extDef nₑ L S intv” (by simp)
 
-lemma segmentDef_defined : Arith.Defined (M := M) (λ v ↦ Segment (v 0) (v 1) (v 2) (v 3) (v 4) (v 5) (v 6)) segmentDef := by
+lemma segmentDef_defined : 𝚺₀.Defined (V := V) (λ v ↦ Segment (v 0) (v 1) (v 2) (v 3) (v 4) (v 5) (v 6)) segmentDef := by
   intro v; simp [Segment, segmentDef, ext_defined.df.iff, isSegmentDef_defined.df.iff, @Eq.comm _ (v 5), @Eq.comm _ (v 6)]
   rfl
 
@@ -514,15 +514,15 @@ def isSeriesDef : 𝚺₀.Semisentence 6 := .mkSigma
       ∃ y <⁺ T, !extDef y L T (l + 1) ∧
         !segmentDef U L A (lI * l) lI x y” (by simp)
 
-lemma bex_eq_le_iff {p : M → Prop} {b : M} :
+lemma bex_eq_le_iff {p : V → Prop} {b : V} :
     (∃ a ≤ z, a = b ∧ p a) ↔ (b ≤ z ∧ p b) :=
   ⟨by rintro ⟨a, hp, rfl, hr⟩; exact ⟨hp, hr⟩, by rintro ⟨hp, hr⟩; exact ⟨b, hp, rfl, hr⟩⟩
 
-lemma bex_eq_lt_iff {p : M → Prop} {b : M} :
+lemma bex_eq_lt_iff {p : V → Prop} {b : V} :
     (∃ a < z, a = b ∧ p a) ↔ (b < z ∧ p b) :=
   ⟨by rintro ⟨a, hp, rfl, hr⟩; exact ⟨hp, hr⟩, by rintro ⟨hp, hr⟩; exact ⟨b, hp, rfl, hr⟩⟩
 
-lemma isSerieDef_defined : Arith.Defined (M := M) (λ v ↦ IsSeries (v 0) (v 1) (v 2) (v 3) (v 4) (v 5)) isSeriesDef := by
+lemma isSerieDef_defined : 𝚺₀.Defined (V := V) (λ v ↦ IsSeries (v 0) (v 1) (v 2) (v 3) (v 4) (v 5)) isSeriesDef := by
   intro v; simp [IsSeries, isSeriesDef, length_defined.df.iff, ext_defined.df.iff, segmentDef_defined.df.iff, lt_succ_iff_le]
   apply forall₂_congr; intro x _
   rw [bex_eq_le_iff, bex_eq_le_iff, bex_eq_le_iff]
@@ -532,7 +532,7 @@ lemma isSerieDef_defined : Arith.Defined (M := M) (λ v ↦ IsSeries (v 0) (v 1)
 def seriesDef : 𝚺₀.Semisentence 6 := .mkSigma
   “U I L A iter n | ∃ T < U, !isSeriesDef U I L A iter T ∧ !extDef 0 L T 0 ∧ !extDef n L T iter” (by simp)
 
-lemma seriesDef_defined : Arith.Defined (M := M) (λ v ↦ Series (v 0) (v 1) (v 2) (v 3) (v 4) (v 5)) seriesDef := by
+lemma seriesDef_defined : 𝚺₀.Defined (V := V) (λ v ↦ Series (v 0) (v 1) (v 2) (v 3) (v 4) (v 5)) seriesDef := by
   intro v; simp [Series, seriesDef, isSerieDef_defined.df.iff, ext_defined.df.iff]
   apply exists_congr; intro T
   apply and_congr_right; intros
@@ -548,7 +548,7 @@ def seriesSegmentDef : 𝚺₀.Semisentence 6 := .mkSigma
       !seriesDef U I L A d nₖ ∧ !segmentDef U L A (l * d) r nₖ n”
   (by simp)
 
-lemma seriesSegmentDef_defined : Arith.Defined (M := M) (λ v ↦ SeriesSegment (v 0) (v 1) (v 2) (v 3) (v 4) (v 5)) seriesSegmentDef := by
+lemma seriesSegmentDef_defined : 𝚺₀.Defined (V := V) (λ v ↦ SeriesSegment (v 0) (v 1) (v 2) (v 3) (v 4) (v 5)) seriesSegmentDef := by
   intro v; simp [SeriesSegment, seriesSegmentDef,
     length_defined.df.iff, div_defined.df.iff, rem_defined.df.iff, seriesDef_defined.df.iff, segmentDef_defined.df.iff, lt_succ_iff_le]
   apply exists_congr; intro nₖ
@@ -563,31 +563,31 @@ def nuonAuxDef : 𝚺₀.Semisentence 3 := .mkSigma
     ∃ lg <⁺ g, !lengthDef lg g ∧
       !seriesSegmentDef ((2 * A + 1) ^' 128) g (lg ²) A k n” (by simp)
 
-lemma nuonAux_defined : 𝚺₀-Relation₃ (NuonAux : M → M → M → Prop) via nuonAuxDef := by
+lemma nuonAux_defined : 𝚺₀-Relation₃ (NuonAux : V → V → V → Prop) via nuonAuxDef := by
   intro v; simp [NuonAux, polyU, polyI, polyL, nuonAuxDef,
     length_defined.df.iff, sqrt_defined.df.iff, bexp_defined.df.iff, seriesSegmentDef_defined.df.iff, lt_succ_iff_le, numeral_eq_natCast]
   rw [bex_eq_le_iff, bex_eq_le_iff, bex_eq_le_iff, bex_eq_le_iff]; simp
 
-instance nuonAux_definable : DefinableRel₃ ℒₒᵣ 𝚺₀ (NuonAux : M → M → M → Prop) := Defined.to_definable _ nuonAux_defined
+instance nuonAux_definable : 𝚺₀-Relation₃ (NuonAux : V → V → V → Prop) := nuonAux_defined.to_definable
 
-instance : Bounded₃ ℒₒᵣ (ext : M → M → M → M) := ⟨#1, λ _ ↦ by simp⟩
+instance : Bounded₃ (ext : V → V → V → V) := ⟨#1, λ _ ↦ by simp⟩
 
-@[simp] lemma NuonAux.initial (A : M) : NuonAux A 0 0 := SeriesSegment.initial (by simp [polyU])
+@[simp] lemma NuonAux.initial (A : V) : NuonAux A 0 0 := SeriesSegment.initial (by simp [polyU])
 
-@[simp] lemma NuonAux.initial_iff (A n : M) : NuonAux A 0 n ↔ n = 0 := ⟨fun h ↦ h.uniq (NuonAux.initial A), by rintro rfl; simp⟩
+@[simp] lemma NuonAux.initial_iff (A n : V) : NuonAux A 0 n ↔ n = 0 := ⟨fun h ↦ h.uniq (NuonAux.initial A), by rintro rfl; simp⟩
 
-@[simp] lemma NuonAux.zero (k : M) : NuonAux 0 k 0 := SeriesSegment.zero (by simp [polyU])
+@[simp] lemma NuonAux.zero (k : V) : NuonAux 0 k 0 := SeriesSegment.zero (by simp [polyU])
 
-lemma NuonAux.le {A k n : M} (H : NuonAux A k n) : n ≤ k := SeriesSegment.le H
+lemma NuonAux.le {A k n : V} (H : NuonAux A k n) : n ≤ k := SeriesSegment.le H
 
-lemma NuonAux.uniq {A k n₁ n₂ : M} (H₁ : NuonAux A k n₁) (H₂ : NuonAux A k n₂) : n₁ = n₂ := SeriesSegment.uniq H₁ H₂
+lemma NuonAux.uniq {A k n₁ n₂ : V} (H₁ : NuonAux A k n₁) (H₂ : NuonAux A k n₂) : n₁ = n₂ := SeriesSegment.uniq H₁ H₂
 
-lemma NuonAux.succ {A k : M} (H : NuonAux A k n) (hk : k ≤ ‖A‖) : NuonAux A (k + 1) (n + fbit A k) := by
+lemma NuonAux.succ {A k : V} (H : NuonAux A k n) (hk : k ≤ ‖A‖) : NuonAux A (k + 1) (n + fbit A k) := by
   rcases zero_le A with (rfl | pos)
   · rcases show n = 0 from H.uniq (NuonAux.zero k); simp
   exact SeriesSegment.succ (sq_polyI_hash_polyL_polybounded pos) (by simp [polyL]) (lt_of_le_of_lt hk $ polyI_le pos) H
 
-lemma NuonAux.exists {k : M} (hk : k ≤ ‖A‖) : ∃ n, NuonAux A k n := by
+lemma NuonAux.exists {k : V} (hk : k ≤ ‖A‖) : ∃ n, NuonAux A k n := by
   suffices ∃ n ≤ k, NuonAux A k n by
     rcases this with ⟨n, _, h⟩; exact ⟨n, h⟩
   revert hk
@@ -600,12 +600,12 @@ lemma NuonAux.exists {k : M} (hk : k ≤ ‖A‖) : ∃ n, NuonAux A k n := by
     rcases IH (le_trans (by simp) hk) with ⟨n, hn, Hn⟩
     exact ⟨n + fbit A k, add_le_add hn (by simp), Hn.succ (le_trans (by simp) hk)⟩
 
-lemma NuonAux.succ_elim {A k : M} (hk : k ≤ ‖A‖) (H : NuonAux A (k + 1) n) : ∃ n', n = n' + fbit A k ∧ NuonAux A k n' := by
+lemma NuonAux.succ_elim {A k : V} (hk : k ≤ ‖A‖) (H : NuonAux A (k + 1) n) : ∃ n', n = n' + fbit A k ∧ NuonAux A k n' := by
   rcases NuonAux.exists hk with ⟨n', H'⟩
   rcases H.uniq (H'.succ hk)
   exact ⟨n', rfl, H'⟩
 
-lemma NuonAux.succ_iff {A k : M} (hk : k ≤ ‖A‖) : NuonAux A (k + 1) (n + fbit A k) ↔ NuonAux A k n := by
+lemma NuonAux.succ_iff {A k : V} (hk : k ≤ ‖A‖) : NuonAux A (k + 1) (n + fbit A k) ↔ NuonAux A k n := by
   constructor
   · intro H
     rcases NuonAux.exists hk with ⟨n', H'⟩
@@ -613,7 +613,7 @@ lemma NuonAux.succ_iff {A k : M} (hk : k ≤ ‖A‖) : NuonAux A (k + 1) (n + f
     exact H'
   · exact (NuonAux.succ · hk)
 
-lemma NuonAux.two_mul {k n : M} (hk : k ≤ ‖A‖) : NuonAux A k n → NuonAux (2 * A) (k + 1) n := by
+lemma NuonAux.two_mul {k n : V} (hk : k ≤ ‖A‖) : NuonAux A k n → NuonAux (2 * A) (k + 1) n := by
   revert n hk
   suffices ∀ n ≤ k, k ≤ ‖A‖ → NuonAux A k n → NuonAux (2 * A) (k + 1) n by
     intro n hk H
@@ -628,7 +628,7 @@ lemma NuonAux.two_mul {k n : M} (hk : k ≤ ‖A‖) : NuonAux A k n → NuonAux
     have IH : NuonAux (2 * A) (k + 1) n' := IH n' H'.le (le_trans (by simp) hk) H'
     simpa using IH.succ (le_trans hk (length_monotone $ by simp))
 
-lemma NuonAux.two_mul_add_one {k n : M} (hk : k ≤ ‖A‖) : NuonAux A k n → NuonAux (2 * A + 1) (k + 1) (n + 1) := by
+lemma NuonAux.two_mul_add_one {k n : V} (hk : k ≤ ‖A‖) : NuonAux A k n → NuonAux (2 * A + 1) (k + 1) (n + 1) := by
   revert n hk
   suffices ∀ n ≤ k, k ≤ ‖A‖ → NuonAux A k n → NuonAux (2 * A + 1) (k + 1) (n + 1) by
     intro n hk H
@@ -647,44 +647,44 @@ end
 
 end Nuon
 
-def Nuon (A n : M) : Prop := Nuon.NuonAux A ‖A‖ n
+def Nuon (A n : V) : Prop := Nuon.NuonAux A ‖A‖ n
 
-lemma Nuon.exists_unique (A : M) : ∃! n, Nuon A n := by
+lemma Nuon.exists_unique (A : V) : ∃! n, Nuon A n := by
   rcases show ∃ n, Nuon A n from NuonAux.exists (by simp) with ⟨n, hn⟩
   exact ExistsUnique.intro n hn (fun n' hn' ↦ hn'.uniq hn)
 
-def nuon (a : M) : M := Classical.choose! (Nuon.exists_unique a)
+def nuon (a : V) : V := Classical.choose! (Nuon.exists_unique a)
 
-@[simp] lemma nuon_nuon (a : M) : Nuon a (nuon a) := Classical.choose!_spec (Nuon.exists_unique a)
+@[simp] lemma nuon_nuon (a : V) : Nuon a (nuon a) := Classical.choose!_spec (Nuon.exists_unique a)
 
-lemma Nuon.nuon_eq {a b : M} (h : Nuon a b) : nuon a = b := (nuon_nuon a).uniq h
+lemma Nuon.nuon_eq {a b : V} (h : Nuon a b) : nuon a = b := (nuon_nuon a).uniq h
 
-lemma Nuon.nuon_eq_iff {a b : M} : b = nuon a ↔ Nuon a b := Classical.choose!_eq_iff (Nuon.exists_unique a)
+lemma Nuon.nuon_eq_iff {a b : V} : b = nuon a ↔ Nuon a b := Classical.choose!_eq_iff (Nuon.exists_unique a)
 
-lemma nuon_bit0 (a : M) : nuon (2 * a) = nuon a := by
+lemma nuon_bit0 (a : V) : nuon (2 * a) = nuon a := by
   rcases zero_le a with (rfl | pos)
   · simp
   · have : Nuon (2 * a) (nuon a) := by simpa [Nuon, length_two_mul_of_pos pos] using (nuon_nuon a).two_mul (by simp)
     exact this.nuon_eq
 
-lemma nuon_bit1 (a : M) : nuon (2 * a + 1) = nuon a + 1 := by
+lemma nuon_bit1 (a : V) : nuon (2 * a + 1) = nuon a + 1 := by
   have : Nuon (2 * a + 1) (nuon a + 1) := by simpa [Nuon, length_two_mul_add_one] using (nuon_nuon a).two_mul_add_one (by simp)
   exact this.nuon_eq
 
-@[simp] lemma nuon_zero : nuon (0 : M) = 0 := Nuon.nuon_eq (by simp [Nuon])
+@[simp] lemma nuon_zero : nuon (0 : V) = 0 := Nuon.nuon_eq (by simp [Nuon])
 
 def _root_.LO.FirstOrder.Arith.nuonDef : 𝚺₀.Semisentence 2 := .mkSigma
   “n A | ∃ l <⁺ A, !lengthDef l A ∧ !Nuon.nuonAuxDef A l n” (by simp)
 
-lemma nuon_defined : 𝚺₀-Function₁ (nuon : M → M) via nuonDef := by
+lemma nuon_defined : 𝚺₀-Function₁ (nuon : V → V) via nuonDef := by
   intro v; simp [Nuon.nuon_eq_iff, Nuon, nuonDef,
     length_defined.df.iff, Nuon.nuonAux_defined.df.iff, lt_succ_iff_le]
   rw [Nuon.bex_eq_le_iff]; simp
 
 @[simp] lemma eval_nuon_iff (v) :
-    Semiformula.Evalbm M v nuonDef.val ↔ v 0 = nuon (v 1) :=nuon_defined.df.iff v
+    Semiformula.Evalbm V v nuonDef.val ↔ v 0 = nuon (v 1) :=nuon_defined.df.iff v
 
-instance nuon_definable : 𝚺₀-Function₁ (nuon : M → M) := Defined.to_definable _ nuon_defined
+instance nuon_definable : 𝚺₀-Function₁ (nuon : V → V) := nuon_defined.to_definable
 
 end
 

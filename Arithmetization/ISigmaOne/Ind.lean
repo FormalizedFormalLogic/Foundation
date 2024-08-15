@@ -54,17 +54,17 @@ lemma order_induction_sigma_or_pi {P Q : V → Prop} (hP : (𝚺, m)-Predicate P
     intro x hx
     induction x using order_induction_sigma1
     · clear hp hq ind
-      apply LO.FirstOrder.Arith.Definable.imp
+      apply LO.FirstOrder.Arith.HierarchySymbol.Boldface.imp
       · simp_all only [SigmaPiDelta.alt_sigma, Fin.isValue]
-        apply LO.FirstOrder.Arith.Definable.comp₂_infer
+        apply LO.FirstOrder.Arith.HierarchySymbol.Boldface.comp₂_infer
         · simp_all only [zero_add, Fin.isValue, DefinableFunction.var]
         · simp_all only [zero_add, DefinableFunction.const]
       · simp_all only [Fin.isValue]
-        apply LO.FirstOrder.Arith.Definable.or
-        · apply LO.FirstOrder.Arith.Definable.comp₂_infer
+        apply LO.FirstOrder.Arith.HierarchySymbol.Boldface.or
+        · apply LO.FirstOrder.Arith.HierarchySymbol.Boldface.comp₂_infer
           · simp_all only [zero_add, Fin.isValue, DefinableFunction.var]
           · simp_all only [zero_add, DefinableFunction.const]
-        · apply LO.FirstOrder.Arith.Definable.comp₂_infer
+        · apply LO.FirstOrder.Arith.HierarchySymbol.Boldface.comp₂_infer
           · simp_all only [zero_add, Fin.isValue, DefinableFunction.var]
           · simp_all only [zero_add, DefinableFunction.const]
     case ind z ih =>

@@ -4,15 +4,15 @@ noncomputable section
 
 namespace LO.Arith
 
-variable {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M]
+variable {V : Type*} [ORingStruc V]
 
 open FirstOrder FirstOrder.Arith
 
 section ISigma₀
 
-variable [M ⊧ₘ* 𝐈𝚺₀]
+variable [V ⊧ₘ* 𝐈𝚺₀]
 
-def SPPow2 (m : M) : Prop := ¬LenBit 1 m ∧ LenBit 2 m ∧ ∀ i ≤ m, Pow2 i → 2 < i → (LenBit i m ↔ (√i)^2 = i ∧ LenBit (√i) m)
+def SPPow2 (m : V) : Prop := ¬LenBit 1 m ∧ LenBit 2 m ∧ ∀ i ≤ m, Pow2 i → 2 < i → (LenBit i m ↔ (√i)^2 = i ∧ LenBit (√i) m)
 
 def _root_.LO.FirstOrder.Arith.sppow2Def : 𝚺₀.Semisentence 1 :=
   .mkSigma
@@ -20,7 +20,7 @@ def _root_.LO.FirstOrder.Arith.sppow2Def : 𝚺₀.Semisentence 1 :=
     ∀ i <⁺ m, !pow2Def i → 2 < i → (!lenbitDef i m ↔ ∃ s <⁺ i, !sqrtDef s i ∧ s * s = i ∧ !lenbitDef s m)
   ” (by simp)
 
-lemma sppow2_defined : 𝚺₀-Predicate (SPPow2 : M → Prop) via sppow2Def := by
+lemma sppow2_defined : 𝚺₀-Predicate (SPPow2 : V → Prop) via sppow2Def := by
   intro v
   simp [SPPow2, sppow2Def, Matrix.vecHead, Matrix.vecTail, lenbit_defined.df.iff,
     pow2_defined.df.iff, sqrt_defined.df.iff, ←le_iff_lt_succ, sq, numeral_eq_natCast]
@@ -30,44 +30,44 @@ lemma sppow2_defined : 𝚺₀-Predicate (SPPow2 : M → Prop) via sppow2Def := 
     · intro h; exact ⟨√x, by simpa using h⟩
     · rintro ⟨_, _, rfl, h⟩; exact h
 
-def PPow2 (i : M) : Prop := Pow2 i ∧ ∃ m < 2 * i, SPPow2 m ∧ LenBit i m
+def PPow2 (i : V) : Prop := Pow2 i ∧ ∃ m < 2 * i, SPPow2 m ∧ LenBit i m
 
 def _root_.LO.FirstOrder.Arith.ppow2Def : 𝚺₀.Semisentence 1 :=
   .mkSigma “i | !pow2Def i ∧ ∃ m < 2 * i, !sppow2Def m ∧ !lenbitDef i m” (by simp)
 
-lemma ppow2_defined : 𝚺₀-Predicate (PPow2 : M → Prop) via ppow2Def := by
+lemma ppow2_defined : 𝚺₀-Predicate (PPow2 : V → Prop) via ppow2Def := by
   intro v; simp[PPow2, ppow2Def, Matrix.vecHead, Matrix.vecTail,
     lenbit_defined.df.iff, pow2_defined.df.iff, sppow2_defined.df.iff, numeral_eq_natCast]
 
-instance ppow2_definable : DefinablePred ℒₒᵣ 𝚺₀ (PPow2 : M → Prop) := Defined.to_definable₀ _ ppow2_defined
+instance ppow2_definable : 𝚺₀-Predicate (PPow2 : V → Prop) := ppow2_defined.to_definable
 
 namespace SPPow2
 
-variable {m : M} (hm : SPPow2 m)
+variable {m : V} (hm : SPPow2 m)
 
 lemma not_lenbit_one : ¬LenBit 1 m := hm.1
 
 lemma lenbit_two : LenBit 2 m := hm.2.1
 
-lemma lenbit_iff {i : M} (hi : i ≤ m) (pi : Pow2 i) (lt2 : 2 < i) :
+lemma lenbit_iff {i : V} (hi : i ≤ m) (pi : Pow2 i) (lt2 : 2 < i) :
     LenBit i m ↔ (√i)^2 = i ∧ LenBit (√i) m := hm.2.2 i hi pi lt2
 
-lemma one_lt {i : M} (hi : LenBit i m) : 1 < i := by
+lemma one_lt {i : V} (hi : LenBit i m) : 1 < i := by
   by_contra A
   rcases (le_one_iff_eq_zero_or_one.mp (show i ≤ 1 from by simpa using A)) with (rfl | rfl)
   · simp at hi
   · exact hm.1 hi
 
-lemma two_lt {i : M} (hi : LenBit i m) (ne2 : i ≠ 2) : 2 < i :=
+lemma two_lt {i : V} (hi : LenBit i m) (ne2 : i ≠ 2) : 2 < i :=
   lt_of_le_of_ne (one_lt_iff_two_le.mp $ hm.one_lt hi) (Ne.symm ne2)
 
-lemma sqrt {i : M} (hi : LenBit i m) (pi : Pow2 i) (ne2 : i ≠ 2) :
+lemma sqrt {i : V} (hi : LenBit i m) (pi : Pow2 i) (ne2 : i ≠ 2) :
     LenBit (√i) m := ((hm.lenbit_iff hi.le pi (hm.two_lt hi ne2)).mp hi).2
 
-lemma sq_sqrt_eq {i : M} (hi : LenBit i m) (pi : Pow2 i) (ne2 : i ≠ 2) :
+lemma sq_sqrt_eq {i : V} (hi : LenBit i m) (pi : Pow2 i) (ne2 : i ≠ 2) :
     (√i)^2 = i := ((hm.lenbit_iff hi.le pi (hm.two_lt hi ne2)).mp hi).1
 
-lemma of_sqrt {i : M} (pi : Pow2 i) (him : i ≤ m) (hsqi : (√i)^2 = i) (hi : LenBit (√i) m) :
+lemma of_sqrt {i : V} (pi : Pow2 i) (him : i ≤ m) (hsqi : (√i)^2 = i) (hi : LenBit (√i) m) :
     LenBit i m := by
   by_cases ne1 : i = 1
   · rcases ne1; simpa using hi
@@ -77,18 +77,18 @@ lemma of_sqrt {i : M} (pi : Pow2 i) (him : i ≤ m) (hsqi : (√i)^2 = i) (hi : 
       (one_lt_iff_two_le.mp <| lt_of_le_of_ne (pos_iff_one_le.mp pi.pos) <| Ne.symm ne1) (Ne.symm ne2)
     exact (hm.lenbit_iff him pi this).mpr ⟨hsqi, hi⟩
 
-@[simp] lemma two : SPPow2 (2 : M) :=
+@[simp] lemma two : SPPow2 (2 : V) :=
   ⟨by simp[LenBit.one], by simp, by
     intro i hi pi
     rcases le_two_iff_eq_zero_or_one_or_two.mp hi with (rfl | rfl | rfl) <;> simp⟩
 
-@[simp] lemma not_zero : ¬SPPow2 (0 : M) := by
+@[simp] lemma not_zero : ¬SPPow2 (0 : V) := by
   rintro ⟨_, h, _⟩; simp at h
 
-@[simp] lemma not_one : ¬SPPow2 (1 : M) := by
+@[simp] lemma not_one : ¬SPPow2 (1 : V) := by
   rintro ⟨_, h, _⟩; simp [LenBit.iff_rem, one_lt_two] at h
 
-lemma sq_le_of_lt {i j : M} (pi : Pow2 i) (pj : Pow2 j) (hi : LenBit i m) (hj : LenBit j m) : i < j → i^2 ≤ j := by
+lemma sq_le_of_lt {i j : V} (pi : Pow2 i) (pj : Pow2 j) (hi : LenBit i m) (hj : LenBit j m) : i < j → i^2 ≤ j := by
   intro hij
   suffices ∀ i < j, Pow2 i → Pow2 j → LenBit i m → LenBit j m → i^2 ≤ j from this i hij pi pj hi hj
   clear i pi hi hij pj hj
@@ -115,7 +115,7 @@ lemma sq_le_of_lt {i j : M} (pi : Pow2 i) (pj : Pow2 j) (hi : LenBit i m) (hj : 
               (pi.sqrt (hm.sq_sqrt_eq hi pi ine2)) (pj.sqrt (hm.sq_sqrt_eq hj pj jne2)) (hm.sqrt hi pi ine2) (hm.sqrt hj pj jne2)
         simpa [hm.sq_sqrt_eq hj pj jne2] using sq_le_sq.mpr this
 
-lemma last_uniq {i j : M} (pi : Pow2 i) (pj : Pow2 j) (hi : LenBit i m) (hj : LenBit j m)
+lemma last_uniq {i j : V} (pi : Pow2 i) (pj : Pow2 j) (hi : LenBit i m) (hj : LenBit j m)
     (hsqi : m < i^2) (hsqj : m < j^2) : i = j := by
   by_contra ne
   wlog hij : i < j
@@ -131,18 +131,18 @@ end SPPow2
 
 namespace PPow2
 
-lemma pow2 {i : M} (h : PPow2 i) : Pow2 i := h.1
+lemma pow2 {i : V} (h : PPow2 i) : Pow2 i := h.1
 
-lemma pos {i : M} (ppi : PPow2 i) : 0 < i := ppi.pow2.pos
+lemma pos {i : V} (ppi : PPow2 i) : 0 < i := ppi.pow2.pos
 
-lemma one_lt {i : M} (ppi : PPow2 i) : 1 < i := by
+lemma one_lt {i : V} (ppi : PPow2 i) : 1 < i := by
   rcases ppi with ⟨_, m, _, sppm, lb⟩; exact sppm.one_lt lb
 
-lemma sq_sqrt_eq {i : M} (ppi : PPow2 i) (ne2 : i ≠ 2) : (√i)^2 = i := by
+lemma sq_sqrt_eq {i : V} (ppi : PPow2 i) (ne2 : i ≠ 2) : (√i)^2 = i := by
   rcases ppi with ⟨pi, m, _, sppm, lb⟩
   exact ((sppm.lenbit_iff lb.le pi (lt_of_le_of_ne (one_lt_iff_two_le.mp $ sppm.one_lt lb) (Ne.symm ne2))).mp lb).1
 
-lemma sqrt {i : M} (ppi : PPow2 i) (ne2 : i ≠ 2) : PPow2 (√i) := by
+lemma sqrt {i : V} (ppi : PPow2 i) (ne2 : i ≠ 2) : PPow2 (√i) := by
   rcases ppi with ⟨pi, m, _, sppm, him⟩
   have : LenBit i m ↔ (√i)^2 = i ∧ LenBit (√i) m :=
     sppm.lenbit_iff him.le pi (lt_of_le_of_ne (one_lt_iff_two_le.mp $ sppm.one_lt him) (Ne.symm ne2))
@@ -162,9 +162,9 @@ lemma sqrt {i : M} (ppi : PPow2 i) (ne2 : i ≠ 2) : PPow2 (√i) := by
           · exact lt_of_le_of_lt (by simp) hjsi⟩
   exact ⟨psqi, m % (2 * √i), mod_lt _ (by simp [psqi.pos]), this, by simp [H]⟩
 
-lemma exists_spp {i : M} (h : PPow2 i) : ∃ m < 2 * i, SPPow2 m ∧ LenBit i m := h.2
+lemma exists_spp {i : V} (h : PPow2 i) : ∃ m < 2 * i, SPPow2 m ∧ LenBit i m := h.2
 
-protected lemma sq {i : M} (ppi : PPow2 i) : PPow2 (i^2) := by
+protected lemma sq {i : V} (ppi : PPow2 i) : PPow2 (i^2) := by
   rcases ppi.exists_spp with ⟨m, hm, sppm, hi⟩
   have sppm' : SPPow2 (m + i^2) :=
     ⟨by rw [LenBit.add_pow2] <;> try simp [ppi.pow2, sppm.not_lenbit_one, sppm.one_lt hi],
@@ -202,16 +202,16 @@ protected lemma sq {i : M} (ppi : PPow2 i) : PPow2 (i^2) := by
     by simp [two_mul, hm, this],
     sppm', LenBit.add_self this⟩
 
-@[simp] lemma two : PPow2 (2 : M) := ⟨by simp, 2, by simp [one_lt_two]⟩
+@[simp] lemma two : PPow2 (2 : V) := ⟨by simp, 2, by simp [one_lt_two]⟩
 
-@[simp] lemma not_zero : ¬PPow2 (0 : M) := by intro h; simpa using h.pow2
+@[simp] lemma not_zero : ¬PPow2 (0 : V) := by intro h; simpa using h.pow2
 
-@[simp] lemma not_one : ¬PPow2 (1 : M) := by
+@[simp] lemma not_one : ¬PPow2 (1 : V) := by
   rintro ⟨_, m, hm, H, _⟩
   have : m ≤ 1 := lt_two_iff_le_one.mp (by simpa using hm)
   rcases le_one_iff_eq_zero_or_one.mp this with (rfl | rfl) <;> simp at H
 
-lemma elim {i : M} : PPow2 i ↔ i = 2 ∨ ∃ b, i = b^2 ∧ PPow2 b := by
+lemma elim {i : V} : PPow2 i ↔ i = 2 ∨ ∃ b, i = b^2 ∧ PPow2 b := by
   by_cases ei : i = 2
   · rcases ei with rfl; simp
   · simp [ei]; constructor
@@ -220,46 +220,46 @@ lemma elim {i : M} : PPow2 i ↔ i = 2 ∨ ∃ b, i = b^2 ∧ PPow2 b := by
     · rintro ⟨j, rfl, ppj⟩
       exact ppj.sq
 
-lemma elim' {i : M} : PPow2 i ↔ i = 2 ∨ 2 < i ∧ ∃ j, i = j^2 ∧ PPow2 j := by
+lemma elim' {i : V} : PPow2 i ↔ i = 2 ∨ 2 < i ∧ ∃ j, i = j^2 ∧ PPow2 j := by
   by_cases ha : 2 < i <;> simp [ha, ←elim]
   have : i = 0 ∨ i = 1 ∨ i = 2 := by simpa [le_two_iff_eq_zero_or_one_or_two] using ha
   rcases this with (rfl | rfl | rfl) <;> simp
 
-@[simp] lemma four : PPow2 (4 : M) := elim.mpr (Or.inr <| ⟨2, by simp [two_pow_two_eq_four]⟩)
+@[simp] lemma four : PPow2 (4 : V) := elim.mpr (Or.inr <| ⟨2, by simp [two_pow_two_eq_four]⟩)
 
-lemma two_le {i : M} (hi : PPow2 i) : 2 ≤ i := by
+lemma two_le {i : V} (hi : PPow2 i) : 2 ≤ i := by
   simp [←one_add_one_eq_two, ←lt_iff_succ_le, hi.one_lt]
 
-lemma not_three : ¬PPow2 (3 : M) := by
+lemma not_three : ¬PPow2 (3 : V) := by
   intro h; simpa [sqrt_three] using h.sqrt (by simp)
 
-lemma two_lt {i : M} (hi : PPow2 i) (ne : i ≠ 2) : 2 < i := by
+lemma two_lt {i : V} (hi : PPow2 i) (ne : i ≠ 2) : 2 < i := by
   by_contra A; simp [ne, le_iff_lt_or_eq, lt_two_iff_le_one] at A
   rcases A with (rfl | rfl) <;> simp at hi
 
-lemma four_le {i : M} (hi : PPow2 i) (ne : i ≠ 2) : 4 ≤ i := by
+lemma four_le {i : V} (hi : PPow2 i) (ne : i ≠ 2) : 4 ≤ i := by
   by_contra A
   have : i ≤ 3 := by simpa [←three_add_one_eq_four, ←le_iff_lt_succ] using A
   rcases le_three_iff_eq_zero_or_one_or_two_or_three.mp this with (rfl | rfl | rfl | rfl) <;> simp at ne hi
-  · have : PPow2 (1 : M) := by simpa [sqrt_three] using hi.sqrt (by simp)
+  · have : PPow2 (1 : V) := by simpa [sqrt_three] using hi.sqrt (by simp)
     simp at this
 
-lemma four_lt {i : M} (hi : PPow2 i) (ne2 : i ≠ 2) (ne4 : i ≠ 4) : 4 < i :=
+lemma four_lt {i : V} (hi : PPow2 i) (ne2 : i ≠ 2) (ne4 : i ≠ 4) : 4 < i :=
   Ne.lt_of_le (Ne.symm ne4) (hi.four_le ne2)
 
-lemma sq_ne_two {i : M} (hi : PPow2 i) : i^2 ≠ 2 := by
+lemma sq_ne_two {i : V} (hi : PPow2 i) : i^2 ≠ 2 := by
   intro e; have : i < 2 := by simpa [←e] using lt_square_of_lt hi.one_lt
   exact not_le.mpr this hi.two_le
 
-lemma sqrt_ne_two {i : M} (hi : PPow2 i) (ne2 : i ≠ 2) (ne4 : i ≠ 4) : √i ≠ 2 := by
+lemma sqrt_ne_two {i : V} (hi : PPow2 i) (ne2 : i ≠ 2) (ne4 : i ≠ 4) : √i ≠ 2 := by
   intro e
   have : i = 4 := by simpa [e, two_pow_two_eq_four] using Eq.symm <| hi.sq_sqrt_eq ne2
   contradiction
 
-lemma sq_ne_four {i : M} (hi : PPow2 i) (ne2 : i ≠ 2) : i^2 ≠ 4 := by
+lemma sq_ne_four {i : V} (hi : PPow2 i) (ne2 : i ≠ 2) : i^2 ≠ 4 := by
   simpa [two_pow_two_eq_four] using ne_of_gt (sq_lt_sq.mpr (hi.two_lt ne2))
 
-lemma sq_le_of_lt {i j : M} (hi : PPow2 i) (hj : PPow2 j) : i < j → i^2 ≤ j := by
+lemma sq_le_of_lt {i j : V} (hi : PPow2 i) (hj : PPow2 j) : i < j → i^2 ≤ j := by
   intro hij
   suffices ∀ i < j, PPow2 i → PPow2 j → i^2 ≤ j from this i hij hi hj
   clear hi hij hj
@@ -282,7 +282,7 @@ lemma sq_le_of_lt {i j : M} (hi : PPow2 i) (hj : PPow2 j) : i < j → i^2 ≤ j 
             IH (√j) (sqrt_lt_self_of_one_lt hj.one_lt) (√i) this (hi.sqrt ei) (hj.sqrt ej)
         simpa [hj.sq_sqrt_eq ej] using sq_le_sq.mpr this
 
-lemma sq_uniq {y i j : M} (py : Pow2 y) (ppi : PPow2 i) (ppj : PPow2 j)
+lemma sq_uniq {y i j : V} (py : Pow2 y) (ppi : PPow2 i) (ppj : PPow2 j)
     (hi : y < i ∧ i ≤ y^2) (hj : y < j ∧ j ≤ y^2) : i = j := by
   by_contra ne
   wlog hij : i < j
@@ -293,7 +293,7 @@ lemma sq_uniq {y i j : M} (py : Pow2 y) (ppi : PPow2 i) (ppj : PPow2 j)
     _   ≤ y^2 := hj.2
   simp_all
 
-lemma two_mul_sq_uniq {y i j : M} (py : Pow2 y) (ppi : PPow2 i) (ppj : PPow2 j)
+lemma two_mul_sq_uniq {y i j : V} (py : Pow2 y) (ppi : PPow2 i) (ppj : PPow2 j)
     (hi : y < i ∧ i ≤ 2 * y^2) (hj : y < j ∧ j ≤ 2 * y^2) : i = j := by
   by_contra ne
   wlog hij : i < j

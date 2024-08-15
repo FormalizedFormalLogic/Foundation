@@ -63,7 +63,7 @@ variable {L}
 
 section
 
-def _root_.LO.FirstOrder.Arith.LDef.negDef (pL : LDef) : 𝚺₁-Semisentence 2 := (blueprint pL).result.rew (Rew.substs ![#0, ‘0’, #1])
+def _root_.LO.FirstOrder.Arith.LDef.negDef (pL : LDef) : 𝚺₁.Semisentence 2 := (blueprint pL).result.rew (Rew.substs ![#0, ‘0’, #1])
 
 variable (L)
 
@@ -169,7 +169,7 @@ section imp
 
 section
 
-def _root_.LO.FirstOrder.Arith.LDef.impDef (pL : LDef) : 𝚺₁-Semisentence 4 := .mkSigma
+def _root_.LO.FirstOrder.Arith.LDef.impDef (pL : LDef) : 𝚺₁.Semisentence 4 := .mkSigma
   “r n p q | ∃ np, !pL.negDef np p ∧ !qqOrDef r n np q” (by simp)
 
 variable (L)
@@ -242,7 +242,7 @@ variable {L}
 
 section
 
-def _root_.LO.FirstOrder.Arith.LDef.shiftDef (pL : LDef) : 𝚺₁-Semisentence 2 := (blueprint pL).result.rew (Rew.substs ![#0, ‘0’, #1])
+def _root_.LO.FirstOrder.Arith.LDef.shiftDef (pL : LDef) : 𝚺₁.Semisentence 2 := (blueprint pL).result.rew (Rew.substs ![#0, ‘0’, #1])
 
 variable (L)
 
@@ -333,7 +333,7 @@ section
 
 variable (L)
 
-def _root_.LO.FirstOrder.Arith.LDef.qVecDef (pL : LDef) : 𝚺₁-Semisentence 4 := .mkSigma
+def _root_.LO.FirstOrder.Arith.LDef.qVecDef (pL : LDef) : 𝚺₁.Semisentence 4 := .mkSigma
   “w' k n w | ∃ sw, !pL.termBShiftVecDef sw k n w ∧ ∃ t, !qqBvarDef t 0 ∧ !consDef w' t sw” (by simp)
 
 lemma qVec_defined : 𝚺₁-Function₃ L.qVec via pL.qVecDef := by
@@ -395,7 +395,7 @@ variable {L}
 
 section
 
-def _root_.LO.FirstOrder.Arith.LDef.substsDef (pL : LDef) : 𝚺₁-Semisentence 4 := .mkSigma
+def _root_.LO.FirstOrder.Arith.LDef.substsDef (pL : LDef) : 𝚺₁.Semisentence 4 := .mkSigma
   “q m w p | ∃ mw, !pairDef mw m w ∧ !(blueprint pL).result q mw p” (by simp)
 
 variable (L)
@@ -459,7 +459,7 @@ lemma uformula_subst_induction {P : V → V → V → V → Prop} (hP : 𝚺₁-
   suffices ∀ param p, L.UFormula p → P (π₁ param) (π₂ param) p ((construction L).result param p) by
     intro p m w hp; simpa using this ⟪m, w⟫ p hp
   apply (construction L).uformula_result_induction (P := fun param p y ↦ P (π₁ param) (π₂ param) p y)
-  · apply Definable.comp₄_infer
+  · apply HierarchySymbol.Boldface.comp₄_infer
       (DefinableFunction.comp₁_infer (DefinableFunction.var _))
       (DefinableFunction.comp₁_infer (DefinableFunction.var _))
       (DefinableFunction.var _)
@@ -498,7 +498,7 @@ lemma semiformula_subst_induction {P : V → V → V → V → V → Prop} (hP :
   suffices ∀ param n p, L.Semiformula n p → P n (π₁ param) (π₂ param) p ((construction L).result param p) by
     intro n p m w hp; simpa using this ⟪m, w⟫ n p hp
   apply (construction L).semiformula_result_induction (P := fun param n p y ↦ P n (π₁ param) (π₂ param) p y)
-  · apply Definable.comp₅_infer
+  · apply HierarchySymbol.Boldface.comp₅_infer
       (DefinableFunction.var _)
       (DefinableFunction.comp₁_infer (DefinableFunction.var _))
       (DefinableFunction.comp₁_infer (DefinableFunction.var _))
@@ -605,13 +605,13 @@ lemma substs_substs {p} (hp : L.Semiformula l p) :
     L.SemitermVec n m w → L.SemitermVec l n v → L.substs m w (L.substs n v p) = L.substs m (L.termSubstVec l n m w v) p := by
   revert m w n v
   apply Language.Semiformula.induction_pi1 ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ _ _ hp
-  · apply Definable.all
-    apply Definable.all
-    apply Definable.all
-    apply Definable.all
-    apply Definable.imp (by definability)
-    apply Definable.imp (by definability)
-    apply Definable.comp₂_infer (by simp; definability)
+  · apply HierarchySymbol.Boldface.all
+    apply HierarchySymbol.Boldface.all
+    apply HierarchySymbol.Boldface.all
+    apply HierarchySymbol.Boldface.all
+    apply HierarchySymbol.Boldface.imp (by definability)
+    apply HierarchySymbol.Boldface.imp (by definability)
+    apply HierarchySymbol.Boldface.comp₂_infer (by simp; definability)
     apply DefinableFunction.comp₃_infer (by definability) ?_ (by definability)
     apply DefinableFunction₅.comp (termSubstVec_definable _) <;> definability
   · intro l k R ts hR hts m w n v _ hv
@@ -700,7 +700,7 @@ section substs₁
 
 section
 
-def _root_.LO.FirstOrder.Arith.LDef.substs₁Def (pL : LDef) : 𝚺₁-Semisentence 3 := .mkSigma
+def _root_.LO.FirstOrder.Arith.LDef.substs₁Def (pL : LDef) : 𝚺₁.Semisentence 3 := .mkSigma
   “ z t p | ∃ v, !consDef v t 0 ∧ !pL.substsDef z 0 v p” (by simp)
 
 variable (L)
@@ -727,7 +727,7 @@ section free
 
 section
 
-def _root_.LO.FirstOrder.Arith.LDef.freeDef (pL : LDef) : 𝚺₁-Semisentence 2 := .mkSigma
+def _root_.LO.FirstOrder.Arith.LDef.freeDef (pL : LDef) : 𝚺₁.Semisentence 2 := .mkSigma
   “q p | ∃ fz, !qqFvarDef fz 0 ∧ ∃ sp, !pL.shiftDef sp p ∧ !pL.substs₁Def q fz sp” (by simp)
 
 variable (L)
@@ -752,7 +752,7 @@ def Language.IsFVFree (n p : V) : Prop := L.Semiformula n p ∧ L.shift p = p
 
 section
 
-def _root_.LO.FirstOrder.Arith.LDef.isFVFreeDef (pL : LDef) : 𝚺₁-Semisentence 2 :=
+def _root_.LO.FirstOrder.Arith.LDef.isFVFreeDef (pL : LDef) : 𝚺₁.Semisentence 2 :=
   .mkSigma “n p | !pL.isSemiformulaDef.sigma n p ∧ !pL.shiftDef p p” (by simp)
 
 lemma isFVFree_defined : 𝚺₁-Relation L.IsFVFree via pL.isFVFreeDef := by
@@ -816,16 +816,16 @@ notation:78 x:78 " ^≮[" n "] " y:79 => qqNLT n x y
 
 notation:78 x:78 " ^≮ " y:79 => qqNLT 0 x y
 
-def _root_.LO.FirstOrder.Arith.qqEQDef : 𝚺₁-Semisentence 4 :=
+def _root_.LO.FirstOrder.Arith.qqEQDef : 𝚺₁.Semisentence 4 :=
   .mkSigma “p n x y | ∃ v, !mkVec₂Def v x y ∧ !qqRelDef p n 2 (!(.Operator.numeral ℒₒᵣ eqIndex)) v” (by simp)
 
-def _root_.LO.FirstOrder.Arith.qqNEQDef : 𝚺₁-Semisentence 4 :=
+def _root_.LO.FirstOrder.Arith.qqNEQDef : 𝚺₁.Semisentence 4 :=
   .mkSigma “p n x y | ∃ v, !mkVec₂Def v x y ∧ !qqNRelDef p n 2 (!(.Operator.numeral ℒₒᵣ eqIndex)) v” (by simp)
 
-def _root_.LO.FirstOrder.Arith.qqLTDef : 𝚺₁-Semisentence 4 :=
+def _root_.LO.FirstOrder.Arith.qqLTDef : 𝚺₁.Semisentence 4 :=
   .mkSigma “p n x y | ∃ v, !mkVec₂Def v x y ∧ !qqRelDef p n 2 (!(.Operator.numeral ℒₒᵣ ltIndex)) v” (by simp)
 
-def _root_.LO.FirstOrder.Arith.qqNLTDef : 𝚺₁-Semisentence 4 :=
+def _root_.LO.FirstOrder.Arith.qqNLTDef : 𝚺₁.Semisentence 4 :=
   .mkSigma “p n x y | ∃ v, !mkVec₂Def v x y ∧ !qqNRelDef p n 2 (!(.Operator.numeral ℒₒᵣ ltIndex)) v” (by simp)
 
 lemma qqEQ_defined : 𝚺₁-Function₃ (qqEQ : V → V → V → V) via qqEQDef := by

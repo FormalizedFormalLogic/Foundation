@@ -33,14 +33,14 @@ variable {T V}
 lemma Language.SyntacticTheory.codeIn_iff : x ∈ T.codeIn V ↔ V ⊧/![x] T.tDef.ch.val := iff_of_eq rfl
 
 lemma mem_coded_theory {σ} (h : σ ∈ T) : ⌜σ⌝ ∈ T.codeIn V := Language.SyntacticTheory.codeIn_iff.mpr <| by
-  have := consequence_iff_add_eq.mp (sound! <| SyntacticTheory.Δ₁Definable.mem_iff.mp h) V inferInstance
+  have := consequence_iff_add_eq.mp (sound! <| SyntacticTheory.Δ₁HierarchySymbol.Boldface.mem_iff.mp h) V inferInstance
   simpa [models_iff, Semiformula.syntacticformula_goedelNumber_def, numeral_eq_natCast] using this
 
 instance tDef_defined : (T.codeIn V).Defined T.tDef where
   defined := ⟨by
     intro v
     rw [show v = ![v 0] from Matrix.constant_eq_singleton']
-    have := consequence_iff_add_eq.mp (sound! <| FirstOrder.SyntacticTheory.Δ₁Definable.isΔ₁ (T := T)) V inferInstance
+    have := consequence_iff_add_eq.mp (sound! <| FirstOrder.SyntacticTheory.Δ₁HierarchySymbol.Boldface.isΔ₁ (T := T)) V inferInstance
     simp [models_iff] at this ⊢
     simp [SyntacticTheory.tDef, this],
   by intro v; simp [SyntacticTheory.codeIn, ←Matrix.constant_eq_singleton']⟩

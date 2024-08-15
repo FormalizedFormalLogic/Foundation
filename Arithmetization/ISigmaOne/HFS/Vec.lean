@@ -12,7 +12,7 @@ namespace LO.Arith
 
 open FirstOrder FirstOrder.Arith
 
-variable {V : Type*} [Zero V] [One V] [Add V] [Mul V] [LT V] [V ⊧ₘ* 𝐈𝚺₁]
+variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
 section cons
 
@@ -76,9 +76,9 @@ lemma cons_defined : 𝚺₀-Function₂ (cons : V → V → V) via consDef := b
 @[simp] lemma eval_cons (v) :
     Semiformula.Evalbm V v consDef.val ↔ v 0 = v 1 ∷ v 2 := cons_defined.df.iff v
 
-instance cons_definable : 𝚺₀-Function₂ (cons : V → V → V) := Defined.to_definable _ cons_defined
+instance cons_definable : 𝚺₀-Function₂ (cons : V → V → V) := cons_defined.to_definable
 
-instance cons_definable' (Γ) : Γ-Function₂ (cons : V → V → V) := .of_zero cons_definable _
+instance cons_definable' (ℌ) : ℌ-Function₂ (cons : V → V → V) := cons_definable.of_zero
 
 def _root_.LO.FirstOrder.Arith.mkVec₁Def : 𝚺₀.Semisentence 2 := .mkSigma
   “s x | !consDef s x 0” (by simp)
@@ -89,11 +89,11 @@ lemma mkVec₁_defined : 𝚺₀-Function₁ (fun x : V ↦ ?[x]) via mkVec₁De
 @[simp] lemma eval_mkVec₁Def (v) :
     Semiformula.Evalbm V v mkVec₁Def.val ↔ v 0 = ?[v 1] := mkVec₁_defined.df.iff v
 
-instance mkVec₁_definable : 𝚺₀-Function₁ (fun x : V ↦ ?[x]) := Defined.to_definable _ mkVec₁_defined
+instance mkVec₁_definable : 𝚺₀-Function₁ (fun x : V ↦ ?[x]) := mkVec₁_defined.to_definable
 
-instance mkVec₁_definable' (Γ) : Γ-Function₁ (fun x : V ↦ ?[x]) := .of_zero mkVec₁_definable _
+instance mkVec₁_definable' (ℌ) : ℌ-Function₁ (fun x : V ↦ ?[x]) := mkVec₁_definable.of_zero
 
-def _root_.LO.FirstOrder.Arith.mkVec₂Def : 𝚺₁-Semisentence 3 := .mkSigma
+def _root_.LO.FirstOrder.Arith.mkVec₂Def : 𝚺₁.Semisentence 3 := .mkSigma
   “s x y | ∃ sy, !mkVec₁Def sy y ∧ !consDef s x sy” (by simp)
 
 lemma mkVec₂_defined : 𝚺₁-Function₂ (fun x y : V ↦ ?[x, y]) via mkVec₂Def := by
@@ -102,9 +102,9 @@ lemma mkVec₂_defined : 𝚺₁-Function₂ (fun x y : V ↦ ?[x, y]) via mkVec
 @[simp] lemma eval_mkVec₂Def (v) :
     Semiformula.Evalbm V v mkVec₂Def.val ↔ v 0 = ?[v 1, v 2] := mkVec₂_defined.df.iff v
 
-instance mkVec₂_definable : 𝚺₁-Function₂ (fun x y : V ↦ ?[x, y]) := Defined.to_definable _ mkVec₂_defined
+instance mkVec₂_definable : 𝚺₁-Function₂ (fun x y : V ↦ ?[x, y]) := mkVec₂_defined.to_definable
 
-instance mkVec₂_definable' (Γ) : (Γ, m + 1)-Function₂ (fun x y : V ↦ ?[x, y]) := .of_sigmaOne mkVec₂_definable _ _
+instance mkVec₂_definable' (Γ m) : Γ-[m + 1]-Function₂ (fun x y : V ↦ ?[x, y]) := .of_sigmaOne mkVec₂_definable _ _
 
 end
 
@@ -162,12 +162,12 @@ def Graph : V → Prop := construction.Fixpoint ![]
 
 section
 
-def graphDef : 𝚺₁-Semisentence 1 := blueprint.fixpointDef
+def graphDef : 𝚺₁.Semisentence 1 := blueprint.fixpointDef
 
 lemma graph_defined : 𝚺₁-Predicate (Graph : V → Prop) via graphDef :=
   construction.fixpoint_defined
 
-instance graph_definable : 𝚺₁-Predicate (Graph : V → Prop) := Defined.to_definable _ graph_defined
+instance graph_definable : 𝚺₁-Predicate (Graph : V → Prop) := graph_defined.to_definable
 
 end
 
@@ -201,7 +201,7 @@ lemma graph_exists (v i : V) : ∃ x, Graph ⟪v, i, x⟫ := by
   suffices ∀ i' ≤ i, ∀ v' ≤ v, ∃ x, Graph ⟪v', i', x⟫ from this i (by simp) v (by simp)
   intro i' hi'
   induction i' using induction_sigma1
-  · definability
+  · {  }
   case zero =>
     intro v' _
     exact ⟨fstIdx v', graph_case.mpr <| Or.inl ⟨v', rfl⟩⟩
@@ -209,7 +209,7 @@ lemma graph_exists (v i : V) : ∃ x, Graph ⟪v, i, x⟫ := by
     intro v' hv'
     rcases ih (le_trans le_self_add hi') (sndIdx v') (le_trans (by simp) hv') with ⟨x, hx⟩
     exact ⟨x, graph_case.mpr <| Or.inr ⟨v', i', x, rfl, hx⟩⟩
-
+/--/
 lemma graph_unique {v i x₁ x₂ : V} : Graph ⟪v, i, x₁⟫ → Graph ⟪v, i, x₂⟫ → x₁ = x₂ := by
   induction i using induction_pi1 generalizing v x₁ x₂
   · definability
@@ -260,7 +260,7 @@ lemma cons_cases (x : V) : x = 0 ∨ ∃ y v, x = y ∷ v := by
   · simp
   · right; exact ⟨π₁ z, π₂ z, by simp [cons]⟩
 
-lemma cons_induction (Γ) {P : V → Prop} (hP : (Γ, 1)-Predicate P)
+lemma cons_induction (Γ) {P : V → Prop} (hP : Γ-[1]-Predicate P)
     (nil : P 0) (cons : ∀ x v, P v → P (x ∷ v)) : ∀ v, P v :=
   order_induction_hh ℒₒᵣ Γ 1 hP (by
     intro v ih
@@ -280,7 +280,7 @@ lemma cons_induction_pi₁ {P : V → Prop} (hP : 𝚷₁-Predicate P)
 
 section
 
-def _root_.LO.FirstOrder.Arith.nthDef : 𝚺₁-Semisentence 3 :=
+def _root_.LO.FirstOrder.Arith.nthDef : 𝚺₁.Semisentence 3 :=
   .mkSigma “y v i | ∃ pr, !pair₃Def pr v i y ∧ !graphDef pr” (by simp)
 
 lemma nth_defined : 𝚺₁-Function₂ (nth : V → V → V) via nthDef := by
@@ -344,8 +344,8 @@ end nth
 namespace VecRec
 
 structure Blueprint (arity : ℕ) where
-  nil : 𝚺₁-Semisentence (arity + 1)
-  cons : 𝚺₁-Semisentence (arity + 4)
+  nil : 𝚺₁.Semisentence (arity + 1)
+  cons : 𝚺₁.Semisentence (arity + 4)
 
 namespace Blueprint
 
@@ -368,9 +368,9 @@ def blueprint : Fixpoint.Blueprint arity where
           !pairDef pr xxs cons ∧ :⟪xs, ih⟫:∈ C)”
       (by simp))
 
-def graphDef : 𝚺₁-Semisentence (arity + 1) := β.blueprint.fixpointDef
+def graphDef : 𝚺₁.Semisentence (arity + 1) := β.blueprint.fixpointDef
 
-def resultDef : 𝚺₁-Semisentence (arity + 2) :=
+def resultDef : 𝚺₁.Semisentence (arity + 2) :=
   .mkSigma “y xs | ∃ pr, !pairDef pr xs y ∧ !β.graphDef pr ⋯” (by simp)
 
 end Blueprint
@@ -433,7 +433,7 @@ lemma graph_defined : Arith.Defined (fun v ↦ c.Graph (v ·.succ) (v 0)) β.gra
 instance graph_definable : Arith.Definable ℒₒᵣ 𝚺₁ (fun v ↦ c.Graph (v ·.succ) (v 0)) := Defined.to_definable _ c.graph_defined
 
 instance graph_definable' (param) : 𝚺₁-Predicate (c.Graph param) := by
-  simpa using Definable.retractiont (n := 1) c.graph_definable (#0 :> fun i ↦ &(param i))
+  simpa using HierarchySymbol.Boldface.retractiont (n := 1) c.graph_definable (#0 :> fun i ↦ &(param i))
 
 end
 
@@ -560,7 +560,7 @@ def len (v : V) : V := construction.result ![] v
 
 section
 
-def _root_.LO.FirstOrder.Arith.lenDef : 𝚺₁-Semisentence 2 := blueprint.resultDef
+def _root_.LO.FirstOrder.Arith.lenDef : 𝚺₁.Semisentence 2 := blueprint.resultDef
 
 lemma len_defined : 𝚺₁-Function₁ (len : V → V) via lenDef := construction.result_defined
 
@@ -681,7 +681,7 @@ lemma takeLast_cons (x v : V) :
 
 section
 
-def _root_.LO.FirstOrder.Arith.takeLastDef : 𝚺₁-Semisentence 3 := blueprint.resultDef
+def _root_.LO.FirstOrder.Arith.takeLastDef : 𝚺₁.Semisentence 3 := blueprint.resultDef
 
 lemma takeLast_defined : 𝚺₁-Function₂ (takeLast : V → V → V) via takeLastDef := construction.result_defined
 
@@ -768,7 +768,7 @@ def concat (v z : V) : V := construction.result ![z] v
 
 section
 
-def _root_.LO.FirstOrder.Arith.concatDef : 𝚺₁-Semisentence 3 := blueprint.resultDef
+def _root_.LO.FirstOrder.Arith.concatDef : 𝚺₁.Semisentence 3 := blueprint.resultDef
 
 lemma concat_defined : 𝚺₁-Function₂ (concat : V → V → V) via concatDef := construction.result_defined
 
@@ -840,7 +840,7 @@ lemma le_of_memVec {x v : V} (h : x ∈ᵥ v) : x ≤ v := by
 
 section
 
-def _root_.LO.FirstOrder.Arith.memVecDef : 𝚫₁-Semisentence 2 := .mkDelta
+def _root_.LO.FirstOrder.Arith.memVecDef : 𝚫₁.Semisentence 2 := .mkDelta
   (.mkSigma “x v | ∃ l, !lenDef l v ∧ ∃ i < l, !nthDef x v i” (by simp))
   (.mkPi “x v | ∀ l, !lenDef l v → ∃ i < l, ∀ vi, !nthDef vi v i → x = vi” (by simp))
 
@@ -876,7 +876,7 @@ scoped infix:30 " ⊆ᵥ " => SubsetVec
 
 section
 
-def _root_.LO.FirstOrder.Arith.subsetVecDef : 𝚫₁-Semisentence 2 := .mkDelta
+def _root_.LO.FirstOrder.Arith.subsetVecDef : 𝚫₁.Semisentence 2 := .mkDelta
   (.mkSigma “v w | ∀ x <⁺ v, !memVecDef.pi x v → !memVecDef.sigma x w” (by simp))
   (.mkPi “v w | ∀ x <⁺ v, !memVecDef.sigma x v → !memVecDef.pi x w” (by simp))
 
@@ -926,7 +926,7 @@ def repeatVec (x k : V) : V := repeatVec.construction.result ![x] k
 
 section
 
-def _root_.LO.FirstOrder.Arith.repeatVecDef : 𝚺₁-Semisentence 3 := repeatVec.blueprint.resultDef |>.rew (Rew.substs ![#0, #2, #1])
+def _root_.LO.FirstOrder.Arith.repeatVecDef : 𝚺₁.Semisentence 3 := repeatVec.blueprint.resultDef |>.rew (Rew.substs ![#0, #2, #1])
 
 lemma repeatVec_defined : 𝚺₁-Function₂ (repeatVec : V → V → V) via repeatVecDef :=
   fun v ↦ by simp [repeatVec.construction.result_defined_iff, repeatVecDef]; rfl
@@ -997,7 +997,7 @@ def vecToSet (v : V) : V := construction.result ![] v
 
 section
 
-def _root_.LO.FirstOrder.Arith.vecToSetDef : 𝚺₁-Semisentence 2 := blueprint.resultDef
+def _root_.LO.FirstOrder.Arith.vecToSetDef : 𝚺₁.Semisentence 2 := blueprint.resultDef
 
 lemma vecToSet_defined : 𝚺₁-Function₁ (vecToSet : V → V) via vecToSetDef := construction.result_defined
 

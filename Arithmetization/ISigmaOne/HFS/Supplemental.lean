@@ -12,30 +12,30 @@ namespace LO.Arith
 
 open FirstOrder FirstOrder.Arith
 
-variable {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐈𝚺₁]
+variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
 section seqExp
 
-lemma seqCons_le {x y s t : M} (hxy : x ≤ y) (hst : s ≤ t) :
+lemma seqCons_le {x y s t : V} (hxy : x ≤ y) (hst : s ≤ t) :
     s ⁀' x ≤ t + exp ((2 * t + y + 1)^2) := by
   have : s ⁀' x ≤ t + exp ⟪2 * t, y⟫ := by
     simp [seqCons]; exact insert_le_of_le_of_le (pair_le_pair (le_trans (lh_bound s) (by simp [hst])) hxy) hst
   exact le_trans this (by simp)
 
-lemma seqProduct_exists_unique (s a : M) : ∃! t : M, ∀ x, x ∈ t ↔ ∃ v ∈ s, ∃ u ∈ a, x = v ⁀' u := by
+lemma seqProduct_exists_unique (s a : V) : ∃! t : V, ∀ x, x ∈ t ↔ ∃ v ∈ s, ∃ u ∈ a, x = v ⁀' u := by
   have : 𝚺₁-Predicate fun x ↦ ∃ v ∈ s, ∃ u ∈ a, x = v ⁀' u := by definability
   exact finite_comprehension₁! this ⟨log s + exp ((2 * log s + log a + 1)^2) + 1, by
     rintro x ⟨v, hv, u, hu, rfl⟩
     exact lt_succ_iff_le.mpr <| seqCons_le (le_log_of_mem hu) (le_log_of_mem hv)⟩
 
-def seqProduct (a s : M) : M := Classical.choose! (seqProduct_exists_unique a s)
+def seqProduct (a s : V) : V := Classical.choose! (seqProduct_exists_unique a s)
 
 infixl:60 " ×ˢ " => seqProduct
 
-lemma mem_seqProduct_iff {x s a : M} : x ∈ s ×ˢ a ↔ ∃ v ∈ s, ∃ u ∈ a, x = v ⁀' u :=
+lemma mem_seqProduct_iff {x s a : V} : x ∈ s ×ˢ a ↔ ∃ v ∈ s, ∃ u ∈ a, x = v ⁀' u :=
   Classical.choose!_spec (seqProduct_exists_unique s a) x
 
-lemma mem_seqProduct_iff' {u v a s : M} (Hv : Seq v) (Hs : ∀ w ∈ s, Seq w) :
+lemma mem_seqProduct_iff' {u v a s : V} (Hv : Seq v) (Hs : ∀ w ∈ s, Seq w) :
     v ⁀' u ∈ s ×ˢ a ↔ v ∈ s ∧ u ∈ a :=
   ⟨by intro h
       rcases mem_seqProduct_iff.mp h with ⟨v', hv', u', hu', e⟩
@@ -45,16 +45,16 @@ lemma mem_seqProduct_iff' {u v a s : M} (Hv : Seq v) (Hs : ∀ w ∈ s, Seq w) :
    by rintro ⟨hv, hu⟩
       exact mem_seqProduct_iff.mpr ⟨v, hv, u, hu, rfl⟩⟩
 
-lemma seqCons_mem_seqProduct {u v a s : M} (hv : v ∈ s) (hu : u ∈ a) : v ⁀' u ∈ s ×ˢ a :=
+lemma seqCons_mem_seqProduct {u v a s : V} (hv : v ∈ s) (hu : u ∈ a) : v ⁀' u ∈ s ×ˢ a :=
   mem_seqProduct_iff.mpr (⟨v, hv, u, hu, rfl⟩)
 
-lemma mem_seqProduct_bound {x s a : M} (h : x ∈ s ×ˢ a) : x ≤ s + exp ((2 * s + a + 1)^2) := by
+lemma mem_seqProduct_bound {x s a : V} (h : x ∈ s ×ˢ a) : x ≤ s + exp ((2 * s + a + 1)^2) := by
   rcases mem_seqProduct_iff.mp h with ⟨v, hv, u, hu, rfl⟩
   exact seqCons_le (le_of_lt <| lt_of_mem hu) (le_of_lt <| lt_of_mem hv)
 
 section
 
-private lemma seqProduct_graph (t s a : M) :
+private lemma seqProduct_graph (t s a : V) :
     t = s ×ˢ a ↔ ∃ e, e = exp ((2 * s + a + 1)^2) ∧ ∀ x ≤ t + s + e, x ∈ t ↔ ∃ v ∈ s, ∃ u ∈ a, x = v ⁀' u :=
 ⟨by rintro rfl; exact ⟨exp ((2 * s + a + 1)^2), rfl, by intro x _; simp [mem_seqProduct_iff]⟩,
  by rintro ⟨_, rfl, h⟩
@@ -67,17 +67,17 @@ private lemma seqProduct_graph (t s a : M) :
       exact h x (le_trans (mem_seqProduct_bound hx) <| by simp [add_assoc])
         |>.mpr (mem_seqProduct_iff.mp hx)⟩
 
-def _root_.LO.FirstOrder.Arith.seqProductDef : 𝚺₁-Semisentence 3 := .mkSigma
+def _root_.LO.FirstOrder.Arith.seqProductDef : 𝚺₁.Semisentence 3 := .mkSigma
   “t s a | ∃ e, !expDef e (2 * s + a + 1)² ∧ ∀ x <⁺ t + s + e, x ∈ t ↔ ∃ v ∈' s, ∃ u ∈' a, !seqConsDef x v u”
   (by simp [Hierarchy.iff_iff])
 
-lemma seqProduct_defined : 𝚺₁-Function₂ (seqProduct : M → M → M) via seqProductDef := by
+lemma seqProduct_defined : 𝚺₁-Function₂ (seqProduct : V → V → V) via seqProductDef := by
   intro v; simp [seqProductDef, seqProduct_graph]
 
 @[simp] lemma seqProduct_defined_iff (v) :
-    Semiformula.Evalbm M v seqProductDef.val ↔ v 0 = v 1 ×ˢ v 2 := seqProduct_defined.df.iff v
+    Semiformula.Evalbm V v seqProductDef.val ↔ v 0 = v 1 ×ˢ v 2 := seqProduct_defined.df.iff v
 
-instance seqProduct_definable : 𝚺₁-Function₂ (seqProduct : M → M → M) := Defined.to_definable _ seqProduct_defined
+instance seqProduct_definable : 𝚺₁-Function₂ (seqProduct : V → V → V) := seqProduct_defined.to_definable
 
 end
 
@@ -85,39 +85,39 @@ def seqExp.formulae : PR.Blueprint 1 where
   zero := .mkSigma “y x | y = 1” (by simp)
   succ := .mkSigma “y ih n x | !seqProductDef y ih x” (by simp)
 
-def seqExp.construction : PR.Construction M seqExp.formulae where
+def seqExp.construction : PR.Construction V seqExp.formulae where
   zero := fun _ ↦ {∅}
   succ := fun a _ s ↦ s ×ˢ a 0
-  zero_defined := by intro v; simp [formulae, one_eq_singleton (M := M)]
+  zero_defined := by intro v; simp [formulae, one_eq_singleton (V := V)]
   succ_defined := by intro v; simp [formulae]; rfl
 
-def seqExp (a k : M) : M := seqExp.construction.result ![a] k
+def seqExp (a k : V) : V := seqExp.construction.result ![a] k
 
 infix:80 " ^ˢ " => seqExp
 
-@[simp] lemma seqExp_zero (a : M) : a ^ˢ 0 = {∅} := by simp [seqExp, seqExp.construction]
+@[simp] lemma seqExp_zero (a : V) : a ^ˢ 0 = {∅} := by simp [seqExp, seqExp.construction]
 
-@[simp] lemma seqExp_succ (a k : M) : a ^ˢ (k + 1) = (a ^ˢ k) ×ˢ a := by simp [seqExp, seqExp.construction]
+@[simp] lemma seqExp_succ (a k : V) : a ^ˢ (k + 1) = (a ^ˢ k) ×ˢ a := by simp [seqExp, seqExp.construction]
 
-def _root_.LO.FirstOrder.Arith.seqExpDef : 𝚺₁-Semisentence 3 := seqExp.formulae.resultDef |>.rew (Rew.substs ![#0, #2, #1])
+def _root_.LO.FirstOrder.Arith.seqExpDef : 𝚺₁.Semisentence 3 := seqExp.formulae.resultDef |>.rew (Rew.substs ![#0, #2, #1])
 
-lemma seqExp_defined : 𝚺₁-Function₂ (seqExp : M → M → M) via seqExpDef :=
+lemma seqExp_defined : 𝚺₁-Function₂ (seqExp : V → V → V) via seqExpDef :=
   fun v ↦ by simp [seqExp.construction.result_defined_iff, seqExpDef]; rfl
 
 @[simp] lemma seqExp_defined_iff (v) :
-    Semiformula.Evalbm M v seqExpDef.val ↔ v 0 = v 1 ^ˢ v 2 := seqExp_defined.df.iff v
+    Semiformula.Evalbm V v seqExpDef.val ↔ v 0 = v 1 ^ˢ v 2 := seqExp_defined.df.iff v
 
-instance seqExp_definable : 𝚺₁-Function₂ (seqExp : M → M → M) := Defined.to_definable _ seqExp_defined
+instance seqExp_definable : 𝚺₁-Function₂ (seqExp : V → V → V) := seqExp_defined.to_definable
 
-@[simp, definability] instance seqExp_definable' (Γ) : (Γ, m + 1)-Function₂ (seqExp : M → M → M) :=
+@[simp, definability] instance seqExp_definable' (Γ) : Γ-[m + 1]-Function₂ (seqExp : V → V → V) :=
   .of_sigmaOne seqExp_definable _ _
 
-lemma mem_seqExp_iff {s a k : M} : s ∈ a ^ˢ k ↔ Seq s ∧ lh s = k ∧ (∀ i z, ⟪i, z⟫ ∈ s → z ∈ a) := by
+lemma mem_seqExp_iff {s a k : V} : s ∈ a ^ˢ k ↔ Seq s ∧ lh s = k ∧ (∀ i z, ⟪i, z⟫ ∈ s → z ∈ a) := by
   induction k using induction_pi1 generalizing s
-  · suffices 𝚷₁-Predicate fun {k} => ∀ {s : M}, s ∈ a ^ˢ k ↔ Seq s ∧ lh s = k ∧ ∀ i < s, ∀ z < s, ⟪i, z⟫ ∈ s → z ∈ a
+  · suffices 𝚷₁-Predicate fun {k} => ∀ {s : V}, s ∈ a ^ˢ k ↔ Seq s ∧ lh s = k ∧ ∀ i < s, ∀ z < s, ⟪i, z⟫ ∈ s → z ∈ a
     by exact this.of_iff (fun k ↦
       forall_congr' <| fun s ↦ iff_congr (by rfl) <| and_congr (by rfl) <| and_congr (by rfl)
-      ⟨fun h i hi z _ hiz ↦ h i z hiz, fun h i z hiz ↦ h i (lt_of_mem_dom hiz) z (lt_of_mem_rng hiz) hiz⟩)
+      ⟨fun h i _ z _ hiz ↦ h i z hiz, fun h i z hiz ↦ h i (lt_of_mem_dom hiz) z (lt_of_mem_rng hiz) hiz⟩)
     definability
   case zero =>
     simp only [seqExp_zero, mem_singleton_iff]
@@ -148,11 +148,11 @@ lemma mem_seqExp_iff {s a k : M} : s ∈ a ^ˢ k ↔ Seq s ∧ lh s = k ∧ (∀
         have hs : s ∈ a ^ˢ k := @ih s |>.mpr ⟨Hs', hsk, fun i z hiz ↦ hs i z (Seq.subset_seqCons s x hiz)⟩
         exact seqCons_mem_seqProduct hs hx
 
-lemma seq_of_mem_seqExp {s a k : M} (h : s ∈ a ^ˢ k) : Seq s := (mem_seqExp_iff.mp h).1
+lemma seq_of_mem_seqExp {s a k : V} (h : s ∈ a ^ˢ k) : Seq s := (mem_seqExp_iff.mp h).1
 
-lemma lh_of_mem_seqExp {s a k : M} (h : s ∈ a ^ˢ k) : lh s = k := (mem_seqExp_iff.mp h).2.1
+lemma lh_of_mem_seqExp {s a k : V} (h : s ∈ a ^ˢ k) : lh s = k := (mem_seqExp_iff.mp h).2.1
 
-lemma pair_mem_mem_seqExp {s a k : M} (h : s ∈ a ^ˢ k) {i z} (hiz : ⟪i, z⟫ ∈ s) : z ∈ a := (mem_seqExp_iff.mp h).2.2 i z hiz
+lemma pair_mem_mem_seqExp {s a k : V} (h : s ∈ a ^ˢ k) {i z} (hiz : ⟪i, z⟫ ∈ s) : z ∈ a := (mem_seqExp_iff.mp h).2.2 i z hiz
 
 end seqExp
 

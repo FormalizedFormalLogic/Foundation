@@ -114,10 +114,10 @@ lemma disjDistr (ps s : V) (d : T.Derivable (vecToSet ps ∪ s)) : T.Derivable (
       (∀ i < len ps - k, ps.[i] ∈ s') → T.Derivable (insert (^⋁ takeLast ps k) (s' ∪ s)) := by
     intro k hk
     induction k using induction_sigma1
-    · apply Definable.imp (by definability)
-      apply Definable.ball_le (by definability)
-      apply Definable.imp (by definability)
-      apply Definable.imp (by definability)
+    · apply HierarchySymbol.Boldface.imp (by definability)
+      apply HierarchySymbol.Boldface.ball_le (by definability)
+      apply HierarchySymbol.Boldface.imp (by definability)
+      apply HierarchySymbol.Boldface.imp (by definability)
       definability
     case zero =>
       intro s' _ ss hs'

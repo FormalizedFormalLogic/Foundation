@@ -364,7 +364,7 @@ variable (L)
 
 def Language.UFormula : V → Prop := (construction L).Fixpoint ![]
 
-def _root_.LO.FirstOrder.Arith.LDef.uformulaDef (pL : LDef) : 𝚫₁-Semisentence 1 :=
+def _root_.LO.FirstOrder.Arith.LDef.uformulaDef (pL : LDef) : 𝚫₁.Semisentence 1 :=
   (blueprint pL).fixpointDefΔ₁
 
 lemma uformula_defined : 𝚫₁-Predicate L.UFormula via pL.uformulaDef :=
@@ -385,7 +385,7 @@ abbrev Language.Formula (p : V) : Prop := L.Semiformula 0 p
 lemma Language.UFormula.toSemiformula {p} (h : L.UFormula p) : L.Semiformula (fstIdx p) p :=
   ⟨h, by rfl⟩
 
-def _root_.LO.FirstOrder.Arith.LDef.isSemiformulaDef (pL : LDef) : 𝚫₁-Semisentence 2 := .mkDelta
+def _root_.LO.FirstOrder.Arith.LDef.isSemiformulaDef (pL : LDef) : 𝚫₁.Semisentence 2 := .mkDelta
   (.mkSigma “n p | !pL.uformulaDef.sigma p ∧ !fstIdxDef n p” (by simp))
   (.mkPi “n p | !pL.uformulaDef.pi p ∧ !fstIdxDef n p” (by simp))
 
@@ -508,7 +508,7 @@ lemma Language.Semiformula.pos {n p : V} (h : L.Semiformula n p) : 0 < p := h.1.
 @[simp] lemma Language.Semiformula.all {n p : V} : L.Semiformula n (^∀[n] p) ↔ L.Semiformula (n + 1) p := by simp [Language.Semiformula]
 @[simp] lemma Language.Semiformula.ex {n p : V} : L.Semiformula n (^∃[n] p) ↔ L.Semiformula (n + 1) p := by simp [Language.Semiformula]
 
-lemma Language.UFormula.induction (Γ) {P : V → Prop} (hP : (Γ, 1)-Predicate P)
+lemma Language.UFormula.induction (Γ) {P : V → Prop} (hP : Γ-[1]-Predicate P)
     (hrel : ∀ n k r v, L.Rel k r → L.SemitermVec k n v → P (^rel n k r v))
     (hnrel : ∀ n k r v, L.Rel k r → L.SemitermVec k n v → P (^nrel n k r v))
     (hverum : ∀ n, P ^⊤[n])
@@ -543,8 +543,8 @@ lemma Language.Semiformula.induction (Γ) {P : V → V → Prop} (hP : (Γ, 1)-R
   suffices ∀ p, 𝐔 p → ∀ n ≤ p, fstIdx p = n → P n p
   by rintro n p ⟨h, rfl⟩; exact this p h (fstIdx p) (by simp) rfl
   apply Language.UFormula.induction (P := fun p ↦ ∀ n ≤ p, fstIdx p = n → P n p) Γ
-  · apply Definable.ball_le (by definability)
-    apply Definable.imp (by definability)
+  · apply HierarchySymbol.Boldface.ball_le (by definability)
+    apply HierarchySymbol.Boldface.imp (by definability)
     simp; exact hP
   · rintro n k r v hr hv _ _ rfl; simpa using hrel n k r v hr hv
   · rintro n k r v hr hv _ _ rfl; simpa using hnrel n k r v hr hv
@@ -590,16 +590,16 @@ end formula
 namespace Language.UformulaRec1
 
 structure Blueprint (pL : LDef) where
-  rel        : 𝚺₁-Semisentence 6
-  nrel       : 𝚺₁-Semisentence 6
-  verum      : 𝚺₁-Semisentence 3
-  falsum     : 𝚺₁-Semisentence 3
-  and        : 𝚺₁-Semisentence 7
-  or         : 𝚺₁-Semisentence 7
-  all        : 𝚺₁-Semisentence 5
-  ex         : 𝚺₁-Semisentence 5
-  allChanges : 𝚺₁-Semisentence 3
-  exChanges  : 𝚺₁-Semisentence 3
+  rel        : 𝚺₁.Semisentence 6
+  nrel       : 𝚺₁.Semisentence 6
+  verum      : 𝚺₁.Semisentence 3
+  falsum     : 𝚺₁.Semisentence 3
+  and        : 𝚺₁.Semisentence 7
+  or         : 𝚺₁.Semisentence 7
+  all        : 𝚺₁.Semisentence 5
+  ex         : 𝚺₁.Semisentence 5
+  allChanges : 𝚺₁.Semisentence 3
+  exChanges  : 𝚺₁.Semisentence 3
 
 namespace Blueprint
 
@@ -637,10 +637,10 @@ def blueprint (β : Blueprint pL) : Fixpoint.Blueprint 0 := ⟨.mkDelta
       (∀ param', !β.exChanges param' param n → :⟪param', p₁, y₁⟫:∈ C) ∧ !qqExDef p n p₁ ∧ !β.ex.graphDelta.pi.val y param n p₁ y₁))
   ” (by simp))⟩
 
-def graph : 𝚺₁-Semisentence 3 := .mkSigma
+def graph : 𝚺₁.Semisentence 3 := .mkSigma
   “param p y | ∃ pr, !pair₃Def pr param p y ∧ !β.blueprint.fixpointDef pr” (by simp)
 
-def result : 𝚺₁-Semisentence 3 := .mkSigma
+def result : 𝚺₁.Semisentence 3 := .mkSigma
   “y param p | (!pL.uformulaDef.pi p → !β.graph param p y) ∧ (¬!pL.uformulaDef.sigma p → y = 0)” (by simp)
 
 end Blueprint
@@ -1209,9 +1209,9 @@ lemma uformula_result_induction {P : V → V → V → Prop} (hP : 𝚺₁-Relat
         (DefinableFunction.comp₂_infer (DefinableFunction.var _) (DefinableFunction.comp₁_infer (DefinableFunction.var _)))
         (DefinableFunction.comp₂_infer (DefinableFunction.var _) (DefinableFunction.comp₁_infer (DefinableFunction.var _))))
   apply sigma₁_order_ball_induction hf ?_ ?_ p param
-  · apply Definable.imp
-      (Definable.comp₁_infer (DefinableFunction.var _))
-      (Definable.comp₃_infer
+  · apply HierarchySymbol.Boldface.imp
+      (HierarchySymbol.Boldface.comp₁_infer (DefinableFunction.var _))
+      (HierarchySymbol.Boldface.comp₃_infer
         (DefinableFunction.var _)
         (DefinableFunction.var _)
         (DefinableFunction.comp₂_infer (DefinableFunction.var _) (DefinableFunction.var _)))
@@ -1255,17 +1255,17 @@ lemma semiformula_result_induction {P : V → V → V → V → Prop} (hP : 𝚺
   intro param p hp
   apply c.uformula_result_induction (P := fun param p y ↦ ∀ n ≤ p, n = fstIdx p → P param n p y)
     ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
-  · apply Definable.ball_le (DefinableFunction.var _)
+  · apply HierarchySymbol.Boldface.ball_le (DefinableFunction.var _)
     simp_all only [zero_add, Nat.succ_eq_add_one, Nat.reduceAdd, Fin.isValue, Fin.succ_one_eq_two,
       Fin.succ_zero_eq_one]
-    apply LO.FirstOrder.Arith.Definable.imp
+    apply LO.FirstOrder.Arith.HierarchySymbol.Boldface.imp
     · simp_all only [SigmaPiDelta.alt_sigma, Fin.isValue]
-      apply LO.FirstOrder.Arith.Definable.comp₂_infer
+      apply LO.FirstOrder.Arith.HierarchySymbol.Boldface.comp₂_infer
       · simp_all only [zero_add, Fin.isValue, DefinableFunction.var]
       · simp_all only [zero_add, Fin.isValue]
         apply LO.FirstOrder.Arith.DefinableFunction.comp₁_infer
         simp_all only [zero_add, Fin.isValue, DefinableFunction.var]
-    · apply LO.FirstOrder.Arith.Definable.comp₄_infer
+    · apply LO.FirstOrder.Arith.HierarchySymbol.Boldface.comp₄_infer
       · simp_all only [zero_add, Fin.isValue, DefinableFunction.var]
       · simp_all only [zero_add, Fin.isValue]
         apply LO.FirstOrder.Arith.DefinableFunction.comp₁_infer
@@ -1299,16 +1299,16 @@ end Language.UformulaRec1
 namespace Language.UformulaRec
 
 structure Blueprint (pL : LDef) (arity : ℕ) where
-  rel        : 𝚺₁-Semisentence (arity + 5)
-  nrel       : 𝚺₁-Semisentence (arity + 5)
-  verum      : 𝚺₁-Semisentence (arity + 2)
-  falsum     : 𝚺₁-Semisentence (arity + 2)
-  and        : 𝚺₁-Semisentence (arity + 6)
-  or         : 𝚺₁-Semisentence (arity + 6)
-  all        : 𝚺₁-Semisentence (arity + 4)
-  ex         : 𝚺₁-Semisentence (arity + 4)
-  allChanges : Fin arity → 𝚺₁-Semisentence (arity + 2)
-  exChanges  : Fin arity → 𝚺₁-Semisentence (arity + 2)
+  rel        : 𝚺₁.Semisentence (arity + 5)
+  nrel       : 𝚺₁.Semisentence (arity + 5)
+  verum      : 𝚺₁.Semisentence (arity + 2)
+  falsum     : 𝚺₁.Semisentence (arity + 2)
+  and        : 𝚺₁.Semisentence (arity + 6)
+  or         : 𝚺₁.Semisentence (arity + 6)
+  all        : 𝚺₁.Semisentence (arity + 4)
+  ex         : 𝚺₁.Semisentence (arity + 4)
+  allChanges : Fin arity → 𝚺₁.Semisentence (arity + 2)
+  exChanges  : Fin arity → 𝚺₁.Semisentence (arity + 2)
 
 structure Construction (L : Arith.Language V) {arity} (φ : Blueprint pL arity) where
   rel                        (param : Fin arity → V) (n k R v : V) : V
@@ -1336,7 +1336,7 @@ variable {arity} (β : Blueprint pL arity)
 
 namespace Blueprint
 
-def decomp {n : ℕ} (s : 𝚺₁-Semisentence n) : 𝚺₁-Semisentence 1 :=
+def decomp {n : ℕ} (s : 𝚺₁.Semisentence n) : 𝚺₁.Semisentence 1 :=
   .mkSigma (∃^[n] (Matrix.conj fun i : Fin n ↦
     (unNpairDef i).val/[#(i.natAdd 1), #⟨n, by simp⟩]) ⋏ (Rew.substs fun i : Fin n ↦ #(i.natAdd 1)).hom s) (by simp)
 

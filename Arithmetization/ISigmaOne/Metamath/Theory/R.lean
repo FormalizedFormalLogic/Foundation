@@ -46,7 +46,7 @@ class R₀Theory (T : LOR.TTheory (V := V)) extends EQTheory T where
 /-
 section
 
-def _root_.LO.FirstOrder.Arith.eqTheory : 𝚺₁-Semisentence 0 := .mkSigma
+def _root_.LO.FirstOrder.Arith.eqTheory : 𝚺₁.Semisentence 0 := .mkSigma
   “(∃ b0, !qqBvarDef b0 0 ∧ !qqAllDef )” (by simp)
 
 end

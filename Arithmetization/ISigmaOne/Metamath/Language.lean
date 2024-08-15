@@ -41,10 +41,10 @@ instance Defined.func_definable : 𝚺₀-Relation L.Func := Defined.to_definabl
 instance Defined.rel_definable : 𝚺₀-Relation L.Rel := Defined.to_definable _ Defined.rel
 
 @[simp, definability] instance Defined.func_definable' (Γ) : Γ-Relation L.Func :=
-  Definable.of_zero Defined.func_definable _
+  HierarchySymbol.Boldface.of_zero Defined.func_definable _
 
 @[simp, definability] instance Defined.rel_definable' (Γ) : Γ-Relation L.Rel :=
-  Definable.of_zero Defined.rel_definable _
+  HierarchySymbol.Boldface.of_zero Defined.rel_definable _
 
 end Language
 

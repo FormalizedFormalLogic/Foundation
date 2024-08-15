@@ -153,7 +153,7 @@ def Language.Semiterm (n : V) : V → Prop := (construction L).Fixpoint ![n]
 
 abbrev Language.Term : V → Prop := L.Semiterm 0
 
-def _root_.LO.FirstOrder.Arith.LDef.isSemitermDef (pL : LDef) : 𝚫₁-Semisentence 2 := (blueprint pL).fixpointDefΔ₁.rew (Rew.substs ![#1, #0])
+def _root_.LO.FirstOrder.Arith.LDef.isSemitermDef (pL : LDef) : 𝚫₁.Semisentence 2 := (blueprint pL).fixpointDefΔ₁.rew (Rew.substs ![#1, #0])
 
 lemma isSemiterm_defined : 𝚫₁-Relation L.Semiterm via pL.isSemitermDef :=
   ⟨HSemiformula.ProperOn.rew (construction L).fixpoint_definedΔ₁.proper _,
@@ -198,7 +198,7 @@ lemma Language.SemitermVec.prop {n m w : V} (h : L.SemitermVec n m w) {i} : i < 
 
 section
 
-def _root_.LO.FirstOrder.Arith.LDef.semitermVecDef (pL : LDef) : 𝚫₁-Semisentence 3 := .mkDelta
+def _root_.LO.FirstOrder.Arith.LDef.semitermVecDef (pL : LDef) : 𝚫₁.Semisentence 3 := .mkDelta
   (.mkSigma
     “n m w | !lenDef n w ∧ ∀ i < n, ∃ u, !nthDef u w i ∧ !pL.isSemitermDef.sigma m u”
     (by simp))
@@ -256,7 +256,7 @@ alias ⟨Language.Semiterm.case, Language.Semiterm.mk⟩ := Language.Semiterm.ca
 lemma Language.Semiterm.func {k f v : V} (hkf : L.Func k f) (hv : L.SemitermVec k n v) :
     L.Semiterm n (^func k f v) := Language.Semiterm.func_iff.mpr ⟨hkf, hv⟩
 
-lemma Language.Semiterm.induction (Γ) {P : V → Prop} (hP : (Γ, 1)-Predicate P)
+lemma Language.Semiterm.induction (Γ) {P : V → Prop} (hP : Γ-[1]-Predicate P)
     (hbvar : ∀ z < n, P (^#z)) (hfvar : ∀ x, P (^&x))
     (hfunc : ∀ k f v, L.Func k f → L.SemitermVec k n v → (∀ i < k, P v.[i]) → P (^func k f v)) :
     ∀ t, L.Semiterm n t → P t :=
@@ -271,9 +271,9 @@ end term
 namespace Language.TermRec
 
 structure Blueprint (pL : LDef) (arity : ℕ) where
-  bvar : 𝚺₁-Semisentence (arity + 3)
-  fvar : 𝚺₁-Semisentence (arity + 3)
-  func : 𝚺₁-Semisentence (arity + 6)
+  bvar : 𝚺₁.Semisentence (arity + 3)
+  fvar : 𝚺₁.Semisentence (arity + 3)
+  func : 𝚺₁.Semisentence (arity + 6)
 
 namespace Blueprint
 
@@ -297,13 +297,13 @@ def blueprint : Fixpoint.Blueprint (arity + 1) := ⟨.mkDelta
         !qqFuncDef t k f v ∧ !β.func.graphDelta.pi y n k f v w ⋯) )”
     (by simp))⟩
 
-def graph : 𝚺₁-Semisentence (arity + 3) := .mkSigma
+def graph : 𝚺₁.Semisentence (arity + 3) := .mkSigma
   “n t y | ∃ pr <⁺ (t + y + 1)², !pairDef pr t y ∧ !β.blueprint.fixpointDef pr n ⋯” (by simp)
 
-def result : 𝚺₁-Semisentence (arity + 3) := .mkSigma
+def result : 𝚺₁.Semisentence (arity + 3) := .mkSigma
   “y n t | (!pL.isSemitermDef.pi n t → !β.graph n t y ⋯) ∧ (¬!pL.isSemitermDef.sigma n t → y = 0)” (by simp)
 
-def resultVec : 𝚺₁-Semisentence (arity + 4) := .mkSigma
+def resultVec : 𝚺₁.Semisentence (arity + 4) := .mkSigma
   “w' k n w |
     (!pL.semitermVecDef.pi k n w → !lenDef k w' ∧ ∀ i < k, ∃ z, !nthDef z w i ∧ ∃ z', !nthDef z' w' i ∧ !β.graph.val n z z' ⋯) ∧
     (¬!pL.semitermVecDef.sigma k n w → w' = 0)” (by simp)
@@ -472,7 +472,7 @@ instance termSubst_definable : Arith.Definable ℒₒᵣ 𝚺₁ (fun v ↦ c.Gr
   Defined.to_definable _ (graph_defined c)
 
 @[simp, definability] instance termSubst_definable₂ (param n) : 𝚺₁-Relation (c.Graph param n) := by
-  simpa using Definable.retractiont (n := 2) (termSubst_definable c) (&n :> #0 :> #1 :> fun i ↦ &(param i))
+  simpa using HierarchySymbol.Boldface.retractiont (n := 2) (termSubst_definable c) (&n :> #0 :> #1 :> fun i ↦ &(param i))
 
 lemma graph_dom_isSemiterm {t y} :
     c.Graph param n t y → L.Semiterm n t := fun h ↦ Graph.case_iff.mp h |>.1
@@ -524,7 +524,7 @@ lemma graph_exists {t : V} : L.Semiterm n t → ∃ y, c.Graph param n t y := by
   case hfunc =>
     intro k f v hkf hv ih
     have : ∃ w, len w = k ∧ ∀ i < k, c.Graph param n v.[i] w.[i] := sigmaOne_skolem_vec
-      (by apply Definable.comp₂ (by definability) (by definability) (c.termSubst_definable₂ param n)) ih
+      (by apply HierarchySymbol.Boldface.comp₂ (by definability) (by definability) (c.termSubst_definable₂ param n)) ih
     rcases this with ⟨w, hwk, hvw⟩
     exact ⟨c.func param n k f v w, c.graph_func hkf hv (Eq.symm hwk) hvw⟩
 
@@ -588,7 +588,7 @@ lemma graph_existsUnique_vec {k n w : V} (hw : L.SemitermVec k n w) :
   have : ∀ i < k, ∃ y, c.Graph param n w.[i] y := by
     intro i hi; exact ⟨c.result param n w.[i], c.result_prop param n (hw.prop hi)⟩
   rcases sigmaOne_skolem_vec
-    (by apply Definable.comp₂ (by definability) (by definability) (c.termSubst_definable₂ param n)) this
+    (by apply HierarchySymbol.Boldface.comp₂ (by definability) (by definability) (c.termSubst_definable₂ param n)) this
     with ⟨w', hw'k, hw'⟩
   refine ExistsUnique.intro w' ⟨hw'k.symm, hw'⟩ ?_
   intro w'' ⟨hkw'', hw''⟩

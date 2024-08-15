@@ -4,17 +4,17 @@ noncomputable section
 
 namespace LO.Arith
 
-variable {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M]
+variable {V : Type*} [ORingStruc V]
 
 open FirstOrder FirstOrder.Arith
 
 section ISigma₀
 
-variable [M ⊧ₘ* 𝐈𝚺₀]
+variable [V ⊧ₘ* 𝐈𝚺₀]
 
-def ext (u z : M) : M := z / u % u
+def ext (u z : V) : V := z / u % u
 
-lemma ext_graph (a b c : M) : a = ext b c ↔ ∃ x ≤ c, x = c / b ∧ a = x % b := by
+lemma ext_graph (a b c : V) : a = ext b c ↔ ∃ x ≤ c, x = c / b ∧ a = x % b := by
   simp [ext]; constructor
   · rintro rfl; exact ⟨c / b, by simp, rfl, by rfl⟩
   · rintro ⟨_, _, rfl, rfl⟩; simp
@@ -22,48 +22,48 @@ lemma ext_graph (a b c : M) : a = ext b c ↔ ∃ x ≤ c, x = c / b ∧ a = x %
 def _root_.LO.FirstOrder.Arith.extDef : 𝚺₀.Semisentence 3 :=
   .mkSigma “a b c | ∃ x <⁺ c, !divDef x c b ∧ !remDef a x b” (by simp)
 
-lemma ext_defined : 𝚺₀-Function₂ (λ a b : M ↦ ext a b) via extDef := by
+lemma ext_defined : 𝚺₀-Function₂ (λ a b : V ↦ ext a b) via extDef := by
   intro v; simp [Matrix.vecHead, Matrix.vecTail, extDef,
     ext_graph, Semiformula.eval_substs, div_defined.df.iff, rem_defined.df.iff, le_iff_lt_succ]
 
-instance ext_definable : 𝚺₀-Function₂ (ext : M → M → M) := Defined.to_definable _ ext_defined
+instance ext_definable : 𝚺₀-Function₂ (ext : V → V → V) := ext_defined.to_definable
 
-@[simp] lemma ext_le_add (u z : M) : ext u z ≤ z :=
+@[simp] lemma ext_le_add (u z : V) : ext u z ≤ z :=
   le_trans (mod_le (z / u) u) (by simp [add_comm])
 
-instance : Bounded₂ (ext : M → M → M) := ⟨#1, by intro v; simp⟩
+instance : Bounded₂ (ext : V → V → V) := ⟨#1, by intro v; simp⟩
 
-@[simp] lemma ext_lt {u} (z : M) (pos : 0 < u) : ext u z < u := by simp [ext, pos]
+@[simp] lemma ext_lt {u} (z : V) (pos : 0 < u) : ext u z < u := by simp [ext, pos]
 
-lemma ext_add_of_dvd_sq_right {u z₁ z₂ : M} (pos : 0 < u) (h : u^2 ∣ z₂) : ext u (z₁ + z₂) = ext u z₁ := by
+lemma ext_add_of_dvd_sq_right {u z₁ z₂ : V} (pos : 0 < u) (h : u^2 ∣ z₂) : ext u (z₁ + z₂) = ext u z₁ := by
   simp [ext]
   have : ∃ z', z₂ = z' * u * u := by rcases h with ⟨u', rfl⟩; exact ⟨u', by simp [mul_comm _ u', mul_assoc]; simp [sq]⟩
   rcases this with ⟨z₂, rfl⟩
   simp [div_add_mul_self, pos]
 
-lemma ext_add_of_dvd_sq_left {u z₁ z₂ : M} (pos : 0 < u) (h : u^2 ∣ z₁) : ext u (z₁ + z₂) = ext u z₂ := by
+lemma ext_add_of_dvd_sq_left {u z₁ z₂ : V} (pos : 0 < u) (h : u^2 ∣ z₁) : ext u (z₁ + z₂) = ext u z₂ := by
   rw [add_comm]; exact ext_add_of_dvd_sq_right pos h
 
-lemma ext_rem {i j z : M} (ppi : PPow2 i) (ppj : PPow2 j) (hij : i < j) : ext i (z % j) = ext i z := by
+lemma ext_rem {i j z : V} (ppi : PPow2 i) (ppj : PPow2 j) (hij : i < j) : ext i (z % j) = ext i z := by
   have := div_add_mod z j
   have : i^2 ∣ j := ppi.pow2.sq.dvd_of_le ppj.pow2 (PPow2.sq_le_of_lt ppi ppj hij)
   calc
     ext i (z % j) = ext i (j * (z / j) + (z % j)) := by symm; exact ext_add_of_dvd_sq_left ppi.pos (Dvd.dvd.mul_right this (z / j))
     _               = ext i z                          := by simp [div_add_mod]
 
-def Exponential.Seq₀ (X Y : M) : Prop := ext 4 X = 1 ∧ ext 4 Y = 2
+def Exponential.Seq₀ (X Y : V) : Prop := ext 4 X = 1 ∧ ext 4 Y = 2
 
-def Exponential.Seqₛ.Even (X Y u : M) : Prop := ext (u^2) X = 2 * ext u X ∧ ext (u^2) Y = (ext u Y)^2
+def Exponential.Seqₛ.Even (X Y u : V) : Prop := ext (u^2) X = 2 * ext u X ∧ ext (u^2) Y = (ext u Y)^2
 
-def Exponential.Seqₛ.Odd (X Y u : M) : Prop := ext (u^2) X = 2 * ext u X + 1 ∧ ext (u^2) Y = 2 * (ext u Y)^2
+def Exponential.Seqₛ.Odd (X Y u : V) : Prop := ext (u^2) X = 2 * ext u X + 1 ∧ ext (u^2) Y = 2 * (ext u Y)^2
 
-def Exponential.Seqₛ (y X Y : M) : Prop := ∀ u ≤ y, u ≠ 2 → PPow2 u → Seqₛ.Even X Y u ∨ Seqₛ.Odd X Y u
+def Exponential.Seqₛ (y X Y : V) : Prop := ∀ u ≤ y, u ≠ 2 → PPow2 u → Seqₛ.Even X Y u ∨ Seqₛ.Odd X Y u
 
-def Exponential.Seqₘ (x y X Y : M) : Prop := ∃ u ≤ y^2, u ≠ 2 ∧ PPow2 u ∧ ext u X = x ∧ ext u Y = y
+def Exponential.Seqₘ (x y X Y : V) : Prop := ∃ u ≤ y^2, u ≠ 2 ∧ PPow2 u ∧ ext u X = x ∧ ext u Y = y
 
-def Exponential (x y : M) : Prop := (x = 0 ∧ y = 1) ∨ ∃ X ≤ y^4, ∃ Y ≤ y^4, Exponential.Seq₀ X Y ∧ Exponential.Seqₛ y X Y ∧ Exponential.Seqₘ x y X Y
+def Exponential (x y : V) : Prop := (x = 0 ∧ y = 1) ∨ ∃ X ≤ y^4, ∃ Y ≤ y^4, Exponential.Seq₀ X Y ∧ Exponential.Seqₛ y X Y ∧ Exponential.Seqₘ x y X Y
 
-lemma Exponential.Seqₛ.iff (y X Y : M) :
+lemma Exponential.Seqₛ.iff (y X Y : V) :
   Exponential.Seqₛ y X Y ↔
   ∀ u ≤ y, u ≠ 2 → PPow2 u →
     ((∃ ext_u_X ≤ X, ext_u_X = ext u X ∧ 2 * ext_u_X = ext (u^2) X)     ∧ (∃ ext_u_Y ≤ Y, ext_u_Y = ext u Y ∧ ext_u_Y^2 = ext (u^2) Y)) ∨
@@ -85,11 +85,11 @@ def Exponential.Seqₛ.def : 𝚺₀.Semisentence 3 := .mkSigma
       ( (∃ ext_u_X <⁺ X, !extDef ext_u_X u X ∧ !extDef (2 * ext_u_X + 1) u² X) ∧
         (∃ ext_u_Y <⁺ Y, !extDef ext_u_Y u Y ∧ !extDef (2 * ext_u_Y²) u² Y) ) ” (by simp)
 
-lemma Exponential.Seqₛ.defined : 𝚺₀-Relation₃ (Exponential.Seqₛ : M → M → M → Prop) via Exponential.Seqₛ.def := by
+lemma Exponential.Seqₛ.defined : 𝚺₀-Relation₃ (Exponential.Seqₛ : V → V → V → Prop) via Exponential.Seqₛ.def := by
   intro v; simp [Exponential.Seqₛ.iff, Exponential.Seqₛ.def, ppow2_defined.df.iff,
     ext_defined.df.iff, ←le_iff_lt_succ, sq, numeral_eq_natCast]
 
-lemma Exponential.graph_iff (x y : M) :
+lemma Exponential.graph_iff (x y : V) :
     Exponential x y ↔
     (x = 0 ∧ y = 1) ∨ ∃ X ≤ y^4, ∃ Y ≤ y^4,
       (1 = ext 4 X ∧ 2 = ext 4 Y) ∧
@@ -109,41 +109,41 @@ def _root_.LO.FirstOrder.Arith.exponentialDef : 𝚺₀.Semisentence 2 := .mkSig
       !Exponential.Seqₛ.def y X Y ∧
       ∃ u <⁺ y², u ≠ 2 ∧ !ppow2Def u ∧ !extDef x u X ∧ !extDef y u Y” (by simp)
 
-lemma Exponential.defined : 𝚺₀-Relation (Exponential : M → M → Prop) via exponentialDef := by
+lemma Exponential.defined : 𝚺₀-Relation (Exponential : V → V → Prop) via exponentialDef := by
   intro v; simp [Exponential.graph_iff, exponentialDef, ppow2_defined.df.iff, ext_defined.df.iff,
     Exponential.Seqₛ.defined.df.iff, ←le_iff_lt_succ, pow_four, sq, numeral_eq_natCast]
 
 @[simp] lemma exponential_defined_iff (v) :
-    Semiformula.Evalbm M v exponentialDef.val ↔ Exponential (v 0) (v 1) := Exponential.defined.df.iff v
+    Semiformula.Evalbm V v exponentialDef.val ↔ Exponential (v 0) (v 1) := Exponential.defined.df.iff v
 
-instance exponential_definable : 𝚺₀-Relation (Exponential : M → M → Prop) := Defined.to_definable _ Exponential.defined
+instance exponential_definable : 𝚺₀-Relation (Exponential : V → V → Prop) := Exponential.defined.to_definable
 
-@[simp] instance exponential_definable' (Γ) : Γ-Relation (Exponential : M → M → Prop) := Definable.of_zero exponential_definable _
+@[simp] instance exponential_definable' (Γ) : Γ-Relation (Exponential : V → V → Prop) := exponential_definable.of_zero
 
 namespace Exponential
 
-def seqX₀ : M := 4
+def seqX₀ : V := 4
 
-def seqY₀ : M := 2 * 4
+def seqY₀ : V := 2 * 4
 
-lemma one_lt_four : (1 : M) < 4 := by
+lemma one_lt_four : (1 : V) < 4 := by
   rw [←three_add_one_eq_four]
   exact lt_add_of_pos_left 1 three_pos
 
-lemma two_lt_three : (2 : M) < 3 := by rw [←two_add_one_eq_three]; exact lt_add_one 2
+lemma two_lt_three : (2 : V) < 3 := by rw [←two_add_one_eq_three]; exact lt_add_one 2
 
-lemma three_lt_four : (3 : M) < 4 := by rw [←three_add_one_eq_four]; exact lt_add_one 3
+lemma three_lt_four : (3 : V) < 4 := by rw [←three_add_one_eq_four]; exact lt_add_one 3
 
-lemma two_lt_four : (2 : M) < 4 := lt_trans two_lt_three three_lt_four
+lemma two_lt_four : (2 : V) < 4 := lt_trans two_lt_three three_lt_four
 
-lemma seq₀_zero_two : Seq₀ (seqX₀ : M) (seqY₀ : M) := by simp [seqX₀, seqY₀, Seq₀, ext, one_lt_four, two_lt_four]
+lemma seq₀_zero_two : Seq₀ (seqX₀ : V) (seqY₀ : V) := by simp [seqX₀, seqY₀, Seq₀, ext, one_lt_four, two_lt_four]
 
-lemma Seq₀.rem {X Y i : M} (h : Seq₀ X Y) (ppi : PPow2 i) (hi : 4 < i) :
+lemma Seq₀.rem {X Y i : V} (h : Seq₀ X Y) (ppi : PPow2 i) (hi : 4 < i) :
     Seq₀ (X % i) (Y % i) := by
   rw [Seq₀, ext_rem, ext_rem] <;> try simp [ppi, hi]
   exact h
 
-lemma Seqₛ.rem {y y' X Y i : M} (h : Seqₛ y X Y) (ppi : PPow2 i) (hi : y'^2 < i) (hy : y' ≤ y) :
+lemma Seqₛ.rem {y y' X Y i : V} (h : Seqₛ y X Y) (ppi : PPow2 i) (hi : y'^2 < i) (hy : y' ≤ y) :
     Seqₛ y' (X % i) (Y % i) := by
   intro j hj ne2 ppj
   have : j^2 < i := lt_of_le_of_lt (sq_le_sq.mpr hj) hi
@@ -152,21 +152,21 @@ lemma Seqₛ.rem {y y' X Y i : M} (h : Seqₛ y X Y) (ppi : PPow2 i) (hi : y'^2 
   · left; simpa [Seqₛ.Even, ext_rem, ppj, ppj.sq, ppi, *] using H
   · right; simpa [Seqₛ.Odd, ext_rem, ppj, ppj.sq, ppi, *] using H
 
-lemma seqₛ_one_zero_two : Seqₛ (1 : M) (seqX₀ : M) (seqY₀ : M) := by
+lemma seqₛ_one_zero_two : Seqₛ (1 : V) (seqX₀ : V) (seqY₀ : V) := by
   intro u leu; rcases le_one_iff_eq_zero_or_one.mp leu with (rfl | rfl) <;> simp
 
-def append (i X z : M) : M := X % i + z * i
+def append (i X z : V) : V := X % i + z * i
 
-lemma append_lt (i X : M) {z} (hz : z < i) : append i X z < i^2 := calc
+lemma append_lt (i X : V) {z} (hz : z < i) : append i X z < i^2 := calc
   append i X z = (X % i) + z * i := rfl
   _            < (1 + z) * i       := by simp [add_mul]; exact mod_lt _ (pos_of_gt hz)
   _            ≤ i^2               := by simp [sq, add_comm]; exact mul_le_mul_of_nonneg_right (lt_iff_succ_le.mp hz) (by simp)
 
-lemma ext_append_last (i X : M) {z} (hz : z < i) :
+lemma ext_append_last (i X : V) {z} (hz : z < i) :
     ext i (append i X z) = z := by
   simp [ext, append, div_add_mul_self, show 0 < i from pos_of_gt hz, hz]
 
-lemma ext_append_of_lt {i j : M} (hi : PPow2 i) (hj : PPow2 j) (hij : i < j) (X z : M) :
+lemma ext_append_of_lt {i j : V} (hi : PPow2 i) (hj : PPow2 j) (hij : i < j) (X z : V) :
     ext i (append j X z) = ext i X := by
   have : i^2 ∣ j := Pow2.dvd_of_le hi.pow2.sq hj.pow2 (PPow2.sq_le_of_lt hi hj hij)
   calc
@@ -175,12 +175,12 @@ lemma ext_append_of_lt {i j : M} (hi : PPow2 i) (hj : PPow2 j) (hij : i < j) (X 
     _                    = ext i (j * (X / j) + (X % j)) := by rw [add_comm]; refine Eq.symm <| ext_add_of_dvd_sq_right hi.pos (Dvd.dvd.mul_right this _)
     _                    = ext i X                         := by simp [div_add_mod]
 
-lemma Seq₀.append {X Y i x y : M} (H : Seq₀ X Y) (ppi : PPow2 i) (hi : 4 < i) :
+lemma Seq₀.append {X Y i x y : V} (H : Seq₀ X Y) (ppi : PPow2 i) (hi : 4 < i) :
     Seq₀ (append i X x) (append i Y y) := by
   rw [Seq₀, ext_append_of_lt, ext_append_of_lt] <;> try simp [ppi, hi]
   exact H
 
-lemma Seqₛ.append {z x y X Y i : M} (h : Seqₛ z X Y) (ppi : PPow2 i) (hz : z < i) :
+lemma Seqₛ.append {z x y X Y i : V} (h : Seqₛ z X Y) (ppi : PPow2 i) (hz : z < i) :
     Seqₛ z (append (i^2) X x) (append (i^2) Y y) := by
   intro j hj ne2 ppj
   have : j < i^2 := lt_of_lt_of_le (lt_of_le_of_lt hj hz) (by simp)
@@ -191,17 +191,17 @@ lemma Seqₛ.append {z x y X Y i : M} (h : Seqₛ z X Y) (ppi : PPow2 i) (hz : z
   · right; rw [ext_append_of_lt, ext_append_of_lt, ext_append_of_lt, ext_append_of_lt] <;> try simp [ppi.sq, ppj.sq, lt_of_le_of_lt hj hz, *]
     exact H
 
-@[simp] lemma exponential_zero_one : Exponential (0 : M) 1 := Or.inl (by simp)
+@[simp] lemma exponential_zero_one : Exponential (0 : V) 1 := Or.inl (by simp)
 
-@[simp] lemma exponential_one_two : Exponential (1 : M) 2 :=
+@[simp] lemma exponential_one_two : Exponential (1 : V) 2 :=
   Or.inr ⟨
     4, by simp [pow_four_eq_sq_sq, two_pow_two_eq_four],
-    2 * 4, by simp [pow_four_eq_sq_sq, two_pow_two_eq_four, sq (4 : M)]; exact le_of_lt two_lt_four,
+    2 * 4, by simp [pow_four_eq_sq_sq, two_pow_two_eq_four, sq (4 : V)]; exact le_of_lt two_lt_four,
     by simp [Seq₀, ext, one_lt_four, two_lt_four],
     by simp [Seqₛ]; intro i hi ne2 ppi; exact False.elim <| not_le.mpr (ppi.two_lt ne2) hi,
     ⟨4, by simp [two_pow_two_eq_four], by simp, by simp [ext, one_lt_four, two_lt_four]⟩⟩
 
-lemma pow2_ext_of_seq₀_of_seqₛ {y X Y : M} (h₀ : Exponential.Seq₀ X Y) (hₛ : Exponential.Seqₛ y X Y)
+lemma pow2_ext_of_seq₀_of_seqₛ {y X Y : V} (h₀ : Exponential.Seq₀ X Y) (hₛ : Exponential.Seqₛ y X Y)
     {i} (ne2 : i ≠ 2) (hi : i ≤ y^2) (ppi : PPow2 i) : Pow2 (ext i Y) := by
   induction i using order_induction_sigma0
   · definability
@@ -217,12 +217,12 @@ lemma pow2_ext_of_seq₀_of_seqₛ {y X Y : M} (h₀ : Exponential.Seq₀ X Y) (
       · have : ext i Y = 2*(ext (√i) Y)^2 := by simpa [ppi.sq_sqrt_eq ne2] using hodd.2
         simp [this, ppsq]
 
-lemma range_pow2 {x y : M} (h : Exponential x y) : Pow2 y := by
+lemma range_pow2 {x y : V} (h : Exponential x y) : Pow2 y := by
   rcases h with (⟨rfl, rfl⟩ | ⟨X, bX, Y, bY, H₀, Hₛ, ⟨u, hu, ne2, ppu, rfl, rfl⟩⟩)
   · simp
   · exact pow2_ext_of_seq₀_of_seqₛ H₀ Hₛ ne2 hu ppu
 
-lemma le_sq_ext_of_seq₀_of_seqₛ {y X Y : M} (h₀ : Exponential.Seq₀ X Y) (hₛ : Exponential.Seqₛ y X Y)
+lemma le_sq_ext_of_seq₀_of_seqₛ {y X Y : V} (h₀ : Exponential.Seq₀ X Y) (hₛ : Exponential.Seqₛ y X Y)
     {i} (ne2 : i ≠ 2) (hi : i ≤ y^2) (ppi : PPow2 i) : i ≤ (ext i Y)^2 := by
   induction i using order_induction_sigma0
   · definability
@@ -243,7 +243,7 @@ lemma le_sq_ext_of_seq₀_of_seqₛ {y X Y : M} (h₀ : Exponential.Seq₀ X Y) 
 
 example {a b c : ℕ} : a * (b * c) = b * (a * c) := by exact Nat.mul_left_comm a b c
 
-lemma two_mul_ext_le_of_seq₀_of_seqₛ {y X Y : M} (h₀ : Exponential.Seq₀ X Y) (hₛ : Exponential.Seqₛ y X Y)
+lemma two_mul_ext_le_of_seq₀_of_seqₛ {y X Y : V} (h₀ : Exponential.Seq₀ X Y) (hₛ : Exponential.Seqₛ y X Y)
     {i} (ne2 : i ≠ 2) (hi : i ≤ y^2) (ppi : PPow2 i) : 2 * ext i Y ≤ i := by
   induction i using order_induction_sigma0
   · definability
@@ -266,14 +266,14 @@ lemma two_mul_ext_le_of_seq₀_of_seqₛ {y X Y : M} (h₀ : Exponential.Seq₀ 
           _           ≤ (√i)^2             := sq_le_sq.mpr IH
           _           = i                  := ppi.sq_sqrt_eq ne2
 
-lemma exponential_exists_sq_of_exponential_even {x y : M} : Exponential (2 * x) y → ∃ y', y = y'^2 ∧ Exponential x y' := by
+lemma exponential_exists_sq_of_exponential_even {x y : V} : Exponential (2 * x) y → ∃ y', y = y'^2 ∧ Exponential x y' := by
   rintro (⟨hx, rfl⟩ | ⟨X, _, Y, _, hseq₀, hseqₛ, i, hi, ne2, ppi, hXx, hYy⟩)
   · exact ⟨1, by simp [show x = 0 from by simpa using hx]⟩
   by_cases ne4 : i = 4
   · rcases ne4 with rfl
     have ex : 1 = 2 * x := by simpa [hseq₀.1] using hXx
-    have : (2 : M) ∣ 1 := by rw [ex]; simp
-    have : ¬(2 : M) ∣ 1 := not_dvd_of_lt (by simp) one_lt_two
+    have : (2 : V) ∣ 1 := by rw [ex]; simp
+    have : ¬(2 : V) ∣ 1 := not_dvd_of_lt (by simp) one_lt_two
     contradiction
   have : Seqₛ.Even X Y (√i) ∨ Seqₛ.Odd X Y (√i) :=
     hseqₛ (√i) (sqrt_le_of_le_sq hi) (ppi.sqrt_ne_two ne2 ne4) (ppi.sqrt ne2)
@@ -299,7 +299,7 @@ lemma exponential_exists_sq_of_exponential_even {x y : M} : Exponential (2 * x) 
         ←mod_eq_zero_iff_dvd, one_lt_two]
     contradiction
 
-lemma bit_zero {x y : M} : Exponential x y → Exponential (2 * x) (y ^ 2) := by
+lemma bit_zero {x y : V} : Exponential x y → Exponential (2 * x) (y ^ 2) := by
   rintro (⟨hx, rfl⟩ | ⟨X, _, Y, _, hseq₀, hseqₛ, i, hi, ne2, ppi, hXx, hYy⟩)
   · rcases hx with rfl; simp
   have hxsqi : 2 * x < i ^ 2 := lt_of_lt_of_le (by simp [←hXx, ppi.pos]) (two_mul_le_sq ppi.two_le)
@@ -332,16 +332,16 @@ lemma bit_zero {x y : M} : Exponential x y → Exponential (2 * x) (y ^ 2) := by
      by simp at *; rw [ext_append_last, ext_append_last] <;> try simp [hxsqi, hysqi]⟩
   exact Or.inr <| ⟨X', bX', Y', bY', hseq₀', hseqₛ', hseqₘ'⟩
 
-lemma exponential_even {x y : M} : Exponential (2 * x) y ↔ ∃ y', y = y'^2 ∧ Exponential x y' :=
+lemma exponential_even {x y : V} : Exponential (2 * x) y ↔ ∃ y', y = y'^2 ∧ Exponential x y' :=
   ⟨exponential_exists_sq_of_exponential_even, by rintro ⟨y, rfl, h⟩; exact bit_zero h⟩
 
-lemma exponential_even_sq {x y : M} : Exponential (2 * x) (y ^ 2) ↔ Exponential x y :=
+lemma exponential_even_sq {x y : V} : Exponential (2 * x) (y ^ 2) ↔ Exponential x y :=
   ⟨by intro h
       rcases exponential_exists_sq_of_exponential_even h with ⟨y', e, h⟩
       simpa [show y = y' from by simpa using e] using h,
    bit_zero⟩
 
-lemma exponential_exists_sq_of_exponential_odd {x y : M} : Exponential (2 * x + 1) y → ∃ y', y = 2 * y'^2 ∧ Exponential x y' := by
+lemma exponential_exists_sq_of_exponential_odd {x y : V} : Exponential (2 * x + 1) y → ∃ y', y = 2 * y'^2 ∧ Exponential x y' := by
   rintro (⟨hx, rfl⟩ | ⟨X, _, Y, _, hseq₀, hseqₛ, i, hi, ne2, ppi, hXx, hYy⟩)
   · simp at hx
   by_cases ne4 : i = 4
@@ -375,7 +375,7 @@ lemma exponential_exists_sq_of_exponential_odd {x y : M} : Exponential (2 * x + 
       Or.inr ⟨X', bX', Y', bY', hseq₀.rem ppi (ppi.four_lt ne2 ne4), hseqₛ', hseqₘ'⟩
     exact ⟨ext (√i) Y, hYy, this⟩
 
-lemma bit_one {x y : M} : Exponential x y → Exponential (2 * x + 1) (2 * y ^ 2) := by
+lemma bit_one {x y : V} : Exponential x y → Exponential (2 * x + 1) (2 * y ^ 2) := by
   rintro (⟨hx, rfl⟩ | ⟨X, _, Y, _, hseq₀, hseqₛ, i, hi, ne2, ppi, hXx, hYy⟩)
   · rcases hx with rfl; simp
   have hxsqi : 2 * x + 1 < i ^ 2 := calc
@@ -416,16 +416,16 @@ lemma bit_one {x y : M} : Exponential x y → Exponential (2 * x + 1) (2 * y ^ 2
      by simp [X', Y']; rw [ext_append_last, ext_append_last] <;> try simp [hxsqi, hysqi]⟩
   exact Or.inr <| ⟨X', bX', Y', bY', hseq₀', hseqₛ', hseqₘ'⟩
 
-lemma exponential_odd {x y : M} : Exponential (2 * x + 1) y ↔ ∃ y', y = 2 * y' ^ 2 ∧ Exponential x y' :=
+lemma exponential_odd {x y : V} : Exponential (2 * x + 1) y ↔ ∃ y', y = 2 * y' ^ 2 ∧ Exponential x y' :=
   ⟨exponential_exists_sq_of_exponential_odd, by rintro ⟨y, rfl, h⟩; exact bit_one h⟩
 
-lemma exponential_odd_two_mul_sq {x y : M} : Exponential (2 * x + 1) (2 * y ^ 2) ↔ Exponential x y :=
+lemma exponential_odd_two_mul_sq {x y : V} : Exponential (2 * x + 1) (2 * y ^ 2) ↔ Exponential x y :=
   ⟨by intro h
       rcases exponential_exists_sq_of_exponential_odd h with ⟨y', e, h⟩
       simpa [show y = y' from by simpa using e] using h,
    bit_one⟩
 
-lemma two_le_ext_of_seq₀_of_seqₛ {y X Y : M} (h₀ : Exponential.Seq₀ X Y) (hₛ : Exponential.Seqₛ y X Y)
+lemma two_le_ext_of_seq₀_of_seqₛ {y X Y : V} (h₀ : Exponential.Seq₀ X Y) (hₛ : Exponential.Seqₛ y X Y)
     {i} (ne2 : i ≠ 2) (hi : i ≤ y^2) (ppi : PPow2 i) : 2 ≤ ext i Y := by
   induction i using order_induction_sigma0
   · definability
@@ -446,7 +446,7 @@ lemma two_le_ext_of_seq₀_of_seqₛ {y X Y : M} (h₀ : Exponential.Seq₀ X Y)
           _ ≤ 2 * (ext (√i) Y)^2 := by simp
           _ = ext i Y            := by simpa [ppi.sq_sqrt_eq ne2] using Eq.symm hodd.2
 
-lemma ext_le_ext_of_seq₀_of_seqₛ {y X Y : M} (h₀ : Exponential.Seq₀ X Y) (hₛ : Exponential.Seqₛ y X Y)
+lemma ext_le_ext_of_seq₀_of_seqₛ {y X Y : V} (h₀ : Exponential.Seq₀ X Y) (hₛ : Exponential.Seqₛ y X Y)
     {i} (ne2 : i ≠ 2) (hi : i ≤ y^2) (ppi : PPow2 i) : ext i X < ext i Y := by
   induction i using order_induction_sigma0
   · definability
@@ -470,30 +470,30 @@ lemma ext_le_ext_of_seq₀_of_seqₛ {y X Y : M} (h₀ : Exponential.Seq₀ X Y)
                   simp [one_add_one_eq_two]; exact (two_le_ext_of_seq₀_of_seqₛ h₀ hₛ (ppi.sqrt_ne_two ne2 ne4) (le_trans (by simp) hi) (ppi.sqrt ne2))))
           _       = ext i Y            := by simpa [ppi.sq_sqrt_eq ne2] using Eq.symm hodd.2
 
-lemma range_pos {x y : M} (h : Exponential x y) : 0 < y := by
+lemma range_pos {x y : V} (h : Exponential x y) : 0 < y := by
   rcases h with (⟨rfl, rfl⟩ | ⟨X, bX, Y, bY, H₀, Hₛ, ⟨u, hu, ne2, ppu, rfl, rfl⟩⟩)
   · simp
   · have : 2 ≤ ext u Y := two_le_ext_of_seq₀_of_seqₛ H₀ Hₛ ne2 hu ppu
     exact lt_of_lt_of_le (by simp) this
 
-lemma lt {x y : M} (h : Exponential x y) : x < y := by
+lemma lt {x y : V} (h : Exponential x y) : x < y := by
   rcases h with (⟨rfl, rfl⟩ | ⟨X, bX, Y, bY, H₀, Hₛ, ⟨u, hu, ne2, ppu, rfl, rfl⟩⟩)
   · simp
   · exact ext_le_ext_of_seq₀_of_seqₛ H₀ Hₛ ne2 hu ppu
 
-lemma not_exponential_of_le {x y : M} (h : x ≤ y) : ¬Exponential y x := by
+lemma not_exponential_of_le {x y : V} (h : x ≤ y) : ¬Exponential y x := by
   intro hxy; exact not_le.mpr (lt hxy) h
 
-@[simp] lemma one_not_even (a : M) : 1 ≠ 2 * a := by
+@[simp] lemma one_not_even (a : V) : 1 ≠ 2 * a := by
   intro h
-  have : (2 : M) ∣ 1 := by rw [h]; simp
-  have : ¬(2 : M) ∣ 1 := not_dvd_of_lt (by simp) one_lt_two
+  have : (2 : V) ∣ 1 := by rw [h]; simp
+  have : ¬(2 : V) ∣ 1 := not_dvd_of_lt (by simp) one_lt_two
   contradiction
 
-@[simp] lemma exponential_two_four : Exponential (2 : M) 4 := by
-  simpa [two_pow_two_eq_four] using (show Exponential (1 : M) 2 from by simp).bit_zero
+@[simp] lemma exponential_two_four : Exponential (2 : V) 4 := by
+  simpa [two_pow_two_eq_four] using (show Exponential (1 : V) 2 from by simp).bit_zero
 
-lemma exponential_succ {x y : M} : Exponential (x + 1) y ↔ ∃ z, y = 2 * z ∧ Exponential x z := by
+lemma exponential_succ {x y : V} : Exponential (x + 1) y ↔ ∃ z, y = 2 * z ∧ Exponential x z := by
   suffices x < y → (Exponential (x + 1) y ↔ ∃ z ≤ y, y = 2 * z ∧ Exponential x z) by
     by_cases hxy : x < y
     · simp [this hxy]
@@ -539,13 +539,13 @@ lemma exponential_succ {x y : M} : Exponential (x + 1) y ↔ ∃ z, y = 2 * z �
           have : Exponential (x + 1) (2 * y) := this.mpr ⟨y, by simp, rfl, H'⟩
           simpa [sq, mul_add, add_assoc, mul_assoc, one_add_one_eq_two, mul_left_comm y 2] using this.bit_zero
 
-lemma exponential_succ_mul_two {x y : M} : Exponential (x + 1) (2 * y) ↔ Exponential x y :=
+lemma exponential_succ_mul_two {x y : V} : Exponential (x + 1) (2 * y) ↔ Exponential x y :=
   ⟨by intro h; rcases exponential_succ.mp h with ⟨y', e, h⟩; simpa [show y = y' from by simpa using e] using h,
    by intro h; exact exponential_succ.mpr ⟨y, rfl, h⟩⟩
 
 alias ⟨of_succ_two_mul, succ⟩ := exponential_succ_mul_two
 
-lemma one_le_ext_of_seq₀_of_seqₛ {y X Y : M} (h₀ : Exponential.Seq₀ X Y) (hₛ : Exponential.Seqₛ y X Y)
+lemma one_le_ext_of_seq₀_of_seqₛ {y X Y : V} (h₀ : Exponential.Seq₀ X Y) (hₛ : Exponential.Seqₛ y X Y)
     {i} (ne2 : i ≠ 2) (hi : i ≤ y^2) (ppi : PPow2 i) : 1 ≤ ext i X := by
   induction i using order_induction_sigma0
   · definability
@@ -561,21 +561,21 @@ lemma one_le_ext_of_seq₀_of_seqₛ {y X Y : M} (h₀ : Exponential.Seq₀ X Y)
       · have : ext i X = 2 * ext (√i) X + 1 := by simpa [ppi.sq_sqrt_eq ne2] using hodd.1
         simp [this]
 
-lemma zero_uniq {y : M} (h : Exponential 0 y) : y = 1 := by
+lemma zero_uniq {y : V} (h : Exponential 0 y) : y = 1 := by
   rcases h with (⟨_, rfl⟩ | ⟨X, _, Y, _, H₀, Hₛ, ⟨u, hu, ne2, ppu, hX, _⟩⟩)
   · rfl
   · have : 1 ≤ ext u X  := one_le_ext_of_seq₀_of_seqₛ H₀ Hₛ ne2 hu ppu
     simp [hX] at this
 
-@[simp] lemma zero_uniq_iff {y : M} : Exponential 0 y ↔ y = 1 :=
+@[simp] lemma zero_uniq_iff {y : V} : Exponential 0 y ↔ y = 1 :=
   ⟨zero_uniq, by rintro rfl; simp⟩
 
-lemma succ_lt_s {y : M} (h : Exponential (x + 1) y) : 2 ≤ y := by
+lemma succ_lt_s {y : V} (h : Exponential (x + 1) y) : 2 ≤ y := by
   rcases h with (⟨h, rfl⟩ | ⟨X, _, Y, _, H₀, Hₛ, ⟨u, hu, ne2, ppu, _, hY⟩⟩)
   · simp at h
   · simpa [hY] using two_le_ext_of_seq₀_of_seqₛ H₀ Hₛ ne2 hu ppu
 
-protected lemma uniq {x y₁ y₂ : M} : Exponential x y₁ → Exponential x y₂ → y₁ = y₂ := by
+protected lemma uniq {x y₁ y₂ : V} : Exponential x y₁ → Exponential x y₂ → y₁ = y₂ := by
   intro h₁ h₂
   wlog h : y₁ ≤ y₂
   · exact Eq.symm <| this h₂ h₁ (show y₂ ≤ y₁ from le_of_not_ge h)
@@ -594,7 +594,7 @@ protected lemma uniq {x y₁ y₂ : M} : Exponential x y₁ → Exponential x y�
         x h₂'.lt y₁ (by simpa using h) h₁' h₂'
       simp [this]
 
-protected lemma inj {x₁ x₂ y : M} : Exponential x₁ y → Exponential x₂ y → x₁ = x₂ := by
+protected lemma inj {x₁ x₂ y : V} : Exponential x₁ y → Exponential x₂ y → x₁ = x₂ := by
   intro h₁ h₂
   revert x₁ x₂ h₁ h₂
   suffices ∀ x₁ < y, ∀ x₂ < y, Exponential x₁ y → Exponential x₂ y → x₁ = x₂ by
@@ -618,7 +618,7 @@ protected lemma inj {x₁ x₂ y : M} : Exponential x₁ y → Exponential x₂ 
           x₁ hy₁.lt x₂ hy₂.lt hy₁ hy₂
       simp [this]
 
-lemma exponential_elim {x y : M} : Exponential x y ↔ (x = 0 ∧ y = 1) ∨ ∃ x', ∃ y', x = x' + 1 ∧ y = 2 * y' ∧ Exponential x' y' :=
+lemma exponential_elim {x y : V} : Exponential x y ↔ (x = 0 ∧ y = 1) ∨ ∃ x', ∃ y', x = x' + 1 ∧ y = 2 * y' ∧ Exponential x' y' :=
   ⟨by intro h
       rcases zero_or_succ x with (rfl | ⟨x', rfl⟩)
       · simp [h.zero_uniq]
@@ -628,7 +628,7 @@ lemma exponential_elim {x y : M} : Exponential x y ↔ (x = 0 ∧ y = 1) ∨ ∃
       · simp
       · exact h.succ⟩
 
-lemma monotone {x₁ x₂ y₁ y₂ : M} : Exponential x₁ y₁ → Exponential x₂ y₂ → x₁ < x₂ → y₁ < y₂ := by
+lemma monotone {x₁ x₂ y₁ y₂ : V} : Exponential x₁ y₁ → Exponential x₂ y₂ → x₁ < x₂ → y₁ < y₂ := by
   suffices ∀ x₁ < y₁, ∀ y₂ ≤ y₁, ∀ x₂ < y₂, Exponential x₁ y₁ → Exponential x₂ y₂ → x₂ ≤ x₁ by
     intro h₁ h₂; contrapose; simp
     intro hy
@@ -650,22 +650,22 @@ lemma monotone {x₁ x₂ y₁ y₂ : M} : Exponential x₁ y₁ → Exponential
         x₁ h₁'.lt y₂ (le_of_mul_le_mul_left hy (by simp)) x₂ h₂'.lt h₁' h₂'
       simpa using this
 
-lemma monotone_le {x₁ x₂ y₁ y₂ : M} (h₁ : Exponential x₁ y₁) (h₂ : Exponential x₂ y₂) : x₁ ≤ x₂ → y₁ ≤ y₂ := by
+lemma monotone_le {x₁ x₂ y₁ y₂ : V} (h₁ : Exponential x₁ y₁) (h₂ : Exponential x₂ y₂) : x₁ ≤ x₂ → y₁ ≤ y₂ := by
   rintro (rfl | h)
   · exact (h₁.uniq h₂).le
   · exact le_of_lt (monotone h₁ h₂ h)
 
-lemma monotone_iff {x₁ x₂ y₁ y₂ : M} (h₁ : Exponential x₁ y₁) (h₂ : Exponential x₂ y₂) : x₁ < x₂ ↔ y₁ < y₂ := by
+lemma monotone_iff {x₁ x₂ y₁ y₂ : V} (h₁ : Exponential x₁ y₁) (h₂ : Exponential x₂ y₂) : x₁ < x₂ ↔ y₁ < y₂ := by
   constructor
   · exact monotone h₁ h₂
   · contrapose; simp; exact monotone_le h₂ h₁
 
-lemma monotone_le_iff {x₁ x₂ y₁ y₂ : M} (h₁ : Exponential x₁ y₁) (h₂ : Exponential x₂ y₂) : x₁ ≤ x₂ ↔ y₁ ≤ y₂ := by
+lemma monotone_le_iff {x₁ x₂ y₁ y₂ : V} (h₁ : Exponential x₁ y₁) (h₂ : Exponential x₂ y₂) : x₁ ≤ x₂ ↔ y₁ ≤ y₂ := by
   constructor
   · exact monotone_le h₁ h₂
   · contrapose; simp; exact monotone h₂ h₁
 
-lemma add_mul {x₁ x₂ y₁ y₂ : M} (h₁ : Exponential x₁ y₁) (h₂ : Exponential x₂ y₂) : Exponential (x₁ + x₂) (y₁ * y₂) := by
+lemma add_mul {x₁ x₂ y₁ y₂ : V} (h₁ : Exponential x₁ y₁) (h₂ : Exponential x₂ y₂) : Exponential (x₁ + x₂) (y₁ * y₂) := by
   wlog hy : y₁ ≥ y₂
   · simpa [add_comm, mul_comm] using this h₂ h₁ (le_of_not_ge hy)
   revert y₂
@@ -688,77 +688,76 @@ end ISigma₀
 
 section ISigma₁
 
-variable [M ⊧ₘ* 𝐈𝚺₁]
+variable [V ⊧ₘ* 𝐈𝚺₁]
 
 namespace Exponential
 
-lemma range_exists (x : M) : ∃ y, Exponential x y := by
+lemma range_exists (x : V) : ∃ y, Exponential x y := by
   induction x using induction_sigma1
-  · apply Definable.ex
-    definability
+  · definability
   case zero => exact ⟨1, by simp⟩
   case succ x IH =>
     rcases IH with ⟨y, IH⟩
     exact ⟨2 * y, IH.succ⟩
 
-lemma range_exists_unique (x : M) : ∃! y, Exponential x y := by
+lemma range_exists_unique (x : V) : ∃! y, Exponential x y := by
   rcases range_exists x with ⟨y, h⟩
   exact ExistsUnique.intro y h (by intro y' h'; exact h'.uniq h)
 
 end Exponential
 
-instance : Exp M := ⟨fun a ↦ Classical.choose! (Exponential.range_exists_unique a)⟩
+instance : Exp V := ⟨fun a ↦ Classical.choose! (Exponential.range_exists_unique a)⟩
 
 section exponential
 
-lemma exponential_exp (a : M) : Exponential a (exp a) := Classical.choose!_spec (Exponential.range_exists_unique a)
+lemma exponential_exp (a : V) : Exponential a (exp a) := Classical.choose!_spec (Exponential.range_exists_unique a)
 
-lemma exponential_graph {a b : M} : a = exp b ↔ Exponential b a := Classical.choose!_eq_iff _
+lemma exponential_graph {a b : V} : a = exp b ↔ Exponential b a := Classical.choose!_eq_iff _
 
 def _root_.LO.FirstOrder.Arith.expDef : 𝚺₀.Semisentence 2 := .mkSigma “x y | !exponentialDef.val y x” (by simp)
 
-lemma exp_defined_deltaZero : 𝚺₀-Function₁ (Exp.exp : M → M) via expDef := by
+lemma exp_defined_deltaZero : 𝚺₀-Function₁ (Exp.exp : V → V) via expDef := by
   intro v; simp [expDef, exponential_graph]
 
 @[simp] lemma exp_defined_iff (v) :
-    Semiformula.Evalbm M v expDef.val ↔ v 0 = Exp.exp (v 1) := exp_defined_deltaZero.df.iff v
+    Semiformula.Evalbm V v expDef.val ↔ v 0 = Exp.exp (v 1) := exp_defined_deltaZero.df.iff v
 
-instance exp_definable_deltaZero : 𝚺₀-Function₁ (Exp.exp : M → M) := Defined.to_definable _ exp_defined_deltaZero
+instance exp_definable_deltaZero : 𝚺₀-Function₁ (Exp.exp : V → V) := exp_defined_deltaZero.to_definable
 
-lemma exp_of_exponential {a b : M} (h : Exponential a b) : exp a = b :=
+lemma exp_of_exponential {a b : V} (h : Exponential a b) : exp a = b :=
   Eq.symm <| exponential_graph.mpr h
 
-lemma exp_inj : Function.Injective (Exp.exp : M → M) := λ a _ H ↦
+lemma exp_inj : Function.Injective (Exp.exp : V → V) := λ a _ H ↦
   (exponential_exp a).inj (exponential_graph.mp H)
 
-@[simp] lemma exp_zero : exp (0 : M) = 1 := exp_of_exponential (by simp)
+@[simp] lemma exp_zero : exp (0 : V) = 1 := exp_of_exponential (by simp)
 
-@[simp] lemma exp_one : exp (1 : M) = 2 := exp_of_exponential (by simp)
+@[simp] lemma exp_one : exp (1 : V) = 2 := exp_of_exponential (by simp)
 
-lemma exp_succ (a : M) : exp (a + 1) = 2 * exp a :=
+lemma exp_succ (a : V) : exp (a + 1) = 2 * exp a :=
   exp_of_exponential <| Exponential.exponential_succ_mul_two.mpr <| exponential_exp a
 
-instance models_exponential_of_models_iSigmaOne : M ⊧ₘ* 𝐄𝐗𝐏 :=
+instance models_exponential_of_models_iSigmaOne : V ⊧ₘ* 𝐄𝐗𝐏 :=
   ⟨by intro f hf; rcases hf <;> simp [models_iff, exp_succ]⟩
 
-lemma exp_even (a : M) : exp (2 * a) = (exp a)^2 :=
+lemma exp_even (a : V) : exp (2 * a) = (exp a)^2 :=
   exp_of_exponential <| Exponential.exponential_even_sq.mpr <| exponential_exp a
 
-@[simp] lemma lt_exp (a : M) : a < exp a := (exponential_exp a).lt
+@[simp] lemma lt_exp (a : V) : a < exp a := (exponential_exp a).lt
 
-@[simp] lemma exp_pos (a : M) : 0 < exp a := (exponential_exp a).range_pos
+@[simp] lemma exp_pos (a : V) : 0 < exp a := (exponential_exp a).range_pos
 
-@[simp] lemma one_le_exp (a : M) : 1 ≤ exp a := pos_iff_one_le.mp (by simp)
+@[simp] lemma one_le_exp (a : V) : 1 ≤ exp a := pos_iff_one_le.mp (by simp)
 
-@[simp] lemma exp_pow2 (a : M) : Pow2 (exp a) := (exponential_exp a).range_pow2
+@[simp] lemma exp_pow2 (a : V) : Pow2 (exp a) := (exponential_exp a).range_pow2
 
-@[simp] lemma exp_monotone {a b : M} : exp a < exp b ↔ a < b :=
+@[simp] lemma exp_monotone {a b : V} : exp a < exp b ↔ a < b :=
   Iff.symm <| Exponential.monotone_iff (exponential_exp a) (exponential_exp b)
 
-@[simp] lemma exp_monotone_le {a b : M} : exp a ≤ exp b ↔ a ≤ b :=
+@[simp] lemma exp_monotone_le {a b : V} : exp a ≤ exp b ↔ a ≤ b :=
   Iff.symm <| Exponential.monotone_le_iff (exponential_exp a) (exponential_exp b)
 
-lemma nat_cast_exp (n : ℕ) : (exp n : ℕ) = exp (n : M) := by
+lemma nat_cast_exp (n : ℕ) : (exp n : ℕ) = exp (n : V) := by
   induction' n with n ih
   · simp
   · simp [exp_succ, ih]
