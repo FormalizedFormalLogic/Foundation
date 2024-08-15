@@ -49,6 +49,8 @@ lemma efq_of_neg! [System.NegationEquiv 𝓢] [HasAxiomEFQ 𝓢] (h : 𝓢 ⊢! 
   have dnp : [p] ⊢[𝓢]! p ⟶ ⊥ := of'! $ neg_equiv'!.mp h;
   exact efq'! (dnp ⨀ FiniteContext.id!);
 
+lemma efq_of_neg₂! [System.NegationEquiv 𝓢] [HasAxiomEFQ 𝓢] (h : 𝓢 ⊢! p) : 𝓢 ⊢! ~p ⟶ q := efq_imply_not₂! ⨀ h
+
 def neg_mdp [System.NegationEquiv 𝓢] (hnp : 𝓢 ⊢ ~p) (hn : 𝓢 ⊢ p) : 𝓢 ⊢ ⊥ := (neg_equiv'.mp hnp) ⨀ hn
 -- infixl:90 "⨀" => neg_mdp
 

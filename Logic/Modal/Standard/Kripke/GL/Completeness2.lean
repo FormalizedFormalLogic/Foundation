@@ -17,7 +17,7 @@ def cases_neg {C : Formula α → Sort w}
     (hfalsum : C ⊥)
     (hatom   : ∀ a : α, C (atom a))
     (hneg    : ∀ p : Formula α, C (~p))
-    (himp     : ∀ (p q : Formula α), q ≠ ⊥ → C (p ⟶ q))
+    (himp    : ∀ (p q : Formula α), q ≠ ⊥ → C (p ⟶ q))
     (hbox    : ∀ (p : Formula α), C (□p))
     : (p : Formula α) → C p
   | ⊥       => hfalsum
@@ -45,55 +45,68 @@ def rec_neg {C : Formula α → Sort w}
 
 section Complement
 
+variable {p q: Formula α}
+
 def negated : Formula α → Bool
-  | ~_ => true
-  | _  => false
+  | ~_ => True
+  | _  => False
 
-lemma negated_iff {p : Formula α} : p.negated ↔ ∃ q, p = ~q := by
+@[simp]
+lemma negated_def : (~p).negated := by simp [negated]
+
+@[simp]
+lemma negated_imp : (p ⟶ q).negated ↔ (q = ⊥) := by
+  simp [negated, Formula.imp_eq];
+  split;
+  . simp_all [Formula.imp_eq]; rfl;
+  . simp_all [Formula.imp_eq]; simpa;
+
+lemma negated_iff : p.negated ↔ ∃ q, p = ~q := by
   induction p using Formula.cases_neg with
-  | himp p q hq =>
-    simp [negated];
-    split;
-    . simp_all [Formula.imp_eq]; contradiction;
-    . simpa;
+  | himp => simp [negated_imp];
   | _ => simp [negated]
 
-lemma not_negated_iff {p : Formula α} : ¬p.negated ↔ ∀ q, p ≠ ~q := by
+lemma not_negated_iff : ¬p.negated ↔ ∀ q, p ≠ ~q := by
   induction p using Formula.cases_neg with
-  | himp p q hq =>
-    simp [negated];
-    split;
-    . simp_all [Formula.imp_eq]; contradiction;
-    . simpa;
+  | himp => simp [negated_imp];
   | _ => simp [negated]
 
-def complement (p : Formula α) : Formula α := if p.negated then p else ~p
+
+
+lemma falsum_eq : (falsum : Formula α) = ⊥ := rfl
+
+def complement : Formula α → Formula α
+  | ~p => p
+  | p  => ~p
+
 prefix:80 "-" => complement
 
-lemma eq_complement_negated {p : Formula α} (hp : p.negated) : -p = p := by
-  induction p using Formula.rec' <;> simp_all [negated, complement]
+namespace complement
 
-lemma eq_complement_not_negated {p : Formula α} (hp : ¬p.negated) : -p = ~p := by
-  induction p using Formula.rec' <;> simp_all [negated, complement]
+@[simp] lemma neg_def : -(~p) = p := by
+  induction p using Formula.rec' <;> simp_all [complement]
 
-lemma complement_bot (h : -p = ⊥) : p = ⊥ := by
-  by_cases hn : p.negated;
-  . rw [eq_complement_negated hn] at h; exact h;
-  . rw [eq_complement_not_negated hn] at h; contradiction;
+@[simp] lemma bot_def : -(⊥ : Formula α) = ~(⊥) := by simp only [complement, imp_inj, and_true]; rfl;
 
-lemma complement_box (h : -p = □q) : p = □q := by
-  by_cases hn : p.negated;
-  . rw [eq_complement_negated hn] at h; exact h;
-  . rw [eq_complement_not_negated hn] at h; contradiction;
+@[simp] lemma box_def : -(□p) = ~(□p) := by simp only [complement, imp_inj, and_true]; rfl;
 
+lemma imp_def₁ (hq : q ≠ ⊥) : -(p ⟶ q) = ~(p ⟶ q) := by
+  simp only [complement];
+  split;
+  . rename_i h; simp [imp_eq, falsum_eq, hq] at h;
+  . rfl;
 
-/-
-lemma complement_imp (h : -p = q ⟶ r) : p = q ⟶ r := by
-  by_cases hn : p.negated;
-  . rw [eq_complement_negated hn] at h; exact h;
-  . rw [eq_complement_not_negated hn] at h; contradiction;
--/
+lemma imp_def₂ (hq : q = ⊥) : -(p ⟶ q) = p := by
+  subst_vars;
+  apply neg_def;
 
+lemma resort_box (h : -p = □q) : p = ~□q := by
+  simp [complement] at h;
+  split at h;
+  . subst_vars; rfl;
+  . contradiction;
+
+end complement
 
 end Complement
 
@@ -103,7 +116,7 @@ def rec_negated {C : Formula α → Sort w}
     (hfalsum : C ⊥)
     (hatom   : ∀ a : α, C (atom a))
     (hneg    : ∀ p : Formula α, C (p) → C (~p))
-    (himp    : ∀ (p q : Formula α), (p ⟶ q).negated = false → C p → C q → C (p ⟶ q))
+    (himp    : ∀ (p q : Formula α), ¬(p ⟶ q).negated → C p → C q → C (p ⟶ q))
     (hbox    : ∀ (p : Formula α), C (p) → C (□p))
     : (p : Formula α) → C p
   | ⊥       => hfalsum
@@ -114,15 +127,11 @@ def rec_negated {C : Formula α → Sort w}
     by_cases e : q = ⊥
     . exact e ▸ hneg p (rec_negated hfalsum hatom hneg himp hbox p)
     . refine himp p q ?_ (rec_negated hfalsum hatom hneg himp hbox p) (rec_negated hfalsum hatom hneg himp hbox q)
-      . simp [negated]
-        split;
-        . rename_i h;
-          simp only [imp_eq, imp_inj] at h;
-          have := h.2;
-          contradiction;
-        . simp;
+      . simpa [negated_imp]
 
+end Formula
 
+/--/
 abbrev Complementary (P : Finset $ Formula α) : Finset (Formula α) := P ∪ (P.image (complement ·))
 postfix:80 "⁻" => Formula.Complementary
 
@@ -139,12 +148,6 @@ prefix:70 "𝒮⁻ " => Formula.GLComplementary
 
 namespace GLComplementary
 
-lemma mem_of_mem_box (h : □q ∈ 𝒮⁻ p) : q ∈ 𝒮⁻ p := by
-  simp_all [GLComplementary];
-  rcases h with h | ⟨r, _, hr₂⟩;
-  . aesop;
-  . have := complement_box hr₂; subst this;
-    aesop;
 
 lemma mem_subformula_of_mem_box (h : □q ∈ 𝒮⁻ p) : □q ∈ 𝒮 p := by
   simp [GLComplementary] at h;
@@ -152,49 +155,9 @@ lemma mem_subformula_of_mem_box (h : □q ∈ 𝒮⁻ p) : □q ∈ 𝒮 p := by
   . assumption;
   . have := complement_box hr₂; subst this; simpa;
 
-/-
-lemma mem_of_mem_imp (h : q ⟶ r ∈ 𝒮⁻ p) : q ∈ 𝒮⁻ p ∧ r ∈ 𝒮⁻ p := by
-  simp_all [GLComplementary];
-  rcases h with h | ⟨s, _, hr₂⟩;
-  . aesop;
-  . have := complement_imp hr₂; subst this; aesop;
-
-lemma mem_of_mem_imp₁ (h : q ⟶ r ∈ 𝒮⁻ p) : q ∈ 𝒮⁻ p := mem_of_mem_imp h |>.1
-
-lemma mem_of_mem_imp₂ (h : q ⟶ r ∈ 𝒮⁻ p) : r ∈ 𝒮⁻ p := mem_of_mem_imp h |>.2
-
-lemma mem_subformula_of_mem_and (h : q ⋏ r ∈ 𝒮⁻ p) : q ⋏ r ∈ 𝒮 p := by
-  simp [GLComplementary] at h;
-  rcases h with h | ⟨s, _, hr₂⟩;
-  . assumption;
-  . have := complement_and hr₂; subst this; simpa;
-
-lemma mem_subformula_of_mem_or (h : q ⋎ r ∈ 𝒮⁻ p) : q ⋎ r ∈ 𝒮 p := by
-  simp [GLComplementary] at h;
-  rcases h with h | ⟨s, _, hr₂⟩;
-  . assumption;
-  . have := complement_or hr₂; subst this; simpa;
-
-lemma mem_subformula_of_mem_imp (h : q ⟶ r ∈ 𝒮⁻ p) : q ⟶ r ∈ 𝒮 p := by
-  simp [GLComplementary] at h;
-  rcases h with h | ⟨s, _, hr₂⟩;
-  . assumption;
-  . have := complement_imp hr₂; subst this; simpa;
-
-lemma mem_subformula_of_mem_top (h : ⊤ ∈ 𝒮⁻ p) : ⊤ ∈ 𝒮 p := by
-  simp [GLComplementary] at h;
-  rcases h with h | ⟨s, _, hr₂⟩;
-  . assumption;
-  . have := complement_top hr₂; subst this; simpa;
-
-attribute [aesop safe 5 forward]
-  mem_subformula_of_mem_box
-  mem_subformula_of_mem_and
-  mem_subformula_of_mem_or
-  mem_subformula_of_mem_imp
-  mem_subformula_of_mem_top
-  -- mem_subformula_of_mem_bot
--/
+lemma mem_of_mem_box (h : □q ∈ 𝒮⁻ p) : q ∈ 𝒮⁻ p := by
+  simp; left;
+  exact Subformulas.mem_box $ mem_subformula_of_mem_box h;
 
 end GLComplementary
 
@@ -234,113 +197,183 @@ lemma Complete.whichone' (self : Theory.Complete T p) : ∀ q ∈ 𝒮 p, (q ∈
   . rwa [Formula.eq_complement_not_negated n] at *;
 
 end Theory
+-/
+
+
+abbrev Formulae (α) := Finset $ Formula α
+
+namespace Formulae
+
+def complementary (P : Formulae α) : Formulae α := P ∪ (P.image (Formula.complement))
+postfix:80 "⁻" => Formulae.complementary
+
+class ComplementaryClosed (X : Formulae α) (S : Formulae α) : Prop where
+  subset : X ⊆ S⁻
+  either : ∀ p ∈ S, p ∈ X ∨ -p ∈ X
+
+def SubformulaeComplementaryClosed (X : Formulae α) (p : Formula α) : Prop := X.ComplementaryClosed (𝒮 p)
+
+variable {S : Formulae α}
+
+end Formulae
 
 
 
-structure CompleteConsistentTheory (Λ : DeductionParameter α) (p : Formula α) where
-  theory : Theory α
-  consistent : (Λ)-Consistent theory
-  complete : theory.Complete p
+namespace Theory
 
-alias CCT := CompleteConsistentTheory
+variable {p : Formula α} {T : Theory α}
 
-namespace CompleteConsistentTheory
+lemma not_mem_of_mem_neg (T_consis : (Λ)-Consistent T) (h : ~p ∈ T) : p ∉ T := by
+  by_contra hC;
+  have : [p, ~p] ⊬[Λ]! ⊥ := (Theory.def_consistent.mp T_consis) [p, ~p] (by simp_all);
+  have : [p, ~p] ⊢[Λ]! ⊥ := System.bot_of_mem_either! (p := p) (Γ := [p, ~p]) (by simp) (by simp);
+  contradiction;
+
+lemma not_mem_neg_of_mem (T_consis : (Λ)-Consistent T) (h : p ∈ T) : ~p ∉ T := by
+  by_contra hC;
+  have : [p, ~p] ⊬[Λ]! ⊥ := (Theory.def_consistent.mp T_consis) [p, ~p] (by simp_all);
+  have : [p, ~p] ⊢[Λ]! ⊥ := System.bot_of_mem_either! (p := p) (Γ := [p, ~p]) (by simp) (by simp);
+  contradiction;
+
+end Theory
+
+
+lemma complement_derive_bot
+  {p : Formula α} [System (Formula α) S] {𝓢 : S} [System.ModusPonens 𝓢]
+  (hp : 𝓢 ⊢! p) (hcp : 𝓢 ⊢! -p)
+  : 𝓢 ⊢! ⊥ := by
+  induction p using Formula.cases_neg with
+  | hfalsum => assumption;
+  | hatom a =>
+    simp [Formula.complement] at hcp;
+    exact hcp ⨀ hp;
+  | hneg =>
+    simp [Formula.complement] at hcp;
+    exact hp ⨀ hcp;
+  | himp p q h =>
+    simp [Formula.complement.imp_def₁ h] at hcp;
+    exact hcp ⨀ hp;
+  | hbox p =>
+    simp [Formula.complement] at hcp;
+    exact hcp ⨀ hp;
+
+lemma complement_derive_bot₂
+  {Λ : DeductionParameter α} (hp : Λ ⊢! p) (hcp : Λ ⊢! -p) : Λ ⊢! ⊥ := complement_derive_bot hp hcp
+
+structure ComplementaryClosedConsistentFormulae (Λ) (S : Formulae α) where
+  formulae : Formulae α
+  consistent : (Λ)-Consistent (formulae.toSet)
+  closed : formulae.ComplementaryClosed S
+alias CCF := ComplementaryClosedConsistentFormulae
+
+namespace ComplementaryClosedConsistentFormulae
 
 open System
-
+open Formula (atom)
 variable {Λ : DeductionParameter α}
 
-lemma lindenbaum (p : Formula α) (consisT : (Λ)-Consistent T) : ∃ Ω : CCT Λ p, (T ⊆ Ω.theory) := by
-  obtain ⟨Z, Z_consis, Z_complete, Z_subset_T⟩ := Theory.complete_lindenbaum (α := α) (Λ := Λ);
-  use ⟨Z, Z_consis, Z_complete⟩;
+lemma lindenbaum
+  {X : Formulae α} (consisT : (Λ)-Consistent X)
+  (S : Formulae α) : ∃ X' : CCF Λ S, X ⊆ X'.formulae ∧ X'.formulae ⊆ S⁻ := by
+  sorry
 
-variable {p q : Formula α}
-variable {Ω Ω₁ Ω₂ : CCT Λ p}
+noncomputable instance [System.Consistent Λ] : Inhabited (CCF Λ S)
+  := ⟨lindenbaum (X := ∅) (by sorry) S |>.choose⟩
 
-lemma mem_compl_of_not_mem (hs : q ∈ 𝒮 p) (h : q ∉ Ω.theory) : -q ∈ Ω.theory := by
-  have := Ω.complete.whichone q (by assumption);
-  aesop;
+variable {S} {X : CCF Λ S}
 
-lemma mem_of_not_mem_compl (hs : q ∈ 𝒮 p) (h : -q ∉ Ω.theory) : q ∈ Ω.theory := by
-  have := Ω.complete.whichone q (by assumption);
-  aesop;
+@[simp] lemma unprovable_falsum : X.formulae *⊬[Λ]! ⊥ := X.consistent
 
-lemma membership_iff (hq : q ∈ 𝒮 p) : (q ∈ Ω.theory) ↔ (Ω.theory *⊢[Λ]! q) := by
+lemma mem_compl_of_not_mem (hs : q ∈ S) (h : q ∉ X.formulae) : -q ∈ X.formulae := by
+  rcases X.closed.either q (by assumption) with (h | h);
+  . contradiction;
+  . assumption;
+
+lemma mem_of_not_mem_compl (hs : q ∈ S) (h : -q ∉ X.formulae) : q ∈ X.formulae := by
+  rcases X.closed.either q (by assumption) with (h | h);
+  . assumption;
+  . contradiction;
+
+lemma membership_iff (hq_sub : q ∈ S) : (q ∈ X.formulae) ↔ (X.formulae *⊢[Λ]! q) := by
   constructor;
   . intro h; exact Context.by_axm! h;
   . intro hp;
-    suffices ~q ∉ Ω.theory by
+    suffices -q ∉ X.formulae by
       apply or_iff_not_imp_right.mp $ ?_;
       assumption;
-      exact Ω.complete.whichone' q hq;
+      exact X.closed.either q hq_sub;
     by_contra hC;
-    have hnp : Ω.theory *⊢[Λ]! ~q := Context.by_axm! hC;
-    have := neg_mdp! hnp hp;
-    have := Ω.consistent;
-    contradiction;
+    have hnp : X.formulae *⊢[Λ]! -q := Context.by_axm! hC;
+    have := complement_derive_bot hp hnp;
+    simpa;
 
-lemma mem_verum (h : ⊤ ∈ 𝒮 p) : ⊤ ∈ Ω.theory := by
+lemma mem_verum (h : ⊤ ∈ S) : ⊤ ∈ X.formulae := by
   apply membership_iff h |>.mpr;
   exact verum!;
 
-@[simp] lemma mem_falsum : ⊥ ∉ Ω.theory := Theory.not_mem_falsum_of_consistent Ω.consistent
+@[simp]
+lemma mem_falsum : ⊥ ∉ X.formulae := Theory.not_mem_falsum_of_consistent X.consistent
 
-lemma unprovable_falsum (h : ⊥ ∈ 𝒮 p) : Ω.theory *⊬[Λ]! ⊥ := by apply membership_iff (by assumption) |>.not.mp; simp
-
-lemma no_both (h : q ∈ 𝒮 p) (hn : ¬q.negated) : ¬((q ∈ Ω.theory) ∧ (-q ∈ Ω.theory)) := by
-  by_contra hC;
-  obtain ⟨hq, hnq⟩ := hC;
-  rw [Formula.eq_complement_not_negated hn] at *;
-  replace hq := membership_iff h |>.mp hq;
-  replace hnq := membership_iff (by sorry) |>.mp hnq;
-  exact unprovable_falsum (by sorry) (hnq ⨀ hq);
-
-lemma iff_mem_compl (hq : q ∈ 𝒮 p) (hn : ¬q.negated) : (q ∈ Ω.theory) ↔ (-q ∉ Ω.theory) := by
+lemma iff_mem_compl (hq_sub : q ∈ S) : (q ∈ X.formulae) ↔ (-q ∉ X.formulae) := by
   constructor;
-  . intro h; have := no_both hq hn (Ω := Ω); simp_all;
-  . intro h; exact mem_of_not_mem_compl (by sorry) h;
+  . intro hq; replace hq := membership_iff hq_sub |>.mp hq;
+    by_contra hnq;
+    induction q using Formula.cases_neg with
+    | hfalsum => exact unprovable_falsum hq;
+    | hatom a =>
+      simp only [Formula.complement] at hnq;
+      have : ↑X.formulae *⊢[Λ]! ~(atom a) := Context.by_axm! hnq;
+      have : ↑X.formulae *⊢[Λ]! ⊥ := complement_derive_bot hq this;
+      simpa;
+    | hbox q =>
+      simp only [Formula.complement] at hnq;
+      have : ↑X.formulae *⊢[Λ]! ~(□q) := Context.by_axm! hnq;
+      have : ↑X.formulae *⊢[Λ]! ⊥ := complement_derive_bot hq this;
+      simpa;
+    | hneg q =>
+      simp only [Formula.complement] at hnq;
+      have : ↑X.formulae *⊢[Λ]! q := Context.by_axm! hnq;
+      have : ↑X.formulae *⊢[Λ]! ⊥ := complement_derive_bot hq this;
+      simpa;
+    | himp q r h =>
+      simp only [Formula.complement.imp_def₁ h] at hnq;
+      have : ↑X.formulae *⊢[Λ]! ~(q ⟶ r) := Context.by_axm! hnq;
+      have : ↑X.formulae *⊢[Λ]! ⊥ := this ⨀ hq;
+      simpa;
+  . intro h; exact mem_of_not_mem_compl (by assumption) h;
 
-lemma iff_mem_imp (hsub : (q ⟶ r) ∈ 𝒮 p) : ((q ⟶ r) ∈ Ω.theory) ↔ (q ∈ Ω.theory) → (-r ∉ Ω.theory) := by
-  constructor;
-  . intro hqr hq;
-    apply iff_mem_compl (by sorry) (by sorry) |>.mp;
-    replace hqr := membership_iff (by sorry) |>.mp hqr;
-    replace hq := membership_iff (by sorry) |>.mp hq;
-    exact membership_iff (by sorry) |>.mpr $ hqr ⨀ hq;
-  . intro hpq;
-    replace hpq := imp_iff_or_not.mp hpq;
-    rcases hpq with (hq | hr);
-    . replace hq := membership_iff (by sorry) |>.mp $ iff_mem_compl (by sorry) (by sorry) |>.mpr hq;
-      apply membership_iff (by sorry) |>.mpr;
-      exact dhyp! hq;
-    . replace hr := by simpa using iff_mem_compl (by sorry) (by sorry) |>.not.mp hr;
-      apply membership_iff (by sorry) |>.mpr;
-      sorry;
-
-lemma iff_mem_imp_not (hsub : (q ⟶ r) ∈ 𝒮 p) : ((q ⟶ r) ∉ Ω.theory) ↔ (q ∈ Ω.theory) ⋏ (-r ∈ Ω.theory) := by
-  simpa using @iff_mem_imp α _ Λ p q Ω r hsub |>.not;
-
-/-
-lemma iff_mem_imp (hsub : (q ⟶ r) ∈ 𝒮 p) : ((q ⟶ r) ∈ Ω.theory) ↔ (q ∈ Ω.theory) → (r ∈ Ω.theory) := by
+lemma iff_mem_imp
+  (hsub_qr : (q ⟶ r) ∈ S) (hsub_q : q ∈ S := by trivial)  (hsub_r : r ∈ S := by trivial)
+  : ((q ⟶ r) ∈ X.formulae) ↔ (q ∈ X.formulae) → (-r ∉ X.formulae) := by
   constructor;
   . intro hqr hq;
-    have dqr := membership_iff (by aesop) |>.mp hqr;
-    have dq  := membership_iff (by aesop) |>.mp hq;
-    apply membership_iff (by aesop) |>.mpr;
-    exact dqr ⨀ dq;
-  . rintro hqr;
-    replace hqr := not_or_of_imp hqr;
+    apply iff_mem_compl hsub_r |>.mp;
+    replace hqr := membership_iff hsub_qr |>.mp hqr;
+    replace hq := membership_iff hsub_q |>.mp hq;
+    exact membership_iff hsub_r |>.mpr $ hqr ⨀ hq;
+  . intro hqr; replace hqr := not_or_of_imp hqr
     rcases hqr with (hq | hr);
-    . apply membership_iff (by aesop) |>.mpr;
-      replace hq := mem_compl_of_not_mem (by aesop) hq;
-      sorry;
-    . apply membership_iff (by aesop) |>.mpr;
-      exact dhyp! $ membership_iff (by aesop) |>.mp hr;
-    -- apply membership_iff (by aesop) |>.mpr;
-    -- sorry;
--/
+    . apply membership_iff hsub_qr |>.mpr;
+      replace hq := mem_compl_of_not_mem hsub_q hq;
+      induction q using Formula.cases_neg with
+      | hfalsum => exact efq!;
+      | hatom a => exact efq_of_neg! $ Context.by_axm! (by simpa using hq);
+      | hbox q => exact efq_of_neg! $ Context.by_axm! (by simpa using hq);
+      | hneg q =>
+        simp only [Formula.complement.neg_def] at hq;
+        exact efq_of_neg₂! $ Context.by_axm! hq;
+      | himp q r h =>
+        simp only [Formula.complement.imp_def₁ h] at hq;
+        exact efq_of_neg! $ Context.by_axm! (by simpa using hq);
+    . apply membership_iff (by assumption) |>.mpr;
+      exact dhyp! $ membership_iff (by assumption) |>.mp $ iff_mem_compl (by assumption) |>.mpr hr;
 
-end CompleteConsistentTheory
+lemma iff_not_mem_imp
+  (hsub_qr : (q ⟶ r) ∈ S) (hsub_q : q ∈ S := by trivial)  (hsub_r : r ∈ S := by trivial)
+  : ((q ⟶ r) ∉ X.formulae) ↔ (q ∈ X.formulae) ∧ (-r ∈ X.formulae) := by
+  simpa using @iff_mem_imp α _ Λ S X q r hsub_qr hsub_q hsub_r |>.not;
+
+end ComplementaryClosedConsistentFormulae
 
 namespace Kripke
 
@@ -349,16 +382,17 @@ open Formula
 variable {p q : Formula α}
 
 abbrev GLCompleteFrame {p : Formula α} (h : 𝐆𝐋 ⊬! p) : Kripke.FiniteFrame where
-  World := CCT 𝐆𝐋 p
+  World := CCF 𝐆𝐋 (𝒮 p)
   World_finite := by
     sorry;
   World_nonempty := by
-    have : (𝐆𝐋)-Consistent {~p} := Theory.unprovable_iff_singleton_neg_consistent.mp h;
-    obtain ⟨Ω, hΩ⟩ := CompleteConsistentTheory.lindenbaum p this;
-    exact ⟨Ω⟩;
+    sorry;
+    -- have : (𝐆𝐋)-Consistent {~p} := Theory.unprovable_iff_singleton_neg_consistent.mp h;
+    -- obtain ⟨Ω, hΩ⟩ := CompleteConsistentTheory.lindenbaum p this;
+    -- exact ⟨Ω⟩;
   Rel X Y :=
-    (∀ q ∈ □''⁻¹(𝒮 p), □q ∈ X.theory → (q ∈ Y.theory ∧ □q ∈ Y.theory)) ∧
-    (∃ r ∈ □''⁻¹(𝒮 p), □r ∉ X.theory ∧ □r ∈ Y.theory)
+    (∀ q ∈ □''⁻¹(𝒮 p), □q ∈ X.formulae → (q ∈ Y.formulae ∧ □q ∈ Y.formulae)) ∧
+    (∃ r ∈ □''⁻¹(𝒮 p), □r ∉ X.formulae ∧ □r ∈ Y.formulae)
 
 namespace GLCompleteFrame
 
@@ -380,15 +414,16 @@ end GLCompleteFrame
 
 abbrev GLCompleteModel (h : 𝐆𝐋 ⊬! p) : Kripke.Model α where
   Frame := GLCompleteFrame h
-  Valuation X a := (atom a) ∈ X.theory
+  Valuation X a := (atom a) ∈ X.formulae
 
 open Formula.Kripke
-open CompleteConsistentTheory
+open ComplementaryClosedConsistentFormulae
 
 open System System.FiniteContext in
 private lemma GL_truthlemma.lemma1
   {q : Formula α}
-  {X : Theory α} (X_consistent : (𝐆𝐋)-Consistent X) (h : □q ∉ X) : (𝐆𝐋)-Consistent ({□q, ~q} ∪ (□''⁻¹X ∪ □''□''⁻¹X)) := by
+  {X : (GLCompleteModel h).World} (h_sub : □q ∉ X.formulae)
+  : (𝐆𝐋)-Consistent (({□q, ~q} ∪ (X.formulae.prebox ∪ X.formulae.prebox.box)).toSet) := by
   by_contra hC;
   obtain ⟨Γ, hΓ₁, hΓ₂⟩ := Context.provable_iff.mp hC;
   have := toₛ! hΓ₂;
@@ -403,58 +438,68 @@ private lemma GL_truthlemma.lemma1
   have : (□'(Γ.remove (~q)).remove (□q)) ⊢[𝐆𝐋]! □q := provable_iff.mpr this;
   sorry;
 
+open Formula.Subformulas in
+macro_rules | `(tactic| trivial) => `(tactic|
+    first
+    | apply mem_self
+    | apply mem_imp₁ $ by assumption
+    | apply mem_imp₂ $ by assumption
+    | apply mem_box  $ by assumption
+  )
+
 open Formula MaximalConsistentTheory in
 lemma GL_truthlemma₂
   {p : Formula α} (h : 𝐆𝐋 ⊬! p) {X : (GLCompleteModel h).World}
-  {q : Formula α} (h_sub : q ∈ 𝒮⁻ p) :
-  Satisfies (GLCompleteModel h) X q ↔ q ∈ X.theory := by
-  induction q using Formula.rec_negated generalizing X with
+  {q : Formula α} (q_sub : q ∈ 𝒮 p) :
+  Satisfies (GLCompleteModel h) X q ↔ q ∈ X.formulae := by
+  induction q using Formula.rec' generalizing X with
+  | hatom => simp [Satisfies];
+  | hfalsum => simp [Satisfies];
+  | himp q r ihq ihr =>
+    constructor;
+    . contrapose;
+      intro h;
+      simp [Satisfies];
+      constructor;
+      . apply ihq (by trivial) |>.mpr;
+        exact iff_not_mem_imp q_sub |>.mp h |>.1;
+      . apply ihr (by trivial) |>.not.mpr;
+        have := iff_not_mem_imp q_sub |>.mp h |>.2;
+        exact iff_mem_compl (by trivial) |>.not.mpr (by simpa using this);
+    . contrapose;
+      intro h; simp [Satisfies] at h;
+      obtain ⟨hq, hr⟩ := h;
+      replace hq := ihq (by trivial) |>.mp hq;
+      replace hr := ihr (by trivial) |>.not.mp hr;
+      apply iff_not_mem_imp q_sub |>.mpr;
+      constructor;
+      . assumption;
+      . simpa using iff_mem_compl (by trivial) |>.not.mp (by simpa using hr);
   | hbox q ih =>
     constructor;
     . contrapose;
       intro h;
-      have := @GL_truthlemma.lemma1 α _ q X.theory X.consistent h;
-      obtain ⟨Y, hY⟩ := CompleteConsistentTheory.lindenbaum p this;
-      simp [Set.insert_subset_iff] at hY;
-      have ⟨⟨hY₁, hY₂⟩, hY₃, hY₄⟩ := hY;
+      have := GL_truthlemma.lemma1 (X := X) (h_sub := h);
+      obtain ⟨Y, hY₁, _⟩ := lindenbaum (S := 𝒮 p) this;
+      simp only [Finset.union_subset_iff] at hY₁;
+      have hY₁₁ : □q ∈ Y.formulae := by apply hY₁.1; simp;
+      have hY₁₂ : ~q ∈ Y.formulae := by apply hY₁.1; simp;
       simp [Satisfies];
       use Y;
       constructor;
-      . intro r hr₁ hr₂;
+      . intro r _ hr_sub;
         constructor;
-        . apply hY₃; exact hr₂;
-        . apply hY₄; exact hr₂;
+        . apply hY₁.2.1; simpa;
+        . apply hY₁.2.2; simpa;
       . use q;
-        refine ⟨?_, ?_, ?_, ?_⟩;
-        . exact GLComplementary.mem_subformula_of_mem_box h_sub;
-        . assumption;
-        . assumption;
-        . apply @ih Y (GLComplementary.mem_of_mem_box h_sub) |>.not.mpr;
-          apply Theory.not_mem_of_mem_neg Y.consistent (by aesop);
+        refine ⟨q_sub, h, hY₁₁, ?_⟩;
+        . apply ih (by trivial) |>.not.mpr;
+          exact Theory.not_mem_of_mem_neg Y.consistent (by simp_all);
     . intro h Y RXY;
-      apply ih (X := Y) (GLComplementary.mem_of_mem_box h_sub) |>.mpr
+      apply ih (by trivial) |>.mpr;
       simp [Frame.Rel'] at RXY;
-      exact RXY.1 q (GLComplementary.mem_subformula_of_mem_box h_sub) h |>.1;
-  | hfalsum => simp [Satisfies];
-  | hatom => simp [Satisfies];
-  | hneg q ih =>
-    sorry;
-  | himp q r neg ihq ihr =>
-    constructor;
-    . contrapose;
-      intro h;
-      have ⟨hq, hr⟩ := iff_mem_imp_not (by sorry) |>.mp h;
-      simp [Satisfies];
-      constructor;
-      . exact ihq (by sorry) |>.mpr hq;
-      . exact ihr (by sorry) |>.not.mpr $ iff_mem_compl (by sorry) (by sorry) |>.not.mpr (by simpa);
-    . contrapose;
-      intro h; simp [Satisfies] at h;
-      obtain ⟨hq, hr⟩ := h;
-      apply iff_mem_imp_not (by sorry) |>.mpr;
-      constructor;
-      . exact ihq (by sorry) |>.mp hq;
-      . simpa using iff_mem_compl (by sorry) (by sorry) |>.not.mp $ ihr (by sorry) |>.not.mp hr;
+      refine RXY.1 q ?_ h |>.1;
+      assumption;
 
 private lemma GL_completeAux : TransitiveIrreflexiveFrameClass.{u}ꟳ# ⊧ p → 𝐆𝐋 ⊢! p := by
   contrapose;
@@ -464,10 +509,11 @@ private lemma GL_completeAux : TransitiveIrreflexiveFrameClass.{u}ꟳ# ⊧ p →
   constructor;
   . exact ⟨GLCompleteFrame.transitive, GLCompleteFrame.irreflexive⟩;
   . simp [Formula.Kripke.ValidOnFrame, Formula.Kripke.ValidOnModel];
-    have ⟨X, hX⟩ := lindenbaum (Λ := 𝐆𝐋) (T := {~p}) (p := p) (Theory.unprovable_iff_singleton_neg_consistent.mp h);
+    obtain ⟨X, hX₁, hX₂⟩ := lindenbaum (Λ := 𝐆𝐋) (X := {~p}) (S := 𝒮 p)
+      (by sorry); -- Theory.unprovable_iff_singleton_neg_consistent.mp h
     use (GLCompleteModel h).Valuation, X;
-    apply GL_truthlemma₂ (h := h) (by simp) |>.not.mpr;
-    apply Theory.not_mem_of_mem_neg X.consistent (by aesop);
+    apply @GL_truthlemma₂ α _ p (by simpa) X p (by trivial) |>.not.mpr;
+    apply Theory.not_mem_of_mem_neg X.consistent (by simp_all);
 
 end Kripke
 
