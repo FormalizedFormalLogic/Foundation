@@ -7,7 +7,7 @@ namespace LO.Arith
 
 open FirstOrder FirstOrder.Arith
 
-variable {V : Type*} [Zero V] [One V] [Add V] [Mul V] [LT V] [V ⊧ₘ* 𝐈𝚺₁]
+variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
 variable {L : Arith.Language V} {pL : LDef} [Arith.Language.Defined L pL]
 
@@ -49,7 +49,7 @@ lemma qqConj_defined : 𝚺₁-Function₂ (qqConj : V → V → V) via qqConjDe
 @[simp] lemma eval_qqConj (v) :
     Semiformula.Evalbm V v qqConjDef.val ↔ v 0 = qqConj (v 1) (v 2) := qqConj_defined.df.iff v
 
-instance qqConj_definable : 𝚺₁-Function₂ (qqConj : V → V → V) := Defined.to_definable _ qqConj_defined
+instance qqConj_definable : 𝚺₁-Function₂ (qqConj : V → V → V) := qqConj_defined.to_definable
 
 instance qqConj_definable' (Γ) : Γ-[m + 1]-Function₂ (qqConj : V → V → V) := .of_sigmaOne qqConj_definable _ _
 
@@ -121,7 +121,7 @@ lemma qqDisj_defined : 𝚺₁-Function₂ (qqDisj : V → V → V) via qqDisjDe
 @[simp] lemma eval_qqDisj (v) :
     Semiformula.Evalbm V v qqDisjDef.val ↔ v 0 = qqDisj (v 1) (v 2) := qqDisj_defined.df.iff v
 
-instance qqDisj_definable : 𝚺₁-Function₂ (qqDisj : V → V → V) := Defined.to_definable _ qqDisj_defined
+instance qqDisj_definable : 𝚺₁-Function₂ (qqDisj : V → V → V) := qqDisj_defined.to_definable
 
 instance qqDisj_definable' (Γ) : Γ-[m + 1]-Function₂ (qqDisj : V → V → V) := .of_sigmaOne qqDisj_definable _ _
 
@@ -184,7 +184,7 @@ lemma substItr_defined : 𝚺₁-Function₄ (substItr : V → V → V → V →
 @[simp] lemma substItr_defined_iff (v) :
     Semiformula.Evalbm V v substItrDef.val ↔ v 0 = substItr (v 1) (v 2) (v 3) (v 4) := substItr_defined.df.iff v
 
-instance substItr_definable : 𝚺₁-Function₄ (substItr : V → V → V → V → V) := Defined.to_definable _ substItr_defined
+instance substItr_definable : 𝚺₁-Function₄ (substItr : V → V → V → V → V) := substItr_defined.to_definable
 
 @[simp, definability] instance substItr_definable' (Γ m) : Γ-[m + 1]-Function₄ (substItr : V → V → V → V → V) :=
   .of_sigmaOne substItr_definable _ _
@@ -300,9 +300,9 @@ lemma qqVerums_defined : 𝚺₁-Function₂ (qqVerums : V → V → V) via qqVe
 @[simp] lemma qqVerums_repeatVec (v) :
     Semiformula.Evalbm V v qqVerumsDef.val ↔ v 0 = qqVerums (v 1) (v 2) := qqVerums_defined.df.iff v
 
-instance qqVerums_definable : 𝚺₁-Function₂ (qqVerums : V → V → V) := Defined.to_definable _ qqVerums_defined
+instance qqVerums_definable : 𝚺₁-Function₂ (qqVerums : V → V → V) := qqVerums_defined.to_definable
 
-@[simp] instance qqVerums_definable' (Γ) : Γ-[m + 1]-Function₂ (qqVerums : V → V → V) :=
+instance qqVerums_definable' (Γ) : Γ-[m + 1]-Function₂ (qqVerums : V → V → V) :=
   .of_sigmaOne qqVerums_definable _ _
 
 end

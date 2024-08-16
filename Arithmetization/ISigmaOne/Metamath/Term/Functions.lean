@@ -232,7 +232,7 @@ lemma termShift_defined : 𝚺₁-Function₂ L.termShift via pL.termShiftDef :=
 instance termShift_definable : 𝚺₁-Function₂ L.termShift :=
   (termShift_defined L).to_definable
 
-@[definability, simp] instance termShift_definable' (Γ i) : (Γ, i + 1)-Function₂ L.termShift := .of_sigmaOne (termShift_definable L) _ _
+@[definability, simp] instance termShift_definable' (Γ i) : Γ-[i + 1]-Function₂ L.termShift := .of_sigmaOne (termShift_definable L) _ _
 
 lemma termShiftVec_defined : 𝚺₁-Function₃ L.termShiftVec via pL.termShiftVecDef := by
   intro v; simpa [LDef.termShiftVecDef, Language.termShiftVec] using (construction L).resultVec_defined v
@@ -241,9 +241,9 @@ lemma termShiftVec_defined : 𝚺₁-Function₃ L.termShiftVec via pL.termShift
     Semiformula.Evalbm (L := ℒₒᵣ) V v pL.termShiftVecDef ↔ v 0 = L.termShiftVec (v 1) (v 2) (v 3) := (termShiftVec_defined L).df.iff v
 
 instance termShiftVec_definable : 𝚺₁-Function₃ L.termShiftVec :=
-  Defined.to_definable _ (termShiftVec_defined L)
+  (termShiftVec_defined L).to_definable
 
-@[simp, definability] instance termShiftVec_definable' (Γ i) : (Γ, i + 1)-Function₃ L.termShiftVec :=
+@[simp, definability] instance termShiftVec_definable' (Γ i) : Γ-[i + 1]-Function₃ L.termShiftVec :=
   .of_sigmaOne (termShiftVec_definable L) _ _
 
 end
@@ -347,9 +347,9 @@ lemma termBShift_defined : 𝚺₁-Function₂ L.termBShift via pL.termBShiftDef
     Semiformula.Evalbm (L := ℒₒᵣ) V v pL.termBShiftDef ↔ v 0 = L.termBShift (v 1) (v 2) := (termBShift_defined L).df.iff v
 
 instance termBShift_definable : 𝚺₁-Function₂ L.termBShift :=
-  Defined.to_definable _ (termBShift_defined L)
+  (termBShift_defined L).to_definable
 
-@[definability, simp] instance termBShift_definable' (Γ i) : (Γ, i + 1)-Function₂ L.termBShift := .of_sigmaOne (termBShift_definable L) _ _
+@[definability, simp] instance termBShift_definable' (Γ i) : Γ-[i + 1]-Function₂ L.termBShift := .of_sigmaOne (termBShift_definable L) _ _
 
 lemma termBShiftVec_defined : 𝚺₁-Function₃ L.termBShiftVec via pL.termBShiftVecDef := by
   intro v; simpa using (construction L).resultVec_defined v
@@ -358,9 +358,9 @@ lemma termBShiftVec_defined : 𝚺₁-Function₃ L.termBShiftVec via pL.termBSh
     Semiformula.Evalbm (L := ℒₒᵣ) V v pL.termBShiftVecDef ↔ v 0 = L.termBShiftVec (v 1) (v 2) (v 3) := (termBShiftVec_defined L).df.iff v
 
 instance termBShiftVec_definable : 𝚺₁-Function₃ L.termBShiftVec :=
-  Defined.to_definable _ (termBShiftVec_defined L)
+  (termBShiftVec_defined L).to_definable
 
-@[simp, definability] instance termBShiftVec_definable' (Γ i) : (Γ, i + 1)-Function₃ L.termBShiftVec :=
+@[simp, definability] instance termBShiftVec_definable' (Γ i) : Γ-[i + 1]-Function₃ L.termBShiftVec :=
   .of_sigmaOne (termBShiftVec_definable L) _ _
 
 end
@@ -584,7 +584,7 @@ lemma numeralAux_defined : 𝚺₁-Function₁ (numeralAux : V → V) via numera
 @[simp] lemma eval_numeralAuxDef (v) :
     Semiformula.Evalbm V v numeralAuxDef.val ↔ v 0 = numeralAux (v 1) := numeralAux_defined.df.iff v
 
-@[definability, simp] instance seqExp_definable : 𝚺₁-Function₁ (numeralAux : V → V) := Defined.to_definable _ numeralAux_defined
+instance seqExp_definable : 𝚺-[0 + 1]-Function₁ (numeralAux : V → V) := numeralAux_defined.to_definable
 
 end
 
@@ -631,7 +631,7 @@ lemma numeral_defined : 𝚺₁-Function₁ (numeral : V → V) via numeralDef :
 @[simp] lemma eval_numeralDef (v) :
     Semiformula.Evalbm V v numeralDef.val ↔ v 0 = numeral (v 1) := numeral_defined.df.iff v
 
-@[simp] instance numeral_definable : 𝚺₁-Function₁ (numeral : V → V) := Defined.to_definable _ numeral_defined
+@[simp] instance numeral_definable : 𝚺₁-Function₁ (numeral : V → V) := numeral_defined.to_definable
 
 @[simp] instance numeral_definable' (Γ m) : Γ-[m + 1]-Function₁ (numeral : V → V) := .of_sigmaOne numeral_definable _ _
 

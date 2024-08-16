@@ -6,7 +6,7 @@ namespace LO.Arith
 
 open FirstOrder FirstOrder.Arith
 
-variable {V : Type*} [Zero V] [One V] [Add V] [Mul V] [LT V] [V ⊧ₘ* 𝐈𝚺₁]
+variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
 variable {L : Arith.Language V} {pL : LDef} [Arith.Language.Defined L pL]
 
@@ -32,7 +32,7 @@ lemma formulaSet_defined : 𝚫₁-Predicate L.FormulaSet via pL.formulaSetDef :
   ⟨by intro v; simp [LDef.formulaSetDef, HierarchySymbol.Semiformula.val_sigma, (semiformula_defined L).df.iff, (semiformula_defined L).proper.iff'],
    by intro v; simp [LDef.formulaSetDef, HierarchySymbol.Semiformula.val_sigma, (semiformula_defined L).df.iff]; rfl⟩
 
-@[simp] instance formulaSet_definable : 𝚫₁-Predicate L.FormulaSet := Defined.to_definable _ (formulaSet_defined L)
+@[simp] instance formulaSet_definable : 𝚫₁-Predicate L.FormulaSet := (formulaSet_defined L).to_definable
 
 end
 
@@ -123,7 +123,7 @@ variable (L)
 lemma setShift_defined : 𝚺₁-Function₁ L.setShift via pL.setShiftDef := by
   intro v; simp [LDef.setShiftDef, setShift_graph, (shift_defined L).df.iff]
 
-@[simp, definability] instance setShift_definable : 𝚺₁-Function₁ L.setShift := Defined.to_definable _ (setShift_defined L)
+@[simp, definability] instance setShift_definable : 𝚺₁-Function₁ L.setShift := (setShift_defined L).to_definable
 
 end
 
@@ -591,7 +591,7 @@ def _root_.LO.FirstOrder.Arith.LDef.TDef.derivationDef {pL : LDef} (pT : pL.TDef
 
 lemma derivation_defined : 𝚫₁-Predicate T.Derivation via pT.derivationDef := (construction T).fixpoint_definedΔ₁
 
-instance derivation_definable : 𝚫₁-Predicate T.Derivation := Defined.to_definable _ (derivation_defined T)
+instance derivation_definable : 𝚫₁-Predicate T.Derivation := (derivation_defined T).to_definable
 
 @[simp] instance derivatin_definable' (Γ) : Γ-[m + 1]-Predicate T.Derivation :=
   .of_deltaOne (derivation_definable T) _ _
@@ -604,7 +604,7 @@ lemma derivationOf_defined : 𝚫₁-Relation T.DerivationOf via pT.derivationOf
   ⟨by intro v; simp [LDef.TDef.derivationOfDef, HierarchySymbol.Semiformula.val_sigma, (derivation_defined T).proper.iff'],
    by intro v; simp [LDef.TDef.derivationOfDef, HierarchySymbol.Semiformula.val_sigma, (derivation_defined T).df.iff, eq_comm (b := fstIdx (v 0))]; rfl⟩
 
-instance derivationOf_definable : 𝚫₁-Relation T.DerivationOf := Defined.to_definable _ (derivationOf_defined T)
+instance derivationOf_definable : 𝚫₁-Relation T.DerivationOf := (derivationOf_defined T).to_definable
 
 @[simp] instance derivatinOf_definable' (Γ) : Γ-[m + 1]-Relation T.DerivationOf :=
   .of_deltaOne (derivationOf_definable T) _ _
@@ -615,10 +615,10 @@ def _root_.LO.FirstOrder.Arith.LDef.TDef.derivableDef {pL : LDef} (pT : pL.TDef)
 lemma Language.Theory.derivable_defined : 𝚺₁-Predicate T.Derivable via pT.derivableDef := by
   intro v; simp [LDef.TDef.derivableDef, HierarchySymbol.Semiformula.val_sigma, (derivationOf_defined T).df.iff, Language.Theory.Derivable]
 
-instance Language.Theory.derivable_definable : 𝚺₁-Predicate T.Derivable := Defined.to_definable _ (derivable_defined T)
+instance Language.Theory.derivable_definable : 𝚺₁-Predicate T.Derivable := (derivable_defined T).to_definable
 
 /-- instance for definability tactic-/
-@[simp] instance Language.Theory.derivable_definable' : (𝚺, 0 + 1)-Predicate T.Derivable := derivable_definable T
+instance Language.Theory.derivable_definable' : 𝚺-[0 + 1]-Predicate T.Derivable := derivable_definable T
 
 def _root_.LO.FirstOrder.Arith.LDef.TDef.prv {pL : LDef} (pT : pL.TDef) : 𝚺₁.Semisentence 1 := .mkSigma
   “p | ∃ s, !insertDef s p 0 ∧ !pT.derivableDef s” (by simp)
@@ -626,10 +626,10 @@ def _root_.LO.FirstOrder.Arith.LDef.TDef.prv {pL : LDef} (pT : pL.TDef) : 𝚺�
 protected lemma Language.Theory.provable_defined : 𝚺₁-Predicate T.Provable via pT.prv := by
   intro v; simp [LDef.TDef.prv, (derivable_defined T).df.iff, Language.Theory.Provable, singleton_eq_insert, emptyset_def]
 
-instance Language.Theory.provable_definable : 𝚺₁-Predicate T.Provable := Defined.to_definable _ T.provable_defined
+instance Language.Theory.provable_definable : 𝚺₁-Predicate T.Provable := T.provable_defined.to_definable
 
 /-- instance for definability tactic-/
-@[simp] instance Language.Theory.provable_definable' : (𝚺, 0 + 1)-Predicate T.Provable := T.provable_definable
+instance Language.Theory.provable_definable' : 𝚺-[0 + 1]-Predicate T.Provable := T.provable_definable
 
 end
 

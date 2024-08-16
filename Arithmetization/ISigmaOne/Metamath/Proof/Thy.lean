@@ -7,7 +7,7 @@ namespace LO.Arith
 
 open FirstOrder FirstOrder.Arith
 
-variable {V : Type*} [Zero V] [One V] [Add V] [Mul V] [LT V] [V ⊧ₘ* 𝐈𝚺₁]
+variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
 variable {L : Arith.Language V} {pL : LDef} [Arith.Language.Defined L pL]
 
@@ -16,7 +16,7 @@ section theory
 variable (L)
 
 structure _root_.LO.FirstOrder.Arith.LDef.TDef (pL : LDef) where
-  ch : HSemisentence ℒₒᵣ 1 𝚫₁
+  ch : 𝚫₁.Semisentence 1
 
 protected structure Language.Theory (L : Arith.Language V) {pL : LDef} [Arith.Language.Defined L pL] where
   set : Set V

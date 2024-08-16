@@ -14,7 +14,7 @@ namespace LO.Arith
 
 open FirstOrder FirstOrder.Arith
 
-variable {V : Type*} [Zero V] [One V] [Add V] [Mul V] [LT V] [V ⊧ₘ* 𝐈𝚺₁]
+variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
 variable {L : Arith.Language V} {pL : LDef} [Arith.Language.Defined L pL]
 
@@ -22,7 +22,7 @@ namespace Formalized
 
 variable (V)
 
-abbrev LOR.Theory := @Language.Theory V _ _ _ _ _ ⌜ℒₒᵣ⌝ (Language.lDef ℒₒᵣ) _
+abbrev LOR.Theory := @Language.Theory V _ ⌜ℒₒᵣ⌝ (Language.lDef ℒₒᵣ) _
 
 variable {V}
 
@@ -37,12 +37,13 @@ class EQTheory (T : LOR.TTheory (V := V)) where
   refl : T ⊢ (#'0 =' #'0).all
   replace (p : ⌜ℒₒᵣ⌝.TSemiformula (0 + 1)) : T ⊢ (#'1 =' #'0 ⟶ p^/[(#'1).sing] ⟶ p^/[(#'0).sing]).all.all
 
+variable (v : V)
+
 class R₀Theory (T : LOR.TTheory (V := V)) extends EQTheory T where
-  add (n m : V) : T ⊢ (↑n + ↑m) =' ↑(n + m)
-  mul (n m : V) : T ⊢ (↑n * ↑m) =' ↑(n * m)
+  add (n m : V) : T ⊢ (n + m : ⌜ℒₒᵣ⌝[V].TSemiterm 0) =' ↑(n + m)
+  mul (n m : V) : T ⊢ (n * m : ⌜ℒₒᵣ⌝[V].TSemiterm 0) =' ↑(n * m)
   ne {n m : V} : n ≠ m → T ⊢ ↑n ≠' ↑m
   ltNumeral (n : V) : T ⊢ (#'0 <' ↑n ⟷ (tSubstItr (#'0).sing (#'1 =' #'0) n).disj).all
-
 /-
 section
 
@@ -227,13 +228,13 @@ section R₀
 
 variable [R₀Theory T]
 
-def addComplete (n m : V) : T ⊢ (↑n + ↑m) =' ↑(n + m) := R₀Theory.add n m
+def addComplete (n m : V) : T ⊢ (n + m : ⌜ℒₒᵣ⌝[V].TSemiterm 0) =' ↑(n + m) := R₀Theory.add n m
 
-lemma add_complete! (n m : V) : T ⊢! (↑n + ↑m) =' ↑(n + m) := ⟨addComplete T n m⟩
+lemma add_complete! (n m : V) : T ⊢! (n + m : ⌜ℒₒᵣ⌝[V].TSemiterm 0) =' ↑(n + m) := ⟨addComplete T n m⟩
 
-def mulComplete (n m : V) : T ⊢ (↑n * ↑m) =' ↑(n * m) := R₀Theory.mul n m
+def mulComplete (n m : V) : T ⊢ (n * m : ⌜ℒₒᵣ⌝[V].TSemiterm 0) =' ↑(n * m) := R₀Theory.mul n m
 
-lemma mul_complete! (n m : V) : T ⊢! (↑n * ↑m) =' ↑(n * m) := ⟨mulComplete T n m⟩
+lemma mul_complete! (n m : V) : T ⊢! (n * m : ⌜ℒₒᵣ⌝[V].TSemiterm 0) =' ↑(n * m) := ⟨mulComplete T n m⟩
 
 def neComplete {n m : V} (h : n ≠ m) : T ⊢ ↑n ≠' ↑m := R₀Theory.ne h
 

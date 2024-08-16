@@ -15,7 +15,7 @@ namespace LO.Arith
 
 open FirstOrder FirstOrder.Arith
 
-variable {V : Type*} [Zero V] [One V] [Add V] [Mul V] [LT V] [V ⊧ₘ* 𝐈𝚺₁]
+variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
 namespace Formalized
 
@@ -71,16 +71,17 @@ noncomputable def termEqComplete {n : ℕ} (e : Fin n → V) :
   | Semiterm.func Language.Zero.zero v => by simpa using eqRefl T _
   | Semiterm.func Language.One.one v   => by simpa using eqRefl T _
   | Semiterm.func Language.Add.add v   => by
-      simp [Rew.func, Semiterm.val_func]
+      simp only [Rew.func, Semiterm.codeIn'_add, Fin.isValue, subst_add, Semiterm.val_func,
+        Structure.add_eq_of_lang]
       have ih : T ⊢ (⌜Rew.embs (v 0)⌝^ᵗ/[toNumVec e] + ⌜Rew.embs (v 1)⌝^ᵗ/[toNumVec e]) =' (↑((v 0).valbm V e) + ↑((v 1).valbm V e)) :=
         addExt T _ _ _ _ ⨀ termEqComplete e (v 0) ⨀ termEqComplete e (v 1)
-      have : T ⊢ (↑((v 0).valbm V e) + ↑((v 1).valbm V e)) =' ↑((v 0).valbm V e + (v 1).valbm V e) := addComplete T _ _
+      have : T ⊢ ((v 0).valbm V e + (v 1).valbm V e : ⌜ℒₒᵣ⌝[V].TSemiterm 0) =' ↑((v 0).valbm V e + (v 1).valbm V e) := addComplete T _ _
       exact eqTrans T _ _ _ ⨀ ih ⨀ this
   | Semiterm.func Language.Mul.mul v   => by
       simp [Rew.func, Semiterm.val_func]
       have ih : T ⊢ (⌜Rew.embs (v 0)⌝^ᵗ/[toNumVec e] * ⌜Rew.embs (v 1)⌝^ᵗ/[toNumVec e]) =' (↑((v 0).valbm V e) * ↑((v 1).valbm V e)) :=
         mulExt T _ _ _ _ ⨀ termEqComplete e (v 0) ⨀ termEqComplete e (v 1)
-      have : T ⊢ (↑((v 0).valbm V e) * ↑((v 1).valbm V e)) =' ↑((v 0).valbm V e * (v 1).valbm V e) := mulComplete T _ _
+      have : T ⊢ ((v 0).valbm V e * (v 1).valbm V e : ⌜ℒₒᵣ⌝[V].TSemiterm 0) =' ↑((v 0).valbm V e * (v 1).valbm V e) := mulComplete T _ _
       exact eqTrans T _ _ _ ⨀ ih ⨀ this
 
 lemma termEq_complete! {n : ℕ} (e : Fin n → V) (t : Semiterm ℒₒᵣ Empty n) :
@@ -168,8 +169,8 @@ open LO.Arith LO.Arith.Formalized
 variable (T : Theory ℒₒᵣ) [Arith.DefinableSigma₁Theory T]
 
 class ISigma₁EQaddR₀ where
-  EQ : ∀ (V : Type) [Zero V] [One V] [Add V] [Mul V] [LT V] [V ⊧ₘ* 𝐈𝚺₁], EQTheory (Theory.codeIn V T)
-  R0 : ∀ (V : Type) [Zero V] [One V] [Add V] [Mul V] [LT V] [V ⊧ₘ* 𝐈𝚺₁], R₀Theory (Theory.codeIn V T)
+  EQ : ∀ (V : Type) [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁], EQTheory (Theory.codeIn V T)
+  R0 : ∀ (V : Type) [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁], R₀Theory (Theory.codeIn V T)
 
 end LO.FirstOrder.Theory
 
@@ -177,7 +178,7 @@ namespace LO.Arith.Formalized
 
 open LO.FirstOrder
 
-variable {V : Type} [Zero V] [One V] [Add V] [Mul V] [LT V] [V ⊧ₘ* 𝐈𝚺₁]
+variable {V : Type} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
 variable (T : Theory ℒₒᵣ) [Arith.DefinableSigma₁Theory T]
 

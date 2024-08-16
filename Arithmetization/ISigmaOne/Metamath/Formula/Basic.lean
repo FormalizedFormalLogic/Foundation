@@ -6,7 +6,7 @@ namespace LO.Arith
 
 open FirstOrder FirstOrder.Arith
 
-variable {V : Type*} [Zero V] [One V] [Add V] [Mul V] [LT V] [V ⊧ₘ* 𝐈𝚺₁]
+variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
 variable {L : Arith.Language V} {pL : LDef} [Arith.Language.Defined L pL]
 
@@ -373,7 +373,7 @@ lemma uformula_defined : 𝚫₁-Predicate L.UFormula via pL.uformulaDef :=
 @[simp] lemma eval_uformulaDef (v) :
     Semiformula.Evalbm V v pL.uformulaDef.val ↔ L.UFormula (v 0) := (uformula_defined L).df.iff v
 
-instance uformulaDef_definable : 𝚫₁-Predicate L.UFormula := Defined.to_definable _ (uformula_defined L)
+instance uformulaDef_definable : 𝚫₁-Predicate L.UFormula := (uformula_defined L).to_definable
 
 @[simp, definability] instance uformulaDef_definable' (Γ) : Γ-[m + 1]-Predicate L.UFormula :=
   .of_deltaOne (uformulaDef_definable L) _ _
@@ -393,7 +393,7 @@ lemma semiformula_defined : 𝚫₁-Relation L.Semiformula via pL.isSemiformulaD
   left := by intro v; simp [LDef.isSemiformulaDef, HierarchySymbol.Semiformula.val_sigma, (uformula_defined L).proper.iff']
   right := by intro v; simp [LDef.isSemiformulaDef, HierarchySymbol.Semiformula.val_sigma, eval_uformulaDef L, Language.Semiformula, eq_comm]
 
-instance semiformula_definable : 𝚫₁-Relation L.Semiformula := Defined.to_definable _ (semiformula_defined L)
+instance semiformula_definable : 𝚫₁-Relation L.Semiformula := (semiformula_defined L).to_definable
 
 @[simp, definability] instance semiformula_defined' (Γ) : Γ-[m + 1]-Relation L.Semiformula :=
   .of_deltaOne (semiformula_definable L) _ _
@@ -530,7 +530,7 @@ lemma Language.UFormula.induction (Γ) {P : V → Prop} (hP : Γ-[1]-Predicate P
     · exact hall n p ⟨(hC p hp).1, hnp⟩ (hC p hp).2
     · exact hex n p ⟨(hC p hp).1, hnp⟩ (hC p hp).2)
 
-lemma Language.Semiformula.induction (Γ) {P : V → V → Prop} (hP : (Γ, 1)-Relation P)
+lemma Language.Semiformula.induction (Γ) {P : V → V → Prop} (hP : Γ-[1]-Relation P)
     (hrel : ∀ n k r v, L.Rel k r → L.SemitermVec k n v → P n (^rel n k r v))
     (hnrel : ∀ n k r v, L.Rel k r → L.SemitermVec k n v → P n (^nrel n k r v))
     (hverum : ∀ n, P n ^⊤[n])
@@ -658,14 +658,14 @@ structure Construction (L : Arith.Language V) (φ : Blueprint pL) where
   ex         (param n p₁ y₁ : V) : V
   allChanges (param n : V) : V
   exChanges  (param n : V) : V
-  rel_defined    : DefinedFunction (fun v ↦ rel (v 0) (v 1) (v 2) (v 3) (v 4)) φ.rel
-  nrel_defined   : DefinedFunction (fun v ↦ nrel (v 0) (v 1) (v 2) (v 3) (v 4)) φ.nrel
-  verum_defined  : DefinedFunction (fun v ↦ verum (v 0) (v 1)) φ.verum
-  falsum_defined : DefinedFunction (fun v ↦ falsum (v 0) (v 1)) φ.falsum
-  and_defined    : DefinedFunction (fun v ↦ and (v 0) (v 1) (v 2) (v 3) (v 4) (v 5)) φ.and
-  or_defined     : DefinedFunction (fun v ↦ or  (v 0) (v 1) (v 2) (v 3) (v 4) (v 5)) φ.or
-  all_defined    : DefinedFunction (fun v ↦ all (v 0) (v 1) (v 2) (v 3)) φ.all
-  ex_defined     : DefinedFunction (fun v ↦ ex  (v 0) (v 1) (v 2) (v 3)) φ.ex
+  rel_defined    : 𝚺₁.DefinedFunction (fun v ↦ rel (v 0) (v 1) (v 2) (v 3) (v 4)) φ.rel
+  nrel_defined   : 𝚺₁.DefinedFunction (fun v ↦ nrel (v 0) (v 1) (v 2) (v 3) (v 4)) φ.nrel
+  verum_defined  : 𝚺₁.DefinedFunction (fun v ↦ verum (v 0) (v 1)) φ.verum
+  falsum_defined : 𝚺₁.DefinedFunction (fun v ↦ falsum (v 0) (v 1)) φ.falsum
+  and_defined    : 𝚺₁.DefinedFunction (fun v ↦ and (v 0) (v 1) (v 2) (v 3) (v 4) (v 5)) φ.and
+  or_defined     : 𝚺₁.DefinedFunction (fun v ↦ or  (v 0) (v 1) (v 2) (v 3) (v 4) (v 5)) φ.or
+  all_defined    : 𝚺₁.DefinedFunction (fun v ↦ all (v 0) (v 1) (v 2) (v 3)) φ.all
+  ex_defined     : 𝚺₁.DefinedFunction (fun v ↦ ex  (v 0) (v 1) (v 2) (v 3)) φ.ex
   allChanges_defined : 𝚺₁-Function₂ allChanges via φ.allChanges
   exChanges_defined  : 𝚺₁-Function₂ exChanges via φ.exChanges
 
@@ -887,7 +887,7 @@ lemma graph_defined : 𝚺₁-Relation₃ c.Graph via β.graph := by
 @[simp] lemma eval_graphDef (v) :
     Semiformula.Evalbm V v β.graph.val ↔ c.Graph (v 0) (v 1) (v 2) := (graph_defined β c).df.iff v
 
-@[definability, simp] instance graph_definable : 𝚺₁-Relation₃ c.Graph := Defined.to_definable _ c.graph_defined
+instance graph_definable : 𝚺-[0 + 1]-Relation₃ c.Graph := (c.graph_defined).to_definable
 
 variable {β}
 
@@ -1203,18 +1203,18 @@ lemma uformula_result_induction {P : V → V → V → Prop} (hP : 𝚺₁-Relat
   haveI : 𝚺₁-Function₂ c.exChanges := c.exChanges_defined.to_definable
   let f : V → V → V := fun p param ↦ max param (max (c.allChanges param (fstIdx p)) (c.exChanges param (fstIdx p)))
   have hf : 𝚺₁-Function₂ f :=
-    DefinableFunction.comp₂_infer (f := Max.max)
-      (DefinableFunction.var _)
-      (DefinableFunction.comp₂_infer
-        (DefinableFunction.comp₂_infer (DefinableFunction.var _) (DefinableFunction.comp₁_infer (DefinableFunction.var _)))
-        (DefinableFunction.comp₂_infer (DefinableFunction.var _) (DefinableFunction.comp₁_infer (DefinableFunction.var _))))
+    HierarchySymbol.BoldfaceFunction.comp₂ (f := Max.max)
+      (HierarchySymbol.BoldfaceFunction.var _)
+      (HierarchySymbol.BoldfaceFunction.comp₂
+        (HierarchySymbol.BoldfaceFunction.comp₂ (HierarchySymbol.BoldfaceFunction.var _) (HierarchySymbol.BoldfaceFunction.comp₁ (HierarchySymbol.BoldfaceFunction.var _)))
+        (HierarchySymbol.BoldfaceFunction.comp₂ (HierarchySymbol.BoldfaceFunction.var _) (HierarchySymbol.BoldfaceFunction.comp₁ (HierarchySymbol.BoldfaceFunction.var _))))
   apply sigma₁_order_ball_induction hf ?_ ?_ p param
   · apply HierarchySymbol.Boldface.imp
-      (HierarchySymbol.Boldface.comp₁_infer (DefinableFunction.var _))
-      (HierarchySymbol.Boldface.comp₃_infer
-        (DefinableFunction.var _)
-        (DefinableFunction.var _)
-        (DefinableFunction.comp₂_infer (DefinableFunction.var _) (DefinableFunction.var _)))
+      (HierarchySymbol.Boldface.comp₁ (HierarchySymbol.BoldfaceFunction.var _))
+      (HierarchySymbol.Boldface.comp₃
+        (HierarchySymbol.BoldfaceFunction.var _)
+        (HierarchySymbol.BoldfaceFunction.var _)
+        (HierarchySymbol.BoldfaceFunction.comp₂ (HierarchySymbol.BoldfaceFunction.var _) (HierarchySymbol.BoldfaceFunction.var _)))
   intro p param ih hp
   rcases hp.case with
     (⟨n, k, r, v, hkr, hv, rfl⟩ | ⟨n, k, r, v, hkr, hv, rfl⟩ |
@@ -1255,23 +1255,23 @@ lemma semiformula_result_induction {P : V → V → V → V → Prop} (hP : 𝚺
   intro param p hp
   apply c.uformula_result_induction (P := fun param p y ↦ ∀ n ≤ p, n = fstIdx p → P param n p y)
     ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
-  · apply HierarchySymbol.Boldface.ball_le (DefinableFunction.var _)
+  · apply HierarchySymbol.Boldface.ball_le (HierarchySymbol.BoldfaceFunction.var _)
     simp_all only [zero_add, Nat.succ_eq_add_one, Nat.reduceAdd, Fin.isValue, Fin.succ_one_eq_two,
       Fin.succ_zero_eq_one]
     apply LO.FirstOrder.Arith.HierarchySymbol.Boldface.imp
     · simp_all only [SigmaPiDelta.alt_sigma, Fin.isValue]
-      apply LO.FirstOrder.Arith.HierarchySymbol.Boldface.comp₂_infer
-      · simp_all only [zero_add, Fin.isValue, DefinableFunction.var]
+      apply LO.FirstOrder.Arith.HierarchySymbol.Boldface.comp₂
+      · simp_all only [zero_add, Fin.isValue, HierarchySymbol.BoldfaceFunction.var]
       · simp_all only [zero_add, Fin.isValue]
-        apply LO.FirstOrder.Arith.DefinableFunction.comp₁_infer
-        simp_all only [zero_add, Fin.isValue, DefinableFunction.var]
-    · apply LO.FirstOrder.Arith.HierarchySymbol.Boldface.comp₄_infer
-      · simp_all only [zero_add, Fin.isValue, DefinableFunction.var]
+        apply LO.FirstOrder.Arith.HierarchySymbol.BoldfaceFunction.comp₁
+        simp_all only [zero_add, Fin.isValue, HierarchySymbol.BoldfaceFunction.var]
+    · apply LO.FirstOrder.Arith.HierarchySymbol.Boldface.comp₄
+      · simp_all only [zero_add, Fin.isValue, HierarchySymbol.BoldfaceFunction.var]
       · simp_all only [zero_add, Fin.isValue]
-        apply LO.FirstOrder.Arith.DefinableFunction.comp₁_infer
-        simp_all only [zero_add, Fin.isValue, DefinableFunction.var]
-      · simp_all only [zero_add, Fin.isValue, DefinableFunction.var]
-      · simp_all only [zero_add, Fin.isValue, DefinableFunction.var]
+        apply LO.FirstOrder.Arith.HierarchySymbol.BoldfaceFunction.comp₁
+        simp_all only [zero_add, Fin.isValue, HierarchySymbol.BoldfaceFunction.var]
+      · simp_all only [zero_add, Fin.isValue, HierarchySymbol.BoldfaceFunction.var]
+      · simp_all only [zero_add, Fin.isValue, HierarchySymbol.BoldfaceFunction.var]
   · rintro param n k R v hkR hv _ _ rfl; simpa using hRel param n k R v hkR hv
   · rintro param n k R v hkR hv _ _ rfl; simpa using hNRel param n k R v hkR hv
   · rintro param n _ _ rfl; simpa using hverum param n

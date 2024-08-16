@@ -708,7 +708,7 @@ lemma retraction {n k} {f : (Fin k → V) → V} (hf : ℌ.BoldfaceFunction f) (
   have := Boldface.retraction (n := n + 1) hf (0 :> fun i ↦ (e i).succ); simp at this
   exact this.of_iff (by intro x; simp)
 
-lemma retractiont {f : (Fin k → V) → V} (hf : ℌ.BoldfaceFunction f) (t : Fin k → Semiterm ℒₒᵣ V n) :
+lemma retractiont {n k} {f : (Fin k → V) → V} (hf : ℌ.BoldfaceFunction f) (t : Fin k → Semiterm ℒₒᵣ V n) :
     ℌ.BoldfaceFunction fun v ↦ f (fun i ↦ Semiterm.valm V v id (t i)) := by
   have := Boldface.retractiont (n := n + 1) hf (#0 :> fun i ↦ Rew.bShift (t i)); simp at this
   exact this.of_iff (by intro x; simp [Semiterm.val_bShift'])
