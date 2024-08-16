@@ -384,9 +384,9 @@ lemma lindenbaum_either {l : List (Formula α)} (hp : p ∈ l) : p ∈ X[l] ∨ 
       }
 
 lemma lindenbaum_subset {l : List (Formula α)} {p : Formula α} (h : p ∈ X[l])
-  : p ∈ X⁻ ∨ p ∈ l ∨ -p ∈ l := by
-  induction l with
-  | nil => simp_all; exact Formulae.complementary_mem h;
+  : p ∈ X ∨ p ∈ l ∨ (∃ q ∈ l, -q = p)  := by
+  induction l generalizing p with
+  | nil => simp_all;
   | cons q qs ih =>
     simp_all [enum, next];
     split at h;
@@ -394,10 +394,7 @@ lemma lindenbaum_subset {l : List (Formula α)} {p : Formula α} (h : p ∈ X[l]
       . tauto;
       . rcases ih h <;> tauto;
     . rcases Finset.mem_insert.mp h with (rfl | h)
-      . rcases Finset.mem_insert.mp h with (h | h)
-        . sorry;
-
-        . tauto;
+      . tauto;
       . rcases ih h <;> tauto;
 
 end exists_consistent_complementary_closed
@@ -413,16 +410,19 @@ lemma exists_consistent_complementary_closed
   . exact enum_consistent Λ X_consis;
   . simp [Formulae.complementary];
     intro p hp;
-    /-
     simp only [Finset.mem_union, Finset.mem_image];
-    rcases lindenbaum_subset Λ hp with (h | h | h);
-    . left; exact h_sub h;
+    rcases lindenbaum_subset Λ hp with (h | h | ⟨q, hq₁, hq₂⟩);
+    . replace h := h_sub h;
+      simp [complementary] at h;
+      rcases h with (_ | ⟨a, b, rfl⟩);
+      . tauto;
+      . right; use a;
     . left; exact Finset.mem_toList.mp h;
     . right;
-      sorry;
-    -/
-    simp [complementary] at h_sub;
-    sorry;
+      use q;
+      constructor;
+      . exact Finset.mem_toList.mp hq₁;
+      . assumption;
   . intro p hp;
     exact lindenbaum_either Λ (by simpa);
 
@@ -555,6 +555,7 @@ variable {p q : Formula α}
 abbrev GLCompleteFrame {p : Formula α} (h : 𝐆𝐋 ⊬! p) : Kripke.FiniteFrame where
   World := CCF 𝐆𝐋 (𝒮 p)
   World_finite := by
+    simp;
     sorry;
   Rel X Y :=
     (∀ q ∈ □''⁻¹(𝒮 p), □q ∈ X.formulae → (q ∈ Y.formulae ∧ □q ∈ Y.formulae)) ∧
