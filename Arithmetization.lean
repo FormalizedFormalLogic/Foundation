@@ -3,7 +3,10 @@ import Arithmetization.Vorspiel.Graph
 import Arithmetization.Vorspiel.Lemmata
 
 import Arithmetization.Definability.Init
-import Arithmetization.Definability.Definability
+import Arithmetization.Definability.Hierarchy
+import Arithmetization.Definability.Boldface
+import Arithmetization.Definability.BoundedBoldface
+import Arithmetization.Definability.Absoluteness
 
 import Arithmetization.Basic.PeanoMinus
 import Arithmetization.Basic.Ind
@@ -41,7 +44,6 @@ import Arithmetization.ISigmaOne.Metamath.Coding
 
 import Arithmetization.ISigmaOne.Metamath.Theory.R
 import Arithmetization.ISigmaOne.Metamath.Theory.SigmaOneDefinable
-import Arithmetization.ISigmaOne.Metamath.Theory.Theory
 
 import Arithmetization.ISigmaOne.Metamath.DerivabilityConditions.D1
 import Arithmetization.ISigmaOne.Metamath.DerivabilityConditions.D3
