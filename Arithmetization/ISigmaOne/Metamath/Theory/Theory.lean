@@ -169,11 +169,11 @@ def _root_.LO.FirstOrder.Arith.LDef.TDef.union {pL : LDef} (t u : pL.TDef) : pL.
 instance union_Defined_union (T U : L.Theory) {t u : pL.TDef} [T.Defined t] [U.Defined u] : (T.union U).Defined (t.union u) where
   defined := ⟨by
     simp [Arith.LDef.TDef.union]
-    apply HSemiformula.ProperOn.or
+    apply HierarchySymbol.Semiformula.ProperOn.or
       (Language.Theory.Defined.defined (T := T)).proper
       (Language.Theory.Defined.defined (T := U)).proper, by
-    intro v; simp [Arith.LDef.TDef.union, HSemiformula.or, Language.Theory.union,
-      HSemiformula.val_sigma,
+    intro v; simp [Arith.LDef.TDef.union, HierarchySymbol.Semiformula.or, Language.Theory.union,
+      HierarchySymbol.Semiformula.val_sigma,
       (Language.Theory.Defined.defined (T := T)).df.iff,
       (Language.Theory.Defined.defined (T := U)).df.iff]⟩
 
@@ -208,7 +208,7 @@ instance : (eqReplaceC (V := V)).Defined eqReplaceCDef where
   defined := by
     intro v
     simp [eqReplaceC, eqReplaceCDef,
-      HSemiformula.val_sigma,
+      HierarchySymbol.Semiformula.val_sigma,
       (semiformula_defined (LOR (V := V))).df.iff, (semiformula_defined (LOR (V := V))).proper.iff',
       (substs_defined (LOR (V := V))).df.iff, (imp_defined (LOR (V := V))).df.iff]
     by_cases h : ⌜ℒₒᵣ⌝.Semiformula 1 (v 1) <;> simp [h]
@@ -272,7 +272,7 @@ instance : (thEQ V).Defined thEQDef where
   defined := ⟨by {
     intro v
     simp [thEQDef,
-      HSemiformula.val_sigma,
+      HierarchySymbol.Semiformula.val_sigma,
       (imp_defined (Language.codeIn ℒₒᵣ V)).df.iff,
       (substs_defined (Language.codeIn ℒₒᵣ V)).df.iff,
       (semiformula_defined (Language.codeIn ℒₒᵣ V)).df.iff]

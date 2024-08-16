@@ -6,7 +6,7 @@ namespace LO.Arith
 
 open FirstOrder FirstOrder.Arith
 
-variable {V : Type*} [Zero V] [One V] [Add V] [Mul V] [LT V] [V ⊧ₘ* 𝐈𝚺₁]
+variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
 section
 
@@ -57,40 +57,40 @@ variable {n m w : V}
 
 section
 
-def _root_.LO.FirstOrder.Arith.LDef.termSubstDef (pL : LDef) : 𝚺₁-Semisentence 5 := (blueprint pL).result.rew <| Rew.substs ![#0, #1, #4, #2, #3]
+def _root_.LO.FirstOrder.Arith.LDef.termSubstDef (pL : LDef) : 𝚺₁.Semisentence 5 := (blueprint pL).result.rew <| Rew.substs ![#0, #1, #4, #2, #3]
 
-def _root_.LO.FirstOrder.Arith.LDef.termSubstVecDef (pL : LDef) : 𝚺₁-Semisentence 6 := (blueprint pL).resultVec.rew <| Rew.substs ![#0, #1, #2, #5, #3, #4]
+def _root_.LO.FirstOrder.Arith.LDef.termSubstVecDef (pL : LDef) : 𝚺₁.Semisentence 6 := (blueprint pL).resultVec.rew <| Rew.substs ![#0, #1, #2, #5, #3, #4]
 
 variable (L)
 
-lemma termSubst_defined : Arith.DefinedFunction (fun v ↦ L.termSubst (v 0) (v 1) (v 2) (v 3)) pL.termSubstDef := by
+lemma termSubst_defined : 𝚺₁.DefinedFunction (fun v ↦ L.termSubst (v 0) (v 1) (v 2) (v 3)) pL.termSubstDef := by
   intro v; simpa [LDef.termSubstDef, Language.termSubst] using (construction L).result_defined ![v 0, v 1, v 4, v 2, v 3]
 
 @[simp] lemma eval_termSubstDef (v : Fin 5 → V) :
     Semiformula.Evalbm (L := ℒₒᵣ) V v pL.termSubstDef ↔ v 0 = L.termSubst (v 1) (v 2) (v 3) (v 4) := (termSubst_defined L).df.iff v
 
-instance termSubst_definable : Arith.DefinableFunction ℒₒᵣ 𝚺₁ (fun v : Fin 4 → V ↦ L.termSubst (v 0) (v 1) (v 2) (v 3)) :=
-  Defined.to_definable _ (termSubst_defined L)
+instance termSubst_definable : 𝚺₁.BoldfaceFunction (fun v : Fin 4 → V ↦ L.termSubst (v 0) (v 1) (v 2) (v 3)) :=
+  (termSubst_defined L).to_definable
 
 instance termSubst_definable₂ (n m : V) : 𝚺₁-Function₂ (L.termSubst n m) := by
-  simpa using DefinableFunction.retractiont (n := 2) (termSubst_definable L) ![&n, &m, #0, #1]
+  simpa using HierarchySymbol.BoldfaceFunction.retractiont (n := 2) (termSubst_definable L) ![&n, &m, #0, #1]
 
-@[simp, definability] instance termSubst_definable₂' (Γ k) (n m : V) : (Γ, k + 1)-Function₂ (L.termSubst n m) :=
+@[simp, definability] instance termSubst_definable₂' (Γ k) (n m : V) : Γ-[k + 1]-Function₂ (L.termSubst n m) :=
   .of_sigmaOne (termSubst_definable₂ L n m) _ _
 
-lemma termSubstVec_defined : Arith.DefinedFunction (fun v ↦ L.termSubstVec (v 0) (v 1) (v 2) (v 3) (v 4)) pL.termSubstVecDef := by
+lemma termSubstVec_defined : 𝚺₁.DefinedFunction (fun v ↦ L.termSubstVec (v 0) (v 1) (v 2) (v 3) (v 4)) pL.termSubstVecDef := by
   intro v; simpa [LDef.termSubstVecDef, Language.termSubstVec] using (construction L).resultVec_defined ![v 0, v 1, v 2, v 5, v 3, v 4]
 
 @[simp] lemma eval_termSubstVecDef (v : Fin 6 → V) :
     Semiformula.Evalbm (L := ℒₒᵣ) V v pL.termSubstVecDef ↔ v 0 = L.termSubstVec (v 1) (v 2) (v 3) (v 4) (v 5) := (termSubstVec_defined L).df.iff v
 
-instance termSubstVec_definable : Arith.DefinableFunction ℒₒᵣ 𝚺₁ (fun v : Fin 5 → V ↦ L.termSubstVec (v 0) (v 1) (v 2) (v 3) (v 4)) :=
-  Defined.to_definable _ (termSubstVec_defined L)
+instance termSubstVec_definable : 𝚺₁.BoldfaceFunction (fun v : Fin 5 → V ↦ L.termSubstVec (v 0) (v 1) (v 2) (v 3) (v 4)) :=
+  (termSubstVec_defined L).to_definable
 
 instance termSubstVec_definable₂ (k n m : V) : 𝚺₁-Function₂ (L.termSubstVec k n m) := by
-  simpa using DefinableFunction.retractiont (n := 2) (termSubstVec_definable L) ![&k, &n, &m, #0, #1]
+  simpa using HierarchySymbol.BoldfaceFunction.retractiont (n := 2) (termSubstVec_definable L) ![&k, &n, &m, #0, #1]
 
-@[simp, definability] instance termSubstVec_definable₂' (Γ i) (k n m : V) : (Γ, i + 1)-Function₂ (L.termSubstVec k n m) :=
+@[simp, definability] instance termSubstVec_definable₂' (Γ i) (k n m : V) : Γ-[i + 1]-Function₂ (L.termSubstVec k n m) :=
   .of_sigmaOne (termSubstVec_definable₂ L k n m) _ _
 
 end
@@ -216,10 +216,10 @@ variable {n : V}
 
 section
 
-def _root_.LO.FirstOrder.Arith.LDef.termShiftDef (pL : LDef) : 𝚺₁-Semisentence 3 :=
+def _root_.LO.FirstOrder.Arith.LDef.termShiftDef (pL : LDef) : 𝚺₁.Semisentence 3 :=
   (blueprint pL).result
 
-def _root_.LO.FirstOrder.Arith.LDef.termShiftVecDef (pL : LDef) : 𝚺₁-Semisentence 4 := (blueprint pL).resultVec
+def _root_.LO.FirstOrder.Arith.LDef.termShiftVecDef (pL : LDef) : 𝚺₁.Semisentence 4 := (blueprint pL).resultVec
 
 variable (L)
 
@@ -230,9 +230,9 @@ lemma termShift_defined : 𝚺₁-Function₂ L.termShift via pL.termShiftDef :=
     Semiformula.Evalbm (L := ℒₒᵣ) V v pL.termShiftDef ↔ v 0 = L.termShift (v 1) (v 2) := (termShift_defined L).df.iff v
 
 instance termShift_definable : 𝚺₁-Function₂ L.termShift :=
-  Defined.to_definable _ (termShift_defined L)
+  (termShift_defined L).to_definable
 
-@[definability, simp] instance termShift_definable' (Γ i) : (Γ, i + 1)-Function₂ L.termShift := .of_sigmaOne (termShift_definable L) _ _
+@[definability, simp] instance termShift_definable' (Γ i) : Γ-[i + 1]-Function₂ L.termShift := .of_sigmaOne (termShift_definable L) _ _
 
 lemma termShiftVec_defined : 𝚺₁-Function₃ L.termShiftVec via pL.termShiftVecDef := by
   intro v; simpa [LDef.termShiftVecDef, Language.termShiftVec] using (construction L).resultVec_defined v
@@ -241,9 +241,9 @@ lemma termShiftVec_defined : 𝚺₁-Function₃ L.termShiftVec via pL.termShift
     Semiformula.Evalbm (L := ℒₒᵣ) V v pL.termShiftVecDef ↔ v 0 = L.termShiftVec (v 1) (v 2) (v 3) := (termShiftVec_defined L).df.iff v
 
 instance termShiftVec_definable : 𝚺₁-Function₃ L.termShiftVec :=
-  Defined.to_definable _ (termShiftVec_defined L)
+  (termShiftVec_defined L).to_definable
 
-@[simp, definability] instance termShiftVec_definable' (Γ i) : (Γ, i + 1)-Function₃ L.termShiftVec :=
+@[simp, definability] instance termShiftVec_definable' (Γ i) : Γ-[i + 1]-Function₃ L.termShiftVec :=
   .of_sigmaOne (termShiftVec_definable L) _ _
 
 end
@@ -333,10 +333,10 @@ variable {n : V}
 
 section
 
-def _root_.LO.FirstOrder.Arith.LDef.termBShiftDef (pL : LDef) : 𝚺₁-Semisentence 3 :=
+def _root_.LO.FirstOrder.Arith.LDef.termBShiftDef (pL : LDef) : 𝚺₁.Semisentence 3 :=
   (blueprint pL).result
 
-def _root_.LO.FirstOrder.Arith.LDef.termBShiftVecDef (pL : LDef) : 𝚺₁-Semisentence 4 := (blueprint pL).resultVec
+def _root_.LO.FirstOrder.Arith.LDef.termBShiftVecDef (pL : LDef) : 𝚺₁.Semisentence 4 := (blueprint pL).resultVec
 
 variable (L)
 
@@ -347,9 +347,9 @@ lemma termBShift_defined : 𝚺₁-Function₂ L.termBShift via pL.termBShiftDef
     Semiformula.Evalbm (L := ℒₒᵣ) V v pL.termBShiftDef ↔ v 0 = L.termBShift (v 1) (v 2) := (termBShift_defined L).df.iff v
 
 instance termBShift_definable : 𝚺₁-Function₂ L.termBShift :=
-  Defined.to_definable _ (termBShift_defined L)
+  (termBShift_defined L).to_definable
 
-@[definability, simp] instance termBShift_definable' (Γ i) : (Γ, i + 1)-Function₂ L.termBShift := .of_sigmaOne (termBShift_definable L) _ _
+@[definability, simp] instance termBShift_definable' (Γ i) : Γ-[i + 1]-Function₂ L.termBShift := .of_sigmaOne (termBShift_definable L) _ _
 
 lemma termBShiftVec_defined : 𝚺₁-Function₃ L.termBShiftVec via pL.termBShiftVecDef := by
   intro v; simpa using (construction L).resultVec_defined v
@@ -358,9 +358,9 @@ lemma termBShiftVec_defined : 𝚺₁-Function₃ L.termBShiftVec via pL.termBSh
     Semiformula.Evalbm (L := ℒₒᵣ) V v pL.termBShiftVecDef ↔ v 0 = L.termBShiftVec (v 1) (v 2) (v 3) := (termBShiftVec_defined L).df.iff v
 
 instance termBShiftVec_definable : 𝚺₁-Function₃ L.termBShiftVec :=
-  Defined.to_definable _ (termBShiftVec_defined L)
+  (termBShiftVec_defined L).to_definable
 
-@[simp, definability] instance termBShiftVec_definable' (Γ i) : (Γ, i + 1)-Function₃ L.termBShiftVec :=
+@[simp, definability] instance termBShiftVec_definable' (Γ i) : Γ-[i + 1]-Function₃ L.termBShiftVec :=
   .of_sigmaOne (termBShiftVec_definable L) _ _
 
 end
@@ -576,7 +576,7 @@ def numeralAux (x : V) : V := construction.result ![] x
 
 section
 
-def numeralAuxDef : 𝚺₁-Semisentence 2 := blueprint.resultDef
+def numeralAuxDef : 𝚺₁.Semisentence 2 := blueprint.resultDef
 
 lemma numeralAux_defined : 𝚺₁-Function₁ (numeralAux : V → V) via numeralAuxDef :=
   fun v ↦ by simp [construction.result_defined_iff, numeralAuxDef]; rfl
@@ -584,12 +584,12 @@ lemma numeralAux_defined : 𝚺₁-Function₁ (numeralAux : V → V) via numera
 @[simp] lemma eval_numeralAuxDef (v) :
     Semiformula.Evalbm V v numeralAuxDef.val ↔ v 0 = numeralAux (v 1) := numeralAux_defined.df.iff v
 
-@[definability, simp] instance seqExp_definable : 𝚺₁-Function₁ (numeralAux : V → V) := Defined.to_definable _ numeralAux_defined
+instance seqExp_definable : 𝚺-[0 + 1]-Function₁ (numeralAux : V → V) := numeralAux_defined.to_definable
 
 end
 
 @[simp] lemma numeralAux_semiterm (n x : V) : ⌜ℒₒᵣ⌝.Semiterm n (numeralAux x) := by
-  induction x using induction_iSigmaOne
+  induction x using induction_sigma1
   · definability
   case zero => simp
   case succ x ih => simp [qqAdd, ih]
@@ -618,7 +618,7 @@ lemma numeral_succ_pos (pos : 0 < n) : numeral (n + 1 : V) = numeral n ^+ 𝟏 :
 
 section
 
-def _root_.LO.FirstOrder.Arith.numeralDef : 𝚺₁-Semisentence 2 := .mkSigma
+def _root_.LO.FirstOrder.Arith.numeralDef : 𝚺₁.Semisentence 2 := .mkSigma
   “t x |
     (x = 0 → t = !!(Semiterm.Operator.numeral ℒₒᵣ Formalized.zero)) ∧
     (x ≠ 0 → ∃ x', !subDef x' x 1 ∧ !numeralAuxDef t x')”
@@ -631,15 +631,15 @@ lemma numeral_defined : 𝚺₁-Function₁ (numeral : V → V) via numeralDef :
 @[simp] lemma eval_numeralDef (v) :
     Semiformula.Evalbm V v numeralDef.val ↔ v 0 = numeral (v 1) := numeral_defined.df.iff v
 
-@[simp] instance numeral_definable : 𝚺₁-Function₁ (numeral : V → V) := Defined.to_definable _ numeral_defined
+@[simp] instance numeral_definable : 𝚺₁-Function₁ (numeral : V → V) := numeral_defined.to_definable
 
-@[simp] instance numeral_definable' (Γ m) : (Γ, m + 1)-Function₁ (numeral : V → V) := .of_sigmaOne numeral_definable _ _
+@[simp] instance numeral_definable' (Γ m) : Γ-[m + 1]-Function₁ (numeral : V → V) := .of_sigmaOne numeral_definable _ _
 
 end
 
 @[simp] lemma numeral_substs {w : V} (hw : ⌜ℒₒᵣ⌝.SemitermVec n m w) (x : V) :
     ⌜ℒₒᵣ⌝.termSubst n m w (numeral x) = numeral x := by
-  induction x using induction_iSigmaOne
+  induction x using induction_sigma1
   · definability
   case zero => simp [hw, Formalized.zero, qqFunc_absolute]
   case succ x ih =>
@@ -649,7 +649,7 @@ end
 
 @[simp] lemma numeral_shift (x : V) :
     ⌜ℒₒᵣ⌝.termShift n (numeral x) = numeral x := by
-  induction x using induction_iSigmaOne
+  induction x using induction_sigma1
   · definability
   case zero => simp [Formalized.zero, qqFunc_absolute]
   case succ x ih =>
@@ -659,7 +659,7 @@ end
 
 @[simp] lemma numeral_bShift (x : V) :
     ⌜ℒₒᵣ⌝.termBShift n (numeral x) = numeral x := by
-  induction x using induction_iSigmaOne
+  induction x using induction_sigma1
   · definability
   case zero => simp [Formalized.zero, qqFunc_absolute]
   case succ x ih =>

@@ -13,7 +13,7 @@ namespace LO.Arith
 
 open FirstOrder FirstOrder.Arith
 
-variable {V : Type*} [Zero V] [One V] [Add V] [Mul V] [LT V] [V ⊧ₘ* 𝐈𝚺₁]
+variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
 @[simp] lemma susbset_insert (x a : V) : a ⊆ insert x a := by intro z hz; simp [hz]
 
@@ -77,7 +77,7 @@ lemma sUnion_graph {u s : V} : u = ⋃ʰᶠ s ↔ ∀ x < u + s, (x ∈ u ↔ �
     · rintro ⟨c, hc, hx⟩
       exact h x (lt_of_lt_of_le (lt_trans (lt_of_mem hx) (lt_of_mem hc)) (by simp)) |>.mpr ⟨c, hc, hx⟩⟩
 
-def _root_.LO.FirstOrder.Arith.sUnionDef : 𝚺₀-Semisentence 2 := .mkSigma
+def _root_.LO.FirstOrder.Arith.sUnionDef : 𝚺₀.Semisentence 2 := .mkSigma
   “u s | ∀ x < u + s, (x ∈ u ↔ ∃ t ∈' s, x ∈ t)” (by simp)
 
 lemma sUnion_defined : 𝚺₀-Function₁ ((⋃ʰᶠ ·) : V → V) via sUnionDef := by
@@ -86,9 +86,9 @@ lemma sUnion_defined : 𝚺₀-Function₁ ((⋃ʰᶠ ·) : V → V) via sUnionD
 @[simp] lemma sUnion_defined_iff (v) :
     Semiformula.Evalbm V v sUnionDef.val ↔ v 0 = ⋃ʰᶠ v 1 := sUnion_defined.df.iff v
 
-instance sUnion_definable : DefinableFunction₁ ℒₒᵣ 𝚺₀ ((⋃ʰᶠ ·) : V → V) := Defined.to_definable _ sUnion_defined
+instance sUnion_definable : 𝚺₀-Function₁ ((⋃ʰᶠ ·) : V → V) := sUnion_defined.to_definable
 
-instance sUnion_definable' (Γ) : DefinableFunction₁ ℒₒᵣ Γ ((⋃ʰᶠ ·) : V → V) := .of_zero sUnion_definable _
+instance sUnion_definable' (ℌ : HierarchySymbol) : ℌ-Function₁ ((⋃ʰᶠ ·) : V → V) := sUnion_definable.of_zero
 
 end sUnion
 
@@ -110,7 +110,7 @@ private lemma union_graph {u s t : V} : u = s ∪ t ↔ ∀ x < u + s + t, (x �
       · exact h x (lt_of_lt_of_le (lt_of_mem hx) (by simp )) |>.mpr (Or.inl hx)
       · exact h x (lt_of_lt_of_le (lt_of_mem hx) (by simp )) |>.mpr (Or.inr hx)⟩
 
-def _root_.LO.FirstOrder.Arith.unionDef : 𝚺₀-Semisentence 3 := .mkSigma
+def _root_.LO.FirstOrder.Arith.unionDef : 𝚺₀.Semisentence 3 := .mkSigma
   “∀[#0 < #1 + #2 + #3](#0 ∈ #1 ↔ #0 ∈ #2 ∨ #0 ∈ #3)” (by simp)
 
 lemma union_defined : 𝚺₀-Function₂ ((· ∪ ·) : V → V → V) via unionDef := by
@@ -119,9 +119,9 @@ lemma union_defined : 𝚺₀-Function₂ ((· ∪ ·) : V → V → V) via unio
 @[simp] lemma union_defined_iff (v) :
     Semiformula.Evalbm V v unionDef.val ↔ v 0 = v 1 ∪ v 2 := union_defined.df.iff v
 
-instance union_definable : DefinableFunction₂ ℒₒᵣ 𝚺₀ ((· ∪ ·) : V → V → V) := Defined.to_definable _ union_defined
+instance union_definable : 𝚺₀-Function₂ ((· ∪ ·) : V → V → V) := union_defined.to_definable
 
-instance union_definable' (Γ) : DefinableFunction₂ ℒₒᵣ Γ ((· ∪ ·) : V → V → V) := .of_zero union_definable _
+instance union_definable' (ℌ : HierarchySymbol) : ℌ-Function₂ ((· ∪ ·) : V → V → V) := union_definable.of_zero
 
 lemma insert_eq_union_singleton (a s : V) : insert a s = {a} ∪ s := mem_ext (fun x ↦ by simp)
 
@@ -137,7 +137,7 @@ lemma insert_eq_union_singleton (a s : V) : insert a s = {a} ∪ s := mem_ext (f
         _ < log (2 * (a + b)) := by simp [log_two_mul_of_pos (show 0 < a + b from by simp [pos_of_nonempty hi])]
         _ ≤ log (2 * (a + b) + 1) := log_monotone (by simp))
 
-instance : Bounded₂ ℒₒᵣ ((· ∪ ·) : V → V → V) := ⟨‘x y | 2 * (x + y)’, fun _ ↦ by simp⟩
+instance : Bounded₂ ((· ∪ ·) : V → V → V) := ⟨‘x y | 2 * (x + y)’, fun _ ↦ by simp⟩
 
 lemma union_comm (a b : V) : a ∪ b = b ∪ a := mem_ext (by simp [or_comm])
 
@@ -232,7 +232,7 @@ private lemma product_graph {u a b : V} : u = a ×ʰᶠ b ↔ ∀ x < u + (a + b
       exact h ⟪y, z⟫ (lt_of_lt_of_le (pair_lt_pair (lt_of_mem hy) (lt_of_mem hz))
         (le_trans (pair_polybound a b) <| by simp)) |>.mpr ⟨y, hy, z, hz, rfl⟩⟩
 
-def _root_.LO.FirstOrder.Arith.productDef : 𝚺₀-Semisentence 3 := .mkSigma
+def _root_.LO.FirstOrder.Arith.productDef : 𝚺₀.Semisentence 3 := .mkSigma
   “u a b | ∀ x < u + (a + b + 1)², (x ∈ u ↔ ∃ y ∈' a, ∃ z ∈' b, !pairDef x y z)” (by simp)
 
 lemma product_defined : 𝚺₀-Function₂ ((· ×ʰᶠ ·) : V → V → V) via productDef := by
@@ -241,9 +241,9 @@ lemma product_defined : 𝚺₀-Function₂ ((· ×ʰᶠ ·) : V → V → V) vi
 @[simp] lemma product_defined_iff (v) :
     Semiformula.Evalbm V v productDef.val ↔ v 0 = v 1 ×ʰᶠ v 2 := product_defined.df.iff v
 
-instance product_definable : DefinableFunction₂ ℒₒᵣ 𝚺₀ ((· ×ʰᶠ ·) : V → V → V) := Defined.to_definable _ product_defined
+instance product_definable : 𝚺₀-Function₂ ((· ×ʰᶠ ·) : V → V → V) := product_defined.to_definable
 
-instance product_definable' (Γ) : DefinableFunction₂ ℒₒᵣ Γ ((· ×ʰᶠ ·) : V → V → V) := .of_zero product_definable _
+instance product_definable' (ℌ : HierarchySymbol) : ℌ-Function₂ ((· ×ʰᶠ ·) : V → V → V) := product_definable.of_zero
 
 end product
 
@@ -252,10 +252,10 @@ section domain
 lemma domain_exists_unique (s : V) :
     ∃! d : V, ∀ x, x ∈ d ↔ ∃ y, ⟪x, y⟫ ∈ s := by
   have : 𝚺₁-Predicate fun x ↦ ∃ y, ⟪x, y⟫ ∈ s :=
-    DefinablePred.of_iff (fun x ↦ ∃ y < s, ⟪x, y⟫ ∈ s)
+    HierarchySymbol.BoldfacePred.of_iff (Q := fun x ↦ ∃ y < s, ⟪x, y⟫ ∈ s)
+      (by definability)
       (fun x ↦ ⟨by rintro ⟨y, hy⟩; exact ⟨y, lt_of_le_of_lt (le_pair_right x y) (lt_of_mem hy), hy⟩,
                 by rintro ⟨y, _, hy⟩; exact ⟨y, hy⟩⟩)
-      (by definability)
   exact finite_comprehension₁!
     this
     (⟨s, fun x ↦ by rintro ⟨y, hy⟩; exact lt_of_le_of_lt (le_pair_left x y) (lt_of_mem hy)⟩)
@@ -276,7 +276,7 @@ private lemma domain_graph {u s : V} : u = domain s ↔ ∀ x < u + s, (x ∈ u 
         exact h x (lt_of_lt_of_le (lt_of_le_of_lt (le_pair_left x y) (lt_of_mem hy)) (by simp))
           |>.mpr ⟨y, lt_of_le_of_lt (le_pair_right x y) (lt_of_mem hy), _, hy, rfl⟩⟩
 
-def _root_.LO.FirstOrder.Arith.domainDef : 𝚺₀-Semisentence 2 := .mkSigma
+def _root_.LO.FirstOrder.Arith.domainDef : 𝚺₀.Semisentence 2 := .mkSigma
   “u s | ∀ x < u + s, (x ∈ u ↔ ∃ y < s, ∃ z ∈' s, !pairDef z x y)” (by simp)
 
 lemma domain_defined : 𝚺₀-Function₁ (domain : V → V) via domainDef := by
@@ -285,9 +285,9 @@ lemma domain_defined : 𝚺₀-Function₁ (domain : V → V) via domainDef := b
 @[simp] lemma domain_defined_iff (v) :
     Semiformula.Evalbm V v domainDef.val ↔ v 0 = domain (v 1) := domain_defined.df.iff v
 
-instance domain_definable : DefinableFunction₁ ℒₒᵣ 𝚺₀ (domain : V → V) := Defined.to_definable _ domain_defined
+instance domain_definable : 𝚺₀-Function₁ (domain : V → V) := domain_defined.to_definable
 
-instance domain_definable' (Γ) : DefinableFunction₁ ℒₒᵣ Γ (domain : V → V) := .of_zero domain_definable _
+instance domain_definable' (ℌ : HierarchySymbol) : ℌ-Function₁ (domain : V → V) := domain_definable.of_zero
 
 @[simp] lemma domain_empty : domain (∅ : V) = ∅ := mem_ext (by simp [mem_domain_iff])
 
@@ -311,7 +311,7 @@ instance domain_definable' (Γ) : DefinableFunction₁ ℒₒᵣ Γ (domain : V 
     exact lt_of_le_of_lt (le_trans (le_pair_left i x) (le_log_of_mem hix))
       (by simp [log_two_mul_add_one_of_pos (pos_of_nonempty hix)]))
 
-instance : Bounded₁ ℒₒᵣ (domain : V → V) := ⟨‘x | 2 * x’, fun _ ↦ by simp⟩
+instance : Bounded₁ (domain : V → V) := ⟨‘x | 2 * x’, fun _ ↦ by simp⟩
 
 lemma mem_domain_of_pair_mem {x y s : V} (h : ⟪x, y⟫ ∈ s) : x ∈ domain s := mem_domain_iff.mpr ⟨y, h⟩
 
@@ -341,10 +341,10 @@ section range
 lemma range_exists_unique (s : V) :
     ∃! r : V, ∀ y, y ∈ r ↔ ∃ x, ⟪x, y⟫ ∈ s := by
   have : 𝚺₁-Predicate fun y ↦ ∃ x, ⟪x, y⟫ ∈ s :=
-    DefinablePred.of_iff (fun y ↦ ∃ x < s, ⟪x, y⟫ ∈ s)
+    HierarchySymbol.BoldfacePred.of_iff (Q := fun y ↦ ∃ x < s, ⟪x, y⟫ ∈ s)
+      (by definability)
       (fun y ↦ ⟨by rintro ⟨x, hy⟩; exact ⟨x, lt_of_le_of_lt (le_pair_left x y) (lt_of_mem hy), hy⟩,
                 by rintro ⟨y, _, hy⟩; exact ⟨y, hy⟩⟩)
-      (by definability)
   exact finite_comprehension₁!
     this
     (⟨s, fun y ↦ by rintro ⟨x, hx⟩; exact lt_of_le_of_lt (le_pair_right x y) (lt_of_mem hx)⟩)
@@ -366,7 +366,7 @@ private lemma range_graph {s' s : V} : s' = range s ↔ ∀ y < s' + s, (y ∈ s
         exact h y (lt_of_lt_of_le (lt_of_mem_rng hx) (by simp))
           |>.mpr ⟨x, lt_of_mem_dom hx, _, hx, rfl⟩⟩
 
-def _root_.LO.FirstOrder.Arith.rangeDef : 𝚺₀-Semisentence 2 := .mkSigma
+def _root_.LO.FirstOrder.Arith.rangeDef : 𝚺₀.Semisentence 2 := .mkSigma
   “s' s | ∀ y < s' + s, (y ∈ s' ↔ ∃ x < s, ∃ z ∈' s, !pairDef z x y)” (by simp)
 
 lemma range_defined : 𝚺₀-Function₁ (range : V → V) via rangeDef := by
@@ -375,9 +375,9 @@ lemma range_defined : 𝚺₀-Function₁ (range : V → V) via rangeDef := by
 @[simp] lemma range_defined_iff (v) :
     Semiformula.Evalbm V v rangeDef.val ↔ v 0 = range (v 1) := range_defined.df.iff v
 
-instance range_definable : DefinableFunction₁ ℒₒᵣ 𝚺₀ (range : V → V) := Defined.to_definable _ range_defined
+instance range_definable : 𝚺₀-Function₁ (range : V → V) := range_defined.to_definable
 
-@[definability, simp] instance range_definable' (Γ) : DefinableFunction₁ ℒₒᵣ Γ (range : V → V) := .of_zero range_definable _
+instance range_definable' (ℌ : HierarchySymbol) : ℌ-Function₁ (range : V → V) := range_definable.of_zero
 
 @[simp] lemma range_empty : range (∅ : V) = ∅ := mem_ext (by simp [mem_range_iff])
 
@@ -418,7 +418,7 @@ private lemma isMapping_iff {m : V} :
       rcases h x hx with ⟨y, _, hxy, h⟩
       exact ExistsUnique.intro y hxy (fun y' hxy' ↦ h y' (lt_of_mem_rng hxy') hxy')⟩
 
-def _root_.LO.FirstOrder.Arith.isMappingDef : 𝚺₀-Semisentence 1 := .mkSigma
+def _root_.LO.FirstOrder.Arith.isMappingDef : 𝚺₀.Semisentence 1 := .mkSigma
   “m | ∃ d <⁺ 2 * m, !domainDef d m ∧ ∀ x ∈' d, ∃ y < m, x ~[m] y ∧ ∀ y' < m, x ~[m] y' → y' = y” (by simp)
 
 lemma isMapping_defined : 𝚺₀-Predicate (IsMapping : V → Prop) via isMappingDef := by
@@ -427,9 +427,9 @@ lemma isMapping_defined : 𝚺₀-Predicate (IsMapping : V → Prop) via isMappi
 @[simp] lemma isMapping_defined_iff (v) :
     Semiformula.Evalbm V v isMappingDef.val ↔ IsMapping (v 0) := isMapping_defined.df.iff v
 
-instance isMapping_definable : 𝚺₀-Predicate (IsMapping : V → Prop) := Defined.to_definable _ isMapping_defined
+instance isMapping_definable : 𝚺₀-Predicate (IsMapping : V → Prop) := isMapping_defined.to_definable
 
-instance isMapping_definable' (Γ) : Γ-Predicate (IsMapping : V → Prop) := .of_zero isMapping_definable _
+instance isMapping_definable' (ℌ) : ℌ-Predicate (IsMapping : V → Prop) := isMapping_definable.of_zero
 
 end
 
@@ -513,9 +513,9 @@ lemma domain_restr_of_subset_domain {f s : V} (h : s ⊆ domain f) : domain (f �
 
 end restriction
 
-theorem insert_induction {P : V → Prop} (hP : (Γ, 1)-Predicate P)
+theorem insert_induction {P : V → Prop} (hP : Γ-[1]-Predicate P)
     (hempty : P ∅) (hinsert : ∀ a s, a ∉ s → P s → P (insert a s)) : ∀ s, P s :=
-  order_induction_hh ℒₒᵣ Γ 1 hP <| by
+  order_induction_hh Γ 1 hP <| by
     intro s IH
     rcases eq_empty_or_nonempty s with (rfl | ⟨x, hx⟩)
     · exact hempty
@@ -593,7 +593,7 @@ def fstIdx (p : V) : V := π₁ (p - 1)
 
 @[simp] lemma fstIdx_le_self (p : V) : fstIdx p ≤ p := le_trans (by simp [fstIdx]) (show p - 1 ≤ p by simp)
 
-def _root_.LO.FirstOrder.Arith.fstIdxDef : 𝚺₀-Semisentence 2 :=
+def _root_.LO.FirstOrder.Arith.fstIdxDef : 𝚺₀.Semisentence 2 :=
   .mkSigma “n p | ∃ p' <⁺ p, !subDef p' p 1 ∧ !pi₁Def n p'” (by simp)
 
 lemma fstIdx_defined : 𝚺₀-Function₁ (fstIdx : V → V) via fstIdxDef := by
@@ -605,9 +605,9 @@ lemma fstIdx_defined : 𝚺₀-Function₁ (fstIdx : V → V) via fstIdxDef := b
 @[simp] lemma eval_fstIdxDef (v) :
     Semiformula.Evalbm V v fstIdxDef.val ↔ v 0 = fstIdx (v 1) := fstIdx_defined.df.iff v
 
-instance fstIdx_definable : 𝚺₀-Function₁ (fstIdx : V → V) := Defined.to_definable _ fstIdx_defined
+instance fstIdx_definable : 𝚺₀-Function₁ (fstIdx : V → V) := fstIdx_defined.to_definable
 
-instance fstIdx_definable' (Γ) : Γ-Function₁ (fstIdx : V → V) := .of_zero fstIdx_definable _
+instance fstIdx_definable' (Γ) : Γ-Function₁ (fstIdx : V → V) := fstIdx_definable.of_zero
 
 end fstIdx
 
@@ -617,7 +617,7 @@ def sndIdx (p : V) : V := π₂ (p - 1)
 
 @[simp] lemma sndIdx_le_self (p : V) : sndIdx p ≤ p := le_trans (by simp [sndIdx]) (show p - 1 ≤ p by simp)
 
-def _root_.LO.FirstOrder.Arith.sndIdxDef : 𝚺₀-Semisentence 2 :=
+def _root_.LO.FirstOrder.Arith.sndIdxDef : 𝚺₀.Semisentence 2 :=
   .mkSigma “n p | ∃ p' <⁺ p, !subDef p' p 1 ∧ !pi₂Def n p'” (by simp)
 
 lemma sndIdx_defined : 𝚺₀-Function₁ (sndIdx : V → V) via sndIdxDef := by
@@ -629,9 +629,9 @@ lemma sndIdx_defined : 𝚺₀-Function₁ (sndIdx : V → V) via sndIdxDef := b
 @[simp] lemma eval_sndIdxDef (v) :
     Semiformula.Evalbm V v sndIdxDef.val ↔ v 0 = sndIdx (v 1) := sndIdx_defined.df.iff v
 
-instance sndIdx_definable : 𝚺₀-Function₁ (sndIdx : V → V) := Defined.to_definable _ sndIdx_defined
+instance sndIdx_definable : 𝚺₀-Function₁ (sndIdx : V → V) := sndIdx_defined.to_definable
 
-instance sndIdx_definable' (Γ) : Γ-Function₁ (sndIdx : V → V) := .of_zero sndIdx_definable _
+instance sndIdx_definable' (Γ) : Γ-Function₁ (sndIdx : V → V) := sndIdx_definable.of_zero
 
 end sndIdx
 

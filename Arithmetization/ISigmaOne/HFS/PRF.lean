@@ -12,15 +12,15 @@ namespace LO.Arith
 
 open FirstOrder FirstOrder.Arith
 
-variable {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐈𝚺₁]
+variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
 namespace PR
 
 structure Blueprint (k : ℕ) where
-  zero : HSemisentence ℒₒᵣ (k + 1) 𝚺₁
-  succ : HSemisentence ℒₒᵣ (k + 3) 𝚺₁
+  zero : 𝚺₁.Semisentence (k + 1)
+  succ : 𝚺₁.Semisentence (k + 3)
 
-def Blueprint.cseqDef (p : Blueprint k) : HSemisentence ℒₒᵣ (k + 1) 𝚺₁ := .mkSigma
+def Blueprint.cseqDef (p : Blueprint k) : 𝚺₁.Semisentence (k + 1) := .mkSigma
   “s |
     :Seq s
     ∧ (∃ z < s, !p.zero z ⋯ ∧ 0 ~[s] z)
@@ -28,28 +28,28 @@ def Blueprint.cseqDef (p : Blueprint k) : HSemisentence ℒₒᵣ (k + 1) 𝚺�
         (∃ l <⁺ 2 * s, !lhDef l s ∧ i + 1 < l) →
         ∀ z < s, i ~[s] z → ∃ u < s, !p.succ u z i ⋯ ∧ i + 1 ~[s] u)” (by simp)
 
-def Blueprint.resultDef (p : Blueprint k) : HSemisentence ℒₒᵣ (k + 2) 𝚺₁ := .mkSigma
+def Blueprint.resultDef (p : Blueprint k) : 𝚺₁.Semisentence (k + 2) := .mkSigma
   “z u | ∃ s, !p.cseqDef s ⋯ ∧ u ~[s] z” (by simp)
 
-def Blueprint.resultDeltaDef (p : Blueprint k) : HSemisentence ℒₒᵣ (k + 2) 𝚫₁ := p.resultDef.graphDelta
+def Blueprint.resultDeltaDef (p : Blueprint k) : 𝚫₁.Semisentence (k + 2) := p.resultDef.graphDelta
 
-variable (M)
+variable (V)
 
 structure Construction {k : ℕ} (p : Blueprint k) where
-  zero : (Fin k → M) → M
-  succ : (Fin k → M) → M → M → M
-  zero_defined : DefinedFunction zero p.zero
-  succ_defined : DefinedFunction (fun v ↦ succ (v ·.succ.succ) (v 1) (v 0)) p.succ
+  zero : (Fin k → V) → V
+  succ : (Fin k → V) → V → V → V
+  zero_defined : 𝚺₁.DefinedFunction zero p.zero
+  succ_defined : 𝚺₁.DefinedFunction (fun v ↦ succ (v ·.succ.succ) (v 1) (v 0)) p.succ
 
-variable {M}
+variable {V}
 
 namespace Construction
 
-variable {k : ℕ} {p : Blueprint k} (c : Construction M p) (v : Fin k → M)
+variable {k : ℕ} {p : Blueprint k} (c : Construction V p) (v : Fin k → V)
 
-def CSeq (s : M) : Prop := Seq s ∧ ⟪0, c.zero v⟫ ∈ s ∧ ∀ i < lh s - 1, ∀ z, ⟪i, z⟫ ∈ s → ⟪i + 1, c.succ v i z⟫ ∈ s
+def CSeq (s : V) : Prop := Seq s ∧ ⟪0, c.zero v⟫ ∈ s ∧ ∀ i < lh s - 1, ∀ z, ⟪i, z⟫ ∈ s → ⟪i + 1, c.succ v i z⟫ ∈ s
 
-private lemma cseq_iff (s : M) : c.CSeq v s ↔
+private lemma cseq_iff (s : V) : c.CSeq v s ↔
     Seq s
     ∧ (∃ z < s, z = c.zero v ∧ ⟪0, z⟫ ∈ s)
     ∧ (∀ i < 2 * s,
@@ -66,17 +66,17 @@ private lemma cseq_iff (s : M) : c.CSeq v s ↔
           ⟨lh s, by simp [lt_succ_iff_le], rfl, by simpa [lt_tsub_iff_right] using hi⟩ z (lt_of_mem_rng hiz) hiz with ⟨_, _, rfl, h⟩
         exact h⟩⟩
 
-lemma cseq_defined : Arith.Defined (fun v ↦ c.CSeq (v ·.succ) (v 0) : (Fin (k + 1) → M) → Prop) p.cseqDef := by
+lemma cseq_defined : 𝚺₁.Defined (fun v ↦ c.CSeq (v ·.succ) (v 0) : (Fin (k + 1) → V) → Prop) p.cseqDef := by
   intro v; simp [Blueprint.cseqDef, cseq_iff, c.zero_defined.df.iff, c.succ_defined.df.iff]
 
 @[simp] lemma cseq_defined_iff (v) :
-    Semiformula.Evalbm M v p.cseqDef.val ↔ c.CSeq (v ·.succ) (v 0) := c.cseq_defined.df.iff v
+    Semiformula.Evalbm V v p.cseqDef.val ↔ c.CSeq (v ·.succ) (v 0) := c.cseq_defined.df.iff v
 
 variable {c v}
 
 namespace CSeq
 
-variable {s : M} (h : c.CSeq v s)
+variable {s : V} (h : c.CSeq v s)
 
 lemma seq : Seq s := h.1
 
@@ -84,13 +84,13 @@ lemma zero : ⟪0, c.zero v⟫ ∈ s := h.2.1
 
 lemma succ : ∀ i < lh s - 1, ∀ z, ⟪i, z⟫ ∈ s → ⟪i + 1, c.succ v i z⟫ ∈ s := h.2.2
 
-lemma unique {s₁ s₂ : M} (H₁ : c.CSeq v s₁) (H₂ : c.CSeq v s₂) (h₁₂ : lh s₁ ≤ lh s₂) {i} (hi : i < lh s₁) {z₁ z₂} :
+lemma unique {s₁ s₂ : V} (H₁ : c.CSeq v s₁) (H₂ : c.CSeq v s₂) (h₁₂ : lh s₁ ≤ lh s₂) {i} (hi : i < lh s₁) {z₁ z₂} :
     ⟪i, z₁⟫ ∈ s₁ → ⟪i, z₂⟫ ∈ s₂ → z₁ = z₂ := by
   revert z₁ z₂
   suffices ∀ z₁ < s₁, ∀ z₂ < s₂, ⟪i, z₁⟫ ∈ s₁ → ⟪i, z₂⟫ ∈ s₂ → z₁ = z₂
   by intro z₁ z₂ hz₁ hz₂; exact this z₁ (lt_of_mem_rng hz₁) z₂ (lt_of_mem_rng hz₂) hz₁ hz₂
   intro z₁ hz₁ z₂ hz₂ h₁ h₂
-  induction i using induction_iSigmaOne generalizing z₁ z₂
+  induction i using induction_sigma1 generalizing z₁ z₂
   · definability
   case zero =>
     have : z₁ = c.zero v := H₁.seq.isMapping.uniq h₁ H₁.zero
@@ -115,7 +115,7 @@ end CSeq
 lemma CSeq.initial : c.CSeq v !⟦c.zero v⟧ :=
   ⟨by simp, by simp [seqCons], by simp⟩
 
-lemma CSeq.successor {s l z : M} (Hs : c.CSeq v s) (hl : l + 1 = lh s) (hz : ⟪l, z⟫ ∈ s) :
+lemma CSeq.successor {s l z : V} (Hs : c.CSeq v s) (hl : l + 1 = lh s) (hz : ⟪l, z⟫ ∈ s) :
     c.CSeq v (s ⁀' c.succ v l z) :=
   ⟨ Hs.seq.seqCons _, by simp [seqCons, Hs.zero], by
     simp [Hs.seq.lh_seqCons]
@@ -133,10 +133,10 @@ lemma CSeq.successor {s l z : M} (Hs : c.CSeq v s) (hl : l + 1 = lh s) (hz : ⟪
 
 variable (c v)
 
-lemma CSeq.exists (l : M) : ∃ s, c.CSeq v s ∧ l + 1 = lh s := by
-  induction l using induction_iSigmaOne
-  · apply Definable.ex
-    apply Definable.and
+lemma CSeq.exists (l : V) : ∃ s, c.CSeq v s ∧ l + 1 = lh s := by
+  induction l using induction_sigma1
+  · apply HierarchySymbol.Boldface.ex
+    apply HierarchySymbol.Boldface.and
     · exact ⟨p.cseqDef.rew (Rew.embSubsts <| #0 :> fun i ↦ &(v i)), by
         intro w; simpa using c.cseq_defined_iff (w 0 :> v) |>.symm⟩
     · definability
@@ -149,7 +149,7 @@ lemma CSeq.exists (l : M) : ∃ s, c.CSeq v s ∧ l + 1 = lh s := by
     rcases this with ⟨z, hz⟩
     exact ⟨s ⁀' c.succ v l z, Hs.successor hls hz, by simp [Hs.seq, hls]⟩
 
-lemma cSeq_result_existsUnique (l : M) : ∃! z, ∃ s, c.CSeq v s ∧ l + 1 = lh s ∧ ⟪l, z⟫ ∈ s := by
+lemma cSeq_result_existsUnique (l : V) : ∃! z, ∃ s, c.CSeq v s ∧ l + 1 = lh s ∧ ⟪l, z⟫ ∈ s := by
   rcases CSeq.exists c v l with ⟨s, Hs, h⟩
   have : ∃ z, ⟪l, z⟫ ∈ s := Hs.seq.exists (show l < lh s from by simp [←h])
   rcases this with ⟨z, hz⟩
@@ -157,23 +157,23 @@ lemma cSeq_result_existsUnique (l : M) : ∃! z, ∃ s, c.CSeq v s ∧ l + 1 = l
     rintro z' ⟨s', Hs', h', hz'⟩
     exact Eq.symm <| Hs.unique Hs' (by simp [←h, ←h']) (show l < lh s from by simp [←h]) hz hz')
 
-def result (u : M) : M := Classical.choose! (c.cSeq_result_existsUnique v u)
+def result (u : V) : V := Classical.choose! (c.cSeq_result_existsUnique v u)
 
-lemma result_spec (u : M) : ∃ s, c.CSeq v s ∧ u + 1 = lh s ∧ ⟪u, c.result v u⟫ ∈ s :=
+lemma result_spec (u : V) : ∃ s, c.CSeq v s ∧ u + 1 = lh s ∧ ⟪u, c.result v u⟫ ∈ s :=
   Classical.choose!_spec (c.cSeq_result_existsUnique v u)
 
 @[simp] theorem result_zero : c.result v 0 = c.zero v := by
   rcases c.result_spec v 0 with ⟨s, Hs, _, h0⟩
   exact Hs.seq.isMapping.uniq h0 Hs.zero
 
-@[simp] theorem result_succ (u : M) : c.result v (u + 1) = c.succ v u (c.result v u) := by
+@[simp] theorem result_succ (u : V) : c.result v (u + 1) = c.succ v u (c.result v u) := by
   rcases c.result_spec v u with ⟨s, Hs, hk, h⟩
   have : CSeq c v (s ⁀' c.succ v u (result c v u) ) := Hs.successor hk h
   exact Eq.symm
     <| Classical.choose_uniq (c.cSeq_result_existsUnique v (u + 1))
     ⟨_, this, by simp [Hs.seq, hk], by simp [hk]⟩
 
-lemma result_graph (z u : M) : z = c.result v u ↔ ∃ s, c.CSeq v s ∧ ⟪u, z⟫ ∈ s :=
+lemma result_graph (z u : V) : z = c.result v u ↔ ∃ s, c.CSeq v s ∧ ⟪u, z⟫ ∈ s :=
   ⟨by rintro rfl
       rcases c.result_spec v u with ⟨s, Hs, _, h⟩
       exact ⟨s, Hs, h⟩,
@@ -183,22 +183,22 @@ lemma result_graph (z u : M) : z = c.result v u ↔ ∃ s, c.CSeq v s ∧ ⟪u, 
         (by simp [←hu, succ_le_iff_lt]; exact Hs.seq.lt_lh_iff.mpr (mem_domain_of_pair_mem h))
         (by simp [←hu]) h' h⟩
 
-lemma result_defined : Arith.DefinedFunction (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → M) → M) p.resultDef := by
+lemma result_defined : 𝚺₁.DefinedFunction (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → V) → V) p.resultDef := by
   intro v; simp [Blueprint.resultDef, result_graph]
   apply exists_congr; intro x
   simp [c.cseq_defined_iff]; intros; rfl
 
-lemma result_defined_delta : Arith.DefinedFunction (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → M) → M) p.resultDeltaDef :=
+lemma result_defined_delta : 𝚫₁.DefinedFunction (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → V) → V) p.resultDeltaDef :=
   c.result_defined.graph_delta
 
 @[simp] lemma result_defined_iff (v) :
-    Semiformula.Evalbm M v p.resultDef.val ↔ v 0 = c.result (v ·.succ.succ) (v 1) := c.result_defined.df.iff v
+    Semiformula.Evalbm V v p.resultDef.val ↔ v 0 = c.result (v ·.succ.succ) (v 1) := c.result_defined.df.iff v
 
-instance result_definable : DefinableFunction ℒₒᵣ 𝚺₁ (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → M) → M) :=
-  Defined.to_definable _ c.result_defined
+instance result_definable : 𝚺₁.BoldfaceFunction (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → V) → V) :=
+  c.result_defined.to_definable
 
-instance result_definable_delta₁ : DefinableFunction ℒₒᵣ 𝚫₁ (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → M) → M) :=
-  Defined.to_definable _ c.result_defined_delta
+instance result_definable_delta₁ : 𝚫₁.BoldfaceFunction (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → V) → V) :=
+  c.result_defined_delta.to_definable
 
 end Construction
 

@@ -4,6 +4,8 @@ namespace Function
 
 variable {σ α β : Sort*}
 
+def Graphᵥ (f : (Fin k → α) → α) : (Fin (k + 1) → α) → Prop := fun v ↦ v 0 = f (v ·.succ)
+
 def Graph (f : α → σ) : σ → α → Prop := fun y x ↦ y = f x
 
 def Graph₂ (f : α → β → σ) : σ → α → β → Prop := fun y x₁ x₂ ↦ y = f x₁ x₂

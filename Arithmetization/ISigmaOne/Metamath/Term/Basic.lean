@@ -7,7 +7,7 @@ namespace LO.Arith
 
 open FirstOrder FirstOrder.Arith
 
-variable {V : Type*} [Zero V] [One V] [Add V] [Mul V] [LT V] [V ⊧ₘ* 𝐈𝚺₁]
+variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
 variable {L : Arith.Language V} {pL : LDef} [Arith.Language.Defined L pL]
 
@@ -47,7 +47,7 @@ lemma lt_qqFunc_of_mem {i b k f v : V} (hi : ⟪i, b⟫ ∈ v) : b < ^func k f v
 
 @[simp] lemma qqFunc_inj {k f v k' f' w : V} : ^func k f v = ^func k' f' w ↔ k = k' ∧ f = f' ∧ v = w := by simp [qqFunc]
 
-def _root_.LO.FirstOrder.Arith.qqBvarDef : 𝚺₀-Semisentence 2 := .mkSigma “t z | ∃ t' < t, !pairDef t' 0 z ∧ t = t' + 1” (by simp)
+def _root_.LO.FirstOrder.Arith.qqBvarDef : 𝚺₀.Semisentence 2 := .mkSigma “t z | ∃ t' < t, !pairDef t' 0 z ∧ t = t' + 1” (by simp)
 
 lemma qqBvar_defined : 𝚺₀-Function₁ (qqBvar : V → V) via qqBvarDef := by
   intro v; simp [qqBvarDef]
@@ -58,7 +58,7 @@ lemma qqBvar_defined : 𝚺₀-Function₁ (qqBvar : V → V) via qqBvarDef := b
 @[simp] lemma eval_qqBvarDef (v) :
     Semiformula.Evalbm V v qqBvarDef.val ↔ v 0 = ^#(v 1) := qqBvar_defined.df.iff v
 
-def _root_.LO.FirstOrder.Arith.qqFvarDef : 𝚺₀-Semisentence 2 := .mkSigma “t x | ∃ t' < t, !pairDef t' 1 x ∧ t = t' + 1” (by simp)
+def _root_.LO.FirstOrder.Arith.qqFvarDef : 𝚺₀.Semisentence 2 := .mkSigma “t x | ∃ t' < t, !pairDef t' 1 x ∧ t = t' + 1” (by simp)
 
 lemma qqFvar_defined : 𝚺₀-Function₁ (qqFvar : V → V) via qqFvarDef := by
   intro v; simp [qqFvarDef]
@@ -77,7 +77,7 @@ private lemma qqFunc_graph {x k f v : V} :
         ⟪2, k, f, v⟫, by simp [qqFunc], rfl, rfl⟩,
    by rintro ⟨_, _, rfl, _, _, rfl, _, _, rfl, rfl⟩; rfl⟩
 
-def _root_.LO.FirstOrder.Arith.qqFuncDef : 𝚺₀-Semisentence 4 := .mkSigma
+def _root_.LO.FirstOrder.Arith.qqFuncDef : 𝚺₀.Semisentence 4 := .mkSigma
   “x k f v | ∃ fv < x, !pairDef fv f v ∧ ∃ kfv < x, !pairDef kfv k fv ∧ ∃ x' < x, !pairDef x' 2 kfv ∧ x = x' + 1” (by simp)
 
 lemma qqFunc_defined : 𝚺₀-Function₃ (qqFunc : V → V → V → V) via qqFuncDef := by
@@ -153,18 +153,18 @@ def Language.Semiterm (n : V) : V → Prop := (construction L).Fixpoint ![n]
 
 abbrev Language.Term : V → Prop := L.Semiterm 0
 
-def _root_.LO.FirstOrder.Arith.LDef.isSemitermDef (pL : LDef) : 𝚫₁-Semisentence 2 := (blueprint pL).fixpointDefΔ₁.rew (Rew.substs ![#1, #0])
+def _root_.LO.FirstOrder.Arith.LDef.isSemitermDef (pL : LDef) : 𝚫₁.Semisentence 2 := (blueprint pL).fixpointDefΔ₁.rew (Rew.substs ![#1, #0])
 
 lemma isSemiterm_defined : 𝚫₁-Relation L.Semiterm via pL.isSemitermDef :=
-  ⟨HSemiformula.ProperOn.rew (construction L).fixpoint_definedΔ₁.proper _,
+  ⟨HierarchySymbol.Semiformula.ProperOn.rew (construction L).fixpoint_definedΔ₁.proper _,
    by intro v; simp [LDef.isSemitermDef, (construction L).eval_fixpointDefΔ₁]; rfl⟩
 
 @[simp] lemma eval_isSemitermDef (v) :
     Semiformula.Evalbm V v pL.isSemitermDef.val ↔ L.Semiterm (v 0) (v 1) := (isSemiterm_defined L).df.iff v
 
-instance isSemitermDef_definable : 𝚫₁-Relation (L.Semiterm) := Defined.to_definable _ (isSemiterm_defined L)
+instance isSemitermDef_definable : 𝚫₁-Relation (L.Semiterm) := (isSemiterm_defined L).to_definable
 
-@[simp, definability] instance isSemitermDef_definable' (Γ) : (Γ, m + 1)-Relation (L.Semiterm) :=
+@[simp, definability] instance isSemitermDef_definable' (Γ) : Γ-[m + 1]-Relation (L.Semiterm) :=
   .of_deltaOne (isSemitermDef_definable L) _ _
 
 def Language.SemitermVec (n m w : V) : Prop := n = len w ∧ ∀ i < n, L.Semiterm m (w.[i])
@@ -198,7 +198,7 @@ lemma Language.SemitermVec.prop {n m w : V} (h : L.SemitermVec n m w) {i} : i < 
 
 section
 
-def _root_.LO.FirstOrder.Arith.LDef.semitermVecDef (pL : LDef) : 𝚫₁-Semisentence 3 := .mkDelta
+def _root_.LO.FirstOrder.Arith.LDef.semitermVecDef (pL : LDef) : 𝚫₁.Semisentence 3 := .mkDelta
   (.mkSigma
     “n m w | !lenDef n w ∧ ∀ i < n, ∃ u, !nthDef u w i ∧ !pL.isSemitermDef.sigma m u”
     (by simp))
@@ -209,15 +209,15 @@ def _root_.LO.FirstOrder.Arith.LDef.semitermVecDef (pL : LDef) : 𝚫₁-Semisen
 variable (L)
 
 lemma semitermVec_defined : 𝚫₁-Relation₃ L.SemitermVec via pL.semitermVecDef :=
-  ⟨by intro v; simp [LDef.semitermVecDef, HSemiformula.val_sigma, eval_isSemitermDef L, (isSemiterm_defined L).proper.iff'],
-   by intro v; simp [LDef.semitermVecDef, HSemiformula.val_sigma, eval_isSemitermDef L, Language.SemitermVec]⟩
+  ⟨by intro v; simp [LDef.semitermVecDef, HierarchySymbol.Semiformula.val_sigma, eval_isSemitermDef L, (isSemiterm_defined L).proper.iff'],
+   by intro v; simp [LDef.semitermVecDef, HierarchySymbol.Semiformula.val_sigma, eval_isSemitermDef L, Language.SemitermVec]⟩
 
 @[simp] lemma eval_semitermVecDef (v) :
     Semiformula.Evalbm V v pL.semitermVecDef.val ↔ L.SemitermVec (v 0) (v 1) (v 2) := (semitermVec_defined L).df.iff v
 
-instance semitermVecDef_definable : 𝚫₁-Relation₃ (L.SemitermVec) := Defined.to_definable _ (semitermVec_defined L)
+instance semitermVecDef_definable : 𝚫₁-Relation₃ (L.SemitermVec) := (semitermVec_defined L).to_definable
 
-@[simp, definability] instance semitermVecDef_definable' (Γ) : (Γ, m + 1)-Relation₃ (L.SemitermVec) :=
+@[simp, definability] instance semitermVecDef_definable' (Γ) : Γ-[m + 1]-Relation₃ (L.SemitermVec) :=
   .of_deltaOne (semitermVecDef_definable L) _ _
 
 end
@@ -256,7 +256,7 @@ alias ⟨Language.Semiterm.case, Language.Semiterm.mk⟩ := Language.Semiterm.ca
 lemma Language.Semiterm.func {k f v : V} (hkf : L.Func k f) (hv : L.SemitermVec k n v) :
     L.Semiterm n (^func k f v) := Language.Semiterm.func_iff.mpr ⟨hkf, hv⟩
 
-lemma Language.Semiterm.induction (Γ) {P : V → Prop} (hP : (Γ, 1)-Predicate P)
+lemma Language.Semiterm.induction (Γ) {P : V → Prop} (hP : Γ-[1]-Predicate P)
     (hbvar : ∀ z < n, P (^#z)) (hfvar : ∀ x, P (^&x))
     (hfunc : ∀ k f v, L.Func k f → L.SemitermVec k n v → (∀ i < k, P v.[i]) → P (^func k f v)) :
     ∀ t, L.Semiterm n t → P t :=
@@ -271,9 +271,9 @@ end term
 namespace Language.TermRec
 
 structure Blueprint (pL : LDef) (arity : ℕ) where
-  bvar : 𝚺₁-Semisentence (arity + 3)
-  fvar : 𝚺₁-Semisentence (arity + 3)
-  func : 𝚺₁-Semisentence (arity + 6)
+  bvar : 𝚺₁.Semisentence (arity + 3)
+  fvar : 𝚺₁.Semisentence (arity + 3)
+  func : 𝚺₁.Semisentence (arity + 6)
 
 namespace Blueprint
 
@@ -297,13 +297,13 @@ def blueprint : Fixpoint.Blueprint (arity + 1) := ⟨.mkDelta
         !qqFuncDef t k f v ∧ !β.func.graphDelta.pi y n k f v w ⋯) )”
     (by simp))⟩
 
-def graph : 𝚺₁-Semisentence (arity + 3) := .mkSigma
+def graph : 𝚺₁.Semisentence (arity + 3) := .mkSigma
   “n t y | ∃ pr <⁺ (t + y + 1)², !pairDef pr t y ∧ !β.blueprint.fixpointDef pr n ⋯” (by simp)
 
-def result : 𝚺₁-Semisentence (arity + 3) := .mkSigma
+def result : 𝚺₁.Semisentence (arity + 3) := .mkSigma
   “y n t | (!pL.isSemitermDef.pi n t → !β.graph n t y ⋯) ∧ (¬!pL.isSemitermDef.sigma n t → y = 0)” (by simp)
 
-def resultVec : 𝚺₁-Semisentence (arity + 4) := .mkSigma
+def resultVec : 𝚺₁.Semisentence (arity + 4) := .mkSigma
   “w' k n w |
     (!pL.semitermVecDef.pi k n w → !lenDef k w' ∧ ∀ i < k, ∃ z, !nthDef z w i ∧ ∃ z', !nthDef z' w' i ∧ !β.graph.val n z z' ⋯) ∧
     (¬!pL.semitermVecDef.sigma k n w → w' = 0)” (by simp)
@@ -316,9 +316,9 @@ structure Construction (L : Arith.Language V) {k : ℕ} (φ : Blueprint pL k) wh
   bvar : (Fin k → V) → V → V → V
   fvar : (Fin k → V) → V → V → V
   func : (Fin k → V) → V → V → V → V → V → V
-  bvar_defined : DefinedFunction (fun v ↦ bvar (v ·.succ.succ) (v 0) (v 1)) φ.bvar
-  fvar_defined : DefinedFunction (fun v ↦ fvar (v ·.succ.succ) (v 0) (v 1)) φ.fvar
-  func_defined : DefinedFunction (fun v ↦ func (v ·.succ.succ.succ.succ.succ) (v 0) (v 1) (v 2) (v 3) (v 4)) φ.func
+  bvar_defined : 𝚺₁.DefinedFunction (fun v ↦ bvar (v ·.succ.succ) (v 0) (v 1)) φ.bvar
+  fvar_defined : 𝚺₁.DefinedFunction (fun v ↦ fvar (v ·.succ.succ) (v 0) (v 1)) φ.fvar
+  func_defined : 𝚺₁.DefinedFunction (fun v ↦ func (v ·.succ.succ.succ.succ.succ) (v 0) (v 1) (v 2) (v 3) (v 4)) φ.func
 
 variable {V}
 
@@ -376,15 +376,15 @@ def construction : Fixpoint.Construction V β.blueprint where
   defined :=
   ⟨by intro v
       /-
-      simp? [HSemiformula.val_sigma, Blueprint.blueprint,
+      simp? [HierarchySymbol.Semiformula.val_sigma, Blueprint.blueprint,
         eval_isSemitermDef L, (isSemiterm_defined L).proper.iff',
         c.bvar_defined.iff, c.bvar_defined.graph_delta.proper.iff',
         c.fvar_defined.iff, c.fvar_defined.graph_delta.proper.iff',
         c.func_defined.iff, c.func_defined.graph_delta.proper.iff']
       -/
-      simp only [Nat.succ_eq_add_one, Blueprint.blueprint, Nat.reduceAdd, HSemiformula.val_sigma,
-        BinderNotation.finSuccItr_one, Nat.add_zero, HSemiformula.sigma_mkDelta,
-        HSemiformula.val_mkSigma, Semiformula.eval_bexLTSucc', Semiterm.val_bvar,
+      simp only [Nat.succ_eq_add_one, Blueprint.blueprint, Nat.reduceAdd, HierarchySymbol.Semiformula.val_sigma,
+        BinderNotation.finSuccItr_one, Nat.add_zero, HierarchySymbol.Semiformula.sigma_mkDelta,
+        HierarchySymbol.Semiformula.val_mkSigma, Semiformula.eval_bexLTSucc', Semiterm.val_bvar,
         Matrix.cons_val_one, Matrix.vecHead, LogicalConnective.HomClass.map_and,
         Semiformula.eval_substs, Matrix.comp_vecCons', Matrix.cons_val_two, Matrix.vecTail,
         Function.comp_apply, Matrix.cons_val_succ, Matrix.cons_val_zero, Matrix.cons_val_fin_one,
@@ -396,21 +396,21 @@ def construction : Fixpoint.Construction V β.blueprint where
         eval_lenDef, Semiformula.eval_ballLT, eval_nthDef, Semiformula.eval_operator₃, cons_app_11,
         cons_app_10, cons_app_9, Matrix.cons_app_eight, eval_memRel, exists_eq_left, eval_qqFuncDef,
         Fin.succ_one_eq_two, c.func_defined.iff, LogicalConnective.Prop.or_eq,
-        HSemiformula.pi_mkDelta, HSemiformula.val_mkPi, (isSemiterm_defined L).proper.iff',
-        c.bvar_defined.graph_delta.proper.iff', HSemiformula.graphDelta_val,
+        HierarchySymbol.Semiformula.pi_mkDelta, HierarchySymbol.Semiformula.val_mkPi, (isSemiterm_defined L).proper.iff',
+        c.bvar_defined.graph_delta.proper.iff', HierarchySymbol.Semiformula.graphDelta_val,
         c.fvar_defined.graph_delta.proper.iff', Semiformula.eval_all,
         LogicalConnective.HomClass.map_imply, Semiformula.eval_operator₂, Structure.Eq.eq,
         LogicalConnective.Prop.arrow_eq, forall_eq, c.func_defined.graph_delta.proper.iff']
       ,
     by  intro v
         /-
-        simpa? [HSemiformula.val_sigma, Blueprint.blueprint, eval_isSemitermDef L,
+        simpa? [HierarchySymbol.Semiformula.val_sigma, Blueprint.blueprint, eval_isSemitermDef L,
           c.bvar_defined.iff, c.fvar_defined.iff, c.func_defined.iff]
         using c.phi_iff _ _ _ _
         -/
         simpa only [Nat.succ_eq_add_one, BinderNotation.finSuccItr_one, Fin.succ_zero_eq_one,
-          Blueprint.blueprint, Nat.reduceAdd, HSemiformula.val_sigma, Nat.add_zero,
-          HSemiformula.val_mkDelta, HSemiformula.val_mkSigma, Semiformula.eval_bexLTSucc',
+          Blueprint.blueprint, Nat.reduceAdd, HierarchySymbol.Semiformula.val_sigma, Nat.add_zero,
+          HierarchySymbol.Semiformula.val_mkDelta, HierarchySymbol.Semiformula.val_mkSigma, Semiformula.eval_bexLTSucc',
           Semiterm.val_bvar, Matrix.cons_val_one, Matrix.vecHead,
           LogicalConnective.HomClass.map_and, Semiformula.eval_substs, Matrix.comp_vecCons',
           Matrix.cons_val_two, Matrix.vecTail, Function.comp_apply, Matrix.cons_val_succ,
@@ -458,7 +458,7 @@ lemma Graph.case_iff {t y : V} :
 
 variable (c)
 
-lemma graph_defined : Arith.Defined (fun v ↦ c.Graph (v ·.succ.succ.succ) (v 0) (v 1) (v 2)) β.graph := by
+lemma graph_defined : 𝚺₁.Defined (fun v ↦ c.Graph (v ·.succ.succ.succ) (v 0) (v 1) (v 2)) β.graph := by
   intro v
   simp [Blueprint.graph, c.construction.fixpoint_defined.iff]
   constructor
@@ -468,11 +468,11 @@ lemma graph_defined : Arith.Defined (fun v ↦ c.Graph (v ·.succ.succ.succ) (v 
 @[simp] lemma eval_graphDef (v) :
     Semiformula.Evalbm V v β.graph.val ↔ c.Graph (v ·.succ.succ.succ) (v 0) (v 1) (v 2) := (graph_defined c).df.iff v
 
-instance termSubst_definable : Arith.Definable ℒₒᵣ 𝚺₁ (fun v ↦ c.Graph (v ·.succ.succ.succ) (v 0) (v 1) (v 2)) :=
-  Defined.to_definable _ (graph_defined c)
+instance termSubst_definable : 𝚺₁.Boldface (fun v ↦ c.Graph (v ·.succ.succ.succ) (v 0) (v 1) (v 2)) :=
+  (graph_defined c).to_definable
 
-@[simp, definability] instance termSubst_definable₂ (param n) : 𝚺₁-Relation (c.Graph param n) := by
-  simpa using Definable.retractiont (n := 2) (termSubst_definable c) (&n :> #0 :> #1 :> fun i ↦ &(param i))
+instance termSubst_definable₂ (param n) : 𝚺-[0 + 1]-Relation (c.Graph param n) := by
+  simpa using HierarchySymbol.Boldface.retractiont (n := 2) (termSubst_definable c) (&n :> #0 :> #1 :> fun i ↦ &(param i))
 
 lemma graph_dom_isSemiterm {t y} :
     c.Graph param n t y → L.Semiterm n t := fun h ↦ Graph.case_iff.mp h |>.1
@@ -523,8 +523,7 @@ lemma graph_exists {t : V} : L.Semiterm n t → ∃ y, c.Graph param n t y := by
     intro x; exact ⟨c.fvar param n x, by simp [c.graph_fvar_iff]⟩
   case hfunc =>
     intro k f v hkf hv ih
-    have : ∃ w, len w = k ∧ ∀ i < k, c.Graph param n v.[i] w.[i] := sigmaOne_skolem_vec
-      (by apply Definable.comp₂ (by definability) (by definability) (c.termSubst_definable₂ param n)) ih
+    have : ∃ w, len w = k ∧ ∀ i < k, c.Graph param n v.[i] w.[i] := sigmaOne_skolem_vec (by definability) ih
     rcases this with ⟨w, hwk, hvw⟩
     exact ⟨c.func param n k f v w, c.graph_func hkf hv (Eq.symm hwk) hvw⟩
 
@@ -587,8 +586,7 @@ lemma graph_existsUnique_vec {k n w : V} (hw : L.SemitermVec k n w) :
     ∃! w' : V, k = len w' ∧ ∀ i < k, c.Graph param n w.[i] w'.[i] := by
   have : ∀ i < k, ∃ y, c.Graph param n w.[i] y := by
     intro i hi; exact ⟨c.result param n w.[i], c.result_prop param n (hw.prop hi)⟩
-  rcases sigmaOne_skolem_vec
-    (by apply Definable.comp₂ (by definability) (by definability) (c.termSubst_definable₂ param n)) this
+  rcases sigmaOne_skolem_vec (by definability) this
     with ⟨w', hw'k, hw'⟩
   refine ExistsUnique.intro w' ⟨hw'k.symm, hw'⟩ ?_
   intro w'' ⟨hkw'', hw''⟩
@@ -642,9 +640,9 @@ variable (c)
 
 section
 
-lemma result_defined : Arith.DefinedFunction (fun v ↦ c.result (v ·.succ.succ) (v 0) (v 1)) β.result := by
+lemma result_defined : 𝚺₁.DefinedFunction (fun v ↦ c.result (v ·.succ.succ) (v 0) (v 1)) β.result := by
   intro v
-  simp [Blueprint.result, HSemiformula.val_sigma, (isSemiterm_defined L).proper.iff',
+  simp [Blueprint.result, HierarchySymbol.Semiformula.val_sigma, (isSemiterm_defined L).proper.iff',
     eval_isSemitermDef L, c.eval_graphDef, result, Classical.choose!_eq_iff]
   rfl
 
@@ -657,9 +655,9 @@ private lemma resultVec_graph {w' k n w} :
       (¬L.SemitermVec k n w → w' = 0) ) :=
   Classical.choose!_eq_iff (c.graph_existsUnique_vec_total param k n w)
 
-lemma resultVec_defined : Arith.DefinedFunction (fun v ↦ c.resultVec (v ·.succ.succ.succ) (v 0) (v 1) (v 2)) β.resultVec := by
+lemma resultVec_defined : 𝚺₁.DefinedFunction (fun v ↦ c.resultVec (v ·.succ.succ.succ) (v 0) (v 1) (v 2)) β.resultVec := by
   intro v
-  simpa [Blueprint.resultVec, HSemiformula.val_sigma, (semitermVec_defined L).proper.iff',
+  simpa [Blueprint.resultVec, HierarchySymbol.Semiformula.val_sigma, (semitermVec_defined L).proper.iff',
     eval_semitermVecDef L, c.eval_graphDef] using c.resultVec_graph
 
 lemma eval_resultVec (v : Fin (arity + 4) → V) :

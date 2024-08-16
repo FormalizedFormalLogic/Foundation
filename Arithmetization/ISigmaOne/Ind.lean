@@ -12,14 +12,13 @@ namespace LO.Arith
 
 open FirstOrder FirstOrder.Arith
 
-variable {V : Type*} [Zero V] [One V] [Add V] [Mul V] [LT V]
-
+variable {V : Type*} [ORingStruc V]
 
 variable (m : ℕ) [Fact (1 ≤ m)] [V ⊧ₘ* 𝐈𝐍𝐃𝚺 m]
 
-lemma induction_sigma_or_pi {P Q : V → Prop} (hP : (𝚺, m)-Predicate P) (hQ : (𝚷, m)-Predicate Q)
+lemma induction_sigma_or_pi {P Q : V → Prop} (hP : 𝚺-[m]-Predicate P) (hQ : 𝚷-[m]-Predicate Q)
     (zero : P 0 ∨ Q 0) (succ : ∀ x, P x ∨ Q x → P (x + 1) ∨ Q (x + 1)) : ∀ x, P x ∨ Q x := by
-  haveI : V ⊧ₘ* 𝐈𝚺₁ := mod_iSigma_of_le (show 1 ≤ m from Fact.out)
+  haveI : V ⊧ₘ* 𝐈𝚺₁ := mod_ISigma_of_le (show 1 ≤ m from Fact.out)
   intro a
   have : ∃ p < exp (a + 1), ∀ x ≤ a, x ∈ p ↔ P x := by
     simpa [lt_succ_iff_le] using finset_comprehension hP (a + 1)
@@ -29,7 +28,7 @@ lemma induction_sigma_or_pi {P Q : V → Prop} (hP : (𝚺, m)-Predicate P) (hQ 
   rcases this with ⟨q, _, hq⟩
   have : ∀ x ≤ a, x ∈ p ∨ x ∈ q := by
     intro x hx
-    induction x using induction_iSigmaOne
+    induction x using induction_sigma1
     · clear hp hq zero succ
       definability
     case zero => simpa [hp, hq] using zero
@@ -40,9 +39,9 @@ lemma induction_sigma_or_pi {P Q : V → Prop} (hP : (𝚺, m)-Predicate P) (hQ 
   have := this a (by rfl)
   simpa [hp, hq] using this
 
-lemma order_induction_sigma_or_pi {P Q : V → Prop} (hP : (𝚺, m)-Predicate P) (hQ : (𝚷, m)-Predicate Q)
+lemma order_induction_sigma_or_pi {P Q : V → Prop} (hP : 𝚺-[m]-Predicate P) (hQ : 𝚷-[m]-Predicate Q)
     (ind : ∀ x, (∀ y < x, P y ∨ Q y) → P x ∨ Q x) : ∀ x, P x ∨ Q x := by
-  haveI : V ⊧ₘ* 𝐈𝚺₁ := mod_iSigma_of_le (show 1 ≤ m from Fact.out)
+  haveI : V ⊧ₘ* 𝐈𝚺₁ := mod_ISigma_of_le (show 1 ≤ m from Fact.out)
   intro a
   have : ∃ p < exp (a + 1), ∀ x ≤ a, x ∈ p ↔ P x := by
     simpa [lt_succ_iff_le] using finset_comprehension hP (a + 1)
@@ -52,21 +51,21 @@ lemma order_induction_sigma_or_pi {P Q : V → Prop} (hP : (𝚺, m)-Predicate P
   rcases this with ⟨q, _, hq⟩
   have : ∀ x ≤ a, x ∈ p ∨ x ∈ q := by
     intro x hx
-    induction x using order_induction_iSigmaOne
+    induction x using order_induction_sigma1
     · clear hp hq ind
-      apply LO.FirstOrder.Arith.Definable.imp
+      apply LO.FirstOrder.Arith.HierarchySymbol.Boldface.imp
       · simp_all only [SigmaPiDelta.alt_sigma, Fin.isValue]
-        apply LO.FirstOrder.Arith.Definable.comp₂'
-        · simp_all only [zero_add, Fin.isValue, DefinableFunction.var]
-        · simp_all only [zero_add, DefinableFunction.const]
+        apply LO.FirstOrder.Arith.HierarchySymbol.Boldface.comp₂
+        · simp_all only [zero_add, Fin.isValue, HierarchySymbol.BoldfaceFunction.var]
+        · simp_all only [zero_add, HierarchySymbol.BoldfaceFunction.const]
       · simp_all only [Fin.isValue]
-        apply LO.FirstOrder.Arith.Definable.or
-        · apply LO.FirstOrder.Arith.Definable.comp₂'
-          · simp_all only [zero_add, Fin.isValue, DefinableFunction.var]
-          · simp_all only [zero_add, DefinableFunction.const]
-        · apply LO.FirstOrder.Arith.Definable.comp₂'
-          · simp_all only [zero_add, Fin.isValue, DefinableFunction.var]
-          · simp_all only [zero_add, DefinableFunction.const]
+        apply LO.FirstOrder.Arith.HierarchySymbol.Boldface.or
+        · apply LO.FirstOrder.Arith.HierarchySymbol.Boldface.comp₂
+          · simp_all only [zero_add, Fin.isValue, HierarchySymbol.BoldfaceFunction.var]
+          · simp_all only [zero_add, HierarchySymbol.BoldfaceFunction.const]
+        · apply LO.FirstOrder.Arith.HierarchySymbol.Boldface.comp₂
+          · simp_all only [zero_add, Fin.isValue, HierarchySymbol.BoldfaceFunction.var]
+          · simp_all only [zero_add, HierarchySymbol.BoldfaceFunction.const]
     case ind z ih =>
       have : P z ∨ Q z :=
         ind z (fun y hy ↦ by
