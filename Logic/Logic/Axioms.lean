@@ -10,46 +10,36 @@ variable (p q r : F)
 
 protected abbrev Verum : F := ⊤
 abbrev Verum.set : Set F := { Axioms.Verum }
-notation "⊤I" => Verum.set
 
 protected abbrev Imply₁ := p ⟶ q ⟶ p
 abbrev Imply₁.set : Set F := { Axioms.Imply₁ p q | (p) (q) }
-notation "⟶₁" => Imply₁.set
 
 protected abbrev Imply₂ := (p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r
 abbrev Imply₂.set : Set F := { Axioms.Imply₂ p q r | (p) (q) (r) }
-notation "⟶₂" => Imply₂.set
 
 protected abbrev ElimContra := (~q ⟶ ~p) ⟶ (p ⟶ q)
 abbrev ElimContra.set : Set F := { Axioms.ElimContra p q | (p) (q) }
 
 protected abbrev AndElim₁ := p ⋏ q ⟶ p
 abbrev AndElim₁.set : Set F := { Axioms.AndElim₁ p q | (p) (q) }
-notation "⋏E₁" => AndElim₁.set
 
 protected abbrev AndElim₂ := p ⋏ q ⟶ q
 abbrev AndElim₂.set : Set F := { Axioms.AndElim₂ p q | (p) (q) }
-notation "⋏E₂" => AndElim₂.set
 
 protected abbrev AndInst := p ⟶ q ⟶ p ⋏ q
 abbrev AndInst.set : Set F := { Axioms.AndInst p q | (p) (q) }
-notation "⋏I" => AndInst.set
 
 protected abbrev OrInst₁ := p ⟶ p ⋎ q
 abbrev OrInst₁.set : Set F := { Axioms.OrInst₁ p q | (p) (q) }
-notation "⋎I₁" => OrInst₁.set
 
 protected abbrev OrInst₂ := q ⟶ p ⋎ q
 abbrev OrInst₂.set : Set F := { Axioms.OrInst₂ p q | (p) (q) }
-notation "⋎I₂" => OrInst₂.set
 
 protected abbrev OrElim := (p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r)
 abbrev OrElim.set : Set F := { Axioms.OrElim p q r | (p) (q) (r) }
-notation "⋎E" => OrElim.set
 
 protected abbrev NegEquiv := ~p ⟷ (p ⟶ ⊥)
 abbrev NegEquiv.set : Set F := { Axioms.NegEquiv p | (p) }
-notation "~⊥" => NegEquiv.set
 
 protected abbrev EFQ := ⊥ ⟶ p
 abbrev EFQ.set : Set F := { Axioms.EFQ p | (p) }

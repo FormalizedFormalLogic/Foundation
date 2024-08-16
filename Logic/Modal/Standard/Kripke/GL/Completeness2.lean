@@ -106,6 +106,14 @@ lemma resort_box (h : -p = □q) : p = ~□q := by
   . subst_vars; rfl;
   . contradiction;
 
+lemma or (p : Formula α) : -p = ~p ∨ ∃ q, ~q = p := by
+  induction p using Formula.cases_neg with
+  | himp _ _ hn => simp [imp_def₁ hn];
+  | hfalsum => simp;
+  | hneg => simp;
+  | hatom a => simp [complement];
+  | hbox p => simp [complement]; rfl;
+
 end complement
 
 end Complement
@@ -279,11 +287,18 @@ lemma neg_complement_derive_bot
     simp [Formula.complement] at hcp;
     exact hcp ⨀ hp;
 
+namespace Theory
+
+variable {Λ : DeductionParameter α}
+variable {T : Theory α}
+
+end Theory
+
 namespace Formulae
 
 open Theory
 
-def Consistent (Λ : DeductionParameter α) (X : Formulae α) : Prop := Theory.Consistent Λ ↑X
+def Consistent (Λ : DeductionParameter α) (X : Formulae α) : Prop :=  X *⊬[Λ]! ⊥
 
 
 variable {Λ : DeductionParameter α}
@@ -304,6 +319,20 @@ lemma neg_provable_iff_insert_not_consistent : ↑X *⊢[Λ]! ~p ↔ ¬(Formulae
 lemma unprovable_iff_singleton_neg_consistent : Λ ⊬! p ↔ Formulae.Consistent Λ ({~p}) := by
   rw [←iff_theory_consistent_formulae_consistent];
   simpa using Theory.unprovable_iff_singleton_neg_consistent;
+
+lemma unprovable_iff_singleton_compl_consistent : Λ ⊬! p ↔ Formulae.Consistent Λ ({-p}) := by
+  rcases (Formula.complement.or p) with (hp | ⟨q, rfl⟩);
+  . rw [hp];
+    convert Theory.unprovable_iff_singleton_neg_consistent (Λ := Λ) (p := p);
+    simp;
+  . simp only [Formula.complement];
+    convert Theory.unprovable_iff_singleton_consistent (Λ := Λ) (p := q);
+    simp;
+
+lemma provable_iff_singleton_compl_inconsistent : Λ ⊢! p ↔ ¬(Formulae.Consistent Λ ({-p})) := by
+  constructor;
+  . contrapose; push_neg; apply unprovable_iff_singleton_compl_consistent.mpr;
+  . contrapose; push_neg; apply unprovable_iff_singleton_compl_consistent.mp;
 
 lemma intro_union_consistent
   (h : ∀ {Γ₁ Γ₂ : List (Formula α)}, (∀ p ∈ Γ₁, p ∈ X₁) → (∀ p ∈ Γ₂, p ∈ X₂) → Λ ⊬! ⋀Γ₁ ⋏ ⋀Γ₂ ⟶ ⊥)
@@ -455,15 +484,15 @@ variable {S} {X : CCF Λ S}
 
 @[simp] lemma unprovable_falsum : X.formulae *⊬[Λ]! ⊥ := X.consistent
 
-lemma mem_compl_of_not_mem (hs : q ∈ S) (h : q ∉ X.formulae) : -q ∈ X.formulae := by
+lemma mem_compl_of_not_mem (hs : q ∈ S) : q ∉ X.formulae → -q ∈ X.formulae := by
+  intro h;
   rcases X.closed.either q (by assumption) with (h | h);
   . contradiction;
   . assumption;
 
-lemma mem_of_not_mem_compl (hs : q ∈ S) (h : -q ∉ X.formulae) : q ∈ X.formulae := by
-  rcases X.closed.either q (by assumption) with (h | h);
-  . assumption;
-  . contradiction;
+lemma mem_of_not_mem_compl (hs : q ∈ S) : -q ∉ X.formulae → q ∈ X.formulae := by
+  apply Not.imp_symm;
+  exact mem_compl_of_not_mem hs;
 
 lemma membership_iff (hq_sub : q ∈ S) : (q ∈ X.formulae) ↔ (X.formulae *⊢[Λ]! q) := by
   constructor;
@@ -609,14 +638,14 @@ open System System.FiniteContext in
 private lemma GL_truthlemma.lemma1
   {h : 𝐆𝐋 ⊬! p} {q : Formula α} (q_sub : □q ∈ 𝒮 p)
   {X : (GLCompleteModel h).World} (h_sub : □q ∉ X.formulae)
-  : Formulae.Consistent 𝐆𝐋 ((X.formulae.prebox ∪ X.formulae.prebox.box) ∪ {□q, ~q}) := by
+  : Formulae.Consistent 𝐆𝐋 ((X.formulae.prebox ∪ X.formulae.prebox.box) ∪ {□q, -q}) := by
   apply Formulae.intro_union_consistent;
   intro Γ₁ Γ₂ hΓ₁ hΓ₂;
   by_contra hC;
   have : 𝐆𝐋 ⊢! ⋀Γ₁ ⟶ ⋀Γ₂ ⟶ ⊥ := and_imply_iff_imply_imply'!.mp hC;
   have : Γ₁ ⊢[𝐆𝐋]! ⋀Γ₂ ⟶ ⊥ := provable_iff.mpr this;
-  have : Γ₁ ⊢[𝐆𝐋]! (□q ⋏ ~q) ⟶ ⊥ := imp_trans''! (by
-    suffices Γ₁ ⊢[𝐆𝐋]! ⋀[□q, ~q] ⟶ ⋀Γ₂ by simpa;
+  have : Γ₁ ⊢[𝐆𝐋]! (□q ⋏ -q) ⟶ ⊥ := imp_trans''! (by
+    suffices Γ₁ ⊢[𝐆𝐋]! ⋀[□q, -q] ⟶ ⋀Γ₂ by simpa;
     apply conjconj_subset!;
     intro p hp;
     have := hΓ₂ p hp;
@@ -625,8 +654,12 @@ private lemma GL_truthlemma.lemma1
     . simp; left; assumption;
     . simp; right; assumption;
   ) this;
-  have : Γ₁ ⊢[𝐆𝐋]! □q ⟶ ~q ⟶ ⊥ := and_imply_iff_imply_imply'!.mp this;
-  have : Γ₁ ⊢[𝐆𝐋]! □q ⟶ q := imp_trans''! this dne!;
+  have : Γ₁ ⊢[𝐆𝐋]! □q ⟶ -q ⟶ ⊥ := and_imply_iff_imply_imply'!.mp this;
+  have : Γ₁ ⊢[𝐆𝐋]! □q ⟶ q := by
+    rcases Formula.complement.or (p := q) with (hp | ⟨q, rfl⟩);
+    . rw [hp] at this;
+      exact imp_trans''! this dne!;
+    . simpa [complement] using this;
   have : (□'Γ₁) ⊢[𝐆𝐋]! □(□q ⟶ q) := contextual_nec this;
   have : (□'Γ₁) ⊢[𝐆𝐋]! □q := axiomL! ⨀ this;
   have H₁ : 𝐆𝐋 ⊢! ⋀□'Γ₁ ⟶ □q := provable_iff.mp this;
@@ -707,7 +740,7 @@ lemma GL_truthlemma₂
       obtain ⟨Y, hY₁⟩ := lindenbaum (S := 𝒮 p) (by sorry) this;
       simp only [Finset.union_subset_iff] at hY₁;
       have hY₁₁ : □q ∈ Y.formulae := by apply hY₁.2; simp;
-      have hY₁₂ : ~q ∈ Y.formulae := by apply hY₁.2; simp;
+      have hY₁₂ : -q ∈ Y.formulae := by apply hY₁.2; simp;
       simp [Satisfies];
       use Y;
       constructor;
@@ -718,7 +751,7 @@ lemma GL_truthlemma₂
       . use q;
         refine ⟨q_sub, h, hY₁₁, ?_⟩;
         . apply ih (by trivial) |>.not.mpr;
-          exact Theory.not_mem_of_mem_neg Y.consistent (by simp_all);
+          exact iff_mem_compl (by trivial) |>.not.mpr (by simpa);
     . intro h Y RXY;
       apply ih (by trivial) |>.mpr;
       simp [Frame.Rel'] at RXY;
@@ -733,12 +766,22 @@ private lemma GL_completeAux : TransitiveIrreflexiveFrameClass.{u}ꟳ# ⊧ p →
   constructor;
   . exact ⟨GLCompleteFrame.transitive, GLCompleteFrame.irreflexive⟩;
   . simp [Formula.Kripke.ValidOnFrame, Formula.Kripke.ValidOnModel];
-    obtain ⟨X, hX₁⟩ := lindenbaum (Λ := 𝐆𝐋) (S := 𝒮 p) (X := {~p})
-      (by sorry)
-      (Formulae.unprovable_iff_singleton_neg_consistent.mp h)
+    obtain ⟨X, hX₁⟩ := lindenbaum (Λ := 𝐆𝐋) (S := 𝒮 p) (X := {-p})
+      (by
+        simp [Formulae.complementary];
+        right; use p; constructor <;> simp;
+      )
+      (Formulae.unprovable_iff_singleton_compl_consistent.mp h);
     use (GLCompleteModel h).Valuation, X;
-    apply @GL_truthlemma₂ α _ _ p (by simpa) X p (by trivial) |>.not.mpr;
-    apply Theory.not_mem_of_mem_neg X.consistent (by simp_all);
+    apply GL_truthlemma₂ (by simpa) (by trivial) |>.not.mpr;
+    exact iff_mem_compl (by trivial) |>.not.mpr $ by
+      simp;
+      apply hX₁;
+      tauto;
+
+instance GL_complete₂ : Complete (𝐆𝐋 : DeductionParameter α) TransitiveIrreflexiveFrameClass.{u}ꟳ# := ⟨GL_completeAux⟩
+
+instance : FiniteFrameProperty (α := α) 𝐆𝐋 TransitiveIrreflexiveFrameClass where
 
 end Kripke
 
