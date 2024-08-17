@@ -145,10 +145,47 @@ abbrev Formulae (α) := Finset $ Formula α
 
 namespace Formulae
 
+class SubformulaClosed (X : Formulae α) : Prop where
+  imp_closed {p q} : p ⟶ q ∈ X → p ∈ X ∧ q ∈ X
+  box_closed {p} : □p ∈ X → p ∈ X
+
+namespace SubformulaClosed
+
+instance {p : Formula α} : Formulae.SubformulaClosed (𝒮 p) where
+  box_closed   := by aesop;
+  imp_closed   := by aesop;
+
+variable {p : Formula α} {X : Formulae α} [T_closed : X.SubformulaClosed]
+
+lemma sub_mem_box (h : □p ∈ X) : p ∈ X := T_closed.box_closed h
+lemma sub_mem_imp (h : p ⟶ q ∈ X) : p ∈ X ∧ q ∈ X := T_closed.imp_closed h
+lemma sub_mem_imp₁ (h : p ⟶ q ∈ X) : p ∈ X := (T_closed.imp_closed h).1
+lemma sub_mem_imp₂ (h : p ⟶ q ∈ X) : q ∈ X := (T_closed.imp_closed h).2
+
+macro_rules | `(tactic| trivial) => `(tactic|
+    first
+    | apply sub_mem_box   $ by assumption
+    | apply sub_mem_imp₁  $ by assumption
+    | apply sub_mem_imp₂  $ by assumption
+  )
+
+end SubformulaClosed
+
 def complementary (P : Formulae α) : Formulae α := P ∪ (P.image (Formula.complement))
 postfix:80 "⁻" => Formulae.complementary
 
-lemma complementary_mem {P : Formulae α} {p : Formula α} : p ∈ P → p ∈ P⁻ := by simp [complementary]; tauto;
+variable {P : Formulae α} {p : Formula α}
+
+lemma complementary_mem : p ∈ P → p ∈ P⁻ := by simp [complementary]; tauto;
+
+lemma complementary_mem_box [P.SubformulaClosed] : □p ∈ P⁻ → □p ∈ P := by
+  simp [complementary];
+  intro h;
+  rcases h with (h | ⟨q, hq, eq⟩);
+  . assumption;
+  . replace eq := Formula.complement.resort_box eq;
+    subst eq;
+    trivial;
 
 class ComplementaryClosed (X : Formulae α) (S : Formulae α) : Prop where
   subset : X ⊆ S⁻
@@ -638,7 +675,7 @@ open System System.FiniteContext in
 private lemma GL_truthlemma.lemma1
   {h : 𝐆𝐋 ⊬! p} {q : Formula α} (q_sub : □q ∈ 𝒮 p)
   {X : (GLCompleteModel h).World} (h_sub : □q ∉ X.formulae)
-  : Formulae.Consistent 𝐆𝐋 ((X.formulae.prebox ∪ X.formulae.prebox.box) ∪ {□q, -q}) := by
+  : Formulae.Consistent 𝐆𝐋  ((X.formulae.prebox ∪ X.formulae.prebox.box) ∪ {□q, -q}) := by
   apply Formulae.intro_union_consistent;
   intro Γ₁ Γ₂ hΓ₁ hΓ₂;
   by_contra hC;
@@ -704,6 +741,29 @@ macro_rules | `(tactic| trivial) => `(tactic|
     | apply mem_box  $ by assumption
   )
 
+open System System.FiniteContext in
+private lemma GL_truthlemma.lemma2
+  {h : 𝐆𝐋 ⊬! p} {q : Formula α} (q_sub : □q ∈ 𝒮 p)
+  {X : (GLCompleteModel h).World}
+  : ((X.formulae.prebox ∪ X.formulae.prebox.box) ∪ {□q, -q}) ⊆ (𝒮 p)⁻ := by
+  simp only [Formulae.complementary];
+  intro r hr;
+  simp [Finset.mem_union] at hr;
+  rcases hr with (rfl | hp | ⟨r, hr, rfl⟩ | rfl);
+  . apply Finset.mem_union.mpr;
+    tauto;
+  . have := X.closed.subset hp;
+    have := Formulae.complementary_mem_box this;
+    apply Finset.mem_union.mpr;
+    left; trivial;
+  . exact X.closed.subset hr;
+  . apply Finset.mem_union.mpr;
+    right; simp;
+    use q;
+    constructor;
+    . trivial;
+    . rfl;
+
 open Formula MaximalConsistentTheory in
 lemma GL_truthlemma₂
   {p : Formula α} (h : 𝐆𝐋 ⊬! p) {X : (GLCompleteModel h).World}
@@ -736,8 +796,7 @@ lemma GL_truthlemma₂
     constructor;
     . contrapose;
       intro h;
-      have := GL_truthlemma.lemma1 (X := X) (h_sub := h) q_sub;
-      obtain ⟨Y, hY₁⟩ := lindenbaum (S := 𝒮 p) (by sorry) this;
+      obtain ⟨Y, hY₁⟩ := lindenbaum (S := 𝒮 p) (GL_truthlemma.lemma2 q_sub) (GL_truthlemma.lemma1 (h_sub := h) q_sub);
       simp only [Finset.union_subset_iff] at hY₁;
       have hY₁₁ : □q ∈ Y.formulae := by apply hY₁.2; simp;
       have hY₁₂ : -q ∈ Y.formulae := by apply hY₁.2; simp;
