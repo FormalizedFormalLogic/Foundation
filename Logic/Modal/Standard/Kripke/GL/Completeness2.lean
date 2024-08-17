@@ -517,7 +517,7 @@ lemma lindenbaum
 
 noncomputable instance [System.Consistent Λ] : Inhabited (CCF Λ S) := ⟨lindenbaum (X := ∅) S (by simp) (by simp) |>.choose⟩
 
-variable {S} {X : CCF Λ S}
+variable {S} {X X₁ X₂ : CCF Λ S}
 
 @[simp] lemma unprovable_falsum : X.formulae *⊬[Λ]! ⊥ := X.consistent
 
@@ -610,6 +610,19 @@ lemma iff_not_mem_imp
   : ((q ⟶ r) ∉ X.formulae) ↔ (q ∈ X.formulae) ∧ (-r ∈ X.formulae) := by
   simpa using @iff_mem_imp α _ Λ S X q r hsub_qr hsub_q hsub_r |>.not;
 
+lemma equality_def : X₁ = X₂ ↔ X₁.formulae = X₂.formulae := by
+  constructor;
+  . intro h; cases h; rfl;
+  . intro h; cases X₁; cases X₂; simp_all;
+
+instance : Finite (CCF Λ S) := by
+  let f : CCF Λ S → (Finset.powerset (S⁻)) := λ X => ⟨X.formulae, by simpa using X.closed.subset⟩
+  have hf : Function.Injective f := by
+    intro X₁ X₂ h;
+    apply equality_def.mpr;
+    simpa [f] using h;
+  exact Finite.of_injective f hf;
+
 end ComplementaryClosedConsistentFormulae
 
 namespace Kripke
@@ -618,22 +631,19 @@ open Formula
 
 variable {p q : Formula α}
 
-abbrev GLCompleteFrame {p : Formula α} (h : 𝐆𝐋 ⊬! p) : Kripke.FiniteFrame where
+abbrev GLCompleteFrame (p : Formula α) : Kripke.FiniteFrame where
   World := CCF 𝐆𝐋 (𝒮 p)
-  World_finite := by
-    simp;
-    sorry;
   Rel X Y :=
     (∀ q ∈ □''⁻¹(𝒮 p), □q ∈ X.formulae → (q ∈ Y.formulae ∧ □q ∈ Y.formulae)) ∧
     (∃ r ∈ □''⁻¹(𝒮 p), □r ∉ X.formulae ∧ □r ∈ Y.formulae)
 
 namespace GLCompleteFrame
 
-variable {p : Formula α} {h : 𝐆𝐋 ⊬! p}
+variable {p : Formula α}
 
-lemma irreflexive : Irreflexive (GLCompleteFrame h).Rel := by simp [Irreflexive];
+lemma irreflexive : Irreflexive (GLCompleteFrame p).Rel := by simp [Irreflexive];
 
-lemma transitive : Transitive (GLCompleteFrame h).Rel := by
+lemma transitive : Transitive (GLCompleteFrame p).Rel := by
   simp;
   rintro X Y Z ⟨RXY, ⟨r, _, _, _⟩⟩ ⟨RYZ, _⟩;
   constructor;
@@ -646,8 +656,8 @@ lemma transitive : Transitive (GLCompleteFrame h).Rel := by
 end GLCompleteFrame
 
 
-abbrev GLCompleteModel (h : 𝐆𝐋 ⊬! p) : Kripke.Model α where
-  Frame := GLCompleteFrame h
+abbrev GLCompleteModel (p : Formula α) : Kripke.Model α where
+  Frame := GLCompleteFrame p
   Valuation X a := (atom a) ∈ X.formulae
 
 open Formula.Kripke
@@ -673,8 +683,7 @@ lemma conjconj_provable'!
 
 open System System.FiniteContext in
 private lemma GL_truthlemma.lemma1
-  {h : 𝐆𝐋 ⊬! p} {q : Formula α} (q_sub : □q ∈ 𝒮 p)
-  {X : (GLCompleteModel h).World} (h_sub : □q ∉ X.formulae)
+  {X : (GLCompleteModel p).World} (hq₁ : □q ∈ 𝒮 p) (hq₂ : □q ∉ X.formulae)
   : Formulae.Consistent 𝐆𝐋  ((X.formulae.prebox ∪ X.formulae.prebox.box) ∪ {□q, -q}) := by
   apply Formulae.intro_union_consistent;
   intro Γ₁ Γ₂ hΓ₁ hΓ₂;
@@ -729,7 +738,7 @@ private lemma GL_truthlemma.lemma1
       simpa using hΓ₁' r hr;
     . assumption;
 
-  have : □q ∈ X.formulae := membership_iff q_sub |>.mpr this;
+  have : □q ∈ X.formulae := membership_iff hq₁ |>.mpr this;
   contradiction;
 
 open Formula.Subformulas in
@@ -743,8 +752,8 @@ macro_rules | `(tactic| trivial) => `(tactic|
 
 open System System.FiniteContext in
 private lemma GL_truthlemma.lemma2
-  {h : 𝐆𝐋 ⊬! p} {q : Formula α} (q_sub : □q ∈ 𝒮 p)
-  {X : (GLCompleteModel h).World}
+  -- {h : 𝐆𝐋 ⊬! p}
+  {X : (GLCompleteModel p).World} (hq : □q ∈ 𝒮 p)
   : ((X.formulae.prebox ∪ X.formulae.prebox.box) ∪ {□q, -q}) ⊆ (𝒮 p)⁻ := by
   simp only [Formulae.complementary];
   intro r hr;
@@ -766,9 +775,9 @@ private lemma GL_truthlemma.lemma2
 
 open Formula MaximalConsistentTheory in
 lemma GL_truthlemma₂
-  {p : Formula α} (h : 𝐆𝐋 ⊬! p) {X : (GLCompleteModel h).World}
+  {p : Formula α} (h : 𝐆𝐋 ⊬! p) {X : (GLCompleteModel p).World}
   {q : Formula α} (q_sub : q ∈ 𝒮 p) :
-  Satisfies (GLCompleteModel h) X q ↔ q ∈ X.formulae := by
+  Satisfies (GLCompleteModel p) X q ↔ q ∈ X.formulae := by
   induction q using Formula.rec' generalizing X with
   | hatom => simp [Satisfies];
   | hfalsum => simp [Satisfies];
@@ -796,7 +805,7 @@ lemma GL_truthlemma₂
     constructor;
     . contrapose;
       intro h;
-      obtain ⟨Y, hY₁⟩ := lindenbaum (S := 𝒮 p) (GL_truthlemma.lemma2 q_sub) (GL_truthlemma.lemma1 (h_sub := h) q_sub);
+      obtain ⟨Y, hY₁⟩ := lindenbaum (S := 𝒮 p) (GL_truthlemma.lemma2 q_sub) (GL_truthlemma.lemma1 q_sub h);
       simp only [Finset.union_subset_iff] at hY₁;
       have hY₁₁ : □q ∈ Y.formulae := by apply hY₁.2; simp;
       have hY₁₂ : -q ∈ Y.formulae := by apply hY₁.2; simp;
@@ -821,7 +830,7 @@ private lemma GL_completeAux : TransitiveIrreflexiveFrameClass.{u}ꟳ# ⊧ p →
   contrapose;
   intro h;
   apply exists_finite_frame.mpr;
-  use (GLCompleteFrame h);
+  use (GLCompleteFrame p);
   constructor;
   . exact ⟨GLCompleteFrame.transitive, GLCompleteFrame.irreflexive⟩;
   . simp [Formula.Kripke.ValidOnFrame, Formula.Kripke.ValidOnModel];
@@ -831,7 +840,7 @@ private lemma GL_completeAux : TransitiveIrreflexiveFrameClass.{u}ꟳ# ⊧ p →
         right; use p; constructor <;> simp;
       )
       (Formulae.unprovable_iff_singleton_compl_consistent.mp h);
-    use (GLCompleteModel h).Valuation, X;
+    use (GLCompleteModel p).Valuation, X;
     apply GL_truthlemma₂ (by simpa) (by trivial) |>.not.mpr;
     exact iff_mem_compl (by trivial) |>.not.mpr $ by
       simp;
