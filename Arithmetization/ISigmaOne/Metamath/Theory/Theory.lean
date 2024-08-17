@@ -87,6 +87,9 @@ variable (L V)
 def Language.Theory.singleton (p : FirstOrder.SyntacticFormula L) : (L.codeIn V).Theory where
   set := {⌜p⌝}
 
+@[simp] lemma Language.Theory.mem_singleton_iff (x : V) (p : FirstOrder.SyntacticFormula L) :
+    x ∈ Language.Theory.singleton V L p ↔ x = ⌜p⌝ := by rfl
+
 variable {L V}
 
 @[simp] lemma Language.Theory.const_set_def (p : FirstOrder.SyntacticFormula L) :
@@ -112,7 +115,7 @@ structure Language.Craig (L : Arith.Language V) {pL : LDef} [Arith.Language.Defi
   core : V → V
 
 structure _root_.LO.FirstOrder.Arith.LDef.SchemeDef (pL : LDef) where
-core : HSemisentence ℒₒᵣ 2 𝚺₁
+core : 𝚺₁.Semisentence 2
 
 class Language.Scheme.Defined (φ : L.Scheme) (ps : outParam pL.SchemeDef) : Prop where
   defined : 𝚺₁-Function₁ φ.scheme via ps.core
@@ -143,7 +146,7 @@ def Language.Craig.toScheme {L : Arith.Language V} {pL : LDef} [Arith.Language.D
   increasing (x) := le_trans (le_qqVerums 0 x) (le_of_lt <| by simp)
 
 structure _root_.LO.FirstOrder.Arith.LDef.CraigDef (pL : LDef) where
-  core : HSemisentence ℒₒᵣ 2 𝚺₁
+  core : 𝚺₁.Semisentence 2
 
 class Language.Craig.Defined (φ : L.Craig) (ps : outParam pL.CraigDef) : Prop where
   defined : 𝚺₁-Function₁ φ.core via ps.core
@@ -162,6 +165,8 @@ variable {L : Arith.Language V} {pL : LDef} [Arith.Language.Defined L pL]
 
 def Language.Theory.union (T U : L.Theory) : L.Theory where
   set := T.set ∪ U.set
+
+@[simp] lemma Language.Theory.mem_union_iff (x : V) (T U : L.Theory) : x ∈ T.union U ↔ x ∈ T ∨ x ∈ U := Set.mem_union _ _ _
 
 def _root_.LO.FirstOrder.Arith.LDef.TDef.union {pL : LDef} (t u : pL.TDef) : pL.TDef where
   ch  := t.ch.or u.ch
@@ -215,13 +220,26 @@ instance : (eqReplaceC (V := V)).Defined eqReplaceCDef where
 
 variable (V)
 
-def thEQ : ⌜ℒₒᵣ⌝[V].Theory := (Language.Theory.singleton V ℒₒᵣ “∀ x, x = x”).union eqReplaceC.toScheme.toTheory
+def Theory.EQ : ⌜ℒₒᵣ⌝[V].Theory := (Language.Theory.singleton V ℒₒᵣ “∀ x, x = x”).union eqReplaceC.toScheme.toTheory
 
 variable {V}
 
-def thEQDef : p⌜ℒₒᵣ⌝.TDef := (Language.Theory.singletonDef (L := ℒₒᵣ) “∀ x, x = x”).union eqReplaceCDef.toSchemeDef.toTDef
+def Theory.eqDef : p⌜ℒₒᵣ⌝.TDef := (Language.Theory.singletonDef (L := ℒₒᵣ) “∀ x, x = x”).union eqReplaceCDef.toSchemeDef.toTDef
 
-instance thEQ_defined : (thEQ V).Defined thEQDef := by apply union_Defined_union
+instance Theory.EQ_defined : (Theory.EQ V).Defined Theory.eqDef := by apply union_Defined_union
+
+def TTheory.thEQ : ⌜ℒₒᵣ⌝[V].TTheory where
+  thy := Theory.EQ V
+  pthy := Theory.eqDef
+
+notation "⌜𝐄𝐐'⌝" => TTheory.thEQ
+notation "⌜𝐄𝐐'⌝[" V "]" => TTheory.thEQ (V := V)
+
+def TTheory.thEQ.eqRefl : ⌜𝐄𝐐'⌝[V] ⊢ (#'0 =' #'0).all := Language.Theory.TProof.byAxm <| by
+  simp [Language.Theory.tmem, TTheory.thEQ, Theory.EQ, FirstOrder.Semiformula.quote_all, FirstOrder.Semiformula.quote_eq,
+    Semiformula.Operator.eq_def, Semiterm.quote_bvar]
+
+
 
 end thEQ
 

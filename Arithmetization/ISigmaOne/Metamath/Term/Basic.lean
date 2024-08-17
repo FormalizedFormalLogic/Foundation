@@ -177,6 +177,18 @@ lemma Language.SemitermVec.prop {n m w : V} (h : L.SemitermVec n m w) {i} : i < 
 
 @[simp] lemma Language.SemitermVec.empty (m : V) : L.SemitermVec 0 m 0 := ⟨by simp, by simp⟩
 
+@[simp] lemma Language.SemitermVec.empty_iff (m : V) : L.SemitermVec 0 m v ↔ v = 0 := by
+  constructor
+  · intro h; exact len_zero_iff_eq_nil.mp h.lh.symm
+  · rintro rfl; simp
+
+lemma Language.SemitermVec.two_iff {m v : V} : L.SemitermVec 2 m v ↔ ∃ t₁ t₂, L.Semiterm m t₁ ∧ L.Semiterm m t₂ ∧ v = ?[t₁, t₂] := by
+  constructor
+  · intro h
+    rcases eq_doubleton_of_len_eq_two.mp h.lh.symm with ⟨t₁, t₂, rfl⟩
+    exact ⟨t₁, t₂, by simpa using h.prop (show 0 < 2 by simp), by simpa using h.prop (show 1 < 2 by simp), rfl⟩
+  · rintro ⟨t₁, t₂, h₁, h₂, rfl⟩; exact ⟨by simp [one_add_one_eq_two], by simp [lt_two_iff_le_one, le_one_iff_eq_zero_or_one, h₁, h₂]⟩
+
 @[simp] lemma Language.SemitermVec.cons {n m w t : V} (h : L.SemitermVec n m w) (ht : L.Semiterm m t) : L.SemitermVec (n + 1) m (t ∷ w) :=
   ⟨by simp [h.lh], fun i hi ↦ by
     rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)

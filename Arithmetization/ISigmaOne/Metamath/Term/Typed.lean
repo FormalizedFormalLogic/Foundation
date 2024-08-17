@@ -334,6 +334,38 @@ variable {n : V}
 @[simp] lemma fvFree_mul (t₁ t₂ : ⌜ℒₒᵣ⌝.TSemiterm n) :
     (t₁ * t₂).FVFree ↔ t₁.FVFree ∧ t₂.FVFree := by simp [Language.TSemiterm.FVFree.iff]
 
+lemma replace {P : α → Prop} {x y} (hx : P x) (h : x = y) : P y := h ▸ hx
+
+lemma semiterm_induction (Γ) {n : V} {P : ⌜ℒₒᵣ⌝.TSemiterm n → Prop}
+    (hP : Γ-[1]-Predicate (fun x ↦ (h : ⌜ℒₒᵣ⌝.Semiterm n x) → P ⟨x, h⟩))
+    (hBvar : ∀ (z : V) (h : z < n), P (⌜ℒₒᵣ⌝.bvar z h))
+    (hFvar : ∀ x, P (⌜ℒₒᵣ⌝.fvar x))
+    (hZero : P ((0 : V) : ⌜ℒₒᵣ⌝.TSemiterm n))
+    (hOne : P ((1 : V) : ⌜ℒₒᵣ⌝.TSemiterm n))
+    (hAdd : ∀ t₁ t₂, P t₁ → P t₂ → P (t₁ + t₂))
+    (hMul : ∀ t₁ t₂, P t₁ → P t₂ → P (t₁ * t₂)) :
+    ∀ (t : ⌜ℒₒᵣ⌝[V].TSemiterm n), P t := by
+  let Q := fun x ↦ (h : ⌜ℒₒᵣ⌝.Semiterm n x) → P ⟨x, h⟩
+  suffices ∀ t, ⌜ℒₒᵣ⌝.Semiterm n t → Q t by intro t; exact this t.val t.prop t.prop
+  apply Language.Semiterm.induction Γ hP
+  case hbvar => intro z hz _; exact hBvar z hz
+  case hfvar => intro x _; exact hFvar x
+  case hfunc =>
+    intro k f v hf hv ih _
+    rcases (by simpa [func_iff] using hf) with (⟨rfl, rfl⟩ | ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩)
+    · rcases (by simpa using hv)
+      exact replace hZero (by ext; simp [Formalized.zero, qqFunc_absolute])
+    · rcases (by simpa using hv)
+      exact replace hOne (by ext; simp [Formalized.one, qqFunc_absolute])
+    · rcases Language.SemitermVec.two_iff.mp hv with ⟨t₁, t₂, ht₁, ht₂, rfl⟩
+      exact hAdd ⟨t₁, ht₁⟩ ⟨t₂, ht₂⟩
+        (by simpa using ih 0 (by simp) (by simp [ht₁]))
+        (by simpa using ih 1 (by simp) (by simp [ht₂]))
+    · rcases Language.SemitermVec.two_iff.mp hv with ⟨t₁, t₂, ht₁, ht₂, rfl⟩
+      exact hMul ⟨t₁, ht₁⟩ ⟨t₂, ht₂⟩
+        (by simpa using ih 0 (by simp) (by simp [ht₁]))
+        (by simpa using ih 1 (by simp) (by simp [ht₂]))
+
 end Formalized
 
 end LO.Arith
