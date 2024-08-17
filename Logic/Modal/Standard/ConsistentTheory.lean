@@ -232,6 +232,17 @@ lemma intro_union_consistent
     . exact iff_provable_list_conj.mp (and₂'! FiniteContext.id!) q $ List.mem_filter_of_mem hq (by simpa);
   ) this;
 
+lemma not_mem_of_mem_neg (h : ~p ∈ T) : p ∉ T := by
+  by_contra hC;
+  have : [p, ~p] ⊬[Λ]! ⊥ := (Theory.def_consistent.mp T_consis) [p, ~p] (by simp_all);
+  have : [p, ~p] ⊢[Λ]! ⊥ := System.bot_of_mem_either! (p := p) (Γ := [p, ~p]) (by simp) (by simp);
+  contradiction;
+
+lemma not_mem_neg_of_mem (h : p ∈ T) : ~p ∉ T := by
+  by_contra hC;
+  have : [p, ~p] ⊬[Λ]! ⊥ := (Theory.def_consistent.mp T_consis) [p, ~p] (by simp_all);
+  have : [p, ~p] ⊢[Λ]! ⊥ := System.bot_of_mem_either! (p := p) (Γ := [p, ~p]) (by simp) (by simp);
+  contradiction;
 end Theory
 
 structure MaximalConsistentTheory (Λ : DeductionParameter α) where

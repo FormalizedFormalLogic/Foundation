@@ -576,6 +576,14 @@ lemma conjconj_subset! (h : ∀ p, p ∈ Γ → p ∈ Δ) : 𝓢 ⊢! ⋀Δ ⟶ 
   | hsingle => simp_all; exact generalConj'! h;
   | hcons p Γ hne ih => simp_all; exact imply_right_and! (generalConj'! h.1) ih;
 
+lemma conjconj_provable! (h : ∀ p, p ∈ Γ → Δ ⊢[𝓢]! p) : 𝓢 ⊢! ⋀Δ ⟶ ⋀Γ :=
+  by induction Γ using List.induction_with_singleton with
+  | hnil => exact dhyp! verum!;
+  | hsingle => simp_all; exact provable_iff.mp h;
+  | hcons p Γ hne ih => simp_all; exact imply_right_and! (provable_iff.mp h.1) ih;
+
+lemma conjconj_provable₂! (h : ∀ p, p ∈ Γ → Δ ⊢[𝓢]! p) : Δ ⊢[𝓢]! ⋀Γ := provable_iff.mpr $ conjconj_provable! h
+
 lemma id_conj! (he : ∀ g ∈ Γ, g = p) : 𝓢 ⊢! p ⟶ ⋀Γ := by
   induction Γ using List.induction_with_singleton with
   | hcons r Γ h ih =>

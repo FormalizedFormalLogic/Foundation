@@ -186,15 +186,6 @@ lemma GL_truthlemma
     simp_all [Satisfies, StandardFilterationValuation];
     try aesop;
 
-lemma exists_finite_frame : ¬𝔽ꟳ# ⊧ p ↔ ∃ F ∈ 𝔽.toFiniteFrameClass, ¬F# ⊧ p := by
-  constructor;
-  . simp;
-  . rintro ⟨F, hF₁, hF₂⟩;
-    simp; use F;
-    constructor;
-    . simp_all;
-    . assumption;
-
 private lemma GL_completeAux {p : Formula α} : TransitiveIrreflexiveFrameClass.{u}ꟳ# ⊧ p → 𝐆𝐋 ⊢! p := by
   contrapose;
   intro h;
