@@ -76,13 +76,15 @@ variable {L}
 
 variable [DefinableLanguage L]
 
-variable {V : Type*} [Zero V] [One V] [Add V] [Mul V] [LT V] [V ⊧ₘ* 𝐏𝐀⁻]
+variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐏𝐀⁻]
 
 variable (L V)
 
 def _root_.LO.FirstOrder.Language.codeIn : Arith.Language V where
   Func := fun x y ↦ Semiformula.Evalbm V ![x, y] L.lDef.func.val
   Rel := fun x y ↦ Semiformula.Evalbm V ![x, y] L.lDef.rel.val
+
+lemma _root_.LO.FirstOrder.Language.codeIn_func_def : (L.codeIn V).Func = fun x y ↦ Semiformula.Evalbm V ![x, y] L.lDef.func.val := rfl
 
 variable {L V}
 
@@ -166,7 +168,7 @@ instance : DefinableLanguage ℒₒᵣ where
 
 namespace Formalized
 
-variable {V : Type*} [Zero V] [One V] [Add V] [Mul V] [LT V] [V ⊧ₘ* 𝐈𝚺₁]
+variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
 abbrev LOR : Arith.Language V := Language.codeIn ℒₒᵣ V
 
@@ -213,6 +215,20 @@ def ltIndex : ℕ := Encodable.encode (Language.LT.lt : (ℒₒᵣ : FirstOrder.
 
 @[simp] lemma LOR_rel_ltIndex : ⌜ℒₒᵣ⌝.Rel 2 (ltIndex : V) := by
   simpa using codeIn_rel_quote (V := V) (L := ℒₒᵣ) Language.LT.lt
+
+lemma lDef.func_def : (ℒₒᵣ).lDef.func = .mkSigma “k f | (k = 0 ∧ f = 0) ∨ (k = 0 ∧ f = 1) ∨ (k = 2 ∧ f = 0) ∨ (k = 2 ∧ f = 1)” (by simp) := rfl
+
+lemma coe_zeroIndex_eq : (zeroIndex : V) = 0 := rfl
+
+lemma coe_oneIndex_eq : (oneIndex : V) = 1 := by simp [oneIndex]; rfl
+
+lemma coe_addIndex_eq : (addIndex : V) = 0 := rfl
+
+lemma coe_mulIndex_eq : (mulIndex : V) = 1 := by simp [mulIndex]; rfl
+
+lemma func_iff {k f : V} : ⌜ℒₒᵣ⌝.Func k f ↔ (k = 0 ∧ f = zeroIndex) ∨ (k = 0 ∧ f = oneIndex) ∨ (k = 2 ∧ f = addIndex) ∨ (k = 2 ∧ f = mulIndex) := by
+  simp [FirstOrder.Language.codeIn_func_def, lDef.func_def,
+    coe_zeroIndex_eq, coe_oneIndex_eq, coe_addIndex_eq, coe_mulIndex_eq]
 
 end Formalized
 

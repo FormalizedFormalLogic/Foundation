@@ -643,6 +643,17 @@ theorem sigmaOne_skolem_vec {R : V → V → Prop} (hP : 𝚺₁-Relation R) {l}
         · simpa [sub_succ_add_succ (succ_le_iff_lt.mp hk) i] using hv i (by simpa using hi)⟩
   simpa using this l (by rfl)
 
+lemma eq_singleton_iff_len_eq_one {v : V} : len v = 1 ↔ ∃ x, v = ?[x] := by
+  constructor
+  · intro h; exact ⟨v.[0], nth_ext (by simp [h]) (by simp [h])⟩
+  · rintro ⟨x, rfl⟩; simp
+
+lemma eq_doubleton_of_len_eq_two {v : V} : len v = 2 ↔ ∃ x y, v = ?[x, y] := by
+  constructor
+  · intro h; exact ⟨v.[0], v.[1],
+      nth_ext (by simp [h, one_add_one_eq_two]) (by simp [lt_two_iff_le_one, le_one_iff_eq_zero_or_one, h])⟩
+  · rintro ⟨x, y, rfl⟩; simp [one_add_one_eq_two]
+
 /-!
 
 ### Take Last k-Element
