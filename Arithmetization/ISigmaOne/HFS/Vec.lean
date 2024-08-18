@@ -104,7 +104,7 @@ lemma mkVec₂_defined : 𝚺₁-Function₂ (fun x y : V ↦ ?[x, y]) via mkVec
 
 instance mkVec₂_definable : 𝚺₁-Function₂ (fun x y : V ↦ ?[x, y]) := mkVec₂_defined.to_definable
 
-instance mkVec₂_definable' (Γ m) : Γ-[m + 1]-Function₂ (fun x y : V ↦ ?[x, y]) := .of_sigmaOne mkVec₂_definable _ _
+instance mkVec₂_definable' (Γ m) : Γ-[m + 1]-Function₂ (fun x y : V ↦ ?[x, y]) := mkVec₂_definable.of_sigmaOne
 
 end
 
@@ -271,12 +271,12 @@ lemma cons_induction (Γ) {P : V → Prop} (hP : Γ-[1]-Predicate P)
     · exact cons _ _ (ih v (by simp)))
 
 @[elab_as_elim]
-lemma cons_induction_sigma₁ {P : V → Prop} (hP : 𝚺₁-Predicate P)
+lemma cons_induction_sigma1 {P : V → Prop} (hP : 𝚺₁-Predicate P)
     (nil : P 0) (cons : ∀ x v, P v → P (x ∷ v)) : ∀ v, P v :=
   cons_induction 𝚺 hP nil cons
 
 @[elab_as_elim]
-lemma cons_induction_pi₁ {P : V → Prop} (hP : 𝚷₁-Predicate P)
+lemma cons_induction_pi1 {P : V → Prop} (hP : 𝚷₁-Predicate P)
     (nil : P 0) (cons : ∀ x v, P v → P (x ∷ v)) : ∀ v, P v :=
   cons_induction 𝚷 hP nil cons
 
@@ -296,7 +296,7 @@ lemma nth_defined : 𝚺₁-Function₂ (nth : V → V → V) via nthDef := by
 
 instance nth_definable : 𝚺₁-Function₂ (nth : V → V → V) := nth_defined.to_definable
 
-instance nth_definable' (Γ m) : Γ-[m + 1]-Function₂ (nth : V → V → V) := .of_sigmaOne nth_definable _ _
+instance nth_definable' (Γ m) : Γ-[m + 1]-Function₂ (nth : V → V → V) := nth_definable.of_sigmaOne
 
 end
 
@@ -469,7 +469,7 @@ lemma graph_cons {x xs y : V} :
 variable (param)
 
 lemma graph_exists (xs : V) : ∃ y, c.Graph param ⟪xs, y⟫ := by
-  induction xs using cons_induction_sigma₁
+  induction xs using cons_induction_sigma1
   · definability
   case nil =>
     exact ⟨c.nil param, c.graph_nil.mpr rfl⟩
@@ -480,7 +480,7 @@ lemma graph_exists (xs : V) : ∃ y, c.Graph param ⟪xs, y⟫ := by
 variable {param}
 
 lemma graph_unique {xs y₁ y₂ : V} : c.Graph param ⟪xs, y₁⟫ → c.Graph param ⟪xs, y₂⟫ → y₁ = y₂ := by
-  induction xs using cons_induction_pi₁ generalizing y₁ y₂
+  induction xs using cons_induction_pi1 generalizing y₁ y₂
   · definability
   case nil =>
     simp [graph_nil]; rintro rfl rfl; rfl
@@ -524,7 +524,7 @@ instance result_definable : 𝚺₁.BoldfaceFunction (fun v ↦ c.result (v ·.s
   c.result_defined.to_definable
 
 instance result_definable' (Γ m) :
-    Γ-[m + 1].BoldfaceFunction (fun v ↦ c.result (v ·.succ) (v 0)) := .of_sigmaOne c.result_definable _ _
+    Γ-[m + 1].BoldfaceFunction (fun v ↦ c.result (v ·.succ) (v 0)) := c.result_definable.of_sigmaOne
 
 end
 
@@ -573,7 +573,7 @@ lemma len_defined : 𝚺₁-Function₁ (len : V → V) via lenDef := constructi
 
 instance len_definable : 𝚺₁-Function₁ (len : V → V) := len_defined.to_definable
 
-instance len_definable' (Γ m) : Γ-[m + 1]-Function₁ (len : V → V) := .of_sigmaOne len_definable _ _
+instance len_definable' (Γ m) : Γ-[m + 1]-Function₁ (len : V → V) := len_definable.of_sigmaOne
 
 end
 
@@ -581,7 +581,7 @@ end
   rcases nil_or_cons v with (rfl | ⟨x, v, rfl⟩) <;> simp
 
 lemma nth_lt_len {v i : V} (hl : len v ≤ i) : v.[i] = 0 := by
-  induction v using cons_induction_pi₁ generalizing i
+  induction v using cons_induction_pi1 generalizing i
   · definability
   case nil => simp
   case cons x v ih =>
@@ -590,7 +590,7 @@ lemma nth_lt_len {v i : V} (hl : len v ≤ i) : v.[i] = 0 := by
     simpa using ih (by simpa using hl)
 
 @[simp] lemma len_le (v : V) : len v ≤ v := by
-  induction v using cons_induction_pi₁
+  induction v using cons_induction_pi1
   · definability
   case nil => simp
   case cons x v ih =>
@@ -601,7 +601,7 @@ lemma nth_lt_len {v i : V} (hl : len v ≤ i) : v.[i] = 0 := by
 end len
 
 lemma nth_ext {v₁ v₂ : V} (hl : len v₁ = len v₂) (H : ∀ i < len v₁, v₁.[i] = v₂.[i]) : v₁ = v₂ := by
-  induction v₁ using cons_induction_pi₁ generalizing v₂
+  induction v₁ using cons_induction_pi1 generalizing v₂
   · definability
   case nil =>
     exact Eq.symm <| len_zero_iff_eq_nil.mp (by simp [←hl])
@@ -616,7 +616,7 @@ lemma nth_ext' (l : V) {v₁ v₂ : V} (hl₁ : len v₁ = l) (hl₂ : len v₂ 
   rcases hl₂; exact nth_ext hl₁ (by simpa [hl₁] using H)
 
 lemma le_of_nth_le_nth {v₁ v₂ : V} (hl : len v₁ = len v₂) (H : ∀ i < len v₁, v₁.[i] ≤ v₂.[i]) : v₁ ≤ v₂ := by
-  induction v₁ using cons_induction_pi₁ generalizing v₂
+  induction v₁ using cons_induction_pi1 generalizing v₂
   · definability
   case nil => simp
   case cons x₁ v₁ ih =>
@@ -653,6 +653,87 @@ lemma eq_doubleton_of_len_eq_two {v : V} : len v = 2 ↔ ∃ x y, v = ?[x, y] :=
   · intro h; exact ⟨v.[0], v.[1],
       nth_ext (by simp [h, one_add_one_eq_two]) (by simp [lt_two_iff_le_one, le_one_iff_eq_zero_or_one, h])⟩
   · rintro ⟨x, y, rfl⟩; simp [one_add_one_eq_two]
+
+
+/-!
+
+### Maximum of List
+
+-/
+
+namespace ListMax
+
+def blueprint : VecRec.Blueprint 0 where
+  nil := .mkSigma “y | y = 0” (by simp)
+  cons := .mkSigma “y x xs ih | !FirstOrder.Arith.max y x ih” (by simp)
+
+def construction : VecRec.Construction V blueprint where
+  nil _ := 0
+  cons _ x _ ih := max x ih
+  nil_defined := by intro v; simp [blueprint]
+  cons_defined := by intro v; simp [blueprint]; rfl
+
+end ListMax
+
+section listMax
+
+open ListMax
+
+def listMax (v : V) : V := construction.result ![] v
+
+@[simp] lemma listMax_nil : listMax (0 : V) = 0 := by simp [listMax, construction]
+
+@[simp] lemma listMax_cons (x v : V) : listMax (x ∷ v) = max x (listMax v) := by simp [listMax, construction]
+
+section
+
+def _root_.LO.FirstOrder.Arith.listMaxDef : 𝚺₁.Semisentence 2 := blueprint.resultDef
+
+lemma listMax_defined : 𝚺₁-Function₁ (listMax : V → V) via listMaxDef := construction.result_defined
+
+@[simp] lemma eval_listMaxDef (v) :
+    Semiformula.Evalbm V v listMaxDef.val ↔ v 0 = listMax (v 1) := listMax_defined.df.iff v
+
+instance listMax_definable : 𝚺₁-Function₁ (listMax : V → V) := listMax_defined.to_definable
+
+instance listMax_definable' (Γ m) : Γ-[m + 1]-Function₁ (listMax : V → V) := listMax_definable.of_sigmaOne
+
+end
+
+lemma nth_le_listMax {i v : V} (h : i < len v) : v.[i] ≤ listMax v := by
+  induction v using cons_induction_pi1 generalizing i
+  · definability
+  case nil => simp
+  case cons x v ih =>
+    rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
+    · simp
+    · simp [ih (by simpa using h)]
+
+lemma listMaxss_le {v z : V} (h : ∀ i < len v, v.[i] ≤ z) : listMax v ≤ z := by
+  induction v using cons_induction_pi1
+  · definability
+  case nil => simp
+  case cons x v ih =>
+    simp only [listMax_cons, max_le_iff]
+    constructor
+    · simpa using h 0 (by simp)
+    · exact ih (fun i hi ↦ by simpa using h (i + 1) (by simp [hi]))
+
+lemma listMaxss_le_iff {v z : V} : listMax v ≤ z ↔ ∀ i < len v, v.[i] ≤ z := by
+  constructor
+  · intro h i hi; exact le_trans (nth_le_listMax hi) h
+  · exact listMaxss_le
+
+/-
+lemma nth_le_listMaxs (v : V) (hv : v ≠ 0) : ∃ i < len v, v.[i] = listMax v := by
+  induction v using cons_induction_sigma1
+  · definability
+  case nil => simp at hv
+  case cons x v ih =>
+    simp
+-/
+
+end listMax
 
 /-!
 
@@ -705,12 +786,12 @@ lemma takeLast_defined : 𝚺₁-Function₂ (takeLast : V → V → V) via take
 
 instance takeLast_definable : 𝚺₁-Function₂ (takeLast : V → V → V) := takeLast_defined.to_definable
 
-instance takeLast_definable' (Γ m) : Γ-[m + 1]-Function₂ (takeLast : V → V → V) := .of_sigmaOne takeLast_definable _ _
+instance takeLast_definable' (Γ m) : Γ-[m + 1]-Function₂ (takeLast : V → V → V) := takeLast_definable.of_sigmaOne
 
 end
 
 lemma len_takeLast {v k : V} (h : k ≤ len v) : len (takeLast v k) = k := by
-  induction v using cons_induction_sigma₁
+  induction v using cons_induction_sigma1
   · definability
   case nil => simp_all
   case cons x v ih =>
@@ -730,13 +811,13 @@ lemma len_takeLast {v k : V} (h : k ≤ len v) : len (takeLast v k) = k := by
 @[simp] lemma add_sub_add (a b c : V) : (a + c) - (b + c) = a - b := add_tsub_add_eq_tsub_right a c b
 
 @[simp] lemma takeLast_zero (v : V) : takeLast v 0 = 0 := by
-  induction v using cons_induction_sigma₁
+  induction v using cons_induction_sigma1
   · definability
   case nil => simp
   case cons x v ih => simp [takeLast_cons, ih]
 
 lemma takeLast_succ_of_lt {i v : V} (h : i < len v) : takeLast v (i + 1) = v.[len v - (i + 1)] ∷ takeLast v i := by
-  induction v using cons_induction_sigma₁ generalizing i
+  induction v using cons_induction_sigma1 generalizing i
   · definability
   case nil => simp at h
   case cons x v ih =>
@@ -792,18 +873,18 @@ lemma concat_defined : 𝚺₁-Function₂ (concat : V → V → V) via concatDe
 
 instance concat_definable : 𝚺₁-Function₂ (concat : V → V → V) := concat_defined.to_definable
 
-instance concat_definable' (Γ m) : Γ-[m + 1]-Function₂ (concat : V → V → V) := .of_sigmaOne concat_definable _ _
+instance concat_definable' (Γ m) : Γ-[m + 1]-Function₂ (concat : V → V → V) := concat_definable.of_sigmaOne
 
 end
 
 @[simp] lemma len_concat (v z : V) : len (concat v z) = len v + 1 := by
-  induction v using cons_induction_sigma₁
+  induction v using cons_induction_sigma1
   · definability
   case nil => simp
   case cons x v ih => simp [ih]
 
 lemma concat_nth_lt (v z : V) {i} (hi : i < len v) : (concat v z).[i] = v.[i] := by
-  induction v using cons_induction_sigma₁ generalizing i
+  induction v using cons_induction_sigma1 generalizing i
   · definability
   case nil => simp at hi
   case cons x v ih =>
@@ -812,7 +893,7 @@ lemma concat_nth_lt (v z : V) {i} (hi : i < len v) : (concat v z).[i] = v.[i] :=
     · simp [ih (by simpa using hi)]
 
 @[simp] lemma concat_nth_len (v z : V) : (concat v z).[len v] = z := by
-  induction v using cons_induction_sigma₁
+  induction v using cons_induction_sigma1
   · definability
   case nil => simp
   case cons x v ih => simp [ih]
@@ -867,7 +948,7 @@ lemma memVec_defined : 𝚫₁-Relation (MemVec : V → V → Prop) via memVecDe
 
 instance memVec_definable : 𝚫₁-Relation (MemVec : V → V → Prop) := memVec_defined.to_definable
 
-instance memVec_definable' (Γ m) : Γ-[m + 1]-Relation (MemVec : V → V → Prop) := .of_deltaOne memVec_definable _ _
+instance memVec_definable' (Γ m) : Γ-[m + 1]-Relation (MemVec : V → V → Prop) := memVec_definable.of_deltaOne
 
 end
 
@@ -908,7 +989,7 @@ lemma subsetVec_defined : 𝚫₁-Relation (SubsetVec : V → V → Prop) via su
 
 instance subsetVec_definable : 𝚫₁-Relation (SubsetVec : V → V → Prop) := subsetVec_defined.to_definable
 
-instance subsetVec_definable' (Γ m) : Γ-[m + 1]-Relation (SubsetVec : V → V → Prop) := .of_deltaOne subsetVec_definable _ _
+instance subsetVec_definable' (Γ m) : Γ-[m + 1]-Relation (SubsetVec : V → V → Prop) := subsetVec_definable.of_deltaOne
 
 end
 
@@ -951,8 +1032,7 @@ lemma repeatVec_defined : 𝚺₁-Function₂ (repeatVec : V → V → V) via re
 
 instance repeatVec_definable : 𝚺₁-Function₂ (repeatVec : V → V → V) := repeatVec_defined.to_definable
 
-@[simp] instance repeatVec_definable' (Γ) : Γ-[m + 1]-Function₂ (repeatVec : V → V → V) :=
-  .of_sigmaOne repeatVec_definable _ _
+instance repeatVec_definable' (Γ) : Γ-[m + 1]-Function₂ (repeatVec : V → V → V) := repeatVec_definable.of_sigmaOne
 
 end
 
@@ -1021,12 +1101,12 @@ lemma vecToSet_defined : 𝚺₁-Function₁ (vecToSet : V → V) via vecToSetDe
 
 instance vecToSet_definable : 𝚺₁-Function₁ (vecToSet : V → V) := vecToSet_defined.to_definable
 
-instance vecToSet_definable' (Γ) : Γ-[m + 1]-Function₁ (vecToSet : V → V) := .of_sigmaOne vecToSet_definable _ _
+instance vecToSet_definable' (Γ) : Γ-[m + 1]-Function₁ (vecToSet : V → V) := vecToSet_definable.of_sigmaOne
 
 end
 
 lemma mem_vecToSet_iff {v x : V} : x ∈ vecToSet v ↔ ∃ i < len v, x = v.[i] := by
-  induction v using cons_induction_sigma₁
+  induction v using cons_induction_sigma1
   · definability
   case nil => simp
   case cons y v ih =>

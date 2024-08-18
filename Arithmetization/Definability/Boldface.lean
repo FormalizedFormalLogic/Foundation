@@ -389,7 +389,7 @@ lemma of_sigma_of_pi (hσ : 𝚺-[m].Boldface P) (hπ : 𝚷-[m].Boldface P) : �
 lemma of_zero (h : Γ'-[0].Boldface P) : ℌ.Boldface P := by
   rcases h with ⟨⟨p, hp⟩⟩; exact hp.to_definable₀
 
-lemma of_deltaOne (h : 𝚫₁.Boldface P) (Γ m) : Γ-[m + 1].Boldface P := by
+lemma of_deltaOne (h : 𝚫₁.Boldface P) {Γ m} : Γ-[m + 1].Boldface P := by
   rcases h with ⟨⟨p, hp⟩⟩; exact hp.to_definable_deltaOne
 
 instance [𝚺₀.Boldface P] (ℌ : HierarchySymbol) : ℌ.Boldface P := Boldface.of_zero (Γ' := 𝚺) (ℌ := ℌ) inferInstance
@@ -683,7 +683,7 @@ instance {k} {f : (Fin k → V) → V} [h : 𝚺-[m].BoldfaceFunction f] : 𝚫-
 instance {k} {f : (Fin k → V) → V} [𝚺₀.BoldfaceFunction f] : ℌ.BoldfaceFunction f := inferInstance
 
 lemma of_sigmaOne {k} {f : (Fin k → V) → V}
-    (h : 𝚺₁.BoldfaceFunction f) (Γ m) : Γ-[m + 1].BoldfaceFunction f := Boldface.of_deltaOne (graph_delta h) Γ m
+    (h : 𝚺₁.BoldfaceFunction f) {Γ m} : Γ-[m + 1].BoldfaceFunction f := Boldface.of_deltaOne (graph_delta h)
 
 @[simp] lemma var {k} (i : Fin k) : ℌ.BoldfaceFunction (fun v : Fin k → V ↦ v i) :=
   .of_zero (Γ' := 𝚺) ⟨.mkSigma “x | x = !!#i.succ” (by simp), by intro _; simp⟩
