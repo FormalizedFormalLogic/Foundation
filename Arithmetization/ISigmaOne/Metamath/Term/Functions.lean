@@ -546,6 +546,26 @@ infixl:80 " ^+ " => qqAdd
 
 infixl:82 " ^* " => qqMul
 
+section
+
+def _root_.LO.FirstOrder.Arith.qqAddDef : 𝚺₁.Semisentence 3 :=
+  .mkSigma “t x y | ∃ v, !mkVec₂Def v x y ∧ !qqFuncDef t 2 ↑addIndex v” (by simp)
+
+def _root_.LO.FirstOrder.Arith.qqMulDef : 𝚺₁.Semisentence 3 :=
+  .mkSigma “t x y | ∃ v, !mkVec₂Def v x y ∧ !qqFuncDef t 2 ↑mulIndex v” (by simp)
+
+lemma qqAdd_defined : 𝚺₁-Function₂ (qqAdd : V → V → V) via qqAddDef := by
+  intro v; simp [qqAddDef, numeral_eq_natCast, qqAdd]
+
+lemma qqMul_defined : 𝚺₁-Function₂ (qqMul : V → V → V) via qqMulDef := by
+  intro v; simp [qqMulDef, numeral_eq_natCast, qqMul]
+
+instance (Γ m) : Γ-[m + 1]-Function₂ (qqAdd : V → V → V) := .of_sigmaOne qqAdd_defined.to_definable _ _
+
+instance (Γ m) : Γ-[m + 1]-Function₂ (qqMul : V → V → V) := .of_sigmaOne qqMul_defined.to_definable _ _
+
+end
+
 lemma qqFunc_absolute (k f v : ℕ) : ((^func k f v : ℕ) : V) = ^func (k : V) (f : V) (v : V) := by simp [qqFunc, nat_cast_pair]
 
 @[simp] lemma zero_semiterm : ⌜ℒₒᵣ⌝.Semiterm n (𝟎 : V) := by

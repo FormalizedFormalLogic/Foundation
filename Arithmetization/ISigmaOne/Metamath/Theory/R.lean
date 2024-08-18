@@ -37,7 +37,9 @@ class EQTheory (T : LOR.TTheory (V := V)) where
   refl : T ⊢ (#'0 =' #'0).all
   replace (p : ⌜ℒₒᵣ⌝.TSemiformula (0 + 1)) : T ⊢ (#'1 =' #'0 ⟶ p^/[(#'1).sing] ⟶ p^/[(#'0).sing]).all.all
 
-variable (v : V)
+abbrev oneAbbrev {n} : ⌜ℒₒᵣ⌝[V].TSemiterm n := (1 : V)
+
+scoped notation "^1" => oneAbbrev
 
 class R₀Theory (T : LOR.TTheory (V := V)) extends EQTheory T where
   add (n m : V) : T ⊢ (n + m : ⌜ℒₒᵣ⌝[V].TSemiterm 0) =' ↑(n + m)
@@ -222,7 +224,48 @@ noncomputable def bexReplace (p : ⌜ℒₒᵣ⌝.TSemiformula (0 + 1)) (t u : �
 lemma bex_replace! (p : ⌜ℒₒᵣ⌝.TSemiformula (0 + 1)) (t u : ⌜ℒₒᵣ⌝.TTerm) :
     T ⊢! t =' u ⟶ p.bex t ⟶ p.bex u := ⟨bexReplace T p t u⟩
 
+def eqComplete {n m : V} (h : n = m) : T ⊢ ↑n =' ↑m := by
+  rcases h; exact eqRefl T _
+
+lemma eq_complete! {n m : V} (h : n = m) : T ⊢! ↑n =' ↑m := ⟨eqComplete T h⟩
+
 end EQTheory
+
+/-
+
+section Q₀
+
+class Q₀Theory (T : LOR.TTheory (V := V)) extends EQTheory T where
+  add_zero : T ⊢ ((#'0 + ((0 : V) : ⌜ℒₒᵣ⌝[V].TSemiterm (0 + 1)) : ⌜ℒₒᵣ⌝[V].TSemiterm (0 + 1)) =' #'0).all
+  add_succ : T ⊢ ((#'1 + (#'0 + ((1 : V) : ⌜ℒₒᵣ⌝[V].TSemiterm 2))) =' ((#'1 + #'0) + ((1 : V) : ⌜ℒₒᵣ⌝[V].TSemiterm 2))).all.all
+  mul : T ⊢ (n * m : ⌜ℒₒᵣ⌝[V].TSemiterm 0) =' ↑(n * m)
+  ne {n m : V} : n ≠ m → T ⊢ ↑n ≠' ↑m
+  ltNumeral (n : V) : T ⊢ (#'1 <' (#'0 + ((1 : V) : ⌜ℒₒᵣ⌝[V].TSemiterm 2)) ⟷ #'1 =' #'0 ⋎ #'1 <' #'0).all.all
+
+variable [Q₀Theory T]
+
+lemma add_zero (t : ⌜ℒₒᵣ⌝.TTerm) : T ⊢! (t + ((0 : V) : ⌜ℒₒᵣ⌝[V].TSemiterm 0) : ⌜ℒₒᵣ⌝[V].TSemiterm 0) =' t := ⟨by
+  simpa using specialize (Q₀Theory.add_zero (T := T)) t⟩
+
+lemma addssss (n m : V) : T ⊢! (n + m : ⌜ℒₒᵣ⌝[V].TSemiterm 0) =' ↑(n + m) := by {
+  revert n m
+  let d : ∀ n m : V, m ≤ n → T ⊢! ((n - m : V) + m : ⌜ℒₒᵣ⌝[V].TSemiterm 0) =' n := by {
+    intro n m hmn
+    induction m using induction_sigma1
+    · sorry -- simp [Language.Theory.TProvable.iff_provable]; definability
+    case zero => simp; apply add_zero
+    case succ m ih =>
+      rcases zero_or_succ m with (rfl | ⟨m, rfl⟩)
+      · simp;
+
+
+   }
+ }
+
+
+end Q₀
+
+-/
 
 section R₀
 
@@ -246,11 +289,6 @@ def ltNumeral (t : ⌜ℒₒᵣ⌝.TTerm) (n : V) : T ⊢ t <' ↑n ⟷ (tSubstI
 
 noncomputable def nltNumeral (t : ⌜ℒₒᵣ⌝.TTerm) (n : V) : T ⊢ t ≮' ↑n ⟷ (tSubstItr t.sing (#'1 ≠' #'0) n).conj := by
   simpa using negReplaceIff' <| ltNumeral T t n
-
-def eqComplete {n m : V} (h : n = m) : T ⊢ ↑n =' ↑m := by
-  rcases h; exact eqRefl T _
-
-lemma eq_complete! {n m : V} (h : n = m) : T ⊢! ↑n =' ↑m := ⟨eqComplete T h⟩
 
 def ltComplete {n m : V} (h : n < m) : T ⊢ ↑n <' ↑m := by
   have : T ⊢ ↑n <' ↑m ⟷ _ := ltNumeral T n m

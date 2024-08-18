@@ -831,14 +831,22 @@ def _root_.LO.FirstOrder.Arith.qqNLTDef : 𝚺₁.Semisentence 4 :=
 lemma qqEQ_defined : 𝚺₁-Function₃ (qqEQ : V → V → V → V) via qqEQDef := by
   intro v; simp [qqEQDef, numeral_eq_natCast, qqEQ]
 
-lemma qqNEQ_defined : 𝚺₁-Function₃ (qqNEQ : V → V → V → V) via qqNEQDef := by
+lemma qqNEQ_defined : 𝚺-[0 + 1]-Function₃ (qqNEQ : V → V → V → V) via qqNEQDef := by
   intro v; simp [qqNEQDef, numeral_eq_natCast, qqNEQ]
 
-lemma qqLT_defined : 𝚺₁-Function₃ (qqLT : V → V → V → V) via qqLTDef := by
+lemma qqLT_defined : 𝚺-[0 + 1]-Function₃ (qqLT : V → V → V → V) via qqLTDef := by
   intro v; simp [qqLTDef, numeral_eq_natCast, qqLT]
 
-lemma qqNLT_defined : 𝚺₁-Function₃ (qqNLT : V → V → V → V) via qqNLTDef := by
+lemma qqNLT_defined : 𝚺-[0 + 1]-Function₃ (qqNLT : V → V → V → V) via qqNLTDef := by
   intro v; simp [qqNLTDef, numeral_eq_natCast, qqNLT]
+
+instance (Γ m) : Γ-[m + 1]-Function₃ (qqEQ : V → V → V → V) := .of_sigmaOne qqEQ_defined.to_definable _ _
+
+instance (Γ m) : Γ-[m + 1]-Function₃ (qqNEQ : V → V → V → V) := .of_sigmaOne qqNEQ_defined.to_definable _ _
+
+instance (Γ m) : Γ-[m + 1]-Function₃ (qqLT : V → V → V → V) := .of_sigmaOne qqLT_defined.to_definable _ _
+
+instance (Γ m) : Γ-[m + 1]-Function₃ (qqNLT : V → V → V → V) := .of_sigmaOne qqNLT_defined.to_definable _ _
 
 @[simp] lemma eval_qqEQDef (v) : Semiformula.Evalbm V v qqEQDef.val ↔ v 0 = v 2 ^=[v 1] v 3 := qqEQ_defined.df.iff v
 

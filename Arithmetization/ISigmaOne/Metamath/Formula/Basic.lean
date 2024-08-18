@@ -154,6 +154,22 @@ lemma qqExists_defined : 𝚺₀-Function₂ (qqEx : V → V → V) via qqExDef 
 @[simp] lemma eval_qqExDef (v) :
     Semiformula.Evalbm V v qqExDef.val ↔ v 0 = ^∃[v 1] (v 2) := qqExists_defined.df.iff v
 
+instance (ℌ : HierarchySymbol) : ℌ-Function₄ (qqRel : V → V → V → V → V) := .of_zero qqRel_defined.to_definable
+
+instance (ℌ : HierarchySymbol) : ℌ-Function₄ (qqNRel : V → V → V → V → V) := .of_zero qqNRel_defined.to_definable
+
+instance (ℌ : HierarchySymbol) : ℌ-Function₁ (qqVerum : V → V) := .of_zero qqVerum_defined.to_definable
+
+instance (ℌ : HierarchySymbol) : ℌ-Function₁ (qqFalsum : V → V) := .of_zero qqFalsum_defined.to_definable
+
+instance (ℌ : HierarchySymbol) : ℌ-Function₃ (qqAnd : V → V → V → V) := .of_zero qqAnd_defined.to_definable
+
+instance (ℌ : HierarchySymbol) : ℌ-Function₃ (qqOr : V → V → V → V) := .of_zero qqOr_defined.to_definable
+
+instance (ℌ : HierarchySymbol) : ℌ-Function₂ (qqAll : V → V → V) := .of_zero qqForall_defined.to_definable
+
+instance (ℌ : HierarchySymbol) : ℌ-Function₂ (qqEx : V → V → V) := .of_zero qqExists_defined.to_definable
+
 end
 
 @[simp] lemma qqRel_inj (n₁ k₁ r₁ v₁ n₂ k₂ r₂ v₂ : V) :
