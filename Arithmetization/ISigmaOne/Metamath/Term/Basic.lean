@@ -162,34 +162,20 @@ instance Language.isUTerm_definable : 𝚫₁-Predicate L.IsUTerm := L.isUTerm_d
 
 instance isUTermDef_definable' (Γ) : Γ-[m + 1]-Predicate L.IsUTerm := L.isUTerm_definable.of_deltaOne
 
-def Language.IsUTermVec (n w : V) : Prop := n = len w ∧ ∀ i < n, L.IsUTerm w.[i]
+def Language.IsUTermVec (w : V) : Prop := ∀ i < len w, L.IsUTerm w.[i]
 
 variable {L}
 
-protected lemma Language.IsUTermVec.lh {n w : V} (h : L.IsUTermVec n w) : n = len w := h.1
+lemma Language.IsUTermVec.nth {w : V} (h : L.IsUTermVec w) {i} : i < len w → L.IsUTerm w.[i] := h i
 
-lemma Language.IsUTermVec.nth {n w : V} (h : L.IsUTermVec n w) {i} : i < n → L.IsUTerm w.[i] := h.2 i
+@[simp] lemma Language.IsUTermVec.empty : L.IsUTermVec 0 := by simp [Language.IsUTermVec]
 
-@[simp] lemma Language.IsUTermVec.empty : L.IsUTermVec 0 0 := ⟨by simp, by simp⟩
-
-@[simp] lemma Language.IsUTermVec.empty_iff : L.IsUTermVec 0 v ↔ v = 0 := by
-  constructor
-  · intro h; exact len_zero_iff_eq_nil.mp h.lh.symm
-  · rintro rfl; simp
-
-lemma Language.IsUTermVec.two_iff {v : V} : L.IsUTermVec 2 v ↔ ∃ t₁ t₂, L.IsUTerm t₁ ∧ L.IsUTerm t₂ ∧ v = ?[t₁, t₂] := by
-  constructor
-  · intro h
-    rcases eq_doubleton_of_len_eq_two.mp h.lh.symm with ⟨t₁, t₂, rfl⟩
-    exact ⟨t₁, t₂, by simpa using h.nth (show 0 < 2 by simp), by simpa using h.nth (show 1 < 2 by simp), rfl⟩
-  · rintro ⟨t₁, t₂, h₁, h₂, rfl⟩; exact ⟨by simp [one_add_one_eq_two], by simp [lt_two_iff_le_one, le_one_iff_eq_zero_or_one, h₁, h₂]⟩
-
-@[simp] lemma Language.IsUTermVec.cons {n w t : V} (h : L.IsUTermVec n w) (ht : L.IsUTerm t) : L.IsUTermVec (n + 1) (t ∷ w) :=
-  ⟨by simp [h.lh], fun i hi ↦ by
+@[simp] lemma Language.IsUTermVec.cons {w t : V} (h : L.IsUTermVec w) (ht : L.IsUTerm t) : L.IsUTermVec (t ∷ w) := fun i hi ↦ by
     rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
     · simpa
-    · simpa using h.nth (by simpa using hi)⟩
+    · simpa using h.nth (by simpa using hi)
 
+/-
 @[simp] lemma Language.IsUTermVec.cons₁_iff {t : V} :
     L.IsUTermVec 1 ?[t] ↔ L.IsUTerm t := by
   constructor
@@ -202,29 +188,30 @@ lemma Language.IsUTermVec.two_iff {v : V} : L.IsUTermVec 2 v ↔ ∃ t₁ t₂, 
   · intro h; exact ⟨by simpa using h.nth (i := 0) (by simp), by simpa using h.nth (i := 1) (by simp)⟩
   · rintro ⟨h₁, h₂⟩
     simpa [one_add_one_eq_two] using (Language.IsUTermVec.cons₁_iff.mpr h₂).cons h₁
+-/
 
 section
 
-def _root_.LO.FirstOrder.Arith.LDef.isUTermVecDef (pL : LDef) : 𝚫₁.Semisentence 2 := .mkDelta
+def _root_.LO.FirstOrder.Arith.LDef.isUTermVecDef (pL : LDef) : 𝚫₁.Semisentence 1 := .mkDelta
   (.mkSigma
-    “n w | !lenDef n w ∧ ∀ i < n, ∃ u, !nthDef u w i ∧ !pL.isUTermDef.sigma u”
+    “w | ∃ l, !lenDef l w ∧ ∀ i < l, ∃ u, !nthDef u w i ∧ !pL.isUTermDef.sigma u”
     (by simp))
   (.mkPi
-    “n w | (∀ l, !lenDef l w → n = l) ∧ ∀ i < n, ∀ u, !nthDef u w i → !pL.isUTermDef.pi u”
+    “w | ∀ l, !lenDef l w → ∀ i < l, ∀ u, !nthDef u w i → !pL.isUTermDef.pi u”
     (by simp))
 
 variable (L)
 
-lemma Language.isUTermVec_defined : 𝚫₁-Relation L.IsUTermVec via pL.isUTermVecDef :=
+lemma Language.isUTermVec_defined : 𝚫₁-Predicate L.IsUTermVec via pL.isUTermVecDef :=
   ⟨by intro v; simp [LDef.isUTermVecDef, HierarchySymbol.Semiformula.val_sigma, eval_isUTermDef L, L.isUTerm_defined.proper.iff'],
    by intro v; simp [LDef.isUTermVecDef, HierarchySymbol.Semiformula.val_sigma, eval_isUTermDef L, Language.IsUTermVec]⟩
 
 @[simp] lemma eval_isUTermVecDef (v) :
-    Semiformula.Evalbm V v pL.isUTermVecDef.val ↔ L.IsUTermVec (v 0) (v 1) := L.isUTermVec_defined.df.iff v
+    Semiformula.Evalbm V v pL.isUTermVecDef.val ↔ L.IsUTermVec (v 0) := L.isUTermVec_defined.df.iff v
 
-instance Language.isUTermVecDef_definable : 𝚫₁-Relation (L.IsUTermVec) := L.isUTermVec_defined.to_definable
+instance Language.isUTermVecDef_definable : 𝚫₁-Predicate (L.IsUTermVec) := L.isUTermVec_defined.to_definable
 
-instance Language.isUTermVecDef_definable' (Γ) : Γ-[m + 1]-Relation L.IsUTermVec := L.isUTermVecDef_definable.of_deltaOne
+instance Language.isUTermVecDef_definable' (Γ) : Γ-[m + 1]-Predicate L.IsUTermVec := L.isUTermVecDef_definable.of_deltaOne
 
 end
 
@@ -232,7 +219,7 @@ lemma Language.IsUTerm.case_iff {t : V} :
     L.IsUTerm t ↔
     (∃ z, t = ^#z) ∨
     (∃ x, t = ^&x) ∨
-    (∃ k f v : V, L.Func k f ∧ L.IsUTermVec k v ∧ t = ^func k f v) := by
+    (∃ k f v : V, L.Func k f ∧ k = len v ∧ L.IsUTermVec v ∧ t = ^func k f v) := by
   simpa [construction, Phi, IsUTermVec, and_assoc] using (construction L).case
 
 alias ⟨Language.IsUTerm.case, Language.IsUTerm.mk⟩ := Language.IsUTerm.case_iff
@@ -267,7 +254,7 @@ lemma Language.IsUTerm.induction (Γ) {P : V → Prop} (hP : Γ-[1]-Predicate P)
     · exact hfunc k f v hkf ⟨hk, fun i hi ↦ hC _ (h i hi) |>.1⟩ (fun i hi ↦ hC _ (h i hi) |>.2))
 
 end term
-
+/--/
 namespace Language.TermRec
 
 structure Blueprint (pL : LDef) (arity : ℕ) where
@@ -602,27 +589,31 @@ lemma graph_existsUnique_vec_total (k w : V) : ∃! w',
     (¬L.IsUTermVec k w → w' = 0) := by
   by_cases h : L.IsUTermVec k w <;> simp [h]; exact c.graph_existsUnique_vec h
 
-def resultVec (k w : V) : V := Classical.choose! (c.graph_existsUnique_vec_total param k w)
+def resultVec (w : V) : V := Classical.choose! (c.graph_existsUnique_vec_total param (len w) w)
 
-@[simp] lemma resultVec_lh {k w : V} (hw : L.IsUTermVec k w) : len (c.resultVec param k w) = k :=
-  Eq.symm <| Classical.choose!_spec (c.graph_existsUnique_vec_total param k w) |>.1 hw |>.1
+@[simp] lemma resultVec_lh {k w : V} (hw : L.IsUTermVec k w) : len (c.resultVec param w) = k := by
+  rcases hw.lh
+  exact Eq.symm <| Classical.choose!_spec (c.graph_existsUnique_vec_total param _ w) |>.1 hw |>.1
 
 lemma graph_of_mem_resultVec {k w : V} (hw : L.IsUTermVec k w) {i : V} (hi : i < k) :
-    c.Graph param w.[i] (c.resultVec param k w).[i] :=
-  Classical.choose!_spec (c.graph_existsUnique_vec_total param k w) |>.1 hw |>.2 i hi
+    c.Graph param w.[i] (c.resultVec param w).[i] := by
+  rcases hw.lh
+  exact Classical.choose!_spec (c.graph_existsUnique_vec_total param _ w) |>.1 hw |>.2 i hi
 
 lemma nth_resultVec {k w i : V} (hw : L.IsUTermVec k w) (hi : i < k) :
-    (c.resultVec param k w).[i] = c.result param w.[i] :=
+    (c.resultVec param w).[i] = c.result param w.[i] :=
   c.result_eq_of_graph (hw.nth hi) (c.graph_of_mem_resultVec param hw hi) |>.symm
 
-@[simp] def resultVec_of_not {k w : V} (hw : ¬L.IsUTermVec k w) : c.resultVec param k w = 0 :=
-  Classical.choose!_spec (c.graph_existsUnique_vec_total param k w) |>.2 hw
+/-
+@[simp] def resultVec_of_not {k w : V} (hw : ¬L.IsUTermVec k w) : c.resultVec param w = 0 :=
+  Classical.choose!_spec (c.graph_existsUnique_vec_total param _ w) |>.2 hw
+-/
 
 @[simp] lemma resultVec_nil :
-    c.resultVec param 0 0 = 0 := len_zero_iff_eq_nil.mp (by simp)
+    c.resultVec param 0 = 0 := len_zero_iff_eq_nil.mp (by rw [resultVec_lh]; simp)
 
 lemma resultVec_cons {k w t : V} (hw : L.IsUTermVec k w) (ht : L.IsUTerm t) :
-    c.resultVec param (k + 1) (t ∷ w) = c.result param t ∷ c.resultVec param k w :=
+    c.resultVec param (t ∷ w) = c.result param t ∷ c.resultVec param w :=
   nth_ext (by simp [hw, hw.cons ht]) (by
     intro i hi
     have hi : i < k + 1 := by simpa [hw.cons ht, resultVec_lh] using hi

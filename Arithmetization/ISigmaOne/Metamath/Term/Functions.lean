@@ -141,8 +141,8 @@ lemma termSubst_termSubst {l n m w v t : V} (hv : L.IsSemitermVec l n v) (ht : L
   · intro z hz; simp [hz, hv.isUTerm]
   · intro x; simp [hv]
   · intro k f ts hf hts ih
-    simp
-    simp only [termSubst_func, Language.IsSemitermVec.termSubstVec, qqFunc_inj, true_and, hf, hts, hv.isUTerm]
+    rw [termSubst_func hf hts.isUTerm, termSubst_func hf (hv.termSubstVec hts).isUTerm, termSubst_func hf hts.isUTerm]
+    simp [hf, hts.isUTerm]
     apply nth_ext' k (by simp [hv, hts]) (by simp [hts])
     intro i hi
     rw [nth_termSubstVec (hv.termSubstVec hts) hi, nth_termSubstVec hts hi, nth_termSubstVec hts hi, ih i hi]
