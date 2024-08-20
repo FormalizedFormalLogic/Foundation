@@ -1247,6 +1247,182 @@ end Construction
 
 end Language.UformulaRec1
 
+section bv
+
+namespace BV
+
+def blueprint (pL : LDef) : Language.UformulaRec1.Blueprint pL where
+  rel := .mkSigma “y param k R v | ∃ M, !pL.termBVVecDef M k v ∧ !listMaxDef y M” (by simp)
+  nrel := .mkSigma “y param k R v | ∃ M, !pL.termBVVecDef M k v ∧ !listMaxDef y M” (by simp)
+  verum := .mkSigma “y param | y = 0” (by simp)
+  falsum := .mkSigma “y param | y = 0” (by simp)
+  and := .mkSigma “y param p₁ p₂ y₁ y₂ | !max y y₁ y₂” (by simp)
+  or := .mkSigma “y param p₁ p₂ y₁ y₂ | !max y y₁ y₂” (by simp)
+  all := .mkSigma “y param p₁ y₁ | !subDef y y₁ 1” (by simp)
+  ex := .mkSigma “y param p₁ y₁ | !subDef y y₁ 1” (by simp)
+  allChanges := .mkSigma “param' param | param' = 0” (by simp)
+  exChanges := .mkSigma “param' param | param' = 0” (by simp)
+
+variable (L)
+
+def construction : Language.UformulaRec1.Construction V L (blueprint pL) where
+  rel {_} := fun k _ v ↦ listMax (L.termBVVec k v)
+  nrel {_} := fun k _ v ↦ listMax (L.termBVVec k v)
+  verum {_} := 0
+  falsum {_} := 0
+  and {_} := fun _ _ y₁ y₂ ↦ Max.max y₁ y₂
+  or {_} := fun _ _ y₁ y₂ ↦ Max.max y₁ y₂
+  all {_} := fun _ y₁ ↦ y₁ - 1
+  ex {_} := fun _ y₁ ↦ y₁ - 1
+  allChanges := fun _ ↦ 0
+  exChanges := fun _ ↦ 0
+  rel_defined := by intro v; simp [blueprint, L.termBVVec_defined.df.iff]; rfl
+  nrel_defined := by intro v; simp [blueprint, L.termBVVec_defined.df.iff]; rfl
+  verum_defined := by intro v; simp [blueprint]
+  falsum_defined := by intro v; simp [blueprint]
+  and_defined := by intro v; simp [blueprint]; rfl
+  or_defined := by intro v; simp [blueprint]; rfl
+  all_defined := by intro v; simp [blueprint]; rfl
+  ex_defined := by intro v; simp [blueprint]; rfl
+  allChanges_defined := by intro v; simp [blueprint]
+  exChanges_defined := by intro v; simp [blueprint]
+
+end BV
+
+open BV
+
+variable (L)
+
+def Language.bv (p : V) : V := (construction L).result 0 p
+
+variable {L}
+
+section
+
+def _root_.LO.FirstOrder.Arith.LDef.bvDef (pL : LDef) : 𝚺₁.Semisentence 2 := (blueprint pL).result.rew (Rew.substs ![#0, ‘0’, #1])
+
+variable (L)
+
+lemma Language.bv_defined : 𝚺₁-Function₁ L.bv via pL.bvDef := fun v ↦ by
+  simpa [LDef.bvDef] using (construction L).result_defined ![v 0, 0, v 1]
+
+instance Language.bv_definable : 𝚺₁-Function₁ L.bv := L.bv_defined.to_definable
+
+instance Language.neg_definable' (Γ) : Γ-[m + 1]-Function₁ L.bv := L.bv_definable.of_sigmaOne
+
+end
+
+@[simp] lemma bv_rel {k R v} (hR : L.Rel k R) (hv : L.IsUTermVec k v) :
+    L.bv (^rel k R v) = listMax (L.termBVVec k v) := by simp [Language.bv, hR, hv, construction]
+
+@[simp] lemma bv_nrel {k R v} (hR : L.Rel k R) (hv : L.IsUTermVec k v) :
+    L.bv (^nrel k R v) = listMax (L.termBVVec k v) := by simp [Language.bv, hR, hv, construction]
+
+@[simp] lemma bv_verum : L.bv ^⊤ = 0 := by simp [Language.bv, construction]
+
+@[simp] lemma bv_falsum : L.bv ^⊥ = 0 := by simp [Language.bv, construction]
+
+@[simp] lemma bv_and {p q} (hp : L.IsUFormula p) (hq : L.IsUFormula q) :
+    L.bv (p ^⋏ q) = Max.max (L.bv p) (L.bv q) := by simp [Language.bv, hp, hq, construction]
+
+@[simp] lemma bv_or {p q} (hp : L.IsUFormula p) (hq : L.IsUFormula q) :
+    L.bv (p ^⋎ q) = Max.max (L.bv p) (L.bv q) := by simp [Language.bv, hp, hq, construction]
+
+@[simp] lemma bv_all {p} (hp : L.IsUFormula p) : L.bv (^∀ p) = L.bv p - 1 := by simp [Language.bv, hp, construction]
+
+@[simp] lemma bv_ex {p} (hp : L.IsUFormula p) : L.bv (^∃ p) = L.bv p - 1 := by simp [Language.bv, hp, construction]
+
+lemma bv_eq_of_not_isUFormula {p} (h : ¬L.IsUFormula p) : L.bv p = 0 := (construction L).result_prop_not _ h
+
+end bv
+
+section isSemiformula
+
+variable (L)
+
+structure Language.IsSemiformula (n p : V) : Prop where
+  isUFormula : L.IsUFormula p
+  bv : L.bv p ≤ n
+
+abbrev Language.IsFormula (p : V) : Prop := L.IsSemiformula 0 p
+
+variable {L}
+
+@[simp] lemma Language.IsSemiformula.rel {n k r v : V} :
+    L.IsSemiformula n (^rel k r v) ↔ L.Rel k r ∧ L.IsSemitermVec k n v := by
+  constructor
+  · intro h
+    have hrv : L.Rel k r ∧ L.IsUTermVec k v := by simpa using h.isUFormula
+    exact ⟨hrv.1, hrv.2, fun i hi ↦ by
+      have : listMax (L.termBVVec k v) ≤ n := by simpa [hrv] using h.bv
+      exact le_trans (le_trans (by simp_all) (nth_le_listMax (i := i) (by simp_all))) this⟩
+  · rintro ⟨hr, hv⟩
+    exact ⟨by simp [hr, hv.isUTerm], by
+      rw [bv_rel hr hv.isUTerm]
+      apply listMaxss_le
+      intro i hi
+      have := hv.bv (i := i) (by simpa [hv.isUTerm] using hi)
+      rwa [nth_termBVVec hv.isUTerm (by simpa [hv.isUTerm] using hi)]⟩
+
+@[simp] lemma Language.IsSemiformula.nrel {n k r v : V} :
+    L.IsSemiformula n (^nrel k r v) ↔ L.Rel k r ∧ L.IsSemitermVec k n v := by
+  constructor
+  · intro h
+    have hrv : L.Rel k r ∧ L.IsUTermVec k v := by simpa using h.isUFormula
+    exact ⟨hrv.1, hrv.2, fun i hi ↦ by
+      have : listMax (L.termBVVec k v) ≤ n := by simpa [hrv] using h.bv
+      exact le_trans (le_trans (by simp_all) (nth_le_listMax (i := i) (by simp_all))) this⟩
+  · rintro ⟨hr, hv⟩
+    exact ⟨by simp [hr, hv.isUTerm], by
+      rw [bv_nrel hr hv.isUTerm]
+      apply listMaxss_le
+      intro i hi
+      have := hv.bv (i := i) (by simpa [hv.isUTerm] using hi)
+      rwa [nth_termBVVec hv.isUTerm (by simpa [hv.isUTerm] using hi)]⟩
+
+@[simp] lemma Language.IsSemiformula.verum {n} : L.IsSemiformula n ^⊤ := ⟨by simp, by simp⟩
+
+@[simp] lemma Language.IsSemiformula.falsum {n} : L.IsSemiformula n ^⊥ := ⟨by simp, by simp⟩
+
+@[simp] lemma Language.IsSemiformula.and {n p q : V} :
+    L.IsSemiformula n (p ^⋏ q) ↔ L.IsSemiformula n p ∧ L.IsSemiformula n q := by
+  constructor
+  · intro h
+    have hpq : L.IsUFormula p ∧ L.IsUFormula q := by simpa using h.isUFormula
+    have hbv : L.bv p ≤ n ∧ L.bv q ≤ n := by simpa [hpq] using h.bv
+    exact ⟨⟨hpq.1, hbv.1⟩, ⟨hpq.2, hbv.2⟩⟩
+  · rintro ⟨hp, hq⟩
+    exact ⟨by simp [hp.isUFormula, hq.isUFormula], by simp [hp.isUFormula, hq.isUFormula, hp.bv, hq.bv]⟩
+
+@[simp] lemma Language.IsSemiformula.or {n p q : V} :
+    L.IsSemiformula n (p ^⋎ q) ↔ L.IsSemiformula n p ∧ L.IsSemiformula n q := by
+  constructor
+  · intro h
+    have hpq : L.IsUFormula p ∧ L.IsUFormula q := by simpa using h.isUFormula
+    have hbv : L.bv p ≤ n ∧ L.bv q ≤ n := by simpa [hpq] using h.bv
+    exact ⟨⟨hpq.1, hbv.1⟩, ⟨hpq.2, hbv.2⟩⟩
+  · rintro ⟨hp, hq⟩
+    exact ⟨by simp [hp.isUFormula, hq.isUFormula], by simp [hp.isUFormula, hq.isUFormula, hp.bv, hq.bv]⟩
+
+@[simp] lemma Language.IsSemiformula.all {n p : V} :
+    L.IsSemiformula n (^∀ p) ↔ L.IsSemiformula (n + 1) p := by
+  constructor
+  · intro h
+    exact ⟨by simpa using h.isUFormula, by
+      simpa [show L.IsUFormula p by simpa using h.isUFormula] using h.bv⟩
+  · intro h
+    exact ⟨by simp [h.isUFormula], by simp [h.isUFormula, h.bv]⟩
+
+@[simp] lemma Language.IsSemiformula.ex {n p : V} :
+    L.IsSemiformula n (^∃ p) ↔ L.IsSemiformula (n + 1) p := by
+  constructor
+  · intro h
+    exact ⟨by simpa using h.isUFormula, by
+      simpa [show L.IsUFormula p by simpa using h.isUFormula] using h.bv⟩
+  · intro h
+    exact ⟨by simp [h.isUFormula], by simp [h.isUFormula, h.bv]⟩
+
+end isSemiformula
 
 end LO.Arith
 
