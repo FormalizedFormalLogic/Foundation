@@ -66,6 +66,9 @@ abbrev DefinedFunction {k} (f : (Fin k → V) → V) (p : ℌ.Semisentence (k + 
 
 variable (ℌ)
 
+abbrev DefinedFunction₀ (c : V) (p : ℌ.Semisentence 1) : Prop :=
+  DefinedFunction (fun _ => c) p
+
 abbrev DefinedFunction₁ (f : V → V) (p : ℌ.Semisentence 2) : Prop :=
   DefinedFunction (fun v => f (v 0)) p
 
@@ -95,6 +98,8 @@ abbrev BoldfaceRel₆ (P : V → V → V → V → V → V → Prop) : Prop := �
 
 abbrev BoldfaceFunction (f : (Fin k → V) → V) : Prop := ℌ.Boldface (k := k + 1) (fun v ↦ v 0 = f (v ·.succ))
 
+abbrev BoldfaceFunction₀ (c : V) : Prop := ℌ.BoldfaceFunction (k := 0) (fun _ ↦ c)
+
 abbrev BoldfaceFunction₁ (f : V → V) : Prop := ℌ.BoldfaceFunction (k := 1) (fun v ↦ f (v 0))
 
 abbrev BoldfaceFunction₂ (f : V → V → V) : Prop := ℌ.BoldfaceFunction (k := 2) (fun v ↦ f (v 0) (v 1))
@@ -114,6 +119,8 @@ notation Γ "-Relation " P " via " p => DefinedRel Γ P p
 notation Γ "-Relation₃ " P " via " p => DefinedRel₃ Γ P p
 
 notation Γ "-Relation₄ " P " via " p => DefinedRel₄ Γ P p
+
+notation Γ "-Function₀ " c " via " p => DefinedFunction₀ Γ c p
 
 notation Γ "-Function₁ " f " via " p => DefinedFunction₁ Γ f p
 
