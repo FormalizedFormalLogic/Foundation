@@ -2,7 +2,7 @@ import Arithmetization.ISigmaOne.Metamath.Term.Functions
 
 /-!
 
-# Typed Formalized Semiterm/Term
+# Typed Formalized IsSemiterm/Term
 
 -/
 
@@ -44,11 +44,11 @@ variable (L)
 
 structure Language.TSemiterm (n : V) where
   val : V
-  prop : L.Semiterm n val
+  prop : L.IsSemiterm n val
 
 structure Language.TSemitermVec (m n : V) where
   val : V
-  prop : L.SemitermVec m n val
+  prop : L.IsSemitermVec m n val
 
 attribute [simp] Language.TSemiterm.prop Language.TSemitermVec.prop
 
@@ -59,6 +59,10 @@ lemma Language.TSemiterm.ext {t u : L.TSemiterm n}
     (h : t.val = u.val) : t = u := by rcases t; rcases u; simpa using h
 
 lemma Language.TSemiterm.ext_iff {t u : L.TSemiterm n} : t = u ↔ t.val = u.val := by rcases t; rcases u; simp
+
+@[simp] lemma Language.TSemiterm.isUTerm (t : L.TSemiterm n) : L.IsUTerm t.val := t.prop.isUTerm
+
+@[simp] lemma Language.TSemitermVec.isUTerm (v : L.TSemitermVec k n) : L.IsUTermVec k v.val := v.prop.isUTerm
 
 @[ext]
 lemma Language.TSemitermVec.ext {v w : L.TSemitermVec k n}
@@ -83,7 +87,7 @@ scoped prefix:max "&'" => fv
 @[simp] lemma Language.val_fvar {n : V} (x : V) : (L.fvar x : L.TSemiterm n).val = ^&x := rfl
 
 def Language.TSemiterm.cons {m n} (t : L.TSemiterm n) (v : L.TSemitermVec m n) :
-    L.TSemitermVec (m + 1) n := ⟨t.val ∷ v.val, v.prop.cons t.prop⟩
+    L.TSemitermVec (m + 1) n := ⟨t.val ∷ v.val, by simp⟩
 
 scoped infixr:67 " ∷ᵗ " => Language.TSemiterm.cons
 
@@ -104,17 +108,17 @@ abbrev Language.TSemiterm.sing {n} (t : L.TSemiterm n) : L.TSemitermVec (0 + 1) 
 namespace Language.TSemiterm
 
 def shift (t : L.TSemiterm n) : L.TSemiterm n :=
-  ⟨L.termShift n t.val, Language.Semiterm.termShift t.prop⟩
+  ⟨L.termShift t.val, Language.IsSemiterm.termShift t.prop⟩
 
 def bShift (t : L.TSemiterm n) : L.TSemiterm (n + 1) :=
-  ⟨L.termBShift n t.val, Language.Semiterm.termBShift t.prop⟩
+  ⟨L.termBShift t.val, Language.IsSemiterm.termBShift t.prop⟩
 
 def substs (t : L.TSemiterm n) (w : L.TSemitermVec n m) : L.TSemiterm m :=
-  ⟨L.termSubst n m w.val t.val, termSubst_rng_semiterm w.prop t.prop⟩
+  ⟨L.termSubst w.val t.val, w.prop.termSubst t.prop⟩
 
-@[simp] lemma val_shift (t : L.TSemiterm n) : t.shift.val = L.termShift n t.val := rfl
-@[simp] lemma val_bShift (t : L.TSemiterm n) : t.bShift.val = L.termBShift n t.val := rfl
-@[simp] lemma val_substs (w : L.TSemitermVec n m) (t : L.TSemiterm n) : (t.substs w).val = L.termSubst n m w.val t.val := rfl
+@[simp] lemma val_shift (t : L.TSemiterm n) : t.shift.val = L.termShift t.val := rfl
+@[simp] lemma val_bShift (t : L.TSemiterm n) : t.bShift.val = L.termBShift t.val := rfl
+@[simp] lemma val_substs (w : L.TSemitermVec n m) (t : L.TSemiterm n) : (t.substs w).val = L.termSubst w.val t.val := rfl
 
 end Language.TSemiterm
 
@@ -123,17 +127,17 @@ notation t:max "^ᵗ/[" w "]" => Language.TSemiterm.substs t w
 namespace Language.TSemitermVec
 
 def shift (v : L.TSemitermVec k n) : L.TSemitermVec k n :=
-  ⟨L.termShiftVec k n v.val, Language.SemitermVec.termShiftVec v.prop⟩
+  ⟨L.termShiftVec k v.val, Language.IsSemitermVec.termShiftVec v.prop⟩
 
 def bShift (v : L.TSemitermVec k n) : L.TSemitermVec k (n + 1) :=
-  ⟨L.termBShiftVec k n v.val, Language.SemitermVec.termBShiftVec v.prop⟩
+  ⟨L.termBShiftVec k v.val, Language.IsSemitermVec.termBShiftVec v.prop⟩
 
 def substs (v : L.TSemitermVec k n) (w : L.TSemitermVec n m) : L.TSemitermVec k m :=
-  ⟨L.termSubstVec k n m w.val v.val, Language.SemitermVec.termSubstVec w.prop v.prop⟩
+  ⟨L.termSubstVec k w.val v.val, Language.IsSemitermVec.termSubstVec w.prop v.prop⟩
 
-@[simp] lemma val_shift (v : L.TSemitermVec k n) : v.shift.val = L.termShiftVec k n v.val := rfl
-@[simp] lemma val_bShift (v : L.TSemitermVec k n) : v.bShift.val = L.termBShiftVec k n v.val := rfl
-@[simp] lemma val_substs (v : L.TSemitermVec k n) (w : L.TSemitermVec n m) : (v.substs w).val = L.termSubstVec k n m w.val v.val := rfl
+@[simp] lemma val_shift (v : L.TSemitermVec k n) : v.shift.val = L.termShiftVec k v.val := rfl
+@[simp] lemma val_bShift (v : L.TSemitermVec k n) : v.bShift.val = L.termBShiftVec k v.val := rfl
+@[simp] lemma val_substs (v : L.TSemitermVec k n) (w : L.TSemitermVec n m) : (v.substs w).val = L.termSubstVec k w.val v.val := rfl
 
 @[simp] lemma bShift_nil (n : V) :
     (nil L n).bShift = nil L (n + 1) := by
@@ -141,7 +145,7 @@ def substs (v : L.TSemitermVec k n) (w : L.TSemitermVec n m) : L.TSemitermVec k 
 
 @[simp] lemma bShift_cons (t : L.TSemiterm n) (v : L.TSemitermVec k n) :
     (t ∷ᵗ v).bShift = t.bShift ∷ᵗ v.bShift := by
-  ext; simp [bShift, Language.TSemiterm.bShift, termBShiftVec_cons t.prop v.prop]
+  ext; simp [bShift, Language.TSemiterm.bShift, termBShiftVec_cons t.prop.isUTerm v.prop.isUTerm]
 
 @[simp] lemma shift_nil (n : V) :
     (nil L n).shift = nil L n := by
@@ -149,7 +153,7 @@ def substs (v : L.TSemitermVec k n) (w : L.TSemitermVec n m) : L.TSemitermVec k 
 
 @[simp] lemma shift_cons (t : L.TSemiterm n) (v : L.TSemitermVec k n) :
     (t ∷ᵗ v).shift = t.shift ∷ᵗ v.shift := by
-  ext; simp [shift, Language.TSemiterm.shift, termShiftVec_cons t.prop v.prop]
+  ext; simp [shift, Language.TSemiterm.shift, termShiftVec_cons t.prop.isUTerm v.prop.isUTerm]
 
 @[simp] lemma substs_nil (w : L.TSemitermVec n m) :
     (nil L n).substs w = nil L m := by
@@ -157,10 +161,10 @@ def substs (v : L.TSemitermVec k n) (w : L.TSemitermVec n m) : L.TSemitermVec k 
 
 @[simp] lemma substs_cons (w : L.TSemitermVec n m) (t : L.TSemiterm n) (v : L.TSemitermVec k n) :
     (t ∷ᵗ v).substs w = t.substs w ∷ᵗ v.substs w := by
-  ext; simp [substs, Language.TSemiterm.substs, termSubstVec_cons t.prop v.prop]
+  ext; simp [substs, Language.TSemiterm.substs, termSubstVec_cons t.prop.isUTerm v.prop.isUTerm]
 
 def nth (t : L.TSemitermVec k n) (i : V) (hi : i < k := by simp) : L.TSemiterm n :=
-  ⟨t.val.[i], t.prop.prop hi⟩
+  ⟨t.val.[i], t.prop.nth hi⟩
 
 @[simp] lemma nth_val (v : L.TSemitermVec k n) (i : V) (hi : i < k) : (v.nth i hi).val = v.val.[i] := by simp [nth]
 
@@ -197,7 +201,7 @@ lemma q_of_pos (w : L.TSemitermVec k n) (i) (ipos : 0 < i) (hi : i < k + 1) :
   · simp at ipos
   · simp [q_succ w (by simpa using hi)]
 
-@[simp] lemma q_val_eq_qVec (w : L.TSemitermVec k n) : w.q.val = L.qVec k n w.val := by simp [q, Language.qVec, Language.bvar, bShift]
+@[simp] lemma q_val_eq_qVec (w : L.TSemitermVec k n) : w.q.val = L.qVec k w.val := by simp [q, Language.qVec, Language.bvar, bShift]
 
 end Language.TSemitermVec
 
@@ -233,16 +237,16 @@ namespace Language.TSemiterm
 
 @[simp] lemma bShift_substs_q (t : L.TSemiterm n) (w : L.TSemitermVec n m) :
     t.bShift.substs w.q = (t.substs w).bShift := by
-  ext; simp only [substs, TSemitermVec.q_val_eq_qVec, bShift, prop, TSemitermVec.prop, substs_qVec_bShift]
+  ext; simp only [substs, TSemitermVec.q_val_eq_qVec, bShift, prop, TSemitermVec.prop, substs_qVec_bShift t.prop w.prop]
 
 @[simp] lemma bShift_substs_sing (t u : L.TTerm) :
     t.bShift.substs u.sing = t := by
   ext; simp [substs, bShift]
-  rw [show (1 : V) = 0 + 1 by simp, substs_cons_bShift] <;> simp
+  rw [substs_cons_bShift t.prop]; simp
 
 lemma bShift_shift_comm (t : L.TSemiterm n) :
     t.shift.bShift = t.bShift.shift := by
-  ext; simp [termBShift_termShift]
+  ext; simp [termBShift_termShift t.prop]
 
 end Language.TSemiterm
 
@@ -298,7 +302,7 @@ variable {n : V}
 
 @[simp] lemma subst_numeral {m n : V} (w : ⌜ℒₒᵣ⌝.TSemitermVec n m) (x : V) :
     (↑x : ⌜ℒₒᵣ⌝.TSemiterm n).substs w = ↑x := by
-  ext; simp [Language.TSemiterm.substs]
+  ext; simp [Language.TSemiterm.substs, numeral_substs w.prop]
 
 @[simp] lemma subst_add {m n : V} (w : ⌜ℒₒᵣ⌝.TSemitermVec n m) (t₁ t₂ : ⌜ℒₒᵣ⌝.TSemiterm n) :
     (t₁ + t₂).substs w = t₁.substs w + t₂.substs w := by
@@ -334,10 +338,11 @@ variable {n : V}
 @[simp] lemma fvFree_mul (t₁ t₂ : ⌜ℒₒᵣ⌝.TSemiterm n) :
     (t₁ * t₂).FVFree ↔ t₁.FVFree ∧ t₂.FVFree := by simp [Language.TSemiterm.FVFree.iff]
 
+/-
 lemma replace {P : α → Prop} {x y} (hx : P x) (h : x = y) : P y := h ▸ hx
 
 lemma semiterm_induction (Γ) {n : V} {P : ⌜ℒₒᵣ⌝.TSemiterm n → Prop}
-    (hP : Γ-[1]-Predicate (fun x ↦ (h : ⌜ℒₒᵣ⌝.Semiterm n x) → P ⟨x, h⟩))
+    (hP : Γ-[1]-Predicate (fun x ↦ (h : ⌜ℒₒᵣ⌝.IsSemiterm n x) → P ⟨x, h⟩))
     (hBvar : ∀ (z : V) (h : z < n), P (⌜ℒₒᵣ⌝.bvar z h))
     (hFvar : ∀ x, P (⌜ℒₒᵣ⌝.fvar x))
     (hZero : P ((0 : V) : ⌜ℒₒᵣ⌝.TSemiterm n))
@@ -345,9 +350,9 @@ lemma semiterm_induction (Γ) {n : V} {P : ⌜ℒₒᵣ⌝.TSemiterm n → Prop}
     (hAdd : ∀ t₁ t₂, P t₁ → P t₂ → P (t₁ + t₂))
     (hMul : ∀ t₁ t₂, P t₁ → P t₂ → P (t₁ * t₂)) :
     ∀ (t : ⌜ℒₒᵣ⌝[V].TSemiterm n), P t := by
-  let Q := fun x ↦ (h : ⌜ℒₒᵣ⌝.Semiterm n x) → P ⟨x, h⟩
-  suffices ∀ t, ⌜ℒₒᵣ⌝.Semiterm n t → Q t by intro t; exact this t.val t.prop t.prop
-  apply Language.Semiterm.induction Γ hP
+  let Q := fun x ↦ (h : ⌜ℒₒᵣ⌝.IsSemiterm n x) → P ⟨x, h⟩
+  suffices ∀ t, ⌜ℒₒᵣ⌝.IsSemiterm n t → Q t by intro t; exact this t.val t.prop t.prop
+  apply Language.IsSemiterm.induction Γ hP
   case hbvar => intro z hz _; exact hBvar z hz
   case hfvar => intro x _; exact hFvar x
   case hfunc =>
@@ -357,14 +362,15 @@ lemma semiterm_induction (Γ) {n : V} {P : ⌜ℒₒᵣ⌝.TSemiterm n → Prop}
       exact replace hZero (by ext; simp [Formalized.zero, qqFunc_absolute])
     · rcases (by simpa using hv)
       exact replace hOne (by ext; simp [Formalized.one, qqFunc_absolute])
-    · rcases Language.SemitermVec.two_iff.mp hv with ⟨t₁, t₂, ht₁, ht₂, rfl⟩
+    · rcases Language.IsSemitermVec.two_iff.mp hv with ⟨t₁, t₂, ht₁, ht₂, rfl⟩
       exact hAdd ⟨t₁, ht₁⟩ ⟨t₂, ht₂⟩
         (by simpa using ih 0 (by simp) (by simp [ht₁]))
         (by simpa using ih 1 (by simp) (by simp [ht₂]))
-    · rcases Language.SemitermVec.two_iff.mp hv with ⟨t₁, t₂, ht₁, ht₂, rfl⟩
+    · rcases Language.IsSemitermVec.two_iff.mp hv with ⟨t₁, t₂, ht₁, ht₂, rfl⟩
       exact hMul ⟨t₁, ht₁⟩ ⟨t₂, ht₂⟩
         (by simpa using ih 0 (by simp) (by simp [ht₁]))
         (by simpa using ih 1 (by simp) (by simp [ht₂]))
+-/
 
 end Formalized
 

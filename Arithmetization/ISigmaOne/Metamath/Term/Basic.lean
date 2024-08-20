@@ -772,6 +772,11 @@ lemma Language.IsSemitermVec.lh {k n v : V} (h : L.IsSemitermVec k n v) : len v 
 lemma Language.IsSemitermVec.nth {k n v : V} (h : L.IsSemitermVec k n v) {i} (hi : i < k) :
     L.IsSemiterm n v.[i] := ⟨h.isUTerm.nth hi, h.bv hi⟩
 
+lemma Language.IsUTerm.isSemiterm {t : V} (h : L.IsUTerm t) : L.IsSemiterm (L.termBV t) t := ⟨h, by simp⟩
+
+lemma Language.IsUTermVec.isSemitermVec {k v : V} (h : L.IsUTermVec k v) : L.IsSemitermVec k (listMax (L.termBVVec k v)) v :=
+  ⟨h, fun i hi ↦ le_trans (by rw [Language.nth_termBVVec h hi]) (nth_le_listMax (i := i) (by simp [h, hi]))⟩
+
 lemma Language.IsSemitermVec.iff {k n v : V} : L.IsSemitermVec k n v ↔ (len v = k ∧ ∀ i < k, L.IsSemiterm n v.[i]) := by
   constructor
   · intro h; exact ⟨h.lh, fun i hi ↦ h.nth hi⟩
@@ -807,7 +812,7 @@ lemma Language.IsSemitermVec.iff {k n v : V} : L.IsSemitermVec k n v ↔ (len v 
   · intro h; exact len_zero_iff_eq_nil.mp h.lh
   · rintro rfl; simp
 
-@[simp] lemma Language.IsSemitermVec.cons {n w t : V} :
+@[simp] lemma Language.IsSemitermVec.cons_iff {n w t : V} :
     L.IsSemitermVec (k + 1) n (t ∷ w) ↔ L.IsSemiterm n t ∧ L.IsSemitermVec k n w := by
   constructor
   · intro h
@@ -819,6 +824,17 @@ lemma Language.IsSemitermVec.iff {k n v : V} : L.IsSemitermVec k n v ↔ (len v 
     rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
     · simp [ht.bv]
     · simpa using hw.nth (by simpa using hi) |>.bv⟩
+
+lemma Language.SemitermVec.cons {n m w t : V} (h : L.IsSemitermVec n m w) (ht : L.IsSemiterm m t) : L.IsSemitermVec (n + 1) m (t ∷ w) :=
+  Language.IsSemitermVec.cons_iff.mpr ⟨ht, h⟩
+
+@[simp] lemma Language.IsSemitermVec.singleton {n t : V} :
+    L.IsSemitermVec 1 n ?[t] ↔ L.IsSemiterm n t := by
+  rw [show (1 : V) = 0 + 1 by simp, Language.IsSemitermVec.cons_iff]; simp
+
+@[simp] lemma Language.IsSemitermVec.doubleton {n t₁ t₂ : V} :
+    L.IsSemitermVec 2 n ?[t₁, t₂] ↔ L.IsSemiterm n t₁ ∧ L.IsSemiterm n t₂ := by
+  rw [show (2 : V) = 1 + 1 by simp [one_add_one_eq_two], Language.IsSemitermVec.cons_iff]; simp
 
 section
 
