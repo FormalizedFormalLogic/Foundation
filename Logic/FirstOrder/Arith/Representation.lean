@@ -137,6 +137,10 @@ lemma codeOfPartrec'_spec {k} {f : Vector ℕ k →. ℕ} (hf : Nat.Partrec' f) 
 
 namespace FirstIncompleteness
 
+attribute [-instance]
+  LO.FirstOrder.Semiterm.encodable
+  LO.FirstOrder.Semiformula.encodable
+
 open Mathlib Encodable Semiterm.Operator.GoedelNumber
 
 variable {T : Theory ℒₒᵣ} [𝐄𝐐 ≼ T] [𝐏𝐀⁻ ≼ T] [DecidablePred T] [SigmaOneSound T] [Theory.Computable T]

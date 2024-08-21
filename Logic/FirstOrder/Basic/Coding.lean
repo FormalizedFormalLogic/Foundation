@@ -20,24 +20,23 @@ def ofNat (n : ℕ) : ℕ → Option (Semiterm L ξ n)
   | e + 1 =>
     match e.unpair.1 with
     | 0 => if h : e.unpair.2 < n then some #⟨e.unpair.2, h⟩ else none
-    | 1 => (&·) <$> decode e.unpair.2
+    | 1 => (decode e.unpair.2).map (&·)
     | 2 =>
       let arity := e.unpair.2.unpair.1
       let ef := e.unpair.2.unpair.2.unpair.1
       let ev := e.unpair.2.unpair.2.unpair.2
       match hv : ev.natToVec arity with
       | some v' =>
-        do
-          let f : L.Func arity ← decode ef
-          let v : Fin arity → Semiterm L ξ n ← Matrix.getM fun i ↦
-            have : v' i < e + 1 :=
-              Nat.lt_succ.mpr
-                <| le_trans (le_of_lt <| Nat.lt_of_eq_natToVec hv i)
-                <| le_trans (Nat.unpair_right_le _)
-                <| le_trans (Nat.unpair_right_le _)
-                <| Nat.unpair_right_le _
-            ofNat n (v' i)
-          return func f v
+        (decode ef).bind fun f : L.Func arity ↦
+        (Matrix.getM fun i ↦
+          have : v' i < e + 1 :=
+            Nat.lt_succ.mpr
+              <| le_trans (le_of_lt <| Nat.lt_of_eq_natToVec hv i)
+              <| le_trans (Nat.unpair_right_le _)
+              <| le_trans (Nat.unpair_right_le _)
+              <| Nat.unpair_right_le _
+          ofNat n (v' i)).map fun v : Fin arity → Semiterm L ξ n ↦
+        func f v
       | none => none
     | _ => none
 
@@ -52,34 +51,30 @@ lemma ofNat_toNat {n : ℕ} : ∀ t : Semiterm L ξ n, ofNat n (toNat t) = some 
       rw [this, Matrix.getM_pure]
       simp
 
-instance : Encodable (Semiterm L ξ n) where
+instance encodable : Encodable (Semiterm L ξ n) where
   encode := toNat
   decode := ofNat n
   encodek := ofNat_toNat
 
 end Semiterm
 
-/-
 namespace Semiformula
 
 def toNat : {n : ℕ} → Semiformula L ξ n → ℕ
-  | n, rel (arity := arity) R v  => (n.pair <| Nat.pair 0 <| arity.pair <| (encode R).pair <| Matrix.vecToNat fun i ↦ encode (v i)) + 1
-  | n, nrel (arity := arity) R v => (n.pair <| Nat.pair 1 <| arity.pair <| (encode R).pair <| Matrix.vecToNat fun i ↦ encode (v i)) + 1
-  | n, ⊤                         => (n.pair <| Nat.pair 2 0) + 1
-  | n, ⊥                         => (n.pair <| Nat.pair 3 0) + 1
-  | n, p ⋏ q                     => (n.pair <| Nat.pair 4 <| p.toNat.pair q.toNat) + 1
-  | n, p ⋎ q                     => (n.pair <| Nat.pair 5 <| p.toNat.pair q.toNat) + 1
-  | n, ∀' p                      => (n.pair <| Nat.pair 6 <| p.toNat) + 1
-  | n, ∃' p                      => (n.pair <| Nat.pair 7 <| p.toNat) + 1
+  | _, rel (arity := arity) R v  => (Nat.pair 0 <| arity.pair <| (encode R).pair <| Matrix.vecToNat fun i ↦ encode (v i)) + 1
+  | _, nrel (arity := arity) R v => (Nat.pair 1 <| arity.pair <| (encode R).pair <| Matrix.vecToNat fun i ↦ encode (v i)) + 1
+  | _, ⊤                         => (Nat.pair 2 0) + 1
+  | _, ⊥                         => (Nat.pair 3 0) + 1
+  | _, p ⋏ q                     => (Nat.pair 4 <| p.toNat.pair q.toNat) + 1
+  | _, p ⋎ q                     => (Nat.pair 5 <| p.toNat.pair q.toNat) + 1
+  | _, ∀' p                      => (Nat.pair 6 <| p.toNat) + 1
+  | _, ∃' p                      => (Nat.pair 7 <| p.toNat) + 1
 
-def bcast {n n' : ℕ} (p : Semiformula L ξ n) (h : n = n') : Semiformula L ξ n' := h ▸ p
-
-def ofNatAux : ℕ → Option ((n : ℕ) × Semiformula L ξ n)
-  | 0 => none
-  | e + 1 =>
-    let n := e.unpair.1
-    let idx := e.unpair.2.unpair.1
-    let c := e.unpair.2.unpair.2
+def ofNat : (n : ℕ) → ℕ → Option (Semiformula L ξ n)
+  | _, 0 => none
+  | n, e + 1 =>
+    let idx := e.unpair.1
+    let c := e.unpair.2
     match idx with
     | 0 =>
       let arity := c.unpair.1
@@ -87,10 +82,9 @@ def ofNatAux : ℕ → Option ((n : ℕ) × Semiformula L ξ n)
       let ev := c.unpair.2.unpair.2
       match ev.natToVec arity with
       | some v' =>
-          do
-            let R : L.Rel arity ← decode eR
-            let v : Fin arity → Semiterm L ξ n ← Matrix.getM fun i ↦ decode (v' i)
-            return ⟨n, rel R v⟩
+          (decode eR).bind fun R : L.Rel arity ↦
+          (Matrix.getM fun i ↦ decode (v' i)).map fun v : Fin arity → Semiterm L ξ n ↦
+          rel R v
       | none => none
     | 1 =>
       let arity := c.unpair.1
@@ -98,55 +92,59 @@ def ofNatAux : ℕ → Option ((n : ℕ) × Semiformula L ξ n)
       let ev := c.unpair.2.unpair.2
       match ev.natToVec arity with
       | some v' =>
-          do
-            let R : L.Rel arity ← decode eR
-            let v : Fin arity → Semiterm L ξ n ← Matrix.getM fun i ↦ decode (v' i)
-            return ⟨n, nrel R v⟩
+          (decode eR).bind fun R : L.Rel arity ↦
+          (Matrix.getM fun i ↦ decode (v' i)).map fun v : Fin arity → Semiterm L ξ n ↦
+          nrel R v
       | none => none
-    | 2 => some ⟨n, ⊤⟩
-    | 3 => some ⟨n, ⊥⟩
+    | 2 => some ⊤
+    | 3 => some ⊥
     | 4 =>
-      have : c.unpair.1 < e + 1 :=
-        Nat.lt_succ.mpr <| le_trans (Nat.unpair_left_le _) <| le_trans (Nat.unpair_right_le _) <| Nat.unpair_right_le _
-      have : c.unpair.2 < e + 1 :=
-        Nat.lt_succ.mpr <| le_trans (Nat.unpair_right_le _) <| le_trans (Nat.unpair_right_le _) <| Nat.unpair_right_le _
+      have : c.unpair.1 < e + 1 := Nat.lt_succ.mpr <| le_trans (Nat.unpair_left_le _) <| Nat.unpair_right_le _
+      have : c.unpair.2 < e + 1 := Nat.lt_succ.mpr <| le_trans (Nat.unpair_right_le _) <| Nat.unpair_right_le _
       do
-        let ⟨n', p⟩ ← ofNatAux c.unpair.1
-        let ⟨n'', q⟩ ← ofNatAux c.unpair.2
-        if h : n' = n ∧ n'' = n then return ⟨n, p.bcast h.1 ⋏ q.bcast h.2⟩ else none
+        let p ← ofNat n c.unpair.1
+        let q ← ofNat n c.unpair.2
+        return p ⋏ q
     | 5 =>
-      have : c.unpair.1 < e + 1 :=
-        Nat.lt_succ.mpr <| le_trans (Nat.unpair_left_le _) <| le_trans (Nat.unpair_right_le _) <| Nat.unpair_right_le _
-      have : c.unpair.2 < e + 1 :=
-        Nat.lt_succ.mpr <| le_trans (Nat.unpair_right_le _) <| le_trans (Nat.unpair_right_le _) <| Nat.unpair_right_le _
+      have : c.unpair.1 < e + 1 := Nat.lt_succ.mpr <| le_trans (Nat.unpair_left_le _) <| Nat.unpair_right_le _
+      have : c.unpair.2 < e + 1 := Nat.lt_succ.mpr <| le_trans (Nat.unpair_right_le _) <| Nat.unpair_right_le _
       do
-        let ⟨n', p⟩ ← ofNatAux c.unpair.1
-        let ⟨n'', q⟩ ← ofNatAux c.unpair.2
-        if h : n' = n ∧ n'' = n then return ⟨n, (p.bcast h.1) ⋎ q.bcast h.2⟩ else none
+        let p ← ofNat n c.unpair.1
+        let q ← ofNat n c.unpair.2
+        return p ⋎ q
     | 6 =>
-      have : c < e + 1 :=
-        Nat.lt_succ.mpr <| le_trans (Nat.unpair_right_le _) <| Nat.unpair_right_le _
+      have : c < e + 1 := Nat.lt_succ.mpr <| Nat.unpair_right_le _
       do
-        let ⟨n', p⟩ ← ofNatAux c
-        if h : n' = n + 1 then return ⟨n, ∀' (p.bcast h)⟩ else none
+        let p ← ofNat (n + 1) c
+        return ∀' p
     | 7 =>
-      have : c < e + 1 :=
-        Nat.lt_succ.mpr <| le_trans (Nat.unpair_right_le _) <| Nat.unpair_right_le _
+      have : c < e + 1 := Nat.lt_succ.mpr <| Nat.unpair_right_le _
       do
-        let ⟨n', p⟩ ← ofNatAux c
-        if h : n' = n + 1 then return ⟨n, ∃' (p.bcast h)⟩ else none
+        let p ← ofNat (n + 1) c
+        return ∃' p
     | _ => none
 
-lemma ofNat_toNat : {n : ℕ} → ∀ p : Semiformula L ξ n, ofNatAux (toNat p) = some ⟨n, p⟩
-  | _, p ⋏ q => by {
-    simp only [toNat, ofNatAux, Nat.unpair_pair, ofNat_toNat p, ofNat_toNat q, Option.pure_def,
-      Option.bind_eq_bind, Option.some_bind, and_true, ↓reduceDite, Option.some.injEq,
-      Sigma.mk.inj_iff, true_and]
-    simp only [bcast]
-    congr
-   }
+lemma ofNat_toNat : {n : ℕ} → ∀ p : Semiformula L ξ n, ofNat n (toNat p) = some p
+  | _, rel R v  => by
+    simp only [toNat, ofNat, Nat.unpair_pair, Option.pure_def, Option.bind_eq_bind]
+    rw [Nat.unpair_pair, Nat.unpair_pair]
+    simp [Matrix.getM_pure]
+  | _, nrel R v => by
+    simp only [toNat, ofNat, Nat.unpair_pair, Option.pure_def, Option.bind_eq_bind]
+    rw [Nat.unpair_pair, Nat.unpair_pair]
+    simp [Matrix.getM_pure]
+  | _, ⊤        => by simp [toNat, ofNat]
+  | _, ⊥        => by simp [toNat, ofNat]
+  | _, p ⋎ q    => by simp [toNat, ofNat, ofNat_toNat p, ofNat_toNat q]
+  | _, p ⋏ q    => by simp [toNat, ofNat, ofNat_toNat p, ofNat_toNat q]
+  | _, ∀' p     => by simp [toNat, ofNat, ofNat_toNat p]
+  | _, ∃' p     => by simp [toNat, ofNat, ofNat_toNat p]
+
+instance encodable : Encodable (Semiformula L ξ n) where
+  encode := toNat
+  decode := ofNat n
+  encodek := ofNat_toNat
 
 end Semiformula
--/
 
 end LO.FirstOrder

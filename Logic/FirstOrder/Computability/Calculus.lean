@@ -2,6 +2,10 @@ import Logic.FirstOrder.Computability.Term
 import Logic.FirstOrder.Computability.Formula
 import Logic.FirstOrder.Hauptsatz
 
+attribute [-instance]
+  LO.FirstOrder.Semiterm.encodable
+  LO.FirstOrder.Semiformula.encodable
+
 namespace LO
 
 namespace FirstOrder

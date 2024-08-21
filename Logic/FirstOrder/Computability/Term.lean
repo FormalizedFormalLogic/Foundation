@@ -1,7 +1,12 @@
 import Logic.FirstOrder.Basic
 import Logic.Vorspiel.W
 
-attribute [-instance] WType.instEncodable Encodable.finPi Encodable.fintypeArrowOfEncodable
+attribute [-instance]
+  WType.instEncodable
+  Encodable.finPi
+  Encodable.fintypeArrowOfEncodable
+  LO.FirstOrder.Semiterm.encodable
+  LO.FirstOrder.Semiformula.encodable
 
 namespace LO
 

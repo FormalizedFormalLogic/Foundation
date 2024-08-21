@@ -1,5 +1,4 @@
 import Logic.FirstOrder.Basic
-import Logic.FirstOrder.Computability.Coding
 
 namespace LO
 
@@ -78,7 +77,6 @@ def Code.equiv (L : Language.{u}) :
   right_inv := fun x => by
     rcases x with (⟨_, _, _⟩ | ⟨⟩ | ⟨_, _⟩ | ⟨_, _⟩ | _ | ⟨_, _⟩ | _) <;> simp
 
-attribute [local instance] Semiterm.encodable Semiformula.encodable in
 instance : Encodable (Code L) :=
   haveI : Encodable Empty := IsEmpty.toEncodable
   Encodable.ofEquiv _ (Code.equiv L)

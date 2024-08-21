@@ -5,6 +5,10 @@ import Logic.Logic.Disjunctive
 
 namespace LO.FirstOrder.Arith.FirstIncompleteness
 
+attribute [-instance]
+  LO.FirstOrder.Semiterm.encodable
+  LO.FirstOrder.Semiformula.encodable
+
 namespace SelfReference
 
 section
