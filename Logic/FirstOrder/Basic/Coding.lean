@@ -1,4 +1,4 @@
-import Logic.FirstOrder.Basic.Calculus2
+import Logic.FirstOrder.Basic.BinderNotation
 
 namespace LO.FirstOrder
 
@@ -144,6 +144,9 @@ instance encodable : Encodable (Semiformula L ξ n) where
   encode := toNat
   decode := ofNat n
   encodek := ofNat_toNat
+
+#eval encode (“0 = 1” : Sentence ℒₒᵣ)
+-- 197238223176519750397888674610667118222730
 
 end Semiformula
 
