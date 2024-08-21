@@ -394,15 +394,17 @@ end termBShift
 
 variable (L)
 
-def Language.qVec (k w : V) : V := ^#0 ∷ L.termBShiftVec k w
+def Language.qVec (w : V) : V := ^#0 ∷ L.termBShiftVec (len w) w
 
 variable {L}
 
-@[simp] lemma len_qVec {k w : V} (h : L.IsUTermVec k w) : len (L.qVec k w) = k + 1 := by simp [Language.qVec, h]
+@[simp] lemma len_qVec {k w : V} (h : L.IsUTermVec k w) : len (L.qVec w) = k + 1 := by
+  rcases h.lh; simp [Language.qVec, h, h]
 
-lemma Language.IsSemitermVec.qVec {k n w : V} (h : L.IsSemitermVec k n w) : L.IsSemitermVec (k + 1) (n + 1) (L.qVec k w) := by
+lemma Language.IsSemitermVec.qVec {k n w : V} (h : L.IsSemitermVec k n w) : L.IsSemitermVec (k + 1) (n + 1) (L.qVec w) := by
+  rcases h.lh
   refine Language.IsSemitermVec.iff.mpr ⟨?_, ?_⟩
-  · simp [h.isUTerm]
+  · simp [h.isUTerm, Language.qVec]
   · intro i hi
     rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
     · simp [Language.qVec]
@@ -468,22 +470,25 @@ lemma bShift_substs {n m w t} (ht : L.IsSemiterm n t) (hw : L.IsSemitermVec n m 
     simp [nth_termBShiftVec (hw.termSubstVec hv).isUTerm hi, nth_termSubstVec hv.isUTerm hi, ih i hi]
 
 lemma substs_qVec_bShift {n t m w} (ht : L.IsSemiterm n t) (hw : L.IsSemitermVec n m w) :
-    L.termSubst (L.qVec n w) (L.termBShift t) = L.termBShift (L.termSubst w t) := by
+    L.termSubst (L.qVec w) (L.termBShift t) = L.termBShift (L.termSubst w t) := by
+  rcases hw.lh
   simp [Language.qVec]
   rw [substs_cons_bShift ht, bShift_substs ht hw]
 
 lemma termSubstVec_qVec_qVec {l n m : V} (hv : L.IsSemitermVec l n v) (hw : L.IsSemitermVec n m w) :
-    L.termSubstVec (l + 1) (L.qVec n w) (L.qVec l v) = L.qVec l (L.termSubstVec l w v) := by
-  apply nth_ext' (l + 1)
-    (by rw [len_termSubstVec hv.qVec.isUTerm])
-    (by rw [len_qVec (hw.termSubstVec hv).isUTerm])
+    L.termSubstVec (l + 1) (L.qVec w) (L.qVec v) = L.qVec (L.termSubstVec l w v) := by
+  apply nth_ext' (len v + 1)
+    (by rw [len_termSubstVec hv.qVec.isUTerm, hv.lh])
+    (by rw [len_qVec (hw.termSubstVec hv).isUTerm, hv.lh])
   intro i hi
   unfold Language.qVec
-  rw [termSubstVec_cons (by simp) hv.termBShiftVec.isUTerm]
+  rcases hv.lh; rcases hw.lh
+  rw [(hw.termSubstVec hv).lh]
+  rw [termSubstVec_cons (by simp) (by rcases hv.lh; exact hv.termBShiftVec.isUTerm)]
   rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
   · simp
   · simp
-    have hi : i < l := by simpa using hi
+    have hi : i < len v := by simpa using hi
     rw [nth_termSubstVec hv.termBShiftVec.isUTerm hi,
       nth_termBShiftVec hv.isUTerm hi,
       nth_termBShiftVec (hw.termSubstVec hv).isUTerm hi,
@@ -492,7 +497,7 @@ lemma termSubstVec_qVec_qVec {l n m : V} (hv : L.IsSemitermVec l n v) (hw : L.Is
       bShift_substs (hv.nth hi) hw]
 
 lemma termShift_qVec {n m w : V} (hw : L.IsSemitermVec n m w) :
-    L.termShiftVec (n + 1) (L.qVec n w) = L.qVec n (L.termShiftVec n w) := by
+    L.termShiftVec (n + 1) (L.qVec w) = L.qVec (L.termShiftVec n w) := by
   apply nth_ext' (n + 1)
     (by rw [len_termShiftVec hw.qVec.isUTerm])
     (by rw [len_qVec hw.termShiftVec.isUTerm])
@@ -501,9 +506,10 @@ lemma termShift_qVec {n m w : V} (hw : L.IsSemitermVec n m w) :
   unfold Language.qVec
   rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
   · simp
-  · rw [nth_cons_succ, nth_cons_succ,
+  · rcases hw.lh
+    rw [nth_cons_succ, nth_cons_succ,
       nth_termBShiftVec hw.isUTerm (by simpa using hi),
-      nth_termBShiftVec hw.termShiftVec.isUTerm (by simpa using hi),
+      nth_termBShiftVec (by simpa [hw.isUTerm] using hw.termShiftVec.isUTerm) (by simpa [hw.isUTerm] using hi),
       nth_termShiftVec hw.isUTerm (by simpa using hi),
       termBShift_termShift (hw.nth (by simpa using hi))]
 

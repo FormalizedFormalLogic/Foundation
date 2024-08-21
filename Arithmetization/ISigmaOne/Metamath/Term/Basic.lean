@@ -757,6 +757,10 @@ def Language.IsSemiterm (n t : V) : Prop := L.IsUTerm t ∧ L.termBV t ≤ n
 
 def Language.IsSemitermVec (k n v : V) : Prop := L.IsUTermVec k v ∧ ∀ i < k, L.termBV v.[i] ≤ n
 
+abbrev Language.IsTerm (t : V) : Prop := L.IsSemiterm 0 t
+
+abbrev Language.IsTermVec (k v : V) : Prop := L.IsSemitermVec k 0 v
+
 variable {L}
 
 lemma Language.IsSemiterm.isUTerm {n t : V} (h : L.IsSemiterm n t) : L.IsUTerm t := h.1

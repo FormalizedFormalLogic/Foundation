@@ -446,28 +446,28 @@ lemma Language.IsUFormula.pos {p : V} (h : L.IsUFormula p) : 0 < p := by
     ⟨_, _, _, _, _, rfl⟩ | ⟨_, _, _, _, _, rfl⟩ | ⟨_, _, _, rfl⟩ | ⟨_, _, _, rfl⟩) <;>
     simp [qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqEx]
 
---lemma Language.Semiformula.pos {n p : V} (h : L.Semiformula n p) : 0 < p := h.1.pos
+--lemma Language.IsSemiformula.pos {n p : V} (h : L.Semiformula n p) : 0 < p := h.1.pos
 
 @[simp] lemma Language.IsUFormula.not_zero : ¬L.IsUFormula (0 : V) := by intro h; simpa using h.pos
 
--- @[simp] lemma Language.Semiformula.not_zero (m : V) : ¬L.Semiformula m (0 : V) := by intro h; simpa using h.pos
+-- @[simp] lemma Language.IsSemiformula.not_zero (m : V) : ¬L.Semiformula m (0 : V) := by intro h; simpa using h.pos
 
 /-
-@[simp] lemma Language.Semiformula.rel {k r v : V} :
+@[simp] lemma Language.IsSemiformula.rel {k r v : V} :
     L.IsUFormula (^rel k r v) ↔ L.Rel k r ∧ L.IsUTermVec k v := by simp
-@[simp] lemma Language.Semiformula.nrel {n k r v : V} :
-    L.Semiformula n (^nrel n k r v) ↔ L.Rel k r ∧ L.SemitermVec k n v := by simp [Language.Semiformula]
-@[simp] lemma Language.Semiformula.verum (n : V) : L.Semiformula n ^⊤[n] := by simp [Language.Semiformula]
-@[simp] lemma Language.Semiformula.falsum (n : V) : L.Semiformula n ^⊥[n] := by simp [Language.Semiformula]
-@[simp] lemma Language.Semiformula.and {n p q : V} :
-    L.Semiformula n (p ^⋏ q) ↔ L.Semiformula n p ∧ L.Semiformula n q := by simp [Language.Semiformula]
-@[simp] lemma Language.Semiformula.or {n p q : V} :
-    L.Semiformula n (p ^⋎ q) ↔ L.Semiformula n p ∧ L.Semiformula n q := by simp [Language.Semiformula]
-@[simp] lemma Language.Semiformula.all {n p : V} : L.Semiformula n (^∀ p) ↔ L.Semiformula (n + 1) p := by simp [Language.Semiformula]
-@[simp] lemma Language.Semiformula.ex {n p : V} : L.Semiformula n (^∃ p) ↔ L.Semiformula (n + 1) p := by simp [Language.Semiformula]
+@[simp] lemma Language.IsSemiformula.nrel {n k r v : V} :
+    L.Semiformula n (^nrel n k r v) ↔ L.Rel k r ∧ L.SemitermVec k n v := by simp [Language.IsSemiformula]
+@[simp] lemma Language.IsSemiformula.verum (n : V) : L.Semiformula n ^⊤[n] := by simp [Language.IsSemiformula]
+@[simp] lemma Language.IsSemiformula.falsum (n : V) : L.Semiformula n ^⊥[n] := by simp [Language.IsSemiformula]
+@[simp] lemma Language.IsSemiformula.and {n p q : V} :
+    L.Semiformula n (p ^⋏ q) ↔ L.Semiformula n p ∧ L.Semiformula n q := by simp [Language.IsSemiformula]
+@[simp] lemma Language.IsSemiformula.or {n p q : V} :
+    L.Semiformula n (p ^⋎ q) ↔ L.Semiformula n p ∧ L.Semiformula n q := by simp [Language.IsSemiformula]
+@[simp] lemma Language.IsSemiformula.all {n p : V} : L.Semiformula n (^∀ p) ↔ L.Semiformula (n + 1) p := by simp [Language.IsSemiformula]
+@[simp] lemma Language.IsSemiformula.ex {n p : V} : L.Semiformula n (^∃ p) ↔ L.Semiformula (n + 1) p := by simp [Language.IsSemiformula]
 -/
 
-lemma Language.IsUFormula.induction (Γ) {P : V → Prop} (hP : Γ-[1]-Predicate P)
+lemma Language.IsUFormula.induction1 (Γ) {P : V → Prop} (hP : Γ-[1]-Predicate P)
     (hrel : ∀ k r v, L.Rel k r → L.IsUTermVec k v → P (^rel k r v))
     (hnrel : ∀ k r v, L.Rel k r → L.IsUTermVec k v → P (^nrel k r v))
     (hverum : P ^⊤)
@@ -489,8 +489,32 @@ lemma Language.IsUFormula.induction (Γ) {P : V → Prop} (hP : Γ-[1]-Predicate
     · exact hall p (hC p hp).1 (hC p hp).2
     · exact hex p (hC p hp).1 (hC p hp).2)
 
+lemma Language.IsUFormula.induction_sigma1 {P : V → Prop} (hP : 𝚺₁-Predicate P)
+    (hrel : ∀ k r v, L.Rel k r → L.IsUTermVec k v → P (^rel k r v))
+    (hnrel : ∀ k r v, L.Rel k r → L.IsUTermVec k v → P (^nrel k r v))
+    (hverum : P ^⊤)
+    (hfalsum : P ^⊥)
+    (hand : ∀ p q, L.IsUFormula p → L.IsUFormula q → P p → P q → P (p ^⋏ q))
+    (hor : ∀ p q, L.IsUFormula p → L.IsUFormula q → P p → P q → P (p ^⋎ q))
+    (hall : ∀ p, L.IsUFormula p → P p → P (^∀ p))
+    (hex : ∀ p, L.IsUFormula p → P p → P (^∃ p)) :
+    ∀ p, L.IsUFormula p → P p :=
+  Language.IsUFormula.induction1 𝚺 hP hrel hnrel hverum hfalsum hand hor hall hex
+
+lemma Language.IsUFormula.induction_pi1 {P : V → Prop} (hP : 𝚷₁-Predicate P)
+    (hrel : ∀ k r v, L.Rel k r → L.IsUTermVec k v → P (^rel k r v))
+    (hnrel : ∀ k r v, L.Rel k r → L.IsUTermVec k v → P (^nrel k r v))
+    (hverum : P ^⊤)
+    (hfalsum : P ^⊥)
+    (hand : ∀ p q, L.IsUFormula p → L.IsUFormula q → P p → P q → P (p ^⋏ q))
+    (hor : ∀ p q, L.IsUFormula p → L.IsUFormula q → P p → P q → P (p ^⋎ q))
+    (hall : ∀ p, L.IsUFormula p → P p → P (^∀ p))
+    (hex : ∀ p, L.IsUFormula p → P p → P (^∃ p)) :
+    ∀ p, L.IsUFormula p → P p :=
+  Language.IsUFormula.induction1 𝚷 hP hrel hnrel hverum hfalsum hand hor hall hex
+
 /-
-lemma Language.Semiformula.induction (Γ) {P : V → V → Prop} (hP : Γ-[1]-Relation P)
+lemma Language.IsSemiformula.induction (Γ) {P : V → V → Prop} (hP : Γ-[1]-Relation P)
     (hrel : ∀ n k r v, L.Rel k r → L.SemitermVec k n v → P n (^rel n k r v))
     (hnrel : ∀ n k r v, L.Rel k r → L.SemitermVec k n v → P n (^nrel n k r v))
     (hverum : ∀ n, P n ^⊤[n])
@@ -521,7 +545,7 @@ lemma Language.Semiformula.induction (Γ) {P : V → V → Prop} (hP : Γ-[1]-Re
   · rintro n p hp ih _ _ rfl
     simpa using hex n p hp (by simpa [hp.2] using ih (fstIdx p) (by simp) rfl)
 
-lemma Language.Semiformula.induction_sigma₁ {P : V → V → Prop} (hP : 𝚺₁-Relation P)
+lemma Language.IsSemiformula.induction_sigma₁ {P : V → V → Prop} (hP : 𝚺₁-Relation P)
     (hrel : ∀ n k r v, L.Rel k r → L.SemitermVec k n v → P n (^rel n k r v))
     (hnrel : ∀ n k r v, L.Rel k r → L.SemitermVec k n v → P n (^nrel n k r v))
     (hverum : ∀ n, P n ^⊤[n])
@@ -531,9 +555,9 @@ lemma Language.Semiformula.induction_sigma₁ {P : V → V → Prop} (hP : 𝚺�
     (hall : ∀ n p, L.Semiformula (n + 1) p → P (n + 1) p → P n (^∀ p))
     (hex : ∀ n p, L.Semiformula (n + 1) p → P (n + 1) p → P n (^∃ p)) :
     ∀ n p, L.Semiformula n p → P n p :=
-  Language.Semiformula.induction 𝚺 hP hrel hnrel hverum hfalsum hand hor hall hex
+  Language.IsSemiformula.induction 𝚺 hP hrel hnrel hverum hfalsum hand hor hall hex
 
-lemma Language.Semiformula.induction_pi1 {P : V → V → Prop} (hP : 𝚷₁-Relation P)
+lemma Language.IsSemiformula.induction_pi1 {P : V → V → Prop} (hP : 𝚷₁-Relation P)
     (hrel : ∀ n k r v, L.Rel k r → L.SemitermVec k n v → P n (^rel n k r v))
     (hnrel : ∀ n k r v, L.Rel k r → L.SemitermVec k n v → P n (^nrel n k r v))
     (hverum : ∀ n, P n ^⊤[n])
@@ -543,7 +567,7 @@ lemma Language.Semiformula.induction_pi1 {P : V → V → Prop} (hP : 𝚷₁-Re
     (hall : ∀ n p, L.Semiformula (n + 1) p → P (n + 1) p → P n (^∀ p))
     (hex : ∀ n p, L.Semiformula (n + 1) p → P (n + 1) p → P n (^∃ p)) :
     ∀ n p, L.Semiformula n p → P n p :=
-  Language.Semiformula.induction 𝚷 hP hrel hnrel hverum hfalsum hand hor hall hex
+  Language.IsSemiformula.induction 𝚷 hP hrel hnrel hverum hfalsum hand hor hall hex
 -/
 
 end formula
@@ -1020,7 +1044,7 @@ lemma graph_exists {p : V} : L.IsUFormula p → ∃ y, c.Graph param p y := by
   haveI : 𝚺₁-Function₁ c.exChanges := c.exChanges_defined.to_definable
   let f : V → V → V := fun _ param ↦ Max.max param (Max.max (c.allChanges param) (c.exChanges param))
   have hf : 𝚺₁-Function₂ f := by simp [f]; definability
-  apply sigma₁_order_ball_induction hf ?_ ?_ p param
+  apply order_ball_induction_sigma1 hf ?_ ?_ p param
   · definability
   intro p param ih hp
   rcases hp.case with
@@ -1044,7 +1068,7 @@ lemma graph_exists {p : V} : L.IsUFormula p → ∃ y, c.Graph param p y := by
     exact ⟨c.ex param p₁ y₁, c.graph_ex hp₁ h₁⟩
 
 lemma graph_unique {p : V} : L.IsUFormula p → ∀ {param r r'}, c.Graph param p r → c.Graph param p r' → r = r' := by
-  apply Language.IsUFormula.induction 𝚷 (P := fun p ↦ ∀ {param r r'}, c.Graph param p r → c.Graph param p r' → r = r')
+  apply Language.IsUFormula.induction_pi1 (P := fun p ↦ ∀ {param r r'}, c.Graph param p r → c.Graph param p r' → r = r')
     (by definability)
   case hrel =>
     intro k R v hkR hv
@@ -1155,12 +1179,12 @@ lemma uformula_result_induction {P : V → V → V → Prop} (hP : 𝚺₁-Relat
       P param (^∃ p) (c.ex param p (c.result (c.exChanges param) p))) :
     ∀ {param p : V}, L.IsUFormula p → P param p (c.result param p) := by
   haveI : 𝚺₁-Function₂ c.result := c.result_definable
-  intro param p
   haveI : 𝚺₁-Function₁ c.allChanges := c.allChanges_defined.to_definable
   haveI : 𝚺₁-Function₁ c.exChanges := c.exChanges_defined.to_definable
   let f : V → V → V := fun _ param ↦ Max.max param (Max.max (c.allChanges param) (c.exChanges param))
   have hf : 𝚺₁-Function₂ f := by simp [f]; definability
-  apply sigma₁_order_ball_induction hf ?_ ?_ p param
+  intro param p
+  apply order_ball_induction_sigma1 hf ?_ ?_ p param
   · apply HierarchySymbol.Boldface.imp
       (HierarchySymbol.Boldface.comp₁ (HierarchySymbol.BoldfaceFunction.var _))
       (HierarchySymbol.Boldface.comp₃
@@ -1169,8 +1193,7 @@ lemma uformula_result_induction {P : V → V → V → Prop} (hP : 𝚺₁-Relat
         (HierarchySymbol.BoldfaceFunction.comp₂ (HierarchySymbol.BoldfaceFunction.var _) (HierarchySymbol.BoldfaceFunction.var _)))
   intro p param ih hp
   rcases hp.case with
-    (⟨k, r, v, hkr, hv, rfl⟩ | ⟨k, r, v, hkr, hv, rfl⟩ |
-    rfl | rfl | ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, hp₁, rfl⟩ | ⟨p₁, hp₁, rfl⟩)
+    (⟨k, r, v, hkr, hv, rfl⟩ | ⟨k, r, v, hkr, hv, rfl⟩ | rfl | rfl | ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, hp₁, rfl⟩ | ⟨p₁, hp₁, rfl⟩)
   · simpa [hkr, hv] using hRel param k r v hkr hv
   · simpa [hkr, hv] using hNRel param k r v hkr hv
   · simpa using hverum param
@@ -1308,7 +1331,7 @@ lemma Language.bv_defined : 𝚺₁-Function₁ L.bv via pL.bvDef := fun v ↦ b
 
 instance Language.bv_definable : 𝚺₁-Function₁ L.bv := L.bv_defined.to_definable
 
-instance Language.neg_definable' (Γ) : Γ-[m + 1]-Function₁ L.bv := L.bv_definable.of_sigmaOne
+instance Language.bv_definable' (Γ) : Γ-[m + 1]-Function₁ L.bv := L.bv_definable.of_sigmaOne
 
 end
 
@@ -1347,6 +1370,35 @@ structure Language.IsSemiformula (n p : V) : Prop where
 abbrev Language.IsFormula (p : V) : Prop := L.IsSemiformula 0 p
 
 variable {L}
+
+lemma Language.isSemiformula_iff {n p : V} :
+    L.IsSemiformula n p ↔ L.IsUFormula p ∧ L.bv p ≤ n :=
+  ⟨fun h ↦ ⟨h.isUFormula, h.bv⟩, by rintro ⟨hp, h⟩; exact ⟨hp, h⟩⟩
+
+section
+
+variable (L)
+
+def _root_.LO.FirstOrder.Arith.LDef.isSemiformulaDef (pL : LDef) : 𝚫₁.Semisentence 2 := .mkDelta
+  (.mkSigma “n p | !pL.isUFormulaDef.sigma p ∧ ∃ b, !pL.bvDef b p ∧ b ≤ n” (by simp))
+  (.mkPi “n p | !pL.isUFormulaDef.pi p ∧ ∀ b, !pL.bvDef b p → b ≤ n” (by simp))
+
+lemma Language.isSemiformula_defined : 𝚫₁-Relation L.IsSemiformula via pL.isSemiformulaDef := by
+  constructor
+  · intro v; simp [FirstOrder.Arith.LDef.isSemiformulaDef, HierarchySymbol.Semiformula.val_sigma,
+      L.bv_defined.df.iff, L.isUFormula_defined.proper.iff']
+  · intro v; simp [FirstOrder.Arith.LDef.isSemiformulaDef, HierarchySymbol.Semiformula.val_sigma,
+      L.bv_defined.df.iff, L.isUFormula_defined.df.iff, Language.isSemiformula_iff]
+
+instance Language.isSemiformula_definable : 𝚫₁-Relation L.IsSemiformula := L.isSemiformula_defined.to_definable
+
+instance Language.isSemiformulaDef_definable' : Γ-[m + 1]-Relation L.IsSemiformula := L.isSemiformula_definable.of_deltaOne
+
+end
+
+@[simp] lemma Language.IsUFormula.isSemiformula {p : V} (h : L.IsUFormula p) : L.IsSemiformula (L.bv p) p where
+  isUFormula := h
+  bv := by rfl
 
 @[simp] lemma Language.IsSemiformula.rel {n k r v : V} :
     L.IsSemiformula n (^rel k r v) ↔ L.Rel k r ∧ L.IsSemitermVec k n v := by
@@ -1422,7 +1474,198 @@ variable {L}
   · intro h
     exact ⟨by simp [h.isUFormula], by simp [h.isUFormula, h.bv]⟩
 
+lemma Language.IsSemiformula.case_iff {n p : V} :
+    L.IsSemiformula n p ↔
+    (∃ k R v, L.Rel k R ∧ L.IsSemitermVec k n v ∧ p = ^rel k R v) ∨
+    (∃ k R v, L.Rel k R ∧ L.IsSemitermVec k n v ∧ p = ^nrel k R v) ∨
+    (p = ^⊤) ∨
+    (p = ^⊥) ∨
+    (∃ p₁ p₂, L.IsSemiformula n p₁ ∧ L.IsSemiformula n p₂ ∧ p = p₁ ^⋏ p₂) ∨
+    (∃ p₁ p₂, L.IsSemiformula n p₁ ∧ L.IsSemiformula n p₂ ∧ p = p₁ ^⋎ p₂) ∨
+    (∃ p₁, L.IsSemiformula (n + 1) p₁ ∧ p = ^∀ p₁) ∨
+    (∃ p₁, L.IsSemiformula (n + 1) p₁ ∧ p = ^∃ p₁) := by
+  constructor
+  · intro h
+    rcases h.isUFormula.case with
+      (⟨k, r, v, _, _, rfl⟩ | ⟨k, r, v, _, _, rfl⟩ | rfl | rfl | ⟨p₁, p₂, _, _, rfl⟩ | ⟨p₁, p₂, _, _, rfl⟩ | ⟨p₁, _, rfl⟩ | ⟨p₁, _, rfl⟩)
+    · have : L.Rel k r ∧ L.IsSemitermVec k n v := by simpa using h
+      exact Or.inl ⟨k, r, v, by simp [this]⟩
+    · have : L.Rel k r ∧ L.IsSemitermVec k n v := by simpa using h
+      exact Or.inr <| Or.inl ⟨k, r, v, by simp [this]⟩
+    · exact Or.inr <| Or.inr <| Or.inl rfl
+    · exact Or.inr <| Or.inr <| Or.inr <| Or.inl rfl
+    · have : L.IsSemiformula n p₁ ∧ L.IsSemiformula n p₂ := by simpa using h
+      exact Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl ⟨p₁, p₂, by simp [this]⟩
+    · have : L.IsSemiformula n p₁ ∧ L.IsSemiformula n p₂ := by simpa using h
+      exact Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl ⟨p₁, p₂, by simp [this]⟩
+    · have : L.IsSemiformula (n + 1) p₁ := by simpa using h
+      exact Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl ⟨p₁, by simp [this]⟩
+    · have : L.IsSemiformula (n + 1) p₁ := by simpa using h
+      exact Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr ⟨p₁, by simp [this]⟩
+  · rintro (⟨k, R, v, hR, hv, rfl⟩ | ⟨k, R, v, hR, hv, rfl⟩ | rfl | rfl | ⟨p₁, p₂, h₁, h₂, rfl⟩ | ⟨p₁, p₂, h₁, h₂, rfl⟩ | ⟨p₁, h₁, rfl⟩ | ⟨p₁, h₁, rfl⟩) <;> simp [*]
+
+lemma Language.IsSemiformula.case {P : V → V → Prop} {n p} (hp : L.IsSemiformula n p)
+    (hrel : ∀ n k r v, L.Rel k r → L.IsSemitermVec k n v → P n (^rel k r v))
+    (hnrel : ∀ n k r v, L.Rel k r → L.IsSemitermVec k n v → P n (^nrel k r v))
+    (hverum : ∀ n, P n ^⊤)
+    (hfalsum : ∀ n, P n ^⊥)
+    (hand : ∀ n p q, L.IsSemiformula n p → L.IsSemiformula n q → P n (p ^⋏ q))
+    (hor : ∀ n p q, L.IsSemiformula n p → L.IsSemiformula n q → P n (p ^⋎ q))
+    (hall : ∀ n p, L.IsSemiformula (n + 1) p → P n (^∀ p))
+    (hex : ∀ n p, L.IsSemiformula (n + 1) p → P n (^∃ p)) : P n p := by
+  rcases Language.IsSemiformula.case_iff.mp hp with
+    (⟨k, R, v, hR, hv, rfl⟩ | ⟨k, R, v, hR, hv, rfl⟩ | rfl | rfl | ⟨p₁, p₂, h₁, h₂, rfl⟩ | ⟨p₁, p₂, h₁, h₂, rfl⟩ | ⟨p₁, h₁, rfl⟩ | ⟨p₁, h₁, rfl⟩)
+  · exact hrel _ _ _ _ hR hv
+  · exact hnrel _ _ _ _ hR hv
+  · exact hverum n
+  · exact hfalsum n
+  · exact hand _ _ _ h₁ h₂
+  · exact hor _ _ _ h₁ h₂
+  · exact hall _ _ h₁
+  · exact hex _ _ h₁
+
+lemma Language.IsSemiformula.induction_sigma1 {P : V → V → Prop} (hP : 𝚺₁-Relation P)
+    (hrel : ∀ n k r v, L.Rel k r → L.IsSemitermVec k n v → P n (^rel k r v))
+    (hnrel : ∀ n k r v, L.Rel k r → L.IsSemitermVec k n v → P n (^nrel k r v))
+    (hverum : ∀ n, P n ^⊤)
+    (hfalsum : ∀ n, P n ^⊥)
+    (hand : ∀ n p q, L.IsSemiformula n p → L.IsSemiformula n q → P n p → P n q → P n (p ^⋏ q))
+    (hor : ∀ n p q, L.IsSemiformula n p → L.IsSemiformula n q → P n p → P n q → P n (p ^⋎ q))
+    (hall : ∀ n p, L.IsSemiformula (n + 1) p → P (n + 1) p → P n (^∀ p))
+    (hex : ∀ n p, L.IsSemiformula (n + 1) p → P (n + 1) p → P n (^∃ p)) {n p} :
+    L.IsSemiformula n p → P n p := by
+  have : 𝚺₁-Function₂ (fun _ (n : V) ↦ n + 1) := by definability
+  apply order_ball_induction_sigma1 this ?_ ?_ p n
+  · apply HierarchySymbol.Boldface.imp
+    · apply HierarchySymbol.Boldface.comp₂ (HierarchySymbol.BoldfaceFunction.var _) (HierarchySymbol.BoldfaceFunction.var _)
+    · apply HierarchySymbol.Boldface.comp₂ (HierarchySymbol.BoldfaceFunction.var _) (HierarchySymbol.BoldfaceFunction.var _)
+  intro p n ih hp
+  rcases Language.IsSemiformula.case_iff.mp hp with
+    (⟨k, R, v, hR, hv, rfl⟩ | ⟨k, R, v, hR, hv, rfl⟩ | rfl | rfl | ⟨p₁, p₂, h₁, h₂, rfl⟩ | ⟨p₁, p₂, h₁, h₂, rfl⟩ | ⟨p₁, h₁, rfl⟩ | ⟨p₁, h₁, rfl⟩)
+  · apply hrel _ _ _ _ hR hv
+  · apply hnrel _ _ _ _ hR hv
+  · apply hverum
+  · apply hfalsum
+  · apply hand _ _ _ h₁ h₂ (ih p₁ (by simp) n (by simp) h₁) (ih p₂ (by simp) n (by simp) h₂)
+  · apply hor _ _ _ h₁ h₂ (ih p₁ (by simp) n (by simp) h₁) (ih p₂ (by simp) n (by simp) h₂)
+  · apply hall _ _ h₁ (ih p₁ (by simp) (n + 1) (by simp) h₁)
+  · apply hex _ _ h₁ (ih p₁ (by simp) (n + 1) (by simp) h₁)
+
+lemma Language.IsSemiformula.induction_pi1 {P : V → V → Prop} (hP : 𝚷₁-Relation P)
+    (hrel : ∀ n k r v, L.Rel k r → L.IsSemitermVec k n v → P n (^rel k r v))
+    (hnrel : ∀ n k r v, L.Rel k r → L.IsSemitermVec k n v → P n (^nrel k r v))
+    (hverum : ∀ n, P n ^⊤)
+    (hfalsum : ∀ n, P n ^⊥)
+    (hand : ∀ n p q, L.IsSemiformula n p → L.IsSemiformula n q → P n p → P n q → P n (p ^⋏ q))
+    (hor : ∀ n p q, L.IsSemiformula n p → L.IsSemiformula n q → P n p → P n q → P n (p ^⋎ q))
+    (hall : ∀ n p, L.IsSemiformula (n + 1) p → P (n + 1) p → P n (^∀ p))
+    (hex : ∀ n p, L.IsSemiformula (n + 1) p → P (n + 1) p → P n (^∃ p)) {n p} :
+    L.IsSemiformula n p → P n p := by
+  suffices L.IsUFormula p → ∀ n, L.IsSemiformula n p → P n p by intro h; exact this h.isUFormula n h
+  apply Language.IsUFormula.induction_pi1 (P := fun p ↦ ∀ n, L.IsSemiformula n p → P n p)
+  · definability
+  · intro k R v hR _ n h
+    have : L.Rel k R ∧ L.IsSemitermVec k n v := by simpa using h
+    exact hrel _ _ _ _ hR this.2
+  · intro k R v hR _ n h
+    have : L.Rel k R ∧ L.IsSemitermVec k n v := by simpa using h
+    exact hnrel _ _ _ _ hR this.2
+  · intro n _; apply hverum
+  · intro n _; apply hfalsum
+  · intro p q _ _ ihp ihq n h
+    have : L.IsSemiformula n p ∧ L.IsSemiformula n q := by simpa using h
+    apply hand _ _ _ this.1 this.2 (ihp n this.1) (ihq n this.2)
+  · intro p q _ _ ihp ihq n h
+    have : L.IsSemiformula n p ∧ L.IsSemiformula n q := by simpa using h
+    apply hor _ _ _ this.1 this.2 (ihp n this.1) (ihq n this.2)
+  · intro p _ ihp n h
+    have : L.IsSemiformula (n + 1) p := by simpa using h
+    apply hall _ _ this (ihp _ this)
+  · intro p _ ihp n h
+    have : L.IsSemiformula (n + 1) p := by simpa using h
+    apply hex _ _ this (ihp _ this)
+
+lemma Language.IsSemiformula.induction1 (Γ) {P : V → V → Prop} (hP : Γ-[1]-Relation P)
+    (hrel : ∀ n k r v, L.Rel k r → L.IsSemitermVec k n v → P n (^rel k r v))
+    (hnrel : ∀ n k r v, L.Rel k r → L.IsSemitermVec k n v → P n (^nrel k r v))
+    (hverum : ∀ n, P n ^⊤)
+    (hfalsum : ∀ n, P n ^⊥)
+    (hand : ∀ n p q, L.IsSemiformula n p → L.IsSemiformula n q → P n p → P n q → P n (p ^⋏ q))
+    (hor : ∀ n p q, L.IsSemiformula n p → L.IsSemiformula n q → P n p → P n q → P n (p ^⋎ q))
+    (hall : ∀ n p, L.IsSemiformula (n + 1) p → P (n + 1) p → P n (^∀ p))
+    (hex : ∀ n p, L.IsSemiformula (n + 1) p → P (n + 1) p → P n (^∃ p)) {n p} :
+    L.IsSemiformula n p → P n p :=
+  match Γ with
+  | 𝚺 => Language.IsSemiformula.induction_sigma1 hP hrel hnrel hverum hfalsum hand hor hall hex
+  | 𝚷 => Language.IsSemiformula.induction_pi1 hP hrel hnrel hverum hfalsum hand hor hall hex
+  | 𝚫 => Language.IsSemiformula.induction_sigma1 hP.of_delta hrel hnrel hverum hfalsum hand hor hall hex
+
+
+lemma Language.IsSemiformula.pos {n p : V} (h : L.IsSemiformula n p) : 0 < p := h.isUFormula.pos
+
+@[simp] lemma Language.IsSemiformula.not_zero (m : V) : ¬L.IsSemiformula m (0 : V) := by intro h; simpa using h.pos
+
 end isSemiformula
+
+namespace Language.UformulaRec1.Construction
+
+variable {β : Blueprint pL} {c : Construction V L β} {param : V}
+
+lemma semiformula_result_induction {P : V → V → V → V → Prop} (hP : 𝚺₁-Relation₄ P)
+    (hRel : ∀ n param k R v, L.Rel k R → L.IsSemitermVec k n v → P param n (^rel k R v) (c.rel param k R v))
+    (hNRel : ∀ n param k R v, L.Rel k R → L.IsSemitermVec k n v → P param n (^nrel k R v) (c.nrel param k R v))
+    (hverum : ∀ n param, P param n ^⊤ (c.verum param))
+    (hfalsum : ∀ n param, P param n ^⊥ (c.falsum param))
+    (hand : ∀ n param p q, L.IsSemiformula n p → L.IsSemiformula n q →
+      P param n p (c.result param p) → P param n q (c.result param q) → P param n (p ^⋏ q) (c.and param p q (c.result param p) (c.result param q)))
+    (hor : ∀ n param p q, L.IsSemiformula n p → L.IsSemiformula n q →
+      P param n p (c.result param p) → P param n q (c.result param q) → P param n (p ^⋎ q) (c.or param p q (c.result param p) (c.result param q)))
+    (hall : ∀ n param p, L.IsSemiformula (n + 1) p →
+      P (c.allChanges param) (n + 1) p (c.result (c.allChanges param) p) →
+      P param n (^∀ p) (c.all param p (c.result (c.allChanges param) p)))
+    (hex : ∀ n param p, L.IsSemiformula (n + 1) p →
+      P (c.exChanges param) (n + 1) p (c.result (c.exChanges param) p) →
+      P param n (^∃ p) (c.ex param p (c.result (c.exChanges param) p))) :
+    ∀ {param n p : V}, L.IsSemiformula n p → P param n p (c.result param p) := by
+  haveI : 𝚺₁-Function₂ c.result := c.result_definable
+  haveI : 𝚺₁-Function₁ c.allChanges := c.allChanges_defined.to_definable
+  haveI : 𝚺₁-Function₁ c.exChanges := c.exChanges_defined.to_definable
+  let f : V → V → V → V := fun _ param _ ↦ Max.max param (Max.max (c.allChanges param) (c.exChanges param))
+  have hf : 𝚺₁-Function₃ f := by simp [f]; definability
+  let g : V → V → V → V := fun _ _ n ↦ n + 1
+  have hg : 𝚺₁-Function₃ g := by simp [g]; definability
+  intro param n p
+  apply order_ball_induction₂_sigma1 hf hg ?_ ?_ p param n
+  · apply HierarchySymbol.Boldface.imp
+    · apply HierarchySymbol.Boldface.comp₂ (HierarchySymbol.BoldfaceFunction.var _) (HierarchySymbol.BoldfaceFunction.var _)
+    · apply HierarchySymbol.Boldface.comp₄
+        (HierarchySymbol.BoldfaceFunction.var _)
+        (HierarchySymbol.BoldfaceFunction.var _)
+        (HierarchySymbol.BoldfaceFunction.var _)
+      apply HierarchySymbol.BoldfaceFunction.comp₂ (HierarchySymbol.BoldfaceFunction.var _) (HierarchySymbol.BoldfaceFunction.var _)
+  intro p param n ih hp
+  rcases Language.IsSemiformula.case_iff.mp hp with
+    (⟨k, R, v, hR, hv, rfl⟩ | ⟨k, R, v, hR, hv, rfl⟩ | rfl | rfl | ⟨p₁, p₂, h₁, h₂, rfl⟩ | ⟨p₁, p₂, h₁, h₂, rfl⟩ | ⟨p₁, h₁, rfl⟩ | ⟨p₁, h₁, rfl⟩)
+  · simpa [hR, hv.isUTerm] using hRel n param k R v hR hv
+  · simpa [hR, hv.isUTerm] using hNRel n param k R v hR hv
+  · simpa using hverum n param
+  · simpa using hfalsum n param
+  · simpa [h₁.isUFormula, h₂.isUFormula] using
+      hand n param p₁ p₂ h₁ h₂
+        (ih p₁ (by simp) param (by simp [f]) n (by simp [g]) h₁)
+        (ih p₂ (by simp) param (by simp [f]) n (by simp [g]) h₂)
+  · simpa [h₁.isUFormula, h₂.isUFormula] using
+      hor n param p₁ p₂ h₁ h₂
+        (ih p₁ (by simp) param (by simp [f]) n (by simp [g]) h₁)
+        (ih p₂ (by simp) param (by simp [f]) n (by simp [g]) h₂)
+  · simpa [h₁.isUFormula] using
+      hall n param p₁ h₁
+        (ih p₁ (by simp) (c.allChanges param) (by simp [f]) (n + 1) (by simp [g]) h₁)
+  · simpa [h₁.isUFormula] using
+      hex n param p₁ h₁
+        (ih p₁ (by simp) (c.exChanges param) (by simp [f]) (n + 1) (by simp [g]) h₁)
+
+end Language.UformulaRec1.Construction
 
 end LO.Arith
 
