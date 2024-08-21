@@ -916,6 +916,15 @@ lemma Language.IsSemiterm.induction (Γ) {P : V → Prop} (hP : Γ-[1]-Predicate
     have hv : L.IsSemitermVec k n v := by simp_all
     exact hfunc k f v hf hv (fun i hi ↦ ih i hi (hv.nth hi))
 
+@[simp] lemma Language.IsSemitermVec.nil (k : V): L.IsSemitermVec 0 k 0 := ⟨by simp, by simp⟩
+
+@[simp] lemma Language.IsSemitermVec.cons {k n w t : V} (h : L.IsSemitermVec n k w) (ht : L.IsSemiterm k t) : L.IsSemitermVec (n + 1) k (t ∷ w) :=
+  ⟨h.isUTerm.cons ht.isUTerm, by
+    intro i hi
+    rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
+    · simp [ht.bv]
+    · simp [h.bv (by simpa using hi)]⟩
+
 end isSemiterm
 
 end LO.Arith

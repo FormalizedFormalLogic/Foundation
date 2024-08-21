@@ -525,8 +525,6 @@ lemma semiformula_subst_induction {P : V → V → V → V → Prop} (hP : 𝚺�
 lemma substs_not_uformula {w x} (h : ¬L.IsUFormula x) :
     L.substs w x = 0 := (construction L).result_prop_not _ h
 
-#check Language.IsSemiformula.induction_pi1
-
 lemma substs_neg {p} (hp : L.IsSemiformula n p) :
     L.IsSemitermVec n m w → L.substs w (L.neg p) = L.neg (L.substs w p) := by
   revert m w
@@ -625,8 +623,8 @@ lemma substs_substs {p} (hp : L.IsSemiformula l p) :
     L.IsSemitermVec n m w → L.IsSemitermVec l n v → L.substs w (L.substs v p) = L.substs (L.termSubstVec l w v) p := by
   revert m w n v
   apply Language.IsSemiformula.induction_pi1 ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
-  · sorry
-  · intro l k R ts hR hts m w n v hw hv
+  · definability
+  · intro l k R ts hR hts m w n v _ hv
     rw [substs_rel hR hts.isUTerm,
       substs_rel hR (hv.termSubstVec hts).isUTerm,
       substs_rel hR hts.isUTerm]
@@ -637,7 +635,7 @@ lemma substs_substs {p} (hp : L.IsSemiformula l p) :
       nth_termSubstVec hts.isUTerm hi,
       nth_termSubstVec hts.isUTerm hi,
       termSubst_termSubst hv (hts.nth hi)]
-  · intro l k R ts hR hts m w n v hw hv
+  · intro l k R ts hR hts m w n v _ hv
     rw [substs_nrel hR hts.isUTerm,
       substs_nrel hR (hv.termSubstVec hts).isUTerm,
       substs_nrel hR hts.isUTerm]
@@ -660,6 +658,18 @@ lemma substs_substs {p} (hp : L.IsSemiformula l p) :
       substs_or (hp.substs hv).isUFormula (hq.substs hv).isUFormula,
       substs_or hp.isUFormula hq.isUFormula,
       ihp hw hv, ihq hw hv]
+  · intro l p hp ih m w n v hw hv
+    rw [substs_all hp.isUFormula,
+      substs_all (hp.substs hv.qVec).isUFormula,
+      substs_all hp.isUFormula,
+      ih hw.qVec hv.qVec,
+      termSubstVec_qVec_qVec hv hw]
+  · intro l p hp ih m w n v hw hv
+    rw [substs_ex hp.isUFormula,
+      substs_ex (hp.substs hv.qVec).isUFormula,
+      substs_ex hp.isUFormula,
+      ih hw.qVec hv.qVec,
+      termSubstVec_qVec_qVec hv hw]
 
 lemma subst_eq_self {n w : V} (hp : L.IsSemiformula n p) (hw : L.IsSemitermVec n n w) (H : ∀ i < n, w.[i] = ^#i) :
     L.substs w p = p := by
