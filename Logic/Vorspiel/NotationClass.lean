@@ -2,16 +2,16 @@ import Logic.Vorspiel.Vorspiel
 
 namespace LO
 
-/-- Coding object into syntactic object (natural numbers, first-order term, etc.) -/
+/-- Coding objects into syntactic objects (e.g. natural numbers, first-order terms) -/
 class GoedelQuote (α β : Sort*) where
   quote : α → β
 
 notation:max "⌜" x "⌝" => GoedelQuote.quote x
 
-/-- Coding object into semantic object (model of theory) -/
+/-- Coding objects into semantic objects (e.g. individuals of a model of a theory) -/
 class StarQuote (α β : Sort*) where
   quote : α → β
 
-prefix:max "✶" => StarQuote.quotes
+prefix:max "✶" => StarQuote.quote
 
 end LO
