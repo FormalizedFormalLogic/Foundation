@@ -20,24 +20,24 @@ variable {L : Arith.Language V} {pL : LDef} [Arith.Language.Defined L pL]
 
 section typed_formula
 
-abbrev Language.TSemiformula.substs₁ (p : L.TSemiformula (0 + 1)) (t : L.TTerm) : L.TFormula := p.substs t.sing
+abbrev Language.Semiformula.substs₁ (p : L.Semiformula (0 + 1)) (t : L.Term) : L.TFormula := p.substs t.sing
 
-abbrev Language.TSemiformula.free (p : L.TSemiformula (0 + 1)) : L.TFormula := p.shift.substs₁ (L.fvar 0)
+abbrev Language.Semiformula.free (p : L.Semiformula (0 + 1)) : L.TFormula := p.shift.substs₁ (L.fvar 0)
 
-@[simp] lemma Language.TSemiformula.val_substs₁ (p : L.TSemiformula (0 + 1)) (t : L.TTerm) :
-    (p.substs₁ t).val = L.substs 0 ?[t.val] p.val := by simp [substs₁, substs]
+@[simp] lemma Language.Semiformula.val_substs₁ (p : L.Semiformula (0 + 1)) (t : L.Term) :
+    (p.substs₁ t).val = L.substs ?[t.val] p.val := by simp [substs₁, substs]
 
-@[simp] lemma Language.TSemiformula.val_free (p : L.TSemiformula (0 + 1)) :
-    p.free.val = L.substs 0 ?[^&0] (L.shift p.val) := by simp [free, substs₁, substs, shift, fvar]
+@[simp] lemma Language.Semiformula.val_free (p : L.Semiformula (0 + 1)) :
+    p.free.val = L.substs ?[^&0] (L.shift p.val) := by simp [free, substs₁, substs, shift, fvar]
 
-@[simp] lemma substs₁_neg (p : L.TSemiformula (0 + 1)) (t : L.TTerm) :
-    (~p).substs₁ t = ~(p.substs₁ t) := by simp [Language.TSemiformula.substs₁]
+@[simp] lemma substs₁_neg (p : L.Semiformula (0 + 1)) (t : L.Term) :
+    (~p).substs₁ t = ~(p.substs₁ t) := by simp [Language.Semiformula.substs₁]
 
-@[simp] lemma substs₁_all (p : L.TSemiformula (0 + 1 + 1)) (t : L.TTerm) :
-    p.all.substs₁ t = (p.substs t.sing.q).all := by simp [Language.TSemiformula.substs₁]
+@[simp] lemma substs₁_all (p : L.Semiformula (0 + 1 + 1)) (t : L.Term) :
+    p.all.substs₁ t = (p.substs t.sing.q).all := by simp [Language.Semiformula.substs₁]
 
-@[simp] lemma substs₁_ex (p : L.TSemiformula (0 + 1 + 1)) (t : L.TTerm) :
-    p.ex.substs₁ t = (p.substs t.sing.q).ex := by simp [Language.TSemiformula.substs₁]
+@[simp] lemma substs₁_ex (p : L.Semiformula (0 + 1 + 1)) (t : L.Term) :
+    p.ex.substs₁ t = (p.substs t.sing.q).ex := by simp [Language.Semiformula.substs₁]
 
 end typed_formula
 
@@ -55,7 +55,7 @@ variable (L)
 
 structure Language.Sequent where
   val : V
-  val_formulaSet : L.FormulaSet val
+  val_formulaSet : L.IsFormulaSet val
 
 attribute [simp] Language.Sequent.val_formulaSet
 
@@ -93,11 +93,11 @@ lemma subset_iff : Γ ⊆ Δ ↔ Γ.val ⊆ Δ.val := iff_of_eq rfl
 
 @[simp] lemma not_mem_empty (p : L.TFormula) : p ∉ (∅ : L.Sequent) := by simp [mem_iff]
 
-@[simp] lemma mem_singleton_iff : p ∈ ({q} : L.Sequent) ↔ p = q := by simp [mem_iff, Language.TSemiformula.val_inj]
+@[simp] lemma mem_singleton_iff : p ∈ ({q} : L.Sequent) ↔ p = q := by simp [mem_iff, Language.Semiformula.val_inj]
 
-@[simp] lemma mem_insert_iff : p ∈ insert q Γ ↔ p = q ∨ p ∈ Γ := by simp [mem_iff, Language.TSemiformula.val_inj]
+@[simp] lemma mem_insert_iff : p ∈ insert q Γ ↔ p = q ∨ p ∈ Γ := by simp [mem_iff, Language.Semiformula.val_inj]
 
-@[simp] lemma mem_union_iff : p ∈ Γ ∪ Δ ↔ p ∈ Γ ∨ p ∈ Δ := by simp [mem_iff, Language.TSemiformula.val_inj]
+@[simp] lemma mem_union_iff : p ∈ Γ ∪ Δ ↔ p ∈ Γ ∨ p ∈ Δ := by simp [mem_iff, Language.Semiformula.val_inj]
 
 @[ext] lemma ext (h : ∀ x, x ∈ Γ ↔ x ∈ Δ) : Γ = Δ := by
   rcases Γ with ⟨Γ, hΓ⟩; rcases Δ with ⟨Δ, hΔ⟩; simp
@@ -185,11 +185,11 @@ def and (dp : T ⊢¹ insert p Γ) (dq : T ⊢¹ insert q Γ) : T ⊢¹ insert (
 def or (dpq : T ⊢¹ insert p (insert q Γ)) : T ⊢¹ insert (p ⋎ q) Γ :=
   Language.Theory.Derivable.toTDerivation _ <| by simpa using Language.Theory.Derivable.or (by simpa using dpq.toDerivable)
 
-def all {p : L.TSemiformula (0 + 1)} (dp : T ⊢¹ insert p.free Γ.shift) : T ⊢¹ insert p.all Γ :=
+def all {p : L.Semiformula (0 + 1)} (dp : T ⊢¹ insert p.free Γ.shift) : T ⊢¹ insert p.all Γ :=
   Language.Theory.Derivable.toTDerivation _ <| by
     simpa using Language.Theory.Derivable.all (by simpa using p.prop) (by simpa using dp.toDerivable)
 
-def ex {p : L.TSemiformula (0 + 1)} (t : L.TTerm) (dp : T ⊢¹ insert (p.substs₁ t) Γ) : T ⊢¹ insert p.ex Γ :=
+def ex {p : L.Semiformula (0 + 1)} (t : L.Term) (dp : T ⊢¹ insert (p.substs₁ t) Γ) : T ⊢¹ insert p.ex Γ :=
   Language.Theory.Derivable.toTDerivation _ <| by
     simpa using Language.Theory.Derivable.ex (by simpa using p.prop) t.prop (by simpa using dp.toDerivable)
 
@@ -208,12 +208,12 @@ def cut (d₁ : T ⊢¹ insert p Γ) (d₂ : T ⊢¹ insert (~p) Γ) : T ⊢¹ �
 def cut' (d₁ : T ⊢¹ insert p Γ) (d₂ : T ⊢¹ insert (~p) Δ) : T ⊢¹ Γ ∪ Δ :=
   cut (p := p) (d₁.wk (by intro x; simp; tauto)) (d₂.wk (by intro x; simp; tauto))
 
-def conj (ps : L.TSemiformulaVec 0) (ds : ∀ i, (hi : i < len ps.val) → T ⊢¹ insert (ps.nth i hi) Γ) : T ⊢¹ insert ps.conj Γ := by
+def conj (ps : L.SemiformulaVec 0) (ds : ∀ i, (hi : i < len ps.val) → T ⊢¹ insert (ps.nth i hi) Γ) : T ⊢¹ insert ps.conj Γ := by
   have : ∀ i < len ps.val, T.thy.Derivable (insert (ps.val.[i]) Γ.val) := by intro i hi; simpa using (ds i hi).toDerivable
   have : T.thy.Derivable (insert (^⋀ ps.val) Γ.val) := Language.Theory.Derivable.conj ps.val (by simp) this
   exact Language.Theory.Derivable.toTDerivation _ (by simpa using this)
 
-def disj (ps : L.TSemiformulaVec 0) {i} (hi : i < len ps.val)
+def disj (ps : L.SemiformulaVec 0) {i} (hi : i < len ps.val)
     (d : T ⊢¹ insert (ps.nth i hi) Γ) : T ⊢¹ insert ps.disj Γ := by
   have : T.thy.Derivable (insert (^⋁ ps.val) Γ.val) :=
     Language.Theory.Derivable.disj ps.val Γ.val ps.prop hi (by simpa using d.toDerivable)
@@ -222,7 +222,7 @@ def disj (ps : L.TSemiformulaVec 0) {i} (hi : i < len ps.val)
 def modusPonens (dpq : T ⊢¹ insert (p ⟶ q) Γ) (dp : T ⊢¹ insert p Γ) : T ⊢¹ insert q Γ := by
   let d : T ⊢¹ insert (p ⟶ q) (insert q Γ) := dpq.wk (insert_subset_insert_of_subset _ <| by simp)
   let b : T ⊢¹ insert (~(p ⟶ q)) (insert q Γ) := by
-    simp only [TSemiformula.imp_def, TSemiformula.neg_or, TSemiformula.neg_neg]
+    simp only [Semiformula.imp_def, Semiformula.neg_or, Semiformula.neg_neg]
     exact and (dp.wk (insert_subset_insert_of_subset _ <| by simp))
       (em q (by simp) (by simp))
   exact cut d b
@@ -241,14 +241,14 @@ def rotate₃ (d : T ⊢¹ p₀ ⫽ p₁ ⫽ p₂ ⫽ p₃ ⫽ Γ) : T ⊢¹ p�
 def orInv (d : T ⊢¹ p ⋎ q ⫽ Γ) : T ⊢¹ p ⫽ q ⫽ Γ := by
   have b : T ⊢¹ p ⋎ q ⫽ p ⫽ q ⫽ Γ := wk d (by intro x; simp; tauto)
   have : T ⊢¹ ~(p ⋎ q) ⫽ p ⫽ q ⫽ Γ := by
-    simp only [TSemiformula.neg_or]
+    simp only [Semiformula.neg_or]
     apply and (em p) (em q)
   exact cut b this
 
-def specialize {p : L.TSemiformula (0 + 1)} (b : T ⊢¹ p.all ⫽ Γ) (t : L.TTerm) : T ⊢¹ p.substs₁ t ⫽ Γ := by
+def specialize {p : L.Semiformula (0 + 1)} (b : T ⊢¹ p.all ⫽ Γ) (t : L.Term) : T ⊢¹ p.substs₁ t ⫽ Γ := by
   apply TDerivation.cut (p := p.all)
   · exact (TDerivation.wk b <| by intro x; simp; tauto)
-  · rw [TSemiformula.neg_all]
+  · rw [Semiformula.neg_all]
     apply TDerivation.ex t
     apply TDerivation.em (p.substs₁ t)
 
@@ -267,7 +267,7 @@ instance : System.ModusPonens T := ⟨modusPonens⟩
 
 instance : System.NegationEquiv T where
   neg_equiv p := by
-    simp [Axioms.NegEquiv, LO.LogicalConnective.iff, TSemiformula.imp_def]
+    simp [Axioms.NegEquiv, LO.LogicalConnective.iff, Semiformula.imp_def]
     apply TDerivation.and
     · apply TDerivation.or
       apply TDerivation.rotate₁
@@ -281,13 +281,13 @@ instance : System.NegationEquiv T where
 instance : System.Minimal T where
   verum := TDerivation.toTProof <| TDerivation.verum
   imply₁ (p q) := by
-    simp only [Axioms.Imply₁, TSemiformula.imp_def]
+    simp only [Axioms.Imply₁, Semiformula.imp_def]
     apply TDerivation.or
     apply TDerivation.rotate₁
     apply TDerivation.or
     exact TDerivation.em p
   imply₂ (p q r) := by
-    simp only [Axioms.Imply₂, TSemiformula.imp_def, TSemiformula.neg_or, TSemiformula.neg_neg]
+    simp only [Axioms.Imply₂, Semiformula.imp_def, Semiformula.neg_or, Semiformula.neg_neg]
     apply TDerivation.or
     apply TDerivation.rotate₁
     apply TDerivation.or
@@ -303,17 +303,17 @@ instance : System.Minimal T where
         · exact TDerivation.em q
         · exact TDerivation.em r
   and₁ (p q) := by
-    simp only [Axioms.AndElim₁, TSemiformula.imp_def, TSemiformula.neg_and]
+    simp only [Axioms.AndElim₁, Semiformula.imp_def, Semiformula.neg_and]
     apply TDerivation.or
     apply TDerivation.or
     exact TDerivation.em p
   and₂ (p q) := by
-    simp only [Axioms.AndElim₂, TSemiformula.imp_def, TSemiformula.neg_and]
+    simp only [Axioms.AndElim₂, Semiformula.imp_def, Semiformula.neg_and]
     apply TDerivation.or
     apply TDerivation.or
     exact TDerivation.em q
   and₃ (p q) := by
-    simp only [Axioms.AndInst, TSemiformula.imp_def]
+    simp only [Axioms.AndInst, Semiformula.imp_def]
     apply TDerivation.or
     apply TDerivation.rotate₁
     apply TDerivation.or
@@ -322,19 +322,19 @@ instance : System.Minimal T where
     · exact TDerivation.em p
     · exact TDerivation.em q
   or₁ (p q) := by
-    simp only [Axioms.OrInst₁, TSemiformula.imp_def]
+    simp only [Axioms.OrInst₁, Semiformula.imp_def]
     apply TDerivation.or
     apply TDerivation.rotate₁
     apply TDerivation.or
     exact TDerivation.em p
   or₂ (p q) := by
-    simp [Axioms.OrInst₂, TSemiformula.imp_def]
+    simp [Axioms.OrInst₂, Semiformula.imp_def]
     apply TDerivation.or
     apply TDerivation.rotate₁
     apply TDerivation.or
     exact TDerivation.em q
   or₃ (p q r) := by
-    simp [Axioms.OrElim, TSemiformula.imp_def]
+    simp [Axioms.OrElim, Semiformula.imp_def]
     apply TDerivation.or
     apply TDerivation.rotate₁
     apply TDerivation.or
@@ -352,43 +352,43 @@ instance : System.Minimal T where
 
 instance : System.Classical T where
   dne p := by
-    simp [Axioms.DNE, TSemiformula.imp_def]
+    simp [Axioms.DNE, Semiformula.imp_def]
     apply TDerivation.or
     exact TDerivation.em p
 
-def exIntro (p : L.TSemiformula (0 + 1)) (t : L.TTerm) (b : T ⊢ p.substs₁ t) : T ⊢ p.ex := TDerivation.ex t b
+def exIntro (p : L.Semiformula (0 + 1)) (t : L.Term) (b : T ⊢ p.substs₁ t) : T ⊢ p.ex := TDerivation.ex t b
 
-lemma ex_intro! (p : L.TSemiformula (0 + 1)) (t : L.TTerm) (b : T ⊢! p.substs₁ t) : T ⊢! p.ex := ⟨exIntro _ t b.get⟩
+lemma ex_intro! (p : L.Semiformula (0 + 1)) (t : L.Term) (b : T ⊢! p.substs₁ t) : T ⊢! p.ex := ⟨exIntro _ t b.get⟩
 
-def specialize {p : L.TSemiformula (0 + 1)} (b : T ⊢ p.all) (t : L.TTerm) : T ⊢ p.substs₁ t := TDerivation.specialize b t
+def specialize {p : L.Semiformula (0 + 1)} (b : T ⊢ p.all) (t : L.Term) : T ⊢ p.substs₁ t := TDerivation.specialize b t
 
-lemma specialize! {p : L.TSemiformula (0 + 1)} (b : T ⊢! p.all) (t : L.TTerm) : T ⊢! p.substs₁ t := ⟨TDerivation.specialize b.get t⟩
+lemma specialize! {p : L.Semiformula (0 + 1)} (b : T ⊢! p.all) (t : L.Term) : T ⊢! p.substs₁ t := ⟨TDerivation.specialize b.get t⟩
 
-def conj (ps : L.TSemiformulaVec 0) (ds : ∀ i, (hi : i < len ps.val) → T ⊢ ps.nth i hi) : T ⊢ ps.conj := TDerivation.conj ps ds
+def conj (ps : L.SemiformulaVec 0) (ds : ∀ i, (hi : i < len ps.val) → T ⊢ ps.nth i hi) : T ⊢ ps.conj := TDerivation.conj ps ds
 
-lemma conj! (ps : L.TSemiformulaVec 0) (ds : ∀ i, (hi : i < len ps.val) → T ⊢! ps.nth i hi) : T ⊢! ps.conj := ⟨conj ps fun i hi ↦ (ds i hi).get⟩
+lemma conj! (ps : L.SemiformulaVec 0) (ds : ∀ i, (hi : i < len ps.val) → T ⊢! ps.nth i hi) : T ⊢! ps.conj := ⟨conj ps fun i hi ↦ (ds i hi).get⟩
 
-def conj' (ps : L.TSemiformulaVec 0) (ds : ∀ i, (hi : i < len ps.val) → T ⊢ ps.nth (len ps.val - (i + 1)) (sub_succ_lt_self hi)) : T ⊢ ps.conj :=
+def conj' (ps : L.SemiformulaVec 0) (ds : ∀ i, (hi : i < len ps.val) → T ⊢ ps.nth (len ps.val - (i + 1)) (sub_succ_lt_self hi)) : T ⊢ ps.conj :=
   TDerivation.conj ps <| fun i hi ↦ by
     simpa [sub_succ_lt_selfs hi] using ds (len ps.val - (i + 1)) (by simp [tsub_lt_iff_left (succ_le_iff_lt.mpr hi)])
 
-def conjOr' (ps : L.TSemiformulaVec 0) (q) (ds : ∀ i, (hi : i < len ps.val) → T ⊢ ps.nth (len ps.val - (i + 1)) (sub_succ_lt_self hi) ⋎ q) : T ⊢ ps.conj ⋎ q :=
+def conjOr' (ps : L.SemiformulaVec 0) (q) (ds : ∀ i, (hi : i < len ps.val) → T ⊢ ps.nth (len ps.val - (i + 1)) (sub_succ_lt_self hi) ⋎ q) : T ⊢ ps.conj ⋎ q :=
   TDerivation.or <| TDerivation.conj ps <| fun i hi ↦ by
     simpa [sub_succ_lt_selfs hi] using TDerivation.orInv (ds (len ps.val - (i + 1)) (by simp [tsub_lt_iff_left (succ_le_iff_lt.mpr hi)]))
 
-def disj (ps : L.TSemiformulaVec 0) {i} (hi : i < len ps.val) (d : T ⊢ ps.nth i hi) : T ⊢ ps.disj :=
+def disj (ps : L.SemiformulaVec 0) {i} (hi : i < len ps.val) (d : T ⊢ ps.nth i hi) : T ⊢ ps.disj :=
   TDerivation.disj ps hi d
 
 def shift {p : L.TFormula} (d : T ⊢ p) : T ⊢ p.shift := by simpa using TDerivation.shift d
 
 lemma shift! {p : L.TFormula} (d : T ⊢! p) : T ⊢! p.shift := ⟨by simpa using TDerivation.shift d.get⟩
 
-def all {p : L.TSemiformula (0 + 1)} (dp : T ⊢ p.free) : T ⊢ p.all := TDerivation.all (by simpa using dp)
+def all {p : L.Semiformula (0 + 1)} (dp : T ⊢ p.free) : T ⊢ p.all := TDerivation.all (by simpa using dp)
 
-lemma all! {p : L.TSemiformula (0 + 1)} (dp : T ⊢! p.free) : T ⊢! p.all := ⟨all dp.get⟩
+lemma all! {p : L.Semiformula (0 + 1)} (dp : T ⊢! p.free) : T ⊢! p.all := ⟨all dp.get⟩
 
-def generalizeAux {C : L.TFormula} {p : L.TSemiformula (0 + 1)} (dp : T ⊢ C.shift ⟶ p.free) : T ⊢ C ⟶ p.all := by
-  rw [TSemiformula.imp_def] at dp ⊢
+def generalizeAux {C : L.TFormula} {p : L.Semiformula (0 + 1)} (dp : T ⊢ C.shift ⟶ p.free) : T ⊢ C ⟶ p.all := by
+  rw [Semiformula.imp_def] at dp ⊢
   apply TDerivation.or
   apply TDerivation.rotate₁
   apply TDerivation.all
@@ -401,27 +401,27 @@ lemma conj_shift (Γ : List L.TFormula) : (⋀Γ).shift = ⋀(Γ.map .shift) := 
     case hcons p ps hps ih =>
       simp [hps, ih]
 
-def generalize {Γ} {p : L.TSemiformula (0 + 1)} (d : Γ.map .shift ⊢[T] p.free) : Γ ⊢[T] p.all := by
+def generalize {Γ} {p : L.Semiformula (0 + 1)} (d : Γ.map .shift ⊢[T] p.free) : Γ ⊢[T] p.all := by
   apply System.FiniteContext.ofDef
   apply generalizeAux
   simpa [conj_shift] using System.FiniteContext.toDef d
 
-lemma generalize! {Γ} {p : L.TSemiformula (0 + 1)} (d : Γ.map .shift ⊢[T]! p.free) : Γ ⊢[T]! p.all := ⟨generalize d.get⟩
+lemma generalize! {Γ} {p : L.Semiformula (0 + 1)} (d : Γ.map .shift ⊢[T]! p.free) : Γ ⊢[T]! p.all := ⟨generalize d.get⟩
 
-def specializeWithCtxAux {C : L.TFormula} {p : L.TSemiformula (0 + 1)} (d : T ⊢ C ⟶ p.all) (t : L.TTerm) : T ⊢ C ⟶ p.substs₁ t := by
-  rw [TSemiformula.imp_def] at d ⊢
+def specializeWithCtxAux {C : L.TFormula} {p : L.Semiformula (0 + 1)} (d : T ⊢ C ⟶ p.all) (t : L.Term) : T ⊢ C ⟶ p.substs₁ t := by
+  rw [Semiformula.imp_def] at d ⊢
   apply TDerivation.or
   apply TDerivation.rotate₁
   apply TDerivation.specialize
   exact TDerivation.wk (TDerivation.orInv d) (by intro x; simp; tauto)
 
-def specializeWithCtx {Γ} {p : L.TSemiformula (0 + 1)} (d : Γ ⊢[T] p.all) (t) : Γ ⊢[T] p.substs₁ t := specializeWithCtxAux d t
+def specializeWithCtx {Γ} {p : L.Semiformula (0 + 1)} (d : Γ ⊢[T] p.all) (t) : Γ ⊢[T] p.substs₁ t := specializeWithCtxAux d t
 
-lemma specialize_with_ctx! {Γ} {p : L.TSemiformula (0 + 1)} (d : Γ ⊢[T]! p.all) (t) : Γ ⊢[T]! p.substs₁ t := ⟨specializeWithCtx d.get t⟩
+lemma specialize_with_ctx! {Γ} {p : L.Semiformula (0 + 1)} (d : Γ ⊢[T]! p.all) (t) : Γ ⊢[T]! p.substs₁ t := ⟨specializeWithCtx d.get t⟩
 
-def ex {p : L.TSemiformula (0 + 1)} (t) (dp : T ⊢ p.substs₁ t) : T ⊢ p.ex := TDerivation.ex t (by simpa using dp)
+def ex {p : L.Semiformula (0 + 1)} (t) (dp : T ⊢ p.substs₁ t) : T ⊢ p.ex := TDerivation.ex t (by simpa using dp)
 
-lemma ex! {p : L.TSemiformula (0 + 1)} (t) (dp : T ⊢! p.substs₁ t) : T ⊢! p.ex := ⟨ex t dp.get⟩
+lemma ex! {p : L.Semiformula (0 + 1)} (t) (dp : T ⊢! p.substs₁ t) : T ⊢! p.ex := ⟨ex t dp.get⟩
 
 end Language.Theory.TProof
 

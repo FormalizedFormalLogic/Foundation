@@ -248,6 +248,15 @@ lemma termShiftVec_cons {k t ts : V} (ht : L.IsUTerm t) (hts : L.IsUTermVec k ts
     L.termShiftVec 2 ?[t₁, t₂] = ?[L.termShift t₁, L.termShift t₂] := by
   rw [show (2 : V) = 0 + 1 + 1  by simp [one_add_one_eq_two], termShiftVec_cons] <;> simp [ht₁, ht₂]
 
+@[simp] lemma Language.IsUTerm.termShift {t} (ht : L.IsUTerm t) : L.IsUTerm (L.termShift t) := by
+  apply Language.IsUTerm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
+  · definability
+  · intro z; simp
+  · intro x; simp
+  · intro k f v hkf hv ih;
+    simp only [hkf, hv, termShift_func, func_iff, true_and]
+    exact ⟨by simp [hv], by intro i hi; rw [nth_termShiftVec hv hi]; exact ih i hi⟩
+
 @[simp] lemma Language.IsSemiterm.termShift {t} (ht : L.IsSemiterm n t) : L.IsSemiterm n (L.termShift t) := by
   apply Language.IsSemiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
   · definability
@@ -261,10 +270,33 @@ lemma termShiftVec_cons {k t ts : V} (ht : L.IsUTerm t) (hts : L.IsUTermVec k ts
       rw [nth_termShiftVec hv.isUTerm hi]
       exact ih i hi
 
+@[simp] lemma Language.IsUTermVec.termShiftVec {k v} (hv : L.IsUTermVec k v) : L.IsUTermVec k (L.termShiftVec k v) :=
+    ⟨by simp [termShiftVec, hv], fun i hi ↦ by rw [nth_termShiftVec hv hi]; exact (hv.nth hi).termShift⟩
+
 @[simp] lemma Language.IsSemitermVec.termShiftVec {k n v} (hv : L.IsSemitermVec k n v) : L.IsSemitermVec k n (L.termShiftVec k v) :=
   Language.IsSemitermVec.iff.mpr
     ⟨by simp [termShiftVec, hv.isUTerm], fun i hi ↦ by
       rw [nth_termShiftVec hv.isUTerm hi]; exact (hv.nth hi).termShift⟩
+
+@[simp] lemma Language.IsUTerm.termBVtermShift {t} (ht : L.IsUTerm t) : L.termBV (L.termShift t) = L.termBV t := by
+  apply Language.IsUTerm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
+  · definability
+  · simp
+  · simp
+  · intro k f v hf hv ih
+    rw [termShift_func hf hv,
+      termBV_func hf hv.termShiftVec,
+      termBV_func hf hv]
+    congr 1
+    apply nth_ext' k (by simp [*]) (by simp [*])
+    intro i hi
+    simp [*]
+
+@[simp] lemma Language.IsUTermVec.termBVVectermShiftVec {v} (hv : L.IsUTermVec k v) :
+    L.termBVVec k (L.termShiftVec k v) = L.termBVVec k v := by
+  apply nth_ext' k (by simp [*]) (by simp [*])
+  intro i hi
+  simp [*, Language.IsUTerm.termBVtermShift (hv.nth hi)]
 
 end termShift
 

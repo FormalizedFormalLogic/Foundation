@@ -290,6 +290,30 @@ end
 lemma shift_not_uformula {x} (h : ¬L.IsUFormula x) :
     L.shift x = 0 := (construction L).result_prop_not _ h
 
+lemma Language.IsUFormula.shift {p : V} : L.IsUFormula p → L.IsUFormula (L.shift p) := by
+  apply Language.IsUFormula.induction_sigma1
+  · definability
+  · intro k r v hr hv; simp [hr, hv]
+  · intro k r v hr hv; simp [hr, hv]
+  · simp
+  · simp
+  · intro p q hp hq ihp ihq; simp [hp, hq, hp.neg, hq.neg, ihp, ihq]
+  · intro p q hp hq ihp ihq; simp [hp, hq, hp.neg, hq.neg, ihp, ihq]
+  · intro p hp ihp; simp [hp, hp.neg, ihp]
+  · intro p hp ihp; simp [hp, hp.neg, ihp]
+
+lemma Language.IsUFormula.bv_shift {p : V} : L.IsUFormula p → L.bv (L.shift p) = L.bv p := by
+  apply Language.IsUFormula.induction_sigma1
+  · definability
+  · intro k r v hr hv; simp [hr, hv]
+  · intro k r v hr hv; simp [hr, hv]
+  · simp
+  · simp
+  · intro p q hp hq ihp ihq; simp [hp, hq, hp.neg, hq.neg, ihp, ihq, hp.shift, hq.shift]
+  · intro p q hp hq ihp ihq; simp [hp, hq, hp.neg, hq.neg, ihp, ihq, hp.shift, hq.shift]
+  · intro p hp ihp; simp [hp, hp.neg, ihp, hp.shift]
+  · intro p hp ihp; simp [hp, hp.neg, ihp, hp.shift]
+
 lemma Language.IsSemiformula.shift {p : V} : L.IsSemiformula n p → L.IsSemiformula n (L.shift p) := by
   apply Language.IsSemiformula.induction_sigma1
   · definability
@@ -302,17 +326,12 @@ lemma Language.IsSemiformula.shift {p : V} : L.IsSemiformula n p → L.IsSemifor
   · intro n p hp ihp; simp [hp, hp.isUFormula, ihp]
   · intro n p hp ihp; simp [hp, hp.isUFormula, ihp]
 
-/-
-@[simp] lemma Language.IsSemiformula.shift_iff {p : V} : L.Semiformula n (L.shift p) ↔ L.Semiformula n p :=
-  ⟨fun h ↦ by
-    rcases h with ⟨h, rfl⟩
-    have : L.UFormula p := by
-      by_contra hp
-      simp [shift_not_uformula hp] at h
-    exact ⟨this, by simp [fstIdx_shift this]⟩,
-    Language.IsSemiformula.shift⟩
--/
 
+@[simp] lemma Language.IsSemiformula.shift_iff {p : V} : L.IsSemiformula n (L.shift p) ↔ L.IsSemiformula n p :=
+  ⟨fun h ↦ by
+    have : L.IsUFormula p := by by_contra hp; simp [shift_not_uformula hp] at h
+    exact ⟨this, by simpa [this.bv_shift] using h.bv⟩,
+    Language.IsSemiformula.shift⟩
 
 lemma shift_neg {p : V} (hp : L.IsSemiformula n p) : L.shift (L.neg p) = L.neg (L.shift p) := by
   apply Language.IsSemiformula.induction_sigma1 ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp

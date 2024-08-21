@@ -117,11 +117,11 @@ lemma imp_def (p q : L.Semiformula n) : p ⟶ q = ~p ⋎ q := by ext; simp [imp]
 
 def shift (p : L.Semiformula n) : L.Semiformula n := ⟨L.shift p.val, p.prop.shift⟩
 
-def substs (p : L.Semiformula n) (w : L.TSemitermVec n m) : L.Semiformula m :=
+def substs (p : L.Semiformula n) (w : L.SemitermVec n m) : L.Semiformula m :=
   ⟨L.substs w.val p.val, p.prop.substs w.prop⟩
 
 @[simp] lemma val_shift (p : L.Semiformula n) : p.shift.val = L.shift p.val := rfl
-@[simp] lemma val_substs (p : L.Semiformula n) (w : L.TSemitermVec n m) : (p.substs w).val = L.substs w.val p.val := rfl
+@[simp] lemma val_substs (p : L.Semiformula n) (w : L.SemitermVec n m) : (p.substs w).val = L.substs w.val p.val := rfl
 
 @[simp] lemma shift_verum : (⊤ : L.Semiformula n).shift = ⊤ := by ext; simp [shift]
 @[simp] lemma shift_falsum : (⊥ : L.Semiformula n).shift = ⊥ := by ext; simp [shift]
@@ -138,29 +138,29 @@ def substs (p : L.Semiformula n) (w : L.TSemitermVec n m) : L.Semiformula m :=
     p₁ ⟶ p₂ = q₁ ⟶ q₂ ↔ p₁ = q₁ ∧ p₂ = q₂ := by simp [imp_def]
 
 @[simp] lemma shift_neg (p : L.Semiformula n) : (~p).shift = ~(p.shift) := by
-  ext; simp [shift, val_neg, TSemitermVec.prop]
+  ext; simp [shift, val_neg, SemitermVec.prop]
   rw [Arith.shift_neg p.prop]
 @[simp] lemma shift_imp (p q : L.Semiformula n) : (p ⟶ q).shift = p.shift ⟶ q.shift := by
   simp [imp_def]
 
-@[simp] lemma substs_verum (w : L.TSemitermVec n m) : (⊤ : L.Semiformula n).substs w = ⊤ := by ext; simp [substs]
-@[simp] lemma substs_falsum (w : L.TSemitermVec n m) : (⊥ : L.Semiformula n).substs w = ⊥ := by ext; simp [substs]
-@[simp] lemma substs_and (w : L.TSemitermVec n m) (p q : L.Semiformula n) :
+@[simp] lemma substs_verum (w : L.SemitermVec n m) : (⊤ : L.Semiformula n).substs w = ⊤ := by ext; simp [substs]
+@[simp] lemma substs_falsum (w : L.SemitermVec n m) : (⊥ : L.Semiformula n).substs w = ⊥ := by ext; simp [substs]
+@[simp] lemma substs_and (w : L.SemitermVec n m) (p q : L.Semiformula n) :
     (p ⋏ q).substs w = p.substs w ⋏ q.substs w := by ext; simp [substs]
-@[simp] lemma substs_or (w : L.TSemitermVec n m) (p q : L.Semiformula n) :
+@[simp] lemma substs_or (w : L.SemitermVec n m) (p q : L.Semiformula n) :
     (p ⋎ q).substs w = p.substs w ⋎ q.substs w := by ext; simp [substs]
-@[simp] lemma substs_all (w : L.TSemitermVec n m) (p : L.Semiformula (n + 1)) :
+@[simp] lemma substs_all (w : L.SemitermVec n m) (p : L.Semiformula (n + 1)) :
     p.all.substs w = (p.substs w.q).all := by
-  ext; simp [substs, Language.bvar, Language.qVec, Language.TSemitermVec.bShift, Language.TSemitermVec.q, w.prop.lh]
-@[simp] lemma substs_ex (w : L.TSemitermVec n m) (p : L.Semiformula (n + 1)) :
+  ext; simp [substs, Language.bvar, Language.qVec, Language.SemitermVec.bShift, Language.SemitermVec.q, w.prop.lh]
+@[simp] lemma substs_ex (w : L.SemitermVec n m) (p : L.Semiformula (n + 1)) :
     p.ex.substs w = (p.substs w.q).ex := by
-  ext; simp [substs, Language.bvar, Language.qVec, Language.TSemitermVec.bShift, Language.TSemitermVec.q, w.prop.lh]
+  ext; simp [substs, Language.bvar, Language.qVec, Language.SemitermVec.bShift, Language.SemitermVec.q, w.prop.lh]
 
-@[simp] lemma substs_neg (w : L.TSemitermVec n m) (p : L.Semiformula n) : (~p).substs w = ~(p.substs w) := by
-  ext; simp [substs, val_neg, TSemitermVec.prop, Arith.substs_neg p.prop w.prop]
-@[simp] lemma substs_imp (w : L.TSemitermVec n m) (p q : L.Semiformula n) : (p ⟶ q).substs w = p.substs w ⟶ q.substs w := by
+@[simp] lemma substs_neg (w : L.SemitermVec n m) (p : L.Semiformula n) : (~p).substs w = ~(p.substs w) := by
+  ext; simp [substs, val_neg, SemitermVec.prop, Arith.substs_neg p.prop w.prop]
+@[simp] lemma substs_imp (w : L.SemitermVec n m) (p q : L.Semiformula n) : (p ⟶ q).substs w = p.substs w ⟶ q.substs w := by
   simp [imp_def]
-@[simp] lemma substs_imply (w : L.TSemitermVec n m) (p q : L.Semiformula n) : (p ⟷ q).substs w = p.substs w ⟷ q.substs w := by
+@[simp] lemma substs_imply (w : L.SemitermVec n m) (p q : L.Semiformula n) : (p ⟷ q).substs w = p.substs w ⟷ q.substs w := by
   simp [LogicalConnective.iff]
 
 end Language.Semiformula
@@ -191,7 +191,7 @@ end Language.SemiformulaVec
 
 namespace Language.TSemifromula
 
-lemma subst_eq_self {n : V} (w : L.TSemitermVec n n) (p : L.Semiformula n) (H : ∀ i, (hi : i < n) → w.nth i hi = L.bvar i hi) :
+lemma subst_eq_self {n : V} (w : L.SemitermVec n n) (p : L.Semiformula n) (H : ∀ i, (hi : i < n) → w.nth i hi = L.bvar i hi) :
     p^/[w] = p := by
   ext; simp; rw [Arith.subst_eq_self p.prop w.prop]
   intro i hi
@@ -204,13 +204,13 @@ lemma subst_eq_self {n : V} (w : L.TSemitermVec n n) (p : L.Semiformula n) (H : 
   rintro _ rfl
   simp
 
-@[simp] lemma subst_nil_eq_self (w : L.TSemitermVec 0 0) :
+@[simp] lemma subst_nil_eq_self (w : L.SemitermVec 0 0) :
     p^/[w] = p := subst_eq_self _ _ (by simp)
 
-lemma shift_substs {n m : V} (w : L.TSemitermVec n m) (p : L.Semiformula n) :
+lemma shift_substs {n m : V} (w : L.SemitermVec n m) (p : L.Semiformula n) :
     (p^/[w]).shift = p.shift^/[w.shift] := by ext; simp; rw [Arith.shift_substs p.prop w.prop]
 
-lemma substs_substs {n m l : V} (v : L.TSemitermVec m l) (w : L.TSemitermVec n m) (p : L.Semiformula n) :
+lemma substs_substs {n m l : V} (v : L.SemitermVec m l) (w : L.SemitermVec n m) (p : L.Semiformula n) :
     (p^/[w])^/[v] = p^/[w.substs v] := by ext; simp; rw [Arith.substs_substs p.prop v.prop w.prop]
 
 end Language.TSemifromula
@@ -336,19 +336,19 @@ variable {n m : V}
     (t₁ ≮' t₂).shift = (t₁.shift ≮' t₂.shift) := by
   ext; simp [Language.Semiterm.notLessThan, Language.Semiterm.shift, Language.Semiformula.shift, qqNLT]
 
-@[simp] lemma substs_equals (w : ⌜ℒₒᵣ⌝.TSemitermVec n m) (t₁ t₂ : ⌜ℒₒᵣ⌝.Semiterm n) :
+@[simp] lemma substs_equals (w : ⌜ℒₒᵣ⌝.SemitermVec n m) (t₁ t₂ : ⌜ℒₒᵣ⌝.Semiterm n) :
     (t₁ =' t₂).substs w = (t₁.substs w =' t₂.substs w) := by
   ext; simp [Language.Semiterm.equals, Language.Semiterm.substs, Language.Semiformula.substs, qqEQ]
 
-@[simp] lemma substs_notEquals (w : ⌜ℒₒᵣ⌝.TSemitermVec n m) (t₁ t₂ : ⌜ℒₒᵣ⌝.Semiterm n) :
+@[simp] lemma substs_notEquals (w : ⌜ℒₒᵣ⌝.SemitermVec n m) (t₁ t₂ : ⌜ℒₒᵣ⌝.Semiterm n) :
     (t₁ ≠' t₂).substs w = (t₁.substs w ≠' t₂.substs w) := by
   ext; simp [Language.Semiterm.notEquals, Language.Semiterm.substs, Language.Semiformula.substs, qqNEQ]
 
-@[simp] lemma substs_lessThan (w : ⌜ℒₒᵣ⌝.TSemitermVec n m) (t₁ t₂ : ⌜ℒₒᵣ⌝.Semiterm n) :
+@[simp] lemma substs_lessThan (w : ⌜ℒₒᵣ⌝.SemitermVec n m) (t₁ t₂ : ⌜ℒₒᵣ⌝.Semiterm n) :
     (t₁ <' t₂).substs w = (t₁.substs w <' t₂.substs w) := by
   ext; simp [Language.Semiterm.lessThan, Language.Semiterm.substs, Language.Semiformula.substs, qqLT]
 
-@[simp] lemma substs_notLessThan (w : ⌜ℒₒᵣ⌝.TSemitermVec n m) (t₁ t₂ : ⌜ℒₒᵣ⌝.Semiterm n) :
+@[simp] lemma substs_notLessThan (w : ⌜ℒₒᵣ⌝.SemitermVec n m) (t₁ t₂ : ⌜ℒₒᵣ⌝.Semiterm n) :
     (t₁ ≮' t₂).substs w = (t₁.substs w ≮' t₂.substs w) := by
   ext; simp [Language.Semiterm.notLessThan, Language.Semiterm.substs, Language.Semiformula.substs, qqNLT]
 
@@ -376,50 +376,50 @@ lemma neg_bex (t : ⌜ℒₒᵣ⌝.Semiterm n) (p : ⌜ℒₒᵣ⌝.Semiformula 
     (p.bex t).shift = p.shift.bex t.shift := by
   simp [Language.Semiformula.bex, Language.Semiterm.bShift_shift_comm]
 
-@[simp] lemma substs_ball (w : ⌜ℒₒᵣ⌝.TSemitermVec n m) (t : ⌜ℒₒᵣ⌝.Semiterm n) (p : ⌜ℒₒᵣ⌝.Semiformula (n + 1)) :
+@[simp] lemma substs_ball (w : ⌜ℒₒᵣ⌝.SemitermVec n m) (t : ⌜ℒₒᵣ⌝.Semiterm n) (p : ⌜ℒₒᵣ⌝.Semiformula (n + 1)) :
     (p.ball t)^/[w] = (p^/[w.q]).ball (t^ᵗ/[w]) := by
   simp [Language.Semiformula.ball]
 
-@[simp] lemma substs_bex (w : ⌜ℒₒᵣ⌝.TSemitermVec n m) (t : ⌜ℒₒᵣ⌝.Semiterm n) (p : ⌜ℒₒᵣ⌝.Semiformula (n + 1)) :
+@[simp] lemma substs_bex (w : ⌜ℒₒᵣ⌝.SemitermVec n m) (t : ⌜ℒₒᵣ⌝.Semiterm n) (p : ⌜ℒₒᵣ⌝.Semiformula (n + 1)) :
     (p.bex t)^/[w] = (p^/[w.q]).bex (t^ᵗ/[w]) := by
   simp [Language.Semiformula.bex]
 
-def tSubstItr {n m : V} (w : ⌜ℒₒᵣ⌝.TSemitermVec n m) (p : ⌜ℒₒᵣ⌝.Semiformula (n + 1)) (k : V) :
+def tSubstItr {n m : V} (w : ⌜ℒₒᵣ⌝.SemitermVec n m) (p : ⌜ℒₒᵣ⌝.Semiformula (n + 1)) (k : V) :
     ⌜ℒₒᵣ⌝.SemiformulaVec m := ⟨substItr w.val p.val k, by
   intro i hi
   have : i < k := by simpa using hi
   simp only [gt_iff_lt, this, substItr_nth]
   exact p.prop.substs (w.prop.cons (by simp))⟩
 
-@[simp] lemma val_tSubstItr {n m : V} (w : ⌜ℒₒᵣ⌝.TSemitermVec n m) (p : ⌜ℒₒᵣ⌝.Semiformula (n + 1)) (k : V) :
+@[simp] lemma val_tSubstItr {n m : V} (w : ⌜ℒₒᵣ⌝.SemitermVec n m) (p : ⌜ℒₒᵣ⌝.Semiformula (n + 1)) (k : V) :
     (tSubstItr w p k).val = substItr w.val p.val k := by simp [tSubstItr]
 
-@[simp] lemma len_tSubstItr {n m : V} (w : ⌜ℒₒᵣ⌝.TSemitermVec n m) (p : ⌜ℒₒᵣ⌝.Semiformula (n + 1)) (k : V) :
+@[simp] lemma len_tSubstItr {n m : V} (w : ⌜ℒₒᵣ⌝.SemitermVec n m) (p : ⌜ℒₒᵣ⌝.Semiformula (n + 1)) (k : V) :
     len (tSubstItr w p k).val = k := by simp
 
-lemma nth_tSubstItr {n m : V} (w : ⌜ℒₒᵣ⌝.TSemitermVec n m) (p : ⌜ℒₒᵣ⌝.Semiformula (n + 1)) (k : V) {i} (hi : i < k) :
+lemma nth_tSubstItr {n m : V} (w : ⌜ℒₒᵣ⌝.SemitermVec n m) (p : ⌜ℒₒᵣ⌝.Semiformula (n + 1)) (k : V) {i} (hi : i < k) :
     (tSubstItr w p k).nth i (by simp [hi]) = p.substs (↑(k - (i + 1)) ∷ᵗ w) := by ext; simp [tSubstItr, Language.Semiformula.substs, hi]
 
-lemma nth_tSubstItr' {n m : V} (w : ⌜ℒₒᵣ⌝.TSemitermVec n m) (p : ⌜ℒₒᵣ⌝.Semiformula (n + 1)) (k : V) {i} (hi : i < k) :
+lemma nth_tSubstItr' {n m : V} (w : ⌜ℒₒᵣ⌝.SemitermVec n m) (p : ⌜ℒₒᵣ⌝.Semiformula (n + 1)) (k : V) {i} (hi : i < k) :
     (tSubstItr w p k).nth (k - (i + 1)) (by simpa using sub_succ_lt_self hi) = p.substs (↑i ∷ᵗ w) := by
   ext; simp [tSubstItr, Language.Semiformula.substs, hi, sub_succ_lt_self hi, sub_succ_lt_selfs hi]
 
-@[simp] lemma neg_conj_tSubstItr {n m : V} (w : ⌜ℒₒᵣ⌝.TSemitermVec n m) (p : ⌜ℒₒᵣ⌝.Semiformula (n + 1)) (k : V) :
+@[simp] lemma neg_conj_tSubstItr {n m : V} (w : ⌜ℒₒᵣ⌝.SemitermVec n m) (p : ⌜ℒₒᵣ⌝.Semiformula (n + 1)) (k : V) :
     ~(tSubstItr w p k).conj = (tSubstItr w (~p) k).disj := by
   ext; simp [neg_conj_substItr p.prop w.prop]
 
-@[simp] lemma neg_disj_tSubstItr {n m : V} (w : ⌜ℒₒᵣ⌝.TSemitermVec n m) (p : ⌜ℒₒᵣ⌝.Semiformula (n + 1)) (k : V) :
+@[simp] lemma neg_disj_tSubstItr {n m : V} (w : ⌜ℒₒᵣ⌝.SemitermVec n m) (p : ⌜ℒₒᵣ⌝.Semiformula (n + 1)) (k : V) :
     ~(tSubstItr w p k).disj = (tSubstItr w (~p) k).conj := by
   ext; simp [neg_disj_substItr p.prop w.prop]
 
-@[simp] lemma substs_conj_tSubstItr {n m l : V} (v : ⌜ℒₒᵣ⌝.TSemitermVec m l) (w : ⌜ℒₒᵣ⌝.TSemitermVec n m) (p : ⌜ℒₒᵣ⌝.Semiformula (n + 1)) (k : V) :
+@[simp] lemma substs_conj_tSubstItr {n m l : V} (v : ⌜ℒₒᵣ⌝.SemitermVec m l) (w : ⌜ℒₒᵣ⌝.SemitermVec n m) (p : ⌜ℒₒᵣ⌝.Semiformula (n + 1)) (k : V) :
     (tSubstItr w p k).conj.substs v = (tSubstItr (w.substs v) p k).conj := by
-  ext; simp [Language.Semiformula.substs, Language.TSemitermVec.substs]
+  ext; simp [Language.Semiformula.substs, Language.SemitermVec.substs]
   rw [substs_conj_substItr p.prop w.prop v.prop]
 
-@[simp] lemma substs_disj_tSubstItr {n m l : V} (v : ⌜ℒₒᵣ⌝.TSemitermVec m l) (w : ⌜ℒₒᵣ⌝.TSemitermVec n m) (p : ⌜ℒₒᵣ⌝.Semiformula (n + 1)) (k : V) :
+@[simp] lemma substs_disj_tSubstItr {n m l : V} (v : ⌜ℒₒᵣ⌝.SemitermVec m l) (w : ⌜ℒₒᵣ⌝.SemitermVec n m) (p : ⌜ℒₒᵣ⌝.Semiformula (n + 1)) (k : V) :
     (tSubstItr w p k).disj.substs v = (tSubstItr (w.substs v) p k).disj := by
-  ext; simp [Language.Semiformula.substs, Language.TSemitermVec.substs]
+  ext; simp [Language.Semiformula.substs, Language.SemitermVec.substs]
   rw [substs_disj_substItr p.prop w.prop v.prop]
 
 /-
