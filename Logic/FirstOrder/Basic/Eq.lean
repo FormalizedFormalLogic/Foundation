@@ -64,17 +64,36 @@ abbrev ConsequenceWithEq (M : Type*) [Semantics (Sentence L) M] (T : Theory L) (
 
 abbrev Consequence₀WithEq (T : Theory L) (σ : Sentence L) : Prop := T⁼ ⊨ σ
 
+structure EquationalTheory (L : Language) [Semiformula.Operator.Eq L] where
+  theory : Set (Sentence L)
+
 notation T:45 " ⊨₌[" M "] " σ:46 => ConsequenceWithEq M T σ
 
 notation T:45 " ⊨₌ " σ:46 => Consequence₀WithEq T σ
 
-abbrev ProofWithEq (T : Theory L) (σ : Sentence L) : Type _ := T⁼ ⊢ σ
+namespace EquationalTheory
 
-abbrev ProvableWithEq (T : Theory L) (σ : Sentence L) : Prop := T⁼ ⊢! σ
+def toTheory (T : EquationalTheory L) : Theory L := T.theory⁼
+
+instance : Coe (Theory L) (EquationalTheory L)  := ⟨fun T ↦ ⟨T⟩⟩
+
+instance : Coe (EquationalTheory L) (Theory L) := ⟨toTheory⟩
+
+instance : System (Sentence L) (EquationalTheory L) := ⟨fun T σ ↦ T.toTheory ⊢ σ⟩
+
+abbrev ProofWithEq (T : Theory L) (σ : Sentence L) : Type _ := (T : EquationalTheory L) ⊢ σ
+
+abbrev ProvableWithEq (T : Theory L) (σ : Sentence L) : Prop := (T : EquationalTheory L) ⊢! σ
 
 infix:45 " ⊢₌ " => ProofWithEq
 
 infix:45 " ⊢₌! " => ProvableWithEq
+
+variable {T : EquationalTheory L}
+
+lemma provable_iff {σ : Sentence L} : T ⊢! σ ↔ T.theory⁼ ⊢! σ := by rfl
+
+end EquationalTheory
 
 namespace Structure
 

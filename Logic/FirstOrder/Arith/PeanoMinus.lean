@@ -1,4 +1,4 @@
-import Logic.FirstOrder.Completeness.Lemmata
+import Logic.FirstOrder.Completeness.Corollaries
 import Logic.FirstOrder.Arith.Model
 import Logic.Vorspiel.ExistsUnique
 import Mathlib.Algebra.Order.Monoid.Canonical.Defs
@@ -222,7 +222,7 @@ theorem sigma_one_completeness [𝐄𝐐 ≼ T] [𝐏𝐀⁻ ≼ T] {σ : Senten
 theorem sigma_one_completeness_iff [𝐏𝐀⁻ ≼ T] [ℕ ⊧ₘ* T] {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
     ℕ ⊧ₘ σ ↔ T ⊢₌! σ :=
   haveI : 𝐏𝐀⁻ ≼ T⁼ := System.Subtheory.comp (𝓣 := T) inferInstance inferInstance
-  ⟨fun h ↦ sigma_one_completeness hσ h, fun h ↦ consequence_iff_add_eq.mp (sound₀! h) ℕ inferInstance⟩
+  ⟨fun h ↦ sigma_one_completeness (T := T⁼) hσ h, fun h ↦ consequence_iff_add_eq.mp (sound₀! h) ℕ inferInstance⟩
 
 end FirstOrder.Arith
 

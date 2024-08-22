@@ -212,8 +212,7 @@ instance Standard.models_trueArith : ℕ ⊧ₘ* 𝐓𝐀 :=
 
 variable (T : Theory ℒₒᵣ) [𝐄𝐐 ≼ T]
 
-lemma oRing_consequence_of (σ : Sentence ℒₒᵣ)
-    (H : ∀ (M : Type*) [ORingStruc M] [M ⊧ₘ* T], M ⊧ₘ σ) :
+lemma oRing_consequence_of (σ : Sentence ℒₒᵣ) (H : ∀ (M : Type*) [ORingStruc M] [M ⊧ₘ* T], M ⊧ₘ σ) :
     T ⊨ σ := consequence_of T σ fun M _ s _ _ ↦ by
   rcases standardModel_unique M s
   exact H M

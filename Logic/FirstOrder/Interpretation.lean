@@ -1,6 +1,6 @@
 import Logic.FirstOrder.Basic
 import Logic.FirstOrder.Completeness.Completeness
-import Logic.FirstOrder.Completeness.Lemmata
+import Logic.FirstOrder.Completeness.Corollaries
 import Logic.Vorspiel.ExistsUnique
 
 namespace LO.FirstOrder

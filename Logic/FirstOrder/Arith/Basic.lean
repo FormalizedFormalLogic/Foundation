@@ -196,6 +196,8 @@ lemma consistent_of_sound [SoundOn T F] (hF : ⊥ ∈ F) : System.Consistent T :
 
 end
 
+section
+
 variable {L : Language.{u}} [L.ORing] (T : Theory L) [𝐄𝐐 ≼ T]
 
 lemma consequence_of (σ : Sentence L)
@@ -209,6 +211,26 @@ lemma consequence_of (σ : Sentence L)
   letI : Structure.Model L M ⊧ₘ* T :=
     ((Structure.ElementaryEquiv.modelsTheory (Structure.Model.elementaryEquiv L M)).mp hT)
   (Structure.ElementaryEquiv.models (Structure.Model.elementaryEquiv L M)).mpr (H (Structure.Model L M))
+
+end
+
+section
+
+open Encodable Semiterm.Operator.GoedelNumber
+
+instance {α} [Encodable α] : Semiterm.Operator.GoedelNumber ℒₒᵣ α :=
+  Semiterm.Operator.GoedelNumber.ofEncodable
+
+lemma goedelNumber_def {α} [Encodable α] (a : α) :
+  goedelNumber a = Semiterm.Operator.encode ℒₒᵣ a := rfl
+
+lemma goedelNumber'_def {α} [Encodable α] (a : α) :
+  (⌜a⌝ : Semiterm ℒₒᵣ ξ n) = Semiterm.Operator.encode ℒₒᵣ a := rfl
+
+@[simp] lemma encode_encode_eq {α} [Encodable α] (a : α) :
+    (goedelNumber (encode a) : Semiterm.Const ℒₒᵣ) = goedelNumber a := by simp [Semiterm.Operator.encode, goedelNumber_def]
+
+end
 
 end Arith
 
