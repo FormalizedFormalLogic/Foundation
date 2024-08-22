@@ -135,6 +135,18 @@ lemma codeOfPartrec'_spec {k} {f : Vector ℕ k →. ℕ} (hf : Nat.Partrec' f) 
     exact ⟨c, models_code hc⟩
   exact Classical.epsilon_spec this y v
 
+instance {α} [Encodable α] : Semiterm.Operator.GoedelNumber ℒₒᵣ α :=
+  Semiterm.Operator.GoedelNumber.ofEncodable
+
+lemma goedelNumber_def {α} [Encodable α] (a : α) :
+  goedelNumber a = Semiterm.Operator.encode ℒₒᵣ a := rfl
+
+lemma goedelNumber'_def {α} [Encodable α] (a : α) :
+  (⌜a⌝ : Semiterm ℒₒᵣ ξ n) = Semiterm.Operator.encode ℒₒᵣ a := rfl
+
+@[simp] lemma encode_encode_eq {α} [Encodable α] (a : α) :
+    (goedelNumber (encode a) : Semiterm.Const ℒₒᵣ) = goedelNumber a := by simp [Semiterm.Operator.encode, goedelNumber_def]
+
 namespace FirstIncompleteness
 
 attribute [-instance]
@@ -184,19 +196,6 @@ lemma provable_computable_code_uniq {k} {f : Vector ℕ k → ℕ}
     intro x; constructor
     · intro H; exact code_uniq H Hfv
     · rintro rfl; simpa))
-
-/-- This instance is scoped since we will define canonical Gödel numbering when formalizing G2.  -/
-scoped instance {α} [Primcodable α] : Semiterm.Operator.GoedelNumber ℒₒᵣ α :=
-  Semiterm.Operator.GoedelNumber.ofEncodable
-
-lemma goedelNumber_def {α} [Primcodable α] (a : α) :
-  goedelNumber a = Semiterm.Operator.encode ℒₒᵣ a := rfl
-
-lemma goedelNumber'_def {α} [Primcodable α] (a : α) :
-  (⌜a⌝ : Semiterm ℒₒᵣ ξ n) = Semiterm.Operator.encode ℒₒᵣ a := rfl
-
-@[simp] lemma encode_encode_eq {α} [Primcodable α] (a : α) :
-    (goedelNumber (encode a) : Semiterm.Const ℒₒᵣ) = goedelNumber a := by simp [Semiterm.Operator.encode, goedelNumber_def]
 
 variable {α β : Type*} {σ : Type*} [Primcodable α] [Primcodable β] [Primcodable σ]
 

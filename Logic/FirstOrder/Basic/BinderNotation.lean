@@ -41,6 +41,7 @@ syntax:70 first_order_term " ^' " num  : first_order_term
 syntax:max first_order_term "²"  : first_order_term
 syntax:max first_order_term "³"  : first_order_term
 syntax:max first_order_term "⁴"  : first_order_term
+syntax:max "⌜" term:max "⌝" : first_order_term
 
 syntax:67  "exp " first_order_term:68 : first_order_term
 
@@ -51,16 +52,12 @@ macro_rules
     let some x := binders.getIdx? x | Macro.throwErrorAt x "error: variable did not found."
     let i := Syntax.mkNumLit (toString x)
     `(#$i)
-  | `(‘ $_* | #$x:term ’)            => do
-    `(#$x)
-  | `(‘ $_* | &$x:term ’)            => do
-    `(&$x)
-  | `(‘ $_* | $m:num ’)              => do
-    `(@Semiterm.Operator.const _ _ _ (Operator.numeral _ $m))
-  | `(‘ $_* | ↑$m:term ’)              => do
-    `(@Semiterm.Operator.const _ _ _ (Operator.numeral _ $m))
-  | `(‘ $_* | ⋆ ’)                   => do
-    `(Operator.const Operator.Star.star)
+  | `(‘ $_* | #$x:term ’)            => `(#$x)
+  | `(‘ $_* | &$x:term ’)            => `(&$x)
+  | `(‘ $_* | $m:num ’)              => `(@Semiterm.Operator.const _ _ _ (Operator.numeral _ $m))
+  | `(‘ $_* | ↑$m:term ’)            => `(@Semiterm.Operator.const _ _ _ (Operator.numeral _ $m))
+  | `(‘ $_* | ⌜ $x:term ⌝ ’)         => `(⌜$x⌝)
+  | `(‘ $_* | ⋆ ’)                   => `(Operator.const Operator.Star.star)
   | `(‘ $binders* | $e₁ + $e₂ ’)     => `(Semiterm.Operator.Add.add.operator ![‘ $binders* | $e₁ ’, ‘ $binders* | $e₂ ’])
   | `(‘ $binders* | $e₁ * $e₂ ’)     => `(Semiterm.Operator.Mul.mul.operator ![‘ $binders* | $e₁ ’, ‘ $binders* | $e₂ ’])
   | `(‘ $binders* | $e₁ ^ $e₂ ’)     => `(Semiterm.Operator.Pow.pow.operator ![‘ $binders* | $e₁ ’, ‘ $binders* | $e₂ ’])
@@ -71,10 +68,10 @@ macro_rules
   | `(‘ $binders* | exp $e ’)        => `(Semiterm.Operator.Exp.exp.operator ![‘ $binders* | $e ’])
   | `(‘ $_*       | !!$t:term ’)     => `($t)
   | `(‘ $_*       | .!!$t:term ’)    => `(Rew.emb $t)
-  | `(‘ $binders* | !$t:term $vs:first_order_term* ’)   => do
+  | `(‘ $binders* | !$t:term $vs:first_order_term* ’)    => do
     let v ← vs.foldrM (β := Lean.TSyntax _) (init := ← `(![])) (fun a s => `(‘ $binders* | $a ’ :> $s))
     `(Rew.substs $v $t)
-  | `(‘ $binders* | !$t:term $vs:first_order_term* ⋯ ’) =>
+  | `(‘ $binders* | !$t:term $vs:first_order_term* ⋯ ’)  =>
     do
     let length := Syntax.mkNumLit (toString binders.size)
     let v ← vs.foldrM (β := Lean.TSyntax _) (init := ← `(fun x ↦ #(finSuccItr x $length))) (fun a s => `(‘ $binders* | $a ’ :> $s))

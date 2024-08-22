@@ -159,7 +159,7 @@ lemma numeral_add_two : numeral L (z + 2) = Operator.Add.add.comp ![numeral L (z
   numeral_succ (by simp)
 
 protected abbrev encode (L : Language) [Operator.Zero L] [Operator.One L] [Operator.Add L]
-    {α : Type*} [Primcodable α] (a : α) : Semiterm.Const L :=
+    {α : Type*} [Encodable α] (a : α) : Semiterm.Const L :=
   Semiterm.Operator.numeral L (Encodable.encode a)
 
 end numeral
@@ -212,8 +212,7 @@ abbrev goedelNumber' (a : α) : Semiterm L ξ n := const (goedelNumber a)
 
 instance : GoedelQuote α (Semiterm L ξ n) := ⟨goedelNumber'⟩
 
-def ofEncodable
-    [Operator.Zero L] [Operator.One L] [Operator.Add L] {α : Type*} [Primcodable α] : GoedelNumber L α := ⟨Operator.encode L⟩
+def ofEncodable [Operator.Zero L] [Operator.One L] [Operator.Add L] {α : Type*} [Encodable α] : GoedelNumber L α := ⟨Operator.encode L⟩
 
 end GoedelNumber
 
