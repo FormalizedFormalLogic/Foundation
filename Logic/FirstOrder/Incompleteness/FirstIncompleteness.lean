@@ -21,6 +21,10 @@ namespace Arith
 
 namespace FirstIncompleteness
 
+attribute [-instance]
+  LO.FirstOrder.Semiterm.encodable
+  LO.FirstOrder.Semiformula.encodable
+
 variable {T : Theory ℒₒᵣ} [𝐄𝐐 ≼ T] [𝐏𝐀⁻ ≼ T] [DecidablePred T] [SigmaOneSound T] [Theory.Computable T]
 
 variable (T)
