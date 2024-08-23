@@ -107,14 +107,14 @@ macro_rules | `(tactic| trivial) => `(tactic| apply complementary_mem $ by assum
 lemma complementary_comp (h : p ∈ P) : -p ∈ P⁻ := by simp [complementary]; tauto;
 macro_rules | `(tactic| trivial) => `(tactic| apply complementary_comp $ by assumption)
 
-lemma complementary_mem_box [P.SubformulaClosed] : □p ∈ P⁻ → □p ∈ P := by
+lemma complementary_mem_box (hi : ∀ {q r}, q ⟶ r ∈ P → q ∈ P := by trivial) : □p ∈ P⁻ → □p ∈ P := by
   simp [complementary];
   intro h;
   rcases h with (h | ⟨q, hq, eq⟩);
   . assumption;
   . replace eq := Formula.complement.resort_box eq;
     subst eq;
-    trivial;
+    exact hi hq;
 
 class ComplementaryClosed (P : Formulae α) (S : Formulae α) : Prop where
   subset : P ⊆ S⁻

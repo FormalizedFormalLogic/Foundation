@@ -99,9 +99,8 @@ private lemma Grz_truthlemma.lemma1
     simp;
     tauto;
   . have := X.closed.subset hr;
-
     left;
-    sorry;
+    exact Formulae.complementary_mem_box GrzSubformulas.mem_imp₁ this;
   . right; simp;
     use q;
     constructor;
