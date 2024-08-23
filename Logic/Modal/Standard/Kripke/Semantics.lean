@@ -666,4 +666,21 @@ lemma DefinesKripkeFrameClass.ofAx (defines : Ax.DefinesKripkeFrameClass 𝔽) [
 
 end DeductionParameter
 
+namespace Kripke
+
+lemma exists_finite_frame : ¬𝔽ꟳ# ⊧ p ↔ ∃ F ∈ 𝔽.toFiniteFrameClass, ¬F# ⊧ p := by
+  constructor;
+  . simp;
+  . rintro ⟨F, hF₁, hF₂⟩;
+    simp; use F;
+    constructor;
+    . simp_all;
+    . assumption;
+
+class FiniteFrameProperty (Λ : DeductionParameter α) (𝔽 : FrameClass.{u}) where
+  [complete : Complete Λ 𝔽ꟳ#]
+  [sound : Sound Λ 𝔽ꟳ#]
+
+end Kripke
+
 end LO.Modal.Standard

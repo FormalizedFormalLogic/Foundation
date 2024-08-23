@@ -40,7 +40,7 @@ lemma multirel_def_multibox : Ω₁ ≺^[n] Ω₂ ↔ ∀ {p}, □^[n]p ∈ Ω�
     . intro h;
       obtain ⟨Ω, hΩ⟩ := lindenbaum (Λ := Λ) (T := (□''⁻¹Ω₁.theory ∪ ◇''^[n]Ω₂.theory)) $ by
         apply Theory.intro_union_consistent;
-        intro Γ Δ hΓ hΔ hC;
+        rintro Γ Δ ⟨hΓ, hΔ⟩ hC;
 
         replace hΓ : ∀ p ∈ Γ, □p ∈ Ω₁.theory := by simpa using hΓ;
         have dΓconj : Ω₁.theory *⊢[Λ]! □⋀Γ := membership_iff.mp $ iff_mem_box_conj.mpr hΓ;

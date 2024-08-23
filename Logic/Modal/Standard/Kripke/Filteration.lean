@@ -195,10 +195,6 @@ instance K_finite_complete : Complete (𝐊 : DeductionParameter α) AllFrameCla
   ) FM.Valuation
 ⟩
 
-class FiniteFrameProperty (Λ : DeductionParameter α) (𝔽 : FrameClass.{u}) where
-  [complete : Complete Λ 𝔽ꟳ#]
-  [sound : Sound Λ 𝔽ꟳ#]
-
 instance : FiniteFrameProperty (α := α) 𝐊 AllFrameClass where
 
 

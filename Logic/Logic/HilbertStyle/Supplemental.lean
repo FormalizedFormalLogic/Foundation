@@ -49,6 +49,8 @@ lemma efq_of_neg! [System.NegationEquiv 𝓢] [HasAxiomEFQ 𝓢] (h : 𝓢 ⊢! 
   have dnp : [p] ⊢[𝓢]! p ⟶ ⊥ := of'! $ neg_equiv'!.mp h;
   exact efq'! (dnp ⨀ FiniteContext.id!);
 
+lemma efq_of_neg₂! [System.NegationEquiv 𝓢] [HasAxiomEFQ 𝓢] (h : 𝓢 ⊢! p) : 𝓢 ⊢! ~p ⟶ q := efq_imply_not₂! ⨀ h
+
 def neg_mdp [System.NegationEquiv 𝓢] (hnp : 𝓢 ⊢ ~p) (hn : 𝓢 ⊢ p) : 𝓢 ⊢ ⊥ := (neg_equiv'.mp hnp) ⨀ hn
 -- infixl:90 "⨀" => neg_mdp
 
@@ -573,6 +575,14 @@ lemma conjconj_subset! (h : ∀ p, p ∈ Γ → p ∈ Δ) : 𝓢 ⊢! ⋀Δ ⟶ 
   | hnil => simp;
   | hsingle => simp_all; exact generalConj'! h;
   | hcons p Γ hne ih => simp_all; exact imply_right_and! (generalConj'! h.1) ih;
+
+lemma conjconj_provable! (h : ∀ p, p ∈ Γ → Δ ⊢[𝓢]! p) : 𝓢 ⊢! ⋀Δ ⟶ ⋀Γ :=
+  by induction Γ using List.induction_with_singleton with
+  | hnil => exact dhyp! verum!;
+  | hsingle => simp_all; exact provable_iff.mp h;
+  | hcons p Γ hne ih => simp_all; exact imply_right_and! (provable_iff.mp h.1) ih;
+
+lemma conjconj_provable₂! (h : ∀ p, p ∈ Γ → Δ ⊢[𝓢]! p) : Δ ⊢[𝓢]! ⋀Γ := provable_iff.mpr $ conjconj_provable! h
 
 lemma id_conj! (he : ∀ g ∈ Γ, g = p) : 𝓢 ⊢! p ⟶ ⋀Γ := by
   induction Γ using List.induction_with_singleton with
