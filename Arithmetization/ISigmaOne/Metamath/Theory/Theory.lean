@@ -99,7 +99,7 @@ def Language.Theory.singletonDef (p : FirstOrder.SyntacticFormula L) : L.lDef.TD
   ch := .ofZero (.mkSigma “x | x = ↑⌜p⌝” (by simp)) _
 
 instance const_defined_const (p : FirstOrder.SyntacticFormula L) : (Language.Theory.singleton V L p).Defined (Language.Theory.singletonDef p) where
-  defined := .of_zero (by intro v; simp [numeral_eq_natCast])
+  defined := .of_zero (by intro v; simp [numeral_eq_natCast, coe_quote])
 
 end
 
@@ -142,8 +142,8 @@ instance scheme_defined_scheme (φ : L.Scheme) {ps : pL.SchemeDef} [φ.Defined p
       (Language.Scheme.Defined.defined (V := V) (φ := φ)).df.iff, eq_comm]⟩
 
 def Language.Craig.toScheme {L : Arith.Language V} {pL : LDef} [Arith.Language.Defined L pL] (c : L.Craig) : L.Scheme where
-  scheme (x) := c.core x ^⋏ qqVerums 0 x
-  increasing (x) := le_trans (le_qqVerums 0 x) (le_of_lt <| by simp)
+  scheme (x) := c.core x ^⋏ qqVerums x
+  increasing (x) := le_trans (le_qqVerums x) (le_of_lt <| by simp)
 
 structure _root_.LO.FirstOrder.Arith.LDef.CraigDef (pL : LDef) where
   core : 𝚺₁.Semisentence 2
@@ -152,7 +152,7 @@ class Language.Craig.Defined (φ : L.Craig) (ps : outParam pL.CraigDef) : Prop w
   defined : 𝚺₁-Function₁ φ.core via ps.core
 
 def _root_.LO.FirstOrder.Arith.LDef.CraigDef.toSchemeDef {pL : LDef} (c : pL.CraigDef) : pL.SchemeDef where
-  core := .mkSigma “p x | ∃ p', !c.core p' x ∧ ∃ vs, !qqVerumsDef vs 0 x ∧ !qqAndDef p 0 p' vs” (by simp)
+  core := .mkSigma “p x | ∃ p', !c.core p' x ∧ ∃ vs, !qqVerumsDef vs x ∧ !qqAndDef p p' vs” (by simp)
 
 instance (φ : L.Craig) (c : pL.CraigDef) [φ.Defined c] : φ.toScheme.Defined c.toSchemeDef where
   defined := by intro v; simp [Language.Craig.toScheme, Arith.LDef.CraigDef.toSchemeDef, (Language.Craig.Defined.defined (φ := φ)).df.iff]
@@ -191,22 +191,22 @@ section thEQ
 def eqRefl : ⌜ℒₒᵣ⌝[V].Theory := Language.Theory.singleton V ℒₒᵣ “∀ x, x = x”
 
 def eqReplaceC : ⌜ℒₒᵣ⌝[V].Craig where
-  core := fun p ↦ if ⌜ℒₒᵣ⌝.Semiformula 1 p then ^∀[0] ^∀[1] (^#1 ^=[2] ^#0 ^→[⌜ℒₒᵣ⌝; 2] ⌜ℒₒᵣ⌝.substs 2 ?[^#1] p ^→[⌜ℒₒᵣ⌝; 2] ⌜ℒₒᵣ⌝.substs 2 ?[^#0] p) else 0
+  core := fun p ↦ if ⌜ℒₒᵣ⌝.IsSemiformula 1 p then ^∀ ^∀ (^#1 ^= ^#0 ^→[⌜ℒₒᵣ⌝] ⌜ℒₒᵣ⌝.substs ?[^#1] p ^→[⌜ℒₒᵣ⌝] ⌜ℒₒᵣ⌝.substs ?[^#0] p) else 0
 
 def eqReplaceCDef : p⌜ℒₒᵣ⌝.CraigDef where
   core := .mkSigma “σ p |
     ( !p⌜ℒₒᵣ⌝.isSemiformulaDef.pi 1 p →
       let x0 := qqBvarDef 0;
       let x1 := qqBvarDef 1;
-      let eq := qqEQDef 2 x1 x0;
+      let eq := qqEQDef x1 x0;
       let v0 := mkVec₁Def x0;
       let v1 := mkVec₁Def x1;
-      let p0 := p⌜ℒₒᵣ⌝.substsDef 2 v1 p;
-      let p1 := p⌜ℒₒᵣ⌝.substsDef 2 v0 p;
-      let imp0 := p⌜ℒₒᵣ⌝.impDef 2 p0 p1;
-      let imp1 := p⌜ℒₒᵣ⌝.impDef 2 eq imp0;
-      let all0 := qqAllDef 1 imp1;
-      !qqAllDef σ 0all0 ) ∧
+      let p0 := p⌜ℒₒᵣ⌝.substsDef v1 p;
+      let p1 := p⌜ℒₒᵣ⌝.substsDef v0 p;
+      let imp0 := p⌜ℒₒᵣ⌝.impDef p0 p1;
+      let imp1 := p⌜ℒₒᵣ⌝.impDef eq imp0;
+      let all0 := qqAllDef imp1;
+      !qqAllDef σ all0 ) ∧
     ( ¬!p⌜ℒₒᵣ⌝.isSemiformulaDef.sigma 1 p → σ = 0)” (by simp)
 
 instance : (eqReplaceC (V := V)).Defined eqReplaceCDef where
@@ -214,9 +214,9 @@ instance : (eqReplaceC (V := V)).Defined eqReplaceCDef where
     intro v
     simp [eqReplaceC, eqReplaceCDef,
       HierarchySymbol.Semiformula.val_sigma,
-      (semiformula_defined (LOR (V := V))).df.iff, (semiformula_defined (LOR (V := V))).proper.iff',
-      (substs_defined (LOR (V := V))).df.iff, (imp_defined (LOR (V := V))).df.iff]
-    by_cases h : ⌜ℒₒᵣ⌝.Semiformula 1 (v 1) <;> simp [h]
+      (Language.isSemiformula_defined (LOR (V := V))).df.iff, (Language.isSemiformula_defined (LOR (V := V))).proper.iff',
+      (Language.substs_defined (LOR (V := V))).df.iff, (Language.imp_defined (LOR (V := V))).df.iff]
+    by_cases h : ⌜ℒₒᵣ⌝.IsSemiformula 1 (v 1) <;> simp [h]
 
 variable (V)
 
@@ -238,8 +238,6 @@ notation "⌜𝐄𝐐'⌝[" V "]" => TTheory.thEQ (V := V)
 def TTheory.thEQ.eqRefl : ⌜𝐄𝐐'⌝[V] ⊢ (#'0 =' #'0).all := Language.Theory.TProof.byAxm <| by
   simp [Language.Theory.tmem, TTheory.thEQ, Theory.EQ, FirstOrder.Semiformula.quote_all, FirstOrder.Semiformula.quote_eq,
     Semiformula.Operator.eq_def, Semiterm.quote_bvar]
-
-
 
 end thEQ
 

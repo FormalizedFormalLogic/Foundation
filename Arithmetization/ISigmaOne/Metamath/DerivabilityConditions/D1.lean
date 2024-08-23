@@ -98,10 +98,10 @@ variable {T : SyntacticTheory L} [T.Δ₁Definable]
 
 open Classical
 
-@[simp] lemma formulaSet_codeIn_finset (Γ : Finset (SyntacticFormula L)) : (L.codeIn V).FormulaSet ⌜Γ⌝ := by
+@[simp] lemma formulaSet_codeIn_finset (Γ : Finset (SyntacticFormula L)) : (L.codeIn V).IsFormulaSet ⌜Γ⌝ := by
   intro x hx
   rcases Derivation3.Sequent.mem_codeIn hx with ⟨p, _, rfl⟩;
-  apply semiformula_quote
+  apply semiformula_quote (n := 0)
 
 open Derivation3
 
@@ -125,20 +125,20 @@ lemma quote_image_shift (Γ : Finset (SyntacticFormula L)) : (L.codeIn V).setShi
       (by simpa [quote_verum] using (Sequent.mem_codeIn_iff (V := V)).mpr h)
   case and Δ p q hpq dp dq ihp ihq =>
     apply Language.Theory.Derivation.andIntro
-      (by simpa using (Sequent.mem_codeIn_iff (V := V)).mpr hpq)
+      (by simpa [quote_and] using (Sequent.mem_codeIn_iff (V := V)).mpr hpq)
       ⟨by simp [fstidx_quote], ihp⟩
       ⟨by simp [fstidx_quote], ihq⟩
   case or Δ p q hpq d ih =>
     apply Language.Theory.Derivation.orIntro
-      (by simpa using (Sequent.mem_codeIn_iff (V := V)).mpr hpq)
+      (by simpa [quote_or] using (Sequent.mem_codeIn_iff (V := V)).mpr hpq)
       ⟨by simp [fstidx_quote], ih⟩
   case all Δ p h d ih =>
     apply Language.Theory.Derivation.allIntro
-      (by simpa using (Sequent.mem_codeIn_iff (V := V)).mpr h)
+      (by simpa [quote_all] using (Sequent.mem_codeIn_iff (V := V)).mpr h)
       ⟨by simp [fstidx_quote, quote_image_shift, free_quote], ih⟩
   case ex Δ p h t d ih =>
     apply Language.Theory.Derivation.exIntro
-      (by simpa using (Sequent.mem_codeIn_iff (V := V)).mpr h)
+      (by simpa [quote_ex] using (Sequent.mem_codeIn_iff (V := V)).mpr h)
       (semiterm_codeIn t)
       ⟨by simp [fstidx_quote, ←substs_quote, Language.substs₁], ih⟩
   case wk Δ Γ d h ih =>
@@ -167,7 +167,7 @@ section
 variable [L.ConstantInhabited] {T : Theory L} [T.Δ₁Definable]
 
 theorem provable_of_provable : T ⊢! p → (T.codeIn V).Provable ⌜p⌝ := fun h ↦ by
-  simpa [quote_semisentence_def] using derivable_of_quote (V := V) (provable_iff_derivable3'.mp h).some
+  simpa using derivable_of_quote (V := V) (provable_iff_derivable3'.mp h).some
 
 /-- Hilbert–Bernays provability condition D1 -/
 theorem tprovable_of_provable : T ⊢! σ → T.tCodeIn V ⊢! ⌜σ⌝ := fun h ↦ by

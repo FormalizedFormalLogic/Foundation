@@ -37,7 +37,7 @@ structure Language.Semiformula (n : V) where
 
 attribute [simp] Language.Semiformula.prop
 
-abbrev Language.TFormula := L.Semiformula 0
+abbrev Language.Formula := L.Semiformula 0
 
 variable {L}
 
