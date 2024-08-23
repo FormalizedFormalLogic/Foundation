@@ -99,7 +99,8 @@ private lemma Grz_truthlemma.lemma1
     simp;
     tauto;
   . have := X.closed.subset hr;
-    right;
+
+    left;
     sorry;
   . right; simp;
     use q;
@@ -109,7 +110,58 @@ private lemma Grz_truthlemma.lemma1
 
 private lemma Grz_truthlemma.lemma2
   {X : CCF 𝐆𝐫𝐳 (𝒮ᴳ p)} (hq₁ : □q ∈ 𝒮 p) (hq₂ : □q ∉ X.formulae)
-  : Formulae.Consistent 𝐆𝐫𝐳 ((X.formulae.prebox.box) ∪ {□(q ⟶ □q), -q}) := by sorry
+  : Formulae.Consistent 𝐆𝐫𝐳 ((X.formulae.prebox.box) ∪ {□(q ⟶ □q), -q}) := by
+    apply Formulae.intro_union_consistent;
+    rintro Γ₁ Γ₂ ⟨hΓ₁, hΓ₂⟩;
+    replace hΓ₂ : ∀ r ∈ Γ₂, r = □(q ⟶ □q) ∨ r = -q := by
+      intro r hr;
+      simpa using hΓ₂ r hr;
+
+    by_contra hC;
+    have : Γ₁ ⊢[𝐆𝐫𝐳]! ⋀Γ₂ ⟶ ⊥ := provable_iff.mpr $ and_imply_iff_imply_imply'!.mp hC;
+    have : Γ₁ ⊢[𝐆𝐫𝐳]! (□(q ⟶ □q) ⋏ -q) ⟶ ⊥ := imp_trans''! (by
+      suffices Γ₁ ⊢[𝐆𝐫𝐳]! ⋀[□(q ⟶ □q), -q] ⟶ ⋀Γ₂ by
+        simpa only [ne_eq, List.cons_ne_self, not_false_eq_true, List.conj₂_cons_nonempty, List.conj₂_singleton];
+      apply conjconj_subset!;
+      simpa using hΓ₂;
+    ) this;
+    have : Γ₁ ⊢[𝐆𝐫𝐳]! □(q ⟶ □q) ⟶ -q ⟶ ⊥ := and_imply_iff_imply_imply'!.mp this;
+    have : Γ₁ ⊢[𝐆𝐫𝐳]! □(q ⟶ □q) ⟶ q := by
+      rcases Formula.complement.or (p := q) with (hp | ⟨q, rfl⟩);
+      . rw [hp] at this;
+        exact imp_trans''! this dne!;
+      . simpa only [complement] using this;
+    have : (□'Γ₁) ⊢[𝐆𝐫𝐳]! □(□(q ⟶ □q) ⟶ q) := contextual_nec! this;
+    have : (□'Γ₁) ⊢[𝐆𝐫𝐳]! q := axiomGrz! ⨀ this;
+    have : (□'□'Γ₁) ⊢[𝐆𝐫𝐳]! □q := contextual_nec! this;
+    -- TODO: `contextual_axiomFour`
+    have : 𝐆𝐫𝐳 ⊢! ⋀□'□'Γ₁ ⟶ □q := provable_iff.mp this;
+    have : 𝐆𝐫𝐳 ⊢! □□⋀Γ₁ ⟶ □q := imp_trans''! (imp_trans''! (distribute_multibox_conj! (n := 2)) $ conjconj_subset! (by simp)) this;
+    have : 𝐆𝐫𝐳 ⊢! □⋀Γ₁ ⟶ □q := imp_trans''! axiomFour! this;
+    have : 𝐆𝐫𝐳 ⊢! ⋀□'Γ₁ ⟶ □q := imp_trans''! collect_box_conj! this;
+    have : 𝐆𝐫𝐳 ⊢! ⋀□'(X.formulae.prebox.box |>.toList) ⟶ □q := imp_trans''! (conjconj_subset! (by
+      simp;
+      intro r hr;
+      have := hΓ₁ _ hr; simp at this;
+      tauto;
+    )) this;
+    have : 𝐆𝐫𝐳 ⊢! ⋀□'(X.formulae.prebox.toList) ⟶ □q := imp_trans''! (conjconj_provable! (by
+      intro q hq;
+      simp at hq;
+      obtain ⟨r, hr, rfl⟩ := hq;
+      apply axiomFour'!;
+      apply FiniteContext.by_axm!;
+      simpa;
+    )) this;
+    have : X.formulae *⊢[𝐆𝐫𝐳]! □q := by
+      apply Context.provable_iff.mpr;
+      use □'X.formulae.prebox.toList;
+      constructor;
+      . simp;
+      . assumption;
+    have : □q ∈ X.formulae := membership_iff (by trivial) |>.mpr this;
+    contradiction;
+
 
 lemma Grz_truthlemma {X : (GrzCompleteModel p).World} (q_sub : q ∈ 𝒮 p) :
   Satisfies (GrzCompleteModel p) X q ↔ q ∈ X.formulae := by

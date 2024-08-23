@@ -733,6 +733,9 @@ variable [System.K 𝓢] [HasAxiomGrz 𝓢]
 def axiomGrz : 𝓢 ⊢ □(□(p ⟶ □p) ⟶ p) ⟶ p := HasAxiomGrz.Grz _
 @[simp] lemma axiomGrz! : 𝓢 ⊢! □(□(p ⟶ □p) ⟶ p) ⟶ p := ⟨axiomGrz⟩
 
+instance [HasAxiomGrz 𝓢] (Γ : FiniteContext F 𝓢) : HasAxiomGrz Γ := ⟨fun _ ↦ FiniteContext.of axiomGrz⟩
+instance [HasAxiomGrz 𝓢] (Γ : Context F 𝓢) : HasAxiomGrz Γ := ⟨fun _ ↦ Context.of axiomGrz⟩
+
 def dhyp_imp (h : 𝓢 ⊢ p ⟶ q) : 𝓢 ⊢ (r ⟶ p) ⟶ (r ⟶ q) := imply₂ (𝓢 := 𝓢) (p := r) (q := p) (r := q) ⨀ (dhyp r h)
 
 def ppq (h : 𝓢 ⊢ p ⟶ p ⟶ q) : 𝓢 ⊢ p ⟶ q := by
