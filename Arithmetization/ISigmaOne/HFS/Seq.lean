@@ -376,7 +376,7 @@ lemma mkSeq₂_defined : 𝚺₁-Function₂ (fun x y : V ↦ !⟦x, y⟧) via m
 
 instance mkSeq₂_definable : 𝚺₁-Function₂ (fun x y : V ↦ !⟦x, y⟧) := mkSeq₂_defined.to_definable
 
-instance mkSeq₂_definable' (Γ m) : Γ-[m + 1]-Function₂ (fun x y : V ↦ !⟦x, y⟧) := .of_sigmaOne mkSeq₂_definable _ _
+instance mkSeq₂_definable' (Γ m) : Γ-[m + 1]-Function₂ (fun x y : V ↦ !⟦x, y⟧) := mkSeq₂_definable.of_sigmaOne
 
 end
 
@@ -423,7 +423,7 @@ lemma mem_vectoSeq {n : ℕ} (v : Fin n → V) (i : Fin n) : ⟪(i : V), v i⟫ 
 
 end seqToVec
 
-lemma sigma₁_order_ball_induction {f : V → V → V} (hf : 𝚺₁-Function₂ f) {P : V → V → Prop} (hP : 𝚺₁-Relation P)
+lemma order_ball_induction_sigma1 {f : V → V → V} (hf : 𝚺₁-Function₂ f) {P : V → V → Prop} (hP : 𝚺₁-Relation P)
     (ind : ∀ x y, (∀ x' < x, ∀ y' ≤ f x y, P x' y') → P x y) : ∀ x y, P x y := by
   have maxf : ∀ x y, ∃ m, ∀ x' ≤ x, ∀ y' ≤ y, f x' y' ≤ m := by
     intro x y;
@@ -516,6 +516,73 @@ lemma sigma₁_order_ball_induction {f : V → V → V} (hf : 𝚺₁-Function�
           x' (by simp [tsub_tsub_cancel_of_le hi, hx']) y' hy'
       exact ih m₁ (by simp [m₁]) (by simp [m₁]) x'' (lt_succ_iff_le.mp (lt_of_lt_of_le hx'' hx')) y'' (le_trans hy'' this)
   exact this x (by rfl) y (lt_of_mem_rng hW₀) (by simpa using hW₀) x (by rfl) y (by rfl)
+
+lemma order_ball_induction_sigma1' {f : V → V} (hf : 𝚺₁-Function₁ f) {P : V → V → Prop} (hP : 𝚺₁-Relation P)
+    (ind : ∀ x y, (∀ x' < x, ∀ y' ≤ f y, P x' y') → P x y) : ∀ x y, P x y :=
+  have : 𝚺₁-Function₂ (fun _ ↦ f) := FirstOrder.Arith.HierarchySymbol.BoldfaceFunction.comp₁ (by simp)
+  order_ball_induction_sigma1 this hP ind
+
+lemma order_ball_induction₂_sigma1 {fy fz : V → V → V → V}
+    (hfy : 𝚺₁-Function₃ fy) (hfz : 𝚺₁-Function₃ fz) {P : V → V → V → Prop} (hP : 𝚺₁-Relation₃ P)
+    (ind : ∀ x y z, (∀ x' < x, ∀ y' ≤ fy x y z, ∀ z' ≤ fz x y z, P x' y' z') → P x y z) : ∀ x y z, P x y z := by
+  let Q : V → V → Prop := fun x w ↦ P x (π₁ w) (π₂ w)
+  have hQ : 𝚺₁-Relation Q := by
+    simp [Q]
+    apply HierarchySymbol.Boldface.comp₃ (HierarchySymbol.BoldfaceFunction.var _)
+      (HierarchySymbol.BoldfaceFunction.comp₁ (HierarchySymbol.BoldfaceFunction.var _))
+      (HierarchySymbol.BoldfaceFunction.comp₁ (HierarchySymbol.BoldfaceFunction.var _))
+  let f : V → V → V := fun x w ↦ ⟪fy x (π₁ w) (π₂ w), fz x (π₁ w) (π₂ w)⟫
+  have hf : 𝚺₁-Function₂ f := by
+    simp [f]
+    apply HierarchySymbol.BoldfaceFunction.comp₂
+    · apply HierarchySymbol.BoldfaceFunction.comp₃ (HierarchySymbol.BoldfaceFunction.var _)
+      · apply HierarchySymbol.BoldfaceFunction.comp₁ (HierarchySymbol.BoldfaceFunction.var _)
+      · apply HierarchySymbol.BoldfaceFunction.comp₁ (HierarchySymbol.BoldfaceFunction.var _)
+    · apply HierarchySymbol.BoldfaceFunction.comp₃ (HierarchySymbol.BoldfaceFunction.var _)
+      · apply HierarchySymbol.BoldfaceFunction.comp₁ (HierarchySymbol.BoldfaceFunction.var _)
+      · apply HierarchySymbol.BoldfaceFunction.comp₁ (HierarchySymbol.BoldfaceFunction.var _)
+  intro x y z
+  simpa [Q] using order_ball_induction_sigma1 hf hQ (fun x w ih ↦
+    ind x (π₁ w) (π₂ w) (fun x' hx' y' hy' z' hz' ↦ by simpa [Q] using ih x' hx' ⟪y', z'⟫ (pair_le_pair hy' hz')))
+    x ⟪y, z⟫
+
+lemma order_ball_induction₃_sigma1 {fy fz fw : V → V → V → V → V}
+    (hfy : 𝚺₁-Function₄ fy) (hfz : 𝚺₁-Function₄ fz) (hfw : 𝚺₁-Function₄ fw) {P : V → V → V → V → Prop} (hP : 𝚺₁-Relation₄ P)
+    (ind : ∀ x y z w, (∀ x' < x, ∀ y' ≤ fy x y z w, ∀ z' ≤ fz x y z w, ∀ w' ≤ fw x y z w, P x' y' z' w') → P x y z w) : ∀ x y z w, P x y z w := by
+  let Q : V → V → Prop := fun x v ↦ P x (π₁ v) (π₁ (π₂ v)) (π₂ (π₂ v))
+  have hQ : 𝚺₁-Relation Q := by
+    simp [Q]
+    apply HierarchySymbol.Boldface.comp₄
+      (HierarchySymbol.BoldfaceFunction.var _)
+      (HierarchySymbol.BoldfaceFunction.comp₁ <| HierarchySymbol.BoldfaceFunction.var _)
+      (HierarchySymbol.BoldfaceFunction.comp₁ <| HierarchySymbol.BoldfaceFunction.comp₁ <| HierarchySymbol.BoldfaceFunction.var _)
+      (HierarchySymbol.BoldfaceFunction.comp₁ <| HierarchySymbol.BoldfaceFunction.comp₁ <| HierarchySymbol.BoldfaceFunction.var _)
+  let f : V → V → V := fun x v ↦ ⟪fy x (π₁ v) (π₁ (π₂ v)) (π₂ (π₂ v)), fz x (π₁ v) (π₁ (π₂ v)) (π₂ (π₂ v)), fw x (π₁ v) (π₁ (π₂ v)) (π₂ (π₂ v))⟫
+  have hf : 𝚺₁-Function₂ f := by
+    simp [f]
+    apply HierarchySymbol.BoldfaceFunction.comp₂
+    · apply HierarchySymbol.BoldfaceFunction.comp₄
+        (HierarchySymbol.BoldfaceFunction.var _)
+        (HierarchySymbol.BoldfaceFunction.comp₁ <| HierarchySymbol.BoldfaceFunction.var _)
+        (HierarchySymbol.BoldfaceFunction.comp₁ <| HierarchySymbol.BoldfaceFunction.comp₁ <| HierarchySymbol.BoldfaceFunction.var _)
+        (HierarchySymbol.BoldfaceFunction.comp₁ <| HierarchySymbol.BoldfaceFunction.comp₁ <| HierarchySymbol.BoldfaceFunction.var _)
+    · apply HierarchySymbol.BoldfaceFunction.comp₂
+      · apply HierarchySymbol.BoldfaceFunction.comp₄
+          (HierarchySymbol.BoldfaceFunction.var _)
+          (HierarchySymbol.BoldfaceFunction.comp₁ <| HierarchySymbol.BoldfaceFunction.var _)
+          (HierarchySymbol.BoldfaceFunction.comp₁ <| HierarchySymbol.BoldfaceFunction.comp₁ <| HierarchySymbol.BoldfaceFunction.var _)
+          (HierarchySymbol.BoldfaceFunction.comp₁ <| HierarchySymbol.BoldfaceFunction.comp₁ <| HierarchySymbol.BoldfaceFunction.var _)
+      · apply HierarchySymbol.BoldfaceFunction.comp₄
+          (HierarchySymbol.BoldfaceFunction.var _)
+          (HierarchySymbol.BoldfaceFunction.comp₁ <| HierarchySymbol.BoldfaceFunction.var _)
+          (HierarchySymbol.BoldfaceFunction.comp₁ <| HierarchySymbol.BoldfaceFunction.comp₁ <| HierarchySymbol.BoldfaceFunction.var _)
+          (HierarchySymbol.BoldfaceFunction.comp₁ <| HierarchySymbol.BoldfaceFunction.comp₁ <| HierarchySymbol.BoldfaceFunction.var _)
+  intro x y z w
+  have := order_ball_induction_sigma1 hf hQ (fun x v ih ↦
+    ind x (π₁ v) (π₁ (π₂ v)) (π₂ (π₂ v)) (fun x' hx' y' hy' z' hz' w' hw' ↦ by
+      simpa [Q] using ih x' hx' ⟪y', z', w'⟫ (pair_le_pair hy' <| pair_le_pair hz' hw')))
+    x ⟪y, z, w⟫
+  simpa [Q] using this
 
 end LO.Arith
 

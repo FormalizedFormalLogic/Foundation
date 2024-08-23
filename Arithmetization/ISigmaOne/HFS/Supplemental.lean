@@ -109,8 +109,7 @@ lemma seqExp_defined : 𝚺₁-Function₂ (seqExp : V → V → V) via seqExpDe
 
 instance seqExp_definable : 𝚺₁-Function₂ (seqExp : V → V → V) := seqExp_defined.to_definable
 
-@[simp, definability] instance seqExp_definable' (Γ) : Γ-[m + 1]-Function₂ (seqExp : V → V → V) :=
-  .of_sigmaOne seqExp_definable _ _
+instance seqExp_definable' (Γ) : Γ-[m + 1]-Function₂ (seqExp : V → V → V) := seqExp_definable.of_sigmaOne
 
 lemma mem_seqExp_iff {s a k : V} : s ∈ a ^ˢ k ↔ Seq s ∧ lh s = k ∧ (∀ i z, ⟪i, z⟫ ∈ s → z ∈ a) := by
   induction k using induction_pi1 generalizing s

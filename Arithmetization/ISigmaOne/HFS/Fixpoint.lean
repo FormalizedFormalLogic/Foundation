@@ -128,9 +128,7 @@ lemma termSet_defined : 𝚺₁.DefinedFunction (fun v ↦ c.limSeq (v ·.succ) 
 instance limSeq_definable :
   𝚺₁.BoldfaceFunction (fun v ↦ c.limSeq (v ·.succ) (v 0)) := c.termSet_defined.to_definable
 
-@[simp, definability] instance limSeq_definable' (Γ) :
-    Γ-[m + 1].BoldfaceFunction (fun v ↦ c.limSeq (v ·.succ) (v 0))  :=
-  .of_sigmaOne c.limSeq_definable _ _
+@[simp, definability] instance limSeq_definable' (Γ) : Γ-[m + 1].BoldfaceFunction (fun v ↦ c.limSeq (v ·.succ) (v 0)) := c.limSeq_definable.of_sigmaOne
 
 lemma mem_limSeq_succ_iff {x s : V} :
     x ∈ c.limSeq v (s + 1) ↔ x ≤ s ∧ c.Φ v {z | z ∈ c.limSeq v s} x := by simp [limSeq_succ, mem_succ_iff]

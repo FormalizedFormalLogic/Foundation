@@ -66,6 +66,9 @@ abbrev DefinedFunction {k} (f : (Fin k → V) → V) (p : ℌ.Semisentence (k + 
 
 variable (ℌ)
 
+abbrev DefinedFunction₀ (c : V) (p : ℌ.Semisentence 1) : Prop :=
+  DefinedFunction (fun _ => c) p
+
 abbrev DefinedFunction₁ (f : V → V) (p : ℌ.Semisentence 2) : Prop :=
   DefinedFunction (fun v => f (v 0)) p
 
@@ -95,6 +98,8 @@ abbrev BoldfaceRel₆ (P : V → V → V → V → V → V → Prop) : Prop := �
 
 abbrev BoldfaceFunction (f : (Fin k → V) → V) : Prop := ℌ.Boldface (k := k + 1) (fun v ↦ v 0 = f (v ·.succ))
 
+abbrev BoldfaceFunction₀ (c : V) : Prop := ℌ.BoldfaceFunction (k := 0) (fun _ ↦ c)
+
 abbrev BoldfaceFunction₁ (f : V → V) : Prop := ℌ.BoldfaceFunction (k := 1) (fun v ↦ f (v 0))
 
 abbrev BoldfaceFunction₂ (f : V → V → V) : Prop := ℌ.BoldfaceFunction (k := 2) (fun v ↦ f (v 0) (v 1))
@@ -114,6 +119,8 @@ notation Γ "-Relation " P " via " p => DefinedRel Γ P p
 notation Γ "-Relation₃ " P " via " p => DefinedRel₃ Γ P p
 
 notation Γ "-Relation₄ " P " via " p => DefinedRel₄ Γ P p
+
+notation Γ "-Function₀ " c " via " p => DefinedFunction₀ Γ c p
 
 notation Γ "-Function₁ " f " via " p => DefinedFunction₁ Γ f p
 
@@ -389,7 +396,7 @@ lemma of_sigma_of_pi (hσ : 𝚺-[m].Boldface P) (hπ : 𝚷-[m].Boldface P) : �
 lemma of_zero (h : Γ'-[0].Boldface P) : ℌ.Boldface P := by
   rcases h with ⟨⟨p, hp⟩⟩; exact hp.to_definable₀
 
-lemma of_deltaOne (h : 𝚫₁.Boldface P) (Γ m) : Γ-[m + 1].Boldface P := by
+lemma of_deltaOne (h : 𝚫₁.Boldface P) {Γ m} : Γ-[m + 1].Boldface P := by
   rcases h with ⟨⟨p, hp⟩⟩; exact hp.to_definable_deltaOne
 
 instance [𝚺₀.Boldface P] (ℌ : HierarchySymbol) : ℌ.Boldface P := Boldface.of_zero (Γ' := 𝚺) (ℌ := ℌ) inferInstance
@@ -683,7 +690,7 @@ instance {k} {f : (Fin k → V) → V} [h : 𝚺-[m].BoldfaceFunction f] : 𝚫-
 instance {k} {f : (Fin k → V) → V} [𝚺₀.BoldfaceFunction f] : ℌ.BoldfaceFunction f := inferInstance
 
 lemma of_sigmaOne {k} {f : (Fin k → V) → V}
-    (h : 𝚺₁.BoldfaceFunction f) (Γ m) : Γ-[m + 1].BoldfaceFunction f := Boldface.of_deltaOne (graph_delta h) Γ m
+    (h : 𝚺₁.BoldfaceFunction f) {Γ m} : Γ-[m + 1].BoldfaceFunction f := Boldface.of_deltaOne (graph_delta h)
 
 @[simp] lemma var {k} (i : Fin k) : ℌ.BoldfaceFunction (fun v : Fin k → V ↦ v i) :=
   .of_zero (Γ' := 𝚺) ⟨.mkSigma “x | x = !!#i.succ” (by simp), by intro _; simp⟩

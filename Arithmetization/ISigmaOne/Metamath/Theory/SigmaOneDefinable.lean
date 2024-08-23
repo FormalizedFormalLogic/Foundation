@@ -17,7 +17,7 @@ def _root_.LO.FirstOrder.SyntacticTheory.tDef (T : SyntacticTheory L) [d : T.Δ�
 
 abbrev _root_.LO.FirstOrder.Theory.tDef (T : Theory L) [d : T.Δ₁Definable] : Arith.LDef.TDef L.lDef := d.toTDef
 
-variable {V : Type*} [Zero V] [One V] [Add V] [Mul V] [LT V] [V ⊧ₘ* 𝐈𝚺₁]
+variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
 variable {T : SyntacticTheory L} [T.Δ₁Definable]
 
@@ -34,7 +34,7 @@ lemma Language.SyntacticTheory.codeIn_iff : x ∈ T.codeIn V ↔ V ⊧/![x] T.tD
 
 lemma mem_coded_theory {σ} (h : σ ∈ T) : ⌜σ⌝ ∈ T.codeIn V := Language.SyntacticTheory.codeIn_iff.mpr <| by
   have := consequence_iff_add_eq.mp (sound! <| SyntacticTheory.Δ₁Definable.mem_iff.mp h) V inferInstance
-  simpa [models_iff, Semiformula.syntacticformula_goedelNumber_def, numeral_eq_natCast] using this
+  simpa [models_iff, coe_quote, Semiformula.syntacticformula_goedelNumber_def, numeral_eq_natCast] using this
 
 instance tDef_defined : (T.codeIn V).Defined T.tDef where
   defined := ⟨by

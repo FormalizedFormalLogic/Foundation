@@ -21,11 +21,12 @@ namespace Formalized
 
 variable {T : LOR.TTheory (V := V)} [R₀Theory T]
 
-def toNumVec {n} (e : Fin n → V) : (Language.codeIn ℒₒᵣ V).TSemitermVec n 0 :=
-  ⟨⌜fun i ↦ numeral (e i)⌝, by simp, by
+def toNumVec {n} (e : Fin n → V) : (Language.codeIn ℒₒᵣ V).SemitermVec n 0 :=
+  ⟨⌜fun i ↦ numeral (e i)⌝,
+   Language.IsSemitermVec.iff.mpr <| ⟨by simp, by
     intro i hi
     rcases eq_fin_of_lt_nat hi with ⟨i, rfl⟩
-    simp [quote_nth_fin (fun i ↦ numeral (e i)) i]⟩
+    simp [quote_nth_fin (fun i ↦ numeral (e i)) i]⟩⟩
 
 @[simp] lemma toNumVec_nil : (toNumVec (![] : Fin 0 → V)) = .nil _ _ := by ext; simp [toNumVec]
 
@@ -38,25 +39,28 @@ def toNumVec {n} (e : Fin n → V) : (Language.codeIn ℒₒᵣ V).TSemitermVec 
   calc (i : V) < (i : V) + (n - i : V) := by simp
   _  = (n : V) := by simp
 
+@[simp] lemma len_semitermvec {L : Arith.Language V} {pL} [L.Defined pL] (v : L.SemitermVec k n) : len v.val = k := v.prop.lh
+
 @[simp] lemma cast_substs_numVec (p : Semisentence ℒₒᵣ (n + 1)) :
     ((.cast (V := V) (n := ↑(n + 1)) (n' := ↑n + 1) ⌜Rew.embs.hom p⌝ (by simp)) ^/[(toNumVec e).q.substs (typedNumeral 0 x).sing]) =
     ⌜Rew.embs.hom p⌝ ^/[toNumVec (x :> e)] := by
   have : (toNumVec e).q.substs (typedNumeral 0 x).sing = x ∷ᵗ toNumVec e := by
     ext; simp
     apply nth_ext' ((↑n : V) + 1)
-      (by rw [len_termSubstVec]; simpa using (toNumVec e).prop.qVec)
-      (by simp [←(toNumVec e).prop.1])
+      (by rw [len_termSubstVec]; simpa using (toNumVec e).prop.qVec.isUTerm)
+      (by simp [(toNumVec e).prop.lh])
     intro i hi
-    rw [nth_termSubstVec (by simpa using (toNumVec e).prop.qVec) hi]
+    rw [nth_termSubstVec (by simpa using (toNumVec e).prop.qVec.isUTerm) hi]
     rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
     · simp [Language.qVec]
-    · simp only [Language.qVec, nth_cons_succ, Language.TSemitermVec.prop]
+    · simp only [Language.qVec, nth_cons_succ, Language.SemitermVec.prop]
       rcases eq_fin_of_lt_nat (by simpa using hi) with ⟨i, rfl⟩
-      rw [nth_termBShiftVec (by simp)]
-      simp; exact coe_coe_lt (V := V) i
+      rw [nth_termBShiftVec (by simp),
+        toNumVec_val_nth, numeral_bShift,
+        numeral_substs (n := 1) (m := 0) (by simp)]
+      simp
   rw [this]
   ext; simp [toNumVec]
-
 
 namespace TProof
 
@@ -75,13 +79,13 @@ noncomputable def termEqComplete {n : ℕ} (e : Fin n → V) :
         Structure.add_eq_of_lang]
       have ih : T ⊢ (⌜Rew.embs (v 0)⌝^ᵗ/[toNumVec e] + ⌜Rew.embs (v 1)⌝^ᵗ/[toNumVec e]) =' (↑((v 0).valbm V e) + ↑((v 1).valbm V e)) :=
         addExt T _ _ _ _ ⨀ termEqComplete e (v 0) ⨀ termEqComplete e (v 1)
-      have : T ⊢ ((v 0).valbm V e + (v 1).valbm V e : ⌜ℒₒᵣ⌝[V].TSemiterm 0) =' ↑((v 0).valbm V e + (v 1).valbm V e) := addComplete T _ _
+      have : T ⊢ ((v 0).valbm V e + (v 1).valbm V e : ⌜ℒₒᵣ⌝[V].Semiterm 0) =' ↑((v 0).valbm V e + (v 1).valbm V e) := addComplete T _ _
       exact eqTrans T _ _ _ ⨀ ih ⨀ this
   | Semiterm.func Language.Mul.mul v   => by
       simp [Rew.func, Semiterm.val_func]
       have ih : T ⊢ (⌜Rew.embs (v 0)⌝^ᵗ/[toNumVec e] * ⌜Rew.embs (v 1)⌝^ᵗ/[toNumVec e]) =' (↑((v 0).valbm V e) * ↑((v 1).valbm V e)) :=
         mulExt T _ _ _ _ ⨀ termEqComplete e (v 0) ⨀ termEqComplete e (v 1)
-      have : T ⊢ ((v 0).valbm V e * (v 1).valbm V e : ⌜ℒₒᵣ⌝[V].TSemiterm 0) =' ↑((v 0).valbm V e * (v 1).valbm V e) := mulComplete T _ _
+      have : T ⊢ ((v 0).valbm V e * (v 1).valbm V e : ⌜ℒₒᵣ⌝[V].Semiterm 0) =' ↑((v 0).valbm V e * (v 1).valbm V e) := mulComplete T _ _
       exact eqTrans T _ _ _ ⨀ ih ⨀ this
 
 lemma termEq_complete! {n : ℕ} (e : Fin n → V) (t : Semiterm ℒₒᵣ Empty n) :
@@ -97,7 +101,7 @@ theorem bold_sigma₁_complete {n} {p : Semisentence ℒₒᵣ n} (hp : Hierarch
   case hFalsum =>
     intro n
     simp only [LogicalConnective.HomClass.map_bot, Prop.bot_eq_false,
-      Semiformula.codeIn'_falsum, Language.TSemiformula.substs_falsum, false_implies, implies_true]
+      Semiformula.codeIn'_falsum, Language.Semiformula.substs_falsum, false_implies, implies_true]
   case hEQ =>
     intro n t₁ t₂ e h
     have : t₁.valbm V e = t₂.valbm V e := by simpa using h
@@ -122,15 +126,15 @@ theorem bold_sigma₁_complete {n} {p : Semisentence ℒₒᵣ n} (hp : Hierarch
     intro n p q hp hq ihp ihq e h
     have h : Semiformula.Evalbm V e p ∧ Semiformula.Evalbm V e q := by simpa using h
     simpa only [LogicalConnective.HomClass.map_and, Semiformula.codeIn'_and,
-      Language.TSemiformula.substs_and] using and_intro! (ihp h.1) (ihq h.2)
+      Language.Semiformula.substs_and] using and_intro! (ihp h.1) (ihq h.2)
   case hOr =>
     intro n p q hp hq ihp ihq e h
     have : Semiformula.Evalbm V e p ∨ Semiformula.Evalbm V e q := by simpa using h
     rcases this with (h | h)
     · simpa only [LogicalConnective.HomClass.map_or, Semiformula.codeIn'_or,
-      Language.TSemiformula.substs_or] using or₁'! (ihp h)
+      Language.Semiformula.substs_or] using or₁'! (ihp h)
     · simpa only [LogicalConnective.HomClass.map_or, Semiformula.codeIn'_or,
-      Language.TSemiformula.substs_or] using or₂'! (ihq h)
+      Language.Semiformula.substs_or] using or₂'! (ihq h)
   case hBall =>
     intro n t p hp ihp e h
     simp only [Rew.ball, Rew.q_emb, Rew.hom_finitary2, Rew.emb_bvar, ← Rew.emb_bShift_term,
@@ -145,7 +149,7 @@ theorem bold_sigma₁_complete {n} {p : Semisentence ℒₒᵣ n} (hp : Hierarch
     exact ihp this
   case hEx =>
     intro n p hp ihp e h
-    simp only [Rew.ex, Rew.q_emb, Semiformula.codeIn'_ex, Language.TSemiformula.substs_ex]
+    simp only [Rew.ex, Rew.q_emb, Semiformula.codeIn'_ex, Language.Semiformula.substs_ex]
     have : ∃ x, Semiformula.Evalbm V (x :> e) p := by simpa using h
     rcases this with ⟨x, hx⟩
     apply ex! x
