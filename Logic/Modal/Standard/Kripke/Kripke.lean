@@ -9,8 +9,7 @@ import Logic.Modal.Standard.Kripke.Geach
 import Logic.Modal.Standard.Kripke.Ver
 import Logic.Modal.Standard.Kripke.Dot3
 import Logic.Modal.Standard.Kripke.S5
-import Logic.Modal.Standard.Kripke.Grz
-
 import Logic.Modal.Standard.Kripke.GL.GL
+import Logic.Modal.Standard.Kripke.Grz.Grz
 
 import Logic.Modal.Standard.Kripke.ModalCompanion
