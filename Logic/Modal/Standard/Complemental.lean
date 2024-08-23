@@ -157,10 +157,28 @@ lemma provable_iff_singleton_compl_inconsistent : Λ ⊢! p ↔ ¬(Formulae.Cons
   . contrapose; push_neg; apply unprovable_iff_singleton_compl_consistent.mp;
 
 lemma intro_union_consistent
-  (h : ∀ {Γ₁ Γ₂ : List (Formula α)}, (∀ p ∈ Γ₁, p ∈ P₁) → (∀ p ∈ Γ₂, p ∈ P₂) → Λ ⊬! ⋀Γ₁ ⋏ ⋀Γ₂ ⟶ ⊥)
+  (h : ∀ {Γ₁ Γ₂ : List (Formula α)}, (∀ p ∈ Γ₁, p ∈ P₁) ∧ (∀ p ∈ Γ₂, p ∈ P₂) → Λ ⊬! ⋀Γ₁ ⋏ ⋀Γ₂ ⟶ ⊥)
   : Formulae.Consistent Λ (P₁ ∪ P₂) := by
   rw [←iff_theory_consistent_formulae_consistent];
   simpa using Theory.intro_union_consistent h;
+
+lemma intro_triunion_consistent
+  (h : ∀ {Γ₁ Γ₂ Γ₃ : List (Formula α)}, (∀ p ∈ Γ₁, p ∈ P₁) ∧ (∀ p ∈ Γ₂, p ∈ P₂) ∧ (∀ p ∈ Γ₃, p ∈ P₃) → Λ ⊬! ⋀Γ₁ ⋏ ⋀Γ₂ ⋏ ⋀Γ₃ ⟶ ⊥)
+  : Formulae.Consistent Λ (P₁ ∪ P₂ ∪ P₃) := by
+  rw [←iff_theory_consistent_formulae_consistent];
+  convert Theory.intro_triunion_consistent h;
+  ext;
+  constructor;
+  . simp only [Finset.coe_union, Set.mem_union, Finset.mem_coe];
+    rintro ((hp₁ | hp₂) | hp₃);
+    . left; left; assumption;
+    . left; right; assumption;
+    . right; assumption;
+  . simp only [Set.mem_union, Finset.coe_union, Finset.mem_coe];
+    rintro ((hp₁ | hp₂) | hp₃);
+    . left; left; assumption;
+    . left; right; assumption;
+    . right; assumption;
 
 @[simp]
 lemma empty_conisistent [System.Consistent Λ] : Formulae.Consistent Λ ∅ := by

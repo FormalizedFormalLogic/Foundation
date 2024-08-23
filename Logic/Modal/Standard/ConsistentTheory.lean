@@ -217,12 +217,12 @@ protected alias lindenbaum := exists_maximal_consistent_theory
 
 open Classical in
 lemma intro_union_consistent
-  (h : ∀ {Γ₁ Γ₂ : List (Formula α)}, (∀ p ∈ Γ₁, p ∈ T₁) → (∀ p ∈ Γ₂, p ∈ T₂) → Λ ⊬! ⋀Γ₁ ⋏ ⋀Γ₂ ⟶ ⊥) : (Λ)-Consistent (T₁ ∪ T₂) := by
+  (h : ∀ {Γ₁ Γ₂ : List (Formula α)}, (∀ p ∈ Γ₁, p ∈ T₁) ∧ (∀ p ∈ Γ₂, p ∈ T₂) → Λ ⊬! ⋀Γ₁ ⋏ ⋀Γ₂ ⟶ ⊥) : (Λ)-Consistent (T₁ ∪ T₂) := by
   apply def_consistent.mpr;
   intro Δ hΔ;
   let Δ₁ := (Δ.filter (· ∈ T₁));
   let Δ₂ := (Δ.filter (· ∈ T₂));
-  have : Λ ⊬! ⋀Δ₁ ⋏ ⋀Δ₂ ⟶ ⊥ := @h Δ₁ Δ₂ (by intro _ h; simpa using List.of_mem_filter h) (by intro _ h; simpa using List.of_mem_filter h);
+  have : Λ ⊬! ⋀Δ₁ ⋏ ⋀Δ₂ ⟶ ⊥ := @h Δ₁ Δ₂ ⟨(by intro _ h; simpa using List.of_mem_filter h), (by intro _ h; simpa using List.of_mem_filter h)⟩;
   exact unprovable_imp_trans''! (by
     apply FiniteContext.deduct'!;
     apply iff_provable_list_conj.mpr;
@@ -231,6 +231,36 @@ lemma intro_union_consistent
     . exact iff_provable_list_conj.mp (and₁'! FiniteContext.id!) q $ List.mem_filter_of_mem hq (by simpa);
     . exact iff_provable_list_conj.mp (and₂'! FiniteContext.id!) q $ List.mem_filter_of_mem hq (by simpa);
   ) this;
+
+open Classical in
+lemma intro_triunion_consistent
+  (h : ∀ {Γ₁ Γ₂ Γ₃ : List (Formula α)}, (∀ p ∈ Γ₁, p ∈ T₁) ∧ (∀ p ∈ Γ₂, p ∈ T₂) ∧ (∀ p ∈ Γ₃, p ∈ T₃) → Λ ⊬! ⋀Γ₁ ⋏ ⋀Γ₂ ⋏ ⋀Γ₃ ⟶ ⊥)
+  : (Λ)-Consistent (T₁ ∪ T₂ ∪ T₃) := by
+  apply intro_union_consistent;
+  rintro Γ₁₂ Γ₃ ⟨h₁₂, h₃⟩;
+  simp at h₁₂;
+  let Γ₁ := (Γ₁₂.filter (· ∈ T₁));
+  let Γ₂ := (Γ₁₂.filter (· ∈ T₂));
+  apply unprovable_imp_trans''! (p := ⋀Γ₁ ⋏ ⋀Γ₂ ⋏ ⋀Γ₃);
+  . exact imp_trans''! (and₂'! $ and_assoc!) $ by
+      apply and_replace_left!;
+      apply imply_left_conj_concat!.mp;
+      apply conjconj_subset!;
+      intro p hp; simp [Γ₁, Γ₂];
+      rcases h₁₂ p hp with (h₁ | h₂);
+      . left; apply List.mem_filter_of_mem <;> simpa;
+      . right; apply List.mem_filter_of_mem <;> simpa;
+  . apply h;
+    refine ⟨?_, ?_, h₃⟩;
+    . intro p hp;
+      rcases h₁₂ p (List.mem_of_mem_filter hp) with (_ | _)
+      . assumption;
+      . simpa using List.of_mem_filter hp;
+    . intro p hp;
+      rcases h₁₂ p (List.mem_of_mem_filter hp) with (_ | _)
+      . have := List.of_mem_filter hp; simp at this;
+        simpa using List.of_mem_filter hp;
+      . assumption;
 
 lemma not_mem_of_mem_neg (h : ~p ∈ T) : p ∉ T := by
   by_contra hC;

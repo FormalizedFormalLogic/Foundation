@@ -42,65 +42,6 @@ open Formula.Kripke
 open ComplementaryClosedConsistentFormulae
 
 private lemma GL_truthlemma.lemma1
-  {X : CCF 𝐆𝐋 (𝒮 p)} (hq₁ : □q ∈ 𝒮 p) (hq₂ : □q ∉ X.formulae)
-  : Formulae.Consistent 𝐆𝐋  ((X.formulae.prebox ∪ X.formulae.prebox.box) ∪ {□q, -q}) := by
-  apply Formulae.intro_union_consistent;
-  intro Γ₁ Γ₂ hΓ₁ hΓ₂;
-  by_contra hC;
-  have : 𝐆𝐋 ⊢! ⋀Γ₁ ⟶ ⋀Γ₂ ⟶ ⊥ := and_imply_iff_imply_imply'!.mp hC;
-  have : Γ₁ ⊢[𝐆𝐋]! ⋀Γ₂ ⟶ ⊥ := provable_iff.mpr this;
-  have : Γ₁ ⊢[𝐆𝐋]! (□q ⋏ -q) ⟶ ⊥ := imp_trans''! (by
-    suffices Γ₁ ⊢[𝐆𝐋]! ⋀[□q, -q] ⟶ ⋀Γ₂ by simpa;
-    apply conjconj_subset!;
-    intro p hp;
-    have := hΓ₂ p hp;
-    simp at this;
-    rcases this with (_ | _);
-    . simp; left; assumption;
-    . simp; right; assumption;
-  ) this;
-  have : Γ₁ ⊢[𝐆𝐋]! □q ⟶ -q ⟶ ⊥ := and_imply_iff_imply_imply'!.mp this;
-  have : Γ₁ ⊢[𝐆𝐋]! □q ⟶ q := by
-    rcases Formula.complement.or (p := q) with (hp | ⟨q, rfl⟩);
-    . rw [hp] at this;
-      exact imp_trans''! this dne!;
-    . simpa [complement] using this;
-  have : (□'Γ₁) ⊢[𝐆𝐋]! □(□q ⟶ q) := contextual_nec! this;
-  have : (□'Γ₁) ⊢[𝐆𝐋]! □q := axiomL! ⨀ this;
-  have H₁ : 𝐆𝐋 ⊢! ⋀□'Γ₁ ⟶ □q := provable_iff.mp this;
-
-  let Γ₁' := Γ₁.filter (λ r => r ∈ X.formulae.prebox);
-  have hΓ₁' : ∀ r ∈ Γ₁', r ∈ X.formulae.prebox := by intro r hr; simpa using List.of_mem_filter hr;
-
-  have H₂ : 𝐆𝐋 ⊢! ⋀□'Γ₁' ⟶ ⋀□'Γ₁ := conjconj_provable! $ by
-    intro r hr; simp at hr;
-    obtain ⟨r, hr, rfl⟩ := hr;
-    have := hΓ₁ r hr; simp at this;
-    rcases this with (_ | ⟨r, hr, rfl⟩);
-    . apply by_axm!;
-      simp [Γ₁'];
-      sorry;
-    . apply axiomFour'!;
-      apply by_axm!;
-      sorry;
-
-  replace H₂ : 𝐆𝐋 ⊢! ⋀□'Γ₁' ⟶ ⋀□'Γ₁ := provable_iff.mp H₂;
-  have := imp_trans''! H₂ H₁;
-
-  have : X.formulae *⊢[𝐆𝐋]! □q := by
-    apply Context.provable_iff.mpr;
-    use (□'Γ₁');
-    constructor;
-    . intro q hq;
-      simp at hq;
-      obtain ⟨r, hr, rfl⟩ := hq;
-      simpa using hΓ₁' r hr;
-    . assumption;
-
-  have : □q ∈ X.formulae := membership_iff hq₁ |>.mpr this;
-  contradiction;
-
-private lemma GL_truthlemma.lemma2
   {X : CCF 𝐆𝐋 (𝒮 p)} (hq : □q ∈ 𝒮 p)
   : ((X.formulae.prebox ∪ X.formulae.prebox.box) ∪ {□q, -q}) ⊆ (𝒮 p)⁻ := by
   simp only [Formulae.complementary];
@@ -121,7 +62,60 @@ private lemma GL_truthlemma.lemma2
     . trivial;
     . rfl;
 
-lemma GL_truthlemma (h : 𝐆𝐋 ⊬! p) {X : CCF 𝐆𝐋 (𝒮 p)} (q_sub : q ∈ 𝒮 p) :
+private lemma GL_truthlemma.lemma2
+  {X : CCF 𝐆𝐋 (𝒮 p)} (hq₁ : □q ∈ 𝒮 p) (hq₂ : □q ∉ X.formulae)
+  : Formulae.Consistent 𝐆𝐋 ((X.formulae.prebox ∪ X.formulae.prebox.box) ∪ {□q, -q}) := by
+  apply Formulae.intro_union_consistent;
+  rintro Γ₁ Γ₂ ⟨hΓ₁, hΓ₂⟩;
+
+  replace hΓ₂ : ∀ r ∈ Γ₂, r = □q ∨ r = -q := by
+    intro r hr;
+    simpa using hΓ₂ r hr;
+
+  by_contra hC;
+  have : Γ₁ ⊢[𝐆𝐋]! ⋀Γ₂ ⟶ ⊥ := provable_iff.mpr $ and_imply_iff_imply_imply'!.mp hC;
+  have : Γ₁ ⊢[𝐆𝐋]! (□q ⋏ -q) ⟶ ⊥ := imp_trans''! (by
+    suffices Γ₁ ⊢[𝐆𝐋]! ⋀[□q, -q] ⟶ ⋀Γ₂ by
+      simpa only [ne_eq, List.cons_ne_self, not_false_eq_true, List.conj₂_cons_nonempty, List.conj₂_singleton];
+    apply conjconj_subset!;
+    simpa using hΓ₂;
+  ) this;
+  have : Γ₁ ⊢[𝐆𝐋]! □q ⟶ -q ⟶ ⊥ := and_imply_iff_imply_imply'!.mp this;
+  have : Γ₁ ⊢[𝐆𝐋]! □q ⟶ q := by
+    rcases Formula.complement.or (p := q) with (hp | ⟨q, rfl⟩);
+    . rw [hp] at this;
+      exact imp_trans''! this dne!;
+    . simpa only [complement] using this;
+  have : (□'Γ₁) ⊢[𝐆𝐋]! □(□q ⟶ q) := contextual_nec! this;
+  have : (□'Γ₁) ⊢[𝐆𝐋]! □q := axiomL! ⨀ this;
+  have : 𝐆𝐋 ⊢! ⋀□'Γ₁ ⟶ □q := provable_iff.mp this;
+  have : 𝐆𝐋 ⊢! ⋀□'(X.formulae.prebox ∪ X.formulae.prebox.box |>.toList) ⟶ □q := imp_trans''! (conjconj_subset! (by
+    simp;
+    intro r hr;
+    have := hΓ₁ _ hr; simp at this;
+    tauto;
+  )) this;
+  have : 𝐆𝐋 ⊢! ⋀□'(X.formulae.prebox.toList) ⟶ □q := imp_trans''! (conjconj_provable! (by
+    intro q hq;
+    simp at hq;
+    obtain ⟨r, hr, rfl⟩ := hq;
+    rcases hr with (hr | ⟨r, hr, rfl⟩);
+    . apply FiniteContext.by_axm!;
+      simpa;
+    . apply axiomFour'!;
+      apply FiniteContext.by_axm!;
+      simpa;
+  )) this;
+  have : X.formulae *⊢[𝐆𝐋]! □q := by
+    apply Context.provable_iff.mpr;
+    use □'X.formulae.prebox.toList;
+    constructor;
+    . simp;
+    . assumption;
+  have : □q ∈ X.formulae := membership_iff hq₁ |>.mpr this;
+  contradiction;
+
+lemma GL_truthlemma {X : (GLCompleteModel p)} (q_sub : q ∈ 𝒮 p) :
   Satisfies (GLCompleteModel p) X q ↔ q ∈ X.formulae := by
   induction q using Formula.rec' generalizing X with
   | hatom => simp [Satisfies];
@@ -150,10 +144,8 @@ lemma GL_truthlemma (h : 𝐆𝐋 ⊬! p) {X : CCF 𝐆𝐋 (𝒮 p)} (q_sub : q
     constructor;
     . contrapose;
       intro h;
-      obtain ⟨Y, hY₁⟩ := lindenbaum (S := 𝒮 p) (GL_truthlemma.lemma2 q_sub) (GL_truthlemma.lemma1 q_sub h);
+      obtain ⟨Y, hY₁⟩ := lindenbaum (S := 𝒮 p) (GL_truthlemma.lemma1 q_sub) (GL_truthlemma.lemma2 q_sub h);
       simp only [Finset.union_subset_iff] at hY₁;
-      have hY₁₁ : □q ∈ Y.formulae := by apply hY₁.2; simp;
-      have hY₁₂ : -q ∈ Y.formulae := by apply hY₁.2; simp;
       simp [Satisfies];
       use Y;
       constructor;
@@ -162,9 +154,10 @@ lemma GL_truthlemma (h : 𝐆𝐋 ⊬! p) {X : CCF 𝐆𝐋 (𝒮 p)} (q_sub : q
         . apply hY₁.1.1; simpa;
         . apply hY₁.1.2; simpa;
       . use q;
-        refine ⟨q_sub, h, hY₁₁, ?_⟩;
+        refine ⟨q_sub, h, ?_, ?_⟩;
+        . apply hY₁.2; simp;
         . apply ih (by trivial) |>.not.mpr;
-          exact iff_mem_compl (by trivial) |>.not.mpr (by simpa);
+          exact iff_mem_compl (by trivial) |>.not.mpr $ by simp; apply hY₁.2; simp;
     . intro h Y RXY;
       apply ih (by trivial) |>.mpr;
       simp [Frame.Rel'] at RXY;
@@ -186,7 +179,7 @@ private lemma GL_completeAux : TransitiveIrreflexiveFrameClass.{u}ꟳ# ⊧ p →
       )
       (Formulae.unprovable_iff_singleton_compl_consistent.mp h);
     use (GLCompleteModel p).Valuation, X;
-    apply GL_truthlemma (by simpa) (by simp) |>.not.mpr;
+    apply GL_truthlemma (by simp) |>.not.mpr;
     exact iff_mem_compl (by simp) |>.not.mpr $ by
       simp;
       apply hX₁;
