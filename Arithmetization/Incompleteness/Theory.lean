@@ -76,7 +76,7 @@ namespace LO.Arith
 
 open FirstOrder FirstOrder.Arith
 
-variable {V : Type*} [Zero V] [One V] [Add V] [Mul V] [LT V] [V ⊧ₘ* 𝐈𝚺₁]
+variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
 section
 
@@ -474,3 +474,38 @@ end
 end
 
 end LO.Arith
+
+/-
+namespace LO.Arith
+
+open FirstOrder Encodable
+
+variable {L : Language} [(k : ℕ) → Encodable (L.Func k)] [(k : ℕ) → Encodable (L.Rel k)] [DefinableLanguage L]
+
+lemma isSemiterm_sound {n t : ℕ} : (L.codeIn ℕ).IsSemiterm n t → ∃ T : FirstOrder.SyntacticSemiterm L n, encode T = t := by { sorry }
+
+lemma isSemiformula_sound {n p : ℕ} : (L.codeIn ℕ).IsSemiformula n p → ∃ F : FirstOrder.SyntacticSemiformula L n, encode F = p := by { sorry }
+
+lemma isFormulaSet_sound {n s : ℕ} : (L.codeIn ℕ).IsFormulaSet s → ∃ S : Finset (SyntacticFormula L), ⌜S⌝ = s := by
+  intro h
+  have : ∀ x, ∃ p : SyntacticFormula L, x ∈ s → encode p = x := by
+    intro x;
+    by_cases hx : x ∈ s <;> simp [hx]
+    exact isSemiformula_sound (h x hx)
+  choose p hp using this
+  sorry
+
+variable [L.ConstantInhabited] {T : Theory L} [T.Δ₁Definable]
+
+section
+
+variable (T : Theory ℒₒᵣ) [T.Δ₁Definable] [𝐑₀ ≼ T] [𝐄𝐐 ≼ T]
+
+lemma provableₐ_sound [𝐑₀ ≼ T] [𝐄𝐐 ≼ T] {σ : Sentence ℒₒᵣ} : T.Provableₐ (⌜σ⌝ : ℕ) → T ⊢! σ := by
+  rintro ⟨d, hd, he⟩
+  sorry
+
+end
+
+end LO.Arith
+-/
