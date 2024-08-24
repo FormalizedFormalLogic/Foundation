@@ -599,6 +599,12 @@ instance : Γ-[m + 1]-Function₂ (qqAdd : V → V → V) := .of_sigmaOne qqAdd_
 
 instance : Γ-[m + 1]-Function₂ (qqMul : V → V → V) := .of_sigmaOne qqMul_defined.to_definable
 
+@[simp] lemma eval_qqAddDef (v) :
+    Semiformula.Evalbm V v qqAddDef.val ↔ v 0 = (v 1) ^+ (v 2) := qqAdd_defined.df.iff v
+
+@[simp] lemma eval_qqMulDef (v) :
+    Semiformula.Evalbm V v qqMulDef.val ↔ v 0 = (v 1) ^* (v 2) := qqMul_defined.df.iff v
+
 end
 
 lemma qqFunc_absolute (k f v : ℕ) : ((^func k f v : ℕ) : V) = ^func (k : V) (f : V) (v : V) := by simp [qqFunc, nat_cast_pair]
@@ -613,7 +619,7 @@ namespace Numeral
 
 def blueprint : PR.Blueprint 0 where
   zero := .mkSigma “y | y = ↑Formalized.one” (by simp)
-  succ := .mkSigma “y t n | ∃ p, !mkVec₂Def p t ↑Formalized.one ∧ !qqFuncDef y 2 ↑addIndex p” (by simp)
+  succ := .mkSigma “y t n | !qqAddDef y t ↑Formalized.one” (by simp)
 
 def construction : PR.Construction V blueprint where
   zero := fun _ ↦ 𝟏

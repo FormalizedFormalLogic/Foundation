@@ -53,6 +53,8 @@ scoped instance : LogicalConnective (L.Semiformula n) where
 
 def Language.Semiformula.cast (p : L.Semiformula n) (eq : n = n' := by simp) : L.Semiformula n' := eq ▸ p
 
+def verums (k : V) : L.Semiformula n := ⟨qqVerums k, by simp⟩
+
 @[simp] lemma Language.Semiformula.val_cast (p : L.Semiformula n) (eq : n = n') :
     (p.cast eq).val = p.val := by rcases eq; simp [Language.Semiformula.cast]
 
@@ -84,6 +86,9 @@ namespace Language.Semiformula
 @[simp] lemma val_ex (p : L.Semiformula (n + 1)) :
     p.ex.val = ^∃ p.val := rfl
 
+@[simp] lemma val_iff (p q : L.Semiformula n) :
+    (p ⟷ q).val = L.iff p.val q.val := rfl
+
 lemma val_inj {p q : L.Semiformula n} :
     p.val = q.val ↔ p = q := by rcases p; rcases q; simp
 
@@ -102,6 +107,12 @@ lemma ext_iff {p q : L.Semiformula n} : p = q ↔ p.val = q.val := by rcases p; 
 
 @[simp] lemma ex_inj {p q : L.Semiformula (n + 1)} :
     p.ex = q.ex ↔ p = q := by simp [ext_iff]
+
+@[simp] lemma val_verums : (verums k : L.Semiformula n).val = qqVerums k := rfl
+
+@[simp] lemma verums_zero : (verums 0 : L.Semiformula n) = ⊤ := by ext; simp
+
+@[simp] lemma verums_succ (k : V) : (verums (k + 1) : L.Semiformula n) = ⊤ ⋏ verums k := by ext; simp
 
 @[simp] lemma neg_verum : ~(⊤ : L.Semiformula n) = ⊥ := by ext; simp
 @[simp] lemma neg_falsum : ~(⊥ : L.Semiformula n) = ⊤ := by ext; simp

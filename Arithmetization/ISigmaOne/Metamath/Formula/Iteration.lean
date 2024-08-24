@@ -294,6 +294,14 @@ instance qqVerums_definable' : Γ-[m + 1]-Function₁ (qqVerums : V → V) := .o
 
 end
 
+@[simp] protected lemma Language.IsSemiformula.qqVerums (k : V) : L.IsSemiformula n (qqVerums k) := by
+  simp [qqVerums]
+  intro i hi; simp [nth_repeatVec _ _ hi]
+
+@[simp] lemma qqVerums_zero : qqVerums (0 : V) = ^⊤ := by simp [qqVerums]
+
+@[simp] lemma qqVerums_succ (k : V) : qqVerums (k + 1) = ^⊤ ^⋏ qqVerums k := by simp [qqVerums]
+
 end verums
 
 end LO.Arith

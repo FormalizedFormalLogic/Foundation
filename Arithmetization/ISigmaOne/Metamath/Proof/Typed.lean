@@ -141,7 +141,9 @@ def Language.Theory.TProof (T : Language.TTheory L) (p : L.Formula) := T ⊢¹ i
 
 instance : System L.Formula L.TTheory := ⟨Language.Theory.TProof⟩
 
-variable {T : L.TTheory}
+instance : HasSubset L.TTheory := ⟨fun T U ↦ T.thy ⊆ U.thy⟩
+
+variable {T U : L.TTheory}
 
 def Language.Theory.Derivable.toTDerivation (Γ : L.Sequent) (h : T.thy.Derivable Γ.val) : T ⊢¹ Γ := by
   choose a ha using h; choose d hd using ha.2
@@ -205,6 +207,10 @@ def cut (d₁ : T ⊢¹ insert p Γ) (d₂ : T ⊢¹ insert (~p) Γ) : T ⊢¹ �
   Language.Theory.Derivable.toTDerivation _ <| by
     simpa using Language.Theory.Derivable.cut p.val (by simpa using d₁.toDerivable) (by simpa using d₂.toDerivable)
 
+def ofSubset (h : T ⊆ U) (d : T ⊢¹ Γ) : U ⊢¹ Γ where
+  derivation := d.derivation
+  derivationOf := ⟨d.derivationOf.1, d.derivationOf.2.of_ss h⟩
+
 def cut' (d₁ : T ⊢¹ insert p Γ) (d₂ : T ⊢¹ insert (~p) Δ) : T ⊢¹ Γ ∪ Δ :=
   cut (p := p) (d₁.wk (by intro x; simp; tauto)) (d₂.wk (by intro x; simp; tauto))
 
@@ -256,12 +262,17 @@ end Language.Theory.TDerivation
 
 namespace Language.Theory.TProof
 
-variable {T : L.TTheory} {p q : L.Formula}
+variable {T U : L.TTheory} {p q : L.Formula}
 
 /-- Condition D2 -/
 def modusPonens (d : T ⊢ p ⟶ q) (b : T ⊢ p) : T ⊢ q := TDerivation.modusPonens d b
 
 def byAxm {p : L.Formula} (h : p ∈' T.thy) : T ⊢ p := TDerivation.byAxm p h (by simp)
+
+def ofSubset (h : T ⊆ U) {p : L.Formula} : T ⊢ p → U ⊢ p := TDerivation.ofSubset h
+
+lemma of_subset (h : T ⊆ U) {p : L.Formula} : T ⊢! p → U ⊢! p := by
+  rintro ⟨b⟩; exact ⟨ofSubset h b⟩
 
 instance : System.ModusPonens T := ⟨modusPonens⟩
 

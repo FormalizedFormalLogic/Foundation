@@ -23,6 +23,8 @@ protected structure Language.Theory (L : Arith.Language V) {pL : LDef} [Arith.La
 
 instance : Membership V L.Theory := ⟨fun x T ↦ x ∈ T.set⟩
 
+instance : HasSubset L.Theory := ⟨fun T U ↦ T.set ⊆ U.set⟩
+
 variable {L}
 
 namespace Language.Theory

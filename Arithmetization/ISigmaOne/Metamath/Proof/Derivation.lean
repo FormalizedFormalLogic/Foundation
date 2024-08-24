@@ -659,6 +659,44 @@ lemma Language.Theory.Derivation.case_iff {d : V} :
 
 alias ⟨Language.Theory.Derivation.case, Language.Theory.Derivation.mk⟩ := Language.Theory.Derivation.case_iff
 
+lemma Language.Theory.Derivation.induction1 (Γ) {P : V → Prop} (hP : Γ-[1]-Predicate P)
+    {d} (hd : T.Derivation d)
+    (hAxL : ∀ s, L.IsFormulaSet s → ∀ p ∈ s, L.neg p ∈ s → P (axL s p))
+    (hVerumIntro : ∀ s, L.IsFormulaSet s → ^⊤ ∈ s → P (verumIntro s))
+    (hAnd : ∀ s, L.IsFormulaSet s → ∀ p q dp dq, p ^⋏ q ∈ s → T.DerivationOf dp (insert p s) → T.DerivationOf dq (insert q s) →
+      P dp → P dq → P (andIntro s p q dp dq))
+    (hOr : ∀ s, L.IsFormulaSet s → ∀ p q d, p ^⋎ q ∈ s → T.DerivationOf d (insert p (insert q s)) →
+      P d → P (orIntro s p q d))
+    (hAll : ∀ s, L.IsFormulaSet s → ∀ p d, ^∀ p ∈ s → T.DerivationOf d (insert (L.free p) (L.setShift s)) →
+      P d → P (allIntro s p d))
+    (hEx : ∀ s, L.IsFormulaSet s → ∀ p t d, ^∃ p ∈ s → L.IsTerm t → T.DerivationOf d (insert (L.substs₁ t p) s) →
+      P d → P (exIntro s p t d))
+    (hWk : ∀ s, L.IsFormulaSet s → ∀ d, fstIdx d ⊆ s → T.Derivation d →
+      P d → P (wkRule s d))
+    (hShift : ∀ s, L.IsFormulaSet s → ∀ d, s = L.setShift (fstIdx d) → T.Derivation d →
+      P d → P (shiftRule s d))
+    (hCut : ∀ s, L.IsFormulaSet s → ∀ p d₁ d₂, T.DerivationOf d₁ (insert p s) → T.DerivationOf d₂ (insert (L.neg p) s) →
+      P d₁ → P d₂ → P (cutRule s p d₁ d₂))
+    (hRoot : ∀ s, L.IsFormulaSet s → ∀ p, p ∈ s → p ∈ T → P (root s p)) : P d :=
+  (construction T).induction (v := ![]) hP (by
+    intro C ih d hd
+    rcases hd with ⟨hds,
+      (⟨s, p, rfl, hps, hnps⟩ | ⟨s, rfl, hs⟩ |
+        ⟨s, p, q, dp, dq, rfl, hpq, h₁, h₂⟩ | ⟨s, p, q, d, rfl, hpq, h⟩ |
+        ⟨s, p, d, rfl, hp, h, hC⟩ | ⟨s, p, t, d, rfl, hp, ht, h, hC⟩ |
+        ⟨s, d, rfl, h, hC⟩ | ⟨s, d, rfl, h, hC⟩ |
+        ⟨s, p, d₁, d₂, rfl, ⟨h₁, hC₁⟩, ⟨h₂, hC₂⟩⟩ | ⟨s, p, rfl, hs, hT⟩)⟩
+    · exact hAxL s (by simpa using hds) p hps hnps
+    · exact hVerumIntro s (by simpa using hds) hs
+    · exact hAnd s (by simpa using hds) p q dp dq hpq ⟨h₁.1, (ih dp h₁.2).1⟩ ⟨h₂.1, (ih dq h₂.2).1⟩ (ih dp h₁.2).2 (ih dq h₂.2).2
+    · exact hOr s (by simpa using hds) p q d hpq ⟨h.1, (ih d h.2).1⟩ (ih d h.2).2
+    · exact hAll s (by simpa using hds) p d hp ⟨h, (ih d hC).1⟩ (ih d hC).2
+    · exact hEx s (by simpa using hds) p t d hp ht ⟨h, (ih d hC).1⟩ (ih d hC).2
+    · exact hWk s (by simpa using hds) d h (ih d hC).1 (ih d hC).2
+    · exact hShift s (by simpa using hds) d h (ih d hC).1 (ih d hC).2
+    · exact hCut s (by simpa using hds) p d₁ d₂ ⟨h₁, (ih d₁ hC₁).1⟩ ⟨h₂, (ih d₂ hC₂).1⟩ (ih d₁ hC₁).2 (ih d₂ hC₂).2
+    · exact hRoot s (by simpa using hds) p hs hT) d hd
+
 lemma Language.Theory.DerivationOf.isFormulaSet {d s : V} (h : T.DerivationOf d s) : L.IsFormulaSet s := by
   simpa [h.1] using h.2.case.1
 
@@ -721,6 +759,31 @@ lemma Language.Theory.Derivation.root {s p : V} (hs : L.IsFormulaSet s) (hp : p 
   Language.Theory.Derivation.mk
     ⟨by simpa using hs,
       Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr ⟨s, p, rfl, hp, hT⟩⟩
+
+variable {U : L.Theory} {pU : pL.TDef} [U.Defined pU]
+
+lemma Language.Theory.Derivation.of_ss (h : T ⊆ U) {d : V} : T.Derivation d → U.Derivation d := by
+  intro hd
+  apply Language.Theory.Derivation.induction1 𝚺 ?_ hd
+  · intro s hs p hp hn; apply axL hs hp hn
+  · intro s hs hv; apply verumIntro hs hv
+  · intro s _ p q dp dq hpq hdp hdq ihp ihq
+    apply andIntro hpq ⟨hdp.1, ihp⟩ ⟨hdq.1, ihq⟩
+  · intro s _ p q d hpq hd ih
+    apply orIntro hpq ⟨hd.1, ih⟩
+  · intro s _ p d hp hd ih
+    apply allIntro hp ⟨hd.1, ih⟩
+  · intro s _ p t d hp ht hd ih
+    apply exIntro hp ht ⟨hd.1, ih⟩
+  · intro s hs d h _ ih
+    apply wkRule hs h ⟨rfl, ih⟩
+  · rintro s hs d rfl _ ih
+    apply shiftRule ⟨rfl, ih⟩
+  · intro s _ p d₁ d₂ h₁ h₂ ih₁ ih₂
+    apply cutRule ⟨h₁.1, ih₁⟩ ⟨h₂.1, ih₂⟩
+  · intro s hs p hps hpT
+    apply root hs hps (h hpT)
+  · definability
 
 namespace Language.Theory.Derivable
 

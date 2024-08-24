@@ -170,6 +170,8 @@ def Language.imp (p q : V) : V := L.neg p ^⋎ q
 
 notation:60 p:61 " ^→[" L "] " q:60 => Language.imp L p q
 
+def Language.iff (p q : V) : V := (L.imp p q) ^⋏ (L.imp q p)
+
 variable {L}
 
 section imp
@@ -194,11 +196,41 @@ lemma Language.imp_defined : 𝚺₁-Function₂ L.imp via pL.impDef := fun v �
 
 instance Language.imp_definable : 𝚺₁-Function₂ L.imp := L.imp_defined.to_definable
 
-instance imp_definable' : Γ-[m + 1]-Function₂ L.imp := L.imp_definable.of_sigmaOne
+instance Language.imp_definable' : Γ-[m + 1]-Function₂ L.imp := L.imp_definable.of_sigmaOne
 
 end
 
 end imp
+
+section iff
+
+@[simp] lemma Language.IsUFormula.iff {p q : V} :
+    L.IsUFormula (L.iff p q) ↔ L.IsUFormula p ∧ L.IsUFormula q := by
+  simp [Language.iff]
+  intros; simp_all
+
+@[simp] lemma Language.IsSemiformula.iff {n p q : V} :
+    L.IsSemiformula n (L.iff p q) ↔ L.IsSemiformula n p ∧ L.IsSemiformula n q := by
+  simp [Language.iff]
+  intros; simp_all
+
+section
+
+def _root_.LO.FirstOrder.Arith.LDef.qqIffDef (pL : LDef) : 𝚺₁.Semisentence 3 := .mkSigma
+  “r p q | ∃ pq, !pL.impDef pq p q ∧ ∃ qp, !pL.impDef qp q p ∧ !qqAndDef r pq qp” (by simp)
+
+variable (L)
+
+lemma Language.iff_defined : 𝚺₁-Function₂ L.iff via pL.qqIffDef := fun v ↦ by
+  simp [LDef.qqIffDef, L.imp_defined.df.iff]; rfl
+
+instance Language.iff_definable : 𝚺₁-Function₂ L.iff := L.iff_defined.to_definable
+
+instance Language.iff_definable' : Γ-[m + 1]-Function₂ L.iff := L.iff_definable.of_sigmaOne
+
+end
+
+end iff
 
 section shift
 
