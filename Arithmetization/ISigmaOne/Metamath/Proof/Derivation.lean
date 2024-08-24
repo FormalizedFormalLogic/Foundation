@@ -840,6 +840,9 @@ lemma by_axm {s : V} (hs : L.IsFormulaSet s) (p) (hp : p ∈ s) (hT : p ∈ T) :
     T.Derivable s := by
   exact ⟨Arith.root s p, by simp, Language.Theory.Derivation.root hs hp hT⟩
 
+lemma of_ss (h : T ⊆ U) {s : V} : T.Derivable s → U.Derivable s := by
+  rintro ⟨d, hd⟩; exact ⟨d, hd.1, hd.2.of_ss h⟩
+
 lemma and {s p q : V} (hp : T.Derivable (insert p s)) (hq : T.Derivable (insert q s)) :
     T.Derivable (insert (p ^⋏ q) s) :=
   and_m (p := p) (q := q) (by simp)

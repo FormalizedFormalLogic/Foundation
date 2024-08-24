@@ -1,4 +1,4 @@
-import Arithmetization.ISigmaOne.Metamath.CodedTheory
+import Arithmetization.Incompleteness.Theory
 
 noncomputable section
 
@@ -166,12 +166,21 @@ section
 
 variable [L.ConstantInhabited] {T : Theory L} [T.Δ₁Definable]
 
-theorem provable_of_provable : T ⊢! p → (T.codeIn V).Provable ⌜p⌝ := fun h ↦ by
+theorem provable_of_provable {σ} : T ⊢! σ → (T.codeIn V).Provable ⌜σ⌝ := fun h ↦ by
   simpa using derivable_of_quote (V := V) (provable_iff_derivable3'.mp h).some
 
 /-- Hilbert–Bernays provability condition D1 -/
-theorem tprovable_of_provable : T ⊢! σ → T.tCodeIn V ⊢! ⌜σ⌝ := fun h ↦ by
+theorem tprovable_of_provable {σ} : T ⊢! σ → T.tCodeIn V ⊢! ⌜σ⌝ := fun h ↦ by
   simpa [Language.Theory.TProvable.iff_provable] using provable_of_provable (V := V) h
+
+end
+
+section
+
+variable {T : Theory ℒₒᵣ} [T.Δ₁Definable]
+
+theorem provableₐ_of_provable {σ} : T ⊢! σ → T.Provableₐ (⌜σ⌝ : V) := fun h ↦
+  Language.Theory.Derivable.of_ss (by simp) (provable_of_provable h)
 
 end
 

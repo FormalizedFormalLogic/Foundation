@@ -408,6 +408,9 @@ def _root_.LO.Arith.Language.TTheory.AddEqAddR₀ (T : ⌜ℒₒᵣ⌝[V].TTheor
   thy := T.thy.AddEqAddR₀
   pthy := T.pthy.addEqAddR₀Def
 
+@[simp] lemma Language.Theory.self_subset_AddEqAddR₀ (T : ⌜ℒₒᵣ⌝[V].Theory) : T ⊆ T.AddEqAddR₀ :=
+  Set.subset_union_of_subset_left Set.subset_union_left _
+
 section
 
 variable {T : ⌜ℒₒᵣ⌝[V].TTheory}
@@ -434,23 +437,39 @@ end Formalized
 
 open Formalized
 
-variable (T : ⌜ℒₒᵣ⌝[V].Theory) {pT : p⌜ℒₒᵣ⌝.TDef} [T.Defined pT]
+section
+
+variable (T : Theory ℒₒᵣ) [T.Δ₁Definable]
 
 /-- Provability predicate for arithmetic stronger than $\mathbf{R_0}$. -/
-def Language.Theory.Provableₐ (p : V) : Prop := T.AddEqAddR₀.Provable p
+def _root_.LO.FirstOrder.Theory.Provableₐ (p : V) : Prop := (T.codeIn V).AddEqAddR₀.Provable p
+
+variable {T}
+
+lemma provableₐ_iff {σ : Sentence ℒₒᵣ} : T.Provableₐ (⌜σ⌝ : V) ↔ (T.tCodeIn V).AddEqAddR₀ ⊢! ⌜σ⌝ := by
+  simp [Language.Theory.TProvable.iff_provable]; rfl
 
 section
 
-def _root_.LO.FirstOrder.Arith.LDef.TDef.prvₐ (pT : p⌜ℒₒᵣ⌝.TDef) : 𝚺₁.Semisentence 1 := .mkSigma
-  “p | !pT.addEqAddR₀Def.prv p” (by simp)
+variable (T)
 
-lemma Language.Theory.provableₐ_defined : 𝚺₁-Predicate T.Provableₐ via pT.prvₐ := by
-  intro v; simp [LDef.TDef.prvₐ, T.AddEqAddR₀.provable_defined.df.iff, Language.Theory.Provableₐ]
+def _root_.LO.FirstOrder.Theory.provableₐ : 𝚺₁.Semisentence 1 := .mkSigma
+  “p | !T.tDef.addEqAddR₀Def.prv p” (by simp)
 
-instance Language.Theory.provableₐ_definable : 𝚺₁-Predicate T.Provableₐ := T.provableₐ_defined.to_definable
+lemma provableₐ_defined : 𝚺₁-Predicate (T.Provableₐ : V → Prop) via T.provableₐ := by
+  intro v; simp [FirstOrder.Theory.provableₐ, FirstOrder.Theory.Provableₐ, (T.codeIn V).AddEqAddR₀.provable_defined.df.iff]
+  symm
+  simpa using (T.codeIn V).AddEqAddR₀.provable_defined.df.iff _
+
+@[simp] lemma eval_provableₐ (v) :
+    Semiformula.Evalbm V v T.provableₐ.val ↔ T.Provableₐ (v 0) := (provableₐ_defined T).df.iff v
+
+instance provableₐ_definable : 𝚺₁-Predicate (T.Provableₐ : V → Prop) := (provableₐ_defined T).to_definable
 
 /-- instance for definability tactic-/
-instance Language.Theory.provableₐ_definable' : 𝚺-[0 + 1]-Predicate T.Provableₐ := T.provableₐ_definable
+instance provableₐ_definable' : 𝚺-[0 + 1]-Predicate (T.Provableₐ : V → Prop) := provableₐ_definable T
+
+end
 
 end
 

@@ -1,4 +1,3 @@
-import Arithmetization.Incompleteness.FormalizedArithmetic
 import Arithmetization.Incompleteness.D1
 
 /-!
@@ -178,5 +177,15 @@ theorem sigma₁_complete {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) 
 end TProof
 
 end Formalized
+
+section
+
+variable {T : Theory ℒₒᵣ} [T.Δ₁Definable]
+
+theorem sigma₁_complete {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
+    V ⊧ₘ σ → T.Provableₐ (⌜σ⌝ : V) := fun h ↦ by
+  simpa [provableₐ_iff] using Formalized.TProof.sigma₁_complete (T.tCodeIn V).AddEqAddR₀ hσ h
+
+end
 
 end LO.Arith

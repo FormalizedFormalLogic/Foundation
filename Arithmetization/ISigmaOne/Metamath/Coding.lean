@@ -125,6 +125,9 @@ lemma coe_quote (x : α) : ↑(⌜x⌝ : ℕ) = (⌜x⌝ : V) := by simp [quote_
 
 lemma quote_eq_encode (x : α) : (⌜x⌝ : ℕ) = Encodable.encode x := by simp [quote_eq_coe_encode]
 
+@[simp] lemma val_quote {ξ n e ε} (x : α) : Semiterm.valm V e ε (⌜x⌝ : Semiterm ℒₒᵣ ξ n) = ⌜x⌝ := by
+  simp [goedelNumber'_def, quote_eq_coe_encode, numeral_eq_natCast]
+
 end
 
 end LO.Arith
@@ -166,15 +169,23 @@ lemma quote_func {k} (f : L.Func k) (v : Fin k → SyntacticSemiterm L n) :
     (⌜(Semiterm.func Language.Zero.zero ![] : SyntacticSemiterm ℒₒᵣ n)⌝ : V) = 𝟎 := by
   simp [FirstOrder.Semiterm.quote_func, Formalized.zero, Formalized.qqFunc_absolute]; rfl
 
+@[simp] lemma quote_zero' (n) : (⌜(‘0’ : SyntacticSemiterm ℒₒᵣ n)⌝ : V) = 𝟎 := quote_zero V n
+
 @[simp] lemma quote_one (n) :
     (⌜(Semiterm.func Language.One.one ![] : SyntacticSemiterm ℒₒᵣ n)⌝ : V) = 𝟏 := by
   simp [FirstOrder.Semiterm.quote_func, Formalized.one, Formalized.qqFunc_absolute]; rfl
 
+@[simp] lemma quote_one' (n) : (⌜(‘1’ : SyntacticSemiterm ℒₒᵣ n)⌝ : V) = 𝟏 := quote_one V n
+
 @[simp] lemma quote_add (t u : SyntacticSemiterm ℒₒᵣ n) :
     (⌜Semiterm.func Language.Add.add ![t, u]⌝ : V) = (⌜t⌝ ^+ ⌜u⌝) := by simp [FirstOrder.Semiterm.quote_func]; rfl
 
+@[simp] lemma quote_add' (t u : SyntacticSemiterm ℒₒᵣ n) : (⌜‘!!t + !!u’⌝ : V) = (⌜t⌝ ^+ ⌜u⌝) := quote_add V t u
+
 @[simp] lemma quote_mul (t u : SyntacticSemiterm ℒₒᵣ n) :
     (⌜Semiterm.func Language.Mul.mul ![t, u]⌝ : V) = (⌜t⌝ ^* ⌜u⌝) := by simp [FirstOrder.Semiterm.quote_func]; rfl
+
+@[simp] lemma quote_mul' (t u : SyntacticSemiterm ℒₒᵣ n) : (⌜‘!!t * !!u’⌝ : V) = (⌜t⌝ ^* ⌜u⌝) := quote_mul V t u
 
 @[simp] lemma quote_absolute (t : SyntacticSemiterm L n) :
     ((⌜t⌝ : ℕ) : V) = ⌜t⌝ := by
@@ -288,6 +299,25 @@ lemma termBShift_quote {n} (t : SyntacticSemiterm L n) :
     rcases eq_fin_of_lt_nat hi with ⟨i, rfl⟩
     rw [nth_termBShiftVec Hv.isUTerm hi]
     simpa using ih i
+
+@[simp] lemma Formalized.quote_numeral_eq_numeral (k : ℕ) :
+    (⌜(‘↑k’ : SyntacticSemiterm ℒₒᵣ n)⌝ : V) = Formalized.numeral (k : V) := by
+  induction k
+  case zero => simp
+  case succ k ih =>
+    simp only [Nat.cast_add, Nat.cast_one]
+    cases' k with k
+    · simp
+    · simp [Operator.numeral_succ, Matrix.comp_vecCons']
+      rw [Matrix.fun_eq_vec₂ (v := fun x : Fin 2 ↦ (![Operator.numeral ℒₒᵣ (k + 1), op(1)] x).operator ![])]
+      simp [ih]; congr; apply quote_one'
+
+lemma quote_eterm_eq_quote_emb (t : Semiterm L Empty n) : (⌜t⌝ : V) = (⌜Rew.embs t⌝ : V) := by
+  simp [quote_eq_coe_encode]
+
+@[simp] lemma Formalized.quote_numeral_eq_numeral' (k : ℕ) :
+    (⌜(‘↑k’ : Semiterm ℒₒᵣ Empty n)⌝ : V) = Formalized.numeral (k : V) := by
+  simp [quote_eterm_eq_quote_emb]
 
 end LO.Arith
 
@@ -447,6 +477,22 @@ lemma substs_quote {n m} (w : Fin n → SyntacticSemiterm L m) (p : SyntacticSem
   case hall p ih => simp [←ih, qVec_quote, Semiterm.quote_bvar]
   case hex p ih => simp [←ih, qVec_quote, Semiterm.quote_bvar]
 
+lemma quote_sentence_eq_quote_emb (σ : Semisentence L n) : (⌜σ⌝ : V) = ⌜Rew.embs.hom σ⌝ := by simp [quote_eq_coe_encode]
+
+lemma substs_quote' {n m} (w : Fin n → Semiterm L Empty m) (σ : Semisentence L n) :
+    (L.codeIn V).substs ⌜fun i ↦ ⌜w i⌝⌝ ⌜σ⌝ = ⌜(Rew.substs w).hom σ⌝ := by
+  let w' : Fin n → SyntacticSemiterm L m := fun i ↦ Rew.emb (w i)
+  have : (⌜fun i ↦ ⌜w i⌝⌝ : V) = ⌜fun i ↦ ⌜w' i⌝⌝ := by
+    apply nth_ext' (↑n) (by simp) (by simp)
+    intro i hi;
+    rcases eq_fin_of_lt_nat hi with ⟨i, rfl⟩
+    simp [w', quote_eterm_eq_quote_emb]
+  rw [quote_sentence_eq_quote_emb, this, substs_quote, quote_sentence_eq_quote_emb]
+  congr 1
+  simp [←Rew.hom_comp_app]; congr 2;
+  ext x <;> simp [Rew.comp_app]; contradiction
+
+
 lemma free_quote (p : SyntacticSemiformula L 1) :
     (L.codeIn V).free ⌜p⌝ = ⌜Rew.free.hom p⌝ := by
   rw [←Rew.hom_substs_mbar_zero_comp_shift_eq_free, ←substs_quote, ←shift_quote]
@@ -565,6 +611,9 @@ lemma quote_sentence_def' (σ : Sentence L) : (⌜σ⌝ : (L.codeIn V).Formula) 
 
 @[simp] lemma quote_sentence_val (σ : Sentence L) : (⌜σ⌝ : (L.codeIn V).Formula).val = ⌜σ⌝ := by
   simp [quote_sentence_def', quote_eq_coe_encode]
+
+@[simp] lemma codeIn''_imp (σ π : Sentence L) : (⌜σ ⟶ π⌝ : (L.codeIn V).Formula) = ⌜σ⌝ ⟶ ⌜π⌝ := by
+  simp [quote_sentence_def']
 
 end Semiformula
 
