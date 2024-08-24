@@ -1,5 +1,5 @@
-import Arithmetization.ISigmaOne.Metamath.Theory.R
-import Arithmetization.ISigmaOne.Metamath.DerivabilityConditions.D1
+import Arithmetization.Incompleteness.FormalizedArithmetic
+import Arithmetization.Incompleteness.D1
 
 /-!
 

@@ -1,6 +1,5 @@
-import Arithmetization.ISigmaOne.Metamath.Proof.Typed
-import Arithmetization.ISigmaOne.Metamath.Theory.SigmaOneDefinable
-import Arithmetization.ISigmaOne.Metamath.Theory.R
+import Arithmetization.ISigmaOne.Metamath.CodedTheory
+import Arithmetization.Incompleteness.FormalizedArithmetic
 
 /-!
 

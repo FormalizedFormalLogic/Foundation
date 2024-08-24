@@ -1,4 +1,4 @@
-import Arithmetization.ISigmaOne.Metamath.Theory.SigmaOneDefinable
+import Arithmetization.ISigmaOne.Metamath.CodedTheory
 
 noncomputable section
 
