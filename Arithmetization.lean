@@ -41,9 +41,10 @@ import Arithmetization.ISigmaOne.Metamath.Proof.Derivation
 import Arithmetization.ISigmaOne.Metamath.Proof.Typed
 
 import Arithmetization.ISigmaOne.Metamath.Coding
+import Arithmetization.ISigmaOne.Metamath.CodedTheory
 
-import Arithmetization.ISigmaOne.Metamath.Theory.R
-import Arithmetization.ISigmaOne.Metamath.Theory.SigmaOneDefinable
-
-import Arithmetization.ISigmaOne.Metamath.DerivabilityConditions.D1
-import Arithmetization.ISigmaOne.Metamath.DerivabilityConditions.D3
+import Arithmetization.Incompleteness.Theory
+import Arithmetization.Incompleteness.FormalizedArithmetic
+import Arithmetization.Incompleteness.D1
+import Arithmetization.Incompleteness.D3
+import Arithmetization.Incompleteness.Second
