@@ -120,15 +120,31 @@ theorem bold_sigma₁_complete {n} {p : Semisentence ℒₒᵣ n} (hp : Hierarch
     refine ne_ext T _ _ _ _ ⨀ ?_ ⨀ ?_ ⨀ ne_complete! T this
     · exact eq_symm'! _ <| termEq_complete! T e t₁
     · exact eq_symm'! _ <| termEq_complete! T e t₂
-  case hLT => sorry
-  case hNLT => sorry
+  case hLT =>
+    intro n t₁ t₂ e h
+    have : t₁.valbm V e < t₂.valbm V e := by simpa using h
+    suffices T ⊢! ⌜Rew.embs t₁⌝^ᵗ/[toNumVec e] <' ⌜Rew.embs t₂⌝^ᵗ/[toNumVec e] by
+      simpa only [Rew.rel2, Semiformula.codeIn'_lt, Fin.isValue, Matrix.cons_val_zero,
+        Matrix.cons_val_one, Matrix.vecHead, Matrix.cons_val_fin_one, substs_lessThan] using this
+    refine lt_ext! T _ _ _ _ ⨀ ?_ ⨀ ?_ ⨀ lt_complete! T this
+    · exact eq_symm'! _ <| termEq_complete! T e t₁
+    · exact eq_symm'! _ <| termEq_complete! T e t₂
+  case hNLT =>
+    intro n t₁ t₂ e h
+    have : t₂.valbm V e ≤ t₁.valbm V e := by simpa using h
+    suffices T ⊢! ⌜Rew.embs t₁⌝^ᵗ/[toNumVec e] ≮' ⌜Rew.embs t₂⌝^ᵗ/[toNumVec e] by
+      simpa only [Rew.nrel2, Semiformula.codeIn'_nlt, Fin.isValue, Matrix.cons_val_zero,
+        Matrix.cons_val_one, Matrix.vecHead, Matrix.cons_val_fin_one, substs_notLessThan] using this
+    refine nlt_ext T _ _ _ _ ⨀ ?_ ⨀ ?_ ⨀ nlt_complete T this
+    · exact eq_symm'! _ <| termEq_complete! T e t₁
+    · exact eq_symm'! _ <| termEq_complete! T e t₂
   case hAnd =>
-    intro n p q hp hq ihp ihq e h
+    intro n p q _ _ ihp ihq e h
     have h : Semiformula.Evalbm V e p ∧ Semiformula.Evalbm V e q := by simpa using h
     simpa only [LogicalConnective.HomClass.map_and, Semiformula.codeIn'_and,
       Language.Semiformula.substs_and] using and_intro! (ihp h.1) (ihq h.2)
   case hOr =>
-    intro n p q hp hq ihp ihq e h
+    intro n p q _ _ ihp ihq e h
     have : Semiformula.Evalbm V e p ∨ Semiformula.Evalbm V e q := by simpa using h
     rcases this with (h | h)
     · simpa only [LogicalConnective.HomClass.map_or, Semiformula.codeIn'_or,
@@ -136,7 +152,7 @@ theorem bold_sigma₁_complete {n} {p : Semisentence ℒₒᵣ n} (hp : Hierarch
     · simpa only [LogicalConnective.HomClass.map_or, Semiformula.codeIn'_or,
       Language.Semiformula.substs_or] using or₂'! (ihq h)
   case hBall =>
-    intro n t p hp ihp e h
+    intro n t p _ ihp e h
     simp only [Rew.ball, Rew.q_emb, Rew.hom_finitary2, Rew.emb_bvar, ← Rew.emb_bShift_term,
       Semiformula.codeIn'_ball, substs_ball]
     apply ball_replace! T _ _ _ ⨀ (eq_symm! T _ _ ⨀ termEq_complete! T e t) ⨀ ?_
@@ -148,7 +164,7 @@ theorem bold_sigma₁_complete {n} {p : Semisentence ℒₒᵣ n} (hp : Hierarch
       simp at h; exact h x hx
     exact ihp this
   case hEx =>
-    intro n p hp ihp e h
+    intro n p _ ihp e h
     simp only [Rew.ex, Rew.q_emb, Semiformula.codeIn'_ex, Language.Semiformula.substs_ex]
     have : ∃ x, Semiformula.Evalbm V (x :> e) p := by simpa using h
     rcases this with ⟨x, hx⟩
@@ -163,34 +179,4 @@ end TProof
 
 end Formalized
 
-/-
 end LO.Arith
-
-namespace LO.FirstOrder.Theory
-
-open LO.Arith LO.Arith.Formalized
-
-variable (T : Theory ℒₒᵣ) [Arith.DefinableSigma₁Theory T]
-
-class ISigma₁EQaddR₀ where
-  EQ : ∀ (V : Type) [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁], EQTheory (Theory.codeIn V T)
-  R0 : ∀ (V : Type) [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁], R₀Theory (Theory.codeIn V T)
-
-end LO.FirstOrder.Theory
-
-namespace LO.Arith.Formalized
-
-open LO.FirstOrder
-
-variable {V : Type} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
-
-variable (T : Theory ℒₒᵣ) [Arith.DefinableSigma₁Theory T]
-
-instance [T.ISigma₁EQaddR₀] : EQTheory (Theory.codeIn V T) := Theory.ISigma₁EQaddR₀.EQ V
-
-instance [T.ISigma₁EQaddR₀] : R₀Theory (Theory.codeIn V T) := Theory.ISigma₁EQaddR₀.R0 V
-
-end LO.Arith.Formalized
-
-end
--/
