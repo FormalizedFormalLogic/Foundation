@@ -161,6 +161,17 @@ private lemma Grz_truthlemma.lemma2
     have : □q ∈ X.formulae := membership_iff (by trivial) |>.mpr this;
     contradiction;
 
+-- TODO: syntactical proof
+private lemma Grz_truthlemma.lemma3 : 𝐊𝐓 ⊢! (p ⋏ □(p ⟶ □p)) ⟶ □p := by
+  by_contra hC;
+  have := (not_imp_not.mpr $ KT_complete (α := α) |>.complete) hC;
+  simp at this;
+  obtain ⟨F, F_refl, hF⟩ := this;
+  simp [ValidOnFrame, ValidOnModel, Satisfies] at hF;
+  obtain ⟨V, x, h₁, h₂, ⟨y, Rxy, h₃⟩⟩ := hF;
+  have := h₂ x (F_refl x);
+  have := (this h₁) _ Rxy;
+  contradiction;
 
 lemma Grz_truthlemma {X : (GrzCompleteModel p).World} (q_sub : q ∈ 𝒮 p) :
   Satisfies (GrzCompleteModel p) X q ↔ q ∈ X.formulae := by
@@ -202,29 +213,32 @@ lemma Grz_truthlemma {X : (GrzCompleteModel p).World} (q_sub : q ∈ 𝒮 p) :
     constructor;
     . contrapose;
       by_cases w : q ∈ X.formulae;
-      . wlog h : □(q ⟶ □q) ∉ X.formulae;
-        . sorry;
-        intro h;
+      . intro h;
         obtain ⟨Y, hY⟩ := lindenbaum (S := 𝒮ᴳ p) (Grz_truthlemma.lemma1 q_sub) (Grz_truthlemma.lemma2 q_sub h);
         simp only [Finset.union_subset_iff] at hY;
-        simp only [Satisfies, Set.eq_prebox_premultibox_one, and_imp, Finset.coe_union,
-          Finset.eq_prebox_premultibox_one, Finset.coe_image, Finset.coe_preimage,
-          Function.iterate_one, Set.preimage_union, Set.mem_union, Set.mem_preimage, Finset.mem_coe,
-          Set.mem_image, Box.box_injective', not_forall, Classical.not_imp];
+        simp only [Satisfies]; push_neg;
         use Y;
-        refine ⟨?_, ?_, ?_⟩;
-        . intro r hr hr₂;
-          apply hY.1;
-          simpa;
-        . apply imp_iff_not_or (b := X = Y) |>.mpr;
-          left; push_neg;
-          use (q ⟶ □q);
-          refine ⟨?_, ?_, ?_⟩;
-          . right; use q;
-          . apply hY.2; simp;
-          . assumption;
-        . apply ih (by sorry) |>.not.mpr;
-          apply iff_mem_compl (by sorry) |>.not.mpr;
+        constructor;
+        . simp [Frame.Rel'];
+          constructor;
+          . intro r hr hr₂;
+            apply hY.1;
+            simpa;
+          . apply imp_iff_not_or (b := X = Y) |>.mpr;
+            left; push_neg;
+            use (q ⟶ □q);
+            refine ⟨?_, ?_, ?_⟩;
+            . right; use q;
+            . apply hY.2; simp;
+            . by_contra hC;
+              have : ↑X.formulae *⊢[𝐆𝐫𝐳]! q := membership_iff (by simp; left; trivial) |>.mp w;
+              have : ↑X.formulae *⊢[𝐆𝐫𝐳]! □(q ⟶ □q) := membership_iff (by simp; right; assumption) |>.mp hC;
+              have : ↑X.formulae *⊢[𝐆𝐫𝐳]! (q ⋏ □(q ⟶ □q)) ⟶ □q := Context.of! $ reducible_KT_Grz Grz_truthlemma.lemma3;
+              have : ↑X.formulae *⊢[𝐆𝐫𝐳]! □q := this ⨀ and₃'! (by assumption) (by assumption);
+              have : □q ∈ X.formulae := membership_iff (GrzSubformulas.mem_origin (by assumption)) |>.mpr this;
+              contradiction;
+        . apply ih (by trivial) |>.not.mpr;
+          apply iff_mem_compl (GrzSubformulas.mem_origin (by trivial)) |>.not.mpr;
           simp;
           apply hY.2;
           simp;
@@ -236,8 +250,9 @@ lemma Grz_truthlemma {X : (GrzCompleteModel p).World} (q_sub : q ∈ 𝒮 p) :
         . exact ih (by trivial) |>.not.mpr w;
     . intro h Y RXY;
       apply ih (by trivial) |>.mpr;
-      have := RXY.1 q (by sorry) h;
-      sorry;
+      have : ↑Y.formulae *⊢[𝐆𝐫𝐳]! □q ⟶ q := Context.of! $ axiomT!;
+      have : ↑Y.formulae *⊢[𝐆𝐫𝐳]! q := this ⨀ (membership_iff (by simp; left; trivial) |>.mp (RXY.1 q (by simp; tauto) h));
+      exact membership_iff (by simp; left; trivial) |>.mpr this;
 
 private lemma Grz_completeAux {p : Formula α} : ReflexiveTransitiveAntisymmetricFrameClass.{u}ꟳ# ⊧ p → 𝐆𝐫𝐳 ⊢! p := by
   contrapose;
