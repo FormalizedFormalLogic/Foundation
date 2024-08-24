@@ -51,7 +51,7 @@ private lemma GL_truthlemma.lemma1
   . apply Finset.mem_union.mpr;
     tauto;
   . have := X.closed.subset hp;
-    have := Formulae.complementary_mem_box this;
+    have := Formulae.complementary_mem_box (by apply Formula.Subformulas.mem_imp₁) this;
     apply Finset.mem_union.mpr;
     left; trivial;
   . exact X.closed.subset hr;
@@ -186,6 +186,8 @@ private lemma GL_completeAux : TransitiveIrreflexiveFrameClass.{u}ꟳ# ⊧ p →
       tauto;
 
 instance GL_complete : Complete (𝐆𝐋 : DeductionParameter α) TransitiveIrreflexiveFrameClass.{u}ꟳ# := ⟨GL_completeAux⟩
+
+#print axioms GL_complete
 
 instance : FiniteFrameProperty (α := α) 𝐆𝐋 TransitiveIrreflexiveFrameClass where
 

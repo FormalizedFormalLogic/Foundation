@@ -314,6 +314,8 @@ instance KT_complete : Complete (𝐊𝐓 : DeductionParameter α) ReflexiveFram
 
 instance KTB_complete : Complete (𝐊𝐓𝐁 : DeductionParameter α) ReflexiveSymmetricFrameClass.{u}# := instGeachLogicCompleteAux
 
+instance K4_complete : Complete (𝐊𝟒 : DeductionParameter α) TransitiveFrameClass.{u}# := instGeachLogicCompleteAux
+
 instance S4_complete : Complete (𝐒𝟒 : DeductionParameter α) PreorderFrameClass.{u}# := instGeachLogicCompleteAux
 
 instance S5_complete : Complete (𝐒𝟓 : DeductionParameter α) ReflexiveEuclideanFrameClass.{u}# := instGeachLogicCompleteAux

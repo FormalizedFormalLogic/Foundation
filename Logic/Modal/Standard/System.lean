@@ -540,11 +540,11 @@ def boxdotAxiomFour [HasAxiomFour 𝓢] : 𝓢 ⊢ ⊡p ⟶ ⊡⊡p := and₁' i
 @[simp] lemma boxdot_axiomFour! [HasAxiomFour 𝓢] : 𝓢 ⊢! ⊡p ⟶ ⊡⊡p := ⟨boxdotAxiomFour⟩
 
 
-def iff_box_boxdot [HasAxiomT 𝓢] [HasAxiomFour 𝓢] : 𝓢 ⊢ □p ⟷ ⊡p := by
+def iff_box_boxdot [HasAxiomT 𝓢] : 𝓢 ⊢ □p ⟷ ⊡p := by
   apply iffIntro;
   . exact implyRightAnd (axiomT) (impId _);
   . exact and₂;
-@[simp] lemma iff_box_boxdot! [HasAxiomT 𝓢] [HasAxiomFour 𝓢] : 𝓢 ⊢! □p ⟷ ⊡p := ⟨iff_box_boxdot⟩
+@[simp] lemma iff_box_boxdot! [HasAxiomT 𝓢] : 𝓢 ⊢! □p ⟷ ⊡p := ⟨iff_box_boxdot⟩
 
 def iff_dia_diadot [HasAxiomT 𝓢] [HasAxiomFour 𝓢] : 𝓢 ⊢ ◇p ⟷ ⟐p := by
   apply iffIntro;
@@ -732,6 +732,9 @@ variable [System.K 𝓢] [HasAxiomGrz 𝓢]
 
 def axiomGrz : 𝓢 ⊢ □(□(p ⟶ □p) ⟶ p) ⟶ p := HasAxiomGrz.Grz _
 @[simp] lemma axiomGrz! : 𝓢 ⊢! □(□(p ⟶ □p) ⟶ p) ⟶ p := ⟨axiomGrz⟩
+
+instance [HasAxiomGrz 𝓢] (Γ : FiniteContext F 𝓢) : HasAxiomGrz Γ := ⟨fun _ ↦ FiniteContext.of axiomGrz⟩
+instance [HasAxiomGrz 𝓢] (Γ : Context F 𝓢) : HasAxiomGrz Γ := ⟨fun _ ↦ Context.of axiomGrz⟩
 
 def dhyp_imp (h : 𝓢 ⊢ p ⟶ q) : 𝓢 ⊢ (r ⟶ p) ⟶ (r ⟶ q) := imply₂ (𝓢 := 𝓢) (p := r) (q := p) (r := q) ⨀ (dhyp r h)
 
