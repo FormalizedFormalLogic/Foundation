@@ -1,6 +1,7 @@
 import Arithmetization.Incompleteness.D3
 import Logic.Logic.HilbertStyle.Gentzen
 import Logic.Logic.HilbertStyle.Supplemental
+import Logic.FirstOrder.Incompleteness.DerivabilityCondition
 
 namespace LO.System
 
@@ -17,6 +18,7 @@ end LO.System
 noncomputable section
 
 open Classical
+open LO.FirstOrder.DerivabilityCondition
 
 namespace LO.Arith.Formalized
 
@@ -83,11 +85,17 @@ theorem diagonal (θ : Semisentence ℒₒᵣ 1) :
       ↔ Θ (substNumeral ⌜diag θ⌝ ⌜diag θ⌝) := by simp [fixpoint_eq]
     _ ↔ Θ ⌜fixpoint θ⌝                     := by simp [substNumeral_app_quote_quote]; rfl
 
+instance : Diagonalization T where
+  fixpoint := fixpoint
+  diag θ := diagonal θ
+
 end Diagonalization
 
 section
 
 variable (U : Theory ℒₒᵣ) [U.Δ₁Definable]
+
+abbrev _root_.LO.FirstOrder.Theory.provₐ : ProvabilityPredicate ℒₒᵣ ℒₒᵣ := ⟨U.provableₐ⟩
 
 abbrev _root_.LO.FirstOrder.Theory.bewₐ (σ : Sentence ℒₒᵣ) : Sentence ℒₒᵣ := U.provableₐ/[⌜σ⌝]
 
@@ -106,6 +114,7 @@ theorem provableₐ_D1 {σ} : U ⊢! σ → T ⊢! U.bewₐ σ := by
   apply complete <| oRing_consequence_of _ _ fun (V : Type) _ _ ↦ by
     haveI : V ⊧ₘ* 𝐈𝚺₁ := ModelsTheory.of_provably_subtheory V _ T inferInstance inferInstance
     simpa [models_iff] using provableₐ_of_provable h
+instance : U.provₐ.HBL1 T U := ⟨provableₐ_D1⟩
 
 theorem provableₐ_D2 {σ π} : T ⊢! U.bewₐ (σ ⟶ π) ⟶ U.bewₐ σ ⟶ U.bewₐ π :=
   complete <| oRing_consequence_of _ _ fun (V : Type) _ _ ↦ by
@@ -113,6 +122,7 @@ theorem provableₐ_D2 {σ π} : T ⊢! U.bewₐ (σ ⟶ π) ⟶ U.bewₐ σ ⟶
     simp [models_iff]
     intro hσπ hσ
     exact provableₐ_iff.mpr <| (by simpa using provableₐ_iff.mp hσπ) ⨀ provableₐ_iff.mp hσ
+instance : U.provₐ.HBL2 T U := ⟨provableₐ_D2⟩
 
 lemma provableₐ_sigma₁_complete {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
     T ⊢! σ ⟶ U.bewₐ σ :=
@@ -122,6 +132,9 @@ lemma provableₐ_sigma₁_complete {σ : Sentence ℒₒᵣ} (hσ : Hierarchy �
 
 theorem provableₐ_D3 {σ : Sentence ℒₒᵣ} :
     T ⊢! U.bewₐ σ ⟶ U.bewₐ (U.bewₐ σ) := provableₐ_sigma₁_complete (by simp)
+instance : U.provₐ.HBL3 T U := ⟨provableₐ_D3⟩
+
+instance : U.provₐ.HBL T U := ⟨⟩
 
 lemma goedel_iff_unprovable_goedel : T ⊢! U.goedelₐ ⟷ ~U.bewₐ U.goedelₐ := by
   simpa [Theory.goedelₐ, Theory.bewₐ] using diagonal (~U.provableₐ)
@@ -133,6 +146,7 @@ lemma provableₐ_D2_context {Γ σ π} (hσπ : Γ ⊢[T]! U.bewₐ (σ ⟶ π)
 
 lemma provableₐ_D3_context {Γ σ} (hσπ : Γ ⊢[T]! U.bewₐ σ) : Γ ⊢[T]! U.bewₐ (U.bewₐ σ) := of'! provableₐ_D3 ⨀ hσπ
 
+instance : U.provₐ.GoedelSound T U := ⟨by sorry⟩
 
 end
 
@@ -173,6 +187,18 @@ lemma consistent_iff_goedel : T ⊢! 𝗖𝗼𝗻 ⟷ 𝗚 := by
 
 lemma consistent_unprovable : T ⊬! 𝗖𝗼𝗻 := fun h ↦
   goedel_unprovable consistent <| and_left! consistent_iff_goedel ⨀ h
+
+-- 1st: unprovable goedel
+example : T ⊬! (goedel T T T.provₐ) := DerivabilityCondition.unprovable_goedel (β := T.provₐ) (T₀ := T) (T := T)
+
+-- 1st: not-complete
+example : ¬System.Complete T := DerivabilityCondition.first_incompleteness (β := T.provₐ) (T₀ := T) (T := T)
+
+-- 2nd: unprovable-consistency
+example : T ⊬! (consistency T.provₐ) := DerivabilityCondition.unprovable_consistency (β := T.provₐ) (T₀ := T) (T := T)
+
+-- 2nd: unrefutable-consistency
+example : T ⊬! ~(consistency T.provₐ) := DerivabilityCondition.unrefutable_consistency (β := T.provₐ) (T₀ := T) (T := T)
 
 end
 
