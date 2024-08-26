@@ -243,7 +243,7 @@ open Formula.Kripke.Satisfies (formula_hereditary)
 
 namespace Kripke
 
-abbrev FrameClassOfSystem (α : Type u) {S : Type v} [System (Formula α) S] (𝓢 : S) : FrameClass.Dep α := { (F : Frame.Dep α) | F ⊧* System.theory 𝓢 }
+abbrev FrameClassOfSystem (α : Type u) {S : Type v} [System (Formula α) S] (𝓢 : S) : FrameClass.Dep α := { F | F#α ⊧* System.theory 𝓢 }
 notation "𝔽(" 𝓢 " of " α ")" => FrameClassOfSystem α 𝓢
 
 section Soundness
@@ -455,19 +455,19 @@ namespace Kripke
 
 open Formula.Kripke (ClassicalSatisfies)
 
-lemma ValidOnClassicalFrame_iff : (Kripke.FrameClassOfSystem.{u, _, 0} α 𝐂𝐥) ⊧ p → ∀ (V : ClassicalValuation α), V ⊧ p := by
+lemma ValidOnClassicalFrame_iff : (Kripke.FrameClassOfSystem.{u, _, _, 0} α 𝐂𝐥) ⊧ p → ∀ (V : ClassicalValuation α), V ⊧ p := by
   intro h V;
   refine @h (ClassicalFrame) ?_ (λ _ a => V a) (by simp [Valuation.atomic_hereditary]) ();
   . apply @Cl_Characteraizable α |>.characterize;
     refine ⟨ClassicalFrame.reflexive, ClassicalFrame.transitive, ClassicalFrame.symmetric⟩;
 
-lemma notClassicalValid_of_exists_ClassicalValuation : (∃ (V : ClassicalValuation α), ¬(V ⊧ p)) → ¬(Kripke.FrameClassOfSystem.{u, _, 0} α 𝐂𝐥) ⊧ p := by
+lemma notClassicalValid_of_exists_ClassicalValuation : (∃ (V : ClassicalValuation α), ¬(V ⊧ p)) → ¬(Kripke.FrameClassOfSystem.{u, _, _, 0} α 𝐂𝐥) ⊧ p := by
   contrapose; push_neg;
   have := @ValidOnClassicalFrame_iff α p;
   exact this;
 
 lemma unprovable_classical_of_exists_ClassicalValuation (h : ∃ (V : ClassicalValuation α), ¬(V ⊧ p)) : 𝐂𝐥 ⊬! p := by
-  apply not_imp_not.mpr $ Kripke.sound.{u, u, 0};
+  apply not_imp_not.mpr $ Kripke.sound.{u, u, _, 0};
   apply notClassicalValid_of_exists_ClassicalValuation;
   assumption;
 

@@ -315,14 +315,10 @@ instance K_sound : Sound 𝐊 (AllFrameClass#α) := inferInstance
 instance K_consistent : System.Consistent (𝐊 : DeductionParameter α) := inferInstance
 
 
-section FiniteSound
-
-variable {𝔽 : FrameClass} {p : Formula α}
-
 lemma restrict_finite : 𝔽#α ⊧ p → 𝔽ꟳ#α ⊧ p := by
   intro h F hF;
-  obtain ⟨fF, hfF, e⟩ := hF; subst e;
-  exact h hfF;
+  obtain ⟨F, ⟨FF, hF₁, hF₂⟩, rfl⟩ := hF;
+  exact h (by simpa [hF₂] using hF₁);
 
 instance instFiniteSound {Λ : DeductionParameter α} [sound : Sound Λ (𝔽#α)] : Sound Λ (𝔽ꟳ#α) := ⟨by
   intro p h;
@@ -331,9 +327,24 @@ instance instFiniteSound {Λ : DeductionParameter α} [sound : Sound Λ (𝔽#α
 
 instance K_fin_sound : Sound 𝐊 (AllFrameClassꟳ#α) := inferInstance
 
-end FiniteSound
+lemma exists_finite_frame : ¬𝔽ꟳ#α ⊧ p ↔ ∃ F ∈ 𝔽ꟳ, ¬F#α ⊧ p := by
+  constructor;
+  . intro h;
+    simp at h;
+    obtain ⟨F, FF₁, ⟨FF₂, hFF₁, hFF₂, rfl, hFF₄⟩⟩ := h;
+    use FF₁;
+    constructor;
+    . use FF₂; constructor <;> assumption;
+    . simpa;
+  . rintro ⟨F, ⟨FF, hF₁, e⟩, hF₂⟩;
+    simp;
+    use F, F, FF;
+    simp_rw [e];
+    simp_all;
 
-end Kripke
+class FiniteFrameProperty (Λ : DeductionParameter α) (𝔽 : FrameClass) where
+  [complete : Complete Λ (𝔽ꟳ#α)]
+  [sound : Sound Λ (𝔽ꟳ#α)]
 
 
 section StrictlyWeakerThan
@@ -408,132 +419,6 @@ theorem K_strictlyWeakerThan_K5 : (𝐊 : DeductionParameter α) <ₛ 𝐊𝟓 :
       simp;
 
 end StrictlyWeakerThan
-
-
-
-/-
-namespace AxiomSet
-
-variable {Ax Ax₁ Ax₂ : AxiomSet α}
-
-def DefinesKripkeFrameClass (Ax : AxiomSet α) (𝔽 : FrameClass) := ∀ {F : Frame}, F#α ⊧* Ax ↔ F ∈ 𝔽
-
-lemma DefinesKripkeFrameClass.union (defines₁ : Ax₁.DefinesKripkeFrameClass 𝔽₁) (defines₂ : Ax₂.DefinesKripkeFrameClass 𝔽₂)
-  : (Ax₁ ∪ Ax₂).DefinesKripkeFrameClass (𝔽₁ ∩ 𝔽₂) := by
-  intro F;
-  simp only [Semantics.RealizeSet.union_iff];
-  constructor;
-  . intro ⟨h₁, h₂⟩;
-    constructor;
-    . exact defines₁.mp h₁;
-    . exact defines₂.mp h₂;
-  . intro ⟨h₁, h₂⟩;
-    constructor;
-    . apply defines₁.mpr h₁;
-    . apply defines₂.mpr h₂;
-
-
-def FinitelyDefinesKripkeFrameClass (Ax : AxiomSet α) (𝔽 : FiniteFrameClass) := ∀ {F : FiniteFrame}, (↑F : Frame)#α ⊧* Ax ↔ F ∈ 𝔽
-
-lemma FinitelyDefinesKripkeFrameClass.union (defines₁ : Ax₁.FinitelyDefinesKripkeFrameClass 𝔽₁) (defines₂ : Ax₂.FinitelyDefinesKripkeFrameClass 𝔽₂)
-  : (Ax₁ ∪ Ax₂).FinitelyDefinesKripkeFrameClass (𝔽₁ ∩ 𝔽₂) := by
-  intro F;
-  simp [Semantics.RealizeSet.union_iff];
-  constructor;
-  . rintro ⟨h₁, h₂⟩;
-    constructor;
-    . exact defines₁.mp h₁;
-    . exact defines₂.mp h₂;
-  . intro ⟨h₁, h₂⟩;
-    constructor;
-    . exact defines₁.mpr h₁;
-    . exact defines₂.mpr h₂;
-
-end AxiomSet
-
-
-namespace Kripke
-
-open Formula
-open AxiomSet (DefinesKripkeFrameClass)
-
-abbrev AllFrameClass : FrameClass := Set.univ
-
-lemma AllFrameClass.nonempty : AllFrameClass.Nonempty.{0} := by
-  use terminalFrame;
-  trivial;
-
-lemma axiomK_defines : DefinesKripkeFrameClass (α := α) 𝗞 AllFrameClass := by
-  intro F;
-  simp only [Set.mem_univ, iff_true];
-  exact Kripke.ValidOnFrame.axiomK_set;
-
-lemma axiomK_union_definability {Ax : AxiomSet α} : (DefinesKripkeFrameClass Ax 𝔽) ↔ DefinesKripkeFrameClass (𝗞 ∪ Ax) 𝔽 := by
-  constructor;
-  . intro defines F;
-    simp [DefinesKripkeFrameClass] at defines;
-    constructor;
-    . intro h;
-      simp only [Semantics.RealizeSet.union_iff] at h;
-      exact defines.mp h.2;
-    . intro h;
-      simp only [Semantics.RealizeSet.union_iff];
-      constructor;
-      . apply Kripke.ValidOnFrame.axiomK_set;
-      . exact defines.mpr h;
-  . intro defines F;
-    simp only [DefinesKripkeFrameClass] at defines;
-    constructor;
-    . intro h;
-      apply defines.mp;
-      simp only [Semantics.RealizeSet.union_iff];
-      constructor;
-      . apply Kripke.ValidOnFrame.axiomK_set;
-      . exact h;
-    . intro h;
-      simp only [Semantics.RealizeSet.union_iff] at defines;
-      exact defines.mpr h |>.2;
-
-end Kripke
-
-
-namespace DeductionParameter
-
-open Kripke
-variable {Λ Λ₁ Λ₂ : DeductionParameter α} [Λ.IsNormal]
-variable {Ax : AxiomSet α}
-
-abbrev DefinesKripkeFrameClass (Λ : DeductionParameter α) [Λ.IsNormal] (𝔽 : FrameClass) := AxiomSet.DefinesKripkeFrameClass (Ax(Λ)) 𝔽
-
-lemma DefinesKripkeFrameClass.toAx (defines : Λ.DefinesKripkeFrameClass 𝔽) : Ax(Λ).DefinesKripkeFrameClass 𝔽 := by
-  simp [DefinesKripkeFrameClass] at defines;
-  exact defines;
-
-lemma DefinesKripkeFrameClass.toAx' (defines : (𝝂Ax).DefinesKripkeFrameClass 𝔽) : Ax.DefinesKripkeFrameClass 𝔽 := by
-  simp [DefinesKripkeFrameClass] at defines;
-  exact axiomK_union_definability.mpr defines;
-
-lemma DefinesKripkeFrameClass.ofAx (defines : Ax.DefinesKripkeFrameClass 𝔽) [(𝝂Ax).IsNormal] : (𝝂Ax).DefinesKripkeFrameClass 𝔽 := by
-  apply axiomK_union_definability.mp;
-  assumption;
-
-end DeductionParameter
--/
-
-namespace Kripke
-
-lemma exists_finite_frame : ¬𝔽ꟳ# ⊧ p ↔ ∃ F ∈ 𝔽.toFiniteFrameClass, ¬F# ⊧ p := by
-  constructor;
-  . simp;
-  . rintro ⟨F, hF₁, hF₂⟩;
-    simp; use F;
-    constructor;
-    . simp_all;
-    . assumption;
-
-class FiniteFrameProperty (Λ : DeductionParameter α) (𝔽 : FrameClass.{u}) where
-  [complete : Complete Λ 𝔽ꟳ#]
-  [sound : Sound Λ 𝔽ꟳ#]
 
 end Kripke
 

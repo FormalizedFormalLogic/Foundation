@@ -180,13 +180,12 @@ instance : Coe (FiniteFrameClass) (FrameClass) := ⟨FiniteFrameClass.toFrameCla
 @[simp] def FrameClass.toFiniteFrameClass (𝔽 : FrameClass) : FiniteFrameClass := { F | F.toFrame ∈ 𝔽 }
 instance : Coe (FrameClass) (FiniteFrameClass) := ⟨FrameClass.toFiniteFrameClass⟩
 
-@[simp] abbrev FrameClass.restrictFinite (𝔽 : FrameClass) : FrameClass := FiniteFrameClass.toFrameClass ↑𝔽
+@[simp] abbrev FrameClass.restrictFinite (𝔽 : FrameClass) : FiniteFrameClass := FiniteFrameClass.toFrameClass ↑𝔽
 postfix:max "ꟳ" => FrameClass.restrictFinite
 
-lemma FrameClass.iff_mem_restrictFinite {𝔽 : FrameClass} {F : Frame} (h : F ∈ 𝔽) (F_finite : Finite F.World) : F ∈ 𝔽ꟳ := by
-  simp;
-  use { toFrame := F, World_finite := F_finite };
-
+lemma FrameClass.iff_mem_restrictFinite {𝔽 : FrameClass} {F : Frame} (h : F ∈ 𝔽) [Finite F.World] : ⟨F⟩ ∈ 𝔽ꟳ := by
+  use ⟨F⟩;
+  simpa;
 
 section
 

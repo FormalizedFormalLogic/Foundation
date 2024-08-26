@@ -309,21 +309,13 @@ lemma complete (H : CanonicalFrame Λ ∈ 𝔽) {p : Formula α} : 𝔽#α ⊧ p
 instance instComplete (H : CanonicalFrame Λ ∈ 𝔽) : Complete Λ (𝔽#α) := ⟨complete H⟩
 
 instance Int_complete : Complete 𝐈𝐧𝐭 (Kripke.ReflexiveTransitiveFrameClass.{u}#α) := instComplete $ by
-  constructor;
-  . exact CanonicalFrame.reflexive;
-  . exact CanonicalFrame.transitive;
+  refine ⟨
+    CanonicalFrame.reflexive,
+    CanonicalFrame.transitive,
+  ⟩
 
 @[deprecated]
 lemma Int_complete_aux : (Kripke.ReflexiveTransitiveFrameClass.{u}#α) ⊧ p → 𝐈𝐧𝐭 ⊢! p := Int_complete.complete
-
-instance : Complete (𝐈𝐧𝐭 : DeductionParameter α) (Kripke.FrameClassOfSystem.{_, _, u} α 𝐈𝐧𝐭) := ⟨by
-  intro p h;
-  apply Complete.complete (𝓜 := Kripke.ReflexiveTransitiveFrameClass#α);
-  intro F hF;
-  apply h;
-  exact Kripke.Int_Characteraizable.characterize hF;
-⟩
-
 
 instance LC_complete : Complete 𝐋𝐂 (Kripke.ReflexiveTransitiveConnectedFrameClass.{u}#α) := instComplete $ by
   refine ⟨
