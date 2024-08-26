@@ -38,8 +38,8 @@ scoped prefix:max "^func " => qqFunc
 @[simp] lemma terms_lt_qqFunc (k f v : V) : v < ^func k f v :=
   le_iff_lt_succ.mp <| le_trans (le_pair_right f v) <| le_trans (le_pair_right k ⟪f, v⟫) <| le_pair_right 2 ⟪k, ⟪f, v⟫⟫
 
-lemma lt_qqFunc_of_mem {i b k f v : V} (hi : ⟪i, b⟫ ∈ v) : b < ^func k f v :=
-  _root_.lt_trans (lt_of_mem_rng hi) (terms_lt_qqFunc k f v)
+lemma nth_lt_qqFunc_of_lt {i k f v : V} (hi : i < len v) : v.[i] < ^func k f v :=
+  lt_trans (nth_lt_self hi) (terms_lt_qqFunc _ _ _)
 
 @[simp] lemma qqBvar_inj {z z' : V} : ^#z = ^#z' ↔ z = z' := by simp [qqBvar]
 

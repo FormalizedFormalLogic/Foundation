@@ -697,6 +697,8 @@ lemma Language.Theory.Derivation.induction1 (Γ) {P : V → Prop} (hP : Γ-[1]-P
     · exact hCut s (by simpa using hds) p d₁ d₂ ⟨h₁, (ih d₁ hC₁).1⟩ ⟨h₂, (ih d₂ hC₂).1⟩ (ih d₁ hC₁).2 (ih d₂ hC₂).2
     · exact hRoot s (by simpa using hds) p hs hT) d hd
 
+lemma Language.Theory.Derivation.isFormulaSet {d : V} (h : T.Derivation d) : L.IsFormulaSet (fstIdx d) := h.case.1
+
 lemma Language.Theory.DerivationOf.isFormulaSet {d s : V} (h : T.DerivationOf d s) : L.IsFormulaSet s := by
   simpa [h.1] using h.2.case.1
 

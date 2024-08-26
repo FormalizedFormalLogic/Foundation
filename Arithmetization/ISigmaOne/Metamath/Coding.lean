@@ -128,6 +128,8 @@ lemma quote_eq_encode (x : α) : (⌜x⌝ : ℕ) = Encodable.encode x := by simp
 @[simp] lemma val_quote {ξ n e ε} (x : α) : Semiterm.valm V e ε (⌜x⌝ : Semiterm ℒₒᵣ ξ n) = ⌜x⌝ := by
   simp [goedelNumber'_def, quote_eq_coe_encode, numeral_eq_natCast]
 
+lemma numeral_quote (x : α) : Semiterm.Operator.numeral ℒₒᵣ (⌜x⌝ : ℕ) = (⌜x⌝ : Semiterm ℒₒᵣ ξ n) := by simp [quote_eq_coe_encode]; rfl
+
 end
 
 end LO.Arith

@@ -180,7 +180,7 @@ end Formalized
 
 section
 
-variable {T : Theory ℒₒᵣ} [T.Δ₁Definable]
+variable {T : Theory ℒₒᵣ} [T.Delta1Definable]
 
 theorem sigma₁_complete {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
     V ⊧ₘ σ → T.Provableₐ (⌜σ⌝ : V) := fun h ↦ by

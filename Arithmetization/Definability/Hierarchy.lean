@@ -57,6 +57,8 @@ protected inductive Semiformula : HierarchySymbol → Type _ where
 
 protected abbrev Semisentence (Γ : HierarchySymbol) (n : ℕ) := Γ.Semiformula Empty n
 
+protected abbrev Sentence (Γ : HierarchySymbol) := Γ.Semiformula Empty 0
+
 variable {Γ : HierarchySymbol}
 
 variable {ξ n}
@@ -144,6 +146,9 @@ lemma ProperWithParamOn.iff {p : 𝚫-[m].Semiformula M n}
 lemma ProperOn.iff' {p : 𝚫-[m].Semisentence n}
     (h : p.ProperOn M) (e : Fin n → M) :
     Semiformula.Evalbm M e p.pi.val ↔ Semiformula.Evalbm M e p.val := by simp [←h.iff, val_sigma]
+
+lemma ProperOn.iff₀ {p : 𝚫-[m].Sentence} (h : p.ProperOn M) :
+    M ⊧ₘ p.pi.val ↔ M ⊧ₘ p.val := h.iff' ![]
 
 lemma ProperWithParamOn.iff' {p : 𝚫-[m].Semiformula M n}
     (h : p.ProperWithParamOn M) (e : Fin n → M) :

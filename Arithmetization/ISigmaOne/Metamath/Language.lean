@@ -81,10 +81,10 @@ variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐏𝐀⁻]
 variable (L V)
 
 def _root_.LO.FirstOrder.Language.codeIn : Arith.Language V where
-  Func := fun x y ↦ Semiformula.Evalbm V ![x, y] L.lDef.func.val
-  Rel := fun x y ↦ Semiformula.Evalbm V ![x, y] L.lDef.rel.val
+  Func := fun x y ↦ V ⊧/![x, y] L.lDef.func.val
+  Rel := fun x y ↦ V ⊧/![x, y] L.lDef.rel.val
 
-lemma _root_.LO.FirstOrder.Language.codeIn_func_def : (L.codeIn V).Func = fun x y ↦ Semiformula.Evalbm V ![x, y] L.lDef.func.val := rfl
+lemma _root_.LO.FirstOrder.Language.codeIn_func_def : (L.codeIn V).Func = fun x y ↦ V ⊧/![x, y] L.lDef.func.val := rfl
 
 variable {L V}
 
@@ -100,15 +100,23 @@ lemma quote_func_def (f : L.Func k) : (⌜f⌝ : V) = ↑(Encodable.encode f) :=
 
 lemma quote_rel_def (R : L.Rel k) : (⌜R⌝ : V) = ↑(Encodable.encode R) := rfl
 
-@[simp] lemma codeIn_func_quote {k : ℕ} (f : L.Func k) : (L.codeIn V).Func k ⌜f⌝ := by
-  simpa [models_iff, numeral_eq_natCast] using
-    consequence_iff_add_eq.mp (sound! <| DefinableLanguage.func_iff.mp ⟨f, rfl⟩) V
-      (models_of_subtheory (T := 𝐏𝐀⁻) inferInstance)
+lemma codeIn_func_quote_iff {k x : ℕ} : (L.codeIn V).Func k x ↔ ∃ f : L.Func k, Encodable.encode f = x :=
+  have : V ⊧/![k, x] L.lDef.func.val ↔ 𝐏𝐀⁻ ⊢₌! (Rew.substs ![‘↑k’, ‘↑x’]).hom L.lDef.func.val := by
+    simpa [Matrix.comp_vecCons', Matrix.comp_vecCons₂'] using
+      models_iff_provable_of_Sigma0_param (V := V) (T := 𝐏𝐀⁻) (σ := L.lDef.func.val) (by simp) (e := ![k, x])
+  Iff.trans this <| Iff.trans (DefinableLanguage.func_iff.symm) <| (by simp)
 
-@[simp] lemma codeIn_rel_quote {k : ℕ} (r : L.Rel k) : (L.codeIn V).Rel k ⌜r⌝ := by
-  simpa [models_iff, numeral_eq_natCast] using
-    consequence_iff_add_eq.mp (sound! <| DefinableLanguage.rel_iff.mp ⟨r, rfl⟩) V
-      (models_of_subtheory (T := 𝐏𝐀⁻) inferInstance)
+lemma codeIn_rel_quote_iff {k x : ℕ} : (L.codeIn V).Rel k x ↔ ∃ R : L.Rel k, Encodable.encode R = x :=
+  have : V ⊧/![k, x] L.lDef.rel.val ↔ 𝐏𝐀⁻ ⊢₌! (Rew.substs ![‘↑k’, ‘↑x’]).hom L.lDef.rel.val := by
+    simpa [Matrix.comp_vecCons', Matrix.comp_vecCons₂'] using
+      models_iff_provable_of_Sigma0_param (V := V) (T := 𝐏𝐀⁻) (σ := L.lDef.rel.val) (by simp) (e := ![k, x])
+  Iff.trans this <| Iff.trans (DefinableLanguage.rel_iff.symm) <| (by simp [quote_rel_def])
+
+@[simp] lemma codeIn_func_quote {k : ℕ} (f : L.Func k) : (L.codeIn V).Func k ⌜f⌝ :=
+  (codeIn_func_quote_iff (V := V)).mpr ⟨f, rfl⟩
+
+@[simp] lemma codeIn_rel_quote {k : ℕ} (r : L.Rel k) : (L.codeIn V).Rel k ⌜r⌝ :=
+  (codeIn_rel_quote_iff (V := V)).mpr ⟨r, rfl⟩
 
 @[simp] lemma quote_func_inj (f₁ f₂ : L.Func k) : (⌜f₁⌝ : V) = (⌜f₂⌝ : V) ↔ f₁ = f₂ := by
   simp [quote_func_def]

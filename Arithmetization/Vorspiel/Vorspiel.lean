@@ -11,6 +11,11 @@ lemma forall_iff {n : ℕ} (p : (Fin (n + 1) → α) → Prop) :
     (∀ v, p v) ↔ (∀ a, ∀ v, p (a :> v)) :=
   ⟨fun h a v ↦ h (a :> v), fun h v ↦ by simpa [←eq_vecCons v] using h (v 0) (v ∘ Fin.succ)⟩
 
+lemma comp_vecCons₂' (g : β → γ) (f : α → β) (a : α) (s : Fin n → α) :
+    (fun x ↦ g <| f <| (a :> s) x) = (g (f a) :> fun i ↦ g <| f <| s i) := by
+  funext x
+  cases x using Fin.cases <;> simp
+
 end Matrix
 
 namespace Set
@@ -264,15 +269,15 @@ lemma nat_extention_piOne {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚷 1 σ) 
 
 end Arith
 
-section
+namespace EquationalTheory
 
-variable (M : Type*) [Nonempty M] [Structure L M]
+variable {L : Language} [Semiformula.Operator.Eq L] (T : Theory L)
 
-abbrev ModelsWithParam {k} (v : Fin k → M) (p : Semisentence L k) : Prop := Semiformula.Evalbm M v p
+@[simp] lemma mk_eq : (EquationalTheory.mk T).toTheory = T⁼ := rfl
 
-notation M:45 " ⊧ₘ[" v "] " p:46 => ModelsWithParam M v p
+instance {V : Type*} [Structure L V] [Nonempty V] [Structure.Eq L V] [V ⊧ₘ* T] : V ⊧ₘ* (EquationalTheory.mk T).toTheory := by simpa
 
-end
+end EquationalTheory
 
 end FirstOrder
 

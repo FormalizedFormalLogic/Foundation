@@ -87,7 +87,7 @@ end Diagonalization
 
 section
 
-variable (U : Theory ℒₒᵣ) [U.Δ₁Definable]
+variable (U : Theory ℒₒᵣ) [U.Delta1Definable]
 
 abbrev _root_.LO.FirstOrder.Theory.bewₐ (σ : Sentence ℒₒᵣ) : Sentence ℒₒᵣ := U.provableₐ/[⌜σ⌝]
 
@@ -99,7 +99,7 @@ end
 
 section
 
-variable {U : Theory ℒₒᵣ} [U.Δ₁Definable]
+variable {U : Theory ℒₒᵣ} [U.Delta1Definable]
 
 theorem provableₐ_D1 {σ} : U ⊢! σ → T ⊢! U.bewₐ σ := by
   intro h
@@ -138,7 +138,7 @@ end
 
 section
 
-variable [T.Δ₁Definable] (consistent : System.Consistent T)
+variable [T.Delta1Definable] (consistent : System.Consistent T)
 
 open LO.System LO.System.FiniteContext
 

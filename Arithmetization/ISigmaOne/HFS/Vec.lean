@@ -626,6 +626,15 @@ lemma le_of_nth_le_nth {v₁ v₂ : V} (hl : len v₁ = len v₂) (H : ∀ i < l
     have hv : v₁ ≤ v₂ := ih (by simpa using hl) (by intro i hi; simpa using H (i + 1) (by simpa using hi))
     exact cons_le_cons hx hv
 
+lemma nth_lt_self {v i : V} (hi : i < len v) : v.[i] < v := by
+  induction v using cons_induction_pi1 generalizing i
+  · definability
+  case nil => simp at hi
+  case cons x v ih =>
+    rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
+    · simp
+    · simpa using lt_trans (ih (by simpa using hi)) (by simp)
+
 theorem sigmaOne_skolem_vec {R : V → V → Prop} (hP : 𝚺₁-Relation R) {l}
     (H : ∀ x < l, ∃ y, R x y) : ∃ v, len v = l ∧ ∀ i < l, R i v.[i] := by
   have : ∀ k ≤ l, ∃ v, len v = k ∧ ∀ i < k, R (l - k + i) v.[i] := by

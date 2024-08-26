@@ -409,6 +409,14 @@ lemma zero_mem_iff {a : V} : 0 ∉ a ↔ 2 ∣ a := by simp [mem_iff_bit, Bit, L
 
 @[simp] lemma zero_not_mem (a : V) : 0 ∉ 2 * a := by simp [mem_iff_bit, Bit, LenBit]
 
+@[simp] lemma zero_mem_double_add_one (a : V) : 0 ∈ 2 * a + 1 := by simp [mem_iff_bit, Bit, LenBit, ←mod_eq_zero_iff_dvd]
+
+@[simp] lemma succ_mem_two_mul_iff {i a : V} : i + 1 ∈ 2 * a ↔ i ∈ a := by
+  simp [mem_iff_bit, Bit, LenBit, exp_succ, div_cancel_left]
+
+@[simp] lemma succ_mem_two_mul_succ_iff {i a : V} : i + 1 ∈ 2 * a + 1 ↔ i ∈ a := by
+  simp [mem_iff_bit, Bit, LenBit, exp_succ, div_mul]
+
 lemma le_of_subset {a b : V} (h : a ⊆ b) : a ≤ b := by
   induction b using hierarchy_polynomial_induction_oRing_pi₁ generalizing a
   · definability
