@@ -277,7 +277,7 @@ attribute [simp] DeMorgan.verum DeMorgan.falsum DeMorgan.and DeMorgan.or DeMorga
 /-- Introducing `~p` as an abbreviation of `p ⟶ ⊥`. -/
 class NegAbbrev (F : Type*) [Tilde F] [Arrow F] [Bot F] where
   neg {p : F} : ~p = p ⟶ ⊥
-attribute [simp] NegAbbrev.neg
+-- attribute [simp] NegAbbrev.neg
 
 namespace LogicalConnective
 

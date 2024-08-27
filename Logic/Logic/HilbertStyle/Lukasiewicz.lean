@@ -10,18 +10,18 @@ class LukasiewiczAbbrev (F : Type*) [LogicalConnective F] where
   or {p q : F} : p ⋎ q = ~p ⟶ q
   and {p q : F} : p ⋏ q = ~(p ⟶ ~q)
 
-attribute [simp]
-  LukasiewiczAbbrev.top
-  LukasiewiczAbbrev.neg
-  LukasiewiczAbbrev.or
-  LukasiewiczAbbrev.and
-
 instance [LogicalConnective F] [LukasiewiczAbbrev F] : NegAbbrev F := ⟨LukasiewiczAbbrev.neg⟩
 
 end
 
 
 namespace System
+
+attribute [local simp]
+  LukasiewiczAbbrev.top
+  LukasiewiczAbbrev.neg
+  LukasiewiczAbbrev.or
+  LukasiewiczAbbrev.and
 
 variable {S F : Type*} [LogicalConnective F] [LukasiewiczAbbrev F] [System F S]
 
