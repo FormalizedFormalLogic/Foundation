@@ -113,7 +113,7 @@ lemma falsum_eq : (falsum : Formula α) = ⊥ := rfl
 
 @[simp] lemma imp_inj (p₁ q₁ p₂ q₂ : Formula α) : p₁ ⟶ p₂ = q₁ ⟶ q₂ ↔ p₁ = q₁ ∧ p₂ = q₂ := by simp[Arrow.arrow]
 
-@[simp] lemma neg_inj (p q : Formula α) : ~p = ~q ↔ p = q := by simp;
+@[simp] lemma neg_inj (p q : Formula α) : ~p = ~q ↔ p = q := by simp [NegAbbrev.neg];
 
 /-
 instance : ModalDeMorgan (Formula α) where
@@ -438,12 +438,12 @@ lemma negated_imp : (p ⟶ q).negated ↔ (q = ⊥) := by
 
 lemma negated_iff : p.negated ↔ ∃ q, p = ~q := by
   induction p using Formula.cases_neg with
-  | himp => simp [negated_imp];
+  | himp => simp [negated_imp, NegAbbrev.neg];
   | _ => simp [negated]
 
 lemma not_negated_iff : ¬p.negated ↔ ∀ q, p ≠ ~q := by
   induction p using Formula.cases_neg with
-  | himp => simp [negated_imp];
+  | himp => simp [negated_imp, NegAbbrev.neg];
   | _ => simp [negated]
 
 @[elab_as_elim]
