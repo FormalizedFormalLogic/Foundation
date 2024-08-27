@@ -305,7 +305,7 @@ lemma N4_characterized : 𝐍𝟒.CharacterizedByPLoNFrameClass (TransitiveFrame
     exact validAxiomFour_of_transitive $ hTrans p (by simp_all);
   | hMdp ihpq ihp => exact PLoN.ValidOnFrame.mdp ihpq ihp;
   | hNec ihp => exact PLoN.ValidOnFrame.nec ihp;
-  | hOrElim => exact PLoN.ValidOnFrame.disj₃;
+  | hElimContra => exact PLoN.ValidOnFrame.elim_contra;
   | _ => simp_all [PLoN.Satisfies];
 
 lemma NRosser_characterized : 𝐍(𝐑).CharacterizedByPLoNFrameClass (SerialFrameClass α) := by
@@ -321,7 +321,7 @@ lemma NRosser_characterized : 𝐍(𝐑).CharacterizedByPLoNFrameClass (SerialFr
       exact PLoN.ValidOnFrame.nec ih;
     . obtain ⟨p, e⟩ := hRosser; subst e; simp_all;
       exact validRosserRule_of_serial (hSerial p (by simp_all)) ih;
-  | hOrElim => exact PLoN.ValidOnFrame.disj₃;
+  | hElimContra => exact PLoN.ValidOnFrame.elim_contra;
   | _ => simp_all [PLoN.Satisfies];
 
 -- TODO: `theory 𝐍𝟒 ∪ theory 𝐍(𝐑) = theory 𝐍𝟒(𝐑)`という事実を示せば共通部分だけで簡単に特徴づけられる気がする
@@ -340,7 +340,7 @@ lemma N4Rosser_characterized : 𝐍𝟒(𝐑).CharacterizedByPLoNFrameClass (Tra
       exact PLoN.ValidOnFrame.nec ih;
     . obtain ⟨p, e⟩ := hRosser; subst e; simp_all;
       exact validRosserRule_of_serial (hSerial (□p) (by simp_all)) ih;
-  | hOrElim => exact PLoN.ValidOnFrame.disj₃;
+  | hElimContra => exact PLoN.ValidOnFrame.elim_contra;
   | _ => simp_all [PLoN.Satisfies];
 
 
