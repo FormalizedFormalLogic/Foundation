@@ -11,6 +11,11 @@ def Formula.BoxdotTranslation : Formula α → Formula α
   | □p => ⊡(BoxdotTranslation p)
 postfix:90 "ᵇ" => Formula.BoxdotTranslation
 
+
+class BoxdotProperty (Λ₁ Λ₂ : DeductionParameter α) where
+  bdp {p} : Λ₁ ⊢! p ↔ Λ₂ ⊢! pᵇ
+
+
 open System
 open Formula
 
@@ -52,5 +57,6 @@ theorem iff_S4_boxdotTranslatedK4 : 𝐒𝟒 ⊢! p ↔ 𝐊𝟒 ⊢! pᵇ := by
   constructor;
   . apply boxdotTranslatedK4_of_S4;
   . apply S4_of_boxdotTranslatedK4;
+instance : BoxdotProperty (𝐒𝟒 : DeductionParameter α) 𝐊𝟒 := ⟨iff_S4_boxdotTranslatedK4⟩
 
 end LO.Modal.Standard

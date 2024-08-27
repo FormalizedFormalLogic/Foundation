@@ -161,4 +161,6 @@ theorem iff_Grz_boxdotTranslatedGL : 𝐆𝐫𝐳 ⊢! p ↔ 𝐆𝐋 ⊢! pᵇ 
   . apply boxdotTranslatedGL_of_Grz;
   . apply Grz_of_boxdotTranslatedGL;
 
+instance : BoxdotProperty (𝐆𝐫𝐳 : DeductionParameter α) 𝐆𝐋 := ⟨iff_Grz_boxdotTranslatedGL⟩
+
 end LO.Modal.Standard
