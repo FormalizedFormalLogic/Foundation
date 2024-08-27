@@ -32,6 +32,9 @@ class HasAxiomT where
 class HasAxiomD where
   D (p : F) : 𝓢 ⊢ Axioms.D p
 
+class HasAxiomD₂ where
+  D₂ : 𝓢 ⊢ Axioms.D₂
+
 class HasAxiomB where
   B (p : F) : 𝓢 ⊢ Axioms.B p
 
@@ -489,11 +492,48 @@ instance [HasAxiomB 𝓢] (Γ : FiniteContext F 𝓢) : HasAxiomB Γ := ⟨fun _
 instance [HasAxiomB 𝓢] (Γ : Context F 𝓢) : HasAxiomB Γ := ⟨fun _ ↦ Context.of axiomB⟩
 
 
-def axiomD [HasAxiomD 𝓢] : 𝓢 ⊢ □p ⟶ ◇p := HasAxiomD.D _
-@[simp] lemma axiomD! [HasAxiomD 𝓢] : 𝓢 ⊢! □p ⟶ ◇p := ⟨axiomD⟩
+section AxiomD
 
-instance [HasAxiomD 𝓢] (Γ : FiniteContext F 𝓢) : HasAxiomD Γ := ⟨fun _ ↦ FiniteContext.of axiomD⟩
-instance [HasAxiomD 𝓢] (Γ : Context F 𝓢) : HasAxiomD Γ := ⟨fun _ ↦ Context.of axiomD⟩
+variable [HasAxiomD 𝓢]
+
+def axiomD : 𝓢 ⊢ □p ⟶ ◇p := HasAxiomD.D _
+@[simp] lemma axiomD! : 𝓢 ⊢! □p ⟶ ◇p := ⟨axiomD⟩
+
+instance (Γ : FiniteContext F 𝓢) : HasAxiomD Γ := ⟨fun _ ↦ FiniteContext.of axiomD⟩
+instance (Γ : Context F 𝓢) : HasAxiomD Γ := ⟨fun _ ↦ Context.of axiomD⟩
+
+-- TODO: move
+def notbot : 𝓢 ⊢ ~⊥ := neg_equiv'.mpr (impId ⊥)
+
+private def D₂_of_D : 𝓢 ⊢ Axioms.D₂ := by
+  have : 𝓢 ⊢ ~~□(~⊥) := dni' $ nec notbot;
+  have : 𝓢 ⊢ ~◇⊥ := (contra₀' $ and₁' diaDuality) ⨀ this;
+  exact (contra₀' axiomD) ⨀ this;
+instance : HasAxiomD₂ 𝓢 := ⟨D₂_of_D⟩
+
+end AxiomD
+
+
+section AxiomD₂
+
+variable [HasAxiomD₂ 𝓢]
+
+def axiomD₂ : 𝓢 ⊢ ~□⊥  := HasAxiomD₂.D₂
+@[simp] lemma axiomD₂! : 𝓢 ⊢! ~□⊥ := ⟨axiomD₂⟩
+
+instance (Γ : FiniteContext F 𝓢) : HasAxiomD₂ Γ := ⟨FiniteContext.of axiomD₂⟩
+instance (Γ : Context F 𝓢) : HasAxiomD₂ Γ := ⟨Context.of axiomD₂⟩
+
+private def D_of_D₂ : 𝓢 ⊢ Axioms.D p := by
+  have : 𝓢 ⊢ p ⟶ (~p ⟶ ⊥) := impTrans'' dni (and₁' neg_equiv);
+  have : 𝓢 ⊢ □p ⟶ □(~p ⟶ ⊥) := implyBoxDistribute' this;
+  have : 𝓢 ⊢ □p ⟶ (□(~p) ⟶ □⊥) := impTrans'' this axiomK;
+  have : 𝓢 ⊢ □p ⟶ (~□⊥ ⟶ ~□(~p)) := impTrans'' this contra₀;
+  have : 𝓢 ⊢ □p ⟶ ~□(~p) := impSwap' this ⨀ axiomD₂;
+  exact impTrans'' this (and₂' diaDuality);
+instance : HasAxiomD 𝓢 := ⟨fun _ ↦ D_of_D₂⟩
+
+end AxiomD₂
 
 
 def axiomFour [HasAxiomFour 𝓢] : 𝓢 ⊢ □p ⟶ □□p := HasAxiomFour.Four _

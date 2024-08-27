@@ -203,6 +203,13 @@ notation "𝐊𝐁" => DeductionParameter.KB
 
 protected abbrev KD : DeductionParameter α := 𝝂𝗗
 notation "𝐊𝐃" => DeductionParameter.KD
+instance : System.KD (𝐊𝐃 : DeductionParameter α) where
+  D _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
+
+protected abbrev KD₂ : DeductionParameter α := 𝝂(𝗗(⊥))
+notation "𝐊𝐃(⊥)" => DeductionParameter.KD₂
+instance : System.HasAxiomD₂ (𝐊𝐃(⊥) : DeductionParameter α) where
+  D₂ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
 
 protected abbrev KTB : DeductionParameter α := 𝝂(𝗧 ∪ 𝗕)
 notation "𝐊𝐓𝐁" => DeductionParameter.KTB
@@ -478,6 +485,22 @@ lemma reducible_GL_GLS : (𝐆𝐋 : DeductionParameter α) ≤ₛ 𝐆𝐋𝐒 
   apply System.weakerThan_iff.mpr;
   intro p h;
   exact Deduction.maxm! (by left; simpa);
+
+private lemma reducible_KD_KD₂ : (𝐊𝐃 : DeductionParameter α) ≤ₛ 𝐊𝐃(⊥) := normal_reducible $ by
+  rintro p (⟨p, q, rfl⟩ | ⟨p, rfl⟩);
+  . exact axiomK!;
+  . exact axiomD!;
+
+private lemma reducible_KD₂_KD : (𝐊𝐃(⊥) : DeductionParameter α) ≤ₛ 𝐊𝐃 := normal_reducible $ by
+  rintro p (⟨p, q, rfl⟩ | ⟨_, rfl⟩);
+  . exact axiomK!;
+  . exact axiomD₂!;
+
+lemma equivalence_KD_KD₂ : (𝐊𝐃 : DeductionParameter α) =ₛ 𝐊𝐃(⊥) := by
+  apply Equiv.antisymm_iff.mpr;
+  constructor;
+  . exact reducible_KD_KD₂;
+  . exact reducible_KD₂_KD;
 
 end Reducible
 
