@@ -311,7 +311,7 @@ end GLAlternative
 
 /-- Solovey's Truth Provability Logic, remark necessitation is *not* permitted. -/
 protected abbrev GLS : DeductionParameter α where
-  axioms := System.theory 𝐆𝐋 ∪ 𝗧
+  axioms := (System.theory 𝐆𝐋) ∪ 𝗧
   rules := ∅
 notation "𝐆𝐋𝐒" => DeductionParameter.GLS
 instance : System.HasAxiomK (𝐆𝐋𝐒 : DeductionParameter α) where
@@ -321,6 +321,20 @@ instance : System.HasAxiomL (𝐆𝐋𝐒 : DeductionParameter α) where
 instance : System.HasAxiomT (𝐆𝐋𝐒 : DeductionParameter α) where
   T _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
 
+
+/-- Dzhaparidze's Provability Logic. -/
+protected abbrev Dz : DeductionParameter α where
+  axioms := (System.theory 𝐆𝐋) ∪ (𝗗(⊥) ∪ 𝗗𝘇)
+  rules := ∅
+notation "𝐃𝐳" => DeductionParameter.Dz
+instance : System.HasAxiomK (𝐃𝐳 : DeductionParameter α) where
+  K _ _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) $ by simp [System.theory, System.axiomK!];
+instance : System.HasAxiomL (𝐃𝐳 : DeductionParameter α) where
+  L _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) $ by simp [System.theory, System.axiomK!];
+instance : System.HasAxiomD₂ (𝐃𝐳 : DeductionParameter α) where
+  D₂ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
+instance : System.HasAxiomDz (𝐃𝐳 : DeductionParameter α) where
+  Dz _ _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
 
 section PLoN
 
@@ -486,6 +500,7 @@ lemma reducible_GL_GLS : (𝐆𝐋 : DeductionParameter α) ≤ₛ 𝐆𝐋𝐒 
   intro p h;
   exact Deduction.maxm! (by left; simpa);
 
+
 private lemma reducible_KD_KD₂ : (𝐊𝐃 : DeductionParameter α) ≤ₛ 𝐊𝐃(⊥) := normal_reducible $ by
   rintro p (⟨p, q, rfl⟩ | ⟨p, rfl⟩);
   . exact axiomK!;
@@ -501,6 +516,25 @@ lemma equivalence_KD_KD₂ : (𝐊𝐃 : DeductionParameter α) =ₛ 𝐊𝐃(�
   constructor;
   . exact reducible_KD_KD₂;
   . exact reducible_KD₂_KD;
+
+
+lemma reducible_GL_Dz : (𝐆𝐋 : DeductionParameter α) ≤ₛ 𝐃𝐳 := by
+  apply System.weakerThan_iff.mpr;
+  intro p h;
+  exact Deduction.maxm! (by left; simpa);
+
+lemma reducible_Dz_GLS : (𝐃𝐳 : DeductionParameter α) ≤ₛ 𝐆𝐋𝐒 := by
+  apply System.weakerThan_iff.mpr;
+  intro p h;
+  induction h using Deduction.inducition! with
+  | hMaxm hp =>
+    simp only [Set.union_insert, Set.mem_insert_iff, Set.mem_union] at hp;
+    rcases hp with (h | ⟨_, rfl⟩ | ⟨p, q, rfl⟩);
+    . simp [System.theory] at h; exact reducible_GL_GLS h;
+    . exact axiomD₂!;
+    . exact axiomDz!;
+  | hMdp ihpq ihp => exact ihpq ⨀ ihp;
+  | _ => trivial;
 
 end Reducible
 

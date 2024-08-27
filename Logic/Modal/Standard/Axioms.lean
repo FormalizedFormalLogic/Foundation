@@ -92,4 +92,8 @@ protected abbrev H := □(□p ⟷ p) ⟶ □p
 abbrev H.set : Set F := { Axioms.H p | (p) }
 notation:max "𝗛" => H.set
 
+protected abbrev Dz := Axioms.T (□p ⋎ □q)
+abbrev Dz.set : Set F := { Axioms.Dz p q | (p) (q) }
+notation:max "𝗗𝘇" => Dz.set
+
 end LO.Axioms

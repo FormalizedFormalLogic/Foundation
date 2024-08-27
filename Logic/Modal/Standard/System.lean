@@ -65,6 +65,9 @@ class HasAxiomVer where
 class HasAxiomH where
   H (p : F) : 𝓢 ⊢ Axioms.H p
 
+class HasAxiomDz where
+  Dz (p q : F) : 𝓢 ⊢ Axioms.Dz p q
+
 protected class K extends System.Classical 𝓢, Necessitation 𝓢, HasAxiomK 𝓢, HasDiaDuality 𝓢
 
 protected class KT extends System.K 𝓢, HasAxiomT 𝓢
@@ -533,6 +536,9 @@ private def D_of_D₂ : 𝓢 ⊢ Axioms.D p := by
   exact impTrans'' this (and₂' diaDuality);
 instance : HasAxiomD 𝓢 := ⟨fun _ ↦ D_of_D₂⟩
 
+private def D₂_of_T [System.HasAxiomT 𝓢] : 𝓢 ⊢ Axioms.D₂ := neg_equiv'.mpr axiomT
+instance [System.HasAxiomT 𝓢] : HasAxiomD₂ 𝓢 := ⟨D₂_of_T⟩
+
 end AxiomD₂
 
 
@@ -848,6 +854,20 @@ noncomputable def boxdot_Grz_of_L : 𝓢 ⊢ ⊡(⊡(p ⟶ ⊡p) ⟶ p) ⟶ p :=
 @[simp] lemma boxdot_Grz_of_L! : 𝓢 ⊢! ⊡(⊡(p ⟶ ⊡p) ⟶ p) ⟶ p := ⟨boxdot_Grz_of_L⟩
 
 end GL_Grz
+
+section Dz
+
+variable [System.HasAxiomDz 𝓢]
+
+def axiomDz : 𝓢 ⊢ □(□p ⋎ □q) ⟶ (□p ⋎ □q) := HasAxiomDz.Dz _ _
+@[simp] lemma axiomDz! : 𝓢 ⊢! □(□p ⋎ □q) ⟶ (□p ⋎ □q) := ⟨axiomDz⟩
+
+instance (Γ : FiniteContext F 𝓢) : HasAxiomDz Γ := ⟨fun _ _ ↦ FiniteContext.of axiomDz⟩
+instance (Γ : Context F 𝓢) : HasAxiomDz Γ := ⟨fun _ _ ↦ Context.of axiomDz⟩
+
+instance [HasAxiomT 𝓢] : HasAxiomDz 𝓢 := ⟨fun _ _ ↦ axiomT⟩
+
+end Dz
 
 lemma contextual_nec! (h : Γ ⊢[𝓢]! p) : (□'Γ) ⊢[𝓢]! □p
   := provable_iff.mpr $ imp_trans''! collect_box_conj! $ imply_box_distribute'! $ provable_iff.mp h
