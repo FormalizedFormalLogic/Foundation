@@ -8,7 +8,6 @@ variable (p q r : F)
 /-- `◇` is duality of `□`. -/
 protected abbrev DiaDuality [Dia F] := ◇p ⟷ ~(□(~p))
 abbrev DiaDuality.set [Dia F] : Set F := { Axioms.DiaDuality p | (p) }
-notation:max "◇Dual" => DiaDuality.set
 
 protected abbrev K := □(p ⟶ q) ⟶ □p ⟶ □q
 abbrev K.set : Set F := { Axioms.K p q | (p) (q) }
@@ -30,6 +29,15 @@ notation:max "𝗕(□)" => B₂.set
 protected abbrev D [Dia F] := □p ⟶ ◇p
 abbrev D.set [Dia F] : Set F := { Axioms.D p | (p) }
 notation:max "𝗗" => D.set
+
+
+/-- Alternative form of axiom `𝗗`. In sight of provability logic, this can be seen as consistency of theory. -/
+protected abbrev D₂ : F := ~(□⊥)
+abbrev D₂.set : Set F := { Axioms.D₂ | }
+notation:max "𝗗(⊥)" => D₂.set
+
+@[simp] lemma D₂.set.def : 𝗗(⊥) = {(~(□⊥) : F)} := by ext; simp;
+
 
 protected abbrev Four := □p ⟶ □□p
 abbrev Four.set : Set F := { Axioms.Four p | (p) }
