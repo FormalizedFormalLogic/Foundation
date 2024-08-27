@@ -555,7 +555,7 @@ lemma not_provable_of_countermodel {p : F} (hp : ¬𝓜 ⊧ p) : 𝓢 ⊬! p :=
 lemma consistent_of_meaningful : Semantics.Meaningful 𝓜 → System.Consistent 𝓢 :=
   fun H ↦ ⟨fun h ↦ by rcases H with ⟨f, hf⟩; exact hf (Sound.sound (h f))⟩
 
-lemma consistent_of_model [Semantics.Bot M] : System.Consistent 𝓢 :=
+lemma consistent_of_model [Semantics.Bot M] {𝓜 : M} [Sound 𝓢 𝓜] : System.Consistent 𝓢 :=
   consistent_of_meaningful (𝓜 := 𝓜) inferInstance
 
 lemma realizeSet_of_prfSet {T : Set F} (b : 𝓢 ⊢!* T) : 𝓜 ⊧* T :=

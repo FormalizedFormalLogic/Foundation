@@ -386,11 +386,10 @@ end Atoms
 
 namespace Formula
 
-variable [DecidableEq α]
 variable {p q r : Formula α}
 
 @[elab_as_elim]
-def cases_neg {C : Formula α → Sort w}
+def cases_neg [DecidableEq α] {C : Formula α → Sort w}
     (hfalsum : C ⊥)
     (hatom   : ∀ a : α, C (atom a))
     (hneg    : ∀ p : Formula α, C (~p))
@@ -404,7 +403,7 @@ def cases_neg {C : Formula α → Sort w}
   | p ⟶ q  => if e : q = ⊥ then e ▸ hneg p else himp p q e
 
 @[elab_as_elim]
-def rec_neg {C : Formula α → Sort w}
+def rec_neg [DecidableEq α] {C : Formula α → Sort w}
     (hfalsum : C ⊥)
     (hatom   : ∀ a : α, C (atom a))
     (hneg    : ∀ p : Formula α, C (p) → C (~p))
@@ -436,18 +435,18 @@ lemma negated_imp : (p ⟶ q).negated ↔ (q = ⊥) := by
   . simp_all [Formula.imp_eq]; rfl;
   . simp_all [Formula.imp_eq]; simpa;
 
-lemma negated_iff : p.negated ↔ ∃ q, p = ~q := by
+lemma negated_iff [DecidableEq α] : p.negated ↔ ∃ q, p = ~q := by
   induction p using Formula.cases_neg with
   | himp => simp [negated_imp, NegAbbrev.neg];
   | _ => simp [negated]
 
-lemma not_negated_iff : ¬p.negated ↔ ∀ q, p ≠ ~q := by
+lemma not_negated_iff [DecidableEq α] : ¬p.negated ↔ ∀ q, p ≠ ~q := by
   induction p using Formula.cases_neg with
   | himp => simp [negated_imp, NegAbbrev.neg];
   | _ => simp [negated]
 
 @[elab_as_elim]
-def rec_negated {C : Formula α → Sort w}
+def rec_negated [DecidableEq α] {C : Formula α → Sort w}
     (hfalsum : C ⊥)
     (hatom   : ∀ a : α, C (atom a))
     (hneg    : ∀ p : Formula α, C (p) → C (~p))

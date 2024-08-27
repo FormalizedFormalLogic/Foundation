@@ -2,8 +2,8 @@ import Logic.Modal.Standard.Deduction
 
 namespace LO.Modal.Standard
 
-variable {α : Type*} [DecidableEq α] [Inhabited α]
-variable {Λ : DeductionParameter α} [Λ_consis : System.Consistent Λ]
+variable {α : Type*} [DecidableEq α] -- [Inhabited α]
+variable {Λ : DeductionParameter α}
 
 open System
 
@@ -28,7 +28,7 @@ lemma def_inconsistent : ¬(Λ)-Consistent T ↔ ∃ (Γ : List (Formula α)), (
   simp only [def_consistent]; push_neg; tauto;
 
 @[simp]
-lemma self_consistent : (Λ)-Consistent Ax(Λ) := by
+lemma self_consistent [Λ_consis : System.Consistent Λ] : (Λ)-Consistent Ax(Λ) := by
   obtain ⟨q, hq⟩ := Λ_consis.exists_unprovable;
   apply def_consistent.mpr;
   intro Γ hΓ;
@@ -36,7 +36,7 @@ lemma self_consistent : (Λ)-Consistent Ax(Λ) := by
   have : Λ ⊢! q := imp_trans''! hC efq! ⨀ (iff_provable_list_conj.mpr $ λ _ h => Deduction.maxm! $ hΓ _ h);
   contradiction;
 
-lemma emptyset_consistent : (Λ)-Consistent ∅ := by
+lemma emptyset_consistent [Λ_consis : System.Consistent Λ] : (Λ)-Consistent ∅ := by
   obtain ⟨f, hf⟩ := Λ_consis.exists_unprovable;
   apply def_consistent.mpr;
   intro Γ hΓ; by_contra hC;
@@ -106,7 +106,7 @@ lemma provable_iff_insert_neg_not_consistent : T *⊢[Λ]! p ↔ ¬(Λ)-Consiste
       exact dne'! $ neg_equiv'!.mpr this;
 
 lemma unprovable_iff_insert_neg_consistent : T *⊬[Λ]! p ↔ (Λ)-Consistent (insert (~p) T) := by
-  simpa [not_not] using provable_iff_insert_neg_not_consistent.not;
+  simpa only [not_not] using provable_iff_insert_neg_not_consistent.not;
 
 lemma unprovable_iff_singleton_neg_consistent : Λ ⊬! p ↔ (Λ)-Consistent {~p} := by
   have e : insert (~p) ∅ = ({~p} : Theory α) := by aesop;
@@ -135,7 +135,7 @@ lemma neg_provable_iff_insert_not_consistent : T *⊢[Λ]! ~p ↔ ¬(Λ)-Consist
       exact imp_swap'! $ and_imply_iff_imply_imply'!.mp hΓ₂;
 
 lemma neg_unprovable_iff_insert_consistent : T *⊬[Λ]! ~p ↔ (Λ)-Consistent (insert (p) T) := by
-  simpa [not_not] using neg_provable_iff_insert_not_consistent.not;
+  simpa only [not_not] using neg_provable_iff_insert_not_consistent.not;
 
 lemma unprovable_iff_singleton_consistent : Λ ⊬! ~p ↔ (Λ)-Consistent {p} := by
   have e : insert (p) ∅ = ({p} : Theory α) := by aesop;
@@ -143,22 +143,20 @@ lemma unprovable_iff_singleton_consistent : Λ ⊬! ~p ↔ (Λ)-Consistent {p} :
   rw [e] at H;
   exact Iff.trans Context.provable_iff_provable.not H;
 
-variable (T_consis : (Λ)-Consistent T)
-
-lemma unprovable_falsum : T *⊬[Λ]! ⊥ := by
+lemma unprovable_falsum (T_consis : (Λ)-Consistent T) : T *⊬[Λ]! ⊥ := by
   by_contra hC;
   obtain ⟨Γ, hΓ₁, _⟩ := Context.provable_iff.mp $ hC;
   have : Γ ⊬[Λ]! ⊥ := (def_consistent.mp T_consis) _ hΓ₁;
   contradiction;
 
-lemma unprovable_either : ¬(T *⊢[Λ]! p ∧ T *⊢[Λ]! ~p) := by
+lemma unprovable_either (T_consis : (Λ)-Consistent T) : ¬(T *⊢[Λ]! p ∧ T *⊢[Λ]! ~p) := by
   by_contra hC;
   have ⟨hC₁, hC₂⟩ := hC;
   have : T *⊢[Λ]! ⊥ := neg_mdp! hC₂ hC₁;
   have : T *⊬[Λ]! ⊥ := unprovable_falsum T_consis;
   contradiction;
 
-lemma not_mem_falsum_of_consistent : ⊥ ∉ T := by
+lemma not_mem_falsum_of_consistent (T_consis : (Λ)-Consistent T) : ⊥ ∉ T := by
   by_contra hC;
   have : Λ ⊬! ⊥ ⟶ ⊥ := (def_consistent.mp T_consis) [⊥] (by simpa);
   have : Λ ⊢! ⊥ ⟶ ⊥ := efq!;
