@@ -53,10 +53,4 @@ theorem iff_S4_boxdotTranslatedK4 : 𝐒𝟒 ⊢! p ↔ 𝐊𝟒 ⊢! pᵇ := by
   . apply boxdotTranslatedK4_of_S4;
   . apply S4_of_boxdotTranslatedK4;
 
-lemma boxdotTranslatedGL_of_Grz : 𝐆𝐫𝐳 ⊢! p → 𝐆𝐋 ⊢! pᵇ := boxdotTranslated $ by
-  intro p hp;
-  rcases hp with (⟨_, _, rfl⟩ | ⟨_, rfl⟩);
-  . dsimp [BoxdotTranslation]; exact boxdot_axiomK!;
-  . dsimp [BoxdotTranslation]; exact boxdot_Grz_of_L!
-
 end LO.Modal.Standard
