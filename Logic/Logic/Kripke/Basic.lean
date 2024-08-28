@@ -19,10 +19,10 @@ instance : CoeFun Frame (λ F => F.World → F.World → Prop) := ⟨Frame.Rel�
 instance {F : Frame} : Nonempty F.World := F.World_nonempty
 
 abbrev Frame.Rel' {F : Frame} (x y : F.World) := F.Rel x y
-scoped infix:45 " ≺ " => Frame.Rel'
+infix:45 " ≺ " => Frame.Rel'
 
 protected abbrev Frame.RelItr' {F : Frame} (n : ℕ) := F.Rel.iterate n
-scoped notation x:45 " ≺^[" n "] " y:46 => Frame.RelItr' n x y
+notation x:45 " ≺^[" n "] " y:46 => Frame.RelItr' n x y
 
 -- TODO: `Rel.iterate`上で示せるはず
 namespace Frame.RelItr'
