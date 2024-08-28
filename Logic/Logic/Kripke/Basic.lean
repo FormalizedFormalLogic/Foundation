@@ -83,7 +83,7 @@ open Relation (ReflTransGen TransGen)
 
 
 abbrev Frame.RelReflTransGen {F : Frame} : _root_.Rel F.World F.World:= ReflTransGen (· ≺ ·)
-scoped infix:45 " ≺^* " => Frame.RelReflTransGen
+infix:45 " ≺^* " => Frame.RelReflTransGen
 
 namespace Frame.RelReflTransGen
 
@@ -124,7 +124,7 @@ end Frame.TransitiveReflexiveClosure
 
 
 abbrev Frame.RelTransGen {F : Frame} : _root_.Rel F.World F.World := TransGen (· ≺ ·)
-scoped infix:45 " ≺^+ " => Frame.RelTransGen
+infix:45 " ≺^+ " => Frame.RelTransGen
 
 namespace Frame.RelTransGen
 
@@ -148,7 +148,7 @@ end Frame.RelTransGen
 abbrev Frame.TransitiveClosure (F : Frame) : Frame where
   World := F.World
   Rel := (· ≺^+ ·)
-scoped postfix:max "^+" => Frame.TransitiveClosure
+postfix:max "^+" => Frame.TransitiveClosure
 
 namespace Frame.TransitiveClosure
 
