@@ -1,4 +1,5 @@
 import Logic.Logic.System
+import Logic.Logic.HilbertStyle.Supplemental
 
 /-!
 # Sequent calculus and variants
@@ -13,437 +14,216 @@ This file defines a characterization of Tait style calculus and Gentzen style ca
 
 namespace LO
 
-class OneSided (F : Type u) where
-  Derivation : List F → Type u
+class OneSided (F : outParam Type*) (K : Type*) where
+  Derivation : K → List F → Type*
 
-class TwoSided (F : Type u) where
-  Derivation : List F → List F → Type u
+infix:45 " ⟹ " => OneSided.Derivation
 
-prefix: 45 "⊢¹ " => OneSided.Derivation
+abbrev OneSided.Derivation₁ [OneSided F K] (𝓚 : K) (p : F) : Type _ := 𝓚 ⟹ [p]
 
-infix: 45 " ⊢² " => TwoSided.Derivation
+infix:45 " ⟹. " => OneSided.Derivation₁
 
-abbrev OneSided.Derivable [OneSided F] (Δ : List F) : Prop := Nonempty (⊢¹ Δ)
+abbrev OneSided.Derivable [OneSided F K] (𝓚 : K) (Δ : List F) : Prop := Nonempty (𝓚 ⟹ Δ)
 
-abbrev TwoSided.Derivable [TwoSided F] (Γ Δ : List F) : Prop := Nonempty (Γ ⊢² Δ)
+infix:45 " ⟹! " => OneSided.Derivable
 
-prefix: 45 "⊢¹! " => OneSided.Derivable
+abbrev OneSided.Derivable₁ [OneSided F K] (𝓚 : K) (p : F) : Prop := Nonempty (𝓚 ⟹. p)
 
-infix: 45 " ⊢²! " => TwoSided.Derivable
+infix:45 " ⟹!. " => OneSided.Derivable₁
 
-class Tait (F : Type u) [LogicalConnective F] extends OneSided F where
-  verum (Δ : List F)         : ⊢¹ ⊤ :: Δ
-  and {p q : F} {Δ : List F} : ⊢¹ p :: Δ → ⊢¹ q :: Δ → ⊢¹ p ⋏ q :: Δ
-  or {p q : F} {Δ : List F}  : ⊢¹ p :: q :: Δ → ⊢¹ p ⋎ q :: Δ
-  wk {Δ Δ' : List F}         : ⊢¹ Δ → Δ ⊆ Δ' → ⊢¹ Δ'
-  em {p} {Δ : List F}        : p ∈ Δ → ~p ∈ Δ → ⊢¹ Δ
+noncomputable def OneSided.Derivable.get [OneSided F K] (𝓚 : K) (Δ : List F) (h : 𝓚 ⟹! Δ) : 𝓚 ⟹ Δ :=
+  Classical.choice h
 
-class Tait.Cut (F : Type u) [LogicalConnective F] [Tait F] where
-  cut {Δ : List F} {p} : ⊢¹ p :: Δ → ⊢¹ ~p :: Δ → ⊢¹ Δ
+class Tait (F K : Type*) [LogicalConnective F] [Collection F K] extends OneSided F K where
+  verum (𝓚 : K) (Δ : List F)         : 𝓚 ⟹ ⊤ :: Δ
+  and {𝓚 : K} {p q : F} {Δ : List F} : 𝓚 ⟹ p :: Δ → 𝓚 ⟹ q :: Δ → 𝓚 ⟹ p ⋏ q :: Δ
+  or {𝓚 : K} {p q : F} {Δ : List F}  : 𝓚 ⟹ p :: q :: Δ → 𝓚 ⟹ p ⋎ q :: Δ
+  wk {𝓚 : K} {Δ Δ' : List F}         : 𝓚 ⟹ Δ → Δ ⊆ Δ' → 𝓚 ⟹ Δ'
+  em {𝓚 : K} {p} {Δ : List F}        : p ∈ Δ → ~p ∈ Δ → 𝓚 ⟹ Δ
 
-class Gentzen (F : Type u) [LogicalConnective F] extends TwoSided F where
-  verum (Γ Δ : List F)                : Γ ⊢² ⊤ :: Δ
-  falsum (Γ Δ : List F)               : ⊥ :: Γ ⊢² Δ
-  negLeft {p : F} {Γ Δ : List F}      : Γ ⊢² p :: Δ → ~p :: Γ ⊢² Δ
-  negRight {p : F} {Γ Δ : List F}     : p :: Γ ⊢² Δ → Γ ⊢² ~p :: Δ
-  andLeft {p q : F} {Γ Δ : List F}    : p :: q :: Γ ⊢² Δ → p ⋏ q :: Γ ⊢² Δ
-  andRight {p q : F} {Γ Δ : List F}   : Γ ⊢² p :: Δ → Γ ⊢² q :: Δ → Γ ⊢² p ⋏ q :: Δ
-  orLeft {p q : F} {Γ Δ : List F}     : p :: Γ ⊢² Δ → q :: Γ ⊢² Δ → p ⋎ q :: Γ ⊢² Δ
-  orRight {p q : F} {Γ Δ : List F}    : Γ ⊢² p :: q :: Δ → Γ ⊢² p ⋎ q :: Δ
-  implyLeft {p q : F} {Γ Δ : List F}  : Γ ⊢² p :: Δ → q :: Γ ⊢² Δ → (p ⟶ q) :: Γ ⊢² Δ
-  implyRight {p q : F} {Γ Δ : List F} : p :: Γ ⊢² q :: Δ → Γ ⊢² (p ⟶ q) :: Δ
-  wk {Γ Γ' Δ Δ' : List F}             : Γ ⊢² Δ → Γ ⊆ Γ' → Δ ⊆ Δ' → Γ' ⊢² Δ'
-  closed (p) {Γ Δ : List F}               : p ∈ Γ → p ∈ Δ → Γ ⊢² Δ
+class Tait.Cut (F K : Type*) [LogicalConnective F] [Collection F K] [Tait F K] where
+  cut {𝓚 : K} {Δ : List F} {p} : 𝓚 ⟹ p :: Δ → 𝓚 ⟹ ~p :: Δ → 𝓚 ⟹ Δ
 
-class Gentzen.Cut (F : Type u) [LogicalConnective F] [Gentzen F] where
-  cut {Γ Δ : List F} {p} : Γ ⊢² p :: Δ → p :: Γ ⊢² Δ → Γ ⊢² Δ
+class Tait.Axiomatized (F K : Type*) [LogicalConnective F] [Collection F K] [Tait F K] where
+  root {𝓚 : K} {p}    : p ∈ 𝓚 → 𝓚 ⟹. p
+  trans {𝓚 𝓛 : K} {Γ} : ((q : F) → q ∈ 𝓚 → 𝓛 ⟹. q) → 𝓚 ⟹ Γ → 𝓛 ⟹ Γ
 
-class LawfulTwoSided (S : Type*) {F : Type*} [LogicalConnective F] [System F S] [TwoSided F] where
-  toProof₁ {Γ} {𝓢 : S} {p : F} : Γ ⊢² [p] → (∀ q ∈ Γ, 𝓢 ⊢ q) → 𝓢 ⊢ p
-
-variable {F : Type*} [LogicalConnective F]
-
-namespace LawfulTwoSided
-
-variable [System F S] [TwoSided F] [LawfulTwoSided S]
-
-def toProofOfNil {p : F} (b : [] ⊢² [p]) (𝓢 : S) : 𝓢 ⊢ p :=
-  toProof₁ b (by intro q h; exact False.elim ((List.mem_nil_iff q).mp h))
-
-lemma toProof₁! {Γ} {𝓢 : S} {p : F} (b : Γ ⊢² [p]) (H : ∀ q ∈ Γ, 𝓢 ⊢! q) : 𝓢 ⊢! p :=
-  ⟨toProof₁ b (fun q hq => (H q hq).get)⟩
-
-end LawfulTwoSided
+variable {F S K : Type*} [LogicalConnective F] [Collection F K]
 
 namespace OneSided
 
-variable [OneSided F] {Γ Δ : List F}
+variable [OneSided F K] {𝓚 : K} {Γ Δ : List F}
 
-protected abbrev cast (d : ⊢¹ Δ) (e : Δ = Γ) : ⊢¹ Γ := cast (congrArg _ e) d
+protected abbrev cast (d : 𝓚 ⟹ Δ) (e : Δ = Γ) : 𝓚 ⟹ Γ := cast (congrArg _ e) d
 
 end OneSided
 
 namespace Tait
 
-variable [DeMorgan F] [Tait F]
+open System
 
-variable {Γ Δ : List F}
+variable [DeMorgan F] [Tait F K]
 
-instance : TwoSided F where
-  Derivation := fun Γ Δ => ⊢¹ Γ.map (~·) ++ Δ
+variable {𝓚 : K} {Γ Δ : List F} {p q p₁ p₂ p₃ p₄ : F}
 
-lemma derivable_iff : Γ ⊢²! Δ ↔ ⊢¹! Γ.map (~·) ++ Δ := by rfl
+def ofEq (b : 𝓚 ⟹ Γ) (h : Γ = Δ) : 𝓚 ⟹ Δ := h ▸ b
 
-def ofConsLeft {p : F} {Γ Δ : List F} (b : p :: Γ ⊢² Δ) :
-    ⊢¹ ~p :: (Γ.map (~·) ++ Δ) := wk b (by simp)
+lemma of_eq (b : 𝓚 ⟹! Γ) (h : Γ = Δ) : 𝓚 ⟹! Δ := h ▸ b
 
-def ofConsRight {p : F} {Γ Δ : List F} (b : Γ ⊢² p :: Δ) :
-    ⊢¹ p :: (Γ.map (~·) ++ Δ) :=
-  wk b (by
-    simp
-    exact ⟨List.subset_cons_of_subset _ (List.subset_append_left _ _),
-      List.subset_cons_of_subset _ (List.subset_append_right _ _)⟩)
+def verum' (h : ⊤ ∈ Γ := by simp) : 𝓚 ⟹ Γ := wk (verum 𝓚 Γ) (by simp [h])
 
-def ofConsRight₂ {p q : F} {Γ Δ : List F} (b : Γ ⊢² p :: q :: Δ) :
-    ⊢¹ p :: q :: (Γ.map (~·) ++ Δ) :=
-  wk b (by
-    simp
-    exact ⟨List.subset_cons_of_subset _ $ List.subset_cons_of_subset _ $ List.subset_append_left _ _,
-      List.subset_cons_of_subset _ $ List.subset_cons_of_subset _ $ List.subset_append_right _ _⟩)
+lemma verum! (𝓚 : K) (Γ : List F) : 𝓚 ⟹! ⊤ :: Γ := ⟨verum _ _⟩
 
-def ofConsLeftRight {p q : F} {Γ Δ : List F} (b : p :: Γ ⊢² q :: Δ) :
-    ⊢¹ ~p :: q :: (Γ.map (~·) ++ Δ) :=
-  wk b (by
-    simp
-    exact ⟨List.subset_cons_of_subset _ $ List.subset_cons_of_subset _ $ List.subset_append_left _ _,
-      List.subset_cons_of_subset _ $ List.subset_cons_of_subset _ $ List.subset_append_right _ _⟩)
+lemma verum'! (h : ⊤ ∈ Γ) : 𝓚 ⟹! Γ := ⟨verum' h⟩
 
-def toConsLeft {p : F} {Γ Δ : List F}
-    (b : ⊢¹ ~p :: (Γ.map (~·) ++ Δ)) :
-    p :: Γ ⊢² Δ := wk b (by simp)
+lemma and! (hp : 𝓚 ⟹! p :: Γ) (hq : 𝓚 ⟹! q :: Γ) : 𝓚 ⟹! p ⋏ q :: Γ := ⟨and hp.get hq.get⟩
 
-def toConsRight {p : F} {Γ Δ : List F}
-    (b : ⊢¹ p :: (Γ.map (~·) ++ Δ)) :
-    Γ ⊢² p :: Δ :=
-  wk b (by
-    simp
-    exact List.subset_append_of_subset_right _ (List.subset_cons _ _))
+lemma or! (h : 𝓚 ⟹! p :: q :: Γ) : 𝓚 ⟹! p ⋎ q :: Γ := ⟨or h.get⟩
 
-instance : Gentzen F where
-  verum := fun _ _ => toConsRight (verum _)
-  falsum := fun _ _ => toConsLeft (by simpa using verum _)
-  negLeft := fun b => toConsLeft (OneSided.cast (ofConsRight b) (by simp))
-  negRight := fun b => toConsRight (OneSided.cast (ofConsLeft b) (by simp))
-  andLeft := fun b => OneSided.cast (or b) (by simp)
-  andRight := fun bp bq =>
-    toConsRight (OneSided.cast (and (ofConsRight bp) (ofConsRight bq)) (by simp))
-  orLeft := fun bp bq =>
-    toConsLeft (OneSided.cast (and (ofConsLeft bp) (ofConsLeft bq)) (by simp))
-  orRight := fun b => toConsRight (OneSided.cast (or $ ofConsRight₂ b) (by simp))
-  implyLeft := fun bp bq =>
-    toConsLeft (OneSided.cast (and (ofConsRight bp) (ofConsLeft bq)) (by simp[DeMorgan.imply]))
-  implyRight := fun b =>
-    toConsRight (OneSided.cast (or $ ofConsLeftRight b) (by simp[DeMorgan.imply]))
-  wk := fun b hΓ hΔ => wk b (by
-    simp
-    exact ⟨List.subset_append_of_subset_left _ $ List.map_subset _ hΓ,
-      List.subset_append_of_subset_right _ $ hΔ⟩)
-  closed := fun p _ _ hΓ hΔ => em (p := p)
-    (List.mem_append.mpr $ .inr $ hΔ)
-    (List.mem_append.mpr $ .inl $ List.mem_map_of_mem (~·) hΓ)
+lemma wk! (h : 𝓚 ⟹! Γ) (ss : Γ ⊆ Δ) : 𝓚 ⟹! Δ := ⟨wk h.get ss⟩
 
-variable [Tait.Cut F]
+lemma em! (hp : p ∈ Γ) (hn : ~p ∈ Γ) : 𝓚 ⟹! Γ := ⟨em hp hn⟩
 
-instance : Gentzen.Cut F := ⟨fun d d' => Cut.cut (ofConsRight d) (ofConsLeft d')⟩
+def close (p : F) (hp : p ∈ Γ := by simp) (hn : ~p ∈ Γ := by simp) : 𝓚 ⟹ Γ := em hp hn
 
-def equiv : Γ ⊢² Δ ≃ ⊢¹ Γ.map (~·) ++ Δ := Equiv.refl _
+lemma close! (p : F) (hp : p ∈ Γ := by simp) (hn : ~p ∈ Γ := by simp) : 𝓚 ⟹! Γ := em! hp hn
 
-def tauto (b : ⊢¹ Δ) : Γ ⊢² Δ := wk b (by simp)
-
-def verum' (h : ⊤ ∈ Γ) : ⊢¹ Γ := wk (verum Γ) (by simp [h])
-
-def and' {p q : F} (h : p ⋏ q ∈ Γ) (dp : ⊢¹ p :: Γ) (dq : ⊢¹ q :: Γ) : ⊢¹ Γ :=
+def and' {p q : F} (h : p ⋏ q ∈ Γ) (dp : 𝓚 ⟹ p :: Γ) (dq : 𝓚 ⟹ q :: Γ) : 𝓚 ⟹ Γ :=
   wk (and dp dq) (by simp [h])
 
-def or' {p q : F} (h : p ⋎ q ∈ Γ) (dpq : ⊢¹ p :: q :: Γ) : ⊢¹ Γ :=
+def or' {p q : F} (h : p ⋎ q ∈ Γ) (dpq : 𝓚 ⟹ p :: q :: Γ) : 𝓚 ⟹ Γ :=
   wk (or dpq) (by simp [h])
 
-end Tait
+def wkTail (d : 𝓚 ⟹ Γ) : 𝓚 ⟹ p :: Γ := wk d (by simp)
 
-namespace Gentzen
+def rotate₁ (d : 𝓚 ⟹ p₂ :: p₁ :: Γ) : 𝓚 ⟹ p₁ :: p₂ :: Γ := wk d (by simp; apply List.subset_cons_of_subset _ (by simp))
 
-variable [Gentzen F] [Gentzen.Cut F] {Γ Δ E : List F}
+def rotate₂ (d : 𝓚 ⟹ p₃ :: p₁ :: p₂ :: Γ) : 𝓚 ⟹ p₁ :: p₂ :: p₃ :: Γ :=
+  wk d (by simp; apply List.subset_cons_of_subset _ (List.subset_cons_of_subset _ <| by simp))
 
-def wkLeft {Γ Γ' Δ : List F} (d : Γ ⊢² Δ) (ss : Γ ⊆ Γ') : Γ' ⊢² Δ := wk d ss (by simp)
+def rotate₃ (d : 𝓚 ⟹ p₄ :: p₁ :: p₂ :: p₃ :: Γ) : 𝓚 ⟹ p₁ :: p₂ :: p₃ :: p₄ :: Γ :=
+  wk d (by simp; apply List.subset_cons_of_subset _ (List.subset_cons_of_subset _ <| List.subset_cons_of_subset _ <| by simp))
 
-def wkRight {Γ Δ Δ' : List F} (d : Γ ⊢² Δ) (ss : Δ ⊆ Δ') : Γ ⊢² Δ' := wk d (by simp) ss
+variable [Tait.Cut F K] [Tait.Axiomatized F K] {𝓚 𝓛 : K} {Γ : List F}
 
-def rotateLeft {Γ Δ : List F} {p} (d : Γ ++ [p] ⊢² Δ) : p :: Γ ⊢² Δ := Gentzen.wkLeft d (by simp)
+alias cut := Tait.Cut.cut
 
-def rotateRight {Γ Δ : List F} {p} (d : Γ ⊢² Δ ++ [p]) : Γ ⊢² p :: Δ := Gentzen.wkRight d (by simp)
+alias root := Tait.Axiomatized.root
 
-def wkL {Γ' Δ : List F} (Γ) (ss : Γ ⊆ Γ') (d : Γ ⊢² Δ) : Γ' ⊢² Δ := wk d ss (by simp)
+lemma cut! (hp : 𝓚 ⟹! p :: Δ) (hn : 𝓚 ⟹! ~p :: Δ) : 𝓚 ⟹! Δ := ⟨cut hp.get hn.get⟩
 
-def wkR {Γ Δ' : List F} (Δ) (ss : Δ ⊆ Δ') (d : Γ ⊢² Δ) : Γ ⊢² Δ' := wk d (by simp) ss
+lemma root! {p} (h : p ∈ 𝓚) : 𝓚 ⟹!. p := ⟨root h⟩
 
-def verum' (h : ⊤ ∈ Δ) : Γ ⊢² Δ := wkRight (verum Γ Δ) (by simp[h])
 
-def Cut.cut' {Γ₁ Γ₂ Δ₁ Δ₂ : List F} (d₁ : Γ₁ ⊢² p :: Δ₁) (d₂ : p :: Γ₂ ⊢² Δ₂) : Γ₁ ++ Γ₂ ⊢² Δ₁ ++ Δ₂ :=
-  let d₁ : Γ₁ ++ Γ₂ ⊢² p :: (Δ₁ ++ Δ₂) := wk d₁ (by simp) (List.cons_subset_cons _ $ by simp)
-  let d₂ : p :: (Γ₁ ++ Γ₂) ⊢² Δ₁ ++ Δ₂ := wk d₂ (List.cons_subset_cons _ $ by simp) (by simp)
-  Cut.cut d₁ d₂
+def ofAxiomSubset (h : 𝓚 ⊆ 𝓛) : 𝓚 ⟹ Γ → 𝓛 ⟹ Γ :=
+  Tait.Axiomatized.trans fun _ hq ↦ Tait.Axiomatized.root (Collection.subset_iff.mp h _ hq)
 
-def ofNegLeft {p} (b : ~p :: Γ ⊢² Δ) : Γ ⊢² p :: Δ :=
-  let d : p :: Γ ⊢² p :: Δ :=
-    Gentzen.wk (show [p] ⊢² [p] from closed _ (List.mem_singleton.mpr rfl) (List.mem_singleton.mpr rfl))
-      (by simp) (by simp)
-  Cut.cut (negRight d) (wkRight b (by simp))
+lemma of_axiom_subset (h : 𝓚 ⊆ 𝓛) : 𝓚 ⟹! Γ → 𝓛 ⟹! Γ := fun b ↦ ⟨ofAxiomSubset h b.get⟩
 
-def ofNegRight {p} (b : Γ ⊢² ~p :: Δ) : p :: Γ ⊢² Δ :=
-  let d : p :: Γ ⊢² p :: Δ :=
-    Gentzen.wk (show [p] ⊢² [p] from closed _ (List.mem_singleton.mpr rfl) (List.mem_singleton.mpr rfl))
-      (by simp) (by simp)
-  Cut.cut (wkLeft b (by simp)) (negLeft d)
+instance system : System F K := ⟨(· ⟹. ·)⟩
 
-def ofImplyRight {p q} (b : Γ ⊢² (p ⟶ q) :: Δ) : p :: Γ ⊢² q :: Δ :=
-  let d : (p ⟶ q) :: p :: Γ ⊢² q :: Δ :=
-    implyLeft (closed p (by simp) (by simp)) (closed q (by simp) (by simp))
-  wk (Cut.cut' b d) (by simp) (by simp)
+instance : System.Axiomatized K where
+  prfAxm := fun hf ↦ Tait.Axiomatized.root <| hf
+  weakening := Tait.ofAxiomSubset
 
-def modusPonens {p q} (b₁ : Γ ⊢² (p ⟶ q) :: Δ) (b₂ : Γ ⊢² p :: Δ) : Γ ⊢² q :: Δ :=
-  wk (Cut.cut' b₂ (ofImplyRight b₁)) (by simp) (by simp)
+lemma waekerThan_of_subset (h : 𝓚 ⊆ 𝓛) : 𝓚 ≤ₛ 𝓛 := fun _ ↦ System.Axiomatized.weakening! h
 
-variable {S : Type*} [Collection F S]
+instance : System.StrongCut K K where
+  cut {_ _ _ bs b} := Tait.Axiomatized.trans (fun _ hq ↦ bs hq) b
 
-structure Disjconseq (𝓣 : S) (Γ : List F) where
-  antecedent : List F
-  subset : ∀ p ∈ antecedent, p ∈ 𝓣
-  derivation : antecedent ⊢² Γ
+lemma provable_bot_iff_derivable_nil : 𝓚 ⟹! [] ↔ 𝓚 ⊢! ⊥ := ⟨fun b ↦ wk! b (by simp), fun b ↦ cut! b (by simpa using verum! _ _)⟩
 
-infix: 45 " ⊢' " => Disjconseq
+instance : DeductiveExplosion K where
+  dexp {𝓚 b p} := wk (Tait.Cut.cut b (by simpa using verum _ _)) (by simp)
 
-def DisjconseqEquivDerivation {𝓣 : S} :
-    𝓣 ⊢' Γ ≃ (Δ : {Δ : List F // ∀ π ∈ Δ, π ∈ 𝓣}) × Δ ⊢² Γ where
-  toFun := fun b => ⟨⟨b.antecedent, b.subset⟩, b.derivation⟩
-  invFun := fun p => ⟨p.1, p.1.prop, p.2⟩
-  left_inv := fun b => by simp
-  right_inv := fun b => by simp
+/-
+instance : System.Deduction K where
+  ofInsert {p q 𝓚 b} := by {  }
+  inv {p q 𝓚 b} :=
+    let h : cons p 𝓚 ⟹ [~p ⋎ q, q] :=
+      wk (show cons p 𝓚 ⟹ [~p ⋎ q] from ofEq (ofAxiomSubset (by simp) b) (by simp [DeMorgan.imply])) (by simp)
+    let n : cons p 𝓚 ⟹ [~(~p ⋎ q), q] :=
+      let hp : cons p 𝓚 ⟹ [p, q] := wk (show cons p 𝓚 ⊢ p from byAxm (by simp)) (by simp)
+      let hq : cons p 𝓚 ⟹ [~q, q] := em (p := q) (by simp) (by simp)
+      ofEq (and hp hq) (by simp)
+    cut h n
+-/
 
-def Disjconseq.weakening {𝓣 U : S} {Γ : List F} (b : 𝓣 ⊢' Γ) (h : 𝓣 ⊆ U) : U ⊢' Γ where
-  antecedent := b.antecedent
-  subset := fun p hp => Collection.subset_iff.mp h _ (b.subset p hp)
-  derivation := b.derivation
+lemma inconsistent_iff_provable :
+    Inconsistent 𝓚 ↔ 𝓚 ⟹! [] :=
+  ⟨fun b ↦ ⟨cut (inconsistent_iff_provable_bot.mp b).get (by simpa using verum _ _)⟩,
+   fun h ↦ inconsistent_iff_provable_bot.mpr (wk! h (by simp))⟩
 
-def toDisjconseq {𝓣 : S} {Γ Δ} (d : Γ ⊢² Δ) (ss : ∀ p ∈ Γ, p ∈ 𝓣) : 𝓣 ⊢' Δ where
-  antecedent := Γ
-  subset := ss
-  derivation := d
+lemma consistent_iff_unprovable :
+    Consistent 𝓚 ↔ IsEmpty (𝓚 ⟹ []) :=
+  not_iff_not.mp <| by simp [not_consistent_iff_inconsistent, inconsistent_iff_provable]
 
-namespace Disjconseq
-
-variable {𝓣 : S}
-
-def wk' {S S'} [Collection F S] [Collection F S'] {𝓣 : S} {𝓣' : S'}
-    (H : Collection.set 𝓣 ⊆ Collection.set 𝓣') {Γ} : 𝓣 ⊢' Γ → 𝓣' ⊢' Γ := fun d ↦
-  ⟨d.antecedent, fun p hp ↦ H (d.subset p hp), d.derivation⟩
-
-def tauto {Δ} (d : [] ⊢² Δ) : 𝓣 ⊢' Δ := toDisjconseq d (by simp)
-
-def wk (b : 𝓣 ⊢' Γ) (ss : Γ ⊆ Γ') : 𝓣 ⊢' Γ' where
-  antecedent := b.antecedent
-  subset := b.subset
-  derivation := wkRight b.derivation ss
-
-def cut (b : 𝓣 ⊢' p :: Γ) (b' : 𝓣 ⊢' ~p :: Γ) : 𝓣 ⊢' Γ where
-  antecedent := b.antecedent ++ b'.antecedent
-  subset := by
-    simp
-    rintro p (hp | hp)
-    · exact b.subset _ hp
-    · exact b'.subset _ hp
-  derivation :=
-    let d : b.antecedent ++ b'.antecedent ⊢² p :: Γ := wkLeft b.derivation (by simp)
-    let d' : b.antecedent ++ b'.antecedent ⊢² ~p :: Γ := wkLeft b'.derivation (by simp)
-    Cut.cut d' (negLeft d)
-
-def cut' (b : 𝓣 ⊢' p :: Γ) (b' : 𝓣 ⊢' ~p :: Δ) : 𝓣 ⊢' Γ ++ Δ where
-  antecedent := b.antecedent ++ b'.antecedent
-  subset := by
-    simp
-    rintro p (hp | hp)
-    · exact b.subset _ hp
-    · exact b'.subset _ hp
-  derivation := by
-    let d : b.antecedent ++ b'.antecedent ⊢² p :: Γ := wkLeft b.derivation (by simp)
-    let d' : b.antecedent ++ b'.antecedent ⊢² ~p :: Δ := wkLeft b'.derivation (by simp)
-    exact Gentzen.wk (Cut.cut' d' (negLeft d)) (by simp) (by simp)
-
-def verum (Γ : List F) : 𝓣 ⊢' ⊤ :: Γ := ⟨[], by simp, Gentzen.verum _ _⟩
-
-def verum' (h : ⊤ ∈ Γ) : 𝓣 ⊢' Γ := wk (verum Γ) (by simp[h])
-
-def em (p) (hp : p ∈ Γ) (hn : ~p ∈ Γ) : 𝓣 ⊢' Γ := tauto (by
-  have : [] ⊢² ~p :: p :: Γ := negRight <| closed p (by simp) (by simp)
-  exact Gentzen.wkRight this (by
-    intro x; simp
-    rintro (rfl | rfl | h) <;> simp [*]))
-
-def and (bp : 𝓣 ⊢' p :: Δ) (bq : 𝓣 ⊢' q :: Δ) : 𝓣 ⊢' p ⋏ q :: Δ where
-  antecedent := bp.antecedent ++ bq.antecedent
-  subset := by
-    simp
-    rintro p (hp | hp)
-    · exact bp.subset _ hp
-    · exact bq.subset _ hp
-  derivation := Gentzen.andRight
-      (Gentzen.wkLeft bp.derivation (List.subset_append_left _ _))
-      (Gentzen.wkLeft bq.derivation (List.subset_append_right _ _))
-
-def or (b : 𝓣 ⊢' p :: q :: Δ) : 𝓣 ⊢' p ⋎ q :: Δ where
-  antecedent := b.antecedent
-  subset := b.subset
-  derivation := Gentzen.orRight b.derivation
-
-def deduction [DecidableEq F] {p} (b : cons p 𝓣 ⊢' Δ) : 𝓣 ⊢' ~p :: Δ where
-  antecedent := b.antecedent.filter (· ≠ p)
-  subset := by
-    simp[List.mem_filter]
-    intro q hq ne
-    simpa[ne] using b.subset q hq
-  derivation := negRight (wkLeft b.derivation $ by
-    intro q hq
-    by_cases e : q = p <;> simp[List.mem_filter, hq, e])
-
-def deductionNeg [DecidableEq F] {p} (b : cons (~p) 𝓣 ⊢' Δ) : 𝓣 ⊢' p :: Δ where
-  antecedent := b.antecedent.filter (· ≠ ~p)
-  subset := by
-    simp[List.mem_filter]
-    intro q hq ne
-    simpa[ne] using b.subset q hq
-  derivation := ofNegLeft (wkLeft b.derivation $ by
-    intro q hq
-    by_cases e : q = ~p <;> simp[List.mem_filter, hq, e])
-
-def byAxm (p) (h : p ∈ 𝓣) : 𝓣 ⊢' p :: Δ := ⟨[p], by simp [h], closed p (by simp) (by simp)⟩
-
-end Disjconseq
-
-variable (F S)
-
-instance : System F S := ⟨(· ⊢' [·])⟩
-
-variable {F S}
-
-instance : System.Axiomatized S where
-  prfAxm := fun {𝓣 f} hf ↦
-    ⟨[f], by simpa, closed _ (List.mem_singleton.mpr rfl) (List.mem_singleton.mpr rfl)⟩
-  weakening := fun ss b => b.weakening ss
-
-def toProof {𝓣 : S} : {Γ Δ : List F} → Γ ⊢² Δ → (∀ q ∈ Γ, 𝓣 ⊢ q) → 𝓣 ⊢' Δ
-  | [],     _, d, _ => toDisjconseq d (by simp)
-  | q :: Γ, Δ, d, h =>
-    let bn : 𝓣 ⊢' ~q :: Δ := toProof (negRight d) (fun q hq => h q (by simp[hq]))
-    let b : 𝓣 ⊢' [q] := h q (by simp)
-    b.cut' bn
-
-instance : LawfulTwoSided S := ⟨toProof⟩
-
-def of {p : F} (b : [] ⊢² [p]) {𝓣 : S} : 𝓣 ⊢ p := ⟨[], by simp, b⟩
-
-instance strongCut (S T) [Collection F S] [Collection F T] :
-    System.StrongCut S T := ⟨fun dU dp ↦ toProof dp.derivation (fun q hq => dU <| dp.subset q hq)⟩
-
-def proofEquivDerivation {𝓣 : S} {p : F} :
-    𝓣 ⊢ p ≃ (Δ : {Δ : List F // ∀ π ∈ Δ, π ∈ 𝓣}) × Δ ⊢² [p] :=
-  DisjconseqEquivDerivation
-
-lemma provable_iff {𝓣 : S} {p : F} :
-    𝓣 ⊢! p ↔ ∃ Δ : List F, (∀ π ∈ Δ, π ∈ 𝓣) ∧ Δ ⊢²! [p] :=
-  ⟨by rintro ⟨b⟩; rcases proofEquivDerivation b with ⟨Δ, d⟩; exact ⟨Δ, Δ.prop, ⟨d⟩⟩,
-   by rintro ⟨Δ, h, ⟨d⟩⟩; exact ⟨proofEquivDerivation.symm ⟨⟨Δ, h⟩, d⟩⟩⟩
-
-instance deductiveExplosion : System.DeductiveExplosion S := ⟨fun {𝓢} b p ↦
-  let t : 𝓢 ⊢ ~⊥ := ⟨[], by simp, Gentzen.negRight (Gentzen.falsum _ _)⟩
-  let b : 𝓢 ⊢' [] := Disjconseq.cut' b t
-  Disjconseq.wk b (by simp)⟩
-
-instance compact : System.Compact S where
-  φ := fun b ↦ b.antecedent.toCollection
-  φPrf := fun b ↦ ⟨b.antecedent, by intro p; simp, b.derivation⟩
-  φ_subset := by intro 𝓣 p b; simpa [Collection.subset_iff] using b.subset
-  φ_finite := by intro 𝓣 p b; simp
-
-variable {𝓣 : S}
-
-lemma consistent_iff_isEmpty :
-    System.Consistent 𝓣 ↔ IsEmpty (𝓣 ⊢' []) :=
-  ⟨by contrapose
-      simp [System.Consistent, System.not_consistent_iff_inconsistent, System.inconsistent_iff_provable_bot]
-      intro b; exact ⟨b.wk (by simp)⟩,
-   by contrapose
-      simp [System.Consistent, System.not_consistent_iff_inconsistent, System.inconsistent_iff_provable_bot]
-      rintro ⟨Δ, h, d⟩
-      have : Δ ⊢² [] := Cut.cut d (falsum _ _)
-      exact ⟨toDisjconseq this h⟩⟩
-
-lemma inconsistent_iff_nonempty :
-    System.Inconsistent 𝓣 ↔ Nonempty (𝓣 ⊢' []) := by
-  simp [←System.not_consistent_iff_inconsistent, consistent_iff_isEmpty]
-
+/-
 lemma provable_iff_inconsistent {p} :
-    𝓣 ⊢! p ↔ System.Inconsistent (cons (~p) 𝓣) :=
-  ⟨by rintro ⟨⟨Δ, h, d⟩⟩
-      simp [inconsistent_iff_nonempty]
-      exact ⟨⟨~p :: Δ, by simp; intro q hq; right; exact h q hq, negLeft d⟩⟩,
-   by letI := Classical.typeDecidableEq F
-      simp [inconsistent_iff_nonempty]
-      exact fun b ↦ ⟨b.deductionNeg⟩⟩
+    𝓚 ⊢! p ↔ Inconsistent (cons (~p) 𝓚) := by
+  simp [inconsistent_iff_provable, deduction_iff, DeMorgan.imply]
+  constructor
+  · intro h; exact cut! (of_axiom_subset (by simp) h) (root! <| by simp)
+  · rintro ⟨b⟩
+    exact ⟨by simpa using Tait.Axiomatized.proofOfContra b⟩
 
 lemma refutable_iff_inconsistent {p} :
-    𝓣 ⊢! ~p ↔ System.Inconsistent (cons p 𝓣) :=
-  ⟨by rintro ⟨⟨Δ, h, d⟩⟩
-      simp [inconsistent_iff_nonempty]
-      exact ⟨⟨p :: Δ, by simp; intro q hq; right; exact h q hq, ofNegRight d⟩⟩,
-   by letI := Classical.typeDecidableEq F
-      simp [inconsistent_iff_nonempty]
-      exact fun b ↦ ⟨b.deduction⟩⟩
+    𝓚 ⊢! ~p ↔ Inconsistent (cons p 𝓚) := by simpa using provable_iff_inconsistent (𝓚 := 𝓚) (p := ~p)
 
 lemma consistent_insert_iff_not_refutable {p}  :
-    System.Consistent (cons p 𝓣) ↔ 𝓣 ⊬! ~p := by
+    System.Consistent (cons p 𝓚) ↔ 𝓚 ⊬! ~p := by
   simp [System.Unprovable, refutable_iff_inconsistent, System.not_inconsistent_iff_consistent]
 
-lemma inconsistent_of_provable_and_refutable {p}
-    (bp : 𝓣 ⊢ p) (br : 𝓣 ⊢ ~p) : System.Inconsistent 𝓣 :=
-  System.not_consistent_iff_inconsistent.mp <| fun A => by
-    have : 𝓣 ⊢' [] := Disjconseq.cut bp br
-    exact (consistent_iff_isEmpty.mp A).false this
+lemma inconsistent_of_provable_and_refutable {p} (bp : 𝓚 ⊢! p) (br : 𝓚 ⊢! ~p) : Inconsistent 𝓚 :=
+  inconsistent_iff_provable.mpr <| cut! bp br
+-/
 
-lemma inconsistent_of_provable_and_refutable! {p}
-    (bp : 𝓣 ⊢! p) (br : 𝓣 ⊢! ~p) : System.Inconsistent 𝓣 := by
-  rcases bp with ⟨bp⟩; rcases br with ⟨br⟩
-  exact inconsistent_of_provable_and_refutable bp br
+instance : System.Classical 𝓚 where
+  mdp {p q dpq dp} :=
+    let dpq : 𝓚 ⟹ [~p ⋎ q, q] := wk dpq (by simp [DeMorgan.imply])
+    let dnq : 𝓚 ⟹ [~(~p ⋎ q), q] :=
+      let d : 𝓚 ⟹ [p ⋏ ~q, q] := and (wk dp <| by simp) (close q)
+      ofEq d (by simp)
+    cut dpq dnq
+  neg_equiv p := ofEq
+    (show 𝓚 ⊢ (p ⋎ ~p ⋎ ⊥) ⋏ (p ⋏ ⊤ ⋎ ~p) from
+      and (or <| rotate₁ <| or <| close p) (or <| and (close p) verum'))
+    (by simp [Axioms.NegEquiv, DeMorgan.imply, LogicalConnective.iff])
+  verum := verum _ _
+  imply₁ p q :=
+    have : 𝓚 ⊢ ~p ⋎ ~q ⋎ p := or <| rotate₁ <| or <| close p
+    ofEq this (by simp [DeMorgan.imply])
+  imply₂ p q r :=
+    have : 𝓚 ⊢ p ⋏ q ⋏ ~ r ⋎ p ⋏ ~q ⋎ ~p ⋎ r :=
+      or <| rotate₁ <| or <| rotate₁ <| or <| rotate₃ <| and
+        (close p)
+        (and (rotate₃ <| and (close p) (close q)) (close r))
+    ofEq this (by simp [DeMorgan.imply])
+  and₁ p q :=
+    have : 𝓚 ⊢ (~p ⋎ ~q) ⋎ p := or <| or <| close p
+    ofEq this (by simp [DeMorgan.imply])
+  and₂ p q :=
+    have : 𝓚 ⊢ (~p ⋎ ~q) ⋎ q := or <| or <| close q
+    ofEq this (by simp [DeMorgan.imply])
+  and₃ p q :=
+    have : 𝓚 ⊢ ~p ⋎ ~q ⋎ p ⋏ q := or <| rotate₁ <| or <| rotate₁ <| and (close p) (close q)
+    ofEq this (by simp [DeMorgan.imply])
+  or₁ p q :=
+    have : 𝓚 ⊢ ~p ⋎ p ⋎ q := or <| rotate₁ <| or <| close p
+    ofEq this (by simp [DeMorgan.imply])
+  or₂ p q :=
+    have : 𝓚 ⊢ ~q ⋎ p ⋎ q := or <| rotate₁ <| or <| close q
+    ofEq this (by simp [DeMorgan.imply])
+  or₃ p q r :=
+    have : 𝓚 ⊢ p ⋏ ~ r ⋎ q ⋏ ~ r ⋎ ~p ⋏ ~q ⋎ r :=
+      or <| rotate₁ <| or <| rotate₁ <| or <| and
+        (rotate₃ <| and (close p) (close r))
+        (rotate₂ <| and (close q) (close r))
+    ofEq this (by simp [DeMorgan.imply])
+  dne p :=
+    have : 𝓚 ⊢ ~p ⋎ p := or <| close p
+    ofEq this (by simp [DeMorgan.imply])
 
-section
-
-variable {S S' : Type*} [Collection F S] [Collection F S']
-
-def wk' {𝓣 : S} {𝓣' : S'} (H : Collection.set 𝓣 ⊆ Collection.set 𝓣') {p} : 𝓣 ⊢ p → 𝓣' ⊢ p := Disjconseq.wk' H
-
-def wk'! {𝓣 : S} {𝓣' : S'} (H : Collection.set 𝓣 ⊆ Collection.set 𝓣') {p} : 𝓣 ⊢! p → 𝓣' ⊢! p := by
-  rintro ⟨b⟩; exact ⟨wk' H b⟩
-
-def le_of_subset {𝓣 : S} {𝓣' : S'} (H : Collection.set 𝓣 ⊆ Collection.set 𝓣') : 𝓣 ≤ₛ 𝓣' := fun _ ↦ wk'! H
-
-end
-
-@[simp] lemma consistent_theory_iff_consistent :
-    System.Consistent (System.theory 𝓣) ↔ System.Consistent 𝓣 :=
-  ⟨fun h ↦ h.of_le (le_of_subset <| by simp [Set.subset_def]; intro p hp; exact System.Axiomatized.provable_axm  𝓣 hp),
-   fun consis ↦ System.consistent_iff_unprovable_bot.mpr <| by
-      rintro h
-      have : System.Inconsistent 𝓣 := System.inconsistent_iff_provable_bot.mpr <| System.StrongCut.cut! (by simp) h
-      exact System.not_inconsistent_iff_consistent.mpr consis this⟩
-
-end Gentzen
+end Tait
 
 end LO

@@ -1093,8 +1093,6 @@ lemma rew_eq_self_of {ω : Rew L ξ n ξ n} {p}
 
 section close
 
-variable [L.ConstantInhabited]
-
 lemma fix_allClosure (p : SyntacticSemiformula L n) :
     ∀' Rew.fix.hom (∀* p) = ∀* (Rew.fix.hom p) := by
   induction n
@@ -1104,15 +1102,8 @@ lemma fix_allClosure (p : SyntacticSemiformula L n) :
 lemma allClosure_fixitr : ∀* (Rew.fixitr 0 (m + 1)).hom p = ∀' Rew.fix.hom (∀* (Rew.fixitr 0 m).hom p) := by
   simp [Rew.fixitr_succ, fix_allClosure, Rew.hom_comp_app]; rfl
 
-def close (p : SyntacticFormula L) : Sentence L := ∀* (Rew.rewrite default).hom ((Rew.fixitr 0 p.upper).hom p)
-
 @[simp] lemma upper_sentence (σ : Semisentence L n) : (Rew.embs.hom σ).upper = 0 := by
     induction σ using rec' <;> simp [upper]
-
-@[simp] lemma close_emb_eq_self (σ : Sentence L) : (Rew.embs.hom σ).close = σ := by
-  simp [close, univClosure_succ]
-  rw [upper_sentence]
-  simp [←Rew.hom_comp_app]
 
 private lemma not_fvar?_fixitr_upper : ¬((Rew.fixitr 0 p.upper).hom p).fvar? x := by
   rw [Rew.eq_bind (Rew.fixitr 0 p.upper)]
@@ -1122,16 +1113,6 @@ private lemma not_fvar?_fixitr_upper : ¬((Rew.fixitr 0 p.upper).hom p).fvar? x 
   · simp at hz
   · have : z < p.upper := lt_upper_of_fvar? hz
     simp [this] at hx
-
-lemma embs_close (p : SyntacticFormula L) : Rew.embs.hom p.close = ∀* (Rew.fixitr 0 p.upper).hom p := by
-  let q := (Rew.hom (Rew.fixitr 0 p.upper)) p
-  simp only [close, Fin.zero_eta, Rew.emb_univClosure, univClosure_inj]
-  suffices Rew.emb.hom ((Rew.rewrite default).hom q) = q by simpa [q] using this
-  simp [←Rew.hom_comp_app]
-  apply rew_eq_self_of
-  · intro x; simp [Rew.comp_app]
-  · intro x hx
-    simp [q, not_fvar?_fixitr_upper] at hx
 
 @[simp] lemma substs_comp_fixitr_eq_map (p : SyntacticFormula L) (f : ℕ → SyntacticTerm L) :
     (Rew.substs (ξ := ℕ) (fun x ↦ f x)).hom ((Rew.fixitr 0 p.upper).hom p) = (Rew.rewrite f).hom p := by
@@ -1148,6 +1129,44 @@ lemma embs_close (p : SyntacticFormula L) : Rew.embs.hom p.close = ∀* (Rew.fix
   · simp
   · intro x hx
     simp [Rew.comp_app, Rew.fixitr_fvar, Semiformula.lt_upper_of_fvar? hx]
+
+def close (p : SyntacticFormula L) : SyntacticFormula L := ∀* ((Rew.fixitr 0 p.upper).hom p)
+
+scoped [LO.FirstOrder] prefix:max "∀∀" => LO.FirstOrder.Semiformula.close
+
+@[simp] lemma rew_close (p : SyntacticFormula L) (ω : SyntacticRew L 0 0) :
+    ω.hom (∀∀p) = ∀∀p := rew_eq_self_of (by simp) (by simp [close, not_fvar?_fixitr_upper])
+
+lemma close_eq_self_of (p : SyntacticFormula L) (h : p.fvarList = []) : ∀∀ p = p := by
+  have : p.upper = 0 := by simp [upper, h]
+  simp [close, univClosure]; rw [this]; simp
+
+@[simp] lemma fvarList_close (p : SyntacticFormula L) : (∀∀p).fvarList = [] :=
+  List.eq_nil_iff_forall_not_mem.mpr <| fun _ ↦ by simpa [close] using not_fvar?_fixitr_upper
+
+@[simp] lemma close_close_eq_close (p : SyntacticFormula L) : ∀∀ ∀∀ p = ∀∀ p :=
+  close_eq_self_of (∀∀p) (by simp)
+
+variable [L.ConstantInhabited]
+
+def close₀ (p : SyntacticFormula L) : Sentence L := ∀* (Rew.rewrite default).hom ((Rew.fixitr 0 p.upper).hom p)
+
+scoped [LO.FirstOrder] prefix:max "∀∀₀" => LO.FirstOrder.Semiformula.close₀
+
+@[simp] lemma close_emb_eq_self (σ : Sentence L) : ∀∀₀(Rew.embs.hom σ) = σ := by
+  simp [close₀, univClosure_succ]
+  rw [upper_sentence]
+  simp [←Rew.hom_comp_app]
+
+@[simp] lemma embs_close (p : SyntacticFormula L) : Rew.embs.hom (∀∀₀p) = ∀∀p := by
+  let q := (Rew.hom (Rew.fixitr 0 p.upper)) p
+  simp only [close, close₀, Fin.zero_eta, Rew.emb_univClosure, univClosure_inj]
+  suffices Rew.emb.hom ((Rew.rewrite default).hom q) = q by simpa [q] using this
+  simp [←Rew.hom_comp_app]
+  apply rew_eq_self_of
+  · intro x; simp [Rew.comp_app]
+  · intro x hx
+    simp [q, not_fvar?_fixitr_upper] at hx
 
 end close
 

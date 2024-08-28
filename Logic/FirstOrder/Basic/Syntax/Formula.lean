@@ -119,6 +119,12 @@ end ToString
   · intro h; simpa using congr_arg (~·) h
   · exact congr_arg _
 
+@[simp] lemma neg_univClosure (p : Semiformula L ξ n) : ~(∀* p) = ∃* ~p := by
+  induction n <;> simp [univClosure, exClosure, *]
+
+@[simp] lemma neg_exClosure (p : Semiformula L ξ n) : ~(∃* p) = ∀* ~p := by
+  induction n <;> simp [univClosure, exClosure, *]
+
 lemma neg_eq (p : Semiformula L ξ n) : ~p = neg p := rfl
 
 lemma imp_eq (p q : Semiformula L ξ n) : p ⟶ q = ~p ⋎ q := rfl
@@ -418,6 +424,9 @@ abbrev fvar? (p : Semiformula L ξ n) (x : ξ) : Prop := x ∈ p.fvarList
 @[simp] lemma fvarList_or (p q : Semiformula L ξ n) : fvarList (p ⋎ q) = p.fvarList ++ q.fvarList := rfl
 @[simp] lemma fvarList_all (p : Semiformula L ξ (n + 1)) : fvarList (∀' p) = fvarList p := rfl
 @[simp] lemma fvarList_ex (p : Semiformula L ξ (n + 1)) : fvarList (∃' p) = fvarList p := rfl
+@[simp] lemma fvarList_univClosure (p : Semiformula L ξ n) : fvarList (∀* p) = fvarList p := by
+  induction n <;> simp [univClosure, *]
+
 @[simp] lemma fvarList_neg (p : Semiformula L ξ n) : fvarList (~p) = fvarList p := by
   induction p using rec' <;> simp[*, fvarList, ←neg_eq]
 @[simp] lemma fvarList_sentence {o : Type*} [IsEmpty o] (p : Semiformula L o n) : fvarList p = [] := by
@@ -433,6 +442,7 @@ abbrev fvar? (p : Semiformula L ξ n) (x : ξ) : Prop := x ∈ p.fvarList
 @[simp] lemma fvar?_or (x) (p q : Semiformula L ξ n) : fvar? (p ⋎ q) x ↔ fvar? p x ∨ fvar? q x := by simp [fvar?]
 @[simp] lemma fvar?_all (x) (p : Semiformula L ξ (n + 1)) : fvar? (∀' p) x ↔ fvar? p x := by simp [fvar?]
 @[simp] lemma fvar?_ex (x) (p : Semiformula L ξ (n + 1)) : fvar? (∃' p) x ↔ fvar? p x := by simp [fvar?]
+@[simp] lemma fvar?_univClosure (x) (p : Semiformula L ξ n) : fvar? (∀* p) x ↔ fvar? p x := by simp [fvar?]
 
 def upper (p : SyntacticSemiformula L n) : ℕ := p.fvarList.maximum?.rec 0 .succ
 
@@ -612,13 +622,13 @@ def fvSup (p : SyntacticSemiformula L n) : WithBot ℕ := p.fvarList.maximum
 
 end Semiformula
 
-abbrev Theory (L : Language) := Set (Sentence L)
+abbrev Theory (L : Language) := Set (SyntacticFormula L)
 
-abbrev SyntacticTheory (L : Language) := Set (SyntacticFormula L)
+abbrev ClosedTheory (L : Language) := Set (Sentence L)
 
-instance : Collection (SyntacticFormula L) (SyntacticTheory L) := inferInstance
+instance : Collection (SyntacticFormula L) (Theory L) := inferInstance
 
-instance : Collection (Sentence L) (Theory L) := inferInstance
+instance : Collection (Sentence L) (ClosedTheory L) := inferInstance
 
 def Theory.lMap (Φ : L₁ →ᵥ L₂) (T : Theory L₁) : Theory L₂ := Semiformula.lMap Φ '' T
 

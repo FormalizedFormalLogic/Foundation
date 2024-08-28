@@ -753,4 +753,15 @@ lemma disj_allsame'! [HasAxiomEFQ 𝓢] (hd : ∀ q ∈ Γ, q = p) (h : 𝓢 ⊢
 
 end disjunction
 
+section consistency
+
+variable [HasAxiomEFQ 𝓢]
+
+lemma inconsistent_of_provable_of_unprovable {p : F}
+    (hp : 𝓢 ⊢! p) (hn : 𝓢 ⊢! ~p) : Inconsistent 𝓢 := by
+  have : 𝓢 ⊢! p ⟶ ⊥ := neg_equiv'!.mp hn
+  intro q; exact efq! ⨀ (this ⨀ hp)
+
+end consistency
+
 end LO.System
