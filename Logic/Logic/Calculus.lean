@@ -114,6 +114,9 @@ lemma cut! (hp : 𝓚 ⟹! p :: Δ) (hn : 𝓚 ⟹! ~p :: Δ) : 𝓚 ⟹! Δ := 
 
 lemma root! {p} (h : p ∈ 𝓚) : 𝓚 ⟹!. p := ⟨root h⟩
 
+def byAxm (p) (h : p ∈ 𝓚) (hΓ : p ∈ Γ := by simp) : 𝓚 ⟹ Γ := wk (root h) (by simp_all)
+
+lemma byAxm! (p) (h : p ∈ 𝓚) (hΓ : p ∈ Γ := by simp) : 𝓚 ⟹! Γ := ⟨byAxm p h hΓ⟩
 
 def ofAxiomSubset (h : 𝓚 ⊆ 𝓛) : 𝓚 ⟹ Γ → 𝓛 ⟹ Γ :=
   Tait.Axiomatized.trans fun _ hq ↦ Tait.Axiomatized.root (Collection.subset_iff.mp h _ hq)

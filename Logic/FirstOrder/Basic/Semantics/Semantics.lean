@@ -177,6 +177,14 @@ lemma val_eq_of_funEqOn (t : Semiterm L ξ n) (h : Function.funEqOn t.fvar? ε �
   case func k f v ih =>
     congr; funext i; exact ih i (by intro x hx; exact h x (by simp; exact ⟨i, hx⟩))
 
+lemma val_toEmpty (t : Semiterm L ξ n) (h : t.fvarList = []) : val s e ε t = valb s e (t.toEmpty h) := by
+  induction t <;> simp [val_func, Semiterm.toEmpty]
+  case fvar => simp at h
+  case func k f v ih =>
+    have : ∀ i, (v i).fvarList = [] := by simpa [Semiterm.fvarList] using h
+    congr 1; funext i
+    exact ih i (this i)
+
 end Semiterm
 
 namespace Structure
@@ -445,6 +453,36 @@ lemma val_fvUnivClosure_inhabited [h : Nonempty ξ] [DecidableEq ξ] {p : Formul
     simp [Formula.fvUnivClosure_sentence p, IsEmpty.eq_elim]
     simp [Matrix.empty_eq]
 
+lemma eval_toEmpty {p : Semiformula L ξ n} (hp : p.fvarList = []) : Eval s e f p ↔ Evalb s e (p.toEmpty hp) := by
+  induction p using Semiformula.rec'
+  case hrel k R v =>
+    simp [eval_rel, Semiformula.toEmpty]
+    apply iff_of_eq; congr; funext i
+    rw [Semiterm.val_toEmpty]
+  case hnrel k R v =>
+    simp [eval_rel, Semiformula.toEmpty]
+    apply iff_of_eq; congr; funext i
+    rw [Semiterm.val_toEmpty]
+  case hverum => simp
+  case hfalsum => simp
+  case hand p q ihp ihq =>
+    simp [ihp (e := e) (by simp [by simpa using hp]), ihq (e := e) (by simp [by simpa using hp])]
+  case hor p q ihp ihq =>
+    simp [ihp (e := e) (by simp [by simpa using hp]), ihq (e := e) (by simp [by simpa using hp])]
+  case hall p ih => simp [fun x ↦ ih (e := (x :> e)) (by simpa using hp)]
+  case hex p ih => simp [fun x ↦ ih (e := (x :> e)) (by simpa using hp)]
+
+lemma eval_close {ε} (p : SyntacticFormula L) :
+    Evalf s ε (∀∀p) ↔ ∀ f, Evalf s f p := by
+  simp [close, eval_rew, Function.comp, Matrix.empty_eq]
+  constructor
+  · intro h f
+    refine (eval_iff_of_funEqOn p ?_).mp (h (fun x ↦ f x))
+    intro x hx; simp [Rew.fixitr_fvar, lt_upper_of_fvar? hx]
+  · intro h f
+    refine (eval_iff_of_funEqOn p ?_).mp (h (fun x ↦ if hx : x < p.upper then f ⟨x, by simp [hx]⟩ else ε 0))
+    intro x hx; simp [Rew.fixitr_fvar, lt_upper_of_fvar? hx]
+
 end Semiformula
 
 namespace Structure
@@ -525,6 +563,13 @@ lemma models_def {p} : (M ⊧ₘ p) = ∀ f, Semiformula.Evalf s f p := rfl
 
 lemma models_iff {p} : M ⊧ₘ p ↔ ∀ f, Semiformula.Evalf s f p := by simp [models_def]
 
+lemma models_emb_iff {σ : Sentence L} : M ⊧ₘ Rew.emb.hom σ ↔ Semiformula.Evalb s ![] σ := by
+  simp [models_iff]
+
+lemma models_iff₀ {p} : M ⊧ₘ p ↔ Semiformula.Evalb s ![] ∀∀₀p := by
+  haveI : Inhabited M := Classical.inhabited_of_nonempty inferInstance
+  simp [models_def, Semiformula.close₀, ←Semiformula.eval_toEmpty (f := default), Semiformula.eval_close]
+
 lemma modelsTheory_iff : M ⊧ₘ* T ↔ (∀ {p}, p ∈ T → M ⊧ₘ p) := Semantics.realizeSet_iff
 
 variable (M T)
@@ -553,6 +598,10 @@ lemma satisfiable_iff :
     Semantics.Satisfiable (Struc.{v, u} L) T ↔ ∃ (M : Type v) (_ : Nonempty M) (_ : Structure L M), M ⊧ₘ* T :=
   ⟨by rintro ⟨s, hs⟩; exact ⟨s.Dom, s.nonempty, s.struc, hs⟩, by rintro ⟨M, i, s, hT⟩; exact ⟨s.toStruc, hT⟩⟩
 
+lemma unsatisfiable_iff :
+    ¬Semantics.Satisfiable (Struc.{v, u} L) T ↔ ∀ (M : Type v) (_ : Nonempty M) (_ : Structure L M), ¬M ⊧ₘ* T := by
+  simpa using satisfiable_iff.not
+
 lemma satisfiable_intro (M : Type v) [Nonempty M] [s : Structure L M] (h : M ⊧ₘ* T) :
     Semantics.Satisfiable (Struc.{v, u} L) T := ⟨s.toStruc, h⟩
 
@@ -572,6 +621,23 @@ noncomputable instance StructureModelOfSat (h : Semantics.Satisfiable (Struc.{v,
     Structure L (ModelOfSat h) := StructureModelOfSatAux h
 
 lemma ModelOfSat.models (h : Semantics.Satisfiable (Struc.{v, u} L) T) : ModelOfSat h ⊧ₘ* T := (StructureModelOfSatAux h).prop
+
+lemma consequence_iff_unsatisfiable {p : SyntacticFormula L} :
+    T ⊨[Struc.{v, u} L] p ↔ ¬Semantics.Satisfiable (Struc.{v, u} L) (insert (~∀∀p) T) := by
+  let σ := ~∀∀₀p
+  have : ~∀∀p = Rew.emb.hom σ := by simp [Semiformula.close₀, σ]
+  rw [this]
+  constructor
+  · intro h
+    apply unsatisfiable_iff.mpr
+    intro M _ s; simp only [Semantics.RealizeSet.insert_iff, models_emb_iff, not_and']
+    intro hT; simpa [σ] using models_iff₀.mp (h hT)
+  · intro h; apply consequence_iff.mpr
+    intro M _ s hT
+    have : ¬(Semiformula.Evalb s ![]) σ := by
+      have := by simpa only [Semantics.RealizeSet.insert_iff, not_and', models_emb_iff] using unsatisfiable_iff.mp h M inferInstance s
+      exact this hT
+    apply models_iff₀.mpr (by simpa [σ] using this)
 
 end
 
