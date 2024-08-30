@@ -184,7 +184,7 @@ abbrev translation (p : Semisentence L' n) : Semisentence L n := ι.interpretati
 lemma sub_models_theory {M : Type u} [Nonempty M] [Structure L M] [Structure.Eq L M] (hT : M ⊧ₘ* T) :
     (ι.interpretation.Sub M) ⊧ₘ* U := modelsTheory_iff.mpr fun {σ} hσ ↦ models_translation_iff.mp (ι.interpret_theory σ hσ hT)
 
-lemma theorem_translation {p : SyntacticFormula L'} (h : U ⊨ p) : T ⊨₌ Rew.emb.hom (ι.translation (∀∀₀p)) :=
+lemma theorem_translation {p : SyntacticFormula L'} (h : U ⊨ p) : T ⊨₌ ↑(ι.translation (∀∀₀p)) :=
   consequence_iff_add_eq.mpr fun M _ _ _ hT ↦
     (@models_translation_iff L L' _ T ι.interpretation M _ _ _ hT p).mpr <| h <| ι.sub_models_theory hT
 

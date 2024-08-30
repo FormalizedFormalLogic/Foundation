@@ -13,15 +13,15 @@ import Logic.Logic.System
 
 -- Propositional
 
-import Logic.Propositional.Classical.Basic.Formula
-import Logic.Propositional.Classical.Basic.Calculus
-import Logic.Propositional.Classical.Basic.Semantics
-import Logic.Propositional.Classical.Basic.Completeness
-import Logic.Propositional.Classical.Basic
+-- import Logic.Propositional.Classical.Basic.Formula
+-- import Logic.Propositional.Classical.Basic.Calculus
+-- import Logic.Propositional.Classical.Basic.Semantics
+-- import Logic.Propositional.Classical.Basic.Completeness
+-- import Logic.Propositional.Classical.Basic
 
 -- Propositional Intuitionistic
 import Logic.Propositional.Superintuitionistic
-import Logic.Propositional.Translation
+-- import Logic.Propositional.Translation
 
 -- FirstOrder
 
@@ -40,13 +40,7 @@ import Logic.FirstOrder.Basic.Soundness
 
 import Logic.FirstOrder.Basic
 
-import Logic.FirstOrder.Hauptsatz
 import Logic.FirstOrder.Ultraproduct
-
-import Logic.FirstOrder.Computability.Term
-import Logic.FirstOrder.Computability.Formula
-import Logic.FirstOrder.Computability.Coding
-import Logic.FirstOrder.Computability.Calculus
 
 import Logic.FirstOrder.Completeness.Coding
 import Logic.FirstOrder.Completeness.SubLanguage
@@ -65,11 +59,9 @@ import Logic.FirstOrder.Arith.PeanoMinus
 import Logic.FirstOrder.Arith.Representation
 import Logic.FirstOrder.Arith.Nonstandard
 
-import Logic.FirstOrder.Arith.EA.Basic
+-- import Logic.FirstOrder.Arith.EA.Basic
 
 import Logic.FirstOrder.Incompleteness.DerivabilityCondition
-import Logic.FirstOrder.Incompleteness.FirstIncompleteness
-import Logic.FirstOrder.Incompleteness.SelfReference
 
 -- Modal Logic
 import Logic.Modal.Standard.Standard
