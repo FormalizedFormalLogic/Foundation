@@ -14,8 +14,6 @@ def orderInd {ξ} (p : Semiformula L ξ 1) : Formula L ξ := “(∀ x, (∀ y <
 
 def leastNumber {ξ} (p : Semiformula L ξ 1) : Formula L ξ := “(∃ x, !p x) → ∃ z, !p z ∧ ∀ x < z, ¬!p x”
 
-def succIndᵤ (p : Semiformula L ξ 1) : Sentence L := ∀ᶠ* succInd p
-
 variable (L)
 
 namespace Theory
@@ -24,33 +22,33 @@ inductive MRT0 : Theory ℒₒᵣ
   | add (n m : ℕ)  : MRT0 “↑n + ↑m = ↑(n + m)”
   | mul (n m : ℕ)  : MRT0 “↑n * ↑m = ↑(n * m)”
   | ne  (n m : ℕ)  : n ≠ m → MRT0 “↑n ≠ ↑m”
-  | bound (n : ℕ)  : MRT0 “∀ x, x < ↑n ↔ ⋁ i, x = ↑(i : Fin n)”
+  | bound (n : ℕ)  : MRT0 “x | x < ↑n ↔ ⋁ i, x = ↑(i : Fin n)”
 
 notation "𝐑₀" => MRT0
 
 inductive peanoMinus : Theory ℒₒᵣ
-  | addZero       : peanoMinus “∀ x, x + 0 = x”
-  | addAssoc      : peanoMinus “∀ x y z, (x + y) + z = x + (y + z)”
-  | addComm       : peanoMinus “∀ x y, x + y = y + x”
-  | addEqOfLt     : peanoMinus “∀ x y, x < y → ∃ z, x + z = y”
-  | zeroLe        : peanoMinus “∀ x, 0 ≤ x”
+  | addZero       : peanoMinus “x | x + 0 = x”
+  | addAssoc      : peanoMinus “x y z | (x + y) + z = x + (y + z)”
+  | addComm       : peanoMinus “x y | x + y = y + x”
+  | addEqOfLt     : peanoMinus “x y | x < y → ∃ z, x + z = y”
+  | zeroLe        : peanoMinus “x | 0 ≤ x”
   | zeroLtOne     : peanoMinus “0 < 1”
-  | oneLeOfZeroLt : peanoMinus “∀ x, 0 < x → 1 ≤ x”
-  | addLtAdd      : peanoMinus “∀ x y z, x < y → x + z < y + z”
-  | mulZero       : peanoMinus “∀ x, x * 0 = 0”
-  | mulOne        : peanoMinus “∀ x, x * 1 = x”
-  | mulAssoc      : peanoMinus “∀ x y z, (x * y) * z = x * (y * z)”
-  | mulComm       : peanoMinus “∀ x y, x * y = y * x”
-  | mulLtMul      : peanoMinus “∀ x y z, x < y ∧ 0 < z → x * z < y * z”
-  | distr         : peanoMinus “∀ x y z, x * (y + z) = x * y + x * z”
-  | ltIrrefl      : peanoMinus “∀ x, x ≮ x”
-  | ltTrans       : peanoMinus “∀ x y z, x < y ∧ y < z → x < z”
-  | ltTri         : peanoMinus “∀ x y, x < y ∨ x = y ∨ x > y”
+  | oneLeOfZeroLt : peanoMinus “x | 0 < x → 1 ≤ x”
+  | addLtAdd      : peanoMinus “x y z | x < y → x + z < y + z”
+  | mulZero       : peanoMinus “x | x * 0 = 0”
+  | mulOne        : peanoMinus “x | x * 1 = x”
+  | mulAssoc      : peanoMinus “x y z | (x * y) * z = x * (y * z)”
+  | mulComm       : peanoMinus “x y | x * y = y * x”
+  | mulLtMul      : peanoMinus “x y z | x < y ∧ 0 < z → x * z < y * z”
+  | distr         : peanoMinus “x y z | x * (y + z) = x * y + x * z”
+  | ltIrrefl      : peanoMinus “x | x ≮ x”
+  | ltTrans       : peanoMinus “x y z | x < y ∧ y < z → x < z”
+  | ltTri         : peanoMinus “x y | x < y ∨ x = y ∨ x > y”
 
 notation "𝐏𝐀⁻" => peanoMinus
 
 def indScheme (Γ : Semiformula L ℕ 1 → Prop) : Theory L :=
-  { q | ∃ p : Semiformula L ℕ 1, Γ p ∧ q = ∀ᶠ* succInd p }
+  { q | ∃ p : Semiformula L ℕ 1, Γ p ∧ q = succInd p }
 
 abbrev iOpen : Theory ℒₒᵣ := 𝐏𝐀⁻ + indScheme ℒₒᵣ Semiformula.Open
 

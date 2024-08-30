@@ -483,6 +483,11 @@ lemma eval_close {ε} (p : SyntacticFormula L) :
     refine (eval_iff_of_funEqOn p ?_).mp (h (fun x ↦ if hx : x < p.upper then f ⟨x, by simp [hx]⟩ else ε 0))
     intro x hx; simp [Rew.fixitr_fvar, lt_upper_of_fvar? hx]
 
+lemma eval_close₀ [Nonempty M] (p : SyntacticFormula L) :
+    Evalb s ![] (∀∀₀p) ↔ ∀ f, Evalf s f p := by
+  haveI : Inhabited M := Classical.inhabited_of_nonempty inferInstance
+  simp [Semiformula.close₀, ←eval_toEmpty (f := default), eval_close]
+
 end Semiformula
 
 namespace Structure
@@ -540,6 +545,10 @@ abbrev Models : SyntacticFormula L → Prop := Semantics.Realize s.toStruc
 
 infix:45 " ⊧ₘ " => Models
 
+abbrev Models₀ (σ : Sentence L) : Prop := M ⊧ₘ Rew.emb.hom σ
+
+infix:45 " ⊧ₘ₀ " => Models₀
+
 abbrev ModelsTheory (T : Theory L) : Prop :=
   Semantics.RealizeSet s.toStruc T
 
@@ -563,12 +572,12 @@ lemma models_def {p} : (M ⊧ₘ p) = ∀ f, Semiformula.Evalf s f p := rfl
 
 lemma models_iff {p} : M ⊧ₘ p ↔ ∀ f, Semiformula.Evalf s f p := by simp [models_def]
 
-lemma models_emb_iff {σ : Sentence L} : M ⊧ₘ Rew.emb.hom σ ↔ Semiformula.Evalb s ![] σ := by
+lemma models₀_iff {σ : Sentence L} : M ⊧ₘ₀ σ ↔ Semiformula.Evalb s ![] σ := by
   simp [models_iff]
 
 lemma models_iff₀ {p} : M ⊧ₘ p ↔ Semiformula.Evalb s ![] ∀∀₀p := by
   haveI : Inhabited M := Classical.inhabited_of_nonempty inferInstance
-  simp [models_def, Semiformula.close₀, ←Semiformula.eval_toEmpty (f := default), Semiformula.eval_close]
+  simp [models_def, Semiformula.eval_close₀]
 
 lemma modelsTheory_iff : M ⊧ₘ* T ↔ (∀ {p}, p ∈ T → M ⊧ₘ p) := Semantics.realizeSet_iff
 
@@ -630,12 +639,12 @@ lemma consequence_iff_unsatisfiable {p : SyntacticFormula L} :
   constructor
   · intro h
     apply unsatisfiable_iff.mpr
-    intro M _ s; simp only [Semantics.RealizeSet.insert_iff, models_emb_iff, not_and']
+    intro M _ s; simp only [Semantics.RealizeSet.insert_iff, models₀_iff, not_and']
     intro hT; simpa [σ] using models_iff₀.mp (h hT)
   · intro h; apply consequence_iff.mpr
     intro M _ s hT
     have : ¬(Semiformula.Evalb s ![]) σ := by
-      have := by simpa only [Semantics.RealizeSet.insert_iff, not_and', models_emb_iff] using unsatisfiable_iff.mp h M inferInstance s
+      have := by simpa only [Semantics.RealizeSet.insert_iff, not_and', models₀_iff] using unsatisfiable_iff.mp h M inferInstance s
       exact this hT
     apply models_iff₀.mpr (by simpa [σ] using this)
 

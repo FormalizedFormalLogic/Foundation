@@ -19,56 +19,56 @@ scoped instance : LE M := ⟨fun x y => x = y ∨ x < y⟩
 
 lemma le_def {x y : M} : x ≤ y ↔ x = y ∨ x < y := iff_of_eq rfl
 
-protected lemma add_zero : ∀ x : M, x + 0 = x := by
-  simpa[models_iff] using ModelsTheory.models M Theory.peanoMinus.addZero
+protected lemma add_zero (x : M) : x + 0 = x := by
+  simpa[models_iff] using ModelsTheory.models M Theory.peanoMinus.addZero (fun _ ↦ x)
 
-protected lemma add_assoc : ∀ x y z : M, (x + y) + z = x + (y + z) := by
-  simpa[models_iff] using ModelsTheory.models M Theory.peanoMinus.addAssoc
+protected lemma add_assoc (x y z : M) : (x + y) + z = x + (y + z) := by
+  simpa[models_iff] using ModelsTheory.models M Theory.peanoMinus.addAssoc (x :>ₙ y :>ₙ fun _ ↦ z)
 
-protected lemma add_comm : ∀ x y : M, x + y = y + x := by
-  simpa[models_iff] using ModelsTheory.models M Theory.peanoMinus.addComm
+protected lemma add_comm (x y : M) : x + y = y + x := by
+  simpa[models_iff] using ModelsTheory.models M Theory.peanoMinus.addComm (x :>ₙ fun _ ↦ y)
 
-lemma add_eq_of_lt : ∀ x y : M, x < y → ∃ z, x + z = y := by
-  simpa[models_iff] using ModelsTheory.models M Theory.peanoMinus.addEqOfLt
+lemma add_eq_of_lt (x y : M) : x < y → ∃ z, x + z = y := by
+  simpa[models_iff] using ModelsTheory.models M Theory.peanoMinus.addEqOfLt (x :>ₙ fun _ ↦ y)
 
-@[simp] lemma zero_le : ∀ x : M, 0 ≤ x := by
-  simpa[models_iff, Structure.le_iff_of_eq_of_lt] using ModelsTheory.models M Theory.peanoMinus.zeroLe
+@[simp] lemma zero_le (x : M) : 0 ≤ x := by
+  simpa[models_iff, Structure.le_iff_of_eq_of_lt] using ModelsTheory.models M Theory.peanoMinus.zeroLe (fun _ ↦ x)
 
 lemma zero_lt_one : (0 : M) < 1 := by
   simpa[models_iff] using ModelsTheory.models M Theory.peanoMinus.zeroLtOne
 
-lemma one_le_of_zero_lt : ∀ x : M, 0 < x → 1 ≤ x := by
-  simpa[models_iff, Structure.le_iff_of_eq_of_lt] using ModelsTheory.models M Theory.peanoMinus.oneLeOfZeroLt
+lemma one_le_of_zero_lt (x : M) : 0 < x → 1 ≤ x := by
+  simpa[models_iff, Structure.le_iff_of_eq_of_lt] using ModelsTheory.models M Theory.peanoMinus.oneLeOfZeroLt (fun _ ↦ x)
 
-lemma add_lt_add : ∀ x y z : M, x < y → x + z < y + z := by
-  simpa[models_iff] using ModelsTheory.models M Theory.peanoMinus.addLtAdd
+lemma add_lt_add (x y z : M) : x < y → x + z < y + z := by
+  simpa[models_iff] using ModelsTheory.models M Theory.peanoMinus.addLtAdd (x :>ₙ y :>ₙ fun _ ↦ z)
 
-protected lemma mul_zero : ∀ x : M, x * 0 = 0 := by
-  simpa[models_iff] using ModelsTheory.models M Theory.peanoMinus.mulZero
+protected lemma mul_zero (x : M) : x * 0 = 0 := by
+  simpa[models_iff] using ModelsTheory.models M Theory.peanoMinus.mulZero (fun _ ↦ x)
 
-protected lemma mul_one : ∀ x : M, x * 1 = x := by
-  simpa[models_iff] using ModelsTheory.models M Theory.peanoMinus.mulOne
+protected lemma mul_one (x : M) : x * 1 = x := by
+  simpa[models_iff] using ModelsTheory.models M Theory.peanoMinus.mulOne (fun _ ↦ x)
 
-protected lemma mul_assoc : ∀ x y z : M, (x * y) * z = x * (y * z) := by
-  simpa[models_iff] using ModelsTheory.models M Theory.peanoMinus.mulAssoc
+protected lemma mul_assoc (x y z : M) : (x * y) * z = x * (y * z) := by
+  simpa[models_iff] using ModelsTheory.models M Theory.peanoMinus.mulAssoc (x :>ₙ y :>ₙ fun _ ↦ z)
 
-protected lemma mul_comm : ∀ x y : M, x * y = y * x := by
-  simpa[models_iff] using ModelsTheory.models M Theory.peanoMinus.mulComm
+protected lemma mul_comm (x y : M) : x * y = y * x := by
+  simpa[models_iff] using ModelsTheory.models M Theory.peanoMinus.mulComm (x :>ₙ fun _ ↦ y)
 
-lemma mul_lt_mul : ∀ x y z : M, x < y → 0 < z → x * z < y * z := by
-  simpa[models_iff] using ModelsTheory.models M Theory.peanoMinus.mulLtMul
+lemma mul_lt_mul (x y z : M) : x < y → 0 < z → x * z < y * z := by
+  simpa[models_iff] using ModelsTheory.models M Theory.peanoMinus.mulLtMul (x :>ₙ y :>ₙ fun _ ↦ z)
 
-lemma distr : ∀ x y z : M, x * (y + z) = x * y + x * z := by
-  simpa[models_iff] using ModelsTheory.models M Theory.peanoMinus.distr
+lemma distr (x y z : M) : x * (y + z) = x * y + x * z := by
+  simpa[models_iff] using ModelsTheory.models M Theory.peanoMinus.distr (x :>ₙ y :>ₙ fun _ ↦ z)
 
-lemma lt_irrefl : ∀ x : M, ¬x < x := by
-  simpa[models_iff] using ModelsTheory.models M Theory.peanoMinus.ltIrrefl
+lemma lt_irrefl (x : M) : ¬x < x := by
+  simpa[models_iff] using ModelsTheory.models M Theory.peanoMinus.ltIrrefl (fun _ ↦ x)
 
-protected lemma lt_trans : ∀ x y z : M, x < y → y < z → x < z := by
-  simpa[models_iff] using ModelsTheory.models M Theory.peanoMinus.ltTrans
+protected lemma lt_trans (x y z : M) : x < y → y < z → x < z := by
+  simpa[models_iff] using ModelsTheory.models M Theory.peanoMinus.ltTrans (x :>ₙ y :>ₙ fun _ ↦ z)
 
-lemma lt_tri : ∀ x y : M, x < y ∨ x = y ∨ y < x := by
-  simpa[models_iff] using ModelsTheory.models M Theory.peanoMinus.ltTri
+lemma lt_tri (x y : M) : x < y ∨ x = y ∨ y < x := by
+  simpa[models_iff] using ModelsTheory.models M Theory.peanoMinus.ltTri (x :>ₙ fun _ ↦ y)
 
 scoped instance : AddCommMonoid M where
   add_assoc := Arith.add_assoc
@@ -167,16 +167,17 @@ lemma eq_nat_of_lt_nat : ∀ {n : ℕ} {x : M}, x < n → ∃ m : ℕ, x = m
 
 open Hierarchy
 
-lemma val_numeral {n} : ∀ (t : Semiterm ℒₒᵣ Empty n),
-    ∀ v, Semiterm.valm M (v ·) Empty.elim t = (Semiterm.valm ℕ v Empty.elim t)
+lemma val_numeral {n} : ∀ (t : Semiterm ℒₒᵣ ξ n),
+    ∀ v f, Semiterm.valm M (v ·) (f ·) t = (Semiterm.valm ℕ v f t)
   | #_,                                 _ => by simp
+  | &x,                                 _ => by simp
   | Semiterm.func Language.Zero.zero _, e => by simp
   | Semiterm.func Language.One.one _,   e => by simp
   | Semiterm.func Language.Add.add v,   e => by simp[Semiterm.val_func, val_numeral (v 0), val_numeral (v 1)]
   | Semiterm.func Language.Mul.mul v,   e => by simp[Semiterm.val_func, val_numeral (v 0), val_numeral (v 1)]
 
-lemma bold_sigma_one_completeness {n} {p : Semisentence ℒₒᵣ n} (hp : Hierarchy 𝚺 1 p) {e} :
-    ℕ ⊧/e p → M ⊧/(e ·) p := by
+lemma bold_sigma_one_completeness {n} {p : Semiformula ℒₒᵣ ξ n} (hp : Hierarchy 𝚺 1 p) {e f} :
+    Semiformula.Evalm ℕ e f p → Semiformula.Evalm M (e ·) (f ·) p := by
   revert e
   apply sigma₁_induction' hp
   case hVerum => simp
@@ -205,6 +206,11 @@ lemma bold_sigma_one_completeness {n} {p : Semisentence ℒₒᵣ n} (hp : Hiera
     intro n p _ ihp e x hp
     exact ⟨x, by simpa [Matrix.comp_vecCons'] using ihp hp⟩
 
+lemma sigma_one_completeness {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
+    ℕ ⊧ₘ₀ σ → M ⊧ₘ₀ σ := by
+  simp [models₀_iff]; intro h
+  simpa [Matrix.empty_eq, Empty.eq_elim] using bold_sigma_one_completeness hσ h
+
 end Arith
 
 namespace FirstOrder.Arith
@@ -214,13 +220,13 @@ open LO.Arith
 variable {T : Theory ℒₒᵣ}
 
 theorem sigma_one_completeness [𝐄𝐐 ≼ T] [𝐏𝐀⁻ ≼ T] {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
-    ℕ ⊧ₘ σ → T ⊢! σ := fun H =>
-  complete (oRing_consequence_of.{0} _ _ (fun M _ _ => by
+    ℕ ⊧ₘ₀ σ → T ⊢! ↑σ := fun H =>
+  complete <| oRing_consequence_of.{0} _ _ <| fun M _ _ => by
     haveI : M ⊧ₘ* 𝐏𝐀⁻ := ModelsTheory.of_provably_subtheory M 𝐏𝐀⁻ T inferInstance (by assumption)
-    simpa [Matrix.empty_eq] using Arith.bold_sigma_one_completeness (M := M) hσ H))
+    exact LO.Arith.sigma_one_completeness hσ H
 
 theorem sigma_one_completeness_iff [𝐏𝐀⁻ ≼ T] [ℕ ⊧ₘ* T] {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
-    ℕ ⊧ₘ σ ↔ T ⊢₌! σ :=
+    ℕ ⊧ₘ₀ σ ↔ T ⊢₌! ↑σ :=
   haveI : 𝐏𝐀⁻ ≼ T⁼ := System.Subtheory.comp (𝓣 := T) inferInstance inferInstance
   ⟨fun h ↦ sigma_one_completeness (T := T⁼) hσ h, fun h ↦ consequence_iff_add_eq.mp (sound₀! h) ℕ inferInstance⟩
 

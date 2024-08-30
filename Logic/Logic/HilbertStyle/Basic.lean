@@ -365,5 +365,41 @@ lemma imply_conj'! [DecidableEq F] (p : F) (Γ : List F) (b : (q : F) → q ∈ 
 def conjImplyConj' [DecidableEq F] {Γ Δ : List F} (h : Δ ⊆ Γ) : 𝓢 ⊢ ⋀Γ ⟶ ⋀Δ :=
   implyConj' _ _ (fun _ hq ↦ generalConj' (h hq))
 
+section
+
+variable {G T : Type*} [System G T] [LogicalConnective G] {𝓣 : T}
+
+def Minimal.ofEquiv (𝓢 : S) [System.Minimal 𝓢] (𝓣 : T) (φ : G →ˡᶜ F) (e : (p : G) → 𝓢 ⊢ φ p ≃ 𝓣 ⊢ p) : System.Minimal 𝓣 where
+  mdp {p q dpq dp} := (e q) (
+    let d : 𝓢 ⊢ φ p ⟶ φ q := by simpa using (e (p ⟶ q)).symm dpq
+    d ⨀ ((e p).symm dp))
+  neg_equiv p := e _ (by simpa using neg_equiv)
+  verum := e _ (by simpa using verum)
+  imply₁ p q := e _ (by simpa using imply₁)
+  imply₂ p q r := e _ (by simpa using imply₂)
+  and₁ p q := e _ (by simpa using and₁)
+  and₂ p q := e _ (by simpa using and₂)
+  and₃ p q := e _ (by simpa using and₃)
+  or₁ p q := e _ (by simpa using or₁)
+  or₂ p q := e _ (by simpa using or₂)
+  or₃ p q r := e _ (by simpa using or₃)
+
+def Classical.ofEquiv (𝓢 : S) [System.Classical 𝓢] (𝓣 : T) (φ : G →ˡᶜ F) (e : (p : G) → 𝓢 ⊢ φ p ≃ 𝓣 ⊢ p) : System.Classical 𝓣 where
+  mdp {p q dpq dp} := (e q) (
+    let d : 𝓢 ⊢ φ p ⟶ φ q := by simpa using (e (p ⟶ q)).symm dpq
+    d ⨀ ((e p).symm dp))
+  neg_equiv p := e _ (by simpa using neg_equiv)
+  verum := e _ (by simpa using verum)
+  imply₁ p q := e _ (by simpa using imply₁)
+  imply₂ p q r := e _ (by simpa using imply₂)
+  and₁ p q := e _ (by simpa using and₁)
+  and₂ p q := e _ (by simpa using and₂)
+  and₃ p q := e _ (by simpa using and₃)
+  or₁ p q := e _ (by simpa using or₁)
+  or₂ p q := e _ (by simpa using or₂)
+  or₃ p q r := e _ (by simpa using or₃)
+  dne p := e _ (by simpa using dne)
+
+end
 
 end LO.System

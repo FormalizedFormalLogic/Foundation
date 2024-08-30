@@ -622,6 +622,8 @@ namespace Semiterm
 
 variable {L L' L₁ L₂ L₃ : Language} {ξ ξ' ξ₁ ξ₂ ξ₃ : Type*} {n n₁ n₂ n₃ : ℕ}
 
+instance : Coe (Semiterm L Empty n) (SyntacticSemiterm L n) := ⟨Rew.emb⟩
+
 @[simp] lemma fvarList_emb {o : Type*} [e : IsEmpty o] {t : Semiterm L o n} : fvarList (Rew.emb t : Semiterm L ξ n) = [] := by
   induction t <;> simp[*, List.eq_nil_iff_forall_not_mem, Rew.func]
   case fvar x => exact IsEmpty.elim' e x
@@ -972,6 +974,12 @@ scoped macro_rules (kind := substsHomNotation)
 namespace Semiformula
 
 variable {L : Language} {ξ : Type*} {n n₁ n₂ n₂ m m₁ m₂ m₃ : ℕ}
+
+@[coe] abbrev embedding (σ : Semisentence L n) : SyntacticSemiformula L n := Rew.emb.hom σ
+
+instance : Coe (Semisentence L n) (SyntacticSemiformula L n) := ⟨embedding⟩
+
+@[simp] lemma embedding_inj (σ π : Semisentence L n) : (σ : SyntacticSemiformula L n) = π ↔ σ = π := Rew.emb.hom_injective.eq_iff
 
 def shiftEmb : SyntacticSemiformula L n ↪ SyntacticSemiformula L n where
   toFun := Rew.shift.hom

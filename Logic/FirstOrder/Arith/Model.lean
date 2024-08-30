@@ -128,10 +128,10 @@ variable {M : Type*} [ORingStruc M] [s : Structure L M]
     M ⊧ₘ* (T.lMap oringEmb : Theory L) ↔ M ⊧ₘ* T := by
   simp [modelsTheory_iff]
   constructor
-  · intro H p hp
-    exact eval_lMap_oringEmb.mp <| @H (Semiformula.lMap oringEmb p) (Set.mem_image_of_mem _ hp)
+  · intro H p hp f
+    exact eval_lMap_oringEmb.mp <| @H (Semiformula.lMap oringEmb p) (Set.mem_image_of_mem _ hp) f
   · simp [Theory.lMap]
-    intro H p hp; exact eval_lMap_oringEmb.mpr (H hp)
+    intro H p hp f; exact eval_lMap_oringEmb.mpr (H hp f)
 
 instance [M ⊧ₘ* 𝐈open] : M ⊧ₘ* 𝐏𝐀⁻ := ModelsTheory.of_add_left M 𝐏𝐀⁻ (Theory.indScheme _ Semiformula.Open)
 
@@ -151,23 +151,23 @@ end model
 
 namespace Standard
 
-variable {μ : Type v} (e : Fin n → ℕ) (ε : μ → ℕ)
+variable {ξ : Type v} (e : Fin n → ℕ) (ε : ξ → ℕ)
 
 instance models_peanoMinus : ℕ ⊧ₘ* 𝐏𝐀⁻ := ⟨by
   intro σ h
   rcases h <;> simp [models_def, ←le_iff_eq_or_lt]
-  case addAssoc => intro l m n; exact add_assoc l m n
-  case addComm  => intro m n; exact add_comm m n
-  case mulAssoc => intro l m n; exact mul_assoc l m n
-  case mulComm  => intro m n; exact mul_comm m n
-  case addEqOfLt => intro m n h; exact ⟨n - m, Nat.add_sub_of_le (le_of_lt h)⟩
+  case addAssoc => intro f; exact add_assoc _ _ _
+  case addComm  => intro f; exact add_comm _ _
+  case mulAssoc => intro f; exact mul_assoc _ _ _
+  case mulComm  => intro f; exact mul_comm _ _
+  case addEqOfLt => intro f h; exact ⟨f 1 - f 0, Nat.add_sub_of_le (le_of_lt h)⟩
   case oneLeOfZeroLt => intro n hn; exact hn
-  case mulLtMul => rintro l m n h hl; exact (mul_lt_mul_right hl).mpr h
-  case distr => intro l m n; exact Nat.mul_add l m n
-  case ltTrans => intro l m n; exact Nat.lt_trans
-  case ltTri => intro n m; exact Nat.lt_trichotomy n m⟩
+  case mulLtMul => rintro f h hl; exact (mul_lt_mul_right hl).mpr h
+  case distr => intro f; exact Nat.mul_add _ _ _
+  case ltTrans => intro f; exact Nat.lt_trans
+  case ltTri => intro f; exact Nat.lt_trichotomy _ _⟩
 
-lemma models_succInd (p : Semiformula ℒₒᵣ ℕ 1) : ℕ ⊧ₘ (∀ᶠ* succInd p) := by
+lemma models_succInd (p : Semiformula ℒₒᵣ ℕ 1) : ℕ ⊧ₘ succInd p := by
   simp[Empty.eq_elim, succInd, models_iff, Matrix.constant_eq_singleton, Matrix.comp_vecCons',
     Semiformula.eval_substs, Semiformula.eval_rew_q Rew.toS, Function.comp]
   intro e hzero hsucc x; induction' x with x ih
@@ -195,11 +195,11 @@ variable (L : Language.{u}) [ORing L]
 
 structure Cut (M : Type w) [s : Structure L M] where
   domain : Set M
-  closedSucc : ∀ x ∈ domain, (‘x | x + 1’).valb s ![x] ∈ domain
-  closedLt : ∀ x y : M, Semiformula.Evalb s ![x, y] “x y | x < y” → y ∈ domain → x ∈ domain
+  closedSucc : ∀ x ∈ domain, (‘x. x + 1’).valb s ![x] ∈ domain
+  closedLt : ∀ x y : M, Semiformula.Evalb s ![x, y] “x y. x < y” → y ∈ domain → x ∈ domain
 
 structure ClosedCut (M : Type w) [s : Structure L M] extends Structure.ClosedSubset L M where
-  closedLt : ∀ x y : M, Semiformula.Evalb s ![x, y] “x y | x < y” → y ∈ domain → x ∈ domain
+  closedLt : ∀ x y : M, Semiformula.Evalb s ![x, y] “x y. x < y” → y ∈ domain → x ∈ domain
 
 end
 
@@ -212,8 +212,8 @@ instance Standard.models_trueArith : ℕ ⊧ₘ* 𝐓𝐀 :=
 
 variable (T : Theory ℒₒᵣ) [𝐄𝐐 ≼ T]
 
-lemma oRing_consequence_of (σ : Sentence ℒₒᵣ) (H : ∀ (M : Type*) [ORingStruc M] [M ⊧ₘ* T], M ⊧ₘ σ) :
-    T ⊨ σ := consequence_of T σ fun M _ s _ _ ↦ by
+lemma oRing_consequence_of (p : SyntacticFormula ℒₒᵣ) (H : ∀ (M : Type*) [ORingStruc M] [M ⊧ₘ* T], M ⊧ₘ p) :
+    T ⊨ p := consequence_of T p fun M _ s _ _ ↦ by
   rcases standardModel_unique M s
   exact H M
 

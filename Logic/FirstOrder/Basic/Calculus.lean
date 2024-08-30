@@ -537,6 +537,42 @@ instance {T U : Theory L} : U ≼ T + U := System.Axiomatized.subtheoryOfSubset 
 
 end Theory
 
+variable (L)
+
+/--
+  An auxiliary structure to provide systems of provability of sentence.
+-/
+structure Theory.Alt where
+  thy : Theory L
+
+variable {L}
+
+alias Theory.alt := Theory.Alt.mk
+
+instance : System (Sentence L) (Theory.Alt L) := ⟨fun T σ ↦ T.thy ⊢ ↑σ⟩
+
+@[simp] lemma Theory.alt_thy (T : Theory L) : T.alt.thy = T := rfl
+
+section
+
+abbrev Provable₀ (T : Theory L) (σ : Sentence L) : Prop := T.alt ⊢! σ
+
+infix:45 " ⊢!. " => Provable₀
+
+abbrev Unprovable₀ (T : Theory L) (σ : Sentence L) : Prop := T.alt ⊬! σ
+
+infix:45 " ⊬!. " => Unprovable₀
+
+instance (T : Theory.Alt L) : System.Classical T := System.Classical.ofEquiv T.thy T Rew.emb.hom (fun _ ↦ .refl _)
+
+variable {T : Theory L} {σ : Sentence L}
+
+lemma provable₀_iff : T ⊢!. σ ↔ T ⊢! ↑σ := iff_of_eq rfl
+
+lemma unprovable₀_iff : T ⊬!. σ ↔ T ⊬! ↑σ := iff_of_eq rfl
+
+end
+
 end FirstOrder
 
 end LO

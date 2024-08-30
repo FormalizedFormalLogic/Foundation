@@ -184,12 +184,12 @@ end BinderNotation
 namespace Arith
 
 class SoundOn {L : Language} [Structure L ℕ]
-    (T : Theory L) (F : Sentence L → Prop) where
-  sound : ∀ {σ}, F σ → T ⊢! σ → ℕ ⊧ₘ σ
+    (T : Theory L) (F : SyntacticFormula L → Prop) where
+  sound : ∀ {p}, F p → T ⊢! p → ℕ ⊧ₘ p
 
 section
 
-variable {L : Language} [Structure L ℕ] (T : Theory L) (F : Set (Sentence L))
+variable {L : Language} [Structure L ℕ] (T : Theory L) (F : Set (SyntacticFormula L))
 
 lemma consistent_of_sound [SoundOn T F] (hF : ⊥ ∈ F) : System.Consistent T :=
   System.consistent_iff_unprovable_bot.mpr <| fun b => by simpa using SoundOn.sound hF b
@@ -200,14 +200,14 @@ section
 
 variable {L : Language.{u}} [L.ORing] (T : Theory L) [𝐄𝐐 ≼ T]
 
-lemma consequence_of (σ : Sentence L)
+lemma consequence_of (p : SyntacticFormula L)
   (H : ∀ (M : Type (max u w))
          [ORingStruc M]
          [Structure L M]
          [Structure.ORing L M]
          [M ⊧ₘ* T],
-         M ⊧ₘ σ) :
-    T ⊨ σ := consequence_iff_consequence.{u, w}.mp <| consequence_iff_eq.mpr fun M _ _ _ hT =>
+         M ⊧ₘ p) :
+    T ⊨ p := consequence_iff_consequence.{u, w}.mp <| consequence_iff_eq.mpr fun M _ _ _ hT =>
   letI : Structure.Model L M ⊧ₘ* T :=
     ((Structure.ElementaryEquiv.modelsTheory (Structure.Model.elementaryEquiv L M)).mp hT)
   (Structure.ElementaryEquiv.models (Structure.Model.elementaryEquiv L M)).mpr (H (Structure.Model L M))
