@@ -1,6 +1,6 @@
 import Logic.Vorspiel.Vorspiel
 import Logic.Vorspiel.Order
-import Logic.Vorspiel.Meta
+--import Logic.Vorspiel.Meta
 
 import Logic.Logic.LogicSymbol
 import Logic.Logic.Semantics

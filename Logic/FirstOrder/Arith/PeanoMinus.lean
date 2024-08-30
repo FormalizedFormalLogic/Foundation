@@ -2,6 +2,7 @@ import Logic.FirstOrder.Completeness.Corollaries
 import Logic.FirstOrder.Arith.Model
 import Logic.Vorspiel.ExistsUnique
 import Mathlib.Algebra.Order.Monoid.Canonical.Defs
+import Mathlib.Data.Nat.Cast.Order.Basic
 
 noncomputable section
 
@@ -182,9 +183,9 @@ lemma bold_sigma_one_completeness {n} {p : Semiformula ℒₒᵣ ξ n} (hp : Hie
   apply sigma₁_induction' hp
   case hVerum => simp
   case hFalsum => simp
-  case hEQ => intro n t₁ t₂ e; simp [val_numeral]
+  case hEQ => intro n t₁ t₂ e; simp? [val_numeral]
   case hNEQ => intro n t₁ t₂ e; simp [val_numeral]
-  case hLT => intro n t₁ t₂ e; simp [val_numeral]
+  case hLT => intro n t₁ t₂ e; simp [val_numeral, Nat.cast_lt]
   case hNLT => intro n t₁ t₂ e; simp [val_numeral]
   case hAnd =>
     simp only [LogicalConnective.HomClass.map_and, LogicalConnective.Prop.and_eq, and_imp]

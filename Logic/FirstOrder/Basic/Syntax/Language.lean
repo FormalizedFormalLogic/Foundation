@@ -1,6 +1,4 @@
 import Logic.Logic.System
-import Logic.Vorspiel.Computability
-import Logic.Vorspiel.Meta
 
 /-!
 # Language of first-order logic
@@ -180,21 +178,6 @@ instance (k) : Primcodable (oRing.Func k) where
           · rcases e with (_ | e) <;> simp
             · rfl)
 
-instance : UniformlyPrimcodable oRing.Func := UniformlyPrimcodable.ofEncodeDecode
-  (Func_encodeDecode_primrec.of_eq $ fun k e => by
-    simp[Encodable.encodeDecode, Encodable.decode]
-    rcases k with (_ | k)
-    · rcases e with (_ | e) <;> simp
-      ·rfl
-      · rcases e with (_ | e) <;> simp
-        · rfl
-    · rcases k with (_ | k) <;> simp
-      · rcases k with (_ | k) <;> simp
-        · rcases e with (_ | e) <;> simp
-          · rfl
-          · rcases e with (_ | e) <;> simp
-            · rfl)
-
 instance (k) : Encodable (oRing.Rel k) where
   encode := fun x =>
     match x with
@@ -218,17 +201,6 @@ private lemma Rel_encodeDecode_primrec : Primrec₂ (fun k e =>
 instance (k) : Primcodable (oRing.Rel k) where
   prim := nat_iff.mp <| (Primrec.encode.comp (Rel_encodeDecode_primrec.comp (Primrec.const k) Primrec.id)).of_eq (fun e => by
     simp[Encodable.decode]
-    rcases k with (_ | k) <;> simp
-    rcases k with (_ | k) <;> simp
-    rcases k with (_ | k) <;> simp
-    rcases e with (_ | e) <;> simp
-    · rfl
-    · rcases e with (_ | e) <;> simp
-      · rfl)
-
-instance : UniformlyPrimcodable oRing.Rel := UniformlyPrimcodable.ofEncodeDecode
-  (Rel_encodeDecode_primrec.of_eq $ fun k e => by
-    simp[Encodable.encodeDecode, Encodable.decode]
     rcases k with (_ | k) <;> simp
     rcases k with (_ | k) <;> simp
     rcases k with (_ | k) <;> simp
