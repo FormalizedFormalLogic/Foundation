@@ -183,7 +183,7 @@ lemma bold_sigma_one_completeness {n} {p : Semiformula ℒₒᵣ ξ n} (hp : Hie
   apply sigma₁_induction' hp
   case hVerum => simp
   case hFalsum => simp
-  case hEQ => intro n t₁ t₂ e; simp? [val_numeral]
+  case hEQ => intro n t₁ t₂ e; simp [val_numeral]
   case hNEQ => intro n t₁ t₂ e; simp [val_numeral]
   case hLT => intro n t₁ t₂ e; simp [val_numeral, Nat.cast_lt]
   case hNLT => intro n t₁ t₂ e; simp [val_numeral]
@@ -218,18 +218,18 @@ namespace FirstOrder.Arith
 
 open LO.Arith
 
-variable {T : Theory ℒₒᵣ}
+variable {T : Theory ℒₒᵣ} [𝐄𝐐 ≼ T] [𝐏𝐀⁻ ≼ T]
 
-theorem sigma_one_completeness [𝐄𝐐 ≼ T] [𝐏𝐀⁻ ≼ T] {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
+theorem sigma_one_completeness {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
     ℕ ⊧ₘ₀ σ → T ⊢! ↑σ := fun H =>
   complete <| oRing_consequence_of.{0} _ _ <| fun M _ _ => by
     haveI : M ⊧ₘ* 𝐏𝐀⁻ := ModelsTheory.of_provably_subtheory M 𝐏𝐀⁻ T inferInstance (by assumption)
     exact LO.Arith.sigma_one_completeness hσ H
 
 theorem sigma_one_completeness_iff [𝐏𝐀⁻ ≼ T] [ℕ ⊧ₘ* T] {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
-    ℕ ⊧ₘ₀ σ ↔ T ⊢₌! ↑σ :=
-  haveI : 𝐏𝐀⁻ ≼ T⁼ := System.Subtheory.comp (𝓣 := T) inferInstance inferInstance
-  ⟨fun h ↦ sigma_one_completeness (T := T⁼) hσ h, fun h ↦ consequence_iff_add_eq.mp (sound₀! h) ℕ inferInstance⟩
+    ℕ ⊧ₘ₀ σ ↔ T ⊢! ↑σ :=
+  haveI : 𝐏𝐀⁻ ≼ T := System.Subtheory.comp (𝓣 := T) inferInstance inferInstance
+  ⟨fun h ↦ sigma_one_completeness (T := T) hσ h, fun h ↦ consequence_iff.mp (sound₀! h) ℕ inferInstance⟩
 
 end FirstOrder.Arith
 
