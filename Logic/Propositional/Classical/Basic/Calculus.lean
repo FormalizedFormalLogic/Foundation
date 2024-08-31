@@ -22,7 +22,7 @@ instance : OneSided (Formula α) (Theory α) := ⟨Derivation⟩
 
 namespace Derivation
 
-variable {T : Theory α} {Δ Δ₁ Δ₂ Γ : Sequent α}
+variable {T U : Theory α} {Δ Δ₁ Δ₂ Γ : Sequent α}
 
 def length : {Δ : Sequent α} → T ⟹ Δ → ℕ
   | _, axL _ _     => 0
@@ -60,8 +60,6 @@ def em {p : Formula α} {Δ : Sequent α} (hpos : p ∈ Δ) (hneg : ~p ∈ Δ) :
     have : T ⟹ p :: q :: Δ := (ihp.and ihq).wk (by simp[hneg])
     exact this.or.wk (by simp[hpos])
 
-end Derivation
-
 instance : Tait (Formula α) (Theory α) where
   verum := fun _ Δ => Derivation.verum Δ
   and := fun dp dq => Derivation.cast (dp.and dq) (by simp)
@@ -70,6 +68,86 @@ instance : Tait (Formula α) (Theory α) where
   em := fun hp hn => Derivation.em hp hn
 
 instance : Tait.Cut (Formula α) (Theory α) := ⟨Derivation.cut⟩
+
+def trans (F : U ⊢* T) {Γ : Sequent α} : T ⟹ Γ → U ⟹ Γ
+  | axL Γ p   => axL Γ p
+  | verum Γ   => verum Γ
+  | and d₁ d₂ => and (trans F d₁) (trans F d₂)
+  | or d      => or (trans F d)
+  | wk d ss   => wk (trans F d) ss
+  | cut d₁ d₂ => cut (trans F d₁) (trans F d₂)
+  | root h    => F h
+
+instance : Tait.Axiomatized (Formula α) (Theory α) where
+  root {_ _ h} := root h
+  trans {_ _ _ F d} := trans (fun h ↦ F _ h) d
+
+variable [DecidableEq α]
+
+def compact {Γ : Sequent α} : T ⟹ Γ → (s : { s : Finset (Formula α) // ↑s ⊆ T}) × (s : Theory α) ⟹ Γ
+  | axL Γ p   => ⟨⟨∅, by simp⟩, axL Γ p⟩
+  | verum Γ   => ⟨⟨∅, by simp⟩, verum Γ⟩
+  | and d₁ d₂ =>
+    let ⟨s₁, d₁⟩ := compact d₁
+    let ⟨s₂, d₂⟩ := compact d₂
+    ⟨⟨(s₁ ∪ s₂ : Finset (Formula α)), by simp [s₁.prop, s₂.prop]⟩,
+      and (Tait.ofAxiomSubset (by simp) d₁) (Tait.ofAxiomSubset (by simp) d₂)⟩
+  | or d      =>
+    let ⟨s, d⟩ := compact d
+    ⟨s, or d⟩
+  | wk d ss   =>
+    let ⟨s, d⟩ := compact d
+    ⟨s, wk d ss⟩
+  | cut d₁ d₂ =>
+    let ⟨s₁, d₁⟩ := compact d₁
+    let ⟨s₂, d₂⟩ := compact d₂
+    ⟨⟨(s₁ ∪ s₂ : Finset (Formula α)), by simp [s₁.prop, s₂.prop]⟩,
+      cut (Tait.ofAxiomSubset (by simp) d₁) (Tait.ofAxiomSubset (by simp) d₂)⟩
+  | root (p := p) h =>
+    ⟨⟨{p}, by simp [h]⟩, root (by simp)⟩
+
+instance : System.Compact (Theory α) where
+  φ b := (compact b).1
+  φPrf b := (compact b).2
+  φ_subset b := by simpa using (compact b).1.prop
+  φ_finite b := by simp
+
+def deductionAux {Γ : Sequent α} {p} : T ⟹ Γ → T \ {p} ⟹ ~p :: Γ
+  | axL Γ p   => wk (axL Γ p) (by simp)
+  | verum Γ   => wk (verum Γ) (by simp)
+  | and d₁ d₂ =>
+    Tait.rotate₁ <| and (Tait.rotate₁ <| deductionAux d₁) (Tait.rotate₁ <| deductionAux d₂)
+  | or d      => Tait.rotate₁ <| Tait.or <| Tait.wk (deductionAux d) (by intro x; simp; tauto)
+  | wk d ss   => wk (deductionAux d) <| List.cons_subset_cons (~p) ss
+  | cut d₁ d₂ => cut (Tait.rotate₁ <| deductionAux d₁) (Tait.rotate₁ <| deductionAux d₂)
+  | root (p := q) h =>
+    if hq : p = q then em (p := p) (by simp [hq]) (by simp) else
+      Tait.wk (show T \ {p} ⟹ [q] from Tait.root (by simp [h, Ne.symm hq])) (by simp)
+
+def deduction {Γ : Sequent α} {p} (d : insert p T ⟹ Γ) : T ⟹ ~p :: Γ := Tait.ofAxiomSubset (by simp) (deductionAux d)
+
+lemma inconsistent_iff_provable :
+    System.Inconsistent (insert p T) ↔ T ⊢! ~p := by
+  constructor
+  · intro h; exact ⟨deduction (Tait.inconsistent_iff_provable.mp h).get⟩
+  · rintro b
+    exact System.inconsistent_of_provable_of_unprovable (p := p) (System.by_axm _ <| by simp) (System.wk! (by simp) b)
+
+lemma consistent_iff_unprovable :
+    System.Consistent (insert p T) ↔ T ⊬! ~p := by simp [←System.not_inconsistent_iff_consistent, inconsistent_iff_provable]
+
+@[simp] lemma inconsistent_theory_iff :
+    System.Inconsistent (System.theory T) ↔ System.Inconsistent T := by
+  constructor
+  · intro h
+    exact System.inconsistent_iff_provable_bot.mpr
+      <| System.StrongCut.cut! (by simp) <| System.inconsistent_iff_provable_bot.mp h
+  · intro h; exact h.of_supset (by simpa using System.Axiomatized.axm_subset T)
+
+@[simp] lemma consistent_theory_iff :
+    System.Consistent (System.theory T) ↔ System.Consistent T := by simp [←System.not_inconsistent_iff_consistent, inconsistent_theory_iff]
+
+end Derivation
 
 end Propositional.Classical
 
