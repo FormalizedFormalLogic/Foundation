@@ -156,8 +156,9 @@ open Mathlib Encodable Semiterm.Operator.GoedelNumber
 
 section
 
-lemma term_primrec {k} : (t : Semiterm ℒₒᵣ Empty k) → Primrec (fun v : Vector ℕ k ↦ t.valbm ℕ v.get)
+lemma term_primrec {k f} : (t : Semiterm ℒₒᵣ ξ k) → Primrec (fun v : Vector ℕ k ↦ t.valm ℕ v.get f)
   | #x                                 => by simpa using Primrec.vector_get.comp .id (.const _)
+  | &x                                 => by simpa using Primrec.const _
   | Semiterm.func Language.Zero.zero _ => by simpa using Primrec.const 0
   | Semiterm.func Language.One.one _   => by simpa using Primrec.const 1
   | Semiterm.func Language.Add.add v   => by
@@ -165,32 +166,33 @@ lemma term_primrec {k} : (t : Semiterm ℒₒᵣ Empty k) → Primrec (fun v : V
   | Semiterm.func Language.Mul.mul v   => by
     simpa [Semiterm.val_func] using Primrec.nat_mul.comp (term_primrec (v 0)) (term_primrec (v 1))
 
-lemma sigma1_re {k} {p : Semisentence ℒₒᵣ k} (hp : Hierarchy 𝚺 1 p) : RePred fun v : Vector ℕ k ↦ ℕ ⊧/v.get p := by
+lemma sigma1_re (ε : ξ → ℕ) {k} {p : Semiformula ℒₒᵣ ξ k} (hp : Hierarchy 𝚺 1 p) :
+    RePred fun v : Vector ℕ k ↦ Semiformula.Evalm ℕ v.get ε p := by
   apply sigma₁_induction' hp
   case hVerum => simp
   case hFalsum => simp
   case hEQ =>
     intro n t₁ t₂
     refine ComputablePred.to_re <| ComputablePred.computable_iff.mpr
-      <| ⟨fun v : Vector ℕ n ↦ decide (t₁.valbm ℕ v.get = t₂.valbm ℕ v.get), ?_, ?_⟩
+      <| ⟨fun v : Vector ℕ n ↦ decide (t₁.valm ℕ v.get ε = t₂.valm ℕ v.get ε), ?_, ?_⟩
     · apply Primrec.to_comp <| Primrec.eq.comp (term_primrec t₁) (term_primrec t₂)
     · simp
   case hNEQ =>
     intro n t₁ t₂
     refine ComputablePred.to_re <| ComputablePred.computable_iff.mpr
-      <| ⟨fun v : Vector ℕ n ↦ !decide (t₁.valbm ℕ v.get = t₂.valbm ℕ v.get), ?_, ?_⟩
+      <| ⟨fun v : Vector ℕ n ↦ !decide (t₁.valm ℕ v.get ε = t₂.valm ℕ v.get ε), ?_, ?_⟩
     · apply Primrec.to_comp <| Primrec.not.comp <| Primrec.eq.comp (term_primrec t₁) (term_primrec t₂)
     · simp
   case hLT =>
     intro n t₁ t₂
     refine ComputablePred.to_re <| ComputablePred.computable_iff.mpr
-      <| ⟨fun v : Vector ℕ n ↦ decide (t₁.valbm ℕ v.get < t₂.valbm ℕ v.get), ?_, ?_⟩
+      <| ⟨fun v : Vector ℕ n ↦ decide (t₁.valm ℕ v.get ε < t₂.valm ℕ v.get ε), ?_, ?_⟩
     · apply Primrec.to_comp <| Primrec.nat_lt.comp (term_primrec t₁) (term_primrec t₂)
     · simp
   case hNLT =>
     intro n t₁ t₂
     refine ComputablePred.to_re <| ComputablePred.computable_iff.mpr
-      <| ⟨fun v : Vector ℕ n ↦ !decide (t₁.valbm ℕ v.get < t₂.valbm ℕ v.get), ?_, ?_⟩
+      <| ⟨fun v : Vector ℕ n ↦ !decide (t₁.valm ℕ v.get ε < t₂.valm ℕ v.get ε), ?_, ?_⟩
     · apply Primrec.to_comp <| Primrec.not.comp <| Primrec.nat_lt.comp (term_primrec t₁) (term_primrec t₂)
     · simp
   case hAnd =>
@@ -203,13 +205,13 @@ lemma sigma1_re {k} {p : Semisentence ℒₒᵣ k} (hp : Hierarchy 𝚺 1 p) : R
     intro n t p _ ih
     rcases RePred.iff'.mp ih with ⟨f, hf, H⟩
     let g : Vector ℕ n →. Unit := fun v ↦
-      Nat.rec (.some ()) (fun x ih ↦ ih.bind fun _ ↦ f (x ::ᵥ v)) (t.valbm ℕ v.get)
+      Nat.rec (.some ()) (fun x ih ↦ ih.bind fun _ ↦ f (x ::ᵥ v)) (t.valm ℕ v.get ε)
     have : Partrec g :=
       Partrec.nat_rec (term_primrec t).to_comp (Computable.const ())
         (Partrec.to₂ <| hf.comp (Primrec.to_comp <| Primrec.vector_cons.comp (Primrec.fst.comp .snd) .fst))
     refine RePred.iff.mpr ⟨_, this, ?_⟩
     funext v; simp [g]
-    suffices ∀ k : ℕ, (∀ x < k, Semiformula.Evalbm ℕ (x :> v.get) p) ↔
+    suffices ∀ k : ℕ, (∀ x < k, Semiformula.Evalm ℕ (x :> v.get) ε p) ↔
       Part.Dom (Nat.rec (.some ()) (fun x ih ↦ ih.bind fun _ ↦ f (x ::ᵥ v)) k) from this _
     intro k; induction k
     case zero => simp
@@ -226,12 +228,11 @@ lemma sigma1_re {k} {p : Semisentence ℒₒᵣ k} (hp : Hierarchy 𝚺 1 p) : R
   case hEx =>
     intro n p _ ih
     rcases RePred.iff'.mp ih with ⟨f, _, _⟩
-    have : RePred fun vx : Vector ℕ n × ℕ ↦ Semiformula.Evalbm ℕ (vx.2 :> vx.1.get) p := by
+    have : RePred fun vx : Vector ℕ n × ℕ ↦ Semiformula.Evalm ℕ (vx.2 :> vx.1.get) ε p := by
       simpa [Vector.cons_get] using ih.comp (Primrec.to_comp <| Primrec.vector_cons.comp .snd .fst)
     simpa using this.projection
 
 end
-
 
 open Nat.ArithPart₁
 
