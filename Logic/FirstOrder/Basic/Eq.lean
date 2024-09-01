@@ -2,39 +2,21 @@ import Logic.FirstOrder.Basic.BinderNotation
 import Logic.FirstOrder.Basic.Semantics.Elementary
 import Logic.FirstOrder.Basic.Soundness
 
+namespace Matrix
+
+variable {α : Type*}
+
+def iget [Inhabited α] (v : Fin k → α) (x : ℕ) : α := if h : x < k then v ⟨x, h⟩ else default
+
+end Matrix
+
 namespace LO
 
 namespace FirstOrder
 
 variable {L : Language} {μ : Type*} [Semiformula.Operator.Eq L]
-namespace Semiterm
-
-def varSumInL {k} : Fin k → Semiterm L μ (k + k) := fun i => #(Fin.castLE (by simp) i)
-
-def varSumInR {k} : Fin k → Semiterm L μ (k + k) := fun i => #(Fin.natAdd k i)
-
-@[simp] lemma substs_varSumInL (w₁ w₂ : Fin k → Semiterm L μ n) (i) :
-  Rew.substs (Matrix.vecAppend rfl w₁ w₂) (varSumInL i) = w₁ i := by simp [varSumInL, Matrix.vecAppend_eq_ite]
-
-@[simp] lemma substs_varSumInR (w₁ w₂ : Fin k → Semiterm L μ n) (i) :
-  Rew.substs (Matrix.vecAppend rfl w₁ w₂) (varSumInR i) = w₂ i := by simp [varSumInR, Matrix.vecAppend_eq_ite]
-
-@[simp] lemma emb_varSumInL {o} [IsEmpty o] (i : Fin k) :
-  (Rew.emb (varSumInL (μ := o) i) : Semiterm L μ (k + k)) = varSumInL i := by simp [varSumInL]
-
-@[simp] lemma emb_varSumInR {o} [IsEmpty o] (i : Fin k) :
-  (Rew.emb (varSumInR (μ := o) i) : Semiterm L μ (k + k)) = varSumInR i := by simp [varSumInR]
-
-end Semiterm
-
-namespace Semiformula
-
-def vecEq {k} (v w : Fin k → Semiterm L μ n) : Semiformula L μ n := Matrix.conj fun i ↦ op(=).operator ![v i, w i]
-
-end Semiformula
 
 namespace Theory
-open Semiterm
 
 class Sub (T U : Theory L) where
   sub : T ⊆ U
@@ -42,13 +24,13 @@ class Sub (T U : Theory L) where
 section Eq
 
 inductive eqAxiom : Theory L
-  | refl : eqAxiom “∀ x, x = x”
-  | symm : eqAxiom “∀ x y, x = y → y = x”
-  | trans : eqAxiom “∀ x y z, x = y → y = z → x = z”
+  | refl : eqAxiom “x | x = x”
+  | symm : eqAxiom “x y | x = y → y = x”
+  | trans : eqAxiom “x y z | x = y → y = z → x = z”
   | funcExt {k} (f : L.Func k) :
-    eqAxiom <| ∀* (Semiformula.vecEq varSumInL varSumInR ⟶ op(=).operator ![Semiterm.func f varSumInL, Semiterm.func f varSumInR])
+    eqAxiom ((Matrix.conj fun i : Fin k ↦ “&i = &(k + i)”) ⟶ op(=).operator ![Semiterm.func f (fun i ↦ &i), Semiterm.func f (fun i ↦ &(k + i))])
   | relExt {k} (r : L.Rel k) :
-    eqAxiom <| ∀* (Semiformula.vecEq varSumInL varSumInR ⟶ Semiformula.rel r varSumInL ⟶ Semiformula.rel r varSumInR)
+    eqAxiom ((Matrix.conj fun i : Fin k ↦ “&i = &(k + i)”) ⟶ Semiformula.rel r (fun i ↦ &i) ⟶ Semiformula.rel r (fun i ↦ &(k + i)))
 
 notation "𝐄𝐐" => eqAxiom
 
@@ -56,55 +38,17 @@ end Eq
 
 end Theory
 
-abbrev Theory.addEqAxiom (T : Theory L) : Theory L := T + 𝐄𝐐
-
-postfix:max "⁼" => Theory.addEqAxiom
-
-abbrev ConsequenceWithEq (M : Type*) [Semantics (Sentence L) M] (T : Theory L) (σ : Sentence L) : Prop := T⁼ ⊨[M] σ
-
-abbrev Consequence₀WithEq (T : Theory L) (σ : Sentence L) : Prop := T⁼ ⊨ σ
-
-structure EquationalTheory (L : Language) [Semiformula.Operator.Eq L] where
-  theory : Set (Sentence L)
-
-notation T:45 " ⊨₌[" M "] " σ:46 => ConsequenceWithEq M T σ
-
-notation T:45 " ⊨₌ " σ:46 => Consequence₀WithEq T σ
-
-namespace EquationalTheory
-
-def toTheory (T : EquationalTheory L) : Theory L := T.theory⁼
-
-instance : Coe (Theory L) (EquationalTheory L)  := ⟨fun T ↦ ⟨T⟩⟩
-
-instance : Coe (EquationalTheory L) (Theory L) := ⟨toTheory⟩
-
-instance : System (Sentence L) (EquationalTheory L) := ⟨fun T σ ↦ T.toTheory ⊢ σ⟩
-
-abbrev ProofWithEq (T : Theory L) (σ : Sentence L) : Type _ := (T : EquationalTheory L) ⊢ σ
-
-abbrev ProvableWithEq (T : Theory L) (σ : Sentence L) : Prop := (T : EquationalTheory L) ⊢! σ
-
-infix:45 " ⊢₌ " => ProofWithEq
-
-infix:45 " ⊢₌! " => ProvableWithEq
-
-variable {T : EquationalTheory L}
-
-lemma provable_iff {σ : Sentence L} : T ⊢! σ ↔ T.theory⁼ ⊢! σ := by rfl
-
-end EquationalTheory
-
 namespace Structure
 
 namespace Eq
 
 @[simp] lemma models_eqAxiom {M : Type u} [Nonempty M] [Structure L M] [Structure.Eq L M] : M ⊧ₘ* (𝐄𝐐 : Theory L) := ⟨by
   intro σ h
-  cases h <;> simp [models_def, Semiformula.vecEq, Semiterm.val_func]
-  · intro e h; congr; funext i; exact h i
-  case relExt r =>
-    simp [Semiformula.eval_rel]; intro e h; simp [congr_arg (rel r) (funext h)]⟩
+  cases h <;> simp [models_def, Semiterm.val_func, Semiformula.eval_rel]
+  case symm => intros; simp_all
+  case trans => intros; simp_all
+  case funcExt f => intro m e; simp [e]
+  case relExt r => intro m e; simp [e]⟩
 
 variable (L)
 
@@ -121,33 +65,35 @@ variable (H : M ⊧ₘ* (𝐄𝐐 : Theory L))
 open Semiterm Theory Semiformula
 
 lemma eqv_refl (a : M) : eqv L a a := by
-  have : M ⊧ₘ “∀ x, x = x” := H.realize (Theory.eqAxiom.refl (L := L))
-  simp [models_def] at this
-  exact this a
+  have : M ⊧ₘ “x | x = x” := H.realize (Theory.eqAxiom.refl (L := L))
+  simpa [models_def] using this (fun _ ↦ a)
 
 lemma eqv_symm {a b : M} : eqv L a b → eqv L b a := by
-  have : M ⊧ₘ “∀ x y, x = y → y = x” := H.realize (Theory.eqAxiom.symm (L := L))
-  simp [models_def] at this
-  exact this a b
+  have : M ⊧ₘ “x y | x = y → y = x” := H.realize (Theory.eqAxiom.symm (L := L))
+  simpa [models_def] using this (a :>ₙ fun _ ↦ b)
 
 lemma eqv_trans {a b c : M} : eqv L a b → eqv L b c → eqv L a c := by
-  have : M ⊧ₘ “∀ x y z, x = y → y = z → x = z” := H.realize (Theory.eqAxiom.trans (L := L))
-  simp [models_def] at this
-  exact this a b c
+  have : M ⊧ₘ “x y z | x = y → y = z → x = z” := H.realize (Theory.eqAxiom.trans (L := L))
+  simpa [models_def] using  this (a :>ₙ b :>ₙ fun _ ↦ c)
 
 lemma eqv_funcExt {k} (f : L.Func k) {v w : Fin k → M} (h : ∀ i, eqv L (v i) (w i)) :
     eqv L (func f v) (func f w) := by
-  have : M ⊧ₘ ∀* (Semiformula.vecEq varSumInL varSumInR ⟶ op(=).operator ![Semiterm.func f varSumInL, Semiterm.func f varSumInR]) :=
-    H.realize (eqAxiom.funcExt f (L := L))
-  simp [varSumInL, varSumInR, models_def, vecEq, Semiterm.val_func] at this
-  simpa [Matrix.vecAppend_eq_ite] using this (Matrix.vecAppend rfl v w) (fun i => by simpa [Matrix.vecAppend_eq_ite] using h i)
+  haveI : Inhabited M := Classical.inhabited_of_nonempty inferInstance
+  have := H.realize (eqAxiom.funcExt f (L := L)) (fun x ↦ Matrix.iget (Matrix.vecAppend rfl v w) x)
+  have : (∀ i, op(=).val ![v i, w i]) → op(=).val ![func f v, func f w] := by {
+    simpa [models_def, Matrix.vecAppend_eq_ite, Semiterm.val_func, Matrix.iget,
+      show ∀ i : Fin k, i < k + k from fun i ↦ lt_of_lt_of_le i.prop (by simp)] using
+      H.realize (eqAxiom.funcExt f (L := L)) (fun x ↦ Matrix.iget (Matrix.vecAppend rfl v w) x) }
+  exact this h
 
 lemma eqv_relExt_aux {k} (r : L.Rel k) {v w : Fin k → M} (h : ∀ i, eqv L (v i) (w i)) :
     rel r v → rel r w := by
-  have : M ⊧ₘ ∀* (Semiformula.vecEq varSumInL varSumInR ⟶ Semiformula.rel r varSumInL ⟶ Semiformula.rel r varSumInR) :=
-    H.realize (eqAxiom.relExt r (L := L))
-  simp [varSumInL, varSumInR, models_def, vecEq, Semiterm.val_func, eval_rel (r := r)] at this
-  simpa [eval_rel, Matrix.vecAppend_eq_ite] using this (Matrix.vecAppend rfl v w) (fun i => by simpa [Matrix.vecAppend_eq_ite] using h i)
+  haveI : Inhabited M := Classical.inhabited_of_nonempty inferInstance
+  have : (∀ i, op(=).val ![v i, w i]) → rel r v → rel r w := by {
+    simpa [models_def, Matrix.vecAppend_eq_ite, Semiterm.val_func, eval_rel (r := r), Matrix.iget,
+      show ∀ i : Fin k, i < k + k from fun i ↦ lt_of_lt_of_le i.prop (by simp)] using
+      H.realize (eqAxiom.relExt r (L := L)) (fun x ↦ Matrix.iget (Matrix.vecAppend rfl v w) x) }
+  exact this h
 
 lemma eqv_relExt {k} (r : L.Rel k) {v w : Fin k → M} (h : ∀ i, eqv L (v i) (w i)) :
     rel r v = rel r w := by
@@ -207,9 +153,16 @@ lemma eval_mk {e} {ε} {p : Semiformula L μ n} :
       exact ⟨a, (ih (e := a :> e)).mp (by simpa [Matrix.comp_vecCons] using h)⟩
     · intro ⟨a, h⟩; exact ⟨⟦a⟧, by simpa [Matrix.comp_vecCons] using ih.mpr h⟩
 
-lemma models_iff {σ : Sentence L} : (QuotEq H) ⊧ₘ σ ↔ M ⊧ₘ σ := by
-  simpa [models_def, Semiformula.Evalf, eq_finZeroElim, Empty.eq_elim] using
-    eval_mk (H := H) (e := finZeroElim) (ε := Empty.elim) (p := σ)
+lemma eval_mk₀ {ε} {p : Formula L ξ} :
+    Semiformula.Evalfm (QuotEq H) (fun i => ⟦ε i⟧) p ↔ Semiformula.Evalfm (L := L) M ε p := by
+  simpa [Matrix.empty_eq] using eval_mk (H := H) (e := ![]) (ε := ε) (p := p)
+
+lemma models_iff {p : SyntacticFormula L} : QuotEq H ⊧ₘ p ↔ M ⊧ₘ p := by
+  constructor
+  · intro h f; exact eval_mk₀.mp (h (fun x ↦ ⟦f x⟧))
+  · intro h f
+    induction' f using Quotient.induction_on_pi with f
+    exact eval_mk₀.mpr (h f)
 
 variable (H)
 
@@ -232,8 +185,8 @@ end Eq
 
 end Structure
 
-lemma consequence_iff_eq {T : Theory L} [𝐄𝐐 ≼ T] {σ : Sentence L} :
-    T ⊨[Struc.{v, u} L] σ ↔ (∀ (M : Type v) [Nonempty M] [Structure L M] [Structure.Eq L M], M ⊧ₘ* T → M ⊧ₘ σ) := by
+lemma consequence_iff_eq {T : Theory L} [𝐄𝐐 ≼ T] {p : SyntacticFormula L} :
+    T ⊨[Struc.{v, u} L] p ↔ (∀ (M : Type v) [Nonempty M] [Structure L M] [Structure.Eq L M], M ⊧ₘ* T → M ⊧ₘ p) := by
   simp [consequence_iff]; constructor
   · intro h M x s _ hM; exact h M x hM
   · intro h M x s hM
@@ -242,13 +195,9 @@ lemma consequence_iff_eq {T : Theory L} [𝐄𝐐 ≼ T] {σ : Sentence L} :
     have e : Structure.Eq.QuotEq H ≡ₑ[L] M := Structure.Eq.QuotEq.elementaryEquiv H
     exact e.models.mp $ h (Structure.Eq.QuotEq H) ⟦x⟧ (e.modelsTheory.mpr hM)
 
-lemma consequence_iff_eq' {T : Theory L} [𝐄𝐐 ≼ T] {σ : Sentence L} :
-    T ⊨[Struc.{v, u} L] σ ↔ (∀ (M : Type v) [Nonempty M] [Structure L M] [Structure.Eq L M] [M ⊧ₘ* T], M ⊧ₘ σ) := by
+lemma consequence_iff_eq' {T : Theory L} [𝐄𝐐 ≼ T] {p : SyntacticFormula L} :
+    T ⊨[Struc.{v, u} L] p ↔ (∀ (M : Type v) [Nonempty M] [Structure L M] [Structure.Eq L M] [M ⊧ₘ* T], M ⊧ₘ p) := by
   rw [consequence_iff_eq]
-
-lemma consequence_iff_add_eq {T : Theory L} {σ : Sentence L} :
-    T ⊨₌[Struc.{v, u} L] σ ↔ (∀ (M : Type v) [Nonempty M] [Structure L M] [Structure.Eq L M], M ⊧ₘ* T → M ⊧ₘ σ) :=
-  Iff.trans consequence_iff_eq (forall₄_congr <| fun M _ _ _ ↦ by simp)
 
 lemma satisfiable_iff_eq {T : Theory L} [𝐄𝐐 ≼ T] :
     Semantics.Satisfiable (Struc.{v, u} L) T ↔ (∃ (M : Type v) (_ : Nonempty M) (_ : Structure L M) (_ : Structure.Eq L M), M ⊧ₘ* T) := by
@@ -336,14 +285,14 @@ syntax:max "∃! " first_order_formula:0 : first_order_formula
 syntax:max "∃! " ident ", " first_order_formula:0 : first_order_formula
 
 macro_rules
-  | `(“ $binders* | ∃! $p:first_order_formula ”) => do
+  | `(⤫formula[ $binders* | $fbinders* | ∃! $p:first_order_formula ]) => do
     let v := mkIdent (Name.mkSimple ("var" ++ toString binders.size))
     let binders' := binders.insertAt 0 v
-    `(∃'! “ $binders'* | $p”)
-  | `(“ $binders* | ∃! $x, $p ”)                 => do
+    `(∃'! ⤫formula[ $binders'* | $fbinders* | $p])
+  | `(⤫formula[ $binders* | $fbinders* | ∃! $x, $p ])                 => do
     if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
     let binders' := binders.insertAt 0 x
-    `(∃'! “ $binders'* | $p ”)
+    `(∃'! ⤫formula[ $binders'* | $fbinders* | $p ])
 
 end BinderNotation
 

@@ -622,6 +622,8 @@ namespace Semiterm
 
 variable {L L' L₁ L₂ L₃ : Language} {ξ ξ' ξ₁ ξ₂ ξ₃ : Type*} {n n₁ n₂ n₃ : ℕ}
 
+instance : Coe (Semiterm L Empty n) (SyntacticSemiterm L n) := ⟨Rew.emb⟩
+
 @[simp] lemma fvarList_emb {o : Type*} [e : IsEmpty o] {t : Semiterm L o n} : fvarList (Rew.emb t : Semiterm L ξ n) = [] := by
   induction t <;> simp[*, List.eq_nil_iff_forall_not_mem, Rew.func]
   case fvar x => exact IsEmpty.elim' e x
@@ -684,6 +686,17 @@ lemma fvar?_bind
 @[simp] lemma fvarList_bShift {t : Semiterm L ξ n} {x} :
     (Rew.bShift t).fvar? x ↔ t.fvar? x := by
   induction t <;> simp [Rew.func, *]
+
+def toEmpty {n : ℕ} : (t : Semiterm L ξ n) → t.fvarList = [] → Semiterm L Empty n
+  | #x,        _ => #x
+  | &x,        h => by simp at h
+  | func f v, h =>
+    have : ∀ i, (v i).fvarList = [] := by simpa [Semiterm.fvarList] using h
+    func f fun i ↦ (toEmpty (v i) (this i))
+
+@[simp] lemma emb_toEmpty (t : Semiterm L ξ n) (ht : t.fvarList = []) : Rew.emb (t.toEmpty ht) = t := by
+  induction t <;> try simp [toEmpty, Rew.func, *]
+  case fvar => simp at ht
 
 end Semiterm
 
@@ -962,6 +975,12 @@ namespace Semiformula
 
 variable {L : Language} {ξ : Type*} {n n₁ n₂ n₂ m m₁ m₂ m₃ : ℕ}
 
+@[coe] abbrev embedding (σ : Semisentence L n) : SyntacticSemiformula L n := Rew.emb.hom σ
+
+instance : Coe (Semisentence L n) (SyntacticSemiformula L n) := ⟨embedding⟩
+
+@[simp] lemma embedding_inj (σ π : Semisentence L n) : (σ : SyntacticSemiformula L n) = π ↔ σ = π := Rew.emb.hom_injective.eq_iff
+
 def shiftEmb : SyntacticSemiformula L n ↪ SyntacticSemiformula L n where
   toFun := Rew.shift.hom
   inj' := Rew.shift.hom_injective
@@ -1093,8 +1112,6 @@ lemma rew_eq_self_of {ω : Rew L ξ n ξ n} {p}
 
 section close
 
-variable [L.ConstantInhabited]
-
 lemma fix_allClosure (p : SyntacticSemiformula L n) :
     ∀' Rew.fix.hom (∀* p) = ∀* (Rew.fix.hom p) := by
   induction n
@@ -1104,15 +1121,8 @@ lemma fix_allClosure (p : SyntacticSemiformula L n) :
 lemma allClosure_fixitr : ∀* (Rew.fixitr 0 (m + 1)).hom p = ∀' Rew.fix.hom (∀* (Rew.fixitr 0 m).hom p) := by
   simp [Rew.fixitr_succ, fix_allClosure, Rew.hom_comp_app]; rfl
 
-def close (p : SyntacticFormula L) : Sentence L := ∀* (Rew.rewrite default).hom ((Rew.fixitr 0 p.upper).hom p)
-
 @[simp] lemma upper_sentence (σ : Semisentence L n) : (Rew.embs.hom σ).upper = 0 := by
     induction σ using rec' <;> simp [upper]
-
-@[simp] lemma close_emb_eq_self (σ : Sentence L) : (Rew.embs.hom σ).close = σ := by
-  simp [close, univClosure_succ]
-  rw [upper_sentence]
-  simp [←Rew.hom_comp_app]
 
 private lemma not_fvar?_fixitr_upper : ¬((Rew.fixitr 0 p.upper).hom p).fvar? x := by
   rw [Rew.eq_bind (Rew.fixitr 0 p.upper)]
@@ -1122,16 +1132,6 @@ private lemma not_fvar?_fixitr_upper : ¬((Rew.fixitr 0 p.upper).hom p).fvar? x 
   · simp at hz
   · have : z < p.upper := lt_upper_of_fvar? hz
     simp [this] at hx
-
-lemma embs_close (p : SyntacticFormula L) : Rew.embs.hom p.close = ∀* (Rew.fixitr 0 p.upper).hom p := by
-  let q := (Rew.hom (Rew.fixitr 0 p.upper)) p
-  simp only [close, Fin.zero_eta, Rew.emb_univClosure, univClosure_inj]
-  suffices Rew.emb.hom ((Rew.rewrite default).hom q) = q by simpa [q] using this
-  simp [←Rew.hom_comp_app]
-  apply rew_eq_self_of
-  · intro x; simp [Rew.comp_app]
-  · intro x hx
-    simp [q, not_fvar?_fixitr_upper] at hx
 
 @[simp] lemma substs_comp_fixitr_eq_map (p : SyntacticFormula L) (f : ℕ → SyntacticTerm L) :
     (Rew.substs (ξ := ℕ) (fun x ↦ f x)).hom ((Rew.fixitr 0 p.upper).hom p) = (Rew.rewrite f).hom p := by
@@ -1148,6 +1148,51 @@ lemma embs_close (p : SyntacticFormula L) : Rew.embs.hom p.close = ∀* (Rew.fix
   · simp
   · intro x hx
     simp [Rew.comp_app, Rew.fixitr_fvar, Semiformula.lt_upper_of_fvar? hx]
+
+def close (p : SyntacticFormula L) : SyntacticFormula L := ∀* ((Rew.fixitr 0 p.upper).hom p)
+
+scoped [LO.FirstOrder] prefix:max "∀∀" => LO.FirstOrder.Semiformula.close
+
+@[simp] lemma rew_close (p : SyntacticFormula L) (ω : SyntacticRew L 0 0) :
+    ω.hom (∀∀p) = ∀∀p := rew_eq_self_of (by simp) (by simp [close, not_fvar?_fixitr_upper])
+
+lemma close_eq_self_of (p : SyntacticFormula L) (h : p.fvarList = []) : ∀∀ p = p := by
+  have : p.upper = 0 := by simp [upper, h]
+  simp [close, univClosure]; rw [this]; simp
+
+@[simp] lemma fvarList_close (p : SyntacticFormula L) : (∀∀p).fvarList = [] :=
+  List.eq_nil_iff_forall_not_mem.mpr <| fun _ ↦ by simpa [close] using not_fvar?_fixitr_upper
+
+@[simp] lemma close_close_eq_close (p : SyntacticFormula L) : ∀∀ ∀∀ p = ∀∀ p :=
+  close_eq_self_of (∀∀p) (by simp)
+
+variable [L.ConstantInhabited]
+
+def toEmpty {n : ℕ} : (p : Semiformula L ξ n) → p.fvarList = [] → Semisentence L n
+  | rel R v,  h => rel R fun i ↦ (v i).toEmpty (by simp [fvarList] at h; exact h i)
+  | nrel R v, h => nrel R fun i ↦ (v i).toEmpty (by simp [fvarList] at h; exact h i)
+  | ⊤,        _ => ⊤
+  | ⊥,        _ => ⊥
+  | p ⋏ q,    h => p.toEmpty (by simp [by simpa using h]) ⋏ q.toEmpty (by simp [by simpa using h])
+  | p ⋎ q,    h => p.toEmpty (by simp [by simpa using h]) ⋎ q.toEmpty (by simp [by simpa using h])
+  | ∀' p,     h => ∀' p.toEmpty (by simpa using h)
+  | ∃' p,     h => ∃' p.toEmpty (by simpa using h)
+
+@[simp] lemma emb_toEmpty (p : Semiformula L ξ n) (hp : p.fvarList = []) : Rew.emb.hom (p.toEmpty hp) = p := by
+  induction p using rec' <;> simp [toEmpty, Rew.rel, Rew.nrel, *]
+
+@[simp] lemma toEmpty_verum : (⊤ : Semiformula L ξ n).toEmpty (by simp) = ⊤ := rfl
+@[simp] lemma toEmpty_falsum : (⊥ : Semiformula L ξ n).toEmpty (by simp) = ⊥ := rfl
+@[simp] lemma toEmpty_and (p q : Semiformula L ξ n) (h) :
+    (p ⋏ q).toEmpty h = p.toEmpty (by simp [by simpa using h]) ⋏ q.toEmpty (by simp [by simpa using h]) := rfl
+@[simp] lemma toEmpty_or (p q : Semiformula L ξ n) (h) :
+    (p ⋎ q).toEmpty h = p.toEmpty (by simp [by simpa using h]) ⋎ q.toEmpty (by simp [by simpa using h]) := rfl
+@[simp] lemma toEmpty_all (p : Semiformula L ξ (n + 1)) (h) : (∀' p).toEmpty h = ∀' (p.toEmpty (by simpa using h)) := rfl
+@[simp] lemma toEmpty_ex (p : Semiformula L ξ (n + 1)) (h) : (∃' p).toEmpty h = ∃' (p.toEmpty (by simpa using h)) := rfl
+
+def close₀ (p : SyntacticFormula L) : Sentence L := (∀∀p).toEmpty (by simp)
+
+scoped [LO.FirstOrder] prefix:max "∀∀₀" => LO.FirstOrder.Semiformula.close₀
 
 end close
 

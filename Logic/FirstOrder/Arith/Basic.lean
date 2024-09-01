@@ -6,7 +6,7 @@ class ORingStruc (α : Type*) extends Zero α, One α, Add α, Mul α, LT α
 
 instance [Zero α] [One α] [Add α] [Mul α] [LT α] : ORingStruc α where
 
-namespace ORingSymbol
+namespace ORingStruc
 
 variable {α : Type*} [ORingStruc α]
 
@@ -19,12 +19,12 @@ def numeral : ℕ → α
 
  @[simp] lemma one_eq_one : (numeral 1 : α) = 1 := rfl
 
-end ORingSymbol
+end ORingStruc
 
-@[simp] lemma Nat.numeral_eq : (n : ℕ) → ORingSymbol.numeral n = n
+@[simp] lemma Nat.numeral_eq : (n : ℕ) → ORingStruc.numeral n = n
   | 0     => rfl
   | 1     => rfl
-  | n + 2 => by simp[ORingSymbol.numeral, Nat.numeral_eq (n + 1)]
+  | n + 2 => by simp[ORingStruc.numeral, Nat.numeral_eq (n + 1)]
 
 namespace FirstOrder
 
@@ -131,10 +131,10 @@ namespace Structure
 variable [Operator.Zero L] [Operator.One L] [Operator.Add L] {M : Type u} [ORingStruc M]
   [Structure L M] [Structure.Zero L M] [Structure.One L M] [Structure.Add L M]
 
-@[simp] lemma numeral_eq_numeral : (z : ℕ) → (Semiterm.Operator.numeral L z).val ![] = (ORingSymbol.numeral z : M)
-  | 0     => by simp[ORingSymbol.numeral, Semiterm.Operator.numeral_zero]
-  | 1     => by simp[ORingSymbol.numeral, Semiterm.Operator.numeral_one]
-  | z + 2 => by simp[ORingSymbol.numeral, Semiterm.Operator.numeral_add_two,
+@[simp] lemma numeral_eq_numeral : (z : ℕ) → (Semiterm.Operator.numeral L z).val ![] = (ORingStruc.numeral z : M)
+  | 0     => by simp[ORingStruc.numeral, Semiterm.Operator.numeral_zero]
+  | 1     => by simp[ORingStruc.numeral, Semiterm.Operator.numeral_one]
+  | z + 2 => by simp[ORingStruc.numeral, Semiterm.Operator.numeral_add_two,
                   Semiterm.Operator.val_comp, Matrix.fun_eq_vec₂, numeral_eq_numeral (z + 1)]
 
 end Structure
@@ -184,12 +184,12 @@ end BinderNotation
 namespace Arith
 
 class SoundOn {L : Language} [Structure L ℕ]
-    (T : Theory L) (F : Sentence L → Prop) where
-  sound : ∀ {σ}, F σ → T ⊢! σ → ℕ ⊧ₘ σ
+    (T : Theory L) (F : SyntacticFormula L → Prop) where
+  sound : ∀ {p}, F p → T ⊢! p → ℕ ⊧ₘ p
 
 section
 
-variable {L : Language} [Structure L ℕ] (T : Theory L) (F : Set (Sentence L))
+variable {L : Language} [Structure L ℕ] (T : Theory L) (F : Set (SyntacticFormula L))
 
 lemma consistent_of_sound [SoundOn T F] (hF : ⊥ ∈ F) : System.Consistent T :=
   System.consistent_iff_unprovable_bot.mpr <| fun b => by simpa using SoundOn.sound hF b
@@ -200,14 +200,14 @@ section
 
 variable {L : Language.{u}} [L.ORing] (T : Theory L) [𝐄𝐐 ≼ T]
 
-lemma consequence_of (σ : Sentence L)
+lemma consequence_of (p : SyntacticFormula L)
   (H : ∀ (M : Type (max u w))
          [ORingStruc M]
          [Structure L M]
          [Structure.ORing L M]
          [M ⊧ₘ* T],
-         M ⊧ₘ σ) :
-    T ⊨ σ := consequence_iff_consequence.{u, w}.mp <| consequence_iff_eq.mpr fun M _ _ _ hT =>
+         M ⊧ₘ p) :
+    T ⊨ p := consequence_iff_consequence.{u, w}.mp <| consequence_iff_eq.mpr fun M _ _ _ hT =>
   letI : Structure.Model L M ⊧ₘ* T :=
     ((Structure.ElementaryEquiv.modelsTheory (Structure.Model.elementaryEquiv L M)).mp hT)
   (Structure.ElementaryEquiv.models (Structure.Model.elementaryEquiv L M)).mpr (H (Structure.Model L M))
@@ -233,6 +233,30 @@ lemma goedelNumber'_def {α} [Encodable α] (a : α) :
 end
 
 end Arith
+
+namespace Theory
+
+variable {L : Language} [L.Eq]
+
+inductive EQ' : Theory L
+  | refl : EQ' “x | x = x”
+  | replace (p : SyntacticSemiformula L 1) : EQ' “∀ x y, x = y → !p x → !p y”
+
+notation "𝐄𝐐'" => EQ'
+
+variable (T : Theory L)
+
+noncomputable instance EQ'.subTheoryOfEQ : (𝐄𝐐' : Theory L) ≼ 𝐄𝐐 := System.Subtheory.ofAxm! <| by
+  rintro p h
+  rcases (show 𝐄𝐐' p from h)
+  case refl =>
+    apply System.by_axm _ (by simpa using eqAxiom.refl)
+  case replace p =>
+    apply complete <| EQ.provOf.{0, 0} _ ?_
+    intro M _ s _ _
+    simp [models_iff, Semiformula.eval_substs]
+
+end Theory
 
 end FirstOrder
 

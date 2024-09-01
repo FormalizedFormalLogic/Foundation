@@ -429,6 +429,10 @@ def translation {𝓢 : S} {𝓣 : T} (B : 𝓢 ⊢* Collection.set 𝓣) : 𝓣
 
 end StrongCut
 
+def Subtheory.ofAxm [StrongCut S S] {𝓢₁ 𝓢₂ : S} (B : 𝓢₂ ⊢* Collection.set 𝓢₁) : 𝓢₁ ≼ 𝓢₂ := ⟨fun b ↦ StrongCut.cut B b⟩
+
+noncomputable def Subtheory.ofAxm! [StrongCut S S] {𝓢₁ 𝓢₂ : S} (B : 𝓢₂ ⊢!* Collection.set 𝓢₁) : 𝓢₁ ≼ 𝓢₂ := ⟨fun b ↦ StrongCut.cut B.get b⟩
+
 def Subtheory.ofSubset {𝓢 𝓣 : S} (h : 𝓢 ⊆ 𝓣) : 𝓢 ≼ 𝓣 := ⟨wk h⟩
 
 variable (S)
@@ -505,25 +509,27 @@ class Deduction [Cons F S] where
 
 variable {S}
 
-section
+section deduction
 
-variable [Cons F S] [Deduction S]
+variable [Cons F S] [Deduction S] {𝓢 : S} {p q : F}
 
 alias deduction := Deduction.ofInsert
 
-lemma Deduction.of_insert! {p q : F} {𝓢 : S} (h : cons p 𝓢 ⊢! q) : 𝓢 ⊢! p ⟶ q := by
+lemma Deduction.of_insert! (h : cons p 𝓢 ⊢! q) : 𝓢 ⊢! p ⟶ q := by
   rcases h with ⟨b⟩; exact ⟨Deduction.ofInsert b⟩
 
 alias deduction! := Deduction.of_insert!
 
-lemma Deduction.inv! {p q : F} {𝓢 : S} (h : 𝓢 ⊢! p ⟶ q) : cons p 𝓢 ⊢! q := by
+lemma Deduction.inv! (h : 𝓢 ⊢! p ⟶ q) : cons p 𝓢 ⊢! q := by
   rcases h with ⟨b⟩; exact ⟨Deduction.inv b⟩
 
 def Deduction.translation (p : F) (𝓢 : S) : cons p 𝓢 ↝ 𝓢 where
   toFun := fun q ↦ p ⟶ q
   prf := deduction
 
-end
+lemma deduction_iff : cons p 𝓢 ⊢! q ↔ 𝓢 ⊢! p ⟶ q := ⟨deduction!, Deduction.inv!⟩
+
+end deduction
 
 end System
 

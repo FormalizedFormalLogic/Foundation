@@ -59,7 +59,7 @@ lemma val_vecCons_val_eq {z : Uprod A 𝓤} {i : I} :
 lemma eval_Uprod {p : Semiformula L μ n} :
     Evalm (Uprod A 𝓤) e ε p ↔ {i | Eval (s i) (fun x ↦ (e x).val i) (fun x ↦ (ε x).val i) p} ∈ 𝓤 := by
   induction p using rec' <;>
-  simp[*, Prop.top_eq_true, Prop.bot_eq_false, eval_rel, eval_nrel, Semiterm.val_Uprod]
+    simp [*, Prop.top_eq_true, Prop.bot_eq_false, eval_rel, eval_nrel, Semiterm.val_Uprod]
   case hverum => exact Filter.univ_mem
   case hnrel k r v =>
     exact Ultrafilter.compl_mem_iff_not_mem.symm
@@ -102,13 +102,12 @@ lemma val_Uprod {p : Formula L μ} :
 
 end Semiformula
 
-lemma models_Uprod [Nonempty I] [(i : I) → Nonempty (A i)] {σ : Sentence L} :
-    (Uprod A 𝓤) ⊧ₘ σ ↔ {i | (A i) ⊧ₘ σ} ∈ 𝓤 :=
-  by simp[models_def, Semiformula.val_Uprod, Empty.eq_elim]
+lemma models_Uprod [Nonempty I] [(i : I) → Nonempty (A i)] {p : SyntacticFormula L} :
+    (Uprod A 𝓤) ⊧ₘ p ↔ {i | (A i) ⊧ₘ p} ∈ 𝓤 := by simp [models_iff₀, Semiformula.val_Uprod, Empty.eq_elim]
 
 variable (A)
 
-def Semiformula.domain (σ : Sentence L) := {i | (A i) ⊧ₘ σ}
+def Semiformula.domain (p : SyntacticFormula L) := {i | A i ⊧ₘ p}
 
 end
 
@@ -116,7 +115,7 @@ section
 
 variable {L : Language.{u}} {T : Theory L}
 
-abbrev FinSubtheory (T : Theory L) := {t : Finset (Sentence L) // ↑t ⊆ T}
+abbrev FinSubtheory (T : Theory L) := {t : Finset (SyntacticFormula L) // ↑t ⊆ T}
 
 variable (A : FinSubtheory T → Type u) [s : (i : FinSubtheory T) → Structure L (A i)]
 
@@ -147,7 +146,7 @@ lemma compactness_aux :
     exact satisfiable_intro (Structure.Uprod A 𝓤) this
 
 theorem compact :
-    Satisfiable T ↔ ∀ u : Finset (Sentence L), ↑u ⊆ T → Satisfiable (u : Theory L) := by
+    Satisfiable T ↔ ∀ u : Finset (SyntacticFormula L), ↑u ⊆ T → Satisfiable (u : Theory L) := by
   rw[compactness_aux]; simp
 
 instance : Compact (SmallStruc L) := ⟨compact⟩
