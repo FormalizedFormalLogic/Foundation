@@ -84,11 +84,11 @@ variable {a b c : M}
 
 instance : Nonempty M := ⟨0⟩
 
-@[simp] lemma numeral_two_eq_two : (ORingSymbol.numeral 2 : M) = 2 := by simp [numeral_eq_natCast]
+@[simp] lemma numeral_two_eq_two : (ORingStruc.numeral 2 : M) = 2 := by simp [numeral_eq_natCast]
 
-@[simp] lemma numeral_three_eq_three : (ORingSymbol.numeral 3 : M) = 3 := by simp [numeral_eq_natCast]
+@[simp] lemma numeral_three_eq_three : (ORingStruc.numeral 3 : M) = 3 := by simp [numeral_eq_natCast]
 
-@[simp] lemma numeral_four_eq_four : (ORingSymbol.numeral 4 : M) = 4 := by simp [numeral_eq_natCast]
+@[simp] lemma numeral_four_eq_four : (ORingStruc.numeral 4 : M) = 4 := by simp [numeral_eq_natCast]
 
 lemma lt_succ_iff_le {x y : M} : x < y + 1 ↔ x ≤ y := Iff.symm le_iff_lt_succ
 

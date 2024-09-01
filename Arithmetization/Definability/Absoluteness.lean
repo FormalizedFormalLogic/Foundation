@@ -5,13 +5,13 @@ namespace LO.FirstOrder.Arith
 open LO.Arith
 
 lemma nat_modelsWithParam_iff_models_substs {v : Fin k → ℕ} {p : Semisentence ℒₒᵣ k} :
-    ℕ ⊧/v p ↔ ℕ ⊧ₘ (Rew.substs (fun i ↦ Semiterm.Operator.numeral ℒₒᵣ (v i)) |>.hom p) := by
+    ℕ ⊧/v p ↔ ℕ ⊧ₘ₀ (Rew.substs (fun i ↦ Semiterm.Operator.numeral ℒₒᵣ (v i)) |>.hom p) := by
   simp [models_iff]
 
 variable (V : Type*) [ORingStruc V] [V ⊧ₘ* 𝐏𝐀⁻]
 
 lemma modelsWithParam_iff_models_substs {v : Fin k → ℕ} {p : Semisentence ℒₒᵣ k} :
-    V ⊧/(v ·) p ↔ V ⊧ₘ (Rew.substs (fun i ↦ Semiterm.Operator.numeral ℒₒᵣ (v i)) |>.hom p) := by
+    V ⊧/(v ·) p ↔ V ⊧ₘ₀ (Rew.substs (fun i ↦ Semiterm.Operator.numeral ℒₒᵣ (v i)) |>.hom p) := by
   simp [models_iff, numeral_eq_natCast]
 
 lemma shigmaZero_absolute {k} (p : 𝚺₀.Semisentence k) (v : Fin k → ℕ) :
@@ -61,48 +61,60 @@ lemma models_iff_of_Sigma0 {σ : Semisentence ℒₒᵣ n} (hσ : Hierarchy 𝚺
     V ⊧/(e ·) σ ↔ ℕ ⊧/e σ := by
   by_cases h : ℕ ⊧/e σ <;> simp [h]
   · have : V ⊧/(e ·) σ := by
-      simpa [Matrix.empty_eq] using LO.Arith.bold_sigma_one_completeness (M := V) (by simp [Hierarchy.of_zero hσ]) h
+      simpa [numeral_eq_natCast] using LO.Arith.bold_sigma_one_completeness' (M := V) (by simp [Hierarchy.of_zero hσ]) h
     simpa [HierarchySymbol.Semiformula.val_sigma] using this
   · have : ℕ ⊧/e (~σ) := by simpa using h
-    have : V ⊧/(e ·) (~σ) := by simpa [Matrix.empty_eq] using LO.Arith.bold_sigma_one_completeness (M := V) (by simp [Hierarchy.of_zero hσ]) this
+    have : V ⊧/(e ·) (~σ) := by simpa [numeral_eq_natCast] using LO.Arith.bold_sigma_one_completeness' (M := V) (by simp [Hierarchy.of_zero hσ]) this
     simpa using this
 
 lemma models_iff_of_Delta1 {σ : 𝚫₁.Semisentence n} (hσ : σ.ProperOn ℕ) (hσV : σ.ProperOn V) {e : Fin n → ℕ} :
     V ⊧/(e ·) σ.val ↔ ℕ ⊧/e σ.val := by
   by_cases h : ℕ ⊧/e σ.val <;> simp [h]
   · have : ℕ ⊧/e σ.sigma.val := by simpa [HierarchySymbol.Semiformula.val_sigma] using h
-    have : V ⊧/(e ·) σ.sigma.val := by simpa [Matrix.empty_eq] using LO.Arith.bold_sigma_one_completeness (M := V) (by simp) this
+    have : V ⊧/(e ·) σ.sigma.val := by simpa [numeral_eq_natCast] using LO.Arith.bold_sigma_one_completeness' (M := V) (by simp) this
     simpa [HierarchySymbol.Semiformula.val_sigma] using this
   · have : ℕ ⊧/e (~σ.pi.val) := by simpa [hσ.iff'] using h
-    have : V ⊧/(e ·) (~σ.pi.val) := by simpa [Matrix.empty_eq] using LO.Arith.bold_sigma_one_completeness (M := V) (by simp) this
+    have : V ⊧/(e ·) (~σ.pi.val) := by simpa [numeral_eq_natCast] using LO.Arith.bold_sigma_one_completeness' (M := V) (by simp) this
     simpa [hσV.iff'] using this
 
 variable {T : Theory ℒₒᵣ} [𝐏𝐀⁻ ≼ T] [ℕ ⊧ₘ* T]
 
+noncomputable instance : 𝐑₀ ≼ T := System.Subtheory.comp (𝓣 := 𝐏𝐀⁻) inferInstance inferInstance
+
 theorem sigma_one_completeness_iff_param {σ : Semisentence ℒₒᵣ n} (hσ : Hierarchy 𝚺 1 σ) {e : Fin n → ℕ} :
-    ℕ ⊧/e σ ↔ T ⊢₌! (Rew.substs fun x ↦ Semiterm.Operator.numeral ℒₒᵣ (e x)).hom σ := Iff.trans
+    ℕ ⊧/e σ ↔ T ⊢!. (Rew.substs fun x ↦ Semiterm.Operator.numeral ℒₒᵣ (e x)).hom σ := Iff.trans
   (by simp [models_iff, Semiformula.eval_substs])
-  (sigma_one_completeness_iff (by simp [hσ]))
+  (sigma_one_completeness_iff (T := T) (by simp [hσ]))
 
 lemma models_iff_provable_of_Sigma0_param [V ⊧ₘ* T] {σ : Semisentence ℒₒᵣ n} (hσ : Hierarchy 𝚺 0 σ) {e : Fin n → ℕ} :
-    V ⊧/(e ·) σ ↔ T ⊢₌! (Rew.substs fun x ↦ Semiterm.Operator.numeral ℒₒᵣ (e x)).hom σ := by
+    V ⊧/(e ·) σ ↔ T ⊢!. (Rew.substs fun x ↦ Semiterm.Operator.numeral ℒₒᵣ (e x)).hom σ := by
   calc
     V ⊧/(e ·) σ ↔ ℕ ⊧/e σ        := by
       simp [models_iff_of_Sigma0 hσ]
-  _             ↔ T ⊢₌! (Rew.substs fun x ↦ Semiterm.Operator.numeral ℒₒᵣ (e x)).hom σ := by
+  _             ↔ T ⊢!. (Rew.substs fun x ↦ Semiterm.Operator.numeral ℒₒᵣ (e x)).hom σ := by
       apply sigma_one_completeness_iff_param (by simp [Hierarchy.of_zero hσ])
 
 lemma models_iff_provable_of_Delta1_param [V ⊧ₘ* T] {σ : 𝚫₁.Semisentence n} (hσ : σ.ProperOn ℕ) (hσV : σ.ProperOn V) {e : Fin n → ℕ} :
-    V ⊧/(e ·) σ.val ↔ T ⊢₌! (Rew.substs fun x ↦ Semiterm.Operator.numeral ℒₒᵣ (e x)).hom σ := by
+    V ⊧/(e ·) σ.val ↔ T ⊢!. (Rew.substs fun x ↦ Semiterm.Operator.numeral ℒₒᵣ (e x)).hom σ := by
   calc
     V ⊧/(e ·) σ.val ↔ ℕ ⊧/e σ.val        := by
       simp [models_iff_of_Delta1 hσ hσV]
   _                 ↔ ℕ ⊧/e σ.sigma.val  := by
       simp [HierarchySymbol.Semiformula.val_sigma]
-  _                 ↔ T ⊢₌! (Rew.substs fun x ↦ Semiterm.Operator.numeral ℒₒᵣ (e x)).hom σ.sigma.val := by
+  _                 ↔ T ⊢!. (Rew.substs fun x ↦ Semiterm.Operator.numeral ℒₒᵣ (e x)).hom σ.sigma.val := by
       apply sigma_one_completeness_iff_param (by simp)
-  _                 ↔ T ⊢₌! (Rew.substs fun x ↦ Semiterm.Operator.numeral ℒₒᵣ (e x)).hom σ.val       := by
+  _                 ↔ T ⊢!. (Rew.substs fun x ↦ Semiterm.Operator.numeral ℒₒᵣ (e x)).hom σ.val       := by
       simp [HierarchySymbol.Semiformula.val_sigma]
+
+lemma re_iff_sigma1 (P : ℕ → Prop) : RePred P ↔ 𝚺₁-Predicate P := by
+  constructor
+  · intro h
+    exact ⟨.mkSigma (codeOfRePred P) (by simp [codeOfRePred, codeOfPartrec']), by
+      intro v; symm; simp; simpa [←Matrix.constant_eq_singleton'] using codeOfRePred_spec h (x := v 0)⟩
+  · rintro ⟨p, hp⟩
+    have := (sigma1_re id (p.sigma_prop)).comp
+      (f := fun x : ℕ ↦ x ::ᵥ Mathlib.Vector.nil) (Primrec.to_comp <| Primrec.vector_cons.comp .id (.const _))
+    exact this.of_eq <| by intro x; symm; simpa [Mathlib.Vector.cons_get] using hp ![x]
 
 end Arith
 

@@ -75,7 +75,7 @@
    "type": "git",
    "subDir": null,
    "scope": "",
-   "rev": "3e8de075c396116e8dc88ae9d919e7d011a11efb",
+   "rev": "5746ea8038198e87e70d89450f2542911e12a56f",
    "name": "logic",
    "manifestFile": "lake-manifest.json",
    "inputRev": "master",

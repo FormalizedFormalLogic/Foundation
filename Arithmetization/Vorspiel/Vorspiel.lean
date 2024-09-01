@@ -1,5 +1,5 @@
+import Logic.FirstOrder.Arith.Representation
 import Logic.FirstOrder.Arith.PeanoMinus
-import Logic.FirstOrder.Arith.EA.Basic
 
 instance [Zero α] : Nonempty α := ⟨0⟩
 
@@ -194,8 +194,6 @@ variable {T : Theory ℒₒᵣ} [𝐄𝐐 ≼ T]
 
 variable (M : Type*) [ORingStruc M] [M ⊧ₘ* T]
 
-lemma oring_sound {σ : Sentence ℒₒᵣ} (h : T ⊢! σ) : M ⊧ₘ σ := (consequence_iff' (T := T)).mp (LO.Sound.sound h) M
-
 instance indScheme_of_indH (Γ n) [M ⊧ₘ* 𝐈𝐍𝐃Γ n] :
     M ⊧ₘ* Theory.indScheme ℒₒᵣ (Arith.Hierarchy Γ n) := models_indScheme_of_models_indH Γ n
 
@@ -233,6 +231,12 @@ abbrev Semiterm.Rlz (t : Semiterm L M n) (e : Fin n → M) : M := t.valm M e id
 
 abbrev Semiformula.Rlz (p : Semiformula L M n) (e : Fin n → M) : Prop := Evalm M e id p
 
+@[simp] lemma models₀_not_iff (σ : Sentence L) : M ⊧ₘ₀ (~σ) ↔ ¬M ⊧ₘ₀ σ := by simp [models₀_iff]
+
+@[simp] lemma models₀_or_iff (σ π : Sentence L) : M ⊧ₘ₀ (σ ⋎ π) ↔ M ⊧ₘ₀ σ ∨ M ⊧ₘ₀ π := by simp [models₀_iff]
+
+@[simp] lemma models₀_imply_iff (σ π : Sentence L) : M ⊧ₘ₀ (σ ⟶ π) ↔ M ⊧ₘ₀ σ → M ⊧ₘ₀ π := by simp [models₀_iff]
+
 end
 
 namespace Arith
@@ -258,27 +262,40 @@ end Hierarchy
 
 variable (M : Type*) [ORingStruc M] [M ⊧ₘ* 𝐏𝐀⁻]
 
+instance : M ⊧ₘ* 𝐑₀ := by refine models_of_subtheory (T := 𝐏𝐀⁻) inferInstance
+
 lemma nat_extention_sigmaOne {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
-    ℕ ⊧ₘ σ → M ⊧ₘ σ := fun h ↦ by
-  simpa [Matrix.empty_eq] using Arith.bold_sigma_one_completeness (M := M) hσ h
+    ℕ ⊧ₘ₀ σ → M ⊧ₘ₀ σ := fun h ↦ by
+  simpa [Matrix.empty_eq] using LO.Arith.sigma_one_completeness (M := M) hσ h
 
 lemma nat_extention_piOne {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚷 1 σ) :
-    M ⊧ₘ σ → ℕ ⊧ₘ σ := by
+    M ⊧ₘ₀ σ → ℕ ⊧ₘ₀ σ := by
   contrapose
   simpa using nat_extention_sigmaOne M (σ := ~σ) (by simpa using hσ)
 
 end Arith
 
-namespace EquationalTheory
-
-variable {L : Language} [Semiformula.Operator.Eq L] (T : Theory L)
-
-@[simp] lemma mk_eq : (EquationalTheory.mk T).toTheory = T⁼ := rfl
-
-instance {V : Type*} [Structure L V] [Nonempty V] [Structure.Eq L V] [V ⊧ₘ* T] : V ⊧ₘ* (EquationalTheory.mk T).toTheory := by simpa
-
-end EquationalTheory
-
 end FirstOrder
 
 end LO
+
+namespace LO.Arith
+
+open FirstOrder FirstOrder.Arith ORingStruc
+
+variable {M : Type*} [ORingStruc M] [M ⊧ₘ* 𝐑₀]
+
+lemma bold_sigma_one_completeness' {n} {σ : Semisentence ℒₒᵣ n} (hσ : Hierarchy 𝚺 1 σ) {e} :
+    Semiformula.Evalbm ℕ e σ → Semiformula.Evalbm M (fun x ↦ numeral (e x)) σ := fun h ↦ by
+  simpa [Empty.eq_elim] using bold_sigma_one_completeness (M := M) (p := σ) hσ (f := Empty.elim) (e := e) h
+
+end LO.Arith
+
+namespace Mathlib.Vector
+
+variable {α : Type*}
+
+@[simp] lemma nil_get (v : Vector α 0) : v.get = ![] := by
+  ext i; exact i.elim0
+
+end Mathlib.Vector

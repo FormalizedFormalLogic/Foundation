@@ -693,19 +693,19 @@ lemma of_sigmaOne {k} {f : (Fin k → V) → V}
     (h : 𝚺₁.BoldfaceFunction f) {Γ m} : Γ-[m + 1].BoldfaceFunction f := Boldface.of_deltaOne (graph_delta h)
 
 @[simp] lemma var {k} (i : Fin k) : ℌ.BoldfaceFunction (fun v : Fin k → V ↦ v i) :=
-  .of_zero (Γ' := 𝚺) ⟨.mkSigma “x | x = !!#i.succ” (by simp), by intro _; simp⟩
+  .of_zero (Γ' := 𝚺) ⟨.mkSigma “x. x = !!#i.succ” (by simp), by intro _; simp⟩
 
 @[simp] lemma const {k} (c : V) : ℌ.BoldfaceFunction (fun _ : Fin k → V ↦ c) :=
-  .of_zero (Γ' := 𝚺) ⟨.mkSigma “x | #0 = &c” (by simp), by intro v; simp⟩
+  .of_zero (Γ' := 𝚺) ⟨.mkSigma “x. #0 = &c” (by simp), by intro v; simp⟩
 
 @[simp] lemma term_retraction (t : Semiterm ℒₒᵣ V n) (e : Fin n → Fin k) :
     ℌ.BoldfaceFunction fun v : Fin k → V ↦ Semiterm.valm V (fun x ↦ v (e x)) id t :=
   .of_zero (Γ' := 𝚺)
-    ⟨.mkSigma “x | x = !!(Rew.substs (fun x ↦ #(e x).succ) t)” (by simp), by intro v; simp [Semiterm.val_substs]⟩
+    ⟨.mkSigma “x. x = !!(Rew.substs (fun x ↦ #(e x).succ) t)” (by simp), by intro v; simp [Semiterm.val_substs]⟩
 
 @[simp] lemma term (t : Semiterm ℒₒᵣ V k) :
     ℌ.BoldfaceFunction fun v : Fin k → V ↦ Semiterm.valm V v id t :=
-  .of_zero (Γ' := 𝚺) ⟨.mkSigma “x | x = !!(Rew.bShift t)” (by simp), by intro v; simp [Semiterm.val_bShift']⟩
+  .of_zero (Γ' := 𝚺) ⟨.mkSigma “x. x = !!(Rew.bShift t)” (by simp), by intro v; simp [Semiterm.val_bShift']⟩
 
 lemma of_eq {f : (Fin k → V) → V} (g) (h : ∀ v, f v = g v) (H : ℌ.BoldfaceFunction f) : ℌ.BoldfaceFunction g := by
   rwa [show g = f from by funext v; simp [h]]
@@ -725,7 +725,7 @@ lemma rel {f : (Fin k → V) → V} (h : ℌ.BoldfaceFunction f) :
 
 @[simp] lemma nth (ℌ : HierarchySymbol) (i : Fin k) : ℌ.BoldfaceFunction fun w : Fin k → V ↦ w i := by
   apply Boldface.of_zero (Γ' := 𝚺)
-  exact ⟨.mkSigma “x | x = #i.succ” (by simp), by intro v; simp⟩
+  exact ⟨.mkSigma “x. x = #i.succ” (by simp), by intro v; simp⟩
 
 lemma substitution {f : Fin k → (Fin l → V) → V}
     (hF : Γ-[m + 1].BoldfaceFunction F) (hf : ∀ i, 𝚺-[m + 1].BoldfaceFunction (f i)) :

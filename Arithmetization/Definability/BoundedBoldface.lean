@@ -74,16 +74,16 @@ lemma Bounded₃.comp {f : V → V → V → V} {k} {g₁ g₂ g₃ : (Fin k →
 namespace Bounded₂
 
 instance add : Bounded₂ ((· + ·) : V → V → V) where
-  bounded := ⟨‘x y | x + y’, by intro _; simp⟩
+  bounded := ⟨‘x y. x + y’, by intro _; simp⟩
 
 instance mul : Bounded₂ ((· * ·) : V → V → V) where
-  bounded := ⟨‘x y | x * y’, by intro _; simp⟩
+  bounded := ⟨‘x y. x * y’, by intro _; simp⟩
 
 instance hAdd : Bounded₂ (HAdd.hAdd : V → V → V) where
-  bounded := ⟨‘x y | x + y’, by intro _; simp⟩
+  bounded := ⟨‘x y. x + y’, by intro _; simp⟩
 
 instance hMul : Bounded₂ (HMul.hMul : V → V → V) where
-  bounded := ⟨‘x y | x * y’, by intro _; simp⟩
+  bounded := ⟨‘x y. x * y’, by intro _; simp⟩
 
 end Bounded₂
 
@@ -167,8 +167,8 @@ lemma ball_ble {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
   rcases h with ⟨p, hp⟩
   have : ℌ.DefinedWithParam (fun v ↦ ∃ x ≤ Semiterm.valm V v id bf, x = f v ∧ ∀ y ≤ x, P v y)
     (HierarchySymbol.Semiformula.bex ‘!!bf + 1’
-      (f_graph ⋏ HierarchySymbol.Semiformula.ball ‘x | x + 1’ (HierarchySymbol.Semiformula.rew (Rew.substs (#0 :> fun i => #i.succ.succ)) p))) := by
-    simpa [←le_iff_lt_succ] using (hf_graph.and ((hp.retraction (0 :> (·.succ.succ))).ball ‘x | x + 1’)).bex ‘!!bf + 1’
+      (f_graph ⋏ HierarchySymbol.Semiformula.ball ‘x. x + 1’ (HierarchySymbol.Semiformula.rew (Rew.substs (#0 :> fun i => #i.succ.succ)) p))) := by
+    simpa [←le_iff_lt_succ] using (hf_graph.and ((hp.retraction (0 :> (·.succ.succ))).ball ‘x. x + 1’)).bex ‘!!bf + 1’
   exact .of_iff ⟨_, this⟩ (fun v ↦ ⟨fun h ↦ ⟨f v, hbf v, rfl, h⟩, by rintro ⟨y, hy, rfl, h⟩; exact h⟩)
 
 lemma bex_ble {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
@@ -179,8 +179,8 @@ lemma bex_ble {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
   rcases h with ⟨p, hp⟩
   have : ℌ.DefinedWithParam (fun v ↦ ∃ x ≤ Semiterm.valm V v id bf, x = f v ∧ ∃ y ≤ x, P v y)
     (HierarchySymbol.Semiformula.bex ‘!!bf + 1’
-      (f_graph ⋏ HierarchySymbol.Semiformula.bex ‘x | x + 1’ (HierarchySymbol.Semiformula.rew (Rew.substs (#0 :> fun i => #i.succ.succ)) p))) := by
-    simpa [←le_iff_lt_succ] using (hf_graph.and ((hp.retraction (0 :> (·.succ.succ))).bex ‘x | x + 1’)).bex ‘!!bf + 1’
+      (f_graph ⋏ HierarchySymbol.Semiformula.bex ‘x. x + 1’ (HierarchySymbol.Semiformula.rew (Rew.substs (#0 :> fun i => #i.succ.succ)) p))) := by
+    simpa [←le_iff_lt_succ] using (hf_graph.and ((hp.retraction (0 :> (·.succ.succ))).bex ‘x. x + 1’)).bex ‘!!bf + 1’
   exact .of_iff ⟨_, this⟩ (fun v ↦ ⟨fun h ↦ ⟨f v, hbf v, rfl, h⟩, by rintro ⟨y, hy, rfl, h⟩; exact h⟩)
 
 lemma ball_blt_zero {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}

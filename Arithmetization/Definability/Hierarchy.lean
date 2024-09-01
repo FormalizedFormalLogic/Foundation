@@ -147,9 +147,6 @@ lemma ProperOn.iff' {p : 𝚫-[m].Semisentence n}
     (h : p.ProperOn M) (e : Fin n → M) :
     Semiformula.Evalbm M e p.pi.val ↔ Semiformula.Evalbm M e p.val := by simp [←h.iff, val_sigma]
 
-lemma ProperOn.iff₀ {p : 𝚫-[m].Sentence} (h : p.ProperOn M) :
-    M ⊧ₘ p.pi.val ↔ M ⊧ₘ p.val := h.iff' ![]
-
 lemma ProperWithParamOn.iff' {p : 𝚫-[m].Semiformula M n}
     (h : p.ProperWithParamOn M) (e : Fin n → M) :
     Semiformula.Evalm M e id p.pi.val ↔ Semiformula.Evalm (L := ℒₒᵣ) M e id p.val := by simp [←h.iff, val_sigma]
@@ -409,7 +406,7 @@ lemma ProperWithParamOn.bex {t} {p : 𝚫-[m].Semiformula M (k + 1)}
 def graphDelta (p : 𝚺-[m].Semiformula ξ (k + 1)) : 𝚫-[m].Semiformula ξ (k + 1) :=
   match m with
   | 0     => p.ofZero _
-  | m + 1 => mkDelta p (mkPi “x | ∀ y, !p.val y ⋯ → y = x” (by simp))
+  | m + 1 => mkDelta p (mkPi “x. ∀ y, !p.val y ⋯ → y = x” (by simp))
 
 @[simp] lemma graphDelta_val (p : 𝚺-[m].Semiformula ξ (k + 1)) : p.graphDelta.val = p.val := by cases m <;> simp [graphDelta]
 
