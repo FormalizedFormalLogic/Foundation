@@ -33,7 +33,7 @@ def _root_.LO.FirstOrder.SyntacticTheory.codeIn : (L.codeIn V).Theory where
     consequence_iff_add_eq.mp (sound! <| LO.FirstOrder.SyntacticTheory.Delta1Definable.isDelta1 (T := T)) V inferInstance
   simpa [←Matrix.constant_eq_singleton'] using this (v 0)
 
-abbrev _root_.LO.FirstOrder.Theory.codeIn (T : Theory L) [T.Delta1Definable] : (L.codeIn V).Theory := SyntacticTheory.codeIn (L := L) V T
+--abbrev _root_.LO.FirstOrder.Theory.codeIn (T : Theory L) [T.Delta1Definable] : (L.codeIn V).Theory := SyntacticTheory.codeIn (L := L) V T
 
 variable {T V}
 
@@ -60,8 +60,10 @@ def _root_.LO.FirstOrder.SyntacticTheory.tCodeIn (T : SyntacticTheory L) [T.Delt
   thy := T.codeIn V
   pthy := T.tDef
 
+/-
 def _root_.LO.FirstOrder.Theory.tCodeIn (T : Theory L) [T.Delta1Definable] : (L.codeIn V).TTheory where
   thy := T.codeIn V
   pthy := T.tDef
+-/
 
 end LO.Arith

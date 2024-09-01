@@ -439,10 +439,10 @@ open Formalized
 
 section
 
-variable (T : Theory ℒₒᵣ) [T.Delta1Definable]
+variable (T : SyntacticTheory ℒₒᵣ) [T.Delta1Definable]
 
 /-- Provability predicate for arithmetic stronger than $\mathbf{R_0}$. -/
-def _root_.LO.FirstOrder.Theory.Provableₐ (p : V) : Prop := (T.codeIn V).AddEqAddR₀.Provable p
+def _root_.LO.FirstOrder.SyntacticTheory.Provableₐ (p : V) : Prop := (T.codeIn V).AddEqAddR₀.Provable p
 
 variable {T}
 
@@ -453,13 +453,11 @@ section
 
 variable (T)
 
-def _root_.LO.FirstOrder.Theory.provableₐ : 𝚺₁.Semisentence 1 := .mkSigma
+def _root_.LO.FirstOrder.SyntacticTheory.provableₐ : 𝚺₁.Semisentence 1 := .mkSigma
   “p | !T.tDef.addEqAddR₀Def.prv p” (by simp)
 
 lemma provableₐ_defined : 𝚺₁-Predicate (T.Provableₐ : V → Prop) via T.provableₐ := by
-  intro v; simp [FirstOrder.Theory.provableₐ, FirstOrder.Theory.Provableₐ, (T.codeIn V).AddEqAddR₀.provable_defined.df.iff]
-  symm
-  simpa using (T.codeIn V).AddEqAddR₀.provable_defined.df.iff _
+  intro v; simp [FirstOrder.SyntacticTheory.provableₐ, FirstOrder.SyntacticTheory.Provableₐ, (T.codeIn V).AddEqAddR₀.provable_defined.df.iff]
 
 @[simp] lemma eval_provableₐ (v) :
     Semiformula.Evalbm V v T.provableₐ.val ↔ T.Provableₐ (v 0) := (provableₐ_defined T).df.iff v
