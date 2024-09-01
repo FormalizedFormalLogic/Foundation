@@ -25,4 +25,17 @@ end ModelsTheory
 
 theorem completeness_iff_with_eq {L : Language} [L.Eq] {T : Theory L} {p : SyntacticFormula L} : T⁼ ⊨ p ↔ T⁼ ⊢! p := complete_iff
 
+variable {L : Language.{u}} [L.Eq] {T : Theory L} [𝐄𝐐 ≼ T]
+
+lemma EQ.provOf (p : SyntacticFormula L)
+  (H : ∀ (M : Type (max u w))
+         [Nonempty M]
+         [Structure L M] [Structure.Eq L M]
+         [M ⊧ₘ* T],
+         M ⊧ₘ p) :
+    T ⊨ p := consequence_iff_consequence.{u, w}.mp <| consequence_iff_eq.mpr fun M _ _ _ hT =>
+  letI : (Structure.Model L M) ⊧ₘ* T :=
+    ((Structure.ElementaryEquiv.modelsTheory (Structure.Model.elementaryEquiv L M)).mp hT)
+  (Structure.ElementaryEquiv.models (Structure.Model.elementaryEquiv L M)).mpr (H (Structure.Model L M))
+
 end LO.FirstOrder

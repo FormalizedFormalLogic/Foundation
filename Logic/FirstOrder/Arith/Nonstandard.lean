@@ -1,4 +1,3 @@
-import Logic.FirstOrder.Arith.Model
 import Logic.FirstOrder.Arith.PeanoMinus
 
 namespace LO
@@ -81,7 +80,7 @@ instance trueArith : ℕ⋆ ⊧ₘ* 𝐓𝐀 := ⟨by
   exact e ▸ this⟩
 
 instance : ℕ⋆ ⊧ₘ* 𝐏𝐀⁻ :=
-  ModelsTheory.of_ss (U := 𝐓𝐀) inferInstance (Structure.subset_of_models.mpr $ Arith.Standard.models_peanoMinus)
+  ModelsTheory.of_ss (U := 𝐓𝐀) inferInstance (Structure.subset_of_models.mpr $ Arith.Standard.models_PAMinus)
 
 open LO.Arith
 

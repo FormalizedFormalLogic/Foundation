@@ -4,9 +4,9 @@ namespace LO
 
 namespace FirstOrder
 
-variable {L : Language} [L.ORing] {ξ : Type*} [DecidableEq ξ]
+open Arith
 
-namespace Arith
+variable {L : Language} [L.ORing] {ξ : Type*} [DecidableEq ξ]
 
 def succInd {ξ} (p : Semiformula L ξ 1) : Formula L ξ := “!p 0 → (∀ x, !p x → !p (x + 1)) → ∀ x, !p x”
 
@@ -14,38 +14,40 @@ def orderInd {ξ} (p : Semiformula L ξ 1) : Formula L ξ := “(∀ x, (∀ y <
 
 def leastNumber {ξ} (p : Semiformula L ξ 1) : Formula L ξ := “(∃ x, !p x) → ∃ z, !p z ∧ ∀ x < z, ¬!p x”
 
-variable (L)
-
 namespace Theory
 
-inductive MRT0 : Theory ℒₒᵣ
-  | add (n m : ℕ)  : MRT0 “↑n + ↑m = ↑(n + m)”
-  | mul (n m : ℕ)  : MRT0 “↑n * ↑m = ↑(n * m)”
-  | ne  (n m : ℕ)  : n ≠ m → MRT0 “↑n ≠ ↑m”
-  | bound (n : ℕ)  : MRT0 “x | x < ↑n ↔ ⋁ i, x = ↑(i : Fin n)”
+variable (L)
 
-notation "𝐑₀" => MRT0
+inductive CobhamR0 : Theory ℒₒᵣ
+  | equal : ∀ p ∈ 𝐄𝐐, CobhamR0 p
+  | Ω₁ (n m : ℕ)  : CobhamR0 “↑n + ↑m = ↑(n + m)”
+  | Ω₂ (n m : ℕ)  : CobhamR0 “↑n * ↑m = ↑(n * m)”
+  | Ω₃  (n m : ℕ)  : n ≠ m → CobhamR0 “↑n ≠ ↑m”
+  | Ω₄ (n : ℕ) : CobhamR0 “∀ x, x < ↑n ↔ ⋁ i, x = ↑(i : Fin n)”
 
-inductive peanoMinus : Theory ℒₒᵣ
-  | addZero       : peanoMinus “x | x + 0 = x”
-  | addAssoc      : peanoMinus “x y z | (x + y) + z = x + (y + z)”
-  | addComm       : peanoMinus “x y | x + y = y + x”
-  | addEqOfLt     : peanoMinus “x y | x < y → ∃ z, x + z = y”
-  | zeroLe        : peanoMinus “x | 0 ≤ x”
-  | zeroLtOne     : peanoMinus “0 < 1”
-  | oneLeOfZeroLt : peanoMinus “x | 0 < x → 1 ≤ x”
-  | addLtAdd      : peanoMinus “x y z | x < y → x + z < y + z”
-  | mulZero       : peanoMinus “x | x * 0 = 0”
-  | mulOne        : peanoMinus “x | x * 1 = x”
-  | mulAssoc      : peanoMinus “x y z | (x * y) * z = x * (y * z)”
-  | mulComm       : peanoMinus “x y | x * y = y * x”
-  | mulLtMul      : peanoMinus “x y z | x < y ∧ 0 < z → x * z < y * z”
-  | distr         : peanoMinus “x y z | x * (y + z) = x * y + x * z”
-  | ltIrrefl      : peanoMinus “x | x ≮ x”
-  | ltTrans       : peanoMinus “x y z | x < y ∧ y < z → x < z”
-  | ltTri         : peanoMinus “x y | x < y ∨ x = y ∨ x > y”
+notation "𝐑₀" => CobhamR0
 
-notation "𝐏𝐀⁻" => peanoMinus
+inductive PAMinus : Theory ℒₒᵣ
+  | equal         : ∀ p ∈ 𝐄𝐐, PAMinus p
+  | addZero       : PAMinus “x | x + 0 = x”
+  | addAssoc      : PAMinus “x y z | (x + y) + z = x + (y + z)”
+  | addComm       : PAMinus “x y | x + y = y + x”
+  | addEqOfLt     : PAMinus “x y | x < y → ∃ z, x + z = y”
+  | zeroLe        : PAMinus “x | 0 ≤ x”
+  | zeroLtOne     : PAMinus “0 < 1”
+  | oneLeOfZeroLt : PAMinus “x | 0 < x → 1 ≤ x”
+  | addLtAdd      : PAMinus “x y z | x < y → x + z < y + z”
+  | mulZero       : PAMinus “x | x * 0 = 0”
+  | mulOne        : PAMinus “x | x * 1 = x”
+  | mulAssoc      : PAMinus “x y z | (x * y) * z = x * (y * z)”
+  | mulComm       : PAMinus “x y | x * y = y * x”
+  | mulLtMul      : PAMinus “x y z | x < y ∧ 0 < z → x * z < y * z”
+  | distr         : PAMinus “x y z | x * (y + z) = x * y + x * z”
+  | ltIrrefl      : PAMinus “x | x ≮ x”
+  | ltTrans       : PAMinus “x y z | x < y ∧ y < z → x < z”
+  | ltTri         : PAMinus “x y | x < y ∨ x = y ∨ x > y”
+
+notation "𝐏𝐀⁻" => PAMinus
 
 def indScheme (Γ : Semiformula L ℕ 1 → Prop) : Theory L :=
   { q | ∃ p : Semiformula L ℕ 1, Γ p ∧ q = succInd p }
@@ -86,10 +88,16 @@ lemma coe_indH_subset_indH : (indScheme ℒₒᵣ (Arith.Hierarchy Γ ν) : Theo
   exact ⟨Semiformula.lMap (Language.oringEmb : ℒₒᵣ →ᵥ L) p, Hierarchy.oringEmb Hp,
     by simp [Formula.lMap_fvUnivClosure, succInd, Semiformula.lMap_substs]⟩
 
-instance : 𝐏𝐀⁻ ≼ 𝐈𝐍𝐃Γ ν := System.Subtheory.ofSubset (by simp [indH, Theory.add_def])
+instance PAMinus.subtheoryOfIndH : 𝐏𝐀⁻ ≼ 𝐈𝐍𝐃Γ n := System.Subtheory.ofSubset (by simp [indH, Theory.add_def])
+
+instance EQ.subtheoryOfCobhamR0 : 𝐄𝐐 ≼ 𝐑₀ := System.Subtheory.ofSubset <| fun p hp ↦ CobhamR0.equal p hp
+
+instance EQ.subtheoryOfPAMinus : 𝐄𝐐 ≼ 𝐏𝐀⁻ := System.Subtheory.ofSubset <| fun p hp ↦ PAMinus.equal p hp
+
+instance EQ.subtheoryOfIndH : 𝐄𝐐 ≼ 𝐈𝐍𝐃Γ n := System.Subtheory.comp PAMinus.subtheoryOfIndH EQ.subtheoryOfPAMinus
+
+instance EQ.subtheoryOfIOpen : 𝐄𝐐 ≼ 𝐈open := System.Subtheory.comp inferInstance EQ.subtheoryOfPAMinus
 
 end Theory
-
-end Arith
 
 end FirstOrder

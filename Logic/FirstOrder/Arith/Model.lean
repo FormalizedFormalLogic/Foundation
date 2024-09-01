@@ -138,12 +138,12 @@ instance [M ⊧ₘ* 𝐈open] : M ⊧ₘ* 𝐏𝐀⁻ := ModelsTheory.of_add_lef
 instance [M ⊧ₘ* 𝐈open] : M ⊧ₘ* Theory.indScheme ℒₒᵣ Semiformula.Open :=
   ModelsTheory.of_add_right M 𝐏𝐀⁻ (Theory.indScheme _ Semiformula.Open)
 
-def models_peanoMinus_of_models_indH (Γ n) [M ⊧ₘ* 𝐈𝐍𝐃 Γ n] : M ⊧ₘ* 𝐏𝐀⁻ := ModelsTheory.of_add_left M 𝐏𝐀⁻ (Theory.indScheme _ (Arith.Hierarchy Γ n))
+def models_PAMinus_of_models_indH (Γ n) [M ⊧ₘ* 𝐈𝐍𝐃 Γ n] : M ⊧ₘ* 𝐏𝐀⁻ := ModelsTheory.of_add_left M 𝐏𝐀⁻ (Theory.indScheme _ (Arith.Hierarchy Γ n))
 
 def models_indScheme_of_models_indH (Γ n) [M ⊧ₘ* 𝐈𝐍𝐃 Γ n] : M ⊧ₘ* Theory.indScheme ℒₒᵣ (Arith.Hierarchy Γ n) :=
   ModelsTheory.of_add_right M 𝐏𝐀⁻ (Theory.indScheme _ (Arith.Hierarchy Γ n))
 
-instance models_peanoMinus_of_models_peano [M ⊧ₘ* 𝐏𝐀] : M ⊧ₘ* 𝐏𝐀⁻ := ModelsTheory.of_add_left M 𝐏𝐀⁻ (Theory.indScheme _ Set.univ)
+instance models_PAMinus_of_models_peano [M ⊧ₘ* 𝐏𝐀] : M ⊧ₘ* 𝐏𝐀⁻ := ModelsTheory.of_add_left M 𝐏𝐀⁻ (Theory.indScheme _ Set.univ)
 
 end
 
@@ -153,7 +153,19 @@ namespace Standard
 
 variable {ξ : Type v} (e : Fin n → ℕ) (ε : ξ → ℕ)
 
-instance models_peanoMinus : ℕ ⊧ₘ* 𝐏𝐀⁻ := ⟨by
+instance models_CobhamR0 : ℕ ⊧ₘ* 𝐑₀ := ⟨by
+  intro σ h
+  rcases h <;> simp [models_def, ←le_iff_eq_or_lt]
+  case equal h =>
+    have : ℕ ⊧ₘ* (𝐄𝐐 : Theory ℒₒᵣ) := inferInstance
+    exact modelsTheory_iff.mp this h
+  case Ω₃ h => exact h
+  case Ω₄ =>
+    intro x; constructor
+    · intro hx; exact ⟨⟨x, hx⟩, by simp⟩
+    · rintro ⟨i, rfl⟩; simp⟩
+
+instance models_PAMinus : ℕ ⊧ₘ* 𝐏𝐀⁻ := ⟨by
   intro σ h
   rcases h <;> simp [models_def, ←le_iff_eq_or_lt]
   case addAssoc => intro f; exact add_assoc _ _ _
@@ -165,7 +177,10 @@ instance models_peanoMinus : ℕ ⊧ₘ* 𝐏𝐀⁻ := ⟨by
   case mulLtMul => rintro f h hl; exact (mul_lt_mul_right hl).mpr h
   case distr => intro f; exact Nat.mul_add _ _ _
   case ltTrans => intro f; exact Nat.lt_trans
-  case ltTri => intro f; exact Nat.lt_trichotomy _ _⟩
+  case ltTri => intro f; exact Nat.lt_trichotomy _ _
+  case equal h =>
+    have : ℕ ⊧ₘ* (𝐄𝐐 : Theory ℒₒᵣ) := inferInstance
+    exact modelsTheory_iff.mp this h⟩
 
 lemma models_succInd (p : Semiformula ℒₒᵣ ℕ 1) : ℕ ⊧ₘ succInd p := by
   simp[Empty.eq_elim, succInd, models_iff, Matrix.constant_eq_singleton, Matrix.comp_vecCons',
@@ -175,18 +190,18 @@ lemma models_succInd (p : Semiformula ℒₒᵣ ℕ 1) : ℕ ⊧ₘ succInd p :=
   · exact hsucc x ih
 
 instance models_iSigma (Γ k) : ℕ ⊧ₘ* 𝐈𝐍𝐃Γ k := by
-  simp [Theory.indScheme, models_peanoMinus]; rintro _ p _ rfl; simp [models_succInd]
+  simp [Theory.indScheme, models_PAMinus]; rintro _ p _ rfl; simp [models_succInd]
 
 instance models_iSigmaZero : ℕ ⊧ₘ* 𝐈𝚺₀ := inferInstance
 
 instance models_iSigmaOne : ℕ ⊧ₘ* 𝐈𝚺₁ := inferInstance
 
 instance models_peano : ℕ ⊧ₘ* 𝐏𝐀 := by
-  simp [Theory.peano, Theory.indScheme, models_peanoMinus]; rintro _ p _ rfl; simp [models_succInd]
+  simp [Theory.peano, Theory.indScheme, models_PAMinus]; rintro _ p _ rfl; simp [models_succInd]
 
 end Standard
 
-theorem peano_consistent : System.Consistent 𝐏𝐀 :=
+instance peano_consistent : System.Consistent 𝐏𝐀 :=
   Sound.consistent_of_satisfiable ⟨_, Standard.models_peano⟩
 
 section

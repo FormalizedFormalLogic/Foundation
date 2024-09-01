@@ -1,4 +1,4 @@
-import Logic.FirstOrder.Arith.PeanoMinus
+import Logic.FirstOrder.Arith.CobhamR0
 import Logic.Vorspiel.Arith
 import Mathlib.Computability.Primrec
 
@@ -252,11 +252,12 @@ def codeAux : {k : ℕ} → Nat.ArithPart₁.Code k → Formula ℒₒᵣ (Fin (
 
 def code (c : Code k) : Semisentence ℒₒᵣ (k + 1) := (Rew.bind ![] (#0 :> (#·.succ))).hom (codeAux c)
 
+/-
 section model
 
 open LO.Arith
 
-variable {M : Type*} [ORingStruc M] [M ⊧ₘ* 𝐏𝐀⁻]
+variable {M : Type*} [ORingStruc M] [M ⊧ₘ* 𝐑₀]
 
 private lemma codeAux_uniq {k} {c : Code k} {v : Fin k → M} {z z' : M} :
     Semiformula.Evalfm M (z :> v) (codeAux c) → Semiformula.Evalfm M (z' :> v) (codeAux c) → z = z' := by
@@ -298,6 +299,7 @@ lemma code_uniq {k} {c : Code k} {v : Fin k → M} {z z' : M} :
   exact codeAux_uniq
 
 end model
+-/
 
 private lemma codeAux_sigma_one {k} (c : Nat.ArithPart₁.Code k) : Hierarchy 𝚺 1 (codeAux c) := by
   induction c <;> simp [codeAux, Matrix.fun_eq_vec₂]
@@ -377,7 +379,7 @@ lemma codeOfRePred_spec {p : ℕ → Prop} (hp : RePred p) {x : ℕ} :
   simp [Semiformula.eval_substs, Matrix.comp_vecCons', Matrix.constant_eq_singleton]
   apply (codeOfPartrec'_spec (Nat.Partrec'.of_part this) (v := ![x]) (y := 0)).trans (by simp [f])
 
-variable {T : Theory ℒₒᵣ} [𝐄𝐐 ≼ T] [𝐏𝐀⁻ ≼ T] [ℕ ⊧ₘ* T]
+variable {T : Theory ℒₒᵣ} [𝐑₀ ≼ T] [ℕ ⊧ₘ* T]
 
 lemma re_complete {p : ℕ → Prop} (hp : RePred p) {x : ℕ} :
     p x ↔ T ⊢! ↑((codeOfRePred p)/[‘↑x’] : Sentence ℒₒᵣ) := Iff.trans

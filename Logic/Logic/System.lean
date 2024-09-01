@@ -429,6 +429,10 @@ def translation {𝓢 : S} {𝓣 : T} (B : 𝓢 ⊢* Collection.set 𝓣) : 𝓣
 
 end StrongCut
 
+def Subtheory.ofAxm [StrongCut S S] {𝓢₁ 𝓢₂ : S} (B : 𝓢₂ ⊢* Collection.set 𝓢₁) : 𝓢₁ ≼ 𝓢₂ := ⟨fun b ↦ StrongCut.cut B b⟩
+
+noncomputable def Subtheory.ofAxm! [StrongCut S S] {𝓢₁ 𝓢₂ : S} (B : 𝓢₂ ⊢!* Collection.set 𝓢₁) : 𝓢₁ ≼ 𝓢₂ := ⟨fun b ↦ StrongCut.cut B.get b⟩
+
 def Subtheory.ofSubset {𝓢 𝓣 : S} (h : 𝓢 ⊆ 𝓣) : 𝓢 ≼ 𝓣 := ⟨wk h⟩
 
 variable (S)
