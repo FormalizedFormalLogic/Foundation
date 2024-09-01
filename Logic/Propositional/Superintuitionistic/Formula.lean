@@ -163,72 +163,68 @@ end Decidable
 
 section Encodable
 
-open Sum
-
-abbrev Node (α) := α ⊕ Fin 2 ⊕ Fin 1 ⊕ Fin 3
-
-@[reducible]
-def Edge (α) : Node α → Type
-  | (inl _)             => Empty
-  | (inr $ inl _)       => Empty
-  | (inr $ inr $ inl _) => Unit
-  | (inr $ inr $ inr _) => Bool
-
-def toW : Formula α → WType (Edge α)
-  | atom a  => ⟨inl a, Empty.elim⟩
-  | falsum  => ⟨inr $ inl 0, Empty.elim⟩
-  | verum   => ⟨inr $ inl 1, Empty.elim⟩
-  | neg p   => ⟨inr $ inr $ inl 0, PUnit.rec p.toW⟩
-  | imp p q => ⟨inr $ inr $ inr 0, Bool.rec p.toW q.toW⟩
-  | or p q  => ⟨inr $ inr $ inr 1, Bool.rec p.toW q.toW⟩
-  | and p q => ⟨inr $ inr $ inr 2, Bool.rec p.toW q.toW⟩
-
-def ofW : WType (Edge α) → Formula α
-  | ⟨inl a, _⟩        => atom a
-  | ⟨inr $ inl 0, _⟩ => falsum
-  | ⟨inr $ inl 1, _⟩  => verum
-  | ⟨inr $ inr $ inl 0, p⟩ => neg (ofW $ p ())
-  | ⟨inr $ inr $ inr 0, p⟩ => imp (ofW $ p false) (ofW $ p true)
-  | ⟨inr $ inr $ inr 1, p⟩ => or  (ofW $ p false) (ofW $ p true)
-  | ⟨inr $ inr $ inr 2, p⟩ => and (ofW $ p false) (ofW $ p true)
-
-lemma toW_ofW : ∀ (w : WType (Edge α)), toW (ofW w) = w
-  | ⟨inl a, _⟩       => by simp [ofW, toW, Empty.eq_elim];
-  | ⟨inr $ inl 0, _⟩ => by simp [ofW, toW, Empty.eq_elim];
-  | ⟨inr $ inl 1, _⟩ => by simp [ofW, toW, Empty.eq_elim];
-  | ⟨inr $ inr $ inl 0, w⟩ => by
-    simp [ofW, toW, toW_ofW (w ())];
-  | ⟨inr $ inr $ inr 0, w⟩ => by
-    simp [ofW, toW, toW_ofW (w false), toW_ofW (w true)];
-    ext b; cases b <;> simp;
-  | ⟨inr $ inr $ inr 1, w⟩ => by
-    simp [ofW, toW, toW_ofW (w false), toW_ofW (w true)];
-    ext b; cases b <;> simp;
-  | ⟨inr $ inr $ inr 2, w⟩ => by
-    simp [ofW, toW, toW_ofW (w false), toW_ofW (w true)];
-    ext b; cases b <;> simp;
-
-def equivW (α) : Formula α ≃ WType (Edge α) where
-  toFun := toW
-  invFun := ofW
-  right_inv := toW_ofW
-  left_inv := λ p => by induction p <;> simp_all [toW, ofW]
-
-instance : (a : Node α) → Fintype (Edge α a)
-  | (inl _)             => Fintype.ofIsEmpty
-  | (inr $ inl _)       => Fintype.ofIsEmpty
-  | (inr $ inr $ inl _) => Unit.fintype
-  | (inr $ inr $ inr _) => Bool.fintype
-
-instance : (a : Node α) → Primcodable (Edge α a)
-  | (inl _)             => Primcodable.empty
-  | (inr $ inl _)       => Primcodable.empty
-  | (inr $ inr $ inl _) => Primcodable.unit
-  | (inr $ inr $ inr _) => Primcodable.bool
-
 variable [Encodable α]
+open Encodable
 
-instance : Encodable (Formula α) := Encodable.ofEquiv (WType (Edge α)) (equivW α)
+def toNat : Formula α → ℕ
+  | atom a  => (Nat.pair 0 <| encode a) + 1
+  | ⊤       => (Nat.pair 1 0) + 1
+  | ⊥       => (Nat.pair 2 0) + 1
+  | ~p      => (Nat.pair 3 <| p.toNat) + 1
+  | p ⟶ q   => (Nat.pair 4 <| p.toNat.pair q.toNat) + 1
+  | p ⋏ q   => (Nat.pair 5 <| p.toNat.pair q.toNat) + 1
+  | p ⋎ q   => (Nat.pair 6 <| p.toNat.pair q.toNat) + 1
+
+def ofNat : ℕ → Option (Formula α)
+  | 0 => none
+  | e + 1 =>
+    let idx := e.unpair.1
+    let c := e.unpair.2
+    match idx with
+    | 0 => (decode c).map Formula.atom
+    | 1 => some ⊤
+    | 2 => some ⊥
+    | 3 =>
+      have : c < e + 1 := Nat.lt_succ.mpr $ Nat.unpair_right_le _
+      do
+        let p <- ofNat c
+        return ~p
+    | 4 =>
+      have : c.unpair.1 < e + 1 := Nat.lt_succ.mpr $ le_trans (Nat.unpair_left_le _) $ Nat.unpair_right_le _
+      have : c.unpair.2 < e + 1 := Nat.lt_succ.mpr $ le_trans (Nat.unpair_right_le _) $ Nat.unpair_right_le _
+      do
+        let p <- ofNat c.unpair.1
+        let q <- ofNat c.unpair.2
+        return p ⟶ q
+    | 5 =>
+      have : c.unpair.1 < e + 1 := Nat.lt_succ.mpr $ le_trans (Nat.unpair_left_le _) $ Nat.unpair_right_le _
+      have : c.unpair.2 < e + 1 := Nat.lt_succ.mpr $ le_trans (Nat.unpair_right_le _) $ Nat.unpair_right_le _
+      do
+        let p <- ofNat c.unpair.1
+        let q <- ofNat c.unpair.2
+        return p ⋏ q
+    | 6 =>
+      have : c.unpair.1 < e + 1 := Nat.lt_succ.mpr $ le_trans (Nat.unpair_left_le _) $ Nat.unpair_right_le _
+      have : c.unpair.2 < e + 1 := Nat.lt_succ.mpr $ le_trans (Nat.unpair_right_le _) $ Nat.unpair_right_le _
+      do
+        let p <- ofNat c.unpair.1
+        let q <- ofNat c.unpair.2
+        return p ⋎ q
+    | _ => none
+
+lemma ofNat_toNat : ∀ (p : Formula α), ofNat (toNat p) = some p
+  | atom a  => by simp [toNat, ofNat, Nat.unpair_pair, encodek, Option.map_some'];
+  | ⊤       => by simp [toNat, ofNat]
+  | ⊥       => by simp [toNat, ofNat]
+  | ~p      => by simp [toNat, ofNat, ofNat_toNat p]
+  | p ⟶ q   => by simp [toNat, ofNat, ofNat_toNat p, ofNat_toNat q]
+  | p ⋏ q   => by simp [toNat, ofNat, ofNat_toNat p, ofNat_toNat q]
+  | p ⋎ q   => by simp [toNat, ofNat, ofNat_toNat p, ofNat_toNat q]
+
+instance : Encodable (Formula α) where
+  encode := toNat
+  decode := ofNat
+  encodek := ofNat_toNat
 
 end Encodable
 
