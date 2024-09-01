@@ -38,45 +38,6 @@ end Eq
 
 end Theory
 
-abbrev Theory.addEqAxiom (T : Theory L) : Theory L := T + 𝐄𝐐
-
-postfix:max "⁼" => Theory.addEqAxiom
-
-abbrev ConsequenceWithEq (M : Type*) [Semantics (SyntacticFormula L) M] (T : Theory L) (p : SyntacticFormula L) : Prop := T⁼ ⊨[M] p
-
-abbrev Consequence₀WithEq (T : Theory L) (p : SyntacticFormula L) : Prop := T⁼ ⊨ p
-
-structure EquationalTheory (L : Language) [Semiformula.Operator.Eq L] where
-  theory : Theory L
-
-notation T:45 " ⊨₌[" M "] " σ:46 => ConsequenceWithEq M T σ
-
-notation T:45 " ⊨₌ " σ:46 => Consequence₀WithEq T σ
-
-namespace EquationalTheory
-
-def toTheory (T : EquationalTheory L) : Theory L := T.theory⁼
-
-instance : Coe (Theory L) (EquationalTheory L)  := ⟨fun T ↦ ⟨T⟩⟩
-
-instance : Coe (EquationalTheory L) (Theory L) := ⟨toTheory⟩
-
-instance : System (SyntacticFormula L) (EquationalTheory L) := ⟨fun T σ ↦ T.toTheory ⊢ σ⟩
-
-abbrev ProofWithEq (T : Theory L) (p : SyntacticFormula L) : Type _ := (T : EquationalTheory L) ⊢ p
-
-abbrev ProvableWithEq (T : Theory L) (p : SyntacticFormula L) : Prop := (T : EquationalTheory L) ⊢! p
-
-infix:45 " ⊢₌ " => ProofWithEq
-
-infix:45 " ⊢₌! " => ProvableWithEq
-
-variable {T : EquationalTheory L}
-
-lemma provable_iff {p : SyntacticFormula L} : T ⊢! p ↔ T.theory⁼ ⊢! p := by rfl
-
-end EquationalTheory
-
 namespace Structure
 
 namespace Eq
@@ -237,10 +198,6 @@ lemma consequence_iff_eq {T : Theory L} [𝐄𝐐 ≼ T] {p : SyntacticFormula L
 lemma consequence_iff_eq' {T : Theory L} [𝐄𝐐 ≼ T] {p : SyntacticFormula L} :
     T ⊨[Struc.{v, u} L] p ↔ (∀ (M : Type v) [Nonempty M] [Structure L M] [Structure.Eq L M] [M ⊧ₘ* T], M ⊧ₘ p) := by
   rw [consequence_iff_eq]
-
-lemma consequence_iff_add_eq {T : Theory L} {p : SyntacticFormula L} :
-    T ⊨₌[Struc.{v, u} L] p ↔ (∀ (M : Type v) [Nonempty M] [Structure L M] [Structure.Eq L M], M ⊧ₘ* T → M ⊧ₘ p) :=
-  Iff.trans consequence_iff_eq (forall₄_congr <| fun M _ _ _ ↦ by simp)
 
 lemma satisfiable_iff_eq {T : Theory L} [𝐄𝐐 ≼ T] :
     Semantics.Satisfiable (Struc.{v, u} L) T ↔ (∃ (M : Type v) (_ : Nonempty M) (_ : Structure L M) (_ : Structure.Eq L M), M ⊧ₘ* T) := by

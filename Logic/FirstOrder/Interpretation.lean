@@ -6,18 +6,18 @@ import Logic.Vorspiel.ExistsUnique
 namespace LO.FirstOrder
 
 @[ext]
-structure Interpretation {L : Language} [L.Eq] (T : Theory L) (L' : Language) where
+structure Interpretation {L : Language} [L.Eq] (T : Theory L) [𝐄𝐐 ≼ T] (L' : Language) where
   domain : Semisentence L 1
   rel {k} : L'.Rel k → Semisentence L k
   func {k} : L'.Func k → Semisentence L (k + 1)
   domain_nonempty :
-    T ⊨₌ ∃' Rew.emb.hom domain
+    T ⊨ ∃' Rew.emb.hom domain
   func_defined {k} (f : L'.Func k) :
-    T ⊨₌ ∀* ((Matrix.conj fun i ↦ (Rew.emb.hom domain)/[#i]) ⟶ ∃'! ((Rew.emb.hom domain)/[#0] ⋏ Rew.emb.hom (func f)))
+    T ⊨ ∀* ((Matrix.conj fun i ↦ (Rew.emb.hom domain)/[#i]) ⟶ ∃'! ((Rew.emb.hom domain)/[#0] ⋏ Rew.emb.hom (func f)))
 
 namespace Interpretation
 
-variable {L L' : Language.{u}} [L.Eq] {T : Theory L}
+variable {L L' : Language.{u}} [L.Eq] {T : Theory L} [𝐄𝐐 ≼ T]
 
 variable (ι : Interpretation T L')
 
@@ -80,10 +80,10 @@ abbrev Sub := {x : M // ι.Dom x}
 @[simp] lemma pval_sub_domain (x : ι.Sub M) : Evalbm M ![x] ι.domain := x.prop
 
 lemma sub_exists : ∃ x : M, ι.Dom x := by
-  simpa [Dom, models_iff, eval_substs, Matrix.constant_eq_singleton] using consequence_iff_add_eq.mp ι.domain_nonempty M inferInstance
+  simpa [Dom, models_iff, eval_substs, Matrix.constant_eq_singleton] using consequence_iff.mp ι.domain_nonempty M inferInstance
 
 lemma func_existsUnique_on_dom {k} (f : L'.Func k) : ∀ (v : Fin k → M), (∀ i, ι.Dom (v i)) → ∃! y, ι.Dom y ∧ Evalbm M (y :> v) (ι.func f) := by
-  simpa [Dom, models_iff, eval_substs, Matrix.constant_eq_singleton] using consequence_iff_add_eq.mp (ι.func_defined f) M inferInstance
+  simpa [Dom, models_iff, eval_substs, Matrix.constant_eq_singleton] using consequence_iff.mp (ι.func_defined f) M inferInstance
 
 lemma func_existsUnique {k} (f : L'.Func k) (v : Fin k → ι.Sub M) : ∃! y : ι.Sub M, Evalbm M (y :> fun i ↦ v i) (ι.func f) := by
   have : ∃! y, ι.Dom y ∧ Evalbm M (y :> fun i ↦ v i) (ι.func f) := ι.func_existsUnique_on_dom M f (fun i ↦ v i) (fun i ↦ by simp [(v i).prop])
@@ -162,12 +162,12 @@ protected def id : Interpretation T L where
   rel (r) := Semiformula.rel r (#·)
   func (f) := “z. z = !!(Semiterm.func f (#·.succ))”
   domain_nonempty := consequence_iff.mpr (by intro M ⟨x⟩ _ _ _; simp [models_iff]; exact ⟨x, by simp⟩)
-  func_defined {k} (f) := consequence_iff_add_eq.mpr fun M _ _ _ _ ↦ by
+  func_defined {k} (f) := EQ.provOf _ fun (M : Type u) _ _ _ _ ↦ by
     simp [models_iff, Semiterm.val_func]
 
 end Interpretation
 
-class TheoryInterpretation {L L' : Language} [L.Eq] (T : Theory L) (U : Theory L') where
+class TheoryInterpretation {L L' : Language} [L.Eq] (T : Theory L) [𝐄𝐐 ≼ T] (U : Theory L') where
   interpretation : Interpretation T L'
   interpret_theory : ∀ p ∈ U, T ⊨ Rew.emb.hom (interpretation.translation (∀∀₀p))
 
@@ -177,16 +177,16 @@ namespace TheoryInterpretation
 
 open Interpretation
 
-variable {L L' : Language.{u}} [L.Eq] {T : Theory L} {U : Theory L'} (ι : T ⊳ U)
+variable {L L' : Language.{u}} [L.Eq] {T : Theory L} [𝐄𝐐 ≼ T] {U : Theory L'} (ι : T ⊳ U)
 
 abbrev translation (p : Semisentence L' n) : Semisentence L n := ι.interpretation.translation p
 
 lemma sub_models_theory {M : Type u} [Nonempty M] [Structure L M] [Structure.Eq L M] (hT : M ⊧ₘ* T) :
     (ι.interpretation.Sub M) ⊧ₘ* U := modelsTheory_iff.mpr fun {σ} hσ ↦ models_translation_iff.mp (ι.interpret_theory σ hσ hT)
 
-lemma theorem_translation {p : SyntacticFormula L'} (h : U ⊨ p) : T ⊨₌ ↑(ι.translation (∀∀₀p)) :=
-  consequence_iff_add_eq.mpr fun M _ _ _ hT ↦
-    (@models_translation_iff L L' _ T ι.interpretation M _ _ _ hT p).mpr <| h <| ι.sub_models_theory hT
+lemma theorem_translation {p : SyntacticFormula L'} (h : U ⊨ p) : T ⊨ ↑(ι.translation (∀∀₀p)) :=
+  EQ.provOf _ fun M _ _ _ hT ↦
+    (@models_translation_iff L L' _ T _ ι.interpretation M _ _ _ hT p).mpr <| h <| ι.sub_models_theory hT
 
 open Interpretation
 

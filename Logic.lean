@@ -55,6 +55,7 @@ import Logic.FirstOrder.Arith.Hierarchy
 import Logic.FirstOrder.Arith.StrictHierarchy
 import Logic.FirstOrder.Arith.Theory
 import Logic.FirstOrder.Arith.Model
+import Logic.FirstOrder.Arith.CobhamR0
 import Logic.FirstOrder.Arith.PeanoMinus
 import Logic.FirstOrder.Arith.Representation
 import Logic.FirstOrder.Arith.Nonstandard

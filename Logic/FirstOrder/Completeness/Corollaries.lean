@@ -23,8 +23,6 @@ lemma of_add_left_right [M ⊧ₘ* T + U + V] : M ⊧ₘ* U := @of_add_right _ M
 
 end ModelsTheory
 
-theorem completeness_iff_with_eq {L : Language} [L.Eq] {T : Theory L} {p : SyntacticFormula L} : T⁼ ⊨ p ↔ T⁼ ⊢! p := complete_iff
-
 variable {L : Language.{u}} [L.Eq] {T : Theory L} [𝐄𝐐 ≼ T]
 
 lemma EQ.provOf (p : SyntacticFormula L)
