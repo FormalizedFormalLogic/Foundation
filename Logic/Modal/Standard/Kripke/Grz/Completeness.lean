@@ -255,7 +255,7 @@ lemma Grz_truthlemma {X : (GrzCompleteModel p).World} (q_sub : q ∈ 𝒮 p) :
       have : ↑Y.formulae *⊢[𝐆𝐫𝐳]! q := this ⨀ (membership_iff (by simp; left; trivial) |>.mp (RXY.1 q (by simp; tauto) h));
       exact membership_iff (by simp; left; trivial) |>.mpr this;
 
-private lemma Grz_completeAux {p : Formula α} : FiniteGrzFrameClass.{u}#α ⊧ p → 𝐆𝐫𝐳 ⊢! p := by
+private lemma Grz_completeAux {p : Formula α} : ReflexiveTransitiveAntisymmetricFrameClass.{u}ꟳ#α ⊧ p → 𝐆𝐫𝐳 ⊢! p := by
   contrapose;
   intro h;
   apply exists_finite_frame.mpr;
@@ -274,9 +274,9 @@ private lemma Grz_completeAux {p : Formula α} : FiniteGrzFrameClass.{u}#α ⊧ 
       apply hX₁;
       tauto;
 
-instance Grz_complete : Complete (𝐆𝐫𝐳 : DeductionParameter α) (FiniteGrzFrameClass.{u}#α) := ⟨Grz_completeAux⟩
+instance Grz_complete : Complete (𝐆𝐫𝐳 : DeductionParameter α) (ReflexiveTransitiveAntisymmetricFrameClass.{u}ꟳ#α) := ⟨Grz_completeAux⟩
 
-instance : FiniteFrameProperty (𝐆𝐫𝐳 : DeductionParameter α) FiniteGrzFrameClass where
+instance : FiniteFrameProperty (𝐆𝐫𝐳 : DeductionParameter α) ReflexiveTransitiveAntisymmetricFrameClass where
 
 end Kripke
 

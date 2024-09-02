@@ -5,7 +5,6 @@ namespace LO
 namespace Kripke
 
 alias GrzFrameClass := ReflexiveTransitiveWeaklyConverseWellFoundedFrameClass
-abbrev FiniteGrzFrameClass := ReflexiveTransitiveAntisymmetricFrameClass.toFiniteFrameClass
 
 end Kripke
 
@@ -184,7 +183,7 @@ instance axiomGrz_defineability : 𝔽((𝗚𝗿𝘇 : Theory α)).DefinedBy Grz
 instance : Sound (𝐆𝐫𝐳 : DeductionParameter α) (GrzFrameClass#α) := inferInstance
 instance : System.Consistent (𝐆𝐫𝐳 : DeductionParameter α) := inferInstance
 
-instance axiomGrz_finite_defines : 𝔽ꟳ((𝗚𝗿𝘇 : Theory α)).DefinedBy FiniteGrzFrameClass where
+instance axiomGrz_finite_defines : 𝔽ꟳ((𝗚𝗿𝘇 : Theory α)).DefinedBy ReflexiveTransitiveAntisymmetricFrameClassꟳ where
   define := by
     intro F;
     constructor;
@@ -202,7 +201,7 @@ instance axiomGrz_finite_defines : 𝔽ꟳ((𝗚𝗿𝘇 : Theory α)).DefinedBy
     use ⟨PUnit, λ _ _ => True⟩;
     refine ⟨?_, ?_, ?_⟩ <;> tauto;
 
-instance : Sound (𝐆𝐫𝐳 : DeductionParameter α) (FiniteGrzFrameClass#α) := inferInstance
+instance : Sound (𝐆𝐫𝐳 : DeductionParameter α) (ReflexiveTransitiveAntisymmetricFrameClassꟳ#α) := inferInstance
 
 end Kripke
 

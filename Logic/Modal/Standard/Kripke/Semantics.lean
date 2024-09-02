@@ -491,9 +491,9 @@ instance : Sound 𝐊 (AllFrameClassꟳ#α) := inferInstance
 
 lemma exists_finite_frame : ¬𝔽ꟳ#α ⊧ p ↔ ∃ F ∈ 𝔽ꟳ, ¬F#α ⊧ p := by simp;
 
-class FiniteFrameProperty (Λ : DeductionParameter α) (𝔽 : FiniteFrameClass) where
-  [complete : Complete Λ 𝔽#α]
-  [sound : Sound Λ 𝔽#α]
+class FiniteFrameProperty (Λ : DeductionParameter α) (𝔽 : FrameClass) where
+  [complete : Complete Λ 𝔽ꟳ#α]
+  [sound : Sound Λ 𝔽ꟳ#α]
 
 
 section StrictlyWeakerThan

@@ -188,15 +188,13 @@ instance K_finite_complete : Complete 𝐊 (AllFrameClass.{u}ꟳ#α) := ⟨by
 
   apply filteration FM (CoarsestFilterationModel.filterOf) (by aesop) |>.mpr;
   apply hp (by
-    suffices Finite (FilterEqvQuotient M p.Subformulas) by
-      simp [FrameClass.restrictFinite];
-      use ⟨FM.Frame⟩;
+    suffices Finite (FilterEqvQuotient M p.Subformulas) by simp; use ⟨FM.Frame⟩;
     apply FilterEqvQuotient.finite;
     simp;
   ) FM.Valuation
 ⟩
 
-instance : FiniteFrameProperty (α := α) 𝐊 AllFrameClass where
+instance : FiniteFrameProperty (𝐊 : DeductionParameter α) AllFrameClass where
 
 
 instance KTB_finite_complete : Complete 𝐊𝐓𝐁 (ReflexiveSymmetricFrameClass.{u}ꟳ#α) := ⟨by
@@ -208,11 +206,13 @@ instance KTB_finite_complete : Complete 𝐊𝐓𝐁 (ReflexiveSymmetricFrameCla
   apply filteration FM (FinestFilterationModel.filterOf) (by aesop) |>.mpr;
   apply hp (by
     suffices Finite (FilterEqvQuotient M (𝒮 p)) by
-      simp [FrameClass.restrictFinite];
-      use ⟨FM.Frame⟩; simp;
-      refine ⟨⟨FM.Frame⟩, ⟨?refl, ?symm⟩, (by simp)⟩;
-      . exact reflexive_filteration_model (FinestFilterationModel.filterOf) F_refl;
-      . exact symmetric_finest_filteration_model F_symm
+      use ⟨FM.Frame⟩;
+      refine ⟨⟨?_, ?_⟩, ?_⟩;
+      . apply reflexive_filteration_model (FinestFilterationModel.filterOf);
+        exact F_refl;
+      . apply symmetric_finest_filteration_model;
+        exact F_symm;
+      . rfl;
     apply FilterEqvQuotient.finite;
     simp;
   ) FM.Valuation
@@ -280,11 +280,9 @@ instance S4_finite_complete : Complete 𝐒𝟒 (PreorderFrameClass.{u}ꟳ#α) :
   apply @filteration α M (𝒮 p) _ FM ?filterOf x p (by simp) |>.mpr;
   apply hp (by
     suffices Finite (FilterEqvQuotient M (𝒮 p)) by
-      simp [FrameClass.restrictFinite];
       use ⟨FM.Frame⟩;
-      simp;
-      refine ⟨⟨FM.Frame⟩, ⟨?refl, rel_transitive⟩, (by simp)⟩;
-      . exact rel_reflexive (by simpa using F_trans) F_refl;
+      refine ⟨⟨?_, rel_transitive⟩, rfl⟩;
+      . exact rel_reflexive (by apply F_trans) F_refl;
     apply FilterEqvQuotient.finite;
     simp;
   ) FM.Valuation;
@@ -305,10 +303,9 @@ instance KT4B_finite_complete : Complete 𝐊𝐓𝟒𝐁 (EquivalenceFrameClass
   apply @filteration α M (𝒮 p) _ FM ?filterOf x p (by simp) |>.mpr;
   apply hp (by
     suffices Finite (FilterEqvQuotient M (𝒮 p)) by
-      simp [FrameClass.restrictFinite];
-      use ⟨FM.Frame⟩; simp;
-      refine ⟨⟨FM.Frame⟩, ⟨?refl, rel_transitive, ?symm⟩, (by simp)⟩;
-      . exact rel_reflexive (by simpa using F_trans) F_refl;
+      use ⟨FM.Frame⟩;
+      refine ⟨⟨?refl, rel_transitive, ?symm⟩, rfl⟩;
+      . exact rel_reflexive (by apply F_trans) F_refl;
       . exact rel_symmetric F_symm;
     apply FilterEqvQuotient.finite;
     simp;
