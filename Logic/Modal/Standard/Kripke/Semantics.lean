@@ -237,7 +237,6 @@ lemma iff_not_set_validOnFrameClass : ¬(𝔽#α ⊧* T) ↔ ∃ p ∈ T, ∃ F 
 lemma iff_not_validOnFrame : ¬(F#α ⊧* T) ↔ ∃ p ∈ T, ∃ V x, ¬Satisfies ⟨F, V⟩ x p := by
   simp [Semantics.realizeSet_iff, ValidOnFrame, ValidOnModel, Satisfies];
 
-
 abbrev FrameClassOfSystem (α : Type u) {S : Type v} [System (Formula α) S] (𝓢 : S) : FrameClass.Dep α := { (F : Frame.Dep α) | F ⊧* System.theory 𝓢 }
 notation "𝔽(" 𝓢 " of " α ")" => FrameClassOfSystem α 𝓢
 
@@ -259,6 +258,7 @@ def characterizable_of_valid_axiomset {Ax : Set (Formula α)} {𝔽 : FrameClass
       | exact Formula.Kripke.ValidOnFrame.imply₂;
       | exact Formula.Kripke.ValidOnFrame.elimContra;
   nonempty := nonempty
+
 
 
 section Sound
@@ -368,8 +368,6 @@ theorem K_strictlyWeakerThan_KD : (𝐊 : DeductionParameter α) <ₛ 𝐊𝐃 :
       use { World := Fin 1, Rel := λ _ _ => False }, (λ w _ => w = 0), 0;
       simp [Satisfies];
 
--- MEMO: 𝐊𝐃 <ₛ 𝐊𝐓, so 𝐊 <ₛ 𝐊𝐓,
-
 theorem K_strictlyWeakerThan_K4 : (𝐊 : DeductionParameter α) <ₛ 𝐊𝟒 := by
   constructor;
   . apply reducible_K_K4;
@@ -420,6 +418,9 @@ theorem K_strictlyWeakerThan_K5 : (𝐊 : DeductionParameter α) <ₛ 𝐊𝟓 :
 
 end StrictlyWeakerThan
 
+
 end Kripke
 
-end LO.Modal.Standard
+end Modal.Standard
+
+end LO

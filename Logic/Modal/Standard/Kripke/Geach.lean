@@ -62,7 +62,7 @@ section
 
 open GeachConfluent
 
-instance : ReflexiveFrameClass.IsGeach [⟨0, 0, 1, 0⟩] where
+instance ReflexiveFrameClass.isGeach : ReflexiveFrameClass.IsGeach [⟨0, 0, 1, 0⟩] where
   define := by intro _; apply reflexive_def;
   nonempty := MultiGeachConfluentFrameClass.nonempty
 
@@ -72,7 +72,7 @@ instance : SerialFrameClass.IsGeach [⟨0, 0, 1, 1⟩] where
   nonempty := MultiGeachConfluentFrameClass.nonempty
 
 
-instance : TransitiveFrameClass.IsGeach ([⟨0, 2, 1, 0⟩]) where
+instance TransitiveFrameClass.isGeach : TransitiveFrameClass.IsGeach ([⟨0, 2, 1, 0⟩]) where
   define := by intro _; apply transitive_def;
   nonempty := MultiGeachConfluentFrameClass.nonempty
 

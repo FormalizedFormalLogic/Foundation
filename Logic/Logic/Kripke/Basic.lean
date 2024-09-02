@@ -227,6 +227,11 @@ abbrev ReflexiveTransitiveConnectedFrameClass : FrameClass := { F | Reflexive F 
 abbrev ReflexiveTransitiveSymmetricFrameClass : FrameClass := { F | Reflexive F ∧ Transitive F ∧ Symmetric F }
 alias EquivalenceFrameClass := ReflexiveTransitiveSymmetricFrameClass
 
+
+abbrev ReflexiveTransitiveWeaklyConverseWellFoundedFrameClass : FrameClass := λ F => Reflexive F.Rel ∧ Transitive F ∧ WeaklyConverseWellFounded F
+
+abbrev ReflexiveTransitiveAntisymmetricFrameClass : FrameClass := λ F => Reflexive F.Rel ∧ Transitive F ∧ Antisymmetric F
+
 end
 
 /-- `𝔽₁` is characterized by `𝔽₂` -/
