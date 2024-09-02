@@ -32,7 +32,6 @@ def Assymetric := ∀ ⦃x y⦄, (x ≺ y) → ¬(y ≺ x)
 def Universal := ∀ ⦃x y⦄, x ≺ y
 
 abbrev ConverseWellFounded := WellFounded $ flip (· ≺ ·)
-alias CWF := ConverseWellFounded
 
 end
 
@@ -117,11 +116,15 @@ lemma refl_of_universal (h : Universal rel) : Reflexive rel := by
 lemma eucl_of_universal (h : Universal rel) : Euclidean rel := by
   rintro x y z _ _; exact @h z y;
 
-
+@[simp]
+lemma WellFounded.trivial_wellfounded : WellFounded (α := α) (λ _ _ => False) := by
+  constructor; intro _;
+  constructor; intro _ _;
+  contradiction;
 
 def Relation.IrreflGen (R : α → α → Prop) := λ x y => x ≠ y ∧ R x y
 
-abbrev WeaklyConverseWellFounded (R : α → α → Prop) := CWF (Relation.IrreflGen R)
+abbrev WeaklyConverseWellFounded (R : α → α → Prop) := ConverseWellFounded (Relation.IrreflGen R)
 alias WCWF := WeaklyConverseWellFounded
 
 section

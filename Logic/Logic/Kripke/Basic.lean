@@ -78,9 +78,7 @@ structure FiniteFrame extends Frame where
 instance {F : FiniteFrame} : Finite (F.World) := F.World_finite
 instance : Coe (FiniteFrame) (Frame) := ⟨λ F ↦ F.toFrame⟩
 
-
 open Relation (ReflTransGen TransGen)
-
 
 abbrev Frame.RelReflTransGen {F : Frame} : _root_.Rel F.World F.World:= ReflTransGen (· ≺ ·)
 infix:45 " ≺^* " => Frame.RelReflTransGen
@@ -174,18 +172,13 @@ notation 𝔽:max "#" α:max => FrameClass.alt 𝔽 α
 
 abbrev FiniteFrameClass := Set (FiniteFrame)
 
-@[simp] def FiniteFrameClass.toFrameClass (𝔽 : FiniteFrameClass) : FrameClass := { F | ∃ F', F' ∈ 𝔽 ∧ F'.toFrame = F }
+@[simp] def FiniteFrameClass.toFrameClass (𝔽 : FiniteFrameClass) : FrameClass := 𝔽.image FiniteFrame.toFrame
 instance : Coe (FiniteFrameClass) (FrameClass) := ⟨FiniteFrameClass.toFrameClass⟩
 
-@[simp] def FrameClass.toFiniteFrameClass (𝔽 : FrameClass) : FiniteFrameClass := { F | F.toFrame ∈ 𝔽 }
-instance : Coe (FrameClass) (FiniteFrameClass) := ⟨FrameClass.toFiniteFrameClass⟩
+@[simp] def FrameClass.toFiniteFrameClass (𝔽 : FrameClass) : FiniteFrameClass := { FF | FF.toFrame ∈ 𝔽 }
+postfix:max "ꟳ" => FrameClass.toFiniteFrameClass
 
-@[simp] abbrev FrameClass.restrictFinite (𝔽 : FrameClass) : FiniteFrameClass := FiniteFrameClass.toFrameClass ↑𝔽
-postfix:max "ꟳ" => FrameClass.restrictFinite
-
-lemma FrameClass.iff_mem_restrictFinite {𝔽 : FrameClass} {F : Frame} (h : F ∈ 𝔽) [Finite F.World] : ⟨F⟩ ∈ 𝔽ꟳ := by
-  use ⟨F⟩;
-  simpa;
+lemma FrameClass.iff_mem_restrictFinite {𝔽 : FrameClass} {F : Frame} (h : F ∈ 𝔽) [Finite F.World] : ⟨F⟩ ∈ 𝔽ꟳ := by simpa;
 
 section
 
@@ -239,11 +232,25 @@ class FrameClass.Characteraizable (𝔽₁ : FrameClass) (𝔽₂ : outParam (Fr
   characterize : ∀ {F}, F ∈ 𝔽₂ → F ∈ 𝔽₁
   nonempty : 𝔽₂.Nonempty
 
+/-- `𝔽₁` is defined by `𝔽₂` -/
 class FrameClass.DefinedBy (𝔽₁ : FrameClass) (𝔽₂ : outParam (FrameClass)) where
   define : ∀ {F}, F ∈ 𝔽₁ ↔ F ∈ 𝔽₂
   nonempty : 𝔽₂.Nonempty
 
 instance {𝔽₁ 𝔽₂ : FrameClass} [defines : 𝔽₁.DefinedBy 𝔽₂] : FrameClass.Characteraizable 𝔽₁ 𝔽₂ where
+  characterize hF := defines.define.mpr hF
+  nonempty := defines.nonempty
+
+
+class FiniteFrameClass.Characteraizable (𝔽₁ : FiniteFrameClass) (𝔽₂ : outParam (FiniteFrameClass)) where
+  characterize : ∀ {F}, F ∈ 𝔽₂ → F ∈ 𝔽₁
+  nonempty : 𝔽₂.Nonempty
+
+class FiniteFrameClass.DefinedBy (𝔽₁ : FiniteFrameClass) (𝔽₂ : outParam (FiniteFrameClass)) where
+  define : ∀ {F}, F ∈ 𝔽₁ ↔ F ∈ 𝔽₂
+  nonempty : 𝔽₂.Nonempty
+
+instance {𝔽₁ 𝔽₂ : FiniteFrameClass} [defines : 𝔽₁.DefinedBy 𝔽₂] : FiniteFrameClass.Characteraizable 𝔽₁ 𝔽₂ where
   characterize hF := defines.define.mpr hF
   nonempty := defines.nonempty
 

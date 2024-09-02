@@ -27,7 +27,6 @@ private lemma connected_of_dot3 : F#α ⊧* (.𝟯 : AxiomSet α) → Connected 
     | 0 => y ≺ w
     | 1 => z ≺ w
   );
-
   simp [Kripke.ValidOnModel];
   use x;
   apply Kripke.Satisfies.or_def.not.mpr;
@@ -52,31 +51,31 @@ private lemma dot3_of_connected : Connected F → F#α ⊧* (.𝟯 : AxiomSet α
   | inl ryz => have := hp z ryz; contradiction;
   | inr rzy => have := hq y rzy; contradiction;
 
-/-
-lemma AxDot3_Definability : AxiomSet.DefinesKripkeFrameClass (α := α) .𝟯 ConnectedFrameClass := by
-  intro F;
-  constructor;
-  . exact connected_of_dot3;
-  . exact dot3_of_connected;
--/
+instance axiomDot3_Definability : 𝔽((.𝟯 : Theory α)).DefinedBy ConnectedFrameClass where
+  define := by
+    intro F;
+    constructor;
+    . exact connected_of_dot3;
+    . exact dot3_of_connected;
+  nonempty := by
+    use ⟨PUnit, λ _ _ => True⟩;
+    tauto;
 
-/-
-lemma ReflexiveTransitiveConnectedFrameClass.nonempty : ReflexiveTransitiveConnectedFrameClass.Nonempty.{0} := by
-  use terminalFrame;
-  simp [Reflexive, Transitive, Connected, Frame.Rel'];
--/
-
-/-
-private lemma S4Dot3_defines' : AxiomSet.DefinesKripkeFrameClass (α := α)  (𝗧 ∪ 𝟰 ∪ .𝟯) ReflexiveTransitiveConnectedFrameClass := by
+instance axiomS4Dot3_defines : 𝔽(((𝗧 ∪ 𝟰 ∪ .𝟯) : Theory α)).DefinedBy ReflexiveTransitiveConnectedFrameClass := by
   rw [(show ReflexiveTransitiveConnectedFrameClass = ({ F | (Reflexive F ∧ Transitive F) ∧ Connected F } : FrameClass) by aesop)];
-  apply AxiomSet.DefinesKripkeFrameClass.union;
-  . exact S4_defines.toAx';
-  . exact AxDot3_Definability;
+  apply definability_union_frameclass_of_theory;
+  . convert axiomMultiGeach_definability (ts := [⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩]);
+    . aesop;
+    . simp [GeachConfluent.reflexive_def, GeachConfluent.transitive_def]; rfl;
+    . assumption;
+  . exact axiomDot3_Definability;
+  . use ⟨PUnit, λ _ _ => True⟩;
+    simp [Reflexive, Transitive, Connected];
+    refine ⟨⟨?_, ?_⟩, ?_⟩ <;> tauto;
 
-lemma S4Dot3_defines : 𝐒𝟒.𝟑.DefinesKripkeFrameClass (α := α) ReflexiveTransitiveConnectedFrameClass :=
-  DeductionParameter.DefinesKripkeFrameClass.ofAx S4Dot3_defines'
+instance S4Dot3_defines : 𝔽((𝐒𝟒.𝟑 : DeductionParameter α)).DefinedBy ReflexiveTransitiveConnectedFrameClass := inferInstance
 
-instance : System.Consistent (𝐒𝟒.𝟑 : DeductionParameter α) := consistent_of_defines S4Dot3_defines' ReflexiveTransitiveConnectedFrameClass.nonempty
+instance : System.Consistent (𝐒𝟒.𝟑 : DeductionParameter α) := inferInstance
 
 open MaximalConsistentTheory in
 lemma connected_CanonicalFrame {Ax : AxiomSet α} (hAx : .𝟯 ⊆ Ax) [System.Consistent (𝝂Ax)] : Connected (CanonicalFrame 𝝂Ax) := by
@@ -105,18 +104,16 @@ lemma connected_CanonicalFrame {Ax : AxiomSet α} (hAx : .𝟯 ⊆ Ax) [System.C
   have : □(□p ⟶ q) ⋎ □(□q ⟶ p) ∈ X.theory := by apply subset_axiomset _; aesop;
   contradiction;
 
-instance : Complete (𝐒𝟒.𝟑 : DeductionParameter α) (ReflexiveTransitiveConnectedFrameClass.{u}#α) := instComplete_of_mem_canonicalFrame $ by
+instance : Complete (𝐒𝟒.𝟑 : DeductionParameter α) (ReflexiveTransitiveConnectedFrameClass.{u}#α) := instComplete_of_mem_canonicalFrame ReflexiveTransitiveConnectedFrameClass $ by
   refine ⟨?reflexive, ?transitive, ?connective⟩;
-  . simp [←GeachConfluent.reflexive_def];
+  . simp [GeachConfluent.reflexive_def];
     apply geachConfluent_CanonicalFrame;
     simp [AxiomSet.Geach.T_def];
-  . rw [←GeachConfluent.transitive_def];
+  . rw [GeachConfluent.transitive_def];
     apply geachConfluent_CanonicalFrame;
     simp [AxiomSet.Geach.Four_def];
   . apply connected_CanonicalFrame;
     simp;
-
--/
 
 end Kripke
 

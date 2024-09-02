@@ -9,6 +9,17 @@ namespace LO.Kripke
 
 abbrev GeachConfluentFrameClass (t : GeachTaple) : FrameClass := { F | (GeachConfluent t) F.Rel }
 
+namespace GeachConfluentFrameClass
+
+instance nonempty : (GeachConfluentFrameClass t).Nonempty := by
+  use ⟨PUnit, λ _ _ => True⟩;
+  simp [GeachConfluentFrameClass];
+  intros x _ _ _; use x;
+  constructor <;> { apply Rel.iterate.true_any; tauto; }
+
+end GeachConfluentFrameClass
+
+
 abbrev MultiGeachConfluentFrameClass (ts : List GeachTaple) : FrameClass := { F | (MultiGeachConfluent ts) F.Rel }
 
 namespace MultiGeachConfluentFrameClass
@@ -163,6 +174,19 @@ lemma axiomGeach_defines : ∀ {F : Kripke.Frame}, (F#α ⊧* 𝗴𝗲(t) ↔ F 
     . assumption;
     . exact (multibox_def.mp hbp) ryu;
 
+instance axiomGeach_definability : 𝔽((𝗴𝗲(t) : Theory α)).DefinedBy (GeachConfluentFrameClass t) where
+  define := axiomGeach_defines;
+  nonempty := GeachConfluentFrameClass.nonempty
+
+instance axiomT_defines : 𝔽((𝗧 : Theory α)).DefinedBy ReflexiveFrameClass := by
+  convert axiomGeach_definability (α := α) (t := ⟨0, 0, 1, 0⟩);
+  simp [GeachConfluentFrameClass, ←GeachConfluent.reflexive_def];
+
+instance axiomFour_defines : 𝔽((𝟰 : Theory α)).DefinedBy TransitiveFrameClass := by
+  convert axiomGeach_definability (α := α) (t := ⟨0, 2, 1, 0⟩);
+  simp [GeachConfluentFrameClass, ←GeachConfluent.transitive_def];
+
+
 lemma axiomMultiGeach_defines : ∀ {F : Kripke.Frame}, (F#α ⊧* 𝗚𝗲(ts) ↔ F ∈ (MultiGeachConfluentFrameClass ts)) := by
   intro F;
   induction ts using List.induction_with_singleton with
@@ -181,12 +205,11 @@ lemma axiomMultiGeach_defines : ∀ {F : Kripke.Frame}, (F#α ⊧* 𝗚𝗲(ts) 
       . exact (axiomGeach_defines.mpr ht);
       . exact hts;
 
-instance Geach_characterizable : 𝔽(𝐆𝐞(ts) of α).Characteraizable (MultiGeachConfluentFrameClass ts) := characterizable_of_valid_axiomset (by simp)
-  (by
-    apply Semantics.realizeSet_iff.mpr;
-    intro p hp F hF;
-    exact Semantics.realizeSet_iff.mp (axiomMultiGeach_defines.mpr hF) hp;
-  )
+instance axiomMultiGeach_definability : 𝔽((𝗚𝗲(ts) : Theory α)).DefinedBy (MultiGeachConfluentFrameClass ts) where
+  define := axiomMultiGeach_defines;
+  nonempty := MultiGeachConfluentFrameClass.nonempty
+
+instance Geach_definability : 𝔽((𝐆𝐞(ts) : DeductionParameter α)).DefinedBy (MultiGeachConfluentFrameClass ts) := inferInstance
 
 instance sound_Geach : Sound 𝐆𝐞(ts) ((MultiGeachConfluentFrameClass ts)#α) := inferInstance
 

@@ -15,18 +15,8 @@ open DeductionParameter (Normal)
 
 variable {α : Type u} [Inhabited α] [DecidableEq α]
 
-instance Ver_characterizable : 𝔽(𝐕𝐞𝐫 of α).Characteraizable (IsolatedFrameClass) := characterizable_of_valid_axiomset
-  ⟨⟨PUnit,  λ _ _ => False⟩, by tauto⟩
-  (by
-    simp;
-    intro p F hF V x y Rxy;
-    have := hF Rxy;
-    contradiction;
-  )
-
-/-
-lemma axiomVer_defines : AxiomSet.DefinesKripkeFrameClass (α := α) 𝗩𝗲𝗿 IsolatedFrameClass := by
-  simp [AxiomSet.DefinesKripkeFrameClass, Kripke.ValidOnFrame];
+lemma axiomVer_defines : ∀ {F : Kripke.Frame}, (F#α ⊧* 𝗩𝗲𝗿 ↔ F ∈ IsolatedFrameClass) := by
+  simp [Kripke.ValidOnFrame];
   intro F;
   constructor;
   . intro h x y hxy;
@@ -34,7 +24,14 @@ lemma axiomVer_defines : AxiomSet.DefinesKripkeFrameClass (α := α) 𝗩𝗲�
   . intro hIrrefl _ _ x y hxy;
     have := hIrrefl hxy;
     contradiction;
--/
+
+instance axiomVer_definability : 𝔽((𝗩𝗲𝗿 : Theory α)).DefinedBy (IsolatedFrameClass) where
+  define := axiomVer_defines
+  nonempty := by
+    use ⟨PUnit,  λ _ _ => False⟩
+    tauto;
+
+instance Ver_definability : 𝔽((𝐕𝐞𝐫 : DeductionParameter α)).DefinedBy (IsolatedFrameClass) := inferInstance
 
 instance : Sound 𝐕𝐞𝐫 (IsolatedFrameClass#α) := inferInstance
 
@@ -45,7 +42,7 @@ lemma isolated_CanonicalFrame {Ax : AxiomSet α} (h : 𝗩𝗲𝗿 ⊆ Ax) [Syst
   have : (CanonicalModel 𝝂Ax) ⊧ □⊥ := iff_valid_on_canonicalModel_deducible.mpr $ Normal.maxm! (by aesop);
   exact this x _ rxy;
 
-instance : Complete 𝐕𝐞𝐫 (IsolatedFrameClass.{u}#α) := instComplete_of_mem_canonicalFrame (IsolatedFrameClass) $ by
+instance : Complete 𝐕𝐞𝐫 (IsolatedFrameClass.{u}#α) := instComplete_of_mem_canonicalFrame IsolatedFrameClass $ by
   apply isolated_CanonicalFrame;
   tauto;
 
