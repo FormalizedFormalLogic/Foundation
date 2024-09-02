@@ -228,7 +228,7 @@ lemma subset_of_le {T : ℕ → Set F} (H : Cumulative T)
     simpa[Nat.add_sub_of_le h] using this s₁ (s₂ - s₁)
   intro s d
   induction' d with d ih
-  · simp; rfl
+  · simp;
   · simpa only [Nat.add_succ, add_zero] using subset_trans ih (H (s + d))
 
 lemma finset_mem {T : ℕ → Set F}

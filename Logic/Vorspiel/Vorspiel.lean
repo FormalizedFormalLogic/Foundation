@@ -12,6 +12,7 @@ import Mathlib.Logic.Encodable.Basic
 import Mathlib.Computability.Primrec
 import Mathlib.Computability.Partrec
 import Mathlib.Data.Finset.Sort
+import Mathlib.Data.List.GetD
 
 namespace Nat
 variable {α : ℕ → Sort u}
@@ -518,6 +519,8 @@ def sup : List α → α
 lemma le_sup {a} {l : List α} : a ∈ l → a ≤ l.sup :=
   by induction' l with a l ih <;> simp[*]; rintro (rfl | h); { simp }; { exact le_sup_of_le_right $ ih h }
 
+#check List.getI_eq_getElem
+
 lemma getI_map_range [Inhabited α] (f : ℕ → α) (h : i < n) : ((List.range n).map f).getI i = f i := by
   simpa using List.getI_eq_get ((List.range n).map f) (n := i) (by simpa using h)
 
@@ -647,11 +650,6 @@ lemma remove_singleton_of_ne {p q : α} (h : p ≠ q) : [p].remove q = [p] := by
 
 lemma mem_remove_iff {l : List α} : b ∈ l.remove a ↔ b ∈ l ∧ b ≠ a := by
   simp [List.remove, List.of_mem_filter];
-  constructor;
-  . intro h;
-    exact ⟨mem_of_mem_filter h, by simpa using of_mem_filter h⟩;
-  . rintro ⟨h₁, h₂⟩;
-    exact mem_filter_of_mem h₁ (by simpa using h₂);
 
 lemma mem_of_mem_remove {a b : α} {l : List α} (h : b ∈ l.remove a) : b ∈ l := by
   rw [mem_remove_iff] at h; exact h.1
