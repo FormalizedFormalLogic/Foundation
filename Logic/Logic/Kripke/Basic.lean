@@ -167,16 +167,24 @@ set_option linter.unusedVariables false in
 abbrev FrameClass.Dep (α : Type v) := FrameClass.{u}
 
 abbrev FrameClass.alt (𝔽 : FrameClass) (α : Type v) : FrameClass.Dep.{u} α := 𝔽
-notation 𝔽:max "#" α:max => FrameClass.alt 𝔽 α
+notation:max 𝔽:max "#" α:max => FrameClass.alt 𝔽 α
 
 
 abbrev FiniteFrameClass := Set (FiniteFrame)
 
-@[simp] def FiniteFrameClass.toFrameClass (𝔽 : FiniteFrameClass) : FrameClass := 𝔽.image FiniteFrame.toFrame
-instance : Coe (FiniteFrameClass) (FrameClass) := ⟨FiniteFrameClass.toFrameClass⟩
+set_option linter.unusedVariables false in
+abbrev FiniteFrameClass.Dep (α : Type v) := FiniteFrameClass.{u}
 
-@[simp] def FrameClass.toFiniteFrameClass (𝔽 : FrameClass) : FiniteFrameClass := { FF | FF.toFrame ∈ 𝔽 }
+abbrev FiniteFrameClass.alt (𝔽 : FiniteFrameClass) (α : Type v) : FiniteFrameClass.Dep.{u} α := 𝔽
+notation:max 𝔽:max "#" α:max => FiniteFrameClass.alt 𝔽 α
+
+
+abbrev FiniteFrameClass.toFrameClass (𝔽 : FiniteFrameClass) : FrameClass := 𝔽.image FiniteFrame.toFrame
+-- instance : Coe (FiniteFrameClass) (FrameClass) := ⟨FiniteFrameClass.toFrameClass⟩
+
+abbrev FrameClass.toFiniteFrameClass (𝔽 : FrameClass) : FiniteFrameClass := { FF | FF.toFrame ∈ 𝔽 }
 postfix:max "ꟳ" => FrameClass.toFiniteFrameClass
+
 
 lemma FrameClass.iff_mem_restrictFinite {𝔽 : FrameClass} {F : Frame} (h : F ∈ 𝔽) [Finite F.World] : ⟨F⟩ ∈ 𝔽ꟳ := by simpa;
 

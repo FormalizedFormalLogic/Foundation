@@ -4,6 +4,8 @@ import Logic.Modal.Standard.Kripke.Grz.Definability
 
 namespace LO.Modal.Standard
 
+open LO.Kripke
+
 variable {α : Type u} [Inhabited α] [DecidableEq α]
 variable {p q : Formula α}
 
@@ -219,8 +221,7 @@ lemma Grz_truthlemma {X : (GrzCompleteModel p).World} (q_sub : q ∈ 𝒮 p) :
         simp only [Satisfies]; push_neg;
         use Y;
         constructor;
-        . simp [Frame.Rel'];
-          constructor;
+        . constructor;
           . intro r hr hr₂;
             apply hY.1;
             simpa;
@@ -228,7 +229,7 @@ lemma Grz_truthlemma {X : (GrzCompleteModel p).World} (q_sub : q ∈ 𝒮 p) :
             left; push_neg;
             use (q ⟶ □q);
             refine ⟨?_, ?_, ?_⟩;
-            . right; use q;
+            . simp_all;
             . apply hY.2; simp;
             . by_contra hC;
               have : ↑X.formulae *⊢[𝐆𝐫𝐳]! q := membership_iff (by simp; left; trivial) |>.mp w;
@@ -254,7 +255,7 @@ lemma Grz_truthlemma {X : (GrzCompleteModel p).World} (q_sub : q ∈ 𝒮 p) :
       have : ↑Y.formulae *⊢[𝐆𝐫𝐳]! q := this ⨀ (membership_iff (by simp; left; trivial) |>.mp (RXY.1 q (by simp; tauto) h));
       exact membership_iff (by simp; left; trivial) |>.mpr this;
 
-private lemma Grz_completeAux {p : Formula α} : ReflexiveTransitiveAntisymmetricFrameClass.{u}ꟳ# ⊧ p → 𝐆𝐫𝐳 ⊢! p := by
+private lemma Grz_completeAux {p : Formula α} : FiniteGrzFrameClass.{u}#α ⊧ p → 𝐆𝐫𝐳 ⊢! p := by
   contrapose;
   intro h;
   apply exists_finite_frame.mpr;
@@ -273,9 +274,9 @@ private lemma Grz_completeAux {p : Formula α} : ReflexiveTransitiveAntisymmetri
       apply hX₁;
       tauto;
 
-instance Grz_complete : Complete (𝐆𝐫𝐳 : DeductionParameter α) ReflexiveTransitiveAntisymmetricFrameClass.{u}ꟳ# := ⟨Grz_completeAux⟩
+instance Grz_complete : Complete (𝐆𝐫𝐳 : DeductionParameter α) (FiniteGrzFrameClass.{u}#α) := ⟨Grz_completeAux⟩
 
-instance : FiniteFrameProperty (α := α) 𝐆𝐫𝐳 ReflexiveTransitiveAntisymmetricFrameClass where
+instance : FiniteFrameProperty (𝐆𝐫𝐳 : DeductionParameter α) FiniteGrzFrameClass where
 
 end Kripke
 
