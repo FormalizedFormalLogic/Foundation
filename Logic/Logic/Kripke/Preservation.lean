@@ -117,7 +117,7 @@ def comp (f : M₁ →ₚ M₂) (g : M₂ →ₚ M₃) : M₁ →ₚ M₃ := mkA
       apply g.atomic.mpr;
       assumption;
 
-def Bisimulation {M₁ M₂ : Kripke.Model α} (f : M₁ →ₚ M₂) : M₁ ⇄ M₂ := {
+def bisimulation {M₁ M₂ : Kripke.Model α} (f : M₁ →ₚ M₂) : M₁ ⇄ M₂ := {
   toRel := Function.graph f,
   atomic := by
     intro x₁ x₂ a e; subst e;
@@ -173,6 +173,14 @@ lemma rel_irreflexive (F_irrefl : Irreflexive F) : Irreflexive (F.PointGenerated
   rintro ⟨x, (rfl | hx)⟩ h;
   all_goals aesop;
 
+lemma rel_universal (F_refl : Reflexive F) (F_eucl : Euclidean F) : Universal (F.PointGenerated r).Rel := by
+  have F_symm := symm_of_refl_eucl F_refl F_eucl;
+  rintro ⟨x, (rfl | hx)⟩ ⟨y, (rfl | hy)⟩;
+  . apply F_refl;
+  . exact hy;
+  . exact F_symm hx;
+  . apply F_symm $ F_eucl hx hy;
+
 lemma rooted : (F.PointGenerated r).isRooted ⟨r, by tauto⟩ := by
   rintro ⟨x, (rfl | hx)⟩;
   . intro h; contradiction;
@@ -208,7 +216,7 @@ def Model.PointGenerated (M : Kripke.Model α) (r : M.World) : Kripke.Model α w
   Valuation w a := M.Valuation w.1 a
 infix:100 "↾" => Model.PointGenerated
 
-def Model.PointGenerated.Bisimulation (M : Model α) (M_trans : Transitive M.Frame) (r : M.World) : (M↾r) ⇄ M where
+def Model.PointGenerated.bisimulation (M : Model α) (M_trans : Transitive M.Frame) (r : M.World) : (M↾r) ⇄ M where
   toRel x y := x.1 = y
   atomic := by
     rintro x y a rfl;
@@ -232,7 +240,7 @@ def Model.PointGenerated.Bisimulation (M : Model α) (M_trans : Transitive M.Fra
       right;
       exact M_trans hx₁ Rx₂y₂;
 
-lemma Model.PointGenerated.Bisimulation.rooted (M_trans : Transitive M.Frame := by assumption) : (Bisimulation M M_trans r) ⟨r, by simp⟩ r := by simp [Bisimulation];
+lemma Model.PointGenerated.bisimulation.rooted (M_trans : Transitive M.Frame := by assumption) : (bisimulation M M_trans r) ⟨r, by simp⟩ r := by simp [bisimulation];
 
 end
 

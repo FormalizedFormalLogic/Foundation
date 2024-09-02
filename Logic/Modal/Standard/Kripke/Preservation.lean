@@ -1,26 +1,29 @@
 import Logic.Modal.Standard.Kripke.Semantics
 import Logic.Logic.Kripke.Preservation
 
-namespace LO.Modal.Standard
 
-open LO.Kripke
-
-variable {α}
+namespace LO
 
 namespace Kripke
 
-section ModalEquivalent
+abbrev IrreflexiveFrameClass : FrameClass := { F | Irreflexive F }
 
+end Kripke
+
+
+open LO.Kripke
+
+namespace Modal.Standard.Kripke
+
+open Formula
 
 def ModalEquivalent {M₁ M₂ : Kripke.Model α} (w₁ : M₁.World) (w₂ : M₂.World) : Prop := ∀ {p}, w₁ ⊧ p ↔ w₂ ⊧ p
 infix:50 " ↭ " => ModalEquivalent
 
-open Formula
+variable {F₁ F₂ : Kripke.Frame}
+         {M₁ M₂ : Kripke.Model α}
 
-variable {M₁ M₂ : Kripke.Model α}
-variable (Bi : M₁ ⇄ M₂)
-
-lemma modal_equivalent_of_bisimilar (bisx : Bi x₁ x₂) : x₁ ↭ x₂ := by
+lemma modal_equivalent_of_bisimilar (Bi : M₁ ⇄ M₂) (bisx : Bi x₁ x₂) : x₁ ↭ x₂ := by
   intro p;
   induction p using Formula.rec' generalizing x₁ x₂ with
   | hatom a => exact Bi.atomic bisx;
@@ -40,17 +43,10 @@ lemma modal_equivalent_of_bisimilar (bisx : Bi x₁ x₂) : x₁ ↭ x₂ := by
       exact ih bisy |>.mpr (h _ rx₂y₂);
   | _ => simp_all;
 
-end ModalEquivalent
-
-open Formula
-
-variable {F₁ F₂ : Kripke.Frame}
-         {M₁ M₂ : Kripke.Model α}
-         {p : Formula α}
 
 lemma modal_equivalence_of_modal_morphism (f : M₁ →ₚ M₂) (w : M₁.World) : w ↭ (f w) := by
-  apply modal_equivalent_of_bisimilar $ Model.PseudoEpimorphism.Bisimulation f;
-  simp [Model.PseudoEpimorphism.Bisimulation];
+  apply modal_equivalent_of_bisimilar $ Model.PseudoEpimorphism.bisimulation f;
+  simp [Model.PseudoEpimorphism.bisimulation];
 
 lemma iff_formula_valid_on_frame_surjective_morphism (f : F₁ →ₚ F₂) (f_surjective : Function.Surjective f) : F₁#α ⊧ p → F₂#α ⊧ p := by
   contrapose;
@@ -76,9 +72,6 @@ lemma iff_theory_valid_on_frame_surjective_morphism (f : F₁ →ₚ F₂) (f_su
   intro h p hp;
   exact iff_formula_valid_on_frame_surjective_morphism f f_surjective (h hp);
 
-
-abbrev IrreflexiveFrameClass : FrameClass := { F | Irreflexive F }
-
 theorem undefinable_irreflexive : ¬∃ (Λ : DeductionParameter α), ∀ F, F ∈ 𝔽(Λ of α) ↔ F ∈ IrreflexiveFrameClass.{0} := by
   by_contra hC;
   obtain ⟨Ax, h⟩ := hC;
@@ -100,6 +93,10 @@ theorem undefinable_irreflexive : ¬∃ (Λ : DeductionParameter α), ∀ F, F �
     (h F₂ |>.mp $ (iff_theory_valid_on_frame_surjective_morphism f f_surjective ) (h F₁ |>.mpr hIF₁));
   contradiction;
 
-end Kripke
+lemma modal_equivalent_at_root_on_generated_model
+  (M : Model α) (M_trans : Transitive M.Frame) (r : M.World) : ModalEquivalent (M₁ := M↾r) (M₂ := M) ⟨r, by simp⟩ r
+  := modal_equivalent_of_bisimilar (Model.PointGenerated.bisimulation M M_trans r) Model.PointGenerated.bisimulation.rooted
 
-end LO.Modal.Standard
+end Modal.Standard.Kripke
+
+end LO

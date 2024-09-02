@@ -1,19 +1,22 @@
 import Logic.Modal.Standard.Kripke.Geach
 
+namespace LO.Kripke
+
+end LO.Kripke
+
 namespace LO.Modal.Standard
 
 namespace Kripke
 
+open LO.Kripke
 open System
 open Kripke
 open Formula
 
-abbrev ConnectedFrameClass : FrameClass := { F | Connected F }
-
 variable {α : Type u} [Inhabited α] [DecidableEq α] [atleast : Atleast 2 α]
 variable {F : Kripke.Frame}
 
-private lemma connected_of_dot3 : F# ⊧* (.𝟯 : AxiomSet α) → Connected F := by
+private lemma connected_of_dot3 : F#α ⊧* (.𝟯 : AxiomSet α) → Connected F := by
   contrapose;
   intro hCon; simp [Connected] at hCon;
   obtain ⟨x, y, rxy, z, ryz, nryz, nrzy⟩ := hCon;
@@ -37,7 +40,7 @@ private lemma connected_of_dot3 : F# ⊧* (.𝟯 : AxiomSet α) → Connected F 
     use z;
     simp_all [Semantics.Realize, Kripke.Satisfies, (fInj 0), (fInj 1)];
 
-private lemma dot3_of_connected : Connected F → F# ⊧* (.𝟯 : AxiomSet α) := by
+private lemma dot3_of_connected : Connected F → F#α ⊧* (.𝟯 : AxiomSet α) := by
   intro hCon;
   simp [Kripke.ValidOnFrame, Kripke.ValidOnModel, Axioms.Dot3];
   intro δ p q e V x; subst e;
@@ -49,20 +52,21 @@ private lemma dot3_of_connected : Connected F → F# ⊧* (.𝟯 : AxiomSet α) 
   | inl ryz => have := hp z ryz; contradiction;
   | inr rzy => have := hq y rzy; contradiction;
 
+/-
 lemma AxDot3_Definability : AxiomSet.DefinesKripkeFrameClass (α := α) .𝟯 ConnectedFrameClass := by
   intro F;
   constructor;
   . exact connected_of_dot3;
   . exact dot3_of_connected;
+-/
 
-abbrev ReflexiveTransitiveConnectedFrameClass : FrameClass := { F | Reflexive F ∧ Transitive F ∧ Connected F }
-
+/-
 lemma ReflexiveTransitiveConnectedFrameClass.nonempty : ReflexiveTransitiveConnectedFrameClass.Nonempty.{0} := by
   use terminalFrame;
   simp [Reflexive, Transitive, Connected, Frame.Rel'];
+-/
 
-
-
+/-
 private lemma S4Dot3_defines' : AxiomSet.DefinesKripkeFrameClass (α := α)  (𝗧 ∪ 𝟰 ∪ .𝟯) ReflexiveTransitiveConnectedFrameClass := by
   rw [(show ReflexiveTransitiveConnectedFrameClass = ({ F | (Reflexive F ∧ Transitive F) ∧ Connected F } : FrameClass) by aesop)];
   apply AxiomSet.DefinesKripkeFrameClass.union;
@@ -73,7 +77,6 @@ lemma S4Dot3_defines : 𝐒𝟒.𝟑.DefinesKripkeFrameClass (α := α) Reflexiv
   DeductionParameter.DefinesKripkeFrameClass.ofAx S4Dot3_defines'
 
 instance : System.Consistent (𝐒𝟒.𝟑 : DeductionParameter α) := consistent_of_defines S4Dot3_defines' ReflexiveTransitiveConnectedFrameClass.nonempty
-
 
 open MaximalConsistentTheory in
 lemma connected_CanonicalFrame {Ax : AxiomSet α} (hAx : .𝟯 ⊆ Ax) [System.Consistent (𝝂Ax)] : Connected (CanonicalFrame 𝝂Ax) := by
@@ -102,7 +105,7 @@ lemma connected_CanonicalFrame {Ax : AxiomSet α} (hAx : .𝟯 ⊆ Ax) [System.C
   have : □(□p ⟶ q) ⋎ □(□q ⟶ p) ∈ X.theory := by apply subset_axiomset _; aesop;
   contradiction;
 
-instance : Complete (𝐒𝟒.𝟑 : DeductionParameter α) (ReflexiveTransitiveConnectedFrameClass.{u}#) := instComplete_of_mem_canonicalFrame $ by
+instance : Complete (𝐒𝟒.𝟑 : DeductionParameter α) (ReflexiveTransitiveConnectedFrameClass.{u}#α) := instComplete_of_mem_canonicalFrame $ by
   refine ⟨?reflexive, ?transitive, ?connective⟩;
   . simp [←GeachConfluent.reflexive_def];
     apply geachConfluent_CanonicalFrame;
@@ -112,6 +115,8 @@ instance : Complete (𝐒𝟒.𝟑 : DeductionParameter α) (ReflexiveTransitive
     simp [AxiomSet.Geach.Four_def];
   . apply connected_CanonicalFrame;
     simp;
+
+-/
 
 end Kripke
 

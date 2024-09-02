@@ -7,16 +7,19 @@ import Logic.Modal.Standard.Kripke.Reducible
 namespace LO.Kripke
 
 
-abbrev GeachConfluentFrameClass (t : GeachTaple) : FrameClass := λ F => (GeachConfluent t) F.Rel
+abbrev GeachConfluentFrameClass (t : GeachTaple) : FrameClass := { F | (GeachConfluent t) F.Rel }
 
-abbrev MultiGeachConfluentFrameClass (ts : List GeachTaple) : FrameClass := λ F => (MultiGeachConfluent ts) F.Rel
+abbrev MultiGeachConfluentFrameClass (ts : List GeachTaple) : FrameClass := { F | (MultiGeachConfluent ts) F.Rel }
 
+namespace MultiGeachConfluentFrameClass
 
-@[simp] lemma MultiGeachConfluentFrameClass.def_nil : MultiGeachConfluentFrameClass [] = AllFrameClass := by rfl;
+@[simp]
+lemma def_nil : MultiGeachConfluentFrameClass [] = AllFrameClass := by rfl;
 
-@[simp] lemma MultiGeachConfluentFrameClass.def_one (t : GeachTaple) : MultiGeachConfluentFrameClass [t] = GeachConfluentFrameClass t := by rfl;
+@[simp]
+lemma def_one (t : GeachTaple) : MultiGeachConfluentFrameClass [t] = GeachConfluentFrameClass t := by rfl;
 
-lemma MultiGeachConfluentFrameClass.def_cons {t : GeachTaple} {ts : List GeachTaple} (ts_nil : ts ≠ [])
+lemma def_cons {t : GeachTaple} {ts : List GeachTaple} (ts_nil : ts ≠ [])
   : MultiGeachConfluentFrameClass (t :: ts) = GeachConfluentFrameClass t ∩ MultiGeachConfluentFrameClass ts := by
   apply Set.eq_of_subset_of_subset;
   . rintro F hF;
@@ -29,7 +32,7 @@ lemma MultiGeachConfluentFrameClass.def_cons {t : GeachTaple} {ts : List GeachTa
     . apply hF₂;
 
 @[simp]
-instance MultiGeachConfluentFrameClass.nonempty : (MultiGeachConfluentFrameClass ts).Nonempty := by
+instance nonempty : (MultiGeachConfluentFrameClass ts).Nonempty := by
   use ⟨PUnit,  λ _ _ => True⟩;
   induction ts using List.induction_with_singleton with
   | hnil => simp only [def_nil, Set.mem_univ];
@@ -44,6 +47,8 @@ instance MultiGeachConfluentFrameClass.nonempty : (MultiGeachConfluentFrameClass
       constructor <;> { apply Rel.iterate.true_any; tauto; }
     . exact ih;
 
+end MultiGeachConfluentFrameClass
+
 
 abbrev FrameClass.IsGeach (𝔽 : FrameClass) (ts : List GeachTaple) := FrameClass.DefinedBy 𝔽 (MultiGeachConfluentFrameClass ts)
 
@@ -52,33 +57,24 @@ lemma FrameClass.IsGeach.equality {𝔽 : FrameClass} [geach : 𝔽.IsGeach ts] 
   . intro F hF; exact geach.define.mp hF;
   . intro F hF; exact geach.define.mpr hF;
 
-open GeachConfluent
 
-/-- FrameClass for `𝐊𝐓` -/
-abbrev ReflexiveFrameClass : FrameClass := λ F => Reflexive F.Rel
+section
+
+open GeachConfluent
 
 instance : ReflexiveFrameClass.IsGeach [⟨0, 0, 1, 0⟩] where
   define := by intro _; apply reflexive_def;
   nonempty := MultiGeachConfluentFrameClass.nonempty
 
 
-/-- FrameClass for `𝐊𝐃` -/
-abbrev SerialFrameClass : FrameClass := λ F => Serial F.Rel
-
 instance : SerialFrameClass.IsGeach [⟨0, 0, 1, 1⟩] where
   define := by intro _; apply serial_def;
   nonempty := MultiGeachConfluentFrameClass.nonempty
 
 
-/-- FrameClass for `𝐊𝟒` -/
-abbrev TransitiveFrameClass : FrameClass := λ F => Transitive F.Rel
-
 instance : TransitiveFrameClass.IsGeach ([⟨0, 2, 1, 0⟩]) where
   define := by intro _; apply transitive_def;
   nonempty := MultiGeachConfluentFrameClass.nonempty
-
-/-- FrameClass for `𝐊𝐓𝟓` (`𝐒𝟓`) -/
-abbrev ReflexiveEuclideanFrameClass : FrameClass := λ F => Reflexive F.Rel ∧ Euclidean F.Rel
 
 instance : ReflexiveEuclideanFrameClass.IsGeach ([⟨0, 0, 1, 0⟩, ⟨1, 1, 0, 1⟩]) where
   define := by
@@ -90,9 +86,6 @@ instance : ReflexiveEuclideanFrameClass.IsGeach ([⟨0, 0, 1, 0⟩, ⟨1, 1, 0, 
       refine ⟨reflexive_def.mpr F_refl, euclidean_def.mpr F_eucl⟩;
   nonempty := MultiGeachConfluentFrameClass.nonempty
 
-/-- FrameClass for `𝐊𝐓𝐁` -/
-abbrev ReflexiveSymmetricFrameClass : FrameClass := λ F => Reflexive F ∧ Symmetric F
-
 instance : ReflexiveSymmetricFrameClass.IsGeach ([⟨0, 0, 1, 0⟩, ⟨0, 1, 0, 1⟩]) where
   define := by
     intro F;
@@ -102,9 +95,6 @@ instance : ReflexiveSymmetricFrameClass.IsGeach ([⟨0, 0, 1, 0⟩, ⟨0, 1, 0, 
     . rintro ⟨F_refl, F_symm⟩;
       refine ⟨reflexive_def.mpr F_refl, symmetric_def.mpr F_symm⟩;
   nonempty := MultiGeachConfluentFrameClass.nonempty
-
-
-alias PreorderFrameClass := ReflexiveTransitiveFrameClass
 
 instance : PreorderFrameClass.IsGeach ([⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩,]) where
   define := by
@@ -117,8 +107,6 @@ instance : PreorderFrameClass.IsGeach ([⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩,]) wh
   nonempty := MultiGeachConfluentFrameClass.nonempty
 
 
-alias EquivalenceFrameClass := ReflexiveTransitiveSymmetricFrameClass
-
 instance : EquivalenceFrameClass.IsGeach ([⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩, ⟨0, 1, 0, 1⟩]) where
   define := by
     intro F;
@@ -128,6 +116,8 @@ instance : EquivalenceFrameClass.IsGeach ([⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩, �
     . rintro ⟨F_refl, F_trans, F_symm⟩;
       refine ⟨reflexive_def.mpr F_refl, transitive_def.mpr F_trans, symmetric_def.mpr F_symm⟩;
   nonempty := MultiGeachConfluentFrameClass.nonempty
+
+end
 
 end LO.Kripke
 
@@ -310,7 +300,7 @@ open Formula.Kripke
 open Kripke
 
 theorem KD_weakerThan_KT : (𝐊𝐃 : DeductionParameter α) ≤ₛ 𝐊𝐓 := by
-  apply reducible_of_subset_FrameClass (α := α) SerialFrameClass ReflexiveFrameClass;
+  apply reducible_of_subset_FrameClass SerialFrameClass ReflexiveFrameClass;
   intro F hF; apply serial_of_refl hF;
 
 theorem KD_strictlyWeakerThan_KT : (𝐊𝐃 : DeductionParameter α) <ₛ 𝐊𝐓 := by
@@ -329,13 +319,11 @@ theorem KD_strictlyWeakerThan_KT : (𝐊𝐃 : DeductionParameter α) <ₛ 𝐊�
         use (λ w _ => w = 1), 0;
         simp [Satisfies];
 
-
-example : (𝐊 : DeductionParameter α) <ₛ 𝐊𝐓 := strictlyWeakerThan.trans K_strictlyWeakerThan_KD KD_strictlyWeakerThan_KT
-
+theorem K_strictlyWeakerThan_KT : (𝐊 : DeductionParameter α) <ₛ 𝐊𝐓 := strictlyWeakerThan.trans K_strictlyWeakerThan_KD KD_strictlyWeakerThan_KT
 
 theorem K4_weakerThan_S4 : (𝐊𝟒 : DeductionParameter α) ≤ₛ 𝐒𝟒 := by
-  apply reducible_of_subset_FrameClass (α := α) TransitiveFrameClass PreorderFrameClass;
-  intro F ⟨_, F_trans⟩;
+  apply reducible_of_subset_FrameClass TransitiveFrameClass PreorderFrameClass;
+  rintro F ⟨_, F_trans⟩;
   exact F_trans;
 
 theorem K4_strictlyWeakerThan_S4 : (𝐊𝟒 : DeductionParameter α) <ₛ 𝐒𝟒 := by
@@ -357,7 +345,7 @@ theorem K4_strictlyWeakerThan_S4 : (𝐊𝟒 : DeductionParameter α) <ₛ 𝐒�
 
 theorem S4_weakerThan_S5 : (𝐒𝟒 : DeductionParameter α) ≤ₛ 𝐒𝟓 := by
   apply reducible_of_subset_FrameClass PreorderFrameClass ReflexiveEuclideanFrameClass;
-  intro _ ⟨F_refl, F_eucl⟩;
+  rintro _ ⟨F_refl, F_eucl⟩;
   refine ⟨F_refl, trans_of_refl_eucl F_refl F_eucl⟩;
 
 theorem S4_strictlyWeakerThan_S5 : (𝐒𝟒 : DeductionParameter α) <ₛ 𝐒𝟓 := by

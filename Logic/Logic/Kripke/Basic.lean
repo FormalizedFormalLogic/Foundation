@@ -168,7 +168,7 @@ abbrev FrameClass := Set (Frame)
 set_option linter.unusedVariables false in
 abbrev FrameClass.Dep (α : Type v) := FrameClass.{u}
 
-abbrev FrameClass.alt (𝔽 : FrameClass) (α) : FrameClass.Dep α := 𝔽
+abbrev FrameClass.alt (𝔽 : FrameClass) (α : Type v) : FrameClass.Dep.{u} α := 𝔽
 notation 𝔽:max "#" α:max => FrameClass.alt 𝔽 α
 
 
@@ -192,17 +192,40 @@ section
 /-- FrameClass for `𝐊` -/
 abbrev AllFrameClass : FrameClass := Set.univ
 
+/-- FrameClass for `𝐊𝐓` -/
+abbrev ReflexiveFrameClass : FrameClass := { F | Reflexive F.Rel }
+
+/-- FrameClass for `𝐊𝐃` -/
+abbrev SerialFrameClass : FrameClass := { F | Serial F.Rel }
+
+/-- FrameClass for `𝐊𝟒` -/
+abbrev TransitiveFrameClass : FrameClass := { F | Transitive F.Rel }
+
+/-- FrameClass for `𝐊𝐓𝟓` (`𝐒𝟓`) -/
+abbrev ReflexiveEuclideanFrameClass : FrameClass := { F | Reflexive F.Rel ∧ Euclidean F.Rel }
+
+/-- FrameClass for `𝐊𝐓𝐁` -/
+abbrev ReflexiveSymmetricFrameClass : FrameClass := { F | Reflexive F ∧ Symmetric F }
+
+/-- FrameClass for `𝐒𝟓` -/
+abbrev UniversalFrameClass : FrameClass := { F | Universal F }
+
+/-- FrameClass for `𝐊.𝟑` -/
+abbrev ConnectedFrameClass : FrameClass := { F | Connected F }
+
 /-- FrameClass for `𝐈𝐧𝐭` and `𝐒𝟒` -/
-abbrev ReflexiveTransitiveFrameClass : FrameClass := λ F => Reflexive F ∧ Transitive F
+abbrev ReflexiveTransitiveFrameClass : FrameClass := { F | Reflexive F ∧ Transitive F }
+alias PreorderFrameClass := ReflexiveTransitiveFrameClass
 
 /-- FrameClass for `𝐊𝐂` and `𝐒𝟒.𝟐` -/
-abbrev ReflexiveTransitiveConfluentFrameClass : FrameClass := λ F => Reflexive F ∧ Transitive F ∧ Confluent F
+abbrev ReflexiveTransitiveConfluentFrameClass : FrameClass := { F | Reflexive F ∧ Transitive F ∧ Confluent F }
 
 /-- FrameClass for `𝐋𝐂` and `𝐒𝟒.𝟑` -/
-abbrev ReflexiveTransitiveConnectedFrameClass : FrameClass := λ F => Reflexive F ∧ Transitive F ∧ Connected F
+abbrev ReflexiveTransitiveConnectedFrameClass : FrameClass := { F | Reflexive F ∧ Transitive F ∧ Connected F }
 
 /-- FrameClass for `𝐂𝐥` and `𝐊𝐓𝟒𝐁` (`𝐒𝟓`) -/
-abbrev ReflexiveTransitiveSymmetricFrameClass : FrameClass := λ F => Reflexive F ∧ Transitive F ∧ Symmetric F
+abbrev ReflexiveTransitiveSymmetricFrameClass : FrameClass := { F | Reflexive F ∧ Transitive F ∧ Symmetric F }
+alias EquivalenceFrameClass := ReflexiveTransitiveSymmetricFrameClass
 
 end
 
