@@ -33,7 +33,7 @@ lemma NoLEMFrame.confluent : Confluent NoLEMFrame.Rel := by simp [Confluent];
 
 lemma NoLEMFrame.connected : Connected NoLEMFrame.Rel := by simp [Connected];
 
-lemma noLEM_on_frameclass : ∃ (p : Formula α), ¬((Kripke.FrameClassOfSystem.{u, _, 0} α 𝐈𝐧𝐭) ⊧ p ⋎ ~p) := by
+lemma noLEM_on_frameclass : ∃ (p : Formula α), ¬((Kripke.FrameClassOfHilbert.{u, 0} 𝐈𝐧𝐭) ⊧ p ⋎ ~p) := by
   use (atom default);
   simp [Semantics.Realize];
   use NoLEMFrame;
@@ -53,7 +53,7 @@ theorem noLEM : ∃ (p : Formula α), 𝐈𝐧𝐭 ⊬! p ⋎ ~p := by
   obtain ⟨p, hp⟩ := noLEM_on_frameclass (α := α);
   use p;
   by_contra hC;
-  have := Kripke.sound hC;
+  have := @Kripke.sound _ _ _ hC;
   contradiction;
 
 /--
@@ -74,7 +74,7 @@ theorem Int_strictly_weaker_than_Cl : (𝐈𝐧𝐭 : DeductionParameter α) <�
 
 section
 
-lemma noLEM_on_frameclass_KC : ∃ (p : Formula α), ¬((Kripke.FrameClassOfSystem.{u, _, 0} α 𝐊𝐂) ⊧ p ⋎ ~p) := by
+lemma noLEM_on_frameclass_KC : ∃ (p : Formula α), ¬((Kripke.FrameClassOfHilbert.{u, 0} 𝐊𝐂) ⊧ p ⋎ ~p) := by
   use (atom default);
   simp [Semantics.Realize];
   use NoLEMFrame;
@@ -91,7 +91,7 @@ lemma noLEM_KC: ∃ (p : Formula α), 𝐊𝐂 ⊬! p ⋎ ~p := by
   obtain ⟨p, hp⟩ := noLEM_on_frameclass_KC (α := α);
   use p;
   by_contra hC;
-  have := Kripke.sound hC;
+  have := @Kripke.sound _ _ _ hC;
   contradiction;
 
 theorem KC_strictly_weaker_than_Cl : (𝐊𝐂 : DeductionParameter α) <ₛ 𝐂𝐥 := by
@@ -110,7 +110,7 @@ end
 
 section
 
-lemma noLEM_on_frameclass_LC : ∃ (p : Formula α), ¬((Kripke.FrameClassOfSystem.{u, _, 0} α 𝐋𝐂) ⊧ p ⋎ ~p) := by
+lemma noLEM_on_frameclass_LC : ∃ (p : Formula α), ¬((Kripke.FrameClassOfHilbert.{u, 0} 𝐋𝐂) ⊧ p ⋎ ~p) := by
   use (atom default);
   simp [Semantics.Realize];
   use NoLEMFrame;
@@ -127,7 +127,7 @@ lemma noLEM_LC: ∃ (p : Formula α), 𝐋𝐂 ⊬! p ⋎ ~p := by
   obtain ⟨p, hp⟩ := noLEM_on_frameclass_LC (α := α);
   use p;
   by_contra hC;
-  have := Kripke.sound hC;
+  have := @Kripke.sound _ _ _ hC;
   contradiction;
 
 theorem LC_strictly_weaker_than_Cl : (𝐋𝐂 : DeductionParameter α) <ₛ 𝐂𝐥 := by
