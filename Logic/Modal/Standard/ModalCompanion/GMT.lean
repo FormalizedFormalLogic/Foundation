@@ -1,3 +1,4 @@
+import Logic.Modal.Standard.ModalCompanion.Basic
 import Logic.Propositional.Superintuitionistic.Kripke.DP
 import Logic.Modal.Standard.Kripke.Geach
 
@@ -8,22 +9,6 @@ open Necessitation
 open LO.Propositional
 
 variable {α : Type u} [DecidableEq α] [Inhabited α] [Encodable α]
-
-/-- Gödel Translation -/
-def GoedelTranslation : Superintuitionistic.Formula α → Formula α
-  | .atom a  => □(Formula.atom a)
-  | ⊤ => ⊤
-  | ⊥ => ⊥
-  | p ⋏ q => (GoedelTranslation p) ⋏ (GoedelTranslation q)
-  | p ⋎ q  => (GoedelTranslation p) ⋎ (GoedelTranslation q)
-  | ~p   => □(~(GoedelTranslation p))
-  | p ⟶ q => □((GoedelTranslation p) ⟶ (GoedelTranslation q))
-
-postfix:90 "ᵍ" => GoedelTranslation
-
-
-class ModalCompanion (iΛ : Superintuitionistic.DeductionParameter α) (mΛ : Modal.Standard.DeductionParameter α) where
-  companion : ∀ {p : Superintuitionistic.Formula α}, iΛ ⊢! p ↔ mΛ ⊢! pᵍ
 
 variable {iΛ : Superintuitionistic.DeductionParameter α} {mΛ : DeductionParameter α}
 variable {p q r : Superintuitionistic.Formula α}
@@ -108,7 +93,7 @@ lemma provable_S4_of_provable_efq : (𝐒𝟒 ⊢! pᵍ) → (𝐈𝐧𝐭 ⊢! 
 
   replace h := (not_imp_not.mpr $ Superintuitionistic.Kripke.Int_complete_aux (α := α)) h;
   simp [Superintuitionistic.Formula.Kripke.ValidOnFrame, Superintuitionistic.Formula.Kripke.ValidOnModel] at h;
-  obtain ⟨F, ⟨F_refl, F_trans⟩, V, V_hered, w, hp⟩ := h;
+  obtain ⟨F, F_refl, F_trans, V, V_hered, w, hp⟩ := h;
 
   have h₁ : ∀ q x, Superintuitionistic.Formula.Kripke.Satisfies ⟨F, V⟩ x q ↔ (Modal.Standard.Formula.Kripke.Satisfies ⟨F, V⟩ x (qᵍ)) := by
     intro q x;

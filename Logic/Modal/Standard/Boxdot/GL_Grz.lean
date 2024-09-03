@@ -1,7 +1,7 @@
 import Logic.Logic.Kripke.Closure
+import Logic.Modal.Standard.Boxdot.Basic
 import Logic.Modal.Standard.Kripke.Grz.Completeness
 import Logic.Modal.Standard.Kripke.GL.Completeness
-import Logic.Modal.Standard.Boxdot
 
 namespace LO.Modal.Standard
 

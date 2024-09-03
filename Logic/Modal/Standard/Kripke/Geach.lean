@@ -297,17 +297,17 @@ instance {Λ : DeductionParameter α} {𝔽 : FrameClass.{u}} [logic_geach : Λ.
   . exact class_geach.equality;
 
 
-instance KT_complete : Complete 𝐊𝐓 (ReflexiveFrameClass.{u}#α) := inferInstance
+instance KT_complete : Complete 𝐊𝐓 ReflexiveFrameClass.{u}#α := inferInstance
 
-instance KTB_complete : Complete 𝐊𝐓𝐁 (ReflexiveSymmetricFrameClass.{u}#α) := inferInstance
+instance KTB_complete : Complete 𝐊𝐓𝐁 ReflexiveSymmetricFrameClass.{u}#α := inferInstance
 
-instance S4_complete : Complete 𝐒𝟒 (PreorderFrameClass.{u}#α) := inferInstance
+instance S4_complete : Complete 𝐒𝟒 PreorderFrameClass.{u}#α := inferInstance
 
-instance K4_complete : Complete (𝐊𝟒 : DeductionParameter α) TransitiveFrameClass.{u}# := instGeachLogicCompleteAux
+instance K4_complete : Complete 𝐊𝟒 TransitiveFrameClass.{u}#α := inferInstance
 
-instance S4_complete : Complete (𝐒𝟒 : DeductionParameter α) PreorderFrameClass.{u}# := instGeachLogicCompleteAux
+instance KT4B_complete : Complete 𝐊𝐓𝟒𝐁 EquivalenceFrameClass.{u}#α := inferInstance
 
-instance KT4B_complete : Complete 𝐊𝐓𝟒𝐁 (EquivalenceFrameClass.{u}#α) := inferInstance
+instance S5_complete : Complete 𝐒𝟓 ReflexiveEuclideanFrameClass.{u}#α := inferInstance
 
 end Kripke
 
