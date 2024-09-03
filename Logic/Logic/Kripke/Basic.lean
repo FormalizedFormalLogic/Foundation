@@ -1,3 +1,4 @@
+import Logic.Logic.Kripke.RelItr
 import Logic.Logic.Semantics
 import Logic.Logic.System
 import Logic.Vorspiel.BinaryRelations
@@ -18,7 +19,47 @@ instance : CoeFun Frame (λ F => F.World → F.World → Prop) := ⟨Frame.Rel�
 instance {F : Frame} : Nonempty F.World := F.World_nonempty
 
 abbrev Frame.Rel' {F : Frame} (x y : F.World) := F.Rel x y
-scoped infix:45 " ≺ " => Frame.Rel'
+infix:45 " ≺ " => Frame.Rel'
+
+protected abbrev Frame.RelItr' {F : Frame} (n : ℕ) := F.Rel.iterate n
+notation x:45 " ≺^[" n "] " y:46 => Frame.RelItr' n x y
+
+-- TODO: `Rel.iterate`上で示せるはず
+namespace Frame.RelItr'
+
+lemma congr {F : Frame} {x y : F.World} {n m : ℕ} (h : x ≺^[n] y) (he : n = m := by omega) : x ≺^[m] y := by
+  subst_vars; exact h;
+
+lemma forward {F : Frame} {x y : F.World} : x ≺^[n + 1] y ↔ ∃ z, x ≺^[n] z ∧ z ≺ y := Rel.iterate.forward
+
+lemma comp {F : Frame} {x y : F.World} {n m : ℕ} : (∃ z, x ≺^[n] z ∧ z ≺^[m] y) ↔ x ≺^[n + m] y := by
+  constructor;
+  . rintro ⟨z, hzx, hzy⟩;
+    induction n generalizing x with
+    | zero => simp_all;
+    | succ n ih =>
+      suffices x ≺^[(n + m + 1)] y by apply congr this;
+      obtain ⟨w, hxw, hwz⟩ := hzx;
+      use w;
+      constructor;
+      . exact hxw;
+      . exact @ih w hwz;
+  . rintro h;
+    induction n generalizing x with
+    | zero => simp_all;
+    | succ n ih =>
+      have rxy : x ≺^[n + m + 1] y := congr h;
+      obtain ⟨w, rxw, rwy⟩ := rxy;
+      obtain ⟨u, rwu, ruy⟩ := @ih w rwy;
+      use u;
+      constructor;
+      . use w;
+      . assumption;
+
+lemma comp' {F : Frame} {x y : F.World} {n m : ℕ+} : (∃ z, x ≺^[n] z ∧ z ≺^[m] y) ↔ x ≺^[n + m] y := comp
+
+end Frame.RelItr'
+
 
 noncomputable abbrev Frame.default {F : Frame} : F.World := Classical.choice F.World_nonempty
 notation "﹫" => Frame.default
@@ -38,142 +79,113 @@ instance {F : FiniteFrame} : Finite (F.World) := F.World_finite
 instance : Coe (FiniteFrame) (Frame) := ⟨λ F ↦ F.toFrame⟩
 
 
-open Relation (ReflTransGen TransGen)
-
-
-abbrev Frame.RelReflTransGen {F : Frame} : _root_.Rel F.World F.World:= ReflTransGen (· ≺ ·)
-scoped infix:45 " ≺^* " => Frame.RelReflTransGen
-
-namespace Frame.RelReflTransGen
-
-variable {F : Frame}
-
-@[simp] lemma single {x y : F.World} (hxy : x ≺ y) : x ≺^* y := ReflTransGen.single hxy
-
-@[simp] lemma reflexive : Reflexive F.RelReflTransGen := Relation.reflexive_reflTransGen
-
-@[simp] lemma refl {x : F.World} : x ≺^* x := reflexive x
-
-@[simp] lemma transitive : Transitive F.RelReflTransGen := Relation.transitive_reflTransGen
-
-@[simp] lemma symmetric : Symmetric F.Rel → Symmetric F.RelReflTransGen := ReflTransGen.symmetric
-
-end Frame.RelReflTransGen
-
-
-abbrev Frame.TransitiveReflexiveClosure (F : Frame) : Frame where
-  World := F.World
-  Rel := (· ≺^* ·)
-postfix:max "^*" => Frame.TransitiveReflexiveClosure
-
-namespace Frame.TransitiveReflexiveClosure
-
-variable {F : Frame}
-
-lemma single {x y : F.World} (hxy : x ≺ y) : F^*.Rel x y := ReflTransGen.single hxy
-
-lemma rel_reflexive : Reflexive F^*.Rel := by intro x; exact ReflTransGen.refl;
-
-lemma rel_transitive : Transitive F^*.Rel := by simp;
-
-lemma rel_symmetric : Symmetric F.Rel → Symmetric F^* := ReflTransGen.symmetric
-
-end Frame.TransitiveReflexiveClosure
-
-
-
-abbrev Frame.RelTransGen {F : Frame} : _root_.Rel F.World F.World := TransGen (· ≺ ·)
-scoped infix:45 " ≺^+ " => Frame.RelTransGen
-
-namespace Frame.RelTransGen
-
-variable {F : Frame}
-
-@[simp] lemma single {x y : F.World} (hxy : x ≺ y) : x ≺^+ y := TransGen.single hxy
-
-@[simp]
-lemma transitive : Transitive F.RelTransGen := λ _ _ _ => TransGen.trans
-
-@[simp]
-lemma symmetric (hSymm : Symmetric F.Rel) : Symmetric F.RelTransGen := by
-  intro x y rxy;
-  induction rxy with
-  | single h => exact TransGen.single $ hSymm h;
-  | tail _ hyz ih => exact TransGen.trans (TransGen.single $ hSymm hyz) ih
-
-end Frame.RelTransGen
-
-
-abbrev Frame.TransitiveClosure (F : Frame) : Frame where
-  World := F.World
-  Rel := (· ≺^+ ·)
-scoped postfix:max "^+" => Frame.TransitiveClosure
-
-namespace Frame.TransitiveClosure
-
-variable {F : Frame}
-
-lemma single {x y : F.World} (hxy : x ≺ y) : F^+ x y := TransGen.single hxy
-
-lemma rel_transitive : Transitive F^+ := by simp;
-
-lemma rel_symmetric (hSymm : Symmetric F.Rel) : Symmetric F.TransitiveClosure := by simp_all
-
-end Frame.TransitiveClosure
-
-
 abbrev FrameClass := Set (Frame)
 
 set_option linter.unusedVariables false in
 abbrev FrameClass.Dep (α : Type v) := FrameClass.{u}
 
-abbrev FrameClass.alt (𝔽 : FrameClass) (α) : FrameClass.Dep α := 𝔽
-notation 𝔽:max "#" α:max => FrameClass.alt 𝔽 α
+abbrev FrameClass.alt (𝔽 : FrameClass) (α : Type v) : FrameClass.Dep.{u} α := 𝔽
+notation:max 𝔽:max "#" α:max => FrameClass.alt 𝔽 α
 
-/-
+
 abbrev FiniteFrameClass := Set (FiniteFrame)
 
-@[simp] def FiniteFrameClass.toFrameClass (𝔽 : FiniteFrameClass) : FrameClass := { F | ∃ F', F' ∈ 𝔽 ∧ F'.toFrame = F }
-instance : Coe (FiniteFrameClass) (FrameClass) := ⟨FiniteFrameClass.toFrameClass⟩
+set_option linter.unusedVariables false in
+abbrev FiniteFrameClass.Dep (α : Type v) := FiniteFrameClass.{u}
 
-@[simp] def FrameClass.toFiniteFrameClass (𝔽 : FrameClass) : FiniteFrameClass := { F | F.toFrame ∈ 𝔽 }
-instance : Coe (FrameClass) (FiniteFrameClass) := ⟨FrameClass.toFiniteFrameClass⟩
+abbrev FiniteFrameClass.alt (𝔽 : FiniteFrameClass) (α : Type v) : FiniteFrameClass.Dep.{u} α := 𝔽
+notation:max 𝔽:max "#" α:max => FiniteFrameClass.alt 𝔽 α
 
-@[simp] abbrev FrameClass.restrictFinite (𝔽 : FrameClass) : FrameClass := FiniteFrameClass.toFrameClass ↑𝔽
-postfix:max "ꟳ" => FrameClass.restrictFinite
 
-lemma FrameClass.iff_mem_restrictFinite {𝔽 : FrameClass} {F : Frame} (h : F ∈ 𝔽) (F_finite : Finite F.World) : F ∈ 𝔽ꟳ := by
-  simp;
-  use { toFrame := F, World_finite := F_finite };
--/
+abbrev FiniteFrameClass.toFrameClass (𝔽 : FiniteFrameClass) : FrameClass := 𝔽.image FiniteFrame.toFrame
+-- instance : Coe (FiniteFrameClass) (FrameClass) := ⟨FiniteFrameClass.toFrameClass⟩
 
--- set_option pp.universes true in
-/-
-abbrev FrameClassOfSystem {F : Type u} [System F S] (𝓢 : S) (α : Type u) [Semantics F (Frame.Dep α)] : FrameClass.Dep α := { F | F ⊧* System.theory 𝓢 }
-notation "𝔽(" 𝓢 " of " α ")" => FrameClassOfSystem 𝓢 α
--/
+abbrev FrameClass.toFiniteFrameClass (𝔽 : FrameClass) : FiniteFrameClass := { FF | FF.toFrame ∈ 𝔽 }
+postfix:max "ꟳ" => FrameClass.toFiniteFrameClass
+
+
+lemma FrameClass.iff_mem_restrictFinite {𝔽 : FrameClass} {F : Frame} (h : F ∈ 𝔽) [Finite F.World] : ⟨F⟩ ∈ 𝔽ꟳ := by simpa;
 
 section
 
+/-- FrameClass for `𝐊` -/
+abbrev AllFrameClass : FrameClass := Set.univ
+
+/-- FrameClass for `𝐊𝐓` -/
+abbrev ReflexiveFrameClass : FrameClass := { F | Reflexive F.Rel }
+
+/-- FrameClass for `𝐊𝐃` -/
+abbrev SerialFrameClass : FrameClass := { F | Serial F.Rel }
+
+/-- FrameClass for `𝐊𝟒` -/
+abbrev TransitiveFrameClass : FrameClass := { F | Transitive F.Rel }
+
+/-- FrameClass for `𝐊𝐓𝟓` (`𝐒𝟓`) -/
+abbrev ReflexiveEuclideanFrameClass : FrameClass := { F | Reflexive F.Rel ∧ Euclidean F.Rel }
+
+/-- FrameClass for `𝐊𝐓𝐁` -/
+abbrev ReflexiveSymmetricFrameClass : FrameClass := { F | Reflexive F ∧ Symmetric F }
+
+/-- FrameClass for `𝐒𝟓` -/
+abbrev UniversalFrameClass : FrameClass := { F | Universal F }
+
+/-- FrameClass for `𝐊.𝟑` -/
+abbrev ConnectedFrameClass : FrameClass := { F | Connected F }
+
 /-- FrameClass for `𝐈𝐧𝐭` and `𝐒𝟒` -/
-abbrev ReflexiveTransitiveFrameClass : FrameClass := λ F => Reflexive F ∧ Transitive F
+abbrev ReflexiveTransitiveFrameClass : FrameClass := { F | Reflexive F ∧ Transitive F }
+alias PreorderFrameClass := ReflexiveTransitiveFrameClass
 
 /-- FrameClass for `𝐊𝐂` and `𝐒𝟒.𝟐` -/
-abbrev ReflexiveTransitiveConfluentFrameClass : FrameClass := λ F => Reflexive F ∧ Transitive F ∧ Confluent F
+abbrev ReflexiveTransitiveConfluentFrameClass : FrameClass := { F | Reflexive F ∧ Transitive F ∧ Confluent F }
 
 /-- FrameClass for `𝐋𝐂` and `𝐒𝟒.𝟑` -/
-abbrev ReflexiveTransitiveConnectedFrameClass : FrameClass := λ F => Reflexive F ∧ Transitive F ∧ Connected F
+abbrev ReflexiveTransitiveConnectedFrameClass : FrameClass := { F | Reflexive F ∧ Transitive F ∧ Connected F }
 
 /-- FrameClass for `𝐂𝐥` and `𝐊𝐓𝟒𝐁` (`𝐒𝟓`) -/
-abbrev ReflexiveTransitiveSymmetricFrameClass : FrameClass := λ F => Reflexive F ∧ Transitive F ∧ Symmetric F
+abbrev ReflexiveTransitiveSymmetricFrameClass : FrameClass := { F | Reflexive F ∧ Transitive F ∧ Symmetric F }
+alias EquivalenceFrameClass := ReflexiveTransitiveSymmetricFrameClass
+
+/-- FrameClass for `𝐆𝐋` -/
+abbrev TransitiveConverseWellFoundedFrameClass : FrameClass := { F | Transitive F ∧ ConverseWellFounded F }
+
+/-- FrameClass for `𝐆𝐋` (Finite version) -/
+abbrev TransitiveIrreflexiveFrameClass : FrameClass := { F | Transitive F ∧ Irreflexive F }
+
+/-- FrameClass for `𝐆𝐫𝐳` -/
+abbrev ReflexiveTransitiveWeaklyConverseWellFoundedFrameClass : FrameClass := { F | Reflexive F.Rel ∧ Transitive F ∧ WeaklyConverseWellFounded F }
+
+/-- FrameClass for `𝐆𝐫𝐳` (Finite version) -/
+abbrev ReflexiveTransitiveAntisymmetricFrameClass : FrameClass := { F | Reflexive F.Rel ∧ Transitive F ∧ Antisymmetric F }
 
 end
 
 /-- `𝔽₁` is characterized by `𝔽₂` -/
 class FrameClass.Characteraizable (𝔽₁ : FrameClass) (𝔽₂ : outParam (FrameClass)) where
   characterize : ∀ {F}, F ∈ 𝔽₂ → F ∈ 𝔽₁
-  nonempty : ∃ F, F ∈ 𝔽₂
+  nonempty : 𝔽₂.Nonempty
 
+/-- `𝔽₁` is defined by `𝔽₂` -/
+class FrameClass.DefinedBy (𝔽₁ : FrameClass) (𝔽₂ : outParam (FrameClass)) where
+  define : ∀ {F}, F ∈ 𝔽₁ ↔ F ∈ 𝔽₂
+  nonempty : 𝔽₂.Nonempty
+
+instance {𝔽₁ 𝔽₂ : FrameClass} [defines : 𝔽₁.DefinedBy 𝔽₂] : FrameClass.Characteraizable 𝔽₁ 𝔽₂ where
+  characterize hF := defines.define.mpr hF
+  nonempty := defines.nonempty
+
+
+class FiniteFrameClass.Characteraizable (𝔽₁ : FiniteFrameClass) (𝔽₂ : outParam (FiniteFrameClass)) where
+  characterize : ∀ {F}, F ∈ 𝔽₂ → F ∈ 𝔽₁
+  nonempty : 𝔽₂.Nonempty
+
+class FiniteFrameClass.DefinedBy (𝔽₁ : FiniteFrameClass) (𝔽₂ : outParam (FiniteFrameClass)) where
+  define : ∀ {F}, F ∈ 𝔽₁ ↔ F ∈ 𝔽₂
+  nonempty : 𝔽₂.Nonempty
+
+instance {𝔽₁ 𝔽₂ : FiniteFrameClass} [defines : 𝔽₁.DefinedBy 𝔽₂] : FiniteFrameClass.Characteraizable 𝔽₁ 𝔽₂ where
+  characterize hF := defines.define.mpr hF
+  nonempty := defines.nonempty
 
 abbrev Valuation (F : Frame) (α : Type*) := F.World → α → Prop
 
@@ -194,7 +206,6 @@ abbrev ClassicalFrame : Kripke.Frame where
   World := Unit
   Rel _ _ := True
 
-
 namespace ClassicalFrame
 
 @[simp] lemma transitive : Transitive ClassicalFrame := by simp [Transitive];
@@ -211,7 +222,6 @@ namespace ClassicalFrame
 
 end ClassicalFrame
 
-
 abbrev ClassicalValuation (α : Type*) := α → Prop
 
 abbrev ClassicalModel (V : ClassicalValuation α) : Kripke.Model α where
@@ -219,6 +229,31 @@ abbrev ClassicalModel (V : ClassicalValuation α) : Kripke.Model α where
   Valuation _ a := V a
 
 end Classical
+
+
+/-- Frame with single world and identiy relation -/
+abbrev terminalFrame : FiniteFrame where
+  World := Unit;
+  Rel := λ _ _ => True
+
+@[simp]
+lemma terminalFrame.iff_rel' {x y : terminalFrame.World} : x ≺ y ↔ x = y := by
+  simp [Frame.Rel'];
+
+@[simp]
+lemma terminalFrame.iff_relItr' {x y : terminalFrame.World} : x ≺^[n] y ↔ x = y := by
+  induction n with
+  | zero => simp;
+  | succ n ih => simp_all;
+
+
+
+abbrev PointFrame : FiniteFrame where
+  World := Unit
+  Rel := (λ _ _ => False)
+
+@[simp]
+lemma PointFrame.iff_rel' {x y : PointFrame.World} : ¬(x ≺ y) := by simp [Frame.Rel'];
 
 
 end LO.Kripke

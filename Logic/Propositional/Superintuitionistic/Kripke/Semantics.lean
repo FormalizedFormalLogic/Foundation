@@ -18,9 +18,10 @@ def Satisfies (M : Kripke.Model.{u, v} α) (w : M.World) : Formula α → Prop
   | p ⋎ q  => Satisfies M w p ∨ Satisfies M w q
   | ~p     => ∀ {w' : M.World}, (w ≺ w') → ¬Satisfies M w' p
   | p ⟶ q => ∀ {w' : M.World}, (w ≺ w') → (Satisfies M w' p → Satisfies M w' q)
-instance instSatisfiesSemantics (M : Kripke.Model.{u, v} α) : Semantics (Formula α) (M.World) := ⟨fun w ↦ Formula.Kripke.Satisfies M w⟩
 
 namespace Satisfies
+
+instance semantics (M : Kripke.Model.{u, v} α) : Semantics (Formula α) (M.World) := ⟨fun w ↦ Formula.Kripke.Satisfies M w⟩
 
 variable {M : Model α} {w : M.World} {p q r : Formula α}
 
@@ -71,9 +72,10 @@ open Satisfies
 
 
 def ValidOnModel (M : Model α) (p : Formula α) := ∀ w : M.World, w ⊧ p
-instance : Semantics (Formula α) (Model α) := ⟨fun M ↦ Formula.Kripke.ValidOnModel M⟩
 
 namespace ValidOnModel
+
+instance semantics : Semantics (Formula α) (Model α) := ⟨fun M ↦ Formula.Kripke.ValidOnModel M⟩
 
 variable
   {M : Model α} {p q r : Formula α}
@@ -169,9 +171,10 @@ end ValidOnModel
 
 def ValidOnFrame (F : Frame) (p : Formula α) := ∀ {V : Valuation F α}, (_ : V.atomic_hereditary) → (⟨F, V⟩ : Kripke.Model α) ⊧ p
 
-instance : Semantics (Formula α) (Frame.Dep α) := ⟨fun F ↦ Formula.Kripke.ValidOnFrame F⟩
 
 namespace ValidOnFrame
+
+instance semantics : Semantics (Formula α) (Frame.Dep α) := ⟨fun F ↦ Formula.Kripke.ValidOnFrame F⟩
 
 variable {F : Frame.Dep α}
 
@@ -220,31 +223,45 @@ instance : Semantics.Bot (Frame.Dep α) where
 end ValidOnFrame
 
 
-instance : Semantics (Formula α) (FrameClass.Dep α) := LO.Semantics.instSet (Frame.Dep α)
+@[simp] def ValidOnFrameClass (𝔽 : FrameClass) (p : Formula α) := ∀ {F : Frame}, F ∈ 𝔽 → F#α ⊧ p
 
+namespace ValidOnFrameClass
+
+instance semantics : Semantics (Formula α) (FrameClass.Dep α) := ⟨fun 𝔽 ↦ Kripke.ValidOnFrameClass 𝔽⟩
+
+variable {𝔽 : FrameClass.Dep α}
+
+@[simp] protected lemma models_iff : 𝔽 ⊧ p ↔ Formula.Kripke.ValidOnFrameClass 𝔽 p := iff_of_eq rfl
+
+end ValidOnFrameClass
 
 end Formula.Kripke
+
 
 open Formula.Kripke
 open Formula.Kripke.Satisfies (formula_hereditary)
 
 namespace Kripke
 
-abbrev FrameClassOfSystem (α : Type u) {S : Type u} [System (Formula α) S] (𝓢 : S) : FrameClass.Dep α := { (F : Frame.Dep α) | F ⊧* System.theory 𝓢 }
-notation "𝔽(" 𝓢 " of " α ")" => FrameClassOfSystem α 𝓢
+abbrev FrameClassOfTheory (T : Theory α) : FrameClass.Dep α := { F | F#α ⊧* T }
+notation "𝔽(" T ")" => FrameClassOfTheory T
+
+abbrev FrameClassOfHilbert (Λ : DeductionParameter α) : FrameClass.Dep α := 𝔽((System.theory Λ))
+notation "𝔽(" Λ ")" => FrameClassOfHilbert Λ
 
 section Soundness
 
-variable {α : Type u} [System (Formula α) S] {𝓢 : S} {p : Formula α}
+variable {Λ : DeductionParameter α}
+         {p : Formula α}
 
-lemma sound : 𝓢 ⊢! p → 𝔽(𝓢 of α) ⊧ p := by
+lemma sound : Λ ⊢! p → 𝔽(Λ) ⊧ p := by
   intro hp F hF;
   simp [System.theory] at hF;
   exact hF p hp;
 
-instance : Sound 𝓢 𝔽(𝓢 of α) := ⟨sound⟩
+instance : Sound Λ 𝔽(Λ) := ⟨sound⟩
 
-lemma unprovable_bot (hc : 𝔽(𝓢 of α).Nonempty) : 𝓢 ⊬! ⊥ := by
+lemma unprovable_bot (hc : 𝔽(Λ).Nonempty) : Λ ⊬! ⊥ := by
   apply (not_imp_not.mpr (sound (α := α)));
   simp [Semantics.Realize];
   obtain ⟨F, hF⟩ := hc;
@@ -253,23 +270,23 @@ lemma unprovable_bot (hc : 𝔽(𝓢 of α).Nonempty) : 𝓢 ⊬! ⊥ := by
   . exact hF;
   . exact Semantics.Bot.realize_bot (F := Formula α) (M := Frame.Dep α) F;
 
-instance (hc : 𝔽(𝓢 of α).Nonempty) : System.Consistent 𝓢 := System.Consistent.of_unprovable $ unprovable_bot hc
+instance (hc : 𝔽(Λ).Nonempty) : System.Consistent Λ := System.Consistent.of_unprovable $ unprovable_bot hc
 
 
-lemma sound_of_characterizability [characterizability : 𝔽(𝓢 of α).Characteraizable 𝔽₂] : 𝓢 ⊢! p → 𝔽₂#α ⊧ p := by
+lemma sound_of_characterizability [characterizability : 𝔽(Λ).Characteraizable 𝔽₂] : Λ ⊢! p → 𝔽₂#α ⊧ p := by
   intro h F hF;
   apply sound h;
   apply characterizability.characterize hF;
 
-instance instSoundOfCharacterizability [𝔽(𝓢 of α).Characteraizable 𝔽₂] : Sound 𝓢 (𝔽₂#α) := ⟨sound_of_characterizability⟩
+instance instSoundOfCharacterizability [𝔽(Λ).Characteraizable 𝔽₂] : Sound Λ (𝔽₂#α) := ⟨sound_of_characterizability⟩
 
-lemma unprovable_bot_of_characterizability [characterizability : 𝔽(𝓢 of α).Characteraizable 𝔽₂] : 𝓢 ⊬! ⊥ := by
+lemma unprovable_bot_of_characterizability [characterizability : 𝔽(Λ).Characteraizable 𝔽₂] : Λ ⊬! ⊥ := by
   apply unprovable_bot;
   obtain ⟨F, hF⟩ := characterizability.nonempty;
   use F;
   apply characterizability.characterize hF;
 
-instance instConsistentOfCharacterizability [FrameClass.Characteraizable.{u} 𝔽(𝓢 of α) 𝔽₂] : System.Consistent 𝓢 := System.Consistent.of_unprovable $ unprovable_bot_of_characterizability
+instance instConsistentOfCharacterizability [FrameClass.Characteraizable.{u} 𝔽(Λ) 𝔽₂] : System.Consistent Λ := System.Consistent.of_unprovable $ unprovable_bot_of_characterizability
 
 end Soundness
 
@@ -278,10 +295,10 @@ section
 
 variable {α : Type u}
 
-instance Int_Characteraizable : 𝔽(𝐈𝐧𝐭 of α).Characteraizable ReflexiveTransitiveFrameClass where
+instance Int_Characteraizable : 𝔽((𝐈𝐧𝐭 : DeductionParameter α)).Characteraizable ReflexiveTransitiveFrameClass where
   characterize := by
     simp [System.theory];
-    rintro F ⟨hTrans, hRefl⟩ p hp;
+    rintro F hTrans hRefl p hp;
     induction hp using Deduction.rec! with
     | verum => apply ValidOnFrame.verum;
     | imply₁ => apply ValidOnFrame.imply₁; simpa;
@@ -309,10 +326,10 @@ instance Int_sound : Sound 𝐈𝐧𝐭 (ReflexiveTransitiveFrameClass#α) := in
 instance : System.Consistent (𝐈𝐧𝐭 : DeductionParameter α) := inferInstance
 
 
-instance Cl_Characteraizable : 𝔽(𝐂𝐥 of α).Characteraizable (λ F => Reflexive F ∧ Transitive F ∧ Symmetric F) where
+instance Cl_Characteraizable : 𝔽((𝐂𝐥 : DeductionParameter α)).Characteraizable ReflexiveTransitiveSymmetricFrameClass#α where
   characterize := by
     simp [System.theory];
-    rintro F ⟨hTrans, hRefl, hExt⟩ p hp;
+    rintro F hTrans hRefl hSymm p hp;
     induction hp using Deduction.rec! with
     | verum => apply ValidOnFrame.verum;
     | imply₁ => apply ValidOnFrame.imply₁; simpa;
@@ -341,7 +358,7 @@ instance : System.Consistent (𝐂𝐥 : DeductionParameter α) := inferInstance
 
 
 
-instance KC_Characteraizable : 𝔽(𝐊𝐂 of α).Characteraizable ReflexiveTransitiveConfluentFrameClass where
+instance KC_Characteraizable : 𝔽((𝐊𝐂 : DeductionParameter α)).Characteraizable ReflexiveTransitiveConfluentFrameClass where
   characterize := by
     rintro F ⟨F_trans, F_refl, F_confl⟩;
     simp [System.theory];
@@ -373,7 +390,7 @@ instance : Sound 𝐊𝐂 (ReflexiveTransitiveConfluentFrameClass#α) := inferIn
 instance : System.Consistent (𝐊𝐂 : DeductionParameter α) := inferInstance
 
 
-instance LC_Characteraizable : 𝔽(𝐋𝐂 of α).Characteraizable ReflexiveTransitiveConnectedFrameClass where
+instance LC_Characteraizable : 𝔽((𝐋𝐂 : DeductionParameter α)).Characteraizable ReflexiveTransitiveConnectedFrameClass where
   characterize := by
     rintro F ⟨F_trans, F_refl, F_conn⟩;
     simp [System.theory];
@@ -442,19 +459,19 @@ namespace Kripke
 
 open Formula.Kripke (ClassicalSatisfies)
 
-lemma ValidOnClassicalFrame_iff : (Kripke.FrameClassOfSystem.{u, _, 0} α 𝐂𝐥) ⊧ p → ∀ (V : ClassicalValuation α), V ⊧ p := by
+lemma ValidOnClassicalFrame_iff : (Kripke.FrameClassOfHilbert.{u, 0} 𝐂𝐥) ⊧ p → ∀ (V : ClassicalValuation α), V ⊧ p := by
   intro h V;
   refine @h (ClassicalFrame) ?_ (λ _ a => V a) (by simp [Valuation.atomic_hereditary]) ();
   . apply @Cl_Characteraizable α |>.characterize;
     refine ⟨ClassicalFrame.reflexive, ClassicalFrame.transitive, ClassicalFrame.symmetric⟩;
 
-lemma notClassicalValid_of_exists_ClassicalValuation : (∃ (V : ClassicalValuation α), ¬(V ⊧ p)) → ¬(Kripke.FrameClassOfSystem.{u, _, 0} α 𝐂𝐥) ⊧ p := by
+lemma notClassicalValid_of_exists_ClassicalValuation : (∃ (V : ClassicalValuation α), ¬(V ⊧ p)) → ¬(Kripke.FrameClassOfHilbert.{u, 0} 𝐂𝐥) ⊧ p := by
   contrapose; push_neg;
   have := @ValidOnClassicalFrame_iff α p;
   exact this;
 
 lemma unprovable_classical_of_exists_ClassicalValuation (h : ∃ (V : ClassicalValuation α), ¬(V ⊧ p)) : 𝐂𝐥 ⊬! p := by
-  apply not_imp_not.mpr $ Kripke.sound.{u, u, 0};
+  apply not_imp_not.mpr $ Kripke.sound.{u, 0};
   apply notClassicalValid_of_exists_ClassicalValuation;
   assumption;
 

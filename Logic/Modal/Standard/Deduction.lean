@@ -34,18 +34,18 @@ structure DeductionParameter (α : Type*) where
 
 namespace DeductionParameter
 
-notation "Ax(" 𝓓 ")" => DeductionParameter.axioms 𝓓
-notation "Rl(" 𝓓 ")" => DeductionParameter.rules 𝓓
+notation "Ax(" Λ ")" => DeductionParameter.axioms Λ
+notation "Rl(" Λ ")" => DeductionParameter.rules Λ
 
 end DeductionParameter
 
-inductive Deduction (𝓓 : DeductionParameter α) : (Formula α) → Type _
-  | maxm {p}     : p ∈ Ax(𝓓) → Deduction 𝓓 p
-  | rule {rl}    : rl ∈ Rl(𝓓) → (∀ {p}, p ∈ rl.antecedents → Deduction 𝓓 p) → Deduction 𝓓 rl.consequence
-  | mdp {p q}    : Deduction 𝓓 (p ⟶ q) → Deduction 𝓓 p → Deduction 𝓓 q
-  | imply₁ p q   : Deduction 𝓓 $ Axioms.Imply₁ p q
-  | imply₂ p q r : Deduction 𝓓 $ Axioms.Imply₂ p q r
-  | ec p q       : Deduction 𝓓 $ Axioms.ElimContra p q
+inductive Deduction (Λ : DeductionParameter α) : (Formula α) → Type _
+  | maxm {p}     : p ∈ Ax(Λ) → Deduction Λ p
+  | rule {rl}    : rl ∈ Rl(Λ) → (∀ {p}, p ∈ rl.antecedents → Deduction Λ p) → Deduction Λ rl.consequence
+  | mdp {p q}    : Deduction Λ (p ⟶ q) → Deduction Λ p → Deduction Λ q
+  | imply₁ p q   : Deduction Λ $ Axioms.Imply₁ p q
+  | imply₂ p q r : Deduction Λ $ Axioms.Imply₂ p q r
+  | ec p q       : Deduction Λ $ Axioms.ElimContra p q
 
 namespace Deduction
 
@@ -53,19 +53,19 @@ open DeductionParameter
 
 instance : System (Formula α) (DeductionParameter α) := ⟨Deduction⟩
 
-variable {𝓓 𝓓₁ 𝓓₂ : DeductionParameter α}
+variable {Λ Λ₁ Λ₂ : DeductionParameter α}
 
-instance : System.Lukasiewicz 𝓓 where
+instance : System.Lukasiewicz Λ where
   mdp := mdp
   imply₁ := imply₁
   imply₂ := imply₂
   elim_contra := ec
 
-instance : System.Classical 𝓓 where
+instance : System.Classical Λ where
 
-instance : System.HasDiaDuality 𝓓 := inferInstance
+instance : System.HasDiaDuality Λ := inferInstance
 
-lemma maxm! {p} (h : p ∈ 𝓓.axioms) : 𝓓 ⊢! p := ⟨maxm h⟩
+lemma maxm! {p} (h : p ∈ Λ.axioms) : Λ ⊢! p := ⟨maxm h⟩
 
 end Deduction
 
@@ -74,40 +74,40 @@ namespace DeductionParameter
 
 open System Deduction
 
-class HasNecessitation (𝓓 : DeductionParameter α) where
-  has_necessitation : ⟮Nec⟯ ⊆ Rl(𝓓) := by aesop
+class HasNecessitation (Λ : DeductionParameter α) where
+  has_necessitation : ⟮Nec⟯ ⊆ Rl(Λ) := by aesop
 
-instance [HasNecessitation 𝓓] : System.Necessitation 𝓓 where
-  nec := @λ p d => rule (show { antecedents := [p], consequence := □p } ∈ Rl(𝓓) by apply HasNecessitation.has_necessitation; simp_all) (by aesop);
-
-
-class HasLoebRule (𝓓 : DeductionParameter α) where
-  has_loeb : ⟮Loeb⟯ ⊆ Rl(𝓓) := by aesop
-
-instance [HasLoebRule 𝓓] : System.LoebRule 𝓓 where
-  loeb := @λ p d => rule (show { antecedents := [□p ⟶ p], consequence := p } ∈ Rl(𝓓) by apply HasLoebRule.has_loeb; simp_all) (by aesop);
+instance [HasNecessitation Λ] : System.Necessitation Λ where
+  nec := @λ p d => rule (show { antecedents := [p], consequence := □p } ∈ Rl(Λ) by apply HasNecessitation.has_necessitation; simp_all) (by aesop);
 
 
-class HasHenkinRule (𝓓 : DeductionParameter α) where
-  has_henkin : ⟮Henkin⟯ ⊆ Rl(𝓓) := by aesop
+class HasLoebRule (Λ : DeductionParameter α) where
+  has_loeb : ⟮Loeb⟯ ⊆ Rl(Λ) := by aesop
 
-instance [HasHenkinRule 𝓓] : System.HenkinRule 𝓓 where
-  henkin := @λ p d => rule (show { antecedents := [□p ⟷ p], consequence := p } ∈ Rl(𝓓) by apply HasHenkinRule.has_henkin; simp_all) (by aesop);
+instance [HasLoebRule Λ] : System.LoebRule Λ where
+  loeb := @λ p d => rule (show { antecedents := [□p ⟶ p], consequence := p } ∈ Rl(Λ) by apply HasLoebRule.has_loeb; simp_all) (by aesop);
 
 
-class HasNecOnly (𝓓 : DeductionParameter α) where
-  has_necessitation_only : Rl(𝓓) = ⟮Nec⟯ := by rfl
+class HasHenkinRule (Λ : DeductionParameter α) where
+  has_henkin : ⟮Henkin⟯ ⊆ Rl(Λ) := by aesop
 
-instance [h : HasNecOnly 𝓓] : 𝓓.HasNecessitation where
+instance [HasHenkinRule Λ] : System.HenkinRule Λ where
+  henkin := @λ p d => rule (show { antecedents := [□p ⟷ p], consequence := p } ∈ Rl(Λ) by apply HasHenkinRule.has_henkin; simp_all) (by aesop);
+
+
+class HasNecOnly (Λ : DeductionParameter α) where
+  has_necessitation_only : Rl(Λ) = ⟮Nec⟯ := by rfl
+
+instance [h : HasNecOnly Λ] : Λ.HasNecessitation where
   has_necessitation := by rw [h.has_necessitation_only]
 
-class HasAxiomK (𝓓 : DeductionParameter α) where
-  has_axiomK : 𝗞 ⊆ Ax(𝓓) := by aesop
+class HasAxiomK (Λ : DeductionParameter α) where
+  has_axiomK : 𝗞 ⊆ Ax(Λ) := by aesop
 
-instance [HasAxiomK 𝓓] : System.HasAxiomK 𝓓 where
+instance [HasAxiomK Λ] : System.HasAxiomK Λ where
   K _ _ := maxm (by apply HasAxiomK.has_axiomK; simp_all)
 
-class IsNormal (𝓓 : DeductionParameter α) extends 𝓓.HasNecOnly, 𝓓.HasAxiomK where
+class IsNormal (Λ : DeductionParameter α) extends Λ.HasNecOnly, Λ.HasAxiomK where
 
 
 end DeductionParameter
@@ -116,20 +116,20 @@ namespace Deduction
 
 open DeductionParameter
 
-variable {𝓓 : DeductionParameter α}
+variable {Λ : DeductionParameter α}
 
 noncomputable def inducition!
-  {motive  : (p : Formula α) → 𝓓 ⊢! p → Sort*}
-  (hRules  : (r : InferenceRule α) → (hr : r ∈ Rl(𝓓)) →
-             (hant : ∀ {p}, p ∈ r.antecedents → 𝓓 ⊢! p) →
+  {motive  : (p : Formula α) → Λ ⊢! p → Sort*}
+  (hRules  : (r : InferenceRule α) → (hr : r ∈ Rl(Λ)) →
+             (hant : ∀ {p}, p ∈ r.antecedents → Λ ⊢! p) →
              (ih : ∀ {p}, (hp : p ∈ r.antecedents) →
              motive p (hant hp)) → motive r.consequence ⟨rule hr (λ hp => (hant hp).some)⟩)
-  (hMaxm     : ∀ {p}, (h : p ∈ Ax(𝓓)) → motive p ⟨maxm h⟩)
-  (hMdp      : ∀ {p q}, {hpq : 𝓓 ⊢! p ⟶ q} → {hp : 𝓓 ⊢! p} → motive (p ⟶ q) hpq → motive p hp → motive q ⟨mdp hpq.some hp.some⟩)
+  (hMaxm     : ∀ {p}, (h : p ∈ Ax(Λ)) → motive p ⟨maxm h⟩)
+  (hMdp      : ∀ {p q}, {hpq : Λ ⊢! p ⟶ q} → {hp : Λ ⊢! p} → motive (p ⟶ q) hpq → motive p hp → motive q ⟨mdp hpq.some hp.some⟩)
   (hImply₁     : ∀ {p q}, motive (p ⟶ q ⟶ p) $ ⟨imply₁ p q⟩)
   (hImply₂     : ∀ {p q r}, motive ((p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r) $ ⟨imply₂ p q r⟩)
   (hElimContra : ∀ {p q}, motive (Axioms.ElimContra p q) $ ⟨ec p q⟩)
-  : ∀ {p}, (d : 𝓓 ⊢! p) → motive p d := by
+  : ∀ {p}, (d : Λ ⊢! p) → motive p d := by
   intro p d;
   induction d.some with
   | maxm h => exact hMaxm h
@@ -138,15 +138,15 @@ noncomputable def inducition!
   | _ => aesop
 
 /-- Useful induction for normal modal logic (because its inference rule is necessitation only) -/
-noncomputable def inducition_with_necOnly! [𝓓.HasNecOnly]
-  {motive  : (p : Formula α) → 𝓓 ⊢! p → Prop}
-  (hMaxm   : ∀ {p}, (h : p ∈ Ax(𝓓)) → motive p ⟨maxm h⟩)
-  (hMdp    : ∀ {p q}, {hpq : 𝓓 ⊢! p ⟶ q} → {hp : 𝓓 ⊢! p} → motive (p ⟶ q) hpq → motive p hp → motive q (hpq ⨀ hp))
-  (hNec    : ∀ {p}, {hp : 𝓓 ⊢! p} → (ihp : motive p hp) → motive (□p) (System.nec! hp))
+noncomputable def inducition_with_necOnly! [Λ.HasNecOnly]
+  {motive  : (p : Formula α) → Λ ⊢! p → Prop}
+  (hMaxm   : ∀ {p}, (h : p ∈ Ax(Λ)) → motive p ⟨maxm h⟩)
+  (hMdp    : ∀ {p q}, {hpq : Λ ⊢! p ⟶ q} → {hp : Λ ⊢! p} → motive (p ⟶ q) hpq → motive p hp → motive q (hpq ⨀ hp))
+  (hNec    : ∀ {p}, {hp : Λ ⊢! p} → (ihp : motive p hp) → motive (□p) (System.nec! hp))
   (hImply₁   : ∀ {p q}, motive (p ⟶ q ⟶ p) $ ⟨imply₁ p q⟩)
   (hImply₂   : ∀ {p q r}, motive ((p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r) $ ⟨imply₂ p q r⟩)
   (hElimContra : ∀ {p q}, motive (Axioms.ElimContra p q) $ ⟨ec p q⟩)
-  : ∀ {p}, (d : 𝓓 ⊢! p) → motive p d := by
+  : ∀ {p}, (d : Λ ⊢! p) → motive p d := by
   intro p d;
   induction d using Deduction.inducition! with
   | hMaxm h => exact hMaxm h
@@ -159,6 +159,25 @@ noncomputable def inducition_with_necOnly! [𝓓.HasNecOnly]
   | hImply₂ => exact hImply₂
   | hElimContra => exact hElimContra
 
+open System in
+macro_rules | `(tactic| trivial) => `(tactic|
+    first
+    | apply verum!
+    | apply imply₁!
+    | apply imply₁!
+    | apply imply₂!
+    | apply and₁!
+    | apply and₂!
+    | apply and₃!
+    | apply or₁!
+    | apply or₂!
+    | apply or₃!
+    | apply neg_equiv!
+  )
+
+open System in
+macro_rules | `(tactic| trivial) => `(tactic | apply dne!)
+
 end Deduction
 
 
@@ -166,7 +185,7 @@ namespace DeductionParameter
 
 open DeductionParameter
 
-abbrev theory (𝓓 : DeductionParameter α) := System.theory 𝓓
+abbrev theory (Λ : DeductionParameter α) := System.theory Λ
 
 protected abbrev K : DeductionParameter α where
   axioms := 𝗞
@@ -183,11 +202,15 @@ abbrev Normal (Ax : AxiomSet α) : DeductionParameter α where
 instance : IsNormal (α := α) (Normal Ax) where
 prefix:max "𝝂" => Normal
 
+lemma K_is_empty_normal : 𝐊 = Normal (α := α) ∅ := by aesop;
+
+lemma K_is_K_normal : 𝐊 = Normal (α := α) 𝗞 := by aesop;
+
 namespace Normal
 
-variable {Ax : AxiomSet α}
+open System
 
-lemma isK : 𝐊 = Normal (α := α) 𝗞 := by aesop;
+variable {Ax : AxiomSet α}
 
 lemma def_ax : Ax(𝝂Ax) = (𝗞 ∪ Ax) := by simp;
 
@@ -350,9 +373,9 @@ macro_rules | `(tactic| trivial) => `(tactic | apply dne!)
 
 section Reducible
 
-lemma normal_reducible {𝓓₁ 𝓓₂ : DeductionParameter α} [𝓓₁.IsNormal] [𝓓₂.IsNormal]
-  (hMaxm : ∀ {p : Formula α}, p ∈ Ax(𝓓₁) → 𝓓₂ ⊢! p)
-  : 𝓓₁ ≤ₛ 𝓓₂ := by
+lemma normal_reducible {Λ₁ Λ₂ : DeductionParameter α} [Λ₁.IsNormal] [Λ₂.IsNormal]
+  (hMaxm : ∀ {p : Formula α}, p ∈ Ax(Λ₁) → Λ₂ ⊢! p)
+  : Λ₁ ≤ₛ Λ₂ := by
   apply System.weakerThan_iff.mpr;
   intro p h;
   induction h using Deduction.inducition_with_necOnly! with
@@ -362,9 +385,9 @@ lemma normal_reducible {𝓓₁ 𝓓₂ : DeductionParameter α} [𝓓₁.IsNorm
   | _ => trivial;
 
 
-lemma normal_reducible_subset {𝓓₁ 𝓓₂ : DeductionParameter α} [𝓓₁.IsNormal] [𝓓₂.IsNormal]
-  (hSubset : Ax(𝓓₁) ⊆ Ax(𝓓₂) := by intro; aesop;)
-  : 𝓓₁ ≤ₛ 𝓓₂ := by
+lemma normal_reducible_subset {Λ₁ Λ₂ : DeductionParameter α} [Λ₁.IsNormal] [Λ₂.IsNormal]
+  (hSubset : Ax(Λ₁) ⊆ Ax(Λ₂) := by intro; aesop;)
+  : Λ₁ ≤ₛ Λ₂ := by
   apply normal_reducible;
   intro p hp;
   exact ⟨Deduction.maxm $ hSubset hp⟩;

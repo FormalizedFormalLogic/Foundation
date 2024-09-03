@@ -3,6 +3,8 @@ import Logic.Modal.Standard.Kripke.GL.Definability
 
 namespace LO.Modal.Standard
 
+open LO.Kripke
+
 variable {α : Type u} [Inhabited α] [DecidableEq α]
 variable {p q : Formula α}
 
@@ -160,11 +162,11 @@ lemma GL_truthlemma {X : (GLCompleteModel p)} (q_sub : q ∈ 𝒮 p) :
           exact iff_mem_compl (by trivial) |>.not.mpr $ by simp; apply hY₁.2; simp;
     . intro h Y RXY;
       apply ih (by trivial) |>.mpr;
-      simp [Frame.Rel'] at RXY;
+      simp at RXY;
       refine RXY.1 q ?_ h |>.1;
       assumption;
 
-private lemma GL_completeAux : TransitiveIrreflexiveFrameClass.{u}ꟳ# ⊧ p → 𝐆𝐋 ⊢! p := by
+private lemma GL_completeAux : TransitiveIrreflexiveFrameClass.{u}ꟳ#α ⊧ p → 𝐆𝐋 ⊢! p := by
   contrapose;
   intro h;
   apply exists_finite_frame.mpr;
@@ -185,11 +187,9 @@ private lemma GL_completeAux : TransitiveIrreflexiveFrameClass.{u}ꟳ# ⊧ p →
       apply hX₁;
       tauto;
 
-instance GL_complete : Complete (𝐆𝐋 : DeductionParameter α) TransitiveIrreflexiveFrameClass.{u}ꟳ# := ⟨GL_completeAux⟩
+instance GL_complete : Complete (𝐆𝐋 : DeductionParameter α) TransitiveIrreflexiveFrameClass.{u}ꟳ#α := ⟨GL_completeAux⟩
 
-#print axioms GL_complete
-
-instance : FiniteFrameProperty (α := α) 𝐆𝐋 TransitiveIrreflexiveFrameClass where
+instance : FiniteFrameProperty (𝐆𝐋 : DeductionParameter α) TransitiveIrreflexiveFrameClass where
 
 end Kripke
 

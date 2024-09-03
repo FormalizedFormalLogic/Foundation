@@ -1,70 +1,48 @@
+import Logic.Logic.Kripke.Closure
+import Logic.Modal.Standard.Boxdot.Basic
 import Logic.Modal.Standard.Kripke.Grz.Completeness
 import Logic.Modal.Standard.Kripke.GL.Completeness
-import Logic.Modal.Standard.Boxdot
 
 namespace LO.Modal.Standard
 
 namespace Kripke
 
-open Relation
-
-protected abbrev Frame.RelReflGen {F : Frame} : _root_.Rel F.World F.World := ReflGen (· ≺ ·)
-scoped infix:45 " ≺^r " => Frame.RelReflGen
-
-abbrev Frame.ReflexiveClosure (F : Frame) : Frame where
-  World := F.World
-  Rel := (· ≺^r ·)
-postfix:max "^r" => Frame.ReflexiveClosure
-
-
-protected abbrev Frame.RelIrreflGen {F : Frame} := λ x y => (x ≠ y) ∧ (F.Rel x y)
-scoped infix:45 " ≺^ir " => Frame.RelIrreflGen
-
-abbrev Frame.IrreflexiveClosure (F : Frame) : Frame where
-  World := F.World
-  Rel := (· ≺^ir ·)
-postfix:max "^ir" => Frame.IrreflexiveClosure
-
+open Relation (ReflGen)
+open LO.Kripke
 open Formula.Kripke
 
-lemma reflexivize (hF : F ∈ TransitiveIrreflexiveFrameClassꟳ) : F^r ∈ ReflexiveTransitiveAntisymmetricFrameClassꟳ := by
-  obtain ⟨FF, ⟨FF_trans, FF_irrefl⟩, hFF₂⟩ := hF;
-  use ⟨FF.World, ReflGen $ FF.Rel⟩;
-  constructor;
-  . refine ⟨?F_refl, ?F_trans, ?F_antisymm⟩;
-    . intro x; apply ReflGen.refl;
-    . simp;
-      rintro x y z (rfl | Rxy) (rfl | Ryz);
-      . apply ReflGen.refl;
-      . apply ReflGen.single Ryz;
-      . apply ReflGen.single Rxy;
-      . apply ReflGen.single $ FF_trans Rxy Ryz;
-    . simp;
-      rintro x y (rfl | Rxy) (rfl | Ryx);
-      . rfl;
-      . rfl;
-      . rfl;
-      . have := FF_trans Rxy Ryx;
-        have := FF_irrefl x;
-        contradiction;
-  . subst_vars; aesop;
+lemma mem_reflClosure_GrzFiniteFrameClass_of_mem_GLFiniteFrameClass (hF : F ∈ TransitiveIrreflexiveFrameClassꟳ) : ⟨F^=⟩ ∈ ReflexiveTransitiveAntisymmetricFrameClassꟳ := by
+  obtain ⟨F_trans, F_irrefl⟩ := hF;
+  refine ⟨?F_refl, ?F_trans, ?F_antisymm⟩;
+  . intro x; apply ReflGen.refl;
+  . rintro x y z (rfl | Rxy) (rfl | Ryz);
+    . apply ReflGen.refl;
+    . apply ReflGen.single Ryz;
+    . apply ReflGen.single Rxy;
+    . apply ReflGen.single $ F_trans Rxy Ryz;
+  . simp;
+    rintro x y (rfl | Rxy) (rfl | Ryx);
+    . rfl;
+    . rfl;
+    . rfl;
+    . have := F_trans Rxy Ryx;
+      have := F_irrefl x;
+      contradiction;
 
-lemma irreflexive (hF : F ∈ ReflexiveTransitiveAntisymmetricFrameClassꟳ) : F^ir ∈ TransitiveIrreflexiveFrameClassꟳ := by
-  obtain ⟨FF, ⟨_, FF_trans, FF_antisymm⟩, rfl⟩ := hF;
-  use ⟨FF.World, λ x y => x ≠ y ∧ FF.Rel x y⟩;
-  simp;
+lemma mem_irreflClosure_GLFiniteFrameClass_of_mem_GrzFiniteFrameClass (hF : F ∈ ReflexiveTransitiveAntisymmetricFrameClassꟳ) : ⟨F^≠⟩ ∈ TransitiveIrreflexiveFrameClassꟳ := by
+  obtain ⟨_, F_trans, F_antisymm⟩ := hF;
   refine ⟨?F_trans, ?F_irrefl⟩;
   . rintro x y z ⟨nexy, Rxy⟩ ⟨_, Ryz⟩;
     constructor;
     . by_contra; subst_vars;
-      have := FF_antisymm Rxy Ryz;
+      have := F_antisymm Rxy Ryz;
       contradiction;
-    . exact FF_trans Rxy Ryz;
-  . simp [Irreflexive];
+    . exact F_trans Rxy Ryz;
+  . simp;
 
 variable {p : Formula α}
 
-lemma iff_boxdot_reflexive_closure : (Satisfies ⟨F, V⟩ x (pᵇ)) ↔ (Satisfies ⟨F^r, V⟩ x p) := by
+lemma iff_boxdot_reflexive_closure : (Satisfies ⟨F, V⟩ x (pᵇ)) ↔ (Satisfies ⟨F^=, V⟩ x p) := by
   induction p using Formula.rec' generalizing x with
   | hatom p => simp [Satisfies];
   | hbox p ih =>
@@ -83,12 +61,12 @@ lemma iff_boxdot_reflexive_closure : (Satisfies ⟨F, V⟩ x (pᵇ)) ↔ (Satisf
         exact @h y (ReflGen.single Rxy);
   | _ => simp_all [Satisfies];
 
-lemma iff_frame_boxdot_reflexive_closure {F : Frame} : (F# ⊧ (pᵇ)) ↔ (F^r# ⊧ p) := by
+lemma iff_frame_boxdot_reflexive_closure {F : Frame} : (F#α ⊧ (pᵇ)) ↔ ((F^=)#α ⊧ p) := by
   constructor;
   . intro h V x; apply iff_boxdot_reflexive_closure.mp; exact h V x;
   . intro h V x; apply iff_boxdot_reflexive_closure.mpr; exact h V x;
 
-lemma iff_reflexivize_irreflexivize {F : Frame} (F_Refl : Reflexive F) {x : F.World} {V} : (Satisfies ⟨F, V⟩ x p) ↔ (Satisfies ⟨F^ir^r, V⟩ x p) := by
+lemma iff_reflexivize_irreflexivize {F : Frame} (F_Refl : Reflexive F) {x : F.World} {V} : (Satisfies ⟨F, V⟩ x p) ↔ (Satisfies ⟨F^≠^=, V⟩ x p) := by
   induction p using Formula.rec' generalizing x with
   | hatom p => rfl;
   | hfalsum => rfl;
@@ -136,25 +114,25 @@ lemma boxdotTranslatedGL_of_Grz : 𝐆𝐫𝐳 ⊢! p → 𝐆𝐋 ⊢! pᵇ := 
 lemma Grz_of_boxdotTranslatedGL : 𝐆𝐋 ⊢! pᵇ → 𝐆𝐫𝐳 ⊢! p := by
   contrapose;
   intro h;
-  apply (not_imp_not.mpr $ Kripke.GL_sound.sound);
+  apply (not_imp_not.mpr $ Kripke.GL_finite_sound.sound);
   have := (not_imp_not.mpr $ Grz_complete |>.complete) h;
   simp at this;
-  obtain ⟨F, ⟨F_refl, F_trans, F_antisymm⟩, hF⟩ := this;
+  obtain ⟨F, FF, ⟨FF_refl, FF_trans, FF_antisymm, rfl, hFF⟩⟩ := this;
   simp;
-  use F^ir, ⟨F^ir⟩;
+  use FF^≠, ⟨FF^≠⟩;
   refine ⟨?_, ?_, ?_, ?_⟩;
   . rintro x y z ⟨Rxy₂, Rxy⟩ ⟨Ryz₂, Ryz⟩;
-    refine ⟨?_, F_trans Rxy Ryz⟩
+    refine ⟨?_, FF_trans Rxy Ryz⟩
     by_contra hC; subst hC;
-    have := F_antisymm Rxy Ryz;
+    have := FF_antisymm Rxy Ryz;
     contradiction;
-  . simp [Irreflexive];
+  . simp;
   . rfl;
   . apply Kripke.iff_frame_boxdot_reflexive_closure.not.mpr;
     simp_all [ValidOnFrame, ValidOnModel];
-    obtain ⟨V, x, h⟩ := hF;
+    obtain ⟨V, x, h⟩ := hFF;
     use V, x;
-    exact iff_reflexivize_irreflexivize F_refl |>.not.mp h;
+    exact iff_reflexivize_irreflexivize FF_refl |>.not.mp h;
 
 theorem iff_Grz_boxdotTranslatedGL : 𝐆𝐫𝐳 ⊢! p ↔ 𝐆𝐋 ⊢! pᵇ := by
   constructor;

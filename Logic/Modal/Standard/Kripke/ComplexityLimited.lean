@@ -2,13 +2,13 @@ import Logic.Modal.Standard.Kripke.Semantics
 
 namespace LO.Modal.Standard.Kripke
 
-def Frame.ComplexityLimit {F : Kripke.Frame} (r : F.World) (p : Formula α) : Kripke.Frame where
+def ComplexityLimitedFrame (F : Kripke.Frame) (r : F.World) (p : Formula α) : Kripke.Frame where
   World := { x | ∃ n ≤ p.complexity, r ≺^[n] x }
   World_nonempty := ⟨r, by use 0; simp⟩
   Rel x y := x.1 ≺ y.1
 
-def Model.ComplexityLimit {M : Kripke.Model α} (w : M.World) (p : Formula α) : Kripke.Model α where
-  Frame := M.Frame.ComplexityLimit w p
+def ComplexityLimitedModel (M : Kripke.Model α) (w : M.World) (p : Formula α) : Kripke.Model α where
+  Frame := ComplexityLimitedFrame M.Frame w p
   Valuation x a := M.Valuation x.1 a
 
 variable [DecidableEq α]
@@ -20,7 +20,7 @@ open Formula.Subformulas
 lemma iff_satisfy_complexity_limit_modelAux
   (hq : q ∈ 𝒮 p)
   (hx : ∃ n ≤ p.complexity - q.complexity, r ≺^[n] x)
-  : x ⊧ q ↔ Satisfies (M.ComplexityLimit r p) ⟨x, (by obtain ⟨n, _, _⟩ := hx; use n; exact ⟨by omega, by assumption⟩)⟩ q := by
+  : x ⊧ q ↔ Satisfies (ComplexityLimitedModel M r p) ⟨x, (by obtain ⟨n, _, _⟩ := hx; use n; exact ⟨by omega, by assumption⟩)⟩ q := by
   induction q using Formula.rec' generalizing x p with
   | hbox q ihq =>
     obtain ⟨n, hn, hx⟩ := hx;
@@ -35,7 +35,7 @@ lemma iff_satisfy_complexity_limit_modelAux
       . use (n + 1);
         constructor;
         . assumption;
-        . apply Frame.RelItr'.forward.mpr;
+        . apply Kripke.Frame.RelItr'.forward.mpr;
           use x; constructor; assumption; exact Rxy;
     . rintro h y Rxy;
       apply ihq (mem_box (by assumption)) ?_ |>.mpr;
@@ -43,7 +43,7 @@ lemma iff_satisfy_complexity_limit_modelAux
       . use (n + 1);
         constructor;
         . assumption;
-        . apply Frame.RelItr'.forward.mpr;
+        . apply Kripke.Frame.RelItr'.forward.mpr;
           use x;
   | himp q₁ q₂ ihq₁ ihq₂ =>
     obtain ⟨n, hn, hx⟩ := hx;
@@ -61,14 +61,14 @@ lemma iff_satisfy_complexity_limit_modelAux
       apply ihq₁ (mem_imp (by assumption) |>.1) ?_ |>.mp hq₂;
       use n; constructor; omega; assumption;
       use n; constructor; omega; assumption;
-  | _ => simp [Satisfies, Model.ComplexityLimit];
+  | _ => simp [Satisfies, ComplexityLimitedModel];
 
-lemma iff_satisfy_complexity_limit_model : r ⊧ p ↔ Satisfies (M.ComplexityLimit r p) ⟨r, (by use 0; simp)⟩ p := by
+lemma iff_satisfy_complexity_limit_model : r ⊧ p ↔ Satisfies (ComplexityLimitedModel M r p) ⟨r, (by use 0; simp)⟩ p := by
   apply iff_satisfy_complexity_limit_modelAux (show p ∈ 𝒮 p by simp);
   use 0; simp;
 
 lemma complexity_limit_model_subformula_closedAux {q₁ q₂ : Formula α} (hq₁ : p ∈ 𝒮 q₁) (hq₂ : p ∈ 𝒮 q₂)
-  : Satisfies (M.ComplexityLimit r q₁) ⟨r, (by use 0; simp)⟩ p → Satisfies (M.ComplexityLimit r q₂) ⟨r, (by use 0; simp)⟩ p := by
+  : Satisfies (ComplexityLimitedModel M r q₁) ⟨r, (by use 0; simp)⟩ p → Satisfies (ComplexityLimitedModel M r q₂) ⟨r, (by use 0; simp)⟩ p := by
   intro h;
   apply @iff_satisfy_complexity_limit_modelAux α _ M r r q₂ p (by assumption) ?_ |>.mp;
   apply @iff_satisfy_complexity_limit_modelAux α _ M r r q₁ p (by assumption) ?_ |>.mpr h;
@@ -76,7 +76,7 @@ lemma complexity_limit_model_subformula_closedAux {q₁ q₂ : Formula α} (hq�
   use 0; simp;
 
 lemma complexity_limit_model_subformula_closed (hq : p ∈ 𝒮 q)
-  : Satisfies (M.ComplexityLimit r p) ⟨r, (by use 0; simp)⟩ p ↔ Satisfies (M.ComplexityLimit r q) ⟨r, (by use 0; simp)⟩ p := by
+  : Satisfies (ComplexityLimitedModel M r p) ⟨r, (by use 0; simp)⟩ p ↔ Satisfies (ComplexityLimitedModel M r q) ⟨r, (by use 0; simp)⟩ p := by
   constructor;
   . apply complexity_limit_model_subformula_closedAux <;> simp_all;
   . apply complexity_limit_model_subformula_closedAux <;> simp_all;

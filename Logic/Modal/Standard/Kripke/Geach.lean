@@ -3,144 +3,150 @@ import Logic.Modal.Standard.Geach
 import Logic.Modal.Standard.Kripke.Completeness
 import Logic.Modal.Standard.Kripke.Reducible
 
-namespace LO.Modal.Standard
+
+namespace LO.Kripke
 
 
-open System
-open System.Axioms (Geach)
+abbrev GeachConfluentFrameClass (t : GeachTaple) : FrameClass := { F | (GeachConfluent t) F.Rel }
 
-variable {α : Type u}
+namespace GeachConfluentFrameClass
 
-def GeachConfluent (t : Geach.Taple) (R : α → α → Prop) := ∀ {x y z : α}, (RelItr R t.i x y) ∧ (RelItr R t.j x z) → ∃ u, (RelItr R t.m y u) ∧ (RelItr R t.n z u)
+instance nonempty : (GeachConfluentFrameClass t).Nonempty := by
+  use ⟨PUnit, λ _ _ => True⟩;
+  simp [GeachConfluentFrameClass];
+  intros x _ _ _; use x;
+  constructor <;> { apply Rel.iterate.true_any; tauto; }
 
-namespace GeachConfluent
+end GeachConfluentFrameClass
 
-variable {R : α → α → Prop}
 
-@[simp]
-lemma serial_def : (GeachConfluent ⟨0, 0, 1, 1⟩ R) ↔ Serial R := by simp [GeachConfluent, Symmetric]; aesop;
+abbrev MultiGeachConfluentFrameClass (ts : List GeachTaple) : FrameClass := { F | (MultiGeachConfluent ts) F.Rel }
 
-@[simp]
-lemma reflexive_def : (GeachConfluent ⟨0, 0, 1, 0⟩ R) ↔ Reflexive R := by simp [GeachConfluent, Reflexive];
-
-@[simp]
-lemma symmetric_def : (GeachConfluent ⟨0, 1, 0, 1⟩ R) ↔ Symmetric R := by simp [GeachConfluent, Symmetric]; aesop;
+namespace MultiGeachConfluentFrameClass
 
 @[simp]
-lemma transitive_def : (GeachConfluent ⟨0, 2, 1, 0⟩ R) ↔ Transitive R := by simp [GeachConfluent, Transitive]; aesop;
+lemma def_nil : MultiGeachConfluentFrameClass [] = AllFrameClass := by rfl;
 
 @[simp]
-lemma euclidean_def : (GeachConfluent ⟨1, 1, 0, 1⟩ R) ↔ Euclidean R := by simp [GeachConfluent, Euclidean];
+lemma def_one (t : GeachTaple) : MultiGeachConfluentFrameClass [t] = GeachConfluentFrameClass t := by rfl;
+
+lemma def_cons {t : GeachTaple} {ts : List GeachTaple} (ts_nil : ts ≠ [])
+  : MultiGeachConfluentFrameClass (t :: ts) = GeachConfluentFrameClass t ∩ MultiGeachConfluentFrameClass ts := by
+  apply Set.eq_of_subset_of_subset;
+  . rintro F hF;
+    apply MultiGeachConfluent.iff_cons ts_nil |>.mp;
+    exact hF;
+  . rintro F ⟨hF₁, hF₂⟩;
+    apply MultiGeachConfluent.iff_cons ts_nil |>.mpr;
+    constructor;
+    . apply hF₁;
+    . apply hF₂;
 
 @[simp]
-lemma confluent_def : (GeachConfluent ⟨1, 1, 1, 1⟩ R) ↔ Confluent R := by simp [GeachConfluent, Confluent];
+instance nonempty : (MultiGeachConfluentFrameClass ts).Nonempty := by
+  use ⟨PUnit,  λ _ _ => True⟩;
+  induction ts using List.induction_with_singleton with
+  | hnil => simp only [def_nil, Set.mem_univ];
+  | hsingle t =>
+    simp [GeachConfluentFrameClass];
+    intros x _ _ _; use x;
+    constructor <;> { apply Rel.iterate.true_any; tauto; }
+  | hcons t ts ts_nil ih =>
+    simp [MultiGeachConfluentFrameClass.def_cons ts_nil];
+    constructor;
+    . intro x _ _ _; use x;
+      constructor <;> { apply Rel.iterate.true_any; tauto; }
+    . exact ih;
 
-@[simp]
-lemma extensive_def : (GeachConfluent ⟨0, 1, 0, 0⟩ R) ↔ Extensive R := by
-  simp [GeachConfluent, Extensive];
-  constructor;
-  . intro h x y Rxy;
-    have := h rfl Rxy;
-    subst_vars;
-    trivial;
-  . intro h x y z Exy Rxz;
-    have := h Rxz;
-    subst_vars;
-    trivial;
-
-@[simp]
-lemma functional_def : (GeachConfluent ⟨1, 1, 0, 0⟩ R) ↔ Functional R := by simp [GeachConfluent, Functional]; aesop
-
-@[simp]
-lemma dense_def : (GeachConfluent ⟨0, 1, 2, 0⟩ R)  ↔ Dense R := by simp [GeachConfluent, Dense]; aesop;
-
-@[simp]
-lemma satisfies_eq : GeachConfluent (α := α) t (· = ·) := by simp [GeachConfluent];
-
-end GeachConfluent
+end MultiGeachConfluentFrameClass
 
 
-def MultiGeachConfluent (ts : List Geach.Taple) (R : α → α → Prop) : Prop :=
-  match ts with
-  | [] => True
-  | t :: ts => (GeachConfluent t R) ∧ (MultiGeachConfluent ts R)
+abbrev FrameClass.IsGeach (𝔽 : FrameClass) (ts : List GeachTaple) := FrameClass.DefinedBy 𝔽 (MultiGeachConfluentFrameClass ts)
 
-namespace MultiGeachConfluent
-
-@[simp]
-lemma satisfies_eq : MultiGeachConfluent (α := α) ts (· = ·) := by
-  induction ts <;> simp_all [MultiGeachConfluent];
-
-end MultiGeachConfluent
-
-
-namespace Kripke
-
-variable {α : Type u} [Inhabited α] [DecidableEq α]
+lemma FrameClass.IsGeach.equality {𝔽 : FrameClass} [geach : 𝔽.IsGeach ts] : 𝔽 = MultiGeachConfluentFrameClass ts := by
+  apply Set.eq_of_subset_of_subset;
+  . intro F hF; exact geach.define.mp hF;
+  . intro F hF; exact geach.define.mpr hF;
 
 
 section
 
-lemma TerminalFrame.geach_confluent : GeachConfluent t (terminalFrame.Rel') := by
-  simp [GeachConfluent];
-  intro x y z Rxy Rxz;
-  replace Rxy := terminalFrame.iff_relItr'.mp Rxy;
-  replace Rxz := terminalFrame.iff_relItr'.mp Rxz;
-  use x; subst_vars;
-  constructor <;> { apply terminalFrame.iff_relItr'.mpr; rfl };
+open GeachConfluent
 
-lemma TerminalFrame.multi_geach_confluent : MultiGeachConfluent ts (terminalFrame.Rel') := by
-  induction ts with
-  | nil => simp [MultiGeachConfluent];
-  | cons t ts ih =>
-    simp [MultiGeachConfluent];
+instance ReflexiveFrameClass.isGeach : ReflexiveFrameClass.IsGeach [⟨0, 0, 1, 0⟩] where
+  define := by intro _; apply reflexive_def;
+  nonempty := MultiGeachConfluentFrameClass.nonempty
+
+
+instance : SerialFrameClass.IsGeach [⟨0, 0, 1, 1⟩] where
+  define := by intro _; apply serial_def;
+  nonempty := MultiGeachConfluentFrameClass.nonempty
+
+
+instance TransitiveFrameClass.isGeach : TransitiveFrameClass.IsGeach ([⟨0, 2, 1, 0⟩]) where
+  define := by intro _; apply transitive_def;
+  nonempty := MultiGeachConfluentFrameClass.nonempty
+
+instance : ReflexiveEuclideanFrameClass.IsGeach ([⟨0, 0, 1, 0⟩, ⟨1, 1, 0, 1⟩]) where
+  define := by
+    intro F;
     constructor;
-    . exact TerminalFrame.geach_confluent;
-    . exact ih;
+    . rintro ⟨F_refl, F_eucl⟩;
+      refine ⟨reflexive_def.mp F_refl, euclidean_def.mp F_eucl⟩;
+    . rintro ⟨F_refl, F_eucl⟩;
+      refine ⟨reflexive_def.mpr F_refl, euclidean_def.mpr F_eucl⟩;
+  nonempty := MultiGeachConfluentFrameClass.nonempty
 
-abbrev GeachConfluentFrameClass (t : Geach.Taple) : FrameClass := { F | (GeachConfluent t) F }
+instance : ReflexiveSymmetricFrameClass.IsGeach ([⟨0, 0, 1, 0⟩, ⟨0, 1, 0, 1⟩]) where
+  define := by
+    intro F;
+    constructor;
+    . rintro ⟨F_refl, F_symm⟩;
+      refine ⟨reflexive_def.mp F_refl, symmetric_def.mp F_symm⟩;
+    . rintro ⟨F_refl, F_symm⟩;
+      refine ⟨reflexive_def.mpr F_refl, symmetric_def.mpr F_symm⟩;
+  nonempty := MultiGeachConfluentFrameClass.nonempty
 
-lemma GeachConfluentFrameClass.nonempty : (GeachConfluentFrameClass.{0} t).Nonempty := by
-  use terminalFrame
-  exact TerminalFrame.geach_confluent;
+instance : PreorderFrameClass.IsGeach ([⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩,]) where
+  define := by
+    intro F;
+    constructor;
+    . rintro ⟨F_refl, F_trans⟩;
+      refine ⟨reflexive_def.mp F_refl, transitive_def.mp F_trans⟩;
+    . rintro ⟨F_refl, F_trans⟩;
+      refine ⟨reflexive_def.mpr F_refl, transitive_def.mpr F_trans⟩;
+  nonempty := MultiGeachConfluentFrameClass.nonempty
 
 
-abbrev MultiGeachConfluentFrameClass (ts : List Geach.Taple) : FrameClass := { F | (MultiGeachConfluent ts) F }
-
-lemma MultiGeachConfluentFrameClass.nonempty : (MultiGeachConfluentFrameClass.{0} ts).Nonempty := by
-  use terminalFrame
-  exact TerminalFrame.multi_geach_confluent;
-
-
-abbrev ReflexiveFrameClass : FrameClass := { F | Reflexive F }
-
-abbrev SerialFrameClass : FrameClass := { F | Serial F }
-
-abbrev TransitiveFrameClass : FrameClass := { F | Transitive F }
-
-abbrev ReflexiveEuclideanFrameClass : FrameClass := { F | Reflexive F ∧ Euclidean F }
-
-abbrev EquivalenceFrameClass : FrameClass := { F | Reflexive F ∧ Transitive F ∧ Symmetric F }
-
-abbrev PreorderFrameClass : FrameClass := { F | Reflexive F ∧ Transitive F }
-
-abbrev ReflexiveSymmetricFrameClass : FrameClass := { F | Reflexive F ∧ Symmetric F }
+instance : EquivalenceFrameClass.IsGeach ([⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩, ⟨0, 1, 0, 1⟩]) where
+  define := by
+    intro F;
+    constructor;
+    . rintro ⟨F_refl, F_trans, F_symm⟩;
+      refine ⟨reflexive_def.mp F_refl, transitive_def.mp F_trans, symmetric_def.mp F_symm⟩;
+    . rintro ⟨F_refl, F_trans, F_symm⟩;
+      refine ⟨reflexive_def.mpr F_refl, transitive_def.mpr F_trans, symmetric_def.mpr F_symm⟩;
+  nonempty := MultiGeachConfluentFrameClass.nonempty
 
 end
 
-section Definability
-
-@[simp]
-lemma MultiGeachConfluentFrameClass.def_nil : MultiGeachConfluentFrameClass [] = AllFrameClass := by rfl;
+end LO.Kripke
 
 
+namespace LO.Modal.Standard
+
+namespace Kripke
+
+open LO.Kripke
 open Formula (atom Kripke.Satisfies)
 open Formula.Kripke.Satisfies (multibox_def multidia_def)
 
-variable [Inhabited α]
+variable {α : Type u} [Inhabited α] [DecidableEq α]
 
-lemma axiomGeach_defines : 𝗴𝗲(t).DefinesKripkeFrameClass (α := α) (GeachConfluentFrameClass t) := by
+
+lemma axiomGeach_defines : ∀ {F : Kripke.Frame}, (F#α ⊧* 𝗴𝗲(t) ↔ F ∈ (GeachConfluentFrameClass t)) := by
   intro F;
+  simp [Semantics.RealizeSet];
   constructor;
   . rintro h x y z ⟨hi, hj⟩;
     let M : Model α := { Frame := F, Valuation := λ v _ => y ≺^[t.m] v };
@@ -156,10 +162,8 @@ lemma axiomGeach_defines : 𝗴𝗲(t).DefinesKripkeFrameClass (α := α) (Geach
     obtain ⟨u, hzu, hyu⟩ := Kripke.Satisfies.multidia_def.mp hn_z;
     use u;
     exact ⟨hyu, hzu⟩;
-  . simp [AxiomSet.Geach, Axioms.Geach, Kripke.Satisfies];
-    intro h p V x;
-    apply Kripke.Satisfies.imp_def.mpr;
-    intro him;
+  . simp [AxiomSet.Geach, System.Axioms.Geach, Kripke.Satisfies];
+    intro h p V x him;
     apply multibox_def.mpr;
     intro z rxz;
     apply multidia_def.mpr;
@@ -170,88 +174,74 @@ lemma axiomGeach_defines : 𝗴𝗲(t).DefinesKripkeFrameClass (α := α) (Geach
     . assumption;
     . exact (multibox_def.mp hbp) ryu;
 
+instance axiomGeach_definability : 𝔽((𝗴𝗲(t) : Theory α)).DefinedBy (GeachConfluentFrameClass t) where
+  define := axiomGeach_defines;
+  nonempty := GeachConfluentFrameClass.nonempty
 
-instance : System.Consistent (𝝂𝗴𝗲(t) : DeductionParameter α) := consistent_of_defines axiomGeach_defines GeachConfluentFrameClass.nonempty
+instance axiomT_defines : 𝔽((𝗧 : Theory α)).DefinedBy ReflexiveFrameClass := by
+  convert axiomGeach_definability (α := α) (t := ⟨0, 0, 1, 0⟩);
+  simp [GeachConfluentFrameClass, ←GeachConfluent.reflexive_def];
+
+instance axiomFour_defines : 𝔽((𝟰 : Theory α)).DefinedBy TransitiveFrameClass := by
+  convert axiomGeach_definability (α := α) (t := ⟨0, 2, 1, 0⟩);
+  simp [GeachConfluentFrameClass, ←GeachConfluent.transitive_def];
 
 
-lemma axiomMultiGeach_defines : 𝗚𝗲(ts).DefinesKripkeFrameClass (α := α) (MultiGeachConfluentFrameClass ts) := by
-  induction ts with
-  | nil => simp [AxiomSet.DefinesKripkeFrameClass];
-  | cons t ts ih =>
-    intro F;
-    simp_all only [Semantics.RealizeSet.union_iff, AxiomSet.MultiGeach.iff_cons];
+lemma axiomMultiGeach_defines : ∀ {F : Kripke.Frame}, (F#α ⊧* 𝗚𝗲(ts) ↔ F ∈ (MultiGeachConfluentFrameClass ts)) := by
+  intro F;
+  induction ts using List.induction_with_singleton with
+  | hnil => simp [MultiGeachConfluentFrameClass];
+  | hsingle t => convert axiomGeach_defines (α := α); simp;
+  | hcons t ts ts_nil ih =>
+    simp_all only [Semantics.RealizeSet.union_iff, AxiomSet.MultiGeach.iff_cons, ih];
+    rw [(MultiGeachConfluentFrameClass.def_cons ts_nil)];
     constructor;
     . rintro ⟨ht, hts⟩;
       constructor;
-      . exact axiomGeach_defines.mp ht;
-      . exact ih.mp hts;
+      . exact (axiomGeach_defines.mp ht);
+      . exact hts;
     . rintro ⟨ht, hts⟩;
       constructor;
-      . exact axiomGeach_defines.mpr ht;
-      . exact ih.mpr hts;
+      . exact (axiomGeach_defines.mpr ht);
+      . exact hts;
 
-private def instGeachLogicDefinability
-  {Λ : DeductionParameter α} [geach : Λ.IsGeach]
-  (𝔽 : FrameClass) (h𝔽 : 𝔽 = MultiGeachConfluentFrameClass geach.taples := by simp_all [MultiGeachConfluentFrameClass, MultiGeachConfluent])
-  : Λ.DefinesKripkeFrameClass 𝔽 := by
-  simp [DeductionParameter.DefinesKripkeFrameClass];
-  nth_rw 1 [geach.char];
-  rw [←(Set.univ_inter 𝔽)];
-  rw [h𝔽];
-  exact AxiomSet.DefinesKripkeFrameClass.union axiomK_defines axiomMultiGeach_defines;
+instance axiomMultiGeach_definability : 𝔽((𝗚𝗲(ts) : Theory α)).DefinedBy (MultiGeachConfluentFrameClass ts) where
+  define := axiomMultiGeach_defines;
+  nonempty := MultiGeachConfluentFrameClass.nonempty
 
-lemma S4_defines : 𝐒𝟒.DefinesKripkeFrameClass (α := α) PreorderFrameClass := instGeachLogicDefinability PreorderFrameClass (by
-  simp_all [PreorderFrameClass, PreorderFrameClass];
-  apply Set.eq_of_subset_of_subset <;> simp [MultiGeachConfluent];
-)
+instance Geach_definability : 𝔽((𝐆𝐞(ts) : DeductionParameter α)).DefinedBy (MultiGeachConfluentFrameClass ts) := inferInstance
 
+instance sound_Geach : Sound 𝐆𝐞(ts) ((MultiGeachConfluentFrameClass ts)#α) := inferInstance
 
-instance : System.Consistent (𝐆𝐞(ts) : DeductionParameter α) := consistent_of_defines axiomMultiGeach_defines MultiGeachConfluentFrameClass.nonempty
+instance : System.Consistent (𝐆𝐞(ts) : DeductionParameter α) := inferInstance
 
-instance {Λ : DeductionParameter α} [geach : Λ.IsGeach] : System.Consistent Λ := by rw [geach.char]; infer_instance;
+instance instGeachLogicSound
+  {Λ : DeductionParameter α} {𝔽 : FrameClass} [logic_geach : Λ.IsGeach ts] [class_geach : 𝔽.IsGeach ts] : Sound Λ (𝔽#α) := by
+  convert sound_Geach (α := α) (ts := ts);
+  . exact logic_geach.char;
+  . exact class_geach.equality;
 
-instance : System.Consistent (𝐒𝟒 : DeductionParameter α) := inferInstance
+instance sound_KD : Sound 𝐊𝐃 (SerialFrameClass#α) := inferInstance
 
-instance : System.Consistent (𝐒𝟓 : DeductionParameter α) := inferInstance
+instance sound_KT : Sound 𝐊𝐓 (ReflexiveFrameClass#α) := inferInstance
 
-end Definability
+instance sound_KTB : Sound 𝐊𝐓𝐁 (ReflexiveSymmetricFrameClass#α) := inferInstance
 
+instance sound_K4 : Sound 𝐊𝟒 (TransitiveFrameClass#α) := inferInstance
 
-section Soundness
+instance sound_S4 : Sound 𝐒𝟒 (PreorderFrameClass#α) := inferInstance
 
-private lemma instGeachLogicSoundAux
-  {Λ : DeductionParameter α} [geach : Λ.IsGeach] {𝔽 : FrameClass}
-  (h𝔽 : 𝔽 = MultiGeachConfluentFrameClass geach.taples := by simp_all [MultiGeachConfluentFrameClass, MultiGeachConfluent])
-  : Sound Λ 𝔽# := by
-    rw [geach.char, h𝔽];
-    apply sound_of_defines (α := α) (Ax := 𝗚𝗲(geach.taples));
-    exact axiomMultiGeach_defines;
+instance sound_S5 : Sound 𝐒𝟓 (ReflexiveEuclideanFrameClass#α) := inferInstance
 
-instance sound_KD : Sound (𝐊𝐃 : DeductionParameter α) SerialFrameClass# := instGeachLogicSoundAux
+instance sound_KT4B : Sound 𝐊𝐓𝟒𝐁 (EquivalenceFrameClass#α) := inferInstance
 
-instance sound_KT : Sound (𝐊𝐓 : DeductionParameter α) ReflexiveFrameClass# := instGeachLogicSoundAux
-
-instance sound_KTB : Sound (𝐊𝐓𝐁 : DeductionParameter α) ReflexiveSymmetricFrameClass# := instGeachLogicSoundAux
-
-instance sound_K4 : Sound (𝐊𝟒 : DeductionParameter α) TransitiveFrameClass# := instGeachLogicSoundAux
-
-instance sound_S4 : Sound (𝐒𝟒 : DeductionParameter α) PreorderFrameClass# := instGeachLogicSoundAux
-
-instance sound_S5 : Sound (𝐒𝟓 : DeductionParameter α) ReflexiveEuclideanFrameClass# := instGeachLogicSoundAux
-
-instance sound_KT4B : Sound (𝐊𝐓𝟒𝐁  : DeductionParameter α) EquivalenceFrameClass# := instGeachLogicSoundAux
-
-end Soundness
-
-
-section Completeness
-
+open System
 open Theory MaximalConsistentTheory CanonicalFrame
 open DeductionParameter (Normal)
 
 variable {Ax : AxiomSet α} [System.Consistent (𝝂Ax)]
 
-lemma geachConfluent_CanonicalFrame (h : 𝗴𝗲(t) ⊆ Ax) : GeachConfluent t (CanonicalFrame 𝝂Ax):= by
+lemma geachConfluent_CanonicalFrame (h : 𝗴𝗲(t) ⊆ Ax) : GeachConfluent t (CanonicalFrame 𝝂Ax).Rel := by
   rintro Ω₁ Ω₂ Ω₃ h;
   have ⟨r₁₂, r₁₃⟩ := h; clear h;
   have ⟨Ω, hΩ⟩ := lindenbaum (Λ := 𝝂Ax) (T := □''⁻¹^[t.m]Ω₂.theory ∪ □''⁻¹^[t.n]Ω₃.theory) $ by
@@ -284,45 +274,40 @@ lemma geachConfluent_CanonicalFrame (h : 𝗴𝗲(t) ⊆ Ax) : GeachConfluent t 
   . apply multirel_def_multibox.mpr; apply hΩ.1;
   . apply multirel_def_multibox.mpr; apply hΩ.2;
 
-lemma multiGeachConfluent_CanonicalFrame (h : 𝗚𝗲(ts) ⊆ Ax) : MultiGeachConfluent ts (CanonicalFrame 𝝂Ax) := by
-  induction ts with
-  | nil => simp [MultiGeachConfluent];
-  | cons t ts ih =>
-    dsimp only [MultiGeachConfluent];
+lemma multiGeachConfluent_CanonicalFrame (h : 𝗚𝗲(ts) ⊆ Ax) : MultiGeachConfluent ts (CanonicalFrame 𝝂Ax).Rel := by
+  induction ts using List.induction_with_singleton with
+  | hnil => simp [MultiGeachConfluent];
+  | hsingle t =>
+    simp [MultiGeachConfluent.iff_singleton] at h;
+    exact geachConfluent_CanonicalFrame h;
+  | hcons t ts ts_nil ih =>
+    simp [(MultiGeachConfluent.iff_cons ts_nil)];
     constructor;
-    . apply geachConfluent_CanonicalFrame;
-      simp_all;
-    . apply ih;
-      simp_all;
+    . apply geachConfluent_CanonicalFrame; simp_all;
+    . apply ih; simp_all;
 
-private instance instMultiGeachComplete : Complete (𝝂𝗚𝗲(ts) : DeductionParameter.{u} α) (MultiGeachConfluentFrameClass.{u} ts)# :=
-  instComplete_of_mem_canonicalFrame $ multiGeachConfluent_CanonicalFrame (by rfl)
+instance instMultiGeachComplete : Complete 𝝂(𝗚𝗲(ts)) ((MultiGeachConfluentFrameClass.{u} ts)#α) :=
+  instComplete_of_mem_canonicalFrame (MultiGeachConfluentFrameClass ts) $ by
+    apply multiGeachConfluent_CanonicalFrame;
+    tauto;
 
-instance {Λ : DeductionParameter α} [g : Λ.IsGeach] : Complete Λ (MultiGeachConfluentFrameClass.{u} g.taples)# := by
-  convert instMultiGeachComplete (α := α);
-  exact g.char;
+instance {Λ : DeductionParameter α} {𝔽 : FrameClass.{u}} [logic_geach : Λ.IsGeach ts] [class_geach : 𝔽.IsGeach ts] : Complete Λ (𝔽#α) := by
+  convert instMultiGeachComplete (α := α) (ts := ts);
+  . exact logic_geach.char;
+  . exact class_geach.equality;
 
-private def instGeachLogicCompleteAux {Λ : DeductionParameter α} [geach : Λ.IsGeach]
-  {𝔽 : FrameClass.Dep.{u, u} α} (h𝔽 : 𝔽 = MultiGeachConfluentFrameClass geach.taples := by simp_all [MultiGeachConfluentFrameClass, MultiGeachConfluent])
-  : Complete Λ 𝔽 := by
-    convert instMultiGeachComplete.{u} (α := α);
-    exact geach.char;
 
-instance : Complete (𝐊𝐓 : DeductionParameter α) ReflexiveFrameClass.{u}# := instGeachLogicCompleteAux
+instance KT_complete : Complete 𝐊𝐓 ReflexiveFrameClass.{u}#α := inferInstance
 
-instance KT_complete : Complete (𝐊𝐓 : DeductionParameter α) ReflexiveFrameClass.{u}# := instGeachLogicCompleteAux
+instance KTB_complete : Complete 𝐊𝐓𝐁 ReflexiveSymmetricFrameClass.{u}#α := inferInstance
 
-instance KTB_complete : Complete (𝐊𝐓𝐁 : DeductionParameter α) ReflexiveSymmetricFrameClass.{u}# := instGeachLogicCompleteAux
+instance S4_complete : Complete 𝐒𝟒 PreorderFrameClass.{u}#α := inferInstance
 
-instance K4_complete : Complete (𝐊𝟒 : DeductionParameter α) TransitiveFrameClass.{u}# := instGeachLogicCompleteAux
+instance K4_complete : Complete 𝐊𝟒 TransitiveFrameClass.{u}#α := inferInstance
 
-instance S4_complete : Complete (𝐒𝟒 : DeductionParameter α) PreorderFrameClass.{u}# := instGeachLogicCompleteAux
+instance KT4B_complete : Complete 𝐊𝐓𝟒𝐁 EquivalenceFrameClass.{u}#α := inferInstance
 
-instance S5_complete : Complete (𝐒𝟓 : DeductionParameter α) ReflexiveEuclideanFrameClass.{u}# := instGeachLogicCompleteAux
-
-instance KT4B_complete : Complete (𝐊𝐓𝟒𝐁 : DeductionParameter α) EquivalenceFrameClass.{u}# := instGeachLogicCompleteAux
-
-end Completeness
+instance S5_complete : Complete 𝐒𝟓 ReflexiveEuclideanFrameClass.{u}#α := inferInstance
 
 end Kripke
 
@@ -331,14 +316,15 @@ section Reducible
 
 variable [Inhabited α] [DecidableEq α]
 
-open Kripke
+open LO.Kripke
+open System (weakerThan_iff strictlyWeakerThan.trans)
 open Formula (atom)
 open Formula.Kripke
-
+open Kripke
 
 theorem KD_weakerThan_KT : (𝐊𝐃 : DeductionParameter α) ≤ₛ 𝐊𝐓 := by
-  apply reducible_of_subset_FrameClass (α := α) SerialFrameClass ReflexiveFrameClass;
-  simp_all [serial_of_refl];
+  apply reducible_of_subset_FrameClass SerialFrameClass ReflexiveFrameClass;
+  intro F hF; apply serial_of_refl hF;
 
 theorem KD_strictlyWeakerThan_KT : (𝐊𝐃 : DeductionParameter α) <ₛ 𝐊𝐓 := by
   constructor;
@@ -348,21 +334,20 @@ theorem KD_strictlyWeakerThan_KT : (𝐊𝐃 : DeductionParameter α) <ₛ 𝐊�
     constructor;
     . exact Deduction.maxm! (by simp);
     . apply sound_KD.not_provable_of_countermodel;
-      simp [FrameClass];
+      simp [Semantics.Realize];
       use { World := Fin 2, Rel := λ _ y => y = 1 };
       constructor;
-      . simp [Serial];
+      . intro x; use 1;
       . simp [ValidOnFrame, ValidOnModel];
         use (λ w _ => w = 1), 0;
         simp [Satisfies];
 
-
-example : (𝐊 : DeductionParameter α) <ₛ 𝐊𝐓 := strictlyWeakerThan.trans K_strictlyWeakerThan_KD KD_strictlyWeakerThan_KT
-
+theorem K_strictlyWeakerThan_KT : (𝐊 : DeductionParameter α) <ₛ 𝐊𝐓 := strictlyWeakerThan.trans K_strictlyWeakerThan_KD KD_strictlyWeakerThan_KT
 
 theorem K4_weakerThan_S4 : (𝐊𝟒 : DeductionParameter α) ≤ₛ 𝐒𝟒 := by
-  apply reducible_of_subset_FrameClass (α := α) TransitiveFrameClass PreorderFrameClass;
-  simp;
+  apply reducible_of_subset_FrameClass TransitiveFrameClass PreorderFrameClass;
+  rintro F ⟨_, F_trans⟩;
+  exact F_trans;
 
 theorem K4_strictlyWeakerThan_S4 : (𝐊𝟒 : DeductionParameter α) <ₛ 𝐒𝟒 := by
   constructor;
@@ -372,10 +357,10 @@ theorem K4_strictlyWeakerThan_S4 : (𝐊𝟒 : DeductionParameter α) <ₛ 𝐒�
     constructor;
     . exact Deduction.maxm! (by simp)
     . apply sound_K4.not_provable_of_countermodel;
-      simp [FrameClass];
+      simp [Semantics.Realize];
       use { World := Fin 3, Rel := λ _ y => y = 1 };
       constructor;
-      . simp [Transitive];
+      . intro _ _ _; simp_all;
       . simp [ValidOnFrame, ValidOnModel];
         use (λ w _ => w = 1), 0;
         simp [Satisfies];
@@ -383,7 +368,8 @@ theorem K4_strictlyWeakerThan_S4 : (𝐊𝟒 : DeductionParameter α) <ₛ 𝐒�
 
 theorem S4_weakerThan_S5 : (𝐒𝟒 : DeductionParameter α) ≤ₛ 𝐒𝟓 := by
   apply reducible_of_subset_FrameClass PreorderFrameClass ReflexiveEuclideanFrameClass;
-  simp_all [trans_of_refl_eucl];
+  rintro _ ⟨F_refl, F_eucl⟩;
+  refine ⟨F_refl, trans_of_refl_eucl F_refl F_eucl⟩;
 
 theorem S4_strictlyWeakerThan_S5 : (𝐒𝟒 : DeductionParameter α) <ₛ 𝐒𝟓 := by
   constructor;
@@ -393,9 +379,9 @@ theorem S4_strictlyWeakerThan_S5 : (𝐒𝟒 : DeductionParameter α) <ₛ 𝐒�
     constructor;
     . exact Deduction.maxm! (by simp);
     . apply sound_S4.not_provable_of_countermodel;
-      simp [FrameClass];
+      simp [Semantics.Realize];
       use { World := Fin 3, Rel := λ x y => (x = y) ∨ (x = 0 ∧ y = 1) ∨ (x = 0 ∧ y = 2) };
-      refine ⟨?_, ?_, ?_⟩;
+      refine ⟨⟨?_, ?_⟩, ?_⟩;
       . simp [Reflexive];
       . simp [Transitive]; aesop;
       . simp [ValidOnFrame, ValidOnModel];
@@ -405,12 +391,13 @@ theorem S4_strictlyWeakerThan_S5 : (𝐒𝟒 : DeductionParameter α) <ₛ 𝐒�
         . omega;
         . use 1; omega;
 
-
 theorem equiv_S5_KT4B : (𝐒𝟓 : DeductionParameter α) =ₛ 𝐊𝐓𝟒𝐁 := by
   apply equiv_of_eq_FrameClass ReflexiveEuclideanFrameClass EquivalenceFrameClass;
   apply Set.eq_of_subset_of_subset;
-  . simp_all [symm_of_refl_eucl, trans_of_refl_eucl];
-  . simp_all [eucl_of_symm_trans];
+  . rintro F ⟨F_refl, F_eucl⟩;
+    refine ⟨F_refl, trans_of_refl_eucl F_refl F_eucl, symm_of_refl_eucl F_refl F_eucl⟩;
+  . rintro F ⟨F_refl, F_eucl, F_symm⟩;
+    refine ⟨F_refl, eucl_of_symm_trans F_symm F_eucl⟩;
 
 end Reducible
 
