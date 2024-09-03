@@ -1,5 +1,3 @@
-import Logic.FirstOrder.Basic
-import Logic.FirstOrder.Completeness.Completeness
 import Logic.FirstOrder.Completeness.Corollaries
 
 namespace LO

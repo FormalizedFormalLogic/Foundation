@@ -1,4 +1,3 @@
-import Logic.FirstOrder.Completeness.Corollaries
 import Logic.FirstOrder.Arith.Model
 import Logic.Vorspiel.ExistsUnique
 import Mathlib.Algebra.Order.Monoid.Canonical.Defs

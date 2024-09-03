@@ -1,4 +1,3 @@
-import Logic.Logic.Semantics
 import Logic.FirstOrder.Basic.Syntax.Rew
 
 /-!

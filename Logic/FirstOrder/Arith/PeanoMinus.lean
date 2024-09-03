@@ -187,8 +187,8 @@ instance CobhamR0.subTheoryPAMinus : 𝐑₀ ≼ 𝐏𝐀⁻ := System.Subtheory
     apply complete <| oRing_consequence_of.{0} _ _ <| fun M _ _ => by
       simp [models_iff, numeral_eq_natCast]; intro x
       constructor
-      · intro hx; rcases eq_nat_of_lt_nat hx with ⟨x, rfl⟩; exact ⟨⟨x, by simpa using hx⟩, by simp⟩
-      · rintro ⟨x, rfl⟩; simp
+      · intro hx; rcases eq_nat_of_lt_nat hx with ⟨x, rfl⟩; exact ⟨x, by simpa using hx, by simp⟩
+      · rintro ⟨i, hi, rfl⟩; simp [hi]
 
 end FirstOrder.Arith
 
