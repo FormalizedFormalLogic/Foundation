@@ -4,14 +4,12 @@ namespace LO.Modal.Standard
 
 variable [Inhabited α] [DecidableEq α]
 
+open LO.Kripke
 open System
 open Classical
 open Formula.Kripke (Satisfies)
 open Formula.Kripke.Satisfies
 open Kripke Kripke.FiniteTransitiveTreeModel
-
-macro "lefta" : tactic => `(tactic| with_reducible left; assumption)
-macro "righta" : tactic => `(tactic| with_reducible right; assumption)
 
 namespace Kripke
 
@@ -136,16 +134,10 @@ lemma GL_MDP_Aux (h : (□''X) *⊢[𝐆𝐋]! □p₁ ⋎ □p₂) : (□''X) *
     obtain ⟨M₁, hM₁⟩ := iff_unprovable_GL_exists_unsatisfies_at_root_on_FiniteTransitiveTree.mp h₁;
     obtain ⟨M₂, hM₂⟩ := iff_unprovable_GL_exists_unsatisfies_at_root_on_FiniteTransitiveTree.mp h₂;
 
-    replace hM₁ : (Satisfies M₁.toModel M₁.root (⊡c ⋏ ~p₁)) := by
-      simp_all only [Satisfies, LogicalConnective.Prop.arrow_eq, imp_false, Decidable.not_not, implies_true];
-    replace hM₁ := @GL_MDPCounterexampleModel.modal_equivalence_original_world₁ (M₁ := M₁) (M₂ := M₂) M₁.root (⊡c ⋏ ~p₁) |>.mp hM₁;
-
-    replace hM₂ : (Satisfies M₂.toModel M₂.root (⊡c ⋏ ~p₂)) := by
-      simp_all only [Satisfies, LogicalConnective.Prop.arrow_eq, imp_false, not_forall, not_exists, Decidable.not_not];
-    replace hM₂ := @GL_MDPCounterexampleModel.modal_equivalence_original_world₂ (M₁ := M₁) (M₂ := M₂) M₂.root (⊡c ⋏ ~p₂) |>.mp hM₂;
+    replace hM₁ := @GL_MDPCounterexampleModel.modal_equivalence_original_world₁ (M₁ := M₁) (M₂ := M₂) M₁.root (⊡c ⋏ ~p₁) |>.mp $ Formula.Kripke.Satisfies.not_imp.mp hM₁;
+    replace hM₂ := @GL_MDPCounterexampleModel.modal_equivalence_original_world₂ (M₁ := M₁) (M₂ := M₂) M₂.root (⊡c ⋏ ~p₂) |>.mp $ Formula.Kripke.Satisfies.not_imp.mp hM₂;
 
     let M := GL_MDPCounterexampleModel M₁ M₂;
-
 
     have hc : Satisfies M.toModel M.root (□c) := by
       intro x Rrx;
@@ -181,17 +173,15 @@ lemma GL_MDP_Aux (h : (□''X) *⊢[𝐆𝐋]! □p₁ ⋎ □p₂) : (□''X) *
     have := imp_trans''! collect_box_conj! this;
     have := FiniteContext.provable_iff.mpr this;
     have := Context.provable_iff.mpr $ by use □'Δ;
-    first | lefta | righta;
+    tauto;
   };
-
-
 
 theorem GL_MDP (h : 𝐆𝐋 ⊢! □p₁ ⋎ □p₂) : 𝐆𝐋 ⊢! p₁ ∨ 𝐆𝐋 ⊢! p₂ := by
   have := GL_MDP_Aux (X := ∅) (p₁ := p₁) (p₂ := p₂) $ Context.of! h;
   simp at this;
   rcases this with (h | h) <;> {
     have := unnec! $ Context.emptyPrf! h;
-    first | lefta | righta;
+    tauto;
   }
 
 instance : System.ModalDisjunctive (𝐆𝐋 : DeductionParameter α) := ⟨GL_MDP⟩

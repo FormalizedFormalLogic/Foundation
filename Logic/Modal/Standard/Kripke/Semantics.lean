@@ -96,6 +96,8 @@ lemma dia_dual : x ⊧ ◇p ↔ x ⊧ ~□(~p) := by simp [Satisfies];
 
 lemma box_dual : x ⊧ □p ↔ x ⊧ ~◇(~p) := by simp [Satisfies];
 
+lemma not_imp : ¬(x ⊧ p ⟶ q) ↔ x ⊧ p ⋏ ~q := by simp [Satisfies];
+
 end Satisfies
 
 
