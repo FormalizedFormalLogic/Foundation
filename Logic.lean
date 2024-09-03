@@ -52,4 +52,4 @@ import Logic.FirstOrder.Arith.Nonstandard
 import Logic.FirstOrder.Incompleteness.DerivabilityCondition
 
 -- Modal Logic
-import Logic.Modal.Standard.Standard
+import Logic.Modal.Modal
