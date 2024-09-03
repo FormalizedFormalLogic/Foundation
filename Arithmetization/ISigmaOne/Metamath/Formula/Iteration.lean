@@ -1,5 +1,21 @@
 import Arithmetization.ISigmaOne.Metamath.Formula.Functions
 
+namespace LO.FirstOrder.Semiformula
+
+variable {L : Language} {ξ : Type*} {n : ℕ}
+
+def replicate (p : Semiformula L ξ n) : ℕ → Semiformula L ξ n
+  | 0     => p
+  | k + 1 => p ⋏ p.replicate k
+
+lemma replicate_zero (p : Semiformula L ξ n) : p.replicate 0 = p := by simp [replicate]
+
+lemma replicate_succ (p : Semiformula L ξ n) (k : ℕ) : p.replicate (k + 1) = p ⋏ p.replicate k := by simp [replicate]
+
+def weight (k : ℕ) : Semiformula L ξ n := (List.replicate k ⊤).conj
+
+end LO.FirstOrder.Semiformula
+
 noncomputable section
 
 namespace LO.Arith

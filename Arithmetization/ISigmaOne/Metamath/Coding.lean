@@ -427,7 +427,8 @@ lemma sentence_goedelNumber_def (σ : Sentence L) :
 lemma syntacticformula_goedelNumber_def (p : SyntacticFormula L) :
   (⌜p⌝ : Semiterm ℒₒᵣ ξ n) = Semiterm.Operator.numeral ℒₒᵣ ⌜p⌝ := by simp [Arith.goedelNumber'_def, quote_eq_encode]
 
-lemma quote_verums (n : ℕ) : ⌜((List.replicate k ⊤).conj : SyntacticSemiformula L n)⌝ = (qqVerums k : V) := by
+@[simp] lemma quote_weight (n : ℕ) : ⌜(weight k : SyntacticSemiformula L n)⌝ = (qqVerums k : V) := by
+  unfold weight
   induction k <;> simp [quote_verum, quote_and, List.replicate, *]
 
 end LO.FirstOrder.Semiformula
@@ -452,6 +453,15 @@ variable {L : Language} [(k : ℕ) → Encodable (L.Func k)] [(k : ℕ) → Enco
   case hall n p ihp => simpa [Semiformula.quote_all] using ihp
   case hex n p ihp => simpa [Semiformula.quote_ex] using ihp
 
+@[simp] lemma semiformula_quote0 (p : SyntacticFormula L) :
+    (L.codeIn V).IsFormula ⌜p⌝ := by simpa using semiformula_quote p
+
+@[simp] lemma semiformula_quote1 (p : SyntacticSemiformula L 1) :
+    (L.codeIn V).IsSemiformula 1 ⌜p⌝ := by simpa using semiformula_quote (V := V) p
+
+@[simp] lemma semiformula_quote2 (p : SyntacticSemiformula L 2) :
+    (L.codeIn V).IsSemiformula 2 ⌜p⌝ := by simpa using semiformula_quote (V := V) p
+
 @[simp] lemma isUFormula_quote {n} (p : SyntacticSemiformula L n) :
     (L.codeIn V).IsUFormula ⌜p⌝ := semiformula_quote p |>.isUFormula
 
@@ -466,6 +476,10 @@ variable {L : Language} [(k : ℕ) → Encodable (L.Func k)] [(k : ℕ) → Enco
 @[simp] lemma quote_imply {n} (p q : SyntacticSemiformula L n) :
     ⌜p ⟶ q⌝ = (L.codeIn V).imp ⌜p⌝ ⌜q⌝ := by
   simp [Semiformula.imp_eq, Language.Semiformula.imp_def, Semiformula.quote_or, quote_neg]; rfl
+
+@[simp] lemma quote_iff {n} (p q : SyntacticSemiformula L n) :
+    ⌜p ⟷ q⌝ = (L.codeIn V).iff ⌜p⌝ ⌜q⌝ := by
+  simp [Semiformula.imp_eq, LogicalConnective.iff, Semiformula.quote_or, quote_neg]; rfl
 
 @[simp] lemma quote_shift {n} (p : SyntacticSemiformula L n) :
     ⌜Rew.shift.hom p⌝ = (L.codeIn V).shift ⌜p⌝ := by
@@ -585,7 +599,9 @@ namespace Semiformula
 
 def codeIn' (p : SyntacticSemiformula L n) : (L.codeIn V).Semiformula n := ⟨⌜p⌝, by simp⟩
 
-instance : GoedelQuote (SyntacticSemiformula L n) ((L.codeIn V).Semiformula n) := ⟨Semiformula.codeIn' V⟩
+instance goedelQuoteSyntacticSemiformulaToCodedSemiformula : GoedelQuote (SyntacticSemiformula L n) ((L.codeIn V).Semiformula n) := ⟨Semiformula.codeIn' V⟩
+
+instance goedelQuoteSyntacticFormulaToCodedFormula : GoedelQuote (SyntacticFormula L) ((L.codeIn V).Formula) := ⟨Semiformula.codeIn' V⟩
 
 @[simp] lemma codeIn'_val (p : SyntacticSemiformula L n) : (⌜p⌝ : (L.codeIn V).Semiformula n).val = ⌜p⌝ := rfl
 
@@ -600,9 +616,9 @@ instance : GoedelQuote (SyntacticSemiformula L n) ((L.codeIn V).Semiformula n) :
 @[simp] lemma codeIn'_imp (p q : SyntacticSemiformula L n) : (⌜p ⟶ q⌝ : (L.codeIn V).Semiformula n) = ⌜p⌝ ⟶ ⌜q⌝ := by
   simp [Semiformula.imp_eq, Language.Semiformula.imp_def]
 
-@[simp] lemma codeIn'_verums (k n : ℕ) :
-    (⌜((List.replicate k ⊤).conj : SyntacticSemiformula L n)⌝ : (L.codeIn V).Semiformula n) = (verums (L := L.codeIn V) k) := by
-  ext; simp [quote_verums]
+@[simp] lemma codeIn'_weight (k n : ℕ) :
+    (⌜(weight k : SyntacticSemiformula L n)⌝ : (L.codeIn V).Semiformula n) = (verums (L := L.codeIn V) k) := by
+  ext; simp
 
 open LO.Arith Formalized
 

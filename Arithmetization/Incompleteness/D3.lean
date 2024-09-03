@@ -171,8 +171,8 @@ theorem bold_sigma₁_complete {n} {p : Semisentence ℒₒᵣ n} (hp : Hierarch
     simpa [Language.TSemifromula.substs_substs] using ihp hx
 
 /-- Hilbert–Bernays provability condition D3 -/
-theorem sigma₁_complete {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) : V ⊧ₘ σ → T ⊢! ⌜σ⌝ := by
-  intro h; simpa using bold_sigma₁_complete T hσ (e := ![]) h
+theorem sigma₁_complete {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) : V ⊧ₘ₀ σ → T ⊢! ⌜σ⌝ := by
+  intro h; simpa using bold_sigma₁_complete T hσ (e := ![]) (by simpa [models₀_iff] using h)
 
 end TProof
 
@@ -183,8 +183,8 @@ section
 variable {T : Theory ℒₒᵣ} [T.Delta1Definable]
 
 theorem sigma₁_complete {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
-    V ⊧ₘ σ → T.Provableₐ (⌜σ⌝ : V) := fun h ↦ by
-  simpa [provableₐ_iff] using Formalized.TProof.sigma₁_complete (T.tCodeIn V).AddEqAddR₀ hσ h
+    V ⊧ₘ₀ σ → T.Provableₐ (⌜σ⌝ : V) := fun h ↦ by
+  simpa [provableₐ_iff] using Formalized.TProof.sigma₁_complete _ hσ h
 
 end
 

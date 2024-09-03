@@ -214,6 +214,10 @@ section iff
   simp [Language.iff]
   intros; simp_all
 
+@[simp] lemma lt_iff_left (p q : V) : p < L.iff p q := lt_trans (lt_or_right _ _) (lt_and_right _ _)
+
+@[simp] lemma lt_iff_right (p q : V) : q < L.iff p q := lt_trans (lt_or_right _ _) (lt_and_left _ _)
+
 section
 
 def _root_.LO.FirstOrder.Arith.LDef.qqIffDef (pL : LDef) : 𝚺₁.Semisentence 3 := .mkSigma
@@ -764,6 +768,9 @@ lemma subst_eq_self {n w : V} (hp : L.IsSemiformula n p) (hw : L.IsSemitermVec n
         simp [H i hi, hi]
     simp [*, hp.isUFormula, ih hw.qVec H]
 
+lemma subst_eq_self₁ (hp : L.IsSemiformula 1 p) :
+    L.substs (^#0 ∷ 0) p = p := subst_eq_self hp (by simp) (by simp)
+
 end substs
 
 variable (L)
@@ -890,6 +897,30 @@ notation:78 x:78 " ^< " y:79 => qqLT x y
 
 notation:78 x:78 " ^≮ " y:79 => qqNLT x y
 
+@[simp] lemma lt_qqEQ_left (x y : V) : x < x ^= y := by
+  simpa using nth_lt_qqRel_of_lt (i := 0) (k := 2) (r := (eqIndex : V)) (v := ?[x, y]) (by simp)
+
+@[simp] lemma lt_qqEQ_right (x y : V) : y < x ^= y := by
+  simpa using nth_lt_qqRel_of_lt (i := 1) (k := 2) (r := (eqIndex : V)) (v := ?[x, y]) (by simp)
+
+@[simp] lemma lt_qqLT_left (x y : V) : x < x ^< y := by
+  simpa using nth_lt_qqRel_of_lt (i := 0) (k := 2) (r := (ltIndex : V)) (v := ?[x, y]) (by simp)
+
+@[simp] lemma lt_qqLT_right (x y : V) : y < x ^< y := by
+  simpa using nth_lt_qqRel_of_lt (i := 1) (k := 2) (r := (ltIndex : V)) (v := ?[x, y]) (by simp)
+
+@[simp] lemma lt_qqNEQ_left (x y : V) : x < x ^≠ y := by
+  simpa using nth_lt_qqNRel_of_lt (i := 0) (k := 2) (r := (eqIndex : V)) (v := ?[x, y]) (by simp)
+
+@[simp] lemma lt_qqNEQ_right (x y : V) : y < x ^≠ y := by
+  simpa using nth_lt_qqNRel_of_lt (i := 1) (k := 2) (r := (eqIndex : V)) (v := ?[x, y]) (by simp)
+
+@[simp] lemma lt_qqNLT_left (x y : V) : x < x ^≮ y := by
+  simpa using nth_lt_qqNRel_of_lt (i := 0) (k := 2) (r := (ltIndex : V)) (v := ?[x, y]) (by simp)
+
+@[simp] lemma lt_qqNLT_right (x y : V) : y < x ^≮ y := by
+  simpa using nth_lt_qqNRel_of_lt (i := 1) (k := 2) (r := (ltIndex : V)) (v := ?[x, y]) (by simp)
+
 def _root_.LO.FirstOrder.Arith.qqEQDef : 𝚺₁.Semisentence 3 :=
   .mkSigma “p x y. ∃ v, !mkVec₂Def v x y ∧ !qqRelDef p 2 ↑eqIndex v” (by simp)
 
@@ -929,6 +960,28 @@ instance (Γ m) : Γ-[m + 1]-Function₂ (qqNLT : V → V → V) := .of_sigmaOne
 @[simp] lemma eval_qqLTDef (v) : Semiformula.Evalbm V v qqLTDef.val ↔ v 0 = v 1 ^< v 2 := qqLT_defined.df.iff v
 
 @[simp] lemma eval_qqNLTDef (v) : Semiformula.Evalbm V v qqNLTDef.val ↔ v 0 = v 1 ^≮ v 2 := qqNLT_defined.df.iff v
+
+lemma neg_eq {t u : V} (ht : ⌜ℒₒᵣ⌝.IsUTerm t) (hu : ⌜ℒₒᵣ⌝.IsUTerm u) : ⌜ℒₒᵣ⌝.neg (t ^= u) = t ^≠ u := by
+  simp [qqEQ, qqNEQ]
+  rw [neg_rel (by simp) (by simp [ht, hu])]
+
+lemma neg_neq {t u : V} (ht : ⌜ℒₒᵣ⌝.IsUTerm t) (hu : ⌜ℒₒᵣ⌝.IsUTerm u) : ⌜ℒₒᵣ⌝.neg (t ^≠ u) = t ^= u := by
+  simp [qqEQ, qqNEQ]
+  rw [neg_nrel (by simp) (by simp [ht, hu])]
+
+lemma neg_lt {t u : V} (ht : ⌜ℒₒᵣ⌝.IsUTerm t) (hu : ⌜ℒₒᵣ⌝.IsUTerm u) : ⌜ℒₒᵣ⌝.neg (t ^< u) = t ^≮ u := by
+  simp [qqLT, qqNLT]
+  rw [neg_rel (by simp) (by simp [ht, hu])]
+
+lemma neg_nlt {t u : V} (ht : ⌜ℒₒᵣ⌝.IsUTerm t) (hu : ⌜ℒₒᵣ⌝.IsUTerm u) : ⌜ℒₒᵣ⌝.neg (t ^≮ u) = t ^< u := by
+  simp [qqLT, qqNLT]
+  rw [neg_nrel (by simp) (by simp [ht, hu])]
+
+lemma substs_eq {t u : V} (ht : ⌜ℒₒᵣ⌝.IsUTerm t) (hu : ⌜ℒₒᵣ⌝.IsUTerm u) :
+    ⌜ℒₒᵣ⌝.substs w (t ^= u) = (⌜ℒₒᵣ⌝.termSubst w t) ^= (⌜ℒₒᵣ⌝.termSubst w u) := by
+  simp [qqEQ]; rw [substs_rel (by simp) (by simp [ht, hu])]
+  simp; rw [termSubstVec_cons₂ ht hu]
+
 
 end Formalized
 

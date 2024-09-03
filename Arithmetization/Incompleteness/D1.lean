@@ -14,7 +14,7 @@ variable {L : Language} [(k : ℕ) → Encodable (L.Func k)] [(k : ℕ) → Enco
 
 variable (V)
 
-namespace Derivation3
+namespace Derivation2
 
 def cast (d : T ⊢₃ Γ) (h : Γ = Δ) : T ⊢₃ Δ := h ▸ d
 
@@ -79,16 +79,17 @@ lemma setShift_quote (Γ : Finset (SyntacticFormula L)) : (L.codeIn V).setShift 
   constructor
   · rintro ⟨x, hx, rfl⟩
     rcases Sequent.mem_codeIn hx with ⟨p, _, rfl⟩
-    simp [shift_quote, Sequent.mem_codeIn_iff]
+    rw [←quote_shift, Sequent.mem_codeIn_iff]
+    simp
     exact ⟨p, by simpa [Sequent.mem_codeIn_iff] using hx, rfl⟩
   · intro hx
     rcases Sequent.mem_codeIn hx with ⟨p', hp', rfl⟩
     rcases by simpa using hp' with ⟨p, hp, rfl⟩
-    exact ⟨⌜p⌝, by simpa [Sequent.mem_codeIn_iff] using hp, by simp [shift_quote]⟩
+    exact ⟨⌜p⌝, by simpa [Sequent.mem_codeIn_iff] using hp, by simp⟩
 
 variable (V)
 
-variable {T : SyntacticTheory L} [T.Delta1Definable]
+variable {T : Theory L} [T.Delta1Definable]
 
 def codeIn : {Γ : Finset (SyntacticFormula L)} → T ⊢₃ Γ → V
   | _, closed Δ p _ _                         => Arith.axL ⌜Δ⌝ ⌜p⌝
@@ -109,7 +110,7 @@ lemma quote_derivation_def {Γ : Finset (SyntacticFormula L)} (d : T ⊢₃ Γ) 
 @[simp] lemma fstidx_quote {Γ : Finset (SyntacticFormula L)} (d : T ⊢₃ Γ) : fstIdx (⌜d⌝ : V) = ⌜Γ⌝ := by
   induction d <;> simp [quote_derivation_def, codeIn]
 
-end Derivation3
+end Derivation2
 
 end LO.FirstOrder
 
@@ -121,28 +122,28 @@ variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
 variable {L : Language} [(k : ℕ) → Encodable (L.Func k)] [(k : ℕ) → Encodable (L.Rel k)] [DefinableLanguage L]
 
-variable {T : SyntacticTheory L} [T.Delta1Definable]
+variable {T : Theory L} [T.Delta1Definable]
 
 open Classical
 
 @[simp] lemma formulaSet_codeIn_finset (Γ : Finset (SyntacticFormula L)) : (L.codeIn V).IsFormulaSet ⌜Γ⌝ := by
   intro x hx
-  rcases Derivation3.Sequent.mem_codeIn hx with ⟨p, _, rfl⟩;
+  rcases Derivation2.Sequent.mem_codeIn hx with ⟨p, _, rfl⟩;
   apply semiformula_quote (n := 0)
 
-open Derivation3
+open Derivation2
 
 lemma quote_image_shift (Γ : Finset (SyntacticFormula L)) : (L.codeIn V).setShift (⌜Γ⌝ : V) = ⌜Γ.image Rew.shift.hom⌝ := by
   induction Γ using Finset.induction
   case empty => simp
-  case insert p Γ _ ih => simp [shift_quote, ih]
+  case insert p Γ _ ih => simp [ih]
 
 @[simp] lemma derivation_quote {Γ : Finset (SyntacticFormula L)} (d : T ⊢₃ Γ) : (T.codeIn V).Derivation ⌜d⌝ := by
   induction d
   case closed p hp hn =>
     exact Language.Theory.Derivation.axL (by simp)
       (by simp [Sequent.mem_codeIn_iff, hp])
-      (by simp [Sequent.mem_codeIn_iff, neg_quote, hn])
+      (by rw [←quote_neg, Sequent.mem_codeIn_iff]; simp [hn])
   case root Δ p hT hp =>
     apply Language.Theory.Derivation.root (by simp)
       (by simp [Sequent.mem_codeIn_iff, hp])
@@ -167,7 +168,7 @@ lemma quote_image_shift (Γ : Finset (SyntacticFormula L)) : (L.codeIn V).setShi
     apply Language.Theory.Derivation.exIntro
       (by simpa [quote_ex] using (Sequent.mem_codeIn_iff (V := V)).mpr h)
       (semiterm_codeIn t)
-      ⟨by simp [fstidx_quote, ←substs_quote, Language.substs₁], ih⟩
+      ⟨by simp [fstidx_quote, Language.substs₁], ih⟩
   case wk Δ Γ d h ih =>
     apply Language.Theory.Derivation.wkRule (s' := ⌜Δ⌝)
       (by simp)
@@ -175,13 +176,13 @@ lemma quote_image_shift (Γ : Finset (SyntacticFormula L)) : (L.codeIn V).setShi
           simp [Sequent.mem_codeIn_iff, h hp])
       ⟨by simp [fstidx_quote], ih⟩
   case shift Δ d ih =>
-    simp [quote_derivation_def, Derivation3.codeIn, ←quote_image_shift]
+    simp [quote_derivation_def, Derivation2.codeIn, ←quote_image_shift]
     apply Language.Theory.Derivation.shiftRule
       ⟨by simp [fstidx_quote], ih⟩
   case cut Δ p d dn ih ihn =>
     apply Language.Theory.Derivation.cutRule
       ⟨by simp [fstidx_quote], ih⟩
-      ⟨by simp [fstidx_quote, neg_quote], ihn⟩
+      ⟨by simp [fstidx_quote], ihn⟩
 
 @[simp] lemma derivationOf_quote {Γ : Finset (SyntacticFormula L)} (d : T ⊢₃ Γ) : (T.codeIn V).DerivationOf ⌜d⌝ ⌜Γ⌝ :=
   ⟨by simp, by simp⟩
@@ -193,11 +194,11 @@ section
 
 variable [L.ConstantInhabited] {T : Theory L} [T.Delta1Definable]
 
-theorem provable_of_provable {σ} : T ⊢! σ → (T.codeIn V).Provable ⌜σ⌝ := fun h ↦ by
-  simpa using derivable_of_quote (V := V) (provable_iff_derivable3'.mp h).some
+theorem provable_of_provable {p} : T ⊢! p → (T.codeIn V).Provable ⌜p⌝ := fun h ↦ by
+  simpa using derivable_of_quote (V := V) (provable_iff_derivable2.mp h).some
 
 /-- Hilbert–Bernays provability condition D1 -/
-theorem tprovable_of_provable {σ} : T ⊢! σ → T.tCodeIn V ⊢! ⌜σ⌝ := fun h ↦ by
+theorem tprovable_of_provable {p} : T ⊢! p → T.tCodeIn V ⊢! ⌜p⌝ := fun h ↦ by
   simpa [Language.Theory.TProvable.iff_provable] using provable_of_provable (V := V) h
 
 end
@@ -207,7 +208,7 @@ section
 variable {T : Theory ℒₒᵣ} [T.Delta1Definable]
 
 theorem provableₐ_of_provable {σ} : T ⊢! σ → T.Provableₐ (⌜σ⌝ : V) := fun h ↦
-  Language.Theory.Derivable.of_ss (by simp) (provable_of_provable h)
+  Language.Theory.Derivable.of_ss Formalized.theory_subset_AddR₀ (provable_of_provable h)
 
 end
 
@@ -249,7 +250,7 @@ end Nat
 
 namespace LO.FirstOrder
 
-variable {L : Language} {T : SyntacticTheory L}
+variable {L : Language} {T : Theory L}
 
 end LO.FirstOrder
 
@@ -257,66 +258,7 @@ namespace LO.Arith
 
 open FirstOrder Encodable
 
-lemma mem_iff_mem_bitIndices {x s : ℕ} : x ∈ s ↔ x ∈ s.bitIndices := by
-  induction s using Nat.binaryRec generalizing x
-  case z => simp
-  case f b s ih =>
-    cases b <;> simp
-    · cases' x with x <;> simp [ih]
-    · cases' x with x <;> simp [ih]
-
 variable {L : Language} [(k : ℕ) → Encodable (L.Func k)] [(k : ℕ) → Encodable (L.Rel k)] [DefinableLanguage L]
-
-lemma Language.IsSemiterm.sound {n t : ℕ} (ht : (L.codeIn ℕ).IsSemiterm n t) : ∃ T : FirstOrder.SyntacticSemiterm L n, ⌜T⌝ = t := by
-  induction t using Nat.strongRec
-  case ind t ih =>
-    rcases ht.case with (⟨z, hz, rfl⟩ | ⟨x, rfl⟩ | ⟨k, f, v, hf, hv, rfl⟩)
-    · exact ⟨#⟨z, hz⟩, by simp [Semiterm.quote_bvar]⟩
-    · exact ⟨&x, by simp [Semiterm.quote_fvar]⟩
-    · have : ∀ i : Fin k, ∃ t : FirstOrder.SyntacticSemiterm L n, ⌜t⌝ = v.[i] := fun i ↦
-        ih v.[i] (nth_lt_qqFunc_of_lt (by simp [hv.lh])) (hv.nth i.prop)
-      choose v' hv' using this
-      have : ∃ F, encode F = f := codeIn_func_quote_iff (V := ℕ) (L := L) (x := f) (k := k) |>.mp (by simp [hf])
-      rcases this with ⟨f, rfl⟩
-      refine ⟨Semiterm.func f v', ?_⟩
-      simp [Semiterm.quote_func, quote_func_def]
-      apply nth_ext' k (by simp) (by simp [hv.lh])
-      intro i hi; simpa [hv'] using quote_nth_fin (fun i : Fin k ↦ v.[i]) ⟨i, hi⟩
-
-lemma Language.IsSemiformula.sound {n p : ℕ} (h : (L.codeIn ℕ).IsSemiformula n p) : ∃ F : FirstOrder.SyntacticSemiformula L n, ⌜F⌝ = p := by
-  induction p using Nat.strongRec generalizing n
-  case ind p ih =>
-    rcases Language.IsSemiformula.case_iff.mp h with
-      (⟨k, r, v, hr, hv, rfl⟩ | ⟨k, r, v, hr, hv, rfl⟩ | rfl | rfl |
-       ⟨p, q, hp, hq, rfl⟩ | ⟨p, q, hp, hq, rfl⟩ | ⟨p, hp, rfl⟩ | ⟨p, hp, rfl⟩)
-    · have : ∀ i : Fin k, ∃ t : FirstOrder.SyntacticSemiterm L n, ⌜t⌝ = v.[i] := fun i ↦ (hv.nth i.prop).sound
-      choose v' hv' using this
-      have : ∃ R, encode R = r := codeIn_rel_quote_iff (V := ℕ) (L := L) (x := r) (k := k) |>.mp (by simp [hr])
-      rcases this with ⟨R, rfl⟩
-      refine ⟨Semiformula.rel R v', ?_⟩
-      simp [Semiformula.quote_rel, quote_rel_def]
-      apply nth_ext' k (by simp) (by simp [hv.lh])
-      intro i hi; simpa [hv'] using quote_nth_fin (fun i : Fin k ↦ v.[i]) ⟨i, hi⟩
-    · have : ∀ i : Fin k, ∃ t : FirstOrder.SyntacticSemiterm L n, ⌜t⌝ = v.[i] := fun i ↦ (hv.nth i.prop).sound
-      choose v' hv' using this
-      have : ∃ R, encode R = r := codeIn_rel_quote_iff (V := ℕ) (L := L) (x := r) (k := k) |>.mp (by simp [hr])
-      rcases this with ⟨R, rfl⟩
-      refine ⟨Semiformula.nrel R v', ?_⟩
-      simp [Semiformula.quote_nrel, quote_rel_def]
-      apply nth_ext' k (by simp) (by simp [hv.lh])
-      intro i hi; simpa [hv'] using quote_nth_fin (fun i : Fin k ↦ v.[i]) ⟨i, hi⟩
-    · exact ⟨⊤, by simp [Semiformula.quote_verum]⟩
-    · exact ⟨⊥, by simp [Semiformula.quote_falsum]⟩
-    · rcases ih p (by simp) hp with ⟨p, rfl⟩
-      rcases ih q (by simp) hq with ⟨q, rfl⟩
-      exact ⟨p ⋏ q, by simp [Semiformula.quote_and]⟩
-    · rcases ih p (by simp) hp with ⟨p, rfl⟩
-      rcases ih q (by simp) hq with ⟨q, rfl⟩
-      exact ⟨p ⋎ q, by simp [Semiformula.quote_or]⟩
-    · rcases ih p (by simp) hp with ⟨p, rfl⟩
-      exact ⟨∀' p, by simp [Semiformula.quote_all]⟩
-    · rcases ih p (by simp) hp with ⟨p, rfl⟩
-      exact ⟨∃' p, by simp [Semiformula.quote_ex]⟩
 
 lemma isFormulaSet_sound {s : ℕ} : (L.codeIn ℕ).IsFormulaSet s → ∃ S : Finset (SyntacticFormula L), ⌜S⌝ = s := by
   intro h
@@ -330,19 +272,19 @@ lemma isFormulaSet_sound {s : ℕ} : (L.codeIn ℕ).IsFormulaSet s → ∃ S : F
     intro x
     constructor
     · intro h
-      rcases Derivation3.Sequent.mem_codeIn h with ⟨p, hp, rfl⟩
+      rcases Derivation2.Sequent.mem_codeIn h with ⟨p, hp, rfl⟩
       rcases by simpa using hp with ⟨x, hx, rfl⟩
       simpa [hps x (mem_iff_mem_bitIndices.mpr hx)] using mem_iff_mem_bitIndices.mpr hx
     · intro h
       rw [←hps x h]
-      simp [Derivation3.Sequent.mem_codeIn_iff, ←mem_iff_mem_bitIndices]
+      simp [Derivation2.Sequent.mem_codeIn_iff, ←mem_iff_mem_bitIndices]
       exact ⟨x, h, rfl⟩⟩
 
 section
 
-variable {T : SyntacticTheory L} [T.Delta1Definable]
+variable {T : Theory L} [T.Delta1Definable]
 
-open Derivation3
+open Derivation2
 
 lemma Language.Theory.Derivation.sound {d : ℕ} (h : (T.codeIn ℕ).Derivation d) : ∃ Γ, ⌜Γ⌝ = fstIdx d ∧ T ⊢₃! Γ := by
   induction d using Nat.strongRec
@@ -356,17 +298,17 @@ lemma Language.Theory.Derivation.sound {d : ℕ} (h : (T.codeIn ℕ).Derivation 
     ⟨s, d, rfl, hs, dd⟩ | ⟨s, d, rfl, rfl, dd⟩ |
     ⟨s, p, d₁, d₂, rfl, ⟨h₁, dd₁⟩, ⟨h₂, dd₂⟩⟩ | ⟨s, p, rfl, hs, hT⟩)
   · rcases (hs p (by simp [hp])).sound with ⟨p, rfl⟩
-    refine ⟨Derivation3.closed Γ p
+    refine ⟨Derivation2.closed Γ p
       (by simp [←Sequent.mem_codeIn_iff (V := ℕ), hΓ, hp])
-      (by simp [←Sequent.mem_codeIn_iff (V := ℕ), hΓ, hp, ←neg_quote, hnp])⟩
-  · refine ⟨Derivation3.verum (by simp [←Sequent.mem_codeIn_iff (V := ℕ), hΓ, Semiformula.quote_verum, hv])⟩
+      (by simp [←Sequent.mem_codeIn_iff (V := ℕ), hΓ, hp, hnp])⟩
+  · refine ⟨Derivation2.verum (by simp [←Sequent.mem_codeIn_iff (V := ℕ), hΓ, Semiformula.quote_verum, hv])⟩
   · have fpq : (L.codeIn ℕ).IsFormula p ∧ (L.codeIn ℕ).IsFormula q := by simpa using hs (p ^⋏ q) (by simp [hpq])
     rcases by simpa using hΓ
     rcases fpq.1.sound with ⟨p, rfl⟩
     rcases fpq.2.sound with ⟨q, rfl⟩
     rcases ih dp (by simp) hdp with ⟨Γp, hΓp, ⟨bp⟩⟩
     rcases ih dq (by simp) hdq with ⟨Γq, hΓq, ⟨bq⟩⟩
-    refine ⟨Derivation3.and (p := p) (q := q)
+    refine ⟨Derivation2.and (p := p) (q := q)
       (by simp [←Sequent.mem_codeIn_iff (V := ℕ), Semiformula.quote_and, hpq])
       (bp.cast <| Sequent.quote_inj (V := ℕ) (by simp [hΓp, hp]))
       (bq.cast <| Sequent.quote_inj (V := ℕ) (by simp [hΓq, hq]))⟩
@@ -375,14 +317,14 @@ lemma Language.Theory.Derivation.sound {d : ℕ} (h : (T.codeIn ℕ).Derivation 
     rcases fpq.1.sound with ⟨p, rfl⟩
     rcases fpq.2.sound with ⟨q, rfl⟩
     rcases ih d (by simp) hd with ⟨Δ, hΔ, ⟨b⟩⟩
-    refine ⟨Derivation3.or (p := p) (q := q)
+    refine ⟨Derivation2.or (p := p) (q := q)
       (by simp [←Sequent.mem_codeIn_iff (V := ℕ), Semiformula.quote_or, hpq])
       (b.cast <| Sequent.quote_inj (V := ℕ) (by simp [hΔ, h]))⟩
   · rcases by simpa using hΓ
     have : (L.codeIn ℕ).IsSemiformula 1 p := by simpa using hs (^∀ p) (by simp [hps])
     rcases this.sound with ⟨p, rfl⟩
     rcases ih d (by simp) dd with ⟨Δ, hΔ, ⟨b⟩⟩
-    refine ⟨Derivation3.all (p := p)
+    refine ⟨Derivation2.all (p := p)
       (by simp [←Sequent.mem_codeIn_iff (V := ℕ), Semiformula.quote_all, hps])
       (b.cast <| Sequent.quote_inj (V := ℕ) <| by simp [hΔ, hd, ←free_quote, setShift_quote])⟩
   · rcases by simpa using hΓ
@@ -390,18 +332,18 @@ lemma Language.Theory.Derivation.sound {d : ℕ} (h : (T.codeIn ℕ).Derivation 
     rcases this.sound with ⟨p, rfl⟩
     rcases ht.sound with ⟨t, rfl⟩
     rcases ih d (by simp) dd with ⟨Δ, hΔ, ⟨b⟩⟩
-    refine ⟨Derivation3.ex (p := p)
+    refine ⟨Derivation2.ex (p := p)
       (by simp [←Sequent.mem_codeIn_iff (V := ℕ), Semiformula.quote_ex, hps]) t
-      (b.cast <| Sequent.quote_inj (V := ℕ) <| by simp [hΔ, hd, ←substs_quote, Language.substs₁])⟩
+      (b.cast <| Sequent.quote_inj (V := ℕ) <| by simp [hΔ, hd, Language.substs₁])⟩
   · rcases by simpa using hΓ
     rcases ih d (by simp) dd with ⟨Δ, hΔ, ⟨b⟩⟩
-    refine ⟨Derivation3.wk (Δ := Δ) b
+    refine ⟨Derivation2.wk (Δ := Δ) b
       (Sequent.subset_of_quote_subset_quote (V := ℕ) <| by simp [hΔ, hs])⟩
   · rcases ih d (by simp) dd with ⟨Δ, hΔ, ⟨b⟩⟩
     have : Γ = Finset.image (Rew.hom Rew.shift) Δ :=
       Sequent.quote_inj <| by simpa [←hΔ, setShift_quote] using hΓ
     rcases this
-    refine ⟨Derivation3.shift b⟩
+    refine ⟨Derivation2.shift b⟩
   · rcases by simpa using hΓ
     have : (L.codeIn ℕ).IsFormula p := dd₁.isFormulaSet p (by simp [h₁])
     rcases this.sound with ⟨p, rfl⟩
@@ -409,14 +351,14 @@ lemma Language.Theory.Derivation.sound {d : ℕ} (h : (T.codeIn ℕ).Derivation 
     have : Δ₁ = (p ⫽ Γ) := Sequent.quote_inj (V := ℕ) <| by simp [hΔ₁, h₁]
     rcases this
     rcases ih d₂ (by simp) dd₂ with ⟨Δ₂, hΔ₂, ⟨b₂⟩⟩
-    have : Δ₂ = (~p ⫽ Γ) := Sequent.quote_inj (V := ℕ) <| by simp [hΔ₂, h₂, neg_quote]
+    have : Δ₂ = (~p ⫽ Γ) := Sequent.quote_inj (V := ℕ) <| by simp [hΔ₂, h₂]
     rcases this
-    refine ⟨Derivation3.cut b₁ b₂⟩
+    refine ⟨Derivation2.cut b₁ b₂⟩
   · rcases by simpa using hΓ
     rcases Sequent.mem_codeIn hs with ⟨p, hp, rfl⟩
-    refine ⟨Derivation3.root p (mem_coded_theory_iff.mp hT) hp⟩
+    refine ⟨Derivation2.root p (mem_coded_theory_iff.mp hT) hp⟩
 
-lemma Language.Theory.Provable.sound {p : SyntacticFormula L} (h : (T.codeIn ℕ).Provable ⌜p⌝) : T ⊢₃.! p := by
+lemma Language.Theory.Provable.sound2 {p : SyntacticFormula L} (h : (T.codeIn ℕ).Provable ⌜p⌝) : T ⊢₃.! p := by
   rcases h with ⟨d, hp, hd⟩
   rcases hd.sound with ⟨Γ, e, b⟩
   have : Γ = {p} := Sequent.quote_inj (V := ℕ) <| by simp [e, hp]
@@ -427,7 +369,14 @@ end
 
 variable [L.ConstantInhabited] {T : Theory L} [T.Delta1Definable]
 
-lemma Language.Theory.Provable.sound' {σ : Sentence L} (h : (T.codeIn ℕ).Provable ⌜σ⌝) : T ⊢! σ :=
-  provable_iff_derivable3'.mpr <| Language.Theory.Provable.sound (p := Rew.emb.hom σ) (by simpa using h)
+lemma Language.Theory.Provable.sound {p : SyntacticFormula L} (h : (T.codeIn ℕ).Provable ⌜p⌝) : T ⊢! p :=
+  provable_iff_derivable2.mpr <| Language.Theory.Provable.sound2 (by simpa using h)
+
+lemma Language.Theory.Provable.sound₀ {σ : Sentence L} (h : (T.codeIn ℕ).Provable ⌜σ⌝) : T ⊢! ↑σ :=
+  provable_iff_derivable2.mpr <| Language.Theory.Provable.sound2 (by simpa using h)
+
+lemma Language.Theory.Provable.complete {p : SyntacticFormula L} :
+    T.tCodeIn ℕ ⊢! ⌜p⌝ ↔ T ⊢! p :=
+  ⟨by simpa [Language.Theory.TProvable.iff_provable] using Language.Theory.Provable.sound, tprovable_of_provable⟩
 
 end LO.Arith

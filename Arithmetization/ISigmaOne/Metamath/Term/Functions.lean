@@ -607,6 +607,18 @@ instance : Γ-[m + 1]-Function₂ (qqMul : V → V → V) := .of_sigmaOne qqMul_
 
 end
 
+@[simp] lemma lt_qqAdd_left (x y : V) : x < x ^+ y := by
+  simpa using nth_lt_qqFunc_of_lt (i := 0) (k := 2) (f := (addIndex : V)) (v := ?[x, y]) (by simp)
+
+@[simp] lemma lt_qqAdd_right (x y : V) : y < x ^+ y := by
+  simpa using nth_lt_qqFunc_of_lt (i := 1) (k := 2) (f := (addIndex : V)) (v := ?[x, y]) (by simp)
+
+@[simp] lemma lt_qqMul_left (x y : V) : x < x ^* y := by
+  simpa using nth_lt_qqFunc_of_lt (i := 0) (k := 2) (f := (mulIndex : V)) (v := ?[x, y]) (by simp)
+
+@[simp] lemma lt_qqMul_right (x y : V) : y < x ^* y := by
+  simpa using nth_lt_qqFunc_of_lt (i := 1) (k := 2) (f := (mulIndex : V)) (v := ?[x, y]) (by simp)
+
 lemma qqFunc_absolute (k f v : ℕ) : ((^func k f v : ℕ) : V) = ^func (k : V) (f : V) (v : V) := by simp [qqFunc, nat_cast_pair]
 
 @[simp] lemma zero_semiterm : ⌜ℒₒᵣ⌝.IsSemiterm n (𝟎 : V) := by
@@ -647,6 +659,13 @@ instance seqExp_definable : 𝚺-[0 + 1]-Function₁ (numeralAux : V → V) := n
 
 end
 
+@[simp] lemma lt_numeralAux_self (n : V) : n < numeralAux n := by
+    induction n using induction_sigma1
+    · definability
+    case zero => simp [Formalized.one]
+    case succ n ih =>
+      refine lt_of_lt_of_le ((add_lt_add_iff_right 1).mpr ih) (by simp [succ_le_iff_lt])
+
 @[simp] lemma numeralAux_semiterm (n x : V) : ⌜ℒₒᵣ⌝.IsSemiterm n (numeralAux x) := by
   induction x using induction_sigma1
   · definability
@@ -676,6 +695,11 @@ lemma numeral_succ_pos (pos : 0 < n) : numeral (n + 1 : V) = numeral n ^+ 𝟏 :
   by_cases hx : x = 0 <;> simp [hx, numeral]
 
 @[simp] lemma numeral_uterm (x : V) : ⌜ℒₒᵣ⌝.IsUTerm (numeral x) := (numeral_semiterm 0 x).isUTerm
+
+@[simp] lemma le_numeral_self (n : V) : n ≤ numeral n := by
+  rcases zero_or_succ n with (rfl | ⟨n, rfl⟩)
+  · simp
+  · simp [numeral, succ_le_iff_lt]
 
 section
 

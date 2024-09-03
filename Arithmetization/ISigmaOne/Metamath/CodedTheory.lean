@@ -2,6 +2,22 @@ import Arithmetization.ISigmaOne.Metamath.Coding
 import Arithmetization.ISigmaOne.Metamath.Proof.Typed
 import Logic.FirstOrder.Arith.PeanoMinus
 
+namespace LO.FirstOrder.Semiformula
+
+variable {L : Language}
+
+variable {M : Type*} [Structure L M]
+
+def curve (σ : Semisentence L 1) : Set M := {x | M ⊧/![x] σ}
+
+variable {σ π : Semisentence L 1}
+
+lemma curve_mem_left {x : M} (hx : x ∈ σ.curve) : x ∈ (σ ⋎ π).curve := by simp [curve]; left; exact hx
+
+lemma curve_mem_right {x : M} (hx : x ∈ π.curve) : x ∈ (σ ⋎ π).curve := by simp [curve]; right; exact hx
+
+end LO.FirstOrder.Semiformula
+
 namespace LO.Arith
 
 open LO.FirstOrder
@@ -21,7 +37,7 @@ variable {T : Theory L} [T.Delta1Definable]
 variable (T V)
 
 def _root_.LO.FirstOrder.Theory.codeIn : (L.codeIn V).Theory where
-  set := {x | V ⊧/![x] T.tDef.ch.val}
+  set := T.tDef.ch.val.curve
 
 @[simp] lemma _root_.LO.FirstOrder.Theory.properOn : T.tDef.ch.ProperOn V := (LO.FirstOrder.Theory.Delta1Definable.isDelta1 (T := T)).properOn V
 
@@ -41,7 +57,7 @@ instance tDef_defined : (T.codeIn V).Defined T.tDef where
     have := (consequence_iff (T := 𝐈𝚺₁)).mp (sound! <| FirstOrder.Theory.Delta1Definable.isDelta1 (T := T)) V inferInstance
     simp [models_iff] at this ⊢
     simp [Theory.tDef, this],
-  by intro v; simp [Theory.codeIn, ←Matrix.constant_eq_singleton']⟩
+  by intro v; simp [FirstOrder.Semiformula.curve, Theory.codeIn, ←Matrix.constant_eq_singleton']⟩
 
 variable (T V)
 
@@ -51,9 +67,9 @@ def _root_.LO.FirstOrder.Theory.tCodeIn (T : Theory L) [T.Delta1Definable] : (L.
 
 variable {T V}
 
-variable (T) (U : Theory L)
+variable {U : Theory L}
 
-def _root_.LO.FirstOrder.Theory.delta1Definable_add [T.Delta1Definable] [U.Delta1Definable] : (T + U).Delta1Definable where
+def _root_.LO.FirstOrder.Theory.Delta1Definable.add (dT : T.Delta1Definable) (dU : U.Delta1Definable) : (T + U).Delta1Definable where
   ch := T.tDef.ch.or U.tDef.ch
   mem_iff {p} := by
     simp [Arith.HierarchySymbol.Semiformula.or, Theory.add_def,
@@ -62,21 +78,25 @@ def _root_.LO.FirstOrder.Theory.delta1Definable_add [T.Delta1Definable] [U.Delta
     by simp [models_iff, models_iff, Arith.HierarchySymbol.Semiformula.or, Arith.HierarchySymbol.Semiformula.val_sigma,
          (T.properOn (V := V)).iff', (U.properOn (V := V)).iff']
 
-def _root_.LO.FirstOrder.Theory.Delta1Definable.intro'
-    (φ : L.lDef.TDef)
-    (H : ∀ p, p ∈ T ↔ ℕ ⊧/![⌜p⌝] φ.ch.val)
-    (Δ : φ.ch.ProvablyProperOn 𝐈𝚺₁) : T.Delta1Definable where
-  ch := φ.ch
-  mem_iff {p} := H p
-  isDelta1 := Δ
+def _root_.LO.FirstOrder.Theory.Delta1Definable.ofEq (dT : T.Delta1Definable) (h : T = U) : U.Delta1Definable where
+  ch := dT.ch
+  mem_iff := by rcases h; exact dT.mem_iff
+  isDelta1 := by rcases h; exact dT.isDelta1
 
-def _root_.LO.FirstOrder.Theory.Delta1Definable.intro''
-    (φ : L.lDef.TDef)
-    (Th : ∀ (M : Type) [ORingStruc M] [M ⊧ₘ* 𝐈𝚺₁], (L.codeIn M).Theory)
-    (H : ∀ (M : Type) [ORingStruc M] [M ⊧ₘ* 𝐈𝚺₁], (Th M).Defined φ)
-    (hTh : ∀ p, p ∈ T ↔ ⌜p⌝ ∈ Th ℕ) : T.Delta1Definable where
-  ch := φ.ch
-  mem_iff {p} := by simpa [hTh] using (H ℕ).defined.df ![⌜p⌝]
-  isDelta1 := Arith.HierarchySymbol.Semiformula.ProvablyProperOn.ofProperOn.{0} _ fun V _ _ v ↦ (H V).defined.proper v
+def _root_.LO.FirstOrder.Theory.Delta1Definable.add_subset_left
+    (dT : T.Delta1Definable) (dU : U.Delta1Definable) :
+    haveI := dT.add dU
+    T.codeIn V ⊆ (T + U).codeIn V := by
+  intro p hp
+  apply FirstOrder.Semiformula.curve_mem_left
+  simpa [Arith.HierarchySymbol.Semiformula.val_sigma] using hp
+
+def _root_.LO.FirstOrder.Theory.Delta1Definable.add_subset_right
+    (dT : T.Delta1Definable) (dU : U.Delta1Definable) :
+    haveI := dT.add dU
+    U.codeIn V ⊆ (T + U).codeIn V := by
+  intro p hp
+  apply FirstOrder.Semiformula.curve_mem_right
+  simpa [Arith.HierarchySymbol.Semiformula.val_sigma] using hp
 
 end LO.Arith
