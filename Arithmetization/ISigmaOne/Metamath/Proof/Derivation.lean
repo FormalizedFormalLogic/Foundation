@@ -23,8 +23,8 @@ variable {L}
 section
 
 def _root_.LO.FirstOrder.Arith.LDef.isFormulaSetDef (pL : LDef) : 𝚫₁.Semisentence 1 := .mkDelta
-  (.mkSigma “s | ∀ p ∈' s, !pL.isSemiformulaDef.sigma 0 p” (by simp))
-  (.mkPi “s | ∀ p ∈' s, !pL.isSemiformulaDef.pi 0 p” (by simp))
+  (.mkSigma “s. ∀ p ∈' s, !pL.isSemiformulaDef.sigma 0 p” (by simp))
+  (.mkPi “s. ∀ p ∈' s, !pL.isSemiformulaDef.pi 0 p” (by simp))
 
 variable (L)
 
@@ -118,7 +118,7 @@ private lemma setShift_graph (t s : V) :
       exact h₂ x hx
 
 def _root_.LO.FirstOrder.Arith.LDef.setShiftDef (pL : LDef) : 𝚺₁.Semisentence 2 := .mkSigma
-  “t s | (∀ y ∈' t, ∃ x ∈' s, !pL.shiftDef y x) ∧ (∀ x ∈' s, ∃ y, !pL.shiftDef y x ∧ y ∈ t)” (by simp)
+  “t s. (∀ y ∈' t, ∃ x ∈' s, !pL.shiftDef y x) ∧ (∀ x ∈' s, ∃ y, !pL.shiftDef y x ∧ y ∈ t)” (by simp)
 
 variable (L)
 
@@ -154,7 +154,7 @@ def root (s p : V) : V := ⟪s, 9, p⟫ + 1
 section
 
 def _root_.LO.FirstOrder.Arith.axLDef : 𝚺₀.Semisentence 3 :=
-  .mkSigma “y s p | ∃ y' < y, !pair₃Def y' s 0 p ∧ y = y' + 1” (by simp)
+  .mkSigma “y s p. ∃ y' < y, !pair₃Def y' s 0 p ∧ y = y' + 1” (by simp)
 
 lemma axL_defined : 𝚺₀-Function₂ (axL : V → V → V) via axLDef := by
   intro v; simp [axLDef]
@@ -166,7 +166,7 @@ lemma axL_defined : 𝚺₀-Function₂ (axL : V → V → V) via axLDef := by
     Semiformula.Evalbm V v axLDef.val ↔ v 0 = axL (v 1) (v 2) := axL_defined.df.iff v
 
 def _root_.LO.FirstOrder.Arith.verumIntroDef : 𝚺₀.Semisentence 2 :=
-  .mkSigma “y s | ∃ y' < y, !pair₃Def y' s 1 0 ∧ y = y' + 1” (by simp)
+  .mkSigma “y s. ∃ y' < y, !pair₃Def y' s 1 0 ∧ y = y' + 1” (by simp)
 
 lemma verumIntro_defined : 𝚺₀-Function₁ (verumIntro : V → V) via verumIntroDef := by
   intro v; simp [verumIntroDef]
@@ -178,7 +178,7 @@ lemma verumIntro_defined : 𝚺₀-Function₁ (verumIntro : V → V) via verumI
     Semiformula.Evalbm V v verumIntroDef.val ↔ v 0 = verumIntro (v 1) := verumIntro_defined.df.iff v
 
 def _root_.LO.FirstOrder.Arith.andIntroDef : 𝚺₀.Semisentence 6 :=
-  .mkSigma “y s p q dp dq | ∃ y' < y, !pair₆Def y' s 2 p q dp dq ∧ y = y' + 1” (by simp)
+  .mkSigma “y s p q dp dq. ∃ y' < y, !pair₆Def y' s 2 p q dp dq ∧ y = y' + 1” (by simp)
 
 lemma andIntro_defined : 𝚺₀-Function₅ (andIntro : V → V → V → V → V → V) via andIntroDef := by
   intro v; simp [andIntroDef]
@@ -190,7 +190,7 @@ lemma andIntro_defined : 𝚺₀-Function₅ (andIntro : V → V → V → V →
     Semiformula.Evalbm V v andIntroDef.val ↔ v 0 = andIntro (v 1) (v 2) (v 3) (v 4) (v 5) := andIntro_defined.df.iff v
 
 def _root_.LO.FirstOrder.Arith.orIntroDef : 𝚺₀.Semisentence 5 :=
-  .mkSigma “y s p q d | ∃ y' < y, !pair₅Def y' s 3 p q d ∧ y = y' + 1” (by simp)
+  .mkSigma “y s p q d. ∃ y' < y, !pair₅Def y' s 3 p q d ∧ y = y' + 1” (by simp)
 
 lemma orIntro_defined : 𝚺₀-Function₄ (orIntro : V → V → V → V → V) via orIntroDef := by
   intro v; simp [orIntroDef]
@@ -202,7 +202,7 @@ lemma orIntro_defined : 𝚺₀-Function₄ (orIntro : V → V → V → V → V
     Semiformula.Evalbm V v orIntroDef.val ↔ v 0 = orIntro (v 1) (v 2) (v 3) (v 4) := orIntro_defined.df.iff v
 
 def _root_.LO.FirstOrder.Arith.allIntroDef : 𝚺₀.Semisentence 4 :=
-  .mkSigma “y s p d | ∃ y' < y, !pair₄Def y' s 4 p d ∧ y = y' + 1” (by simp)
+  .mkSigma “y s p d. ∃ y' < y, !pair₄Def y' s 4 p d ∧ y = y' + 1” (by simp)
 
 lemma allIntro_defined : 𝚺₀-Function₃ (allIntro : V → V → V → V) via allIntroDef := by
   intro v; simp [allIntroDef]
@@ -214,7 +214,7 @@ lemma allIntro_defined : 𝚺₀-Function₃ (allIntro : V → V → V → V) vi
     Semiformula.Evalbm V v allIntroDef.val ↔ v 0 = allIntro (v 1) (v 2) (v 3) := allIntro_defined.df.iff v
 
 def _root_.LO.FirstOrder.Arith.exIntroDef : 𝚺₀.Semisentence 5 :=
-  .mkSigma “y s p t d | ∃ y' < y, !pair₅Def y' s 5 p t d ∧ y = y' + 1” (by simp)
+  .mkSigma “y s p t d. ∃ y' < y, !pair₅Def y' s 5 p t d ∧ y = y' + 1” (by simp)
 
 lemma exIntro_defined : 𝚺₀-Function₄ (exIntro : V → V → V → V → V) via exIntroDef := by
   intro v; simp [exIntroDef, numeral_eq_natCast]
@@ -226,7 +226,7 @@ lemma exIntro_defined : 𝚺₀-Function₄ (exIntro : V → V → V → V → V
     Semiformula.Evalbm V v exIntroDef.val ↔ v 0 = exIntro (v 1) (v 2) (v 3) (v 4) := exIntro_defined.df.iff v
 
 def _root_.LO.FirstOrder.Arith.wkRuleDef : 𝚺₀.Semisentence 3 :=
-  .mkSigma “y s d | ∃ y' < y, !pair₃Def y' s 6 d ∧ y = y' + 1” (by simp)
+  .mkSigma “y s d. ∃ y' < y, !pair₃Def y' s 6 d ∧ y = y' + 1” (by simp)
 
 lemma wkRule_defined : 𝚺₀-Function₂ (wkRule : V → V → V) via wkRuleDef := by
   intro v; simp [wkRuleDef, numeral_eq_natCast]
@@ -238,7 +238,7 @@ lemma wkRule_defined : 𝚺₀-Function₂ (wkRule : V → V → V) via wkRuleDe
     Semiformula.Evalbm V v wkRuleDef.val ↔ v 0 = wkRule (v 1) (v 2) := wkRule_defined.df.iff v
 
 def _root_.LO.FirstOrder.Arith.shiftRuleDef : 𝚺₀.Semisentence 3 :=
-  .mkSigma “y s d | ∃ y' < y, !pair₃Def y' s 7 d ∧ y = y' + 1” (by simp)
+  .mkSigma “y s d. ∃ y' < y, !pair₃Def y' s 7 d ∧ y = y' + 1” (by simp)
 
 lemma shiftRule_defined : 𝚺₀-Function₂ (shiftRule : V → V → V) via shiftRuleDef := by
   intro v; simp [shiftRuleDef, numeral_eq_natCast]
@@ -250,7 +250,7 @@ lemma shiftRule_defined : 𝚺₀-Function₂ (shiftRule : V → V → V) via sh
     Semiformula.Evalbm V v shiftRuleDef.val ↔ v 0 = shiftRule (v 1) (v 2) := shiftRule_defined.df.iff v
 
 def _root_.LO.FirstOrder.Arith.cutRuleDef : 𝚺₀.Semisentence 5 :=
-  .mkSigma “y s p d₁ d₂ | ∃ y' < y, !pair₅Def y' s 8 p d₁ d₂ ∧ y = y' + 1” (by simp)
+  .mkSigma “y s p d₁ d₂. ∃ y' < y, !pair₅Def y' s 8 p d₁ d₂ ∧ y = y' + 1” (by simp)
 
 lemma cutRule_defined : 𝚺₀-Function₄ (cutRule : V → V → V → V → V) via cutRuleDef := by
   intro v; simp [cutRuleDef, numeral_eq_natCast]
@@ -262,7 +262,7 @@ lemma cutRule_defined : 𝚺₀-Function₄ (cutRule : V → V → V → V → V
     Semiformula.Evalbm V v cutRuleDef.val ↔ v 0 = cutRule (v 1) (v 2) (v 3) (v 4) := cutRule_defined.df.iff v
 
 def _root_.LO.FirstOrder.Arith.rootDef : 𝚺₀.Semisentence 3 :=
-  .mkSigma “y s p | ∃ y' < y, !pair₃Def y' s 9 p ∧ y = y' + 1” (by simp)
+  .mkSigma “y s p. ∃ y' < y, !pair₃Def y' s 9 p ∧ y = y' + 1” (by simp)
 
 lemma root_defined : 𝚺₀-Function₂ (root : V → V → V) via rootDef := by
   intro v; simp [rootDef, numeral_eq_natCast]
@@ -413,7 +413,7 @@ private lemma phi_iff (C d : V) :
     · right; right; right; right; right; right; right; right; right; exact ⟨s, p, h⟩
 
 def blueprint {pL : LDef} (pT : pL.TDef) : Fixpoint.Blueprint 0 := ⟨.mkDelta
-  (.mkSigma “d C |
+  (.mkSigma “d C.
     (∃ fst, !fstIdxDef fst d ∧ !pL.isFormulaSetDef.sigma fst) ∧
     ( (∃ s < d, ∃ p < d, !axLDef d s p ∧ p ∈ s ∧ ∃ np, !pL.negDef np p ∧ np ∈ s) ∨
       (∃ s < d, !verumIntroDef d s ∧ ∃ vrm, !qqVerumDef vrm ∧ vrm ∈ s) ∨
@@ -442,7 +442,7 @@ def blueprint {pL : LDef} (pT : pL.TDef) : Fixpoint.Blueprint 0 := ⟨.mkDelta
       (∃ s < d, ∃ p < d,
         !rootDef d s p ∧ p ∈ s ∧ !pT.ch.sigma p) )”
     (by simp))
-  (.mkPi “d C |
+  (.mkPi “d C.
     (∀ fst, !fstIdxDef fst d → !pL.isFormulaSetDef.pi fst) ∧
     ( (∃ s < d, ∃ p < d, !axLDef d s p ∧ p ∈ s ∧ ∀ np, !pL.negDef np p → np ∈ s) ∨
       (∃ s < d, !verumIntroDef d s ∧ ∀ vrm, !qqVerumDef vrm → vrm ∈ s) ∨
@@ -503,7 +503,7 @@ def construction : Fixpoint.Construction V (blueprint pT) where
       eval_andIntroDef, eval_qqAndDef, insert_defined_iff, Matrix.cons_app_seven,
       Matrix.cons_app_six, eval_orIntroDef, eval_qqOrDef, eval_allIntroDef, eval_qqAllDef,
       L.free_defined.df.iff, L.setShift_defined.df.iff, eval_exIntroDef, eval_qqExDef,
-      Semiterm.val_operator₀, Structure.numeral_eq_numeral, ORingSymbol.zero_eq_zero,
+      Semiterm.val_operator₀, Structure.numeral_eq_numeral, ORingStruc.zero_eq_zero,
       L.isSemiterm_defined.df.iff, L.substs₁_defined.df.iff, eval_wkRuleDef, bitSubset_defined_iff,
       eval_shiftRuleDef, eval_cutRuleDef, eval_rootDef, T.mem_defined.df.iff,
       LogicalConnective.Prop.or_eq, HierarchySymbol.Semiformula.pi_mkDelta,
@@ -540,7 +540,7 @@ def construction : Fixpoint.Construction V (blueprint pT) where
       eval_andIntroDef, eval_qqAndDef, insert_defined_iff, Matrix.cons_app_seven,
       Matrix.cons_app_six, eval_orIntroDef, eval_qqOrDef, eval_allIntroDef, eval_qqAllDef,
       L.free_defined.df.iff, L.setShift_defined.df.iff, eval_exIntroDef, eval_qqExDef,
-      Semiterm.val_operator₀, Structure.numeral_eq_numeral, ORingSymbol.zero_eq_zero,
+      Semiterm.val_operator₀, Structure.numeral_eq_numeral, ORingStruc.zero_eq_zero,
       L.isSemiterm_defined.df.iff, L.substs₁_defined.df.iff, eval_wkRuleDef, bitSubset_defined_iff,
       eval_shiftRuleDef, eval_cutRuleDef, eval_rootDef, T.mem_defined.df.iff,
       LogicalConnective.Prop.or_eq]
@@ -605,8 +605,8 @@ instance Language.Theory.derivation_definable : 𝚫₁-Predicate T.Derivation :
 instance Language.Theory.derivation_definable' : Γ-[m + 1]-Predicate T.Derivation := T.derivation_definable.of_deltaOne
 
 def _root_.LO.FirstOrder.Arith.LDef.TDef.derivationOfDef {pL : LDef} (pT : pL.TDef) : 𝚫₁.Semisentence 2 := .mkDelta
-  (.mkSigma “d s | !fstIdxDef s d ∧ !pT.derivationDef.sigma d” (by simp))
-  (.mkPi “d s | !fstIdxDef s d ∧ !pT.derivationDef.pi d” (by simp))
+  (.mkSigma “d s. !fstIdxDef s d ∧ !pT.derivationDef.sigma d” (by simp))
+  (.mkPi “d s. !fstIdxDef s d ∧ !pT.derivationDef.pi d” (by simp))
 
 lemma Language.Theory.derivationOf_defined : 𝚫₁-Relation T.DerivationOf via pT.derivationOfDef :=
   ⟨by intro v; simp [LDef.TDef.derivationOfDef, HierarchySymbol.Semiformula.val_sigma, T.derivation_defined.proper.iff'],
@@ -617,7 +617,7 @@ instance Language.Theory.derivationOf_definable : 𝚫₁-Relation T.DerivationO
 instance Language.Theory.derivationOf_definable' : Γ-[m + 1]-Relation T.DerivationOf := T.derivationOf_definable.of_deltaOne
 
 def _root_.LO.FirstOrder.Arith.LDef.TDef.derivableDef {pL : LDef} (pT : pL.TDef) : 𝚺₁.Semisentence 1 := .mkSigma
-  “s | ∃ d, !pT.derivationOfDef.sigma d s” (by simp)
+  “s. ∃ d, !pT.derivationOfDef.sigma d s” (by simp)
 
 lemma Language.Theory.derivable_defined : 𝚺₁-Predicate T.Derivable via pT.derivableDef := by
   intro v; simp [LDef.TDef.derivableDef, HierarchySymbol.Semiformula.val_sigma, (derivationOf_defined T).df.iff, Language.Theory.Derivable]
@@ -628,7 +628,7 @@ instance Language.Theory.derivable_definable : 𝚺₁-Predicate T.Derivable := 
 instance Language.Theory.derivable_definable' : 𝚺-[0 + 1]-Predicate T.Derivable := derivable_definable T
 
 def _root_.LO.FirstOrder.Arith.LDef.TDef.prv {pL : LDef} (pT : pL.TDef) : 𝚺₁.Semisentence 1 := .mkSigma
-  “p | ∃ s, !insertDef s p 0 ∧ !pT.derivableDef s” (by simp)
+  “p. ∃ s, !insertDef s p 0 ∧ !pT.derivableDef s” (by simp)
 
 protected lemma Language.Theory.provable_defined : 𝚺₁-Predicate T.Provable via pT.prv := by
   intro v; simp [LDef.TDef.prv, (derivable_defined T).df.iff, Language.Theory.Provable, singleton_eq_insert, emptyset_def]

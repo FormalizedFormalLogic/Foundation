@@ -25,6 +25,8 @@ instance : Membership V L.Theory := ⟨fun x T ↦ x ∈ T.set⟩
 
 instance : HasSubset L.Theory := ⟨fun T U ↦ T.set ⊆ U.set⟩
 
+lemma Language.Theory.mem_def {T : L.Theory} {p} : p ∈ T ↔ p ∈ T.set := by rfl
+
 variable {L}
 
 namespace Language.Theory

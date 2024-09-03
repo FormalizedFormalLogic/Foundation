@@ -106,7 +106,7 @@ lemma models_iff_provable_of_Delta1_param [V ⊧ₘ* T] {σ : 𝚫₁.Semisenten
   _                 ↔ T ⊢!. (Rew.substs fun x ↦ Semiterm.Operator.numeral ℒₒᵣ (e x)).hom σ.val       := by
       simp [HierarchySymbol.Semiformula.val_sigma]
 
-lemma re_iff_sigma1 (P : ℕ → Prop) : RePred P ↔ 𝚺₁-Predicate P := by
+lemma re_iff_sigma1 {P : ℕ → Prop} : RePred P ↔ 𝚺₁-Predicate P := by
   constructor
   · intro h
     exact ⟨.mkSigma (codeOfRePred P) (by simp [codeOfRePred, codeOfPartrec']), by
@@ -115,6 +115,13 @@ lemma re_iff_sigma1 (P : ℕ → Prop) : RePred P ↔ 𝚺₁-Predicate P := by
     have := (sigma1_re id (p.sigma_prop)).comp
       (f := fun x : ℕ ↦ x ::ᵥ Mathlib.Vector.nil) (Primrec.to_comp <| Primrec.vector_cons.comp .id (.const _))
     exact this.of_eq <| by intro x; symm; simpa [Mathlib.Vector.cons_get] using hp ![x]
+
+/-
+lemma computable_iff_delta1 {P : ℕ → Prop} : ComputablePred P ↔ 𝚫₁-Predicate P := by {
+  haveI : DecidablePred P := Classical.decPred P
+  simp [ComputablePred.computable_iff_re_compl_re]
+ }
+-/
 
 end Arith
 

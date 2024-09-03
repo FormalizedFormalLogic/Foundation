@@ -21,7 +21,7 @@ structure Blueprint (k : ℕ) where
   succ : 𝚺₁.Semisentence (k + 3)
 
 def Blueprint.cseqDef (p : Blueprint k) : 𝚺₁.Semisentence (k + 1) := .mkSigma
-  “s |
+  “s.
     :Seq s
     ∧ (∃ z < s, !p.zero z ⋯ ∧ 0 ~[s] z)
     ∧ (∀ i < 2 * s,
@@ -29,7 +29,7 @@ def Blueprint.cseqDef (p : Blueprint k) : 𝚺₁.Semisentence (k + 1) := .mkSig
         ∀ z < s, i ~[s] z → ∃ u < s, !p.succ u z i ⋯ ∧ i + 1 ~[s] u)” (by simp)
 
 def Blueprint.resultDef (p : Blueprint k) : 𝚺₁.Semisentence (k + 2) := .mkSigma
-  “z u | ∃ s, !p.cseqDef s ⋯ ∧ u ~[s] z” (by simp)
+  “z u. ∃ s, !p.cseqDef s ⋯ ∧ u ~[s] z” (by simp)
 
 def Blueprint.resultDeltaDef (p : Blueprint k) : 𝚫₁.Semisentence (k + 2) := p.resultDef.graphDelta
 

@@ -27,7 +27,7 @@ private lemma seq_iff (s : V) : Seq s ↔ IsMapping s ∧ ∃ l ≤ 2 * s, ∃ d
    by rintro ⟨hs, l, _, _, _, rfl, h⟩; exact ⟨hs, l, h⟩⟩
 
 def _root_.LO.FirstOrder.Arith.seqDef : 𝚺₀.Semisentence 1 := .mkSigma
-  “s | !isMappingDef s ∧ ∃ l <⁺ 2 * s, ∃ d <⁺ 2 * s, !domainDef d s ∧ !underDef d l” (by simp)
+  “s. !isMappingDef s ∧ ∃ l <⁺ 2 * s, ∃ d <⁺ 2 * s, !domainDef d s ∧ !underDef d l” (by simp)
 
 lemma seq_defined : 𝚺₀-Predicate (Seq : V → Prop) via seqDef := by
   intro v; simp [seqDef, seq_iff]
@@ -46,8 +46,8 @@ open Lean PrettyPrinter Delaborator
 syntax ":Seq " first_order_term : first_order_formula
 
 scoped macro_rules
-  | `(“ $binders* | :Seq $t:first_order_term ”) =>
-    `(“ $binders* | !seqDef.val $t ”)
+  | `(⤫formula[$binders* | $fbinders* | :Seq $t:first_order_term]) =>
+    `(⤫formula[$binders* | $fbinders* | !seqDef.val $t])
 
 end
 
@@ -84,7 +84,7 @@ private lemma lh_graph (l s : V) : l = lh s ↔ (Seq s → ∃ d ≤ 2 * s, d = 
     · simp [lh_prop_of_not_seq Hs, hn Hs]⟩
 
 def _root_.LO.FirstOrder.Arith.lhDef : 𝚺₀.Semisentence 2 := .mkSigma
-  “l s | (!seqDef s → ∃ d <⁺ 2 * s, !domainDef d s ∧ !underDef d l) ∧ (¬!seqDef s → l = 0)” (by simp)
+  “l s. (!seqDef s → ∃ d <⁺ 2 * s, !domainDef d s ∧ !underDef d l) ∧ (¬!seqDef s → l = 0)” (by simp)
 
 lemma lh_defined : 𝚺₀-Function₁ (lh : V → V) via lhDef := by
   intro v; simp [lhDef, -exists_eq_right_right, lh_graph]
@@ -96,7 +96,7 @@ instance lh_definable : 𝚺₀-Function₁ (lh : V → V) := lh_defined.to_defi
 
 instance lh_definable' (ℌ) : ℌ-Function₁ (lh : V → V) := lh_definable.of_zero
 
-instance : Bounded₁ (lh : V → V) := ⟨‘x | 2 * x’, fun _ ↦ by simp⟩
+instance : Bounded₁ (lh : V → V) := ⟨‘x. 2 * x’, fun _ ↦ by simp⟩
 
 lemma Seq.exists {s : V} (h : Seq s) {x : V} (hx : x < lh s) : ∃ y, ⟪x, y⟫ ∈ s := h.isMapping x (by simpa [h.domain_eq] using hx) |>.exists
 
@@ -138,7 +138,7 @@ lemma znth_prop_not {s i : V} (h : ¬Seq s ∨ lh s ≤ i) : znth s i = 0 :=
   Classical.choose!_spec (znth_existsUnique s i) |>.2 (by simpa [-not_and, not_and_or] using h)
 
 def _root_.LO.FirstOrder.Arith.znthDef : 𝚺₀.Semisentence 3 := .mkSigma
-  “x s i | ∃ l <⁺ 2 * s, !lhDef l s ∧ (:Seq s ∧ i < l → i ~[s] x) ∧ (¬(:Seq s ∧ i < l) → x = 0)” (by simp)
+  “x s i. ∃ l <⁺ 2 * s, !lhDef l s ∧ (:Seq s ∧ i < l → i ~[s] x) ∧ (¬(:Seq s ∧ i < l) → x = 0)” (by simp)
 
 private lemma znth_graph {x s i : V} : x = znth s i ↔ ∃ l ≤ 2 * s, l = lh s ∧ (Seq s ∧ i < l → ⟪i, x⟫ ∈ s) ∧ (¬(Seq s ∧ i < l) → x = 0) := by
   simp [znth, Classical.choose!_eq_iff]; constructor
@@ -212,7 +212,7 @@ lemma seqCons_graph (t x s : V) :
    by rintro ⟨l, _, rfl, p, _, rfl, rfl⟩; rfl⟩
 
 def _root_.LO.FirstOrder.Arith.seqConsDef : 𝚺₀.Semisentence 3 := .mkSigma
-  “t s x | ∃ l <⁺ 2 * s, !lhDef l s ∧ ∃ p <⁺ (2 * s + x + 1)², !pairDef p l x ∧ !insertDef t p s” (by simp)
+  “t s x. ∃ l <⁺ 2 * s, !lhDef l s ∧ ∃ p <⁺ (2 * s + x + 1)², !pairDef p l x ∧ !insertDef t p s” (by simp)
 
 lemma seqCons_defined : 𝚺₀-Function₂ (seqCons : V → V → V) via seqConsDef := by
   intro v; simp [seqConsDef, seqCons_graph]
@@ -353,7 +353,7 @@ def vecConsUnexpander : Lean.PrettyPrinter.Unexpander
 section
 
 def _root_.LO.FirstOrder.Arith.mkSeq₁Def : 𝚺₀.Semisentence 2 := .mkSigma
-  “s x | !seqConsDef s 0 x” (by simp)
+  “s x. !seqConsDef s 0 x” (by simp)
 
 lemma mkSeq₁_defined : 𝚺₀-Function₁ (fun x : V ↦ !⟦x⟧) via mkSeq₁Def := by
   intro v; simp [mkSeq₁Def]; rfl
@@ -366,7 +366,7 @@ instance mkSeq₁_definable : 𝚺₀-Function₁ (fun x : V ↦ !⟦x⟧) := mk
 instance mkSeq₁_definable' (Γ) : Γ-Function₁ (fun x : V ↦ !⟦x⟧) := mkSeq₁_definable.of_zero
 
 def _root_.LO.FirstOrder.Arith.mkSeq₂Def : 𝚺₁.Semisentence 3 := .mkSigma
-  “s x y | ∃ sx, !mkSeq₁Def sx x ∧ !seqConsDef s sx y” (by simp)
+  “s x y. ∃ sx, !mkSeq₁Def sx x ∧ !seqConsDef s sx y” (by simp)
 
 lemma mkSeq₂_defined : 𝚺₁-Function₂ (fun x y : V ↦ !⟦x, y⟧) via mkSeq₂Def := by
   intro v; simp [mkSeq₂Def]

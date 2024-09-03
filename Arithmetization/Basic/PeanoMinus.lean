@@ -38,7 +38,7 @@ lemma sub_eq_iff : c = a - b ↔ ((a ≥ b → a = b + c) ∧ (a < b → c = 0))
 open FirstOrder.Arith.HierarchySymbol.Boldface
 
 def _root_.LO.FirstOrder.Arith.subDef : 𝚺₀.Semisentence 3 :=
-  .mkSigma “z x y | (x ≥ y → x = y + z) ∧ (x < y → z = 0)” (by simp[Hierarchy.pi_zero_iff_sigma_zero])
+  .mkSigma “z x y. (x ≥ y → x = y + z) ∧ (x < y → z = 0)” (by simp[Hierarchy.pi_zero_iff_sigma_zero])
 
 lemma sub_defined : 𝚺₀-Function₂ ((· - ·) : V → V → V) via subDef := by
   intro v; simp [FirstOrder.Arith.subDef, sub_eq_iff]
@@ -158,7 +158,7 @@ lemma dvd_iff_bounded {a b : V} : a ∣ b ↔ ∃ c ≤ b, b = a * c := by
     · rintro ⟨c, hz, rfl⟩; exact dvd_mul_right a c
 
 def _root_.LO.FirstOrder.Arith.dvd : 𝚺₀.Semisentence 2 :=
-  .mkSigma “x y | ∃ z <⁺ y, y = x * z” (by simp)
+  .mkSigma “x y. ∃ z <⁺ y, y = x * z” (by simp)
 
 lemma dvd_defined : 𝚺₀-Relation (fun a b : V ↦ a ∣ b) via dvd :=
   fun v ↦ by simp [dvd_iff_bounded, Matrix.vecHead, Matrix.vecTail, dvd]
@@ -173,7 +173,7 @@ section
 syntax:45 first_order_term:45 " ∣ " first_order_term:0 : first_order_formula
 
 macro_rules
-  | `(“ $binders* | $t:first_order_term ∣ $u:first_order_term ”) => `(“ $binders* | !dvd.val $t $u”)
+  | `(⤫formula[ $binders* | $fbinders* | $t:first_order_term ∣ $u:first_order_term]) => `(⤫formula[ $binders* | $fbinders* | !dvd.val $t $u])
 
 end
 
@@ -211,36 +211,11 @@ lemma eq_one_or_eq_of_dvd_of_prime {p a : V} (pp : Prime p) (hxp : a ∣ p) : a 
   · right; exact dvd_antisymm hxp hx
   · left; exact dvd_one_iff.mp hx
 
-/-
-lemma irreducible_iff_bounded {a : V} : Irreducible a ↔ 1 < a ∧ ∀ b ≤ a, (b ∣ a → b = 1 ∨ b = a) := by
-  constructor
-  · intro ha
-    have : 1 < a := by
-      by_contra A
-      simp [Irreducible.ne_one ha, Irreducible.ne_zero ha, le_one_iff_eq_zero_or_one] at A
-    exact ⟨this, by {  }⟩
-
-lemma prime_iff_bounded {a : V} : Prime a ↔ 1 < a ∧ ∀ b ≤ a, (b ∣ a → b = 1 ∨ b = a) := by
-  constructor
-  · intro prim
-    have : 1 < a := by
-      by_contra A; simp at A
-      rcases le_one_iff_eq_zero_or_one.mp A with (rfl | rfl)
-      · exact not_prime_zero prim
-      · exact not_prime_one prim
-    exact ⟨this, fun b hy hyx ↦ eq_one_or_eq_of_dvd_of_prime prim hyx⟩
-  · intro H; constructor
-    · sorry
-    · constructor
-      · sorry
-      · intro b c h
--/
-
 def IsPrime (a : V) : Prop := 1 < a ∧ ∀ b ≤ a, b ∣ a → b = 1 ∨ b = a
 -- TODO: prove IsPrime a ↔ Prime a
 
 def _root_.LO.FirstOrder.Arith.isPrime : 𝚺₀.Semisentence 1 :=
-  .mkSigma “x | 1 < x ∧ ∀ y <⁺ x, !dvd.val y x → y = 1 ∨ y = x” (by simp [Hierarchy.pi_zero_iff_sigma_zero])
+  .mkSigma “x. 1 < x ∧ ∀ y <⁺ x, !dvd.val y x → y = 1 ∨ y = x” (by simp [Hierarchy.pi_zero_iff_sigma_zero])
 
 lemma isPrime_defined : 𝚺₀-Predicate (λ a : V ↦ IsPrime a) via isPrime := by
   intro v
@@ -252,7 +227,7 @@ end Prime
 section min
 
 def _root_.LO.FirstOrder.Arith.min : 𝚺₀.Semisentence 3 :=
-  .mkSigma “z x y | (x ≤ y → z = x) ∧ (x ≥ y → z = y)” (by simp)
+  .mkSigma “z x y. (x ≤ y → z = x) ∧ (x ≥ y → z = y)” (by simp)
 
 lemma min_defined : 𝚺₀-Function₂ (min : V → V → V) via min := by
   intro v; simp [FirstOrder.Arith.min]
@@ -274,7 +249,7 @@ end min
 section max
 
 def _root_.LO.FirstOrder.Arith.max : 𝚺₀.Semisentence 3 :=
-  .mkSigma “z x y | (x ≥ y → z = x) ∧ (x ≤ y → z = y)” (by simp)
+  .mkSigma “z x y. (x ≥ y → z = x) ∧ (x ≤ y → z = y)” (by simp)
 
 lemma max_defined : 𝚺₀-Function₂ (max : V → V → V) via max := by
   intro v; simp [Arith.max]

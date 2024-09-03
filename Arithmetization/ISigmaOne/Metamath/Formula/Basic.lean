@@ -45,28 +45,28 @@ scoped notation "^∃ " p:64 => qqEx p
 section
 
 def _root_.LO.FirstOrder.Arith.qqRelDef : 𝚺₀.Semisentence 4 :=
-  .mkSigma “p k r v | ∃ p' < p, !pair₄Def p' 0 k r v ∧ p = p' + 1” (by simp)
+  .mkSigma “p k r v. ∃ p' < p, !pair₄Def p' 0 k r v ∧ p = p' + 1” (by simp)
 
 def _root_.LO.FirstOrder.Arith.qqNRelDef : 𝚺₀.Semisentence 4 :=
-  .mkSigma “p k r v | ∃ p' < p, !pair₄Def p' 1 k r v ∧ p = p' + 1” (by simp)
+  .mkSigma “p k r v. ∃ p' < p, !pair₄Def p' 1 k r v ∧ p = p' + 1” (by simp)
 
 def _root_.LO.FirstOrder.Arith.qqVerumDef : 𝚺₀.Semisentence 1 :=
-  .mkSigma “p | ∃ p' < p, !pairDef p' 2 0 ∧ p = p' + 1” (by simp)
+  .mkSigma “p. ∃ p' < p, !pairDef p' 2 0 ∧ p = p' + 1” (by simp)
 
 def _root_.LO.FirstOrder.Arith.qqFalsumDef : 𝚺₀.Semisentence 1 :=
-  .mkSigma “p | ∃ p' < p, !pairDef p' 3 0 ∧ p = p' + 1” (by simp)
+  .mkSigma “p. ∃ p' < p, !pairDef p' 3 0 ∧ p = p' + 1” (by simp)
 
 def _root_.LO.FirstOrder.Arith.qqAndDef : 𝚺₀.Semisentence 3 :=
-  .mkSigma “r p q | ∃ r' < r, !pair₃Def r' 4 p q ∧ r = r' + 1” (by simp)
+  .mkSigma “r p q. ∃ r' < r, !pair₃Def r' 4 p q ∧ r = r' + 1” (by simp)
 
 def _root_.LO.FirstOrder.Arith.qqOrDef : 𝚺₀.Semisentence 3 :=
-  .mkSigma “r p q | ∃ r' < r, !pair₃Def r' 5 p q ∧ r = r' + 1” (by simp)
+  .mkSigma “r p q. ∃ r' < r, !pair₃Def r' 5 p q ∧ r = r' + 1” (by simp)
 
 def _root_.LO.FirstOrder.Arith.qqAllDef : 𝚺₀.Semisentence 2 :=
-  .mkSigma “r p | ∃ r' < r, !pairDef r' 6 p ∧ r = r' + 1” (by simp)
+  .mkSigma “r p. ∃ r' < r, !pairDef r' 6 p ∧ r = r' + 1” (by simp)
 
 def _root_.LO.FirstOrder.Arith.qqExDef : 𝚺₀.Semisentence 2 :=
-  .mkSigma “r p | ∃ r' < r, !pairDef r' 7 p ∧ r = r' + 1” (by simp)
+  .mkSigma “r p. ∃ r' < r, !pairDef r' 7 p ∧ r = r' + 1” (by simp)
 
 lemma qqRel_defined : 𝚺₀-Function₃ (qqRel : V → V → V → V) via qqRelDef := by
   intro v; simp [qqRelDef]
@@ -255,7 +255,7 @@ private lemma phi_iff (C p : V) :
     · right; exact ⟨q, hq, rfl⟩
 
 def formulaAux : 𝚺₀.Semisentence 2 := .mkSigma
-  “p C |
+  “p C.
     !qqVerumDef p ∨
     !qqFalsumDef p ∨
     (∃ p₁ < p, ∃ p₂ < p, p₁ ∈ C ∧ p₂ ∈ C ∧ !qqAndDef p p₁ p₂) ∨
@@ -266,12 +266,12 @@ def formulaAux : 𝚺₀.Semisentence 2 := .mkSigma
 
 def blueprint (pL : LDef) : Fixpoint.Blueprint 0 := ⟨.mkDelta
   (.mkSigma
-    “p C |
+    “p C.
       (∃ k < p, ∃ r < p, ∃ v < p, !pL.rel k r ∧ !pL.isUTermVecDef.sigma k v ∧ !qqRelDef p k r v) ∨
       (∃ k < p, ∃ r < p, ∃ v < p, !pL.rel k r ∧ !pL.isUTermVecDef.sigma k v ∧ !qqNRelDef p k r v) ∨
       !formulaAux p C” (by simp))
   (.mkPi
-    “p C |
+    “p C.
       (∃ k < p, ∃ r < p, ∃ v < p, !pL.rel k r ∧ !pL.isUTermVecDef.pi k v ∧ !qqRelDef p k r v) ∨
       (∃ k < p, ∃ r < p, ∃ v < p, !pL.rel k r ∧ !pL.isUTermVecDef.pi k v ∧ !qqNRelDef p k r v) ∨
       !formulaAux p C” (by simp))⟩
@@ -597,7 +597,7 @@ namespace Blueprint
 variable {pL : LDef} (β : Blueprint pL)
 
 def blueprint (β : Blueprint pL) : Fixpoint.Blueprint 0 := ⟨.mkDelta
-  (.mkSigma “pr C |
+  (.mkSigma “pr C.
     ∃ param <⁺ pr, ∃ p <⁺ pr, ∃ y <⁺ pr, !pair₃Def pr param p y ∧ !pL.isUFormulaDef.sigma p ∧
     ((∃ k < p, ∃ R < p, ∃ v < p, !qqRelDef p k R v ∧ !β.rel y param k R v) ∨
     (∃ k < p, ∃ R < p, ∃ v < p, !qqNRelDef p k R v ∧ !β.nrel y param k R v) ∨
@@ -612,7 +612,7 @@ def blueprint (β : Blueprint pL) : Fixpoint.Blueprint 0 := ⟨.mkDelta
     (∃ p₁ < p, ∃ y₁ < C,
       (∃ param', !β.exChanges param' param ∧ :⟪param', p₁, y₁⟫:∈ C) ∧ !qqExDef p p₁ ∧ !β.ex y param p₁ y₁))
   ” (by simp))
-  (.mkPi “pr C |
+  (.mkPi “pr C.
     ∃ param <⁺ pr, ∃ p <⁺ pr, ∃ y <⁺ pr, !pair₃Def pr param p y ∧ !pL.isUFormulaDef.pi p ∧
     ((∃ k < p, ∃ R < p, ∃ v < p, !qqRelDef p k R v ∧ !β.rel.graphDelta.pi.val y param k R v) ∨
     (∃ k < p, ∃ R < p, ∃ v < p, !qqNRelDef p k R v ∧ !β.nrel.graphDelta.pi.val y param k R v) ∨
@@ -629,10 +629,10 @@ def blueprint (β : Blueprint pL) : Fixpoint.Blueprint 0 := ⟨.mkDelta
   ” (by simp))⟩
 
 def graph : 𝚺₁.Semisentence 3 := .mkSigma
-  “param p y | ∃ pr, !pair₃Def pr param p y ∧ !β.blueprint.fixpointDef pr” (by simp)
+  “param p y. ∃ pr, !pair₃Def pr param p y ∧ !β.blueprint.fixpointDef pr” (by simp)
 
 def result : 𝚺₁.Semisentence 3 := .mkSigma
-  “y param p | (!pL.isUFormulaDef.pi p → !β.graph param p y) ∧ (¬!pL.isUFormulaDef.sigma p → y = 0)” (by simp)
+  “y param p. (!pL.isUFormulaDef.pi p → !β.graph param p y) ∧ (¬!pL.isUFormulaDef.sigma p → y = 0)” (by simp)
 
 end Blueprint
 
@@ -1281,16 +1281,16 @@ section bv
 namespace BV
 
 def blueprint (pL : LDef) : Language.UformulaRec1.Blueprint pL where
-  rel := .mkSigma “y param k R v | ∃ M, !pL.termBVVecDef M k v ∧ !listMaxDef y M” (by simp)
-  nrel := .mkSigma “y param k R v | ∃ M, !pL.termBVVecDef M k v ∧ !listMaxDef y M” (by simp)
-  verum := .mkSigma “y param | y = 0” (by simp)
-  falsum := .mkSigma “y param | y = 0” (by simp)
-  and := .mkSigma “y param p₁ p₂ y₁ y₂ | !max y y₁ y₂” (by simp)
-  or := .mkSigma “y param p₁ p₂ y₁ y₂ | !max y y₁ y₂” (by simp)
-  all := .mkSigma “y param p₁ y₁ | !subDef y y₁ 1” (by simp)
-  ex := .mkSigma “y param p₁ y₁ | !subDef y y₁ 1” (by simp)
-  allChanges := .mkSigma “param' param | param' = 0” (by simp)
-  exChanges := .mkSigma “param' param | param' = 0” (by simp)
+  rel := .mkSigma “y param k R v. ∃ M, !pL.termBVVecDef M k v ∧ !listMaxDef y M” (by simp)
+  nrel := .mkSigma “y param k R v. ∃ M, !pL.termBVVecDef M k v ∧ !listMaxDef y M” (by simp)
+  verum := .mkSigma “y param. y = 0” (by simp)
+  falsum := .mkSigma “y param. y = 0” (by simp)
+  and := .mkSigma “y param p₁ p₂ y₁ y₂. !max y y₁ y₂” (by simp)
+  or := .mkSigma “y param p₁ p₂ y₁ y₂. !max y y₁ y₂” (by simp)
+  all := .mkSigma “y param p₁ y₁. !subDef y y₁ 1” (by simp)
+  ex := .mkSigma “y param p₁ y₁. !subDef y y₁ 1” (by simp)
+  allChanges := .mkSigma “param' param. param' = 0” (by simp)
+  exChanges := .mkSigma “param' param. param' = 0” (by simp)
 
 variable (L)
 
@@ -1386,8 +1386,8 @@ section
 variable (L)
 
 def _root_.LO.FirstOrder.Arith.LDef.isSemiformulaDef (pL : LDef) : 𝚫₁.Semisentence 2 := .mkDelta
-  (.mkSigma “n p | !pL.isUFormulaDef.sigma p ∧ ∃ b, !pL.bvDef b p ∧ b ≤ n” (by simp))
-  (.mkPi “n p | !pL.isUFormulaDef.pi p ∧ ∀ b, !pL.bvDef b p → b ≤ n” (by simp))
+  (.mkSigma “n p. !pL.isUFormulaDef.sigma p ∧ ∃ b, !pL.bvDef b p ∧ b ≤ n” (by simp))
+  (.mkPi “n p. !pL.isUFormulaDef.pi p ∧ ∀ b, !pL.bvDef b p → b ≤ n” (by simp))
 
 lemma Language.isSemiformula_defined : 𝚫₁-Relation L.IsSemiformula via pL.isSemiformulaDef := by
   constructor

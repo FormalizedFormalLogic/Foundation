@@ -47,7 +47,7 @@ lemma nth_lt_qqFunc_of_lt {i k f v : V} (hi : i < len v) : v.[i] < ^func k f v :
 
 @[simp] lemma qqFunc_inj {k f v k' f' w : V} : ^func k f v = ^func k' f' w ↔ k = k' ∧ f = f' ∧ v = w := by simp [qqFunc]
 
-def _root_.LO.FirstOrder.Arith.qqBvarDef : 𝚺₀.Semisentence 2 := .mkSigma “t z | ∃ t' < t, !pairDef t' 0 z ∧ t = t' + 1” (by simp)
+def _root_.LO.FirstOrder.Arith.qqBvarDef : 𝚺₀.Semisentence 2 := .mkSigma “t z. ∃ t' < t, !pairDef t' 0 z ∧ t = t' + 1” (by simp)
 
 lemma qqBvar_defined : 𝚺₀-Function₁ (qqBvar : V → V) via qqBvarDef := by
   intro v; simp [qqBvarDef]
@@ -58,7 +58,7 @@ lemma qqBvar_defined : 𝚺₀-Function₁ (qqBvar : V → V) via qqBvarDef := b
 @[simp] lemma eval_qqBvarDef (v) :
     Semiformula.Evalbm V v qqBvarDef.val ↔ v 0 = ^#(v 1) := qqBvar_defined.df.iff v
 
-def _root_.LO.FirstOrder.Arith.qqFvarDef : 𝚺₀.Semisentence 2 := .mkSigma “t x | ∃ t' < t, !pairDef t' 1 x ∧ t = t' + 1” (by simp)
+def _root_.LO.FirstOrder.Arith.qqFvarDef : 𝚺₀.Semisentence 2 := .mkSigma “t x. ∃ t' < t, !pairDef t' 1 x ∧ t = t' + 1” (by simp)
 
 lemma qqFvar_defined : 𝚺₀-Function₁ (qqFvar : V → V) via qqFvarDef := by
   intro v; simp [qqFvarDef]
@@ -78,7 +78,7 @@ private lemma qqFunc_graph {x k f v : V} :
    by rintro ⟨_, _, rfl, _, _, rfl, _, _, rfl, rfl⟩; rfl⟩
 
 def _root_.LO.FirstOrder.Arith.qqFuncDef : 𝚺₀.Semisentence 4 := .mkSigma
-  “x k f v | ∃ fv < x, !pairDef fv f v ∧ ∃ kfv < x, !pairDef kfv k fv ∧ ∃ x' < x, !pairDef x' 2 kfv ∧ x = x' + 1” (by simp)
+  “x k f v. ∃ fv < x, !pairDef fv f v ∧ ∃ kfv < x, !pairDef kfv k fv ∧ ∃ x' < x, !pairDef x' 2 kfv ∧ x = x' + 1” (by simp)
 
 lemma qqFunc_defined : 𝚺₀-Function₃ (qqFunc : V → V → V → V) via qqFuncDef := by
   intro v; simp [qqFuncDef, qqFunc_graph]
@@ -114,12 +114,12 @@ private lemma phi_iff (C : V) (t : V) :
 
 def blueprint (pL : LDef) : Fixpoint.Blueprint 0 where
   core := .mkDelta
-    (.mkSigma “t C |
+    (.mkSigma “t C.
       (∃ z < t, !qqBvarDef t z) ∨
       (∃ x < t, !qqFvarDef t x) ∨
       (∃ k < t, ∃ f < t, ∃ v < t, !pL.func k f ∧ !lenDef k v ∧ (∀ i < k, ∃ u, !nthDef u v i ∧ u ∈ C) ∧ !qqFuncDef t k f v)”
     (by simp))
-    (.mkPi “t C |
+    (.mkPi “t C.
       (∃ z < t, !qqBvarDef t z) ∨
       (∃ x < t, !qqFvarDef t x) ∨
       (∃ k < t, ∃ f < t, ∃ v < t, !pL.func k f ∧ (∀ l, !lenDef l v → k = l) ∧ (∀ i < k, ∀ u, !nthDef u v i → u ∈ C) ∧ !qqFuncDef t k f v)”
@@ -207,10 +207,10 @@ section
 
 def _root_.LO.FirstOrder.Arith.LDef.isUTermVecDef (pL : LDef) : 𝚫₁.Semisentence 2 := .mkDelta
   (.mkSigma
-    “n w | !lenDef n w ∧ ∀ i < n, ∃ u, !nthDef u w i ∧ !pL.isUTermDef.sigma u”
+    “n w. !lenDef n w ∧ ∀ i < n, ∃ u, !nthDef u w i ∧ !pL.isUTermDef.sigma u”
     (by simp))
   (.mkPi
-    “n w | (∀ l, !lenDef l w → n = l) ∧ ∀ i < n, ∀ u, !nthDef u w i → !pL.isUTermDef.pi u”
+    “n w. (∀ l, !lenDef l w → n = l) ∧ ∀ i < n, ∀ u, !nthDef u w i → !pL.isUTermDef.pi u”
     (by simp))
 
 variable (L)
@@ -280,7 +280,7 @@ namespace Blueprint
 variable (β : Blueprint pL arity)
 
 def blueprint : Fixpoint.Blueprint arity := ⟨.mkDelta
-  (.mkSigma “pr C |
+  (.mkSigma “pr C.
     ∃ t <⁺ pr, ∃ y <⁺ pr, !pairDef pr t y ∧ !pL.isUTermDef.sigma t ∧
     ( (∃ z < t, !qqBvarDef t z ∧ !β.bvar y z ⋯) ∨
       (∃ x < t, !qqFvarDef t x ∧ !β.fvar y x ⋯) ∨
@@ -288,7 +288,7 @@ def blueprint : Fixpoint.Blueprint arity := ⟨.mkDelta
         (!lenDef k w ∧ ∀ i < k, ∃ vi, !nthDef vi v i ∧ ∃ v'i, !nthDef v'i w i ∧ :⟪vi, v'i⟫:∈ C) ∧
         !qqFuncDef t k f v ∧ !β.func y k f v w ⋯) )”
     (by simp))
-  (.mkPi “pr C |
+  (.mkPi “pr C.
     ∃ t <⁺ pr, ∃ y <⁺ pr, !pairDef pr t y ∧ !pL.isUTermDef.pi t ∧
     ( (∃ z < t, !qqBvarDef t z ∧ !β.bvar.graphDelta.pi y z ⋯) ∨
       (∃ x < t, !qqFvarDef t x ∧ !β.fvar.graphDelta.pi y x ⋯) ∨
@@ -298,13 +298,13 @@ def blueprint : Fixpoint.Blueprint arity := ⟨.mkDelta
     (by simp))⟩
 
 def graph : 𝚺₁.Semisentence (arity + 2) := .mkSigma
-  “t y | ∃ pr <⁺ (t + y + 1)², !pairDef pr t y ∧ !β.blueprint.fixpointDef pr ⋯” (by simp)
+  “t y. ∃ pr <⁺ (t + y + 1)², !pairDef pr t y ∧ !β.blueprint.fixpointDef pr ⋯” (by simp)
 
 def result : 𝚺₁.Semisentence (arity + 2) := .mkSigma
-  “y t | (!pL.isUTermDef.pi t → !β.graph t y ⋯) ∧ (¬!pL.isUTermDef.sigma t → y = 0)” (by simp)
+  “y t. (!pL.isUTermDef.pi t → !β.graph t y ⋯) ∧ (¬!pL.isUTermDef.sigma t → y = 0)” (by simp)
 
 def resultVec : 𝚺₁.Semisentence (arity + 3) := .mkSigma
-  “w' k w |
+  “w' k w.
     (!pL.isUTermVecDef.pi k w → !lenDef k w' ∧ ∀ i < k, ∃ z, !nthDef z w i ∧ ∃ z', !nthDef z' w' i ∧ !β.graph.val z z' ⋯) ∧
     (¬!pL.isUTermVecDef.sigma k w → w' = 0)” (by simp)
 
@@ -674,9 +674,9 @@ end Language.TermRec
 namespace IsUTerm.BV
 
 def blueprint (pL : LDef) : Language.TermRec.Blueprint pL 0 where
-  bvar := .mkSigma “y z | y = z + 1” (by simp)
-  fvar := .mkSigma “y x | y = 0” (by simp)
-  func := .mkSigma “y k f v v' | !listMaxDef y v'” (by simp)
+  bvar := .mkSigma “y z. y = z + 1” (by simp)
+  fvar := .mkSigma “y x. y = 0” (by simp)
+  func := .mkSigma “y k f v v'. !listMaxDef y v'” (by simp)
 
 variable (L)
 
@@ -845,8 +845,8 @@ section
 variable (L)
 
 def _root_.LO.FirstOrder.Arith.LDef.isSemitermDef (pL : LDef) : 𝚫₁.Semisentence 2 := .mkDelta
-  (.mkSigma “n p | !pL.isUTermDef.sigma p ∧ ∃ b, !pL.termBVDef b p ∧ b ≤ n” (by simp))
-  (.mkPi “n p | !pL.isUTermDef.pi p ∧ ∀ b, !pL.termBVDef b p → b ≤ n” (by simp))
+  (.mkSigma “n p. !pL.isUTermDef.sigma p ∧ ∃ b, !pL.termBVDef b p ∧ b ≤ n” (by simp))
+  (.mkPi “n p. !pL.isUTermDef.pi p ∧ ∀ b, !pL.termBVDef b p → b ≤ n” (by simp))
 
 lemma Language.isSemiterm_defined : 𝚫₁-Relation L.IsSemiterm via pL.isSemitermDef where
   left := by
@@ -864,8 +864,8 @@ instance Language.isSemiterm_definable : 𝚫₁-Relation L.IsSemiterm := L.isSe
 instance Language.isSemiterm_defined' (Γ m) : Γ-[m + 1]-Relation L.IsSemiterm := L.isSemiterm_definable.of_deltaOne
 
 def _root_.LO.FirstOrder.Arith.LDef.isSemitermVecDef (pL : LDef) : 𝚫₁.Semisentence 3 := .mkDelta
-  (.mkSigma “k n ps | !pL.isUTermVecDef.sigma k ps ∧ ∀ i < k, ∃ p, !nthDef p ps i ∧ ∃ b, !pL.termBVDef b p ∧ b ≤ n” (by simp))
-  (.mkPi “k n ps | !pL.isUTermVecDef.pi k ps ∧ ∀ i < k, ∀ p, !nthDef p ps i → ∀ b, !pL.termBVDef b p → b ≤ n” (by simp))
+  (.mkSigma “k n ps. !pL.isUTermVecDef.sigma k ps ∧ ∀ i < k, ∃ p, !nthDef p ps i ∧ ∃ b, !pL.termBVDef b p ∧ b ≤ n” (by simp))
+  (.mkPi “k n ps. !pL.isUTermVecDef.pi k ps ∧ ∀ i < k, ∀ p, !nthDef p ps i → ∀ b, !pL.termBVDef b p → b ≤ n” (by simp))
 
 lemma Language.isSemitermVec_defined : 𝚫₁-Relation₃ L.IsSemitermVec via pL.isSemitermVecDef where
   left := by

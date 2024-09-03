@@ -20,7 +20,7 @@ lemma ext_graph (a b c : V) : a = ext b c ↔ ∃ x ≤ c, x = c / b ∧ a = x %
   · rintro ⟨_, _, rfl, rfl⟩; simp
 
 def _root_.LO.FirstOrder.Arith.extDef : 𝚺₀.Semisentence 3 :=
-  .mkSigma “a b c | ∃ x <⁺ c, !divDef x c b ∧ !remDef a x b” (by simp)
+  .mkSigma “a b c. ∃ x <⁺ c, !divDef x c b ∧ !remDef a x b” (by simp)
 
 lemma ext_defined : 𝚺₀-Function₂ (λ a b : V ↦ ext a b) via extDef := by
   intro v; simp [Matrix.vecHead, Matrix.vecTail, extDef,
@@ -78,7 +78,7 @@ lemma Exponential.Seqₛ.iff (y X Y : V) :
       · exact Or.inr ⟨by simp [hx, hy], by simp [hx, hy]⟩⟩
 
 def Exponential.Seqₛ.def : 𝚺₀.Semisentence 3 := .mkSigma
-  “ y X Y |
+  “ y X Y.
     ∀ u <⁺ y, u ≠ 2 → !ppow2Def u →
       ( (∃ ext_u_X <⁺ X, !extDef ext_u_X u X ∧ !extDef (2 * ext_u_X) u² X) ∧
         (∃ ext_u_Y <⁺ Y, !extDef ext_u_Y u Y ∧ !extDef ext_u_Y² u² Y)  ) ∨
@@ -103,7 +103,7 @@ lemma Exponential.graph_iff (x y : V) :
       · exact Or.inr ⟨X, bX, Y, bY, ⟨H₀.1.symm, H₀.2.symm⟩, Hₛ, ⟨u, hu, ne2, ppu, hX.symm, hY.symm⟩⟩⟩
 
 def _root_.LO.FirstOrder.Arith.exponentialDef : 𝚺₀.Semisentence 2 := .mkSigma
-  “x y |
+  “x y.
     (x = 0 ∧ y = 1) ∨ ∃ X <⁺ y⁴, ∃ Y <⁺ y⁴,
       (!extDef 1 4 X ∧ !extDef 2 4 Y) ∧
       !Exponential.Seqₛ.def y X Y ∧
@@ -714,7 +714,7 @@ lemma exponential_exp (a : V) : Exponential a (exp a) := Classical.choose!_spec 
 
 lemma exponential_graph {a b : V} : a = exp b ↔ Exponential b a := Classical.choose!_eq_iff _
 
-def _root_.LO.FirstOrder.Arith.expDef : 𝚺₀.Semisentence 2 := .mkSigma “x y | !exponentialDef.val y x” (by simp)
+def _root_.LO.FirstOrder.Arith.expDef : 𝚺₀.Semisentence 2 := .mkSigma “x y. !exponentialDef.val y x” (by simp)
 
 lemma exp_defined_deltaZero : 𝚺₀-Function₁ (Exp.exp : V → V) via expDef := by
   intro v; simp [expDef, exponential_graph]
@@ -736,9 +736,6 @@ lemma exp_inj : Function.Injective (Exp.exp : V → V) := λ a _ H ↦
 
 lemma exp_succ (a : V) : exp (a + 1) = 2 * exp a :=
   exp_of_exponential <| Exponential.exponential_succ_mul_two.mpr <| exponential_exp a
-
-instance models_exponential_of_models_iSigmaOne : V ⊧ₘ* 𝐄𝐗𝐏 :=
-  ⟨by intro f hf; rcases hf <;> simp [models_iff, exp_succ]⟩
 
 lemma exp_even (a : V) : exp (2 * a) = (exp a)^2 :=
   exp_of_exponential <| Exponential.exponential_even_sq.mpr <| exponential_exp a

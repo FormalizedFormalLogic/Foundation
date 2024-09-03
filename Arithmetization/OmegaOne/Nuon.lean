@@ -61,7 +61,7 @@ lemma ext_graph (z S L i : V) : z = S{L}[i] ↔
       exact ⟨b, hb, Hb, by rw [HhL.uniq (exponential_hash_one L)]⟩
 
 def extDef : 𝚺₀.Semisentence 4 := .mkSigma
-  “z L S i |
+  “z L S i.
     ∃ lS <⁺ S, !lengthDef lS S ∧ ∃ lL <⁺ L, !lengthDef lL L ∧
       (lS ≤ i * lL → z = 0) ∧
       (i * lL < lS →
@@ -484,7 +484,7 @@ lemma sq_polyI_hash_polyL_polybounded {A : V} (pos : 0 < A) : ((polyI A) # (poly
 def NuonAux (A k n : V) : Prop := SeriesSegment (polyU A) (polyI A) (polyL A) A k n
 
 def isSegmentDef : 𝚺₀.Semisentence 5 := .mkSigma
-  “L A start intv S |
+  “L A start intv S.
     ∀ i < intv,
       ∃ S_L_i_succ <⁺ S, !extDef S_L_i_succ L S (i + 1) ∧
       ∃ S_L_i <⁺ S, !extDef S_L_i L S i ∧
@@ -500,14 +500,14 @@ lemma isSegmentDef_defined : 𝚺₀.Defined (V := V) (λ v ↦ IsSegment (v 0) 
   · rintro ⟨_, _, rfl, _, _, rfl, _, _, rfl, h⟩; exact h
 
 def segmentDef : 𝚺₀.Semisentence 7 := .mkSigma
-  “U L A start intv nₛ nₑ | ∃ S < U, !isSegmentDef L A start intv S ∧ !extDef nₛ L S 0 ∧ !extDef nₑ L S intv” (by simp)
+  “U L A start intv nₛ nₑ. ∃ S < U, !isSegmentDef L A start intv S ∧ !extDef nₛ L S 0 ∧ !extDef nₑ L S intv” (by simp)
 
 lemma segmentDef_defined : 𝚺₀.Defined (V := V) (λ v ↦ Segment (v 0) (v 1) (v 2) (v 3) (v 4) (v 5) (v 6)) segmentDef := by
   intro v; simp [Segment, segmentDef, ext_defined.df.iff, isSegmentDef_defined.df.iff, @Eq.comm _ (v 5), @Eq.comm _ (v 6)]
   rfl
 
 def isSeriesDef : 𝚺₀.Semisentence 6 := .mkSigma
-  “U I L A iter T |
+  “U I L A iter T.
     ∀ l < iter,
       ∃ lI <⁺ I, !lengthDef lI I ∧
       ∃ x <⁺ T, !extDef x L T l ∧
@@ -530,7 +530,7 @@ lemma isSerieDef_defined : 𝚺₀.Defined (V := V) (λ v ↦ IsSeries (v 0) (v 
 
 
 def seriesDef : 𝚺₀.Semisentence 6 := .mkSigma
-  “U I L A iter n | ∃ T < U, !isSeriesDef U I L A iter T ∧ !extDef 0 L T 0 ∧ !extDef n L T iter” (by simp)
+  “U I L A iter n. ∃ T < U, !isSeriesDef U I L A iter T ∧ !extDef 0 L T 0 ∧ !extDef n L T iter” (by simp)
 
 lemma seriesDef_defined : 𝚺₀.Defined (V := V) (λ v ↦ Series (v 0) (v 1) (v 2) (v 3) (v 4) (v 5)) seriesDef := by
   intro v; simp [Series, seriesDef, isSerieDef_defined.df.iff, ext_defined.df.iff]
@@ -540,7 +540,7 @@ lemma seriesDef_defined : 𝚺₀.Defined (V := V) (λ v ↦ Series (v 0) (v 1) 
   simp [Eq.comm]
 
 def seriesSegmentDef : 𝚺₀.Semisentence 6 := .mkSigma
-  “U I L A k n |
+  “U I L A k n.
     ∃ nₖ <⁺ n,
       ∃ l <⁺ I, !lengthDef l I ∧
       ∃ d <⁺ k, !divDef d k l ∧
@@ -556,7 +556,7 @@ lemma seriesSegmentDef_defined : 𝚺₀.Defined (V := V) (λ v ↦ SeriesSegmen
   rw [bex_eq_le_iff, bex_eq_le_iff, bex_eq_le_iff]; simp; rfl
 
 def nuonAuxDef : 𝚺₀.Semisentence 3 := .mkSigma
-  “A k n |
+  “A k n.
     ∃ lA <⁺ A, !lengthDef lA A ∧
     ∃ sA <⁺ lA, !sqrtDef sA lA ∧
     ∃ g <⁺ 2 * A, !bexpDef g (2 * A) sA ∧
@@ -674,7 +674,7 @@ lemma nuon_bit1 (a : V) : nuon (2 * a + 1) = nuon a + 1 := by
 @[simp] lemma nuon_zero : nuon (0 : V) = 0 := Nuon.nuon_eq (by simp [Nuon])
 
 def _root_.LO.FirstOrder.Arith.nuonDef : 𝚺₀.Semisentence 2 := .mkSigma
-  “n A | ∃ l <⁺ A, !lengthDef l A ∧ !Nuon.nuonAuxDef A l n” (by simp)
+  “n A. ∃ l <⁺ A, !lengthDef l A ∧ !Nuon.nuonAuxDef A l n” (by simp)
 
 lemma nuon_defined : 𝚺₀-Function₁ (nuon : V → V) via nuonDef := by
   intro v; simp [Nuon.nuon_eq_iff, Nuon, nuonDef,

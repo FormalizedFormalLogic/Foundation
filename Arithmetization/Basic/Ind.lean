@@ -2,25 +2,23 @@ import Arithmetization.Basic.PeanoMinus
 
 namespace LO.FirstOrder.Arith
 
-namespace Theory
+open FirstOrder.Theory
 
 variable {C C' : Semiformula ℒₒᵣ ℕ 1 → Prop}
 
 lemma mem_indScheme_of_mem {p : Semiformula ℒₒᵣ ℕ 1} (hp : C p) :
-    ∀ᶠ* succInd p ∈ indScheme ℒₒᵣ C := by
+    succInd p ∈ indScheme ℒₒᵣ C := by
   simp [indScheme]; exact ⟨p, hp, rfl⟩
 
 lemma mem_iOpen_of_qfree {p : Semiformula ℒₒᵣ ℕ 1} (hp : p.Open) :
-    ∀ᶠ* succInd p ∈ indScheme ℒₒᵣ Semiformula.Open := by
+    succInd p ∈ indScheme ℒₒᵣ Semiformula.Open := by
   exact ⟨p, hp, rfl⟩
 
 lemma indScheme_subset (h : ∀ {p : Semiformula ℒₒᵣ ℕ 1},  C p → C' p) : indScheme ℒₒᵣ C ⊆ indScheme ℒₒᵣ C' := by
   intro _; simp [indScheme]; rintro p hp rfl; exact ⟨p, h hp, rfl⟩
 
 lemma iSigma_subset_mono {s₁ s₂} (h : s₁ ≤ s₂) : 𝐈𝚺 s₁ ⊆ 𝐈𝚺 s₂ :=
-  Set.union_subset_union_right _ (Theory.indScheme_subset (fun H ↦ H.mono h))
-
-end Theory
+  Set.union_subset_union_right _ (indScheme_subset (fun H ↦ H.mono h))
 
 end LO.FirstOrder.Arith
 
@@ -44,8 +42,8 @@ private lemma induction_eval {p : Semiformula ℒₒᵣ ℕ 1} (hp : C p) (v) :
     Semiformula.Evalm V ![0] v p →
     (∀ x, Semiformula.Evalm V ![x] v p → Semiformula.Evalm V ![x + 1] v p) →
     ∀ x, Semiformula.Evalm V ![x] v p := by
-  have : V ⊧ₘ (∀ᶠ* succInd p) :=
-    ModelsTheory.models (T := Theory.indScheme _ C) V (by simpa using Theory.mem_indScheme_of_mem hp)
+  have : V ⊧ₘ succInd p :=
+    ModelsTheory.models (T := Theory.indScheme _ C) V (by simpa using mem_indScheme_of_mem hp)
   simp [models_iff, succInd, Semiformula.eval_substs,
     Semiformula.eval_rew_q Rew.toS, Function.comp, Matrix.constant_eq_singleton] at this
   exact this v
@@ -205,10 +203,10 @@ end
 
 def mod_IOpen_of_mod_indH (Γ n) [V ⊧ₘ* 𝐈𝐍𝐃Γ n] : V ⊧ₘ* 𝐈open :=
   ModelsTheory.of_ss (U := 𝐈𝐍𝐃Γ n) inferInstance
-    (Set.union_subset_union_right _ (Theory.indScheme_subset Hierarchy.of_open))
+    (Set.union_subset_union_right _ (indScheme_subset Hierarchy.of_open))
 
 def mod_ISigma_of_le {n₁ n₂} (h : n₁ ≤ n₂) [V ⊧ₘ* 𝐈𝚺 n₂] : V ⊧ₘ* 𝐈𝚺 n₁ :=
-  ModelsTheory.of_ss inferInstance (Theory.iSigma_subset_mono h)
+  ModelsTheory.of_ss inferInstance (iSigma_subset_mono h)
 
 instance [V ⊧ₘ* 𝐈open] : V ⊧ₘ* 𝐏𝐀⁻ := ModelsTheory.of_add_left V 𝐏𝐀⁻ (Theory.indScheme _ Semiformula.Open)
 
@@ -217,11 +215,11 @@ instance [V ⊧ₘ* 𝐈𝚺₀] : V ⊧ₘ* 𝐈open := mod_IOpen_of_mod_indH �
 instance [V ⊧ₘ* 𝐈𝚺₁] : V ⊧ₘ* 𝐈𝚺₀ := mod_ISigma_of_le (show 0 ≤ 1 from by simp)
 
 instance [V ⊧ₘ* 𝐈𝚺 n] : V ⊧ₘ* 𝐈𝚷 n :=
-  haveI : V ⊧ₘ* 𝐏𝐀⁻ := Arith.models_peanoMinus_of_models_indH 𝚺 n
+  haveI : V ⊧ₘ* 𝐏𝐀⁻ := models_PAMinus_of_models_indH 𝚺 n
   inferInstance
 
 instance [V ⊧ₘ* 𝐈𝚷 n] : V ⊧ₘ* 𝐈𝚺 n :=
-  haveI : V ⊧ₘ* 𝐏𝐀⁻ := Arith.models_peanoMinus_of_models_indH 𝚷 n
+  haveI : V ⊧ₘ* 𝐏𝐀⁻ := Arith.models_PAMinus_of_models_indH 𝚷 n
   by simp [*]; simpa [Theory.iPi] using models_indScheme_alt (V := V) 𝚷 n
 
 lemma models_ISigma_iff_models_IPi {n} : V ⊧ₘ* 𝐈𝚺 n ↔ V ⊧ₘ* 𝐈𝚷 n :=

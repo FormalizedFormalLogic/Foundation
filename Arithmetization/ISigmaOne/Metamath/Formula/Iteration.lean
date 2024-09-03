@@ -13,8 +13,8 @@ variable {L : Arith.Language V} {pL : LDef} [Arith.Language.Defined L pL]
 namespace QQConj
 
 def blueprint : VecRec.Blueprint 0 where
-  nil := .mkSigma “y | !qqVerumDef y” (by simp)
-  cons := .mkSigma “y p ps ih | !qqAndDef y p ih” (by simp)
+  nil := .mkSigma “y. !qqVerumDef y” (by simp)
+  cons := .mkSigma “y p ps ih. !qqAndDef y p ih” (by simp)
 
 def construction : VecRec.Construction V blueprint where
   nil _ := ^⊤
@@ -82,8 +82,8 @@ end qqConj
 namespace QQDisj
 
 def blueprint : VecRec.Blueprint 0 where
-  nil := .mkSigma “y | !qqFalsumDef y” (by simp)
-  cons := .mkSigma “y p ps ih | !qqOrDef y p ih” (by simp)
+  nil := .mkSigma “y. !qqFalsumDef y” (by simp)
+  cons := .mkSigma “y p ps ih. !qqOrDef y p ih” (by simp)
 
 def construction : VecRec.Construction V blueprint where
   nil _ := ^⊥
@@ -147,8 +147,8 @@ section substItr
 namespace SubstItr
 
 def blueprint : PR.Blueprint 2 where
-  zero := .mkSigma “y w p | y = 0” (by simp)
-  succ := .mkSigma “y ih k w p | ∃ numeral, !numeralDef numeral k ∧ ∃ v, !consDef v numeral w ∧
+  zero := .mkSigma “y w p. y = 0” (by simp)
+  succ := .mkSigma “y ih k w p. ∃ numeral, !numeralDef numeral k ∧ ∃ v, !consDef v numeral w ∧
     ∃ sp, !(Language.lDef ℒₒᵣ).substsDef sp v p ∧ !consDef y sp ih” (by simp)
 
 def construction : PR.Construction V blueprint where
@@ -280,7 +280,7 @@ def qqVerums (k : V) : V := ^⋀ repeatVec ^⊤ k
 section
 
 def _root_.LO.FirstOrder.Arith.qqVerumsDef : 𝚺₁.Semisentence 2 := .mkSigma
-  “y k | ∃ verum, !qqVerumDef verum ∧ ∃ vs, !repeatVecDef vs verum k ∧ !qqConjDef y vs” (by simp)
+  “y k. ∃ verum, !qqVerumDef verum ∧ ∃ vs, !repeatVecDef vs verum k ∧ !qqConjDef y vs” (by simp)
 
 lemma qqVerums_defined : 𝚺₁-Function₁ (qqVerums : V → V) via qqVerumsDef :=
   fun v ↦ by simp [qqVerumsDef]; rfl

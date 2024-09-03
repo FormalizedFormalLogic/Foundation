@@ -68,7 +68,7 @@ private lemma seqProduct_graph (t s a : V) :
         |>.mpr (mem_seqProduct_iff.mp hx)⟩
 
 def _root_.LO.FirstOrder.Arith.seqProductDef : 𝚺₁.Semisentence 3 := .mkSigma
-  “t s a | ∃ e, !expDef e (2 * s + a + 1)² ∧ ∀ x <⁺ t + s + e, x ∈ t ↔ ∃ v ∈' s, ∃ u ∈' a, !seqConsDef x v u”
+  “t s a. ∃ e, !expDef e (2 * s + a + 1)² ∧ ∀ x <⁺ t + s + e, x ∈ t ↔ ∃ v ∈' s, ∃ u ∈' a, !seqConsDef x v u”
   (by simp [Hierarchy.iff_iff])
 
 lemma seqProduct_defined : 𝚺₁-Function₂ (seqProduct : V → V → V) via seqProductDef := by
@@ -82,8 +82,8 @@ instance seqProduct_definable : 𝚺₁-Function₂ (seqProduct : V → V → V)
 end
 
 def seqExp.formulae : PR.Blueprint 1 where
-  zero := .mkSigma “y x | y = 1” (by simp)
-  succ := .mkSigma “y ih n x | !seqProductDef y ih x” (by simp)
+  zero := .mkSigma “y x. y = 1” (by simp)
+  succ := .mkSigma “y ih n x. !seqProductDef y ih x” (by simp)
 
 def seqExp.construction : PR.Construction V seqExp.formulae where
   zero := fun _ ↦ {∅}

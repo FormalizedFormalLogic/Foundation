@@ -30,15 +30,12 @@ open Lean PrettyPrinter Delaborator
 
 syntax:max "let " ident " := " term:max first_order_term:61* "; " first_order_formula:0 : first_order_formula
 syntax:max "let' " ident " := " term:max first_order_term:61* "; " first_order_formula:0 : first_order_formula
-syntax:max "if " first_order_formula:0 " then " first_order_formula:0 " else " first_order_formula:0 : first_order_formula
 
 macro_rules
-  | `(“ $binders* | let $x:ident := $f:term $vs:first_order_term* ; $p:first_order_formula ”) =>
-    `(“ $binders* | ∃ $x, !$f:term #0 $vs:first_order_term* ∧ $p ”)
-  | `(“ $binders* | let' $x:ident := $f:term $vs:first_order_term* ; $p:first_order_formula ”) =>
-    `(“ $binders* | ∀ $x, !$f:term #0 $vs:first_order_term* → $p ”)
-  | `(“ $binders* | if $c:first_order_formula then $p:first_order_formula else $q:first_order_formula ”) =>
-    `(Semiformula.ifElse “ $binders* | $c ” “ $binders* | $p ” “ $binders* | $q ”)
+  | `(⤫formula[$binders* | $fbinders* | let $x:ident := $f:term $vs:first_order_term* ; $p:first_order_formula]) =>
+    `(⤫formula[$binders* | $fbinders* | ∃ $x, !$f:term #0 $vs:first_order_term* ∧ $p])
+  | `(⤫formula[$binders* | $fbinders* | let' $x:ident := $f:term $vs:first_order_term* ; $p:first_order_formula]) =>
+    `(⤫formula[$binders* | $fbinders* | ∀ $x, !$f:term #0 $vs:first_order_term* → $p])
 
 end
 
@@ -54,11 +51,15 @@ end Arith.Hierarchy
 
 namespace Theory
 
-variable (L : Language) [L.Eq]
+inductive CobhamR0' : Theory ℒₒᵣ
+  | eq_refl : CobhamR0' “∀ x, x = x”
+  | replace (p : SyntacticSemiformula ℒₒᵣ 1) : CobhamR0' “∀ x y, x = y → !p x → !p y”
+  | Ω₁ (n m : ℕ)  : CobhamR0' “↑n + ↑m = ↑(n + m)”
+  | Ω₂ (n m : ℕ)  : CobhamR0' “↑n * ↑m = ↑(n * m)”
+  | Ω₃ (n m : ℕ)  : n ≠ m → CobhamR0' “↑n ≠ ↑m”
+  | Ω₄ (n : ℕ) : CobhamR0' “∀ x, x < ↑n ↔ ⋁ i, x = ↑(i : Fin n)”
 
-inductive EQ₀ : Theory L
-  | reflAx : EQ₀ “∀ x, x = x”
-  | replaceAx (p : Semisentence L 1) : EQ₀ “∀ x y, x = y → !p x → !p y”
+notation "𝐑₀'" => CobhamR0'
 
 end Theory
 
@@ -96,7 +97,7 @@ variable {L V}
     (Language.Theory.singleton V L p).set = {⌜p⌝} := rfl
 
 def Language.Theory.singletonDef (p : FirstOrder.SyntacticFormula L) : L.lDef.TDef where
-  ch := .ofZero (.mkSigma “x | x = ↑⌜p⌝” (by simp)) _
+  ch := .ofZero (.mkSigma “x. x = ↑⌜p⌝” (by simp)) _
 
 instance const_defined_const (p : FirstOrder.SyntacticFormula L) : (Language.Theory.singleton V L p).Defined (Language.Theory.singletonDef p) where
   defined := .of_zero (by intro v; simp [numeral_eq_natCast, coe_quote])
@@ -123,8 +124,8 @@ def Language.Scheme.toTheory (φ : L.Scheme) : L.Theory where
 
 def _root_.LO.FirstOrder.Arith.LDef.SchemeDef.toTDef {pL : LDef} (ps : pL.SchemeDef) : pL.TDef where
   ch := .mkDelta
-    (.mkSigma “p | ∃ x, ∃ p', !ps.core p' x ∧ ∃ vs, !qqVerumsDef vs x ∧ !qqAndDef p p' vs” (by simp))
-    (.mkPi “p | ∃ x <⁺ p, ∀ p', !ps.core p' x → ∀ vs, !qqVerumsDef vs x → !qqAndDef p p' vs”  (by simp))
+    (.mkSigma “p. ∃ x, ∃ p', !ps.core p' x ∧ ∃ vs, !qqVerumsDef vs x ∧ !qqAndDef p p' vs” (by simp))
+    (.mkPi “p. ∃ x <⁺ p, ∀ p', !ps.core p' x → ∀ vs, !qqVerumsDef vs x → !qqAndDef p p' vs”  (by simp))
 
 instance scheme_defined_scheme (φ : L.Scheme) {ps : pL.SchemeDef} [φ.Defined ps] : φ.toTheory.Defined ps.toTDef where
   defined := ⟨by
@@ -141,6 +142,10 @@ variable (φ : L.Scheme) (c : pL.SchemeDef) [φ.Defined c]
 lemma Language.Scheme.mem_toTheory (x : V) :
     φ.scheme x ⋏ verums x ∈' φ.toTheory := Set.mem_range_self _
 
+lemma Language.Scheme.mem_toTheory_iff {z : V} :
+    z ∈ φ.toTheory ↔ ∃ x, (φ.scheme x ⋏ verums x).val = z := by
+  simp [Language.Scheme.toTheory, Language.Theory.mem_def]
+
 end scheme
 
 section union
@@ -150,14 +155,22 @@ variable {L : Arith.Language V} {pL : LDef} [Arith.Language.Defined L pL]
 def Language.Theory.union (T U : L.Theory) : L.Theory where
   set := T.set ∪ U.set
 
-@[simp] lemma Language.Theory.mem_union_iff (x : V) (T U : L.Theory) : x ∈ T.union U ↔ x ∈ T ∨ x ∈ U := Set.mem_union _ _ _
+instance : Add L.Theory := ⟨Language.Theory.union⟩
 
-@[simp] lemma Language.TTheory.tmem_union_iff (x : L.Formula) (T U : L.Theory) : x ∈' T.union U ↔ x ∈' T ∨ x ∈' U := Set.mem_union _ _ _
+@[simp] lemma Language.Theory.def_def (T U : L.Theory) : (T + U).set = T.set ∪ U.set := rfl
+
+@[simp] lemma Language.Theory.mem_union_iff (x : V) (T U : L.Theory) : x ∈ T + U ↔ x ∈ T ∨ x ∈ U := Set.mem_union _ _ _
+
+@[simp] lemma Language.TTheory.tmem_union_iff (x : L.Formula) (T U : L.Theory) : x ∈' T + U ↔ x ∈' T ∨ x ∈' U := Set.mem_union _ _ _
 
 def _root_.LO.FirstOrder.Arith.LDef.TDef.union {pL : LDef} (t u : pL.TDef) : pL.TDef where
   ch  := t.ch.or u.ch
 
-instance union_Defined_union (T U : L.Theory) {t u : pL.TDef} [T.Defined t] [U.Defined u] : (T.union U).Defined (t.union u) where
+instance : Add (pL.TDef) := ⟨Arith.LDef.TDef.union⟩
+
+@[simp] lemma _root_.LO.FirstOrder.Arith.LDef.add_ch {t u : pL.TDef} : (t + u).ch = t.ch.or u.ch := rfl
+
+instance union_Defined_union (T U : L.Theory) {t u : pL.TDef} [T.Defined t] [U.Defined u] : (T + U).Defined (t + u) where
   defined := ⟨by
     simp [Arith.LDef.TDef.union]
     apply HierarchySymbol.Semiformula.ProperOn.or
@@ -172,7 +185,7 @@ end union
 
 namespace Formalized
 
-namespace Theory.EQ
+namespace Theory.R₀'
 
 def eqRefl : ⌜ℒₒᵣ⌝[V].Theory := Language.Theory.singleton V ℒₒᵣ “∀ x, x = x”
 
@@ -181,12 +194,42 @@ def eqScheme : ⌜ℒₒᵣ⌝[V].Scheme where
     let p : ⌜ℒₒᵣ⌝[V].Semiformula (0 + 1) := ⟨p, by simp [hp]⟩
     (#'1 =' #'0 ⟶ p^/[(#'1).sing] ⟶ p^/[(#'0).sing]).all.all else ⊤
 
-@[simp] lemma eqScheme_scheme (p : ⌜ℒₒᵣ⌝[V].Semiformula (0 + 1)) :
-    eqScheme.scheme p.val = (#'1 =' #'0 ⟶ p^/[(#'1).sing] ⟶ p^/[(#'0).sing]).all.all := by
-  simp [eqScheme, by simpa using p.prop]
+def eqSchemes :
+    FirstOrder.Theory.Delta1Definable {“∀ x y, x = y → !p x → !p y” | p : SyntacticSemiformula ℒₒᵣ 1} where
+  ch := .mkDelta
+    (.mkSigma
+      “p.
+      ∃ q <⁺ p, !p⌜ℒₒᵣ⌝.isSemiformulaDef.sigma 1 q ∧
+      let x0 := qqBvarDef 0;
+      let x1 := qqBvarDef 1;
+      let eq := qqEQDef x1 x0;
+      let v0 := mkVec₁Def x0;
+      let v1 := mkVec₁Def x1;
+      let q0 := p⌜ℒₒᵣ⌝.substsDef v1 q;
+      let q1 := p⌜ℒₒᵣ⌝.substsDef v0 q;
+      let imp0 := p⌜ℒₒᵣ⌝.impDef q0 q1;
+      let imp1 := p⌜ℒₒᵣ⌝.impDef eq imp0;
+      let all0 := qqAllDef imp1;
+      !qqAllDef p all0” (by simp))
+    (.mkPi
+      “p.
+      ∃ q <⁺ p, !p⌜ℒₒᵣ⌝.isSemiformulaDef.pi 1 q ∧
+      let' x0 := qqBvarDef 0;
+      let' x1 := qqBvarDef 1;
+      let' eq := qqEQDef x1 x0;
+      let' v0 := mkVec₁Def x0;
+      let' v1 := mkVec₁Def x1;
+      let' q0 := p⌜ℒₒᵣ⌝.substsDef v1 q;
+      let' q1 := p⌜ℒₒᵣ⌝.substsDef v0 q;
+      let' imp0 := p⌜ℒₒᵣ⌝.impDef q0 q1;
+      let' imp1 := p⌜ℒₒᵣ⌝.impDef eq imp0;
+      let' all0 := qqAllDef imp1;
+      !qqAllDef p all0” (by simp))
+  mem_iff := by { simp [HierarchySymbol.Semiformula.val_sigma, (Language.isSemiformula_defined (LOR (V := ℕ ))).df.iff, (Language.isSemiformula_defined (LOR (V := V))).proper.iff',
+      (Language.substs_defined (LOR (V := ℕ))).df.iff, (Language.imp_defined (LOR (V := ℕ))).df.iff] }
 
 def eqSchemeDef : p⌜ℒₒᵣ⌝.SchemeDef where
-  core := .mkSigma “σ p |
+  core := .mkSigma “σ p.
     ( !p⌜ℒₒᵣ⌝.isSemiformulaDef.pi 1 p →
       let x0 := qqBvarDef 0;
       let x1 := qqBvarDef 1;
@@ -200,7 +243,7 @@ def eqSchemeDef : p⌜ℒₒᵣ⌝.SchemeDef where
       let all0 := qqAllDef imp1;
       !qqAllDef σ all0 ) ∧
     ( ¬!p⌜ℒₒᵣ⌝.isSemiformulaDef.sigma 1 p → !qqVerumDef σ)” (by simp)
-
+/--/
 instance : (eqScheme (V := V)).Defined eqSchemeDef where
   defined := by
     intro v
@@ -210,18 +253,182 @@ instance : (eqScheme (V := V)).Defined eqSchemeDef where
       (Language.substs_defined (LOR (V := V))).df.iff, (Language.imp_defined (LOR (V := V))).df.iff]
     by_cases h : ⌜ℒₒᵣ⌝.IsSemiformula 1 (v 1) <;> simp [h]
 
-end Theory.EQ
+def addScheme : ⌜ℒₒᵣ⌝[V].Scheme where
+  scheme := fun x ↦
+    let n := π₁ x
+    let m := π₂ x
+    (n + m : ⌜ℒₒᵣ⌝[V].Semiterm 0) =' ↑(n + m)
+
+def addScheme.def : p⌜ℒₒᵣ⌝.SchemeDef where
+  core := .mkSigma “σ x.
+    let n := pi₁Def x;
+    let m := pi₂Def x;
+    let numn := numeralDef n;
+    let numm := numeralDef m;
+    let lhd := qqAddDef numn numm;
+    let rhd := numeralDef (n + m);
+    !qqEQDef σ lhd rhd” (by simp)
+
+instance : (addScheme (V := V)).Defined addScheme.def where
+  defined := by intro v; simp [addScheme, addScheme.def]
+
+@[simp] lemma addScheme_scheme (n m : V) :
+    addScheme.scheme ⟪n, m⟫ = (n + m : ⌜ℒₒᵣ⌝[V].Semiterm 0) =' ↑(n + m) := by
+  simp [addScheme]
+
+def mulScheme : ⌜ℒₒᵣ⌝[V].Scheme where
+  scheme := fun x ↦
+    let n := π₁ x
+    let m := π₂ x
+    (n * m : ⌜ℒₒᵣ⌝[V].Semiterm 0) =' ↑(n * m)
+
+def mulScheme.def : p⌜ℒₒᵣ⌝.SchemeDef where
+  core := .mkSigma “σ x.
+    let n := pi₁Def x;
+    let m := pi₂Def x;
+    let numn := numeralDef n;
+    let numm := numeralDef m;
+    let lhd := qqMulDef numn numm;
+    let rhd := numeralDef (n * m);
+    !qqEQDef σ lhd rhd” (by simp)
+
+instance : (mulScheme (V := V)).Defined mulScheme.def where
+  defined := by intro v; simp [mulScheme, mulScheme.def]
+
+@[simp] lemma mulScheme_scheme (n m : V) :
+    mulScheme.scheme ⟪n, m⟫ = (n * m : ⌜ℒₒᵣ⌝[V].Semiterm 0) =' ↑(n * m) := by
+  simp [mulScheme]
+
+def neqScheme : ⌜ℒₒᵣ⌝[V].Scheme where
+  scheme := fun x ↦
+    let n := π₁ x
+    let m := π₂ x
+    if n ≠ m then ↑n ≠' ↑m else ⊤
+
+def neqScheme.def : p⌜ℒₒᵣ⌝.SchemeDef where
+  core := .mkSigma “σ x.
+    let n := pi₁Def x;
+    let m := pi₂Def x;
+    ( n ≠ m →
+      let numn := numeralDef n;
+      let numm := numeralDef m;
+      !qqNEQDef σ numn numm ) ∧
+    ( n = m → !qqVerumDef σ )” (by simp)
+
+instance : (neqScheme (V := V)).Defined neqScheme.def where
+  defined := by
+    intro v; simp [neqScheme, neqScheme.def]
+    by_cases h : π₁ (v 1) = π₂ (v 1) <;> simp [h]
+
+@[simp] lemma neqScheme_scheme {n m : V} (h : n ≠ m) :
+    neqScheme.scheme ⟪n, m⟫ = ↑n ≠' ↑m := by
+  simp [neqScheme, h]
+
+def ltNumeralScheme : ⌜ℒₒᵣ⌝[V].Scheme where
+  scheme := fun n ↦ (#'0 <' ↑n ⟷ (tSubstItr (#'0).sing (#'1 =' #'0) n).disj).all
+
+def ltNumeralScheme.def : p⌜ℒₒᵣ⌝.SchemeDef where
+  core := .mkSigma “σ n.
+    let numn := numeralDef n;
+    let x₀ := qqBvarDef 0;
+    let x₁ := qqBvarDef 1;
+    let lhd := qqLTDef x₀ numn;
+    let v := consDef x₀ 0;
+    let e := qqEQDef x₁ x₀;
+    let ti := substItrDef v e n;
+    let rhd := qqDisjDef ti;
+    let iff := p⌜ℒₒᵣ⌝.qqIffDef lhd rhd;
+    !qqAllDef σ iff” (by simp)
+
+instance : (ltNumeralScheme (V := V)).Defined ltNumeralScheme.def where
+  defined := by
+    intro v; simp [ltNumeralScheme, ltNumeralScheme.def,
+      (Language.iff_defined (LOR (V := V))).df.iff]
+
+end Theory.R₀'
 
 variable (V)
 
-def Theory.EQ : ⌜ℒₒᵣ⌝[V].Theory := (Language.Theory.singleton V ℒₒᵣ “∀ x, x = x”).union Theory.EQ.eqScheme.toTheory
+def Theory.R₀' : ⌜ℒₒᵣ⌝[V].Theory := (Language.Theory.singleton V ℒₒᵣ “∀ x, x = x”)
+    + Theory.R₀'.eqScheme.toTheory
+    + Theory.R₀'.addScheme.toTheory
+    + Theory.R₀'.mulScheme.toTheory
+    + Theory.R₀'.neqScheme.toTheory
+    + Theory.R₀'.ltNumeralScheme.toTheory
 
-def Theory.Eq.def : p⌜ℒₒᵣ⌝.TDef := (Language.Theory.singletonDef (L := ℒₒᵣ) “∀ x, x = x”).union Theory.EQ.eqSchemeDef.toTDef
+def Theory.R₀'.def : p⌜ℒₒᵣ⌝.TDef := (Language.Theory.singletonDef (L := ℒₒᵣ) “∀ x, x = x”)
+    + Theory.R₀'.eqSchemeDef.toTDef
+    + Theory.R₀'.addScheme.def.toTDef
+    + Theory.R₀'.mulScheme.def.toTDef
+    + Theory.R₀'.neqScheme.def.toTDef
+    + Theory.R₀'.ltNumeralScheme.def.toTDef
 
-instance Theory.EQ.defined : (Theory.EQ V).Defined Theory.Eq.def := by apply union_Defined_union
+instance Theory.R₀'.defined : (Theory.R₀' V).Defined Theory.R₀'.def := by apply union_Defined_union
+
+#check verums
+
+lemma byvbuyvu (p : ℕ) :
+    p ∈ (Theory.R₀' ℕ) →
+      (∃ k, p = ⌜((List.replicate k ⊤).conj : SyntacticFormula ℒₒᵣ)⌝) ∨
+      p = ⌜(“∀ x, x = x” : SyntacticFormula ℒₒᵣ)⌝ ∨
+      (∃ q : SyntacticSemiformula ℒₒᵣ 1, p = ⌜(“∀ x y, x = y → !q x → !q y” : SyntacticFormula ℒₒᵣ) ⋏ (List.replicate ⌜q⌝ ⊤).conj⌝) ∨
+      (∃ n m : ℕ, p = ⌜(“↑n + ↑m = ↑(n + m)” : SyntacticFormula ℒₒᵣ) ⋏ (List.replicate ⟪n, m⟫ ⊤).conj⌝) ∨
+      (∃ x, (Theory.R₀'.mulScheme.scheme x).val ^⋏ qqVerums x = p) ∨
+      (∃ x, (Theory.R₀'.neqScheme.scheme x).val ^⋏ qqVerums x = p) ∨
+      ∃ x, (Theory.R₀'.ltNumeralScheme.scheme x).val ^⋏ qqVerums x = p := by {
+  simp [Theory.R₀', or_assoc, Language.Scheme.mem_toTheory_iff]
+  · rintro (rfl | ⟨x, rfl⟩ | ⟨x, rfl⟩ | _)
+    · right; left; rfl
+    · by_cases h : ⌜ℒₒᵣ⌝.IsSemiformula 1 x
+      · right; right; left
+        rcases h.sound with ⟨q, rfl⟩
+        use q
+        simp [Theory.R₀'.eqScheme, h, Semiformula.quote_verums]
+      · left; use x + 1
+        simp [Theory.R₀'.eqScheme, h, Semiformula.quote_verums]
+    · right; right; right; left
+      use π₁ x; use π₂ x
+      simp [Theory.R₀'.addScheme, Semiformula.quote_verums]
+
+
+                 }
+
+instance  fefed : 𝐑₀'.Delta1Definable := LO.FirstOrder.Theory.Delta1Definable.intro'' _
+  ((Language.Theory.singletonDef (L := ℒₒᵣ) “∀ x, x = x”)
+    + Theory.R₀'.eqSchemeDef.toTDef
+    + Theory.R₀'.addScheme.def.toTDef
+    + Theory.R₀'.mulScheme.def.toTDef
+    + Theory.R₀'.neqScheme.def.toTDef
+    + Theory.R₀'.ltNumeralScheme.def.toTDef)
+  (fun V _ _ ↦
+    (Language.Theory.singleton V ℒₒᵣ “∀ x, x = x”)
+    + Theory.R₀'.eqScheme.toTheory
+    + Theory.R₀'.addScheme.toTheory
+    + Theory.R₀'.mulScheme.toTheory
+    + Theory.R₀'.neqScheme.toTheory
+    + Theory.R₀'.ltNumeralScheme.toTheory)
+  (fun V _ _ ↦ by apply union_Defined_union)
+  (fun p ↦ by {
+    /-
+    V : Type u_1
+    inst✝¹ : ORingStruc V
+    inst✝ : V ⊧ₘ* 𝐈𝚺₁
+    p : SyntacticFormula ℒₒᵣ
+    ⊢ p ∈ 𝐑₀' ↔
+      p = (“∀' #0 = #0”) ∨
+        (∃ x, (Theory.R₀'.eqScheme.scheme x).val ^⋏ qqVerums x = ⌜p⌝) ∨
+          (∃ x, (Theory.R₀'.addScheme.scheme x).val ^⋏ qqVerums x = ⌜p⌝) ∨
+            (∃ x, (Theory.R₀'.mulScheme.scheme x).val ^⋏ qqVerums x = ⌜p⌝) ∨
+              (∃ x, (Theory.R₀'.neqScheme.scheme x).val ^⋏ qqVerums x = ⌜p⌝) ∨
+                ∃ x, (Theory.R₀'.ltNumeralScheme.scheme x).val ^⋏ qqVerums x = ⌜p⌝
+    -/
+    simp [or_assoc, Language.Scheme.mem_toTheory_iff]
+    simp [Theory.R₀'.eqScheme]
+    constructor
+   })
 
 variable {V}
-
+/--/
 def TTheory.EQ : ⌜ℒₒᵣ⌝[V].TTheory where
   thy := Theory.EQ V
   pthy := Theory.Eq.def
@@ -246,97 +453,6 @@ end TTheory.EQ
 
 namespace Theory.R₀
 
-def addScheme : ⌜ℒₒᵣ⌝[V].Scheme where
-  scheme := fun x ↦
-    let n := π₁ x
-    let m := π₂ x
-    (n + m : ⌜ℒₒᵣ⌝[V].Semiterm 0) =' ↑(n + m)
-
-def addScheme.def : p⌜ℒₒᵣ⌝.SchemeDef where
-  core := .mkSigma “σ x |
-    let n := pi₁Def x;
-    let m := pi₂Def x;
-    let numn := numeralDef n;
-    let numm := numeralDef m;
-    let lhd := qqAddDef numn numm;
-    let rhd := numeralDef (n + m);
-    !qqEQDef σ lhd rhd” (by simp)
-
-instance : (addScheme (V := V)).Defined addScheme.def where
-  defined := by intro v; simp [Theory.R₀.addScheme, Theory.R₀.addScheme.def]
-
-@[simp] lemma addScheme_scheme (n m : V) :
-    addScheme.scheme ⟪n, m⟫ = (n + m : ⌜ℒₒᵣ⌝[V].Semiterm 0) =' ↑(n + m) := by
-  simp [addScheme]
-
-def mulScheme : ⌜ℒₒᵣ⌝[V].Scheme where
-  scheme := fun x ↦
-    let n := π₁ x
-    let m := π₂ x
-    (n * m : ⌜ℒₒᵣ⌝[V].Semiterm 0) =' ↑(n * m)
-
-def mulScheme.def : p⌜ℒₒᵣ⌝.SchemeDef where
-  core := .mkSigma “σ x |
-    let n := pi₁Def x;
-    let m := pi₂Def x;
-    let numn := numeralDef n;
-    let numm := numeralDef m;
-    let lhd := qqMulDef numn numm;
-    let rhd := numeralDef (n * m);
-    !qqEQDef σ lhd rhd” (by simp)
-
-instance : (mulScheme (V := V)).Defined mulScheme.def where
-  defined := by intro v; simp [Theory.R₀.mulScheme, Theory.R₀.mulScheme.def]
-
-@[simp] lemma mulScheme_scheme (n m : V) :
-    mulScheme.scheme ⟪n, m⟫ = (n * m : ⌜ℒₒᵣ⌝[V].Semiterm 0) =' ↑(n * m) := by
-  simp [mulScheme]
-
-def neqScheme : ⌜ℒₒᵣ⌝[V].Scheme where
-  scheme := fun x ↦
-    let n := π₁ x
-    let m := π₂ x
-    if n ≠ m then ↑n ≠' ↑m else ⊤
-
-def neqScheme.def : p⌜ℒₒᵣ⌝.SchemeDef where
-  core := .mkSigma “σ x |
-    let n := pi₁Def x;
-    let m := pi₂Def x;
-    ( n ≠ m →
-      let numn := numeralDef n;
-      let numm := numeralDef m;
-      !qqNEQDef σ numn numm ) ∧
-    ( n = m → !qqVerumDef σ )” (by simp)
-
-instance : (Theory.R₀.neqScheme (V := V)).Defined Theory.R₀.neqScheme.def where
-  defined := by
-    intro v; simp [Theory.R₀.neqScheme, Theory.R₀.neqScheme.def]
-    by_cases h : π₁ (v 1) = π₂ (v 1) <;> simp [h]
-
-@[simp] lemma neqScheme_scheme {n m : V} (h : n ≠ m) :
-    neqScheme.scheme ⟪n, m⟫ = ↑n ≠' ↑m := by
-  simp [neqScheme, h]
-
-def ltNumeralScheme : ⌜ℒₒᵣ⌝[V].Scheme where
-  scheme := fun n ↦ (#'0 <' ↑n ⟷ (tSubstItr (#'0).sing (#'1 =' #'0) n).disj).all
-
-def ltNumeralScheme.def : p⌜ℒₒᵣ⌝.SchemeDef where
-  core := .mkSigma “σ n |
-    let numn := numeralDef n;
-    let x₀ := qqBvarDef 0;
-    let x₁ := qqBvarDef 1;
-    let lhd := qqLTDef x₀ numn;
-    let v := consDef x₀ 0;
-    let e := qqEQDef x₁ x₀;
-    let ti := substItrDef v e n;
-    let rhd := qqDisjDef ti;
-    let iff := p⌜ℒₒᵣ⌝.qqIffDef lhd rhd;
-    !qqAllDef σ iff” (by simp)
-
-instance : (ltNumeralScheme (V := V)).Defined Theory.R₀.ltNumeralScheme.def where
-  defined := by
-    intro v; simp [ltNumeralScheme, ltNumeralScheme.def,
-      (Language.iff_defined (LOR (V := V))).df.iff]
 
 end Theory.R₀
 
@@ -439,10 +555,10 @@ open Formalized
 
 section
 
-variable (T : SyntacticTheory ℒₒᵣ) [T.Delta1Definable]
+variable (T : Theory ℒₒᵣ) [T.Delta1Definable]
 
 /-- Provability predicate for arithmetic stronger than $\mathbf{R_0}$. -/
-def _root_.LO.FirstOrder.SyntacticTheory.Provableₐ (p : V) : Prop := (T.codeIn V).AddEqAddR₀.Provable p
+def _root_.LO.FirstOrder.Theory.Provableₐ (p : V) : Prop := (T.codeIn V).AddEqAddR₀.Provable p
 
 variable {T}
 
@@ -453,11 +569,11 @@ section
 
 variable (T)
 
-def _root_.LO.FirstOrder.SyntacticTheory.provableₐ : 𝚺₁.Semisentence 1 := .mkSigma
-  “p | !T.tDef.addEqAddR₀Def.prv p” (by simp)
+def _root_.LO.FirstOrder.Theory.provableₐ : 𝚺₁.Semisentence 1 := .mkSigma
+  “p. !T.tDef.addEqAddR₀Def.prv p” (by simp)
 
 lemma provableₐ_defined : 𝚺₁-Predicate (T.Provableₐ : V → Prop) via T.provableₐ := by
-  intro v; simp [FirstOrder.SyntacticTheory.provableₐ, FirstOrder.SyntacticTheory.Provableₐ, (T.codeIn V).AddEqAddR₀.provable_defined.df.iff]
+  intro v; simp [FirstOrder.Theory.provableₐ, FirstOrder.Theory.Provableₐ, (T.codeIn V).AddEqAddR₀.provable_defined.df.iff]
 
 @[simp] lemma eval_provableₐ (v) :
     Semiformula.Evalbm V v T.provableₐ.val ↔ T.Provableₐ (v 0) := (provableₐ_defined T).df.iff v

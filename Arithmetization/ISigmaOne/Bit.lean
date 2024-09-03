@@ -16,7 +16,7 @@ def Bit (i a : V) : Prop := LenBit (exp i) a
 instance : Membership V V := ⟨Bit⟩
 
 def _root_.LO.FirstOrder.Arith.bitDef : 𝚺₀.Semisentence 2 := .mkSigma
-  “x y | ∃ z <⁺ y, !expDef z x ∧ !lenbitDef z y” (by simp)
+  “x y. ∃ z <⁺ y, !expDef z x ∧ !lenbitDef z y” (by simp)
 
 lemma bit_defined : 𝚺₀-Relation ((· ∈ ·) : V → V → Prop) via bitDef := by
   intro v; simp [bitDef, ←le_iff_lt_succ]
@@ -84,20 +84,18 @@ def bexIn (t : Semiterm ℒₒᵣ ξ n) (p : Semiformula ℒₒᵣ ξ (n + 1)) :
 @[simp] lemma Hieralchy.ballIn {Γ m} (t : Semiterm ℒₒᵣ ξ n) (p : Semiformula ℒₒᵣ ξ (n + 1)) :
     Hierarchy Γ m (ballIn t p) ↔ Hierarchy Γ m p := by
   simp only [Arith.ballIn, Rew.bshift_positive, Hierarchy.ball_iff, Hierarchy.imp_iff, and_iff_right_iff_imp]
-  intros
   simp [Semiformula.Operator.operator, operator_mem_def]
 
 @[simp] lemma Hieralchy.bexIn {Γ m} (t : Semiterm ℒₒᵣ ξ n) (p : Semiformula ℒₒᵣ ξ (n + 1)) :
     Hierarchy Γ m (bexIn t p) ↔ Hierarchy Γ m p := by
   simp only [Arith.bexIn, Rew.bshift_positive, Hierarchy.bex_iff, Hierarchy.and_iff, and_iff_right_iff_imp]
-  intros
   simp [Semiformula.Operator.operator, operator_mem_def]
 
 def memRel : 𝚺₀.Semisentence 3 := .mkSigma
-  “R x y | ∃ p <⁺ (x + y + 1)², !pairDef p x y ∧ p ∈ R” (by simp)
+  “R x y. ∃ p <⁺ (x + y + 1)², !pairDef p x y ∧ p ∈ R” (by simp)
 
 def memRel₃ : 𝚺₀.Semisentence 4 := .mkSigma
-  “R x y z | ∃ yz <⁺ (y + z + 1)², !pairDef yz y z ∧ ∃ xyz <⁺ (x + yz + 1)², !pairDef xyz x yz ∧ xyz ∈ R” (by simp)
+  “R x y z. ∃ yz <⁺ (y + z + 1)², !pairDef yz y z ∧ ∃ xyz <⁺ (x + yz + 1)², !pairDef xyz x yz ∧ xyz ∈ R” (by simp)
 
 def memRelOpr : Semiformula.Operator ℒₒᵣ 3 := ⟨memRel.val⟩
 
@@ -111,14 +109,14 @@ syntax:max "∀ " ident " ∈' " first_order_term ", " first_order_formula:0 : f
 syntax:max "∃ " ident " ∈' " first_order_term ", " first_order_formula:0 : first_order_formula
 
 macro_rules
-  | `(“ $binders* | ∀ $x ∈' $t, $p ”) => do
+  | `(⤫formula[ $binders* | $fbinders* | ∀ $x ∈' $t, $p]) => do
     if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
     let binders' := binders.insertAt 0 x
-    `(ballIn ‘ $binders* | $t ’ “ $binders'* | $p ”)
-  | `(“ $binders* | ∃ $x ∈' $t, $p ”) => do
+    `(ballIn ⤫term[ $binders* | $fbinders* | $t] ⤫formula[$binders'* | $fbinders* | $p])
+  | `(⤫formula[ $binders* | $fbinders* | ∃ $x ∈' $t, $p]) => do
     if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
     let binders' := binders.insertAt 0 x
-    `(bexIn ‘ $binders* | $t ’ “ $binders'* | $p ”)
+    `(bexIn ⤫term[$binders* | $fbinders* | $t] ⤫formula[$binders'* | $fbinders* | $p])
 
 syntax:45 first_order_term:45 " ~[" first_order_term "]" first_order_term:0 : first_order_formula
 syntax:45 first_order_term:45 " ≁[" first_order_term "]" first_order_term:0 : first_order_formula
@@ -126,14 +124,14 @@ syntax:45 ":⟪" first_order_term ", " first_order_term "⟫:∈ " first_order_t
 syntax:45 ":⟪" first_order_term ", " first_order_term ", " first_order_term "⟫:∈ " first_order_term:0 : first_order_formula
 
 macro_rules
-  | `(“ $binders* | $t₁:first_order_term ~[ $u:first_order_term ] $t₂:first_order_term ”) =>
-    `(memRelOpr.operator ![‘$binders* | $u’, ‘$binders* | $t₁’, ‘$binders* | $t₂’])
-  | `(“ $binders* | $t₁:first_order_term ≁[ $u:first_order_term ] $t₂:first_order_term ”) =>
-    `(~memRelOpr.operator ![‘$binders* | $u’, ‘$binders* | $t₁’, ‘$binders* | $t₂’])
-  | `(“ $binders* | :⟪$t₁:first_order_term, $t₂:first_order_term⟫:∈ $u:first_order_term ”) =>
-    `(memRelOpr.operator ![‘$binders* | $u’, ‘$binders* | $t₁’, ‘$binders* | $t₂’])
-  | `(“ $binders* | :⟪$t₁:first_order_term, $t₂:first_order_term, $t₃:first_order_term⟫:∈ $u:first_order_term ”) =>
-    `(memRel₃Opr.operator ![‘$binders* | $u’, ‘$binders* | $t₁’, ‘$binders* | $t₂’, ‘$binders* | $t₃’])
+  | `(⤫formula[ $binders* | $fbinders* | $t₁:first_order_term ~[ $u:first_order_term ] $t₂:first_order_term]) =>
+    `(memRelOpr.operator ![⤫term[$binders* | $fbinders* | $u], ⤫term[$binders* | $fbinders* | $t₁], ⤫term[$binders* | $fbinders* | $t₂]])
+  | `(⤫formula[ $binders* | $fbinders* | $t₁:first_order_term ≁[ $u:first_order_term ] $t₂:first_order_term]) =>
+    `(~memRelOpr.operator ![⤫term[$binders* | $fbinders* | $u], ⤫term[$binders* | $fbinders* | $t₁], ⤫term[$binders* | $fbinders* | $t₂]])
+  | `(⤫formula[ $binders* | $fbinders* | :⟪$t₁:first_order_term, $t₂:first_order_term⟫:∈ $u:first_order_term]) =>
+    `(memRelOpr.operator ![⤫term[$binders* | $fbinders* | $u], ⤫term[$binders* | $fbinders* | $t₁], ⤫term[$binders* | $fbinders* | $t₂]])
+  | `(⤫formula[ $binders* | $fbinders* | :⟪$t₁:first_order_term, $t₂:first_order_term, $t₃:first_order_term⟫:∈ $u:first_order_term]) =>
+    `(memRel₃Opr.operator ![⤫term[$binders* | $fbinders* | $u], ⤫term[$binders* | $fbinders* | $t₁], ⤫term[$binders* | $fbinders* | $t₂], ⤫term[$binders* | $fbinders* | $t₃]])
 end
 
 @[simp] lemma Hierarchy.memRel {t₁ t₂ u : Semiterm ℒₒᵣ μ n} : Hierarchy Γ s “!!t₁ ~[ !!u ] !!t₂” := by
@@ -142,7 +140,7 @@ end
 @[simp] lemma Hierarchy.memRel₃ {t₁ t₂ t₃ u : Semiterm ℒₒᵣ μ n} : Hierarchy Γ s “:⟪!!t₁, !!t₂, !!t₃⟫:∈ !!u” := by
   simp[Semiformula.Operator.operator, Matrix.fun_eq_vec₂, operator_mem_def, memRel₃Opr]
 
-variable {V : Type*} [Zero V] [One V] [Add V] [Mul V] [LT V] [V ⊧ₘ* 𝐈𝚺₁]
+variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
 open LO.Arith
 
@@ -266,7 +264,7 @@ lemma insert_graph (b i a : V) :
       rintro x _ rfl rfl; rfl ⟩
 
 def _root_.LO.FirstOrder.Arith.insertDef : 𝚺₀.Semisentence 3 := .mkSigma
-  “b i a | (i ∈ a ∧ b = a) ∨ (i ∉ a ∧ ∃ e <⁺ b, !expDef e i ∧ b = a + e)” (by simp)
+  “b i a. (i ∈ a ∧ b = a) ∨ (i ∉ a ∧ ∃ e <⁺ b, !expDef e i ∧ b = a + e)” (by simp)
 
 lemma insert_defined : 𝚺₀-Function₂ (insert : V → V → V) via insertDef := by
   intro v; simp [insertDef, insert_graph]
@@ -325,7 +323,7 @@ lemma lt_exp_iff {a i : V} : a < exp i ↔ ∀ j ∈ a, j < i :=
 instance : HasSubset V := ⟨fun a b ↦ ∀ ⦃i⦄, i ∈ a → i ∈ b⟩
 
 def _root_.LO.FirstOrder.Arith.bitSubsetDef : 𝚺₀.Semisentence 2 := .mkSigma
-  “a b | ∀ i < a, i ∈ a → i ∈ b” (by simp)
+  “a b. ∀ i < a, i ∈ a → i ∈ b” (by simp)
 
 lemma bitSubset_defined : 𝚺₀-Relation ((· ⊆ ·) : V → V → Prop) via bitSubsetDef := by
   intro v; simp [bitSubsetDef]
@@ -383,7 +381,7 @@ private lemma under_graph (x y : V) : y = under x ↔ y + 1 = exp x :=
   ⟨by rintro rfl; simp [under, sub_add_self_of_le], by intro h; have := congr_arg (· - 1) h; simp [under] at this ⊢; exact this⟩
 
 def _root_.LO.FirstOrder.Arith.underDef : 𝚺₀.Semisentence 2 := .mkSigma
-  “y x | !expDef.val (y + 1) x” (by simp)
+  “y x. !expDef.val (y + 1) x” (by simp)
 
 lemma under_defined : 𝚺₀-Function₁ (under : V → V) via underDef := by
   intro v; simp [underDef, under_graph]

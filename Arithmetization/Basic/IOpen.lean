@@ -41,7 +41,7 @@ lemma open_leastNumber {P : V → Prop}
 lemma div_exists_unique_pos (a : V) {b} (pos : 0 < b) : ∃! u, b * u ≤ a ∧ a < b * (u + 1) := by
   have : ∃ u, b * u ≤ a ∧ a < b * (u + 1) := by
     have : a < b * (a + 1) → ∃ u, b * u ≤ a ∧ a < b * (u + 1) := by
-      simpa using open_leastNumber (P := fun u ↦ b * u ≤ a) ⟨“x | &b * x ≤ &a”, by simp, by intro x; simp⟩
+      simpa using open_leastNumber (P := fun u ↦ b * u ≤ a) ⟨“x. &b * x ≤ &a”, by simp, by intro x; simp⟩
     simp at this
     have hx : a < b * (a + 1) := by
       have : a + 0 < b * a + b :=
@@ -133,7 +133,7 @@ lemma div_graph {a b c : V} : c = a / b ↔ ((0 < b → b * c ≤ a ∧ a < b * 
   Classical.choose!_eq_iff _
 
 def _root_.LO.FirstOrder.Arith.divDef : 𝚺₀.Semisentence 3 :=
-  .mkSigma “c a b | (0 < b → b * c ≤ a ∧ a < b * (c + 1)) ∧ (b = 0 → c = 0)” (by simp[Hierarchy.pi_zero_iff_sigma_zero])
+  .mkSigma “c a b. (0 < b → b * c ≤ a ∧ a < b * (c + 1)) ∧ (b = 0 → c = 0)” (by simp[Hierarchy.pi_zero_iff_sigma_zero])
 
 lemma div_defined : 𝚺₀-Function₂ ((· / ·) : V → V → V) via divDef := by
   intro v; simp[div_graph, divDef, Matrix.vecHead, Matrix.vecTail]
@@ -289,7 +289,7 @@ scoped instance : Mod V := ⟨rem⟩
 lemma mod_def (a b : V) : a % b = a - b * (a / b) := rfl
 
 def _root_.LO.FirstOrder.Arith.remDef : 𝚺₀.Semisentence 3 :=
-  .mkSigma “c a b | ∃ d <⁺ a, !divDef.val d a b ∧ !subDef.val c a (b * d)” (by simp)
+  .mkSigma “c a b. ∃ d <⁺ a, !divDef.val d a b ∧ !subDef.val c a (b * d)” (by simp)
 
 lemma rem_graph (a b c : V) : a = b % c ↔ ∃ x ≤ b, (x = b / c ∧ a = b - c * x) := by
   simp [mod_def]; constructor
@@ -428,7 +428,7 @@ section sqrt
 lemma sqrt_exists_unique (a : V) : ∃! x, x * x ≤ a ∧ a < (x + 1) * (x + 1) := by
   have : ∃ x, x * x ≤ a ∧ a < (x + 1) * (x + 1) := by
     have : a < (a + 1) * (a + 1) → ∃ x, x * x ≤ a ∧ a < (x + 1) * (x + 1) := by
-      simpa using open_leastNumber (P := λ x ↦ x * x ≤ a) ⟨“x | x * x ≤ &a”, by simp, by simp⟩
+      simpa using open_leastNumber (P := λ x ↦ x * x ≤ a) ⟨“x. x * x ≤ &a”, by simp, by simp⟩
     have hn : a < (a + 1) * (a + 1) := calc
       a ≤ a * a             := le_mul_self a
       _ < a * a + 1         := lt_add_one (a * a)
@@ -457,7 +457,7 @@ prefix:75 "√" => sqrt
 lemma sqrt_graph {a b : V} : b = √a ↔ b * b ≤ a ∧ a < (b + 1) * (b + 1) := Classical.choose!_eq_iff _
 
 def _root_.LO.FirstOrder.Arith.sqrtDef : 𝚺₀.Semisentence 2 :=
-  .mkSigma “b a | b * b ≤ a ∧ a < (b + 1) * (b + 1)” (by simp[Hierarchy.pi_zero_iff_sigma_zero])
+  .mkSigma “b a. b * b ≤ a ∧ a < (b + 1) * (b + 1)” (by simp[Hierarchy.pi_zero_iff_sigma_zero])
 
 lemma sqrt_defined : 𝚺₀-Function₁ (λ a : V ↦ √a) via sqrtDef := by
   intro v; simp[sqrt_graph, sqrtDef, Matrix.vecHead, Matrix.vecTail]
@@ -564,7 +564,7 @@ lemma pair_graph {a b c : V} :
   · simp [h, show b ≤ a from by simpa using h]
 
 def _root_.LO.FirstOrder.Arith.pairDef : 𝚺₀.Semisentence 3 :=
-  .mkSigma “c a b | (a < b ∧ c = b * b + a) ∨ (b ≤ a ∧ c = a * a + a + b)” (by simp)
+  .mkSigma “c a b. (a < b ∧ c = b * b + a) ∨ (b ≤ a ∧ c = a * a + a + b)” (by simp)
 
 lemma pair_defined : 𝚺₀-Function₂ (λ a b : V ↦ ⟪a, b⟫) via pairDef := by
   intro v; simp [pair_graph, pairDef]
@@ -575,7 +575,7 @@ lemma pair_defined : 𝚺₀-Function₂ (λ a b : V ↦ ⟪a, b⟫) via pairDef
 instance pair_definable : 𝚺₀-Function₂ (pair : V → V → V) := pair_defined.to_definable
 
 instance : Bounded₂ (pair : V → V → V) :=
-  ⟨‘x y | (y * y + x) + (x * x + x + y)’, by intro v; simp [pair]; split_ifs <;> try simp [pair, *]⟩
+  ⟨‘x y. (y * y + x) + (x * x + x + y)’, by intro v; simp [pair]; split_ifs <;> try simp [pair, *]⟩
 
 def unpair (a : V) : V × V := if a - √a * √a < √a then (a - √a * √a, √a) else (√a, a - √a * √a - √a)
 
@@ -634,10 +634,10 @@ instance : Bounded₁ (pi₁ : V → V) := ⟨#0, by intro v; simp⟩
 instance : Bounded₁ (pi₂ : V → V) := ⟨#0, by intro v; simp⟩
 
 def _root_.LO.FirstOrder.Arith.pi₁Def : 𝚺₀.Semisentence 2 :=
-  .mkSigma “x p | ∃ y <⁺ p, !pairDef p x y” (by simp)
+  .mkSigma “x p. ∃ y <⁺ p, !pairDef p x y” (by simp)
 
 def _root_.LO.FirstOrder.Arith.pi₂Def : 𝚺₀.Semisentence 2 :=
-  .mkSigma “y p | ∃ x <⁺ p, !pairDef p x y” (by simp)
+  .mkSigma “y p. ∃ x <⁺ p, !pairDef p x y” (by simp)
 
 lemma pi₁_defined : 𝚺₀-Function₁ (pi₁ : V → V) via pi₁Def := by
   intro v; simp [pi₁Def]
@@ -711,16 +711,16 @@ lemma pair_lt_pair {a₁ a₂ b₁ b₂ : V} (ha : a₁ < a₂) (hb : b₁ < b�
 section
 
 def _root_.LO.FirstOrder.Arith.pair₃Def : 𝚺₀.Semisentence 4 :=
-  .mkSigma “p a b c | ∃ bc <⁺ p, !pairDef p a bc ∧ !pairDef bc b c” (by simp)
+  .mkSigma “p a b c. ∃ bc <⁺ p, !pairDef p a bc ∧ !pairDef bc b c” (by simp)
 
 def _root_.LO.FirstOrder.Arith.pair₄Def : 𝚺₀.Semisentence 5 :=
-  .mkSigma “p a b c d | ∃ bcd <⁺ p, ∃ cd <⁺ bcd, !pairDef p a bcd ∧ !pairDef bcd b cd ∧ !pairDef cd c d” (by simp)
+  .mkSigma “p a b c d. ∃ bcd <⁺ p, ∃ cd <⁺ bcd, !pairDef p a bcd ∧ !pairDef bcd b cd ∧ !pairDef cd c d” (by simp)
 
 def _root_.LO.FirstOrder.Arith.pair₅Def : 𝚺₀.Semisentence 6 :=
-  .mkSigma “p a b c d e | ∃ bcde <⁺ p, ∃ cde <⁺ bcde, ∃ de <⁺ cde, !pairDef p a bcde ∧ !pairDef bcde b cde ∧ !pairDef cde c de ∧ !pairDef de d e” (by simp)
+  .mkSigma “p a b c d e. ∃ bcde <⁺ p, ∃ cde <⁺ bcde, ∃ de <⁺ cde, !pairDef p a bcde ∧ !pairDef bcde b cde ∧ !pairDef cde c de ∧ !pairDef de d e” (by simp)
 
 def _root_.LO.FirstOrder.Arith.pair₆Def : 𝚺₀.Semisentence 7 :=
-  .mkSigma “p a b c d e f | ∃ bcdef <⁺ p, !pair₅Def bcdef b c d e f ∧ !pairDef p a bcdef” (by simp)
+  .mkSigma “p a b c d e f. ∃ bcdef <⁺ p, !pair₅Def bcdef b c d e f ∧ !pairDef p a bcdef” (by simp)
 
 lemma pair₃_defined : 𝚺₀-Function₃ ((⟪·, ·, ·⟫) : V → V → V → V) via pair₃Def := by
   intro v; simp [pair₃Def]; rintro h; simp [h]
@@ -782,7 +782,7 @@ section
 def _root_.LO.FirstOrder.Arith.unNpairDef : {n : ℕ} → (i : Fin n) → 𝚺₀.Semisentence 2
   | 0,     i => i.elim0
   | n + 1, i =>
-    Fin.cases pi₁Def (fun i ↦ .mkSigma “z v | ∃ r <⁺ v, !pi₂Def r v ∧ !(unNpairDef i) z r” (by simp)) i
+    Fin.cases pi₁Def (fun i ↦ .mkSigma “z v. ∃ r <⁺ v, !pi₂Def r v ∧ !(unNpairDef i) z r” (by simp)) i
 
 lemma unNpair_defined {n} (i : Fin n) : 𝚺₀-Function₁ (unNpair i : V → V) via unNpairDef i := by
   induction' n with n ih

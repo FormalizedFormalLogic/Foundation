@@ -15,9 +15,9 @@ variable {L : Arith.Language V} {pL : LDef} [Arith.Language.Defined L pL]
 namespace TermSubst
 
 def blueprint (pL : LDef) : Language.TermRec.Blueprint pL 1 where
-  bvar := .mkSigma “y z w | !nthDef y w z” (by simp)
-  fvar := .mkSigma “y x w | !qqFvarDef y x” (by simp)
-  func := .mkSigma “y k f v v' w | !qqFuncDef y k f v'” (by simp)
+  bvar := .mkSigma “y z w. !nthDef y w z” (by simp)
+  fvar := .mkSigma “y x w. !qqFvarDef y x” (by simp)
+  func := .mkSigma “y k f v v' w. !qqFuncDef y k f v'” (by simp)
 
 variable (L)
 
@@ -164,9 +164,9 @@ end termSubst
 namespace TermShift
 
 def blueprint (pL : LDef) : Language.TermRec.Blueprint pL 0 where
-  bvar := .mkSigma “y z | !qqBvarDef y z” (by simp)
-  fvar := .mkSigma “y x | !qqFvarDef y (x + 1)” (by simp)
-  func := .mkSigma “y k f v v' | !qqFuncDef y k f v'” (by simp)
+  bvar := .mkSigma “y z. !qqBvarDef y z” (by simp)
+  fvar := .mkSigma “y x. !qqFvarDef y (x + 1)” (by simp)
+  func := .mkSigma “y k f v v'. !qqFuncDef y k f v'” (by simp)
 
 variable (L)
 
@@ -303,9 +303,9 @@ end termShift
 namespace TermBShift
 
 def blueprint (pL : LDef) : Language.TermRec.Blueprint pL 0 where
-  bvar := .mkSigma “y z | !qqBvarDef y (z + 1)” (by simp)
-  fvar := .mkSigma “y x | !qqFvarDef y x” (by simp)
-  func := .mkSigma “y k f v v' | !qqFuncDef y k f v'” (by simp)
+  bvar := .mkSigma “y z. !qqBvarDef y (z + 1)” (by simp)
+  fvar := .mkSigma “y x. !qqFvarDef y x” (by simp)
+  func := .mkSigma “y k f v v'. !qqFuncDef y k f v'” (by simp)
 
 variable (L)
 
@@ -541,7 +541,7 @@ lemma termShift_qVec {n m w : V} (hw : L.IsSemitermVec n m w) :
   · rcases hw.lh
     rw [nth_cons_succ, nth_cons_succ,
       nth_termBShiftVec hw.isUTerm (by simpa using hi),
-      nth_termBShiftVec (by simpa [hw.isUTerm] using hw.termShiftVec.isUTerm) (by simpa [hw.isUTerm] using hi),
+      nth_termBShiftVec (by simp [hw.isUTerm]) (by simpa [hw.isUTerm] using hi),
       nth_termShiftVec hw.isUTerm (by simpa using hi),
       termBShift_termShift (hw.nth (by simpa using hi))]
 
@@ -584,10 +584,10 @@ infixl:82 " ^* " => qqMul
 section
 
 def _root_.LO.FirstOrder.Arith.qqAddDef : 𝚺₁.Semisentence 3 :=
-  .mkSigma “t x y | ∃ v, !mkVec₂Def v x y ∧ !qqFuncDef t 2 ↑addIndex v” (by simp)
+  .mkSigma “t x y. ∃ v, !mkVec₂Def v x y ∧ !qqFuncDef t 2 ↑addIndex v” (by simp)
 
 def _root_.LO.FirstOrder.Arith.qqMulDef : 𝚺₁.Semisentence 3 :=
-  .mkSigma “t x y | ∃ v, !mkVec₂Def v x y ∧ !qqFuncDef t 2 ↑mulIndex v” (by simp)
+  .mkSigma “t x y. ∃ v, !mkVec₂Def v x y ∧ !qqFuncDef t 2 ↑mulIndex v” (by simp)
 
 lemma qqAdd_defined : 𝚺₁-Function₂ (qqAdd : V → V → V) via qqAddDef := by
   intro v; simp [qqAddDef, numeral_eq_natCast, qqAdd]
@@ -618,8 +618,8 @@ lemma qqFunc_absolute (k f v : ℕ) : ((^func k f v : ℕ) : V) = ^func (k : V) 
 namespace Numeral
 
 def blueprint : PR.Blueprint 0 where
-  zero := .mkSigma “y | y = ↑Formalized.one” (by simp)
-  succ := .mkSigma “y t n | !qqAddDef y t ↑Formalized.one” (by simp)
+  zero := .mkSigma “y. y = ↑Formalized.one” (by simp)
+  succ := .mkSigma “y t n. !qqAddDef y t ↑Formalized.one” (by simp)
 
 def construction : PR.Construction V blueprint where
   zero := fun _ ↦ 𝟏
@@ -680,7 +680,7 @@ lemma numeral_succ_pos (pos : 0 < n) : numeral (n + 1 : V) = numeral n ^+ 𝟏 :
 section
 
 def _root_.LO.FirstOrder.Arith.numeralDef : 𝚺₁.Semisentence 2 := .mkSigma
-  “t x |
+  “t x.
     (x = 0 → t = ↑Formalized.zero) ∧
     (x ≠ 0 → ∃ x', !subDef x' x 1 ∧ !numeralAuxDef t x')”
   (by simp)

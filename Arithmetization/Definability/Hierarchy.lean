@@ -123,7 +123,7 @@ def mkPolarity (p : Semiformula ℒₒᵣ ξ n) : (Γ : Polarity) → Hierarchy 
   · cases p
     simp; exact Hierarchy.of_zero (sigma_prop _)
 
-variable {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M]
+variable {M : Type*} [ORingStruc M]
 
 variable (M)
 
@@ -132,6 +132,9 @@ def ProperOn (p : 𝚫-[m].Semisentence n) : Prop :=
 
 def ProperWithParamOn (p : 𝚫-[m].Semiformula M n) : Prop :=
   ∀ (e : Fin n → M), Semiformula.Evalm M e id p.sigma.val ↔ Semiformula.Evalm M e id p.pi.val
+
+def ProvablyProperOn (p : 𝚫-[m].Semisentence n) (T : Theory ℒₒᵣ) : Prop :=
+  T ⊢!. ∀* “!p.sigma.val ⋯ ↔ !p.pi.val ⋯”
 
 variable {M}
 
@@ -150,6 +153,26 @@ lemma ProperOn.iff' {p : 𝚫-[m].Semisentence n}
 lemma ProperWithParamOn.iff' {p : 𝚫-[m].Semiformula M n}
     (h : p.ProperWithParamOn M) (e : Fin n → M) :
     Semiformula.Evalm M e id p.pi.val ↔ Semiformula.Evalm (L := ℒₒᵣ) M e id p.val := by simp [←h.iff, val_sigma]
+
+section ProvablyProperOn
+
+variable (T : Theory ℒₒᵣ) [𝐄𝐐 ≼ T]
+
+lemma ProvablyProperOn.ofProperOn {p : 𝚫-[m].Semisentence n}
+    (h : ∀ (M : Type w) [ORingStruc M] [M ⊧ₘ* T], p.ProperOn M) : p.ProvablyProperOn T := by
+  apply complete (T := T) <| FirstOrder.Arith.oRing_consequence_of.{w} T _ ?_
+  intro M _ _
+  simpa [models_iff] using (h M).iff
+
+variable {T}
+
+lemma ProvablyProperOn.properOn {p : 𝚫-[m].Semisentence n} (h : p.ProvablyProperOn T)
+    (M : Type w) [ORingStruc M] [M ⊧ₘ* T] : p.ProperOn M := by
+  intro v
+  have := by simpa [models_iff] using consequence_iff.mp (sound! (T := T) h) M inferInstance
+  exact this v
+
+end ProvablyProperOn
 
 def rew (ω : Rew ℒₒᵣ ξ₁ n₁ ξ₂ n₂) : {Γ : HierarchySymbol} → Γ.Semiformula ξ₁ n₁ → Γ.Semiformula ξ₂ n₂
   | 𝚺-[_], mkSigma p hp => mkSigma (ω.hom p) (by simpa using hp)
