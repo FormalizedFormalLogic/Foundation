@@ -78,88 +78,6 @@ structure FiniteFrame extends Frame where
 instance {F : FiniteFrame} : Finite (F.World) := F.World_finite
 instance : Coe (FiniteFrame) (Frame) := ⟨λ F ↦ F.toFrame⟩
 
-open Relation (ReflTransGen TransGen)
-
-abbrev Frame.RelReflTransGen {F : Frame} : _root_.Rel F.World F.World:= ReflTransGen (· ≺ ·)
-infix:45 " ≺^* " => Frame.RelReflTransGen
-
-namespace Frame.RelReflTransGen
-
-variable {F : Frame}
-
-@[simp] lemma single {x y : F.World} (hxy : x ≺ y) : x ≺^* y := ReflTransGen.single hxy
-
-@[simp] lemma reflexive : Reflexive F.RelReflTransGen := Relation.reflexive_reflTransGen
-
-@[simp] lemma refl {x : F.World} : x ≺^* x := reflexive x
-
-@[simp] lemma transitive : Transitive F.RelReflTransGen := Relation.transitive_reflTransGen
-
-@[simp] lemma symmetric : Symmetric F.Rel → Symmetric F.RelReflTransGen := ReflTransGen.symmetric
-
-end Frame.RelReflTransGen
-
-
-abbrev Frame.TransitiveReflexiveClosure (F : Frame) : Frame where
-  World := F.World
-  Rel := (· ≺^* ·)
-postfix:max "^*" => Frame.TransitiveReflexiveClosure
-
-namespace Frame.TransitiveReflexiveClosure
-
-variable {F : Frame}
-
-lemma single {x y : F.World} (hxy : x ≺ y) : F^*.Rel x y := ReflTransGen.single hxy
-
-lemma rel_reflexive : Reflexive F^*.Rel := by intro x; exact ReflTransGen.refl;
-
-lemma rel_transitive : Transitive F^*.Rel := by simp;
-
-lemma rel_symmetric : Symmetric F.Rel → Symmetric F^* := ReflTransGen.symmetric
-
-end Frame.TransitiveReflexiveClosure
-
-
-
-abbrev Frame.RelTransGen {F : Frame} : _root_.Rel F.World F.World := TransGen (· ≺ ·)
-infix:45 " ≺^+ " => Frame.RelTransGen
-
-namespace Frame.RelTransGen
-
-variable {F : Frame}
-
-@[simp] lemma single {x y : F.World} (hxy : x ≺ y) : x ≺^+ y := TransGen.single hxy
-
-@[simp]
-lemma transitive : Transitive F.RelTransGen := λ _ _ _ => TransGen.trans
-
-@[simp]
-lemma symmetric (hSymm : Symmetric F.Rel) : Symmetric F.RelTransGen := by
-  intro x y rxy;
-  induction rxy with
-  | single h => exact TransGen.single $ hSymm h;
-  | tail _ hyz ih => exact TransGen.trans (TransGen.single $ hSymm hyz) ih
-
-end Frame.RelTransGen
-
-
-abbrev Frame.TransitiveClosure (F : Frame) : Frame where
-  World := F.World
-  Rel := (· ≺^+ ·)
-postfix:max "^+" => Frame.TransitiveClosure
-
-namespace Frame.TransitiveClosure
-
-variable {F : Frame}
-
-lemma single {x y : F.World} (hxy : x ≺ y) : F^+ x y := TransGen.single hxy
-
-lemma rel_transitive : Transitive F^+ := by simp;
-
-lemma rel_symmetric (hSymm : Symmetric F.Rel) : Symmetric F.TransitiveClosure := by simp_all
-
-end Frame.TransitiveClosure
-
 
 abbrev FrameClass := Set (Frame)
 
@@ -228,10 +146,17 @@ abbrev ReflexiveTransitiveConnectedFrameClass : FrameClass := { F | Reflexive F 
 abbrev ReflexiveTransitiveSymmetricFrameClass : FrameClass := { F | Reflexive F ∧ Transitive F ∧ Symmetric F }
 alias EquivalenceFrameClass := ReflexiveTransitiveSymmetricFrameClass
 
+/-- FrameClass for `𝐆𝐋` -/
+abbrev TransitiveConverseWellFoundedFrameClass : FrameClass := { F | Transitive F ∧ ConverseWellFounded F }
 
-abbrev ReflexiveTransitiveWeaklyConverseWellFoundedFrameClass : FrameClass := λ F => Reflexive F.Rel ∧ Transitive F ∧ WeaklyConverseWellFounded F
+/-- FrameClass for `𝐆𝐋` (Finite version) -/
+abbrev TransitiveIrreflexiveFrameClass : FrameClass := { F | Transitive F ∧ Irreflexive F }
 
-abbrev ReflexiveTransitiveAntisymmetricFrameClass : FrameClass := λ F => Reflexive F.Rel ∧ Transitive F ∧ Antisymmetric F
+/-- FrameClass for `𝐆𝐫𝐳` -/
+abbrev ReflexiveTransitiveWeaklyConverseWellFoundedFrameClass : FrameClass := { F | Reflexive F.Rel ∧ Transitive F ∧ WeaklyConverseWellFounded F }
+
+/-- FrameClass for `𝐆𝐫𝐳` (Finite version) -/
+abbrev ReflexiveTransitiveAntisymmetricFrameClass : FrameClass := { F | Reflexive F.Rel ∧ Transitive F ∧ Antisymmetric F }
 
 end
 

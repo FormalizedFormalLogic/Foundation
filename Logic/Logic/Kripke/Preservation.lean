@@ -1,4 +1,5 @@
 import Logic.Logic.Kripke.Basic
+import Logic.Logic.Kripke.Closure
 
 namespace LO.Kripke
 

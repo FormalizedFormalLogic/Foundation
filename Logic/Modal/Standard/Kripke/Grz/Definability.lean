@@ -2,13 +2,6 @@ import Logic.Modal.Standard.Kripke.Geach
 
 namespace LO
 
-namespace Kripke
-
-alias GrzFrameClass := ReflexiveTransitiveWeaklyConverseWellFoundedFrameClass
-
-end Kripke
-
-
 namespace Modal.Standard
 
 namespace Kripke
@@ -167,7 +160,7 @@ private lemma Grz_of_wcwf : (Reflexive F.Rel ∧ Transitive F.Rel ∧ WeaklyConv
       . aesop;
       . exact Rwx;
 
-instance axiomGrz_defineability : 𝔽((𝗚𝗿𝘇 : Theory α)).DefinedBy GrzFrameClass where
+instance axiomGrz_defineability : 𝔽((𝗚𝗿𝘇 : Theory α)).DefinedBy ReflexiveTransitiveWeaklyConverseWellFoundedFrameClass where
   define := by
     intro F;
     constructor;
@@ -180,7 +173,7 @@ instance axiomGrz_defineability : 𝔽((𝗚𝗿𝘇 : Theory α)).DefinedBy Grz
     simp [WeaklyConverseWellFounded, ConverseWellFounded, IrreflGen];
     apply WellFounded.trivial_wellfounded;
 
-instance : Sound (𝐆𝐫𝐳 : DeductionParameter α) (GrzFrameClass#α) := inferInstance
+instance : Sound (𝐆𝐫𝐳 : DeductionParameter α) (ReflexiveTransitiveWeaklyConverseWellFoundedFrameClass#α) := inferInstance
 instance : System.Consistent (𝐆𝐫𝐳 : DeductionParameter α) := inferInstance
 
 instance axiomGrz_finite_defines : 𝔽ꟳ((𝗚𝗿𝘇 : Theory α)).DefinedBy ReflexiveTransitiveAntisymmetricFrameClassꟳ where

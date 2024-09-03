@@ -1,3 +1,4 @@
+import Logic.Logic.Kripke.Closure
 import Logic.Modal.Standard.Kripke.Completeness
 import Logic.Modal.Standard.Kripke.Geach
 

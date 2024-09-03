@@ -12,11 +12,7 @@ open Formula
 
 variable {α : Type u} [Inhabited α]
 
-variable {F : Kripke.Frame}
-
-abbrev TransitiveCWFFrameClass : FrameClass := λ F => Transitive F ∧ ConverseWellFounded F
-
-private lemma trans_of_L : F#α ⊧* (𝗟 : AxiomSet α) → Transitive F.Rel := by
+private lemma trans_of_L {F : Kripke.Frame} : F#α ⊧* (𝗟 : AxiomSet α) → Transitive F.Rel := by
   contrapose;
   intro hT; simp [Transitive] at hT;
   obtain ⟨w₁, w₂, r₁₂, w₃, r₂₃, nr₁₃⟩ := hT;
@@ -34,7 +30,7 @@ private lemma trans_of_L : F#α ⊧* (𝗟 : AxiomSet α) → Transitive F.Rel :
       . by_cases hx₃ : x = w₃ <;> simp_all [Kripke.Satisfies, hx₃];
     . existsi w₂; simpa [Kripke.Satisfies];
 
-private lemma cwf_of_L  : F#α ⊧* (𝗟 : AxiomSet α) → ConverseWellFounded F.Rel := by
+private lemma cwf_of_L {F : Kripke.Frame} : F#α ⊧* (𝗟 : AxiomSet α) → ConverseWellFounded F.Rel := by
   contrapose;
   intro hCF;
   obtain ⟨X, ⟨x, _⟩, hX₂⟩ := by simpa using ConverseWellFounded.iff_has_max.not.mp hCF;
@@ -54,7 +50,7 @@ private lemma cwf_of_L  : F#α ⊧* (𝗟 : AxiomSet α) → ConverseWellFounded
     . obtain ⟨y, _, _⟩ := hX₂ x (by assumption);
       use y;
 
-private lemma L_of_trans_and_cwf : (Transitive F.Rel ∧ ConverseWellFounded F.Rel) → F#α ⊧* (𝗟 : AxiomSet α) := by
+private lemma L_of_trans_and_cwf {F : Kripke.Frame} : (Transitive F.Rel ∧ ConverseWellFounded F.Rel) → F#α ⊧* (𝗟 : AxiomSet α) := by
   rintro ⟨hTrans, hWF⟩;
   simp [Axioms.L];
   intro p V w;
@@ -74,54 +70,45 @@ private lemma L_of_trans_and_cwf : (Transitive F.Rel ∧ ConverseWellFounded F.R
       exact rmn;
     . exact hm;
 
-lemma axiomL_defines : ∀ {F : Kripke.Frame}, F#α ⊧* 𝗟 ↔ F ∈ TransitiveCWFFrameClass := by
-  intro F;
-  constructor;
-  . intro h;
+instance axiomL_definability : 𝔽((𝗟 : Theory α)).DefinedBy (TransitiveConverseWellFoundedFrameClass) where
+  define := by
+    intro F;
     constructor;
-    . exact trans_of_L h;
-    . exact cwf_of_L h;
-  . exact L_of_trans_and_cwf;
+    . intro h;
+      constructor;
+      . exact trans_of_L h;
+      . exact cwf_of_L h;
+    . exact L_of_trans_and_cwf;
+  nonempty := by
+    use ⟨PUnit,  λ _ _ => False⟩;
+    refine ⟨by tauto, ?_⟩;
+    simp [Transitive, ConverseWellFounded];
+    apply WellFounded.trivial_wellfounded;
 
+instance : Sound (𝐆𝐋 : DeductionParameter α) (TransitiveConverseWellFoundedFrameClass#α) := inferInstance
+instance : System.Consistent (𝐆𝐋 : DeductionParameter α) := inferInstance
 
-abbrev TransitiveIrreflexiveFrameClass : FrameClass := λ F => Transitive F ∧ Irreflexive F
-
-/-
-lemma TransitiveIrreflexiveFiniteFrameClass.nonempty : TransitiveIrreflexiveFrameClass.Nonempty.{0} := by
-  use PointFrame;
-  simp [Transitive, Irreflexive];
--/
-
-lemma axiomL_finite_defines : ∀ {F : FiniteFrame}, F#α ⊧* 𝗟 ↔ F ∈ TransitiveIrreflexiveFrameClassꟳ := by
-  intro F;
-  constructor;
-  . intro h;
-    obtain ⟨hTrans, hCWF⟩ := axiomL_defines.mp h;
-    simp;
-    use F;
-    refine ⟨⟨hTrans, ?irreflexive⟩, rfl⟩;
-    . intro w;
+instance axiomL_finite_definability : 𝔽ꟳ((𝗟 : Theory α)).DefinedBy (TransitiveIrreflexiveFrameClassꟳ) where
+  define := by
+    intro F;
+    constructor;
+    . rintro h;
+      obtain ⟨hTrans, hCWF⟩ := axiomL_definability.define.mp h;
+      refine ⟨hTrans, ?irreflexive⟩;
+      intro w;
       simpa using ConverseWellFounded.iff_has_max.mp hCWF {w} (by simp);
-  . simp;
-    rintro FF ⟨FF_trans, FF_irrefl⟩ e p;
-    have := @axiomL_defines α _ FF |>.mpr ?_;
-    simp [e] at this;
-    have := this p;
-    apply this;
-    constructor;
-    . exact FF_trans;
-    . apply Finite.converseWellFounded_of_trans_irrefl';
+    . rintro ⟨hTrans, hIrrefl⟩;
+      apply axiomL_definability.define.mpr;
+      refine ⟨hTrans, ?_⟩;
+      apply Finite.converseWellFounded_of_trans_irrefl';
       . infer_instance;
       . assumption;
       . assumption;
+  nonempty := by
+    use ⟨PUnit,  λ _ _ => False⟩;
+    refine ⟨?_, ?_⟩ <;> tauto;
 
-instance GL_characterizable : 𝔽(𝐆𝐋 of α).Characteraizable (TransitiveIrreflexiveFrameClassꟳ) := characterizable_of_valid_axiomset (by sorry) (by sorry)
-
-instance GL_sound : Sound 𝐆𝐋 (TransitiveIrreflexiveFrameClassꟳ#α) := sound_of_finitely_defines axiomL_finite_defines
-
-instance : System.Consistent (𝐆𝐋 : DeductionParameter α) := consistent_of_finitely_defines.{u} axiomL_finite_defines $ by
-  use PointFrame;
-  simp [Transitive, Irreflexive];
+instance GL_finite_sound : Sound 𝐆𝐋 (TransitiveIrreflexiveFrameClassꟳ#α) := inferInstance
 
 end Kripke
 
