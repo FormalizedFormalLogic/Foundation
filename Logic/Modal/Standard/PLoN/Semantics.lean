@@ -8,10 +8,10 @@ namespace PLoN
 
 structure Frame (α) where
   World : Type*
-  [World_inhabited : Inhabited World]
+  [World_nonempty : Nonempty World]
   Rel : Formula α → World → World → Prop
 
-abbrev Frame.default {F : PLoN.Frame α} : F.World := F.World_inhabited.default
+noncomputable abbrev Frame.default {F : PLoN.Frame α} : F.World := F.World_nonempty.some
 scoped notation "﹫" => Frame.default
 
 

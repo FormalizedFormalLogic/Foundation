@@ -12,17 +12,17 @@ open Formula
 open Theory
 open MaximalConsistentTheory
 
-abbrev CanonicalFrame (Λ : DeductionParameter α) [Inhabited (Λ)-MCT] : PLoN.Frame α where
+abbrev CanonicalFrame (Λ : DeductionParameter α) [Nonempty (Λ)-MCT] : PLoN.Frame α where
   World := (Λ)-MCT
   Rel := λ p Ω₁ Ω₂ => ~(□p) ∈ Ω₁.theory ∧ ~p ∈ Ω₂.theory
 
-abbrev CanonicalModel (Λ : DeductionParameter α) [Inhabited (Λ)-MCT] : PLoN.Model α where
+abbrev CanonicalModel (Λ : DeductionParameter α) [Nonempty (Λ)-MCT] : PLoN.Model α where
   Frame := CanonicalFrame Λ
   Valuation Ω a := (atom a) ∈ Ω.theory
 
-instance CanonicalModel.instSatisfies [Inhabited (Λ)-MCT] : Semantics (Formula α) ((CanonicalModel Λ).World) := Formula.PLoN.Satisfies.semantics (CanonicalModel Λ)
+instance CanonicalModel.instSatisfies [Nonempty (Λ)-MCT] : Semantics (Formula α) ((CanonicalModel Λ).World) := Formula.PLoN.Satisfies.semantics (CanonicalModel Λ)
 
-variable {Λ : DeductionParameter α} [Inhabited (Λ)-MCT] [Λ.HasNecessitation]
+variable {Λ : DeductionParameter α} [Nonempty (Λ)-MCT] [Λ.HasNecessitation]
          {p : Formula α}
 
 lemma truthlemma : ∀ {Ω : (CanonicalModel Λ).World}, Ω ⊧ p ↔ (p ∈ Ω.theory) := by
@@ -32,7 +32,7 @@ lemma truthlemma : ∀ {Ω : (CanonicalModel Λ).World}, Ω ⊧ p ↔ (p ∈ Ω.
     constructor;
     . intro h;
       by_contra hC;
-      suffices ¬Ω ⊧ □p by contradiction; done;
+      suffices ¬Ω ⊧ □p by contradiction;
       simp [PLoN.Satisfies];
       constructor;
       . assumption;
