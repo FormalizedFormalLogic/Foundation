@@ -186,6 +186,8 @@ syntax:10 first_order_formula:9 " → " first_order_formula:10 : first_order_for
 syntax:5 first_order_formula " ↔ " first_order_formula : first_order_formula
 syntax:max "⋀ " ident ", " first_order_formula:0 : first_order_formula
 syntax:max "⋁ " ident ", " first_order_formula:0 : first_order_formula
+syntax:max "⋀ " ident " < " term ", " first_order_formula:0 : first_order_formula
+syntax:max "⋁ " ident " < " term ", " first_order_formula:0 : first_order_formula
 
 syntax:max "∀ " ident+ ", " first_order_formula:0 : first_order_formula
 syntax:max "∃ " ident+ ", " first_order_formula:0 : first_order_formula
@@ -223,6 +225,8 @@ macro_rules
   | `(⤫formula[ $binders* | $fbinders* | $p ↔ $q                           ]) => `(⤫formula[ $binders* | $fbinders* | $p ] ⟷ ⤫formula[ $binders* | $fbinders* | $q ])
   | `(⤫formula[ $binders* | $fbinders* | ⋀ $i, $p                          ]) => `(Matrix.conj fun $i ↦ ⤫formula[ $binders* | $fbinders* | $p ])
   | `(⤫formula[ $binders* | $fbinders* | ⋁ $i, $p                          ]) => `(Matrix.disj fun $i ↦ ⤫formula[ $binders* | $fbinders* | $p ])
+  | `(⤫formula[ $binders* | $fbinders* | ⋀ $i < $t, $p                     ]) => `(conjLt (fun $i ↦ ⤫formula[ $binders* | $fbinders* | $p ]) $t)
+  | `(⤫formula[ $binders* | $fbinders* | ⋁ $i < $t, $p                     ]) => `(disjLt (fun $i ↦ ⤫formula[ $binders* | $fbinders* | $p ]) $t)
   | `(⤫formula[ $binders* | $fbinders* | ∀ $xs*, $p                        ]) => do
     let xs := xs.reverse
     let binders' : TSyntaxArray `ident ← xs.foldrM

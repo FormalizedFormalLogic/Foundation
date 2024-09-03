@@ -27,7 +27,12 @@ lemma numeral_ne_numeral_of_ne {n m : ℕ} (h : n ≠ m) : (numeral n : M) ≠ n
 
 lemma lt_numeral_iff {x : M} {n : ℕ} : x < numeral n ↔ ∃ i : Fin n, x = numeral i := by
   have := by simpa [models_iff] using ModelsTheory.models M (Theory.CobhamR0.Ω₄ n) (fun _ ↦ 0)
-  exact this x
+  constructor
+  · intro hx
+    rcases (this x).mp hx with ⟨i, hi, rfl⟩
+    exact ⟨⟨i, hi⟩, by simp⟩
+  · rintro ⟨i, rfl⟩
+    exact (this (numeral i)).mpr ⟨i, by simp, rfl⟩
 
 @[simp] lemma numeral_inj_iff {n m : ℕ} : (numeral n : M) = numeral m ↔ n = m :=
   ⟨by contrapose; exact numeral_ne_numeral_of_ne, by rintro rfl; rfl⟩

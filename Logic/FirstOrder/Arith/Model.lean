@@ -159,11 +159,7 @@ instance models_CobhamR0 : ℕ ⊧ₘ* 𝐑₀ := ⟨by
   case equal h =>
     have : ℕ ⊧ₘ* (𝐄𝐐 : Theory ℒₒᵣ) := inferInstance
     exact modelsTheory_iff.mp this h
-  case Ω₃ h => exact h
-  case Ω₄ =>
-    intro x; constructor
-    · intro hx; exact ⟨⟨x, hx⟩, by simp⟩
-    · rintro ⟨i, rfl⟩; simp⟩
+  case Ω₃ h => exact h⟩
 
 instance models_PAMinus : ℕ ⊧ₘ* 𝐏𝐀⁻ := ⟨by
   intro σ h
@@ -201,9 +197,6 @@ instance models_peano : ℕ ⊧ₘ* 𝐏𝐀 := by
 
 end Standard
 
-instance peano_consistent : System.Consistent 𝐏𝐀 :=
-  Sound.consistent_of_satisfiable ⟨_, Standard.models_peano⟩
-
 section
 
 variable (L : Language.{u}) [ORing L]
@@ -218,9 +211,9 @@ structure ClosedCut (M : Type w) [s : Structure L M] extends Structure.ClosedSub
 
 end
 
-abbrev Theory.trueArith : Theory ℒₒᵣ := Structure.theory ℒₒᵣ ℕ
+abbrev Theory.TrueArith : Theory ℒₒᵣ := Structure.theory ℒₒᵣ ℕ
 
-notation "𝐓𝐀" => Theory.trueArith
+notation "𝐓𝐀" => Theory.TrueArith
 
 instance Standard.models_trueArith : ℕ ⊧ₘ* 𝐓𝐀 :=
   modelsTheory_iff.mpr fun {p} ↦ by simp
@@ -233,6 +226,18 @@ lemma oRing_consequence_of (p : SyntacticFormula ℒₒᵣ) (H : ∀ (M : Type*)
   exact H M
 
 end Arith
+
+namespace Theory
+
+open Arith
+
+instance CobhamR0.consistent : System.Consistent 𝐑₀ :=
+  Sound.consistent_of_satisfiable ⟨_, Standard.models_CobhamR0⟩
+
+instance Peano.consistent : System.Consistent 𝐏𝐀 :=
+  Sound.consistent_of_satisfiable ⟨_, Standard.models_peano⟩
+
+end Theory
 
 end FirstOrder
 

@@ -459,6 +459,51 @@ class LogicalConnective.Subclosed [LogicalConnective F] (C : F → Prop) extends
 
 end Subclosed
 
+section conjdisj
+
+variable {α β : Type*} [LogicalConnective α] [LogicalConnective β]
+
+def conjLt (p : ℕ → α) : ℕ → α
+  | 0     => ⊤
+  | k + 1 => p k ⋏ conjLt p k
+
+@[simp] lemma conjLt_zero (p : ℕ → α) : conjLt p 0 = ⊤ := rfl
+
+@[simp] lemma conjLt_succ (p : ℕ → α) (k) : conjLt p (k + 1) = p k ⋏ conjLt p k := rfl
+
+@[simp] lemma hom_conj_prop [FunLike F α Prop] [LogicalConnective.HomClass F α Prop] (f : F) (p : ℕ → α) :
+    f (conjLt p k) ↔ ∀ i < k, f (p i) := by
+  induction' k with k ih <;> simp[*]
+  constructor
+  · rintro ⟨hk, h⟩
+    intro i hi
+    rcases Nat.eq_or_lt_of_le (Nat.le_of_lt_succ hi) with (rfl | hi)
+    · exact hk
+    · exact h i hi
+  · rintro h
+    exact ⟨h k (by simp), fun i hi ↦ h i (Nat.lt_add_right 1 hi)⟩
+
+def disjLt (p : ℕ → α) : ℕ → α
+  | 0     => ⊥
+  | k + 1 => p k ⋎ disjLt p k
+
+@[simp] lemma disjLt_zero (p : ℕ → α) : disjLt p 0 = ⊥ := rfl
+
+@[simp] lemma disjLt_succ (p : ℕ → α) (k) : disjLt p (k + 1) = p k ⋎ disjLt p k := rfl
+
+@[simp] lemma hom_disj_prop [FunLike F α Prop] [LogicalConnective.HomClass F α Prop] (f : F) (p : ℕ → α) :
+    f (disjLt p k) ↔ ∃ i < k, f (p i) := by
+  induction' k with k ih <;> simp[*]
+  constructor
+  · rintro (h | ⟨i, hi, h⟩)
+    · exact ⟨k, by simp, h⟩
+    · exact ⟨i, Nat.lt_add_right 1 hi, h⟩
+  · rintro ⟨i, hi, h⟩
+    rcases Nat.eq_or_lt_of_le (Nat.le_of_lt_succ hi) with (rfl | hi)
+    · left; exact h
+    · right; exact ⟨i, hi, h⟩
+
+end conjdisj
 
 end LO
 
@@ -551,7 +596,6 @@ lemma map_disj_append [FunLike F α Prop] [LogicalConnective.HomClass F α Prop]
   induction l₁ <;> induction l₂ <;> aesop;
 
 end
-
 
 section
 
