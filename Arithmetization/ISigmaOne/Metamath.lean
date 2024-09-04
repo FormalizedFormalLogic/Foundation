@@ -1,10 +1,15 @@
-import Arithmetization.ISigmaOne.Metamath.DerivabilityConditions.D1
-import Arithmetization.ISigmaOne.Metamath.DerivabilityConditions.D3
+import Arithmetization.ISigmaOne.Metamath.Term.Basic
+import Arithmetization.ISigmaOne.Metamath.Term.Functions
+import Arithmetization.ISigmaOne.Metamath.Term.Typed
 
-namespace LO.FirstOrder.Arith
+import Arithmetization.ISigmaOne.Metamath.Formula.Basic
+import Arithmetization.ISigmaOne.Metamath.Formula.Functions
+import Arithmetization.ISigmaOne.Metamath.Formula.Iteration
+import Arithmetization.ISigmaOne.Metamath.Formula.Typed
 
-variable (T : Theory ℒₒᵣ)
+import Arithmetization.ISigmaOne.Metamath.Proof.Thy
+import Arithmetization.ISigmaOne.Metamath.Proof.Derivation
+import Arithmetization.ISigmaOne.Metamath.Proof.Typed
 
-
-
-end LO.FirstOrder.Arith
+import Arithmetization.ISigmaOne.Metamath.Coding
+import Arithmetization.ISigmaOne.Metamath.CodedTheory

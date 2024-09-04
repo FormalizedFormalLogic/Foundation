@@ -24,7 +24,6 @@ import Arithmetization.ISigmaOne.Bit
 import Arithmetization.ISigmaOne.HFS.Basic
 import Arithmetization.ISigmaOne.HFS.Seq
 import Arithmetization.ISigmaOne.HFS.PRF
-import Arithmetization.ISigmaOne.HFS.Supplemental
 import Arithmetization.ISigmaOne.HFS.Fixpoint
 
 import Arithmetization.ISigmaOne.Metamath.Term.Basic
@@ -47,4 +46,5 @@ import Arithmetization.Incompleteness.Theory
 import Arithmetization.Incompleteness.FormalizedArithmetic
 import Arithmetization.Incompleteness.D1
 import Arithmetization.Incompleteness.D3
+import Arithmetization.Incompleteness.First
 import Arithmetization.Incompleteness.Second

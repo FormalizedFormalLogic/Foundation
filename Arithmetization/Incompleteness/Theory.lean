@@ -1,4 +1,3 @@
-import Arithmetization.ISigmaOne.Metamath.CodedTheory
 import Arithmetization.Incompleteness.FormalizedArithmetic
 
 /-!

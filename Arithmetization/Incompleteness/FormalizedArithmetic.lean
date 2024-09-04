@@ -1,4 +1,4 @@
-import Arithmetization.ISigmaOne.Metamath.Proof.Typed
+import Arithmetization.ISigmaOne.Metamath
 
 /-!
 
