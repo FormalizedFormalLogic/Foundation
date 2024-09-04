@@ -1,4 +1,4 @@
-import Logic.Modal.Deduction
+import Logic.Modal.Hilbert
 
 universe u v
 
@@ -175,7 +175,7 @@ protected lemma elim_contra : 𝔽 ⊧ (Axioms.ElimContra p q) := by intro _ _; 
 end Formula.PLoN.ValidOnFrameClass
 
 
-def DeductionParameter.DefinesPLoNFrameClass (𝓓 : DeductionParameter α) (𝔽 : PLoN.FrameClass α) := ∀ {F : Frame α}, F ⊧* 𝓓.theory ↔ F ∈ 𝔽
+def Hilbert.DefinesPLoNFrameClass (Λ : Hilbert α) (𝔽 : PLoN.FrameClass α) := ∀ {F : Frame α}, F ⊧* Λ.theorems ↔ F ∈ 𝔽
 
 namespace PLoN
 
@@ -190,7 +190,7 @@ open Formula
 
 lemma N_defines : 𝐍.DefinesPLoNFrameClass (AllFrameClass α) := by
   intro F;
-  simp [DeductionParameter.theory, System.theory, PLoN.ValidOnFrame, PLoN.ValidOnModel];
+  simp [Hilbert.theorems, System.theory, PLoN.ValidOnFrame, PLoN.ValidOnModel];
   intro p hp;
   induction hp using Deduction.inducition_with_necOnly! with
   | hMaxm h => simp at h;

@@ -1,7 +1,6 @@
 import Logic.Vorspiel.BinaryRelations
 import Logic.Modal.Geach
 import Logic.Modal.Kripke.Completeness
-import Logic.Modal.Kripke.Reducible
 
 
 namespace LO.Kripke
@@ -162,7 +161,7 @@ lemma axiomGeach_defines : ∀ {F : Kripke.Frame}, (F#α ⊧* 𝗴𝗲(t) ↔ F 
     obtain ⟨u, hzu, hyu⟩ := Kripke.Satisfies.multidia_def.mp hn_z;
     use u;
     exact ⟨hyu, hzu⟩;
-  . simp [AxiomSet.Geach, System.Axioms.Geach, Kripke.Satisfies];
+  . simp [Axioms.Geach, Kripke.Satisfies];
     intro h p V x him;
     apply multibox_def.mpr;
     intro z rxz;
@@ -193,7 +192,7 @@ lemma axiomMultiGeach_defines : ∀ {F : Kripke.Frame}, (F#α ⊧* 𝗚𝗲(ts) 
   | hnil => simp [MultiGeachConfluentFrameClass];
   | hsingle t => convert axiomGeach_defines (α := α); simp;
   | hcons t ts ts_nil ih =>
-    simp_all only [Semantics.RealizeSet.union_iff, AxiomSet.MultiGeach.iff_cons, ih];
+    simp_all only [Semantics.RealizeSet.union_iff, Axioms.MultiGeach.iff_cons, ih];
     rw [(MultiGeachConfluentFrameClass.def_cons ts_nil)];
     constructor;
     . rintro ⟨ht, hts⟩;
@@ -209,14 +208,14 @@ instance axiomMultiGeach_definability : 𝔽((𝗚𝗲(ts) : Theory α)).Defined
   define := axiomMultiGeach_defines;
   nonempty := MultiGeachConfluentFrameClass.nonempty
 
-instance Geach_definability : 𝔽((𝐆𝐞(ts) : DeductionParameter α)).DefinedBy (MultiGeachConfluentFrameClass ts) := inferInstance
+instance Geach_definability : 𝔽((𝐆𝐞(ts) : Hilbert α)).DefinedBy (MultiGeachConfluentFrameClass ts) := inferInstance
 
 instance sound_Geach : Sound 𝐆𝐞(ts) ((MultiGeachConfluentFrameClass ts)#α) := inferInstance
 
-instance : System.Consistent (𝐆𝐞(ts) : DeductionParameter α) := inferInstance
+instance : System.Consistent (𝐆𝐞(ts) : Hilbert α) := inferInstance
 
 instance instGeachLogicSound
-  {Λ : DeductionParameter α} {𝔽 : FrameClass} [logic_geach : Λ.IsGeach ts] [class_geach : 𝔽.IsGeach ts] : Sound Λ (𝔽#α) := by
+  {Λ : Hilbert α} {𝔽 : FrameClass} [logic_geach : Λ.IsGeach ts] [class_geach : 𝔽.IsGeach ts] : Sound Λ (𝔽#α) := by
   convert sound_Geach (α := α) (ts := ts);
   . exact logic_geach.char;
   . exact class_geach.equality;
@@ -237,9 +236,8 @@ instance sound_KT4B : Sound 𝐊𝐓𝟒𝐁 (EquivalenceFrameClass#α) := infer
 
 open System
 open Theory MaximalConsistentTheory CanonicalFrame
-open DeductionParameter (Normal)
 
-variable {Ax : AxiomSet α} [System.Consistent (𝝂Ax)]
+variable {Ax : Theory α} [System.Consistent (𝝂Ax)]
 
 lemma geachConfluent_CanonicalFrame (h : 𝗴𝗲(t) ⊆ Ax) : GeachConfluent t (CanonicalFrame 𝝂Ax).Rel := by
   rintro Ω₁ Ω₂ Ω₃ h;
@@ -291,7 +289,7 @@ instance instMultiGeachComplete : Complete 𝝂(𝗚𝗲(ts)) ((MultiGeachConflu
     apply multiGeachConfluent_CanonicalFrame;
     tauto;
 
-instance {Λ : DeductionParameter α} {𝔽 : FrameClass.{u}} [logic_geach : Λ.IsGeach ts] [class_geach : 𝔽.IsGeach ts] : Complete Λ (𝔽#α) := by
+instance {Λ : Hilbert α} {𝔽 : FrameClass.{u}} [logic_geach : Λ.IsGeach ts] [class_geach : 𝔽.IsGeach ts] : Complete Λ (𝔽#α) := by
   convert instMultiGeachComplete (α := α) (ts := ts);
   . exact logic_geach.char;
   . exact class_geach.equality;
@@ -312,21 +310,21 @@ instance S5_complete : Complete 𝐒𝟓 ReflexiveEuclideanFrameClass.{u}#α := 
 end Kripke
 
 
-section Reducible
+section
+
+open System
+open LO.Kripke
+open Kripke
+open Formula (atom)
+open Formula.Kripke
 
 variable [Inhabited α] [DecidableEq α]
 
-open LO.Kripke
-open System (weakerThan_iff strictlyWeakerThan.trans)
-open Formula (atom)
-open Formula.Kripke
-open Kripke
-
-theorem KD_weakerThan_KT : (𝐊𝐃 : DeductionParameter α) ≤ₛ 𝐊𝐓 := by
-  apply reducible_of_subset_FrameClass SerialFrameClass ReflexiveFrameClass;
+lemma KD_weakerThan_KT : (𝐊𝐃 : Hilbert α) ≤ₛ 𝐊𝐓 := by
+  apply weakerThan_of_subset_FrameClass SerialFrameClass ReflexiveFrameClass;
   intro F hF; apply serial_of_refl hF;
 
-theorem KD_strictlyWeakerThan_KT : (𝐊𝐃 : DeductionParameter α) <ₛ 𝐊𝐓 := by
+theorem KD_strictlyWeakerThan_KT : (𝐊𝐃 : Hilbert α) <ₛ 𝐊𝐓 := by
   constructor;
   . apply KD_weakerThan_KT;
   . simp [weakerThan_iff];
@@ -335,21 +333,16 @@ theorem KD_strictlyWeakerThan_KT : (𝐊𝐃 : DeductionParameter α) <ₛ 𝐊�
     . exact Deduction.maxm! (by simp);
     . apply sound_KD.not_provable_of_countermodel;
       simp [Semantics.Realize];
-      use { World := Fin 2, Rel := λ _ y => y = 1 };
+      use ⟨Fin 2, λ _ y => y = 1⟩;
       constructor;
       . intro x; use 1;
       . simp [ValidOnFrame, ValidOnModel];
         use (λ w _ => w = 1), 0;
         simp [Satisfies];
 
-theorem K_strictlyWeakerThan_KT : (𝐊 : DeductionParameter α) <ₛ 𝐊𝐓 := strictlyWeakerThan.trans K_strictlyWeakerThan_KD KD_strictlyWeakerThan_KT
+theorem K_strictlyWeakerThan_KT : (𝐊 : Hilbert α) <ₛ 𝐊𝐓 := strictlyWeakerThan.trans K_strictlyWeakerThan_KD KD_strictlyWeakerThan_KT
 
-theorem K4_weakerThan_S4 : (𝐊𝟒 : DeductionParameter α) ≤ₛ 𝐒𝟒 := by
-  apply reducible_of_subset_FrameClass TransitiveFrameClass PreorderFrameClass;
-  rintro F ⟨_, F_trans⟩;
-  exact F_trans;
-
-theorem K4_strictlyWeakerThan_S4 : (𝐊𝟒 : DeductionParameter α) <ₛ 𝐒𝟒 := by
+theorem K4_strictlyWeakerThan_S4 : (𝐊𝟒 : Hilbert α) <ₛ 𝐒𝟒 := by
   constructor;
   . apply K4_weakerThan_S4;
   . simp [weakerThan_iff]
@@ -358,29 +351,28 @@ theorem K4_strictlyWeakerThan_S4 : (𝐊𝟒 : DeductionParameter α) <ₛ 𝐒�
     . exact Deduction.maxm! (by simp)
     . apply sound_K4.not_provable_of_countermodel;
       simp [Semantics.Realize];
-      use { World := Fin 3, Rel := λ _ y => y = 1 };
+      use ⟨Fin 3, λ _ y => y = 1⟩;
       constructor;
       . intro _ _ _; simp_all;
       . simp [ValidOnFrame, ValidOnModel];
         use (λ w _ => w = 1), 0;
         simp [Satisfies];
 
-
-theorem S4_weakerThan_S5 : (𝐒𝟒 : DeductionParameter α) ≤ₛ 𝐒𝟓 := by
-  apply reducible_of_subset_FrameClass PreorderFrameClass ReflexiveEuclideanFrameClass;
+lemma S4_weakerThan_S5 : (𝐒𝟒 : Hilbert α) ≤ₛ 𝐒𝟓 := by
+  apply weakerThan_of_subset_FrameClass PreorderFrameClass ReflexiveEuclideanFrameClass;
   rintro _ ⟨F_refl, F_eucl⟩;
   refine ⟨F_refl, trans_of_refl_eucl F_refl F_eucl⟩;
 
-theorem S4_strictlyWeakerThan_S5 : (𝐒𝟒 : DeductionParameter α) <ₛ 𝐒𝟓 := by
+theorem S4_strictlyWeakerThan_S5 : (𝐒𝟒 : Hilbert α) <ₛ 𝐒𝟓 := by
   constructor;
   . apply S4_weakerThan_S5;
   . simp [weakerThan_iff];
-    use (◇(atom default) ⟶  □◇(atom default));
+    use (◇(atom default) ⟶ □◇(atom default));
     constructor;
     . exact Deduction.maxm! (by simp);
     . apply sound_S4.not_provable_of_countermodel;
       simp [Semantics.Realize];
-      use { World := Fin 3, Rel := λ x y => (x = y) ∨ (x = 0 ∧ y = 1) ∨ (x = 0 ∧ y = 2) };
+      use ⟨Fin 3, λ x y => (x = y) ∨ (x = 0 ∧ y = 1) ∨ (x = 0 ∧ y = 2)⟩;
       refine ⟨⟨?_, ?_⟩, ?_⟩;
       . simp [Reflexive];
       . simp [Transitive]; aesop;
@@ -391,7 +383,7 @@ theorem S4_strictlyWeakerThan_S5 : (𝐒𝟒 : DeductionParameter α) <ₛ 𝐒�
         . omega;
         . use 1; omega;
 
-theorem equiv_S5_KT4B : (𝐒𝟓 : DeductionParameter α) =ₛ 𝐊𝐓𝟒𝐁 := by
+theorem equiv_S5_KT4B : (𝐒𝟓 : Hilbert α) =ₛ 𝐊𝐓𝟒𝐁 := by
   apply equiv_of_eq_FrameClass ReflexiveEuclideanFrameClass EquivalenceFrameClass;
   apply Set.eq_of_subset_of_subset;
   . rintro F ⟨F_refl, F_eucl⟩;
@@ -399,6 +391,6 @@ theorem equiv_S5_KT4B : (𝐒𝟓 : DeductionParameter α) =ₛ 𝐊𝐓𝟒𝐁
   . rintro F ⟨F_refl, F_eucl, F_symm⟩;
     refine ⟨F_refl, eucl_of_symm_trans F_symm F_eucl⟩;
 
-end Reducible
+end
 
 end LO.Modal

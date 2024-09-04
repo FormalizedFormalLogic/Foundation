@@ -195,7 +195,7 @@ instance K_finite_complete : Complete 𝐊 (AllFrameClass.{u}ꟳ#α) := ⟨by
   ) FM.Valuation
 ⟩
 
-instance : FiniteFrameProperty (𝐊 : DeductionParameter α) AllFrameClass where
+instance : FiniteFrameProperty (α := α) 𝐊 AllFrameClass where
 
 
 instance KTB_finite_complete : Complete 𝐊𝐓𝐁 (ReflexiveSymmetricFrameClass.{u}ꟳ#α) := ⟨by

@@ -1,4 +1,4 @@
-import Logic.Modal.Deduction
+import Logic.Modal.Hilbert
 import Logic.Propositional.Superintuitionistic.Kripke.Semantics
 
 /-!
@@ -123,7 +123,7 @@ lemma deducible_iff_verTranslation : 𝐕𝐞𝐫 ⊢! p ⟷ pⱽ := by
   | himp _ _ ih₁ ih₂ => exact imp_replace_iff! ih₁ ih₂;
   | _ => apply iff_id!
 
-lemma of_classical {mΛ : Modal.DeductionParameter α} {p : Superintuitionistic.Formula α} : (𝐂𝐥 ⊢! p) → (mΛ ⊢! pᴹ) := by
+lemma of_classical {mΛ : Modal.Hilbert α} {p : Superintuitionistic.Formula α} : (𝐂𝐥 ⊢! p) → (mΛ ⊢! pᴹ) := by
   intro h;
   induction h.some with
   | eaxm ih =>
@@ -173,7 +173,7 @@ lemma iff_Ver_classical : 𝐕𝐞𝐫 ⊢! p ↔ 𝐂𝐥 ⊢! pⱽᴾ := by
 lemma trivTranslated_of_K4 : 𝐊𝟒 ⊢! p → 𝐂𝐥 ⊢! pᵀᴾ := by
   intro h;
   apply iff_Triv_classical.mp;
-  exact System.weakerThan_iff.mp reducible_K4_Triv h;
+  exact System.weakerThan_iff.mp K4_weakerThan_Triv h;
 
 
 lemma verTranslated_of_GL : 𝐆𝐋 ⊢! p → 𝐂𝐥 ⊢! pⱽᴾ := by
@@ -207,10 +207,10 @@ lemma unprovable_AxiomL_K4 : 𝐊𝟒 ⊬! Axioms.L (atom default : Formula α) 
   use (λ _ => False);
   trivial;
 
-theorem strictReducible_K4_GL : (𝐊𝟒 : DeductionParameter α) <ₛ 𝐆𝐋 := by
+theorem K4_strictReducible_GL : (𝐊𝟒 : Hilbert α) <ₛ 𝐆𝐋 := by
   dsimp [StrictlyWeakerThan];
   constructor;
-  . apply reducible_K4_GL;
+  . apply K4_weakerThan_GL;
   . simp [System.not_weakerThan_iff];
     existsi (Axioms.L (atom default))
     constructor;
@@ -225,13 +225,13 @@ lemma unprovable_AxiomT_GL : 𝐆𝐋 ⊬! Axioms.T (atom default : Formula α) 
   trivial;
 
 
-instance instGLConsistencyViaUnprovableAxiomT : System.Consistent (𝐆𝐋 : DeductionParameter α) := by
+instance instGLConsistencyViaUnprovableAxiomT : System.Consistent (𝐆𝐋 : Hilbert α) := by
   apply consistent_iff_exists_unprovable.mpr;
   existsi (Axioms.T (atom default));
   apply unprovable_AxiomT_GL;
 
 
-theorem notReducible_S4_GL : ¬(𝐒𝟒 : DeductionParameter α) ≤ₛ 𝐆𝐋 := by
+theorem not_S4_weakerThan_GL : ¬(𝐒𝟒 : Hilbert α) ≤ₛ 𝐆𝐋 := by
   apply System.not_weakerThan_iff.mpr;
   existsi (Axioms.T (atom default));
   constructor;

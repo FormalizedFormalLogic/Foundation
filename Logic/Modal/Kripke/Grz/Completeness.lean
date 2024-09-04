@@ -234,7 +234,7 @@ lemma Grz_truthlemma {X : (GrzCompleteModel p).World} (q_sub : q ∈ 𝒮 p) :
             . by_contra hC;
               have : ↑X.formulae *⊢[𝐆𝐫𝐳]! q := membership_iff (by simp; left; trivial) |>.mp w;
               have : ↑X.formulae *⊢[𝐆𝐫𝐳]! □(q ⟶ □q) := membership_iff (by simp; right; assumption) |>.mp hC;
-              have : ↑X.formulae *⊢[𝐆𝐫𝐳]! (q ⋏ □(q ⟶ □q)) ⟶ □q := Context.of! $ reducible_KT_Grz Grz_truthlemma.lemma3;
+              have : ↑X.formulae *⊢[𝐆𝐫𝐳]! (q ⋏ □(q ⟶ □q)) ⟶ □q := Context.of! $ KT_weakerThan_Grz Grz_truthlemma.lemma3;
               have : ↑X.formulae *⊢[𝐆𝐫𝐳]! □q := this ⨀ and₃'! (by assumption) (by assumption);
               have : □q ∈ X.formulae := membership_iff (GrzSubformulas.mem_origin (by assumption)) |>.mpr this;
               contradiction;
@@ -274,9 +274,9 @@ private lemma Grz_completeAux {p : Formula α} : ReflexiveTransitiveAntisymmetri
       apply hX₁;
       tauto;
 
-instance Grz_complete : Complete (𝐆𝐫𝐳 : DeductionParameter α) (ReflexiveTransitiveAntisymmetricFrameClass.{u}ꟳ#α) := ⟨Grz_completeAux⟩
+instance Grz_complete : Complete (𝐆𝐫𝐳 : Hilbert α) (ReflexiveTransitiveAntisymmetricFrameClass.{u}ꟳ#α) := ⟨Grz_completeAux⟩
 
-instance : FiniteFrameProperty (𝐆𝐫𝐳 : DeductionParameter α) ReflexiveTransitiveAntisymmetricFrameClass where
+instance : FiniteFrameProperty (α := α) 𝐆𝐫𝐳 ReflexiveTransitiveAntisymmetricFrameClass where
 
 end Kripke
 

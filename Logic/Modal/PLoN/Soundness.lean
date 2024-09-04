@@ -6,7 +6,7 @@ namespace PLoN
 
 open Formula
 
-variable {p : Formula α} {Λ : DeductionParameter α}
+variable {p : Formula α} {Λ : Hilbert α}
 
 lemma sound (defines : Λ.DefinesPLoNFrameClass 𝔽) (d : Λ ⊢! p) : 𝔽 ⊧ p := by
   intro F hF;
@@ -27,7 +27,7 @@ lemma consistent_of_defines (defines : Λ.DefinesPLoNFrameClass 𝔽) (nonempty 
 
 instance : Sound 𝐍 (AllFrameClass α) := sound_of_defines N_defines
 
-instance : System.Consistent (𝐍 : DeductionParameter α) := consistent_of_defines N_defines AllFrameClass.nonempty
+instance : System.Consistent (𝐍 : Hilbert α) := consistent_of_defines N_defines AllFrameClass.nonempty
 
 end PLoN
 

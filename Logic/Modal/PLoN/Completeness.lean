@@ -6,23 +6,23 @@ namespace LO.Modal
 namespace PLoN
 
 variable {α : Type u} [DecidableEq α]
-variable {Λ : DeductionParameter α}
+variable {Λ : Hilbert α}
 
 open Formula
 open Theory
 open MaximalConsistentTheory
 
-abbrev CanonicalFrame (Λ : DeductionParameter α) [Nonempty (Λ)-MCT] : PLoN.Frame α where
-  World := (Λ)-MCT
+abbrev CanonicalFrame (Λ : Hilbert α) [Nonempty (MCT Λ)] : PLoN.Frame α where
+  World := (MCT Λ)
   Rel := λ p Ω₁ Ω₂ => ~(□p) ∈ Ω₁.theory ∧ ~p ∈ Ω₂.theory
 
-abbrev CanonicalModel (Λ : DeductionParameter α) [Nonempty (Λ)-MCT] : PLoN.Model α where
+abbrev CanonicalModel (Λ : Hilbert α) [Nonempty (MCT Λ)] : PLoN.Model α where
   Frame := CanonicalFrame Λ
   Valuation Ω a := (atom a) ∈ Ω.theory
 
-instance CanonicalModel.instSatisfies [Nonempty (Λ)-MCT] : Semantics (Formula α) ((CanonicalModel Λ).World) := Formula.PLoN.Satisfies.semantics (CanonicalModel Λ)
+instance CanonicalModel.instSatisfies [Nonempty (MCT Λ)] : Semantics (Formula α) ((CanonicalModel Λ).World) := Formula.PLoN.Satisfies.semantics (CanonicalModel Λ)
 
-variable {Λ : DeductionParameter α} [Nonempty (Λ)-MCT] [Λ.HasNecessitation]
+variable {Λ : Hilbert α} [Nonempty (MCT Λ)] [Λ.HasNecessitation]
          {p : Formula α}
 
 lemma truthlemma : ∀ {Ω : (CanonicalModel Λ).World}, Ω ⊧ p ↔ (p ∈ Ω.theory) := by

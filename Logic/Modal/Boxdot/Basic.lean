@@ -1,4 +1,4 @@
-import Logic.Modal.Deduction
+import Logic.Modal.Hilbert
 
 namespace LO.Modal
 
@@ -12,7 +12,7 @@ def Formula.BoxdotTranslation : Formula α → Formula α
 postfix:90 "ᵇ" => Formula.BoxdotTranslation
 
 
-class BoxdotProperty (Λ₁ Λ₂ : DeductionParameter α) where
+class BoxdotProperty (Λ₁ Λ₂ : Hilbert α) where
   bdp {p} : Λ₁ ⊢! p ↔ Λ₂ ⊢! pᵇ
 
 
@@ -22,7 +22,7 @@ open Formula
 variable {p : Formula α}
 
 theorem boxdotTranslated
-  {Λ₁ Λ₂ : DeductionParameter α} [Λ₁.IsNormal] [Λ₂.IsNormal]
+  {Λ₁ Λ₂ : Hilbert α} [Λ₁.IsNormal] [Λ₂.IsNormal]
   (h : ∀ p ∈ Ax(Λ₁), Λ₂ ⊢! pᵇ) : Λ₁ ⊢! p → Λ₂ ⊢! pᵇ := by
   intro d;
   induction d using Deduction.inducition_with_necOnly! with
@@ -51,12 +51,12 @@ lemma iff_boxdotTranslation_S4 : 𝐒𝟒 ⊢! p ⟷ pᵇ := by
   | _ => exact iff_id!;
 
 lemma S4_of_boxdotTranslatedK4 (h : 𝐊𝟒 ⊢! pᵇ) : 𝐒𝟒 ⊢! p := by
-  exact (and₂'! iff_boxdotTranslation_S4) ⨀ (weakerThan_iff.mp $ reducible_K4_S4) h
+  exact (and₂'! iff_boxdotTranslation_S4) ⨀ (weakerThan_iff.mp $ K4_weakerThan_S4) h
 
 theorem iff_S4_boxdotTranslatedK4 : 𝐒𝟒 ⊢! p ↔ 𝐊𝟒 ⊢! pᵇ := by
   constructor;
   . apply boxdotTranslatedK4_of_S4;
   . apply S4_of_boxdotTranslatedK4;
-instance : BoxdotProperty (𝐒𝟒 : DeductionParameter α) 𝐊𝟒 := ⟨iff_S4_boxdotTranslatedK4⟩
+instance : BoxdotProperty (𝐒𝟒 : Hilbert α) 𝐊𝟒 := ⟨iff_S4_boxdotTranslatedK4⟩
 
 end LO.Modal

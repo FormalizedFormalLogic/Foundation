@@ -3,7 +3,7 @@ import Logic.Modal.ConsistentTheory
 namespace LO.Modal
 
 variable [DecidableEq α]
-variable {Λ : DeductionParameter α}
+variable {Λ : Hilbert α}
 
 namespace Formula
 
@@ -126,7 +126,7 @@ def SubformulaeComplementaryClosed (P : Formulae α) (p : Formula α) : Prop := 
 
 section Consistent
 
-def Consistent (Λ : DeductionParameter α) (P : Formulae α) : Prop :=  P *⊬[Λ]! ⊥
+def Consistent (Λ : Hilbert α) (P : Formulae α) : Prop :=  P *⊬[Λ]! ⊥
 
 open Theory
 
@@ -313,7 +313,7 @@ namespace ComplementaryClosedConsistentFormulae
 
 open System
 open Formula (atom)
-variable {Λ : DeductionParameter α}
+variable {Λ : Hilbert α}
 
 lemma lindenbaum
   (S : Formulae α)

@@ -7,20 +7,19 @@ open LO.Kripke
 open System
 open Formula
 open MaximalConsistentTheory
-open DeductionParameter (Normal)
 
 variable {α : Type u} [DecidableEq α] [Inhabited α]
-variable {Λ : DeductionParameter α} [Λ.IsNormal]
+variable {Λ : Hilbert α} [Λ.IsNormal]
 
 namespace Kripke
 
-abbrev CanonicalFrame (Λ : DeductionParameter α) [Nonempty (Λ)-MCT] : Kripke.Frame where
-  World := (Λ)-MCT
+abbrev CanonicalFrame (Λ : Hilbert α) [Nonempty (MCT Λ)] : Kripke.Frame where
+  World := MCT Λ
   Rel Ω₁ Ω₂ := □''⁻¹Ω₁.theory ⊆ Ω₂.theory
 
 namespace CanonicalFrame
 
-variable [Nonempty (Λ)-MCT]
+variable [Nonempty (MCT Λ)]
 variable {Ω₁ Ω₂ : (CanonicalFrame Λ).World}
 
 @[simp]
@@ -93,14 +92,14 @@ lemma rel_def_dia : Ω₁ ≺ Ω₂ ↔ ∀ {p}, p ∈ Ω₂.theory → ◇p ∈
 end CanonicalFrame
 
 
-abbrev CanonicalModel (Λ : DeductionParameter α) [Nonempty (Λ)-MCT]  : Model α where
+abbrev CanonicalModel (Λ : Hilbert α) [Nonempty (MCT Λ)]  : Model α where
   Frame := CanonicalFrame Λ
   Valuation Ω a := (atom a) ∈ Ω.theory
 
 
 namespace CanonicalModel
 
-variable [Nonempty (Λ)-MCT]
+variable [Nonempty (MCT Λ)]
 
 @[reducible]
 instance : Semantics (Formula α) (CanonicalModel Λ).World := Formula.Kripke.Satisfies.semantics (M := CanonicalModel Λ)
@@ -113,7 +112,7 @@ end CanonicalModel
 
 section
 
-variable [Nonempty (Λ)-MCT] {p : Formula α}
+variable [Nonempty (MCT Λ)] {p : Formula α}
 
 lemma truthlemma : ∀ {Ω : (CanonicalModel Λ).World}, Ω ⊧ p ↔ (p ∈ Ω.theory) := by
   induction p using Formula.rec' with
@@ -148,7 +147,7 @@ lemma iff_valid_on_canonicalModel_deducible : (CanonicalModel Λ) ⊧ p ↔ Λ �
   constructor;
   . contrapose;
     intro h;
-    have : (Λ)-Consistent ({~p}) := by
+    have : Theory.Consistent Λ ({~p}) := by
       apply Theory.def_consistent.mpr;
       intro Γ hΓ;
       by_contra hC;
@@ -161,7 +160,7 @@ lemma iff_valid_on_canonicalModel_deducible : (CanonicalModel Λ) ⊧ p ↔ Λ �
   . intro h Ω;
     suffices p ∈ Ω.theory by exact truthlemma.mpr this;
     by_contra hC;
-    obtain ⟨Γ, hΓ₁, hΓ₂⟩ := Theory.iff_insert_inconsistent.mp $ Ω.maximal' hC;
+    obtain ⟨Γ, hΓ₁, hΓ₂⟩ := Theory.iff_insert_inconsistent.mp $ (MaximalConsistentTheory.maximal' hC);
     have : Γ ⊢[Λ]! ⊥ := FiniteContext.provable_iff.mpr $ and_imply_iff_imply_imply'!.mp hΓ₂ ⨀ h;
     have : Γ ⊬[Λ]! ⊥ := Theory.def_consistent.mp Ω.consistent _ hΓ₁;
     contradiction;
@@ -180,7 +179,7 @@ lemma realize_theory_of_self_canonicalModel : (CanonicalModel Λ) ⊧* (System.t
 
 end
 
-lemma complete_of_mem_canonicalFrame [Nonempty (Λ)-MCT] {𝔽 : FrameClass} (hFC : CanonicalFrame Λ ∈ 𝔽) : 𝔽#α ⊧ p → (Λ) ⊢! p := by
+lemma complete_of_mem_canonicalFrame [Nonempty (MCT Λ)] {𝔽 : FrameClass} (hFC : CanonicalFrame Λ ∈ 𝔽) : 𝔽#α ⊧ p → (Λ) ⊢! p := by
   simp [Semantics.Realize, Kripke.ValidOnFrame];
   contrapose;
   push_neg;
@@ -191,11 +190,11 @@ lemma complete_of_mem_canonicalFrame [Nonempty (Λ)-MCT] {𝔽 : FrameClass} (hF
   . use (CanonicalModel Λ).Valuation;
     exact iff_valid_on_canonicalModel_deducible.not.mpr h;
 
-instance instComplete_of_mem_canonicalFrame [Nonempty (Λ)-MCT] (𝔽 : FrameClass) (hFC : CanonicalFrame Λ ∈ 𝔽) : Complete (Λ) (𝔽#α) := ⟨complete_of_mem_canonicalFrame hFC⟩
+instance instComplete_of_mem_canonicalFrame [Nonempty (MCT Λ)] (𝔽 : FrameClass) (hFC : CanonicalFrame Λ ∈ 𝔽) : Complete (Λ) (𝔽#α) := ⟨complete_of_mem_canonicalFrame hFC⟩
 
 instance K_complete : Complete 𝐊 (AllFrameClass.{u}#α) := by
   convert instComplete_of_mem_canonicalFrame (α := α) AllFrameClass trivial;
-  rw [DeductionParameter.K_is_empty_normal];
+  rw [K_is_empty_normal];
   . tauto;
   . infer_instance;
 

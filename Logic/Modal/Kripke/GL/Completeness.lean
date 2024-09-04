@@ -187,9 +187,9 @@ private lemma GL_completeAux : TransitiveIrreflexiveFrameClass.{u}ꟳ#α ⊧ p �
       apply hX₁;
       tauto;
 
-instance GL_complete : Complete (𝐆𝐋 : DeductionParameter α) TransitiveIrreflexiveFrameClass.{u}ꟳ#α := ⟨GL_completeAux⟩
+instance GL_complete : Complete (𝐆𝐋 : Hilbert α) TransitiveIrreflexiveFrameClass.{u}ꟳ#α := ⟨GL_completeAux⟩
 
-instance : FiniteFrameProperty (𝐆𝐋 : DeductionParameter α) TransitiveIrreflexiveFrameClass where
+instance : FiniteFrameProperty (α := α) 𝐆𝐋 TransitiveIrreflexiveFrameClass where
 
 end Kripke
 

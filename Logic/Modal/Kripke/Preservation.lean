@@ -72,7 +72,7 @@ lemma iff_theory_valid_on_frame_surjective_morphism (f : F₁ →ₚ F₂) (f_su
   intro h p hp;
   exact iff_formula_valid_on_frame_surjective_morphism f f_surjective (h hp);
 
-theorem undefinable_irreflexive : ¬∃ (Λ : DeductionParameter α), ∀ F, F ∈ 𝔽(Λ) ↔ F ∈ IrreflexiveFrameClass.{0} := by
+theorem undefinable_irreflexive : ¬∃ (Λ : Hilbert α), ∀ F, F ∈ 𝔽(Λ) ↔ F ∈ IrreflexiveFrameClass.{0} := by
   by_contra hC;
   obtain ⟨Ax, h⟩ := hC;
 

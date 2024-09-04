@@ -16,7 +16,7 @@ open Formula
 variable {α : Type u} [Inhabited α] [DecidableEq α] [atleast : Atleast 2 α]
 variable {F : Kripke.Frame}
 
-private lemma connected_of_dot3 : F#α ⊧* (.𝟯 : AxiomSet α) → Connected F := by
+private lemma connected_of_dot3 : F#α ⊧* .𝟯 → Connected F := by
   contrapose;
   intro hCon; simp [Connected] at hCon;
   obtain ⟨x, y, rxy, z, ryz, nryz, nrzy⟩ := hCon;
@@ -39,7 +39,7 @@ private lemma connected_of_dot3 : F#α ⊧* (.𝟯 : AxiomSet α) → Connected 
     use z;
     simp_all [Semantics.Realize, Kripke.Satisfies, (fInj 0), (fInj 1)];
 
-private lemma dot3_of_connected : Connected F → F#α ⊧* (.𝟯 : AxiomSet α) := by
+private lemma dot3_of_connected : Connected F → F#α ⊧* .𝟯 := by
   intro hCon;
   simp [Kripke.ValidOnFrame, Kripke.ValidOnModel, Axioms.Dot3];
   intro δ p q e V x; subst e;
@@ -73,12 +73,12 @@ instance axiomS4Dot3_defines : 𝔽(((𝗧 ∪ 𝟰 ∪ .𝟯) : Theory α)).Def
     simp [Reflexive, Transitive, Connected];
     refine ⟨⟨?_, ?_⟩, ?_⟩ <;> tauto;
 
-instance S4Dot3_defines : 𝔽((𝐒𝟒.𝟑 : DeductionParameter α)).DefinedBy ReflexiveTransitiveConnectedFrameClass := inferInstance
+instance S4Dot3_defines : 𝔽((𝐒𝟒.𝟑 : Hilbert α)).DefinedBy ReflexiveTransitiveConnectedFrameClass := inferInstance
 
-instance : System.Consistent (𝐒𝟒.𝟑 : DeductionParameter α) := inferInstance
+instance : System.Consistent (𝐒𝟒.𝟑 : Hilbert α) := inferInstance
 
 open MaximalConsistentTheory in
-lemma connected_CanonicalFrame {Ax : AxiomSet α} (hAx : .𝟯 ⊆ Ax) [System.Consistent (𝝂Ax)] : Connected (CanonicalFrame 𝝂Ax) := by
+lemma connected_CanonicalFrame {Ax : Theory α} (hAx : .𝟯 ⊆ Ax) [System.Consistent (𝝂Ax)] : Connected (CanonicalFrame 𝝂Ax) := by
   dsimp only [Connected];
   intro X Y Z ⟨hXY, hXZ⟩;
   by_contra hC; push_neg at hC;
@@ -104,14 +104,14 @@ lemma connected_CanonicalFrame {Ax : AxiomSet α} (hAx : .𝟯 ⊆ Ax) [System.C
   have : □(□p ⟶ q) ⋎ □(□q ⟶ p) ∈ X.theory := by apply subset_axiomset _; aesop;
   contradiction;
 
-instance : Complete (𝐒𝟒.𝟑 : DeductionParameter α) (ReflexiveTransitiveConnectedFrameClass.{u}#α) := instComplete_of_mem_canonicalFrame ReflexiveTransitiveConnectedFrameClass $ by
+instance : Complete (𝐒𝟒.𝟑 : Hilbert α) (ReflexiveTransitiveConnectedFrameClass.{u}#α) := instComplete_of_mem_canonicalFrame ReflexiveTransitiveConnectedFrameClass $ by
   refine ⟨?reflexive, ?transitive, ?connective⟩;
   . simp [GeachConfluent.reflexive_def];
     apply geachConfluent_CanonicalFrame;
-    simp [AxiomSet.Geach.T_def];
+    simp [Axioms.Geach.T_def];
   . rw [GeachConfluent.transitive_def];
     apply geachConfluent_CanonicalFrame;
-    simp [AxiomSet.Geach.Four_def];
+    simp [Axioms.Geach.Four_def];
   . apply connected_CanonicalFrame;
     simp;
 

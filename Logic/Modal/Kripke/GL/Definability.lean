@@ -12,7 +12,7 @@ open Formula
 
 variable {α : Type u} [Inhabited α]
 
-private lemma trans_of_L {F : Kripke.Frame} : F#α ⊧* (𝗟 : AxiomSet α) → Transitive F.Rel := by
+private lemma trans_of_L {F : Kripke.Frame} : F#α ⊧* 𝗟 → Transitive F.Rel := by
   contrapose;
   intro hT; simp [Transitive] at hT;
   obtain ⟨w₁, w₂, r₁₂, w₃, r₂₃, nr₁₃⟩ := hT;
@@ -30,7 +30,7 @@ private lemma trans_of_L {F : Kripke.Frame} : F#α ⊧* (𝗟 : AxiomSet α) →
       . by_cases hx₃ : x = w₃ <;> simp_all [Kripke.Satisfies, hx₃];
     . existsi w₂; simpa [Kripke.Satisfies];
 
-private lemma cwf_of_L {F : Kripke.Frame} : F#α ⊧* (𝗟 : AxiomSet α) → ConverseWellFounded F.Rel := by
+private lemma cwf_of_L {F : Kripke.Frame} : F#α ⊧* 𝗟 → ConverseWellFounded F.Rel := by
   contrapose;
   intro hCF;
   obtain ⟨X, ⟨x, _⟩, hX₂⟩ := by simpa using ConverseWellFounded.iff_has_max.not.mp hCF;
@@ -50,7 +50,7 @@ private lemma cwf_of_L {F : Kripke.Frame} : F#α ⊧* (𝗟 : AxiomSet α) → C
     . obtain ⟨y, _, _⟩ := hX₂ x (by assumption);
       use y;
 
-private lemma L_of_trans_and_cwf {F : Kripke.Frame} : (Transitive F.Rel ∧ ConverseWellFounded F.Rel) → F#α ⊧* (𝗟 : AxiomSet α) := by
+private lemma L_of_trans_and_cwf {F : Kripke.Frame} : (Transitive F.Rel ∧ ConverseWellFounded F.Rel) → F#α ⊧* 𝗟 := by
   rintro ⟨hTrans, hWF⟩;
   simp [Axioms.L];
   intro p V w;
@@ -85,8 +85,8 @@ instance axiomL_definability : 𝔽((𝗟 : Theory α)).DefinedBy (TransitiveCon
     simp [Transitive, ConverseWellFounded];
     apply WellFounded.trivial_wellfounded;
 
-instance : Sound (𝐆𝐋 : DeductionParameter α) (TransitiveConverseWellFoundedFrameClass#α) := inferInstance
-instance : System.Consistent (𝐆𝐋 : DeductionParameter α) := inferInstance
+instance : Sound (𝐆𝐋 : Hilbert α) (TransitiveConverseWellFoundedFrameClass#α) := inferInstance
+instance : System.Consistent (𝐆𝐋 : Hilbert α) := inferInstance
 
 instance axiomL_finite_definability : 𝔽ꟳ((𝗟 : Theory α)).DefinedBy (TransitiveIrreflexiveFrameClassꟳ) where
   define := by

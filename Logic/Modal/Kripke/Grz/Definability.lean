@@ -16,7 +16,7 @@ open Relation (IrreflGen)
 variable {α : Type u} [Inhabited α] [DecidableEq α]
 variable {F : Kripke.Frame}
 
-private lemma valid_on_frame_T_and_Four_of_Grz (h : F#α ⊧* (𝗚𝗿𝘇 : AxiomSet α)) : F#α ⊧* ({□p ⟶ (p ⋏ (□p ⟶ □□p)) | (p : Formula α)}) := by
+private lemma valid_on_frame_T_and_Four_of_Grz (h : F#α ⊧* 𝗚𝗿𝘇) : F#α ⊧* ({□p ⟶ (p ⋏ (□p ⟶ □□p)) | (p : Formula α)}) := by
   simp_all [ValidOnFrame, ValidOnModel, Axioms.T, Axioms.Grz];
   intro p V x;
   let q := p ⋏ (□p ⟶ □□p);
@@ -24,25 +24,25 @@ private lemma valid_on_frame_T_and_Four_of_Grz (h : F#α ⊧* (𝗚𝗿𝘇 : Ax
   have h₂ : Satisfies ⟨F#α, V⟩ x (□(□(q ⟶ □q) ⟶ q) ⟶ q)  := h q V x;
   exact λ f => h₂ (h₁ f);
 
-private lemma valid_on_frame_T_of_Grz (h : F#α ⊧* (𝗚𝗿𝘇 : AxiomSet α)) : F#α ⊧* (𝗧 : AxiomSet α) := by
+private lemma valid_on_frame_T_of_Grz (h : F#α ⊧* 𝗚𝗿𝘇) : F#α ⊧* 𝗧 := by
   have := valid_on_frame_T_and_Four_of_Grz h;
   simp_all [ValidOnFrame, ValidOnModel, Axioms.T, Axioms.Grz];
   intro p V x hx;
   exact Satisfies.and_def.mp (this p V x hx) |>.1
 
-private lemma valid_on_frame_Four_of_Grz (h : F#α ⊧* (𝗚𝗿𝘇 : AxiomSet α)) : F#α ⊧* (𝟰 : AxiomSet α) := by
+private lemma valid_on_frame_Four_of_Grz (h : F#α ⊧* 𝗚𝗿𝘇) : F#α ⊧* 𝟰 := by
   have := valid_on_frame_T_and_Four_of_Grz h;
   simp_all [ValidOnFrame, ValidOnModel, Axioms.T, Axioms.Grz];
   intro p V x hx;
   exact (Satisfies.and_def.mp (this p V x hx) |>.2) hx;
 
-private lemma refl_of_Grz (h : F#α ⊧* (𝗚𝗿𝘇 : AxiomSet α)) : Reflexive F := by
-  exact axiomT_defines.define.mp $ (valid_on_frame_T_of_Grz h);
+private lemma refl_of_Grz (h : F#α ⊧* 𝗚𝗿𝘇) : Reflexive F := by
+  exact axiomT_defines.define.mp $ valid_on_frame_T_of_Grz h;
 
-private lemma trans_of_Grz (h : F#α ⊧* (𝗚𝗿𝘇 : AxiomSet α)) : Transitive F := by
-  exact axiomFour_defines.define.mp $ (valid_on_frame_Four_of_Grz h);
+private lemma trans_of_Grz (h : F#α ⊧* 𝗚𝗿𝘇) : Transitive F := by
+  exact axiomFour_defines.define.mp $ valid_on_frame_Four_of_Grz h;
 
-private lemma WCWF_of_Grz (h : F#α ⊧* (𝗚𝗿𝘇 : AxiomSet α)) : WCWF F := by
+private lemma WCWF_of_Grz (h : F#α ⊧* 𝗚𝗿𝘇) : WCWF F := by
   have F_trans : Transitive F := trans_of_Grz h;
   have F_refl : Reflexive F := refl_of_Grz h;
 
@@ -110,7 +110,7 @@ private lemma WCWF_of_Grz (h : F#α ⊧* (𝗚𝗿𝘇 : AxiomSet α)) : WCWF F 
         exact this _ hx;
       . simp [Satisfies, V];
 
-private lemma Grz_of_wcwf : (Reflexive F.Rel ∧ Transitive F.Rel ∧ WeaklyConverseWellFounded F.Rel) → F#α ⊧* (𝗚𝗿𝘇 : AxiomSet α) := by
+private lemma Grz_of_wcwf : (Reflexive F.Rel ∧ Transitive F.Rel ∧ WeaklyConverseWellFounded F.Rel) → F#α ⊧* 𝗚𝗿𝘇 := by
   rintro ⟨hRefl, hTrans, hWCWF⟩;
   simp [Axioms.Grz];
   intro p V;
@@ -173,8 +173,8 @@ instance axiomGrz_defineability : 𝔽((𝗚𝗿𝘇 : Theory α)).DefinedBy Ref
     simp [WeaklyConverseWellFounded, ConverseWellFounded, IrreflGen];
     apply WellFounded.trivial_wellfounded;
 
-instance : Sound (𝐆𝐫𝐳 : DeductionParameter α) (ReflexiveTransitiveWeaklyConverseWellFoundedFrameClass#α) := inferInstance
-instance : System.Consistent (𝐆𝐫𝐳 : DeductionParameter α) := inferInstance
+instance : Sound (𝐆𝐫𝐳 : Hilbert α) (ReflexiveTransitiveWeaklyConverseWellFoundedFrameClass#α) := inferInstance
+instance : System.Consistent (𝐆𝐫𝐳 : Hilbert α) := inferInstance
 
 instance axiomGrz_finite_defines : 𝔽ꟳ((𝗚𝗿𝘇 : Theory α)).DefinedBy ReflexiveTransitiveAntisymmetricFrameClassꟳ where
   define := by
@@ -194,7 +194,7 @@ instance axiomGrz_finite_defines : 𝔽ꟳ((𝗚𝗿𝘇 : Theory α)).DefinedBy
     use ⟨PUnit, λ _ _ => True⟩;
     refine ⟨?_, ?_, ?_⟩ <;> tauto;
 
-instance : Sound (𝐆𝐫𝐳 : DeductionParameter α) (ReflexiveTransitiveAntisymmetricFrameClassꟳ#α) := inferInstance
+instance : Sound (𝐆𝐫𝐳 : Hilbert α) (ReflexiveTransitiveAntisymmetricFrameClassꟳ#α) := inferInstance
 
 end Kripke
 

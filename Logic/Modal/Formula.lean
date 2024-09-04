@@ -214,8 +214,6 @@ abbrev Formulae (α) := Finset (Formula α)
 abbrev Theory (α) := Set (Formula α)
 instance : Collection (Formula α) (Theory α) := inferInstance
 
-abbrev AxiomSet (α) := Set (Formula α)
-
 section Subformula
 
 variable [DecidableEq α]

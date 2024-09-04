@@ -1,7 +1,7 @@
 import Logic.Logic.Kripke.Basic
 import Logic.Logic.System
 import Logic.Modal.Formula
-import Logic.Modal.Deduction
+import Logic.Modal.Hilbert
 
 namespace LO.Modal
 
@@ -289,12 +289,12 @@ def characterizability_union_frameclass_of_theory {T₁ T₂ : Theory α}
     . simpa using char₂.characterize hF₂;
   nonempty := nonempty
 
-abbrev FrameClassOfHilbert (Λ : DeductionParameter α) : FrameClass.Dep α := 𝔽(System.theory Λ)
+abbrev FrameClassOfHilbert (Λ : Hilbert α) : FrameClass.Dep α := 𝔽(Λ.theorems)
 notation "𝔽(" Λ ")"  => FrameClassOfHilbert Λ
 
-instance {Ax : Set (Formula α)} {𝔽 : FrameClass} [defi : 𝔽(Ax).DefinedBy 𝔽] : 𝔽(𝝂(Ax)).DefinedBy 𝔽 where
+instance {Ax : Theory α} {𝔽 : FrameClass} [defi : 𝔽(Ax).DefinedBy 𝔽] : 𝔽(𝝂(Ax)).DefinedBy 𝔽 where
   define := by
-    simp only [System.theory, Semantics.RealizeSet.setOf_iff, ValidOnFrame.models_iff, Set.mem_setOf_eq];
+    simp only [Hilbert.theorems, System.theory, Semantics.RealizeSet.setOf_iff, ValidOnFrame.models_iff, Set.mem_setOf_eq];
     intro F;
     constructor;
     . intro h;
@@ -319,9 +319,9 @@ instance {Ax : Set (Formula α)} {𝔽 : FrameClass} [defi : 𝔽(Ax).DefinedBy 
         | exact Formula.Kripke.ValidOnFrame.elimContra;
   nonempty := defi.nonempty
 
-instance {Ax : Set (Formula α)} {𝔽 : FrameClass} [char : 𝔽(Ax).Characteraizable 𝔽] : 𝔽(𝝂(Ax)).Characteraizable 𝔽 where
+instance {Ax : Theory α} {𝔽 : FrameClass} [char : 𝔽(Ax).Characteraizable 𝔽] : 𝔽(𝝂(Ax)).Characteraizable 𝔽 where
   characterize := by
-    simp only [System.theory, Semantics.RealizeSet.setOf_iff, ValidOnFrame.models_iff, Set.mem_setOf_eq];
+    simp only [Hilbert.theorems, System.theory, Semantics.RealizeSet.setOf_iff, ValidOnFrame.models_iff, Set.mem_setOf_eq];
     intro F hF p hp;
     induction hp using Deduction.inducition_with_necOnly! with
     | hMaxm h =>
@@ -340,12 +340,12 @@ instance {Ax : Set (Formula α)} {𝔽 : FrameClass} [char : 𝔽(Ax).Charactera
   nonempty := char.nonempty
 
 
-abbrev FiniteFrameClassOfHilbert (Λ : DeductionParameter α) : FiniteFrameClass.Dep α := 𝔽(Λ)ꟳ
+abbrev FiniteFrameClassOfHilbert (Λ : Hilbert α) : FiniteFrameClass.Dep α := 𝔽(Λ)ꟳ
 notation "𝔽ꟳ(" Λ ")"  => FiniteFrameClassOfHilbert Λ
 
 instance {Ax : Set (Formula α)} {𝔽 : FiniteFrameClass}  [defi : 𝔽ꟳ(Ax).DefinedBy 𝔽] : 𝔽ꟳ(𝝂(Ax)).DefinedBy 𝔽 where
   define := by
-    simp only [System.theory, Semantics.RealizeSet.setOf_iff, ValidOnFrame.models_iff, Set.mem_setOf_eq];
+    simp only [Hilbert.theorems, System.theory, Semantics.RealizeSet.setOf_iff, ValidOnFrame.models_iff, Set.mem_setOf_eq];
     intro F;
     constructor;
     . intro h;
@@ -372,7 +372,7 @@ instance {Ax : Set (Formula α)} {𝔽 : FiniteFrameClass}  [defi : 𝔽ꟳ(Ax).
 
 instance {Ax : Set (Formula α)} {𝔽 : FiniteFrameClass} [char : 𝔽ꟳ(Ax).Characteraizable 𝔽] : 𝔽ꟳ(𝝂(Ax)).Characteraizable 𝔽 where
   characterize := by
-    simp only [System.theory, Semantics.RealizeSet.setOf_iff, ValidOnFrame.models_iff, Set.mem_setOf_eq];
+    simp only [Hilbert.theorems, System.theory, Semantics.RealizeSet.setOf_iff, ValidOnFrame.models_iff, Set.mem_setOf_eq];
     intro F hF p hp;
     induction hp using Deduction.inducition_with_necOnly! with
     | hMaxm h =>
@@ -393,17 +393,17 @@ instance {Ax : Set (Formula α)} {𝔽 : FiniteFrameClass} [char : 𝔽ꟳ(Ax).C
 section sound
 
 variable {α : Type u}
-variable {Λ : DeductionParameter α} {p : Formula α}
+variable {Λ : Hilbert α} {p : Formula α}
 
 lemma sound : Λ ⊢! p → 𝔽(Λ) ⊧ p := by
   intro hp F hF;
-  simp [System.theory] at hF;
+  simp [Hilbert.theorems, System.theory] at hF;
   exact hF p hp;
 instance : Sound Λ 𝔽(Λ) := ⟨sound⟩
 
 lemma sound_finite : Λ ⊢! p → 𝔽ꟳ(Λ) ⊧ p := by
   intro hp F hF;
-  simp [System.theory] at hF;
+  simp [Hilbert.theorems, System.theory] at hF;
   obtain ⟨FF, hFF₁, rfl⟩ := hF;
   exact hFF₁ p hp;
 instance : Sound Λ 𝔽ꟳ(Λ) := ⟨sound_finite⟩
@@ -468,15 +468,15 @@ instance empty_axiom_definability : 𝔽((∅ : Theory α)).DefinedBy AllFrameCl
   define := by simp;
   nonempty :=  ⟨⟨PUnit,  λ _ _ => True⟩, trivial⟩
 
-private instance K_definability' : 𝔽((𝝂(∅) : DeductionParameter α)).DefinedBy AllFrameClass := inferInstance
+private instance K_definability' : 𝔽((𝝂(∅) : Hilbert α)).DefinedBy AllFrameClass := inferInstance
 
-instance K_definability : 𝔽((𝐊 : DeductionParameter α)).DefinedBy AllFrameClass := by
+instance K_definability : 𝔽((𝐊 : Hilbert α)).DefinedBy AllFrameClass := by
   convert K_definability';
-  exact DeductionParameter.K_is_empty_normal;
+  exact K_is_empty_normal;
 
 instance K_sound : Sound 𝐊 (AllFrameClass#α) := inferInstance
 
-instance K_consistent : System.Consistent (𝐊 : DeductionParameter α) := inferInstance
+instance K_consistent : System.Consistent (𝐊 : Hilbert α) := inferInstance
 
 
 lemma restrict_finite : 𝔽#α ⊧ p → 𝔽ꟳ#α ⊧ p := by
@@ -484,7 +484,7 @@ lemma restrict_finite : 𝔽#α ⊧ p → 𝔽ꟳ#α ⊧ p := by
   obtain ⟨FF, hFF₁, rfl⟩ := hF;
   exact h (by simpa)
 
-instance {Λ : DeductionParameter α} [sound : Sound Λ 𝔽#α] : Sound Λ 𝔽ꟳ#α := ⟨by
+instance {Λ : Hilbert α} [sound : Sound Λ 𝔽#α] : Sound Λ 𝔽ꟳ#α := ⟨by
   intro p h;
   exact restrict_finite $ sound.sound h;
 ⟩
@@ -493,84 +493,105 @@ instance : Sound 𝐊 (AllFrameClassꟳ#α) := inferInstance
 
 lemma exists_finite_frame : ¬𝔽ꟳ#α ⊧ p ↔ ∃ F ∈ 𝔽ꟳ, ¬F#α ⊧ p := by simp;
 
-class FiniteFrameProperty (Λ : DeductionParameter α) (𝔽 : FrameClass) where
+class FiniteFrameProperty (Λ : Hilbert α) (𝔽 : FrameClass) where
   [complete : Complete Λ 𝔽ꟳ#α]
   [sound : Sound Λ 𝔽ꟳ#α]
 
+end Kripke
 
-section StrictlyWeakerThan
 
-variable [Inhabited α] [DecidableEq α]
+section
 
-open System (weakerThan_iff)
-open Kripke
 open Formula (atom)
 open Formula.Kripke
+open Kripke (K_sound)
 
-theorem K_strictlyWeakerThan_KD : (𝐊 : DeductionParameter α) <ₛ 𝐊𝐃 := by
+variable [DecidableEq α] [Inhabited α]
+
+theorem K_strictlyWeakerThan_KD : (𝐊 : Hilbert α) <ₛ 𝐊𝐃 := by
   constructor;
-  . apply reducible_K_KD;
+  . apply K_weakerThan_KD;
   . simp [weakerThan_iff];
     use (□(atom default) ⟶ ◇(atom default));
     constructor;
     . exact Deduction.maxm! (by simp);
     . apply K_sound.not_provable_of_countermodel;
       simp [ValidOnFrame, ValidOnModel];
-      use { World := Fin 1, Rel := λ _ _ => False }, (λ w _ => w = 0), 0;
+      use ⟨Fin 1, λ _ _ => False⟩, (λ w _ => w = 0), 0;
       simp [Satisfies];
 
-theorem K_strictlyWeakerThan_K4 : (𝐊 : DeductionParameter α) <ₛ 𝐊𝟒 := by
+theorem K_strictlyWeakerThan_KB : (𝐊 : Hilbert α) <ₛ 𝐊𝐁 := by
   constructor;
-  . apply reducible_K_K4;
-  . simp [weakerThan_iff];
-    use (□(atom default) ⟶ □□(atom default));
-    constructor;
-    . exact Deduction.maxm! (by simp);
-    . apply K_sound.not_provable_of_countermodel;
-      simp [ValidOnFrame, ValidOnModel];
-      use { World := Fin 2, Rel := λ x y => x ≠ y }, (λ w _ => w = 1), 0;
-      simp [Satisfies];
-      constructor;
-      . intro y;
-        match y with
-        | 0 => simp [Frame.Rel]; aesop;
-        | 1 => simp;
-      . use 1;
-        constructor;
-        . simp [Frame.Rel]; aesop;
-        . use 0; simp [Frame.Rel]; aesop;
-
-theorem K_strictlyWeakerThan_KB : (𝐊 : DeductionParameter α) <ₛ 𝐊𝐁 := by
-  constructor;
-  . apply reducible_K_KB;
+  . apply K_weakerThan_KB;
   . simp [weakerThan_iff];
     use ((atom default) ⟶ □◇(atom default));
     constructor;
     . exact Deduction.maxm! (by simp);
     . apply K_sound.not_provable_of_countermodel;
       simp [ValidOnFrame, ValidOnModel];
-      use { World := Fin 2, Rel := λ x y => x = 0 ∧ y = 1 }, (λ w _ => w = 0), 0;
+      use ⟨Fin 2, λ x y => x = 0 ∧ y = 1⟩, (λ w _ => w = 0), 0;
       simp [Satisfies];
       use 1;
 
-theorem K_strictlyWeakerThan_K5 : (𝐊 : DeductionParameter α) <ₛ 𝐊𝟓 := by
+theorem K_strictlyWeakerThan_K4 : (𝐊 : Hilbert α) <ₛ 𝐊𝟒 := by
   constructor;
-  . apply reducible_K_K5;
+  . apply K_weakerThan_K4;
+  . simp [weakerThan_iff];
+    use (□(atom default) ⟶ □□(atom default));
+    constructor;
+    . exact Deduction.maxm! (by simp);
+    . apply K_sound.not_provable_of_countermodel;
+      simp [ValidOnFrame, ValidOnModel];
+      use ⟨Fin 2, λ x y => x ≠ y⟩, (λ w _ => w = 1), 0;
+      simp [Satisfies];
+      constructor;
+      . intro y;
+        match y with
+        | 0 => aesop;
+        | 1 => simp;
+      . use 1;
+        constructor;
+        . aesop;
+        . use 0; aesop;
+
+theorem K_strictlyWeakerThan_K5 : (𝐊 : Hilbert α) <ₛ 𝐊𝟓 := by
+  constructor;
+  . apply K_weakerThan_K5;
   . simp [weakerThan_iff];
     use (◇(atom default) ⟶ □◇(atom default));
     constructor;
     . exact Deduction.maxm! (by simp);
     . apply K_sound.not_provable_of_countermodel;
       simp [ValidOnFrame, ValidOnModel];
-      use { World := Fin 2, Rel := λ x _ => x = 0 }, (λ w _ => w = 0), 0;
+      use ⟨Fin 2, λ x _ => x = 0⟩, (λ w _ => w = 0), 0;
       simp [Satisfies];
       use 1;
       simp;
 
-end StrictlyWeakerThan
+
+section
+
+variable {Ax₁ Ax₂ : Theory α} (𝔽₁ 𝔽₂ : FrameClass)
+  [sound₁ : Sound 𝝂Ax₁ (𝔽₁#α)] [sound₂ : Sound 𝝂Ax₂ (𝔽₂#α)]
+  [complete₁ : Complete 𝝂Ax₁ (𝔽₁#α)] [complete₂ : Complete 𝝂Ax₂ (𝔽₂#α)]
+
+lemma weakerThan_of_subset_FrameClass (h𝔽 : 𝔽₂ ⊆ 𝔽₁) : 𝝂Ax₁ ≤ₛ 𝝂Ax₂ := by
+  apply System.weakerThan_iff.mpr;
+  intro p hp;
+  apply complete₂.complete;
+  intro F hF;
+  exact sound₁.sound hp $ h𝔽 hF;
+
+lemma equiv_of_eq_FrameClass (h𝔽 : 𝔽₁ = 𝔽₂) : 𝝂Ax₁ =ₛ 𝝂Ax₂ := by
+  apply System.Equiv.antisymm_iff.mpr;
+  constructor;
+  . apply weakerThan_of_subset_FrameClass 𝔽₁ 𝔽₂; subst_vars; rfl;
+  . apply weakerThan_of_subset_FrameClass 𝔽₂ 𝔽₁; subst_vars; rfl;
+
+end
 
 
-end Kripke
+end
 
 end Modal
 

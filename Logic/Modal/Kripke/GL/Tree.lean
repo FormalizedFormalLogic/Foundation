@@ -202,7 +202,7 @@ theorem GL_unnecessitation! : 𝐆𝐋 ⊢! □p → 𝐆𝐋 ⊢! p := by
   have : 𝐆𝐋 ⊢! ⊡⊤ ⟶ p := GL_imply_boxdot_plain_of_imply_box_box this;
   exact this ⨀ boxdotverum!;
 
-noncomputable instance : System.Unnecessitation (𝐆𝐋 : DeductionParameter α) where
+noncomputable instance : System.Unnecessitation (𝐆𝐋 : Hilbert α) where
   unnec := λ h => GL_unnecessitation! ⟨h⟩ |>.some
 
 end

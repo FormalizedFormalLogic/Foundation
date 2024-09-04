@@ -11,7 +11,6 @@ open LO.Kripke
 open System
 open Kripke
 open Formula
-open DeductionParameter (Normal)
 
 variable {α : Type u} [Inhabited α] [DecidableEq α]
 
@@ -31,13 +30,13 @@ instance axiomVer_definability : 𝔽((𝗩𝗲𝗿 : Theory α)).DefinedBy (Iso
     use ⟨PUnit,  λ _ _ => False⟩
     tauto;
 
-instance Ver_definability : 𝔽((𝐕𝐞𝐫 : DeductionParameter α)).DefinedBy (IsolatedFrameClass) := inferInstance
+instance Ver_definability : 𝔽((𝐕𝐞𝐫 : Hilbert α)).DefinedBy (IsolatedFrameClass) := inferInstance
 
 instance : Sound 𝐕𝐞𝐫 (IsolatedFrameClass#α) := inferInstance
 
-instance : System.Consistent (𝐕𝐞𝐫 : DeductionParameter α) := inferInstance
+instance : System.Consistent (𝐕𝐞𝐫 : Hilbert α) := inferInstance
 
-lemma isolated_CanonicalFrame {Ax : AxiomSet α} (h : 𝗩𝗲𝗿 ⊆ Ax) [System.Consistent 𝝂Ax] : Isolated (CanonicalFrame 𝝂Ax) := by
+lemma isolated_CanonicalFrame {Ax : Theory α} (h : 𝗩𝗲𝗿 ⊆ Ax) [System.Consistent 𝝂Ax] : Isolated (CanonicalFrame 𝝂Ax) := by
   intro x y rxy;
   have : (CanonicalModel 𝝂Ax) ⊧ □⊥ := iff_valid_on_canonicalModel_deducible.mpr $ Normal.maxm! (by aesop);
   exact this x _ rxy;

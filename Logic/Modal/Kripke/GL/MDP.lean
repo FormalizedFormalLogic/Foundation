@@ -184,6 +184,6 @@ theorem GL_MDP (h : 𝐆𝐋 ⊢! □p₁ ⋎ □p₂) : 𝐆𝐋 ⊢! p₁ ∨ 
     tauto;
   }
 
-instance : System.ModalDisjunctive (𝐆𝐋 : DeductionParameter α) := ⟨GL_MDP⟩
+instance : System.ModalDisjunctive (𝐆𝐋 : Hilbert α) := ⟨GL_MDP⟩
 
 end LO.Modal
