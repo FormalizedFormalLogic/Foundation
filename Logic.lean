@@ -19,8 +19,6 @@ import Logic.Propositional.Classical.Basic.Semantics
 import Logic.Propositional.Classical.Basic.Completeness
 import Logic.Propositional.Classical.Basic
 
--- Propositional Intuitionistic
-import Logic.Propositional.Superintuitionistic
 -- import Logic.Propositional.Translation
 
 -- FirstOrder
@@ -47,5 +45,7 @@ import Logic.FirstOrder.Arith.PeanoMinus
 import Logic.FirstOrder.Arith.Representation
 import Logic.FirstOrder.Arith.Nonstandard
 
--- Modal Logic
-import Logic.Modal.Standard.Standard
+-- import Logic.FirstOrder.Arith.EA.Basic
+
+import Logic.IntProp.IntProp
+import Logic.Modal.Modal
