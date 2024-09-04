@@ -1,4 +1,4 @@
-import Logic.Propositional.Superintuitionistic.Kripke.Semantics
+import Logic.IntProp.Kripke.Semantics
 
 /-!
   # Counterexample to the Law of Excluded Middle in Intuitionistic Logic
@@ -7,7 +7,7 @@ import Logic.Propositional.Superintuitionistic.Kripke.Semantics
   - `noLEM`: LEM is not always valid in intuitionistic logic.
 -/
 
-namespace LO.Propositional.Superintuitionistic.Kripke
+namespace LO.IntProp.Kripke
 
 open System
 
@@ -59,7 +59,7 @@ theorem noLEM : ∃ (p : Formula α), 𝐈𝐧𝐭 ⊬! p ⋎ ~p := by
 /--
   Intuitionistic logic is proper weaker than classical logic.
 -/
-theorem Int_strictly_weaker_than_Cl : (𝐈𝐧𝐭 : DeductionParameter α) <ₛ 𝐂𝐥 := by
+theorem Int_strictly_weaker_than_Cl : (𝐈𝐧𝐭 : Hilbert α) <ₛ 𝐂𝐥 := by
   constructor;
   . exact Int_weaker_than_Cl;
   . apply weakerThan_iff.not.mpr;
@@ -94,7 +94,7 @@ lemma noLEM_KC: ∃ (p : Formula α), 𝐊𝐂 ⊬! p ⋎ ~p := by
   have := @Kripke.sound _ _ _ hC;
   contradiction;
 
-theorem KC_strictly_weaker_than_Cl : (𝐊𝐂 : DeductionParameter α) <ₛ 𝐂𝐥 := by
+theorem KC_strictly_weaker_than_Cl : (𝐊𝐂 : Hilbert α) <ₛ 𝐂𝐥 := by
   constructor;
   . exact KC_weaker_than_Cl;
   . apply weakerThan_iff.not.mpr;
@@ -130,7 +130,7 @@ lemma noLEM_LC: ∃ (p : Formula α), 𝐋𝐂 ⊬! p ⋎ ~p := by
   have := @Kripke.sound _ _ _ hC;
   contradiction;
 
-theorem LC_strictly_weaker_than_Cl : (𝐋𝐂 : DeductionParameter α) <ₛ 𝐂𝐥 := by
+theorem LC_strictly_weaker_than_Cl : (𝐋𝐂 : Hilbert α) <ₛ 𝐂𝐥 := by
   constructor;
   . exact LC_weaker_than_Cl;
   . apply weakerThan_iff.not.mpr;
@@ -144,4 +144,4 @@ theorem LC_strictly_weaker_than_Cl : (𝐋𝐂 : DeductionParameter α) <ₛ �
 end
 
 
-end LO.Propositional.Superintuitionistic.Kripke
+end LO.IntProp.Kripke

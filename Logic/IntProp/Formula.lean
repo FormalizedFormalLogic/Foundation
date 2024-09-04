@@ -1,7 +1,7 @@
 import Logic.Logic.LogicSymbol
 import Logic.Logic.HilbertStyle.Basic
 
-namespace LO.Propositional.Superintuitionistic
+namespace LO.IntProp
 
 inductive Formula (α : Type u) : Type u
   | atom   : α → Formula α
@@ -233,8 +233,6 @@ end Formula
 
 abbrev Theory (α : Type u) := Set (Formula α)
 
-abbrev AxiomSet (α : Type u) := Set (Formula α)
-
 abbrev Context (α : Type u) := Finset (Formula α)
 
-end LO.Propositional.Superintuitionistic
+end LO.IntProp

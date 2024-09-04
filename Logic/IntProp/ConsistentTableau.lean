@@ -1,15 +1,15 @@
-import Logic.Propositional.Superintuitionistic.Deduction
+import Logic.IntProp.Deduction
 
 set_option autoImplicit false
 universe u v
 
-namespace LO.Propositional.Superintuitionistic
+namespace LO.IntProp
 
 open System FiniteContext
 open Formula
 
 variable {α : Type u} [DecidableEq α] [Inhabited α]
-variable {Λ : DeductionParameter α} [Λ.IncludeEFQ]
+variable {Λ : Hilbert α} [Λ.IncludeEFQ]
 
 def Tableau (α : Type u) := Theory α × Theory α
 
@@ -24,12 +24,11 @@ instance : HasSubset (Tableau α) := ⟨λ t₁ t₂ => t₁.1 ⊆ t₂.1 ∧ t�
   . intro h; cases h; simp;
   . rintro ⟨h₁, h₂⟩; cases t₁; cases t₂; simp_all;
 
-def ParametricConsistent (Λ : DeductionParameter α) (t : Tableau α) := ∀ {Γ Δ : List (Formula α)}, (∀ p ∈ Γ, p ∈ t.1) → (∀ p ∈ Δ, p ∈ t.2) → Λ ⊬! ⋀Γ ⟶ ⋁Δ
-notation "(" Λ ")-Consistent" => ParametricConsistent Λ
+def Consistent (Λ : Hilbert α) (t : Tableau α) := ∀ {Γ Δ : List (Formula α)}, (∀ p ∈ Γ, p ∈ t.1) → (∀ p ∈ Δ, p ∈ t.2) → Λ ⊬! ⋀Γ ⟶ ⋁Δ
 
 variable {p q: Formula α} {T U : Theory α}
 
-lemma iff_ParametricConsistent_insert₁ : (Λ)-Consistent ((insert p T), U) ↔ ∀ {Γ Δ : List (Formula α)}, (∀ p ∈ Γ, p ∈ T) → (∀ p ∈ Δ, p ∈ U) → Λ ⊬! p ⋏ ⋀Γ ⟶ ⋁Δ := by
+lemma iff_consistent_insert₁ : Tableau.Consistent Λ ((insert p T), U) ↔ ∀ {Γ Δ : List (Formula α)}, (∀ p ∈ Γ, p ∈ T) → (∀ p ∈ Δ, p ∈ U) → Λ ⊬! p ⋏ ⋀Γ ⟶ ⋁Δ := by
   constructor;
   . intro h Γ Δ hΓ hΔ;
     by_contra hC;
@@ -49,12 +48,12 @@ lemma iff_ParametricConsistent_insert₁ : (Λ)-Consistent ((insert p T), U) ↔
     have : Λ ⊢! p ⋏ ⋀(Γ.remove p) ⟶ ⋁Δ := imp_trans''! and_comm! $ imply_left_remove_conj! (p := p) hC;
     contradiction;
 
-lemma iff_not_ParametricConsistent_insert₁ : ¬(Λ)-Consistent ((insert p T), U) ↔ ∃ Γ Δ : List (Formula α), (∀ p ∈ Γ, p ∈ T) ∧ (∀ p ∈ Δ, p ∈ U) ∧ Λ ⊢! p ⋏ ⋀Γ ⟶ ⋁Δ := by
+lemma iff_not_consistent_insert₁ : ¬Tableau.Consistent Λ ((insert p T), U) ↔ ∃ Γ Δ : List (Formula α), (∀ p ∈ Γ, p ∈ T) ∧ (∀ p ∈ Δ, p ∈ U) ∧ Λ ⊢! p ⋏ ⋀Γ ⟶ ⋁Δ := by
   constructor;
-  . contrapose; push_neg; apply iff_ParametricConsistent_insert₁.mpr;
-  . contrapose; push_neg; apply iff_ParametricConsistent_insert₁.mp;
+  . contrapose; push_neg; apply iff_consistent_insert₁.mpr;
+  . contrapose; push_neg; apply iff_consistent_insert₁.mp;
 
-lemma iff_ParametricConsistent_insert₂ : (Λ)-Consistent (T, (insert p U)) ↔ ∀ {Γ Δ : List (Formula α)}, (∀ p ∈ Γ, p ∈ T) → (∀ p ∈ Δ, p ∈ U) → Λ ⊬! ⋀Γ ⟶ p ⋎ ⋁Δ := by
+lemma iff_consistent_insert₂ : Tableau.Consistent Λ (T, (insert p U)) ↔ ∀ {Γ Δ : List (Formula α)}, (∀ p ∈ Γ, p ∈ T) → (∀ p ∈ Δ, p ∈ U) → Λ ⊬! ⋀Γ ⟶ p ⋎ ⋁Δ := by
   constructor;
   . intro h Γ Δ hΓ hΔ;
     by_contra hC;
@@ -75,24 +74,24 @@ lemma iff_ParametricConsistent_insert₂ : (Λ)-Consistent (T, (insert p U)) ↔
     contradiction;
 
 
-lemma iff_not_ParametricConsistent_insert₂ : ¬(Λ)-Consistent (T, (insert p U)) ↔ ∃ Γ Δ : List (Formula α), (∀ p ∈ Γ, p ∈ T) ∧ (∀ p ∈ Δ, p ∈ U) ∧ Λ ⊢! ⋀Γ ⟶ p ⋎ ⋁Δ := by
+lemma iff_not_consistent_insert₂ : ¬Tableau.Consistent Λ (T, (insert p U)) ↔ ∃ Γ Δ : List (Formula α), (∀ p ∈ Γ, p ∈ T) ∧ (∀ p ∈ Δ, p ∈ U) ∧ Λ ⊢! ⋀Γ ⟶ p ⋎ ⋁Δ := by
   constructor;
-  . contrapose; push_neg; apply iff_ParametricConsistent_insert₂.mpr;
-  . contrapose; push_neg; apply iff_ParametricConsistent_insert₂.mp;
+  . contrapose; push_neg; apply iff_consistent_insert₂.mpr;
+  . contrapose; push_neg; apply iff_consistent_insert₂.mp;
 
 section Consistent
 
-variable {t} (hCon : (Λ)-Consistent t)
+variable {t} (hCon : Tableau.Consistent Λ t)
 
-lemma consistent_either (p : Formula α) : (Λ)-Consistent ((insert p t.1), t.2) ∨ (Λ)-Consistent (t.1, (insert p t.2)) := by
+lemma consistent_either (p : Formula α) : Tableau.Consistent Λ ((insert p t.1), t.2) ∨ Tableau.Consistent Λ (t.1, (insert p t.2)) := by
   by_contra hC;
   push_neg at hC;
   have ⟨hC₁, hC₂⟩ := hC;
 
-  obtain ⟨Γ₁, Δ₁, hΓ₁, hΔ₁, h₁⟩ := iff_not_ParametricConsistent_insert₁.mp hC₁;
+  obtain ⟨Γ₁, Δ₁, hΓ₁, hΔ₁, h₁⟩ := iff_not_consistent_insert₁.mp hC₁;
   replace h₁ := imply_left_and_comm'! h₁;
 
-  obtain ⟨Γ₂, Δ₂, hΓ₂, hΔ₂, h₂⟩ := iff_not_ParametricConsistent_insert₂.mp hC₂;
+  obtain ⟨Γ₂, Δ₂, hΓ₂, hΔ₂, h₂⟩ := iff_not_consistent_insert₂.mp hC₂;
 
   have : Λ ⊢! ⋀(Γ₁ ++ Γ₂) ⟶ ⋁(Δ₁ ++ Δ₂) := imp_trans''! (and₁'! iff_concat_conj!) $ imp_trans''! (cut! h₁ h₂) (and₂'! iff_concact_disj!);
   have : Λ ⊬! ⋀(Γ₁ ++ Γ₂) ⟶ ⋁(Δ₁ ++ Δ₂) := hCon (by simp; rintro q (hq₁ | hq₂); exact hΓ₁ q hq₁; exact hΓ₂ q hq₂) (by simp; rintro q (hq₁ | hq₂); exact hΔ₁ q hq₁; exact hΔ₂ q hq₂);
@@ -102,7 +101,7 @@ lemma disjoint_of_consistent : Disjoint t.1 t.2 := by
   by_contra h;
   obtain ⟨T, hp₁, hp₂, hp⟩ := by simpa [Disjoint] using h;
   obtain ⟨p, hp, _⟩ := Set.not_subset.mp hp;
-  simp [ParametricConsistent] at hCon;
+  simp [Consistent] at hCon;
   have : Λ ⊬! ⋀[p] ⟶ ⋁[p] := hCon
     (by simp_all; apply hp₁; assumption)
     (by simp_all; apply hp₂; assumption);
@@ -123,7 +122,7 @@ abbrev Saturated (t : Tableau α) := ∀ p : Formula α, p ∈ t.1 ∨ p ∈ t.2
 section Saturated
 
 variable {t : Tableau α}
-variable (hCon : (Λ)-Consistent t := by assumption) (hMat : Saturated t := by assumption)
+variable (hCon : Tableau.Consistent Λ t := by assumption) (hMat : Saturated t := by assumption)
 
 lemma mem₂_of_not_mem₁ : p ∉ t.1 → p ∈ t.2 := by
   intro h;
@@ -149,7 +148,7 @@ lemma not_mem₂_iff_mem₁ : p ∉ t.2 ↔ p ∈ t.1 := by
 
 lemma saturated_duality
   {t₁ t₂ : Tableau α}
-  (ct₁ : (Λ)-Consistent t₁) (ct₂ : (Λ)-Consistent t₂)
+  (ct₁ : Tableau.Consistent Λ t₁) (ct₂ : Tableau.Consistent Λ t₂)
   (st₁ : Saturated t₁) (st₂ : Saturated t₂)
   : t₁.1 = t₂.1 ↔ t₁.2 = t₂.2 := by
   constructor;
@@ -174,7 +173,7 @@ end Saturated
 
 variable [Inhabited α]
 
-lemma self_ParametricConsistent [h : System.Consistent Λ] : (Λ)-Consistent (Ax(Λ), ∅) := by
+lemma self_consistent [h : System.Consistent Λ] : Tableau.Consistent Λ (Ax(Λ), ∅) := by
   intro Γ Δ hΓ hΔ;
   replace hΔ : Δ = [] := List.nil_iff.mpr hΔ;
   obtain ⟨q, hq⟩ := h.exists_unprovable;
@@ -197,7 +196,7 @@ variable {t : Tableau α}
 open Classical
 open Encodable
 
-def lindenbaum_next (p : Formula α) (t : Tableau α) : Tableau α := if (Λ)-Consistent (insert p t.1, t.2) then (insert p t.1, t.2) else (t.1, insert p t.2)
+def lindenbaum_next (p : Formula α) (t : Tableau α) : Tableau α := if Tableau.Consistent Λ (insert p t.1, t.2) then (insert p t.1, t.2) else (t.1, insert p t.2)
 
 def lindenbaum_next_indexed (t : Tableau α) : ℕ → Tableau α
   | 0 => t
@@ -212,7 +211,7 @@ local notation:max t"∞" => lindenbaum_maximal Λ t
 
 variable {Λ}
 
-lemma next_parametericConsistent (consistent : (Λ)-Consistent t) (p : Formula α) : (Λ)-Consistent (t.lindenbaum_next Λ p) := by
+lemma next_parametericConsistent (consistent : Tableau.Consistent Λ t) (p : Formula α) : Tableau.Consistent Λ (t.lindenbaum_next Λ p) := by
   simp [lindenbaum_next];
   split;
   . simpa;
@@ -222,7 +221,7 @@ lemma next_parametericConsistent (consistent : (Λ)-Consistent t) (p : Formula �
 @[simp]
 lemma lindenbaum_next_indexed_zero {t : Tableau α} : (t.lindenbaum_next_indexed Λ 0) = t := by simp [lindenbaum_next_indexed]
 
-lemma lindenbaum_next_indexed_parametricConsistent_succ {i : ℕ} : (Λ)-Consistent t[i] → (Λ)-Consistent t[i + 1] := by
+lemma lindenbaum_next_indexed_parametricConsistent_succ {i : ℕ} : Tableau.Consistent Λ t[i] → Tableau.Consistent Λ t[i + 1] := by
   simp [lindenbaum_next_indexed];
   split;
   . intro h; apply next_parametericConsistent; assumption;
@@ -234,7 +233,7 @@ lemma mem_lindenbaum_next_indexed (t) (p : Formula α) : p ∈ t[(encode p) + 1]
   . left; tauto;
   . right; tauto;
 
-lemma lindenbaum_next_indexed_parametricConsistent (consistent : (Λ)-Consistent t) (i : ℕ) : (Λ)-Consistent t[i] := by
+lemma lindenbaum_next_indexed_parametricConsistent (consistent : Tableau.Consistent Λ t) (i : ℕ) : Tableau.Consistent Λ t[i] := by
   induction i with
   | zero => simpa;
   | succ i ih => apply lindenbaum_next_indexed_parametricConsistent_succ; assumption;
@@ -259,7 +258,7 @@ lemma lindenbaum_next_indexed_subset₂_of_lt (h : m ≤ n) : t[m].2 ⊆ t[n].2 
     . split <;> tauto;
     . tauto;
 
-lemma exists_parametricConsistent_saturated_tableau (hCon : (Λ)-Consistent t) : ∃ u, t ⊆ u ∧ ((Λ)-Consistent u) ∧ (Saturated u) := by
+lemma exists_parametricConsistent_saturated_tableau (hCon : Tableau.Consistent Λ t) : ∃ u, t ⊆ u ∧ (Tableau.Consistent Λ u) ∧ (Saturated u) := by
   use t∞;
   refine ⟨?subset, ?consistent, ?saturated⟩;
   case subset => constructor <;> apply Set.subset_iUnion_of_subset 0 (by simp);
@@ -311,10 +310,10 @@ variable [Encodable α]
 
 open Tableau
 
-structure SaturatedConsistentTableau (Λ : DeductionParameter α) where
+structure SaturatedConsistentTableau (Λ : Hilbert α) where
   tableau : Tableau α
   saturated : Saturated tableau
-  consistent : (Λ)-Consistent tableau
+  consistent : Tableau.Consistent Λ tableau
 
 alias SCT := SaturatedConsistentTableau
 
@@ -322,11 +321,11 @@ namespace SaturatedConsistentTableau
 
 variable {t₀ : Tableau α} {p q : Formula α}
 
-lemma lindenbaum (hCon : (Λ)-Consistent t₀) : ∃ (t : SaturatedConsistentTableau Λ), t₀ ⊆ t.tableau := by
+lemma lindenbaum (hCon : Tableau.Consistent Λ t₀) : ∃ (t : SaturatedConsistentTableau Λ), t₀ ⊆ t.tableau := by
   obtain ⟨t, ht, hCon, hMax⟩ := Tableau.lindenbaum hCon;
   exact ⟨⟨t, hMax, hCon⟩, ht⟩;
 
-instance [System.Consistent Λ] : Nonempty (SCT Λ) := ⟨lindenbaum Tableau.self_ParametricConsistent |>.choose⟩
+instance [System.Consistent Λ] : Nonempty (SCT Λ) := ⟨lindenbaum Tableau.self_consistent |>.choose⟩
 
 variable {t : SCT Λ}
 

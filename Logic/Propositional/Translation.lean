@@ -1,14 +1,14 @@
 import Logic.Propositional.Classical.Basic
-import Logic.Propositional.Superintuitionistic
+import Logic.IntProp
 
 namespace LO.Propositional
 
 variable {α : Type*}
 
-namespace Superintuitionistic
+namespace IntProp
 
 @[simp]
-def Formula.toClassical : Superintuitionistic.Formula α → Classical.Formula α
+def Formula.toClassical : IntProp.Formula α → Classical.Formula α
   | .atom a => Classical.Formula.atom a
   | ⊤              => ⊤
   | ⊥              => ⊥
@@ -40,22 +40,22 @@ def Deduction.toClassical {T : Theory α} {p} : T ⊢ p → (T : Classical.Theor
   | or₃ _ _ _ _              => by simp; prover
 -/
 
-end Superintuitionistic
+end IntProp
 
 namespace Classical
 
 @[simp]
-def Formula.toSuperintuitionistic : Formula α → Superintuitionistic.Formula α
-  | Formula.atom a  => Superintuitionistic.Formula.atom a
-  | Formula.natom a => ~Superintuitionistic.Formula.atom a
+def Formula.toIntProp : Formula α → IntProp.Formula α
+  | Formula.atom a  => IntProp.Formula.atom a
+  | Formula.natom a => ~IntProp.Formula.atom a
   | ⊤               => ⊤
   | ⊥               => ⊥
-  | p ⋏ q           => p.toSuperintuitionistic ⋏ q.toSuperintuitionistic
-  | p ⋎ q           => p.toSuperintuitionistic ⋎ q.toSuperintuitionistic
+  | p ⋏ q           => p.toIntProp ⋏ q.toIntProp
+  | p ⋎ q           => p.toIntProp ⋎ q.toIntProp
 
-instance : Coe (Formula α) (Superintuitionistic.Formula α) := ⟨Formula.toSuperintuitionistic⟩
+instance : Coe (Formula α) (IntProp.Formula α) := ⟨Formula.toIntProp⟩
 
-instance : Coe (Theory α) (Superintuitionistic.Theory α) := ⟨(Formula.toSuperintuitionistic '' ·)⟩
+instance : Coe (Theory α) (IntProp.Theory α) := ⟨(Formula.toIntProp '' ·)⟩
 
 variable [DecidableEq α] [Encodable α]
 

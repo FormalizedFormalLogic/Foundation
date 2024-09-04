@@ -1,29 +1,29 @@
 import Logic.Logic.HilbertStyle.Basic
 import Logic.Logic.HilbertStyle.Supplemental
-import Logic.Propositional.Superintuitionistic.Formula
+import Logic.IntProp.Formula
 
-namespace LO.Propositional.Superintuitionistic
+namespace LO.IntProp
 
 variable {α : Type u} [DecidableEq α]
 
-structure DeductionParameter (α) where
-  axiomSet : AxiomSet α
-notation "Ax(" Λ ")" => DeductionParameter.axiomSet Λ
+structure Hilbert (α) where
+  axiomSet : Theory α
+notation "Ax(" Λ ")" => Hilbert.axiomSet Λ
 
-namespace DeductionParameter
+namespace Hilbert
 
-class IncludeEFQ (Λ : DeductionParameter α) where
+class IncludeEFQ (Λ : Hilbert α) where
   include_EFQ : 𝗘𝗙𝗤 ⊆ Ax(Λ) := by simp
 
-class IncludeLEM (Λ : DeductionParameter α) where
+class IncludeLEM (Λ : Hilbert α) where
   include_LEM : 𝗟𝗘𝗠 ⊆ Ax(Λ) := by simp
 
-class IncludeDNE (Λ : DeductionParameter α) where
+class IncludeDNE (Λ : Hilbert α) where
   include_DNE : 𝗗𝗡𝗘 ⊆ Ax(Λ) := by simp
 
-end DeductionParameter
+end Hilbert
 
-inductive Deduction (Λ : DeductionParameter α) : Formula α → Type _
+inductive Deduction (Λ : Hilbert α) : Formula α → Type _
   | eaxm {p}     : p ∈ Ax(Λ) → Deduction Λ p
   | mdp {p q}    : Deduction Λ (p ⟶ q) → Deduction Λ p → Deduction Λ q
   | verum        : Deduction Λ $ ⊤
@@ -37,12 +37,12 @@ inductive Deduction (Λ : DeductionParameter α) : Formula α → Type _
   | or₃ p q r    : Deduction Λ $ (p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r)
   | neg_equiv p  : Deduction Λ $ Axioms.NegEquiv p
 
-instance : System (Formula α) (DeductionParameter α) := ⟨Deduction⟩
+instance : System (Formula α) (Hilbert α) := ⟨Deduction⟩
 
 open Deduction
-open DeductionParameter
+open Hilbert
 
-variable {Λ : DeductionParameter α}
+variable {Λ : Hilbert α}
 
 instance : System.Minimal Λ where
   mdp := mdp
@@ -72,35 +72,37 @@ instance [Λ.IncludeDNE] : System.Classical Λ where
 
 instance [Λ.IncludeEFQ] [Λ.IncludeLEM] : System.Classical Λ where
 
+lemma Deduction.eaxm! {Λ : Hilbert α} {p : Formula α} (h : p ∈ Ax(Λ)) : Λ ⊢! p := ⟨eaxm h⟩
 
-namespace DeductionParameter
 
-lemma eaxm! {Λ : DeductionParameter α} {p : Formula α} (h : p ∈ Ax(Λ)) : Λ ⊢! p := ⟨eaxm h⟩
+namespace Hilbert
 
-protected abbrev Minimal : DeductionParameter α := { axiomSet := ∅ }
+abbrev theorems (Λ : Hilbert α) : Set (Formula α) := System.theory Λ
 
-protected abbrev Intuitionistic : DeductionParameter α := { axiomSet := 𝗘𝗙𝗤 }
-notation "𝐈𝐧𝐭" => DeductionParameter.Intuitionistic
+protected abbrev Minimal : Hilbert α := ⟨∅⟩
+
+protected abbrev Intuitionistic : Hilbert α := ⟨𝗘𝗙𝗤⟩
+notation "𝐈𝐧𝐭" => Hilbert.Intuitionistic
 instance : IncludeEFQ (α := α) 𝐈𝐧𝐭 where
-instance : System.Intuitionistic (𝐈𝐧𝐭 : DeductionParameter α) where
+instance : System.Intuitionistic (𝐈𝐧𝐭 : Hilbert α) where
 
-protected abbrev Classical : DeductionParameter α := { axiomSet := 𝗘𝗙𝗤 ∪ 𝗟𝗘𝗠 }
-notation "𝐂𝐥" => DeductionParameter.Classical
+protected abbrev Classical : Hilbert α := ⟨𝗘𝗙𝗤 ∪ 𝗟𝗘𝗠⟩
+notation "𝐂𝐥" => Hilbert.Classical
 instance : IncludeLEM (α := α) 𝐂𝐥 where
 instance : IncludeEFQ (α := α) 𝐂𝐥 where
 
 -- `𝐊𝐂` from chagrov & zakharyaschev (1997)
-protected abbrev KC : DeductionParameter α := { axiomSet := 𝗘𝗙𝗤 ∪ 𝗪𝗟𝗘𝗠 }
-notation "𝐊𝐂" => DeductionParameter.KC
+protected abbrev KC : Hilbert α := ⟨𝗘𝗙𝗤 ∪ 𝗪𝗟𝗘𝗠⟩
+notation "𝐊𝐂" => Hilbert.KC
 instance : IncludeEFQ (α := α) 𝐊𝐂 where
-instance : System.HasAxiomWeakLEM (𝐊𝐂 : DeductionParameter α) where
+instance : System.HasAxiomWeakLEM (𝐊𝐂 : Hilbert α) where
   wlem p := by apply eaxm; aesop;
 
 -- `𝐋𝐂` from chagrov & zakharyaschev (1997)
-protected abbrev LC : DeductionParameter α := { axiomSet := 𝗘𝗙𝗤 ∪ 𝗗𝘂𝗺 }
-notation "𝐋𝐂" => DeductionParameter.LC
+protected abbrev LC : Hilbert α := ⟨𝗘𝗙𝗤 ∪ 𝗗𝘂𝗺⟩
+notation "𝐋𝐂" => Hilbert.LC
 instance : IncludeEFQ (α := α) 𝐋𝐂 where
-instance : System.HasAxiomDummett (𝐋𝐂 : DeductionParameter α) where
+instance : System.HasAxiomDummett (𝐋𝐂 : Hilbert α) where
   dummett p q := by apply eaxm; aesop;
 
 /- MEMO:
@@ -108,21 +110,21 @@ instance : System.HasAxiomDummett (𝐋𝐂 : DeductionParameter α) where
   Minimal <ₛ WeakMinimal <ₛ WeakClassical <ₛ Classical
 -/
 
-protected abbrev WeakMinimal : DeductionParameter α := { axiomSet := 𝗟𝗘𝗠 }
+protected abbrev WeakMinimal : Hilbert α := ⟨𝗟𝗘𝗠⟩
 
-protected abbrev WeakClassical : DeductionParameter α := { axiomSet := 𝗣𝗲 }
+protected abbrev WeakClassical : Hilbert α := ⟨𝗣𝗲⟩
 
 
-end DeductionParameter
+end Hilbert
 
 
 namespace Deduction
 
-variable {Λ : DeductionParameter α}
+variable {Λ : Hilbert α}
 
 open System
 
-noncomputable def rec! {α : Type u} {Λ : DeductionParameter α}
+noncomputable def rec! {α : Type u} {Λ : Hilbert α}
   {motive : (a : Formula α) → Λ ⊢! a → Sort u_1}
   (eaxm   : ∀ {p}, (a : p ∈ Ax(Λ)) → motive p ⟨eaxm a⟩)
   (mdp    : ∀ {p q}, {hpq : Λ ⊢! (p ⟶ q)} → {hp : Λ ⊢! p} → motive (p ⟶ q) hpq → motive p hp → motive q (hpq ⨀ hp))
@@ -148,7 +150,7 @@ end Deduction
 
 open System
 
-variable {Λ₁ Λ₂ : DeductionParameter α}
+variable {Λ₁ Λ₂ : Hilbert α}
 
 lemma weaker_than_of_subset_axiomset' (hMaxm : ∀ {p : Formula α}, p ∈ Ax(Λ₁) → Λ₂ ⊢! p)
   : Λ₁ ≤ₛ Λ₂ := by
@@ -164,18 +166,18 @@ lemma weaker_than_of_subset_axiomset (hSubset : Ax(Λ₁) ⊆ Ax(Λ₂) := by ae
   intro p hp;
   apply eaxm! $ hSubset hp;
 
-lemma Int_weaker_than_Cl : (𝐈𝐧𝐭 : DeductionParameter α) ≤ₛ 𝐂𝐥 := weaker_than_of_subset_axiomset
+lemma Int_weaker_than_Cl : (𝐈𝐧𝐭 : Hilbert α) ≤ₛ 𝐂𝐥 := weaker_than_of_subset_axiomset
 
-lemma Int_weaker_than_KC : (𝐈𝐧𝐭 : DeductionParameter α) ≤ₛ 𝐊𝐂 := weaker_than_of_subset_axiomset
+lemma Int_weaker_than_KC : (𝐈𝐧𝐭 : Hilbert α) ≤ₛ 𝐊𝐂 := weaker_than_of_subset_axiomset
 
-lemma Int_weaker_than_LC : (𝐈𝐧𝐭 : DeductionParameter α) ≤ₛ 𝐋𝐂 := weaker_than_of_subset_axiomset
+lemma Int_weaker_than_LC : (𝐈𝐧𝐭 : Hilbert α) ≤ₛ 𝐋𝐂 := weaker_than_of_subset_axiomset
 
-lemma KC_weaker_than_Cl : (𝐊𝐂 : DeductionParameter α) ≤ₛ 𝐂𝐥 := by
+lemma KC_weaker_than_Cl : (𝐊𝐂 : Hilbert α) ≤ₛ 𝐂𝐥 := by
   apply weaker_than_of_subset_axiomset';
   intro p hp;
   rcases hp with (⟨_, rfl⟩ | ⟨_, rfl⟩) <;> simp;
 
-lemma LC_weaker_than_Cl : (𝐋𝐂 : DeductionParameter α) ≤ₛ 𝐂𝐥 := by
+lemma LC_weaker_than_Cl : (𝐋𝐂 : Hilbert α) ≤ₛ 𝐂𝐥 := by
   apply weaker_than_of_subset_axiomset';
   intro p hp;
   rcases hp with (⟨_, rfl⟩ | ⟨_, _, rfl⟩) <;> simp;
@@ -210,4 +212,4 @@ theorem iff_provable_neg_efq_provable_neg_efq : 𝐈𝐧𝐭 ⊢! ~p ↔ 𝐂�
   . intro d; exact glivenko.mp $ dni'! d;
   . intro d; exact tne'! $ glivenko.mpr d;
 
-end LO.Propositional.Superintuitionistic
+end LO.IntProp

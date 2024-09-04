@@ -1,16 +1,15 @@
 import Logic.Logic.Disjunctive
-import Logic.Propositional.Superintuitionistic.Deduction
+import Logic.IntProp.Deduction
 import Logic.Modal.Hilbert
 
 namespace LO.Modal
 
 open System FiniteContext
-open LO.Propositional
 open Necessitation
-open LO.Propositional
+open IntProp
 
 /-- Gödel Translation -/
-def GoedelTranslation : Superintuitionistic.Formula α → Formula α
+def GoedelTranslation : IntProp.Formula α → Modal.Formula α
   | .atom a  => □(Formula.atom a)
   | ⊤ => ⊤
   | ⊥ => ⊥
@@ -20,15 +19,15 @@ def GoedelTranslation : Superintuitionistic.Formula α → Formula α
   | p ⟶ q => □((GoedelTranslation p) ⟶ (GoedelTranslation q))
 postfix:90 "ᵍ" => GoedelTranslation
 
-class ModalCompanion (iΛ : Superintuitionistic.DeductionParameter α) (mΛ : Modal.Hilbert α) where
-  companion : ∀ {p : Superintuitionistic.Formula α}, iΛ ⊢! p ↔ mΛ ⊢! pᵍ
+class ModalCompanion (iΛ : IntProp.Hilbert α) (mΛ : Modal.Hilbert α) where
+  companion : ∀ {p : IntProp.Formula α}, iΛ ⊢! p ↔ mΛ ⊢! pᵍ
 
 variable {α : Type u} [DecidableEq α] [Inhabited α] [Encodable α]
-variable {iΛ : Superintuitionistic.DeductionParameter α} {mΛ : Hilbert α}
-variable {p q r : Superintuitionistic.Formula α}
+variable {iΛ : IntProp.Hilbert α} {mΛ : Hilbert α}
+variable {p q r : IntProp.Formula α}
 
 lemma axiomTc_GTranslate! [System.K4 mΛ] : mΛ ⊢! pᵍ ⟶ □pᵍ := by
-  induction p using Superintuitionistic.Formula.rec' with
+  induction p using IntProp.Formula.rec' with
   | hverum => exact dhyp! (nec! verum!);
   | hfalsum => simp only [GoedelTranslation, efq!];
   | hand p q ihp ihq =>

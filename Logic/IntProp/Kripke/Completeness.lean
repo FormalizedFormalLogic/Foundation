@@ -1,10 +1,10 @@
-import Logic.Propositional.Superintuitionistic.ConsistentTableau
-import Logic.Propositional.Superintuitionistic.Kripke.Semantics
+import Logic.IntProp.ConsistentTableau
+import Logic.IntProp.Kripke.Semantics
 
 set_option autoImplicit false
 universe u v
 
-namespace LO.Propositional.Superintuitionistic
+namespace LO.IntProp
 
 open System System.FiniteContext
 open Formula (atom)
@@ -14,11 +14,11 @@ open Kripke
 namespace Kripke
 
 variable {α : Type u} [Inhabited α] [DecidableEq α] [Encodable α]
-         {Λ : DeductionParameter α} [Λ.IncludeEFQ]
+         {Λ : Hilbert α} [Λ.IncludeEFQ]
 
 open SaturatedConsistentTableau
 
-def CanonicalFrame (Λ : DeductionParameter α) [Nonempty (SCT Λ)] : Kripke.Frame.Dep α where
+def CanonicalFrame (Λ : Hilbert α) [Nonempty (SCT Λ)] : Kripke.Frame.Dep α where
   World := SCT Λ
   Rel t₁ t₂ := t₁.tableau.1 ⊆ t₂.tableau.1
 
@@ -45,7 +45,7 @@ open Classical in
 lemma confluent [HasAxiomWeakLEM Λ] : Confluent (CanonicalFrame Λ) := by
   simp [Confluent, CanonicalFrame];
   intro x y z Rxy Rxz;
-  suffices (Λ)-Consistent (y.tableau.1 ∪ z.tableau.1, ∅) by
+  suffices Tableau.Consistent Λ (y.tableau.1 ∪ z.tableau.1, ∅) by
     obtain ⟨w, hw⟩ := lindenbaum (Λ := Λ) this;
     use w;
     simp_all;
@@ -153,7 +153,7 @@ lemma connected [HasAxiomDummett Λ] : Connected (CanonicalFrame Λ) := by
 end CanonicalFrame
 
 
-def CanonicalModel (Λ : DeductionParameter α) [Nonempty (SCT Λ)] : Kripke.Model α where
+def CanonicalModel (Λ : Hilbert α) [Nonempty (SCT Λ)] : Kripke.Model α where
   Frame := CanonicalFrame Λ
   Valuation t a := (atom a) ∈ t.tableau.1
   -- hereditary := by aesop;
@@ -191,7 +191,7 @@ private lemma truthlemma.himp
     intro h;
     replace h := not_mem₁_iff_mem₂.mp h;
     obtain ⟨t', ⟨h, _⟩⟩ := lindenbaum (Λ := Λ) (t₀ := (insert p t.tableau.1, {q})) $ by
-      simp only [Tableau.ParametricConsistent];
+      simp only [Tableau.Consistent];
       intro Γ Δ hΓ hΔ;
       replace hΓ : ∀ r, r ∈ Γ.remove p → r ∈ t.tableau.1 := by
         intro r hr;
@@ -242,7 +242,7 @@ private lemma truthlemma.hneg
     intro h;
     replace h := not_mem₁_iff_mem₂.mp h;
     obtain ⟨t', ⟨h, _⟩⟩ := lindenbaum (Λ := Λ) (t₀ := (insert p t.tableau.1, ∅)) $ by
-      simp only [Tableau.ParametricConsistent];
+      simp only [Tableau.Consistent];
       intro Γ Δ hΓ hΔ;
       replace hΓ : ∀ q, q ∈ Γ.remove p → q ∈ t.tableau.1 := by
         intro q hq;
@@ -274,8 +274,8 @@ lemma deducible_of_validOnCanonicelModel : (CanonicalModel Λ) ⊧ p ↔ Λ ⊢!
   constructor;
   . contrapose;
     intro h;
-    have : (Λ)-Consistent (∅, {p}) := by
-      simp only [Tableau.ParametricConsistent, Collection.not_mem_empty, imp_false, Set.mem_singleton_iff];
+    have : Tableau.Consistent Λ (∅, {p}) := by
+      simp only [Tableau.Consistent, Collection.not_mem_empty, imp_false, Set.mem_singleton_iff];
       rintro Γ Δ hΓ hΔ;
       by_contra hC;
       replace hΓ : Γ = [] := List.nil_iff.mpr hΓ;
@@ -314,9 +314,6 @@ instance Int_complete : Complete 𝐈𝐧𝐭 (Kripke.ReflexiveTransitiveFrameCl
     CanonicalFrame.transitive,
   ⟩
 
-@[deprecated]
-lemma Int_complete_aux : (Kripke.ReflexiveTransitiveFrameClass.{u}#α) ⊧ p → 𝐈𝐧𝐭 ⊢! p := Int_complete.complete
-
 instance LC_complete : Complete 𝐋𝐂 (Kripke.ReflexiveTransitiveConnectedFrameClass.{u}#α) := instComplete $ by
   refine ⟨
     CanonicalFrame.reflexive,
@@ -338,4 +335,4 @@ end
 
 end Kripke
 
-end LO.Propositional.Superintuitionistic
+end LO.IntProp

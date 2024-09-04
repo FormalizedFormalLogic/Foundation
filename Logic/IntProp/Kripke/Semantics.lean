@@ -1,7 +1,7 @@
 import Logic.Logic.Kripke.Basic
-import Logic.Propositional.Superintuitionistic.Deduction
+import Logic.IntProp.Deduction
 
-namespace LO.Propositional.Superintuitionistic
+namespace LO.IntProp
 
 open System
 open Kripke
@@ -246,12 +246,12 @@ namespace Kripke
 abbrev FrameClassOfTheory (T : Theory α) : FrameClass.Dep α := { F | F#α ⊧* T }
 notation "𝔽(" T ")" => FrameClassOfTheory T
 
-abbrev FrameClassOfHilbert (Λ : DeductionParameter α) : FrameClass.Dep α := 𝔽((System.theory Λ))
+abbrev FrameClassOfHilbert (Λ : Hilbert α) : FrameClass.Dep α := 𝔽((System.theory Λ))
 notation "𝔽(" Λ ")" => FrameClassOfHilbert Λ
 
 section Soundness
 
-variable {Λ : DeductionParameter α}
+variable {Λ : Hilbert α}
          {p : Formula α}
 
 lemma sound : Λ ⊢! p → 𝔽(Λ) ⊧ p := by
@@ -295,7 +295,7 @@ section
 
 variable {α : Type u}
 
-instance Int_Characteraizable : 𝔽((𝐈𝐧𝐭 : DeductionParameter α)).Characteraizable ReflexiveTransitiveFrameClass where
+instance Int_Characteraizable : 𝔽((𝐈𝐧𝐭 : Hilbert α)).Characteraizable ReflexiveTransitiveFrameClass where
   characterize := by
     simp [System.theory];
     rintro F hTrans hRefl p hp;
@@ -323,10 +323,10 @@ instance Int_Characteraizable : 𝔽((𝐈𝐧𝐭 : DeductionParameter α)).Cha
 
 instance Int_sound : Sound 𝐈𝐧𝐭 (ReflexiveTransitiveFrameClass#α) := inferInstance
 
-instance : System.Consistent (𝐈𝐧𝐭 : DeductionParameter α) := inferInstance
+instance : System.Consistent (𝐈𝐧𝐭 : Hilbert α) := inferInstance
 
 
-instance Cl_Characteraizable : 𝔽((𝐂𝐥 : DeductionParameter α)).Characteraizable ReflexiveTransitiveSymmetricFrameClass#α where
+instance Cl_Characteraizable : 𝔽((𝐂𝐥 : Hilbert α)).Characteraizable ReflexiveTransitiveSymmetricFrameClass#α where
   characterize := by
     simp [System.theory];
     rintro F hTrans hRefl hSymm p hp;
@@ -354,11 +354,11 @@ instance Cl_Characteraizable : 𝔽((𝐂𝐥 : DeductionParameter α)).Characte
 
 instance : Sound 𝐂𝐥 (ReflexiveTransitiveSymmetricFrameClass#α) := inferInstance
 
-instance : System.Consistent (𝐂𝐥 : DeductionParameter α) := inferInstance
+instance : System.Consistent (𝐂𝐥 : Hilbert α) := inferInstance
 
 
 
-instance KC_Characteraizable : 𝔽((𝐊𝐂 : DeductionParameter α)).Characteraizable ReflexiveTransitiveConfluentFrameClass where
+instance KC_Characteraizable : 𝔽((𝐊𝐂 : Hilbert α)).Characteraizable ReflexiveTransitiveConfluentFrameClass where
   characterize := by
     rintro F ⟨F_trans, F_refl, F_confl⟩;
     simp [System.theory];
@@ -387,10 +387,10 @@ instance KC_Characteraizable : 𝔽((𝐊𝐂 : DeductionParameter α)).Characte
 
 instance : Sound 𝐊𝐂 (ReflexiveTransitiveConfluentFrameClass#α) := inferInstance
 
-instance : System.Consistent (𝐊𝐂 : DeductionParameter α) := inferInstance
+instance : System.Consistent (𝐊𝐂 : Hilbert α) := inferInstance
 
 
-instance LC_Characteraizable : 𝔽((𝐋𝐂 : DeductionParameter α)).Characteraizable ReflexiveTransitiveConnectedFrameClass where
+instance LC_Characteraizable : 𝔽((𝐋𝐂 : Hilbert α)).Characteraizable ReflexiveTransitiveConnectedFrameClass where
   characterize := by
     rintro F ⟨F_trans, F_refl, F_conn⟩;
     simp [System.theory];
@@ -419,7 +419,7 @@ instance LC_Characteraizable : 𝔽((𝐋𝐂 : DeductionParameter α)).Characte
 
 instance : Sound 𝐋𝐂 (ReflexiveTransitiveConnectedFrameClass#α) := inferInstance
 
-instance : System.Consistent (𝐋𝐂 : DeductionParameter α) := inferInstance
+instance : System.Consistent (𝐋𝐂 : Hilbert α) := inferInstance
 
 end
 
@@ -480,4 +480,4 @@ end Kripke
 end Classical
 
 
-end LO.Propositional.Superintuitionistic
+end LO.IntProp

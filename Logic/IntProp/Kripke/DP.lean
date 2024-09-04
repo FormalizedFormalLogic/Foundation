@@ -1,9 +1,7 @@
 import Logic.Logic.Disjunctive
-import Logic.Propositional.Superintuitionistic.Kripke.Completeness
+import Logic.IntProp.Kripke.Completeness
 
--- TODO: 証明自体は通っているがコードが雑なためそのうちリファクタリングする
-
-namespace LO.Propositional.Superintuitionistic
+namespace LO.IntProp
 
 open System
 open Formula Formula.Kripke
@@ -142,8 +140,8 @@ theorem disjunctive_int : 𝐈𝐧𝐭 ⊢! p ⋎ q → 𝐈𝐧𝐭 ⊢! p ∨ 
           (w := Sum.inl ()) (w' := Sum.inr $ Sum.inr wq) (by aesop))
         $ satisfies_right_on_IntDPCounterexampleModel |>.not.mp hq;
 
-instance : Disjunctive (𝐈𝐧𝐭 : DeductionParameter α) := ⟨disjunctive_int⟩
+instance : Disjunctive (𝐈𝐧𝐭 : Hilbert α) := ⟨disjunctive_int⟩
 
 end Kripke
 
-end LO.Propositional.Superintuitionistic
+end LO.IntProp

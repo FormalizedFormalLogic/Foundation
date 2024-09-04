@@ -222,7 +222,7 @@ lemma Grz_truthlemma {X : (GrzCompleteModel p).World} (q_sub : q ∈ 𝒮 p) :
         use Y;
         constructor;
         . constructor;
-          . intro r hr hr₂;
+          . intro r _ hr₂;
             apply hY.1;
             simpa;
           . apply imp_iff_not_or (b := X = Y) |>.mpr;

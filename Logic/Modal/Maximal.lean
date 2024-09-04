@@ -1,5 +1,5 @@
 import Logic.Modal.Hilbert
-import Logic.Propositional.Superintuitionistic.Kripke.Semantics
+import Logic.IntProp.Kripke.Semantics
 
 /-!
   # Maximality of `𝐓𝐫𝐢𝐯` and `𝐕𝐞𝐫`
@@ -7,7 +7,7 @@ import Logic.Propositional.Superintuitionistic.Kripke.Semantics
   `𝐓𝐫𝐢𝐯` and `𝐕𝐞𝐫` are maximal in normal modal logic.
 -/
 
-namespace LO.Propositional.Superintuitionistic
+namespace LO.IntProp
 
 def Formula.toModalFormula : Formula α → Modal.Formula α
   | .atom a => Modal.Formula.atom a
@@ -19,20 +19,20 @@ def Formula.toModalFormula : Formula α → Modal.Formula α
   | p ⋎ q => (toModalFormula p) ⋎ (toModalFormula q)
 postfix:75 "ᴹ" => Formula.toModalFormula
 
-end LO.Propositional.Superintuitionistic
+end LO.IntProp
 
 
 namespace LO.Modal
 
-open LO.Propositional
+open IntProp
 
 variable {α} [DecidableEq α]
 
 namespace Formula
 
-def toPropFormula (p : Formula α) (_ : p.degree = 0 := by simp_all [Formula.degree, Formula.degree_neg, Formula.degree_imp]) : Superintuitionistic.Formula α :=
+def toPropFormula (p : Formula α) (_ : p.degree = 0 := by simp_all [Formula.degree, Formula.degree_neg, Formula.degree_imp]) : IntProp.Formula α :=
   match p with
-  | atom a => Superintuitionistic.Formula.atom a
+  | atom a => IntProp.Formula.atom a
   | ⊥ => ⊥
   | p ⟶ q => p.toPropFormula ⟶ q.toPropFormula
 postfix:75 "ᴾ" => Formula.toPropFormula
@@ -54,7 +54,7 @@ postfix:75 "ᵀ" => TrivTranslation
 namespace TrivTranslation
 
 @[simp] lemma degree_zero : pᵀ.degree = 0 := by induction p <;> simp [TrivTranslation, degree, *];
-@[simp] lemma back : pᵀᴾᴹ = pᵀ := by induction p using rec' <;> simp [Superintuitionistic.Formula.toModalFormula, TrivTranslation, *];
+@[simp] lemma back : pᵀᴾᴹ = pᵀ := by induction p using rec' <;> simp [IntProp.Formula.toModalFormula, TrivTranslation, *];
 
 end TrivTranslation
 
@@ -71,7 +71,7 @@ namespace VerTranslation
 @[simp] lemma degree_zero : pⱽ.degree = 0 := by induction p <;> simp [degree, *];
 @[simp] lemma back  : pⱽᴾᴹ = pⱽ := by
   induction p using rec' with
-  | himp => simp [VerTranslation, toPropFormula, Superintuitionistic.Formula.toModalFormula, *];
+  | himp => simp [VerTranslation, toPropFormula, IntProp.Formula.toModalFormula, *];
   | _ => rfl;
 
 end VerTranslation
@@ -123,7 +123,7 @@ lemma deducible_iff_verTranslation : 𝐕𝐞𝐫 ⊢! p ⟷ pⱽ := by
   | himp _ _ ih₁ ih₂ => exact imp_replace_iff! ih₁ ih₂;
   | _ => apply iff_id!
 
-lemma of_classical {mΛ : Modal.Hilbert α} {p : Superintuitionistic.Formula α} : (𝐂𝐥 ⊢! p) → (mΛ ⊢! pᴹ) := by
+lemma of_classical {mΛ : Modal.Hilbert α} {p : IntProp.Formula α} : (𝐂𝐥 ⊢! p) → (mΛ ⊢! pᴹ) := by
   intro h;
   induction h.some with
   | eaxm ih =>
@@ -132,9 +132,9 @@ lemma of_classical {mΛ : Modal.Hilbert α} {p : Superintuitionistic.Formula α}
     . exact efq!;
     . exact lem!;
   | mdp h₁ h₂ ih₁ ih₂ =>
-    dsimp only [Superintuitionistic.Formula.toModalFormula] at ih₁ ih₂;
+    dsimp only [IntProp.Formula.toModalFormula] at ih₁ ih₂;
     exact (ih₁ ⟨h₁⟩) ⨀ (ih₂ ⟨h₂⟩);
-  | _ => dsimp [Superintuitionistic.Formula.toModalFormula]; trivial;
+  | _ => dsimp [IntProp.Formula.toModalFormula]; trivial;
 
 lemma iff_Triv_classical : 𝐓𝐫𝐢𝐯 ⊢! p ↔ 𝐂𝐥 ⊢! pᵀᴾ := by
   constructor;
@@ -189,21 +189,21 @@ lemma verTranslated_of_GL : 𝐆𝐋 ⊢! p → 𝐂𝐥 ⊢! pⱽᴾ := by
     | _ => dsimp [VerTranslation]; trivial;
 
 
-open Superintuitionistic.Kripke (unprovable_classical_of_exists_ClassicalValuation)
+open IntProp.Kripke (unprovable_classical_of_exists_ClassicalValuation)
 
 variable [Inhabited α]
 
 example : 𝐓𝐫𝐢𝐯 ⊬! Axioms.L (atom default : Formula α) := by
   apply iff_Triv_classical.not.mpr;
   apply unprovable_classical_of_exists_ClassicalValuation;
-  simp [Axioms.L, TrivTranslation, toPropFormula, Superintuitionistic.Formula.Kripke.Satisfies];
+  simp [Axioms.L, TrivTranslation, toPropFormula, IntProp.Formula.Kripke.Satisfies];
   use (λ _ => False);
   trivial;
 
 lemma unprovable_AxiomL_K4 : 𝐊𝟒 ⊬! Axioms.L (atom default : Formula α) := by
   apply not_imp_not.mpr trivTranslated_of_K4;
   apply unprovable_classical_of_exists_ClassicalValuation;
-  simp [Axioms.L, TrivTranslation, toPropFormula, Superintuitionistic.Formula.Kripke.Satisfies];
+  simp [Axioms.L, TrivTranslation, toPropFormula, IntProp.Formula.Kripke.Satisfies];
   use (λ _ => False);
   trivial;
 
@@ -220,7 +220,7 @@ theorem K4_strictReducible_GL : (𝐊𝟒 : Hilbert α) <ₛ 𝐆𝐋 := by
 lemma unprovable_AxiomT_GL : 𝐆𝐋 ⊬! Axioms.T (atom default : Formula α) := by
   apply not_imp_not.mpr verTranslated_of_GL;
   apply unprovable_classical_of_exists_ClassicalValuation;
-  simp [Axioms.T, VerTranslation, toPropFormula, Superintuitionistic.Formula.Kripke.Satisfies];
+  simp [Axioms.T, VerTranslation, toPropFormula, IntProp.Formula.Kripke.Satisfies];
   use (λ _ => False);
   trivial;
 
@@ -242,7 +242,7 @@ theorem not_S4_weakerThan_GL : ¬(𝐒𝟒 : Hilbert α) ≤ₛ 𝐆𝐋 := by
 example : 𝐕𝐞𝐫 ⊬! (~(□⊥) : Formula α) := by
   apply iff_Ver_classical.not.mpr;
   apply unprovable_classical_of_exists_ClassicalValuation;
-  dsimp [VerTranslation, toPropFormula, Superintuitionistic.Formula.Kripke.Satisfies];
+  dsimp [VerTranslation, toPropFormula, IntProp.Formula.Kripke.Satisfies];
   use (λ _ => True);
   simp;
 

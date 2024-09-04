@@ -1,37 +1,28 @@
-import Logic.Modal.ModalCompanion.Basic
-import Logic.Propositional.Superintuitionistic.Kripke.DP
+import Logic.IntProp.Kripke.Completeness
 import Logic.Modal.Kripke.Geach
+import Logic.Modal.ModalCompanion.Basic
 
 namespace LO.Modal
 
-open System FiniteContext
-open Necessitation
-open LO.Propositional
+open LO.Kripke
+open Modal.Kripke
 
 variable {α : Type u} [DecidableEq α] [Inhabited α] [Encodable α]
 
-variable {iΛ : Superintuitionistic.DeductionParameter α} {mΛ : Modal.Hilbert α}
-variable {p q r : Superintuitionistic.Formula α}
-
-open Kripke
-
-open LO.Kripke
-open Formula
+variable {iΛ : IntProp.Hilbert α} {mΛ : Modal.Hilbert α}
+variable {p q r : IntProp.Formula α}
 
 lemma provable_S4_of_provable_efq : (𝐒𝟒 ⊢! pᵍ) → (𝐈𝐧𝐭 ⊢! p) := by
   contrapose;
   intro h;
 
-  -- TOOD: なぜかこれは `Semantics (Superintuitionistic.Formula α) (FrameClass.Dep α)` のsynthが出来ず失敗する．
-  -- replace h := (not_imp_not.mpr $ Superintuitionistic.Kripke.Int_complete (α := α) |>.complete) h;
-
-  replace h := (not_imp_not.mpr $ Superintuitionistic.Kripke.Int_complete_aux (α := α)) h;
-  simp [Superintuitionistic.Formula.Kripke.ValidOnFrame, Superintuitionistic.Formula.Kripke.ValidOnModel] at h;
+  replace h := (not_imp_not.mpr $ IntProp.Kripke.Int_complete.complete) h;
+  simp [IntProp.Formula.Kripke.ValidOnFrame, IntProp.Formula.Kripke.ValidOnModel] at h;
   obtain ⟨F, F_refl, F_trans, V, V_hered, w, hp⟩ := h;
 
-  have h₁ : ∀ q x, Superintuitionistic.Formula.Kripke.Satisfies ⟨F, V⟩ x q ↔ (Modal.Formula.Kripke.Satisfies ⟨F, V⟩ x (qᵍ)) := by
+  have h₁ : ∀ q x, IntProp.Formula.Kripke.Satisfies ⟨F, V⟩ x q ↔ (Modal.Formula.Kripke.Satisfies ⟨F, V⟩ x (qᵍ)) := by
     intro q x;
-    induction q using Superintuitionistic.Formula.rec' generalizing x with
+    induction q using IntProp.Formula.rec' generalizing x with
     | hatom a =>
       simp [GoedelTranslation];
       constructor;
@@ -50,15 +41,14 @@ lemma provable_S4_of_provable_efq : (𝐒𝟒 ⊢! pᵍ) → (𝐈𝐧𝐭 ⊢! 
         . left; exact ihp x |>.mpr hp;
         . right; exact ihq x |>.mpr hq;
     | _ =>
-      simp_all [Superintuitionistic.Formula.Kripke.Satisfies, Modal.Formula.Kripke.Satisfies];
+      simp_all [IntProp.Formula.Kripke.Satisfies, Modal.Formula.Kripke.Satisfies];
   have : ¬(Modal.Formula.Kripke.Satisfies ⟨F, V⟩ w (pᵍ)) := (h₁ p w).not.mp hp;
 
-  apply not_imp_not.mpr $ Modal.Kripke.sound_S4.sound;
-  simp [Formula.Kripke.ValidOnFrame, Kripke.ValidOnModel];
+  apply not_imp_not.mpr $ S4_sound_aux;
+  simp [Formula.Kripke.ValidOnFrame, Formula.Kripke.ValidOnModel];
   use F;
   exact ⟨⟨F_refl, F_trans⟩, by use V, w⟩;
 
-/-- a.k.a. _Gödel-McKinsey-Tarski Theorem_ -/
 theorem provable_efq_iff_provable_S4 : 𝐈𝐧𝐭 ⊢! p ↔ 𝐒𝟒 ⊢! pᵍ := ⟨provable_efq_of_provable_S4, provable_S4_of_provable_efq⟩
 instance : ModalCompanion (α := α) 𝐈𝐧𝐭 𝐒𝟒 := ⟨provable_efq_iff_provable_S4⟩
 

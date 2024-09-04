@@ -235,7 +235,7 @@ variable {p q r : Formula α}
 lemma mem_imp (h : (q ⟶ r) ∈ 𝒮 p := by assumption) : q ∈ 𝒮 p ∧ r ∈ 𝒮 p := by
   induction p using Formula.rec' with
   | himp => simp_all [Subformulas]; rcases h with ⟨_⟩ | ⟨⟨_⟩ | ⟨_⟩⟩ <;> simp_all
-  | _ => simp_all [Subformulas]; try rcases h with (hq | hr); simp_all; simp_all;
+  | _ => simp_all [Subformulas];
 
 lemma mem_imp₁ (h : (q ⟶ r) ∈ 𝒮 p := by assumption) : q ∈ 𝒮 p := mem_imp (r := r) |>.1
 

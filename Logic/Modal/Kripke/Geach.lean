@@ -220,19 +220,21 @@ instance instGeachLogicSound
   . exact logic_geach.char;
   . exact class_geach.equality;
 
-instance sound_KD : Sound 𝐊𝐃 (SerialFrameClass#α) := inferInstance
+instance KD_sound : Sound 𝐊𝐃 (SerialFrameClass#α) := inferInstance
 
-instance sound_KT : Sound 𝐊𝐓 (ReflexiveFrameClass#α) := inferInstance
+instance KT_sound : Sound 𝐊𝐓 (ReflexiveFrameClass#α) := inferInstance
 
-instance sound_KTB : Sound 𝐊𝐓𝐁 (ReflexiveSymmetricFrameClass#α) := inferInstance
+instance KTB_sound : Sound 𝐊𝐓𝐁 (ReflexiveSymmetricFrameClass#α) := inferInstance
 
-instance sound_K4 : Sound 𝐊𝟒 (TransitiveFrameClass#α) := inferInstance
+instance K4_sound : Sound 𝐊𝟒 (TransitiveFrameClass#α) := inferInstance
 
-instance sound_S4 : Sound 𝐒𝟒 (PreorderFrameClass#α) := inferInstance
+instance S4_sound : Sound 𝐒𝟒 (PreorderFrameClass#α) := inferInstance
 
-instance sound_S5 : Sound 𝐒𝟓 (ReflexiveEuclideanFrameClass#α) := inferInstance
+@[deprecated] lemma S4_sound_aux : 𝐒𝟒 ⊢! p → (PreorderFrameClass#α) ⊧ p := S4_sound.sound
 
-instance sound_KT4B : Sound 𝐊𝐓𝟒𝐁 (EquivalenceFrameClass#α) := inferInstance
+instance S5_sound : Sound 𝐒𝟓 (ReflexiveEuclideanFrameClass#α) := inferInstance
+
+instance KT4B_sound : Sound 𝐊𝐓𝟒𝐁 (EquivalenceFrameClass#α) := inferInstance
 
 open System
 open Theory MaximalConsistentTheory CanonicalFrame
@@ -331,7 +333,7 @@ theorem KD_strictlyWeakerThan_KT : (𝐊𝐃 : Hilbert α) <ₛ 𝐊𝐓 := by
     use (□(atom default) ⟶ (atom default));
     constructor;
     . exact Deduction.maxm! (by simp);
-    . apply sound_KD.not_provable_of_countermodel;
+    . apply KD_sound.not_provable_of_countermodel;
       simp [Semantics.Realize];
       use ⟨Fin 2, λ _ y => y = 1⟩;
       constructor;
@@ -349,7 +351,7 @@ theorem K4_strictlyWeakerThan_S4 : (𝐊𝟒 : Hilbert α) <ₛ 𝐒𝟒 := by
     use (□(atom default) ⟶ (atom default));
     constructor;
     . exact Deduction.maxm! (by simp)
-    . apply sound_K4.not_provable_of_countermodel;
+    . apply K4_sound.not_provable_of_countermodel;
       simp [Semantics.Realize];
       use ⟨Fin 3, λ _ y => y = 1⟩;
       constructor;
@@ -370,7 +372,7 @@ theorem S4_strictlyWeakerThan_S5 : (𝐒𝟒 : Hilbert α) <ₛ 𝐒𝟓 := by
     use (◇(atom default) ⟶ □◇(atom default));
     constructor;
     . exact Deduction.maxm! (by simp);
-    . apply sound_S4.not_provable_of_countermodel;
+    . apply S4_sound.not_provable_of_countermodel;
       simp [Semantics.Realize];
       use ⟨Fin 3, λ x y => (x = y) ∨ (x = 0 ∧ y = 1) ∨ (x = 0 ∧ y = 2)⟩;
       refine ⟨⟨?_, ?_⟩, ?_⟩;
