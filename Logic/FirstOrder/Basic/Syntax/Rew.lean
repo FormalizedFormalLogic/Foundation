@@ -981,6 +981,19 @@ instance : Coe (Semisentence L n) (SyntacticSemiformula L n) := ⟨embedding⟩
 
 @[simp] lemma embedding_inj (σ π : Semisentence L n) : (σ : SyntacticSemiformula L n) = π ↔ σ = π := Rew.emb.hom_injective.eq_iff
 
+lemma coe_substs_eq_substs_coe (σ : Semisentence L k) (v : Fin k → Semiterm L Empty n) :
+    (((Rew.substs v).hom σ) : SyntacticSemiformula L n) =
+    (Rew.substs (fun x ↦ Rew.emb (v x))).hom (↑σ : SyntacticSemiformula L k) := by
+  simp [embedding, ←Rew.hom_comp_app]; congr 2
+  ext x
+  · simp [Rew.comp_app]
+  · exact x.elim
+
+lemma coe_substs_eq_substs_coe₁ (σ : Semisentence L 1) (t : Semiterm L Empty n) :
+    (σ/[t] : SyntacticSemiformula L n) =
+    (↑σ : SyntacticSemiformula L 1)/[(↑t : Semiterm L ℕ n)] := by
+  simpa [Matrix.constant_eq_singleton] using coe_substs_eq_substs_coe σ ![t]
+
 def shiftEmb : SyntacticSemiformula L n ↪ SyntacticSemiformula L n where
   toFun := Rew.shift.hom
   inj' := Rew.shift.hom_injective

@@ -105,10 +105,10 @@ theorem sigma_one_completeness {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1
     haveI : M ⊧ₘ* 𝐑₀ := ModelsTheory.of_provably_subtheory M 𝐑₀ T inferInstance (by assumption)
     exact LO.Arith.sigma_one_completeness hσ H
 
-theorem sigma_one_completeness_iff [ℕ ⊧ₘ* T] {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
+theorem sigma_one_completeness_iff [ss : Sigma1Sound T] {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
     ℕ ⊧ₘ₀ σ ↔ T ⊢! ↑σ :=
   haveI : 𝐑₀ ≼ T := System.Subtheory.comp (𝓣 := T) inferInstance inferInstance
-  ⟨fun h ↦ sigma_one_completeness (T := T) hσ h, fun h ↦ consequence_iff.mp (sound₀! h) ℕ inferInstance⟩
+  ⟨fun h ↦ sigma_one_completeness (T := T) hσ h, fun h ↦ ss.sound (by simp [hσ]) h⟩
 
 end FirstOrder.Arith
 

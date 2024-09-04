@@ -380,7 +380,7 @@ lemma codeOfRePred_spec {p : ℕ → Prop} (hp : RePred p) {x : ℕ} :
   simp [Semiformula.eval_substs, Matrix.comp_vecCons', Matrix.constant_eq_singleton]
   apply (codeOfPartrec'_spec (Nat.Partrec'.of_part this) (v := ![x]) (y := 0)).trans (by simp [f])
 
-variable {T : Theory ℒₒᵣ} [𝐑₀ ≼ T] [ℕ ⊧ₘ* T]
+variable {T : Theory ℒₒᵣ} [𝐑₀ ≼ T] [Sigma1Sound T]
 
 lemma re_complete {p : ℕ → Prop} (hp : RePred p) {x : ℕ} :
     p x ↔ T ⊢! ↑((codeOfRePred p)/[‘↑x’] : Sentence ℒₒᵣ) := Iff.trans
