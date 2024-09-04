@@ -3,4 +3,3 @@ import Logic.Modal.Kripke.Kripke
 import Logic.Modal.Boxdot.Boxdot
 import Logic.Modal.ModalCompanion.ModalCompanion
 import Logic.Modal.PLoN.PLoN
-import Logic.Modal.Provability.Basic
