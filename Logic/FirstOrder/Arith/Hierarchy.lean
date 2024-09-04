@@ -354,9 +354,9 @@ section
 variable {L : Language} [(k : ℕ) → DecidableEq (L.Func k)] [(k : ℕ) → DecidableEq (L.Rel k)]
   [L.LT] [Structure L ℕ]
 
-abbrev SigmaOneSound (T : Theory L) := SoundOn T (Hierarchy 𝚺 1)
+abbrev Sigma1Sound (T : Theory L) := SoundOn T (Hierarchy 𝚺 1)
 
-lemma consistent_of_sigmaOneSound (T : Theory L) [SigmaOneSound T] :
+lemma consistent_of_sigma1Sound (T : Theory L) [Sigma1Sound T] :
     System.Consistent T := consistent_of_sound T (Hierarchy 𝚺 1) (by simp [Set.mem_def])
 
 end
