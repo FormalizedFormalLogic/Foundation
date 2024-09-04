@@ -130,6 +130,8 @@ lemma quote_eq_encode (x : α) : (⌜x⌝ : ℕ) = Encodable.encode x := by simp
 
 lemma numeral_quote (x : α) : Semiterm.Operator.numeral ℒₒᵣ (⌜x⌝ : ℕ) = (⌜x⌝ : Semiterm ℒₒᵣ ξ n) := by simp [quote_eq_coe_encode]; rfl
 
+@[simp] lemma quote_inj_iff {x y : α} : (⌜x⌝ : V) = ⌜y⌝ ↔ x = y := by simp [quote_eq_coe_encode]
+
 end
 
 end LO.Arith
@@ -319,6 +321,10 @@ lemma quote_eterm_eq_quote_emb (t : Semiterm L Empty n) : (⌜t⌝ : V) = (⌜Re
     (⌜(‘↑k’ : Semiterm ℒₒᵣ Empty n)⌝ : V) = Formalized.numeral (k : V) := by
   simp [quote_eterm_eq_quote_emb]
 
+@[simp] lemma quote_quote_eq_numeral {α : Type*} [Encodable α] {x : α} : (⌜(⌜x⌝ : Semiterm ℒₒᵣ ℕ n)⌝ : V) = Formalized.numeral ⌜x⌝ := by
+  simp [goedelNumber'_def]
+  rw [quote_eq_coe_encode]
+
 end LO.Arith
 
 namespace LO.FirstOrder.Semiformula
@@ -370,53 +376,6 @@ lemma quote_nrel {k} (R : L.Rel k) (v : Fin k → SyntacticSemiterm L n) : (⌜n
 
 @[simp] lemma quote_nlt' (t u : SyntacticSemiterm ℒₒᵣ n) :
     (⌜“!!t ≮ !!u”⌝ : V) = (⌜t⌝ ^≮ ⌜u⌝) := by simp [Semiformula.Operator.lt_def]
-
-@[simp] lemma codeIn_inj {n} {p q : SyntacticSemiformula L n} : (⌜p⌝ : V) = ⌜q⌝ ↔ p = q := by
-  induction p using rec'
-  case hrel =>
-    cases q using cases' <;>
-      simp [quote_rel, quote_nrel, quote_verum, quote_falsum, quote_and, quote_or, quote_all, quote_ex,
-        qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqEx]
-    rintro rfl; simp; rintro rfl;
-    constructor
-    · intro h; funext i; simpa using congr_fun h i
-    · rintro rfl; rfl
-  case hnrel =>
-    cases q using cases' <;>
-      simp [quote_rel, quote_nrel, quote_verum, quote_falsum, quote_and, quote_or, quote_all, quote_ex,
-        qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqEx]
-    rintro rfl; simp; rintro rfl;
-    constructor
-    · intro h; funext i; simpa using congr_fun h i
-    · rintro rfl; rfl
-  case hverum =>
-    cases q using cases' <;>
-      simp [quote_rel, quote_nrel, quote_verum, quote_falsum, quote_and, quote_or, quote_all, quote_ex,
-        qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqEx]
-  case hfalsum =>
-    cases q using cases' <;>
-      simp [quote_rel, quote_nrel, quote_verum, quote_falsum, quote_and, quote_or, quote_all, quote_ex,
-        qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqEx]
-  case hand n p q ihp ihq =>
-    cases q using cases' <;>
-      simp [quote_rel, quote_nrel, quote_verum, quote_falsum, quote_and, quote_or, quote_all, quote_ex,
-        qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqEx]
-    rw [ihp, ihq]
-  case hor n p q ihp ihq =>
-    cases q using cases' <;>
-      simp [quote_rel, quote_nrel, quote_verum, quote_falsum, quote_and, quote_or, quote_all, quote_ex,
-        qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqEx]
-    rw [ihp, ihq]
-  case hall n p ih =>
-    cases q using cases' <;>
-      simp [quote_rel, quote_nrel, quote_verum, quote_falsum, quote_and, quote_or, quote_all, quote_ex,
-        qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqEx]
-    rw [ih]
-  case hex n p ih =>
-    cases q using cases' <;>
-      simp [quote_rel, quote_nrel, quote_verum, quote_falsum, quote_and, quote_or, quote_all, quote_ex,
-        qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqEx]
-    rw [ih]
 
 @[simp] lemma quote_semisentence_def (p : Semisentence L n) : ⌜(Rew.emb.hom p : SyntacticSemiformula L n)⌝ = (⌜p⌝ : V) := by
   simp [quote_eq_coe_encode]

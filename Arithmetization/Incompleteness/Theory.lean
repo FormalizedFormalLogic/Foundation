@@ -260,7 +260,7 @@ def replace :
         exact lt_or_right _ _, by simp⟩
     · rintro ⟨x, _, hx, h⟩
       rcases hx.sound with ⟨q, rfl⟩
-      exact ⟨q, by symm; apply (Semiformula.codeIn_inj (L := ℒₒᵣ) (V := ℕ)).mp; simpa using h⟩
+      exact ⟨q, by symm; apply (quote_inj_iff (V := ℕ)).mp; simpa using h⟩
   isDelta1 := Arith.HierarchySymbol.Semiformula.ProvablyProperOn.ofProperOn.{0} _ fun V _ _ v ↦ by
     /-
     simp? [HierarchySymbol.Semiformula.val_sigma,
@@ -330,7 +330,7 @@ def Ω₁ :
           apply lt_of_le_of_lt (by simp [le_iff_eq_or_lt, ←LO.Arith.le_def]) (lt_qqAdd_right _ _), by simp⟩
     · rintro ⟨n, _, m, _, h⟩
       use n; use m
-      exact (Semiformula.codeIn_inj (L := ℒₒᵣ) (V := ℕ)).mp (by simpa using h)
+      exact (quote_inj_iff (V := ℕ)).mp (by simpa using h)
   isDelta1 := Arith.HierarchySymbol.Semiformula.ProvablyProperOn.ofProperOn.{0} _ fun V _ _ v ↦ by
     /-
     simp? [HierarchySymbol.Semiformula.val_sigma,
@@ -393,7 +393,7 @@ def Ω₂ :
           apply lt_of_le_of_lt (by simp [le_iff_eq_or_lt, ←LO.Arith.le_def]) (lt_qqMul_right _ _), by simp⟩
     · rintro ⟨n, _, m, _, h⟩
       use n; use m
-      exact (Semiformula.codeIn_inj (L := ℒₒᵣ) (V := ℕ)).mp (by simpa using h)
+      exact (quote_inj_iff (V := ℕ)).mp (by simpa using h)
   isDelta1 := Arith.HierarchySymbol.Semiformula.ProvablyProperOn.ofProperOn.{0} _ fun V _ _ v ↦ by
     /-
     simp? [HierarchySymbol.Semiformula.val_sigma,
@@ -451,7 +451,7 @@ def Ω₃ :
       simp; rw [neg_eq (by simp) (by simp)]
     · rintro ⟨n, _, m, _, ne, h⟩
       refine ⟨n, m, ne, ?_⟩
-      exact (Semiformula.codeIn_inj (L := ℒₒᵣ) (V := ℕ)).mp (by simp; rw [neg_eq (by simp) (by simp)]; simpa using h)
+      exact (quote_inj_iff (V := ℕ)).mp (by simp; rw [neg_eq (by simp) (by simp)]; simpa using h)
   isDelta1 := Arith.HierarchySymbol.Semiformula.ProvablyProperOn.ofProperOn.{0} _ fun V _ _ v ↦ by simp
 
 private lemma quote_disjLt_eq (n : ℕ) :
@@ -517,7 +517,7 @@ def Ω₄ :
     · rintro ⟨n, _, h⟩
       use n
       symm;
-      exact (Semiformula.codeIn_inj (L := ℒₒᵣ) (V := ℕ)).mp (by simpa [quote_disjLt_eq] using h)
+      exact (quote_inj_iff (V := ℕ)).mp (by simpa [quote_disjLt_eq] using h)
   isDelta1 := Arith.HierarchySymbol.Semiformula.ProvablyProperOn.ofProperOn.{0} _ fun V _ _ v ↦ by
     /-
     simp? [HierarchySymbol.Semiformula.val_sigma,
