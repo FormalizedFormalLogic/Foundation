@@ -41,10 +41,3 @@ import Arithmetization.ISigmaOne.Metamath.Proof.Typed
 
 import Arithmetization.ISigmaOne.Metamath.Coding
 import Arithmetization.ISigmaOne.Metamath.CodedTheory
-
-import Arithmetization.Incompleteness.Theory
-import Arithmetization.Incompleteness.FormalizedArithmetic
-import Arithmetization.Incompleteness.D1
-import Arithmetization.Incompleteness.D3
-import Arithmetization.Incompleteness.First
-import Arithmetization.Incompleteness.Second
