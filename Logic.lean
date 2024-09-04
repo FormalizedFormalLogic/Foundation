@@ -47,9 +47,5 @@ import Logic.FirstOrder.Arith.PeanoMinus
 import Logic.FirstOrder.Arith.Representation
 import Logic.FirstOrder.Arith.Nonstandard
 
--- import Logic.FirstOrder.Arith.EA.Basic
-
-import Logic.FirstOrder.Incompleteness.DerivabilityCondition
-
 -- Modal Logic
 import Logic.Modal.Standard.Standard
