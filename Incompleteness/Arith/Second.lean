@@ -136,7 +136,7 @@ end
 
 section
 
-variable [ℕ ⊧ₘ* T] [T.Delta1Definable] [System.Consistent T]
+variable [T.Delta1Definable]
 
 open LO.System LO.System.FiniteContext
 
@@ -146,17 +146,18 @@ local notation "𝗖𝗼𝗻" => T.consistentₐ
 
 local prefix:max "□" => T.bewₐ
 
-lemma goedel_unprovable : T ⊬! ↑𝗚 := by
+lemma goedel_unprovable [System.Consistent T] : T ⊬! ↑𝗚 := by
   intro h
   have hp : T ⊢! ↑□𝗚 := provableₐ_D1 h
   have hn : T ⊢! ~↑□𝗚 := by simpa [provable₀_iff] using and_left! goedel_iff_unprovable_goedel ⨀ h
   exact not_consistent_iff_inconsistent.mpr (inconsistent_of_provable_of_unprovable hp hn) inferInstance
 
-lemma not_goedel_unprovable : T ⊬! ~↑𝗚 := fun h ↦ by
+lemma not_goedel_unprovable [ℕ ⊧ₘ* T] : T ⊬! ~↑𝗚 := fun h ↦ by
   haveI : 𝐑₀ ≼ T := System.Subtheory.comp (𝓣 := 𝐈𝚺₁) inferInstance inferInstance
   have : T ⊢!. □𝗚 := System.contra₂'! (and_right! goedel_iff_unprovable_goedel) ⨀ (by simpa [provable₀_iff] using h)
   have : T ⊢! ↑𝗚 := provableₐ_sound this
-  exact not_consistent_iff_inconsistent.mpr (inconsistent_of_provable_of_unprovable this h) inferInstance
+  exact not_consistent_iff_inconsistent.mpr (inconsistent_of_provable_of_unprovable this h)
+    (Sound.consistent_of_satisfiable ⟨_, (inferInstance : ℕ ⊧ₘ* T)⟩)
 
 lemma consistent_iff_goedel : T ⊢! ↑𝗖𝗼𝗻 ⟷ ↑𝗚 := by
   apply iff_intro!
@@ -175,10 +176,10 @@ lemma consistent_iff_goedel : T ⊢! ↑𝗖𝗼𝗻 ⟷ ↑𝗚 := by
       of'! (contra₁'! <| and_left! <| goedel_iff_unprovable_goedel) ⨀ this
     simpa [provable₀_iff] using  contra₁'! (deduct'! this)
 
-lemma consistent_unprovable : T ⊬! ↑𝗖𝗼𝗻 := fun h ↦
+lemma consistent_unprovable [System.Consistent T] : T ⊬! ↑𝗖𝗼𝗻 := fun h ↦
   goedel_unprovable <| and_left! consistent_iff_goedel ⨀ h
 
-lemma inconsistent_unprovable : T ⊬! ~↑𝗖𝗼𝗻 := fun h ↦
+lemma inconsistent_unprovable [ℕ ⊧ₘ* T] : T ⊬! ~↑𝗖𝗼𝗻 := fun h ↦
   not_goedel_unprovable <| contra₀'! (and_right! (consistent_iff_goedel (T := T))) ⨀ h
 
 end
