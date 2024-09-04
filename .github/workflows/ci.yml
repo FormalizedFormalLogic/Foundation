@@ -64,7 +64,7 @@ jobs:
       # Generate document only master branch
       - name: Generate document
         if: github.ref == 'refs/heads/master'
-        run: lake -R -Kenv=ci build Logic:docs Incompleteness:docs
+        run: lake -R -Kenv=ci build Logic:docs Arithmetization:docs Incompleteness:docs
       - name: Upload document
         uses: actions/upload-artifact@v4
         if: github.ref == 'refs/heads/master'
