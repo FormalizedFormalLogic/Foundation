@@ -77,7 +77,7 @@ lemma models_iff_of_Delta1 {σ : 𝚫₁.Semisentence n} (hσ : σ.ProperOn ℕ)
     have : V ⊧/(e ·) (~σ.pi.val) := by simpa [numeral_eq_natCast] using LO.Arith.bold_sigma_one_completeness' (M := V) (by simp) this
     simpa [hσV.iff'] using this
 
-variable {T : Theory ℒₒᵣ} [𝐏𝐀⁻ ≼ T] [ℕ ⊧ₘ* T]
+variable {T : Theory ℒₒᵣ} [𝐏𝐀⁻ ≼ T] [Sigma1Sound T]
 
 noncomputable instance : 𝐑₀ ≼ T := System.Subtheory.comp (𝓣 := 𝐏𝐀⁻) inferInstance inferInstance
 
@@ -105,23 +105,6 @@ lemma models_iff_provable_of_Delta1_param [V ⊧ₘ* T] {σ : 𝚫₁.Semisenten
       apply sigma_one_completeness_iff_param (by simp)
   _                 ↔ T ⊢!. (Rew.substs fun x ↦ Semiterm.Operator.numeral ℒₒᵣ (e x)).hom σ.val       := by
       simp [HierarchySymbol.Semiformula.val_sigma]
-
-lemma re_iff_sigma1 {P : ℕ → Prop} : RePred P ↔ 𝚺₁-Predicate P := by
-  constructor
-  · intro h
-    exact ⟨.mkSigma (codeOfRePred P) (by simp [codeOfRePred, codeOfPartrec']), by
-      intro v; symm; simp; simpa [←Matrix.constant_eq_singleton'] using codeOfRePred_spec h (x := v 0)⟩
-  · rintro ⟨p, hp⟩
-    have := (sigma1_re id (p.sigma_prop)).comp
-      (f := fun x : ℕ ↦ x ::ᵥ Mathlib.Vector.nil) (Primrec.to_comp <| Primrec.vector_cons.comp .id (.const _))
-    exact this.of_eq <| by intro x; symm; simpa [Mathlib.Vector.cons_get] using hp ![x]
-
-/-
-lemma computable_iff_delta1 {P : ℕ → Prop} : ComputablePred P ↔ 𝚫₁-Predicate P := by {
-  haveI : DecidablePred P := Classical.decPred P
-  simp [ComputablePred.computable_iff_re_compl_re]
- }
--/
 
 end Arith
 

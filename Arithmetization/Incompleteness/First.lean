@@ -2,30 +2,21 @@ import Arithmetization.Incompleteness.D1
 
 namespace LO.FirstOrder
 
-namespace Semiformula
-
-variable {L : Language}
-
-lemma coe_substs_eq_substs_coe (σ : Semisentence L k) (v : Fin k → Semiterm L Empty n) :
-    (((Rew.substs v).hom σ) : SyntacticSemiformula L n) =
-    (Rew.substs (fun x ↦ Rew.emb (v x))).hom (↑σ : SyntacticSemiformula L k) := by
-  simp [embedding, ←Rew.hom_comp_app]; congr 2
-  ext x
-  · simp [Rew.comp_app]
-  · exact x.elim
-
-lemma coe_substs_eq_substs_coe₁ (σ : Semisentence L 1) (t : Semiterm L Empty n) :
-    (σ/[t] : SyntacticSemiformula L n) =
-    (↑σ : SyntacticSemiformula L 1)/[(↑t : Semiterm L ℕ n)] := by
-  simpa using coe_substs_eq_substs_coe σ ![t]
-
-end Semiformula
-
 namespace Arith
 
 open LO.Arith LO.System LO.Arith.Formalized
 
-variable (T : Theory ℒₒᵣ) [𝐑₀ ≼ T] [ℕ ⊧ₘ* T] [T.Delta1Definable]
+lemma re_iff_sigma1 {P : ℕ → Prop} : RePred P ↔ 𝚺₁-Predicate P := by
+  constructor
+  · intro h
+    exact ⟨.mkSigma (codeOfRePred P) (by simp [codeOfRePred, codeOfPartrec']), by
+      intro v; symm; simp; simpa [←Matrix.constant_eq_singleton'] using codeOfRePred_spec h (x := v 0)⟩
+  · rintro ⟨p, hp⟩
+    have := (sigma1_re id (p.sigma_prop)).comp
+      (f := fun x : ℕ ↦ x ::ᵥ Mathlib.Vector.nil) (Primrec.to_comp <| Primrec.vector_cons.comp .id (.const _))
+    exact this.of_eq <| by intro x; symm; simpa [Mathlib.Vector.cons_get] using hp ![x]
+
+variable (T : Theory ℒₒᵣ) [𝐑₀ ≼ T] [Sigma1Sound T] [T.Delta1Definable]
 
 theorem incomplete : ¬System.Complete T  := by
   let D : ℕ → Prop := fun n : ℕ ↦ ∃ p : SyntacticSemiformula ℒₒᵣ 1, n = ⌜p⌝ ∧ T ⊢! ~p/[⌜p⌝]
@@ -45,7 +36,7 @@ theorem incomplete : ¬System.Complete T  := by
     simpa [Semiformula.coe_substs_eq_substs_coe₁] using re_complete (T := T) (D_re) (x := n)
   have : T ⊢! ~ρ ↔ T ⊢! ρ := by
     simpa [D, goedelNumber'_def, quote_eq_encode] using this ⌜σ⌝
-  have con : System.Consistent T := Sound.consistent_of_satisfiable ⟨_, (inferInstance : ℕ ⊧ₘ* T)⟩
+  have con : System.Consistent T := consistent_of_sigma1Sound T
   refine LO.System.incomplete_iff_exists_undecidable.mpr ⟨↑ρ, ?_, ?_⟩
   · intro h
     have : T ⊢! ~↑ρ := by simpa [provable₀_iff] using this.mpr h
