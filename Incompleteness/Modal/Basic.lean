@@ -1,5 +1,5 @@
 import Incompleteness.DC.Basic
-import Logic.Modal.Standard.Deduction
+import Logic.Modal.Hilbert
 
 namespace LO.Modal.Standard.Provability
 
@@ -91,6 +91,7 @@ lemma arithmetical_soundness_K4Loeb [𝔟.HBL T₀ T] (h : 𝐊𝟒(𝐋) ⊢! p
     exact ihpq ⨀ ihp;
   | _ => dsimp [interpretation]; trivial;
 
+/-
 theorem arithmetical_soundness_GL [𝔟.HBL T₀ T] (h : 𝐆𝐋 ⊢! p) : ∀ {f : realization L α}, T ⊢!. (f[𝔟] p) := by
   apply arithmetical_soundness_K4Loeb (T₀ := T₀);
   exact (System.weakerThan_iff.mp reducible_GL_K4Loeb) h;
@@ -109,7 +110,7 @@ lemma arithmetical_soundness_N [𝔟.HBL T₀ T] (h : 𝐍 ⊢! p) : ∀ {f : re
     simp only [interpretation] at ihpq;
     exact ihpq ⨀ ihp;
   | _ => dsimp [interpretation]; trivial;
-
+-/
 end ArithmeticalSoundness
 
 end Modal.Standard.Provability
