@@ -6,4 +6,5 @@ import Incompleteness.Arith.First
 import Incompleteness.Arith.Second
 import Incompleteness.Arith.DC
 import Incompleteness.DC.Basic
-import Incompleteness.Modal.Basic
+
+import Incompleteness.ProvabilityLogic.ProvabilityLogic

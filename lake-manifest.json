@@ -79,7 +79,7 @@
    "name": "logic",
    "manifestFile": "lake-manifest.json",
    "inputRev": "master",
-   "inherited": true,
+   "inherited": false,
    "configFile": "lakefile.lean"},
   {"url": "https://github.com/FormalizedFormalLogic/Arithmetization",
    "type": "git",

@@ -8,6 +8,8 @@ package «Incompleteness» where
   ]
   -- add any additional package configuration options here
 
+require «logic» from git "https://github.com/FormalizedFormalLogic/Foundation" @ "master"
+
 require arithmetization from git "https://github.com/FormalizedFormalLogic/Arithmetization" @ "master"
 
 require proofwidgets from git "https://github.com/leanprover-community/ProofWidgets4"@"v0.0.39"

@@ -18,13 +18,14 @@ instance : Diagonalization T where
   fixpoint := fixpoint
   diag θ := diagonal θ
 
-abbrev _root_.LO.FirstOrder.Theory.standardDP : ProvabilityPredicate ℒₒᵣ ℒₒᵣ := ⟨U.provableₐ⟩
+abbrev _root_.LO.FirstOrder.Theory.standardDP : ProvabilityPredicate T U where
+  prov := U.provableₐ
+  spec := provableₐ_D1
 
-instance : U.standardDP.HBL1 T U := ⟨provableₐ_D1⟩
-instance : U.standardDP.HBL2 T U := ⟨provableₐ_D2⟩
-instance : U.standardDP.HBL3 T U := ⟨provableₐ_D3⟩
-instance : U.standardDP.HBL T U := ⟨⟩
-instance : U.standardDP.GoedelSound T U := ⟨fun h ↦ by simpa using provableₐ_sound h⟩
+instance : (Theory.standardDP T U).HBL2 := ⟨provableₐ_D2⟩
+instance : (Theory.standardDP T U).HBL3 := ⟨provableₐ_D3⟩
+instance : (Theory.standardDP T U).HBL := ⟨⟩
+instance : (Theory.standardDP T U).GoedelSound := ⟨fun h ↦ by simpa using provableₐ_sound h⟩
 
 end LO.FirstOrder.Arith
 
