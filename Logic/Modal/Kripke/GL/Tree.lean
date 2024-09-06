@@ -2,9 +2,9 @@ import Logic.Logic.Kripke.Tree
 import Logic.Modal.Kripke.Preservation
 import Logic.Modal.Kripke.GL.Completeness
 
-namespace LO.Modal
+namespace LO
 
-namespace Kripke
+namespace Modal.Kripke
 
 open LO.Kripke
 open Kripke
@@ -64,7 +64,10 @@ lemma iff_unprovable_GL_exists_unsatisfies_at_root_on_FiniteTransitiveTree : �
 
 end
 
+end Modal.Kripke
 
+
+namespace Kripke
 
 def FiniteTransitiveTree.SimpleExtension (F : FiniteTransitiveTree) : Kripke.FiniteTransitiveTree where
   World := (Fin 1) ⊕ F.World
@@ -145,13 +148,21 @@ instance : Coe (M.World) (M↧.World) := ⟨Sum.inr⟩
 def p_morphism : M →ₚ (M↧.toModel) := Model.PseudoEpimorphism.mkAtomic (FiniteTransitiveTree.SimpleExtension.p_morphism) $ by
   simp [FiniteTransitiveTree.SimpleExtension.p_morphism];
 
-lemma modal_equivalence_original_world {x : M.toModel.World} : ModalEquivalent (M₁ := M) (M₂ := (M↧).toModel) x x := by
-  apply Kripke.modal_equivalence_of_modal_morphism p_morphism;
-
 end FiniteTransitiveTreeModel.SimpleExtension
 
 end Kripke
 
+
+namespace Modal
+
+open LO.Kripke
+open Kripke
+open Formula.Kripke
+
+variable {M : FiniteTransitiveTreeModel α}
+
+lemma Kripke.modalEquivalence_on_original_world_of_finiteTransitiveTree_simpleExtension {x : M.toModel.World} : ModalEquivalent (M₁ := M) (M₂ := (M↧).toModel) x x := by
+  apply Kripke.modal_equivalence_of_modal_morphism FiniteTransitiveTreeModel.SimpleExtension.p_morphism;
 
 section
 
@@ -174,7 +185,7 @@ lemma GL_imply_boxdot_plain_of_imply_box_box : 𝐆𝐋 ⊢! □p ⟶ □q → �
   have := iff_unprovable_GL_exists_unsatisfies_at_root_on_FiniteTransitiveTree.mp h;
   obtain ⟨M, hs⟩ := this;
   have hs : M.root ⊧ ⊡p ⋏ ~q := by simp_all [Satisfies, Semantics.Realize];
-  replace hs := @FiniteTransitiveTreeModel.SimpleExtension.modal_equivalence_original_world α M M.root (⊡p ⋏ ~q) |>.mp hs;
+  replace hs := @modalEquivalence_on_original_world_of_finiteTransitiveTree_simpleExtension α M M.root (⊡p ⋏ ~q) |>.mp hs;
 
   simp [Satisfies, Semantics.Realize] at hs;
   have ⟨hs₁, hs₂, hs₃⟩ := hs;
@@ -207,4 +218,6 @@ noncomputable instance : System.Unnecessitation (𝐆𝐋 : Hilbert α) where
 
 end
 
-end LO.Modal
+end Modal
+
+end LO
