@@ -54,7 +54,7 @@ def toStr : Formula α → String
   | atom a  => "{" ++ toString a ++ "}"
   | □p      => "\\Box " ++ toStr p
   -- | ◇p      => "\\Diamond " ++ toStr p
-  | p ⟶ q   => "\\left(" ++ toStr p ++ " \\to " ++ toStr q ++ "\\right)"
+  | p ➝ q   => "\\left(" ++ toStr p ++ " \\to " ++ toStr q ++ "\\right)"
   -- | p ⋏ q   => "\\left(" ++ toStr p ++ " \\land " ++ toStr q ++ "\\right)"
   -- | p ⋎ q   => "\\left(" ++ toStr p ++ " \\lor "   ++ toStr q ++ "\\right)"
 
@@ -95,7 +95,7 @@ lemma or_eq (p q : Formula α) : or p q = p ⋎ q := rfl
 
 lemma and_eq (p q : Formula α) : and p q = p ⋏ q := rfl
 
-lemma imp_eq (p q : Formula α) : imp p q = p ⟶ q := rfl
+lemma imp_eq (p q : Formula α) : imp p q = p ➝ q := rfl
 
 lemma neg_eq (p : Formula α) : neg p = ~p := rfl
 
@@ -103,7 +103,7 @@ lemma box_eq (p : Formula α) : box p = □p := rfl
 
 lemma dia_eq (p : Formula α) : dia p = ◇p := rfl
 
-lemma iff_eq (p q : Formula α) : p ⟷ q = (p ⟶ q) ⋏ (q ⟶ p) := rfl
+lemma iff_eq (p q : Formula α) : p ⭤ q = (p ➝ q) ⋏ (q ➝ p) := rfl
 
 lemma falsum_eq : (falsum : Formula α) = ⊥ := rfl
 
@@ -111,7 +111,7 @@ lemma falsum_eq : (falsum : Formula α) = ⊥ := rfl
 
 @[simp] lemma or_inj (p₁ q₁ p₂ q₂ : Formula α) : p₁ ⋎ p₂ = q₁ ⋎ q₂ ↔ p₁ = q₁ ∧ p₂ = q₂ := by simp[Vee.vee]
 
-@[simp] lemma imp_inj (p₁ q₁ p₂ q₂ : Formula α) : p₁ ⟶ p₂ = q₁ ⟶ q₂ ↔ p₁ = q₁ ∧ p₂ = q₂ := by simp[Arrow.arrow]
+@[simp] lemma imp_inj (p₁ q₁ p₂ q₂ : Formula α) : p₁ ➝ p₂ = q₁ ➝ q₂ ↔ p₁ = q₁ ∧ p₂ = q₂ := by simp[Arrow.arrow]
 
 @[simp] lemma neg_inj (p q : Formula α) : ~p = ~q ↔ p = q := by simp [NegAbbrev.neg];
 
@@ -131,41 +131,41 @@ instance : ModalDeMorgan (Formula α) where
 def complexity : Formula α → ℕ
 | atom _  => 0
 | ⊥       => 0
-| p ⟶ q   => max p.complexity q.complexity + 1
+| p ➝ q   => max p.complexity q.complexity + 1
 | □p   => p.complexity + 1
 
 /-- Max numbers of `□` -/
 def degree : Formula α → Nat
   | atom _ => 0
   | ⊥ => 0
-  | p ⟶ q => max p.degree q.degree
+  | p ➝ q => max p.degree q.degree
   | □p => p.degree + 1
 
 @[simp] lemma degree_neg (p : Formula α) : degree (~p) = degree p := by induction p <;> simp_all [degree, neg, neg_eq]
-@[simp] lemma degree_imp (p q : Formula α) : degree (p ⟶ q) = max (degree p) (degree q) := by simp [degree, imp_eq]
+@[simp] lemma degree_imp (p q : Formula α) : degree (p ➝ q) = max (degree p) (degree q) := by simp [degree, imp_eq]
 
 @[elab_as_elim]
 def cases' {C : Formula α → Sort w}
     (hfalsum : C ⊥)
     (hatom   : ∀ a : α, C (atom a))
-    (himp     : ∀ (p q : Formula α), C (p ⟶ q))
+    (himp     : ∀ (p q : Formula α), C (p ➝ q))
     (hbox    : ∀ (p : Formula α), C (□p))
     : (p : Formula α) → C p
   | ⊥       => hfalsum
   | atom a  => hatom a
   | □p      => hbox p
-  | p ⟶ q   => himp p q
+  | p ➝ q   => himp p q
 
 @[elab_as_elim]
 def rec' {C : Formula α → Sort w}
   (hfalsum : C ⊥)
   (hatom   : ∀ a : α, C (atom a))
-  (himp    : ∀ (p q : Formula α), C p → C q → C (p ⟶ q))
+  (himp    : ∀ (p q : Formula α), C p → C q → C (p ➝ q))
   (hbox    : ∀ (p : Formula α), C p → C (□p))
   : (p : Formula α) → C p
   | ⊥      => hfalsum
   | atom a => hatom a
-  | p ⟶ q  => himp p q (rec' hfalsum hatom himp hbox p) (rec' hfalsum hatom himp hbox q)
+  | p ➝ q  => himp p q (rec' hfalsum hatom himp hbox p) (rec' hfalsum hatom himp hbox q)
   | □p     => hbox p (rec' hfalsum hatom himp hbox p)
 
 -- @[simp] lemma complexity_neg (p : Formula α) : complexity (~p) = p.complexity + 1 :=
@@ -182,7 +182,7 @@ def hasDecEq : (p q : Formula α) → Decidable (p = q)
   | atom a, q => by
     cases q <;> try { simp; exact isFalse not_false }
     simp; exact decEq _ _;
-  | p ⟶ q, r => by
+  | p ➝ q, r => by
     cases r using cases' <;> try { simp; exact isFalse not_false }
     case himp p' q' =>
       exact match hasDecEq p p' with
@@ -221,7 +221,7 @@ variable [DecidableEq α]
 def Formula.Subformulas: Formula α → Formulae α
   | atom a => {(atom a)}
   | ⊥      => {⊥}
-  | p ⟶ q  => insert (p ⟶ q) (p.Subformulas ∪ q.Subformulas)
+  | p ➝ q  => insert (p ➝ q) (p.Subformulas ∪ q.Subformulas)
   | □p     => insert (□p) p.Subformulas
 
 prefix:70 "𝒮 " => Formula.Subformulas
@@ -232,14 +232,14 @@ namespace Formula.Subformulas
 
 variable {p q r : Formula α}
 
-lemma mem_imp (h : (q ⟶ r) ∈ 𝒮 p := by assumption) : q ∈ 𝒮 p ∧ r ∈ 𝒮 p := by
+lemma mem_imp (h : (q ➝ r) ∈ 𝒮 p := by assumption) : q ∈ 𝒮 p ∧ r ∈ 𝒮 p := by
   induction p using Formula.rec' with
   | himp => simp_all [Subformulas]; rcases h with ⟨_⟩ | ⟨⟨_⟩ | ⟨_⟩⟩ <;> simp_all
   | _ => simp_all [Subformulas];
 
-lemma mem_imp₁ (h : (q ⟶ r) ∈ 𝒮 p := by assumption) : q ∈ 𝒮 p := mem_imp (r := r) |>.1
+lemma mem_imp₁ (h : (q ➝ r) ∈ 𝒮 p := by assumption) : q ∈ 𝒮 p := mem_imp (r := r) |>.1
 
-lemma mem_imp₂ (h : (q ⟶ r) ∈ 𝒮 p := by assumption) : r ∈ 𝒮 p := mem_imp (r := r) |>.2
+lemma mem_imp₂ (h : (q ➝ r) ∈ 𝒮 p := by assumption) : r ∈ 𝒮 p := mem_imp (r := r) |>.2
 
 lemma mem_box (h : □q ∈ 𝒮 p := by assumption) : q ∈ 𝒮 p := by
   induction p using Formula.rec' <;> {
@@ -299,7 +299,7 @@ end Formula.Subformulas
 
 
 class Formulae.SubformulaClosed (X : Formulae α) where
-  imp_closed    : ∀ {p q}, p ⟶ q ∈ X → p ∈ X ∧ q ∈ X
+  imp_closed    : ∀ {p q}, p ➝ q ∈ X → p ∈ X ∧ q ∈ X
   box_closed   : ∀ {p}, □p ∈ X → p ∈ X
 
 namespace SubformulaClosed
@@ -311,9 +311,9 @@ instance {p : Formula α} : Formulae.SubformulaClosed (𝒮 p) where
 variable {p : Formula α} {X : Formulae α} [T_closed : X.SubformulaClosed]
 
 lemma sub_mem_box (h : □p ∈ X) : p ∈ X := T_closed.box_closed h
-lemma sub_mem_imp (h : p ⟶ q ∈ X) : p ∈ X ∧ q ∈ X := T_closed.imp_closed h
-lemma sub_mem_imp₁ (h : p ⟶ q ∈ X) : p ∈ X := (T_closed.imp_closed h).1
-lemma sub_mem_imp₂ (h : p ⟶ q ∈ X) : q ∈ X := (T_closed.imp_closed h).2
+lemma sub_mem_imp (h : p ➝ q ∈ X) : p ∈ X ∧ q ∈ X := T_closed.imp_closed h
+lemma sub_mem_imp₁ (h : p ➝ q ∈ X) : p ∈ X := (T_closed.imp_closed h).1
+lemma sub_mem_imp₂ (h : p ➝ q ∈ X) : q ∈ X := (T_closed.imp_closed h).2
 
 macro_rules | `(tactic| trivial) => `(tactic|
     first
@@ -326,7 +326,7 @@ end SubformulaClosed
 
 
 class Theory.SubformulaClosed (T : Theory α) where
-  imp_closed    : ∀ {p q}, p ⟶ q ∈ T → p ∈ T ∧ q ∈ T
+  imp_closed    : ∀ {p q}, p ➝ q ∈ T → p ∈ T ∧ q ∈ T
   box_closed   : ∀ {p}, □p ∈ T → p ∈ T
 
 namespace Theory.SubformulaClosed
@@ -338,9 +338,9 @@ instance {p : Formula α} : Theory.SubformulaClosed (𝒮 p).toSet where
 variable {p : Formula α} {T : Theory α} [T_closed : T.SubformulaClosed]
 
 lemma sub_mem_box (h : □p ∈ T) : p ∈ T := T_closed.box_closed h
-lemma sub_mem_imp (h : p ⟶ q ∈ T) : p ∈ T ∧ q ∈ T := T_closed.imp_closed h
-lemma sub_mem_imp₁ (h : p ⟶ q ∈ T) : p ∈ T := (T_closed.imp_closed h).1
-lemma sub_mem_imp₂ (h : p ⟶ q ∈ T) : q ∈ T := (T_closed.imp_closed h).2
+lemma sub_mem_imp (h : p ➝ q ∈ T) : p ∈ T ∧ q ∈ T := T_closed.imp_closed h
+lemma sub_mem_imp₁ (h : p ➝ q ∈ T) : p ∈ T := (T_closed.imp_closed h).1
+lemma sub_mem_imp₂ (h : p ➝ q ∈ T) : q ∈ T := (T_closed.imp_closed h).2
 
 macro_rules | `(tactic| trivial) => `(tactic|
     first
@@ -367,7 +367,7 @@ def atoms : Formula α → Finset (α)
   | ⊥      => ∅
   | ~p     => p.atoms
   | □p  => p.atoms
-  | p ⟶ q => p.atoms ∪ q.atoms
+  | p ➝ q => p.atoms ∪ q.atoms
   | p ⋏ q  => p.atoms ∪ q.atoms
   | p ⋎ q  => p.atoms ∪ q.atoms
 prefix:70 "𝒜 " => Formula.atoms
@@ -392,28 +392,28 @@ def cases_neg {C : Formula α → Sort w}
     (hfalsum : C ⊥)
     (hatom   : ∀ a : α, C (atom a))
     (hneg    : ∀ p : Formula α, C (~p))
-    (himp    : ∀ (p q : Formula α), q ≠ ⊥ → C (p ⟶ q))
+    (himp    : ∀ (p q : Formula α), q ≠ ⊥ → C (p ➝ q))
     (hbox    : ∀ (p : Formula α), C (□p))
     : (p : Formula α) → C p
   | ⊥       => hfalsum
   | atom a  => hatom a
   | □p      => hbox p
   | ~p      => hneg p
-  | p ⟶ q  => if e : q = ⊥ then e ▸ hneg p else himp p q e
+  | p ➝ q  => if e : q = ⊥ then e ▸ hneg p else himp p q e
 
 @[elab_as_elim]
 def rec_neg {C : Formula α → Sort w}
     (hfalsum : C ⊥)
     (hatom   : ∀ a : α, C (atom a))
     (hneg    : ∀ p : Formula α, C (p) → C (~p))
-    (himp    : ∀ (p q : Formula α), q ≠ ⊥ → C p → C q → C (p ⟶ q))
+    (himp    : ∀ (p q : Formula α), q ≠ ⊥ → C p → C q → C (p ➝ q))
     (hbox    : ∀ (p : Formula α), C (p) → C (□p))
     : (p : Formula α) → C p
   | ⊥       => hfalsum
   | atom a  => hatom a
   | □p      => hbox p (rec_neg hfalsum hatom hneg himp hbox p)
   | ~p      => hneg p (rec_neg hfalsum hatom hneg himp hbox p)
-  | p ⟶ q  =>
+  | p ➝ q  =>
     if e : q = ⊥
     then e ▸ hneg p (rec_neg hfalsum hatom hneg himp hbox p)
     else himp p q e (rec_neg hfalsum hatom hneg himp hbox p) (rec_neg hfalsum hatom hneg himp hbox q)
@@ -428,7 +428,7 @@ def negated : Formula α → Bool
 @[simp] lemma negated_def : (~p).negated := by simp [negated]
 
 @[simp]
-lemma negated_imp : (p ⟶ q).negated ↔ (q = ⊥) := by
+lemma negated_imp : (p ➝ q).negated ↔ (q = ⊥) := by
   simp [negated, Formula.imp_eq];
   split;
   . simp_all [Formula.imp_eq]; rfl;
@@ -449,14 +449,14 @@ def rec_negated {C : Formula α → Sort w}
     (hfalsum : C ⊥)
     (hatom   : ∀ a : α, C (atom a))
     (hneg    : ∀ p : Formula α, C (p) → C (~p))
-    (himp    : ∀ (p q : Formula α), ¬(p ⟶ q).negated → C p → C q → C (p ⟶ q))
+    (himp    : ∀ (p q : Formula α), ¬(p ➝ q).negated → C p → C q → C (p ➝ q))
     (hbox    : ∀ (p : Formula α), C (p) → C (□p))
     : (p : Formula α) → C p
   | ⊥       => hfalsum
   | atom a  => hatom a
   | □p      => hbox p (rec_negated hfalsum hatom hneg himp hbox p)
   | ~p      => hneg p (rec_negated hfalsum hatom hneg himp hbox p)
-  | p ⟶ q  => by
+  | p ➝ q  => by
     by_cases e : q = ⊥
     . exact e ▸ hneg p (rec_negated hfalsum hatom hneg himp hbox p)
     . refine himp p q ?_ (rec_negated hfalsum hatom hneg himp hbox p) (rec_negated hfalsum hatom hneg himp hbox q)
@@ -473,7 +473,7 @@ def toNat : Formula α → ℕ
   | atom a  => (Nat.pair 0 <| encode a) + 1
   | ⊥       => (Nat.pair 1 0) + 1
   | □p      => (Nat.pair 2 <| p.toNat) + 1
-  | p ⟶ q   => (Nat.pair 3 <| p.toNat.pair q.toNat) + 1
+  | p ➝ q   => (Nat.pair 3 <| p.toNat.pair q.toNat) + 1
 
 def ofNat : ℕ → Option (Formula α)
   | 0 => none
@@ -494,14 +494,14 @@ def ofNat : ℕ → Option (Formula α)
       do
         let p <- ofNat c.unpair.1
         let q <- ofNat c.unpair.2
-        return p ⟶ q
+        return p ➝ q
     | _ => none
 
 lemma ofNat_toNat : ∀ (p : Formula α), ofNat (toNat p) = some p
   | atom a  => by simp [toNat, ofNat, Nat.unpair_pair, encodek, Option.map_some'];
   | ⊥       => by simp [toNat, ofNat]
   | □p      => by simp [toNat, ofNat, ofNat_toNat p]
-  | p ⟶ q   => by simp [toNat, ofNat, ofNat_toNat p, ofNat_toNat q]
+  | p ➝ q   => by simp [toNat, ofNat, ofNat_toNat p, ofNat_toNat q]
 
 instance : Encodable (Formula α) where
   encode := toNat

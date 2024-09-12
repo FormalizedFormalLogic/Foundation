@@ -123,13 +123,13 @@ variable {X : Theory α} {p₁ p₂ : Formula α}
 lemma GL_MDP_Aux (h : (□''X) *⊢[𝐆𝐋]! □p₁ ⋎ □p₂) : (□''X) *⊢[𝐆𝐋]! □p₁ ∨ (□''X) *⊢[𝐆𝐋]! □p₂ := by
   obtain ⟨Δ, sΓ, hΓ⟩ := Context.provable_iff_boxed.mp h;
 
-  have : 𝐆𝐋 ⊢! ⋀□'Δ ⟶ (□p₁ ⋎ □p₂) := FiniteContext.provable_iff.mp hΓ;
-  have : 𝐆𝐋 ⊢! □⋀Δ ⟶ (□p₁ ⋎ □p₂) := imp_trans''! (by simp) this;
+  have : 𝐆𝐋 ⊢! ⋀□'Δ ➝ (□p₁ ⋎ □p₂) := FiniteContext.provable_iff.mp hΓ;
+  have : 𝐆𝐋 ⊢! □⋀Δ ➝ (□p₁ ⋎ □p₂) := imp_trans''! (by simp) this;
   generalize e : ⋀Δ = c at this;
 
-  have : (𝐆𝐋 ⊢! ⊡c ⟶ p₁) ⋎ (𝐆𝐋 ⊢! ⊡c ⟶ p₂) := by
+  have : (𝐆𝐋 ⊢! ⊡c ➝ p₁) ⋎ (𝐆𝐋 ⊢! ⊡c ➝ p₂) := by
     by_contra hC;
-    have ⟨h₁, h₂⟩ : (𝐆𝐋 ⊬! ⊡c ⟶ p₁) ∧ (𝐆𝐋 ⊬! ⊡c ⟶ p₂) := not_or.mp hC;
+    have ⟨h₁, h₂⟩ : (𝐆𝐋 ⊬! ⊡c ➝ p₁) ∧ (𝐆𝐋 ⊬! ⊡c ➝ p₂) := not_or.mp hC;
 
     obtain ⟨M₁, hM₁⟩ := iff_unprovable_GL_exists_unsatisfies_at_root_on_FiniteTransitiveTree.mp h₁;
     obtain ⟨M₂, hM₂⟩ := iff_unprovable_GL_exists_unsatisfies_at_root_on_FiniteTransitiveTree.mp h₂;
@@ -163,7 +163,7 @@ lemma GL_MDP_Aux (h : (□''X) *⊢[𝐆𝐋]! □p₁ ⋎ □p₂) : (□''X) *
       apply Satisfies.or_def.not.mpr;
       push_neg;
       exact ⟨hp₁, hp₂⟩;
-    have : ¬(Satisfies M.toModel M.root (□c ⟶ (□p₁ ⋎ □p₂))) := _root_.not_imp.mpr ⟨hc, this⟩;
+    have : ¬(Satisfies M.toModel M.root (□c ➝ (□p₁ ⋎ □p₂))) := _root_.not_imp.mpr ⟨hc, this⟩;
     have := iff_unprovable_GL_exists_unsatisfies_at_root_on_FiniteTransitiveTree.mpr ⟨M, this⟩;
     contradiction;
 

@@ -52,19 +52,19 @@ lemma multirel_def_multibox : Ω₁ ≺^[n] Ω₂ ↔ ∀ {p}, □^[n]p ∈ Ω�
         have hΔconj : ⋀◇'⁻¹^[n]Δ ∈ Ω₂.theory := iff_mem_conj.mpr hΔ₂;
 
         have : ⋀◇'⁻¹^[n]Δ ∉ Ω₂.theory := by {
-          have d₁ : Λ ⊢! ⋀Γ ⟶ ⋀Δ ⟶ ⊥ := and_imply_iff_imply_imply'!.mp hC;
-          have : Λ ⊢! ⋀(◇'^[n]◇'⁻¹^[n]Δ) ⟶ ⋀Δ := by
+          have d₁ : Λ ⊢! ⋀Γ ➝ ⋀Δ ➝ ⊥ := and_imply_iff_imply_imply'!.mp hC;
+          have : Λ ⊢! ⋀(◇'^[n]◇'⁻¹^[n]Δ) ➝ ⋀Δ := by
             apply conjconj_subset!;
             intro q hq;
             obtain ⟨r, _, _⟩ := hΔ q hq;
             subst_vars;
             simpa;
-          have : Λ ⊢! ◇^[n]⋀◇'⁻¹^[n]Δ ⟶ ⋀Δ := imp_trans''! iff_conjmultidia_multidiaconj! $ this;
-          have : Λ ⊢! ~(□^[n](~⋀◇'⁻¹^[n]Δ)) ⟶ ⋀Δ := imp_trans''! (and₂'! multidia_duality!) this;
-          have : Λ ⊢! ~⋀Δ ⟶ □^[n](~⋀◇'⁻¹^[n]Δ) := contra₂'! this;
-          have : Λ ⊢! (⋀Δ ⟶ ⊥) ⟶ □^[n](~⋀◇'⁻¹^[n]Δ) := imp_trans''! (and₂'! neg_equiv!) this;
-          have : Λ ⊢! ⋀Γ ⟶ □^[n](~⋀◇'⁻¹^[n]Δ) := imp_trans''! d₁ this;
-          have : Λ ⊢! □⋀Γ ⟶ □^[(n + 1)](~⋀◇'⁻¹^[n]Δ) := by simpa using imply_box_distribute'! this;
+          have : Λ ⊢! ◇^[n]⋀◇'⁻¹^[n]Δ ➝ ⋀Δ := imp_trans''! iff_conjmultidia_multidiaconj! $ this;
+          have : Λ ⊢! ~(□^[n](~⋀◇'⁻¹^[n]Δ)) ➝ ⋀Δ := imp_trans''! (and₂'! multidia_duality!) this;
+          have : Λ ⊢! ~⋀Δ ➝ □^[n](~⋀◇'⁻¹^[n]Δ) := contra₂'! this;
+          have : Λ ⊢! (⋀Δ ➝ ⊥) ➝ □^[n](~⋀◇'⁻¹^[n]Δ) := imp_trans''! (and₂'! neg_equiv!) this;
+          have : Λ ⊢! ⋀Γ ➝ □^[n](~⋀◇'⁻¹^[n]Δ) := imp_trans''! d₁ this;
+          have : Λ ⊢! □⋀Γ ➝ □^[(n + 1)](~⋀◇'⁻¹^[n]Δ) := by simpa using imply_box_distribute'! this;
           exact iff_mem_neg.mp $ h $ membership_iff.mpr $ (Context.of! this) ⨀ dΓconj;
         }
 

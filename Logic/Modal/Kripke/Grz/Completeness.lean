@@ -11,7 +11,7 @@ variable {p q : Formula α}
 
 namespace Formula
 
-noncomputable abbrev GrzSubformulas (p : Formula α) := (𝒮 p) ∪ ((𝒮 p).prebox.image (λ q => □(q ⟶ □q)))
+noncomputable abbrev GrzSubformulas (p : Formula α) := (𝒮 p) ∪ ((𝒮 p).prebox.image (λ q => □(q ➝ □q)))
 prefix:70 "𝒮ᴳ " => Formula.GrzSubformulas
 
 namespace GrzSubformulas
@@ -19,17 +19,17 @@ namespace GrzSubformulas
 @[simp]
 lemma mem_self : p ∈ 𝒮ᴳ p := by simp [GrzSubformulas, Subformulas.mem_self]
 
-lemma mem_boximpbox (h : q ∈ (𝒮 p).prebox) : □(q ⟶ □q) ∈ 𝒮ᴳ p := by simp_all [GrzSubformulas];
+lemma mem_boximpbox (h : q ∈ (𝒮 p).prebox) : □(q ➝ □q) ∈ 𝒮ᴳ p := by simp_all [GrzSubformulas];
 
 lemma mem_origin (h : q ∈ 𝒮 p) : q ∈ 𝒮ᴳ p := by simp_all [GrzSubformulas];
 
-lemma mem_imp (h : (q ⟶ r) ∈ 𝒮ᴳ p) : q ∈ 𝒮ᴳ p ∧ r ∈ 𝒮ᴳ p := by
+lemma mem_imp (h : (q ➝ r) ∈ 𝒮ᴳ p) : q ∈ 𝒮ᴳ p ∧ r ∈ 𝒮ᴳ p := by
   simp_all [GrzSubformulas];
   aesop;
 
-lemma mem_imp₁ (h : (q ⟶ r) ∈ 𝒮ᴳ p) : q ∈ 𝒮ᴳ p := mem_imp h |>.1
+lemma mem_imp₁ (h : (q ➝ r) ∈ 𝒮ᴳ p) : q ∈ 𝒮ᴳ p := mem_imp h |>.1
 
-lemma mem_imp₂ (h : (q ⟶ r) ∈ 𝒮ᴳ p) : r ∈ 𝒮ᴳ p := mem_imp h |>.2
+lemma mem_imp₂ (h : (q ➝ r) ∈ 𝒮ᴳ p) : r ∈ 𝒮ᴳ p := mem_imp h |>.2
 
 macro_rules | `(tactic| trivial) => `(tactic|
     first
@@ -91,7 +91,7 @@ open ComplementaryClosedConsistentFormulae
 
 private lemma Grz_truthlemma.lemma1
   {X : CCF 𝐆𝐫𝐳 (𝒮ᴳ p)} (hq : □q ∈ 𝒮 p)
-  : ((X.formulae.prebox.box) ∪ {□(q ⟶ □q), -q}) ⊆ (𝒮ᴳ p)⁻ := by
+  : ((X.formulae.prebox.box) ∪ {□(q ➝ □q), -q}) ⊆ (𝒮ᴳ p)⁻ := by
   simp only [Formulae.complementary];
   intro r hr;
   simp [Finset.mem_union] at hr;
@@ -111,42 +111,42 @@ private lemma Grz_truthlemma.lemma1
 
 private lemma Grz_truthlemma.lemma2
   {X : CCF 𝐆𝐫𝐳 (𝒮ᴳ p)} (hq₁ : □q ∈ 𝒮 p) (hq₂ : □q ∉ X.formulae)
-  : Formulae.Consistent 𝐆𝐫𝐳 ((X.formulae.prebox.box) ∪ {□(q ⟶ □q), -q}) := by
+  : Formulae.Consistent 𝐆𝐫𝐳 ((X.formulae.prebox.box) ∪ {□(q ➝ □q), -q}) := by
     apply Formulae.intro_union_consistent;
     rintro Γ₁ Γ₂ ⟨hΓ₁, hΓ₂⟩;
-    replace hΓ₂ : ∀ r ∈ Γ₂, r = □(q ⟶ □q) ∨ r = -q := by
+    replace hΓ₂ : ∀ r ∈ Γ₂, r = □(q ➝ □q) ∨ r = -q := by
       intro r hr;
       simpa using hΓ₂ r hr;
 
     by_contra hC;
-    have : Γ₁ ⊢[𝐆𝐫𝐳]! ⋀Γ₂ ⟶ ⊥ := provable_iff.mpr $ and_imply_iff_imply_imply'!.mp hC;
-    have : Γ₁ ⊢[𝐆𝐫𝐳]! (□(q ⟶ □q) ⋏ -q) ⟶ ⊥ := imp_trans''! (by
-      suffices Γ₁ ⊢[𝐆𝐫𝐳]! ⋀[□(q ⟶ □q), -q] ⟶ ⋀Γ₂ by
+    have : Γ₁ ⊢[𝐆𝐫𝐳]! ⋀Γ₂ ➝ ⊥ := provable_iff.mpr $ and_imply_iff_imply_imply'!.mp hC;
+    have : Γ₁ ⊢[𝐆𝐫𝐳]! (□(q ➝ □q) ⋏ -q) ➝ ⊥ := imp_trans''! (by
+      suffices Γ₁ ⊢[𝐆𝐫𝐳]! ⋀[□(q ➝ □q), -q] ➝ ⋀Γ₂ by
         simpa only [ne_eq, List.cons_ne_self, not_false_eq_true, List.conj₂_cons_nonempty, List.conj₂_singleton];
       apply conjconj_subset!;
       simpa using hΓ₂;
     ) this;
-    have : Γ₁ ⊢[𝐆𝐫𝐳]! □(q ⟶ □q) ⟶ -q ⟶ ⊥ := and_imply_iff_imply_imply'!.mp this;
-    have : Γ₁ ⊢[𝐆𝐫𝐳]! □(q ⟶ □q) ⟶ q := by
+    have : Γ₁ ⊢[𝐆𝐫𝐳]! □(q ➝ □q) ➝ -q ➝ ⊥ := and_imply_iff_imply_imply'!.mp this;
+    have : Γ₁ ⊢[𝐆𝐫𝐳]! □(q ➝ □q) ➝ q := by
       rcases Formula.complement.or (p := q) with (hp | ⟨q, rfl⟩);
       . rw [hp] at this;
         exact imp_trans''! this dne!;
       . simpa only [complement] using this;
-    have : (□'Γ₁) ⊢[𝐆𝐫𝐳]! □(□(q ⟶ □q) ⟶ q) := contextual_nec! this;
+    have : (□'Γ₁) ⊢[𝐆𝐫𝐳]! □(□(q ➝ □q) ➝ q) := contextual_nec! this;
     have : (□'Γ₁) ⊢[𝐆𝐫𝐳]! q := axiomGrz! ⨀ this;
     have : (□'□'Γ₁) ⊢[𝐆𝐫𝐳]! □q := contextual_nec! this;
     -- TODO: `contextual_axiomFour`
-    have : 𝐆𝐫𝐳 ⊢! ⋀□'□'Γ₁ ⟶ □q := provable_iff.mp this;
-    have : 𝐆𝐫𝐳 ⊢! □□⋀Γ₁ ⟶ □q := imp_trans''! (imp_trans''! (distribute_multibox_conj! (n := 2)) $ conjconj_subset! (by simp)) this;
-    have : 𝐆𝐫𝐳 ⊢! □⋀Γ₁ ⟶ □q := imp_trans''! axiomFour! this;
-    have : 𝐆𝐫𝐳 ⊢! ⋀□'Γ₁ ⟶ □q := imp_trans''! collect_box_conj! this;
-    have : 𝐆𝐫𝐳 ⊢! ⋀□'(X.formulae.prebox.box |>.toList) ⟶ □q := imp_trans''! (conjconj_subset! (by
+    have : 𝐆𝐫𝐳 ⊢! ⋀□'□'Γ₁ ➝ □q := provable_iff.mp this;
+    have : 𝐆𝐫𝐳 ⊢! □□⋀Γ₁ ➝ □q := imp_trans''! (imp_trans''! (distribute_multibox_conj! (n := 2)) $ conjconj_subset! (by simp)) this;
+    have : 𝐆𝐫𝐳 ⊢! □⋀Γ₁ ➝ □q := imp_trans''! axiomFour! this;
+    have : 𝐆𝐫𝐳 ⊢! ⋀□'Γ₁ ➝ □q := imp_trans''! collect_box_conj! this;
+    have : 𝐆𝐫𝐳 ⊢! ⋀□'(X.formulae.prebox.box |>.toList) ➝ □q := imp_trans''! (conjconj_subset! (by
       simp;
       intro r hr;
       have := hΓ₁ _ hr; simp at this;
       tauto;
     )) this;
-    have : 𝐆𝐫𝐳 ⊢! ⋀□'(X.formulae.prebox.toList) ⟶ □q := imp_trans''! (conjconj_provable! (by
+    have : 𝐆𝐫𝐳 ⊢! ⋀□'(X.formulae.prebox.toList) ➝ □q := imp_trans''! (conjconj_provable! (by
       intro q hq;
       simp at hq;
       obtain ⟨r, hr, rfl⟩ := hq;
@@ -164,7 +164,7 @@ private lemma Grz_truthlemma.lemma2
     contradiction;
 
 -- TODO: syntactical proof
-private lemma Grz_truthlemma.lemma3 : 𝐊𝐓 ⊢! (p ⋏ □(p ⟶ □p)) ⟶ □p := by
+private lemma Grz_truthlemma.lemma3 : 𝐊𝐓 ⊢! (p ⋏ □(p ➝ □p)) ➝ □p := by
   by_contra hC;
   have := (not_imp_not.mpr $ KT_complete (α := α) |>.complete) hC;
   simp at this;
@@ -227,14 +227,14 @@ lemma Grz_truthlemma {X : (GrzCompleteModel p).World} (q_sub : q ∈ 𝒮 p) :
             simpa;
           . apply imp_iff_not_or (b := X = Y) |>.mpr;
             left; push_neg;
-            use (q ⟶ □q);
+            use (q ➝ □q);
             refine ⟨?_, ?_, ?_⟩;
             . simp_all;
             . apply hY.2; simp;
             . by_contra hC;
               have : ↑X.formulae *⊢[𝐆𝐫𝐳]! q := membership_iff (by simp; left; trivial) |>.mp w;
-              have : ↑X.formulae *⊢[𝐆𝐫𝐳]! □(q ⟶ □q) := membership_iff (by simp; right; assumption) |>.mp hC;
-              have : ↑X.formulae *⊢[𝐆𝐫𝐳]! (q ⋏ □(q ⟶ □q)) ⟶ □q := Context.of! $ KT_weakerThan_Grz Grz_truthlemma.lemma3;
+              have : ↑X.formulae *⊢[𝐆𝐫𝐳]! □(q ➝ □q) := membership_iff (by simp; right; assumption) |>.mp hC;
+              have : ↑X.formulae *⊢[𝐆𝐫𝐳]! (q ⋏ □(q ➝ □q)) ➝ □q := Context.of! $ KT_weakerThan_Grz Grz_truthlemma.lemma3;
               have : ↑X.formulae *⊢[𝐆𝐫𝐳]! □q := this ⨀ and₃'! (by assumption) (by assumption);
               have : □q ∈ X.formulae := membership_iff (GrzSubformulas.mem_origin (by assumption)) |>.mpr this;
               contradiction;
@@ -251,7 +251,7 @@ lemma Grz_truthlemma {X : (GrzCompleteModel p).World} (q_sub : q ∈ 𝒮 p) :
         . exact ih (by trivial) |>.not.mpr w;
     . intro h Y RXY;
       apply ih (by trivial) |>.mpr;
-      have : ↑Y.formulae *⊢[𝐆𝐫𝐳]! □q ⟶ q := Context.of! $ axiomT!;
+      have : ↑Y.formulae *⊢[𝐆𝐫𝐳]! □q ➝ q := Context.of! $ axiomT!;
       have : ↑Y.formulae *⊢[𝐆𝐫𝐳]! q := this ⨀ (membership_iff (by simp; left; trivial) |>.mp (RXY.1 q (by simp; tauto) h));
       exact membership_iff (by simp; left; trivial) |>.mpr this;
 

@@ -13,7 +13,7 @@ structure Interpretation {L : Language} [L.Eq] (T : Theory L) [𝐄𝐐 ≼ T] (
   domain_nonempty :
     T ⊨ ∃' Rew.emb.hom domain
   func_defined {k} (f : L'.Func k) :
-    T ⊨ ∀* ((Matrix.conj fun i ↦ (Rew.emb.hom domain)/[#i]) ⟶ ∃'! ((Rew.emb.hom domain)/[#0] ⋏ Rew.emb.hom (func f)))
+    T ⊨ ∀* ((Matrix.conj fun i ↦ (Rew.emb.hom domain)/[#i]) ➝ ∃'! ((Rew.emb.hom domain)/[#0] ⋏ Rew.emb.hom (func f)))
 
 namespace Interpretation
 
@@ -25,11 +25,11 @@ def varEquals {n : ℕ} : Semiterm L' Empty n → Semisentence L (n + 1)
   | #x                => “z. z = #x.succ”
   | Semiterm.func f v =>
       Rew.toS.hom
-        <| ∀* ((Matrix.conj fun i ↦ (Rew.embSubsts ![#i]).hom ι.domain ⋏ (Rew.embSubsts (#i :> (& ·.succ))).hom (varEquals <| v i)) ⟶
+        <| ∀* ((Matrix.conj fun i ↦ (Rew.embSubsts ![#i]).hom ι.domain ⋏ (Rew.embSubsts (#i :> (& ·.succ))).hom (varEquals <| v i)) ➝
           (Rew.embSubsts (&0 :> (# ·))).hom (ι.func f))
 
 def translationRel {k} (r : L'.Rel k) (v : Fin k → Semiterm L' Empty n) : Semisentence L n :=
-  Rew.toS.hom <| ∀* ((Matrix.conj fun i ↦ (Rew.embSubsts ![#i]).hom ι.domain ⋏ (Rew.embSubsts (#i :> (& ·))).hom (ι.varEquals <| v i)) ⟶ Rew.emb.hom (ι.rel r))
+  Rew.toS.hom <| ∀* ((Matrix.conj fun i ↦ (Rew.embSubsts ![#i]).hom ι.domain ⋏ (Rew.embSubsts (#i :> (& ·))).hom (ι.varEquals <| v i)) ➝ Rew.emb.hom (ι.rel r))
 
 def translationAux : {n : ℕ} → Semisentence L' n → Semisentence L n
   | _, Semiformula.rel r v  => ι.translationRel r v

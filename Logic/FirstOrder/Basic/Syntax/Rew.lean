@@ -928,7 +928,7 @@ lemma eq_ex_iff {p : Semiformula L ξ₁ n₁} {q} :
   cases p using Semiformula.rec' <;> simp[Rew.rel, Rew.nrel]
 
 @[simp] lemma eq_neg_iff {p : Semiformula L ξ₁ n₁} {q₁ q₂} :
-    ω.hom p = q₁ ⟶ q₂ ↔ ∃ p₁ p₂, ω.hom p₁ = q₁ ∧ ω.hom p₂ = q₂ ∧ p = p₁ ⟶ p₂ := by
+    ω.hom p = q₁ ➝ q₂ ↔ ∃ p₁ p₂, ω.hom p₁ = q₁ ∧ ω.hom p₂ = q₂ ∧ p = p₁ ➝ p₂ := by
   simp[imp_eq]; constructor
   · rintro ⟨p₁, hp₁, q₂, rfl, rfl⟩; exact ⟨~p₁, by simp[hp₁]⟩
   · rintro ⟨p₁, rfl, p₂, rfl, rfl⟩; exact ⟨~p₁, by simp, p₂, by simp⟩

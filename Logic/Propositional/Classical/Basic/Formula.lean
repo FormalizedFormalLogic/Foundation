@@ -76,9 +76,9 @@ end ToString
 
 lemma neg_eq (p : Formula α) : ~p = neg p := rfl
 
-lemma imp_eq (p q : Formula α) : p ⟶ q = ~p ⋎ q := rfl
+lemma imp_eq (p q : Formula α) : p ➝ q = ~p ⋎ q := rfl
 
-lemma iff_eq (p q : Formula α) : p ⟷ q = (~p ⋎ q) ⋏ (~q ⋎ p) := rfl
+lemma iff_eq (p q : Formula α) : p ⭤ q = (~p ⋎ q) ⋏ (~q ⋎ p) := rfl
 
 @[simp] lemma and_inj (p₁ q₁ p₂ q₂ : Formula α) : p₁ ⋏ p₂ = q₁ ⋏ q₂ ↔ p₁ = q₁ ∧ p₂ = q₂ :=
 by simp[Wedge.wedge]

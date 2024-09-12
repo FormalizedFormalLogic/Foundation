@@ -34,10 +34,10 @@ def rAndLeft (d : Γ ++ [p, q] ⊢² Δ) : p ⋏ q :: Γ ⊢² Δ :=
 def rAndRight (dp : Γ ⊢² Δ ++ [p]) (dq : Γ ⊢² Δ ++ [q]) : Γ ⊢² p ⋏ q :: Δ :=
   andRight (wk dp (by simp) (by simp)) (wk dq (by simp) (by simp))
 
-def rImplyLeft (dp : Γ ⊢² Δ ++ [p]) (dq : Γ ++ [q] ⊢² Δ) : (p ⟶ q) :: Γ ⊢² Δ :=
+def rImplyLeft (dp : Γ ⊢² Δ ++ [p]) (dq : Γ ++ [q] ⊢² Δ) : (p ➝ q) :: Γ ⊢² Δ :=
   implyLeft (wk dp (by simp) (by simp)) (wk dq (by simp) (by simp))
 
-def rImplyRight (d : Γ ++ [p] ⊢² Δ ++ [q]) : Γ ⊢² (p ⟶ q) :: Δ :=
+def rImplyRight (d : Γ ++ [p] ⊢² Δ ++ [q]) : Γ ⊢² (p ➝ q) :: Δ :=
   implyRight (wk d (by simp) (by simp))
 
 end Gentzen
@@ -63,7 +63,7 @@ def DEq {F : Q(Type*)} : Lit F → Lit F → MetaM Bool
   | ~p,              ~p'              => return (← DEq p p')
   | p ⋏ q,           p' ⋏ q'          => return (← DEq p p') && (← DEq q q')
   | p ⋎ q,           p' ⋎ q'          => return (← DEq p p') && (← DEq q q')
-  | p ⟶ q,          p' ⟶ q'         => return (← DEq p p') && (← DEq q q')
+  | p ➝ q,          p' ➝ q'         => return (← DEq p p') && (← DEq q q')
   | _,               _                => return false
 
 def DMem {F : Q(Type*)} (p : Lit F) (Δ : List (Lit F)) : MetaM Bool :=
@@ -148,7 +148,7 @@ def rOrRight {p q : Lit F} (d : DerivationQ instLS instGz L (R ++ [p, q])) : Der
   q(Gentzen.rOrRight $d)
 
 def rImplyLeft {p q : Lit F} (dp : DerivationQ instLS instGz L (R ++ [p])) (dq : DerivationQ instLS instGz (L ++ [q]) R) :
-    DerivationQ instLS instGz ((p ⟶ q) :: L) R :=
+    DerivationQ instLS instGz ((p ➝ q) :: L) R :=
   letI := denotation F instLS
   let dp : Q(TwoSided.Derivation
     $(Denotation.toExprₗ (denotation F instLS) L)
@@ -158,7 +158,7 @@ def rImplyLeft {p q : Lit F} (dp : DerivationQ instLS instGz L (R ++ [p])) (dq :
     $(Denotation.toExprₗ (denotation F instLS) R)) := dq
   q(Gentzen.rImplyLeft $dp $dq)
 
-def rImplyRight {p q : Lit F} (d : DerivationQ instLS instGz (L ++ [p]) (R ++ [q])) : DerivationQ instLS instGz L ((p ⟶ q) :: R) :=
+def rImplyRight {p q : Lit F} (d : DerivationQ instLS instGz (L ++ [p]) (R ++ [q])) : DerivationQ instLS instGz L ((p ➝ q) :: R) :=
   letI := denotation F instLS
   let d : Q(TwoSided.Derivation
     ($(Denotation.toExprₗ (denotation F instLS) L) ++ [$(toExpr F p)])
@@ -189,7 +189,7 @@ def deriveAux {F : Q(Type u)} (instLS : Q(LogicalConnective $F)) (instGz : Q(Gen
       let dp ← deriveAux instLS instGz s false (L ++ [p]) R
       let dq ← deriveAux instLS instGz s false (L ++ [q]) R
       return rOrLeft L R dp dq
-    | p ⟶ q => do
+    | p ➝ q => do
       let dp ← deriveAux instLS instGz s false L (R ++ [p])
       let dq ← deriveAux instLS instGz s false (L ++ [q]) R
       return rImplyLeft L R dp dq
@@ -214,7 +214,7 @@ def deriveAux {F : Q(Type u)} (instLS : Q(LogicalConnective $F)) (instGz : Q(Gen
     | p ⋎ q => do
       let d ← deriveAux instLS instGz s true L (R ++ [p, q])
       return rOrRight L R d
-    | p ⟶ q => do
+    | p ➝ q => do
       let d ← deriveAux instLS instGz s true (L ++ [p]) (R ++ [q])
       return rImplyRight L R d
 

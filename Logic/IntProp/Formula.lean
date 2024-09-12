@@ -34,7 +34,7 @@ def toStr : Formula α → String
   | ~p      => "\\lnot " ++ toStr p
   | p ⋏ q   => "\\left(" ++ toStr p ++ " \\land " ++ toStr q ++ "\\right)"
   | p ⋎ q   => "\\left(" ++ toStr p ++ " \\lor "  ++ toStr q ++ "\\right)"
-  | p ⟶ q   => "\\left(" ++ toStr p ++ " \\rightarrow " ++ toStr q ++ "\\right)"
+  | p ➝ q   => "\\left(" ++ toStr p ++ " \\rightarrow " ++ toStr q ++ "\\right)"
 
 instance : Repr (Formula α) := ⟨fun t _ => toStr t⟩
 instance : ToString (Formula α) := ⟨toStr⟩
@@ -43,19 +43,19 @@ end ToString
 
 @[simp] lemma and_inj (p₁ q₁ p₂ q₂ : Formula α) : p₁ ⋏ p₂ = q₁ ⋏ q₂ ↔ p₁ = q₁ ∧ p₂ = q₂ := by simp[Wedge.wedge]
 @[simp] lemma or_inj (p₁ q₁ p₂ q₂ : Formula α) : p₁ ⋎ p₂ = q₁ ⋎ q₂ ↔ p₁ = q₁ ∧ p₂ = q₂ := by simp[Vee.vee]
-@[simp] lemma imp_inj (p₁ q₁ p₂ q₂ : Formula α) : p₁ ⟶ p₂ = q₁ ⟶ q₂ ↔ p₁ = q₁ ∧ p₂ = q₂ := by simp[Arrow.arrow]
+@[simp] lemma imp_inj (p₁ q₁ p₂ q₂ : Formula α) : p₁ ➝ p₂ = q₁ ➝ q₂ ↔ p₁ = q₁ ∧ p₂ = q₂ := by simp[Arrow.arrow]
 @[simp] lemma neg_inj (p q : Formula α) : ~p = ~q ↔ p = q := by simp[Tilde.tilde]
 
--- lemma neg_def (p : Formula α) : ~p = p ⟶ ⊥ := rfl
+-- lemma neg_def (p : Formula α) : ~p = p ➝ ⊥ := rfl
 
-lemma iff_def (p q : Formula α) : p ⟷ q = (p ⟶ q) ⋏ (q ⟶ p) := by rfl
+lemma iff_def (p q : Formula α) : p ⭤ q = (p ➝ q) ⋏ (q ➝ p) := by rfl
 
 def complexity : Formula α → ℕ
 | atom _  => 0
 | ⊤       => 0
 | ⊥       => 0
 | ~p      => p.complexity + 1
-| p ⟶ q  => max p.complexity q.complexity + 1
+| p ➝ q  => max p.complexity q.complexity + 1
 | p ⋏ q   => max p.complexity q.complexity + 1
 | p ⋎ q   => max p.complexity q.complexity + 1
 
@@ -64,7 +64,7 @@ def complexity : Formula α → ℕ
 
 @[simp] lemma complexity_atom (a : α) : complexity (atom a) = 0 := rfl
 
-@[simp] lemma complexity_imp (p q : Formula α) : complexity (p ⟶ q) = max p.complexity q.complexity + 1 := rfl
+@[simp] lemma complexity_imp (p q : Formula α) : complexity (p ➝ q) = max p.complexity q.complexity + 1 := rfl
 @[simp] lemma complexity_imp' (p q : Formula α) : complexity (imp p q) = max p.complexity q.complexity + 1 := rfl
 
 @[simp] lemma complexity_and (p q : Formula α) : complexity (p ⋏ q) = max p.complexity q.complexity + 1 := rfl
@@ -79,7 +79,7 @@ def cases' {C : Formula α → Sort w}
     (hverum  : C ⊤)
     (hatom   : ∀ a : α, C (atom a))
     (hneg    : ∀ p : Formula α, C (~p))
-    (himp    : ∀ (p q : Formula α), C (p ⟶ q))
+    (himp    : ∀ (p q : Formula α), C (p ➝ q))
     (hand    : ∀ (p q : Formula α), C (p ⋏ q))
     (hor     : ∀ (p q : Formula α), C (p ⋎ q))
     : (p : Formula α) → C p
@@ -87,7 +87,7 @@ def cases' {C : Formula α → Sort w}
   | ⊤       => hverum
   | atom a  => hatom a
   | ~p      => hneg p
-  | p ⟶ q  => himp p q
+  | p ➝ q  => himp p q
   | p ⋏ q   => hand p q
   | p ⋎ q   => hor p q
 
@@ -97,7 +97,7 @@ def rec' {C : Formula α → Sort w}
   (hverum  : C ⊤)
   (hatom   : ∀ a : α, C (atom a))
   (hneg    : ∀ p : Formula α, C p → C (~p))
-  (himp    : ∀ (p q : Formula α), C p → C q → C (p ⟶ q))
+  (himp    : ∀ (p q : Formula α), C p → C q → C (p ➝ q))
   (hand    : ∀ (p q : Formula α), C p → C q → C (p ⋏ q))
   (hor     : ∀ (p q : Formula α), C p → C q → C (p ⋎ q))
   : (p : Formula α) → C p
@@ -105,7 +105,7 @@ def rec' {C : Formula α → Sort w}
   | ⊤       => hverum
   | atom a  => hatom a
   | ~p      => hneg p (rec' hfalsum hverum hatom hneg himp hand hor p)
-  | p ⟶ q  => himp p q (rec' hfalsum hverum hatom hneg himp hand hor p) (rec' hfalsum hverum hatom hneg himp hand hor q)
+  | p ➝ q  => himp p q (rec' hfalsum hverum hatom hneg himp hand hor p) (rec' hfalsum hverum hatom hneg himp hand hor q)
   | p ⋏ q   => hand p q (rec' hfalsum hverum hatom hneg himp hand hor p) (rec' hfalsum hverum hatom hneg himp hand hor q)
   | p ⋎ q   => hor p q (rec' hfalsum hverum hatom hneg himp hand hor p) (rec' hfalsum hverum hatom hneg himp hand hor q)
 
@@ -129,7 +129,7 @@ def hasDecEq : (p q : Formula α) → Decidable (p = q)
       exact match hasDecEq p p' with
       | isTrue hp  => isTrue (by simp[hp])
       | isFalse hp => isFalse (by simp[hp])
-  | p ⟶ q, r => by
+  | p ➝ q, r => by
     cases r using cases' <;> try { simp; exact isFalse not_false }
     case himp p' q' =>
       exact match hasDecEq p p' with
@@ -171,7 +171,7 @@ def toNat : Formula α → ℕ
   | ⊤       => (Nat.pair 1 0) + 1
   | ⊥       => (Nat.pair 2 0) + 1
   | ~p      => (Nat.pair 3 <| p.toNat) + 1
-  | p ⟶ q   => (Nat.pair 4 <| p.toNat.pair q.toNat) + 1
+  | p ➝ q   => (Nat.pair 4 <| p.toNat.pair q.toNat) + 1
   | p ⋏ q   => (Nat.pair 5 <| p.toNat.pair q.toNat) + 1
   | p ⋎ q   => (Nat.pair 6 <| p.toNat.pair q.toNat) + 1
 
@@ -195,7 +195,7 @@ def ofNat : ℕ → Option (Formula α)
       do
         let p <- ofNat c.unpair.1
         let q <- ofNat c.unpair.2
-        return p ⟶ q
+        return p ➝ q
     | 5 =>
       have : c.unpair.1 < e + 1 := Nat.lt_succ.mpr $ le_trans (Nat.unpair_left_le _) $ Nat.unpair_right_le _
       have : c.unpair.2 < e + 1 := Nat.lt_succ.mpr $ le_trans (Nat.unpair_right_le _) $ Nat.unpair_right_le _
@@ -217,7 +217,7 @@ lemma ofNat_toNat : ∀ (p : Formula α), ofNat (toNat p) = some p
   | ⊤       => by simp [toNat, ofNat]
   | ⊥       => by simp [toNat, ofNat]
   | ~p      => by simp [toNat, ofNat, ofNat_toNat p]
-  | p ⟶ q   => by simp [toNat, ofNat, ofNat_toNat p, ofNat_toNat q]
+  | p ➝ q   => by simp [toNat, ofNat, ofNat_toNat p, ofNat_toNat q]
   | p ⋏ q   => by simp [toNat, ofNat, ofNat_toNat p, ofNat_toNat q]
   | p ⋎ q   => by simp [toNat, ofNat, ofNat_toNat p, ofNat_toNat q]
 

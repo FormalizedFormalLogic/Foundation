@@ -23,13 +23,13 @@ variable {p q : Formula α}
 
 @[simp] lemma box_def : -(□p) = ~(□p) := by simp only [complement, imp_inj, and_true]; rfl;
 
-lemma imp_def₁ (hq : q ≠ ⊥) : -(p ⟶ q) = ~(p ⟶ q) := by
+lemma imp_def₁ (hq : q ≠ ⊥) : -(p ➝ q) = ~(p ➝ q) := by
   simp only [complement];
   split;
   . rename_i h; simp [imp_eq, falsum_eq, hq] at h;
   . rfl;
 
-lemma imp_def₂ (hq : q = ⊥) : -(p ⟶ q) = p := by
+lemma imp_def₂ (hq : q = ⊥) : -(p ➝ q) = p := by
   subst_vars;
   apply neg_def;
 
@@ -107,7 +107,7 @@ macro_rules | `(tactic| trivial) => `(tactic| apply complementary_mem $ by assum
 lemma complementary_comp (h : p ∈ P) : -p ∈ P⁻ := by simp [complementary]; tauto;
 macro_rules | `(tactic| trivial) => `(tactic| apply complementary_comp $ by assumption)
 
-lemma complementary_mem_box (hi : ∀ {q r}, q ⟶ r ∈ P → q ∈ P := by trivial) : □p ∈ P⁻ → □p ∈ P := by
+lemma complementary_mem_box (hi : ∀ {q r}, q ➝ r ∈ P → q ∈ P := by trivial) : □p ∈ P⁻ → □p ∈ P := by
   simp [complementary];
   intro h;
   rcases h with (h | ⟨q, hq, eq⟩);
@@ -161,13 +161,13 @@ lemma provable_iff_singleton_compl_inconsistent : Λ ⊢! p ↔ ¬(Formulae.Cons
   . contrapose; push_neg; apply unprovable_iff_singleton_compl_consistent.mp;
 
 lemma intro_union_consistent
-  (h : ∀ {Γ₁ Γ₂ : List (Formula α)}, (∀ p ∈ Γ₁, p ∈ P₁) ∧ (∀ p ∈ Γ₂, p ∈ P₂) → Λ ⊬! ⋀Γ₁ ⋏ ⋀Γ₂ ⟶ ⊥)
+  (h : ∀ {Γ₁ Γ₂ : List (Formula α)}, (∀ p ∈ Γ₁, p ∈ P₁) ∧ (∀ p ∈ Γ₂, p ∈ P₂) → Λ ⊬! ⋀Γ₁ ⋏ ⋀Γ₂ ➝ ⊥)
   : Formulae.Consistent Λ (P₁ ∪ P₂) := by
   rw [←iff_theory_consistent_formulae_consistent];
   simpa using Theory.intro_union_consistent h;
 
 lemma intro_triunion_consistent
-  (h : ∀ {Γ₁ Γ₂ Γ₃ : List (Formula α)}, (∀ p ∈ Γ₁, p ∈ P₁) ∧ (∀ p ∈ Γ₂, p ∈ P₂) ∧ (∀ p ∈ Γ₃, p ∈ P₃) → Λ ⊬! ⋀Γ₁ ⋏ ⋀Γ₂ ⋏ ⋀Γ₃ ⟶ ⊥)
+  (h : ∀ {Γ₁ Γ₂ Γ₃ : List (Formula α)}, (∀ p ∈ Γ₁, p ∈ P₁) ∧ (∀ p ∈ Γ₂, p ∈ P₂) ∧ (∀ p ∈ Γ₃, p ∈ P₃) → Λ ⊬! ⋀Γ₁ ⋏ ⋀Γ₂ ⋏ ⋀Γ₃ ➝ ⊥)
   : Formulae.Consistent Λ (P₁ ∪ P₂ ∪ P₃) := by
   rw [←iff_theory_consistent_formulae_consistent];
   convert Theory.intro_triunion_consistent h;
@@ -381,14 +381,14 @@ lemma iff_mem_compl (hq_sub : q ∈ S) : (q ∈ X.formulae) ↔ (-q ∉ X.formul
       simpa;
     | himp q r h =>
       simp only [Formula.complement.imp_def₁ h] at hnq;
-      have : ↑X.formulae *⊢[Λ]! ~(q ⟶ r) := Context.by_axm! hnq;
+      have : ↑X.formulae *⊢[Λ]! ~(q ➝ r) := Context.by_axm! hnq;
       have : ↑X.formulae *⊢[Λ]! ⊥ := this ⨀ hq;
       simpa;
   . intro h; exact mem_of_not_mem_compl (by assumption) h;
 
 lemma iff_mem_imp
-  (hsub_qr : (q ⟶ r) ∈ S) (hsub_q : q ∈ S := by trivial)  (hsub_r : r ∈ S := by trivial)
-  : ((q ⟶ r) ∈ X.formulae) ↔ (q ∈ X.formulae) → (-r ∉ X.formulae) := by
+  (hsub_qr : (q ➝ r) ∈ S) (hsub_q : q ∈ S := by trivial)  (hsub_r : r ∈ S := by trivial)
+  : ((q ➝ r) ∈ X.formulae) ↔ (q ∈ X.formulae) → (-r ∉ X.formulae) := by
   constructor;
   . intro hqr hq;
     apply iff_mem_compl hsub_r |>.mp;
@@ -413,8 +413,8 @@ lemma iff_mem_imp
       exact dhyp! $ membership_iff (by assumption) |>.mp $ iff_mem_compl (by assumption) |>.mpr hr;
 
 lemma iff_not_mem_imp
-  (hsub_qr : (q ⟶ r) ∈ S) (hsub_q : q ∈ S := by trivial)  (hsub_r : r ∈ S := by trivial)
-  : ((q ⟶ r) ∉ X.formulae) ↔ (q ∈ X.formulae) ∧ (-r ∈ X.formulae) := by
+  (hsub_qr : (q ➝ r) ∈ S) (hsub_q : q ∈ S := by trivial)  (hsub_r : r ∈ S := by trivial)
+  : ((q ➝ r) ∉ X.formulae) ↔ (q ∈ X.formulae) ∧ (-r ∈ X.formulae) := by
   simpa using @iff_mem_imp α _ Λ S X q r hsub_qr hsub_q hsub_r |>.not;
 
 lemma equality_def : X₁ = X₂ ↔ X₁.formulae = X₂.formulae := by

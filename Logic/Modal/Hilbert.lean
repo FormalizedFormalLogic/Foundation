@@ -22,10 +22,10 @@ abbrev InferenceRules (α : Type*) := Set (InferenceRule α)
 abbrev Necessitation {α} : InferenceRules α := { { antecedents := [p], consequence := □p} | (p) }
 notation "⟮Nec⟯" => Necessitation
 
-abbrev LoebRule {α} : InferenceRules α := { { antecedents := [□p ⟶ p], consequence := p} | (p) }
+abbrev LoebRule {α} : InferenceRules α := { { antecedents := [□p ➝ p], consequence := p} | (p) }
 notation "⟮Loeb⟯" => LoebRule
 
-abbrev HenkinRule {α} : InferenceRules α := { { antecedents := [□p ⟷ p], consequence := p }| (p) }
+abbrev HenkinRule {α} : InferenceRules α := { { antecedents := [□p ⭤ p], consequence := p }| (p) }
 notation "⟮Henkin⟯" => HenkinRule
 
 structure Hilbert (α : Type*) where
@@ -38,7 +38,7 @@ notation "Rl(" Λ ")" => Hilbert.rules Λ
 inductive Deduction (Λ : Hilbert α) : (Formula α) → Type _
   | maxm {p}     : p ∈ Ax(Λ) → Deduction Λ p
   | rule {rl}    : rl ∈ Rl(Λ) → (∀ {p}, p ∈ rl.antecedents → Deduction Λ p) → Deduction Λ rl.consequence
-  | mdp {p q}    : Deduction Λ (p ⟶ q) → Deduction Λ p → Deduction Λ q
+  | mdp {p q}    : Deduction Λ (p ➝ q) → Deduction Λ p → Deduction Λ q
   | imply₁ p q   : Deduction Λ $ Axioms.Imply₁ p q
   | imply₂ p q r : Deduction Λ $ Axioms.Imply₂ p q r
   | ec p q       : Deduction Λ $ Axioms.ElimContra p q
@@ -79,14 +79,14 @@ class HasLoebRule (Λ : Hilbert α) where
   has_loeb : ⟮Loeb⟯ ⊆ Rl(Λ) := by aesop
 
 instance [HasLoebRule Λ] : System.LoebRule Λ where
-  loeb := @λ p d => rule (show { antecedents := [□p ⟶ p], consequence := p } ∈ Rl(Λ) by apply HasLoebRule.has_loeb; simp_all) (by aesop);
+  loeb := @λ p d => rule (show { antecedents := [□p ➝ p], consequence := p } ∈ Rl(Λ) by apply HasLoebRule.has_loeb; simp_all) (by aesop);
 
 
 class HasHenkinRule (Λ : Hilbert α) where
   has_henkin : ⟮Henkin⟯ ⊆ Rl(Λ) := by aesop
 
 instance [HasHenkinRule Λ] : System.HenkinRule Λ where
-  henkin := @λ p d => rule (show { antecedents := [□p ⟷ p], consequence := p } ∈ Rl(Λ) by apply HasHenkinRule.has_henkin; simp_all) (by aesop);
+  henkin := @λ p d => rule (show { antecedents := [□p ⭤ p], consequence := p } ∈ Rl(Λ) by apply HasHenkinRule.has_henkin; simp_all) (by aesop);
 
 
 class HasNecOnly (Λ : Hilbert α) where
@@ -119,9 +119,9 @@ noncomputable def inducition!
              (ih : ∀ {p}, (hp : p ∈ r.antecedents) →
              motive p (hant hp)) → motive r.consequence ⟨rule hr (λ hp => (hant hp).some)⟩)
   (hMaxm     : ∀ {p}, (h : p ∈ Ax(Λ)) → motive p ⟨maxm h⟩)
-  (hMdp      : ∀ {p q}, {hpq : Λ ⊢! p ⟶ q} → {hp : Λ ⊢! p} → motive (p ⟶ q) hpq → motive p hp → motive q ⟨mdp hpq.some hp.some⟩)
-  (hImply₁     : ∀ {p q}, motive (p ⟶ q ⟶ p) $ ⟨imply₁ p q⟩)
-  (hImply₂     : ∀ {p q r}, motive ((p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r) $ ⟨imply₂ p q r⟩)
+  (hMdp      : ∀ {p q}, {hpq : Λ ⊢! p ➝ q} → {hp : Λ ⊢! p} → motive (p ➝ q) hpq → motive p hp → motive q ⟨mdp hpq.some hp.some⟩)
+  (hImply₁     : ∀ {p q}, motive (p ➝ q ➝ p) $ ⟨imply₁ p q⟩)
+  (hImply₂     : ∀ {p q r}, motive ((p ➝ q ➝ r) ➝ (p ➝ q) ➝ p ➝ r) $ ⟨imply₂ p q r⟩)
   (hElimContra : ∀ {p q}, motive (Axioms.ElimContra p q) $ ⟨ec p q⟩)
   : ∀ {p}, (d : Λ ⊢! p) → motive p d := by
   intro p d;
@@ -137,10 +137,10 @@ noncomputable def inducition!
 noncomputable def inducition_with_necOnly! [Λ.HasNecOnly]
   {motive  : (p : Formula α) → Λ ⊢! p → Prop}
   (hMaxm   : ∀ {p}, (h : p ∈ Ax(Λ)) → motive p ⟨maxm h⟩)
-  (hMdp    : ∀ {p q}, {hpq : Λ ⊢! p ⟶ q} → {hp : Λ ⊢! p} → motive (p ⟶ q) hpq → motive p hp → motive q (hpq ⨀ hp))
+  (hMdp    : ∀ {p q}, {hpq : Λ ⊢! p ➝ q} → {hp : Λ ⊢! p} → motive (p ➝ q) hpq → motive p hp → motive q (hpq ⨀ hp))
   (hNec    : ∀ {p}, {hp : Λ ⊢! p} → (ihp : motive p hp) → motive (□p) (System.nec! hp))
-  (hImply₁   : ∀ {p q}, motive (p ⟶ q ⟶ p) $ ⟨imply₁ p q⟩)
-  (hImply₂   : ∀ {p q r}, motive ((p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r) $ ⟨imply₂ p q r⟩)
+  (hImply₁   : ∀ {p q}, motive (p ➝ q ➝ p) $ ⟨imply₁ p q⟩)
+  (hImply₂   : ∀ {p q r}, motive ((p ➝ q ➝ r) ➝ (p ➝ q) ➝ p ➝ r) $ ⟨imply₂ p q r⟩)
   (hElimContra : ∀ {p q}, motive (Axioms.ElimContra p q) $ ⟨ec p q⟩)
   : ∀ {p}, (d : Λ ⊢! p) → motive p d := by
   intro p d;

@@ -23,7 +23,7 @@ instance (𝓣 : S) : System.Classical 𝓣 where
   verum := of <| verum _ _
   imply₁ := fun p q ↦ of <| implyRight <| implyRight <| closed p (by simp) (by simp)
   imply₂ := fun p q r ↦ of
-    <| implyRight <| implyRight <| implyRight <| wkL [p ⟶ q ⟶ r, p ⟶ q, p] (by simp)
+    <| implyRight <| implyRight <| implyRight <| wkL [p ➝ q ➝ r, p ➝ q, p] (by simp)
     <| implyLeft
       (closed p (by simp) (by simp))
       (implyLeft
@@ -38,16 +38,16 @@ instance (𝓣 : S) : System.Classical 𝓣 where
   or₂  := fun p q ↦ of <| implyRight <| orRight <| closed q (by simp) (by simp)
   or₃  := fun p q r ↦ of <| implyRight <| implyRight <| implyRight
     <| orLeft
-      (wkL [p ⟶ r, p] (by simp) <| implyLeft (closed p (by simp) (by simp)) (closed r (by simp) (by simp)))
-      (wkL [q ⟶ r, q] (by simp) <| implyLeft (closed q (by simp) (by simp)) (closed r (by simp) (by simp)))
+      (wkL [p ➝ r, p] (by simp) <| implyLeft (closed p (by simp) (by simp)) (closed r (by simp) (by simp)))
+      (wkL [q ➝ r, q] (by simp) <| implyLeft (closed q (by simp) (by simp)) (closed r (by simp) (by simp)))
   dne := fun p ↦ of <| implyRight <| negLeft <| negRight <| closed p (by simp) (by simp)
   neg_equiv := λ {p} => of <| andRight
     (implyRight <| implyRight <| rotateLeft <| negLeft <| closed p (by simp) (by simp))
     (implyRight <| negRight  <| rotateLeft <| implyLeft (closed p (by simp) (by simp)) (falsum _ _))
 
 
-def notContra {𝓣 : S} {p q : F} (b : 𝓣 ⊢ p ⟷ ~q) : 𝓣 ⊢ ~p ⟷ q := by
-  have : [p ⟷ ~q] ⊢² [~p ⟷ q] :=
+def notContra {𝓣 : S} {p q : F} (b : 𝓣 ⊢ p ⭤ ~q) : 𝓣 ⊢ ~p ⭤ q := by
+  have : [p ⭤ ~q] ⊢² [~p ⭤ q] :=
     andRight
       (andLeft <| implyRight
         <| negLeft <| implyLeft
@@ -62,7 +62,7 @@ def notContra {𝓣 : S} {p q : F} (b : 𝓣 ⊢ p ⟷ ~q) : 𝓣 ⊢ ~p ⟷ q :
         (negLeft <| closed q (by simp) (by simp)))
   exact toProof this (fun r ↦ by simp; rintro rfl; exact b)
 
-lemma not_contra! {𝓣 : S} {p q : F} (b : 𝓣 ⊢! p ⟷ ~q) : 𝓣 ⊢! ~p ⟷ q := ⟨notContra b.get⟩
+lemma not_contra! {𝓣 : S} {p q : F} (b : 𝓣 ⊢! p ⭤ ~q) : 𝓣 ⊢! ~p ⭤ q := ⟨notContra b.get⟩
 
 end Gentzen
 

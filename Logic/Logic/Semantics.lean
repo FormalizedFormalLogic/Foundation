@@ -44,7 +44,7 @@ protected class Or where
   realize_or {𝓜 : M} {p q : F} : 𝓜 ⊧ p ⋎ q ↔ 𝓜 ⊧ p ∨ 𝓜 ⊧ q
 
 protected class Imp where
-  realize_imp {𝓜 : M} {p q : F} : 𝓜 ⊧ p ⟶ q ↔ (𝓜 ⊧ p → 𝓜 ⊧ q)
+  realize_imp {𝓜 : M} {p q : F} : 𝓜 ⊧ p ➝ q ↔ (𝓜 ⊧ p → 𝓜 ⊧ q)
 
 protected class Not where
   realize_not {𝓜 : M} {p : F} : 𝓜 ⊧ ~p ↔ ¬𝓜 ⊧ p
@@ -74,7 +74,7 @@ variable [Tarski M]
 variable {𝓜 : M}
 
 @[simp] lemma realize_iff {p q : F} :
-    𝓜 ⊧ p ⟷ q ↔ ((𝓜 ⊧ p) ↔ (𝓜 ⊧ q)) := by
+    𝓜 ⊧ p ⭤ q ↔ ((𝓜 ⊧ p) ↔ (𝓜 ⊧ q)) := by
   simp [LogicalConnective.iff, iff_iff_implies_and_implies]
 
 @[simp] lemma realize_list_conj {l : List F} :

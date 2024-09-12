@@ -53,7 +53,7 @@ open PLoN
 def Formula.PLoN.Satisfies (M : PLoN.Model α) (w : M.World) : Formula α → Prop
   | atom a  => M.Valuation w a
   | falsum  => False
-  | p ⟶ q => (PLoN.Satisfies M w p) → (PLoN.Satisfies M w q)
+  | p ➝ q => (PLoN.Satisfies M w p) → (PLoN.Satisfies M w q)
   | □p   => ∀ {w'}, w ≺[p] w' → (PLoN.Satisfies M w' p)
 
 
@@ -72,7 +72,7 @@ lemma not_def : x ⊧ ~p ↔ ¬(x ⊧ p) := by
   | _ => simp_all [Satisfies];
 instance : Semantics.Not (M.World) := ⟨not_def⟩
 
-lemma imp_def : x ⊧ p ⟶ q ↔ (x ⊧ p) → (x ⊧ q) := by tauto;
+lemma imp_def : x ⊧ p ➝ q ↔ (x ⊧ p) → (x ⊧ q) := by tauto;
 instance : Semantics.Imp (M.World) := ⟨imp_def⟩
 
 lemma or_def : x ⊧ p ⋎ q ↔ x ⊧ p ∨ x ⊧ q := by simp [Satisfies]; tauto;
@@ -133,7 +133,7 @@ protected lemma nec (h : F ⊧ p) : F ⊧ □p := by
   intro V x y _;
   exact h V y;
 
-protected lemma mdp (hpq : F ⊧ p ⟶ q) (hp : F ⊧ p) : F ⊧ q := by
+protected lemma mdp (hpq : F ⊧ p ➝ q) (hp : F ⊧ p) : F ⊧ q := by
   intro V x;
   exact (hpq V x) (hp V x);
 
@@ -162,7 +162,7 @@ protected lemma nec (h : 𝔽 ⊧ p) : 𝔽 ⊧ □p := by
   apply PLoN.ValidOnFrame.nec;
   exact h hF;
 
-protected lemma mdp (hpq : 𝔽 ⊧ p ⟶ q) (hp : 𝔽 ⊧ p) : 𝔽 ⊧ q := by
+protected lemma mdp (hpq : 𝔽 ⊧ p ➝ q) (hp : 𝔽 ⊧ p) : 𝔽 ⊧ q := by
   intro _ hF;
   exact PLoN.ValidOnFrame.mdp (hpq hF) (hp hF)
 

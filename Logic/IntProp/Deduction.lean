@@ -25,16 +25,16 @@ end Hilbert
 
 inductive Deduction (Λ : Hilbert α) : Formula α → Type _
   | eaxm {p}     : p ∈ Ax(Λ) → Deduction Λ p
-  | mdp {p q}    : Deduction Λ (p ⟶ q) → Deduction Λ p → Deduction Λ q
+  | mdp {p q}    : Deduction Λ (p ➝ q) → Deduction Λ p → Deduction Λ q
   | verum        : Deduction Λ $ ⊤
-  | imply₁ p q   : Deduction Λ $ p ⟶ q ⟶ p
-  | imply₂ p q r : Deduction Λ $ (p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r
-  | and₁ p q     : Deduction Λ $ p ⋏ q ⟶ p
-  | and₂ p q     : Deduction Λ $ p ⋏ q ⟶ q
-  | and₃ p q     : Deduction Λ $ p ⟶ q ⟶ p ⋏ q
-  | or₁ p q      : Deduction Λ $ p ⟶ p ⋎ q
-  | or₂ p q      : Deduction Λ $ q ⟶ p ⋎ q
-  | or₃ p q r    : Deduction Λ $ (p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r)
+  | imply₁ p q   : Deduction Λ $ p ➝ q ➝ p
+  | imply₂ p q r : Deduction Λ $ (p ➝ q ➝ r) ➝ (p ➝ q) ➝ p ➝ r
+  | and₁ p q     : Deduction Λ $ p ⋏ q ➝ p
+  | and₂ p q     : Deduction Λ $ p ⋏ q ➝ q
+  | and₃ p q     : Deduction Λ $ p ➝ q ➝ p ⋏ q
+  | or₁ p q      : Deduction Λ $ p ➝ p ⋎ q
+  | or₂ p q      : Deduction Λ $ q ➝ p ⋎ q
+  | or₃ p q r    : Deduction Λ $ (p ➝ r) ➝ (q ➝ r) ➝ (p ⋎ q ➝ r)
   | neg_equiv p  : Deduction Λ $ Axioms.NegEquiv p
 
 instance : System (Formula α) (Hilbert α) := ⟨Deduction⟩
@@ -127,16 +127,16 @@ open System
 noncomputable def rec! {α : Type u} {Λ : Hilbert α}
   {motive : (a : Formula α) → Λ ⊢! a → Sort u_1}
   (eaxm   : ∀ {p}, (a : p ∈ Ax(Λ)) → motive p ⟨eaxm a⟩)
-  (mdp    : ∀ {p q}, {hpq : Λ ⊢! (p ⟶ q)} → {hp : Λ ⊢! p} → motive (p ⟶ q) hpq → motive p hp → motive q (hpq ⨀ hp))
+  (mdp    : ∀ {p q}, {hpq : Λ ⊢! (p ➝ q)} → {hp : Λ ⊢! p} → motive (p ➝ q) hpq → motive p hp → motive q (hpq ⨀ hp))
   (verum  : motive ⊤ verum!)
-  (imply₁ : ∀ {p q},   motive (p ⟶ q ⟶ p) imply₁!)
-  (imply₂ : ∀ {p q r}, motive ((p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r) imply₂!)
-  (and₁   : ∀ {p q},   motive (p ⋏ q ⟶ p) and₁!)
-  (and₂   : ∀ {p q},   motive (p ⋏ q ⟶ q) and₂!)
-  (and₃   : ∀ {p q},   motive (p ⟶ q ⟶ p ⋏ q) and₃!)
-  (or₁    : ∀ {p q},   motive (p ⟶ p ⋎ q) or₁!)
-  (or₂    : ∀ {p q},   motive (q ⟶ p ⋎ q) or₂!)
-  (or₃    : ∀ {p q r}, motive ((p ⟶ r) ⟶ (q ⟶ r) ⟶ p ⋎ q ⟶ r) or₃!)
+  (imply₁ : ∀ {p q},   motive (p ➝ q ➝ p) imply₁!)
+  (imply₂ : ∀ {p q r}, motive ((p ➝ q ➝ r) ➝ (p ➝ q) ➝ p ➝ r) imply₂!)
+  (and₁   : ∀ {p q},   motive (p ⋏ q ➝ p) and₁!)
+  (and₂   : ∀ {p q},   motive (p ⋏ q ➝ q) and₂!)
+  (and₃   : ∀ {p q},   motive (p ➝ q ➝ p ⋏ q) and₃!)
+  (or₁    : ∀ {p q},   motive (p ➝ p ⋎ q) or₁!)
+  (or₂    : ∀ {p q},   motive (q ➝ p ⋎ q) or₂!)
+  (or₃    : ∀ {p q r}, motive ((p ➝ r) ➝ (q ➝ r) ➝ p ⋎ q ➝ r) or₃!)
   (neg_equiv : ∀ {p}, motive (Axioms.NegEquiv p) neg_equiv!) :
   {a : Formula α} → (t : Λ ⊢! a) → motive a t := by
   intro p d;

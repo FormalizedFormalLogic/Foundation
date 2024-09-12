@@ -127,11 +127,11 @@ end ToString
 
 lemma neg_eq (p : Semiformula L ξ n) : ~p = neg p := rfl
 
-lemma imp_eq (p q : Semiformula L ξ n) : p ⟶ q = ~p ⋎ q := rfl
+lemma imp_eq (p q : Semiformula L ξ n) : p ➝ q = ~p ⋎ q := rfl
 
-lemma iff_eq (p q : Semiformula L ξ n) : p ⟷ q = (~p ⋎ q) ⋏ (~q ⋎ p) := rfl
+lemma iff_eq (p q : Semiformula L ξ n) : p ⭤ q = (~p ⋎ q) ⋏ (~q ⋎ p) := rfl
 
-lemma ball_eq (p q : Semiformula L ξ (n + 1)) : (∀[p] q) = ∀' (p ⟶ q) := rfl
+lemma ball_eq (p q : Semiformula L ξ (n + 1)) : (∀[p] q) = ∀' (p ➝ q) := rfl
 
 lemma bex_eq (p q : Semiformula L ξ (n + 1)) : (∃[p] q) = ∃' (p ⋏ q) := rfl
 
@@ -166,7 +166,7 @@ by simp[Vee.vee]
   induction k <;> simp [*, exItr_succ]
 
 @[simp] lemma imp_inj {p₁ p₂ q₁ q₂ : Semiformula L ξ n} :
-    p₁ ⟶ p₂ = q₁ ⟶ q₂ ↔ p₁ = q₁ ∧ p₂ = q₂ := by simp [imp_eq]
+    p₁ ➝ p₂ = q₁ ➝ q₂ ↔ p₁ = q₁ ∧ p₂ = q₂ := by simp [imp_eq]
 
 abbrev rel! (L : Language) (k) (r : L.Rel k) (v : Fin k → Semiterm L ξ n) := rel r v
 
@@ -334,7 +334,7 @@ lemma fv_nrel {k} (r : L.Rel k) (v : Fin k → Semiterm L ξ n) : (nrel r v).fv 
 @[simp] lemma fv_not (p : Semiformula L ξ n) : (~p).fv = p.fv := by
   induction p using rec' <;> simp [*, fv_rel, fv_nrel]
 
-@[simp] lemma fv_imp (p q : Semiformula L ξ n) : (p ⟶ q).fv = p.fv ∪ q.fv := by simp [imp_eq]
+@[simp] lemma fv_imp (p q : Semiformula L ξ n) : (p ➝ q).fv = p.fv ∪ q.fv := by simp [imp_eq]
 
 end fv
 
@@ -373,10 +373,10 @@ def qr : ∀ {n}, Semiformula L ξ n → ℕ
 @[simp] lemma qr_neg (p : Semiformula L ξ n) : (~p).qr = p.qr := by
   induction' p using rec' <;> simp[*]
 
-@[simp] lemma qr_imply (p q : Semiformula L ξ n) : (p ⟶ q).qr = max p.qr q.qr :=
+@[simp] lemma qr_imply (p q : Semiformula L ξ n) : (p ➝ q).qr = max p.qr q.qr :=
   by simp[imp_eq]
 
-@[simp] lemma qr_iff (p q : Semiformula L ξ n) : (p ⟷ q).qr = max p.qr q.qr :=
+@[simp] lemma qr_iff (p q : Semiformula L ξ n) : (p ⭤ q).qr = max p.qr q.qr :=
   by simp[iff_eq, total_of]
 
 def Open (p : Semiformula L ξ n) : Prop := p.qr = 0
@@ -400,10 +400,10 @@ def Open (p : Semiformula L ξ n) : Prop := p.qr = 0
 @[simp] lemma open_neg {p : Semiformula L ξ n} : (~p).Open ↔ p.Open := by
   simp[Open]
 
-@[simp] lemma open_imply {p q : Semiformula L ξ n} : (p ⟶ q).Open ↔ p.Open ∧ q.Open :=
+@[simp] lemma open_imply {p q : Semiformula L ξ n} : (p ➝ q).Open ↔ p.Open ∧ q.Open :=
   by simp[Open]
 
-@[simp] lemma open_iff {p q : Semiformula L ξ n} : (p ⟷ q).Open ↔ p.Open ∧ q.Open :=
+@[simp] lemma open_iff {p q : Semiformula L ξ n} : (p ⭤ q).Open ↔ p.Open ∧ q.Open :=
   by simp[Open]
 
 def fvarList : {n : ℕ} → Semiformula L ξ n → List ξ
