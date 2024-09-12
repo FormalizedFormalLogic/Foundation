@@ -63,14 +63,14 @@ def explode (h₁ : 𝓢 ⊢ p) (h₂ : 𝓢 ⊢ ∼p) : 𝓢 ⊢ q := by
   exact elim_contra ⨀ this ⨀ h₁;
 
 def explodeHyp (h₁ : 𝓢 ⊢ p ➝ q) (h₂ : 𝓢 ⊢ p ➝ ∼q) : 𝓢 ⊢ p ➝ r := by
-  have : 𝓢 ⊢ p ➝ ∼q ➝ ∼(r) ➝ ∼q := dhyp imply₁ (q := p)
-  have : 𝓢 ⊢ p ➝ ∼(r) ➝ ∼q := this ⨀₁ h₂;
+  have : 𝓢 ⊢ p ➝ ∼q ➝ ∼r ➝ ∼q := dhyp imply₁ (q := p)
+  have : 𝓢 ⊢ p ➝ ∼r ➝ ∼q := this ⨀₁ h₂;
   have : 𝓢 ⊢ p ➝ q ➝ r := (dhyp elim_contra (q := p)) ⨀₁ this;
   exact this ⨀₁ h₁;
 
-def explodeHyp₂ (h₁ : 𝓢 ⊢ p ➝ q ➝ r) (h₂ : 𝓢 ⊢ p ➝ q ➝ ∼(r)) : 𝓢 ⊢ p ➝ q ➝ s := by
-  have : 𝓢 ⊢ p ➝ q ➝ ∼(r) ➝ ∼s ➝ ∼(r) := dhyp (dhyp imply₁ (q := q)) (q := p)
-  have : 𝓢 ⊢ p ➝ q ➝ ∼(s) ➝ ∼(r) := this ⨀₂ h₂;
+def explodeHyp₂ (h₁ : 𝓢 ⊢ p ➝ q ➝ r) (h₂ : 𝓢 ⊢ p ➝ q ➝ ∼r) : 𝓢 ⊢ p ➝ q ➝ s := by
+  have : 𝓢 ⊢ p ➝ q ➝ ∼r ➝ ∼s ➝ ∼r := dhyp (dhyp imply₁ (q := q)) (q := p)
+  have : 𝓢 ⊢ p ➝ q ➝ ∼(s) ➝ ∼r := this ⨀₂ h₂;
   have : 𝓢 ⊢ p ➝ q ➝ r ➝ s := (dhyp (dhyp elim_contra (q := q)) (q := p)) ⨀₂ this;
   exact this ⨀₂ h₁;
 
@@ -165,19 +165,19 @@ instance : HasAxiomOrInst₂ 𝓢 := ⟨λ p q => Lukasiewicz.orInst₂ (p := p)
 -- or_imply
 def orElim : 𝓢 ⊢ (p ➝ r) ➝ (q ➝ r) ➝ (p ⋎ q ➝ r) := by
   simp only [LukasiewiczAbbrev.or];
-  have d₁ : 𝓢 ⊢ (p ➝ r) ➝ (q ➝ r) ➝ (∼p ➝ q) ➝ (p ➝ r) ➝ ∼(r) ➝ ∼p
+  have d₁ : 𝓢 ⊢ (p ➝ r) ➝ (q ➝ r) ➝ (∼p ➝ q) ➝ (p ➝ r) ➝ ∼r ➝ ∼p
     := (dhyp (p ➝ r) <| dhyp (q ➝ r) <| dhyp (∼p ➝ q) <| contraIntro (p := p) (q := r));
-  have d₂ : 𝓢 ⊢ (p ➝ r) ➝ (q ➝ r) ➝ (∼p ➝ q) ➝ ∼(r) ➝ ∼p
+  have d₂ : 𝓢 ⊢ (p ➝ r) ➝ (q ➝ r) ➝ (∼p ➝ q) ➝ ∼r ➝ ∼p
     := d₁ ⨀₃ (imply₁₁ (p ➝ r) (q ➝ r) (∼p ➝ q));
-  have d₃ : 𝓢 ⊢ (p ➝ r) ➝ (q ➝ r) ➝ (∼p ➝ q) ➝ ∼(r) ➝ q
-    := (dhyp (p ➝ r) <| dhyp (q ➝ r) <| imply₁ (p := ∼p ➝ q) (q := ∼(r))) ⨀₄ d₂;
-  have d₄ : 𝓢 ⊢ (p ➝ r) ➝ (q ➝ r) ➝ (∼p ➝ q) ➝ ∼(r) ➝ r
-    := (dhyp (p ➝ r) <| imply₁₁ (p := q ➝ r) (q := ∼p ➝ q) (r := ∼(r))) ⨀₄ d₃;
-  have d₅ : 𝓢 ⊢ (p ➝ r) ➝ (q ➝ r) ➝ (∼p ➝ q) ➝ ∼(r) ➝ r ➝ ⊥
-    := by simpa using dhyp (p ➝ r) <| dhyp (q ➝ r) <| dhyp (∼p ➝ q) <| impId (p := ∼(r));
-  have d₆ : 𝓢 ⊢ (p ➝ r) ➝ (q ➝ r) ➝ (∼p ➝ q) ➝ ∼∼(r)
+  have d₃ : 𝓢 ⊢ (p ➝ r) ➝ (q ➝ r) ➝ (∼p ➝ q) ➝ ∼r ➝ q
+    := (dhyp (p ➝ r) <| dhyp (q ➝ r) <| imply₁ (p := ∼p ➝ q) (q := ∼r)) ⨀₄ d₂;
+  have d₄ : 𝓢 ⊢ (p ➝ r) ➝ (q ➝ r) ➝ (∼p ➝ q) ➝ ∼r ➝ r
+    := (dhyp (p ➝ r) <| imply₁₁ (p := q ➝ r) (q := ∼p ➝ q) (r := ∼r)) ⨀₄ d₃;
+  have d₅ : 𝓢 ⊢ (p ➝ r) ➝ (q ➝ r) ➝ (∼p ➝ q) ➝ ∼r ➝ r ➝ ⊥
+    := by simpa using dhyp (p ➝ r) <| dhyp (q ➝ r) <| dhyp (∼p ➝ q) <| impId (p := ∼r);
+  have d₆ : 𝓢 ⊢ (p ➝ r) ➝ (q ➝ r) ➝ (∼p ➝ q) ➝ ∼∼r
     := by simpa using d₅ ⨀₄ d₄;
-  have d₇ : 𝓢 ⊢ (p ➝ r) ➝ (q ➝ r) ➝ (∼p ➝ q) ➝ ∼∼(r) ➝ r
+  have d₇ : 𝓢 ⊢ (p ➝ r) ➝ (q ➝ r) ➝ (∼p ➝ q) ➝ ∼∼r ➝ r
     := dhyp (p ➝ r) <| dhyp (q ➝ r) <| dhyp (∼p ➝ q) <| dne (p := r);
   exact d₇ ⨀₃ d₆;
 
