@@ -29,7 +29,7 @@ lemma box_def : x ⊧ □p ↔ ∀ y, x ≺ y → y ⊧ p := by simp [Kripke.Sat
 
 lemma dia_def : x ⊧ ◇p ↔ ∃ y, x ≺ y ∧ y ⊧ p := by simp [Kripke.Satisfies];
 
-lemma not_def : x ⊧ ~p ↔ ¬(x ⊧ p) := by
+lemma not_def : x ⊧ ∼p ↔ ¬(x ⊧ p) := by
   induction p using Formula.rec' generalizing x with
   | _ => simp_all [Satisfies];
 instance : Semantics.Not (M.World) := ⟨not_def⟩
@@ -47,7 +47,7 @@ protected instance : Semantics.Tarski (M.World) where
   realize_top := by tauto;
   realize_bot := by tauto;
 
-lemma negneg_def : x ⊧ ~~p ↔ x ⊧ p := by simp [Satisfies];
+lemma negneg_def : x ⊧ ∼∼p ↔ x ⊧ p := by simp [Satisfies];
 
 lemma multibox_def : x ⊧ □^[n]p ↔ ∀ {y}, x ≺^[n] y → y ⊧ p := by
   induction n generalizing x with
@@ -92,11 +92,11 @@ lemma trans (hpq : x ⊧ p ➝ q) (hqr : x ⊧ q ➝ r) : x ⊧ p ➝ r := by si
 
 lemma mdp (hpq : x ⊧ p ➝ q) (hp : x ⊧ p) : x ⊧ q := by simp_all;
 
-lemma dia_dual : x ⊧ ◇p ↔ x ⊧ ~□(~p) := by simp [Satisfies];
+lemma dia_dual : x ⊧ ◇p ↔ x ⊧ ∼□(∼p) := by simp [Satisfies];
 
-lemma box_dual : x ⊧ □p ↔ x ⊧ ~◇(~p) := by simp [Satisfies];
+lemma box_dual : x ⊧ □p ↔ x ⊧ ∼◇(∼p) := by simp [Satisfies];
 
-lemma not_imp : ¬(x ⊧ p ➝ q) ↔ x ⊧ p ⋏ ~q := by simp [Satisfies];
+lemma not_imp : ¬(x ⊧ p ➝ q) ↔ x ⊧ p ⋏ ∼q := by simp [Satisfies];
 
 end Satisfies
 

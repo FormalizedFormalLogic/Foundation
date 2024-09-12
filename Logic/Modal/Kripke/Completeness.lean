@@ -60,11 +60,11 @@ lemma multirel_def_multibox : Ω₁ ≺^[n] Ω₂ ↔ ∀ {p}, □^[n]p ∈ Ω�
             subst_vars;
             simpa;
           have : Λ ⊢! ◇^[n]⋀◇'⁻¹^[n]Δ ➝ ⋀Δ := imp_trans''! iff_conjmultidia_multidiaconj! $ this;
-          have : Λ ⊢! ~(□^[n](~⋀◇'⁻¹^[n]Δ)) ➝ ⋀Δ := imp_trans''! (and₂'! multidia_duality!) this;
-          have : Λ ⊢! ~⋀Δ ➝ □^[n](~⋀◇'⁻¹^[n]Δ) := contra₂'! this;
-          have : Λ ⊢! (⋀Δ ➝ ⊥) ➝ □^[n](~⋀◇'⁻¹^[n]Δ) := imp_trans''! (and₂'! neg_equiv!) this;
-          have : Λ ⊢! ⋀Γ ➝ □^[n](~⋀◇'⁻¹^[n]Δ) := imp_trans''! d₁ this;
-          have : Λ ⊢! □⋀Γ ➝ □^[(n + 1)](~⋀◇'⁻¹^[n]Δ) := by simpa using imply_box_distribute'! this;
+          have : Λ ⊢! ∼(□^[n](∼⋀◇'⁻¹^[n]Δ)) ➝ ⋀Δ := imp_trans''! (and₂'! multidia_duality!) this;
+          have : Λ ⊢! ∼⋀Δ ➝ □^[n](∼⋀◇'⁻¹^[n]Δ) := contra₂'! this;
+          have : Λ ⊢! (⋀Δ ➝ ⊥) ➝ □^[n](∼⋀◇'⁻¹^[n]Δ) := imp_trans''! (and₂'! neg_equiv!) this;
+          have : Λ ⊢! ⋀Γ ➝ □^[n](∼⋀◇'⁻¹^[n]Δ) := imp_trans''! d₁ this;
+          have : Λ ⊢! □⋀Γ ➝ □^[(n + 1)](∼⋀◇'⁻¹^[n]Δ) := by simpa using imply_box_distribute'! this;
           exact iff_mem_neg.mp $ h $ membership_iff.mpr $ (Context.of! this) ⨀ dΓconj;
         }
 
@@ -147,7 +147,7 @@ lemma iff_valid_on_canonicalModel_deducible : (CanonicalModel Λ) ⊧ p ↔ Λ �
   constructor;
   . contrapose;
     intro h;
-    have : Theory.Consistent Λ ({~p}) := by
+    have : Theory.Consistent Λ ({∼p}) := by
       apply Theory.def_consistent.mpr;
       intro Γ hΓ;
       by_contra hC;
@@ -156,7 +156,7 @@ lemma iff_valid_on_canonicalModel_deducible : (CanonicalModel Λ) ⊧ p ↔ Λ �
     obtain ⟨Ω, hΩ⟩ := lindenbaum this;
     simp [Kripke.ValidOnModel];
     use Ω;
-    exact truthlemma.not.mpr $ iff_mem_neg.mp (show ~p ∈ Ω.theory by simp_all);
+    exact truthlemma.not.mpr $ iff_mem_neg.mp (show ∼p ∈ Ω.theory by simp_all);
   . intro h Ω;
     suffices p ∈ Ω.theory by exact truthlemma.mpr this;
     by_contra hC;

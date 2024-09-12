@@ -147,7 +147,7 @@ variable {L : Language} [L.Eq] [L.LT]
 
 end
 
-lemma neg {p : Semiformula L ξ n} : Hierarchy Γ s p → Hierarchy Γ.alt s (~p) := by
+lemma neg {p : Semiformula L ξ n} : Hierarchy Γ s p → Hierarchy Γ.alt s (∼p) := by
   intro h; induction h <;> try simp[*]
   case bex pos _ ih => exact ball pos ih
   case ball pos _ ih => exact bex pos ih
@@ -158,7 +158,7 @@ lemma neg {p : Semiformula L ξ n} : Hierarchy Γ s p → Hierarchy Γ.alt s (~p
   case dummy_pi ih => exact dummy_sigma ih
   case dummy_sigma ih => exact dummy_pi ih
 
-@[simp] lemma neg_iff {p : Semiformula L ξ n} : Hierarchy Γ s (~p) ↔ Hierarchy Γ.alt s p :=
+@[simp] lemma neg_iff {p : Semiformula L ξ n} : Hierarchy Γ s (∼p) ↔ Hierarchy Γ.alt s p :=
   ⟨fun h => by simpa using neg h, fun h => by simpa using neg h⟩
 
 @[simp] lemma imp_iff {p q : Semiformula L ξ n} : Hierarchy Γ s (p ➝ q) ↔ (Hierarchy Γ.alt s p ∧ Hierarchy Γ s q) := by simp[Semiformula.imp_eq]

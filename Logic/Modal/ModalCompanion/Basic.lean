@@ -13,7 +13,7 @@ def GoedelTranslation : IntProp.Formula α → Modal.Formula α
   | .atom a  => □(Formula.atom a)
   | ⊤ => ⊤
   | ⊥ => ⊥
-  | ~p => □(~(GoedelTranslation p))
+  | ∼p => □(∼(GoedelTranslation p))
   | p ⋏ q => (GoedelTranslation p) ⋏ (GoedelTranslation q)
   | p ⋎ q => (GoedelTranslation p) ⋎ (GoedelTranslation q)
   | p ➝ q => □((GoedelTranslation p) ➝ (GoedelTranslation q))

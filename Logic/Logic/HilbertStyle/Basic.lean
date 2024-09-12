@@ -12,9 +12,9 @@ class ModusPonens where
 
 
 /--
-  Negation `~p` is equivalent to `p ➝ ⊥` on **system**.
+  Negation `∼p` is equivalent to `p ➝ ⊥` on **system**.
 
-  This is weaker asssumption than _"introducing `~p` as an abbreviation of `p ➝ ⊥`" (`NegAbbrev`)_.
+  This is weaker asssumption than _"introducing `∼p` as an abbreviation of `p ➝ ⊥`" (`NegAbbrev`)_.
 -/
 class NegationEquiv (𝓢 : S) where
   neg_equiv (p) : 𝓢 ⊢ Axioms.NegEquiv p
@@ -139,17 +139,17 @@ def efq [HasAxiomEFQ 𝓢] : 𝓢 ⊢ ⊥ ➝ p := HasAxiomEFQ.efq _
 def efq' [HasAxiomEFQ 𝓢] (b : 𝓢 ⊢ ⊥) : 𝓢 ⊢ p := efq ⨀ b
 @[simp] lemma efq'! [HasAxiomEFQ 𝓢] (h : 𝓢 ⊢! ⊥) : 𝓢 ⊢! p := ⟨efq' h.some⟩
 
-def lem [HasAxiomLEM 𝓢] : 𝓢 ⊢ p ⋎ ~p := HasAxiomLEM.lem p
-@[simp] lemma lem! [HasAxiomLEM 𝓢] : 𝓢 ⊢! p ⋎ ~p := ⟨lem⟩
+def lem [HasAxiomLEM 𝓢] : 𝓢 ⊢ p ⋎ ∼p := HasAxiomLEM.lem p
+@[simp] lemma lem! [HasAxiomLEM 𝓢] : 𝓢 ⊢! p ⋎ ∼p := ⟨lem⟩
 
-def dne [HasAxiomDNE 𝓢] : 𝓢 ⊢ ~~p ➝ p := HasAxiomDNE.dne _
-@[simp] lemma dne! [HasAxiomDNE 𝓢] : 𝓢 ⊢! ~~p ➝ p := ⟨dne⟩
+def dne [HasAxiomDNE 𝓢] : 𝓢 ⊢ ∼∼p ➝ p := HasAxiomDNE.dne _
+@[simp] lemma dne! [HasAxiomDNE 𝓢] : 𝓢 ⊢! ∼∼p ➝ p := ⟨dne⟩
 
-def dne' [HasAxiomDNE 𝓢] (b : 𝓢 ⊢ ~~p) : 𝓢 ⊢ p := dne ⨀ b
-@[simp] lemma dne'! [HasAxiomDNE 𝓢] (h : 𝓢 ⊢! ~~p) : 𝓢 ⊢! p := ⟨dne' h.some⟩
+def dne' [HasAxiomDNE 𝓢] (b : 𝓢 ⊢ ∼∼p) : 𝓢 ⊢ p := dne ⨀ b
+@[simp] lemma dne'! [HasAxiomDNE 𝓢] (h : 𝓢 ⊢! ∼∼p) : 𝓢 ⊢! p := ⟨dne' h.some⟩
 
-def wlem [HasAxiomWeakLEM 𝓢] : 𝓢 ⊢ ~p ⋎ ~~p := HasAxiomWeakLEM.wlem p
-@[simp] lemma wlem! [HasAxiomWeakLEM 𝓢] : 𝓢 ⊢! ~p ⋎ ~~p := ⟨wlem⟩
+def wlem [HasAxiomWeakLEM 𝓢] : 𝓢 ⊢ ∼p ⋎ ∼∼p := HasAxiomWeakLEM.wlem p
+@[simp] lemma wlem! [HasAxiomWeakLEM 𝓢] : 𝓢 ⊢! ∼p ⋎ ∼∼p := ⟨wlem⟩
 
 def dummett [HasAxiomDummett 𝓢] : 𝓢 ⊢ (p ➝ q) ⋎ (q ➝ p) := HasAxiomDummett.dummett p q
 @[simp] lemma dummett! [HasAxiomDummett 𝓢] : 𝓢 ⊢! Axioms.GD p q := ⟨dummett⟩
@@ -157,8 +157,8 @@ def dummett [HasAxiomDummett 𝓢] : 𝓢 ⊢ (p ➝ q) ⋎ (q ➝ p) := HasAxio
 def peirce [HasAxiomPeirce 𝓢] : 𝓢 ⊢ ((p ➝ q) ➝ p) ➝ p := HasAxiomPeirce.peirce _ _
 @[simp] lemma peirce! [HasAxiomPeirce 𝓢] : 𝓢 ⊢! ((p ➝ q) ➝ p) ➝ p := ⟨peirce⟩
 
-def elim_contra [HasAxiomElimContra 𝓢] : 𝓢 ⊢ ((~q) ➝ (~p)) ➝ (p ➝ q) := HasAxiomElimContra.elim_contra _ _
-@[simp] lemma elim_contra! [HasAxiomElimContra 𝓢] : 𝓢 ⊢! (~q ➝ ~p) ➝ (p ➝ q)  := ⟨elim_contra⟩
+def elim_contra [HasAxiomElimContra 𝓢] : 𝓢 ⊢ ((∼q) ➝ (∼p)) ➝ (p ➝ q) := HasAxiomElimContra.elim_contra _ _
+@[simp] lemma elim_contra! [HasAxiomElimContra 𝓢] : 𝓢 ⊢! (∼q ➝ ∼p) ➝ (p ➝ q)  := ⟨elim_contra⟩
 
 def imply₁' (h : 𝓢 ⊢ p) : 𝓢 ⊢ q ➝ p := imply₁ ⨀ h
 lemma imply₁'! (d : 𝓢 ⊢! p) : 𝓢 ⊢! q ➝ p := ⟨imply₁' d.some⟩
@@ -213,12 +213,12 @@ def iffId (p : F) : 𝓢 ⊢ p ⭤ p := and₃' (impId p) (impId p)
 @[simp] def iff_id! : 𝓢 ⊢! p ⭤ p := ⟨iffId p⟩
 
 
-def neg_equiv [NegationEquiv 𝓢] : 𝓢 ⊢ ~p ⭤ (p ➝ ⊥) := NegationEquiv.neg_equiv _
-@[simp] lemma neg_equiv! [NegationEquiv 𝓢] : 𝓢 ⊢! ~p ⭤ (p ➝ ⊥) := ⟨neg_equiv⟩
+def neg_equiv [NegationEquiv 𝓢] : 𝓢 ⊢ ∼p ⭤ (p ➝ ⊥) := NegationEquiv.neg_equiv _
+@[simp] lemma neg_equiv! [NegationEquiv 𝓢] : 𝓢 ⊢! ∼p ⭤ (p ➝ ⊥) := ⟨neg_equiv⟩
 
-def neg_equiv'.mp [NegationEquiv 𝓢] : 𝓢 ⊢ ~p → 𝓢 ⊢ p ➝ ⊥ := λ h => (and₁' neg_equiv) ⨀ h
-def neg_equiv'.mpr [NegationEquiv 𝓢] : 𝓢 ⊢ p ➝ ⊥ → 𝓢 ⊢ ~p := λ h => (and₂' neg_equiv) ⨀ h
-lemma neg_equiv'! [NegationEquiv 𝓢] : 𝓢 ⊢! ~p ↔ 𝓢 ⊢! p ➝ ⊥ := ⟨λ ⟨h⟩ => ⟨neg_equiv'.mp h⟩, λ ⟨h⟩ => ⟨neg_equiv'.mpr h⟩⟩
+def neg_equiv'.mp [NegationEquiv 𝓢] : 𝓢 ⊢ ∼p → 𝓢 ⊢ p ➝ ⊥ := λ h => (and₁' neg_equiv) ⨀ h
+def neg_equiv'.mpr [NegationEquiv 𝓢] : 𝓢 ⊢ p ➝ ⊥ → 𝓢 ⊢ ∼p := λ h => (and₂' neg_equiv) ⨀ h
+lemma neg_equiv'! [NegationEquiv 𝓢] : 𝓢 ⊢! ∼p ↔ 𝓢 ⊢! p ➝ ⊥ := ⟨λ ⟨h⟩ => ⟨neg_equiv'.mp h⟩, λ ⟨h⟩ => ⟨neg_equiv'.mpr h⟩⟩
 
 instance [NegAbbrev F] : System.NegationEquiv 𝓢 where
   neg_equiv := by intro p; simp [Axioms.NegEquiv, NegAbbrev.neg]; apply iffId;

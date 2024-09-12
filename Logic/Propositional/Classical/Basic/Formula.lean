@@ -55,30 +55,30 @@ instance : ToString (Formula α) := ⟨toStr⟩
 
 end ToString
 
-@[simp] lemma neg_top : ~(⊤ : Formula α) = ⊥ := rfl
+@[simp] lemma neg_top : ∼(⊤ : Formula α) = ⊥ := rfl
 
-@[simp] lemma neg_bot : ~(⊥ : Formula α) = ⊤ := rfl
+@[simp] lemma neg_bot : ∼(⊥ : Formula α) = ⊤ := rfl
 
-@[simp] lemma neg_atom (a : α) : ~(atom a) = natom a := rfl
+@[simp] lemma neg_atom (a : α) : ∼(atom a) = natom a := rfl
 
-@[simp] lemma neg_natom (a : α) : ~(natom a) = atom a := rfl
+@[simp] lemma neg_natom (a : α) : ∼(natom a) = atom a := rfl
 
-@[simp] lemma neg_and (p q : Formula α) : ~(p ⋏ q) = ~p ⋎ ~q := rfl
+@[simp] lemma neg_and (p q : Formula α) : ∼(p ⋏ q) = ∼p ⋎ ∼q := rfl
 
-@[simp] lemma neg_or (p q : Formula α) : ~(p ⋎ q) = ~p ⋏ ~q := rfl
+@[simp] lemma neg_or (p q : Formula α) : ∼(p ⋎ q) = ∼p ⋏ ∼q := rfl
 
-@[simp] lemma neg_neg' (p : Formula α) : ~~p = p := neg_neg p
+@[simp] lemma neg_neg' (p : Formula α) : ∼∼p = p := neg_neg p
 
-@[simp] lemma neg_inj (p q : Formula α) : ~p = ~q ↔ p = q := by
+@[simp] lemma neg_inj (p q : Formula α) : ∼p = ∼q ↔ p = q := by
   constructor
-  · intro h; simpa using congr_arg (~·) h
+  · intro h; simpa using congr_arg (∼·) h
   · exact congr_arg _
 
-lemma neg_eq (p : Formula α) : ~p = neg p := rfl
+lemma neg_eq (p : Formula α) : ∼p = neg p := rfl
 
-lemma imp_eq (p q : Formula α) : p ➝ q = ~p ⋎ q := rfl
+lemma imp_eq (p q : Formula α) : p ➝ q = ∼p ⋎ q := rfl
 
-lemma iff_eq (p q : Formula α) : p ⭤ q = (~p ⋎ q) ⋏ (~q ⋎ p) := rfl
+lemma iff_eq (p q : Formula α) : p ⭤ q = (∼p ⋎ q) ⋏ (∼q ⋎ p) := rfl
 
 @[simp] lemma and_inj (p₁ q₁ p₂ q₂ : Formula α) : p₁ ⋏ p₂ = q₁ ⋏ q₂ ↔ p₁ = q₁ ∧ p₂ = q₂ :=
 by simp[Wedge.wedge]
@@ -146,7 +146,7 @@ def rec' {C : Formula α → Sort w}
   | p ⋏ q   => hand p q (rec' hverum hfalsum hatom hnatom hand hor p) (rec' hverum hfalsum hatom hnatom hand hor q)
   | p ⋎ q   => hor p q (rec' hverum hfalsum hatom hnatom hand hor p) (rec' hverum hfalsum hatom hnatom hand hor q)
 
-@[simp] lemma complexity_neg (p : Formula α) : complexity (~p) = complexity p :=
+@[simp] lemma complexity_neg (p : Formula α) : complexity (∼p) = complexity p :=
   by induction p using rec' <;> simp[*]
 
 section Decidable

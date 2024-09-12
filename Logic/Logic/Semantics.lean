@@ -47,7 +47,7 @@ protected class Imp where
   realize_imp {𝓜 : M} {p q : F} : 𝓜 ⊧ p ➝ q ↔ (𝓜 ⊧ p → 𝓜 ⊧ q)
 
 protected class Not where
-  realize_not {𝓜 : M} {p : F} : 𝓜 ⊧ ~p ↔ ¬𝓜 ⊧ p
+  realize_not {𝓜 : M} {p : F} : 𝓜 ⊧ ∼p ↔ ¬𝓜 ⊧ p
 
 class Tarski extends
   Semantics.Top M,
@@ -122,7 +122,7 @@ lemma realizeSet_iff {𝓜 : M} {T : Set F} : 𝓜 ⊧* T ↔ ∀ ⦃f⦄, f ∈
   ⟨by rintro ⟨h⟩ f hf; exact h hf, by intro h; exact ⟨h⟩⟩
 
 lemma not_satisfiable_finset [Tarski M] [DecidableEq F] (t : Finset F) :
-    ¬Satisfiable M (t : Set F) ↔ Valid M (t.image (~·)).disj := by
+    ¬Satisfiable M (t : Set F) ↔ Valid M (t.image (∼·)).disj := by
   simp [Satisfiable, realizeSet_iff, Valid, Finset.map_disj]
 
 lemma satisfiableSet_iff_models_nonempty {T : Set F} :
@@ -169,7 +169,7 @@ instance empty' (𝓜 : M) : 𝓜 ⊧* (∅ : Set F) := ⟨by simp⟩
 
 end RealizeSet
 
-lemma valid_neg_iff [Tarski M] (f : F) : Valid M (~f) ↔ ¬Satisfiable M {f} := by simp [Valid, Satisfiable]
+lemma valid_neg_iff [Tarski M] (f : F) : Valid M (∼f) ↔ ¬Satisfiable M {f} := by simp [Valid, Satisfiable]
 
 lemma Satisfiable.of_subset {T U : Set F} (h : Satisfiable M U) (ss : T ⊆ U) : Satisfiable M T := by
   rcases h with ⟨𝓜, h⟩; exact ⟨𝓜, RealizeSet.of_subset h ss⟩
@@ -206,7 +206,7 @@ lemma consequence_iff' {T : Set F} {f : F} : T ⊨[M] f ↔ (∀ (𝓜 : M) [�
   ⟨fun h _ _ => consequence_iff.mp h inferInstance, fun H 𝓜 hs => @H 𝓜 hs⟩
 
 lemma consequence_iff_not_satisfiable [Tarski M] {f : F} :
-    T ⊨[M] f ↔ ¬Satisfiable M (insert (~f) T) := by
+    T ⊨[M] f ↔ ¬Satisfiable M (insert (∼f) T) := by
   simp [consequence_iff, Satisfiable]; constructor
   · intro h 𝓜 hf hT; have : 𝓜 ⊧ f := h hT; contradiction
   · intro h 𝓜; contrapose; exact h 𝓜
@@ -265,13 +265,13 @@ variable {𝓜 : M}
 
 lemma conseq_compact [Semantics.Tarski M] [DecidableEq F] {f : F} :
     T ⊨[M] f ↔ ∃ u : Finset F, ↑u ⊆ T ∧ u ⊨[M] f := by
-  simp [Semantics.consequence_iff_not_satisfiable, compact (T := insert (~f) T)]
+  simp [Semantics.consequence_iff_not_satisfiable, compact (T := insert (∼f) T)]
   constructor
   · intro ⟨u, ss, hu⟩
-    exact ⟨Finset.erase u (~f), by simp [ss],
+    exact ⟨Finset.erase u (∼f), by simp [ss],
       by simp; intro h; exact hu (Semantics.Satisfiable.of_subset h (by simp))⟩
   · intro ⟨u, ss, hu⟩
-    exact ⟨insert (~f) u,
+    exact ⟨insert (∼f) u,
       by simpa using Set.insert_subset_insert ss, by simpa using hu⟩
 
 lemma compact_cumulative {T : ℕ → Set F} (hT : Cumulative T) :

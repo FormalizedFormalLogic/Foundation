@@ -134,8 +134,8 @@ lemma GL_MDP_Aux (h : (□''X) *⊢[𝐆𝐋]! □p₁ ⋎ □p₂) : (□''X) *
     obtain ⟨M₁, hM₁⟩ := iff_unprovable_GL_exists_unsatisfies_at_root_on_FiniteTransitiveTree.mp h₁;
     obtain ⟨M₂, hM₂⟩ := iff_unprovable_GL_exists_unsatisfies_at_root_on_FiniteTransitiveTree.mp h₂;
 
-    replace hM₁ := @GL_MDPCounterexampleModel.modal_equivalence_original_world₁ (M₁ := M₁) (M₂ := M₂) M₁.root (⊡c ⋏ ~p₁) |>.mp $ Formula.Kripke.Satisfies.not_imp.mp hM₁;
-    replace hM₂ := @GL_MDPCounterexampleModel.modal_equivalence_original_world₂ (M₁ := M₁) (M₂ := M₂) M₂.root (⊡c ⋏ ~p₂) |>.mp $ Formula.Kripke.Satisfies.not_imp.mp hM₂;
+    replace hM₁ := @GL_MDPCounterexampleModel.modal_equivalence_original_world₁ (M₁ := M₁) (M₂ := M₂) M₁.root (⊡c ⋏ ∼p₁) |>.mp $ Formula.Kripke.Satisfies.not_imp.mp hM₁;
+    replace hM₂ := @GL_MDPCounterexampleModel.modal_equivalence_original_world₂ (M₁ := M₁) (M₂ := M₂) M₂.root (⊡c ⋏ ∼p₂) |>.mp $ Formula.Kripke.Satisfies.not_imp.mp hM₂;
 
     let M := GL_MDPCounterexampleModel M₁ M₂;
 

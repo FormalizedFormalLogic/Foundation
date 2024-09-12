@@ -358,9 +358,9 @@ variable [LogicalConnective F]
 
 variable (𝓢 : S)
 
-def Complete : Prop := ∀ f, 𝓢 ⊢! f ∨ 𝓢 ⊢! ~f
+def Complete : Prop := ∀ f, 𝓢 ⊢! f ∨ 𝓢 ⊢! ∼f
 
-def Undecidable (f : F) : Prop := 𝓢 ⊬! f ∧ 𝓢 ⊬! ~f
+def Undecidable (f : F) : Prop := 𝓢 ⊬! f ∧ 𝓢 ⊬! ∼f
 
 end
 

@@ -220,7 +220,7 @@ macro_rules
   | `(⤫formula[ $_*       | $_*        | ⊥                                 ]) => `(⊥)
   | `(⤫formula[ $binders* | $fbinders* | $p ∧ $q                           ]) => `(⤫formula[ $binders* | $fbinders* | $p ] ⋏ ⤫formula[ $binders* | $fbinders* | $q ])
   | `(⤫formula[ $binders* | $fbinders* | $p ∨ $q                           ]) => `(⤫formula[ $binders* | $fbinders* | $p ] ⋎ ⤫formula[ $binders* | $fbinders* | $q ])
-  | `(⤫formula[ $binders* | $fbinders* | ¬$p                               ]) => `(~⤫formula[ $binders* | $fbinders* | $p ])
+  | `(⤫formula[ $binders* | $fbinders* | ¬$p                               ]) => `(∼⤫formula[ $binders* | $fbinders* | $p ])
   | `(⤫formula[ $binders* | $fbinders* | $p → $q                           ]) => `(⤫formula[ $binders* | $fbinders* | $p ] ➝ ⤫formula[ $binders* | $fbinders* | $q ])
   | `(⤫formula[ $binders* | $fbinders* | $p ↔ $q                           ]) => `(⤫formula[ $binders* | $fbinders* | $p ] ⭤ ⤫formula[ $binders* | $fbinders* | $q ])
   | `(⤫formula[ $binders* | $fbinders* | ⋀ $i, $p                          ]) => `(Matrix.conj fun $i ↦ ⤫formula[ $binders* | $fbinders* | $p ])
@@ -322,10 +322,10 @@ macro_rules
   | `(⤫formula[ $binders* | $fbinders* | $t:first_order_term ≥ $u:first_order_term ]) => `(Semiformula.Operator.operator Operator.LE.le ![⤫term[ $binders* | $fbinders* | $u ], ⤫term[ $binders* | $fbinders* | $t ]])
   | `(⤫formula[ $binders* | $fbinders* | $t:first_order_term ∈ $u:first_order_term ]) => `(Semiformula.Operator.operator Operator.Mem.mem ![⤫term[ $binders* | $fbinders* | $t ], ⤫term[ $binders* | $fbinders* | $u ]])
   | `(⤫formula[ $binders* | $fbinders* | $t:first_order_term ∋ $u:first_order_term ]) => `(Semiformula.Operator.operator Operator.Mem.mem ![⤫term[ $binders* | $fbinders* | $u ], ⤫term[ $binders* | $fbinders* | $t ]])
-  | `(⤫formula[ $binders* | $fbinders* | $t:first_order_term ≠ $u:first_order_term ]) => `(~(Semiformula.Operator.operator Operator.Eq.eq ![⤫term[ $binders* | $fbinders* | $t ], ⤫term[ $binders* | $fbinders* | $u ]]))
-  | `(⤫formula[ $binders* | $fbinders* | $t:first_order_term ≮ $u:first_order_term ]) => `(~(Semiformula.Operator.operator Operator.LT.lt ![⤫term[ $binders* | $fbinders* | $t ], ⤫term[ $binders* | $fbinders* | $u ]]))
-  | `(⤫formula[ $binders* | $fbinders* | $t:first_order_term ≰ $u:first_order_term ]) => `(~(Semiformula.Operator.operator Operator.LE.le ![⤫term[ $binders* | $fbinders* | $t ], ⤫term[ $binders* | $fbinders* | $u ]]))
-  | `(⤫formula[ $binders* | $fbinders* | $t:first_order_term ∉ $u:first_order_term ]) => `(~(Semiformula.Operator.operator Operator.Mem.mem ![⤫term[ $binders* | $fbinders* | $t ], ⤫term[ $binders* | $fbinders* | $u ]]))
+  | `(⤫formula[ $binders* | $fbinders* | $t:first_order_term ≠ $u:first_order_term ]) => `(∼(Semiformula.Operator.operator Operator.Eq.eq ![⤫term[ $binders* | $fbinders* | $t ], ⤫term[ $binders* | $fbinders* | $u ]]))
+  | `(⤫formula[ $binders* | $fbinders* | $t:first_order_term ≮ $u:first_order_term ]) => `(∼(Semiformula.Operator.operator Operator.LT.lt ![⤫term[ $binders* | $fbinders* | $t ], ⤫term[ $binders* | $fbinders* | $u ]]))
+  | `(⤫formula[ $binders* | $fbinders* | $t:first_order_term ≰ $u:first_order_term ]) => `(∼(Semiformula.Operator.operator Operator.LE.le ![⤫term[ $binders* | $fbinders* | $t ], ⤫term[ $binders* | $fbinders* | $u ]]))
+  | `(⤫formula[ $binders* | $fbinders* | $t:first_order_term ∉ $u:first_order_term ]) => `(∼(Semiformula.Operator.operator Operator.Mem.mem ![⤫term[ $binders* | $fbinders* | $t ], ⤫term[ $binders* | $fbinders* | $u ]]))
 
 #check “∀ x, ∀ y, ∀ z, ∀ v, ∀ w, x + y + z + v + w = 0”
 #check “∀ x y z v w, x + y + z + v + w = 0”

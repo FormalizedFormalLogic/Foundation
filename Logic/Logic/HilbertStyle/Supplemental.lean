@@ -20,44 +20,44 @@ def mdp_in : 𝓢 ⊢ p ⋏ (p ➝ q) ➝ q := by
   exact hpq ⨀ hp;
 lemma mdp_in! : 𝓢 ⊢! p ⋏ (p ➝ q) ➝ q := ⟨mdp_in⟩
 
-def bot_of_mem_either [System.NegationEquiv 𝓢] (h₁ : p ∈ Γ) (h₂ : ~p ∈ Γ) : Γ ⊢[𝓢] ⊥ := by
+def bot_of_mem_either [System.NegationEquiv 𝓢] (h₁ : p ∈ Γ) (h₂ : ∼p ∈ Γ) : Γ ⊢[𝓢] ⊥ := by
   have hp : Γ ⊢[𝓢] p := FiniteContext.byAxm h₁;
   have hnp : Γ ⊢[𝓢] p ➝ ⊥ := neg_equiv'.mp $ FiniteContext.byAxm h₂;
   exact hnp ⨀ hp
 
-@[simp] lemma bot_of_mem_either! [System.NegationEquiv 𝓢] (h₁ : p ∈ Γ) (h₂ : ~p ∈ Γ) : Γ ⊢[𝓢]! ⊥ := ⟨bot_of_mem_either h₁ h₂⟩
+@[simp] lemma bot_of_mem_either! [System.NegationEquiv 𝓢] (h₁ : p ∈ Γ) (h₂ : ∼p ∈ Γ) : Γ ⊢[𝓢]! ⊥ := ⟨bot_of_mem_either h₁ h₂⟩
 
 
-def efq_of_mem_either [System.NegationEquiv 𝓢] [HasAxiomEFQ 𝓢] (h₁ : p ∈ Γ) (h₂ : ~p ∈ Γ) : Γ ⊢[𝓢] q := efq' $ bot_of_mem_either h₁ h₂
-@[simp] lemma efq_of_mem_either! [System.NegationEquiv 𝓢] [HasAxiomEFQ 𝓢] (h₁ : p ∈ Γ) (h₂ : ~p ∈ Γ) : Γ ⊢[𝓢]! q := ⟨efq_of_mem_either h₁ h₂⟩
+def efq_of_mem_either [System.NegationEquiv 𝓢] [HasAxiomEFQ 𝓢] (h₁ : p ∈ Γ) (h₂ : ∼p ∈ Γ) : Γ ⊢[𝓢] q := efq' $ bot_of_mem_either h₁ h₂
+@[simp] lemma efq_of_mem_either! [System.NegationEquiv 𝓢] [HasAxiomEFQ 𝓢] (h₁ : p ∈ Γ) (h₂ : ∼p ∈ Γ) : Γ ⊢[𝓢]! q := ⟨efq_of_mem_either h₁ h₂⟩
 
-def efq_imply_not₁ [System.NegationEquiv 𝓢] [HasAxiomEFQ 𝓢] : 𝓢 ⊢ ~p ➝ p ➝ q := by
+def efq_imply_not₁ [System.NegationEquiv 𝓢] [HasAxiomEFQ 𝓢] : 𝓢 ⊢ ∼p ➝ p ➝ q := by
   apply deduct';
   apply deduct;
   apply efq_of_mem_either (p := p) (by simp) (by simp);
-@[simp] lemma efq_imply_not₁! [System.NegationEquiv 𝓢] [HasAxiomEFQ 𝓢] : 𝓢 ⊢! ~p ➝ p ➝ q := ⟨efq_imply_not₁⟩
+@[simp] lemma efq_imply_not₁! [System.NegationEquiv 𝓢] [HasAxiomEFQ 𝓢] : 𝓢 ⊢! ∼p ➝ p ➝ q := ⟨efq_imply_not₁⟩
 
-def efq_imply_not₂ [System.NegationEquiv 𝓢] [HasAxiomEFQ 𝓢] : 𝓢 ⊢ p ➝ ~p ➝ q := by
+def efq_imply_not₂ [System.NegationEquiv 𝓢] [HasAxiomEFQ 𝓢] : 𝓢 ⊢ p ➝ ∼p ➝ q := by
   apply deduct';
   apply deduct;
   apply efq_of_mem_either (p := p) (by simp) (by simp);
-@[simp] lemma efq_imply_not₂! [System.NegationEquiv 𝓢] [HasAxiomEFQ 𝓢] : 𝓢 ⊢! p ➝ ~p ➝ q := ⟨efq_imply_not₂⟩
+@[simp] lemma efq_imply_not₂! [System.NegationEquiv 𝓢] [HasAxiomEFQ 𝓢] : 𝓢 ⊢! p ➝ ∼p ➝ q := ⟨efq_imply_not₂⟩
 
-lemma efq_of_neg! [System.NegationEquiv 𝓢] [HasAxiomEFQ 𝓢] (h : 𝓢 ⊢! ~p) : 𝓢 ⊢! p ➝ q := by
+lemma efq_of_neg! [System.NegationEquiv 𝓢] [HasAxiomEFQ 𝓢] (h : 𝓢 ⊢! ∼p) : 𝓢 ⊢! p ➝ q := by
   apply provable_iff_provable.mpr;
   apply deduct_iff.mpr;
   have dnp : [p] ⊢[𝓢]! p ➝ ⊥ := of'! $ neg_equiv'!.mp h;
   exact efq'! (dnp ⨀ FiniteContext.id!);
 
-lemma efq_of_neg₂! [System.NegationEquiv 𝓢] [HasAxiomEFQ 𝓢] (h : 𝓢 ⊢! p) : 𝓢 ⊢! ~p ➝ q := efq_imply_not₂! ⨀ h
+lemma efq_of_neg₂! [System.NegationEquiv 𝓢] [HasAxiomEFQ 𝓢] (h : 𝓢 ⊢! p) : 𝓢 ⊢! ∼p ➝ q := efq_imply_not₂! ⨀ h
 
-def neg_mdp [System.NegationEquiv 𝓢] (hnp : 𝓢 ⊢ ~p) (hn : 𝓢 ⊢ p) : 𝓢 ⊢ ⊥ := (neg_equiv'.mp hnp) ⨀ hn
+def neg_mdp [System.NegationEquiv 𝓢] (hnp : 𝓢 ⊢ ∼p) (hn : 𝓢 ⊢ p) : 𝓢 ⊢ ⊥ := (neg_equiv'.mp hnp) ⨀ hn
 -- infixl:90 "⨀" => neg_mdp
 
-lemma neg_mdp! [System.NegationEquiv 𝓢] (hnp : 𝓢 ⊢! ~p) (hn : 𝓢 ⊢! p) : 𝓢 ⊢! ⊥ := ⟨neg_mdp hnp.some hn.some⟩
+lemma neg_mdp! [System.NegationEquiv 𝓢] (hnp : 𝓢 ⊢! ∼p) (hn : 𝓢 ⊢! p) : 𝓢 ⊢! ⊥ := ⟨neg_mdp hnp.some hn.some⟩
 -- infixl:90 "⨀" => neg_mdp!
 
-def dneOr [HasAxiomDNE 𝓢] (d : 𝓢 ⊢ ~~p ⋎ ~~q) : 𝓢 ⊢ p ⋎ q := or₃''' (impTrans'' dne or₁) (impTrans'' dne or₂) d
+def dneOr [HasAxiomDNE 𝓢] (d : 𝓢 ⊢ ∼∼p ⋎ ∼∼q) : 𝓢 ⊢ p ⋎ q := or₃''' (impTrans'' dne or₁) (impTrans'' dne or₂) d
 
 def implyLeftOr' (h : 𝓢 ⊢ p ➝ r) : 𝓢 ⊢ p ➝ (r ⋎ q) := by
   apply deduct';
@@ -233,94 +233,94 @@ lemma imp_replace_iff! (hp : 𝓢 ⊢! p₁ ⭤ p₂) (hq : 𝓢 ⊢! q₁ ⭤ q
 
 variable [System.NegationEquiv 𝓢]
 
-def dni : 𝓢 ⊢ p ➝ ~~p := by
+def dni : 𝓢 ⊢ p ➝ ∼∼p := by
   apply deduct';
   apply neg_equiv'.mpr;
   apply deduct;
   exact bot_of_mem_either (p := p) (by simp) (by simp);
-@[simp] lemma dni! : 𝓢 ⊢! p ➝ ~~p := ⟨dni⟩
+@[simp] lemma dni! : 𝓢 ⊢! p ➝ ∼∼p := ⟨dni⟩
 
-def dni' (b : 𝓢 ⊢ p) : 𝓢 ⊢ ~~p := dni ⨀ b
-lemma dni'! (b : 𝓢 ⊢! p) : 𝓢 ⊢! ~~p := ⟨dni' b.some⟩
-
-
-def dniOr' (d : 𝓢 ⊢ p ⋎ q) : 𝓢 ⊢ ~~p ⋎ ~~q := or₃''' (impTrans'' dni or₁) (impTrans'' dni or₂) d
-lemma dni_or'! (d : 𝓢 ⊢! p ⋎ q) : 𝓢 ⊢! ~~p ⋎ ~~q := ⟨dniOr' d.some⟩
-
-def dniAnd' (d : 𝓢 ⊢ p ⋏ q) : 𝓢 ⊢ ~~p ⋏ ~~q := and₃' (dni' $ and₁' d) (dni' $ and₂' d)
-lemma dni_and'! (d : 𝓢 ⊢! p ⋏ q) : 𝓢 ⊢! ~~p ⋏ ~~q := ⟨dniAnd' d.some⟩
+def dni' (b : 𝓢 ⊢ p) : 𝓢 ⊢ ∼∼p := dni ⨀ b
+lemma dni'! (b : 𝓢 ⊢! p) : 𝓢 ⊢! ∼∼p := ⟨dni' b.some⟩
 
 
-def dn [HasAxiomDNE 𝓢] : 𝓢 ⊢ p ⭤ ~~p := iffIntro dni dne
-@[simp] lemma dn! [HasAxiomDNE 𝓢] : 𝓢 ⊢! p ⭤ ~~p := ⟨dn⟩
+def dniOr' (d : 𝓢 ⊢ p ⋎ q) : 𝓢 ⊢ ∼∼p ⋎ ∼∼q := or₃''' (impTrans'' dni or₁) (impTrans'' dni or₂) d
+lemma dni_or'! (d : 𝓢 ⊢! p ⋎ q) : 𝓢 ⊢! ∼∼p ⋎ ∼∼q := ⟨dniOr' d.some⟩
+
+def dniAnd' (d : 𝓢 ⊢ p ⋏ q) : 𝓢 ⊢ ∼∼p ⋏ ∼∼q := and₃' (dni' $ and₁' d) (dni' $ and₂' d)
+lemma dni_and'! (d : 𝓢 ⊢! p ⋏ q) : 𝓢 ⊢! ∼∼p ⋏ ∼∼q := ⟨dniAnd' d.some⟩
+
+
+def dn [HasAxiomDNE 𝓢] : 𝓢 ⊢ p ⭤ ∼∼p := iffIntro dni dne
+@[simp] lemma dn! [HasAxiomDNE 𝓢] : 𝓢 ⊢! p ⭤ ∼∼p := ⟨dn⟩
 
 
 
-def contra₀ : 𝓢 ⊢ (p ➝ q) ➝ (~q ➝ ~p) := by
+def contra₀ : 𝓢 ⊢ (p ➝ q) ➝ (∼q ➝ ∼p) := by
   apply deduct';
   apply deduct;
   apply neg_equiv'.mpr;
   apply deduct;
-  have dp  : [p, ~q, p ➝ q] ⊢[𝓢] p := FiniteContext.byAxm;
-  have dpq : [p, ~q, p ➝ q] ⊢[𝓢] p ➝ q := FiniteContext.byAxm;
-  have dq  : [p, ~q, p ➝ q] ⊢[𝓢] q := dpq ⨀ dp;
-  have dnq : [p, ~q, p ➝ q] ⊢[𝓢] q ➝ ⊥ := neg_equiv'.mp $ FiniteContext.byAxm;
+  have dp  : [p, ∼q, p ➝ q] ⊢[𝓢] p := FiniteContext.byAxm;
+  have dpq : [p, ∼q, p ➝ q] ⊢[𝓢] p ➝ q := FiniteContext.byAxm;
+  have dq  : [p, ∼q, p ➝ q] ⊢[𝓢] q := dpq ⨀ dp;
+  have dnq : [p, ∼q, p ➝ q] ⊢[𝓢] q ➝ ⊥ := neg_equiv'.mp $ FiniteContext.byAxm;
   exact dnq ⨀ dq;
-@[simp] def contra₀! : 𝓢 ⊢! (p ➝ q) ➝ (~q ➝ ~p) := ⟨contra₀⟩
+@[simp] def contra₀! : 𝓢 ⊢! (p ➝ q) ➝ (∼q ➝ ∼p) := ⟨contra₀⟩
 
-def contra₀' (b : 𝓢 ⊢ p ➝ q) : 𝓢 ⊢ ~q ➝ ~p := contra₀ ⨀ b
-lemma contra₀'! (b : 𝓢 ⊢! p ➝ q) : 𝓢 ⊢! ~q ➝ ~p := ⟨contra₀' b.some⟩
+def contra₀' (b : 𝓢 ⊢ p ➝ q) : 𝓢 ⊢ ∼q ➝ ∼p := contra₀ ⨀ b
+lemma contra₀'! (b : 𝓢 ⊢! p ➝ q) : 𝓢 ⊢! ∼q ➝ ∼p := ⟨contra₀' b.some⟩
 
-def contra₀x2' (b : 𝓢 ⊢ p ➝ q) : 𝓢 ⊢ ~~p ➝ ~~q := contra₀' $ contra₀' b
-lemma contra₀x2'! (b : 𝓢 ⊢! p ➝ q) : 𝓢 ⊢! ~~p ➝ ~~q := ⟨contra₀x2' b.some⟩
+def contra₀x2' (b : 𝓢 ⊢ p ➝ q) : 𝓢 ⊢ ∼∼p ➝ ∼∼q := contra₀' $ contra₀' b
+lemma contra₀x2'! (b : 𝓢 ⊢! p ➝ q) : 𝓢 ⊢! ∼∼p ➝ ∼∼q := ⟨contra₀x2' b.some⟩
 
-def contra₀x2 : 𝓢 ⊢ (p ➝ q) ➝ (~~p ➝ ~~q) := deduct' $ contra₀x2' FiniteContext.id
-@[simp] lemma contra₀x2! : 𝓢 ⊢! (p ➝ q) ➝ (~~p ➝ ~~q) := ⟨contra₀x2⟩
-
-
-def contra₁' (b : 𝓢 ⊢ p ➝ ~q) : 𝓢 ⊢ q ➝ ~p := impTrans'' dni (contra₀' b)
-lemma contra₁'! (b : 𝓢 ⊢! p ➝ ~q) : 𝓢 ⊢! q ➝ ~p := ⟨contra₁' b.some⟩
-
-def contra₁ : 𝓢 ⊢ (p ➝ ~q) ➝ (q ➝ ~p) := deduct' $ contra₁' FiniteContext.id
-lemma contra₁! : 𝓢 ⊢! (p ➝ ~q) ➝ (q ➝ ~p) := ⟨contra₁⟩
+def contra₀x2 : 𝓢 ⊢ (p ➝ q) ➝ (∼∼p ➝ ∼∼q) := deduct' $ contra₀x2' FiniteContext.id
+@[simp] lemma contra₀x2! : 𝓢 ⊢! (p ➝ q) ➝ (∼∼p ➝ ∼∼q) := ⟨contra₀x2⟩
 
 
-def contra₂' [HasAxiomDNE 𝓢] (b : 𝓢 ⊢ ~p ➝ q) : 𝓢 ⊢ ~q ➝ p := impTrans'' (contra₀' b) dne
-lemma contra₂'! [HasAxiomDNE 𝓢] (b : 𝓢 ⊢! ~p ➝ q) : 𝓢 ⊢! ~q ➝ p := ⟨contra₂' b.some⟩
+def contra₁' (b : 𝓢 ⊢ p ➝ ∼q) : 𝓢 ⊢ q ➝ ∼p := impTrans'' dni (contra₀' b)
+lemma contra₁'! (b : 𝓢 ⊢! p ➝ ∼q) : 𝓢 ⊢! q ➝ ∼p := ⟨contra₁' b.some⟩
 
-def contra₂ [HasAxiomDNE 𝓢] : 𝓢 ⊢ (~p ➝ q) ➝ (~q ➝ p) := deduct' $ contra₂' FiniteContext.id
-@[simp] lemma contra₂! [HasAxiomDNE 𝓢] : 𝓢 ⊢! (~p ➝ q) ➝ (~q ➝ p) := ⟨contra₂⟩
-
-
-def contra₃' [HasAxiomDNE 𝓢] (b : 𝓢 ⊢ ~p ➝ ~q) : 𝓢 ⊢ q ➝ p := impTrans'' dni (contra₂' b)
-lemma contra₃'! [HasAxiomDNE 𝓢] (b : 𝓢 ⊢! ~p ➝ ~q) : 𝓢 ⊢! q ➝ p := ⟨contra₃' b.some⟩
-
-def contra₃ [HasAxiomDNE 𝓢] : 𝓢 ⊢ (~p ➝ ~q) ➝ (q ➝ p) :=  deduct' $ contra₃' FiniteContext.id
-@[simp] lemma contra₃! [HasAxiomDNE 𝓢] : 𝓢 ⊢! (~p ➝ ~q) ➝ (q ➝ p) := ⟨contra₃⟩
+def contra₁ : 𝓢 ⊢ (p ➝ ∼q) ➝ (q ➝ ∼p) := deduct' $ contra₁' FiniteContext.id
+lemma contra₁! : 𝓢 ⊢! (p ➝ ∼q) ➝ (q ➝ ∼p) := ⟨contra₁⟩
 
 
-def negReplaceIff' (b : 𝓢 ⊢ p ⭤ q) : 𝓢 ⊢ ~p ⭤ ~q := iffIntro (contra₀' $ and₂' b) (contra₀' $ and₁' b)
-lemma neg_replace_iff'! (b : 𝓢 ⊢! p ⭤ q) : 𝓢 ⊢! ~p ⭤ ~q := ⟨negReplaceIff' b.some⟩
+def contra₂' [HasAxiomDNE 𝓢] (b : 𝓢 ⊢ ∼p ➝ q) : 𝓢 ⊢ ∼q ➝ p := impTrans'' (contra₀' b) dne
+lemma contra₂'! [HasAxiomDNE 𝓢] (b : 𝓢 ⊢! ∼p ➝ q) : 𝓢 ⊢! ∼q ➝ p := ⟨contra₂' b.some⟩
+
+def contra₂ [HasAxiomDNE 𝓢] : 𝓢 ⊢ (∼p ➝ q) ➝ (∼q ➝ p) := deduct' $ contra₂' FiniteContext.id
+@[simp] lemma contra₂! [HasAxiomDNE 𝓢] : 𝓢 ⊢! (∼p ➝ q) ➝ (∼q ➝ p) := ⟨contra₂⟩
 
 
-def iffNegLeftToRight' [HasAxiomDNE 𝓢] (h : 𝓢 ⊢ p ⭤ ~q) : 𝓢 ⊢ ~p ⭤ q := by
+def contra₃' [HasAxiomDNE 𝓢] (b : 𝓢 ⊢ ∼p ➝ ∼q) : 𝓢 ⊢ q ➝ p := impTrans'' dni (contra₂' b)
+lemma contra₃'! [HasAxiomDNE 𝓢] (b : 𝓢 ⊢! ∼p ➝ ∼q) : 𝓢 ⊢! q ➝ p := ⟨contra₃' b.some⟩
+
+def contra₃ [HasAxiomDNE 𝓢] : 𝓢 ⊢ (∼p ➝ ∼q) ➝ (q ➝ p) :=  deduct' $ contra₃' FiniteContext.id
+@[simp] lemma contra₃! [HasAxiomDNE 𝓢] : 𝓢 ⊢! (∼p ➝ ∼q) ➝ (q ➝ p) := ⟨contra₃⟩
+
+
+def negReplaceIff' (b : 𝓢 ⊢ p ⭤ q) : 𝓢 ⊢ ∼p ⭤ ∼q := iffIntro (contra₀' $ and₂' b) (contra₀' $ and₁' b)
+lemma neg_replace_iff'! (b : 𝓢 ⊢! p ⭤ q) : 𝓢 ⊢! ∼p ⭤ ∼q := ⟨negReplaceIff' b.some⟩
+
+
+def iffNegLeftToRight' [HasAxiomDNE 𝓢] (h : 𝓢 ⊢ p ⭤ ∼q) : 𝓢 ⊢ ∼p ⭤ q := by
   apply iffIntro;
   . apply contra₂' $  and₂' h;
   . apply contra₁' $  and₁' h;
-lemma iff_neg_left_to_right'! [HasAxiomDNE 𝓢] (h : 𝓢 ⊢! p ⭤ ~q) : 𝓢 ⊢! ~p ⭤ q := ⟨iffNegLeftToRight' h.some⟩
+lemma iff_neg_left_to_right'! [HasAxiomDNE 𝓢] (h : 𝓢 ⊢! p ⭤ ∼q) : 𝓢 ⊢! ∼p ⭤ q := ⟨iffNegLeftToRight' h.some⟩
 
-def iffNegRightToLeft' [HasAxiomDNE 𝓢] (h : 𝓢 ⊢ ~p ⭤ q) : 𝓢 ⊢ p ⭤ ~q := iffComm' $ iffNegLeftToRight' $ iffComm' h
-lemma iff_neg_right_to_left'! [HasAxiomDNE 𝓢] (h : 𝓢 ⊢! ~p ⭤ q) : 𝓢 ⊢! p ⭤ ~q := ⟨iffNegRightToLeft' h.some⟩
+def iffNegRightToLeft' [HasAxiomDNE 𝓢] (h : 𝓢 ⊢ ∼p ⭤ q) : 𝓢 ⊢ p ⭤ ∼q := iffComm' $ iffNegLeftToRight' $ iffComm' h
+lemma iff_neg_right_to_left'! [HasAxiomDNE 𝓢] (h : 𝓢 ⊢! ∼p ⭤ q) : 𝓢 ⊢! p ⭤ ∼q := ⟨iffNegRightToLeft' h.some⟩
 
 section NegationEquiv
 
 variable [System.NegationEquiv 𝓢]
 
-def negneg_equiv : 𝓢 ⊢ ~~p ⭤ ((p ➝ ⊥) ➝ ⊥) := by
+def negneg_equiv : 𝓢 ⊢ ∼∼p ⭤ ((p ➝ ⊥) ➝ ⊥) := by
   apply iffIntro;
   . exact impTrans'' (by apply contra₀'; exact and₂' neg_equiv) (and₁' neg_equiv)
   . exact impTrans'' (and₂' neg_equiv) (by apply contra₀'; exact and₁' neg_equiv)
-@[simp] lemma negneg_equiv! : 𝓢 ⊢! ~~p ⭤ ((p ➝ ⊥) ➝ ⊥) := ⟨negneg_equiv⟩
+@[simp] lemma negneg_equiv! : 𝓢 ⊢! ∼∼p ⭤ ((p ➝ ⊥) ➝ ⊥) := ⟨negneg_equiv⟩
 
 def negneg_equiv_dne [HasAxiomDNE 𝓢] : 𝓢 ⊢ p ⭤ ((p ➝ ⊥) ➝ ⊥) := iffTrans'' dn negneg_equiv
 lemma negneg_equiv_dne! [HasAxiomDNE 𝓢] : 𝓢 ⊢! p ⭤ ((p ➝ ⊥) ➝ ⊥) := ⟨negneg_equiv_dne⟩
@@ -334,11 +334,11 @@ def elim_contra_neg [NegationEquiv 𝓢] [HasAxiomElimContra 𝓢] : 𝓢 ⊢ ((
 lemma elim_contra_neg! [NegationEquiv 𝓢] [HasAxiomElimContra 𝓢] : 𝓢 ⊢! ((q ➝ ⊥) ➝ (p ➝ ⊥)) ➝ (p ➝ q) := ⟨elim_contra_neg⟩
 
 
-def tne : 𝓢 ⊢ ~(~~p) ➝ ~p := contra₀' dni
-@[simp] lemma tne! : 𝓢 ⊢! ~(~~p) ➝ ~p := ⟨tne⟩
+def tne : 𝓢 ⊢ ∼(∼∼p) ➝ ∼p := contra₀' dni
+@[simp] lemma tne! : 𝓢 ⊢! ∼(∼∼p) ➝ ∼p := ⟨tne⟩
 
-def tne' (b : 𝓢 ⊢ ~(~~p)) : 𝓢 ⊢ ~p := tne ⨀ b
-lemma tne'! (b : 𝓢 ⊢! ~(~~p)) : 𝓢 ⊢! ~p := ⟨tne' b.some⟩
+def tne' (b : 𝓢 ⊢ ∼(∼∼p)) : 𝓢 ⊢ ∼p := tne ⨀ b
+lemma tne'! (b : 𝓢 ⊢! ∼(∼∼p)) : 𝓢 ⊢! ∼p := ⟨tne' b.some⟩
 
 def implyLeftReplace (h : 𝓢 ⊢ q ➝ p) : 𝓢 ⊢ (p ➝ r) ➝ (q ➝ r) := by
   apply deduct';
@@ -369,100 +369,100 @@ def impSwap : 𝓢 ⊢ (p ➝ q ➝ r) ➝ (q ➝ p ➝ r) := deduct' $ impSwap'
 
 
 -- TODO: Actually this can be computable but it's too slow.
-noncomputable def dnDistributeImply : 𝓢 ⊢ ~~(p ➝ q) ➝ (~~p ➝ ~~q) := by
+noncomputable def dnDistributeImply : 𝓢 ⊢ ∼∼(p ➝ q) ➝ (∼∼p ➝ ∼∼q) := by
   apply impSwap';
   apply deduct';
   exact impTrans'' (contra₀x2' $ deductInv $ of $ impSwap' $ contra₀x2) tne;
-@[simp] lemma dn_distribute_imply! : 𝓢 ⊢! ~~(p ➝ q) ➝ (~~p ➝ ~~q) := ⟨dnDistributeImply⟩
+@[simp] lemma dn_distribute_imply! : 𝓢 ⊢! ∼∼(p ➝ q) ➝ (∼∼p ➝ ∼∼q) := ⟨dnDistributeImply⟩
 
-noncomputable def dnDistributeImply' (b : 𝓢 ⊢ ~~(p ➝ q)) : 𝓢 ⊢ ~~p ➝ ~~q := dnDistributeImply ⨀ b
-lemma dn_distribute_imply'! (b : 𝓢 ⊢! ~~(p ➝ q)) : 𝓢 ⊢! ~~p ➝ ~~q := ⟨dnDistributeImply' b.some⟩
+noncomputable def dnDistributeImply' (b : 𝓢 ⊢ ∼∼(p ➝ q)) : 𝓢 ⊢ ∼∼p ➝ ∼∼q := dnDistributeImply ⨀ b
+lemma dn_distribute_imply'! (b : 𝓢 ⊢! ∼∼(p ➝ q)) : 𝓢 ⊢! ∼∼p ➝ ∼∼q := ⟨dnDistributeImply' b.some⟩
 
 
-def introFalsumOfAnd' (h : 𝓢 ⊢ p ⋏ ~p) : 𝓢 ⊢ ⊥ := (neg_equiv'.mp $ and₂' h) ⨀ (and₁' h)
-lemma intro_falsum_of_and'! (h : 𝓢 ⊢! p ⋏ ~p) : 𝓢 ⊢! ⊥ := ⟨introFalsumOfAnd' h.some⟩
+def introFalsumOfAnd' (h : 𝓢 ⊢ p ⋏ ∼p) : 𝓢 ⊢ ⊥ := (neg_equiv'.mp $ and₂' h) ⨀ (and₁' h)
+lemma intro_falsum_of_and'! (h : 𝓢 ⊢! p ⋏ ∼p) : 𝓢 ⊢! ⊥ := ⟨introFalsumOfAnd' h.some⟩
 /-- Law of contradiction -/
 alias lac'! := intro_falsum_of_and'!
 
-def introFalsumOfAnd : 𝓢 ⊢ p ⋏ ~p ➝ ⊥ := by
+def introFalsumOfAnd : 𝓢 ⊢ p ⋏ ∼p ➝ ⊥ := by
   apply deduct';
   exact introFalsumOfAnd' (p := p) $ FiniteContext.id
-@[simp] lemma intro_bot_of_and! : 𝓢 ⊢! p ⋏ ~p ➝ ⊥ := ⟨introFalsumOfAnd⟩
+@[simp] lemma intro_bot_of_and! : 𝓢 ⊢! p ⋏ ∼p ➝ ⊥ := ⟨introFalsumOfAnd⟩
 /-- Law of contradiction -/
 alias lac! := intro_bot_of_and!
 
 
 
-def implyOfNotOr [HasAxiomEFQ 𝓢] : 𝓢 ⊢ (~p ⋎ q) ➝ (p ➝ q) := or₃'' (by
+def implyOfNotOr [HasAxiomEFQ 𝓢] : 𝓢 ⊢ (∼p ⋎ q) ➝ (p ➝ q) := or₃'' (by
     apply emptyPrf;
     apply deduct;
     apply deduct;
     exact efq_of_mem_either (p := p) (by simp) (by simp)
   ) imply₁
-@[simp] lemma imply_of_not_or! [HasAxiomEFQ 𝓢] : 𝓢 ⊢! (~p ⋎ q) ➝ (p ➝ q) := ⟨implyOfNotOr⟩
+@[simp] lemma imply_of_not_or! [HasAxiomEFQ 𝓢] : 𝓢 ⊢! (∼p ⋎ q) ➝ (p ➝ q) := ⟨implyOfNotOr⟩
 
-def implyOfNotOr' [HasAxiomEFQ 𝓢] (b : 𝓢 ⊢ ~p ⋎ q) : 𝓢 ⊢ p ➝ q := implyOfNotOr ⨀ b
-lemma imply_of_not_or'! [HasAxiomEFQ 𝓢] (b : 𝓢 ⊢! ~p ⋎ q) : 𝓢 ⊢! p ➝ q := ⟨implyOfNotOr' b.some⟩
-
-
-def demorgan₁ : 𝓢 ⊢ (~p ⋎ ~q) ➝ ~(p ⋏ q) := or₃'' (contra₀' and₁) (contra₀' and₂)
-@[simp] lemma demorgan₁! : 𝓢 ⊢! (~p ⋎ ~q) ➝ ~(p ⋏ q) := ⟨demorgan₁⟩
-
-def demorgan₁' (d : 𝓢 ⊢ ~p ⋎ ~q) : 𝓢 ⊢ ~(p ⋏ q)  := demorgan₁ ⨀ d
-lemma demorgan₁'! (d : 𝓢 ⊢! ~p ⋎ ~q) : 𝓢 ⊢! ~(p ⋏ q) := ⟨demorgan₁' d.some⟩
+def implyOfNotOr' [HasAxiomEFQ 𝓢] (b : 𝓢 ⊢ ∼p ⋎ q) : 𝓢 ⊢ p ➝ q := implyOfNotOr ⨀ b
+lemma imply_of_not_or'! [HasAxiomEFQ 𝓢] (b : 𝓢 ⊢! ∼p ⋎ q) : 𝓢 ⊢! p ➝ q := ⟨implyOfNotOr' b.some⟩
 
 
-def demorgan₂ : 𝓢 ⊢ (~p ⋏ ~q) ➝ ~(p ⋎ q) := by
+def demorgan₁ : 𝓢 ⊢ (∼p ⋎ ∼q) ➝ ∼(p ⋏ q) := or₃'' (contra₀' and₁) (contra₀' and₂)
+@[simp] lemma demorgan₁! : 𝓢 ⊢! (∼p ⋎ ∼q) ➝ ∼(p ⋏ q) := ⟨demorgan₁⟩
+
+def demorgan₁' (d : 𝓢 ⊢ ∼p ⋎ ∼q) : 𝓢 ⊢ ∼(p ⋏ q)  := demorgan₁ ⨀ d
+lemma demorgan₁'! (d : 𝓢 ⊢! ∼p ⋎ ∼q) : 𝓢 ⊢! ∼(p ⋏ q) := ⟨demorgan₁' d.some⟩
+
+
+def demorgan₂ : 𝓢 ⊢ (∼p ⋏ ∼q) ➝ ∼(p ⋎ q) := by
   apply andImplyIffImplyImply'.mpr;
   apply deduct';
   apply deduct;
   apply neg_equiv'.mpr;
   apply deduct;
   exact or₃''' (neg_equiv'.mp FiniteContext.byAxm) (neg_equiv'.mp FiniteContext.byAxm) (FiniteContext.byAxm (p := p ⋎ q));
-@[simp] lemma demorgan₂! : 𝓢 ⊢! ~p ⋏ ~q ➝ ~(p ⋎ q) := ⟨demorgan₂⟩
+@[simp] lemma demorgan₂! : 𝓢 ⊢! ∼p ⋏ ∼q ➝ ∼(p ⋎ q) := ⟨demorgan₂⟩
 
-def demorgan₂' (d : 𝓢 ⊢ ~p ⋏ ~q) : 𝓢 ⊢ ~(p ⋎ q) := demorgan₂ ⨀ d
-lemma demorgan₂'! (d : 𝓢 ⊢! ~p ⋏ ~q) : 𝓢 ⊢! ~(p ⋎ q) := ⟨demorgan₂' d.some⟩
+def demorgan₂' (d : 𝓢 ⊢ ∼p ⋏ ∼q) : 𝓢 ⊢ ∼(p ⋎ q) := demorgan₂ ⨀ d
+lemma demorgan₂'! (d : 𝓢 ⊢! ∼p ⋏ ∼q) : 𝓢 ⊢! ∼(p ⋎ q) := ⟨demorgan₂' d.some⟩
 
 
-def demorgan₃ : 𝓢 ⊢ ~(p ⋎ q) ➝ (~p ⋏ ~q) := by
+def demorgan₃ : 𝓢 ⊢ ∼(p ⋎ q) ➝ (∼p ⋏ ∼q) := by
   apply deduct';
   exact and₃' (deductInv $ contra₀' $ or₁) (deductInv $ contra₀' $ or₂)
-@[simp] lemma demorgan₃! : 𝓢 ⊢! ~(p ⋎ q) ➝ (~p ⋏ ~q) := ⟨demorgan₃⟩
+@[simp] lemma demorgan₃! : 𝓢 ⊢! ∼(p ⋎ q) ➝ (∼p ⋏ ∼q) := ⟨demorgan₃⟩
 
-def demorgan₃' (b : 𝓢 ⊢ ~(p ⋎ q)) : 𝓢 ⊢ ~p ⋏ ~q := demorgan₃ ⨀ b
-lemma demorgan₃'! (b : 𝓢 ⊢! ~(p ⋎ q)) : 𝓢 ⊢! ~p ⋏ ~q := ⟨demorgan₃' b.some⟩
+def demorgan₃' (b : 𝓢 ⊢ ∼(p ⋎ q)) : 𝓢 ⊢ ∼p ⋏ ∼q := demorgan₃ ⨀ b
+lemma demorgan₃'! (b : 𝓢 ⊢! ∼(p ⋎ q)) : 𝓢 ⊢! ∼p ⋏ ∼q := ⟨demorgan₃' b.some⟩
 
 
 -- TODO: Actually this can be computable but it's too slow.
-noncomputable def demorgan₄ [HasAxiomDNE 𝓢] : 𝓢 ⊢ ~(p ⋏ q) ➝ (~p ⋎ ~q) := by
+noncomputable def demorgan₄ [HasAxiomDNE 𝓢] : 𝓢 ⊢ ∼(p ⋏ q) ➝ (∼p ⋎ ∼q) := by
   apply contra₂';
   apply deduct';
   exact andReplace' (demorgan₃' $ FiniteContext.id) dne dne;
-@[simp] lemma demorgan₄! [HasAxiomDNE 𝓢] : 𝓢 ⊢! ~(p ⋏ q) ➝ (~p ⋎ ~q) := ⟨demorgan₄⟩
+@[simp] lemma demorgan₄! [HasAxiomDNE 𝓢] : 𝓢 ⊢! ∼(p ⋏ q) ➝ (∼p ⋎ ∼q) := ⟨demorgan₄⟩
 
-noncomputable def demorgan₄' [HasAxiomDNE 𝓢] (b : 𝓢 ⊢ ~(p ⋏ q)) : 𝓢 ⊢ ~p ⋎ ~q := demorgan₄ ⨀ b
-lemma demorgan₄'! [HasAxiomDNE 𝓢] (b : 𝓢 ⊢! ~(p ⋏ q)) : 𝓢 ⊢! ~p ⋎ ~q := ⟨demorgan₄' b.some⟩
+noncomputable def demorgan₄' [HasAxiomDNE 𝓢] (b : 𝓢 ⊢ ∼(p ⋏ q)) : 𝓢 ⊢ ∼p ⋎ ∼q := demorgan₄ ⨀ b
+lemma demorgan₄'! [HasAxiomDNE 𝓢] (b : 𝓢 ⊢! ∼(p ⋏ q)) : 𝓢 ⊢! ∼p ⋎ ∼q := ⟨demorgan₄' b.some⟩
 
 -- TODO: Actually this can be computable but it's too slow.
-noncomputable def NotOrOfImply' [HasAxiomDNE 𝓢] (d : 𝓢 ⊢ p ➝ q) : 𝓢 ⊢ ~p ⋎ q := by
+noncomputable def NotOrOfImply' [HasAxiomDNE 𝓢] (d : 𝓢 ⊢ p ➝ q) : 𝓢 ⊢ ∼p ⋎ q := by
   apply dne';
   apply neg_equiv'.mpr;
   apply deduct';
-  have d₁ : [~(~p ⋎ q)] ⊢[𝓢] ~~p ⋏ ~q := demorgan₃' $ FiniteContext.id;
-  have d₂ : [~(~p ⋎ q)] ⊢[𝓢] ~p ➝ ⊥ := neg_equiv'.mp $ and₁' d₁;
-  have d₃ : [~(~p ⋎ q)] ⊢[𝓢] ~p := (of (Γ := [~(~p ⋎ q)]) $ contra₀' d) ⨀ (and₂' d₁);
+  have d₁ : [∼(∼p ⋎ q)] ⊢[𝓢] ∼∼p ⋏ ∼q := demorgan₃' $ FiniteContext.id;
+  have d₂ : [∼(∼p ⋎ q)] ⊢[𝓢] ∼p ➝ ⊥ := neg_equiv'.mp $ and₁' d₁;
+  have d₃ : [∼(∼p ⋎ q)] ⊢[𝓢] ∼p := (of (Γ := [∼(∼p ⋎ q)]) $ contra₀' d) ⨀ (and₂' d₁);
   exact d₂ ⨀ d₃;
-lemma not_or_of_imply'! [HasAxiomDNE 𝓢] (d : 𝓢 ⊢! p ➝ q) : 𝓢 ⊢! ~p ⋎ q := ⟨NotOrOfImply' d.some⟩
+lemma not_or_of_imply'! [HasAxiomDNE 𝓢] (d : 𝓢 ⊢! p ➝ q) : 𝓢 ⊢! ∼p ⋎ q := ⟨NotOrOfImply' d.some⟩
 
-noncomputable def NotOrOfImply [HasAxiomDNE 𝓢]  : 𝓢 ⊢ (p ➝ q) ➝ (~p ⋎ q) := by
+noncomputable def NotOrOfImply [HasAxiomDNE 𝓢]  : 𝓢 ⊢ (p ➝ q) ➝ (∼p ⋎ q) := by
   apply deduct';
   apply NotOrOfImply';
   exact FiniteContext.byAxm;
-lemma not_or_of_imply! [HasAxiomDNE 𝓢] : 𝓢 ⊢! (p ➝ q) ➝ ~p ⋎ q := ⟨NotOrOfImply⟩
+lemma not_or_of_imply! [HasAxiomDNE 𝓢] : 𝓢 ⊢! (p ➝ q) ➝ ∼p ⋎ q := ⟨NotOrOfImply⟩
 
 -- TODO: Actually this can be computable but it's too slow.
-noncomputable def dnCollectImply [HasAxiomEFQ 𝓢] : 𝓢 ⊢ (~~p ➝ ~~q) ➝ ~~(p ➝ q) := by
+noncomputable def dnCollectImply [HasAxiomEFQ 𝓢] : 𝓢 ⊢ (∼∼p ➝ ∼∼q) ➝ ∼∼(p ➝ q) := by
   apply deduct';
   apply neg_equiv'.mpr;
   exact impTrans''
@@ -470,17 +470,17 @@ noncomputable def dnCollectImply [HasAxiomEFQ 𝓢] : 𝓢 ⊢ (~~p ➝ ~~q) ➝
       apply deductInv;
       apply andImplyIffImplyImply'.mp;
       apply deduct;
-      have d₁ : [(~~p ➝ ~~q) ⋏ ~(p ➝ q)] ⊢[𝓢] ~~p ➝ ~~q := and₁' (q := ~(p ➝ q)) $ FiniteContext.id;
-      have d₂ : [(~~p ➝ ~~q) ⋏ ~(p ➝ q)] ⊢[𝓢] ~~p ⋏ ~q := demorgan₃' $ (contra₀' implyOfNotOr) ⨀ (and₂' (p := (~~p ➝ ~~q)) $ FiniteContext.id)
+      have d₁ : [(∼∼p ➝ ∼∼q) ⋏ ∼(p ➝ q)] ⊢[𝓢] ∼∼p ➝ ∼∼q := and₁' (q := ∼(p ➝ q)) $ FiniteContext.id;
+      have d₂ : [(∼∼p ➝ ∼∼q) ⋏ ∼(p ➝ q)] ⊢[𝓢] ∼∼p ⋏ ∼q := demorgan₃' $ (contra₀' implyOfNotOr) ⨀ (and₂' (p := (∼∼p ➝ ∼∼q)) $ FiniteContext.id)
       exact and₃' (and₂' d₂) (d₁ ⨀ (and₁' d₂))
     )
-    (introFalsumOfAnd (p := ~q));
+    (introFalsumOfAnd (p := ∼q));
 
-@[simp] lemma dn_collect_imply! [HasAxiomEFQ 𝓢] : 𝓢 ⊢! (~~p ➝ ~~q) ➝ ~~(p ➝ q) := ⟨dnCollectImply⟩
+@[simp] lemma dn_collect_imply! [HasAxiomEFQ 𝓢] : 𝓢 ⊢! (∼∼p ➝ ∼∼q) ➝ ∼∼(p ➝ q) := ⟨dnCollectImply⟩
 
 -- TODO: Actually this can be computable but it's too slow.
-noncomputable def dnCollectImply' [HasAxiomEFQ 𝓢] (b : 𝓢 ⊢ ~~p ➝ ~~q) : 𝓢 ⊢ ~~(p ➝ q) := dnCollectImply ⨀ b
-lemma dn_collect_imply'! [HasAxiomEFQ 𝓢] (b : 𝓢 ⊢! ~~p ➝ ~~q) : 𝓢 ⊢! ~~(p ➝ q) := ⟨dnCollectImply' b.some⟩
+noncomputable def dnCollectImply' [HasAxiomEFQ 𝓢] (b : 𝓢 ⊢ ∼∼p ➝ ∼∼q) : 𝓢 ⊢ ∼∼(p ➝ q) := dnCollectImply ⨀ b
+lemma dn_collect_imply'! [HasAxiomEFQ 𝓢] (b : 𝓢 ⊢! ∼∼p ➝ ∼∼q) : 𝓢 ⊢! ∼∼(p ➝ q) := ⟨dnCollectImply' b.some⟩
 
 
 def andImplyAndOfImply {p q p' q' : F} (bp : 𝓢 ⊢ p ➝ p') (bq : 𝓢 ⊢ q ➝ q') : 𝓢 ⊢ p ⋏ q ➝ p' ⋏ q' :=
@@ -509,18 +509,18 @@ instance [HasAxiomEFQ 𝓢] [HasAxiomLEM 𝓢] : HasAxiomDNE 𝓢 where
     apply deduct';
     exact or₃''' (impId _) (by
       apply deduct;
-      have nnp : [~p, ~~p] ⊢[𝓢] ~p ➝ ⊥ := neg_equiv'.mp $ FiniteContext.byAxm;
-      have np : [~p, ~~p] ⊢[𝓢] ~p := FiniteContext.byAxm;
+      have nnp : [∼p, ∼∼p] ⊢[𝓢] ∼p ➝ ⊥ := neg_equiv'.mp $ FiniteContext.byAxm;
+      have np : [∼p, ∼∼p] ⊢[𝓢] ∼p := FiniteContext.byAxm;
       exact efq' $ nnp ⨀ np;
     ) $ of lem;;
 
 instance [HasAxiomLEM 𝓢] : HasAxiomWeakLEM 𝓢 where
-  wlem p := lem (p := ~p);
+  wlem p := lem (p := ∼p);
 
 instance [HasAxiomEFQ 𝓢] [HasAxiomLEM 𝓢] : HasAxiomDummett 𝓢 where
   dummett p q := by
     have d₁ : 𝓢 ⊢ p ➝ ((p ➝ q) ⋎ (q ➝ p)) := impTrans'' imply₁ or₂;
-    have d₂ : 𝓢 ⊢ ~p ➝ ((p ➝ q) ⋎ (q ➝ p)) := impTrans'' efq_imply_not₁ or₁;
+    have d₂ : 𝓢 ⊢ ∼p ➝ ((p ➝ q) ⋎ (q ➝ p)) := impTrans'' efq_imply_not₁ or₁;
     exact or₃''' d₁ d₂ lem;
 
 noncomputable instance [HasAxiomDNE 𝓢] : HasAxiomPeirce 𝓢 where
@@ -535,7 +535,7 @@ noncomputable instance [HasAxiomDNE 𝓢] : HasAxiomPeirce 𝓢 where
 instance [HasAxiomDNE 𝓢] : HasAxiomElimContra 𝓢 where
   elim_contra p q := by
     apply deduct';
-    have : [~q ➝ ~p] ⊢[𝓢] ~q ➝ ~p := FiniteContext.byAxm;
+    have : [∼q ➝ ∼p] ⊢[𝓢] ∼q ➝ ∼p := FiniteContext.byAxm;
     exact contra₃' this;
 
 end Instantinate
@@ -758,7 +758,7 @@ section consistency
 variable [HasAxiomEFQ 𝓢]
 
 lemma inconsistent_of_provable_of_unprovable {p : F}
-    (hp : 𝓢 ⊢! p) (hn : 𝓢 ⊢! ~p) : Inconsistent 𝓢 := by
+    (hp : 𝓢 ⊢! p) (hn : 𝓢 ⊢! ∼p) : Inconsistent 𝓢 := by
   have : 𝓢 ⊢! p ➝ ⊥ := neg_equiv'!.mp hn
   intro q; exact efq! ⨀ (this ⨀ hp)
 

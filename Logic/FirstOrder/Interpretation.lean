@@ -33,7 +33,7 @@ def translationRel {k} (r : L'.Rel k) (v : Fin k → Semiterm L' Empty n) : Semi
 
 def translationAux : {n : ℕ} → Semisentence L' n → Semisentence L n
   | _, Semiformula.rel r v  => ι.translationRel r v
-  | _, Semiformula.nrel r v => ~ι.translationRel r v
+  | _, Semiformula.nrel r v => ∼ι.translationRel r v
   | _, ⊤                    => ⊤
   | _, ⊥                    => ⊥
   | _, p ⋏ q                => translationAux p ⋏ translationAux q
@@ -41,7 +41,7 @@ def translationAux : {n : ℕ} → Semisentence L' n → Semisentence L n
   | _, ∀' p                 => ∀[ι.domain/[#0]] translationAux p
   | _, ∃' p                 => ∃[ι.domain/[#0]] translationAux p
 
-lemma translationAux_neg {n : ℕ} (p : Semisentence L' n) : ι.translationAux (~p) = ~ ι.translationAux p := by
+lemma translationAux_neg {n : ℕ} (p : Semisentence L' n) : ι.translationAux (∼p) = ∼ ι.translationAux p := by
   induction p using Semiformula.rec' <;> simp [translationAux, *, ←Semiformula.neg_eq]
 
 def translation {n : ℕ} : Semisentence L' n →ˡᶜ Semisentence L n where
@@ -57,7 +57,7 @@ def translation {n : ℕ} : Semisentence L' n →ˡᶜ Semisentence L n where
     ι.translation (Semiformula.rel r v) = ι.translationRel r v := rfl
 
 @[simp] lemma translation_nrel {k} (r : L'.Rel k) (v : Fin k → Semiterm L' Empty n) :
-    ι.translation (Semiformula.nrel r v) = ~ι.translationRel r v := rfl
+    ι.translation (Semiformula.nrel r v) = ∼ι.translationRel r v := rfl
 
 @[simp] lemma translation_all (p : Semisentence L' (n + 1)) : ι.translation (∀' p) = ∀[ι.domain/[#0]] ι.translation p := rfl
 

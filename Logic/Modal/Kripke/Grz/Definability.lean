@@ -63,7 +63,7 @@ private lemma WCWF_of_Grz (h : F#α ⊧* 𝗚𝗿𝘇) : WCWF F := by
     . use (λ v _ => ∀ i, v ≠ f (2 * i)), (f 0);
       apply Classical.not_imp.mpr
       constructor;
-      . suffices Satisfies ⟨F, _⟩ (f 0) (□(~(atom default) ➝ ~(□(atom default ➝ □atom default)))) by
+      . suffices Satisfies ⟨F, _⟩ (f 0) (□(∼(atom default) ➝ ∼(□(atom default ➝ □atom default)))) by
           intro x hx;
           exact not_imp_not.mp $ this _ hx;
         simp [Satisfies];
@@ -85,7 +85,7 @@ private lemma WCWF_of_Grz (h : F#α ⊧* 𝗚𝗿𝘇) : WCWF F := by
       use (λ v _ => v ≠ f j), (f j);
       apply Classical.not_imp.mpr;
       constructor;
-      . have : Satisfies ⟨F, V⟩ (f (j + 1)) (~((atom default) ➝ □(atom default))) := by
+      . have : Satisfies ⟨F, V⟩ (f (j + 1)) (∼((atom default) ➝ □(atom default))) := by
           simp_all [Satisfies, V];
           constructor;
           . exact Ne.symm $ (hf j).1;
@@ -100,7 +100,7 @@ private lemma WCWF_of_Grz (h : F#α ⊧* 𝗚𝗿𝘇) : WCWF F := by
               apply F_refl;
             . have : j + 1 < k := by omega;
               exact H this;
-        have : Satisfies ⟨F, V⟩ (f j) (□(~(atom default) ➝ ~□((atom default) ➝ □atom default))) := by
+        have : Satisfies ⟨F, V⟩ (f j) (□(∼(atom default) ➝ ∼□((atom default) ➝ □atom default))) := by
           simp_all [Satisfies, V];
           rintro x hx rfl;
           use f (j + 1);

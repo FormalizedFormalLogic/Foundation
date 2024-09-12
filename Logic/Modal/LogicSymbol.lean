@@ -105,12 +105,12 @@ class BasicModalLogicConnective.Subclosed [BasicModalLogicalConnective F] (C : F
   Dia.Subclosed C
 
 class DiaAbbrev (F : Type*) [Box F] [Dia F] [Tilde F] where
-  dia_abbrev {p : F} : ◇p =  ~(□(~p))
+  dia_abbrev {p : F} : ◇p =  ∼(□(∼p))
 -- attribute [aesop safe 5 forward] DiaAbbrev.dia_abbrev
 
 class ModalDeMorgan (F : Type*) [BasicModalLogicalConnective F] extends DeMorgan F where
-  dia (p : F) : ~◇p = □(~p)
-  box (p : F) : ~□p = ◇(~p)
+  dia (p : F) : ∼◇p = □(∼p)
+  box (p : F) : ∼□p = ◇(∼p)
 
 attribute [simp] ModalDeMorgan.dia ModalDeMorgan.box
 
@@ -363,17 +363,17 @@ variable [Box F] [Dia F]
 @[simp] lemma dia_single : (◇'[p]) = [◇p] := by simp;
 
 
-lemma multibox_cons (hl : p ∉ l) : □'^[n](p :: l) ~ □^[n]p :: □'^[n]l := by
+lemma multibox_cons (hl : p ∉ l) : □'^[n](p :: l) ∼ □^[n]p :: □'^[n]l := by
   simp [List.multibox];
   apply Finset.toList_insert;
   simp_all;
-lemma box_cons (hl : p ∉ l) : □'(p :: l) ~ □p :: □'l := by simpa using multibox_cons hl
+lemma box_cons (hl : p ∉ l) : □'(p :: l) ∼ □p :: □'l := by simpa using multibox_cons hl
 
-lemma multidia_cons (hl : p ∉ l) : ◇'^[n](p :: l) ~ ◇^[n]p :: ◇'^[n]l := by
+lemma multidia_cons (hl : p ∉ l) : ◇'^[n](p :: l) ∼ ◇^[n]p :: ◇'^[n]l := by
   simp [List.multidia];
   apply Finset.toList_insert;
   simp_all;
-lemma dia_cons (hl : p ∉ l) : ◇'(p :: l) ~ ◇p :: ◇'l := by simpa using multidia_cons hl
+lemma dia_cons (hl : p ∉ l) : ◇'(p :: l) ∼ ◇p :: ◇'l := by simpa using multidia_cons hl
 
 
 lemma forall_multibox_of_subset_multibox (h : ∀ p ∈ l, p ∈ □''^[n]s) : ∀ p ∈ l, ∃ q ∈ s, p = □^[n]q := by

@@ -46,8 +46,8 @@ instance (𝓣 : S) : System.Classical 𝓣 where
     (implyRight <| negRight  <| rotateLeft <| implyLeft (closed p (by simp) (by simp)) (falsum _ _))
 
 
-def notContra {𝓣 : S} {p q : F} (b : 𝓣 ⊢ p ⭤ ~q) : 𝓣 ⊢ ~p ⭤ q := by
-  have : [p ⭤ ~q] ⊢² [~p ⭤ q] :=
+def notContra {𝓣 : S} {p q : F} (b : 𝓣 ⊢ p ⭤ ∼q) : 𝓣 ⊢ ∼p ⭤ q := by
+  have : [p ⭤ ∼q] ⊢² [∼p ⭤ q] :=
     andRight
       (andLeft <| implyRight
         <| negLeft <| implyLeft
@@ -62,7 +62,7 @@ def notContra {𝓣 : S} {p q : F} (b : 𝓣 ⊢ p ⭤ ~q) : 𝓣 ⊢ ~p ⭤ q :
         (negLeft <| closed q (by simp) (by simp)))
   exact toProof this (fun r ↦ by simp; rintro rfl; exact b)
 
-lemma not_contra! {𝓣 : S} {p q : F} (b : 𝓣 ⊢! p ⭤ ~q) : 𝓣 ⊢! ~p ⭤ q := ⟨notContra b.get⟩
+lemma not_contra! {𝓣 : S} {p q : F} (b : 𝓣 ⊢! p ⭤ ∼q) : 𝓣 ⊢! ∼p ⭤ q := ⟨notContra b.get⟩
 
 end Gentzen
 

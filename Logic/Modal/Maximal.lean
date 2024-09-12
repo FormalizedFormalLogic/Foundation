@@ -13,7 +13,7 @@ def Formula.toModalFormula : Formula α → Modal.Formula α
   | .atom a => Modal.Formula.atom a
   | ⊤ => ⊤
   | ⊥ => ⊥
-  | ~p => ~(toModalFormula p)
+  | ∼p => ∼(toModalFormula p)
   | p ➝ q => (toModalFormula p) ➝ (toModalFormula q)
   | p ⋏ q => (toModalFormula p) ⋏ (toModalFormula q)
   | p ⋎ q => (toModalFormula p) ⋎ (toModalFormula q)
@@ -239,7 +239,7 @@ theorem not_S4_weakerThan_GL : ¬(𝐒𝟒 : Hilbert α) ≤ₛ 𝐆𝐋 := by
   . exact unprovable_AxiomT_GL;
 
 
-example : 𝐕𝐞𝐫 ⊬! (~(□⊥) : Formula α) := by
+example : 𝐕𝐞𝐫 ⊬! (∼(□⊥) : Formula α) := by
   apply iff_Ver_classical.not.mpr;
   apply unprovable_classical_of_exists_ClassicalValuation;
   dsimp [VerTranslation, toPropFormula, IntProp.Formula.Kripke.Satisfies];

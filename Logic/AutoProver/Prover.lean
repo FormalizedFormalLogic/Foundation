@@ -16,10 +16,10 @@ def rEmLeft (h : p ∈ Δ) : p :: Γ ⊢² Δ := closed _ (by simp) h
 
 def rEmRight (h : p ∈ Γ) : Γ ⊢² p :: Δ := closed _ h (by simp)
 
-def rNegLeft (dp : Γ ⊢² Δ ++ [p]) : ~p :: Γ ⊢² Δ :=
+def rNegLeft (dp : Γ ⊢² Δ ++ [p]) : ∼p :: Γ ⊢² Δ :=
   negLeft (wk dp (by simp) (by simp))
 
-def rNegRight (dp : Γ ++ [p] ⊢² Δ) : Γ ⊢² ~p :: Δ :=
+def rNegRight (dp : Γ ++ [p] ⊢² Δ) : Γ ⊢² ∼p :: Δ :=
   negRight (wk dp (by simp) (by simp))
 
 def rOrLeft (dp : Γ ++ [p] ⊢² Δ) (dq : Γ ++ [q] ⊢² Δ) : p ⋎ q :: Γ ⊢² Δ :=
@@ -60,7 +60,7 @@ def DEq {F : Q(Type*)} : Lit F → Lit F → MetaM Bool
   | Litform.atom e,  Litform.atom e'  => Lean.Meta.isDefEq e e'
   | ⊤,               ⊤                => return true
   | ⊥,               ⊥                => return true
-  | ~p,              ~p'              => return (← DEq p p')
+  | ∼p,              ∼p'              => return (← DEq p p')
   | p ⋏ q,           p' ⋏ q'          => return (← DEq p p') && (← DEq q q')
   | p ⋎ q,           p' ⋎ q'          => return (← DEq p p') && (← DEq q q')
   | p ➝ q,          p' ➝ q'         => return (← DEq p p') && (← DEq q q')
@@ -97,14 +97,14 @@ def rEmRightOfEq {p : Lit F} : MetaM (DerivationQ instLS instGz L (p :: R)) :=
   do let some h ← Denotation.memList? (denotation F instLS) p L | throwError m! "failed to derive {p} ∈ {R}"
      return q(Gentzen.rEmRight $h)
 
-def rNegLeft {p : Lit F} (d : DerivationQ instLS instGz L (R ++ [p])) : DerivationQ instLS instGz (~p :: L) R :=
+def rNegLeft {p : Lit F} (d : DerivationQ instLS instGz L (R ++ [p])) : DerivationQ instLS instGz (∼p :: L) R :=
   letI := denotation F instLS
   let d : Q(TwoSided.Derivation
     $(Denotation.toExprₗ (denotation F instLS) L)
     ($(Denotation.toExprₗ (denotation F instLS) R) ++ [$(toExpr F p)])) := d
   q(Gentzen.rNegLeft $d)
 
-def rNegRight {p : Lit F} (d : DerivationQ instLS instGz (L ++ [p]) R) : DerivationQ instLS instGz L (~p :: R) :=
+def rNegRight {p : Lit F} (d : DerivationQ instLS instGz (L ++ [p]) R) : DerivationQ instLS instGz L (∼p :: R) :=
   letI := denotation F instLS
   let d : Q(TwoSided.Derivation
     ($(Denotation.toExprₗ (denotation F instLS) L) ++ [$(toExpr F p)])
@@ -179,7 +179,7 @@ def deriveAux {F : Q(Type u)} (instLS : Q(LogicalConnective $F)) (instGz : Q(Gen
     | ⊤ => return rotateLeft L R (← deriveAux instLS instGz s false (L ++ [⊤]) R)
     | ⊥ => return falsum L R
     | Litform.atom a => return rotateLeft L R (← deriveAux instLS instGz s false (L ++ [Litform.atom a]) R)
-    | ~p    => do
+    | ∼p    => do
       let d ← deriveAux instLS instGz s false L (R ++ [p])
       return rNegLeft L R d
     | p ⋏ q => do
@@ -204,7 +204,7 @@ def deriveAux {F : Q(Type u)} (instLS : Q(LogicalConnective $F)) (instGz : Q(Gen
     | ⊤ => return verum L R
     | ⊥ => return rotateRight L R (← deriveAux instLS instGz s true L (R ++ [⊥]))
     | Litform.atom a => return rotateRight L R (← deriveAux instLS instGz s true L (R ++ [Litform.atom a]))
-    | ~p    => do
+    | ∼p    => do
       let d ← deriveAux instLS instGz s true (L ++ [p]) R
       return rNegRight L R d
     | p ⋏ q => do
@@ -224,7 +224,7 @@ def derive {F : Q(Type u)} (instLS : Q(LogicalConnective $F)) (instGz : Q(Gentze
 end DerivationQ
 
 def isExprProvable? (ty : Q(Prop)) : MetaM ((u : Level) × (v : Level) × (_ : Level) × (F : Q(Type u)) × (S : Q(Type v)) × Q($S) × Q($F)) := do
-  let ~q(@System.Provable $F $S $instSys $T $p) := ty | throwError m!"(isExprProvable?) error: {ty} not a prop _ ⊢! _"
+  let ∼q(@System.Provable $F $S $instSys $T $p) := ty | throwError m!"(isExprProvable?) error: {ty} not a prop _ ⊢! _"
   return ⟨_, _, u_3, F, S, T, p⟩
 
 section

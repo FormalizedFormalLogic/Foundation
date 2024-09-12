@@ -71,14 +71,14 @@ lemma confluent [HasAxiomWeakLEM Λ] : Confluent (CanonicalFrame Λ) := by
   let Θz := Γ.filter (λ p => p ∈ z.tableau.1 ∧ p ∉ x.tableau.1);
   let Θx := Γ.filter (λ p => (p ∈ y.tableau.1 ∧ p ∈ x.tableau.1) ∨ (p ∈ z.tableau.1 ∧ p ∈ x.tableau.1));
 
-  suffices ~⋀Θy ∈ x.tableau.1 by
-    have : ~⋀Θy ∈ y.tableau.1 := Rxy this;
+  suffices ∼⋀Θy ∈ x.tableau.1 by
+    have : ∼⋀Θy ∈ y.tableau.1 := Rxy this;
     have : ⋀Θy ∈ y.tableau.1 := iff_mem₁_conj.mpr $ by
       intro p hp;
       have := by simpa using List.of_mem_filter hp;
       exact this.1;
-    have : Λ ⊬! ⋀Θy ⋏ ~⋀Θy ➝ ⊥ := y.consistent (Γ := [⋀Θy, ~⋀Θy]) (Δ := []) (by simp; constructor <;> assumption) (by simp);
-    have : Λ ⊢! ⋀Θy ⋏ ~⋀Θy ➝ ⊥ := by simp;
+    have : Λ ⊬! ⋀Θy ⋏ ∼⋀Θy ➝ ⊥ := y.consistent (Γ := [⋀Θy, ∼⋀Θy]) (Δ := []) (by simp; constructor <;> assumption) (by simp);
+    have : Λ ⊢! ⋀Θy ⋏ ∼⋀Θy ➝ ⊥ := by simp;
     contradiction;
 
   have : Λ ⊢! (⋀Θx ⋏ (⋀Θy ⋏ ⋀Θz)) ➝ ⊥ := imp_trans''! (by
@@ -112,9 +112,9 @@ lemma confluent [HasAxiomWeakLEM Λ] : Confluent (CanonicalFrame Λ) := by
         . assumption;
         . exact hz₁ hz;
   ) h;
-  have : Λ ⊢! ⋀Θx ➝ ⋀Θy ➝ ~⋀Θz := and_imply_iff_imply_imply'!.mp $
+  have : Λ ⊢! ⋀Θx ➝ ⋀Θy ➝ ∼⋀Θz := and_imply_iff_imply_imply'!.mp $
     (imp_trans''! (and_imply_iff_imply_imply'!.mp $ imp_trans''! (and₁'! and_assoc!) this) (and₂'! $ neg_equiv!));
-  have d : Λ ⊢! ⋀Θx ➝ ~~⋀Θz ➝ ~⋀Θy := imp_trans''! this contra₀!;
+  have d : Λ ⊢! ⋀Θx ➝ ∼∼⋀Θz ➝ ∼⋀Θy := imp_trans''! this contra₀!;
 
   have mem_Θx_x : ⋀Θx ∈ x.tableau.1 := iff_mem₁_conj.mpr $ by
     intro p hp;
@@ -125,9 +125,9 @@ lemma confluent [HasAxiomWeakLEM Λ] : Confluent (CanonicalFrame Λ) := by
     have := by simpa using List.of_mem_filter hp;
     exact this.1;
 
-  have nmem_nΘz_z : ~⋀Θz ∉ z.tableau.1 := not_mem₁_neg_of_mem₁ mem_Θz_z;
-  have nmem_nΘz_x : ~⋀Θz ∉ x.tableau.1 := Set.not_mem_subset Rxz nmem_nΘz_z;
-  have mem_nnΘz_x : ~~⋀Θz ∈ x.tableau.1 := or_iff_not_imp_left.mp (iff_mem₁_or.mp $ mem₁_of_provable $ wlem!) nmem_nΘz_x;
+  have nmem_nΘz_z : ∼⋀Θz ∉ z.tableau.1 := not_mem₁_neg_of_mem₁ mem_Θz_z;
+  have nmem_nΘz_x : ∼⋀Θz ∉ x.tableau.1 := Set.not_mem_subset Rxz nmem_nΘz_z;
+  have mem_nnΘz_x : ∼∼⋀Θz ∈ x.tableau.1 := or_iff_not_imp_left.mp (iff_mem₁_or.mp $ mem₁_of_provable $ wlem!) nmem_nΘz_x;
 
   exact mdp₁_mem mem_nnΘz_x $ mdp₁ mem_Θx_x d;
 
@@ -235,7 +235,7 @@ private lemma truthlemma.himp
 private lemma truthlemma.hneg
   {t : (CanonicalModel Λ).World}
   (ihp : ∀ {t : (CanonicalModel Λ).World}, t ⊧ p ↔ p ∈ t.tableau.1)
-  : t ⊧ ~p ↔ ~p ∈ t.tableau.1 := by
+  : t ⊧ ∼p ↔ ∼p ∈ t.tableau.1 := by
   constructor;
   . contrapose;
     simp_all [Satisfies];
@@ -251,8 +251,8 @@ private lemma truthlemma.hneg
         simp_all;
       replace hΔ : Δ = [] := List.nil_iff.mpr hΔ; subst hΔ;
       by_contra hC; simp at hC;
-      have : Λ ⊢! ⋀(Γ.remove p) ➝ ~p := imp_trans''! (and_imply_iff_imply_imply'!.mp $ imply_left_remove_conj! hC) (and₂'! neg_equiv!);
-      have : Λ ⊬! ⋀(Γ.remove p) ➝ ~p := by simpa using t.consistent (Δ := [~p]) hΓ (by simpa);
+      have : Λ ⊢! ⋀(Γ.remove p) ➝ ∼p := imp_trans''! (and_imply_iff_imply_imply'!.mp $ imply_left_remove_conj! hC) (and₂'! neg_equiv!);
+      have : Λ ⊬! ⋀(Γ.remove p) ➝ ∼p := by simpa using t.consistent (Δ := [∼p]) hΓ (by simpa);
       contradiction;
     have ⟨_, _⟩ := Set.insert_subset_iff.mp h;
     use t';
@@ -260,8 +260,8 @@ private lemma truthlemma.hneg
     intro ht t' htt';
     apply ihp.not.mpr;
     by_contra hC;
-    have : Λ ⊬! p ⋏ ~p ➝ ⊥ := by simpa using t'.consistent (Γ := [p, ~p]) (Δ := []) (by aesop) (by simp);
-    have : Λ ⊢! p ⋏ ~p ➝ ⊥ := intro_bot_of_and!;
+    have : Λ ⊬! p ⋏ ∼p ➝ ⊥ := by simpa using t'.consistent (Γ := [p, ∼p]) (Δ := []) (by aesop) (by simp);
+    have : Λ ⊢! p ⋏ ∼p ➝ ⊥ := intro_bot_of_and!;
     contradiction;
 
 lemma truthlemma {t : (CanonicalModel Λ).World} : t ⊧ p ↔ p ∈ t.tableau.1 := by

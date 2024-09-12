@@ -66,28 +66,28 @@ instance : Coe α (Formula α) := ⟨atom⟩
 
 end ToString
 
--- @[simp] lemma neg_top : ~(⊤ : Formula α) = ⊥ := rfl
+-- @[simp] lemma neg_top : ∼(⊤ : Formula α) = ⊥ := rfl
 
-@[simp] lemma neg_bot : ~(⊥ : Formula α) = ⊤ := rfl
+@[simp] lemma neg_bot : ∼(⊥ : Formula α) = ⊤ := rfl
 
--- @[simp] lemma neg_atom (a : α) : ~(atom a) = natom a := rfl
+-- @[simp] lemma neg_atom (a : α) : ∼(atom a) = natom a := rfl
 
--- @[simp] lemma neg_natom (a : α) : ~(natom a) = atom a := rfl
+-- @[simp] lemma neg_natom (a : α) : ∼(natom a) = atom a := rfl
 
--- @[simp] lemma neg_and (p q : Formula α) : ~(p ⋏ q) = ~p ⋎ ~q := rfl
+-- @[simp] lemma neg_and (p q : Formula α) : ∼(p ⋏ q) = ∼p ⋎ ∼q := rfl
 
--- @[simp] lemma neg_or (p q : Formula α) : ~(p ⋎ q) = ~p ⋏ ~q := rfl
+-- @[simp] lemma neg_or (p q : Formula α) : ∼(p ⋎ q) = ∼p ⋏ ∼q := rfl
 
--- @[simp] lemma neg_neg' (p : Formula α) : ~~p = p := neg_neg p
+-- @[simp] lemma neg_neg' (p : Formula α) : ∼∼p = p := neg_neg p
 
--- @[simp] lemma neg_box (p : Formula α) : ~(□p) = ◇(~p) := rfl
+-- @[simp] lemma neg_box (p : Formula α) : ∼(□p) = ◇(∼p) := rfl
 
--- @[simp] lemma neg_dia (p : Formula α) : ~(◇p) = □(~p) := rfl
+-- @[simp] lemma neg_dia (p : Formula α) : ∼(◇p) = □(∼p) := rfl
 
 /-
-@[simp] lemma neg_inj (p q : Formula α) : ~p = ~q ↔ p = q := by
+@[simp] lemma neg_inj (p q : Formula α) : ∼p = ∼q ↔ p = q := by
   constructor
-  · intro h; simpa using congr_arg (~·) h
+  · intro h; simpa using congr_arg (∼·) h
   · exact congr_arg _
 -/
 
@@ -97,7 +97,7 @@ lemma and_eq (p q : Formula α) : and p q = p ⋏ q := rfl
 
 lemma imp_eq (p q : Formula α) : imp p q = p ➝ q := rfl
 
-lemma neg_eq (p : Formula α) : neg p = ~p := rfl
+lemma neg_eq (p : Formula α) : neg p = ∼p := rfl
 
 lemma box_eq (p : Formula α) : box p = □p := rfl
 
@@ -113,7 +113,7 @@ lemma falsum_eq : (falsum : Formula α) = ⊥ := rfl
 
 @[simp] lemma imp_inj (p₁ q₁ p₂ q₂ : Formula α) : p₁ ➝ p₂ = q₁ ➝ q₂ ↔ p₁ = q₁ ∧ p₂ = q₂ := by simp[Arrow.arrow]
 
-@[simp] lemma neg_inj (p q : Formula α) : ~p = ~q ↔ p = q := by simp [NegAbbrev.neg];
+@[simp] lemma neg_inj (p q : Formula α) : ∼p = ∼q ↔ p = q := by simp [NegAbbrev.neg];
 
 /-
 instance : ModalDeMorgan (Formula α) where
@@ -141,7 +141,7 @@ def degree : Formula α → Nat
   | p ➝ q => max p.degree q.degree
   | □p => p.degree + 1
 
-@[simp] lemma degree_neg (p : Formula α) : degree (~p) = degree p := by induction p <;> simp_all [degree, neg, neg_eq]
+@[simp] lemma degree_neg (p : Formula α) : degree (∼p) = degree p := by induction p <;> simp_all [degree, neg, neg_eq]
 @[simp] lemma degree_imp (p q : Formula α) : degree (p ➝ q) = max (degree p) (degree q) := by simp [degree, imp_eq]
 
 @[elab_as_elim]
@@ -168,7 +168,7 @@ def rec' {C : Formula α → Sort w}
   | p ➝ q  => himp p q (rec' hfalsum hatom himp hbox p) (rec' hfalsum hatom himp hbox q)
   | □p     => hbox p (rec' hfalsum hatom himp hbox p)
 
--- @[simp] lemma complexity_neg (p : Formula α) : complexity (~p) = p.complexity + 1 :=
+-- @[simp] lemma complexity_neg (p : Formula α) : complexity (∼p) = p.complexity + 1 :=
 --   by induction p using rec' <;> try { simp[neg_eq, neg, *]; rfl;}
 
 section Decidable
@@ -365,7 +365,7 @@ def atoms : Formula α → Finset (α)
   | .atom a => {a}
   | ⊤      => ∅
   | ⊥      => ∅
-  | ~p     => p.atoms
+  | ∼p     => p.atoms
   | □p  => p.atoms
   | p ➝ q => p.atoms ∪ q.atoms
   | p ⋏ q  => p.atoms ∪ q.atoms
@@ -391,28 +391,28 @@ variable {p q r : Formula α}
 def cases_neg {C : Formula α → Sort w}
     (hfalsum : C ⊥)
     (hatom   : ∀ a : α, C (atom a))
-    (hneg    : ∀ p : Formula α, C (~p))
+    (hneg    : ∀ p : Formula α, C (∼p))
     (himp    : ∀ (p q : Formula α), q ≠ ⊥ → C (p ➝ q))
     (hbox    : ∀ (p : Formula α), C (□p))
     : (p : Formula α) → C p
   | ⊥       => hfalsum
   | atom a  => hatom a
   | □p      => hbox p
-  | ~p      => hneg p
+  | ∼p      => hneg p
   | p ➝ q  => if e : q = ⊥ then e ▸ hneg p else himp p q e
 
 @[elab_as_elim]
 def rec_neg {C : Formula α → Sort w}
     (hfalsum : C ⊥)
     (hatom   : ∀ a : α, C (atom a))
-    (hneg    : ∀ p : Formula α, C (p) → C (~p))
+    (hneg    : ∀ p : Formula α, C (p) → C (∼p))
     (himp    : ∀ (p q : Formula α), q ≠ ⊥ → C p → C q → C (p ➝ q))
     (hbox    : ∀ (p : Formula α), C (p) → C (□p))
     : (p : Formula α) → C p
   | ⊥       => hfalsum
   | atom a  => hatom a
   | □p      => hbox p (rec_neg hfalsum hatom hneg himp hbox p)
-  | ~p      => hneg p (rec_neg hfalsum hatom hneg himp hbox p)
+  | ∼p      => hneg p (rec_neg hfalsum hatom hneg himp hbox p)
   | p ➝ q  =>
     if e : q = ⊥
     then e ▸ hneg p (rec_neg hfalsum hatom hneg himp hbox p)
@@ -422,10 +422,10 @@ def rec_neg {C : Formula α → Sort w}
 section negated
 
 def negated : Formula α → Bool
-  | ~_ => True
+  | ∼_ => True
   | _  => False
 
-@[simp] lemma negated_def : (~p).negated := by simp [negated]
+@[simp] lemma negated_def : (∼p).negated := by simp [negated]
 
 @[simp]
 lemma negated_imp : (p ➝ q).negated ↔ (q = ⊥) := by
@@ -434,12 +434,12 @@ lemma negated_imp : (p ➝ q).negated ↔ (q = ⊥) := by
   . simp_all [Formula.imp_eq]; rfl;
   . simp_all [Formula.imp_eq]; simpa;
 
-lemma negated_iff : p.negated ↔ ∃ q, p = ~q := by
+lemma negated_iff : p.negated ↔ ∃ q, p = ∼q := by
   induction p using Formula.cases_neg with
   | himp => simp [negated_imp, NegAbbrev.neg];
   | _ => simp [negated]
 
-lemma not_negated_iff : ¬p.negated ↔ ∀ q, p ≠ ~q := by
+lemma not_negated_iff : ¬p.negated ↔ ∀ q, p ≠ ∼q := by
   induction p using Formula.cases_neg with
   | himp => simp [negated_imp, NegAbbrev.neg];
   | _ => simp [negated]
@@ -448,14 +448,14 @@ lemma not_negated_iff : ¬p.negated ↔ ∀ q, p ≠ ~q := by
 def rec_negated {C : Formula α → Sort w}
     (hfalsum : C ⊥)
     (hatom   : ∀ a : α, C (atom a))
-    (hneg    : ∀ p : Formula α, C (p) → C (~p))
+    (hneg    : ∀ p : Formula α, C (p) → C (∼p))
     (himp    : ∀ (p q : Formula α), ¬(p ➝ q).negated → C p → C q → C (p ➝ q))
     (hbox    : ∀ (p : Formula α), C (p) → C (□p))
     : (p : Formula α) → C p
   | ⊥       => hfalsum
   | atom a  => hatom a
   | □p      => hbox p (rec_negated hfalsum hatom hneg himp hbox p)
-  | ~p      => hneg p (rec_negated hfalsum hatom hneg himp hbox p)
+  | ∼p      => hneg p (rec_negated hfalsum hatom hneg himp hbox p)
   | p ➝ q  => by
     by_cases e : q = ⊥
     . exact e ▸ hneg p (rec_negated hfalsum hatom hneg himp hbox p)

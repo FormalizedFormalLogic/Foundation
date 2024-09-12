@@ -184,7 +184,7 @@ lemma LC_weaker_than_Cl : (𝐋𝐂 : Hilbert α) ≤ₛ 𝐂𝐥 := by
 
 variable {p : Formula α}
 
-theorem iff_provable_dn_efq_dne_provable: 𝐈𝐧𝐭 ⊢! ~~p ↔ 𝐂𝐥 ⊢! p := by
+theorem iff_provable_dn_efq_dne_provable: 𝐈𝐧𝐭 ⊢! ∼∼p ↔ 𝐂𝐥 ⊢! p := by
   constructor;
   . intro d; exact dne'! $ Int_weaker_than_Cl d;
   . intro d;
@@ -199,7 +199,7 @@ theorem iff_provable_dn_efq_dne_provable: 𝐈𝐧𝐭 ⊢! ~~p ↔ 𝐂𝐥 ⊢
         subst hq;
         apply neg_equiv'!.mpr;
         apply FiniteContext.deduct'!;
-        have : [~(q ⋎ ~q)] ⊢[𝐈𝐧𝐭]! ~q ⋏ ~~q := demorgan₃'! $ FiniteContext.id!;
+        have : [∼(q ⋎ ∼q)] ⊢[𝐈𝐧𝐭]! ∼q ⋏ ∼∼q := demorgan₃'! $ FiniteContext.id!;
         exact neg_mdp! (and₂'! this) (and₁'! this);
     | @mdp p q h₁ h₂ ih₁ ih₂ =>
       exact (dn_distribute_imply'! $ ih₁ ⟨h₁⟩) ⨀ ih₂ ⟨h₂⟩;
@@ -207,7 +207,7 @@ theorem iff_provable_dn_efq_dne_provable: 𝐈𝐧𝐭 ⊢! ~~p ↔ 𝐂𝐥 ⊢
 
 alias glivenko := iff_provable_dn_efq_dne_provable
 
-theorem iff_provable_neg_efq_provable_neg_efq : 𝐈𝐧𝐭 ⊢! ~p ↔ 𝐂𝐥 ⊢! ~p := by
+theorem iff_provable_neg_efq_provable_neg_efq : 𝐈𝐧𝐭 ⊢! ∼p ↔ 𝐂𝐥 ⊢! ∼p := by
   constructor;
   . intro d; exact glivenko.mp $ dni'! d;
   . intro d; exact tne'! $ glivenko.mpr d;

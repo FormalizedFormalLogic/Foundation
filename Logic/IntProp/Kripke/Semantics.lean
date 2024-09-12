@@ -16,7 +16,7 @@ def Satisfies (M : Kripke.Model.{u, v} α) (w : M.World) : Formula α → Prop
   | ⊥      => False
   | p ⋏ q  => Satisfies M w p ∧ Satisfies M w q
   | p ⋎ q  => Satisfies M w p ∨ Satisfies M w q
-  | ~p     => ∀ {w' : M.World}, (w ≺ w') → ¬Satisfies M w' p
+  | ∼p     => ∀ {w' : M.World}, (w ≺ w') → ¬Satisfies M w' p
   | p ➝ q => ∀ {w' : M.World}, (w ≺ w') → (Satisfies M w' p → Satisfies M w' q)
 
 namespace Satisfies
@@ -33,7 +33,7 @@ variable {M : Model α} {w : M.World} {p q r : Formula α}
 @[simp] lemma and_def  : w ⊧ p ⋏ q ↔ w ⊧ p ∧ w ⊧ q := by simp [Satisfies];
 @[simp] lemma or_def   : w ⊧ p ⋎ q ↔ w ⊧ p ∨ w ⊧ q := by simp [Satisfies];
 @[simp] lemma imp_def  : w ⊧ p ➝ q ↔ ∀ {w' : M.World}, (w ≺ w') → (w' ⊧ p → w' ⊧ q) := by simp [Satisfies, imp_iff_not_or];
-@[simp] lemma neg_def  : w ⊧ ~p ↔ ∀ {w' : M.World}, (w ≺ w') → ¬(w' ⊧ p) := by simp [Satisfies];
+@[simp] lemma neg_def  : w ⊧ ∼p ↔ ∀ {w' : M.World}, (w ≺ w') → ¬(w' ⊧ p) := by simp [Satisfies];
 
 instance : Semantics.Top M.World where
   realize_top := by simp [Satisfies];
@@ -63,7 +63,7 @@ lemma formula_hereditary
   | _ => simp_all [Satisfies];
 
 
-lemma neg_equiv : w ⊧ ~p ↔ w ⊧ p ➝ ⊥ := by simp_all [Satisfies];
+lemma neg_equiv : w ⊧ ∼p ↔ w ⊧ p ➝ ⊥ := by simp_all [Satisfies];
 
 end Satisfies
 

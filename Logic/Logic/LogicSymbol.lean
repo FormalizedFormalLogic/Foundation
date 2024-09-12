@@ -118,7 +118,7 @@ class LogicalConnective (α : Type*)
   ex₂₁ : ∀ {m n}, α (m + 1) n → α m n
   ex₂₂ : ∀ {m n}, α m (n + 1) → α m n
 
-prefix:75 "~" => Tilde.tilde
+prefix:75 "∼" => Tilde.tilde
 
 infixr:60 " ➝ " => Arrow.arrow
 
@@ -265,18 +265,18 @@ end ExQuantifier₂
 end logicNotation
 
 class DeMorgan (F : Type*) [LogicalConnective F] where
-  verum           : ~(⊤ : F) = ⊥
-  falsum          : ~(⊥ : F) = ⊤
-  imply (p q : F) : (p ➝ q) = ~p ⋎ q
-  and (p q : F)   : ~(p ⋏ q) = ~p ⋎ ~q
-  or (p q : F)    : ~(p ⋎ q) = ~p ⋏ ~q
-  neg (p : F)     : ~~p = p
+  verum           : ∼(⊤ : F) = ⊥
+  falsum          : ∼(⊥ : F) = ⊤
+  imply (p q : F) : (p ➝ q) = ∼p ⋎ q
+  and (p q : F)   : ∼(p ⋏ q) = ∼p ⋎ ∼q
+  or (p q : F)    : ∼(p ⋎ q) = ∼p ⋏ ∼q
+  neg (p : F)     : ∼∼p = p
 
 attribute [simp] DeMorgan.verum DeMorgan.falsum DeMorgan.and DeMorgan.or DeMorgan.neg
 
-/-- Introducing `~p` as an abbreviation of `p ➝ ⊥`. -/
+/-- Introducing `∼p` as an abbreviation of `p ➝ ⊥`. -/
 class NegAbbrev (F : Type*) [Tilde F] [Arrow F] [Bot F] where
-  neg {p : F} : ~p = p ➝ ⊥
+  neg {p : F} : ∼p = p ➝ ⊥
 -- attribute [simp] NegAbbrev.neg
 
 namespace LogicalConnective
@@ -303,7 +303,7 @@ instance PropLogicSymbols : LogicalConnective Prop where
 
 @[simp] lemma Prop.bot_eq : ⊥ = False := rfl
 
-@[simp] lemma Prop.neg_eq (p : Prop) : ~ p = ¬p := rfl
+@[simp] lemma Prop.neg_eq (p : Prop) : ∼ p = ¬p := rfl
 
 @[simp] lemma Prop.arrow_eq (p q : Prop) : (p ➝ q) = (p → q) := rfl
 
@@ -324,7 +324,7 @@ instance : DeMorgan Prop where
 class HomClass (F : Type*) (α β : outParam Type*) [LogicalConnective α] [LogicalConnective β] [FunLike F α β] where
   map_top : ∀ (f : F), f ⊤ = ⊤
   map_bot : ∀ (f : F), f ⊥ = ⊥
-  map_neg : ∀ (f : F) (p : α), f (~ p) = ~f p
+  map_neg : ∀ (f : F) (p : α), f (∼ p) = ∼f p
   map_imply : ∀ (f : F) (p q : α), f (p ➝ q) = f p ➝ f q
   map_and : ∀ (f : F) (p q : α), f (p ⋏ q) = f p ⋏ f q
   map_or  : ∀ (f : F) (p q : α), f (p ⋎ q) = f p ⋎ f q
@@ -349,7 +349,7 @@ structure Hom where
   toTr : α → β
   map_top' : toTr ⊤ = ⊤
   map_bot' : toTr ⊥ = ⊥
-  map_neg' : ∀ p, toTr (~ p) = ~toTr p
+  map_neg' : ∀ p, toTr (∼ p) = ∼toTr p
   map_imply' : ∀ p q, toTr (p ➝ q) = toTr p ➝ toTr q
   map_and' : ∀ p q, toTr (p ⋏ q) = toTr p ⋏ toTr q
   map_or'  : ∀ p q, toTr (p ⋎ q) = toTr p ⋎ toTr q
@@ -423,7 +423,7 @@ class AndOrClosed {F} [LogicalConnective F] (C : F → Prop) where
   or  {f g : F} : C f → C g → C (f ⋎ g)
 
 class Closed {F} [LogicalConnective F] (C : F → Prop) extends AndOrClosed C where
-  not {f : F} : C f → C (~f)
+  not {f : F} : C f → C (∼f)
   imply {f g : F} : C f → C g → C (f ➝ g)
 
 attribute [simp] AndOrClosed.verum AndOrClosed.falsum
@@ -434,7 +434,7 @@ end LogicalConnective
 section Subclosed
 
 class Tilde.Subclosed [Tilde F] (C : F → Prop) where
-  tilde_closed : C (~p) → C p
+  tilde_closed : C (∼p) → C p
 
 class Arrow.Subclosed [Arrow F] (C : F → Prop) where
   arrow_closed : C (p ➝ q) → C p ∧ C q

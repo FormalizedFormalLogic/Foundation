@@ -12,7 +12,7 @@ def Formula.toClassical : IntProp.Formula α → Classical.Formula α
   | .atom a => Classical.Formula.atom a
   | ⊤              => ⊤
   | ⊥              => ⊥
-  | ~p             => ~p.toClassical
+  | ∼p             => ∼p.toClassical
   | p ⋏ q          => p.toClassical ⋏ q.toClassical
   | p ⋎ q          => p.toClassical ⋎ q.toClassical
   | p ➝ q          => p.toClassical ➝ q.toClassical
@@ -47,7 +47,7 @@ namespace Classical
 @[simp]
 def Formula.toIntProp : Formula α → IntProp.Formula α
   | Formula.atom a  => IntProp.Formula.atom a
-  | Formula.natom a => ~IntProp.Formula.atom a
+  | Formula.natom a => ∼IntProp.Formula.atom a
   | ⊤               => ⊤
   | ⊥               => ⊥
   | p ⋏ q           => p.toIntProp ⋏ q.toIntProp
@@ -59,7 +59,7 @@ instance : Coe (Theory α) (IntProp.Theory α) := ⟨(Formula.toIntProp '' ·)�
 
 variable [DecidableEq α] [Encodable α]
 
--- lemma Deducible.toClassical {T : Theory α} {p} : T ⊢! p → (T : Intuitionistic.Theory α) ⊢! ~~p := sorry
+-- lemma Deducible.toClassical {T : Theory α} {p} : T ⊢! p → (T : Intuitionistic.Theory α) ⊢! ∼∼p := sorry
 
 end Classical
 

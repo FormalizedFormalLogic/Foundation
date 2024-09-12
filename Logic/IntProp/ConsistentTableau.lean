@@ -411,7 +411,7 @@ lemma iff_mem₁_or : p ⋎ q ∈ t.tableau.1 ↔ p ∈ t.tableau.1 ∨ q ∈ t.
     | inl h => exact mdp₁ h or₁!
     | inr h => exact mdp₁ h or₂!
 
-lemma not_mem₁_neg_of_mem₁ : p ∈ t.tableau.1 → ~p ∉ t.tableau.1 := by
+lemma not_mem₁_neg_of_mem₁ : p ∈ t.tableau.1 → ∼p ∉ t.tableau.1 := by
   intro hp;
   by_contra hnp;
   have := iff_mem₁_and.mpr ⟨hp, hnp⟩;
@@ -419,9 +419,9 @@ lemma not_mem₁_neg_of_mem₁ : p ∈ t.tableau.1 → ~p ∉ t.tableau.1 := by
   have : ⊥ ∉ t.tableau.1 := not_mem₁_falsum
   contradiction;
 
-lemma mem₂_neg_of_mem₁ : p ∈ t.tableau.1 → ~p ∈ t.tableau.2 := by
+lemma mem₂_neg_of_mem₁ : p ∈ t.tableau.1 → ∼p ∈ t.tableau.2 := by
   intro h;
-  exact not_mem₁_iff_mem₂ (p := ~p) (t := t) |>.mp $ not_mem₁_neg_of_mem₁ h;
+  exact not_mem₁_iff_mem₂ (p := ∼p) (t := t) |>.mp $ not_mem₁_neg_of_mem₁ h;
 
 lemma mem₁_of_provable : Λ ⊢! p → p ∈ t.tableau.1 := by
   intro h;

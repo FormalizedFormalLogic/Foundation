@@ -67,7 +67,7 @@ variable {M : PLoN.Model α} {x : M.World} {p q : Formula α}
 
 lemma box_def : x ⊧ □p ↔ ∀ y, x ≺[p] y → y ⊧ p := by simp [PLoN.Satisfies];
 
-lemma not_def : x ⊧ ~p ↔ ¬(x ⊧ p) := by
+lemma not_def : x ⊧ ∼p ↔ ¬(x ⊧ p) := by
   induction p using Formula.rec' generalizing x with
   | _ => simp_all [Satisfies];
 instance : Semantics.Not (M.World) := ⟨not_def⟩
