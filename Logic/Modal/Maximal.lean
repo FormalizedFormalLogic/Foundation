@@ -193,14 +193,14 @@ open IntProp.Kripke (unprovable_classical_of_exists_ClassicalValuation)
 
 variable [Inhabited α]
 
-example : 𝐓𝐫𝐢𝐯 ⊬! Axioms.L (atom default : Formula α) := by
+example : 𝐓𝐫𝐢𝐯 ⊬ Axioms.L (atom default : Formula α) := by
   apply iff_Triv_classical.not.mpr;
   apply unprovable_classical_of_exists_ClassicalValuation;
   simp [Axioms.L, TrivTranslation, toPropFormula, IntProp.Formula.Kripke.Satisfies];
   use (λ _ => False);
   trivial;
 
-lemma unprovable_AxiomL_K4 : 𝐊𝟒 ⊬! Axioms.L (atom default : Formula α) := by
+lemma unprovable_AxiomL_K4 : 𝐊𝟒 ⊬ Axioms.L (atom default : Formula α) := by
   apply not_imp_not.mpr trivTranslated_of_K4;
   apply unprovable_classical_of_exists_ClassicalValuation;
   simp [Axioms.L, TrivTranslation, toPropFormula, IntProp.Formula.Kripke.Satisfies];
@@ -217,7 +217,7 @@ theorem K4_strictReducible_GL : (𝐊𝟒 : Hilbert α) <ₛ 𝐆𝐋 := by
     . exact axiomL!;
     . exact unprovable_AxiomL_K4;
 
-lemma unprovable_AxiomT_GL : 𝐆𝐋 ⊬! Axioms.T (atom default : Formula α) := by
+lemma unprovable_AxiomT_GL : 𝐆𝐋 ⊬ Axioms.T (atom default : Formula α) := by
   apply not_imp_not.mpr verTranslated_of_GL;
   apply unprovable_classical_of_exists_ClassicalValuation;
   simp [Axioms.T, VerTranslation, toPropFormula, IntProp.Formula.Kripke.Satisfies];
@@ -239,7 +239,7 @@ theorem not_S4_weakerThan_GL : ¬(𝐒𝟒 : Hilbert α) ≤ₛ 𝐆𝐋 := by
   . exact unprovable_AxiomT_GL;
 
 
-example : 𝐕𝐞𝐫 ⊬! (∼(□⊥) : Formula α) := by
+example : 𝐕𝐞𝐫 ⊬ (∼(□⊥) : Formula α) := by
   apply iff_Ver_classical.not.mpr;
   apply unprovable_classical_of_exists_ClassicalValuation;
   dsimp [VerTranslation, toPropFormula, IntProp.Formula.Kripke.Satisfies];

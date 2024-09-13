@@ -440,7 +440,7 @@ def provable_iff_inconsistent : T ⊢! p ↔ System.Inconsistent (insert (∼∀
     have : T ⊢ ∀∀p :=  Derivation.cast (deduction d) (by rw [close_eq_self_of (∼∀∀p) (by simp)]; simp)
     exact ⟨invClose this⟩
 
-def unprovable_iff_consistent : T ⊬! p ↔ System.Consistent (insert (∼∀∀p) T) := by
+def unprovable_iff_consistent : T ⊬ p ↔ System.Consistent (insert (∼∀∀p) T) := by
   simp [←System.not_inconsistent_iff_consistent, ←provable_iff_inconsistent]
 
 section Hom
@@ -559,9 +559,9 @@ abbrev Provable₀ (T : Theory L) (σ : Sentence L) : Prop := T.alt ⊢! σ
 
 infix:45 " ⊢!. " => Provable₀
 
-abbrev Unprovable₀ (T : Theory L) (σ : Sentence L) : Prop := T.alt ⊬! σ
+abbrev Unprovable₀ (T : Theory L) (σ : Sentence L) : Prop := T.alt ⊬ σ
 
-infix:45 " ⊬!. " => Unprovable₀
+infix:45 " ⊬. " => Unprovable₀
 
 instance (T : Theory.Alt L) : System.Classical T := System.Classical.ofEquiv T.thy T Rew.emb.hom (fun _ ↦ .refl _)
 
@@ -569,7 +569,7 @@ variable {T : Theory L} {σ : Sentence L}
 
 lemma provable₀_iff : T ⊢!. σ ↔ T ⊢! ↑σ := iff_of_eq rfl
 
-lemma unprovable₀_iff : T ⊬!. σ ↔ T ⊬! ↑σ := iff_of_eq rfl
+lemma unprovable₀_iff : T ⊬. σ ↔ T ⊬ ↑σ := iff_of_eq rfl
 
 end
 

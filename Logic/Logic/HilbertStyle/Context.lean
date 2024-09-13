@@ -49,7 +49,7 @@ abbrev Prf (𝓢 : S) (Γ : List F) (p : F) : Type _ := (Γ : FiniteContext F �
 
 abbrev Provable (𝓢 : S) (Γ : List F) (p : F) : Prop := (Γ : FiniteContext F 𝓢) ⊢! p
 
-abbrev Unprovable (𝓢 : S) (Γ : List F) (p : F) : Prop := (Γ : FiniteContext F 𝓢) ⊬! p
+abbrev Unprovable (𝓢 : S) (Γ : List F) (p : F) : Prop := (Γ : FiniteContext F 𝓢) ⊬ p
 
 abbrev PrfSet (𝓢 : S) (Γ : List F) (s : Set F) : Type _ := (Γ : FiniteContext F 𝓢) ⊢* s
 
@@ -59,7 +59,7 @@ notation Γ:45 " ⊢[" 𝓢 "] " p:46 => Prf 𝓢 Γ p
 
 notation Γ:45 " ⊢[" 𝓢 "]! " p:46 => Provable 𝓢 Γ p
 
-notation Γ:45 " ⊬[" 𝓢 "]! " p:46 => Unprovable 𝓢 Γ p
+notation Γ:45 " ⊬[" 𝓢 "] " p:46 => Unprovable 𝓢 Γ p
 
 notation Γ:45 " ⊢[" 𝓢 "]* " s:46 => PrfSet 𝓢 Γ s
 
@@ -238,7 +238,7 @@ abbrev Prf (Γ : Set F) (p : F) : Type _ := (Γ : Context F 𝓢) ⊢ p
 
 abbrev Provable (Γ : Set F) (p : F) : Prop := (Γ : Context F 𝓢) ⊢! p
 
-abbrev Unprovable (Γ : Set F) (p : F) : Prop := (Γ : Context F 𝓢) ⊬! p
+abbrev Unprovable (Γ : Set F) (p : F) : Prop := (Γ : Context F 𝓢) ⊬ p
 
 abbrev PrfSet (Γ : Set F) (s : Set F) : Type _ := (Γ : Context F 𝓢) ⊢* s
 
@@ -248,7 +248,7 @@ notation Γ:45 " *⊢[" 𝓢 "] " p:46 => Prf 𝓢 Γ p
 
 notation Γ:45 " *⊢[" 𝓢 "]! " p:46 => Provable 𝓢 Γ p
 
-notation Γ:45 " *⊬[" 𝓢 "]! " p:46 => Unprovable 𝓢 Γ p
+notation Γ:45 " *⊬[" 𝓢 "] " p:46 => Unprovable 𝓢 Γ p
 
 notation Γ:45 " *⊢[" 𝓢 "]* " s:46 => PrfSet 𝓢 Γ s
 

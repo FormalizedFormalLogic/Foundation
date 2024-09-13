@@ -126,7 +126,7 @@ def SubformulaeComplementaryClosed (P : Formulae α) (p : Formula α) : Prop := 
 
 section Consistent
 
-def Consistent (Λ : Hilbert α) (P : Formulae α) : Prop :=  P *⊬[Λ]! ⊥
+def Consistent (Λ : Hilbert α) (P : Formulae α) : Prop :=  P *⊬[Λ] ⊥
 
 open Theory
 
@@ -142,11 +142,11 @@ lemma neg_provable_iff_insert_not_consistent : ↑P *⊢[Λ]! ∼p ↔ ¬(Formul
   rw [←iff_theory_consistent_formulae_consistent];
   simpa only [Finset.coe_insert, not_not] using Theory.neg_provable_iff_insert_not_consistent;
 
-lemma unprovable_iff_singleton_neg_consistent : Λ ⊬! p ↔ Formulae.Consistent Λ ({∼p}) := by
+lemma unprovable_iff_singleton_neg_consistent : Λ ⊬ p ↔ Formulae.Consistent Λ ({∼p}) := by
   rw [←iff_theory_consistent_formulae_consistent];
   simpa using Theory.unprovable_iff_singleton_neg_consistent;
 
-lemma unprovable_iff_singleton_compl_consistent : Λ ⊬! p ↔ Formulae.Consistent Λ ({-p}) := by
+lemma unprovable_iff_singleton_compl_consistent : Λ ⊬ p ↔ Formulae.Consistent Λ ({-p}) := by
   rcases (Formula.complement.or p) with (hp | ⟨q, rfl⟩);
   . rw [hp];
     convert Theory.unprovable_iff_singleton_neg_consistent (Λ := Λ) (p := p);
@@ -161,13 +161,13 @@ lemma provable_iff_singleton_compl_inconsistent : Λ ⊢! p ↔ ¬(Formulae.Cons
   . contrapose; push_neg; apply unprovable_iff_singleton_compl_consistent.mp;
 
 lemma intro_union_consistent
-  (h : ∀ {Γ₁ Γ₂ : List (Formula α)}, (∀ p ∈ Γ₁, p ∈ P₁) ∧ (∀ p ∈ Γ₂, p ∈ P₂) → Λ ⊬! ⋀Γ₁ ⋏ ⋀Γ₂ ➝ ⊥)
+  (h : ∀ {Γ₁ Γ₂ : List (Formula α)}, (∀ p ∈ Γ₁, p ∈ P₁) ∧ (∀ p ∈ Γ₂, p ∈ P₂) → Λ ⊬ ⋀Γ₁ ⋏ ⋀Γ₂ ➝ ⊥)
   : Formulae.Consistent Λ (P₁ ∪ P₂) := by
   rw [←iff_theory_consistent_formulae_consistent];
   simpa using Theory.intro_union_consistent h;
 
 lemma intro_triunion_consistent
-  (h : ∀ {Γ₁ Γ₂ Γ₃ : List (Formula α)}, (∀ p ∈ Γ₁, p ∈ P₁) ∧ (∀ p ∈ Γ₂, p ∈ P₂) ∧ (∀ p ∈ Γ₃, p ∈ P₃) → Λ ⊬! ⋀Γ₁ ⋏ ⋀Γ₂ ⋏ ⋀Γ₃ ➝ ⊥)
+  (h : ∀ {Γ₁ Γ₂ Γ₃ : List (Formula α)}, (∀ p ∈ Γ₁, p ∈ P₁) ∧ (∀ p ∈ Γ₂, p ∈ P₂) ∧ (∀ p ∈ Γ₃, p ∈ P₃) → Λ ⊬ ⋀Γ₁ ⋏ ⋀Γ₂ ⋏ ⋀Γ₃ ➝ ⊥)
   : Formulae.Consistent Λ (P₁ ∪ P₂ ∪ P₃) := by
   rw [←iff_theory_consistent_formulae_consistent];
   convert Theory.intro_triunion_consistent h;
@@ -326,7 +326,7 @@ noncomputable instance [System.Consistent Λ] : Inhabited (CCF Λ S) := ⟨linde
 
 variable {S} {X X₁ X₂ : CCF Λ S}
 
-@[simp] lemma unprovable_falsum : X.formulae *⊬[Λ]! ⊥ := X.consistent
+@[simp] lemma unprovable_falsum : X.formulae *⊬[Λ] ⊥ := X.consistent
 
 lemma mem_compl_of_not_mem (hs : q ∈ S) : q ∉ X.formulae → -q ∈ X.formulae := by
   intro h;

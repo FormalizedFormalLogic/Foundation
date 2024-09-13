@@ -174,7 +174,7 @@ lemma refutable_iff_inconsistent {p} :
     𝓚 ⊢! ∼p ↔ Inconsistent (cons p 𝓚) := by simpa using provable_iff_inconsistent (𝓚 := 𝓚) (p := ∼p)
 
 lemma consistent_insert_iff_not_refutable {p}  :
-    System.Consistent (cons p 𝓚) ↔ 𝓚 ⊬! ∼p := by
+    System.Consistent (cons p 𝓚) ↔ 𝓚 ⊬ ∼p := by
   simp [System.Unprovable, refutable_iff_inconsistent, System.not_inconsistent_iff_consistent]
 
 lemma inconsistent_of_provable_and_refutable {p} (bp : 𝓚 ⊢! p) (br : 𝓚 ⊢! ∼p) : Inconsistent 𝓚 :=

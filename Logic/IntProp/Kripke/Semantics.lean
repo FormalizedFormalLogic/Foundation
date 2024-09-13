@@ -261,7 +261,7 @@ lemma sound : Λ ⊢! p → 𝔽(Λ) ⊧ p := by
 
 instance : Sound Λ 𝔽(Λ) := ⟨sound⟩
 
-lemma unprovable_bot (hc : 𝔽(Λ).Nonempty) : Λ ⊬! ⊥ := by
+lemma unprovable_bot (hc : 𝔽(Λ).Nonempty) : Λ ⊬ ⊥ := by
   apply (not_imp_not.mpr (sound (α := α)));
   simp [Semantics.Realize];
   obtain ⟨F, hF⟩ := hc;
@@ -280,7 +280,7 @@ lemma sound_of_characterizability [characterizability : 𝔽(Λ).Characteraizabl
 
 instance instSoundOfCharacterizability [𝔽(Λ).Characteraizable 𝔽₂] : Sound Λ (𝔽₂#α) := ⟨sound_of_characterizability⟩
 
-lemma unprovable_bot_of_characterizability [characterizability : 𝔽(Λ).Characteraizable 𝔽₂] : Λ ⊬! ⊥ := by
+lemma unprovable_bot_of_characterizability [characterizability : 𝔽(Λ).Characteraizable 𝔽₂] : Λ ⊬ ⊥ := by
   apply unprovable_bot;
   obtain ⟨F, hF⟩ := characterizability.nonempty;
   use F;
@@ -470,7 +470,7 @@ lemma notClassicalValid_of_exists_ClassicalValuation : (∃ (V : ClassicalValuat
   have := @ValidOnClassicalFrame_iff α p;
   exact this;
 
-lemma unprovable_classical_of_exists_ClassicalValuation (h : ∃ (V : ClassicalValuation α), ¬(V ⊧ p)) : 𝐂𝐥 ⊬! p := by
+lemma unprovable_classical_of_exists_ClassicalValuation (h : ∃ (V : ClassicalValuation α), ¬(V ⊧ p)) : 𝐂𝐥 ⊬ p := by
   apply not_imp_not.mpr $ Kripke.sound.{u, 0};
   apply notClassicalValid_of_exists_ClassicalValuation;
   assumption;
