@@ -57,7 +57,7 @@ theorem iff_provable_GL_satisfies_at_root_on_FiniteTransitiveTree : 𝐆𝐋 ⊢
     intro F hF V;
     apply valid_on_TransitiveIrreflexiveFrameClass_of_satisfies_at_root_on_FiniteTransitiveTree h hF;
 
-lemma iff_unprovable_GL_exists_unsatisfies_at_root_on_FiniteTransitiveTree : 𝐆𝐋 ⊬! p ↔ ∃ M : FiniteTransitiveTreeModel.{u, u} α, ¬M.root ⊧ p := by
+lemma iff_unprovable_GL_exists_unsatisfies_at_root_on_FiniteTransitiveTree : 𝐆𝐋 ⊬ p ↔ ∃ M : FiniteTransitiveTreeModel.{u, u} α, ¬M.root ⊧ p := by
   constructor;
   . contrapose; simp; apply iff_provable_GL_satisfies_at_root_on_FiniteTransitiveTree.mpr;
   . contrapose; simp; apply iff_provable_GL_satisfies_at_root_on_FiniteTransitiveTree.mp;

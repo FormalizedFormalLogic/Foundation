@@ -134,7 +134,7 @@ lemma inconsistent_iff_provable :
     exact System.inconsistent_of_provable_of_unprovable (p := p) (System.by_axm _ <| by simp) (System.wk! (by simp) b)
 
 lemma consistent_iff_unprovable :
-    System.Consistent (insert p T) ↔ T ⊬! ∼p := by simp [←System.not_inconsistent_iff_consistent, inconsistent_iff_provable]
+    System.Consistent (insert p T) ↔ T ⊬ ∼p := by simp [←System.not_inconsistent_iff_consistent, inconsistent_iff_provable]
 
 @[simp] lemma inconsistent_theory_iff :
     System.Inconsistent (System.theory T) ↔ System.Inconsistent T := by

@@ -15,7 +15,7 @@ lemma sound (defines : Λ.DefinesPLoNFrameClass 𝔽) (d : Λ ⊢! p) : 𝔽 ⊧
 
 lemma sound_of_defines (defines : Λ.DefinesPLoNFrameClass 𝔽) : Sound Λ 𝔽 := ⟨sound defines⟩
 
-lemma unprovable_bot_of_nonempty_frameclass (defines : Λ.DefinesPLoNFrameClass 𝔽) (nonempty : 𝔽.Nonempty) : Λ ⊬! ⊥ := by
+lemma unprovable_bot_of_nonempty_frameclass (defines : Λ.DefinesPLoNFrameClass 𝔽) (nonempty : 𝔽.Nonempty) : Λ ⊬ ⊥ := by
   intro h;
   obtain ⟨⟨_, F⟩, hF⟩ := nonempty;
   simpa using sound defines h hF;

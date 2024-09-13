@@ -77,7 +77,7 @@ lemma confluent [HasAxiomWeakLEM Λ] : Confluent (CanonicalFrame Λ) := by
       intro p hp;
       have := by simpa using List.of_mem_filter hp;
       exact this.1;
-    have : Λ ⊬! ⋀Θy ⋏ ∼⋀Θy ➝ ⊥ := y.consistent (Γ := [⋀Θy, ∼⋀Θy]) (Δ := []) (by simp; constructor <;> assumption) (by simp);
+    have : Λ ⊬ ⋀Θy ⋏ ∼⋀Θy ➝ ⊥ := y.consistent (Γ := [⋀Θy, ∼⋀Θy]) (Δ := []) (by simp; constructor <;> assumption) (by simp);
     have : Λ ⊢! ⋀Θy ⋏ ∼⋀Θy ➝ ⊥ := by simp;
     contradiction;
 
@@ -206,7 +206,7 @@ private lemma truthlemma.himp
         have : [p, p ➝ ⋁Δ] ⊢[Λ]! ⋁Δ := by_axm! ⨀ this;
         exact disj_allsame'! (by simpa using hΔ) this;
       )
-      have : Λ ⊬! ⋀(Γ.remove p) ➝ (p ➝ q) := by simpa using (t.consistent hΓ (show ∀ r ∈ [p ➝ q], r ∈ t.tableau.2 by simp_all));
+      have : Λ ⊬ ⋀(Γ.remove p) ➝ (p ➝ q) := by simpa using (t.consistent hΓ (show ∀ r ∈ [p ➝ q], r ∈ t.tableau.2 by simp_all));
       contradiction;
     have ⟨_, _⟩ := Set.insert_subset_iff.mp h;
     use t';
@@ -252,7 +252,7 @@ private lemma truthlemma.hneg
       replace hΔ : Δ = [] := List.nil_iff.mpr hΔ; subst hΔ;
       by_contra hC; simp at hC;
       have : Λ ⊢! ⋀(Γ.remove p) ➝ ∼p := imp_trans''! (and_imply_iff_imply_imply'!.mp $ imply_left_remove_conj! hC) (and₂'! neg_equiv!);
-      have : Λ ⊬! ⋀(Γ.remove p) ➝ ∼p := by simpa using t.consistent (Δ := [∼p]) hΓ (by simpa);
+      have : Λ ⊬ ⋀(Γ.remove p) ➝ ∼p := by simpa using t.consistent (Δ := [∼p]) hΓ (by simpa);
       contradiction;
     have ⟨_, _⟩ := Set.insert_subset_iff.mp h;
     use t';
@@ -260,7 +260,7 @@ private lemma truthlemma.hneg
     intro ht t' htt';
     apply ihp.not.mpr;
     by_contra hC;
-    have : Λ ⊬! p ⋏ ∼p ➝ ⊥ := by simpa using t'.consistent (Γ := [p, ∼p]) (Δ := []) (by aesop) (by simp);
+    have : Λ ⊬ p ⋏ ∼p ➝ ⊥ := by simpa using t'.consistent (Γ := [p, ∼p]) (Δ := []) (by aesop) (by simp);
     have : Λ ⊢! p ⋏ ∼p ➝ ⊥ := intro_bot_of_and!;
     contradiction;
 

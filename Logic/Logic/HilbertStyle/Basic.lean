@@ -249,7 +249,7 @@ infixl:90 "⨀₄" => mdp₄!
 def impTrans'' (bpq : 𝓢 ⊢ p ➝ q) (bqr : 𝓢 ⊢ q ➝ r) : 𝓢 ⊢ p ➝ r := imply₂ ⨀ dhyp p bqr ⨀ bpq
 lemma imp_trans''! (hpq : 𝓢 ⊢! p ➝ q) (hqr : 𝓢 ⊢! q ➝ r) : 𝓢 ⊢! p ➝ r := ⟨impTrans'' hpq.some hqr.some⟩
 
-lemma unprovable_imp_trans''! (hpq : 𝓢 ⊢! p ➝ q) : 𝓢 ⊬! p ➝ r → 𝓢 ⊬! q ➝ r := by
+lemma unprovable_imp_trans''! (hpq : 𝓢 ⊢! p ➝ q) : 𝓢 ⊬ p ➝ r → 𝓢 ⊬ q ➝ r := by
   contrapose; simp [neg_neg];
   exact imp_trans''! hpq;
 
@@ -259,7 +259,7 @@ def iffTrans'' (h₁ : 𝓢 ⊢ p ⭤ q) (h₂ : 𝓢 ⊢ q ⭤ r) : 𝓢 ⊢ p 
   . exact impTrans'' (and₂' h₂) (and₂' h₁);
 lemma iff_trans''! (h₁ : 𝓢 ⊢! p ⭤ q) (h₂ : 𝓢 ⊢! q ⭤ r) : 𝓢 ⊢! p ⭤ r := ⟨iffTrans'' h₁.some h₂.some⟩
 
-lemma unprovable_iff! (H : 𝓢 ⊢! p ⭤ q) : 𝓢 ⊬! p ↔ 𝓢 ⊬! q := by
+lemma unprovable_iff! (H : 𝓢 ⊢! p ⭤ q) : 𝓢 ⊬ p ↔ 𝓢 ⊬ q := by
   constructor;
   . intro hp hq; have := and₂'! H ⨀ hq; contradiction;
   . intro hq hp; have := and₁'! H ⨀ hp; contradiction;

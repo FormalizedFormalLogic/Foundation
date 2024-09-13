@@ -162,7 +162,7 @@ lemma iff_valid_on_canonicalModel_deducible : (CanonicalModel Λ) ⊧ p ↔ Λ �
     by_contra hC;
     obtain ⟨Γ, hΓ₁, hΓ₂⟩ := Theory.iff_insert_inconsistent.mp $ (MaximalConsistentTheory.maximal' hC);
     have : Γ ⊢[Λ]! ⊥ := FiniteContext.provable_iff.mpr $ and_imply_iff_imply_imply'!.mp hΓ₂ ⨀ h;
-    have : Γ ⊬[Λ]! ⊥ := Theory.def_consistent.mp Ω.consistent _ hΓ₁;
+    have : Γ ⊬[Λ] ⊥ := Theory.def_consistent.mp Ω.consistent _ hΓ₁;
     contradiction;
 
 lemma realize_axiomset_of_self_canonicalModel : (CanonicalModel Λ) ⊧* Ax(Λ) := by

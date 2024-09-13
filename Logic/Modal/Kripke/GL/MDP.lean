@@ -129,7 +129,7 @@ lemma GL_MDP_Aux (h : (□''X) *⊢[𝐆𝐋]! □p₁ ⋎ □p₂) : (□''X) *
 
   have : (𝐆𝐋 ⊢! ⊡c ➝ p₁) ⋎ (𝐆𝐋 ⊢! ⊡c ➝ p₂) := by
     by_contra hC;
-    have ⟨h₁, h₂⟩ : (𝐆𝐋 ⊬! ⊡c ➝ p₁) ∧ (𝐆𝐋 ⊬! ⊡c ➝ p₂) := not_or.mp hC;
+    have ⟨h₁, h₂⟩ : (𝐆𝐋 ⊬ ⊡c ➝ p₁) ∧ (𝐆𝐋 ⊬ ⊡c ➝ p₂) := not_or.mp hC;
 
     obtain ⟨M₁, hM₁⟩ := iff_unprovable_GL_exists_unsatisfies_at_root_on_FiniteTransitiveTree.mp h₁;
     obtain ⟨M₂, hM₂⟩ := iff_unprovable_GL_exists_unsatisfies_at_root_on_FiniteTransitiveTree.mp h₂;

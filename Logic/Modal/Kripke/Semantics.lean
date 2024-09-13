@@ -408,7 +408,7 @@ lemma sound_finite : Λ ⊢! p → 𝔽ꟳ(Λ) ⊧ p := by
   exact hFF₁ p hp;
 instance : Sound Λ 𝔽ꟳ(Λ) := ⟨sound_finite⟩
 
-lemma unprovable_bot (hc : 𝔽(Λ).Nonempty) : Λ ⊬! ⊥ := by
+lemma unprovable_bot (hc : 𝔽(Λ).Nonempty) : Λ ⊬ ⊥ := by
   apply (not_imp_not.mpr (sound (α := α)));
   simp [Semantics.Realize];
   obtain ⟨F, hF⟩ := hc;
@@ -418,7 +418,7 @@ lemma unprovable_bot (hc : 𝔽(Λ).Nonempty) : Λ ⊬! ⊥ := by
   . exact Semantics.Bot.realize_bot (F := Formula α) (M := Frame.Dep α) F;
 instance (hc : 𝔽(Λ).Nonempty) : System.Consistent Λ := System.Consistent.of_unprovable $ unprovable_bot hc
 
-lemma unprovable_bot_finite (hc : 𝔽ꟳ(Λ).Nonempty) : Λ ⊬! ⊥ := by
+lemma unprovable_bot_finite (hc : 𝔽ꟳ(Λ).Nonempty) : Λ ⊬ ⊥ := by
   apply (not_imp_not.mpr (sound_finite (α := α)));
   simp [Semantics.Realize];
   obtain ⟨F, hF⟩ := hc;
@@ -446,7 +446,7 @@ lemma sound_of_finite_characterizability {𝔽 : FiniteFrameClass} [char : 𝔽�
   . rfl;
 instance {𝔽 : FiniteFrameClass} [𝔽ꟳ(Λ).Characteraizable 𝔽] : Sound Λ 𝔽#α := ⟨sound_of_finite_characterizability⟩
 
-lemma unprovable_bot_of_characterizability {𝔽 : FrameClass} [char : 𝔽(Λ).Characteraizable 𝔽] : Λ ⊬! ⊥ := by
+lemma unprovable_bot_of_characterizability {𝔽 : FrameClass} [char : 𝔽(Λ).Characteraizable 𝔽] : Λ ⊬ ⊥ := by
   apply unprovable_bot;
   obtain ⟨F, hF⟩ := char.nonempty;
   use F;
@@ -454,7 +454,7 @@ lemma unprovable_bot_of_characterizability {𝔽 : FrameClass} [char : 𝔽(Λ).
 instance [FrameClass.Characteraizable.{u} 𝔽(Λ) 𝔽] : System.Consistent Λ
   := System.Consistent.of_unprovable $ unprovable_bot_of_characterizability
 
-lemma unprovable_bot_of_finite_characterizability {𝔽 : FiniteFrameClass}  [char : 𝔽ꟳ(Λ).Characteraizable 𝔽] : Λ ⊬! ⊥ := by
+lemma unprovable_bot_of_finite_characterizability {𝔽 : FiniteFrameClass}  [char : 𝔽ꟳ(Λ).Characteraizable 𝔽] : Λ ⊬ ⊥ := by
   apply unprovable_bot_finite;
   obtain ⟨F, hF⟩ := char.nonempty;
   use F;
