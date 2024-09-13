@@ -219,7 +219,7 @@ def EvalAux (s : Structure L M) (ε : ξ → M) : ∀ {n}, (Fin n → M) → Sem
   | _, e, ∃' p     => ∃ x : M, (p.EvalAux s ε (x :> e))
 
 @[simp] lemma EvalAux_neg (p : Semiformula L ξ n) :
-    EvalAux s ε e (~p) = ¬EvalAux s ε e p :=
+    EvalAux s ε e (∼p) = ¬EvalAux s ε e p :=
   by induction p using rec' <;> simp [*, EvalAux, ←neg_eq, or_iff_not_imp_left]
 
 def Eval (s : Structure L M) (e : Fin n → M) (ε : ξ → M) : Semiformula L ξ n →ˡᶜ Prop where
@@ -631,9 +631,9 @@ noncomputable instance StructureModelOfSat (h : Semantics.Satisfiable (Struc.{v,
 lemma ModelOfSat.models (h : Semantics.Satisfiable (Struc.{v, u} L) T) : ModelOfSat h ⊧ₘ* T := (StructureModelOfSatAux h).prop
 
 lemma consequence_iff_unsatisfiable {p : SyntacticFormula L} :
-    T ⊨[Struc.{v, u} L] p ↔ ¬Semantics.Satisfiable (Struc.{v, u} L) (insert (~∀∀p) T) := by
-  let σ := ~∀∀₀p
-  have : ~∀∀p = Rew.emb.hom σ := by simp [Semiformula.close₀, σ]
+    T ⊨[Struc.{v, u} L] p ↔ ¬Semantics.Satisfiable (Struc.{v, u} L) (insert (∼∀∀p) T) := by
+  let σ := ∼∀∀₀p
+  have : ∼∀∀p = Rew.emb.hom σ := by simp [Semiformula.close₀, σ]
   rw [this]
   constructor
   · intro h

@@ -52,11 +52,11 @@ lemma union_not_consistent : ¬T₁.Consistent Λ ∨ ¬T₂.Consistent Λ → �
   contrapose; push_neg;
   exact union_consistent;
 
-lemma iff_insert_consistent : Theory.Consistent Λ (insert p T) ↔ ∀ {Γ : List (Formula α)}, (∀ q ∈ Γ, q ∈ T) → Λ ⊬! p ⋏ ⋀Γ ⟶ ⊥ := by
+lemma iff_insert_consistent : Theory.Consistent Λ (insert p T) ↔ ∀ {Γ : List (Formula α)}, (∀ q ∈ Γ, q ∈ T) → Λ ⊬! p ⋏ ⋀Γ ➝ ⊥ := by
   constructor;
   . intro h Γ hΓ;
     by_contra hC;
-    have : Λ ⊬! p ⋏ ⋀Γ ⟶ ⊥ := iff_imply_left_cons_conj'!.not.mp $ (def_consistent.mp h) (p :: Γ) (by
+    have : Λ ⊬! p ⋏ ⋀Γ ➝ ⊥ := iff_imply_left_cons_conj'!.not.mp $ (def_consistent.mp h) (p :: Γ) (by
       rintro q hq;
       simp at hq;
       cases hq with
@@ -67,7 +67,7 @@ lemma iff_insert_consistent : Theory.Consistent Λ (insert p T) ↔ ∀ {Γ : Li
   . intro h;
     apply def_consistent.mpr;
     intro Γ hΓ;
-    have  : Λ ⊬! p ⋏ ⋀List.remove p Γ ⟶ ⊥ := @h (Γ.remove p) (by
+    have  : Λ ⊬! p ⋏ ⋀List.remove p Γ ➝ ⊥ := @h (Γ.remove p) (by
       intro q hq;
       have := by simpa using hΓ q $ List.mem_of_mem_remove hq;
       cases this with
@@ -79,12 +79,12 @@ lemma iff_insert_consistent : Theory.Consistent Λ (insert p T) ↔ ∀ {Γ : Li
     have := imp_trans''! and_comm! $ imply_left_remove_conj! (p := p) $ FiniteContext.provable_iff.mp hC;
     contradiction;
 
-lemma iff_insert_inconsistent : ¬(insert p T).Consistent Λ ↔ ∃ Γ : List (Formula α), (∀ p ∈ Γ, p ∈ T) ∧ Λ ⊢! p ⋏ ⋀Γ ⟶ ⊥ := by
+lemma iff_insert_inconsistent : ¬(insert p T).Consistent Λ ↔ ∃ Γ : List (Formula α), (∀ p ∈ Γ, p ∈ T) ∧ Λ ⊢! p ⋏ ⋀Γ ➝ ⊥ := by
   constructor;
   . contrapose; push_neg; apply iff_insert_consistent.mpr;
   . contrapose; push_neg; apply iff_insert_consistent.mp;
 
-lemma provable_iff_insert_neg_not_consistent : T *⊢[Λ]! p ↔ ¬Theory.Consistent Λ (insert (~p) T) := by
+lemma provable_iff_insert_neg_not_consistent : T *⊢[Λ]! p ↔ ¬Theory.Consistent Λ (insert (∼p) T) := by
   constructor;
   . intro h;
     apply iff_insert_inconsistent.mpr;
@@ -101,19 +101,19 @@ lemma provable_iff_insert_neg_not_consistent : T *⊢[Λ]! p ↔ ¬Theory.Consis
     existsi Γ;
     constructor;
     . exact hΓ₁;
-    . have : Γ ⊢[Λ]! ~p ⟶ ⊥ := imp_swap'! $ and_imply_iff_imply_imply'!.mp hΓ₂;
+    . have : Γ ⊢[Λ]! ∼p ➝ ⊥ := imp_swap'! $ and_imply_iff_imply_imply'!.mp hΓ₂;
       exact dne'! $ neg_equiv'!.mpr this;
 
-lemma unprovable_iff_insert_neg_consistent : T *⊬[Λ]! p ↔ Theory.Consistent Λ (insert (~p) T) := by
+lemma unprovable_iff_insert_neg_consistent : T *⊬[Λ]! p ↔ Theory.Consistent Λ (insert (∼p) T) := by
   simpa [not_not] using provable_iff_insert_neg_not_consistent.not;
 
-lemma unprovable_iff_singleton_neg_consistent : Λ ⊬! p ↔ Theory.Consistent Λ {~p} := by
-  have e : insert (~p) ∅ = ({~p} : Theory α) := by aesop;
+lemma unprovable_iff_singleton_neg_consistent : Λ ⊬! p ↔ Theory.Consistent Λ {∼p} := by
+  have e : insert (∼p) ∅ = ({∼p} : Theory α) := by aesop;
   have H := unprovable_iff_insert_neg_consistent (Λ := Λ) (T := ∅) (p := p);
   rw [e] at H;
   exact Iff.trans Context.provable_iff_provable.not H;
 
-lemma neg_provable_iff_insert_not_consistent : T *⊢[Λ]! ~p ↔ ¬Theory.Consistent Λ (insert (p) T) := by
+lemma neg_provable_iff_insert_not_consistent : T *⊢[Λ]! ∼p ↔ ¬Theory.Consistent Λ (insert (p) T) := by
   constructor;
   . intro h;
     apply iff_insert_inconsistent.mpr;
@@ -133,10 +133,10 @@ lemma neg_provable_iff_insert_not_consistent : T *⊢[Λ]! ~p ↔ ¬Theory.Consi
     . apply neg_equiv'!.mpr;
       exact imp_swap'! $ and_imply_iff_imply_imply'!.mp hΓ₂;
 
-lemma neg_unprovable_iff_insert_consistent : T *⊬[Λ]! ~p ↔ Theory.Consistent Λ (insert (p) T) := by
+lemma neg_unprovable_iff_insert_consistent : T *⊬[Λ]! ∼p ↔ Theory.Consistent Λ (insert (p) T) := by
   simpa [not_not] using neg_provable_iff_insert_not_consistent.not;
 
-lemma unprovable_iff_singleton_consistent : Λ ⊬! ~p ↔ Theory.Consistent Λ {p} := by
+lemma unprovable_iff_singleton_consistent : Λ ⊬! ∼p ↔ Theory.Consistent Λ {p} := by
   have e : insert (p) ∅ = ({p} : Theory α) := by aesop;
   have H := neg_unprovable_iff_insert_consistent (Λ := Λ) (T := ∅) (p := p);
   rw [e] at H;
@@ -150,7 +150,7 @@ lemma unprovable_falsum : T *⊬[Λ]! ⊥ := by
   have : Γ ⊬[Λ]! ⊥ := (def_consistent.mp T_consis) _ hΓ₁;
   contradiction;
 
-lemma unprovable_either : ¬(T *⊢[Λ]! p ∧ T *⊢[Λ]! ~p) := by
+lemma unprovable_either : ¬(T *⊢[Λ]! p ∧ T *⊢[Λ]! ∼p) := by
   by_contra hC;
   have ⟨hC₁, hC₂⟩ := hC;
   have : T *⊢[Λ]! ⊥ := neg_mdp! hC₂ hC₁;
@@ -159,28 +159,28 @@ lemma unprovable_either : ¬(T *⊢[Λ]! p ∧ T *⊢[Λ]! ~p) := by
 
 lemma not_mem_falsum_of_consistent : ⊥ ∉ T := by
   by_contra hC;
-  have : Λ ⊬! ⊥ ⟶ ⊥ := (def_consistent.mp T_consis) [⊥] (by simpa);
-  have : Λ ⊢! ⊥ ⟶ ⊥ := efq!;
+  have : Λ ⊬! ⊥ ➝ ⊥ := (def_consistent.mp T_consis) [⊥] (by simpa);
+  have : Λ ⊢! ⊥ ➝ ⊥ := efq!;
   contradiction;
 
-lemma not_singleton_consistent [Λ.HasNecessitation] (h : ~(□p) ∈ T) : Theory.Consistent Λ {~p} := by
+lemma not_singleton_consistent [Λ.HasNecessitation] (h : ∼(□p) ∈ T) : Theory.Consistent Λ {∼p} := by
   apply def_consistent.mpr;
   intro Γ hΓ;
   simp only [Set.mem_singleton_iff] at hΓ;
   by_contra hC;
-  have : Λ ⊢! ~(□p) ⟶ ⊥ := neg_equiv'!.mp $ dni'! $ nec! $ dne'! $ neg_equiv'!.mpr $ replace_imply_left_conj! hΓ hC;
-  have : Λ ⊬! ~(□p) ⟶ ⊥ := def_consistent.mp T_consis (Γ := [~(□p)]) (by aesop)
+  have : Λ ⊢! ∼(□p) ➝ ⊥ := neg_equiv'!.mp $ dni'! $ nec! $ dne'! $ neg_equiv'!.mpr $ replace_imply_left_conj! hΓ hC;
+  have : Λ ⊬! ∼(□p) ➝ ⊥ := def_consistent.mp T_consis (Γ := [∼(□p)]) (by aesop)
   contradiction;
 
-lemma either_consistent (p) : Theory.Consistent Λ (insert p T) ∨ Theory.Consistent Λ (insert (~p) T) := by
+lemma either_consistent (p) : Theory.Consistent Λ (insert p T) ∨ Theory.Consistent Λ (insert (∼p) T) := by
   by_contra hC; push_neg at hC;
   obtain ⟨Γ, hΓ₁, hΓ₂⟩ := iff_insert_inconsistent.mp hC.1;
   obtain ⟨Δ, hΔ₁, hΔ₂⟩ := iff_insert_inconsistent.mp hC.2;
 
   replace hΓ₂ := neg_equiv'!.mpr hΓ₂;
   replace hΔ₂ := neg_equiv'!.mpr hΔ₂;
-  have : Λ ⊢! ⋀Γ ⋏ ⋀Δ ⟶ ⊥ := neg_equiv'!.mp $ demorgan₁'! $ or₃'''! (imp_trans''! (imply_of_not_or'! $ demorgan₄'! hΓ₂) or₁!) (imp_trans''! (imply_of_not_or'! $ demorgan₄'! hΔ₂) or₂!) lem!
-  have : Λ ⊬! ⋀Γ ⋏ ⋀Δ ⟶ ⊥ := unprovable_imp_trans''! imply_left_concat_conj! $ def_consistent.mp T_consis (Γ ++ Δ) $ by
+  have : Λ ⊢! ⋀Γ ⋏ ⋀Δ ➝ ⊥ := neg_equiv'!.mp $ demorgan₁'! $ or₃'''! (imp_trans''! (imply_of_not_or'! $ demorgan₄'! hΓ₂) or₁!) (imp_trans''! (imply_of_not_or'! $ demorgan₄'! hΔ₂) or₂!) lem!
+  have : Λ ⊬! ⋀Γ ⋏ ⋀Δ ➝ ⊥ := unprovable_imp_trans''! imply_left_concat_conj! $ def_consistent.mp T_consis (Γ ++ Δ) $ by
     simp;
     rintro q (hqΓ | hqΔ);
     . exact hΓ₁ q hqΓ;
@@ -216,12 +216,12 @@ protected alias lindenbaum := exists_maximal_consistent_theory
 
 open Classical in
 lemma intro_union_consistent
-  (h : ∀ {Γ₁ Γ₂ : List (Formula α)}, (∀ p ∈ Γ₁, p ∈ T₁) ∧ (∀ p ∈ Γ₂, p ∈ T₂) → Λ ⊬! ⋀Γ₁ ⋏ ⋀Γ₂ ⟶ ⊥) : Theory.Consistent Λ (T₁ ∪ T₂) := by
+  (h : ∀ {Γ₁ Γ₂ : List (Formula α)}, (∀ p ∈ Γ₁, p ∈ T₁) ∧ (∀ p ∈ Γ₂, p ∈ T₂) → Λ ⊬! ⋀Γ₁ ⋏ ⋀Γ₂ ➝ ⊥) : Theory.Consistent Λ (T₁ ∪ T₂) := by
   apply def_consistent.mpr;
   intro Δ hΔ;
   let Δ₁ := (Δ.filter (· ∈ T₁));
   let Δ₂ := (Δ.filter (· ∈ T₂));
-  have : Λ ⊬! ⋀Δ₁ ⋏ ⋀Δ₂ ⟶ ⊥ := @h Δ₁ Δ₂ ⟨(by intro _ h; simpa using List.of_mem_filter h), (by intro _ h; simpa using List.of_mem_filter h)⟩;
+  have : Λ ⊬! ⋀Δ₁ ⋏ ⋀Δ₂ ➝ ⊥ := @h Δ₁ Δ₂ ⟨(by intro _ h; simpa using List.of_mem_filter h), (by intro _ h; simpa using List.of_mem_filter h)⟩;
   exact unprovable_imp_trans''! (by
     apply FiniteContext.deduct'!;
     apply iff_provable_list_conj.mpr;
@@ -233,7 +233,7 @@ lemma intro_union_consistent
 
 open Classical in
 lemma intro_triunion_consistent
-  (h : ∀ {Γ₁ Γ₂ Γ₃ : List (Formula α)}, (∀ p ∈ Γ₁, p ∈ T₁) ∧ (∀ p ∈ Γ₂, p ∈ T₂) ∧ (∀ p ∈ Γ₃, p ∈ T₃) → Λ ⊬! ⋀Γ₁ ⋏ ⋀Γ₂ ⋏ ⋀Γ₃ ⟶ ⊥)
+  (h : ∀ {Γ₁ Γ₂ Γ₃ : List (Formula α)}, (∀ p ∈ Γ₁, p ∈ T₁) ∧ (∀ p ∈ Γ₂, p ∈ T₂) ∧ (∀ p ∈ Γ₃, p ∈ T₃) → Λ ⊬! ⋀Γ₁ ⋏ ⋀Γ₂ ⋏ ⋀Γ₃ ➝ ⊥)
   : Theory.Consistent Λ (T₁ ∪ T₂ ∪ T₃) := by
   apply intro_union_consistent;
   rintro Γ₁₂ Γ₃ ⟨h₁₂, h₃⟩;
@@ -261,16 +261,16 @@ lemma intro_triunion_consistent
         simpa using List.of_mem_filter hp;
       . assumption;
 
-lemma not_mem_of_mem_neg (h : ~p ∈ T) : p ∉ T := by
+lemma not_mem_of_mem_neg (h : ∼p ∈ T) : p ∉ T := by
   by_contra hC;
-  have : [p, ~p] ⊬[Λ]! ⊥ := (Theory.def_consistent.mp T_consis) [p, ~p] (by simp_all);
-  have : [p, ~p] ⊢[Λ]! ⊥ := System.bot_of_mem_either! (p := p) (Γ := [p, ~p]) (by simp) (by simp);
+  have : [p, ∼p] ⊬[Λ]! ⊥ := (Theory.def_consistent.mp T_consis) [p, ∼p] (by simp_all);
+  have : [p, ∼p] ⊢[Λ]! ⊥ := System.bot_of_mem_either! (p := p) (Γ := [p, ∼p]) (by simp) (by simp);
   contradiction;
 
-lemma not_mem_neg_of_mem (h : p ∈ T) : ~p ∉ T := by
+lemma not_mem_neg_of_mem (h : p ∈ T) : ∼p ∉ T := by
   by_contra hC;
-  have : [p, ~p] ⊬[Λ]! ⊥ := (Theory.def_consistent.mp T_consis) [p, ~p] (by simp_all);
-  have : [p, ~p] ⊢[Λ]! ⊥ := System.bot_of_mem_either! (p := p) (Γ := [p, ~p]) (by simp) (by simp);
+  have : [p, ∼p] ⊬[Λ]! ⊥ := (Theory.def_consistent.mp T_consis) [p, ∼p] (by simp_all);
+  have : [p, ∼p] ⊢[Λ]! ⊥ := System.bot_of_mem_either! (p := p) (Γ := [p, ∼p]) (by simp) (by simp);
   contradiction;
 end Theory
 
@@ -305,7 +305,7 @@ alias lindenbaum := exists_maximal_Lconsistented_theory
 
 instance [System.Consistent Λ] : Nonempty (MCT Λ) := ⟨lindenbaum emptyset_consistent |>.choose⟩
 
-lemma either_mem (Ω : MCT Λ) (p) : p ∈ Ω.theory ∨ ~p ∈ Ω.theory := by
+lemma either_mem (Ω : MCT Λ) (p) : p ∈ Ω.theory ∨ ∼p ∈ Ω.theory := by
   by_contra hC; push_neg at hC;
   cases either_consistent Ω.consistent p with
   | inl h => have := Ω.maximal (Set.ssubset_insert hC.1); contradiction;
@@ -317,9 +317,9 @@ lemma membership_iff : (p ∈ Ω.theory) ↔ (Ω.theory *⊢[Λ]! p) := by
   constructor;
   . intro h; exact Context.by_axm! h;
   . intro hp;
-    suffices ~p ∉ Ω.theory by apply or_iff_not_imp_right.mp $ (either_mem Ω p); assumption;
+    suffices ∼p ∉ Ω.theory by apply or_iff_not_imp_right.mp $ (either_mem Ω p); assumption;
     by_contra hC;
-    have hnp : Ω.theory *⊢[Λ]! ~p := Context.by_axm! hC;
+    have hnp : Ω.theory *⊢[Λ]! ∼p := Context.by_axm! hC;
     have := neg_mdp! hnp hp;
     have := Ω.consistent;
     contradiction;
@@ -338,7 +338,7 @@ lemma subset_axiomset : Ax(Λ) ⊆ Ω.theory := by
 lemma unprovable_falsum : Ω.theory *⊬[Λ]! ⊥ := by apply membership_iff.not.mp; simp
 
 @[simp]
-lemma iff_mem_neg : (~p ∈ Ω.theory) ↔ (p ∉ Ω.theory) := by
+lemma iff_mem_neg : (∼p ∈ Ω.theory) ↔ (p ∉ Ω.theory) := by
   constructor;
   . intro hnp;
     by_contra hp;
@@ -349,19 +349,19 @@ lemma iff_mem_neg : (~p ∈ Ω.theory) ↔ (p ∉ Ω.theory) := by
     contradiction;
   . intro hp;
     have := provable_iff_insert_neg_not_consistent.not.mp $ membership_iff.not.mp hp;
-    have := (not_imp_not.mpr $ Ω.maximal (U := insert (~p) Ω.theory)) this;
+    have := (not_imp_not.mpr $ Ω.maximal (U := insert (∼p) Ω.theory)) this;
     simp [Set.ssubset_def] at this;
     apply this;
     simp;
 
-lemma iff_mem_negneg : (~~p ∈ Ω.theory) ↔ (p ∈ Ω.theory) := by
+lemma iff_mem_negneg : (∼∼p ∈ Ω.theory) ↔ (p ∈ Ω.theory) := by
   simp only [membership_iff];
   constructor;
   . exact dne'!;
   . exact dni'!;
 
 @[simp]
-lemma iff_mem_imp : ((p ⟶ q) ∈ Ω.theory) ↔ (p ∈ Ω.theory) → (q ∈ Ω.theory) := by
+lemma iff_mem_imp : ((p ➝ q) ∈ Ω.theory) ↔ (p ∈ Ω.theory) → (q ∈ Ω.theory) := by
   constructor;
   . intro hpq hp;
     replace dpq := membership_iff.mp hpq;
@@ -408,13 +408,13 @@ lemma iff_mem_or : ((p ⋎ q) ∈ Ω.theory) ↔ (p ∈ Ω.theory) ∨ (q ∈ Ω
     . apply membership_iff.mpr;
       exact or₂'! (membership_iff.mp hq);
 
-lemma iff_congr : (Ω.theory *⊢[Λ]! (p ⟷ q)) → ((p ∈ Ω.theory) ↔ (q ∈ Ω.theory)) := by
+lemma iff_congr : (Ω.theory *⊢[Λ]! (p ⭤ q)) → ((p ∈ Ω.theory) ↔ (q ∈ Ω.theory)) := by
   intro hpq;
   constructor;
   . intro hp; exact iff_mem_imp.mp (membership_iff.mpr $ and₁'! hpq) hp;
   . intro hq; exact iff_mem_imp.mp (membership_iff.mpr $ and₂'! hpq) hq;
 
-lemma mem_dn_iff : (p ∈ Ω.theory) ↔ (~~p ∈ Ω.theory) := iff_congr $ dn!
+lemma mem_dn_iff : (p ∈ Ω.theory) ↔ (∼∼p ∈ Ω.theory) := iff_congr $ dn!
 
 lemma equality_def : Ω₁ = Ω₂ ↔ Ω₁.theory = Ω₂.theory := by
   constructor;
@@ -433,7 +433,7 @@ lemma intro_equality {h : ∀ p, p ∈ Ω₁.theory → p ∈ Ω₂.theory} : Ω
       apply iff_mem_neg.mpr hp;
     )
 
-lemma neg_imp (h : q ∈ Ω₂.theory → p ∈ Ω₁.theory) : (~p ∈ Ω₁.theory) → (~q ∈ Ω₂.theory) := by
+lemma neg_imp (h : q ∈ Ω₂.theory → p ∈ Ω₁.theory) : (∼p ∈ Ω₁.theory) → (∼q ∈ Ω₂.theory) := by
   contrapose;
   intro hq;
   apply iff_mem_neg.mp;
@@ -441,7 +441,7 @@ lemma neg_imp (h : q ∈ Ω₂.theory → p ∈ Ω₁.theory) : (~p ∈ Ω₁.th
   apply h;
   exact mem_dn_iff.mpr $ iff_mem_neg.mpr hq;
 
-lemma neg_iff (h : p ∈ Ω₁.theory ↔ q ∈ Ω₂.theory) : (~p ∈ Ω₁.theory) ↔ (~q ∈ Ω₂.theory) := ⟨neg_imp $ h.mpr, neg_imp $ h.mp⟩
+lemma neg_iff (h : p ∈ Ω₁.theory ↔ q ∈ Ω₂.theory) : (∼p ∈ Ω₁.theory) ↔ (∼q ∈ Ω₂.theory) := ⟨neg_imp $ h.mpr, neg_imp $ h.mp⟩
 
 -- These lemmata require Λ normality
 section Normal
@@ -454,15 +454,15 @@ lemma iff_mem_multibox : (□^[n]p ∈ Ω.theory) ↔ (∀ {Ω' : MCT Λ}, (□'
   . contrapose;
     push_neg;
     intro hp;
-    obtain ⟨Ω', hΩ'⟩ := lindenbaum (Λ := Λ) (T := insert (~p) (□''⁻¹^[n]Ω.theory)) (by
+    obtain ⟨Ω', hΩ'⟩ := lindenbaum (Λ := Λ) (T := insert (∼p) (□''⁻¹^[n]Ω.theory)) (by
       apply unprovable_iff_insert_neg_consistent.mp;
       by_contra hC;
       obtain ⟨Γ, hΓ₁, hΓ₂⟩ := Context.provable_iff.mp hC;
-      have : Λ ⊢! □^[n]⋀Γ ⟶ □^[n]p := imply_multibox_distribute'! hΓ₂;
-      have : Λ ⊬! □^[n]⋀Γ ⟶ □^[n]p := by
+      have : Λ ⊢! □^[n]⋀Γ ➝ □^[n]p := imply_multibox_distribute'! hΓ₂;
+      have : Λ ⊬! □^[n]⋀Γ ➝ □^[n]p := by
         have := Context.provable_iff.not.mp $ membership_iff.not.mp hp;
         push_neg at this;
-        have : Λ ⊬! ⋀□'^[n]Γ ⟶ □^[n]p := FiniteContext.provable_iff.not.mp $ this (□'^[n]Γ) (by
+        have : Λ ⊬! ⋀□'^[n]Γ ➝ □^[n]p := FiniteContext.provable_iff.not.mp $ this (□'^[n]Γ) (by
           intro q hq;
           obtain ⟨r, hr₁, hr₂⟩ := by simpa using hq;
           subst hr₂;
@@ -482,14 +482,14 @@ lemma iff_mem_multibox : (□^[n]p ∈ Ω.theory) ↔ (∀ {Ω' : MCT Λ}, (□'
       simp only [Set.mem_insert_iff, true_or]
 lemma iff_mem_box : (□p ∈ Ω.theory) ↔ (∀ {Ω' : MCT Λ}, (□''⁻¹Ω.theory ⊆ Ω'.theory) → (p ∈ Ω'.theory)) := iff_mem_multibox (n := 1)
 
-lemma multibox_dn_iff : (□^[n](~~p) ∈ Ω.theory) ↔ (□^[n]p ∈ Ω.theory) := by
+lemma multibox_dn_iff : (□^[n](∼∼p) ∈ Ω.theory) ↔ (□^[n]p ∈ Ω.theory) := by
   simp only [iff_mem_multibox];
   constructor;
   . intro h Ω hΩ; exact iff_mem_negneg.mp $ h hΩ;
   . intro h Ω hΩ; exact iff_mem_negneg.mpr $ h hΩ;
-lemma box_dn_iff : (□(~~p) ∈ Ω.theory) ↔ (□p ∈ Ω.theory) := multibox_dn_iff (n := 1)
+lemma box_dn_iff : (□(∼∼p) ∈ Ω.theory) ↔ (□p ∈ Ω.theory) := multibox_dn_iff (n := 1)
 
-lemma mem_multibox_dual : □^[n]p ∈ Ω.theory ↔ ~(◇^[n](~p)) ∈ Ω.theory := by
+lemma mem_multibox_dual : □^[n]p ∈ Ω.theory ↔ ∼(◇^[n](∼p)) ∈ Ω.theory := by
   simp [membership_iff];
   constructor;
   . intro h;
@@ -506,13 +506,13 @@ lemma mem_multibox_dual : □^[n]p ∈ Ω.theory ↔ ~(◇^[n](~p)) ∈ Ω.theor
     constructor;
     . assumption;
     . exact FiniteContext.provable_iff.mpr $ imp_trans''! (FiniteContext.provable_iff.mp hΓ₂) (and₂'! multibox_duality!);
-lemma mem_box_dual : □p ∈ Ω.theory ↔ (~(◇(~p)) ∈ Ω.theory) := mem_multibox_dual (n := 1)
+lemma mem_box_dual : □p ∈ Ω.theory ↔ (∼(◇(∼p)) ∈ Ω.theory) := mem_multibox_dual (n := 1)
 
--- lemma multidia_dn_iff : (◇^[n](~~p) ∈ Ω.theory) ↔ (◇^[n]p ∈ Ω.theory) := by sorry
+-- lemma multidia_dn_iff : (◇^[n](∼∼p) ∈ Ω.theory) ↔ (◇^[n]p ∈ Ω.theory) := by sorry
 
--- lemma dia_dn_iff : (◇(~~p) ∈ Ω.theory) ↔ (◇p) ∈ Ω.theory := neg_iff box_dn_iff -- TODO: multidia_dn_iff (n := 1)
+-- lemma dia_dn_iff : (◇(∼∼p) ∈ Ω.theory) ↔ (◇p) ∈ Ω.theory := neg_iff box_dn_iff -- TODO: multidia_dn_iff (n := 1)
 
-lemma mem_multidia_dual : ◇^[n]p ∈ Ω.theory ↔ ~(□^[n](~p)) ∈ Ω.theory := by
+lemma mem_multidia_dual : ◇^[n]p ∈ Ω.theory ↔ ∼(□^[n](∼p)) ∈ Ω.theory := by
   simp [membership_iff];
   constructor;
   . intro h;
@@ -529,7 +529,7 @@ lemma mem_multidia_dual : ◇^[n]p ∈ Ω.theory ↔ ~(□^[n](~p)) ∈ Ω.theor
     constructor;
     . assumption;
     . exact FiniteContext.provable_iff.mpr $ imp_trans''! (FiniteContext.provable_iff.mp hΓ₂) (and₂'! multidia_duality!);
-lemma mem_dia_dual : ◇p ∈ Ω.theory ↔ (~(□(~p)) ∈ Ω.theory) := mem_multidia_dual (n := 1)
+lemma mem_dia_dual : ◇p ∈ Ω.theory ↔ (∼(□(∼p)) ∈ Ω.theory) := mem_multidia_dual (n := 1)
 
 lemma iff_mem_multidia : (◇^[n]p ∈ Ω.theory) ↔ (∃ Ω' : MCT Λ, (□''⁻¹^[n]Ω.theory ⊆ Ω'.theory) ∧ (p ∈ Ω'.theory)) := by
   constructor;

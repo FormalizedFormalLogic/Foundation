@@ -32,10 +32,10 @@ def toStr : Litform α → String
   | ⊤      => "⊤"
   | ⊥      => "⊥"
   | atom a => toString a
-  | ~p     => "(¬" ++ toStr p ++ ")"
+  | ∼p     => "(¬" ++ toStr p ++ ")"
   | p ⋏ q  => "(" ++ toStr p ++ " ∧ " ++ toStr q ++ ")"
   | p ⋎ q  => "(" ++ toStr p ++ " ∨ "  ++ toStr q ++ ")"
-  | p ⟶ q => "(" ++ toStr p ++ " ⟶ "  ++ toStr q ++ ")"
+  | p ➝ q => "(" ++ toStr p ++ " ➝ "  ++ toStr q ++ ")"
 
 instance : Repr (Litform α) := ⟨fun t _ => toStr t⟩
 
@@ -55,18 +55,18 @@ abbrev toExpr : Lit F → Q($F)
   | ⊥       => q(⊥)
   | p ⋏ q   => q($(toExpr p) ⋏ $(toExpr q))
   | p ⋎ q   => q($(toExpr p) ⋎ $(toExpr q))
-  | ~p      => q(~$(toExpr p))
-  | p ⟶ q  => q($(toExpr p) ⟶ $(toExpr q))
+  | ∼p      => q(∼$(toExpr p))
+  | p ➝ q  => q($(toExpr p) ➝ $(toExpr q))
 
 partial def denote : Q($F) → MetaM (Lit F)
-  | ~q(⊤)        => return ⊤
-  | ~q(⊥)        => return ⊥
-  | ~q($p ⋏ $q)  => return (←denote p) ⋏ (←denote q)
-  | ~q($p ⋎ $q)  => return (←denote p) ⋎ (←denote q)
-  | ~q($p ⟶ $q) => return (←denote p) ⟶ (←denote q)
-  | ~q($p ⟷ $q)  => return (←denote p) ⟷ (←denote q)
-  | ~q(~$p)      => return ~(←denote p)
-  | ~q($e)       => return atom e
+  | ∼q(⊤)        => return ⊤
+  | ∼q(⊥)        => return ⊥
+  | ∼q($p ⋏ $q)  => return (←denote p) ⋏ (←denote q)
+  | ∼q($p ⋎ $q)  => return (←denote p) ⋎ (←denote q)
+  | ∼q($p ➝ $q) => return (←denote p) ➝ (←denote q)
+  | ∼q($p ⭤ $q)  => return (←denote p) ⭤ (←denote q)
+  | ∼q(∼$p)      => return ∼(←denote p)
+  | ∼q($e)       => return atom e
 
 instance denotation : Denotation q($F) (Lit F) where
   denote' := denote F ls

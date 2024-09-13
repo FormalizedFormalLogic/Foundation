@@ -13,8 +13,8 @@ def Formula.toModalFormula : Formula α → Modal.Formula α
   | .atom a => Modal.Formula.atom a
   | ⊤ => ⊤
   | ⊥ => ⊥
-  | ~p => ~(toModalFormula p)
-  | p ⟶ q => (toModalFormula p) ⟶ (toModalFormula q)
+  | ∼p => ∼(toModalFormula p)
+  | p ➝ q => (toModalFormula p) ➝ (toModalFormula q)
   | p ⋏ q => (toModalFormula p) ⋏ (toModalFormula q)
   | p ⋎ q => (toModalFormula p) ⋎ (toModalFormula q)
 postfix:75 "ᴹ" => Formula.toModalFormula
@@ -34,7 +34,7 @@ def toPropFormula (p : Formula α) (_ : p.degree = 0 := by simp_all [Formula.deg
   match p with
   | atom a => IntProp.Formula.atom a
   | ⊥ => ⊥
-  | p ⟶ q => p.toPropFormula ⟶ q.toPropFormula
+  | p ➝ q => p.toPropFormula ➝ q.toPropFormula
 postfix:75 "ᴾ" => Formula.toPropFormula
 
 namespace toPropFormula
@@ -48,7 +48,7 @@ def TrivTranslation : Formula α → Formula α
   | atom a => atom a
   | □p => p.TrivTranslation
   | ⊥ => ⊥
-  | p ⟶ q => (p.TrivTranslation) ⟶ (q.TrivTranslation)
+  | p ➝ q => (p.TrivTranslation) ➝ (q.TrivTranslation)
 postfix:75 "ᵀ" => TrivTranslation
 
 namespace TrivTranslation
@@ -63,7 +63,7 @@ def VerTranslation : Formula α → Formula α
   | atom a => atom a
   | □_ => ⊤
   | ⊥ => ⊥
-  | p ⟶ q => (p.VerTranslation) ⟶ (q.VerTranslation)
+  | p ➝ q => (p.VerTranslation) ➝ (q.VerTranslation)
 postfix:75 "ⱽ" => VerTranslation
 
 namespace VerTranslation
@@ -104,7 +104,7 @@ macro_rules | `(tactic| trivial) => `(tactic|
     | apply imp_id!;
   )
 
-lemma deducible_iff_trivTranslation : 𝐓𝐫𝐢𝐯 ⊢! p ⟷ pᵀ := by
+lemma deducible_iff_trivTranslation : 𝐓𝐫𝐢𝐯 ⊢! p ⭤ pᵀ := by
   induction p using Formula.rec' with
   | hbox p ih =>
     simp [TrivTranslation];
@@ -114,7 +114,7 @@ lemma deducible_iff_trivTranslation : 𝐓𝐫𝐢𝐯 ⊢! p ⟷ pᵀ := by
   | himp _ _ ih₁ ih₂ => exact imp_replace_iff! ih₁ ih₂;
   | _ => apply iff_id!
 
-lemma deducible_iff_verTranslation : 𝐕𝐞𝐫 ⊢! p ⟷ pⱽ := by
+lemma deducible_iff_verTranslation : 𝐕𝐞𝐫 ⊢! p ⭤ pⱽ := by
   induction p using Formula.rec' with
   | hbox =>
     apply iff_intro!;
@@ -149,7 +149,7 @@ lemma iff_Triv_classical : 𝐓𝐫𝐢𝐯 ⊢! p ↔ 𝐂𝐥 ⊢! pᵀᴾ := 
     | hNec ih => dsimp [TrivTranslation]; trivial;
     | _ => dsimp [TrivTranslation]; trivial;
   . intro h;
-    have d₁ : 𝐓𝐫𝐢𝐯 ⊢! pᵀ ⟶ p := and₂'! deducible_iff_trivTranslation;
+    have d₁ : 𝐓𝐫𝐢𝐯 ⊢! pᵀ ➝ p := and₂'! deducible_iff_trivTranslation;
     have d₂ : 𝐓𝐫𝐢𝐯 ⊢! pᵀ := by simpa only [TrivTranslation.back] using of_classical h;
     exact d₁ ⨀ d₂;
 
@@ -166,7 +166,7 @@ lemma iff_Ver_classical : 𝐕𝐞𝐫 ⊢! p ↔ 𝐂𝐥 ⊢! pⱽᴾ := by
     | hNec => dsimp [VerTranslation]; trivial;
     | _ => dsimp [VerTranslation]; trivial;
   . intro h;
-    have d₁ : 𝐕𝐞𝐫 ⊢! pⱽ ⟶ p := and₂'! deducible_iff_verTranslation;
+    have d₁ : 𝐕𝐞𝐫 ⊢! pⱽ ➝ p := and₂'! deducible_iff_verTranslation;
     have d₂ : 𝐕𝐞𝐫 ⊢! pⱽ := by simpa using of_classical h;
     exact d₁ ⨀ d₂;
 
@@ -239,7 +239,7 @@ theorem not_S4_weakerThan_GL : ¬(𝐒𝟒 : Hilbert α) ≤ₛ 𝐆𝐋 := by
   . exact unprovable_AxiomT_GL;
 
 
-example : 𝐕𝐞𝐫 ⊬! (~(□⊥) : Formula α) := by
+example : 𝐕𝐞𝐫 ⊬! (∼(□⊥) : Formula α) := by
   apply iff_Ver_classical.not.mpr;
   apply unprovable_classical_of_exists_ClassicalValuation;
   dsimp [VerTranslation, toPropFormula, IntProp.Formula.Kripke.Satisfies];

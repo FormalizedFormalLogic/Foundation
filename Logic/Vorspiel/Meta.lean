@@ -87,8 +87,8 @@ def toQList {α : Q(Type u)} : List Q($α) → Q(List $α)
 
 partial def ofQList {α : Q(Type u)} (l : Q(List $α)) : MetaM $ List Q($α) := do
   match l with
-  | ~q([])       => return []
-  | ~q($a :: $l) => return a :: (← ofQList l)
+  | ∼q([])       => return []
+  | ∼q($a :: $l) => return a :: (← ofQList l)
 
 def isStrongEq (t s : Expr) : MetaM Bool := do isDefEq (← whnf t) (← whnf s)
 
@@ -201,7 +201,7 @@ def vecUnfold (α : Q(Type u)) :
   | 0,     _ => pure finZeroElim
   | n + 1, v =>
     match v with
-    | ~q($a :> $w) => do
+    | ∼q($a :> $w) => do
       let ih ←vecUnfold α n w
       return a :> ih
 
@@ -213,7 +213,7 @@ partial def vectorGet {α : Q(Type u)} :
   | 0,     _, i => Fin.elim0 i
   | n + 1, l, i =>
     match l with
-    | ~q($a :> $as) =>
+    | ∼q($a :> $as) =>
       i.cases (pure ⟨q($a), q(rfl)⟩)
         (fun i : Fin n => do
           let ⟨b, hb⟩ ← vectorGet as i
@@ -223,13 +223,13 @@ partial def mapVector {α : Q(Type u)} {β : Q(Type v)}
   (r : Q($α) → MetaM Q($β))
   (n : Q(ℕ)) (l : Q(Fin $n → $α)) : MetaM Q(Fin $n → $β) := do
   match n with
-  | ~q(0) =>
+  | ∼q(0) =>
     match l with
-    | ~q(![]) =>
+    | ∼q(![]) =>
       return q(![])
-  | ~q($n + 1) =>
+  | ∼q($n + 1) =>
     match l with
-    | ~q($a :> $as) =>
+    | ∼q($a :> $as) =>
       let b ← r a
       let bs ← mapVector r n as
       return q($b :> $bs)
@@ -240,13 +240,13 @@ partial def resultVectorOfResult {α : Q(Type u)}
   (r : (e : Q($α)) → MetaM ((r : Q($α)) × Q($e = $r)))
   (n : Q(ℕ)) (l : Q(Fin $n → $α)) : MetaM ((l' : Q(Fin $n → $α)) × Q($l = $l')) := do
   match n with
-  | ~q(0) =>
+  | ∼q(0) =>
     match l with
-    | ~q(![]) =>
+    | ∼q(![]) =>
       return ⟨q(![]), q(rfl)⟩
-  | ~q($n + 1) =>
+  | ∼q($n + 1) =>
     match l with
-    | ~q($a :> $as) =>
+    | ∼q($a :> $as) =>
       let ⟨b, be⟩ ← r a
       let ⟨bs, bse⟩ ← resultVectorOfResult r n as
       return ⟨q($b :> $bs), q(vecConsExt $be $bse)⟩
@@ -257,13 +257,13 @@ partial def resultVectorOfResultFun {α : Q(Type u)} {β : Q(Type v)}
   (f : Q($α → $β)) (r : (e : Q($α)) → MetaM ((r : Q($β)) × Q($f $e = $r)))
   (n : Q(ℕ)) (l : Q(Fin $n → $α)) : MetaM ((l' : Q(Fin $n → $β)) × Q($f ∘ $l = $l')) := do
   match n with
-  | ~q(0) =>
+  | ∼q(0) =>
     match l with
-    | ~q(![]) =>
+    | ∼q(![]) =>
       return ⟨q(![]), q(compVecEmpty $f)⟩
-  | ~q($n + 1) =>
+  | ∼q($n + 1) =>
     match l with
-    | ~q($a :> $as) =>
+    | ∼q($a :> $as) =>
       let ⟨b, be⟩ ← r a
       let ⟨bs, bse⟩ ← resultVectorOfResultFun f r n as
       return ⟨q($b :> $bs), q(compVecCons $f $be $bse)⟩
@@ -274,13 +274,13 @@ partial def vectorCollection {α : Q(Type u)} {β : Q(Type v)} {H : Q($α → $�
   (r : (a : Q($α)) → MetaM ((b : Q($β)) × Q($H $a $b)))
   (n : Q(ℕ)) (l : Q(Fin $n → $α)) : MetaM ((b : Q(Fin $n → $β)) × Q((i : Fin $n) → $H ($l i) ($b i))) := do
   match n with
-  | ~q(0)      =>
+  | ∼q(0)      =>
     match l with
-    | ~q(![])  =>
+    | ∼q(![])  =>
       return ⟨q(![]), q(finZeroElim)⟩
-  | ~q($n' + 1) =>
+  | ∼q($n' + 1) =>
     match l with
-    | ~q($a :> $as) =>
+    | ∼q($a :> $as) =>
       let p ← r a
       let ps ← vectorCollection r n' as
       let vectorConsQ
@@ -301,13 +301,13 @@ partial def vectorCollection {α : Q(Type u)} {β : Q(Type v)} {H : Q($α → $�
 partial def mapVectorQ {α : Q(Type u)} {β : Q(Type v)} (f : Q($α) → MetaM Q($β))
     (n : Q(ℕ)) (l : Q(Fin $n → $α)) : MetaM Q(Fin $n → $β) := do
   match n with
-  | ~q(0) =>
+  | ∼q(0) =>
     match l with
-    | ~q(![]) =>
+    | ∼q(![]) =>
       return q(![])
-  | ~q($n' + 1) =>
+  | ∼q($n' + 1) =>
     match l with
-    | ~q($a :> $as) =>
+    | ∼q($a :> $as) =>
       let b : Q($β) ← f a
       let bs : Q(Fin $n' → $β) ← mapVectorQ f n' as
       return q($b :> $bs)
@@ -328,17 +328,17 @@ partial def vectorQNthAux {α : Q(Type u)}
   match i with
   | 0 =>
     match n with
-    | ~q(0) => throwError m!"out of bound"
-    | ~q($n + 1) =>
+    | ∼q(0) => throwError m!"out of bound"
+    | ∼q($n + 1) =>
       match l with
-      | ~q($a :> _) => return a
+      | ∼q($a :> _) => return a
       | _ => throwError m!"error in vectorQNthAux(2). nonexhaustive match: {l}"
   | .succ i' =>
     match n with
-    | ~q(0) => throwError m!"out of bound"
-    | ~q($n + 1) =>
+    | ∼q(0) => throwError m!"out of bound"
+    | ∼q($n + 1) =>
       match l with
-      | ~q(_ :> $l') => vectorQNthAux n l' i'
+      | ∼q(_ :> $l') => vectorQNthAux n l' i'
       | _ => throwError m!"error in vectorQNthAux(2). nonexhaustive match: {l}"
 
 partial def vectorQNth {α : Q(Type u)}
@@ -365,10 +365,10 @@ private lemma vecCons_assoc_eq {a b : α} {s : Fin n → α} (h : s <: b = t) :
 partial def vectorAppend {α : Q(Type u)}
     (n : Q(ℕ)) (v : Q(Fin $n → $α)) (a : Q($α)) : MetaM ((w : Q(Fin ($n + 1) → $α)) × Q($v <: $a = $w)) := do
   match n with
-  | ~q(0) => return ⟨q(![$a]), q(Matrix.vecConsLast_vecEmpty $a)⟩
-  | ~q($n' + 1) =>
+  | ∼q(0) => return ⟨q(![$a]), q(Matrix.vecConsLast_vecEmpty $a)⟩
+  | ∼q($n' + 1) =>
     match v with
-    | ~q($b :> $v') =>
+    | ∼q($b :> $v') =>
       let ⟨ih, ihh⟩ ← vectorAppend n' v' a
       return ⟨q($b :> $ih), q(vecCons_assoc_eq $ihh)⟩
     | _ => throwError m!"error in vectorQNthAux(2). nonexhaustive match: {v}"

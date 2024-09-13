@@ -28,7 +28,7 @@ inductive Redux (T : Theory L) : Code L → Sequent L → Sequent L → Prop
     ∃' p ∈ Γ → Redux T (Code.ex p t) (p/[t] :: Γ) Γ
   | exRefl    {Γ : Sequent L} {p : SyntacticSemiformula L 1} {t : SyntacticTerm L} :
     ∃' p ∉ Γ → Redux T (Code.ex p t) Γ Γ
-  | id        {Γ : Sequent L} {p : SyntacticFormula L} (hp : p ∈ T) : Redux T (Code.id p) ((~∀∀p) :: Γ) Γ
+  | id        {Γ : Sequent L} {p : SyntacticFormula L} (hp : p ∈ T) : Redux T (Code.id p) ((∼∀∀p) :: Γ) Γ
   | idRefl    {Γ : Sequent L} {p : SyntacticFormula L} (hp : p ∉ T) : Redux T (Code.id p) Γ Γ
 
 local notation:25 Δ₁" ≺[" c:25 "] " Δ₂:80 => Redux T c Δ₁ Δ₂
@@ -129,8 +129,8 @@ noncomputable def syntacticMainLemma (p : SearchTree T Γ) : T ⟹ p.seq := by
       · exact ih' (ReduxNat.redux hs $ Redux.exRefl h)
     case id p =>
       by_cases h : p ∈ T
-      · have : (~∀∀p) :: Δ₁ ≺[Code.id p] Δ₁ := Redux.id h
-        have : T ⟹ (~∀∀p) :: Δ₁ := ih' (ReduxNat.redux hs this)
+      · have : (∼∀∀p) :: Δ₁ ≺[Code.id p] Δ₁ := Redux.id h
+        have : T ⟹ (∼∀∀p) :: Δ₁ := ih' (ReduxNat.redux hs this)
         exact Derivation.id h this
       · exact ih' (ReduxNat.redux hs $ Redux.idRefl h)
 
@@ -251,7 +251,7 @@ lemma chainSet_ex {p : SyntacticSemiformula L 1} (h : ∃' p ∈ ⛓️) : ∀ t
   { have : ∃' p ∈ ⛓️[(encode $ Code.ex p t).pair s] := chain_monotone nwf (Nat.right_le_pair _ _) hs
     contradiction }
 
-lemma chainSet_id {p : SyntacticFormula L} (h : p ∈ T) : ~∀∀p ∈ ⛓️ := by
+lemma chainSet_id {p : SyntacticFormula L} (h : p ∈ T) : ∼∀∀p ∈ ⛓️ := by
   have : ⛓️[(encode $ Code.id p).pair 0 + 1] ≺[Code.id p] ⛓️[(encode $ Code.id p).pair 0] := chain_spec' nwf _ _
   generalize hΔ : ⛓️[(encode $ Code.id p).pair 0 + 1] = Δ
   rw[hΔ] at this; rcases this

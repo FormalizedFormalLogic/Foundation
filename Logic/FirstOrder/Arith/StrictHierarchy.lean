@@ -202,7 +202,7 @@ instance atom : (DeltaZeroIn ξ T).Atom := SHClassIn.atom 𝚺 0 T
 
 instance not : (DeltaZeroIn ξ T).Not := ⟨by
   rintro _ p ⟨p', hp', Hp⟩
-  exact ⟨~p',
+  exact ⟨∼p',
     zero_iff_delta_zero.mpr
       (by simp [←Hierarchy.zero_iff_delta_zero (Γ := 𝚺), pi_zero_iff_sigma_zero]; exact zero_iff_delta_zero.mp hp'),
     Hp.not⟩⟩

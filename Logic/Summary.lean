@@ -71,7 +71,7 @@ example : ¬System.Complete T :=
 #print axioms FirstOrder.Arith.first_incompleteness
 
 /-- Undecidable sentence  -/
-example : T ⊬ undecidable T ∧ T ⊬ ~undecidable T :=
+example : T ⊬ undecidable T ∧ T ⊬ ∼undecidable T :=
   FirstOrder.Arith.undecidable T
 
 #print axioms FirstOrder.Arith.undecidable

@@ -75,29 +75,29 @@ private lemma GL_truthlemma.lemma2
     simpa using hΓ₂ r hr;
 
   by_contra hC;
-  have : Γ₁ ⊢[𝐆𝐋]! ⋀Γ₂ ⟶ ⊥ := provable_iff.mpr $ and_imply_iff_imply_imply'!.mp hC;
-  have : Γ₁ ⊢[𝐆𝐋]! (□q ⋏ -q) ⟶ ⊥ := imp_trans''! (by
-    suffices Γ₁ ⊢[𝐆𝐋]! ⋀[□q, -q] ⟶ ⋀Γ₂ by
+  have : Γ₁ ⊢[𝐆𝐋]! ⋀Γ₂ ➝ ⊥ := provable_iff.mpr $ and_imply_iff_imply_imply'!.mp hC;
+  have : Γ₁ ⊢[𝐆𝐋]! (□q ⋏ -q) ➝ ⊥ := imp_trans''! (by
+    suffices Γ₁ ⊢[𝐆𝐋]! ⋀[□q, -q] ➝ ⋀Γ₂ by
       simpa only [ne_eq, List.cons_ne_self, not_false_eq_true, List.conj₂_cons_nonempty, List.conj₂_singleton];
     apply conjconj_subset!;
     simpa using hΓ₂;
   ) this;
-  have : Γ₁ ⊢[𝐆𝐋]! □q ⟶ -q ⟶ ⊥ := and_imply_iff_imply_imply'!.mp this;
-  have : Γ₁ ⊢[𝐆𝐋]! □q ⟶ q := by
+  have : Γ₁ ⊢[𝐆𝐋]! □q ➝ -q ➝ ⊥ := and_imply_iff_imply_imply'!.mp this;
+  have : Γ₁ ⊢[𝐆𝐋]! □q ➝ q := by
     rcases Formula.complement.or (p := q) with (hp | ⟨q, rfl⟩);
     . rw [hp] at this;
       exact imp_trans''! this dne!;
     . simpa only [complement] using this;
-  have : (□'Γ₁) ⊢[𝐆𝐋]! □(□q ⟶ q) := contextual_nec! this;
+  have : (□'Γ₁) ⊢[𝐆𝐋]! □(□q ➝ q) := contextual_nec! this;
   have : (□'Γ₁) ⊢[𝐆𝐋]! □q := axiomL! ⨀ this;
-  have : 𝐆𝐋 ⊢! ⋀□'Γ₁ ⟶ □q := provable_iff.mp this;
-  have : 𝐆𝐋 ⊢! ⋀□'(X.formulae.prebox ∪ X.formulae.prebox.box |>.toList) ⟶ □q := imp_trans''! (conjconj_subset! (by
+  have : 𝐆𝐋 ⊢! ⋀□'Γ₁ ➝ □q := provable_iff.mp this;
+  have : 𝐆𝐋 ⊢! ⋀□'(X.formulae.prebox ∪ X.formulae.prebox.box |>.toList) ➝ □q := imp_trans''! (conjconj_subset! (by
     simp;
     intro r hr;
     have := hΓ₁ _ hr; simp at this;
     tauto;
   )) this;
-  have : 𝐆𝐋 ⊢! ⋀□'(X.formulae.prebox.toList) ⟶ □q := imp_trans''! (conjconj_provable! (by
+  have : 𝐆𝐋 ⊢! ⋀□'(X.formulae.prebox.toList) ➝ □q := imp_trans''! (conjconj_provable! (by
     intro q hq;
     simp at hq;
     obtain ⟨r, hr, rfl⟩ := hq;

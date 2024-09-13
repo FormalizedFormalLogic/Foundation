@@ -259,13 +259,13 @@ lemma geachConfluent_CanonicalFrame (h : 𝗴𝗲(t) ⊆ Ax) : GeachConfluent t 
       (multirel_def_multidia.mp r₁₂ hΓconj)
     have : ◇^[t.n]⋀Γ ∈ Ω₃.theory := multirel_def_multibox.mp r₁₃ this;
 
-    have : 𝝂Ax ⊢! □^[t.n]⋀Δ ⋏ ◇^[t.n]⋀Γ ⟶ ⊥ := by {
+    have : 𝝂Ax ⊢! □^[t.n]⋀Δ ⋏ ◇^[t.n]⋀Γ ➝ ⊥ := by {
       apply and_imply_iff_imply_imply'!.mpr;
       exact imp_trans''!
-        (show 𝝂Ax ⊢! □^[t.n]⋀Δ ⟶ □^[t.n](~⋀Γ) by exact imply_multibox_distribute'! $ contra₁'! $ imp_trans''! (and_imply_iff_imply_imply'!.mp hC) (and₂'! neg_equiv!))
-        (show 𝝂Ax ⊢! □^[t.n](~⋀Γ) ⟶ (◇^[t.n]⋀Γ) ⟶ ⊥ by exact imp_trans''! (contra₁'! $ and₁'! $ multidia_duality!) (and₁'! neg_equiv!));
+        (show 𝝂Ax ⊢! □^[t.n]⋀Δ ➝ □^[t.n](∼⋀Γ) by exact imply_multibox_distribute'! $ contra₁'! $ imp_trans''! (and_imply_iff_imply_imply'!.mp hC) (and₂'! neg_equiv!))
+        (show 𝝂Ax ⊢! □^[t.n](∼⋀Γ) ➝ (◇^[t.n]⋀Γ) ➝ ⊥ by exact imp_trans''! (contra₁'! $ and₁'! $ multidia_duality!) (and₁'! neg_equiv!));
     }
-    have : 𝝂Ax ⊬! □^[t.n]⋀Δ ⋏ ◇^[t.n]⋀Γ ⟶ ⊥ := by simpa using (def_consistent.mp Ω₃.consistent) (Γ := [□^[t.n]⋀Δ, ◇^[t.n]⋀Γ]) (by simp_all)
+    have : 𝝂Ax ⊬! □^[t.n]⋀Δ ⋏ ◇^[t.n]⋀Γ ➝ ⊥ := by simpa using (def_consistent.mp Ω₃.consistent) (Γ := [□^[t.n]⋀Δ, ◇^[t.n]⋀Γ]) (by simp_all)
 
     contradiction;
 
@@ -330,7 +330,7 @@ theorem KD_strictlyWeakerThan_KT : (𝐊𝐃 : Hilbert α) <ₛ 𝐊𝐓 := by
   constructor;
   . apply KD_weakerThan_KT;
   . simp [weakerThan_iff];
-    use (□(atom default) ⟶ (atom default));
+    use (□(atom default) ➝ (atom default));
     constructor;
     . exact Deduction.maxm! (by simp);
     . apply KD_sound.not_provable_of_countermodel;
@@ -348,7 +348,7 @@ theorem K4_strictlyWeakerThan_S4 : (𝐊𝟒 : Hilbert α) <ₛ 𝐒𝟒 := by
   constructor;
   . apply K4_weakerThan_S4;
   . simp [weakerThan_iff]
-    use (□(atom default) ⟶ (atom default));
+    use (□(atom default) ➝ (atom default));
     constructor;
     . exact Deduction.maxm! (by simp)
     . apply K4_sound.not_provable_of_countermodel;
@@ -369,7 +369,7 @@ theorem S4_strictlyWeakerThan_S5 : (𝐒𝟒 : Hilbert α) <ₛ 𝐒𝟓 := by
   constructor;
   . apply S4_weakerThan_S5;
   . simp [weakerThan_iff];
-    use (◇(atom default) ⟶ □◇(atom default));
+    use (◇(atom default) ➝ □◇(atom default));
     constructor;
     . exact Deduction.maxm! (by simp);
     . apply S4_sound.not_provable_of_countermodel;

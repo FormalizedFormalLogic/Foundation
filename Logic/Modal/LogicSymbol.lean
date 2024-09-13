@@ -105,12 +105,12 @@ class BasicModalLogicConnective.Subclosed [BasicModalLogicalConnective F] (C : F
   Dia.Subclosed C
 
 class DiaAbbrev (F : Type*) [Box F] [Dia F] [Tilde F] where
-  dia_abbrev {p : F} : ◇p =  ~(□(~p))
+  dia_abbrev {p : F} : ◇p =  ∼(□(∼p))
 -- attribute [aesop safe 5 forward] DiaAbbrev.dia_abbrev
 
 class ModalDeMorgan (F : Type*) [BasicModalLogicalConnective F] extends DeMorgan F where
-  dia (p : F) : ~◇p = □(~p)
-  box (p : F) : ~□p = ◇(~p)
+  dia (p : F) : ∼◇p = □(∼p)
+  box (p : F) : ∼□p = ◇(∼p)
 
 attribute [simp] ModalDeMorgan.dia ModalDeMorgan.box
 

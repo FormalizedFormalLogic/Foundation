@@ -33,7 +33,7 @@ lemma NoLEMFrame.confluent : Confluent NoLEMFrame.Rel := by simp [Confluent];
 
 lemma NoLEMFrame.connected : Connected NoLEMFrame.Rel := by simp [Connected];
 
-lemma noLEM_on_frameclass : ∃ (p : Formula α), ¬((Kripke.FrameClassOfHilbert.{u, 0} 𝐈𝐧𝐭) ⊧ p ⋎ ~p) := by
+lemma noLEM_on_frameclass : ∃ (p : Formula α), ¬((Kripke.FrameClassOfHilbert.{u, 0} 𝐈𝐧𝐭) ⊧ p ⋎ ∼p) := by
   use (atom default);
   simp [Semantics.Realize];
   use NoLEMFrame;
@@ -49,7 +49,7 @@ lemma noLEM_on_frameclass : ∃ (p : Formula α), ¬((Kripke.FrameClassOfHilbert
 /--
   Law of Excluded Middle is not always provable in intuitionistic logic.
 -/
-theorem noLEM : ∃ (p : Formula α), 𝐈𝐧𝐭 ⊬! p ⋎ ~p := by
+theorem noLEM : ∃ (p : Formula α), 𝐈𝐧𝐭 ⊬! p ⋎ ∼p := by
   obtain ⟨p, hp⟩ := noLEM_on_frameclass (α := α);
   use p;
   by_contra hC;
@@ -65,7 +65,7 @@ theorem Int_strictly_weaker_than_Cl : (𝐈𝐧𝐭 : Hilbert α) <ₛ 𝐂𝐥 
   . apply weakerThan_iff.not.mpr;
     push_neg;
     obtain ⟨p, hp⟩ := noLEM (α := α);
-    use (p ⋎ ~p);
+    use (p ⋎ ∼p);
     constructor;
     . exact lem!;
     . assumption;
@@ -74,7 +74,7 @@ theorem Int_strictly_weaker_than_Cl : (𝐈𝐧𝐭 : Hilbert α) <ₛ 𝐂𝐥 
 
 section
 
-lemma noLEM_on_frameclass_KC : ∃ (p : Formula α), ¬((Kripke.FrameClassOfHilbert.{u, 0} 𝐊𝐂) ⊧ p ⋎ ~p) := by
+lemma noLEM_on_frameclass_KC : ∃ (p : Formula α), ¬((Kripke.FrameClassOfHilbert.{u, 0} 𝐊𝐂) ⊧ p ⋎ ∼p) := by
   use (atom default);
   simp [Semantics.Realize];
   use NoLEMFrame;
@@ -87,7 +87,7 @@ lemma noLEM_on_frameclass_KC : ∃ (p : Formula α), ¬((Kripke.FrameClassOfHilb
     . simp;
     . simp [ValidOnModel, Satisfies];
 
-lemma noLEM_KC: ∃ (p : Formula α), 𝐊𝐂 ⊬! p ⋎ ~p := by
+lemma noLEM_KC: ∃ (p : Formula α), 𝐊𝐂 ⊬! p ⋎ ∼p := by
   obtain ⟨p, hp⟩ := noLEM_on_frameclass_KC (α := α);
   use p;
   by_contra hC;
@@ -100,7 +100,7 @@ theorem KC_strictly_weaker_than_Cl : (𝐊𝐂 : Hilbert α) <ₛ 𝐂𝐥 := by
   . apply weakerThan_iff.not.mpr;
     push_neg;
     obtain ⟨p, hp⟩ := noLEM_KC (α := α);
-    use (p ⋎ ~p);
+    use (p ⋎ ∼p);
     constructor;
     . exact lem!;
     . assumption;
@@ -110,7 +110,7 @@ end
 
 section
 
-lemma noLEM_on_frameclass_LC : ∃ (p : Formula α), ¬((Kripke.FrameClassOfHilbert.{u, 0} 𝐋𝐂) ⊧ p ⋎ ~p) := by
+lemma noLEM_on_frameclass_LC : ∃ (p : Formula α), ¬((Kripke.FrameClassOfHilbert.{u, 0} 𝐋𝐂) ⊧ p ⋎ ∼p) := by
   use (atom default);
   simp [Semantics.Realize];
   use NoLEMFrame;
@@ -123,7 +123,7 @@ lemma noLEM_on_frameclass_LC : ∃ (p : Formula α), ¬((Kripke.FrameClassOfHilb
     . simp;
     . simp [ValidOnModel, Satisfies];
 
-lemma noLEM_LC: ∃ (p : Formula α), 𝐋𝐂 ⊬! p ⋎ ~p := by
+lemma noLEM_LC: ∃ (p : Formula α), 𝐋𝐂 ⊬! p ⋎ ∼p := by
   obtain ⟨p, hp⟩ := noLEM_on_frameclass_LC (α := α);
   use p;
   by_contra hC;
@@ -136,7 +136,7 @@ theorem LC_strictly_weaker_than_Cl : (𝐋𝐂 : Hilbert α) <ₛ 𝐂𝐥 := by
   . apply weakerThan_iff.not.mpr;
     push_neg;
     obtain ⟨p, hp⟩ := noLEM_LC (α := α);
-    use (p ⋎ ~p);
+    use (p ⋎ ∼p);
     constructor;
     . exact lem!;
     . assumption;

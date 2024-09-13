@@ -87,21 +87,21 @@ lemma connected_CanonicalFrame {Ax : Theory α} (hAx : .𝟯 ⊆ Ax) [System.Con
   obtain ⟨p, hpY, hpZ⟩ := nhYZ; replace hpY : □p ∈ Y.theory := hpY;
   obtain ⟨q, hqZ, hqY⟩ := nhZY; replace hqZ : □q ∈ Z.theory := hqZ;
 
-  have hpqX : □(□p ⟶ q) ∉ X.theory := by
+  have hpqX : □(□p ➝ q) ∉ X.theory := by
     apply iff_mem_box.not.mpr; push_neg;
     use Y;
     constructor;
     . assumption;
     . apply iff_mem_imp.not.mpr; simp [hpY, hqY];
-  have hqpX : □(□q ⟶ p) ∉ X.theory := by
+  have hqpX : □(□q ➝ p) ∉ X.theory := by
     apply iff_mem_box.not.mpr; push_neg;
     use Z;
     constructor;
     . assumption;
     . apply iff_mem_imp.not.mpr; simp [hpZ, hqZ];
 
-  have : (□(□p ⟶ q) ⋎ □(□q ⟶ p)) ∉ X.theory := by apply iff_mem_or.not.mpr; push_neg; exact ⟨hpqX, hqpX⟩;
-  have : □(□p ⟶ q) ⋎ □(□q ⟶ p) ∈ X.theory := by apply subset_axiomset _; aesop;
+  have : (□(□p ➝ q) ⋎ □(□q ➝ p)) ∉ X.theory := by apply iff_mem_or.not.mpr; push_neg; exact ⟨hpqX, hqpX⟩;
+  have : □(□p ➝ q) ⋎ □(□q ➝ p) ∈ X.theory := by apply subset_axiomset _; aesop;
   contradiction;
 
 instance : Complete (𝐒𝟒.𝟑 : Hilbert α) (ReflexiveTransitiveConnectedFrameClass.{u}#α) := instComplete_of_mem_canonicalFrame ReflexiveTransitiveConnectedFrameClass $ by

@@ -16,8 +16,8 @@ def Satisfies (M : Kripke.Model.{u, v} α) (w : M.World) : Formula α → Prop
   | ⊥      => False
   | p ⋏ q  => Satisfies M w p ∧ Satisfies M w q
   | p ⋎ q  => Satisfies M w p ∨ Satisfies M w q
-  | ~p     => ∀ {w' : M.World}, (w ≺ w') → ¬Satisfies M w' p
-  | p ⟶ q => ∀ {w' : M.World}, (w ≺ w') → (Satisfies M w' p → Satisfies M w' q)
+  | ∼p     => ∀ {w' : M.World}, (w ≺ w') → ¬Satisfies M w' p
+  | p ➝ q => ∀ {w' : M.World}, (w ≺ w') → (Satisfies M w' p → Satisfies M w' q)
 
 namespace Satisfies
 
@@ -32,8 +32,8 @@ variable {M : Model α} {w : M.World} {p q r : Formula α}
 @[simp] lemma bot_def  : w ⊧ ⊥ ↔ False := by simp [Satisfies];
 @[simp] lemma and_def  : w ⊧ p ⋏ q ↔ w ⊧ p ∧ w ⊧ q := by simp [Satisfies];
 @[simp] lemma or_def   : w ⊧ p ⋎ q ↔ w ⊧ p ∨ w ⊧ q := by simp [Satisfies];
-@[simp] lemma imp_def  : w ⊧ p ⟶ q ↔ ∀ {w' : M.World}, (w ≺ w') → (w' ⊧ p → w' ⊧ q) := by simp [Satisfies, imp_iff_not_or];
-@[simp] lemma neg_def  : w ⊧ ~p ↔ ∀ {w' : M.World}, (w ≺ w') → ¬(w' ⊧ p) := by simp [Satisfies];
+@[simp] lemma imp_def  : w ⊧ p ➝ q ↔ ∀ {w' : M.World}, (w ≺ w') → (w' ⊧ p → w' ⊧ q) := by simp [Satisfies, imp_iff_not_or];
+@[simp] lemma neg_def  : w ⊧ ∼p ↔ ∀ {w' : M.World}, (w ≺ w') → ¬(w' ⊧ p) := by simp [Satisfies];
 
 instance : Semantics.Top M.World where
   realize_top := by simp [Satisfies];
@@ -63,7 +63,7 @@ lemma formula_hereditary
   | _ => simp_all [Satisfies];
 
 
-lemma neg_equiv : w ⊧ ~p ↔ w ⊧ p ⟶ ⊥ := by simp_all [Satisfies];
+lemma neg_equiv : w ⊧ ∼p ↔ w ⊧ p ➝ ⊥ := by simp_all [Satisfies];
 
 end Satisfies
 
@@ -87,37 +87,37 @@ variable
 
 protected lemma verum : M ⊧ ⊤ := by simp_all [ValidOnModel];
 
-protected lemma and₁ : M ⊧ p ⋏ q ⟶ p := by simp_all [ValidOnModel, Satisfies];
+protected lemma and₁ : M ⊧ p ⋏ q ➝ p := by simp_all [ValidOnModel, Satisfies];
 
-protected lemma and₂ : M ⊧ p ⋏ q ⟶ q := by simp_all [ValidOnModel, Satisfies];
+protected lemma and₂ : M ⊧ p ⋏ q ➝ q := by simp_all [ValidOnModel, Satisfies];
 
-protected lemma and₃ : M ⊧ p ⟶ q ⟶ p ⋏ q := by
+protected lemma and₃ : M ⊧ p ➝ q ➝ p ⋏ q := by
   intro x y _ hp z Ryz hq;
   replace hp : Satisfies M z p := formula_hereditary atom_hereditary F_trans Ryz hp;
   exact ⟨hp, hq⟩;
 
-protected lemma or₁ : M ⊧ p ⟶ p ⋎ q := by simp_all [ValidOnModel, Satisfies];
+protected lemma or₁ : M ⊧ p ➝ p ⋎ q := by simp_all [ValidOnModel, Satisfies];
 
-protected lemma or₂ : M ⊧ q ⟶ p ⋎ q := by simp_all [ValidOnModel, Satisfies];
+protected lemma or₂ : M ⊧ q ➝ p ⋎ q := by simp_all [ValidOnModel, Satisfies];
 
-protected lemma or₃ : M ⊧ (p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r) := by
+protected lemma or₃ : M ⊧ (p ➝ r) ➝ (q ➝ r) ➝ (p ⋎ q ➝ r) := by
   simp_all only [ValidOnModel.iff_models, ValidOnModel, Satisfies.iff_models, Satisfies.imp_def, Satisfies.or_def];
   intro w₁ w₂ _ hpr w₃ hw₂₃ hqr w₄ hw₃₄ hpq;
   cases hpq with
   | inl hp => exact hpr (F_trans hw₂₃ hw₃₄) hp;
   | inr hq => exact hqr hw₃₄ hq;
 
-protected lemma imply₁ : M ⊧ p ⟶ q ⟶ p := by
+protected lemma imply₁ : M ⊧ p ➝ q ➝ p := by
   intro x y _ hp z Ryz _;
   exact formula_hereditary atom_hereditary F_trans Ryz hp;
 
-protected lemma imply₂ : M ⊧ (p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r := by
+protected lemma imply₂ : M ⊧ (p ➝ q ➝ r) ➝ (p ➝ q) ➝ p ➝ r := by
   intro x y _ hpqr z Ryz hpq w Rzw hp;
   have Ryw := F_trans Ryz Rzw;
   have Rww := F_refl w;
   exact hpqr Ryw hp Rww (hpq Rzw hp);
 
-protected lemma mdp (hpq : M ⊧ p ⟶ q) (hp : M ⊧ p) : M ⊧ q := by
+protected lemma mdp (hpq : M ⊧ p ➝ q) (hp : M ⊧ p) : M ⊧ q := by
   intro w;
   exact hpq w (F_refl w) $ hp w;
 
@@ -186,23 +186,23 @@ variable {F : Frame.Dep α} {p q r : Formula α}
 
 protected lemma verum : F ⊧ ⊤ := fun _ => ValidOnModel.verum
 
-protected lemma and₁ : F ⊧ p ⋏ q ⟶ p := fun _ => ValidOnModel.and₁
+protected lemma and₁ : F ⊧ p ⋏ q ➝ p := fun _ => ValidOnModel.and₁
 
-protected lemma and₂ : F ⊧ p ⋏ q ⟶ q := fun _ => ValidOnModel.and₂
+protected lemma and₂ : F ⊧ p ⋏ q ➝ q := fun _ => ValidOnModel.and₂
 
-protected lemma and₃ : F ⊧ p ⟶ q ⟶ p ⋏ q := fun hV => ValidOnModel.and₃ hV F_trans
+protected lemma and₃ : F ⊧ p ➝ q ➝ p ⋏ q := fun hV => ValidOnModel.and₃ hV F_trans
 
-protected lemma or₁ : F ⊧ p ⟶ p ⋎ q := fun _ => ValidOnModel.or₁
+protected lemma or₁ : F ⊧ p ➝ p ⋎ q := fun _ => ValidOnModel.or₁
 
-protected lemma or₂ : F ⊧ q ⟶ p ⋎ q := fun _ => ValidOnModel.or₂
+protected lemma or₂ : F ⊧ q ➝ p ⋎ q := fun _ => ValidOnModel.or₂
 
-protected lemma or₃ : F ⊧ (p ⟶ r) ⟶ (q ⟶ r) ⟶ (p ⋎ q ⟶ r) := fun _ => ValidOnModel.or₃ F_trans
+protected lemma or₃ : F ⊧ (p ➝ r) ➝ (q ➝ r) ➝ (p ⋎ q ➝ r) := fun _ => ValidOnModel.or₃ F_trans
 
-protected lemma imply₁ : F ⊧ p ⟶ q ⟶ p := fun hV => ValidOnModel.imply₁ hV F_trans
+protected lemma imply₁ : F ⊧ p ➝ q ➝ p := fun hV => ValidOnModel.imply₁ hV F_trans
 
-protected lemma imply₂ : F ⊧ (p ⟶ q ⟶ r) ⟶ (p ⟶ q) ⟶ p ⟶ r := fun _ => ValidOnModel.imply₂ F_trans F_refl
+protected lemma imply₂ : F ⊧ (p ➝ q ➝ r) ➝ (p ➝ q) ➝ p ➝ r := fun _ => ValidOnModel.imply₂ F_trans F_refl
 
-protected lemma mdp (hpq : F ⊧ p ⟶ q) (hp : F ⊧ p) : F ⊧ q := fun hV => ValidOnModel.mdp F_refl (hpq hV) (hp hV)
+protected lemma mdp (hpq : F ⊧ p ➝ q) (hp : F ⊧ p) : F ⊧ q := fun hV => ValidOnModel.mdp F_refl (hpq hV) (hp hV)
 
 protected lemma efq : F ⊧ Axioms.EFQ p := fun _ => ValidOnModel.efq
 

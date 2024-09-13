@@ -14,7 +14,7 @@ open MaximalConsistentTheory
 
 abbrev CanonicalFrame (Λ : Hilbert α) [Nonempty (MCT Λ)] : PLoN.Frame α where
   World := (MCT Λ)
-  Rel := λ p Ω₁ Ω₂ => ~(□p) ∈ Ω₁.theory ∧ ~p ∈ Ω₂.theory
+  Rel := λ p Ω₁ Ω₂ => ∼(□p) ∈ Ω₁.theory ∧ ∼p ∈ Ω₂.theory
 
 abbrev CanonicalModel (Λ : Hilbert α) [Nonempty (MCT Λ)] : PLoN.Model α where
   Frame := CanonicalFrame Λ
@@ -36,7 +36,7 @@ lemma truthlemma : ∀ {Ω : (CanonicalModel Λ).World}, Ω ⊧ p ↔ (p ∈ Ω.
       simp [PLoN.Satisfies];
       constructor;
       . assumption;
-      . obtain ⟨Ω', hΩ'⟩ := lindenbaum (Λ := Λ) (T := {~p}) (not_singleton_consistent Ω.consistent (iff_mem_neg.mpr hC));
+      . obtain ⟨Ω', hΩ'⟩ := lindenbaum (Λ := Λ) (T := {∼p}) (not_singleton_consistent Ω.consistent (iff_mem_neg.mpr hC));
         use Ω';
         constructor;
         . apply iff_mem_neg.mp;
@@ -58,7 +58,7 @@ lemma complete_of_mem_canonicalFrame {𝔽 : FrameClass α} (hFC : CanonicalFram
   constructor;
   . exact hFC;
   . use (CanonicalModel Λ).Valuation;
-    obtain ⟨Ω, hΩ⟩ := lindenbaum (Λ := Λ) (T := {~p}) (by
+    obtain ⟨Ω, hΩ⟩ := lindenbaum (Λ := Λ) (T := {∼p}) (by
       apply unprovable_iff_singleton_neg_consistent.mp;
       exact h;
     );

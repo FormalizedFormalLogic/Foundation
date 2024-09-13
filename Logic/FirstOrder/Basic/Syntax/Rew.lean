@@ -728,12 +728,12 @@ section
 variable (ω : Rew L ξ₁ n₁ ξ₂ n₂)
 
 lemma loMap_neg (p : Semiformula L ξ₁ n₁) :
-    ω.loMap (~p) = ~ω.loMap p :=
+    ω.loMap (∼p) = ∼ω.loMap p :=
   by induction p using Semiformula.rec' generalizing n₂ <;> simp[*, loMap, ←Semiformula.neg_eq]
 
 lemma ext_loMap' {ω₁ ω₂ : Rew L ξ₁ n₁ ξ₂ n₂} (h : ω₁ = ω₂) (p : Semiformula L ξ₁ n₁) : ω₁.loMap p = ω₂.loMap p:= by simp[h]
 
-lemma neg' (p : Semiformula L ξ₁ n₁) : ω.loMap (~p) = ~ω.loMap p := loMap_neg ω p
+lemma neg' (p : Semiformula L ξ₁ n₁) : ω.loMap (∼p) = ∼ω.loMap p := loMap_neg ω p
 
 lemma or' (p q : Semiformula L ξ₁ n₁) : ω.loMap (p ⋎ q) = ω.loMap p ⋎ ω.loMap q := by rfl
 
@@ -756,7 +756,7 @@ scoped[FirstOrder] notation:max ω "ᵀ" => (ω : Semiterm _ _ _ → Semiterm _ 
 
 scoped[FirstOrder] notation:max ω "ᴾ" => (ω : Semiformula _ _ _ → Semiformula _ _ _)
 
-lemma neg' (p : Semiformula L ξ₁ n₁) : ω (~p) = ~ω p := loMap_neg ω p
+lemma neg' (p : Semiformula L ξ₁ n₁) : ω (∼p) = ∼ω p := loMap_neg ω p
 
 lemma or' (p q : Semiformula L ξ₁ n₁) : ω (p ⋎ q) = ω p ⋎ ω q := by rfl
 
@@ -928,10 +928,10 @@ lemma eq_ex_iff {p : Semiformula L ξ₁ n₁} {q} :
   cases p using Semiformula.rec' <;> simp[Rew.rel, Rew.nrel]
 
 @[simp] lemma eq_neg_iff {p : Semiformula L ξ₁ n₁} {q₁ q₂} :
-    ω.hom p = q₁ ⟶ q₂ ↔ ∃ p₁ p₂, ω.hom p₁ = q₁ ∧ ω.hom p₂ = q₂ ∧ p = p₁ ⟶ p₂ := by
+    ω.hom p = q₁ ➝ q₂ ↔ ∃ p₁ p₂, ω.hom p₁ = q₁ ∧ ω.hom p₂ = q₂ ∧ p = p₁ ➝ p₂ := by
   simp[imp_eq]; constructor
-  · rintro ⟨p₁, hp₁, q₂, rfl, rfl⟩; exact ⟨~p₁, by simp[hp₁]⟩
-  · rintro ⟨p₁, rfl, p₂, rfl, rfl⟩; exact ⟨~p₁, by simp, p₂, by simp⟩
+  · rintro ⟨p₁, hp₁, q₂, rfl, rfl⟩; exact ⟨∼p₁, by simp[hp₁]⟩
+  · rintro ⟨p₁, rfl, p₂, rfl, rfl⟩; exact ⟨∼p₁, by simp, p₂, by simp⟩
 
 lemma eq_ball_iff {p : Semiformula L ξ₁ n₁} {q₁ q₂} :
     (ω.hom p = ∀[q₁] q₂) ↔ ∃ p₁ p₂, ω.q.hom p₁ = q₁ ∧ ω.q.hom p₂ = q₂ ∧ p = ∀[p₁] p₂ := by

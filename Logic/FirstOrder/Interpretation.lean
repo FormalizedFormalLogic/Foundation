@@ -13,7 +13,7 @@ structure Interpretation {L : Language} [L.Eq] (T : Theory L) [𝐄𝐐 ≼ T] (
   domain_nonempty :
     T ⊨ ∃' Rew.emb.hom domain
   func_defined {k} (f : L'.Func k) :
-    T ⊨ ∀* ((Matrix.conj fun i ↦ (Rew.emb.hom domain)/[#i]) ⟶ ∃'! ((Rew.emb.hom domain)/[#0] ⋏ Rew.emb.hom (func f)))
+    T ⊨ ∀* ((Matrix.conj fun i ↦ (Rew.emb.hom domain)/[#i]) ➝ ∃'! ((Rew.emb.hom domain)/[#0] ⋏ Rew.emb.hom (func f)))
 
 namespace Interpretation
 
@@ -25,15 +25,15 @@ def varEquals {n : ℕ} : Semiterm L' Empty n → Semisentence L (n + 1)
   | #x                => “z. z = #x.succ”
   | Semiterm.func f v =>
       Rew.toS.hom
-        <| ∀* ((Matrix.conj fun i ↦ (Rew.embSubsts ![#i]).hom ι.domain ⋏ (Rew.embSubsts (#i :> (& ·.succ))).hom (varEquals <| v i)) ⟶
+        <| ∀* ((Matrix.conj fun i ↦ (Rew.embSubsts ![#i]).hom ι.domain ⋏ (Rew.embSubsts (#i :> (& ·.succ))).hom (varEquals <| v i)) ➝
           (Rew.embSubsts (&0 :> (# ·))).hom (ι.func f))
 
 def translationRel {k} (r : L'.Rel k) (v : Fin k → Semiterm L' Empty n) : Semisentence L n :=
-  Rew.toS.hom <| ∀* ((Matrix.conj fun i ↦ (Rew.embSubsts ![#i]).hom ι.domain ⋏ (Rew.embSubsts (#i :> (& ·))).hom (ι.varEquals <| v i)) ⟶ Rew.emb.hom (ι.rel r))
+  Rew.toS.hom <| ∀* ((Matrix.conj fun i ↦ (Rew.embSubsts ![#i]).hom ι.domain ⋏ (Rew.embSubsts (#i :> (& ·))).hom (ι.varEquals <| v i)) ➝ Rew.emb.hom (ι.rel r))
 
 def translationAux : {n : ℕ} → Semisentence L' n → Semisentence L n
   | _, Semiformula.rel r v  => ι.translationRel r v
-  | _, Semiformula.nrel r v => ~ι.translationRel r v
+  | _, Semiformula.nrel r v => ∼ι.translationRel r v
   | _, ⊤                    => ⊤
   | _, ⊥                    => ⊥
   | _, p ⋏ q                => translationAux p ⋏ translationAux q
@@ -41,7 +41,7 @@ def translationAux : {n : ℕ} → Semisentence L' n → Semisentence L n
   | _, ∀' p                 => ∀[ι.domain/[#0]] translationAux p
   | _, ∃' p                 => ∃[ι.domain/[#0]] translationAux p
 
-lemma translationAux_neg {n : ℕ} (p : Semisentence L' n) : ι.translationAux (~p) = ~ ι.translationAux p := by
+lemma translationAux_neg {n : ℕ} (p : Semisentence L' n) : ι.translationAux (∼p) = ∼ ι.translationAux p := by
   induction p using Semiformula.rec' <;> simp [translationAux, *, ←Semiformula.neg_eq]
 
 def translation {n : ℕ} : Semisentence L' n →ˡᶜ Semisentence L n where
@@ -57,7 +57,7 @@ def translation {n : ℕ} : Semisentence L' n →ˡᶜ Semisentence L n where
     ι.translation (Semiformula.rel r v) = ι.translationRel r v := rfl
 
 @[simp] lemma translation_nrel {k} (r : L'.Rel k) (v : Fin k → Semiterm L' Empty n) :
-    ι.translation (Semiformula.nrel r v) = ~ι.translationRel r v := rfl
+    ι.translation (Semiformula.nrel r v) = ∼ι.translationRel r v := rfl
 
 @[simp] lemma translation_all (p : Semisentence L' (n + 1)) : ι.translation (∀' p) = ∀[ι.domain/[#0]] ι.translation p := rfl
 
