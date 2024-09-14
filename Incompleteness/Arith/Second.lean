@@ -138,6 +138,8 @@ end
 
 section
 
+variable (T)
+
 variable [T.Delta1Definable]
 
 open LO.System LO.System.FiniteContext
@@ -179,11 +181,17 @@ lemma consistent_iff_goedel : T ⊢! ↑𝗖𝗼𝗻 ⭤ ↑𝗚 := by
     simpa [provable₀_iff] using  contra₁'! (deduct'! this)
 
 /-- Gödel's Second Incompleteness Theorem-/
-theorem consistent_unprovable [System.Consistent T] : T ⊬ ↑𝗖𝗼𝗻 := fun h ↦
-  goedel_unprovable <| and_left! consistent_iff_goedel ⨀ h
+theorem goedel_second_incompleteness [System.Consistent T] : T ⊬ ↑𝗖𝗼𝗻 := fun h ↦
+  goedel_unprovable T <| and_left! (consistent_iff_goedel T) ⨀ h
 
 theorem inconsistent_unprovable [ℕ ⊧ₘ* T] : T ⊬ ∼↑𝗖𝗼𝗻 := fun h ↦
-  not_goedel_unprovable <| contra₀'! (and_right! (consistent_iff_goedel (T := T))) ⨀ h
+  not_goedel_unprovable T <| contra₀'! (and_right! (consistent_iff_goedel T)) ⨀ h
+
+theorem inconsistent_undecidable [ℕ ⊧ₘ* T] : System.Undecidable T ↑𝗖𝗼𝗻 := by
+  haveI : Consistent T := Sound.consistent_of_satisfiable ⟨_, (inferInstance : ℕ ⊧ₘ* T)⟩
+  constructor
+  · exact goedel_second_incompleteness T
+  · exact inconsistent_unprovable T
 
 end
 

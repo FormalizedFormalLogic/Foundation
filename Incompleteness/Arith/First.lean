@@ -18,7 +18,8 @@ lemma re_iff_sigma1 {P : ℕ → Prop} : RePred P ↔ 𝚺₁-Predicate P := by
 
 variable (T : Theory ℒₒᵣ) [𝐑₀ ≼ T] [Sigma1Sound T] [T.Delta1Definable]
 
-theorem incomplete : ¬System.Complete T  := by
+/-- Gödel's First Incompleteness Theorem-/
+theorem goedel_first_incompleteness : ¬System.Complete T := by
   let D : ℕ → Prop := fun n : ℕ ↦ ∃ p : SyntacticSemiformula ℒₒᵣ 1, n = ⌜p⌝ ∧ T ⊢! ∼p/[⌜p⌝]
   have D_re : RePred D := by
     have : 𝚺₁-Predicate fun p : ℕ ↦
