@@ -419,7 +419,7 @@ private lemma isMapping_iff {m : V} :
       exact ExistsUnique.intro y hxy (fun y' hxy' ↦ h y' (lt_of_mem_rng hxy') hxy')⟩
 
 def _root_.LO.FirstOrder.Arith.isMappingDef : 𝚺₀.Semisentence 1 := .mkSigma
-  “m. ∃ d <⁺ 2 * m, !domainDef d m ∧ ∀ x ∈' d, ∃ y < m, x ~[m] y ∧ ∀ y' < m, x ~[m] y' → y' = y” (by simp)
+  “m. ∃ d <⁺ 2 * m, !domainDef d m ∧ ∀ x ∈' d, ∃ y < m, x ∼[m] y ∧ ∀ y' < m, x ∼[m] y' → y' = y” (by simp)
 
 lemma isMapping_defined : 𝚺₀-Predicate (IsMapping : V → Prop) via isMappingDef := by
   intro v; simp [isMappingDef, isMapping_iff, lt_succ_iff_le]

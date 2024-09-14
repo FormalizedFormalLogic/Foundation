@@ -128,7 +128,7 @@ lemma models_indScheme_alt : V ⊧ₘ* Theory.indScheme ℒₒᵣ (Arith.Hierarc
       ∀ x, Semiformula.Evalm V ![x] v p := by
     simpa using
       neg_induction_h Γ m (P := λ x ↦ ¬Semiformula.Evalm V ![x] v p)
-        (.mkPolarity (~(Rew.rewriteMap v).hom p) (by simpa using hp)
+        (.mkPolarity (∼(Rew.rewriteMap v).hom p) (by simpa using hp)
         (by intro x; simp [←Matrix.constant_eq_singleton', Semiformula.eval_rewriteMap]))
   exact this H0 Hsucc x
 

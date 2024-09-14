@@ -428,16 +428,16 @@ variable {L : Language} [(k : ℕ) → Encodable (L.Func k)] [(k : ℕ) → Enco
     (L.codeIn V).IsSemiformula (n + 1) ⌜p⌝ := by simpa using semiformula_quote p
 
 @[simp] lemma quote_neg {n} (p : SyntacticSemiformula L n) :
-    ⌜~p⌝ = (L.codeIn V).neg ⌜p⌝ := by
+    ⌜∼p⌝ = (L.codeIn V).neg ⌜p⌝ := by
   induction p using Semiformula.rec' <;>
     simp [*, quote_rel, quote_nrel, quote_verum, quote_falsum, quote_and, quote_or, quote_all, quote_ex]
 
 @[simp] lemma quote_imply {n} (p q : SyntacticSemiformula L n) :
-    ⌜p ⟶ q⌝ = (L.codeIn V).imp ⌜p⌝ ⌜q⌝ := by
+    ⌜p ➝ q⌝ = (L.codeIn V).imp ⌜p⌝ ⌜q⌝ := by
   simp [Semiformula.imp_eq, Language.Semiformula.imp_def, Semiformula.quote_or, quote_neg]; rfl
 
 @[simp] lemma quote_iff {n} (p q : SyntacticSemiformula L n) :
-    ⌜p ⟷ q⌝ = (L.codeIn V).iff ⌜p⌝ ⌜q⌝ := by
+    ⌜p ⭤ q⌝ = (L.codeIn V).iff ⌜p⌝ ⌜q⌝ := by
   simp [Semiformula.imp_eq, LogicalConnective.iff, Semiformula.quote_or, quote_neg]; rfl
 
 @[simp] lemma quote_shift {n} (p : SyntacticSemiformula L n) :
@@ -570,9 +570,9 @@ instance goedelQuoteSyntacticFormulaToCodedFormula : GoedelQuote (SyntacticFormu
 @[simp] lemma codeIn'_or (p q : SyntacticSemiformula L n) : (⌜p ⋎ q⌝ : (L.codeIn V).Semiformula n) = ⌜p⌝ ⋎ ⌜q⌝ := by ext; simp [quote_or]
 @[simp] lemma codeIn'_all (p : SyntacticSemiformula L (n + 1)) : (⌜∀' p⌝ : (L.codeIn V).Semiformula n) = .all (.cast (n := ↑(n + 1)) ⌜p⌝) := by ext; simp [quote_all]
 @[simp] lemma codeIn'_ex (p : SyntacticSemiformula L (n + 1)) : (⌜∃' p⌝ : (L.codeIn V).Semiformula n) = .ex (.cast (n := ↑(n + 1)) ⌜p⌝) := by ext; simp [quote_ex]
-@[simp] lemma codeIn'_neg (p : SyntacticSemiformula L n) : (⌜~p⌝ : (L.codeIn V).Semiformula n) = ~⌜p⌝ := by
+@[simp] lemma codeIn'_neg (p : SyntacticSemiformula L n) : (⌜∼p⌝ : (L.codeIn V).Semiformula n) = ∼⌜p⌝ := by
   ext; simp
-@[simp] lemma codeIn'_imp (p q : SyntacticSemiformula L n) : (⌜p ⟶ q⌝ : (L.codeIn V).Semiformula n) = ⌜p⌝ ⟶ ⌜q⌝ := by
+@[simp] lemma codeIn'_imp (p q : SyntacticSemiformula L n) : (⌜p ➝ q⌝ : (L.codeIn V).Semiformula n) = ⌜p⌝ ➝ ⌜q⌝ := by
   simp [Semiformula.imp_eq, Language.Semiformula.imp_def]
 
 @[simp] lemma codeIn'_weight (k n : ℕ) :
@@ -609,7 +609,7 @@ lemma quote_sentence_def' (σ : Sentence L) : (⌜σ⌝ : (L.codeIn V).Formula) 
 @[simp] lemma quote_sentence_val (σ : Sentence L) : (⌜σ⌝ : (L.codeIn V).Formula).val = ⌜σ⌝ := by
   simp [quote_sentence_def', quote_eq_coe_encode]
 
-@[simp] lemma codeIn''_imp (σ π : Sentence L) : (⌜σ ⟶ π⌝ : (L.codeIn V).Formula) = ⌜σ⌝ ⟶ ⌜π⌝ := by
+@[simp] lemma codeIn''_imp (σ π : Sentence L) : (⌜σ ➝ π⌝ : (L.codeIn V).Formula) = ⌜σ⌝ ➝ ⌜π⌝ := by
   simp [quote_sentence_def']
 
 end Semiformula

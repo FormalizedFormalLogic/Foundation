@@ -118,23 +118,23 @@ macro_rules
     let binders' := binders.insertAt 0 x
     `(bexIn ⤫term[$binders* | $fbinders* | $t] ⤫formula[$binders'* | $fbinders* | $p])
 
-syntax:45 first_order_term:45 " ~[" first_order_term "]" first_order_term:0 : first_order_formula
+syntax:45 first_order_term:45 " ∼[" first_order_term "]" first_order_term:0 : first_order_formula
 syntax:45 first_order_term:45 " ≁[" first_order_term "]" first_order_term:0 : first_order_formula
 syntax:45 ":⟪" first_order_term ", " first_order_term "⟫:∈ " first_order_term:0 : first_order_formula
 syntax:45 ":⟪" first_order_term ", " first_order_term ", " first_order_term "⟫:∈ " first_order_term:0 : first_order_formula
 
 macro_rules
-  | `(⤫formula[ $binders* | $fbinders* | $t₁:first_order_term ~[ $u:first_order_term ] $t₂:first_order_term]) =>
+  | `(⤫formula[ $binders* | $fbinders* | $t₁:first_order_term ∼[ $u:first_order_term ] $t₂:first_order_term]) =>
     `(memRelOpr.operator ![⤫term[$binders* | $fbinders* | $u], ⤫term[$binders* | $fbinders* | $t₁], ⤫term[$binders* | $fbinders* | $t₂]])
   | `(⤫formula[ $binders* | $fbinders* | $t₁:first_order_term ≁[ $u:first_order_term ] $t₂:first_order_term]) =>
-    `(~memRelOpr.operator ![⤫term[$binders* | $fbinders* | $u], ⤫term[$binders* | $fbinders* | $t₁], ⤫term[$binders* | $fbinders* | $t₂]])
+    `(∼memRelOpr.operator ![⤫term[$binders* | $fbinders* | $u], ⤫term[$binders* | $fbinders* | $t₁], ⤫term[$binders* | $fbinders* | $t₂]])
   | `(⤫formula[ $binders* | $fbinders* | :⟪$t₁:first_order_term, $t₂:first_order_term⟫:∈ $u:first_order_term]) =>
     `(memRelOpr.operator ![⤫term[$binders* | $fbinders* | $u], ⤫term[$binders* | $fbinders* | $t₁], ⤫term[$binders* | $fbinders* | $t₂]])
   | `(⤫formula[ $binders* | $fbinders* | :⟪$t₁:first_order_term, $t₂:first_order_term, $t₃:first_order_term⟫:∈ $u:first_order_term]) =>
     `(memRel₃Opr.operator ![⤫term[$binders* | $fbinders* | $u], ⤫term[$binders* | $fbinders* | $t₁], ⤫term[$binders* | $fbinders* | $t₂], ⤫term[$binders* | $fbinders* | $t₃]])
 end
 
-@[simp] lemma Hierarchy.memRel {t₁ t₂ u : Semiterm ℒₒᵣ μ n} : Hierarchy Γ s “!!t₁ ~[ !!u ] !!t₂” := by
+@[simp] lemma Hierarchy.memRel {t₁ t₂ u : Semiterm ℒₒᵣ μ n} : Hierarchy Γ s “!!t₁ ∼[ !!u ] !!t₂” := by
   simp[Semiformula.Operator.operator, Matrix.fun_eq_vec₂, operator_mem_def, memRelOpr]
 
 @[simp] lemma Hierarchy.memRel₃ {t₁ t₂ t₃ u : Semiterm ℒₒᵣ μ n} : Hierarchy Γ s “:⟪!!t₁, !!t₂, !!t₃⟫:∈ !!u” := by

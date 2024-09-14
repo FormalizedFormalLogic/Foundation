@@ -177,7 +177,7 @@ def formulaToStr : ∀ {n}, Semiformula ℒₒᵣ μ n → String
   | _, nrel Language.LT.lt v         => termToStr (v 0) ++ " \\not < " ++ termToStr (v 1)
   | _, p ⋏ q                         => "[" ++ formulaToStr p ++ "]" ++ " \\land " ++ "[" ++ formulaToStr q ++ "]"
   | _, p ⋎ q                         => "[" ++ formulaToStr p ++ "]" ++ " \\lor "  ++ "[" ++ formulaToStr q ++ "]"
-  | n, ∀' (rel Language.LT.lt v ⟶ p) => "(\\forall x_{" ++ toString n ++ "} < " ++ termToStr (v 1) ++ ") " ++ "[" ++ formulaToStr p ++ "]"
+  | n, ∀' (rel Language.LT.lt v ➝ p) => "(\\forall x_{" ++ toString n ++ "} < " ++ termToStr (v 1) ++ ") " ++ "[" ++ formulaToStr p ++ "]"
   | n, ∃' (rel Language.LT.lt v ⋏ p) => "(\\exists x_{" ++ toString n ++ "} < " ++ termToStr (v 1) ++ ") " ++ "[" ++ formulaToStr p  ++ "]"
   | n, ∀' p                          => "(\\forall x_{" ++ toString n ++ "}) " ++ "[" ++ formulaToStr p ++ "]"
   | n, ∃' p                          => "(\\exists x_{" ++ toString n ++ "}) " ++ "[" ++ formulaToStr p ++ "]"
@@ -231,11 +231,11 @@ abbrev Semiterm.Rlz (t : Semiterm L M n) (e : Fin n → M) : M := t.valm M e id
 
 abbrev Semiformula.Rlz (p : Semiformula L M n) (e : Fin n → M) : Prop := Evalm M e id p
 
-@[simp] lemma models₀_not_iff (σ : Sentence L) : M ⊧ₘ₀ (~σ) ↔ ¬M ⊧ₘ₀ σ := by simp [models₀_iff]
+@[simp] lemma models₀_not_iff (σ : Sentence L) : M ⊧ₘ₀ (∼σ) ↔ ¬M ⊧ₘ₀ σ := by simp [models₀_iff]
 
 @[simp] lemma models₀_or_iff (σ π : Sentence L) : M ⊧ₘ₀ (σ ⋎ π) ↔ M ⊧ₘ₀ σ ∨ M ⊧ₘ₀ π := by simp [models₀_iff]
 
-@[simp] lemma models₀_imply_iff (σ π : Sentence L) : M ⊧ₘ₀ (σ ⟶ π) ↔ M ⊧ₘ₀ σ → M ⊧ₘ₀ π := by simp [models₀_iff]
+@[simp] lemma models₀_imply_iff (σ π : Sentence L) : M ⊧ₘ₀ (σ ➝ π) ↔ M ⊧ₘ₀ σ → M ⊧ₘ₀ π := by simp [models₀_iff]
 
 end
 
@@ -271,7 +271,7 @@ lemma nat_extention_sigmaOne {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 �
 lemma nat_extention_piOne {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚷 1 σ) :
     M ⊧ₘ₀ σ → ℕ ⊧ₘ₀ σ := by
   contrapose
-  simpa using nat_extention_sigmaOne M (σ := ~σ) (by simpa using hσ)
+  simpa using nat_extention_sigmaOne M (σ := ∼σ) (by simpa using hσ)
 
 end Arith
 

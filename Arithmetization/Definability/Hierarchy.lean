@@ -286,9 +286,9 @@ def or : {Γ : HierarchySymbol} → Γ.Semiformula ξ n → Γ.Semiformula ξ n 
   | 𝚷-[m], p, q => mkPi (p.val ⋎ q.val) (by simp)
   | 𝚫-[m], p, q => mkDelta (mkSigma (p.sigma.val ⋎ q.sigma.val) (by simp)) (mkPi (p.pi.val ⋎ q.pi.val) (by simp))
 
-def negSigma (p : 𝚺-[m].Semiformula ξ n) : 𝚷-[m].Semiformula ξ n := mkPi (~p.val) (by simp)
+def negSigma (p : 𝚺-[m].Semiformula ξ n) : 𝚷-[m].Semiformula ξ n := mkPi (∼p.val) (by simp)
 
-def negPi (p : 𝚷-[m].Semiformula ξ n) : 𝚺-[m].Semiformula ξ n := mkSigma (~p.val) (by simp)
+def negPi (p : 𝚷-[m].Semiformula ξ n) : 𝚺-[m].Semiformula ξ n := mkSigma (∼p.val) (by simp)
 
 def negDelta (p : 𝚫-[m].Semiformula ξ n) : 𝚫-[m].Semiformula ξ n := mkDelta (p.pi.negPi) (p.sigma.negSigma)
 
@@ -319,7 +319,7 @@ instance : Vee (Γ.Semiformula ξ n) := ⟨or⟩
 instance : Tilde (𝚫-[m].Semiformula ξ n) := ⟨negDelta⟩
 
 instance : LogicalConnective (𝚫-[m].Semiformula ξ n) where
-  arrow p q := ~p ⋎ q
+  arrow p q := ∼p ⋎ q
 
 instance : ExQuantifier (𝚺-[m + 1].Semiformula ξ) := ⟨ex⟩
 
@@ -356,15 +356,15 @@ def substSigma (p : 𝚺-[m + 1].Semiformula ξ 1) (F : 𝚺-[m + 1].Semiformula
 
 @[simp] lemma pi_or (p q : 𝚫-[m].Semiformula ξ n) : (p ⋎ q).pi = p.pi ⋎ q.pi := by simp [Vee.vee, or]
 
-@[simp] lemma val_negSigma {m} (p : 𝚺-[m].Semiformula ξ n) : p.negSigma.val = ~p.val := by simp [val, val_sigma]
+@[simp] lemma val_negSigma {m} (p : 𝚺-[m].Semiformula ξ n) : p.negSigma.val = ∼p.val := by simp [val, val_sigma]
 
-@[simp] lemma val_negPi {m} (p : 𝚷-[m].Semiformula ξ n) : p.negPi.val = ~p.val := by simp [val, val_sigma]
+@[simp] lemma val_negPi {m} (p : 𝚷-[m].Semiformula ξ n) : p.negPi.val = ∼p.val := by simp [val, val_sigma]
 
-lemma val_negDelta {m} (p : 𝚫-[m].Semiformula ξ n) : (~p).val = ~p.pi.val := by simp [Tilde.tilde, negDelta]
+lemma val_negDelta {m} (p : 𝚫-[m].Semiformula ξ n) : (∼p).val = ∼p.pi.val := by simp [Tilde.tilde, negDelta]
 
-@[simp] lemma sigma_negDelta {m} (p : 𝚫-[m].Semiformula ξ n) : (~p).sigma = p.pi.negPi := by simp [Tilde.tilde, negDelta]
+@[simp] lemma sigma_negDelta {m} (p : 𝚫-[m].Semiformula ξ n) : (∼p).sigma = p.pi.negPi := by simp [Tilde.tilde, negDelta]
 
-@[simp] lemma sigma_negPi {m} (p : 𝚫-[m].Semiformula ξ n) : (~p).pi = p.sigma.negSigma := by simp [Tilde.tilde, negDelta]
+@[simp] lemma sigma_negPi {m} (p : 𝚫-[m].Semiformula ξ n) : (∼p).pi = p.sigma.negSigma := by simp [Tilde.tilde, negDelta]
 
 @[simp] lemma val_ball (t : Semiterm ℒₒᵣ ξ n) (p : Γ.Semiformula ξ (n + 1)) : (ball t p).val = ∀[“#0 < !!(Rew.bShift t)”] p.val := by
   rcases Γ with ⟨Γ, m⟩; rcases Γ <;> simp [val, val_sigma]
@@ -386,11 +386,11 @@ lemma ProperOn.and {p q : 𝚫-[m].Semisentence k} (hp : p.ProperOn M) (hq : q.P
 lemma ProperOn.or {p q : 𝚫-[m].Semisentence k} (hp : p.ProperOn M) (hq : q.ProperOn M) : (p ⋎ q).ProperOn M := by
   intro e; simp [hp.iff, hq.iff]
 
-lemma ProperOn.neg {p : 𝚫-[m].Semisentence k} (hp : p.ProperOn M) : (~p).ProperOn M := by
+lemma ProperOn.neg {p : 𝚫-[m].Semisentence k} (hp : p.ProperOn M) : (∼p).ProperOn M := by
   intro e; simp [hp.iff]
 
 lemma ProperOn.eval_neg {p : 𝚫-[m].Semisentence k} (hp : p.ProperOn M) (e) :
-    Semiformula.Evalbm M e (~p).val ↔ ¬Semiformula.Evalbm M e p.val := by
+    Semiformula.Evalbm M e (∼p).val ↔ ¬Semiformula.Evalbm M e p.val := by
   simp [val, ←val_sigma, hp.iff]
 
 lemma ProperOn.ball {t} {p : 𝚫-[m + 1].Semisentence (k + 1)} (hp : p.ProperOn M) : (ball t p).ProperOn M := by
@@ -411,11 +411,11 @@ lemma ProperWithParamOn.or {p q : 𝚫-[m].Semiformula M k}
     (hp : p.ProperWithParamOn M) (hq : q.ProperWithParamOn M) : (p ⋎ q).ProperWithParamOn M := by
   intro e; simp [hp.iff, hq.iff]
 
-lemma ProperWithParamOn.neg {p : 𝚫-[m].Semiformula M k} (hp : p.ProperWithParamOn M) : (~p).ProperWithParamOn M := by
+lemma ProperWithParamOn.neg {p : 𝚫-[m].Semiformula M k} (hp : p.ProperWithParamOn M) : (∼p).ProperWithParamOn M := by
   intro e; simp [hp.iff]
 
 lemma ProperWithParamOn.eval_neg {p : 𝚫-[m].Semiformula M k} (hp : p.ProperWithParamOn M) (e) :
-    Semiformula.Evalm M e id (~p).val ↔ ¬Semiformula.Evalm M e id p.val := by
+    Semiformula.Evalm M e id (∼p).val ↔ ¬Semiformula.Evalm M e id p.val := by
   simp [val, ←val_sigma, hp.iff]
 
 lemma ProperWithParamOn.ball {t} {p : 𝚫-[m].Semiformula M (k + 1)}

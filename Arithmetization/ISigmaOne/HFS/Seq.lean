@@ -138,7 +138,7 @@ lemma znth_prop_not {s i : V} (h : ¬Seq s ∨ lh s ≤ i) : znth s i = 0 :=
   Classical.choose!_spec (znth_existsUnique s i) |>.2 (by simpa [-not_and, not_and_or] using h)
 
 def _root_.LO.FirstOrder.Arith.znthDef : 𝚺₀.Semisentence 3 := .mkSigma
-  “x s i. ∃ l <⁺ 2 * s, !lhDef l s ∧ (:Seq s ∧ i < l → i ~[s] x) ∧ (¬(:Seq s ∧ i < l) → x = 0)” (by simp)
+  “x s i. ∃ l <⁺ 2 * s, !lhDef l s ∧ (:Seq s ∧ i < l → i ∼[s] x) ∧ (¬(:Seq s ∧ i < l) → x = 0)” (by simp)
 
 private lemma znth_graph {x s i : V} : x = znth s i ↔ ∃ l ≤ 2 * s, l = lh s ∧ (Seq s ∧ i < l → ⟪i, x⟫ ∈ s) ∧ (¬(Seq s ∧ i < l) → x = 0) := by
   simp [znth, Classical.choose!_eq_iff]; constructor
