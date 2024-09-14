@@ -35,11 +35,11 @@ variable {V}
 
 class R₀Theory (T : LOR.TTheory (V := V)) where
   refl : T ⊢ (#'0 =' #'0).all
-  replace (p : ⌜ℒₒᵣ⌝.Semiformula (0 + 1)) : T ⊢ (#'1 =' #'0 ⟶ p^/[(#'1).sing] ⟶ p^/[(#'0).sing]).all.all
+  replace (p : ⌜ℒₒᵣ⌝.Semiformula (0 + 1)) : T ⊢ (#'1 =' #'0 ➝ p^/[(#'1).sing] ➝ p^/[(#'0).sing]).all.all
   add (n m : V) : T ⊢ (n + m : ⌜ℒₒᵣ⌝[V].Semiterm 0) =' ↑(n + m)
   mul (n m : V) : T ⊢ (n * m : ⌜ℒₒᵣ⌝[V].Semiterm 0) =' ↑(n * m)
   ne {n m : V} : n ≠ m → T ⊢ ↑n ≠' ↑m
-  ltNumeral (n : V) : T ⊢ (#'0 <' ↑n ⟷ (tSubstItr (#'0).sing (#'1 =' #'0) n).disj).all
+  ltNumeral (n : V) : T ⊢ (#'0 <' ↑n ⭤ (tSubstItr (#'0).sing (#'1 =' #'0) n).disj).all
 
 abbrev oneAbbrev {n} : ⌜ℒₒᵣ⌝[V].Semiterm n := (1 : V)
 
@@ -71,74 +71,74 @@ def eqRefl (t : ⌜ℒₒᵣ⌝.Term) : T ⊢ t =' t := by
 lemma eq_refl! (t : ⌜ℒₒᵣ⌝.Term) : T ⊢! t =' t := ⟨eqRefl T t⟩
 
 noncomputable def replace (p : ⌜ℒₒᵣ⌝.Semiformula (0 + 1)) (t u : ⌜ℒₒᵣ⌝.Term) :
-    T ⊢ t =' u ⟶ p^/[t.sing] ⟶ p^/[u.sing] := by
-  have : T ⊢ (#'1 =' #'0 ⟶ p^/[(#'1).sing] ⟶ p^/[(#'0).sing]).all.all := R₀Theory.replace p
+    T ⊢ t =' u ➝ p^/[t.sing] ➝ p^/[u.sing] := by
+  have : T ⊢ (#'1 =' #'0 ➝ p^/[(#'1).sing] ➝ p^/[(#'0).sing]).all.all := R₀Theory.replace p
   have := by simpa using specialize this t
   simpa [Language.SemitermVec.q_of_pos, Language.Semiformula.substs₁,
     Language.TSemifromula.substs_substs] using specialize this u
 
-lemma replace! (p : ⌜ℒₒᵣ⌝.Semiformula (0 + 1)) (t u : ⌜ℒₒᵣ⌝.Term) : T ⊢! t =' u ⟶ p^/[t.sing] ⟶ p^/[u.sing] := ⟨replace T p t u⟩
+lemma replace! (p : ⌜ℒₒᵣ⌝.Semiformula (0 + 1)) (t u : ⌜ℒₒᵣ⌝.Term) : T ⊢! t =' u ➝ p^/[t.sing] ➝ p^/[u.sing] := ⟨replace T p t u⟩
 
-def eqSymm (t₁ t₂ : ⌜ℒₒᵣ⌝.Term) : T ⊢ t₁ =' t₂ ⟶ t₂ =' t₁ := by
+def eqSymm (t₁ t₂ : ⌜ℒₒᵣ⌝.Term) : T ⊢ t₁ =' t₂ ➝ t₂ =' t₁ := by
   apply deduct'
   let Γ := [t₁ =' t₂]
   have e₁ : Γ ⊢[T] t₁ =' t₂ := FiniteContext.byAxm (by simp [Γ])
   have e₂ : Γ ⊢[T] t₁ =' t₁ := of <| eqRefl T t₁
-  have : Γ ⊢[T] t₁ =' t₂ ⟶ t₁ =' t₁ ⟶ t₂ =' t₁ := of <| by
+  have : Γ ⊢[T] t₁ =' t₂ ➝ t₁ =' t₁ ➝ t₂ =' t₁ := of <| by
     simpa using replace T (#'0 =' t₁.bShift) t₁ t₂
   exact this ⨀ e₁ ⨀ e₂
 
-lemma eq_symm! (t₁ t₂ : ⌜ℒₒᵣ⌝.Term) : T ⊢! t₁ =' t₂ ⟶ t₂ =' t₁ := ⟨eqSymm T t₁ t₂⟩
+lemma eq_symm! (t₁ t₂ : ⌜ℒₒᵣ⌝.Term) : T ⊢! t₁ =' t₂ ➝ t₂ =' t₁ := ⟨eqSymm T t₁ t₂⟩
 
 lemma eq_symm'! {t₁ t₂ : ⌜ℒₒᵣ⌝.Term} (h : T ⊢! t₁ =' t₂) : T ⊢! t₂ =' t₁ := eq_symm! T t₁ t₂ ⨀ h
 
-def eqTrans (t₁ t₂ t₃ : ⌜ℒₒᵣ⌝.Term) : T ⊢ t₁ =' t₂ ⟶ t₂ =' t₃ ⟶ t₁ =' t₃ := by
+def eqTrans (t₁ t₂ t₃ : ⌜ℒₒᵣ⌝.Term) : T ⊢ t₁ =' t₂ ➝ t₂ =' t₃ ➝ t₁ =' t₃ := by
   apply deduct'
   apply deduct
   let Γ := [t₂ =' t₃, t₁ =' t₂]
   have e₁ : Γ ⊢[T] t₁ =' t₂ := FiniteContext.byAxm (by simp [Γ])
   have e₂ : Γ ⊢[T] t₂ =' t₃ := FiniteContext.byAxm (by simp [Γ])
-  have : Γ ⊢[T] t₂ =' t₃ ⟶ t₁ =' t₂ ⟶ t₁ =' t₃ := of <| by
+  have : Γ ⊢[T] t₂ =' t₃ ➝ t₁ =' t₂ ➝ t₁ =' t₃ := of <| by
     simpa using replace T (t₁.bShift =' #'0) t₂ t₃
   exact this ⨀ e₂ ⨀ e₁
 
-lemma eq_trans! (t₁ t₂ t₃ : ⌜ℒₒᵣ⌝.Term) : T ⊢! t₁ =' t₂ ⟶ t₂ =' t₃ ⟶ t₁ =' t₃ := ⟨eqTrans T t₁ t₂ t₃⟩
+lemma eq_trans! (t₁ t₂ t₃ : ⌜ℒₒᵣ⌝.Term) : T ⊢! t₁ =' t₂ ➝ t₂ =' t₃ ➝ t₁ =' t₃ := ⟨eqTrans T t₁ t₂ t₃⟩
 
-noncomputable def addExt (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.Term) : T ⊢ t₁ =' t₂ ⟶ u₁ =' u₂ ⟶ (t₁ + u₁) =' (t₂ + u₂) := by
+noncomputable def addExt (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.Term) : T ⊢ t₁ =' t₂ ➝ u₁ =' u₂ ➝ (t₁ + u₁) =' (t₂ + u₂) := by
   apply deduct'
   apply deduct
   let Γ := [u₁ =' u₂, t₁ =' t₂]
   have bt : Γ ⊢[T] t₁ =' t₂ := FiniteContext.byAxm <| by simp [Γ]
   have bu : Γ ⊢[T] u₁ =' u₂ := FiniteContext.byAxm <| by simp [Γ]
-  have : T ⊢ t₁ =' t₂ ⟶ (t₁ + u₁) =' (t₁ + u₁) ⟶ (t₁ + u₁) =' (t₂ + u₁) := by
+  have : T ⊢ t₁ =' t₂ ➝ (t₁ + u₁) =' (t₁ + u₁) ➝ (t₁ + u₁) =' (t₂ + u₁) := by
     have := replace T ((t₁.bShift + u₁.bShift) =' (#'0 + u₁.bShift)) t₁ t₂
     simpa using this
   have b : Γ ⊢[T] (t₁ + u₁) =' (t₂ + u₁) := of (Γ := Γ) this ⨀ bt ⨀ of (eqRefl _ _)
-  have : T ⊢ u₁ =' u₂ ⟶ (t₁ + u₁) =' (t₂ + u₁) ⟶ (t₁ + u₁) =' (t₂ + u₂) := by
+  have : T ⊢ u₁ =' u₂ ➝ (t₁ + u₁) =' (t₂ + u₁) ➝ (t₁ + u₁) =' (t₂ + u₂) := by
     have := replace T ((t₁.bShift + u₁.bShift) =' (t₂.bShift + #'0)) u₁ u₂
     simpa using this
   exact of (Γ := Γ) this ⨀ bu ⨀ b
 
-lemma add_ext! (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.Term) : T ⊢! t₁ =' t₂ ⟶ u₁ =' u₂ ⟶ (t₁ + u₁) =' (t₂ + u₂) := ⟨addExt T t₁ t₂ u₁ u₂⟩
+lemma add_ext! (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.Term) : T ⊢! t₁ =' t₂ ➝ u₁ =' u₂ ➝ (t₁ + u₁) =' (t₂ + u₂) := ⟨addExt T t₁ t₂ u₁ u₂⟩
 
-noncomputable def mulExt (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.Term) : T ⊢ t₁ =' t₂ ⟶ u₁ =' u₂ ⟶ (t₁ * u₁) =' (t₂ * u₂) := by
+noncomputable def mulExt (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.Term) : T ⊢ t₁ =' t₂ ➝ u₁ =' u₂ ➝ (t₁ * u₁) =' (t₂ * u₂) := by
   apply deduct'
   apply deduct
   let Γ := [u₁ =' u₂, t₁ =' t₂]
   have bt : Γ ⊢[T] t₁ =' t₂ := FiniteContext.byAxm <| by simp [Γ]
   have bu : Γ ⊢[T] u₁ =' u₂ := FiniteContext.byAxm <| by simp [Γ]
-  have : T ⊢ t₁ =' t₂ ⟶ (t₁ * u₁) =' (t₁ * u₁) ⟶ (t₁ * u₁) =' (t₂ * u₁) := by
+  have : T ⊢ t₁ =' t₂ ➝ (t₁ * u₁) =' (t₁ * u₁) ➝ (t₁ * u₁) =' (t₂ * u₁) := by
     have := replace T ((t₁.bShift * u₁.bShift) =' (#'0 * u₁.bShift)) t₁ t₂
     simpa using this
   have b : Γ ⊢[T] (t₁ * u₁) =' (t₂ * u₁) := of (Γ := Γ) this ⨀ bt ⨀ of (eqRefl _ _)
-  have : T ⊢ u₁ =' u₂ ⟶ (t₁ * u₁) =' (t₂ * u₁) ⟶ (t₁ * u₁) =' (t₂ * u₂) := by
+  have : T ⊢ u₁ =' u₂ ➝ (t₁ * u₁) =' (t₂ * u₁) ➝ (t₁ * u₁) =' (t₂ * u₂) := by
     have := replace T ((t₁.bShift * u₁.bShift) =' (t₂.bShift * #'0)) u₁ u₂
     simpa using this
   exact of (Γ := Γ) this ⨀ bu ⨀ b
 
-lemma mul_ext! (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.Term) : T ⊢! t₁ =' t₂ ⟶ u₁ =' u₂ ⟶ (t₁ * u₁) =' (t₂ * u₂) := ⟨mulExt T t₁ t₂ u₁ u₂⟩
+lemma mul_ext! (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.Term) : T ⊢! t₁ =' t₂ ➝ u₁ =' u₂ ➝ (t₁ * u₁) =' (t₂ * u₂) := ⟨mulExt T t₁ t₂ u₁ u₂⟩
 
-noncomputable def eqExt (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.Term) : T ⊢ t₁ =' t₂ ⟶ u₁ =' u₂ ⟶ t₁ =' u₁ ⟶ t₂ =' u₂ := by
+noncomputable def eqExt (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.Term) : T ⊢ t₁ =' t₂ ➝ u₁ =' u₂ ➝ t₁ =' u₁ ➝ t₂ =' u₂ := by
   apply deduct'
   apply deduct
   apply deduct
@@ -149,10 +149,10 @@ noncomputable def eqExt (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.Term) : T ⊢ t�
   have e3 : Γ ⊢[T] u₁ =' u₂ := FiniteContext.byAxm (by simp [Γ])
   exact (of <| eqTrans T t₂ u₁ u₂) ⨀ ((of <| eqTrans T t₂ t₁ u₁) ⨀ e1 ⨀ e2) ⨀ e3
 
-lemma eq_ext (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.Term) : T ⊢! t₁ =' t₂ ⟶ u₁ =' u₂ ⟶ t₁ =' u₁ ⟶ t₂ =' u₂ :=
+lemma eq_ext (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.Term) : T ⊢! t₁ =' t₂ ➝ u₁ =' u₂ ➝ t₁ =' u₁ ➝ t₂ =' u₂ :=
   ⟨eqExt T t₁ t₂ u₁ u₂⟩
 
-noncomputable def neExt (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.Term) : T ⊢ t₁ =' t₂ ⟶ u₁ =' u₂ ⟶ t₁ ≠' u₁ ⟶ t₂ ≠' u₂ := by
+noncomputable def neExt (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.Term) : T ⊢ t₁ =' t₂ ➝ u₁ =' u₂ ➝ t₁ ≠' u₁ ➝ t₂ ≠' u₂ := by
   apply deduct'
   apply deduct
   apply deduct
@@ -160,18 +160,18 @@ noncomputable def neExt (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.Term) : T ⊢ t�
   have bt : Γ ⊢[T] t₁ =' t₂ := FiniteContext.byAxm <| by simp [Γ]
   have bu : Γ ⊢[T] u₁ =' u₂ := FiniteContext.byAxm <| by simp [Γ]
   have bl : Γ ⊢[T] t₁ ≠' u₁ := FiniteContext.byAxm <| by simp [Γ]
-  have : T ⊢ t₁ =' t₂ ⟶ t₁ ≠' u₁ ⟶ t₂ ≠' u₁ := by
+  have : T ⊢ t₁ =' t₂ ➝ t₁ ≠' u₁ ➝ t₂ ≠' u₁ := by
     have := replace T (#'0 ≠' u₁.bShift) t₁ t₂
     simpa using this
   have b : Γ ⊢[T] t₂ ≠' u₁ := of (Γ := Γ) this ⨀ bt ⨀ bl
-  have : T ⊢ u₁ =' u₂ ⟶ t₂ ≠' u₁ ⟶ t₂ ≠' u₂ := by
+  have : T ⊢ u₁ =' u₂ ➝ t₂ ≠' u₁ ➝ t₂ ≠' u₂ := by
     simpa using replace T (t₂.bShift ≠' #'0) u₁ u₂
   exact of (Γ := Γ) this ⨀ bu ⨀ b
 
-lemma ne_ext (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.Term) : T ⊢! t₁ =' t₂ ⟶ u₁ =' u₂ ⟶ t₁ ≠' u₁ ⟶ t₂ ≠' u₂ :=
+lemma ne_ext (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.Term) : T ⊢! t₁ =' t₂ ➝ u₁ =' u₂ ➝ t₁ ≠' u₁ ➝ t₂ ≠' u₂ :=
   ⟨neExt T t₁ t₂ u₁ u₂⟩
 
-noncomputable def ltExt (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.Term) : T ⊢ t₁ =' t₂ ⟶ u₁ =' u₂ ⟶ t₁ <' u₁ ⟶ t₂ <' u₂ := by
+noncomputable def ltExt (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.Term) : T ⊢ t₁ =' t₂ ➝ u₁ =' u₂ ➝ t₁ <' u₁ ➝ t₂ <' u₂ := by
   apply deduct'
   apply deduct
   apply deduct
@@ -179,18 +179,18 @@ noncomputable def ltExt (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.Term) : T ⊢ t�
   have bt : Γ ⊢[T] t₁ =' t₂ := FiniteContext.byAxm <| by simp [Γ]
   have bu : Γ ⊢[T] u₁ =' u₂ := FiniteContext.byAxm <| by simp [Γ]
   have bl : Γ ⊢[T] t₁ <' u₁ := FiniteContext.byAxm <| by simp [Γ]
-  have : T ⊢ t₁ =' t₂ ⟶ t₁ <' u₁ ⟶ t₂ <' u₁ := by
+  have : T ⊢ t₁ =' t₂ ➝ t₁ <' u₁ ➝ t₂ <' u₁ := by
     have := replace T (#'0 <' u₁.bShift) t₁ t₂
     simpa using this
   have b : Γ ⊢[T] t₂ <' u₁ := of (Γ := Γ) this ⨀ bt ⨀ bl
-  have : T ⊢ u₁ =' u₂ ⟶ t₂ <' u₁ ⟶ t₂ <' u₂ := by
+  have : T ⊢ u₁ =' u₂ ➝ t₂ <' u₁ ➝ t₂ <' u₂ := by
     have := replace T (t₂.bShift <' #'0) u₁ u₂
     simpa using this
   exact of (Γ := Γ) this ⨀ bu ⨀ b
 
-lemma lt_ext! (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.Term) : T ⊢! t₁ =' t₂ ⟶ u₁ =' u₂ ⟶ t₁ <' u₁ ⟶ t₂ <' u₂ := ⟨ltExt T t₁ t₂ u₁ u₂⟩
+lemma lt_ext! (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.Term) : T ⊢! t₁ =' t₂ ➝ u₁ =' u₂ ➝ t₁ <' u₁ ➝ t₂ <' u₂ := ⟨ltExt T t₁ t₂ u₁ u₂⟩
 
-noncomputable def nltExt (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.Term) : T ⊢ t₁ =' t₂ ⟶ u₁ =' u₂ ⟶ t₁ ≮' u₁ ⟶ t₂ ≮' u₂ := by
+noncomputable def nltExt (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.Term) : T ⊢ t₁ =' t₂ ➝ u₁ =' u₂ ➝ t₁ ≮' u₁ ➝ t₂ ≮' u₂ := by
   apply deduct'
   apply deduct
   apply deduct
@@ -198,30 +198,30 @@ noncomputable def nltExt (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.Term) : T ⊢ t�
   have bt : Γ ⊢[T] t₁ =' t₂ := FiniteContext.byAxm <| by simp [Γ]
   have bu : Γ ⊢[T] u₁ =' u₂ := FiniteContext.byAxm <| by simp [Γ]
   have bl : Γ ⊢[T] t₁ ≮' u₁ := FiniteContext.byAxm <| by simp [Γ]
-  have : T ⊢ t₁ =' t₂ ⟶ t₁ ≮' u₁ ⟶ t₂ ≮' u₁ := by
+  have : T ⊢ t₁ =' t₂ ➝ t₁ ≮' u₁ ➝ t₂ ≮' u₁ := by
     have := replace T (#'0 ≮' u₁.bShift) t₁ t₂
     simpa using this
   have b : Γ ⊢[T] t₂ ≮' u₁ := of (Γ := Γ) this ⨀ bt ⨀ bl
-  have : T ⊢ u₁ =' u₂ ⟶ t₂ ≮' u₁ ⟶ t₂ ≮' u₂ := by
+  have : T ⊢ u₁ =' u₂ ➝ t₂ ≮' u₁ ➝ t₂ ≮' u₂ := by
     have := replace T (t₂.bShift ≮' #'0) u₁ u₂
     simpa using this
   exact of (Γ := Γ) this ⨀ bu ⨀ b
 
-lemma nlt_ext (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.Term) : T ⊢! t₁ =' t₂ ⟶ u₁ =' u₂ ⟶ t₁ ≮' u₁ ⟶ t₂ ≮' u₂ := ⟨nltExt T t₁ t₂ u₁ u₂⟩
+lemma nlt_ext (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.Term) : T ⊢! t₁ =' t₂ ➝ u₁ =' u₂ ➝ t₁ ≮' u₁ ➝ t₂ ≮' u₂ := ⟨nltExt T t₁ t₂ u₁ u₂⟩
 
 noncomputable def ballReplace (p : ⌜ℒₒᵣ⌝.Semiformula (0 + 1)) (t u : ⌜ℒₒᵣ⌝.Term) :
-    T ⊢ t =' u ⟶ p.ball t ⟶ p.ball u := by
+    T ⊢ t =' u ➝ p.ball t ➝ p.ball u := by
   simpa [Language.TSemifromula.substs_substs] using replace T ((p^/[(#'0).sing]).ball #'0) t u
 
 lemma ball_replace! (p : ⌜ℒₒᵣ⌝.Semiformula (0 + 1)) (t u : ⌜ℒₒᵣ⌝.Term) :
-    T ⊢! t =' u ⟶ p.ball t ⟶ p.ball u := ⟨ballReplace T p t u⟩
+    T ⊢! t =' u ➝ p.ball t ➝ p.ball u := ⟨ballReplace T p t u⟩
 
 noncomputable def bexReplace (p : ⌜ℒₒᵣ⌝.Semiformula (0 + 1)) (t u : ⌜ℒₒᵣ⌝.Term) :
-    T ⊢ t =' u ⟶ p.bex t ⟶ p.bex u := by
+    T ⊢ t =' u ➝ p.bex t ➝ p.bex u := by
   simpa [Language.TSemifromula.substs_substs] using replace T ((p^/[(#'0).sing]).bex #'0) t u
 
 lemma bex_replace! (p : ⌜ℒₒᵣ⌝.Semiformula (0 + 1)) (t u : ⌜ℒₒᵣ⌝.Term) :
-    T ⊢! t =' u ⟶ p.bex t ⟶ p.bex u := ⟨bexReplace T p t u⟩
+    T ⊢! t =' u ➝ p.bex t ➝ p.bex u := ⟨bexReplace T p t u⟩
 
 def eqComplete {n m : V} (h : n = m) : T ⊢ ↑n =' ↑m := by
   rcases h; exact eqRefl T _
@@ -240,15 +240,15 @@ def neComplete {n m : V} (h : n ≠ m) : T ⊢ ↑n ≠' ↑m := R₀Theory.ne h
 
 lemma ne_complete! {n m : V} (h : n ≠ m) : T ⊢! ↑n ≠' ↑m := ⟨neComplete T h⟩
 
-def ltNumeral (t : ⌜ℒₒᵣ⌝.Term) (n : V) : T ⊢ t <' ↑n ⟷ (tSubstItr t.sing (#'1 =' #'0) n).disj := by
-  have : T ⊢ (#'0 <' ↑n ⟷ (tSubstItr (#'0).sing (#'1 =' #'0) n).disj).all := R₀Theory.ltNumeral n
+def ltNumeral (t : ⌜ℒₒᵣ⌝.Term) (n : V) : T ⊢ t <' ↑n ⭤ (tSubstItr t.sing (#'1 =' #'0) n).disj := by
+  have : T ⊢ (#'0 <' ↑n ⭤ (tSubstItr (#'0).sing (#'1 =' #'0) n).disj).all := R₀Theory.ltNumeral n
   simpa [Language.SemitermVec.q_of_pos, Language.Semiformula.substs₁] using specialize this t
 
-noncomputable def nltNumeral (t : ⌜ℒₒᵣ⌝.Term) (n : V) : T ⊢ t ≮' ↑n ⟷ (tSubstItr t.sing (#'1 ≠' #'0) n).conj := by
+noncomputable def nltNumeral (t : ⌜ℒₒᵣ⌝.Term) (n : V) : T ⊢ t ≮' ↑n ⭤ (tSubstItr t.sing (#'1 ≠' #'0) n).conj := by
   simpa using negReplaceIff' <| ltNumeral T t n
 
 def ltComplete {n m : V} (h : n < m) : T ⊢ ↑n <' ↑m := by
-  have : T ⊢ ↑n <' ↑m ⟷ _ := ltNumeral T n m
+  have : T ⊢ ↑n <' ↑m ⭤ _ := ltNumeral T n m
   apply andRight this ⨀ ?_
   apply disj (i := m - (n + 1)) _ (by simpa using sub_succ_lt_self (by simp [h]))
   simpa [nth_tSubstItr', h] using eqRefl T ↑n
@@ -256,7 +256,7 @@ def ltComplete {n m : V} (h : n < m) : T ⊢ ↑n <' ↑m := by
 lemma lt_complete! {n m : V} (h : n < m) : T ⊢! ↑n <' ↑m := ⟨ltComplete T h⟩
 
 noncomputable def nltComplete {n m : V} (h : m ≤ n) : T ⊢ ↑n ≮' ↑m := by
-  have : T ⊢ ↑n ≮' ↑m ⟷ (tSubstItr (↑n : ⌜ℒₒᵣ⌝.Term).sing (#'1 ≠' #'0) m).conj := by
+  have : T ⊢ ↑n ≮' ↑m ⭤ (tSubstItr (↑n : ⌜ℒₒᵣ⌝.Term).sing (#'1 ≠' #'0) m).conj := by
     simpa using negReplaceIff' <| ltNumeral T n m
   refine andRight this ⨀ ?_
   apply conj'

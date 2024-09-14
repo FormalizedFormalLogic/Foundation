@@ -24,7 +24,7 @@ def Realization.interpret
   | .atom a => f a
   | □p => 𝔅 (f.interpret 𝔅 p)
   | ⊥ => ⊥
-  | p ⟶ q => (f.interpret 𝔅 p) ⟶ (f.interpret 𝔅 q)
+  | p ➝ q => (f.interpret 𝔅 p) ➝ (f.interpret 𝔅 q)
 
 variable [Semiterm.Operator.GoedelNumber L (Sentence L)]
 

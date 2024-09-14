@@ -19,7 +19,7 @@ lemma re_iff_sigma1 {P : ℕ → Prop} : RePred P ↔ 𝚺₁-Predicate P := by
 variable (T : Theory ℒₒᵣ) [𝐑₀ ≼ T] [Sigma1Sound T] [T.Delta1Definable]
 
 theorem incomplete : ¬System.Complete T  := by
-  let D : ℕ → Prop := fun n : ℕ ↦ ∃ p : SyntacticSemiformula ℒₒᵣ 1, n = ⌜p⌝ ∧ T ⊢! ~p/[⌜p⌝]
+  let D : ℕ → Prop := fun n : ℕ ↦ ∃ p : SyntacticSemiformula ℒₒᵣ 1, n = ⌜p⌝ ∧ T ⊢! ∼p/[⌜p⌝]
   have D_re : RePred D := by
     have : 𝚺₁-Predicate fun p : ℕ ↦
       ⌜ℒₒᵣ⌝.IsSemiformula 1 p ∧ (T.codeIn ℕ).Provable (⌜ℒₒᵣ⌝.neg <| ⌜ℒₒᵣ⌝.substs ?[numeral p] p) := by definability
@@ -34,12 +34,12 @@ theorem incomplete : ¬System.Complete T  := by
   let ρ : SyntacticFormula ℒₒᵣ := σ/[⌜σ⌝]
   have : ∀ n : ℕ, D n ↔ T ⊢! σ/[‘↑n’] := fun n ↦ by
     simpa [Semiformula.coe_substs_eq_substs_coe₁] using re_complete (T := T) (D_re) (x := n)
-  have : T ⊢! ~ρ ↔ T ⊢! ρ := by
+  have : T ⊢! ∼ρ ↔ T ⊢! ρ := by
     simpa [D, goedelNumber'_def, quote_eq_encode] using this ⌜σ⌝
   have con : System.Consistent T := consistent_of_sigma1Sound T
   refine LO.System.incomplete_iff_exists_undecidable.mpr ⟨↑ρ, ?_, ?_⟩
   · intro h
-    have : T ⊢! ~↑ρ := by simpa [provable₀_iff] using this.mpr h
+    have : T ⊢! ∼↑ρ := by simpa [provable₀_iff] using this.mpr h
     exact LO.System.not_consistent_iff_inconsistent.mpr (inconsistent_of_provable_of_unprovable h this) inferInstance
   · intro h
     have : T ⊢! ↑ρ := this.mp (by simpa [provable₀_iff] using h)

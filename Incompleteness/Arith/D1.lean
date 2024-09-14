@@ -351,7 +351,7 @@ lemma Language.Theory.Derivation.sound {d : ℕ} (h : (T.codeIn ℕ).Derivation 
     have : Δ₁ = (p ⫽ Γ) := Sequent.quote_inj (V := ℕ) <| by simp [hΔ₁, h₁]
     rcases this
     rcases ih d₂ (by simp) dd₂ with ⟨Δ₂, hΔ₂, ⟨b₂⟩⟩
-    have : Δ₂ = (~p ⫽ Γ) := Sequent.quote_inj (V := ℕ) <| by simp [hΔ₂, h₂]
+    have : Δ₂ = (∼p ⫽ Γ) := Sequent.quote_inj (V := ℕ) <| by simp [hΔ₂, h₂]
     rcases this
     refine ⟨Derivation2.cut b₁ b₂⟩
   · rcases by simpa using hΓ
