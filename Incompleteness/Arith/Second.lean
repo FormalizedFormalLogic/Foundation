@@ -126,11 +126,13 @@ lemma provableₐ_D3_context {Γ σ} (hσπ : Γ ⊢[T.alt]! U.bewₐ σ) : Γ �
 
 variable [ℕ ⊧ₘ* T] [𝐑₀ ≼ U]
 
-theorem provableₐ_sound {σ} : T ⊢!. U.bewₐ σ → U ⊢! ↑σ := by
+lemma provableₐ_sound {σ} : T ⊢!. U.bewₐ σ → U ⊢! ↑σ := by
   intro h
   have : U.Provableₐ (⌜σ⌝ : ℕ) := by simpa [models₀_iff] using consequence_iff.mp (sound! (T := T) h) ℕ inferInstance
   have : U + 𝐑₀' ⊢! ↑σ := Language.Theory.Provable.sound₀ this
   exact add_cobhamR0'.mpr this
+
+lemma provableₐ_complete {σ} : U ⊢! ↑σ ↔ T ⊢!. U.bewₐ σ := ⟨provableₐ_D1, provableₐ_sound⟩
 
 end
 
@@ -176,10 +178,11 @@ lemma consistent_iff_goedel : T ⊢! ↑𝗖𝗼𝗻 ⭤ ↑𝗚 := by
       of'! (contra₁'! <| and_left! <| goedel_iff_unprovable_goedel) ⨀ this
     simpa [provable₀_iff] using  contra₁'! (deduct'! this)
 
-lemma consistent_unprovable [System.Consistent T] : T ⊬ ↑𝗖𝗼𝗻 := fun h ↦
+/-- Gödel's Second Incompleteness Theorem-/
+theorem consistent_unprovable [System.Consistent T] : T ⊬ ↑𝗖𝗼𝗻 := fun h ↦
   goedel_unprovable <| and_left! consistent_iff_goedel ⨀ h
 
-lemma inconsistent_unprovable [ℕ ⊧ₘ* T] : T ⊬ ∼↑𝗖𝗼𝗻 := fun h ↦
+theorem inconsistent_unprovable [ℕ ⊧ₘ* T] : T ⊬ ∼↑𝗖𝗼𝗻 := fun h ↦
   not_goedel_unprovable <| contra₀'! (and_right! (consistent_iff_goedel (T := T))) ⨀ h
 
 end
