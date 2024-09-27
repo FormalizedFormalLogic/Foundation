@@ -93,13 +93,13 @@ lemma maximalConsistentTheory_maximal :
     (by simpa using System.Axiomatized.axm_subset (maximalConsistentTheory consisT))
 
 lemma mem_or_neg_mem_maximalConsistentTheory (p) :
-    p ∈ maximalConsistentTheory consisT ∨ ~p ∈ maximalConsistentTheory consisT := by
+    p ∈ maximalConsistentTheory consisT ∨ ∼p ∈ maximalConsistentTheory consisT := by
   haveI : DecidableEq α := Classical.typeDecidableEq α
   by_contra A
-  have hp : p ∉ maximalConsistentTheory consisT ∧ ~p ∉ maximalConsistentTheory consisT := by simpa [not_or] using A
+  have hp : p ∉ maximalConsistentTheory consisT ∧ ∼p ∉ maximalConsistentTheory consisT := by simpa [not_or] using A
   have : Consistent (insert p (maximalConsistentTheory consisT)) :=
     Derivation.consistent_iff_unprovable.mpr
-      (show ~p ∉ theory (maximalConsistentTheory consisT) from by simpa using hp.2)
+      (show ∼p ∉ theory (maximalConsistentTheory consisT) from by simpa using hp.2)
   have : insert p (maximalConsistentTheory consisT) ≠ maximalConsistentTheory consisT := by
     simp [hp]
   have : insert p (maximalConsistentTheory consisT) = maximalConsistentTheory consisT :=
@@ -111,7 +111,7 @@ lemma mem_maximalConsistentTheory_iff :
   ⟨fun h ↦ ⟨System.byAxm h⟩, fun h ↦ by have : p ∈ theory (maximalConsistentTheory consisT) := h; simpa using this⟩
 
 lemma maximalConsistentTheory_consistent' {p} :
-    p ∈ maximalConsistentTheory consisT → ~p ∉ maximalConsistentTheory consisT := by
+    p ∈ maximalConsistentTheory consisT → ∼p ∉ maximalConsistentTheory consisT := by
   intro h hn
   have : Inconsistent (maximalConsistentTheory consisT) :=
     System.inconsistent_iff_provable_bot.mpr
@@ -120,7 +120,7 @@ lemma maximalConsistentTheory_consistent' {p} :
   simp_all
 
 lemma not_mem_maximalConsistentTheory_iff :
-    p ∉ maximalConsistentTheory consisT ↔ maximalConsistentTheory consisT ⊢! ~p := by
+    p ∉ maximalConsistentTheory consisT ↔ maximalConsistentTheory consisT ⊢! ∼p := by
   by_cases hp : p ∈ maximalConsistentTheory consisT <;> simp [hp]
   · intro bnp
     have : Inconsistent (maximalConsistentTheory consisT) :=
@@ -139,7 +139,7 @@ lemma mem_maximalConsistentTheory_and {p q} (h : p ⋏ q ∈ maximalConsistentTh
 lemma mem_maximalConsistentTheory_or {p q} (h : p ⋎ q ∈ maximalConsistentTheory consisT) :
     p ∈ maximalConsistentTheory consisT ∨ q ∈ maximalConsistentTheory consisT := by
   by_contra A
-  have b : maximalConsistentTheory consisT ⊢! ~p ∧ maximalConsistentTheory consisT ⊢! ~q := by
+  have b : maximalConsistentTheory consisT ⊢! ∼p ∧ maximalConsistentTheory consisT ⊢! ∼q := by
     simpa [not_or, not_mem_maximalConsistentTheory_iff] using A
   have : Inconsistent (maximalConsistentTheory consisT) :=
     System.inconsistent_of_provable
@@ -171,15 +171,15 @@ lemma satisfiable_of_consistent (consisT : Consistent T) : Semantics.Satisfiable
 
 theorem completeness! : T ⊨[Valuation α] p → T ⊢! p := by
   haveI : DecidableEq α := Classical.typeDecidableEq α
-  suffices Consistent (insert (~p) T) → Semantics.Satisfiable (Valuation α) (insert (~p) T) by
+  suffices Consistent (insert (∼p) T) → Semantics.Satisfiable (Valuation α) (insert (∼p) T) by
     contrapose
     intro hp hs
-    have : Semantics.Satisfiable (Valuation α) (insert (~p) T) :=
+    have : Semantics.Satisfiable (Valuation α) (insert (∼p) T) :=
       this (Derivation.consistent_iff_unprovable.mpr $ by simpa)
     rcases this with ⟨v, hv⟩
     have : v ⊧* T := Semantics.RealizeSet.of_subset hv (by simp)
     have : v ⊧ p := hs this
-    have : ¬v ⊧ p := by simpa using hv.realize (Set.mem_insert (~p) T)
+    have : ¬v ⊧ p := by simpa using hv.realize (Set.mem_insert (∼p) T)
     contradiction
   intro consis
   exact satisfiable_of_consistent consis

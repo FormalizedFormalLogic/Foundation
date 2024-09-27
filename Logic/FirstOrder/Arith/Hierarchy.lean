@@ -147,7 +147,7 @@ variable {L : Language} [L.Eq] [L.LT]
 
 end
 
-lemma neg {p : Semiformula L ξ n} : Hierarchy Γ s p → Hierarchy Γ.alt s (~p) := by
+lemma neg {p : Semiformula L ξ n} : Hierarchy Γ s p → Hierarchy Γ.alt s (∼p) := by
   intro h; induction h <;> try simp[*]
   case bex pos _ ih => exact ball pos ih
   case ball pos _ ih => exact bex pos ih
@@ -158,10 +158,10 @@ lemma neg {p : Semiformula L ξ n} : Hierarchy Γ s p → Hierarchy Γ.alt s (~p
   case dummy_pi ih => exact dummy_sigma ih
   case dummy_sigma ih => exact dummy_pi ih
 
-@[simp] lemma neg_iff {p : Semiformula L ξ n} : Hierarchy Γ s (~p) ↔ Hierarchy Γ.alt s p :=
+@[simp] lemma neg_iff {p : Semiformula L ξ n} : Hierarchy Γ s (∼p) ↔ Hierarchy Γ.alt s p :=
   ⟨fun h => by simpa using neg h, fun h => by simpa using neg h⟩
 
-@[simp] lemma imp_iff {p q : Semiformula L ξ n} : Hierarchy Γ s (p ⟶ q) ↔ (Hierarchy Γ.alt s p ∧ Hierarchy Γ s q) := by simp[Semiformula.imp_eq]
+@[simp] lemma imp_iff {p q : Semiformula L ξ n} : Hierarchy Γ s (p ➝ q) ↔ (Hierarchy Γ.alt s p ∧ Hierarchy Γ s q) := by simp[Semiformula.imp_eq]
 
 @[simp] lemma ball_iff {Γ s n} {p : Semiformula L ξ (n + 1)} {t : Semiterm L ξ (n + 1)} (ht : t.Positive) :
     Hierarchy Γ s (∀[“x. x < !!t”] p) ↔ Hierarchy Γ s p :=
@@ -322,11 +322,11 @@ lemma oringEmb {p : Semiformula ℒₒᵣ ξ n} : Hierarchy Γ s p → Hierarchy
   case dummy_sigma ih => exact ih.dummy_sigma
 
 lemma iff_iff {p q : Semiformula L ξ n} :
-    Hierarchy b s (p ⟷ q) ↔ (Hierarchy b s p ∧ Hierarchy b.alt s p ∧ Hierarchy b s q ∧ Hierarchy b.alt s q) := by
+    Hierarchy b s (p ⭤ q) ↔ (Hierarchy b s p ∧ Hierarchy b.alt s p ∧ Hierarchy b s q ∧ Hierarchy b.alt s q) := by
   simp[Semiformula.iff_eq]; tauto
 
 @[simp] lemma iff_iff₀ {p q : Semiformula L ξ n} :
-    Hierarchy b 0 (p ⟷ q) ↔ (Hierarchy b 0 p ∧ Hierarchy b 0 q) := by
+    Hierarchy b 0 (p ⭤ q) ↔ (Hierarchy b 0 p ∧ Hierarchy b 0 q) := by
   simp[Semiformula.iff_eq]; tauto
 
 @[simp] lemma matrix_conj_iff {b s n} {p : Fin m → Semiformula L ξ n} :

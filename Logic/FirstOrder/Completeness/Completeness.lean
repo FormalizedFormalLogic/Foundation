@@ -37,7 +37,7 @@ open Classical
 
 theorem complete {p : SyntacticFormula L} :
     T ⊨ p → T ⊢! p := fun h ↦ by
-  have : ∃ u : Finset (SyntacticFormula L), ↑u ⊆ insert (~∀∀p) T ∧ ¬Satisfiable (u : Theory L) := by
+  have : ∃ u : Finset (SyntacticFormula L), ↑u ⊆ insert (∼∀∀p) T ∧ ¬Satisfiable (u : Theory L) := by
     simpa using compact.not.mp (consequence_iff_unsatisfiable.mp h)
   rcases this with ⟨u, ssu, hu⟩
   haveI : ∀ k, Encodable ((languageFinset u).Func k) := fun _ ↦ Fintype.toEncodable _
@@ -55,7 +55,7 @@ theorem complete {p : SyntacticFormula L} :
     contradiction
   have : System.Inconsistent (u' : Theory (languageFinset u)) := Complete.inconsistent_of_unsatisfiable this
   have : System.Inconsistent (u : Theory L) := by rw[←image_u']; simpa using Derivation.inconsistent_lMap L.ofSubLanguage this
-  have : System.Inconsistent (insert (~∀∀p) T) := this.of_supset ssu
+  have : System.Inconsistent (insert (∼∀∀p) T) := this.of_supset ssu
   exact Derivation.provable_iff_inconsistent.mpr this
 
 theorem complete_iff : T ⊨ p ↔ T ⊢! p :=

@@ -17,7 +17,7 @@ variable [L.ConstantInhabited]
 section derivation3
 
 inductive Derivation2 (T : Theory L) : Finset (SyntacticFormula L) → Type _
-| closed (Δ) (p : SyntacticFormula L)      : p ∈ Δ → ~p ∈ Δ → Derivation2 T Δ
+| closed (Δ) (p : SyntacticFormula L)      : p ∈ Δ → ∼p ∈ Δ → Derivation2 T Δ
 | root  {Δ} (p : SyntacticFormula L)       : p ∈ T → p ∈ Δ → Derivation2 T Δ
 | verum {Δ}                                : ⊤ ∈ Δ → Derivation2 T Δ
 | and   {Δ} {p q : SyntacticFormula L}     : p ⋏ q ∈ Δ → Derivation2 T (insert p Δ) → Derivation2 T (insert q Δ) → Derivation2 T Δ
@@ -26,7 +26,7 @@ inductive Derivation2 (T : Theory L) : Finset (SyntacticFormula L) → Type _
 | ex    {Δ} {p : SyntacticSemiformula L 1} : ∃' p ∈ Δ → (t : SyntacticTerm L) → Derivation2 T (insert (p/[t]) Δ) → Derivation2 T Δ
 | wk    {Δ Γ} : Derivation2 T Δ → Δ ⊆ Γ → Derivation2 T Γ
 | shift {Δ}   : Derivation2 T Δ → Derivation2 T (Δ.image Rew.shift.hom)
-| cut   {Δ p} : Derivation2 T (insert p Δ) → Derivation2 T (insert (~p) Δ) → Derivation2 T Δ
+| cut   {Δ p} : Derivation2 T (insert p Δ) → Derivation2 T (insert (∼p) Δ) → Derivation2 T Δ
 
 scoped infix:45 " ⊢₃ " => Derivation2
 

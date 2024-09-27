@@ -57,7 +57,7 @@ theorem iff_provable_GL_satisfies_at_root_on_FiniteTransitiveTree : 𝐆𝐋 ⊢
     intro F hF V;
     apply valid_on_TransitiveIrreflexiveFrameClass_of_satisfies_at_root_on_FiniteTransitiveTree h hF;
 
-lemma iff_unprovable_GL_exists_unsatisfies_at_root_on_FiniteTransitiveTree : 𝐆𝐋 ⊬! p ↔ ∃ M : FiniteTransitiveTreeModel.{u, u} α, ¬M.root ⊧ p := by
+lemma iff_unprovable_GL_exists_unsatisfies_at_root_on_FiniteTransitiveTree : 𝐆𝐋 ⊬ p ↔ ∃ M : FiniteTransitiveTreeModel.{u, u} α, ¬M.root ⊧ p := by
   constructor;
   . contrapose; simp; apply iff_provable_GL_satisfies_at_root_on_FiniteTransitiveTree.mpr;
   . contrapose; simp; apply iff_provable_GL_satisfies_at_root_on_FiniteTransitiveTree.mp;
@@ -168,13 +168,13 @@ variable {p q : Formula α}
   - `System.imply_boxdot_axiomT_of_imply_boxdot_boxdot`
   - `System.imply_box_box_of_imply_boxdot_axiomT`
 -/
-lemma GL_imply_boxdot_plain_of_imply_box_box : 𝐆𝐋 ⊢! □p ⟶ □q → 𝐆𝐋 ⊢! ⊡p ⟶ q := by
+lemma GL_imply_boxdot_plain_of_imply_box_box : 𝐆𝐋 ⊢! □p ➝ □q → 𝐆𝐋 ⊢! ⊡p ➝ q := by
   contrapose;
   intro h;
   have := iff_unprovable_GL_exists_unsatisfies_at_root_on_FiniteTransitiveTree.mp h;
   obtain ⟨M, hs⟩ := this;
-  have hs : M.root ⊧ ⊡p ⋏ ~q := by simp_all [Satisfies, Semantics.Realize];
-  replace hs := @FiniteTransitiveTreeModel.SimpleExtension.modal_equivalence_original_world α M M.root (⊡p ⋏ ~q) |>.mp hs;
+  have hs : M.root ⊧ ⊡p ⋏ ∼q := by simp_all [Satisfies, Semantics.Realize];
+  replace hs := @FiniteTransitiveTreeModel.SimpleExtension.modal_equivalence_original_world α M M.root (⊡p ⋏ ∼q) |>.mp hs;
 
   simp [Satisfies, Semantics.Realize] at hs;
   have ⟨hs₁, hs₂, hs₃⟩ := hs;
@@ -198,8 +198,8 @@ lemma GL_imply_boxdot_plain_of_imply_box_box : 𝐆𝐋 ⊢! □p ⟶ □q → �
 
 theorem GL_unnecessitation! : 𝐆𝐋 ⊢! □p → 𝐆𝐋 ⊢! p := by
   intro h;
-  have : 𝐆𝐋 ⊢! □⊤ ⟶ □p := dhyp! (q := □⊤) h;
-  have : 𝐆𝐋 ⊢! ⊡⊤ ⟶ p := GL_imply_boxdot_plain_of_imply_box_box this;
+  have : 𝐆𝐋 ⊢! □⊤ ➝ □p := dhyp! (q := □⊤) h;
+  have : 𝐆𝐋 ⊢! ⊡⊤ ➝ p := GL_imply_boxdot_plain_of_imply_box_box this;
   exact this ⨀ boxdotverum!;
 
 noncomputable instance : System.Unnecessitation (𝐆𝐋 : Hilbert α) where

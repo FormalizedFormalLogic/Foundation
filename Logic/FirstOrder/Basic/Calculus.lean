@@ -31,7 +31,7 @@ lemma shifts_union (Δ Γ : List (SyntacticSemiformula L n)) :
     (Δ ++ Γ)⁺ = Δ⁺ ++ Γ⁺ := by simp[shifts]
 
 lemma shifts_neg (Γ : List (SyntacticSemiformula L n)) :
-    (Γ.map (~·))⁺ = (Γ⁺).map (~·) := by simp [shifts]
+    (Γ.map (∼·))⁺ = (Γ⁺).map (∼·) := by simp [shifts]
 
 @[simp] lemma shifts_emb (Γ : List (Semisentence L n)) :
     (Γ.map Rew.emb.hom)⁺ = Γ.map Rew.emb.hom := by
@@ -45,7 +45,7 @@ inductive Derivation (T : Theory L) : Sequent L → Type _
 | all {Δ p}    : Derivation T (Rew.free.hom p :: Δ⁺) → Derivation T ((∀' p) :: Δ)
 | ex {Δ p} (t) : Derivation T (p/[t] :: Δ) → Derivation T ((∃' p) :: Δ)
 | wk {Δ Γ}     : Derivation T Δ → Δ ⊆ Γ → Derivation T Γ
-| cut {Δ p}    : Derivation T (p :: Δ) → Derivation T (~p :: Δ) → Derivation T Δ
+| cut {Δ p}    : Derivation T (p :: Δ) → Derivation T (∼p :: Δ) → Derivation T Δ
 | root {p}     : p ∈ T → Derivation T [p]
 
 instance : OneSided (SyntacticFormula L) (Theory L) := ⟨Derivation⟩
@@ -71,7 +71,7 @@ inductive CutRestricted (C : Set (SyntacticFormula L)) : {Δ : Sequent L} → �
 | all {Δ p} {d : ⊢ᵀ Rew.free.hom p :: Δ⁺}       : CutRestricted C d → CutRestricted C d.all
 | ex {Δ p} (t) {d : ⊢ᵀ p/[t] :: Δ}              : CutRestricted C d → CutRestricted C d.ex
 | wk {Δ Γ} {d : ⊢ᵀ Δ} (ss : Δ ⊆ Γ)              : CutRestricted C d → CutRestricted C (d.wk ss)
-| cut {Δ p} {dp : ⊢ᵀ p :: Δ} {dn : ⊢ᵀ ~p :: Δ}  : CutRestricted C dp → CutRestricted C dn → p ∈ C → CutRestricted C (dp.cut dn)
+| cut {Δ p} {dp : ⊢ᵀ p :: Δ} {dn : ⊢ᵀ ∼p :: Δ}  : CutRestricted C dp → CutRestricted C dn → p ∈ C → CutRestricted C (dp.cut dn)
 
 def CutFree {Δ : Sequent L} (d : ⊢ᵀ Δ) : Prop := CutRestricted ∅ d
 
@@ -96,7 +96,7 @@ attribute [simp] CutRestricted.axL CutRestricted.verum
 @[simp] lemma wk' {d : ⊢ᵀ Δ} {ss : Δ ⊆ Γ} : CutRestricted C (Derivation.wk d ss) ↔ CutRestricted C d :=
   ⟨by rintro ⟨⟩; assumption, CutRestricted.wk ss⟩
 
-@[simp] lemma cut' {dp : ⊢ᵀ p :: Δ} {dn : ⊢ᵀ ~p :: Δ} :
+@[simp] lemma cut' {dp : ⊢ᵀ p :: Δ} {dn : ⊢ᵀ ∼p :: Δ} :
     CutRestricted C (Derivation.cut dp dn) ↔ p ∈ C ∧ CutRestricted C dp ∧ CutRestricted C dn :=
   ⟨by { rintro ⟨⟩; constructor; { assumption }; constructor <;> assumption },
    by rintro ⟨h, dp, dq⟩; exact CutRestricted.cut dp dq h⟩
@@ -144,7 +144,7 @@ section length
 
 @[simp] lemma length_wk (d : T ⟹ Δ) (h : Δ ⊆ Γ) : length (wk d h) = d.length.succ := rfl
 
-@[simp] lemma length_cut {p} (dp : T ⟹ p :: Δ) (dn : T ⟹ (~p) :: Δ) :
+@[simp] lemma length_cut {p} (dp : T ⟹ p :: Δ) (dn : T ⟹ (∼p) :: Δ) :
   length (cut dp dn) = (max (length dp) (length dn)).succ := rfl
 
 end length
@@ -190,7 +190,7 @@ protected unsafe def repr : {Δ : Sequent L} → T ⟹ Δ → String
   | _, root (p := p) _   =>
       "\\AxiomC{}\n" ++
       "\\RightLabel{\\scriptsize(ROOT)}\n" ++
-      "\\UnaryInfC{$" ++ reprStr p ++ ", " ++ reprStr (~p) ++ "$}\n\n"
+      "\\UnaryInfC{$" ++ reprStr p ++ ", " ++ reprStr (∼p) ++ "$}\n\n"
 
 unsafe instance : Repr (T ⟹ Δ) where reprPrec d _ := Derivation.repr d
 
@@ -231,18 +231,18 @@ def ex' {p} (h : ∃' p ∈ Δ) (t) (d : T ⟹ p/[t] :: Δ) : T ⟹ Δ := (d.ex 
 @[simp] lemma ne_step_max' (n m : ℕ) : n ≠ max m n + 1 :=
   ne_of_lt $ Nat.lt_succ_of_le $ by simp
 
-private lemma neg_ne_and {p q : SyntacticFormula L} : ¬~p = p ⋏ q :=
+private lemma neg_ne_and {p q : SyntacticFormula L} : ¬∼p = p ⋏ q :=
 ne_of_ne_complexity (by simp)
 
-def em {p : SyntacticFormula L} {Δ : Sequent L} (hpos : p ∈ Δ) (hneg : ~p ∈ Δ) : T ⟹ Δ := by
+def em {p : SyntacticFormula L} {Δ : Sequent L} (hpos : p ∈ Δ) (hneg : ∼p ∈ Δ) : T ⟹ Δ := by
   induction p using Semiformula.formulaRec generalizing Δ <;> simp at hneg
   case hverum           => exact verum' hpos
   case hfalsum          => exact verum' hneg
   case hrel r v         => exact axL' r v hpos hneg
   case hnrel r v        => exact axL' r v hneg hpos
   case hall p ih        =>
-    have : T ⟹ ~Rew.free.hom p :: Rew.free.hom p :: Δ⁺ := ih (by simp) (by simp)
-    have : T ⟹ (~Rew.shift.hom p)/[&0] :: Rew.free.hom p :: Δ⁺ :=
+    have : T ⟹ ∼Rew.free.hom p :: Rew.free.hom p :: Δ⁺ := ih (by simp) (by simp)
+    have : T ⟹ (∼Rew.shift.hom p)/[&0] :: Rew.free.hom p :: Δ⁺ :=
       Derivation.cast this (by simp[←Rew.hom_comp_app])
     have : T ⟹ Rew.free.hom p :: Δ⁺ := (ex &0 this).wk
       (by simp; right;
@@ -250,22 +250,22 @@ def em {p : SyntacticFormula L} {Δ : Sequent L} (hpos : p ∈ Δ) (hneg : ~p �
           rwa [Rew.ex, Rew.q_shift, LogicalConnective.HomClass.map_neg] at this)
     exact this.all.wk (by simp[hpos])
   case hex p ih         =>
-    have : T ⟹ Rew.free.hom p :: ~Rew.free.hom p :: Δ⁺ := ih (by simp) (by simp)
-    have : T ⟹ (Rew.shift.hom p)/[&0] :: ~Rew.free.hom p :: Δ⁺ :=
+    have : T ⟹ Rew.free.hom p :: ∼Rew.free.hom p :: Δ⁺ := ih (by simp) (by simp)
+    have : T ⟹ (Rew.shift.hom p)/[&0] :: ∼Rew.free.hom p :: Δ⁺ :=
       Derivation.cast this (by simp[←Rew.hom_comp_app])
-    have : T ⟹ Rew.free.hom (~p) :: Δ⁺ := (ex &0 this).wk
+    have : T ⟹ Rew.free.hom (∼p) :: Δ⁺ := (ex &0 this).wk
       (by simp; right;
           have := mem_shifts_iff.mpr hpos
           rwa [Rew.ex, Rew.q_shift] at this)
     exact this.all.wk (by simp[hneg])
   case hand p q ihp ihq =>
-    have ihp : T ⟹ p :: ~p :: ~q :: Δ := ihp (by simp) (by simp)
-    have ihq : T ⟹ q :: ~p :: ~q :: Δ := ihq (by simp) (by simp)
-    have : T ⟹ ~p :: ~q :: Δ := (ihp.and ihq).wk (by simp[hpos])
+    have ihp : T ⟹ p :: ∼p :: ∼q :: Δ := ihp (by simp) (by simp)
+    have ihq : T ⟹ q :: ∼p :: ∼q :: Δ := ihq (by simp) (by simp)
+    have : T ⟹ ∼p :: ∼q :: Δ := (ihp.and ihq).wk (by simp[hpos])
     exact this.or.wk (by simp[hneg])
   case hor p q ihp ihq  =>
-    have ihp : T ⟹ ~p :: p :: q :: Δ := ihp (by simp) (by simp)
-    have ihq : T ⟹ ~q :: p :: q :: Δ := ihq (by simp) (by simp)
+    have ihp : T ⟹ ∼p :: p :: q :: Δ := ihp (by simp) (by simp)
+    have ihq : T ⟹ ∼q :: p :: q :: Δ := ihq (by simp) (by simp)
     have : T ⟹ p :: q :: Δ := (ihp.and ihq).wk (by simp[hneg])
     exact this.or.wk (by simp[hpos])
 
@@ -283,8 +283,8 @@ def provableOfDerivable {p} (b : T ⟹. p) : T ⊢ p := b
 
 def specialize {p : SyntacticSemiformula L 1} (t : SyntacticTerm L) :
     T ⟹ (∀' p) :: Γ → T ⟹ p/[t] :: Γ := fun d ↦
-  have : T ⟹ ~p/[t] :: p/[t] :: Γ := Tait.em (p := p/[t]) (by simp) (by simp)
-  have dn : T ⟹ ~(∀' p) :: p/[t] :: Γ := by
+  have : T ⟹ ∼p/[t] :: p/[t] :: Γ := Tait.em (p := p/[t]) (by simp) (by simp)
+  have dn : T ⟹ ∼(∀' p) :: p/[t] :: Γ := by
     simp only [neg_all, Nat.reduceAdd, Nat.succ_eq_add_one]
     exact Derivation.ex t (by simpa using this)
   have dp : T ⟹ (∀' p) :: p/[t] :: Γ :=
@@ -350,7 +350,7 @@ def rewrite : ∀ {Δ}, T ⟹ Δ → ∀ (f : ℕ → SyntacticTerm L), T ⟹ Δ
   | _, @wk _ _ Δ Γ d ss,     f => (rewrite d f).wk (List.map_subset _ ss)
   | _, @cut _ _ Δ p d dn,    f =>
     have dΔ : T ⟹ ((Rew.rewrite f).hom p) :: Δ.map ((Rew.rewrite f).hom) := Derivation.cast (rewrite d f) (by simp)
-    have dΓ : T ⟹ (~(Rew.rewrite f).hom p) :: Δ.map ((Rew.rewrite f).hom) := Derivation.cast (rewrite dn f) (by simp)
+    have dΓ : T ⟹ (∼(Rew.rewrite f).hom p) :: Δ.map ((Rew.rewrite f).hom) := Derivation.cast (rewrite dn f) (by simp)
     Derivation.cast (cut dΔ dΓ) (by simp)
   | _, root h,               f => rewrite₁ (root h) f
 
@@ -407,15 +407,15 @@ instance : Tait.Axiomatized (SyntacticFormula L) (Theory L) where
 
 variable [(k : ℕ) → DecidableEq (L.Func k)] [(k : ℕ) → DecidableEq (L.Rel k)]
 
-private def not_close' (p) : T ⟹ [~(∀∀p), p] :=
-  have : T ⟹ [∃* ~(Rew.hom (Rew.fixitr 0 (upper p))) p, p] := instances (v := fun x ↦ &x) (em (p := p) (by simp) (by simp))
+private def not_close' (p) : T ⟹ [∼(∀∀p), p] :=
+  have : T ⟹ [∃* ∼(Rew.hom (Rew.fixitr 0 (upper p))) p, p] := instances (v := fun x ↦ &x) (em (p := p) (by simp) (by simp))
   Derivation.cast this (by simp [close])
 
 def invClose (b : T ⊢ ∀∀p) : T ⊢ p := cut (wk b (by simp)) (not_close' p)
 
 def invClose! (b : T ⊢! ∀∀p) : T ⊢! p := ⟨invClose b.get⟩
 
-private def deductionAux : {Γ : Sequent L} → T ⟹ Γ → T \ {p} ⟹ ~(∀∀p) :: Γ
+private def deductionAux : {Γ : Sequent L} → T ⟹ Γ → T \ {p} ⟹ ∼(∀∀p) :: Γ
   | _, axL Γ R v       => Tait.wkTail <| axL Γ R v
   | _, verum Γ         => Tait.wkTail <| verum Γ
   | _, and d₁ d₂       => Tait.rotate₁ <| and (Tait.rotate₁ (deductionAux d₁)) (Tait.rotate₁ (deductionAux d₂))
@@ -428,19 +428,19 @@ private def deductionAux : {Γ : Sequent L} → T ⟹ Γ → T \ {p} ⟹ ~(∀�
     have : T \ {p} ⟹. q := root (by simp [h, Ne.symm hq])
     wk this (by simp)
 
-def deduction (d : insert p T ⟹ Γ) : T ⟹ ~(∀∀p) :: Γ := Tait.ofAxiomSubset (by intro x; simp; tauto) (deductionAux d (p := p))
+def deduction (d : insert p T ⟹ Γ) : T ⟹ ∼(∀∀p) :: Γ := Tait.ofAxiomSubset (by intro x; simp; tauto) (deductionAux d (p := p))
 
-def provable_iff_inconsistent : T ⊢! p ↔ System.Inconsistent (insert (~∀∀p) T) := by
+def provable_iff_inconsistent : T ⊢! p ↔ System.Inconsistent (insert (∼∀∀p) T) := by
   constructor
   · rintro b
     exact System.inconsistent_of_provable_of_unprovable
       (System.wk! (by simp) (toClose! b)) (System.by_axm _ (by simp))
   · intro h
     rcases Tait.inconsistent_iff_provable.mp h with ⟨d⟩
-    have : T ⊢ ∀∀p :=  Derivation.cast (deduction d) (by rw [close_eq_self_of (~∀∀p) (by simp)]; simp)
+    have : T ⊢ ∀∀p :=  Derivation.cast (deduction d) (by rw [close_eq_self_of (∼∀∀p) (by simp)]; simp)
     exact ⟨invClose this⟩
 
-def unprovable_iff_consistent : T ⊬! p ↔ System.Consistent (insert (~∀∀p) T) := by
+def unprovable_iff_consistent : T ⊬ p ↔ System.Consistent (insert (∼∀∀p) T) := by
   simp [←System.not_inconsistent_iff_consistent, ←provable_iff_inconsistent]
 
 section Hom
@@ -559,9 +559,9 @@ abbrev Provable₀ (T : Theory L) (σ : Sentence L) : Prop := T.alt ⊢! σ
 
 infix:45 " ⊢!. " => Provable₀
 
-abbrev Unprovable₀ (T : Theory L) (σ : Sentence L) : Prop := T.alt ⊬! σ
+abbrev Unprovable₀ (T : Theory L) (σ : Sentence L) : Prop := T.alt ⊬ σ
 
-infix:45 " ⊬!. " => Unprovable₀
+infix:45 " ⊬. " => Unprovable₀
 
 instance (T : Theory.Alt L) : System.Classical T := System.Classical.ofEquiv T.thy T Rew.emb.hom (fun _ ↦ .refl _)
 
@@ -569,7 +569,7 @@ variable {T : Theory L} {σ : Sentence L}
 
 lemma provable₀_iff : T ⊢!. σ ↔ T ⊢! ↑σ := iff_of_eq rfl
 
-lemma unprovable₀_iff : T ⊬!. σ ↔ T ⊬! ↑σ := iff_of_eq rfl
+lemma unprovable₀_iff : T ⊬. σ ↔ T ⊬ ↑σ := iff_of_eq rfl
 
 end
 

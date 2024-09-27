@@ -39,10 +39,10 @@ class Tait (F K : Type*) [LogicalConnective F] [Collection F K] extends OneSided
   and {𝓚 : K} {p q : F} {Δ : List F} : 𝓚 ⟹ p :: Δ → 𝓚 ⟹ q :: Δ → 𝓚 ⟹ p ⋏ q :: Δ
   or {𝓚 : K} {p q : F} {Δ : List F}  : 𝓚 ⟹ p :: q :: Δ → 𝓚 ⟹ p ⋎ q :: Δ
   wk {𝓚 : K} {Δ Δ' : List F}         : 𝓚 ⟹ Δ → Δ ⊆ Δ' → 𝓚 ⟹ Δ'
-  em {𝓚 : K} {p} {Δ : List F}        : p ∈ Δ → ~p ∈ Δ → 𝓚 ⟹ Δ
+  em {𝓚 : K} {p} {Δ : List F}        : p ∈ Δ → ∼p ∈ Δ → 𝓚 ⟹ Δ
 
 class Tait.Cut (F K : Type*) [LogicalConnective F] [Collection F K] [Tait F K] where
-  cut {𝓚 : K} {Δ : List F} {p} : 𝓚 ⟹ p :: Δ → 𝓚 ⟹ ~p :: Δ → 𝓚 ⟹ Δ
+  cut {𝓚 : K} {Δ : List F} {p} : 𝓚 ⟹ p :: Δ → 𝓚 ⟹ ∼p :: Δ → 𝓚 ⟹ Δ
 
 class Tait.Axiomatized (F K : Type*) [LogicalConnective F] [Collection F K] [Tait F K] where
   root {𝓚 : K} {p}    : p ∈ 𝓚 → 𝓚 ⟹. p
@@ -82,11 +82,11 @@ lemma or! (h : 𝓚 ⟹! p :: q :: Γ) : 𝓚 ⟹! p ⋎ q :: Γ := ⟨or h.get�
 
 lemma wk! (h : 𝓚 ⟹! Γ) (ss : Γ ⊆ Δ) : 𝓚 ⟹! Δ := ⟨wk h.get ss⟩
 
-lemma em! (hp : p ∈ Γ) (hn : ~p ∈ Γ) : 𝓚 ⟹! Γ := ⟨em hp hn⟩
+lemma em! (hp : p ∈ Γ) (hn : ∼p ∈ Γ) : 𝓚 ⟹! Γ := ⟨em hp hn⟩
 
-def close (p : F) (hp : p ∈ Γ := by simp) (hn : ~p ∈ Γ := by simp) : 𝓚 ⟹ Γ := em hp hn
+def close (p : F) (hp : p ∈ Γ := by simp) (hn : ∼p ∈ Γ := by simp) : 𝓚 ⟹ Γ := em hp hn
 
-lemma close! (p : F) (hp : p ∈ Γ := by simp) (hn : ~p ∈ Γ := by simp) : 𝓚 ⟹! Γ := em! hp hn
+lemma close! (p : F) (hp : p ∈ Γ := by simp) (hn : ∼p ∈ Γ := by simp) : 𝓚 ⟹! Γ := em! hp hn
 
 def and' {p q : F} (h : p ⋏ q ∈ Γ) (dp : 𝓚 ⟹ p :: Γ) (dq : 𝓚 ⟹ q :: Γ) : 𝓚 ⟹ Γ :=
   wk (and dp dq) (by simp [h])
@@ -110,7 +110,7 @@ alias cut := Tait.Cut.cut
 
 alias root := Tait.Axiomatized.root
 
-lemma cut! (hp : 𝓚 ⟹! p :: Δ) (hn : 𝓚 ⟹! ~p :: Δ) : 𝓚 ⟹! Δ := ⟨cut hp.get hn.get⟩
+lemma cut! (hp : 𝓚 ⟹! p :: Δ) (hn : 𝓚 ⟹! ∼p :: Δ) : 𝓚 ⟹! Δ := ⟨cut hp.get hn.get⟩
 
 lemma root! {p} (h : p ∈ 𝓚) : 𝓚 ⟹!. p := ⟨root h⟩
 
@@ -143,11 +143,11 @@ instance : DeductiveExplosion K where
 instance : System.Deduction K where
   ofInsert {p q 𝓚 b} := by {  }
   inv {p q 𝓚 b} :=
-    let h : cons p 𝓚 ⟹ [~p ⋎ q, q] :=
-      wk (show cons p 𝓚 ⟹ [~p ⋎ q] from ofEq (ofAxiomSubset (by simp) b) (by simp [DeMorgan.imply])) (by simp)
-    let n : cons p 𝓚 ⟹ [~(~p ⋎ q), q] :=
+    let h : cons p 𝓚 ⟹ [∼p ⋎ q, q] :=
+      wk (show cons p 𝓚 ⟹ [∼p ⋎ q] from ofEq (ofAxiomSubset (by simp) b) (by simp [DeMorgan.imply])) (by simp)
+    let n : cons p 𝓚 ⟹ [∼(∼p ⋎ q), q] :=
       let hp : cons p 𝓚 ⟹ [p, q] := wk (show cons p 𝓚 ⊢ p from byAxm (by simp)) (by simp)
-      let hq : cons p 𝓚 ⟹ [~q, q] := em (p := q) (by simp) (by simp)
+      let hq : cons p 𝓚 ⟹ [∼q, q] := em (p := q) (by simp) (by simp)
       ofEq (and hp hq) (by simp)
     cut h n
 -/
@@ -163,7 +163,7 @@ lemma consistent_iff_unprovable :
 
 /-
 lemma provable_iff_inconsistent {p} :
-    𝓚 ⊢! p ↔ Inconsistent (cons (~p) 𝓚) := by
+    𝓚 ⊢! p ↔ Inconsistent (cons (∼p) 𝓚) := by
   simp [inconsistent_iff_provable, deduction_iff, DeMorgan.imply]
   constructor
   · intro h; exact cut! (of_axiom_subset (by simp) h) (root! <| by simp)
@@ -171,60 +171,60 @@ lemma provable_iff_inconsistent {p} :
     exact ⟨by simpa using Tait.Axiomatized.proofOfContra b⟩
 
 lemma refutable_iff_inconsistent {p} :
-    𝓚 ⊢! ~p ↔ Inconsistent (cons p 𝓚) := by simpa using provable_iff_inconsistent (𝓚 := 𝓚) (p := ~p)
+    𝓚 ⊢! ∼p ↔ Inconsistent (cons p 𝓚) := by simpa using provable_iff_inconsistent (𝓚 := 𝓚) (p := ∼p)
 
 lemma consistent_insert_iff_not_refutable {p}  :
-    System.Consistent (cons p 𝓚) ↔ 𝓚 ⊬! ~p := by
+    System.Consistent (cons p 𝓚) ↔ 𝓚 ⊬ ∼p := by
   simp [System.Unprovable, refutable_iff_inconsistent, System.not_inconsistent_iff_consistent]
 
-lemma inconsistent_of_provable_and_refutable {p} (bp : 𝓚 ⊢! p) (br : 𝓚 ⊢! ~p) : Inconsistent 𝓚 :=
+lemma inconsistent_of_provable_and_refutable {p} (bp : 𝓚 ⊢! p) (br : 𝓚 ⊢! ∼p) : Inconsistent 𝓚 :=
   inconsistent_iff_provable.mpr <| cut! bp br
 -/
 
 instance : System.Classical 𝓚 where
   mdp {p q dpq dp} :=
-    let dpq : 𝓚 ⟹ [~p ⋎ q, q] := wk dpq (by simp [DeMorgan.imply])
-    let dnq : 𝓚 ⟹ [~(~p ⋎ q), q] :=
-      let d : 𝓚 ⟹ [p ⋏ ~q, q] := and (wk dp <| by simp) (close q)
+    let dpq : 𝓚 ⟹ [∼p ⋎ q, q] := wk dpq (by simp [DeMorgan.imply])
+    let dnq : 𝓚 ⟹ [∼(∼p ⋎ q), q] :=
+      let d : 𝓚 ⟹ [p ⋏ ∼q, q] := and (wk dp <| by simp) (close q)
       ofEq d (by simp)
     cut dpq dnq
   neg_equiv p := ofEq
-    (show 𝓚 ⊢ (p ⋎ ~p ⋎ ⊥) ⋏ (p ⋏ ⊤ ⋎ ~p) from
+    (show 𝓚 ⊢ (p ⋎ ∼p ⋎ ⊥) ⋏ (p ⋏ ⊤ ⋎ ∼p) from
       and (or <| rotate₁ <| or <| close p) (or <| and (close p) verum'))
     (by simp [Axioms.NegEquiv, DeMorgan.imply, LogicalConnective.iff])
   verum := verum _ _
   imply₁ p q :=
-    have : 𝓚 ⊢ ~p ⋎ ~q ⋎ p := or <| rotate₁ <| or <| close p
+    have : 𝓚 ⊢ ∼p ⋎ ∼q ⋎ p := or <| rotate₁ <| or <| close p
     ofEq this (by simp [DeMorgan.imply])
   imply₂ p q r :=
-    have : 𝓚 ⊢ p ⋏ q ⋏ ~ r ⋎ p ⋏ ~q ⋎ ~p ⋎ r :=
+    have : 𝓚 ⊢ p ⋏ q ⋏ ∼ r ⋎ p ⋏ ∼q ⋎ ∼p ⋎ r :=
       or <| rotate₁ <| or <| rotate₁ <| or <| rotate₃ <| and
         (close p)
         (and (rotate₃ <| and (close p) (close q)) (close r))
     ofEq this (by simp [DeMorgan.imply])
   and₁ p q :=
-    have : 𝓚 ⊢ (~p ⋎ ~q) ⋎ p := or <| or <| close p
+    have : 𝓚 ⊢ (∼p ⋎ ∼q) ⋎ p := or <| or <| close p
     ofEq this (by simp [DeMorgan.imply])
   and₂ p q :=
-    have : 𝓚 ⊢ (~p ⋎ ~q) ⋎ q := or <| or <| close q
+    have : 𝓚 ⊢ (∼p ⋎ ∼q) ⋎ q := or <| or <| close q
     ofEq this (by simp [DeMorgan.imply])
   and₃ p q :=
-    have : 𝓚 ⊢ ~p ⋎ ~q ⋎ p ⋏ q := or <| rotate₁ <| or <| rotate₁ <| and (close p) (close q)
+    have : 𝓚 ⊢ ∼p ⋎ ∼q ⋎ p ⋏ q := or <| rotate₁ <| or <| rotate₁ <| and (close p) (close q)
     ofEq this (by simp [DeMorgan.imply])
   or₁ p q :=
-    have : 𝓚 ⊢ ~p ⋎ p ⋎ q := or <| rotate₁ <| or <| close p
+    have : 𝓚 ⊢ ∼p ⋎ p ⋎ q := or <| rotate₁ <| or <| close p
     ofEq this (by simp [DeMorgan.imply])
   or₂ p q :=
-    have : 𝓚 ⊢ ~q ⋎ p ⋎ q := or <| rotate₁ <| or <| close q
+    have : 𝓚 ⊢ ∼q ⋎ p ⋎ q := or <| rotate₁ <| or <| close q
     ofEq this (by simp [DeMorgan.imply])
   or₃ p q r :=
-    have : 𝓚 ⊢ p ⋏ ~ r ⋎ q ⋏ ~ r ⋎ ~p ⋏ ~q ⋎ r :=
+    have : 𝓚 ⊢ p ⋏ ∼ r ⋎ q ⋏ ∼ r ⋎ ∼p ⋏ ∼q ⋎ r :=
       or <| rotate₁ <| or <| rotate₁ <| or <| and
         (rotate₃ <| and (close p) (close r))
         (rotate₂ <| and (close q) (close r))
     ofEq this (by simp [DeMorgan.imply])
   dne p :=
-    have : 𝓚 ⊢ ~p ⋎ p := or <| close p
+    have : 𝓚 ⊢ ∼p ⋎ p := or <| close p
     ofEq this (by simp [DeMorgan.imply])
 
 end Tait

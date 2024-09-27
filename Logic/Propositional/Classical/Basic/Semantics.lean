@@ -15,14 +15,14 @@ variable {F : Type*} [LogicalConnective F] [DeMorgan F] (v : α → F)
 
 def valAux : Formula α → F
   | atom a  => v a
-  | natom a => ~v a
+  | natom a => ∼v a
   | ⊤       => ⊤
   | ⊥       => ⊥
   | p ⋏ q   => p.valAux ⋏ q.valAux
   | p ⋎ q   => p.valAux ⋎ q.valAux
 
 lemma valAux_neg (p : Formula α) :
-    valAux v (~p) = ~(valAux v p) :=
+    valAux v (∼p) = ∼(valAux v p) :=
   by induction p using rec' <;> simp[*, valAux, ←neg_eq, or_iff_not_imp_left]
 
 def val : Formula α →ˡᶜ F where
@@ -36,7 +36,7 @@ def val : Formula α →ˡᶜ F where
 
 @[simp] lemma val_atom : val v (atom a) = v a := rfl
 
-@[simp] lemma val_natom : val v (natom a) = ~v a := rfl
+@[simp] lemma val_natom : val v (natom a) = ∼v a := rfl
 
 end val
 

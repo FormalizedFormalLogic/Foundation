@@ -13,7 +13,7 @@ namespace Formula.Kripke
 def Satisfies (M : Kripke.Model α) (x : M.World) : Formula α → Prop
   | atom a  => M.Valuation x a
   | ⊥  => False
-  | p ⟶ q => (Satisfies M x p) ⟶ (Satisfies M x q)
+  | p ➝ q => (Satisfies M x p) ➝ (Satisfies M x q)
   | □p   => ∀ y, x ≺ y → (Satisfies M y p)
 
 namespace Satisfies
@@ -29,12 +29,12 @@ lemma box_def : x ⊧ □p ↔ ∀ y, x ≺ y → y ⊧ p := by simp [Kripke.Sat
 
 lemma dia_def : x ⊧ ◇p ↔ ∃ y, x ≺ y ∧ y ⊧ p := by simp [Kripke.Satisfies];
 
-lemma not_def : x ⊧ ~p ↔ ¬(x ⊧ p) := by
+lemma not_def : x ⊧ ∼p ↔ ¬(x ⊧ p) := by
   induction p using Formula.rec' generalizing x with
   | _ => simp_all [Satisfies];
 instance : Semantics.Not (M.World) := ⟨not_def⟩
 
-lemma imp_def : x ⊧ p ⟶ q ↔ (x ⊧ p) → (x ⊧ q) := by tauto;
+lemma imp_def : x ⊧ p ➝ q ↔ (x ⊧ p) → (x ⊧ q) := by tauto;
 instance : Semantics.Imp (M.World) := ⟨imp_def⟩
 
 lemma or_def : x ⊧ p ⋎ q ↔ x ⊧ p ∨ x ⊧ q := by simp [Satisfies]; tauto;
@@ -47,7 +47,7 @@ protected instance : Semantics.Tarski (M.World) where
   realize_top := by tauto;
   realize_bot := by tauto;
 
-lemma negneg_def : x ⊧ ~~p ↔ x ⊧ p := by simp [Satisfies];
+lemma negneg_def : x ⊧ ∼∼p ↔ x ⊧ p := by simp [Satisfies];
 
 lemma multibox_def : x ⊧ □^[n]p ↔ ∀ {y}, x ≺^[n] y → y ⊧ p := by
   induction n generalizing x with
@@ -88,15 +88,15 @@ lemma multidia_def : x ⊧ ◇^[n]p ↔ ∃ y, x ≺^[n] y ∧ y ⊧ p := by
       . apply ih.mpr;
         use y;
 
-lemma trans (hpq : x ⊧ p ⟶ q) (hqr : x ⊧ q ⟶ r) : x ⊧ p ⟶ r := by simp_all;
+lemma trans (hpq : x ⊧ p ➝ q) (hqr : x ⊧ q ➝ r) : x ⊧ p ➝ r := by simp_all;
 
-lemma mdp (hpq : x ⊧ p ⟶ q) (hp : x ⊧ p) : x ⊧ q := by simp_all;
+lemma mdp (hpq : x ⊧ p ➝ q) (hp : x ⊧ p) : x ⊧ q := by simp_all;
 
-lemma dia_dual : x ⊧ ◇p ↔ x ⊧ ~□(~p) := by simp [Satisfies];
+lemma dia_dual : x ⊧ ◇p ↔ x ⊧ ∼□(∼p) := by simp [Satisfies];
 
-lemma box_dual : x ⊧ □p ↔ x ⊧ ~◇(~p) := by simp [Satisfies];
+lemma box_dual : x ⊧ □p ↔ x ⊧ ∼◇(∼p) := by simp [Satisfies];
 
-lemma not_imp : ¬(x ⊧ p ⟶ q) ↔ x ⊧ p ⋏ ~q := by simp [Satisfies];
+lemma not_imp : ¬(x ⊧ p ➝ q) ↔ x ⊧ p ⋏ ∼q := by simp [Satisfies];
 
 end Satisfies
 
@@ -114,7 +114,7 @@ instance : Semantics.Bot (Kripke.Model α) where
 
 variable {M : Model α} {p q r : Formula α}
 
-protected lemma mdp (hpq : M ⊧ p ⟶ q) (hp : M ⊧ p) : M ⊧ q := by
+protected lemma mdp (hpq : M ⊧ p ➝ q) (hp : M ⊧ p) : M ⊧ q := by
   intro x;
   exact (Satisfies.imp_def.mp $ hpq x) (hp x);
 
@@ -160,7 +160,7 @@ protected lemma nec (h : F ⊧ p) : F ⊧ □p := by
   intro V x y _;
   exact h V y;
 
-protected lemma mdp (hpq : F ⊧ p ⟶ q) (hp : F ⊧ p) : F ⊧ q := by
+protected lemma mdp (hpq : F ⊧ p ➝ q) (hp : F ⊧ p) : F ⊧ q := by
   intro V x;
   exact (hpq V x) (hp V x);
 
@@ -198,7 +198,7 @@ protected lemma nec (h : 𝔽 ⊧ p) : 𝔽 ⊧ □p := by
   apply Kripke.ValidOnFrame.nec;
   exact h hF;
 
-protected lemma mdp (hpq : 𝔽 ⊧ p ⟶ q) (hp : 𝔽 ⊧ p) : 𝔽 ⊧ q := by
+protected lemma mdp (hpq : 𝔽 ⊧ p ➝ q) (hp : 𝔽 ⊧ p) : 𝔽 ⊧ q := by
   intro _ hF;
   exact Kripke.ValidOnFrame.mdp (hpq hF) (hp hF)
 
@@ -239,7 +239,7 @@ protected lemma nec (h : 𝔽#α ⊧ p) : 𝔽#α ⊧ □p := by
   apply ValidOnFrame.nec;
   exact h hF;
 
-protected lemma mdp (hpq : 𝔽#α ⊧ p ⟶ q) (hp : 𝔽#α ⊧ p) : 𝔽#α ⊧ q := by
+protected lemma mdp (hpq : 𝔽#α ⊧ p ➝ q) (hp : 𝔽#α ⊧ p) : 𝔽#α ⊧ q := by
   intro _ hF;
   exact Formula.Kripke.ValidOnFrame.mdp (hpq hF) (hp hF)
 
@@ -408,7 +408,7 @@ lemma sound_finite : Λ ⊢! p → 𝔽ꟳ(Λ) ⊧ p := by
   exact hFF₁ p hp;
 instance : Sound Λ 𝔽ꟳ(Λ) := ⟨sound_finite⟩
 
-lemma unprovable_bot (hc : 𝔽(Λ).Nonempty) : Λ ⊬! ⊥ := by
+lemma unprovable_bot (hc : 𝔽(Λ).Nonempty) : Λ ⊬ ⊥ := by
   apply (not_imp_not.mpr (sound (α := α)));
   simp [Semantics.Realize];
   obtain ⟨F, hF⟩ := hc;
@@ -418,7 +418,7 @@ lemma unprovable_bot (hc : 𝔽(Λ).Nonempty) : Λ ⊬! ⊥ := by
   . exact Semantics.Bot.realize_bot (F := Formula α) (M := Frame.Dep α) F;
 instance (hc : 𝔽(Λ).Nonempty) : System.Consistent Λ := System.Consistent.of_unprovable $ unprovable_bot hc
 
-lemma unprovable_bot_finite (hc : 𝔽ꟳ(Λ).Nonempty) : Λ ⊬! ⊥ := by
+lemma unprovable_bot_finite (hc : 𝔽ꟳ(Λ).Nonempty) : Λ ⊬ ⊥ := by
   apply (not_imp_not.mpr (sound_finite (α := α)));
   simp [Semantics.Realize];
   obtain ⟨F, hF⟩ := hc;
@@ -446,7 +446,7 @@ lemma sound_of_finite_characterizability {𝔽 : FiniteFrameClass} [char : 𝔽�
   . rfl;
 instance {𝔽 : FiniteFrameClass} [𝔽ꟳ(Λ).Characteraizable 𝔽] : Sound Λ 𝔽#α := ⟨sound_of_finite_characterizability⟩
 
-lemma unprovable_bot_of_characterizability {𝔽 : FrameClass} [char : 𝔽(Λ).Characteraizable 𝔽] : Λ ⊬! ⊥ := by
+lemma unprovable_bot_of_characterizability {𝔽 : FrameClass} [char : 𝔽(Λ).Characteraizable 𝔽] : Λ ⊬ ⊥ := by
   apply unprovable_bot;
   obtain ⟨F, hF⟩ := char.nonempty;
   use F;
@@ -454,7 +454,7 @@ lemma unprovable_bot_of_characterizability {𝔽 : FrameClass} [char : 𝔽(Λ).
 instance [FrameClass.Characteraizable.{u} 𝔽(Λ) 𝔽] : System.Consistent Λ
   := System.Consistent.of_unprovable $ unprovable_bot_of_characterizability
 
-lemma unprovable_bot_of_finite_characterizability {𝔽 : FiniteFrameClass}  [char : 𝔽ꟳ(Λ).Characteraizable 𝔽] : Λ ⊬! ⊥ := by
+lemma unprovable_bot_of_finite_characterizability {𝔽 : FiniteFrameClass}  [char : 𝔽ꟳ(Λ).Characteraizable 𝔽] : Λ ⊬ ⊥ := by
   apply unprovable_bot_finite;
   obtain ⟨F, hF⟩ := char.nonempty;
   use F;
@@ -512,7 +512,7 @@ theorem K_strictlyWeakerThan_KD : (𝐊 : Hilbert α) <ₛ 𝐊𝐃 := by
   constructor;
   . apply K_weakerThan_KD;
   . simp [weakerThan_iff];
-    use (□(atom default) ⟶ ◇(atom default));
+    use (□(atom default) ➝ ◇(atom default));
     constructor;
     . exact Deduction.maxm! (by simp);
     . apply K_sound.not_provable_of_countermodel;
@@ -524,7 +524,7 @@ theorem K_strictlyWeakerThan_KB : (𝐊 : Hilbert α) <ₛ 𝐊𝐁 := by
   constructor;
   . apply K_weakerThan_KB;
   . simp [weakerThan_iff];
-    use ((atom default) ⟶ □◇(atom default));
+    use ((atom default) ➝ □◇(atom default));
     constructor;
     . exact Deduction.maxm! (by simp);
     . apply K_sound.not_provable_of_countermodel;
@@ -537,7 +537,7 @@ theorem K_strictlyWeakerThan_K4 : (𝐊 : Hilbert α) <ₛ 𝐊𝟒 := by
   constructor;
   . apply K_weakerThan_K4;
   . simp [weakerThan_iff];
-    use (□(atom default) ⟶ □□(atom default));
+    use (□(atom default) ➝ □□(atom default));
     constructor;
     . exact Deduction.maxm! (by simp);
     . apply K_sound.not_provable_of_countermodel;
@@ -558,7 +558,7 @@ theorem K_strictlyWeakerThan_K5 : (𝐊 : Hilbert α) <ₛ 𝐊𝟓 := by
   constructor;
   . apply K_weakerThan_K5;
   . simp [weakerThan_iff];
-    use (◇(atom default) ⟶ □◇(atom default));
+    use (◇(atom default) ➝ □◇(atom default));
     constructor;
     . exact Deduction.maxm! (by simp);
     . apply K_sound.not_provable_of_countermodel;

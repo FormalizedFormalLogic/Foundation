@@ -24,7 +24,7 @@ def allNvar {p} (h : ∀' p ∈ Δ) : T ⟹ p/[&(newVar Δ)] :: Δ → T ⟹ Δ 
     genelalizeByNewver (by simpa[fvar?] using not_fvar?_newVar h) (fun _ ↦ not_fvar?_newVar) b
   Tait.wk b (by simp[h])
 
-protected def id {p} (hp : p ∈ T) : T ⟹ ~∀∀ p :: Δ → T ⟹ Δ := fun b ↦ Tait.cut (Tait.wk (toClose (root hp)) (by simp)) b
+protected def id {p} (hp : p ∈ T) : T ⟹ ∼∀∀ p :: Δ → T ⟹ Δ := fun b ↦ Tait.cut (Tait.wk (toClose (root hp)) (by simp)) b
 
 end Derivation
 

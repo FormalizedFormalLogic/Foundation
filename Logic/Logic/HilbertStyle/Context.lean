@@ -43,13 +43,13 @@ instance : Collection F (FiniteContext F 𝓢) where
   not_mem_empty := by simp
   mem_cons_iff := by simp [Cons.cons, mem_def]
 
-instance (𝓢 : S) : System F (FiniteContext F 𝓢) := ⟨(𝓢 ⊢ ·.conj ⟶ ·)⟩
+instance (𝓢 : S) : System F (FiniteContext F 𝓢) := ⟨(𝓢 ⊢ ·.conj ➝ ·)⟩
 
 abbrev Prf (𝓢 : S) (Γ : List F) (p : F) : Type _ := (Γ : FiniteContext F 𝓢) ⊢ p
 
 abbrev Provable (𝓢 : S) (Γ : List F) (p : F) : Prop := (Γ : FiniteContext F 𝓢) ⊢! p
 
-abbrev Unprovable (𝓢 : S) (Γ : List F) (p : F) : Prop := (Γ : FiniteContext F 𝓢) ⊬! p
+abbrev Unprovable (𝓢 : S) (Γ : List F) (p : F) : Prop := (Γ : FiniteContext F 𝓢) ⊬ p
 
 abbrev PrfSet (𝓢 : S) (Γ : List F) (s : Set F) : Type _ := (Γ : FiniteContext F 𝓢) ⊢* s
 
@@ -59,21 +59,21 @@ notation Γ:45 " ⊢[" 𝓢 "] " p:46 => Prf 𝓢 Γ p
 
 notation Γ:45 " ⊢[" 𝓢 "]! " p:46 => Provable 𝓢 Γ p
 
-notation Γ:45 " ⊬[" 𝓢 "]! " p:46 => Unprovable 𝓢 Γ p
+notation Γ:45 " ⊬[" 𝓢 "] " p:46 => Unprovable 𝓢 Γ p
 
 notation Γ:45 " ⊢[" 𝓢 "]* " s:46 => PrfSet 𝓢 Γ s
 
 notation Γ:45 " ⊢[" 𝓢 "]*! " s:46 => ProvableSet 𝓢 Γ s
 
-lemma system_def (Γ : FiniteContext F 𝓢) (p : F) : (Γ ⊢ p) = (𝓢 ⊢ Γ.conj ⟶ p) := rfl
+lemma system_def (Γ : FiniteContext F 𝓢) (p : F) : (Γ ⊢ p) = (𝓢 ⊢ Γ.conj ➝ p) := rfl
 
-def ofDef {Γ : List F} {p : F} (b : 𝓢 ⊢ ⋀Γ ⟶ p) : Γ ⊢[𝓢] p := b
+def ofDef {Γ : List F} {p : F} (b : 𝓢 ⊢ ⋀Γ ➝ p) : Γ ⊢[𝓢] p := b
 
-def toDef {Γ : List F} {p : F} (b : Γ ⊢[𝓢] p) : 𝓢 ⊢ ⋀Γ ⟶ p := b
+def toDef {Γ : List F} {p : F} (b : Γ ⊢[𝓢] p) : 𝓢 ⊢ ⋀Γ ➝ p := b
 
-lemma toₛ! (b : Γ ⊢[𝓢]! p) : 𝓢 ⊢! ⋀Γ ⟶ p := b
+lemma toₛ! (b : Γ ⊢[𝓢]! p) : 𝓢 ⊢! ⋀Γ ➝ p := b
 
-lemma provable_iff {p : F} : Γ ⊢[𝓢]! p ↔ 𝓢 ⊢! ⋀Γ ⟶ p := iff_of_eq rfl
+lemma provable_iff {p : F} : Γ ⊢[𝓢]! p ↔ 𝓢 ⊢! ⋀Γ ➝ p := iff_of_eq rfl
 
 variable {Γ Δ E : List F}
 
@@ -141,31 +141,31 @@ instance [HasAxiomOrElim 𝓢] (Γ : FiniteContext F 𝓢) : System.HasAxiomOrEl
 
 instance [NegationEquiv 𝓢] (Γ : FiniteContext F 𝓢) : System.NegationEquiv Γ := ⟨fun _ ↦ of neg_equiv⟩
 
-def mdp' (bΓ : Γ ⊢[𝓢] p ⟶ q) (bΔ : Δ ⊢[𝓢] p) : (Γ ++ Δ) ⊢[𝓢] q := wk (by simp) bΓ ⨀ wk (by simp) bΔ
+def mdp' (bΓ : Γ ⊢[𝓢] p ➝ q) (bΔ : Δ ⊢[𝓢] p) : (Γ ++ Δ) ⊢[𝓢] q := wk (by simp) bΓ ⨀ wk (by simp) bΔ
 
-def deduct {p q : F} : {Γ : List F} → (p :: Γ) ⊢[𝓢] q → Γ ⊢[𝓢] p ⟶ q
+def deduct {p q : F} : {Γ : List F} → (p :: Γ) ⊢[𝓢] q → Γ ⊢[𝓢] p ➝ q
   | .nil => fun b ↦ ofDef <| dhyp _ (toDef b)
   | .cons _ _ => fun b ↦ ofDef <| andImplyIffImplyImply'.mp (impTrans'' (andComm _ _) (toDef b))
 
-lemma deduct! (h : (p :: Γ) ⊢[𝓢]! q) :  Γ ⊢[𝓢]! p ⟶ q  := ⟨FiniteContext.deduct h.some⟩
+lemma deduct! (h : (p :: Γ) ⊢[𝓢]! q) :  Γ ⊢[𝓢]! p ➝ q  := ⟨FiniteContext.deduct h.some⟩
 
-def deductInv {p q : F} : {Γ : List F} → Γ ⊢[𝓢] p ⟶ q → (p :: Γ) ⊢[𝓢] q
+def deductInv {p q : F} : {Γ : List F} → Γ ⊢[𝓢] p ➝ q → (p :: Γ) ⊢[𝓢] q
   | .nil => λ b => ofDef <| (toDef b) ⨀ verum
   | .cons _ _ => λ b => ofDef <| (impTrans'' (andComm _ _) (andImplyIffImplyImply'.mpr (toDef b)))
 
-lemma deductInv! (h : Γ ⊢[𝓢]! p ⟶ q) : (p :: Γ) ⊢[𝓢]! q := ⟨FiniteContext.deductInv h.some⟩
+lemma deductInv! (h : Γ ⊢[𝓢]! p ➝ q) : (p :: Γ) ⊢[𝓢]! q := ⟨FiniteContext.deductInv h.some⟩
 
-lemma deduct_iff {p q : F} {Γ : List F} : Γ ⊢[𝓢]! p ⟶ q ↔ (p :: Γ) ⊢[𝓢]! q :=
+lemma deduct_iff {p q : F} {Γ : List F} : Γ ⊢[𝓢]! p ➝ q ↔ (p :: Γ) ⊢[𝓢]! q :=
   ⟨fun h ↦ ⟨deductInv h.some⟩, fun h ↦ ⟨deduct h.some⟩⟩
 
-def deduct' : [p] ⊢[𝓢] q → 𝓢 ⊢ p ⟶ q := fun b ↦ emptyPrf <| deduct b
+def deduct' : [p] ⊢[𝓢] q → 𝓢 ⊢ p ➝ q := fun b ↦ emptyPrf <| deduct b
 
-lemma deduct'! (h : [p] ⊢[𝓢]! q) : 𝓢 ⊢! p ⟶ q := ⟨FiniteContext.deduct' h.some⟩
+lemma deduct'! (h : [p] ⊢[𝓢]! q) : 𝓢 ⊢! p ➝ q := ⟨FiniteContext.deduct' h.some⟩
 
 
-def deductInv' : 𝓢 ⊢ p ⟶ q → [p] ⊢[𝓢] q := fun b ↦ deductInv <| of b
+def deductInv' : 𝓢 ⊢ p ➝ q → [p] ⊢[𝓢] q := fun b ↦ deductInv <| of b
 
-lemma deductInv'! (h : 𝓢 ⊢! p ⟶ q) : [p] ⊢[𝓢]! q := ⟨FiniteContext.deductInv' h.some⟩
+lemma deductInv'! (h : 𝓢 ⊢! p ➝ q) : [p] ⊢[𝓢]! q := ⟨FiniteContext.deductInv' h.some⟩
 
 
 instance deduction : Deduction (FiniteContext F 𝓢) where
@@ -238,7 +238,7 @@ abbrev Prf (Γ : Set F) (p : F) : Type _ := (Γ : Context F 𝓢) ⊢ p
 
 abbrev Provable (Γ : Set F) (p : F) : Prop := (Γ : Context F 𝓢) ⊢! p
 
-abbrev Unprovable (Γ : Set F) (p : F) : Prop := (Γ : Context F 𝓢) ⊬! p
+abbrev Unprovable (Γ : Set F) (p : F) : Prop := (Γ : Context F 𝓢) ⊬ p
 
 abbrev PrfSet (Γ : Set F) (s : Set F) : Type _ := (Γ : Context F 𝓢) ⊢* s
 
@@ -248,7 +248,7 @@ notation Γ:45 " *⊢[" 𝓢 "] " p:46 => Prf 𝓢 Γ p
 
 notation Γ:45 " *⊢[" 𝓢 "]! " p:46 => Provable 𝓢 Γ p
 
-notation Γ:45 " *⊬[" 𝓢 "]! " p:46 => Unprovable 𝓢 Γ p
+notation Γ:45 " *⊬[" 𝓢 "] " p:46 => Unprovable 𝓢 Γ p
 
 notation Γ:45 " *⊢[" 𝓢 "]* " s:46 => PrfSet 𝓢 Γ s
 
@@ -274,7 +274,7 @@ instance : Compact (Context F 𝓢) where
   φ_subset := by rintro ⟨Γ⟩ p b; exact b.subset
   φ_finite := by rintro ⟨Γ⟩; simp [Collection.Finite, Collection.set]
 
-def deduct [DecidableEq F] {p q : F} {Γ : Set F} : (insert p Γ) *⊢[𝓢] q → Γ *⊢[𝓢] p ⟶ q
+def deduct [DecidableEq F] {p q : F} {Γ : Set F} : (insert p Γ) *⊢[𝓢] q → Γ *⊢[𝓢] p ➝ q
   | ⟨Δ, h, b⟩ =>
     have h : ∀ q ∈ Δ, q = p ∨ q ∈ Γ := by simpa using h
     let b' : (p :: Δ.filter (· ≠ p)) ⊢[𝓢] q :=
@@ -289,7 +289,7 @@ def deduct [DecidableEq F] {p q : F} {Γ : Set F} : (insert p Γ) *⊢[𝓢] q �
       · assumption,
       FiniteContext.deduct b' ⟩
 
-def deductInv {p q : F} {Γ : Set F} : Γ *⊢[𝓢] p ⟶ q → (insert p Γ) *⊢[𝓢] q
+def deductInv {p q : F} {Γ : Set F} : Γ *⊢[𝓢] p ➝ q → (insert p Γ) *⊢[𝓢] q
   | ⟨Δ, h, b⟩ => ⟨p :: Δ, by simp; intro r hr; exact Or.inr (h r hr), FiniteContext.deductInv b⟩
 
 instance deduction : Deduction (Context F 𝓢) where
@@ -300,7 +300,7 @@ def of {p : F} (b : 𝓢 ⊢ p) : Γ *⊢[𝓢] p := ⟨[], by simp, FiniteConte
 
 lemma of! (b : 𝓢 ⊢! p) : Γ *⊢[𝓢]! p := ⟨Context.of b.some⟩
 
-def mdp {Γ : Set F} (bpq : Γ *⊢[𝓢] p ⟶ q) (bp : Γ *⊢[𝓢] p) : Γ *⊢[𝓢] q :=
+def mdp {Γ : Set F} (bpq : Γ *⊢[𝓢] p ➝ q) (bp : Γ *⊢[𝓢] p) : Γ *⊢[𝓢] q :=
   ⟨ bpq.ctx ++ bp.ctx, by
     simp; rintro r (hr | hr)
     · exact bpq.subset r hr

@@ -28,9 +28,9 @@ inductive eqAxiom : Theory L
   | symm : eqAxiom “x y | x = y → y = x”
   | trans : eqAxiom “x y z | x = y → y = z → x = z”
   | funcExt {k} (f : L.Func k) :
-    eqAxiom ((Matrix.conj fun i : Fin k ↦ “&i = &(k + i)”) ⟶ op(=).operator ![Semiterm.func f (fun i ↦ &i), Semiterm.func f (fun i ↦ &(k + i))])
+    eqAxiom ((Matrix.conj fun i : Fin k ↦ “&i = &(k + i)”) ➝ op(=).operator ![Semiterm.func f (fun i ↦ &i), Semiterm.func f (fun i ↦ &(k + i))])
   | relExt {k} (r : L.Rel k) :
-    eqAxiom ((Matrix.conj fun i : Fin k ↦ “&i = &(k + i)”) ⟶ Semiformula.rel r (fun i ↦ &i) ⟶ Semiformula.rel r (fun i ↦ &(k + i)))
+    eqAxiom ((Matrix.conj fun i : Fin k ↦ “&i = &(k + i)”) ➝ Semiformula.rel r (fun i ↦ &i) ➝ Semiformula.rel r (fun i ↦ &(k + i)))
 
 notation "𝐄𝐐" => eqAxiom
 

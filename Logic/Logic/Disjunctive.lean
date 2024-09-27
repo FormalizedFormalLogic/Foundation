@@ -24,6 +24,6 @@ lemma iff_complete_disjunctive {𝓢 : S} [System.Classical 𝓢] : (System.Comp
     . right; exact or₃'''! (efq_of_neg! hnp) imp_id! hpq;
   . intro hDisj p;
     replace hDisj : ∀ {p q}, 𝓢 ⊢! p ⋎ q → 𝓢 ⊢! p ∨ 𝓢 ⊢! q := iff_disjunctive.mp hDisj;
-    exact @hDisj p (~p) lem!;
+    exact @hDisj p (∼p) lem!;
 
 end LO.System

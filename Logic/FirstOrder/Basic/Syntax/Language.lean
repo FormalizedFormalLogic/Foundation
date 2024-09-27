@@ -382,19 +382,19 @@ open Qq Lean Elab Meta Tactic
 def denoteFunc : (k : ℕ) → Q(oRing.Func $k) → MetaM (oRing.Func k)
   | 0, e =>
     match e with
-    | ~q(Zero.zero) => return Language.Zero.zero
-    | ~q(One.one)   => return Language.One.one
+    | ∼q(Zero.zero) => return Language.Zero.zero
+    | ∼q(One.one)   => return Language.One.one
   | 2, e =>
     match e with
-    | ~q(Language.Add.add) => return Language.Add.add
-    | ~q(Language.Mul.mul) => return Language.Mul.mul
+    | ∼q(Language.Add.add) => return Language.Add.add
+    | ∼q(Language.Mul.mul) => return Language.Mul.mul
   | _, e => throwError m!"error in DenotationORing : {e}"
 
 def denoteRel : (k : ℕ) → Q(oRing.Rel $k) → MetaM (oRing.Rel k)
   | 2, e =>
     match e with
-    | ~q(Language.Eq.eq) => return Language.Eq.eq
-    | ~q(Language.LT.lt) => return Language.LT.lt
+    | ∼q(Language.Eq.eq) => return Language.Eq.eq
+    | ∼q(Language.LT.lt) => return Language.LT.lt
   | _, e => throwError m!"error in DenotationORing : {e}"
 
 instance (k : ℕ) : Denotation q(oRing.Func $k) (oRing.Func k) where

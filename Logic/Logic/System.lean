@@ -18,7 +18,7 @@ Also defines soundness and completeness.
 ## Notation
 * `𝓢 ⊢ p`: a type of formalized proofs of `p : F` from deductive system `𝓢 : S`.
 * `𝓢 ⊢! p`: a proposition that states there is a proof of `p` from `𝓢`, i.e. `p` is provable from `𝓢`.
-* `𝓢 ⊬! p`: a proposition that states `p` is not provable from `𝓢`.
+* `𝓢 ⊬ p`: a proposition that states `p` is not provable from `𝓢`.
 * `𝓢 ⊢* T`: a type of formalized proofs for each formulae in a set `T` from `𝓢`.
 * `𝓢 ⊢!* T`: a proposition that states each formulae in `T` is provable from `𝓢`.
 
@@ -45,7 +45,7 @@ abbrev Unprovable (f : F) : Prop := ¬Provable 𝓢 f
 
 infix:45 " ⊢! " => Provable
 
-infix:45 " ⊬! " => Unprovable
+infix:45 " ⊬ " => Unprovable
 
 def PrfSet (s : Set F) : Type _ := {f : F} → f ∈ s → 𝓢 ⊢ f
 
@@ -60,7 +60,7 @@ def theory : Set F := {f | 𝓢 ⊢! f}
 end
 
 lemma unprovable_iff_isEmpty {𝓢 : S} {f : F} :
-    𝓢 ⊬! f ↔ IsEmpty (𝓢 ⊢ f) := by simp [Provable, Unprovable]
+    𝓢 ⊬ f ↔ IsEmpty (𝓢 ⊢ f) := by simp [Provable, Unprovable]
 
 noncomputable def Provable.get {𝓢 : S} {f : F} (h : 𝓢 ⊢! f) : 𝓢 ⊢ f :=
   Classical.choice h
@@ -95,9 +95,9 @@ variable {𝓢 : S} {𝓣 : T} {𝓤 : U}
 lemma weakerThan_iff : 𝓢 ≤ₛ 𝓣 ↔ (∀ {f}, 𝓢 ⊢! f → 𝓣 ⊢! f) :=
   ⟨fun h _ hf ↦ h hf, fun h _ hf ↦ h hf⟩
 
-lemma not_weakerThan_iff : ¬𝓢 ≤ₛ 𝓣 ↔ (∃ f, 𝓢 ⊢! f ∧ 𝓣 ⊬! f) := by simp [weakerThan_iff, Unprovable];
+lemma not_weakerThan_iff : ¬𝓢 ≤ₛ 𝓣 ↔ (∃ f, 𝓢 ⊢! f ∧ 𝓣 ⊬ f) := by simp [weakerThan_iff, Unprovable];
 
-lemma strictlyWeakerThan_iff : 𝓢 <ₛ 𝓣 ↔ (∀ {f}, 𝓢 ⊢! f → 𝓣 ⊢! f) ∧ (∃ f, 𝓢 ⊬! f ∧ 𝓣 ⊢! f) := by
+lemma strictlyWeakerThan_iff : 𝓢 <ₛ 𝓣 ↔ (∀ {f}, 𝓢 ⊢! f → 𝓣 ⊢! f) ∧ (∃ f, 𝓢 ⊬ f ∧ 𝓣 ⊢! f) := by
   simp [StrictlyWeakerThan, weakerThan_iff]; intro _
   exact exists_congr (fun _ ↦ by simp [and_comm])
 
@@ -195,12 +195,12 @@ lemma not_consistent_iff_inconsistent {𝓢 : S} :
 alias ⟨_, Inconsistent.not_con⟩ := not_consistent_iff_inconsistent
 
 lemma consistent_iff_exists_unprovable {𝓢 : S} :
-    Consistent 𝓢 ↔ ∃ f, 𝓢 ⊬! f := by
+    Consistent 𝓢 ↔ ∃ f, 𝓢 ⊬ f := by
   simp [←not_inconsistent_iff_consistent, inconsistent_def]
 
 alias ⟨Consistent.exists_unprovable, _⟩ := consistent_iff_exists_unprovable
 
-lemma Consistent.of_unprovable {𝓢 : S} {f} (h : 𝓢 ⊬! f) : Consistent 𝓢 :=
+lemma Consistent.of_unprovable {𝓢 : S} {f} (h : 𝓢 ⊬ f) : Consistent 𝓢 :=
   ⟨fun hp ↦ h (hp f)⟩
 
 lemma inconsistent_iff_theory_eq_univ {𝓢 : S} :
@@ -358,9 +358,9 @@ variable [LogicalConnective F]
 
 variable (𝓢 : S)
 
-def Complete : Prop := ∀ f, 𝓢 ⊢! f ∨ 𝓢 ⊢! ~f
+def Complete : Prop := ∀ f, 𝓢 ⊢! f ∨ 𝓢 ⊢! ∼f
 
-def Undecidable (f : F) : Prop := 𝓢 ⊬! f ∧ 𝓢 ⊬! ~f
+def Undecidable (f : F) : Prop := 𝓢 ⊬ f ∧ 𝓢 ⊬ ∼f
 
 end
 
@@ -483,7 +483,7 @@ lemma inconsistent_iff_provable_bot {𝓢 : S} :
 alias ⟨_, inconsistent_of_provable⟩ := inconsistent_iff_provable_bot
 
 lemma consistent_iff_unprovable_bot {𝓢 : S} :
-    Consistent 𝓢 ↔ 𝓢 ⊬! ⊥ := by
+    Consistent 𝓢 ↔ 𝓢 ⊬ ⊥ := by
   simp [inconsistent_iff_provable_bot, ←not_inconsistent_iff_consistent]
 
 alias ⟨Consistent.not_bot, _⟩ := consistent_iff_unprovable_bot
@@ -504,8 +504,8 @@ end
 variable (S)
 
 class Deduction [Cons F S] where
-  ofInsert {p q : F} {𝓢 : S} : cons p 𝓢 ⊢ q → 𝓢 ⊢ p ⟶ q
-  inv {p q : F} {𝓢 : S} : 𝓢 ⊢ p ⟶ q → cons p 𝓢 ⊢ q
+  ofInsert {p q : F} {𝓢 : S} : cons p 𝓢 ⊢ q → 𝓢 ⊢ p ➝ q
+  inv {p q : F} {𝓢 : S} : 𝓢 ⊢ p ➝ q → cons p 𝓢 ⊢ q
 
 variable {S}
 
@@ -515,19 +515,19 @@ variable [Cons F S] [Deduction S] {𝓢 : S} {p q : F}
 
 alias deduction := Deduction.ofInsert
 
-lemma Deduction.of_insert! (h : cons p 𝓢 ⊢! q) : 𝓢 ⊢! p ⟶ q := by
+lemma Deduction.of_insert! (h : cons p 𝓢 ⊢! q) : 𝓢 ⊢! p ➝ q := by
   rcases h with ⟨b⟩; exact ⟨Deduction.ofInsert b⟩
 
 alias deduction! := Deduction.of_insert!
 
-lemma Deduction.inv! (h : 𝓢 ⊢! p ⟶ q) : cons p 𝓢 ⊢! q := by
+lemma Deduction.inv! (h : 𝓢 ⊢! p ➝ q) : cons p 𝓢 ⊢! q := by
   rcases h with ⟨b⟩; exact ⟨Deduction.inv b⟩
 
 def Deduction.translation (p : F) (𝓢 : S) : cons p 𝓢 ↝ 𝓢 where
-  toFun := fun q ↦ p ⟶ q
+  toFun := fun q ↦ p ➝ q
   prf := deduction
 
-lemma deduction_iff : cons p 𝓢 ⊢! q ↔ 𝓢 ⊢! p ⟶ q := ⟨deduction!, Deduction.inv!⟩
+lemma deduction_iff : cons p 𝓢 ⊢! q ↔ 𝓢 ⊢! p ➝ q := ⟨deduction!, Deduction.inv!⟩
 
 end deduction
 
@@ -549,7 +549,7 @@ section
 
 variable {𝓢 𝓣 : S} {𝓜 𝓝 : M} [Sound 𝓢 𝓜] [Sound 𝓣 𝓝]
 
-lemma not_provable_of_countermodel {p : F} (hp : ¬𝓜 ⊧ p) : 𝓢 ⊬! p :=
+lemma not_provable_of_countermodel {p : F} (hp : ¬𝓜 ⊧ p) : 𝓢 ⊬ p :=
   fun b ↦ hp (Sound.sound b)
 
 lemma consistent_of_meaningful : Semantics.Meaningful 𝓜 → System.Consistent 𝓢 :=
