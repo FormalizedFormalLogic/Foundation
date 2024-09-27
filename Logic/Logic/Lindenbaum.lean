@@ -128,6 +128,28 @@ instance : GeneralizedHeytingAlgebra (Lindenbaum 𝓢) where
     simp only [himp_def, le_def, inf_def]
     exact Iff.symm and_imply_iff_imply_imply'!
 
+variable {𝓢}
+
+lemma provable_iff_eq_top {p : F} : 𝓢 ⊢! p ↔ (⟦p⟧ : Lindenbaum 𝓢) = ⊤ := by
+  simp [top_def, provable_iff_provablyEquivalent_verum]; rfl
+
+lemma inconsistent_iff_trivial : Inconsistent 𝓢 ↔ (∀ p : Lindenbaum 𝓢, p = ⊤) := by
+  simp [Inconsistent, provable_iff_eq_top]
+  constructor
+  · intro h p;
+    induction p using Quotient.ind
+    simp [h]
+  · intro h f; simp [h]
+
+lemma consistent_iff_nontrivial : Consistent 𝓢 ↔ Nontrivial (Lindenbaum 𝓢) := by
+  apply not_iff_not.mp
+  simp [not_consistent_iff_inconsistent, nontrivial_iff, inconsistent_iff_trivial]
+  constructor
+  · intro h p q; simp [h]
+  · intro h p; exact h p ⊤
+
+instance nontrivial_of_consistent [Consistent 𝓢] : Nontrivial (Lindenbaum 𝓢) := consistent_iff_nontrivial.mp inferInstance
+
 end Lindenbaum
 
 section intuitionistic
@@ -136,7 +158,7 @@ open Lindenbaum
 
 variable [System.Intuitionistic 𝓢]
 
-instance : HeytingAlgebra (Lindenbaum 𝓢) where
+instance Lindenbaum.heyting : HeytingAlgebra (Lindenbaum 𝓢) where
   bot_le p := by
     induction' p using Quotient.ind with p
     simp only [bot_def, le_def]

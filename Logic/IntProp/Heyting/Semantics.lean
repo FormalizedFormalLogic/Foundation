@@ -1,9 +1,10 @@
 import Logic.IntProp.Deduction
 import Logic.Vorspiel.Order
+import Logic.Logic.Lindenbaum
 
 namespace LO.IntProp
 
-variable {α : Type*}
+variable {α : Type u} [DecidableEq α]
 
 namespace Formula
 
@@ -91,15 +92,17 @@ lemma val_not (p : Formula α) : ℍ ⊧ ∼p ↔ (ℍ ⊧ₕ p) = ⊥ := by sim
 @[simp] lemma val_or (p q : Formula α) : ℍ ⊧ p ⋎ q ↔ (ℍ ⊧ₕ p) ⊔ (ℍ ⊧ₕ q) = ⊤ := by
   simp [val_def]; rfl
 
-def mod (T : Hilbert α) : Set (HeytingSemantics α) := Semantics.models (HeytingSemantics α) T.axiomSet
+def mod (Λ : Hilbert α) : Set (HeytingSemantics α) := Semantics.models (HeytingSemantics α) Λ.axiomSet
 
-variable {T : Hilbert α}
+variable {Λ : Hilbert α} [Λ.IncludeEFQ]
+
+instance : System.Intuitionistic Λ where
 
 lemma mod_models_iff {p : Formula α} :
-    mod.{_,w} T ⊧ p ↔ ∀ ℍ : HeytingSemantics.{_,w} α, ℍ ⊧* T.axiomSet → ℍ ⊧ p := by
+    mod.{_,w} Λ ⊧ p ↔ ∀ ℍ : HeytingSemantics.{_,w} α, ℍ ⊧* Λ.axiomSet → ℍ ⊧ p := by
   simp [mod, Semantics.models, Semantics.set_models_iff]
 
-lemma sound {p : Formula α} (d : T ⊢! p) : mod T ⊧ p := by
+lemma sound {p : Formula α} (d : Λ ⊢! p) : mod Λ ⊧ p := by
   rcases d with ⟨d⟩
   apply mod_models_iff.mpr fun ℍ hℍ ↦ ?_
   induction d
@@ -120,6 +123,45 @@ lemma sound {p : Formula α} (d : T ⊢! p) : mod T ⊧ p := by
   case neg_equiv p =>
     simp [Axioms.NegEquiv]
 
-instance : Sound T (mod T)  := ⟨sound⟩
+instance : Sound Λ (mod Λ) := ⟨sound⟩
+
+section
+
+open System.Lindenbaum
+
+variable (Λ)
+variable [System.Consistent Λ]
+
+def lindenbaum : HeytingSemantics α where
+  Algebra := System.Lindenbaum Λ
+  valAtom a := ⟦.atom a⟧
+
+lemma lindenbaum_val_eq : (lindenbaum Λ ⊧ₕ p) = ⟦p⟧ := by
+  induction p using Formula.rec' <;> try simp [top_def, bot_def]
+  case hatom => rfl
+  case hverum => rfl
+  case hfalsum => rfl
+  case hand ihp ihq => simp [ihp, ihq]; rw [inf_def]
+  case hor ihp ihq => simp [ihp, ihq]; rw [sup_def]
+  case himp ihp ihq => simp [ihp, ihq]; rw [himp_def]
+  case hneg ih => simp [ih]; rw [compl_def]
+
+variable {Λ}
+
+lemma lindenbaum_complete_iff [System.Consistent Λ] {p : Formula α} : lindenbaum Λ ⊧ p ↔ Λ ⊢! p := by
+  simp [val_def', lindenbaum_val_eq, provable_iff_eq_top]
+
+instance : Sound Λ (lindenbaum Λ) := ⟨lindenbaum_complete_iff.mpr⟩
+
+instance : Complete Λ (lindenbaum Λ) := ⟨lindenbaum_complete_iff.mp⟩
+
+end
+
+lemma complete {p : Formula α} (h : mod.{_,u} Λ ⊧ p) : Λ ⊢! p := by {
+  wlog Con : System.Consistent Λ
+  · exact System.not_consistent_iff_inconsistent.mp Con p
+  have := mod_models_iff.mp h (lindenbaum Λ)
+}
+
 
 end HeytingSemantics
