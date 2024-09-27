@@ -230,6 +230,8 @@ def impReplaceIff (hp : 𝓢 ⊢ p₁ ⭤ p₂) (hq : 𝓢 ⊢ q₁ ⭤ q₂) : 
   . apply deduct'; exact impTrans'' (of $ and₁' hp) $ impTrans'' (FiniteContext.id) (of $ and₂' hq);
 lemma imp_replace_iff! (hp : 𝓢 ⊢! p₁ ⭤ p₂) (hq : 𝓢 ⊢! q₁ ⭤ q₂) : 𝓢 ⊢! (p₁ ➝ q₁) ⭤ (p₂ ➝ q₂) := ⟨impReplaceIff hp.some hq.some⟩
 
+lemma imp_replace_iff!' (hp : 𝓢 ⊢! p₁ ⭤ p₂) (hq : 𝓢 ⊢! q₁ ⭤ q₂) : 𝓢 ⊢! p₁ ➝ q₁ ↔ 𝓢 ⊢! p₂ ➝ q₂ :=
+  provable_iff_of_iff (imp_replace_iff! hp hq)
 
 variable [System.NegationEquiv 𝓢]
 

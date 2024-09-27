@@ -194,6 +194,8 @@ lemma and_intro_iff : 𝓢 ⊢! p ⋏ q ↔ 𝓢 ⊢! p ∧ 𝓢 ⊢! q := ⟨fu
 
 lemma iff_intro_iff : 𝓢 ⊢! p ⭤ q ↔ 𝓢 ⊢! p ➝ q ∧ 𝓢 ⊢! q ➝ p := ⟨fun h ↦ ⟨and_left! h, and_right! h⟩, fun h ↦ and_intro! h.1 h.2⟩
 
+lemma provable_iff_of_iff (h : 𝓢 ⊢! p ⭤ q) : 𝓢 ⊢! p ↔ 𝓢 ⊢! q := ⟨fun hp ↦ and_left! h ⨀ hp, fun hq ↦ and_right! h ⨀ hq⟩
+
 def or₁' (d : 𝓢 ⊢ p) : 𝓢 ⊢ p ⋎ q := or₁ ⨀ d
 lemma or₁'! (d : 𝓢 ⊢! p) : 𝓢 ⊢! p ⋎ q := ⟨or₁' d.some⟩
 
