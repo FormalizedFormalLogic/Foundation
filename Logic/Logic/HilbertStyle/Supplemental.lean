@@ -230,6 +230,8 @@ def impReplaceIff (hp : 𝓢 ⊢ p₁ ⭤ p₂) (hq : 𝓢 ⊢ q₁ ⭤ q₂) : 
   . apply deduct'; exact impTrans'' (of $ and₁' hp) $ impTrans'' (FiniteContext.id) (of $ and₂' hq);
 lemma imp_replace_iff! (hp : 𝓢 ⊢! p₁ ⭤ p₂) (hq : 𝓢 ⊢! q₁ ⭤ q₂) : 𝓢 ⊢! (p₁ ➝ q₁) ⭤ (p₂ ➝ q₂) := ⟨impReplaceIff hp.some hq.some⟩
 
+lemma imp_replace_iff!' (hp : 𝓢 ⊢! p₁ ⭤ p₂) (hq : 𝓢 ⊢! q₁ ⭤ q₂) : 𝓢 ⊢! p₁ ➝ q₁ ↔ 𝓢 ⊢! p₂ ➝ q₂ :=
+  provable_iff_of_iff (imp_replace_iff! hp hq)
 
 variable [System.NegationEquiv 𝓢]
 
@@ -540,6 +542,10 @@ instance [HasAxiomDNE 𝓢] : HasAxiomElimContra 𝓢 where
 
 end Instantinate
 
+noncomputable def implyIffNotOr [HasAxiomDNE 𝓢] : 𝓢 ⊢ (p ➝ q) ⭤ (∼p ⋎ q) := iffIntro
+  NotOrOfImply (deduct' (orCases efq_imply_not₁ imply₁ byAxm₀))
+
+noncomputable def imply_iff_not_or! [HasAxiomDNE 𝓢] : 𝓢 ⊢! (p ➝ q) ⭤ (∼p ⋎ q) := ⟨implyIffNotOr⟩
 
 def conjIffConj : (Γ : List F) → 𝓢 ⊢ ⋀Γ ⭤ Γ.conj
   | []          => iffId ⊤

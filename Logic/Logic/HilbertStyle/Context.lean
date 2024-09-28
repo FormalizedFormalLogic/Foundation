@@ -117,6 +117,18 @@ lemma of'! (h : 𝓢 ⊢! p) : Γ ⊢[𝓢]! p := weakening! (by simp) $ provabl
 
 def id : [p] ⊢[𝓢] p := byAxm
 
+def byAxm₀ : (p :: Γ) ⊢[𝓢] p := byAxm
+
+def byAxm₁ : (p :: q :: Γ) ⊢[𝓢] q := byAxm
+
+def byAxm₂ : (p :: q :: r :: Γ) ⊢[𝓢] r := byAxm
+
+lemma by_axm₀! : (p :: Γ) ⊢[𝓢]! p := by_axm!
+
+lemma by_axm₁! : (p :: q :: Γ) ⊢[𝓢]! q := by_axm!
+
+lemma by_axm₂! : (p :: q :: r :: Γ) ⊢[𝓢]! r := by_axm!
+
 @[simp] lemma id! : [p] ⊢[𝓢]! p := by_axm!
 
 instance (Γ : FiniteContext F 𝓢) : System.ModusPonens Γ := ⟨mdp₁⟩

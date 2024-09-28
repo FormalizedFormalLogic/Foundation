@@ -194,6 +194,8 @@ lemma and_intro_iff : 𝓢 ⊢! p ⋏ q ↔ 𝓢 ⊢! p ∧ 𝓢 ⊢! q := ⟨fu
 
 lemma iff_intro_iff : 𝓢 ⊢! p ⭤ q ↔ 𝓢 ⊢! p ➝ q ∧ 𝓢 ⊢! q ➝ p := ⟨fun h ↦ ⟨and_left! h, and_right! h⟩, fun h ↦ and_intro! h.1 h.2⟩
 
+lemma provable_iff_of_iff (h : 𝓢 ⊢! p ⭤ q) : 𝓢 ⊢! p ↔ 𝓢 ⊢! q := ⟨fun hp ↦ and_left! h ⨀ hp, fun hq ↦ and_right! h ⨀ hq⟩
+
 def or₁' (d : 𝓢 ⊢ p) : 𝓢 ⊢ p ⋎ q := or₁ ⨀ d
 lemma or₁'! (d : 𝓢 ⊢! p) : 𝓢 ⊢! p ⋎ q := ⟨or₁' d.some⟩
 
@@ -205,6 +207,9 @@ lemma or₃''! (d₁ : 𝓢 ⊢! p ➝ r) (d₂ : 𝓢 ⊢! q ➝ r) : 𝓢 ⊢!
 
 def or₃''' (d₁ : 𝓢 ⊢ p ➝ r) (d₂ : 𝓢 ⊢ q ➝ r) (d₃ : 𝓢 ⊢ p ⋎ q) : 𝓢 ⊢ r := or₃ ⨀ d₁ ⨀ d₂ ⨀ d₃
 lemma or₃'''! (d₁ : 𝓢 ⊢! p ➝ r) (d₂ : 𝓢 ⊢! q ➝ r) (d₃ : 𝓢 ⊢! p ⋎ q) : 𝓢 ⊢! r := ⟨or₃''' d₁.some d₂.some d₃.some⟩
+
+alias orCases := or₃'''
+alias or_cases! := or₃'''!
 
 def impId (p : F) : 𝓢 ⊢ p ➝ p := imply₂ (p := p) (q := (p ➝ p)) (r := p) ⨀ imply₁ ⨀ imply₁
 @[simp] def imp_id! : 𝓢 ⊢! p ➝ p := ⟨impId p⟩
