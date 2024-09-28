@@ -157,11 +157,12 @@ instance : Complete Λ (lindenbaum Λ) := ⟨lindenbaum_complete_iff.mp⟩
 
 end
 
-lemma complete {p : Formula α} (h : mod.{_,u} Λ ⊧ p) : Λ ⊢! p := by {
+lemma complete {p : Formula α} (h : mod.{_,u} Λ ⊧ p) : Λ ⊢! p := by
   wlog Con : System.Consistent Λ
   · exact System.not_consistent_iff_inconsistent.mp Con p
-  have := mod_models_iff.mp h (lindenbaum Λ)
-}
+  exact lindenbaum_complete_iff.mp <|
+    mod_models_iff.mp h (lindenbaum Λ) ⟨fun q hq ↦ lindenbaum_complete_iff.mpr <| Deduction.eaxm! hq⟩
 
+instance : Complete Λ (mod.{_,u} Λ) := ⟨complete⟩
 
 end HeytingSemantics
