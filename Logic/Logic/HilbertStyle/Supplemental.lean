@@ -542,6 +542,10 @@ instance [HasAxiomDNE 𝓢] : HasAxiomElimContra 𝓢 where
 
 end Instantinate
 
+noncomputable def implyIffNotOr [HasAxiomDNE 𝓢] : 𝓢 ⊢ (p ➝ q) ⭤ (∼p ⋎ q) := iffIntro
+  NotOrOfImply (deduct' (orCases efq_imply_not₁ imply₁ byAxm₀))
+
+noncomputable def imply_iff_not_or! [HasAxiomDNE 𝓢] : 𝓢 ⊢! (p ➝ q) ⭤ (∼p ⋎ q) := ⟨implyIffNotOr⟩
 
 def conjIffConj : (Γ : List F) → 𝓢 ⊢ ⋀Γ ⭤ Γ.conj
   | []          => iffId ⊤

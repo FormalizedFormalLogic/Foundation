@@ -208,6 +208,9 @@ lemma or₃''! (d₁ : 𝓢 ⊢! p ➝ r) (d₂ : 𝓢 ⊢! q ➝ r) : 𝓢 ⊢!
 def or₃''' (d₁ : 𝓢 ⊢ p ➝ r) (d₂ : 𝓢 ⊢ q ➝ r) (d₃ : 𝓢 ⊢ p ⋎ q) : 𝓢 ⊢ r := or₃ ⨀ d₁ ⨀ d₂ ⨀ d₃
 lemma or₃'''! (d₁ : 𝓢 ⊢! p ➝ r) (d₂ : 𝓢 ⊢! q ➝ r) (d₃ : 𝓢 ⊢! p ⋎ q) : 𝓢 ⊢! r := ⟨or₃''' d₁.some d₂.some d₃.some⟩
 
+alias orCases := or₃'''
+alias or_cases! := or₃'''!
+
 def impId (p : F) : 𝓢 ⊢ p ➝ p := imply₂ (p := p) (q := (p ➝ p)) (r := p) ⨀ imply₁ ⨀ imply₁
 @[simp] def imp_id! : 𝓢 ⊢! p ➝ p := ⟨impId p⟩
 

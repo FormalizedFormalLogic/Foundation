@@ -176,7 +176,7 @@ open Lindenbaum
 
 variable [System.Classical 𝓢]
 
-instance : BooleanAlgebra (Lindenbaum 𝓢) where
+instance Lindenbaum.boolean : BooleanAlgebra (Lindenbaum 𝓢) where
   inf_compl_le_bot p := by
     induction' p using Quotient.ind with p
     simp only [compl_def, inf_def, bot_def, le_def, intro_bot_of_and!]
@@ -197,8 +197,7 @@ instance : BooleanAlgebra (Lindenbaum 𝓢) where
     induction' q using Quotient.ind with q
     rw [sup_comm]
     simp [himp_def, compl_def, sup_def]
-    have : 𝓢 ⊢! (p ➝ q) ⭤ (∼p ⋎ q) := by sorry -- help!
-    exact this
+    exact imply_iff_not_or!
 
 end classical
 
