@@ -628,6 +628,22 @@ def diaT [HasDiaDuality 𝓢] : 𝓢 ⊢ ◇p ➝ p := by
 def diaT' [HasDiaDuality 𝓢] (h : 𝓢 ⊢ ◇p) : 𝓢 ⊢ p := diaT ⨀ h
 lemma diaT'! [HasDiaDuality 𝓢] (h : 𝓢 ⊢! ◇p) : 𝓢 ⊢! p := ⟨diaT' h.some⟩
 
+private def axiomFive_of_Tc : 𝓢 ⊢ ◇p ➝ □◇p := axiomTc
+instance : HasAxiomFive 𝓢 := ⟨fun _ ↦ axiomFive_of_Tc⟩
+
+-- TODO: move
+def p_pq_q : 𝓢 ⊢ p ➝ (p ➝ q) ➝ q := impSwap' $ impId _
+lemma p_pq_q! : 𝓢 ⊢! p ➝ (p ➝ q) ➝ q := ⟨p_pq_q⟩
+
+private def axiomGrz_of_Tc_and_T [HasAxiomT 𝓢] : 𝓢 ⊢ □(□(p ➝ □p) ➝ p) ➝ p := by
+  have : 𝓢 ⊢ p ➝ □p := axiomTc;
+  have d₁ := nec this;
+  have d₂ : 𝓢 ⊢ □(p ➝ □p) ➝ ((□(p ➝ □p)) ➝ p) ➝ p := p_pq_q;
+  have := d₂ ⨀ d₁;
+  exact impTrans'' axiomT this;
+
+instance [HasAxiomT 𝓢] : HasAxiomGrz 𝓢 := ⟨fun _ ↦ axiomGrz_of_Tc_and_T⟩
+
 end AxiomTc
 
 
