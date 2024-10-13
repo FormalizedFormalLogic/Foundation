@@ -208,13 +208,6 @@ instance : System.S4 (𝝈Ax) where
 
 @[simp] lemma ExtS4.def_ax : Ax(𝝈Ax) = (𝗞 ∪ 𝗧 ∪ 𝟰 ∪ Ax) := by aesop;
 
-abbrev ExtS4Grz (Ax : Theory α) : Hilbert α := 𝝈(Ax ∪ 𝗚𝗿𝘇)
-prefix:max "𝝉" => ExtS4Grz
-instance : System.Grz (𝝉Ax) where
-  Grz _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
-
-lemma ExtS4Grz.def_ax : Ax(𝝉Ax) = (𝗞 ∪ 𝗧 ∪ 𝟰 ∪ 𝗚𝗿𝘇 ∪ Ax) := by aesop;
-
 end
 
 
@@ -257,7 +250,7 @@ notation "𝐒𝟒.𝟐" => Modal.S4Dot2
 protected abbrev S4Dot3 : Hilbert α := 𝝈(.𝟯)
 notation "𝐒𝟒.𝟑" => Modal.S4Dot3
 
-protected abbrev S4Grz : Hilbert α := 𝝉(∅)
+protected abbrev S4Grz : Hilbert α := 𝝈(𝗚𝗿𝘇) -- S4 + 𝗚𝗿𝘇
 notation "𝐒𝟒𝐆𝐫𝐳" => Modal.S4Grz
 
 protected abbrev KT4B : Hilbert α := 𝝈(𝗕)
@@ -269,7 +262,7 @@ instance : System.S5 (𝐒𝟓 : Hilbert α) where
   T _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
   Five _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
 
-protected abbrev S5Grz : Hilbert α := 𝝂(𝗧 ∪ 𝟱 ∪ 𝗚𝗿𝘇)
+protected abbrev S5Grz : Hilbert α := 𝝂(𝗧 ∪ 𝟱 ∪ 𝗚𝗿𝘇) -- 𝐒𝟓 + 𝗚𝗿𝘇
 notation "𝐒𝟓𝐆𝐫𝐳" => Modal.S5Grz
 instance : System.S5 (𝐒𝟓𝐆𝐫𝐳 : Hilbert α) where
   T _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
