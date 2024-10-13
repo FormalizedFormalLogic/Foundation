@@ -472,7 +472,7 @@ private instance K_definability' : 𝔽((𝝂(∅) : Hilbert α)).DefinedBy AllF
 
 instance K_definability : 𝔽((𝐊 : Hilbert α)).DefinedBy AllFrameClass := by
   convert K_definability';
-  exact K_is_empty_normal;
+  exact K_is_extK_of_empty;
 
 instance K_sound : Sound 𝐊 (AllFrameClass#α) := inferInstance
 

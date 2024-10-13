@@ -39,6 +39,7 @@ theorem boxdotTranslated
 
 lemma boxdotTranslatedK4_of_S4 : 𝐒𝟒 ⊢! p → 𝐊𝟒 ⊢! pᵇ := boxdotTranslated $ by
   intro p hp;
+  simp at hp;
   rcases hp with (⟨_, _, rfl⟩ | ⟨_, rfl⟩ | ⟨_, rfl⟩);
   . dsimp [BoxdotTranslation]; exact boxdot_axiomK!;
   . dsimp [BoxdotTranslation]; exact boxdot_axiomT!;

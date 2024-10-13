@@ -176,13 +176,13 @@ protected abbrev K : Hilbert α := ⟨𝗞, ⟮Nec⟯⟩
 notation "𝐊" => Modal.K
 instance : 𝐊.IsNormal (α := α) where
 
-abbrev Normal (Ax : Theory α) : Hilbert α := ⟨𝗞 ∪ Ax, ⟮Nec⟯⟩
-instance : Hilbert.IsNormal (α := α) (Normal Ax) where
-prefix:max "𝝂" => Normal
+abbrev ExtK (Ax : Theory α) : Hilbert α := ⟨𝗞 ∪ Ax, ⟮Nec⟯⟩
+instance : Hilbert.IsNormal (α := α) (ExtK Ax) where
+prefix:max "𝝂" => ExtK
 
-lemma K_is_empty_normal : 𝐊 = Normal (α := α) ∅ := by aesop;
+lemma K_is_extK_of_empty : (𝐊 : Hilbert α) = 𝝂∅ := by aesop;
 
-lemma K_is_K_normal : 𝐊 = Normal (α := α) 𝗞 := by aesop;
+lemma K_is_extK_of_AxiomK : (𝐊 : Hilbert α) = 𝝂𝗞 := by aesop;
 
 namespace Normal
 
@@ -197,13 +197,34 @@ lemma maxm! (h : p ∈ Ax) : 𝝂Ax ⊢! p := ⟨Deduction.maxm (by simp [def_ax
 end Normal
 
 
-protected abbrev KT : Hilbert α := 𝝂𝗧
+-- tools of Modal Companion
+section
+
+abbrev ExtS4 (Ax : Theory α) : Hilbert α := 𝝂(𝗧 ∪ 𝟰 ∪ Ax)
+prefix:max "𝝈" => ExtS4
+instance : System.S4 (𝝈Ax) where
+  T _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
+  Four _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
+
+@[simp] lemma ExtS4.def_ax : Ax(𝝈Ax) = (𝗞 ∪ 𝗧 ∪ 𝟰 ∪ Ax) := by aesop;
+
+abbrev ExtS4Grz (Ax : Theory α) : Hilbert α := 𝝈(Ax ∪ 𝗚𝗿𝘇)
+prefix:max "𝝉" => ExtS4Grz
+instance : System.Grz (𝝉Ax) where
+  Grz _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
+
+lemma ExtS4Grz.def_ax : Ax(𝝉Ax) = (𝗞 ∪ 𝗧 ∪ 𝟰 ∪ 𝗚𝗿𝘇 ∪ Ax) := by aesop;
+
+end
+
+
+protected abbrev KT : Hilbert α := 𝝂(𝗧)
 notation "𝐊𝐓" => Modal.KT
 
-protected abbrev KB : Hilbert α := 𝝂𝗕
+protected abbrev KB : Hilbert α := 𝝂(𝗕)
 notation "𝐊𝐁" => Modal.KB
 
-protected abbrev KD : Hilbert α := 𝝂𝗗
+protected abbrev KD : Hilbert α := 𝝂(𝗗)
 notation "𝐊𝐃" => Modal.KD
 instance : System.KD (𝐊𝐃 : Hilbert α) where
   D _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
@@ -216,31 +237,31 @@ instance : System.HasAxiomD₂ (𝐊𝐃(⊥) : Hilbert α) where
 protected abbrev KTB : Hilbert α := 𝝂(𝗧 ∪ 𝗕)
 notation "𝐊𝐓𝐁" => Modal.KTB
 
-protected abbrev K4 : Hilbert α := 𝝂𝟰
+protected abbrev K4 : Hilbert α := 𝝂(𝟰)
 notation "𝐊𝟒" => Modal.K4
 instance : System.K4 (𝐊𝟒 : Hilbert α) where
   Four _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
 
-protected abbrev K5 : Hilbert α := 𝝂𝟱
+protected abbrev K5 : Hilbert α := 𝝂(𝟱)
 notation "𝐊𝟓" => Modal.K5
 
-protected abbrev KT4B : Hilbert α := 𝝂(𝗧 ∪ 𝟰 ∪ 𝗕)
-notation "𝐊𝐓𝟒𝐁" => Modal.KT4B
-
-protected abbrev S4 : Hilbert α := 𝝂(𝗧 ∪ 𝟰)
+protected abbrev S4 : Hilbert α := 𝝈(∅)
 notation "𝐒𝟒" => Modal.S4
 instance : System.S4 (𝐒𝟒 : Hilbert α) where
   T _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
   Four _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
 
-protected abbrev S4Dot2 : Hilbert α := 𝝂(𝗧 ∪ 𝟰 ∪ .𝟮)
+protected abbrev S4Dot2 : Hilbert α := 𝝈(.𝟮)
 notation "𝐒𝟒.𝟐" => Modal.S4Dot2
 
-protected abbrev S4Dot3 : Hilbert α := 𝝂(𝗧 ∪ 𝟰 ∪ .𝟯)
+protected abbrev S4Dot3 : Hilbert α := 𝝈(.𝟯)
 notation "𝐒𝟒.𝟑" => Modal.S4Dot3
 
-protected abbrev S4Grz : Hilbert α := 𝝂(𝗧 ∪ 𝟰 ∪ 𝗚𝗿𝘇)
+protected abbrev S4Grz : Hilbert α := 𝝉(∅)
 notation "𝐒𝟒𝐆𝐫𝐳" => Modal.S4Grz
+
+protected abbrev KT4B : Hilbert α := 𝝈(𝗕)
+notation "𝐊𝐓𝟒𝐁" => Modal.KT4B
 
 protected abbrev S5 : Hilbert α := 𝝂(𝗧 ∪ 𝟱)
 notation "𝐒𝟓" => Modal.S5
