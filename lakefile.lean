@@ -10,12 +10,6 @@ lean_lib «Logic» {
   -- add library configuration options here
 }
 
-require mathlib from git "https://github.com/leanprover-community/mathlib4"
+require mathlib from git "https://github.com/leanprover-community/mathlib4" @ "ab9dec5b351bc7e92f30b47031edf13458bc7a1d"
 
-require proofwidgets from git "https://github.com/leanprover-community/ProofWidgets4"@"v0.0.39"
-
-meta if get_config? env = some "ci" then
-require importGraph from git "https://github.com/leanprover-community/import-graph" @ "main"
-
-meta if get_config? env = some "ci" then
-require «doc-gen4» from git "https://github.com/leanprover/doc-gen4" @ "main"
+require importGraph from git "https://github.com/leanprover-community/import-graph" @ "68b518c9b352fbee16e6d632adcb7a6d0760e2b7"
