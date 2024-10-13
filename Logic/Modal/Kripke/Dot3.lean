@@ -78,7 +78,7 @@ instance S4Dot3_defines : 𝔽((𝐒𝟒.𝟑 : Hilbert α)).DefinedBy Reflexive
 instance : System.Consistent (𝐒𝟒.𝟑 : Hilbert α) := inferInstance
 
 open MaximalConsistentTheory in
-lemma connected_CanonicalFrame {Ax : Theory α} (hAx : .𝟯 ⊆ Ax) [System.Consistent (𝝂Ax)] : Connected (CanonicalFrame 𝝂Ax) := by
+lemma connected_CanonicalFrame {Ax : Theory α} (hAx : .𝟯 ⊆ Ax) [System.Consistent (𝜿Ax)] : Connected (CanonicalFrame 𝜿Ax) := by
   dsimp only [Connected];
   intro X Y Z ⟨hXY, hXZ⟩;
   by_contra hC; push_neg at hC;

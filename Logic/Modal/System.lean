@@ -32,8 +32,8 @@ class HasAxiomT where
 class HasAxiomD where
   D (p : F) : 𝓢 ⊢ Axioms.D p
 
-class HasAxiomD₂ where
-  D₂ : 𝓢 ⊢ Axioms.D₂
+class HasAxiomP where
+  P : 𝓢 ⊢ Axioms.P
 
 class HasAxiomB where
   B (p : F) : 𝓢 ⊢ Axioms.B p
@@ -180,18 +180,29 @@ instance [DiaAbbrev F] : HasDiaDuality 𝓢 := ⟨by
   apply iffId;
 ⟩
 
-def diaDuality [HasDiaDuality 𝓢] : 𝓢 ⊢ ◇p ⭤ ∼(□(∼p)) := HasDiaDuality.dia_dual _
-@[simp] lemma dia_duality! [HasDiaDuality 𝓢] : 𝓢 ⊢! ◇p ⭤ ∼(□(∼p)) := ⟨diaDuality⟩
 
-def diaDuality'.mp [HasDiaDuality 𝓢] (h : 𝓢 ⊢ ◇p) : 𝓢 ⊢ ∼(□(∼p)) := (and₁' diaDuality) ⨀ h
-def diaDuality'.mpr [HasDiaDuality 𝓢] (h : 𝓢 ⊢ ∼(□(∼p))) : 𝓢 ⊢ ◇p := (and₂' diaDuality) ⨀ h
+section Duality
 
-lemma dia_duality'! [HasDiaDuality 𝓢] : 𝓢 ⊢! ◇p ↔ 𝓢 ⊢! ∼(□(∼p)) := ⟨
+variable [HasDiaDuality 𝓢]
+
+def diaDuality : 𝓢 ⊢ ◇p ⭤ ∼(□(∼p)) := HasDiaDuality.dia_dual _
+@[simp] lemma dia_duality! : 𝓢 ⊢! ◇p ⭤ ∼(□(∼p)) := ⟨diaDuality⟩
+
+def diaDuality_mp : 𝓢 ⊢ ◇p ➝ ∼(□(∼p)) := and₁' diaDuality
+@[simp] lemma diaDuality_mp! : 𝓢 ⊢! ◇p ➝ ∼(□(∼p)) := ⟨diaDuality_mp⟩
+
+def diaDuality_mpr : 𝓢 ⊢ ∼(□(∼p)) ➝ ◇p := and₂' diaDuality
+@[simp] lemma diaDuality_mpr! : 𝓢 ⊢! ∼(□(∼p)) ➝ ◇p := ⟨diaDuality_mpr⟩
+
+def diaDuality'.mp (h : 𝓢 ⊢ ◇p) : 𝓢 ⊢ ∼(□(∼p)) := (and₁' diaDuality) ⨀ h
+def diaDuality'.mpr (h : 𝓢 ⊢ ∼(□(∼p))) : 𝓢 ⊢ ◇p := (and₂' diaDuality) ⨀ h
+
+lemma dia_duality'! : 𝓢 ⊢! ◇p ↔ 𝓢 ⊢! ∼(□(∼p)) := ⟨
   λ h => ⟨diaDuality'.mp h.some⟩,
   λ h => ⟨diaDuality'.mpr h.some⟩
 ⟩
 
-def multiDiaDuality [HasDiaDuality 𝓢] : 𝓢 ⊢ ◇^[n]p ⭤ ∼(□^[n](∼p)) := by
+def multiDiaDuality : 𝓢 ⊢ ◇^[n]p ⭤ ∼(□^[n](∼p)) := by
   induction n with
   | zero => simp; apply dn;
   | succ n ih =>
@@ -202,9 +213,7 @@ def multiDiaDuality [HasDiaDuality 𝓢] : 𝓢 ⊢ ◇^[n]p ⭤ ∼(□^[n](∼
     apply iffIntro;
     . exact contra₂' $ and₂' ih;
     . exact contra₁' $ and₁' ih;
-lemma multidia_duality! [HasDiaDuality 𝓢] : 𝓢 ⊢! ◇^[n]p ⭤ ∼(□^[n](∼p)) := ⟨multiDiaDuality⟩
-
-variable [HasDiaDuality 𝓢]
+lemma multidia_duality! : 𝓢 ⊢! ◇^[n]p ⭤ ∼(□^[n](∼p)) := ⟨multiDiaDuality⟩
 
 lemma multidia_duality'! : 𝓢 ⊢! ◇^[n]p ↔ 𝓢 ⊢! ∼(□^[n](∼p)) := by
   constructor;
@@ -243,12 +252,33 @@ def multiboxDuality : 𝓢 ⊢ □^[n]p ⭤ ∼(◇^[n](∼p)) := by
 def boxDuality : 𝓢 ⊢ □p ⭤ ∼(◇(∼p)) := multiboxDuality (n := 1)
 @[simp] lemma box_duality! : 𝓢 ⊢! □p ⭤ ∼(◇(∼p)) := ⟨boxDuality⟩
 
+def boxDuality_mp : 𝓢 ⊢ □p ➝ ∼(◇(∼p)) := and₁' boxDuality
+@[simp] lemma boxDuality_mp! : 𝓢 ⊢! □p ➝ ∼(◇(∼p)) := ⟨boxDuality_mp⟩
+
+def boxDuality_mp' (h : 𝓢 ⊢ □p) : 𝓢 ⊢ ∼(◇(∼p)) := boxDuality_mp ⨀ h
+lemma boxDuality_mp'! (h : 𝓢 ⊢! □p) : 𝓢 ⊢! ∼(◇(∼p)) := ⟨boxDuality_mp' h.some⟩
+
+def boxDuality_mpr : 𝓢 ⊢ ∼(◇(∼p)) ➝ □p := and₂' boxDuality
+@[simp] lemma boxDuality_mpr! : 𝓢 ⊢! ∼(◇(∼p)) ➝ □p := ⟨boxDuality_mpr⟩
+
+def boxDuality_mpr' (h : 𝓢 ⊢ ∼(◇(∼p))) : 𝓢 ⊢ □p := boxDuality_mpr ⨀ h
+lemma boxDuality_mpr'! (h : 𝓢 ⊢! ∼(◇(∼p))) : 𝓢 ⊢! □p := ⟨boxDuality_mpr' h.some⟩
+
 lemma multibox_duality'! : 𝓢 ⊢! □^[n]p ↔ 𝓢 ⊢! ∼(◇^[n](∼p)) := by
   constructor;
   . intro h; exact (and₁'! multibox_duality!) ⨀ h;
   . intro h; exact (and₂'! multibox_duality!) ⨀ h;
 
 lemma box_duality'! : 𝓢 ⊢! □p ↔ 𝓢 ⊢! ∼(◇(∼p)) := multibox_duality'! (n := 1)
+
+end Duality
+
+
+def box_dne : 𝓢 ⊢ □(∼∼p) ➝ □p := axiomK' $ nec dne
+@[simp] lemma box_dne! : 𝓢 ⊢! □(∼∼p) ➝ □p := ⟨box_dne⟩
+
+def box_dne' (h : 𝓢 ⊢ □(∼∼p)): 𝓢 ⊢ □p := box_dne ⨀ h
+lemma box_dne'! (h : 𝓢 ⊢! □(∼∼p)): 𝓢 ⊢! □p := ⟨box_dne' h.some⟩
 
 
 def multiboxverum : 𝓢 ⊢ (□^[n]⊤ : F) := multinec verum
@@ -387,6 +417,8 @@ lemma collect_multibox_or'! (h : 𝓢 ⊢! □^[n]p ⋎ □^[n]q) : 𝓢 ⊢! �
 def collect_box_or' (h : 𝓢 ⊢ □p ⋎ □q) : 𝓢 ⊢ □(p ⋎ q) := collect_multibox_or' (n := 1) h
 lemma collect_box_or'! (h : 𝓢 ⊢! □p ⋎ □q) : 𝓢 ⊢! □(p ⋎ q) := ⟨collect_box_or' h.some⟩
 
+variable [HasDiaDuality 𝓢]
+
 def diaOrInst₁ : 𝓢 ⊢ ◇p ➝ ◇(p ⋎ q) := by
   apply impTrans'' (and₁' diaDuality);
   apply impTrans'' ?h (and₂' diaDuality);
@@ -424,7 +456,6 @@ def collect_dia_or' (h : 𝓢 ⊢ ◇p ⋎ ◇q) : 𝓢 ⊢ ◇(p ⋎ q) := coll
   apply imp_trans''! collect_multibox_or! (imply_multibox_distribute'! demorgan₁!)
 
 @[simp] lemma distribute_dia_and! : 𝓢 ⊢! ◇(p ⋏ q) ➝ ◇p ⋏ ◇q := distribute_multidia_and! (n := 1)
-
 
 -- TODO: `iffConjMultidiaMultidiaconj` is computable but it's too slow, so leave it.
 @[simp] lemma iff_conjmultidia_multidiaconj! : 𝓢 ⊢! ◇^[n](⋀Γ) ➝ ⋀(◇'^[n]Γ) := by
@@ -505,35 +536,35 @@ instance (Γ : Context F 𝓢) : HasAxiomD Γ := ⟨fun _ ↦ Context.of axiomD�
 -- TODO: move
 def notbot : 𝓢 ⊢ ∼⊥ := neg_equiv'.mpr (impId ⊥)
 
-private def D₂_of_D : 𝓢 ⊢ Axioms.D₂ := by
+private def P_of_D : 𝓢 ⊢ Axioms.P := by
   have : 𝓢 ⊢ ∼∼□(∼⊥) := dni' $ nec notbot;
   have : 𝓢 ⊢ ∼◇⊥ := (contra₀' $ and₁' diaDuality) ⨀ this;
   exact (contra₀' axiomD) ⨀ this;
-instance : HasAxiomD₂ 𝓢 := ⟨D₂_of_D⟩
+instance : HasAxiomP 𝓢 := ⟨P_of_D⟩
 
 end AxiomD
 
 
-section AxiomD₂
+section AxiomP
 
-variable [HasAxiomD₂ 𝓢]
+variable [HasAxiomP 𝓢]
 
-def axiomD₂ : 𝓢 ⊢ ∼□⊥  := HasAxiomD₂.D₂
-@[simp] lemma axiomD₂! : 𝓢 ⊢! ∼□⊥ := ⟨axiomD₂⟩
+def axiomP : 𝓢 ⊢ ∼□⊥  := HasAxiomP.P
+@[simp] lemma axiomP! : 𝓢 ⊢! ∼□⊥ := ⟨axiomP⟩
 
-instance (Γ : FiniteContext F 𝓢) : HasAxiomD₂ Γ := ⟨FiniteContext.of axiomD₂⟩
-instance (Γ : Context F 𝓢) : HasAxiomD₂ Γ := ⟨Context.of axiomD₂⟩
+instance (Γ : FiniteContext F 𝓢) : HasAxiomP Γ := ⟨FiniteContext.of axiomP⟩
+instance (Γ : Context F 𝓢) : HasAxiomP Γ := ⟨Context.of axiomP⟩
 
-private def D_of_D₂ : 𝓢 ⊢ Axioms.D p := by
+private def D_of_P : 𝓢 ⊢ Axioms.D p := by
   have : 𝓢 ⊢ p ➝ (∼p ➝ ⊥) := impTrans'' dni (and₁' neg_equiv);
   have : 𝓢 ⊢ □p ➝ □(∼p ➝ ⊥) := implyBoxDistribute' this;
   have : 𝓢 ⊢ □p ➝ (□(∼p) ➝ □⊥) := impTrans'' this axiomK;
   have : 𝓢 ⊢ □p ➝ (∼□⊥ ➝ ∼□(∼p)) := impTrans'' this contra₀;
-  have : 𝓢 ⊢ □p ➝ ∼□(∼p) := impSwap' this ⨀ axiomD₂;
+  have : 𝓢 ⊢ □p ➝ ∼□(∼p) := impSwap' this ⨀ axiomP;
   exact impTrans'' this (and₂' diaDuality);
-instance : HasAxiomD 𝓢 := ⟨fun _ ↦ D_of_D₂⟩
+instance : HasAxiomD 𝓢 := ⟨fun _ ↦ D_of_P⟩
 
-end AxiomD₂
+end AxiomP
 
 
 def axiomFour [HasAxiomFour 𝓢] : 𝓢 ⊢ □p ➝ □□p := HasAxiomFour.Four _
@@ -592,68 +623,130 @@ def iff_dia_diadot [HasAxiomT 𝓢] [HasAxiomFour 𝓢] : 𝓢 ⊢ ◇p ⭤ ⟐p
   . exact or₃'' (diaTc) (impId _)
 @[simp] lemma iff_dia_diadot! [HasAxiomT 𝓢] [HasAxiomFour 𝓢] : 𝓢 ⊢! ◇p ⭤ ⟐p := ⟨iff_dia_diadot⟩
 
-def axiomFive [HasAxiomFive 𝓢] : 𝓢 ⊢ ◇p ➝ □◇p := HasAxiomFive.Five _
-@[simp] lemma axiomFive! [HasAxiomFive 𝓢] : 𝓢 ⊢! ◇p ➝ □◇p := ⟨axiomFive⟩
 
-instance [HasAxiomFive 𝓢] (Γ : FiniteContext F 𝓢) : HasAxiomFive Γ := ⟨fun _ ↦ FiniteContext.of axiomFive⟩
-instance [HasAxiomFive 𝓢] (Γ : Context F 𝓢) : HasAxiomFive Γ := ⟨fun _ ↦ Context.of axiomFive⟩
+section AxiomFive
+
+variable [HasAxiomFive 𝓢]
+
+def axiomFive : 𝓢 ⊢ ◇p ➝ □◇p := HasAxiomFive.Five _
+@[simp] lemma axiomFive! : 𝓢 ⊢! ◇p ➝ □◇p := ⟨axiomFive⟩
+
+instance (Γ : FiniteContext F 𝓢) : HasAxiomFive Γ := ⟨fun _ ↦ FiniteContext.of axiomFive⟩
+instance (Γ : Context F 𝓢) : HasAxiomFive Γ := ⟨fun _ ↦ Context.of axiomFive⟩
+
+end AxiomFive
 
 
-def axiomTc [HasAxiomTc 𝓢] : 𝓢 ⊢ p ➝ □p := HasAxiomTc.Tc _
-@[simp] lemma axiomTc! [HasAxiomTc 𝓢] : 𝓢 ⊢! p ➝ □p := ⟨axiomTc⟩
+section S5
 
-instance [HasAxiomTc 𝓢] (Γ : FiniteContext F 𝓢) : HasAxiomTc Γ := ⟨fun _ ↦ FiniteContext.of axiomTc⟩
-instance [HasAxiomTc 𝓢] (Γ : Context F 𝓢) : HasAxiomTc Γ := ⟨fun _ ↦ Context.of axiomTc⟩
+variable [HasAxiomFive 𝓢] [HasAxiomT 𝓢]
 
-private def axiomFour_of_Tc [HasAxiomTc 𝓢]  : 𝓢 ⊢ Axioms.Four p := axiomTc
-instance [HasAxiomTc 𝓢] : HasAxiomFour 𝓢 := ⟨fun _ ↦ axiomFour_of_Tc⟩
+-- MEMO: need more simple proof
+def diabox_box : 𝓢 ⊢ ◇□p ➝ □p := by
+  have : 𝓢 ⊢ ◇(∼p) ➝ □◇(∼p) := axiomFive;
+  have : 𝓢 ⊢ ∼□◇(∼p) ➝ ∼◇(∼p) := contra₀' this;
+  have : 𝓢 ⊢ ∼□◇(∼p) ➝ □p := impTrans'' this boxDuality_mpr;
+  refine impTrans'' ?_ this;
+  refine impTrans'' diaDuality_mp $ ?_
+  apply contra₀';
+  apply implyBoxDistribute';
+  refine impTrans'' diaDuality_mp ?_;
+  apply contra₀';
+  apply implyBoxDistribute';
+  apply dni;
+@[simp] lemma diabox_box! : 𝓢 ⊢! ◇□p ➝ □p := ⟨diabox_box⟩
 
-def diaT [HasDiaDuality 𝓢] [HasAxiomTc 𝓢] : 𝓢 ⊢ ◇p ➝ p := by
+def diabox_box' (h : 𝓢 ⊢ ◇□p) : 𝓢 ⊢ □p := diabox_box ⨀ h
+lemma diabox_box'! (h : 𝓢 ⊢! ◇□p) : 𝓢 ⊢! □p := ⟨diabox_box' h.some⟩
+
+
+def rm_diabox : 𝓢 ⊢ ◇□p ➝ p := impTrans'' diabox_box axiomT
+@[simp] lemma rm_diabox! : 𝓢 ⊢! ◇□p ➝ p := ⟨rm_diabox⟩
+
+def rm_diabox' (h : 𝓢 ⊢ ◇□p) : 𝓢 ⊢ p := rm_diabox ⨀ h
+lemma rm_diabox'! (h : 𝓢 ⊢! ◇□p) : 𝓢 ⊢! p := ⟨rm_diabox' h.some⟩
+
+end S5
+
+
+section AxiomTc
+
+variable [HasAxiomTc 𝓢]
+
+def axiomTc : 𝓢 ⊢ p ➝ □p := HasAxiomTc.Tc _
+@[simp] lemma axiomTc! : 𝓢 ⊢! p ➝ □p := ⟨axiomTc⟩
+
+instance (Γ : FiniteContext F 𝓢) : HasAxiomTc Γ := ⟨fun _ ↦ FiniteContext.of axiomTc⟩
+instance (Γ : Context F 𝓢) : HasAxiomTc Γ := ⟨fun _ ↦ Context.of axiomTc⟩
+
+private def axiomFour_of_Tc : 𝓢 ⊢ Axioms.Four p := axiomTc
+instance : HasAxiomFour 𝓢 := ⟨fun _ ↦ axiomFour_of_Tc⟩
+
+def diaT [HasDiaDuality 𝓢] : 𝓢 ⊢ ◇p ➝ p := by
   apply impTrans'' (and₁' diaDuality) ?_;
   apply contra₂';
   exact axiomTc;
-@[simp] lemma diaT! [HasDiaDuality 𝓢] [HasAxiomTc 𝓢] : 𝓢 ⊢! ◇p ➝ p := ⟨diaT⟩
+@[simp] lemma diaT! [HasDiaDuality 𝓢] : 𝓢 ⊢! ◇p ➝ p := ⟨diaT⟩
 
-def diaT' [HasDiaDuality 𝓢] [HasAxiomTc 𝓢] (h : 𝓢 ⊢ ◇p) : 𝓢 ⊢ p := diaT ⨀ h
-lemma diaT'! [HasDiaDuality 𝓢] [HasAxiomTc 𝓢] (h : 𝓢 ⊢! ◇p) : 𝓢 ⊢! p := ⟨diaT' h.some⟩
+def diaT' [HasDiaDuality 𝓢] (h : 𝓢 ⊢ ◇p) : 𝓢 ⊢ p := diaT ⨀ h
+lemma diaT'! [HasDiaDuality 𝓢] (h : 𝓢 ⊢! ◇p) : 𝓢 ⊢! p := ⟨diaT' h.some⟩
+
+private def axiomFive_of_Tc : 𝓢 ⊢ ◇p ➝ □◇p := axiomTc
+instance : HasAxiomFive 𝓢 := ⟨fun _ ↦ axiomFive_of_Tc⟩
+
+private def axiomGrz_of_Tc_and_T [HasAxiomT 𝓢] : 𝓢 ⊢ □(□(p ➝ □p) ➝ p) ➝ p := by
+  have : 𝓢 ⊢ p ➝ □p := axiomTc;
+  have d₁ := nec this;
+  have d₂ : 𝓢 ⊢ □(p ➝ □p) ➝ ((□(p ➝ □p)) ➝ p) ➝ p := p_pq_q;
+  have := d₂ ⨀ d₁;
+  exact impTrans'' axiomT this;
+
+instance [HasAxiomT 𝓢] : HasAxiomGrz 𝓢 := ⟨fun _ ↦ axiomGrz_of_Tc_and_T⟩
+
+end AxiomTc
 
 
-def axiomVer [HasAxiomVer 𝓢] : 𝓢 ⊢ □p := HasAxiomVer.Ver _
-@[simp] lemma axiomVer! [HasAxiomVer 𝓢] : 𝓢 ⊢! □p := ⟨axiomVer⟩
+section AxiomVer
 
-instance [HasAxiomVer 𝓢] (Γ : FiniteContext F 𝓢) : HasAxiomVer Γ := ⟨fun _ ↦ FiniteContext.of axiomVer⟩
-instance [HasAxiomVer 𝓢] (Γ : Context F 𝓢) : HasAxiomVer Γ := ⟨fun _ ↦ Context.of axiomVer⟩
+variable [HasAxiomVer 𝓢]
 
-private def axiomTc_of_Ver [HasAxiomVer 𝓢] : 𝓢 ⊢ Axioms.Tc p := dhyp _ axiomVer
-instance [HasAxiomVer 𝓢] : HasAxiomTc 𝓢 := ⟨fun _ ↦ axiomTc_of_Ver⟩
+def axiomVer : 𝓢 ⊢ □p := HasAxiomVer.Ver _
+@[simp] lemma axiomVer! : 𝓢 ⊢! □p := ⟨axiomVer⟩
 
-private def axiomL_of_Ver [HasAxiomVer 𝓢] : 𝓢 ⊢ Axioms.L p := dhyp _ axiomVer
-instance [HasAxiomVer 𝓢] : HasAxiomL 𝓢 := ⟨fun _ ↦ axiomL_of_Ver⟩
+instance (Γ : FiniteContext F 𝓢) : HasAxiomVer Γ := ⟨fun _ ↦ FiniteContext.of axiomVer⟩
+instance (Γ : Context F 𝓢) : HasAxiomVer Γ := ⟨fun _ ↦ Context.of axiomVer⟩
 
-def bot_of_dia [NegationEquiv 𝓢] [HasDiaDuality 𝓢] [HasAxiomVer 𝓢] : 𝓢 ⊢ ◇p ➝ ⊥ := by
+private def axiomTc_of_Ver : 𝓢 ⊢ Axioms.Tc p := dhyp _ axiomVer
+instance : HasAxiomTc 𝓢 := ⟨fun _ ↦ axiomTc_of_Ver⟩
+
+private def axiomL_of_Ver : 𝓢 ⊢ Axioms.L p := dhyp _ axiomVer
+instance : HasAxiomL 𝓢 := ⟨fun _ ↦ axiomL_of_Ver⟩
+
+def bot_of_dia [NegationEquiv 𝓢] [HasDiaDuality 𝓢] : 𝓢 ⊢ ◇p ➝ ⊥ := by
   have : 𝓢 ⊢ ∼◇p ➝ (◇p ➝ ⊥) := and₁' $ neg_equiv (𝓢 := 𝓢) (p := ◇p);
   exact this ⨀ (contra₀' (and₁' diaDuality) ⨀ by
     apply dni';
     apply axiomVer;
   );
-lemma bot_of_dia! [NegationEquiv 𝓢] [HasDiaDuality 𝓢] [HasAxiomVer 𝓢] : 𝓢 ⊢! ◇p ➝ ⊥ := ⟨bot_of_dia⟩
+lemma bot_of_dia! [NegationEquiv 𝓢] [HasDiaDuality 𝓢] : 𝓢 ⊢! ◇p ➝ ⊥ := ⟨bot_of_dia⟩
 
-def bot_of_dia' [NegationEquiv 𝓢] [HasDiaDuality 𝓢] [HasAxiomVer 𝓢] (h : 𝓢 ⊢ ◇p) : 𝓢 ⊢ ⊥ := bot_of_dia ⨀ h
-lemma bot_of_dia'! [NegationEquiv 𝓢] [HasDiaDuality 𝓢] [HasAxiomVer 𝓢] (h : 𝓢 ⊢! ◇p) : 𝓢 ⊢! ⊥ := ⟨bot_of_dia' h.some⟩
+def bot_of_dia' [NegationEquiv 𝓢] [HasDiaDuality 𝓢] (h : 𝓢 ⊢ ◇p) : 𝓢 ⊢ ⊥ := bot_of_dia ⨀ h
+lemma bot_of_dia'! [NegationEquiv 𝓢] [HasDiaDuality 𝓢] (h : 𝓢 ⊢! ◇p) : 𝓢 ⊢! ⊥ := ⟨bot_of_dia' h.some⟩
 
--- axiomTriv : 𝓢 ⊢ p ➝ □p はネセシテーションを無意味にするはず
--- instance [Necessitation 𝓢] (Γ : FiniteContext F 𝓢) (h : 𝓢 ⊢ Γ.ctx.conj ➝ □Γ.ctx.conj) : Necessitation Γ := ⟨
---   by intro p hp; exact ofDef $ impTrans'' h (implyBoxDistribute' $ toDef hp);
--- ⟩
+end AxiomVer
 
 
-def axiomL [HasAxiomL 𝓢] : 𝓢 ⊢ □(□p ➝ p) ➝ □p := HasAxiomL.L _
-@[simp] lemma axiomL! [HasAxiomL 𝓢] : 𝓢 ⊢! □(□p ➝ p) ➝ □p := ⟨axiomL⟩
+section AxiomL
 
-instance [HasAxiomL 𝓢] (Γ : FiniteContext F 𝓢) : HasAxiomL Γ := ⟨fun _ ↦ FiniteContext.of axiomL⟩
-instance [HasAxiomL 𝓢] (Γ : Context F 𝓢) : HasAxiomL Γ := ⟨fun _ ↦ Context.of axiomL⟩
+variable [HasAxiomL 𝓢]
 
-private def axiomFour_of_L [HasAxiomL 𝓢] : 𝓢 ⊢ Axioms.Four p := by
+def axiomL : 𝓢 ⊢ □(□p ➝ p) ➝ □p := HasAxiomL.L _
+@[simp] lemma axiomL! : 𝓢 ⊢! □(□p ➝ p) ➝ □p := ⟨axiomL⟩
+
+instance (Γ : FiniteContext F 𝓢) : HasAxiomL Γ := ⟨fun _ ↦ FiniteContext.of axiomL⟩
+instance (Γ : Context F 𝓢) : HasAxiomL Γ := ⟨fun _ ↦ Context.of axiomL⟩
+
+private def axiomFour_of_L : 𝓢 ⊢ Axioms.Four p := by
   dsimp [Axioms.Four];
   have : 𝓢 ⊢ p ➝ (⊡□p ➝ ⊡p) := by
     apply deduct';
@@ -661,9 +754,9 @@ private def axiomFour_of_L [HasAxiomL 𝓢] : 𝓢 ⊢ Axioms.Four p := by
     exact and₃' (FiniteContext.byAxm) (and₁' (q := □□p) $ FiniteContext.byAxm);
   have : 𝓢 ⊢ p ➝ (□⊡p ➝ ⊡p) := impTrans'' this (implyLeftReplace BoxBoxdot_BoxDotbox);
   exact impTrans'' (impTrans'' (implyBoxDistribute' this) axiomL) (implyBoxDistribute' $ and₂);
-instance [HasAxiomL 𝓢] : HasAxiomFour 𝓢 := ⟨fun _ ↦ axiomFour_of_L⟩
+instance : HasAxiomFour 𝓢 := ⟨fun _ ↦ axiomFour_of_L⟩
 
-def goedel2 [HasAxiomL 𝓢] : 𝓢 ⊢ (∼(□⊥) ⭤ ∼(□(∼(□⊥))) : F) := by
+def goedel2 : 𝓢 ⊢ (∼(□⊥) ⭤ ∼(□(∼(□⊥))) : F) := by
   apply negReplaceIff';
   apply iffIntro;
   . apply implyBoxDistribute';
@@ -672,23 +765,60 @@ def goedel2 [HasAxiomL 𝓢] : 𝓢 ⊢ (∼(□⊥) ⭤ ∼(□(∼(□⊥))) :
       apply implyBoxDistribute';
       exact and₁' neg_equiv;
     ) axiomL;
-lemma goedel2! [HasAxiomL 𝓢] : 𝓢 ⊢! (∼(□⊥) ⭤ ∼(□(∼(□⊥))) : F) := ⟨goedel2⟩
+lemma goedel2! : 𝓢 ⊢! (∼(□⊥) ⭤ ∼(□(∼(□⊥))) : F) := ⟨goedel2⟩
 
-def goedel2'.mp [HasAxiomL 𝓢] : 𝓢 ⊢ (∼(□⊥) : F) → 𝓢 ⊢ ∼(□(∼(□⊥)) : F) := by intro h; exact (and₁' goedel2) ⨀ h;
-def goedel2'.mpr [HasAxiomL 𝓢] : 𝓢 ⊢ ∼(□(∼(□⊥)) : F) → 𝓢 ⊢ (∼(□⊥) : F) := by intro h; exact (and₂' goedel2) ⨀ h;
-lemma goedel2'! [HasAxiomL 𝓢] : 𝓢 ⊢! (∼(□⊥) : F) ↔ 𝓢 ⊢! ∼(□(∼(□⊥)) : F) := ⟨λ ⟨h⟩ ↦ ⟨goedel2'.mp h⟩, λ ⟨h⟩ ↦ ⟨goedel2'.mpr h⟩⟩
+def goedel2'.mp : 𝓢 ⊢ (∼(□⊥) : F) → 𝓢 ⊢ ∼(□(∼(□⊥)) : F) := by intro h; exact (and₁' goedel2) ⨀ h;
+def goedel2'.mpr : 𝓢 ⊢ ∼(□(∼(□⊥)) : F) → 𝓢 ⊢ (∼(□⊥) : F) := by intro h; exact (and₂' goedel2) ⨀ h;
+lemma goedel2'! : 𝓢 ⊢! (∼(□⊥) : F) ↔ 𝓢 ⊢! ∼(□(∼(□⊥)) : F) := ⟨λ ⟨h⟩ ↦ ⟨goedel2'.mp h⟩, λ ⟨h⟩ ↦ ⟨goedel2'.mpr h⟩⟩
 
-def axiomH [HasAxiomH 𝓢] : 𝓢 ⊢ □(□p ⭤ p) ➝ □p := HasAxiomH.H _
-@[simp] lemma axiomH! [HasAxiomH 𝓢] : 𝓢 ⊢! □(□p ⭤ p) ➝ □p := ⟨axiomH⟩
+private def axiomH_of_GL : 𝓢 ⊢ Axioms.H p := impTrans'' (implyBoxDistribute' and₁) axiomL
+instance : HasAxiomH 𝓢 := ⟨fun _ ↦ axiomH_of_GL⟩
 
-instance [HasAxiomH 𝓢] (Γ : FiniteContext F 𝓢) : HasAxiomH Γ := ⟨fun _ ↦ FiniteContext.of axiomH⟩
-instance [HasAxiomH 𝓢] (Γ : Context F 𝓢) : HasAxiomH Γ := ⟨fun _ ↦ Context.of axiomH⟩
+private noncomputable def boxdot_Grz_of_L1 : 𝓢 ⊢ (⊡(⊡(p ➝ ⊡p) ➝ p)) ➝ (□(p ➝ ⊡p) ➝ p) := by
+  have : 𝓢 ⊢ (□(p ➝ ⊡p) ⋏ ∼p) ➝ ⊡(p ➝ ⊡p) := by
+    apply deduct';
+    apply and₃';
+    . exact (of efq_imply_not₁) ⨀ and₂;
+    . exact (of (impId _)) ⨀ and₁;
+  have : 𝓢 ⊢ ∼⊡(p ➝ ⊡p) ➝ (∼□(p ➝ ⊡p) ⋎ p) := impTrans'' (contra₀' this) $ impTrans'' demorgan₄ (orReplaceRight dne);
+  have : 𝓢 ⊢ (∼⊡(p ➝ ⊡p) ⋎ p) ➝ (∼□(p ➝ ⊡p) ⋎ p) := or₃'' this or₂;
+  have : 𝓢 ⊢ ∼⊡(p ➝ ⊡p) ⋎ p ➝ □(p ➝ ⊡p) ➝ p := impTrans'' this implyOfNotOr;
+  have : 𝓢 ⊢ (⊡(p ➝ ⊡p) ➝ p) ➝ (□(p ➝ ⊡p) ➝ p) := impTrans'' NotOrOfImply this;
+  exact impTrans'' boxdotAxiomT this;
+
+noncomputable def boxdot_Grz_of_L : 𝓢 ⊢ ⊡(⊡(p ➝ ⊡p) ➝ p) ➝ p := by
+  have : 𝓢 ⊢ □(⊡(p ➝ ⊡p) ➝ p) ➝ □⊡(p ➝ ⊡p) ➝ □p := axiomK;
+  have : 𝓢 ⊢ □(⊡(p ➝ ⊡p) ➝ p) ➝ □(p ➝ ⊡p) ➝ □p := impTrans'' this $ implyLeftReplace $ imply_Box_BoxBoxdot;
+  have : 𝓢 ⊢ □(⊡(p ➝ ⊡p) ➝ p) ➝ □(p ➝ ⊡p) ➝ (p ➝ ⊡p) := by
+    apply deduct'; apply deduct; apply deduct;
+    exact and₃' FiniteContext.byAxm $ (of this) ⨀ (FiniteContext.byAxm) ⨀ (FiniteContext.byAxm);
+  have : 𝓢 ⊢ □□(⊡(p ➝ ⊡p) ➝ p) ➝ □(□(p ➝ ⊡p) ➝ (p ➝ ⊡p)) := implyBoxDistribute' this;
+  have : 𝓢 ⊢ □(⊡(p ➝ ⊡p) ➝ p) ➝ □(□(p ➝ ⊡p) ➝ (p ➝ ⊡p)) := impTrans'' axiomFour this;
+  have : 𝓢 ⊢ □(⊡(p ➝ ⊡p) ➝ p) ➝ □(p ➝ ⊡p) := impTrans'' this axiomL;
+  have : 𝓢 ⊢ ⊡(⊡(p ➝ ⊡p) ➝ p) ➝ □(p ➝ ⊡p) := impTrans'' boxdotBox this;
+  exact mdp₁ boxdot_Grz_of_L1 this;
+@[simp] lemma boxdot_Grz_of_L! : 𝓢 ⊢! ⊡(⊡(p ➝ ⊡p) ➝ p) ➝ p := ⟨boxdot_Grz_of_L⟩
+
+end AxiomL
+
+
+section AxiomH
+
+variable [HasAxiomH 𝓢]
+
+def axiomH : 𝓢 ⊢ □(□p ⭤ p) ➝ □p := HasAxiomH.H _
+@[simp] lemma axiomH! : 𝓢 ⊢! □(□p ⭤ p) ➝ □p := ⟨axiomH⟩
+
+instance (Γ : FiniteContext F 𝓢) : HasAxiomH Γ := ⟨fun _ ↦ FiniteContext.of axiomH⟩
+instance (Γ : Context F 𝓢) : HasAxiomH Γ := ⟨fun _ ↦ Context.of axiomH⟩
+
+end AxiomH
+
+
+section LoebRule
 
 alias loeb := LoebRule.loeb
 lemma loeb! [LoebRule 𝓢] : 𝓢 ⊢! □p ➝ p → 𝓢 ⊢! p := by rintro ⟨hp⟩; exact ⟨loeb hp⟩
-
-alias henkin := HenkinRule.henkin
-lemma henkin! [HenkinRule 𝓢] : 𝓢 ⊢! □p ⭤ p → 𝓢 ⊢! p := by rintro ⟨hp⟩; exact ⟨henkin hp⟩
 
 private def axiomL_of_K4Loeb [HasAxiomFour 𝓢] [LoebRule 𝓢] : 𝓢 ⊢ Axioms.L p := by
   dsimp [Axioms.L];
@@ -702,17 +832,24 @@ private def axiomL_of_K4Loeb [HasAxiomFour 𝓢] [LoebRule 𝓢] : 𝓢 ⊢ Axio
   exact loeb this;
 instance [System.K4Loeb 𝓢] : HasAxiomL 𝓢 := ⟨fun _ ↦ axiomL_of_K4Loeb⟩
 
+end LoebRule
+
+
+section HenkinRule
+
+alias henkin := HenkinRule.henkin
+lemma henkin! [HenkinRule 𝓢] : 𝓢 ⊢! □p ⭤ p → 𝓢 ⊢! p := by rintro ⟨hp⟩; exact ⟨henkin hp⟩
+
 instance [HasAxiomFour 𝓢] [HenkinRule 𝓢]  : LoebRule 𝓢 where
   loeb h := h ⨀ (henkin $ iffIntro (axiomK' $ nec h) axiomFour);
 
 instance [HasAxiomFour 𝓢] [HasAxiomH 𝓢] : HenkinRule 𝓢 where
   henkin h := (and₁' h) ⨀ (axiomH ⨀ nec h);
 
-private def axiomH_of_GL [HasAxiomL 𝓢] : 𝓢 ⊢ Axioms.H p := by
-  exact impTrans'' (implyBoxDistribute' $ and₁) axiomL
-instance [HasAxiomL 𝓢] : HasAxiomH 𝓢 := ⟨fun _ ↦ axiomH_of_GL⟩
+end HenkinRule
 
-section
+
+section Unnecessitation
 
 variable [Unnecessitation 𝓢]
 
@@ -732,7 +869,7 @@ instance [HasAxiomT 𝓢] : Unnecessitation 𝓢 := ⟨by
   exact axiomT ⨀ hp;
 ⟩
 
-end
+end Unnecessitation
 
 
 
@@ -768,33 +905,26 @@ end
 
 section Grz
 
-variable [System.K 𝓢] [HasAxiomGrz 𝓢]
+variable [HasAxiomGrz 𝓢]
 
 def axiomGrz : 𝓢 ⊢ □(□(p ➝ □p) ➝ p) ➝ p := HasAxiomGrz.Grz _
 @[simp] lemma axiomGrz! : 𝓢 ⊢! □(□(p ➝ □p) ➝ p) ➝ p := ⟨axiomGrz⟩
 
-instance [HasAxiomGrz 𝓢] (Γ : FiniteContext F 𝓢) : HasAxiomGrz Γ := ⟨fun _ ↦ FiniteContext.of axiomGrz⟩
-instance [HasAxiomGrz 𝓢] (Γ : Context F 𝓢) : HasAxiomGrz Γ := ⟨fun _ ↦ Context.of axiomGrz⟩
-
-def dhyp_imp (h : 𝓢 ⊢ p ➝ q) : 𝓢 ⊢ (r ➝ p) ➝ (r ➝ q) := imply₂ (𝓢 := 𝓢) (p := r) (q := p) (r := q) ⨀ (dhyp r h)
-
-def ppq (h : 𝓢 ⊢ p ➝ p ➝ q) : 𝓢 ⊢ p ➝ q := by
-  apply deduct';
-  have := of (Γ := [p]) h;
-  exact this ⨀ (FiniteContext.byAxm) ⨀ (FiniteContext.byAxm);
+instance (Γ : FiniteContext F 𝓢) : HasAxiomGrz Γ := ⟨fun _ ↦ FiniteContext.of axiomGrz⟩
+instance (Γ : Context F 𝓢) : HasAxiomGrz Γ := ⟨fun _ ↦ Context.of axiomGrz⟩
 
 noncomputable def lemma_Grz₁ : 𝓢 ⊢ □p ➝ □(□((p ⋏ (□p ➝ □□p)) ➝ □(p ⋏ (□p ➝ □□p))) ➝ (p ⋏ (□p ➝ □□p))) := by
   let q := p ⋏ (□p ➝ □□p);
   have    : 𝓢 ⊢ ((□p ➝ □□p) ➝ □p) ➝ □p := peirce
-  have    : 𝓢 ⊢ (p ➝ ((□p ➝ □□p) ➝ □p)) ➝ (p ➝ □p) := dhyp_imp this;
+  have    : 𝓢 ⊢ (p ➝ ((□p ➝ □□p) ➝ □p)) ➝ (p ➝ □p) := dhyp_imp' this;
   have d₁ : 𝓢 ⊢ (q ➝ □p) ➝ p ➝ □p := impTrans'' (and₁' $ andImplyIffImplyImply p (□p ➝ □□p) (□p)) this;
   have    : 𝓢 ⊢ q ➝ p := and₁;
   have    : 𝓢 ⊢ □q ➝ □p := implyBoxDistribute' this;
-  have d₂ : 𝓢 ⊢ (q ➝ □q) ➝ (q ➝ □p) := dhyp_imp this;
+  have d₂ : 𝓢 ⊢ (q ➝ □q) ➝ (q ➝ □p) := dhyp_imp' this;
   have    : 𝓢 ⊢ (q ➝ □q) ➝ p ➝ □p := impTrans'' d₂ d₁;
   have    : 𝓢 ⊢ □(q ➝ □q) ➝ □(p ➝ □p) := implyBoxDistribute' this;
   have    : 𝓢 ⊢ □(q ➝ □q) ➝ (□p ➝ □□p) := impTrans'' this axiomK;
-  have    : 𝓢 ⊢ (p ➝ □(q ➝ □q)) ➝ (p ➝ (□p ➝ □□p)) := dhyp_imp this;
+  have    : 𝓢 ⊢ (p ➝ □(q ➝ □q)) ➝ (p ➝ (□p ➝ □□p)) := dhyp_imp' this;
   have    : 𝓢 ⊢ p ➝ (□(q ➝ □q) ➝ (p ⋏ (□p ➝ □□p))) := by
     apply deduct';
     apply deduct;
@@ -818,41 +948,40 @@ noncomputable instance : HasAxiomT 𝓢 := ⟨fun _ ↦ T_of_Grz⟩
 end Grz
 
 
-section GL_Grz
+section Tc_of_S5Grz
 
-variable [System.K 𝓢] [HasAxiomL 𝓢]
+private def lem₁_diaT_of_S5Grz [HasDiaDuality 𝓢] : 𝓢 ⊢ (∼□(∼p) ➝ ∼□(∼□p)) ➝ (◇p ➝ ◇□p)
+  := impTrans'' (rev_dhyp_imp' diaDuality_mp) (dhyp_imp' diaDuality_mpr)
 
-private noncomputable def boxdot_Grz_of_L1 : 𝓢 ⊢ (⊡(⊡(p ➝ ⊡p) ➝ p)) ➝ (□(p ➝ ⊡p) ➝ p) := by
-  have : 𝓢 ⊢ (□(p ➝ ⊡p) ⋏ ∼p) ➝ ⊡(p ➝ ⊡p) := by
-    apply deduct';
-    apply and₃';
-    . exact (of efq_imply_not₁) ⨀ and₂;
-    . exact (of (impId _)) ⨀ and₁;
-  have : 𝓢 ⊢ ∼⊡(p ➝ ⊡p) ➝ (∼□(p ➝ ⊡p) ⋎ p) := impTrans'' (contra₀' this) $ impTrans'' demorgan₄ (orReplaceRight dne);
-  have : 𝓢 ⊢ (∼⊡(p ➝ ⊡p) ⋎ p) ➝ (∼□(p ➝ ⊡p) ⋎ p) := or₃'' this or₂;
-  have : 𝓢 ⊢ ∼⊡(p ➝ ⊡p) ⋎ p ➝ □(p ➝ ⊡p) ➝ p := impTrans'' this implyOfNotOr;
-  have : 𝓢 ⊢ (⊡(p ➝ ⊡p) ➝ p) ➝ (□(p ➝ ⊡p) ➝ p) := impTrans'' NotOrOfImply this;
-  exact impTrans'' boxdotAxiomT this;
+private def lem₂_diaT_of_S5Grz [HasAxiomT 𝓢] [HasAxiomFive 𝓢] : 𝓢 ⊢ (◇p ➝ ◇□p) ➝ (◇p ➝ p)
+  := dhyp_imp' rm_diabox
 
-noncomputable def boxdot_Grz_of_L : 𝓢 ⊢ ⊡(⊡(p ➝ ⊡p) ➝ p) ➝ p := by
-  have : 𝓢 ⊢ □(⊡(p ➝ ⊡p) ➝ p) ➝ □⊡(p ➝ ⊡p) ➝ □p := axiomK;
-  have : 𝓢 ⊢ □(⊡(p ➝ ⊡p) ➝ p) ➝ □(p ➝ ⊡p) ➝ □p := impTrans'' this $ implyLeftReplace $ imply_Box_BoxBoxdot;
-  have : 𝓢 ⊢ □(⊡(p ➝ ⊡p) ➝ p) ➝ □(p ➝ ⊡p) ➝ (p ➝ ⊡p) := by
-    apply deduct'; apply deduct; apply deduct;
-    exact and₃' FiniteContext.byAxm $ (of this) ⨀ (FiniteContext.byAxm) ⨀ (FiniteContext.byAxm);
-  have : 𝓢 ⊢ □□(⊡(p ➝ ⊡p) ➝ p) ➝ □(□(p ➝ ⊡p) ➝ (p ➝ ⊡p)) := implyBoxDistribute' this;
-  have : 𝓢 ⊢ □(⊡(p ➝ ⊡p) ➝ p) ➝ □(□(p ➝ ⊡p) ➝ (p ➝ ⊡p)) := impTrans'' axiomFour this;
-  have : 𝓢 ⊢ □(⊡(p ➝ ⊡p) ➝ p) ➝ □(p ➝ ⊡p) := impTrans'' this axiomL;
-  have : 𝓢 ⊢ ⊡(⊡(p ➝ ⊡p) ➝ p) ➝ □(p ➝ ⊡p) := impTrans'' boxdotBox this;
-  exact mdp₁ boxdot_Grz_of_L1 this;
-@[simp] lemma boxdot_Grz_of_L! : 𝓢 ⊢! ⊡(⊡(p ➝ ⊡p) ➝ p) ➝ p := ⟨boxdot_Grz_of_L⟩
+private def diaT_of_S5Grz [HasAxiomT 𝓢] [HasAxiomFive 𝓢] [HasAxiomGrz 𝓢] [HasDiaDuality 𝓢] : 𝓢 ⊢ ◇p ➝ p := by
+  have : 𝓢 ⊢ (p ➝ □p) ➝ (∼□p ➝ ∼p) := contra₀;
+  have : 𝓢 ⊢ □(p ➝ □p) ➝ □(∼□p ➝ ∼p) := implyBoxDistribute' this;
+  have : 𝓢 ⊢ □(p ➝ □p) ➝ (□(∼□p) ➝ □(∼p)) := impTrans'' this axiomK;
+  have : 𝓢 ⊢ □(p ➝ □p) ➝ (∼□(∼p) ➝ ∼□(∼□p)) := impTrans'' this contra₀;
+  have : 𝓢 ⊢ □(p ➝ □p) ➝ (◇p ➝ ◇□p) := impTrans'' this lem₁_diaT_of_S5Grz;
+  have : 𝓢 ⊢ □(p ➝ □p) ➝ (◇p ➝ □p) := impTrans'' this $ dhyp_imp' diabox_box;
+  have : 𝓢 ⊢ □(p ➝ □p) ➝ (◇p ➝ p) := impTrans'' this $ dhyp_imp' axiomT;
+  have : 𝓢 ⊢ ◇p ➝ □(p ➝ □p) ➝ p := impSwap' this;
+  have : 𝓢 ⊢ □◇p ➝ □(□(p ➝ □p) ➝ p) := implyBoxDistribute' this;
+  have : 𝓢 ⊢ □◇p ➝ p := impTrans'' this axiomGrz;
+  exact impTrans'' axiomFive this;
 
-end GL_Grz
+private def Tc_of_S5Grz [HasAxiomFive 𝓢] [HasAxiomT 𝓢] [HasAxiomGrz 𝓢] [HasDiaDuality 𝓢] : 𝓢 ⊢ p ➝ □p :=
+  impTrans'' (contra₃' (impTrans'' (and₂' diaDuality) diaT_of_S5Grz)) box_dne
+
+instance [HasAxiomT 𝓢] [HasAxiomFive 𝓢] [HasAxiomGrz 𝓢] [HasDiaDuality 𝓢] : HasAxiomTc 𝓢 := ⟨fun _ ↦ Tc_of_S5Grz⟩
+
+end Tc_of_S5Grz
+
 
 lemma contextual_nec! (h : Γ ⊢[𝓢]! p) : (□'Γ) ⊢[𝓢]! □p
   := provable_iff.mpr $ imp_trans''! collect_box_conj! $ imply_box_distribute'! $ provable_iff.mp h
 
 end
+
 
 section ModalDP
 

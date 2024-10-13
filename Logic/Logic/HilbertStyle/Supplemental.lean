@@ -369,6 +369,20 @@ lemma imp_swap'! (h : 𝓢 ⊢! (p ➝ q ➝ r)) : 𝓢 ⊢! (q ➝ p ➝ r) := 
 def impSwap : 𝓢 ⊢ (p ➝ q ➝ r) ➝ (q ➝ p ➝ r) := deduct' $ impSwap' FiniteContext.id
 @[simp] lemma imp_swap! : 𝓢 ⊢! (p ➝ q ➝ r) ➝ (q ➝ p ➝ r) := ⟨impSwap⟩
 
+def ppq (h : 𝓢 ⊢ p ➝ p ➝ q) : 𝓢 ⊢ p ➝ q := by
+  apply deduct';
+  have := of (Γ := [p]) h;
+  exact this ⨀ (FiniteContext.byAxm) ⨀ (FiniteContext.byAxm);
+lemma ppq! (h : 𝓢 ⊢! p ➝ p ➝ q) : 𝓢 ⊢! p ➝ q := ⟨ppq h.some⟩
+
+def p_pq_q : 𝓢 ⊢ p ➝ (p ➝ q) ➝ q := impSwap' $ impId _
+lemma p_pq_q! : 𝓢 ⊢! p ➝ (p ➝ q) ➝ q := ⟨p_pq_q⟩
+
+def dhyp_imp' (h : 𝓢 ⊢ p ➝ q) : 𝓢 ⊢ (r ➝ p) ➝ (r ➝ q) := imply₂ ⨀ (dhyp r h)
+lemma dhyp_imp'! (h : 𝓢 ⊢! p ➝ q) : 𝓢 ⊢! (r ➝ p) ➝ (r ➝ q) := ⟨dhyp_imp' h.some⟩
+
+def rev_dhyp_imp' (h : 𝓢 ⊢ q ➝ p) : 𝓢 ⊢ (p ➝ r) ➝ (q ➝ r) := impSwap' $ impTrans'' h p_pq_q
+lemma rev_dhyp_imp'! (h : 𝓢 ⊢! q ➝ p) : 𝓢 ⊢! (p ➝ r) ➝ (q ➝ r) := ⟨rev_dhyp_imp' h.some⟩
 
 -- TODO: Actually this can be computable but it's too slow.
 noncomputable def dnDistributeImply : 𝓢 ⊢ ∼∼(p ➝ q) ➝ (∼∼p ➝ ∼∼q) := by

@@ -239,12 +239,12 @@ instance KT4B_sound : Sound 𝐊𝐓𝟒𝐁 (EquivalenceFrameClass#α) := infer
 open System
 open Theory MaximalConsistentTheory CanonicalFrame
 
-variable {Ax : Theory α} [System.Consistent (𝝂Ax)]
+variable {Ax : Theory α} [System.Consistent (𝜿Ax)]
 
-lemma geachConfluent_CanonicalFrame (h : 𝗴𝗲(t) ⊆ Ax) : GeachConfluent t (CanonicalFrame 𝝂Ax).Rel := by
+lemma geachConfluent_CanonicalFrame (h : 𝗴𝗲(t) ⊆ Ax) : GeachConfluent t (CanonicalFrame 𝜿Ax).Rel := by
   rintro Ω₁ Ω₂ Ω₃ h;
   have ⟨r₁₂, r₁₃⟩ := h; clear h;
-  have ⟨Ω, hΩ⟩ := lindenbaum (Λ := 𝝂Ax) (T := □''⁻¹^[t.m]Ω₂.theory ∪ □''⁻¹^[t.n]Ω₃.theory) $ by
+  have ⟨Ω, hΩ⟩ := lindenbaum (Λ := 𝜿Ax) (T := □''⁻¹^[t.m]Ω₂.theory ∪ □''⁻¹^[t.n]Ω₃.theory) $ by
     apply intro_union_consistent;
     rintro Γ Δ ⟨hΓ, hΔ⟩ hC;
 
@@ -259,13 +259,13 @@ lemma geachConfluent_CanonicalFrame (h : 𝗴𝗲(t) ⊆ Ax) : GeachConfluent t 
       (multirel_def_multidia.mp r₁₂ hΓconj)
     have : ◇^[t.n]⋀Γ ∈ Ω₃.theory := multirel_def_multibox.mp r₁₃ this;
 
-    have : 𝝂Ax ⊢! □^[t.n]⋀Δ ⋏ ◇^[t.n]⋀Γ ➝ ⊥ := by {
+    have : 𝜿Ax ⊢! □^[t.n]⋀Δ ⋏ ◇^[t.n]⋀Γ ➝ ⊥ := by {
       apply and_imply_iff_imply_imply'!.mpr;
       exact imp_trans''!
-        (show 𝝂Ax ⊢! □^[t.n]⋀Δ ➝ □^[t.n](∼⋀Γ) by exact imply_multibox_distribute'! $ contra₁'! $ imp_trans''! (and_imply_iff_imply_imply'!.mp hC) (and₂'! neg_equiv!))
-        (show 𝝂Ax ⊢! □^[t.n](∼⋀Γ) ➝ (◇^[t.n]⋀Γ) ➝ ⊥ by exact imp_trans''! (contra₁'! $ and₁'! $ multidia_duality!) (and₁'! neg_equiv!));
+        (show 𝜿Ax ⊢! □^[t.n]⋀Δ ➝ □^[t.n](∼⋀Γ) by exact imply_multibox_distribute'! $ contra₁'! $ imp_trans''! (and_imply_iff_imply_imply'!.mp hC) (and₂'! neg_equiv!))
+        (show 𝜿Ax ⊢! □^[t.n](∼⋀Γ) ➝ (◇^[t.n]⋀Γ) ➝ ⊥ by exact imp_trans''! (contra₁'! $ and₁'! $ multidia_duality!) (and₁'! neg_equiv!));
     }
-    have : 𝝂Ax ⊬ □^[t.n]⋀Δ ⋏ ◇^[t.n]⋀Γ ➝ ⊥ := by simpa using (def_consistent.mp Ω₃.consistent) (Γ := [□^[t.n]⋀Δ, ◇^[t.n]⋀Γ]) (by simp_all)
+    have : 𝜿Ax ⊬ □^[t.n]⋀Δ ⋏ ◇^[t.n]⋀Γ ➝ ⊥ := by simpa using (def_consistent.mp Ω₃.consistent) (Γ := [□^[t.n]⋀Δ, ◇^[t.n]⋀Γ]) (by simp_all)
 
     contradiction;
 
@@ -274,7 +274,7 @@ lemma geachConfluent_CanonicalFrame (h : 𝗴𝗲(t) ⊆ Ax) : GeachConfluent t 
   . apply multirel_def_multibox.mpr; apply hΩ.1;
   . apply multirel_def_multibox.mpr; apply hΩ.2;
 
-lemma multiGeachConfluent_CanonicalFrame (h : 𝗚𝗲(ts) ⊆ Ax) : MultiGeachConfluent ts (CanonicalFrame 𝝂Ax).Rel := by
+lemma multiGeachConfluent_CanonicalFrame (h : 𝗚𝗲(ts) ⊆ Ax) : MultiGeachConfluent ts (CanonicalFrame 𝜿Ax).Rel := by
   induction ts using List.induction_with_singleton with
   | hnil => simp [MultiGeachConfluent];
   | hsingle t =>
@@ -286,7 +286,7 @@ lemma multiGeachConfluent_CanonicalFrame (h : 𝗚𝗲(ts) ⊆ Ax) : MultiGeachC
     . apply geachConfluent_CanonicalFrame; simp_all;
     . apply ih; simp_all;
 
-instance instMultiGeachComplete : Complete 𝝂(𝗚𝗲(ts)) ((MultiGeachConfluentFrameClass.{u} ts)#α) :=
+instance instMultiGeachComplete : Complete 𝜿(𝗚𝗲(ts)) ((MultiGeachConfluentFrameClass.{u} ts)#α) :=
   instComplete_of_mem_canonicalFrame (MultiGeachConfluentFrameClass ts) $ by
     apply multiGeachConfluent_CanonicalFrame;
     tauto;
