@@ -229,10 +229,10 @@ notation "𝐊𝐃" => Modal.KD
 instance : System.KD (𝐊𝐃 : Hilbert α) where
   D _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
 
-protected abbrev KD₂ : Hilbert α := 𝝂(𝗗(⊥))
-notation "𝐊𝐃(⊥)" => Modal.KD₂
-instance : System.HasAxiomD₂ (𝐊𝐃(⊥) : Hilbert α) where
-  D₂ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
+protected abbrev KP : Hilbert α := 𝝂(𝗣)
+notation "𝐊𝐏" => Modal.KP
+instance : System.HasAxiomP (𝐊𝐏 : Hilbert α) where
+  P := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
 
 protected abbrev KTB : Hilbert α := 𝝂(𝗧 ∪ 𝗕)
 notation "𝐊𝐓𝐁" => Modal.KTB
@@ -415,17 +415,17 @@ lemma K4_weakerThan_Grz : (𝐊𝟒 : Hilbert α) ≤ₛ 𝐆𝐫𝐳 := by
   . obtain ⟨_, _, rfl⟩ := hGrz; exact axiomFour!;
 
 
-lemma KD_weakerThan_KD₂ : (𝐊𝐃 : Hilbert α) ≤ₛ 𝐊𝐃(⊥) := normal_weakerThan_of_maxm $ by
+lemma KD_weakerThan_KP : (𝐊𝐃 : Hilbert α) ≤ₛ 𝐊𝐏 := normal_weakerThan_of_maxm $ by
   rintro p (⟨p, q, rfl⟩ | ⟨p, rfl⟩);
   . exact axiomK!;
   . exact axiomD!;
 
-lemma KD₂_weakerThan_KD : (𝐊𝐃(⊥) : Hilbert α) ≤ₛ 𝐊𝐃 := normal_weakerThan_of_maxm $ by
+lemma KP_weakerThan_KD : (𝐊𝐏 : Hilbert α) ≤ₛ 𝐊𝐃 := normal_weakerThan_of_maxm $ by
   rintro p (⟨p, q, rfl⟩ | ⟨_, rfl⟩);
   . exact axiomK!;
-  . exact axiomD₂!;
+  . exact axiomP!;
 
-lemma KD_equiv_KD₂ : (𝐊𝐃 : Hilbert α) =ₛ 𝐊𝐃(⊥) := Equiv.antisymm_iff.mpr ⟨KD_weakerThan_KD₂, KD₂_weakerThan_KD⟩
+lemma KD_equiv_KP : (𝐊𝐃 : Hilbert α) =ₛ 𝐊𝐏 := Equiv.antisymm_iff.mpr ⟨KD_weakerThan_KP, KP_weakerThan_KD⟩
 
 
 lemma GL_weakerThan_K4Loeb : (𝐆𝐋 : Hilbert α) ≤ₛ 𝐊𝟒(𝐋) := by
@@ -506,11 +506,8 @@ lemma Triv_weakerThan_S5Grz : (𝐓𝐫𝐢𝐯 : Hilbert α) ≤ₛ 𝐒𝟓�
   . exact axiomT!;
   . exact axiomTc!;
 
-lemma S5Grz_equiv_Triv : (𝐒𝟓𝐆𝐫𝐳 : Hilbert α) =ₛ 𝐓𝐫𝐢𝐯 := by
-  apply Equiv.antisymm_iff.mpr;
-  constructor;
-  . exact S5Grz_weakerThan_Triv;
-  . exact Triv_weakerThan_S5Grz;
+lemma S5Grz_equiv_Triv : (𝐒𝟓𝐆𝐫𝐳 : Hilbert α) =ₛ 𝐓𝐫𝐢𝐯
+  := Equiv.antisymm_iff.mpr ⟨S5Grz_weakerThan_Triv, Triv_weakerThan_S5Grz⟩
 
 end
 

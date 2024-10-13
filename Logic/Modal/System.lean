@@ -32,8 +32,8 @@ class HasAxiomT where
 class HasAxiomD where
   D (p : F) : 𝓢 ⊢ Axioms.D p
 
-class HasAxiomD₂ where
-  D₂ : 𝓢 ⊢ Axioms.D₂
+class HasAxiomP where
+  P : 𝓢 ⊢ Axioms.P
 
 class HasAxiomB where
   B (p : F) : 𝓢 ⊢ Axioms.B p
@@ -536,35 +536,35 @@ instance (Γ : Context F 𝓢) : HasAxiomD Γ := ⟨fun _ ↦ Context.of axiomD�
 -- TODO: move
 def notbot : 𝓢 ⊢ ∼⊥ := neg_equiv'.mpr (impId ⊥)
 
-private def D₂_of_D : 𝓢 ⊢ Axioms.D₂ := by
+private def P_of_D : 𝓢 ⊢ Axioms.P := by
   have : 𝓢 ⊢ ∼∼□(∼⊥) := dni' $ nec notbot;
   have : 𝓢 ⊢ ∼◇⊥ := (contra₀' $ and₁' diaDuality) ⨀ this;
   exact (contra₀' axiomD) ⨀ this;
-instance : HasAxiomD₂ 𝓢 := ⟨D₂_of_D⟩
+instance : HasAxiomP 𝓢 := ⟨P_of_D⟩
 
 end AxiomD
 
 
-section AxiomD₂
+section AxiomP
 
-variable [HasAxiomD₂ 𝓢]
+variable [HasAxiomP 𝓢]
 
-def axiomD₂ : 𝓢 ⊢ ∼□⊥  := HasAxiomD₂.D₂
-@[simp] lemma axiomD₂! : 𝓢 ⊢! ∼□⊥ := ⟨axiomD₂⟩
+def axiomP : 𝓢 ⊢ ∼□⊥  := HasAxiomP.P
+@[simp] lemma axiomP! : 𝓢 ⊢! ∼□⊥ := ⟨axiomP⟩
 
-instance (Γ : FiniteContext F 𝓢) : HasAxiomD₂ Γ := ⟨FiniteContext.of axiomD₂⟩
-instance (Γ : Context F 𝓢) : HasAxiomD₂ Γ := ⟨Context.of axiomD₂⟩
+instance (Γ : FiniteContext F 𝓢) : HasAxiomP Γ := ⟨FiniteContext.of axiomP⟩
+instance (Γ : Context F 𝓢) : HasAxiomP Γ := ⟨Context.of axiomP⟩
 
-private def D_of_D₂ : 𝓢 ⊢ Axioms.D p := by
+private def D_of_P : 𝓢 ⊢ Axioms.D p := by
   have : 𝓢 ⊢ p ➝ (∼p ➝ ⊥) := impTrans'' dni (and₁' neg_equiv);
   have : 𝓢 ⊢ □p ➝ □(∼p ➝ ⊥) := implyBoxDistribute' this;
   have : 𝓢 ⊢ □p ➝ (□(∼p) ➝ □⊥) := impTrans'' this axiomK;
   have : 𝓢 ⊢ □p ➝ (∼□⊥ ➝ ∼□(∼p)) := impTrans'' this contra₀;
-  have : 𝓢 ⊢ □p ➝ ∼□(∼p) := impSwap' this ⨀ axiomD₂;
+  have : 𝓢 ⊢ □p ➝ ∼□(∼p) := impSwap' this ⨀ axiomP;
   exact impTrans'' this (and₂' diaDuality);
-instance : HasAxiomD 𝓢 := ⟨fun _ ↦ D_of_D₂⟩
+instance : HasAxiomD 𝓢 := ⟨fun _ ↦ D_of_P⟩
 
-end AxiomD₂
+end AxiomP
 
 
 def axiomFour [HasAxiomFour 𝓢] : 𝓢 ⊢ □p ➝ □□p := HasAxiomFour.Four _

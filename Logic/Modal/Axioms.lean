@@ -31,12 +31,10 @@ abbrev D.set [Dia F] : Set F := { Axioms.D p | (p) }
 notation:max "𝗗" => D.set
 
 
-/-- Alternative form of axiom `𝗗`. In sight of provability logic, this can be seen as consistency of theory. -/
-protected abbrev D₂ : F := ∼(□⊥)
-abbrev D₂.set : Set F := { Axioms.D₂ | }
-notation:max "𝗗(⊥)" => D₂.set
-
-@[simp] lemma D₂.set.def : 𝗗(⊥) = {(∼(□⊥) : F)} := by ext; simp;
+protected abbrev P : F := ∼(□⊥)
+abbrev P.set : Set F := { Axioms.P | }
+notation:max "𝗣" => P.set
+@[simp] lemma P.set.def : 𝗣 = {(∼(□⊥) : F)} := by ext; simp;
 
 
 protected abbrev Four := □p ➝ □□p
