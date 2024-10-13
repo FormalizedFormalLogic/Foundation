@@ -292,7 +292,7 @@ def characterizability_union_frameclass_of_theory {T₁ T₂ : Theory α}
 abbrev FrameClassOfHilbert (Λ : Hilbert α) : FrameClass.Dep α := 𝔽(Λ.theorems)
 notation "𝔽(" Λ ")"  => FrameClassOfHilbert Λ
 
-instance {Ax : Theory α} {𝔽 : FrameClass} [defi : 𝔽(Ax).DefinedBy 𝔽] : 𝔽(𝝂(Ax)).DefinedBy 𝔽 where
+instance {Ax : Theory α} {𝔽 : FrameClass} [defi : 𝔽(Ax).DefinedBy 𝔽] : 𝔽(𝜿(Ax)).DefinedBy 𝔽 where
   define := by
     simp only [Hilbert.theorems, System.theory, Semantics.RealizeSet.setOf_iff, ValidOnFrame.models_iff, Set.mem_setOf_eq];
     intro F;
@@ -319,7 +319,7 @@ instance {Ax : Theory α} {𝔽 : FrameClass} [defi : 𝔽(Ax).DefinedBy 𝔽] :
         | exact Formula.Kripke.ValidOnFrame.elimContra;
   nonempty := defi.nonempty
 
-instance {Ax : Theory α} {𝔽 : FrameClass} [char : 𝔽(Ax).Characteraizable 𝔽] : 𝔽(𝝂(Ax)).Characteraizable 𝔽 where
+instance {Ax : Theory α} {𝔽 : FrameClass} [char : 𝔽(Ax).Characteraizable 𝔽] : 𝔽(𝜿(Ax)).Characteraizable 𝔽 where
   characterize := by
     simp only [Hilbert.theorems, System.theory, Semantics.RealizeSet.setOf_iff, ValidOnFrame.models_iff, Set.mem_setOf_eq];
     intro F hF p hp;
@@ -343,7 +343,7 @@ instance {Ax : Theory α} {𝔽 : FrameClass} [char : 𝔽(Ax).Characteraizable 
 abbrev FiniteFrameClassOfHilbert (Λ : Hilbert α) : FiniteFrameClass.Dep α := 𝔽(Λ)ꟳ
 notation "𝔽ꟳ(" Λ ")"  => FiniteFrameClassOfHilbert Λ
 
-instance {Ax : Set (Formula α)} {𝔽 : FiniteFrameClass}  [defi : 𝔽ꟳ(Ax).DefinedBy 𝔽] : 𝔽ꟳ(𝝂(Ax)).DefinedBy 𝔽 where
+instance {Ax : Set (Formula α)} {𝔽 : FiniteFrameClass}  [defi : 𝔽ꟳ(Ax).DefinedBy 𝔽] : 𝔽ꟳ(𝜿(Ax)).DefinedBy 𝔽 where
   define := by
     simp only [Hilbert.theorems, System.theory, Semantics.RealizeSet.setOf_iff, ValidOnFrame.models_iff, Set.mem_setOf_eq];
     intro F;
@@ -370,7 +370,7 @@ instance {Ax : Set (Formula α)} {𝔽 : FiniteFrameClass}  [defi : 𝔽ꟳ(Ax).
         | exact Formula.Kripke.ValidOnFrame.elimContra;
   nonempty := defi.nonempty
 
-instance {Ax : Set (Formula α)} {𝔽 : FiniteFrameClass} [char : 𝔽ꟳ(Ax).Characteraizable 𝔽] : 𝔽ꟳ(𝝂(Ax)).Characteraizable 𝔽 where
+instance {Ax : Set (Formula α)} {𝔽 : FiniteFrameClass} [char : 𝔽ꟳ(Ax).Characteraizable 𝔽] : 𝔽ꟳ(𝜿(Ax)).Characteraizable 𝔽 where
   characterize := by
     simp only [Hilbert.theorems, System.theory, Semantics.RealizeSet.setOf_iff, ValidOnFrame.models_iff, Set.mem_setOf_eq];
     intro F hF p hp;
@@ -468,7 +468,7 @@ instance empty_axiom_definability : 𝔽((∅ : Theory α)).DefinedBy AllFrameCl
   define := by simp;
   nonempty :=  ⟨⟨PUnit,  λ _ _ => True⟩, trivial⟩
 
-private instance K_definability' : 𝔽((𝝂(∅) : Hilbert α)).DefinedBy AllFrameClass := inferInstance
+private instance K_definability' : 𝔽((𝜿(∅) : Hilbert α)).DefinedBy AllFrameClass := inferInstance
 
 instance K_definability : 𝔽((𝐊 : Hilbert α)).DefinedBy AllFrameClass := by
   convert K_definability';
@@ -572,17 +572,17 @@ theorem K_strictlyWeakerThan_K5 : (𝐊 : Hilbert α) <ₛ 𝐊𝟓 := by
 section
 
 variable {Ax₁ Ax₂ : Theory α} (𝔽₁ 𝔽₂ : FrameClass)
-  [sound₁ : Sound 𝝂Ax₁ (𝔽₁#α)] [sound₂ : Sound 𝝂Ax₂ (𝔽₂#α)]
-  [complete₁ : Complete 𝝂Ax₁ (𝔽₁#α)] [complete₂ : Complete 𝝂Ax₂ (𝔽₂#α)]
+  [sound₁ : Sound 𝜿Ax₁ (𝔽₁#α)] [sound₂ : Sound 𝜿Ax₂ (𝔽₂#α)]
+  [complete₁ : Complete 𝜿Ax₁ (𝔽₁#α)] [complete₂ : Complete 𝜿Ax₂ (𝔽₂#α)]
 
-lemma weakerThan_of_subset_FrameClass (h𝔽 : 𝔽₂ ⊆ 𝔽₁) : 𝝂Ax₁ ≤ₛ 𝝂Ax₂ := by
+lemma weakerThan_of_subset_FrameClass (h𝔽 : 𝔽₂ ⊆ 𝔽₁) : 𝜿Ax₁ ≤ₛ 𝜿Ax₂ := by
   apply System.weakerThan_iff.mpr;
   intro p hp;
   apply complete₂.complete;
   intro F hF;
   exact sound₁.sound hp $ h𝔽 hF;
 
-lemma equiv_of_eq_FrameClass (h𝔽 : 𝔽₁ = 𝔽₂) : 𝝂Ax₁ =ₛ 𝝂Ax₂ := by
+lemma equiv_of_eq_FrameClass (h𝔽 : 𝔽₁ = 𝔽₂) : 𝜿Ax₁ =ₛ 𝜿Ax₂ := by
   apply System.Equiv.antisymm_iff.mpr;
   constructor;
   . apply weakerThan_of_subset_FrameClass 𝔽₁ 𝔽₂; subst_vars; rfl;

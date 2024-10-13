@@ -144,7 +144,7 @@ variable {Ax : Theory α}
 
 open System
 
-protected abbrev Geach (l : List GeachTaple) : Hilbert α := 𝝂(𝗚𝗲(l))
+protected abbrev Geach (l : List GeachTaple) : Hilbert α := 𝜿(𝗚𝗲(l))
 notation "𝐆𝐞(" l ")" => Modal.Geach l
 
 namespace Geach

@@ -36,9 +36,9 @@ instance : Sound 𝐕𝐞𝐫 (IsolatedFrameClass#α) := inferInstance
 
 instance : System.Consistent (𝐕𝐞𝐫 : Hilbert α) := inferInstance
 
-lemma isolated_CanonicalFrame {Ax : Theory α} (h : 𝗩𝗲𝗿 ⊆ Ax) [System.Consistent 𝝂Ax] : Isolated (CanonicalFrame 𝝂Ax) := by
+lemma isolated_CanonicalFrame {Ax : Theory α} (h : 𝗩𝗲𝗿 ⊆ Ax) [System.Consistent 𝜿Ax] : Isolated (CanonicalFrame 𝜿Ax) := by
   intro x y rxy;
-  have : (CanonicalModel 𝝂Ax) ⊧ □⊥ := iff_valid_on_canonicalModel_deducible.mpr $ Normal.maxm! (by aesop);
+  have : (CanonicalModel 𝜿Ax) ⊧ □⊥ := iff_valid_on_canonicalModel_deducible.mpr $ Normal.maxm! (by aesop);
   exact this x _ rxy;
 
 instance : Complete 𝐕𝐞𝐫 (IsolatedFrameClass.{u}#α) := instComplete_of_mem_canonicalFrame IsolatedFrameClass $ by
