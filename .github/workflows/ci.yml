@@ -7,11 +7,6 @@ on:
   pull_request:
   workflow_dispatch:
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -23,35 +18,3 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: leanprover/lean-action@v1
-      - uses: ts-graphviz/setup-graphviz@v2
-      - name: Generate import graph
-        run: |
-          lake exe graph
-          dot -Tpng ./import_graph.dot -o import_graph.png
-          dot -Tpdf ./import_graph.dot -o import_graph.pdf
-      - name: Upload import graph
-        uses: actions/upload-artifact@v4
-        if: github.ref == 'refs/heads/master'
-        with:
-          name: import_graph
-          path: |
-            ./import_graph.dot
-            ./import_graph.png
-            ./import_graph.pdf
-
-  deploy:
-    name: Deploy to GitHub Pages
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master'
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    needs:
-      - build
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          name: import_graph
-          path: ./_site/assets/import_graph/
-      - uses: actions/deploy-pages@v4
-        id: deployment
