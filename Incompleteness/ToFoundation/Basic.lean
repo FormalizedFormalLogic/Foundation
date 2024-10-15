@@ -1,4 +1,4 @@
-import Logic.FirstOrder.Arith.Hierarchy
+import Foundation.FirstOrder.Arith.Hierarchy
 
 namespace Fin
 

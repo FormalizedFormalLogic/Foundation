@@ -1,18 +1,11 @@
 name: CI
 
-# https://github.com/FormalizedFormalLogic/Foundation/blob/master/.github/workflows/ci.yml
-
 on:
   push:
     branches:
       - "master"
   pull_request:
   workflow_dispatch:
-
-permissions:
-  contents: read
-  pages: write
-  id-token: write
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -24,74 +17,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install elan
-        run: |
-          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain none
-          echo "$HOME/.elan/bin" >> $GITHUB_PATH
-      - name: Check toolchain version
-        run: |
-          elan --version
-          lake --version
-          lean --version
-      - uses: actions/cache@v4
-        with:
-          path: .lake
-          key: lake-${{ runner.os }}-${{ hashFiles('lean-toolchain') }}
-          restore-keys: lake-${{ runner.os }}-${{ hashFiles('lean-toolchain') }}
-
-      - name: Fetching cache
-        run: lake -R -Kenv=ci exe cache get
-
-      - name: Build project
-        run: lake -R -Kenv=ci build
-
-      - uses: ts-graphviz/setup-graphviz@v2
-      - name: Generate import graph
-        run: |
-          lake -R -Kenv=ci exe graph
-          dot -Tpng ./import_graph.dot -o import_graph.png
-          dot -Tpdf ./import_graph.dot -o import_graph.pdf
-      - name: Upload import graph
-        uses: actions/upload-artifact@v4
-        if: github.ref == 'refs/heads/master'
-        with:
-          name: import_graph
-          path: |
-            ./import_graph.dot
-            ./import_graph.png
-            ./import_graph.pdf
-
-      # Generate document only master branch
-      - name: Generate document
-        if: github.ref == 'refs/heads/master'
-        run: lake -R -Kenv=ci build Logic:docs Arithmetization:docs Incompleteness:docs
-      - name: Upload document
-        uses: actions/upload-artifact@v4
-        if: github.ref == 'refs/heads/master'
-        with:
-          name: docs
-          path: ./.lake/build/doc
-
-  deploy:
-    name: Deploy to GitHub Pages
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master'
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    needs:
-      - build
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          name: docs
-          path: ./_site/docs/
-      - uses: actions/download-artifact@v4
-        with:
-          name: import_graph
-          path: ./_site/assets/import_graph/
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: ./_site
-      - uses: actions/deploy-pages@v4
-        id: deployment
+      - uses: leanprover/lean-action@v1

@@ -1,5 +1,5 @@
 import Incompleteness.Arith.D3
-import Logic.Logic.HilbertStyle.Supplemental
+import Foundation.Logic.HilbertStyle.Supplemental
 import Incompleteness.ToFoundation.Basic
 
 noncomputable section

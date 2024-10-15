@@ -1,5 +1,5 @@
-import Logic.FirstOrder.Arith.Theory
-import Logic.Logic.HilbertStyle.Supplemental
+import Foundation.FirstOrder.Arith.Theory
+import Foundation.Logic.HilbertStyle.Supplemental
 
 namespace LO.FirstOrder
 

@@ -1,6 +1,6 @@
 import Incompleteness.Arith.DC
 import Incompleteness.DC.Basic
-import Logic.Modal.Hilbert
+import Foundation.Modal.Hilbert
 
 namespace LO
 
