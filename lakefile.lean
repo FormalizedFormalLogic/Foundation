@@ -1,12 +1,12 @@
 import Lake
 open Lake DSL
 
-package «logic» {
+package foundation {
   -- add package configuration options here
 }
 
 @[default_target]
-lean_lib «Logic» {
+lean_lib Foundation {
   -- add library configuration options here
 }
 
