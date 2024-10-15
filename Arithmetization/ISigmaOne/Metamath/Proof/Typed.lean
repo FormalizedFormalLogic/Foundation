@@ -1,6 +1,6 @@
 import Arithmetization.ISigmaOne.Metamath.Formula.Typed
 import Arithmetization.ISigmaOne.Metamath.Proof.Derivation
-import Logic.Logic.HilbertStyle.Supplemental
+import Foundation.Logic.HilbertStyle.Supplemental
 
 /-!
 

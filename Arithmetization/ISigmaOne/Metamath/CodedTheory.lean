@@ -1,6 +1,6 @@
 import Arithmetization.ISigmaOne.Metamath.Coding
 import Arithmetization.ISigmaOne.Metamath.Proof.Typed
-import Logic.FirstOrder.Arith.PeanoMinus
+import Foundation.FirstOrder.Arith.PeanoMinus
 
 namespace LO.FirstOrder.Semiformula
 

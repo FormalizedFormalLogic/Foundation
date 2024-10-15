@@ -1,5 +1,5 @@
-import Logic.FirstOrder.Arith.Representation
-import Logic.FirstOrder.Arith.PeanoMinus
+import Foundation.FirstOrder.Arith.Representation
+import Foundation.FirstOrder.Arith.PeanoMinus
 
 instance [Zero α] : Nonempty α := ⟨0⟩
 
