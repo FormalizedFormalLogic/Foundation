@@ -1,6 +1,6 @@
 import Foundation.IntProp.Deduction
 import Foundation.Vorspiel.Order
-import Foundation.Logic.Lindenbaum
+import Foundation.Logic.LindenbaumAlgebra
 
 namespace LO.IntProp
 
@@ -127,13 +127,13 @@ instance : Sound Λ (mod Λ) := ⟨sound⟩
 
 section
 
-open System.Lindenbaum
+open System.LindenbaumAlgebra
 
 variable (Λ)
 variable [System.Consistent Λ]
 
 def lindenbaum : HeytingSemantics α where
-  Algebra := System.Lindenbaum Λ
+  Algebra := System.LindenbaumAlgebra Λ
   valAtom a := ⟦.atom a⟧
 
 lemma lindenbaum_val_eq : (lindenbaum Λ ⊧ₕ p) = ⟦p⟧ := by

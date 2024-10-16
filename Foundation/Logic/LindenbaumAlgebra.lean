@@ -29,48 +29,48 @@ def ProvablyEquivalent.setoid [System.Minimal 𝓢] : Setoid F where
   r := (· ≡ ·)
   iseqv := { refl := .refl _, symm := .symm, trans := .trans }
 
-abbrev Lindenbaum [System.Minimal 𝓢] := Quotient (ProvablyEquivalent.setoid 𝓢)
+abbrev LindenbaumAlgebra [System.Minimal 𝓢] := Quotient (ProvablyEquivalent.setoid 𝓢)
 
-namespace Lindenbaum
+namespace LindenbaumAlgebra
 
 variable [System.Minimal 𝓢]
 
-lemma of_eq_of {p q : F} : (⟦p⟧ : Lindenbaum 𝓢) = ⟦q⟧ ↔ p ≡ q := Quotient.eq (r := ProvablyEquivalent.setoid 𝓢)
+lemma of_eq_of {p q : F} : (⟦p⟧ : LindenbaumAlgebra 𝓢) = ⟦q⟧ ↔ p ≡ q := Quotient.eq (r := ProvablyEquivalent.setoid 𝓢)
 
-instance : LE (Lindenbaum 𝓢) :=
+instance : LE (LindenbaumAlgebra 𝓢) :=
   ⟨Quotient.lift₂ (fun p q ↦ 𝓢 ⊢! p ➝ q) fun p₁ q₁ p₂ q₂ hp hq ↦ by simp only [eq_iff_iff, imp_replace_iff!' hp hq]⟩
 
-lemma le_def {p q : F} : (⟦p⟧ : Lindenbaum 𝓢) ≤ ⟦q⟧ ↔ 𝓢 ⊢! p ➝ q := iff_of_eq rfl
+lemma le_def {p q : F} : (⟦p⟧ : LindenbaumAlgebra 𝓢) ≤ ⟦q⟧ ↔ 𝓢 ⊢! p ➝ q := iff_of_eq rfl
 
-instance : Top (Lindenbaum 𝓢) := ⟨⟦⊤⟧⟩
+instance : Top (LindenbaumAlgebra 𝓢) := ⟨⟦⊤⟧⟩
 
-instance : Bot (Lindenbaum 𝓢) := ⟨⟦⊥⟧⟩
+instance : Bot (LindenbaumAlgebra 𝓢) := ⟨⟦⊥⟧⟩
 
-instance : Inf (Lindenbaum 𝓢) := ⟨Quotient.lift₂ (fun p q ↦ ⟦p ⋏ q⟧) fun p₁ q₁ p₂ q₂ hp hq ↦ by
+instance : Inf (LindenbaumAlgebra 𝓢) := ⟨Quotient.lift₂ (fun p q ↦ ⟦p ⋏ q⟧) fun p₁ q₁ p₂ q₂ hp hq ↦ by
   simpa only [Quotient.eq] using and_replace_iff! hp hq⟩
 
-instance : Sup (Lindenbaum 𝓢) := ⟨Quotient.lift₂ (fun p q ↦ ⟦p ⋎ q⟧) fun p₁ q₁ p₂ q₂ hp hq ↦ by
+instance : Sup (LindenbaumAlgebra 𝓢) := ⟨Quotient.lift₂ (fun p q ↦ ⟦p ⋎ q⟧) fun p₁ q₁ p₂ q₂ hp hq ↦ by
   simpa only [Quotient.eq] using or_replace_iff! hp hq⟩
 
-instance : HImp (Lindenbaum 𝓢) := ⟨Quotient.lift₂ (fun p q ↦ ⟦p ➝ q⟧) fun p₁ q₁ p₂ q₂ hp hq ↦ by
+instance : HImp (LindenbaumAlgebra 𝓢) := ⟨Quotient.lift₂ (fun p q ↦ ⟦p ➝ q⟧) fun p₁ q₁ p₂ q₂ hp hq ↦ by
   simpa only [Quotient.eq] using imp_replace_iff! hp hq⟩
 
-instance : HasCompl (Lindenbaum 𝓢) := ⟨Quotient.lift (fun p ↦ ⟦∼p⟧) fun p₁ p₂ hp ↦ by
+instance : HasCompl (LindenbaumAlgebra 𝓢) := ⟨Quotient.lift (fun p ↦ ⟦∼p⟧) fun p₁ p₂ hp ↦ by
   simpa only [Quotient.eq] using neg_replace_iff'! hp⟩
 
-lemma top_def : (⊤ : Lindenbaum 𝓢) = ⟦⊤⟧ := rfl
+lemma top_def : (⊤ : LindenbaumAlgebra 𝓢) = ⟦⊤⟧ := rfl
 
-lemma bot_def : (⊥ : Lindenbaum 𝓢) = ⟦⊥⟧ := rfl
+lemma bot_def : (⊥ : LindenbaumAlgebra 𝓢) = ⟦⊥⟧ := rfl
 
-lemma inf_def (p q : F) : (⟦p⟧ : Lindenbaum 𝓢) ⊓ ⟦q⟧ = ⟦p ⋏ q⟧ := rfl
+lemma inf_def (p q : F) : (⟦p⟧ : LindenbaumAlgebra 𝓢) ⊓ ⟦q⟧ = ⟦p ⋏ q⟧ := rfl
 
-lemma sup_def (p q : F) : (⟦p⟧ : Lindenbaum 𝓢) ⊔ ⟦q⟧ = ⟦p ⋎ q⟧ := rfl
+lemma sup_def (p q : F) : (⟦p⟧ : LindenbaumAlgebra 𝓢) ⊔ ⟦q⟧ = ⟦p ⋎ q⟧ := rfl
 
-lemma himp_def (p q : F) : (⟦p⟧ : Lindenbaum 𝓢) ⇨ ⟦q⟧ = ⟦p ➝ q⟧ := rfl
+lemma himp_def (p q : F) : (⟦p⟧ : LindenbaumAlgebra 𝓢) ⇨ ⟦q⟧ = ⟦p ➝ q⟧ := rfl
 
-lemma compl_def (p : F) : (⟦p⟧ : Lindenbaum 𝓢)ᶜ = ⟦∼p⟧ := rfl
+lemma compl_def (p : F) : (⟦p⟧ : LindenbaumAlgebra 𝓢)ᶜ = ⟦∼p⟧ := rfl
 
-instance : GeneralizedHeytingAlgebra (Lindenbaum 𝓢) where
+instance : GeneralizedHeytingAlgebra (LindenbaumAlgebra 𝓢) where
   le_refl p := by
     induction' p using Quotient.ind with p
     simp [le_def]
@@ -130,10 +130,10 @@ instance : GeneralizedHeytingAlgebra (Lindenbaum 𝓢) where
 
 variable {𝓢}
 
-lemma provable_iff_eq_top {p : F} : 𝓢 ⊢! p ↔ (⟦p⟧ : Lindenbaum 𝓢) = ⊤ := by
+lemma provable_iff_eq_top {p : F} : 𝓢 ⊢! p ↔ (⟦p⟧ : LindenbaumAlgebra 𝓢) = ⊤ := by
   simp [top_def, provable_iff_provablyEquivalent_verum]; rfl
 
-lemma inconsistent_iff_trivial : Inconsistent 𝓢 ↔ (∀ p : Lindenbaum 𝓢, p = ⊤) := by
+lemma inconsistent_iff_trivial : Inconsistent 𝓢 ↔ (∀ p : LindenbaumAlgebra 𝓢, p = ⊤) := by
   simp [Inconsistent, provable_iff_eq_top]
   constructor
   · intro h p;
@@ -141,24 +141,24 @@ lemma inconsistent_iff_trivial : Inconsistent 𝓢 ↔ (∀ p : Lindenbaum 𝓢,
     simp [h]
   · intro h f; simp [h]
 
-lemma consistent_iff_nontrivial : Consistent 𝓢 ↔ Nontrivial (Lindenbaum 𝓢) := by
+lemma consistent_iff_nontrivial : Consistent 𝓢 ↔ Nontrivial (LindenbaumAlgebra 𝓢) := by
   apply not_iff_not.mp
   simp [not_consistent_iff_inconsistent, nontrivial_iff, inconsistent_iff_trivial]
   constructor
   · intro h p q; simp [h]
   · intro h p; exact h p ⊤
 
-instance nontrivial_of_consistent [Consistent 𝓢] : Nontrivial (Lindenbaum 𝓢) := consistent_iff_nontrivial.mp inferInstance
+instance nontrivial_of_consistent [Consistent 𝓢] : Nontrivial (LindenbaumAlgebra 𝓢) := consistent_iff_nontrivial.mp inferInstance
 
-end Lindenbaum
+end LindenbaumAlgebra
 
 section intuitionistic
 
-open Lindenbaum
+open LindenbaumAlgebra
 
 variable [System.Intuitionistic 𝓢]
 
-instance Lindenbaum.heyting : HeytingAlgebra (Lindenbaum 𝓢) where
+instance LindenbaumAlgebra.heyting : HeytingAlgebra (LindenbaumAlgebra 𝓢) where
   bot_le p := by
     induction' p using Quotient.ind with p
     simp only [bot_def, le_def]
@@ -172,11 +172,11 @@ end intuitionistic
 
 section classical
 
-open Lindenbaum
+open LindenbaumAlgebra
 
 variable [System.Classical 𝓢]
 
-instance Lindenbaum.boolean : BooleanAlgebra (Lindenbaum 𝓢) where
+instance LindenbaumAlgebra.boolean : BooleanAlgebra (LindenbaumAlgebra 𝓢) where
   inf_compl_le_bot p := by
     induction' p using Quotient.ind with p
     simp only [compl_def, inf_def, bot_def, le_def, intro_bot_of_and!]
