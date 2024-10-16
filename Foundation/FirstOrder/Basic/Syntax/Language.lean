@@ -3,7 +3,7 @@ import Foundation.Logic.System
 /-!
 # Language of first-order logic
 
-This file defines the language of first-order Foundation.
+This file defines the language of first-order logic.
 
 - `LO.FirstOrder.Language.empty` is the empty language.
 - `LO.FirstOrder.Language.constant C` is a language with only constants of the element `C`.

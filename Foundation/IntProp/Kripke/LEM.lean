@@ -4,7 +4,7 @@ import Foundation.IntProp.Kripke.Semantics
   # Counterexample to the Law of Excluded Middle in Intuitionistic Logic
 
   ## Theorems
-  - `noLEM`: LEM is not always valid in intuitionistic Foundation.
+  - `noLEM`: LEM is not always valid in intuitionistic logic.
 -/
 
 namespace LO.IntProp.Kripke
@@ -47,7 +47,7 @@ lemma noLEM_on_frameclass : ∃ (p : Formula α), ¬((Kripke.FrameClassOfHilbert
     . simp [ValidOnModel, Satisfies];
 
 /--
-  Law of Excluded Middle is not always provable in intuitionistic Foundation.
+  Law of Excluded Middle is not always provable in intuitionistic logic.
 -/
 theorem noLEM : ∃ (p : Formula α), 𝐈𝐧𝐭 ⊬ p ⋎ ∼p := by
   obtain ⟨p, hp⟩ := noLEM_on_frameclass (α := α);
@@ -57,7 +57,7 @@ theorem noLEM : ∃ (p : Formula α), 𝐈𝐧𝐭 ⊬ p ⋎ ∼p := by
   contradiction;
 
 /--
-  Intuitionistic logic is proper weaker than classical Foundation.
+  Intuitionistic logic is proper weaker than classical logic.
 -/
 theorem Int_strictly_weaker_than_Cl : (𝐈𝐧𝐭 : Hilbert α) <ₛ 𝐂𝐥 := by
   constructor;

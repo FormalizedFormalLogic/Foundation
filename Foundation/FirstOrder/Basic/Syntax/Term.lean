@@ -3,7 +3,7 @@ import Foundation.FirstOrder.Basic.Syntax.Language
 /-!
 # Terms of first-order logic
 
-This file defines the terms of first-order Foundation.
+This file defines the terms of first-order logic.
 
 The bounded variables are denoted by `#x` for `x : Fin n`, and free variables are denoted by `&x` for `x : ξ`.
 `t : Semiterm L ξ n` is a (semi-)term of language `L` with bounded variables of `Fin n` and free variables of `ξ`.

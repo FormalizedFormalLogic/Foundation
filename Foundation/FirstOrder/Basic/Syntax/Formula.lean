@@ -3,7 +3,7 @@ import Foundation.FirstOrder.Basic.Syntax.Term
 /-!
 # Formulas of first-order logic
 
-This file defines the formulas of first-order Foundation.
+This file defines the formulas of first-order logic.
 
 `p : Semiformula L ξ n` is a (semi-)formula of language `L` with bounded variables of `Fin n` and free variables of `ξ`.
 The quantification is represented by de Bruijn index.

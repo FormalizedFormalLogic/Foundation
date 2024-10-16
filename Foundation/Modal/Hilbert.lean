@@ -133,7 +133,7 @@ noncomputable def inducition!
   | imply₂ => exact hImply₂
   | ec => exact hElimContra
 
-/-- Useful induction for normal modal Foundation. -/
+/-- Useful induction for normal modal logic. -/
 noncomputable def inducition_with_necOnly! [Λ.HasNecOnly]
   {motive  : (p : Formula α) → Λ ⊢! p → Prop}
   (hMaxm   : ∀ {p}, (h : p ∈ Ax(Λ)) → motive p ⟨maxm h⟩)
