@@ -1,6 +1,7 @@
 import Foundation.Logic.Disjunctive
 import Foundation.IntProp.Deduction
 import Foundation.Modal.Hilbert
+import Foundation.Modal.MDP
 
 namespace LO.Modal
 
