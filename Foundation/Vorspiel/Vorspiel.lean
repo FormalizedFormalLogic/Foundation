@@ -690,6 +690,20 @@ lemma remove_map_substet_map_remove [DecidableEq β] (f : α → β) (l : List �
 
 end remove
 
+lemma induction_with_singleton
+  {motive : List F → Prop}
+  (hnil : motive [])
+  (hsingle : ∀ a, motive [a])
+  (hcons : ∀ a as, as ≠ [] → motive as → motive (a :: as)) : ∀ as, motive as := by
+  intro as;
+  induction as with
+  | nil => exact hnil;
+  | cons a as ih => cases as with
+    | nil => exact hsingle a;
+    | cons b bs => exact hcons a (b :: bs) (by simp) ih;
+
+
+
 end List
 
 namespace Mathlib.Vector

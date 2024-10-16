@@ -406,6 +406,8 @@ end Axiomatized
 alias by_axm := Axiomatized.provable_axm
 alias wk! := Axiomatized.weakening!
 
+section axiomatized
+
 variable [Collection F S] [Collection F T] [Axiomatized S]
 
 def FiniteAxiomatizable (𝓢 : S) : Prop := ∃ 𝓕 : S, Collection.Finite 𝓕 ∧ 𝓕 ≈ 𝓢
@@ -416,9 +418,11 @@ lemma Consistent.of_subset {𝓢 𝓣 : S} (h𝓢 : Consistent 𝓢) (h : 𝓣 �
 lemma Inconsistent.of_supset {𝓢 𝓣 : S} (h𝓢 : Inconsistent 𝓢) (h : 𝓢 ⊆ 𝓣) : Inconsistent 𝓣 :=
   h𝓢.of_ge (Axiomatized.le_of_subset h)
 
+end axiomatized
+
 namespace StrongCut
 
-variable [StrongCut S T]
+variable [Collection F T] [StrongCut S T]
 
 lemma cut! {𝓢 : S} {𝓣 : T} {p : F} (H : 𝓢 ⊢!* Collection.set 𝓣) (hp : 𝓣 ⊢! p) : 𝓢 ⊢! p := by
   rcases hp with ⟨b⟩; exact ⟨StrongCut.cut H.get b⟩
@@ -429,15 +433,15 @@ def translation {𝓢 : S} {𝓣 : T} (B : 𝓢 ⊢* Collection.set 𝓣) : 𝓣
 
 end StrongCut
 
-def Subtheory.ofAxm [StrongCut S S] {𝓢₁ 𝓢₂ : S} (B : 𝓢₂ ⊢* Collection.set 𝓢₁) : 𝓢₁ ≼ 𝓢₂ := ⟨fun b ↦ StrongCut.cut B b⟩
+def Subtheory.ofAxm [Collection F S] [StrongCut S S] {𝓢₁ 𝓢₂ : S} (B : 𝓢₂ ⊢* Collection.set 𝓢₁) : 𝓢₁ ≼ 𝓢₂ := ⟨fun b ↦ StrongCut.cut B b⟩
 
-noncomputable def Subtheory.ofAxm! [StrongCut S S] {𝓢₁ 𝓢₂ : S} (B : 𝓢₂ ⊢!* Collection.set 𝓢₁) : 𝓢₁ ≼ 𝓢₂ := ⟨fun b ↦ StrongCut.cut B.get b⟩
+noncomputable def Subtheory.ofAxm! [Collection F S] [StrongCut S S] {𝓢₁ 𝓢₂ : S} (B : 𝓢₂ ⊢!* Collection.set 𝓢₁) : 𝓢₁ ≼ 𝓢₂ := ⟨fun b ↦ StrongCut.cut B.get b⟩
 
-def Subtheory.ofSubset {𝓢 𝓣 : S} (h : 𝓢 ⊆ 𝓣) : 𝓢 ≼ 𝓣 := ⟨wk h⟩
+def Subtheory.ofSubset [Collection F S] [Axiomatized S] {𝓢 𝓣 : S} (h : 𝓢 ⊆ 𝓣) : 𝓢 ≼ 𝓣 := ⟨wk h⟩
 
 variable (S)
 
-class Compact where
+class Compact [Collection F S] where
   φ {𝓢 : S} {f : F} : 𝓢 ⊢ f → S
   φPrf {𝓢 : S} {f : F} (b : 𝓢 ⊢ f) : φ b ⊢ f
   φ_subset {𝓢 : S} {f : F} (b : 𝓢 ⊢ f) : φ b ⊆ 𝓢
@@ -447,7 +451,7 @@ variable {S}
 
 namespace Compact
 
-variable [Compact S]
+variable [Collection F S] [Compact S]
 
 lemma finite_provable {𝓢 : S} (h : 𝓢 ⊢! f) : ∃ 𝓕 : S, 𝓕 ⊆ 𝓢 ∧ Collection.Finite 𝓕 ∧ 𝓕 ⊢! f := by
   rcases h with ⟨b⟩
@@ -535,7 +539,7 @@ end System
 
 section
 
-variable {S : Type*} {F : Type*} [LogicalConnective F] [System F S] {M : Type*} [Semantics F M]
+variable {S : Type*} {F : Type*} [System F S] {M : Type*} [Semantics F M]
 
 class Sound (𝓢 : S) (𝓜 : M) : Prop where
   sound : ∀ {f : F}, 𝓢 ⊢! f → 𝓜 ⊧ f
@@ -555,7 +559,7 @@ lemma not_provable_of_countermodel {p : F} (hp : ¬𝓜 ⊧ p) : 𝓢 ⊬ p :=
 lemma consistent_of_meaningful : Semantics.Meaningful 𝓜 → System.Consistent 𝓢 :=
   fun H ↦ ⟨fun h ↦ by rcases H with ⟨f, hf⟩; exact hf (Sound.sound (h f))⟩
 
-lemma consistent_of_model [Semantics.Bot M] : System.Consistent 𝓢 :=
+lemma consistent_of_model [LogicalConnective F] [Semantics.Bot M] (𝓜 : M) [Sound 𝓢 𝓜] : System.Consistent 𝓢 :=
   consistent_of_meaningful (𝓜 := 𝓜) inferInstance
 
 lemma realizeSet_of_prfSet {T : Set F} (b : 𝓢 ⊢!* T) : 𝓜 ⊧* T :=
@@ -565,11 +569,11 @@ end
 
 section
 
-variable [∀ 𝓜 : M, Semantics.Meaningful 𝓜] {𝓢 : S} {T : Set F} [Sound 𝓢 (Semantics.models M T)]
+variable {𝓢 : S} {T : Set F} [Sound 𝓢 (Semantics.models M T)]
 
 lemma consequence_of_provable {f : F} : 𝓢 ⊢! f → T ⊨[M] f := sound
 
-lemma consistent_of_satisfiable : Semantics.Satisfiable M T → System.Consistent 𝓢 :=
+lemma consistent_of_satisfiable [LogicalConnective F] [∀ 𝓜 : M, Semantics.Meaningful 𝓜] : Semantics.Satisfiable M T → System.Consistent 𝓢 :=
   fun H ↦ consistent_of_meaningful (Semantics.meaningful_iff_satisfiableSet.mp H)
 
 end
@@ -591,21 +595,23 @@ end
 
 section
 
-variable [∀ 𝓜 : M, Semantics.Meaningful 𝓜] {𝓢 : S} {T : Set F} [Complete 𝓢 (Semantics.models M T)]
+variable {𝓢 : S} {T : Set F} [Complete 𝓢 (Semantics.models M T)]
 
 lemma provable_of_consequence {f : F} : T ⊨[M] f → 𝓢 ⊢! f := complete
 
-lemma satisfiable_of_consistent : System.Consistent 𝓢 → Semantics.Satisfiable M T :=
+lemma provable_iff_consequence [Sound 𝓢 (Semantics.models M T)] {f : F} : T ⊨[M] f ↔ 𝓢 ⊢! f := ⟨complete, Sound.sound⟩
+
+variable [LogicalConnective F] [∀ 𝓜 : M, Semantics.Meaningful 𝓜]
+
+lemma satisfiable_of_consistent :
+    System.Consistent 𝓢 → Semantics.Satisfiable M T :=
   fun H ↦ Semantics.meaningful_iff_satisfiableSet.mpr (meaningful_of_consistent H)
 
-lemma inconsistent_of_unsatisfiable : ¬Semantics.Satisfiable M T → System.Inconsistent 𝓢 := by
+lemma inconsistent_of_unsatisfiable :
+    ¬Semantics.Satisfiable M T → System.Inconsistent 𝓢 := by
   contrapose; simpa [←System.not_consistent_iff_inconsistent] using satisfiable_of_consistent
 
-variable [Sound 𝓢 (Semantics.models M T)]
-
-lemma provable_iff_consequence {f : F} : T ⊨[M] f ↔ 𝓢 ⊢! f := ⟨complete, Sound.sound⟩
-
-lemma consistent_iff_satisfiable : System.Consistent 𝓢 ↔ Semantics.Satisfiable M T :=
+lemma consistent_iff_satisfiable [Sound 𝓢 (Semantics.models M T)] : System.Consistent 𝓢 ↔ Semantics.Satisfiable M T :=
   ⟨satisfiable_of_consistent, Sound.consistent_of_satisfiable⟩
 
 end
