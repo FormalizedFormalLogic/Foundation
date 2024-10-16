@@ -5,7 +5,7 @@ namespace LO.System
 
 section Systems
 
-variable {S F : Type*} [LogicalConnective F] [BasicModalLogicalConnective F] [System F S]
+variable {S F : Type*} [LogicalConnective F] [Box F] [Dia F] [System F S]
 variable (𝓢 : S)
 
 class HasDiaDuality where
@@ -102,7 +102,7 @@ end Systems
 section
 
 
-variable {F : Type*} [BasicModalLogicalConnective F][DecidableEq F]
+variable {F : Type*} [DecidableEq F] [LogicalConnective F] [Box F] [Dia F]
 variable {S : Type*} [System F S]
 variable {p q r : F} {Γ Δ : List F}
 
@@ -981,17 +981,6 @@ lemma contextual_nec! (h : Γ ⊢[𝓢]! p) : (□'Γ) ⊢[𝓢]! □p
   := provable_iff.mpr $ imp_trans''! collect_box_conj! $ imply_box_distribute'! $ provable_iff.mp h
 
 end
-
-
-section ModalDP
-
-variable {F : Type*} [LogicalConnective F] [Box F]
-variable {S : Type*} [System F S]
-
-class ModalDisjunctive (𝓢 : S) : Prop where
-  modal_disjunctive : ∀ {p q : F}, 𝓢 ⊢! □p ⋎ □q → 𝓢 ⊢! p ∨ 𝓢 ⊢! q
-
-end ModalDP
 
 
 section Contextual

@@ -153,7 +153,7 @@ end FiniteTransitiveTreeModel.SimpleExtension
 end Kripke
 
 
-section
+section Unnecessitation
 
 open System
 open Formula.Kripke (Satisfies)
@@ -205,6 +205,7 @@ theorem GL_unnecessitation! : 𝐆𝐋 ⊢! □p → 𝐆𝐋 ⊢! p := by
 noncomputable instance : System.Unnecessitation (𝐆𝐋 : Hilbert α) where
   unnec := λ h => GL_unnecessitation! ⟨h⟩ |>.some
 
-end
+end Unnecessitation
+
 
 end LO.Modal

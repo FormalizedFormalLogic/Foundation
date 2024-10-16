@@ -9,6 +9,8 @@ variable [DecidableEq F]
 class Disjunctive (𝓢 : S) : Prop where
   disjunctive : ∀ {p q}, 𝓢 ⊢! p ⋎ q → 𝓢 ⊢! p ∨ 𝓢 ⊢! q
 
+alias disjunctive := Disjunctive.disjunctive
+
 lemma iff_disjunctive {𝓢 : S}  : (Disjunctive 𝓢) ↔ ∀ {p q}, 𝓢 ⊢! p ⋎ q → 𝓢 ⊢! p ∨ 𝓢 ⊢! q := by
   constructor;
   . apply Disjunctive.disjunctive;
