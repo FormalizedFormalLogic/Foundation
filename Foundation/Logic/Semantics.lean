@@ -21,7 +21,7 @@ namespace LO
 class Semantics (F : outParam Type*) (M : Type*) where
   Realize : M → F → Prop
 
-variable {M : Type*} {F : Type*} [LogicalConnective F] [𝓢 : Semantics F M]
+variable {M : Type*} {F : Type*} [𝓢 : Semantics F M]
 
 namespace Semantics
 
@@ -29,7 +29,7 @@ infix:45 " ⊧ " => Realize
 
 section
 
-variable (M)
+variable [LogicalConnective F] (M)
 
 protected class Top where
   realize_top (𝓜 : M) : 𝓜 ⊧ (⊤ : F)
@@ -111,7 +111,7 @@ def theory (𝓜 : M) : Set F := {f | 𝓜 ⊧ f}
 class Meaningful (𝓜 : M) : Prop where
   exists_unrealize : ∃ f, ¬𝓜 ⊧ f
 
-instance [Semantics.Bot M] (𝓜 : M) : Meaningful 𝓜 := ⟨⟨⊥, by simp⟩⟩
+instance [LogicalConnective F] [Semantics.Bot M] (𝓜 : M) : Meaningful 𝓜 := ⟨⟨⊥, by simp⟩⟩
 
 lemma meaningful_iff {𝓜 : M} : Meaningful 𝓜 ↔ ∃ f, ¬𝓜 ⊧ f :=
   ⟨by rintro ⟨h⟩; exact h, fun h ↦ ⟨h⟩⟩
@@ -121,7 +121,7 @@ lemma not_meaningful_iff (𝓜 : M) : ¬Meaningful 𝓜 ↔ ∀ f, 𝓜 ⊧ f :=
 lemma realizeSet_iff {𝓜 : M} {T : Set F} : 𝓜 ⊧* T ↔ ∀ ⦃f⦄, f ∈ T → Realize 𝓜 f :=
   ⟨by rintro ⟨h⟩ f hf; exact h hf, by intro h; exact ⟨h⟩⟩
 
-lemma not_satisfiable_finset [Tarski M] [DecidableEq F] (t : Finset F) :
+lemma not_satisfiable_finset [LogicalConnective F] [Tarski M] [DecidableEq F] (t : Finset F) :
     ¬Satisfiable M (t : Set F) ↔ Valid M (t.image (∼·)).disj := by
   simp [Satisfiable, realizeSet_iff, Valid, Finset.map_disj]
 
@@ -169,7 +169,8 @@ instance empty' (𝓜 : M) : 𝓜 ⊧* (∅ : Set F) := ⟨by simp⟩
 
 end RealizeSet
 
-lemma valid_neg_iff [Tarski M] (f : F) : Valid M (∼f) ↔ ¬Satisfiable M {f} := by simp [Valid, Satisfiable]
+lemma valid_neg_iff [LogicalConnective F] [Tarski M] (f : F) : Valid M (∼f) ↔ ¬Satisfiable M {f} := by
+  simp [Valid, Satisfiable]
 
 lemma Satisfiable.of_subset {T U : Set F} (h : Satisfiable M U) (ss : T ⊆ U) : Satisfiable M T := by
   rcases h with ⟨𝓜, h⟩; exact ⟨𝓜, RealizeSet.of_subset h ss⟩
@@ -189,15 +190,15 @@ variable {M}
 
 lemma set_models_iff {s : Set M} : s ⊧ f ↔ ∀ 𝓜 ∈ s, 𝓜 ⊧ f := iff_of_eq rfl
 
-instance [Semantics.Top M] : Semantics.Top (Set M) := ⟨fun s ↦ by simp [set_models_iff]⟩
+instance [LogicalConnective F] [Semantics.Top M] : Semantics.Top (Set M) := ⟨fun s ↦ by simp [set_models_iff]⟩
 
-lemma set_meaningful_iff_nonempty [∀ 𝓜 : M, Meaningful 𝓜] {s : Set M} : Meaningful s ↔ s.Nonempty :=
+lemma set_meaningful_iff_nonempty [LogicalConnective F] [∀ 𝓜 : M, Meaningful 𝓜] {s : Set M} : Meaningful s ↔ s.Nonempty :=
   ⟨by rintro ⟨f, hf⟩; by_contra A; rcases Set.not_nonempty_iff_eq_empty.mp A; simp at hf,
    by rintro ⟨𝓜, h𝓜⟩
-      rcases Meaningful.exists_unrealize (𝓜 := 𝓜) with ⟨f, hf⟩
+      rcases Meaningful.exists_unrealize (self := inferInstanceAs (Meaningful 𝓜)) with ⟨f, hf⟩
       exact ⟨f, by simp [set_models_iff]; exact ⟨𝓜, h𝓜, hf⟩⟩⟩
 
-lemma meaningful_iff_satisfiableSet [∀ 𝓜 : M, Meaningful 𝓜] : Satisfiable M T ↔ Meaningful (models M T) := by
+lemma meaningful_iff_satisfiableSet [LogicalConnective F] [∀ 𝓜 : M, Meaningful 𝓜] : Satisfiable M T ↔ Meaningful (models M T) := by
   simp [set_meaningful_iff_nonempty, satisfiableSet_iff_models_nonempty]
 
 lemma consequence_iff {T : Set F} {f} : T ⊨[M] f ↔ ∀ {𝓜 : M}, 𝓜 ⊧* T → 𝓜 ⊧ f := iff_of_eq rfl
@@ -205,7 +206,7 @@ lemma consequence_iff {T : Set F} {f} : T ⊨[M] f ↔ ∀ {𝓜 : M}, 𝓜 ⊧*
 lemma consequence_iff' {T : Set F} {f : F} : T ⊨[M] f ↔ (∀ (𝓜 : M) [𝓜 ⊧* T], 𝓜 ⊧ f) :=
   ⟨fun h _ _ => consequence_iff.mp h inferInstance, fun H 𝓜 hs => @H 𝓜 hs⟩
 
-lemma consequence_iff_not_satisfiable [Tarski M] {f : F} :
+lemma consequence_iff_not_satisfiable [LogicalConnective F] [Tarski M] {f : F} :
     T ⊨[M] f ↔ ¬Satisfiable M (insert (∼f) T) := by
   simp [consequence_iff, Satisfiable]; constructor
   · intro h 𝓜 hf hT; have : 𝓜 ⊧ f := h hT; contradiction
@@ -228,7 +229,7 @@ lemma subset_of_le {T : ℕ → Set F} (H : Cumulative T)
     simpa[Nat.add_sub_of_le h] using this s₁ (s₂ - s₁)
   intro s d
   induction' d with d ih
-  · simp; rfl
+  · simp
   · simpa only [Nat.add_succ, add_zero] using subset_trans ih (H (s + d))
 
 lemma finset_mem {T : ℕ → Set F}
@@ -263,7 +264,7 @@ variable [Compact M]
 
 variable {𝓜 : M}
 
-lemma conseq_compact [Semantics.Tarski M] [DecidableEq F] {f : F} :
+lemma conseq_compact [LogicalConnective F] [Semantics.Tarski M] [DecidableEq F] {f : F} :
     T ⊨[M] f ↔ ∃ u : Finset F, ↑u ⊆ T ∧ u ⊨[M] f := by
   simp [Semantics.consequence_iff_not_satisfiable, compact (T := insert (∼f) T)]
   constructor

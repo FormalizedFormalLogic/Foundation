@@ -12,6 +12,7 @@ import Mathlib.Logic.Encodable.Basic
 import Mathlib.Computability.Primrec
 import Mathlib.Computability.Partrec
 import Mathlib.Data.Finset.Sort
+import Mathlib.Data.List.GetD
 
 namespace Nat
 variable {α : ℕ → Sort u}
@@ -158,13 +159,14 @@ funext (fun i => lastCases (by simp) (by simp) i)
 @[simp] lemma vecHead_comp (f : α → β) (v : Fin (n + 1) → α) : vecHead (f ∘ v) = f (vecHead v) :=
   by simp[vecHead]
 
-@[simp] lemma vecTail_comp (f : α → β) (v : Fin (n + 1) → α) : vecTail (f ∘ v) = f ∘ (vecTail v) :=
-  by simp[vecTail, Function.comp.assoc]
+@[simp] lemma vecTail_comp (f : α → β) (v : Fin (n + 1) → α) : vecTail (f ∘ v) = f ∘ (vecTail v) := by
+  simp [vecTail, Function.comp_assoc]
 
 lemma vecConsLast_vecEmpty {s : Fin 0 → α} (a : α) : s <: a = ![a] :=
   funext (fun x => by
     have : 0 = Fin.last 0 := by rfl
-    cases' x using Fin.cases with i <;> simp[this]
+    cases' x using Fin.cases with i
+    · rw [this, rightConcat_last, cons_val_fin_one]
     have := i.isLt; contradiction )
 
 lemma constant_eq_singleton {a : α} : (fun _ => a) = ![a] := by funext x; simp
@@ -205,8 +207,8 @@ def toOptionVec : {n : ℕ} → (Fin n → Option α) → Option (Fin n → α)
   | _ + 1, v => (toOptionVec (v ∘ Fin.succ)).bind (fun vs => (v 0).map (fun z => z :> vs))
 
 @[simp] lemma toOptionVec_some (v : Fin n → α) :
-    toOptionVec (fun i => some (v i)) = some v :=
-  by induction n <;> simp[*, Matrix.empty_eq, toOptionVec, Function.comp]
+    toOptionVec (fun i ↦ some (v i)) = some v := by
+  induction n <;> simp[*, Matrix.empty_eq, toOptionVec, Function.comp_def]
 
 @[simp] lemma toOptionVec_zero (v : Fin 0 → Option α) : toOptionVec v = some ![] := rfl
 
@@ -275,7 +277,8 @@ open Encodable
 
 @[simp] lemma vecToNat_empty (v : Fin 0 → ℕ) : vecToNat v = 0 := by rfl
 
-@[simp] lemma encode_succ {n} (x : ℕ) (v : Fin n → ℕ) : vecToNat (x :> v) = Nat.pair x (vecToNat v) + 1 := by simp [vecToNat, Function.comp]
+@[simp] lemma encode_succ {n} (x : ℕ) (v : Fin n → ℕ) : vecToNat (x :> v) = Nat.pair x (vecToNat v) + 1 := by
+  simp [vecToNat, Function.comp_def]
 
 end vecToNat
 
@@ -479,6 +482,11 @@ end Quotient
 
 namespace List
 
+variable {α : Type u} {β: Type v}
+
+lemma getI_map_range [Inhabited α] (f : ℕ → α) (h : i < n) : ((List.range n).map f).getI i = f i := by
+  simpa [h] using List.getI_eq_getElem ((List.range n).map f) (n := i) (by simpa using h)
+
 def subsetSet (l : List α) (s : Set α) [DecidablePred s] : Bool :=
   l.foldr (fun a ih => s a && ih) true
 
@@ -496,7 +504,9 @@ lemma lt_upper (l : List ℕ) {n} (h : n ∈ l) : n < l.upper := by
     rcases h with (rfl | h); { exact Or.inl (Nat.lt_succ_self _) }
     exact Or.inr (ih h)
 
-variable {α : Type u} [DecidableEq α] {β: Type v} [DecidableEq β]
+section finset
+
+variable [DecidableEq α] [DecidableEq β]
 
 lemma toFinset_map {f : α → β} (l : List α) : (l.map f).toFinset = Finset.image f l.toFinset := by
   induction l <;> simp[*]
@@ -504,8 +514,11 @@ lemma toFinset_map {f : α → β} (l : List α) : (l.map f).toFinset = Finset.i
 lemma toFinset_mono {l l' : List α} (h : l ⊆ l') : l.toFinset ⊆ l'.toFinset := by
   intro a; simp; intro ha; exact h ha
 
-section
-variable {α : Type u} [SemilatticeSup α] [OrderBot α]
+end finset
+
+section sup
+
+variable [SemilatticeSup α] [OrderBot α]
 
 def sup : List α → α
   | [] => ⊥
@@ -518,22 +531,20 @@ def sup : List α → α
 lemma le_sup {a} {l : List α} : a ∈ l → a ≤ l.sup :=
   by induction' l with a l ih <;> simp[*]; rintro (rfl | h); { simp }; { exact le_sup_of_le_right $ ih h }
 
-lemma getI_map_range [Inhabited α] (f : ℕ → α) (h : i < n) : ((List.range n).map f).getI i = f i := by
-  simpa using List.getI_eq_get ((List.range n).map f) (n := i) (by simpa using h)
-
 lemma sup_ofFn (f : Fin n → α) : (ofFn f).sup = Finset.sup Finset.univ f := by
   induction' n with n ih <;> simp
-  { simp[ih]
+  · simp[ih]
     have : (Finset.univ : Finset (Fin (n + 1))) = insert 0 ((Finset.univ : Finset (Fin n)).image Fin.succ) := by
       ext i; simp
     rw[this, Finset.sup_insert]; simp
     have : Finset.sup Finset.univ (fun i => f (Fin.succ i)) = Finset.sup {0}ᶜ f := by
       simpa[Function.comp] using Eq.symm <| Finset.sup_image (Finset.univ : Finset (Fin n)) Fin.succ f
-    rw[this] }
+    rw[this]
 
-end
+end sup
 
-lemma ofFn_get_eq_map_cast {n} (g : α → β) (as : List α) {h} : ofFn (fun i => g (as.get (i.cast h)) : Fin n → β) = as.map g := by
+lemma ofFn_get_eq_map_cast {n} (g : α → β) (as : List α) {h} :
+    ofFn (fun i => g (as.get (i.cast h)) : Fin n → β) = as.map g := by
   ext i b; simp
   by_cases hi : i < n
   · simp [hi, List.ofFnNthVal, List.getElem?_eq_getElem (h ▸ hi)]
@@ -626,7 +637,7 @@ lemma nil_iff {l : List α} : l = [] ↔ ∀ a, a ∉ l := by
   induction l with
   | nil => simp only [not_mem_nil, not_false_eq_true, implies_true];
   | cons a _ _ =>
-    simp_all only [mem_cons, not_or, false_iff, not_forall, not_and, not_not];
+    simp_all [mem_cons, not_or]
     use a;
     tauto;
 
@@ -646,12 +657,7 @@ lemma eq_remove_cons {l : List α} : (q :: l).remove q = l.remove q := by induct
 lemma remove_singleton_of_ne {p q : α} (h : p ≠ q) : [p].remove q = [p] := by simp_all [List.remove, Ne.symm];
 
 lemma mem_remove_iff {l : List α} : b ∈ l.remove a ↔ b ∈ l ∧ b ≠ a := by
-  simp [List.remove, List.of_mem_filter];
-  constructor;
-  . intro h;
-    exact ⟨mem_of_mem_filter h, by simpa using of_mem_filter h⟩;
-  . rintro ⟨h₁, h₂⟩;
-    exact mem_filter_of_mem h₁ (by simpa using h₂);
+  simp [List.remove, List.of_mem_filter]
 
 lemma mem_of_mem_remove {a b : α} {l : List α} (h : b ∈ l.remove a) : b ∈ l := by
   rw [mem_remove_iff] at h; exact h.1
@@ -676,13 +682,27 @@ lemma remove_cons_subset_cons_remove (a b) (l : List α) :
   intro x; simp[List.mem_remove_iff]
   rintro (rfl | hx) nex <;> simp[*]
 
-lemma remove_map_substet_map_remove [DecidableEq α] [DecidableEq β] (f : α → β) (l : List α) (a) :
+lemma remove_map_substet_map_remove [DecidableEq β] (f : α → β) (l : List α) (a) :
     (l.map f).remove (f a) ⊆ (l.remove a).map f := by
   simp[List.subset_def, List.mem_remove_iff]
   intro b hb neb;
   exact ⟨b, ⟨hb, by rintro rfl; exact neb rfl⟩, rfl⟩
 
 end remove
+
+lemma induction_with_singleton
+  {motive : List F → Prop}
+  (hnil : motive [])
+  (hsingle : ∀ a, motive [a])
+  (hcons : ∀ a as, as ≠ [] → motive as → motive (a :: as)) : ∀ as, motive as := by
+  intro as;
+  induction as with
+  | nil => exact hnil;
+  | cons a as ih => cases as with
+    | nil => exact hsingle a;
+    | cons b bs => exact hcons a (b :: bs) (by simp) ih;
+
+
 
 end List
 
@@ -733,14 +753,6 @@ lemma erase_union [DecidableEq α] {a : α} {s t : Finset α} :
 @[simp] lemma sup_univ_equiv {α α'} [DecidableEq α] [Fintype α] [Fintype α'] [SemilatticeSup β] [OrderBot β] (f : α → β) (e : α' ≃ α) :
     Finset.sup Finset.univ (fun i => f (e i)) = Finset.sup Finset.univ f := by
   simpa [Function.comp] using Eq.symm <| Finset.sup_image Finset.univ e f
-
-lemma sup_univ_list_eq_sup_map {σ : Type _} {α : Type _} [SemilatticeSup α] [OrderBot α]
-  (l : List σ) (f : σ → α) : Finset.sup Finset.univ (fun (i : Fin l.length) => f $ l[i]) = (l.map f).sup := by
-  induction' l with s l ih <;> simp
-  · have : (Finset.univ : Finset (Fin $ l.length + 1)) = insert 0 ((Finset.univ : Finset (Fin l.length)).image Fin.succ) := by ext; simp
-    rw [this, Finset.sup_insert, Finset.sup_image]
-    simp at ih
-    simp[Function.comp, ih]
 
 lemma sup_univ_cast {α : Type _} [SemilatticeSup α] [OrderBot α] {n} (f : Fin n → α) (n') {h : n' = n} :
     Finset.sup Finset.univ (fun (i : Fin n') => f (i.cast h)) = Finset.sup Finset.univ f := by rcases h with rfl; simp

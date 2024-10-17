@@ -1,4 +1,4 @@
-import Mathlib.Init.Logic
+import Foundation.Vorspiel.Vorspiel
 import Mathlib.Data.Finite.Basic
 
 section
@@ -39,41 +39,36 @@ section
 
 variable {α : Type u}
 variable {rel : α → α → Prop}
-variable (hRefl : Reflexive rel) -- T
-         (hSymm : Symmetric rel) -- B
-         (hSerial : Serial rel) -- D
-         (hTrans : Transitive rel) -- 4
-         (hEucl : Euclidean rel) -- 5
 
 -- T → D
-lemma serial_of_refl : Serial rel := by
+lemma serial_of_refl (hRefl : Reflexive rel) : Serial rel := by
   rintro w;
   existsi w;
   exact hRefl w;
 
 -- B + 4 → 5
-lemma eucl_of_symm_trans : Euclidean rel := by
+lemma eucl_of_symm_trans (hSymm : Symmetric rel) (hTrans : Transitive rel) : Euclidean rel := by
   intro x y z Rxy Rxz;
   have Ryx := hSymm Rxy;
   exact hSymm $ hTrans Ryx Rxz;
 
 -- B + 5 → 4
-lemma trans_of_symm_eucl : Transitive rel := by
+lemma trans_of_symm_eucl (hSymm : Symmetric rel) (hEucl : Euclidean rel) : Transitive rel := by
   rintro x y z Rxy Ryz;
   exact hSymm $ hEucl (hSymm Rxy) Ryz;
 
 -- T + 5 → B
-lemma symm_of_refl_eucl : Symmetric rel := by
+lemma symm_of_refl_eucl (hRefl : Reflexive rel) (hEucl : Euclidean rel) : Symmetric rel := by
   intro x y Rxy;
   exact hEucl (hRefl x) Rxy;
 
 -- T + 5 → 4
-lemma trans_of_refl_eucl : Transitive rel := by
+lemma trans_of_refl_eucl (hRefl : Reflexive rel) (hEucl : Euclidean rel) : Transitive rel := by
   have hSymm := symm_of_refl_eucl hRefl hEucl;
   exact trans_of_symm_eucl hSymm hEucl;
 
 -- B + D + 5 → T
-lemma refl_of_symm_serial_eucl : Reflexive rel := by
+lemma refl_of_symm_serial_eucl (hSymm : Symmetric rel) (hSerial : Serial rel) (hEucl : Euclidean rel) : Reflexive rel := by
   rintro x;
   obtain ⟨y, Rxy⟩ := hSerial x;
   have Ryx := hSymm Rxy;
@@ -90,7 +85,8 @@ lemma Finite.converseWellFounded_of_trans_irrefl [Finite α] [IsTrans α rel] [I
     ⟨by intro a b c rba rcb; exact IsTrans.trans c b a rcb rba⟩
     ⟨by simp [flip, IsIrrefl.irrefl]⟩
 
-lemma Finite.converseWellFounded_of_trans_irrefl' (hFinite : Finite α) (hTrans : Transitive rel) (hIrrefl : Irreflexive rel) : ConverseWellFounded rel :=
+lemma Finite.converseWellFounded_of_trans_irrefl'
+    (hFinite : Finite α) (hTrans : Transitive rel) (hIrrefl : Irreflexive rel) : ConverseWellFounded rel :=
   @Finite.wellFounded_of_trans_of_irrefl _ _ _
     ⟨by simp [flip]; intro a b c ba cb; exact hTrans cb ba;⟩
     ⟨by simp [flip]; exact hIrrefl⟩
