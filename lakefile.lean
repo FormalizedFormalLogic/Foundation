@@ -11,5 +11,3 @@ lean_lib Foundation {
 }
 
 require "leanprover-community" / "mathlib" @ git "master"
-
-require "leanprover-community" / "importGraph" @ git "main"

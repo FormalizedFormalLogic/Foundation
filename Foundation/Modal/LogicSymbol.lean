@@ -150,7 +150,8 @@ prefix:80 "◇''⁻¹" => Set.predia
 
 namespace Set
 
-variable [Box F] [Dia F] {s t : Set F}
+variable {s t : Set F}
+variable [Box F] [Dia F]
 
 @[simp] lemma eq_box_multibox_one : □''s = □''^[1]s := by rfl
 @[simp] lemma eq_dia_multidia_one : ◇''s = ◇''^[1]s := by rfl

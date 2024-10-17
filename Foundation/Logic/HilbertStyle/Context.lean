@@ -24,7 +24,7 @@ abbrev disj (Γ : FiniteContext F 𝓢) : F := ⋁Γ.ctx
 
 instance : EmptyCollection (FiniteContext F 𝓢) := ⟨⟨[]⟩⟩
 
-instance : Membership F (FiniteContext F 𝓢) := ⟨(· ∈ ·.ctx)⟩
+instance : Membership F (FiniteContext F 𝓢) := ⟨λ Γ x => (x ∈ Γ.ctx)⟩
 
 instance : HasSubset (FiniteContext F 𝓢) := ⟨(·.ctx ⊆ ·.ctx)⟩
 
@@ -218,7 +218,7 @@ instance : Coe (Set F) (Context F 𝓢) := ⟨mk⟩
 
 instance : EmptyCollection (Context F 𝓢) := ⟨⟨∅⟩⟩
 
-instance : Membership F (Context F 𝓢) := ⟨(· ∈ ·.ctx)⟩
+instance : Membership F (Context F 𝓢) := ⟨λ Γ x => (x ∈ Γ.ctx)⟩
 
 instance : HasSubset (Context F 𝓢) := ⟨(·.ctx ⊆ ·.ctx)⟩
 
