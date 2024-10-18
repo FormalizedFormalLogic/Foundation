@@ -5,7 +5,7 @@ namespace LO
 
 namespace System
 
-variable (F : Type*) [LogicalConnective F] [DecidableEq F] {S : Type*} [System F S]
+variable (F : Type*) {S : Type*}
 
 structure FiniteContext (𝓢 : S) where
   ctx : List F
@@ -18,9 +18,9 @@ variable {𝓢 : S}
 
 instance : Coe (List F) (FiniteContext F 𝓢) := ⟨mk⟩
 
-abbrev conj (Γ : FiniteContext F 𝓢) : F := ⋀Γ.ctx
+abbrev conj [LogicalConnective F] (Γ : FiniteContext F 𝓢) : F := ⋀Γ.ctx
 
-abbrev disj (Γ : FiniteContext F 𝓢) : F := ⋁Γ.ctx
+abbrev disj [LogicalConnective F] (Γ : FiniteContext F 𝓢) : F := ⋁Γ.ctx
 
 instance : EmptyCollection (FiniteContext F 𝓢) := ⟨⟨[]⟩⟩
 
@@ -42,6 +42,8 @@ instance : Collection F (FiniteContext F 𝓢) where
   subset_iff := List.subset_def
   not_mem_empty := by simp
   mem_cons_iff := by simp [Cons.cons, mem_def]
+
+variable [System F S] [LogicalConnective F]
 
 instance (𝓢 : S) : System F (FiniteContext F 𝓢) := ⟨(𝓢 ⊢ ·.conj ➝ ·)⟩
 
@@ -75,8 +77,12 @@ lemma toₛ! (b : Γ ⊢[𝓢]! p) : 𝓢 ⊢! ⋀Γ ➝ p := b
 
 lemma provable_iff {p : F} : Γ ⊢[𝓢]! p ↔ 𝓢 ⊢! ⋀Γ ➝ p := iff_of_eq rfl
 
-variable {Γ Δ E : List F}
 
+set_option deprecated.oldSectionVars true in -- TODO: remove this option
+section
+
+variable [DecidableEq F]
+variable {Γ Δ E : List F}
 variable
   [System.ModusPonens 𝓢]
   [System.HasAxiomVerum 𝓢]
@@ -201,7 +207,10 @@ instance [System.Intuitionistic 𝓢] (Γ : FiniteContext F 𝓢) : System.Intui
 
 instance [System.Classical 𝓢] (Γ : FiniteContext F 𝓢) : System.Classical Γ where
 
+end
+
 end FiniteContext
+
 
 variable (F)
 
@@ -209,6 +218,7 @@ structure Context (𝓢 : S) where
   ctx : Set F
 
 variable {F}
+
 
 namespace Context
 
@@ -236,6 +246,8 @@ instance : Collection F (Context F 𝓢) where
   subset_iff := by rintro ⟨s⟩ ⟨u⟩; simp [Set.subset_def]
   not_mem_empty := by simp
   mem_cons_iff := by simp [Cons.cons, mem_def]
+
+variable [LogicalConnective F] [System F S]
 
 structure Proof (Γ : Context F 𝓢) (p : F) where
   ctx : List F
@@ -266,7 +278,10 @@ notation Γ:45 " *⊢[" 𝓢 "]* " s:46 => PrfSet 𝓢 Γ s
 
 notation Γ:45 " *⊢[" 𝓢 "]*! " s:46 => ProvableSet 𝓢 Γ s
 
+set_option deprecated.oldSectionVars true in -- TODO: remove this option
+section
 
+variable [DecidableEq F]
 variable {𝓢}
 
 lemma provable_iff {p : F} : Γ *⊢[𝓢]! p ↔ ∃ Δ : List F, (∀ q ∈ Δ, q ∈ Γ) ∧ Δ ⊢[𝓢]! p :=
@@ -355,6 +370,8 @@ end minimal
 instance [System.Intuitionistic 𝓢] (Γ : Context F 𝓢) : System.Intuitionistic Γ where
 
 instance [System.Classical 𝓢] (Γ : Context F 𝓢) : System.Classical Γ where
+
+end
 
 end Context
 

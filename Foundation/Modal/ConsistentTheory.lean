@@ -1,5 +1,8 @@
 import Foundation.Modal.Hilbert
 
+-- TODO: remove
+set_option deprecated.oldSectionVars true
+
 namespace LO.Modal
 
 variable {α : Type*} [DecidableEq α] [Inhabited α]
@@ -188,8 +191,8 @@ lemma either_consistent (p) : Theory.Consistent Λ (insert p T) ∨ Theory.Consi
   contradiction;
 
 lemma exists_maximal_consistent_theory
-  : ∃ Z, Theory.Consistent Λ Z ∧ T ⊆ Z ∧ ∀ U, Theory.Consistent Λ U → Z ⊆ U → U = Z
-  := zorn_subset_nonempty { T : Theory α | T.Consistent Λ } (by
+  : ∃ Z, Theory.Consistent Λ Z ∧ T ⊆ Z ∧ ∀ U, Theory.Consistent Λ U → Z ⊆ U → U = Z := by
+  obtain ⟨Z, h₁, ⟨h₂, h₃⟩⟩ := zorn_subset_nonempty { T : Theory α | T.Consistent Λ } (by
     intro c hc chain hnc;
     existsi (⋃₀ c);
     simp only [Set.mem_setOf_eq, Set.mem_sUnion];
@@ -211,7 +214,15 @@ lemma exists_maximal_consistent_theory
       contradiction;
     . intro s a;
       exact Set.subset_sUnion_of_mem a;
-  ) T T_consis
+  ) T T_consis;
+  use Z;
+  simp_all only [Set.mem_setOf_eq, Set.le_eq_subset, true_and];
+  constructor;
+  . assumption;
+  . intro U hU hZU;
+    apply Set.eq_of_subset_of_subset;
+    . exact h₃ hU hZU;
+    . assumption;
 protected alias lindenbaum := exists_maximal_consistent_theory
 
 open Classical in
@@ -247,8 +258,8 @@ lemma intro_triunion_consistent
       apply conjconj_subset!;
       intro p hp; simp [Γ₁, Γ₂];
       rcases h₁₂ p hp with (h₁ | h₂);
-      . left; apply List.mem_filter_of_mem <;> simpa;
-      . right; apply List.mem_filter_of_mem <;> simpa;
+      . left; exact ⟨hp, h₁⟩;
+      . right; exact ⟨hp, h₂⟩;
   . apply h;
     refine ⟨?_, ?_, h₃⟩;
     . intro p hp;

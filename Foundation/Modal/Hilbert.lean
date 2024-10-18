@@ -4,7 +4,7 @@ import Foundation.Logic.HilbertStyle.Lukasiewicz
 
 namespace LO.Modal
 
-variable {α : Type*} [DecidableEq α]
+variable {α : Type*}
 
 /-- instance of inference rule -/
 structure InferenceRule (α : Type*) where
@@ -336,6 +336,7 @@ instance : 𝐍.HasNecOnly (α := α) where
 
 section
 
+variable [DecidableEq α]
 open System
 open Formula (atom)
 
@@ -477,6 +478,7 @@ lemma GL_equiv_K4Loeb : (𝐆𝐋 : Hilbert α) =ₛ 𝐊𝟒(𝐋) := by
   . exact GL_weakerThan_K4Loeb;
   . exact WeakerThan.trans (K4Loeb_weakerThan_K4Henkin) $ WeakerThan.trans K4Henkin_weakerThan_K4H K4Henkin_weakerThan_GL
 
+set_option linter.unusedSectionVars false in -- TODO: remove
 lemma GL_weakerThan_GLS : (𝐆𝐋 : Hilbert α) ≤ₛ 𝐆𝐋𝐒 := by
   apply System.weakerThan_iff.mpr;
   intro p h;

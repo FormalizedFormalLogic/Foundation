@@ -897,7 +897,6 @@ section Unnecessitation
 variable [Unnecessitation 𝓢]
 
 alias unnec := Unnecessitation.unnec
-
 lemma unnec! : 𝓢 ⊢! □p → 𝓢 ⊢! p := by rintro ⟨hp⟩; exact ⟨unnec hp⟩
 
 def multiunnec : 𝓢 ⊢ □^[n]p → 𝓢 ⊢ p := by
