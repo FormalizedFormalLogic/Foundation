@@ -91,7 +91,8 @@ lemma mdp! [ModusPonens 𝓢] : 𝓢 ⊢! p ➝ q → 𝓢 ⊢! p → 𝓢 ⊢! 
   exact ⟨hpq ⨀ hp⟩
 infixl:90 "⨀" => mdp!
 
-
+-- TODO: remove this option later
+set_option linter.unusedSectionVars false
 variable
   [System.ModusPonens 𝓢]
   [System.HasAxiomVerum 𝓢]
@@ -224,6 +225,9 @@ def neg_equiv [NegationEquiv 𝓢] : 𝓢 ⊢ ∼p ⭤ (p ➝ ⊥) := NegationEq
 def neg_equiv'.mp [NegationEquiv 𝓢] : 𝓢 ⊢ ∼p → 𝓢 ⊢ p ➝ ⊥ := λ h => (and₁' neg_equiv) ⨀ h
 def neg_equiv'.mpr [NegationEquiv 𝓢] : 𝓢 ⊢ p ➝ ⊥ → 𝓢 ⊢ ∼p := λ h => (and₂' neg_equiv) ⨀ h
 lemma neg_equiv'! [NegationEquiv 𝓢] : 𝓢 ⊢! ∼p ↔ 𝓢 ⊢! p ➝ ⊥ := ⟨λ ⟨h⟩ => ⟨neg_equiv'.mp h⟩, λ ⟨h⟩ => ⟨neg_equiv'.mpr h⟩⟩
+
+def notbot [NegationEquiv 𝓢] : 𝓢 ⊢ ∼⊥ := neg_equiv'.mpr (impId ⊥)
+@[simp] lemma notbot! [NegationEquiv 𝓢] : 𝓢 ⊢! ∼⊥ := ⟨notbot⟩
 
 instance [NegAbbrev F] : System.NegationEquiv 𝓢 where
   neg_equiv := by intro p; simp [Axioms.NegEquiv, NegAbbrev.neg]; apply iffId;

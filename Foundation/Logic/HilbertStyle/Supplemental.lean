@@ -1,6 +1,8 @@
 import Foundation.Logic.System
 import Foundation.Logic.HilbertStyle.Context
 
+set_option deprecated.oldSectionVars true
+
 namespace LO.System
 
 variable {F : Type*} [LogicalConnective F] [DecidableEq F]
