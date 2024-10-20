@@ -216,9 +216,7 @@ instance : Collection (Formula α) (Theory α) := inferInstance
 
 section Subformula
 
-variable [DecidableEq α]
-
-def Formula.Subformulas: Formula α → Formulae α
+def Formula.Subformulas [DecidableEq α] : Formula α → Formulae α
   | atom a => {(atom a)}
   | ⊥      => {⊥}
   | p ➝ q  => insert (p ➝ q) (p.Subformulas ∪ q.Subformulas)
@@ -227,6 +225,8 @@ def Formula.Subformulas: Formula α → Formulae α
 prefix:70 "𝒮 " => Formula.Subformulas
 
 namespace Formula.Subformulas
+
+variable [DecidableEq α]
 
 @[simp] lemma mem_self (p : Formula α) : p ∈ 𝒮 p := by induction p <;> { simp [Subformulas]; try tauto; }
 
@@ -304,7 +304,7 @@ class Formulae.SubformulaClosed (X : Formulae α) where
 
 namespace SubformulaClosed
 
-instance {p : Formula α} : Formulae.SubformulaClosed (𝒮 p) where
+instance [DecidableEq α] {p : Formula α} : Formulae.SubformulaClosed (𝒮 p) where
   box_closed   := by aesop;
   imp_closed   := by aesop;
 
@@ -331,7 +331,7 @@ class Theory.SubformulaClosed (T : Theory α) where
 
 namespace Theory.SubformulaClosed
 
-instance {p : Formula α} : Theory.SubformulaClosed (𝒮 p).toSet where
+instance {p : Formula α} [DecidableEq α] : Theory.SubformulaClosed (𝒮 p).toSet where
   box_closed   := by aesop;
   imp_closed   := by aesop;
 
@@ -384,11 +384,10 @@ end Atoms
 
 namespace Formula
 
-variable [DecidableEq α]
 variable {p q r : Formula α}
 
 @[elab_as_elim]
-def cases_neg {C : Formula α → Sort w}
+def cases_neg [DecidableEq α] {C : Formula α → Sort w}
     (hfalsum : C ⊥)
     (hatom   : ∀ a : α, C (atom a))
     (hneg    : ∀ p : Formula α, C (∼p))
@@ -402,7 +401,7 @@ def cases_neg {C : Formula α → Sort w}
   | p ➝ q  => if e : q = ⊥ then e ▸ hneg p else himp p q e
 
 @[elab_as_elim]
-def rec_neg {C : Formula α → Sort w}
+def rec_neg [DecidableEq α] {C : Formula α → Sort w}
     (hfalsum : C ⊥)
     (hatom   : ∀ a : α, C (atom a))
     (hneg    : ∀ p : Formula α, C (p) → C (∼p))
@@ -434,18 +433,18 @@ lemma negated_imp : (p ➝ q).negated ↔ (q = ⊥) := by
   . simp_all [Formula.imp_eq]; rfl;
   . simp_all [Formula.imp_eq]; simpa;
 
-lemma negated_iff : p.negated ↔ ∃ q, p = ∼q := by
+lemma negated_iff [DecidableEq α] : p.negated ↔ ∃ q, p = ∼q := by
   induction p using Formula.cases_neg with
   | himp => simp [negated_imp, NegAbbrev.neg];
   | _ => simp [negated]
 
-lemma not_negated_iff : ¬p.negated ↔ ∀ q, p ≠ ∼q := by
+lemma not_negated_iff [DecidableEq α] : ¬p.negated ↔ ∀ q, p ≠ ∼q := by
   induction p using Formula.cases_neg with
   | himp => simp [negated_imp, NegAbbrev.neg];
   | _ => simp [negated]
 
 @[elab_as_elim]
-def rec_negated {C : Formula α → Sort w}
+def rec_negated [DecidableEq α] {C : Formula α → Sort w}
     (hfalsum : C ⊥)
     (hatom   : ∀ a : α, C (atom a))
     (hneg    : ∀ p : Formula α, C (p) → C (∼p))

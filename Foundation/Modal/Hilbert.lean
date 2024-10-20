@@ -4,7 +4,7 @@ import Foundation.Logic.HilbertStyle.Lukasiewicz
 
 namespace LO.Modal
 
-variable {α : Type*} [DecidableEq α]
+variable {α : Type*}
 
 /-- instance of inference rule -/
 structure InferenceRule (α : Type*) where
@@ -32,12 +32,9 @@ structure Hilbert (α : Type*) where
   axioms : Theory α
   rules : InferenceRules α
 
-notation "Ax(" Λ ")" => Hilbert.axioms Λ
-notation "Rl(" Λ ")" => Hilbert.rules Λ
-
 inductive Deduction (Λ : Hilbert α) : (Formula α) → Type _
-  | maxm {p}     : p ∈ Ax(Λ) → Deduction Λ p
-  | rule {rl}    : rl ∈ Rl(Λ) → (∀ {p}, p ∈ rl.antecedents → Deduction Λ p) → Deduction Λ rl.consequence
+  | maxm {p}     : p ∈ Λ.axioms → Deduction Λ p
+  | rule {rl}    : rl ∈ Λ.rules → (∀ {p}, p ∈ rl.antecedents → Deduction Λ p) → Deduction Λ rl.consequence
   | mdp {p q}    : Deduction Λ (p ➝ q) → Deduction Λ p → Deduction Λ q
   | imply₁ p q   : Deduction Λ $ Axioms.Imply₁ p q
   | imply₂ p q r : Deduction Λ $ Axioms.Imply₂ p q r
@@ -69,34 +66,34 @@ namespace Hilbert
 open Deduction
 
 class HasNecessitation (Λ : Hilbert α) where
-  has_necessitation : ⟮Nec⟯ ⊆ Rl(Λ) := by aesop
+  has_necessitation : ⟮Nec⟯ ⊆ Λ.rules := by aesop
 
 instance [HasNecessitation Λ] : System.Necessitation Λ where
-  nec := @λ p d => rule (show { antecedents := [p], consequence := □p } ∈ Rl(Λ) by apply HasNecessitation.has_necessitation; simp_all) (by aesop);
+  nec := @λ p d => rule (show { antecedents := [p], consequence := □p } ∈ Λ.rules by apply HasNecessitation.has_necessitation; simp_all) (by aesop);
 
 
 class HasLoebRule (Λ : Hilbert α) where
-  has_loeb : ⟮Loeb⟯ ⊆ Rl(Λ) := by aesop
+  has_loeb : ⟮Loeb⟯ ⊆ Λ.rules := by aesop
 
 instance [HasLoebRule Λ] : System.LoebRule Λ where
-  loeb := @λ p d => rule (show { antecedents := [□p ➝ p], consequence := p } ∈ Rl(Λ) by apply HasLoebRule.has_loeb; simp_all) (by aesop);
+  loeb := @λ p d => rule (show { antecedents := [□p ➝ p], consequence := p } ∈ Λ.rules by apply HasLoebRule.has_loeb; simp_all) (by aesop);
 
 
 class HasHenkinRule (Λ : Hilbert α) where
-  has_henkin : ⟮Henkin⟯ ⊆ Rl(Λ) := by aesop
+  has_henkin : ⟮Henkin⟯ ⊆ Λ.rules := by aesop
 
 instance [HasHenkinRule Λ] : System.HenkinRule Λ where
-  henkin := @λ p d => rule (show { antecedents := [□p ⭤ p], consequence := p } ∈ Rl(Λ) by apply HasHenkinRule.has_henkin; simp_all) (by aesop);
+  henkin := @λ p d => rule (show { antecedents := [□p ⭤ p], consequence := p } ∈ Λ.rules by apply HasHenkinRule.has_henkin; simp_all) (by aesop);
 
 
 class HasNecOnly (Λ : Hilbert α) where
-  has_necessitation_only : Rl(Λ) = ⟮Nec⟯ := by rfl
+  has_necessitation_only : Λ.rules = ⟮Nec⟯ := by rfl
 
 instance [h : HasNecOnly Λ] : Λ.HasNecessitation where
   has_necessitation := by rw [h.has_necessitation_only]
 
 class HasAxiomK (Λ : Hilbert α) where
-  has_axiomK : 𝗞 ⊆ Ax(Λ) := by aesop
+  has_axiomK : 𝗞 ⊆ Λ.axioms := by aesop
 
 instance [HasAxiomK Λ] : System.HasAxiomK Λ where
   K _ _ := maxm (by apply HasAxiomK.has_axiomK; simp_all)
@@ -114,11 +111,11 @@ variable {Λ : Hilbert α}
 
 noncomputable def inducition!
   {motive  : (p : Formula α) → Λ ⊢! p → Sort*}
-  (hRules  : (r : InferenceRule α) → (hr : r ∈ Rl(Λ)) →
+  (hRules  : (r : InferenceRule α) → (hr : r ∈ Λ.rules) →
              (hant : ∀ {p}, p ∈ r.antecedents → Λ ⊢! p) →
              (ih : ∀ {p}, (hp : p ∈ r.antecedents) →
              motive p (hant hp)) → motive r.consequence ⟨rule hr (λ hp => (hant hp).some)⟩)
-  (hMaxm     : ∀ {p}, (h : p ∈ Ax(Λ)) → motive p ⟨maxm h⟩)
+  (hMaxm     : ∀ {p}, (h : p ∈ Λ.axioms) → motive p ⟨maxm h⟩)
   (hMdp      : ∀ {p q}, {hpq : Λ ⊢! p ➝ q} → {hp : Λ ⊢! p} → motive (p ➝ q) hpq → motive p hp → motive q ⟨mdp hpq.some hp.some⟩)
   (hImply₁     : ∀ {p q}, motive (p ➝ q ➝ p) $ ⟨imply₁ p q⟩)
   (hImply₂     : ∀ {p q r}, motive ((p ➝ q ➝ r) ➝ (p ➝ q) ➝ p ➝ r) $ ⟨imply₂ p q r⟩)
@@ -136,7 +133,7 @@ noncomputable def inducition!
 /-- Useful induction for normal modal logic. -/
 noncomputable def inducition_with_necOnly! [Λ.HasNecOnly]
   {motive  : (p : Formula α) → Λ ⊢! p → Prop}
-  (hMaxm   : ∀ {p}, (h : p ∈ Ax(Λ)) → motive p ⟨maxm h⟩)
+  (hMaxm   : ∀ {p}, (h : p ∈ Λ.axioms) → motive p ⟨maxm h⟩)
   (hMdp    : ∀ {p q}, {hpq : Λ ⊢! p ➝ q} → {hp : Λ ⊢! p} → motive (p ➝ q) hpq → motive p hp → motive q (hpq ⨀ hp))
   (hNec    : ∀ {p}, {hp : Λ ⊢! p} → (ihp : motive p hp) → motive (□p) (System.nec! hp))
   (hImply₁   : ∀ {p q}, motive (p ➝ q ➝ p) $ ⟨imply₁ p q⟩)
@@ -177,8 +174,8 @@ notation "𝐊" => Modal.K
 instance : 𝐊.IsNormal (α := α) where
 
 abbrev ExtK (Ax : Theory α) : Hilbert α := ⟨𝗞 ∪ Ax, ⟮Nec⟯⟩
-instance : Hilbert.IsNormal (α := α) (ExtK Ax) where
 prefix:max "𝜿" => ExtK
+instance : (𝜿Ax).IsNormal (α := α) where
 
 lemma K_is_extK_of_empty : (𝐊 : Hilbert α) = 𝜿∅ := by aesop;
 
@@ -190,7 +187,7 @@ open System
 
 variable {Ax : Theory α}
 
-lemma def_ax : Ax(𝜿Ax) = (𝗞 ∪ Ax) := by simp;
+lemma def_ax : (𝜿Ax).axioms = (𝗞 ∪ Ax) := by simp;
 
 lemma maxm! (h : p ∈ Ax) : 𝜿Ax ⊢! p := ⟨Deduction.maxm (by simp [def_ax]; right; assumption)⟩
 
@@ -206,16 +203,20 @@ instance : System.S4 (𝝈Ax) where
   T _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
   Four _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
 
-@[simp] lemma ExtS4.def_ax : Ax(𝝈Ax) = (𝗞 ∪ 𝗧 ∪ 𝟰 ∪ Ax) := by aesop;
+@[simp] lemma ExtS4.def_ax : (𝝈Ax).axioms = (𝗞 ∪ 𝗧 ∪ 𝟰 ∪ Ax) := by aesop;
 
 end
 
 
 protected abbrev KT : Hilbert α := 𝜿(𝗧)
 notation "𝐊𝐓" => Modal.KT
+instance : System.KT (𝐊𝐓 : Hilbert α) where
+  T _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
 
 protected abbrev KB : Hilbert α := 𝜿(𝗕)
 notation "𝐊𝐁" => Modal.KB
+instance : System.KB (𝐊𝐁 : Hilbert α) where
+  B _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
 
 protected abbrev KD : Hilbert α := 𝜿(𝗗)
 notation "𝐊𝐃" => Modal.KD
@@ -224,7 +225,7 @@ instance : System.KD (𝐊𝐃 : Hilbert α) where
 
 protected abbrev KP : Hilbert α := 𝜿(𝗣)
 notation "𝐊𝐏" => Modal.KP
-instance : System.HasAxiomP (𝐊𝐏 : Hilbert α) where
+instance : System.KP (𝐊𝐏 : Hilbert α) where
   P := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
 
 protected abbrev KTB : Hilbert α := 𝜿(𝗧 ∪ 𝗕)
@@ -237,6 +238,8 @@ instance : System.K4 (𝐊𝟒 : Hilbert α) where
 
 protected abbrev K5 : Hilbert α := 𝜿(𝟱)
 notation "𝐊𝟓" => Modal.K5
+instance : System.K5 (𝐊𝟓 : Hilbert α) where
+  Five _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
 
 protected abbrev S4 : Hilbert α := 𝝈(∅)
 notation "𝐒𝟒" => Modal.S4
@@ -264,10 +267,9 @@ instance : System.S5 (𝐒𝟓 : Hilbert α) where
 
 protected abbrev S5Grz : Hilbert α := 𝜿(𝗧 ∪ 𝟱 ∪ 𝗚𝗿𝘇) -- 𝐒𝟓 + 𝗚𝗿𝘇
 notation "𝐒𝟓𝐆𝐫𝐳" => Modal.S5Grz
-instance : System.S5 (𝐒𝟓𝐆𝐫𝐳 : Hilbert α) where
+instance : System.S5Grz (𝐒𝟓𝐆𝐫𝐳 : Hilbert α) where
   T _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
   Five _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
-instance : System.Grz (𝐒𝟓𝐆𝐫𝐳 : Hilbert α) where
   Grz _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
 
 protected abbrev Triv : Hilbert α := 𝜿(𝗧 ∪ 𝗧𝗰)
@@ -336,11 +338,12 @@ instance : 𝐍.HasNecOnly (α := α) where
 
 section
 
+variable [DecidableEq α]
 open System
 open Formula (atom)
 
 lemma normal_weakerThan_of_maxm {Λ₁ Λ₂ : Hilbert α} [Λ₁.IsNormal] [Λ₂.IsNormal]
-  (hMaxm : ∀ {p : Formula α}, p ∈ Ax(Λ₁) → Λ₂ ⊢! p)
+  (hMaxm : ∀ {p : Formula α}, p ∈ Λ₁.axioms → Λ₂ ⊢! p)
   : Λ₁ ≤ₛ Λ₂ := by
   apply System.weakerThan_iff.mpr;
   intro p h;
@@ -350,34 +353,33 @@ lemma normal_weakerThan_of_maxm {Λ₁ Λ₂ : Hilbert α} [Λ₁.IsNormal] [Λ�
   | hNec ihp => exact nec! ihp;
   | _ => trivial;
 
-lemma normal_weakerThan_of_subset {Λ₁ Λ₂ : Hilbert α} [Λ₁.IsNormal] [Λ₂.IsNormal]
-  (hSubset : Ax(Λ₁) ⊆ Ax(Λ₂) := by intro; aesop;)
+lemma normal_weakerThan_of_subset {Λ₁ Λ₂ : Hilbert α} [Λ₁.IsNormal] [Λ₂.IsNormal] (hSubset : Λ₁.axioms ⊆ Λ₂.axioms)
   : Λ₁ ≤ₛ Λ₂ := by
   apply normal_weakerThan_of_maxm;
   intro p hp;
   exact ⟨Deduction.maxm $ hSubset hp⟩;
 
-lemma K_weakerThan_KD : (𝐊 : Hilbert α) ≤ₛ 𝐊𝐃 := normal_weakerThan_of_subset
+lemma K_weakerThan_KD : (𝐊 : Hilbert α) ≤ₛ 𝐊𝐃 := normal_weakerThan_of_subset $ by aesop;
 
-lemma K_weakerThan_KB : (𝐊 : Hilbert α) ≤ₛ 𝐊𝐁 := normal_weakerThan_of_subset
+lemma K_weakerThan_KB : (𝐊 : Hilbert α) ≤ₛ 𝐊𝐁 := normal_weakerThan_of_subset $ by aesop;
 
-lemma K_weakerThan_KT : (𝐊 : Hilbert α) ≤ₛ 𝐊𝐓 := normal_weakerThan_of_subset
+lemma K_weakerThan_KT : (𝐊 : Hilbert α) ≤ₛ 𝐊𝐓 := normal_weakerThan_of_subset $ by aesop;
 
-lemma K_weakerThan_K4 : (𝐊 : Hilbert α) ≤ₛ 𝐊𝟒 := normal_weakerThan_of_subset
+lemma K_weakerThan_K4 : (𝐊 : Hilbert α) ≤ₛ 𝐊𝟒 := normal_weakerThan_of_subset $ by aesop;
 
-lemma K_weakerThan_K5 : (𝐊 : Hilbert α) ≤ₛ 𝐊𝟓 := normal_weakerThan_of_subset
+lemma K_weakerThan_K5 : (𝐊 : Hilbert α) ≤ₛ 𝐊𝟓 := normal_weakerThan_of_subset $ by aesop;
 
-lemma KT_weakerThan_S4 : (𝐊𝐓 : Hilbert α) ≤ₛ 𝐒𝟒 := normal_weakerThan_of_subset
+lemma KT_weakerThan_S4 : (𝐊𝐓 : Hilbert α) ≤ₛ 𝐒𝟒 := normal_weakerThan_of_subset $ by intro; aesop;
 
-lemma K4_weakerThan_S4 : (𝐊𝟒 : Hilbert α) ≤ₛ 𝐒𝟒 := normal_weakerThan_of_subset
+lemma K4_weakerThan_S4 : (𝐊𝟒 : Hilbert α) ≤ₛ 𝐒𝟒 := normal_weakerThan_of_subset $ by intro; aesop;
 
-lemma S4_weakerThan_S4Dot2 : (𝐒𝟒 : Hilbert α) ≤ₛ 𝐒𝟒.𝟐 := normal_weakerThan_of_subset
+lemma S4_weakerThan_S4Dot2 : (𝐒𝟒 : Hilbert α) ≤ₛ 𝐒𝟒.𝟐 := normal_weakerThan_of_subset $ by intro; aesop;
 
-lemma S4_weakerThan_S4Dot3 : (𝐒𝟒 : Hilbert α) ≤ₛ 𝐒𝟒.𝟑 := normal_weakerThan_of_subset
+lemma S4_weakerThan_S4Dot3 : (𝐒𝟒 : Hilbert α) ≤ₛ 𝐒𝟒.𝟑 := normal_weakerThan_of_subset $ by intro; aesop;
 
-lemma S4_weakerThan_S4Grz : (𝐒𝟒 : Hilbert α) ≤ₛ 𝐒𝟒𝐆𝐫𝐳 := normal_weakerThan_of_subset
+lemma S4_weakerThan_S4Grz : (𝐒𝟒 : Hilbert α) ≤ₛ 𝐒𝟒𝐆𝐫𝐳 := normal_weakerThan_of_subset $ by intro; aesop;
 
-lemma K_weakerThan_GL : (𝐊 : Hilbert α) ≤ₛ 𝐆𝐋 := normal_weakerThan_of_subset
+lemma K_weakerThan_GL : (𝐊 : Hilbert α) ≤ₛ 𝐆𝐋 := normal_weakerThan_of_subset $ by intro; aesop;
 
 lemma K4_weakerThan_Triv : (𝐊𝟒 : Hilbert α) ≤ₛ 𝐓𝐫𝐢𝐯 := by
   apply normal_weakerThan_of_maxm;
@@ -477,6 +479,7 @@ lemma GL_equiv_K4Loeb : (𝐆𝐋 : Hilbert α) =ₛ 𝐊𝟒(𝐋) := by
   . exact GL_weakerThan_K4Loeb;
   . exact WeakerThan.trans (K4Loeb_weakerThan_K4Henkin) $ WeakerThan.trans K4Henkin_weakerThan_K4H K4Henkin_weakerThan_GL
 
+set_option linter.unusedSectionVars false in -- TODO: remove
 lemma GL_weakerThan_GLS : (𝐆𝐋 : Hilbert α) ≤ₛ 𝐆𝐋𝐒 := by
   apply System.weakerThan_iff.mpr;
   intro p h;

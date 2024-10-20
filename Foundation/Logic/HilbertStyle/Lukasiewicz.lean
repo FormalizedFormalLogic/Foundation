@@ -119,14 +119,13 @@ def andElim₁ : 𝓢 ⊢ p ⋏ q ➝ p := by
   have : 𝓢 ⊢ ∼p ➝ p ➝ ∼q := explodeHyp₂ explode₂₁ imply₁;
   have : 𝓢 ⊢ ∼(p ➝ ∼q) ➝ ∼∼p := contraIntro' explode₂₁
   exact impTrans'' this dne;
-instance : HasAxiomAndElim₁ 𝓢 := ⟨λ p q => Lukasiewicz.andElim₁ (p := p) (q := q)⟩
 
 def andElim₂ : 𝓢 ⊢ p ⋏ q ➝ q := by
   simp only [LukasiewiczAbbrev.and];
   have : 𝓢 ⊢ ∼q ➝ p ➝ ∼q := imply₁ (p := ∼q) (q := p);
   have : 𝓢 ⊢ ∼(p ➝ ∼q) ➝ ∼∼q := contraIntro' this;
   exact impTrans'' this dne;
-instance : HasAxiomAndElim₂ 𝓢 := ⟨λ p q => Lukasiewicz.andElim₂ (p := p) (q := q)⟩
+instance : HasAxiomAndElim 𝓢 := ⟨λ p q => Lukasiewicz.andElim₁ (p := p) (q := q), λ p q => Lukasiewicz.andElim₂ (p := p) (q := q)⟩
 
 def andImplyLeft : 𝓢 ⊢ (p₁ ➝ q) ➝ p₁ ⋏ p₂ ➝ q := (impSwap $ dhyp _ (impId _)) ⨀₂ (dhyp _ andElim₁)
 def andImplyLeft' (h : 𝓢 ⊢ (p₁ ➝ q)) : 𝓢 ⊢ p₁ ⋏ p₂ ➝ q := andImplyLeft ⨀ h
@@ -151,16 +150,16 @@ def andInst : 𝓢 ⊢ p ➝ q ➝ p ⋏ q := by
 
 instance : HasAxiomAndInst 𝓢 := ⟨λ p q => Lukasiewicz.andInst (p := p) (q := q)⟩
 
+
 def orInst₁ : 𝓢 ⊢ p ➝ p ⋎ q := by
   simp only [LukasiewiczAbbrev.or];
   exact explode₁₂;
 
-instance : HasAxiomOrInst₁ 𝓢 := ⟨λ p q => Lukasiewicz.orInst₁ (p := p) (q := q)⟩
-
 def orInst₂ : 𝓢 ⊢ q ➝ p ⋎ q := by
   simp [LukasiewiczAbbrev.or];
   exact imply₁;
-instance : HasAxiomOrInst₂ 𝓢 := ⟨λ p q => Lukasiewicz.orInst₂ (p := p) (q := q)⟩
+
+instance : HasAxiomOrInst 𝓢 := ⟨λ p q => Lukasiewicz.orInst₁ (p := p) (q := q), λ p q => Lukasiewicz.orInst₂ (p := p) (q := q)⟩
 
 -- or_imply
 def orElim : 𝓢 ⊢ (p ➝ r) ➝ (q ➝ r) ➝ (p ⋎ q ➝ r) := by
