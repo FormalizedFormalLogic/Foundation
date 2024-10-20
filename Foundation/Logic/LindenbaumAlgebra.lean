@@ -21,7 +21,7 @@ protected lemma ProvablyEquivalent.symm [System.Minimal 𝓢] {p q : F} : p ≡ 
 protected lemma ProvablyEquivalent.trans [System.Minimal 𝓢] {p q r : F} : p ≡ q → q ≡ r → p ≡ r := iff_trans''!
 
 lemma provable_iff_provablyEquivalent_verum [System.Minimal 𝓢] {p : F} : 𝓢 ⊢! p ↔ p ≡ ⊤ :=
-  ⟨fun h ↦ iff_intro! imply_left_verum (dhyp! h), fun h ↦ (and_right! h) ⨀ verum!⟩
+  ⟨fun h ↦ iff_intro! imply_left_verum! (dhyp! h), fun h ↦ (and_right! h) ⨀ verum!⟩
 
 variable (𝓢)
 
@@ -120,7 +120,7 @@ instance : GeneralizedHeytingAlgebra (LindenbaumAlgebra 𝓢) where
   le_top p := by
     induction' p using Quotient.ind with p
     simp only [top_def, le_def]
-    exact imply_left_verum
+    exact imply_left_verum!
   le_himp_iff p q r := by
     induction' p using Quotient.ind with p
     induction' q using Quotient.ind with q
@@ -187,7 +187,7 @@ instance LindenbaumAlgebra.boolean : BooleanAlgebra (LindenbaumAlgebra 𝓢) whe
   le_top p := by
     induction' p using Quotient.ind with p
     simp only [top_def, le_def]
-    exact imply_left_verum
+    exact imply_left_verum!
   bot_le p := by
     induction' p using Quotient.ind with p
     simp only [bot_def, le_def]
