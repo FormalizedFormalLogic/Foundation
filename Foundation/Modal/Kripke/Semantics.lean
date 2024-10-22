@@ -506,9 +506,8 @@ open Formula (atom)
 open Formula.Kripke
 open Kripke (K_sound)
 
-variable [DecidableEq α] [Inhabited α]
 
-theorem K_strictlyWeakerThan_KD : (𝐊 : Hilbert α) <ₛ 𝐊𝐃 := by
+theorem K_strictlyWeakerThan_KD [DecidableEq α] [Inhabited α] : (𝐊 : Hilbert α) <ₛ 𝐊𝐃 := by
   constructor;
   . apply K_weakerThan_KD;
   . simp [weakerThan_iff];
@@ -520,7 +519,7 @@ theorem K_strictlyWeakerThan_KD : (𝐊 : Hilbert α) <ₛ 𝐊𝐃 := by
       use ⟨Fin 1, λ _ _ => False⟩, (λ w _ => w = 0), 0;
       simp [Satisfies];
 
-theorem K_strictlyWeakerThan_KB : (𝐊 : Hilbert α) <ₛ 𝐊𝐁 := by
+theorem K_strictlyWeakerThan_KB [DecidableEq α] [Inhabited α] : (𝐊 : Hilbert α) <ₛ 𝐊𝐁 := by
   constructor;
   . apply K_weakerThan_KB;
   . simp [weakerThan_iff];
@@ -533,7 +532,7 @@ theorem K_strictlyWeakerThan_KB : (𝐊 : Hilbert α) <ₛ 𝐊𝐁 := by
       simp [Satisfies];
       use 1;
 
-theorem K_strictlyWeakerThan_K4 : (𝐊 : Hilbert α) <ₛ 𝐊𝟒 := by
+theorem K_strictlyWeakerThan_K4 [DecidableEq α] [Inhabited α] : (𝐊 : Hilbert α) <ₛ 𝐊𝟒 := by
   constructor;
   . apply K_weakerThan_K4;
   . simp [weakerThan_iff];
@@ -554,7 +553,7 @@ theorem K_strictlyWeakerThan_K4 : (𝐊 : Hilbert α) <ₛ 𝐊𝟒 := by
         . aesop;
         . use 0; aesop;
 
-theorem K_strictlyWeakerThan_K5 : (𝐊 : Hilbert α) <ₛ 𝐊𝟓 := by
+theorem K_strictlyWeakerThan_K5 [DecidableEq α] [Inhabited α] : (𝐊 : Hilbert α) <ₛ 𝐊𝟓 := by
   constructor;
   . apply K_weakerThan_K5;
   . simp [weakerThan_iff];
@@ -572,17 +571,20 @@ theorem K_strictlyWeakerThan_K5 : (𝐊 : Hilbert α) <ₛ 𝐊𝟓 := by
 section
 
 variable {Ax₁ Ax₂ : Theory α} (𝔽₁ 𝔽₂ : FrameClass)
-  [sound₁ : Sound 𝜿Ax₁ (𝔽₁#α)] [sound₂ : Sound 𝜿Ax₂ (𝔽₂#α)]
-  [complete₁ : Complete 𝜿Ax₁ (𝔽₁#α)] [complete₂ : Complete 𝜿Ax₂ (𝔽₂#α)]
 
-lemma weakerThan_of_subset_FrameClass (h𝔽 : 𝔽₂ ⊆ 𝔽₁) : 𝜿Ax₁ ≤ₛ 𝜿Ax₂ := by
+lemma weakerThan_of_subset_FrameClass
+  [sound₁ : Sound 𝜿Ax₁ 𝔽₁#α] [complete₂ : Complete 𝜿Ax₂ 𝔽₂#α]
+  (h𝔽 : 𝔽₂ ⊆ 𝔽₁) : 𝜿Ax₁ ≤ₛ 𝜿Ax₂ := by
   apply System.weakerThan_iff.mpr;
   intro p hp;
   apply complete₂.complete;
   intro F hF;
   exact sound₁.sound hp $ h𝔽 hF;
 
-lemma equiv_of_eq_FrameClass (h𝔽 : 𝔽₁ = 𝔽₂) : 𝜿Ax₁ =ₛ 𝜿Ax₂ := by
+lemma equiv_of_eq_FrameClass
+  [sound₁ : Sound 𝜿Ax₁ 𝔽₁#α] [sound₂ : Sound 𝜿Ax₂ 𝔽₂#α]
+  [complete₁ : Complete 𝜿Ax₁ 𝔽₁#α] [complete₂ : Complete 𝜿Ax₂ 𝔽₂#α]
+  (h𝔽 : 𝔽₁ = 𝔽₂) : 𝜿Ax₁ =ₛ 𝜿Ax₂ := by
   apply System.Equiv.antisymm_iff.mpr;
   constructor;
   . apply weakerThan_of_subset_FrameClass 𝔽₁ 𝔽₂; subst_vars; rfl;

@@ -119,7 +119,7 @@ lemma deducible_iff_verTranslation : 𝐕𝐞𝐫 ⊢! p ⭤ pⱽ := by
   | hbox =>
     apply iff_intro!;
     . exact imply₁'! verum!
-    . exact dhyp! (by simp)
+    . exact imply₁'! (by simp)
   | himp _ _ ih₁ ih₂ => exact imp_replace_iff! ih₁ ih₂;
   | _ => apply iff_id!
 

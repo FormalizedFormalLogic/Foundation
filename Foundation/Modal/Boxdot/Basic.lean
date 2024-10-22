@@ -23,7 +23,7 @@ variable {p : Formula α}
 
 theorem boxdotTranslated
   {Λ₁ Λ₂ : Hilbert α} [Λ₁.IsNormal] [Λ₂.IsNormal]
-  (h : ∀ p ∈ Ax(Λ₁), Λ₂ ⊢! pᵇ) : Λ₁ ⊢! p → Λ₂ ⊢! pᵇ := by
+  (h : ∀ p ∈ Λ₁.axioms, Λ₂ ⊢! pᵇ) : Λ₁ ⊢! p → Λ₂ ⊢! pᵇ := by
   intro d;
   induction d using Deduction.inducition_with_necOnly! with
   | hMaxm hs => exact h _ hs;

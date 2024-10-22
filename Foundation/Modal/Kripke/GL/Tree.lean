@@ -21,7 +21,7 @@ lemma modal_equivalence_at_root_on_treeUnravelling (M : Kripke.Model α) (M_tran
 
 section
 
-variable [Inhabited α] [DecidableEq α]
+
 variable {p : Formula α}
 
 open Classical
@@ -46,6 +46,7 @@ lemma valid_on_TransitiveIrreflexiveFrameClass_of_satisfies_at_root_on_FiniteTra
   apply modal_equivalence_at_root_on_treeUnravelling (M↾r) (Frame.PointGenerated.rel_transitive F_trans) ⟨r, by tauto⟩ |>.mp;
   exact H ⟨(F.FiniteTransitiveTreeUnravelling F_trans F_irrefl r), (M.FiniteTransitiveTreeUnravelling r).Valuation⟩;
 
+variable [Inhabited α] [DecidableEq α]
 theorem iff_provable_GL_satisfies_at_root_on_FiniteTransitiveTree : 𝐆𝐋 ⊢! p ↔ (∀ M : FiniteTransitiveTreeModel.{u, u} α, M.root ⊧ p) := by
   constructor;
   . intro h M;
@@ -198,7 +199,7 @@ lemma GL_imply_boxdot_plain_of_imply_box_box : 𝐆𝐋 ⊢! □p ➝ □q → �
 
 theorem GL_unnecessitation! : 𝐆𝐋 ⊢! □p → 𝐆𝐋 ⊢! p := by
   intro h;
-  have : 𝐆𝐋 ⊢! □⊤ ➝ □p := dhyp! (q := □⊤) h;
+  have : 𝐆𝐋 ⊢! □⊤ ➝ □p := imply₁'! (q := □⊤) h;
   have : 𝐆𝐋 ⊢! ⊡⊤ ➝ p := GL_imply_boxdot_plain_of_imply_box_box this;
   exact this ⨀ boxdotverum!;
 

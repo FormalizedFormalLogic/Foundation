@@ -158,7 +158,7 @@ attribute [simp] Hilbert.IsGeach.char
 
 namespace IsGeach
 
-lemma ax {Λ : Hilbert α} [geach : Λ.IsGeach ts] : Ax(Λ) = (𝗞 ∪ 𝗚𝗲(ts)) := by
+lemma ax {Λ : Hilbert α} [geach : Λ.IsGeach ts] : Λ.axioms = (𝗞 ∪ 𝗚𝗲(ts)) := by
   have e := geach.char;
   simp [Modal.Geach] at e;
   simp_all;
