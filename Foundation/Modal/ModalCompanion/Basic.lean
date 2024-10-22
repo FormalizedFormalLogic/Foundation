@@ -23,13 +23,13 @@ postfix:90 "ᵍ" => GoedelTranslation
 class ModalCompanion (iΛ : IntProp.Hilbert α) (mΛ : Modal.Hilbert α) where
   companion : ∀ {p : IntProp.Formula α}, iΛ ⊢! p ↔ mΛ ⊢! pᵍ
 
-variable {α : Type u} [DecidableEq α] [Inhabited α] [Encodable α]
+variable {α : Type u}
 variable {iΛ : IntProp.Hilbert α} {mΛ : Hilbert α}
 variable {p q r : IntProp.Formula α}
 
-lemma axiomTc_GTranslate! [System.K4 mΛ] : mΛ ⊢! pᵍ ➝ □pᵍ := by
+lemma axiomTc_GTranslate! [DecidableEq α] [System.K4 mΛ] : mΛ ⊢! pᵍ ➝ □pᵍ := by
   induction p using IntProp.Formula.rec' with
-  | hverum => exact dhyp! (nec! verum!);
+  | hverum => exact imply₁'! (nec! verum!);
   | hfalsum => simp only [GoedelTranslation, efq!];
   | hand p q ihp ihq =>
     simp only [GoedelTranslation];
@@ -42,11 +42,11 @@ lemma axiomTc_GTranslate! [System.K4 mΛ] : mΛ ⊢! pᵍ ➝ □pᵍ := by
 
 section
 
-private lemma provable_efq_of_provable_S4.case_imply₁ [System.K4 mΛ] : mΛ ⊢! (p ➝ q ➝ p)ᵍ := by
+private lemma provable_efq_of_provable_S4.case_imply₁ [DecidableEq α] [System.K4 mΛ] : mΛ ⊢! (p ➝ q ➝ p)ᵍ := by
   simp only [GoedelTranslation];
   exact nec! $ imp_trans''! axiomTc_GTranslate! $ axiomK'! $ nec! $ imply₁!;
 
-private lemma provable_efq_of_provable_S4.case_imply₂ [System.S4 mΛ] : mΛ ⊢! ((p ➝ q ➝ r) ➝ (p ➝ q) ➝ p ➝ r)ᵍ := by
+private lemma provable_efq_of_provable_S4.case_imply₂ [DecidableEq α] [System.S4 mΛ] : mΛ ⊢! ((p ➝ q ➝ r) ➝ (p ➝ q) ➝ p ➝ r)ᵍ := by
   simp only [GoedelTranslation];
   apply nec! $ imp_trans''! (imp_trans''! (axiomK'! $ nec! ?b) axiomFour!) $ axiomK'! $ nec! $ imp_trans''! (axiomK'! $ nec! imply₂!) axiomK!;
   apply provable_iff_provable.mpr;
@@ -56,7 +56,7 @@ private lemma provable_efq_of_provable_S4.case_imply₂ [System.S4 mΛ] : mΛ �
   have : [pᵍ, pᵍ ➝ □(qᵍ ➝ rᵍ)] ⊢[mΛ]! (pᵍ ➝ □(qᵍ ➝ rᵍ)) := by_axm!;
   have : [pᵍ, pᵍ ➝ □(qᵍ ➝ rᵍ)] ⊢[mΛ]! □(qᵍ ➝ rᵍ) := (by assumption) ⨀ (by assumption);
   exact axiomT'! this;
-private lemma provable_efq_of_provable_S4.case_and₃ [System.K4 mΛ] : mΛ ⊢! (p ➝ q ➝ p ⋏ q)ᵍ := by
+private lemma provable_efq_of_provable_S4.case_and₃ [DecidableEq α] [System.K4 mΛ] : mΛ ⊢! (p ➝ q ➝ p ⋏ q)ᵍ := by
   simp only [GoedelTranslation];
   exact nec! $ imp_trans''! axiomTc_GTranslate! $ axiomK'! $ nec! $ and₃!
 
@@ -73,7 +73,7 @@ private lemma provable_efq_of_provable_S4.case_neg_equiv [System.K4 mΛ] : mΛ �
 instance [System.S4 mΛ] : System.K4 mΛ where
 
 open provable_efq_of_provable_S4 in
-lemma provable_efq_of_provable_S4 (h : 𝐈𝐧𝐭 ⊢! p) : 𝐒𝟒 ⊢! pᵍ := by
+lemma provable_efq_of_provable_S4 [DecidableEq α] (h : 𝐈𝐧𝐭 ⊢! p) : 𝐒𝟒 ⊢! pᵍ := by
   induction h.some with
   | eaxm ih =>
     simp_all only [Set.mem_setOf_eq];
@@ -95,13 +95,13 @@ lemma provable_efq_of_provable_S4 (h : 𝐈𝐧𝐭 ⊢! p) : 𝐒𝟒 ⊢! pᵍ
 end
 
 
-lemma dp_of_mdp [ModalDisjunctive mΛ] [ModalCompanion iΛ mΛ] [System.S4 mΛ] : iΛ ⊢! p ⋎ q → iΛ ⊢! p ∨ iΛ ⊢! q := by
+lemma dp_of_mdp [DecidableEq α] [ModalDisjunctive mΛ] [ModalCompanion iΛ mΛ] [System.S4 mΛ] : iΛ ⊢! p ⋎ q → iΛ ⊢! p ∨ iΛ ⊢! q := by
     intro hpq;
     have : mΛ ⊢! □pᵍ ⋎ □qᵍ := or₃'''! (imply_left_or'! axiomTc_GTranslate!) (imply_right_or'! axiomTc_GTranslate!) (by simpa using ModalCompanion.companion.mp hpq);
     cases ModalDisjunctive.modal_disjunctive this with
     | inl h => left; exact ModalCompanion.companion.mpr h;
     | inr h => right; exact ModalCompanion.companion.mpr h;
 
-theorem disjunctive_of_modalDisjunctive [ModalDisjunctive mΛ] [ModalCompanion iΛ mΛ] [System.S4 mΛ] : Disjunctive iΛ := ⟨dp_of_mdp (iΛ := iΛ) (mΛ := mΛ)⟩
+theorem disjunctive_of_modalDisjunctive [DecidableEq α] [ModalDisjunctive mΛ] [ModalCompanion iΛ mΛ] [System.S4 mΛ] : Disjunctive iΛ := ⟨dp_of_mdp (iΛ := iΛ) (mΛ := mΛ)⟩
 
 end LO.Modal

@@ -21,7 +21,7 @@ protected lemma ProvablyEquivalent.symm [System.Minimal 𝓢] {p q : F} : p ≡ 
 protected lemma ProvablyEquivalent.trans [System.Minimal 𝓢] {p q r : F} : p ≡ q → q ≡ r → p ≡ r := iff_trans''!
 
 lemma provable_iff_provablyEquivalent_verum [System.Minimal 𝓢] {p : F} : 𝓢 ⊢! p ↔ p ≡ ⊤ :=
-  ⟨fun h ↦ iff_intro! imply_left_verum! (dhyp! h), fun h ↦ (and_right! h) ⨀ verum!⟩
+  ⟨fun h ↦ iff_intro! imply_left_verum! (imply₁'! h), fun h ↦ (and_right! h) ⨀ verum!⟩
 
 variable (𝓢)
 
@@ -183,7 +183,7 @@ instance LindenbaumAlgebra.boolean : BooleanAlgebra (LindenbaumAlgebra 𝓢) whe
   top_le_sup_compl p := by
     induction' p using Quotient.ind with p
     simp [compl_def, sup_def, top_def, le_def]
-    apply dhyp! lem!
+    apply imply₁'! lem!
   le_top p := by
     induction' p using Quotient.ind with p
     simp only [top_def, le_def]

@@ -597,7 +597,7 @@ lemma conjconj_subset! (h : ∀ p, p ∈ Γ → p ∈ Δ) : 𝓢 ⊢! ⋀Δ ➝ 
 
 lemma conjconj_provable! (h : ∀ p, p ∈ Γ → Δ ⊢[𝓢]! p) : 𝓢 ⊢! ⋀Δ ➝ ⋀Γ :=
   by induction Γ using List.induction_with_singleton with
-  | hnil => exact dhyp! verum!;
+  | hnil => exact imply₁'! verum!;
   | hsingle => simp_all; exact provable_iff.mp h;
   | hcons p Γ hne ih => simp_all; exact imply_right_and! (provable_iff.mp h.1) ih;
 
@@ -618,7 +618,7 @@ lemma iff_imply_left_cons_conj'! : 𝓢 ⊢! ⋀(p :: Γ) ➝ q ↔ 𝓢 ⊢! p 
   | nil =>
     simp [and_imply_iff_imply_imply'!];
     constructor;
-    . intro h; apply imp_swap'!; exact dhyp! h;
+    . intro h; apply imp_swap'!; exact imply₁'! h;
     . intro h; exact imp_swap'! h ⨀ verum!;
   | cons q ih => simp;
 

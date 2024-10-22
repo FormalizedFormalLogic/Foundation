@@ -655,7 +655,7 @@ lemma multibox_cons_conj! :  𝓢 ⊢! ⋀(□'^[n](p :: Γ)) ➝ ⋀□'^[n]Γ 
 @[simp]
 lemma collect_multibox_conj! : 𝓢 ⊢! ⋀□'^[n]Γ ➝ □^[n]⋀Γ := by
   induction Γ using List.induction_with_singleton with
-  | hnil => simpa using dhyp! multiboxverum!;
+  | hnil => simpa using imply₁'! multiboxverum!;
   | hsingle => simp;
   | hcons p Γ h ih =>
     simp_all;

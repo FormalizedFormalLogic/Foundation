@@ -39,7 +39,6 @@ def imply₁' [ModusPonens 𝓢] [HasAxiomImply₁ 𝓢] (h : 𝓢 ⊢ p) : 𝓢
 lemma imply₁'! [ModusPonens 𝓢] [HasAxiomImply₁ 𝓢] (d : 𝓢 ⊢! p) : 𝓢 ⊢! q ➝ p := ⟨imply₁' d.some⟩
 
 @[deprecated imply₁'] def dhyp [ModusPonens 𝓢] [HasAxiomImply₁ 𝓢] (q : F) (b : 𝓢 ⊢ p) : 𝓢 ⊢ q ➝ p := imply₁' b
-@[deprecated imply₁'!] lemma dhyp! [ModusPonens 𝓢] [HasAxiomImply₁ 𝓢] (b : 𝓢 ⊢! p) : 𝓢 ⊢! q ➝ p := ⟨dhyp _ b.some⟩
 
 
 class HasAxiomImply₂ (𝓢 : S)  where

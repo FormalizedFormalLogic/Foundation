@@ -425,7 +425,7 @@ lemma mem₂_neg_of_mem₁ : p ∈ t.tableau.1 → ∼p ∈ t.tableau.2 := by
 
 lemma mem₁_of_provable : Λ ⊢! p → p ∈ t.tableau.1 := by
   intro h;
-  exact mdp₁ mem₁_verum $ dhyp! h;
+  exact mdp₁ mem₁_verum $ imply₁'! h;
 
 lemma mdp₁_mem (hp : p ∈ t.tableau.1) (h : p ➝ q ∈ t.tableau.1) : q ∈ t.tableau.1 := by
   apply not_mem₂_iff_mem₁.mp;

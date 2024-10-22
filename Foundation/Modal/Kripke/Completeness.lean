@@ -8,7 +8,7 @@ open System
 open Formula
 open MaximalConsistentTheory
 
-variable {α : Type u} [DecidableEq α] [Inhabited α]
+variable {α : Type u} [DecidableEq α]
 variable {Λ : Hilbert α} [Λ.IsNormal]
 
 namespace Kripke
@@ -22,8 +22,8 @@ namespace CanonicalFrame
 variable [Nonempty (MCT Λ)]
 variable {Ω₁ Ω₂ : (CanonicalFrame Λ).World}
 
-@[simp]
-lemma rel_def_box: Ω₁ ≺ Ω₂ ↔ ∀ {p}, □p ∈ Ω₁.theory → p ∈ Ω₂.theory := by simp [Frame.Rel']; aesop;
+omit [DecidableEq α] [Λ.IsNormal] in
+@[simp] lemma rel_def_box: Ω₁ ≺ Ω₂ ↔ ∀ {p}, □p ∈ Ω₁.theory → p ∈ Ω₂.theory := by simp [Frame.Rel']; aesop;
 
 lemma multirel_def_multibox : Ω₁ ≺^[n] Ω₂ ↔ ∀ {p}, □^[n]p ∈ Ω₁.theory → p ∈ Ω₂.theory := by
   induction n generalizing Ω₁ Ω₂ with
@@ -165,7 +165,7 @@ lemma iff_valid_on_canonicalModel_deducible : (CanonicalModel Λ) ⊧ p ↔ Λ �
     have : Γ ⊬[Λ] ⊥ := Theory.def_consistent.mp Ω.consistent _ hΓ₁;
     contradiction;
 
-lemma realize_axiomset_of_self_canonicalModel : (CanonicalModel Λ) ⊧* Ax(Λ) := by
+lemma realize_axiomset_of_self_canonicalModel : (CanonicalModel Λ) ⊧* Λ.axioms := by
   apply Semantics.realizeSet_iff.mpr;
   intro p hp;
   apply iff_valid_on_canonicalModel_deducible.mpr;

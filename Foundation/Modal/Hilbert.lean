@@ -6,31 +6,36 @@ namespace LO.Modal
 
 variable {α : Type*}
 
+section
+
 /-- instance of inference rule -/
 structure InferenceRule (α : Type*) where
   antecedents : List (Formula α)
+  consequence : Formula α
   /--
   Empty antecedent rule can be simply regarded as axiom rule.
   However, union of all these rules including to `Hilbert.rules` would be too complex for implementation and induction,
   so more than one antecedent is required.
   -/
   antecedents_nonempty : antecedents ≠ [] := by simp
-  consequence : Formula α
 
-abbrev InferenceRules (α : Type*) := Set (InferenceRule α)
+abbrev Necessitation (p : Formula α) : InferenceRule α := ⟨[p], □p, by simp⟩
+abbrev Necessitation.set : Set (InferenceRule α) := { Necessitation p | p }
+notation "⟮Nec⟯" => Necessitation.set
 
-abbrev Necessitation {α} : InferenceRules α := { { antecedents := [p], consequence := □p} | (p) }
-notation "⟮Nec⟯" => Necessitation
+abbrev LoebRule (p : Formula α) : InferenceRule α := ⟨[□p ➝ p], p, by simp⟩
+abbrev LoebRule.set : Set (InferenceRule α) := { LoebRule p | p }
+notation "⟮Loeb⟯" => LoebRule.set
 
-abbrev LoebRule {α} : InferenceRules α := { { antecedents := [□p ➝ p], consequence := p} | (p) }
-notation "⟮Loeb⟯" => LoebRule
+abbrev HenkinRule (p : Formula α) : InferenceRule α := ⟨[□p ⭤ p], p, by simp⟩
+abbrev HenkinRule.set : Set (InferenceRule α) := { HenkinRule p | p }
+notation "⟮Henkin⟯" => HenkinRule.set
 
-abbrev HenkinRule {α} : InferenceRules α := { { antecedents := [□p ⭤ p], consequence := p }| (p) }
-notation "⟮Henkin⟯" => HenkinRule
+end
 
 structure Hilbert (α : Type*) where
   axioms : Theory α
-  rules : InferenceRules α
+  rules : Set (InferenceRule α)
 
 inductive Deduction (Λ : Hilbert α) : (Formula α) → Type _
   | maxm {p}     : p ∈ Λ.axioms → Deduction Λ p
@@ -99,6 +104,8 @@ instance [HasAxiomK Λ] : System.HasAxiomK Λ where
   K _ _ := maxm (by apply HasAxiomK.has_axiomK; simp_all)
 
 class IsNormal (Λ : Hilbert α) extends Λ.HasNecOnly, Λ.HasAxiomK where
+
+instance [IsNormal Λ] : System.K Λ where
 
 end Hilbert
 
