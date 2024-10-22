@@ -428,10 +428,10 @@ def multibox_axiomK : 𝓢 ⊢ □^[n](p ➝ q) ➝ □^[n]p ➝ □^[n]q := by
   induction n with
   | zero => simp; apply impId;
   | succ n ih => simpa using impTrans'' (axiomK' $ nec ih) (by apply axiomK);
-@[simp] lemma multibox_axiomK! : 𝓢 ⊢! □^[n](p ➝ q) ➝ □^[n]p ➝ □^[n]q := ⟨multibox_axiomK⟩
+omit [DecidableEq F] in @[simp] lemma multibox_axiomK! : 𝓢 ⊢! □^[n](p ➝ q) ➝ □^[n]p ➝ □^[n]q := ⟨multibox_axiomK⟩
 
 def multibox_axiomK' (h : 𝓢 ⊢ □^[n](p ➝ q)) : 𝓢 ⊢ □^[n]p ➝ □^[n]q := multibox_axiomK ⨀ h
-@[simp] lemma multibox_axiomK'! (h : 𝓢 ⊢! □^[n](p ➝ q)) : 𝓢 ⊢! □^[n]p ➝ □^[n]q := ⟨multibox_axiomK' h.some⟩
+omit [DecidableEq F] in @[simp] lemma multibox_axiomK'! (h : 𝓢 ⊢! □^[n](p ➝ q)) : 𝓢 ⊢! □^[n]p ➝ □^[n]q := ⟨multibox_axiomK' h.some⟩
 
 alias multiboxedImplyDistribute := multibox_axiomK'
 alias multiboxed_imply_distribute! := multibox_axiomK'!
@@ -441,24 +441,25 @@ def boxIff' (h : 𝓢 ⊢ p ⭤ q) : 𝓢 ⊢ (□p ⭤ □q) := by
   apply iffIntro;
   . exact axiomK' $ nec $ and₁' h;
   . exact axiomK' $ nec $ and₂' h;
-@[simp] lemma box_iff! (h : 𝓢 ⊢! p ⭤ q) : 𝓢 ⊢! □p ⭤ □q := ⟨boxIff' h.some⟩
+omit [DecidableEq F] in @[simp] lemma box_iff! (h : 𝓢 ⊢! p ⭤ q) : 𝓢 ⊢! □p ⭤ □q := ⟨boxIff' h.some⟩
 
 def multiboxIff' (h : 𝓢 ⊢ p ⭤ q) : 𝓢 ⊢ □^[n]p ⭤ □^[n]q := by
   induction n with
   | zero => simpa;
   | succ n ih => simpa using boxIff' ih;
-@[simp] lemma multibox_iff! (h : 𝓢 ⊢! p ⭤ q) : 𝓢 ⊢! □^[n]p ⭤ □^[n]q := ⟨multiboxIff' h.some⟩
+omit [DecidableEq F] in @[simp] lemma multibox_iff! (h : 𝓢 ⊢! p ⭤ q) : 𝓢 ⊢! □^[n]p ⭤ □^[n]q := ⟨multiboxIff' h.some⟩
 
 
 def diaDuality_mp : 𝓢 ⊢ ◇p ➝ ∼(□(∼p)) := and₁' diaDuality
-@[simp] lemma diaDuality_mp! : 𝓢 ⊢! ◇p ➝ ∼(□(∼p)) := ⟨diaDuality_mp⟩
+omit [DecidableEq F] in @[simp] lemma diaDuality_mp! : 𝓢 ⊢! ◇p ➝ ∼(□(∼p)) := ⟨diaDuality_mp⟩
 
 def diaDuality_mpr : 𝓢 ⊢ ∼(□(∼p)) ➝ ◇p := and₂' diaDuality
-@[simp] lemma diaDuality_mpr! : 𝓢 ⊢! ∼(□(∼p)) ➝ ◇p := ⟨diaDuality_mpr⟩
+omit [DecidableEq F] in @[simp] lemma diaDuality_mpr! : 𝓢 ⊢! ∼(□(∼p)) ➝ ◇p := ⟨diaDuality_mpr⟩
 
 def diaDuality'.mp (h : 𝓢 ⊢ ◇p) : 𝓢 ⊢ ∼(□(∼p)) := (and₁' diaDuality) ⨀ h
 def diaDuality'.mpr (h : 𝓢 ⊢ ∼(□(∼p))) : 𝓢 ⊢ ◇p := (and₂' diaDuality) ⨀ h
 
+omit [DecidableEq F] in
 lemma dia_duality'! : 𝓢 ⊢! ◇p ↔ 𝓢 ⊢! ∼(□(∼p)) := ⟨
   λ h => ⟨diaDuality'.mp h.some⟩,
   λ h => ⟨diaDuality'.mpr h.some⟩
@@ -534,26 +535,26 @@ lemma multibox_duality'! : 𝓢 ⊢! □^[n]p ↔ 𝓢 ⊢! ∼(◇^[n](∼p)) :
 lemma box_duality'! : 𝓢 ⊢! □p ↔ 𝓢 ⊢! ∼(◇(∼p)) := multibox_duality'! (n := 1)
 
 def box_dne : 𝓢 ⊢ □(∼∼p) ➝ □p := axiomK' $ nec dne
-@[simp] lemma box_dne! : 𝓢 ⊢! □(∼∼p) ➝ □p := ⟨box_dne⟩
+omit [DecidableEq F] in @[simp] lemma box_dne! : 𝓢 ⊢! □(∼∼p) ➝ □p := ⟨box_dne⟩
 
 def box_dne' (h : 𝓢 ⊢ □(∼∼p)): 𝓢 ⊢ □p := box_dne ⨀ h
-lemma box_dne'! (h : 𝓢 ⊢! □(∼∼p)): 𝓢 ⊢! □p := ⟨box_dne' h.some⟩
+omit [DecidableEq F] in lemma box_dne'! (h : 𝓢 ⊢! □(∼∼p)): 𝓢 ⊢! □p := ⟨box_dne' h.some⟩
 
 
 def multiboxverum : 𝓢 ⊢ (□^[n]⊤ : F) := multinec verum
-@[simp] lemma multiboxverum! : 𝓢 ⊢! (□^[n]⊤ : F) := ⟨multiboxverum⟩
+omit [DecidableEq F] in @[simp] lemma multiboxverum! : 𝓢 ⊢! (□^[n]⊤ : F) := ⟨multiboxverum⟩
 
 def boxverum : 𝓢 ⊢ (□⊤ : F) := multiboxverum (n := 1)
-@[simp] lemma boxverum! : 𝓢 ⊢! (□⊤ : F) := ⟨boxverum⟩
+omit [DecidableEq F] in @[simp] lemma boxverum! : 𝓢 ⊢! (□⊤ : F) := ⟨boxverum⟩
 
 def boxdotverum : 𝓢 ⊢ (⊡⊤ : F) := andIntro verum boxverum
-@[simp] lemma boxdotverum! : 𝓢 ⊢! (⊡⊤ : F) := ⟨boxdotverum⟩
+omit [DecidableEq F] in @[simp] lemma boxdotverum! : 𝓢 ⊢! (⊡⊤ : F) := ⟨boxdotverum⟩
 
 def implyMultiboxDistribute' (h : 𝓢 ⊢ p ➝ q) : 𝓢 ⊢ □^[n]p ➝ □^[n]q := multibox_axiomK' $ multinec h
-lemma imply_multibox_distribute'! (h : 𝓢 ⊢! p ➝ q) : 𝓢 ⊢! □^[n]p ➝ □^[n]q := ⟨implyMultiboxDistribute' h.some⟩
+omit [DecidableEq F] in lemma imply_multibox_distribute'! (h : 𝓢 ⊢! p ➝ q) : 𝓢 ⊢! □^[n]p ➝ □^[n]q := ⟨implyMultiboxDistribute' h.some⟩
 
 def implyBoxDistribute' (h : 𝓢 ⊢ p ➝ q) : 𝓢 ⊢ □p ➝ □q := implyMultiboxDistribute' (n := 1) h
-lemma imply_box_distribute'! (h : 𝓢 ⊢! p ➝ q) : 𝓢 ⊢! □p ➝ □q := ⟨implyBoxDistribute' h.some⟩
+omit [DecidableEq F] in lemma imply_box_distribute'! (h : 𝓢 ⊢! p ➝ q) : 𝓢 ⊢! □p ➝ □q := ⟨implyBoxDistribute' h.some⟩
 
 
 def distribute_multibox_and : 𝓢 ⊢ □^[n](p ⋏ q) ➝ □^[n]p ⋏ □^[n]q := implyRightAnd (implyMultiboxDistribute' and₁) (implyMultiboxDistribute' and₂)
@@ -603,16 +604,16 @@ def collect_multibox_and : 𝓢 ⊢ □^[n]p ⋏ □^[n]q ➝ □^[n](p ⋏ q) :
   have d₁ : 𝓢 ⊢ □^[n]p ➝ □^[n](q ➝ p ⋏ q) := implyMultiboxDistribute' and₃;
   have d₂ : 𝓢 ⊢ □^[n](q ➝ p ⋏ q) ➝ (□^[n]q ➝ □^[n](p ⋏ q)) := multibox_axiomK;
   exact (and₂' (andImplyIffImplyImply _ _ _)) ⨀ (impTrans'' d₁ d₂);
-@[simp] lemma collect_multibox_and! : 𝓢 ⊢! □^[n]p ⋏ □^[n]q ➝ □^[n](p ⋏ q) := ⟨collect_multibox_and⟩
+omit [DecidableEq F] in @[simp] lemma collect_multibox_and! : 𝓢 ⊢! □^[n]p ⋏ □^[n]q ➝ □^[n](p ⋏ q) := ⟨collect_multibox_and⟩
 
 def collect_box_and : 𝓢 ⊢ □p ⋏ □q ➝ □(p ⋏ q) := collect_multibox_and (n := 1)
-@[simp] lemma collect_box_and! : 𝓢 ⊢! □p ⋏ □q ➝ □(p ⋏ q) := ⟨collect_box_and⟩
+omit [DecidableEq F] in @[simp] lemma collect_box_and! : 𝓢 ⊢! □p ⋏ □q ➝ □(p ⋏ q) := ⟨collect_box_and⟩
 
 def collect_multibox_and' (h : 𝓢 ⊢ □^[n]p ⋏ □^[n]q) : 𝓢 ⊢ □^[n](p ⋏ q) := collect_multibox_and ⨀ h
-lemma collect_multibox_and'! (h : 𝓢 ⊢! □^[n]p ⋏ □^[n]q) : 𝓢 ⊢! □^[n](p ⋏ q) := ⟨collect_multibox_and' h.some⟩
+omit [DecidableEq F] in lemma collect_multibox_and'! (h : 𝓢 ⊢! □^[n]p ⋏ □^[n]q) : 𝓢 ⊢! □^[n](p ⋏ q) := ⟨collect_multibox_and' h.some⟩
 
 def collect_box_and' (h : 𝓢 ⊢ □p ⋏ □q) : 𝓢 ⊢ □(p ⋏ q) := collect_multibox_and' (n := 1) h
-lemma collect_box_and'! (h : 𝓢 ⊢! □p ⋏ □q) : 𝓢 ⊢! □(p ⋏ q) := ⟨collect_box_and' h.some⟩
+omit [DecidableEq F] in lemma collect_box_and'! (h : 𝓢 ⊢! □p ⋏ □q) : 𝓢 ⊢! □(p ⋏ q) := ⟨collect_box_and' h.some⟩
 
 
 lemma multiboxConj'_iff! : 𝓢 ⊢! □^[n]⋀Γ ↔ ∀ p ∈ Γ, 𝓢 ⊢! □^[n]p := by
@@ -665,16 +666,16 @@ lemma collect_box_conj! : 𝓢 ⊢! ⋀(□'Γ) ➝ □(⋀Γ) := collect_multib
 
 
 def collect_multibox_or : 𝓢 ⊢ □^[n]p ⋎ □^[n]q ➝ □^[n](p ⋎ q) := or₃'' (multibox_axiomK' $ multinec or₁) (multibox_axiomK' $ multinec or₂)
-@[simp] lemma collect_multibox_or! : 𝓢 ⊢! □^[n]p ⋎ □^[n]q ➝ □^[n](p ⋎ q) := ⟨collect_multibox_or⟩
+omit [DecidableEq F] in @[simp] lemma collect_multibox_or! : 𝓢 ⊢! □^[n]p ⋎ □^[n]q ➝ □^[n](p ⋎ q) := ⟨collect_multibox_or⟩
 
 def collect_box_or : 𝓢 ⊢ □p ⋎ □q ➝ □(p ⋎ q) := collect_multibox_or (n := 1)
-@[simp] lemma collect_box_or! : 𝓢 ⊢! □p ⋎ □q ➝ □(p ⋎ q) := ⟨collect_box_or⟩
+omit [DecidableEq F] in @[simp] lemma collect_box_or! : 𝓢 ⊢! □p ⋎ □q ➝ □(p ⋎ q) := ⟨collect_box_or⟩
 
 def collect_multibox_or' (h : 𝓢 ⊢ □^[n]p ⋎ □^[n]q) : 𝓢 ⊢ □^[n](p ⋎ q) := collect_multibox_or ⨀ h
-lemma collect_multibox_or'! (h : 𝓢 ⊢! □^[n]p ⋎ □^[n]q) : 𝓢 ⊢! □^[n](p ⋎ q) := ⟨collect_multibox_or' h.some⟩
+omit [DecidableEq F] in lemma collect_multibox_or'! (h : 𝓢 ⊢! □^[n]p ⋎ □^[n]q) : 𝓢 ⊢! □^[n](p ⋎ q) := ⟨collect_multibox_or' h.some⟩
 
 def collect_box_or' (h : 𝓢 ⊢ □p ⋎ □q) : 𝓢 ⊢ □(p ⋎ q) := collect_multibox_or' (n := 1) h
-lemma collect_box_or'! (h : 𝓢 ⊢! □p ⋎ □q) : 𝓢 ⊢! □(p ⋎ q) := ⟨collect_box_or' h.some⟩
+omit [DecidableEq F] in lemma collect_box_or'! (h : 𝓢 ⊢! □p ⋎ □q) : 𝓢 ⊢! □(p ⋎ q) := ⟨collect_box_or' h.some⟩
 
 def diaOrInst₁ : 𝓢 ⊢ ◇p ➝ ◇(p ⋎ q) := by
   apply impTrans'' (and₁' diaDuality);
@@ -743,13 +744,13 @@ def boxdotAxiomK : 𝓢 ⊢ ⊡(p ➝ q) ➝ (⊡p ➝ ⊡q) := by
 @[simp] lemma boxdot_axiomK! : 𝓢 ⊢! ⊡(p ➝ q) ➝ (⊡p ➝ ⊡q) := ⟨boxdotAxiomK⟩
 
 def boxdotAxiomT : 𝓢 ⊢ ⊡p ➝ p := by exact and₁;
-@[simp] lemma boxdot_axiomT! : 𝓢 ⊢! ⊡p ➝ p := ⟨boxdotAxiomT⟩
+omit [DecidableEq F] in @[simp] lemma boxdot_axiomT! : 𝓢 ⊢! ⊡p ➝ p := ⟨boxdotAxiomT⟩
 
 def boxdotNec (d : 𝓢 ⊢ p) : 𝓢 ⊢ ⊡p := and₃' d (nec d)
-lemma boxdot_nec! (d : 𝓢 ⊢! p) : 𝓢 ⊢! ⊡p := ⟨boxdotNec d.some⟩
+omit [DecidableEq F] in lemma boxdot_nec! (d : 𝓢 ⊢! p) : 𝓢 ⊢! ⊡p := ⟨boxdotNec d.some⟩
 
 def boxdotBox : 𝓢 ⊢ ⊡p ➝ □p := by exact and₂;
-lemma boxdot_box! : 𝓢 ⊢! ⊡p ➝ □p := ⟨boxdotBox⟩
+omit [DecidableEq F] in lemma boxdot_box! : 𝓢 ⊢! ⊡p ➝ □p := ⟨boxdotBox⟩
 
 def BoxBoxdot_BoxDotbox : 𝓢 ⊢ □⊡p ➝ ⊡□p := impTrans'' distribute_box_and (impId _)
 lemma boxboxdot_boxdotbox : 𝓢 ⊢! □⊡p ➝ ⊡□p := ⟨BoxBoxdot_BoxDotbox⟩
