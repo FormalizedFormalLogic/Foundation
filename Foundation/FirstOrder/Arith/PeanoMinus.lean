@@ -10,13 +10,15 @@ namespace Arith
 
 open FirstOrder FirstOrder.Arith
 
-variable {M : Type*} [ORingStruc M] [M ⊧ₘ* 𝐏𝐀⁻]
+variable {M : Type*} [ORingStruc M]
 
 open Language
 
 scoped instance : LE M := ⟨fun x y => x = y ∨ x < y⟩
 
 lemma le_def {x y : M} : x ≤ y ↔ x = y ∨ x < y := iff_of_eq rfl
+
+variable [M ⊧ₘ* 𝐏𝐀⁻]
 
 protected lemma add_zero (x : M) : x + 0 = x := by
   simpa[models_iff] using ModelsTheory.models M Theory.PAMinus.addZero (fun _ ↦ x)

@@ -67,7 +67,9 @@ section semantics
 
 open Semiformula
 
-variable {M : Type u} [Nonempty M] [s : Structure L M] [Structure.Eq L M] [M ⊧ₘ* T]
+variable {M : Type u} [s : Structure L M]
+
+-- [Structure.Eq L M]
 
 def Dom (x : M) : Prop := Evalbm M ![x] ι.domain
 
@@ -79,8 +81,10 @@ abbrev Sub := {x : M // ι.Dom x}
 
 @[simp] lemma pval_sub_domain (x : ι.Sub M) : Evalbm M ![x] ι.domain := x.prop
 
-lemma sub_exists : ∃ x : M, ι.Dom x := by
+lemma sub_exists [Nonempty M] [M ⊧ₘ* T] : ∃ x : M, ι.Dom x := by
   simpa [Dom, models_iff, eval_substs, Matrix.constant_eq_singleton] using consequence_iff.mp ι.domain_nonempty M inferInstance
+
+variable [Nonempty M] [M ⊧ₘ* T] [Structure.Eq L M]
 
 lemma func_existsUnique_on_dom {k} (f : L'.Func k) : ∀ (v : Fin k → M), (∀ i, ι.Dom (v i)) → ∃! y, ι.Dom y ∧ Evalbm M (y :> v) (ι.func f) := by
   simpa [Dom, models_iff, eval_substs, Matrix.constant_eq_singleton] using consequence_iff.mp (ι.func_defined f) M inferInstance
@@ -186,7 +190,7 @@ lemma sub_models_theory {M : Type u} [Nonempty M] [Structure L M] [Structure.Eq 
 
 lemma theorem_translation {p : SyntacticFormula L'} (h : U ⊨ p) : T ⊨ ↑(ι.translation (∀∀₀p)) :=
   EQ.provOf _ fun M _ _ _ hT ↦
-    (@models_translation_iff L L' _ T _ ι.interpretation M _ _ _ hT p).mpr <| h <| ι.sub_models_theory hT
+    (@models_translation_iff L L' _ T _ ι.interpretation M _ _ hT _ p).mpr <| h <| ι.sub_models_theory hT
 
 open Interpretation
 

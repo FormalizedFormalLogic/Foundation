@@ -192,7 +192,7 @@ section
 variable {L : Language} [Structure L ℕ] (T : Theory L) (F : Set (SyntacticFormula L))
 
 lemma consistent_of_sound [SoundOn T F] (hF : ⊥ ∈ F) : System.Consistent T :=
-  System.consistent_iff_unprovable_bot.mpr <| fun b => by simpa using SoundOn.sound hF b
+  System.consistent_iff_unprovable_bot.mpr fun b ↦ by simpa using SoundOn.sound (F := F) hF b
 
 end
 

@@ -277,13 +277,13 @@ private lemma codeAux_uniq {k} {c : Code k} {v : Fin k → M} {z z' : M} :
     · rintro rfl rfl; rfl
     · rintro rfl rfl; rfl
   case comp m n c d ihc ihd =>
-    simp [Semiformula.eval_rew, Function.comp, Matrix.empty_eq, Matrix.comp_vecCons']
+    simp [Semiformula.eval_rew, Function.comp_def, Matrix.empty_eq, Matrix.comp_vecCons']
     intro w₁ hc₁ hd₁ w₂ hc₂ hd₂;
     have : w₁ = w₂ := funext fun i => ihd i (hd₁ i) (hd₂ i)
     rcases this with rfl
     exact ihc hc₁ hc₂
   case rfind c ih =>
-    simp [Semiformula.eval_rew, Function.comp, Matrix.empty_eq, Matrix.comp_vecCons']
+    simp [Semiformula.eval_rew, Function.comp_def, Matrix.empty_eq, Matrix.comp_vecCons']
     intro h₁ hm₁ h₂ hm₂
     by_contra hz
     wlog h : z < z' with Hz
@@ -296,7 +296,7 @@ private lemma codeAux_uniq {k} {c : Code k} {v : Fin k → M} {z z' : M} :
 
 lemma code_uniq {k} {c : Code k} {v : Fin k → M} {z z' : M} :
     Semiformula.Evalbm M (z :> v) (code c) → Semiformula.Evalbm M (z' :> v) (code c) → z = z' := by
-  simp [code, Semiformula.eval_rew, Matrix.empty_eq, Function.comp, Matrix.comp_vecCons']
+  simp [code, Semiformula.eval_rew, Matrix.empty_eq, Function.comp_def, Matrix.comp_vecCons']
   exact codeAux_uniq
 
 end model
@@ -331,7 +331,7 @@ private lemma models_codeAux {c : Code k} {f : Vector ℕ k →. ℕ} (hc : c.ev
   case mul => simp [eq_comm]
   case proj => simp [eq_comm]
   case comp c d f g _ _ ihf ihg =>
-    simp [Semiformula.eval_rew, Function.comp, Matrix.empty_eq, Matrix.comp_vecCons']
+    simp [Semiformula.eval_rew, Function.comp_def, Matrix.empty_eq, Matrix.comp_vecCons']
     constructor
     · rintro ⟨e, hf, hg⟩
       have hf : f (Vector.ofFn e) = Part.some y := (ihf _ _).mp hf
@@ -344,15 +344,15 @@ private lemma models_codeAux {c : Code k} {f : Vector ℕ k →. ℕ} (hc : c.ev
       exact ⟨w.get, (ihf y w.get).mpr (by simpa[Part.eq_some_iff] using hy),
         fun i => (ihg i (w.get i) v).mpr (by simpa[Part.eq_some_iff] using hw i)⟩
   case rfind c f _ ihf =>
-    simp [Semiformula.eval_rew, Function.comp, Matrix.empty_eq, Matrix.comp_vecCons', ihf, Vector.ofFn_vecCons]
+    simp [Semiformula.eval_rew, Function.comp_def, Matrix.empty_eq, Matrix.comp_vecCons', ihf, Vector.ofFn_vecCons]
     constructor
     · rintro ⟨hy, h⟩; simp [Part.eq_some_iff]
-      exact ⟨by simpa using hy, by intro z hz; simpa using h z hz⟩
-    · intro h; simpa using Nat.mem_rfind.mp (Part.eq_some_iff.mp h)
+      exact ⟨by simpa using hy, by intro z hz; exact Nat.not_eq_zero_of_lt (h z hz)⟩
+    · intro h; simpa [pos_iff_ne_zero] using Nat.mem_rfind.mp (Part.eq_some_iff.mp h)
 
 lemma models_code {c : Code k} {f : Vector ℕ k →. ℕ} (hc : c.eval f) (y : ℕ) (v : Fin k → ℕ) :
     Semiformula.Evalbm ℕ (y :> v) (code c) ↔ y ∈ f (Vector.ofFn v) := by
-  simpa[code, models_iff, Semiformula.eval_rew, Matrix.empty_eq, Function.comp,
+  simpa[code, models_iff, Semiformula.eval_rew, Matrix.empty_eq, Function.comp_def,
     Matrix.comp_vecCons', ←Part.eq_some_iff] using models_codeAux hc y v
 
 noncomputable def codeOfPartrec' {k} (f : Vector ℕ k →. ℕ) : Semisentence ℒₒᵣ (k + 1) :=

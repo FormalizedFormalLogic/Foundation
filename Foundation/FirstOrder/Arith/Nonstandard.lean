@@ -17,7 +17,7 @@ def trueArithWithStarUnbounded (n : ℕ) : Theory ℒₒᵣ⋆ :=
 
 lemma trueArithWithStarUnbounded.cumulative : Cumulative trueArithWithStarUnbounded := fun c =>
   Set.union_subset_union_right _ <|
-    Set.range_subset_range_iff_exists_comp.mpr <| ⟨Fin.castSucc, by simp[Function.comp]⟩
+    Set.range_subset_range_iff_exists_comp.mpr ⟨Fin.castSucc, by simp [Function.comp_def]⟩
 
 def modelStar (c : ℕ) : Structure Language.unit ℕ where
   func := fun _ ⟨⟨⟩⟩ _ => c
@@ -76,7 +76,7 @@ instance trueArith : ℕ⋆ ⊧ₘ* 𝐓𝐀 := ⟨by
         ←Semiformula.eval_lMap, Matrix.fun_eq_vec₂]⟩
     haveI : Structure.LT ℒₒᵣ ℕ⋆ := ⟨fun _ _ => iff_of_eq rfl⟩
     exact standardModel_unique _ _
-  have : s.toStruc ⊧ σ := Semiformula.models_lMap.mp (this.realize (Set.mem_image_of_mem _ hσ))
+  have : s.toStruc ⊧ σ := Semiformula.models_lMap.mp (this.realize _ (Set.mem_image_of_mem _ hσ))
   exact e ▸ this⟩
 
 instance : ℕ⋆ ⊧ₘ* 𝐏𝐀⁻ :=
@@ -86,7 +86,7 @@ open LO.Arith
 
 lemma star_unbounded (n : ℕ) : n < ⋆ := by
   have : ℕ⋆ ⊧ₘ (“!!(Semiterm.Operator.numeral ℒₒᵣ⋆ n) < ⋆” : Sentence ℒₒᵣ⋆) :=
-    models_union_trueArithWithStarUnbounded.realize
+    models_union_trueArithWithStarUnbounded.realize _
       (Set.mem_iUnion_of_mem (n + 1) (Set.mem_union_right _ <| by simp; apply Set.mem_range_self (Fin.last n)))
   simpa [models_iff, Arith.numeral_eq_natCast] using this
 

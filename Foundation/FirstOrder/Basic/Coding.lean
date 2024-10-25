@@ -147,9 +147,6 @@ instance encodable : Encodable (Semiformula L ξ n) where
   decode := ofNat n
   encodek := ofNat_toNat
 
-#eval encode (“0 = 1” : Sentence ℒₒᵣ)
--- 197238223176519750397888674610667118222730
-
 end Semiformula
 
 end LO.FirstOrder

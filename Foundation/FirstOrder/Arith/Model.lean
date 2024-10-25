@@ -74,7 +74,7 @@ instance : ORing ℒₒᵣ := ORing.mk
 
 lemma standardModel_unique' (s : Structure ℒₒᵣ M)
     (hZero : Structure.Zero ℒₒᵣ M) (hOne : Structure.One ℒₒᵣ M) (hAdd : Structure.Add ℒₒᵣ M) (hMul : Structure.Mul ℒₒᵣ M)
-    (hEq : Structure.Eq ℒₒᵣ M) (hLT : Structure.LT ℒₒᵣ M) : s = standardModel M := Structure.ext _ _
+    (hEq : Structure.Eq ℒₒᵣ M) (hLT : Structure.LT ℒₒᵣ M) : s = standardModel M := Structure.ext
   (funext₃ fun k f _ =>
     match k, f with
     | _, Language.Zero.zero => by simp[Matrix.empty_eq]

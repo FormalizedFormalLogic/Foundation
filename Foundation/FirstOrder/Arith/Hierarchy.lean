@@ -130,17 +130,17 @@ lemma of_zero {b b'} {s : ℕ} {p : Semiformula L ξ n} (hp : Hierarchy b 0 p) :
 
 section
 
-variable {L : Language} [L.Eq] [L.LT]
+variable {L : Language}
 
-@[simp] lemma equal {t u : Semiterm L ξ n} : Hierarchy Γ s “!!t = !!u” := by
+@[simp] lemma equal [L.Eq] [L.LT] {t u : Semiterm L ξ n} : Hierarchy Γ s “!!t = !!u” := by
   simp[Semiformula.Operator.operator, Matrix.fun_eq_vec₂,
     Semiformula.Operator.Eq.sentence_eq]
 
-@[simp] lemma lt {t u : Semiterm L ξ n} : Hierarchy Γ s “!!t < !!u” := by
+@[simp] lemma lt [L.LT] {t u : Semiterm L ξ n} : Hierarchy Γ s “!!t < !!u” := by
   simp[Semiformula.Operator.operator, Matrix.fun_eq_vec₂,
     Semiformula.Operator.Eq.sentence_eq, Semiformula.Operator.LT.sentence_eq]
 
-@[simp] lemma le {t u : Semiterm L ξ n} : Hierarchy Γ s “!!t ≤ !!u” := by
+@[simp] lemma le [L.Eq] [L.LT] {t u : Semiterm L ξ n} : Hierarchy Γ s “!!t ≤ !!u” := by
   simp[Semiformula.Operator.operator, Matrix.fun_eq_vec₂,
     Semiformula.Operator.Eq.sentence_eq, Semiformula.Operator.LT.sentence_eq,
     Semiformula.Operator.LE.sentence_eq]
@@ -351,8 +351,7 @@ end Hierarchy
 
 section
 
-variable {L : Language} [(k : ℕ) → DecidableEq (L.Func k)] [(k : ℕ) → DecidableEq (L.Rel k)]
-  [L.LT] [Structure L ℕ]
+variable {L : Language} [L.LT] [Structure L ℕ]
 
 abbrev Sigma1Sound (T : Theory L) := SoundOn T (Hierarchy 𝚺 1)
 
