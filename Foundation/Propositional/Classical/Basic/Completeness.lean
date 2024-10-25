@@ -51,16 +51,15 @@ open Classical
 
 def consistentTheory : Set (Theory α) := { U : Theory α | System.Consistent U }
 
-variable {T : Theory α} (consisT : System.Consistent T)
+variable {T : Theory α}
 
 open System Derivation
 
-lemma exists_maximal_consistent_theory :
+lemma exists_maximal_consistent_theory (consisT : System.Consistent T) :
     ∃ Z, Consistent Z ∧ T ⊆ Z ∧ ∀ U, Consistent U → Z ⊆ U → U = Z :=
-  have : ∃ Z : Theory α, Consistent Z ∧ T ⊆ Z ∧ ∀ U : Theory α, Consistent U → Z ⊆ U → U = Z :=
+  have : ∃ Z : Theory α, T ⊆ Z ∧ Maximal Consistent Z :=
     zorn_subset_nonempty { U : Theory α | Consistent U }
-      (fun c hc chain hnc ↦ ⟨⋃₀ c,
-       by simp
+      ( fun c hc chain hnc ↦ ⟨⋃₀ c, by
           haveI : DecidableEq α := Classical.typeDecidableEq α
           by_contra A
           rcases System.inconsistent_compact.mp (System.not_consistent_iff_inconsistent.mp A) with ⟨𝓕, h𝓕, fin, 𝓕_consis⟩
@@ -68,19 +67,18 @@ lemma exists_maximal_consistent_theory :
           have : Consistent U := hc hUc
           have : ¬Consistent U := (𝓕_consis.of_supset hsU).not_con
           contradiction,
-       fun s a => Set.subset_sUnion_of_mem a⟩) T consisT
-  by rcases this with ⟨Z, con, ss, hZ⟩
-     exact ⟨Z, con, ss, by intro U conU ssU; simpa using hZ U conU ssU⟩
+        fun s a => Set.subset_sUnion_of_mem a⟩) T consisT
+  by rcases this with ⟨Z, ss, con, hZ⟩
+     exact ⟨Z, con, ss, by intro U conU ssU; exact Set.Subset.antisymm (hZ conU ssU) ssU⟩
 
-noncomputable def maximalConsistentTheory : Theory α :=
+noncomputable def maximalConsistentTheory (consisT : System.Consistent T) : Theory α :=
   Classical.choose (exists_maximal_consistent_theory consisT)
-
-variable {consisT}
 
 @[simp] lemma maximalConsistentTheory_consistent : Consistent (maximalConsistentTheory consisT) :=
   (Classical.choose_spec (exists_maximal_consistent_theory consisT)).1
 
-@[simp] lemma subset_maximalConsistentTheory : T ⊆ maximalConsistentTheory consisT :=
+@[simp] lemma subset_maximalConsistentTheory {consisT : System.Consistent T} :
+    T ⊆ maximalConsistentTheory consisT :=
   (Classical.choose_spec (exists_maximal_consistent_theory consisT)).2.1
 
 lemma maximalConsistentTheory_maximal :
@@ -92,7 +90,7 @@ lemma maximalConsistentTheory_maximal :
   maximalConsistentTheory_maximal (U := theory (maximalConsistentTheory consisT)) (by simp)
     (by simpa using System.Axiomatized.axm_subset (maximalConsistentTheory consisT))
 
-lemma mem_or_neg_mem_maximalConsistentTheory (p) :
+lemma mem_or_neg_mem_maximalConsistentTheory {consisT : System.Consistent T} (p) :
     p ∈ maximalConsistentTheory consisT ∨ ∼p ∈ maximalConsistentTheory consisT := by
   haveI : DecidableEq α := Classical.typeDecidableEq α
   by_contra A
@@ -179,7 +177,8 @@ theorem completeness! : T ⊨[Valuation α] p → T ⊢! p := by
     rcases this with ⟨v, hv⟩
     have : v ⊧* T := Semantics.RealizeSet.of_subset hv (by simp)
     have : v ⊧ p := hs this
-    have : ¬v ⊧ p := by simpa using hv.realize (Set.mem_insert (∼p) T)
+    have : ¬v ⊧ p := by
+      simpa using hv.realize v (Set.mem_insert (∼p) T)
     contradiction
   intro consis
   exact satisfiable_of_consistent consis
