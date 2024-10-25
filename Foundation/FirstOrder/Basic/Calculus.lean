@@ -35,7 +35,7 @@ lemma shifts_neg (Γ : List (SyntacticSemiformula L n)) :
 
 @[simp] lemma shifts_emb (Γ : List (Semisentence L n)) :
     (Γ.map Rew.emb.hom)⁺ = Γ.map Rew.emb.hom := by
-  simp[shifts, Function.comp, ←Rew.hom_comp_app]
+  simp[shifts, Function.comp_def, ←Rew.hom_comp_app]
 
 inductive Derivation (T : Theory L) : Sequent L → Type _
 | axL (Δ) {k} (r : L.Rel k) (v) : Derivation T (rel r v :: nrel r v :: Δ)
@@ -340,7 +340,7 @@ def rewrite : ∀ {Δ}, T ⟹ Δ → ∀ (f : ℕ → SyntacticTerm L), T ⟹ Δ
     have : T ⟹ ((Rew.free.hom p) :: Δ⁺).map (Rew.rewrite (&0 :>ₙ fun x => Rew.shift (f x))).hom :=
       rewrite d (&0 :>ₙ fun x => Rew.shift (f x))
     have : T ⟹ (∀' (Rew.rewrite (Rew.bShift ∘ f)).hom p) :: Δ.map ((Rew.rewrite f).hom) :=
-      all (Derivation.cast this (by simp [free_rewrite_eq, shifts, shift_rewrite_eq, Finset.image_image, Function.comp]))
+      all (Derivation.cast this (by simp [free_rewrite_eq, shifts, shift_rewrite_eq, Finset.image_image, Function.comp_def]))
     Derivation.cast this (by simp[Rew.q_rewrite])
   | _, @ex _ _ Δ p t d,      f =>
     have : T ⟹ (p/[t] :: Δ).map ((Rew.rewrite f).hom) := rewrite d f
@@ -403,8 +403,6 @@ instance : Tait.Axiomatized (SyntacticFormula L) (Theory L) where
   root {_ _ h} := root h
   trans {_ _ _ F d} := trans (fun h ↦ F _ h) d
 
-
-
 variable [(k : ℕ) → DecidableEq (L.Func k)] [(k : ℕ) → DecidableEq (L.Rel k)]
 
 private def not_close' (p) : T ⟹ [∼(∀∀p), p] :=
@@ -449,7 +447,7 @@ variable {L₁ : Language} {L₂ : Language} {T₁ : Theory L₁} {Δ₁ : Seque
 
 lemma shifts_image (Φ : L₁ →ᵥ L₂) {Δ : List (SyntacticFormula L₁)} :
      (Δ.map $ .lMap Φ)⁺ = ((Δ⁺).map (.lMap Φ)) :=
-  by simp[shifts, shiftEmb, Finset.map_eq_image, Finset.image_image, Function.comp, Semiformula.lMap_shift]
+  by simp[shifts, shiftEmb, Finset.map_eq_image, Finset.image_image, Function.comp_def, Semiformula.lMap_shift]
 
 def lMap (Φ : L₁ →ᵥ L₂) : ∀ {Δ}, T₁ ⟹ Δ → T₁.lMap Φ ⟹ Δ.map (.lMap Φ)
   | _, axL Δ r v          =>
@@ -495,6 +493,7 @@ lemma inconsistent_lMap (Φ : L₁ →ᵥ L₂) : System.Inconsistent T₁ → S
 
 end Hom
 
+omit [(k : ℕ) → DecidableEq (L.Func k)] [(k : ℕ) → DecidableEq (L.Rel k)]
 private lemma map_subst_eq_free (p : SyntacticSemiformula L 1) (h : ¬p.fvar? m) :
     (Rew.rewriteMap (fun x => if x = m then 0 else x + 1)).hom (p/[&m]) = Rew.free.hom p := by
   simp[←Rew.hom_comp_app];
@@ -516,16 +515,12 @@ def genelalizeByNewver {p : SyntacticSemiformula L 1} (hp : ¬p.fvar? m) (hΔ : 
 def exOfInstances (v : List (SyntacticTerm L)) (p : SyntacticSemiformula L 1)
   (h : T ⟹ v.map (p/[·]) ++ Γ) : T ⟹ (∃' p) :: Γ := by
   induction' v with t v ih generalizing Γ <;> simp at h
-  · exact weakening h (List.subset_cons _ _)
-  · exact (ih (Γ := (∃' p) :: Γ)
-      ((ex t h).wk (by simp; exact List.subset_append_of_subset_right _ (List.subset_cons _ _)))).wk
-        (by simp)
+  · exact weakening h (List.subset_cons_self _ _)
+  · exact (ih (Γ := (∃' p) :: Γ) ((ex t h).wk (by simp))).wk (by simp)
 
 def exOfInstances' (v : List (SyntacticTerm L)) (p : SyntacticSemiformula L 1)
   (h : T ⟹ (∃' p) :: v.map (p/[·]) ++ Γ) : T ⟹ (∃' p) :: Γ :=
-  (exOfInstances (Γ := (∃' p) :: Γ) v p
-    (h.wk <| by simp; exact List.subset_append_of_subset_right _ (List.subset_cons _ _))).wk
-    (by simp)
+  (exOfInstances (Γ := (∃' p) :: Γ) v p (h.wk <| by simp)).wk (by simp)
 
 end Derivation
 

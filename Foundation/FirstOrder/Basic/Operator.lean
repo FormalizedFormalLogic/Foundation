@@ -220,21 +220,21 @@ end Operator
 
 section complexity
 
-variable {L : Language} [L.Zero] [L.One] [L.Add] [L.Mul]
+variable {L : Language}
 
-@[simp] lemma complexity_zero : ((Operator.Zero.zero : Const L) : Semiterm L ξ n).complexity = 1 := by
+@[simp] lemma complexity_zero [L.Zero] : ((Operator.Zero.zero : Const L) : Semiterm L ξ n).complexity = 1 := by
   simp [Operator.const, Operator.operator, Operator.numeral, Operator.Zero.term_eq, complexity_func]
 
-@[simp] lemma complexity_one : ((Operator.One.one : Const L) : Semiterm L ξ n).complexity = 1 := by
+@[simp] lemma complexity_one [L.One] : ((Operator.One.one : Const L) : Semiterm L ξ n).complexity = 1 := by
   simp [Operator.const, Operator.operator, Operator.numeral, Operator.One.term_eq, complexity_func]
 
-@[simp] lemma complexity_add (t u : Semiterm L ξ n) :
+@[simp] lemma complexity_add [L.Add] (t u : Semiterm L ξ n) :
     (Operator.Add.add.operator ![t, u]).complexity = max t.complexity u.complexity + 1 := by
   simp [Operator.const, Operator.operator, Operator.numeral, Operator.Add.term_eq, complexity_func, Rew.func]
   rw [show (Finset.univ : Finset (Fin 2)) = {0, 1} from by ext i; cases i using Fin.cases <;> simp [Fin.eq_zero]]
   simp [sup_eq_max]
 
-@[simp] lemma complexity_mul (t u : Semiterm L ξ n) :
+@[simp] lemma complexity_mul [L.Mul] (t u : Semiterm L ξ n) :
     (Operator.Mul.mul.operator ![t, u]).complexity = max t.complexity u.complexity + 1 := by
   simp [Operator.const, Operator.operator, Operator.numeral, Operator.Mul.term_eq, complexity_func, Rew.func]
   rw [show (Finset.univ : Finset (Fin 2)) = {0, 1} from by ext i; cases i using Fin.cases <;> simp [Fin.eq_zero]]
@@ -372,13 +372,13 @@ lemma le_def [L.Eq] [L.LT] (t u : Semiterm L ξ n) :
     LE.le.operator ![t, u] = Semiformula.rel Language.Eq.eq ![t, u] ⋎ Semiformula.rel Language.LT.lt ![t, u] := by
   simp [operator, Eq.sentence_eq, LT.sentence_eq, LE.sentence_eq, Rew.rel]
 
-variable {L : Language} [L.Eq] [L.LT]
+variable {L : Language}
 
-@[simp] lemma Eq.open (t u : Semiterm L ξ n) : (Eq.eq.operator ![t, u]).Open := by simp [Operator.operator, Operator.Eq.sentence_eq]
+@[simp] lemma Eq.open [L.Eq] (t u : Semiterm L ξ n) : (Eq.eq.operator ![t, u]).Open := by simp [Operator.operator, Operator.Eq.sentence_eq]
 
-@[simp] lemma LT.open (t u : Semiterm L ξ n) : (LT.lt.operator ![t, u]).Open := by simp [Operator.operator, Operator.LT.sentence_eq]
+@[simp] lemma LT.open [L.LT] (t u : Semiterm L ξ n) : (LT.lt.operator ![t, u]).Open := by simp [Operator.operator, Operator.LT.sentence_eq]
 
-@[simp] lemma LE.open (t u : Semiterm L ξ n) : (LE.le.operator ![t, u]).Open := by
+@[simp] lemma LE.open [L.Eq] [L.LT] (t u : Semiterm L ξ n) : (LE.le.operator ![t, u]).Open := by
   simp [Operator.operator, Operator.LE.sentence_eq, Operator.Eq.sentence_eq, Operator.LT.sentence_eq]
 
 end Operator

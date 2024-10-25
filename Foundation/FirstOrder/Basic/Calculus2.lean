@@ -12,9 +12,7 @@ namespace LO.FirstOrder
 
 variable {L : Language} [(k : ℕ) → DecidableEq (L.Func k)] [(k : ℕ) → DecidableEq (L.Rel k)]
 
-variable [L.ConstantInhabited]
-
-section derivation3
+section derivation2
 
 inductive Derivation2 (T : Theory L) : Finset (SyntacticFormula L) → Type _
 | closed (Δ) (p : SyntacticFormula L)      : p ∈ Δ → ∼p ∈ Δ → Derivation2 T Δ
@@ -28,22 +26,22 @@ inductive Derivation2 (T : Theory L) : Finset (SyntacticFormula L) → Type _
 | shift {Δ}   : Derivation2 T Δ → Derivation2 T (Δ.image Rew.shift.hom)
 | cut   {Δ p} : Derivation2 T (insert p Δ) → Derivation2 T (insert (∼p) Δ) → Derivation2 T Δ
 
-scoped infix:45 " ⊢₃ " => Derivation2
+scoped infix:45 " ⊢₂ " => Derivation2
 
-abbrev Derivable3 (T : Theory L) (Γ : Finset (SyntacticFormula L)) := Nonempty (T ⊢₃ Γ)
+abbrev Derivable2 (T : Theory L) (Γ : Finset (SyntacticFormula L)) := Nonempty (T ⊢₂ Γ)
 
-scoped infix:45 " ⊢₃! " => Derivable3
+scoped infix:45 " ⊢₂! " => Derivable2
 
-abbrev Derivable3SingleConseq (T : Theory L) (p : SyntacticFormula L) : Prop := T ⊢₃! {p}
+abbrev Derivable2SingleConseq (T : Theory L) (p : SyntacticFormula L) : Prop := T ⊢₂! {p}
 
-scoped infix: 45 " ⊢₃.! " => Derivable3SingleConseq
+scoped infix: 45 " ⊢₂.! " => Derivable2SingleConseq
 
 variable {T : Theory L}
 
 lemma shifts_toFinset_eq_image_shift (Δ : Sequent L) :
     (shifts Δ).toFinset = Δ.toFinset.image Rew.shift.hom := by ext p; simp [shifts]
 
-def Derivation.toDerivation2 T : {Γ : Sequent L} → T ⟹ Γ → T ⊢₃ Γ.toFinset
+def Derivation.toDerivation2 T : {Γ : Sequent L} → T ⟹ Γ → T ⊢₂ Γ.toFinset
   | _, Derivation.axL Δ R v            => Derivation2.closed _ (Semiformula.rel R v) (by simp) (by simp)
   | _, Derivation.root (p := p) h      => Derivation2.root p h (by simp)
   | _, Derivation.verum Δ              => Derivation2.verum (by simp)
@@ -69,7 +67,7 @@ def Derivation.toDerivation2 T : {Γ : Sequent L} → T ⟹ Γ → T ⊢₃ Γ.t
       (Derivation2.wk (Derivation.toDerivation2 T d₁) (by simp))
       (Derivation2.wk (Derivation.toDerivation2 T d₂) (by simp))
 
-noncomputable def Derivation2.toDerivation : {Γ : Finset (SyntacticFormula L)} → T ⊢₃ Γ → T ⟹ Γ.toList
+noncomputable def Derivation2.toDerivation : {Γ : Finset (SyntacticFormula L)} → T ⊢₂ Γ → T ⟹ Γ.toList
   | _, Derivation2.closed Δ p hp hn              => Derivation.em (p := p) (by simp [hp]) (by simp [hn])
   | _, Derivation2.root p hp h                   => Tait.wk (Derivation.root hp) (by simp_all)
   | _, Derivation2.verum h                       => Tait.verum' (by simp [h])
@@ -92,13 +90,13 @@ noncomputable def Derivation2.toDerivation : {Γ : Finset (SyntacticFormula L)} 
       (Tait.wk d.toDerivation <| by intro x; simp)
       (Tait.wk dn.toDerivation <| by intro x; simp)
 
-lemma derivable_iff_derivable2 {Γ : List (SyntacticFormula L)} : T ⟹! Γ ↔ T ⊢₃! Γ.toFinset := by
+lemma derivable_iff_derivable2 {Γ : List (SyntacticFormula L)} : T ⟹! Γ ↔ T ⊢₂! Γ.toFinset := by
   constructor
   · rintro ⟨d⟩; exact ⟨by simpa using Derivation.toDerivation2 T d⟩
   · rintro ⟨d⟩; exact ⟨.wk d.toDerivation (by intro x; simp)⟩
 
-def provable_iff_derivable2 {p} : T ⊢! p ↔ T ⊢₃.! p := derivable_iff_derivable2
+def provable_iff_derivable2 {p} : T ⊢! p ↔ T ⊢₂.! p := derivable_iff_derivable2
 
-end derivation3
+end derivation2
 
 end LO.FirstOrder

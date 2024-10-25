@@ -146,9 +146,10 @@ variable (b : Fin n₁ → Semiterm L ξ₂ n₂) (e : ξ₁ → Semiterm L ξ�
 @[simp] lemma bind_bvar (n : Fin n₁) : bind b e (#n : Semiterm L ξ₁ n₁) = b n := rfl
 
 lemma eq_bind (ω : Rew L ξ₁ n₁ ξ₂ n₂) : ω = bind (ω ∘ bvar) (ω ∘ fvar) := by
-  ext t; induction t ; simp[Rew.func'']; funext; simp[*]
+  ext t; induction t ;simp [Rew.func'']; simp [*]
 
-@[simp] lemma bind_eq_id_of_zero (f : Fin 0 → Semiterm L ξ₂ 0) : bind f fvar = Rew.id := by { ext x <;> simp; exact Fin.elim0 x }
+@[simp] lemma bind_eq_id_of_zero (f : Fin 0 → Semiterm L ξ₂ 0) : bind f fvar = Rew.id := by
+  ext x <;> simp; exact Fin.elim0 x
 
 end bind
 
@@ -648,8 +649,8 @@ lemma lMap_bind (b : Fin n₁ → Semiterm L₁ ξ₂ n₂) (e : ξ₁ → Semit
   by induction t <;> simp[*, lMap_func, Rew.func]
 
 lemma lMap_map (b : Fin n₁ → Fin n₂) (e : ξ₁ → ξ₂) (t) :
-    (map b e t).lMap Φ = map b e (t.lMap Φ) :=
-  by simp[map, lMap_bind, Function.comp]
+    (map b e t).lMap Φ = map b e (t.lMap Φ) := by
+  simp [map, lMap_bind, Function.comp_def]
 
 lemma lMap_bShift (t : Semiterm L₁ ξ₁ n) : (bShift t).lMap Φ = bShift (t.lMap Φ) :=
   by simp[bShift, lMap_map]
@@ -1139,7 +1140,7 @@ lemma allClosure_fixitr : ∀* (Rew.fixitr 0 (m + 1)).hom p = ∀' Rew.fix.hom (
 
 private lemma not_fvar?_fixitr_upper : ¬((Rew.fixitr 0 p.upper).hom p).fvar? x := by
   rw [Rew.eq_bind (Rew.fixitr 0 p.upper)]
-  simp only [Function.comp, Rew.fixitr_bvar, Rew.fixitr_fvar, Fin.natAdd_mk, zero_add]
+  simp only [Function.comp_def, Rew.fixitr_bvar, Rew.fixitr_fvar, Fin.natAdd_mk, zero_add]
   intro h
   rcases fvar?_bind h with (⟨z, hz⟩ | ⟨z, hz, hx⟩)
   · simp at hz
@@ -1179,8 +1180,6 @@ lemma close_eq_self_of (p : SyntacticFormula L) (h : p.fvarList = []) : ∀∀ p
 @[simp] lemma close_close_eq_close (p : SyntacticFormula L) : ∀∀ ∀∀ p = ∀∀ p :=
   close_eq_self_of (∀∀p) (by simp)
 
-variable [L.ConstantInhabited]
-
 def toEmpty {n : ℕ} : (p : Semiformula L ξ n) → p.fvarList = [] → Semisentence L n
   | rel R v,  h => rel R fun i ↦ (v i).toEmpty (by simp [fvarList] at h; exact h i)
   | nrel R v, h => nrel R fun i ↦ (v i).toEmpty (by simp [fvarList] at h; exact h i)
@@ -1216,14 +1215,14 @@ variable {L : Language.{u}} {L₁ : Language.{u₁}} {L₂ : Language.{u₂}} {L
 lemma lMap_bind (b : Fin n₁ → Semiterm L₁ ξ₂ n₂) (e : ξ₁ → Semiterm L₁ ξ₂ n₂) (p) :
     lMap Φ ((Rew.bind b e).hom p) = (Rew.bind (Semiterm.lMap Φ ∘ b) (Semiterm.lMap Φ ∘ e)).hom (lMap Φ p) := by
   induction p using rec' generalizing ξ₂ n₂ <;>
-  simp[*, Rew.rel, Rew.nrel, lMap_rel, lMap_nrel, Semiterm.lMap_bind, Rew.q_bind, Matrix.comp_vecCons', Semiterm.lMap_bShift, Function.comp]
+  simp[*, Rew.rel, Rew.nrel, lMap_rel, lMap_nrel, Semiterm.lMap_bind, Rew.q_bind, Matrix.comp_vecCons', Semiterm.lMap_bShift, Function.comp_def]
 
 lemma lMap_map (b : Fin n₁ → Fin n₂) (e : ξ₁ → ξ₂) (p) :
     lMap Φ ((Rew.map b e).hom p) = (Rew.map b e).hom (lMap Φ p) := lMap_bind _ _ _
 
 lemma lMap_rewrite (f : ξ₁ → Semiterm L₁ ξ₂ n) (p : Semiformula L₁ ξ₁ n) :
     lMap Φ ((Rew.rewrite f).hom p) = (Rew.rewrite (Semiterm.lMap Φ ∘ f)).hom (lMap Φ p) :=
-  by simp[Rew.rewrite, lMap_bind, Function.comp]
+  by simp[Rew.rewrite, lMap_bind, Function.comp_def]
 
 lemma lMap_substs (w : Fin k → Semiterm L₁ ξ n) (p : Semiformula L₁ ξ k) :
     lMap Φ ((Rew.substs w).hom p) = (Rew.substs (Semiterm.lMap Φ ∘ w)).hom (lMap Φ p) := lMap_bind _ _ _
@@ -1231,10 +1230,10 @@ lemma lMap_substs (w : Fin k → Semiterm L₁ ξ n) (p : Semiformula L₁ ξ k)
 lemma lMap_shift (p : SyntacticSemiformula L₁ n) : lMap Φ (Rew.shift.hom p) = Rew.shift.hom (lMap Φ p) := lMap_bind _ _ _
 
 lemma lMap_free (p : SyntacticSemiformula L₁ (n + 1)) : lMap Φ (Rew.free.hom p) = Rew.free.hom (lMap Φ p) := by
-  simp[Rew.free, lMap_bind, Function.comp, Matrix.comp_vecConsLast]
+  simp[Rew.free, lMap_bind, Function.comp_def, Matrix.comp_vecConsLast]
 
 lemma lMap_fix (p : SyntacticSemiformula L₁ n) : lMap Φ (Rew.fix.hom p) = Rew.fix.hom (lMap Φ p) :=
-  by simp[Rew.fix, lMap_bind, Function.comp]; congr; { funext x; cases x <;> simp }
+  by simp[Rew.fix, lMap_bind, Function.comp_def]; congr; { funext x; cases x <;> simp }
 
 lemma lMap_emb {o : Type*} [IsEmpty o] (p : Semiformula L₁ o n) :
     (lMap Φ (Rew.emb.hom p) : Semiformula L₂ ξ n) = Rew.emb.hom (lMap Φ p) := lMap_bind _ _ _
@@ -1242,11 +1241,11 @@ lemma lMap_emb {o : Type*} [IsEmpty o] (p : Semiformula L₁ o n) :
 lemma lMap_toS (p : Semiformula L₁ (Fin n) 0) :
     lMap Φ (Rew.toS.hom p) = Rew.toS.hom (lMap Φ p) := by
   rw [Rew.eq_bind Rew.toS, lMap_bind]
-  simp [Function.comp, Matrix.empty_eq]; congr
+  simp [Function.comp_def, Matrix.empty_eq]; congr
 
 lemma lMap_rewriteMap (p : Semiformula L₁ ξ₁ n) (f : ξ₁ → ξ₂) :
     lMap Φ ((Rew.rewriteMap f).hom p) = (Rew.rewriteMap f).hom (lMap Φ p) := by
-  simp [Rew.rewriteMap, lMap_rewrite, Function.comp]
+  simp [Rew.rewriteMap, lMap_rewrite, Function.comp_def]
 
 end lMap
 

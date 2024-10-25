@@ -444,40 +444,19 @@ abbrev fvar? (p : Semiformula L ξ n) (x : ξ) : Prop := x ∈ p.fvarList
 @[simp] lemma fvar?_ex (x) (p : Semiformula L ξ (n + 1)) : fvar? (∃' p) x ↔ fvar? p x := by simp [fvar?]
 @[simp] lemma fvar?_univClosure (x) (p : Semiformula L ξ n) : fvar? (∀* p) x ↔ fvar? p x := by simp [fvar?]
 
-def upper (p : SyntacticSemiformula L n) : ℕ := p.fvarList.maximum?.rec 0 .succ
+def upper (p : SyntacticSemiformula L n) : ℕ := p.fvarList.max?.rec 0 .succ
 
 section
 
 variable {α : Type*} [LinearOrder  α]
 
-lemma List.maximam?_some_of_not_nil {l : List α} (h : l ≠ []) : l.maximum?.isSome := by
+lemma List.maximam?_some_of_not_nil {l : List α} (h : l ≠ []) : l.max?.isSome := by
   cases l
   case nil => simp at h
-  case cons l => simp [List.maximum?_cons]
+  case cons l => simp [List.max?_cons]
 
-@[simp] lemma le_foldl_max_self (x : α) (l : List α) : x ≤ l.foldl max x := by
-  induction l generalizing x
-  case nil => simp
-  case cons y l ih => simpa using le_trans (le_max_left x y) (ih (max x y))
-
-lemma le_foldl_max (x : α) (l : List α) {y} : y ∈ l → y ≤ l.foldl max x := by
-  induction l generalizing x y
-  case nil => simp
-  case cons z l ih =>
-    simp only [List.mem_cons, List.foldl_cons]
-    rintro (rfl | hy)
-    · exact le_trans (le_max_right x y) (le_foldl_max_self _ _)
-    · exact ih (max x z) hy
-
-lemma List.maximam?_eq_some {l : List α} {a} (h : l.maximum? = some a) : ∀ x ∈ l, x ≤ a := by
-  induction l
-  case nil => simp
-  case cons x l ih =>
-    have : List.foldl max x l = a := by simpa [List.maximum?_cons] using h
-    rcases this
-    simp
-    rintro y hy
-    exact le_foldl_max x l hy
+lemma List.maximam?_eq_some {l : List α} {a} (h : l.max? = some a) : ∀ x ∈ l, x ≤ a :=
+  List.max?_le_iff (by simp) h (x := a) |>.mp (by rfl)
 
 end
 
