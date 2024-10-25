@@ -34,17 +34,17 @@ infix:45 " ⟹!. " => OneSided.Derivable₁
 noncomputable def OneSided.Derivable.get [OneSided F K] (𝓚 : K) (Δ : List F) (h : 𝓚 ⟹! Δ) : 𝓚 ⟹ Δ :=
   Classical.choice h
 
-class Tait (F K : Type*) [LogicalConnective F] [Collection F K] extends OneSided F K where
+class Tait (F K : Type*) [LogicalConnective F] [DeMorgan F] [Collection F K] extends OneSided F K where
   verum (𝓚 : K) (Δ : List F)         : 𝓚 ⟹ ⊤ :: Δ
   and {𝓚 : K} {p q : F} {Δ : List F} : 𝓚 ⟹ p :: Δ → 𝓚 ⟹ q :: Δ → 𝓚 ⟹ p ⋏ q :: Δ
   or {𝓚 : K} {p q : F} {Δ : List F}  : 𝓚 ⟹ p :: q :: Δ → 𝓚 ⟹ p ⋎ q :: Δ
   wk {𝓚 : K} {Δ Δ' : List F}         : 𝓚 ⟹ Δ → Δ ⊆ Δ' → 𝓚 ⟹ Δ'
   em {𝓚 : K} {p} {Δ : List F}        : p ∈ Δ → ∼p ∈ Δ → 𝓚 ⟹ Δ
 
-class Tait.Cut (F K : Type*) [LogicalConnective F] [Collection F K] [Tait F K] where
+class Tait.Cut (F K : Type*) [LogicalConnective F] [DeMorgan F] [Collection F K] [Tait F K] where
   cut {𝓚 : K} {Δ : List F} {p} : 𝓚 ⟹ p :: Δ → 𝓚 ⟹ ∼p :: Δ → 𝓚 ⟹ Δ
 
-class Tait.Axiomatized (F K : Type*) [LogicalConnective F] [Collection F K] [Tait F K] where
+class Tait.Axiomatized (F K : Type*) [LogicalConnective F] [DeMorgan F] [Collection F K] [Tait F K] where
   root {𝓚 : K} {p}    : p ∈ 𝓚 → 𝓚 ⟹. p
   trans {𝓚 𝓛 : K} {Γ} : ((q : F) → q ∈ 𝓚 → 𝓛 ⟹. q) → 𝓚 ⟹ Γ → 𝓛 ⟹ Γ
 
@@ -96,7 +96,7 @@ def or' {p q : F} (h : p ⋎ q ∈ Γ) (dpq : 𝓚 ⟹ p :: q :: Γ) : 𝓚 ⟹ 
 
 def wkTail (d : 𝓚 ⟹ Γ) : 𝓚 ⟹ p :: Γ := wk d (by simp)
 
-def rotate₁ (d : 𝓚 ⟹ p₂ :: p₁ :: Γ) : 𝓚 ⟹ p₁ :: p₂ :: Γ := wk d (by simp; apply List.subset_cons_of_subset _ (by simp))
+def rotate₁ (d : 𝓚 ⟹ p₂ :: p₁ :: Γ) : 𝓚 ⟹ p₁ :: p₂ :: Γ := wk d (by simp)
 
 def rotate₂ (d : 𝓚 ⟹ p₃ :: p₁ :: p₂ :: Γ) : 𝓚 ⟹ p₁ :: p₂ :: p₃ :: Γ :=
   wk d (by simp; apply List.subset_cons_of_subset _ (List.subset_cons_of_subset _ <| by simp))
@@ -104,39 +104,40 @@ def rotate₂ (d : 𝓚 ⟹ p₃ :: p₁ :: p₂ :: Γ) : 𝓚 ⟹ p₁ :: p₂ 
 def rotate₃ (d : 𝓚 ⟹ p₄ :: p₁ :: p₂ :: p₃ :: Γ) : 𝓚 ⟹ p₁ :: p₂ :: p₃ :: p₄ :: Γ :=
   wk d (by simp; apply List.subset_cons_of_subset _ (List.subset_cons_of_subset _ <| List.subset_cons_of_subset _ <| by simp))
 
-variable [Tait.Cut F K] [Tait.Axiomatized F K] {𝓚 𝓛 : K} {Γ : List F}
+variable {𝓚 𝓛 : K} {Γ : List F}
 
 alias cut := Tait.Cut.cut
 
 alias root := Tait.Axiomatized.root
 
-lemma cut! (hp : 𝓚 ⟹! p :: Δ) (hn : 𝓚 ⟹! ∼p :: Δ) : 𝓚 ⟹! Δ := ⟨cut hp.get hn.get⟩
+lemma cut! [Tait.Cut F K] (hp : 𝓚 ⟹! p :: Δ) (hn : 𝓚 ⟹! ∼p :: Δ) : 𝓚 ⟹! Δ := ⟨cut hp.get hn.get⟩
 
-lemma root! {p} (h : p ∈ 𝓚) : 𝓚 ⟹!. p := ⟨root h⟩
+lemma root! [Tait.Axiomatized F K] {p} (h : p ∈ 𝓚) : 𝓚 ⟹!. p := ⟨root h⟩
 
-def byAxm (p) (h : p ∈ 𝓚) (hΓ : p ∈ Γ := by simp) : 𝓚 ⟹ Γ := wk (root h) (by simp_all)
+def byAxm [Tait.Axiomatized F K] (p) (h : p ∈ 𝓚) (hΓ : p ∈ Γ := by simp) : 𝓚 ⟹ Γ := wk (root h) (by simp_all)
 
-lemma byAxm! (p) (h : p ∈ 𝓚) (hΓ : p ∈ Γ := by simp) : 𝓚 ⟹! Γ := ⟨byAxm p h hΓ⟩
+lemma byAxm! [Tait.Axiomatized F K] (p) (h : p ∈ 𝓚) (hΓ : p ∈ Γ := by simp) : 𝓚 ⟹! Γ := ⟨byAxm p h hΓ⟩
 
-def ofAxiomSubset (h : 𝓚 ⊆ 𝓛) : 𝓚 ⟹ Γ → 𝓛 ⟹ Γ :=
+def ofAxiomSubset [Tait.Axiomatized F K] (h : 𝓚 ⊆ 𝓛) : 𝓚 ⟹ Γ → 𝓛 ⟹ Γ :=
   Tait.Axiomatized.trans fun _ hq ↦ Tait.Axiomatized.root (Collection.subset_iff.mp h _ hq)
 
-lemma of_axiom_subset (h : 𝓚 ⊆ 𝓛) : 𝓚 ⟹! Γ → 𝓛 ⟹! Γ := fun b ↦ ⟨ofAxiomSubset h b.get⟩
+lemma of_axiom_subset [Tait.Axiomatized F K] (h : 𝓚 ⊆ 𝓛) : 𝓚 ⟹! Γ → 𝓛 ⟹! Γ := fun b ↦ ⟨ofAxiomSubset h b.get⟩
 
 instance system : System F K := ⟨(· ⟹. ·)⟩
 
-instance : System.Axiomatized K where
+instance [Tait.Axiomatized F K] : System.Axiomatized K where
   prfAxm := fun hf ↦ Tait.Axiomatized.root <| hf
   weakening := Tait.ofAxiomSubset
 
-lemma waekerThan_of_subset (h : 𝓚 ⊆ 𝓛) : 𝓚 ≤ₛ 𝓛 := fun _ ↦ System.Axiomatized.weakening! h
+lemma provable_bot_iff_derivable_nil [Tait.Cut F K] : 𝓚 ⟹! [] ↔ 𝓚 ⊢! ⊥ :=
+  ⟨fun b ↦ wk! b (by simp), fun b ↦ cut! b (by simpa using verum! _ _)⟩
 
-instance : System.StrongCut K K where
+lemma waekerThan_of_subset [Tait.Axiomatized F K] (h : 𝓚 ⊆ 𝓛) : 𝓚 ≤ₛ 𝓛 := fun _ ↦ System.Axiomatized.weakening! h
+
+instance [Tait.Axiomatized F K] : System.StrongCut K K where
   cut {_ _ _ bs b} := Tait.Axiomatized.trans (fun _ hq ↦ bs hq) b
 
-lemma provable_bot_iff_derivable_nil : 𝓚 ⟹! [] ↔ 𝓚 ⊢! ⊥ := ⟨fun b ↦ wk! b (by simp), fun b ↦ cut! b (by simpa using verum! _ _)⟩
-
-instance : DeductiveExplosion K where
+instance [Tait.Cut F K] : DeductiveExplosion K where
   dexp {𝓚 b p} := wk (Tait.Cut.cut b (by simpa using verum _ _)) (by simp)
 
 /-
@@ -152,12 +153,12 @@ instance : System.Deduction K where
     cut h n
 -/
 
-lemma inconsistent_iff_provable :
+lemma inconsistent_iff_provable [Tait.Cut F K] :
     Inconsistent 𝓚 ↔ 𝓚 ⟹! [] :=
   ⟨fun b ↦ ⟨cut (inconsistent_iff_provable_bot.mp b).get (by simpa using verum _ _)⟩,
    fun h ↦ inconsistent_iff_provable_bot.mpr (wk! h (by simp))⟩
 
-lemma consistent_iff_unprovable :
+lemma consistent_iff_unprovable [Tait.Axiomatized F K] [Tait.Cut F K] :
     Consistent 𝓚 ↔ IsEmpty (𝓚 ⟹ []) :=
   not_iff_not.mp <| by simp [not_consistent_iff_inconsistent, inconsistent_iff_provable]
 
@@ -181,7 +182,7 @@ lemma inconsistent_of_provable_and_refutable {p} (bp : 𝓚 ⊢! p) (br : 𝓚 �
   inconsistent_iff_provable.mpr <| cut! bp br
 -/
 
-instance : System.Classical 𝓚 where
+instance [Tait.Cut F K] : System.Classical 𝓚 where
   mdp {p q dpq dp} :=
     let dpq : 𝓚 ⟹ [∼p ⋎ q, q] := wk dpq (by simp [DeMorgan.imply])
     let dnq : 𝓚 ⟹ [∼(∼p ⋎ q), q] :=
