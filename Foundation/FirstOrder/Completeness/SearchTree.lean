@@ -9,8 +9,6 @@ namespace Completeness
 
 open Semiformula Encodable System
 variable {L : Language.{u}}
-  [∀ k, DecidableEq (L.Func k)] [∀ k, DecidableEq (L.Rel k)]
-  [∀ k, Encodable (L.Func k)] [∀ k, Encodable (L.Rel k)]
 variable {T : Theory L} {Γ : Sequent L}
 
 inductive Redux (T : Theory L) : Code L → Sequent L → Sequent L → Prop
@@ -33,14 +31,16 @@ inductive Redux (T : Theory L) : Code L → Sequent L → Sequent L → Prop
 
 local notation:25 Δ₁" ≺[" c:25 "] " Δ₂:80 => Redux T c Δ₁ Δ₂
 
+lemma Redux.antimonotone {c : Code L} {Δ₂ Δ₁ : Sequent L} (h : Δ₂ ≺[c] Δ₁) : Δ₁ ⊆ Δ₂ := by
+  cases h <;> simp[List.subset_cons_of_subset _ (List.subset_cons_self _ _)]
+
+variable [∀ k, DecidableEq (L.Func k)] [∀ k, DecidableEq (L.Rel k)] [∀ k, Encodable (L.Func k)] [∀ k, Encodable (L.Rel k)]
+
 inductive ReduxNat (T : Theory L) (s : ℕ) : Sequent L → Sequent L → Prop
   | redux {c : Code L} : decode s.unpair.1 = some c → ∀ {Δ₂ Δ₁}, Redux T c Δ₂ Δ₁ → ReduxNat T s Δ₂ Δ₁
   | refl : decode (α := Code L) s.unpair.1 = none → ∀ Δ, ReduxNat T s Δ Δ
 
 local notation:25 Δ₁" ≺⟨" s:25 "⟩ " Δ₂:80 => ReduxNat T s Δ₁ Δ₂
-
-lemma Redux.antimonotone {c : Code L} {Δ₂ Δ₁ : Sequent L} (h : Δ₂ ≺[c] Δ₁) : Δ₁ ⊆ Δ₂ := by
-  cases h <;> simp[List.subset_cons_of_subset _ (List.subset_cons _ _)]
 
 lemma ReduxNat.antimonotone {s : ℕ} {Δ₂ Δ₁ : Sequent L} (h : Δ₂ ≺⟨s⟩ Δ₁) : Δ₁ ⊆ Δ₂ := by
   cases h; { exact Redux.antimonotone (by assumption) }; { exact List.Subset.refl Δ₂ }
@@ -140,8 +140,6 @@ end WellFounded
 
 section NotWellFounded
 
-variable (nwf : ¬WellFounded (SearchTree.Lt T Γ))
-
 noncomputable def chainU (T : Theory L) (Γ : Sequent L) : ℕ → SearchTree T Γ := descendingChain (SearchTree.Lt T Γ) ⊤
 
 noncomputable def chain (T : Theory L) (Γ : Sequent L) (s : ℕ) : Sequent L := (chainU T Γ s).seq
@@ -152,7 +150,7 @@ local notation "⛓️[" s "]" => chain T Γ s
 
 local notation "⛓️" => chainSet T Γ
 
-lemma top_inaccessible : ¬Acc (SearchTree.Lt T Γ) ⊤ := by
+lemma top_inaccessible (nwf : ¬WellFounded (SearchTree.Lt T Γ)) : ¬Acc (SearchTree.Lt T Γ) ⊤ := by
   intro A
   have : WellFounded (SearchTree.Lt T Γ) := ⟨by
     rintro ⟨s, Δ, a⟩
@@ -161,27 +159,28 @@ lemma top_inaccessible : ¬Acc (SearchTree.Lt T Γ) ⊤ := by
     case succ s Δ₁ Δ₂ a r ih => exact ih.inv (SearchTree.Lt.intro a r)⟩
   contradiction
 
-lemma chainU_spec : IsInfiniteDescendingChain (SearchTree.Lt T Γ) (chainU T Γ) :=
+lemma chainU_spec (nwf : ¬WellFounded (SearchTree.Lt T Γ)) : IsInfiniteDescendingChain (SearchTree.Lt T Γ) (chainU T Γ) :=
   isInfiniteDescendingChain_of_non_acc _ _ (top_inaccessible nwf)
 
-lemma chainU_val_fst_eq (s : ℕ) : (chainU T Γ s).rank = s := by
+lemma chainU_val_fst_eq (nwf : ¬WellFounded (SearchTree.Lt T Γ)) (s : ℕ) : (chainU T Γ s).rank = s := by
   induction' s with s ih <;> simp[SearchTree.rank]
   · exact rfl
   · simpa[ih] using SearchTree.rank_of_lt (chainU_spec nwf s)
 
-lemma chain_spec (s) : ⛓️[s + 1] ≺⟨s⟩ ⛓️[s] :=
+lemma chain_spec (nwf : ¬WellFounded (SearchTree.Lt T Γ)) (s) : ⛓️[s + 1] ≺⟨s⟩ ⛓️[s] :=
   by simpa[chainU_val_fst_eq nwf s] using SearchTree.seq_of_lt (chainU_spec nwf s)
 
-lemma chain_monotone {s u : ℕ} (h : s ≤ u) : ⛓️[s] ⊆ ⛓️[u] := by
+lemma chain_monotone (nwf : ¬WellFounded (SearchTree.Lt T Γ)) {s u : ℕ} (h : s ≤ u) : ⛓️[s] ⊆ ⛓️[u] := by
   suffices ∀ d, ⛓️[s] ⊆ ⛓️[s + d] by
     simpa[Nat.add_sub_of_le h] using this (u - s)
   intro d; induction' d with d ih
   · simp
   · simpa only [Nat.add_succ] using subset_trans ih <| ReduxNat.antimonotone (chain_spec nwf (s + d))
 
-lemma chain_spec' (c : Code L) (i : ℕ) : ⛓️[(encode c).pair i + 1] ≺[c] ⛓️[(encode c).pair i] := (chain_spec nwf _).toRedux
+lemma chain_spec' (nwf : ¬WellFounded (SearchTree.Lt T Γ)) (c : Code L) (i : ℕ) :
+    ⛓️[(encode c).pair i + 1] ≺[c] ⛓️[(encode c).pair i] := (chain_spec nwf _).toRedux
 
-lemma chainSet_verum : ⊤ ∉ ⛓️ := by
+lemma chainSet_verum (nwf : ¬WellFounded (SearchTree.Lt T Γ)) : ⊤ ∉ ⛓️ := by
   simp[chainSet]; intro s h
   have : ⊤ ∈ ⛓️[(encode (Code.verum : Code L)).pair s] := chain_monotone nwf (Nat.right_le_pair _ _) h
   have : ¬⊤ ∈ ⛓️[(encode (Code.verum : Code L)).pair s] := by
@@ -190,7 +189,8 @@ lemma chainSet_verum : ⊤ ∉ ⛓️ := by
     rcases this; assumption
   contradiction
 
-lemma chainSet_axL {k} (r : L.Rel k) (v : Fin k → SyntacticTerm L) : rel r v ∉ ⛓️ ∨ nrel r v ∉ ⛓️ := by
+lemma chainSet_axL (nwf : ¬WellFounded (SearchTree.Lt T Γ)) {k} (r : L.Rel k) (v : Fin k → SyntacticTerm L) :
+    rel r v ∉ ⛓️ ∨ nrel r v ∉ ⛓️ := by
   by_contra h
   have : (∃ s₁, rel r v ∈ ⛓️[s₁]) ∧ (∃ s₂, nrel r v ∈ ⛓️[s₂]) := by
     have h : rel r v ∈ ⛓️ ∧ nrel r v ∈ ⛓️ := by simpa[not_or] using h
@@ -201,12 +201,14 @@ lemma chainSet_axL {k} (r : L.Rel k) (v : Fin k → SyntacticTerm L) : rel r v �
     chain_monotone nwf (le_trans (by simp) (Nat.right_le_pair _ _)) hs₂⟩
   have : ¬(rel r v ∈ ⛓️[(encode $ Code.axL r v).pair (max s₁ s₂)] ∧ nrel r v ∈ ⛓️[(encode $ Code.axL r v).pair (max s₁ s₂)]) := by
     rw[not_and_or]
-    have : ⛓️[(encode $ Code.axL r v).pair (max s₁ s₂) + 1] ≺[Code.axL r v] ⛓️[(encode $ Code.axL r v).pair (max s₁ s₂)] := chain_spec' nwf _ _
+    have : ⛓️[(encode $ Code.axL r v).pair (max s₁ s₂) + 1] ≺[Code.axL r v] ⛓️[(encode $ Code.axL r v).pair (max s₁ s₂)] :=
+      chain_spec' nwf _ _
     generalize ⛓️[(encode $ Code.axL r v).pair (max s₁ s₂) + 1] = Δ' at this
     rcases this; assumption
   contradiction
 
-lemma chainSet_and {p q : SyntacticFormula L} (h : p ⋏ q ∈ ⛓️) : p ∈ ⛓️ ∨ q ∈ ⛓️ := by
+lemma chainSet_and (nwf : ¬WellFounded (SearchTree.Lt T Γ)) {p q : SyntacticFormula L} (h : p ⋏ q ∈ ⛓️) :
+    p ∈ ⛓️ ∨ q ∈ ⛓️ := by
   have : ∃ s, p ⋏ q ∈ ⛓️[s] := by simpa[chainSet] using h
   rcases this with ⟨s, hs⟩
   have : ⛓️[(encode $ Code.and p q).pair s + 1] ≺[Code.and p q] ⛓️[(encode $ Code.and p q).pair s] := chain_spec' nwf _ _
@@ -220,7 +222,8 @@ lemma chainSet_and {p q : SyntacticFormula L} (h : p ⋏ q ∈ ⛓️) : p ∈ �
     have : p ⋏ q ∈ ⛓️[(encode $ Code.and p q).pair s] := chain_monotone nwf (Nat.right_le_pair _ _) hs
     contradiction
 
-lemma chainSet_or {p q : SyntacticFormula L} (h : p ⋎ q ∈ ⛓️) : p ∈ ⛓️ ∧ q ∈ ⛓️ := by
+lemma chainSet_or (nwf : ¬WellFounded (SearchTree.Lt T Γ)) {p q : SyntacticFormula L} (h : p ⋎ q ∈ ⛓️) :
+    p ∈ ⛓️ ∧ q ∈ ⛓️ := by
   have : ∃ s, p ⋎ q ∈ ⛓️[s] := by simpa[chainSet] using h
   rcases this with ⟨s, hs⟩
   have : ⛓️[(encode $ Code.or p q).pair s + 1] ≺[Code.or p q] ⛓️[(encode $ Code.or p q).pair s] := chain_spec' nwf _ _
@@ -231,7 +234,8 @@ lemma chainSet_or {p q : SyntacticFormula L} (h : p ⋎ q ∈ ⛓️) : p ∈ �
   { have : p ⋎ q ∈ ⛓️[(encode $ Code.or p q).pair s] := chain_monotone nwf (Nat.right_le_pair _ _) hs
     contradiction }
 
-lemma chainSet_all {p : SyntacticSemiformula L 1} (h : ∀' p ∈ ⛓️) : ∃ t, p/[t] ∈ ⛓️ := by
+lemma chainSet_all (nwf : ¬WellFounded (SearchTree.Lt T Γ)) {p : SyntacticSemiformula L 1} (h : ∀' p ∈ ⛓️) :
+    ∃ t, p/[t] ∈ ⛓️ := by
   have : ∃ s, ∀' p ∈ ⛓️[s] := by simpa[chainSet] using h
   rcases this with ⟨s, hs⟩
   have : ⛓️[(encode $ Code.all p).pair s + 1] ≺[Code.all p] ⛓️[(encode $ Code.all p).pair s] := chain_spec' nwf _ _
@@ -241,7 +245,8 @@ lemma chainSet_all {p : SyntacticSemiformula L 1} (h : ∀' p ∈ ⛓️) : ∃ 
   { have : ∀' p ∈ ⛓️[(encode $ Code.all p).pair s] := chain_monotone nwf (Nat.right_le_pair _ _) hs
     contradiction }
 
-lemma chainSet_ex {p : SyntacticSemiformula L 1} (h : ∃' p ∈ ⛓️) : ∀ t, p/[t] ∈ ⛓️ := fun t => by
+lemma chainSet_ex (nwf : ¬WellFounded (SearchTree.Lt T Γ)) {p : SyntacticSemiformula L 1} (h : ∃' p ∈ ⛓️) :
+    ∀ t, p/[t] ∈ ⛓️ := fun t => by
   have : ∃ s, ∃' p ∈ ⛓️[s] := by simpa[chainSet] using h
   rcases this with ⟨s, hs⟩
   have : ⛓️[(encode $ Code.ex p t).pair s + 1] ≺[Code.ex p t] ⛓️[(encode $ Code.ex p t).pair s] := chain_spec' nwf _ _
@@ -251,7 +256,8 @@ lemma chainSet_ex {p : SyntacticSemiformula L 1} (h : ∃' p ∈ ⛓️) : ∀ t
   { have : ∃' p ∈ ⛓️[(encode $ Code.ex p t).pair s] := chain_monotone nwf (Nat.right_le_pair _ _) hs
     contradiction }
 
-lemma chainSet_id {p : SyntacticFormula L} (h : p ∈ T) : ∼∀∀p ∈ ⛓️ := by
+lemma chainSet_id (nwf : ¬WellFounded (SearchTree.Lt T Γ)) {p : SyntacticFormula L} (h : p ∈ T) :
+    ∼∀∀p ∈ ⛓️ := by
   have : ⛓️[(encode $ Code.id p).pair 0 + 1] ≺[Code.id p] ⛓️[(encode $ Code.id p).pair 0] := chain_spec' nwf _ _
   generalize hΔ : ⛓️[(encode $ Code.id p).pair 0 + 1] = Δ
   rw[hΔ] at this; rcases this
@@ -276,7 +282,8 @@ instance Model.structure (T : Theory L) (Γ : Sequent L) : Structure L (Model T 
 @[simp] lemma Model.rel {k} (r : L.Rel k) (v : Fin k → SyntacticTerm L) :
     (Model.structure T Γ).rel r v ↔ nrel r v ∈ ⛓️ := of_eq rfl
 
-lemma semanticMainLemma_val : (p : SyntacticFormula L) → p ∈ ⛓️ → ¬Evalf (Model.structure T Γ) Semiterm.fvar p
+lemma semanticMainLemma_val (nwf : ¬WellFounded (SearchTree.Lt T Γ)) :
+    (p : SyntacticFormula L) → p ∈ ⛓️ → ¬Evalf (Model.structure T Γ) Semiterm.fvar p
   | ⊤,        h => by by_contra; exact chainSet_verum nwf h
   | ⊥,        _ => by simp
   | rel r v,  h => by rcases chainSet_axL nwf r v with (hr | hr); { contradiction }; { simpa[eval_rel] using hr }
@@ -285,36 +292,39 @@ lemma semanticMainLemma_val : (p : SyntacticFormula L) → p ∈ ⛓️ → ¬Ev
       simp; intro _ _
       have : p ∈ ⛓️ ∨ q ∈ ⛓️ := chainSet_and nwf h
       rcases this with (h | h)
-      · have : ¬Evalf (Model.structure T Γ) Semiterm.fvar p := semanticMainLemma_val p h
+      · have : ¬Evalf (Model.structure T Γ) Semiterm.fvar p := semanticMainLemma_val nwf p h
         contradiction
-      · have : ¬Evalf (Model.structure T Γ) Semiterm.fvar q := semanticMainLemma_val q h
+      · have : ¬Evalf (Model.structure T Γ) Semiterm.fvar q := semanticMainLemma_val nwf q h
         contradiction
   | p ⋎ q,    h => by
       have hpq : p ∈ ⛓️ ∧ q ∈ ⛓️ := chainSet_or nwf h
       simp only [LogicalConnective.HomClass.map_or, LogicalConnective.Prop.or_eq]
       rintro (h | h)
-      · exact semanticMainLemma_val p hpq.1 h
-      · exact semanticMainLemma_val q hpq.2 h
+      · exact semanticMainLemma_val nwf p hpq.1 h
+      · exact semanticMainLemma_val nwf q hpq.2 h
   | ∀' p,     h => by
       have : ∃ u, p/[u] ∈ ⛓️ := chainSet_all nwf h
       rcases this with ⟨u, hu⟩
       have : ¬Eval (Model.structure T Γ) ![u] Semiterm.fvar p := by
-        simpa[eval_substs, Matrix.constant_eq_singleton] using semanticMainLemma_val (p/[u]) hu
+        simpa[eval_substs, Matrix.constant_eq_singleton] using semanticMainLemma_val nwf (p/[u]) hu
       simp; exact ⟨u, this⟩
   | ∃' p,     h => by
       simp; intro u
       have : p/[u] ∈ ⛓️ := chainSet_ex nwf h u
       have : ¬Eval (Model.structure T Γ) ![u] Semiterm.fvar p := by
-        simpa[eval_substs, Matrix.constant_eq_singleton] using semanticMainLemma_val (p/[u]) this
+        simpa[eval_substs, Matrix.constant_eq_singleton] using semanticMainLemma_val nwf (p/[u]) this
       assumption
   termination_by p _ => p.complexity
 
-lemma Model.models : Model T Γ ⊧ₘ* T :=
+lemma Model.models (nwf : ¬WellFounded (SearchTree.Lt T Γ)) :
+    Model T Γ ⊧ₘ* T :=
   ⟨by intro p hp f
-      have : ∀ f, (Evalf (Model.structure T Γ) f) p := by simpa [Semiformula.eval_close] using semanticMainLemma_val nwf _ (chainSet_id nwf hp)
+      have : ∀ f, (Evalf (Model.structure T Γ) f) p := by
+        simpa [Semiformula.eval_close] using semanticMainLemma_val nwf _ (chainSet_id nwf hp)
       exact this f⟩
 
-lemma semanticMainLemmaTop {p : SyntacticFormula L} (h : p ∈ Γ) : ¬Evalf (Model.structure T Γ) Semiterm.fvar p :=
+lemma semanticMainLemmaTop (nwf : ¬WellFounded (SearchTree.Lt T Γ)) {p : SyntacticFormula L} (h : p ∈ Γ) :
+    ¬Evalf (Model.structure T Γ) Semiterm.fvar p :=
   semanticMainLemma_val nwf p (Set.mem_iUnion.mpr ⟨0, by simp[chain, chainU, h]⟩)
 
 end NotWellFounded

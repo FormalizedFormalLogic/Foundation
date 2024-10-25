@@ -6,8 +6,6 @@ namespace FirstOrder
 
 open Semiformula
 variable {L : Language.{u}}
-  [∀ k, DecidableEq (L.Func k)] [∀ k, DecidableEq (L.Rel k)]
-  [∀ k, Encodable (L.Func k)] [∀ k, Encodable (L.Rel k)]
 
 def newVar (Γ : Sequent L) : ℕ := (Γ.map Semiformula.upper).foldr max 0
 
@@ -70,7 +68,8 @@ def Code.equiv (L : Language.{u}) :
   right_inv := fun x => by
     rcases x with (⟨_, _, _⟩ | ⟨⟩ | ⟨_, _⟩ | ⟨_, _⟩ | _ | ⟨_, _⟩ | _) <;> simp
 
-instance : Encodable (Code L) :=
+instance [∀ k, DecidableEq (L.Func k)] [∀ k, DecidableEq (L.Rel k)] [∀ k, Encodable (L.Func k)] [∀ k, Encodable (L.Rel k)] :
+    Encodable (Code L) :=
   haveI : Encodable Empty := IsEmpty.toEncodable
   Encodable.ofEquiv _ (Code.equiv L)
 
