@@ -207,7 +207,7 @@ variable {L : Language}
 
 namespace Semiformula
 
-variable {M : Type*} [Nonempty M] {s : Structure L M}
+variable {M : Type*} {s : Structure L M}
 
 variable {n : ℕ} {ε : ξ → M}
 
