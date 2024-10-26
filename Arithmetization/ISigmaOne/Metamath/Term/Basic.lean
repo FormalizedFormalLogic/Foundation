@@ -645,7 +645,6 @@ lemma result_defined : 𝚺₁.DefinedFunction (fun v ↦ c.result (v ·.succ) (
   intro v
   simp [Blueprint.result, HierarchySymbol.Semiformula.val_sigma, (isUTerm_defined L).proper.iff',
     eval_isUTermDef L, c.eval_graphDef, result, Classical.choose!_eq_iff]
-  rfl
 
 @[simp] lemma result_graphDef (v) :
     Semiformula.Evalbm V v β.result.val ↔ v 0 = c.result (v ·.succ.succ) (v 1) := (result_defined c).df.iff v

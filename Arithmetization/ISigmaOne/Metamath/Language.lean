@@ -8,7 +8,7 @@ open FirstOrder FirstOrder.Arith
 
 section
 
-variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
+variable {V : Type*} [ORingStruc V]
 
 variable (V)
 
@@ -74,7 +74,7 @@ variable {L}
 
 variable [DefinableLanguage L]
 
-variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐏𝐀⁻]
+variable {V : Type*} [ORingStruc V]
 
 variable (L V)
 
@@ -86,6 +86,8 @@ lemma _root_.LO.FirstOrder.Language.codeIn_func_def : (L.codeIn V).Func = fun x 
 
 variable {L V}
 
+variable [V ⊧ₘ* 𝐏𝐀⁻]
+
 instance : (L.codeIn V).Defined L.lDef where
   func := by intro v; simp [Language.codeIn, ←Matrix.fun_eq_vec₂]
   rel := by intro v; simp [Language.codeIn, ←Matrix.fun_eq_vec₂]
@@ -94,8 +96,10 @@ instance : GoedelQuote (L.Func k) V := ⟨fun f ↦ ↑(Encodable.encode f)⟩
 
 instance : GoedelQuote (L.Rel k) V := ⟨fun R ↦ ↑(Encodable.encode R)⟩
 
+omit [(k : ℕ) → Encodable (L.Rel k)] [DefinableLanguage L] in
 lemma quote_func_def (f : L.Func k) : (⌜f⌝ : V) = ↑(Encodable.encode f) := rfl
 
+omit [(k : ℕ) → Encodable (L.Func k)] [DefinableLanguage L] in
 lemma quote_rel_def (R : L.Rel k) : (⌜R⌝ : V) = ↑(Encodable.encode R) := rfl
 
 lemma codeIn_func_quote_iff {k x : ℕ} : (L.codeIn V).Func k x ↔ ∃ f : L.Func k, Encodable.encode f = x :=
@@ -114,15 +118,19 @@ lemma codeIn_rel_quote_iff {k x : ℕ} : (L.codeIn V).Rel k x ↔ ∃ R : L.Rel 
 @[simp] lemma codeIn_rel_quote {k : ℕ} (r : L.Rel k) : (L.codeIn V).Rel k ⌜r⌝ :=
   (codeIn_rel_quote_iff (V := V)).mpr ⟨r, rfl⟩
 
+omit [(k : ℕ) → Encodable (L.Rel k)] [DefinableLanguage L] in
 @[simp] lemma quote_func_inj (f₁ f₂ : L.Func k) : (⌜f₁⌝ : V) = (⌜f₂⌝ : V) ↔ f₁ = f₂ := by
   simp [quote_func_def]
 
+omit [(k : ℕ) → Encodable (L.Func k)] [DefinableLanguage L] in
 @[simp] lemma quote_rel_inj (R₁ R₂ : L.Rel k) : (⌜R₁⌝ : V) = (⌜R₂⌝ : V) ↔ R₁ = R₂ := by
   simp [quote_rel_def]
 
+omit [(k : ℕ) → Encodable (L.Rel k)] [DefinableLanguage L] in
 @[simp] lemma coe_quote_func_nat (f : L.Func k) : ((⌜f⌝ : ℕ) : V) = (⌜f⌝ : V) := by
   simp [quote_func_def]
 
+omit [(k : ℕ) → Encodable (L.Func k)] [DefinableLanguage L] in
 @[simp] lemma coe_quote_rel_nat (R : L.Rel k) : ((⌜R⌝ : ℕ) : V) = (⌜R⌝ : V) := by
   simp [quote_rel_def]
 

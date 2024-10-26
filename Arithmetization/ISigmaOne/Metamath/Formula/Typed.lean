@@ -94,19 +94,17 @@ lemma val_inj {p q : L.Semiformula n} :
 
 @[ext] lemma ext {p q : L.Semiformula n} (h : p.val = q.val) : p = q := val_inj.mp h
 
-lemma ext_iff {p q : L.Semiformula n} : p = q ↔ p.val = q.val := by rcases p; rcases q; simp
-
 @[simp] lemma and_inj {p₁ p₂ q₁ q₂ : L.Semiformula n} :
-    p₁ ⋏ p₂ = q₁ ⋏ q₂ ↔ p₁ = q₁ ∧ p₂ = q₂ := by simp [ext_iff]
+    p₁ ⋏ p₂ = q₁ ⋏ q₂ ↔ p₁ = q₁ ∧ p₂ = q₂ := by simp [Semiformula.ext_iff]
 
 @[simp] lemma or_inj {p₁ p₂ q₁ q₂ : L.Semiformula n} :
-    p₁ ⋎ p₂ = q₁ ⋎ q₂ ↔ p₁ = q₁ ∧ p₂ = q₂ := by simp [ext_iff]
+    p₁ ⋎ p₂ = q₁ ⋎ q₂ ↔ p₁ = q₁ ∧ p₂ = q₂ := by simp [Semiformula.ext_iff]
 
 @[simp] lemma all_inj {p q : L.Semiformula (n + 1)} :
-    p.all = q.all ↔ p = q := by simp [ext_iff]
+    p.all = q.all ↔ p = q := by simp [Semiformula.ext_iff]
 
 @[simp] lemma ex_inj {p q : L.Semiformula (n + 1)} :
-    p.ex = q.ex ↔ p = q := by simp [ext_iff]
+    p.ex = q.ex ↔ p = q := by simp [Semiformula.ext_iff]
 
 @[simp] lemma val_verums : (verums k : L.Semiformula n).val = qqVerums k := rfl
 
@@ -432,20 +430,6 @@ lemma nth_tSubstItr' {n m : V} (w : ⌜ℒₒᵣ⌝.SemitermVec n m) (p : ⌜ℒ
     (tSubstItr w p k).disj.substs v = (tSubstItr (w.substs v) p k).disj := by
   ext; simp [Language.Semiformula.substs, Language.SemitermVec.substs]
   rw [substs_disj_substItr p.prop w.prop v.prop]
-
-/-
-@[simp] lemma equals_fvfree {t u : ⌜ℒₒᵣ⌝.Semiterm n} : (t =' u).FVFree ↔ t.FVFree ∧ u.FVFree := by
-  simp [Language.Semiformula.FVFree.iff, Language.Semiterm.FVFree.iff]
-
-@[simp] lemma notEquals_fvfree {t u : ⌜ℒₒᵣ⌝.Semiterm n} : (t ≠' u).FVFree ↔ t.FVFree ∧ u.FVFree := by
-  simp [Language.Semiformula.FVFree.iff, Language.Semiterm.FVFree.iff]
-
-@[simp] lemma lessThan_fvfree {t u : ⌜ℒₒᵣ⌝.Semiterm n} : (t <' u).FVFree ↔ t.FVFree ∧ u.FVFree := by
-  simp [Language.Semiformula.FVFree.iff, Language.Semiterm.FVFree.iff]
-
-@[simp] lemma notLessThan_fvfree {t u : ⌜ℒₒᵣ⌝.Semiterm n} : (t ≮' u).FVFree ↔ t.FVFree ∧ u.FVFree := by
-  simp [Language.Semiformula.FVFree.iff, Language.Semiterm.FVFree.iff]
--/
 
 end Formalized
 

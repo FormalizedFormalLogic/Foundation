@@ -58,8 +58,6 @@ abbrev Language.Term := L.Semiterm 0
 lemma Language.Semiterm.ext {t u : L.Semiterm n}
     (h : t.val = u.val) : t = u := by rcases t; rcases u; simpa using h
 
-lemma Language.Semiterm.ext_iff {t u : L.Semiterm n} : t = u ↔ t.val = u.val := by rcases t; rcases u; simp
-
 @[simp] lemma Language.Semiterm.isUTerm (t : L.Semiterm n) : L.IsUTerm t.val := t.prop.isUTerm
 
 @[simp] lemma Language.SemitermVec.isUTerm (v : L.SemitermVec k n) : L.IsUTermVec k v.val := v.prop.isUTerm
@@ -259,7 +257,7 @@ namespace Language.Semiterm
 def FVFree (t : L.Semiterm n) : Prop := L.IsTermFVFree n t.val
 
 lemma FVFree.iff {t : L.Semiterm n} : t.FVFree ↔ t.shift = t := by
-  simp [FVFree, Language.IsTermFVFree, ext_iff]
+  simp [FVFree, Language.IsTermFVFree, Semiterm.ext_iff]
 
 @[simp] lemma FVFree.bvar (z : V) (h : z < n) : (L.bvar z h).FVFree := by simp [FVFree, h]
 

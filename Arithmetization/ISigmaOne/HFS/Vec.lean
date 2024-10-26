@@ -515,7 +515,7 @@ lemma result_defined : 𝚺₁.DefinedFunction (fun v ↦ c.result (v ·.succ) (
   intro v; simp [Blueprint.resultDef, c.graph_defined.df.iff]
   constructor
   · intro h; rw [h]; exact c.result_graph _ _
-  · intro h; rw [c.result_eq_of_graph _ h]
+  · intro h; symm; simpa using c.result_eq_of_graph _ h
 
 @[simp] lemma eval_resultDef (v) :
     Semiformula.Evalbm V v β.resultDef.val ↔ v 0 = c.result (v ·.succ.succ) (v 1) := c.result_defined.df.iff v

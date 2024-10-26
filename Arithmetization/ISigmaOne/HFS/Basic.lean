@@ -635,7 +635,6 @@ instance sndIdx_definable' (Γ) : Γ-Function₁ (sndIdx : V → V) := sndIdx_de
 
 end sndIdx
 
-
 end LO.Arith
 
 end

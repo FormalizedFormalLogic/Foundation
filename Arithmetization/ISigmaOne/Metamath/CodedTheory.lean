@@ -43,6 +43,7 @@ def _root_.LO.FirstOrder.Theory.codeIn : (L.codeIn V).Theory where
 
 variable {T V}
 
+omit [V ⊧ₘ* 𝐈𝚺₁] in
 lemma Language.Theory.codeIn_iff : x ∈ T.codeIn V ↔ V ⊧/![x] T.tDef.ch.val := iff_of_eq rfl
 
 lemma mem_coded_theory_iff {σ} : ⌜σ⌝ ∈ T.codeIn V ↔ σ ∈ T :=

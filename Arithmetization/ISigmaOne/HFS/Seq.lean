@@ -423,6 +423,8 @@ lemma mem_vectoSeq {n : ℕ} (v : Fin n → V) (i : Fin n) : ⟪(i : V), v i⟫ 
 
 end seqToVec
 
+open HierarchySymbol
+
 lemma order_ball_induction_sigma1 {f : V → V → V} (hf : 𝚺₁-Function₂ f) {P : V → V → Prop} (hP : 𝚺₁-Relation P)
     (ind : ∀ x y, (∀ x' < x, ∀ y' ≤ f x y, P x' y') → P x y) : ∀ x y, P x y := by
   have maxf : ∀ x y, ∃ m, ∀ x' ≤ x, ∀ y' ≤ y, f x' y' ≤ m := by
@@ -437,38 +439,30 @@ lemma order_ball_induction_sigma1 {f : V → V → V} (hf : 𝚺₁-Function₂ 
       ∀ l < k, ∀ m < W, ∀ m' < W, ⟪l, m⟫ ∈ W → ⟪l + 1, m'⟫ ∈ W → ∀ x' ≤ x - l, ∀ y' ≤ m, f x' y' ≤ m' := by
     intro k hk
     induction k using induction_sigma1
-    · apply HierarchySymbol.Boldface.imp (HierarchySymbol.Boldface.comp₂ (by definability) (by definability))
-      apply HierarchySymbol.Boldface.ex
-      apply HierarchySymbol.Boldface.and (HierarchySymbol.Boldface.comp₁ (by definability))
-      apply HierarchySymbol.Boldface.and
-        (HierarchySymbol.Boldface.comp₂
-          (HierarchySymbol.BoldfaceFunction.comp₂ (HierarchySymbol.BoldfaceFunction.var _) (HierarchySymbol.BoldfaceFunction.const _))
-          (HierarchySymbol.BoldfaceFunction.comp₁ <| HierarchySymbol.BoldfaceFunction.var _))
-      apply HierarchySymbol.Boldface.and
-        (HierarchySymbol.Boldface.comp₂
-          (HierarchySymbol.BoldfaceFunction.comp₂
-            (HierarchySymbol.BoldfaceFunction.const _) (HierarchySymbol.BoldfaceFunction.const _)) (HierarchySymbol.BoldfaceFunction.var _))
-      apply HierarchySymbol.Boldface.ball_lt (HierarchySymbol.BoldfaceFunction.var _)
-      apply HierarchySymbol.Boldface.ball_lt (HierarchySymbol.BoldfaceFunction.var _)
-      apply HierarchySymbol.Boldface.ball_lt (HierarchySymbol.BoldfaceFunction.var _)
-      apply HierarchySymbol.Boldface.imp
-        (HierarchySymbol.Boldface.comp₂
-          (HierarchySymbol.BoldfaceFunction.comp₂ (HierarchySymbol.BoldfaceFunction.var _) (HierarchySymbol.BoldfaceFunction.var _))
-          (HierarchySymbol.BoldfaceFunction.var _))
-      apply HierarchySymbol.Boldface.imp
-        (HierarchySymbol.Boldface.comp₂
-          (HierarchySymbol.BoldfaceFunction.comp₂
-            (HierarchySymbol.BoldfaceFunction.comp₂ (HierarchySymbol.BoldfaceFunction.var _) (HierarchySymbol.BoldfaceFunction.const _))
-            (HierarchySymbol.BoldfaceFunction.var _))
-          (HierarchySymbol.BoldfaceFunction.var _))
-      apply HierarchySymbol.Boldface.ball_le
-        (HierarchySymbol.Boldface.comp₂
-          (HierarchySymbol.BoldfaceFunction.var _)
-          (HierarchySymbol.BoldfaceFunction.comp₂ (HierarchySymbol.BoldfaceFunction.const _) (HierarchySymbol.BoldfaceFunction.var _)))
-      apply HierarchySymbol.Boldface.ball_le (HierarchySymbol.BoldfaceFunction.var _)
-      apply HierarchySymbol.Boldface.comp₂
-        (HierarchySymbol.BoldfaceFunction.comp₂
-          (HierarchySymbol.BoldfaceFunction.var _) (HierarchySymbol.BoldfaceFunction.var _)) (HierarchySymbol.BoldfaceFunction.var _)
+    · apply Boldface.imp (Boldface.comp₂ (by definability) (by definability))
+      apply Boldface.ex
+      apply Boldface.and (Boldface.comp₁ (by definability))
+      apply Boldface.and
+        (Boldface.comp₂
+          (BoldfaceFunction.comp₂ (.var _) (.const _))
+          (BoldfaceFunction.comp₁ (.var _)))
+      apply Boldface.and
+        (Boldface.comp₂ (.var 0) (by definability))
+      apply Boldface.ball_lt (.var _)
+      apply Boldface.ball_lt (.var _)
+      apply Boldface.ball_lt (.var _)
+      apply Boldface.imp
+        (Boldface.comp₂ (.var _) (BoldfaceFunction.comp₂ (.var _) (.var _)))
+      apply Boldface.imp
+        (Boldface.comp₂ (.var _) (BoldfaceFunction.comp₂ (BoldfaceFunction.comp₂ (.var _) (.const _)) (.var _)))
+      apply Boldface.ball_le
+        (Boldface.comp₂
+          (.var _)
+          (BoldfaceFunction.comp₂ (.const _) (.var _)))
+      apply Boldface.ball_le (.var _)
+      apply Boldface.comp₂
+        (BoldfaceFunction.comp₂
+          (.var _) (.var _)) (.var _)
     case zero => exact ⟨!⟦y⟧, by simp⟩
     case succ k ih =>
       rcases ih (le_trans le_self_add hk) with ⟨W, SW, hkW, hW₀, hWₛ⟩
@@ -488,18 +482,18 @@ lemma order_ball_induction_sigma1 {f : V → V → V} (hf : 𝚺₁-Function₂ 
   have : ∀ i ≤ x, ∀ m < W, ⟪x - i, m⟫ ∈ W → ∀ x' ≤ i, ∀ y' ≤ m, P x' y' := by
     intro i
     induction i using induction_sigma1
-    · apply HierarchySymbol.Boldface.imp
-        (HierarchySymbol.Boldface.comp₂ (HierarchySymbol.BoldfaceFunction.var _) (HierarchySymbol.BoldfaceFunction.const _))
-      apply HierarchySymbol.Boldface.ball_lt (HierarchySymbol.BoldfaceFunction.const _)
-      apply HierarchySymbol.Boldface.imp
-        (HierarchySymbol.Boldface.comp₂
-          (HierarchySymbol.BoldfaceFunction.comp₂
-            (HierarchySymbol.BoldfaceFunction.comp₂
-              (HierarchySymbol.BoldfaceFunction.const _) (HierarchySymbol.BoldfaceFunction.var _)) (HierarchySymbol.BoldfaceFunction.var _))
-          (HierarchySymbol.BoldfaceFunction.const _))
-      apply HierarchySymbol.Boldface.ball_le (HierarchySymbol.BoldfaceFunction.var _)
-      apply HierarchySymbol.Boldface.ball_le (HierarchySymbol.BoldfaceFunction.var _)
-      apply HierarchySymbol.Boldface.comp₂ (HierarchySymbol.BoldfaceFunction.var _) (HierarchySymbol.BoldfaceFunction.var _)
+    · apply Boldface.imp
+        (Boldface.comp₂ (.var _) (.const _))
+      apply Boldface.ball_lt (.const _)
+      apply Boldface.imp
+        (Boldface.comp₂
+          (.const _)
+          (BoldfaceFunction.comp₂
+            (BoldfaceFunction.comp₂
+              (.const _) (.var _)) (.var _)))
+      apply Boldface.ball_le (.var _)
+      apply Boldface.ball_le (.var _)
+      apply Boldface.comp₂ (.var _) (.var _)
     case zero =>
       intro _ _ _ _ _ h y' _
       rcases nonpos_iff_eq_zero.mp h
@@ -519,28 +513,29 @@ lemma order_ball_induction_sigma1 {f : V → V → V} (hf : 𝚺₁-Function₂ 
 
 lemma order_ball_induction_sigma1' {f : V → V} (hf : 𝚺₁-Function₁ f) {P : V → V → Prop} (hP : 𝚺₁-Relation P)
     (ind : ∀ x y, (∀ x' < x, ∀ y' ≤ f y, P x' y') → P x y) : ∀ x y, P x y :=
-  have : 𝚺₁-Function₂ (fun _ ↦ f) := FirstOrder.Arith.HierarchySymbol.BoldfaceFunction.comp₁ (by simp)
+  have : 𝚺₁-Function₂ (fun _ ↦ f) := BoldfaceFunction.comp₁ (by simp)
   order_ball_induction_sigma1 this hP ind
 
 lemma order_ball_induction₂_sigma1 {fy fz : V → V → V → V}
     (hfy : 𝚺₁-Function₃ fy) (hfz : 𝚺₁-Function₃ fz) {P : V → V → V → Prop} (hP : 𝚺₁-Relation₃ P)
-    (ind : ∀ x y z, (∀ x' < x, ∀ y' ≤ fy x y z, ∀ z' ≤ fz x y z, P x' y' z') → P x y z) : ∀ x y z, P x y z := by
+    (ind : ∀ x y z, (∀ x' < x, ∀ y' ≤ fy x y z, ∀ z' ≤ fz x y z, P x' y' z') → P x y z) :
+    ∀ x y z, P x y z := by
   let Q : V → V → Prop := fun x w ↦ P x (π₁ w) (π₂ w)
   have hQ : 𝚺₁-Relation Q := by
     simp [Q]
-    apply HierarchySymbol.Boldface.comp₃ (HierarchySymbol.BoldfaceFunction.var _)
-      (HierarchySymbol.BoldfaceFunction.comp₁ (HierarchySymbol.BoldfaceFunction.var _))
-      (HierarchySymbol.BoldfaceFunction.comp₁ (HierarchySymbol.BoldfaceFunction.var _))
+    apply Boldface.comp₃ (.var _)
+      (BoldfaceFunction.comp₁ (.var _))
+      (BoldfaceFunction.comp₁ (.var _))
   let f : V → V → V := fun x w ↦ ⟪fy x (π₁ w) (π₂ w), fz x (π₁ w) (π₂ w)⟫
   have hf : 𝚺₁-Function₂ f := by
     simp [f]
-    apply HierarchySymbol.BoldfaceFunction.comp₂
-    · apply HierarchySymbol.BoldfaceFunction.comp₃ (HierarchySymbol.BoldfaceFunction.var _)
-      · apply HierarchySymbol.BoldfaceFunction.comp₁ (HierarchySymbol.BoldfaceFunction.var _)
-      · apply HierarchySymbol.BoldfaceFunction.comp₁ (HierarchySymbol.BoldfaceFunction.var _)
-    · apply HierarchySymbol.BoldfaceFunction.comp₃ (HierarchySymbol.BoldfaceFunction.var _)
-      · apply HierarchySymbol.BoldfaceFunction.comp₁ (HierarchySymbol.BoldfaceFunction.var _)
-      · apply HierarchySymbol.BoldfaceFunction.comp₁ (HierarchySymbol.BoldfaceFunction.var _)
+    apply BoldfaceFunction.comp₂
+    · apply BoldfaceFunction.comp₃ (.var _)
+      · apply BoldfaceFunction.comp₁ (.var _)
+      · apply BoldfaceFunction.comp₁ (.var _)
+    · apply BoldfaceFunction.comp₃ (.var _)
+      · apply BoldfaceFunction.comp₁ (.var _)
+      · apply BoldfaceFunction.comp₁ (.var _)
   intro x y z
   simpa [Q] using order_ball_induction_sigma1 hf hQ (fun x w ih ↦
     ind x (π₁ w) (π₂ w) (fun x' hx' y' hy' z' hz' ↦ by simpa [Q] using ih x' hx' ⟪y', z'⟫ (pair_le_pair hy' hz')))
@@ -548,35 +543,37 @@ lemma order_ball_induction₂_sigma1 {fy fz : V → V → V → V}
 
 lemma order_ball_induction₃_sigma1 {fy fz fw : V → V → V → V → V}
     (hfy : 𝚺₁-Function₄ fy) (hfz : 𝚺₁-Function₄ fz) (hfw : 𝚺₁-Function₄ fw) {P : V → V → V → V → Prop} (hP : 𝚺₁-Relation₄ P)
-    (ind : ∀ x y z w, (∀ x' < x, ∀ y' ≤ fy x y z w, ∀ z' ≤ fz x y z w, ∀ w' ≤ fw x y z w, P x' y' z' w') → P x y z w) : ∀ x y z w, P x y z w := by
+    (ind : ∀ x y z w, (∀ x' < x, ∀ y' ≤ fy x y z w, ∀ z' ≤ fz x y z w, ∀ w' ≤ fw x y z w, P x' y' z' w') → P x y z w) :
+    ∀ x y z w, P x y z w := by
   let Q : V → V → Prop := fun x v ↦ P x (π₁ v) (π₁ (π₂ v)) (π₂ (π₂ v))
   have hQ : 𝚺₁-Relation Q := by
     simp [Q]
-    apply HierarchySymbol.Boldface.comp₄
-      (HierarchySymbol.BoldfaceFunction.var _)
-      (HierarchySymbol.BoldfaceFunction.comp₁ <| HierarchySymbol.BoldfaceFunction.var _)
-      (HierarchySymbol.BoldfaceFunction.comp₁ <| HierarchySymbol.BoldfaceFunction.comp₁ <| HierarchySymbol.BoldfaceFunction.var _)
-      (HierarchySymbol.BoldfaceFunction.comp₁ <| HierarchySymbol.BoldfaceFunction.comp₁ <| HierarchySymbol.BoldfaceFunction.var _)
-  let f : V → V → V := fun x v ↦ ⟪fy x (π₁ v) (π₁ (π₂ v)) (π₂ (π₂ v)), fz x (π₁ v) (π₁ (π₂ v)) (π₂ (π₂ v)), fw x (π₁ v) (π₁ (π₂ v)) (π₂ (π₂ v))⟫
+    apply Boldface.comp₄
+      (.var _)
+      (BoldfaceFunction.comp₁ <| .var _)
+      (BoldfaceFunction.comp₁ <| BoldfaceFunction.comp₁ <| .var _)
+      (BoldfaceFunction.comp₁ <| BoldfaceFunction.comp₁ <| .var _)
+  let f : V → V → V := fun x v ↦
+    ⟪fy x (π₁ v) (π₁ (π₂ v)) (π₂ (π₂ v)), fz x (π₁ v) (π₁ (π₂ v)) (π₂ (π₂ v)), fw x (π₁ v) (π₁ (π₂ v)) (π₂ (π₂ v))⟫
   have hf : 𝚺₁-Function₂ f := by
     simp [f]
-    apply HierarchySymbol.BoldfaceFunction.comp₂
-    · apply HierarchySymbol.BoldfaceFunction.comp₄
-        (HierarchySymbol.BoldfaceFunction.var _)
-        (HierarchySymbol.BoldfaceFunction.comp₁ <| HierarchySymbol.BoldfaceFunction.var _)
-        (HierarchySymbol.BoldfaceFunction.comp₁ <| HierarchySymbol.BoldfaceFunction.comp₁ <| HierarchySymbol.BoldfaceFunction.var _)
-        (HierarchySymbol.BoldfaceFunction.comp₁ <| HierarchySymbol.BoldfaceFunction.comp₁ <| HierarchySymbol.BoldfaceFunction.var _)
-    · apply HierarchySymbol.BoldfaceFunction.comp₂
-      · apply HierarchySymbol.BoldfaceFunction.comp₄
-          (HierarchySymbol.BoldfaceFunction.var _)
-          (HierarchySymbol.BoldfaceFunction.comp₁ <| HierarchySymbol.BoldfaceFunction.var _)
-          (HierarchySymbol.BoldfaceFunction.comp₁ <| HierarchySymbol.BoldfaceFunction.comp₁ <| HierarchySymbol.BoldfaceFunction.var _)
-          (HierarchySymbol.BoldfaceFunction.comp₁ <| HierarchySymbol.BoldfaceFunction.comp₁ <| HierarchySymbol.BoldfaceFunction.var _)
-      · apply HierarchySymbol.BoldfaceFunction.comp₄
-          (HierarchySymbol.BoldfaceFunction.var _)
-          (HierarchySymbol.BoldfaceFunction.comp₁ <| HierarchySymbol.BoldfaceFunction.var _)
-          (HierarchySymbol.BoldfaceFunction.comp₁ <| HierarchySymbol.BoldfaceFunction.comp₁ <| HierarchySymbol.BoldfaceFunction.var _)
-          (HierarchySymbol.BoldfaceFunction.comp₁ <| HierarchySymbol.BoldfaceFunction.comp₁ <| HierarchySymbol.BoldfaceFunction.var _)
+    apply BoldfaceFunction.comp₂
+    · apply BoldfaceFunction.comp₄
+        (.var _)
+        (BoldfaceFunction.comp₁ <| .var _)
+        (BoldfaceFunction.comp₁ <| BoldfaceFunction.comp₁ <| .var _)
+        (BoldfaceFunction.comp₁ <| BoldfaceFunction.comp₁ <| .var _)
+    · apply BoldfaceFunction.comp₂
+      · apply BoldfaceFunction.comp₄
+          (.var _)
+          (BoldfaceFunction.comp₁ <| .var _)
+          (BoldfaceFunction.comp₁ <| BoldfaceFunction.comp₁ <| .var _)
+          (BoldfaceFunction.comp₁ <| BoldfaceFunction.comp₁ <| .var _)
+      · apply BoldfaceFunction.comp₄
+          (.var _)
+          (BoldfaceFunction.comp₁ <| .var _)
+          (BoldfaceFunction.comp₁ <| BoldfaceFunction.comp₁ <| .var _)
+          (BoldfaceFunction.comp₁ <| BoldfaceFunction.comp₁ <| .var _)
   intro x y z w
   have := order_ball_induction_sigma1 hf hQ (fun x v ih ↦
     ind x (π₁ v) (π₁ (π₂ v)) (π₂ (π₂ v)) (fun x' hx' y' hy' z' hz' w' hw' ↦ by
