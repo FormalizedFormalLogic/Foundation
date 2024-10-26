@@ -1,4 +1,5 @@
 import Arithmetization.ISigmaZero.Exponential.PPow2
+import Mathlib.Algebra.Order.Ring.Basic
 
 noncomputable section
 
@@ -309,10 +310,10 @@ lemma bit_zero {x y : V} : Exponential x y → Exponential (2 * x) (y ^ 2) := by
   let Y' := append (i^2) Y (y ^ 2)
   have bX' : X' ≤ (y^2)^4 := by
     have : X' < i^4 := by simpa [pow_four_eq_sq_sq] using append_lt (i^2) X hxsqi
-    exact le_trans (le_of_lt this) (pow_le_pow_left (by simp) hi 4)
+    exact le_trans (le_of_lt this) (pow_le_pow_left' hi 4)
   have bY' : Y' ≤ (y^2)^4 := by
     have : Y' < i^4 := by simpa [pow_four_eq_sq_sq] using append_lt (i^2) Y hysqi
-    exact le_trans (le_of_lt this) (pow_le_pow_left (by simp) hi 4)
+    exact le_trans (le_of_lt this) (pow_le_pow_left' hi 4)
   have hseq₀' : Seq₀ X' Y' := hseq₀.append ppi.sq (ppi.sq.four_lt ppi.sq_ne_two (ppi.sq_ne_four ne2))
   have hseqₛ' : Seqₛ (y ^ 2) X' Y' := by
     intro j hj jne2 ppj
@@ -393,10 +394,10 @@ lemma bit_one {x y : V} : Exponential x y → Exponential (2 * x + 1) (2 * y ^ 2
   let Y' := append (i^2) Y (2 * (y^2))
   have bX' : X' ≤ (2 * y ^ 2)^4 := by
     have : X' < i^4 := by simpa [pow_four_eq_sq_sq] using append_lt (i^2) X hxsqi
-    exact le_trans (le_of_lt this) (pow_le_pow_left (by simp) (le_trans hi $ by simp) 4)
+    exact le_trans (le_of_lt this) (pow_le_pow_left' (le_trans hi $ by simp) 4)
   have bY' : Y' ≤ (2 * y ^ 2)^4 := by
     have : Y' < i^4 := by simpa [pow_four_eq_sq_sq] using append_lt (i^2) Y hysqi
-    exact le_trans (le_of_lt this) (pow_le_pow_left (by simp) (le_trans hi $ by simp) 4)
+    exact le_trans (le_of_lt this) (pow_le_pow_left' (le_trans hi $ by simp) 4)
   have hseq₀' : Seq₀ X' Y' := hseq₀.append ppi.sq (ppi.sq.four_lt ppi.sq_ne_two (ppi.sq_ne_four ne2))
   have hseqₛ' : Seqₛ (2 * y ^ 2) X' Y' := by
     intro j hj jne2 ppj
