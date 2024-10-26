@@ -32,8 +32,6 @@ variable {V : Type*} [ORingStruc V]
 
 section
 
-variable [V ⊧ₘ* 𝐏𝐀⁻]
-
 section IndScheme
 
 variable {C : Semiformula ℒₒᵣ ℕ 1 → Prop} [V ⊧ₘ* Theory.indScheme ℒₒᵣ C]
@@ -56,11 +54,12 @@ lemma induction {P : V → Prop}
 
 end IndScheme
 
+variable [V ⊧ₘ* 𝐏𝐀⁻]
+
 section neg
 
 variable (Γ : Polarity) (m : ℕ) [V ⊧ₘ* Theory.indScheme ℒₒᵣ (Arith.Hierarchy Γ m)]
 
-@[elab_as_elim]
 lemma induction_h {P : V → Prop} (hP : Γ-[m].BoldfacePred P)
     (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x :=
   induction (P := P) (C := Hierarchy Γ m) (by
@@ -73,7 +72,6 @@ lemma induction_h {P : V → Prop} (hP : Γ-[m].BoldfacePred P)
           simp [this, hp.df.iff]⟩)
     zero succ
 
-@[elab_as_elim]
 lemma order_induction_h {P : V → Prop} (hP : Γ-[m].BoldfacePred P)
     (ind : ∀ x, (∀ y < x, P y) → P x) : ∀ x, P x := by
   suffices ∀ x, ∀ y < x, P y by
