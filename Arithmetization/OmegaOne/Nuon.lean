@@ -297,9 +297,9 @@ lemma SeriesSegment.uniq {U I L A k n₁ n₂ : V} (H₁ : SeriesSegment U I L A
   rcases show nₘ₁ = nₘ₂ from hT₁.uniq hT₂
   exact hS₁.uniq hS₂
 
-variable {U I L A : V} (hU : (I # L)^2 ≤ U) (hIL : ‖‖I‖^2‖ ≤ ‖L‖) (Ipos : 0 < I)
+variable {U I L A : V}
 
-lemma Segment.succ {start intv nₛ nₑ : V} (H : Segment U L A start intv nₛ nₑ) (hintv : intv < ‖I‖) (hnₛ : ‖nₛ + ‖I‖‖ ≤ ‖L‖) :
+lemma Segment.succ (hU : (I # L)^2 ≤ U) {start intv nₛ nₑ : V} (H : Segment U L A start intv nₛ nₑ) (hintv : intv < ‖I‖) (hnₛ : ‖nₛ + ‖I‖‖ ≤ ‖L‖) :
     Segment U L A start (intv + 1) nₛ (nₑ + fbit A (start + intv)) := by
   rcases H with ⟨S, _, H, rfl, rfl⟩
   let S' := append I L S (intv + 1) (S{L}[intv] + fbit A (start + intv))
@@ -325,7 +325,8 @@ lemma Segment.succ {start intv nₛ nₑ : V} (H : Segment U L A start intv nₛ
       ext_append_lt I L S (succ_le_iff_lt.mpr hintv) (by simp),
       ext_append_last I L S (succ_le_iff_lt.mpr hintv) le_len_L ⟩
 
-lemma Series.succ {iter n n' : V} (HT : Series U I L A iter n) (HS : Segment U L A (‖I‖ * iter) ‖I‖ n n') (hiter : iter < ‖I‖) :
+lemma Series.succ (hU : (I # L)^2 ≤ U) (hIL : ‖‖I‖^2‖ ≤ ‖L‖)
+    {iter n n' : V} (HT : Series U I L A iter n) (HS : Segment U L A (‖I‖ * iter) ‖I‖ n n') (hiter : iter < ‖I‖) :
     Series U I L A (iter + 1) n' := by
   have Hn : n ≤ ‖I‖ * iter := HT.le_add
   rcases HT with ⟨T, _, HT, Tₛ, rfl⟩
@@ -369,7 +370,8 @@ lemma div_mod_succ (a b : V) : ((a + 1) / b = a / b + 1 ∧ (a + 1) % b = 0 ∧ 
     · rw [←this, mul_comm b, mod_mul_add _ _ pos]
       simp [ltb]
 
-lemma SeriesSegment.succ {k n : V} (hk : k < ‖I‖^2) (H : SeriesSegment U I L A k n) :
+lemma SeriesSegment.succ (hU : (I # L)^2 ≤ U) (hIL : ‖‖I‖^2‖ ≤ ‖L‖)
+    {k n : V} (hk : k < ‖I‖^2) (H : SeriesSegment U I L A k n) :
     SeriesSegment U I L A (k + 1) (n + fbit A k) := by
   have hhk : (k + 1)/‖I‖ ≤ ‖I‖ := by simpa using div_monotone (succ_le_iff_lt.mpr hk) ‖I‖
   have hnk : n ≤ k := H.le
@@ -514,10 +516,12 @@ def isSeriesDef : 𝚺₀.Semisentence 6 := .mkSigma
       ∃ y <⁺ T, !extDef y L T (l + 1) ∧
         !segmentDef U L A (lI * l) lI x y” (by simp)
 
+omit [V ⊧ₘ* 𝐈𝚺₀ + 𝛀₁] in
 lemma bex_eq_le_iff {p : V → Prop} {b : V} :
     (∃ a ≤ z, a = b ∧ p a) ↔ (b ≤ z ∧ p b) :=
   ⟨by rintro ⟨a, hp, rfl, hr⟩; exact ⟨hp, hr⟩, by rintro ⟨hp, hr⟩; exact ⟨b, hp, rfl, hr⟩⟩
 
+omit [V ⊧ₘ* 𝐈𝚺₀ + 𝛀₁] in
 lemma bex_eq_lt_iff {p : V → Prop} {b : V} :
     (∃ a < z, a = b ∧ p a) ↔ (b < z ∧ p b) :=
   ⟨by rintro ⟨a, hp, rfl, hr⟩; exact ⟨hp, hr⟩, by rintro ⟨hp, hr⟩; exact ⟨b, hp, rfl, hr⟩⟩
