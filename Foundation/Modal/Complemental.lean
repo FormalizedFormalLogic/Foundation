@@ -121,7 +121,7 @@ class ComplementaryClosed (P : Formulae α) (S : Formulae α) : Prop where
   subset : P ⊆ S⁻
   either : ∀ p ∈ S, p ∈ P ∨ -p ∈ P
 
-def SubformulaeComplementaryClosed (P : Formulae α) (p : Formula α) : Prop := P.ComplementaryClosed (𝒮 p)
+def SubformulaeComplementaryClosed (P : Formulae α) (p : Formula α) : Prop := P.ComplementaryClosed p.subformulae
 
 
 
@@ -216,8 +216,8 @@ lemma next_consistent
   split;
   . simpa;
   . rename_i h;
-    have h₁ := Formulae.neg_provable_iff_insert_not_consistent (Λ := Λ) (P := P) (p := p) |>.mpr h;
     by_contra hC;
+    have h₁ := Formulae.neg_provable_iff_insert_not_consistent (Λ := Λ) (P := P) (p := p) |>.mpr h;
     have h₂ := Formulae.neg_provable_iff_insert_not_consistent (Λ := Λ) (P := P) (p := -p) |>.mpr hC;
     have := neg_complement_derive_bot h₁ h₂;
     contradiction;

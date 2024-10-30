@@ -6,30 +6,29 @@ namespace LO.Modal
 
 open LO.Kripke
 
-variable {α : Type u} [Inhabited α] [DecidableEq α]
+variable {α : Type u} [DecidableEq α]
 variable {p q : Formula α}
 
 namespace Formula
 
-noncomputable abbrev GrzSubformulas (p : Formula α) := (𝒮 p) ∪ ((𝒮 p).prebox.image (λ q => □(q ➝ □q)))
-prefix:70 "𝒮ᴳ " => Formula.GrzSubformulas
+noncomputable abbrev subformulaeGrz (p : Formula α) := p.subformulae ∪ (p.subformulae.prebox.image (λ q => □(q ➝ □q)))
 
-namespace GrzSubformulas
+namespace subformulaeGrz
 
 @[simp]
-lemma mem_self : p ∈ 𝒮ᴳ p := by simp [GrzSubformulas, Subformulas.mem_self]
+lemma mem_self : p ∈ p.subformulaeGrz := by simp [subformulaeGrz, subformulae.mem_self]
 
-lemma mem_boximpbox (h : q ∈ (𝒮 p).prebox) : □(q ➝ □q) ∈ 𝒮ᴳ p := by simp_all [GrzSubformulas];
+lemma mem_boximpbox (h : q ∈ p.subformulae.prebox) : □(q ➝ □q) ∈ p.subformulaeGrz := by simp_all [subformulaeGrz];
 
-lemma mem_origin (h : q ∈ 𝒮 p) : q ∈ 𝒮ᴳ p := by simp_all [GrzSubformulas];
+lemma mem_origin (h : q ∈ p.subformulae) : q ∈ p.subformulaeGrz := by simp_all [subformulaeGrz];
 
-lemma mem_imp (h : (q ➝ r) ∈ 𝒮ᴳ p) : q ∈ 𝒮ᴳ p ∧ r ∈ 𝒮ᴳ p := by
-  simp_all [GrzSubformulas];
+lemma mem_imp (h : (q ➝ r) ∈ p.subformulaeGrz) : q ∈ p.subformulaeGrz ∧ r ∈ p.subformulaeGrz := by
+  simp_all [subformulaeGrz];
   aesop;
 
-lemma mem_imp₁ (h : (q ➝ r) ∈ 𝒮ᴳ p) : q ∈ 𝒮ᴳ p := mem_imp h |>.1
+lemma mem_imp₁ (h : (q ➝ r) ∈ p.subformulaeGrz) : q ∈ p.subformulaeGrz := mem_imp h |>.1
 
-lemma mem_imp₂ (h : (q ➝ r) ∈ 𝒮ᴳ p) : r ∈ 𝒮ᴳ p := mem_imp h |>.2
+lemma mem_imp₂ (h : (q ➝ r) ∈ p.subformulaeGrz) : r ∈ p.subformulaeGrz := mem_imp h |>.2
 
 macro_rules | `(tactic| trivial) => `(tactic|
     first
@@ -38,7 +37,7 @@ macro_rules | `(tactic| trivial) => `(tactic|
     | apply mem_imp₂  $ by assumption
   )
 
-end GrzSubformulas
+end subformulaeGrz
 
 
 end Formula
@@ -47,18 +46,20 @@ namespace Kripke
 
 open Formula
 
-abbrev GrzCompleteFrame (p : Formula α) : Kripke.FiniteFrame where
-  World := CCF 𝐆𝐫𝐳 (𝒮ᴳ p)
+abbrev GrzCompleteFrame [Inhabited α] (p : Formula α) : Kripke.FiniteFrame where
+  World := CCF 𝐆𝐫𝐳 (p.subformulaeGrz)
   Rel X Y :=
-    (∀ q ∈ □''⁻¹(𝒮ᴳ p), □q ∈ X.formulae → □q ∈ Y.formulae) ∧
-    ((∀ q ∈ □''⁻¹(𝒮ᴳ p), □q ∈ Y.formulae → □q ∈ X.formulae) → X = Y)
+    (∀ q ∈ □''⁻¹(p.subformulaeGrz), □q ∈ X.formulae → □q ∈ Y.formulae) ∧
+    ((∀ q ∈ □''⁻¹(p.subformulaeGrz), □q ∈ Y.formulae → □q ∈ X.formulae) → X = Y)
 
 namespace GrzCompleteFrame
+
+variable [Inhabited α]
 
 lemma reflexive : Reflexive (GrzCompleteFrame p).Rel := by simp [Reflexive];
 
 lemma transitive : Transitive (GrzCompleteFrame p).Rel := by
-  simp;
+  simp only [Transitive];
   rintro X Y Z ⟨RXY₁, RXY₂⟩ ⟨RYZ₁, RYZ₂⟩;
   constructor;
   . rintro q hq₁ hq₂;
@@ -79,7 +80,7 @@ lemma antisymm : Antisymmetric (GrzCompleteFrame p).Rel := by
 
 end GrzCompleteFrame
 
-abbrev GrzCompleteModel (p : Formula α) : Kripke.Model α where
+abbrev GrzCompleteModel [Inhabited α] (p : Formula α) : Kripke.Model α where
   Frame := GrzCompleteFrame p
   Valuation X a := (atom a) ∈ X.formulae
 
@@ -88,10 +89,9 @@ open System System.FiniteContext
 open Formula.Kripke
 open ComplementaryClosedConsistentFormulae
 
-
 private lemma Grz_truthlemma.lemma1
-  {X : CCF 𝐆𝐫𝐳 (𝒮ᴳ p)} (hq : □q ∈ 𝒮 p)
-  : ((X.formulae.prebox.box) ∪ {□(q ➝ □q), -q}) ⊆ (𝒮ᴳ p)⁻ := by
+  {X : CCF 𝐆𝐫𝐳 (p.subformulaeGrz)} (hq : □q ∈ p.subformulae)
+  : ((X.formulae.prebox.box) ∪ {□(q ➝ □q), -q}) ⊆ (p.subformulaeGrz)⁻ := by
   simp only [Formulae.complementary];
   intro r hr;
   simp [Finset.mem_union] at hr;
@@ -102,15 +102,16 @@ private lemma Grz_truthlemma.lemma1
     tauto;
   . have := X.closed.subset hr;
     left;
-    exact Formulae.complementary_mem_box GrzSubformulas.mem_imp₁ this;
+    exact Formulae.complementary_mem_box subformulaeGrz.mem_imp₁ this;
   . right; simp;
     use q;
     constructor;
-    . left; trivial;
+    . left;
+      exact subformulae.mem_box hq;
     . rfl;
 
 private lemma Grz_truthlemma.lemma2
-  {X : CCF 𝐆𝐫𝐳 (𝒮ᴳ p)} (hq₁ : □q ∈ 𝒮 p) (hq₂ : □q ∉ X.formulae)
+  {X : CCF 𝐆𝐫𝐳 (p.subformulaeGrz)} (hq₁ : □q ∈ p.subformulae) (hq₂ : □q ∉ X.formulae)
   : Formulae.Consistent 𝐆𝐫𝐳 ((X.formulae.prebox.box) ∪ {□(q ➝ □q), -q}) := by
     apply Formulae.intro_union_consistent;
     rintro Γ₁ Γ₂ ⟨hΓ₁, hΓ₂⟩;
@@ -164,7 +165,7 @@ private lemma Grz_truthlemma.lemma2
     contradiction;
 
 -- TODO: syntactical proof
-private lemma Grz_truthlemma.lemma3 : 𝐊𝐓 ⊢! (p ⋏ □(p ➝ □p)) ➝ □p := by
+private lemma Grz_truthlemma.lemma3 [Inhabited α] : 𝐊𝐓 ⊢! (p ⋏ □(p ➝ □p)) ➝ □p := by
   by_contra hC;
   have := (not_imp_not.mpr $ KT_complete (α := α) |>.complete) hC;
   simp at this;
@@ -175,7 +176,7 @@ private lemma Grz_truthlemma.lemma3 : 𝐊𝐓 ⊢! (p ⋏ □(p ➝ □p)) ➝ 
   have := (this h₁) _ Rxy;
   contradiction;
 
-lemma Grz_truthlemma {X : (GrzCompleteModel p).World} (q_sub : q ∈ 𝒮 p) :
+lemma Grz_truthlemma [Inhabited α] {X : (GrzCompleteModel p).World} (q_sub : q ∈ p.subformulae) :
   Satisfies (GrzCompleteModel p) X q ↔ q ∈ X.formulae := by
   induction q using Formula.rec' generalizing X with
   | hatom => simp [Satisfies];
@@ -186,37 +187,37 @@ lemma Grz_truthlemma {X : (GrzCompleteModel p).World} (q_sub : q ∈ 𝒮 p) :
       intro h;
       simp [Satisfies];
       constructor;
-      . apply ihq (by trivial) |>.mpr;
+      . apply ihq (by aesop) |>.mpr;
         exact iff_not_mem_imp
-          (hsub_qr := GrzSubformulas.mem_origin q_sub)
-          (hsub_q := by simp [GrzSubformulas]; left; trivial)
-          (hsub_r := by simp [GrzSubformulas]; left; trivial)
+          (hsub_qr := subformulaeGrz.mem_origin q_sub)
+          (hsub_q := by simp [subformulaeGrz]; left; aesop)
+          (hsub_r := by simp [subformulaeGrz]; left; aesop)
           |>.mp h |>.1;
-      . apply ihr (by trivial) |>.not.mpr;
+      . apply ihr (by aesop) |>.not.mpr;
         have := iff_not_mem_imp
-          (hsub_qr := GrzSubformulas.mem_origin q_sub)
-          (hsub_q := by simp [GrzSubformulas]; left; trivial)
-          (hsub_r := by simp [GrzSubformulas]; left; trivial)
+          (hsub_qr := subformulaeGrz.mem_origin q_sub)
+          (hsub_q := by simp [subformulaeGrz]; left; aesop)
+          (hsub_r := by simp [subformulaeGrz]; left; aesop)
           |>.mp h |>.2;
-        exact iff_mem_compl (by simp [GrzSubformulas]; left; trivial) |>.not.mpr (by simpa using this);
+        exact iff_mem_compl (by simp [subformulaeGrz]; left; aesop) |>.not.mpr (by simpa using this);
     . contrapose;
       intro h; simp [Satisfies] at h;
       obtain ⟨hq, hr⟩ := h;
-      replace hq := ihq (by trivial) |>.mp hq;
-      replace hr := ihr (by trivial) |>.not.mp hr;
+      replace hq := ihq (by aesop) |>.mp hq;
+      replace hr := ihr (by aesop) |>.not.mp hr;
       apply iff_not_mem_imp
-        (hsub_qr := GrzSubformulas.mem_origin q_sub)
-        (hsub_q := by simp [GrzSubformulas]; left; trivial)
-        (hsub_r := by simp [GrzSubformulas]; left; trivial) |>.mpr;
+        (hsub_qr := subformulaeGrz.mem_origin q_sub)
+        (hsub_q := by simp [subformulaeGrz]; left; aesop)
+        (hsub_r := by simp [subformulaeGrz]; left; aesop) |>.mpr;
       constructor;
       . assumption;
-      . simpa using iff_mem_compl (by simp [GrzSubformulas]; left; trivial) |>.not.mp (by simpa using hr);
+      . simpa using iff_mem_compl (by simp [subformulaeGrz]; left; aesop) |>.not.mp (by simpa using hr);
   | hbox q ih =>
     constructor;
     . contrapose;
       by_cases w : q ∈ X.formulae;
       . intro h;
-        obtain ⟨Y, hY⟩ := lindenbaum (S := 𝒮ᴳ p) (Grz_truthlemma.lemma1 q_sub) (Grz_truthlemma.lemma2 q_sub h);
+        obtain ⟨Y, hY⟩ := lindenbaum (S := p.subformulaeGrz) (Grz_truthlemma.lemma1 q_sub) (Grz_truthlemma.lemma2 q_sub h);
         simp only [Finset.union_subset_iff] at hY;
         simp only [Satisfies]; push_neg;
         use Y;
@@ -232,14 +233,14 @@ lemma Grz_truthlemma {X : (GrzCompleteModel p).World} (q_sub : q ∈ 𝒮 p) :
             . simp_all;
             . apply hY.2; simp;
             . by_contra hC;
-              have : ↑X.formulae *⊢[𝐆𝐫𝐳]! q := membership_iff (by simp; left; trivial) |>.mp w;
+              have : ↑X.formulae *⊢[𝐆𝐫𝐳]! q := membership_iff (by simp; left; aesop) |>.mp w;
               have : ↑X.formulae *⊢[𝐆𝐫𝐳]! □(q ➝ □q) := membership_iff (by simp; right; assumption) |>.mp hC;
               have : ↑X.formulae *⊢[𝐆𝐫𝐳]! (q ⋏ □(q ➝ □q)) ➝ □q := Context.of! $ KT_weakerThan_Grz Grz_truthlemma.lemma3;
               have : ↑X.formulae *⊢[𝐆𝐫𝐳]! □q := this ⨀ and₃'! (by assumption) (by assumption);
-              have : □q ∈ X.formulae := membership_iff (GrzSubformulas.mem_origin (by assumption)) |>.mpr this;
+              have : □q ∈ X.formulae := membership_iff (subformulaeGrz.mem_origin (by assumption)) |>.mpr this;
               contradiction;
-        . apply ih (by trivial) |>.not.mpr;
-          apply iff_mem_compl (GrzSubformulas.mem_origin (by trivial)) |>.not.mpr;
+        . apply ih (by aesop) |>.not.mpr;
+          apply iff_mem_compl (subformulaeGrz.mem_origin (by aesop)) |>.not.mpr;
           simp;
           apply hY.2;
           simp;
@@ -248,14 +249,14 @@ lemma Grz_truthlemma {X : (GrzCompleteModel p).World} (q_sub : q ∈ 𝒮 p) :
         use X;
         constructor;
         . exact GrzCompleteFrame.reflexive X;
-        . exact ih (by trivial) |>.not.mpr w;
+        . exact ih (by aesop) |>.not.mpr w;
     . intro h Y RXY;
-      apply ih (by trivial) |>.mpr;
+      apply ih (subformulae.mem_box q_sub) |>.mpr;
       have : ↑Y.formulae *⊢[𝐆𝐫𝐳]! □q ➝ q := Context.of! $ axiomT!;
       have : ↑Y.formulae *⊢[𝐆𝐫𝐳]! q := this ⨀ (membership_iff (by simp; left; trivial) |>.mp (RXY.1 q (by simp; tauto) h));
-      exact membership_iff (by simp; left; trivial) |>.mpr this;
+      exact membership_iff (by simp; left; exact subformulae.mem_box q_sub) |>.mpr this;
 
-private lemma Grz_completeAux {p : Formula α} : ReflexiveTransitiveAntisymmetricFrameClass.{u}ꟳ#α ⊧ p → 𝐆𝐫𝐳 ⊢! p := by
+private lemma Grz_completeAux [Inhabited α] {p : Formula α} : ReflexiveTransitiveAntisymmetricFrameClass.{u}ꟳ#α ⊧ p → 𝐆𝐫𝐳 ⊢! p := by
   contrapose;
   intro h;
   apply exists_finite_frame.mpr;
@@ -264,7 +265,7 @@ private lemma Grz_completeAux {p : Formula α} : ReflexiveTransitiveAntisymmetri
   . refine ⟨GrzCompleteFrame.reflexive, GrzCompleteFrame.transitive, GrzCompleteFrame.antisymm⟩;
   . simp only [ValidOnFrame.models_iff, ValidOnFrame, ValidOnModel.iff_models, ValidOnModel, Satisfies.iff_models];
     push_neg;
-    obtain ⟨X, hX₁⟩ := lindenbaum (S := 𝒮ᴳ p) (X := {-p})
+    obtain ⟨X, hX₁⟩ := lindenbaum (S := p.subformulaeGrz) (X := {-p})
       (by simp; apply Formulae.complementary_comp; simp)
       (Formulae.unprovable_iff_singleton_compl_consistent.mp h);
     use (GrzCompleteModel p).Valuation, X;
@@ -274,9 +275,9 @@ private lemma Grz_completeAux {p : Formula α} : ReflexiveTransitiveAntisymmetri
       apply hX₁;
       tauto;
 
-instance Grz_complete : Complete (𝐆𝐫𝐳 : Hilbert α) (ReflexiveTransitiveAntisymmetricFrameClass.{u}ꟳ#α) := ⟨Grz_completeAux⟩
+instance Grz_complete [Inhabited α] : Complete (𝐆𝐫𝐳 : Hilbert α) (ReflexiveTransitiveAntisymmetricFrameClass.{u}ꟳ#α) := ⟨Grz_completeAux⟩
 
-instance : FiniteFrameProperty (α := α) 𝐆𝐫𝐳 ReflexiveTransitiveAntisymmetricFrameClass where
+instance [Inhabited α] : FiniteFrameProperty (α := α) 𝐆𝐫𝐳 ReflexiveTransitiveAntisymmetricFrameClass where
 
 end Kripke
 

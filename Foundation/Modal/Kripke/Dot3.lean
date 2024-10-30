@@ -68,7 +68,6 @@ instance axiomS4Dot3_defines [Atleast 2 α] [Inhabited α] [DecidableEq α] : �
     . aesop;
     . simp [GeachConfluent.reflexive_def, GeachConfluent.transitive_def]; rfl;
     . assumption;
-    . assumption;
   . exact axiomDot3_Definability;
   . use ⟨PUnit, λ _ _ => True⟩;
     simp [Reflexive, Transitive, Connected];

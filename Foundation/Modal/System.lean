@@ -755,6 +755,30 @@ omit [DecidableEq F] in lemma boxdot_box! : 𝓢 ⊢! ⊡p ➝ □p := ⟨boxdot
 def BoxBoxdot_BoxDotbox : 𝓢 ⊢ □⊡p ➝ ⊡□p := impTrans'' distribute_box_and (impId _)
 lemma boxboxdot_boxdotbox : 𝓢 ⊢! □⊡p ➝ ⊡□p := ⟨BoxBoxdot_BoxDotbox⟩
 
+
+noncomputable def lemma_Grz₁ : 𝓢 ⊢ □p ➝ □(□((p ⋏ (□p ➝ □□p)) ➝ □(p ⋏ (□p ➝ □□p))) ➝ (p ⋏ (□p ➝ □□p))) := by
+  let q := p ⋏ (□p ➝ □□p);
+  have    : 𝓢 ⊢ ((□p ➝ □□p) ➝ □p) ➝ □p := peirce
+  have    : 𝓢 ⊢ (p ➝ ((□p ➝ □□p) ➝ □p)) ➝ (p ➝ □p) := dhyp_imp' this;
+  have d₁ : 𝓢 ⊢ (q ➝ □p) ➝ p ➝ □p := impTrans'' (and₁' $ andImplyIffImplyImply p (□p ➝ □□p) (□p)) this;
+  have    : 𝓢 ⊢ q ➝ p := and₁;
+  have    : 𝓢 ⊢ □q ➝ □p := implyBoxDistribute' this;
+  have d₂ : 𝓢 ⊢ (q ➝ □q) ➝ (q ➝ □p) := dhyp_imp' this;
+  have    : 𝓢 ⊢ (q ➝ □q) ➝ p ➝ □p := impTrans'' d₂ d₁;
+  have    : 𝓢 ⊢ □(q ➝ □q) ➝ □(p ➝ □p) := implyBoxDistribute' this;
+  have    : 𝓢 ⊢ □(q ➝ □q) ➝ (□p ➝ □□p) := impTrans'' this axiomK;
+  have    : 𝓢 ⊢ (p ➝ □(q ➝ □q)) ➝ (p ➝ (□p ➝ □□p)) := dhyp_imp' this;
+  have    : 𝓢 ⊢ p ➝ (□(q ➝ □q) ➝ (p ⋏ (□p ➝ □□p))) := by
+    apply deduct';
+    apply deduct;
+    apply and₃';
+    . exact FiniteContext.byAxm;
+    . exact (of this) ⨀ (dhyp p FiniteContext.byAxm) ⨀ (FiniteContext.byAxm);
+  have    : 𝓢 ⊢ p ➝ (□(q ➝ □q) ➝ q) := this;
+  exact implyBoxDistribute' this;
+
+lemma lemma_Grz₁! : 𝓢 ⊢! (□p ➝ □(□((p ⋏ (□p ➝ □□p)) ➝ □(p ⋏ (□p ➝ □□p))) ➝ (p ⋏ (□p ➝ □□p)))) := ⟨lemma_Grz₁⟩
+
 end K
 
 
@@ -1057,29 +1081,7 @@ section Grz
 
 variable [System.Grz 𝓢]
 
-noncomputable def lemma_Grz₁ : 𝓢 ⊢ □p ➝ □(□((p ⋏ (□p ➝ □□p)) ➝ □(p ⋏ (□p ➝ □□p))) ➝ (p ⋏ (□p ➝ □□p))) := by
-  let q := p ⋏ (□p ➝ □□p);
-  have    : 𝓢 ⊢ ((□p ➝ □□p) ➝ □p) ➝ □p := peirce
-  have    : 𝓢 ⊢ (p ➝ ((□p ➝ □□p) ➝ □p)) ➝ (p ➝ □p) := dhyp_imp' this;
-  have d₁ : 𝓢 ⊢ (q ➝ □p) ➝ p ➝ □p := impTrans'' (and₁' $ andImplyIffImplyImply p (□p ➝ □□p) (□p)) this;
-  have    : 𝓢 ⊢ q ➝ p := and₁;
-  have    : 𝓢 ⊢ □q ➝ □p := implyBoxDistribute' this;
-  have d₂ : 𝓢 ⊢ (q ➝ □q) ➝ (q ➝ □p) := dhyp_imp' this;
-  have    : 𝓢 ⊢ (q ➝ □q) ➝ p ➝ □p := impTrans'' d₂ d₁;
-  have    : 𝓢 ⊢ □(q ➝ □q) ➝ □(p ➝ □p) := implyBoxDistribute' this;
-  have    : 𝓢 ⊢ □(q ➝ □q) ➝ (□p ➝ □□p) := impTrans'' this axiomK;
-  have    : 𝓢 ⊢ (p ➝ □(q ➝ □q)) ➝ (p ➝ (□p ➝ □□p)) := dhyp_imp' this;
-  have    : 𝓢 ⊢ p ➝ (□(q ➝ □q) ➝ (p ⋏ (□p ➝ □□p))) := by
-    apply deduct';
-    apply deduct;
-    apply and₃';
-    . exact FiniteContext.byAxm;
-    . exact (of this) ⨀ (dhyp p FiniteContext.byAxm) ⨀ (FiniteContext.byAxm);
-  have    : 𝓢 ⊢ p ➝ (□(q ➝ □q) ➝ q) := this;
-  exact implyBoxDistribute' this;
-lemma lemma_Grz₁! : 𝓢 ⊢! (□p ➝ □(□((p ⋏ (□p ➝ □□p)) ➝ □(p ⋏ (□p ➝ □□p))) ➝ (p ⋏ (□p ➝ □□p)))) := ⟨lemma_Grz₁⟩
-
-noncomputable def lemma_Grz₂ : 𝓢 ⊢ □p ➝ (p ⋏ (□p ➝ □□p)) := impTrans'' (lemma_Grz₁ (p := p)) axiomGrz
+noncomputable def lemma_Grz₂ [System.Grz 𝓢] : 𝓢 ⊢ □p ➝ (p ⋏ (□p ➝ □□p)) := impTrans'' (lemma_Grz₁ (p := p)) axiomGrz
 
 private noncomputable def Four_of_Grz : 𝓢 ⊢ □p ➝ □□p := ppq $ impTrans'' lemma_Grz₂ and₂
 noncomputable instance : HasAxiomFour 𝓢 := ⟨fun _ ↦ Four_of_Grz⟩
