@@ -1,3 +1,4 @@
+import Mathlib.Data.Finite.Sum
 import Foundation.Logic.Kripke.Tree
 import Foundation.Modal.Kripke.Preservation
 import Foundation.Modal.Kripke.GL.Completeness
@@ -66,6 +67,7 @@ lemma iff_unprovable_GL_exists_unsatisfies_at_root_on_FiniteTransitiveTree : ğ
 end
 
 
+#check Finite
 
 def FiniteTransitiveTree.SimpleExtension (F : FiniteTransitiveTree) : Kripke.FiniteTransitiveTree where
   World := (Fin 1) âŠ• F.World
