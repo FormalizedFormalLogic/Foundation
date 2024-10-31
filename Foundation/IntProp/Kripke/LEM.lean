@@ -109,7 +109,7 @@ end
 
 section
 
-lemma noLEM_on_frameclass_LC : ∃ (p : Formula α), ¬((Kripke.FrameClassOfHilbert.{u, 0} 𝐋𝐂) ⊧ p ⋎ ∼p) := by
+lemma noLEM_on_frameclass_LC [Inhabited α] : ∃ (p : Formula α), ¬((Kripke.FrameClassOfHilbert.{u, 0} 𝐋𝐂) ⊧ p ⋎ ∼p) := by
   use (atom default);
   simp [Semantics.Realize];
   use NoLEMFrame;
@@ -122,14 +122,14 @@ lemma noLEM_on_frameclass_LC : ∃ (p : Formula α), ¬((Kripke.FrameClassOfHilb
     . simp;
     . simp [ValidOnModel, Satisfies];
 
-lemma noLEM_LC: ∃ (p : Formula α), 𝐋𝐂 ⊬ p ⋎ ∼p := by
+lemma noLEM_LC [Inhabited α] : ∃ (p : Formula α), 𝐋𝐂 ⊬ p ⋎ ∼p := by
   obtain ⟨p, hp⟩ := noLEM_on_frameclass_LC (α := α);
   use p;
   by_contra hC;
   have := @Kripke.sound _ _ _ hC;
   contradiction;
 
-theorem LC_strictly_weaker_than_Cl : (𝐋𝐂 : Hilbert α) <ₛ 𝐂𝐥 := by
+theorem LC_strictly_weaker_than_Cl [DecidableEq α] [Inhabited α] : (𝐋𝐂 : Hilbert α) <ₛ 𝐂𝐥 := by
   constructor;
   . exact LC_weaker_than_Cl;
   . apply weakerThan_iff.not.mpr;
