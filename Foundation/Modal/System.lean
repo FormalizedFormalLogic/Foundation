@@ -773,7 +773,7 @@ noncomputable def lemma_Grz₁ : 𝓢 ⊢ □p ➝ □(□((p ⋏ (□p ➝ □�
     apply deduct;
     apply and₃';
     . exact FiniteContext.byAxm;
-    . exact (of this) ⨀ (dhyp p FiniteContext.byAxm) ⨀ (FiniteContext.byAxm);
+    . exact (of this) ⨀ (imply₁' FiniteContext.byAxm) ⨀ (FiniteContext.byAxm);
   have    : 𝓢 ⊢ p ➝ (□(q ➝ □q) ➝ q) := this;
   exact implyBoxDistribute' this;
 
@@ -973,10 +973,10 @@ section Ver
 
 variable [System.Ver 𝓢]
 
-private def axiomTc_of_Ver : 𝓢 ⊢ Axioms.Tc p := dhyp _ axiomVer
+private def axiomTc_of_Ver : 𝓢 ⊢ Axioms.Tc p := imply₁' axiomVer
 instance : HasAxiomTc 𝓢 := ⟨fun _ ↦ axiomTc_of_Ver⟩
 
-private def axiomL_of_Ver : 𝓢 ⊢ Axioms.L p := dhyp _ axiomVer
+private def axiomL_of_Ver : 𝓢 ⊢ Axioms.L p := imply₁' axiomVer
 instance : HasAxiomL 𝓢 := ⟨fun _ ↦ axiomL_of_Ver⟩
 
 def bot_of_dia : 𝓢 ⊢ ◇p ➝ ⊥ := by

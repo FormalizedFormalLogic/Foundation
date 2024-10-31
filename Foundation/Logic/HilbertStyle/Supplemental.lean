@@ -376,7 +376,7 @@ lemma ppq! (h : 𝓢 ⊢! p ➝ p ➝ q) : 𝓢 ⊢! p ➝ q := ⟨ppq h.some⟩
 def p_pq_q : 𝓢 ⊢ p ➝ (p ➝ q) ➝ q := impSwap' $ impId _
 lemma p_pq_q! : 𝓢 ⊢! p ➝ (p ➝ q) ➝ q := ⟨p_pq_q⟩
 
-def dhyp_imp' (h : 𝓢 ⊢ p ➝ q) : 𝓢 ⊢ (r ➝ p) ➝ (r ➝ q) := imply₂ ⨀ (dhyp r h)
+def dhyp_imp' (h : 𝓢 ⊢ p ➝ q) : 𝓢 ⊢ (r ➝ p) ➝ (r ➝ q) := imply₂ ⨀ (imply₁' h)
 omit [DecidableEq F] in lemma dhyp_imp'! (h : 𝓢 ⊢! p ➝ q) : 𝓢 ⊢! (r ➝ p) ➝ (r ➝ q) := ⟨dhyp_imp' h.some⟩
 
 def rev_dhyp_imp' (h : 𝓢 ⊢ q ➝ p) : 𝓢 ⊢ (p ➝ r) ➝ (q ➝ r) := impSwap' $ impTrans'' h p_pq_q

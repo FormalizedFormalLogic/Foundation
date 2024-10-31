@@ -4,7 +4,7 @@ import Foundation.IntProp.Formula
 
 namespace LO.IntProp
 
-variable {α : Type u} [DecidableEq α]
+variable {α : Type u}
 
 structure Hilbert (α) where
   axiomSet : Theory α
@@ -70,7 +70,7 @@ instance [Λ.IncludeEFQ] : System.Intuitionistic Λ where
 
 instance [Λ.IncludeDNE] : System.Classical Λ where
 
-instance [Λ.IncludeEFQ] [Λ.IncludeLEM] : System.Classical Λ where
+instance [DecidableEq α] [Λ.IncludeEFQ] [Λ.IncludeLEM] : System.Classical Λ where
 
 lemma Deduction.eaxm! {Λ : Hilbert α} {p : Formula α} (h : p ∈ Ax(Λ)) : Λ ⊢! p := ⟨eaxm h⟩
 
@@ -152,7 +152,6 @@ open System
 
 variable {Λ₁ Λ₂ : Hilbert α}
 
-omit [DecidableEq α] in
 lemma weaker_than_of_subset_axiomset' (hMaxm : ∀ {p : Formula α}, p ∈ Ax(Λ₁) → Λ₂ ⊢! p)
   : Λ₁ ≤ₛ Λ₂ := by
   apply System.weakerThan_iff.mpr;
@@ -173,20 +172,19 @@ lemma Int_weaker_than_KC : (𝐈𝐧𝐭 : Hilbert α) ≤ₛ 𝐊𝐂 := weaker
 
 lemma Int_weaker_than_LC : (𝐈𝐧𝐭 : Hilbert α) ≤ₛ 𝐋𝐂 := weaker_than_of_subset_axiomset
 
-omit [DecidableEq α] in
 lemma KC_weaker_than_Cl : (𝐊𝐂 : Hilbert α) ≤ₛ 𝐂𝐥 := by
   apply weaker_than_of_subset_axiomset';
   intro p hp;
   rcases hp with (⟨_, rfl⟩ | ⟨_, rfl⟩) <;> simp;
 
-lemma LC_weaker_than_Cl : (𝐋𝐂 : Hilbert α) ≤ₛ 𝐂𝐥 := by
+lemma LC_weaker_than_Cl [DecidableEq α] : (𝐋𝐂 : Hilbert α) ≤ₛ 𝐂𝐥 := by
   apply weaker_than_of_subset_axiomset';
   intro p hp;
   rcases hp with (⟨_, rfl⟩ | ⟨_, _, rfl⟩) <;> simp;
 
 variable {p : Formula α}
 
-theorem iff_provable_dn_efq_dne_provable: 𝐈𝐧𝐭 ⊢! ∼∼p ↔ 𝐂𝐥 ⊢! p := by
+theorem iff_provable_dn_efq_dne_provable [DecidableEq α] : 𝐈𝐧𝐭 ⊢! ∼∼p ↔ 𝐂𝐥 ⊢! p := by
   constructor;
   . intro d; exact dne'! $ Int_weaker_than_Cl d;
   . intro d;
@@ -209,7 +207,7 @@ theorem iff_provable_dn_efq_dne_provable: 𝐈𝐧𝐭 ⊢! ∼∼p ↔ 𝐂𝐥
 
 alias glivenko := iff_provable_dn_efq_dne_provable
 
-theorem iff_provable_neg_efq_provable_neg_efq : 𝐈𝐧𝐭 ⊢! ∼p ↔ 𝐂𝐥 ⊢! ∼p := by
+theorem iff_provable_neg_efq_provable_neg_efq [DecidableEq α] : 𝐈𝐧𝐭 ⊢! ∼p ↔ 𝐂𝐥 ⊢! ∼p := by
   constructor;
   . intro d; exact glivenko.mp $ dni'! d;
   . intro d; exact tne'! $ glivenko.mpr d;

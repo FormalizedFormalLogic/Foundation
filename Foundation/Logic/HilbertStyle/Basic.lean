@@ -235,24 +235,24 @@ lemma mdp₁! [HasAxiomImply₂ 𝓢] (hqr : 𝓢 ⊢! p ➝ q ➝ r) (hq : 𝓢
 infixl:90 "⨀₁" => mdp₁
 infixl:90 "⨀₁" => mdp₁!
 
-def mdp₂ [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (bqr : 𝓢 ⊢ p ➝ q ➝ r ➝ s) (bq : 𝓢 ⊢ p ➝ q ➝ r) : 𝓢 ⊢ p ➝ q ➝ s := dhyp p (imply₂) ⨀₁ bqr ⨀₁ bq
+def mdp₂ [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (bqr : 𝓢 ⊢ p ➝ q ➝ r ➝ s) (bq : 𝓢 ⊢ p ➝ q ➝ r) : 𝓢 ⊢ p ➝ q ➝ s := imply₁' (imply₂) ⨀₁ bqr ⨀₁ bq
 lemma mdp₂! [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (hqr : 𝓢 ⊢! p ➝ q ➝ r ➝ s) (hq : 𝓢 ⊢! p ➝ q ➝ r) : 𝓢 ⊢! p ➝ q ➝ s := ⟨mdp₂ hqr.some hq.some⟩
 
 infixl:90 "⨀₂" => mdp₂
 infixl:90 "⨀₂" => mdp₂!
 
-def mdp₃ [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (bqr : 𝓢 ⊢ p ➝ q ➝ r ➝ s ➝ t) (bq : 𝓢 ⊢ p ➝ q ➝ r ➝ s) : 𝓢 ⊢ p ➝ q ➝ r ➝ t := (dhyp p <| dhyp q <| imply₂) ⨀₂ bqr ⨀₂ bq
+def mdp₃ [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (bqr : 𝓢 ⊢ p ➝ q ➝ r ➝ s ➝ t) (bq : 𝓢 ⊢ p ➝ q ➝ r ➝ s) : 𝓢 ⊢ p ➝ q ➝ r ➝ t := (imply₁' <| imply₁' <| imply₂) ⨀₂ bqr ⨀₂ bq
 lemma mdp₃! [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (hqr : 𝓢 ⊢! p ➝ q ➝ r ➝ s ➝ t) (hq : 𝓢 ⊢! p ➝ q ➝ r ➝ s) : 𝓢 ⊢! p ➝ q ➝ r ➝ t := ⟨mdp₃ hqr.some hq.some⟩
 
 infixl:90 "⨀₃" => mdp₃
 infixl:90 "⨀₃" => mdp₃!
 
-def mdp₄ [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (bqr : 𝓢 ⊢ p ➝ q ➝ r ➝ s ➝ t ➝ u) (bq : 𝓢 ⊢ p ➝ q ➝ r ➝ s ➝ t) : 𝓢 ⊢ p ➝ q ➝ r ➝ s ➝ u := (dhyp p <| dhyp q <| dhyp r <| imply₂) ⨀₃ bqr ⨀₃ bq
+def mdp₄ [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (bqr : 𝓢 ⊢ p ➝ q ➝ r ➝ s ➝ t ➝ u) (bq : 𝓢 ⊢ p ➝ q ➝ r ➝ s ➝ t) : 𝓢 ⊢ p ➝ q ➝ r ➝ s ➝ u := (imply₁' <| imply₁' <| imply₁' <| imply₂) ⨀₃ bqr ⨀₃ bq
 lemma mdp₄! [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (hqr : 𝓢 ⊢! p ➝ q ➝ r ➝ s ➝ t ➝ u) (hq : 𝓢 ⊢! p ➝ q ➝ r ➝ s ➝ t) : 𝓢 ⊢! p ➝ q ➝ r ➝ s ➝ u := ⟨mdp₄ hqr.some hq.some⟩
 infixl:90 "⨀₄" => mdp₄
 infixl:90 "⨀₄" => mdp₄!
 
-def impTrans'' [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (bpq : 𝓢 ⊢ p ➝ q) (bqr : 𝓢 ⊢ q ➝ r) : 𝓢 ⊢ p ➝ r := imply₂ ⨀ dhyp p bqr ⨀ bpq
+def impTrans'' [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (bpq : 𝓢 ⊢ p ➝ q) (bqr : 𝓢 ⊢ q ➝ r) : 𝓢 ⊢ p ➝ r := imply₂ ⨀ imply₁' bqr ⨀ bpq
 lemma imp_trans''! [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (hpq : 𝓢 ⊢! p ➝ q) (hqr : 𝓢 ⊢! q ➝ r) : 𝓢 ⊢! p ➝ r := ⟨impTrans'' hpq.some hqr.some⟩
 
 lemma unprovable_imp_trans''! [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (hpq : 𝓢 ⊢! p ➝ q) : 𝓢 ⊬ p ➝ r → 𝓢 ⊬ q ➝ r := by
@@ -275,7 +275,7 @@ def imply₁₁ [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂
 
 -- lemma generalConjFinset! [DecidableEq F] {Γ : Finset F} (h : p ∈ Γ) : 𝓢 ⊢! ⋀Γ ➝ p := by simp [Finset.conj, (generalConj! (Finset.mem_toList.mpr h))];
 
-def implyAnd [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (bq : 𝓢 ⊢ p ➝ q) (br : 𝓢 ⊢ p ➝ r) : 𝓢 ⊢ p ➝ q ⋏ r := dhyp p and₃ ⨀₁ bq ⨀₁ br
+def implyAnd [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (bq : 𝓢 ⊢ p ➝ q) (br : 𝓢 ⊢ p ➝ r) : 𝓢 ⊢ p ➝ q ⋏ r := imply₁' and₃ ⨀₁ bq ⨀₁ br
 lemma imply_and! [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (hq : 𝓢 ⊢! p ➝ q) (hr : 𝓢 ⊢! p ➝ r) : 𝓢 ⊢! p ➝ q ⋏ r := ⟨implyAnd hq.some hr.some⟩
 
 
@@ -295,9 +295,9 @@ lemma iff_comm'! [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁
 
 def andImplyIffImplyImply [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (p q r : F) : 𝓢 ⊢ (p ⋏ q ➝ r) ⭤ (p ➝ q ➝ r) := by
   let b₁ : 𝓢 ⊢ (p ⋏ q ➝ r) ➝ p ➝ q ➝ r :=
-    imply₁₁ (p ⋏ q ➝ r) p q ⨀₃ dhyp (p ⋏ q ➝ r) and₃
+    imply₁₁ (p ⋏ q ➝ r) p q ⨀₃ imply₁' (q := p ⋏ q ➝ r) and₃
   let b₂ : 𝓢 ⊢ (p ➝ q ➝ r) ➝ p ⋏ q ➝ r :=
-    imply₁ ⨀₂ (dhyp (p ➝ q ➝ r) and₁) ⨀₂ (dhyp (p ➝ q ➝ r) and₂);
+    imply₁ ⨀₂ (imply₁' (q := p ➝ q ➝ r) and₁) ⨀₂ (imply₁' (q := p ➝ q ➝ r) and₂);
   exact iffIntro b₁ b₂
 lemma and_imply_iff_imply_imply! [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] : 𝓢 ⊢! (p ⋏ q ➝ r) ⭤ (p ➝ q ➝ r) := ⟨andImplyIffImplyImply p q r⟩
 
@@ -309,7 +309,7 @@ lemma and_imply_iff_imply_imply'! [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] 
   . intro ⟨h⟩; exact ⟨andImplyIffImplyImply'.mp h⟩
   . intro ⟨h⟩; exact ⟨andImplyIffImplyImply'.mpr h⟩
 
-def imply_left_verum [HasAxiomVerum 𝓢] [HasAxiomImply₁ 𝓢] : 𝓢 ⊢ p ➝ ⊤ := dhyp p verum
+def imply_left_verum [HasAxiomVerum 𝓢] [HasAxiomImply₁ 𝓢] : 𝓢 ⊢ p ➝ ⊤ := imply₁' verum
 @[simp] lemma imply_left_verum! [HasAxiomImply₁ 𝓢] [HasAxiomVerum 𝓢] : 𝓢 ⊢! p ➝ ⊤ := ⟨imply_left_verum⟩
 
 
@@ -341,7 +341,7 @@ def conjIntro (Γ : List F) (b : (p : F) → p ∈ Γ → 𝓢 ⊢ p) : 𝓢 ⊢
 
 def implyConj (p : F) (Γ : List F) (b : (q : F) → q ∈ Γ → 𝓢 ⊢ p ➝ q) : 𝓢 ⊢ p ➝ Γ.conj :=
   match Γ with
-  | []     => dhyp p verum
+  | []     => imply₁' verum
   | q :: Γ => implyAnd (b q (by simp)) (implyConj p Γ (fun q hq ↦ b q (by simp [hq])))
 
 def conjImplyConj (h : Δ ⊆ Γ) : 𝓢 ⊢ Γ.conj ➝ Δ.conj := implyConj _ _ (fun _ hq ↦ generalConj (h hq))
@@ -365,15 +365,17 @@ def conjIntro' (Γ : List F) (b : (p : F) → p ∈ Γ → 𝓢 ⊢ p) : 𝓢 �
   | q :: r :: Γ => by
     simp;
     exact andIntro (b q (by simp)) (conjIntro' _ (by aesop))
+omit [DecidableEq F] in
 lemma conj_intro'! (b : (p : F) → p ∈ Γ → 𝓢 ⊢! p) : 𝓢 ⊢! ⋀Γ := ⟨conjIntro' Γ (λ p hp => (b p hp).some)⟩
 
 def implyConj' (p : F) (Γ : List F) (b : (q : F) → q ∈ Γ → 𝓢 ⊢ p ➝ q) : 𝓢 ⊢ p ➝ ⋀Γ :=
   match Γ with
-  | []     => dhyp p verum
+  | []     => imply₁' verum
   | [q]    => by apply b; simp;
   | q :: r :: Γ => by
     simp;
     apply implyAnd (b q (by simp)) (implyConj' p _ (fun q hq ↦ b q (by simp [hq])));
+omit [DecidableEq F] in
 lemma imply_conj'! (p : F) (Γ : List F) (b : (q : F) → q ∈ Γ → 𝓢 ⊢! p ➝ q) : 𝓢 ⊢! p ➝ ⋀Γ := ⟨implyConj' p Γ (λ q hq => (b q hq).some)⟩
 
 def conjImplyConj' {Γ Δ : List F} (h : Δ ⊆ Γ) : 𝓢 ⊢ ⋀Γ ➝ ⋀Δ :=
